@@ -161,3 +161,15 @@ A/COC and Storage should now turn the accepted logical boundary into a complete 
 - Explicit open-decision register with decision owner (A, I, D, C, H or Storage); no implicit cross-owner acceptance.
 
 **Gate disposition:** Gate B architecture design may proceed now. It is not an implementation PASS. Gate A remains open only for remaining architecture specifications and cross-owner decisions; production runtime binding is `DEFERRED_TO_ENGINEERING_PHASE`, not a blocker. Gate C implementation fault injection is deferred until executable participants exist. No deployment or production activation is authorized.
+
+## Storage durable COC log and recovery protocol proposal published (2026-11-17)
+
+Storage has published a dedicated technical design proposal:
+- `reviews/storage-consistency/phase-3.6-coc-durable-log-and-recovery-protocol-storage-design.md`
+- Commit: `9a975f665ee60f4551effe0104ea8f867716d9dd`
+
+The proposal defines the immutable log envelope and record families, idempotent quorum append/read contracts, participant registry projection, coordinator recovery states, owner-local I/D outage gates, atomic recovery-cutoff batch, pre-cutoff participant enumeration/reconciliation, snapshot/restore fencing, JF-10 same-XID participant bridge, crash matrix, and owner acceptance checklist.
+
+Important safety refinement: a new leader must enter `RECOVERY_FENCED`; protected writes/finalization remain disabled until it verifies the committed prefix, commits the complete outage cutoff batch, reconciles every pre-batch participant, receives I/D gate-clearance evidence bound to that batch, and commits `RECOVERY_EPOCH_COMPLETED`. If the leader crashes before that completion record, the next leader starts fenced again. This closes the gap between quorum restoration and asynchronous cutoff registration.
+
+This is a Storage technical proposal, not a claim that A/I/D/C/H have accepted it. Exact consensus product, signature profile, failure-domain placement, retention and RPO/RTO remain open owner decisions. Implementation/deployment/conformance remain deferred to the engineering phase.
