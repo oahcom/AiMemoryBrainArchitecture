@@ -55,3 +55,8 @@ E persists every output declaration, close-discovery, freeze, reopen and termina
 ### JF-08 — Unknown is not negative
 
 E treats missing receipt, empty lookup, timeout, replica lag and coordinator outage as OutcomeUnknown unless the authoritative coordinator returns a NOT_COMMITTED result carrying a completed decision-barrier cursor. E persists that cursor with the outcome. No new idempotency key may be minted while outcome is unknown; only same-key/digest replay or authoritative lookup is permitted. An unresolved outcome prevents Published and root terminality.
+
+
+### JF-09 — Bind every publish attempt to current inventory and manifest
+
+E includes the exact InventorySealReceipt / ProducerDomainInventoryEpoch required for the Forget domain and current frozen OutputManifestVersion/digest in every dependency registration and final publish request. If inventory epoch changes, manifest reopens, or a newer manifest version exists before visibility commit, E refreshes the inventory/manifest, rebuilds dependency completeness as needed, and resubmits with a new operation key bound to the new immutable request; the prior staged bytes remain private. A previously successful PublishGatePending check or dependency receipt cannot authorize visibility against a superseded manifest or inventory seal.
