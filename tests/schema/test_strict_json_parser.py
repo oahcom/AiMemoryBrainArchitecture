@@ -1,4 +1,9 @@
+import sys
 import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "08-bmcp-protocol" / "runtime_reference"))
 
 from strict_json_parser import (DuplicateKeyError, ProtocolParseError,
                                 UnknownCriticalExtension, parse_strict_json,
