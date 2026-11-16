@@ -1434,3 +1434,17 @@ The Hermes repository and service observations recorded in §13.33 were gathered
 - PostgreSQL 18.7 CI probes remain valid, bounded engine-capability evidence only. They do not select the project's production database or imply a Hermes integration.
 
 This correction supersedes any interpretation of §13.33 that connected Hermes to the architecture's dependency graph or treated Hermes inspection as a Gate A prerequisite. The architecture mainline proceeds solely from AiMemoryBrainArchitecture Owner artifacts, contracts and explicitly designated deployment evidence.
+
+
+## 13.35 Project-scoped Canonical Authority deployment binding record — 2026-11-17
+
+A created a project-scoped deployment binding record:
+- Path: `reviews/integration/phase-3.6-jf10-canonical-authority-deployment-binding-record.md`
+- Commit: `fcfc88d309a36d2a3a0aea269c0fdbe2e0e63202`
+- Blob: `0fbcc193da42e700948c8aaaa9dab2be6a18d44e`
+
+The record separates the passing PostgreSQL 18.7 CI capability evidence from the still-unassigned production deployment. It enumerates the required project-owned deployment, database, participant adapter, I/D ledger, COC, failover/fencing, operator, runbook and RPO/RTO bindings. Every production field remains NOT DESIGNATED until supported by explicit project evidence.
+
+The record explicitly excludes Hermes and unrelated runtime repositories from the Canonical Authority designation absent a formal project decision. It does not select a production DB or relax the sequential gate order.
+
+Disposition unchanged: Gate 0 CLOSED; Gate A CI capability subtests PASS but production deployment binding OPEN / NOT DESIGNATED; Gate B BLOCKED; Gate C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
