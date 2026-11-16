@@ -22,7 +22,7 @@
 | Storage exact COC boundary acceptance for old pair | Storage branch | `9b297f0f76c9a054206cee5a6ee18200db3e1798` |
 | Storage realization review accepting A COC architecture a3c51 | Storage branch | `107d21bd2c604ee0b04feff2ee5580e1de9c7fce` |
 
-Storage branch HEAD at latest refresh: `fe7debe55da71e655eecfc46f25ec49eae43404a`.
+Storage branch HEAD at latest refresh: `5919cb3ce401e157f6e09de8f5e4905f626a55d4`.
 
 ## 2. What is sound in the proposal
 
@@ -236,3 +236,62 @@ Storage readiness §23.1/§23.4 now correctly says Gate B specification is publi
 **ACCEPT AS A STRONG GATE B ARCHITECTURE SPECIFICATION CANDIDATE; EXACT OWNER REVIEW AND RESIDUAL AMENDMENTS OPEN.**
 
 The new spec closes the broad topology/quorum/commit-proof/participant-manifest/fault-model gaps. It does not yet close the recovery completion record, repeated cutoff batches, exact H schema mapping, domain registry authority, external anti-rollback anchor custody or Applied companion pin drift. No COC implementation, production deployment or Gate C pass is claimed.
+
+
+## 11. Storage Design v2 — recovery realization review
+
+Storage has also published a new immutable technical design proposal:
+- Path: `reviews/storage-consistency/phase-3.6-coc-durable-log-and-recovery-protocol-storage-design-v2.md`
+- Blob: `bb026fa79b617c4bab84de84c3ff2337ca5bf96c`
+- Current Storage branch at review: `5919cb3ce401e157f6e09de8f5e4905f626a55d4`
+- Status: REVISED STORAGE TECHNICAL DESIGN PROPOSAL — FRESH OWNER REVIEW REQUIRED.
+- It supersedes the preliminary storage-design v1 blob `cd5566...`, not explicitly the separate Phase 3.6.3 COC protocol blob `86ff3...`.
+
+This v2 materially closes several prior review findings:
+- Explicit `RECOVERY_EPOCH_COMPLETED` record after all reconciliations and owner gate releases.
+- Precomputed immutable participant manifest, then two separate quorum-committed records: `COC_RECOVERY_CUTOFF_BATCH` and `PARTICIPANT_SET_RECONCILIATION`.
+- Manifest count, digest/root, retrieval locator, prefix/high-water and canonical ordering.
+- Explicit repeated cutoff-batch handling for requests arriving after an owner snapshot; owner gate remains closed until a subsequent batch or proven out-of-scope result.
+- Explicit `OWNER_LOCAL_GATE_RELEASE` signed by the relevant owner, separate from COC recovery completion.
+- Exact A/H-facing names `I_JF10_TERMINAL_DECISION_OBSERVED` and `JF10_BRIDGE_RECONCILIATION_RECORDED`.
+- I/D owner-local gates, C provider-side-effect gate, per-fence D lineage membership and fail-closed behavior.
+- External monotonic owner anchors and restore fencing.
+
+### 11.1 Critical mismatch with Phase 3.6.3 §14 — PreparedTransactionGID
+
+The Phase 3.6.3 COC protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` §14 now normatively distinguishes:
+- `PreparedParticipantRef`: stable cross-service participant identity;
+- `PreparedTransactionGID`: client-chosen PostgreSQL prepared-transaction GID, allocated and bound before COC prepare intent;
+- PostgreSQL numeric native XID: engine-assigned observed evidence only, never the preallocated participant identity.
+
+Storage Design v2 still describes a generic “preallocated XID” / “same XID” in §7 and its record model, without separating the client-chosen GID from the engine-native XID. This is a normative mismatch between two current Storage artifacts.
+
+Required change: v2 must adopt the §14 three-identifier model and bind the exact GID, native XID observation, DB identity/OID, cluster system identifier, prepare timeline/LSN, operation/request digest, owner boundary, COC intent position and signer/key version in the PreparedParticipantReceipt and StorageResolutionProof. B must confirm type semantics; H must map wire fields; I must approve security/authorization meaning; D/E/C must confirm their participant/producer/idempotency bindings.
+
+### 11.2 The two Storage documents need one explicit normative relationship
+
+Phase 3.6.3 protocol Blob `86ff...` and Storage Design v2 Blob `bb026...` overlap but use different record names and state representations:
+- Protocol v1.1 includes `RECOVERY_CUTOFF_BATCH`, `RECOVERY_RECONCILIATION_RECORDED`, `VoterConfigurationEpoch` and `COCCommitReceipt`.
+- Storage Design v2 includes `COC_RECOVERY_CUTOFF_BATCH`, `PARTICIPANT_SET_RECONCILIATION`, `OWNER_LOCAL_GATE_RELEASE`, `RECOVERY_EPOCH_COMPLETED` and exact H bridge record names.
+- The v2 prefix binds a committed configuration epoch, but its immutable record envelope does not clearly repeat the same `VoterConfigurationEpoch`/quorum proof fields as the protocol spec.
+
+These can be complementary (service protocol + Storage realization), but the repository does not yet define a canonical bundle/version manifest or normative mapping. Required: identify the authoritative COC record/API model; map each v2 Storage record to the protocol RecordType and H message/schema; bind the same config epoch, log position, digest and commit proof; declare which document controls if wording differs. Do not accept both documents as interchangeable.
+
+### 11.3 Review scope and residual decisions
+
+The v2 header requests A/I/D/C/H review. Expand the exact review set:
+- B: typed PolicyDomainRef/CausalOrderDomainRef and PreparedParticipantRef/PreparedTransactionGID/native-XID distinction.
+- E: compiler producer/participant registration and immutable operation tuple.
+- G: Applied/current-use gating and consumption of owner-gate/recovery receipts.
+- A/I/D/C/H: integration, authorization, Forget lineage, provider side effects and wire mapping.
+- Storage: durable log/participant/recovery realization.
+
+The v2 still needs an explicit owner for the authoritative CausalOrderDomain registry (bind to I-owned PolicyDomain registry/version), and an exact BMCP field-level mapping. The v2 provides the required recovery-completion and repeated-batch semantics, but the protocol/v2 relationship must be settled before Gate B freeze.
+
+### 11.4 Current exact-version acceptance vector
+
+- Phase 3.6.3 Blob `4ac63...`: A/B/C/D/E/G/H/I and Storage have role-based exact-version design acceptances with enumerated exceptions.
+- Amended Phase 3.6.3 Blob `86ff...`: Storage accepts with conditions (dossier §§26–27); A/B/C/D/E/G/H/I decisions still pin `4ac63...` and require focused re-review.
+- Storage Design v2 Blob `bb026...`: fresh review required; no cross-owner acceptance is inferred.
+- Gate B implementation/conformance: NOT RUN; Gate C deferred to engineering.
+
