@@ -3,7 +3,7 @@
 - Document: TAR-AI-001 / TAB-001 v0.1
 - Owner: C — Agent Integration Architect
 - Branch: `session-c-agent-integration-2026-11-16`
-- Reviewed source branch HEAD (pre-publication snapshot): `0a81f370bfc331872897ff83b6cbe051806cfc7b`; tree SHA: `b83522caa7739dab6960442ac8ade81f24742505`. The report publication commit is recorded separately in the final execution summary.nt-SHA verification during report publication**; branch-local C contract files were fetched.
+- Reviewed source branch HEAD (pre-publication snapshot): `0a81f370bfc331872897ff83b6cbe051806cfc7b`; tree SHA: `b83522caa7739dab6960442ac8ade81f24742505`. The report publication commit is recorded separately in the execution summary.
 - Review date: 2026-11-17
 - Report version: 1.0
 - Verdict: **CONDITIONAL PASS**
@@ -203,5 +203,4 @@ Enforce per-Agent/session queue and memory quotas, maximum payload/context size,
 - C Adapter Conformance Cases blob: `6569cb558805ca1247df07f17e3fafa15334528b`
 - H Protocol Overview blob: `b88ef3a6fd3be293e7c2e77d9652f386b169bc47`
 - H Capability/Applied blob: `ed6b43a29aa368d772c701ffc83309a5aadf3c00`
-- Current branch HEAD: pending exact commit-parent verification; no fabricated SHA.
 - C conformance documents specify TEL/EVT/IDN/APP/SEC/FRG/XMOD and PI35 test cases; **executed: none, passed: none claimed**.
