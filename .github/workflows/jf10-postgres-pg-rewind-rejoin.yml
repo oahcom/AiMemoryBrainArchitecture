@@ -100,8 +100,24 @@ jobs:
         env:
           PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
         run: |
-          docker exec jf10-primary psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE TABLE jf10_rejoin_marker (marker text PRIMARY KEY, value text NOT NULL)"
-          docker exec jf10-primary psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "INSERT INTO jf10_rejoin_marker VALUES ('before-failover', 'pre-failover-write')"
+          docker exec -i jf10-primary psql -U postgres -d postgres -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE TABLE jf10_rejoin_marker (marker text PRIMARY KEY, value text NOT NULL);
+          CREATE TABLE jf10_fence_state (id integer PRIMARY KEY, epoch bigint NOT NULL);
+          INSERT INTO jf10_fence_state VALUES (1, 1);
+          CREATE FUNCTION jf10_guarded_write(p_epoch bigint, p_marker text, p_value text)
+          RETURNS void LANGUAGE plpgsql AS $
+          DECLARE current_epoch bigint;
+          BEGIN
+            SELECT epoch INTO current_epoch FROM jf10_fence_state WHERE id = 1;
+            IF current_epoch <> p_epoch THEN
+              RAISE EXCEPTION 'stale fencing epoch: expected %, current %', p_epoch, current_epoch
+                USING ERRCODE = '40001';
+            END IF;
+            INSERT INTO jf10_rejoin_marker(marker, value) VALUES (p_marker, p_value);
+          END;
+          $;
+          SELECT jf10_guarded_write(1, 'before-failover', 'pre-failover-write');
+          SQL
           for i in $(seq 1 90); do
             CURRENT=$(docker exec jf10-primary psql -U postgres -At -c "SELECT pg_current_wal_lsn()")
             REPLAYED=$(docker exec jf10-standby psql -U postgres -At -c "SELECT pg_last_wal_replay_lsn()")
@@ -116,13 +132,14 @@ jobs:
             if [ "$(docker exec jf10-standby psql -U postgres -At -c 'SELECT NOT pg_is_in_recovery()')" = "t" ]; then break; fi
             sleep 1
           done
-          docker exec jf10-standby psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "INSERT INTO jf10_rejoin_marker VALUES ('after-promotion', 'new-primary-write')"
+          docker exec jf10-standby psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "UPDATE jf10_fence_state SET epoch = 2 WHERE id = 1"
+          docker exec jf10-standby psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "SELECT jf10_guarded_write(2, 'after-promotion', 'new-primary-write')"
           # Recover the fenced old primary offline so pg_rewind receives a cleanly stopped target.
           docker rm jf10-primary
           docker run --rm --network none --user postgres \
             -v jf10-primary-data:/var/lib/postgresql \
             --entrypoint bash "$PG_IMAGE" -lc \
-            "/usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -o \"-c listen_addresses='' -c port=5544 -c wal_keep_size=512MB\" -w start && /usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -m fast -w stop"
+            "/usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -o \"-c listen_addresses='' -c port=5544 -c wal_keep_size=512MB\" -w start && set +e; OUT=$( /usr/lib/postgresql/18/bin/psql -h /var/run/postgresql -p 5544 -U postgres -d postgres -v ON_ERROR_STOP=1 -c \"SELECT jf10_guarded_write(2, 'old-primary-stale-epoch-attempt', 'must-fail')\" 2>&1 ); STATUS=$?; set -e; echo \"$OUT\"; if [ $STATUS -eq 0 ]; then exit 1; fi; echo \"$OUT\" | grep -q 'stale fencing epoch'; echo OLD_PRIMARY_STALE_EPOCH_WRITE_REJECTED=PASS; /usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -m fast -w stop"
           echo "OLD_PRIMARY_OFFLINE_CRASH_RECOVERY=PASS"
           docker run --rm --user postgres --network jf10-rejoin-net \
             -v jf10-primary-data:/var/lib/postgresql \
