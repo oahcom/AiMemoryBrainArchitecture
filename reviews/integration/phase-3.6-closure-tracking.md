@@ -1319,3 +1319,20 @@ The run proved physical backup/restore startup, prepared-XID survival, same-XID 
 | JF-10 P0 / production activation | OPEN / NOT AUTHORIZED |
 
 Issue #10 comment 6922597562 records the backup/restore result. No production DB deployment, operator readiness, I/D integration, COC persistence, provider integration or end-to-end JF-10 conformance pass is inferred.
+
+
+## 13.29 Gate A evidence manifest and current Owner artifact pins — 2026-11-17
+
+Current Storage Owner artifacts after all Gate A test addenda:
+- Storage realization review: reviews/storage-consistency/forget-atomicity-storage-realization-review.md — Blob 4e09fb3f5952f7676996968e2c0f20b5eb89f98e.
+- PostgreSQL 18.7 capability dossier: reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md — Blob d539bb37c677000010dac3571128beee5f475ee4.
+- Deployment/readiness record: reviews/storage-consistency/phase-3.6-deployment-selection-and-verification-readiness.md — Blob 6aaee894e0eb08f9f4fbbc4f98d6880c397e9c34.
+
+Passing executable evidence:
+1. Single-node prepared-XID + SIGKILL/restart + same-XID commit/rollback: run 43907296027; probe Blob c15ea6e66a15be2fb96f737769f58b7b6c224b7e; workflow Blob 4eef5b24f6da1d596c34e0d072dc39d5008a1a25.
+2. Two-node synchronous replication + promotion + same-XID commit/rollback: run 43908746695; probe Blob cbe1f317479145dbf1467e426b0c0737a6ec054c; workflow Blob f3c05f90c6065458b49879def10dce672685c850.
+3. Physical pg_basebackup/restore + prepared-XID recovery + stale-control fail-closed gate: run 43909138634; probe Blob 81072ea2411af12f29c7a7a4d984df3f870321ca; workflow Blob 38369ed197665c4ed99a9ba30602cb5e3b04ba75.
+
+All three evidence groups have successful GitHub Actions run/job readbacks and corresponding raw logs. Additional workflow reruns triggered by the latest probe commit also passed for the single-node and synchronous failover jobs (runs 43909115285 and 43909115273).
+
+Gate A remains PARTIAL PASS / OPEN because CI does not identify or prove the real production Canonical Authority deployment, physical host/zone/cloud storage, production failover fencing/routing, human on-call/operator, approved runbook, or RPO/RTO. No production activation is authorized. This manifest supersedes any earlier A note that treated the single-node probe as the only physical evidence.
