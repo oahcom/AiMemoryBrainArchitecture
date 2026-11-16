@@ -534,3 +534,40 @@ Correct interpretation of evidence:
 Architecture-phase Gate A must instead close its design deliverables: selected engine/version/profile and rationale; transaction/isolation and lock/visibility contract; durable prepared-XID and same-XID recovery semantics; atomic VisibilityPointer + PublicationReceipt + owner outcome/receipt-consumption/outbox boundary; authoritative-read and stale-replica exclusion rules; backup/PITR/archive continuity and fail-closed recovery rules; HA/fencing/rejoin architecture; failure-domain/topology requirements; and explicit future implementation/operations acceptance criteria including RPO/RTO and accountable deployment ownership. Any item not yet specified remains an architecture design gap, not a missing-code blocker.
 
 **Disposition:** remove “production runtime/DB adapter not identified” as a Gate A architecture blocker. Keep it as DEFERRED_TO_ENGINEERING_PHASE. PostgreSQL 18.7 CI capability evidence remains PASS within its stated isolated-fixture scope. Gate A overall remains PARTIAL PASS / OPEN only for outstanding architecture specifications and cross-owner design decisions. Gate B COC persistence and recovery protocol design is now authorized to proceed as the next architecture workstream; this does not authorize implementation or production activation. Gate C end-to-end implementation fault injection remains deferred until the relevant protocols and a runnable implementation exist. JF-10 P0 remains OPEN until its architecture and later engineering acceptance criteria are met; production activation NOT AUTHORIZED.
+
+
+## 24. Exact target-WAL PITR evidence and authoritative-reader negative fixtures — PASS (2026-11-17)
+
+Storage strengthened the prepared-XID PITR probe after reviewing the prior passing campaign. The updated probe now derives and waits for the exact WAL segment containing each recovery target (prepared, COMMIT and ROLLBACK), emits each target LSN/timeline/required segment, checks a paired VisibilityPointer + PublicationReceipt authoritative-reader view, and binds each negative archive failure to the exact deliberately damaged required segment.
+
+Evidence:
+- Probe: `reviews/storage-consistency/postgres_probe/jf10_postgres_pitr_atomicity_probe.py`
+- Probe Blob: `9d2a85f9a5d53f91df247a310c38377e563d259d`
+- Workflow: `.github/workflows/jf10-postgres-pitr-atomicity.yml`; Blob `a055d311c324d09eb6ebf4054247761116795eb7`
+- Successful run: `43957910909`; job `133617253176`; conclusion SUCCESS
+- Run commit: `2d476dd32ac020d329e8290ee2aaaa1f0c057c92`
+- Pinned image: `postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc`
+
+Raw job log target markers:
+- Prepared target: LSN `0/5004710`, timeline `1`, required WAL `000000010000000000000005`, archived PASS.
+- COMMIT target: LSN `0/6000000`, timeline `1`, required WAL `000000010000000000000006`, archived PASS.
+- ROLLBACK target: LSN `0/6000110`, timeline `1`, required WAL `000000010000000000000006`, archived PASS.
+
+Observed PASS markers:
+- `AUTHORITATIVE_READER_REJECTS_POINTER_ONLY_AND_RECEIPT_ONLY=PASS`
+- `PITR_PREPARED_XID_PRIVATE_AND_LOCKED=PASS`
+- `PITR_COMMIT_POINTER_AND_RECEIPT_ATOMIC=PASS`
+- `PITR_ROLLBACK_NO_POINTER_NO_RECEIPT=PASS`
+- `PITR_MISSING_EXACT_WAL_FAILS_CLOSED=PASS`
+- `PITR_CORRUPT_EXACT_WAL_FAILS_CLOSED=PASS`
+- `PITR_INCOMPLETE_EXACT_WAL_FAILS_CLOSED=PASS`
+- `PITR_MISSING_NO_WRITABLE_OR_AUTHORITATIVE_SERVICE=PASS`
+- `PITR_CORRUPT_NO_WRITABLE_OR_AUTHORITATIVE_SERVICE=PASS`
+- `PITR_INCOMPLETE_NO_WRITABLE_OR_AUTHORITATIVE_SERVICE=PASS`
+- `JF10_POSTGRESQL_PITR_ATOMICITY_AND_NEGATIVES=PASS`
+
+The missing/corrupt/incomplete cases each target the exact segment required to reach the rollback LSN. The raw logs identify the affected segment; the corruption case reports PostgreSQL's invalid WAL magic number, and the incomplete case reports the 8192-byte archive segment where 16777216 bytes are required. The failed restores do not promote to writable primary or expose an authoritative service.
+
+**Scope limitation:** the authoritative-reader check is an isolated SQL-view fixture that joins the pointer and receipt by XID and artifact identity; it rejects pointer-only and receipt-only rows in that fixture. It is not the project's production authoritative read adapter, which remains unidentified in this repository. The CI uses local Docker volumes and local archive storage; it does not prove production I/D control-ledger integration, archive immutability/off-site retention, cross-zone durability, production fencing, operator/runbook or RPO/RTO. Two earlier runs on intermediate commits failed because the corrupt-WAL assertion did not recognize PostgreSQL's exact `invalid magic number` diagnostic; those failures are not counted. The corrected run above is the passing evidence.
+
+Gate A remains PARTIAL PASS / OPEN. Gate B remains BLOCKED pending full Gate A acceptance; Gate C remains BLOCKED pending Gate B; JF-10 P0 remains OPEN; production activation remains NOT AUTHORIZED.
