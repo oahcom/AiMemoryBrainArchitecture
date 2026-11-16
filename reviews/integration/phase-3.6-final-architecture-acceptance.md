@@ -126,3 +126,27 @@ Not allowed:
 **Phase 3.6 architecture closure is NOT ACCEPTED at this snapshot. G8 is BLOCKED and architecture baseline freeze is NOT AUTHORIZED.**
 
 The conclusion does not invalidate delivered Owner work. It distinguishes completed design decisions from missing cross-owner acceptance, governance approval, implementation and verification. The next stage may continue the bounded closure work listed above, but may not treat this architecture as frozen or production-ready.
+
+
+## Addendum — C/F/G BIH consumer acceptance verified (2026-11-16)
+
+
+Issue #6 comment `6919556745` records C, F and G independent exact-version BIH consumer decisions against A package Blob `a45ae90b318a79bf009d14f4d917611881e9e214`. A fetched all three Owner artifacts from their named branches and verified their exact Blob SHAs:
+
+| Owner | Decision | Verified Owner artifact Blob |
+|---|---|---|
+| C | **ACCEPT WITH ENUMERATED EXCEPTIONS** | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` |
+| F | **ACCEPT WITH ENUMERATED EXCEPTIONS** | `ce59252dbbdc5d10d016704797e9ba12d5a941bd` |
+| G | **ACCEPT WITH ENUMERATED EXCEPTIONS** | `5406b3f2558daa3f5915f6bb46e808be8d90d3ca` |
+
+This closes the **C/F/G BIH design consumer-acceptance** subrequirement. It does not close I36-GOV-01..10, H36/I36 or C/F/G runtime suites (all remain BLOCKED or NOT RUN as applicable). It also does not, by itself, establish a common C/G/H Applied schema version/digest or close the separate Applied-contract convergence finding.
+
+### Corrected gate interpretation
+
+- G1 Domain Model & Identity: consumer-acceptance portion advanced; remains **CONDITIONAL** due external governance, Environment Registry Authority and ADR-001.
+- G4 BMCP & Applied Contract: remains **BLOCKED** until the separate common Applied contract/wire/profile and required predicate-owner conditions are closed.
+- G6 Cross-Module Contract Convergence: **PARTIAL — C/F/G BIH consumer acceptance complete**, but other cross-module blockers remain.
+- G7 Architecture Conformance: **NOT RUN**.
+- G8 Architecture Baseline Freeze / overall G10: **BLOCKED — NOT AUTHORIZED**.
+
+The prior final decision remains **NOT ACCEPTED — ARCHITECTURE BASELINE FREEZE NOT AUTHORIZED**.
