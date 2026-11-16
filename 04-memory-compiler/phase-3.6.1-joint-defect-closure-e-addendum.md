@@ -60,3 +60,14 @@ E treats missing receipt, empty lookup, timeout, replica lag and coordinator out
 ### JF-09 — Bind every publish attempt to current inventory and manifest
 
 E includes the exact InventorySealReceipt / ProducerDomainInventoryEpoch required for the Forget domain and current frozen OutputManifestVersion/digest in every dependency registration and final publish request. If inventory epoch changes, manifest reopens, or a newer manifest version exists before visibility commit, E refreshes the inventory/manifest, rebuilds dependency completeness as needed, and resubmits with a new operation key bound to the new immutable request; the prior staged bytes remain private. A previously successful PublishGatePending check or dependency receipt cannot authorize visibility against a superseded manifest or inventory seal.
+
+
+## 9. Phase 3.6 deployment-profile consumption decision
+
+E accepts the Storage-selected **single transactional database per Canonical Memory Authority with per-authority coordinator/serializable transaction** as the preferred logical deployment profile. E preserves the existing Producer Registration → private staging → complete dependency/manifest registration → final Publish Gate → atomic visibility/PublicationReceipt → terminal disposition sequence.
+
+E's queue, lease, retry, DLQ, replay, recompile and outbox are not authorities for admission, visibility or terminality. D's durable WorkItem receipt must precede queue/lease/source dereference/execution; the final visibility commit must use the selected authoritative transaction and the exact current fence/manifest/inventory and I authorization proof. CAS is only an in-transaction guard; the Work Ledger is required; outbox is a same-transaction notification mechanism.
+
+This acceptance is a logical consumer mapping, not an executable E API, database deployment, or independent Storage engineering approval. The repository contains no E runtime, build/test harness, migration or database configuration. E36-01..20 remain NOT RUN.
+
+**I external dependency remains BLOCKED:** no approved I ProducerDomainInventoryEpoch/InventorySeal or commit-usable PermissionEpoch/revocation interface has been supplied. E remains private/non-terminal on missing, stale or unknown proof. The I Owner request is tracked in repository issue #4.
