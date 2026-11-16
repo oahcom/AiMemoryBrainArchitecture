@@ -403,13 +403,13 @@ Storage Owner branch `session-storage-consistency-forget-atomicity-2026-11-16` n
 - `reviews/storage-consistency/reference_model/README.md` — Blob `5ba7efe359d2adbf21f4fe4aa2d9f28b4663fb9f`.
 - Updated executable conformance plan — Blob `95fd8706da9bc3a96b0851e2df17fe329f6a98aa`.
 
-The reference state machine covers single-domain-only decisions, immutable terminal outcomes, stable operation/XID/manifest identity, Storage PREPARED/IN_DOUBT resolution, same-XID recovery, modeled atomic publication facts and receipt consumption, and D fence-first / participant-first ordering. E retry AttemptId does not change stable publication identity.
+The reference state machine covers single-domain-only decisions, immutable terminal outcomes, stable operation/XID/manifest identity, Storage PREPARED/IN_DOUBT resolution, same-XID recovery, modeled atomic publication facts and receipt consumption, D fence-first / participant-first ordering, E retry identity, and deterministic crashes before/after the local publication commit point with projection reconstruction. A branch-scoped GitHub Actions workflow was added; no successful run has yet been verified.
 
 D and E Owner branches each received their own mapping artifacts:
 - D Blob `a3555162827bd1cc7cf4c0918d4ab9b6ce94c8bb`.
 - E Blob `20770a84daea00ba9f38cc9a5bc43f153f09c3a7`.
 
-Issue #4 records the model publication and requests D/E/Storage review (comment `6919546496`). A local semantic replay of 13 deterministic assertions passed. The committed unittest suite has not yet been run by repository CI.
+Issue #4 records the model publication and requests D/E/Storage review (comment `6919546496`). A local semantic replay of 15 deterministic assertions passed. The committed unittest suite has not yet been run by repository CI.
 
 ### Gate and claim boundaries
 
