@@ -554,3 +554,26 @@ The Owner branch commits are:
 - H exact-version decision re-read: `08-bmcp-protocol/phase-3.6-cgh-applied-contract-exact-version-h-owner-decision.md`, Blob `c0e10966e8dd95a9d1f5b1dfa156cb4b098b26e0`. It says concrete schema remains OPEN / NOT FROZEN / NOT YET DELIVERED. This conflicts with earlier Issue #3/A notes describing `bmcp.applied-ack/1.0.0` as an owner-decided candidate. H branch tree did not expose a separately published concrete schema artifact in this inspection. Treat as an evidence discrepancy; ask H to identify the authoritative artifact/Blob or confirm H-EX-01 remains open.
 - I's exact-package confirmation requires CommitAuthorizationReceipt and I sequencer terminal-order proof to be mapped at the protected final gate. H's schema cannot omit these required evidence references.
 - Applied Contract Frozen remains **NO**; C-submit/I-revocation/D-fence order remains **OPEN**; tests NOT RUN; production implementation NOT VERIFIED.
+
+
+## C / D / I causal-order Owner contract artifacts discovered — 2026-11-16
+
+Fresh branch-aware tree and file reads found:
+- C artifact `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`, Blob `543d04e10a95d1f5720c3da8050befe6d21cd0c6`.
+- D artifact `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md`, Blob `1c60e7129c5b4255d6b9033bcb03e28e43b3b5af`.
+- I artifact `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md`, Blob `8a9d418593c7d6be12f072ec8eeb0b3a56eb4be8`.
+
+All three specify `CausalOrderProfile/1.0`, target H schema `bmcp.applied-ack/1.1.0`, and proposed successor `CGH-APPLIED-1.1`. Their statuses explicitly leave cross-owner acceptance and coordinator deployment open. These are specifications, not runtime implementation or test results.
+
+A recorded integration reconciliation requirements:
+- create and pin a new 1.1 package; do not transfer 1.0 approvals;
+- reconcile C/I receipt and participant reservation ordering (I allows a pre-bound nonce finalized before provider side effect);
+- distinguish I gate terminal outcome from C provider-success evidence;
+- prove I revocation pending and D fence barrier share the same durable reservation across crash/failover;
+- H must publish concrete 1.1.0 wire schema with exact receipt/proof fields;
+- G must accept the 1.1 predicate; B exact-version review may be required;
+- coordinator/participant registry deployment, HA and conformance remain open.
+
+H's current exact-version decision remains Blob `c0e10966e8dd95a9d1f5b1dfa156cb4b098b26e0` and explicitly says concrete wire schema OPEN / NOT DELIVERED. No H 1.1.0 schema artifact has been verified. The previous `bmcp.applied-ack/1.0.0` candidate note does not satisfy the newly proposed 1.1.0 deliverable.
+
+Original CGH-APPLIED-1.0 remains not frozen. Proposed CGH-APPLIED-1.1 is not yet baselined. Tests remain NOT RUN; production implementation NOT VERIFIED.
