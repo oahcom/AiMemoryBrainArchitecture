@@ -93,3 +93,17 @@ Exceptions and closure conditions:
 5. Multi-PolicyDomain/all-or-none authorization remains BLOCKED unless I approves a complete domain-set protocol. I-CO and I36 conformance remain NOT RUN; production implementation NOT VERIFIED.
 
 This decision applies only to the exact A Blob above. It does not approve D authority, H deployment, G Applied, external governance, or transfer any 1.0 approval.
+
+
+## I Owner exact-version reaffirmation — current CGH-APPLIED-1.1 candidate
+
+- A candidate Blob SHA: `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`
+- Profile: `CausalOrderProfile/1.0`; H schema: `bmcp.applied-ack/1.1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within I's authorization, receipt, PermissionEpoch and revocation-sequencing authority.
+
+I accepts the exact ParticipantIntent-bound, single-use CommitAuthorizationReceipt; IAuthorizationTerminalRef binding the I sequencer outcome and applicable IRevocationRequestRef/cutoff (or explicit no-earlier-request assertion); and the distinction between I COMMIT_WON and actual C provider success. Revocation before intent blocks admission; after intent but before receipt consumption may win; after COMMIT_WON it remains pending behind the unresolved participant until exact C outcome or safe abort is durable.
+
+I explicitly accepts the outage-cutoff amendment: if I receives a revocation request while COC is unavailable, I locally suspends affected receipt issuance/consumption and reports UNKNOWN/PENDING. I MUST NOT reopen affected admission until the request cutoff is durably committed to COC and reconciled with the same participant ledger. Coordinator unavailability cannot be treated as proof that no revocation request exists, and no timeout/lease expiry may advance effective revocation past an unresolved participant.
+
+Exceptions: (1) I receipt/sequencer deployment and monotonic crash/failover/restore behavior remain unverified; (2) COC operator and durable participant store remain undesignated; (3) exact H signature/MAC suite, key custody/rotation/compromise and federation require separate I/Security approval; (4) multi-PolicyDomain atomic authorization remains blocked; (5) I36/ I-CO conformance remains NOT RUN. This decision applies only to the exact A Blob above.
