@@ -156,6 +156,19 @@ class RestoreHighWaterTests(unittest.TestCase):
         self.assertIsNone(self.m.receipt)
         self.assertEqual(self.m.state, "RESTORE_FENCED")
 
+    def test_coc_highwater_advance_during_restore_requires_retry(self):
+        final_coc = dict(self.m.current_coc, index=101, prefix_digest="coc-prefix-101")
+        with self.assertRaises(Blocked):
+            self.reconcile(final_coc=final_coc)
+        self.assertIsNone(self.m.receipt)
+
+    def test_d_highwater_advance_during_restore_requires_retry(self):
+        final_d = copy.deepcopy(self.m.current_d)
+        final_d["forget-2"]["fence_generation"] = 3
+        with self.assertRaises(Blocked):
+            self.reconcile(final_d=final_d)
+        self.assertIsNone(self.m.receipt)
+
     def test_restore_receipt_alone_does_not_enable_service(self):
         self.reconcile()
         self.assertFalse(self.m.owner_service_gate)
