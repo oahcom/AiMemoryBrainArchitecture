@@ -3,6 +3,9 @@
 - Exact Storage restore contract Blob: `4f656163aeba532a441eaed1d293a48e2363cb4a`
 - Exact I restore proof acceptance Blob: `85d62b8858fc86addacd3b83f49476e42f49b785`
 - Exact D restore proof acceptance Blob: `211e54acfb4573b1c51d96f07af297671dfc4c4b`
+- Exact B type review Blob: `5e7c6a869fa1a29d59dfc7f404cade3d66c410f2`
+- Exact H transport-boundary acceptance Blob: `5a4b9a768d7396eb4be58d0d1ed3c6c0021955ea`
+- Exact Storage owner acceptance Blob: `d3923fe42bec04d9f5233c7a810303da80b73bc2`
 - Related COC protocol §14 Blob: `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`
 - Decision: **ACCEPT AS SYSTEM RESTORE ARCHITECTURE WITH OWNER-LOCAL RELEASE GATES**
 - Mode: delegated A integration review under user instruction; not independent human sign-off.
