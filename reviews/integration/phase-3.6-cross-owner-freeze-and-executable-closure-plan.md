@@ -946,3 +946,19 @@ H exact-version decision has been read back from its Owner branch:
 H's five message-family mappings are recorded. The schema remains a candidate: generated schemas/SDKs and interoperability not produced/tested; crypto/key governance remains I/Security-owned; H-JF10-01..10 NOT RUN; production freeze NO.
 
 **Updated Owner gate: I ACCEPT; D ACCEPT; Storage ACCEPT; H ACCEPT (schema candidate only); C PENDING.** The remaining requested action is C's exact-version acceptance against the same A Blob. JF-10 P0, implementation, deployment and conformance remain OPEN / NOT VERIFIED / NOT RUN.
+
+
+## 13.16 C exact-bundle acceptance — JF-10 prepared participant ↔ COC bridge
+
+C has published an independent append-only decision against the complete Issue #8 exact bridge bundle:
+- C artifact: `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`
+- C branch: `session-c-agent-integration-2026-11-16`
+- C decision Blob: `45a48249717c8cddb07ab96197730ef93d406c22`
+- C commit: `702263dee9b40cf78fe95481731f52adb775c0d2`
+- Decision: **ACCEPT THE EXACT JF-10 ↔ COC BRIDGE BUNDLE WITH ENUMERATED C-OWNED CONDITIONS**.
+
+C pins A `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, I `8069ff86988396442c8d9dc3fd58653683abe2f3`, D/Storage common JF-10 v2 protocol `94679897e84a6f58fd8b9467b5249e1a885cb0b0`, D `5a56c406578fdf257509315eb3f6f3f75456116c`, Storage `55c01f4512f2e3d8aac767dd004e768ae073178e`, and H §12.10 wire mapping `1716b23741479740f9e12003cbf2bd1a80c63aab`.
+
+C accepts the provider boundary: no protected provider invocation before durable COC prepare-intent registration, Storage-signed same-XID prepared receipt registration, and authoritative I terminal decision. C alone emits actual CSubmitOutcome. UNKNOWN/IN_DOUBT retains the same participant, XID and provider idempotency key; no retry-as-new-operation and no barrier release. D fence-first blocks provider invocation; participant-first remains in D barrier through I/Storage/C terminal evidence. Scope is one I PolicyDomain only.
+
+This closes the outstanding architecture/interface Owner-decision gate for the named bridge bundle. It does not close provider-specific idempotency proof, runtime implementation, DB capability, conformance, deployment or production gates. C-CO-01..10 and H-JF10-01..10 remain SPECIFIED / NOT RUN; H schema remains candidate/not production-frozen; Storage DB capability remains unproven; COC operator/deployment remains undesignated. JF-10 remains P0 OPEN; multi-PolicyDomain atomicity BLOCKED. The earlier §13.15 pending snapshot is historical and superseded by this §13.16 readback.
