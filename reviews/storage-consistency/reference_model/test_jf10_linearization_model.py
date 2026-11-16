@@ -66,6 +66,31 @@ class JF10LinearizationModelTests(unittest.TestCase):
         self.assertIn(self.op.operation_id, self.gate.prepared_operations)
         self.assertFalse(self.storage.reader_can_see(self.op.operation_id))
 
+    def test_recovery_rejects_receipt_not_bound_by_coordinator(self):
+        self.op.receipt = self.receipt
+        self.storage.prepare(self.op)
+        self.coordinator.decide(
+            self.op.operation_id, self.op.request_digest,
+            frozenset({self.op.policy_domain}), self.receipt,
+        )
+        self.op.receipt = AuthorizationReceipt(
+            "forged-receipt", self.op.operation_id, self.op.request_digest,
+            self.op.policy_domain,
+        )
+        with self.assertRaises(ProtocolError):
+            self.storage.recover(self.op.operation_id, self.coordinator)
+        self.assertFalse(self.storage.reader_can_see(self.op.operation_id))
+        self.assertIn(self.op.operation_id, self.gate.prepared_operations)
+
+    def test_committed_publication_readback_is_idempotent(self):
+        self.prepare_and_decide()
+        self.assertEqual(self.storage.recover(self.op.operation_id, self.coordinator),
+                         ParticipantState.COMMITTED)
+        record = self.storage.publication_records[self.op.operation_id]
+        self.assertEqual(self.storage.recover(self.op.operation_id, self.coordinator),
+                         ParticipantState.COMMITTED)
+        self.assertEqual(self.storage.publication_records[self.op.operation_id], record)
+
     def test_abort_releases_lock_without_publication(self):
         self.op.receipt = self.receipt
         self.storage.prepare(self.op)
