@@ -54,6 +54,8 @@ Recommended dependency order:
 
 ### Phase 4 — Technology and engineering architecture
 
+The initial system-wide technology architecture blueprint is recorded at `13-engineering-decisions/technology-architecture-blueprint.md` (TAB-001, v0.1, CANDIDATE; not a technology freeze). It defines the technology layers, candidate stack, deployment topology, data flows, model inference boundaries, resource planning envelope, required ADRs, and validation gates. Subsystem owners must review it; unresolved technology choices remain OPEN or TO_VALIDATE.
+
 Only after the logical architecture is stable:
 
 - Evaluate Rust module/crate boundaries.
