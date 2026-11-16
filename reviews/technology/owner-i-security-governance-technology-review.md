@@ -189,3 +189,9 @@ The I branch advanced after the original technology review. This addendum consum
 
 **CONDITIONAL PASS** for candidate security architecture direction; **BLOCKED** for deployable security acceptance, signed-receipt trust approval, JF-10 application recovery and Global Forget completion. This addendum does not approve the signature profile or claim implementation/security-test evidence.
 
+
+## 9. Expanded Global Forget model evidence (2026-11-17)
+
+The Global Forget reference model now passes **30/30 tests** after adding empty-inventory rejection, valid exception completion, NotApplicable completion, Failed-target blocking and post-completion target-discovery reopening. Exact run `43963450717`, job `133636592112`, commit `8a6a6e67696c496e265b3d87f1a550fe5e8bb2a0`; updated test Blob `428e15c6263b5b2d730b93ce5412d55e782a449b`.
+
+This remains in-memory logic evidence only. It does not approve I36-GOV-01..10 or establish a real inventory seal, target completion, external deletion, backup erasure or physical erasure.
