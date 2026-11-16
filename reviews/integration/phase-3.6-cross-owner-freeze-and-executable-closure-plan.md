@@ -540,3 +540,25 @@ The common coordinator log must also order the *request* points, not only termin
 - D fence request is recorded with `DForgetFenceRequestRef` and a coordinator cutoff position. Any affected ParticipantIntentRef after that cutoff is rejected immediately, even if D's effective fence commit is delayed while earlier participants drain. D terminal evidence carries both request cutoff and effective positions.
 - I revocation request is recorded with `IRevocationRequestRef` and a coordinator cutoff position. It immediately blocks new receipts/authorizations in the affected domain. If it precedes intent or receipt consumption, it wins; if I has already terminalized a receipt as COMMIT_WON, effective PermissionEpoch advancement waits behind that unresolved participant. I remains the authority for the actual epoch advance.
 - The coordinator's common order is evidence of causality only. It does not issue I PermissionEpoch, D ForgetFenceGeneration, or owner terminal decisions.
+
+
+## 13.6 CGH-APPLIED-1.1 cutoff-order refinement and current Owner pins
+
+The 1.1 candidate now explicitly distinguishes **request/cutoff position** from **effective transition position** for both I revocation and D ForgetFence:
+
+- I's `IAuthorizationTerminalRef` binds the applicable `IRevocationRequestRef` and cutoff position, or explicitly records that no earlier revocation request existed. A revocation request before ParticipantIntentRef blocks admission; a revocation request after intent but before receipt consumption may still win; after I `COMMIT_WON`, later revocation waits behind the unresolved participant.
+- D's `DParticipantClearanceRef` binds `ParticipantIntentRef`, complete lineage and inventory version. `DForgetFenceRequestRef` cutoff and eventual `ForgetFenceRef` effective position are distinct. A fence request before intent rejects that intent even while the effective fence is draining earlier participants; an intent before the fence request is tracked in the barrier.
+- C remains the only authority for actual provider success. I `COMMIT_WON` and D clearance do not prove provider handoff. CSubmitOutcome and the common terminal proof are both required before G may consider Full Applied.
+
+The A candidate package was updated and its latest Blob is now:
+- `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`
+- Blob SHA: `471c8ce86e93c036ad9a58a77d45d9daa0ab8af8`
+- Commit: `78adae653730c740a9a711c3550b8094f0faa786`
+
+Current Owner artifact readbacks supersede prior hashes:
+- C: `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`, Blob `f2c5b379cacfedd81500e8496d3053b628e144a0`, branch HEAD `8f017a5a17620c21f3e7f0075a087c4b098baa8e`.
+- D: `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md`, Blob `317a9bc170c5a66720f738bf24bbf93c87385887`, branch HEAD `c0d51b3cc61f182a69632f008c43650e14c213ef`.
+- I: `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md`, Blob `71779133a4f95d63a24c4c7e606af174763366f1`, branch HEAD `2fb2bb9653350e83ebf2a6a56195a762d112189f`.
+- H: `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, Blob `5cbf0bb548a46671054cb22c6fab3c3d007365d4`, branch HEAD `f5ecd8e649efb578a06cedfa5a5dbd4f8c7bc84a`.
+
+These are still owner-side specifications/schema candidate, not explicit acceptance of the exact A 1.1 package. G and B exact 1.1 dispositions remain pending. Coordinator/operator deployment, Storage durability/restore acceptance and conformance remain open.
