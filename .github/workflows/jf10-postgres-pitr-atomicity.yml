@@ -1,0 +1,43 @@
+name: JF-10 PostgreSQL 18.7 PITR prepared-XID atomicity and archive negatives
+
+on:
+  push:
+    branches:
+      - session-storage-consistency-forget-atomicity-2026-11-16
+    paths:
+      - "reviews/storage-consistency/postgres_probe/jf10_postgres_pitr_atomicity_probe.py"
+      - ".github/workflows/jf10-postgres-pitr-atomicity.yml"
+  pull_request:
+    paths:
+      - "reviews/storage-consistency/postgres_probe/jf10_postgres_pitr_atomicity_probe.py"
+      - ".github/workflows/jf10-postgres-pitr-atomicity.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  pitr-atomicity:
+    name: Prepared XID / VisibilityPointer / PublicationReceipt PITR and WAL negative cases
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: session-storage-consistency-forget-atomicity-2026-11-16
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install psycopg
+        run: python -m pip install "psycopg[binary]>=3.2,<4"
+      - name: Run PostgreSQL 18.7 PITR atomicity and negative archive campaign
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: python reviews/storage-consistency/postgres_probe/jf10_postgres_pitr_atomicity_probe.py
+      - name: Capture PostgreSQL diagnostics
+        if: always()
+        run: |
+          docker ps -a
+          for c in $(docker ps -a --format '{{.Names}}' | grep '^jf10-pitr-atomicity-' || true); do
+            echo "===== $c ====="
+            docker logs "$c" || true
+          done
