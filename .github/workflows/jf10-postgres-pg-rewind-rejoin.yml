@@ -120,7 +120,7 @@ jobs:
           docker run --rm --network none --user postgres \
             -v jf10-primary-data:/var/lib/postgresql \
             --entrypoint bash "$PG_IMAGE" -lc \
-            "/usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -o \"-c listen_addresses='' -c port=5544\" -w start && /usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -m fast -w stop"
+            "/usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -o \"-c listen_addresses='' -c port=5544 -c wal_keep_size=512MB\" -w start && /usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -m fast -w stop"
           echo "OLD_PRIMARY_OFFLINE_CRASH_RECOVERY=PASS"
           docker run --rm --user postgres --network jf10-rejoin-net \
             -v jf10-primary-data:/var/lib/postgresql \
