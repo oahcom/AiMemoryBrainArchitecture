@@ -113,6 +113,10 @@ jobs:
             -v jf10-pitr-backup:/var/lib/postgresql \
             -v jf10-pitr-wal:/archive \
             "$PG_IMAGE" \
+            -c max_prepared_transactions=16 \
+            -c wal_level=replica \
+            -c fsync=on \
+            -c full_page_writes=on \
             -c "restore_command=cp /archive/%f %p" \
             -c "recovery_target_lsn=$TARGET_LSN" \
             -c recovery_target_action=promote \
