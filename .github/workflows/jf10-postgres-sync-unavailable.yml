@@ -111,6 +111,7 @@ jobs:
           PGUSER: postgres
           PGPASSWORD: jf10-ha-ci-only
           PGDATABASE: postgres
+        timeout-minutes: 2
         run: python reviews/storage-consistency/postgres_probe/jf10_postgres_sync_unavailable_probe.py
       - name: Capture primary and standby diagnostics
         if: always()
