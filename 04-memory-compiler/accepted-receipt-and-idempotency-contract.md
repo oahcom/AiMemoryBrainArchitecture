@@ -214,3 +214,12 @@ The receipt evidence matrix is therefore extended with:
 - ProducerWorkTerminalReceipt + D barrier reconciliation cursor.
 
 All of these remain distinct typed evidence objects. None is interchangeable with AggregateRevision, LifecycleEventCursor, IndexWatermark, ForgetFenceGeneration, PermissionEpoch or ContextVersion.
+
+
+
+---
+## Phase 3.5 Addendum — Receipt OPEN Item Correction
+
+D's normative operation document now specifies semantic lookup and receipt behavior for RegisterProducerClass, RegisterProducerWork, InstallForgetFence, CaptureProducerRegistrationHighWater, RegisterDerivedDependency, PublishDerivedIfFenceCurrent, CompleteProducerWork, ResolveProducerWork and ReconcileForgetBarrier. Therefore OPEN-REC-04 is narrowed: D semantic lookup identities, receipt classes and error outcomes are specified; callable API/transport schemas, authentication serialization and wire error mapping remain OPEN under OPEN-API-01. Storage/Consistency atomic visibility and recovery remain OPEN under OPEN-STORAGE-01.
+
+The AcceptedReceipt's own durable commit profile remains separately OPEN under OPEN-REC-01. D producer-ledger receipt durability does not substitute for the E ingress transaction, and an AcceptedReceipt does not imply a D ProducerRegistrationReceipt.
