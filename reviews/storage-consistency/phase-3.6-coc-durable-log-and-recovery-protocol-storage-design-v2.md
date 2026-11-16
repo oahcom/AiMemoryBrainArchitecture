@@ -4,7 +4,9 @@
 - Date: 2026-11-17
 - Status: **REVISED STORAGE TECHNICAL DESIGN PROPOSAL — FRESH OWNER REVIEW REQUIRED**
 - Project phase: **ARCHITECTURE DESIGN**
-- Supersedes for review: v1 at commit `9a975f665ee60f4551effe0104ea8f867716d9dd`, blob `cd5566b3d99b5204401ac713a5bb2dcf89a02726`
+- Supersedes the earlier Storage design draft at commit `9a975f665ee60f4551effe0104ea8f867716d9dd`, blob `cd5566b3d99b5204401ac713a5bb2dcf89a02726`.
+- Exact five-Owner review baseline (pinned by A/I/D/C/H acceptance artifacts): `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`.
+- Current Storage companion clarification source: `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` (PostgreSQL prepared-participant identity mapping integrated in §7.5; this later Blob is not misrepresented as the five-review baseline).
 - Parent COC architecture: A branch `session-a-integration-2026-11-16`, blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`
 - Related Storage boundary: `phase-3.6-coc-storage-boundary-acceptance.md`
 - Implementation / deployment / conformance: **NOT IMPLEMENTED / NOT DEPLOYED / NOT RUN**
@@ -13,7 +15,7 @@
 
 ## 1. Purpose, scope and non-goals
 
-This proposal specifies Storage-facing durable-state, participant-accounting and recovery contracts for the COC append-only quorum log. It addresses five independent Owner reviews (A, I, D, C and H) of v1 and their consolidated findings.
+This proposal specifies Storage-facing durable-state, participant-accounting and recovery contracts for the COC append-only quorum log. It addresses five independent Owner reviews (A, I, D, C and H) of the exact review baseline Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`, plus the subsequent A exact-version R1–R6 review as an additional blocking clarification set. The older Storage design draft Blob `cd5566b3d99b5204401ac713a5bb2dcf89a02726` is a separate predecessor, not the exact artifact pinned by the five Owner acceptance records.
 
 It covers:
 1. quorum-committed COC records and deterministic participant accounting;
@@ -218,6 +220,8 @@ C's runtime gate is a fail-closed side-effect admission rule, not an I/D authori
 - C MUST NOT infer absence of an I revocation or D fence from COC unavailability.
 - A participant already admitted before the gate closed is not blindly cancelled or replayed. It is included in the recovery manifest and reconciled against C's authoritative provider evidence.
 - Before any provider side effect, C freezes the exact request identity/digest, owner boundary and provider idempotency key/namespace.
+- **Provider invocation is permitted only after I has durably decided `COMMIT_WON` for the exact bound operation/final-gate participant and every required D predicate for that operation is satisfied.** An I `REVOCATION_WON`, `INDETERMINATE_ABORTED` or other abort terminal requires same-XID Storage rollback/non-publication and MUST NOT invoke the provider. `UNKNOWN` / `IN_DOUBT`, missing I proof, mismatched tuple or unresolved D predicate blocks provider invocation.
+- Any pre-provider reservation is strictly non-side-effecting: it may reserve internal bookkeeping capacity but MUST NOT contact the provider, create externally observable work, or be represented as provider handoff.
 - C records actual provider boundary evidence only. Provider ACCEPTED requires determinate handoff evidence; definitive REJECTED requires proof of no handoff. Timeout, process death, lost response or contradictory evidence is UNKNOWN/IN_DOUBT.
 - Recovery uses the same provider key and authoritative provider lookup where supported. Never mint a new transaction, reservation or provider key to escape ambiguity.
 
@@ -286,6 +290,20 @@ and `D_LINEAGE_CLEARANCE_OBSERVED(...)`.
 Every transition carries the issuing owner's signed evidence ref/digest. Bare COC states named `COMMIT_WON`, `ABORT_WON` or `STORAGE_RESOLVED` MUST NOT be interpreted as COC-owned decisions. Terminalization requires the complete applicable typed evidence set; no aggregate state may synthesize missing owner facts.
 
 Multi-PolicyDomain JF-10 remains unsupported/blocked absent a separate I-approved atomic authorization profile.
+
+### 7.5 PostgreSQL prepared-participant identity mapping — Storage clarification
+
+The engine-neutral `preallocated XID` MUST be distinguished from an engine-assigned native transaction number. For the PostgreSQL 18.7 candidate profile:
+
+1. `PreparedParticipantRef` is the stable cross-service participant identity.
+2. `PreparedTransactionGID` is the client-chosen PostgreSQL prepared-transaction GID. Storage allocates and durably binds this unique GID to the immutable `PublicationOperationId` / `RequestDigest` before `JF10_PREPARE_INTENT_REGISTERED`. This is the preallocated identifier carried in the COC prepare-intent record and reused for every lookup, retry, `COMMIT PREPARED` and `ROLLBACK PREPARED`.
+3. PostgreSQL's numeric `pg_prepared_xacts.transaction` value is an engine-assigned native XID allocated by PostgreSQL; the client cannot preallocate it. It MUST NOT be described as the preallocated cross-service XID or used as the sole participant identity. Storage records it as observed engine evidence after PREPARE.
+4. `PreparedParticipantReceipt` MUST bind at least: `PreparedParticipantRef`; `PreparedTransactionGID`; native XID as observed; `CanonicalAuthorityDBRef`; PostgreSQL cluster `system_identifier`; target database identity/OID; original prepare timeline and observed prepare LSN; participant digest; `PublicationOperationId` and `RequestDigest`; exact `owner_boundary`; `CausalOrderDomainRef` and `PolicyDomainRef`; COC prepare-intent position/digest; prepared state; Storage signer/key version and audience.
+5. The GID MUST be unique within the bound PostgreSQL cluster/database authority and MUST NOT be reassigned to a different operation after resolution. A same-GID/same-digest retry is lookup/replay; a same-GID/different-tuple request is `CONFLICT`.
+6. After a durable I terminal decision, `StorageResolutionProof` MUST bind the same GID and original participant tuple to the final `COMMITTED` or `ROLLED_BACK` state. On commit it includes the exact VisibilityPointer/PublicationReceipt transaction identity and receipt digest; on rollback it includes authoritative non-publication evidence. It also records recovery timeline/LSN context without replacing the original prepare identity.
+7. Absence of a GID from `pg_prepared_xacts` is not, by itself, proof of commit or rollback. Storage MUST resolve through the durable participant outcome/idempotency ledger and authoritative DB readback. If those disagree or are unavailable, the result remains `UNKNOWN` / `IN_DOUBT` and protected reads stay closed.
+
+This clarification preserves the protocol's engine-neutral intent while making the PostgreSQL mapping implementable. Other database engines MUST define an equivalent stable prepared-participant identifier and separately typed engine-native transaction identifier. Exact field names and wire encoding require H review; the security tuple and same-participant recovery invariant are normative.
 
 ## 8. Snapshot, compaction and restore anti-rollback
 
@@ -374,6 +392,18 @@ The following are acceptance-test requirements only; no PASS is claimed:
 
 ## 13. Five-review disposition matrix
 
+The exact Owner review source pins are:
+
+| Owner | Acceptance artifact | Branch | Review artifact Blob |
+|---|---|---|---|
+| A | `reviews/integration/phase-3.6.3-a-coc-durable-protocol-integration-acceptance.md` | `session-a-integration-2026-11-16` | `d20d08581fd8606a1adf0400bf5dcb24004a9611` |
+| I | `09-security-governance/phase-3.6.3-i-coc-durable-protocol-authority-acceptance.md` | `session-i-security-governance-2026-11-16` | `528945f82e3e25258052240a7a4ba43753ae6cf8` |
+| D | `03-memory-brain/phase-3.6.3-d-coc-durable-protocol-acceptance.md` | `session-d-memory-brain-2026-11-16` | `e2a74d138ccebfb4266d19ea0c0c03f58a815bf5` |
+| C | `07-agent-integration/phase-3.6.3-c-coc-durable-protocol-acceptance.md` | `session-c-agent-integration-2026-11-16` | `8c8a43f99ecd5986f802fb81ddfa5fd942cef0ae` |
+| H | `08-bmcp-protocol/phase-3.6.3-h-coc-durable-protocol-wire-acceptance.md` | `session-h-bmcp-protocol` | `5dfc7ae56b2ae7351d6c2c108f7be3249125f6c3` |
+
+All five acceptance artifacts pin the same reviewed Storage baseline Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`. The separate earlier Storage draft Blob `cd5566b3d99b5204401ac713a5bb2dcf89a02726` is retained as predecessor history only.
+
 | Review | Original finding | v2 response | Status |
 |---|---|---|---|
 | A | Batch committed before participant enumeration | §5.3–5.4 precomputes deterministic manifest and binds it into batch; separate committed manifest cross-binds batch digest | Addressed in proposal; A re-review required |
@@ -393,6 +423,20 @@ The following are acceptance-test requirements only; no PASS is claimed:
 | H | Batch/manifest identity ambiguity | §5.4 and §10 | Addressed in proposal; H re-review required |
 | H | Envelope/canonicalization/security schema gaps | §§3.1, 10–11 | Requirements enumerated; exact H/I schema/security profile remains open |
 | H | Error/lost ACK semantics | §4.3 and §5.4 | Addressed in proposal; H re-review required |
+
+## 13.1 Additional A exact-version review R1–R6 disposition
+
+This is a subsequent review gate, distinct from the five earlier A/I/D/C/H acceptance artifacts above. A reviewed its exact COC bundle and published **ACCEPT WITH BLOCKING CLARIFICATIONS / AMENDMENTS REQUIRED**. This v2 amendment addresses the findings as follows; it does not claim A has accepted this v2:
+
+| Finding | v2 disposition | Normative location / remaining condition |
+|---|---|---|
+| R1 Recovery Cutoff Batch completeness | Addressed by owner high-water attestations, explicit empty manifest, exact prefix-bound participant manifest, batch/manifest cross-binding, and subsequent batch for post-high-water requests | §§5.2–5.6; each Owner must verify its own request set and gate disposition |
+| R2 Owner-local Gate linearization | Addressed by atomic owner gate closure + local snapshot/high-water capture; racing requests are either captured or remain behind the closed gate | §§5.2, 5.6, 6.1–6.4; Owner implementation proof remains required |
+| R3 Participant completeness and gate release | Addressed by immutable retrievable manifest, per-fence D lineage manifest, owner-signed independent releases and separate outage-gate / effective-fence states | §§5.3–5.5, 6.1–6.4 |
+| R4 C provider invocation | Explicitly requires exact I `COMMIT_WON` plus all required D predicates; abort outcomes prohibit provider invocation; pre-provider reservation is non-side-effecting | §6.3; C must provide provider-specific same-key lookup/idempotency evidence |
+| R5 Same-XID recovery | Exact DB identity/GID/XID tuple remains immutable; I COMMIT_WON forward-commits same participant; abort rolls back same participant; UNKNOWN retains prepared state; no alternate identity or heuristic resolution | §§7.1–7.5; selected-engine conformance remains required |
+| R6 Exact-version/schema drift | Five review source pins and later A bundle are distinguished; H must bind recovery schema applicability to exact A §11/§12 and reject downgrade/field omission | Header, §§10, 13; H schema remains candidate and requires exact-version H review |
+
 
 ## 14. Acceptance and release boundary
 
