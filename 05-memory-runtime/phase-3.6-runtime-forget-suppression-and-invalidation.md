@@ -139,3 +139,32 @@ Every case is **SPECIFIED / NOT RUN** in this design pass. A pass requires execu
 **F decisions:** per-stage authorization/fence checks; final-return linearization gate; per-partition IndexWatermark; cache key binds identity/scope/permission/fence/version; read-time authority checks repair lost invalidation; reconnect never restores old Working Set before current reconciliation.
 
 **Cross-module status:** Runtime Forget End-to-End Closed is not claimed. D/E/Storage atomic publication and I global completion remain separate blockers.
+
+
+## Phase 3.6 CFG joint architecture closure addendum — F runtime integration decision
+
+- Owner: F — Retrieval, Index, Cache and Working Set
+- Status: **F runtime safety semantics DECIDED; cross-owner interfaces remain owner-controlled; implementation/execution NOT VERIFIED**.
+
+### 1. Runtime consistency decision
+
+1. D canonical Memory/lifecycle and ForgetFence are authoritative. F indexes, caches, retrieval candidates and Working Sets are projections, never authorities.
+2. Scope and current authorization filtering occur before candidate generation can affect output, fusion, ranking, counts, traces, cache keys or side channels. Every evidence/provenance dereference is separately authorized.
+3. Each IndexWatermark is a per-index/partition contiguous accounted-through cursor with schema and coverage. Multi-partition freshness is a vector. A gap, lag, incompatible schema or unknown coverage never advances the watermark and never proves absence or deletion.
+4. When the index lags, F may perform a bounded, scope-filtered canonical read-through against exact current MemoryVersionRefs if D/I authority and the latency/budget policy permit. Otherwise F returns an explicitly incomplete/unavailable result; it must not silently omit candidates or claim freshness.
+5. Cache keys bind authenticated Principal/security domain, exact typed Scope and Environment, Agent/Task/RuntimeSession, I PermissionEpoch, D ForgetFence, exact MemoryVersion or index generation/watermark/schema/coverage, query/filter fingerprint and validity. A key is isolation metadata, not authorization. Every protected cache hit revalidates current I/D state and canonical lifecycle.
+6. Fence or revocation advances the local invalidation generation, denies affected refs immediately, cancels in-flight fills/prefetch/graph expansion/reranking/materialization, evicts or quarantines affected cache/Working Set state, and requires a final authority recheck at result visibility. A late fill is discarded if its final write/visibility gate is stale.
+7. Working Sets contain canonical references first; snippets are protected cached content. ContextVersion belongs to G and is not a substitute for canonical version, IndexWatermark, PermissionEpoch, ForgetFence or CapabilityEpoch.
+8. Reconnect is a new authorization boundary. Authenticate the new session; obtain current I epoch and D fence; reconcile F checkpoints; suppress/clear stale Working Set and fills; then restore only current authorized refs. Never restore old state first and clean it later.
+
+### 2. Dual-authority race rule
+
+PermissionEpoch and ForgetFenceGeneration are independent opaque typed namespaces. Neither is numerically compared with, derived from, or substituted for the other. F must establish current authorization and current Forget suppression independently at candidate admission, dereference, cache read/write, final materialization and final return. If either authority is stale, gapped, unavailable or ambiguous, affected content is suppressed. Revoking the requester does not cancel an already committed D suppression obligation; cleanup proceeds only under a currently authorized service/continuity principal.
+
+### 3. F boundary outcomes
+
+F reports only F-local candidate/freshness/index/cache/Working-Set suppression evidence. It cannot report G Applied, H Adapter purge, D canonical Forget completion, I global completion or physical erasure. TTL expiry, index rebuild completion, high watermark, zero search hits and missing invalidation notifications are not proof of deletion. Lost invalidation is repaired by durable authority revalidation plus checkpoint replay/resync; a gap blocks protected reads until repaired.
+
+### 4. Conformance disposition
+
+The existing F-RT-01..13 and joint CFG-01..20 / PI-01..08 remain **SPECIFIED / NOT RUN**. No executable retrieval race, cache fault, rebuild/replay, reconnect, injection or provider-boundary evidence was supplied. This addendum records normative architecture, not implementation or test success.
