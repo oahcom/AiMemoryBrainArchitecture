@@ -3,7 +3,7 @@
 - Document: TAR-AI-001 / TAB-001 v0.1
 - Owner: F — Memory Runtime Architect
 - Branch: `session-f-memory-runtime`
-- Reviewed source branch HEAD (pre-publication snapshot): `61814ec33e7c6851c8b64ed9a7ca581c1ebe0b21`; tree SHA: `5ec5f265d4197c9bf22127cc12548d1ec09e70a9`. The report publication commit is recorded separately in the final execution summary.nt-SHA verification during report publication**. Branch existence and branch-local file reads were verified; the GitHub file reader returned blob SHAs but not the resolved ref commit SHA.
+- Reviewed source branch HEAD (pre-publication snapshot): `61814ec33e7c6851c8b64ed9a7ca581c1ebe0b21`; tree SHA: `5ec5f265d4197c9bf22127cc12548d1ec09e70a9`. The report publication commit is recorded separately in the execution summary.
 - Review date: 2026-11-17
 - Report version: 1.0
 - Verdict: **CONDITIONAL PASS**
@@ -47,7 +47,7 @@ These are current owner artifacts, not substitutes for the missing owner technol
 | Phase 3 D/E/H/I contract review | main; blob `edaccb802e0425f2d47bd4b613fab4dfde107144` | D cursor, D/E atomic gate, I/F Forget vector dependency |
 | F Runtime Working Set and Cache | F branch; blob `a934491950c876701e8ac592a0e6aaea983b44e3` | Cache keys, session isolation, invalidation, fail-closed behavior |
 
-Phase 2 records F branch design commit `dad5deb6bfaa2df9956930d0b1372df354112567` and five design documents. The exact current branch HEAD was not exposed by the branch/file operations used here; it is not represented as verified. The other F design filenames were not independently resolved in this read and are treated as secondary evidence through the Phase 2 reconciliation, not as newly fetched artifacts.
+Phase 2's F design commit `dad5deb6bfaa2df9956930d0b1372df354112567` remains historical context only; the current source HEAD and tree are recorded above.
 
 ### Scope boundaries
 
@@ -166,5 +166,4 @@ Required controls: per-session and global byte/item limits, queue bounds, admiss
 - Phase 3 D/E/H/I review blob: `edaccb802e0425f2d47bd4b613fab4dfde107144`
 - F Working Set/cache blob: `a934491950c876701e8ac592a0e6aaea983b44e3`
 - F design baseline commit recorded by Phase 2: `dad5deb6bfaa2df9956930d0b1372df354112567` (not asserted to be current HEAD)
-- Branch current HEAD: pending exact commit-parent verification; no fabricated SHA.
 - No runtime, fault-injection, security, or performance tests executed in this review.
