@@ -267,3 +267,8 @@ Measure events/bytes per Agent, task, session, and environment; ingress p50/p95/
 - **DECIDED:** Unknown/uncertain states are first-class.
 - **CANDIDATE:** Small canonical core with typed payloads and namespaced extensions.
 - **OPEN:** Wire schema belongs to Session H; domain mapping belongs to Sessions B and E.
+
+
+## Phase 3.5 identity/trust overlay
+
+The definitive identity binding and per-signal telemetry requirements are in `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md` §§2–3. In particular, payload Agent/Adapter/Actor/Scope/Environment/session/task values are claims until bound by H/I and typed/resolved by the relevant authority. Environment identity must be exact and registry-backed; the typed EnvironmentRef owner/contract is OPEN unless explicitly established by B/governance. Intent/Plan remain prospective, Tool Call is not Tool Result or proof of side effect, and Observation is not automatically Verified. This addendum supersedes any weaker trust implication in earlier signal summaries.

@@ -246,3 +246,8 @@ Acceptance scenarios:
 - **CANDIDATE:** Deltas for normal sync; snapshots for bootstrap/recovery.
 - **DECIDED:** Unknown base requires rejection or reconciliation.
 - **OPEN:** Wire acknowledgements and Adapter conformance belong to Session H; context authority remains Session G.
+
+
+## Phase 3.5 final-submit authority overlay
+
+The definitive Applied proof boundary, binding tuple, creation point, invalidation conditions and Tier 1/2/3 ceiling are in `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md` §§4 and 8. Full Applied requires observation of the exact final immutable request actually submitted to the inference runtime/provider, including request ID and complete Managed Region digest. An intermediate middleware representation or local buffer is insufficient. Tier 2 and Tier 3 MUST NOT claim Full Applied. PermissionEpoch, ForgetFenceGeneration, CapabilityEpoch and ContextVersion remain distinct namespaces and are independently revalidated. This addendum supersedes any earlier ambiguity about a middleware hook being sufficient proof.
