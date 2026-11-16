@@ -103,7 +103,7 @@ A green reference-model test is not a substitute for any physical campaign test.
 | D + Storage full multi-artifact bundle confirmation | CLOSED | Issue #9 closed after exact D/Storage Owner decisions and A readback verification |
 | Storage candidate DB profile | PostgreSQL 18.7 candidate selected for qualification | Single-node CI profile pinned; production Canonical Authority deployment and human on-call remain undesignated |
 | Named COC operator/infrastructure | NOT DESIGNATED | No deployed consensus/log service or accountable operator |
-| DB prepared-XID/lock/visibility capability | SINGLE-NODE CI PASS / HA OPEN | Run 43907296027 proves same-volume crash recovery; synchronous replication, promotion and restore remain NOT RUN |
+| DB prepared-XID/lock/visibility capability | SINGLE-NODE + TWO-NODE PROMOTION CI PASS / RESTORE OPEN | Runs 43907296027 and 43908428220 prove same-volume crash recovery and exact-XID promotion/commit on pinned CI; rollback-after-promotion, lost ACK, restore and production operations remain open |
 | Persistent COC | NOT IMPLEMENTED / NOT VERIFIED | Architecture proposal only |
 | Provider idempotency | NOT VERIFIED | No provider-specific implementation/probe evidence |
 | 18-test reference validator revision | COMMITTED / READBACK VERIFIED / CI PENDING | New commit should trigger push workflow; no run result read back yet |
@@ -170,3 +170,14 @@ A reviewed the probe source and posted blocking review findings in Issue #10 com
 The probe's `synchronous_commit=remote_apply` is stronger than `on` for standby replay visibility; this is acceptable if intentional, but the dossier must describe the actual tested setting exactly.
 
 **Current gate:** Gate A single-node profile PASS; HA probe source AUTHORED / REVIEW BLOCKED / NO PASS YET; backup/restore NOT RUN; production topology and human on-call NOT DESIGNATED. Gate B remains BLOCKED until full Gate A; Gate C remains BLOCKED until Gate B. JF-10 P0 remains OPEN.
+
+
+## 8. Gate A two-node promotion result and remaining stop conditions — 2026-11-17
+
+A independently verified Storage's current probe Blob `23d8ea8546932e592093c5c17cd2b52f8a294720`, workflow Blob `f3c05f90c6065458b49879def10dce672685c850`, and successful run `43908428220` / job `133443444760` from raw job logs. The helpers now forward the requested port correctly. The run proves synchronous physical standby state, prepared WAL replay, primary hard-kill, promotion, exact prepared-XID recovery, retained row lock, same-XID COMMIT PREPARED and atomic pointer+receipt visibility for the pinned Docker CI profile.
+
+Record the exact primary setting as `synchronous_commit=remote_apply`; the promoted server's observed value is `on`. Do not describe the primary profile as `on`.
+
+Gate A remains PARTIAL PASS / OPEN. Required next Storage-owned evidence: (1) separate same-GID ROLLBACK PREPARED after promotion and prove no publication; (2) lost-ACK around PREPARE and terminal resolution with UNKNOWN/IN_DOUBT fail-closed semantics; (3) backup/restore/PITR including unresolved prepared XID and stale-snapshot RecoveryQuarantined/control-ledger reconciliation; (4) old-primary fencing/rejoin prevention; (5) actual Canonical Authority topology, named human production operator/on-call, RPO/RTO and runbook. See Issue #10 comment 6922471557.
+
+Gate B remains BLOCKED until all Gate A requirements pass. Gate C remains BLOCKED until Gate B passes. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
