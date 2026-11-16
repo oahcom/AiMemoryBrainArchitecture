@@ -213,3 +213,12 @@ H extended the schema suite with a strict JSON parser reference model. Evidence:
 **Result: 23/23 tests PASS** (11 JSON Schema/fixture + 12 strict-parser cases). The reference model covers duplicate keys, invalid UTF-8, non-finite values, bounded size/depth, unknown critical extension rejection and opaque preservation of non-critical extensions.
 
 Limit: this is not the production BMCP parser/transport and does not prove cryptographic signatures, channel binding, issuer trust, replay resistance, normative canonicalization, generated SDK interoperability or live owner integration. H schema remains candidate/not frozen.
+## 10. Reassessment — Storage §14 prepared participant identity and BMCP 1.1.1 (2026-11-17)
+
+H reviewed the exact Storage protocol §14 Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` and A integration mapping Blob `a71251704851cacd15f67faa985a5bd50057e92a`. H's exact wire acceptance is `08-bmcp-protocol/phase-3.6.4-h-prepared-participant-identity-wire-acceptance.md`, commit `6c47aaabc0e039210eeb57d218649c9384b1d3ab`.
+
+H created the additive BMCP schema 1.1.1 candidate, Blob `c0bbfc7611a8d88a39cee209831db32b62601fde`, separating PreparedParticipantRef, PreparedTransactionGID and engine-native XID and binding PostgreSQL system identifier/database OID/prepare timeline/LSN/Storage signer key version. Evidence: `08-bmcp-protocol/phase-3.6.4-jf10-prepared-gid-schema-validation-evidence.md`, commit `8c134c9bb1efc2ddcc4ad49447fee42838adbe39`.
+
+**Result: 34/34 combined schema/parser tests PASS**, run `43964080044`, job `133638783610`, commit `576d86cef149110173f681a39cdc598e2ddafc4f`.
+
+Limit: H's schema and parser reference tests do not prove cross-message same-GID/participant consistency, DB uniqueness, alias equality at runtime, cryptographic signatures, channel binding, issuer trust, replay-resistant transport, generated SDK or live owner integration. Schema 1.1.1 remains candidate/not frozen; JF-10 runtime P0 remains open.
