@@ -178,5 +178,5 @@ A's final context-optimization package records eight non-A Owner perspectives as
 - JF-10 P0 remains OPEN; Multi-PolicyDomain remains BLOCKED; Gate C is DEFERRED_TO_ENGINEERING_PHASE.
 - All nine module baseline proposals remain PROPOSED / NOT APPROVED.
 - Project G0 / architecture freeze remains NOT AUTHORIZED; no PGA appointment evidenced.
-- P/main are diverged (latest compare before this report update: P ahead 80 / behind 4; this report commit increments P's ahead count by one). No merge, force update, main write or Owner-branch write by P.
+- P/main remain diverged; re-query the live compare before any integration. No merge, force update, main write or Owner-branch write by P.
 
