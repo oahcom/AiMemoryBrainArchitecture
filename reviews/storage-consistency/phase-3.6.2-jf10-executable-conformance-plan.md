@@ -168,7 +168,7 @@ D and E Owner branches now each contain an explicit consumption/mapping note:
 - D: `03-memory-brain/phase-3.6.2-jf10-reference-model-consumption.md`
 - E: `04-memory-compiler/phase-3.6.2-jf10-reference-model-consumption.md`
 
-A local semantic replay of 15 deterministic assertions passed. **The committed unittest suite has not yet been run by a repository CI runner.** The reference model is in-memory and does not implement a durable coordinator, real database prepared transactions, shared serializable D/Storage state, I service, receipt cryptography, HA, failover, restore, or real reader/object-store integration.
+15 deterministic unittest methods are authored. No execution result has been verified in a local Python runtime or GitHub Actions; test status remains NOT RUN. **The committed unittest suite has not yet been run by a repository CI runner.** The reference model is in-memory and does not implement a durable coordinator, real database prepared transactions, shared serializable D/Storage state, I service, receipt cryptography, HA, failover, restore, or real reader/object-store integration.
 
 ### Status correction
 
