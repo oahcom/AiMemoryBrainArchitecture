@@ -133,7 +133,7 @@ No vendor, SQL dialect, isolation guarantee, deployment topology or migration co
 
 **Physical PostgreSQL 18.7 CI capability tests:** PASS for single-node prepared-XID/restart; two-node synchronous promotion and same-XID commit/rollback; physical backup/restore with stale-control fixture; coordinator ACK-gap; TCP ACK-loss; required-standby-unavailable UNKNOWN/private/lock-retention; WAL-archive PITR to explicit LSN.
 
-**Still NOT RUN / NOT VERIFIED:** D36 full module conformance matrix; E36-01..E36-20 application-level tests; C01–C20 end-to-end application conformance; actual I/D service integration; production COC quorum/durable log; production fencing/STONITH and split-brain prevention; production host/zone/cloud-volume durability; production deployment restore and control-ledger replay; operator/runbook/RPO/RTO acceptance.
+**Still NOT RUN / NOT VERIFIED:** D36 full module conformance matrix; E36-01..E36-20 application-level tests; C01–C20 end-to-end application conformance; actual I/D service integration; production COC quorum/durable log; production fencing/STONITH and split-brain prevention (CI pg_rewind rejoin procedure now passes, but does not certify production fencing); production host/zone/cloud-volume durability; production deployment restore and control-ledger replay; operator/runbook/RPO/RTO acceptance.
 
 - Implementation Verified: **NO**.
 - Production Deployment Bound: **NO — NOT DESIGNATED**.
@@ -347,3 +347,15 @@ A PostgreSQL 18.7 CI campaign completed physical base backup + WAL archive recov
 - Base marker and target marker were present; post-target marker was absent.
 
 This closes the WAL-archive PITR subtest for the exact pinned CI profile only. It does not establish production backup retention, off-site durability, immutable backup catalog, actual I/D Forget-control replay, RPO/RTO or cross-zone restore. Gate A remains PARTIAL PASS / OPEN.
+
+
+## 11. Old-primary pg_rewind and standby rejoin procedure — PASS for pinned CI profile (2026-11-17)
+
+Storage executed a two-node PostgreSQL 18.7 failover/rejoin procedure:
+- Probe Blob: `0fe6af4a8c9ef350ef9cbf0694a8f975e8f142f5`
+- Workflow Blob: `7670ff9537054df1c1303d4eda4d46bffdfa3c4c`
+- Run: `43930047054`; job: `133519705454`; conclusion SUCCESS.
+
+The old primary was hard-stopped, recovered offline with networking disabled, rewound to the promoted source using pg_rewind, then rejoined only as a standby. The rejoined standby rejected writes and received a new write made after rejoin from the promoted primary. This proves the tested rejoin procedure and no-dual-writer behavior in the CI harness.
+
+The container stop is not production STONITH or cloud/storage fencing. Production split-brain prevention, independent failure-domain fencing, HA-manager arbitration, connection routing and monitoring remain OPEN. Gate A remains PARTIAL PASS / OPEN.
