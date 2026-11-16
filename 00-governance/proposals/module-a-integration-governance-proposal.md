@@ -53,3 +53,12 @@ PGA appointment/quorum; evidence freshness TTL; finding severity/closure quorum;
 
 ## 14. Explicit Non-Claims
 No claim of project authority, contract freeze, implementation completion, G0 approval, branch merge or system readiness.
+
+
+## Live Owner update — 2026-11-17
+
+A's current Owner branch advanced during this Session P pass to `7d73102576660fb602376c7ce2f2522a0a8b29ad` (commit: `A: record JF-10 bundle decision closure and Gate A transition`). This proposal's original source snapshot is therefore not the latest A HEAD; A Owner must re-review against the new tip before adoption.
+
+The new A integration record says Issue #9 is closed at the decision layer after D and Storage each published exact-bundle Owner decisions. It records D's acceptance as limited to D-owned ForgetFence/barrier semantics and Storage's acceptance as architecture/participant interface only. Issue #10 Gate A remains active: Storage must identify the actual DB product/version/configuration and accountable operator and prove prepared-XID/lock-retention/same-XID recovery and atomic visibility. Gate B persistent COC and Gate C fault injection remain blocked. JF-10 P0 remains OPEN; multi-PolicyDomain remains BLOCKED.
+
+A's latest record also preserves the separate Applied contract issue: C/G/H common Applied schema version/digest and exact approvals remain unresolved; architecture baseline freeze remains NOT AUTHORIZED. A Owner should refresh this proposal's branch HEAD and registry source pins before deciding it.
