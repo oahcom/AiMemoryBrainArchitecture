@@ -71,3 +71,38 @@
 | ContextVersion / AdapterCapabilityEpoch | exact delivery and final-request evidence, stale/late ACK behavior | **Specified; cross-owner approval and execution OPEN** |
 
 This registry records D's owner decision without claiming Storage or consumer implementation. It does not close CR-P1-01, CR-P1-02, INT-P0-02, INT-P0-03, INT-X-01, INT-X-04 or INT-X-07.
+
+
+---
+
+## Phase 3.6 closure reconciliation — 2026-11-16
+
+The Phase 3.5 token semantics above remain the controlling typed-namespace baseline. The following Phase 3.6 closure facts are added without changing any token owner or semantic meaning.
+
+### 1. Current source baseline
+
+Current branch tips: A `9c3dafb97b97aee50a8b61fe60836ed0a8e92fe3`; B `2148dcf1a53ff7aab194ba1bf799fa5a6a3b697f`; C `3b6c1d9a5d648f61daa04f5874d887f33475f098`; D `968ce314cf2e44f50e3efd711060e495374cac98`; E `e3afa99728f399d154767c959e37ff38f651b4b6`; F `2da5209d7072272d5510d376c0f319bed0402a6f`; G `ac32e980003aa41faf0ae958ffef3df5ab387984`; H `59926f5090dfd2e2ad78d9c25d0bd9062b4bcabc`; I `6a92f49bd740f6e2db11568d9bd61e8c58132cbc`; Storage `c0d01d81698fa6bc2a22e84b0e2ada66ce329815`.
+
+### 2. Typed namespace closure requirements
+
+| Namespace / receipt | Phase 3.6 closure owner | Required reconciliation | Current status |
+|---|---|---|---|
+| `PermissionEpoch` / `AuthorizationCommitPermit` | I | Named policy domain, currentness/revocation ordering, single-use commit receipt and approval/effective policy version | Contract specified; governance and consumer integration OPEN |
+| `ProducerDomainInventoryEpoch` / `InventorySealReceipt` | I | Closed-world producer/recipient/backup inventory, authenticated member enumeration, digest and seal; D validates reference but cannot manufacture it | Contract specified; inventory owner I; operational seal not supplied |
+| `ProducerRegistryVersion` / `ProducerRegistrationHighWater` | D | D-local class registry and per-Forget work admission barrier remain distinct from I global inventory | D semantics decided; implementation NOT VERIFIED |
+| `ForgetFenceGeneration` / `FenceSnapshotReceipt` | D | Bind D barrier snapshot and current inventory seal; fence remains separate from PermissionEpoch | D semantics decided; implementation NOT VERIFIED |
+| `CanonicalCommitCursor` | D | One ordered sequence per Canonical Memory authority; Storage proves sequence/transaction/recovery continuity | D decision recorded; Storage realization NOT VERIFIED |
+| `IndexWatermark` | F | Partition-local contiguous accounted-through D cursor; gaps cannot be skipped | F semantics decided; tests NOT RUN |
+| `ContextVersion` / DeliveryId / DeliveryAttemptId | G | Exact immutable target and attempt; no scalar applied_version substitution | G semantics decided; Applied freeze blocked |
+| `AdapterCapabilityEpoch` / ACK evidence | H | Exact Adapter instance/session/capability and action/region evidence; ACK is not Applied by itself | H technical baseline decided; governance/consumer acceptance open |
+| `InferenceRequestId` / `FinalRequestBoundaryId` | C | Exact immutable request and observable final submit boundary | C semantic contract delivered; C/G/H freeze blocked |
+
+### 3. No implicit ordering or approval
+
+- I's global inventory epoch is not D's per-Forget work high-water.
+- I's PermissionEpoch is not D's ForgetFenceGeneration, F's IndexWatermark, G's ContextVersion or H's AdapterCapabilityEpoch.
+- A receipt proves only the operation and authority named by its type; RegistrationReceipt, DependencyRegistrationReceipt, PublicationReceipt, InventorySealReceipt and AuthorizationCommitPermit are not interchangeable.
+- The DE-S design self-review is closed after two zero-finding rounds; physical storage implementation and I integration remain open.
+- BIH36-JD-01..17 are a delegated joint technical baseline; governance and consumer acceptance are separate gates.
+- C/G/H do not share a pinned Applied schema/version or common approval record; Applied Contract Frozen remains NO.
+- Typed-cursor and cross-namespace conformance tests remain NOT RUN. No test result is implied by this registry.
