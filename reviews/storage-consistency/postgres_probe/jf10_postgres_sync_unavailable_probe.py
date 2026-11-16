@@ -142,6 +142,9 @@ def main():
 
     # Resolve only after the test has established the private/locked UNKNOWN state.
     with conn() as c:
+        # Test cleanup only: the required standby is intentionally still down.
+        # Safety assertions above have already captured the UNKNOWN state.
+        c.execute("SET synchronous_commit = local")
         c.execute(f"ROLLBACK PREPARED '{XID}'")
         visible = c.execute(
             "SELECT value FROM jf10_sync_unavailable_visibility WHERE operation_id = %s",
