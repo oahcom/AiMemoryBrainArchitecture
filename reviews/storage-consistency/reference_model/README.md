@@ -34,3 +34,10 @@ A passing result means only that the modeled logical invariants hold for these
 deterministic cases. G3 remains blocked; JF-10 P0 remains open; production
 conformance remains NOT RUN until the designated runtime repository, database,
 coordinator and owners are identified and exercised.
+
+
+## Crash-injection boundaries
+
+The test suite now injects a crash immediately before the modeled local publication commit and immediately after the atomic PublicationRecord insertion. Before-commit crash must leave the operation IN_DOUBT, invisible, and fenced/prepared. After-commit crash must preserve reader visibility through the atomic record; recovery reconstructs readback projections (VisibilityPointer, PublicationReceipt, owner outcome, receipt consumption and outbox) from that record. These are deterministic in-memory fault points, not process-kill or database crash tests.
+
+A branch-scoped GitHub Actions workflow is provided at `.github/workflows/jf10-reference-model.yml` to run the unittest suite on changes and pull requests. A workflow definition is not itself evidence of a successful CI run; retain NOT RUN until a concrete successful run is observed.
