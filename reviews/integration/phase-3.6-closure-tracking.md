@@ -390,3 +390,33 @@ I's formal confirmation covers both PermissionEpoch and the complete protected-a
 - C, F and G remain the next consumer-acceptance owners. Issue #6 already contains A's explicit request (comment 6919372132); continue tracking each Owner's separate response and refresh exact branch/blob evidence on receipt.
 - Keep I36-GOV-01..10 BLOCKED, H36/I36 NOT RUN, and overall G10 BLOCKED until their own acceptance evidence exists.
 
+
+
+## DE-S executable linearization tranche — reference model published (2026-11-16)
+
+### New executable artifacts
+
+Storage Owner branch `session-storage-consistency-forget-atomicity-2026-11-16` now contains:
+
+- `reviews/storage-consistency/reference_model/jf10_linearization_model.py` — Blob `9d69132d2981ae6801d36ef3ecf71c078a7b3ac7`.
+- `reviews/storage-consistency/reference_model/test_jf10_linearization_model.py` — Blob `8e9e0f2d19816371709fbb9a2bc64cdb7a2cbc87`.
+- `reviews/storage-consistency/reference_model/README.md` — Blob `5ba7efe359d2adbf21f4fe4aa2d9f28b4663fb9f`.
+- Updated executable conformance plan — Blob `95fd8706da9bc3a96b0851e2df17fe329f6a98aa`.
+
+The reference state machine covers single-domain-only decisions, immutable terminal outcomes, stable operation/XID/manifest identity, Storage PREPARED/IN_DOUBT resolution, same-XID recovery, modeled atomic publication facts and receipt consumption, and D fence-first / participant-first ordering. E retry AttemptId does not change stable publication identity.
+
+D and E Owner branches each received their own mapping artifacts:
+- D Blob `a3555162827bd1cc7cf4c0918d4ab9b6ce94c8bb`.
+- E Blob `20770a84daea00ba9f38cc9a5bc43f153f09c3a7`.
+
+Issue #4 records the model publication and requests D/E/Storage review (comment `6919546496`). A local semantic replay of 12 deterministic assertions passed. The committed unittest suite has not yet been run by repository CI.
+
+### Gate and claim boundaries
+
+- **Logical reference model:** IMPLEMENTED.
+- **Unittest source:** AUTHORED / NOT RUN IN REPOSITORY CI.
+- **Production JF-10 implementation:** NOT IMPLEMENTED / NOT VERIFIED.
+- **JF10-01..17 production conformance:** NOT RUN.
+- **JF-10 P0 / G3:** OPEN / BLOCKED.
+
+The model is in-memory. It does not prove durable I sequencing, prepared-XID durability/lock retention, shared serializable D/Storage DB state, real receipt signing/verification, HA failover, backup/restore or reader/object-store/cache/index integration. The designated runtime implementation repository and accountable engineering owner are still required (issue #7). This tranche advances executable protocol validation but does not close G3 or authorize Architecture Freeze.
