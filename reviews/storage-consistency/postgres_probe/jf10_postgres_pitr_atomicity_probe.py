@@ -152,6 +152,23 @@ def main() -> None:
         xid_name text PRIMARY KEY, artifact_id text NOT NULL, receipt text NOT NULL
     )""")
     psql("CREATE TABLE jf10_pitr_boundary_marker (name text PRIMARY KEY)")
+    psql("""CREATE VIEW jf10_authoritative_publication AS
+        SELECT p.xid_name, p.artifact_id, p.state, r.receipt
+        FROM jf10_visibility_pointer p
+        JOIN jf10_publication_receipt r
+          ON r.xid_name = p.xid_name AND r.artifact_id = p.artifact_id
+        WHERE p.state = 'VISIBLE'
+    """)
+    # Reader-path negative fixtures: neither half of a publication is authoritative.
+    psql("INSERT INTO jf10_visibility_pointer VALUES "
+         "('jf10-pointer-only-fixture', 'artifact-pointer-only', 'VISIBLE')")
+    psql("INSERT INTO jf10_publication_receipt VALUES "
+         "('jf10-receipt-only-fixture', 'artifact-receipt-only', 'receipt-only')")
+    assert scalar("SELECT count(*) FROM jf10_authoritative_publication "
+                  "WHERE xid_name IN ('jf10-pointer-only-fixture', 'jf10-receipt-only-fixture')") == "0"
+    print("AUTHORITATIVE_READER_REJECTS_POINTER_ONLY_AND_RECEIPT_ONLY=PASS")
+    psql("DELETE FROM jf10_visibility_pointer WHERE xid_name='jf10-pointer-only-fixture'")
+    psql("DELETE FROM jf10_publication_receipt WHERE xid_name='jf10-receipt-only-fixture'")
 
     xid_commit = "jf10-pitr-commit-" + uuid.uuid4().hex[:12]
     xid_rollback = "jf10-pitr-rollback-" + uuid.uuid4().hex[:12]
@@ -178,29 +195,40 @@ def main() -> None:
     psql("INSERT INTO jf10_pitr_boundary_marker VALUES ('after-backup-before-resolution')")
     prepared_lsn = scalar("SELECT pg_current_wal_lsn()")
     prepared_wal = scalar(f"SELECT pg_walfile_name('{prepared_lsn}'::pg_lsn)")
+    prepared_timeline = scalar("SELECT timeline_id FROM pg_control_checkpoint()")
     psql(f"COMMIT PREPARED '{xid_commit}'")
     psql("INSERT INTO jf10_pitr_boundary_marker VALUES ('after-commit-before-rollback')")
     psql("SELECT pg_switch_wal()")
     commit_lsn = scalar("SELECT pg_current_wal_lsn()")
+    commit_wal = scalar(f"SELECT pg_walfile_name('{commit_lsn}'::pg_lsn)")
     psql(f"ROLLBACK PREPARED '{xid_rollback}'")
     psql("INSERT INTO jf10_pitr_boundary_marker VALUES ('after-rollback')")
     # Capture a target inside the WAL segment containing the rollback outcome.
     # pg_switch_wal() returns the next segment boundary and can overshoot the
     # final archived WAL when recovery is later asked to reach that boundary.
     rollback_lsn = scalar("SELECT pg_current_wal_flush_lsn()")
+    rollback_wal = scalar(f"SELECT pg_walfile_name('{rollback_lsn}'::pg_lsn)")
+    rollback_timeline = scalar("SELECT timeline_id FROM pg_control_checkpoint()")
+    # Force every segment containing a declared recovery target into the archive.
     psql("SELECT pg_switch_wal()")
-    for _ in range(120):
-        try:
-            docker("exec", PRIMARY, "bash", "-lc", f"test -f /archive/{prepared_wal}")
-            break
-        except subprocess.CalledProcessError:
-            time.sleep(1)
-    else:
-        raise RuntimeError("prepared-boundary WAL segment was not archived")
-    print(f"PREPARED_BOUNDARY_LSN={prepared_lsn}")
-    print(f"COMMIT_BOUNDARY_LSN={commit_lsn}")
-    print(f"ROLLBACK_BOUNDARY_LSN={rollback_lsn}")
-    print("PREPARED_BOUNDARY_WAL_ARCHIVED=PASS")
+    required_segments = {
+        "prepared": (prepared_lsn, prepared_wal, prepared_timeline),
+        "committed": (commit_lsn, commit_wal, prepared_timeline),
+        "rolledback": (rollback_lsn, rollback_wal, rollback_timeline),
+    }
+    for label, (target_lsn, target_wal, target_timeline) in required_segments.items():
+        for _ in range(120):
+            try:
+                docker("exec", PRIMARY, "bash", "-lc", f"test -s /archive/{target_wal}")
+                break
+            except subprocess.CalledProcessError:
+                time.sleep(1)
+        else:
+            raise RuntimeError(f"{label} target WAL segment {target_wal} was not archived")
+        print(f"PITR_TARGET_{label.upper()}_LSN={target_lsn}")
+        print(f"PITR_TARGET_{label.upper()}_TIMELINE={target_timeline}")
+        print(f"PITR_TARGET_{label.upper()}_REQUIRED_WAL={target_wal}")
+        print(f"PITR_TARGET_{label.upper()}_WAL_ARCHIVED=PASS")
 
     docker("stop", PRIMARY)
     cases = [
@@ -220,12 +248,13 @@ def main() -> None:
         results[label] = restore_query(port, """
             SELECT (SELECT count(*) FROM pg_prepared_xacts),
                    (SELECT count(*) FROM jf10_visibility_pointer),
-                   (SELECT count(*) FROM jf10_publication_receipt)
+                   (SELECT count(*) FROM jf10_publication_receipt),
+                   (SELECT count(*) FROM jf10_authoritative_publication)
         """)[0]
         if label == "prepared":
             gids = restore_query(port, "SELECT gid FROM pg_prepared_xacts")
             assert xid_commit in str(gids) and xid_rollback in str(gids), gids
-            assert results[label][1:] == (0, 0), results[label]
+            assert results[label][1:] == (0, 0, 0), results[label]
             locks = restore_query(port, "SELECT count(*) FROM pg_locks WHERE locktype='transactionid'")
             assert locks[0][0] >= 2, locks
             print("PITR_PREPARED_XID_PRIVATE_AND_LOCKED=PASS")
@@ -233,13 +262,13 @@ def main() -> None:
             assert restore_query(port, f"SELECT count(*) FROM jf10_visibility_pointer WHERE xid_name='{xid_commit}'")[0][0] == 1
             assert restore_query(port, f"SELECT count(*) FROM jf10_publication_receipt WHERE xid_name='{xid_commit}'")[0][0] == 1
             assert xid_rollback in str(restore_query(port, "SELECT gid FROM pg_prepared_xacts"))
-            assert results[label][1:] == (1, 1), results[label]
+            assert results[label][1:] == (1, 1, 1), results[label]
             print("PITR_COMMIT_POINTER_AND_RECEIPT_ATOMIC=PASS")
         else:
             assert results[label][0] == 0, results[label]
             assert restore_query(port, f"SELECT count(*) FROM jf10_visibility_pointer WHERE xid_name='{xid_rollback}'")[0][0] == 0
             assert restore_query(port, f"SELECT count(*) FROM jf10_publication_receipt WHERE xid_name='{xid_rollback}'")[0][0] == 0
-            assert results[label][1:] == (1, 1), results[label]
+            assert results[label][1:] == (1, 1, 1), results[label]
             print("PITR_ROLLBACK_NO_POINTER_NO_RECEIPT=PASS")
     print("JF10_PITR_PREPARED_XID_VISIBILITY_RECEIPT_BOUNDARIES=PASS")
 
@@ -251,7 +280,7 @@ def main() -> None:
         wal = f"jf10-pitr-atomicity-{label}-wal"
         clone_volume(BACKUP_VOL, data, "/backup")
         copy_archive(wal)
-        target_wal = prepared_wal
+        target_wal = rollback_wal
         # Remove the target segment from both backup pg_wal and archive for all
         # modes, ensuring restore cannot silently use a copy in the base backup.
         docker("run", "--rm", "--user", "root", "-v", f"{data}:/data", "-v", f"{wal}:/archive",
@@ -274,8 +303,30 @@ def main() -> None:
         if promoted:
             raise AssertionError(f"{mode} WAL archive unexpectedly promoted to writable")
         logs = docker("logs", name, check=False)
-        assert any(s in logs.lower() for s in ("restore", "wal", "invalid", "could not", "failed")), logs[-4000:]
-        print(f"PITR_{mode.upper()}_WAL_FAILS_CLOSED=PASS")
+        lowered = logs.lower()
+        assert target_wal.lower() in lowered, (mode, target_wal, logs[-5000:])
+        if mode == "missing":
+            assert ("no such file" in lowered or "could not restore" in lowered or
+                    "recovery ended before configured recovery target" in lowered), logs[-5000:]
+        elif mode == "corrupt":
+            assert ("wrong size" in lowered or "invalid record" in lowered or
+                    "incorrect checksum" in lowered), logs[-5000:]
+        else:
+            assert ("wrong size" in lowered or "invalid record" in lowered or
+                    "recovery ended before configured recovery target" in lowered), logs[-5000:]
+        # Failed recovery must not become a writable primary or authoritative reader.
+        try:
+            with psycopg.connect(host="127.0.0.1", port=port, dbname="postgres",
+                                 user="postgres", password=PASSWORD, connect_timeout=2) as c:
+                in_recovery = c.execute("SELECT pg_is_in_recovery()").fetchone()[0]
+                read_only = c.execute("SHOW transaction_read_only").fetchone()[0]
+                assert in_recovery and read_only == "on", (mode, in_recovery, read_only)
+        except psycopg.OperationalError:
+            pass  # PostgreSQL did not open a queryable listener while recovery was incomplete.
+        else:
+            assert in_recovery and read_only == "on"
+        print(f"PITR_{mode.upper()}_EXACT_WAL_FAILS_CLOSED=PASS")
+        print(f"PITR_{mode.upper()}_NO_WRITABLE_OR_AUTHORITATIVE_SERVICE=PASS")
     print("JF10_PITR_WAL_NEGATIVE_CASES=PASS")
     print("SCOPE=ISOLATED_STORAGE_FIXTURE_NOT_PRODUCTION_COC_OR_ID_LEDGER")
     print("JF10_POSTGRESQL_PITR_ATOMICITY_AND_NEGATIVES=PASS")
