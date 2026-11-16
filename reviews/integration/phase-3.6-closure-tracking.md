@@ -1097,3 +1097,21 @@ A refreshed Issue #2 and the current D/E/F/I/Storage Owner artifacts and posted 
 | Storage physical realization | `reviews/storage-consistency/forget-atomicity-storage-realization-review.md`, Blob `55c01f4512f2e3d8aac767dd004e768ae073178e` | Single-transaction/linearizable-coordinator realization remains a recommendation. DB engine/version, prepared-XID and lock durability, operator/topology, atomic visibility, crash/failover/restore proof remain OPEN / NOT VERIFIED. |
 
 Issue #2 remains OPEN. D/E semantics and F consumer rules are not promoted to physical atomicity. Explicit independent Owner dispositions, selected DB/deployment evidence and E36/D36/Storage fault conformance remain required. No implementation, test pass, or production readiness is inferred from this reconciliation.
+
+
+## 13.23 JF-10 sequential gate refresh — 2026-11-17
+
+A refreshed Issue #9 and #10 comments and re-read the D and Storage Owner artifacts on their respective Owner branches.
+
+| Gate | Fresh readback | Current control |
+|---|---|---|
+| D full pinned-bundle acceptance | No Owner response on Issue #9; D artifact remains Blob `5a56c406578fdf257509315eb3f6f3f75456116c` and does not pin the common JF-10 v2 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0` as part of the full bundle | PENDING; D Owner action required |
+| Storage full pinned-bundle acceptance | No Owner response on Issue #9; Storage artifact remains Blob `55c01f4512f2e3d8aac767dd004e768ae073178e` and does not pin the common JF-10 v2 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0` as part of the full bundle | PENDING; Storage Owner action required |
+| Gate A — concrete DB capability | Storage artifact still has no selected engine/version/configuration, XA/prepared-XID profile, topology, accountable operator or executable physical capability evidence | NEXT; BLOCKED until Gate 0 (D + Storage full-bundle confirmation) is verified |
+| Gate B — persistent COC | No persistent implementation/operator proof accepted | BLOCKED by Gate A |
+| Gate C — end-to-end fault injection | Physical DB/COC/provider fault campaign not run | BLOCKED by Gate B |
+| JF-10 P0 / production | No production activation authorization | OPEN / NOT AUTHORIZED |
+
+The prior Issue #10 comment described Gate A as “ACTIVE NOW”. This was clarified by a subsequent A comment: the controlling sequential plan puts D + Storage full-bundle confirmation in Gate 0 before Gate A. Gate A is therefore NEXT but not started; preparatory work does not advance the gate ledger. This clarification preserves the user's strict sequential execution instruction and prevents parallel-gate claims.
+
+No Owner decision was inferred, no D/Storage Owner artifact was edited, and no physical capability or implementation test is claimed.
