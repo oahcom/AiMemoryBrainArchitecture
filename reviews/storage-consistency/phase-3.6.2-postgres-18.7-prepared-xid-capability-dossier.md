@@ -743,3 +743,23 @@ I accepts the single-PolicyDomain owner-gate-participating durable 2PC architect
 No Storage fixture in this dossier is evidence that these bridge integrations exist. Until the production runtime and owner APIs are supplied, the current PostgreSQL 18.7 work remains bounded engine-capability qualification.
 
 Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED; Gate C remains BLOCKED; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+
+## Current architecture-phase gate correction and latest regression (2026-11-17)
+
+The project owner confirmed this is the architecture-design phase; no production code repository/runtime is expected yet. Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Production runtime/adapter absence is not a Gate A architecture blocker. The earlier statement that Gate B is blocked until production implementation/runtime binding is available is superseded for architecture design.
+
+Storage published the COC durable protocol specification at `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, Blob `6154d6c345daf260e6c2552e2257d073f1675188`. It defines the durable quorum log, membership epoch, immutable participant registry, linearizable read/write APIs, outage recovery batch, snapshot/restore fencing, compaction and crash matrix. Gate B is now **SPECIFICATION PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED**. Gate C remains deferred to engineering-phase executable integration and fault injection.
+
+The latest complete PostgreSQL 18.7 capability regression is 7/7 SUCCESS:
+
+| Capability | Run | Job |
+|---|---:|---:|
+| Prepared-XID PITR / visibility / receipt / exact WAL negatives | `43958775001` | `133620265141` |
+| Prepared-XID persistence/restart | `43959079736` | `133621314502` |
+| Synchronous standby promotion | `43959079669` | `133621315610` |
+| Physical backup/restore | `43959079703` | `133621314624` |
+| Explicit-LSN WAL PITR | `43959079745` | `133621314724` |
+| Synchronous standby unavailable fail-closed | `43959079760` | `133621315188` |
+| Old-primary pg_rewind/rejoin | `43959079930` | `133621314973` |
+
+These are pinned PostgreSQL 18.7 CI capability results and isolated fixtures, not production application-path or real I/D/COC service integration. Gate A remains PARTIAL PASS / OPEN pending architecture specification and exact owner acceptance; JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED.
