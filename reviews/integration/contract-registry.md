@@ -47,6 +47,8 @@ F/G remain dependencies. Their older refs in prior registry/task-pack are histor
 | CR-P1-03 Registry stale source refs and H/I presence | **A registry correction delivered; ongoing registry freshness required** | A | Actual branch refs and package inventory | Re-queryable branch HEADs and artifact paths; H/I recorded as present candidate packages; evidence dimensions kept separate |
 | CR-P1-04 E decision/change-log supersession hygiene | **OPEN / E-owned** | E | D cursor decision; current H/I package refs; historical E statements | E adds explicit supersession/current-state notice while preserving history; E branch readback and owner review |
 | CR-P1-05 I global Forget vector / D-H-E target mapping | **OPEN / owner mapping required** | I (global policy); D/E/H/F/G own local evidence | H ACK-to-I target state mapping; Adapter identity/capability/session/region; producer-domain epoch vs work-item barrier; typed fence vs permission epoch | Owner-approved mapping table and negative/unknown/offline cases; no implicit success; conformance evidence |
+| CR-P0-01 Fact/Claim canonical semantics | **ADR-BLOCKED** | B + Architecture Governance | B's domain decision and downstream D/E/F/G mappings | Formally approved ADR; synchronized domain and consumer contracts; until then no canonical schema/API freeze |
+| CR-P0-02 Principal/ActorRef/ScopeRef identity mapping | **OPEN / identity freeze blocked** | I (policy), B (typed refs), H (transport binding) | Issuer/delegation binding, ProducerIdentity, ScopeRef semantics, permission epoch and E idempotency namespace | Joint B/I/H owner mapping, authenticated binding contract and cross-scope/stale-epoch negative tests |
 
 ## 4. INT issue register
 
