@@ -44,3 +44,14 @@ Object bytes remain private until the current gate succeeds. A restored Publishe
 Add `OutputManifestOpen`, `OutputManifestFrozen`, `OutcomeUnknown` and `RecoveryBlocked` as explicit durable states (or equivalent typed substates). None is terminal. Only the final immutable output manifest plus durable per-output terminal receipts can close the root obligation. DLQ, timeout, queue deletion, worker death, lease expiry and object-store existence remain non-terminal.
 
 E36 race/fault/replay/restore tests remain **NOT RUN**. This document records semantics, not executable implementation.
+
+
+## 8. Round-1 self-review closure — JF-07 / JF-08
+
+### JF-07 — Manifest transitions are durable barrier events
+
+E persists every output declaration, close-discovery, freeze, reopen and terminal request against the root WorkItemId with monotonic OutputManifestVersion and immutable digest. E obtains a durable D receipt for each barrier-relevant transition before it relies on that transition. Freeze and terminal requests race through D's shared authority: terminalization names the exact final frozen version/digest; a prior manifest mutation forces terminalization to re-evaluate, while a committed terminal disposition rejects later mutation. A newly discovered independent output after terminalization must be admitted as a new linked child WorkItem before any processing, never silently attached to a terminal root. E-local manifest state is not authoritative.
+
+### JF-08 — Unknown is not negative
+
+E treats missing receipt, empty lookup, timeout, replica lag and coordinator outage as OutcomeUnknown unless the authoritative coordinator returns a NOT_COMMITTED result carrying a completed decision-barrier cursor. E persists that cursor with the outcome. No new idempotency key may be minted while outcome is unknown; only same-key/digest replay or authoritative lookup is permitted. An unresolved outcome prevents Published and root terminality.
