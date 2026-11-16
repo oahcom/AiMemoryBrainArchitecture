@@ -111,3 +111,16 @@ No E, I, H, A, F, G, B or governance files were modified. No branch was merged.
 ### 7.4 Non-claims
 
 This delivery is a D-owned documentation contract only. It does not prove a D API exists, a Storage transaction is implemented, E has adopted a final schema, any race test passed, downstream F/G/H enforcement passed, I approved global policy, or Forget is globally/physically complete. D-REV-P1-003 remains integration OPEN pending owner implementation and conformance evidence.
+
+
+## Phase 3.6 — Forget Fence Linearization & Atomicity Proof
+
+- **Status:** D semantic contract DECIDED; cross-module enforcement and implementation OPEN.
+- **Updated:** `forget-fence-operation-and-publication-gate.md` with the unique safety invariant, evidence-bearing stages, operation linearization table, Producer Work state machine, Fence/Permission dual-validation contract, implementation-neutral Storage requirements, explicit rejection criteria, 12-case fault/race proof matrix and D/E/Storage decision register.
+- **Updated:** `forget-fence-and-completion-contract.md` to point to the Phase 3.6 normative operation contract and preserve the distinction between D semantics and Storage implementation evidence.
+- **D decision:** registration/fence, dependency/fence and publication/fence races each require one authoritative ordering boundary and exactly the documented outcomes. Work terminalization requires a durable terminal receipt; crash before that point leaves work open.
+- **Permission qualification:** D requires an I-authoritative current PermissionEpoch/authorization decision at the final visibility boundary. I/Storage commit-bound revocation freshness remains OPEN; unavailable or uncertain authorization fails closed.
+- **Storage qualification:** no database, lock, CAS or distributed transaction product is mandated. The Storage branch proposal remains proposed/not implemented/not verified.
+- **Cross-owner disposition:** E's Phase 3.6 conformance is design-only and requests confirmation; Storage has not jointly confirmed an implementation. F/G/H consumer enforcement and I global completion remain owner dependencies.
+- **CR-P1-01:** explicitly remains OPEN. This D semantic update does not claim database atomicity, executable conformance, global Forget completion or physical erasure.
+- **Scope:** only D-owned files under `03-memory-brain/` were changed. No E, Storage, I, A or other Owner branch was modified.
