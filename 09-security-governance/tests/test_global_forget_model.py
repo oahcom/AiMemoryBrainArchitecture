@@ -164,6 +164,38 @@ class GlobalForgetModelTests(unittest.TestCase):
         self.assertEqual(result, "CONFIRMED")
         self.assertEqual(self.g.targets["F:partition-1"].evidence_ref, "resolved-ack")
 
+    def test_empty_inventory_cannot_be_sealed_without_absence_proof(self):
+        empty = GlobalForgetModel()
+        with self.assertRaises(Blocked):
+            empty.seal_inventory(seal_id="empty", digest="empty", signer="I-inventory-authority")
+
+    def test_valid_exception_yields_completed_with_policy_exception(self):
+        self.g.approve_exception("F:partition-1", approver_role="privacy",
+                                 approver="independent-approver", requester="requester",
+                                 scope_ref="scope-A", reason="documented retention hold",
+                                 expiry=100, now=1, signed_evidence="approval-proof")
+        self.complete_setup()
+        self.assertEqual(self.g.evaluate(now=2), "CompletedWithPolicyException")
+
+    def test_not_applicable_target_requires_proof_and_independent_review_to_complete(self):
+        self.g.mark_not_applicable("F:partition-1", proof_of_absence="signed inventory proves absent",
+                                   reviewer="independent-reviewer", target_owner="F-owner")
+        self.complete_setup()
+        self.assertEqual(self.g.evaluate(now=1), "Completed")
+
+    def test_failed_target_blocks_global_completion(self):
+        self.g.set_failed("F:partition-1", "failure-proof")
+        self.complete_setup()
+        self.assertEqual(self.g.evaluate(now=1), "Pending")
+
+    def test_new_target_after_completed_operation_reopens_it(self):
+        self.g.record_evidence(self.evidence())
+        self.complete_setup()
+        self.assertEqual(self.g.evaluate(now=1), "Completed")
+        self.g.register_target(Target("H:late-adapter", "H-owner", ("scope-A",), "H-cap-v1", "CLEAR"))
+        self.assertEqual(self.g.state, "Reopened")
+        self.assertIsNone(self.g.seal)
+
     def test_global_completion_requires_every_component_and_target(self):
         self.g.record_evidence(self.evidence())
         self.complete_setup()
