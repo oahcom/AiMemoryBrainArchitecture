@@ -10,7 +10,7 @@
 
 ## 1. Live branch baseline
 
-All HEADs are full 40-character SHAs returned by the live GitHub branch collection during this review.
+All HEADs are full 40-character SHAs returned by the live GitHub branch collection at the start of source discovery. The A row is the pre-publication source snapshot; A-only report commits subsequently advanced the A publication branch. Final publication HEAD is reported in the delivery record outside this source snapshot table.
 
 | Owner | Branch | Latest observed HEAD |
 |---|---|---|
