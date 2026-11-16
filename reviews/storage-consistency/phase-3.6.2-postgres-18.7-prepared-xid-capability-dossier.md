@@ -151,3 +151,46 @@ Still NOT VERIFIED:
 The two-node workflow uses a simple CI promotion command and does not validate a production-grade fencing/STONITH system, quorum manager, split-brain prevention, DNS/connection routing, or external I sequencer decision log. No production HA approval is implied.
 
 Next Gate A action: add rollback-after-promotion and backup/restore recovery evidence, then identify the actual deployment and human operator. Gate B remains blocked until Gate A passes; Gate C remains blocked until Gate B passes.
+
+
+## 9. Same-XID rollback after primary-loss promotion — PASS (2026-11-17)
+
+The two-node probe was extended to prepare two independent participants on the primary before failover:
+- XID jf10_pg187_sync_failover_commit_001 — resolved by COMMIT PREPARED after promotion.
+- XID jf10_pg187_sync_failover_rollback_001 — resolved by ROLLBACK PREPARED after promotion.
+
+The participants used distinct serialization-guard rows and distinct operation IDs. Both prepared XIDs were synchronously WAL-replayed to the standby. After primary SIGKILL and standby promotion, both exact XIDs were present in pg_prepared_xacts; both locks remained held. The promoted standby committed the first XID and rolled back the second. The first participant exposed pointer + receipt together; the second exposed neither.
+
+Updated exact evidence:
+- Probe Blob: cbe1f317479145dbf1467e426b0c0737a6ec054c
+- Workflow Blob: f3c05f90c6065458b49879def10dce672685c850
+- Successful run: 43908746695
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43908746695
+- Run head commit: b59c0842dba86b581ded4d9519c4289b6a699fde
+- Job ID: 133444572245
+- Job conclusion: SUCCESS
+
+Additional raw-log markers:
+- SAME_XID_ROLLBACK_AFTER_PRIMARY_LOSS=PASS
+- ROLLBACK_NON_PUBLICATION_AFTER_PROMOTION=PASS
+
+This supersedes the prior §8 open item “same-XID ROLLBACK PREPARED after promotion”. That item is now PASS for the pinned two-node CI profile.
+
+## 10. Gate A remaining blockers after commit + rollback failover proof
+
+**Gate A remains PARTIAL PASS / OPEN.** The pinned CI profile now proves:
+- single-node hard restart with same-XID commit and rollback;
+- two-node synchronous prepared-WAL replay;
+- primary hard loss and standby promotion;
+- same-XID commit and rollback after promotion;
+- retained prepared locks;
+- atomic publication pointer + receipt visibility and rollback non-publication.
+
+Still NOT VERIFIED:
+- physical backup/restore and point-in-time recovery;
+- restoration of an older snapshot while a newer Forget fence/participant decision exists, and mandatory control-ledger reconciliation before serving any read;
+- real host/zone/storage failure and durability semantics beyond ephemeral Docker volumes;
+- production failover fencing/STONITH, quorum manager, split-brain prevention, routing and reconnect behavior;
+- actual Canonical Authority deployment profile and named human production on-call/operator, runbook, RPO/RTO.
+
+Gate B remains blocked until the remaining Gate A conditions pass; Gate C remains blocked until Gate B.
