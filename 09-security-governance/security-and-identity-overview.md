@@ -2,6 +2,15 @@
 
 - Owner: Session I — Security, Identity & Governance Principal Architect
 - Baseline branch/commit: `main` @ `8e57f38e1f81a26280f0d56d6a40d6b98c5c6ac2`
+- Reviewed module baselines:
+  - B: `main` @ `8e57f38e1f81a26280f0d56d6a40d6b98c5c6ac2` — `02-domain-model/domain-model-overview.md`, `core-entities.md`, `scope-and-permission-model.md`.
+  - C: `main` @ `8e57f38e1f81a26280f0d56d6a40d6b98c5c6ac2` — Agent integration, telemetry, inference-boundary and Adapter capability-tier documents.
+  - D: `session-d-memory-brain-2026-11-16` @ `9dc08c63f6912320e290a963c634748ec44a81c8`.
+  - E: `session-e-memory-compiler-2026-11-16` @ `54df136d1e410af834461950e3c61c5c80abd6ad`.
+  - F: `session-f-memory-runtime` @ `dad5deb6bfaa2df9956930d0b1372df354112567`.
+  - G: `session-g-memory-context` @ `3d2c065be863bc1d349faaeece6f6eaa0047abae`.
+  - H: `session-h-bmcp-protocol` @ `fcc5103399b4c322e52d642cae5a2414969399a7` — six candidate BMCP design documents reviewed.
+- Governance baseline: all three files under `00-governance/` on the stated main baseline.
 - Status: **CANDIDATE architecture policy; not an approved production security policy or implementation certification**
 - Related issues: INT-P0-02, INT-P0-03, INT-P0-04, INT-P1-03, INT-P1-04, INT-P1-05, INT-X-02, INT-X-03, INT-X-04, INT-X-06, INT-X-07, D-REV-P1-003.
 - Authority: I owns global identity/authorization policy, delegation/revocation, retention, audit governance, backup/external-copy policy, global Forget completion policy and physical-erasure requirements. D/E/F/G retain local mechanisms; H owns wire encoding; C owns Agent-side boundary semantics.
@@ -61,7 +70,7 @@ Authentication answers *who presented a verifiable identity*. Authorization answ
 | Reauthorization points | Required at ingress through final inference boundary | CANDIDATE; all boundary owners |
 | Forget suppression/cleanup/erasure | Three independent states with global inventory and barrier | CANDIDATE; D + I, E/F/G/H implement |
 | Fact / Claim model | I consumes B's typed references; does not adjudicate model | **ADR-BLOCKED INT-P0-01** |
-| BMCP envelope | H owns serialization and wire fields | H package not present at inspected ref; dependency OPEN |
+| BMCP envelope | H owns serialization and wire fields | H candidate package exists on `session-h-bmcp-protocol` @ `fcc5103399b4c322e52d642cae5a2414969399a7`; its identity and Forget fields remain dependent on I/D/C and are not frozen |
 | Applied | C/G/H define evidence; no proof of model attention | CANDIDATE |
 | External provider erasure | Contractual/API evidence only; hidden internal state outside control | Residual risk |
 

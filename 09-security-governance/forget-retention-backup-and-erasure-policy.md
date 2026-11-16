@@ -175,6 +175,6 @@ Global result:
 - E must prove atomic dependency registration and no late derivative publication across queue/lease/retry/DLQ/replay.
 - F must expose per-channel/per-partition suppression watermarks and block stale cache/index rebuild.
 - G must expose Context reconciliation and delivery cancellation watermarks.
-- H must define Adapter clear/quarantine acknowledgement and reconnect gate; H package was absent from inspected branch at this review time.
+- H must define Adapter clear/quarantine acknowledgement and reconnect gate; H candidate package was reviewed on `session-h-bmcp-protocol` @ `fcc5103399b4c322e52d642cae5a2414969399a7`; its Adapter-local clear/ACK semantics are candidates, not global completion proof.
 - Storage must provide backup inventory, restore quarantine, expiry and physical-erasure evidence.
 - I policy does not replace any local module implementation or conformance proof.
