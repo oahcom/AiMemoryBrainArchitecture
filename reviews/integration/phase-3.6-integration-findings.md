@@ -29,3 +29,19 @@
 ## Integration disposition
 
 No finding is closed by document presence alone. An Owner decision, cross-owner acceptance, external governance approval, implementation evidence and test pass are recorded as separate dimensions. A finding closes only when the exact required evidence is fetched from its authority Owner branch and revalidated against live HEADs.
+
+
+## Consumer acceptance status refresh — C/F/G BIH decisions verified (2026-11-16)
+
+
+Issue #6 comment `6919556745` records C, F and G each accepting the exact A BIH package Blob `a45ae90b318a79bf009d14f4d917611881e9e214` with enumerated exceptions. A independently fetched the three Owner artifacts from their respective branches and verified exact Blob matches:
+
+- C: `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`
+- F: `ce59252dbbdc5d10d016704797e9ba12d5a941bd`
+- G: `5406b3f2558daa3f5915f6bb46e808be8d90d3ca`
+
+**A36-P0-05 is updated to PARTIAL / BLOCKED:** C/F/G BIH consumer acceptance is COMPLETE — ACCEPTED WITH ENUMERATED EXCEPTIONS. The finding remains open because I36-GOV-01..10 external governance approvals and I36/H36 runtime verification are independent outstanding requirements.
+
+**A36-P0-06 remains OPEN / P0.** C/F/G BIH consumer acceptance does not itself establish a common C/G/H Applied contract schema version/digest, same-version C/G/H acceptance, D/I/B predicate closure, or runtime conformance. Do not close this finding on the basis of Issue #6 comment 6919556745.
+
+No runtime suite is upgraded from NOT RUN. No governance approval, implementation conformance, production readiness or G10 closure is inferred.
