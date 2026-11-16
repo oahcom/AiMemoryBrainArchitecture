@@ -254,3 +254,44 @@ Add mandatory cases: channel-binding mismatch; same message replayed across sess
 ### 10.7 H decision-state reconciliation (H36-SR-06)
 
 The older Section 9 Owner Decision and Cross-module Agreement lines are superseded as process status for the BIH technical design only. Current state: **H protocol-binding technical design DECIDED under the user's delegated joint decision.** This does not claim independent H-session signature, global BMCP schema freeze, external governance approval, C/D/E/F/G/Storage acceptance or implementation conformance. Those remain OPEN/BLOCKED as applicable. ADR-001 remains ADR-BLOCKED.
+
+## 11. Phase 3.6.3 — Issue #3 H exact-version decision and BMCP Applied Wire Profile
+
+- Owner: H — BMCP protocol, Adapter authentication, ACK transport and reconnect.
+- Exact shared package: reviews/integration/phase-3.6-cgh-applied-contract-decision-package.md, Blob SHA 122b164bcc0760b83bf555072a36fc55631623e1.
+- Common contract version: **CGH-APPLIED-1.0**.
+- H decision: **APPROVE WITH ENUMERATED EXCEPTIONS** for H-owned transport, authenticated binding, wire evidence and reconnect clauses. H accepts the same lifecycle and Full Applied evidence boundaries as C/G; H does not claim G Applied authority.
+- H wire profile: **bmcp.applied-ack / 1.0.0**, protocol major 1, minor 0. This is the versioned H-owned schema candidate associated with CGH-APPLIED-1.0.
+
+### 11.1 Envelope
+
+Required fields: protocol_family=BMCP; protocol_major/minor (uint16); profile_id/profile_version; message_type; message_id; message_nonce; audience; verifier-bound RuntimeSessionRef; correlation_id; sent_at (audit only); typed body; integrity proof. Major mismatch, unknown critical type/field, duplicate keys, malformed typed Ref, canonicalization ambiguity, nonce reuse, audience/session mismatch or downgrade rejects before state mutation.
+
+### 11.2 Message registry
+
+| Message | Direction | Required body |
+|---|---|---|
+| DELIVERY_RECEIPT | Adapter → receiver | DeliveryId, attempt, ContextId/ContextVersion, AdapterRef/instance, AgentRef, RuntimeSessionRef, ActorRef, role-tagged ScopeBindingSet, applicable EnvironmentRef, CapabilityEpoch, I PermissionDecision refs, ACK_ID and digest |
+| MATERIALIZATION_RECEIPT | Adapter → receiver | delivery/context tuple, ManagedRegion ref/revision, canonicalization profile, complete region digest, Adapter/session binding, ACK_ID/digest |
+| FINAL_REQUEST_SUBMISSION_EVIDENCE | C → receiver | InferenceRequestId, FinalRequestBoundaryId, ContextVersion, DeliveryId/attempt, exact final-request digest, ManagedRegion digest/profile, authenticated runtime/session, ActorRef, ScopeBindingSet, applicable EnvironmentRef, PermissionDecision/PermissionEpoch, ForgetFenceGeneration, CapabilityEpoch, immutable evidence ID/digest |
+| APPLIED_ACK | Adapter → receiver | context/delivery tuple, InferenceRequestId, FinalRequestBoundaryId, C evidence ref/digest, ManagedRegion digest/profile, authenticated Adapter/instance + Agent + RuntimeSession, ActorRef, ScopeBindingSet, applicable EnvironmentRef, PermissionDecision set, ForgetFence ref/generation where applicable, CapabilityEpoch, ACK_ID/digest |
+| FORGET_ACTION_ACK | Adapter → receiver | ForgetOperation/Fence, target/region/action/coverage, capability/evidence tier, authenticated Adapter/session, PermissionDecision, postcondition, ACK_ID/digest |
+| CAPABILITY_NEGOTIATION | bidirectional | Adapter/instance, supported protocol/profile versions, action set, evidence tier, capability digest and nonce |
+| RECONNECT_STATE | bidirectional | fresh session binding, issuer/principal/workload, capability profile, current PermissionDecision set, D fence cursor, pending Delivery cursor, ACK journal digest |
+| ACK_RECEIPT | receiver → Adapter | original ACK namespace/digest, trusted receiver sequence, durable receipt disposition |
+
+Typed refs preserve B type discriminator and namespace. ScopeBindingSet is non-empty. EnvironmentRef is required exactly when the registered operation/resource applicability profile says so; sender cannot self-declare inapplicability. PermissionEpoch and ForgetFence are distinct.
+
+### 11.3 ACK and ordering
+
+ACK kinds: DELIVERY_RECEIVED, MATERIALIZED, FINAL_REQUEST_SUBMITTED_EVIDENCE, APPLIED, EXECUTION_STARTED, FORGET_ACTION, CAPABILITY. Results: ACCEPTED_FOR_OWNER_REVIEW, DURABLY_RECORDED, REJECTED_INVALID, REJECTED_UNAUTHORIZED, REPLAY_DUPLICATE, IDEMPOTENCY_CONFLICT, HISTORICAL_ONLY, UNKNOWN_ORDERING, UNSUPPORTED_ACTION, PENDING_RECONCILIATION. DURABLY_RECORDED proves H receiver durability only; APPLIED is not a transition command; Forget ACK is not Applied proof.
+
+Idempotency namespace: authenticated IssuerRef, AdapterRef, AdapterInstanceRef, operation family, operation ID, ACK_ID. Same namespace+same digest returns original receipt; changed digest is conflict/security event. Session is bound in integrity evidence but does not reset deduplication. H assigns trusted receiver sequence; sender wall clock is audit-only. D/I/G order against their own authoritative commit cursor. Unknown order is evidence-only.
+
+### 11.4 Canonicalization and integrity
+
+Profile 1.0.0 requires deterministic canonical encoding, unique keys, valid UTF-8, explicit typed-ref encoding, normalized set ordering and explicit digest/canonicalization identifiers. Content/idempotency digest is SHA-256. Integrity binds protected-channel binding, RuntimeSessionRef, message ID/nonce, audience, protocol major, profile version, canonicalization profile and canonical digest. TLS 1.3 exporter channel binding and message-level integrity are both required. Exact signature/MAC suite, key custody, rotation and compromise policy require I/Security review before production activation. Unknown requiredness profile, duplicate keys, malformed refs, stale session, nonce reuse, audience mismatch, downgrade or canonicalization ambiguity fails closed.
+
+### 11.5 H decision exceptions and verification
+
+H does not mint C submission evidence, decide G Applied, authorize through I, issue D fences, or prove Storage visibility/Forget completion. Profile status: **SCHEMA CANDIDATE 1.0.0 / OWNER-DECIDED FOR CGH-APPLIED-1.0**; not production freeze or deployed interoperability. H36-01..18 and H36-SR remain **SPECIFIED / NOT RUN**.
