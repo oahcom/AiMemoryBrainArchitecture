@@ -522,3 +522,23 @@ A re-resolved the branch tips after the latest evidence corrections. Current pre
 - E remains `530645a08b55716257cf4cde20b0900b628abb52`.
 
 Storage's latest plan now explicitly corrects the test evidence: 15 unittest methods are authored, but no local Python or GitHub Actions execution result is verified. Workflow definition exists; CI remains NOT RUN. G0's prior ten-branch table is a timestamped snapshot; the A and Storage tip delta above supersedes those two entries for the current pre-write snapshot.
+
+
+## CGH-APPLIED-1.0 I / D / B authority confirmation refresh — 2026-11-16
+
+The exact common A package remains Blob `122b164bcc0760b83bf555072a36fc55631623e1`. I/D/B authority-scope records have been committed to their respective Owner branches and read back:
+
+| Owner | Disposition | Artifact | Verified Blob SHA |
+|---|---|---|---|
+| I | APPROVE WITH ENUMERATED EXCEPTIONS — authorization semantics only | `09-security-governance/phase-3.6-cgh-applied-1.0-i-authority-confirmation.md` | `8004b0f21e523b203ae36870fe88a25f977e70fa` |
+| D | APPROVE WITH ENUMERATED EXCEPTIONS — ForgetFence/lineage semantics only | `03-memory-brain/phase-3.6-cgh-applied-1.0-d-forget-fence-authority-confirmation.md` | `b5a0354d263185723954ffb952fdf0b005f59ba8` |
+| B | APPROVE — semantic types and role mapping only | `02-domain-model/phase-3.6-cgh-applied-1.0-b-typed-reference-authority-confirmation.md` | `483f68f074348fda8eeb965a0b43143ae242337d` |
+
+Issue #3 coordination comment: `6919769731`.
+
+**Status correction:** I/D/B exact-package authority semantics are now recorded with bounded exceptions. This does not imply external I governance approval, deployed cross-owner causal ordering, H production wire interoperability, test execution, or runtime conformance. The C-submit/D-fence causal proof remains OPEN; CGH/I36/H36 remain NOT RUN; Applied Contract Frozen remains NO. No branch merge is requested or implied.
+
+The Owner branch commits are:
+- I: `cc3cdc2e8d3a50be7551087f12d6fb4d6ce0d6f3`
+- D: `302b9fc09e040db7ef32c56e39bd91272cc1abb9`
+- B: `026e52c72bd8bdb65b63bdd77f25d925e0624f9f`
