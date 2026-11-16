@@ -459,3 +459,35 @@ This refresh records exact Owner-branch readbacks and does not promote design ac
 | Overall Phase 3.6 G10 | **BLOCKED**; no final acceptance inferred |
 
 No branch merge is requested or implied. No implementation, test pass, security certification, global Forget completion or physical erasure is claimed.
+
+
+## C/F/G BIH consumer acceptance refresh — exact Owner branch verification (2026-11-16)
+
+
+The A follow-up request has been answered. Issue #6 comment `6919556745` records independent C/F/G Owner decisions against the exact A BIH package Blob `a45ae90b318a79bf009d14f4d917611881e9e214`. A fetched each Owner artifact from its named Owner branch and verified the returned Blob SHA exactly matches the reported readback.
+
+| Consumer | Owner branch | Owner artifact | Verified Blob SHA | Decision |
+|---|---|---|---|---|
+| C | `session-c-agent-integration-2026-11-16` | `07-agent-integration/phase-3.6-final-request-evidence-contract.md` | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | **ACCEPT WITH ENUMERATED EXCEPTIONS** |
+| F | `session-f-memory-runtime` | `05-memory-runtime/phase-3.6-runtime-forget-suppression-and-invalidation.md` | `ce59252dbbdc5d10d016704797e9ba12d5a941bd` | **ACCEPT WITH ENUMERATED EXCEPTIONS** |
+| G | `session-g-memory-context` | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `5406b3f2558daa3f5915f6bb46e808be8d90d3ca` | **ACCEPT WITH ENUMERATED EXCEPTIONS** |
+
+Each Owner decision includes consumed field mapping, verifier/authority source, enforcement boundary, fail-closed behavior, enumerated exceptions and negative conformance cases. F explicitly consumes I's formal PermissionEpoch/authorization technical baseline and does not treat external I36-GOV approval as missing technical specification.
+
+**Corrected BIH consumer status:** C/F/G BIH design consumer acceptance is **COMPLETE — ACCEPTED WITH ENUMERATED EXCEPTIONS**. This closes the specific C/F/G BIH consumer-acceptance request, not runtime verification or external governance.
+
+**Do not conflate this with the separate CFG Applied-contract convergence item.** These three decisions are against the A BIH package, not evidence that a common C/G/H Applied schema has been frozen or that C/G/H have approved the same Applied contract digest. The separate Applied-contract finding remains governed by its own exact package and owner decisions.
+
+### Updated independent status
+
+| Dimension | Current state |
+|---|---|
+| H acceptance of A exact BIH package | COMPLETE |
+| I PermissionEpoch and complete authorization technical confirmation | COMPLETE |
+| C/F/G BIH consumer acceptance | **COMPLETE — ACCEPTED WITH ENUMERATED EXCEPTIONS** |
+| I36-GOV-01..10 external governance approvals | BLOCKED |
+| H36/I36 and C/F/G runtime conformance | NOT RUN |
+| C/G/H common Applied contract freeze | NOT ESTABLISHED by this BIH acceptance |
+| Overall G10 / architecture freeze | BLOCKED / NOT AUTHORIZED |
+
+A36-P0-05 is therefore partially advanced: its C/F/G consumer-acceptance subrequirement is complete, while governance approvals and runtime verification remain blocked/not run. A36-P0-06 (common C/G/H Applied contract) is not closed by these BIH decisions.
