@@ -16,7 +16,7 @@ D alone issues ForgetOperationRef, ForgetFenceRef/ForgetFenceGeneration, target/
 Before C invokes a provider/runtime submit side effect, the exact operation MUST be durably registered as a participant against:
 - ForgetOperation/target and all applicable source/ancestor lineage;
 - CausalOrderProfileRef, CausalOrderCoordinatorRef and CausalOrderTransactionRef;
-- ParticipantReservationRef;
+- ParticipantIntentRef (durable pre-side-effect intent; D's barrier is registered against this intent);
 - exact request/ManagedRegion digest, ContextVersion, DeliveryId/attempt, FinalRequestBoundaryId;
 - I CommitAuthorizationReceiptRef and PolicyDomainRef/PermissionEpoch;
 - authenticated C workload/instance/session and applicable Scope/Environment.
@@ -26,16 +26,16 @@ D returns a signed DParticipantClearanceRef only after verifying the participant
 ## 3. Fence installation and terminality
 
 - A fence request is durably recorded as pending before it becomes effective.
-- If a participant reservation is ordered before the fence's effective point, D MUST keep the fence barrier open until that participant has a durable C submit outcome and compatible I terminal evidence, or a safe abort is durably established.
+- If a ParticipantIntentRef is ordered before the fence's effective point, D MUST keep the fence barrier open until that participant has a durable C submit outcome and compatible I terminal evidence, or a safe abort is durably established.
 - A participant cannot be dropped because of process death, timeout, lease expiry, queue deletion, DLQ movement, worker replacement, coordinator disconnection or lost ACK.
 - If provider outcome is unknown, participant state is IN_DOUBT and fence effectiveness/completion remains blocked. Recovery must reconcile the same transaction/reservation and provider idempotency identity.
-- If the fence is effective before reservation, D returns FENCE_WON and C cannot submit.
+- If the fence is effective before ParticipantIntentRef, D returns FENCE_WON and C cannot submit.
 - If the participant safely aborts before provider side effect, D may clear it only with immutable terminal abort evidence.
 - A successful submit proven before a later fence remains a historical event requiring the normal Forget reconciliation; it is not eligible for subsequent current use.
 
 ## 4. Lineage and multi-source correctness
 
-DParticipantClearanceRef binds complete target plus source/ancestor lineage coverage and the exact lineage inventory version. Any missing, late-discovered or changed dependency invalidates clearance and forces reconciliation. D does not infer global producer inventory completeness, TargetInventorySeal or Global Forget completion from local participant drainage.
+DParticipantClearanceRef binds ParticipantIntentRef plus complete target and source/ancestor lineage coverage and the exact lineage inventory version. Any missing, late-discovered or changed dependency invalidates clearance and forces reconciliation. D does not infer global producer inventory completeness, TargetInventorySeal or Global Forget completion from local participant drainage.
 
 ## 5. Authority separation
 
