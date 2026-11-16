@@ -319,3 +319,29 @@ SQLite WAL provides atomic commit and reader/writer concurrency on a same-host s
 Therefore PostgreSQL 18.7 now has materially stronger direct evidence for the JF-10 prepared-participant requirement than SQLite + WAL. This does **not** select PostgreSQL for production. SQLite may remain a single-node candidate only if the Owners specify and prove an alternate durable participant/intent protocol that preserves the same JF-10 invariants without assuming native prepared-XID support. TEC-003/004 remain CANDIDATE / TO_VALIDATE until production adapter and operational evidence is bound.
 
 The full bounded assessment is recorded at `00-governance/reviews/jf10-storage-evidence-assessment.md` on the P branch. It is Session P evidence reconciliation only, not Storage/D/E/I Owner acceptance or a database ADR.
+
+
+## 15. CGH-APPLIED-1.1 exact Owner decisions and A tracker freshness correction — 2026-11-17
+
+The initial Session P Applied assessment incorrectly marked C and H exact-version decisions as pending. That was based on stale/incorrect branch-artifact assumptions. The current live branch files were re-read and the exact A package/COC companion pair was verified:
+- A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819`.
+- Companion COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
+
+Live exact-pair decisions:
+- C: `45a48249717c8cddb07ab96197730ef93d406c22` — ACCEPT WITH ENUMERATED EXCEPTIONS.
+- D: `ed7c491f4ca10fee67203a9978cfaa0e0748c0a2` — ACCEPT WITH ENUMERATED EXCEPTIONS.
+- I: `5a5304d48aa912dcf6f817099bd5659371d8cdc8` — ACCEPT WITH ENUMERATED EXCEPTIONS.
+- H: `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248` — ACCEPT WITH ENUMERATED EXCEPTIONS.
+- G: `aa3afa73d8a76cc6f025839c52bfbff6a983046a` — ACCEPT WITH ENUMERATED EXCEPTIONS.
+- B: `3a1e77889cd9a90cd5822d9f0cb3437880868706` — APPROVE; no B semantic type change.
+- Storage: `a589d983ac145244962c22e5da3a55427aa35ff8` — CONFIRMED WITH CHANGES, architecture interface only.
+
+Thus the exact CGH-APPLIED-1.1 recovery-batch package/companion design decisions are recorded. Applied Contract Frozen nevertheless remains NO: H schema is candidate/not generated/not interoperability-tested; COC operator/deployment remains undesignated; I sequencer, D barrier, C provider and G Applied runtime implementations are unverified; all owner conformance/race suites remain NOT RUN. JF-10 P0 and production activation gates remain open.
+
+### 15.1 A integration tracker is stale against live Owner branches
+
+A's current closure tracker blob `554d4b85a94f433856506dce4c020b9c00183e69` ends at §13.43. It records old C/D/I/H/G/B/Storage source pins and Storage branch head `df60b547...`, including the prior failing deep-PITR attempt. Current Storage branch HEAD is `3c8ab8ee4579a550300aa48aecab928149cf9370`, whose dossier blob `2f76ca8b8c19b84c37e7604cd254990dd93eb8b1` records the corrected deep-PITR run and seven-workflow regression batch PASS on evidence commit `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd`.
+
+The A deployment-binding record correctly keeps Gate A PARTIAL PASS / OPEN and production deployment NOT DESIGNATED. A must refresh the detailed closure tracker and source pins; Session P cannot modify A's Owner record.
+
+The full corrected exact-version decision vector is recorded in `00-governance/reviews/applied-contract-1.1-exact-version-reconciliation.md`.
