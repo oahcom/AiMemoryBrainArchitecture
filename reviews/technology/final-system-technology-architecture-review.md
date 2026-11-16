@@ -522,3 +522,412 @@ These results improve logical and schema evidence only. They do not close Global
 ### 19.4 Current verdict remains unchanged
 
 The additional logical-model/schema CI results do not justify a stronger system verdict. The current disposition remains **CONDITIONAL PASS — ARCHITECTURE DESIGN BASELINE ONLY; NOT FROZEN; PRODUCTION/RELEASE ACCEPTANCE BLOCKED**. TAB-001 remains CANDIDATE / NOT FROZEN; Global Forget is NOT COMPLETED; production activation is NOT AUTHORIZED.
+
+---
+
+## 20. Superseding live revalidation — TAR-AI-001 final system decision (2026-11-17)
+
+> This section is the controlling current assessment. It supersedes the historical branch snapshot, missing-report rationale, and earlier conditional system verdicts in §§1–19 where they conflict with the live evidence below. Earlier sections remain as audit history. The original TAB-001 blueprint is not modified by this addendum.
+
+### 20.1 Executive decision
+
+**Final Verdict: BLOCKED.**
+
+**TAB-001: CANDIDATE / NOT APPROVED / NOT FROZEN.**
+
+The mandatory eight Owner technology reports now exist and have been fetched from their respective current Owner branches. Therefore, the earlier NOT REVIEWABLE verdict's missing-report rationale is no longer applicable. However, the current evidence does not satisfy the system approval gate:
+
+- B Fact/Claim remains ADR-BLOCKED.
+- D/E/Storage producer admission, Forget fence installation, complete dependency registration and final publication visibility still lack one implemented and end-to-end verified linearization boundary.
+- JF-10 application integration between I sequencer, Storage prepared participant/XID, D fence/lineage and C provider-side-effect admission remains P0 OPEN. PostgreSQL capability CI does not close the application integration gap.
+- I Global Forget target inventory/seal, external recipient coverage, target evidence and restore governance remain OPEN; D-local suppression is not global completion.
+- C/G/H Full Applied still requires one exact compatible proof profile and an executable final-request boundary verifier.
+- H/I/C identity and Permission binding has technical design progress but remains subject to governance approval, consumer conformance and runtime tests.
+- F's anti-resurrection result is a logical model pass, not an actual index/cache/ANN/rebuild/reconnect pass.
+- No representative application performance or resource benchmark has been run.
+
+This is a **BLOCKED** verdict rather than NOT REVIEWABLE: the system is reviewable, the reports are present, and the blocking evidence is identifiable. It is not a PASS or CONDITIONAL PASS because the unresolved P0s are not merely future production-hardening tasks; they affect the correctness and authority boundaries of the proposed system.
+
+### 20.2 Live branch HEAD and exact Owner report verification
+
+The following HEADs were refreshed from the live branch refs by comparing each ref with itself. Report Blob SHAs are from fetching the exact report path at the current branch ref.
+
+| Owner | Current branch HEAD | Technology report path | Current report Blob SHA | Owner report verdict / current qualification |
+|---|---|---|---|---|
+| B | `310f305575d6f406e80d5d6ebf951bcd9e79e35f` | `reviews/technology/owner-b-domain-model-technology-review.md` | `fd3e5723b81de10bed806896e4be71ceb7a1669b` | CONDITIONAL PASS; ADR-001 remains ADR-BLOCKED |
+| I | `73a0bff13b531b5b9feaeeec1887db31d6266589` | `reviews/technology/owner-i-security-governance-technology-review.md` | `592baa4653e91287678a1e0926119ca94780bc08` | CONDITIONAL PASS for direction; deployment and Global Forget BLOCKED |
+| D | `a3ea0de75ca7b2297589293ec142f2cb07757282` | `reviews/technology/owner-d-canonical-brain-technology-review.md` | `97c049050d67dd12e0c64ef49b2b05795651608c` | CONDITIONAL PASS for semantics; implementation/JF-10 BLOCKED |
+| E | `5fb76b666fac49ceeb51ddb7c320fe5975313d99` | `reviews/technology/owner-e-memory-compiler-technology-review.md` | `c94f6a8e64ba3138a27e6f316f10411ef33b7ab8` | CONDITIONAL PASS for compiler topology; publication/recovery BLOCKED |
+| F | `e4c26214b8f78169c0e20f1faae23f945c3afeb9` | `reviews/technology/owner-f-memory-runtime-technology-review.md` | `124cc9300442b0e3a1e83603910e1c332b4fae48` | CONDITIONAL PASS; logical model PASS, runtime OPEN |
+| G | `b0c515399c6a336dcbf17a1ced6925413c804d5c` | `reviews/technology/owner-g-memory-context-technology-review.md` | `8b9ea4b4a63f7bbddbefdb0b14cf99943b3e7613` | CONDITIONAL PASS; Applied/runtime and durable Context evidence OPEN |
+| H | `b99e5ead283dd1dcc3e86a4da871356731e162dc` | `reviews/technology/owner-h-bmcp-technology-review.md` | `c003e6cc078fc58d6c150d0fb418c28f94de8e8a` | CONDITIONAL PASS; schema structure PASS, protocol freeze OPEN |
+| C | `018de5044810e755d4e21cb21e982526c27eb9a8` | `reviews/technology/owner-c-agent-integration-technology-review.md` | `ee42c7192561261789a0c7b5bd16d32c0eaaf14c` | CONDITIONAL PASS; final-submit runtime proof OPEN |
+
+All eight reports were fetched and their contents inspected. All eight explicitly identify their execution as a centralized/delegated static architecture review, not independent human-owner attestation. This limits the governance meaning of the reports: they are owner-scoped technical review artifacts and do not substitute for separately required approvals.
+
+**Reviewed source snapshot versus publication tip:** the report metadata records earlier source snapshots in several cases (B `a5bf20b...`, I `4b1ef1c...`, D `06bce7f...`, E `9f53263...`, F `f1ba5c4...`, G `e854730...`, H `9c33237...`, C `d13aa06...`). These are not misreported as current branch HEADs. Live compare confirms that B's one-commit delta, D/E/G/C report-publication deltas, I's eight-commit delta, F's three-commit delta, and H's nine-commit delta are distinct from the report's reviewed source snapshot. I's later delta includes Global Forget logical-model/evidence artifacts; F's includes anti-resurrection model evidence; H's includes JF-10 schema validation evidence. The current report blobs above are the fetched versions at the live branch tips.
+
+### 20.3 Phase 2 / Phase 3 reconciliation
+
+The required integration reports were fetched and read:
+
+| Artifact | Path | Blob SHA | Current interpretation |
+|---|---|---|---|
+| Phase 2 D/E/F/G reconciliation | `reviews/integration/phase-2-defg-cross-session-reconciliation.md` | `3cd31abeac88703de5b9a0b29bea5d82cd5fdee7` | Historical branch-aware reconciliation; CONDITIONAL PASS for continued integration, not freeze |
+| Phase 3 D/E/H/I contract review | `reviews/integration/phase-3-defghi-cross-module-contract-review.md` | `edaccb802e0425f2d47bd4b613fab4dfde107144` | Historical static contract review; CONDITIONAL PASS for integration, not freeze |
+| Phase 3 remediation task pack | `reviews/integration/phase-3-cross-module-remediation-task-pack.md` | `7abe73e5209ee985c9807b95d99616069911a6b7` | Task package, not approval |
+| TAB-001 review task pack | `reviews/integration/tab-001-a-i-technology-architecture-review-task-pack.md` | `cf903cd5812cfed3a64a52b169a3bd84209ba3f5` | Review task pack; not review result |
+
+Phase 2 correctly distinguishes branch visibility errors from design quality and preserves INT-P0-01..04 as open at that snapshot. Phase 3 correctly identifies the D/E registration/publication linearization gap, stale cursor references, identity binding, Global Forget mapping, Fact/Claim ADR and Applied proof as open. Later Owner decisions and tests narrow some design questions, but do not establish application implementation closure.
+
+### 20.4 System architecture assessment
+
+The architecture's logical separation is sound and should be preserved:
+
+| Layer | Authority and boundary | System assessment |
+|---|---|---|
+| Agent Adapter / telemetry | C captures host events and final inference-boundary evidence; Agent retains planning/tool authority | Sound boundary; no Tier 1 final-submit integration demonstrated |
+| BMCP | H owns envelope, schema, transport, capability negotiation and ACK carriage | Sound separation; current schema is candidate, interoperability and authentication proof open |
+| Security / Governance | I owns Principal trust, authorization, PermissionEpoch, revocation, target inventory and global completion | Correct authority placement; operational security and governance approval open |
+| Ingress / Compiler | E owns durable Accepted receipt, work state, extraction proposals, provenance and staged derivatives | Sound semantic split; durable implementation and publication gate open |
+| Canonical Memory Brain | D owns canonical identity/version, lifecycle, canonical commit cursor, Forget fence and producer barrier | Sound authority; Fact/Claim schema remains blocked by B ADR |
+| Runtime / Retrieval | F owns candidate retrieval, ranking, completeness, watermarks, activation recommendations and disposable cache/working sets | Sound boundary; filtering and anti-resurrection runtime tests open |
+| Memory Context | G owns Context membership/order/budget, ContextVersion, ChangeSet and Delivery intent | Sound boundary; durable CAS/reconciliation and Applied verifier not demonstrated |
+| Persistence / COC | Storage owns database transaction, prepared participant/XID, visibility pointer and publication receipt; COC orders participant observations | Authority split is coherent; latest amended protocol and physical implementation gates remain open |
+| Index / Cache | Derived, rebuildable and never authoritative | Correct principle; actual anti-resurrection runtime proof absent |
+| Inference | Optional, replaceable provider; model output remains proposal | Correct isolation principle; target hardware/model workload not benchmarked |
+
+No cyclic dependency is required if these authorities remain enforced. The initial modular Rust monolith is a reasonable local-first prototype topology, but it does not by itself solve cross-authority JF-10. The COC quorum, I sequencer, D control ledger, Storage prepared participant, C provider boundary and their durable owner-local gates are separate logical durability/authority domains. Their process and failure-domain topology must be explicitly included before deployment approval. Logical modules must not automatically become microservices.
+
+### 20.5 Technology selection matrix — current disposition
+
+No candidate is upgraded to APPROVED solely by appearing in TAB-001 or an Owner report.
+
+| Concern | Preferred candidate / alternatives | Current decision | Cost, reliability and compatibility assessment | ADR / prototype |
+|---|---|---|---|---|
+| Core language | Rust; alternatives Go/JVM/Python | Rust is the project direction, not a complete toolchain freeze | Strong typing/ownership for state machines; compile-time and integration complexity; CPU/RAM depend on workload | Existing direction; crate/dependency review |
+| Async runtime | Tokio; alternatives async-std / sync workers | RECOMMENDED, not frozen | Mature async IO; CPU-heavy work must not block executor; bounded worker pools required | Runtime supervision prototype |
+| Primary transactional DB | SQLite WAL vs PostgreSQL; embedded KV/RocksDB alternative | No final DB ADR | SQLite low operations and embedded footprint but single-writer limits; PostgreSQL stronger concurrent transaction and prepared-XID capability but service/admin/HA burden; KV shifts constraints and transactions into application code | ADR-TEC-001; same-fixture app conformance and workload comparison |
+| PostgreSQL prepared-XID profile | PostgreSQL 18.7 pinned CI profile | QUALIFIED ENGINE-CAPABILITY CANDIDATE only | Seven CI workflows passed; does not prove production deployment, real I/D/COC integration, production fencing or application-level atomicity | Gate A remains PARTIAL PASS / OPEN |
+| Blob storage | Content-addressed local filesystem + transactional metadata; alternatives DB blobs/object store | RECOMMENDED direction | Filesystem/object store needs coordinated DB visibility, digest verification, orphan reconciliation, encryption and complete backup; DB-only snapshot may omit referenced blobs | ADR-TEC-002; crash/restore prototype |
+| Structured search | SQL indexes | RECOMMENDED | Strong typed filtering and transactional locality; query plans/selectivity require corpus tests | Workload/query-plan tests |
+| Full-text | SQLite FTS5 vs Tantivy | FTS5 first comparison candidate; no selection | FTS5 is colocated and simple; Tantivy offers Rust-native control and scale but adds separate index generation/recovery | ADR-TEC-003; identical corpus benchmark |
+| Vector ANN | usearch/HNSW vs sqlite-vec; defer remote vector DB | OPEN | ANN memory, recall, update/delete, filtering and rebuild costs are workload-sensitive; authorization must precede candidate emission | ADR-TEC-004; only after embedding/corpus freeze |
+| Cache | Moka in-process; Redis or no cache | RECOMMENDED candidate | Low operational footprint; keys/invalidation must include Authority, Scope, PermissionEpoch, ForgetFenceGeneration and Context identity/version; TTL alone is insufficient | Cache race, memory bound and anti-resurrection tests |
+| Queue / scheduling | Transactional outbox + bounded DB-backed Tokio workers; NATS/Kafka alternatives | Candidate for local first release | Outbox avoids dual-write only if transaction boundaries are correct; lease fencing, DLQ, replay and backpressure still require proof; external broker adds operational recovery domains | ADR-TEC-002; crash/replay/poison tests |
+| Compiler / extraction | Deterministic Rust normalization + replaceable model providers | Architecture direction accepted; backend open | Deterministic ingress independent of model availability; inference workers require bounded CPU/GPU admission and retry | E application prototype |
+| Embedding / reranker | ONNX Runtime candidate; CPU fallback; Candle alternative | CANDIDATE | Compatibility, quantization, execution provider, vector dimension, model/version provenance and CPU/GPU latency unmeasured | ADR-TEC-005; target hardware benchmark |
+| Local generative inference | llama.cpp-compatible GGUF worker; Candle alternative; remote provider optional | CANDIDATE | Separate process recommended; weight/KV/context/batch/concurrency determine VRAM; remote provider adds residency/retention risk | ADR-TEC-006; OOM and fallback tests |
+| Serialization | Serde internal; JSON/JCS candidate; CBOR/MessagePack alternatives | OPEN / H-owned | JSON debuggable but signing requires canonical bytes, duplicate-key rejection and strict number/Unicode rules; binary encodings need equivalent canonical profiles | ADR-TEC-007; golden vectors/fuzz |
+| Transport | HTTP(S), Unix socket / Windows named pipe; gRPC alternative | OPEN / H-owned | HTTP broad interoperability; local IPC low hop cost but platform peer-auth; gRPC adds generated schema/runtime complexity | ADR-TEC-007; cross-language/OS tests |
+| Identity / auth | I-issued Principal and typed ActorRef/ScopeRef binding; transport auth mechanisms | Design direction only | Payload identity is a claim, not proof; issuer, audience, delegation, Scope and PermissionEpoch must be authenticated and rechecked at every protected boundary | I/B/H/C joint exact contract and negative tests |
+| Crypto / key custody | OS key store, vetted crypto, envelope encryption | OPEN / I-owned | Key loss/rotation/recovery, backup encryption and cryptographic erasure need explicit custody and threat model; no algorithm is approved here | ADR-TEC-010 / I security ADR |
+| Backup / restore | Coordinated DB + blobs + WAL/archive + D/I control state + index rebuild | OPEN | Restore must quarantine, reapply current Forget/revocation/retention state before serving; stale backups must not resurrect content | ADR-TEC-010; restore-after-Forget drill |
+| Deployment | Local modular monolith + optional isolated inference worker + capability-tiered Adapter SDK/sidecar | CANDIDATE | Good first prototype; COC/I/D/Storage protected cross-authority path adds quorum and operator requirements not proven by a single process | ADR-TEC-009; crash/isolation/upgrade tests |
+| Observability / audit | tracing + metrics facade; OpenTelemetry/Prometheus exporters | RECOMMENDED direction | Correlation IDs and typed cursor metrics required; diagnostic logs must not become sensitive memory copies; audit has separate integrity/retention needs | ADR-TEC-008; redaction and audit tests |
+| Schema migration | Versioned SQL migrations + compatibility checks | RECOMMENDED | Migration interruption, forward/backward compatibility and restore must be restartable/auditable | Migration fault tests |
+| COC | Single logical quorum-committed log, participant registry, recovery cutoff batch, checkpoint/restore | Current amended Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` is PROPOSED / focused exact-owner re-review required | Older Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` has design-level owner acceptance with exceptions; acceptance does not transfer to amended bytes. No production quorum/service is deployed | Exact-version owner review of 86ff; Gate C implementation deferred |
+
+### 20.6 Cross-module dependency and interface matrix
+
+| Dependency | Authority | Current compatibility | Required closure |
+|---|---|---|---|
+| Fact/Claim → Canonical schema/API/wire | B + Architecture Governance; D/E/F/G consumers | BLOCKED by ADR-001 | Formal ADR decision; exact consumer mapping; schema and migration vectors |
+| Principal / ActorRef / ScopeRef / EnvironmentRef | B semantics; I trust/policy; H wire binding; C/E/F/G/D consumers | Design decisions exist, but no end-to-end frozen identity/permission profile | Exact typed mapping, issuer/delegation/audience rules, authenticated transport binding, PermissionEpoch and negative conformance |
+| CanonicalCommitCursor → E/F/G | D owns one global ordered sequence per Canonical Memory Authority; F owns per-channel/partition IndexWatermark | D semantic decision is explicit; downstream consumer and Storage continuity tests incomplete | Update all stale coordination artifacts; test gaps, replay, snapshot and cursor atomicity |
+| Producer admission / Forget fence / dependency / publish | D semantic authority; E producer lifecycle; Storage physical transaction and visibility | Design boundaries align; application linearization P0 OPEN | One callable transaction/gate contract; no read-then-write split; race/crash proof |
+| JF-10 / COC | I sequencer and receipt consumption; Storage prepared participant/XID; D fence/lineage; C provider side effect; COC order/evidence only | Single-policy-domain design only; application integration P0 OPEN | Exact final owner-gate in I policy order; same-XID recovery; C admission and provider outcome; current COC protocol exact acceptance |
+| Index / cache / Runtime | D canonical feed; F IndexWatermark and suppression | Logical reference model pass; runtime OPEN | Scope/Permission before candidate emission; authoritative fence revalidation; actual ANN/cache/rebuild tests |
+| Context / Delivery / Applied | G owns ContextVersion and Delivery; H transport/ACK; C final submit; I permission; D ForgetFence | Semantic split aligned; common exact Applied profile and execution not complete | Same-version exact binding, independent verifier, final immutable request proof, reconnect and revocation tests |
+| Global Forget | I owns sealed target inventory and global Completion Evidence Vector; D/E/F/G/H/C/Storage provide bounded evidence | OPEN | Map every target class and ACK state; inventory epoch/seal; unknown/offline/external/backup targets cannot silently pass |
+| Backup / restore | Storage physical backup; I retention/Forget policy; D canonical state | Engine capability evidence only | Restore quarantine, D/I ledger replay, blob/index/Adapter/external recipient reconciliation |
+
+### 20.7 Data flow and control flow assessment
+
+| Flow | Required durable boundary / confirmation | Idempotency and recovery | Status |
+|---|---|---|---|
+| Event Ingress → Compiler → Canonical Memory | Event + payload reference + idempotency record + AcceptedReceipt + compile intent durable before Accepted; canonical revision and CanonicalCommitCursor atomic | Same key/same payload returns same logical receipt; same key/different payload conflicts; replay retains WorkItemId and current authorization/fence checks | Semantics defined; E/Storage application implementation not evidenced |
+| Canonical Memory → Index → Runtime Retrieval | Consume committed canonical changes; typed per-channel IndexWatermark; suppression and authorization before candidate disclosure | Gap detection, deterministic rebuild, stale watermark and Forget revalidation | F logical model partly tested; runtime channels not verified |
+| Retrieval → Activation → Context Planning | RetrievalResult/ActivationRecommendation are proposals; G alone commits ContextVersion/ChangeSet | G CAS/base-version, deterministic snapshot/delta reconciliation | Ownership sound; durable Context application not demonstrated |
+| Context Change → Delivery → Adapter Applied | G durable Delivery intent; H authenticated transport; C exact final request submission; G records Applied only after valid proof | Retry preserves logical delivery/request identity; timeout/lost ACK is Unknown until queried/reconciled; stale version is superseded | Exact final request implementation and independent verifier OPEN |
+| Forget → Fence → Producer Barrier → Derived Suppression → Index/Cache/Context/Adapter Revocation | I authorizes; D installs fence and captures work barrier; E registers complete dependencies; Storage gate controls visibility; F/G/H/C provide bounded target evidence; I seals inventory and decides global completion | Late worker/replay/index rebuild/cache fill/offline Adapter/backup restore must recheck current control state; unknown remains blocking | Multiple design and logical test results exist; integrated P0 OPEN |
+
+### 20.8 Deployment topology assessment
+
+The prototype topology remains a local Rust modular monolith with explicit internal ports and adapters:
+
+1. `brain-app` supervises startup, shutdown, migrations, health and worker admission.
+2. Correctness-critical domain, storage coordination, ingress, Compiler state, Context state and governance interfaces remain in a small number of explicit transaction boundaries.
+3. PostgreSQL is the current leading prepared-XID capability target for JF-10 integration; SQLite remains a comparative lightweight prototype, not a selected production authority.
+4. Blob storage is private/content-addressed until its metadata and publication transaction is authoritative.
+5. FTS5/Tantivy and vector indexes are derived services/workers; Moka cache and Working Sets are disposable.
+6. Model inference runs in an isolated optional worker with bounded GPU/CPU admission.
+7. Agent integration supports embedded SDK where a real final-submit hook exists and sidecar/IPC where process/language isolation is needed. Tier 2/3 integrations cannot claim Full Applied.
+8. JF-10 protected operations additionally require the COC quorum, I sequencer, D control ledger, Storage participant and C provider-side-effect boundary. Their process placement, independent failure domains, fencing, operator and recovery topology are not yet deployment-approved.
+
+Do not add Kafka, Kubernetes, a hosted vector database or microservices solely because logical modules exist. Conversely, do not claim a single local process proves distributed COC/JF-10 recovery.
+
+### 20.9 Resource budget assessment
+
+All numbers below are planning envelopes or estimates from TAB-001, not measured application performance.
+
+| Profile | Current planning assumption | Safe interpretation |
+|---|---|---|
+| 12 GB VRAM | 1.5–2.0 GB driver/runtime/headroom; 6.5–7.5 GB LLM weights; 1.5–2.0 GB KV/context; 0–1.0 GB embedding/reranker transient | Tight budget; sequential GPU scheduling, small context/concurrency, CPU fallback or model offload likely |
+| 16 GB VRAM | 1.5–2.0 GB headroom; 8.5–10.5 GB weights; 2.0–3.0 GB KV/context; 0–1.5 GB embedding/reranker transient | More room but no basis to co-schedule large generation, embedding and reranking without measured peak/fragmentation |
+| CPU-only / model offload | No approved throughput or latency budget | Durable ingress and canonical authority must remain usable; inference may degrade, queue or be disabled; embedding and LLM CPU throughput require measurement |
+| Host RAM | 16 GB minimal test; 32 GB preferred initial development/acceptance; 64 GB+ larger corpus/concurrency | Indicative component estimates: core 0.5–1.5 GB; deterministic compiler 0.5–1.5 GB; retrieval/index/cache 1–4 GB; inference host memory backend-dependent; OS/Agent/filesystem cache reserve additional headroom |
+| SSD / database / blob / indexes | No corpus or retention volume supplied | Must budget source payloads, revisions/provenance, WAL, outbox, index amplification, model files, audit, backup generations and restore staging; disk-full must backpressure before false Accepted |
+| Concurrent sessions / growth | No fixed session count, write rate, corpus size or retention horizon | No throughput, capacity, RTO/RPO or P95/P99 can be accepted yet |
+
+**Measurement status:** no representative application benchmark or production measurement was found in the eight reports. All ingress/compile/retrieval/context/delivery/Forget latency, throughput, index build/rebuild, SSD amplification, queue depth, RAM/RSS, VRAM peak, model latency and recovery duration remain **NOT BENCHMARKED**.
+
+### 20.10 Failure and recovery matrix
+
+| Failure | Detection / isolation | Required recovery and safe state | Data-loss risk / required test |
+|---|---|---|---|
+| Database crash | Connection failure, health/readiness loss, transaction outcome unknown | No success ACK before durable commit; resolve unknown transaction by durable ID; restart/replay outbox; retain in-doubt participants | Accepted/canonical ambiguity; kill before/after commit and ACK |
+| Disk space exhausted | Low-space alarm, write failure, WAL/blob growth monitor | Backpressure ingress/workers; no partial blob visibility; preserve committed state and cleanup audit | Lost uncommitted input or orphan blob; quota/disk-full injection |
+| WAL corruption | Startup/checksum/archive validation failure | Isolate DB; restore from verified backup/WAL; quarantine and replay D/I control state before serving | Loss since last valid WAL/archive; corruption/PITR drill |
+| Index loss/corruption | Missing generation, checksum or watermark gap | Rebuild from canonical history plus current Forget/Permission state; publish only complete generation | Stale/forgotten content reappears; delete/rebuild/partial-channel tests |
+| Compiler crash | Worker heartbeat/lease expiry | Recover durable WorkItem; new AttemptId/LeaseEpoch; stale worker cannot publish; barrier still accounts for it | Lost source or duplicate derivative; crash at every durable stage |
+| Outbox replay / duplicate ingress | Duplicate key, sequence gap, replay counters | Same key/digest returns same receipt; conflict on changed digest; idempotent downstream publication | Duplicate canonical/derived effects; same-key and replay tests |
+| Queue/DLQ backlog | Age/depth/lease metrics | Bounded retry, DLQ nonterminal; replay rechecks D/I fence and permission; backpressure producers | Forgotten work resurfacing; poison, retry storm and DLQ-after-Forget tests |
+| Forget vs derived publication race | Fence/gate conflict or unresolved participant | One serialization winner; pre-fence work included in barrier; post-fence work rejected/private; UNKNOWN keeps gate closed | Late derivative exposure; exhaustive interleaving and process-kill race suite |
+| Adapter offline/reconnect | Session/capability heartbeat expiry | Pending/Unknown; authenticate, get current PermissionEpoch and ForgetFence, clear stale state, reconcile G Context before replay | Stale Context/forgotten content applied; offline Forget/reconnect tests |
+| Duplicate Context delivery | Delivery/idempotency ledger | Preserve logical Delivery identity; duplicate does not create second Context version or Applied result | Duplicate or out-of-order prompt region; duplicate/reorder/base-gap tests |
+| Applied ACK lost | No ACK or ambiguous adapter outcome | Query exact request-bound proof; remain Unknown until verified; never infer from transport receipt | False Applied; lost ACK after actual submit and after no-submit tests |
+| Model service unavailable/OOM | Worker health, allocation failure, timeout | Durable ingress/canonical reads continue where safe; inference retry/degrade/CPU fallback; isolate worker | Lost accepted Event if coupled incorrectly; OOM/provider outage tests |
+| PermissionEpoch changes | I sequencer/current policy lookup | Reauthorize at every protected boundary; stale delivery/cache/worker cannot proceed; fail closed on unknown | Unauthorized disclosure/side effect; revoke during read/compile/delivery/submit tests |
+| Upgrade/schema migration interrupted | Migration journal/version mismatch | Quiesce incompatible writers; atomic/restartable migration; verified backup/rollback; restore quarantine | Corrupt or incompatible state; kill mid-migration and mixed-version tests |
+
+No row is marked implementation-verified solely from a written recovery rule. Existing PostgreSQL CI evidence applies only to the pinned engine capability fixtures; F/H/I logical/schema tests have the bounded scopes stated above.
+
+### 20.11 Security, Forget and Applied assessment
+
+**Identity and Permission**
+
+- B's formal ActorRef/ScopeRef/EnvironmentRef semantic mapping is a real B-domain decision; it does not approve I's trust policy or H's wire fields.
+- I owns Principal trust, issuer/delegation, authorization, PermissionEpoch, revocation and global target policy.
+- H must bind authenticated transport identity and signer/issuer evidence; payload ActorRef/ProducerId/ScopeRef is never credential proof.
+- H's current identity-binding record says technical protocol binding is joint-decided, consumer-owner acceptance remains open, governance approval is blocked and H36 is NOT RUN.
+- Exact H/I/C/B consumer schemas, issuer/audience/delegation behavior and stale-epoch negative tests remain prerequisites to freezing the public protocol.
+
+**Forget and Anti-Resurrection**
+
+- D's local ForgetFence and ProducerRegistrationHighWater are not I's ProducerDomainInventoryEpoch or target inventory seal.
+- I's Global Forget Completion Evidence Vector must include D/E/F/G/H/C/Storage, backups, replicas, logs, exports, external recipients and model/provider onward copies as applicable.
+- I's 25/25 global-Forget logical model tests passed (run `43962873109`); no real inventory seal, complete provider/recipient registry, target-bound deletion receipt, governance approval or physical erasure is established.
+- F's 19/19 anti-resurrection reference model passed (run `43961714501`); actual F-RT index/ANN/cache/rebuild/reconnect tests remain NOT RUN.
+- H's 11/11 schema tests passed (run `43962364955`); actual Adapter clear, per-region ACK, authenticated capability, duplicate-key and signature/channel-binding tests remain NOT RUN.
+- Restore must be isolated and must replay current I/D policy/fence/retention state before any canonical or derived content becomes queryable.
+
+**Applied**
+
+Full Applied is not Delivery, Accepted, Materialized or local insertion success. It must bind G ContextVersion/Delivery, C's exact immutable final inference request and submit evidence, H Adapter instance/capability epoch, I PermissionEpoch and D ForgetFence. No model attention/comprehension claim follows from Applied. The actual final-submit hook and independent verifier are not demonstrated; no Full Applied production claim is accepted.
+
+**Prompt injection**
+
+Memory, evidence, provenance, summaries and retrieved content remain untrusted data. Region formatting alone cannot guarantee that an LLM ignores malicious instructions. C/H must prove protected-region integrity and I must own threat/risk acceptance. Retrieval poisoning, provenance/summary laundering, cross-scope injection and tool-authority escalation tests remain NOT RUN.
+
+### 20.12 Protocol and compatibility assessment — COC / JF-10
+
+The COC architecture must preserve the separation of authority:
+
+- COC orders and durably accounts for participant observations; it does not authorize I, establish D fence effectiveness, decide Storage visibility, prove C provider success or certify G Applied.
+- I owns PolicyDomainRef, CommitAuthorizationReceipt consumption, PermissionEpoch, revocation order and terminal authorization decision.
+- D owns ForgetFence, lineage, producer barrier and CanonicalSuppressionComplete.
+- Storage owns the exact prepared participant/XID, VisibilityPointer and PublicationReceipt.
+- C owns provider-side-effect admission and immutable CSubmitOutcome.
+- H transports authenticated evidence; it cannot mint owner outcomes.
+- UNKNOWN/IN_DOUBT is durable and blocking. No TTL, timeout, missing row, lost ACK or operator force-clear may infer terminality.
+- The accepted JF-10 architecture profile is limited to one I PolicyDomain. Multi-PolicyDomain atomicity remains BLOCKED.
+
+**Exact-version warning:** the older COC protocol Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` has design-level owner acceptance with enumerated exceptions, recorded in A's acceptance matrix Blob `9a39e48a394fedbab16d15589056d59ef33f390f`. The current Storage protocol Blob is `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`. The Storage branch explicitly records the amended Blob as published / focused exact-owner re-review required / not yet accepted overall. Prior acceptance of 4ac63ac does not transfer to 86ff3b.
+
+Storage's PostgreSQL 18.7 capability dossier records 7/7 CI workflows for the pinned profile. Gate A nevertheless remains PARTIAL PASS / OPEN because production runtime/DB adapter, actual I/D control-ledger integration, infrastructure fencing/failure-domain durability, operator/runbook and RPO/RTO remain unverified. Gate B design acceptance of the older protocol is not Gate C implementation/fault-injection PASS. JF-10 P0 remains OPEN; production activation is not authorized.
+
+The amended COC review must explicitly close:
+1. Recovery Cutoff Batch completeness and manifest ordering before immutable batch commit.
+2. Owner-local admission gate ordering with I revocation and D fence requests.
+3. C provider-side-effect admission and recovery enumeration.
+4. PreparedParticipantReceipt/GID/XID/digest/database identity and single-use I authorization binding.
+5. Same-XID forward/rollback recovery and Storage-only visibility proof.
+6. COC prefix/quorum/restore proof and owner receipt reconciliation.
+7. Exact schema/IDL, canonical bytes, duplicate-key rejection, signature/channel binding and cross-language interoperability.
+
+### 20.13 Blocking findings
+
+| Finding | Severity | Accountable owner(s) | Current state | Closure evidence |
+|---|---|---|---|---|
+| TAR-A-P0-001 — Fact/Claim canonical identity and semantics | P0 | B + Architecture Governance; D/E/F/G consult | ADR-001 explicitly ADR-BLOCKED | Formal approved/rejected ADR with named decision authority; synchronized consumer mappings and schema vectors |
+| TAR-A-P0-002 — Producer Admission / Fence / Dependency / Publish linearization | P0 | D + E + Storage; F/G consume; I governs | Design semantics advanced; implementation boundary unproven | One authoritative callable gate/transaction contract; race interleavings; crash/restart; no late publication after barrier closure |
+| TAR-A-P0-003 — JF-10 same-XID cross-authority recovery | P0 | I + Storage + D + C; COC coordinates; H transports | Single-domain design only; application integration NOT RUN | I sequencer and exact owner-final-gate receipt; Storage prepared XID and same-XID recovery; D ledger/fence; C provider boundary; failover/restore tests |
+| TAR-A-P0-004 — I Global Forget inventory/seal/completion | P0 | I; D/E/F/G/H/C/Storage provide target evidence | Logical model 25/25 PASS; real inventory and global completion OPEN | Real ProducerDomainInventoryEpoch and TargetInventorySeal; complete target registry; per-target receipts; restore/external-copy evidence; governance approval |
+| TAR-A-P1-001 — Identity and Permission binding | P1 | B/I/H/C/E; all consumers | Semantic/technical progress; governance and consumer execution open | Exact typed binding profile; issuer/delegation; transport authentication; PermissionEpoch/revocation negative tests |
+| TAR-A-P1-002 — Full Applied proof | P1 | C/G/H/I/D | Contract concepts align; common exact proof/runtime not verified | Final-submit Agent hook; exact request tuple; independent verifier; lost ACK/stale version/Forget race tests |
+| TAR-A-P1-003 — F Index/Cache anti-resurrection | P1 | F + D/E/I; G/H consumers | 19/19 logical model PASS only | Actual FTS/ANN/cache/rebuild/concurrent fill/offline/reconnect and restore tests |
+| TAR-A-P1-004 — COC amended exact-version acceptance | P1 | Storage + A/I/D/C/H/E/G/B | 86ff3b published; focused exact-owner re-review pending | New exact-Blob owner acceptance matrix for amended bytes; no acceptance inheritance from 4ac63ac |
+| TAR-A-P1-005 — Schema/transport/cryptographic interoperability | P1 | H + I + C | 11/11 schema fixtures PASS; parser/signature/channel/SDK tests open | Normative IDL/schema; canonical parser; duplicate-key/unknown-critical rejection; signed vectors; cross-language HTTP/IPC tests |
+| TAR-A-P1-006 — Prompt injection and protected-region integrity | P1 | I + C + H; F/G/E contribute | Design boundary only | Adversarial fixtures and before/after protected-region/tool-policy digest evidence |
+| TAR-A-P1-007 — Resource and performance envelope | P1 | A + D/E/F/G/H/C + Engineering | NOT BENCHMARKED | Reproducible corpus/hardware/workload benchmark and approved SLO/RTO/RPO |
+| TAR-A-P1-008 — Blob/DB/backup/migration integration | P1 | Storage + D/E/I | Engine capability only; app boundary open | Blob visibility/orphan/digest, backup/PITR, stale restore quarantine, migration interruption and disk-full tests |
+
+### 20.14 ADR and formal decision register
+
+| Decision | Owner | Current status | Required next action |
+|---|---|---|---|
+| ADR-001 Fact/Claim canonical model | B + Architecture Governance | ADR-BLOCKED | Obtain explicit governance decision; no dependent schema freeze |
+| ADR-TEC-001 database and transaction model | D + Storage; A coordinates | OPEN | Compare SQLite and PostgreSQL with the same application transaction/race harness; decide production profile only after proof |
+| ADR-TEC-002 canonical persistence, outbox and blob layout | D/E/Storage | OPEN | Prove atomic acceptance, cursor, outbox, blob visibility, recovery and backup |
+| ADR-TEC-003 lexical engine | F | OPEN | FTS5/Tantivy corpus benchmark |
+| ADR-TEC-004 vector index/hybrid retrieval | F | OPEN | Compare ANN candidates after corpus/embedding profile is fixed |
+| ADR-TEC-005 embedding/reranker backend | E/F | OPEN | Model compatibility, quality, CPU/GPU and memory benchmark |
+| ADR-TEC-006 local generative inference/GPU scheduling | E/C + A | OPEN | Target model/quant/context/concurrency benchmark and OOM/fallback tests |
+| ADR-TEC-007 BMCP encoding/transport/schema compatibility | H + I/C/G | OPEN | Exact owner field map, JSON/JCS vs alternatives, authenticated interoperability vectors |
+| ADR-TEC-008 observability/audit/diagnostics | I + A/Storage | OPEN | Audit integrity, minimization, retention and sensitive-data review |
+| ADR-TEC-009 local deployment/process/upgrade model | A + C/H + Storage | OPEN | Modular monolith, inference worker, sidecar and COC topology/failure isolation prototype |
+| ADR-TEC-010 backup/restore/encryption/key custody | I + Storage | OPEN | Key lifecycle, restore quarantine, Forget/revocation replay and recovery drill |
+| I36-GOV-01..10 / global target inventory and policy exceptions | I + designated governance approvers | GOVERNANCE-BLOCKED | Name approvers, approve target inventory/seal and exception semantics |
+| JF-10 single-policy-domain profile | I/D/Storage/C/COC | Design accepted with exceptions; runtime P0 OPEN | Implement and test exact I/Storage/D/C same-XID boundary; multi-domain remains blocked |
+| COC current amended protocol 86ff3b | Storage + A/B/C/D/E/G/H/I | Focused exact-owner re-review pending | Review exact amended Blob and publish new owner matrix |
+
+No database, protocol encoding, transport, model backend, key algorithm, COC consensus implementation or production topology is declared formally approved by this review.
+
+### 20.15 Prototype and benchmark plan
+
+Execute in dependency order; do not start by tuning latency while correctness gates are open.
+
+**Gate 1 — Domain and identity**
+- Resolve ADR-001.
+- Publish typed-reference, issuer/delegation, Scope and PermissionEpoch golden vectors.
+- Negative tests for forged ActorRef/ProducerId, wrong issuer/audience, stale PermissionEpoch and confused deputy.
+
+**Gate 2 — Persistence and Forget linearization**
+- Implement the D/E/Storage producer admission, fence, complete dependency registration and publication operation.
+- Run exhaustive register-vs-fence and publish-vs-fence interleavings.
+- Crash at every durable boundary; test lease expiry, stale worker, DLQ replay and lost registration/publication ACK.
+- Prove canonical revision, CanonicalCommitCursor, lifecycle event, outbox, VisibilityPointer and PublicationReceipt atomicity.
+
+**Gate 3 — JF-10 / COC**
+- Exact-owner review amended COC Blob 86ff3b.
+- Implement I sequencer receipt consumption, owner-local gates, COC durable quorum/prefix, participant registry, Storage prepared XID and same-XID recovery.
+- Test Recovery Cutoff Batch completeness, owner high-water capture, PreparedParticipantReceipt/GID identity, commit/rollback/unknown, coordinator crash, quorum loss, old-primary fencing, promotion, restore and ACK loss.
+- Keep UNKNOWN/IN_DOUBT private and blocking; no heuristic resolution.
+
+**Gate 4 — Forget / Derived / Applied**
+- Run end-to-end Forget against E queue/leases/DLQ, F SQL/FTS/ANN/cache/Working Sets, G snapshots/deltas/deliveries, H Adapter buffers, C final request, backup/restore and external recipient fixtures.
+- Prove real target inventory seal and per-target evidence.
+- Implement independent Applied verifier against final immutable Agent request and exact G/H/I/D binding.
+- Run prompt-injection and protected-region integrity adversarial tests.
+
+**Gate 5 — Performance and deployment**
+- Benchmark 12 GB, 16 GB and CPU-only/offload profiles with exact model, quantization, context, batch and concurrency.
+- Compare SQLite/PostgreSQL on identical D/E application fixtures; record commit contention, WAL growth/checkpoint, prepared-XID duration, backup/restore and recovery.
+- Compare FTS5/Tantivy and vector ANN on identical labeled corpus; report filtered recall, p50/p95/p99, memory, update/delete and rebuild.
+- Measure compiler peak RSS, queue age/depth, embedding latency, retrieval P95/P99, Context delivery/Applied lag, Forget suppression/completion time, SSD amplification and index rebuild.
+- Establish explicit RTO/RPO, operator/runbook, failure-domain and migration acceptance.
+
+Every test result must record commit SHA, Blob SHA, environment, command, fixture/corpus version, expected/actual result and CI artifact. Existing logical-model and engine-capability results must not be relabeled as application conformance.
+
+### 20.16 Required remediation and exact execution order
+
+1. **B + Architecture Governance:** resolve ADR-001; keep E neutral CandidateProposition/ExtractionIR until decision.
+2. **I + B + H + C + E:** freeze exact authenticated Principal/ActorRef/ScopeRef/ProducerIdentity/PermissionEpoch mapping and consumer negative-test vectors.
+3. **D + E + Storage:** implement and prove the single producer-admission/fence/dependency/publication serialization boundary; preserve D's per-authority global CanonicalCommitCursor semantics and synchronize E/F/G.
+4. **I + Storage + D + C + COC:** exact-review current COC Blob 86ff3; close Recovery Cutoff Batch, Owner-local Gate, PreparedParticipantReceipt/GID, same-XID and final owner-gate semantics; keep JF-10 P0 open until application tests pass.
+5. **I + all target owners:** complete ProducerDomainInventoryEpoch, TargetInventorySeal, target evidence mapping, backup/external recipient governance and explicit Unknown/PolicyException handling.
+6. **F:** execute real index/cache anti-resurrection, Scope-before-candidate, watermark gap/rebuild and concurrent fill tests.
+7. **C + G + H + I + D:** converge one exact Applied proof profile and implement final-submit hook/verifier, offline reconnect and revocation/Forget races.
+8. **Storage + D/E/I:** integrate blob, DB, WAL/PITR, migration, backup/restore quarantine and current control-ledger replay.
+9. **H + C:** complete canonical parser/signature/channel binding, generated IDL/SDK and cross-language HTTP/IPC interoperability.
+10. **I + C + H + F/G/E:** run prompt-injection, provider residency/retention, external-copy and security adversarial suite.
+11. **Engineering + all Owners:** complete representative resource/performance benchmarks and set measurable SLO/RTO/RPO.
+12. **A:** refresh all branch refs and exact artifacts again; run a second system integration review; request formal governance approval only after every P0 is closed and P1s are closed or explicitly accepted with bounded exceptions.
+
+### 20.17 Exact live Commit and Blob SHA evidence
+
+**Live refs resolved during this review**
+
+| Ref | Exact HEAD |
+|---|---|
+| main | `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f` |
+| A | `a4081392ca4863e9745ee7c166b099d6f7b151b9` |
+| B | `310f305575d6f406e80d5d6ebf951bcd9e79e35f` |
+| I | `73a0bff13b531b5b9feaeeec1887db31d6266589` |
+| D | `a3ea0de75ca7b2297589293ec142f2cb07757282` |
+| E | `5fb76b666fac49ceeb51ddb7c320fe5975313d99` |
+| F | `e4c26214b8f78169c0e20f1faae23f945c3afeb9` |
+| G | `b0c515399c6a336dcbf17a1ced6925413c804d5c` |
+| H | `b99e5ead283dd1dcc3e86a4da871356731e162dc` |
+| C | `018de5044810e755d4e21cb21e982526c27eb9a8` |
+| Storage | `337fe8bffa178e64ad8e4750f1ede1d561424edc` |
+
+**Main baseline and integration reports**
+
+| Artifact | Blob SHA |
+|---|---|
+| TAB-001 blueprint | `7b6f2d139217dbe13ab3a3af31bfbff525f20e71` |
+| TAR-AI-001 review task pack | `5a813edeccf7190d66dfd71a96ca581c48f8a4cb` |
+| Architecture Roadmap | `29289361973ec4369f067706132190793cd57a6b` |
+| Phase 2 reconciliation | `3cd31abeac88703de5b9a0b29bea5d82cd5fdee7` |
+| Phase 3 D/E/H/I review | `edaccb802e0425f2d47bd4b613fab4dfde107144` |
+| Phase 3 remediation task pack | `7abe73e5209ee985c9807b95d99616069911a6b7` |
+| Phase 3.6 A final architecture acceptance | `16f86859645447f3f4397c5c89c6013c3cce92b5` |
+| A COC older-version acceptance matrix | `9a39e48a394fedbab16d15589056d59ef33f390f` |
+
+**Owner technology report blobs**
+
+| Owner | Blob SHA |
+|---|---|
+| B | `fd3e5723b81de10bed806896e4be71ceb7a1669b` |
+| I | `592baa4653e91287678a1e0926119ca94780bc08` |
+| D | `97c049050d67dd12e0c64ef49b2b05795651608c` |
+| E | `c94f6a8e64ba3138a27e6f316f10411ef33b7ab8` |
+| F | `124cc9300442b0e3a1e83603910e1c332b4fae48` |
+| G | `8b9ea4b4a63f7bbddbefdb0b14cf99943b3e7613` |
+| H | `c003e6cc078fc58d6c150d0fb418c28f94de8e8a` |
+| C | `ee42c7192561261789a0c7b5bd16d32c0eaaf14c` |
+
+**Controlling domain, security, Storage and test evidence**
+
+| Artifact | Blob SHA / CI evidence |
+|---|---|
+| B ADR-001 Fact/Claim canonical model | `df77e4a93cb8fef689ae7c828888d960cbf381d6` |
+| B Actor/Scope/Environment semantic confirmation | `3a1e77889cd9a90cd5822d9f0cb3437880868706` |
+| I Global Forget inventory contract | `9100061fa986fb6676656169de3fcf9fc1c72664` |
+| I Global Forget reconciliation | `b6a34bf28b9f68453c93d7548f731677e1728b19` |
+| I PermissionEpoch confirmation | `bae6a24fe3a374bc816993979a8fa9af52517dea` |
+| I JF-10 v2 disposition | `8069ff86988396442c8d9dc3fd58653683abe2f3` |
+| D joint Forget linearization decision | `1b6a312ecffd3947bbb4df59f902242482c98a40` |
+| D publication gate | `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` |
+| D JF-10 cross-authority recovery protocol | `94679897e84a6f58fd8b9467b5249e1a885cb0b0` |
+| E producer publication conformance contract | `a17f065e69e809fceacb51873d6a36a8b0f5c235` |
+| F anti-resurrection evidence | `15049d448ace5ad24a6c02eba3fc906fcac149f6`; run `43961714501`, 19/19 PASS |
+| H JF-10 schema evidence | `318c433d5b96966ecd47e6d1b265a0b12b28e581`; run `43962364955`, 11/11 PASS |
+| Storage COC current amended protocol | `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` |
+| Storage PostgreSQL 18.7 capability dossier | `0aabf66848dc97deee028c571183c0d7204008c0` |
+| Storage realization review | `107d21bd2c604ee0b04feff2ee5580e1de9c7fce` |
+
+### 20.18 Final system verdict
+
+**BLOCKED — TAB-001 IS NOT READY FOR FORMAL APPROVAL OR FREEZE.**
+
+What is complete:
+- All eight Owner technology reports are present and version/blob-verified at live branch refs.
+- Phase 2 and Phase 3 integration reports have been read and reconciled.
+- The modular Rust/local-first architecture direction and owner authority boundaries are sufficiently coherent to continue engineering planning.
+- PostgreSQL 18.7 has bounded prepared-XID capability evidence in the pinned CI profile.
+- F logical anti-resurrection, I logical Global Forget and H schema-structure test suites have their stated bounded PASS results.
+- The older COC protocol revision has design-level owner acceptance with explicit exceptions.
+
+What is not complete:
+- ADR-001 and other owner/governance decisions remain open.
+- D/E/Storage atomic producer/fence/dependency/publication implementation is not verified.
+- JF-10 same-XID cross-authority application integration is P0 OPEN.
+- Global Forget inventory/seal/target completion and physical-erasure evidence are open.
+- C/G/H Applied final-request runtime proof is not verified.
+- Current amended COC Blob 86ff3 has not inherited the older 4ac63ac owner acceptance.
+- No application-level resource/performance benchmark or integrated failure/security conformance has passed.
+
+**TAB-001 must remain CANDIDATE. Do not mark FROZEN, APPROVED or production-ready.** The next phase is controlled owner remediation and executable engineering validation in the exact sequence in §20.16. A will perform a fresh integration review only after the evidence package is complete.
