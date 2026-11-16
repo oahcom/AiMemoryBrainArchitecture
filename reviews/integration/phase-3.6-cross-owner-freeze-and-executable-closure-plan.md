@@ -651,3 +651,12 @@ A independently re-read the six Owner artifacts from their respective Owner bran
 - G's decision is a contract/predicate acceptance, not proof that its validator or Applied persistence consumes the complete 1.1 evidence set.
 - C-CO/I-CO/D-CO/H36-CO/G conformance remains SPECIFIED / NOT RUN. Production causal proof and implementation remain NOT VERIFIED.
 - Therefore Applied Contract Frozen = NO; G8 remains BLOCKED, G9 NOT RUN, G10 BLOCKED. No branch merge or production activation is authorized.
+
+
+## 13.10 COC outage recovery batch — current exact package checkpoint
+
+The current COC architecture Blob is `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`; the current companion CGH-APPLIED-1.1 package Blob is `4961ffefc0f9920efb8425a9b2a7af42d8f64819`. The package binds the exact companion pin and adds durable I/D owner-local pending gates for requests received during COC outage, one atomic recovery-cutoff batch (without deriving cross-owner order from local clocks), enumeration of all affected pre-batch ParticipantIntentRefs, I receipt/revocation reconciliation, D lineage-barrier reconciliation and owner high-water verification before gates reopen. Missing log prefix, intent, lineage or owner proof keeps the system RESTORE_FENCED/UNKNOWN/IN_DOUBT.
+
+Six Owner decisions exist for historical package Blob `9808b31f840606b329f1a794935dfc9c5084d63b` only: C/D/I/H/G accepted with enumerated exceptions and B approved semantic typed-reference bindings. Those approvals do not automatically cover the recovery-batch amendment. Fresh exact-Blob decisions are requested in Issue #3 comment `6920481902`; Storage's exact COC decision is requested in Issue #2 comment `6920482983`.
+
+Current gates: package A CANDIDATE / FRESH OWNER REVIEW REQUIRED / NOT FROZEN; coordinator proposal NOT DESIGNATED / NOT DEPLOYED; Storage operator/durability and Security/key governance PENDING; COC-01..16 and C/I/D/H/G consumer conformance NOT RUN; production causal proof NOT VERIFIED. G8 BLOCKED, G9 NOT RUN, G10 BLOCKED.
