@@ -176,3 +176,12 @@ Do **not** retain source text, excerpt, normalized proposition, prompt, embeddin
 - **OPEN — H:** authenticated producer/actor binding and wire representation; no H contract assumed.
 - **OPEN — F/G:** downstream invalidation acknowledgement semantics; E only publishes notifications.
 - **OPEN — Storage/Engineering:** transaction boundary between staged derived object, dependency registration and visibility gate.
+
+
+## 12. Alignment with D candidate Forget contract (read on D branch)
+
+D's `memory-lifecycle-manager.md` proposes a durable ForgetOperation containing operation/request identity, typed targets, actor/scope, authorization and policy versions, suppression time, dependency snapshot ID/watermark, per-target results, residual exceptions and completion proof reference. It explicitly requires a durable suppression fence before cleanup; a ForgetOperation cannot complete while required targets remain pending/failed. D's `canonical-memory-store.md` also requires Forget suppression to be consulted by canonical reads and projection consumers.
+
+D's current candidate consistency text describes dependency discovery using a snapshot/watermark and recording late-arriving derivatives for follow-up suppression/cleanup. **That is not yet a closed producer-registration barrier or an atomic register-if-open / publish-if-fence-current gate.** The late-derivative race identified as D-REV-P1-003 therefore remains OPEN. E's pre-visibility registration and atomic publication gate above is a required proposal for D/I/Storage to reconcile; E does not claim D has already specified or implemented it.
+
+D's `memory-versioning.md` leaves canonical sequence scope (per aggregate vs global) OPEN. LifecycleEvent per-aggregate sequence and Forget dependency snapshot/watermark are not substitutes for the canonical commit cursor or E source cursor.
