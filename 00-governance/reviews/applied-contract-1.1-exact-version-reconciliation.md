@@ -136,3 +136,21 @@ The A deployment-binding record correctly retains Gate A PARTIAL PASS / OPEN and
 - Production activation: **NOT AUTHORIZED**.
 
 This assessment corrects the prior version's false statement that C/H exact-version decisions were pending. It does not convert design acceptance into implementation, test, deployment or production approval.
+
+
+## 7. Subsequent COC companion pin drift — exact decisions must not be conflated
+
+The exact decision vector in §§1–3 remains valid for the exact pair:
+- CGH-APPLIED-1.1 package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819`;
+- companion COC architecture Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
+
+However, A's current file at the same companion path `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md` is now Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, a later amended version containing the I/JF-10 bridge §§12.1–12.8.
+
+Live Owner evidence:
+- C, D, H, I and Storage have separate exact-version acceptance/readback evidence for A COC architecture Blob `a3c51...`.
+- C, D, G, H, I and Storage have exact-version decisions for Applied package Blob `4961...` + companion Blob `fc3...`; B approves unchanged B-owned type semantics.
+- G's exact Applied decision still pins `4961 + fc3` and does not mention `a3c51`.
+
+These are two related but distinct exact-version decision sets. No Owner decision may be silently transferred from one blob to the other. A must publish a canonical version manifest or superseding package that declares whether `a3c51` supersedes `fc3` or is an additive architecture record. If the Applied companion pin changes, obtain a fresh exact-version decision from G and every affected Owner. The new Storage COC durable-log design references `a3c51` and itself remains PROPOSED / OWNER ACCEPTANCE PENDING.
+
+Therefore the earlier “design decisions recorded with exceptions” result remains true for the exact old pair, but the canonical current package/companion chain is not frozen. UMR-024 tracks this source-pin reconciliation.
