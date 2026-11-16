@@ -183,3 +183,14 @@ Capability epoch MUST change if any change could invalidate earlier proof claims
 - I defines authenticated principal binding, permission epoch, signature trust and audit policy.
 - H defines SDK interfaces, capability declaration, evidence encoding and protocol validation.
 - The inference provider's hidden prompt retention and model internal state are outside H's control and MUST NOT be represented as cleared or verified.
+
+
+## 10. Forget capability declaration and ACK boundary
+
+Capability Negotiation MUST additionally declare whether the Adapter can: (a) durably suppress selected content from future inference assembly, (b) enumerate/clear volatile managed buffers, (c) enumerate/purge persistent local cache namespaces and partitions, and (d) enumerate/cancel local queued/retry deliveries. Each declaration includes exact Managed Region/session coverage, inventory revision, observability and limitations. A capability bit without an enumerated coverage boundary cannot support a complete-clear claim.
+
+CapabilityEpoch changes whenever Adapter identity/build, runtime hook, Managed Region boundary, queue/cache inventory or relevant clear/apply capability changes. An ACK binds to the exact epoch and cannot be projected onto a replacement Adapter Instance or changed region.
+
+Forget ACK and Applied Attestation are separate evidence families. Applied binds G ContextVersion + Delivery + inference request at the declared final submission boundary. Forget ACK binds ForgetOperation + D fence + I Permission Epoch + local action/Managed Region. Applied does not prove model attention or use; Forget ACK does not prove global Forget completion or provider deletion.
+
+The full status semantics, target mapping and evidence fields are defined in adapter-forget-ack-and-target-binding.md.
