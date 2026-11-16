@@ -170,6 +170,11 @@ class CoordinatorModel:
                             "request_set_digest": digest})
         self.batch = RecoveryBatch(batch_ref, pos, i_requests, d_requests,
                                    tuple(sorted(affected)), digest)
+        # The batch cutoff becomes the durable admission cutoff for all later
+        # intents. Releasing an owner-local outage gate never erases this cutoff.
+        for owner, refs in (("I", i_requests), ("D", d_requests)):
+            for ref in refs:
+                self.cutoffs.append((pos, self.pending_gates[owner][ref]))
         return self.batch
 
     def reconcile_participant(self, intent_ref: str, *, i_state: str,
@@ -219,4 +224,6 @@ class CoordinatorModel:
             if any(self._affects(req, domain_ref, lineage)
                    for req in self.pending_gates[owner].values()):
                 return False
+        if any(self._affects(req, domain_ref, lineage) for _, req in self.cutoffs):
+            return False
         return True
