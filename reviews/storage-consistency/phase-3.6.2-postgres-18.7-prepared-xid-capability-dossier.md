@@ -874,3 +874,12 @@ This resolves Storage-owned specification gaps; it does not convert CI fixtures 
 Residual cross-owner items remain: I authorization permit/revocation serialization and governance approval; D control-ledger/lineage high-water restore proof; exact owner-final-gate/participant receipt interface conformance; object-store ACL implementation; measured performance/size budgets; and engineering-phase HA/fencing, deployment, operator/runbook and RPO/RTO validation.
 
 **Current disposition:** Gate A PARTIAL PASS / OPEN for remaining architecture and I/D cross-owner decisions; Gate B prior protocol revision DESIGN-LEVEL ACCEPTED WITH EXCEPTIONS; the current amended revision is PUBLISHED / FOCUSED EXACT-OWNER RE-REVIEW REQUIRED / NOT YET ACCEPTED (not implementation/conformance PASS); Gate C deferred to engineering-phase executable integration and distributed fault injection; JF-10 runtime P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED. This section supersedes older dossier wording that treats production runtime/adapter absence as an architecture-phase Gate A blocker.
+
+
+## 32. Exact Storage review of amended COC §14 — accepted with conditions
+
+Storage reviewed COC protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` §14 and ACCEPTS WITH CONDITIONS the PostgreSQL mapping of stable `PreparedParticipantRef`, client-chosen `PreparedTransactionGID`, separately observed engine-native XID, signed participant receipt binding, immutable GID-to-operation tuple, same-GID recovery and outcome-ledger/authoritative-readback reconciliation.
+
+The Storage decision and conditions are recorded in readiness §27, commit `5919cb3ce401e157f6e09de8f5e4905f626a55d4`, Blob `b9e664dfbed1c0f268b2b8b0d9c2ddcd29221bf1`. H still owns exact field/schema/wire encoding; I/Security owns signer trust, audience, key custody and authorization semantics; COC/A must bind the exact GID in its durable prepare-intent API before PREPARE. The isolated PITR fixture proves same-GID restore/resolution mechanics only; it does not implement the signed receipt or live COC/I bridge.
+
+The current amended COC revision remains PUBLISHED / FOCUSED EXACT-OWNER RE-REVIEW PENDING / NOT YET ACCEPTED overall. Gate A PARTIAL PASS / OPEN; Gate C deferred to engineering-phase executable integration/fault injection; JF-10 runtime P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
