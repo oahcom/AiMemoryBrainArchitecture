@@ -704,3 +704,42 @@ Storage also searched the linked GitHub repository catalog for `AiMemoryBrain`, 
 **Disposition:** the canonical production runtime, authoritative DB adapter, schema/migration path and deployment manifest remain NOT IDENTIFIED. Storage cannot truthfully claim production adapter conformance or bind the PostgreSQL 18.7 capability fixtures to an application path until A/C/designated implementation owner supplies the immutable implementation repository/commit and runtime entrypoint, or explicitly designates this repository as the implementation home and delivers the missing code.
 
 Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED; Gate C remains BLOCKED; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
+
+
+## 28. I-accepted JF-10 v2 Storage bridge — contract-to-evidence gap (2026-11-17)
+
+Storage re-read the exact D/Storage common v2 protocol and I's formal disposition before defining the next implementation boundary:
+- D/Storage common v2 protocol: Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`.
+- I JF-10 v2 disposition: Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`.
+- A COC architecture proposal: Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`.
+
+I accepts the single-PolicyDomain owner-gate-participating durable 2PC architecture with binding clarifications. I's policy-domain sequencer remains the sole durable COMMIT/ABORT decision authority; COC is the quorum-ordered intent/participant-observation and reconciliation service; Storage alone resolves the exact prepared XID and commits/rolls back local visibility. COC positions and I sequencer positions are distinct typed orders and MUST NOT be numerically compared or synthesized.
+
+### Storage bridge requirements versus current evidence
+
+| Normative requirement | Current evidence | Status / missing implementation |
+|---|---|---|
+| Preallocated XID + stable PublicationOperationId/RequestDigest + exact owner_boundary + participant digest + Canonical Authority DB identity | Local PostgreSQL probes use stable or generated GIDs and exercise same-XID recovery | **PARTIAL** — no production DB identity, COC ParticipantIntentRef or immutable cross-service tuple binding |
+| COC `JF10_PREPARE_INTENT_REGISTERED` before Storage PREPARE | No COC integration in the probes | **NOT IMPLEMENTED** |
+| Storage-authenticated `PreparedParticipantReceipt` binding exact XID/digest/operation/DB identity/prepare state | Local pg_prepared_xacts and lock observations only | **NOT IMPLEMENTED** — no signing/verifying identity or receipt wire contract in the Storage runtime |
+| COC `JF10_PREPARED_PARTICIPANT_REGISTERED` before I owner-final-gate | No COC participant registry or linearizable prefix API in the repository | **NOT IMPLEMENTED** |
+| I owner-final-gate consumes the exact COC-registered participant and atomically consumes CommitAuthorizationReceipt | No live I sequencer or authenticated I API used by the probes | **NOT IMPLEMENTED** |
+| I COMMIT_WON => forward-commit exact XID; I ABORT => rollback exact XID; UNKNOWN => retain XID/locks/private bytes | PostgreSQL same-XID restart/failover/PITR commit/rollback capability is covered locally | **PARTIAL** — no terminal decision source, coordinator outage, or COC/I recovery bridge |
+| Atomic VisibilityPointer + PublicationReceipt + owner outcome + receipt-consumption evidence + outbox | Isolated prepared transaction proves pointer+receipt atomicity; local authoritative SQL-view fixture rejects pointer-only/receipt-only | **PARTIAL** — no production owner outcome, receipt-consumption record, outbox or application authoritative reader |
+| COC `STORAGE_JF10_PARTICIPANT_RESOLVED` and `JF10_BRIDGE_RECONCILIATION_RECORDED` with authoritative readback | Not present | **NOT IMPLEMENTED** |
+| D fence/lineage serialization shares the Canonical Authority DB lock domain; barrier cannot close before exact participant resolution | No live D fence/lineage tables or D API used in the probes | **NOT IMPLEMENTED** |
+| Restore reconciles COC prefix, I terminal decision, D fence/high-water and Storage XID before serving | Physical restore and WAL PITR fixtures exist; stale-control fixture uses synthetic local epoch | **PARTIAL** — no authenticated external I/D high-water or RecoveryQuarantined integration |
+
+### Required Storage implementation sequence
+
+1. Obtain the exact canonical runtime repository/branch/commit, runtime entrypoint, DB adapter and schema/migration path. The default branch of this architecture repository contains no executable runtime; see §27.
+2. Bind the production Canonical Authority DB identity and a durable preallocated-XID allocator to the owner PublicationIntent and exact immutable operation tuple.
+3. Implement the Storage-side PreparedParticipantReceipt signer/verifier and idempotent same-XID lookup/recovery. Do not create a replacement XID after lost ACK.
+4. Integrate the COC API/schema for pre-prepare intent registration, prepared-receipt registration, unresolved-participant enumeration, authoritative prefix read and participant-resolution/reconciliation records.
+5. Integrate I's authenticated owner-final-gate API and authoritative decision lookup. Storage must execute only the exact I terminal outcome and must not infer terminality from COC.
+6. Bind D's target/source/ancestor fence rows, producer/attempt/lease rows, dependency/manifest versions and fence barrier to the same Canonical Authority DB serialization transaction.
+7. Run the I-accepted JF10-COC-01..10 campaign plus D fence race cases against the actual application read/write path, including I COMMIT while COC is unavailable, I ABORT while COC is unavailable, and restore behind external control-ledger high-water.
+
+No Storage fixture in this dossier is evidence that these bridge integrations exist. Until the production runtime and owner APIs are supplied, the current PostgreSQL 18.7 work remains bounded engine-capability qualification.
+
+Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED; Gate C remains BLOCKED; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
