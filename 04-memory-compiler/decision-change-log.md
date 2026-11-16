@@ -68,3 +68,24 @@
 ## 6. Change control
 
 This branch change does not merge D/F/G/H/I work, freeze wire/schema contracts, select a concrete database product, define I retention durations, declare physical erasure, or claim production tests passed. Any D/I/H schema mismatch must be reconciled by the owning module before contract freeze.
+
+
+## 7. Additional branch-aware source review (correction to §1)
+
+D branch `session-d-memory-brain-2026-11-16` was read for:
+- `03-memory-brain/canonical-memory-store.md`;
+- `03-memory-brain/memory-versioning.md`;
+- `03-memory-brain/memory-lifecycle-manager.md`;
+- `03-memory-brain/memory-brain-overview.md`;
+- `reviews/03-memory-brain/three-party-six-dimension-review.md`.
+
+D candidate findings consumed by E:
+- CanonicalCommit carries operation/idempotency/request digest, expected/resulting version and commit_sequence; D proposes a monotonic canonical sequence, but sequence scope remains OPEN.
+- LifecycleEvent sequence is per Memory aggregate and is not a global canonical commit cursor.
+- ForgetOperation includes target inventory, policy/auth references, suppression time, dependency snapshot/watermark, per-target progress, exceptions and completion proof reference.
+- D requires suppression before asynchronous cleanup and late-arriving derivatives to be recorded for follow-up cleanup; a producer-registration barrier and atomic pre-publication gate are not closed in the inspected D candidate. D-REV-P1-003 remains OPEN.
+- E's contracts intentionally require D/I/Storage to close this race and fail closed until the authoritative gate exists.
+
+H and I branch search returned no matching branches. Their contracts remain **OPEN**, as the Phase 3 Task Pack baseline states. The B Fact/Claim ADR is still not verified as approved; Phase 2 and D's review continue to mark INT-P0-01 ADR-BLOCKED. No E mapping was added.
+
+The E five-file inventory and E self-review remain only partially verified: three E design files were located and read; the GitHub connector did not expose a directory listing or resolve the other two design paths/self-review in this pass. The three located files were updated with the new ingress/Forget constraints. This limitation blocks a claim of complete five-file/self-review review and is recorded as an explicit OPEN review item.
