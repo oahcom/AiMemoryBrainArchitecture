@@ -176,3 +176,62 @@ Storage readiness blob `5da030123e76e523f681d1262b8a31483df0e6b3` explicitly aut
 - Gate C implementation fault-injection: DEFERRED_TO_ENGINEERING_PHASE.
 - JF-10 P0: OPEN; production activation NOT AUTHORIZED.
 
+
+
+## 10. Phase 3.6.3 superseding protocol specification — updated review
+
+Storage has superseded the preliminary `phase-3.6-coc-durable-log-and-recovery-protocol-storage-design.md` with:
+- Path: `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`
+- Blob: `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`
+- Current Storage branch at latest read: `fe7debe55da71e655eecfc46f25ec49eae43404a`
+- Status: ARCHITECTURE PROTOCOL SPECIFICATION — PROPOSED FOR EXACT OWNER REVIEW; NOT IMPLEMENTED.
+
+The newer specification materially improves the design and closes several earlier review findings:
+- Adds a normative Raft crash-fault model, durable quorum ACK boundary, linearizable ReadIndex, old-leader fencing and joint-consensus voter membership changes.
+- Adds `VoterConfigurationEpoch` to the immutable record envelope and checkpoint manifest.
+- Defines `COCCommitReceipt` with cluster/domain/term/index/config epoch/entry digest/previous digest/operation/request digest/leader identity and quorum proof; a leader signature alone is insufficient.
+- Adds complete I/D request sets, owner completeness attestations, participant-set digest and owner high-water marks to `RECOVERY_CUTOFF_BATCH`.
+- Adds `RecoveryReconciliationReceipt` binding checkpoint/prefix, batch, I/D request sets, participant set, owner lookups, voter config epoch and reconciliation result.
+- Adds an explicit crash-fault model and scopes RPO 0 to quorum-acknowledged entries under the three-voter/two-quorum profile.
+- Separates COC/I/D/Storage/C proof namespaces and explicitly defers production runtime binding to the engineering phase.
+- Adds a Gate B architecture conformance plan and exact phase boundaries.
+
+### 10.1 Residual protocol gaps after Phase 3.6.3
+
+The new specification is materially stronger, but it is not yet ready for exact Owner acceptance:
+
+| ID | Residual | Why it remains open | Required amendment |
+|---|---|---|---|
+| COC-REV-002 | No explicit quorum-committed recovery-epoch completion record | Record table includes `RECOVERY_CUTOFF_BATCH` and `RESTORE_RECONCILIATION_RECORDED`; the signed `RecoveryReconciliationReceipt` is not clearly a committed log record. No `RECOVERY_EPOCH_COMPLETED` or equivalent is defined. | Add a durable completion record or explicitly define which committed record is the completion point; bind final batch digest, complete participant manifest, I/D high-water proofs, owner acknowledgements and unresolved=0. |
+| COC-REV-003 | COC record names are not mapped exactly to H's normative BMCP message/schema names | Storage uses `I_AUTHORIZATION_TERMINAL_RECORDED` and `RESTORE_RECONCILIATION_RECORDED`; A/H bridge names include `I_JF10_TERMINAL_DECISION_OBSERVED` and `JF10_BRIDGE_RECONCILIATION_RECORDED`. | Publish a field-by-field RecordType ↔ BMCP message/schema mapping, including requiredness, signer, canonicalization, idempotency and version aliases. |
+| COC-REV-005 | Recovery requests arriving after the batch snapshot are not fully modeled | §6.2 commits one batch and then reconciles; it does not define a repeated-batch loop or sub-epoch if a new I/D local pending request arrives during reconciliation. | Keep that owner's gate closed; append a subsequent batch with new high-water/request-set digest; reopen only after a stable final high-water and completion record. |
+| COC-REV-006 | Domain registry authority is still unnamed | `ResolveDomain` and `DOMAIN_BINDING_VERIFIED` require an authoritative registry but do not name its owner or change/revocation authority. | Bind `CausalOrderDomainRef` to I-owned `PolicyDomainRef` registry/version; define who may create/change/revoke and stale mapping failure behavior. |
+| COC-REV-008 | External anti-rollback anchor owner/failure domain is still unspecified | Checkpoint binds an external monotonic anchor, but does not identify its independent authority, physical failure domain, update quorum and retention. | Assign anchor custody, independent failure domain, append/retention/verification, key ownership and missing/stale-anchor behavior (RESTORE_FENCED). |
+| COC-REV-007 | Applied package companion pin mismatch remains | A package 4961 pins fc3 while current A COC architecture is a3c51; G's exact Applied decision remains on 4961+fc3. | Resolve under UMR-024 before any package/contract freeze. |
+
+COC-REV-001 is **substantially addressed**: §6.1/§6.2 now suspends new I receipt issuance/consumption and new protected actions during COC outage, and says an earlier COMMIT_WON remains pending until C/Storage terminal evidence. Add one explicit sentence that this means an I decision durably committed before COC loss; no new I terminal decision may be created during the outage.
+
+COC-REV-004 is **addressed at the design level**: the recovery batch includes the complete participant-set digest. Exact manifest retrieval, deterministic ordering and verifier conformance remain Gate B tests.
+
+### 10.2 Owner review scope
+
+The new document's own required-review list names A/I/D/C/E/H/Storage. Because the specification uses typed PolicyDomain/Actor/Scope references and the recovery receipt is a prerequisite for G Full Applied/current-use suppression, add:
+- B for domain-reference type/identity semantics;
+- G for Full Applied, current-use suppression and recovery-batch evidence consumption.
+
+Each Owner must accept/reject the exact Phase 3.6.3 Blob on its own branch. The prior acceptance of A COC architecture Blob a3c51 is not acceptance of this new Storage protocol Blob 4ac63.
+
+### 10.3 Gate state
+
+The new specification itself states:
+- Gate B: proposed protocol design; exact A/I/D/C/E/H/Storage review pending; not passed.
+- Gate C: implementation and distributed fault-injection after executable participants exist.
+- Implementation binding: DEFERRED_TO_ENGINEERING_PHASE.
+
+Storage readiness §23.1/§23.4 now correctly says Gate B specification is published and exact Owner review is pending. However later §29 still says Gate B is blocked until Gate A and COC deployment evidence. That contradicts the design-phase sequencing and must be reconciled to distinguish design review from implementation/deployment.
+
+### 10.4 Updated verdict
+
+**ACCEPT AS A STRONG GATE B ARCHITECTURE SPECIFICATION CANDIDATE; EXACT OWNER REVIEW AND RESIDUAL AMENDMENTS OPEN.**
+
+The new spec closes the broad topology/quorum/commit-proof/participant-manifest/fault-model gaps. It does not yet close the recovery completion record, repeated cutoff batches, exact H schema mapping, domain registry authority, external anti-rollback anchor custody or Applied companion pin drift. No COC implementation, production deployment or Gate C pass is claimed.
