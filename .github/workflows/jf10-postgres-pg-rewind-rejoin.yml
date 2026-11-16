@@ -109,7 +109,7 @@ jobs:
           docker kill --signal=KILL jf10-primary
           test "$(docker inspect -f '{{.State.Running}}' jf10-primary)" = "false"
           echo "OLD_PRIMARY_HARD_FENCED=PASS"
-          docker exec -u postgres jf10-standby pg_ctl -D /var/lib/postgresql/18/docker promote
+          docker exec -u postgres jf10-standby /usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker promote
           for i in $(seq 1 90); do
             if [ "$(docker exec jf10-standby psql -U postgres -At -c 'SELECT NOT pg_is_in_recovery()')" = "t" ]; then break; fi
             sleep 1
@@ -120,12 +120,12 @@ jobs:
           docker run --rm --network none --user postgres \
             -v jf10-primary-data:/var/lib/postgresql \
             --entrypoint bash "$PG_IMAGE" -lc \
-            "pg_ctl -D /var/lib/postgresql/18/docker -o \"-c listen_addresses='' -c port=5544\" -w start && pg_ctl -D /var/lib/postgresql/18/docker -m fast -w stop"
+            "/usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -o \"-c listen_addresses='' -c port=5544\" -w start && /usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -m fast -w stop"
           echo "OLD_PRIMARY_OFFLINE_CRASH_RECOVERY=PASS"
           docker run --rm --user postgres --network jf10-rejoin-net \
             -v jf10-primary-data:/var/lib/postgresql \
             --entrypoint bash "$PG_IMAGE" -lc \
-            "pg_rewind --target-pgdata=/var/lib/postgresql/18/docker --source-server='host=jf10-standby port=5432 user=postgres dbname=postgres' --write-recovery-conf"
+            "/usr/lib/postgresql/18/bin/pg_rewind --target-pgdata=/var/lib/postgresql/18/docker --source-server='host=jf10-standby port=5432 user=postgres dbname=postgres' --write-recovery-conf"
           echo "PG_REWIND_TO_PROMOTED_TIMELINE=PASS"
           docker run -d --name jf10-rejoined-old-primary --network jf10-rejoin-net \
             -e POSTGRES_PASSWORD=jf10-ha-ci-only \
