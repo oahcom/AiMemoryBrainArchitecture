@@ -389,10 +389,10 @@ G recorded **APPROVE WITH ENUMERATED EXCEPTIONS** for G-owned ContextVersion, De
 | C | APPROVE WITH ENUMERATED EXCEPTIONS — recorded above | No further C semantic change unless package version changes |
 | G | APPROVE WITH ENUMERATED EXCEPTIONS — recorded above | No further G semantic change unless package version changes |
 | F | Runtime architecture decision recorded | F execution evidence later |
-| H | **PENDING / NOT APPROVED** in the inspected owner record | H must explicitly accept the exact package Blob SHA or enumerate exceptions/replacement and repin common version |
+| H | **APPROVE WITH ENUMERATED EXCEPTIONS** — H-owned protocol binding only; exact wire schema remains open | H must explicitly accept the exact package Blob SHA or enumerate exceptions/replacement and repin common version |
 | I | Predicate confirmation pending; I policy remains CANDIDATE / GOVERNANCE-BLOCKED | Approve PermissionEpoch/authorization mapping and governance version under I authority |
 | D | Predicate confirmation pending; D canonical semantics decided but cross-owner execution open | Confirm ForgetFence/lineage ordering for exact Applied submit boundary |
-| B | Typed reference confirmation pending; related governance/ADR scope remains independent | Confirm ActorRef/ScopeRef/EnvironmentRef bindings without reopening unrelated ADRs |
+| B | **APPROVE WITH ENUMERATED EXCEPTIONS** — B semantic reference mapping only; I registry/trust policy remains open | Confirm ActorRef/ScopeRef/EnvironmentRef bindings without reopening unrelated ADRs |
 
 C/G approval is intentionally not represented as C/G/H joint acceptance. A's approval ledger remains A-owned and must be reconciled by A.
 
@@ -401,7 +401,7 @@ C/G approval is intentionally not represented as C/G/H joint acceptance. A's app
 1. **H same-version acceptance:** no H approval of A package Blob SHA `61d961c32138fd875069e8cbac4696bb031447c0` is recorded. H must approve or enumerate exceptions. Until then Applied Contract Frozen = NO.
 2. **H concrete wire contract:** exact schema IDs, field encoding, ACK enums, signatures/MAC/key lifecycle, canonicalization, replay nonce/sequence, durable journal, receiver ordering, capability epoch and reconnect semantics require H-owned versioned schema and approval.
 3. **I authorization governance:** PermissionEpoch policy domain/fan-out, issuer trust, delegation, revocation freshness, cross-Scope/Environment grants, exception authority and global Forget inventory/seal remain I-owned and not fully approved.
-4. **D Forget ordering:** D must supply current fence/lineage evidence and the authoritative causal ordering proof used at the final submit boundary. A fence token cannot be inferred from a watermark.
+4. **D Forget ordering:** D has confirmed its fence/lineage semantics for the exact package: submit-before-fence may remain historical only; fence-before-submit rejects Full; ambiguous order is Unknown/suppressed. Executable causal ordering and D/E/Storage proof remain open. A fence token cannot be inferred from a watermark.
 5. **B typed identity:** ActorRef/ScopeRef/EnvironmentRef and scope hierarchy remain B-owned. Fact/Claim ADR status is not changed by this CFG work.
 6. **D/E/Storage publication realization:** durable producer/dependency registration, Forget barrier, final visibility gate, crash/failover/restore and callable API remain design-level/open to the DE-S owners. A staged G ChangeSet remains private without that proof.
 7. **Executable implementation:** no executable C/F/G/H Adapter/provider/database environment, deterministic race runner, deployment identity or reproducible logs were supplied.
@@ -414,7 +414,7 @@ C/G approval is intentionally not represented as C/G/H joint acceptance. A's app
 - C package decision: **APPROVE WITH ENUMERATED EXCEPTIONS**.
 - G package decision: **APPROVE WITH ENUMERATED EXCEPTIONS**.
 - F runtime integration: **DECIDED at architecture level**.
-- C/G/H same-version acceptance: **PARTIAL — H PENDING**.
+- C/G/H same-version semantic acceptance: **RECORDED WITH ENUMERATED EXCEPTIONS** (C, G and H decisions pinned to the same A package SHA); exact H wire schema and I/D authority predicates remain open.
 - Applied Contract Freeze: **NO**.
 - Runtime Forget end-to-end closure: **NO**.
 - CFG-01..20: **SPECIFIED / NOT RUN**.
@@ -422,4 +422,40 @@ C/G approval is intentionally not represented as C/G/H joint acceptance. A's app
 - Implementation verified: **NO**.
 - Global Forget complete / physical erasure: **NOT CLAIMED**.
 
-The next valid closure step is H's explicit decision on the pinned A package, followed by I/D/B predicate confirmations, A's approval-ledger reconciliation, and executable cross-owner conformance. No architecture statement in this report substitutes for those decisions or evidence.
+H and B have now recorded explicit decisions with enumerated exceptions against the pinned A package; D has confirmed its fence semantics; I has explicitly withheld approval pending governance. The next valid closure step is to resolve I governance and exact H wire schema, then obtain D/E/Storage executable linearization evidence and run cross-owner conformance. No architecture statement in this report substitutes for those decisions or evidence.
+
+
+## 17. Phase 3.6.2 — Owner decision reconciliation (2026-11-16)
+
+All decisions below reference the same A package Blob SHA `61d961c32138fd875069e8cbac4696bb031447c0`. These are owner-artifact decisions, not independent governance signatures.
+
+| Owner | Updated owner artifact blob | Decision on the pinned package | Exact limit |
+|---|---|---|---|
+| C | `45cab0f9c538fa653ac9e3ca8ddba3dee1b8383b` | APPROVE WITH ENUMERATED EXCEPTIONS | C final-submit semantics only |
+| G | `6513932991fdbe13231b26e43440fc2c4fcbf7fa` | APPROVE WITH ENUMERATED EXCEPTIONS | G Context/Delivery/Applied semantics only |
+| H | `afe74345936e29c3d9cd4fb8b4ec0e665446d435` | APPROVE WITH ENUMERATED EXCEPTIONS | H protocol binding; concrete wire schema remains open |
+| B | `08af297cb010f7e6ac5e3f29daa4469be112e12e` | APPROVE WITH ENUMERATED EXCEPTIONS | Typed-reference semantics only; I policy remains open |
+| D | `f4447ae1c3db9bbe9a3e93f2079423e8631c690f` | APPROVE D-OWNED FENCE/LINEAGE SEMANTICS WITH AUTHORITY RESERVATIONS | Causal runtime proof and D/E/Storage realization remain open |
+| I | `17bbfcbe8f001c4ae1200cf1930ccc80059d7f9c` | CANDIDATE / NO APPROVAL | Governance, issuer trust, PermissionEpoch operational policy and global Forget policy blocked |
+
+C/G/H have all made explicit decisions on the same exact A package version. This is **not** Applied Contract Freeze: H's concrete versioned wire package is not frozen, and I's required authorization approval is withheld. D's semantic confirmation does not replace executable serialization proof.
+
+### 17.1 Updated closure state
+
+- C/G/H same-version semantic decisions: **RECORDED WITH ENUMERATED EXCEPTIONS**.
+- B typed-reference semantic confirmation: **RECORDED WITH ENUMERATED EXCEPTIONS**.
+- D fence/lineage predicate confirmation: **RECORDED; EXECUTABLE ORDERING NOT VERIFIED**.
+- I PermissionEpoch / authorization predicate: **BLOCKED — NO APPROVAL**.
+- H concrete versioned Applied/ACK wire schema: **OPEN — NOT FROZEN**.
+- Applied Contract Frozen: **NO**.
+- Runtime Forget end-to-end closure: **NO**.
+- CFG-01..20 / PI-01..08 / H36 / I36 / D36 / DE-S fault-race suites: **SPECIFIED / NOT RUN** unless separate raw execution artifacts are attached.
+- Implementation verified: **NO**.
+- Global Forget completion / physical erasure: **NOT CLAIMED**.
+
+### 17.2 Exact owner artifact references
+
+- H: `08-bmcp-protocol/phase-3.6-bih-joint-architecture-acceptance-addendum.md`, blob `afe74345936e29c3d9cd4fb8b4ec0e665446d435`.
+- B: `02-domain-model/typed-reference-registry.md`, blob `08af297cb010f7e6ac5e3f29daa4469be112e12e`.
+- I: `09-security-governance/phase-3.6-principal-trust-chain-authorization-revocation.md`, blob `17bbfcbe8f001c4ae1200cf1930ccc80059d7f9c`.
+- D: `03-memory-brain/forget-fence-operation-and-publication-gate.md`, blob `f4447ae1c3db9bbe9a3e93f2079423e8631c690f`.
