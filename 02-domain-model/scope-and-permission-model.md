@@ -179,3 +179,64 @@ Acceptance:
 - BMCP/Adapter defines authenticated actor and scope claims; Agent labels are not trusted identity.
 - Compiler attaches source/environment scopes to Event/Evidence/Claim proposals.
 - Runtime/MCM enforces scope filtering before activation and context delivery.
+
+
+## 15. Phase 3.5 typed ScopeRef contract
+
+**DECIDED semantic distinction:** `ScopeRef` is a typed reference to a domain boundary; it is neither a Principal identity nor a Permission/Grant/PolicyDecision. A valid ScopeRef establishes which ownership/applicability namespace is being discussed. It does not establish that the caller may read, write, share, export, activate or deliver anything in that namespace.
+
+### 15.1 Logical reference components
+
+A ScopeRef MUST resolve to the following semantic components (wire encoding remains H-owned and OPEN):
+
+- registered reference discriminator: `ScopeRef`;
+- authoritative Scope registry / issuer reference;
+- tenant or security-domain namespace;
+- opaque `scope_id`;
+- registered `scope_kind`;
+- optional exact Scope version/reference;
+- optional owner PrincipalRef or parent ScopeRef;
+- lifecycle status and registry version.
+
+A bare string, display name, tenant label, project name, Agent label, session token or environment name is not a ScopeRef. Unknown or incompatible reference types fail closed.
+
+### 15.2 Ownership Scope vs applicability Scope
+
+Ownership Scope identifies administrative custody and the boundary whose owner/governance controls the asset. Applicability Scope qualifies where a proposition or asset is relevant or valid. They may both be present and MUST retain their roles; a consumer MUST NOT flatten them into an untyped `scope_id` or assume one substitutes for the other.
+
+A multi-Scope object carries an explicit typed set of references and roles. Set membership is not an access-control union. Each required Scope is resolved and checked under the applicable policy.
+
+### 15.3 Cross-Scope references
+
+- Cross-Scope links are domain relationships, not grants.
+- A reference from Scope A to an object in Scope B does not make B visible in A.
+- Parent/child, sibling, same-user, same-Agent and shared-project relationships do not imply inherited access.
+- Explicit sharing must be authorized by I/Governance with recipient, operations, purpose, audience, validity, revocation and audit. It does not rewrite object ownership.
+- Endpoint visibility, Evidence access and Provenance access are checked independently at dereference time.
+- Ambiguous, unresolved or closed/revoked Scope references may be retained for historical explanation but cannot authorize ordinary operations.
+
+### 15.4 Cross-Environment references
+
+EnvironmentRef identifies an authoritative environment identity; Environment ScopeRef identifies its domain boundary. The two are related but not interchangeable. Environment version/revision is a separate typed version reference.
+
+Environment-dependent Events, Claims, Memories and Relations MUST carry a resolved Environment Scope binding. Same Agent, same text, same coordinates or same environment display label does not establish equivalence across worlds/saves/simulations.
+
+Cross-Environment references are denied by default. A permitted bridge requires an authoritative mapping that names source and target EnvironmentRefs, mapping purpose, allowed relation, provenance, validity and I authorization. No implicit conversion or cross-environment join is permitted.
+
+### 15.5 Delegation and permission
+
+Delegation changes the bounded authority under which a Principal may act; it does not change Scope identity, transfer ownership or turn a ScopeRef into a Permission. A delegation chain must be issuer-trusted, signed/validated, audience/action/resource/Scope/purpose/time constrained, revocable and cycle/depth bounded. Effective authority is the intersection of grantor authority and every delegation link. Missing, expired, revoked or indeterminate delegation fails closed.
+
+The authorization result remains I-owned and is bound to the authenticated Principal, ActorRef, action, resource, Scope binding, audience, purpose, policy version and PermissionEpoch. PermissionEpoch is not a ScopeRef, object version, ForgetFenceGeneration or cursor.
+
+### 15.6 Validation sequence
+
+1. H authenticates transport/session/workload and binds the verified Principal.
+2. Resolve ScopeRef and EnvironmentRef from authoritative registries; never trust payload display strings.
+3. Validate issuer, namespace, kind, existence, lifecycle status, parent/owner and domain compatibility.
+4. Validate cross-Scope/Environment relationship and any explicit bridge.
+5. Validate delegation and current revocation state.
+6. I evaluates current Permission for the exact operation/resource/purpose/audience.
+7. Recheck permission epoch and relevant Forget fence at the final commit/disclosure linearization point.
+
+Domain compatibility is not authorization. A semantically valid cross-Scope reference can still be denied. No subsystem may treat an ActorRef, AgentRef, ProducerRef, AdapterRef or EnvironmentRef as a substitute for ScopeRef or Permission.
