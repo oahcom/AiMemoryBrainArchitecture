@@ -206,3 +206,14 @@ A/B/C baseline; D Canonical Memory and lifecycle contracts; H producer identity 
 - **CANDIDATE:** queue lanes, model routing, deterministic-first thresholds, stage journal.
 - **TO_VALIDATE:** local model-assisted extraction quality/cost on 12–16 GB VRAM; throughput and backlog recovery.
 - **OPEN:** exact retention horizon for ingress idempotency receipts and replay metadata, owned with I.
+
+
+## 19. Phase 3 durable ingress and Forget integration addendum
+
+- The compiler pipeline consumes an E durable Accepted receipt and compile-intent record. Accepted is a custody/durability milestone only; it is not Processed, Compiled, CanonicalCommitted or Indexed. The receipt and idempotency identity survive model outages and transport response loss.
+- Stage results and next-stage intents require an atomic stage-result/outbox boundary or equivalent recoverable journal. Every replay/recompile is a new attempt over the immutable Event identity, reauthorized against current I permission epoch and D Forget fence.
+- Each CompilerWorkItem lease's `authorization_epoch` and `forget_fence_epoch` are opaque owner-issued tokens. E must not mint, numerically compare or substitute these for source Event cursor, D canonical commit cursor, F index watermark or ContextVersion.
+- E registers each in-flight producer/run and every derived dependency before output visibility. D/I's authoritative barrier and publication gate must serialize registration against Forget; local prechecks alone do not close the check-then-publish race.
+- The H BMCP envelope and I Principal/ActorRef contracts are candidate dependencies. H transports owner-defined idempotency namespace/key/digest; I defines authenticated producer binding, security-domain identity, permission epoch and policy.
+- The B Fact/Claim mapping remains ADR-BLOCKED. The CandidateEnvelope and CandidateProposition remain pre-canonical IR.
+- See `accepted-receipt-and-idempotency-contract.md` and `forget-fence-and-derived-registration.md` for detailed CANDIDATE contracts.
