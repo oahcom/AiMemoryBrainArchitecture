@@ -107,3 +107,17 @@ I accepts the exact ParticipantIntent-bound, single-use CommitAuthorizationRecei
 I explicitly accepts the outage-cutoff amendment: if I receives a revocation request while COC is unavailable, I locally suspends affected receipt issuance/consumption and reports UNKNOWN/PENDING. I MUST NOT reopen affected admission until the request cutoff is durably committed to COC and reconciled with the same participant ledger. Coordinator unavailability cannot be treated as proof that no revocation request exists, and no timeout/lease expiry may advance effective revocation past an unresolved participant.
 
 Exceptions: (1) I receipt/sequencer deployment and monotonic crash/failover/restore behavior remain unverified; (2) COC operator and durable participant store remain undesignated; (3) exact H signature/MAC suite, key custody/rotation/compromise and federation require separate I/Security approval; (4) multi-PolicyDomain atomic authorization remains blocked; (5) I36/ I-CO conformance remains NOT RUN. This decision applies only to the exact A Blob above.
+
+## I exact-version acceptance — CGH-APPLIED-1.1 recovery-batch amendment
+
+- A package Blob: `4961ffefc0f9920efb8425a9b2a7af42d8f64819`
+- Companion COC Blob: `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`
+- Profile: `CausalOrderProfile/1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within I's policy-domain sequencer, CommitAuthorizationReceipt, PermissionEpoch and revocation authority.
+
+I accepts durable owner-local suspension of affected receipt issuance/consumption when a revocation request arrives during COC outage. The local pending gate survives restart and is not itself a PermissionEpoch advance or cross-authority ordering fact. I accepts the recovery-cutoff batch containing all owner-known outage requests without deriving I-vs-D order from local timestamps. I must reconcile every affected pre-batch ParticipantIntentRef against its authoritative sequencer state: an unconsumed receipt may terminalize REVOCATION_WON; an earlier COMMIT_WON remains pending behind its exact participant until C's outcome/safe abort is durable. I does not reopen affected admission until batch durability, participant reconciliation and I high-water verification are complete.
+
+I's sequencer remains authoritative for actual authorization terminality and PermissionEpoch. COC batch position cannot mint or replace I terminal evidence.
+
+Exceptions: (1) I sequencer/receipt service and crash/failover/restore durability remain unverified; (2) COC operator/store remain undesignated; (3) this does not approve H crypto/key lifecycle or external I36 governance; (4) I-CO and recovery-batch tests remain NOT RUN; (5) multi-PolicyDomain atomicity remains blocked. This decision applies only to the exact A/COC Blob pair above.
