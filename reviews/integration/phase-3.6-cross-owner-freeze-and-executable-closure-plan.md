@@ -241,8 +241,8 @@ A may update integration findings and this plan. A must not edit owner-owned con
 
 | Finding | Owners | Current state | Closure condition |
 |---|---|---|---|
-| Applied evidence/wire/capability agreement | C/G/H + D/I | BLOCKED / NOT FROZEN | Same versioned contract explicitly approved by C, G, H; D/I predicate confirmed |
-| Typed identity and Scope/Environment mapping | B/I/H | BLOCKED / NOT FROZEN | Canonical mapping and negative cases explicitly approved |
+| Applied evidence/wire/capability agreement | C/G/H + D/I/B | SEMANTIC DECISIONS RECORDED WITH EXCEPTIONS; NOT FROZEN | H versioned wire package; I governance approval; D executable ordering proof |
+| Typed identity and Scope/Environment mapping | B/I/H | B SEMANTICS ACCEPTED WITH EXCEPTIONS; I POLICY BLOCKED | I trust/registry approval, Scope/Environment grant governance and negative tests |
 | Physical Forget linearization and visibility | D/E/Storage | LOGICAL DECISION MADE; IMPLEMENTATION NOT VERIFIED | Concrete transaction authority, executable implementation and fault proof |
 | Runtime retrieval/context invalidation | C/F/G/H + D/I | SPECIFIED; TEST NOT RUN | Executed deterministic races and owner-reviewed evidence |
 | Prompt injection and provenance safety | B/C/F/G/I | SPECIFIED; TEST NOT RUN | PI-01..08 and extended identity/scope cases pass |
@@ -263,10 +263,24 @@ Do not use “closed”, “complete”, “atomic”, “secure”, “fully ap
 
 ## 11. Immediate next actions
 
-1. Refresh C/G/H/B/I/D/E/Storage branch tips and re-read their current Phase 3.6 artifacts.
+1. Refresh C/G/H/B/I/D/E/Storage branch tips and re-read their current Phase 3.6 artifacts; retain exact artifact Blob SHAs.
 2. Publish an owner-specific decision request for the C/G/H mapping package, preserving all current Candidate states until explicit approval.
 3. Publish the B/I/H field-mapping and negative-test request.
 4. Convert the D/E/Storage implementation gap into a deployment/evidence checklist with the Storage engineering owner.
 5. Update the A integration control ledger only from observed branch and test evidence.
 
 **No branch merge is authorized by this plan. No owner approval is implied by its publication.**
+
+
+## 12. Phase 3.6.2 control-plan reconciliation
+
+The C/G/H package decision request has received explicit same-version decisions: C, G and H each recorded APPROVE WITH ENUMERATED EXCEPTIONS against A package Blob SHA `61d961c32138fd875069e8cbac4696bb031447c0`. B separately accepted typed-reference semantics with exceptions; D confirmed D-owned fence/lineage semantics; I explicitly recorded CANDIDATE / NO APPROVAL.
+
+The next closure order is now:
+1. I governance: obtain formal issuer/Principal/delegation and PermissionEpoch policy approval, including the currentness/freshness and revocation effective-point protocol; until then the Applied authorization predicate remains blocked.
+2. H wire: pin the exact versioned Applied/ACK schema, requiredness registry profile, integrity/canonicalization/replay and reconnect/receiver-ordering behavior; then cross-check against the accepted semantic mapping.
+3. D/E/Storage: implement and prove the already-decided registration/fence/dependency/publication linearization with crash/failover/restore race evidence; D semantics alone do not close CR-P1-01.
+4. C/F/G/H and I/D: build deterministic shared fixtures and execute CFG/PI plus H36/I36/D36/DE-S suites with raw reproducible logs and owner review.
+5. A: update the integration control ledger only from exact owner artifact versions and evidence; no branch merge is authorized.
+
+No Owner approval is implied by A's synthesis. No test is passed by specification or static review. Applied Contract Frozen and Runtime Forget End-to-End Closed remain **NO**.
