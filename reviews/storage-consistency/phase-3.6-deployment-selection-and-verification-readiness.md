@@ -647,3 +647,31 @@ The mandatory clarification is that the preallocated cross-service participant i
 This is Storage's exact-version acceptance only. The prior revision Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` had design-level owner acceptance complete with enumerated exceptions; §14 is a material amendment, so A/I/D/C/H (and any affected E/G/B consumers) must perform focused exact-version review of Blob `86ff3b...`. No prior acceptance silently carries forward to the amended Blob. H must approve wire/type encoding; I/Security must approve signer trust/key custody; A must update the integration matrix.
 
 Phase boundary: `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. The project owner confirmed that no production runtime repository is expected during architecture design; its absence is not a Gate A blocker. Gate A remains PARTIAL PASS / OPEN. Gate B prior revision is design-level accepted with exceptions; current amended revision is published / focused exact-owner re-review required / not yet accepted. Gate C implementation and distributed fault injection are deferred to engineering phase. JF-10 P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+
+
+## 27. Storage exact-version review — COC §14 PostgreSQL prepared-participant identity mapping (2026-11-17)
+
+Reviewed exact amended COC protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`, §14, “PostgreSQL prepared-participant identity mapping — Storage clarification”.
+
+**Storage decision: ACCEPT WITH CONDITIONS for the PostgreSQL 18.7 engine mapping and Storage-owned participant semantics.** This is an architecture-level Storage acceptance, not a whole-protocol acceptance by H/I/Security/A and not an implementation or deployment PASS.
+
+### Accepted semantics
+
+1. `PreparedParticipantRef` is the stable engine-neutral cross-service participant identity; PostgreSQL's client-chosen `PreparedTransactionGID` is the stable engine-specific recovery handle.
+2. Storage must allocate and durably bind GID + PublicationOperationId + RequestDigest + participant tuple before the COC prepare-intent record. The COC intent must then durably record that exact GID/binding before PostgreSQL PREPARE is allowed.
+3. PostgreSQL's numeric native XID in `pg_prepared_xacts.transaction` is engine-assigned observation only; it is not client-preallocatable and cannot replace the GID or stable participant identity.
+4. `PreparedParticipantReceipt` must bind the GID and participant tuple to the actual Canonical Authority cluster/database identity, observed native XID, prepare timeline/LSN, COC intent position/digest, state, signer/key version and audience. Native XID/LSN/timeline are evidence fields, not standalone authorization.
+5. GID is immutable for its operation and never reassigned to a different operation. Same-GID/same-tuple retry is lookup/replay; same-GID/different-tuple is CONFLICT.
+6. Absence from `pg_prepared_xacts` is not a terminal outcome. Storage must reconcile the durable participant outcome/idempotency ledger with authoritative database readback; any gap/disagreement/unavailability remains UNKNOWN/IN_DOUBT.
+7. After I's durable terminal decision, Storage resolves the same GID and returns a `StorageResolutionProof`. COMMIT binds the exact pointer/receipt atomic transaction and digest; ROLLBACK proves authoritative non-publication. Recovery timeline/LSN context does not replace original prepare identity.
+
+### Conditions / exact-owner dependencies
+
+- H must approve exact engine-neutral field names, schema, canonical serialization and wire encoding; this review does not approve a wire format.
+- I/Security must approve signer trust, audience, key custody/rotation/revocation and the receipt's authorization meaning. Storage does not mint I's COMMIT/ABORT authority.
+- COC/A must confirm the prepare-intent API persists the exact GID and immutable participant binding before Storage PREPARE, and the participant registry uses the stable PreparedParticipantRef rather than PostgreSQL native XID as identity.
+- The engineering implementation must enforce collision checks, durable GID binding, same-GID retry/terminal resolution and ledger/readback reconciliation. These are not established by the current isolated PITR fixture.
+
+No semantic conflict was found between §14 and Storage's exact-XID PITR/lock-retention evidence. The current probe already uses client-chosen GIDs and resolves those same GIDs after PITR; it does not yet implement the signed receipt or COC/I bridge.
+
+**Disposition:** Storage §14 mapping ACCEPTED WITH CONDITIONS at architecture level. Gate A remains PARTIAL PASS / OPEN pending the remaining exact-owner reviews and I/D decisions. The current amended COC revision remains PUBLISHED / FOCUSED EXACT-OWNER RE-REVIEW PENDING / NOT YET ACCEPTED overall. Gate C remains deferred to engineering-phase integration/fault injection; JF-10 runtime P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
