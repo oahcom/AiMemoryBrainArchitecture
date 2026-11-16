@@ -86,19 +86,21 @@ This is valuable engine capability evidence for the invariant that prepared work
 
 Additional dossier evidence includes a real TCP CommandComplete response-loss probe (run 43913477785), coordinator process-crash/ACK-gap recovery, synchronous standby unavailable fail-closed behavior, and a single-runner Docker old-primary fencing/rewind/rejoin simulation. Each is bounded by the dossier's explicit limitations.
 
-## 5. Production implementation stop condition
+## 5. Architecture-phase acceptance boundary — implementation binding deferred
 
-The Storage dossier's recursive tree audit explicitly reports no production runtime source tree, service executable, Canonical Authority DB adapter, migration package or application deployment manifest in the inspected repository branch. The repository README on main also describes the repository as architecture definition with implementation not started by design.
+Storage's current readiness record explicitly clarifies that the project is in architecture-design phase and has no production runtime/adapter by design. Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. The absence of production code in this repository remains a bounded inventory fact, but it is **not a Gate A architecture blocker** and must not be used to prevent Gate B design work.
 
-This is the decisive remaining gap. Before Gate A can close, the accountable Owner must:
-1. identify the canonical implementation repository and branch, or explicitly designate this repository as the implementation home;
-2. pin the runtime entrypoint, DB adapter, schema/migration path and build SHA;
-3. trace the actual authoritative write/read path for prepared XID, D/lineage locks, VisibilityPointer, PublicationReceipt, owner outcome, receipt consumption and outbox;
-4. map I sequencer/COC durable decision and D fence ordering to the actual implementation;
-5. run the production-equivalent crash, ACK-loss, failover, PITR, WAL-negative and restore campaign against that exact path;
-6. bind real infrastructure fencing/STONITH, split-brain prevention, archive retention/immutability, human operator, runbook, RPO/RTO and deployment profile.
+Gate A architecture closure must instead specify:
+1. engine/version/profile rationale and unresolved DB product decision;
+2. isolation, D fence/lineage lock scope and linearization point;
+3. prepared-XID durability, lock retention, same-XID resolution and in-doubt handling;
+4. atomic VisibilityPointer + PublicationReceipt + owner outcome + receipt-consumption + outbox boundary;
+5. authoritative read path and stale replica/cache exclusion;
+6. PITR/WAL prefix continuity, missing/corrupt/incomplete archive fail-closed restore and control-ledger reconciliation;
+7. HA/fencing/rejoin, failure-domain and topology constraints;
+8. future engineering/operations acceptance criteria, including named operator, runbook, RPO/RTO and deployment profile.
 
-Until this exists, the CI fixtures cannot be promoted to production conformance.
+Implementation binding, actual runtime/DB adapter, production fencing, operator/runbook and RPO/RTO are engineering/deployment-phase gates. They remain future acceptance requirements, not prerequisites for architecture Gate A closure.
 
 ## 6. Database decision implication: SQLite versus PostgreSQL
 
@@ -215,11 +217,12 @@ Thus the earlier seven-workflow success batch remains valid for its exact older 
 Storage corrected the corrupt-WAL diagnostic assertion to recognize PostgreSQL's actual `invalid magic number` diagnostic while retaining exact target-segment matching and mandatory no-writable/no-authoritative checks. The enhanced probe now completes the missing, corrupt and incomplete cases.
 
 Exact current evidence:
-- Current Storage branch HEAD: `e6e578766b081b6d450d6af7fc4d6d673f8afd53`.
-- Current dossier blob: `3d1c66e61334764013ddd253f18c07b52714fc77`.
-- Current PITR probe blob: `9d2a85f9a5d53f91df247a310c38377e563d259d`.
-- Tested commit: `2d476dd32ac020d329e8290ee2aaaa1f0c057c92`.
-- Current branch is three commits ahead of tested commit; compare shows only `phase-3.6-coc-storage-boundary-acceptance.md`, `phase-3.6-deployment-selection-and-verification-readiness.md`, and the dossier changed. The PITR probe blob is identical at test commit and current branch.
+- Current Storage branch HEAD: `9f784a15ef33a6cde4b4cda1ab6fca2df8a705fa`.
+- Current dossier blob: `a3b69a832c6ac84dc59b0d41d5746884c217a8b3`.
+- Current readiness blob: `5da030123e76e523f681d1262b8a31483df0e6b3`.
+- Current PITR probe blob: `63506807be82b3203e7e682b0772452621c92558`; workflow blob: `a055d311c324d09eb6ebf4054247761116795eb7`.
+- Current prepared-XID probe blob: `184e0507fd225ee18f321f3f1ce6a63f869b13f3`; capability workflow blob: `fbcbce...`.
+- Current branch is five commits ahead of the six-workflow test commit `83bdacbafa840808dca9be7a8c76c4df83c63504`; compare shows only readiness and dossier documents changed. Both probe blobs remain identical to the tested revisions.
 - PITR run: `43957910909`, job `133617253176`, SUCCESS.
 - Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43957910909
 
@@ -246,3 +249,19 @@ The six other workflows on the same tested commit also completed SUCCESS:
 - Old-primary rewind/rejoin: run `43957911036`.
 
 Thus the current enhanced probe revision and all six supporting workflows have a 7/7 CI PASS batch. This closes the test-harness defect recorded in §10 / UMR-018 for the pinned PostgreSQL 18.7 CI profile. It does **not** close Gate A overall: the production Canonical Authority runtime/adapter is still NOT IDENTIFIED in the inspected repository, production I/D ledger integration and COC quorum deployment are unverified, and real infrastructure fencing, operator/runbook, RPO/RTO and production operational acceptance remain open. Gate A PARTIAL PASS / OPEN; Gate B BLOCKED; Gate C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+## 12. Project phase and Gate B sequencing correction
+
+The current Storage readiness blob `5da030123e76e523f681d1262b8a31483df0e6b3` clarifies:
+- `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; no production code repository/runtime is expected during architecture design.
+- Gate A remains PARTIAL PASS / OPEN for remaining storage architecture specifications and cross-owner decisions.
+- Gate B COC persistence/quorum log/participant registry/recovery-cutoff design is authorized to proceed now in parallel with Gate A closure.
+- Gate B design acceptance remains pending; this is not implementation PASS.
+- Gate C implementation fault-injection is deferred until an implementation exists.
+- JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
+
+The same readiness document still contains stale statements later in the file that Gate B/C remain BLOCKED after it authorizes Gate B design. The correct state vector is: **Gate B design activity AUTHORIZED / Gate B design acceptance OPEN / Gate B implementation NOT RUN / Gate C implementation tests DEFERRED**.
+
+A detailed review of the newly published Storage COC design is in `00-governance/reviews/storage-coc-durable-log-recovery-design-review.md`. It is a strong candidate with blocking amendments; it does not yet close Gate B.
+
