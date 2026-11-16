@@ -270,3 +270,33 @@ This addendum supersedes the earlier DE-S JF-10 description above where it says 
 - BIH: D/E/H/Storage design-level consumer acceptance exists; C/F/G consumer acceptance remains open; I36-GOV-01..10 remain GOVERNANCE-BLOCKED; I36/H36 remain NOT RUN; ADR-001 remains independently ADR-BLOCKED.
 - CFG: C/F/G semantics remain delivered; no single version-pinned C/G/H Applied contract with explicit same-version approvals; D/I/B predicate confirmations and integrated CFG-01..20 / PI-01..08 execution remain open.
 - Overall G10 and architecture freeze remain BLOCKED / NOT AUTHORIZED.
+
+
+## Runtime implementation repository discovery — 2026-11-16
+
+### Evidence inspected
+
+- Read `README.md` from `main`, Blob `dfb5bf8a91f4a3ba29b14d623fbd2083f0273508`.
+- The repository self-identifies as **Architecture definition** and explicitly states **Implementation status: Not started by design**.
+- Its stated documentation map is architecture specifications, protocols, governance, testing/acceptance and engineering decisions. Root checks for common runtime/build entry points (`Cargo.toml`, `package.json`, `pyproject.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Makefile`, `docker-compose.yml`) found none.
+- Default-branch code searches for JF-10 runtime symbols (`prepared XID`, `PublicationOperationId`, `VisibilityPointer`, `ForgetOperationId`, `CanonicalSuppressionComplete`) returned no matching implementation files. These searches are supporting evidence only; they do not prove no separate implementation repository exists.
+
+### A-level consequence
+
+G3 is not merely awaiting a missing test suite inside this repository. The architecture repository intentionally does not contain runtime implementation. Therefore:
+
+1. Do not create placeholder/mock runtime code here and label it implementation.
+2. Do not change G3 from BLOCKED or claim a test can run against production-equivalent behavior.
+3. A must identify the designated runtime implementation repository (or formally authorize a separate implementation repository), its canonical branch, accountable engineering owner, build/release pipeline and source-to-architecture traceability.
+4. The implementation repository must then map D/E/I/Storage contracts and H01–H13 to actual modules, code hooks, database migrations, coordinator APIs and recovery workers.
+5. Only after that mapping may the implementation owners select/prototype the DB/coordinator profile and execute the deterministic conformance plan.
+
+### New blocking dependency for G3
+
+**G3-IMPL-REPO-01 — Runtime implementation repository and accountable engineering owner not identified in the reviewed architecture repository.**
+
+Required closure evidence: repository URL and branch; owner/maintainer; build and CI entry points; deployed service topology; architecture-contract traceability map; test environment and reproducible command. Until supplied by the project authority, this is OPEN/BLOCKING. This is not a finding that no implementation exists anywhere; it is a finding that the reviewed architecture repository does not identify or host it.
+
+### Next action assigned to A
+
+A must obtain/record the authoritative implementation repository and accountable engineering owner from project governance, while continuing BIH governance/consumer and CFG Applied closure in parallel. DE-S must not unilaterally choose an implementation repository or claim deployment ownership.
