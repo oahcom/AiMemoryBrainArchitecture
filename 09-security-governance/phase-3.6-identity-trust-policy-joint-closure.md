@@ -23,7 +23,7 @@ Every stage produces verifier/authority-owned evidence. A later stage MUST NOT r
 | Delegation Validation | I Delegation Registry/policy | Grant chain, grantor/delegate, issuer, actions, resource, Scope, audience, purpose, nbf/exp, parent links and revocation | Immutable validated DelegationChainRef and authority intersection | Missing/expired/revoked/invalid signature/cycle/depth overflow/audience or Scope mismatch/amplification: deny |
 | ActorRef Resolution | B defines type; H supplies authenticated binding; I validates assertions | Authenticated Principal, validated delegation, Agent/Adapter/Producer binding, operation correlation | Verifier-resolved ActorRef bound to Principal, operation and chain | Payload-only/caller-constructed ActorRef, mismatch or missing binding: reject and audit |
 | Scope Authorization | I policy; B owns ScopeRef semantics | Principal, ActorRef, ScopeRef roles, EnvironmentRef, Action, Resource, purpose, audience, delegation | ALLOW/DENY/INDETERMINATE, obligations, policy version and exact scope coverage | Unknown/missing required Scope/Environment, implicit inheritance or unapproved cross-boundary request: deny |
-| PermissionEpoch Validation | I sole logical authority; each consumer validates with I or approved bounded lease | Current policy-domain epoch, decision epoch, revocation continuity, decision expiry and subject/resource binding | Current authorization proof bound to policy domain, epoch and validity | Stale/gapped/unknown epoch, expired decision, revocation uncertainty or unapproved offline lease: pause/deny |
+| PermissionEpoch Validation | I sole logical authority; each consumer validates with I or approved bounded lease | Current policy-domain epoch, linearizable revocation position, single-use CommitAuthorizationReceipt and subject/resource binding | Current authorization proof plus single-use receipt atomically ordered with owner commit and revocation | Stale/gapped/unknown epoch, expired decision, revocation uncertainty or unapproved offline lease: pause/deny |
 | Protected Operation | Owning boundary: C/D/E/F/G/H; I supplies policy | All verifier evidence + exact action/resource + final-boundary epoch and owner-local fence/version | Operation receipt and audit decision | Missing proof, epoch change before linearization, stale fence or ambiguous outcome: abort/quarantine; never report success |
 
 Audit record: correlation/operation ID, stage, verifier/owner, opaque typed refs or approved non-reversible fingerprints, issuer/key/trust-registry version, decision/reason, policy domain/epoch, timestamp/clock quality and integrity metadata. Never log credentials, bearer tokens, private keys or protected plaintext.
@@ -115,7 +115,7 @@ Before each protected operation, and again at irreversible commit/disclosure for
 - obtain online authoritative current decision/epoch; or
 - validate an I-issued, non-transferable lease bound to audience/resource/action/Scope with explicitly approved maximum staleness and expiry.
 
-Cache TTL is only an upper bound. Cached ALLOW is usable only when domain epoch is proven current or an approved bounded lease remains valid and all identity/resource/Scope/audience/purpose/delegation inputs match. Old, stale, unknown or incomparable epoch MUST be rejected; consumers fail closed on currentness uncertainty. Invalidation must evict/mark unusable decisions, sessions, derived grants and local authorization caches bound to the affected domain.
+Cache TTL is never authorization validity. Cached ALLOW is usable only after online proof that the policy-domain PermissionEpoch remains current and all identity/resource/Scope/audience/purpose/delegation inputs match. Offline authorization leases, stale-epoch grace and cached ALLOW without currentness proof are prohibited in this Phase 3.6 baseline. Old, stale, unknown or incomparable epoch MUST be rejected; consumers fail closed on currentness uncertainty. Invalidation must evict/mark unusable decisions, sessions, derived grants and local authorization caches bound to the affected domain.
 
 ### 5.4 Distinction from ForgetFenceGeneration
 
@@ -181,9 +181,9 @@ Evidence required per executed test: build/commit, test harness/version, issuer/
 ## 9. Joint decision and non-claims
 
 - **B Owner Decision:** B semantic proposal consumed; no B approval inferred.
-- **I Owner Decision:** This document is an I policy proposal; formal I approval must be recorded by I Owner through its decision process.
+- **I Owner Decision (current):** Phase 3.6 technical policy design DECIDED under delegated joint authority; external governance approval remains GOVERNANCE-BLOCKED.
 - **H Owner Decision:** H wire/authentication mapping approval remains OPEN.
-- **Cross-module Agreement:** OPEN pending explicit B/I/H and consumer-owner decisions.
+- **Cross-module Agreement (current):** BIH Phase 3.6 technical design DECIDED under delegated joint authority; C/D/E/F/G/Storage consumer acceptance remains OPEN.
 - **Governance Approval:** GOVERNANCE-BLOCKED; no named approver, decision record and effective version evidenced.
 - **Implementation Evidence:** NOT PROVIDED / NOT VERIFIED; tests NOT RUN.
 - **Fact/Claim ADR-001:** remains independently ADR-BLOCKED. This policy proposal does not resolve it.
@@ -254,3 +254,46 @@ The technical defaults above are deny-first interim rules, not substitutes for a
 | Fact/Claim ADR-001 | **ADR-BLOCKED — independent and unchanged** |
 
 This joint decision supersedes only B/I/H Phase 3.6 technical Candidate/Open labels for BIH36-JD-01..17. It does not supersede governance approvals, other Owner decisions, ADR-001 or implementation evidence requirements.
+
+## 10. Phase 3.6 Self-Review Remediation — Binding I Clarifications
+
+This section resolves I36-SR-01..07 and is normative for the I Phase 3.6 technical baseline. It does not activate governance-blocked policy profiles.
+
+### 10.1 Principal collision, alias and migration (I36-SR-01)
+
+The canonical resolution key is `(IssuerRef, TrustDomainRef, TenantRef, PrincipalKind, IssuerSubject)`. Subject equality across issuers, trust domains, tenants or kinds MUST NOT merge Principals. Key rotation under the same IssuerRef does not by itself create a new Principal. Issuer subject-format migration requires an explicit signed issuer migration assertion plus I registry approval, preserving the old key as a historical alias with effective interval, provenance and audit trail. Alias linking is one-way and non-authoritative for authentication: both old and new identifiers resolve only through I's registry, and revocation of either alias follows the recorded migration policy. Principal merge is prohibited by default; any future merge requires a separately governed migration procedure, dual-control approval, collision analysis and immutable audit lineage. No automatic email/name/subject similarity linking is permitted.
+
+### 10.2 PermissionEpoch consistency and revocation linearization (I36-SR-02 / I36-SR-05)
+
+Each policy domain has a single logical I authority backed by a linearizable commit sequencer. Authorization decisions and revocation commits for that domain are totally ordered by that sequencer. Revocation becomes effective at the sequencer's committed epoch-advance point; no replica-local clock or eventually consistent cache can declare it effective earlier or later.
+
+A protected irreversible operation must obtain a single-use I CommitAuthorizationReceipt bound to:
+`(policy_domain_id, PermissionEpoch, PrincipalRef, ActorRef, action, ResourceRef, purpose, audience, ScopeBindingSet digest, EnvironmentRef, DelegationChainRef, operation_id, operation_payload_digest, owner_boundary, decision_id)`.
+The receipt is not a transferable permission and is not an offline lease. The operation owner MUST submit the receipt to its final commit/disclosure gate, which participates in the same per-domain commit ordering protocol. The gate atomically orders the operation commit against revocation:
+- if operation commit is sequenced first, it may complete and the audit record states COMMIT_WON;
+- if revocation epoch advance is sequenced first, the receipt is rejected and the operation states REVOCATION_WON;
+- if ordering cannot be established, the operation is paused/aborted and no success is reported.
+
+Receipt replay, changed operation digest, changed boundary, stale epoch, duplicate commit, or expired/unknown receipt is rejected. A receipt is single-use. The owner records receipt ID, decision ID, sequencer position, epoch, operation digest and terminal outcome. This is a required protocol contract; implementation evidence is still NOT VERIFIED.
+
+### 10.3 Canonical policy-domain identity and multi-domain operations (I36-SR-03)
+
+A policy domain is a registered I-owned policy partition with immutable `PolicyDomainRef`. Its canonical identity is assigned by I registry and is not computed ad hoc by consumers. Registry metadata binds tenant/security domain, policy authority, resource classes, issuer trust set, epoch stream ID, status and policy version. Consumers may not derive a domain from labels or concatenate arbitrary fields.
+
+An operation touching resources in multiple policy domains MUST obtain a current epoch and commit authorization for every domain. It is permitted only if the I coordinator can atomically reserve/sequence the full domain set as one all-or-none decision. Partial ALLOW is never sufficient. If a common coordinator is unavailable, domain membership is ambiguous, epochs cannot be proven current, or atomic ordering cannot be achieved, the operation is DENIED/PAUSED. Domain migration is an explicit I registry event with old/new domain mapping, migration epoch, cutover position and audit record; old epochs are never reinterpreted in the new domain.
+
+### 10.4 Offline lease rule — no lease is active (I36-SR-04)
+
+For this Phase 3.6 baseline, **offline authorization leases, cached ALLOW based on a lease, and stale-epoch grace are prohibited**. Remove any implication that an I-issued bounded lease is currently usable. Cache TTL is only a performance hint: a cached decision is usable only after online proof that its PermissionEpoch is current and all bound inputs still match. If currentness cannot be checked, deny/pause. A future bounded lease requires a new explicit governance approval and a new versioned policy profile; this addendum does not enable one.
+
+### 10.5 Required revocation evidence and race audit (I36-SR-05)
+
+Every operation owner must retain a verifiable terminal ordering record containing I decision ID, CommitAuthorizationReceipt ID, policy-domain sequencer position(s), PermissionEpoch(s), operation digest, owner commit cursor/transaction ID, revocation event ID/epoch where relevant, and terminal outcome `COMMIT_WON`, `REVOCATION_WON` or `INDETERMINATE_ABORTED`. INDETERMINATE_ABORTED is never reported as success. If the operation cannot expose this evidence, it is not eligible for protected production operation.
+
+### 10.6 Test additions (I36-SR-07)
+
+Add mandatory adversarial cases: (a) epoch read races revocation commit; (b) operation receipt commit races revocation and both sequencer orderings are checked; (c) cross-domain partial authorization failure; (d) multi-domain coordinator outage; (e) issuer subject collision across issuers/tenants/kinds; (f) key rotation overlap, rollback and revoked old key; (g) alias migration replay and attempted Principal merge. All are **SPECIFIED / NOT RUN** until runtime evidence is attached.
+
+### 10.7 I decision-state reconciliation (I36-SR-06)
+
+The older Section 9 Owner Decision and Cross-module Agreement lines are superseded as process status for the BIH technical design only. Current state: **I technical policy design DECIDED under the user's delegated joint decision.** External governance approval remains **GOVERNANCE-BLOCKED** for the enumerated profiles; no external approver, signature, jurisdictional approval or policy activation is inferred. C/D/E/F/G/Storage acceptance remains OPEN. Runtime verification remains NOT RUN. ADR-001 remains ADR-BLOCKED.
