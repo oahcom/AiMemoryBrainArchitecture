@@ -319,6 +319,8 @@ All references below are opaque, typed, issuer-namespaced references. H transpor
 | `participant_reservation_ref` | ParticipantReservationRef / coordinator | Finalized reservation after I and D terminal evidence validates; required before C provider side effect |
 | `i_commit_authorization_receipt_ref` | CommitAuthorizationReceiptRef / I | Single-use I receipt bound to exact authorization tuple, request digest, transaction and C boundary |
 | `i_authorization_terminal_ref` | IAuthorizationTerminalRef / I | I sequencer terminal decision and effective ordering position for this operation |
+| `i_revocation_request_ref` | IRevocationRequestRef / I | Immutable revocation request and coordinator admission-cutoff position |
+| `d_fence_request_ref` | DForgetFenceRequestRef / D | Immutable fence request and coordinator admission-cutoff position |
 | `d_forget_fence_ref` | ForgetFenceRef / D | Exact applicable fence identity and generation |
 | `d_lineage_coverage_ref` | ForgetLineageCoverageRef / D | Immutable target + complete source/ancestor lineage coverage proof |
 | `d_participant_clearance_ref` | DParticipantClearanceRef / D | D's proof that the reserved participant is ordered before fence effectiveness or has been safely aborted |
@@ -333,8 +335,10 @@ All references below are opaque, typed, issuer-namespaced references. H transpor
 | `CAUSAL_ORDER_INTENT_RECEIPT` | coordinator → C/I/D | transaction ref, ParticipantIntentRef, durable coordinator epoch/position, exact digest, intent state |
 | `CAUSAL_ORDER_RESERVATION` | C → coordinator | transaction + ParticipantIntent refs, I CommitAuthorizationReceiptRef + I terminal ref, D fence + lineage + participant-clearance refs bound to ParticipantIntentRef, exact digest and owner evidence digests; finalizes the reservation only after all owner bindings validate |
 | `CAUSAL_ORDER_RESERVATION_RECEIPT` | coordinator → C | transaction ref, reservation ref, accepted coordinator epoch/position, exact evidence digest, reservation state, expiry policy (must not silently expire into success) |
-| `I_AUTHORIZATION_TERMINAL` | I → coordinator/C | CommitAuthorizationReceiptRef, I PolicyDomainRef/PermissionEpoch, exact operation and request digest, single-use consumption result, I sequencer terminal ref/position, COMMIT_WON or REVOCATION_WON or UNKNOWN/IN_DOUBT |
-| `D_FENCE_TERMINAL` | D → coordinator/C | ForgetOperationRef, ForgetFenceRef/generation, lineage coverage ref, ParticipantIntentRef, D fence-request cutoff position, D fence-effective position, participant disposition, D clearance ref |
+| `I_REVOCATION_REQUEST` | I → coordinator | IRevocationRequestRef, PolicyDomainRef, affected action/resource/scope, coordinator cutoff position, I request digest; request immediately blocks new receipts |
+| `I_AUTHORIZATION_TERMINAL` | I → coordinator/C | CommitAuthorizationReceiptRef, ParticipantIntentRef, I PolicyDomainRef/PermissionEpoch, exact operation and request digest, single-use consumption result, I sequencer terminal ref/position, applicable IRevocationRequestRef/cutoff or explicit none, COMMIT_WON or REVOCATION_WON or UNKNOWN/IN_DOUBT |
+| `D_FENCE_REQUEST` | D → coordinator | DForgetFenceRequestRef, ForgetOperationRef, target/source/ancestor lineage selector, coordinator cutoff position and immutable request digest; request blocks later affected intents |
+| `D_FENCE_TERMINAL` | D → coordinator/C | ForgetOperationRef, DForgetFenceRequestRef, ForgetFenceRef/generation, lineage coverage ref, ParticipantIntentRef, D fence-request cutoff position, D fence-effective position, participant disposition, D clearance ref |
 | `C_SUBMIT_OUTCOME` | C → coordinator | transaction/reservation refs, actual provider/runtime result, actual InferenceRequestId, FinalRequestBoundaryId, immutable final request digest, provider receipt ref, C evidence ref/digest, outcome ACCEPTED / REJECTED / UNKNOWN |
 | `CAUSAL_ORDER_TERMINAL_PROOF` | coordinator → C/G/H | coordinator/profile/transaction refs, reservation ref, I receipt + terminal refs, D fence + lineage + clearance refs, C submit outcome ref, ordered positions, terminal outcome, proof digest and coordinator signature/key ref |
 | `CAUSAL_ORDER_ACK` | H receiver → sender | original transaction/proof refs, receiver sequence, durable receipt disposition; explicitly transport durability only |
@@ -368,7 +372,7 @@ A successful historical submit proof never grants later permission or current-us
 - IAuthorizationTerminalRef MUST prove I sequencer consumption and terminal order; a PermissionDecisionRef or PermissionEpoch alone is insufficient.
 - DLineageCoverageRef MUST cover exact target plus all applicable source/ancestor dependencies; DParticipantClearanceRef MUST prove the participant is before fence effectiveness or safely aborted.
 - CSubmitOutcomeRef MUST be issued only from actual successful/failed provider/runtime boundary observation; local buffer, middleware render, transport ACK or reservation receipt is insufficient.
-- CausalOrderTerminalProofRef MUST cryptographically bind every above ref, the common transaction, ParticipantIntentRef, coordinator epoch/positions and terminal result.
+- CausalOrderTerminalProofRef MUST cryptographically bind every above ref, the common transaction, ParticipantIntentRef, I revocation request cutoff (or explicit none), D fence request cutoff, coordinator epoch/positions and terminal result.
 - H MUST preserve all refs exactly, enforce profile requiredness and integrity, reject unknown critical fields, and never downgrade a 1.1.0 Full-Applied flow to 1.0.0.
 
 ### 12.6 Operational and safety limits
