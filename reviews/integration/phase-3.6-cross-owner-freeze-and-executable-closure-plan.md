@@ -863,3 +863,18 @@ Corrected CI:
 The new test proves that after the D owner-local pending gate is released, the batch-committed D cutoff still blocks later intents/submits in the affected lineage while unrelated lineage remains independently eligible after COC service recovery.
 
 The earlier COC model CI run `43897053156` (10 tests) is superseded by this corrected 11-test run. This remains an in-memory logical model only; it does not implement consensus durability, real I/D owner gates, participant storage, HA/failover/restore or production COC conformance. COC-01..16 remain NOT RUN and G10 remains BLOCKED.
+
+## 13.13 I exact-version acceptance of amended A COC bridge
+
+I reviewed and formally accepted the exact amended A architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` on A branch `session-a-integration-2026-11-16`. The decision is **ACCEPT — exact Blob, with binding single-I-PolicyDomain limitation**.
+
+I Owner disposition readback:
+- Path: `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md`
+- Branch: `session-i-security-governance-2026-11-16`
+- Blob: `8069ff86988396442c8d9dc3fd58653683abe2f3`
+- Commit: `f16a52ebc0bddb707565c0393f378a4baa782e54`
+- Formal decision: §11, exact-version acceptance.
+
+Issue #4 comment records the decision: `6920893505`.
+
+**Remaining independent gates:** D must accept fence/barrier membership and cutoff ordering; Storage must accept durable preallocated-XID preparation, signed PreparedParticipantReceipt and exact-XID recovery; H must decide any required wire-schema mapping. I's acceptance is architecture-interface only and does not establish implementation, deployment, conformance or production approval. COC-01..12 and JF10-COC-01..10 remain NOT RUN; JF-10 remains P0 OPEN; multi-policy-domain atomicity remains BLOCKED.
