@@ -1122,3 +1122,19 @@ Issue #9 is now **CLOSED / COMPLETED** after D and Storage each published an Own
 - Both decisions pin common JF-10 v2 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`, A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, I disposition Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`, C bridge Blob `45a48249717c8cddb07ab96197730ef93d406c22`, and current H mapping Blob `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248` plus H schema candidate Blob `a8a945cc3623c2907003b93625e3c79742150944`.
 
 **Gate transition:** Issue #9 decision layer is closed. Issue #10 Gate A remains the sole active next gate: Storage must identify the actual database product/version/configuration and accountable operator, then produce executable prepared-XID/lock-retention/same-XID recovery and atomic-visibility capability evidence. Gate B persistent COC and Gate C fault-injection remain blocked until Gate A passes. No database, operator, physical capability, production deployment or conformance pass is inferred. JF-10 P0 remains OPEN; multi-PolicyDomain remains BLOCKED.
+
+
+## 13.24 Gate A cross-repository runtime inventory — 2026-11-17
+
+A inspected the accessible `oahcom/hermes-scripts` `quality-gate` branch as a possible runtime context before asking for a database choice.
+
+Observed:
+- `scripts/episodic_memory.py` uses Python SQLite for a local episodic-memory DB at `~/.hermes/data/state/episodic_memory.db` by default.
+- `scripts/audit_test_db.py` and `scripts/audittestdb.py` are stubs, not capability tests.
+- `config/services.yaml` lists memory-server endpoints but does not establish the backing Canonical Memory Authority database.
+- `MEMORY.md` mentions a local `fact_store/memory_store.db`, but does not establish the engine/version/configuration or whether it is the Canonical Memory Authority participant store.
+- The separate `oahcom/hermes-by-dkk` repository contains only 13 tracked paths, none identifying a DB implementation or JF-10 runtime.
+
+A therefore did **not** infer SQLite as the JF-10 target. No accessible artifact establishes a selected Canonical Authority DB, prepared-XID durability, cross-process lock retention, same-XID recovery, atomic visibility/receipt transaction, or failover/restore capability. The discovery and boundary were recorded in Issue #10 comment 6922191590.
+
+**Gate A remains BLOCKED pending Storage's explicit candidate and accountable operator selection plus executable capability proof.** Gates B/C remain blocked; JF-10 P0 OPEN. This inventory does not prove that no other runtime repository or deployment exists.
