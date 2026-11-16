@@ -238,3 +238,14 @@ H for producer identity and BMCP envelope; I for authorization, retention, Forge
 - **CANDIDATE:** four priority classes and logical lane scheduling.
 - **TO_VALIDATE:** payload-size limits, throughput, queue budgets, recovery time and model-offline backlog drain.
 - **OPEN:** per-source ordering guarantees and late/out-of-order event policy (coordinate C/H).
+
+
+## 19. Phase 3 H/I alignment and durable receipt addendum
+
+- H's `message-envelope-and-versioning.md` requires an owner-defined idempotency namespace/key/payload digest, versioned canonicalization and integrity metadata. H currently proposes JCS as a canonicalization candidate; E owns ingress key semantics, while H owns wire representation. Protocol version, payload schema version, permission epoch and Forget fence remain distinct.
+- I's `principal-actor-and-authorization-contract.md` proposes idempotency identity scoped by authenticated producer + tenant/security domain + operation family + caller key. The payload ActorRef/producer claim is never authentication. Receipt lookup/replay must not disclose a receipt across principals or scopes.
+- I requires authorization at ingress and again on every retry/replay; a durable Accepted receipt is not a standing permission to compile later. E must revalidate current permission epoch and Forget fence at worker execution and final commit/publication linearization points.
+- Retention duration is not frozen: I requires coverage of declared retry/replay horizon while minimizing content and subjecting idempotency metadata/tombstones to Forget policy. Exact numeric horizon and legal-hold treatment remain OPEN with I/Privacy/Legal.
+- I's scope/revocation matrix explicitly covers compile start, each dereference, derivative creation/publication, canonical commit, DLQ/replay and retries. Missing/stale permission epoch or Forget fence fails closed.
+- E's Accepted linearization point remains the atomic/recoverable commit of Event, immutable payload reference/digest, idempotency record, receipt and compile intent. H's receipt wire format and I's identity/retention policy do not move that durability boundary.
+- See `accepted-receipt-and-idempotency-contract.md` for the transaction/WAL crash matrix and cursor separation.
