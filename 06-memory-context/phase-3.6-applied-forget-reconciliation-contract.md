@@ -218,3 +218,26 @@ G considers its semantic portion of the A package accepted with the exceptions a
 - Fail closed: payload-only identity, unknown/revoked issuer or Adapter, forged ActorRef, missing Scope/Environment, absent explicit cross-Scope/Environment grant, stale/incomparable epoch, stale/unknown fence, capability mismatch, old-session ACK, changed duplicate digest, or unknown causal order cannot mutate Applied state; reject/quarantine, historical-only or Unknown as applicable.
 - Exceptions: G does not define B identity types, I trust/authorization policy, H wire cryptography/serialization, D fence issuance, C submit evidence or Storage atomicity. External governance and runtime conformance remain separate.
 - G Applied/reconciliation matrix remains **SPECIFIED / NOT RUN**.
+
+## G Owner exact-version decision — CGH-APPLIED-1.1
+
+- A package: `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`
+- Exact A package Blob SHA: `9808b31f840606b329f1a794935dfc9c5084d63b`
+- Common contract: `CGH-APPLIED-1.1`
+- Causal profile: `CausalOrderProfile/1.0`
+- H schema target: `bmcp.applied-ack/1.1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within G's sole authority over the Full Applied predicate, durable Applied fact/idempotency and historical-versus-current-use projection.
+
+G accepts the 1.1 evidence set as the required causal-order input to its Applied decision: exact G target/context/delivery attempt; C actual provider receipt and immutable CSubmitOutcome; I receipt and terminal proof including revocation cutoff; D intent-bound clearance and lineage/fence cutoff/effective evidence; H integrity-protected transport/schema evidence; B typed references; and a determinate CausalOrderTerminalProof binding the same transaction, digest, reservation and terminal outcome. G will not infer Full Applied from I COMMIT_WON, D clearance, reservation, intent or transport ACK alone.
+
+G's Applied rule for 1.1 is: commit historical Full Applied only after validating the complete predicate and a determinate successful C provider handoff; keep historical fact distinct from current-use eligibility, which is recomputed against current Context head, I authorization/PermissionEpoch, D fence/lineage, scope/environment, session and capability. Later revocation/fence/supersession cannot rewrite a valid historical fact but immediately makes it non-current for protected use. Any unknown order, incomplete lineage, missing/contradictory owner evidence, unknown provider outcome or digest conflict yields no Full promotion and remains suppressed/UNKNOWN.
+
+Exceptions and closure conditions:
+1. The coordinator and durable participant/order service are not designated/deployed/verified. G acceptance is conditional on durable, monotonic terminal proof and recovery that cannot clear IN_DOUBT participants.
+2. G's validator and Applied persistence implementation have not been shown to consume the complete 1.1 evidence set. This is contract acceptance, not implementation verification.
+3. Same transaction/idempotency key plus same digest is idempotent; same identity with changed digest is conflict/quarantine, never last-write-wins. G's durable commit and recovery behavior requires tests.
+4. Historical Applied does not authorize current use; current-use projection must fail closed on stale/missing I/D/current-context evidence.
+5. G-CO/Applied race and recovery conformance remains SPECIFIED / NOT RUN; no runtime pass is claimed.
+
+This decision applies only to the exact A Blob above and does not transfer the prior 1.0 decision, certify global Forget, or imply implementation/deployment.
