@@ -345,3 +345,14 @@ A's current closure tracker blob `554d4b85a94f433856506dce4c020b9c00183e69` ends
 The A deployment-binding record correctly keeps Gate A PARTIAL PASS / OPEN and production deployment NOT DESIGNATED. A must refresh the detailed closure tracker and source pins; Session P cannot modify A's Owner record.
 
 The full corrected exact-version decision vector is recorded in `00-governance/reviews/applied-contract-1.1-exact-version-reconciliation.md`.
+
+
+## 16. Current Storage regression revision — enhanced PITR still failing
+
+Storage's current branch is `3c8ab8ee4579a550300aa48aecab928149cf9370`, eight commits beyond the earlier all-green evidence commit `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd`. The current PITR probe blob is `7fa4bb3fb07eacc3f708f5682ea4c9e2019f267d`; the workflow blob remains `a055d311c324d09eb6ebf4054247761116795eb7`.
+
+The new probe adds valuable checks: an authoritative reader must reject pointer-only or receipt-only publication; each target LSN/timeline/WAL segment is recorded and verified; negative WAL cases must prove no writable/authoritative service. On current HEAD, six other workflows pass, but PITR run `43957456225` fails in the corrupt-WAL assertion. The log shows PostgreSQL's `invalid magic number D158` followed by recovery ending before the target. The assertion recognizes `wrong size`, `invalid record` or `incorrect checksum`, but not `invalid magic number`; it fails before the no-writable assertion and the incomplete-WAL case is not reached.
+
+Required correction: accept the actual `invalid magic number` diagnostic while retaining exact target segment matching and mandatory no-writable/no-authoritative checks; rerun all three missing/corrupt/incomplete cases. UMR-018 records this. The previous 7/7 result remains valid only for the earlier probe revision and must not be represented as current-source regression pass.
+
+Gate A remains PARTIAL PASS / OPEN; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
