@@ -443,3 +443,48 @@ The CI procedure kept the old primary stopped and unreachable after hard kill, p
 **Scope limitation:** the “fence” is a stopped Docker container under a single GitHub Actions runner, not production STONITH, cloud instance fencing, storage fencing, independent failure-domain control, HA-manager arbitration, DNS/connection routing or split-brain monitoring. The checkpoint timeline fields returned by `pg_control_checkpoint()` remained at the prior checkpoint timeline in this short test; the authoritative evidence of the new timeline is `pg_rewind` plus the standby WAL receiver streaming from timeline 2 and successful post-rejoin replication. Do not cite the checkpoint timeline fields as proof of timeline 2.
 
 This closes only the pg_rewind/rejoin procedure subtest for the pinned CI profile. Production fencing and split-brain prevention remain OPEN. Gate A remains PARTIAL PASS / OPEN.
+
+
+## 20. Prepared-XID / visibility / receipt PITR boundaries and WAL archive negatives — PASS (2026-11-17)
+
+Storage executed the dedicated PostgreSQL 18.7 PITR atomicity campaign on the pinned image digest. The probe creates two prepared transactions, takes a physical backup while both are prepared, then resolves one by COMMIT PREPARED and the other by ROLLBACK PREPARED. Separate restores target the prepared, commit and rollback LSN boundaries. The same workflow also runs missing, corrupt and incomplete WAL archive negative cases.
+
+Evidence:
+- Probe: `reviews/storage-consistency/postgres_probe/jf10_postgres_pitr_atomicity_probe.py`
+- Probe Blob: `8c0e281f1db4dd6190127f02ac71b1126da39903`
+- Workflow: `.github/workflows/jf10-postgres-pitr-atomicity.yml`
+- Successful run: `43955195460`
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43955195460
+- Run head commit: `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd`
+- Job ID: `133607791713`
+- Job conclusion: SUCCESS
+- Pinned image: `postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc`
+- Observed boundary LSNs: prepared `0/5004420`; commit `0/6000000`; rollback `0/6000110`.
+
+Observed raw-log PASS markers:
+- `PREPARED_XIDS_CREATED=PASS`
+- `PREPARED_BOUNDARY_WAL_ARCHIVED=PASS`
+- `PITR_PREPARED_XID_PRIVATE_AND_LOCKED=PASS`
+- `PITR_COMMIT_POINTER_AND_RECEIPT_ATOMIC=PASS`
+- `PITR_ROLLBACK_NO_POINTER_NO_RECEIPT=PASS`
+- `JF10_PITR_PREPARED_XID_VISIBILITY_RECEIPT_BOUNDARIES=PASS`
+- `PITR_MISSING_WAL_FAILS_CLOSED=PASS`
+- `PITR_CORRUPT_WAL_FAILS_CLOSED=PASS`
+- `PITR_INCOMPLETE_WAL_FAILS_CLOSED=PASS`
+- `JF10_PITR_WAL_NEGATIVE_CASES=PASS`
+- `JF10_POSTGRESQL_PITR_ATOMICITY_AND_NEGATIVES=PASS`
+
+The prepared-boundary restore retained both exact prepared XIDs and their locks while exposing neither VisibilityPointer nor PublicationReceipt. The commit-boundary restore exposed the commit participant's pointer and receipt together while retaining the other prepared participant. The rollback-boundary restore showed no pointer and no receipt for the rolled-back participant. Each malformed or unavailable archive case failed recovery closed rather than allowing a writable, incorrectly promoted recovery instance.
+
+The first attempt exposed a test-harness target-LSN defect: the rollback target was sampled after `pg_switch_wal()`, which moved the target to the next WAL segment boundary. The corrected probe captures `pg_current_wal_flush_lsn()` after the rollback marker and before switching WAL. The successful run above is on the corrected commit; the earlier failed run is not counted as passing evidence.
+
+**Scope limitation:** this is an isolated Storage fixture using local Docker volumes and a local archive. It proves PostgreSQL capability behavior for the pinned CI profile, not production COC quorum durability, production I/D Forget-control ledger replay, archive immutability/off-site retention, cross-zone recovery, production operator procedures, or RPO/RTO. Gate A remains PARTIAL PASS / OPEN. Gate B remains blocked pending full Gate A acceptance; Gate C remains blocked pending Gate B; JF-10 P0 remains OPEN and production activation remains NOT AUTHORIZED.
+
+## 21. Repeated physical backup/restore and explicit-LSN PITR workflow confirmation — PASS (2026-11-17)
+
+The same corrected commit also reran the previously established physical backup/restore and explicit-LSN PITR workflows successfully:
+- Physical backup/restore run: `43955195219`; job `133607790737`; final marker `JF10_POSTGRESQL_18_7_BACKUP_RESTORE_CAPABILITY=PASS`.
+- Explicit-LSN archive PITR run: `43955195388`; job `133607790699`; final markers `PITR_BASE_STATE_PRESENT=PASS`, `PITR_TARGET_STATE_PRESENT=PASS`, `PITR_POST_TARGET_STATE_ABSENT=PASS`, `PITR_EXACT_LSN_RECOVERY=PASS`, `JF10_POSTGRESQL_WAL_ARCHIVE_PITR=PASS`.
+- Explicit target LSN: `0/5000190`; observed replay LSN: `0/6000000`; promoted timeline: `2`.
+
+These are rerun confirmations of the respective isolated CI probes, not production restore qualification. All three workflows ran against commit `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd`.
