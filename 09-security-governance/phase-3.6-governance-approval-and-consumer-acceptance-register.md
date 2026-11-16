@@ -162,3 +162,44 @@ The live branch inventory also includes `main` at `8a6414158c9c056c1638222534e19
 | H | `session-h-bmcp-protocol` | `59926f5090dfd2e2ad78d9c25bd0d9062b4bcabc` | `08-bmcp-protocol/forget-revocation-and-reconnect.md` | `695909360782987781e259187041618f495f1c8c` |
 
 These readbacks cover the typed identity/Scope model, Principal/Actor mapping, Principal/authorization policy, Scope/revocation policy, BMCP envelope/versioning, ACK target binding, and reconnect/revocation semantics. They remain design artifacts and do not constitute runtime proof or consumer-owner acceptance.
+
+
+## 5. Owner-side acceptance reconciliation — 2026-11-16 refresh
+
+The following consumer Owner artifacts were independently fetched from their current Owner branches and reviewed against the exact B/H/I source Blob references recorded in each artifact. I now recognizes these as **design-level consumer acceptance evidence** for the named boundary. This registry reconciliation does not upgrade runtime conformance, external governance approval, or JF-10 closure.
+
+| Consumer | Current Owner HEAD | Owner acceptance artifact | Blob SHA | I registry disposition | Remaining boundary |
+|---|---|---|---|---|---|
+| D | `df1b415bcddbbd066d7db6316e0caa14b3097d92` | `03-memory-brain/phase-3.6-bih-identity-consumer-acceptance.md` | `184423d2d8191a12f2d4a869bc63f5e7fafaf96a` | **DESIGN ACCEPTANCE RECOGNIZED** | D36 implementation/tests NOT RUN; JF-10 P0 open; I governance remains blocked |
+| E | `2adc95ad4d6562f37d9bb6ed8743ce3514a1d615` | `04-memory-compiler/phase-3.6-bih-identity-consumer-acceptance.md` | `6f4100618695fcf971560fb784f7887a72798c96` | **DESIGN ACCEPTANCE RECOGNIZED** | E36 implementation/tests NOT RUN; JF-10 P0 open; I governance remains blocked |
+| Storage | `eea8e645b84f73a668428a298dded3313a82353d` | `reviews/storage-consistency/phase-3.6-bih-identity-consumer-acceptance.md` | `ec8e49d0d11c72d37ad0c291611a96a1122ba6f5` | **DESIGN ACCEPTANCE RECOGNIZED** | Storage implementation/deployment verification NOT RUN; JF-10 P0 open; I governance remains blocked |
+
+### 5.1 Accepted scope
+
+Each of the three owner records explicitly accepts the BIH identity-trust semantics at its own boundary, including:
+- typed PrincipalRef / ActorRef / ProducerRef / AdapterRef / ScopeRef / EnvironmentRef distinctions;
+- verifier-established identity and rejection of payload-only or caller-minted identity;
+- role-tagged Scope and exact Environment resolution;
+- complete operation-bound authorization tuple and authenticated workload/session binding;
+- I-owned PermissionEpoch currentness, with no offline/stale lease or cached ALLOW without online currentness proof;
+- independent D ForgetFence checks;
+- fail-closed handling for forged, malformed, unknown, unsupported and ambiguous inputs;
+- single-use CommitAuthorizationReceipt binding and final-boundary submission;
+- distinct I authorization ordering, D fence and Storage visibility authority.
+
+The source refs are:
+- B: `02-domain-model/phase-3.6-typed-identity-trust-closure.md`, Blob `0a6b78a842e550b58533b797cdfcd2d954ed6826`;
+- H: `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, Blob `9845c97ac43d7888732afafe12e28850ec02add8`;
+- I: `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md`, Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`, plus I execution addendum Blob `1f5d2e4aba7afa75c0696f3c8f025b0cb903e0ad`.
+
+### 5.2 Matrix update
+
+For the D, E and Storage rows of §4, the ten identity/security behavior columns (PrincipalRef, ActorRef, ScopeRef, EnvironmentRef, Producer/Adapter Identity, Authenticated Transport Binding, PermissionEpoch Validation, Revocation, Forged Payload Identity Rejection, Unknown/Unsupported Handling) are now **DESIGN-ACCEPTED** based on the exact owner artifacts above.
+
+This does not mean implementation exists or that the tests passed. It does not change the OPEN status of C, F, G or H consumer acceptance. A remains registrar only.
+
+### 5.3 Gate consequence
+
+G6 BIH Consumer Acceptance has advanced from no DE-S consumer acceptance evidence to **PARTIAL / BLOCKED**: D, E and Storage design-level acceptance is now recorded; C, F, G and H remain OPEN. H's BIH ownership/design baseline is not a substitute for its separate consumer acceptance record. Runtime conformance remains unverified for every consumer.
+
+No I36 governance decision is approved by this reconciliation. I36-GOV-01..10 remain GOVERNANCE-BLOCKED. JF-10 remains P0 OPEN and the corrective I owner-gate ordering decision is recorded separately. I36/H36/D36/E36 and Storage conformance remain NOT RUN.
