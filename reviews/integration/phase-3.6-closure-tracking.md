@@ -1350,3 +1350,32 @@ A inspected the current default branch and Owner branch inventory:
 This confirms the boundary: the PostgreSQL 18.7 single-node, synchronous failover, rollback-after-promotion and physical backup/restore probes are real CI evidence, but there is no in-repository production deployment to bind them to. No actual host/zone/cloud volume, primary/standby endpoint, production fencing/routing, human on-call, runbook or RPO/RTO can be inferred.
 
 **Gate A remains PARTIAL PASS / OPEN at production binding.** Required next artifact: a concrete deployment binding record naming the actual Canonical Authority environment, exact DB image/build/configuration, host/zone/storage topology, failover/fencing/routing mechanism, human on-call/operator, runbook, RPO/RTO and the real I/D control-ledger source. Execute the proven probes against that environment before Gate A acceptance. Gate B remains blocked until this is complete. Issue #10 comment 6922650120 records the inventory.
+
+
+## 13.31 Gate A — coordinator crash-window / unrecorded-ACK recovery PASS — 2026-11-17
+
+Storage executed an additional PostgreSQL 18.7 CI probe for the JF-10 UNKNOWN/IN_DOUBT crash window. A coordinator child process was terminated after the participant successfully executed PREPARE TRANSACTION, COMMIT PREPARED or ROLLBACK PREPARED, but before the coordinator persisted the acknowledgement/result.
+
+Evidence:
+- Probe Blob: 51cf8c7a9fa169aff8b0a5fd8a7ec5f934ad35a2
+- Workflow Blob: 7b612223f309ef0b963d262a94845a083e79ec7c
+- Successful run: 43912857694
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43912857694
+- Run commit: 5f342adb95f95208e8f1e2cc52538cf0944aa9e3
+- Job: 133459107145
+
+Raw log confirmed:
+- PREPARE_ACK_UNRECORDED_COORDINATOR_CRASH=PASS
+- RECOVERED_EXACT_PREPARED_XID_NO_NEW_XID=PASS
+- PREPARED_VISIBILITY_PRIVATE_AFTER_ACK_GAP=PASS
+- SAME_XID_COMMIT_OUTCOME_RECONCILED=PASS
+- COMMIT_VISIBILITY_INVARIANT_AFTER_ACK_GAP=PASS
+- SAME_XID_ROLLBACK_OUTCOME_RECONCILED=PASS
+- ROLLBACK_VISIBILITY_INVARIANT_AFTER_ACK_GAP=PASS
+- JF10_COORDINATOR_ACK_GAP_RECOVERY=PASS
+
+The recovery process reconciled the exact original XID without creating a replacement. PREPARE ambiguity retained private visibility and locks; COMMIT ambiguity reconciled to pointer + receipt visible together; ROLLBACK ambiguity reconciled to neither visible.
+
+**Scope limitation:** this is a deterministic coordinator process-crash/unrecorded-checkpoint window test, not TCP packet loss or production I sequencer/COC durability. The SQLite coordinator ledger is a CI fixture only.
+
+Gate A remains PARTIAL PASS / OPEN. Production Canonical Authority binding, actual I/D control-ledger integration, production fencing/STONITH and split-brain prevention, host/zone/cloud-storage durability, named human on-call, approved runbook and RPO/RTO remain open. Gate B remains BLOCKED until full Gate A acceptance; Gate C remains BLOCKED until Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
