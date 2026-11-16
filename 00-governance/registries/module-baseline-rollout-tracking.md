@@ -51,3 +51,24 @@ Each Owner's submission must:
 - Existing design artifacts do not prove a module baseline proposal was submitted or accepted.
 - Branch protection is currently reported false for the listed branches; this inventory does not change repository settings.
 - No Owner branch was modified, no PR was merged, and main was not changed by this tracking update.
+
+
+## Prepared owner-review proposal packages (Session P, 2026-11-17)
+
+Nine module-specific 14-section proposal packages have been prepared from the source artifacts listed in each file. They are located on the P coordination branch only; they are not committed to Owner branches and are not represented as Owner-authored decisions.
+
+| Module | Proposal path | Prepared status | Owner action required |
+|---|---|---|---|
+| A | `00-governance/proposals/module-a-integration-governance-proposal.md` | PROPOSED / P-prepared | A Owner review, correct, adopt or reject on A branch |
+| B | `00-governance/proposals/module-b-domain-model-proposal.md` | PROPOSED / P-prepared | B Owner review, preserve ADR-001 blocker, adopt or reject on B branch |
+| C | `00-governance/proposals/module-c-agent-integration-proposal.md` | PROPOSED / P-prepared | C Owner review, adopt or reject on C branch |
+| D | `00-governance/proposals/module-d-memory-brain-proposal.md` | PROPOSED / P-prepared | D Owner review, preserve JF-10 boundaries, adopt or reject on D branch |
+| E | `00-governance/proposals/module-e-memory-compiler-proposal.md` | PROPOSED / P-prepared | E Owner review, preserve publication blockers, adopt or reject on E branch |
+| F | `00-governance/proposals/module-f-memory-runtime-proposal.md` | PROPOSED / P-prepared | F Owner review, preserve backend/cancellation validation, adopt or reject on F branch |
+| G | `00-governance/proposals/module-g-memory-context-proposal.md` | PROPOSED / P-prepared | G Owner review, preserve C/G/H Applied freeze blocker, adopt or reject on G branch |
+| H | `00-governance/proposals/module-h-bmcp-protocol-proposal.md` | PROPOSED / P-prepared | H Owner review, preserve B/I identity dependencies and H36 NOT RUN, adopt or reject on H branch |
+| I | `00-governance/proposals/module-i-security-governance-proposal.md` | PROPOSED / P-prepared | I Owner review, preserve external governance/consumer/test blockers, adopt or reject on I branch |
+
+Readback verified all nine proposal files on P. Their current blob SHAs are recorded by the GitHub fetch evidence in the Session P work log. Each package includes mission, ownership, capabilities, domain ownership, interfaces, security, module redlines, forbidden cross-module actions, dependencies, conformance, acceptance, change authority, open decisions and non-claims.
+
+**Adoption gate:** A package is not a module baseline until its named Owner explicitly reviews and adopts a specific version on the corresponding Owner branch. Session P has not written to A–I branches. No Owner decision, cross-module acceptance, project G0 approval or implementation/test result is inferred.
