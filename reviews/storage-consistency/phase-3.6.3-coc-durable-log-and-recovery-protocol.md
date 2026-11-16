@@ -258,3 +258,23 @@ Seven PostgreSQL 18.7 CI workflows completed SUCCESS on Storage commit `2d476dd3
 This specification does not claim a running Raft cluster, selected consensus library, production quorum, COC operator, deployed KMS, actual RPO/RTO measurement, I sequencer integration, D barrier integration, C provider idempotency, E compiler integration, G Applied implementation, H SDK interoperability, global Forget completeness or production activation.
 
 Required exact review: A (integrated protocol), I (owner policy/sequencer boundary), D (cutoff/lineage/barrier), C (provider side-effect lifecycle), E (producer lifecycle), H (wire/identity), G (Applied evidence), Storage (durability/restore/retention). Any change to this artifact after review requires exact-Blob re-acceptance from affected owners.
+## 13. Protocol review clarifications — quorum proof and fault model
+
+### 13.1 COC commit receipt
+
+A client-visible committed append returns a COC-issued immutable `COCCommitReceipt` binding cluster ID, CausalOrderDomainRef, CoordinatorEpoch, CoordinatorIndex, VoterConfigurationEpoch, EntryDigest, PreviousEntryDigest, OperationId, canonical request digest, leader identity and the quorum-confirmed commit index. The receipt is authenticated by the COC service signing identity. The verifier checks the signer/key status and the receipt against a current linearizable COC read or a verifiable quorum-commit proof supported by the selected consensus implementation. A leader signature by itself, without a commit-index/quorum proof, is not sufficient. COCCommitReceipt proves only COC log commitment; it never substitutes for an I/D/Storage owner signature or decision.
+
+### 13.2 Explicit crash-fault model and RPO boundary
+
+The initial three-voter/two-quorum profile tolerates one crash/unavailable voter while preserving quorum. RPO 0 applies to every quorum-acknowledged COC entry under this stated crash-fault model, assuming each counted vote has crossed its configured durable-media boundary. Two unavailable voters, correlated loss of a majority, Byzantine behavior, operator deletion, compromised credentials or total correlated site loss are outside the initial availability guarantee. Such conditions do not permit an inferred rollback or a new empty cluster: restore must use the latest externally anchored checkpoint plus contiguous committed log, or remain RESTORE_FENCED. No numeric RTO is claimed.
+
+### 13.3 Proof namespace and authority invariants
+
+- `COCCommitReceipt` / CoordinatorEpoch / CoordinatorIndex prove only COC ordering and commit.
+- `CommitAuthorizationReceipt` / I sequencer position / PermissionEpoch prove only I authorization and revocation order.
+- D fence request cutoff / effective position / ForgetFenceGeneration prove only D Forget ordering and lineage completion.
+- Storage PreparedParticipantReceipt / XID / PublicationReceipt / VisibilityPointer transaction prove only Storage's prepared participant and visibility outcome.
+- CSubmitOutcome proves only the observed provider/runtime side effect.
+- CausalOrderTerminalProof is a cross-reference bundle over these independently authoritative facts; it cannot mint or upgrade any constituent fact.
+
+Any missing, invalid, stale or contradictory proof keeps the operation UNKNOWN/IN_DOUBT. No authority may infer another authority's decision from a COC index, common transaction ID or elapsed time.
