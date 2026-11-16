@@ -34,7 +34,7 @@ Observed GitHub branch refs at this refresh. These are point-in-time HEADs, not 
 | Storage | session-storage-consistency-forget-atomicity-2026-11-16 | 337fe8bffa178e64ad8e4750f1ede1d561424edc |
 | main | main | 3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f |
 
-P vs main is **diverged** (latest compare before this update: ahead 79 / behind 4; each P coordination commit increments the ahead count). No merge, force-update or main write is authorized or performed.
+P vs main remains **diverged**. Re-query the live compare before any integration because every P coordination commit changes the ahead count. No merge, force-update or main write is authorized or performed.
 
 ## 3. Current system gate vector
 
