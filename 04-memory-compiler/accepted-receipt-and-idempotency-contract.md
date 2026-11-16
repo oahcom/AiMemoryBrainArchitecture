@@ -172,3 +172,12 @@ An E outbox sequence/dispatch offset is a fourth E-local transport checkpoint; i
 D's `canonical-memory-store.md` describes a CanonicalCommit receipt with operation ID, idempotency key, request digest, expected/resulting version and `commit_sequence`; it proposes a monotonic sequence within the canonical authority and atomic/recoverable commit of immutable version, pointer, receipt and outbox. D's `memory-versioning.md` still leaves sequence scope **OPEN** (per aggregate vs global commit stream). Therefore E will store D's returned typed commit reference unchanged and will not assume a globally contiguous sequence or equate it to a Memory aggregate revision.
 
 D's LifecycleEvent sequence is per Memory aggregate and is not the canonical commit cursor. E's source ingress partition offset and F's per-index/per-partition applied watermark remain separate namespaces. The exact D cursor type, partition key, gap and replay semantics require D + Storage/Consistency + A agreement before freeze.
+
+
+## 10. H/I candidate alignment
+
+H's envelope contract requires an owner-defined idempotency namespace/key/payload digest and states that the same key/same canonical digest returns the original operation/receipt while same key/different digest conflicts. H transports the E-owned namespace semantics; H does not own the E receipt's durability or retention. H proposes versioned canonical serialization (including JCS as a candidate) and distinct protocol/payload schema versions. Exact canonicalization profile and signature/integrity details remain candidate until H/I approval.
+
+I's Principal/ActorRef candidate aligns the key namespace to authenticated producer + tenant/security domain + operation family + caller key. The request's payload ActorRef, producer_id, tenant, project or environment fields are claims/selectors only and must be compared to authenticated transport binding and authoritative registries. Receipt lookup and replay are authorized against current Principal, Scope and permission epoch; a receipt must not be exposed across principals or scopes.
+
+I requires Accepted to mean durable custody, not authorization forever. Every retry/replay revalidates current authorization and Forget fence. I requires idempotency metadata to cover the declared retry/replay horizon, but exact numeric retention periods are OPEN with I/Privacy/Legal. H/I do not change E's transaction linearization point.
