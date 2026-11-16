@@ -694,3 +694,23 @@ Until each authority supplies the required evidence:
 - No `Completed` or `CompletedWithPolicyException` claim without the I-approved CEV and exact approved exception evidence.
 
 These are DE-S consumption restrictions, not I policy approvals. Governance closure, consumer acceptance and JF-10 remain OPEN/BLOCKED. I36 tests remain NOT RUN. Phase 3.6 final gate and Contract Freeze remain unavailable.
+
+
+## DE-S consumer acceptance refresh — D/E identity boundary
+
+A live read of the B/H/I Phase 3.6 sources was completed. D and E have now recorded explicit **design-level** consumer acceptance against the BIH typed identity and authenticated transport contract. This is not runtime conformance and does not change I's consumer register without I's recognition.
+
+| Consumer | Owner artifact | Commit | Readback Blob | Disposition |
+|---|---|---|---|---|
+| D canonical mutation / Forget boundary | `03-memory-brain/phase-3.6-bih-identity-consumer-acceptance.md` | `caabdab0690629144c8ef66c546a781f5a08b821` | `184423d2d8191a12f2d4a869bc63f5e7fafaf96a` | DESIGN-LEVEL ACCEPTANCE; runtime NOT VERIFIED |
+| E producer ingress / compiler publication | `04-memory-compiler/phase-3.6-bih-identity-consumer-acceptance.md` | `6131b3bda825c08097cde12fe14dae2d376bd7bb` | `6f4100618695fcf971560fb784f7887a72798c96` | DESIGN-LEVEL ACCEPTANCE; runtime NOT VERIFIED |
+
+The accepted contract explicitly covers PrincipalRef, ActorRef, Producer/Adapter identity, ScopeRef, EnvironmentRef, protected H transport binding, current PermissionEpoch, revocation ordering, forged payload identity rejection and fail-closed Unknown/Unsupported behavior. It also adopts I's single-use `CommitAuthorizationReceipt` binding and distinguishes `COMMIT_WON` authorization ordering from Storage visibility commit. D continues to validate its own ForgetFence independently; E continues to require the final visibility gate and Storage durable publication receipt.
+
+The exact source artifacts used were B typed identity closure Blob `0a6b78a842e550b58533b797cdfcd2d954ed6826`, H authenticated protected-operation binding Blob `9845c97ac43d7888732afafe12e28850ec02add8`, and I joint trust policy Blob `0cbf6bb7480db873790c454817593a9b1c5548ba` plus I execution addendum Blob `1f5d2e4aba7afa75c0696f3c8f025b0cb903e0ad`.
+
+**I register remains OPEN:** I's current acceptance register must explicitly recognize the D and E owner artifacts. No I approval is inferred. JF-10 remains P0 OPEN; GOV-01..10 remain GOVERNANCE-BLOCKED; Inventory Seal and Global Forget CEV remain CANDIDATE; D/E runtime tests and I36 remain NOT RUN / NOT VERIFIED. No final gate or Contract Freeze is claimed.
+
+## JF-10 response monitoring
+
+Issue #4 was re-read after the formal DE-S request. It remains OPEN. The returned comment set contains DE-S-authored follow-ups only; no I Owner ACCEPT / REVISE / BLOCK disposition or I-owned recovery artifact was found in this read. The request is outstanding; no duplicate comment was posted in this cycle.
