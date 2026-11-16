@@ -416,3 +416,17 @@ Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Do not require produ
 Architecture Gate A must close the complete storage design contract: engine/version/profile rationale; isolation, D fence/lineage locks and visibility; prepared-XID durability and recovery; atomic VisibilityPointer/PublicationReceipt/owner outcome/receipt-consumption/outbox; authoritative reads and stale replica exclusion; PITR/WAL prefix continuity and fail-closed restore; HA/fencing/rejoin; failure-domain/topology constraints; and future implementation/operations conformance criteria (including RPO/RTO and named operational ownership). Unspecified items remain design gaps and must be resolved in architecture artifacts.
 
 **Gate transition:** Gate B COC persistence/quorum log/participant registry/recovery-cutoff design may proceed now, in parallel with closure of remaining Gate A design specifications. This is design authorization only. Gate C's full implementation fault-injection campaign remains for the engineering phase after Gate B protocol design and executable implementation are available. JF-10 P0 remains OPEN; no implementation, deployment or production activation is implied. Production activation NOT AUTHORIZED.
+
+
+## 19. Strengthened PITR target-segment and authoritative-reader fixture — PASS (2026-11-17)
+
+Storage updated the prepared-XID PITR probe to verify the exact archived WAL segment for each recovery target, not only the prepared boundary. The probe now emits target LSN, timeline and required WAL filename for prepared/COMMIT/ROLLBACK cuts; its fixture authoritative-reader view rejects pointer-only and receipt-only states; and each missing/corrupt/incomplete negative case asserts the exact required segment and confirms no writable/authoritative service is exposed.
+
+- Probe Blob: `9d2a85f9a5d53f91df247a310c38377e563d259d`
+- Run: `43957910909`; job: `133617253176`; SUCCESS.
+- Commit: `2d476dd32ac020d329e8290ee2aaaa1f0c057c92`.
+- Target LSN / timeline / required WAL: prepared `0/5004710` / `1` / `000000010000000000000005`; COMMIT `0/6000000` / `1` / `000000010000000000000006`; ROLLBACK `0/6000110` / `1` / `000000010000000000000006`.
+
+Raw logs confirm exact target WAL archival, prepared XID/private/lock state, pointer+receipt joint visibility, rollback absence, pointer-only/receipt-only reader rejection, and missing/corrupt/incomplete exact-WAL fail-closed behavior without writable or authoritative service.
+
+The reader is a synthetic SQL view in the isolated probe, not the production Canonical Authority adapter. Production runtime/adapter binding, real I/D ledger integration, off-site/immutable archive, cross-zone durability, real fencing, operator/runbook and RPO/RTO remain open. Gate A remains PARTIAL PASS / OPEN; Gate B/C remain BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
