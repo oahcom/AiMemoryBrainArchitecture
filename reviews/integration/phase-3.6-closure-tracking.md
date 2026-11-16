@@ -694,3 +694,25 @@ Decision requests:
 - Issue #2 comment `6920327101`: Storage/Consistency exact decision request for the coordinator durability, restore, retention and operator model, in addition to the existing JF-10 publication transaction review.
 
 Current status remains: CGH-APPLIED-1.1 candidate / owner decisions pending / not frozen. Coordinator proposal committed and read back, but operator and infrastructure not designated. Storage acceptance pending. COC-01..12 and consumer race suites specified / not run. Production causal proof not verified. G8 BLOCKED; G9 NOT RUN; G10 BLOCKED.
+
+## CGH-APPLIED-1.1 exact Owner decision reconciliation — 2026-11-16
+
+A independently re-read the six Owner artifacts from their respective Owner branches. Every decision below is explicitly pinned to the same exact A candidate package Blob `9808b31f840606b329f1a794935dfc9c5084d63b` (`CGH-APPLIED-1.1`, `CausalOrderProfile/1.0`, H target `bmcp.applied-ack/1.1.0`). This is not an approval transfer from 1.0.
+
+| Owner | Exact-version decision | Owner artifact | Verified readback Blob SHA |
+|---|---|---|---|
+| C | ACCEPT WITH ENUMERATED EXCEPTIONS — actual provider boundary/CSubmitOutcome | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `5723dba00de54fcd73552d9b82734a8c044550ec` |
+| D | ACCEPT WITH ENUMERATED EXCEPTIONS — fence cutoff, lineage and participant barrier | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `744b99942cdee437b85fdde90ff61ff09c391b05` |
+| I | ACCEPT WITH ENUMERATED EXCEPTIONS — single-use authorization receipt and revocation cutoff | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md` | `bb4987268381bcb8485276c2d4e4906fe1e20b03` |
+| H | ACCEPT WITH ENUMERATED EXCEPTIONS — 1.1.0 transport/schema candidate mapping | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `6686510bb8d8265d86ce9249286de8f49d90d178` |
+| G | ACCEPT WITH ENUMERATED EXCEPTIONS — 1.1 Full Applied predicate and historical/current-use split | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `a96c61fe203e9e02921d4360d6cac17ad6a7b506` |
+| B | APPROVE — typed-reference semantics and role-preserving bindings | `02-domain-model/phase-3.6-b-owner-formal-actor-scope-environment-type-mapping-confirmation.md` | `ac9a092b467f78f2122f4adf08d7ba445e40e927` |
+
+### Gate interpretation and remaining blockers
+
+- The six requested Owner decisions are RECORDED against one exact A package Blob. Each Owner retains its own enumerated authority exceptions.
+- H `bmcp.applied-ack/1.1.0` remains a schema candidate, NOT production-frozen, deployed or interoperably verified; crypto/key lifecycle still requires I/Security governance approval.
+- C/D/I sequencers and the common coordinator/participant registry are specifications, not verified deployed services. Accountable coordinator/Storage operator, durable store, HA/failover/restore, retention and recovery acceptance remain OPEN.
+- G's decision is a contract/predicate acceptance, not proof that its validator or Applied persistence consumes the complete 1.1 evidence set.
+- C-CO/I-CO/D-CO/H36-CO/G conformance remains SPECIFIED / NOT RUN. Production causal proof and implementation remain NOT VERIFIED.
+- Therefore Applied Contract Frozen = NO; G8 remains BLOCKED, G9 NOT RUN, G10 BLOCKED. No branch merge or production activation is authorized.
