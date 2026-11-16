@@ -1051,3 +1051,21 @@ The ten passing tests cover valid terminal bridge lifecycle, changed-XID conflic
 **Evidence boundary:** this PASS is limited to the dependency-free in-memory Python semantic reference validator and its ten unit tests at commit `bd104eaf...`. It does not validate JSON Schema at runtime, canonical-byte/duplicate-key parser enforcement, cryptographic signatures, COC quorum/prefix, authoritative live I/D/Storage lookups, real DB prepared-XID/lock durability, provider idempotency, crash/failover/restore, cross-process interoperability or production integration. JF10-COC-01..10 and C-CO/H-JF10 production conformance remain NOT RUN; JF-10 P0 remains OPEN; implementation/deployment NOT VERIFIED; multi-PolicyDomain atomicity BLOCKED.
 
 The CI run was read back from GitHub Actions, including all five job steps and full test log. This replaces the prior §13.18 statement that no run result had yet been observed; the historical note is retained as the state at the time it was written.
+
+
+## 13.20 JF-10 exact bundle and implementation gates — 2026-11-17
+
+| Gate | Verified state | Evidence / next action |
+|---|---|---|
+| C exact complete JF-10 ↔ COC bundle acceptance | **ACCEPT** | C artifact Blob `45a48249717c8cddb07ab96197730ef93d406c22`; exact A/I/D/Storage/common-protocol/H bundle pins recorded in C decision. |
+| D exact A COC architecture acceptance | **ACCEPT** | D artifact Blob `5a56c406578fdf257509315eb3f6f3f75456116c`; D-owned fence/barrier semantics accepted with authority reservations. |
+| Storage exact A COC architecture acceptance | **ACCEPT** | Storage artifact Blob `55c01f4512f2e3d8aac767dd004e768ae073178e`; same-XID participant/visibility contract accepted subject to concrete DB capability proof. |
+| D complete multi-artifact bundle confirmation | **PENDING** | Current D artifact does not independently pin common D/Storage v2 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0` as part of the same full bundle. Issue [#9](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/9). |
+| Storage complete multi-artifact bundle confirmation | **PENDING** | Current Storage artifact does not independently pin common D/Storage v2 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0` as part of the same full bundle. Issue [#9](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/9). |
+| Real DB prepared-XID/lock/visibility capability | **OPEN / NOT VERIFIED** | Issue [#10](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/10): require exact engine/version/config, executable prepared-XID and same-XID crash/failover proof, atomic visibility and restore evidence. |
+| Persistent COC coordinator/quorum/prefix/recovery batch | **OPEN / NOT VERIFIED** | Issue [#10](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/10): require selected implementation/operator, durable quorum log, participant registry, recovery-cutoff batch, restore fencing and restart evidence. |
+| Deterministic JF-10 crash/fault recovery tests | **SPECIFIED; NOT RUN** | Issue [#10](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/10) enumerates durable-boundary crashes, owner cutoff races, provider UNKNOWN, outage, stale prefix, partial restore and invariant evidence. |
+| In-memory semantic reference CI | **PASS — LIMITED SCOPE** | §13.19: 10 tests passed at `bd104eaf...`; does not prove real DB, COC quorum, signatures, provider idempotency or crash/failover/restore. |
+| JF-10 P0 / production activation | **OPEN / NOT AUTHORIZED** | No implementation/deployment/conformance claim; multi-PolicyDomain remains BLOCKED. |
+
+A does not infer Owner decisions from an issue request. D and Storage full-bundle confirmation will be marked complete only after each append-only Owner decision is fetched from its own branch and exact Blob SHA is verified.
