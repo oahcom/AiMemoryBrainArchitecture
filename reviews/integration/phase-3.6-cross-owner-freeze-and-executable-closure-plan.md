@@ -1016,3 +1016,19 @@ A has added a dependency-free Python reference semantic validator and 10 unit te
 The validator checks five-message lifecycle order, immutable tuple equality, preallocated/same XID binding, exact COC prepare references, durable-private/locked prepared state, I terminal and revocation evidence, Storage COMMITTED versus ROLLED_BACK proof requirements, reconciliation against I/Storage lookup outcomes, D barrier terminality, and single-PolicyDomain scope. Ten tests cover valid terminal lifecycle and nine negative/conflict cases.
 
 CI is configured to compile and run the unittest suite on pushes to the A Owner branch affecting the test/workflow paths, pull requests, or manual dispatch. The GitHub workflow has been committed and fetched back; **a GitHub Actions run result has not yet been observed**, so tests remain NOT RUN / NOT VERIFIED in this ledger. The validator explicitly does not verify cryptographic signatures, COC quorum, owner-authoritative lookups, provider idempotency or real Storage engine behavior. Those remain integration/runtime gates.
+
+
+## 13.19 JF-10 COC semantic validator — first GitHub Actions execution PASS
+
+A refreshed the workflow run collection and fetched the exact job steps and logs for the semantic validator CI:
+- Workflow: `.github/workflows/jf10-coc-semantic.yml`, Blob `5efdb89804fd5b1f69da66a36fdaf93c6c2546f9`.
+- Workflow run: [`43904569127`](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43904569127), event `push`, branch `session-a-integration-2026-11-16`.
+- Tested head commit: `bd104eaf63c7234a45fd780d484bc41ae15dd988`.
+- Job: `semantic-validator`, job ID `133429825688`, conclusion **SUCCESS**.
+- Both `py_compile` and the unittest step completed successfully. Logs report **Ran 10 tests; OK**.
+
+The ten passing tests cover valid terminal bridge lifecycle, changed-XID conflict, prepared receipt exact-XID binding, mandatory I revocation cutoff proof, commit visibility/PublicationReceipt requirement, rollback non-publication/no-publication-receipt rule, D barrier terminality, UNKNOWN not promoted to terminal I, multi-PolicyDomain rejection, and reconciliation consistency with authoritative owner lookup outcomes.
+
+**Evidence boundary:** this PASS is limited to the dependency-free in-memory Python semantic reference validator and its ten unit tests at commit `bd104eaf...`. It does not validate JSON Schema at runtime, canonical-byte/duplicate-key parser enforcement, cryptographic signatures, COC quorum/prefix, authoritative live I/D/Storage lookups, real DB prepared-XID/lock durability, provider idempotency, crash/failover/restore, cross-process interoperability or production integration. JF10-COC-01..10 and C-CO/H-JF10 production conformance remain NOT RUN; JF-10 P0 remains OPEN; implementation/deployment NOT VERIFIED; multi-PolicyDomain atomicity BLOCKED.
+
+The CI run was read back from GitHub Actions, including all five job steps and full test log. This replaces the prior §13.18 statement that no run result had yet been observed; the historical note is retained as the state at the time it was written.
