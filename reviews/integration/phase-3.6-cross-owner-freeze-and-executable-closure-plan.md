@@ -1032,3 +1032,20 @@ The ten passing tests cover valid terminal bridge lifecycle, changed-XID conflic
 **Evidence boundary:** this PASS is limited to the dependency-free in-memory Python semantic reference validator and its ten unit tests at commit `bd104eaf...`. It does not validate JSON Schema at runtime, canonical-byte/duplicate-key parser enforcement, cryptographic signatures, COC quorum/prefix, authoritative live I/D/Storage lookups, real DB prepared-XID/lock durability, provider idempotency, crash/failover/restore, cross-process interoperability or production integration. JF10-COC-01..10 and C-CO/H-JF10 production conformance remain NOT RUN; JF-10 P0 remains OPEN; implementation/deployment NOT VERIFIED; multi-PolicyDomain atomicity BLOCKED.
 
 The CI run was read back from GitHub Actions, including all five job steps and full test log. This replaces the prior §13.18 statement that no run result had yet been observed; the historical note is retained as the state at the time it was written.
+
+
+## 13.20 JF-10 exact bundle confirmation and physical realization gates — 2026-11-17
+
+A refreshed the C, D, Storage and A Owner artifacts before this reconciliation. Exact readback:
+- A COC architecture §12.1–12.8: Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`.
+- C exact complete bridge acceptance: Blob `45a48249717c8cddb07ab96197730ef93d406c22`; C names A, I, D, Storage, common D/Storage v2 protocol and H mapping members and accepts with enumerated C-owned conditions.
+- D exact A-architecture acceptance: Blob `5a56c406578fdf257509315eb3f6f3f75456116c`; D confirms D-owned fence/barrier semantics and authority reservations.
+- Storage exact A-architecture acceptance: Blob `55c01f4512f2e3d8aac767dd004e768ae073178e`; Storage confirms the participant/XID/visibility contract subject to actual database capability and deployment proof.
+- Common D/Storage JF-10 v2 recovery protocol named by C: Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`.
+- H bridge wire mapping: Blob `1716b23741479740f9e12003cbf2bd1a80c63aab`; H schema candidate: Blob `a8a945cc3623c2907003b93625e3c79742150944`.
+
+**Decision reconciliation:** C's complete-bundle acceptance is verified. D and Storage currently accept the exact A COC architecture Blob, but their read-back decision text does not yet independently pin the common recovery-protocol Blob as part of the complete multi-artifact bundle. Do not promote this to D+Storage complete-bundle confirmation. Issue [#9](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/9) requests append-only exact-bundle Owner decisions naming all member Blob SHAs. Until both Owner responses are read back, status is C=ACCEPT; D=ACCEPT A architecture / full-bundle confirmation PENDING; Storage=ACCEPT A architecture / full-bundle confirmation PENDING.
+
+**Physical realization and verification request:** Issue [#10](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/10) opens the next independent gates: (A) name and prove the concrete DB engine/version/configuration, durable prepared-XID/lock retention, same-XID recovery, atomic visibility and failover/restore; (B) implement/prove persistent COC quorum log, prefix, participant registry and recovery-cutoff batch; (C) execute deterministic crash/fault injection at every durable boundary, owner cutoff race, provider UNKNOWN, outage, stale replica, missing prefix and partial restore.
+
+The previous §13.19 semantic-validator CI PASS remains valid only for its dependency-free in-memory reference model (10 unit tests at commit `bd104eaf63c7234a45fd780d484bc41ae15dd988`). It is not real database, persistent coordinator, provider, crash/failover/restore or production conformance evidence. JF-10 P0 remains OPEN; implementation/deployment NOT VERIFIED; JF10-COC-01..10 and provider fault suites remain NOT RUN; multi-PolicyDomain atomicity BLOCKED; no production activation authorized.
