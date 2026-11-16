@@ -987,3 +987,20 @@ Following H's exact wire-mapping decision (§13.15), H has published a machine-r
 The JSON file was fetched back from H Owner branch and parsed as JSON; it contains exactly five message variants. It expresses common required envelope fields, per-message required fields, state/outcome enums, opaque reference length and SHA-256 syntax, and conditional revocation/Storage outcome requirements.
 
 This is a schema candidate, not production-frozen or generated from an executable IDL pipeline. JSON Schema cannot prove signatures, quorum commit, exact tuple equality across messages, same-XID identity, causal ordering, owner authority or terminal reconciliation. Parser enforcement for duplicate keys/canonical bytes and semantic cross-message validators remain required. SDK generation, cross-implementation interoperability and H-JF10 conformance remain NOT RUN. The architecture/interface Owner-decision gate remains closed; implementation, runtime, DB/provider capability, conformance and production gates remain open. JF-10 P0 remains OPEN.
+
+
+## 13.18 Final exact-version bridge reconciliation — 2026-11-16
+
+The final independent Owner readback set for A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` is:
+- **C ACCEPT WITH ENUMERATED C-OWNED CONDITIONS:** `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`, Blob `45a48249717c8cddb07ab96197730ef93d406c22`.
+- **D ACCEPT:** `03-memory-brain/forget-fence-operation-and-publication-gate.md`, Blob `5a56c406578fdf257509315eb3f6f3f75456116c`.
+- **Storage ACCEPT:** `reviews/storage-consistency/forget-atomicity-storage-realization-review.md`, Blob `55c01f4512f2e3d8aac767dd004e768ae073178e`.
+- **I ACCEPT:** `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md`, Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`, §11.2; single-I-PolicyDomain only.
+- **H ACCEPT (schema candidate):** `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, Blob `1716b23741479740f9e12003cbf2bd1a80c63aab`, §12.10.
+
+H additionally published machine-readable JSON Schema Draft 2020-12 candidate:
+- `08-bmcp-protocol/schemas/bmcp.applied-ack-1.1.0-jf10-bridge.schema.json`, Blob `a8a945cc3623c2907003b93625e3c79742150944`, commit `d1880f9de26e6ec29753ca847989926d8ea5d70e`.
+- H source/disposition document after schema recording: Blob `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248`, commit `08cca6341c3c44ad8502c215eba2b1941a8febb7`.
+- Parsed readback reports five message variants. This remains a candidate; semantic cross-message validation, signature/quorum proofs, SDK generation/interoperability and H-JF10 tests are not established.
+
+**Result: the C/D/Storage joint architecture/interface bridge acceptance is CLOSED WITH ENUMERATED EXCEPTIONS.** This does not close JF-10 P0. Selected DB durable prepared-XID/lock behavior, same-XID crash recovery, COC quorum/operator/deployment, provider idempotency, production conformance, crypto governance and schema interoperability remain OPEN / NOT VERIFIED / NOT RUN. Multi-PolicyDomain atomicity remains BLOCKED. No production activation or merge is authorized.
