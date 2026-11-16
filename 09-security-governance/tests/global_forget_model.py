@@ -79,10 +79,12 @@ class GlobalForgetModel:
             if prior != target:
                 raise Conflict("TargetId is immutable within an inventory epoch")
             return
+        had_seal = self.seal is not None
+        was_terminal = self.state in {"Completed", "CompletedWithPolicyException"}
         self.targets[target.target_id] = target
         self.inventory_epoch += 1
         self.seal = None
-        self.state = "Reopened" if self.state in {"Completed", "CompletedWithPolicyException"} else "Requested"
+        self.state = "Reopened" if had_seal or was_terminal else "Requested"
 
     def seal_inventory(self, *, seal_id: str, digest: str, signer: str, gaps: Iterable[str] = ()) -> InventorySeal:
         if signer != "I-inventory-authority":
