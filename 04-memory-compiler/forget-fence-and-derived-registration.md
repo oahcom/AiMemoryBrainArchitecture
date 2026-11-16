@@ -293,3 +293,50 @@ The evidence bundle proves only the named publication boundary. It is not a glob
 | E-FAULT-16 | Lost RegisterProducerWork ACK | No enqueue/lease until lookup by same ID/digest proves durable registration or rejection | request digest, lookup response, dispatch hold |
 
 These cases are specification acceptance criteria only. No runtime test, fault injection, race execution or implementation conformance is claimed.
+
+
+
+---
+## Phase 3.5 Addendum — Exact D Operation Set Alignment
+
+This addendum supersedes the abbreviated five-row operation inventory in §1 above where D's newer normative operation contract defines additional operations and more precise semantics. D operation source: 03-memory-brain/forget-fence-operation-and-publication-gate.md on session-d-memory-brain-2026-11-16 (blob 2c5b1358ff58f99af838b741a75966ccd07ad088). D's decision log records D35-01 through D35-10. These are D semantic decisions, not proof of a callable API or Storage implementation.
+
+| D normative operation | E consumption / production | D durable result / key semantics | E error/recovery handling |
+|---|---|---|---|
+| RegisterProducerClass | E registers compiler, extraction/consolidation, replay, recompile and other derivative-capable producer classes before accepting derivative work | ProducerClassRegistrationReceipt, ProducerRegistryVersion, ENABLED/DISABLED/QUARANTINED status and effective registry sequence; key class ID + version + digest | Unknown/disabled/incomplete class fails closed; existing work remains tracked after disable. OPEN: global inventory reconciliation with I/A and exact H/B identity binding |
+| RegisterProducerWork | E registers stable logical work before queue, lease, source dereference or execution | RegistrationReceipt with ProducerRegistrationSequence, ProducerRegistryVersion, admission fence observation and ACCEPTED/REJECTED/QUARANTINED/CLEANUP_ONLY disposition; key WorkItemId + canonical digest | Same ID/digest resolves same receipt; changed digest conflicts. Registration/fence race follows D's single linearizable order. EventRef-only ingress is supported, but E must link exact canonical refs/revisions once available |
+| InstallForgetFence | D installs; E consumes and reacts | ForgetFenceCursor + installation CanonicalCommitCursor + captured ProducerRegistryVersion + ProducerRegistrationHighWater + target snapshot/watermark + outbox intent; key ForgetOperationId + target/request digest | E must stop/reconcile covered work. Fence installation and registration are one D serialization domain. E does not install or advance fences |
+| CaptureProducerRegistrationHighWater | E consumes the immutable snapshot receipt during reconciliation | BarrierSnapshotReceipt with the exact high-water, registry version, target digest, fence generation and ledger consistency proof; key fence + snapshot key | Repeated capture cannot advance cutoff. Missing/gapped snapshot => UNKNOWN/blocked; never approximate the high-water |
+| RegisterDerivedDependency | E registers every staged artifact and complete lineage before visibility | DependencyRegistrationReceipt + inventory position; key DependencyRegistrationId + canonical digest; complete direct/transitive refs, parent artifact receipts, provenance, scope, fence and permission evidence | Partial/unknown edge set remains private; same key/digest lookup; different digest conflicts; immutable changed lineage requires new artifact version |
+| PublishDerivedIfFenceCurrent | E submits complete gate evidence immediately before visibility | PublicationReceipt binds registration, class/version, work/attempt/lease/run, source revisions, scope, observed + authoritative fence, I PermissionEpoch decision, every dependency receipt, artifact and visibility commit identity; key PublicationOperationId + digest | Gate linearizes with visibility and latest fence + current permission. Fenced/stale/incomplete/permission/storage-unavailable outcomes remain private. No independent check-then-write or delayed unbound token |
+| CompleteProducerWork | E submits terminal disposition only when no publish/replay path remains | ProducerWorkTerminalReceipt, barrier state, unresolved-output count and reconciliation cursor; key WorkItemId + terminal digest | Terminal is monotonic; same digest idempotent; conflict returns terminal conflict. Lease expiry, queue deletion, worker shutdown and DLQ parking are not terminal |
+| ResolveProducerWork | E uses after lost ACK, timeout, crash or restore | Authoritative registration/dependency/publication/terminal receipts, current lease/attempt and barrier membership; read-only key WorkItemId + original registration digest and optional operation IDs | UNKNOWN/ledger unavailable remains fail-closed; lookup never creates work or advances fence; reuse original IDs/digests |
+| ReconcileForgetBarrier | E supplies evidence and consumes D barrier disposition | BarrierReconciliationReceipt with exact high-water, included/terminal/open/expired/DLQ/unknown counts, dependency watermark, late-derivative count, registry gaps and DRAINED/OPEN_WORK/OPEN_DEPENDENCY/REGISTRY_GAP/LATE_DERIVATIVE/UNKNOWN; key fence + snapshot/checkpoint | Append-only checkpoints; any late derivative/gap reopens reconciliation. D asserts D-local barrier only; I decides global completion |
+
+### D operation error semantics consumed by E
+
+E must preserve typed non-success outcomes rather than flattening them into generic retry success:
+
+- Producer class/admission: UNKNOWN_PRODUCER_CLASS, CLASS_DISABLED, REGISTRY_INCOMPLETE, FENCE_CLOSED, FENCE_UNKNOWN, PERMISSION_STALE_OR_DENIED, SCOPE_INVALID, SOURCE_LINEAGE_INVALID, IDEMPOTENCY_CONFLICT.
+- Fence/snapshot: FENCE_STATE_CONFLICT, SERIALIZATION_RETRY_EXHAUSTED, FENCE_NOT_INSTALLED, FENCE_MISMATCH, LEDGER_GAP, SNAPSHOT_UNAVAILABLE.
+- Dependency: WORK_NOT_REGISTERED, WORK_TERMINAL, SOURCE_FENCED, LINEAGE_INCOMPLETE, SCOPE_MISMATCH, ARTIFACT_ID_CONFLICT, DEPENDENCY_NOT_DURABLE.
+- Publication: REGISTRATION_NOT_DURABLE, WORK_NOT_ACTIVE, ATTEMPT_STALE, LEASE_STALE, FENCE_ADVANCED_OR_COVERS_ANCESTOR, FENCE_UNKNOWN, PERMISSION_EPOCH_STALE_OR_REVOKED, DEPENDENCY_NOT_DURABLE, STORAGE_ATOMICITY_UNAVAILABLE.
+- Completion/recovery: OUTPUT_UNRECONCILED, PUBLICATION_UNKNOWN, LEASE_STILL_VALID, REPLAY_STILL_POSSIBLE, TERMINAL_CONFLICT, EVIDENCE_INCOMPLETE, DIGEST_MISMATCH, RECEIPT_NOT_RETAINED, LEDGER_UNAVAILABLE, DEPENDENCY_INVENTORY_GAP, RECONCILIATION_UNAVAILABLE.
+
+The above error names are D's semantic vocabulary; exact transport/wire encoding and API exposure remain OPEN. E may map them internally only while preserving the original typed reason and retryability.
+
+### Additional exact linearization rules
+
+- RegisterProducerClass linearizes at durable registry-version/status commit; work admission must observe an enabled committed version.
+- RegisterProducerWork linearizes at durable work-ledger insertion in the same ordering domain as InstallForgetFence; ProducerRegistrationSequence is assigned only there.
+- InstallForgetFence linearizes at one durable canonical transaction that makes the fence effective and captures registry version + work high-water.
+- CaptureProducerRegistrationHighWater is a consistent snapshot read tied to the install transaction/version; it verifies but never changes the immutable cutoff.
+- RegisterDerivedDependency linearizes at durable commit of the artifact record and all required dependency edges; partial edge persistence is not success.
+- PublishDerivedIfFenceCurrent linearizes at the single durable visibility commit, with current fence, dependency/registration state and I authorization validated at that point.
+- CompleteProducerWork linearizes at durable D terminal-disposition commit after evidence validation.
+- ResolveProducerWork is a consistent read and must return UNKNOWN if authoritative current state cannot be established.
+- ReconcileForgetBarrier is a consistent, versioned snapshot across barrier ledger, dependency inventory and target inventory; a DRAINED result applies only to those checkpoints.
+
+### Typed sequence namespace correction
+
+ProducerRegistrationSequence / ProducerRegistrationHighWater and ProducerRegistryVersion are D-owned, distinct from CanonicalCommitCursor. They must be stored as typed values and never substituted for or numerically compared with CanonicalCommitCursor, AggregateRevision, LifecycleEventCursor, ForgetFenceGeneration, PermissionEpoch, IndexWatermark or ContextVersion.
