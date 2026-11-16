@@ -181,3 +181,21 @@ No branch merge, production activation, architecture freeze, test PASS or Global
 A re-fetched the current C/D/I/H Owner artifacts after the previous candidate publication. The current H schema source pin is now `5cbf0bb548a46671054cb22c6fab3c3d007365d4` (branch `session-h-bmcp-protocol`), superseding the earlier H pin `a23b9a879a3ec0e212645a8247a6797bd0055360`. The normative C/D/I source pins remain C `f2c5b379cacfedd81500e8496d3053b628e144a0`, D `317a9bc170c5a66720f738bf24bbf93c87385887`, and I `71779133a4f95d63a24c4c7e606af174763366f1`. This is a source-reference reconciliation, not a new H acceptance or deployment claim.
 
 The current G Applied contract and B typed-reference confirmation were also re-read. Their published semantic decisions are not an explicit acceptance of this exact CGH-APPLIED-1.1 candidate. G and B exact-version decisions remain required. No C/D/I/H exact-package acceptance is inferred from their component specifications. Coordinator/Storage operator acceptance and deployment remain absent; all causal-order suites remain NOT RUN.
+
+
+## 9. Coordinator deployment and durable recovery profile — A proposal
+
+The companion deployment architecture is:
+- `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`
+- Blob `3f302a333f413e6ea7d5cbf1fe06473be6228a09`
+- Commit `a3e17f4f77d980bafab4268f8825a1cd61371d6e`
+
+The proposed initial realization is one logical Causal Order Coordinator backed by one strongly consistent append-only consensus log, with a target three-voter/two-quorum deployment across independent failure domains. The log's committed position is returned only after durable quorum commit. Minority partitions fail closed. Initial v1 deliberately avoids sharding and cross-log transactions.
+
+Storage/Consistency is proposed as infrastructure custodian for log replication, durable snapshots, restore fencing, retention and operational SLO. This is not a designation or Owner acceptance; Storage must name the actual operator and approve actual failure-domain placement, durability class, RPO/RTO, backup, retention, restore and key-custody interfaces.
+
+The coordinator records request cutoffs, participant intents, owner-issued I/D terminal evidence, finalized reservations, C actual submit outcomes and terminal proofs. It does not mint owner decisions. Unresolved participants are non-expiring. Unknown provider outcome remains IN_DOUBT and is reconciled under the same transaction/reservation/idempotency key. Unprovable restore enters RESTORE_FENCED; no new intents, reservations, barrier releases or Full Applied until reconciliation.
+
+The initial profile rejects unsupported multi-policy-domain authorization and any multi-domain fence operation for which an atomic request cutoff cannot be guaranteed. No partial registration, heuristic terminalization, TTL barrier release, or 1.0 downgrade is permitted.
+
+This deployment profile is **PROPOSED / NOT DESIGNATED / NOT DEPLOYED**. Storage, C, I, D, H, G and Security/Governance must explicitly accept or amend the exact companion artifact before production activation. COC-01..12 and consumer race suites remain SPECIFIED / NOT RUN.
