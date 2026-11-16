@@ -124,3 +124,59 @@ Next sequence:
 3. A reconciles the Applied package/companion manifest and publishes one canonical exact pair.
 4. G and all affected Owners reaccept the canonical pair where the exact companion changed.
 5. A updates the integration gate vector; P refreshes the central registries.
+
+
+## 8. Superseding live refresh — 2026-11-17
+
+The branch-head table and status statements above are historical. Use this section together with the current Unified Remediation Register and Module Baseline Rollout Tracking for current status.
+
+### 8.1 Current observed refs
+
+| Role | Branch | HEAD |
+|---|---|---|
+| A | session-a-integration-2026-11-16 | bccd8769e981310b85da4974fb4af98e41f9f374 |
+| B | session-b-domain-model-phase3 | 310f305575d6f406e80d5d6ebf951bcd9e79e35f |
+| C | session-c-agent-integration-2026-11-16 | 018de5044810e755d4e21cb21e982526c27eb9a8 |
+| D | session-d-memory-brain-2026-11-16 | a3ea0de75ca7b2297589293ec142f2cb07757282 |
+| E | session-e-memory-compiler-2026-11-16 | 5fb76b666fac49ceeb51ddb7c320fe5975313d99 |
+| F | session-f-memory-runtime | e4c26214b8f78169c0e20f1faae23f945c3afeb9 |
+| G | session-g-memory-context | b0c515399c6a336dcbf17a1ced6925413c804d5c |
+| H | session-h-bmcp-protocol | 26378ea59675f31ac0455d745e9cbedab898db8c |
+| I | session-i-security-governance-2026-11-16 | ba0d1dfcca9392f3a20c405169c83b41da3f12b7 |
+| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | 337fe8bffa178e64ad8e4750f1ede1d561424edc |
+
+### 8.2 TAB-001 status correction
+
+All eight B/C/D/E/F/G/H/I Owner technology reports now exist on their respective branches. A's final system review has a §19.4 CONDITIONAL PASS reassessment. Its front matter still says NOT REVIEWABLE, earlier §2.2 still says B/D/E/I missing, and its §19.2 source manifest has stale H/I branch heads. Treat the later conditional reassessment as the current verdict, but require A to consolidate the report before it is treated as a clean final record.
+
+### 8.3 Current COC/JF-10 exact-version boundary
+
+- COC protocol Blob 4ac63... has a complete role-based acceptance matrix from A/B/C/D/E/G/H/I/Storage with enumerated exceptions.
+- COC protocol Blob 86ff3... is the amended current protocol. Storage accepts with conditions. A's Prepared GID review is ACCEPT WITH ENUMERATED AMENDMENTS; H's strict wire review and I's signature/trust review are CANDIDATE / NO APPROVAL. These A/H/I review artifacts explicitly state they are coordinating-session role simulations, not independent signatures.
+- Storage Design v2 Blob 4ed423... is the current fresh review target. It adds the R1–R6 disposition, recovery completion, repeated cutoff batches, owner-local gate release and the PreparedTransactionGID/native-XID distinction. Issue #16 remains open; no independent exact-v2 acceptance is recorded.
+- Issue #14 remains open: Storage's v2 disposition does not substitute for independent I/D/C/H decisions on A's R1–R6 findings.
+- Issue #15 remains open for the amended protocol Blob 86ff3....
+- Issue #17 tracks the dual-blob Prepared GID / JF-10 / trust / wire review. Role-based A/H/I reviews are not independent acceptance.
+- The common JF-10 protocol Blob 9467... and H schema candidate Blob a8a9... still use generic/opaque XID references. Storage v2 §7.5 distinguishes PreparedTransactionGID and NativeXidObserved, but the common protocol, Storage readiness §26.2, B typed model and H schema still require alignment.
+
+### 8.4 Latest executable evidence
+
+- Storage PostgreSQL 18.7 capability suite: 7/7 PASS; isolated capability evidence only.
+- F anti-resurrection reference model: 19/19 PASS; logical model only.
+- H JF-10 schema + strict JSON parser: 23/23 PASS; candidate schema/parser only.
+- I Global Forget reference model: 30/30 PASS; logical model only.
+- COC in-memory outage model and JF-10 semantic validator remain separate reference suites (11 and 18 tests respectively); neither is a production distributed service.
+
+### 8.5 Context optimization / Observation Archive
+
+A's final context-optimization package records eight non-A Owner perspectives as ACCEPT WITH CONDITIONS. This is a conditional design-level acceptance, not unconditional interface freeze, module baseline adoption, F/G joint Recall contract acceptance or runtime conformance. A's older context decision register and closure tracker still need synchronization. F/G module baseline proposals remain PROPOSED and need Owner-authored updates for Observation Archive/Recall and TSS/ObservationRef/compaction/fidelity/lineage-loss semantics.
+
+### 8.6 Governance and integration boundary
+
+- B Fact/Claim ADR-001 remains ADR-BLOCKED.
+- I36-GOV-01..10 is a proposal only; Global Forget remains GOVERNANCE-BLOCKED / NOT COMPLETED.
+- JF-10 P0 remains OPEN; Multi-PolicyDomain remains BLOCKED; Gate C is DEFERRED_TO_ENGINEERING_PHASE.
+- All nine module baseline proposals remain PROPOSED / NOT APPROVED.
+- Project G0 / architecture freeze remains NOT AUTHORIZED; no PGA appointment evidenced.
+- P/main are diverged (P ahead 73 / behind 4 at this refresh). No merge, force update, main write or Owner-branch write by P.
+
