@@ -152,7 +152,7 @@ def main() -> None:
                       (xid, f"artifact-{xid}"))
             c.execute("INSERT INTO jf10_publication_receipt VALUES (%s, %s, %s)",
                       (xid, f"artifact-{xid}", f"receipt-{xid}"))
-            c.execute("PREPARE TRANSACTION %s", (xid,))
+            c.execute(f"PREPARE TRANSACTION '{xid}'")
     prepared = psql("SELECT gid FROM pg_prepared_xacts ORDER BY gid")
     assert xid_commit in prepared and xid_rollback in prepared, prepared
     print("PREPARED_XIDS_CREATED=PASS")
