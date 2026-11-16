@@ -1142,3 +1142,44 @@ Observed:
 A therefore did **not** infer SQLite as the JF-10 target. No accessible artifact establishes a selected Canonical Authority DB, prepared-XID durability, cross-process lock retention, same-XID recovery, atomic visibility/receipt transaction, or failover/restore capability. The discovery and boundary were recorded in Issue #10 comment 6922191590.
 
 **Gate A remains BLOCKED pending Storage's explicit candidate and accountable operator selection plus executable capability proof.** Gates B/C remain blocked; JF-10 P0 OPEN. This inventory does not prove that no other runtime repository or deployment exists.
+
+
+## 13.25 JF-10 Gate A PostgreSQL 18.7 physical capability update — 2026-11-17
+
+This section supersedes the earlier §13.24 statement that no concrete database candidate or executable physical capability evidence had yet been established. The earlier inventory remains historically accurate as of its inspection time; Storage has since selected a pinned candidate qualification profile and executed a real database probe.
+
+### Gate 0 — complete
+
+- D complete-bundle decision: Blob 4da0b61ba3656a768ea56b4a2a24e09da4e21cd5; commit 1460fbd17ee38ea4044dc6c75cfe49039c7fc585.
+- Storage complete-bundle decision: Blob 67d5d9b7c1f7979f5dda417ca30bb4b6f521cb45; commit a231b74e1ff3742435548ffe4efbcdeb8a59fccf.
+- Both decisions pin the same common protocol Blob 94679897e84a6f58fd8b9467b5249e1a885cb0b0 and the same A/I/C/H bridge package. Issue #9 is CLOSED / COMPLETED.
+
+### Gate A — PARTIAL PASS / OPEN
+
+Storage selected PostgreSQL 18.7 as the candidate engine for capability qualification and ran a physical single-node CI probe:
+
+- Exact image: postgres:18.7; observed build 18.7 (Debian 18.7-1.pgdg13+2).
+- Image digest: sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc.
+- Settings: max_prepared_transactions=16; fsync=on; synchronous_commit=on; full_page_writes=on; wal_level=replica.
+- Probe Blob: c15ea6e66a15be2fb96f737769f58b7b6c224b7e.
+- Workflow Blob: 4eef5b24f6da1d596c34e0d072dc39d5008a1a25.
+- Successful run: 43907296027; URL https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43907296027.
+- Head commit: 8c9ef00364d93c383aba515923565f8dc04bf1b6; job ID 133439447210.
+
+The raw run log proves, for this single-node CI profile only: prepared state invisible; row lock retained; abrupt container/postmaster SIGKILL + restart using the same named volume; same prepared XID survives; same-XID COMMIT PREPARED exposes VisibilityPointer and PublicationReceipt together; same-XID ROLLBACK PREPARED leaves both absent.
+
+Storage dossier: reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md. The candidate profile and evidence are also recorded in Storage's deployment-readiness and realization artifacts. Issue #10 comment 6922291995 records the run and limits.
+
+**Remaining Gate A blockers:** synchronous standby replication, promotion/failover and prepared-XID resolution after primary loss; backup/restore and current Forget-control-ledger replay; production storage semantics and actual Canonical Authority deployment topology; named human production on-call/operator. wal_level=replica is not proof of replication. Storage DB Platform Operator is the accountable technical role for candidate qualification; the production on-call identity is not designated.
+
+### Strict sequence
+
+| Gate | Status |
+|---|---|
+| Gate 0 — D + Storage exact complete-bundle decisions | CLOSED |
+| Gate A — PostgreSQL candidate capability | PARTIAL PASS / OPEN |
+| Gate B — persistent COC/quorum log | BLOCKED until Gate A passes |
+| Gate C — deterministic end-to-end fault campaign | BLOCKED until Gate B passes |
+| JF-10 P0 / production activation | OPEN / NOT AUTHORIZED |
+
+The successful PostgreSQL run is not an application participant implementation, COC persistence, I sequencer, provider integration, HA/failover, restore, or end-to-end conformance result. No production activation is authorized; multi-PolicyDomain atomicity remains BLOCKED.
