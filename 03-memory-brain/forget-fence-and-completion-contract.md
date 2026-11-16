@@ -171,3 +171,16 @@ Publication evidence binds WorkItemId/AttemptId, ProducerClass, source MemoryVer
 ### 10.4 Status
 
 D operation semantics and required race outcomes are DECIDED as a domain contract. E mapping, I authorization decision semantics, global producer inventory completeness and Storage/Consistency realization remain OPEN. No Storage/Consistency Owner was established in the reviewed package; this is an explicit OPEN ownership gap. Design conformance cases are specified but NOT RUN. This section does not close INT-P0-03 or assert end-to-end Forget completion.
+
+
+---
+
+## Phase 3.6 normative addendum — atomicity boundary
+
+The D-owned operation-level Phase 3.6 linearization, Producer Work state machine, Fence/Permission dual-validation rules, implementation-neutral Storage semantic requirements, 12-case Fault/Race Proof Matrix and D/E/Storage OPEN Decision Register are specified normatively in [forget-fence-operation-and-publication-gate.md](forget-fence-operation-and-publication-gate.md), **Phase 3.6 — Forget Fence Linearization & Atomicity Semantics**.
+
+The unique safety invariant is: no derivative may become retrievable, deliverable, indexable, inferable or otherwise visible unless its logical Producer Work is durably registered and accounted for by every applicable Forget barrier, its complete dependency lineage is durable, and the final visibility commit validates the latest applicable D ForgetFence and current I authorization/PermissionEpoch for the authenticated Principal and exact Scope. Unknown or stale evidence is non-visible.
+
+Work Registration, Barrier Capture, Dependency Registration, Staging, Publish Authorization, Durable Commit, Artifact Visibility and Terminal Disposition are separate evidence-bearing stages. Barrier capture accounts for pre-fence work; it is not publication permission. Lease expiry, queue deletion, retry delay and DLQ parking do not terminalize work.
+
+D defines domain semantics and observable ordering only. Storage may choose any realization that proves the same linearization and crash-recovery behavior; this addendum does not approve a database or claim implementation. **CR-P1-01 remains OPEN pending E + Storage joint confirmation and executable evidence.**
