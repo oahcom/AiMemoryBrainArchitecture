@@ -1491,7 +1491,7 @@ Storage owns its dossier/readiness record and must reconcile any stale statement
 
 ## 13.37 Gate A database candidate qualification — PostgreSQL 18.7 CI evidence reconciled; production binding still open — 2026-11-17
 
-A has refreshed the Storage Owner dossier and the Issue #10 execution record. This section supersedes any older tracking text that says no candidate engine has been selected or that the physical capability probes have not run.
+A has refreshed its integration tracking after re-reading the current Storage Owner dossier and Issue #10 evidence. This section supersedes any older tracking text that says no candidate engine has been selected or that the physical capability probes have not run.
 
 ### Candidate decision boundary
 
