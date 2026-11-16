@@ -14,9 +14,11 @@ This summary supersedes historical interim status and “next test” statements
 6. Required synchronous standby unavailable: PREPARE waits on SyncRep; client outcome UNKNOWN; local prepared XID and lock remain; visibility remains private.
 7. WAL-archive PITR to explicit LSN; target state restored, post-target state excluded.
 
-**Still OPEN for Gate A:** production Canonical Authority deployment and DB profile NOT DESIGNATED; production I/D control-ledger integration; production old-primary fencing/STONITH, rejoin control and split-brain prevention beyond the CI pg_rewind rejoin procedure; production host/zone/cloud-volume durability and failover routing/monitoring; backup archive retention and operational restore governance; named production operator/on-call, approved runbook, RPO/RTO and operational acceptance.
+**Remaining Gate A architecture-design items:** exact owner acceptance of the Storage/JF-10/COC protocol set; final storage engine/profile rationale and cross-owner agreement on D fence/lineage serialization, authoritative visibility, participant recovery and restore boundaries.
 
-Gate A remains PARTIAL PASS / OPEN. Gate B remains BLOCKED until Gate A acceptance; Gate C remains BLOCKED until Gate B acceptance; JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED.
+**Deferred to engineering/deployment phase (not Gate A blockers):** production Canonical Authority deployment/runtime binding, live I/D/COC adapter integration, cloud/failure-domain placement, production fencing/routing/monitoring, archive retention/restore operations, named operator/on-call, runbook and measured RPO/RTO. Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`.
+
+Gate A remains PARTIAL PASS / OPEN. Gate B is SPECIFICATION PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED. Gate C is DEFERRED_TO_ENGINEERING_PHASE for executable distributed implementation/fault injection. JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED.
 
 **Owner:** Storage / Consistency  
 **Decision date:** 2026-11-17  
@@ -701,9 +703,9 @@ Storage rechecked the repository's default branch, not only the Storage feature 
 
 Storage also searched the linked GitHub repository catalog for `AiMemoryBrain`, `Canonical Authority`, and `memory runtime`. Only `oahcom/AiMemoryBrainArchitecture` matched the project-specific query; no separate Canonical Authority or memory-runtime repository was identified by those searches. This is a bounded account/repository search, not proof that no external or unlinked repository exists.
 
-**Disposition:** the canonical production runtime, authoritative DB adapter, schema/migration path and deployment manifest remain NOT IDENTIFIED. Storage cannot truthfully claim production adapter conformance or bind the PostgreSQL 18.7 capability fixtures to an application path until A/C/designated implementation owner supplies the immutable implementation repository/commit and runtime entrypoint, or explicitly designates this repository as the implementation home and delivers the missing code.
+**Disposition:** the default-branch tree inventory is accurate, but the project owner confirmed that no production code repository/runtime is expected during the architecture-design phase. Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Production runtime/adapter absence is therefore NOT a Gate A blocker. The exact implementation repository, runtime entrypoint and schema/migration path become engineering-phase binding artifacts; no production adapter conformance is claimed by current CI.
 
-Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED; Gate C remains BLOCKED; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
+Gate A remains PARTIAL PASS / OPEN for architecture specification and exact owner decisions; Gate B is SPECIFICATION PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED; Gate C is DEFERRED_TO_ENGINEERING_PHASE; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
 
 
 ## 28. I-accepted JF-10 v2 Storage bridge — contract-to-evidence gap (2026-11-17)
@@ -730,9 +732,9 @@ I accepts the single-PolicyDomain owner-gate-participating durable 2PC architect
 | D fence/lineage serialization shares the Canonical Authority DB lock domain; barrier cannot close before exact participant resolution | No live D fence/lineage tables or D API used in the probes | **NOT IMPLEMENTED** |
 | Restore reconciles COC prefix, I terminal decision, D fence/high-water and Storage XID before serving | Physical restore and WAL PITR fixtures exist; stale-control fixture uses synthetic local epoch | **PARTIAL** — no authenticated external I/D high-water or RecoveryQuarantined integration |
 
-### Required Storage implementation sequence
+### Required Storage engineering-phase implementation sequence
 
-1. Obtain the exact canonical runtime repository/branch/commit, runtime entrypoint, DB adapter and schema/migration path. The default branch of this architecture repository contains no executable runtime; see §27.
+These are engineering-phase prerequisites, not architecture-phase Gate A blockers. At engineering-phase kickoff, bind the exact canonical runtime repository/branch/commit, runtime entrypoint, DB adapter and schema/migration path; the current architecture repository intentionally contains specifications and fixtures rather than production runtime code.
 2. Bind the production Canonical Authority DB identity and a durable preallocated-XID allocator to the owner PublicationIntent and exact immutable operation tuple.
 3. Implement the Storage-side PreparedParticipantReceipt signer/verifier and idempotent same-XID lookup/recovery. Do not create a replacement XID after lost ACK.
 4. Integrate the COC API/schema for pre-prepare intent registration, prepared-receipt registration, unresolved-participant enumeration, authoritative prefix read and participant-resolution/reconciliation records.
@@ -742,7 +744,7 @@ I accepts the single-PolicyDomain owner-gate-participating durable 2PC architect
 
 No Storage fixture in this dossier is evidence that these bridge integrations exist. Until the production runtime and owner APIs are supplied, the current PostgreSQL 18.7 work remains bounded engine-capability qualification.
 
-Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED; Gate C remains BLOCKED; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+Gate A remains PARTIAL PASS / OPEN; Gate B is SPECIFICATION PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED; Gate C is DEFERRED_TO_ENGINEERING_PHASE; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
 
 ## Current architecture-phase gate correction and latest regression (2026-11-17)
 
@@ -834,3 +836,30 @@ The probe emits and checks the exact target WAL archive file for each target bef
 This probe uses synthetic local tables, a synthetic authoritative-reader view, isolated prepared transactions and disposable Docker volumes. It does not test the real production read path or any live COC, I or D service. It does not prove signed participant receipts, I's owner-final-gate/authorization consumption, COC participant registry/reconciliation, D fence/lineage serialization, authenticated owner high-water quarantine, production archive durability, independent failure-domain fencing or deployment operations.
 
 This PASS supersedes prior FAILURE results for this exact probe revision, not the wider JF-10 gate. Gate A remains PARTIAL PASS / OPEN; Gate B DESIGN-LEVEL ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS (not implementation/conformance PASS); Gate C deferred to engineering-phase executable integration/fault campaign; JF-10 runtime P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+
+
+## 30. Storage exact-owner review — COC durable protocol v1.1 with PostgreSQL participant identity clarification
+
+Storage reviewed the current exact COC durable protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`, commit `71f0c745961cff7f75ef0ba2ac7bfd6f8aeccb66`, including §14's distinction between the preallocated client-chosen PostgreSQL `PreparedTransactionGID` and the engine-assigned numeric native XID.
+
+**Storage decision: ACCEPT WITH CLARIFICATION for the Storage-owned durability, participant registry, recovery and custody responsibilities.** This is Storage's exact-version technical acceptance only. It does not imply A/I/D/C/E/H/G acceptance, implementation, deployment or production activation.
+
+Storage confirms the protocol's architecture boundaries:
+- COC is a three-voter/two-quorum Raft-class append-only ordering and participant-accounting service with quorum-durable receipts, linearizable reads, immutable digest-chained positions, joint-consensus membership change, checkpoints and restore fencing.
+- COC does not decide I authorization/COMMIT/ABORT, D ForgetFence/lineage completion, C provider outcome, or Storage visibility. COC/I/D/Storage/C proof namespaces remain distinct.
+- Storage is the logical COC infrastructure custodian at design level and separately owns the Canonical Authority prepared participant and local atomic visibility transaction.
+- RPO 0 applies only to quorum-acknowledged COC commits under the specified crash-fault model and durable-vote boundary. No numeric RTO or availability SLA is claimed.
+- COC outage requires durable I/D owner-local pending gates and a complete recovery-cutoff batch; no wall-clock ordering is inferred.
+- COC restore requires an externally anchored quorum-certified checkpoint, contiguous committed prefix, participant enumeration, current I/D owner lookups and RESTORE_FENCED on any missing/stale/contradictory evidence.
+
+### Mandatory Storage clarification
+
+The phrase `preallocated XID` in the engine-neutral bridge maps on PostgreSQL to a client-chosen, stable `PreparedTransactionGID` allocated before `JF10_PREPARE_INTENT_REGISTERED`. PostgreSQL's numeric `pg_prepared_xacts.transaction` is allocated by the engine at transaction execution and is recorded as evidence only; it is not the cross-service identity. The Storage-signed PreparedParticipantReceipt binds both identifiers plus CanonicalAuthorityDBRef, PostgreSQL system_identifier, database identity/OID, original prepare timeline/LSN, participant digest, operation tuple, owner boundary and COC intent position. Missing GID from `pg_prepared_xacts` is not by itself proof of commit/rollback; resolution requires the durable participant outcome ledger and authoritative readback.
+
+The exact wire field names/encoding require H review; signer trust/key custody requires I/Security review. Other owner exact-version decisions remain pending. The current COC protocol remains **PROPOSED FOR EXACT OWNER REVIEW / NOT IMPLEMENTED**.
+
+### Correct phase boundary
+
+The project owner confirmed architecture-design phase; no production code repository/runtime is expected yet. Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Runtime/adapter absence is not a Gate A blocker. Gate B is specification published and awaits exact owner review; Gate C distributed implementation/fault injection is deferred to engineering phase.
+
+Gate A remains PARTIAL PASS / OPEN; Gate B is SPECIFICATION PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED; Gate C is DEFERRED_TO_ENGINEERING_PHASE; JF-10 P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
