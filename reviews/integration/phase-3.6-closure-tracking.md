@@ -957,3 +957,17 @@ Issue [#8](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/8) was ref
 A posted reconciliation comment on Issue #8 (comment ID `6921025964`) requesting C's exact-bundle decision and D/Storage clarification that their acceptances cover the complete corrected bundle. Until those responses are read back, the joint Issue #8 gate remains OPEN; do not infer a complete three-owner bridge acceptance.
 
 JF-10 P0 remains OPEN; production implementation and selected DB capability remain NOT VERIFIED; JF10-COC-01..10 remain NOT RUN; multi-policy-domain atomicity remains BLOCKED.
+
+
+## 13.15 JF-10 ↔ COC bridge exact-version Owner reconciliation
+
+A refreshed all controlling Owner artifacts and corrected the exact review bundle in Issue #8:
+- A COC architecture: `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`.
+- I formal decision: `8069ff86988396442c8d9dc3fd58653683abe2f3`, §11.2 ACCEPTS the exact A Blob, single-I-PolicyDomain only.
+- D exact bridge acceptance: `03-memory-brain/forget-fence-operation-and-publication-gate.md`, Blob `5a56c406578fdf257509315eb3f6f3f75456116c`, commit `edf35b8a80bb9d096748dab129cea5867561b5d3`.
+- Storage exact bridge acceptance: `reviews/storage-consistency/forget-atomicity-storage-realization-review.md`, Blob `55c01f4512f2e3d8aac767dd004e768ae073178e`, commit `76ca854aa91db1c7b2fcf0bf4174606624c72a46`.
+- C current contract: Blob `a72a3eb1e5207f67c01f804508311f42db9a6e0a`, but its exact recovery-batch decision pins older A/COC Blobs `4961ffefc0f9920efb8425a9b2a7af42d8f64819` / `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`; it does not decide the amended A architecture Blob above.
+
+**Reconciled Owner status: I = ACCEPT; D = ACCEPT; Storage = ACCEPT; C = PENDING.** C has been explicitly asked on Issue #8 to publish an append-only exact-version decision against A Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`. The request asks C to confirm provider-side-effect ordering, actual provider receipt, idempotency and UNKNOWN/IN_DOUBT behavior. No prior C decision is transferred.
+
+JF-10 P0 remains OPEN. D/Storage acceptance is architecture-level and does not establish selected DB capability, production deployment, COC operator, crash/recovery conformance or production activation.
