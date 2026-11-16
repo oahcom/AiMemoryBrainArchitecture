@@ -3,7 +3,7 @@
 - Authority: user-delegated DE-S Joint Architect acting across D/E/Storage
 - Storage decision owner: DE-S joint architect for logical realization; independent production engineering approval remains required
 - Date: 2026-11-16
-- Status: **LOGICAL DEPLOYMENT PROFILE SELECTED / CONCRETE ENGINE AND RUNTIME DEPLOYMENT BLOCKED**
+- Status: **LOGICAL DEPLOYMENT PROFILE SELECTED / POSTGRESQL 18.7 CI CANDIDATE QUALIFIED / PRODUCTION CANONICAL AUTHORITY DEPLOYMENT NOT DESIGNATED**
 - Baseline: preserve the already-decided D/E/Storage logical Forget Atomicity contract; this record selects its preferred realization and does not reopen its semantics.
 - I dependency: **BLOCKED — I Owner approval requested in repository issue #4; no I policy approval is implied.**
 
@@ -105,15 +105,15 @@ The I Phase 3.6 source currently allows an online authoritative decision or an a
 
 ## 6. Deployment assumptions and unresolved risks
 
-The repository contains Markdown design artifacts only on the inspected main, D, E and Storage tips; no source code, migrations, executable test project, CI workflow, database configuration or runtime deployment manifest was present. Therefore this is a **logical deployment profile selection**, not a concrete product deployment.
+At the initial logical selection, the inspected branches contained design artifacts but no application implementation or deployment manifest. Storage has since added PostgreSQL 18.7 CI capability probes and workflows. This is now a **qualified CI candidate profile**, not a production Canonical Authority deployment or application implementation.
 
 Still OPEN:
-- database product, version, storage engine and schema;
+- production Canonical Authority database product/build, storage engine and schema (PostgreSQL 18.7 is selected only as the pinned CI capability candidate);
 - transaction isolation/strict-serializability guarantee and lock semantics;
-- HA/replication/failover and primary-read consistency;
+- production HA manager, synchronous replication topology, failover/fencing and primary-read consistency (CI two-node capability tests are not production topology proof);
 - transaction size/contention and per-authority throughput limits;
 - object-store private ACL and exposure proof;
-- backup catalog, control-ledger independence and restore procedure;
+- production backup catalog/retention, off-site immutability, control-ledger independence and approved restore/PITR procedure (CI WAL-archive PITR subtest now passes);
 - I authorization permit / revocation serialization contract and governance approval;
 - production migration plan, backfill, dual-read/write, rollback and cutover criteria;
 - named independent Storage engineering approver and operational owner.
@@ -129,14 +129,14 @@ No vendor, SQL dialect, isolation guarantee, deployment topology or migration co
 - **I governance approval:** I/security/privacy/legal/data authorities approve I-owned inventory, authorization, exception and completion policy. DE-S cannot approve it.
 - **Release/production approval:** separate service/product/security/data owners after implementation and test evidence.
 
-## 8. Verification status
+## 8. Verification status — reconciled 2026-11-17
 
-- D36 matrix: **NOT RUN**.
-- E36-01..E36-20: **NOT RUN**.
-- C01–C20: **NOT RUN**.
-- Authorization/revocation, manifest/inventory, read-response/fence, unknown-outcome and restore fault additions: **NOT RUN**.
+**Physical PostgreSQL 18.7 CI capability tests:** PASS for single-node prepared-XID/restart; two-node synchronous promotion and same-XID commit/rollback; physical backup/restore with stale-control fixture; coordinator ACK-gap; TCP ACK-loss; required-standby-unavailable UNKNOWN/private/lock-retention; WAL-archive PITR to explicit LSN.
+
+**Still NOT RUN / NOT VERIFIED:** D36 full module conformance matrix; E36-01..E36-20 application-level tests; C01–C20 end-to-end application conformance; actual I/D service integration; production COC quorum/durable log; production fencing/STONITH and split-brain prevention; production host/zone/cloud-volume durability; production deployment restore and control-ledger replay; operator/runbook/RPO/RTO acceptance.
+
 - Implementation Verified: **NO**.
-- Deployment Implemented: **NO**.
+- Production Deployment Bound: **NO — NOT DESIGNATED**.
 - Production Ready: **NO**.
 
 
