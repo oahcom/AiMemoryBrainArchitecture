@@ -260,3 +260,20 @@ Completed is prohibited while any of the following holds:
 ## 15. Non-claims
 
 This contract does not prove deployed code, runtime suppression, physical media erasure, recipient compliance, backup expiry, restore safety or security test success. It does not define D's atomic fence implementation, E's scheduling, F's IndexWatermark, G's ContextVersion or H's wire/Adapter implementation.
+
+
+---
+
+## Phase 3.5 reconciliation addendum
+
+The detailed I-owned identity and two-layer producer inventory mapping is normative candidate policy in `phase-3.5-global-identity-forget-governance.md` §§2–3. The following clarifications apply to this inventory contract:
+
+1. I's `ProducerDomainInventoryEpoch` covers the global catalogue of producer/recipient classes and instances. D's `ProducerRegistrationHighWater` / per-operation `WorkItemBarrier` covers concrete admitted work for one ForgetOperation. They are separate mandatory evidence references; neither substitutes for the other.
+2. A target inventory entry is not valid merely because a payload or module reports its own ID. Issuer, Principal, instance, ScopeRef coverage and owner must be authenticated and resolved.
+3. Required/optional/NotApplicable status is determined by an approved policy taxonomy and the sealed inventory. A target cannot be downgraded to optional after it fails or becomes Unknown. NotApplicable requires positive evidence of absence and independent review.
+4. H ACK evidence must bind the authenticated Adapter identity and instance, capability epoch/profile, session-at-ACK, exact ScopeRef coverage, managed region/buffer/cache/queue, operation, target, D fence, action and integrity proof. Evidence validity is action-specific; no universal TTL is assumed.
+5. `UNSUPPORTED` remains Unknown unless a valid independent PolicyException exists. It is not a successful clear or purge.
+6. Global evaluation must explicitly include ProducerDomainInventoryEpoch, D barrier reference, late-derivative state, external recipient/onward-copy state, backup restore-control state and physical-erasure state. Missing mandatory evidence blocks Completed.
+7. Any relevant inventory epoch change, late derivative/recipient/backup route, restore resurrection or expired exception invalidates the prior completion evaluation and requires Reopened/resealed evidence.
+
+No new implementation or runtime test result is asserted by this addendum.
