@@ -484,3 +484,18 @@ The physical probe passed PostgreSQL 18.7 PREPARE TRANSACTION, prepared-state in
 **Gate A is PARTIALLY SATISFIED, NOT CLOSED.** The CI profile is single-node. Synchronous standby replication, prepared-XID promotion/failover recovery, backup/restore, production storage guarantees, actual Canonical Authority deployment selection and named human on-call ownership remain open. wal_level=replica alone does not prove a replication topology. The Storage DB Platform Operator role is accountable for this candidate qualification; the production on-call individual remains undesignated.
 
 No Gate B or Gate C work is promoted by this result. Persistent COC remains blocked until full Gate A; end-to-end fault injection remains blocked until Gate B. JF-10 P0 remains OPEN and production activation is NOT AUTHORIZED.
+
+
+## Phase 3.6.2 — Storage PostgreSQL 18.7 synchronous standby failover evidence
+
+Storage's two-node physical capability run succeeded:
+- Dossier: reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md
+- Probe Blob: 23d8ea8546932e592093c5c17cd2b52f8a294720
+- Workflow Blob: f3c05f90c6065458b49879def10dce672685c850
+- CI run: 43908428220 (SUCCESS), commit 7cd416a1f80364fe7de316f19716325b6503cbfa, job 133443444760.
+
+The pinned PostgreSQL 18.7 primary used synchronous_commit=remote_apply and synchronous_standby_names=FIRST 1 (jf10_standby). The standby was observed in streaming/sync state before PREPARE. The test then confirmed prepared WAL replay, primary hard kill, standby promotion, same-XID recovery after promotion, lock retention, and atomic visibility-pointer + PublicationReceipt commit after primary loss.
+
+Important runtime rule: pg_prepared_xacts is empty while PostgreSQL is in hot-standby recovery; the prepared XID must be inspected/resolved after promotion completes recovery. The executable probe asserts this documented behavior rather than treating it as missing data.
+
+**Gate A remains PARTIAL PASS / OPEN.** Rollback-after-promotion, backup/restore, PITR, control-ledger reconciliation before serving restored data, host/zone/storage durability, production failover fencing/routing, actual Canonical Authority deployment and named human production operator/RPO/RTO remain open. This CI topology is not production HA approval. Gate B/C remain blocked; JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED.
