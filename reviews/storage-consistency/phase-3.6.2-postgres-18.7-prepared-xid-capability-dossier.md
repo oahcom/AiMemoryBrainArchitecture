@@ -242,3 +242,41 @@ Remaining NOT VERIFIED:
 - the external I sequencer, COC quorum log, C provider, application Storage participant adapter and end-to-end JF-10 integration.
 
 The backup/restore control epoch in this CI probe is an explicit test fixture standing in for the externally authoritative I/D Forget-control ledger; it proves the fail-closed gate behavior, not production integration with I or D services. Gate B remains blocked until the real production deployment/operator portion of Gate A is accepted. Gate C remains blocked until Gate B.
+
+
+## 13. Coordinator crash-window / unrecorded-ACK recovery — PASS (2026-11-17)
+
+Storage added an independent deterministic coordinator-crash test around three ambiguous outcome boundaries. The test uses the pinned PostgreSQL 18.7 image and a durable SQLite coordinator-ledger fixture. Each child process terminates immediately after the PostgreSQL participant command succeeds but before the coordinator writes the ACK/result to its ledger. A fresh process then reconciles the exact original XID and authoritative participant rows.
+
+Evidence:
+- Probe: reviews/storage-consistency/postgres_probe/jf10_postgres_ack_gap_probe.py
+- Probe Blob: 51cf8c7a9fa169aff8b0a5fd8a7ec5f934ad35a2
+- Workflow: .github/workflows/jf10-postgres-ack-gap-capability.yml
+- Workflow Blob: 7b612223f309ef0b963d262a94845a083e79ec7c
+- Pinned image: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+- Successful run: 43912857694
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43912857694
+- Run head commit: 5f342adb95f95208e8f1e2cc52538cf0944aa9e3
+- Job ID: 133459107145
+- Job conclusion: SUCCESS
+
+Observed raw-log PASS markers:
+- PREPARE_ACK_UNRECORDED_COORDINATOR_CRASH=PASS
+- RECOVERED_EXACT_PREPARED_XID_NO_NEW_XID=PASS
+- PREPARED_VISIBILITY_PRIVATE_AFTER_ACK_GAP=PASS
+- PREPARE_ACK_GAP_THEN_TERMINAL_COMMIT_ACK_GAP=PASS
+- SAME_XID_COMMIT_OUTCOME_RECONCILED=PASS
+- COMMIT_ACK_UNRECORDED_COORDINATOR_CRASH=PASS
+- COMMIT_VISIBILITY_INVARIANT_AFTER_ACK_GAP=PASS
+- ROLLBACK_ACK_UNRECORDED_COORDINATOR_CRASH=PASS
+- SAME_XID_ROLLBACK_OUTCOME_RECONCILED=PASS
+- ROLLBACK_VISIBILITY_INVARIANT_AFTER_ACK_GAP=PASS
+- JF10_COORDINATOR_ACK_GAP_RECOVERY=PASS
+
+The test proves that after a coordinator process dies between participant success and recording the outcome, recovery can inspect the same XID and participant visibility state without allocating a replacement XID. PREPARE ambiguity retains private visibility and the prepared lock; terminal COMMIT ambiguity reconciles to pointer + receipt visible together; terminal ROLLBACK ambiguity reconciles to neither visible.
+
+**Scope limitation:** this is a deterministic process-crash / lost-coordinator-checkpoint window test. It is not a TCP packet-drop or network ACK-loss test, does not use the production I sequencer/COC quorum log, and does not prove production coordinator durability. The SQLite ledger is a CI fixture only.
+
+## 14. Updated Gate A status — participant ACK-gap subtest passed
+
+The PostgreSQL 18.7 CI qualification now includes the four physical capability groups previously listed plus the coordinator ACK-gap recovery subtest. Gate A remains PARTIAL PASS / OPEN because the production deployment binding, real I/D control-ledger integration, production fencing/STONITH and split-brain prevention, host/zone/cloud storage durability, named human operator, approved runbook and RPO/RTO remain unverified. Gate B remains blocked pending full Gate A acceptance; Gate C remains blocked pending Gate B.
