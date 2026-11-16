@@ -18,6 +18,7 @@ class RestoreReceipt:
     d_proof_digests: tuple
     storage_ledger_digest: str
     target_lsn: str
+    target_timeline: int
 
 
 class RestoreModel:
@@ -38,15 +39,21 @@ class RestoreModel:
         self.current_d = {
             "forget-1": {"fence_generation": 4, "effective_position": "d1-8",
                         "request_cutoff": "d1-cut-7", "producer_highwater": 12,
-                        "lineage_digest": "lineage-1", "barrier_state": "COMPLETE"},
+                        "lineage_digest": "lineage-1", "barrier_state": "COMPLETE",
+                        "policy_domain": "pd-A", "inventory_seal_ref": "seal-1"},
             "forget-2": {"fence_generation": 2, "effective_position": "d2-3",
                         "request_cutoff": "d2-cut-2", "producer_highwater": 5,
-                        "lineage_digest": "lineage-2", "barrier_state": "COMPLETE"},
+                        "lineage_digest": "lineage-2", "barrier_state": "COMPLETE",
+                        "policy_domain": "pd-B", "inventory_seal_ref": "seal-2"},
         }
         self.current_storage = {
             "ledger_digest": "storage-ledger-7",
             "participants": {
-                "participant-1": {"gid": "gid_1234567890", "native_xid": "native-xid:501",
+                "participant-1": {"participant_ref": "prepared-participant-1",
+                                  "gid": "gid_1234567890", "native_xid": "native-xid:501",
+                                  "canonical_authority_db_ref": "db-authority-1",
+                                  "system_identifier": "1234567890", "database_oid": "16384",
+                                  "prepare_timeline": 1, "prepare_lsn": "0/5004710",
                                   "state": "COMMITTED", "resolution_digest": "resolution-1"},
             },
             "visibility_pairs": {"artifact-1": {"pointer_tx": "tx-1", "receipt_tx": "tx-1"}},
@@ -147,7 +154,7 @@ class RestoreModel:
             raise Blocked("D Forget high-water advanced during restore; refresh/reconcile again")
         receipt = RestoreReceipt("restore-op-1", "RECONCILED_BUT_FENCED",
                                  coc_proof["prefix_digest"], i_digests, d_digests,
-                                 storage_digest, snapshot["target_lsn"])
+                                 storage_digest, snapshot["target_lsn"], snapshot["target_timeline"])
         self.receipt = receipt
         self.state = "RECONCILED_BUT_FENCED"
         return receipt
