@@ -438,3 +438,28 @@ The strengthened PITR probe (exact WAL target segments, pointer-only/receipt-onl
 **Phase/sequence correction:** the project is in architecture design and has no production code repository/runtime by design. Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. This is not a Gate A blocker. The prior sections that list missing runtime/adapter and production operator as blockers are superseded insofar as they require code or deployment artifacts before architecture acceptance. Their underlying topics remain future engineering/deployment acceptance requirements.
 
 Gate B COC persistence/recovery protocol design is authorized to proceed now, in parallel with closure of remaining Gate A architecture specifications. This does not mark Gate B implementation PASS. Gate C's executable end-to-end fault injection is deferred until an implementation exists. Gate A remains PARTIAL PASS / OPEN for architecture specifications and cross-owner decisions; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
+
+
+## 20. Exact prepared-XID lock identity and same-XID PITR resolution — PASS (2026-11-17)
+
+The prepared-boundary PITR restore now correlates each exact restored prepared GID to its transaction-ID lock in `pg_locks`. After proving both XIDs are private/in-doubt and their exact locks remain, the probe resolves the same original GIDs with COMMIT PREPARED and ROLLBACK PREPARED. The restored authoritative fixture exposes the commit pointer+receipt together and exposes neither row for the rollback participant.
+
+- Probe Blob: `63506807be82b3203e7e682b0772452621c92558`
+- Commit: `d026add5cfaec0d395537e8763317cdbd8255398`
+- Run/job: `43958775001` / `133620265141`, SUCCESS.
+- Raw markers: `PITR_EXACT_PREPARED_XID_LOCKS_RETAINED=PASS`; `PITR_SAME_XID_COMMIT_ROLLBACK_AFTER_RESTORE=PASS`.
+
+This remains an isolated PostgreSQL 18.7 fixture, not production application-path or I/D/COC integration.
+
+## 21. Stable PostgreSQL initdb readiness and seven-workflow regression — PASS (2026-11-17)
+
+A regression run found the prepared-XID workflow could mistake the official image's temporary initdb server for the final durable server. Storage changed the workflow to require both initdb and final-server readiness log events before the TCP readiness check, and the Python probe now calls bounded `wait_ready()` before setup.
+
+- Fix commit: `83bdacbafa840808dca9be7a8c76c4df83c63504`
+- Workflow Blob: `fbcbce03d4525f7a0fb9dd3673a580a3a4c00134`
+- Probe Blob: `184e0507fd225ee18f321f3f1ce6a63f869b13f3`
+- Prepared-XID/restart rerun: `43959079736` / `133621314502`, SUCCESS.
+
+Together with the prepared-XID PITR run `43958775001` / `133620265141` on the immediately preceding PITR probe commit, the complete seven-workflow Storage regression set is green: prepared-XID PITR, prepared-XID/restart, synchronous standby promotion, physical backup/restore, explicit-LSN PITR, synchronous-standby-unavailable fail-closed, and old-primary pg_rewind/rejoin. The six non-PITR workflows reran on the readiness-fix commit; the PITR workflow ran on its exact code commit. The initial transient-startup failure is superseded, not counted.
+
+This does not close production runtime/adapter binding, real I/D ledger integration, off-site/immutable archive, cross-zone durability, real fencing, production operator/runbook or RPO/RTO. Gate A remains PARTIAL PASS / OPEN; Gate B/C remain BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
