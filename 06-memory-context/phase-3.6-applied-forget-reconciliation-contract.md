@@ -156,3 +156,42 @@ Context is a data region, not an instruction region. Entries carry source refs, 
 **G decisions:** G is authoritative for Applied state; Applied requires complete request-bound evidence; historical Applied and current-use validity are separate; Forget/revocation invalidates all current delivery/reconnect surfaces but does not rewrite history; Context Remove is not Canonical Forget; reconnect always reauthenticates and reconciles current authority before restoring context.
 
 **Cross-module status:** Applied Contract Frozen = NO. Runtime Forget End-to-End Closed = NO. No global Forget completion or physical erasure claim is made.
+
+
+## Phase 3.6 CFG joint architecture closure addendum — G Owner decision
+
+- Decision package: A-owned `reviews/integration/phase-3.6-cgh-applied-contract-decision-package.md`
+- Exact package Blob SHA reviewed: `61d961c32138fd875069e8cbac4696bb031447c0`
+- G decision: **APPROVE WITH ENUMERATED EXCEPTIONS** for G-owned ContextVersion, Delivery and Applied semantics. This is not a global freeze and is not H approval.
+
+### G accepted clauses
+
+1. G owns desired Context state, immutable ContextVersion, ChangeSet commit, Delivery intent/target, reconciliation and the authoritative per-request Applied record. G does not own canonical Memory mutation/Forget, BMCP wire, Agent reasoning or tool execution.
+2. The lifecycle is `Prepared → Delivered → Materialized → Final Request Submitted → Applied → Execution Started`, with independent evidence and authority at each transition. G does not infer a later state from an earlier receipt.
+3. Full Applied is per exact ContextId/ContextVersion + DeliveryId/attempt + InferenceRequestId + FinalRequestBoundaryId + authenticated Agent/Adapter/Runtime/Session + Scope/Environment + ManagedRegion revision/inventory + complete digest/profile + current I PermissionEpoch/decision + current D ForgetFence/lineage + H CapabilityEpoch + valid H delivery/identity proof + immutable C submission proof. Every predicate must be verified; missing, stale, mismatched, ambiguous or unverifiable evidence rejects Full.
+4. G commits Applied idempotently by the exact request/attempt/evidence identity. Exact duplicate digest returns the original disposition; same identity with changed digest is conflict/quarantine. Late evidence may add historical fact only and cannot roll back a newer ContextVersion or Delivery attempt.
+5. Historical truth and current-use eligibility are separate. A submit proven before a later Forget/revocation may be retained as historical Applied, but current-use is invalidated. If Forget/revocation precedes submit, reject Full. If order is ambiguous, Unknown and suppress.
+6. Execution Started is a separate runtime/provider fact bound to the same InferenceRequestId; G does not infer it from Applied.
+7. Remove is Context membership removal only. It does not create a canonical ForgetOperation, advance D's fence, or prove deletion. A D Forget independently tombstones every matching G entry by canonical lineage and exact Scope.
+8. G deny tombstones suppress affected entries, non-serving ContextVersions, ChangeSets, Snapshots, Deltas, pending Delivery attempts, reconnect state and current-use projections before physical cleanup. Historical audit facts remain immutable subject to I retention policy.
+9. Reconnect is a new trust boundary: H authenticates and negotiates the new session/capability; I and D provide current independent epochs/fence; G reconciles tombstones, delivery ledger and current head; old Snapshot is rejected when stale/superseded/tombstoned/unauthorized; Delta requires exact known base and current target; unknown continuity requires a new full Snapshot only after current checks. Revalidate again immediately before apply and final submit.
+
+### Enumerated exceptions and external authority reservations
+
+- **H wire exception:** G accepts the semantic separation of delivery receipt, materialization evidence, final-submit evidence, Applied record and Execution Started receipt. G does not freeze H message schema, ACK enums, signature profile, wire field encoding, replay journal or capability negotiation. H must explicitly accept the same package Blob SHA or issue a new common version.
+- **C producer exception:** G cannot manufacture final-request proof; C remains the sole producer of exact submit evidence. The C decision must remain pinned to this package and the evidence profile.
+- **I authorization exception:** I alone defines PermissionEpoch, Principal/Issuer/delegation, revocation and policy freshness. G requires a current decision but does not define its policy.
+- **D Forget exception:** D alone defines ForgetOperation/Fence/lineage authority and ordering. G consumes D's current fence and durable target evidence.
+- **B type exception:** B owns ActorRef/ScopeRef/EnvironmentRef typed semantics; G does not redefine them.
+- **D/E/Storage publication exception:** a G ChangeSet may be staged privately but cannot become public Context head, sendable Snapshot/Delta or Prepared Delivery until dependency registration, current D fence, current I PermissionEpoch, D final publication gate and G BaseVersion CAS are all proven. Callable API/physical transaction realization remains open to D/E/Storage.
+
+### Context operation and version rules reaffirmed
+
+- Add/Update/Remove/Replace/Reorder/Expire/Compact/Reconcile are ChangeSet operations against one Context and exact BaseVersion; deterministic operation order and idempotency identity are required.
+- Validate against a staged working copy; no partial target version becomes visible. A successful non-no-op ChangeSet creates one immutable ContextVersion; a stale base conflicts/reconciles rather than silently rebasing. Duplicate operation identity with identical payload is idempotent; altered payload is conflict.
+- Remove writes a G membership tombstone only. Replace is atomic at ContextVersion publication; Reorder changes membership ordering only; Expire is evaluated against authoritative time/policy and must not resurrect on replay; Compact preserves provenance/trust/conflict labels and lineage; Reconcile revalidates canonical refs, permission, temporal validity, retrieval freshness and Adapter state.
+- Context entries reference only legal canonical MemoryVersionRefs. A stale canonical ref is reconciled to an eligible successor only under D lifecycle semantics and current I authorization; no implicit float-to-latest.
+
+### G decision consequence
+
+G considers its semantic portion of the A package accepted with the exceptions above. The C/G/H Applied Contract remains **NOT FROZEN** until H explicitly accepts the same version and I/D/B provide their own authority confirmations. G conformance remains **SPECIFIED / NOT RUN**; implementation remains **NOT VERIFIED**.
