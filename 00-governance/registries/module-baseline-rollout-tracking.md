@@ -247,7 +247,7 @@ This section supersedes earlier point-in-time branch-head/status tables above. B
 | H | `session-h-bmcp-protocol` | `26378ea59675f31ac0455d745e9cbedab898db8c` |
 | I | `session-i-security-governance-2026-11-16` | `ba0d1dfcca9392f3a20c405169c83b41da3f12b7` |
 | Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `337fe8bffa178e64ad8e4750f1ede1d561424edc` |
-| P | `session-p-project-governance-baseline` | Current refresh commit follows this tracking update |
+| P | `session-p-project-governance-baseline` | Coordination branch; consult live Git ref (not a decision pin) |
 | main | `main` | `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f` |
 
 P/main remains diverged; before this tracking update P was ahead 73 / behind 4. No merge or force update.
