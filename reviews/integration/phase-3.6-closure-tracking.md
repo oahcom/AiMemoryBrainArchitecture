@@ -971,3 +971,18 @@ A refreshed all controlling Owner artifacts and corrected the exact review bundl
 **Reconciled Owner status: I = ACCEPT; D = ACCEPT; Storage = ACCEPT; C = PENDING.** C has been explicitly asked on Issue #8 to publish an append-only exact-version decision against A Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`. The request asks C to confirm provider-side-effect ordering, actual provider receipt, idempotency and UNKNOWN/IN_DOUBT behavior. No prior C decision is transferred.
 
 JF-10 P0 remains OPEN. D/Storage acceptance is architecture-level and does not establish selected DB capability, production deployment, COC operator, crash/recovery conformance or production activation.
+
+
+## 13.16 H exact-version JF-10 bridge wire-mapping decision — 2026-11-16
+
+H's current Owner artifact was refreshed and read back:
+- Path: `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`
+- Branch: `session-h-bmcp-protocol`
+- Blob SHA: `1716b23741479740f9e12003cbf2bd1a80c63aab`
+- §12.10 explicitly records: **ACCEPT THE JF-10 BRIDGE WIRE MAPPING FOR A architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, WITH ENUMERATED EXCEPTIONS.**
+
+H defines five distinct additive `bmcp.applied-ack/1.1.0` message families: `JF10_PREPARE_INTENT_REGISTERED`, `JF10_PREPARED_PARTICIPANT_REGISTERED`, `I_JF10_TERMINAL_DECISION_OBSERVED`, `STORAGE_JF10_PARTICIPANT_RESOLVED`, and `JF10_BRIDGE_RECONCILIATION_RECORDED`. It preserves separate typed COC/I/D/Storage positions, exact immutable tuple binding, owner-issued evidence, same-XID recovery evidence, IN_DOUBT fail-closed behavior and single-I-PolicyDomain scope.
+
+This closes H's exact field-mapping decision gap at schema-candidate documentation level. It does NOT freeze the schema or establish generated JSON Schema/IDL, SDK bindings, interoperability, cryptographic/key governance, implementation or conformance. H-JF10-01..10 remain SPECIFIED / NOT RUN; JF-10 P0 remains OPEN. A posted the exact H decision to Issue #8 in comment `6921054285`.
+
+**Issue #8 bridge gate remains OPEN** pending C's distinct exact-bundle decision and D/Storage clarification that their acceptances cover the complete corrected bundle. I/D/Storage/H architecture decisions do not imply production implementation or multi-policy-domain support.
