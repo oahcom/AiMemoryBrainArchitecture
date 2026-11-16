@@ -1,0 +1,64 @@
+name: JF-10 PostgreSQL 18.7 Coordinator ACK-Gap Recovery
+
+on:
+  push:
+    branches:
+      - session-storage-consistency-forget-atomicity-2026-11-16
+    paths:
+      - "reviews/storage-consistency/postgres_probe/jf10_postgres_ack_gap_probe.py"
+      - ".github/workflows/jf10-postgres-ack-gap-capability.yml"
+  pull_request:
+    paths:
+      - "reviews/storage-consistency/postgres_probe/jf10_postgres_ack_gap_probe.py"
+      - ".github/workflows/jf10-postgres-ack-gap-capability.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  coordinator-ack-gap:
+    name: PostgreSQL 18.7 same-XID coordinator ACK-gap recovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install psycopg
+        run: python -m pip install "psycopg[binary]>=3.2,<4"
+      - name: Start pinned PostgreSQL 18.7
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker volume create jf10-ack-gap-data
+          docker run -d --name jf10-ack-gap --network host \
+            -e POSTGRES_PASSWORD=jf10-ci-only \
+            -e POSTGRES_DB=postgres \
+            -v jf10-ack-gap-data:/var/lib/postgresql \
+            "$PG_IMAGE" \
+            -c max_prepared_transactions=16 \
+            -c fsync=on \
+            -c synchronous_commit=on \
+            -c full_page_writes=on \
+            -c wal_level=replica
+          for i in $(seq 1 60); do
+            if docker exec jf10-ack-gap pg_isready -U postgres -d postgres; then exit 0; fi
+            sleep 1
+          done
+          docker logs jf10-ack-gap
+          exit 1
+      - name: Run coordinator crash-window and same-XID recovery probe
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: postgres
+          PGPASSWORD: jf10-ci-only
+          PGDATABASE: postgres
+          JF10_LEDGER: /tmp/jf10-coordinator-ledger.sqlite
+        run: python reviews/storage-consistency/postgres_probe/jf10_postgres_ack_gap_probe.py
+      - name: Capture PostgreSQL and coordinator diagnostics
+        if: always()
+        run: |
+          docker exec jf10-ack-gap psql -U postgres -d postgres -c "SELECT gid, prepared FROM pg_prepared_xacts;" || true
+          docker logs jf10-ack-gap || true
