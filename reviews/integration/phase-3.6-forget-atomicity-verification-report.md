@@ -168,14 +168,11 @@ Concrete implementation approval requires:
 - measured contention/latency/throughput;
 - named independent Storage engineering approver.
 
-### 5.4 Permission revocation is a separate unresolved transaction boundary
+### 5.4 Permission revocation and owner-commit coupling
 
-A DB transaction cannot silently make an external I policy service atomic. I must provide one of:
-1. authorization state in the same authoritative transaction domain;
-2. an I-issued, non-transferable commit permit/fencing lease whose validity is serialized against revocation and cannot remain commit-usable after revocation becomes effective; or
-3. another formally proven, recoverable equivalent.
+The latest I technical baseline specifies a single-use, non-transferable `CommitAuthorizationReceipt` bound to the complete authorization tuple and operation payload digest. The final owner commit/disclosure gate must participate in the same I policy-domain linearizable sequencer as revocation. The allowed terminal outcomes are `COMMIT_WON`, `REVOCATION_WON` and `INDETERMINATE_ABORTED`; offline leases and stale-epoch grace are prohibited.
 
-Until I approves and specifies this, the final publish gate remains BLOCKED/FAIL CLOSED. Storage cannot mint or reinterpret I authorization.
+**JF-10 remains P0 OPEN:** the I artifact does not fully define how the I sequencer's terminal ordering is crash-atomically/recoverably coupled to the Storage transaction that commits VisibilityPointer + PublicationReceipt. I + Storage must define the durable commit handshake/participant protocol, correlation/digest, idempotent cross-authority outcome lookup, and recovery for sequencer commit followed by owner DB crash/abort or lost ACK. Until that is jointly specified and tested, final publish is BLOCKED/FAIL CLOSED. Storage cannot mint or reinterpret I authorization.
 
 ## 6. Test Execution Results
 
