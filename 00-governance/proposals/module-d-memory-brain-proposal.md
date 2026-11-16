@@ -52,3 +52,14 @@ I acceptance of JF-10 commit authorization sequencer; concrete Storage transacti
 
 ## 14. Explicit Non-Claims
 No physical erasure, global Forget completion, implementation correctness, fault-injection pass or deployment readiness claim.
+
+
+## Live Owner decision update — 2026-11-17
+
+D's current Owner branch advanced during this Session P pass to `1460fbd17ee38ea4044dc6c75cfe49039c7fc585`. D has now published `03-memory-brain/forget-fence-operation-and-publication-gate.md`, blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`, with an exact decision: **ACCEPT WITH ENUMERATED EXCEPTIONS**, limited to D-owned ForgetFence, producer registration, dependency inventory, lineage and barrier semantics for the single-I-PolicyDomain JF-10 v2 profile.
+
+The accepted bundle pins A COC architecture `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, I disposition `8069ff86988396442c8d9dc3fd58653683abe2f3`, common JF-10 v2 protocol `94679897e84a6f58fd8b9467b5249e1a885cb0b0`, C bridge `45a48249717c8cddb07ab96197730ef93d406c22`, Storage participant contract `55c01f4512f2e3d8aac767dd004e768ae073178e`, H mapping `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248` and H schema candidate `a8a945cc3623c2907003b93625e3c79742150944`.
+
+D's exceptions are material: this is architecture/interface acceptance only; D APIs, durable ledger, locks, participant recovery, COC deployment and production conformance are not verified; Storage must prove actual DB prepared-XID/lock retention, same-XID restart/failover recovery and atomic visibility; I retains sequencer/authorization authority; C provider idempotency, H generated schema/SDK interoperability and COC quorum durability remain unverified. D36/JF10-01..13 and crash/fault suites remain NOT RUN. JF-10 P0 remains OPEN; multi-PolicyDomain atomicity remains BLOCKED.
+
+This new decision supersedes the older proposal wording that described the complete D architecture decision as still awaiting D acceptance. The engineering and global-governance blockers remain open. D Owner must review this proposal against the latest HEAD before adoption.
