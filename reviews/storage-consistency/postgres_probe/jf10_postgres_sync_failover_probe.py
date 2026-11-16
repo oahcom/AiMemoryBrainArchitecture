@@ -15,7 +15,9 @@ from psycopg import errors
 
 
 XID = "jf10_pg187_sync_failover_commit_001"
+XID_ROLLBACK = "jf10_pg187_sync_failover_rollback_001"
 OPERATION_ID = "op-sync-failover-commit"
+OPERATION_ID_ROLLBACK = "op-sync-failover-rollback"
 
 
 def conn(host: str, port: int = 5432):
@@ -89,7 +91,7 @@ def setup_tables():
         c.execute("DROP TABLE IF EXISTS jf10_ha_visibility")
         c.execute("DROP TABLE IF EXISTS jf10_ha_lock")
         c.execute("CREATE TABLE jf10_ha_lock (id integer PRIMARY KEY, marker text NOT NULL)")
-        c.execute("INSERT INTO jf10_ha_lock VALUES (1, 'serialization-guard')")
+        c.execute("INSERT INTO jf10_ha_lock VALUES (1, 'serialization-guard'), (2, 'serialization-guard-rollback')")
         c.execute(
             "CREATE TABLE jf10_ha_visibility "
             "(operation_id text PRIMARY KEY, visibility_pointer text NOT NULL)"
@@ -103,49 +105,53 @@ def setup_tables():
 
 
 def prepare_on_primary():
-    with conn("127.0.0.1") as c:
-        c.execute("BEGIN ISOLATION LEVEL SERIALIZABLE")
-        c.execute("SELECT id FROM jf10_ha_lock WHERE id = 1 FOR UPDATE")
-        c.execute(
-            "INSERT INTO jf10_ha_visibility VALUES (%s, %s)",
-            (OPERATION_ID, "private-staged-object:" + OPERATION_ID),
-        )
-        c.execute(
-            "INSERT INTO jf10_ha_receipt VALUES (%s, %s)",
-            (OPERATION_ID, "sha256:" + OPERATION_ID),
-        )
-        c.execute(f"PREPARE TRANSACTION '{XID}'")
-    print(f"PRIMARY_PREPARED_XID={XID}")
+    for xid, operation_id, lock_id in (
+        (XID, OPERATION_ID, 1),
+        (XID_ROLLBACK, OPERATION_ID_ROLLBACK, 2),
+    ):
+        with conn("127.0.0.1") as c:
+            c.execute("BEGIN ISOLATION LEVEL SERIALIZABLE")
+            c.execute("SELECT id FROM jf10_ha_lock WHERE id = %s FOR UPDATE", (lock_id,))
+            c.execute(
+                "INSERT INTO jf10_ha_visibility VALUES (%s, %s)",
+                (operation_id, "private-staged-object:" + operation_id),
+            )
+            c.execute(
+                "INSERT INTO jf10_ha_receipt VALUES (%s, %s)",
+                (operation_id, "sha256:" + operation_id),
+            )
+            c.execute(f"PREPARE TRANSACTION '{xid}'")
+        print(f"PRIMARY_PREPARED_XID={xid}")
 
 
-def assert_prepared(host: str, port: int = 5432):
+def assert_prepared(host: str, port: int = 5432, xid: str = XID):
     with conn(host, port) as c:
         row = c.execute(
-            "SELECT gid FROM pg_prepared_xacts WHERE gid = %s", (XID,)
+            "SELECT gid FROM pg_prepared_xacts WHERE gid = %s", (xid,)
         ).fetchone()
-        assert row == (XID,), f"{host} missing prepared XID: {row}"
+        assert row == (xid,), f"{host} missing prepared XID {xid}: {row}"
 
 
-def assert_not_visible(host: str, port: int = 5432):
+def assert_not_visible(host: str, port: int = 5432, operation_id: str = OPERATION_ID):
     with conn(host, port) as c:
         p = c.execute(
             "SELECT 1 FROM jf10_ha_visibility WHERE operation_id = %s",
-            (OPERATION_ID,),
+            (operation_id,),
         ).fetchone()
         r = c.execute(
             "SELECT 1 FROM jf10_ha_receipt WHERE operation_id = %s",
-            (OPERATION_ID,),
+            (operation_id,),
         ).fetchone()
         assert p is None and r is None, (host, p, r)
 
 
-def assert_lock_blocked(host: str, port: int = 5432):
+def assert_lock_blocked(host: str, port: int = 5432, lock_id: int = 1):
     with conn(host, port) as c:
         c.execute("BEGIN")
         c.execute("SET LOCAL lock_timeout = '750ms'")
         try:
             c.execute(
-                "UPDATE jf10_ha_lock SET marker = 'must-not-pass' WHERE id = 1"
+                "UPDATE jf10_ha_lock SET marker = 'must-not-pass' WHERE id = %s", (lock_id,)
             )
         except errors.LockNotAvailable:
             c.execute("ROLLBACK")
@@ -186,11 +192,15 @@ def verify_and_commit():
         assert settings["max_prepared_transactions"] == "16", settings
         print(f"PROMOTED_SETTINGS={settings}")
 
-    assert_prepared("127.0.0.1", 5433)
-    assert_not_visible("127.0.0.1", 5433)
-    assert_lock_blocked("127.0.0.1", 5433)
+    assert_prepared("127.0.0.1", 5433, XID)
+    assert_prepared("127.0.0.1", 5433, XID_ROLLBACK)
+    assert_not_visible("127.0.0.1", 5433, OPERATION_ID)
+    assert_not_visible("127.0.0.1", 5433, OPERATION_ID_ROLLBACK)
+    assert_lock_blocked("127.0.0.1", 5433, 1)
+    assert_lock_blocked("127.0.0.1", 5433, 2)
     with conn("127.0.0.1", 5433) as c:
         c.execute(f"COMMIT PREPARED '{XID}'")
+        c.execute(f"ROLLBACK PREPARED '{XID_ROLLBACK}'")
     with conn("127.0.0.1", 5433) as c:
         p = c.execute(
             "SELECT visibility_pointer FROM jf10_ha_visibility WHERE operation_id = %s",
@@ -200,11 +210,22 @@ def verify_and_commit():
             "SELECT receipt_digest FROM jf10_ha_receipt WHERE operation_id = %s",
             (OPERATION_ID,),
         ).fetchone()
+        p_abort = c.execute(
+            "SELECT 1 FROM jf10_ha_visibility WHERE operation_id = %s",
+            (OPERATION_ID_ROLLBACK,),
+        ).fetchone()
+        r_abort = c.execute(
+            "SELECT 1 FROM jf10_ha_receipt WHERE operation_id = %s",
+            (OPERATION_ID_ROLLBACK,),
+        ).fetchone()
     assert p == ("private-staged-object:" + OPERATION_ID,), p
     assert r == ("sha256:" + OPERATION_ID,), r
+    assert p_abort is None and r_abort is None, (p_abort, r_abort)
     print("PREPARED_XID_REPLAYED_TO_SYNC_STANDBY=PASS")
     print("SAME_XID_COMMIT_AFTER_PRIMARY_LOSS=PASS")
+    print("SAME_XID_ROLLBACK_AFTER_PRIMARY_LOSS=PASS")
     print("ATOMIC_VISIBILITY_AFTER_PROMOTION=PASS")
+    print("ROLLBACK_NON_PUBLICATION_AFTER_PROMOTION=PASS")
 
 
 if __name__ == "__main__":
@@ -226,9 +247,10 @@ if __name__ == "__main__":
     wait_sync()
     setup_tables()
     prepare_on_primary()
-    assert_prepared("127.0.0.1")
-    assert_prepared("127.0.0.1")  # verify primary view before promotion
-    assert_not_visible("127.0.0.1")
+    assert_prepared("127.0.0.1", 5432, XID)
+    assert_prepared("127.0.0.1", 5432, XID_ROLLBACK)
+    assert_not_visible("127.0.0.1", 5432, OPERATION_ID)
+    assert_not_visible("127.0.0.1", 5432, OPERATION_ID_ROLLBACK)
     # Standby SQL is reached through host port 5433.
     with psycopg.connect(
         host="127.0.0.1", port=5433, dbname="postgres", user="postgres",
@@ -239,16 +261,21 @@ if __name__ == "__main__":
         # a server is in hot-standby recovery. Verify private data here; verify
         # the prepared XID after promotion has completed recovery.
         row = standby.execute(
-            "SELECT gid FROM pg_prepared_xacts WHERE gid = %s", (XID,)
-        ).fetchone()
-        assert row is None, f"hot standby unexpectedly exposed prepared XID: {row}"
+            "SELECT gid FROM pg_prepared_xacts WHERE gid IN (%s, %s)",
+            (XID, XID_ROLLBACK),
+        ).fetchall()
+        assert row == [], f"hot standby unexpectedly exposed prepared XIDs: {row}"
         assert standby.execute(
             "SELECT 1 FROM jf10_ha_visibility WHERE operation_id = %s",
             (OPERATION_ID,),
         ).fetchone() is None
         assert standby.execute(
-            "SELECT 1 FROM jf10_ha_receipt WHERE operation_id = %s",
-            (OPERATION_ID,),
+            "SELECT 1 FROM jf10_ha_receipt WHERE operation_id IN (%s, %s)",
+            (OPERATION_ID, OPERATION_ID_ROLLBACK),
+        ).fetchone() is None
+        assert standby.execute(
+            "SELECT 1 FROM jf10_ha_visibility WHERE operation_id = %s",
+            (OPERATION_ID_ROLLBACK,),
         ).fetchone() is None
     print("SYNCHRONOUS_STANDBY_PREPARED_WAL_REPLAY=PASS")
     print("HOT_STANDBY_PREPARED_XACT_VIEW_HIDDEN_AS_DOCUMENTED=PASS")
