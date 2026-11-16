@@ -1250,3 +1250,28 @@ PostgreSQL hot standby intentionally exposes no pg_prepared_xacts rows while in 
 | JF-10 P0 / production activation | OPEN / NOT AUTHORIZED |
 
 Issue #10 comment 6922463540 records this evidence. Storage dossier: reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md. No production HA, application participant, I sequencer, COC or end-to-end conformance pass is inferred.
+
+
+## 13.28 Gate A two-node PostgreSQL 18.7 promotion CI independently verified — 2026-11-17
+
+This section supersedes the earlier §13.27 status that treated the HA probe as review-blocked/no pass. A re-fetched the current Storage source and independently fetched the raw Actions job log.
+
+- Current probe Blob: `23d8ea8546932e592093c5c17cd2b52f8a294720`; the three helpers `assert_prepared`, `assert_not_visible`, and `assert_lock_blocked` now pass the requested port to `conn(host, port)`, correcting the previously reported routing defect.
+- Current workflow Blob: `f3c05f90c6065458b49879def10dce672685c850`.
+- Run `43908428220`, head commit `7cd416a1f80364fe7de316f19716325b6503cbfa`, job `133443444760`, conclusion SUCCESS.
+- Raw log confirms primary-side `synchronous_commit=remote_apply`, named physical standby in `streaming/sync`, PREPARE, hard primary-container kill, standby promotion, exact prepared-XID recovery, lock retention, same-XID COMMIT PREPARED and atomic pointer+receipt visibility.
+- The promoted node reports `synchronous_commit=on`; the dossier must retain both the primary tested value (`remote_apply`) and promoted-node observed value (`on`) without conflating them.
+
+**Accepted scope:** two-node PostgreSQL 18.7 CI promotion/failover capability for this exact Docker profile. This does not prove production fencing/STONITH, split-brain prevention, external sequencer integration, host/zone durability or production deployment.
+
+**Still open:** post-promotion same-GID ROLLBACK PREPARED/non-publication; deterministic PREPARE and terminal-resolution lost-ACK/UNKNOWN handling; backup/restore/PITR and stale-snapshot RecoveryQuarantined/control-ledger reconciliation; production topology, named human on-call/operator, RPO/RTO and runbook. Storage was asked to update its dossier and add these cases in Issue #10 comment 6922471557.
+
+| Gate | Current status |
+|---|---|
+| Gate 0 — exact D + Storage full-bundle decisions | CLOSED |
+| Gate A — PostgreSQL 18.7 single-node + two-node promotion CI | PARTIAL PASS / OPEN |
+| Gate A — post-promotion rollback, lost ACK, backup/restore, production operations | OPEN / NOT VERIFIED |
+| Gate B — persistent COC/quorum log | BLOCKED until all Gate A requirements pass |
+| Gate C — end-to-end fault campaign | BLOCKED until Gate B passes |
+| JF-10 P0 / production activation | OPEN / NOT AUTHORIZED |
+
