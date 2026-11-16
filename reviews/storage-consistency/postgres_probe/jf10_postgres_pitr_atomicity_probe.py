@@ -39,6 +39,13 @@ def psql(sql: str, host: str = PRIMARY, port: int = 5432) -> str:
         return "\n".join(str(r) for r in cur.fetchall()) if cur.description else ""
 
 
+def scalar(sql: str) -> str:
+    with psycopg.connect(host="127.0.0.1", port=5432, dbname="postgres",
+                         user="postgres", password=PASSWORD, autocommit=True,
+                         connect_timeout=3) as c:
+        return str(c.execute(sql).fetchone()[0])
+
+
 def wait_primary(name: str, port: int, timeout: int = 120) -> None:
     end = time.time() + timeout
     last = ""
@@ -113,13 +120,11 @@ def main() -> None:
            "--entrypoint", "bash", IMAGE, "-lc", "chown -R postgres:postgres /archive")
     docker("run", "-d", "--name", PRIMARY, "--network", NETWORK, "-p", "5432:5432",
            "-e", f"POSTGRES_PASSWORD={PASSWORD}", "-e", "POSTGRES_HOST_AUTH_METHOD=trust",
-           IMAGE, "-c", "max_prepared_transactions=16", "-c", "wal_level=replica",
+           "-v", f"{ARCHIVE_VOL}:/archive", IMAGE,
+           "-c", "max_prepared_transactions=16", "-c", "wal_level=replica",
            "-c", "max_wal_senders=10", "-c", "fsync=on", "-c", "full_page_writes=on",
            "-c", "archive_mode=on", "-c", "archive_timeout=1s",
-           "-c", "archive_command=test ! -f /archive/%f && cp %p /archive/%f",
-           "-v", f"{ARCHIVE_VOL}:/archive")
-    # Docker accepts volume mounts before the image; the command above is normalized below
-    # by inspecting and recreating if the daemon rejected an invalid argument sequence.
+           "-c", "archive_command=test ! -f /archive/%f && cp %p /archive/%f")
     end = time.time() + 90
     while time.time() < end:
         try:
@@ -140,10 +145,14 @@ def main() -> None:
     xid_commit = "jf10-pitr-commit-" + uuid.uuid4().hex[:12]
     xid_rollback = "jf10-pitr-rollback-" + uuid.uuid4().hex[:12]
     for xid in (xid_commit, xid_rollback):
-        psql(f"BEGIN")
-        psql(f"INSERT INTO jf10_visibility_pointer VALUES ('{xid}', 'artifact-{xid}', 'VISIBLE')")
-        psql(f"INSERT INTO jf10_publication_receipt VALUES ('{xid}', 'artifact-{xid}', 'receipt-{xid}')")
-        psql(f"PREPARE TRANSACTION '{xid}'")
+        with psycopg.connect(host="127.0.0.1", port=5432, dbname="postgres",
+                             user="postgres", password=PASSWORD, autocommit=True) as c:
+            c.execute("BEGIN")
+            c.execute("INSERT INTO jf10_visibility_pointer VALUES (%s, %s, 'VISIBLE')",
+                      (xid, f"artifact-{xid}"))
+            c.execute("INSERT INTO jf10_publication_receipt VALUES (%s, %s, %s)",
+                      (xid, f"artifact-{xid}", f"receipt-{xid}"))
+            c.execute("PREPARE TRANSACTION %s", (xid,))
     prepared = psql("SELECT gid FROM pg_prepared_xacts ORDER BY gid")
     assert xid_commit in prepared and xid_rollback in prepared, prepared
     print("PREPARED_XIDS_CREATED=PASS")
@@ -155,20 +164,20 @@ def main() -> None:
                  f"-h {PRIMARY} -U postgres -D /var/lib/postgresql/18/docker -Fp -Xs -P",
            check=True)
     psql("SELECT pg_switch_wal()")
-    prepared_lsn = psql("SELECT pg_current_wal_lsn()").strip("()")
-    prepared_wal = psql(f"SELECT pg_walfile_name('{prepared_lsn}'::pg_lsn)").strip("()")
+    prepared_lsn = scalar("SELECT pg_current_wal_lsn()")
+    prepared_wal = scalar(f"SELECT pg_walfile_name('{prepared_lsn}'::pg_lsn)")
     psql(f"COMMIT PREPARED '{xid_commit}'")
     psql("SELECT pg_switch_wal()")
-    commit_lsn = psql("SELECT pg_current_wal_lsn()").strip("()")
+    commit_lsn = scalar("SELECT pg_current_wal_lsn()")
     psql(f"ROLLBACK PREPARED '{xid_rollback}'")
     psql("SELECT pg_switch_wal()")
-    rollback_lsn = psql("SELECT pg_current_wal_lsn()").strip("()")
+    rollback_lsn = scalar("SELECT pg_current_wal_lsn()")
     for _ in range(120):
-        archived = docker("exec", PRIMARY, "bash", "-lc", f"test -f /archive/{prepared_wal}",
-                          check=False)
-        if archived == "":
+        try:
+            docker("exec", PRIMARY, "bash", "-lc", f"test -f /archive/{prepared_wal}")
             break
-        time.sleep(1)
+        except subprocess.CalledProcessError:
+            time.sleep(1)
     else:
         raise RuntimeError("prepared-boundary WAL segment was not archived")
     print(f"PREPARED_BOUNDARY_LSN={prepared_lsn}")
