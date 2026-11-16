@@ -620,3 +620,26 @@ A single DE-S engineering proposal has now been published identically on all thr
 The proposal defines a durable owner-side publication intent, stable operation ID + immutable request digest, I sequencer terminal lookup/replay, owner-side atomic VisibilityPointer + PublicationReceipt + outcome + outbox commit, and forward recovery after lost acknowledgements or crashes. It explicitly preserves I authorization order, D fence order and Storage visibility order as separate authorities.
 
 **Disposition remains unchanged:** this is a DE-S candidate, not an I-approved protocol. I must accept or replace the sequencer lookup, terminal-retention, receipt-consumption and crash/failover semantics. JF-10 remains P0 OPEN; the eight proposed JF10 cases are NOT RUN. No implementation, production approval, consumer acceptance or Contract Freeze is claimed.
+
+
+## Live branch refresh after DE-S JF-10 proposal
+
+The repository branch collection was re-read after the three protocol commits. These are the observed current tips, not historical values copied from earlier A/DE-S reports:
+
+| Owner | Branch | Current observed HEAD |
+|---|---|---|
+| main | `main` | `8a6414158c9c056c1638222534e1993d1bbc99d2` |
+| A | `session-a-integration-2026-11-16` | `70552cb4d232da657a16dc469ebf6d5ca10f2624` |
+| B | `session-b-domain-model-phase3` | `225c1f519c439d7bb87827e11d63185a5dcfe819` |
+| C | `session-c-agent-integration-2026-11-16` | `3b6c1d9a5d648f61daa04f5874d887f33475f098` |
+| D | `session-d-memory-brain-2026-11-16` | `bf1c64a2797e287461bfc8ff03509e86d3bda3e6` |
+| E | `session-e-memory-compiler-2026-11-16` | `c1f95853880591909eab8653195bc435d58c9602` |
+| F | `session-f-memory-runtime` | `2da5209d7072272d5510d376c0f319bed0402a6f` |
+| G | `session-g-memory-context` | `ac32e980003aa41faf0ae958ffef3df5ab387984` |
+| H | `session-h-bmcp-protocol` | `8747085d962877d8a99c6d2b5f09bfaa538fa97f` |
+| I | `session-i-security-governance-2026-11-16` | `7ef0a0fa71e02ffb0a67f0ebe927c91d0d5bd778` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `7625c208b55a5b226b2abb7010736ee585e08eb3` |
+
+D/E/Storage recursive trees were re-read at these tips: D has 39 blobs, E 40, Storage 42; all are Markdown and none is executable source, a migration, test fixture, runner or CI workflow. Thus the JF-10 proposal is verified as documentation delivery only. D36/E36/C01–C20 remain NOT RUN and implementation remains NOT VERIFIED.
+
+A's branch remains at `70552cb4d232da657a16dc469ebf6d5ca10f2624`; its existing Closure Tracking snapshot still predates the latest B/D/E/H/I/Storage tips and the new JF-10 proposal. A's integration ledger must refresh those source references before a final gate decision. This DE-S report does not modify A-owned files or claim A gate closure.
