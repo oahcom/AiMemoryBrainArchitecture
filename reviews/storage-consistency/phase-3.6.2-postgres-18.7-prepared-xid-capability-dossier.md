@@ -488,3 +488,17 @@ The same corrected commit also reran the previously established physical backup/
 - Explicit target LSN: `0/5000190`; observed replay LSN: `0/6000000`; promoted timeline: `2`.
 
 These are rerun confirmations of the respective isolated CI probes, not production restore qualification. All three workflows ran against commit `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd`.
+
+
+## 22. Repository runtime / authoritative DB adapter boundary audit — NOT IDENTIFIED (2026-11-17)
+
+Storage inspected the complete recursive Git tree for the exact branch head after the PITR evidence updates:
+- Branch: `session-storage-consistency-forget-atomicity-2026-11-16`
+- Tree head: `e803f7d79d4ec747272299113d8222c60c3be8e9`
+- Recursive tree entries: 86; GitHub reported `truncated=false`.
+- Executable/source-like files: 21 total. All 21 are GitHub Actions workflows, isolated PostgreSQL probe scripts, or the JF-10 reference model and its tests.
+- No production runtime source tree, service executable, Canonical Authority DB adapter, migration package, or application deployment manifest is present in this branch snapshot.
+
+This is a repository-content observation, not a claim that no implementation exists in any external repository or deployment. The project-designated Canonical Authority runtime executable and its authoritative database access path therefore cannot be identified or inspected from this repository branch. The PostgreSQL 18.7 CI probes remain engine-capability fixtures and must not be described as exercising the production adapter.
+
+**Gate A stop condition:** the responsible Owner must provide the canonical implementation repository/branch and exact runtime entrypoint, DB adapter and schema/migration path, or explicitly designate this repository as the implementation home and deliver those artifacts. Storage must then trace the actual authoritative write/read path for prepared XID, D/lineage locks, VisibilityPointer, PublicationReceipt, owner outcome, receipt-consumption evidence and outbox, and run the conformance/fault suite against that path. Until then, production database binding and implementation conformance remain NOT IDENTIFIED / NOT VERIFIED; Gate A remains PARTIAL PASS / OPEN.
