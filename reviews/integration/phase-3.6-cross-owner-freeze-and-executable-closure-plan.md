@@ -1065,3 +1065,18 @@ Eight additional negative cases cover missing lifecycle records, reordered lifec
 The existing workflow is configured for push events affecting `tests/conformance/**`, so this test-file commit should trigger the workflow. **The new 18-test revision has not yet had its GitHub Actions run and is NOT VERIFIED.** The previously recorded 10-test CI PASS in §13.19 remains valid only for the older tested commit; it must not be carried forward as proof for this expanded test revision.
 
 Coverage boundary remains: the reference validator does not authenticate signatures/quorum, call live owner authorities, test provider idempotency, exercise real prepared-XID/lock persistence, or simulate process/host/region crash, failover and restore. JF-10 P0 remains OPEN; production implementation/deployment NOT VERIFIED; multi-PolicyDomain atomicity BLOCKED.
+
+
+## 13.21 Sequential execution control — 2026-11-17
+
+The user directed A to proceed sequentially without asking for a choice at each step. A therefore enforces this order:
+
+1. Close D and Storage exact full-bundle confirmation (Issue #9). C's complete-bundle acceptance is verified; D and Storage's A-architecture acceptances are verified; each Owner's explicit full-bundle confirmation is still pending.
+2. **Only after step 1**, complete Storage Gate A: select the concrete DB engine/version/configuration and prove prepared-XID/lock durability, same-XID restart/failover recovery, atomic visibility and restore safety. Issue #10 Gate A is the only active implementation gate.
+3. Only after Gate A passes, proceed to persistent COC implementation and quorum/recovery proof (Gate B).
+4. Only after Gate B passes, run deterministic end-to-end fault injection (Gate C).
+5. Obtain independent Owner sign-offs and keep JF-10 P0 open until all required evidence is accepted.
+
+Storage artifact inventory confirms: no concrete engine/version, XA profile, replication/failover topology, operator or deployment has been selected/verified; no Storage C01–C20 or crash/fault test has run. Searchable default-branch repository search found no matching PostgreSQL/SQLite/prepared-transaction/database-adapter/consensus implementation files. This is limited to the searchable default branch and is not a claim about every Owner branch. No DB choice is inferred or made by A; Storage must own and prove it.
+
+Issue #10 has been commented to mark Gate A ACTIVE and Gates B/C BLOCKED until prior gate proof. This is an execution-order control, not a technical pass. No physical DB capability, persistent COC, crash recovery or production conformance is verified at this point.
