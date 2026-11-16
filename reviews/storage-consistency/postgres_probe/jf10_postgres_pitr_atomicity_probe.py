@@ -77,6 +77,10 @@ def copy_archive(destination: str) -> None:
 
 def start_restore(label: str, target_lsn: str, data_vol: str, wal_vol: str, port: int) -> str:
     name = f"jf10-pitr-atomicity-{label}"
+    docker("run", "--rm", "--user", "postgres", "-v", f"{data_vol}:/var/lib/postgresql",
+           "--entrypoint", "bash", IMAGE, "-lc",
+           "rm -f /var/lib/postgresql/18/docker/standby.signal && "
+           "touch /var/lib/postgresql/18/docker/recovery.signal")
     docker("run", "-d", "--name", name, "--network", NETWORK,
            "-e", f"POSTGRES_PASSWORD={PASSWORD}", "-p", f"{port}:5432",
            "-v", f"{data_vol}:/var/lib/postgresql", "-v", f"{wal_vol}:/archive",
