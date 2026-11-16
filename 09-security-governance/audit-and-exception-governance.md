@@ -156,3 +156,22 @@ It excludes forgotten payload and reconstructive digests. Auditors verify eviden
 - D/E/F/G/H must expose target-specific acknowledgements and typed watermarks.
 - A must register the shared issue states and cross-module evidence format.
 - External recipients and model providers must disclose their deletion/retention capabilities; unsupported claims remain Unknown or PolicyException.
+
+---
+
+## Phase 3 targeted remediation — exception and completion evidence controls
+
+A PolicyException used by Global Forget MUST satisfy all of the following:
+1. Exact ForgetOperationId, TargetId(s), target class, ScopeRef coverage and residual data class are bound. Broad wildcard exceptions are invalid.
+2. The exception identifies the specific unmet action/evidence, why it cannot be completed, legal/policy basis and compensating controls.
+3. Approval is by the authority appropriate to the exception class in the matrix above, with an independent reviewer. The target operator and request handler cannot approve their own failure.
+4. The record has an effective time, hard expiry, review date, revocation condition, risk owner and user-disclosure obligation. No perpetual exception by default.
+5. The exception cannot authorize ordinary retrieval, derivation, Context delivery, Adapter application, training or export of forgotten content. It only governs the explicitly described residual retention/copy.
+6. Evidence includes signed approval, policy version, target evidence, risk assessment, controls and audit correlation. I records the decision but does not self-approve legal/privacy risk.
+
+At expiry, the exception ceases to satisfy completion automatically. The target becomes Pending/Unknown, the global operation is Reopened, and any prior CompletedWithPolicyException result is superseded until fresh evidence or a newly approved exception exists.
+
+Global completion audit bundle must separately reference the I ProducerDomainInventoryEpoch/Target Inventory Seal and D ProducerRegistrationHighWater/Work-item Barrier. Audit must not store their values in one untyped "epoch" field. H ACK evidence is retained per Adapter target and per capability action; a roll-up count without enumerated coverage is insufficient.
+
+A completion evaluator records the vector component states (suppression, producer barrier, derived cleanup, runtime/context/adapter, external copy, backup/restore, physical erasure), exact mandatory target set, exceptions and expiry, evidence verifier, evaluation time and policy version. Any newly discovered target, invalidated seal, late derivative, failed restore suppression or expired exception produces an auditable Reopened transition. The previous proof remains as historical/superseded evidence and is never silently overwritten.
+
