@@ -385,3 +385,36 @@ No I-owned file was modified. No other Owner branch was merged. No physical-eras
 A further live branch read after the report publication found the I Owner branch advanced from the §1.1 snapshot HEAD 678a97ef6b43aed9f51f8ecdadf0955ea53915fa to **36171dff26ff1251d5ad6a8e54a41bfa49b5e2c2**. The relevant I JF-10 correction Blob remains **57474cfb0c5da07a2cbcbeff1fc792ced36c5dd6**, the I JF-10 interface acceptance Blob remains **77ffa8f019ea7734e22d785953e54f65c05208ac**, and the I Global Inventory contract Blob remains **9100061fa986fb6676656169de3fcf9fc1c72664**. The I governance/consumer acceptance register advanced to Blob **11c4bfde5de02a684cc6e5df46d1f9676f5a40a5**; its latest readback recognizes H design acceptance but continues to record JF-10 P0 OPEN and I36-GOV-01..10 GOVERNANCE-BLOCKED. No I response accepting or amending the newly submitted DE-S JF-10 v2 was present in issue #4 at this refresh.
 
 D, E and Storage Owner branch HEADs remained respectively **6a22f86e4fa04a2f00a67b45c3389b65d721d127**, **ba769bed2956c2550c37fcc5ba7bd4c21332d576** and **68d06a9b8297a4545dea67efad56b72b6da8d765** before this report append. This refresh changes no I-owned artifact and does not infer I acceptance from the unrelated I register update.
+
+
+## 14. Post-report phase transition — I JF-10 disposition consumed
+
+I Owner has now published and formally accepted the exact common JF-10 v2 Blob `d544cc38a922b314e6dc45dd4db76aae6b47f5fc` for the **single-policy-domain** profile, with binding clarifications:
+
+- I artifact: `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md`
+- I Blob: `b7b0287cde3922434a560fca90051cc5b418d987`
+- Decision: single-domain architecture ACCEPTED WITH BINDING CLARIFICATIONS; multi-domain atomicity BLOCKED / NOT ACCEPTED; JF-10 P0 remains OPEN.
+
+DE-S consumed that disposition by appending the binding requirements to the common JF-10 protocol on all three Owner branches. The post-update protocol readbacks are byte-identical at Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`. The append clarifies exact owner-gate tuple binding, atomic receipt consumption, terminal outcomes, IN_DOUBT/revocation behavior, I-authoritative InventorySeal validation, and mandatory rejection of multi-domain requests. D's fence/serialization acceptance remains D-owned; E's non-terminal-until-Storage-receipt behavior remains E-owned; Storage's prepared-XID/atomic-visibility behavior remains Storage-owned.
+
+A deterministic conformance plan is now published at:
+`reviews/storage-consistency/phase-3.6.2-jf10-executable-conformance-plan.md`
+Storage commit: `22a1b244ac3943250731b992d153687c3dbeeb1b`.
+
+The plan defines H01–H13 crash hooks, JF10-01..08, JF10-I-09..13, D/E boundary cases and a multi-domain rejection case; it specifies evidence bundles and concrete implementation prerequisites. This is **test design**, not an executable harness or test run.
+
+### Current phase status
+
+| Gate | Status |
+|---|---|
+| JF-10 single-domain architecture | I ACCEPTED WITH BINDING CLARIFICATIONS; DE-S consumption recorded |
+| Multi-domain atomicity | BLOCKED / NOT ACCEPTED; reject or pause requests |
+| Test design | COMPLETE at architecture/conformance-plan level |
+| Executable harness / implementation | NOT PRESENT IN REVIEWED REPOSITORY |
+| Software tests | NOT RUN |
+| Concrete DB/coordinator deployment selection | OPEN |
+| I InventorySeal / Global Forget governance | OPEN / GOVERNANCE-BLOCKED |
+| Global Forget Completion | NOT CLAIMED |
+| JF-10 P0 | OPEN |
+
+The next engineering gate is implementation mapping: select and prove the concrete DB's durable prepared-XID, lock-retention, failover and restore behavior; map every crash hook to executable fault injection; implement authoritative I lookup and same-XID recovery; then run the suite and collect independently reviewed evidence. No branch merge or I-owned file edit was performed.
