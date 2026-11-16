@@ -7,24 +7,27 @@
 
 ## 0. Scope, source baseline and authority
 
-Repository inspection found no existing Storage/Consistency formal design package, Storage-owned module directory, storage implementation or fault-injection suite. This is a new Storage/Consistency workflow. This report does not claim an existing Storage module or implementation.
+Repository inspection at the start of this workflow found no pre-existing Storage/Consistency owner package, Storage-owned module directory, storage implementation or fault-injection suite. This branch now contains the first Storage/Consistency proposed realization report (this document); it is a review artifact, not an established module authority or implementation. The package is not present on main and has not been owner-approved or merged.
 
 Reviewed source artifacts:
 
 | Artifact | Branch | Branch HEAD | Path |
 |---|---|---|---|
-| Cross-module contract review | main | 8a6414158c9c056c1638222534e1993d1bbc99d2 | reviews/integration/phase-3-defghi-cross-module-contract-review.md |
-| D Forget contract | session-d-memory-brain-2026-11-16 | 30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6 | 03-memory-brain/forget-fence-and-completion-contract.md |
-| D cursor semantics | session-d-memory-brain-2026-11-16 | 30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6 | 03-memory-brain/commit-cursor-semantics.md |
-| E producer admission | session-e-memory-compiler-2026-11-16 | 2dea3ae510c57987460d940224db569d43df78f1 | 04-memory-compiler/compiler-state-and-producer-admission.md |
-| E derived registration | session-e-memory-compiler-2026-11-16 | 2dea3ae510c57987460d940224db569d43df78f1 | 04-memory-compiler/forget-fence-and-derived-registration.md |
-| I Global Forget inventory | session-i-security-governance-2026-11-16 | 4c7c5f953b166bc512064f6de3b7d18a742d0449 | 09-security-governance/global-forget-target-inventory-and-completion-evidence.md |
+| Cross-module contract review | main | 8a6414158c9c056c1638222534e1993d1bbc99d2 (reviewed source commit) | reviews/integration/phase-3-defghi-cross-module-contract-review.md |
+| D Forget operation + fence contract | session-d-memory-brain-2026-11-16 | da8e5882d0b238d765d00b2225b79eea45a483b1 | 03-memory-brain/forget-fence-operation-and-publication-gate.md; 03-memory-brain/forget-fence-and-completion-contract.md |
+| D cursor semantics | session-d-memory-brain-2026-11-16 | da8e5882d0b238d765d00b2225b79eea45a483b1 | 03-memory-brain/commit-cursor-semantics.md |
+| E producer admission | session-e-memory-compiler-2026-11-16 | 13a720724fcfae84f4c4abe36fbc44dd2820445d | 04-memory-compiler/compiler-state-and-producer-admission.md |
+| E derived registration | session-e-memory-compiler-2026-11-16 | 13a720724fcfae84f4c4abe36fbc44dd2820445d | 04-memory-compiler/forget-fence-and-derived-registration.md |
+| I Global Forget inventory | session-i-security-governance-2026-11-16 | 5591ad3620ec3f5d74194bd79556dcf3e25bea07 | 09-security-governance/global-forget-target-inventory-and-completion-evidence.md |
+| Storage proposed realization | session-storage-consistency-forget-atomicity-2026-11-16 | ec0e29d9b6e6e32728116514376214503aeb2434 (pre-update HEAD) | reviews/storage-consistency/forget-atomicity-storage-realization-review.md |
 
 Fetched source blob SHAs:
-- D Forget contract: 761aa1412c38ff1ebb9154765993cfd9850fd0fa
+- D Forget operation + publication gate: 2c5b1358ff58f99af838b741a75966ccd07ad088
+- D Forget completion contract: cce2108899525c9ce6808716224641baa11faf4f
 - D cursor semantics: 4688a0ca487bf4d853c7f0220408abe8d743d159
-- E producer admission: 8a5ea350176251b336c98d4d8983b55b1865965e
-- E derived registration: 7ac738edb9eef68d3f4b96d244af381ab8ca4116
+- E producer admission: 07b3d47dcb12fa94c2d449160905ba9731ee2ccd
+- E derived registration: 81841c5f29f0d21c5acdb5fe8a392ff560808919
+- I Global Forget inventory: 9100061fa986fb6676656169de3fcf9fc1c72664
 
 Authority is unchanged:
 - D owns ForgetOperation, ForgetFence, canonical producer-registration/barrier semantics, dependency inventory authority and CanonicalCommitCursor.
@@ -308,3 +311,97 @@ These questions do not authorize Storage to rewrite D/E/I contracts. Any semanti
 **Current gate:** DESIGN REVIEW / PROPOSED REALIZATION ONLY. CR-P1-01 and INT-P0-03 remain OPEN. Do not label Implementation Verified, Conformance Passed, Contract Frozen or Production Ready.
 
 **Next step:** D, E and Storage jointly select the shared linearization authority and operation/receipt contracts; I confirms authorization freshness and inventory linkage. Only then implement the coordinator, ledgers, visibility gate and crash-injection suite.
+
+
+---
+
+## Phase 3.5 Reassessment Addendum — Current D/E/I Owner Baseline
+
+**Reassessment date:** 2026-11-16  
+**Status:** DESIGN REVIEW / PROPOSED REALIZATION; no implementation or test execution is claimed.
+
+This addendum supersedes stale source-baseline and OPEN-item wording above where the latest owner branches have since made semantic decisions. It does not supersede D/E/I authority.
+
+### A. Current owner decisions consumed
+
+D's current operation-level contract specifies nine semantic operations: RegisterProducerClass, RegisterProducerWork, InstallForgetFence, CaptureProducerRegistrationHighWater, RegisterDerivedDependency, PublishDerivedIfFenceCurrent, CompleteProducerWork, ResolveProducerWork and ReconcileForgetBarrier. It specifies stable operation identities/digests, durable receipts, typed outcomes, idempotency and semantic linearization points.
+
+E's current producer-admission and derived-registration addenda explicitly consume that operation set and correct earlier OPEN statements. Therefore this Storage review MUST NOT continue to describe D's semantic registration/fence fields, high-water type, operation receipt vocabulary or two-outcome race as undefined.
+
+I's current inventory contract explicitly distinguishes:
+- I ProducerDomainInventoryEpoch: global closed-world producer/recipient class and instance inventory;
+- D ProducerRegistryVersion: D-local producer-class registry snapshot;
+- D ProducerRegistrationHighWater: concrete admitted-work cutoff for one ForgetOperation.
+
+These are distinct evidence dimensions. Storage can persist and reconcile them but cannot collapse them or claim that a complete D ledger proves global producer-domain completeness.
+
+### B. Corrected Storage decision boundary
+
+The recommended physical realization remains one shared per-Canonical-Memory-authority serialization domain. The logical coordinator must serialize at least:
+1. RegisterProducerWork;
+2. InstallForgetFence and its captured ProducerRegistryVersion + ProducerRegistrationHighWater;
+3. RegisterDerivedDependency for the complete artifact/dependency set;
+4. PublishDerivedIfFenceCurrent and the authoritative visibility transition;
+5. CompleteProducerWork and barrier-visible terminal disposition.
+
+RegisterProducerClass must commit a versioned enabled/disabled registry state which RegisterProducerWork reads in that same authority's admission order. CaptureProducerRegistrationHighWater is a consistent immutable read tied to the fence installation commit; it MUST NOT allocate a later cutoff or repair a missing ledger sequence.
+
+**Important deployment qualification:** the single-database recommendation is valid only if D's authoritative fence/producer ledger and the visibility authority can participate in the same atomic transaction/serialization domain. If they are physically separate, a plain D-issued token followed by an independent E/object-store write is rejected. The only acceptable alternative is a D-approved durable prepare/commit or equivalent linearizable coordinator protocol in which the final visibility commit validates the current fence at its own commit point, survives coordinator/participant crash, and exposes no prepared artifact. This deployment choice remains unverified.
+
+### C. Linearization and visibility invariants
+
+- Work admission linearizes when the durable ProducerWork row and its ProducerRegistrationSequence commit in the same serialization domain used by fence installation.
+- Fence installation linearizes when the effective fence and immutable registry-version/work-high-water snapshot commit together.
+- Dependency registration linearizes only when the artifact identity and the complete required dependency edge set are durably committed as one complete registration; partial sets remain non-publishable.
+- Publication linearizes only at the authoritative visibility commit. The latest fence, current dependency receipts, active work/attempt/lease and I-authoritative authorization decision must be validated within that commit's serialization boundary.
+- Terminal disposition linearizes when the durable terminal receipt and barrier-visible terminal state commit after every output/attempt/replay path is resolved.
+- The reader's visibility predicate must not trust a stale cache, staging path, object-store listing, index replay or outbox event. Only committed publication state may make an artifact queryable, and the applicable current fence remains enforceable on every read/rebuild path.
+
+### D. Corrected OPEN item disposition
+
+| Prior report item | Current disposition | Remaining work |
+|---|---|---|
+| O-01 shared serialization authority | **Storage realization OPEN; D semantic order DECIDED** | D + Storage name one authority/transaction or approved equivalent and prove it |
+| O-02 producer sequence scope | **D DECIDED** | Persist typed ProducerRegistrationSequence/HighWater separately from CanonicalCommitCursor |
+| O-03 EventRef-only ingress | **D/E semantics specified; detailed typed lineage/identity dependencies remain OPEN** | B/D/E confirm typed refs and immutable lineage binding; no untracked admission |
+| O-04 retry/recompile identity | **OPEN** | D/E decide linked child/re-admission identity and barrier accounting before execution |
+| O-05 dependency atomicity | **D semantic complete-set rule DECIDED** | Storage prove atomic complete-set commit or D-approved durable prepare/finalize with invisible incomplete state |
+| O-06 visibility ownership/token | **D semantic visibility linearization DECIDED** | D/E/Storage select physical transaction/coordinator; no check-then-write |
+| O-07 current I authorization | **I-owned OPEN** | I define authoritative decision freshness, revocation and lookup semantics at gate commit |
+| O-08 terminal disposition | **D semantics specified** | E map multi-output/replay lifecycle; Storage prove stale lease/attempt cannot terminalize |
+| O-09 global inventory linkage | **I semantics distinguish the epochs** | I/A/module owners prove closed-world ProducerDomainInventoryEpoch and map D-local registry/work evidence |
+| O-10 transitive lineage/scope | **D/E typed evidence requirements specified; exact B/I identity integration remains OPEN** | Verify complete lineage digest and typed ScopeRef/source references, including EventRef-only and derivative-of-derivative |
+| O-11 restore safety | **Storage + D/I realization OPEN** | Prove current Forget control ledger is replayed/authoritative before any restored artifact is served |
+| O-12 database guarantees | **Storage OPEN** | Select engine/version/configuration and execute the verification plan in §6.1 |
+
+The earlier OPEN-01..05 language in the body is to be read through this corrected owner-status table. Storage must not convert a semantic D decision into a claim that its physical realization is already implemented.
+
+### E. Registration/fence proof — explicit exhaustive outcomes
+
+Let the coordinator serialize RegisterProducerWork and InstallForgetFence. For any work W applicable to fence F:
+
+**Admission commits first:** W receives sequence n; InstallForgetFence subsequently commits captured high-water H with n ≤ H. W is barrier-captured. It may continue only as tracked work; any dependency/publication gate subsequently observes F and cannot make a covered derivative visible.
+
+**Fence commits first:** F and H become durable; RegisterProducerWork subsequently evaluates the current fence and commits REJECTED/QUARANTINED/CLEANUP_ONLY (as D's semantic contract directs). No lease or execution permission is granted.
+
+No third state is legal. In particular, sequence allocation outside the same serialization transaction, local E admission based on cached fence, or queue insertion before authoritative receipt would violate the proof.
+
+Fence/publication has the same two-order property: publication visibility commits first and is then part of the durable pre-fence inventory/reconciliation, or fence installation commits first and publication is rejected. A captured barrier is not itself a publication permit.
+
+### F. Conformance plan status and required execution evidence
+
+The existing C01–C20 matrix remains the executable plan, not a result. Add/retain the following hard assertions in its harness:
+- For every generated WorkItemId, exactly one of (accepted with sequence ≤ the applicable fence H) or (durably rejected/quarantined/cleanup-only) is observable.
+- No accepted work can be absent from the captured ledger snapshot.
+- No VISIBLE artifact can lack a complete dependency receipt and committed PublicationReceipt.
+- No stale lease epoch, stale fence observation or revoked PermissionEpoch can commit visibility.
+- A late derivative or inventory epoch change invalidates/reopens any prior barrier/global completion proof.
+- After failover/restore, stale control data cannot be served before the current Forget control ledger is reconciled.
+
+Required evidence per run: engine/version/configuration, isolation and replication mode, two-client race trace, deterministic seed, crash point, request IDs/digests, registration/fence/dependency/publication/terminal receipts, authoritative reader snapshots, database transaction/lock/CAS traces, failover/restore logs, invariant-checker output and owner sign-off. None of this evidence is currently present; no C01–C20 test has been executed by this review.
+
+### G. Updated disposition
+
+**Recommended realization:** one durable transaction/linearizable coordinator per Canonical Memory authority, with Durable Work Ledger, immutable barrier snapshot, complete dependency registration, authoritative visibility commit and transactional outbox. Use a distributed prepare/commit or equivalent only if a single transaction domain cannot cover D's fence ledger and the authoritative visibility store.
+
+**Gate:** DESIGN REVIEW / PROPOSED REALIZATION ONLY. D's semantic contract is substantially specified; Storage's physical serialization, replica/read behavior, restore safety and crash/fault conformance remain OPEN. INT-P0-03 and D-REV-P1-003 remain OPEN. No implementation, runtime or fault-injection verification is claimed.
