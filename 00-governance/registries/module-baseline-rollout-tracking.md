@@ -13,10 +13,10 @@ The following are live branch-tip SHAs fetched from GitHub branch metadata on 20
 
 | Module | Owner branch | Fresh HEAD SHA | Branch protected | Module baseline proposal |
 |---|---|---|---|---|
-| A | `session-a-integration-2026-11-16` | `2059f27bffa5f0aeecb50108440fe177515b09ff` | No | NOT SUBMITTED |
+| A | `session-a-integration-2026-11-16` | `7d73102576660fb602376c7ce2f2522a0a8b29ad` | No | NOT SUBMITTED |
 | B | `session-b-domain-model-phase3` | `0cf703a3fec9921aeb8e6252a8ac4708b8b723b3` | No | NOT SUBMITTED |
 | C | `session-c-agent-integration-2026-11-16` | `702263dee9b40cf78fe95481731f52adb775c0d2` | No | NOT SUBMITTED |
-| D | `session-d-memory-brain-2026-11-16` | `edf35b8a80bb9d096748dab129cea5867561b5d3` | No | NOT SUBMITTED |
+| D | `session-d-memory-brain-2026-11-16` | `1460fbd17ee38ea4044dc6c75cfe49039c7fc585` | No | NOT SUBMITTED |
 | E | `session-e-memory-compiler-2026-11-16` | `530645a08b55716257cf4cde20b0900b628abb52` | No | NOT SUBMITTED |
 | F | `session-f-memory-runtime` | `6cdc23f0835ea9576867f7cd1ac145e57f598c4b` | No | NOT SUBMITTED |
 | G | `session-g-memory-context` | `f6e7c46da9963ffee02c7805330b3f14291ab540` | No | NOT SUBMITTED |
@@ -72,3 +72,12 @@ Nine module-specific 14-section proposal packages have been prepared from the so
 Readback verified all nine proposal files on P. Their current blob SHAs are recorded by the GitHub fetch evidence in the Session P work log. Each package includes mission, ownership, capabilities, domain ownership, interfaces, security, module redlines, forbidden cross-module actions, dependencies, conformance, acceptance, change authority, open decisions and non-claims.
 
 **Adoption gate:** A package is not a module baseline until its named Owner explicitly reviews and adopts a specific version on the corresponding Owner branch. Session P has not written to A–I branches. No Owner decision, cross-module acceptance, project G0 approval or implementation/test result is inferred.
+
+
+## Concurrent Owner branch movement observed during this pass
+
+A and D advanced after the initial inventory while Session P was preparing the proposal packages. Their tips were re-fetched and the tracking table has been corrected:
+- A current HEAD: `7d73102576660fb602376c7ce2f2522a0a8b29ad`; latest commit records D + Storage exact JF-10 bundle decision closure at architecture/interface level and Gate A engineering evidence as next blocker. A freeze remains NOT AUTHORIZED.
+- D current HEAD: `1460fbd17ee38ea4044dc6c75cfe49039c7fc585`; latest commit records exact JF-10 v2 acceptance with enumerated exceptions, limited to D-owned semantics. Implementation, DB capability, recovery/fault conformance and multi-domain remain open.
+
+The A and D proposal packages on P were refreshed with these live decisions. The other seven branch tips were rechecked and remained at the initially recorded SHAs at the time of the final inventory. Because branches are live, all Owners must pin their own HEAD again when adopting a proposal.
