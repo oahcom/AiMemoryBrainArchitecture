@@ -248,3 +248,72 @@ This section supersedes earlier wording that could imply D has not defined seman
 Normal path: `REGISTERED → QUEUED → LEASED → RUNNING → STAGED → DEPENDENCY_REGISTERED → PUBLISH_PENDING → PUBLISHED`. Retry returns to QUEUED under the same WorkItemId and a new AttemptId. DLQ/lease expiry are non-terminal. A suppression/quarantine terminal path requires durable proof that no future publication is possible.
 
 **DECIDED by D:** ProducerClass/WorkItem distinction; RegisterProducerWork/InstallForgetFence shared ordering; immutable ProducerRegistryVersion + ProducerRegistrationHighWater; dependency durability before visibility; final publish linearization; terminal/reconciliation receipts. **OPEN:** callable transport/API and wire errors; H/B/I identity serialization; I PermissionEpoch current-decision binding; I global inventory reconciliation; exact recompile child identity; named Storage owner and validated atomic realization; executable conformance. No endpoint or implementation is claimed to exist or pass.
+
+
+---
+
+## Phase 3.6 — Fence-Enforced Producer Work Protocol
+
+**Status:** E producer execution contract defined; D semantic operations consumed; Storage serialization/visibility realization and D/Storage owner confirmation OPEN. **Implementation NOT VERIFIED.**
+
+### 1. Stable work identity and attempt model
+
+The logical producer work identity is immutable across the entire recovery/reprocessing lifetime:
+
+- **ProducerClass**: D-registered, versioned, enabled producer capability class. E's compiler ingress, extraction/normalization, consolidation, retry scheduler, DLQ replay, worker recovery, outbox dispatcher, rebuild/recompile initiators are separately declared capabilities as required by D/I inventory policy. A local E allow-list is not admission authority.
+- **WorkItemId / ProducerWorkItemId**: one stable identity for the logical source-to-derived work obligation. It is created and persisted before dispatch. It remains unchanged through retry, DLQ, replay, recompile, outbox replay, lease expiry, worker recovery and process restart. A changed semantic request under the same ID conflicts; a new AttemptId or DerivationRunId never creates a new WorkItemId.
+- **AttemptId**: immutable identity for one execution attempt; new for every retry/replay/recovery attempt.
+- **DerivationRunId**: immutable identity for one extraction/normalization/consolidation run; a recompile creates a new run linked to the original WorkItemId, accepted source and lineage. It does not mint a replacement WorkItemId. Any D-required child/re-admission operation must preserve the root WorkItemId as the barrier identity and be explicitly confirmed by D before dispatch.
+- **RegistrationReceipt**: E stores the D-issued ProducerClassRegistrationReceipt and ProducerRegistrationReceipt separately. The latter binds WorkItemId, canonical request digest, ProducerClass/registry version, source lineage, ScopeRefs, admission disposition and ProducerRegistrationSequence. It is not an AcceptedReceipt, a lease, or a publish permit.
+- **Lease**: a time-bounded worker claim bound to WorkItemId, AttemptId, worker identity, LeaseId, lease epoch/expiry, observed ForgetFenceCursor and PermissionEpoch. Lease acquire/renewal is conditional and durable. A lease is never admission authority; expiry invalidates that attempt only.
+- **Source MemoryVersion**: exact immutable source MemoryRef + MemoryVersionRef/revision when canonical memory exists; EventRef + immutable payload digest is retained for Event-only ingress. Every recompile/derivative-of-derivative preserves complete source ancestry and lineage digest.
+- **ScopeRef**: typed, validated scope binding and security-domain reference. ScopeRef is not permission and payload claims are not credentials.
+- **FenceGeneration / ForgetFenceCursor**: D-issued typed fence generation and cursor tuple. E stores them unchanged; it never compares them numerically with PermissionEpoch or other cursors.
+- **PermissionEpoch**: I-issued opaque authorization freshness value with an authorization-decision reference. E revalidates through I; it never treats the value as a grant.
+- **Dependency Registration**: stable DependencyRegistrationId + canonical digest and D-issued DependencyRegistrationReceipt for the complete artifact/version and all direct/transitive source/parent edges. Same ID/digest resolves to the original receipt; changed digest conflicts.
+- **Terminal Disposition**: durable, append-only final work outcome submitted through D CompleteProducerWork and accepted only when D returns ProducerWorkTerminalReceipt. E local completion is not D barrier closure.
+
+### 2. Admission and execution ordering
+
+The required ordering is:
+
+1. Persist immutable ingress/CompileIntent and stable WorkItemId in E's durable acceptance/outbox boundary.
+2. Resolve the enabled D ProducerClass registration and current authenticated producer/Scope binding.
+3. Call D RegisterProducerWork using WorkItemId + canonical request digest and exact source lineage; resolve any timeout using the same key.
+4. Dispatch/queue only after a durable ACCEPTED RegistrationReceipt is confirmed. REJECTED, QUARANTINED, CLEANUP_ONLY, UNKNOWN, missing receipt or registry gap cannot enter ordinary compile execution.
+5. Acquire a fresh LeaseId/AttemptId under current I authorization and D fence state. Only then may protected source/evidence/provenance be dereferenced.
+6. Execute extraction, normalization and consolidation into private staging. Record source MemoryVersion(s), ScopeRef(s), FenceGeneration observation, PermissionEpoch observation and provenance digest.
+7. Register the complete derived dependency set with D. Partial/unknown dependency registration remains private.
+8. Invoke the final PublishDerivedIfFenceCurrent operation; the final visibility commit, not a prior check, decides publication.
+9. Resolve the authoritative PublicationReceipt, then submit terminal evidence to D. Work is terminal only after every output/attempt/replay path is reconciled.
+
+No E queue insertion, lease, source dereference, execution, retry, DLQ replay, recompile, rebuild-triggered compiler work or publication may bypass D registration and current authorization/fence checks.
+
+### 3. Lease, retry and terminal rules
+
+- Lease renewal retains WorkItemId, AttemptId and LeaseId; it advances only the lease epoch/expiry under a current authorization/fence check.
+- Lease expiry revokes the old lease/attempt's ability to publish. Recovery preserves WorkItemId and lineage, creates a new AttemptId/LeaseId, and re-resolves D work state plus current I PermissionEpoch and D ForgetFence before source access.
+- Retry and DLQ parking do not close D barrier membership. DLQ is nonterminal while replay or publication remains possible.
+- DLQ replay/outbox replay uses the same WorkItemId, CompileIntentId, source EventRef/MemoryVersion and request digest; it creates a new AttemptId and lease, then rechecks all current controls.
+- Recompile uses the same WorkItemId and original source lineage, a new DerivationRunId and immutable output artifact/version IDs. It must not mint a new AcceptedReceipt or use a new WorkItemId to evade an old fence. D must explicitly confirm any child-registration representation while preserving root barrier identity.
+- Terminal disposition is allowed only after all attempts are revoked/expired, all outputs are either published with receipts or suppressed/quarantined, no dependency/publication outcome is UNKNOWN, no outbox/DLQ/replay path can dispatch, and D accepts CompleteProducerWork. FAILED_PARKED is nonterminal.
+- A stale worker may not publish or terminalize after a newer attempt/lease takes ownership. D's final gate validates the active attempt/lease and Storage must serialize that validation with visibility.
+
+### 4. Typed state transitions
+
+`RECEIVED -> DURABLE_INGESTION -> ACCEPTED -> D_REGISTRATION_PENDING -> REGISTERED -> QUEUED -> LEASED -> RUNNING -> CANDIDATE_PRIVATE -> STAGED_PRIVATE -> DEPENDENCY_REGISTRATION_PENDING -> DEPENDENCY_REGISTERED -> PUBLISH_PENDING -> PUBLISHED -> TERMINAL`
+
+Alternative transitions:
+
+- Any ambiguous D operation result: `*_PENDING -> UNKNOWN_RECONCILIATION`; do not advance, dispatch or expose until same operation identity resolves.
+- Retry/worker recovery: `RUNNING/STAGED/UNKNOWN -> RETRY_QUEUED`; same WorkItemId, new AttemptId/LeaseId, fresh authorization/fence.
+- DLQ: `RETRY_QUEUED -> DLQ_PARKED`; still registered and barrier-open.
+- Recompile: new DerivationRunId under same WorkItemId; old run/output evidence remains immutable and linked.
+- Fence/permission denial: `*_PRIVATE -> SUPPRESSED_QUARANTINED`; publication disabled; terminal only after durable no-future-publication proof and D acceptance.
+- Any partial dependency registration or ambiguous publication: remain private and unresolved.
+
+### 5. E/D evidence separation
+
+E's local states (queued, leased, running, candidate, staged, retry, DLQ) are execution telemetry. D's RegistrationReceipt, DependencyRegistrationReceipt, PublicationReceipt and ProducerWorkTerminalReceipt are authoritative ledger evidence. A local row, queue ACK, object-store presence, lease heartbeat or worker success log cannot substitute for a D receipt.
+
+The D producer-registration sequence/high-water, D ForgetFenceGeneration, D CanonicalCommitCursor and I PermissionEpoch are distinct typed namespaces. E stores each in its own typed field and delegates currentness/coverage evaluation to the issuing authority.
