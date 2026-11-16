@@ -483,3 +483,39 @@ Current PostgreSQL 18.7 probes prove local prepared-XID/lock/visibility/PITR cap
 **Next hard dependency:** A/C/designated implementation owner must supply the canonical runtime repository/commit, runtime entrypoint, DB adapter, schema/migration path, and the exact COC/I/D API/schema and signer-verifier contracts. Storage will then implement the adapter and run I's JF10-COC-01..10 plus D fence-race tests against the actual application path. No substitute fixture will be called production conformance.
 
 Gate A remains PARTIAL PASS / OPEN; Gate B/C remain BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+
+## 23. Architecture-phase COC protocol publication and latest seven-workflow evidence (2026-11-17)
+
+### 23.1 COC Gate B protocol artifact
+
+Storage has published `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, Blob `6154d6c345daf260e6c2552e2257d073f1675188`, commit `9f784a15ef33a6cde4b4cda1ab6fca2df8a705fa`. It specifies the Raft-style quorum state machine, three-voter/two-quorum target, voter-configuration epoch and joint membership changes, immutable log envelope/digest chain, append idempotency, participant registry/state machine, linearizable APIs, owner-local outage gates, recovery-cutoff batch, complete pre-batch participant reconciliation, signed recovery receipt, checkpoint/snapshot/rollback fencing, WAL/PITR requirements, retention/compaction, security boundaries, failure matrix and Gate B conformance cases.
+
+**Gate B status is corrected to: ARCHITECTURE SPECIFICATION PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED.** The earlier statements in §§18, 20, 21 and 22 that Gate B is blocked pending production runtime or Gate A implementation evidence are superseded insofar as they prevent architecture design from proceeding. Gate B design was expressly authorized by §19/§21. Gate C executable end-to-end fault injection remains deferred to the engineering phase after executable participants exist.
+
+### 23.2 Latest complete PostgreSQL 18.7 regression set
+
+The latest seven-workflow capability regression set is 7/7 SUCCESS. The PITR prepared-XID/VisibilityPointer/PublicationReceipt negative campaign ran on commit `d026add5cfaec0d395537e8763317cdbd8255398`; the six companion workflows reran on readiness-fix commit `83bdacbafa840808dca9be7a8c76c4df83c63504`.
+
+| Capability | Run | Job | Result |
+|---|---:|---:|---|
+| Prepared-XID / VisibilityPointer / PublicationReceipt PITR + missing/corrupt/incomplete WAL | `43958775001` | `133620265141` | SUCCESS |
+| Prepared-XID persistence/restart and lock retention | `43959079736` | `133621314502` | SUCCESS |
+| Synchronous standby promotion, same-XID commit and rollback | `43959079669` | `133621315610` | SUCCESS |
+| Physical backup/restore and stale-control gate | `43959079703` | `133621314624` | SUCCESS |
+| WAL archive PITR to explicit LSN | `43959079745` | `133621314724` | SUCCESS |
+| Required synchronous standby unavailable — fail closed | `43959079760` | `133621315188` | SUCCESS |
+| Old-primary fencing, pg_rewind and standby rejoin | `43959079930` | `133621314973` | SUCCESS |
+
+The prepared-XID PITR job proves exact prepared XID lock retention, same-XID COMMIT/ROLLBACK after restore, pointer+receipt atomic visibility, rollback non-publication, pointer-only/receipt-only reader rejection, and fail-closed outcomes for missing, corrupt and incomplete exact target WAL. The six companion runs prove the pinned PostgreSQL 18.7 engine capability profile. The earlier prepared-XID transient-initdb failure is superseded by the readiness fix and successful rerun; it is not counted as a final failure.
+
+### 23.3 Corrected phase and acceptance boundary
+
+- `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; absence of production source/runtime is intentional in this architecture-design phase, not a Gate A blocker.
+- PostgreSQL 18.7 is a qualified CI candidate for the Canonical Authority prepared-XID profile, not a production database deployment selection.
+- Durability objective for quorum-acknowledged COC records is RPO 0 under the specified synchronous durable quorum. Numeric RTO remains TBD for engineering/operations; the service remains fenced until recovery proof is complete.
+- Logical service custodian is Storage/Consistency. Named primary/backup operator, host/zone placement, KMS, retention, runbook and measured RPO/RTO are engineering/deployment deliverables, not silently assumed.
+- Gate A remains PARTIAL PASS / OPEN for remaining architecture specification and exact cross-owner acceptance; Gate B specification is published and awaiting exact owner review; Gate C implementation campaign is deferred; JF-10 P0 remains OPEN; production activation remains NOT AUTHORIZED.
+
+### 23.4 Supersession note
+
+This addendum supersedes the stale Gate B/C wording in §22 and any earlier wording that conditions architecture-phase Gate B design on a production runtime repository. It does not supersede any technical test limitation, production non-claim, owner authority boundary or production-activation prohibition.
