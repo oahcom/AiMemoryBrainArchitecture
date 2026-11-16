@@ -1537,7 +1537,7 @@ Storage completed the pinned PostgreSQL 18.7 old-primary rejoin campaign:
 - Run: `43930047054`; job: `133519705454`; conclusion SUCCESS.
 - URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43930047054
 - Run commit: `1eb9c9c08e3ae658fcbcfa568d1c2e1ab0e1999a`
-- Probe Blob: `0fe6af4a8c9ef350ef9cbf0694a8f975e8f142f5`
+- Probe Blob: `10461a2de093ad0c4944536ba686c217aa0aa835`
 - Workflow Blob: `7670ff9537054df1c1303d4eda4d46bffdfa3c4c`
 
 The test hard-stopped the old primary, verified it remained unavailable, promoted the synchronous standby, recovered the old primary offline with networking disabled, used `pg_rewind` to align the old data directory with the promoted source, then rejoined it as a read-only standby. A write issued by the promoted primary after rejoin was replicated to the old node; a direct write attempt on the rejoined node was rejected.
