@@ -3,7 +3,7 @@
 - Owner: A — Principal Integration Architect
 - Exact Storage COC protocol §14 Blob: `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`
 - Exact A integration mapping Blob: `a71251704851cacd15f67faa985a5bd50057e92a`
-- Exact B typed-reference registry Blob: `b5a169a1f2c2e6db4b7c8f96b127af971ff53f1f`
+- Exact B typed-reference registry Blob: `63ccb4bf687b00dea2b21fc2773f3018648d76e6`
 - Exact H BMCP 1.1.1 schema candidate Blob: `c0bbfc7611a8d88a39cee209831db32b62601fde`
 - Date: 2026-11-17
 - Status: **AMENDED §14 EXACT OWNER REVIEW COMPLETE WITH CONDITIONS; NOT IMPLEMENTED**
@@ -16,6 +16,7 @@
 | C | `dd6c28a88aad019fcb513e789dcfffc20934e852` | `b053a2c8b1790046b4cdfe3bb05ec333757df291` | Provider idempotency remains distinct; no GID/native-XID substitution. |
 | D | `3cba777f8951a5d88e27a314a37c000aeedc19d0` | `c57fc9323f01b3bb46d8048741df014d13136e9c` | D barrier participant key and preallocation/cutoff ordering. |
 | E | `057c1c2096e97798e60e07710f301ae7cc522bbc` | `e593b387fd3b18f3bf53ecbfb9c2c97c25948335` | Producer retry/publication lifecycle binds same pair. |
+| F | `67e77f783a275727eb444cefca280a27a0f095ef` | `86c013814fbbfff1829729eb18fdc3a5de265969` | Index/cache/Working Set identity remains separate; same source participant/GID binding. |
 | G | `60dc4f43cc03e720e1c2552d77ddabe9947e8e86` | `ecb8062c0b533a960656aca2fba2f294981f8ab2` | Full Applied proof binds same pair and Storage resolution. |
 | H | `98321da4b93d39ada9d227f4e03f2e55ba45aa29` | `c92fc4a0deb6b4d07be8ef3bf27ea116af9d6136` | Wire mapping and BMCP 1.1.1 candidate. |
 | I | `20fc13bbfe7b93c0d6f6233fd714c57dadca1fda` | `553355afa017e82b4972315493abdc8b0f5b6603` | I terminal receipt/consumption binds pair; governance remains separate. |
@@ -24,7 +25,7 @@
 
 ## 2. Integrated architecture decision
 
-All nine Owner perspectives have reviewed the same exact amended Storage protocol Blob `86ff3b...` and the same A mapping Blob `a71251...`. H has additionally accepted the 1.1.1 candidate wire schema `c0bbfc...` and reports 34/34 schema/parser tests passing in CI run `43964080044`.
+All ten Owner perspectives have reviewed the same exact amended Storage protocol Blob `86ff3b...` and the same A mapping Blob `a71251...`. H has additionally accepted the 1.1.1 candidate wire schema `c0bbfc...` and reports 34/34 schema/parser tests passing in CI run `43964080044`.
 
 The accepted identifier model is:
 
