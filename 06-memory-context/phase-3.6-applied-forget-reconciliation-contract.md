@@ -195,3 +195,26 @@ Context is a data region, not an instruction region. Entries carry source refs, 
 ### G decision consequence
 
 G considers its semantic portion of the A package accepted with the exceptions above. The C/G/H Applied Contract remains **NOT FROZEN** until H explicitly accepts the same version and I/D/B provide their own authority confirmations. G conformance remains **SPECIFIED / NOT RUN**; implementation remains **NOT VERIFIED**.
+
+## Phase 3.6.3 — Issue #3 exact-version G Owner decision
+
+- Owner: G — ContextVersion, Delivery, reconciliation and Applied state authority.
+- Exact shared package: reviews/integration/phase-3.6-cgh-applied-contract-decision-package.md, Blob SHA 122b164bcc0760b83bf555072a36fc55631623e1.
+- Decision: **APPROVE WITH ENUMERATED EXCEPTIONS** for G-owned Context/Delivery/Applied clauses. This is G's explicit Issue #3 decision, not a global freeze.
+- Common contract version: **CGH-APPLIED-1.0**, anchored to the exact package Blob above.
+- G owns the authoritative per-request Applied record. Full Applied requires exact ContextId/ContextVersion, DeliveryId/attempt, InferenceRequestId, FinalRequestBoundaryId, authenticated Agent/Adapter/RuntimeSession, verifier-resolved ActorRef, role-tagged ScopeBindingSet, applicable EnvironmentRef, complete ManagedRegion revision/inventory/digest/profile, current I PermissionDecision/PermissionEpoch, current D ForgetFence/lineage, H CapabilityEpoch and authenticated H ACK plus immutable C final-submit proof.
+- Commit/idempotency: exact request/attempt/evidence identity; same identity+same digest returns original disposition; same identity+different digest is conflict/quarantine. Late evidence cannot roll back newer ContextVersion or Delivery attempt.
+- Temporal rule: proven submit before later Forget/revocation may remain historical Applied while current-use is invalid; Forget/revocation before submit rejects Full; unknown order remains Unknown and suppressed. Sender wall clock is not ordering authority; owning authority commit cursor and trusted receiver receipt sequence are required.
+- Exceptions: G does not own C final-request evidence, H wire encoding/cryptography, I authorization/PermissionEpoch policy, D ForgetFence/lineage, B typed references or Storage publication atomicity. This does not prove execution, attention, comprehension, recall, global Forget or physical erasure.
+- Negative cases (missing C proof, invalid H binding, stale epoch/fence, scope/environment mismatch, unsupported tier, stale delivery, changed duplicate digest, ambiguous order) reject Full or remain historical/Unknown.
+- CGH-01..20 remain **SPECIFIED / NOT RUN**.
+
+## Phase 3.6.3 — Issue #6 G BIH consumer acceptance
+
+- Exact BIH package: reviews/integration/phase-3.6-identity-trust-joint-architecture.md, Blob SHA a45ae90b318a79bf009d14f4d917611881e9e214.
+- Disposition: **ACCEPT WITH ENUMERATED EXCEPTIONS** as a downstream consumer of BIH36-JD-01..17.
+- Mapping: G binds authenticated Principal/Issuer and Adapter/Agent workload instance to RuntimeSession; ActorRef must be verifier-resolved and operation-bound. G preserves exact ScopeRef role set and applicable EnvironmentRef in Context, Delivery, Applied and reconciliation records. PermissionEpoch is opaque and I-issued; ForgetFence is a distinct D-issued token; CapabilityEpoch is H-owned.
+- Enforcement: before Delivery authorization, on authenticated receipt/materialization, and at Applied commit, G verifies current I decision/epoch, exact ContextVersion/Delivery attempt, H authenticated Adapter/session/capability evidence, D fence/lineage and C immutable final-submit evidence. Reconnect reconciles G's durable delivery/ACK journal after fresh authentication and current authority checks.
+- Fail closed: payload-only identity, unknown/revoked issuer or Adapter, forged ActorRef, missing Scope/Environment, absent explicit cross-Scope/Environment grant, stale/incomparable epoch, stale/unknown fence, capability mismatch, old-session ACK, changed duplicate digest, or unknown causal order cannot mutate Applied state; reject/quarantine, historical-only or Unknown as applicable.
+- Exceptions: G does not define B identity types, I trust/authorization policy, H wire cryptography/serialization, D fence issuance, C submit evidence or Storage atomicity. External governance and runtime conformance remain separate.
+- G Applied/reconciliation matrix remains **SPECIFIED / NOT RUN**.
