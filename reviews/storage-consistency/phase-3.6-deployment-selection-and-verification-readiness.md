@@ -678,7 +678,7 @@ No semantic conflict was found between §14 and Storage's exact-XID PITR/lock-re
 
 ## 28. Exact-owner re-review of §14 prepared-participant identity — COMPLETE (2026-11-17)
 
-The focused exact-version review required by §25 and §27 is now complete. All A/B/C/D/E/F/G/H/I/Storage owners accepted the same current Storage protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` and A integration mapping Blob `a71251704851cacd15f67faa985a5bd50057e92a`. The exact acceptance matrix is `reviews/integration/phase-3.6.4-jf10-prepared-participant-gid-owner-acceptance-matrix.md`, Blob `c9e6da594b9dcf648502801cb214e883805bdfb1`.
+The focused exact-version review required by §25 and §27 is now complete. All A/B/C/D/E/F/G/H/I/Storage owners accepted the same current Storage protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` and A integration mapping Blob `a71251704851cacd15f67faa985a5bd50057e92a`. The exact acceptance matrix is `reviews/integration/phase-3.6.4-jf10-prepared-participant-gid-owner-acceptance-matrix.md`, Blob `dd7f00945b362b8d71b91d007e0335a8cffd96c2`.
 
 H additionally accepted the 1.1.1 wire candidate in `08-bmcp-protocol/phase-3.6.4-h-prepared-participant-identity-wire-acceptance.md`, Blob `98321da4b93d39ada9d227f4e03f2e55ba45aa29`; H's combined schema/parser CI run `43964080044` passed 34/34 tests.
 
