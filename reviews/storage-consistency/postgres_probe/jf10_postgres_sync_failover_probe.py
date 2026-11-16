@@ -119,7 +119,7 @@ def prepare_on_primary():
 
 
 def assert_prepared(host: str, port: int = 5432):
-    with conn(host) as c:
+    with conn(host, port) as c:
         row = c.execute(
             "SELECT gid FROM pg_prepared_xacts WHERE gid = %s", (XID,)
         ).fetchone()
@@ -127,7 +127,7 @@ def assert_prepared(host: str, port: int = 5432):
 
 
 def assert_not_visible(host: str, port: int = 5432):
-    with conn(host) as c:
+    with conn(host, port) as c:
         p = c.execute(
             "SELECT 1 FROM jf10_ha_visibility WHERE operation_id = %s",
             (OPERATION_ID,),
@@ -140,7 +140,7 @@ def assert_not_visible(host: str, port: int = 5432):
 
 
 def assert_lock_blocked(host: str, port: int = 5432):
-    with conn(host) as c:
+    with conn(host, port) as c:
         c.execute("BEGIN")
         c.execute("SET LOCAL lock_timeout = '750ms'")
         try:
