@@ -1,8 +1,8 @@
 # A Owner — Exact Restore Control-High-Water and Quarantine Integration Acceptance
 
 - Exact Storage restore contract Blob: `4f656163aeba532a441eaed1d293a48e2363cb4a`
-- Exact I restore proof acceptance: pending exact artifact in I branch
-- Exact D restore proof acceptance: pending exact artifact in D branch
+- Exact I restore proof acceptance Blob: `85d62b8858fc86addacd3b83f49476e42f49b785`
+- Exact D restore proof acceptance Blob: `211e54acfb4573b1c51d96f07af297671dfc4c4b`
 - Related COC protocol §14 Blob: `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`
 - Decision: **ACCEPT AS SYSTEM RESTORE ARCHITECTURE WITH OWNER-LOCAL RELEASE GATES**
 - Mode: delegated A integration review under user instruction; not independent human sign-off.
