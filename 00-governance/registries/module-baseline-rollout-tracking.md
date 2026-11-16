@@ -129,3 +129,18 @@ These are valuable design inputs but not a G baseline change or implementation r
 At the review point, P compared with main is ahead 30 / behind 4. Main's four additional files/changes are the TAB-001 blueprint, its integration review task pack, the Phase 1 Owner review task document and the roadmap update. The branches are diverged; no merge or force update is authorized. UMR-015 tracks a reviewed, non-destructive reconciliation before any future integration.
 
 The unified report and remediation register have been updated to include this mainline workstream. No A–I Owner branch or main was modified by Session P.
+
+
+## JF-10 PostgreSQL 18.7 evidence refresh — 2026-11-17
+
+Storage's current branch HEAD is `a1fbbd15d3a7993bbb61821ad44957e4f69d3ed1`; dossier blob `2f76ca8b8c19b84c37e7604cd254990dd93eb8b1`; executable conformance plan blob `49056cd46fd30445c0e564c99e0e234f60f065c4`.
+
+Correction to prior status: Storage has expanded beyond the earlier single-node probe. Seven PostgreSQL 18.7 CI workflows all completed SUCCESS on evidence commit `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd`: prepared-XID/restart, synchronous standby promotion, physical backup/restore, explicit-LSN PITR, prepared-XID PITR plus WAL negatives, synchronous-standby-unavailable fail-closed, and old-primary rewind/rejoin. Exact run IDs and scope boundaries are in `00-governance/reviews/jf10-storage-evidence-assessment.md`.
+
+The strongest evidence is the isolated PITR fixture proving prepared-XID and lock retention with no visibility, commit pointer+receipt atomic visibility, rollback non-publication, and missing/corrupt/incomplete WAL fail-closed. These are PostgreSQL engine capability fixtures using isolated `jf10_*` tables, not production I/D/COC or Canonical Authority runtime integration.
+
+Storage's current dossier records that no production runtime source tree, Canonical Authority DB adapter, migration package or application deployment manifest was found in the inspected repository branch. This is now the principal Gate A stop condition. Gate A = PARTIAL PASS / OPEN; Gate B/C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+Database comparison implication: PostgreSQL 18.7 has stronger direct prepared-XID evidence for JF-10 than SQLite + WAL. SQLite remains a candidate only if D/E/I/Storage specify and prove an alternate durable participant/intent protocol preserving the same invariants. TEC-003/004 remain CANDIDATE / TO_VALIDATE; no final DB selection is made.
+
+Full coordinator assessment: `00-governance/reviews/jf10-storage-evidence-assessment.md`.
