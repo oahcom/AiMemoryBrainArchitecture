@@ -1082,3 +1082,18 @@ A does not infer Owner decisions from an issue request. D and Storage full-bundl
 | 5 | Independent Owner conformance and P0 closure | **BLOCKED** | JF-10 P0 OPEN; production activation not authorized; multi-PolicyDomain BLOCKED. |
 
 A posted explicit sequencing instructions on Issues #9 and #10 and updated the A closure plan. No Owner decision or physical implementation result is inferred from those requests. The repository code-search observation is limited to the searchable default branch; all six relevant Owner branches were refreshed and found, but no concrete DB product/configuration evidence was present in the fetched Storage decision artifact.
+
+
+## 13.22 Issue #2 D/E/Storage publication boundary reconciliation — 2026-11-17
+
+A refreshed Issue #2 and the current D/E/F/I/Storage Owner artifacts and posted the evidence reconciliation as Issue #2 comment 6922062473.
+
+| Owner / boundary | Current verified artifact | Reconciled state |
+|---|---|---|
+| D fence / producer / barrier | `03-memory-brain/forget-fence-operation-and-publication-gate.md`, Blob `5a56c406578fdf257509315eb3f6f3f75456116c` | D-owned semantics and exact JF-10 fence/barrier architecture acceptance exist. Issue-specific mixed canonical+derived operation receipt/ordering mapping still needs an explicit answer. |
+| E producer / publication | `04-memory-compiler/phase-3.6-joint-producer-publication-decision.md`, Blob `aaa15de9d6e3a6ce74b11fda376369d6a49659ab`; conformance matrix Blob `a17f065e69e809fceacb51873d6a36a8b0f5c235` | DE-S joint architecture and E36-01..23 expected outcomes are specified. This is not a separate E Owner response to Issue #2; tests are NOT RUN. |
+| I permission / revocation | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md`, Blob `5a5304d48aa912dcf6f817099bd5659371d8cdc8` | I receipt/sequencer semantics specified; live authoritative current-PermissionEpoch lookup at final Storage visibility commit is not implementation-verified. |
+| F consumer | `05-memory-runtime/phase-3.6-runtime-forget-suppression-and-invalidation.md`, Blob `ce59252dbbdc5d10d016704797e9ba12d5a941bd` | F runtime safety semantics require exact committed PUBLISHED artifact and current fence/permission checks; separate explicit acceptance of this exact E/D/Storage boundary is not pinned; tests NOT RUN. |
+| Storage physical realization | `reviews/storage-consistency/forget-atomicity-storage-realization-review.md`, Blob `55c01f4512f2e3d8aac767dd004e768ae073178e` | Single-transaction/linearizable-coordinator realization remains a recommendation. DB engine/version, prepared-XID and lock durability, operator/topology, atomic visibility, crash/failover/restore proof remain OPEN / NOT VERIFIED. |
+
+Issue #2 remains OPEN. D/E semantics and F consumer rules are not promoted to physical atomicity. Explicit independent Owner dispositions, selected DB/deployment evidence and E36/D36/Storage fault conformance remain required. No implementation, test pass, or production readiness is inferred from this reconciliation.
