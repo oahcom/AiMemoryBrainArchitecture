@@ -252,3 +252,19 @@ The AcceptedReceipt's own durable commit profile remains separately OPEN under O
 - Lost D registration/dependency/publication/terminal ACKs use the original operation ID/digest. UNKNOWN keeps artifact private and work barrier-open.
 
 Canonical digest profile, typed identity serialization, retention horizon and post-Forget receipt disclosure remain OPEN with B/H/I/Storage. No wire schema or retention duration is frozen.
+
+
+### Typed cursor and fence-generation namespace — explicit E contract
+
+| Token | Owner and scope | E treatment |
+|---|---|---|
+| CanonicalCommitCursor | D; one globally ordered sequence per Canonical Memory authority | Store the exact D-issued value only after successful canonical commit. |
+| AggregateRevision | D; independent sequence per aggregate | Store separately with its aggregate identity; never use as global commit order. |
+| LifecycleEventCursor | D; independent append-only stream per Memory | Store only when a lifecycle event exists; preserve its Memory scope. |
+| IndexWatermark | F; per index/channel partition, applied-through CanonicalCommitCursor | E supplies source/outbox events but never allocates or advances it. |
+| ForgetFenceGeneration | D; monotonic generation in the ForgetFence namespace, bound through ForgetFenceCursor to ForgetOperationId and target-set digest | Treat as a fence token, not a commit cursor or work-registration sequence. Validate freshness only through D semantics. |
+| ProducerRegistrationSequence / ProducerRegistrationHighWater | D; producer-work ledger and one Forget barrier cutoff | Store separately; never substitute for CanonicalCommitCursor or ForgetFenceGeneration. |
+| PermissionEpoch | I; policy/security domain | Revalidate through I; never compare numerically with D fence generation. |
+| ContextVersion | G; managed Context | Opaque downstream reference; E does not allocate it. |
+
+No arithmetic, numeric comparison, coercion or token substitution is permitted across these namespaces. In particular, a fence installation may itself carry an installation CanonicalCommitCursor for audit, but that cursor does not define or replace ForgetFenceGeneration.
