@@ -378,3 +378,10 @@ The same JF-10 v2 Blob SHA is recorded in all three Owner branches. This is a co
 **Implementation and tests:** NOT VERIFIED / NOT RUN. Architecture decisions and test specifications are not software execution evidence.
 
 No I-owned file was modified. No other Owner branch was merged. No physical-erasure, production-readiness or Phase 3.6 overall final-acceptance claim is made.
+
+
+## 13. Post-publication branch refresh
+
+A further live branch read after the report publication found the I Owner branch advanced from the §1.1 snapshot HEAD 678a97ef6b43aed9f51f8ecdadf0955ea53915fa to **36171dff26ff1251d5ad6a8e54a41bfa49b5e2c2**. The relevant I JF-10 correction Blob remains **57474cfb0c5da07a2cbcbeff1fc792ced36c5dd6**, the I JF-10 interface acceptance Blob remains **77ffa8f019ea7734e22d785953e54f65c05208ac**, and the I Global Inventory contract Blob remains **9100061fa986fb6676656169de3fcf9fc1c72664**. The I governance/consumer acceptance register advanced to Blob **11c4bfde5de02a684cc6e5df46d1f9676f5a40a5**; its latest readback recognizes H design acceptance but continues to record JF-10 P0 OPEN and I36-GOV-01..10 GOVERNANCE-BLOCKED. No I response accepting or amending the newly submitted DE-S JF-10 v2 was present in issue #4 at this refresh.
+
+D, E and Storage Owner branch HEADs remained respectively **6a22f86e4fa04a2f00a67b45c3389b65d721d127**, **ba769bed2956c2550c37fcc5ba7bd4c21332d576** and **68d06a9b8297a4545dea67efad56b72b6da8d765** before this report append. This refresh changes no I-owned artifact and does not infer I acceptance from the unrelated I register update.
