@@ -59,8 +59,7 @@ Keep independent dimensions:
 | Active | Superseded | Explicit successor or replacement relation; preserve old validity/history and reason. |
 | Candidate/Consolidated/Active/Superseded | Archived | Retention or policy reason; archive is not deletion. |
 | Archived | Active | Explicit restore permission; revalidate scope, Evidence availability, currentness and conflicts; append event and new version where content changes. |
-| Any non-Forgotten | ForgetOperation started | I authorizes; durable fence recorded; access suppression occurs before cleanup. |
-| ForgetOperation started | Forgotten | All required in-scope targets complete or policy-approved exceptions are explicitly disclosed; no required target silently skipped. |
+| Any non-Forgotten lifecycle state | Forgotten | A distinct, I-authorized canonical lifecycle transition after the applicable governance completion criterion is supplied by I; the in-progress ForgetOperation state is not a lifecycle state. |
 | Forgotten | Any | Forbidden for same identity. New later information creates a new Memory ID. |
 
 Rejected candidate is not silently invented as a new lifecycle state: OPEN whether it remains Candidate with terminal decision metadata or is archived. Consolidated may be durable or a transient policy checkpoint (OPEN).
@@ -69,7 +68,7 @@ Claim epistemic changes are independent. Retraction records a withdrawal; it doe
 
 ## 8. Operations
 
-EvaluateCandidate; AcceptCandidate; Consolidate; Activate; Supersede(successor); Archive; Restore; RetractClaim; OpenConflictSet; ResolveConflict; StartForget; SuppressForgetTargets; DiscoverDependencies; RecordTargetProgress; ReconcileForget; CompleteForget.
+EvaluateCandidate; AcceptCandidate; Consolidate; Activate; Supersede(successor); Archive; Restore; RetractClaim; OpenConflictSet; ResolveConflict; StartForget; EstablishForgetFence; RegisterForgetProducerWork; DiscoverDependencies; RecordTargetProgress; CloseProducerBarrier; RecordCanonicalSuppressionProof.
 
 All transitions require expected state/version and idempotency key. Compiler may request/evidence a transition but cannot self-authorize it. For async Forget stages, I reauthorizes before each protected or irreversible step.
 
@@ -81,7 +80,7 @@ All transitions require expected state/version and idempotency key. Compiler may
 - Superseded content remains historically queryable subject to scope/retention.
 - Archived does not mean forgotten.
 - Forget fence suppresses ordinary reads/activation before asynchronous cleanup.
-- A ForgetOperation cannot be Complete while required targets are pending/failed.
+- D records CanonicalSuppressionComplete only when the producer barrier is closed and every required canonical-domain target has suppression confirmation or an explicit I-approved residual exception. This is not global Forget completion, cleanup completion or physical-erasure proof.
 - Forget does not guarantee deletion from third-party model/provider data already received.
 - No memory text can instruct or authorize tools (INT-P0-04).
 
@@ -132,3 +131,41 @@ Canonical Store for lifecycle event durability and versions; Domain Model for ep
 - OPEN: Provenance DAG vs constrained cycles; DAG is recommended candidate pending domain validation (DM-007).
 - OPEN: ConflictSet semantics and Claim identity/revision after ADR (DM-003/004).
 - TO_VALIDATE: suppression propagation and dependency traversal capacity.
+
+
+## Phase 3 remediation — separate operation state and canonical lifecycle
+
+### Normative distinction
+
+Memory lifecycle is exactly: Candidate, Consolidated, Active, Superseded, Archived, Forgotten. There is no Memory state named Forgetting. The Memory lifecycle field MUST NOT be set to an operation phase, fence state, visibility state or cleanup state.
+
+ForgetOperation has its own durable state machine, independent of Memory lifecycle:
+
+| ForgetOperation state | Meaning |
+|---|---|
+| Requested | Durable operation ID and idempotency identity exist; authorization decision is pending/being recorded by I. |
+| FenceEstablished | Monotonic fence generation and affected target-set digest are durably committed; canonical reads fail closed for covered targets. |
+| InventoryOpen | Dependency inventory and producer work registrations are being reconciled. |
+| BarrierDraining | All pre-fence registered work is required to reach a terminal, fenced outcome; no unregistered producer may bypass admission. |
+| TargetReconciliation | Per-target suppression/cleanup acknowledgements are collected; unknown/failed targets remain explicit. |
+| CanonicalSuppressionComplete | D's closed producer barrier and canonical-domain suppression proof are durable. Does not assert global policy completion or physical erasure. |
+| Blocked / Failed | Coverage, authorization, dependency or target evidence is insufficient; operation remains resumable where safe. |
+
+There is no generic D-owned `Complete` state that means the whole system has forgotten the data. I may attach a separate governance decision/completion attestation according to its policy. D records that reference but does not manufacture it.
+
+### Fence and lifecycle ordering
+
+1. I authorizes and supplies the applicable policy/identity context; D creates the durable operation record and atomically installs its fence generation.
+2. Canonical reads, writes, dependency registration and publication gates evaluate the active fence before returning or making a covered target visible.
+3. D enumerates canonical dependencies and closes the producer barrier only after every pre-fence registered producer work item is terminal and every target is inventoried.
+4. D records per-target outcomes and the canonical suppression proof.
+5. Only when I supplies the required governance completion criterion may D append a LifecycleEvent transitioning the canonical Memory to Forgotten. This event is not evidence of remote physical erasure.
+
+### Failure and retry
+
+Fence installation is monotonic and idempotent by ForgetOperation ID. A worker crash cannot lower the fence or regress a confirmed target. Unknown inventory, expired producer lease without recovery evidence, unreachable required target, cursor gap or missing acknowledgement leaves the operation in progress/blocked. A retry resumes from durable registrations and target checkpoints; it does not restart with a weaker inventory snapshot. See [forget-fence-and-completion-contract.md](forget-fence-and-completion-contract.md).
+
+
+### Cursor references
+
+LifecycleEventCursor is `(memory_id, lifecycle_event_sequence, event_id)`, with each committed event also carrying CanonicalCommitCursor. LifecycleEvent sequence is contiguous per Memory; CanonicalCommitCursor orders the enclosing transaction globally. LifecycleProjection.last_event_cursor is a LifecycleEventCursor, never an IndexWatermark. F's IndexWatermark and D's ForgetFenceCursor remain separate types.

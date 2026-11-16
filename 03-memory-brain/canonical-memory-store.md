@@ -127,3 +127,58 @@ Domain Model (B) for typed semantics; Lifecycle Manager for transitions; E for p
 - OPEN: canonical sequence partitioning and multi-tenant ordering.
 - OPEN: legal retention/tombstone fields after Forget; coordinate with I.
 - TO_VALIDATE: storage engines, snapshot cadence, read/write and recovery benchmarks.
+
+
+## Phase 3 remediation — normative cursor boundary (2026-11-16)
+
+This section supersedes any earlier untyped use of “sequence”, “watermark” or “generation”. The following are distinct types and MUST NOT be compared, added, substituted or serialized as one generic integer:
+
+| Type | Authority / scope | Meaning and ordering |
+|---|---|---|
+| `CanonicalCommitCursor` | D Canonical Store; one Brain authority | Globally ordered committed transaction position. Assigned only at successful atomic commit. It orders canonical transactions, not aggregate revisions or downstream application. |
+| `AggregateRevision` | D; one aggregate identity (Memory, Entity, Relation, etc.) | Monotonic revision number within that aggregate. It is not globally comparable and does not imply a commit-stream position. A committed revision also carries its `CanonicalCommitCursor`. |
+| `LifecycleEventCursor` | D; one Memory lifecycle stream | Tuple `(memory_id, lifecycle_event_sequence, event_id)`; sequence is contiguous within that Memory's append-only lifecycle stream. Each event also records its enclosing `CanonicalCommitCursor`. |
+| `IndexWatermark` | F; one index/channel/partition | Tuple `(index_id, partition_id, applied_through: CanonicalCommitCursor, coverage/schema metadata)`. It means the partition has accounted for every canonical commit through the stated prefix; it is not a D commit cursor and never proves Forget completion. |
+| `ForgetFenceCursor` | D canonical Forget authority; operation + affected target set | Tuple `(forget_operation_id, fence_generation, target_set_digest)`; generation is monotonically allocated by D. It establishes a suppression epoch, not a commit position or index watermark. |
+
+A ContextVersion remains G-owned and is not any of the above. BMCP delivery/request identifiers remain H-owned. I's permission/revocation epoch remains I-owned. No D contract defines their wire encoding.
+
+### Canonical transaction visibility and replay
+
+A successful canonical transaction atomically makes visible its canonical object/revision writes, aggregate-head CAS updates, any LifecycleEvent append, a durable CanonicalCommit record, and recoverable outbox intent. The transaction receives exactly one globally ordered `CanonicalCommitCursor` at commit serialization. Aborted/rejected transactions receive no cursor; therefore the committed canonical stream has no holes caused by rolled-back sequence allocation. Readers at an `as_of` cursor observe the whole transaction or none of it. A cursor is visible only after durable commit.
+
+Consumers resume strictly after the last durably applied cursor. Re-delivery is allowed and must be idempotent by stable event/operation ID. A consumer may not advance its contiguous applied prefix past a missing commit, failed transaction application, or unknown schema. Out-of-order work may be staged, but the watermark remains at the last contiguous prefix until the gap is repaired. If retained history no longer covers a requested cursor, the consumer must bootstrap from a consistent snapshot carrying its base cursor and then resume; it must not silently jump to “latest”. Outbox publication may lag or retry, but it cannot change canonical commit order or authority. A projection watermark reports applied coverage only; it never changes canonical truth.
+
+### Lifecycle event cursor
+
+LifecycleEvent sequence is local to a Memory lifecycle stream, allocated only when the event and enclosing canonical transaction commit. Gaps in a consumer's observed sequence mean missing/unapplied lifecycle events and require replay/reconciliation. The event's commit cursor provides cross-aggregate transaction ordering; its lifecycle cursor provides per-Memory lifecycle order. Neither substitutes for the other.
+
+
+## Phase 3 remediation — canonical commit contract
+
+### Commit cursor decision
+
+**DECIDED (D domain contract):** `CanonicalCommitCursor` is a globally ordered cursor within one Canonical Memory authority, not a per-aggregate revision. The per-aggregate revision remains a separate `AggregateRevision`. The canonical transaction record is the join point: it records the commit cursor and the exact aggregate revision(s) created by that transaction. A transaction may advance multiple aggregate heads while receiving one commit cursor.
+
+The cursor is allocated in the serialized commit path only after all validation/CAS checks succeed and the transaction is durably committed. The commit record, immutable writes, head changes, LifecycleEvent appends and outbox intent become visible atomically. A rejected CAS or aborted transaction consumes no cursor. Readers never observe a partially committed transaction.
+
+### Gap, replay and outbox
+
+The canonical committed stream is contiguous by definition. A consumer-observed gap is an operational gap (missing publication, failed application or unavailable history), not permission to skip. Consumers persist the last contiguous applied cursor, replay after it with idempotent event IDs, and repair a gap before advancing. If history has expired, a consistent snapshot plus its base cursor is required. Outbox delivery can be delayed, duplicated or retried; it cannot renumber commits. IndexWatermark is F-owned and reports the contiguous canonical prefix applied by one index partition. It is not the outbox's private offset and not a ForgetFenceCursor.
+
+### Transaction visibility tests
+
+1. Commit of a MemoryVersion + aggregate head + LifecycleEvent + outbox intent yields one cursor and all become visible together.
+2. CAS failure yields no new revision, event, outbox intent or commit cursor.
+3. A crash after durable commit but before outbox publish is recovered by replaying the same committed event IDs and cursor.
+4. Duplicate/out-of-order delivery does not duplicate effects or advance a contiguous watermark across a missing commit.
+5. A snapshot at cursor N plus replay after N yields the same canonical state as a full replay.
+6. Two aggregates committed in one transaction share the transaction cursor but retain independent aggregate revisions.
+
+### Interfaces
+
+- E publishes/consumes its own durable ingress and compile cursors; E receives CanonicalCommitCursor only as D's commit result and registers derived dependencies before visibility.
+- F consumes CanonicalCommitCursor and publishes its own per-index IndexWatermark; it revalidates canonical state and ForgetFence before exposure.
+- G consumes D lifecycle/change signals and exact MemoryVersion refs; G's ContextVersion is independent.
+- H transports opaque typed refs and acknowledgements; D defines no wire encoding.
+- I supplies authorization/revocation policy; D defines no policy epoch or global completion rule.

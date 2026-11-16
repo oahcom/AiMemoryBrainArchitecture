@@ -59,7 +59,7 @@ A MemoryVersion snapshot contains content digest, parent version, commit sequenc
 
 ## 7. State Machine
 
-Memory lifecycle: Candidate → Consolidated → Active → Superseded or Archived. Active/Superseded may be Archived. Archived → Active requires explicit restore authorization and a new auditable transition/version. Any non-Forgotten state may enter Forgetting through a governed operation; Forgotten is terminal for that content identity. No resurrection after Forget; newly supplied information gets a new identity and provenance.
+Memory lifecycle: Candidate → Consolidated → Active → Superseded or Archived. Active/Superseded may be Archived. Archived → Active requires explicit restore authorization and a new auditable transition/version. Forget is not a Memory lifecycle state or transition. A governed ForgetOperation installs a durable suppression fence; after the applicable I-governed completion criterion is met, the Memory may transition directly from its existing non-Forgotten lifecycle state to terminal Forgotten. The operation's in-progress state is never stored in the Memory lifecycle field. No resurrection after Forget; newly supplied information gets a new identity and provenance.
 
 Claim epistemic status is independent: Observed, Reported, Inferred, Verified, Disputed, Retracted. Entity identity status and Relation lifecycle are separate state machines. FactRecord status, if approved, is separately defined by its ADR. Context and Delivery states belong to G and Sync, not Brain.
 
@@ -140,3 +140,22 @@ Depends on B Domain Model for canonical semantics; E for source/Event and propos
 - OPEN: whether Consolidated is durable state or evaluation checkpoint.
 - OPEN: retention/backup cryptographic-erasure guarantees and external source deletion (INT-P0-03, DM-011).
 - TO_VALIDATE: storage layout, snapshot strategy, graph fan-out/depth budgets, and local Rust performance.
+
+
+## Phase 3 remediation — authority clarifications
+
+### Memory lifecycle versus Forget operation
+
+The only Memory lifecycle states are Candidate, Consolidated, Active, Superseded, Archived and Forgotten. “Forgetting” is not a lifecycle state, status alias or transient lifecycle transition. A ForgetOperation is a separate durable workflow with its own operation state and monotonic fence. Immediate read suppression is an effective availability rule derived from the active fence; it is not a mutation of Memory lifecycle. The canonical transition to Forgotten is a distinct LifecycleEvent after the applicable governance criterion is supplied by I. Forgotten is terminal for that content identity; genuinely new information requires a new identity and provenance.
+
+### Typed ordering
+
+The normative cursor definitions, transaction visibility and replay rules are in [commit-cursor-semantics.md](commit-cursor-semantics.md). Every MemoryVersion carries both its per-Memory AggregateRevision and its CanonicalCommitCursor. LifecycleEventCursor, IndexWatermark and ForgetFenceCursor are separate types. ContextVersion is G-owned; protocol/delivery identifiers are H-owned; authorization epochs and completion policy are I-owned.
+
+### Forget authority boundary
+
+D is authoritative for the durable ForgetOperation identity, target references, suppression fence/generation, canonical dependency inventory, producer registration barrier, target-progress evidence and canonical-domain suppression proof. D does not authorize the operation, decide retention/backup/external-recipient policy, attest remote physical erasure, or declare global system Forget complete. I supplies the governing authorization and completion policy. E/F/G/H own their local execution and acknowledgement mechanics. The detailed contract is [forget-fence-and-completion-contract.md](forget-fence-and-completion-contract.md).
+
+### Fact/Claim
+
+INT-P0-01 remains ADR-BLOCKED: the inspected main branch contains no approved `02-domain-model/adr/ADR-001-fact-claim-canonical-model.md`. Claim, ClaimRevision and ConflictSet fields in D documents remain illustrative CANDIDATE descriptions only. No schema, DDL, API or wire shape is frozen by this remediation.

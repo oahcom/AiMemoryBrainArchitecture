@@ -132,3 +132,40 @@ Domain Model B for type/temporal semantics; Canonical Store for immutable revisi
 - OPEN: whether inverse relation records are ever required beyond derived traversal.
 - OPEN: DAG/cycle rule for provenance links crossing relation/entity derivations (DM-007).
 - TO_VALIDATE: relation fan-out/depth and merge/split migration benchmarks.
+
+
+## Phase 3 remediation — historical-safe Merge/Split and Relation migration
+
+**DECIDED at D domain-contract level:** Entity IDs, EntityVersion IDs, Relation IDs and RelationRevision IDs are immutable and never reused. Merge/Split does not rewrite historical object payloads, old MemoryVersions, Claim/Evidence/Provenance refs or prior RelationRevisions. It appends immutable migration records and emits canonical change/outbox events.
+
+### Entity Merge
+
+An EntityMergeRecord MUST include operation ID, ordered source Entity IDs and exact source EntityVersion refs, survivor Entity ID and exact survivor version before/after, evidence/provenance refs, scope refs, actor ref, reason, canonical commit cursor, redirect mapping, affected current-reference inventory digest, RelationMigrationRecord refs, and correction/supersession pointer. The source identities remain resolvable as historical identities. A caller asking for the historical identity receives the original ID/version; only an explicitly authorized “resolve current identity” query may follow a redirect. Redirect traversal is cycle-checked and bounded.
+
+Merge is not a destructive alias rewrite. Current references are migrated only through an explicit per-reference mapping committed with the merge operation. References whose semantics are ambiguous remain unresolved and are not silently assigned to the survivor. Relation edges are not deduplicated merely because their endpoints now redirect to the same survivor; semantic equivalence, scope, validity and evidence must be evaluated and the outcome recorded.
+
+### Entity Split
+
+An EntitySplitRecord MUST include source Entity ID and exact source version, newly allocated Entity IDs and genesis versions, evidence-backed partition criteria, exact affected current-reference set, per-reference destination mapping or explicit unresolved outcome, affected relation migration refs, actor/scope/reason, canonical commit cursor and correction pointer. The source Entity identity and all historical versions remain addressable. Split partitions current references only where evidence is sufficient; ambiguous references remain attached to their historical source or unresolved according to an explicit mapping decision. No automatic rewrite of historical references occurs.
+
+### Relation migration
+
+A RelationMigrationRecord maps an exact old RelationRevision (including endpoint refs) to zero, one or more successor Relation IDs/RelationRevisions, or an explicit retired/unresolved outcome. Each successor is a new immutable revision (or new Relation identity when predicate/endpoint semantics materially change) with new subject/object refs, evidence/provenance, validity, scope and reason. The old revision remains historically queryable. Relation migration is committed atomically with its canonical migration record and outbox intent; projection failure is repaired by replay, not by mutating history.
+
+For a merge, an edge whose endpoint redirects may receive a successor revision with the survivor endpoint only after scope and predicate constraints are revalidated. For a split, an edge is assigned to a successor only when endpoint partition evidence identifies the correct new Entity; otherwise it is marked unresolved/retired for current traversal while the old revision remains available to authorized historical queries. Symmetric/inverse traversal remains vocabulary-derived; migration does not create duplicate inverse records by default.
+
+### Query semantics and audit
+
+- Historical query: return the exact originally stored Entity/Relation identity and revision; do not silently follow redirects.
+- Current-identity query: may follow the authorized redirect/partition map and must return the migration chain and mapping confidence/status.
+- Graph traversal: use current successor revisions only; stale projections are invalidated/rebuilt from canonical migration records and cannot resurrect retired edges.
+- Forget dependency discovery: include original and successor identities, migration records and all current/historical references subject to I retention policy; a redirect is not deletion.
+
+### Acceptance cases
+
+1. Merge followed by historical lookup returns original source IDs and revisions; current lookup follows the recorded redirect with audit chain.
+2. Split after merge creates new IDs and an explicit correction chain; it does not rewrite the prior merge or old references.
+3. Ambiguous split references remain unresolved; no guessed assignment.
+4. Relation endpoint migration creates a new revision/record; the prior edge remains historically intact.
+5. Projection rebuild after merge/split yields the same current graph and preserves historical lookup semantics.
+6. Cross-scope merge/split fails closed unless I-authorized grant evidence is present.

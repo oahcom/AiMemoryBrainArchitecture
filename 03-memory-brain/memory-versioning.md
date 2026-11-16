@@ -149,3 +149,45 @@ Domain Model time/epistemic semantics; Canonical Store; Lifecycle Manager; E pro
 - OPEN: sequence scope (per aggregate vs global commit stream).
 - OPEN: schema/vocabulary registry and migration compatibility (DM-013).
 - TO_VALIDATE: immutable snapshot vs delta storage, history query and migration performance.
+
+
+## Phase 3 remediation — normative cursor boundary (2026-11-16)
+
+This section supersedes any earlier untyped use of “sequence”, “watermark” or “generation”. The following are distinct types and MUST NOT be compared, added, substituted or serialized as one generic integer:
+
+| Type | Authority / scope | Meaning and ordering |
+|---|---|---|
+| `CanonicalCommitCursor` | D Canonical Store; one Brain authority | Globally ordered committed transaction position. Assigned only at successful atomic commit. It orders canonical transactions, not aggregate revisions or downstream application. |
+| `AggregateRevision` | D; one aggregate identity (Memory, Entity, Relation, etc.) | Monotonic revision number within that aggregate. It is not globally comparable and does not imply a commit-stream position. A committed revision also carries its `CanonicalCommitCursor`. |
+| `LifecycleEventCursor` | D; one Memory lifecycle stream | Tuple `(memory_id, lifecycle_event_sequence, event_id)`; sequence is contiguous within that Memory's append-only lifecycle stream. Each event also records its enclosing `CanonicalCommitCursor`. |
+| `IndexWatermark` | F; one index/channel/partition | Tuple `(index_id, partition_id, applied_through: CanonicalCommitCursor, coverage/schema metadata)`. It means the partition has accounted for every canonical commit through the stated prefix; it is not a D commit cursor and never proves Forget completion. |
+| `ForgetFenceCursor` | D canonical Forget authority; operation + affected target set | Tuple `(forget_operation_id, fence_generation, target_set_digest)`; generation is monotonically allocated by D. It establishes a suppression epoch, not a commit position or index watermark. |
+
+A ContextVersion remains G-owned and is not any of the above. BMCP delivery/request identifiers remain H-owned. I's permission/revocation epoch remains I-owned. No D contract defines their wire encoding.
+
+### Canonical transaction visibility and replay
+
+A successful canonical transaction atomically makes visible its canonical object/revision writes, aggregate-head CAS updates, any LifecycleEvent append, a durable CanonicalCommit record, and recoverable outbox intent. The transaction receives exactly one globally ordered `CanonicalCommitCursor` at commit serialization. Aborted/rejected transactions receive no cursor; therefore the committed canonical stream has no holes caused by rolled-back sequence allocation. Readers at an `as_of` cursor observe the whole transaction or none of it. A cursor is visible only after durable commit.
+
+Consumers resume strictly after the last durably applied cursor. Re-delivery is allowed and must be idempotent by stable event/operation ID. A consumer may not advance its contiguous applied prefix past a missing commit, failed transaction application, or unknown schema. Out-of-order work may be staged, but the watermark remains at the last contiguous prefix until the gap is repaired. If retained history no longer covers a requested cursor, the consumer must bootstrap from a consistent snapshot carrying its base cursor and then resume; it must not silently jump to “latest”. Outbox publication may lag or retry, but it cannot change canonical commit order or authority. A projection watermark reports applied coverage only; it never changes canonical truth.
+
+### Lifecycle event cursor
+
+LifecycleEvent sequence is local to a Memory lifecycle stream, allocated only when the event and enclosing canonical transaction commit. Gaps in a consumer's observed sequence mean missing/unapplied lifecycle events and require replay/reconciliation. The event's commit cursor provides cross-aggregate transaction ordering; its lifecycle cursor provides per-Memory lifecycle order. Neither substitutes for the other.
+
+
+## Phase 3 remediation — version and cursor semantics
+
+**DECIDED:** MemoryVersion sequence is a per-Memory AggregateRevision. It is not the global CanonicalCommitCursor. Every committed MemoryVersion records both. EntityVersion and RelationRevision likewise carry their own aggregate revision and the CanonicalCommitCursor of their commit. Aggregate revision advances only on successful commit; rejected proposals and failed CAS attempts do not consume a revision.
+
+**DECIDED:** LifecycleEventCursor is per Memory lifecycle stream and is independent from both MemoryVersion AggregateRevision and CanonicalCommitCursor. A lifecycle event may be committed in the same transaction as a MemoryVersion, but the three values retain separate names and meanings. The event records the enclosing canonical commit cursor for cross-aggregate ordering.
+
+**DECIDED:** IndexWatermark is owned by F and is scoped to an index/channel partition. It describes a contiguous applied prefix of the canonical commit stream, plus coverage/schema metadata. An index rebuild starts from a consistent canonical snapshot cursor and catches up by replay; it must check the latest ForgetFence before making any candidate visible. Rebuild progress cannot be represented by MemoryVersion sequence or LifecycleEventCursor.
+
+### Historical reads and replay
+
+Historical reads use a committed CanonicalCommitCursor/as-of snapshot and exact aggregate revision refs, never projection arrival order. A consumer's replay cursor is exclusive: resume after the last committed-and-applied cursor. Duplicate replay is idempotent; a missing cursor blocks contiguous advancement. If the replay window has expired, use a consistent snapshot with a base cursor. A per-aggregate history can be sparse in the global commit stream because unrelated aggregates commit between its revisions; this is not a gap in that aggregate's revision sequence.
+
+### Claim / ConflictSet freeze gate
+
+Claim identity, ClaimRevision schema, ConflictSet schema and any field-level references remain **ADR-BLOCKED** until Architecture Governance + B approve INT-P0-01. The present document's existing ClaimRevision table is an option sketch only, not a D decision. D will map the approved ADR into immutable revision mechanics after approval; no schema, DDL, public API or wire contract may be frozen in advance.
