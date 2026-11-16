@@ -472,3 +472,14 @@ Storage checked the default `main` branch at commit `3799616bea65bf5ffd1cd0bdb32
 The project-designated production runtime, authoritative DB adapter, schema/migration path and deployment manifest therefore remain NOT IDENTIFIED. A/C/designated implementation owner must provide the immutable implementation repository/commit and runtime entrypoint, or designate this repository as the implementation home and deliver executable artifacts. PostgreSQL 18.7 evidence remains engine-capability CI only, not production application-path conformance.
 
 Gate A remains PARTIAL PASS / OPEN; Gate B/C remain BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+## 23. I-accepted JF-10 v2 Storage bridge integration boundary — NOT IMPLEMENTED
+
+Storage re-read the exact common v2 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0` and I disposition Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`. The binding flow requires: preallocated XID and immutable operation tuple; COC prepare-intent registration before Storage PREPARE; Storage-authenticated PreparedParticipantReceipt; COC prepared-participant registration before I owner-final-gate; I sequencer's exact terminal COMMIT/ABORT; same-XID forward/rollback; atomic Storage visibility/receipt/outcome/receipt-consumption/outbox; and COC participant-resolution/reconciliation readback.
+
+Current PostgreSQL 18.7 probes prove local prepared-XID/lock/visibility/PITR capabilities only. They do not implement COC records/APIs, Storage participant receipt signing, I owner-final-gate or receipt consumption, D fence/lineage lock integration, production authoritative read path, or authenticated external control-ledger restore quarantine. The SQL authoritative-reader remains a synthetic fixture.
+
+**Next hard dependency:** A/C/designated implementation owner must supply the canonical runtime repository/commit, runtime entrypoint, DB adapter, schema/migration path, and the exact COC/I/D API/schema and signer-verifier contracts. Storage will then implement the adapter and run I's JF10-COC-01..10 plus D fence-race tests against the actual application path. No substitute fixture will be called production conformance.
+
+Gate A remains PARTIAL PASS / OPEN; Gate B/C remain BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
