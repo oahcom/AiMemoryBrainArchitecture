@@ -257,13 +257,13 @@ Do not log forgotten plaintext, raw sensitive query/evidence, unauthorized IDs, 
 
 | Owner | Branch | HEAD SHA |
 |---|---|---|
-| F | `session-f-memory-runtime` | `dad5deb6bfaa2df9956930d0b1372df354112567` |
+| F | `session-f-memory-runtime` | `8b16a3621cbe2be4badac1799822b64824532b25` (review base HEAD) |
 | D | `session-d-memory-brain-2026-11-16` | `da8e5882d0b238d765d00b2225b79eea45a483b1` |
-| E | `session-e-memory-compiler-2026-11-16` | `e1bf8ed13d23b5481c63a06ffc49031428a03aa8` |
-| I | `session-i-security-governance-2026-11-16` | `4c7c5f953b166bc512064f6de3b7d18a742d0449` |
+| E | `session-e-memory-compiler-2026-11-16` | `c2f14408ba62447c11172d65b93a279fef96d175` |
+| I | `session-i-security-governance-2026-11-16` | `5591ad3620ec3f5d74194bd79556dcf3e25bea07` |
 | G | `session-g-memory-context` | `3d2c065be863bc1d349faaeece6f6eaa0047abae` |
-| H | `session-h-bmcp-protocol` | `d46961254bc50995479bd43abed0ee6fe1cdcbb6` |
-| C | `session-c-agent-integration-2026-11-16` | `17d5cd629564372330def6a390e20d05ebad6937` |
+| H | `session-h-bmcp-protocol` | `1ee65928f123d92a4758b0de09bc8d6df1e46253` |
+| C | `session-c-agent-integration-2026-11-16` | `35de58ddc93c5f1e554596cdfc430cd6c392d355` |
 | B | `session-b-domain-model-phase3` | `66adf6bdcf5ec69a146fe75afe20ce3b85af8448` |
 
 HEADs were read from branch-vs-main commit comparisons in this review. They are review-time snapshots, not pinned dependencies; re-read before merge/freeze.
@@ -275,8 +275,8 @@ HEADs were read from branch-vs-main commit comparisons in this review. They are 
 - E: `04-memory-compiler/forget-fence-and-derived-registration.md`; `04-memory-compiler/compiler-state-and-producer-admission.md`.
 - I: `09-security-governance/forget-retention-backup-and-erasure-policy.md`; `09-security-governance/scope-and-revocation-policy.md`; `09-security-governance/global-forget-target-inventory-and-completion-evidence.md`.
 - G: `06-memory-context/context-reconciliation.md`; `06-memory-context/context-versioning.md`.
-- H: `08-bmcp-protocol/forget-revocation-and-reconnect.md`; `08-bmcp-protocol/adapter-forget-ack-and-target-binding.md`; `08-bmcp-protocol/message-envelope-and-versioning.md`.
-- C: `07-agent-integration/final-inference-boundary-attestation.md`; `07-agent-integration/security-and-untrusted-memory-boundary.md`.
+- H: `08-bmcp-protocol/phase-3-5-identity-applied-ack-reconnect-contract.md`; `08-bmcp-protocol/forget-revocation-and-reconnect.md`; `08-bmcp-protocol/adapter-forget-ack-and-target-binding.md`; `08-bmcp-protocol/message-envelope-and-versioning.md`.
+- C: `07-agent-integration/phase-3.5-agent-identity-applied-attestation-untrusted-memory.md`; `07-agent-integration/final-inference-boundary-attestation.md`; `07-agent-integration/security-and-untrusted-memory-boundary.md`.
 - B: `02-domain-model/typed-reference-and-scope-semantics.md`.
 
 ### 10.3 Verification status
@@ -285,3 +285,49 @@ HEADs were read from branch-vs-main commit comparisons in this review. They are 
 - F documentation changes: recorded by the commits listed in the delivery response.
 - Repository reread of changed F documents: required after write and recorded in the delivery response.
 - Runtime implementation tests, concurrent fence/revocation tests, cache-loss/reconnect tests, index rebuild tests, performance benchmarks and fault injection: **NOT RUN / NOT CLAIMED**.
+
+
+## 11. Phase 3.5 reprocessing addendum — D/E/I/H alignment
+
+This addendum supersedes the earlier source snapshot and OPEN descriptions only where explicitly updated here. The owner authorities remain unchanged.
+
+### 11.1 Current owner decisions consumed
+
+- **D @ `da8e5882d0b238d765d00b2225b79eea45a483b1`:** operation semantics are DECIDED for `RegisterProducerClass`, `RegisterProducerWork`, `InstallForgetFence`, `CaptureProducerRegistrationHighWater`, `RegisterDerivedDependency`, `PublishDerivedIfFenceCurrent`, `CompleteProducerWork`, `ResolveProducerWork` and `ReconcileForgetBarrier`. These are normative semantic operation names, not callable API/schema claims. Producer registration and fence installation serialize in one D ordering domain; final visibility must serialize with fence installation. Storage transaction/CAS or equivalent recovery realization and cross-owner conformance remain OPEN.
+- **E @ `c2f14408ba62447c11172d65b93a279fef96d175`:** F consumes E's private-staging, stable work/run/attempt identity, complete dependency registration, current auth/fence recheck, final publication gate and terminal receipt distinctions. E's detailed contract still cites an older D baseline (`30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6)); D's current operation-level contract above takes precedence. E must refresh that dependency baseline; F does not edit E-owned files.
+- **I @ `5591ad3620ec3f5d74194bd79556dcf3e25bea07`:** ProducerDomainInventoryEpoch/TargetInventorySeal/TargetId and global target/component states are I-owned. They are distinct from D ProducerRegistrationHighWater and F IndexWatermark. F supplies exact per-index/per-partition, cache and Working Set suppression/freshness evidence; I alone evaluates target confirmation, exceptions and global completion.
+- **H @ `1ee65928f123d92a4758b0de09bc8d6df1e46253`:** Adapter ACK classes remain bounded to exact authenticated Adapter instance/session/Scope/Managed Region/capability slice. SUPPRESSED, LOCAL_BUFFER_CLEARED, LOCAL_CACHE_PURGED, QUEUED_DELIVERY_CANCELLED, FAILED, UNKNOWN and UNSUPPORTED are non-equivalent. H cannot mint I TargetId or declare I Target State. The current H reprocessing contract remains CANDIDATE pending B/C/D/G/I approvals.
+- **C @ `35de58ddc93c5f1e554596cdfc430cd6c392d355`:** Full Applied requires exact final immutable request submission evidence at the trusted boundary and all required identity/context/permission/fence bindings. F does not observe or claim Applied, model attention or behavior.
+- **G @ `3d2c065be863bc1d349faaeece6f6eaa0047abae`:** ContextVersion and reconciliation/delivery state remain G-owned. F output is only a candidate/recommendation envelope.
+- **B @ `66adf6bdcf5ec69a146fe75afe20ce3b85af8448`:** ActorRef/ScopeRef are typed domain references, not credentials/grants; the domain contract remains CANDIDATE pending required ADR/identity approval.
+
+### 11.2 F index producer protocol
+
+For every derivative-capable or durable/rebuildable F index operation:
+
+1. F's producer class/capability (including rebuild, backfill, replay and recovery) must be registered and ENABLED in D's versioned producer registry before work admission.
+2. Allocate/persist one stable `ProducerWorkItemId` and canonical request digest. Call D's semantic `RegisterProducerWork` and obtain/reconcile the durable `RegistrationReceipt` before enqueue, lease, canonical source dereference or execution.
+3. Preserve `ProducerRegistrationSequence/HighWater`, `CanonicalCommitCursor`, `ForgetFenceCursor/Generation` and I `PermissionEpoch` as separate typed fields. Retry/lease replacement retains WorkItemId/digest; AttemptId/LeaseId change only as E/D semantics permit.
+4. Stage index segment privately. Register complete source/transitive lineage and artifact dependencies through D's `RegisterDerivedDependency` semantic operation. Missing, partial or ambiguous receipt keeps the segment private.
+5. Publish/swap only through D's `PublishDerivedIfFenceCurrent` semantic gate bound to the same durable visibility transition. If D/Storage cannot provide the callable operation and atomic/recoverable visibility boundary, quarantine the staged generation; a local check-then-swap is forbidden.
+6. Record durable publication outcome and terminal work disposition using D's publication/terminal evidence semantics. Unknown ACK is reconciled by stable operation/work IDs; it is never assumed successful.
+7. Advance only the exact partition's IndexWatermark after the visible segment accounts for a contiguous canonical prefix including explicit no-op coverage. No cross-partition max or cursor substitution.
+
+### 11.3 I target-evidence contract for F
+
+F emits evidence only for its own declared producer/consumer surfaces: index ID + partition, cache family/namespace, Working Set/session namespace, rebuild worker and suppression/invalidation checkpoint. Evidence binds ForgetOperationId, I TargetId/inventory seal when supplied by I, exact ScopeRef coverage, D fence reference, relevant I PermissionEpoch, per-partition IndexWatermark/coverage/schema, action/postcondition, attempt, timestamp, authenticated F producer identity and integrity/audit references. F does not create TargetId, seal inventory, decide NotApplicable, mark global component Confirmed or convert a watermark into target absence. A partition gap or unknown coverage is Unknown for the affected target slice.
+
+### 11.4 OPEN items refined
+
+- **F35-O1 remains BLOCKING:** D operation semantics are now explicit, but callable D API/schema, storage transaction/CAS or equivalent prepare/commit/recovery proof, and cross-owner linearization tests are not evidenced.
+- **F35-O3 remains OPEN:** E's current contract is candidate and its source baseline still references old D head; E must reconcile current D operations, outbox/replay ordering and F per-partition watermark schema.
+- **F35-O4/O5 remain OPEN:** I PermissionEpoch fan-out/currentness, revocation-stream continuity, target inventory feed/seal and per-target evidence acceptance API are not frozen. Reconcile synchronously or quarantine/fail closed.
+- **F35-O6 remains OPEN:** G candidate/evidence/reconciliation envelope and Context target hints are not a frozen F interface.
+- **F35-O7/O8 remain OPEN:** H/B/I authenticated identity, typed-reference serialization and exact target binding require owner approval; payload labels never substitute.
+- **F35-O9 remains non-blocking for Retrieval correctness:** C/H/G Applied evidence is downstream and cannot be inferred by F.
+- **F35-O10/O11/O12 remain TO_VALIDATE:** ANN pre-filter implementation, cancellation/final-return race behavior, TTL/capacity/invalidation SLO and performance budgets require actual tests.
+- **Additional integration note:** The Phase 3 D/E/H/I cross-module review on main @ `8a6414158c9c056c1638222534e1993d1bbc99d2` remains CONDITIONAL PASS for continued integration only; CR-P1-01, CR-P1-02, CR-P1-05 and identity/target mapping are not freeze-closed.
+
+### 11.5 Verification boundary
+
+This reprocessing is static contract/document review and GitHub read-back only. No concurrent fence/revocation test, cache loss/reconnect test, index rebuild/replay test, ANN pre-filter test, performance benchmark, fault injection or production implementation validation is claimed.
