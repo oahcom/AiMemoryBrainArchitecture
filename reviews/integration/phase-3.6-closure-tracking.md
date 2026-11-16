@@ -1529,3 +1529,26 @@ Storage Owner updated:
 - Storage branch HEAD at reconciliation: `0267084bedb26fc9352282ec993bc5e81d1aa831`
 
 Remaining Gate A blockers: actual project Canonical Authority deployment/profile NOT DESIGNATED; production I/D control-ledger integration; old-primary fencing/rejoin and split-brain protection; production host/zone/cloud-volume durability and failover routing/monitoring; named operator/on-call, approved runbook, RPO/RTO and operational acceptance. Gate A remains PARTIAL PASS / OPEN. Gate B and Gate C remain BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+## 13.38 Storage Gate A — fenced old-primary pg_rewind/rejoin CI subtest PASS — 2026-11-17
+
+Storage completed the pinned PostgreSQL 18.7 old-primary rejoin campaign:
+- Run: `43930047054`; job: `133519705454`; conclusion SUCCESS.
+- URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43930047054
+- Run commit: `1eb9c9c08e3ae658fcbcfa568d1c2e1ab0e1999a`
+- Probe Blob: `0fe6af4a8c9ef350ef9cbf0694a8f975e8f142f5`
+- Workflow Blob: `7670ff9537054df1c1303d4eda4d46bffdfa3c4c`
+
+The test hard-stopped the old primary, verified it remained unavailable, promoted the synchronous standby, recovered the old primary offline with networking disabled, used `pg_rewind` to align the old data directory with the promoted source, then rejoined it as a read-only standby. A write issued by the promoted primary after rejoin was replicated to the old node; a direct write attempt on the rejoined node was rejected.
+
+PASS markers: `OLD_PRIMARY_HARD_FENCED`, `OLD_PRIMARY_OFFLINE_CRASH_RECOVERY`, `PG_REWIND_TO_PROMOTED_TIMELINE`, `NEW_PRIMARY_POST_REJOIN_WRITE_REPLICATED`, `REJOINED_OLD_PRIMARY_REJECTS_WRITES`, `OLD_PRIMARY_REJOINED_AS_STANDBY`, `NO_DUAL_WRITER_AFTER_REJOIN`.
+
+**Scope limitation:** the fence is a stopped Docker container on one CI runner, not production STONITH, cloud instance fencing, independent storage fencing, HA-manager arbitration, network/DNS routing or split-brain monitoring. Production fencing and split-brain prevention remain OPEN.
+
+Storage Owner records:
+- Capability dossier Blob: `63b0bd54c44c287c22adb886f602432be214f21f`
+- Deployment/readiness Blob: `f7a34fa2057ae585f641c2f2d1d9c24ecc9b9d27`
+- Storage branch HEAD: `781bc8de041623be0001181470475090b295b813`
+
+Gate A remains PARTIAL PASS / OPEN. Remaining: actual project Canonical Authority deployment/profile NOT DESIGNATED; production I/D control-ledger integration; production fencing/STONITH and split-brain prevention; production host/zone/cloud-volume durability and failover routing/monitoring; production backup governance; named operator/on-call, approved runbook, RPO/RTO and operational acceptance. Gate B/C remain BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
