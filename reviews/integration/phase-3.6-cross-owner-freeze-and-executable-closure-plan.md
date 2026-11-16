@@ -796,3 +796,24 @@ This is only a logical Python reference-model pass. It does not verify productio
 - Named COC operator / actual infrastructure / DB engine / RPO-RTO / SLO / KMS: OPEN / NOT VERIFIED.
 - COC-01..16, H-CO-17..23, JF10-01..17, Storage C01..C23, I-CO and G-CO: NOT RUN (except the separate in-memory reference-model suite above).
 - Applied Contract Frozen: NO; implementation verified: NO; G8 BLOCKED; G9 NOT RUN; G10 BLOCKED.
+
+## 13.13 COC outage-recovery logical model and CI — 2026-11-16
+
+A added a deterministic in-memory reference model for the COC outage recovery-batch semantics:
+- Model: `reviews/integration/reference_model/coc_recovery_model.py`, Blob `10091e727874cf35eda619e745fb316683a9e978`.
+- Tests: `reviews/integration/reference_model/test_coc_recovery_model.py`, Blob `daf3016cf99970414b804be5fef9174f99fa8eab`.
+- Workflow: `.github/workflows/coc-recovery-reference-model.yml`, Blob `4f3e849f9f6861f6f0ed45fec8fc81631b65f933`.
+- README: Blob `6947279443b79aa3d85ca1ca3ebac5e3010697d2`.
+
+The first CI run exposed an incorrect test expectation: while the single global COC log is unavailable, all protected submits must fail closed, not merely those matching a D lineage request. The test was corrected to assert global fail-closed during outage and owner-local lineage scoping after COC returns while the D pending gate remains closed.
+
+**Corrected CI result:**
+- Workflow run: `43897053156`.
+- URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43897053156
+- Head commit: `553b81880ead745cca6afd426955b2df45ef4913`.
+- Job: `Deterministic COC recovery-batch model tests`.
+- Result: **SUCCESS — 10 tests passed** (`Ran 10 tests ... OK`).
+
+Coverage includes I/D local pending gates, global outage fail-closed, affected-lineage gate after recovery, no new intent while pending, simultaneous I/D requests in one batch without local-time ordering, pre-batch participant enumeration, unresolved participant retention, owner-specific high-water checks before gate release, RESTORE_FENCED for missing prefix/incomplete request set, and immutable request digest conflict.
+
+**Strict limitation:** this is an in-memory logical reference model, not a Raft/quorum COC, durable owner-local gate, production I sequencer, D fence service, persistent participant registry, process crash/failover/restore, or cross-protocol atomicity test. It does not pass COC-01..16 production conformance or Phase 3.6 G10. Production COC remains NOT IMPLEMENTED / NOT VERIFIED; deployment/operator remains NOT DESIGNATED.
