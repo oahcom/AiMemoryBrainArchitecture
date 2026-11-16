@@ -93,3 +93,8 @@ A manifest freeze is accepted only while the root is non-terminal and its curren
 ### JF-08 — NOT_COMMITTED requires a completed authoritative decision barrier
 
 An authoritative outcome lookup may return NOT_COMMITTED only after the coordinator has established a read/decision barrier that is ordered after the operation's possible commit point and has resolved every in-flight transaction/participant decision for that idempotency key. The result must include the barrier cursor/epoch and prove no committed receipt exists at or before that barrier. A stale replica, negative cache, absent row during an in-flight transaction, expired client timeout or coordinator unavailability is never proof of absence and must return UNKNOWN. If the commit decision cannot be fenced/resolved, retry is prohibited except as same-key idempotent replay when the coordinator explicitly supports it; terminality remains blocked.
+
+
+### JF-09 — Publication must bind the current inventory seal and manifest version
+
+The final publication predicate is extended: the gate must bind the current valid InventorySealReceipt / ProducerDomainInventoryEpoch (where the D closed-world contract requires it) and the exact current frozen OutputManifestVersion/digest. A stale seal, inventory epoch advance, manifest reopen, superseded freeze or mismatched digest denies publication. The coordinator checks these values at the visibility linearization point, not only when the producer entered PublishGatePending. If the inventory epoch advances or the manifest reopens before visibility commit, the producer must reconcile and obtain fresh receipts; an earlier dependency-complete receipt is not a permit.
