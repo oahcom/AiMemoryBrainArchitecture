@@ -327,3 +327,15 @@ H explicitly marks this **SCHEMA CANDIDATE 1.0.0 / OWNER-DECIDED FOR CGH-APPLIED
 - No branch merge is authorized.
 
 The exact A decision package Blob SHA `122b164bcc0760b83bf555072a36fc55631623e1` is deliberately not changed: changing it would invalidate the common-version pin and require fresh explicit decisions from C, G and H.
+
+
+### 13.1 I technical confirmation evidence — exact-package scope distinction
+
+A re-read I's formal PermissionEpoch/authorization confirmation on `session-i-security-governance-2026-11-16`:
+
+- Artifact: `09-security-governance/phase-3.6-permission-epoch-and-authorization-formal-confirmation.md`
+- Readback Blob SHA: `bae6a24fe3a374bc816993979a8fa9af52517dea`
+- I explicitly confirms PermissionEpoch authority/domain/monotonicity/currentness, epoch advancement and invalidation, complete authorization tuple, no offline lease/stale-epoch grace, revocation effective point, and protected-operation race semantics.
+- It explicitly keeps external governance activation/approval BLOCKED and implementation/conformance NOT VERIFIED / NOT RUN.
+
+This is strong I-owned technical consumer-contract evidence, but the artifact does not pin A's exact C/G/H package Blob `122b164bcc0760b83bf555072a36fc55631623e1` as an Issue #3 decision. Therefore A records **I technical semantics CONFIRMED; exact Issue #3 package disposition NOT RECORDED**. No exact-package approval is inferred. I36-GOV-01..10 remain GOVERNANCE-BLOCKED.
