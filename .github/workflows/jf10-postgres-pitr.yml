@@ -1,0 +1,130 @@
+name: JF-10 PostgreSQL 18.7 WAL Archive PITR
+
+on:
+  push:
+    branches:
+      - session-storage-consistency-forget-atomicity-2026-11-16
+    paths:
+      - "reviews/storage-consistency/postgres_probe/**"
+      - ".github/workflows/jf10-postgres-pitr.yml"
+  pull_request:
+    paths:
+      - "reviews/storage-consistency/postgres_probe/**"
+      - ".github/workflows/jf10-postgres-pitr.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-wal-pitr:
+    name: PostgreSQL 18.7 WAL archive point-in-time recovery to explicit LSN
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out Storage branch
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install psycopg
+        run: python -m pip install "psycopg[binary]>=3.2,<4"
+      - name: Prepare isolated PostgreSQL and archive volumes
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker network create jf10-pitr-net
+          docker volume create jf10-pitr-primary
+          docker volume create jf10-pitr-backup
+          docker volume create jf10-pitr-wal
+          docker run --rm --user root -v jf10-pitr-primary:/var/lib/postgresql --entrypoint bash "$PG_IMAGE" -lc "chown -R postgres:postgres /var/lib/postgresql"
+          docker run --rm --user root -v jf10-pitr-backup:/var/lib/postgresql --entrypoint bash "$PG_IMAGE" -lc "chown -R postgres:postgres /var/lib/postgresql"
+          docker run --rm --user root -v jf10-pitr-wal:/archive --entrypoint bash "$PG_IMAGE" -lc "chown -R postgres:postgres /archive"
+      - name: Start pinned PostgreSQL 18.7 archiving primary
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker run -d --name jf10-pitr-primary --network jf10-pitr-net \
+            -e POSTGRES_PASSWORD=jf10-pitr-ci-only \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -p 5432:5432 \
+            -v jf10-pitr-primary:/var/lib/postgresql \
+            -v jf10-pitr-wal:/archive \
+            "$PG_IMAGE" \
+            -c max_prepared_transactions=16 \
+            -c wal_level=replica \
+            -c fsync=on \
+            -c full_page_writes=on \
+            -c archive_mode=on \
+            -c archive_timeout=1s \
+            -c "archive_command=test ! -f /archive/%f && cp %p /archive/%f"
+          for i in $(seq 1 90); do
+            if docker exec jf10-pitr-primary pg_isready -h 127.0.0.1 -p 5432 -U postgres -d postgres; then break; fi
+            sleep 1
+          done
+          docker exec jf10-pitr-primary psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE TABLE jf10_pitr_marker (marker text PRIMARY KEY, value text NOT NULL)"
+          docker exec jf10-pitr-primary psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "INSERT INTO jf10_pitr_marker VALUES ('base', 'base-visible')"
+      - name: Take physical base backup
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker run --rm --user postgres --network jf10-pitr-net \
+            -v jf10-pitr-backup:/var/lib/postgresql \
+            --entrypoint bash "$PG_IMAGE" -lc \
+            "mkdir -p /var/lib/postgresql/18/docker && pg_basebackup -d 'host=jf10-pitr-primary user=postgres' -D /var/lib/postgresql/18/docker -Fp -Xs -P"
+          echo "PITR_BASE_BACKUP_CREATED=PASS"
+      - name: Commit target and post-target WAL records and wait for archive
+        id: target
+        run: |
+          docker exec jf10-pitr-primary psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "INSERT INTO jf10_pitr_marker VALUES ('target', 'target-visible')"
+          TARGET_LSN=$(docker exec jf10-pitr-primary psql -U postgres -At -d postgres -c "SELECT pg_current_wal_lsn()")
+          TARGET_WAL=$(docker exec jf10-pitr-primary psql -U postgres -At -d postgres -c "SELECT pg_walfile_name('$TARGET_LSN'::pg_lsn)")
+          docker exec jf10-pitr-primary psql -U postgres -At -d postgres -c "SELECT pg_switch_wal()"
+          docker exec jf10-pitr-primary psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "INSERT INTO jf10_pitr_marker VALUES ('after-target', 'must-not-appear')"
+          docker exec jf10-pitr-primary psql -U postgres -At -d postgres -c "SELECT pg_switch_wal()"
+          for i in $(seq 1 120); do
+            if docker exec jf10-pitr-primary bash -lc "test -f /archive/$TARGET_WAL"; then
+              break
+            fi
+            sleep 1
+          done
+          docker exec jf10-pitr-primary bash -lc "test -f /archive/$TARGET_WAL"
+          echo "TARGET_LSN=$TARGET_LSN" >> "$GITHUB_OUTPUT"
+          echo "TARGET_WAL=$TARGET_WAL" >> "$GITHUB_OUTPUT"
+          echo "PITR_TARGET_WAL_ARCHIVED=PASS"
+      - name: Prepare restored cluster for point-in-time recovery
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker stop jf10-pitr-primary
+          docker run --rm --user postgres -v jf10-pitr-backup:/var/lib/postgresql \
+            --entrypoint bash "$PG_IMAGE" -lc "touch /var/lib/postgresql/18/docker/recovery.signal"
+      - name: Start PITR restore at the exact target LSN
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+          TARGET_LSN: ${{ steps.target.outputs.TARGET_LSN }}
+        run: |
+          docker run -d --name jf10-pitr-restore --network jf10-pitr-net \
+            -e POSTGRES_PASSWORD=jf10-pitr-ci-only \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -p 5434:5432 \
+            -v jf10-pitr-backup:/var/lib/postgresql \
+            -v jf10-pitr-wal:/archive \
+            "$PG_IMAGE" \
+            -c "restore_command=cp /archive/%f %p" \
+            -c "recovery_target_lsn=$TARGET_LSN" \
+            -c recovery_target_action=promote \
+            -c recovery_target_timeline=latest
+          for i in $(seq 1 120); do
+            if docker exec jf10-pitr-restore pg_isready -h 127.0.0.1 -p 5432 -U postgres -d postgres; then break; fi
+            sleep 1
+          done
+      - name: Verify exact PITR target and exclusion of later data
+        env:
+          JF10_TARGET_LSN: ${{ steps.target.outputs.TARGET_LSN }}
+        run: python reviews/storage-consistency/postgres_probe/jf10_postgres_pitr_probe.py
+      - name: Capture PITR diagnostics
+        if: always()
+        run: |
+          docker logs jf10-pitr-primary || true
+          docker logs jf10-pitr-restore || true
