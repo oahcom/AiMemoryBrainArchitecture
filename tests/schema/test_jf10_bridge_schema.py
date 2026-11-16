@@ -131,7 +131,7 @@ class JF10BridgeSchemaTests(unittest.TestCase):
         record.pop("visibility_pointer_transaction_ref")
         self.validator.validate(record)
 
-    def test_reconciliation_terminal_requires_consistent_d_barrier_field_shape(self):
+    def test_schema_defers_cross_message_reconciliation_truth_to_semantic_validator(self):
         variant = self.schema["oneOf"][4]
         record = valid_message(self.schema, variant)
         record["d_barrier_state"] = "UNKNOWN"
