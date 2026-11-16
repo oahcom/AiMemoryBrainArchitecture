@@ -181,3 +181,37 @@ Record the exact primary setting as `synchronous_commit=remote_apply`; the promo
 Gate A remains PARTIAL PASS / OPEN. Required next Storage-owned evidence: (1) separate same-GID ROLLBACK PREPARED after promotion and prove no publication; (2) lost-ACK around PREPARE and terminal resolution with UNKNOWN/IN_DOUBT fail-closed semantics; (3) backup/restore/PITR including unresolved prepared XID and stale-snapshot RecoveryQuarantined/control-ledger reconciliation; (4) old-primary fencing/rejoin prevention; (5) actual Canonical Authority topology, named human production operator/on-call, RPO/RTO and runbook. See Issue #10 comment 6922471557.
 
 Gate B remains BLOCKED until all Gate A requirements pass. Gate C remains BLOCKED until Gate B passes. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
+
+
+## 9. Gate A evidence reconciliation — five CI classes pass; production binding remains open (2026-11-17)
+
+A re-fetched Storage Owner source artifacts and independently read the raw GitHub Actions job logs. The prior §7/§8 restore-open / ACK-not-run status is superseded by the following verified CI evidence:
+
+| Evidence class | Run / job | Verified scope |
+|---|---|---|
+| Single-node prepared-XID + SIGKILL/restart | 43907296027 / 133439447210 | Exact GID and lock survive same-volume restart; same-GID commit publishes pointer+receipt together; rollback publishes neither |
+| Two-node synchronous standby promotion | 43908428220 / 133443444760 | PostgreSQL 18.7 pinned primary/standby, sync streaming, primary hard-kill, promotion, prepared GID/locks survive, same-GID commit and rollback after promotion |
+| Physical backup/restore + stale-control gate | 43909138634 / 133445937783 | pg_basebackup physical copy; unresolved prepared GID survives; restored test fixture refuses reads until newer external control epoch replay; same-GID commit afterward |
+| Coordinator process crash / ACK-gap | 43912857694 / 133459107145 | Crash after participant command but before coordinator checkpoint; exact same XID reconciled; commit/rollback invariants hold; SQLite is only a CI coordinator-ledger fixture |
+| TCP CommandComplete response loss | 43913477785 / 133461308120 | Real TCP proxy drops server response after PREPARE/COMMIT/ROLLBACK; client observes UNKNOWN; exact same-XID recovery reconciles outcomes |
+
+All listed runs report completed/success and the corresponding raw job logs were inspected. The HA profile must be described exactly: primary synchronous_commit=remote_apply; promoted standby observed synchronous_commit=on. The two-node CI test is not a production fencing proof.
+
+### 9.1 Remaining Gate A stop conditions — NOT VERIFIED
+
+1. **Actual Canonical Authority runtime binding:** the Hermes service repository identifies DKK/SSK endpoints, but the installed memory_server.py implementation and actual authoritative DB adapter/path are not tracked in the inspected repository. The authorized Desktop Commander host is OFFLINE; no live process, service-unit or backing-store inspection was possible. Do not infer PostgreSQL 18.7 is the currently deployed engine.
+2. **PITR:** the passing restore probe uses pg_basebackup physical copy and restore. No WAL archive/PITR target-time campaign, timeline selection, recovery LSN/WAL range proof or PITR negative cases were evidenced. Mark physical backup/restore PASS for its fixture only; PITR remains OPEN.
+3. **Old-primary fencing/rejoin prevention:** CI kills the primary container before promotion, but does not prove production STONITH/fencing, write-path isolation, stale-primary rejoin rejection or split-brain prevention.
+4. **Standby-unavailable behavior:** no accepted raw evidence yet proves protected PREPARE blocks/fails closed when the synchronous standby is unavailable; local-only downgrade must be ruled out.
+5. **Production durability and operations:** actual host/zone/cloud-volume topology and durability guarantees, named human production operator/on-call, approved runbook, RPO/RTO, failover routing and monitoring remain unbound.
+6. **Real authority integration:** the restore probe's control epoch is a test fixture, not production I/D authoritative control-ledger integration. Actual I/D source, high-water and reconciliation binding remain open.
+
+### 9.2 Gate decision
+
+- Gate 0: CLOSED.
+- Gate A: **PARTIAL PASS / OPEN** — five CI evidence classes pass for their exact test profiles; production binding and listed stop conditions remain open.
+- Gate B persistent COC/quorum log: **BLOCKED** until Gate A is accepted.
+- Gate C end-to-end fault campaign: **BLOCKED** until Gate B passes.
+- JF-10 P0: OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
+
+No CI result is promoted to production readiness, no PostgreSQL candidate is asserted as the current Hermes production DB, and no later gate is started by this update.
