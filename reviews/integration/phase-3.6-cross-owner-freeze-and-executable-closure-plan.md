@@ -341,33 +341,35 @@ A re-read I's formal PermissionEpoch/authorization confirmation on `session-i-se
 This is strong I-owned technical consumer-contract evidence, but the artifact does not pin A's exact C/G/H package Blob `122b164bcc0760b83bf555072a36fc55631623e1` as an Issue #3 decision. Therefore A records **I technical semantics CONFIRMED; exact Issue #3 package disposition NOT RECORDED**. No exact-package approval is inferred. I36-GOV-01..10 remain GOVERNANCE-BLOCKED.
 
 
-## 13.2 I Owner exact-version authority confirmation — CGH-APPLIED-1.0
+## 13.2 I / D / B Owner-branch authority confirmations — CGH-APPLIED-1.0
 
-I has now issued an explicit decision against the exact A package and H schema candidate:
+The earlier I-only exact-version note is superseded by this current branch-aware reconciliation. The exact common A package remains unchanged:
 
-- Exact A package Blob: `122b164bcc0760b83bf555072a36fc55631623e1`
-- I Owner branch: `session-i-security-governance-2026-11-16`
-- I artifact: `09-security-governance/phase-3.6-cgh-applied-1.0-i-owner-authoritative-confirmation.md`
-- I artifact readback Blob: `9b09a31b786c0d49669bffb2c8cca332308c7098`
-- I commit: `d65ba193fe31199d9bb9ec9c8a6f2647376932e9`
-- Decision: **I APPROVES CGH-APPLIED-1.0 WITH ENUMERATED I-OWNED EXCEPTIONS**.
+- Contract: `CGH-APPLIED-1.0`
+- Package: `reviews/integration/phase-3.6-cgh-applied-contract-decision-package.md`
+- Package Blob SHA: `122b164bcc0760b83bf555072a36fc55631623e1`
 
-### Confirmed I-owned authority
+Exact-version authority records have been committed to the respective Owner branches and read back. These records formalize the delegated Owner-scope decisions and their limits; they are not external governance signatures or production acceptance.
 
-I confirms issuer/Principal trust, verifier-resolved Actor attribution, canonical I PolicyDomainRef, I-issued monotonic PermissionEpoch, online currentness, no offline/stale grace, complete authorization tuple, final-boundary enforcement, revocation effective point at I durable sequencer epoch advance, and exact-operation race outcomes. I confirms that H transports but does not mint, refresh, interpret or validate I authorization.
+| Owner | Decision | Owner artifact | Readback Blob SHA | Commit |
+|---|---|---|---|---|
+| I | APPROVE WITH ENUMERATED EXCEPTIONS — I authorization semantics only | `09-security-governance/phase-3.6-cgh-applied-1.0-i-authority-confirmation.md` | `8004b0f21e523b203ae36870fe88a25f977e70fa` | `cc3cdc2e8d3a50be7551087f12d6fb4d6ce0d6f3` |
+| D | APPROVE WITH ENUMERATED EXCEPTIONS — D ForgetFence/lineage semantics only | `03-memory-brain/phase-3.6-cgh-applied-1.0-d-forget-fence-authority-confirmation.md` | `b5a0354d263185723954ffb952fdf0b005f59ba8` | `302b9fc09e040db7ef32c56e39bd91272cc1abb9` |
+| B | APPROVE — B semantic types and role mapping only | `02-domain-model/phase-3.6-cgh-applied-1.0-b-typed-reference-authority-confirmation.md` | `483f68f074348fda8eeb965a0b43143ae242337d` | `026e52c72bd8bdb65b63bdd77f25d925e0624f9f` |
 
-### Binding exceptions
+### Confirmed authority boundaries
 
-1. H `bmcp.applied-ack / 1.0.0` carries PermissionDecision references and PermissionEpoch but does not yet explicitly carry the I CommitAuthorizationReceipt reference and I sequencer terminal-order proof needed for protected final-boundary disclosure. Receipt consumption and ordering evidence are mandatory at the actual owner-final-gate. C/H must reconcile an exact versioned opaque reference/evidence mapping; H must not synthesize or validate it.
-2. TLS 1.3 exporter binding and SHA-256 digest are acceptable design mechanisms, but exact signature/MAC suite, key custody, key rotation, compromise response and federation require separate I/Security governance approval.
-3. I36-GOV-01..10 remain GOVERNANCE-BLOCKED; ProducerDomainInventoryEpoch/InventorySeal remain CANDIDATE/OPEN where required; multi-policy-domain authorization remains BLOCKED/NOT ACCEPTED.
-4. D ForgetFence, lineage, barrier and cross-authority ordering remain D-owned and are not approved by I.
-5. I36/H36/CGH tests remain SPECIFIED / NOT RUN; implementation and production interoperability remain NOT VERIFIED.
+- **I:** PermissionEpoch authority/currentness, complete authorization tuple, default-deny, revocation effective point and commit-versus-revocation semantics are confirmed. I36-GOV-01..10 remain externally GOVERNANCE-BLOCKED. Signature/MAC suite, key custody and production conformance are not approved.
+- **D:** ForgetFence namespace, target/source/ancestor lineage, fence-first ordering and ambiguous-order fail-closed semantics are confirmed. A production causal bridge proving C's actual submit boundary against D's fence remains OPEN; wall-clock timestamps alone are insufficient.
+- **B:** ActorRef, role-preserving ScopeRef, EnvironmentRef orthogonality and no implicit string coercion are confirmed. Consumer wire paths, H serialization and registry authority designation remain outside B approval.
 
-### Updated A integration gate
+### Combined Applied gate disposition
 
-- I exact-version authorization disposition: **RECORDED — APPROVE WITH ENUMERATED EXCEPTIONS**.
-- D exact-version ForgetFence/lineage/order confirmation: **STILL REQUIRED**.
-- H schema candidate 1.0.0: **NOT PRODUCTION-FROZEN**.
-- Applied Contract Frozen: **NO**.
-- Issue #3 remains OPEN; no branch merge authorized.
+- I/D/B authority-semantic confirmation for the exact CGH-APPLIED-1.0 package: **RECORDED WITH ENUMERATED SCOPE LIMITS**.
+- C/G/H exact-version decisions: **RECORDED WITH ENUMERATED EXCEPTIONS**.
+- H `bmcp.applied-ack/1.0.0`: **OWNER-DECIDED SCHEMA CANDIDATE; NOT DEPLOYED INTEROPERABILITY**.
+- C-submit / D-fence causal proof: **OPEN / NOT ESTABLISHED**.
+- External I governance approval: **BLOCKED**.
+- CGH/I36/H36 tests: **NOT RUN**; implementation: **NOT VERIFIED**.
+- Applied Contract Frozen: **NO** until remaining exceptions, concrete wire/receipt mapping and causal proof are closed and A revalidates all exact artifact versions.
+- Issue #3 remains open. No branch merge is requested or authorized.
