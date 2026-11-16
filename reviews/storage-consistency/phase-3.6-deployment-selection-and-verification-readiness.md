@@ -377,3 +377,14 @@ The same commit also reran:
 - Explicit-LSN archive PITR: run `43955195388`, job `133607790699`, SUCCESS; target `0/5000190`, replay `0/6000000`, timeline `2`; base and target state present, post-target state absent, exact-LSN recovery PASS.
 
 **Gate A remains PARTIAL PASS / OPEN.** These are isolated PostgreSQL 18.7 CI fixtures, not production Canonical Authority deployment or production I/D ledger integration. They do not close production archive retention/immutability, off-site or cross-zone durability, real fencing/STONITH and split-brain prevention, operator/runbook, or RPO/RTO. Gate B remains BLOCKED pending full Gate A acceptance; Gate C remains BLOCKED pending Gate B; JF-10 P0 remains OPEN; production activation remains NOT AUTHORIZED.
+
+
+## 17. Gate A — production runtime and authoritative DB adapter not present in audited repository tree (2026-11-17)
+
+Storage inspected the complete recursive tree at branch head `e803f7d79d4ec747272299113d8222c60c3be8e9` (`truncated=false`, 86 entries). Its 21 executable/source-like files are exclusively GitHub Actions workflows, isolated PostgreSQL probes and the JF-10 reference model/tests. No production runtime source tree, Canonical Authority DB adapter, schema/migration package, or application deployment manifest is present in this branch snapshot.
+
+This does not establish that no external implementation exists. It establishes that the production runtime/adapter cannot be selected or verified from the repository currently under Storage review. The pinned PostgreSQL 18.7 tests are database-engine capability evidence only; they are not application-path integration tests.
+
+**Required next artifact:** A/C/Storage must identify the authoritative implementation repository and immutable branch/commit, runtime entrypoint, DB adapter, schema/migration path and deployment manifest. Storage then traces the actual canonical write/read path and binds the same-XID prepare/recovery and atomic VisibilityPointer + PublicationReceipt tests to that implementation. If this repository is intended to contain the implementation, the designated Owner must deliver the missing executable artifacts before conformance can be claimed.
+
+**Gate A remains PARTIAL PASS / OPEN.** Production runtime binding and adapter conformance are NOT IDENTIFIED / NOT VERIFIED. Gate B remains BLOCKED pending full Gate A acceptance; Gate C remains BLOCKED pending Gate B; JF-10 P0 remains OPEN; production activation remains NOT AUTHORIZED.
