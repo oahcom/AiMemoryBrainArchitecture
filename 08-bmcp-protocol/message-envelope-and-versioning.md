@@ -145,3 +145,14 @@ Before marking this document DECIDED, H requires:
 - E-approved Accepted receipt/idempotency fields;
 - G-approved ContextVersion and ChangeSet wire mapping;
 - cross-module agreement on error codes and cursor correlation.
+
+
+## 8. Adapter Forget ACK identity and epoch fields
+
+For Forget/Revocation and Adapter-local ACK messages, the logical envelope/payload binding MUST include: authenticated Adapter Principal + concrete Adapter Instance; authenticated Agent Principal + Runtime Instance; Issuer and transport-authentication context; B-typed ActorRef and ScopeRef; authenticated Session ID; Managed Region ID/revision; negotiated Capability Set/Epoch; G ContextRef/opaque ContextVersion and Delivery ID/attempt; D ForgetOperation ID and ForgetFence Generation; I Permission Epoch; evidence timestamp plus local monotonic sequence; action result, coverage and integrity-protected evidence reference.
+
+The wire field names/encodings remain CANDIDATE until I/B/G/D approve their referenced contracts. H does not mint these references or define their semantics. Payload adapter_id, actor_ref, producer_id, agent_id, session_id, issuer and scope_ref are assertions only; compare them with authenticated transport and registry bindings. Mismatch is rejected/quarantined and fails closed.
+
+Permission Epoch is I-issued authorization state; ForgetFence Generation is D-issued canonical Forget barrier state. They MUST remain separately typed, separately validated and separately stored. No numeric comparison, conversion, reuse or field substitution is permitted. ContextVersion and CapabilityEpoch are also independent namespaces.
+
+See adapter-forget-ack-and-target-binding.md for the complete H evidence contract and conformance scenarios.
