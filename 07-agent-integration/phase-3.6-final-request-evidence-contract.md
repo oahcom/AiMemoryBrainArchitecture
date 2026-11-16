@@ -127,3 +127,32 @@ All cases below are **SPECIFIED / NOT RUN** unless a future run attaches executa
 **C decisions:** stage separation; C is final-request evidence producer; exact final immutable request and actual submit are required for candidate Full evidence; Tier 2/3 cannot claim Full Applied; Memory remains untrusted data; historical Applied is retained but cannot be reused after invalidation.
 
 **Cross-module status:** C/G/H Applied contract is not Frozen. This file specifies C's producer contract only and does not alter H wire or G state authority.
+
+
+## Phase 3.6 CFG joint architecture closure addendum — C Owner decision
+
+- Decision package: A-owned `reviews/integration/phase-3.6-cgh-applied-contract-decision-package.md`
+- Exact package Blob SHA reviewed: `61d961c32138fd875069e8cbac4696bb031447c0`
+- C decision: **APPROVE WITH ENUMERATED EXCEPTIONS** for the C-owned final-request semantics and the shared six-stage lifecycle. This is not a global freeze and is not H approval.
+
+### C accepted clauses
+
+1. The lifecycle is strictly `Prepared → Delivered → Materialized → Final Request Submitted → Applied → Execution Started`; the stages are separate facts with separate authorities.
+2. C alone produces immutable, per-request Final Request Submitted evidence after the exact post-transformation request crosses the declared successful runtime/provider submit boundary. A local buffer, middleware render, transport ACK, or Delivery receipt is insufficient.
+3. C binds the evidence to the actual runtime-assigned `InferenceRequestId`, `FinalRequestBoundaryId`, G `ContextId/ContextVersion`, `DeliveryId/DeliveryAttempt`, authenticated Agent/Adapter/Runtime/Session, exact Scope/Environment, ManagedRegion identity/revision, complete region digest/profile, I `PermissionEpoch`, D `ForgetFenceGeneration`, H `CapabilityEpoch`, and integrity/correlation evidence.
+4. Tier 1 may emit candidate Full evidence only where exact final-request and submit observability, region completeness, identity binding and integrity are demonstrated. Tier 2/3 and any bypass/unknown coverage cannot claim Full.
+5. C evidence is append-only. Exact duplicate identity+digest is idempotent; same identity with a changed digest is conflict/quarantine. Late evidence cannot roll back a newer Context or rebind across Adapter/Session/CapabilityEpoch.
+6. C does not mutate G Applied state. Applied does not prove model attention, comprehension, recall, behavioral use, or correctness. Execution Started requires a separate runtime/provider receipt.
+7. If D/I transition ordering relative to submit is unprovable, C reports Unknown and the managed region remains suppressed for future use.
+
+### Enumerated exceptions and external authority reservations
+
+- **H wire exception:** this approval does not freeze H message schemas, field encodings, ACK taxonomy, signatures/MACs, key rotation, canonicalization, replay journal, receiver ordering, capability negotiation or reconnect wire behavior. H must approve the same package Blob SHA or publish an enumerated replacement and a new common package version.
+- **I authorization exception:** C consumes, but does not define, PermissionEpoch domain/issuer/freshness, Principal/delegation trust or revocation policy. I approval and authoritative current-decision evidence remain required.
+- **D Forget exception:** C consumes, but does not define, ForgetOperation/Fence generation, lineage coverage or the canonical linearization proof. D confirmation remains required.
+- **B typed-reference exception:** C does not define ActorRef/ScopeRef/EnvironmentRef types or scope hierarchy. B approval remains required.
+- **Execution evidence exception:** no implementation, live Adapter/provider boundary, test execution or production evidence is approved by this semantic decision.
+
+### C decision consequence
+
+C considers its semantic portion of the A package accepted with the exceptions above. The C/G/H Applied Contract remains **NOT FROZEN** until H explicitly accepts the same version (and I/D/B provide their own authority confirmations). C conformance and PI suites remain **SPECIFIED / NOT RUN**; implementation remains **NOT VERIFIED**.
