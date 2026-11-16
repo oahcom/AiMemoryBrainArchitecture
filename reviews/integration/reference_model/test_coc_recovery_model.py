@@ -111,6 +111,18 @@ class COCRecoveryModelTests(unittest.TestCase):
             self.coc.recover_batch(owner_complete={"D": False})
         self.assertTrue(self.coc.restore_fenced)
 
+    def test_recovery_batch_cutoff_remains_after_local_gate_release(self):
+        self.coc.set_outage()
+        self.coc.record_owner_request(self.d_req)
+        self.coc.available = True
+        self.coc.recover_batch(owner_complete={"D": True})
+        self.coc.release_owner_gate("D", owner_high_water=9)
+        # Owner-local pending gate is cleared, but the committed D cutoff persists.
+        self.assertFalse(self.coc.provider_submit_allowed("domain-A", ("memory-A",)))
+        self.assertTrue(self.coc.provider_submit_allowed("domain-A", ("unrelated-memory",)))
+        with self.assertRaises(Blocked):
+            self.coc.admit_intent("late-intent", "domain-A", "late-digest", ("memory-A",))
+
     def test_changed_owner_request_digest_is_conflict(self):
         self.coc.set_outage()
         self.coc.record_owner_request(self.i_req)
