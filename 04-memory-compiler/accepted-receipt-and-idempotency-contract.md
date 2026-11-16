@@ -165,3 +165,10 @@ An E outbox sequence/dispatch offset is a fourth E-local transport checkpoint; i
 - **OPEN — C:** source identity/sequence semantics and late-event policy.
 - **OPEN — Storage/Engineering:** database/outbox/WAL product and replication/fdatasync durability target.
 - **ADR-BLOCKED — B/Governance:** no CandidateProposition/ExtractionIR to canonical Claim mapping until ADR-001 is approved.
+
+
+## 9. Alignment with D candidate cursor contract (read on D branch)
+
+D's `canonical-memory-store.md` describes a CanonicalCommit receipt with operation ID, idempotency key, request digest, expected/resulting version and `commit_sequence`; it proposes a monotonic sequence within the canonical authority and atomic/recoverable commit of immutable version, pointer, receipt and outbox. D's `memory-versioning.md` still leaves sequence scope **OPEN** (per aggregate vs global commit stream). Therefore E will store D's returned typed commit reference unchanged and will not assume a globally contiguous sequence or equate it to a Memory aggregate revision.
+
+D's LifecycleEvent sequence is per Memory aggregate and is not the canonical commit cursor. E's source ingress partition offset and F's per-index/per-partition applied watermark remain separate namespaces. The exact D cursor type, partition key, gap and replay semantics require D + Storage/Consistency + A agreement before freeze.
