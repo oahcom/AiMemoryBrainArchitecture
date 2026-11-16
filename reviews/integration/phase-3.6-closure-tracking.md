@@ -1069,3 +1069,16 @@ The CI run was read back from GitHub Actions, including all five job steps and f
 | JF-10 P0 / production activation | **OPEN / NOT AUTHORIZED** | No implementation/deployment/conformance claim; multi-PolicyDomain remains BLOCKED. |
 
 A does not infer Owner decisions from an issue request. D and Storage full-bundle confirmation will be marked complete only after each append-only Owner decision is fetched from its own branch and exact Blob SHA is verified.
+
+
+## 13.21 Sequential execution gate — 2026-11-17
+
+| Order | Gate | State | Control |
+|---|---|---|---|
+| 1 | D + Storage exact full-bundle confirmation | **PENDING** | Issue #9 has no Owner response comments yet. C is ACCEPT; D and Storage accepted A architecture only. Do not mark complete until both append exact bundle SHA decisions on their own branches. |
+| 2 | Storage concrete DB capability selection/proof | **ACTIVE NEXT; NOT STARTED BY OWNER** | Storage evidence says no engine/version/XA profile/replication-failover/operator/deployment selected; no C01–C20 or crash/fault tests run. Issue #10 Gate A is active. |
+| 3 | Persistent COC implementation and proof | **BLOCKED BY GATE 2** | Do not start/claim implementation until DB profile and atomic participant/visibility feasibility are proven. |
+| 4 | Deterministic end-to-end fault injection | **BLOCKED BY GATE 3** | In-memory 10-test semantic CI is limited and cannot substitute for physical DB/COC fault tests. |
+| 5 | Independent Owner conformance and P0 closure | **BLOCKED** | JF-10 P0 OPEN; production activation not authorized; multi-PolicyDomain BLOCKED. |
+
+A posted explicit sequencing instructions on Issues #9 and #10 and updated the A closure plan. No Owner decision or physical implementation result is inferred from those requests. The repository code-search observation is limited to the searchable default branch; all six relevant Owner branches were refreshed and found, but no concrete DB product/configuration evidence was present in the fetched Storage decision artifact.
