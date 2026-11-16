@@ -1,0 +1,32 @@
+name: F Runtime Anti-Resurrection Logical Reference Model
+
+on:
+  push:
+    branches:
+      - session-f-memory-runtime
+    paths:
+      - "tests/anti_resurrection/**"
+      - ".github/workflows/f-anti-resurrection-reference-model.yml"
+  pull_request:
+    paths:
+      - "tests/anti_resurrection/**"
+      - ".github/workflows/f-anti-resurrection-reference-model.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  f-anti-resurrection:
+    name: Deterministic F anti-resurrection reference tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile model and tests
+        run: python -m py_compile tests/anti_resurrection/f_runtime_model.py tests/anti_resurrection/test_f_runtime_model.py
+      - name: Run anti-resurrection tests
+        working-directory: tests/anti_resurrection
+        run: python -m unittest discover -v
