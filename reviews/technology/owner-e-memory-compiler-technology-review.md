@@ -113,3 +113,12 @@ Measure events/sec, bytes/event, acceptance latency, outbox lag, queue depth/age
 ## 8. Final recommendation and non-claims
 
 Conditionally accept TAB-001's compiler topology. Do not freeze queue implementation, database, model runtime or publication coordinator. No executable race/fault suite, model benchmark, VRAM measurement, production queue, database-backed outbox, or end-to-end compiler publication was run by this review.
+## 9. Reassessment — Storage candidate and JF-10 producer boundary (2026-11-17)
+
+The original report's Storage realization blocker is refined for the current architecture phase:
+- PostgreSQL 18.7 is now a qualified prepared-XID candidate for the pinned CI profile, with seven capability workflows 7/7 SUCCESS (PITR `43958775001`; prepared-XID `43959079736`; synchronous promotion `43959079669`; backup/restore `43959079703`; WAL PITR `43959079745`; sync-unavailable `43959079760`; pg_rewind/rejoin `43959079930`). These are engine capability fixtures, not production E/Storage integration.
+- E has accepted the exact JF-10 producer lifecycle contract in `04-memory-compiler/phase-3.6.2-e-jf10-coc-bridge-producer-acceptance.md`, Blob `4503628cf6f6ea46696ab14e7decd3e408ced19a`.
+- E has accepted the exact COC durable protocol Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` in `04-memory-compiler/phase-3.6.3-e-coc-durable-protocol-acceptance.md`, Blob `b9dd9af8c770a40b44849d02caac306e0a701100`.
+- Gate B COC protocol design is accepted by exact owner review; Gate C integrated runtime/fault injection remains deferred to engineering.
+
+Updated E disposition: **CONDITIONAL PASS — compiler architecture and producer-boundary contract accepted; runtime integration remains NOT IMPLEMENTED / NOT VERIFIED.** No E ledger, durable queue, D client, artifact store or Storage adapter is claimed. JF-10 P0 remains OPEN until executable end-to-end conformance.
