@@ -675,3 +675,15 @@ Reviewed exact amended COC protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0
 No semantic conflict was found between §14 and Storage's exact-XID PITR/lock-retention evidence. The current probe already uses client-chosen GIDs and resolves those same GIDs after PITR; it does not yet implement the signed receipt or COC/I bridge.
 
 **Disposition:** Storage §14 mapping ACCEPTED WITH CONDITIONS at architecture level. Gate A remains PARTIAL PASS / OPEN pending the remaining exact-owner reviews and I/D decisions. The current amended COC revision remains PUBLISHED / FOCUSED EXACT-OWNER RE-REVIEW PENDING / NOT YET ACCEPTED overall. Gate C remains deferred to engineering-phase integration/fault injection; JF-10 runtime P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+
+## 28. Exact-owner re-review of §14 prepared-participant identity — COMPLETE (2026-11-17)
+
+The focused exact-version review required by §25 and §27 is now complete. All B/C/D/E/G/H/I/A/Storage owners accepted the same current Storage protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` and A integration mapping Blob `a71251704851cacd15f67faa985a5bd50057e92a`. The exact acceptance matrix is `reviews/integration/phase-3.6.4-jf10-prepared-participant-gid-owner-acceptance-matrix.md`, Blob `4059a228613cf2c72a7797f2a1427f843ef066a0`.
+
+H additionally accepted the 1.1.1 wire candidate in `08-bmcp-protocol/phase-3.6.4-h-prepared-participant-identity-wire-acceptance.md`, Blob `98321da4b93d39ada9d227f4e03f2e55ba45aa29`; H's combined schema/parser CI run `43964080044` passed 34/34 tests.
+
+**Gate B amended protocol §14 status is now: DESIGN-LEVEL EXACT OWNER ACCEPTANCE COMPLETE WITH CONDITIONS.** This supersedes §25, §26 and §27 statements that focused owner review of Blob `86ff3b...` was pending. It does not change Gate B implementation/conformance (NOT RUN), Gate C (deferred to engineering), JF-10 runtime P0 (OPEN), or production activation (NOT AUTHORIZED).
+
+Storage accepts the A mapping's preallocation boundary: the stable PreparedParticipantRef and PreparedTransactionGID are durably bound to the immutable tuple before COC intent; state remains ALLOCATED_NOT_PREPARED until the exact COC intent is committed; PREPARE is forbidden before that commit. If a D/I cutoff wins before intent, cancellation requires durable Storage ledger proof and authoritative engine lookup; absence from pg_prepared_xacts alone is insufficient.
+
+Gate A remains PARTIAL PASS / OPEN for the remaining restore high-water proof contract and Storage deployment/engineering criteria. The amended §14 owner-review gap itself is CLOSED.
