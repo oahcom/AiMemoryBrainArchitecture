@@ -56,6 +56,8 @@ jobs:
             sleep 1
           done
           docker exec jf10-primary psql -U postgres -d postgres -c "SELECT version();"
+          docker exec jf10-primary bash -lc 'echo "host replication postgres 0.0.0.0/0 trust" >> "$PGDATA/pg_hba.conf"'
+          docker exec jf10-primary psql -U postgres -d postgres -c "SELECT pg_reload_conf()"
       - name: Seed standby from primary
         env:
           PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
