@@ -687,3 +687,36 @@ H additionally accepted the 1.1.1 wire candidate in `08-bmcp-protocol/phase-3.6.
 Storage accepts the A mapping's preallocation boundary: the stable PreparedParticipantRef and PreparedTransactionGID are durably bound to the immutable tuple before COC intent; state remains ALLOCATED_NOT_PREPARED until the exact COC intent is committed; PREPARE is forbidden before that commit. If a D/I cutoff wins before intent, cancellation requires durable Storage ledger proof and authoritative engine lookup; absence from pg_prepared_xacts alone is insufficient.
 
 Gate A remains PARTIAL PASS / OPEN for the remaining restore high-water proof contract and Storage deployment/engineering criteria. The amended §14 owner-review gap itself is CLOSED.
+## 29. Restore control-high-water contract exact review complete; Gate A design disposition (2026-11-17)
+
+The restore control-high-water contract is `reviews/storage-consistency/phase-3.6.5-restore-control-highwater-and-quarantine-contract.md`, Blob `4f656163aeba532a441eaed1d293a48e2363cb4a`. Exact owner reviews are recorded:
+
+- IControlHighWaterProof: I acceptance Blob `85d62b8858fc86addacd3b83f49476e42f49b785`.
+- DForgetControlHighWaterProof: D acceptance Blob `211e54acfb4573b1c51d96f07af297671dfc4c4b`.
+- B typed proof-reference semantics: B acceptance Blob `5e7c6a869fa1a29d59dfc7f404cade3d66c410f2`.
+- H transport/authority boundary: H acceptance Blob `5a4b9a768d7396eb4be58d0d1ed3c6c0021955ea`.
+- A system integration: A acceptance Blob `fa5e066a208a64401c96a6b8790d8b53dc7f1585`.
+- Storage owner acceptance: Storage acceptance Blob `d3923fe42bec04d9f5233c7a810303da80b73bc2`.
+
+All reviewed the same exact Storage restore contract Blob. The contract separates COCCommittedPrefixProof, per-PolicyDomain IControlHighWaterProof, per-ForgetOperation DForgetControlHighWaterProof, StorageParticipantLedgerProof and Storage RestoreReconciliationReceipt. The receipt is `RECONCILED_BUT_FENCED`; it is not permission to serve or owner authority.
+
+### 29.1 Gate A design disposition
+
+The remaining I/D architecture decision gap identified in §26.6 is closed at the semantic/contract level: I and D have accepted their exact high-water proof shapes, B accepted type separation, H accepted the semantic transport boundary, and A accepted the integration/recheck order. The amended COC §14 exact-owner review is also complete under §28.
+
+**Storage Gate A disposition is upgraded to: CONDITIONAL PASS — STORAGE ARCHITECTURE DESIGN CONTRACT COMPLETE WITH ENUMERATED ENGINEERING / GOVERNANCE CONDITIONS.** This is not a production readiness PASS or a system-wide architecture freeze.
+
+Items reclassified as engineering/deployment deliverables under `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`: real proof APIs/signature verification; object-store ACL implementation; representative workload/size/latency/throughput and SERIALIZABLE contention benchmarks; production failure-domain placement and physical fencing/STONITH; independent archive/checkpoint custody; KMS/key lifecycle implementation; named human operator/approver; runbooks; measured restore duration/RTO; production backup/restore and Gate C distributed fault injection.
+
+Non-waived architecture/governance blockers remain: I36-GOV-01..10 are GOVERNANCE-BLOCKED; Fact/Claim ADR-001 remains ADR-BLOCKED; Global Forget target inventory and physical-erasure evidence remain open; multi-PolicyDomain atomicity remains blocked. These prevent TAB-001 freeze and production activation even though the Storage Gate A design contract is conditionally accepted.
+
+### 29.2 Current gate vector
+
+- Storage Gate A architecture design: **CONDITIONAL PASS**.
+- Storage Gate A implementation/deployment/operational readiness: **NOT PASSED / DEFERRED TO ENGINEERING**.
+- Gate B amended COC protocol §14 design: **EXACT OWNER ACCEPTANCE COMPLETE WITH CONDITIONS**.
+- Gate B implementation/conformance: **NOT RUN / DEFERRED**.
+- Gate C distributed fault injection: **DEFERRED TO ENGINEERING**.
+- JF-10 runtime P0: **OPEN**.
+- TAB-001: **CANDIDATE / NOT FROZEN**.
+- Production activation: **NOT AUTHORIZED**.
