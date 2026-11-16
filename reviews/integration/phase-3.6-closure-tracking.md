@@ -664,3 +664,18 @@ A posted a focused exact-SHA decision call to Issue #3 (comment 6920276322), req
 - Executable cross-authority race/conformance tests: NOT RUN.
 
 **CGH-APPLIED-1.1 remains CANDIDATE / NOT OWNER-DECIDED / NOT FROZEN.** G8 remains BLOCKED; G9 NOT RUN; G10 BLOCKED. No 1.0 approval is transferred to 1.1. No implementation, deployment, test pass or production causal proof is claimed.
+
+
+## CGH-APPLIED-1.1 current source-pin reconciliation — 2026-11-16
+
+A re-read current C/D/I/H/G/B Owner artifacts and corrected the H source pin in the A successor package. The package now has exact Blob SHA `9808b31f840606b329f1a794935dfc9c5084d63b` (commit `8a4b20ccaf6f82c823de3bb0931304dd9cce7517`). This supersedes the prior A candidate Blob `471c8ce86e93c036ad9a58a77d45d9daa0ab8af8`; all prior decisions against that earlier package must not be transferred.
+
+Current exact source readbacks:
+- C `f2c5b379cacfedd81500e8496d3053b628e144a0`
+- D `317a9bc170c5a66720f738bf24bbf93c87385887`
+- I `71779133a4f95d63a24c4c7e606af174763366f1`
+- H `5cbf0bb548a46671054cb22c6fab3c3d007365d4`
+- G Applied contract `5406b3f2558daa3f5915f6bb46e808be8d90d3ca` (semantic baseline only; exact 1.1 decision absent)
+- B typed-reference confirmation `729a706860b1259115816265e847a29683c3c233` (semantic baseline only; exact 1.1 decision absent)
+
+The new exact-version decision request is recorded in Issue #3 comment `6920297962`. C/D/I causal-order contracts are specified and read back, but no C/D/I/H/G/B acceptance of this exact candidate is inferred. Coordinator/Storage operator acceptance and deployment remain open. CO suites remain SPECIFIED / NOT RUN; production causal proof NOT VERIFIED; Applied Contract Frozen NO; G10 BLOCKED.
