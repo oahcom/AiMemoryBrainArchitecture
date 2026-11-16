@@ -498,3 +498,14 @@ D confirms the following as normative D-side requirements for the proposed owner
 7. A late derivative, newly discovered producer, registry gap or restored stale task invalidates/reopens the relevant D proof and creates an audited reconciliation obligation; it never silently reuses a prior completion checkpoint.
 
 D accepts the v2 protocol only as a proposed cross-authority design subject to I's exact owner-gate review. D does not define I's sequencer implementation, approve I inventory/authorization/exception policy, select a concrete database engine, or claim runtime conformance.
+
+
+### D36 §9 rows 11–13 — offline rejoin, inventory epoch change and stale task recovery
+
+| Source ID | Test name | Required result | Status |
+|---|---|---|---|
+| D36 §9 row 11 | Offline producer rejoin after fence | Rejoining worker resolves its original registered WorkItemId and current fence before source access; stale task is rejected/quarantined; offline/unknown producer evidence does not close I global inventory | NOT RUN |
+| D36 §9 row 12 | I inventory epoch changes during Forget | D's local ProducerRegistrationHighWater remains unchanged; I seal becomes stale/reopened; no global completion until I issues a replacement seal and all newly applicable targets are reconciled | NOT RUN |
+| D36 §9 row 13 | Old Compiler task resumes after CanonicalSuppressionComplete | Current D fence suppresses it before publication; stable WorkItemId/lineage is preserved; any late derivative invalidates/reopens prior D proof and is audited | NOT RUN |
+
+These cases extend the original D36 §9 matrix; they do not renumber or weaken rows 1–10.
