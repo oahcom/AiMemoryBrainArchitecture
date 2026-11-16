@@ -1,6 +1,6 @@
 # Compiler State Machine and D Producer Admission Interface
 
-**Status:** CANDIDATE E state/adapter contract; D API schema and D/E/Storage linearization remain OPEN.
+**Status:** CANDIDATE E lifecycle/adapter contract; D semantic operation contracts and linearization are DECIDED; callable transport/API binding and Storage atomic realization remain OPEN.
 **Owner:** Session E — Memory Compiler.
 **Authority boundary:** E owns compiler-internal work/attempt/stage state. D owns Producer Registration ledger, Forget barrier and canonical gate semantics. I owns authorization/PermissionEpoch and global Forget policy. H owns authenticated transport binding. Storage owns physical transaction/visibility realization only when explicitly agreed.
 
@@ -224,3 +224,27 @@ The remaining OPEN work is limited to:
 - executable crash/race/fault tests and retained evidence.
 
 E must consume D's semantic fields unchanged. In particular, ProducerRegistrationSequence is the ordering position used for barrier inclusion; ProducerRegistryVersion identifies the class registry snapshot. Neither is a CanonicalCommitCursor or ForgetFenceGeneration.
+
+
+---
+
+## Phase 3.5 Revalidation — Producer Lifecycle and D Semantic Consumption
+
+This section supersedes earlier wording that could imply D has not defined semantic operation inputs, outputs, idempotency, errors or linearization. D's authoritative semantic source is `03-memory-brain/forget-fence-operation-and-publication-gate.md`; cursor authority is `commit-cursor-semantics.md`. E consumes those semantics without inventing callable API or wire schemas.
+
+| Lifecycle element | Identity / state | Required E behavior and D barrier effect |
+|---|---|---|
+| ProducerClass registration | Stable ProducerClassId + contract version; D registry status | Separate from WorkItem registration. Only D-confirmed ENABLED class admits work. Unknown/disabled/incomplete registry fails closed. |
+| WorkItem registration | Stable ProducerWorkItemId + request digest + D RegistrationReceipt | Durable registration before enqueue, lease, protected dereference or execution. Same ID/digest returns same receipt; changed digest conflicts. |
+| Lease acquire/renew | LeaseId + monotonic lease epoch/expiry | Conditional current-owner lease; revalidate identity, PermissionEpoch and ForgetFence. A lease is not new admission authority. |
+| Lease expiry | Attempt/lease expired; WorkItem remains open | Invalidates that attempt only. Never terminal or barrier closure. |
+| Attempt identity | New AttemptId per execution attempt | Append-only audit identity; never replaces WorkItemId. |
+| Retry | Same WorkItemId; new AttemptId | Reuse D registration; recheck current authorization/fence. Never create a second logical registration for retry. |
+| DLQ | Same WorkItemId and lineage, durable failure reason | Remains barrier-open while replay/publication is possible. Parking/deleting queue entry is not terminal. |
+| Replay | Same WorkItemId, new AttemptId, original source/receipt refs | Reauthenticate and reauthorize; recheck fence before dereference, staging, dependency registration and publication. |
+| Recompile | New DerivationRunId linked to original source/intent | D requires explicit linked child/re-admission decision. Whether a distinct child ProducerWorkItemId is required remains OPEN-RECOMPILE-01. |
+| Terminal disposition | D ProducerWorkTerminalReceipt + all output/attempt evidence | CompleteProducerWork only after every output is published with receipts or suppressed/quarantined and no attempt can later publish. |
+
+Normal path: `REGISTERED → QUEUED → LEASED → RUNNING → STAGED → DEPENDENCY_REGISTERED → PUBLISH_PENDING → PUBLISHED`. Retry returns to QUEUED under the same WorkItemId and a new AttemptId. DLQ/lease expiry are non-terminal. A suppression/quarantine terminal path requires durable proof that no future publication is possible.
+
+**DECIDED by D:** ProducerClass/WorkItem distinction; RegisterProducerWork/InstallForgetFence shared ordering; immutable ProducerRegistryVersion + ProducerRegistrationHighWater; dependency durability before visibility; final publish linearization; terminal/reconciliation receipts. **OPEN:** callable transport/API and wire errors; H/B/I identity serialization; I PermissionEpoch current-decision binding; I global inventory reconciliation; exact recompile child identity; named Storage owner and validated atomic realization; executable conformance. No endpoint or implementation is claimed to exist or pass.
