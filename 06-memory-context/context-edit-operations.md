@@ -87,3 +87,43 @@ Errors: ENTRY_NOT_FOUND, ENTRY_REVISION_CONFLICT, DUPLICATE_MEMBERSHIP, CANONICA
 - **CANDIDATE:** duplicate Add dedupes by canonical ref/version/render profile; no-op sets do not advance version.
 - **TO_VALIDATE:** compaction fidelity under uncertainty/conflict/temporal qualifiers.
 - **OPEN:** canonical rendering/evidence refs (D/I), per-entry delivery support and wire encoding (H).
+
+
+## 4. Phase 3.5 producer, fence and authorization preconditions
+
+The common operation contract is extended with the following owner-typed evidence for any operation that reads, derives, materializes, retains or republishes canonical Memory content:
+
+- authenticated producer/ActorRef binding resolved by I/H; typed ScopeRefs resolved under B/I;
+- exact source MemoryRef and MemoryVersionRef, plus complete transitive lineage/provenance references;
+- current I PermissionEpoch and action-specific authorization-decision reference;
+- current D ForgetFenceCursor and applicable target/lineage decision;
+- D ProducerClass/registry version, ProducerWorkItemId, RegistrationReceipt and attempt/lease references where derivative work is admitted;
+- D DependencyRegistrationReceipt for every derivative artifact before visibility;
+- D final publication-gate receipt/decision for the visibility transition;
+- F source completeness and per-index/per-partition IndexWatermark vector when the operation consumes Runtime candidates;
+- I TargetId/TargetInventorySeal references only when supplied by I for a registered G-owned Forget target.
+
+These are not interchangeable cursors. A valid Base Version or previously accepted operation does not authorize a later derivative publication. Every retry and final visibility/apply boundary rechecks current permission and ForgetFence.
+
+### 4.1 Operation-specific producer/fence behavior
+
+| Operation | Canonical/derivative behavior under Phase 3.5 |
+|---|---|
+| Add | Pin exact MemoryVersion and full source lineage. Register the resulting ContextEntry/projection dependency before it can appear in a visible ContextVersion or delivery. |
+| Update | Revalidate the new rendering/source version and lineage; register changed derived projection. A metadata-only update still creates a new ContextVersion if semantically changed. |
+| Remove | Remove membership only. Do not mutate or Forget Canonical Memory. A replayed older Snapshot/Delta containing the removed or fenced entry must be rejected/superseded. |
+| Replace | Validate both old and replacement refs; new lineage must be registered before the replacement becomes visible. The old ref remains historical/audit data under I retention, not active membership. |
+| Reorder | Does not change canonical truth, but the ChangeSet/version remains a G-owned derivative record subject to G producer admission and publication controls. |
+| Expire | Expiry makes the entry ineligible at its effective time. Any persisted removal/snapshot/delivery is a G derivative and must pass current fence/permission publication checks. |
+| Compact | Register every source entry, canonical version and transitive lineage; preserve expansion refs and epistemic/conflict/temporal qualifiers. Compacted output stays private until dependency registration and final publication gate succeed. |
+| Reconcile | Consume D/I authoritative triggers and current F completeness. Tombstone first for Forget/revocation; never rebuild a target from a stale snapshot or F-only result. A new safe ContextVersion must pass the same producer/dependency/publication gate. |
+
+### 4.2 Forget precedence over staged or replayed edits
+
+A ForgetFence or permission revocation that wins before the G artifact visibility/apply boundary invalidates any staged ChangeSet, ContextVersion, Snapshot, Delta or Delivery containing the affected lineage. G must reject, quarantine or recompute a new ChangeSet from the current safe head; it must not rebase by silently dropping the fence check, replay a historical operation, or mint a new artifact ID to escape lineage. Tombstones remain effective until D/I authoritative reconciliation says the affected reference is no longer blocked.
+
+A ChangeSet already committed before the fence remains immutable history, but its snapshot/delta/delivery is not eligible for new use after the fence. Historical audit retention follows I policy and must not retain reconstructive forgotten plaintext.
+
+### 4.3 No partial visibility
+
+Operation-level diagnostics may identify which precondition failed, but the desired Context head changes only if the complete ordered operation set, D dependency registration and D final publication gate all succeed. A failed or unknown cross-owner gate leaves the target artifact private and the current head unchanged. Adapter partial coverage is an application outcome, not a partial ChangeSet commit.

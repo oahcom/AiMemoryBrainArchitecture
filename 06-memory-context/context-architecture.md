@@ -115,3 +115,61 @@ Confirmed means the Adapter attests that its managed region/cache no longer expo
 - **OPEN:** generic Scope/permission schema (B/I); wire/proof fields (H/C); canonical Forget completion criteria (I).
 
 Acceptance: negative tests prove no cross-user/Agent/instance/task/environment mixing; missing environment identity rejects environment-dependent entries; every entry resolves only through current authorization; Context edits cannot mutate canonical memory; prompt regions and tool permissions remain protected; Forget blocks active and pending delivery paths before the next inference boundary.
+
+
+## 11. Phase 3.5 cross-module contract alignment
+
+**Status:** G-owned Context semantics are DECIDED where stated below; D/E/F/H/I execution interfaces remain owner-controlled and are not frozen by this document.
+
+### 11.1 Typed identity, scope and epoch separation
+
+G stores resolved typed references, not caller-supplied labels or credentials. The trusted binding chain is established by I/H and typed-reference semantics by B. ActorRef and ScopeRef identify attribution/applicability; neither is a credential, grant or PolicyDecision. Payload principal, actor, producer, Agent, Adapter, session, task or environment fields are claims and must be compared with authenticated bindings.
+
+A Context's isolation key includes the required ownership and applicability dimensions: Principal/tenant, project, Agent, Agent Instance, Session, Task and Environment. The exact required subset is declared by operation class. EnvironmentRef is mandatory whenever Context semantics or any entry are environment-dependent. Missing, ambiguous, retired or mismatched EnvironmentRef blocks use; display names never substitute. Inheritance across task/session/environment requires an explicit authorized relation and creates a separately resolved Context identity or versioned inheritance decision.
+
+The following are distinct opaque typed namespaces. G and consumers MUST NOT numerically compare, cast, increment or substitute them:
+
+| Type | Owner | G use |
+|---|---|---|
+| PermissionEpoch | I | Current authorization/revocation validity |
+| ForgetFenceCursor / ForgetFenceGeneration | D | Canonical suppression of a Memory identity and its lineage |
+| ProducerRegistrationSequence / HighWater | D | Admission/barrier accounting for G producer work |
+| CanonicalCommitCursor | D | Canonical commit ordering and reconciliation watermark |
+| ProducerDomainInventoryEpoch / TargetInventorySeal / TargetId | I | Global producer/recipient inventory and target-specific evidence |
+| IndexWatermark | F, per index and partition | Retrieval freshness/completeness only |
+| ContextVersion | G, per Context | Desired managed-region state |
+| CapabilityEpoch | H, per Adapter instance | Capability/proof profile used for a delivery/application |
+| DeliveryId / DeliveryAttemptId | G | Logical delivery and one execution attempt |
+| InferenceRequestId / FinalRequestBoundaryId | C/H | Exact final inference submission correlation |
+
+A scalar applied_version is only a convenience projection. Application history is per Adapter Instance, Runtime Session, Context Session, Delivery and Inference Request.
+
+### 11.2 G as a registered derivative producer
+
+D's current semantic contract includes G Context membership/materializations, ChangeSets, Snapshots, Deltas and Delivery Intents in the derivative-producer inventory. G MUST register its producer class and every derivative-capable work item with D before queueing, leasing, dereferencing protected canonical source payload, executing a rebuild/replay or making an artifact visible.
+
+The G work record binds a stable ProducerWorkItemId, ProducerClass/registry version, normalized request digest, exact source Memory/MemoryVersion and transitive lineage refs, ScopeRefs, Context ID, intended artifact class, observed D ForgetFenceCursor, current I PermissionEpoch/authorization decision, and correlation/causation. Retries and lease replacement retain ProducerWorkItemId and digest; AttemptId/LeaseId identify attempts. A new derivation run is explicitly linked and re-admitted; it cannot acquire new publication rights by changing artifact ID.
+
+For every ContextVersion snapshot, compacted projection, Snapshot/Delta package or delivery artifact that can expose canonical content, G registers complete dependency lineage with D before visibility. It then uses D's semantic final publication gate, which rechecks the latest applicable fence and current I authorization at the visibility linearization point. A prior fence read or a local check-then-publish is insufficient. If D/Storage cannot provide the callable, atomic/recoverable gate, G keeps the staged artifact private/quarantined and does not advance a visible head or create a sendable delivery. These are semantic requirements, not a claim that the current branches already expose a production API or shared transaction.
+
+### 11.3 I inventory and target evidence boundary
+
+I owns ProducerDomainInventoryEpoch, TargetInventorySeal, TargetId, required action, per-target state, PolicyException and global completion. D's ProducerRegistrationHighWater is a separate per-Forget work barrier. G does not mint I TargetIds, seal the global inventory, decide NotApplicable, approve exceptions or declare global Forget complete.
+
+G supplies evidence only for its declared surfaces: Context membership/materialization, immutable snapshots, deltas, ChangeSets, delivery intents and G-owned caches/queues. Each G evidence item binds ForgetOperationId, I TargetId and inventory seal when supplied, exact ScopeRef coverage, D ForgetFenceCursor, relevant I PermissionEpoch/decision, Context/Version/ChangeSet/Delivery/attempt references, target action/postcondition, capability or schema profile where applicable, timestamp, authenticated G producer identity, integrity/audit reference and unresolved gaps. A G acknowledgement can confirm only the exact G-owned target/action slice accepted by I; it cannot imply H Adapter clearing, F cache/index cleanup, backup erasure or global completion.
+
+### 11.4 Applied and Forget evidence are separate
+
+H's transport receipt, local materialization, final immutable request submission and execution-start evidence are distinct stages. G accepts Delivery Applied only when C's Full Applied predicates are satisfied and H's attestation binds the exact Context ID/Version, Delivery ID/attempt, authenticated Adapter/Agent/runtime/session, Scope/Environment, CapabilityEpoch, current PermissionEpoch, applicable D ForgetFence, Managed Region inventory and exact final InferenceRequestId/FinalRequestBoundaryId evidence. Missing, stale, partial or unverifiable evidence remains Partial, Bypassed or Unknown; it is not Full Applied. Tier 2/3 and paths without final-request visibility cannot claim Tier 1 Full Applied.
+
+Applied Attestation is not a Forget ACK. H's SUPPRESSED, LOCAL_BUFFER_CLEARED, LOCAL_CACHE_PURGED and QUEUED_DELIVERY_CANCELLED are distinct action-specific Adapter observations. G records them as evidence for the matching target/session only; I evaluates whether they satisfy the sealed target requirement.
+
+### 11.5 Cross-module acceptance gates
+
+- G never emits a Context candidate from an untrusted or unresolved scope.
+- No derivative-capable G work executes without D registration and current I authorization.
+- No G artifact becomes visible/sendable without complete D dependency registration and final fence/permission publication gate.
+- Every F candidate is revalidated by G against D canonical identity/version/lifecycle and current I permission/fence; F completeness is a per-partition vector, not a scalar maximum.
+- Forget/revocation tombstones block old Context snapshots, deltas, pending ChangeSets and deliveries before cleanup; historical immutable versions are audit-only.
+- Offline Adapter state remains Pending/Unknown; reconnect must authenticate, refresh I PermissionEpoch and D fence, reconcile G target/delivery state and discard stale materialization before reuse.
+- No G status asserts physical erasure or model comprehension/use.

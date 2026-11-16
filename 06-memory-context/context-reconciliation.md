@@ -90,3 +90,62 @@ Audit trigger/source/watermark, Context IDs, canonical refs as permitted, policy
 - **CANDIDATE:** event-driven invalidation plus periodic watermark sweep.
 - **TO_VALIDATE:** fan-out, propagation lag and reconnect convergence.
 - **OPEN:** canonical Forget proof (I); event/watermark schema (E); completeness (F); Adapter clear attestation (H).
+
+
+## 8. Phase 3.5 ForgetFence, typed inventory and target-evidence alignment
+
+### 8.1 Authority and cursor separation
+
+G consumes but does not create or redefine the following:
+- D ForgetOperationId, ForgetFenceCursor/Generation, CanonicalCommitCursor, ProducerRegistryVersion, ProducerRegistrationSequence/HighWater, dependency inventory and D barrier receipts;
+- I PermissionEpoch, ProducerDomainInventoryEpoch, TargetInventorySeal, TargetId, required action, target state, PolicyException and Global Forget Completion;
+- F per-index/per-partition IndexWatermark and completeness/truncation evidence;
+- H CapabilityEpoch and action-specific Adapter ACK evidence;
+- G ContextVersion, ChangeSet, DeliveryId and attempt identities.
+
+These are typed opaque references from independent authorities. No max, numeric comparison, arithmetic or conversion across them is valid. D's ProducerRegistrationHighWater is a per-Forget work barrier, not I's global ProducerDomainInventoryEpoch. A sealed I target inventory does not prove D's producer work drained. An F IndexWatermark does not prove Forget suppression or cleanup. G ContextVersion does not prove Adapter application.
+
+### 8.2 G producer registration and barrier participation
+
+G is a registered derivative producer for Context membership/materializations, ChangeSets, snapshots, deltas and delivery intents. Before derivative-capable work is queued, leased, executed or allowed to dereference protected canonical content, G registers the producer class and stable ProducerWorkItemId with D. The work record binds canonical request digest, exact source refs/revisions and transitive lineage, ScopeRefs, Context/artifact identity, admission CanonicalCommitCursor, observed ForgetFenceCursor, I PermissionEpoch/decision and correlation refs. Retries preserve WorkItemId/digest; attempt/lease identities are separate.
+
+Every derived Context artifact registers complete dependencies with D before visibility. G consumes D's RegisterDerivedDependency and PublishDerivedIfFenceCurrent semantics; these names are semantic contracts, not a claim of an available callable API. The final fence/permission check must serialize with the artifact visibility transition. If D/Storage cannot provide the atomic/recoverable gate, G keeps the artifact private and no sendable delivery is created. G completes producer work only with durable terminal evidence; expired lease, deleted queue message or lost ACK is not terminal.
+
+### 8.3 Forget immediate suppression and Context invalidation
+
+When D installs a ForgetFence covering a Memory identity or ancestor lineage, G immediately installs a deny tombstone before expensive reconciliation. It:
+1. blocks affected entries in active Context reads/planning and blocks new inclusion;
+2. invalidates affected staged ChangeSets and private/pending materializations;
+3. cancels or supersedes Prepared/Delivered deliveries where possible and blocks any late Applied promotion;
+4. invalidates affected snapshots, deltas, compaction artifacts and G caches by Scope + lineage + D fence reference + I PermissionEpoch;
+5. commits a safe replacement ContextVersion only through complete D dependency registration and final publication gate;
+6. emits G-owned target evidence for I's sealed inventory, while requesting H's separate Adapter suppression/clear actions;
+7. keeps old immutable versions only as non-serving audit history under I retention rules.
+
+The tombstone is checked on read, plan, edit, replay, snapshot construction, immediately before delivery and in the H apply/reconnect gate. A stale cached fence or missing current fence is fail-closed. A new Memory ID, rendering hash or compaction ID cannot escape source-lineage coverage.
+
+### 8.4 I target evidence from G
+
+I owns TargetId and TargetInventorySeal. G never invents target identity or decides global state. For each I-registered G target slice, G emits evidence binding:
+- ForgetOperationId, TargetId and inventory seal reference;
+- exact ScopeRef coverage and G producer identity/instance;
+- D ForgetFenceCursor and relevant I PermissionEpoch/authorization decision;
+- target class and action/postcondition (Context access suppression, snapshot/delta invalidation, ChangeSet/delivery cancellation, G cache/queue invalidation, or other explicitly registered G surface);
+- Context IDs, ContextVersion(s), ChangeSet IDs, Delivery IDs/attempts and ProducerWorkItemId/terminal receipts as applicable;
+- attempt, timestamp, integrity/evidence reference, correlation/causation and unresolved coverage gaps.
+
+G may report only the action it controls. It cannot claim H Adapter cache purge from a G delivery cancellation, F index cleanup from a G snapshot invalidation, backup erasure, external recipient deletion or global Forget completion. I evaluates target state as Pending, Confirmed, Failed, Unknown or PolicyException. G's local result remains evidence, not I's state.
+
+### 8.5 Adapter ACK and offline reconnect
+
+H ACK classes are distinct: SUPPRESSED, LOCAL_BUFFER_CLEARED, LOCAL_CACHE_PURGED, QUEUED_DELIVERY_CANCELLED, FAILED, UNKNOWN and UNSUPPORTED. Each is bound to an authenticated Adapter instance/runtime session, ScopeRef, Managed Region, capability epoch, action and exact target. G stores the evidence and correlates it to its Context/Delivery; I decides whether it satisfies the target requirement. A generic "cleared" or "deleted" response is not accepted.
+
+Offline Adapter remains Pending/Unknown. On reconnect, H authenticates identity, refreshes current I PermissionEpoch and D ForgetFence for affected lineage, suppresses/clears stale local state, reports action-specific evidence, queries G's current Context/delivery ledger, rejects stale Snapshot/Delta and only then restores a current authorized managed region. No old cache or queued payload is replayed before this sequence. A missing ACK remains Unknown; UNSUPPORTED is not success and only I may approve a PolicyException.
+
+### 8.6 Reconciliation completion boundaries
+
+G may report its Context-side propagation complete only when no active or pending G-owned Context artifact/delivery can expose the target and every known G-owned target slice is reconciled with accepted evidence. G does not declare global Forget complete. I's global completion requires its sealed ProducerDomainInventoryEpoch/TargetInventorySeal, D's producer work barrier and canonical suppression proof, E/F/G/H target evidence, external-copy and backup/restore obligations, and required physical-erasure evidence or valid PolicyException. Unknown, missing target, invalidated seal, late derivative, unresolved D work item or pending H Adapter target prevents I completion.
+
+### 8.7 Typed reconciliation inputs
+
+A reconciliation run records the exact typed vector it observed: D CanonicalCommitCursor, D ForgetFenceCursor, D ProducerRegistryVersion and ProducerRegistrationHighWater/barrier receipt; I PermissionEpoch and ProducerDomainInventoryEpoch/TargetInventorySeal; F IndexWatermark per index/partition with gap/coverage status; G Base/Target ContextVersion; H CapabilityEpoch and per-session ACK evidence. A run cannot collapse these into one freshness integer. If any required authority is unknown, stale or gapped, the run remains Blocked/Unknown for affected references.

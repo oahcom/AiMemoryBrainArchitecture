@@ -136,3 +136,72 @@ Only Full may set Delivery status Applied under strict semantics. Partial/Bypass
 - **CANDIDATE:** serialized writer per Context plus CAS.
 - **TO_VALIDATE:** snapshot/delta size, hash canonicalization, retry retention and contention.
 - **OPEN:** proof/digest fields (C/H); canonical revision watermark schema (D/E/F).
+
+
+## 13. Phase 3.5 typed cursor, producer and attestation extensions
+
+### 13.1 Typed cursor registry consumed by G
+
+| Field/reference | Authority | Semantics and constraint |
+|---|---|---|
+| CanonicalCommitCursor | D | One Brain-authority commit ordering cursor; source for canonical reconciliation, not a Context sequence |
+| ForgetFenceCursor | D | Opaque tuple identifying ForgetOperation, fence generation and target-set digest |
+| ProducerRegistrationSequence / ProducerRegistrationHighWater | D | D producer work ledger admission order and per-operation barrier cutoff |
+| ProducerRegistryVersion | D | Version of enabled producer classes |
+| PermissionEpoch | I | Opaque policy-domain authorization/revocation epoch with currentness validation |
+| ProducerDomainInventoryEpoch | I | Global producer/recipient inventory revision |
+| TargetInventorySeal / TargetId | I | Immutable inventory seal and stable target identity; G never creates either |
+| IndexWatermark | F, per index and partition | Contiguous canonical publication coverage for that exact partition |
+| ContextVersion sequence | G, per Context | Desired Context state ordering only |
+| DeliveryId / DeliveryAttemptId | G | Logical delivery identity and distinct attempt identity |
+| CapabilityEpoch | H | Adapter instance capability/proof epoch |
+| InferenceRequestId / FinalRequestBoundaryId | C/H | Actual final request and boundary evidence |
+
+These values are opaque, typed and authority-scoped. No arithmetic, max(), comparison or cursor substitution across namespaces is valid. In particular, F's maximum partition watermark cannot stand in for a vector of per-partition watermarks, D's ProducerRegistrationHighWater cannot stand in for CanonicalCommitCursor, and I's inventory epoch cannot stand in for D's per-Forget work barrier.
+
+### 13.2 Producer work and artifact publication fields
+
+For derivative-capable G work, retain:
+- producer_class_id and producer_registry_version;
+- producer_work_item_id and canonical_request_digest;
+- registration_receipt_ref and producer_registration_sequence;
+- attempt_id / lease_id and derivation_run_id where applicable;
+- source_memory_refs with exact MemoryVersionRefs and transitive lineage digest/ref;
+- scope_refs and context_id;
+- observed_forget_fence_cursor and canonical_commit_cursor;
+- permission_epoch and authorization_decision_ref;
+- derived_artifact_ref/version, dependency_registration_receipt_refs;
+- publication_operation_id/receipt_ref and visibility disposition;
+- complete/unknown dependency and terminal-work disposition.
+
+G's producer work registration precedes queueing, leasing, protected source dereference and execution. Retry preserves WorkItemId/digest. D's semantic operation receipts are owner-controlled; this document does not invent their wire or storage schema.
+
+### 13.3 Visibility and storage atomicity
+
+The logical Context commit remains G-owned and creates one immutable ContextVersion. However, when the target version or its Snapshot/Delta/Delivery is a derivative of canonical content, its visible-head transition must be fenced by D's PublishDerivedIfFenceCurrent semantics and current I authorization at the same linearizable visibility decision. G must first durably register complete dependencies with D. A local pre-check followed by an independent G head write is invalid.
+
+The physical transaction/CAS or equivalent recoverable prepare/commit protocol spanning G visibility and D's final gate is **OPEN** with D and Storage/Consistency. Until that realization is specified and proven, G may stage privately but must not expose the artifact, advance the public head or send a delivery. This is an explicit implementation gate, not a claim that an API exists.
+
+### 13.4 Applied attestation evidence
+
+G Delivery records consume H evidence stages separately: DELIVERED (transport endpoint receipt), MANAGED_REGION_MATERIALIZED (local region postcondition) and FINAL_REQUEST_SUBMITTED (exact immutable request crossed the trusted handoff boundary). EXECUTION_STARTED is later runtime lifecycle evidence and is not required to define Applied.
+
+Full Applied requires C's final-request predicates and an H evidence record binding all of:
+- exact ContextRef and immutable target ContextVersion;
+- stable DeliveryId and unique DeliveryAttemptId;
+- authenticated Adapter Principal/Instance and Agent Principal/Agent/Instance;
+- Runtime Instance/Session and exact InferenceRequestId;
+- FinalRequestBoundaryId and verifiable final-submission evidence;
+- ManagedRegion ID/revision/inventory and FULL coverage;
+- CapabilityEpoch, current I PermissionEpoch/authorization decision;
+- applicable D ForgetFenceCursor for all included source lineage;
+- exact Managed Region digest plus versioned canonicalization/digest profile;
+- protected-region integrity evidence and timestamp/anti-replay identity.
+
+The digest is scoped to the declared managed region extracted from the final immutable request; it excludes System/Developer/User content, credentials and unrelated prompt content. A digest alone is not proof. Missing/stale/unverifiable fields force Partial, Bypassed or Unknown, never Full. Tier 2/3 cannot claim Full unless C's same final-boundary conformance predicates are demonstrably met; otherwise the Adapter reports its lower-tier coverage.
+
+### 13.5 Delivery identity and state
+
+DeliveryId is stable across retransmission of one logical delivery; DeliveryAttemptId is unique for each attempt. InferenceRequestId is unique per actual submitted inference invocation; a retry that creates a new inference invocation receives a new request ID and new final-submission evidence. ACK identity/digest is immutable; same identity plus same digest is idempotent, same identity plus different digest is conflict.
+
+Delivery lifecycle includes Prepared, Delivered, Applied, Rejected, Expired, Superseded and Unknown. Unknown represents timeout, crash, offline or ambiguous outcome; it is not success. A late Applied ACK may be retained as historical evidence only if its ordering is provable before expiry/supersession/fence/revocation; it cannot restore current Context or roll the desired head backward.

@@ -79,3 +79,58 @@ Measure planning/commit/delivery latency separately; CAS conflicts; outbox age; 
 - **CANDIDATE:** single writer per Context with CAS guard and deterministic operation order.
 - **TO_VALIDATE:** throughput/contention under multi-Agent updates.
 - **OPEN:** physical outbox transaction (engineering), wire schema (H), authorization schema (I).
+
+
+## 10. Phase 3.5 coordinator and producer-gate workflow
+
+The coordinator must preserve the owner-specific linearization points; a sequence of successful local checks is not a substitute for an atomic visibility gate.
+
+### 10.1 Producer admission and work identity
+
+Before G enables a producer class for Context snapshot/delta, compaction, reconciliation materialization or delivery-intent production, it registers the class/version with D. Before a derivative-capable work item is enqueued, leased, dereferences protected canonical source data or starts execution, G durably registers it through D's semantic RegisterProducerWork contract. The registration binds stable ProducerWorkItemId, canonical request digest, ProducerClass/registry version, exact source refs/revisions and transitive lineage, ScopeRefs, Context/artifact target, admission CanonicalCommitCursor, observed ForgetFenceCursor, current I PermissionEpoch/authorization decision and correlation refs.
+
+Retry retains ProducerWorkItemId/digest; AttemptId and LeaseId change per execution. Unknown registration receipt, D registry gap, stale permission or unavailable current fence means no work admission. G does not assume that a queue entry or lease is a durable D registration.
+
+### 10.2 Context artifact publication
+
+A staged ContextVersion/ChangeSet may be computed privately. Before it is visible as the current Context head or can be included in a sendable Snapshot/Delta, G registers complete dependency lineage with D (including exact canonical refs, source/transitive lineage and G artifact/version identity) and obtains a durable dependency receipt. The final visibility decision must use D PublishDerivedIfFenceCurrent semantics and current I authorization at the same linearizable decision that makes the G artifact visible. If G and D storage cannot implement a shared transaction or proven recoverable prepare/commit protocol, the staged artifact remains private; G must not advance the public Context head or deliver it. A local check followed by an independent write is forbidden.
+
+This refines, rather than removes, G's T1 atomicity requirement: the G transaction still atomically persists idempotency, ChangeSet, immutable version, audit and outbox/head decision; the cross-owner fence gate must be part of that visibility decision. The exact storage realization remains OPEN with Storage/Consistency and D.
+
+### 10.3 Updated coordinator sequence
+
+1. Authenticate protected transport context; resolve B typed ActorRef/ScopeRef and I Principal/Producer/Adapter bindings. Never trust payload identity claims.
+2. Resolve Context's complete required identity tuple, including EnvironmentRef where relevant; reject ambiguity.
+3. Obtain current I PermissionEpoch and action-specific authorization. Obtain current D ForgetFenceCursor for every referenced Memory lineage. These tokens are independent.
+4. Load the exact Context head and immutable snapshot; validate integrity, scope fingerprint, policy epoch and existing tombstones.
+5. Consume F RetrievalResult/ActivationRecommendation only as immutable proposals. Require exact MemoryRef/MemoryVersionRef, activation rationale, source/evidence refs, uncertainty, completeness/truncation and per-index/per-partition IndexWatermark vector.
+6. Reauthorize and resolve each candidate against D canonical state. F ranking, watermark or cache hit is not canonical authority and cannot override Forget/retraction/supersession.
+7. Plan task-specific coverage and budget; stage ordered operations against one Base Version.
+8. Register G producer work with D before derivative work admission/execution; preserve stable work identity across retries.
+9. Register every derivative artifact and complete dependency lineage with D before visibility.
+10. Atomically decide the G Context commit with D's final publication/fence gate and current I permission. On missing callable gate or unproven cross-store atomicity, quarantine; do not publish or advance visible head.
+11. Create a Delivery intent only for a committed, current, non-expired target. Bind stable DeliveryId and separate AttemptId; reauthorize and recheck fence immediately before each send.
+12. H validates delivery and applies only at the next inference boundary; G accepts Applied only from valid C/H Full final-request evidence.
+13. Reconcile all timeouts, lost receipts, stale cursors, late ACKs, revocation and Forget using stable IDs; never infer success from elapsed time.
+
+### 10.4 I Forget inventory evidence produced by G
+
+G reports its own registered target slices only. It binds I's TargetId/TargetInventorySeal, ForgetOperationId, exact Context/snapshot/delta/ChangeSet/delivery target, ScopeRef coverage, D fence, I PermissionEpoch, operation/action, pre/postcondition, producer work/attempt, timestamp and integrity evidence. I owns Target State aggregation. G must not mark a target Confirmed merely because it sent a clear request; H action-specific Adapter evidence is separate. Unknown/offline remains unresolved.
+
+### 10.5 Failure and degraded behavior
+
+| Condition | Required G outcome |
+|---|---|
+| D producer class/work registration unavailable or unknown | Do not enqueue/lease/execute derivative work; retain private pending intent |
+| D dependency registration incomplete | Keep artifact private; no Context head advance or delivery |
+| D final publication gate unavailable/unproven | Quarantine; no visible Context Version or sendable Snapshot/Delta |
+| D ForgetFence unavailable/stale | Block affected Context references and fail closed |
+| I PermissionEpoch/current decision unavailable | Block protected read, mutation, publication and delivery |
+| F per-partition watermark gap/truncation | Mark plan incomplete; no false completeness or absence inference |
+| H final request evidence absent | Delivery remains Delivered/Unknown, never Full Applied |
+| H Forget ACK missing/unsupported | G target evidence remains Pending/Unknown; I decides exception/completion |
+| Late derivative or invalidated I inventory seal | Reopen G reconciliation and emit updated target evidence; do not silently preserve completion |
+
+### 10.6 Owner boundary
+
+D owns producer registration/fence/publication semantics; Storage/Consistency owns any physical atomicity realization; I owns identity, PermissionEpoch and global target/completion policy; F owns retrieval/index/caches; H owns BMCP and Adapter-local evidence; C owns final-request proof predicates; G owns desired Context state, membership/version and its own reconciliation/delivery intent. This workflow does not create a cross-module transaction or wire schema by assertion.

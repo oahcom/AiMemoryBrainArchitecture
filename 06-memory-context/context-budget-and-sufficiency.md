@@ -86,3 +86,35 @@ Measure token/byte/count utilization, stage latency, coverage by dimension, omit
 - **CANDIDATE:** marginal coverage optimization and tier reserves.
 - **TO_VALIDATE:** weights, thresholds, tokenizer variance, compaction fidelity and latency.
 - **OPEN:** task requirement schema with F/C; rendering/token accounting with H.
+
+
+## 9. Phase 3.5 candidate integrity, typed freshness and producer constraints
+
+### 9.1 Runtime candidate admission
+
+F RetrievalResult and ActivationRecommendation are immutable proposals, not Context membership or authorization. G requires exact typed MemoryRef/MemoryVersionRef, ScopeRefs, activation reason, source/evidence refs, epistemic/lifecycle/temporal metadata, uncertainty, completeness/truncation, canonical source references and per-index/per-partition IndexWatermark. G independently re-resolves canonical identity/version/lifecycle with D and current permission/fence with I/D before inclusion.
+
+A single maximum IndexWatermark cannot represent a multi-partition result. Sufficiency records a vector of per-index/per-partition watermarks, contiguous-gap state, freshness requirement and completeness outcome. Missing or lagging partition data is Partial/Unknown; omission is not proof of nonexistence. F cache/index freshness never overrides D canonical retraction, supersession or ForgetFence.
+
+### 9.2 Hard constraints before optimization
+
+The following are admission constraints, not weighted preferences: authenticated identity; complete required Scope including EnvironmentRef; current I PermissionEpoch/authorization; current D ForgetFence and source-lineage eligibility; canonical MemoryVersion/lifecycle/temporal validity; required Evidence/Provenance authorization; classification; and task/environment match. A high relevance score, P0 priority, evidence summary or sufficient token budget cannot compensate for any failed hard constraint.
+
+### 9.3 Compaction as a registered derivative
+
+Compaction is a G-owned derived artifact. Its source set includes every input ContextEntry, exact canonical MemoryVersion, Evidence/Provenance refs and transitive lineage. G records algorithm/model/profile version, canonical input/output digests, omissions/loss, validation outcome and expansion refs. It registers producer work and complete dependency lineage with D before publication, rechecks I PermissionEpoch and D ForgetFence at the final visibility gate, and keeps output private if any receipt/gate is missing or unknown.
+
+Compaction cannot convert disputed/reported/inferred material into verified statements, merge conflicting Claims into a synthetic fact, remove required risk/uncertainty qualifiers or sever provenance. A compacted projection changes desired Context content and therefore participates in a new immutable ContextVersion; it never creates or updates Canonical Memory.
+
+### 9.4 Budget reporting and safe degradation
+
+The sufficiency report adds:
+- exact ContextVersion and requirement-profile version;
+- per-dimension coverage and omissions;
+- per-index/per-partition IndexWatermark vector and completeness gaps;
+- canonical commit/fence references and current PermissionEpoch decision;
+- budget vector (token estimate/profile, bytes, entries, relation/provenance bounds, latency/CPU);
+- compacted source membership and validation/digest profile;
+- blocked/deferred refs without leaking unauthorized existence or counts.
+
+If D/I currentness or F completeness cannot be established, mark Unknown/Insufficient for affected requirements and do not publish a Context that implies complete coverage. If hard requirements exceed budget, report the exact safe omissions/gaps; never silently drop protected P0, risk, uncertainty or provenance requirements.
