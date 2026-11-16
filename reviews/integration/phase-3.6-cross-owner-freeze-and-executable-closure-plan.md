@@ -618,3 +618,14 @@ The exact A successor package was updated to incorporate the companion coordinat
 This is a package amendment. Any previous exact-version acceptance of the older CGH-APPLIED-1.1 package Blob does not automatically approve this amended Blob. C/D/I/H/G/B and Storage/operator must make fresh exact-Blob decisions or explicitly state which unchanged clauses their prior decision covers and approve the amended package hash.
 
 Current status remains A CANDIDATE / OWNER REVIEW REQUIRED / NOT FROZEN; coordinator operator not designated; Storage acceptance pending; tests not run.
+
+
+## 13.9 Coordinator outage cutoff safety and latest package pins
+
+A closed an outage race in the coordinator proposal: when I receives a revocation request or D receives a fence request while COC is unavailable, that owner locally blocks affected admissions/receipt issuance and returns PENDING/UNKNOWN. Admission cannot reopen until the request cutoff is durably recorded in COC. This ensures an owner-known request cannot be invisible to the common order.
+
+Latest readback pins:
+- Coordinator deployment artifact Blob: `65878e1e2b569b1dc6d0918f51a313da122236d4`, commit `56909a979239a57d04d7c6ce2e36a4a63dd96e60`.
+- CGH-APPLIED-1.1 candidate package Blob: `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`, commit `e1113c3cd84787ad087a2ebb363cde165d563f1f`.
+
+These amendments invalidate any prior exact-Blob approval of the earlier package or coordinator artifact. Fresh exact-version Owner decisions are required. Status remains proposed/not designated/not deployed; Storage and C/I/D/H/G/Security approvals pending; tests not run; Applied Contract Frozen NO.
