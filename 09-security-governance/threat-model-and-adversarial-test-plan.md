@@ -190,3 +190,33 @@ The following threats extend (and do not replace) SEC-001..SEC-026. Tests remain
 - Global completion tests must prove that each mandatory Unknown/Failed/Unsupported/missing target blocks Completed, and that expiry of an exception reopens it.
 
 A test PASS requires reproducible fixtures, environment, test version, expected/actual result, owner sign-off and non-sensitive evidence. No Phase 3.5 test execution is claimed.
+
+
+## Phase 3.6 Principal Trust Chain / Authorization / Revocation tests
+
+Detailed specification: `phase-3.6-principal-trust-chain-authorization-revocation.md` §9. All cases below are **NOT RUN**; this table records required coverage, not execution results.
+
+| ID | Threat case | Required result | Status |
+|---|---|---|---|
+| I36-T01 | Forged PrincipalRef contradicts authenticated transport | Reject identity mismatch; never trust payload | NOT RUN |
+| I36-T02 | Forged/caller-constructed ActorRef without verifier binding | Reject; ActorRef is not a credential | NOT RUN |
+| I36-T03 | Unknown Issuer or key ID | Fail closed; no trust-on-first-use | NOT RUN |
+| I36-T04 | Revoked Issuer/key | Reject new auth; invalidate dependents and advance affected PermissionEpoch | NOT RUN |
+| I36-T05 | Expired delegation or expired parent grant | Deny delegate and descendants | NOT RUN |
+| I36-T06 | Delegation cycle, excessive depth or authority amplification | Deny chain | NOT RUN |
+| I36-T07 | Stale PermissionEpoch with unexpired cached ALLOW | Deny/pause; TTL is not freshness proof | NOT RUN |
+| I36-T08 | Epoch stream gap or authority unavailable | Pause protected operation until authoritative reconciliation | NOT RUN |
+| I36-T09 | Cross-Scope access without explicit grant | Deny with no candidate/count/graph side channel | NOT RUN |
+| I36-T10 | Cross-Environment access via free-text/caller-supplied environment | Deny; require exact registry-backed EnvironmentRef | NOT RUN |
+| I36-T11 | Producer self-assertion or mismatch against authenticated registration | Reject before enqueue, lease, dereference or compile | NOT RUN |
+| I36-T12 | Adapter identity spoof or cross-instance session | Reject; keep managed region suppressed | NOT RUN |
+| I36-T13 | Revocation races with E publication | If revocation precedes visibility linearization, staged artifact remains private | NOT RUN |
+| I36-T14 | Revocation races with F retrieval | No candidate/count/snippet disclosure; invalidate cache | NOT RUN |
+| I36-T15 | Revocation races with G/H delivery or apply | Cancel/quarantine pending delivery; fresh auth on reconnect | NOT RUN |
+| I36-T16 | Revocation races with C final Applied/inference submission | No submission if revocation wins; no Full Applied | NOT RUN |
+| I36-T17 | PermissionEpoch confused with ForgetFenceGeneration | Reject type/namespace substitution; validate both independently | NOT RUN |
+| I36-T18 | Revocation after disclosure linearization | Do not claim recall; block future access and initiate recipient/Forget workflow | NOT RUN |
+| I36-T19 | Initiating Principal revoked after Forget fence installation | Preserve Forget obligation; cleanup requires separate current service authority | NOT RUN |
+| I36-T20 | Unsupported Adapter/offline recipient during Global Forget | Unknown/Pending unless narrow approved exception | NOT RUN |
+
+A test is PASS only with reproducible fixture, build/environment, policy/issuer registry snapshot, deterministic race pause point where relevant, expected/actual result, durable test artifact, timestamp and owner sign-off. This append-only test plan does not claim any execution.
