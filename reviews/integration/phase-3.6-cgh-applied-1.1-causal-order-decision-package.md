@@ -187,7 +187,7 @@ The current G Applied contract and B typed-reference confirmation were also re-r
 
 The companion deployment architecture is:
 - `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`
-- Blob `3f302a333f413e6ea7d5cbf1fe06473be6228a09`
+- Blob `65878e1e2b569b1dc6d0918f51a313da122236d4`
 - Commit `a3e17f4f77d980bafab4268f8825a1cd61371d6e`
 
 The proposed initial realization is one logical Causal Order Coordinator backed by one strongly consistent append-only consensus log, with a target three-voter/two-quorum deployment across independent failure domains. The log's committed position is returned only after durable quorum commit. Minority partitions fail closed. Initial v1 deliberately avoids sharding and cross-log transactions.
@@ -199,3 +199,10 @@ The coordinator records request cutoffs, participant intents, owner-issued I/D t
 The initial profile rejects unsupported multi-policy-domain authorization and any multi-domain fence operation for which an atomic request cutoff cannot be guaranteed. No partial registration, heuristic terminalization, TTL barrier release, or 1.0 downgrade is permitted.
 
 This deployment profile is **PROPOSED / NOT DESIGNATED / NOT DEPLOYED**. Storage, C, I, D, H, G and Security/Governance must explicitly accept or amend the exact companion artifact before production activation. COC-01..12 and consumer race suites remain SPECIFIED / NOT RUN.
+
+
+### 9.1 Coordinator outage admission-cutoff safety refinement
+
+The companion coordinator proposal now requires owner-local fail-closed behavior for a request received while COC is unavailable: D locally closes affected lineage admission after receiving a fence request; I locally suspends affected receipt issuance/consumption after receiving a revocation request. Neither owner may reopen admission until its request cutoff is durably recorded in COC. This prevents a request known to an authority from remaining invisible to the common order during coordinator outage.
+
+Updated companion artifact Blob: `65878e1e2b569b1dc6d0918f51a313da122236d4`. This amendment is included in the current candidate package and requires fresh exact-Blob owner review.
