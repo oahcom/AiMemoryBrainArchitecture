@@ -178,3 +178,183 @@ Global result:
 - H must define Adapter clear/quarantine acknowledgement and reconnect gate; H candidate package was reviewed on `session-h-bmcp-protocol` @ `fcc5103399b4c322e52d642cae5a2414969399a7`; its Adapter-local clear/ACK semantics are candidates, not global completion proof.
 - Storage must provide backup inventory, restore quarantine, expiry and physical-erasure evidence.
 - I policy does not replace any local module implementation or conformance proof.
+
+---
+
+## Phase 3 targeted remediation — global target inventory and evidence vector
+
+**Status: CANDIDATE I governance contract.** This section refines the global policy; it does not implement D/E/F/G/H mechanisms or close INT-P0-03.
+
+### 12. Two independent inventory/barrier authorities
+
+Two values MUST remain distinct and MUST NOT be numerically compared, merged, or substituted:
+
+- **ProducerDomainInventoryEpoch (I-owned):** monotonically versioned snapshot of the registered producer/recipient domain catalogue, including domain classes, registered instances, scope coverage, owner, capabilities and evidence obligations. It answers whether the global closed-world set of places that can create, retain, deliver or restore a target is complete.
+- **ProducerRegistrationHighWater / WorkItemBarrier (D-owned):** the per-Forget fence snapshot of concrete registered work items and attempts admitted before the fence. It answers which individual work items must reach terminal disposition before D can close its barrier.
+
+The I epoch is a catalogue revision, not a work sequence. D's barrier is a Forget-operation-specific work boundary, not a catalogue revision. A higher I epoch does not prove D work drained; a closed D barrier does not prove all producer/recipient domains were inventoried.
+
+Every global completion bundle MUST bind both values independently:
+`inventory_epoch_ref + inventory_seal_digest` and `D_forget_fence_ref + producer_registration_barrier_ref`, each with its issuer/owner, version, scope, timestamp and evidence reference. No arithmetic comparison is permitted.
+
+### 13. Inventory epoch change during Forget
+
+At seal time, I records the active ProducerDomainInventoryEpoch and a canonicalized inventory digest. While an operation is open:
+1. A domain registration, capability expansion, scope expansion, new recipient, new backup/restore path or discovered producer increments the I inventory epoch.
+2. If the change can affect the Forget target or its lineage, the operation transitions to **Reopened** (or remains pre-completion pending), the old seal becomes superseded for completion, and newly affected targets are enumerated.
+3. The owner of the newly registered domain supplies its target-specific evidence contract; no target is assumed complete because it was absent from the previous seal.
+4. I emits a new inventory seal version and completion evaluation restarts against the new seal and the still-distinct D barrier.
+5. If a new producer is discovered after a prior completion, completion is invalidated and the operation is Reopened. An incident/audit event is mandatory.
+
+The only permitted non-reopening change is a proven metadata-only catalogue edit that cannot change target coverage, capability, scope or evidence obligations; I must record the proof and reviewer.
+
+### 14. Target Inventory Seal
+
+A seal is a signed, immutable snapshot, not a permanent assertion that the universe can never change. It contains:
+- `seal_id`, schema version, ForgetOperationId, inventory epoch and parent/superseded seal reference;
+- sorted target identities and a digest over the canonical representation;
+- registry source/version and enumeration timestamp;
+- target owner, category/type, instance identity, exact ScopeRef coverage and scope-binding fingerprint;
+- capability set and capability version, required actions/evidence profile;
+- target status at seal time and any unresolved registration gaps;
+- D fence reference and D barrier reference as separate opaque typed references when available;
+- signer/verifier identity, integrity metadata and audit correlation.
+
+Seal validity is invalidated by: a relevant producer-domain epoch change; a newly discovered target; target identity/owner/scope/capability/evidence-contract change; inventory enumeration gap; scope expansion; invalid signature; or evidence that the seal omitted an active domain. A seal does not close D's barrier and is not itself cleanup evidence.
+
+### 15. Target identity and record
+
+Each target record has a stable, non-recycled `TargetId` and at minimum:
+- target type/category and domain class;
+- stable instance identity (or a declared singleton logical target);
+- accountable OwnerPrincipal/owner team and operational contact;
+- exact ScopeRef set / coverage rule and scope fingerprint;
+- capability set, capability epoch/version and supported action semantics;
+- required evidence profile and verifier;
+- registry state, online/disabled/revoked state and last inventory epoch;
+- current target state and per-attempt evidence references;
+- retention class, backup/external-copy status and jurisdiction where applicable.
+
+Target identity is not merely a hostname or display name. It is bound to the authenticated owner/issuer and registered instance. Unknown target identity, ambiguous scope, untrusted issuer or missing owner is **Unknown** and blocks completion.
+
+### 16. Minimum global target classes
+
+| Target class | Minimum target coverage | Owner | Required completion evidence |
+|---|---|---|---|
+| D canonical | Canonical Memory/versions, ForgetFence and canonical dependency inventory | D | Fence installation proof, exact target-set binding, D work-item barrier reference, terminal disposition for all pre-fence work, canonical suppression proof |
+| E producer | Ingress producers, compiler queues, leases, retries, DLQ, replay, staged outputs and derived artifacts | E | Producer/work registration receipt, compile/replay terminal watermark, derivative/dependency registration watermark, no late publication proof |
+| F runtime | Each lexical/ANN/graph/temporal/evidence/provenance index partition, cache namespace and Working Set | F | Per-partition suppression/publication watermark, cache/Working Set invalidation evidence, stale candidate rejection proof |
+| G context | Context entries, snapshots, deltas, ChangeSets, delivery ledger and pending deliveries | G | Reconciliation watermark, invalidated snapshot/delta evidence, delivery cancellation/supersession/completion disposition |
+| H adapter | Each Adapter instance × managed region × relevant scope; local queues and caches separately where capabilities differ | H | ACK bound to Adapter identity, capability epoch, managed-region identity, scope, fence and operation; per-capability evidence |
+| External recipient | Every registered export, webhook, sync, analytics, model provider and onward recipient | I registry; recipient executes | Delivery receipt plus recipient-specific deletion/withdrawal ACK or valid exception; onward-copy disclosure |
+| Backup/replica/restore | Primary replicas, snapshots, WAL/archive, object versions, DR and restore destinations | Storage/backup owner | Catalog coverage, retention/expiry or erasure proof, restore quarantine and suppression-ledger replay evidence |
+| Other derived target | Summaries, compactions, embeddings, projections, exports, search copies and newly registered derivatives | Creating domain owner | Lineage/dependency registration, suppression/cleanup watermark and no-recreation proof |
+| Audit/observability | Traces, logs, metrics, support bundles and non-reconstructive tombstones | I + platform owner | Minimization scan/attestation, retention disposition, no reconstructive payload or digest |
+
+Where a target class has multiple partitions, instances, regions or independent capability surfaces, each independently addressable unit is a target. Aggregated evidence is acceptable only if it cryptographically enumerates the covered members and proves no gaps.
+
+### 17. Completion Evidence Vector (CEV)
+
+The global result is a versioned vector, not a Boolean. Every component is typed and independently owned:
+
+| Vector component | Meaning | Owner | Evidence required |
+|---|---|---|---|
+| `immediate_access_suppression` | Ordinary protected access, derivation, retrieval and delivery are blocked | D + local boundary owners | D fence + local suppression attestations |
+| `producer_barrier_completion` | All pre-fence work items terminal and no bypass/late publication | D (barrier); E/F/G/H implement | D barrier reference, terminal dispositions, producer inventory completeness and late-output checks |
+| `derived_artifact_cleanup` | Registered derivative lineage suppressed/cleaned | E and derivative owners | E registration/replay/derived watermarks and per-target cleanup evidence |
+| `runtime_context_adapter_suppression` | F indexes/caches/Working Sets, G Context/delivery, H managed regions cannot expose forgotten target | F/G/H | Per-partition F watermarks; G reconciliation/delivery dispositions; H per-region ACKs |
+| `external_copy_handling` | External recipients have acknowledged, failed, remain unknown, or are excepted | I + recipient | Recipient-specific request/receipt/ACK, onward-copy scope and exception reference |
+| `backup_retention_restore` | Backup copies are isolated, retention-bounded, restore-suppressed and eventually expired/erased | Storage + I | Backup catalog, retention/expiry, restore-quarantine test, suppression-ledger replay, erasure proof if required |
+| `physical_erasure` | Controlled copies/media have met the applicable irreversible-erasure standard | Storage/recipient + I policy | Exact systems/media/key scope, method, operator, postcondition/expiry and residual-copy statement |
+
+Each component is represented as `Pending | Confirmed | Failed | Unknown | PolicyException | NotApplicable`, with NotApplicable permitted only when the sealed inventory proves the class is absent and the verifier approves the rationale. Component records include owner, target set, scope, typed watermark/reference, evidence digest, verifier, timestamp and policy version.
+
+**Completed** requires all mandatory components Confirmed, all mandatory targets Confirmed, both I inventory seal and D barrier valid, no unresolved Unknown/Failed, and physical erasure Confirmed wherever the declared completion promise requires it. **CompletedWithPolicyException** is permitted only when each residual target is covered by an active, approved, unexpired exception and all non-excepted components are Confirmed. It is never described as physical erasure of excepted data.
+
+A policy may expose separate milestone reports (e.g. AccessSuppressed, CleanupComplete, BackupDispositionComplete, PhysicalErasureComplete). It MUST NOT collapse them into one undifferentiated "deleted" result.
+
+### 18. D/E/F/G/H evidence contracts consumed by I
+
+- **D:** I consumes D's canonical ForgetOperation/fence reference, target-set digest, producer registration high-water/work-item barrier, dependency inventory reconciliation, terminal dispositions, and canonical suppression proof. I does not define D's atomicity or barrier internals.
+- **E:** I consumes producer-class registration references, compile/replay watermarks, lease/retry/DLQ terminal evidence and derived dependency-registration/publication evidence. E's watermark cannot replace D's barrier.
+- **F:** I consumes a distinct suppression/publication watermark for every relevant index/channel partition and cache/Working Set disposition. I does not define IndexWatermark.
+- **G:** I consumes Context reconciliation, immutable snapshot/delta invalidation and each delivery's cancelled/superseded/completed/unknown disposition. A pending delivery remains unresolved.
+- **H:** I consumes Adapter-local ACKs only for the exact registered Adapter target and capability surface. H ACK is never a global completion signal.
+- **Storage:** I consumes catalog/restore/expiry/erasure proof; a main-table delete or logical tombstone is not physical-erasure proof.
+
+A target evidence item must bind ForgetOperationId, TargetId, exact ScopeRef coverage, relevant D fence reference, inventory seal version, action, capability/evidence contract version, attempt ID, result, time, integrity/authentication metadata and verifier. PermissionEpoch is included when the action is permission-sensitive; it is not substituted for ForgetFence generation.
+
+### 19. H ACK → target state mapping
+
+| H ACK | I target disposition | What it proves | What it does NOT prove / next requirement |
+|---|---|---|---|
+| `SUPPRESSED` | At most `Confirmed` for immediate managed-region access suppression, if all bindings and capability scope verify | Target will not include affected content in future managed inference requests | Does not prove buffer/cache purge, queued cancellation, provider deletion or physical erasure; those remain separate target actions |
+| `LOCAL_BUFFER_CLEARED` | `Confirmed` only for the declared volatile buffer-clear action | Adapter-controlled volatile managed buffer was cleared | Does not prove persistent cache purge, all queues, other regions or provider copies |
+| `LOCAL_CACHE_PURGED` | `Confirmed` only for named cache(s) and declared purge capability | Adapter-controlled cache purge for the exact cache scope | Does not prove other caches/queues, external provider or media-level secure erasure unless separately attested |
+| `QUEUED_DELIVERY_CANCELLED` | `Confirmed` only for named queued delivery IDs | Named queued delivery cannot be replayed under that Adapter contract | Does not prove already submitted requests or unrelated queues/deliveries cleared |
+| `FAILED` | `Failed` for attempted target action | Action failed with authenticated reason evidence | Retry/escalation required; cannot satisfy completion |
+| `UNKNOWN` | `Unknown` | Outcome cannot be established | Offline, timeout, ambiguous state or missing evidence blocks completion unless a valid narrow exception is approved |
+| `UNSUPPORTED` | `Unknown` by default; `PolicyException` only after explicit approval | Adapter lacks the capability | Never Confirmed. Register an alternate control/disable the Adapter or approve a scoped residual-risk exception |
+
+Mandatory H binding fields: ForgetOperationId, exact TargetId, authenticated AdapterIdentity/Principal and issuer, Adapter instance, managed-region/cache/queue identity, ScopeRef coverage, D ForgetFence reference (opaque), I PermissionEpoch reference where relevant, capability epoch/version, ACK type, action/attempt ID, delivery/Context refs where relevant, observed time, evidence profile/version, integrity/authentication proof and result reason. Missing or mismatched binding makes the ACK **Unknown** or **Failed**, not Confirmed.
+
+One ACK can confirm only one action/capability surface. Multiple ACKs may be required for one Adapter target (e.g. suppression + buffer clear + cache purge + queued cancellation). Offline reconnect must authenticate, obtain current policy/fence, clear/reconcile before use; no ACK means Unknown/Pending.
+
+### 20. Backup and external-copy completion semantics
+
+Backup copies may remain physically present during an approved retention interval only when they are encrypted, catalogued, access-isolated, unavailable to ordinary runtime, and governed by a finite expiry/rotation deadline. The Forget/revocation control plane must survive independently of the backup snapshot. Restore is quarantine-only until the current Forget and permission ledgers have been replayed and all affected objects are suppressed or removed. A restore test must prove that forgotten targets cannot be queried, indexed, delivered or exported before release.
+
+A retained backup is **BackupPending** or an explicitly approved **PolicyException**, never PhysicallyErased. At expiry, storage supplies catalog-specific deletion/crypto-erasure proof. Key destruction counts only if no plaintext, escrow, alternate key, replica or derived recoverable copy exists. External recipients are separately inventoried; an outbound delivery receipt is not a deletion ACK. A non-responsive recipient remains Unknown unless an approved exception exists.
+
+### 21. Global Forget state machine
+
+| State | Entry condition | Exit condition | Required audit evidence / failure recovery |
+|---|---|---|---|
+| Requested | Authenticated request received | Authorization approved and D operation linked, or denied | Request/actor/scope/decision; denied requests terminate as Failed/Rejected outside completion |
+| InventorySealed | I enumerated domains and signed Target Inventory Seal | Immediate suppression evidence accepted | Seal digest, epoch, targets, scope and verifier; relevant catalogue change invalidates seal |
+| SuppressionEstablished | D fence installed and mandatory read/derive/delivery paths report suppression | Producer barrier evaluation starts | D fence ref + per-boundary suppression; missing confirmation stays Pending/Unknown |
+| BarrierPending | D barrier exists and pre-fence work remains | All required work terminal and D proof accepted | D work-item barrier, lease/retry/DLQ states; recover unresolved work, never time out to success |
+| TargetCleanupPending | Barrier terminal; derived/runtime/context/adapter targets enumerated | All required cleanup targets Confirmed or excepted | E/F/G/H target evidence; retries and reopen on late derivative |
+| ExternalCopyPending | External recipient targets exist and deletion/withdrawal requests sent | All required recipients Confirmed or approved exceptions | Recipient request/receipt/ACK, escalation and exception audit |
+| BackupPending | Backup/replica/restore targets exist or retention period remains | Required restore safety and retention/erasure disposition complete | Backup catalog, isolation, expiry, restore test and physical-erasure evidence |
+| CompletionEvaluated | All evidence vectors assembled against current seal and D barrier | Completed, CompletedWithPolicyException, Failed or Reopened | Signed evaluation snapshot; any missing/invalid/expired evidence returns to relevant pending state |
+| Completed | All mandatory targets/components Confirmed; no active exception needed | Terminal unless later discovery invalidates proof | Immutable proof bundle; post-completion discovery forces Reopened |
+| CompletedWithPolicyException | All non-excepted requirements Confirmed; every residual has active approved exception | Exception resolved/expired (then Reopened) or new review | Approval, scope, rationale, expiry, risk owner, controls and disclosure |
+| Failed | Definitive non-compliance or policy denial prevents completion | Remediation/retry explicitly reopens operation | Failure reason, target, attempt, owner; never silently reset |
+| Reopened | New target/domain, inventory seal invalidation, late derivative, restore resurrection or expired exception | New seal and re-evaluation; returns to appropriate pending state | Prior proof retained as superseded, new reason/epoch/targets recorded |
+
+Transitions are monotonic in audit history. A terminal state is not silently edited. A later target discovery, inventory epoch change affecting coverage, invalid ACK, expired exception, failed restore suppression or evidence-integrity failure creates a new evaluation and Reopened state. Reopened does not erase the prior result; it marks the previous result superseded for current assurance.
+
+### 22. Global completion hard stops
+
+The following MUST prevent Completed:
+- unknown/unregistered producer domain or recipient with plausible target coverage;
+- invalid or superseded inventory seal;
+- D barrier not closed, unresolved lease/work item, registration gap or late derivative;
+- missing required E/F/G/H evidence or stale/partition-incomplete watermark;
+- G pending delivery or H offline/unknown/unsupported target without valid exception;
+- external recipient without required ACK/exception;
+- backup restore path not quarantined or Forget ledger not replayed;
+- physical erasure claimed without storage/media/key-scope evidence;
+- expired/revoked PolicyException;
+- permission/issuer/identity binding cannot be verified for a required action.
+
+### 23. Phase 3 test cases (design acceptance; execution not claimed)
+
+| Test | Scenario | Allowed final state | Forbidden state | Owner(s) | Required audit evidence |
+|---|---|---|---|---|---|
+| I-FGT-01 | Unknown Producer Domain at Forget | Reopened or Pending/Unknown | Completed | I + discovered domain + D | Unknown domain record, epoch change, new seal, D barrier reconciliation |
+| I-FGT-02 | Fence installed with unresolved lease | BarrierPending | Completed / Barrier closed | D + lease owner | Work ID, lease/attempt, terminal disposition and D barrier proof |
+| I-FGT-03 | I inventory changes during Forget | Reopened + new InventorySealed | Continue using old seal as complete | I + affected owner | Old/new epoch, diff, invalidation reason, new target evidence |
+| I-FGT-04 | H Adapter offline, Clear cannot be confirmed | Unknown/Pending or approved narrow PolicyException | Confirmed / unconditional Completed | H + I | Last authenticated session, timeout, target identity, retry and exception if any |
+| I-FGT-05 | H returns UNSUPPORTED | Unknown or approved PolicyException after alternate control review | Confirmed | H + I + risk approver | Capability declaration, unsupported action, alternative control and approval |
+| I-FGT-06 | G Context Delivery remains Pending | TargetCleanupPending | Completed | G + H | Delivery ID, Context ref/version, pending reason and reconciliation attempts |
+| I-FGT-07 | F IndexWatermark has not crossed required fence | TargetCleanupPending/Unknown | Runtime cleanup Confirmed | F + I | Partition ID, observed/required watermark refs, lag and retry |
+| I-FGT-08 | Backup restore attempts to restore forgotten memory | BackupPending or Failed until quarantined/suppressed | Visible/restored to serving path | Storage + I + D | Restore job, quarantine proof, ledger replay, suppressed object count |
+| I-FGT-09 | External recipient has no ACK | ExternalCopyPending/Unknown or approved exception | Confirmed / unconditional Completed | I + recipient owner | Request receipt, retry/escalation, non-response and exception |
+| I-FGT-10 | PolicyException expires | Reopened / Pending/Unknown | Continue CompletedWithPolicyException | Approver + I + target owner | Expiry event, revoked exception, renewed evidence or new approval |
+| I-FGT-11 | Permission revocation races Forget | Deny protected work; Forget continues under separately authorized operation or pauses if authority invalid | Reuse stale ALLOW / merge PermissionEpoch with fence generation | I + D/E/F/G/H | Principal/issuer, old/new PermissionEpoch, Forget fence, decision and in-flight outcome |
+| I-FGT-12 | New derived target discovered after seal | Reopened; new target and seal | Retain prior Completed as current | Discovering owner + I + D | Derivation lineage, discovery time, epoch bump, invalidated proof and cleanup evidence |
+
+These are specification-level cases only. No PASS is claimed without executable fixtures, environment, expected/actual output, test artifact and owner sign-off.
+
