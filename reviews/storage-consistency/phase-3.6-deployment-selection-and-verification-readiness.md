@@ -321,3 +321,17 @@ PASS: client-observed UNKNOWN after PREPARE, COMMIT PREPARED and ROLLBACK PREPAR
 This is actual PostgreSQL protocol TCP response-loss fault injection at the CommandComplete boundary, not merely an application result suppressed after receipt. Scope is single-node PostgreSQL 18.7 CI; it does not prove production I sequencer/COC integration, coordinator quorum durability, cross-zone network partition behavior, production fencing or deployment readiness.
 
 Gate A remains PARTIAL PASS / OPEN at production binding. Gate B/C remain blocked.
+
+
+## 9. Gate A negative-path evidence — required synchronous standby unavailable (2026-11-17)
+
+Storage added and executed the PostgreSQL 18.7 negative-path probe with a required synchronous standby. When the standby was stopped, `PREPARE TRANSACTION` waited in PostgreSQL's `SyncRep` wait event. The backend was terminated before the synchronous acknowledgement returned. The client outcome was UNKNOWN; the exact prepared XID remained locally in-doubt, the prepared row lock remained held, and no protected visibility row appeared. The exact same XID was rolled back only after those assertions.
+
+- Probe Blob: `b6de4e4f461405107464ff8ad179520f9b028749`
+- Workflow Blob: `32ed78aa702dfb6f45c73f94c81bd617b970976b`
+- Run: `43927416496`; job: `133510446871`; conclusion SUCCESS.
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43927416496
+
+This is a PASS for the fail-closed UNKNOWN/private/lock-retention subtest, not proof that the prepared XID reached the unavailable standby. Production recovery must preserve the in-doubt XID and must not promote a stale standby or let I commit based on a PREPARE ACK that was never returned. The cleanup-only `synchronous_commit=local` setting is not a production recommendation.
+
+Gate A remains PARTIAL PASS / OPEN. The test does not close production fencing, split-brain prevention, actual deployment binding, or operational ownership.
