@@ -295,3 +295,95 @@ Profile 1.0.0 requires deterministic canonical encoding, unique keys, valid UTF-
 ### 11.5 H decision exceptions and verification
 
 H does not mint C submission evidence, decide G Applied, authorize through I, issue D fences, or prove Storage visibility/Forget completion. Profile status: **SCHEMA CANDIDATE 1.0.0 / OWNER-DECIDED FOR CGH-APPLIED-1.0**; not production freeze or deployed interoperability. H36-01..18 and H36-SR remain **SPECIFIED / NOT RUN**.
+
+
+## 12. Phase 3.6.4 — Cross-authority causal ordering profile (successor candidate)
+
+- Profile: **`bmcp.applied-ack / 1.1.0`**
+- Protocol: major 1, minor 1
+- Common contract target: **CGH-APPLIED-1.1 (PROPOSED SUCCESSOR; NOT YET CROSS-OWNER FROZEN)**
+- Supersedes 1.0.0 only for flows claiming Full Applied under the three-authority causal-order requirement. 1.0.0 remains parseable for historical/transport evidence but MUST NOT be treated as sufficient proof of C-submit/I-authorization/D-ForgetFence ordering.
+- Status: **H-OWNED SCHEMA CANDIDATE; NOT PRODUCTION-FROZEN / NOT DEPLOYED**.
+
+### 12.1 New typed evidence references
+
+All references below are opaque, typed, issuer-namespaced references. H transports and integrity-binds them; H MUST NOT mint, validate semantic truth, compare their numeric values, or infer owner decisions.
+
+| Field | Type / authority | Required meaning |
+|---|---|---|
+| `causal_order_profile_ref` | CausalOrderProfileRef / joint registry | Exact immutable profile and policy version |
+| `causal_order_coordinator_ref` | CausalOrderCoordinatorRef / designated coordinator registry | Identity of the common durable ordering authority |
+| `causal_order_transaction_ref` | CausalOrderTransactionRef / coordinator | One protected submission transaction |
+| `causal_order_position` | CausalOrderPosition / coordinator | Opaque total-order position; comparable only inside the named coordinator epoch |
+| `participant_reservation_ref` | ParticipantReservationRef / coordinator | Durable pre-side-effect reservation for C's exact submit obligation |
+| `i_commit_authorization_receipt_ref` | CommitAuthorizationReceiptRef / I | Single-use I receipt bound to exact authorization tuple, request digest, transaction and C boundary |
+| `i_authorization_terminal_ref` | IAuthorizationTerminalRef / I | I sequencer terminal decision and effective ordering position for this operation |
+| `d_forget_fence_ref` | ForgetFenceRef / D | Exact applicable fence identity and generation |
+| `d_lineage_coverage_ref` | ForgetLineageCoverageRef / D | Immutable target + complete source/ancestor lineage coverage proof |
+| `d_participant_clearance_ref` | DParticipantClearanceRef / D | D's proof that the reserved participant is ordered before fence effectiveness or has been safely aborted |
+| `c_submit_outcome_ref` | CSubmitOutcomeRef / C | Actual provider/runtime boundary outcome, bound to actual InferenceRequestId and FinalRequestBoundaryId |
+| `causal_order_terminal_proof_ref` | CausalOrderTerminalProofRef / coordinator | Terminal proof over the participant, I and D evidence references and exact ordered outcomes |
+
+### 12.2 New message families and mandatory bodies
+
+| Message | Direction | Mandatory fields |
+|---|---|---|
+| `CAUSAL_ORDER_RESERVATION` | C → coordinator | coordinator/profile refs, transaction ref, exact InferenceRequestId reservation namespace (or preallocated boundary correlation bound later), FinalRequestBoundaryId, immutable request digest, ContextVersion, DeliveryId/attempt, authenticated Principal/Actor/Adapter/runtime/session, ScopeBindingSet, EnvironmentRef if required, CapabilityEpoch, I receipt ref, D fence + lineage refs, participant reservation request nonce |
+| `CAUSAL_ORDER_RESERVATION_RECEIPT` | coordinator → C | transaction ref, reservation ref, accepted coordinator epoch/position, exact evidence digest, reservation state, expiry policy (must not silently expire into success) |
+| `I_AUTHORIZATION_TERMINAL` | I → coordinator/C | CommitAuthorizationReceiptRef, I PolicyDomainRef/PermissionEpoch, exact operation and request digest, single-use consumption result, I sequencer terminal ref/position, COMMIT_WON or REVOCATION_WON or UNKNOWN/IN_DOUBT |
+| `D_FENCE_TERMINAL` | D → coordinator/C | ForgetOperationRef, ForgetFenceRef/generation, lineage coverage ref, participant reservation ref, D fence effective position, participant disposition, D clearance ref |
+| `C_SUBMIT_OUTCOME` | C → coordinator | transaction/reservation refs, actual provider/runtime result, actual InferenceRequestId, FinalRequestBoundaryId, immutable final request digest, provider receipt ref, C evidence ref/digest, outcome ACCEPTED / REJECTED / UNKNOWN |
+| `CAUSAL_ORDER_TERMINAL_PROOF` | coordinator → C/G/H | coordinator/profile/transaction refs, reservation ref, I receipt + terminal refs, D fence + lineage + clearance refs, C submit outcome ref, ordered positions, terminal outcome, proof digest and coordinator signature/key ref |
+| `CAUSAL_ORDER_ACK` | H receiver → sender | original transaction/proof refs, receiver sequence, durable receipt disposition; explicitly transport durability only |
+
+### 12.3 Normative participant-barrier protocol
+
+1. **Preflight is not authorization.** C obtains current I authorization and D fence/lineage evidence, but these are provisional until the participant reservation and terminal ordering protocol completes.
+2. **Reserve before side effect.** Before invoking the actual provider/runtime submit side effect, C durably registers the exact immutable request as a participant with the coordinator. The reservation binds the request digest, boundary, identity/session, context/delivery, I receipt and D fence/lineage refs.
+3. **I single-use terminalization.** I consumes the CommitAuthorizationReceipt exactly once and orders that exact operation against revocation in I's authoritative sequencer. I emits a signed terminal reference; cached ALLOW or an unconsumed receipt is not sufficient.
+4. **D fence barrier.** D registers the participant against the exact target/source/ancestor lineage. A fence request may be recorded as pending, but D MUST NOT declare the fence effective past an earlier unresolved participant. D either waits for that participant's exact submit terminal outcome or records an authoritative safe-abort disposition. Process death, timeout, lease expiry, queue deletion or missing callback is never implicit clearance.
+5. **Coordinator serialization.** The coordinator durably serializes participant reservation, I terminal result, D fence-effective transition and C submit outcome in one monotonic order. I and D remain semantic authorities: coordinator positions do not mint PermissionEpoch or ForgetFenceGeneration and cannot override an I/D rejection.
+6. **Submit authorization gate.** C may invoke the provider/runtime only while the reservation is live and both I and D have returned compatible non-revoked/non-fenced participant clearances. The provider call is bound to that reservation and exact digest.
+7. **Terminalization.** C appends the actual provider/runtime outcome. Coordinator emits a terminal proof only after C's outcome and I/D terminal evidence are all durable and mutually bound.
+8. **Fence/revocation race.** A fence or revocation that arrives after reservation MUST wait for the reserved participant to terminalize. If submit succeeds first, the historical submission is ordered before the later effective fence/revocation; subsequent current use is still invalidated. If safe abort is committed first, no provider submit may occur. If provider outcome cannot be determined, participant remains IN_DOUBT and the fence/revocation barrier remains blocked until authoritative reconciliation.
+9. **No favorable inference.** Missing coordinator, unavailable owner, inconsistent positions, lost receipt, unknown provider outcome, incomplete lineage, receipt replay, or digest mismatch => UNKNOWN/IN_DOUBT; suppress content; no Full Applied.
+10. **No wall-clock ordering.** `sent_at`, local timestamps, receiver arrival order and H receiver sequence are audit/transport metadata only; none substitutes for coordinator ordering.
+
+### 12.4 Terminal outcome vocabulary
+
+- `SUBMIT_COMMIT_WON`: exact provider/runtime submission is durably proven before the effective D fence and I revocation terminal points.
+- `ABORT_WON`: safe abort is durably terminal before the provider side effect; provider submission is forbidden.
+- `REVOCATION_WON`: I revocation is terminal before authorization consumption; C must not submit.
+- `FENCE_WON`: D fence is effective before participant reservation; C must not submit.
+- `IN_DOUBT`: external provider outcome or owner/coordinator ordering cannot be proven; no success or Full Applied.
+- `CONFLICT`: same transaction/receipt identity has different immutable digest or contradictory terminal claims; quarantine and security event.
+
+A successful historical submit proof never grants later permission or current-use eligibility. G alone decides Applied and recomputes current-use against current I/D state.
+
+### 12.5 Required validation rules
+
+- CommitAuthorizationReceiptRef MUST be I-issued, single-use, bound to exact PolicyDomainRef, PermissionEpoch, complete identity/action/resource/purpose/audience/scope/environment/delegation tuple, request digest, CausalOrderTransactionRef and FinalRequestBoundaryId.
+- IAuthorizationTerminalRef MUST prove I sequencer consumption and terminal order; a PermissionDecisionRef or PermissionEpoch alone is insufficient.
+- DLineageCoverageRef MUST cover exact target plus all applicable source/ancestor dependencies; DParticipantClearanceRef MUST prove the participant is before fence effectiveness or safely aborted.
+- CSubmitOutcomeRef MUST be issued only from actual successful/failed provider/runtime boundary observation; local buffer, middleware render, transport ACK or reservation receipt is insufficient.
+- CausalOrderTerminalProofRef MUST cryptographically bind every above ref, the common transaction, coordinator epoch/positions and terminal result.
+- H MUST preserve all refs exactly, enforce profile requiredness and integrity, reject unknown critical fields, and never downgrade a 1.1.0 Full-Applied flow to 1.0.0.
+
+### 12.6 Operational and safety limits
+
+The coordinator's concrete operator, durable store, HA/failover, retention, disaster recovery, key trust and availability SLO are **NOT YET DESIGNATED / NOT APPROVED**. No production use is allowed until C, I, D and the coordinator/storage operator approve the same profile and demonstrate that coordinator restore cannot roll back terminal positions or clear unresolved participants. The safe failure mode is blocked submission and blocked fence/revocation completion, not bypass.
+
+### 12.7 Conformance additions (specified, not run)
+
+- H36-CO-01 reservation before provider side effect; no receipt means no submit.
+- H36-CO-02 I receipt replay / wrong request digest; reject.
+- H36-CO-03 I revocation before receipt consumption; REVOCATION_WON.
+- H36-CO-04 D fence before reservation; FENCE_WON.
+- H36-CO-05 fence requested after reservation; fence remains pending until submit/abort terminal.
+- H36-CO-06 provider accepted, then D fence/revocation requested; historical submit ordered first, current-use invalid.
+- H36-CO-07 provider outcome unknown after crash; IN_DOUBT, D/I barriers remain open.
+- H36-CO-08 coordinator failover/restore cannot regress positions or clear participants.
+- H36-CO-09 contradictory C/I/D terminal evidence; CONFLICT/quarantine.
+- H36-CO-10 wall-clock and H receiver sequence deliberately inverted; coordinator order remains decisive.
+
+All cases: **SPECIFIED / NOT RUN**. This addendum is a schema candidate and architecture proposal; it does not establish owner acceptance, coordinator deployment, implementation or test pass.
