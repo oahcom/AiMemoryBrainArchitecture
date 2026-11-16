@@ -111,3 +111,53 @@ The original verdict's phrase 'BLOCKED for storage selection' is superseded for 
 - Storage Gate B protocol design is exact-owner-reviewed; A records the matrix in `reviews/integration/phase-3.6.3-coc-durable-protocol-acceptance-matrix.md`.
 
 Updated D disposition: **CONDITIONAL PASS — D semantic and architecture contract accepted; runtime implementation and end-to-end conformance deferred to engineering.** D does not certify PostgreSQL production deployment, I sequencer integration, D ledger implementation, physical erasure or Global Forget completion. JF-10 implementation P0 remains OPEN.
+
+## 10. TAR-AI-001 refresh — current D/Storage capability evidence (2026-11-17)
+
+This addendum supersedes any earlier statement in this report that no concrete Storage engine candidate or CI capability evidence exists. The D review was refreshed against D branch HEAD `06bce7f13bfe003d6d70b8d57c9522f5e46e2ed9`; the report's earlier semantic review baseline was D HEAD `7385e6fa45087a73ea314e8790e22903f3a3be7c`. The current Storage branch at refresh was `session-storage-consistency-forget-atomicity-2026-11-16` HEAD `7a1b733c2e83fd2427aacdd18bd30518b27fcd72`.
+
+### 10.1 Updated candidate disposition
+
+- PostgreSQL 18.7 is now the **selected CI capability qualification profile** for JF-10 prepared-XID testing, not an approved production Canonical Authority deployment.
+- The Storage dossier records PASS for the pinned profile's single-node prepared-XID persistence/lock retention/hard restart/same-XID resolution, two-node synchronous WAL replay and promotion, physical backup/restore stale-control fail-closed fixture, coordinator crash in the participant-success/ACK gap, TCP ACK loss, synchronous-standby-unavailable UNKNOWN/private behavior, and WAL-archive PITR.
+- The Storage dossier explicitly keeps Gate A PARTIAL PASS / OPEN; Gate B's exact-owner protocol acceptance is design-level with enumerated exceptions and the later amended revision requires focused exact-owner re-review; Gate C implementation/fault injection is deferred to engineering. JF-10 P0 remains OPEN and production activation is not authorized.
+- Therefore D's engine disposition is updated: PostgreSQL 18.7 is the leading qualified capability candidate for the JF-10 profile; SQLite WAL remains a plausible lightweight canonical-store prototype but is not evidenced for durable prepared-XID recovery across an external I sequencer. No final database ADR or production deployment selection is approved here.
+
+### 10.2 Revised component/dependency and interface assessment
+
+The D/E joint decision fixes the semantic serialization order across RegisterProducerWork, InstallForgetFence, complete RegisterDerivedDependency, final visibility commit and barrier-visible terminal disposition. E's stable WorkItemId/AttemptId/LeaseEpoch/DerivationRunId mapping is aligned. I accepts JF-10 v2 only for a single PolicyDomainRef and binds its sequencer decision to the exact prepared Storage participant/XID and owner boundary. Storage alone controls VisibilityPointer and PublicationReceipt. COC records order/participant observations but cannot mint D fence effectiveness, I authorization or Storage visibility.
+
+The remaining implementation gate is narrower than an undefined contract but still P0: bind the exact owner-final-gate and D fence/lineage predicate into one tested storage/COC/I deployment, preserve prepared XID and locks through failover/restore, prove same-XID forward commit/rollback, and demonstrate D's ledger and I sequencer integration. Multi-PolicyDomain atomicity remains blocked. D local CanonicalSuppressionComplete remains distinct from I Global Forget completion and physical erasure.
+
+### 10.3 Updated blocking findings
+
+- **P0 — TAR-D-P0-001:** D/E/Storage integrated producer admission, fence installation, dependency completeness, publication visibility and terminal barrier implementation is not present or verified. Design contracts exist; runtime linearizability remains unproven.
+- **P0 — TAR-D-P0-002:** JF-10 application-level I sequencer + Storage prepared-XID participant + D fence/lineage integration and same-XID recovery remain unimplemented / not end-to-end tested. PostgreSQL engine capability tests do not close this.
+- **P1 — TAR-D-P1-001:** Complete exact-owner acceptance of the currently amended Storage/COC protocol revision and production topology/profile remains open.
+- **P1 — TAR-D-P1-002:** Canonical commit/revision/lifecycle/outbox cursor atomicity and F/G consumer continuity require actual application transaction and consumer tests.
+- **P1 — TAR-D-P1-003:** Blob staging, metadata visibility, encryption, backup/PITR and restore quarantine must be integrated with the D control ledger.
+- **P1 — TAR-D-P1-004:** Callable D operations/receipts, D ledger persistence, I coordinator client and F/G consumer conformance are not implemented.
+
+### 10.4 Required prototypes/tests and evidence boundary
+
+Storage CI provides real engine-capability evidence for PostgreSQL 18.7 under the pinned CI configuration. It is not a benchmark of the AiMemoryBrain application, not an E/D/I/COC adapter integration test, and not production deployment evidence. Required next engineering tests:
+1. Implement D ledger + producer/fence/dependency/publication transaction adapters against PostgreSQL 18.7 and a comparable SQLite prototype where SQLite remains under consideration.
+2. Run the complete D36/E36/JF-10/COC crash and race suite against the real application adapters, including old-primary fencing, prepared-XID failover, coordinator restore and same-XID recovery.
+3. Verify canonical cursor assignment, immutable revision, lifecycle event, visibility pointer, PublicationReceipt, receipt consumption and outbox atomicity.
+4. Restore database + blobs + WAL/archive + I/D control ledgers from stale and current points; prove quarantine before serving and no resurrection.
+5. Benchmark writer contention, prepared-XID lock duration, queue/reader throughput, WAL growth/checkpoint, backup/PITR/restore time, RAM/disk and operational overhead.
+
+### 10.5 Exact additional evidence
+
+| Source | Commit SHA | Blob SHA |
+|---|---|---|
+| D branch refresh | `06bce7f13bfe003d6d70b8d57c9522f5e46e2ed9` | branch tree at review refresh |
+| Storage branch | `7a1b733c2e83fd2427aacdd18bd30518b27fcd72` | branch tree at review refresh |
+| Storage realization review | `7a1b733c2e83fd2427aacdd18bd30518b27fcd72` | `107d21bd2c604ee0b04feff2ee5580e1de9c7fce` |
+| PostgreSQL 18.7 capability dossier | `7a1b733c2e83fd2427aacdd18bd30518b27fcd72` | `0aabf66848dc97deee028c571183c0d7204008c0` |
+| Storage joint durable atomicity decision | `7a1b733c2e83fd2427aacdd18bd30518b27fcd72` | `17071157152c7868d638383ec97543fe3d35e652` |
+| Forget atomicity verification report | `7a1b733c2e83fd2427aacdd18bd30518b27fcd72` | `9f224722a40844686d275e44a8ab6ba72fa1ddb8` |
+| D joint Forget decision | `06bce7f13bfe003d6d70b8d57c9522f5e46e2ed9` | `1b6a312ecffd3947bbb4df59f902242482c98a40` |
+| D COC acceptance | `06bce7f13bfe003d6d70b8d57c9522f5e46e2ed9` | `e2a74d138ccebfb4266d19ea0c0c03f58a815bf5` |
+
+This refresh changes only the D technology review report. It does not modify D module contracts, Storage artifacts, TAB-001, or any other Owner branch. No end-to-end D/E/Storage/I/COC implementation test or Global Forget completion is claimed.
