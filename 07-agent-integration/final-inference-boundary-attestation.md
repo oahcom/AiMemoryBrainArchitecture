@@ -208,3 +208,109 @@ Do not record full prompts or hidden reasoning by default. Retention and audit m
 - Protected System/Developer/User/Agent Policy regions remain unchanged.
 - Tool authorization remains independent and Agent-owned.
 - Forget/revocation/supersession wins over stale delivery and late ACK.
+
+## Phase 3 targeted remediation — G/H/I evidence closure and Forget/reconnect
+
+### 12. Separate lifecycle stages
+
+| Stage | Meaning | Authority / non-equivalence |
+|---|---|---|
+| Context Prepared | G created versioned target/change and delivery intent | G; no receipt or application implied |
+| Context Delivered | H transport/Adapter received Delivery | H receipt only; not Applied |
+| Context Applied | Runtime placed target Managed Region in controlled request assembly state | Agent Runtime evidence; not final submission |
+| Final Inference Request Submitted | Exact immutable request including complete Managed Region crossed final submit boundary | Trusted runtime boundary proves request ID and submit result |
+| Model Execution Started | Runtime/provider began execution | Runtime/provider lifecycle; not model attention/use |
+
+These events fail independently. Delivered is not Applied; Applied is not Submitted; Submitted is not Execution Started.
+
+### 13. Evidence producer
+
+The Agent Runtime or trusted component at the final request submission boundary MUST generate or co-sign Full Applied evidence. Adapter may do so only if it is itself the trusted final boundary and observes the exact post-transformation immutable request handed to inference runtime. Middleware observing an intermediate prompt cannot attest Full Applied.
+
+Evidence is created after prompt assembly, truncation, template expansion, routing, safety transformations and middleware rewrites affecting inference payload. It is correlated to the actual submit operation and outcome. A pre-submit callback or local version counter is insufficient.
+
+### 14. Required evidence tuple
+
+Full Applied evidence MUST be integrity-bound or independently verifiable against:
+- authenticated Principal and issuer reference resolved by H/I;
+- canonical Agent Identity and Adapter Identity/instance;
+- Agent Instance, Runtime Session and Capability Epoch;
+- InferenceRequest Identity and final submission boundary identity;
+- G Context identity, exact ContextVersion and ChangeSet/target reference where available;
+- H Delivery Identity and attempt/correlation identity;
+- exact Managed Region identity and complete-region coverage result;
+- Permission Epoch and authorization decision reference;
+- D ForgetFence generation/token and successful current-fence validation;
+- Applied Content Digest or equivalent privacy-preserving integrity proof over canonical Managed Region content;
+- final request digest or commitment proving the Managed Region commitment is included in submitted request;
+- attestation timestamp/clock quality, runtime submit result and attestor identity.
+
+C defines semantics only. G owns ContextVersion/ChangeSet/Delivery and authoritative Applied transition. H owns BMCP encoding, signing/transport/ACK mechanics and negotiation. I owns Principal, authorization, Permission Epoch, audit and retention. D owns ForgetFence semantics. These dependencies remain candidate until owner agreement.
+
+### 15. Full Applied and submit race
+
+Full Applied is permitted only if, at final submission linearization:
+1. Agent/Adapter/session is the currently authenticated target.
+2. Exact G ContextVersion and H Delivery remain current, authorized, unexpired and not superseded.
+3. Complete Managed Region is present, unchanged after digest calculation and isolated from protected regions.
+4. Permission Epoch and authorization remain current for Principal, Scope and operation.
+5. ForgetFence is current and no suppression/revocation invalidates the region.
+6. Final boundary observed the immutable request actually submitted and submission succeeded.
+7. Capability Epoch and boundary implementation match conformance-tested declaration.
+
+The runtime MUST atomically seal and submit with final permission/fence/version checks, or use an equivalent compare-and-submit protocol. If ContextVersion, Delivery, Permission Epoch or ForgetFence changes before submit, abort Full claim, suppress/rebuild from current authorized state and report Superseded/Rejected/Unknown. A change after submission cannot rewrite that historical request; subsequent requests must use current state. A digest match never substitutes for target-version, delivery, permission or fence checks.
+
+### 16. Failure outcomes
+
+| Condition | Required result | Full Applied? |
+|---|---|---|
+| Complete region in exact submitted request | Full evidence, all bindings validate | Yes |
+| Subset inserted | Partial with coverage/digest | No |
+| Region absent/path bypassed | Bypassed | No |
+| Final boundary unobservable | Unknown / CapabilityInsufficient | No |
+| Intermediate prompt only | Partial/Unknown, Tier 2 at most | No |
+| Submit timeout, provider outcome unknown | Unknown; reconcile by request ID | No |
+| Cancel before submit | Cancelled; invalidate pending evidence | No |
+| Duplicate attestation | Idempotently return original disposition | Only original valid evidence |
+| Late ACK for superseded version | Historical evidence; cannot roll G head back | No for current target |
+| Permission/Fence changed before submit | Reject/suppress and revalidate | No |
+| Context changed before submit | Supersede and rebuild/reconcile | No |
+
+### 17. Forget / Clear / Reconnect requirements
+
+| Capability | Required behavior | Failure |
+|---|---|---|
+| Suppress | Stop future exposure/application immediately at Agent boundary | Failed/Unknown; no Full Applied |
+| Clear Managed Context | Remove affected entries from active managed region | Unsupported/Unknown if host cannot clear |
+| Clear Managed Buffer | Remove queued prompt fragments, staged request material and middleware buffers | Report exact uncovered buffers |
+| Purge Managed Cache | Purge scoped cache copies and invalidate lookup keys | No success if inventory incomplete |
+| Cancel Pending Delivery | Cancel/obsolete queued and in-flight attempts where possible | Pending/Unknown until reconciled |
+| Reject Stale Context | Reject old ContextVersion, superseded Delivery, stale Permission Epoch/Fence | Fail closed |
+| Revalidate Permission | Reauthorize before apply, reconnect replay and final submit | Unknown policy state => deny |
+| Revalidate ForgetFence | Obtain current D fence state before apply/replay | Unknown/stale fence => suppress/block |
+| Reconcile After Reconnect | Authenticate, negotiate, fetch current policy/fence/context, clear invalid state, reconcile deliveries, then apply current target | No queue replay before reconciliation |
+
+Keep separate: Brain issued Forget; Adapter received Forget; Runtime suppressed re-entry; Adapter cleared declared Managed Region/buffers/cache; I determined global Forget completion. Local clear is bounded to exact instance/session/region/capability epoch. C does not declare global Forget completion or physical erasure.
+
+Old deliveries, retries and offline queues are invalidated or revalidated against current Permission Epoch, ForgetFence and G target. If any authority is unreachable, fail closed. Unsupported host regions are reported Unsupported/Unknown with coverage.
+
+### 18. Cross-module mapping
+
+| C-side concept | Authority | C responsibility | Status |
+|---|---|---|---|
+| Principal / Authorization | I | Consume authenticated identity and current decision | I candidate; OPEN approval |
+| ActorRef / ScopeRef | B | Consume typed refs, not credentials/grants | B candidate; OPEN |
+| Permission Epoch | I | Carry/revalidate opaque policy epoch | I candidate; OPEN |
+| ContextVersion / ChangeSet | G | Identify exact target and reject stale versions | G branch candidate |
+| Delivery / Applied State | G | Supply Agent proof; no state transition authority | G owner; evidence mapping OPEN |
+| Applied ACK Wire | H | Supply semantic evidence inputs | H candidate; wire not frozen |
+| ForgetFence | D | Consume current fence and fail closed | D owner; binding OPEN |
+| Adapter ACK | H | Distinguish receipt, clear and application | H candidate |
+| Telemetry / Task State | C | Define semantics, lineage and ordering | C semantic requirement |
+| Canonical Memory | D | Consume references only | D owner |
+| Compiler / Evidence lineage | E | Supply telemetry provenance; no bypass | E owner |
+| Retrieval / Activation | F | Consume authorized scoped outputs | F owner |
+
+### 19. Dependency snapshot
+
+G branch session-g-memory-context at 3d2c065be863bc1d349faaeece6f6eaa0047abae contains six Context architecture/versioning/reconciliation files; no separate Applied consumer or Forget/Reconnect extension file exists at that HEAD. H branch session-h-bmcp-protocol at fcc5103399b4c322e52d642cae5a2414969399a7 contains Envelope, Delivery/ACK, capability/Applied and Forget/Reconnect candidate files. I branch session-i-security-governance-2026-11-16 at 8c91d99e450ab5e8862bd6a3301fa193e28e6cbb contains Principal/Actor, Scope/revocation, global Forget evidence vector and threat-model candidate files. None of these snapshots is declared globally approved by C.
