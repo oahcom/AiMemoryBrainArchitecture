@@ -1552,3 +1552,47 @@ Storage Owner records:
 - Storage branch HEAD: `781bc8de041623be0001181470475090b295b813`
 
 Gate A remains PARTIAL PASS / OPEN. Remaining: actual project Canonical Authority deployment/profile NOT DESIGNATED; production I/D control-ledger integration; production fencing/STONITH and split-brain prevention; production host/zone/cloud-volume durability and failover routing/monitoring; production backup governance; named operator/on-call, approved runbook, RPO/RTO and operational acceptance. Gate B/C remain BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+
+## 13.39 Gate A — Storage readiness reconciliation and old-primary rejoin CI subtest independently verified — 2026-11-17
+
+A refreshed the Storage Owner branch at current HEAD `0f57f7a191f81d54a0bf1be9768fd91c00a2ef8d` and inspected the current Storage-owned readiness record, capability dossier, workflow job metadata and raw old-primary rejoin job log.
+
+### A1 — readiness/dossier reconciliation: ACCEPTED as documentation correctness only
+
+- Storage readiness path: `reviews/storage-consistency/phase-3.6-deployment-selection-and-verification-readiness.md`
+- Current readiness Blob: `f7a34fa2057ae585f641c2f2d1d9c24ecc9b9d27`
+- Current capability dossier Blob: `63b0bd54c44c287c22adb886f602432be214f21f`
+
+The current readiness opening status now explicitly reads: **LOGICAL DEPLOYMENT PROFILE SELECTED / POSTGRESQL 18.7 CI CANDIDATE QUALIFIED / PRODUCTION CANONICAL AUTHORITY DEPLOYMENT NOT DESIGNATED**. Its verification section distinguishes bounded CI capability from application implementation and production deployment; it records Implementation Verified=NO, Production Deployment Bound=NO / NOT DESIGNATED and Production Ready=NO. The accountable production operator/on-call remains NOT DESIGNATED.
+
+This supersedes earlier A1 comments that cited stale readiness blobs/status. A1 closes only the documentation reconciliation item; it is not Gate A acceptance.
+
+### A4 — old-primary offline recovery / pg_rewind / standby rejoin: PASS for bounded CI procedure only
+
+- Storage branch current HEAD: `0f57f7a191f81d54a0bf1be9768fd91c00a2ef8d`
+- Probe: `reviews/storage-consistency/postgres_probe/jf10_postgres_pg_rewind_rejoin_probe.py`
+- Probe Blob: `0fe6af4a8c9ef350ef9cbf0694a8f975e8f142f5`
+- Workflow: `.github/workflows/jf10-postgres-pg-rewind-rejoin.yml`
+- Workflow Blob: `7670ff9537054df1c1303d4eda4d46bffdfa3c4c`
+- Run: `43930047054`
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43930047054
+- Job: `133519705454`, conclusion SUCCESS
+- Run commit: `1eb9c9c08e3ae658fcbcfa568d1c2e1ab0e1999a`
+
+A inspected the raw job log. It confirms the old primary container was stopped before promotion, the old data directory was recovered offline, `pg_rewind` aligned it to the promoted source, the old node rejoined as a standby, a post-promotion write replicated to it, and a direct write to the rejoined standby was rejected. Raw markers include `OLD_PRIMARY_HARD_FENCED=PASS`, `PG_REWIND_TO_PROMOTED_TIMELINE=PASS`, `NEW_PRIMARY_POST_REJOIN_WRITE_REPLICATED=PASS`, `REJOINED_OLD_PRIMARY_REJECTS_WRITES=PASS`, `OLD_PRIMARY_REJOINED_AS_STANDBY=PASS` and `NO_DUAL_WRITER_AFTER_REJOIN=PASS`.
+
+**Strict limitation:** this is a stopped Docker container on one GitHub Actions runner. It does not establish production STONITH/cloud-instance or independent storage fencing, HA-manager arbitration, production network/DNS/failover routing, or production split-brain monitoring. A4's CI rejoin-procedure subtest passes; production fencing/split-brain acceptance remains OPEN.
+
+### Current sequential disposition
+
+- Gate 0: CLOSED.
+- Gate A: **PARTIAL PASS / OPEN**. A1 documentation reconciliation accepted; A2 synchronous-standby-unavailable UNKNOWN/private/lock-retention CI subtest PASS; A3 explicit-LSN marker-row PITR CI subtest PASS; A4 old-primary pg_rewind/rejoin CI subtest PASS. These are bounded CI results only.
+- Still required for Gate A: actual project Canonical Authority deployment and production DB profile NOT DESIGNATED; real I/D control-ledger integration/high-water reconciliation; production fencing/STONITH and split-brain prevention; production host/zone/cloud-volume durability, failover routing and monitoring; production backup retention/immutability and recovery governance; named operator/on-call, approved runbook, RPO/RTO and independent operational acceptance; deeper PITR recovery-boundary, WAL-gap/corruption/incomplete-archive negative tests.
+- Gate B: BLOCKED until Gate A is formally accepted.
+- Gate C: BLOCKED until Gate B is accepted.
+- JF-10 P0: OPEN.
+- Production activation: NOT AUTHORIZED.
+
+A1 does not designate the production target or operator. No production deployment, Gate A acceptance, Gate B/C execution or production activation is inferred from these CI runs.
