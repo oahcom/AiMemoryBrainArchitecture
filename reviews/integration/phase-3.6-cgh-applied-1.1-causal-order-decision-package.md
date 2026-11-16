@@ -100,7 +100,7 @@ I `COMMIT_WON` is an authorization/order outcome for the exact owner gate; it is
 
 ## 4. H 1.1.0 wire-schema candidate mapping
 
-H's Owner artifact `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, Blob `a23b9a879a3ec0e212645a8247a6797bd0055360`, now describes `bmcp.applied-ack/1.1.0` as an H-owned schema candidate (not production-frozen/deployed). This candidate package requires H to pin that exact schema artifact and complete all requiredness, canonicalization, crypto, replay, compatibility and conformance details.
+H's Owner artifact `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, Blob `5cbf0bb548a46671054cb22c6fab3c3d007365d4`, now describes `bmcp.applied-ack/1.1.0` as an H-owned schema candidate (not production-frozen/deployed). This candidate package requires H to pin that exact schema artifact and complete all requiredness, canonicalization, crypto, replay, compatibility and conformance details.
 
 Required opaque references include:
 
@@ -174,3 +174,10 @@ Current status:
 - Phase 3.6 G10: **BLOCKED**.
 
 No branch merge, production activation, architecture freeze, test PASS or Global Forget completion is authorized by this candidate package.
+
+
+## 8. A source-pin reconciliation — 2026-11-16
+
+A re-fetched the current C/D/I/H Owner artifacts after the previous candidate publication. The current H schema source pin is now `5cbf0bb548a46671054cb22c6fab3c3d007365d4` (branch `session-h-bmcp-protocol`), superseding the earlier H pin `a23b9a879a3ec0e212645a8247a6797bd0055360`. The normative C/D/I source pins remain C `f2c5b379cacfedd81500e8496d3053b628e144a0`, D `317a9bc170c5a66720f738bf24bbf93c87385887`, and I `71779133a4f95d63a24c4c7e606af174763366f1`. This is a source-reference reconciliation, not a new H acceptance or deployment claim.
+
+The current G Applied contract and B typed-reference confirmation were also re-read. Their published semantic decisions are not an explicit acceptance of this exact CGH-APPLIED-1.1 candidate. G and B exact-version decisions remain required. No C/D/I/H exact-package acceptance is inferred from their component specifications. Coordinator/Storage operator acceptance and deployment remain absent; all causal-order suites remain NOT RUN.
