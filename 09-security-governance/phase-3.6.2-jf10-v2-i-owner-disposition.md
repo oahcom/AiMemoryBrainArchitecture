@@ -263,3 +263,34 @@ Evidence MUST include COC quorum log positions/digests, I sequencer terminal log
 I's formal decision is **ACCEPT WITH BINDING BRIDGE AMENDMENTS for the single-policy-domain JF-10 ↔ COC interface**. The A COC architecture requires the additions in §§10.3–10.7 before it can be considered fully reconciled with I's JF-10 protocol. This does not approve COC deployment, name a Storage operator, approve a concrete database engine, activate external governance, close InventorySeal/Global Forget, or establish implementation/conformance.
 
 JF-10 remains **P0 OPEN**; I/COC/Storage/D conformance remains **SPECIFIED / NOT RUN**; multi-policy-domain atomicity remains **BLOCKED**; production implementation remains **NOT VERIFIED**.
+
+## 11. I exact-version re-acceptance of amended A COC bridge
+
+### 11.1 Exact artifact reviewed
+
+I reviewed the amended A architecture:
+- Path: `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`
+- Owner branch: `session-a-integration-2026-11-16`
+- Exact Blob SHA: `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`
+- Amendment commit: `78b811ee12499413d6e7a2e03ee5b36e6a0a2f38`
+- Incorporated I bridge decision: this artifact §12, including §§12.1–12.8.
+
+### 11.2 Formal I decision
+
+**I DECISION: ACCEPT — EXACT A BLOB a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d, WITH THE BINDING SINGLE-POLICY-DOMAIN LIMITATION.**
+
+I confirms that A §12 now incorporates the material bridge requirements of I §10: COC is an ordering/participant-observation authority and not the JF-10 COMMIT/ABORT decision maker; I's policy-domain sequencer remains the sole durable terminal decision authority; Storage resolves the exact same prepared XID; D retains exclusive ForgetFence/barrier authority; COC and I positions remain distinct typed orders; and the five JF-10 bridge record families and ten JF10-COC conformance cases are specified.
+
+This acceptance is limited to the architecture interface and exact Blob above. It does not waive any requirement in I §10, and does not imply implementation, deployment, operational custody, conformance, governance approval, or production activation.
+
+### 11.3 Conditions and retained blocks
+
+- Scope remains one I PolicyDomainRef. Multi-policy-domain atomicity remains **BLOCKED / NOT ACCEPTED**.
+- D must independently accept the prospective participant's fence/barrier membership and cutoff ordering.
+- Storage must independently accept durable preallocated-XID preparation, signed PreparedParticipantReceipt, exact-XID recovery and atomic publication/rollback evidence.
+- H must decide any required versioned 1.1.0 wire/schema mapping; A's naming of records is not an H schema approval.
+- COC-01..12 and JF10-COC-01..10 remain **SPECIFIED / NOT RUN**.
+- I sequencer durability, receipt-consumption atomicity, failover/restore and Storage same-XID execution remain **NOT VERIFIED**.
+- JF-10 remains **P0 OPEN**. No production or deployment approval is granted.
+
+This exact-version acceptance supersedes no Owner's independent implementation or governance gate. Any material change to A §12 requires renewed I review against the new Blob SHA.
