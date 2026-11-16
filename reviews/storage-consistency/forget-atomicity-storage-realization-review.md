@@ -467,3 +467,20 @@ Storage does not accept or decide I authorization/PermissionEpoch/receipt semant
 - The required one-transaction visibility boundary and same-XID recovery must be proven on the selected engine. If unsupported, stop and publish a blocking incompatibility plus a D/I-approved alternative; do not substitute check-then-write or a weaker independent transaction.
 - COC quorum/log durability, snapshot rollback protection, RPO/RTO, SLO, retention, KMS/key custody and operational ownership remain OPEN.
 - This decision does not approve I external governance, cryptographic suite/key lifecycle, H production schema freeze, C provider implementation, or production activation. JF-10 P0 remains OPEN.
+
+
+## Phase 3.6.2 — Storage Gate A PostgreSQL 18.7 physical capability result
+
+**Storage decision:** select PostgreSQL 18.7 as the concrete candidate engine for JF-10 capability qualification, limited to the pinned single-node CI profile. This is not production deployment selection or HA approval.
+
+Exact evidence:
+- Dossier: reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md
+- Probe Blob: c15ea6e66a15be2fb96f737769f58b7b6c224b7e
+- Workflow Blob: 4eef5b24f6da1d596c34e0d072dc39d5008a1a25
+- CI run: 43907296027 (SUCCESS), commit 8c9ef00364d93c383aba515923565f8dc04bf1b6, job 133439447210.
+
+The physical probe passed PostgreSQL 18.7 PREPARE TRANSACTION, prepared-state invisibility, retained row lock, abrupt postmaster/container kill and restart with the same persistent volume, same-XID recovery via COMMIT PREPARED, atomic VisibilityPointer + PublicationReceipt visibility, and same-XID ROLLBACK PREPARED with non-publication.
+
+**Gate A is PARTIALLY SATISFIED, NOT CLOSED.** The CI profile is single-node. Synchronous standby replication, prepared-XID promotion/failover recovery, backup/restore, production storage guarantees, actual Canonical Authority deployment selection and named human on-call ownership remain open. wal_level=replica alone does not prove a replication topology. The Storage DB Platform Operator role is accountable for this candidate qualification; the production on-call individual remains undesignated.
+
+No Gate B or Gate C work is promoted by this result. Persistent COC remains blocked until full Gate A; end-to-end fault injection remains blocked until Gate B. JF-10 P0 remains OPEN and production activation is NOT AUTHORIZED.
