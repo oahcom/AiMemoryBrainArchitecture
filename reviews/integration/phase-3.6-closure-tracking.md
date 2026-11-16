@@ -1466,3 +1466,25 @@ Remaining Gate A blockers are explicitly: (1) actual project-designated Canonica
 The previously explored Hermes repository is explicitly excluded from the Canonical Authority designation absent a formal project decision; no runtime identity or dependency is inferred. The authorized Desktop Commander device MS-QSZMHWTHUAJW is OFFLINE; no live host inspection was performed. Issue #10 body was amended with the superseding five-class status; Storage follow-up comment 6924704083 requests owner-side dossier/readiness reconciliation and the remaining evidence. A execution-plan Blob is 26cbd002a247f198a36781de971fd7345fdd917d.
 
 **Gate A remains PARTIAL PASS / OPEN.** Gate B persistent COC remains BLOCKED until Gate A acceptance; Gate C remains BLOCKED until Gate B passes; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
+
+
+## 13.36 Superseding Gate A residual blocker list and ledger reconciliation — 2026-11-17
+
+This section is the latest controlling A disposition and supersedes the stale blocker list in the later-appended duplicate §13.34 above.
+
+**Hermes is not a project dependency or Gate A blocker.** The phrase “live Hermes memory-server executable” in that stale list is withdrawn. §13.33 remains historical exploratory context only; §13.34 scope correction and §13.35 deployment binding record govern.
+
+The five pinned PostgreSQL 18.7 CI evidence classes remain valid and bounded. Gate A's remaining blockers are only project-scoped or engine/deployment proof gaps:
+1. Actual AiMemoryBrainArchitecture Canonical Authority deployment and deployed DB profile are NOT DESIGNATED.
+2. WAL-archive PITR is not tested; the existing restore test is pg_basebackup physical restore with a test-fixture control epoch.
+3. Old-primary fencing/rejoin prevention and split-brain protection are not proven beyond the CI primary-kill/promotion simulation.
+4. Synchronous-standby-unavailable fail-closed behavior is not evidenced.
+5. Production host/zone/cloud-volume durability, failover routing and monitoring are not bound.
+6. Production I/D control-ledger source/high-water integration is not demonstrated.
+7. Named production operator/on-call, approved runbook, RPO/RTO and operational acceptance are NOT DESIGNATED.
+
+The authorized Desktop Commander device was offline during the prior attempted live inspection. This is an access limitation, not evidence that any Hermes service is part of this project.
+
+Storage owns its dossier/readiness record and must reconcile any stale statements that still say no candidate engine was selected or omit the five passing CI classes. A does not edit Storage-owned artifacts. A's Issue #10 comment 6924704083 requests that Owner-side reconciliation and the remaining Storage evidence.
+
+**Current status:** Gate 0 CLOSED; Gate A PARTIAL PASS / OPEN; Gate B BLOCKED; Gate C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain BLOCKED.
