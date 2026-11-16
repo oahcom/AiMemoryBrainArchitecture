@@ -42,3 +42,6 @@ When a decision is approved, append (do not overwrite) an approval entry contain
 ## OPEN policy decisions
 
 The detailed unresolved decision list is maintained in `phase-3.5-global-identity-forget-governance.md` §6. No OPEN item is implicitly resolved by this register.
+
+
+| I35-DEC-13 | C Full Applied evidence is final-request/managed-region inclusion evidence and remains distinct from H Forget/Clear ACK | I evidence policy; C semantics / H transport / G Context | C + H + G + Security Governance | C Phase 3.5 attestation predicates, H integrity/CapabilityEpoch binding, G Context/Delivery validation, I PermissionEpoch and D fence validation, final-submit replay/race tests | Proposed | None |
