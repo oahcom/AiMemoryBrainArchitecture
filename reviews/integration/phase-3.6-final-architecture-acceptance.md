@@ -150,3 +150,12 @@ This closes the **C/F/G BIH design consumer-acceptance** subrequirement. It does
 - G8 Architecture Baseline Freeze / overall G10: **BLOCKED — NOT AUTHORIZED**.
 
 The prior final decision remains **NOT ACCEPTED — ARCHITECTURE BASELINE FREEZE NOT AUTHORIZED**.
+
+
+## CGH-APPLIED-1.1 source reconciliation and current acceptance gate — 2026-11-16
+
+C/D/I have published aligned causal-order specifications, and A has reconciled the current H schema source pin into a single successor candidate. The exact current A package is `CGH-APPLIED-1.1`, Blob `9808b31f840606b329f1a794935dfc9c5084d63b`. C/D/I/H source pins are recorded in the Closure Tracking register.
+
+This is a material specification advance only. Exact C/D/I/H/G/B decisions against this exact package remain pending; the prior CGH-APPLIED-1.0 approvals and the previous 1.1 candidate's requested decisions are not transferable. The common coordinator/operator, Storage durability and recovery acceptance, implementation repository, deployed topology and reproducible conformance evidence remain unresolved.
+
+Therefore G4 and G6 remain BLOCKED/PARTIAL as applicable; G7 remains NOT RUN; G8 and G10 remain BLOCKED. **Phase 3.6 is NOT ACCEPTED; architecture baseline freeze is NOT AUTHORIZED.**
