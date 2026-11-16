@@ -1651,3 +1651,42 @@ The existing two probes cannot be combined into a claim of prepared-XID-safe WAL
 - Gate A: PARTIAL PASS / OPEN. Gate B/C BLOCKED. JF-10 P0 OPEN. Production activation NOT AUTHORIZED.
 
 This audit does not modify Storage-owned files and does not promote fixture evidence to real I/D integration.
+
+
+## 13.42 Gate A — deep PITR atomicity implementation found; latest CI still failing — 2026-11-17
+
+A refreshed Storage's branch after the §13.41 audit and found a newly committed deep-PITR workflow/probe.
+
+### New Storage source
+- Storage branch HEAD: `df60b547da69d5114347022680d1ee45c09f0494`.
+- Probe: `reviews/storage-consistency/postgres_probe/jf10_postgres_pitr_atomicity_probe.py`, Blob `a53feffcc680a939964d630ccc87d4c034c2cc5a`.
+- Workflow: `.github/workflows/jf10-postgres-pitr-atomicity.yml`, Blob `a055d311c324d09eb6ebf4054247761116795eb7`.
+- Latest run `43953479942`, job `133601794173`, FAILURE. Earlier attempts `43952625869`, `43952735117`, `43952803752`, `43952935142`, `43952997441`, `43953166502`, `43953305724` also failed.
+
+### Independently observed partial assertions
+The latest raw job log emitted:
+- `PITR_PREPARED_XID_PRIVATE_AND_LOCKED=PASS`.
+- `PITR_COMMIT_POINTER_AND_RECEIPT_ATOMIC=PASS`.
+
+These are intermediate observations from the isolated Storage fixture only. The workflow did not complete successfully and these markers do not close the deep-PITR evidence class.
+
+### Failure and required correction
+The run failed restoring the rollback target. The configured target was `0/7000000`; PostgreSQL reported `recovery ended before configured recovery target was reached`, and the required WAL segment `000000010000000000000007` was not archived. The current probe switches WAL and then samples `pg_current_wal_lsn()`, which can capture the next segment boundary before the segment containing that target has been archived. Storage must correct the target capture/archive ordering and demonstrate each target is reachable.
+
+### Remaining probe quality requirements
+1. Tighten each missing/corrupt/incomplete-WAL negative case. Current assertions accept generic log substrings and do not independently establish the exact required segment failure plus non-promotion/non-writable/non-authoritative state.
+2. Add an explicit authoritative read-path check and pointer-only / receipt-only negative fixtures. Current positive checks query fixture tables directly.
+3. Preserve the explicit fixture disclaimer. This probe does not call a live I sequencer or D control ledger and does not prove RecoveryQuarantined against a newer authenticated external high-water.
+4. Re-run the full workflow successfully and publish per-case target LSN/timeline, XID, required archived segments, raw logs, and exact source/workflow SHAs.
+
+A recorded these findings in Issue #10 comment `6928963460`. Storage owns the correction and its dossier/readiness update; A has not modified Storage-owned files.
+
+### Current sequential disposition
+- Gate 0: CLOSED.
+- Gate A: PARTIAL PASS / OPEN. A1 documentation reconciliation, A2 sync-standby-unavailable fail-closed, A3 explicit-LSN marker-row PITR, and A4 bounded pg_rewind/rejoin CI subtests remain accepted within their narrow scopes. Deep PITR atomicity: IMPLEMENTED / CI FAILING; not a pass.
+- Still required: successful deep PITR recovery-boundary and WAL-negative campaign; authoritative read-path/pointer-receipt negative checks; real I/D control-ledger integration and restore quarantine; production Canonical Authority deployment/profile; production fencing/failure-domain durability/routing/monitoring; backup governance; named operator/on-call, runbook, RPO/RTO and independent operational acceptance.
+- Gate B: BLOCKED pending formal Gate A acceptance.
+- Gate C: BLOCKED pending Gate B acceptance.
+- JF-10 P0: OPEN.
+- Production activation: NOT AUTHORIZED.
+- Multi-PolicyDomain: BLOCKED.
