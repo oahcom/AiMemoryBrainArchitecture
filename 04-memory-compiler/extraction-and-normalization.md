@@ -183,3 +183,13 @@ D domain types and Fact/Claim ADR; B epistemic/temporal/scope semantics; C/H sou
 - **CANDIDATE:** extraction IR and deterministic-first routing.
 - **TO_VALIDATE:** modality classifier quality, entity/time extraction accuracy, multilingual prompt-injection detection and local model resource use.
 - **OPEN:** source-span canonical encoding for multimodal and streaming payloads.
+
+
+## 19. Durable ingress and Forget enforcement addendum
+
+- The input Event is eligible for compiler work only after the durable Accepted receipt and compile intent exist under `accepted-receipt-and-idempotency-contract.md`. Volatile receipt/queue publication is not acceptance.
+- Extraction stage identity remains derived from immutable Event/source version, digest, Scope and pinned parser/model/policy versions. Retries reuse the same logical stage identity; changed inputs or method versions create a new attempt/revision.
+- Persist a stage result and its next-stage outbox/journal intent atomically or through an equivalent recoverable journal. A worker crash must not lose a completed stage or duplicate its externally visible effect.
+- Before payload dereference, source-span resolution, model prompt construction, stage-result publication or retry, re-check current permission and D Forget fence. Unknown fence/policy state fails closed.
+- ExtractionIR, CandidateProposition, spans, embeddings and normalized values are derived objects: lineage and dependency registration must be durable before visibility under `forget-fence-and-derived-registration.md`.
+- CandidateProposition remains neutral pre-canonical IR. Mapping to Fact/Claim is **ADR-BLOCKED** until B/Governance approval; E must not infer the approved model.
