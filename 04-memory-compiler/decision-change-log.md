@@ -212,3 +212,17 @@ The requested `reviews/integration/phase-3-defghi-cross-module-contract-review.m
 ### 9.6 Tests and verification status
 
 All conformance scenarios in the updated E documents are **NOT RUN**. This delivery is design/documentation only. No Storage transaction, D endpoint, worker, queue, DLQ, fence service, permission service, publication gate or runtime test was executed. The E branch commit and post-write file readback are recorded in the final delivery report after commit creation.
+
+
+## 10. Final concurrent-branch refresh before delivery
+
+H and I advanced while this E remediation was being authored. Their latest branch refs were re-read before final delivery; the semantics used above were checked against these current heads, superseding the earlier H/I SHAs recorded in §9.1.
+
+| Owner | Branch | Latest HEAD re-read | Relevant current files |
+|---|---|---|---|
+| H | `session-h-bmcp-protocol` | `3c4c03c28c4e50cc6eed89d505725b873241bad7` | `message-envelope-and-versioning.md` blob `5547ecd78d118bd63e571e5daad87194d9b694e4`; `forget-revocation-and-reconnect.md` blob `695909360782987781e259187041618f495f1c8c` |
+| I | `session-i-security-governance-2026-11-16` | `135afd3d8333256ee2efcca9525a39a9d06739fc` | `principal-actor-and-authorization-contract.md` blob `4f6f5691a599a0566b036f4240003152d64e2242`; `forget-retention-backup-and-erasure-policy.md` blob `db602095f1b9760798ea423b09887ae8b9b4821c` |
+
+The refreshed H/I documents continue to require authenticated transport binding, reject payload self-asserted producer/actor/scope identity as authentication, recheck current PermissionEpoch and ForgetFence on replay and at the commit/disclosure boundary, and keep local Adapter acknowledgement distinct from global Forget completion. H/I remain CANDIDATE, not frozen.
+
+The current A-branch tree and repository code search did not locate `reviews/integration/phase-3-defghi-cross-module-contract-review.md`; that named review remains unavailable and is not claimed as read.
