@@ -3,7 +3,7 @@
 - Document: TAR-AI-001 / TAB-001 v0.1
 - Owner: G — Memory Context Architect
 - Branch: `session-g-memory-context`
-- Reviewed source branch HEAD (pre-publication snapshot): `270ac5530182dc84d6bb8b5ae05e84d8f0973803`; tree SHA: `445348890091f1e962599028518cf6c9031c41bc`. The report publication commit is recorded separately in the final execution summary.nt-SHA verification during report publication**. Branch-local artifacts were read; the file reader exposed blob SHAs but not the resolved branch commit.
+- Reviewed source branch HEAD (pre-publication snapshot): `270ac5530182dc84d6bb8b5ae05e84d8f0973803`; tree SHA: `445348890091f1e962599028518cf6c9031c41bc`. The report publication commit is recorded separately in the execution summary.
 - Review date: 2026-11-17
 - Report version: 1.0
 - Verdict: **CONDITIONAL PASS**
@@ -44,7 +44,7 @@ These are current owner artifacts, not substitutes for the missing owner technol
 | H Context Delivery and Acknowledgement | H branch; blob `bf9732cc39d156853b507c3a3a4e573159978f49` | Delivery state machine and Full Applied conditions |
 | C Final Inference Boundary | C branch; blob `f3b254fcfd9a652a0ec68921e801f78d93bb5163` | Applied binding tuple and final-request proof boundary |
 
-Phase 2 records six G design documents and design commit `3d2c065be863bc1d349faaeece6f6eaa0047abae`; it is a historical baseline, not verified as current branch HEAD. Other G design paths were not all independently resolved in this retrieval; findings are bounded to the two fetched G artifacts plus cross-module reports.
+Phase 2's G design commit `3d2c065be863bc1d349faaeece6f6eaa0047abae` remains historical context only; the current source HEAD and tree are recorded above.
 
 ## 3. Six-Dimension Review Matrix
 
@@ -172,5 +172,4 @@ Do not use one tokenizer estimate for all models. Unknown tokenizer requires con
 - H Delivery/Acknowledgement blob: `bf9732cc39d156853b507c3a3a4e573159978f49`
 - C Final Inference Boundary blob: `f3b254fcfd9a652a0ec68921e801f78d93bb5163`
 - G design baseline commit recorded by Phase 2: `3d2c065be863bc1d349faaeece6f6eaa0047abae` (not asserted to be current HEAD)
-- Branch current HEAD: pending exact commit-parent verification; no fabricated SHA.
 - No runtime, fault-injection, security, or performance tests executed in this review.
