@@ -212,3 +212,48 @@ Audit the decision ID, policy version, epoch, actor/issuer references, action/re
 - **OPEN INT-P1-04:** E/H/I/storage must finalize durable Accepted receipt and retention horizon.
 - **OPEN:** exact issuer federation, credential format, key management, epoch partitioning and consistency SLA require security engineering and deployment threat assessment.
 - **OPEN:** B's typed ActorRef/ScopeRef details are candidate and must be reconciled before public schema freeze.
+
+---
+
+## Phase 3 targeted remediation — authenticated identity and permission binding
+
+**Status: CANDIDATE security semantics; INT-P0-02 remains OPEN pending B typed-reference and H transport alignment.**
+
+### 9. Cross-module identity binding
+
+The authorization subject is resolved from a trusted authentication context, never from a payload field. The trust chain is:
+
+`Issuer → authenticated credential/session → Principal → ActorRef → (optional) Delegation chain → ProducerIdentity / AdapterIdentity → action + resource + ScopeRef → PolicyDecision`.
+
+- **Principal:** stable security subject, namespaced by trusted Issuer and tenant/security domain. Retired IDs are never reassigned.
+- **Issuer:** trusted credential/delegation authority with active audience, key, tenant and validity configuration. Trust is explicit, non-transitive by default.
+- **ActorRef:** B-owned typed domain reference identifying the actor for one operation. I requires it to resolve to the authenticated Principal and preserve issuer/authentication provenance. It is not a credential or bearer token.
+- **ProducerIdentity:** registered producer/application/workload instance bound to authenticated Principal, issuer, credential, allowed event families, scope and revocation state.
+- **AdapterIdentity:** registered Adapter Principal plus stable instance identity, issuer, capability registration/version and managed-region/scope coverage. A payload Adapter ID is only a claim to compare.
+- **ScopeRef:** B-owned typed domain reference. I defines its security use: ownership scope and applicability scope are independent of permission and neither grants access by itself.
+- **Delegation:** signed, bounded grant chain from grantor to delegate. Every link is checked for signature/trust, audience, action/resource, scope, purpose, time, depth, parent authority and revocation. Effective authority is the intersection of all links and the grantor's current authority.
+- **PermissionEpoch:** I-owned monotonic authorization generation scoped to a declared policy domain (at minimum the affected tenant + subject/grant domain; finer partitioning is allowed only if the authority publishes an unambiguous mapping). It invalidates decisions, leases and caches. It is not a Forget fence.
+- **RevocationState:** authoritative active/revoked/expired/unknown state for credentials, delegations, principals, producers, adapters and grants. Unknown is not active.
+
+### 10. Payload claims versus authentication
+
+Payload `ActorRef`, `producer_id`, `adapter_id`, tenant, project, environment or issuer strings are untrusted claims. The receiving boundary MUST compare each claim with the authenticated transport/session/workload identity and authoritative registries. A match does not replace signature/session verification. A mismatch is rejected and security-audited. Caller-constructed ActorRef is never accepted as proof of identity.
+
+### 11. Delegation and revocation
+
+Delegation validation is online or backed by a verifiably current revocation snapshot. If any parent grantor loses the underlying authority, all dependent grants become invalid. Cycles, excessive depth, missing parent, unknown issuer, invalid signature, audience mismatch, expired/not-yet-valid grant or unresolved revocation state fail closed.
+
+Revocation is a PermissionEpoch-changing policy event. Consumers track the highest contiguous epoch in their declared policy domain. On a gap, offline state or uncertain ordering they stop protected operations, synchronously revalidate, invalidate decisions/caches/leases and resume only after authoritative reconciliation. An old cached ALLOW is never valid merely because its TTL has not elapsed.
+
+### 12. Epoch separation and final authorization
+
+`PermissionEpoch`, `ForgetFenceGeneration`, D producer-registration barrier, I ProducerDomainInventoryEpoch, F IndexWatermark, G ContextVersion and H capability epoch are separate typed namespaces with separate owners and ordering semantics. They MUST NOT be combined into a scalar, numerically compared, or used as substitutes.
+
+PermissionEpoch advances for authorization-policy changes. ForgetFenceGeneration advances under D's canonical Forget authority for suppression. A Forget request must be separately authorized under the current PermissionEpoch; revocation can deny the actor's ability to initiate or continue administrative work, but it does not erase the already committed suppression obligation. A valid service/continuity principal may continue cleanup only under explicitly delegated, auditable authority.
+
+Every protected boundary reauthorizes: ingress, compile and every source dereference, derivative publication, canonical commit, retrieval candidate and finalization, cache/Working Set read/write, evidence/provenance dereference, Context mutation/reconciliation, delivery, Adapter apply/reconnect, final inference submission, export, backup and restore. Sensitive disclosure and irreversible mutation recheck at their final linearization point. Unknown identity, untrusted issuer, expired credential/delegation, stale PermissionEpoch, unresolved revocation, missing ScopeRef or unavailable policy service fails closed.
+
+### 13. B compatibility guard
+
+I does not define or freeze ActorRef/ScopeRef wire or domain types. B owns their stable typed-reference semantics. The logical fields above are semantic assertions only. The Fact/Claim ADR remains **ADR-BLOCKED**; this remediation does not approve Fact, Claim, ClaimRevision, ConflictSet or any canonical schema. H owns transport/wire binding and must consume B/I decisions without treating payload claims as credentials.
+
