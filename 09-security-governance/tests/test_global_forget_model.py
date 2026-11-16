@@ -108,6 +108,12 @@ class GlobalForgetModelTests(unittest.TestCase):
                         "SUPPRESS", physical_erasure_required=True)
         self.g.register_target(target)
         self.assertIsNone(self.g.seal)
+        self.seal()
+        self.g.record_evidence(Evidence("forget-op-1", "backup-1", "seal-1",
+            self.g.inventory_epoch, "Storage-owner", "scope-A", "SUPPRESS",
+            "backup-v1", "CONFIRMED", "suppress-only-proof"))
+        self.complete_setup()
+        self.assertEqual(self.g.evaluate(now=1), "Pending")
 
     def test_exception_requires_authorized_independent_approver(self):
         with self.assertRaises(Blocked):
@@ -173,6 +179,12 @@ class GlobalForgetModelTests(unittest.TestCase):
                                       "backup-v1", "PHYSICAL_ERASURE",
                                       physical_erasure_required=True))
         self.assertIsNone(self.g.seal)
+        self.seal()
+        self.g.record_evidence(Evidence("forget-op-1", "backup-2", "seal-1",
+            self.g.inventory_epoch, "Storage-owner", "scope-A", "PHYSICAL_ERASURE",
+            "backup-v1", "CONFIRMED", "erase-proof"))
+        self.complete_setup()
+        self.assertEqual(self.g.evaluate(now=1), "Completed")
 
 
 if __name__ == "__main__":
