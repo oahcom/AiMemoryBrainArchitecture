@@ -206,3 +206,8 @@ Tier 1 requires end-to-end boundary observation and submit correlation. Prompt h
 ### 16. Capability negotiation and downgrade
 
 Negotiation binds authenticated Adapter, Agent instance, Runtime Session and Capability Epoch. Effective capabilities are the intersection of runtime support, Adapter implementation, H protocol support and I-authorized operations. Unknown capabilities are unsupported. Downgrade takes effect before next managed application and pending deliveries are re-evaluated. Capability epoch changes invalidate stale Full Applied proofs. Upgrade requires conformance evidence, not a config flag. H encodes negotiation; G owns Context/Delivery; I owns authorization/revocation.
+
+
+## Phase 3.5 tier clarification — supersedes conflicting Tier 2 language
+
+The definitive tier ceiling is in `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md` §8 and the final-request contract §4. A Tier 1 integration must observe the exact final immutable request and actual runtime/provider submission, bind the actual request ID and complete Managed Region digest, and pass per-request freshness/authorization/fence checks. Tier 2 can observe/materialize its Managed Region but cannot prove actual final submission and therefore MUST NOT claim Full Applied. Tier 3 reports transport/receipt/Recall only and makes no Applied claim. Product names, middleware labels and declared capabilities do not establish tier; reproducible conformance evidence does.

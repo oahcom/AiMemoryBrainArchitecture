@@ -268,3 +268,8 @@ Memory, Evidence, Provenance, Retrieved Summary, Entity Description, Tool Observ
 | Retrieval / Activation | F | Consume authorized scoped outputs |
 
 Non-C rows are owner dependencies, not C approvals. Freeze requires owner agreement and executable conformance evidence.
+
+
+## Phase 3.5 authoritative C addendum
+
+The C-owned Phase 3.5 contract is `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md`. It supersedes any older ambiguous Tier 2 wording: Full Applied requires exact final immutable request submission observability; managed-region-only middleware cannot claim Full. Identity claims in Agent payloads remain assertions until H transport binding, I authorization and B typed references are resolved. Forget, Permission and Capability epochs remain independent. Prompt-injection conformance is specified but not executed; INT-P0-04 remains OPEN.

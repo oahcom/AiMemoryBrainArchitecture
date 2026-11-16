@@ -374,3 +374,10 @@ Invalid identity, Scope, permission, environment, integrity or ordering telemetr
 ### 18. Compiler and canonicalization guardrail
 
 C telemetry is source material, not canonical Memory. E's normal ingestion, extraction, normalization, evidence/provenance and producer enforcement remain mandatory. D alone controls Canonical Memory commit/lifecycle and ForgetFence. Authentication proves source identity, not truth. No Agent-authenticated Intent, Plan Summary, Pending Action, Tool Call, Observation or self-reported Outcome may be promoted to verified fact solely due to authentication.
+
+
+## Phase 3.5 identity and telemetry conformance addendum (authoritative)
+
+See `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md` §§2–3. This addendum clarifies that Transport-authenticated Principal, self-reported Agent identity, Adapter identity, Runtime Session, Task Identity, ActorRef, ScopeRef, EnvironmentRef and PermissionEpoch are distinct values with different issuers and proof ceilings. Payload identity fields are claims only. H binds transport identity; I resolves trust/authorization and PermissionEpoch; B owns typed ActorRef/ScopeRef semantics. No C field definition approves B/I/H candidates.
+
+The mandatory telemetry profile now explicitly covers Task State, Intent, Plan Summary, Tool Call, Observation, Outcome, Uncertainty, Risk Signal and Environment Delta with identity, scope, environment, time, provenance and trust requirements. Intent/Plan are prospective; Tool Call is not Tool Result or side-effect proof; Observation is not automatically Verified. Authenticated reporting never upgrades a signal to canonical Fact/Claim. ADR-001 remains ADR-BLOCKED.

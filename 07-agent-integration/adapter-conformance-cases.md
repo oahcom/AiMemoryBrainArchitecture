@@ -240,3 +240,8 @@ The following cases extend the existing EVT/IDN/APP/SEC/FRG/XMOD suite. They are
 ### 16. Execution status
 
 Defined: prior EVT/IDN/APP/SEC/FRG/XMOD cases plus C3-001..012 and PI-001..008. Executed: none in this delivery. Passed: none claimed. I and designated product/security authority retain risk acceptance.
+
+
+## Phase 3.5 adversarial and identity test addendum
+
+The complete additional conformance set PI35-01..PI35-12 and identity/applied/Forget evidence requirements are defined in `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md` §§2, 4–6, 10. Existing tests remain design cases only. Executed: none evidenced by this architecture delivery. Passed: none claimed. A test result requires implementation/build, runtime/Adapter, tier and CapabilityEpoch, fixture, identity/scope/environment, current PermissionEpoch/Fence/Context/Delivery, expected/actual protected-region and managed-region evidence, trace and reviewer. INT-P0-04 and INT-P0-03 remain OPEN.

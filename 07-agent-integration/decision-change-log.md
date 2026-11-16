@@ -55,3 +55,15 @@ HEADs were fetched from current GitHub branch refs during this round; they are e
 ## 4. Status discipline
 
 DECIDED means C-owned semantics/Agent requirements only. CANDIDATE means implementation profile awaiting owner agreement. OPEN means external decision, mapping or implementation evidence is absent. ADR-BLOCKED prevents canonical schema/type freeze. TO_VALIDATE requires executable evidence. No item here marks INT-P0-02, INT-P0-04, CR-P1-05 or INT-X-03/04 globally CLOSED.
+
+
+## Phase 3.5 — 2026-11-16 — Identity, final-submit and untrusted-memory conformance
+
+- Added `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md` as the consolidated C-owned consumer contract.
+- Separated authenticated Principal, payload Agent identity, Adapter identity, Runtime Session, Task Identity, ActorRef, ScopeRef, EnvironmentRef and I PermissionEpoch.
+- Added per-signal telemetry identity/scope/environment/time/provenance/trust requirements and explicit non-equivalence rules.
+- Tightened Full Applied to require exact final immutable request submission observability and the complete Agent/Adapter/session/request/Context/Delivery/Managed Region/Permission/Fence/Capability/digest/boundary binding.
+- Clarified Suppress/Clear/Purge/Cancel/Revalidate/Reconnect and fail-closed behavior.
+- Expanded adversarial tests PI35-01..12. Tests remain NOT EXECUTED; INT-P0-04 remains OPEN.
+- Superseded ambiguous Tier 2 wording: Tier 2 cannot claim Full Applied without actual final submission evidence.
+- Upstream B/I/H/G/D artifacts were read at recorded branch heads; no upstream files modified and no candidate status promoted.

@@ -48,3 +48,8 @@
 ## 4. Evidence standard
 
 PASS requires test ID/version, exact module branch/commit, runtime and Adapter build, environment, authenticated Principal/issuer fixture, Scope/Environment/Permission Epoch, ContextVersion/Delivery/ForgetFence where relevant, input fixture digest, expected/actual result, failure/timeout/retry trace and owner sign-off. Minimize evidence; do not retain hidden CoT, credentials or unnecessary prompt plaintext. This is a design artifact: no runtime, adversarial, penetration, reconnect, fault-injection or end-to-end test is claimed executed or passed.
+
+
+## Phase 3.5 status overlay
+
+The Phase 3.5 C semantic requirements and PI35-01..12 test specifications are recorded in `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md`. This is a design/conformance specification only. Identity binding, final-submit platform proof, Forget/reconnect enforcement and prompt-injection runtime tests remain OPEN. Executed tests: none evidenced. Passed tests: none claimed. INT-P0-04 is not closed.

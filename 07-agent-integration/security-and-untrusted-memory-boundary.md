@@ -68,3 +68,8 @@ An item is eligible only when exact reference, evidence dependencies, Scope and 
 ## 7. Ownership
 
 C defines Agent-side region separation, untrusted-data handling and tests. H encodes/transports evidence. G owns Context. B owns ActorRef/ScopeRef types. I owns policy, threat model, residual risk acceptance, revocation and audit. D owns canonical Memory and ForgetFence. No model-behavior guarantee, penetration-test pass, production security certification or INT-P0-04 closure is claimed.
+
+
+## Phase 3.5 adversarial conformance addendum
+
+The normative adversarial matrix is expanded to PI35-01..PI35-12 in `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md` §6.3. It adds explicit cross-Scope and cross-Environment exfiltration, forged ActorRef/Adapter/Session claims, provenance laundering through summaries, stale PermissionEpoch, ForgetFence advance-before-submit, malicious tool observations and reconnect replay. Each case requires observable protected-region/managed-region digests, authorization/fence/context identifiers and tool-dispatch evidence as applicable. All cases are SPECIFIED, NOT EXECUTED; none is marked PASS. INT-P0-04 remains OPEN.

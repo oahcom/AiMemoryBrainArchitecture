@@ -314,3 +314,10 @@ Old deliveries, retries and offline queues are invalidated or revalidated agains
 ### 19. Dependency snapshot
 
 G branch session-g-memory-context at 3d2c065be863bc1d349faaeece6f6eaa0047abae contains six Context architecture/versioning/reconciliation files; no separate Applied consumer or Forget/Reconnect extension file exists at that HEAD. H branch session-h-bmcp-protocol at fcc5103399b4c322e52d642cae5a2414969399a7 contains Envelope, Delivery/ACK, capability/Applied and Forget/Reconnect candidate files. I branch session-i-security-governance-2026-11-16 at 8c91d99e450ab5e8862bd6a3301fa193e28e6cbb contains Principal/Actor, Scope/revocation, global Forget evidence vector and threat-model candidate files. None of these snapshots is declared globally approved by C.
+
+
+## Phase 3.5 exact binding and final-submit evidence addendum (authoritative)
+
+See `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md` §4. For Tier 1 Full Applied, the proof binds Agent and Adapter identities, Runtime Session, InferenceRequest, G ContextVersion, Delivery/attempt, Managed Region ID/revision, H CapabilityEpoch, I PermissionEpoch + decision reference, D ForgetFenceGeneration, exact Applied Content Digest + canonicalization profile, and Final Request Boundary ID + observed runtime/provider handoff. The Adapter/runtime integration creates evidence at the final immutable request submission hook; H transports/integrity-protects it, while G/I/D independently validate their own authoritative dimensions.
+
+Missing final request observation, request ID, any binding, digest mismatch, stale epoch/fence, supersession, cancellation-before-submit, region mutation or unverifiable integrity means Partial/Bypassed/Rejected/Superseded/Unknown, never Full. This proof establishes boundary inclusion only, not model attention or use.
