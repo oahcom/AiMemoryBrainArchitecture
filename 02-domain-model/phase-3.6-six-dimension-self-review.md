@@ -46,3 +46,13 @@ Semantic conformance expectations are appropriate and explicitly not executed. N
 - P1: name Environment registry owner, resolve AuthenticationContextRef and define Scope role schema.
 - P2: formalize identity namespace dimensions, workload-binding cardinality and historical/current validity separation.
 - No implementation verification, governance approval or external consumer acceptance is inferred. ADR-001 remains ADR-BLOCKED.
+
+## 7. Remediation disposition — design-level closure
+
+The B findings B36-SR-01..07 have been addressed in the controlling B contract Section 10, committed separately on this branch. The contract now defines AuthenticationContextRef as verifier-internal/non-domain, canonical Principal namespace dimensions, workload-binding cardinality/history, role-tagged ScopeBindingSet, fail-closed EnvironmentRef behavior pending registry authority designation, historical ActorRef semantics, and corrected delegated decision status.
+
+- B36-SR-01: **RESOLVED at semantic-contract level**; Environment Registry Authority designation remains an external project dependency and cross-environment operations remain denied until designated.
+- B36-SR-02..06: **RESOLVED at semantic-contract level**.
+- B36-SR-07: **RESOLVED**; stale Candidate/Open status is superseded by the current delegated joint decision statement.
+- Runtime implementation and conformance: **NOT VERIFIED / NOT RUN**.
+- Overall: **DESIGN FINDINGS CLOSED; IMPLEMENTATION/GOVERNANCE CONDITIONAL**.
