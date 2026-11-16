@@ -1336,3 +1336,17 @@ Passing executable evidence:
 All three evidence groups have successful GitHub Actions run/job readbacks and corresponding raw logs. Additional workflow reruns triggered by the latest probe commit also passed for the single-node and synchronous failover jobs (runs 43909115285 and 43909115273).
 
 Gate A remains PARTIAL PASS / OPEN because CI does not identify or prove the real production Canonical Authority deployment, physical host/zone/cloud storage, production failover fencing/routing, human on-call/operator, approved runbook, or RPO/RTO. No production activation is authorized. This manifest supersedes any earlier A note that treated the single-node probe as the only physical evidence.
+
+
+## 13.30 Gate A production deployment boundary — unresolved external binding — 2026-11-17
+
+A inspected the current default branch and Owner branch inventory:
+- main HEAD: 8a6414158c9c056c1638222534e1993d1bbc99d2.
+- main tree: 47 entries, not truncated.
+- No Dockerfile/Compose, Helm/Kubernetes, Terraform, Patroni, PostgreSQL deployment, DB migration or production deployment artifacts exist in main.
+- Storage branch contains JF-10 probes, workflows and architecture/review records, but no deployed Canonical Authority runtime or production DB topology.
+- Accessible repository inventory did not identify a separate Canonical Authority runtime repository.
+
+This confirms the boundary: the PostgreSQL 18.7 single-node, synchronous failover, rollback-after-promotion and physical backup/restore probes are real CI evidence, but there is no in-repository production deployment to bind them to. No actual host/zone/cloud volume, primary/standby endpoint, production fencing/routing, human on-call, runbook or RPO/RTO can be inferred.
+
+**Gate A remains PARTIAL PASS / OPEN at production binding.** Required next artifact: a concrete deployment binding record naming the actual Canonical Authority environment, exact DB image/build/configuration, host/zone/storage topology, failover/fencing/routing mechanism, human on-call/operator, runbook, RPO/RTO and the real I/D control-ledger source. Execute the proven probes against that environment before Gate A acceptance. Gate B remains blocked until this is complete. Issue #10 comment 6922650120 records the inventory.
