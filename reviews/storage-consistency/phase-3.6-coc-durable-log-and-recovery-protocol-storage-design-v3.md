@@ -426,7 +426,7 @@ All five acceptance artifacts pin the same reviewed Storage baseline Blob `4ac63
 
 ## 13.1 Additional A exact-version review R1–R6 disposition
 
-This is a subsequent review gate, distinct from the five earlier A/I/D/C/H acceptance artifacts above. A reviewed its exact COC bundle and published **ACCEPT WITH BLOCKING CLARIFICATIONS / AMENDMENTS REQUIRED**. The v2 amendment addressed the findings as follows; it does not claim A has accepted this v2:
+This is a subsequent review gate, distinct from the five earlier A/I/D/C/H acceptance artifacts above. A reviewed its exact COC bundle and published **ACCEPT WITH BLOCKING CLARIFICATIONS / AMENDMENTS REQUIRED**. The v2 amendment addressed the findings as follows; this v3 does not claim A has accepted v3:
 
 | Finding | v2 disposition | Normative location / remaining condition |
 |---|---|---|
