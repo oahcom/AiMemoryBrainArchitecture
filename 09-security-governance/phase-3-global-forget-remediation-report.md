@@ -18,7 +18,7 @@ Reviewed the current I-owned policy package and the relevant D/E/H contracts fro
 
 D's current Forget fence contract was read from `session-d-memory-brain-2026-11-16`; E's derived-registration contract from `session-e-memory-compiler-2026-11-16`; H's Forget/reconnect contract from `session-h-bmcp-protocol`. I's current policy files were read from this branch before modification. The cross-module review itself identifies B Fact/Claim as ADR-BLOCKED and INT-P0-02 as OPEN.
 
-B's exact typed-reference/Fact-Claim ADR file and G's exact Context reconciliation file could not be resolved by the attempted paths on their branches during this pass. No claim is made that those source artifacts were reviewed in full. Their ownership boundaries and review conclusions are preserved; follow-up owner confirmation is required before joint contract freeze.
+B's `fact-claim-consumer-mapping.md` was reviewed from B's reviewed commit diff, together with B's `scope-and-permission-model.md` on the B branch; the mapping explicitly keeps canonical Fact/Claim portions ADR-BLOCKED. A separate B typed-reference ADR/artifact was not located during this pass, so B's exact ActorRef/ScopeRef reference rules still require owner confirmation. G's `context-reconciliation.md` was read from the G branch; it confirms tombstone-first Forget, per-Adapter pending/confirmed/failed/unknown states, and that G cannot declare global completion or provider physical erasure.
 
 ## 2. Changed I-owned files
 
