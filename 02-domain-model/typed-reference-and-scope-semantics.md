@@ -257,3 +257,68 @@ The word “inheritance” is restricted to domain metadata and validation:
 | E consolidation/conflict | `session-e-memory-compiler-2026-11-16` | `54df136d1e410af834461950e3c61c5c80abd6ad` | `bac3123d02e726ecffd8eb73ada515dea566e7e6` |
 
 **Branch-awareness:** D/E references were inspected from their own unmerged branches and exact commits. They are not described as main content.
+
+ 
+## 10. Phase 3.6 Scope / Environment Boundary Addendum (CANDIDATE)
+
+- **Status:** CANDIDATE B domain semantics; I36-GOV-03 and I36-GOV-04 remain GOVERNANCE-BLOCKED.
+- **Baseline:** B HEAD `66adf6bdcf5ec69a146fe75afe20ce3b85af8448`; prior blob `7c4517ee16e824f91c04306e000457662430ef69`.
+
+### 10.1 ScopeRef, EnvironmentRef, Permission and Policy Domain are orthogonal
+
+- **ScopeRef** identifies an ownership or applicability boundary in which an object/request is interpreted.
+- **EnvironmentRef** identifies the authoritative external state domain (world/save/simulation/device fleet). It is not a ScopeRef and not a label.
+- **Permission** is a decision for an authenticated Principal, exact action/resource, audience, purpose and resolved Scope/Environment tuple. It is not a reference.
+- **Policy Domain** is I's partition for policy evaluation/currentness and PermissionEpoch. It is not a Scope and not necessarily identical to a tenant, project, environment or storage partition.
+- A ScopeRef or EnvironmentRef conveys no permission. A matching Scope does not imply ALLOW. A policy-domain epoch does not identify a resource.
+
+### 10.2 Candidate Scope hierarchy and namespace
+
+- Scope identity is namespaced by the authoritative Scope registry/security domain and an opaque, never-reused Scope ID; Scope kind is validated registry metadata, not caller-selected type text.
+- Candidate hierarchy: BrainAuthority/system root → tenant → user/project/workspace → Agent/Agent-instance/task/session/environment scopes where registered by the relevant authority. This is a domain taxonomy proposal, not a mandate that every deployment instantiate every level.
+- Candidate containment rule: at most one containment parent per Scope; cycles forbidden; reparenting is versioned/audited. Cross-cutting membership is an explicit association, not a second parent.
+- Every canonical object has one owner ScopeRef and zero or more role-labelled applicability ScopeRefs unless a separately approved shared-ownership model exists.
+- Ownership Scope answers custody/admin ownership; applicability Scope answers where the proposition/resource is meaningful. They MUST NOT be flattened into one unordered union.
+- Scope version/descriptor changes do not mutate the stable ScopeRef identity. Historical parent/descriptor resolution must be version-aware where the query depends on it.
+
+### 10.3 Cross-Scope reference and access rules
+
+- A typed relation may refer to an object in another Scope only if the domain relation itself is valid and both endpoints resolve. Storing a reference is not permission to dereference it.
+- Default is no cross-Scope visibility or operation. Parent/child, sibling, same-Principal, same-Agent, same-label or same-tenant relationships do not imply grants.
+- Parent containment is organizational/domain metadata only. It never implies permission inheritance, visibility inheritance, write authority, retention exception or policy-domain equivalence.
+- Explicit sharing/grants, if any, are I-authorized and bind recipient, action, resource, source/target Scope, audience, purpose, expiry and revocation. They do not rewrite ownership or merge namespaces.
+- Each endpoint and each Evidence/Provenance dereference is independently subject to authorization.
+- Scope mismatch (incompatible domain relationship) and permission denial (policy disallows an otherwise valid operation) are distinct outcomes.
+
+### 10.4 Cross-Environment access
+
+- Environment-bound Event, Observation, Claim candidate, Memory or Relation must carry a resolved EnvironmentRef and its required Environment Scope association; no free-text label, URL, world name or coordinates may stand in for the identity.
+- Same Agent, Principal, project label or Scope kind in two environments does not make the environments equivalent.
+- Cross-Environment reference/access is denied by default. A bridge requires a registry-backed source EnvironmentRef and target EnvironmentRef, explicit mapping/relation, provenance, authorized recipient/action/purpose and current I policy decision.
+- EnvironmentRef stable identity and environment revision are separate. A bridge between identities does not imply that their revisions or state are equivalent.
+- Missing or ambiguous required EnvironmentRef yields INDETERMINATE/block for environment-dependent operations, not wildcard/default environment.
+
+### 10.5 Validation and authorization boundary
+
+1. Authenticate Principal/Issuer/RuntimeSession via protected H/I boundary.
+2. Resolve ScopeRef and EnvironmentRef against authoritative registries; reject unknown type, issuer, namespace, kind or retired identity.
+3. Validate owner/applicability roles, containment compatibility, environment binding and domain relation.
+4. Resolve any explicit delegation/sharing/bridge reference; validity policy is I-owned.
+5. Ask I to authorize exact action/resource/audience/purpose and source/target Scope/Environment.
+6. Revalidate current I PermissionEpoch at the final protected commit/disclosure boundary; D ForgetFence and other owner tokens are checked independently.
+
+The order is a B candidate validation contract, not an I authorization policy or H wire schema.
+
+### 10.6 OPEN decisions
+
+- **OPEN / I36-GOV-03 GOVERNANCE-BLOCKED:** cross-Scope grant model, containment/sharing algebra and any inheritance semantics.
+- **OPEN / I36-GOV-04 GOVERNANCE-BLOCKED:** cross-Environment federation, bridge admission and trust boundary.
+- **OPEN / I36-GOV-06 GOVERNANCE-BLOCKED:** policy-domain partitioning and PermissionEpoch semantics.
+- **OPEN / I + B:** authoritative Scope registry owner, Scope kind registry and stable namespace contract.
+- **OPEN / H:** exact serialization and multi-Scope wire representation.
+- **OPEN / D/E/C:** exact producer fields, owner/applicability role names and EnvironmentRef migration/requiredness.
+- **CANDIDATE / B:** one containment parent, no implicit permission inheritance, owner/applicability distinction and default-deny cross-boundary reference rules.
+
+### 10.7 ADR independence
+
+This addendum does not alter ADR-001. Fact/Claim canonical identity, revision, attestation and storage semantics remain **ADR-BLOCKED**. Scope/Environment typing does not imply approval of any Fact/Claim alternative.
