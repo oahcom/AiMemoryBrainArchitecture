@@ -389,20 +389,20 @@ G recorded **APPROVE WITH ENUMERATED EXCEPTIONS** for G-owned ContextVersion, De
 | C | APPROVE WITH ENUMERATED EXCEPTIONS — recorded above | No further C semantic change unless package version changes |
 | G | APPROVE WITH ENUMERATED EXCEPTIONS — recorded above | No further G semantic change unless package version changes |
 | F | Runtime architecture decision recorded | F execution evidence later |
-| H | **APPROVE WITH ENUMERATED EXCEPTIONS** — H-owned protocol binding only; exact wire schema remains open | H must explicitly accept the exact package Blob SHA or enumerate exceptions/replacement and repin common version |
-| I | Predicate confirmation pending; I policy remains CANDIDATE / GOVERNANCE-BLOCKED | Approve PermissionEpoch/authorization mapping and governance version under I authority |
-| D | Predicate confirmation pending; D canonical semantics decided but cross-owner execution open | Confirm ForgetFence/lineage ordering for exact Applied submit boundary |
+| H | **APPROVE WITH ENUMERATED EXCEPTIONS** — H-owned protocol binding only; exact wire schema remains open | Pin and verify the concrete versioned wire package; preserve H's enumerated limits |
+| I | **CANDIDATE / NO APPROVAL** — governance remains BLOCKED | Obtain formal issuer/Principal/delegation and PermissionEpoch policy approval plus operational freshness/revocation evidence |
+| D | **APPROVE D-OWNED FENCE/LINEAGE SEMANTICS WITH AUTHORITY RESERVATIONS** | Prove causal ordering and D/E/Storage linearization in executable environment |
 | B | **APPROVE WITH ENUMERATED EXCEPTIONS** — B semantic reference mapping only; I registry/trust policy remains open | Confirm ActorRef/ScopeRef/EnvironmentRef bindings without reopening unrelated ADRs |
 
 C/G approval is intentionally not represented as C/G/H joint acceptance. A's approval ledger remains A-owned and must be reconciled by A.
 
 ## 15. Remaining decisions and blockers
 
-1. **H same-version acceptance:** no H approval of A package Blob SHA `61d961c32138fd875069e8cbac4696bb031447c0` is recorded. H must approve or enumerate exceptions. Until then Applied Contract Frozen = NO.
+1. **H wire schema:** H has approved its protocol-binding portion of the exact A package with enumerated exceptions. The concrete versioned Applied/ACK wire package, requiredness profile, integrity/canonicalization, replay journal, receiver ordering and reconnect profile are still not frozen; Applied Contract Frozen remains NO.
 2. **H concrete wire contract:** exact schema IDs, field encoding, ACK enums, signatures/MAC/key lifecycle, canonicalization, replay nonce/sequence, durable journal, receiver ordering, capability epoch and reconnect semantics require H-owned versioned schema and approval.
 3. **I authorization governance:** PermissionEpoch policy domain/fan-out, issuer trust, delegation, revocation freshness, cross-Scope/Environment grants, exception authority and global Forget inventory/seal remain I-owned and not fully approved.
 4. **D Forget ordering:** D has confirmed its fence/lineage semantics for the exact package: submit-before-fence may remain historical only; fence-before-submit rejects Full; ambiguous order is Unknown/suppressed. Executable causal ordering and D/E/Storage proof remain open. A fence token cannot be inferred from a watermark.
-5. **B typed identity:** ActorRef/ScopeRef/EnvironmentRef and scope hierarchy remain B-owned. Fact/Claim ADR status is not changed by this CFG work.
+5. **B typed identity:** B has approved the semantic ActorRef/ScopeRef/EnvironmentRef mapping with exceptions. I-owned registry trust, cross-Scope/Environment governance and Fact/Claim ADR status remain independent and open.
 6. **D/E/Storage publication realization:** durable producer/dependency registration, Forget barrier, final visibility gate, crash/failover/restore and callable API remain design-level/open to the DE-S owners. A staged G ChangeSet remains private without that proof.
 7. **Executable implementation:** no executable C/F/G/H Adapter/provider/database environment, deterministic race runner, deployment identity or reproducible logs were supplied.
 8. **Test execution:** CFG-01..20, PI-01..08, H36, I36 and relevant D/E/Storage suites remain NOT RUN unless separate execution artifacts are attached and reviewed.
