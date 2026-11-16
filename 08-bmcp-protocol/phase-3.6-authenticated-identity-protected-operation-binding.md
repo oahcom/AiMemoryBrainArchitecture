@@ -414,3 +414,50 @@ Exceptions and closure conditions:
 5. H does not approve coordinator deployment, provider idempotency, I/D sequencer/fence implementation or G Full Applied predicate.
 
 This decision applies only to the exact A Blob above. It does not assert schema freeze, production interoperability, test pass or transfer of any CGH-APPLIED-1.0 decision.
+
+
+## 12.8 H normative field-level decision for CGH-APPLIED-1.1
+
+- Exact A candidate Blob SHA reviewed: `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`
+- Schema: `bmcp.applied-ack/1.1.0` (protocol major 1, minor 1)
+- Profile: `CausalOrderProfile/1.0`
+
+**H DECISION: ACCEPT WITH ENUMERATED EXCEPTIONS**, within H's BMCP schema, serialization, transport-integrity, ACK, replay and compatibility authority. This is a schema decision, not production freeze or deployment approval.
+
+### 12.8.1 Field encoding and common envelope
+
+1. Every 1.1 field name is lower_snake_case and case-sensitive. Typed references are opaque non-empty UTF-8 strings (1..512 bytes after UTF-8 encoding), issuer-namespaced by the issuing authority. H MUST preserve their byte-level value after schema decoding/re-encoding; it MUST NOT parse embedded numeric meaning, rewrite namespaces, normalize identifiers or synthesize refs.
+2. Digests are exactly 32-byte SHA-256 values represented as 64 lowercase hexadecimal characters. Digest algorithm and canonicalization profile identifiers are explicit fields; no implicit algorithm negotiation is permitted.
+3. Structured message bodies use UTF-8 JSON with deterministic canonicalization: unique object keys, no duplicate keys, no NaN/Infinity, stable object-key ordering, arrays retain semantic order unless the field is explicitly a set, set-valued fields are sorted by canonical encoded member, and strings are valid Unicode scalar sequences. Canonicalization profile ID is mandatory and covered by the message integrity digest. A profile mismatch is rejected.
+4. Coordinator epoch and order positions are opaque strings, not JSON numbers. They are comparable only by the coordinator-defined comparison operation within the same coordinator identity and epoch; H MUST NOT sort or compare them lexically or numerically. Wall-clock timestamps and H receiver sequence remain audit/transport metadata only.
+5. The authenticated envelope MUST include schema_id, schema_version, message_id, nonce, audience, RuntimeSessionRef, CausalOrderCoordinatorRef, CausalOrderProfileRef, canonicalization_profile_id, payload_digest and integrity_proof_ref. The protected channel binding and message-level integrity cover the complete canonical envelope and body.
+
+### 12.8.2 Requiredness by message family
+
+- Every causal-order message: `schema_id`, `schema_version=1.1.0`, `message_id`, `nonce`, `audience`, authenticated session, `causal_order_profile_ref`, `causal_order_coordinator_ref`, `causal_order_transaction_ref`, canonicalization profile, payload digest and integrity proof are REQUIRED.
+- `CAUSAL_ORDER_INTENT`: transaction/profile/coordinator refs, request digest, FinalRequestBoundaryId, ContextVersion, DeliveryId + attempt, identity/Actor/Adapter/runtime/session binding, ScopeBindingSet, CapabilityEpoch and unique intent nonce are REQUIRED. EnvironmentRef is REQUIRED when the applicable policy/environment binding says one applies; otherwise it MUST be explicitly represented as not-applicable, not silently omitted.
+- `CAUSAL_ORDER_INTENT_RECEIPT`: ParticipantIntentRef, coordinator epoch/position, request digest and durable intent state are REQUIRED.
+- `I_AUTHORIZATION_TERMINAL`: CommitAuthorizationReceiptRef, IAuthorizationTerminalRef, ParticipantIntentRef, PolicyDomainRef, PermissionEpoch, I sequencer identity/epoch/position, request digest and terminal outcome are REQUIRED. `i_revocation_request_state` is REQUIRED with enum `PRESENT` or `NONE_AT_TERMINALIZATION`. If PRESENT, IRevocationRequestRef and its coordinator cutoff position are REQUIRED; if NONE_AT_TERMINALIZATION, both are forbidden. The explicit state prevents absence from being interpreted as proof of no earlier request.
+- `D_FENCE_TERMINAL`: DForgetFenceRequestRef, request cutoff position, ForgetOperationRef, ForgetFenceRef/generation, ForgetLineageCoverageRef, ParticipantIntentRef, DParticipantClearanceRef, fence-effective position (when effective), and participant disposition are REQUIRED. Request cutoff and effective position are separate typed fields and MUST NOT share a slot. If the fence is not yet effective, effective position is explicitly null with disposition PENDING; it is not omitted.
+- `CAUSAL_ORDER_RESERVATION_RECEIPT`: ParticipantIntentRef, ParticipantReservationRef, reservation coordinator epoch/position, exact evidence digest and reservation state are REQUIRED. Any expiry field is informational only and MUST NOT authorize automatic barrier release.
+- `C_SUBMIT_OUTCOME`: ParticipantReservationRef, CSubmitOutcomeRef, exact request digest, FinalRequestBoundaryId, actual InferenceRequestId, provider receipt reference when outcome is ACCEPTED, and outcome enum are REQUIRED. For REJECTED, definitive no-handoff evidence is REQUIRED. For UNKNOWN, provider receipt may be absent but state MUST be IN_DOUBT and no Full Applied proof is allowed.
+- `CAUSAL_ORDER_TERMINAL_PROOF`: ParticipantIntentRef, ParticipantReservationRef (if reservation was finalized), I receipt and terminal refs, explicit I revocation state/ref-or-none, D fence request cutoff, D effective position-or-pending state, lineage and D clearance refs, CSubmitOutcomeRef, coordinator epoch and ordered positions, terminal outcome, evidence digest and coordinator signature/key reference are REQUIRED. A safe-abort path MUST explicitly encode that no provider side effect occurred and include the immutable abort evidence ref.
+- `CAUSAL_ORDER_ACK`: original transaction/proof refs, receiver sequence, durable receipt disposition and receiver identity are REQUIRED. ACK is transport durability only and cannot substitute for C/I/D terminal evidence.
+
+### 12.8.3 Validation, replay and downgrade behavior
+
+- Unknown non-critical extension fields MAY be retained and forwarded unchanged. Unknown critical fields MUST be rejected. Missing required fields, null in place of a required field, malformed typed refs, duplicate keys, digest mismatch, invalid enum, inconsistent conditional fields or mismatched transaction/boundary/digest MUST be rejected/quarantined.
+- Message ID + nonce replay is rejected unless it is an exact idempotent replay of the same transaction, same message family and same canonical payload digest; same identity with a different digest is CONFLICT and security-event material. A replayed single-use CommitAuthorizationReceipt MUST never cause a second authorization consumption.
+- 1.0.0 remains parseable for historical and transport evidence. For any Full Applied claim under CGH-APPLIED-1.1, negotiation MUST require 1.1.0; downgrade, fallback or mixed-version evidence is rejected as insufficient. 1.0 ACKs may be acknowledged as transport receipts but MUST NOT be promoted to 1.1 terminal proof.
+- H receiver sequence, ACK arrival time and reconnect order are not causal positions. Reconnect MUST preserve original transaction, message ID, nonce, digest and owner refs; no new terminal proof may be synthesized during replay.
+- H MUST reject an untrusted coordinator identity/profile, invalid channel binding, expired/stale runtime session, audience mismatch, nonce reuse, invalid integrity proof or downgrade attempt before delivering a message to the consumer.
+
+### 12.8.4 H acceptance exceptions
+
+1. Exact signature/MAC suite, key custody, rotation, compromise recovery and federation remain subject to separate I/Security governance approval.
+2. The schema remains a candidate: generated schema artifacts, implementation interoperability, H36-CO and replay/reconnect suites are NOT RUN.
+3. Coordinator/operator deployment and C/I/D service conformance remain outside H authority and are not approved by this decision.
+4. G alone decides Applied; H ACK and valid schema parsing never imply Full Applied or current-use eligibility.
+
+This H decision applies only to A package Blob `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`. It supersedes no 1.0 decision and does not claim production freeze, deployment or test pass.
+
