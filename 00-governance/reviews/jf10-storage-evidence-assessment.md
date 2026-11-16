@@ -217,9 +217,10 @@ Thus the earlier seven-workflow success batch remains valid for its exact older 
 Storage corrected the corrupt-WAL diagnostic assertion to recognize PostgreSQL's actual `invalid magic number` diagnostic while retaining exact target-segment matching and mandatory no-writable/no-authoritative checks. The enhanced probe now completes the missing, corrupt and incomplete cases.
 
 Exact current evidence:
-- Current Storage branch HEAD: `9f784a15ef33a6cde4b4cda1ab6fca2df8a705fa`.
-- Current dossier blob: `a3b69a832c6ac84dc59b0d41d5746884c217a8b3`.
-- Current readiness blob: `5da030123e76e523f681d1262b8a31483df0e6b3`.
+- Current Storage branch HEAD: `fe7debe55da71e655eecfc46f25ec49eae43404a`.
+- Current dossier blob: `b011683568857c73c5bfc0cfe1d9d56278fb6578`.
+- Current readiness blob: `812d33d7a64107a890191ad7fae036fde7f319df`.
+- Current COC protocol specification: `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`.
 - Current PITR probe blob: `63506807be82b3203e7e682b0772452621c92558`; workflow blob: `a055d311c324d09eb6ebf4054247761116795eb7`.
 - Current prepared-XID probe blob: `184e0507fd225ee18f321f3f1ce6a63f869b13f3`; capability workflow blob: `fbcbce...`.
 - Current branch is five commits ahead of the six-workflow test commit `83bdacbafa840808dca9be7a8c76c4df83c63504`; compare shows only readiness and dossier documents changed. Both probe blobs remain identical to the tested revisions.
@@ -261,7 +262,28 @@ The current Storage readiness blob `5da030123e76e523f681d1262b8a31483df0e6b3` cl
 - Gate C implementation fault-injection is deferred until an implementation exists.
 - JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
 
-The same readiness document still contains stale statements later in the file that Gate B/C remain BLOCKED after it authorizes Gate B design. The correct state vector is: **Gate B design activity AUTHORIZED / Gate B design acceptance OPEN / Gate B implementation NOT RUN / Gate C implementation tests DEFERRED**.
+The same readiness document still contains stale statements later in the file that Gate B/C remain BLOCKED after it authorizes Gate B design. The correct state vector is: **Gate B specification PUBLISHED / exact Owner review PENDING / Gate B design acceptance OPEN / Gate B implementation NOT RUN / Gate C implementation tests DEFERRED**. The current Phase 3.6.3 protocol Blob `4ac63...` is a proposal, not an Owner-approved or implemented protocol.
 
 A detailed review of the newly published Storage COC design is in `00-governance/reviews/storage-coc-durable-log-recovery-design-review.md`. It is a strong candidate with blocking amendments; it does not yet close Gate B.
+
+
+
+## 13. Phase 3.6.3 COC protocol specification published
+
+Storage published `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`. It is a materially stronger architecture specification: Raft crash-fault model, durable quorum commit receipts, VoterConfigurationEpoch/joint membership, immutable record envelope, participant registry/state machine, linearizable APIs, I/D owner-local outage gates, recovery batch with participant-set digest, signed RecoveryReconciliationReceipt, checkpoint/WAL/PITR/restore fencing, retention and Gate B conformance plan.
+
+Exact Owner review is still pending. Residual design issues recorded in `00-governance/reviews/storage-coc-durable-log-recovery-design-review.md`:
+- no explicit quorum-committed recovery-epoch completion record;
+- no exact COC RecordType ↔ H BMCP message/schema mapping;
+- no repeated cutoff-batch loop for requests arriving during reconciliation;
+- I-owned PolicyDomain/CausalOrderDomain registry authority not explicit;
+- external anti-rollback anchor custody/failure domain not named;
+- A Applied package companion pin remains fc3 while current A COC architecture is a3c51.
+
+The readiness document §23.1/§23.4 says Gate B spec published / exact Owner review pending, but §29 still says Gate B blocked until Gate A and deployment evidence. UMR-023 tracks this inconsistency. Correct phase vector:
+- Gate A: PARTIAL PASS / OPEN for remaining architecture specifications and exact Owner decisions.
+- Gate B: specification PUBLISHED / exact Owner review PENDING / acceptance OPEN.
+- Gate C: implementation fault-injection DEFERRED_TO_ENGINEERING_PHASE.
+- Implementation binding: DEFERRED_TO_ENGINEERING_PHASE.
+- JF-10 P0 OPEN; production activation NOT AUTHORIZED.
 
