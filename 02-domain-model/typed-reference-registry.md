@@ -196,3 +196,27 @@ Enumerated exceptions:
 4. Consumer-specific C/D/E field production, D durable admission receipts and executable negative tests remain under their respective owners; no conformance execution is claimed.
 
 **Decision consequence:** B's semantic portion of the exact A package is accepted with the exceptions above. B does not claim cross-owner schema freeze, I policy approval, runtime implementation or conformance. The prior Phase 3.6 Candidate dependent-authority items remain Candidate/Open; this decision only resolves B's semantic review of the pinned package.
+
+## 11. Phase 3.6.4 — Prepared participant / prepared GID / native XID type separation
+
+Exact inputs reviewed: Storage COC protocol §14 Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`; A integration mapping Blob `a71251704851cacd15f67faa985a5bd50057e92a`; H BMCP schema 1.1.1 candidate Blob `c0bbfc7611a8d88a39cee209831db32b62601fde`.
+
+Add these distinct candidate domain types:
+
+| Type | Issuer/owner | Semantic contract |
+|---|---|---|
+| `PreparedParticipantRef` | Storage | Stable opaque engine-neutral identity for one prepared participant; bound to immutable PublicationOperationId/RequestDigest/participant tuple and CanonicalAuthorityDBRef. |
+| `PreparedTransactionGID` | Storage, PostgreSQL 18.7 profile | Client-chosen, preallocated, cluster/database-scoped GID used for PREPARE/lookup/retry/COMMIT PREPARED/ROLLBACK PREPARED. Never reused or rebound to another tuple. |
+| `EngineNativeTransactionXIDRef` | Database engine, observed by Storage | Engine-assigned native transaction XID/handle observed after PREPARE. Evidence only; not preallocatable and never the participant identity. |
+| `CanonicalAuthorityDBRef` | Storage registry | Opaque identity for the authoritative cluster/database boundary; distinct from PostgreSQL system_identifier, database OID, timeline and LSN. |
+
+Type invariants:
+
+1. `PreparedParticipantRef`, `PreparedTransactionGID`, `EngineNativeTransactionXIDRef`, `CanonicalAuthorityDBRef`, `PostgresSystemIdentifier`, `DatabaseOID`, `Timeline` and `LSN` are separate typed namespaces. No cast, arithmetic, lexical ordering or inferred equality across namespaces.
+2. The participant ref and GID are immutable for the operation. Same tuple/digest retry is idempotent; same GID or participant ref rebound to a different tuple is CONFLICT.
+3. The native XID is observed only after PREPARE and is bound as evidence to the stable participant/GID and original DB/timeline/LSN. It cannot authorize a COMMIT/ROLLBACK or replace the GID.
+4. `PreparedParticipantRef` is engine-neutral; `PreparedTransactionGID` is PostgreSQL-profile-specific. Other engines require a separately named engine-specific prepared handle and native transaction identity.
+5. COC, I, D, H and G position/epoch/proof types remain separate from all Storage transaction identifiers.
+6. H 1.1.1 fields are wire encodings of these B semantic types, not new authority. Legacy 1.1.0 aliases are deprecated and do not change the type system.
+
+Disposition: **CANDIDATE / B TYPE SEMANTICS ACCEPTED FOR THIS EXACT MAPPING**. This does not close ADR-001, approve I identity governance, freeze a canonical schema, select a production database or certify runtime conformance.
