@@ -229,3 +229,77 @@ New cross-owner decisions (not module baseline adoption):
 Issue #14 remains OPEN with A R1–R6 review and no I/D/C/H response found at refresh. Applied package companion pin mismatch remains open. JF-10 P0 remains OPEN; Gate A PARTIAL PASS / OPEN; Gate B design activity authorized but acceptance open; Gate C deferred to engineering. Global Forget governance and ADR-001 remain blocked.
 
 This addendum supersedes stale earlier HEAD values in this tracking file. Historical values above are retained as point-in-time records, not current branch tips.
+
+
+## Current live-branch and Owner evidence refresh — 2026-11-17
+
+This section supersedes earlier point-in-time branch-head/status tables above. Branches remain independently owned; this refresh is coordination evidence only.
+
+| Role | Branch | Current observed HEAD |
+|---|---|---|
+| A | `session-a-integration-2026-11-16` | `bccd8769e981310b85da4974fb4af98e41f9f374` |
+| B | `session-b-domain-model-phase3` | `310f305575d6f406e80d5d6ebf951bcd9e79e35f` |
+| C | `session-c-agent-integration-2026-11-16` | `018de5044810e755d4e21cb21e982526c27eb9a8` |
+| D | `session-d-memory-brain-2026-11-16` | `a3ea0de75ca7b2297589293ec142f2cb07757282` |
+| E | `session-e-memory-compiler-2026-11-16` | `5fb76b666fac49ceeb51ddb7c320fe5975313d99` |
+| F | `session-f-memory-runtime` | `e4c26214b8f78169c0e20f1faae23f945c3afeb9` |
+| G | `session-g-memory-context` | `b0c515399c6a336dcbf17a1ced6925413c804d5c` |
+| H | `session-h-bmcp-protocol` | `26378ea59675f31ac0455d745e9cbedab898db8c` |
+| I | `session-i-security-governance-2026-11-16` | `ba0d1dfcca9392f3a20c405169c83b41da3f12b7` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `337fe8bffa178e64ad8e4750f1ede1d561424edc` |
+| P | `session-p-project-governance-baseline` | Current refresh commit follows this tracking update |
+| main | `main` | `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f` |
+
+P/main remains diverged; before this tracking update P was ahead 73 / behind 4. No merge or force update.
+
+### Module baseline status
+
+The nine Owner baseline proposal blobs remain unchanged from the previous inventory:
+- A `a43a8f2f...`
+- B `410d6cc6...`
+- C `c79da952...`
+- D `84e402f4...`
+- E `7f037a76...`
+- F `d4756cab...`
+- G `fb2eb805...`
+- H `a4d961ac...`
+- I `b0493cf0...`
+
+All nine remain **PROPOSED / NOT APPROVED**. Recent Owner branch changes added acceptance/review/evidence artifacts; they did not adopt the nine module baseline proposals. F's proposal still lacks the Observation Archive/RecallSession/ReadCursor/ReadReceipt/completeness contract. G's proposal still lacks the TSS/ObservationRef/dynamic compaction/fidelity/lineage-loss/Forget-invalidation contract.
+
+### Current Owner decisions and exact-version boundaries
+
+- Applied 1.1: A's matrix explicitly separates the immutable package/companion pair `4961ffef...` + `fc3bac39...` from the separate COC/JF-10 bridge architecture `a3c51ec...`; the earlier pin-role ambiguity is CLOSED at design-decision level. Do not substitute the blobs.
+- COC protocol Blob `4ac63ac...`: A/B/C/D/E/G/H/I/Storage exact role-based design acceptances with enumerated exceptions; matrix Blob `9a39e48a394fedbab16d15589056d59ef33f390f`.
+- COC protocol amended Blob `86ff3b...`: Storage accepts with conditions. A's GID review is ACCEPT WITH ENUMERATED AMENDMENTS; H/I reviews are CANDIDATE / NO APPROVAL. Those A/H/I reviews are role-simulated by the coordinating session, not independent signatures.
+- Storage Design v2 Blob `4ed4234...`: new proposal with R1–R6 disposition, recovery completion/multi-batch semantics and GID/native-XID mapping. Issue #16 is OPEN; fresh exact-v2 Owner decisions remain required.
+- Issue #14 R1–R6 remains OPEN. Storage's v2 disposition is a proposal, not I/D/C/H acceptance.
+- Issue #17 Prepared GID / signed wire review remains OPEN. A is conditional with amendments; H/I no approval in role-simulated reviews; independent decisions required.
+- Context optimization / Observation Archive: A's final package records eight non-A Owner perspectives as ACCEPT WITH CONDITIONS. F/G joint Recall contract remains conditional; A's older context decision register and closure tracker require synchronization.
+- I36-GOV-01..10: I published a conservative proposal only; all remain GOVERNANCE-BLOCKED / NOT APPROVED.
+
+### Current evidence results
+
+| Suite | Current result | Scope limit |
+|---|---|---|
+| Storage PostgreSQL 18.7 capability workflows | 7/7 PASS | Isolated capability/fixture profile only; no production COC/DB adapter or deployment proof |
+| F anti-resurrection reference model | 19/19 PASS | Logical model only; runtime/fault/restore proof open |
+| H JF-10 schema + strict JSON parser | 23/23 PASS | Candidate schema/parser only; no cryptographic/canonicalization/SDK/live transport proof |
+| I Global Forget inventory/completion model | 30/30 PASS | Logical model only; production inventory seal/targets/governance/physical erasure open |
+
+The A final TAR-AI-001 report now has a §19.4 CONDITIONAL PASS reassessment and 8/8 Owner reports present, but front matter still says NOT REVIEWABLE, earlier §2.2 still says B/D/E/I missing, and the §19.2 source manifest has stale H/I branch heads. A must consolidate this report and include the latest H 23/23 and I 30/30 evidence.
+
+### Current phase vector
+
+- Gate A: PARTIAL PASS / OPEN for remaining architecture decisions and exact cross-owner contracts.
+- Gate B prior protocol Blob `4ac63...`: design-level accepted with exceptions.
+- Gate B current protocol Blob `86ff3...`: focused exact-owner re-review pending.
+- Storage Design v2 Blob `4ed423...`: fresh exact-owner review pending.
+- Gate B implementation/conformance: NOT RUN / DEFERRED_TO_ENGINEERING_PHASE.
+- Gate C distributed implementation fault injection: DEFERRED_TO_ENGINEERING_PHASE.
+- JF-10 P0: OPEN; Multi-PolicyDomain: BLOCKED.
+- ADR-001: ADR-BLOCKED.
+- Global Forget: GOVERNANCE-BLOCKED / NOT COMPLETED.
+- Project G0 / architecture freeze: NOT AUTHORIZED; no PGA appointment evidenced.
+
+This refresh does not authorize module baseline adoption, schema freeze, production activation, merge or main modification.
