@@ -14,7 +14,7 @@ This summary supersedes historical interim status and “next test” statements
 6. Required synchronous standby unavailable: PREPARE waits on SyncRep; client outcome UNKNOWN; local prepared XID and lock remain; visibility remains private.
 7. WAL-archive PITR to explicit LSN; target state restored, post-target state excluded.
 
-**Still OPEN for Gate A:** production Canonical Authority deployment and DB profile NOT DESIGNATED; production I/D control-ledger integration; old-primary fencing/rejoin and split-brain prevention beyond the CI rejoin test (if/when passed); production host/zone/cloud-volume durability and failover routing/monitoring; backup archive retention and operational restore governance; named production operator/on-call, approved runbook, RPO/RTO and operational acceptance.
+**Still OPEN for Gate A:** production Canonical Authority deployment and DB profile NOT DESIGNATED; production I/D control-ledger integration; production old-primary fencing/STONITH, rejoin control and split-brain prevention beyond the CI pg_rewind rejoin procedure; production host/zone/cloud-volume durability and failover routing/monitoring; backup archive retention and operational restore governance; named production operator/on-call, approved runbook, RPO/RTO and operational acceptance.
 
 Gate A remains PARTIAL PASS / OPEN. Gate B remains BLOCKED until Gate A acceptance; Gate C remains BLOCKED until Gate B acceptance; JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED.
 
@@ -410,3 +410,36 @@ Raw log PASS markers:
 The test proves that the base state and target transaction are present after recovery while the transaction committed after the target LSN is absent. The restored server was promoted on timeline 2. The recovery image was configured with the same `max_prepared_transactions=16`, `wal_level=replica`, `fsync=on` and `full_page_writes=on` profile as the source; the restore explicitly removed any standby.signal and used recovery.signal plus the archived WAL.
 
 Scope: this is a single-node CI PITR capability test using a local Docker named volume and archive volume. It does not prove production archive retention, off-site immutability, backup catalog integrity, cross-zone recovery, RPO/RTO, key custody, or replay of the production I/D Forget-control ledger. Gate A remains PARTIAL PASS / OPEN.
+
+
+## 19. Fenced old-primary pg_rewind and safe standby rejoin — PASS (2026-11-17)
+
+Storage added and executed a PostgreSQL 18.7 two-node rejoin-procedure test. It hard-fences the old primary container, promotes the synchronous standby, recovers the old data directory offline, rewinds it to the promoted source timeline with `pg_rewind`, and starts it only as a standby.
+
+Evidence:
+- Probe: `reviews/storage-consistency/postgres_probe/jf10_postgres_pg_rewind_rejoin_probe.py`
+- Probe Blob: `0fe6af4a8c9ef350ef9cbf0694a8f975e8f142f5`
+- Workflow: `.github/workflows/jf10-postgres-pg-rewind-rejoin.yml`
+- Workflow Blob: `7670ff9537054df1c1303d4eda4d46bffdfa3c4c`
+- Successful run: `43930047054`
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43930047054
+- Run commit: `1eb9c9c08e3ae658fcbcfa568d1c2e1ab0e1999a`
+- Job ID: `133519705454`
+- Conclusion: SUCCESS
+
+Observed raw log PASS markers:
+- `OLD_PRIMARY_HARD_FENCED=PASS`
+- `OLD_PRIMARY_OFFLINE_CRASH_RECOVERY=PASS`
+- `PG_REWIND_TO_PROMOTED_TIMELINE=PASS`
+- `NEW_PRIMARY_POST_REJOIN_WRITE_REPLICATED=PASS`
+- `REJOINED_OLD_PRIMARY_REJECTS_WRITES=PASS`
+- `OLD_PRIMARY_REJOINED_AS_STANDBY=PASS`
+- `PRE_FAILOVER_AND_POST_PROMOTION_DATA_REPLICATED=PASS`
+- `NO_DUAL_WRITER_AFTER_REJOIN=PASS`
+- `JF10_POSTGRESQL_PG_REWIND_REJOIN=PASS`
+
+The CI procedure kept the old primary stopped and unreachable after hard kill, performed crash recovery with networking disabled, retained required WAL for `pg_rewind`, rewound the data directory to the promoted primary, then rejoined the old node as a read-only standby. A new write made after rejoin was observed on the rejoined standby; a direct write attempt on that standby was rejected.
+
+**Scope limitation:** the “fence” is a stopped Docker container under a single GitHub Actions runner, not production STONITH, cloud instance fencing, storage fencing, independent failure-domain control, HA-manager arbitration, DNS/connection routing or split-brain monitoring. The checkpoint timeline fields returned by `pg_control_checkpoint()` remained at the prior checkpoint timeline in this short test; the authoritative evidence of the new timeline is `pg_rewind` plus the standby WAL receiver streaming from timeline 2 and successful post-rejoin replication. Do not cite the checkpoint timeline fields as proof of timeline 2.
+
+This closes only the pg_rewind/rejoin procedure subtest for the pinned CI profile. Production fencing and split-brain prevention remain OPEN. Gate A remains PARTIAL PASS / OPEN.
