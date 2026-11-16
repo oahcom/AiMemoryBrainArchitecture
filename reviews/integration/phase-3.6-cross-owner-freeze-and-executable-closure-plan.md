@@ -1198,3 +1198,15 @@ Storage's two-node PostgreSQL 18.7 probe now prepares two independent XIDs befor
 Both XIDs were synchronously replayed; both exact XIDs and locks survived primary loss/promotion; commit exposed pointer + receipt atomically; rollback exposed neither. The rollback-after-promotion subtest is now PASS for this exact CI profile.
 
 Remaining Gate A work is limited to backup/restore + PITR and stale-snapshot/control-ledger reconciliation, production host/zone/storage durability, failover fencing/routing, actual Canonical Authority deployment and named human operator/runbook/RPO/RTO. Gate A remains PARTIAL PASS / OPEN. Gate B remains blocked until Gate A fully passes; Gate C remains blocked until Gate B. JF-10 P0 remains OPEN and production activation NOT AUTHORIZED.
+
+
+## 13.28 Gate A — physical backup/restore and stale-control gate PASS — 2026-11-17
+
+Storage's PostgreSQL 18.7 backup/restore probe succeeded:
+- Probe Blob: 81072ea2411af12f29c7a7a4d984df3f870321ca
+- Workflow Blob: 38369ed197665c4ed99a9ba30602cb5e3b04ba75
+- Run: 43909138634 (SUCCESS), commit 62033b9f90a28c4afdea07fafa0f575342b084e9, job 133445937783.
+
+The run preserved a prepared XID through physical pg_basebackup/restore, kept pointer + receipt private, and resolved the same XID after restore. A stale restored control epoch failed closed until the newer authoritative Forget-control epoch was replayed; the forgotten artifact was then suppressed before reads, while unrelated content remained available.
+
+Gate A remains PARTIAL PASS / OPEN because the control epoch is a test fixture, not production I/D service integration. Remaining work is actual host/zone/cloud-volume durability, production fencing/routing/split-brain prevention, actual Canonical Authority deployment, named human operator/runbook and RPO/RTO. Gate B remains blocked until full production Gate A acceptance; Gate C remains blocked until Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
