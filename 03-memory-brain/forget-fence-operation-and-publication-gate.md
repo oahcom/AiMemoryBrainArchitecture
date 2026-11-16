@@ -541,3 +541,34 @@ D accepts the bridge's prospective-participant ordering and barrier requirements
 6. D and COC positions are typed, separate orders. D does not compare opaque values or infer order from wall-clock time; D consumes the authenticated bridge tuple and its own canonical fence/lineage evidence.
 
 This is D's exact-version architecture acceptance for D-owned fence/barrier semantics only. It does not approve I's sequencer implementation, Storage's database/XA capability, COC deployment/operator, H schema, implementation, conformance or production activation. D36 and JF10-COC-01..10 remain NOT RUN. JF-10 remains P0 OPEN; multi-policy-domain atomicity remains BLOCKED.
+
+
+## Phase 3.6.2 — D exact acceptance of complete JF-10 ↔ COC decision bundle
+
+**Decision:** **ACCEPT WITH ENUMERATED EXCEPTIONS**, limited strictly to D-owned ForgetFence, producer registration, dependency inventory, lineage and barrier semantics for the single-I-PolicyDomain JF-10 v2 profile. This decision is not I authorization approval, Storage capability certification, C provider approval, H production schema freeze, or production implementation acceptance.
+
+### Exact bundle reviewed
+- A COC architecture: `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`
+- I JF-10 v2 Owner disposition: `8069ff86988396442c8d9dc3fd58653683abe2f3`
+- D/E/Storage common JF-10 v2 recovery protocol: `94679897e84a6f58fd8b9467b5249e1a885cb0b0`
+- C bridge Owner contract: `45a48249717c8cddb07ab96197730ef93d406c22`
+- D fence/barrier Owner contract: `5a56c406578fdf257509315eb3f6f3f75456116c`
+- Storage realization / participant contract: `55c01f4512f2e3d8aac767dd004e768ae073178e`
+- H bridge wire mapping Owner contract (current branch readback): `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248`
+- H JSON Schema candidate: `a8a945cc3623c2907003b93625e3c79742150944`
+
+### D-owned accepted semantics
+1. A quorum-committed COC prepare-intent registered before the D fence cutoff is a prospective D barrier participant, even before Storage's prepared receipt is registered. A D cutoff before prepare-intent rejects the affected prepare.
+2. The same preallocated XID/participant identity remains bound through Storage PREPARE, I terminal decision and same-XID commit/rollback resolution. A changed XID, digest, owner boundary or lineage binding is a conflict.
+3. Participant-first retains D target/lineage serialization and keeps the D barrier open until I terminal evidence, Storage same-XID resolution, C provider outcome where required, and D lineage obligations are authoritative. Fence-first rejects. There is no third order.
+4. UNKNOWN/IN_DOUBT, COC outage, missing log prefix, stale replica, lost ACK, missing participant row or incomplete owner proof cannot release the barrier or establish CanonicalSuppressionComplete.
+5. D retains sole authority over ForgetOperation, ForgetFence, ProducerRegistrationHighWater, BarrierSnapshotReceipt, target/ancestor coverage and D completion. COC/I/Storage positions are distinct typed evidence; D does not compare them or infer order from wall-clock time.
+6. The outage recovery batch and owner-local pending-gate rules are accepted only as fail-closed coordination evidence. D may reopen its local gate only after durable cutoff, complete pre-batch participant reconciliation and D owner high-water verification.
+7. Acceptance is limited to one I PolicyDomain. Multi-PolicyDomain atomicity remains BLOCKED / NOT ACCEPTED.
+
+### Enumerated exceptions / closure conditions
+- This is architecture/interface acceptance only. D APIs, durable ledger, locks, participant recovery, COC deployment and production conformance are NOT VERIFIED.
+- Storage must prove the selected DB's actual prepared-XID/lock retention, same-XID restart/failover recovery and atomic visibility transaction. D does not select or certify a DB engine.
+- I owns the sequencer, receipt consumption, PermissionEpoch and revocation effective point; D's acceptance does not certify I implementation or external governance.
+- C provider idempotency/outcome, H generated schema/parser/SDK interoperability, and COC consensus/quorum durability remain separately owned and unverified.
+- D36, JF10-01..13, Storage crash/fault and cross-owner conformance remain NOT RUN. JF-10 P0 remains OPEN; no production activation or merge is authorized.
