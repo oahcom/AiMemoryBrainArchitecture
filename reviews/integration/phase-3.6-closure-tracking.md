@@ -347,3 +347,46 @@ These decisions improve technical cross-owner acceptance evidence but do not clo
 ## G3 implementation location escalation
 
 A opened issue #7: [Identify authoritative runtime implementation repository and accountable engineering owner](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/7). It requests the canonical implementation repository/branch, accountable engineering owners, build/CI commands, deployed topology, architecture-to-code traceability and a formal statement on whether implementation is in another repository or deferred. G3 remains BLOCKED until the project authority supplies this information. No runtime implementation was fabricated in this architecture repository.
+
+
+## BIH exact-version and I authorization technical confirmation refresh — 2026-11-16
+
+This addendum records the exact-version evidence and corrects the distinction between technical-owner confirmation, consumer acceptance, external governance approval and runtime verification. It supersedes any earlier tracking wording that treated the following I technical confirmations or H exact-package acceptance as still missing. It does not supersede their explicit non-claims.
+
+### Exact evidence pinned
+
+| Item | Owner evidence | Exact version / digest | Disposition |
+|---|---|---|---|
+| H acceptance of A's exact BIH package | Issue #6 comment 6919218061; H decision `08-bmcp-protocol/phase-3.6-a-package-exact-version-h-owner-acceptance.md`; decision commit `891247f3bdd15a2b649490d7703575a598a17ba2` | A package `reviews/integration/phase-3.6-identity-trust-joint-architecture.md`, Blob `a45ae90b318a79bf009d14f4d917611881e9e214`; H decision Blob `fe437a3d44790f249f613d1e6cafc0db40d45b10` | **COMPLETE — ACCEPTED WITH BINDING H-OWNED PROTOCOL BOUNDARIES** |
+| H BMCP technical design | H protocol artifact `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | Blob `9845c97ac43d7888732afafe12e28850ec02add8` | **COMPLETE — DESIGN ACCEPTED**; does not freeze wire spelling/canonicalization/schema |
+| I PermissionEpoch and protected authorization conditions | I formal confirmation `09-security-governance/phase-3.6-permission-epoch-and-authorization-formal-confirmation.md`; issue #5 comment 6919213602; commit `dc20c61539870159bf90fa5c6fa169c990513019` | Blob `bae6a24fe3a374bc816993979a8fa9af52517dea`; controlling BIH technical decisions `BIH36-JD-10..13`; reviewed A package Blob `a45ae90b318a79bf009d14f4d917611881e9e214` | **COMPLETE — FORMAL I OWNER TECHNICAL CONFIRMATION** |
+
+I's formal confirmation covers both PermissionEpoch and the complete protected-authorization tuple/conditions, including authenticated issuer/principal/actor/workload/session, delegation, ownership and applicability Scope, Environment, action/resource/purpose/audience, policy domain and epoch currentness, fail-closed handling, and the required owner-boundary recheck. The exact I artifact is the authority for the full normative detail; this summary does not replace it.
+
+### Corrected independent status dimensions
+
+| Item | Current state |
+|---|---|
+| H acceptance of A exact package version | **COMPLETE** |
+| H BMCP design acceptance | **COMPLETE** |
+| I PermissionEpoch formal technical confirmation | **COMPLETE** |
+| I complete protected-authorization conditions technical confirmation | **COMPLETE** |
+| I external governance approvals I36-GOV-01..10 | **BLOCKED** |
+| H36 / I36 runtime verification | **NOT RUN** |
+| C / F / G BIH consumer acceptance | **OPEN** |
+| Phase 3.6 overall G10 / architecture freeze | **BLOCKED / NOT AUTHORIZED** |
+
+### Required interpretation
+
+1. I's technical-owner confirmation is a completed normative technical decision. It must not be described as missing or pending.
+2. The technical confirmation is not an external Security Governance, Identity Governance, Data/Scope Governance or Environment Governance approval. I36-GOV-01..10 remain blocked until the required named authorities, decision records, exact policy hashes, jurisdiction/scope, effective versions and approval evidence exist.
+3. H's exact-version package acceptance and BMCP design acceptance are complete at the stated design boundary. They do not constitute wire-schema freeze, H36 execution, or C/F/G consumer acceptance.
+4. H36/I36 remain NOT RUN. No runtime conformance PASS is inferred.
+5. C/F/G must each publish an Owner-owned exact-version BIH consumer acceptance/rejection against A package Blob `a45ae90b318a79bf009d14f4d917611881e9e214`, stating field mapping, authority source, enforcement boundary, fail-closed behavior, exceptions and conformance cases. Their separate semantic contract decisions are not implicit BIH acceptance.
+
+### A next actions
+
+- A records the above exact-version evidence as completed in its closure ledger; no Owner contract is rewritten.
+- C, F and G remain the next consumer-acceptance owners. Issue #6 already contains A's explicit request (comment 6919372132); continue tracking each Owner's separate response and refresh exact branch/blob evidence on receipt.
+- Keep I36-GOV-01..10 BLOCKED, H36/I36 NOT RUN, and overall G10 BLOCKED until their own acceptance evidence exists.
+
