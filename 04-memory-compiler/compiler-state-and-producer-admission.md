@@ -193,3 +193,18 @@ A terminal assertion must include ProducerWorkItemId, registration receipt, term
 - OPEN-D-TERMINAL-01: D's accepted terminal-disposition schema and evidence validation rules.
 - OPEN-I-AUTH-01: exact authenticated ProducerIdentity/ActorRef/ScopeRef binding remains subject to B/I/H agreement; B Fact/Claim remains ADR-BLOCKED.
 - OPEN-STORAGE-01: durable lease, staging, outbox, dependency and visibility transaction implementation is not selected or tested.
+
+
+
+---
+## Phase 3.5 Addendum — D Registry and Barrier Snapshot Consumption
+
+E's ProducerClass registration is not merely local configuration. Before derivative-capable work is admitted, E must hold a D ProducerClassRegistrationReceipt proving the class is ENABLED under a committed ProducerRegistryVersion. A local allow-list cannot substitute for D's closed-world registry. Disabling a class blocks new work but does not erase or terminalize existing work.
+
+D's ProducerWork RegistrationReceipt includes ProducerRegistrationSequence and ProducerRegistryVersion. The sequence/high-water is a producer-ledger namespace, not CanonicalCommitCursor, AggregateRevision, LifecycleEventCursor or ForgetFenceGeneration. E stores it unchanged and uses it only as D directs.
+
+D InstallForgetFence captures ProducerRegistryVersion and ProducerRegistrationHighWater in the same durable linearization point that makes the fence effective. CaptureProducerRegistrationHighWater returns an immutable BarrierSnapshotReceipt tied to that installation; it is a verification/read operation, not a second or movable cutoff.
+
+E recovery uses D ResolveProducerWork with the original ProducerWorkItemId and registration digest. D ReconcileForgetBarrier is the authoritative D-local roll-up over immutable barrier/dependency/target checkpoints. E supplies its receipts and terminal evidence; it cannot independently assert DRAINED or global completion.
+
+D's normative operation set also includes RegisterProducerClass, CaptureProducerRegistrationHighWater, ResolveProducerWork and ReconcileForgetBarrier in addition to RegisterProducerWork, InstallForgetFence, RegisterDerivedDependency, PublishDerivedIfFenceCurrent and CompleteProducerWork. Exact D semantic operation contracts are consumed from D's operation-level specification; API transport schemas remain OPEN.
