@@ -185,3 +185,22 @@ D's `memory-lifecycle-manager.md` proposes a durable ForgetOperation containing 
 D's current candidate consistency text describes dependency discovery using a snapshot/watermark and recording late-arriving derivatives for follow-up suppression/cleanup. **That is not yet a closed producer-registration barrier or an atomic register-if-open / publish-if-fence-current gate.** The late-derivative race identified as D-REV-P1-003 therefore remains OPEN. E's pre-visibility registration and atomic publication gate above is a required proposal for D/I/Storage to reconcile; E does not claim D has already specified or implemented it.
 
 D's `memory-versioning.md` leaves canonical sequence scope (per aggregate vs global) OPEN. LifecycleEvent per-aggregate sequence and Forget dependency snapshot/watermark are not substitutes for the canonical commit cursor or E source cursor.
+
+
+## 13. I/H governance alignment
+
+I's Forget policy requires a closed inventory of registered producer/consumer/copy domains, including E queued/leased/retry/DLQ/replay/model jobs and staged outputs. Every producer domain registers stable target class, owner, Scope coverage, supported operations, last processed watermark, online/offline state, retention horizon and evidence capability. A new dependency cannot be silently registered against a sealed target; it must be included in a reopened/reconciled inventory and barrier.
+
+I's no-resurrection proof requires:
+1. inventory sealed at a recorded producer-registration epoch;
+2. every derivative-capable producer crossed the barrier or is disabled/revoked;
+3. all in-flight work at/below the barrier is terminal and cannot publish after the fence;
+4. each consumer/partition advanced beyond the required ForgetFence;
+5. external recipients/backups are Confirmed or covered by an explicitly approved PolicyException;
+6. restore/replay reapplies the fence before content becomes queryable/deliverable.
+
+If an E producer is offline, its target remains Pending/Unknown; E cannot translate unknown into confirmation. An unregistered copy discovered later reopens the inventory and can invalidate a prior completion claim. The exact atomic registration and publish gate remains a D/E/Storage implementation dependency.
+
+I's audit policy requires non-reconstructive tombstones: random opaque IDs, coarse target class, non-reversible restricted partition token, typed suppression fence and coarse state/time. It explicitly disallows raw content, low-entropy or correlatable content digests, embeddings, summaries, provenance edges and plaintext object identifiers/URLs/paths that reveal the forgotten subject. Tombstones are bounded by approved retention and are not eternal IDs by default.
+
+H's `forget-revocation-and-reconnect.md` defines Adapter-local clear/quarantine ACK only. H cannot declare global Forget complete or claim provider-side physical erasure. E's completion evidence is likewise limited to E producer/job/dependency statuses and watermarks. I owns global completion and physical-erasure policy.
