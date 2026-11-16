@@ -8,7 +8,7 @@ class RestoreHighWaterTests(unittest.TestCase):
     def setUp(self):
         self.m = RestoreModel()
         self.coc, self.i, self.d, self.storage = valid_proofs(self.m)
-        self.snapshot = {"wal_contiguous": True, "target_lsn": "0/7000000",
+        self.snapshot = {"wal_contiguous": True, "target_lsn": "0/7000000", "target_timeline": 1,
                          "timeline_verified": True, "old_primary_fenced": True,
                          "quarantined": True}
 
@@ -73,6 +73,12 @@ class RestoreHighWaterTests(unittest.TestCase):
         with self.assertRaises(Blocked):
             self.reconcile(d_proofs=bad)
 
+    def test_i_inventory_seal_must_match_d_operation_binding(self):
+        bad = copy.deepcopy(self.d)
+        bad["forget-1"]["inventory_seal_ref"] = "stale-seal"
+        with self.assertRaises(Blocked):
+            self.reconcile(d_proofs=bad)
+
     def test_incomplete_lineage_digest_blocks_restore(self):
         bad = copy.deepcopy(self.d)
         bad["forget-1"]["lineage_digest"] = "incomplete"
@@ -84,6 +90,17 @@ class RestoreHighWaterTests(unittest.TestCase):
         bad["participants"] = {}
         with self.assertRaises(Blocked):
             self.reconcile(storage_proof=bad)
+
+    def test_participant_ref_and_database_identity_mismatch_blocks(self):
+        for field, value in (("participant_ref", "other-participant"),
+                             ("canonical_authority_db_ref", "other-db"),
+                             ("system_identifier", "999"),
+                             ("database_oid", "999"),
+                             ("prepare_lsn", "0/9999999")):
+            bad = copy.deepcopy(self.storage)
+            bad["participants"]["participant-1"][field] = value
+            with self.subTest(field=field), self.assertRaises(Blocked):
+                self.reconcile(storage_proof=bad)
 
     def test_same_gid_native_xid_or_terminal_outcome_mismatch_blocks(self):
         bad = copy.deepcopy(self.storage)
