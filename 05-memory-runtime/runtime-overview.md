@@ -3,7 +3,7 @@
 **Owner:** Session F — Memory Runtime  
 **Status:** DECIDED for authority/safety boundaries; CANDIDATE for topology; TO_VALIDATE for numeric budgets.  
 **Baseline:** main at e443b23f8a179ad12c163722ad93bc646fd3a80a.  
-**Contract maturity:** D/E/G/H/I detailed contracts are not present in this checkout. Payloads below are provisional logical contracts, not frozen wire schemas.
+**Phase 3.5 dependency review:** D/E/I/G/H/C/B owner-branch contracts are present and were re-read at the exact heads recorded in `phase-3.5-forget-suppression-and-cursor-consumption.md`. F's consumer semantics are DECIDED; callable cross-module schemas, Storage realization and runtime conformance remain OPEN. No wire schema is frozen by this document.
 
 ## 1. Purpose
 Memory Runtime is the Brain's bounded online read/activation execution layer. It interprets Recall, authorizes scope, routes retrieval across canonical and derived representations, produces evidence-bearing candidates, recommends activation, and maintains disposable Working Sets/caches. It is not an Agent Runtime, planner, tool executor, canonical store, compiler, or Context Version authority. Default Recall is deterministic and does not synchronously invoke a large LLM.
@@ -101,3 +101,15 @@ Retrieval enforces Scope, current permission and latest applicable Forget Fence 
 F's index rebuild/backfill/replay is derivative-capable work: register before admission under D's Producer Registration contract, replay a contiguous canonical commit prefix, exclude fenced lineage, and use the authoritative final publication gate. If the D/E/Storage gate is unavailable or unresolved, keep the staged generation private/quarantined.
 
 ActivationRecommendation is advisory only. G alone decides Context mutations and ContextVersion; H/C own Adapter/final-request evidence. F does not claim Applied, global Forget completion or physical erasure.
+
+
+## 19. Phase 3.5 reprocessing — runtime authority checkpoints
+
+- Request admission binds authenticated Principal, trusted owner/applicability ScopeRefs, purpose, I PermissionEpoch (policy-domain/issuer scoped) and current D ForgetFence. Query text and payload-supplied ActorRef/ScopeRef/producer labels are not authority.
+- Each candidate-producing adapter enforces Scope and permission before candidate emission. Each exact hit is canonical-revalidated for MemoryVersion, AggregateRevision where relevant, LifecycleEventCursor, source lineage, D fence coverage and independent authorization of Memory, Entity, Relation, Evidence and Provenance.
+- Fusion/reranking/materialization accept only revalidated candidates. Any epoch/fence change or unverifiable ordering causes cancellation plus suppression; cancellation is not the safety proof.
+- Final response serialization and G handoff perform a current D fence and I authorization checkpoint. No affected content is disclosed when current authority cannot be established.
+- Freshness is a per-index/per-partition vector. Each IndexWatermark represents a contiguous prefix of D CanonicalCommitCursor for that partition and explicit coverage/schema version; a lagging partition cannot be masked by another. It never proves target absence, Forget completion or physical erasure.
+- F ActivationRecommendation is immutable and advisory. G alone validates and mutates Context/ContextVersion; H/C own Adapter/final-request evidence. F never claims Applied.
+
+Reprocessing source heads: D `da8e5882d0b238d765d00b2225b79eea45a483b1`; E `c2f14408ba62447c11172d65b93a279fef96d175`; I `5591ad3620ec3f5d74194bd79556dcf3e25bea07`; G `3d2c065be863bc1d349faaeece6f6eaa0047abae`; H `1ee65928f123d92a4758b0de09bc8d6df1e46253`; C `35de58ddc93c5f1e554596cdfc430cd6c392d355`; B `66adf6bdcf5ec69a146fe75afe20ce3b85af8448`.
