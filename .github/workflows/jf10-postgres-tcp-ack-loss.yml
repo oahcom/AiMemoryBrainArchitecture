@@ -1,0 +1,57 @@
+name: JF-10 PostgreSQL 18.7 TCP ACK-Loss Recovery
+
+on:
+  push:
+    branches:
+      - session-storage-consistency-forget-atomicity-2026-11-16
+    paths:
+      - "reviews/storage-consistency/postgres_probe/jf10_postgres_tcp_ack_loss_probe.py"
+      - ".github/workflows/jf10-postgres-tcp-ack-loss.yml"
+  pull_request:
+    paths:
+      - "reviews/storage-consistency/postgres_probe/jf10_postgres_tcp_ack_loss_probe.py"
+      - ".github/workflows/jf10-postgres-tcp-ack-loss.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  tcp-ack-loss:
+    name: PostgreSQL 18.7 real TCP CommandComplete loss and same-XID recovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install psycopg
+        run: python -m pip install "psycopg[binary]>=3.2,<4"
+      - name: Start pinned PostgreSQL 18.7
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker volume create jf10-tcp-ack-data
+          docker run -d --name jf10-tcp-ack --network host \
+            -e POSTGRES_PASSWORD=jf10-ci-only \
+            -e POSTGRES_DB=postgres \
+            -v jf10-tcp-ack-data:/var/lib/postgresql \
+            "$PG_IMAGE" \
+            -c max_prepared_transactions=16 \
+            -c fsync=on \
+            -c synchronous_commit=on \
+            -c full_page_writes=on \
+            -c wal_level=replica
+          for i in $(seq 1 60); do
+            if docker exec jf10-tcp-ack pg_isready -U postgres -d postgres; then exit 0; fi
+            sleep 1
+          done
+          docker logs jf10-tcp-ack
+          exit 1
+      - name: Run real TCP ACK-loss fault injection
+        run: python reviews/storage-consistency/postgres_probe/jf10_postgres_tcp_ack_loss_probe.py
+      - name: Capture diagnostics
+        if: always()
+        run: |
+          docker exec jf10-tcp-ack psql -U postgres -d postgres -c "SELECT gid, prepared FROM pg_prepared_xacts;" || true
+          docker logs jf10-tcp-ack || true
