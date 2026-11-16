@@ -931,3 +931,59 @@ What is not complete:
 - No application-level resource/performance benchmark or integrated failure/security conformance has passed.
 
 **TAB-001 must remain CANDIDATE. Do not mark FROZEN, APPROVED or production-ready.** The next phase is controlled owner remediation and executable engineering validation in the exact sequence in §20.16. A will perform a fresh integration review only after the evidence package is complete.
+
+## 21. Latest exact-owner protocol, restore and logical-model evidence (2026-11-17)
+
+### 21.1 Amended COC protocol §14 — exact owner review now complete
+
+The current Storage COC protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` and A prepared-participant mapping Blob `a71251704851cacd15f67faa985a5bd50057e92a` have now been reviewed by all B/C/D/E/G/H/I/A/Storage owner perspectives. Exact matrix: `reviews/integration/phase-3.6.4-jf10-prepared-participant-gid-owner-acceptance-matrix.md`, Blob `4059a228613cf2c72a7797f2a1427f843ef066a0`.
+
+The accepted type split is PreparedParticipantRef (stable engine-neutral identity), PreparedTransactionGID (client-chosen PostgreSQL prepared handle, bound before COC intent), and EngineNativeTransactionXIDRef (observed after PREPARE). Storage PREPARE is prohibited until the exact COC intent is committed. The H 1.1.1 candidate schema Blob is `c0bbfc7611a8d88a39cee209831db32b62601fde`.
+
+**Gate B amended §14 status: DESIGN-LEVEL EXACT OWNER ACCEPTANCE COMPLETE WITH CONDITIONS.** This supersedes §20.18's statement that Blob `86ff3...` had not inherited owner acceptance from the older `4ac63...` revision. It does not close implementation P0 or Gate C.
+
+### 21.2 Restore control-high-water architecture — all owner perspectives accepted
+
+The exact Storage restore contract Blob `4f656163aeba532a441eaed1d293a48e2363cb4a` has been accepted by A/B/C/D/E/F/G/H/I/Storage. Exact matrix: `reviews/integration/phase-3.6.5-restore-highwater-owner-acceptance-matrix.md`, Blob `3b488ae3a7cf9aca9a70a659aba09ecba53ce17f`.
+
+Accepted proof boundaries: COCCommittedPrefixProof; per-PolicyDomain IControlHighWaterProof; per-ForgetOperation DForgetControlHighWaterProof; StorageParticipantLedgerProof; and Storage RestoreReconciliationReceipt in state RECONCILED_BUT_FENCED. The receipt is not permission to serve, I authorization, D clearance, Global Forget completion or physical-erasure proof.
+
+Storage Gate A architecture design is now **CONDITIONAL PASS** because its restore proof shapes, authority boundaries, fail-closed behavior and high-water recheck order have exact owner acceptance. Storage implementation/deployment readiness remains NOT PASSED / DEFERRED. This is a sub-gate result, not a system verdict.
+
+### 21.3 New executable evidence
+
+| Area | Exact CI evidence | Result | Boundary |
+|---|---|---|---|
+| F Anti-Resurrection | Run `43961714501`, job `133630540252`; model Blob `33fa2ca2dc29771aca241e194f13e078a4f8d774`; tests Blob `c2575327a75577923440ef770d42122218a1e091` | **19/19 PASS** | Logical model only; actual ANN/index/cache/Working Set runtime remains untested. |
+| I Global Forget inventory/CEV | Run `43963450717`, job `133636592112`; model Blob `5233da028e409ec3f41848582dad73a923e7155b`; tests Blob `428e15c6263b5b2d730b93ce5412d55e782a449b` | **30/30 PASS** | Logical model only; no production inventory seal, external deletion, governance approval or physical erasure. |
+| H BMCP JF-10 schemas/parser | Run `43964080044`, job `133638783610`; schema 1.1.1 Blob `c0bbfc7611a8d88a39cee209831db32b62601fde`; evidence Blob `d7652727e21c2f88d6cc2481deeeca96c2efd38f` | **34/34 PASS** | Schema/parser reference tests only; no production signatures, channel binding, replay, SDK or live transport. |
+| Storage restore high-water | Run `43965501810`, job `133643756066`; model Blob `be0aef6232c8ee2ed6179df7b0a74473c3e25b3b`; tests Blob `a9e1a96b449c6bf0e2b52c5fea394a8c32961a24`; evidence Blob `bf991a8a098bfdacc24bace53d452b8ccf2078e6` | **25/25 PASS** | In-memory model only; no real backup/WAL restore, signed proof APIs, old-primary fencing or measured RTO. |
+
+### 21.4 Updated blocking register
+
+- A-TAR-P0-002 Fact/Claim ADR-001: **OPEN / P0**; no formal Architecture Governance approval.
+- A-TAR-P0-003 JF-10 atomic registration/fence/dependency/publication: **DESIGN ACCEPTED / IMPLEMENTATION P0 OPEN**. Amended §14 exact-owner review is complete.
+- A-TAR-P0-004 Global Forget: **OPEN / P0**. I's 30-test model passes; real global inventory/seal, target evidence, external deletion, production restore and physical-erasure proof are absent.
+- A-TAR-P1-003 Anti-Resurrection: **LOGICAL MODEL PASS / RUNTIME OPEN**.
+- A-TAR-P1-005 BMCP JF-10 schema: **1.1.0/1.1.1 schema and parser reference PASS / PRODUCTION INTEROPERABILITY OPEN**.
+- Storage Gate A architecture design: **CONDITIONAL PASS**; implementation/deployment NOT PASSED.
+- I36-GOV-01..10: **GOVERNANCE-BLOCKED / NOT APPROVED**. The conservative decision proposal is not an approval.
+
+### 21.5 Current Owner branch/report manifest
+
+| Owner | Current branch HEAD | Current report/readiness Blob SHA |
+|---|---|---|
+| A | `78dd8c5cb44b8f50f06504ef6fc6a7523aa074d5` | `56d238fa236c2f5089eb98e8bff8363e47e73748` |
+| B | `e79ff629af3656e055a7ce10cc7b9fea468cf84f` | `fd3e5723b81de10bed806896e4be71ceb7a1669b` |
+| C | `c408d2c138d1975eff1167bd5889ba45a13b126b` | `ee42c7192561261789a0c7b5bd16d32c0eaaf14c` |
+| D | `f5cbe59561b73c75708a52f28b0bf12707d75c71` | `97c049050d67dd12e0c64ef49b2b05795651608c` |
+| E | `fb063e15ee31569e501f5fa0a3198b3cf0b67a9c` | `c94f6a8e64ba3138a27e6f316f10411ef33b7ab8` |
+| F | `3cb98c5a8a60cfaf4ad446e53833fbabcaa0eddf` | `124cc9300442b0e3a1e83603910e1c332b4fae48` |
+| G | `466e2bf5992ea5944ef6ecebd79a39eeb21cdc97` | `8b9ea4b4a63f7bbddbefdb0b14cf99943b3e7613` |
+| H | `a5fe5268fe846f2ec3c94448bda5592783ef7212` | `cb9d1d97604bdb71bc2f5bf47f6392e03f30ba99` |
+| I | `d66361dd88f07278340663b75bcb22e040d96965` | `c24f03aae6ce7bc76eaeb1ed33bb24fb7fcac624` |
+| Storage | `7f035e4275f2c9ee3264fadc2516e0cfbc8f14cf` | `555844c93da2dd255f042c8bf4cd874cb0af076c` |
+
+### 21.6 System verdict remains BLOCKED
+
+The new exact-owner and logical-model evidence closes specific design-review gaps only. It does not justify system-level approval or freeze. **Final verdict remains BLOCKED — TAB-001 IS NOT READY FOR FORMAL APPROVAL OR FREEZE.** TAB-001 remains CANDIDATE / NOT FROZEN; JF-10 runtime P0 remains open; Global Forget is NOT COMPLETED; production activation is NOT AUTHORIZED.
