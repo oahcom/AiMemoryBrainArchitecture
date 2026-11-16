@@ -1227,3 +1227,12 @@ Three executable evidence groups have successful CI runs:
 The latest reruns of single-node and HA workflows also passed (43909115285, 43909115273). Probe/workflow Blob SHAs are recorded in A tracking §13.29 and the Storage dossier.
 
 Gate A remains PARTIAL PASS / OPEN. Remaining production boundary: identify the actual Canonical Authority deployment, physical host/zone/cloud-storage semantics, production fencing/routing and split-brain prevention, named human on-call/operator, runbook and RPO/RTO. No production activation is authorized. Gate B remains blocked until these conditions pass; Gate C remains blocked until Gate B.
+
+
+## 13.30 Gate A production binding remains the only blocking boundary — 2026-11-17
+
+A inspected the default branch and available Owner branch inventory. The default main branch is HEAD 8a6414158c9c056c1638222534e1993d1bbc99d2 with a complete 47-entry tree; no Docker/Compose, Helm/Kubernetes, Terraform, Patroni, PostgreSQL deployment, DB migration or production deployment artifacts exist. The Storage branch contains only the JF-10 probes/workflows and review artifacts, not a deployed Canonical Authority runtime or actual production DB topology. No separate Canonical Authority runtime repository was identified in the accessible repository inventory.
+
+Therefore all current PostgreSQL 18.7 physical test results remain CI qualification evidence only. Gate A cannot be closed until the real Canonical Authority deployment is bound: exact DB build/configuration, host/zone/cloud-storage topology, production failover fencing/routing, actual I/D control-ledger source, named human on-call/operator, approved runbook and RPO/RTO. The proven probes must then be run against that deployment.
+
+Do not start Gate B until this deployment binding is supplied and Gate A is accepted. Gate C remains blocked by Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED. Issue #10 comment 6922650120 records the repository inventory.
