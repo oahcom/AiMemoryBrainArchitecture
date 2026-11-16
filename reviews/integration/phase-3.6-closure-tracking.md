@@ -300,3 +300,35 @@ Required closure evidence: repository URL and branch; owner/maintainer; build an
 ### Next action assigned to A
 
 A must obtain/record the authoritative implementation repository and accountable engineering owner from project governance, while continuing BIH governance/consumer and CFG Applied closure in parallel. DE-S must not unilaterally choose an implementation repository or claim deployment ownership.
+
+
+## BIH / CFG consumer refresh — exact Owner readbacks and requests (2026-11-16)
+
+### Current exact artifact readbacks
+
+| Owner | Artifact | Current Blob SHA | Correct interpretation |
+|---|---|---|---|
+| B | `02-domain-model/phase-3.6-typed-identity-trust-closure.md` | `0a6b78a842e550b58533b797cdfcd2d954ed6826` | BIH technical type semantics decided; B's separate formal ActorRef/ScopeRef/EnvironmentRef mapping approval is recorded in issue #3 comment 6919299226, Blob `729a706860b1259115816265e847a29683c3c233` |
+| I | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | `0cbf6bb7480db873790c454817593a9b1c5548ba` | Technical design decided; governance approval remains blocked; I36-GOV-01..10 require named formal approvals |
+| H | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `9845c97ac43d7888732afafe12e28850ec02add8` | BIH technical design decided; separate H acceptance of exact A BIH package recorded in issue #6 comment 6919218061; wire schema freeze and H36 execution remain open |
+| C | `07-agent-integration/phase-3.6-final-request-evidence-contract.md` | `45cab0f9c538fa653ac9e3ca8ddba3dee1b8383b` | C semantic portion accepted with exceptions; not C's BIH consumer acceptance; C/G/H Applied freeze blocked |
+| F | `05-memory-runtime/phase-3.6-runtime-forget-suppression-and-invalidation.md` | `cd34244a3d92aff2ade1fc7758874cf30e512564` | F semantic contract current; F36 dependencies and runtime conformance remain open/NOT RUN |
+| G | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `6513932991fdbe13231b26e43440fc2c4fcbf7fa` | G semantic portion accepted with exceptions; not G's BIH consumer acceptance; C/G/H Applied freeze blocked |
+
+These are exact file Blob readbacks. They do not claim that each Owner branch HEAD has been fully refreshed in this update. G0 still requires a complete live branch-head snapshot before final closure.
+
+### Owner coordination actions
+
+- Issue #3 updated with current C/G/H contract state and exact decisions requested from C, G, H, I, D and B. Comment `6919370891`.
+- Issue #6 updated with current C/F/G contract refs and explicit request for C/F/G exact-version BIH consumer acceptance. Comment `6919372132`.
+
+### Corrected status
+
+- B typed-reference semantic mapping: formally approved by B; no wire encoding/schema approval implied.
+- H exact A-package BIH acceptance: ACCEPTED WITH BINDING H-OWNED PROTOCOL BOUNDARIES; H36 NOT RUN.
+- C and G each record acceptance of their own semantic portions with exceptions. This does not close C/G/H Applied Contract Freeze or their separate BIH consumer acceptance obligations.
+- F runtime contract exists; F has not supplied an explicit BIH36-JD-01..17 consumer acceptance record in the evidence reviewed here.
+- I36-GOV-01..10 remain GOVERNANCE-BLOCKED. ADR-001 remains ADR-BLOCKED.
+- C/G/H Applied contract remains NOT FROZEN; CFG-01..20 and PI-01..08 remain NOT RUN.
+
+A remains integration coordinator only. These owner decisions and issue requests do not authorize A to approve their contracts or merge branches.
