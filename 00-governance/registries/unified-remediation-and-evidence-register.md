@@ -17,10 +17,15 @@
 | UMR-006 | P1 | Owner baseline adoption and current evidence pins | Each A–I Owner; A tracks | All nine module proposals PROPOSED; no module baseline adoption recorded by this review | Owner-specific ADOPT / ADOPT WITH EXCEPTIONS / REVISE / REJECT record, proposal version, current HEAD, artifact blob SHA and affected-consumer acceptance |
 | UMR-007 | P1 | Baseline template applicability and structural normalization | Project Governance Authority / P until appointed | P template exists; not in main; governance not ratified | Exact template version adoption or approved replacement; each Owner maps all required sections and records deviations |
 | UMR-008 | P1 | Refresh technical-review source HEAD provenance | C/F/G/H; A records; B/D/E/I review coverage to be decided | Existing reports are static conditional; source HEADs are pre-publication snapshots | Reviewed source HEAD, report publication commit, artifact blob SHA, and explicit statement whether newer changes alter findings |
-| UMR-009 | P1 | Technology review coverage for B/D/E/I | B/D/E/I Owners; A coordinates scope | No separate TAR-AI-001 report located in inspected current artifacts | Owner-specific review or explicit scope rationale; six dimensions, dependency/failure/recovery, resource limits, interface compatibility and evidence-based verdict |
+| UMR-009 | P1 | TAB-001 Owner technology review coverage for A/B/D/E/I | A/B/D/E/I Owners; A coordinates | Assigned reports absent on current Owner branches; C/F/G/H reports exist as static conditional reviews | Owner-specific review at exact task-pack path, six dimensions R1–R6, current main blueprint blob SHA, current Owner HEAD, findings and no-claim statement |
 | UMR-010 | P1 | Inspect PostgreSQL 18.7 capability probe workflow evidence | Storage Owner / CI operator | PR #12 closed; description limits evidence to single-node probe and disclaims production/failover proof; run result not yet verified here | Workflow run URL, commit/build SHA, exact job/test result and logs; preserve non-claims for replication, production restore, hardware durability and operator readiness |
 | UMR-011 | P2 | Normalize document structure to 14-section template | Each Owner; governance template authority | A has 13 sections; B/C/G/H/I 14; D/E/F 15; template only on P | Owner-confirmed section map, distinct Evidence & Version History, deviations justified |
 | UMR-012 | P2 | Central gate vector and registry synchronization | A; P maintains governance rollout record | Tracking registry stale at review start | Current branch HEADs and artifact SHAs, owner decisions, cross-owner acceptances, governance, implementation and tests tracked independently |
+
+
+| UMR-013 | P0 | SQLite/PostgreSQL transaction-profile decision for JF-10 | D/E/Storage; I for policy/sequencer | TAB-001 recommends SQLite WAL only as a prototype candidate; Storage PostgreSQL 18.7 probe is a single-node capability experiment; no final DB selection | Compare exact producer admission/fence/dependency/publication/recovery semantics, prepared-XID, crash/PITR/failover and operational requirements; keep TEC-003/004 OPEN until evidence |
+| UMR-014 | P1 | Integrate G NVIDIA context-optimization research with TAB-001 | G; A coordinates; B/C/D/E/F/H/I/Storage consulted | G impact assessment and candidate register are PROPOSED only; no implementation/interface freeze | Cross-owner mapping for TSS, ObservationRef, compaction, fidelity, immutable evidence archive, cost gate and Forget invalidation; paired controlled benchmark and negative tests |
+| UMR-015 | P1 | Reconcile P/main branch divergence before any future integration | P coordinator + A; project governance authority when appointed | P is ahead 30 / behind 4 against main; main contains TAB-001 blueprint, task pack and roadmap update | Reviewed non-destructive reconciliation of four main-side files, fresh compare, no force update and no merge without explicit authorization |
 
 ## 2. Non-substitutable acceptance evidence
 
@@ -48,18 +53,22 @@ No row may be marked complete because a different row is complete. Static review
 | ADR-001 | ADR-BLOCKED | No formal decision record |
 | JF-10 P0 | OPEN | Storage engineering/recovery and I authority evidence incomplete |
 | Global Forget | GOVERNANCE-BLOCKED | I approvals, sealed inventory and target-state evidence incomplete |
+| TAB-001 Owner technology review | 4/9 reports present; 5/9 missing | A/B/D/E/I reports absent at assigned paths; C/F/G/H reports are conditional/static |
 | Project G0 / architecture freeze | GOVERNANCE-OPEN / NOT AUTHORIZED | No PGA appointment or exact G0 approval evidenced |
 | Production implementation/test sign-off | NOT VERIFIED / NOT RUN where applicable | No general end-to-end implementation and conformance evidence |
 
 ## 4. Operating sequence
 
 1. Close UMR-001, UMR-003 and UMR-005 at the exact contract/ADR level without conflating their authority.
-2. Close UMR-002 and UMR-004 with real Storage and I evidence.
-3. Obtain each Owner's exact-version baseline disposition under UMR-006.
-4. Normalize the documents and review coverage under UMR-007/008/009/011.
-5. A publishes an updated integration gate vector; P updates project tracking.
-6. Only a formally appointed Project Governance Authority may ratify G0 or authorize a project-wide architecture freeze.
+2. Run UMR-013 as a D/E/Storage/I technology spike; reconcile G research under UMR-014; do not merge P/main while UMR-015 remains open.
+3. Close UMR-002 and UMR-004 with real Storage and I evidence.
+4. Obtain each Owner's exact-version baseline disposition under UMR-006.
+5. Normalize the documents and review coverage under UMR-007/008/009/011.
+6. A publishes an updated integration gate vector; P updates project tracking.
+7. Only a formally appointed Project Governance Authority may ratify G0 or authorize a project-wide architecture freeze.
 
 ## 5. Change log
 
 - 2026-11-17: Initial unified register prepared from live A–I branch reads, current baseline artifact blobs, A Phase 3.6 closure tracking, D JF-10 bounded acceptance and Storage PR #12 metadata.
+
+- 2026-11-17 addendum: reconciled current TAB-001 v0.1 and A–I technology-review task pack. Main HEAD `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f`; TAB-001 blob `7b6f2d139217dbe13ab3a3af31bfbff525f20e71`; task pack blob `5a813edeccf7190d66dfd71a96ca581c48f8a4cb`. G research blobs `3fb9f011e24c93a748442018d48c5954584e4f43` and `eadefd4e0fe541ef8479a030a2a99a0d57dbcf8b`. P/main divergence: ahead 30 / behind 4.
