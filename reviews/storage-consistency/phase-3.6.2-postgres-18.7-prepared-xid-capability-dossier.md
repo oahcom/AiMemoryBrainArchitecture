@@ -863,3 +863,14 @@ The exact wire field names/encoding require H review; signer trust/key custody r
 The project owner confirmed architecture-design phase; no production code repository/runtime is expected yet. Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Runtime/adapter absence is not a Gate A blocker. Gate B is specification published and awaits exact owner review; Gate C distributed implementation/fault injection is deferred to engineering phase.
 
 Gate A remains PARTIAL PASS / OPEN; Gate B is SPECIFICATION PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED; Gate C is DEFERRED_TO_ENGINEERING_PHASE; JF-10 P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+
+
+## 31. Gate A architecture contract cross-reference and current residuals (2026-11-17)
+
+The Storage-owned architecture contract is now consolidated in readiness artifact §26, commit `f595f8bb3499e3837ac6064c3ae76c41aef82c58`, Blob `36d0d13888e077dfa139807411f98cdf0aea1402`. It freezes the architecture target for authority-local SERIALIZABLE transactions and exact row-lock participation; the prepared-XID lifecycle; synchronous replication/fail-closed behavior; atomic VisibilityPointer + PublicationReceipt publication; authoritative read exclusion; WAL/PITR continuity and restore quarantine; private artifact staging; and explicit performance/migration acceptance criteria.
+
+This resolves Storage-owned specification gaps; it does not convert CI fixtures into production evidence. PostgreSQL 18.7 remains a pinned CI candidate, not a production Canonical Authority deployment. Runtime/adapter/deployment binding is `DEFERRED_TO_ENGINEERING_PHASE` by the project-phase decision.
+
+Residual cross-owner items remain: I authorization permit/revocation serialization and governance approval; D control-ledger/lineage high-water restore proof; exact owner-final-gate/participant receipt interface conformance; object-store ACL implementation; measured performance/size budgets; and engineering-phase HA/fencing, deployment, operator/runbook and RPO/RTO validation.
+
+**Current disposition:** Gate A PARTIAL PASS / OPEN for remaining architecture and I/D cross-owner decisions; Gate B DESIGN-LEVEL ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS (not implementation/conformance PASS); Gate C deferred to engineering-phase executable integration and distributed fault injection; JF-10 runtime P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED. This section supersedes older dossier wording that treats production runtime/adapter absence as an architecture-phase Gate A blocker.
