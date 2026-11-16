@@ -594,3 +594,51 @@ Scope remains the pinned PostgreSQL CI/reference fixture only. The reader is a s
 ## 26. Gate B design sequencing after project-phase clarification
 
 The project is in architecture design; no production code repository/runtime is expected. Production implementation binding is `DEFERRED_TO_ENGINEERING_PHASE`, not a Gate A blocker. Gate B's persistent COC/quorum log/participant registry/recovery-cutoff protocol design may proceed now, in parallel with closure of remaining Gate A storage design specifications. This is design authorization only; Gate B is not implementation-PASS. Gate C executable fault injection remains deferred until implementation exists. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
+
+
+## 25. Exact prepared-XID lock binding and same-XID resolution after PITR — PASS (2026-11-17)
+
+Storage extended the PITR prepared-boundary restore to correlate each exact prepared GID with its transaction-ID lock in `pg_locks`, rather than relying only on a global lock count. After recording the in-doubt/private state, the probe resolves the restored transactions using the original exact GIDs: COMMIT PREPARED for the commit participant and ROLLBACK PREPARED for the rollback participant.
+
+Evidence:
+- Probe Blob: `63506807be82b3203e7e682b0772452621c92558`
+- Commit: `d026add5cfaec0d395537e8763317cdbd8255398`
+- Workflow run/job: `43958775001` / `133620265141`, SUCCESS.
+- Pinned image: `postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc`.
+
+Raw-log PASS markers:
+- `PITR_EXACT_PREPARED_XID_LOCKS_RETAINED=PASS`
+- `PITR_PREPARED_XID_PRIVATE_AND_LOCKED=PASS`
+- `PITR_SAME_XID_COMMIT_ROLLBACK_AFTER_RESTORE=PASS`
+- `PITR_COMMIT_POINTER_AND_RECEIPT_ATOMIC=PASS`
+- `PITR_ROLLBACK_NO_POINTER_NO_RECEIPT=PASS`
+- `JF10_POSTGRESQL_PITR_ATOMICITY_AND_NEGATIVES=PASS`
+
+This establishes exact prepared-GID/transaction-lock correlation and same-GID forward/rollback resolution in the isolated PostgreSQL PITR fixture. It does not turn the fixture into the production Storage adapter or prove I/D/COC control-plane integration.
+
+
+## 26. PostgreSQL initdb readiness race correction and seven-workflow regression — PASS (2026-11-17)
+
+A full regression batch after the PITR changes exposed one unrelated single-node capability workflow startup race: the initial `pg_isready` could observe the temporary PostgreSQL server used by the official image's initdb sequence, immediately before that server shut down and the durable server started. The Python probe then received a closed connection. This was not a prepared-XID invariant failure.
+
+Storage corrected the workflow to wait until the initdb temporary and final server readiness log events have both occurred before accepting `pg_isready`, and made the probe itself call its bounded `wait_ready()` before setup.
+- Workflow Blob: `fbcbce03d4525f7a0fb9dd3673a580a3a4c00134`
+- Probe Blob: `184e0507fd225ee18f321f3f1ce6a63f869b13f3`
+- Fix commit: `83bdacbafa840808dca9be7a8c76c4df83c63504`
+- Prepared-XID workflow after fix: run `43959079736`, job `133621314502`, SUCCESS; markers include `SAME_XID_COMMIT_AFTER_RESTART=PASS`, `SAME_XID_ROLLBACK=PASS`, and `JF10_POSTGRESQL_18_7_SINGLE_NODE_CAPABILITY=PASS`.
+
+The seven-workflow regression evidence is:
+
+| Capability | Run / Job | Source commit | Conclusion |
+|---|---|---|---|
+| Prepared-XID PITR + exact locks + same-XID resolution + archive negatives | `43958775001` / `133620265141` | `d026add5cfaec0d395537e8763317cdbd8255398` | SUCCESS |
+| Prepared-XID + restart | `43959079736` / `133621314502` | `83bdacbafa840808dca9be7a8c76c4df83c63504` | SUCCESS |
+| Synchronous standby promotion | `43959079669` / `133621315610` | `83bdacbafa840808dca9be7a8c76c4df83c63504` | SUCCESS |
+| Physical backup/restore | `43959079703` / `133621314624` | `83bdacbafa840808dca9be7a8c76c4df83c63504` | SUCCESS |
+| Explicit-LSN WAL PITR | `43959079745` / `133621314724` | `83bdacbafa840808dca9be7a8c76c4df83c63504` | SUCCESS |
+| Synchronous standby unavailable | `43959079760` / `133621315188` | `83bdacbafa840808dca9be7a8c76c4df83c63504` | SUCCESS |
+| Old-primary pg_rewind/rejoin | `43959079930` / `133621314973` | `83bdacbafa840808dca9be7a8c76c4df83c63504` | SUCCESS |
+
+All seven jobs' final raw-log markers were independently inspected. The first prepared-XID workflow attempt on commit `d026add5...` failed only at the transient initdb readiness race; it is superseded by the successful run `43959079736` after the readiness fix and is not counted as passing evidence.
+
+This is a regression result for pinned PostgreSQL 18.7 CI fixtures, not production deployment acceptance. Gate A remains PARTIAL PASS / OPEN; Gate B and Gate C remain BLOCKED; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
