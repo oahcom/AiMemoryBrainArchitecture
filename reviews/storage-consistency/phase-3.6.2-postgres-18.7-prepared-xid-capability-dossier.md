@@ -194,3 +194,51 @@ Still NOT VERIFIED:
 - actual Canonical Authority deployment profile and named human production on-call/operator, runbook, RPO/RTO.
 
 Gate B remains blocked until the remaining Gate A conditions pass; Gate C remains blocked until Gate B.
+
+
+## 11. Physical backup/restore, prepared-XID recovery and stale-control fail-closed — PASS (2026-11-17)
+
+Storage added a physical pg_basebackup/restore probe using the same pinned PostgreSQL 18.7 image digest. It deliberately takes a physical backup while one XID is prepared and while a previously visible artifact remains in a stale snapshot. After restore, it verifies the old control-ledger epoch blocks all reads until the newer authoritative Forget-control epoch is replayed.
+
+Exact evidence:
+- Probe: reviews/storage-consistency/postgres_probe/jf10_postgres_backup_restore_probe.py
+- Probe Blob: 81072ea2411af12f29c7a7a4d984df3f870321ca
+- Workflow: .github/workflows/jf10-postgres-restore-capability.yml
+- Workflow Blob: 38369ed197665c4ed99a9ba30602cb5e3b04ba75
+- Pinned image: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+- Successful run: 43909138634
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43909138634
+- Run head commit: 62033b9f90a28c4afdea07fafa0f575342b084e9
+- Job ID: 133445937783
+- Job conclusion: SUCCESS
+
+Observed PASS markers:
+- PG_BASEBACKUP_PHYSICAL_COPY=PASS
+- PHYSICAL_BACKUP_RESTORE_STARTUP=PASS
+- STALE_RESTORE_READ_GATE_CLOSED=PASS
+- PREPARED_XID_SURVIVES_PHYSICAL_BACKUP_RESTORE=PASS
+- CURRENT_FORGET_CONTROL_REPLAY_BEFORE_READS=PASS
+- FORGOTTEN_ARTIFACT_SUPPRESSED_AFTER_RESTORE=PASS
+- UNRELATED_ARTIFACT_REMAINS_READABLE=PASS
+- SAME_XID_COMMIT_AFTER_RESTORE=PASS
+- RESTORED_PREPARED_VISIBILITY_POINTER_PLUS_RECEIPT=PASS
+- JF10_POSTGRESQL_18_7_BACKUP_RESTORE_CAPABILITY=PASS
+
+The backup was taken while the exact participant XID was prepared. The restored server retained that XID; the visibility pointer and receipt remained private. The restored snapshot contained local Forget-control epoch 0 while the test fixture supplied authoritative required epoch 1. The read gate rejected reads before reconciliation. The newer control record was then replayed, the forgotten artifact was suppressed, an unrelated artifact remained readable, and only then was the original prepared XID committed by the same XID.
+
+## 12. Updated Gate A disposition after backup/restore
+
+**Gate A remains PARTIAL PASS / OPEN, but all four executable CI sub-gates now pass on the pinned PostgreSQL 18.7 image:**
+1. Single-node prepared-XID, lock retention, hard restart, same-XID commit/rollback.
+2. Two-node synchronous WAL replay, primary hard loss, standby promotion, same-XID commit/rollback and atomic visibility.
+3. Physical pg_basebackup/restore while a prepared XID exists; same-XID resolution after restore.
+4. Stale restored control snapshot fails closed until newer Forget-control epoch is replayed before reads.
+
+Remaining NOT VERIFIED:
+- production host/zone loss, cloud volume durability, hardware persistence guarantees and real RPO/RTO;
+- production failover fencing/STONITH, quorum manager, split-brain prevention, routing, reconnect and operational recovery ownership;
+- actual Canonical Memory Authority deployment and exact production DB/storage/network/security configuration;
+- named human production on-call/operator and approved runbooks;
+- the external I sequencer, COC quorum log, C provider, application Storage participant adapter and end-to-end JF-10 integration.
+
+The backup/restore control epoch in this CI probe is an explicit test fixture standing in for the externally authoritative I/D Forget-control ledger; it proves the fail-closed gate behavior, not production integration with I or D services. Gate B remains blocked until the real production deployment/operator portion of Gate A is accepted. Gate C remains blocked until Gate B.
