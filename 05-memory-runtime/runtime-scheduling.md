@@ -86,3 +86,7 @@ D canonical read/fence; E index adapters/watermarks; G context requirements and 
 
 ## 21. Open Questions
 OPEN: workload classes and SLO targets; H cancellation/error codes; I per-principal quota identity; E watermark semantics. CANDIDATE: async task groups in modular monolith, bounded per-class queues, deterministic fallback. TO_VALIDATE: scheduler policy, parallelism, queue caps, resource isolation and hardware benchmarks.
+
+
+## 22. Data Model
+ScheduledRequest binds request_id, authenticated principal, normalized Scope refs, environment/task/session refs, permission_epoch, Forget_epoch, request_class, deadline, cancellation state, required canonical/index fence, reserved CPU/RAM/candidate/evidence budgets and correlation_id. ChannelTask binds channel_id, scoped predicate digest, local candidate/fan-out/time budgets, source watermark, task state and outcome. SchedulerLease records admitted quota reservation, expiry and release state. These are Runtime execution records, not canonical domain objects or Agent Planning State.
