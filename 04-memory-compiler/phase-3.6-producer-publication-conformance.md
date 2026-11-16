@@ -93,3 +93,14 @@ E confirms:
 7. After Forget completion, an old task resumed from retry/DLQ/replay/backup must re-resolve the original WorkItemId and source lineage against the current D fence and I authorization/inventory evidence. It cannot create a new WorkItemId to escape the fence.
 
 E accepts the JF-10 v2 proposal's E caller/recovery role and the requirement to remain non-terminal through I/Storage IN_DOUBT. This is a technical owner-side acceptance, not evidence of an executable Compiler, queue, lease service, database participant or passing E36 test.
+
+
+## 4. Phase 3.6.2 additional producer conformance cases
+
+| ID | Scenario | Required result | Evidence to retain | Status |
+|---|---|---|---|---|
+| E36-21 | Offline producer/worker rejoins with queued or leased pre-fence task | Resolve original WorkItemId and latest D fence before source dereference; stale attempt cannot execute, stage, publish or terminalize; no new ID is minted | D receipt lookup, current fence, lease epoch, rejected attempt and audit record | NOT RUN |
+| E36-22 | I ProducerDomainInventoryEpoch changes while Forget is open | Existing InventorySealReceipt is invalidated when membership/capability/scope/evidence obligations change; E does not treat D high-water as global completeness; publication/completion remains blocked until replacement I seal is verified | old/new epoch, seal digest, invalidation reason and refreshed target manifest | NOT RUN |
+| E36-23 | Old Compiler task resumes after D CanonicalSuppressionComplete | Current fence check suppresses before publish; preserve WorkItemId and lineage; late derivative triggers D proof reopen/reconciliation and is never visible | original work receipt, fence generation, task/attempt identity, suppression receipt and reopened proof reference | NOT RUN |
+
+These additions cover three cases not explicit as standalone IDs in E36-01..20. All existing E36 expected outcomes remain unchanged.
