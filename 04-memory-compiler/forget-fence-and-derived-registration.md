@@ -203,3 +203,93 @@ H's message-envelope document and I's Principal/ActorRef contract are CANDIDATE 
 15. Canonical cursor is globally ordered per Brain authority; aggregate revision/lifecycle cursor remain independent; F IndexWatermark is never rewritten by E.
 
 **Acceptance:** design requirements documented only. No runtime implementation, Storage atomicity, conformance test or production safety claim is made.
+
+
+
+---
+## Phase 3.5 — D-to-E Operation Mapping and Publish Gate Evidence
+
+**Normative boundary:** operation names below are the D operation contract names supplied for this workstream. This section states E's consumption requirements only. It does not declare callable APIs, fill D-owned schema gaps, or prove Storage atomicity.
+
+### 1. D-to-E Operation Mapping
+
+| D operation | E invocation point | Required E inputs/evidence | Required D result consumed by E | E failure behavior / OPEN |
+|---|---|---|---|---|
+| RegisterProducerWork | After durable Accepted/CompileIntent identity creation and before queue/lease/run; repeat lookup on recovery | Stable ProducerWorkItemId; ProducerClass ID/version; authenticated ProducerIdentity binding; EventRef + canonical source refs/exact revisions where available; lineage digest; ScopeRefs; operation/correlation/causation IDs; admission CanonicalCommitCursor; observed ForgetFenceCursor; PermissionEpoch/decision ref; request digest | Durable ProducerRegistrationReceipt and registration high-water/ledger position; explicit accepted/rejected result | Unknown ACK => lookup same ID/digest, no dispatch. OPEN: exact fields, errors, producer-class registration API, EventRef-only source semantics, high-water type and fence race linearization |
+| InstallForgetFence | D-owned Forget workflow; E is a consumer/participant, not the installer | E retains registered work IDs, attempt/lease inventory, lineage, output inventory and latest known registration receipt; consume fence/target/barrier snapshot | Durable fence identity/generation, producer-registration barrier high-water, affected target digest, install commit position and recoverable notification | E stops or quarantines affected work, reconciles pre-barrier items. OPEN: notification/query schema, whether D returns complete per-item barrier snapshot, ordering/consistency SLA |
+| RegisterDerivedDependency | After immutable output is staged privately and before any visibility transition | DerivedArtifactRef/version; ProducerWorkItemId; DerivationRunId/AttemptId; direct + transitive source refs/exact versions or approved opaque tokens; ProvenanceRef; ScopeRefs; lineage digest; observed fence; idempotency key/digest | Durable DerivedRegistrationReceipt for every required edge/artifact, plus inventory position and explicit duplicate/conflict result | Partial/unknown registration => artifact remains private; resolve same key/digest. OPEN: authoritative source-ref classes, D vs designated inventory service ownership, atomic batch/partial semantics, exact receipt fields/errors |
+| PublishDerivedIfFenceCurrent | Immediately before publication, after all dependency receipts and current authorization are established | PublicationOperationId; artifact/version; ProducerWorkItemId; DerivationRunId; AttemptId/LeaseId; all dependency receipt IDs; source lineage digest; ScopeRefs; current I authorization decision + PermissionEpoch; observed ForgetFenceCursor; request digest | Durable PublicationReceipt bound to artifact/version, exact dependencies, checked fence, permission epoch, visibility result and commit identity | Any stale/unknown fence, auth failure, missing receipt or ambiguous outcome => no visibility; query same operation ID. OPEN: whether D performs visibility commit or issues a single-use token consumed atomically by Storage; cross-store linearization and error taxonomy |
+| CompleteProducerWork | Only after all output, dependency, publication/canonical-commit and no-future-publication outcomes are durably reconciled | ProducerWorkItemId + RegistrationReceipt; terminal disposition; all Attempt/DerivationRun IDs; output inventory digest; dependency/publication/canonical receipt refs; observed final fence + auth evidence; terminal request digest | Durable terminal acknowledgement and barrier-ledger state; idempotent same-evidence result or conflict | Lost ACK => lookup same work ID/digest; never locally assume barrier closure. OPEN: terminal enum/schema, required proof completeness, reopen/invalidation behavior for late derivative |
+
+InstallForgetFence is not an E API call. E consumes its durable outcome and ensures every E work item in the captured barrier remains discoverable until terminal acknowledgement. E does not claim authority to install or advance D's fence.
+
+### 2. Required operation ordering
+
+1. Persist AcceptedReceipt + CompileIntent + stable ProducerWorkItemId/outbox.
+2. Confirm ProducerClass registration is active (class-registration API remains D OPEN).
+3. Call/resolve RegisterProducerWork; do not queue, lease or execute until its durable receipt is known.
+4. Acquire LeaseId/AttemptId; revalidate current I authorization/PermissionEpoch and D fence before protected source reads.
+5. Execute compile stages and write immutable Candidate/Staged artifacts to private storage only.
+6. Build complete direct/transitive dependency set and call/resolve RegisterDerivedDependency for every artifact/version/edge.
+7. Reauthorize and fetch/validate the latest applicable fence immediately before gate request.
+8. Call/resolve PublishDerivedIfFenceCurrent; visibility transition must share D's specified atomic boundary. If no such proven boundary exists, remain staged/private.
+9. Record PublicationReceipt separately from CanonicalCommitReceipt and IndexAppliedAcknowledgement.
+10. Call/resolve CompleteProducerWork only when terminal disposition is durable and no retry/replay/publication path remains unaccounted.
+
+### 3. Staging, dependency durability and visibility
+
+- CandidateProposition, ExtractionIR, normalization output, consolidation candidates, embeddings, summaries, provenance edges, outbox payloads and all other derivatives are private until publication succeeds.
+- Staging storage MUST be excluded from Runtime retrieval, canonical reads, F indexers, G context builders, H delivery, exports and general-purpose search. “Not linked from UI” is not an access-control boundary.
+- Dependency registration is durable and idempotent. A derivative is not eligible for publication until the full required dependency set is acknowledged. Partial success is a private incomplete state, never partial visibility.
+- The final gate checks the latest D fence and current I authorization at its linearization point. A precheck, worker lease, earlier generation, cached permission decision or local E database read is insufficient.
+- Fence installation and final publication must serialize so that either publication linearizes before fence installation and is included in the barrier/inventory, or fence installation wins and publication is rejected/quarantined. There is no third outcome in which a late derivative becomes visible outside the barrier.
+- If dependency registration and visibility cannot be one atomic transaction, only a D-approved durable prepare/commit protocol with recovery and no-visible-before-commit semantics is acceptable. An uncoordinated “D token then Storage write” is not sufficient.
+- Any fence/authorization/lineage/receipt failure leaves the artifact private and marks the work blocked/suppressed. E must not silently drop it or report success.
+
+### 4. Publish Gate Evidence bundle
+
+| Evidence | Required binding |
+|---|---|
+| Work identity | ProducerClass ID/version, ProducerWorkItemId, ProducerRegistrationReceipt, DerivationRunId, AttemptId, LeaseId |
+| Source lineage | EventRef, source canonical refs + exact revisions, complete direct/transitive lineage digest, ProvenanceRef, ScopeRefs |
+| Authorization | authenticated ProducerIdentity reference, I PolicyDecision reference, PermissionEpoch, action/resource/audience/scope binding, decision validity at gate |
+| Forget state | latest D ForgetFenceCursor/generation observed at gate, target-set/lineage applicability result, D gate decision reference |
+| Dependency proof | complete list/digest of DerivedRegistrationReceipt IDs and inventory position |
+| Publication proof | PublicationOperationId, PublicationReceipt, artifact/version, visibility commit identity/time and result |
+| Recovery proof | idempotency request digests, ACK lookup/recovery outcome, correlation/causation IDs |
+
+The evidence bundle proves only the named publication boundary. It is not a global Forget completion proof, physical-erasure proof, F index watermark or G context delivery proof.
+
+### 5. Explicit OPEN contract gaps (do not promote to DECIDED)
+
+- OPEN-E/D-01 RegisterProducerWork: ProducerClass registration/version, EventRef-only ingress, source-revision availability, authenticated producer binding, registration high-water type, exact receipt and duplicate/conflict/error codes.
+- OPEN-E/D-02 RegisterProducerWork vs InstallForgetFence: transaction/linearization rule and exact serialization outcomes for concurrent admission and fence install.
+- OPEN-E/D-03 RegisterDerivedDependency: authoritative inventory owner, full source-reference type set, transitive closure rule, batch/partial behavior, receipt and retry/error semantics.
+- OPEN-E/D-04 PublishDerivedIfFenceCurrent: exact latest-fence read/serialization and authorization check, output/evidence schema, whether gate commits visibility or coordinates a D/Storage CAS/transaction.
+- OPEN-E/D-05 CompleteProducerWork: terminal dispositions, terminal evidence schema, late derivative invalidation/reopen behavior, ACK lookup and conflict rules.
+- OPEN-E/ST-06 Storage atomicity: atomic dependency registration + visibility, durable prepare/commit alternative, crash recovery, isolation and read-path enforcement are not selected or tested.
+- OPEN-E/I/B/H-07 Identity binding: exact ActorRef/ScopeRef/ProducerIdentity schema remains joint B/I/H work; Fact/Claim ADR remains ADR-BLOCKED.
+- OPEN-E/I-08 Retention: idempotency/tombstone and replay evidence retention horizon remains I-owned and numerically OPEN.
+
+### 6. Fault and race conformance matrix (design only; NOT EXECUTED)
+
+| ID | Race/fault | Required safe outcome | Evidence required |
+|---|---|---|---|
+| D-RACE-01 | RegisterProducerWork races InstallForgetFence | Exactly one serialized outcome: included at/below captured barrier, or rejected/quarantined; never untracked admitted work | D registration receipt/high-water, fence barrier snapshot, transaction ordering result |
+| D-RACE-02 | Queued work exists when fence installs | Queue item remains in D barrier; cancel/quarantine or drain to durable terminal disposition | Work ID, queue/outbox state, terminal ACK |
+| D-RACE-03 | Leased/in-flight compile completes after fence | Final gate rejects; staged output stays private and is suppressed/quarantined | Attempt/Lease IDs, observed/current fence, gate denial, private-stage proof |
+| D-RACE-04 | Retry scheduler fires after fence | Same work ID remains barrier-open; new attempt rechecks current fence/auth and cannot publish stale lineage | Retry event, new AttemptId, registration lookup, denial/terminal evidence |
+| D-RACE-05 | DLQ replay after fence | Replay is registered/reconciled under original lineage and rejected/quarantined for forgotten source | DLQ item, replay AttemptId, fence result |
+| D-RACE-06 | Lease expires during fence drain | Expiry does not close barrier; recovery creates new attempt or explicit terminal evidence | Lease history, unresolved work ledger, recovery/terminal ACK |
+| D-RACE-07 | Partial dependency registration | Artifact remains private; resume same idempotency keys or quarantine | Per-edge receipts, missing-edge set, no-visible assertion |
+| D-RACE-08 | Fence advances after staging but before final gate | Latest fence wins; publication denied | staged artifact, fence generations, gate result |
+| D-RACE-09 | PermissionEpoch revoked/advanced before gate | Authorization fails closed; no visibility even if Forget fence unchanged | PolicyDecision, old/current epoch, gate denial |
+| D-RACE-10 | Late derivative discovered after barrier/proof | Immediately suppress; register target, invalidate/reopen proof and alert D/I; no silent completion | lineage, discovery time, new dependency entry, invalidation event |
+| E-FAULT-11 | Compiler process crashes after D registration | Recover same ProducerWorkItemId and intent; never create untracked duplicate | registration receipt lookup, recovery log, attempt sequence |
+| E-FAULT-12 | Outbox replay duplicates dispatch | At-least-once replay resolves same work/receipt; no duplicate logical work or side effect | outbox event ID, work ID, idempotency digest, duplicate result |
+| E-FAULT-13 | DLQ replay repeated or concurrent | Same work ID; distinct attempts; one terminal/publish result, duplicates reconcile idempotently | DLQ ID, AttemptIds, gate/publication receipts |
+| E-FAULT-14 | Recompile after Forget | New DerivationRunId cannot bypass original source lineage; D rejects/quarantines forgotten ancestry | original EventRef/work ID, prior run, new run, current fence decision |
+| E-FAULT-15 | Duplicate AcceptedReceipt submission | Same authenticated namespace + same semantic digest returns original receipt/intent; no duplicate admission | receipt ID, idempotency key/digest, existing work identity |
+| E-FAULT-16 | Lost RegisterProducerWork ACK | No enqueue/lease until lookup by same ID/digest proves durable registration or rejection | request digest, lookup response, dispatch hold |
+
+These cases are specification acceptance criteria only. No runtime test, fault injection, race execution or implementation conformance is claimed.
