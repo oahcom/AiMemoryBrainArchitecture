@@ -295,3 +295,70 @@ The v2 still needs an explicit owner for the authoritative CausalOrderDomain reg
 - Storage Design v2 Blob `bb026...`: fresh review required; no cross-owner acceptance is inferred.
 - Gate B implementation/conformance: NOT RUN; Gate C deferred to engineering.
 
+
+
+## 12. Current Storage v2 / §14 identity alignment — blocking cross-document consistency
+
+Current exact source pins:
+- Phase 3.6.3 COC protocol v1.1 with §14: Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`.
+- Storage Design v2: Blob `bb026fa79b617c4bab84de84c3ff2337ca5bf96c`.
+- Storage readiness/Gate A contract: Blob `b9e664dfbed1c0f268b2b8b0d9c2ddcd29221bf1`.
+- Storage exact dossier: Blob `0aabf66848dc97deee028c571183c0d7204008c0`.
+- Storage self-review file: Blob `332de9192ccab6f18fc2a0d18700cc9585a98983`.
+
+### 12.1 What the v2 proposal improves
+
+Storage Design v2 explicitly adds the recovery completion record, two-step batch/manifest commit, exact participant-set digest/count/locator, repeated cutoff-batch handling, owner-signed gate release, per-fence D lineage membership, I/D/C owner gates and exact A/H bridge record names. These directly address the earlier v1 recovery-cutoff gaps.
+
+### 12.2 Three-way identity mismatch
+
+Phase 3.6.3 §14 correctly defines:
+1. `PreparedParticipantRef`: stable engine-neutral cross-service participant identity.
+2. `PreparedTransactionGID`: client-chosen PostgreSQL prepared-transaction GID, allocated/bound before COC prepare intent.
+3. PostgreSQL numeric native XID: engine-assigned after PREPARE, recorded only as observed evidence.
+
+But two current Storage documents still say “preallocate the exact XID” and bind the generic XID as the participant identity:
+- Storage Design v2 §7 uses “preallocated XID” / “same XID” without naming PreparedTransactionGID or separately typing native XID.
+- Storage readiness §26.2 says “Preallocate and durably bind the exact XID” before PREPARE, also without the GID/native-XID distinction.
+
+The common JF-10 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0` and H schema candidate Blob `a8a945cc3623c2907003b93625e3c79742150944` must be checked against this new distinction. H currently has opaque `preallocated_storage_xid_ref` and `storage_xid_ref` fields; no mapping may be inferred without H's explicit decision.
+
+**Required correction:** use one canonical typed tuple throughout:
+- `PreparedParticipantRef` — cross-service identity;
+- `PreparedTransactionGID` — PostgreSQL stable client-chosen recovery handle;
+- `NativeXidObserved` — engine-assigned numeric XID evidence;
+- `DBIdentity` — cluster/system_identifier + database identity/OID;
+- prepare timeline/LSN and COC prepare-intent position/digest;
+- immutable operation/request digest and owner boundary.
+
+The same GID must be allocated and durably bound before COC prepare intent, recorded in the COC log, included in Storage's signed PreparedParticipantReceipt, bound by I's final-gate decision and reused for all same-participant lookup/COMMIT PREPARED/ROLLBACK PREPARED. Native XID is not a substitute. B must approve the types; H the wire fields; I the security/authorization tuple; C/D/E the operation/participant/producer binding; A the integration contract.
+
+### 12.3 Normative protocol / Storage design v2 relationship
+
+The current COC protocol and Storage Design v2 overlap but use different RecordType/state names:
+- Protocol v1.1 uses `RECOVERY_CUTOFF_BATCH`, `RECOVERY_RECONCILIATION_RECORDED`, `VoterConfigurationEpoch` and `COCCommitReceipt`.
+- Storage Design v2 uses `COC_RECOVERY_CUTOFF_BATCH`, `PARTICIPANT_SET_RECONCILIATION`, `OWNER_LOCAL_GATE_RELEASE`, `RECOVERY_EPOCH_COMPLETED` and exact H bridge names.
+- The v2 record envelope does not clearly carry the same VoterConfigurationEpoch/quorum-proof fields as the protocol v1.1 envelope; it only binds a committed configuration epoch in the recovery prefix.
+
+These may be complementary (COC service protocol + Storage recovery realization), but the repository needs one canonical manifest and a normative RecordType/API/wire mapping. A must state which artifact is normative for the COC service; Storage must state which v2 fields extend it; H must approve the exact schema; B must approve typed refs. Any conflicting names/fields must be versioned aliases or consolidated, not left as parallel normative definitions.
+
+### 12.4 Current exact-version status and document hygiene
+
+- Blob `4ac63...`: role-based design acceptance from A/B/C/D/E/G/H/I/Storage with enumerated exceptions.
+- Blob `86ff3...`: Storage accepts with conditions (readiness §§26–27); A/B/C/D/E/G/H/I exact decisions still pin `4ac63...` and do not automatically carry forward.
+- Storage Design v2 Blob `bb026...`: fresh review required; no cross-owner acceptance yet.
+- Storage self-review Blob `332de...` still pins old Blob `4ac63...`; the dossier/readiness have newer Storage acceptance of `86ff3...`. Storage should update the self-review or clearly mark it historical.
+- A's COC acceptance matrix covers Blob `4ac63...`, not `86ff3...` or Storage Design v2. A's context decision register and closure tracker also remain stale against new F/G/D and COC Owner decisions.
+
+### 12.5 Required next decisions
+
+1. Storage: update Design v2 and readiness §26.2 to use PreparedTransactionGID/native-XID distinction; publish exact new blob and version relationship to protocol86ff.
+2. A: publish a single canonical Gate B manifest that pins protocol86ff + Storage Design v2 + A COC/JF-10 architecture a3c51 + common JF-10 contract + H schema candidate, and identifies normative ownership.
+3. B: define/accept PreparedParticipantRef, PreparedTransactionGID, NativeXidObserved and DBIdentity as distinct types.
+4. H: map the exact GID/native-XID tuple to versioned BMCP fields and validators; no wire acceptance is inferred from Blob4ac.
+5. I/D/C/E: review the same tuple against authorization, Forget participant identity, provider idempotency and compiler producer registration.
+6. G: review only the recovery/owner-gate evidence consumed by Applied; do not assign G ownership over COC or Storage.
+7. A/B/C/D/E/G/H/I/Storage: exact-version review of the current amended protocol and Storage Design v2 as a single declared package or explicitly versioned complementary pair.
+
+**Disposition:** Gate B has a fully reviewed prior design revision (4ac63) with exceptions. The current protocol revision (86ff) has Storage-only conditional acceptance; the Storage Design v2 (bb026) is a fresh proposal. The GID/native-XID and protocol/v2 mapping are P0 cross-document blockers to freezing the current Gate B package. No implementation or Gate C pass is claimed.
+
