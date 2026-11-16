@@ -1626,3 +1626,28 @@ The CI fence is a stopped Docker container on one runner. Production STONITH/clo
 4. Name accountable production operator/on-call; approve runbook, RPO/RTO and independent operational acceptance.
 
 Current disposition: Gate A PARTIAL PASS / OPEN; Gate B BLOCKED pending Gate A acceptance; Gate C BLOCKED pending Gate B; JF-10 P0 OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain BLOCKED. No Storage-owned file was changed by A.
+
+
+## 13.41 Gate A — deep PITR scope audit; no new recovery-boundary evidence yet — 2026-11-17
+
+A refreshed the Storage branch tree at commit `0f57f7a191f81d54a0bf1be9768fd91c00a2ef8d` and inspected every JF-10 PITR/restore workflow and probe path. No new deep-PITR workflow or probe artifact is present at this branch head; the branch tree contains the existing explicit-LSN PITR probe and the separate physical-backup/restore probe only.
+
+### Existing evidence that must not be conflated
+
+1. **Explicit-LSN WAL PITR** remains the narrow marker-row test: probe Blob `6e7721ee8f8708357610e0bc564e015872b8263c`, workflow Blob `4c2175055ae43ccebb95f219952ec0480121e62d`, run `43927783471`. It checks base/target/post-target marker rows and timeline/replay diagnostics. It does not create a prepared participant or test archive-negative cases.
+2. **Physical pg_basebackup restore** is a separate passing test: probe Blob `81072ea2411af12f29c7a7a4d984df3f870321ca`, workflow Blob `38369ed197665c4ed99a9ba30602cb5e3b04ba75`. It verifies one prepared XID survives a physical backup/restore, its visibility/receipt rows are initially private, then same-XID COMMIT exposes both; it also tests stale local control epoch fail-closed behavior.
+3. The physical-restore probe explicitly synthesizes the external Forget-control epoch in local test code and applies it directly to a fixture table. It is not a live I/D control-ledger client, signed sequencer proof, or production RecoveryQuarantined integration.
+
+### Newly identified acceptance boundary
+
+The existing two probes cannot be combined into a claim of prepared-XID-safe WAL PITR. The PITR workflow's backup is taken before its target marker and does not stage/prepare the JF-10 participant. The physical-restore test is not recovery to an explicit WAL target. Neither test tests missing/corrupt/incomplete WAL fail-closed behavior. The existing atomicity assertion is table readback of two fixture rows, not a complete authoritative reader/bypass-path integration.
+
+### Current disposition
+
+- A1 documentation reconciliation: CLOSED (documentation only).
+- A2 synchronous-standby-unavailable UNKNOWN/private/lock-retention CI subtest: PASS (bounded).
+- A3 explicit-LSN marker-row PITR: PASS (bounded); deep PITR recovery safety: OPEN.
+- A4 pg_rewind/rejoin procedure: PASS (bounded CI); production fencing/split-brain: OPEN.
+- Gate A: PARTIAL PASS / OPEN. Gate B/C BLOCKED. JF-10 P0 OPEN. Production activation NOT AUTHORIZED.
+
+This audit does not modify Storage-owned files and does not promote fixture evidence to real I/D integration.
