@@ -161,3 +161,74 @@ Storage CI provides real engine-capability evidence for PostgreSQL 18.7 under th
 | D COC acceptance | `06bce7f13bfe003d6d70b8d57c9522f5e46e2ed9` | `e2a74d138ccebfb4266d19ea0c0c03f58a815bf5` |
 
 This refresh changes only the D technology review report. It does not modify D module contracts, Storage artifacts, TAB-001, or any other Owner branch. No end-to-end D/E/Storage/I/COC implementation test or Global Forget completion is claimed.
+
+
+## 11. TAR-AI-001 mandatory-section index and final D disposition
+
+### Executive Summary
+
+**CONDITIONAL PASS** for D semantic and technology architecture; **BLOCKED** for integrated Storage implementation and JF-10 application conformance. PostgreSQL 18.7 is a qualified CI capability candidate, not a production engine approval.
+
+### Review Scope
+
+TAB-001, D canonical store, cursor semantics, Forget/publication gate, D/E joint linearization, JF-10, D COC acceptance, current E producer decisions, I JF-10 disposition and Storage branch capability evidence were inspected. The latest D owner design source HEAD before report publication was `06bce7f13bfe003d6d70b8d57c9522f5e46e2ed9`; Storage source HEAD `7a1b733c2e83fd2427aacdd18bd30518b27fcd72`.
+
+### Six-Dimension Review Conclusions
+
+1. **Technical Requirements & Workload Fit:** CONDITIONAL — semantic operations and typed cursors are specified; production workload envelope unmeasured.
+2. **Component Dependencies & Boundaries:** CONDITIONAL — D/E/I/Storage/COC authority split is coherent; application adapters absent.
+3. **Candidate Technology Selection:** CONDITIONAL — PostgreSQL 18.7 is the leading prepared-XID capability candidate; SQLite remains an unqualified alternative for JF-10; no production database ADR.
+4. **Resource Constraints:** NOT MEASURED — throughput, lock duration, prepared-XID backlog, WAL, blob, RAM/disk, backup/restore and operations need measurement.
+5. **Failure Recovery & Operational Safety:** BLOCKED — engine capability CI passed, but application D/I/COC integration and end-to-end recovery are not run.
+6. **Interface & Compatibility:** CONDITIONAL — typed cursor/fence/epoch/XID boundaries are clear; callable APIs, receipts and F/G consumers remain unimplemented.
+
+### Component Dependency Analysis
+
+D owns canonical identities, immutable revisions, CanonicalCommitCursor, LifecycleEventCursor, ForgetFence and producer barrier. E owns WorkItem/Attempt/Lease/manifest. I owns PermissionEpoch/CommitAuthorizationReceipt/revocation and global inventory. Storage owns physical XID, VisibilityPointer and PublicationReceipt. COC records order/participant observations only. F/G/H/C are downstream consumers and cannot infer global Forget or Applied from D-local state.
+
+### Candidate Technology Comparison
+
+PostgreSQL 18.7 supports tested prepared-XID and recovery capabilities under the pinned CI profile, but has server/ops overhead and remains unbound to production. SQLite WAL is low-footprint and appropriate for local transactional prototypes, but its ordinary transaction model does not demonstrate durable external prepared-XID participant recovery. RocksDB/KV adds application-level transaction/constraint burden. A database-backed outbox is suitable for local queues but is not the barrier authority. Recommendation: continue PostgreSQL 18.7 as the JF-10 integration target while retaining SQLite only as a comparative prototype; make no final engine ADR before application-level race/recovery evidence.
+
+### Resource Budget Analysis
+
+No application performance or capacity measurement is claimed. Benchmark concurrent canonical writers/readers, transaction and lock duration, prepared-XID/in-doubt count, D barrier latency, WAL growth/checkpoint, blob throughput, backup/PITR/restore throughput, connection/RAM/disk overhead and recovery time. Keep model inference outside D commit path.
+
+### Failure & Recovery Matrix
+
+- Admission wins before fence → work included in captured high-water.
+- Fence wins before admission → durable reject/quarantine; no lease or source dereference.
+- Dependency registration incomplete → private/no visibility.
+- Publish wins before fence → durable publication included in pre-fence reconciliation.
+- Fence wins before publish → reject; private artifact.
+- I COMMIT_WON + Storage crash → same-XID forward recovery, private until Storage visibility commit.
+- I REVOCATION_WON → same-XID rollback/no publication.
+- UNKNOWN/IN_DOUBT → preserve participant, locks and barrier; no timeout/TTL release.
+- Restore → quarantine and reconcile current D/I control state before serving.
+- PostgreSQL capability subtests are PASS for their pinned CI profile; application-level D/E/I/COC cases remain NOT RUN.
+
+### Interface Compatibility Findings
+
+CanonicalCommitCursor is one global sequence per Brain authority; AggregateRevision and LifecycleEventCursor are independent. ForgetFenceGeneration, ProducerRegistrationHighWater, PermissionEpoch, ProducerDomainInventoryEpoch, IndexWatermark, ContextVersion, AdapterCapabilityEpoch, Storage XID and COC positions remain distinct. I JF-10 v2 accepts one PolicyDomainRef only. D local CanonicalSuppressionComplete is not I Global Forget completion or physical erasure.
+
+### Blocking Findings
+
+P0: D/E/Storage atomic admission/fence/dependency/publication/terminal integration not implemented; JF-10 same-XID I/Storage application recovery not integrated. P1: current Storage protocol exact-owner acceptance/re-review; canonical commit/cursor/outbox app tests; DB/blob/backup/restore integration; D/I ledger and F/G consumer conformance.
+
+### Required ADRs
+
+Database engine/profile ADR (PostgreSQL vs SQLite under app harness); Storage isolation/participant/XID recovery ADR; blob/DB visibility and backup/PITR ADR; B Fact/Claim ADR remains upstream and blocks schema freeze.
+
+### Required Prototypes and Tests
+
+PostgreSQL/SQLite same-fixture app harness; D36/E36 deterministic race suite; JF-10 prepare/commit/rollback/unknown crash matrix; I sequencer and D ledger integration; WAL/PITR/corruption/disk-full/restore-after-Forget; blob orphan/digest tests; F/G cursor/fence consumer tests; concurrency and resource benchmarks. Engine CI is not a substitute for these application tests.
+
+### Verdict
+
+**CONDITIONAL PASS** for semantic design and candidate technology direction; **BLOCKED** for implementation acceptance and global Forget completion.
+
+### Evidence and Exact SHAs
+
+See §10.5 for the current D/Storage exact evidence manifest and this report's publication commit. Additional controlling source blobs: D canonical store `6b37c91033fda21f072e2a3bde6f274663b1e76e`; D cursor semantics `4688a0ca487bf4d853c7f0220408abe8d743d159`; D publication gate `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`; D JF-10 `94679897e84a6f58fd8b9467b5249e1a885cb0b0`; E producer conformance `a17f065e69e809fceacb51873d6a36a8b0f5c235`; I PermissionEpoch `bae6a24fe3a374bc816993979a8fa9af52517dea`; I Global Forget inventory `9100061fa986fb6676656169de3fcf9fc1c72664`.
+
+This appendix is part of the D review report only. No module contract, TAB-001, or other Owner report is changed.
