@@ -16,7 +16,7 @@ FenceSnapshotReceipt must immutably bind all values, ForgetOperationId, target-s
 
 ## 2. JF-02 — Authorization commit freshness
 
-The physical commit must consume a verifiable I AuthorizationCommitPermit bound to exact principal/action/resource/scope/lineage/work/attempt/lease/dependency/fence values, PermissionEpoch, revocation watermark, policy version, audience, expiry and nonce.
+The physical commit must consume a verifiable I CommitAuthorizationReceipt bound to exact principal/action/resource/scope/lineage/work/attempt/lease/dependency/fence values, PermissionEpoch, revocation watermark, policy version, audience, expiry and nonce.
 
 The deployment must provide a revocation-vs-publication serialization guarantee: same atomic authority, or an I-issued linearizable commit fencing grant whose validity cannot overlap an effective revocation, or an equivalently proven distributed commit protocol. A plain signed snapshot with an unchecked expiry is insufficient if revocation can take effect before visibility commit. If no such protocol exists, final commit is denied. Storage records the permit ID/epoch/watermark in PublicationReceipt but does not decide I policy.
 
@@ -89,3 +89,14 @@ The coordinator's linearized operation set MUST include output declaration, clos
 ### JF-09 — Gate commit compares current inventory seal and manifest version
 
 The visibility transaction MUST compare the exact current frozen OutputManifestVersion/digest and applicable current InventorySealReceipt / ProducerDomainInventoryEpoch against the values bound to dependency registration and the publication request. These checks occur inside the visibility linearization boundary. A manifest reopen/version advance or inventory epoch advance before commit makes the old dependency receipt/gate stale and the artifact remains private until refreshed evidence is committed. This comparison is separate from, and in addition to, fence generation, PermissionEpoch permit, WorkItem/Attempt/Lease and dependency digest validation.
+
+
+## 10. I CommitAuthorizationReceipt integration and JF-10
+
+The latest I technical baseline is `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` (I HEAD observed `8d1ddadb6af70a7c387105d20ca8f2f6de80c5fb`, Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`). Storage adopts its exact `CommitAuthorizationReceipt` name and semantics for consumption; I remains the sole authority and governance approval remains blocked.
+
+The receipt binds the complete I tuple: policy domain, PermissionEpoch, PrincipalRef, ActorRef, action, ResourceRef, purpose, audience, ScopeBindingSet digest, EnvironmentRef, DelegationChainRef, operation ID, operation payload digest, owner boundary and I decision ID. It is single-use and not an offline lease. The final visibility gate must participate in the same I per-domain linearizable commit sequencer as revocation. Storage must retain the receipt ID, decision ID, sequencer position, epoch, operation digest, owner transaction/commit cursor, revocation event/epoch if relevant, and terminal outcome `COMMIT_WON`, `REVOCATION_WON` or `INDETERMINATE_ABORTED`. No offline lease or stale-epoch grace is permitted.
+
+**JF-10 — Crash-atomic coupling between I sequencer and owner visibility commit (P0 OPEN).** The current I technical document defines ordering and terminal outcomes but does not fully specify the cross-authority crash protocol that guarantees the I sequencer's COMMIT_WON is atomically/recoverably coupled to the Storage VisibilityPointer + PublicationReceipt commit. Required closure: define the commit handshake/participant protocol, durable correlation ID and operation digest, idempotent outcome lookup across both authorities, handling of sequencer COMMIT_WON followed by owner transaction abort/crash, owner commit followed by lost sequencer/owner ACK, duplicate receipt replay, and the single authoritative terminal outcome. A timeout or one-sided receipt cannot be interpreted as success. Prepared/ambiguous artifacts remain hidden; unresolved cross-authority state is INDETERMINATE_ABORTED or UNKNOWN and cannot publish/terminalize. I + Storage must jointly approve this protocol; DE-S cannot infer it from the existence of a signed receipt.
+
+The selected local DB transaction remains the baseline for D/E/Storage records. It is not by itself proof of I/Storage cross-authority atomicity. Until JF-10 is resolved, final visibility publication is blocked.
