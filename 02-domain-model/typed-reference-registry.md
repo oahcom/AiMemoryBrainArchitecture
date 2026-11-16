@@ -129,3 +129,52 @@ Do not reveal protected object existence through error distinctions where I poli
 - **OPEN:** D/E callable producer admission/registration operations and exact ref serialization.
 - **OPEN:** cross-Scope algebra and Environment bridge governance.
 - No implementation, cryptographic, runtime or conformance test is claimed by this document.
+
+ 
+## 9. Phase 3.6 Registry Closure Addendum (B-owned semantics; dependent decisions remain Candidate)
+
+- **Status:** CANDIDATE — domain typing and separation rules proposed by B; not a cross-module freeze and not I policy approval.
+- **Baseline:** B branch HEAD `66adf6bdcf5ec69a146fe75afe20ce3b85af8448`; prior registry blob `50252bce6a531c4087678c1e85b0cb8fe8348dd3`.
+- **Decision boundary:** B defines type meaning and constraints. I alone approves issuer trust, principal registration, delegation, authorization, revocation and PermissionEpoch policy. H owns wire encoding and transport binding. C/D/E own their respective producer/consumer field semantics.
+
+### 9.1 Complete typed-reference registry
+
+| Type | Domain meaning | Namespace | Authority / issuer | Stability | Lifecycle | Cross-Scope reference | Payload self-declaration | Trusted validation boundary |
+|---|---|---|---|---|---|---|---|---|
+| `PrincipalRef` | Stable security subject (human, Agent workload, service, Adapter or recipient) | Issuer + tenant/security-domain + principal-kind namespace | I Principal registry; credential/assertion issuer is identified by IssuerRef | Stable opaque subject ID; never reassigned; credential rotation does not change subject identity | Active/disabled/revoked/retired status is I-authoritative; historical attribution remains addressable | No implicit cross-tenant alias; federation mapping must be explicit | May appear only as an untrusted claim/selector; cannot prove identity | H authenticates transport/session; I validates issuer, credential, audience, status and subject binding |
+| `IssuerRef` | Typed identity of the authority that issued a credential, assertion or signed grant | Issuer registry namespace + trust domain | I owns trusted-issuer registry and trust policy; external issuer controls its own keys, not local trust admission | Stable issuer identity; key/credential rotation is a separate versioned security event | Trusted, suspended, compromised, retired or unknown states are I-authoritative; never reuse issuer ID | No transitive cross-Issuer trust; federation requires explicit I trust mapping | Payload issuer value is an untrusted claim, never a trust anchor | Verifier obtains issuer/key identity from protected credential metadata and resolves it against I trust registry |
+| `ActorRef` | Immutable per-operation attribution binding an authenticated Principal and any verified acting/delegation context | Issuer + security domain + operation/attribution namespace | B owns semantic type; I validates Principal/issuer/delegation assertions; H supplies authenticated binding | Immutable per operation; distinct ActorRef for distinct operation/auth context; never credential | Historical attribution immutable; present usability depends on current I trust, revocation and authorization | No implicit crossing; operation-specific Scope and grant checks required | A payload may carry a claimed ActorRef for correlation, but cannot mint or authenticate it | Only verifier-issued binding assembled from protected auth context and resolved registries; D/E revalidate at protected boundary |
+| `AgentRef` | Stable logical Agent identity, not runtime instance or security subject | Agent registry + tenant/security domain | Agent/deployment registry; I binds Agent to Principal; B defines ref semantics | Stable logical identity; config/version and instance are separate | Registered, active, suspended, retired; no ID reuse | Multiple scopes only through explicit registered association and authorization | Payload Agent ID is a selector/claim only | H/I validate authenticated workload assignment and Agent registry binding |
+| `AdapterRef` | Registered protocol Adapter application identity; concrete instance is separately identified | Adapter registry + issuer/security domain | H owns Adapter/capability registry; I owns Adapter Principal trust and revocation | Application identity stable; instance/session/capability epoch are distinct | Registered, active, disabled, revoked, retired; instance replacement does not silently inherit identity | No implicit managed-region/Context sharing across scopes | Payload adapter ID is an untrusted claim | H authenticates Adapter transport/workload and resolves instance; I validates bound Principal and current authorization |
+| `ProducerRef` | Registered producer/application/workload allowed to emit declared event/work families | Producer registry + issuer + tenant/security domain | I owns producer trust/registration/revocation; C declares telemetry claim; E enforces ingress; D owns per-work admission | Stable producer identity; workload instance and registration epoch rotate independently | Registered, active, suspended, revoked, retired; historical attribution retained | Explicit per-domain and allowed-Scope/event-family registration; no string-equality sharing | Payload producer_id/producer_claim is assertion only | H authenticates workload; I resolves ProducerIdentity; C/E compare claim; D separately checks work barrier |
+| `ScopeRef` | Registered ownership or applicability/data boundary | Scope authority + tenant/security domain + Scope kind + opaque ID | B owns semantic type; authoritative registry and grant policy are I/Governance-owned | Stable opaque identity; descriptor/parent changes are versioned, not ID reuse | Active, suspended, closed or retired; historical reference may resolve subject to retention | Cross-Scope relation may be represented only with explicit compatible relation; dereference/action separately authorized | Payload ScopeRef may be an untrusted hint; never authoritative by itself | Resolve against authoritative Scope registry; validate kind, authority, owner, parent, status and binding; I authorizes action |
+| `EnvironmentRef` | Registered external state domain (world/save/simulation/device fleet), not a label | Environment authority + tenant/project + environment-kind namespace | Environment registry/owner; I governs trust binding and cross-environment policy; B defines semantics | Stable environment identity; environment revision is separate | Active, suspended, closed or retired; historical identity not reused | Cross-environment references denied by default; bridge requires explicit mapping and authorization | Payload environment_id is an untrusted selector/claim | Authenticated Environment Adapter or authoritative registry resolves exact ref; I authorizes bridge/action |
+| `RuntimeSessionRef` | One authenticated, bounded runtime/session instance used for correlation and operation binding | Issuer + runtime/Agent/Adapter instance + session namespace | H/I session authority; verifier/session service issues it; B defines reference semantics | Short-lived, unique, non-reusable; renewal creates a new ref | Created, active, expired, revoked, closed; no resurrection after expiry/revocation | No implicit cross-Scope use; session's bound Principal/Agent/Adapter and scope constraints must match | Payload session_id is correlation/claim only; never authentication | H verifies protected channel/session; I validates issuer, Principal binding, audience, expiry and revocation |
+
+### 9.2 Identity, claim, credential and authentication result
+
+These are four different layers and MUST NOT be collapsed:
+
+1. **Reference:** typed address to an identity/resource. A reference does not authenticate its presenter and grants no access.
+2. **Identity Claim:** untrusted statement such as payload `principal_ref`, `actor_ref`, `producer_id`, `agent_id`, `adapter_id`, `scope_ref`, `environment_id` or `session_id`. It is a selector/assertion to compare with trusted context.
+3. **Authentication Credential:** verifier-consumed material (for example, credential/key-backed proof). It belongs to the authentication boundary and MUST NOT be embedded in a Ref or logged as a domain field.
+4. **Authenticated Principal:** verifier result after credential, issuer, audience, validity, key and revocation checks. It is represented by a resolved PrincipalRef plus protected authentication-context evidence; the Ref alone is not that evidence.
+
+ActorRef, AgentRef, AdapterRef and ProducerRef are never authentication credentials. A signed payload/digest may prove integrity under a key but does not establish that the key is trusted or authorized to assert the payload identity.
+
+### 9.3 Serialization and declaration rules
+
+- Every serialized reference preserves discriminator, issuer/authority, namespace/security-domain and opaque object identity. Exact wire field names and canonical encoding remain H-owned and OPEN.
+- Unknown or incompatible discriminator, issuer/namespace mismatch, unresolved authority, retired identity or malformed version binding fails closed.
+- Payload-supplied references remain claims until independently resolved. A payload cannot declare its own trusted issuer, Principal, Actor, Producer, Adapter, Scope, Environment or Runtime Session.
+- A trusted boundary may accept payload references as selectors only after comparison with protected authenticated context and authoritative registries.
+- No reference is a bearer token, capability, credential, permission, authorization receipt or PermissionEpoch.
+- PermissionEpoch, ForgetFenceGeneration, ContextVersion, AdapterCapabilityEpoch, ProducerRegistrationEpoch and RuntimeSessionRef are distinct namespaces and MUST NOT be compared, cast or substituted.
+
+### 9.4 Registry-wide unresolved items
+
+- **OPEN / I:** issuer admission/federation, Principal registration, delegation eligibility, revocation effective point and PermissionEpoch policy.
+- **OPEN / H:** exact wire type IDs, field names, canonical encoding, authentication-context and RuntimeSessionRef transport binding.
+- **OPEN / C:** exact telemetry field profile and mandatory/optional identity fields.
+- **OPEN / D/E:** exact domain field mapping, durable producer admission interface and ActorRef/ScopeRef validation receipts.
+- **CANDIDATE / B:** the nine semantic definitions and fail-closed type separation in §9.1; this is not cross-module approval.
