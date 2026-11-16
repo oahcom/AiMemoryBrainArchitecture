@@ -80,3 +80,16 @@ The preferred realization is an independently durable, monotonic control ledger 
 `CanonicalSuppressionComplete` requires a sealed global inventory where I policy requires it, no unresolved captured work/output/attempt/outcome, and D's canonical target suppression proof. It remains distinct from I's Global Forget completion and physical erasure. A newly observed inventory epoch, output manifest mutation, unknown commit outcome or restore mismatch reopens the relevant proof.
 
 These are architecture decisions, not implementation evidence. D36 race, recovery and fault tests remain **NOT RUN**.
+
+
+## 8. Round-1 self-review closure — JF-07 / JF-08
+
+### JF-07 — Manifest mutation and terminal disposition share one order
+
+Output-manifest declaration, close-discovery, freeze, reopen, and root terminal disposition are durable D barrier events, not E-local metadata. Each event binds WorkItemId, root lineage, OutputManifestVersion, prior manifest digest, new manifest digest and idempotency key. The event must be ordered in the same authority as producer registration, fence installation and terminal disposition.
+
+A manifest freeze is accepted only while the root is non-terminal and its current lease/producer authority is valid. Root terminalization must compare-and-set the exact final frozen version/digest and prove that no manifest mutation or child registration is pending or outcome-unknown. If manifest mutation wins, terminalization retries against the new version; if terminalization wins, subsequent mutation is rejected and cannot create an untracked output. Any legitimate later work must be a separately registered child/root obligation with explicit lineage and barrier accounting. No local E cache can decide this race.
+
+### JF-08 — NOT_COMMITTED requires a completed authoritative decision barrier
+
+An authoritative outcome lookup may return NOT_COMMITTED only after the coordinator has established a read/decision barrier that is ordered after the operation's possible commit point and has resolved every in-flight transaction/participant decision for that idempotency key. The result must include the barrier cursor/epoch and prove no committed receipt exists at or before that barrier. A stale replica, negative cache, absent row during an in-flight transaction, expired client timeout or coordinator unavailability is never proof of absence and must return UNKNOWN. If the commit decision cannot be fenced/resolved, retry is prohibited except as same-key idempotent replay when the coordinator explicitly supports it; terminality remains blocked.
