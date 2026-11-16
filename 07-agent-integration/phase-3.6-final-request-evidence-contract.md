@@ -156,3 +156,25 @@ All cases below are **SPECIFIED / NOT RUN** unless a future run attaches executa
 ### C decision consequence
 
 C considers its semantic portion of the A package accepted with the exceptions above. The C/G/H Applied Contract remains **NOT FROZEN** until H explicitly accepts the same version (and I/D/B provide their own authority confirmations). C conformance and PI suites remain **SPECIFIED / NOT RUN**; implementation remains **NOT VERIFIED**.
+
+## Phase 3.6.3 — Issue #3 exact-version C Owner decision
+
+- Owner: C — Final Request Boundary and immutable submission evidence.
+- Exact shared package: reviews/integration/phase-3.6-cgh-applied-contract-decision-package.md, Blob SHA 122b164bcc0760b83bf555072a36fc55631623e1.
+- Decision: **APPROVE WITH ENUMERATED EXCEPTIONS** for C-owned final-request evidence and lifecycle clauses. This is C's explicit Issue #3 decision, not a global freeze.
+- Common contract version: **CGH-APPLIED-1.0**, anchored to the exact package Blob above.
+- C requires the actual post-transformation request to cross the successful provider/runtime submit boundary; runtime-assigned InferenceRequestId and FinalRequestBoundaryId; exact ContextId/ContextVersion and DeliveryId/attempt; authenticated Agent/Adapter/RuntimeSession and verifier-resolved ActorRef; exact role-tagged ScopeBindingSet and applicable EnvironmentRef; complete ManagedRegion identity/revision/inventory/digest/profile; current I PermissionDecision/PermissionEpoch; D ForgetFenceGeneration/lineage; H CapabilityEpoch and authenticated ACK binding. Local render, materialization, transport ACK or caller claim is not submission evidence.
+- Temporal rule: proven submit before later fence/revocation may remain historical evidence but current-use is invalidated; fence/revocation before submit cannot be Full; indeterminate order is Unknown and suppressed. C never mutates G Applied state.
+- Exceptions: H owns wire serialization and cryptographic profile; I owns policy/PermissionEpoch and governance; D owns fence/lineage; B owns typed references; runtime/test evidence is not supplied by this decision.
+- Negative cases (no submit, partial/bypassed boundary, digest mismatch/truncation, stale epoch/fence, forged ActorRef/Scope/Environment, late old-session ACK, changed digest under same identity, ambiguous order) reject Full or remain Unknown/suppressed.
+- C-FR-01..12 remain **SPECIFIED / NOT RUN**.
+
+## Phase 3.6.3 — Issue #6 C BIH consumer acceptance
+
+- Exact BIH package: reviews/integration/phase-3.6-identity-trust-joint-architecture.md, Blob SHA a45ae90b318a79bf009d14f4d917611881e9e214.
+- Disposition: **ACCEPT WITH ENUMERATED EXCEPTIONS** as a downstream consumer of BIH36-JD-01..17.
+- Mapping: PrincipalRef/IssuerRef and workload/Adapter identity come only from protected verifier context; ActorRef is verifier-produced per-operation attribution; payload identity values remain claims. C binds explicit ScopeRef roles and applicable EnvironmentRef to final-request evidence. PermissionDecision/PermissionEpoch is opaque and policy-domain scoped; C revalidates currentness at final submit and does not mint epochs or infer grants.
+- Enforcement: before final submission, C validates authenticated Principal/Actor/workload/session, exact operation/resource/purpose/audience, Scope/Environment applicability, delegation result, current I decision/epoch, D fence and H capability/session evidence. Missing, mismatched, stale, gapped, revoked or indeterminate input blocks submission and prevents Full evidence.
+- Fail closed: forged/unresolved identity, unknown issuer, malformed Ref, missing required Scope/Environment, invalid delegation, ungranted cross-Scope/Environment, stale/incomparable epoch, unknown requiredness profile, unsupported capability, stale fence or uncertain order => DENY/PAUSE/UNKNOWN; no payload fallback and no Full Applied.
+- Exceptions: C does not own issuer admission, Principal registry, delegation policy, PermissionEpoch issuance, cross-domain grants, cryptographic suite, BMCP serialization, ForgetFence issuance or G Applied state. I36-GOV approvals and I36/H36 runtime tests are separate gates.
+- C-FR-05..10 and BIH negative cases remain **SPECIFIED / NOT RUN**.
