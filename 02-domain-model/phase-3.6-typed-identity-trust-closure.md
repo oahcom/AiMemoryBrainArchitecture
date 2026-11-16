@@ -86,19 +86,19 @@ This is a semantic ordering requirement. It does not prescribe I APIs, H envelop
 
 | Item | B semantic disposition | Required authority / status |
 |---|---|---|
-| Distinct typed identities and no credential/permission substitution | Proposed normative B semantic rule | B Owner decision/readback required |
-| ActorRef is immutable per-operation attribution, not Principal | Proposed normative B semantic rule | B Owner decision/readback required |
+| Distinct typed identities and no credential/permission substitution | JOINT-DECIDED normative B semantic rule | Delegated joint decision recorded in Section 9 |
+| ActorRef is immutable per-operation attribution, not Principal | JOINT-DECIDED normative B semantic rule | Delegated joint decision recorded in Section 9 |
 | Principal/Issuer registry, trust, revocation and delegation | Not B-owned | I decision; governance approvals required |
 | Scope registry, grant and authorization policy | B defines type only | I/Governance policy decision |
-| Environment registry authority and bridge policy | B defines type only; registry owner must be named | Environment owner + I governance; OPEN |
+| Environment registry authority and bridge policy | B defines type only; unresolved registry authority means cross-environment operations unavailable/denied | Project must designate registry authority; until then fail closed |
 | Wire names/serialization/protected auth context | Not B-owned | H decision with B/I/C acceptance |
 | Producer event fields and requiredness | Not B-owned | C decision with I/H/E acceptance |
 | D/E canonical/compiler field migrations | Not B-owned | D/E decisions; no implicit cast |
 
-**B Owner Decision:** CANDIDATE proposal only; no independent B approval evidence recorded in this joint session.
+**B Owner Decision (current):** Phase 3.6 domain semantics technically DECIDED under delegated joint authority; no separate B-session signature is claimed.
 **I Owner Decision:** Not requested/assumed by this B document.
 **H Owner Decision:** Not requested/assumed by this B document.
-**Cross-module Agreement:** OPEN.
+**Cross-module Agreement (current):** BIH Phase 3.6 technical design DECIDED under delegated joint authority; downstream consumer acceptance remains OPEN.
 **Governance Approval:** Not applicable to B type meaning; I policy approvals remain GOVERNANCE-BLOCKED.
 **Implementation Evidence:** NOT PROVIDED / NOT VERIFIED.
 
@@ -154,3 +154,44 @@ B adopts BIH36-JD-01..03, JD-05..06, JD-08..09 and the B semantic portions of JD
 ### 9.3 Governance and non-claims
 
 I36-GOV-01..08 remain GOVERNANCE-BLOCKED as applicable. Environment registry ownership remains to be formally assigned. Implementation tests are NOT RUN. ADR-001 remains ADR-BLOCKED.
+
+## 10. Phase 3.6 Self-Review Remediation — Binding B Clarifications
+
+This section resolves B36-SR-01..07. It is normative for B's Phase 3.6 semantic contract.
+
+### 10.1 AuthenticationContextRef disposition (B36-SR-02 / H36-SR-01)
+
+AuthenticationContextRef is **not a tenth domain identity Ref** and MUST NOT appear as a caller-constructible or payload-selectable domain reference. It is a verifier-internal opaque handle owned jointly by the H/I authentication implementation boundary. Its value is not serialized in ordinary BMCP payloads, is not accepted from untrusted senders, is not dereferenceable by domain consumers, and confers no permission. It is scoped to one authenticated channel/session and verifier lifecycle; it expires or is invalidated on channel/session closure, credential/issuer revocation, principal/workload binding change, or verifier restart unless a secure verifier-owned continuation is explicitly established. H may carry a protected internal handle between trusted verifier components; B does not register it in Typed Reference Registry.
+
+ActorRef stores only the verifier's stable operation-attribution result and its validated typed domain components. It MUST NOT expose the internal AuthenticationContextRef handle as a public field or durable domain identifier.
+
+### 10.2 Canonical Principal namespace (B36-SR-03)
+
+The canonical Principal resolution key is the ordered tuple:
+`(IssuerRef, TrustDomainRef, TenantRef, PrincipalKind, IssuerSubject)`.
+All five components are required for issuer-authenticated resolution. TenantRef and TrustDomainRef are distinct dimensions and MUST NOT be concatenated into an ambiguous string. PrincipalKind is a closed, versioned enum. IssuerSubject is opaque and compared byte-for-byte after the issuer-defined canonicalization profile has been validated by I. Display names, email addresses and mutable aliases are never primary keys. A change to any tuple component creates a new resolution identity unless I records an explicit, audited link/migration; it never silently rewrites or merges PrincipalRef.
+
+### 10.3 Workload binding cardinality and history (B36-SR-04)
+
+Principal-to-Agent/Adapter/Producer bindings are explicit, time-bounded registry relationships, not one-to-one identity equivalence. A Principal may bind to multiple workload identities. A workload identity may have multiple Principal bindings only where I's policy explicitly models distinct credential subjects/roles and records the exact validity intervals; overlapping active bindings that create ambiguity are denied. Every binding records issuer, tenant/security domain, workload identity, concrete instance where applicable, effective-from/to, status, registration version and revocation reason. Credential rotation does not create a new workload identity unless the workload registration itself changes. Instance replacement creates a new instance identity; old instances remain historical and cannot authenticate new work after revocation/retirement.
+
+### 10.4 Canonical Scope role set (B36-SR-05)
+
+Every protected operation carries a canonical, non-empty, role-tagged ScopeBindingSet whenever the operation is scoped. Each entry is `(ScopeRef, ScopeRole)`; ScopeRole is a closed enum:
+- `OWNERSHIP`: administrative/data custody boundary;
+- `APPLICABILITY`: boundary in which the resource/proposition is asserted to apply;
+- `SOURCE` and `TARGET`: explicit endpoints of a cross-Scope operation/bridge, where the operation profile requires them.
+
+Entries are sorted by canonical typed ScopeRef encoding then ScopeRole; exact duplicates are rejected; the same ScopeRef may appear under multiple roles only if the operation profile explicitly permits that combination. Unknown roles, missing required roles, conflicting owners, unresolvable refs, or sender omission fail closed. An empty set is allowed only for an operation profile explicitly classified as global/non-scoped by I and the resource owner; the sender cannot self-declare that classification.
+
+### 10.5 Environment registry dependency (B36-SR-01)
+
+B owns EnvironmentRef type semantics and canonical identity shape, not the real-world authority to create/retire environment records. Until the project designates a named Environment Registry Authority and publishes its trust/administration contract, EnvironmentRef resolution is **UNAVAILABLE** for protected cross-environment operations. Such operations are denied; consumers MUST NOT fall back to display labels, project membership or caller-supplied coordinates. The future registry contract MUST provide issuer/authority namespace, tenant/project, environment-kind, opaque stable ID, revision, lifecycle, authenticated adapter provenance, administrative ownership and revocation/history. This closes the semantic ambiguity without inventing an external owner.
+
+### 10.6 Historical attribution versus current validity (B36-SR-06)
+
+ActorRef is immutable historical attribution. It answers who/what was verified as acting for a particular operation at its authenticated time. It does not attest that the Principal, Issuer, credential, delegation or workload remains currently valid. New operations always resolve current status and authorization. Revocation preserves historical attribution and audit records but invalidates the ActorRef as a source of authority for any new operation. A historical ActorRef may be read only under current authorization and retention policy.
+
+### 10.7 B decision-state reconciliation (B36-SR-07)
+
+The older Section 6 table and status lines are historical process notes, not current status. For Phase 3.6, the controlling state is: **B domain semantics technically DECIDED under the user's delegated joint decision; no separate B-session signature is claimed.** The cross-module design baseline is jointly decided for B/I/H only. Consumer acceptance by C/D/E/F/G/Storage, Environment Registry Authority designation, governance approvals and implementation evidence remain OPEN/BLOCKED as stated in Sections 9 and 10.5. Any implementation-facing reader MUST use this current status rather than the superseded Candidate/Open process wording.
