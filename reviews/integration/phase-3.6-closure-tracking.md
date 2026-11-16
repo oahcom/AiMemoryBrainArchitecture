@@ -542,3 +542,15 @@ The Owner branch commits are:
 - I: `cc3cdc2e8d3a50be7551087f12d6fb4d6ce0d6f3`
 - D: `302b9fc09e040db7ef32c56e39bd91272cc1abb9`
 - B: `026e52c72bd8bdb65b63bdd77f25d925e0624f9f`
+
+
+## CGH-APPLIED-1.0 causal-order proposal and H schema reconciliation — 2026-11-16
+
+- A proposal: `reviews/integration/phase-3.6-cgh-applied-cross-authority-causal-ordering-proposal.md`
+- Proposal Blob: `6c858583aac8769d241a2bc53b026b972e65f91a`
+- Issue #3 owner-decision request: `6919903078`
+- Proposed mechanism: durable shared order gate; C PREPARE + provider-receipt terminalization; I/D transitions participate while retaining their authority; SUBMIT_WON / ABORTED / IN_DOUBT outcomes. This remains **PROPOSED / NOT APPROVED / NOT IMPLEMENTATION-VERIFIED**.
+- Required responses: C provider-boundary and idempotent recovery feasibility; I revocation participation and CommitAuthorizationReceipt mapping; D fence-install participation and lineage binding; G minimum Applied evidence; H exact schema/receipt mapping.
+- H exact-version decision re-read: `08-bmcp-protocol/phase-3.6-cgh-applied-contract-exact-version-h-owner-decision.md`, Blob `c0e10966e8dd95a9d1f5b1dfa156cb4b098b26e0`. It says concrete schema remains OPEN / NOT FROZEN / NOT YET DELIVERED. This conflicts with earlier Issue #3/A notes describing `bmcp.applied-ack/1.0.0` as an owner-decided candidate. H branch tree did not expose a separately published concrete schema artifact in this inspection. Treat as an evidence discrepancy; ask H to identify the authoritative artifact/Blob or confirm H-EX-01 remains open.
+- I's exact-package confirmation requires CommitAuthorizationReceipt and I sequencer terminal-order proof to be mapped at the protected final gate. H's schema cannot omit these required evidence references.
+- Applied Contract Frozen remains **NO**; C-submit/I-revocation/D-fence order remains **OPEN**; tests NOT RUN; production implementation NOT VERIFIED.
