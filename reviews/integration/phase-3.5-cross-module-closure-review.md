@@ -239,7 +239,7 @@ Only A-owned files were changed:
 |---|---|---|
 | `reviews/integration/contract-registry.md` | Rebuilt registry with all live branch/HEAD refs, latest commit evidence, artifact inventory, owner boundaries, typed findings and closure rules | Commit `019d473855e6e95ea356722a51a3f487196874e1` |
 | `reviews/integration/typed-cursor-and-watermark-contract.md` | Replaced stale cursor proposal with nine-token typed registry, scope/order/consumer/prohibited-conversion rules and supporting evidence types | Commit `1f7b83d35c8c1fde140d39f821b4626a960370b8` |
-| `reviews/integration/phase-3.5-cross-module-closure-review.md` | Created this full closure review | Commit SHA returned by create operation; record in final A branch readback |
+| `reviews/integration/phase-3.5-cross-module-closure-review.md` | Created this full closure review | b4ab5a9863aa515e154c02031fa57cc2c9aa5228 |
 
 No D/E/F/G/H/I/B/C/Storage design file was modified. No branch was merged.
 
