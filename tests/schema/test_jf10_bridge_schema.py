@@ -26,8 +26,17 @@ def sample_value(prop_schema, root):
         return prop_schema["enum"][0]
     kind = prop_schema.get("type")
     if kind == "string":
-        if prop_schema.get("pattern") == "^[a-f0-9]{64}$":
+        pattern = prop_schema.get("pattern")
+        if pattern == "^[a-f0-9]{64}$":
             return "a" * 64
+        if pattern == "^[0-9]{1,20}$":
+            return "1234567890"
+        if pattern == "^[0-9]{1,10}$":
+            return "123456789"
+        if pattern == "^[0-9A-F]+/[0-9A-F]+$":
+            return "0/5004710"
+        if pattern == "^[A-Za-z0-9_-]+$":
+            return "gid_1234567890"
         return "ref:sample"
     if kind == "array":
         return ["ref:sample"]
@@ -58,6 +67,11 @@ def valid_message(root, variant):
         record["i_lookup_state"] = "COMMIT_WON"
         record["storage_lookup_state"] = "COMMITTED"
         record["d_barrier_state"] = "SATISFIED"
+        for name in ("engine_native_transaction_xid_ref", "postgres_system_identifier",
+                     "target_database_oid", "prepare_timeline", "prepare_lsn",
+                     "storage_signer_key_version"):
+            if name in props:
+                record[name] = sample_value(props[name], root)
     return record
 
 
