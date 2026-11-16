@@ -35,6 +35,20 @@ class RuntimeAntiResurrectionTests(unittest.TestCase):
         self.f.rebuild([self.good], contiguous_replay=True, watermark=100, generation=2)
         self.assertEqual(self.f.retrieve(), [])
 
+    def test_targeted_forget_does_not_expose_affected_entry_or_suppress_unrelated_index_entry(self):
+        unrelated = RuntimeEntry("mem-4", "scope-A", "env-A", "pd-A", 7, 0, "v1")
+        self.f.index.entries = [self.good, unrelated]
+        self.f.apply_forget("forget-1", "d1", ["mem-1"])
+        self.assertEqual([x.memory_ref for x in self.f.retrieve()], ["mem-4"])
+
+    def test_global_fence_generation_change_invalidates_old_cache_key(self):
+        unrelated = RuntimeEntry("mem-4", "scope-A", "env-A", "pd-A", 7, 0, "v1")
+        key = self.f.cache_key(unrelated)
+        self.f.cache[key] = unrelated
+        self.f.apply_forget("forget-1", "d1", ["mem-1"])
+        self.assertIsNone(self.f.cache_get(key))
+        self.assertEqual(self.f.stale_evictions, 1)
+
     def test_watermark_gap_blocks_retrieval(self):
         self.f.index.complete = False
         with self.assertRaises(Blocked):
