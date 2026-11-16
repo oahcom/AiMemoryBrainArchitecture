@@ -817,3 +817,15 @@ The first CI run exposed an incorrect test expectation: while the single global 
 Coverage includes I/D local pending gates, global outage fail-closed, affected-lineage gate after recovery, no new intent while pending, simultaneous I/D requests in one batch without local-time ordering, pre-batch participant enumeration, unresolved participant retention, owner-specific high-water checks before gate release, RESTORE_FENCED for missing prefix/incomplete request set, and immutable request digest conflict.
 
 **Strict limitation:** this is an in-memory logical reference model, not a Raft/quorum COC, durable owner-local gate, production I sequencer, D fence service, persistent participant registry, process crash/failover/restore, or cross-protocol atomicity test. It does not pass COC-01..16 production conformance or Phase 3.6 G10. Production COC remains NOT IMPLEMENTED / NOT VERIFIED; deployment/operator remains NOT DESIGNATED.
+
+## 13.12 A COC architecture amendment — I JF-10 prepared participant bridge
+
+A amended `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md` on `session-a-integration-2026-11-16` to incorporate I's formal JF-10 bridge decision (I disposition Blob `1dedce596761807b25d337daf4a0d21bb797a197`).
+
+- A COC architecture exact post-amendment Blob: `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`.
+- Commit: `78b811ee12499413d6e7a2e03ee5b36e6a0a2f38`.
+- Readback from A Owner branch verified §12, all five required JF-10 bridge record names, and all ten `JF10-COC-01..10` case identifiers.
+
+The amendment makes the authority boundary normative: COC orders and observes; I's policy-domain sequencer alone decides COMMIT/ABORT; Storage resolves the exact same XID; D owns ForgetFence and barrier semantics. It adds pre-PREPARE intent registration, Storage-signed PreparedParticipantReceipt registration before I's owner-final gate, exact tuple binding, typed non-comparable COC/I positions, same-XID recovery, outage handling and ten new conformance specifications.
+
+**Status correction:** A architecture text amended and readback-verified. This is not fresh I/C/D/H/Storage exact-Blob acceptance, not implementation evidence, not deployment/operator designation, and not a test pass. COC-01..12 and JF10-COC-01..10 remain NOT RUN; JF-10 remains P0 OPEN; multi-policy-domain atomicity remains BLOCKED. Next closure actions are fresh I and relevant Owner decisions on the new A Blob, plus explicit D barrier and Storage prepared-XID/same-XID recovery acceptance; H must approve any required 1.1.0 wire mapping.
