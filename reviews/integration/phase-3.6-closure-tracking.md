@@ -802,3 +802,37 @@ Current gate: latest package CANDIDATE / FRESH OWNER REVIEW REQUIRED / NOT FROZE
 Storage explicitly records JF-10 reference model as in-memory logical model only; 15 unittest methods authored but not run in repository CI; JF-10 production implementation not implemented/not verified; COC-01..16 specified/not run; production activation not authorized; Applied Contract Frozen = NO.
 
 **A disposition:** Storage's logical authority/persistence/recovery boundary is formally CONFIRMED WITH CHANGES for the two exact A artifacts above. This closes the Storage *architecture-interface decision* only. It does not close deployment selection, operational durability, I bridge, production implementation, or conformance gates. Any subsequent A amendment requires a fresh Storage exact-Blob decision.
+
+## 13.11 Current CGH-APPLIED-1.1 recovery-batch exact decisions and Storage boundary — 2026-11-16
+
+Current A candidate and companion profile:
+- CGH-APPLIED-1.1 package Blob: `4961ffefc0f9920efb8425a9b2a7af42d8f64819`.
+- Causal Order Coordinator architecture Blob: `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
+- Profile: `CausalOrderProfile/1.0`; H schema target: `bmcp.applied-ack/1.1.0`.
+
+All six semantic owners have now independently recorded a fresh decision against the exact 4961 package and fc3 COC companion, with Owner-branch readback verified:
+
+| Owner | Decision on recovery-batch amendment | Current Owner artifact Blob |
+|---|---|---|
+| C | ACCEPT WITH ENUMERATED EXCEPTIONS | `a72a3eb1e5207f67c01f804508311f42db9a6e0a` |
+| D | ACCEPT WITH ENUMERATED EXCEPTIONS | `ed7c491f4ca10fee67203a9978cfaa0e0748c0a2` |
+| I | ACCEPT WITH ENUMERATED EXCEPTIONS | `5a5304d48aa912dcf6f817099bd5659371d8cdc8` |
+| H | ACCEPT WITH ENUMERATED EXCEPTIONS — wire mapping still needs addendum | `22853b21d583d2cae75eb3ef1c580c68b4cf4c70` |
+| G | ACCEPT WITH ENUMERATED EXCEPTIONS — recovery evidence required for Full Applied | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` |
+| B | APPROVE — no new B semantic type introduced | `3a1e77889cd9a90cd5822d9f0cb3437880868706` |
+
+Storage/Consistency also published exact COC/package review:
+- Decision: **CONFIRMED WITH CHANGES — ARCHITECTURE INTERFACE ONLY**.
+- Artifact: `reviews/storage-consistency/phase-3.6-coc-storage-boundary-acceptance.md`.
+- Blob: `a589d983ac145244962c22e5da3a55427aa35ff8`; commit `7b83e61c44dd4b67fa2059a3bff83d453aeaf757`.
+- Storage readiness addendum Blob: `445cdf31832f5ac914ff39d6c90801e6e1931fbc`.
+
+### Binding constraints / open gates
+
+- COC is a cross-authority causal-order ledger, not the Canonical Memory Authority VisibilityPointer/PublicationReceipt transaction and not I's policy-domain sequencer/JF-10 2PC coordinator.
+- Storage's per-Canonical-Memory-authority serializable visibility transaction remains separate. I's owner-gate-participating JF-10 protocol and any COC↔JF-10 bridge remain BLOCKED until I specifies/approves exact composition and C/D/Storage accept it.
+- H accepts recovery semantics but exact wire field names, message requiredness and canonicalization for every recovery-batch evidence item remain an H schema addendum requirement. 1.1.0 is not production-frozen.
+- Actual COC operator, infrastructure, voter/failure-domain placement, DB engine/version/isolation, prepared-XID capability, RPO/RTO, SLO, retention, restore, encryption/KMS and key governance remain OPEN / NOT VERIFIED.
+- COC-01..16, JF10-01..17, Storage C01..C23 and consumer conformance remain SPECIFIED / NOT RUN. Reference model is in-memory only; no production implementation verified.
+
+**Current gate:** exact 1.1 recovery-batch semantic owner decisions = RECORDED WITH ENUMERATED EXCEPTIONS; Storage COC interface = CONFIRMED WITH CHANGES. Applied Contract Frozen = NO; production coordinator/operator = NOT DESIGNATED; combined COC/JF-10/Storage atomicity = NOT PROVEN; implementation verified = NO; G8 BLOCKED, G9 NOT RUN, G10 BLOCKED. No merge or production activation authorized.
