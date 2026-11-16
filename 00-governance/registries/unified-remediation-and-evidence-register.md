@@ -154,3 +154,16 @@ The latest live branch tips and Owner decisions are reconciled in `00-governance
 - D/F/G/I Context Optimization / Observation Archive acceptances are conditional; F/G contract/schema, cross-owner dependencies and all 15 negative tests remain OPEN/NOT RUN.
 - Module baseline adoptions: all nine remain OPEN; proposal documents remain PROPOSED.
 - ADR-001 remains ADR-BLOCKED; I Global Forget remains GOVERNANCE-BLOCKED; G0 / architecture freeze NOT AUTHORIZED.
+
+
+## 7. Storage protocol source refresh and R1/R2 technical proposal — 2026-11-17
+
+A fresh read of Storage's live Phase 3.6.3 protocol now returns blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`, superseding the earlier `6154d6c3...` source pin. The protocol's §6.2 requires owner request sets, high-water marks and owner-controlled reopening, but still does not define the atomic owner-local transaction/CAS that closes admission with request acceptance, durable enumeration of pre-COC in-flight admissions, or repeated cutoff rounds for requests arriving during reconciliation.
+
+P prepared a technical closure proposal at `00-governance/reviews/r1-r2-owner-gate-and-recovery-batch-linearization-proposal.md`. It is coordinator analysis only, not normative and not an I/D/Storage decision. The proposal specifies an owner-local serialization boundary, durable request and in-flight admission ledgers, signed seals with high-water/count/digest/empty-set proof, repeated recovery batch rounds, and owner-only CAS gate release.
+
+| ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
+|---|---|---|---|---|---|
+| UMR-028 | P0 | Precisely define R1/R2 Recovery Cutoff Batch closure and Owner-local Gate linearization | I and D own local gate semantics; Storage owns COC batch; H owns schema; C/A integrate their boundaries | OPEN. Current Storage blob `86ff3b24...` states high-water and completeness concepts but lacks exact owner-local linearization and repeated-batch/seal/release CAS semantics. P technical proposal is non-normative. | I and D publish exact owner-local transaction/CAS and in-flight admission contracts; Storage publishes multi-round COC batch/manifest protocol; H maps signed seal/release records; A reissues exact bundle and obtains exact-version acceptances. |
+
+Source pin update: Storage current protocol `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`; previous P review source pin `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` is stale. Re-review against the current blob is required before any COC-REV closure.
