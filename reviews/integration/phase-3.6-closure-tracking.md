@@ -398,8 +398,8 @@ I's formal confirmation covers both PermissionEpoch and the complete protected-a
 
 Storage Owner branch `session-storage-consistency-forget-atomicity-2026-11-16` now contains:
 
-- `reviews/storage-consistency/reference_model/jf10_linearization_model.py` — Blob `9d69132d2981ae6801d36ef3ecf71c078a7b3ac7`.
-- `reviews/storage-consistency/reference_model/test_jf10_linearization_model.py` — Blob `8e9e0f2d19816371709fbb9a2bc64cdb7a2cbc87`.
+- `reviews/storage-consistency/reference_model/jf10_linearization_model.py` — Blob `d4bdc5537260c24db1deedbf8c7ec48443f6560b`.
+- `reviews/storage-consistency/reference_model/test_jf10_linearization_model.py` — Blob `7519542462f337485218e55f4dcd3fc5ff7a50c6`.
 - `reviews/storage-consistency/reference_model/README.md` — Blob `5ba7efe359d2adbf21f4fe4aa2d9f28b4663fb9f`.
 - Updated executable conformance plan — Blob `95fd8706da9bc3a96b0851e2df17fe329f6a98aa`.
 
@@ -409,7 +409,7 @@ D and E Owner branches each received their own mapping artifacts:
 - D Blob `a3555162827bd1cc7cf4c0918d4ab9b6ce94c8bb`.
 - E Blob `20770a84daea00ba9f38cc9a5bc43f153f09c3a7`.
 
-Issue #4 records the model publication and requests D/E/Storage review (comment `6919546496`). A local semantic replay of 12 deterministic assertions passed. The committed unittest suite has not yet been run by repository CI.
+Issue #4 records the model publication and requests D/E/Storage review (comment `6919546496`). A local semantic replay of 13 deterministic assertions passed. The committed unittest suite has not yet been run by repository CI.
 
 ### Gate and claim boundaries
 
