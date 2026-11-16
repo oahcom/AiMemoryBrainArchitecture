@@ -426,3 +426,5 @@ The H schema candidate Blob `a8a945...` remains unchanged and does not yet expos
 
 P's current evidence reconciliation records F 19/19, H 23/23 and I 30/30 reference/model evidence. A's final TAB-001 report still records the earlier H 11/11 and I 25/25 counts; its front matter says NOT REVIEWABLE while §19.4 says CONDITIONAL PASS, and its source manifest has stale H/I heads. A must consolidate the report, update the current counts and include the current COC/GID status.
 
+
+P has also published a non-normative cross-owner mapping aid at `00-governance/proposals/prepared-participant-identity-and-gate-b-manifest-proposal.md`, Blob `371e3c07520897a0c7ba2027c5b9ba0991ae1183`. It maps the PreparedParticipantRef / PreparedTransactionGID / NativeXidObserved / DatabaseIncarnationRef / PrepareAttempt tuple to candidate Storage receipts, I terminal binding, COC record mapping and negative tests. It is a coordinator proposal only; every Owner must explicitly adopt, amend or reject its own portion.
