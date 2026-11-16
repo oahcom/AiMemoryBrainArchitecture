@@ -595,3 +595,24 @@ Corrected latest Owner pins after branch-head refresh:
 - H 1.1.0 schema candidate Blob `a23b9a879a3ec0e212645a8247a6797bd0055360`, commit `ceb20c0aa0318e2c4c82f7ffb90b05432bd87255`. This supersedes the earlier statement that no 1.1.0 schema artifact was found; H's current Owner file now contains the candidate schema and message families. It remains NOT PRODUCTION-FROZEN / NOT DEPLOYED.
 
 Exact-version acceptance by C/D/I/H/G/B, coordinator/Storage operator acceptance, deployment and tests remain open. Causal order production proof NOT VERIFIED; CGH-CO/I-CO/D-CO/H36-CO NOT RUN.
+
+
+## CGH-APPLIED-1.1 request-cutoff ordering refinement — latest Owner pins
+
+The A 1.1 candidate was refined to distinguish authority **request/cutoff** positions from eventual **effective** transition positions:
+- I `IAuthorizationTerminalRef` binds `IRevocationRequestRef` and cutoff, or explicit no-earlier-request; a revocation before intent blocks admission, between intent and receipt consumption may win, after COMMIT_WON waits behind the participant.
+- D `DParticipantClearanceRef` binds `ParticipantIntentRef` and full lineage. `DForgetFenceRequestRef` cutoff differs from eventual fence-effective position; earlier request rejects new intent, later request waits behind pre-existing participant.
+- I/D owner outcomes and clearances are not provider success. C actual provider receipt + CSubmitOutcome and terminal proof remain mandatory before G Full Applied.
+
+Latest A candidate package:
+- Blob `471c8ce86e93c036ad9a58a77d45d9daa0ab8af8`
+- Commit `78adae653730c740a9a711c3550b8094f0faa786`
+- Status remains A CANDIDATE / OWNER REVIEW REQUIRED / NOT FROZEN.
+
+Latest Owner artifact pins:
+- C `f2c5b379cacfedd81500e8496d3053b628e144a0` (branch HEAD `8f017a5a17620c21f3e7f0075a087c4b098baa8e)).
+- D `317a9bc170c5a66720f738bf24bbf93c87385887` (branch HEAD `c0d51b3cc61f182a69632f008c43650e14c213ef`).
+- I `71779133a4f95d63a24c4c7e606af174763366f1` (branch HEAD `2fb2bb9653350e83ebf2a6a56195a762d112189f`).
+- H `5cbf0bb548a46671054cb22c6fab3c3d007365d4` (branch HEAD `f5ecd8e649efb578a06cedfa5a5dbd4f8c7bc84a`).
+
+G and B exact 1.1 acceptance remain pending. Coordinator/operator, Storage durability, deployment and conformance remain open. Tests NOT RUN; production implementation NOT VERIFIED.
