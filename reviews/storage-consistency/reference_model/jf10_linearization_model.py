@@ -18,6 +18,10 @@ class Blocked(ProtocolError):
     pass
 
 
+class SimulatedCrash(RuntimeError):
+    """Injected crash at a modeled persistence boundary."""
+
+
 class Decision(str, Enum):
     UNKNOWN = "UNKNOWN"
     COMMIT = "COMMIT_WON"
@@ -189,8 +193,25 @@ class StorageParticipantModel:
         self._xid_owner[operation.xid] = operation.operation_id
         return operation
 
-    def recover(self, operation_id: str, coordinator: CoordinatorModel) -> ParticipantState:
+    def _project_committed_record(self, operation_id: str, op: Operation,
+                                  record: PublicationRecord) -> None:
+        self.visibility_pointers[operation_id] = record.manifest_digest
+        self.publication_receipts[operation_id] = record.publication_receipt_id
+        self.owner_outcomes[operation_id] = record.owner_outcome
+        self.consumed_receipts.add(record.consumed_receipt_id)
+        if record.outbox_enqueued:
+            self.outbox.add(operation_id)
+        op.state = ParticipantState.COMMITTED
+        self.gate.terminal(operation_id)
+
+    def recover(self, operation_id: str, coordinator: CoordinatorModel,
+                fault_at: Optional[str] = None) -> ParticipantState:
         op = self.operations[operation_id]
+        # If the atomic record was committed before a crash, replay its projections.
+        committed_record = self.publication_records.get(operation_id)
+        if committed_record is not None:
+            self._project_committed_record(operation_id, op, committed_record)
+            return ParticipantState.COMMITTED
         decision = coordinator.lookup(operation_id)
         if decision == Decision.UNKNOWN:
             op.state = ParticipantState.IN_DOUBT
@@ -208,8 +229,13 @@ class StorageParticipantModel:
             if self.owner_outcomes.get(operation_id) == "COMMITTED":
                 return ParticipantState.COMMITTED
             raise ProtocolError("authorization receipt was already consumed")
+        if fault_at == "before_local_commit":
+            op.state = ParticipantState.IN_DOUBT
+            raise SimulatedCrash("crash before Storage local commit linearization point")
+        if fault_at not in (None, "after_local_commit"):
+            raise ValueError("unknown fault injection point")
         # One modeled atomic local transaction: this single record insertion is
-        # the linearization point. The dictionaries below are projections.
+        # the linearization point. The dictionaries below are readback projections.
         record = PublicationRecord(
             manifest_digest=op.manifest_digest,
             publication_receipt_id=op.receipt.receipt_id,
@@ -218,14 +244,10 @@ class StorageParticipantModel:
             outbox_enqueued=True,
         )
         self.publication_records[operation_id] = record
-        self.visibility_pointers[operation_id] = record.manifest_digest
-        self.publication_receipts[operation_id] = record.publication_receipt_id
-        self.owner_outcomes[operation_id] = record.owner_outcome
-        self.consumed_receipts.add(record.consumed_receipt_id)
-        if record.outbox_enqueued:
-            self.outbox.add(operation_id)
-        op.state = ParticipantState.COMMITTED
-        self.gate.terminal(operation_id)
+        if fault_at == "after_local_commit":
+            op.state = ParticipantState.IN_DOUBT
+            raise SimulatedCrash("crash after Storage local commit linearization point")
+        self._project_committed_record(operation_id, op, record)
         return op.state
 
     def reader_can_see(self, operation_id: str) -> bool:
