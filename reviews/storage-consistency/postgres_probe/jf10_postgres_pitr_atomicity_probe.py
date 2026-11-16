@@ -115,6 +115,13 @@ def restore_query(port: int, sql: str):
         return c.execute(sql).fetchall()
 
 
+def restore_execute(port: int, sql: str) -> None:
+    with psycopg.connect(host="127.0.0.1", port=port, dbname="postgres",
+                         user="postgres", password=PASSWORD, autocommit=True,
+                         connect_timeout=5) as c:
+        c.execute(sql)
+
+
 def main() -> None:
     docker("network", "create", NETWORK)
     docker("volume", "create", BACKUP_VOL)
@@ -255,9 +262,30 @@ def main() -> None:
             gids = restore_query(port, "SELECT gid FROM pg_prepared_xacts")
             assert xid_commit in str(gids) and xid_rollback in str(gids), gids
             assert results[label][1:] == (0, 0, 0), results[label]
-            locks = restore_query(port, "SELECT count(*) FROM pg_locks WHERE locktype='transactionid'")
-            assert locks[0][0] >= 2, locks
+            locks = restore_query(port, f"""
+                SELECT p.gid, count(l.transactionid)
+                FROM pg_prepared_xacts p
+                JOIN pg_locks l
+                  ON l.locktype = 'transactionid'
+                 AND l.transactionid = p.transaction
+                 AND l.granted
+                WHERE p.gid IN ('{xid_commit}', '{xid_rollback}')
+                GROUP BY p.gid ORDER BY p.gid
+            """)
+            lock_counts = {gid: count for gid, count in locks}
+            assert set(lock_counts) == {xid_commit, xid_rollback}, locks
+            assert all(count >= 1 for count in lock_counts.values()), locks
+            print("PITR_EXACT_PREPARED_XID_LOCKS_RETAINED=PASS")
             print("PITR_PREPARED_XID_PRIVATE_AND_LOCKED=PASS")
+            # Resolve the exact restored GIDs after proving their in-doubt state.
+            restore_execute(port, f"COMMIT PREPARED '{xid_commit}'")
+            restore_execute(port, f"ROLLBACK PREPARED '{xid_rollback}'")
+            assert restore_query(port, f"SELECT count(*) FROM jf10_authoritative_publication WHERE xid_name='{xid_commit}'")[0][0] == 1
+            assert restore_query(port, f"SELECT count(*) FROM jf10_visibility_pointer WHERE xid_name='{xid_rollback}'")[0][0] == 0
+            assert restore_query(port, f"SELECT count(*) FROM jf10_publication_receipt WHERE xid_name='{xid_rollback}'")[0][0] == 0
+            remaining = restore_query(port, "SELECT gid FROM pg_prepared_xacts")
+            assert xid_commit not in str(remaining) and xid_rollback not in str(remaining), remaining
+            print("PITR_SAME_XID_COMMIT_ROLLBACK_AFTER_RESTORE=PASS")
         elif label == "committed":
             assert restore_query(port, f"SELECT count(*) FROM jf10_visibility_pointer WHERE xid_name='{xid_commit}'")[0][0] == 1
             assert restore_query(port, f"SELECT count(*) FROM jf10_publication_receipt WHERE xid_name='{xid_commit}'")[0][0] == 1
