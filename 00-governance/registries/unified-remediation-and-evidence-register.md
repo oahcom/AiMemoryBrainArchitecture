@@ -127,3 +127,30 @@ No row may be marked complete because a different row is complete. Static review
 
 - 2026-11-17 Phase 3.6.3 COC protocol supersedes the preliminary Storage COC design: Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`, current Storage HEAD `fe7debe55da71e655eecfc46f25ec49eae43404a`. P review residual gaps: committed recovery completion event, exact H schema mapping, repeated cutoff batches, I-owned domain registry, external anti-rollback anchor custody, and exact Applied companion pin reconciliation.
 - 2026-11-17 readiness state inconsistency: §23.1/§23.4 says Gate B specification published / exact Owner review pending; §29 still says Gate B blocked pending Gate A and deployment evidence. UMR-023 requires one phase-correct vector.
+
+
+## 6. Live-source refresh — 2026-11-17
+
+The latest live branch tips and Owner decisions are reconciled in `00-governance/reviews/live-branch-refresh-and-phase36-owner-decision-status.md`. The previous UMR-022/024 entries are superseded by the following source-current notes:
+
+- Storage protocol current blob is `6154d6c345daf260e6c2552e2257d073f1675188` at Storage HEAD `9f784a15ef33a6cde4b4cda1ab6fca2df8a705fa`. P's prior review cites blob `cd5566b3d99b5204401ac713a5bb2dcf89a02726`; exact source re-pin and current-text re-review are required.
+- A's current exact-version review blob is `fdf63550696948f77dc37c0a3788276ac4d525f5`; Issue #14 remains OPEN with R1–R6 and no I/D/C/H response found at refresh.
+- D/F/G/I have conditional Context Optimization / Observation Archive acceptance records; E has a bounded JF-10 producer lifecycle acceptance; B has a bounded Applied typed-reference acceptance. These do not equal module baseline adoption or a frozen F/G contract.
+- Fresh P/main comparison is ahead 51 / behind 4 / diverged. No integration or merge performed.
+
+| ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
+|---|---|---|---|---|---|
+| UMR-025 | P0 | Close A COC persistence exact-version findings R1–R6 | I, D, C, H; A integrates; Storage supports | OPEN. Issue #14 has A's exact review only; no I/D/C/H Owner response. Findings cover cutoff completeness, owner-local gate linearization, participant enumeration/gate release, C COMMIT_WON provider gate, same-XID recovery and exact-version/schema drift. | Each assigned Owner publishes append-only exact-blob decision and normative amendments on its branch; A publishes a reconciled new bundle and affected Owners reaccept exact versions. |
+| UMR-026 | P1 | Re-pin and re-review current Storage 3.6.3 COC protocol | Storage; A/I/D/C/E/G/H as affected | Current protocol blob `6154d6c345daf260e6c2552e2257d073f1675188`; P's earlier COC-REV-001..008 review cites `cd5566b3...`. Current text still leaves repeated cutoff batches, owner-local linearization, immutable participant manifest, RECOVERY_EPOCH_COMPLETED, H schema mapping, registry authority and anti-rollback anchor custody incomplete. | Storage publishes exact source/version reconciliation and amended protocol; P/A re-review current blob; affected Owners accept the exact new blob. |
+| UMR-027 | P1 | Close Applied package/COC companion exact-version mismatch | A; C/D/G/H/I/Storage, B as typed-boundary authority | A package `4961ffef...` pins companion `fc3bac39...`; current A COC architecture file is `a3c51ec...`. G's Applied decision pins `4961+fc3`; no silent substitution allowed. | A publishes canonical manifest or superseding exact package/companion pair; G and every affected Owner explicitly reaccept the exact new pair. |
+
+### Updated gate vector
+
+- Issue #14 R1–R6: OPEN.
+- Storage Gate B design activity: AUTHORIZED TO PROCEED; Gate B design acceptance: OPEN.
+- Gate C implementation fault injection: DEFERRED_TO_ENGINEERING_PHASE.
+- JF-10 P0: OPEN; PostgreSQL 18.7 capability suite 7/7 applies only to pinned isolated engine fixtures.
+- Applied 1.1: design decisions recorded with exceptions for the prior exact pair; canonical companion pin mismatch OPEN; freeze NO.
+- D/F/G/I Context Optimization / Observation Archive acceptances are conditional; F/G contract/schema, cross-owner dependencies and all 15 negative tests remain OPEN/NOT RUN.
+- Module baseline adoptions: all nine remain OPEN; proposal documents remain PROPOSED.
+- ADR-001 remains ADR-BLOCKED; I Global Forget remains GOVERNANCE-BLOCKED; G0 / architecture freeze NOT AUTHORIZED.
