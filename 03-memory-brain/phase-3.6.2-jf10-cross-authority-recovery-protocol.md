@@ -178,6 +178,7 @@ Until I publishes and accepts the owner-gate participation protocol:
 
 This addendum is a DE-S gap report and formal request for I's decision, not an I policy amendment or acceptance. The original candidate remains preserved for traceability. **JF-10 P0 OPEN; I36-SR-02 runtime NOT VERIFIED; no cross-authority atomicity proof; no Phase 3.6 final gate.**
 
+
 # Addendum v2 — Owner-Gate-Participating Durable 2PC Protocol (JF-10)
 
 - Status: **DE-S REVISED ARCHITECTURE PROPOSAL / READY FOR EXACT I OWNER REVIEW; NOT I-ACCEPTED; NOT IMPLEMENTED; NOT TESTED**
