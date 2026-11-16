@@ -136,3 +136,47 @@ A degraded mode must name the data class, permitted action, maximum staleness, e
 - C must expose the final inference boundary and distinguish managed-region inclusion from model behavior.
 - D/E/F/G must map local reauthorization to their transaction, worker, query, cache and delivery linearization points.
 - A must register common typed epochs/cursors without conflating PermissionEpoch, ForgetFence, canonical commit sequence, index watermark, ContextVersion or Adapter capability epoch.
+
+---
+
+## Phase 3 targeted remediation — permission epoch, revocation and boundary obligations
+
+**Status: CANDIDATE policy semantics; implementation conformance OPEN.**
+
+### 7. PermissionEpoch contract
+
+PermissionEpoch is an opaque typed generation issued by I's policy authority for a named policy domain. Its domain identifier, issuer, generation, policy version, effective time and revocation-stream position are part of its verification context. The generation is monotonic only within that exact domain and issuer. No cross-domain arithmetic or ordering is valid.
+
+A policy-domain change affecting a Principal, delegation, grant, ProducerIdentity, AdapterIdentity, scope membership or protected resource increments the affected epoch(s) according to the authority's published fan-out map. A consumer may rely on an epoch only when it has a contiguous, authenticated view through the required point or has synchronously revalidated with the authority. Unknown partition mapping, gap, issuer mismatch, stale cache or offline revocation state fails closed.
+
+PermissionEpoch expiry is not a permission grant. A decision expires at the earliest of decision expiry, credential expiry, delegation expiry, session expiry, policy validity end or resource/Scope binding expiry. At expiry the consumer must reauthorize; it cannot extend the prior ALLOW locally.
+
+### 8. Forget concurrency
+
+Permission revocation and Forget are distinct concurrent workflows:
+- revocation denies future actions under the revoked authority and invalidates in-flight operations not past their declared commit/disclosure point;
+- Forget suppression remains governed by D's ForgetFence and I's global completion policy;
+- revoking the requester does not roll back a committed fence or convert pending targets to complete;
+- if the requester loses authority before the Forget authorization/fence commit, the operation must stop or be reauthorized by a currently authorized Principal;
+- cleanup after requester revocation may continue only under a registered service Principal with a scoped, auditable delegation/policy grant;
+- evidence binds both the applicable PermissionEpoch and D ForgetFence reference separately.
+
+### 9. Boundary reauthorization requirements
+
+| Boundary | Required identity/policy evidence | Fail-closed behavior |
+|---|---|---|
+| Ingress / producer registration | authenticated Principal, Issuer, ProducerIdentity, ActorRef claim match, ScopeRef and current PermissionEpoch | reject acceptance/registration |
+| Compiler execution / replay | producer + actor binding, source ScopeRef, purpose, delegation, current PermissionEpoch and D fence | cancel/quarantine work; no dereference/publication |
+| Canonical commit | actor/principal, action/resource, ownership ScopeRef, current permission decision and D fence at commit | abort/retry against current policy |
+| Runtime candidate/finalization | caller identity, requested ScopeRef, current epoch and target authorization | filter before emission; fail closed if final recheck unavailable |
+| Cache / Working Set | principal, scope, environment, PermissionEpoch, ForgetFence and version namespace | bypass/invalidate; never serve stale protected hit |
+| Context reconciliation/delivery | recipient Principal/AdapterIdentity, Context target, ScopeRef, PermissionEpoch and D fence | pending/unknown; no stale apply |
+| Adapter reconnect/final inference | authenticated AdapterIdentity, capability epoch, current PermissionEpoch, D fence and G target | quarantine managed region until reconciled |
+| External recipient/export | authenticated recipient identity, audience, purpose, ScopeRef, current epoch and retention policy | stop new export; revoke credentials and issue withdrawal |
+| Backup/restore | storage workload Principal, restore target scope, current permission and persistent Forget ledger | restore to quarantine; no serving before reconciliation |
+
+### 10. Revocation state and recovery
+
+Revocation states are `Active | RevocationPending | Revoked | Expired | Unknown`. Only Active with a current, verified epoch may authorize. RevocationPending/Unknown blocks protected actions. Recovery requires authenticated resynchronization, current policy decision, invalidation of old decision/cache/lease state and audit record. A late invalidation cannot be ignored because a local cache is still within TTL.
+
+
