@@ -22,7 +22,7 @@ D owns validation and persistence of the seal reference; I alone defines and att
 
 ## 2. JF-02 — Authorization freshness at visibility linearization
 
-D's Forget predicate and I's authorization predicate are separate mandatory predicates. The final visibility decision MUST bind an I-authoritative AuthorizationCommitPermit to the exact principal/actor, action, resource/artifact, source lineage, ScopeRef, ForgetOperationId/fence generation, WorkItemId, AttemptId, LeaseEpoch, DependencySetDigest, and intended visibility operation.
+D's Forget predicate and I's authorization predicate are separate mandatory predicates. The final visibility decision MUST bind an I-authoritative CommitAuthorizationReceipt to the exact principal/actor, action, resource/artifact, source lineage, ScopeRef, ForgetOperationId/fence generation, WorkItemId, AttemptId, LeaseEpoch, DependencySetDigest, and intended visibility operation.
 
 The permit MUST carry PermissionEpoch, revocation watermark, decision ID, policy version, issuance/expiry, audience and unique nonce. It must be cryptographically verifiable and single-use/idempotently consumable. A cached authorization decision or a permit for another scope/action is invalid.
 
@@ -109,3 +109,16 @@ CAS/conditional updates are acceptable as transaction-internal guards, not as a 
 This is not a concrete database selection or deployment approval. No engine/version/configuration, schema, HA/replication, failover or restore implementation is present in the repository. D does not certify implementation or tests.
 
 **I external dependency remains BLOCKED:** I's current ProducerDomainInventoryEpoch/InventorySeal and PermissionEpoch/revocation commit contract are not governance-approved. Until I supplies current, commit-usable authorization evidence and inventory seal, D/E/Storage fail closed; D does not mint or approve I evidence. The I Owner request is tracked in repository issue #4.
+
+
+## 10. I Phase 3.6 technical contract refresh — CommitAuthorizationReceipt
+
+The current I branch now contains `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` (HEAD observed `8d1ddadb6af70a7c387105d20ca8f2f6de80c5fb`, Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`). It supersedes earlier I technical Candidate/Open wording for the delegated BIH technical baseline only; it does **not** clear I governance approval or make I policy active.
+
+D adopts the exact I-owned `CommitAuthorizationReceipt` terminology and consumption fields. The receipt binds policy domain, PermissionEpoch, PrincipalRef, ActorRef, action, ResourceRef, purpose, audience, ScopeBindingSet digest, EnvironmentRef, DelegationChainRef, operation ID, operation payload digest, owner boundary and I decision ID. It is single-use, non-transferable and not an offline lease.
+
+For final publication, D requires the E/Storage gate to submit/consume this receipt in the same I policy-domain commit-ordering protocol that serializes authorization decisions against revocation. The gate records I receipt ID, decision ID, policy-domain sequencer position, PermissionEpoch, operation digest, owner commit cursor/transaction ID, relevant revocation event/epoch and terminal outcome `COMMIT_WON`, `REVOCATION_WON` or `INDETERMINATE_ABORTED`. Indeterminate is never success. Offline leases and stale-epoch grace are prohibited in this Phase 3.6 baseline.
+
+**JF-10 — I sequencer / Storage visibility commit crash-coupling remains OPEN (P0 integration blocker).** I specifies the single-use receipt and common per-domain ordering requirement, but the inspected I artifact does not fully define the crash-atomic protocol that binds an I sequencer outcome to the Storage VisibilityPointer + PublicationReceipt transaction (including I commit-won followed by owner DB crash/rollback, lost ACK and replay). D will not invent that cross-owner protocol. I + Storage must specify a recoverable, idempotent commit handshake/transaction participation whose durable terminal outcome proves both revocation order and owner visibility commit. Until then, final publication remains fail-closed and not implementation-approved.
+
+I's ProducerDomainInventoryEpoch / InventorySeal and Global Forget Completion governance dependencies remain separately BLOCKED. The I inventory contract remains CANDIDATE; this technical authorization update does not approve it.
