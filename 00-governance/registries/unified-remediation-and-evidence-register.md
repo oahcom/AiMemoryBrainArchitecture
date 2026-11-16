@@ -32,10 +32,9 @@ Observed GitHub branch refs at this refresh. These are point-in-time HEADs, not 
 | H | session-h-bmcp-protocol | 26378ea59675f31ac0455d745e9cbedab898db8c |
 | I | session-i-security-governance-2026-11-16 | ba0d1dfcca9392f3a20c405169c83b41da3f12b7 |
 | Storage | session-storage-consistency-forget-atomicity-2026-11-16 | 337fe8bffa178e64ad8e4750f1ede1d561424edc |
-| P | session-p-project-governance-baseline | d65075630d691889840acb7621f4a44fb9a05571 |
 | main | main | 3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f |
 
-P vs main: **ahead 73 / behind 4 / diverged**. No merge, force-update or main write is authorized or performed.
+P vs main is **diverged** (latest compare before this update: ahead 79 / behind 4; each P coordination commit increments the ahead count). No merge, force-update or main write is authorized or performed.
 
 ## 3. Current system gate vector
 
@@ -113,7 +112,7 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 | UMR-024 | P2 | Preserve Applied package/COC artifact role reconciliation | A/P | **CLOSED — DESIGN DECISION LEVEL** | A matrix distinguishes immutable Applied pair 4961+fc3 from separate bridge architecture a3c51; do not silently substitute. |
 | UMR-025 | P1 | Normalize Gate A/B/C phase vector and remove stale status language | Storage + A | OPEN | Gate A PARTIAL PASS / OPEN; prior4ac design accepted with exceptions; current86ff focused re-review; v2 4ed fresh review; Gate B implementation NOT RUN; Gate C DEFERRED_TO_ENGINEERING_PHASE. |
 | UMR-026 | P1 | Preserve strict role/provenance boundary for all Owner decisions | A–I + P | OPEN | Role-simulated coordinator reviews are technical inputs only; obtain actual Owner-session confirmation or replace them with independently authored exact decisions. |
-| UMR-027 | P1 | Maintain no-merge integration boundary | P + A; governance authority when appointed | OPEN / SAFETY CONTROL | P/main diverged 73/4; reviewed non-destructive reconciliation required; no merge/force update without explicit authorization. |
+| UMR-027 | P1 | Maintain no-merge integration boundary | P + A; governance authority when appointed | OPEN / SAFETY CONTROL | P/main diverged (latest compare before this update: ahead 79 / behind 4); reviewed non-destructive reconciliation required; no merge/force update without explicit authorization. |
 | UMR-028 | P1 | Complete module baseline adoption and governance ratification | A–I + Project Governance Authority | OPEN | Each Owner adopts/rejects exact proposal version; formal PGA appointment and G0 approval required before project-wide freeze. |
 
 ## 7. Current issue trackers
