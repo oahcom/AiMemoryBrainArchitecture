@@ -1217,3 +1217,36 @@ A reviewed the probe source and posted blocking review findings in Issue #10 com
 The probe's `synchronous_commit=remote_apply` is stronger than `on` for standby replay visibility; this is acceptable if intentional, but the dossier must describe the actual tested setting exactly.
 
 **Current gate:** Gate A single-node profile PASS; HA probe source AUTHORED / REVIEW BLOCKED / NO PASS YET; backup/restore NOT RUN; production topology and human on-call NOT DESIGNATED. Gate B remains BLOCKED until full Gate A; Gate C remains BLOCKED until Gate B. JF-10 P0 remains OPEN.
+
+
+## 13.26 Gate A — PostgreSQL 18.7 synchronous standby promotion result — 2026-11-17
+
+This section extends §13.25. The single-node prepared-XID and hard-restart probe remains PASS. Storage has now also completed a two-node synchronous replication / primary-loss promotion probe.
+
+### Two-node physical evidence
+
+- Pinned image: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+- Probe Blob: 23d8ea8546932e592093c5c17cd2b52f8a294720
+- Workflow Blob: f3c05f90c6065458b49879def10dce672685c850
+- Successful run: 43908428220
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43908428220
+- Run commit: 7cd416a1f80364fe7de316f19716325b6503cbfa
+- Job: 133443444760
+
+The CI run configured a physical standby as FIRST 1 synchronous replica with synchronous_commit=remote_apply and verified streaming/sync before PREPARE. It then proved prepared WAL replay, hard primary kill, standby promotion, same-XID resolution after promotion, retained lock, and atomic visibility-pointer + PublicationReceipt commit after primary loss.
+
+PostgreSQL hot standby intentionally exposes no pg_prepared_xacts rows while in recovery. The test asserts that behavior and checks the exact XID only after promotion completes recovery.
+
+### Gate A status
+
+**PARTIAL PASS / OPEN.** Single-node crash/restart and two-node synchronous promotion/recovery are now demonstrated on the pinned CI image. Still open: rollback-after-promotion, backup/restore + PITR, control-ledger reconciliation before serving restored data, host/zone/storage durability, production fencing/routing, actual Canonical Authority deployment and named human production operator/RPO/RTO.
+
+| Gate | Status |
+|---|---|
+| Gate 0 — D + Storage exact complete-bundle decisions | CLOSED |
+| Gate A — PostgreSQL 18.7 candidate capability | PARTIAL PASS / OPEN |
+| Gate B — persistent COC/quorum log | BLOCKED until Gate A passes |
+| Gate C — deterministic end-to-end fault campaign | BLOCKED until Gate B passes |
+| JF-10 P0 / production activation | OPEN / NOT AUTHORIZED |
+
+Issue #10 comment 6922463540 records this evidence. Storage dossier: reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md. No production HA, application participant, I sequencer, COC or end-to-end conformance pass is inferred.
