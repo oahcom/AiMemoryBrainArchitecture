@@ -130,3 +130,34 @@ This decision was made after reading the exact A COC and CGH package Blob SHAs i
 - `reviews/storage-consistency/reference_model/README.md`, Blob `91bc63ae3619d851b6a56e178e273c7d9868129e`.
 
 This decision is pinned only to COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea` and A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819`. Any later amendment requires a fresh Storage review.
+
+## Architecture-phase continuation — persistent COC protocol design (2026-11-17)
+
+The project is in architecture design; no production code repository/runtime is expected at this stage. This does not relax any safety invariant. It changes the acceptance boundary: implementation binding, deployed quorum, cloud failure domains, production operator/on-call and executable production conformance are deferred to the engineering/deployment phase. They are not prerequisites for producing and reviewing the architecture protocol.
+
+### COC design work now authorized
+
+A/COC and Storage should now turn the accepted logical boundary into a complete durable protocol specification, without claiming implementation. The design must explicitly define:
+
+1. **Log record model:** immutable COC transaction ID, participant IDs, canonical payload digest, schema/version, actor/authority, typed owner references, term/index, previous-record digest and record digest. Define append idempotency and same-ID/different-digest conflict.
+2. **Quorum commit semantics:** voter membership/configuration epoch, quorum definition, durable-ack point, linearizable read barrier, monotonic term/index, leader change and stale-leader rejection. The three-voter/two-quorum topology remains a design candidate until failure-domain assumptions are explicit.
+3. **Participant intent registry:** exact participant identity and owner authority; preallocated Storage XID binding where applicable; prepared/registered/terminal states; immutable request binding; authoritative unresolved-participant enumeration.
+4. **Owner protocol binding:** define what is committed in COC versus each owner ledger. COC append/ACK must never be treated as Storage visibility or I terminal authorization. Keep I sequencer, D fence and Storage visibility authority distinct; specify the approved bridge and reject any unsupported atomicity assumption.
+5. **Recovery cutoff:** precise algorithm for freezing a quorum-confirmed prefix, collecting I/D owner-local requests while COC is unavailable, sorting only within each owner's own authority, persisting a recovery batch and reopening gates only after every pre-cutoff participant is enumerated and reconciled. Do not invent a cross-owner order from clocks or incomparable cursors.
+6. **UNKNOWN/IN_DOUBT:** exact state transitions and permissible actions for lost append ACK, lost read ACK, leader crash, minority partition, participant response loss and owner restart. No TTL/heuristic release; no new operation ID to escape an unresolved participant.
+7. **Snapshot/restore:** snapshot anchor term/index/digest, prefix continuity proof, high-water marks and membership epoch. Missing prefix, rollback, stale snapshot or mismatched owner high-water must produce RESTORE_FENCED and prevent gate reopening.
+8. **Read APIs and evidence:** linearizable get-by-ID/digest, list unresolved participants, fetch quorum-confirmed prefix, reconcile participant outcome, and produce a verifiable recovery receipt. Define authorization, retention and audit semantics.
+9. **Crash matrix and invariants:** before/after append quorum, response loss, participant prepare, receipt registration, terminal decision, owner visibility commit, recovery-cutoff freeze and restore. Each row states durable facts, UNKNOWN behavior, recovery owner and forbidden inference.
+10. **Engineering handoff:** specify logical interfaces, storage durability properties, deployment topology constraints, operational controls, monitoring, RPO/RTO targets to be selected, and future deterministic fault-injection acceptance. Mark all physical implementation evidence NOT RUN until implementation exists.
+
+### Required protocol outputs
+
+- COC durable log and quorum state-machine specification.
+- Participant registry schema/state machine and idempotency rules.
+- COC outage recovery-cutoff and owner-local batch protocol.
+- Snapshot/restore fencing protocol.
+- Cross-authority sequence/authority matrix and message/API contracts.
+- Complete crash/recovery matrix with safety invariants and conformance cases.
+- Explicit open-decision register with decision owner (A, I, D, C, H or Storage); no implicit cross-owner acceptance.
+
+**Gate disposition:** Gate B architecture design may proceed now. It is not an implementation PASS. Gate A remains open only for remaining architecture specifications and cross-owner decisions; production runtime binding is `DEFERRED_TO_ENGINEERING_PHASE`, not a blocker. Gate C implementation fault injection is deferred until executable participants exist. No deployment or production activation is authorized.
