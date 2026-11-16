@@ -175,3 +175,16 @@ Global completion audit bundle must separately reference the I ProducerDomainInv
 
 A completion evaluator records the vector component states (suppression, producer barrier, derived cleanup, runtime/context/adapter, external copy, backup/restore, physical erasure), exact mandatory target set, exceptions and expiry, evidence verifier, evaluation time and policy version. Any newly discovered target, invalidated seal, late derivative, failed restore suppression or expired exception produces an auditable Reopened transition. The previous proof remains as historical/superseded evidence and is never silently overwritten.
 
+
+
+---
+
+## Phase 3.5 governance decision traceability
+
+The I-owned decision register is maintained in `governance-decision-register.md`; the full OPEN policy decision list is in `phase-3.5-global-identity-forget-governance.md` §6.
+
+No decision is effective solely because a policy document was committed. Every approval must identify the exact decision text/hash, approving PrincipalRef and Issuer, independent reviewer where required, evidence artifact/version, scope/jurisdiction/data class, effective policy version/time, expiry/review date and revocation/supersession conditions.
+
+A global Forget completion bundle must separately reference I's ProducerDomainInventoryEpoch and Target Inventory Seal, D's per-operation ProducerRegistrationHighWater/WorkItemBarrier, each mandatory target/action ACK, external recipient and onward-copy evidence, backup/restore proof, physical-erasure evidence and all active PolicyExceptions. No untyped aggregate epoch or roll-up count may replace the underlying typed evidence.
+
+A PolicyException remains a disclosed residual risk, never a technical success. It cannot authorize ordinary retrieval, derivation, Context delivery, Adapter application, training or export of forgotten content. Expiry/revocation invalidates the exception and reopens the operation.
