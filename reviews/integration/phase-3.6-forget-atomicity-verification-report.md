@@ -342,3 +342,198 @@ The new I contract does not activate governance policy: I36-GOV-01..08 remain GO
 - **Recommendation:** I + Storage define a durable commit handshake/participant or coordinator protocol, immutable correlation and operation digest, idempotent outcome lookup across both authorities, explicit recovery for each one-sided crash/ACK-loss ordering, and a single authoritative terminal outcome. Prepared/ambiguous artifacts remain hidden.
 - **Reapproval:** requires I owner/authority approval of its sequencer integration and Storage engineering approval of the exact commit/recovery implementation. DE-S cannot approve I policy.
 - **Status:** OPEN / BLOCKED; fail closed. No implementation or race test has run.
+
+
+## 12. Session DE-S live reconciliation and normalized execution ledger
+
+This section is an append-only refresh against the live Owner branches on 2026-11-16. It supersedes stale report-time HEAD metadata in §2 for the branches re-read here; it does not rewrite or merge any Owner branch.
+
+### 12.1 Live branch and decision baseline
+
+| Owner | Branch | HEAD before this report update | HEAD commit message | Status |
+|---|---|---|---|---|
+| D | `session-d-memory-brain-2026-11-16` | `2fb9d4aa07abbe7a6709dea4c99ec6363b0e627a` | Align DE-S final gate with I CommitAuthorizationReceipt; record JF-10 integration blocker | Live |
+| E | `session-e-memory-compiler-2026-11-16` | `29f66cafaa1e51df72ef75df4da2f08f83724034` | Align DE-S final gate with I CommitAuthorizationReceipt; record JF-10 integration blocker | Live |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `2817c894eea2fc64d5715aa45c8f339e4024421a` | Add I governance decision register to evidence manifest | Live; this report update will advance this branch |
+| I (read-only external dependency) | `session-i-security-governance-2026-11-16` | `8d1ddadb6af70a7c387105d20ca8f2f6de80c5fb` | docs(I): preserve existing governance decision IDs | Read-only; not modified |
+
+Recursive tree checks at these tips: D 38 blobs / 38 Markdown; E 39 blobs / 39 Markdown; Storage 41 blobs / 41 Markdown. No non-Markdown files, source code, executable test project, build manifest, migration, database config, runtime deployment manifest, fixture runner or CI workflow was present. This is repository evidence, not a claim about unlinked external systems.
+
+### 12.2 Current source artifact and Blob SHA manifest
+
+| Owner | Artifact | Blob SHA |
+|---|---|---|
+| D | `03-memory-brain/forget-fence-operation-and-publication-gate.md` | `b9f75456140eed6a34faa8d84be20436cd91c745` |
+| D | `03-memory-brain/phase-3.6-joint-forget-linearization-decision.md` | `1b6a312ecffd3947bbb4df59f902242482c98a40` |
+| D | `reviews/03-memory-brain/three-party-six-dimension-review.md` | `dfcbf1deb56d92787f3f093c9ac926013e1d571d` |
+| D | `03-memory-brain/phase-3.6.1-joint-defect-closure-d-addendum.md` | `53685b864fbbcbac010e60a67c59430be7f27fce` |
+| E | `04-memory-compiler/phase-3.6-producer-publication-conformance.md` | `a21f81dfe53ae6998818d2cc59e865f5dd1b839d` |
+| E | `04-memory-compiler/phase-3.6-joint-producer-publication-decision.md` | `aaa15de9d6e3a6ce74b11fda376369d6a49659ab` |
+| E | `reviews/04-memory-compiler/three-party-six-dimension-review.md` | `682dbd401a7a4eaf5bc1fea3c2990ac6b621c7fd` |
+| E | `04-memory-compiler/phase-3.6.1-joint-defect-closure-e-addendum.md` | `004bd48661a7657b88911ec40de79bde8fe35aa6` |
+| Storage | `reviews/storage-consistency/forget-atomicity-storage-realization-review.md` | `5e2d55c8b210997693a7f83d35a5a03588e4ae6b` |
+| Storage | `reviews/storage-consistency/phase-3.6-joint-durable-atomicity-decision.md` | `17071157152c7868d638383ec97543fe3d35e652` |
+| Storage | `reviews/storage-consistency/phase-3.6-deployment-selection-and-verification-readiness.md` | `765b10978813680985a71600e82fc15caa75bf2c` |
+| Storage | `reviews/storage-consistency/phase-3.6.1-de-s-six-dimension-two-round-self-review.md` | `30abb437905eb9a932083a34e8b7a0d84aa170d7` |
+| Storage | `reviews/storage-consistency/phase-3.6.1-joint-defect-closure-storage-addendum.md` | `c649b7fb669628c42e4cfdcb06b4e33ffa8aed70` |
+| Storage | This verification report, before this update | `305ad1d9d2357e50d14fbaac9683cd8346e59ce5` |
+| I (external) | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | `0cbf6bb7480db873790c454817593a9b1c5548ba` |
+| I (external) | `09-security-governance/governance-decision-register.md` | `3718ae8b24940ff655a2652e908996635709c1ad` |
+| I (external) | `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` |
+
+### 12.3 Existing Decision Preservation and lifecycle classification
+
+The already-decided definitions are preserved without semantic redesign:
+
+| Contract | Design status | Approved status | Implemented | Tested |
+|---|---|---|---|---|
+| ProducerClass / authenticated ProducerIdentity registration | Decided | Joint DE-S technical decision under user delegation; I identity/governance activation not approved | No evidence | No |
+| Producer WorkItem registration and durable receipt before queue/lease/source dereference | Decided | Joint DE-S technical decision | No evidence | No |
+| ForgetFence installation and immutable high-water capture in the same serialization order as admission | Decided | Joint DE-S technical decision | No evidence | No |
+| Complete Derived Dependency registration + frozen output manifest | Decided | Joint DE-S technical decision | No evidence | No |
+| Publish Gate: latest fence, complete dependencies, current attempt/lease, manifest/inventory, exact lineage/scope and I permit | Decided | I authorization governance and cross-authority integration remain unapproved | No evidence | No |
+| Durable visibility commit + PublicationReceipt | Decided | Logical profile selected; independent Storage engineering approval pending | No evidence | No |
+| Artifact visibility across reads/indexes/caches | Decided | Consumer-owner acceptance open | No evidence | No |
+| Producer Work Completion / root terminality | Decided | Joint DE-S technical decision | No evidence | No |
+| Retry / recovery / ACK loss / unknown outcomes | Decided | Joint DE-S technical decision | No evidence | No |
+| Late derivative suppression and proof reopening | Decided | Joint DE-S technical decision | No evidence | No |
+| Two six-dimension rounds | Review completed; zero new findings for reviewed design baseline | Not a production/security approval | N/A | Design review only |
+
+No evidence in the inspected trees establishes implementation. The D36, E36 and C01–C20 specifications remain specifications only.
+
+### 12.4 I external dependency disposition (I branch is read-only)
+
+The I branch was read at HEAD `8d1ddadb6af70a7c387105d20ca8f2f6de80c5fb`. The I technical contract records BIH36-JD-01..17 and a single-use, non-transferable `CommitAuthorizationReceipt`, bound to policy domain, PermissionEpoch, PrincipalRef, ActorRef, action, ResourceRef, purpose, audience, ScopeBindingSet digest, EnvironmentRef, DelegationChainRef, operation ID/payload digest, owner boundary and I decision. I's per-policy-domain sequencer orders authorization against revocation with terminal outcomes `COMMIT_WON`, `REVOCATION_WON`, `INDETERMINATE_ABORTED`. Offline leases, stale-epoch grace and cached ALLOW are not usable in this baseline.
+
+This is a technical contract decision, not governance approval or consumer acceptance. I36-GOV-01..08 remain GOVERNANCE-BLOCKED; C/D/E/F/G/Storage consumer acceptance remains OPEN. The I Global Producer Inventory / Completion Evidence Vector remains CANDIDATE and unapproved.
+
+| I dependency | DE-S engineering consumption contract | I disposition | Closure evidence still required |
+|---|---|---|---|
+| Authoritative producer/recipient inventory source | Consume only authenticated I system-of-record evidence; never infer global completeness from D work high-water | BLOCKED / source not approved | Named registry/system of record, accountable owner, registration/authentication and audit trail |
+| ProducerClass / ProducerIdentity full coverage | Bind every class and authenticated instance to D/E registration and typed identity/scope/capabilities | BLOCKED | Approved mandatory fields, identity proof and complete instance inventory |
+| ProducerDomainInventoryEpoch / InventorySeal | Bind current epoch + digest + signer/seal to barrier and final publication; any relevant change invalidates proof | CANDIDATE / BLOCKED | Approved epoch/seal semantics, signer/verifier and invalidation/reopen policy |
+| Join/leave/change | Any producer, recipient, capability, scope, owner, issuer, backup or route change reopens reconciliation | CANDIDATE / BLOCKED | Approved lifecycle rules and evidence obligations |
+| Unknown producer | DENY/QUARANTINE/UNKNOWN; no implicit registration or NotApplicable-by-omission | Technical fail-closed semantics specified; governance activation BLOCKED | I approval and complete negative conformance |
+| Global Forget coverage | I closed-world inventory is separate from D per-operation work high-water | CANDIDATE / BLOCKED | Approved mandatory producer/recipient/replica/export/backup/restore coverage |
+| PermissionEpoch / final authorization | Consume exact I CommitAuthorizationReceipt; owner final gate participates in I sequencer; no offline/stale permit | Technical baseline specified; governance BLOCKED; JF-10 OPEN | I governance approval and tested cross-authority commit/recovery protocol |
+| Unsupported / Offline targets | UNKNOWN/PENDING by default; no silent success; exact approved exception only | I36-GOV-07/08 BLOCKED | Named exception authority, scope, expiry, alternate controls and review |
+| Global Forget Completion | D may report only canonical suppression/barrier evidence; DE-S does not claim global completion | CEV candidate / BLOCKED | I + privacy/security/data governance approval and target-specific evidence policy |
+
+Repository issue [#4 — I Owner Phase 3.6 external dependency decisions](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/4) remains OPEN. It has one baseline-refresh comment from the repository author; no distinct I Owner approval/response or signed approval evidence is present. DE-S did not modify I-owned files and does not approve I policy.
+
+### 12.5 Deployment Selection Record
+
+**Logical profile selected and preserved:** one transactional database per Canonical Memory Authority, with a per-authority coordinator row/lock and serializable (or formally proven equivalent strict-serializable) transactions. The same transaction domain must govern ProducerClass registry, Work Ledger/sequence, ForgetOperation/Fence/BarrierSnapshot, dependency set and frozen manifest, lease fencing, idempotency/outcome records, final gate, VisibilityPointer + PublicationReceipt, terminal disposition, recovery watermark and same-transaction outbox. Large artifact bytes may be held only in private staging; VisibilityPointer remains the sole publication authority.
+
+| Option | Decision | Reason / boundary |
+|---|---|---|
+| Single DB transaction + per-authority coordinator | SELECTED logical baseline | Directly co-locates required serialization and atomic visibility; vendor/runtime still unselected |
+| CAS / Conditional Update | Use inside selected transaction | Guards expected versions/fence/lease/manifest; standalone CAS cannot atomically include dependent writes |
+| Durable Work Ledger | REQUIRED component | Stable WorkItemId, durable admission/barrier accounting and recovery; not a complete serializer by itself |
+| Transactional Outbox | REQUIRED supplement | Same-transaction delivery, at-least-once idempotent notification; never visibility authority |
+| Serialized Coordinator service | NOT selected while single DB feasible; fallback only | Durable consensus/log, participant recovery and in-doubt resolution impose higher operational burden |
+| Durable 2PC / prepare-commit | Fallback only if one DB cannot span authority | Prepared state hidden; durable coordinator and participant recovery required |
+| Eventual consistency / async reconciliation | REJECTED for safety gate | Cannot prove fence/publish or revocation linearization |
+
+Transaction boundaries: (1) admission/fence share one coordinator transaction; (2) dependency set + frozen manifest commit as one completeness unit; (3) final visibility transaction rechecks D fence, work/attempt/lease, dependency digest, manifest/inventory seal and I authorization then atomically changes VisibilityPointer + PublicationReceipt; (4) terminal transaction closes only exact frozen manifest and all child/output/attempt/outcome obligations. Failure uses same-key authoritative outcome lookup; UNKNOWN stays private/non-terminal; stale restore enters RecoveryQuarantined.
+
+This is a logical design selection only. No database product/version, SQL dialect, schema/migration, isolation config, HA/failover topology, backup/restore runbook, production deployment or named independent Storage engineering approver is evidenced. D and E accept this logical target in their respective addenda; neither claims runtime implementation.
+
+### 12.6 D36 execution ledger — original D §9 rows, numbering preserved
+
+Source: D `03-memory-brain/forget-fence-operation-and-publication-gate.md` §9, Blob `b9f75456140eed6a34faa8d84be20436cd91c745`. The source uses row numbers rather than D36-xx IDs; no new test IDs are invented.
+
+| Test ID | Test Name | Environment | Fixture | Command | Expected Result | Actual Result | Pass/Fail | Evidence | Failure Analysis |
+|---|---|---|---|---|---|---|---|---|---|
+| D36 §9 row 1 | Registration vs Fence race | No executable DB/runtime/runner; no command defined | Not present | None defined; no test runner or executable target | Registration-first is captured at/below H; fence-first rejects/quarantines; no uncovered work | Not executed | BLOCKED / NOT RUN | D §9 spec Blob b9f75456140eed6a34faa8d84be20436cd91c745 | Cannot execute: repository contains documentation only; required DB/runtime/fixture/runner absent |
+| D36 §9 row 2 | Registration ACK lost | No executable DB/runtime/runner; no command defined | Not present | None defined; no test runner or executable target | Same WorkItemId/digest resolves same receipt or authoritative fence rejection | Not executed | BLOCKED / NOT RUN | D §9 spec Blob b9f75456140eed6a34faa8d84be20436cd91c745 | Cannot execute: repository contains documentation only; required DB/runtime/fixture/runner absent |
+| D36 §9 row 3 | Crash after staging before Publish | No executable DB/runtime/runner; no command defined | Not present | None defined; no test runner or executable target | Artifact remains private; recovery reuses IDs and rechecks fence/permission | Not executed | BLOCKED / NOT RUN | D §9 spec Blob b9f75456140eed6a34faa8d84be20436cd91c745 | Cannot execute: repository contains documentation only; required DB/runtime/fixture/runner absent |
+| D36 §9 row 4 | Publish committed, ACK lost | No executable DB/runtime/runner; no command defined | Not present | None defined; no test runner or executable target | Same PublicationOperationId returns original PublicationReceipt; no duplicate effect | Not executed | BLOCKED / NOT RUN | D §9 spec Blob b9f75456140eed6a34faa8d84be20436cd91c745 | Cannot execute: repository contains documentation only; required DB/runtime/fixture/runner absent |
+| D36 §9 row 5 | Lease expiry / stale worker | No executable DB/runtime/runner; no command defined | Not present | None defined; no test runner or executable target | Old attempt fenced; new attempt refreshes permission/fence; expiry does not close work | Not executed | BLOCKED / NOT RUN | D §9 spec Blob b9f75456140eed6a34faa8d84be20436cd91c745 | Cannot execute: repository contains documentation only; required DB/runtime/fixture/runner absent |
+| D36 §9 row 6 | DLQ replay | No executable DB/runtime/runner; no command defined | Not present | None defined; no test runner or executable target | Same WorkItemId/lineage, new AttemptId, fresh checks; barrier stays open | Not executed | BLOCKED / NOT RUN | D §9 spec Blob b9f75456140eed6a34faa8d84be20436cd91c745 | Cannot execute: repository contains documentation only; required DB/runtime/fixture/runner absent |
+| D36 §9 row 7 | Index/backfill/rebuild replay | No executable DB/runtime/runner; no command defined | Not present | None defined; no test runner or executable target | Rebuild uses committed publication state and current fence; covered artifact suppressed | Not executed | BLOCKED / NOT RUN | D §9 spec Blob b9f75456140eed6a34faa8d84be20436cd91c745 | Cannot execute: repository contains documentation only; required DB/runtime/fixture/runner absent |
+| D36 §9 row 8 | Fence advances after staging | No executable DB/runtime/runner; no command defined | Not present | None defined; no test runner or executable target | Final gate rejects/quarantines; no visibility commit | Not executed | BLOCKED / NOT RUN | D §9 spec Blob b9f75456140eed6a34faa8d84be20436cd91c745 | Cannot execute: repository contains documentation only; required DB/runtime/fixture/runner absent |
+| D36 §9 row 9 | PermissionEpoch revoked before Publish | No executable DB/runtime/runner; no command defined | Not present | None defined; no test runner or executable target | I final decision denies/stales; artifact remains private | Not executed | BLOCKED / NOT RUN | D §9 spec Blob b9f75456140eed6a34faa8d84be20436cd91c745 | Cannot execute: repository contains documentation only; required DB/runtime/fixture/runner absent |
+| D36 §9 row 10 | Unknown/disabled ProducerClass | No executable DB/runtime/runner; no command defined | Not present | None defined; no test runner or executable target | Reject/quarantine; registry incompleteness blocks barrier proof | Not executed | BLOCKED / NOT RUN | D §9 spec Blob b9f75456140eed6a34faa8d84be20436cd91c745 | Cannot execute: repository contains documentation only; required DB/runtime/fixture/runner absent |
+Additional D variants specified in the source (partial dependency receipts, same key/different digest, fence lookup unavailable, terminal ACK lost, late derivative after proof, overlapping fences, stale restore, publication CAS conflict and Permission lookup timeout) also remain NOT RUN; no executable fixture/command exists.
+
+### 12.7 E36 execution ledger — E36-01..E36-20 IDs preserved
+
+Source: E `04-memory-compiler/phase-3.6-producer-publication-conformance.md`, Blob `a21f81dfe53ae6998818d2cc59e865f5dd1b839d`.
+
+| Test ID | Test Name | Environment | Fixture | Command | Expected Result | Actual Result | Pass/Fail | Evidence | Failure Analysis |
+|---|---|---|---|---|---|---|---|---|---|
+| E36-01 | ProducerClass absent/disabled/registry incomplete | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Reject/quarantine before queue/lease | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-02 | RegisterProducerWork vs Fence race | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Exactly one order; captured or rejected | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-03 | D registration ACK lost | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Resolve same WorkItemId/digest; no enqueue while UNKNOWN | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-04 | Worker crash after registration | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Same WorkItemId recovered; old lease invalidated; new AttemptId | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-05 | Lease expiry while old worker resumes | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Old attempt cannot publish/terminalize | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-06 | Retry/DLQ/replay/recompile | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Stable WorkItemId; new AttemptId; new DerivationRunId for recompile; fresh checks | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-07 | Candidate/staged object enumeration | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | No result; private ACL/visibility denies access | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-08 | Partial dependency registration | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Artifact remains private; no PublicationReceipt | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-09 | Fence advances after staging | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Final gate rejects/quarantines | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-10 | PermissionEpoch revoked after staging | No runtime/DB/harness; I commit integration unavailable | Not present | None defined; no test runner or executable target | Final gate rejects/quarantines | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-11 | Publish vs Fence race | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Publish-first inventoried or fence-first rejects; no third state | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-12 | Publication ACK lost after commit | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Same PublicationOperationId returns original receipt | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-13 | Crash between prepare and final commit | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Prepared artifact remains hidden; recovery commits/aborts idempotently | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-14 | Crash after visibility commit before E local update | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Readback recovers committed marker/receipt; no second publish | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-15 | Outbox replay duplicates publish request | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Same operation ID/digest returns original receipt | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-16 | Terminal request with unresolved DLQ/replay/lease/publication | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | D refuses terminal; barrier remains open | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-17 | Restore with old staged/published objects | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Quarantine first; current fence/permission applied before serve | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-18 | Mixed canonical + derived commit | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | One approved serialization decision; no forbidden visible derivative | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-19 | Same idempotency key, changed digest | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Conflict; immutable original unchanged | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+| E36-20 | Late derivative/ancestor after checkpoint | No executable runtime/DB/harness | Not present | None defined; no test runner or executable target | Reopen reconciliation; stale completion not reused | Not executed | BLOCKED / NOT RUN | E36 spec Blob a21f81dfe53ae6998818d2cc59e865f5dd1b839d | Cannot execute: compiler/worker/queue/DB harness absent; E10 also lacks approved I commit integration |
+
+### 12.8 C01–C20 execution ledger — IDs preserved
+
+Source: Storage `reviews/storage-consistency/forget-atomicity-storage-realization-review.md` §7, Blob `5e2d55c8b210997693a7f83d35a5a03588e4ae6b`.
+
+| Test ID | Test Name | Environment | Fixture | Command | Expected Result | Actual Result | Pass/Fail | Evidence | Failure Analysis |
+|---|---|---|---|---|---|---|---|---|---|
+| C01 | Thread race: registration first | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Work sequence <= Fence H; barrier remains open | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C02 | Thread race: fence first | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Work rejected/quarantined; no lease/execution | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C03 | Stress race | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Every work item captured or rejected; zero uncovered publish | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C04 | Dependency vs Fence | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Dependency-first is captured; fence-first rejects; artifact private | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C05 | Publish vs Fence | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Publish-first inventoried; fence-first rejects; no stale publish | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C06 | Crash before registration commit | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | No accepted receipt; retry resolves one outcome | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C07 | Crash after registration commit | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Same receipt returned; one work row | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C08 | Crash after Fence commit | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Same generation and H returned | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C09 | ACK loss | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Original receipts returned; no duplicate effect | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C10 | Lease expiry | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Old lease cannot publish/terminalize; barrier remains open | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C11 | Worker restart | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Same WorkItemId, new attempt, fresh checks, no duplicate visibility | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C12 | Dual Worker retry | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | At most one current lease and one logical publication | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C13 | Outbox replay | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Idempotent effects; no cursor gap skipped | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C14 | DREG/Publish crash gap | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Artifact private until same Publish key commits after fresh checks | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C15 | Stale Fence | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Authoritative transaction rejects stale observation | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C16 | Late derivative | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Suppress/quarantine; proof reopened; audit defect | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C17 | Duplicate operation | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Same digest returns same receipt; changed digest conflicts | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C18 | Barrier terminality | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Queue deletion/lease expiry/DLQ do not close barrier absent terminal receipt | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C19 | Atomic visibility | No DB/worker/object-store/test harness | Not present | None defined; no test runner or executable target | Reader sees absent/private or fully visible with receipts; never partial | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+| C20 | Restore stale snapshot | No backup/restore environment | Not present | None defined; no test runner or executable target | Quarantine until current Forget ledger replay/reconciliation | Not executed | BLOCKED / NOT RUN | C01–C20 spec Blob 5e2d55c8b210997693a7f83d35a5a03588e4ae6b | Cannot execute: DB/threads/worker/object-store/crash/restore harness absent |
+
+**Execution summary:** D36 0 executed / 10 blocked; E36 0 executed / 20 blocked; C01–C20 0 executed / 20 blocked. These are BLOCKED / NOT RUN, not FAIL and not PASS. No test command was run because no executable target exists. No expected outcome has been copied into Actual Result.
+
+### 12.9 Race / crash evidence
+
+Design-level ordering proofs and expected outcomes exist for registration/fence, dependency/fence, publish/fence, authorization/revocation, stale lease, duplicate ACK, unknown commit outcome, outbox replay, terminality, restore and late derivative. Runtime evidence is absent: no transaction trace, lock/CAS trace, receipt, database snapshot, deterministic fixture/seed, crash/failover/restore log or invariant-checker output was found. JF-10 specifically remains a P0 cross-authority crash/ACK-loss blocker. No empirical race/crash claim is made.
+
+### 12.10 D/E/Storage joint confirmation and final gate states
+
+| Owner | Joint technical confirmation | Not claimed |
+|---|---|---|
+| D | Preserve ForgetOperation/Fence, registration/high-water, dependency inventory, publication predicate and terminality; accept selected single-DB logical serialization profile | No I policy approval, concrete DB selection, implementation or D36 pass |
+| E | Preserve admission, stable WorkItem/Attempt/Lease, private staging, dependency/manifest completeness, final gate and retry/replay semantics; accept selected transaction boundary | No executable compiler/worker/queue/publication implementation or E36 pass |
+| Storage | Select logical single-DB coordinator/serializable transaction profile; require durable Work Ledger, same-transaction outbox and private object staging | No concrete engine/configuration, HA/failover/restore approval or C01–C20 pass |
+
+These are the joint architect's confirmations under user delegation, not signatures from independent absent Owner personnel or production approvers.
+
+| Final gate | Status |
+|---|---|
+| Design Closure | CLOSED for reviewed D/E/Storage logical architecture; JF-01..JF-09 preserved; two consecutive zero-finding design review rounds remain valid for their reviewed baseline |
+| Governance Dependency Closure | OPEN / BLOCKED — I governance, inventory/seal, Global Forget Completion and consumer acceptance |
+| Deployment Decision | LOGICAL PROFILE SELECTED; concrete database/deployment implementation and independent engineering approval OPEN |
+| Implementation Verification | NOT VERIFIED — no executable implementation evidence |
+| Test Verification | BLOCKED / NOT RUN — D36, E36-01..20, C01–C20 |
+| Global Forget Completion | NOT CLAIMED |
+
+No branch merge was performed. I-owned files were read only. This addendum records the live baseline and execution blockers; it does not assert deployment, implementation, test pass, production readiness, physical erasure or Global Forget completion.
