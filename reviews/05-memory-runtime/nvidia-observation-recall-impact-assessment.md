@@ -43,7 +43,7 @@ No numeric page size, TTL, retention period, cache quota, ANN threshold or compa
 
 ### 2.1 Paper 1 — *You don't need long context* (arXiv:2611.05306)
 
-**Source and evidence scope.** The 31-page v1 paper dated 3 Nov 2026 was read, including methodology, benchmark sections, SAC results, discussion and appendix material. Its core distinction is between long-horizon history and long-input source material. The paper defines FHA (Full-History Accumulation), EoCC (End-of-Conversation Compaction) and SAC (Single-Action Compaction); these are paper-defined harness regimes, not production archive protocols.
+**Source and evidence scope.** The 31-page v1 paper dated 3 Nov 2026 was inspected for its methodology, benchmark sections, SAC results and discussion. This assessment relies on the relevant main-paper sections; it does not claim an exhaustive independent reproduction of every appendix table. Its core distinction is between long-horizon history and long-input source material. The paper defines FHA (Full-History Accumulation), EoCC (End-of-Conversation Compaction) and SAC (Single-Action Compaction); these are paper-defined harness regimes, not production archive protocols.
 
 #### FHA — Full-History Accumulation
 
