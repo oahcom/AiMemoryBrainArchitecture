@@ -1,0 +1,157 @@
+name: JF-10 PostgreSQL 18.7 Fenced Old-Primary Rewind and Rejoin
+
+on:
+  push:
+    branches:
+      - session-storage-consistency-forget-atomicity-2026-11-16
+    paths:
+      - "reviews/storage-consistency/postgres_probe/**"
+      - ".github/workflows/jf10-postgres-pg-rewind-rejoin.yml"
+  pull_request:
+    paths:
+      - "reviews/storage-consistency/postgres_probe/**"
+      - ".github/workflows/jf10-postgres-pg-rewind-rejoin.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-pg-rewind-rejoin:
+    name: PostgreSQL 18.7 old primary stays fenced, rewinds, rejoins as standby
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out Storage branch
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install psycopg
+        run: python -m pip install "psycopg[binary]>=3.2,<4"
+      - name: Start pinned PostgreSQL 18.7 primary
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker network create jf10-rejoin-net
+          docker volume create jf10-primary-data
+          docker volume create jf10-standby-data
+          docker run -d --name jf10-primary --network jf10-rejoin-net \
+            -e POSTGRES_PASSWORD=jf10-ha-ci-only \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -p 5432:5432 \
+            -v jf10-primary-data:/var/lib/postgresql \
+            "$PG_IMAGE" \
+            -c max_prepared_transactions=16 \
+            -c wal_level=replica \
+            -c max_wal_senders=10 \
+            -c max_replication_slots=10 \
+            -c wal_log_hints=on \
+            -c synchronous_commit=remote_apply \
+            -c synchronous_standby_names='FIRST 1 (jf10_standby)' \
+            -c fsync=on \
+            -c full_page_writes=on
+          for i in $(seq 1 90); do
+            if docker exec jf10-primary pg_isready -h 127.0.0.1 -p 5432 -U postgres -d postgres; then break; fi
+            sleep 1
+          done
+          docker exec jf10-primary bash -lc 'echo "host replication postgres 0.0.0.0/0 trust" >> "$PGDATA/pg_hba.conf"'
+          docker exec jf10-primary psql -U postgres -d postgres -c "SELECT pg_reload_conf()"
+      - name: Seed standby from old primary
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker run --rm --user root -v jf10-standby-data:/var/lib/postgresql --entrypoint bash "$PG_IMAGE" -lc "chown -R postgres:postgres /var/lib/postgresql"
+          docker run --rm --user postgres --network jf10-rejoin-net \
+            -v jf10-standby-data:/var/lib/postgresql \
+            --entrypoint bash "$PG_IMAGE" -lc \
+            "mkdir -p /var/lib/postgresql/18/docker && pg_basebackup -d 'host=jf10-primary user=postgres application_name=jf10_standby' -D /var/lib/postgresql/18/docker -Fp -Xs -P -R"
+      - name: Start synchronous standby
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker run -d --name jf10-standby --network jf10-rejoin-net \
+            -e POSTGRES_PASSWORD=jf10-ha-ci-only \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -p 5433:5432 \
+            -v jf10-standby-data:/var/lib/postgresql \
+            "$PG_IMAGE" \
+            -c max_prepared_transactions=16 \
+            -c wal_level=replica \
+            -c max_wal_senders=10 \
+            -c max_replication_slots=10 \
+            -c wal_log_hints=on \
+            -c hot_standby=on \
+            -c fsync=on \
+            -c full_page_writes=on
+          for i in $(seq 1 90); do
+            if docker exec jf10-standby pg_isready -h 127.0.0.1 -p 5432 -U postgres -d postgres; then break; fi
+            sleep 1
+          done
+          for i in $(seq 1 90); do
+            STATE=$(docker exec jf10-primary psql -U postgres -At -c "SELECT sync_state FROM pg_stat_replication WHERE application_name='jf10_standby'")
+            if [ "$STATE" = "sync" ]; then echo "SYNCHRONOUS_STANDBY_STATE=sync"; exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Fence old primary, promote standby, rewind and rejoin
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker exec jf10-primary psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE TABLE jf10_rejoin_marker (marker text PRIMARY KEY, value text NOT NULL)"
+          docker exec jf10-primary psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "INSERT INTO jf10_rejoin_marker VALUES ('before-failover', 'pre-failover-write')"
+          for i in $(seq 1 90); do
+            CURRENT=$(docker exec jf10-primary psql -U postgres -At -c "SELECT pg_current_wal_lsn()")
+            REPLAYED=$(docker exec jf10-standby psql -U postgres -At -c "SELECT pg_last_wal_replay_lsn()")
+            if docker exec jf10-standby psql -U postgres -At -c "SELECT '$REPLAYED'::pg_lsn >= '$CURRENT'::pg_lsn" | grep -qx t; then break; fi
+            sleep 1
+          done
+          docker kill --signal=KILL jf10-primary
+          test "$(docker inspect -f '{{.State.Running}}' jf10-primary)" = "false"
+          echo "OLD_PRIMARY_HARD_FENCED=PASS"
+          docker exec -u postgres jf10-standby pg_ctl -D /var/lib/postgresql/18/docker promote
+          for i in $(seq 1 90); do
+            if [ "$(docker exec jf10-standby psql -U postgres -At -c 'SELECT NOT pg_is_in_recovery()')" = "t" ]; then break; fi
+            sleep 1
+          done
+          docker exec jf10-standby psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "INSERT INTO jf10_rejoin_marker VALUES ('after-promotion', 'new-primary-write')"
+          # Recover the fenced old primary offline so pg_rewind receives a cleanly stopped target.
+          docker rm jf10-primary
+          docker run --rm --network none --user postgres \
+            -v jf10-primary-data:/var/lib/postgresql \
+            --entrypoint bash "$PG_IMAGE" -lc \
+            "pg_ctl -D /var/lib/postgresql/18/docker -o \"-c listen_addresses='' -c port=5544\" -w start && pg_ctl -D /var/lib/postgresql/18/docker -m fast -w stop"
+          echo "OLD_PRIMARY_OFFLINE_CRASH_RECOVERY=PASS"
+          docker run --rm --user postgres --network jf10-rejoin-net \
+            -v jf10-primary-data:/var/lib/postgresql \
+            --entrypoint bash "$PG_IMAGE" -lc \
+            "pg_rewind --target-pgdata=/var/lib/postgresql/18/docker --source-server='host=jf10-standby port=5432 user=postgres dbname=postgres' --write-recovery-conf"
+          echo "PG_REWIND_TO_PROMOTED_TIMELINE=PASS"
+          docker run -d --name jf10-rejoined-old-primary --network jf10-rejoin-net \
+            -e POSTGRES_PASSWORD=jf10-ha-ci-only \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -p 5432:5432 \
+            -v jf10-primary-data:/var/lib/postgresql \
+            "$PG_IMAGE" \
+            -c max_prepared_transactions=16 \
+            -c wal_level=replica \
+            -c max_wal_senders=10 \
+            -c max_replication_slots=10 \
+            -c wal_log_hints=on \
+            -c hot_standby=on \
+            -c fsync=on \
+            -c full_page_writes=on
+          for i in $(seq 1 120); do
+            if docker exec jf10-rejoined-old-primary pg_isready -h 127.0.0.1 -p 5432 -U postgres -d postgres; then break; fi
+            sleep 1
+          done
+      - name: Verify no dual writer and safe old-primary rejoin
+        timeout-minutes: 3
+        run: python reviews/storage-consistency/postgres_probe/jf10_postgres_pg_rewind_rejoin_probe.py
+      - name: Capture rejoin diagnostics
+        if: always()
+        run: |
+          docker exec jf10-standby psql -U postgres -c "SELECT pg_is_in_recovery(); SELECT * FROM pg_stat_replication;" || true
+          docker exec jf10-rejoined-old-primary psql -U postgres -c "SELECT pg_is_in_recovery(); SELECT timeline_id FROM pg_control_checkpoint();" || true
+          docker logs jf10-standby || true
+          docker logs jf10-rejoined-old-primary || true
