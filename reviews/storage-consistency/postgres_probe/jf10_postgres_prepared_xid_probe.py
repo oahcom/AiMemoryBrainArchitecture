@@ -203,6 +203,7 @@ def rollback_case():
 
 
 if __name__ == "__main__":
+    wait_ready()
     setup()
     commit_case()
     rollback_case()
