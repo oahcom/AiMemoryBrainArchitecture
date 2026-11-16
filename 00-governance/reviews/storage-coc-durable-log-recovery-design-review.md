@@ -3,14 +3,15 @@
 - Review ID: P-COC-DURABLE-LOG-REVIEW-001
 - Date: 2026-11-17
 - Prepared by: Session P coordinator
-- Status: **GATE B DESIGN AUTHORIZED; STORAGE PROPOSAL IS A STRONG CANDIDATE WITH REQUIRED AMENDMENTS; OWNER ACCEPTANCE PENDING**
+- Status: **GATE B SPECIFICATION PUBLISHED; EXACT OWNER REVIEW PENDING; RESIDUAL AMENDMENTS OPEN**
 - Scope: Independent integration review of Storage's detailed COC log/recovery design against A's current COC architecture, I/D/C/H decisions and the Applied 1.1 package. This is not a Storage/A/I/D/C/H Owner decision.
 
 ## 1. Source pins
 
 | Artifact | Branch | Blob |
 |---|---|---|
-| Storage COC durable log and recovery protocol design | `session-storage-consistency-forget-atomicity-2026-11-16` | `cd5566b3d99b5204401ac713a5bb2dcf89a02726` |
+| Storage Phase 3.6.3 COC durable log/recovery protocol (current) | `session-storage-consistency-forget-atomicity-2026-11-16` | `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` |
+| Preliminary Storage COC design (superseded) | same | `cd5566b3d99b5204401ac713a5bb2dcf89a02726` |
 | A COC deployment architecture, current file version | `session-a-integration-2026-11-16` | `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` |
 | A CGH-APPLIED-1.1 package | same | `4961ffefc0f9920efb8425a9b2a7af42d8f64819` |
 | A package's pinned companion COC blob | same path, older blob | `fc3bac39ec64fda68b8cba5e1aada4e719e5acea` |
@@ -21,7 +22,7 @@
 | Storage exact COC boundary acceptance for old pair | Storage branch | `9b297f0f76c9a054206cee5a6ee18200db3e1798` |
 | Storage realization review accepting A COC architecture a3c51 | Storage branch | `107d21bd2c604ee0b04feff2ee5580e1de9c7fce` |
 
-Storage branch HEAD at latest refresh: `9f784a15ef33a6cde4b4cda1ab6fca2df8a705fa`.
+Storage branch HEAD at latest refresh: `fe7debe55da71e655eecfc46f25ec49eae43404a`.
 
 ## 2. What is sound in the proposal
 
@@ -223,7 +224,7 @@ Each Owner must accept/reject the exact Phase 3.6.3 Blob on its own branch. The 
 
 ### 10.3 Gate state
 
-The new specification itself states:
+The current Phase 3.6.3 specification itself states:
 - Gate B: proposed protocol design; exact A/I/D/C/E/H/Storage review pending; not passed.
 - Gate C: implementation and distributed fault-injection after executable participants exist.
 - Implementation binding: DEFERRED_TO_ENGINEERING_PHASE.
