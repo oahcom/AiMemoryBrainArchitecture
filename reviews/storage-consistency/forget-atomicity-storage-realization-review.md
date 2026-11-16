@@ -499,3 +499,16 @@ The pinned PostgreSQL 18.7 primary used synchronous_commit=remote_apply and sync
 Important runtime rule: pg_prepared_xacts is empty while PostgreSQL is in hot-standby recovery; the prepared XID must be inspected/resolved after promotion completes recovery. The executable probe asserts this documented behavior rather than treating it as missing data.
 
 **Gate A remains PARTIAL PASS / OPEN.** Rollback-after-promotion, backup/restore, PITR, control-ledger reconciliation before serving restored data, host/zone/storage durability, production failover fencing/routing, actual Canonical Authority deployment and named human production operator/RPO/RTO remain open. This CI topology is not production HA approval. Gate B/C remain blocked; JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED.
+
+
+## Phase 3.6.2 — Storage same-XID rollback after promotion evidence
+
+The PostgreSQL 18.7 synchronous failover probe now prepares two participants before primary loss and resolves one with COMMIT PREPARED and one with ROLLBACK PREPARED after standby promotion.
+
+- Probe Blob: cbe1f317479145dbf1467e426b0c0737a6ec054c
+- Workflow Blob: f3c05f90c6065458b49879def10dce672685c850
+- CI run: 43908746695 (SUCCESS), commit b59c0842dba86b581ded4d9519c4289b6a699fde, job 133444572245.
+
+The run confirms both prepared XIDs were synchronously replayed, exact XIDs and locks survived primary loss/promotion, the commit participant exposed pointer + receipt atomically, and the rollback participant exposed neither. This closes the rollback-after-promotion subtest for the pinned CI profile.
+
+Gate A remains PARTIAL PASS / OPEN due backup/restore + PITR, Forget-control-ledger replay before restored reads, host/zone/storage durability, production fencing/routing, actual Canonical Authority deployment and named human production operator/RPO/RTO. Gate B/C remain blocked; JF-10 P0 remains OPEN.
