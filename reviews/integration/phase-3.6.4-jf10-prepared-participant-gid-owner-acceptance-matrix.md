@@ -21,7 +21,7 @@
 | H | `98321da4b93d39ada9d227f4e03f2e55ba45aa29` | `c92fc4a0deb6b4d07be8ef3bf27ea116af9d6136` | Wire mapping and BMCP 1.1.1 candidate. |
 | I | `20fc13bbfe7b93c0d6f6233fd714c57dadca1fda` | `553355afa017e82b4972315493abdc8b0f5b6603` | I terminal receipt/consumption binds pair; governance remains separate. |
 | A | `d6402bd4cc5d13a4f17f6c40398cfa31d9820f9d` | `8ee08da3e613c4260804a7cf4e252a58cbda1b15` | Integrated COC prepare-intent, participant and recovery mapping. |
-| Storage | `984ea06c7380e31ee7761195990a62bc9dcc9f85` | `db226387b0f2dede30a32a19a1478136b368cc1e` | Storage-owned GID allocation, same-GID resolution and DB evidence. |
+| Storage | `a1fd4866f18e3f9a03bff7a40a842c3a04fdc62c` | `db226387b0f2dede30a32a19a1478136b368cc1e` | Storage-owned GID allocation, same-GID resolution and DB evidence. |
 
 ## 2. Integrated architecture decision
 
