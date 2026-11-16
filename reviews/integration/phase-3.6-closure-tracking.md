@@ -1035,3 +1035,19 @@ H additionally published machine-readable JSON Schema Draft 2020-12 candidate:
 - Parsed readback reports five message variants. This remains a candidate; semantic cross-message validation, signature/quorum proofs, SDK generation/interoperability and H-JF10 tests are not established.
 
 **Result: the C/D/Storage joint architecture/interface bridge acceptance is CLOSED WITH ENUMERATED EXCEPTIONS.** This does not close JF-10 P0. Selected DB durable prepared-XID/lock behavior, same-XID crash recovery, COC quorum/operator/deployment, provider idempotency, production conformance, crypto governance and schema interoperability remain OPEN / NOT VERIFIED / NOT RUN. Multi-PolicyDomain atomicity remains BLOCKED. No production activation or merge is authorized.
+
+
+## 13.19 JF-10 COC semantic validator — first GitHub Actions execution PASS
+
+A refreshed the workflow run collection and fetched the exact job steps and logs for the semantic validator CI:
+- Workflow: `.github/workflows/jf10-coc-semantic.yml`, Blob `5efdb89804fd5b1f69da66a36fdaf93c6c2546f9`.
+- Workflow run: [`43904569127`](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43904569127), event `push`, branch `session-a-integration-2026-11-16`.
+- Tested head commit: `bd104eaf63c7234a45fd780d484bc41ae15dd988`.
+- Job: `semantic-validator`, job ID `133429825688`, conclusion **SUCCESS**.
+- Both `py_compile` and the unittest step completed successfully. Logs report **Ran 10 tests; OK**.
+
+The ten passing tests cover valid terminal bridge lifecycle, changed-XID conflict, prepared receipt exact-XID binding, mandatory I revocation cutoff proof, commit visibility/PublicationReceipt requirement, rollback non-publication/no-publication-receipt rule, D barrier terminality, UNKNOWN not promoted to terminal I, multi-PolicyDomain rejection, and reconciliation consistency with authoritative owner lookup outcomes.
+
+**Evidence boundary:** this PASS is limited to the dependency-free in-memory Python semantic reference validator and its ten unit tests at commit `bd104eaf...`. It does not validate JSON Schema at runtime, canonical-byte/duplicate-key parser enforcement, cryptographic signatures, COC quorum/prefix, authoritative live I/D/Storage lookups, real DB prepared-XID/lock durability, provider idempotency, crash/failover/restore, cross-process interoperability or production integration. JF10-COC-01..10 and C-CO/H-JF10 production conformance remain NOT RUN; JF-10 P0 remains OPEN; implementation/deployment NOT VERIFIED; multi-PolicyDomain atomicity BLOCKED.
+
+The CI run was read back from GitHub Actions, including all five job steps and full test log. This replaces the prior §13.18 statement that no run result had yet been observed; the historical note is retained as the state at the time it was written.
