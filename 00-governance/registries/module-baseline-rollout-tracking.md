@@ -144,3 +144,34 @@ Storage's current dossier records that no production runtime source tree, Canoni
 Database comparison implication: PostgreSQL 18.7 has stronger direct prepared-XID evidence for JF-10 than SQLite + WAL. SQLite remains a candidate only if D/E/I/Storage specify and prove an alternate durable participant/intent protocol preserving the same invariants. TEC-003/004 remain CANDIDATE / TO_VALIDATE; no final DB selection is made.
 
 Full coordinator assessment: `00-governance/reviews/jf10-storage-evidence-assessment.md`.
+
+
+## Current JF-10 and Applied source reconciliation — 2026-11-17
+
+### Applied 1.1 exact decisions
+
+The live C/D/G/H/I Owner artifacts now all explicitly pin A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` and companion COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`:
+- C `45a48249717c8cddb07ab96197730ef93d406c22`: ACCEPT WITH ENUMERATED EXCEPTIONS.
+- D `ed7c491f4ca10fee67203a9978cfaa0e0748c0a2`: ACCEPT WITH ENUMERATED EXCEPTIONS.
+- G `aa3afa73d8a76cc6f025839c52bfbff6a983046a`: ACCEPT WITH ENUMERATED EXCEPTIONS.
+- H `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248`: ACCEPT WITH ENUMERATED EXCEPTIONS.
+- I `5a5304d48aa912dcf6f817099bd5659371d8cdc8`: ACCEPT WITH ENUMERATED EXCEPTIONS.
+- B `3a1e77889cd9a90cd5822d9f0cb3437880868706`: APPROVE — no B semantic type change.
+- Storage `a589d983ac145244962c22e5da3a55427aa35ff8`: CONFIRMED WITH CHANGES — ARCHITECTURE INTERFACE ONLY.
+
+Applied design decisions are recorded; freeze remains NO because H schema is not generated/frozen/interoperability-tested, COC deployment/operator is undesignated, runtime implementation is unverified and conformance suites are NOT RUN. The full decision reconciliation is in `00-governance/reviews/applied-contract-1.1-exact-version-reconciliation.md`.
+
+### Storage current-source regression
+
+Current Storage branch HEAD: `3c8ab8ee4579a550300aa48aecab928149cf9370`.
+Current dossier blob: `2f76ca8b8c19b84c37e7604cd254990dd93eb8b1`.
+Current enhanced PITR probe blob: `7fa4bb3fb07eacc3f708f5682ea4c9e2019f267d`.
+Current enhanced PITR run: `43957456225`, job `133615673051`, FAILURE.
+
+The current probe adds an authoritative reader negative fixture (pointer-only/receipt-only rejection), exact target WAL/timeline/segment mapping and stricter negative-case assertions. The log confirms reader negative, prepared/private, commit pointer+receipt, rollback nonpublication and missing exact WAL checks PASS. The corrupt-WAL case reached PostgreSQL's `invalid magic number` fail-closed recovery, but the Python assertion did not accept that diagnostic string; it failed before the no-writable/read-only assertion. The incomplete-WAL case was not reached. Current branch batch is six workflows PASS and one PITR failure; earlier 7/7 PASS remains pinned to older source commit `8b8c749...`.
+
+UMR-018 tracks the exact one-line assertion vocabulary correction and full rerun. JF-10 P0 remains OPEN; Gate A PARTIAL PASS / OPEN.
+
+### A integration tracker freshness
+
+A's live closure tracker blob `554d4b85a94f433856506dce4c020b9c00183e69` still records older Storage HEAD `df60b547...` and prior failed PITR attempt at §13.43. A must refresh its source pins and current regression vector; P does not modify A's Owner record.
