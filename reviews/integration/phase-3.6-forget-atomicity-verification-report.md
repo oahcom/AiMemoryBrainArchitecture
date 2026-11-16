@@ -719,3 +719,14 @@ Issue #4 was re-read after the formal DE-S request. It remains OPEN. The returne
 ### D/E acceptance notification to I
 
 DE-S notified I in Issue #4 comment `6918512678` that the exact D/E design-acceptance artifacts are available and requested I to record or reject them in its owner-controlled consumer register. This notification is not I acceptance. Issue state at readback: `open`; no I-authored disposition appears in the returned comment set.
+
+
+### Storage consumer acceptance artifact
+
+Storage has recorded design-level acceptance of the BIH identity contract at its durable visibility boundary:
+- Path: `reviews/storage-consistency/phase-3.6-bih-identity-consumer-acceptance.md`
+- Commit: `a970c6859629afecd017ef5cdae2f1dc0215dc92`
+- Readback Blob: `ec8e49d0d11c72d37ad0c291611a96a1122ba6f5`
+- I notification comment: `6918538077`
+
+The artifact distinguishes I authorization ordering from Storage's own VisibilityPointer/PublicationReceipt transaction and explicitly leaves JF-10 P0 OPEN. Storage runtime conformance remains NOT VERIFIED. I's Storage consumer row remains OPEN until I records or rejects this artifact.
