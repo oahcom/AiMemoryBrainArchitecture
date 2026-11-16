@@ -91,13 +91,13 @@ All records are immutable and idempotent by stable operation key plus canonical 
 
 ### 5.1 D fence cutoff
 
-A D fence request must first be quorum-committed as `D_FENCE_REQUEST_RECORDED`. Any affected intent ordered after that cutoff is rejected `FENCE_WON`, even if fence effectiveness is waiting for earlier participants to drain.
+A D fence request must first be quorum-committed as `D_FENCE_REQUEST_RECORDED`. Any affected intent ordered after that cutoff is rejected `FENCE_WON`, even if fence effectiveness is waiting for earlier participants to drain. If D has received a fence request but COC cannot durably record it, D must locally close admission for the affected target/lineage and report PENDING/UNKNOWN; it cannot accept new affected intents or claim the request is safely registered. Once connectivity returns, the request cutoff is committed before admission reopens.
 
 An intent before the cutoff remains a D barrier participant. D cannot commit the effective ForgetFenceGeneration until each earlier participant has a proven C outcome or safe abort and the required lineage coverage is complete. D terminal evidence carries both request cutoff and effective transition position.
 
 ### 5.2 I revocation cutoff
 
-An I revocation request must first be quorum-committed as `I_REVOCATION_REQUEST_RECORDED`, blocking new affected receipts/admissions. I still decides the actual PermissionEpoch advance in its own sequencer.
+An I revocation request must first be quorum-committed as `I_REVOCATION_REQUEST_RECORDED`, blocking new affected receipts/admissions. I still decides the actual PermissionEpoch advance in its own sequencer. If I has received a revocation request but COC cannot durably record it, I must locally suspend issuance/consumption of affected receipts and return UNKNOWN; it cannot allow new protected authorization to pass while the cutoff is unrecorded. Once connectivity returns, the revocation request is committed before affected admission can reopen. This prevents coordinator unavailability from creating a race window in which an owner-known request is invisible to the common log.
 
 If revocation wins before receipt consumption, C aborts. If I has already terminalized the exact receipt as COMMIT_WON, the revocation remains pending and I cannot claim effective epoch advancement past that unresolved participant until its exact C outcome or safe abort is terminal. If I's sequencer and COC cannot establish compatible order, outcome is UNKNOWN and no submit is admitted.
 
