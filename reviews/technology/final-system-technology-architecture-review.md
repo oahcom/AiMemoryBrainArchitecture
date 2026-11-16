@@ -485,3 +485,40 @@ The project is in architecture design; no production implementation repository/r
 - **Production activation / merge / technology freeze:** NOT AUTHORIZED.
 
 This reassessment supersedes only the prior `NOT REVIEWABLE` verdict's missing-report rationale and the earlier P0-003 design-contract gap. It does not waive any P0/P1 item, owner authority, exact-version acceptance requirement or production evidence requirement.
+## 19. Latest logical-model and schema validation evidence (2026-11-17)
+
+### 19.1 New evidence
+
+| Area | Exact evidence | Result | What it does not prove |
+|---|---|---|---|
+| F Anti-Resurrection | Model Blob `33fa2ca2dc29771aca241e194f13e078a4f8d774`; tests Blob `c2575327a75577923440ef770d42122218a1e091`; run `43961714501`, job `133630540252`, commit `f1ba5c478e395da6b126423e32e20d0990e61920` | **19/19 PASS** | No actual ANN/index/cache/Working Set implementation, multi-process race, real reconnect or restore proof. |
+| I Global Forget inventory/CEV | Model Blob `5233da028e409ec3f41848582dad73a923e7155b`; tests Blob `091f9450adf49a2a9f9ec8a2fa4470918023f765`; run `43962873109`, job `133634616584`, commit `73a0bff13b531b5b9feaeeec1887db31d6266589` | **25/25 PASS** | No production ProducerDomainInventoryEpoch registry, real TargetInventorySeal, actual external target evidence, governance approval or physical erasure. |
+| H JF-10 bridge schema | Schema Blob `a8a945cc3623c2907003b93625e3c79742150944`; tests Blob `74bc4286abe1489ce29c2446c6fc22445784609f`; run `43962364955`, job `133632849768`, commit `eab7ee9d196437daed31d5853570b7fb7acf08b6` | **11/11 PASS** | No duplicate-key canonical parser, signature/channel binding, unknown-critical-extension enforcement, generated IDL/SDK or live transport interoperability. |
+
+These results improve logical and schema evidence only. They do not close Global Forget, Anti-Resurrection runtime or JF-10 implementation P0.
+
+### 19.2 Current Owner report manifest
+
+| Owner | Current branch HEAD | Current technology report Blob SHA |
+|---|---|---|
+| B | `310f305575d6f406e80d5d6ebf951bcd9e79e35f` | `fd3e5723b81de10bed806896e4be71ceb7a1669b` |
+| I | `fad96468cc5cf295b7fd389ad2677cae5dfd0979` | `6b87bc61cf48d7377cc689a2316cdf3771b616af` |
+| D | `a3ea0de75ca7b2297589293ec142f2cb07757282` | `97c049050d67dd12e0c64ef49b2b05795651608c` |
+| E | `5fb76b666fac49ceeb51ddb7c320fe5975313d99` | `c94f6a8e64ba3138a27e6f316f10411ef33b7ab8` |
+| C | `018de5044810e755d4e21cb21e982526c27eb9a8` | `ee42c7192561261789a0c7b5bd16d32c0eaaf14c` |
+| F | `e4c26214b8f78169c0e20f1faae23f945c3afeb9` | `124cc9300442b0e3a1e83603910e1c332b4fae48` |
+| G | `b0c515399c6a336dcbf17a1ced6925413c804d5c` | `8b9ea4b4a63f7bbddbefdb0b14cf99943b3e7613` |
+| H | `b99e5ead283dd1dcc3e86a4da871356731e162dc` | `c003e6cc078fc58d6c150d0fb418c28f94de8e8a` |
+
+### 19.3 Updated blocking register
+
+- A-TAR-P0-001 missing Owner reports: **CLOSED**.
+- A-TAR-P0-002 Fact/Claim ADR-001: **OPEN / P0**; no formal Architecture Governance approval exists.
+- A-TAR-P0-003 JF-10 atomic registration/fence/dependency/publication: **DESIGN ACCEPTED / IMPLEMENTATION P0 OPEN**.
+- A-TAR-P0-004 Global Forget: **OPEN / P0**. The 25-test logical model passes, but no real inventory seal, complete target evidence, external recipient proof, restore drill or physical-erasure proof exists.
+- A-TAR-P1-003 Anti-Resurrection: **LOGICAL MODEL PASS / RUNTIME OPEN**.
+- A-TAR-P1-005 BMCP JF-10 schema: **STRUCTURAL VALIDATION PASS / INTEROPERABILITY OPEN**.
+
+### 19.4 Current verdict remains unchanged
+
+The additional logical-model/schema CI results do not justify a stronger system verdict. The current disposition remains **CONDITIONAL PASS — ARCHITECTURE DESIGN BASELINE ONLY; NOT FROZEN; PRODUCTION/RELEASE ACCEPTANCE BLOCKED**. TAB-001 remains CANDIDATE / NOT FROZEN; Global Forget is NOT COMPLETED; production activation is NOT AUTHORIZED.
