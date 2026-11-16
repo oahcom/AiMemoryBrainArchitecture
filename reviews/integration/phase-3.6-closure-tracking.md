@@ -616,3 +616,22 @@ Latest Owner artifact pins:
 - H `5cbf0bb548a46671054cb22c6fab3c3d007365d4` (branch HEAD `f5ecd8e649efb578a06cedfa5a5dbd4f8c7bc84a`).
 
 G and B exact 1.1 acceptance remain pending. Coordinator/operator, Storage durability, deployment and conformance remain open. Tests NOT RUN; production implementation NOT VERIFIED.
+
+
+## Current CGH-APPLIED-1.1 pins and runtime implementation discovery — 2026-11-16
+
+This entry supersedes earlier Owner hashes recorded above.
+
+- A 1.1 candidate package Blob: `471c8ce86e93c036ad9a58a77d45d9daa0ab8af8`.
+- C causal-order contract Blob: `f2c5b379cacfedd81500e8496d3053b628e144a0`, branch HEAD `8f017a5a17620c21f3e7f0075a087c4b098baa8e`.
+- D causal-participant barrier contract Blob: `317a9bc170c5a66720f738bf24bbf93c87385887`, branch HEAD `c0d51b3cc61f182a69632f008c43650e14c213ef`.
+- I commit-authorization causal-order contract Blob: `71779133a4f95d63a24c4c7e606af174763366f1`, branch HEAD `2fb2bb9653350e83ebf2a6a56195a762d112189f`.
+- H 1.1.0 schema candidate Blob: `5cbf0bb548a46671054cb22c6fab3c3d007365d4`, branch HEAD `f5ecd8e649efb578a06cedfa5a5dbd4f8c7bc84a`.
+
+The latest C/D/I/H specs now consistently use pre-side-effect `ParticipantIntentRef`, owner-issued I/D terminal/clearance evidence, then final `ParticipantReservationRef`, followed by actual C provider outcome and common terminal proof. I binds the applicable revocation request/cutoff (or explicit none); D binds the fence request cutoff separately from the effective fence position. A's 1.1 candidate incorporates these distinctions.
+
+**Implementation-location check:** the A/C/D/H/I architecture branches contain no implementation source files. Storage contains only the JF-10 logical reference model, unittest source and workflow, not a deployed coordinator/participant implementation. Search of currently connected/installed repositories for runtime/coordinator repositories returned no matches; this is limited to the accessible connected repository set and does not prove no separate repository exists.
+
+Issue #7 implementation-location request refreshed with this evidence: comment `6920154270`. Issue #3 exact CGH-APPLIED-1.1 Owner decision request: comment `6920129025`.
+
+Status remains: exact 1.1 acceptance by C/D/I/H/G/B pending; coordinator/operator and Storage acceptance open; implementation NOT VERIFIED; CO conformance NOT RUN; Applied Contract Frozen NO.
