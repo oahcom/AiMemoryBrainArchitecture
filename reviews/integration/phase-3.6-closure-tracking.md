@@ -679,3 +679,18 @@ Current exact source readbacks:
 - B typed-reference confirmation `729a706860b1259115816265e847a29683c3c233` (semantic baseline only; exact 1.1 decision absent)
 
 The new exact-version decision request is recorded in Issue #3 comment `6920297962`. C/D/I causal-order contracts are specified and read back, but no C/D/I/H/G/B acceptance of this exact candidate is inferred. Coordinator/Storage operator acceptance and deployment remain open. CO suites remain SPECIFIED / NOT RUN; production causal proof NOT VERIFIED; Applied Contract Frozen NO; G10 BLOCKED.
+
+
+## Coordinator proposal and exact candidate decision refresh — 2026-11-16 23:09 +08
+
+The A Owner branch now contains a separate coordinator deployment proposal:
+- `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`
+- Blob SHA `3f302a333f413e6ea7d5cbf1fe06473be6228a09`; commit `a3e17f4f77d980bafab4268f8825a1cd61371d6e`.
+- It proposes one logical COC with a single quorum-committed append-only consensus log (three voters / quorum two as a target), immutable cutoffs and participant records, non-expiring IN_DOUBT, same-transaction provider recovery and RESTORE_FENCED on uncertain restore. This is an architecture proposal only; no actual topology, operator, deployment or test is claimed.
+
+Decision requests:
+- Issue #3 comment `6920297962`: exact CGH-APPLIED-1.1 package decision request against current candidate Blob `9808b31f840606b329f1a794935dfc9c5084d63b` (supersedes stale SHA `471c8ce86e93c036ad9a58a77d45d9daa0ab8af8`).
+- Issue #3 comment `6920311660`: exact coordinator proposal decisions requested from Storage/Consistency, C, I, D, H, G and Security/Governance.
+- Issue #2 comment `6920327101`: Storage/Consistency exact decision request for the coordinator durability, restore, retention and operator model, in addition to the existing JF-10 publication transaction review.
+
+Current status remains: CGH-APPLIED-1.1 candidate / owner decisions pending / not frozen. Coordinator proposal committed and read back, but operator and infrastructure not designated. Storage acceptance pending. COC-01..12 and consumer race suites specified / not run. Production causal proof not verified. G8 BLOCKED; G9 NOT RUN; G10 BLOCKED.
