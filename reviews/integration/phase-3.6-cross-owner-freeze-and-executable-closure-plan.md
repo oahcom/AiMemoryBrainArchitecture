@@ -895,3 +895,10 @@ Storage confirms preallocated XID, durable prepared participant and locks, Stora
 Issue #4 records both decisions in comment `6920938325`.
 
 **Remaining gate:** H's exact 1.1.0 schema/wire mapping decision remains outstanding. Implementation, concrete DB capability, COC-01..12 and JF10-COC-01..10 conformance remain unverified/not run. JF-10 P0 remains OPEN; multi-policy-domain atomicity remains BLOCKED; production activation is NOT APPROVED.
+
+
+## 13.15 JF-10 ↔ COC bridge decision refresh — 2026-11-16
+
+The exact Owner evidence was refreshed and reconciled on Issue #8. I accepts A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` with the single-I-PolicyDomain limitation (I disposition Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`). D accepts that A Blob for D-owned fence/barrier semantics (D artifact Blob `5a56c406578fdf257509315eb3f6f3f75456116c`). Storage accepts the Storage participant contract for that A Blob, conditional on concrete database capability and deployment proof (Storage artifact Blob `55c01f4512f2e3d8aac767dd004e768ae073178e`). C's current artifact Blob `a72a3eb1e5207f67c01f804508311f42db9a6e0a` accepts the CGH-APPLIED-1.1 recovery-batch package/companion pair but does not yet record a distinct formal decision against the complete Issue #8 bridge bundle and A architecture Blob `a3c51ec...`.
+
+A posted Issue #8 reconciliation comment (ID `6921025964`) asking C for exact-bundle acceptance/amendment/rejection and asking D/Storage to confirm their exact acceptances cover the complete corrected bundle. The bridge gate therefore remains OPEN pending readback of those clarifications. No production implementation, database capability, operator/deployment or conformance is implied. JF-10 P0 remains OPEN; JF10-COC-01..10 NOT RUN; multi-policy-domain atomicity BLOCKED.
