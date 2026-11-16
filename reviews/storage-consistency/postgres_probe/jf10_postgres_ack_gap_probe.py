@@ -164,6 +164,41 @@ def recover_prepare():
     print("PREPARED_VISIBILITY_PRIVATE_AFTER_ACK_GAP=PASS")
 
 
+def prepare_case_direct(kind: str):
+    xid, op = CASES[kind]
+    with db() as c:
+        c.execute("BEGIN ISOLATION LEVEL SERIALIZABLE")
+        c.execute("SELECT id FROM jf10_ack_lock WHERE id=1 FOR UPDATE")
+        c.execute("INSERT INTO jf10_ack_visibility VALUES (%s, %s)", (op, "private:" + op))
+        c.execute("INSERT INTO jf10_ack_receipt VALUES (%s, %s)", (op, "sha256:" + op))
+        c.execute(f"PREPARE TRANSACTION '{xid}'")
+    with ledger() as l:
+        l.execute(
+            "UPDATE coordinator_operation SET phase='PREPARED_RECOVERED' WHERE operation_id=?",
+            (op,),
+        )
+    assert participant_state(xid) == (xid,)
+    assert visibility_state(op) == (None, None)
+
+
+def recover_prepare_case_terminal_commit():
+    xid, op = CASES["prepare"]
+    with ledger() as l:
+        phase, decision = l.execute(
+            "SELECT phase, decision FROM coordinator_operation WHERE operation_id=?", (op,)
+        ).fetchone()
+        assert (phase, decision) == ("COMMIT_SENT", "COMMIT"), (phase, decision)
+    assert participant_state(xid) is None
+    assert visibility_state(op) == (("private:" + op,), ("sha256:" + op,))
+    with ledger() as l:
+        l.execute(
+            "UPDATE coordinator_operation SET phase='COMMITTED_RECOVERED' WHERE operation_id=?",
+            (op,),
+        )
+    print("PREPARE_ACK_GAP_THEN_TERMINAL_COMMIT_ACK_GAP=PASS")
+    print("SAME_XID_COMMIT_OUTCOME_RECONCILED=PASS")
+
+
 def recover_terminal(kind: str):
     xid, op = CASES[kind]
     decision = "COMMIT" if kind == "commit" else "ROLLBACK"
@@ -224,9 +259,11 @@ def main():
     with db() as c:
         c.execute(f"COMMIT PREPARED '{CASES['prepare'][0]}'")
     # Intentionally leave the coordinator ledger at COMMIT_SENT.
-    print("PREPARE_RECOVERY_TERMINAL_COMMIT_ACK_GAP=PASS")
-    # Independent explicit commit and rollback cases use child crashes.
+    recover_prepare_case_terminal_commit()
+    # Independent explicit commit and rollback cases are prepared first,
+    # then the coordinator records the terminal intent before the child dies.
     for kind in ("commit", "rollback"):
+        prepare_case_direct(kind)
         run_crashed_child(kind + "-send")
         recover_terminal(kind)
     print("JF10_COORDINATOR_ACK_GAP_RECOVERY=PASS")
