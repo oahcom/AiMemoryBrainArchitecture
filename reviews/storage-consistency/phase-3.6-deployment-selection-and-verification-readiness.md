@@ -1,0 +1,140 @@
+# Phase 3.6 — Storage Deployment Selection and Verification Readiness
+
+- Authority: user-delegated DE-S Joint Architect acting across D/E/Storage
+- Storage decision owner: DE-S joint architect for logical realization; independent production engineering approval remains required
+- Date: 2026-11-16
+- Status: **LOGICAL DEPLOYMENT PROFILE SELECTED / CONCRETE ENGINE AND RUNTIME DEPLOYMENT BLOCKED**
+- Baseline: preserve the already-decided D/E/Storage logical Forget Atomicity contract; this record selects its preferred realization and does not reopen its semantics.
+- I dependency: **BLOCKED — I Owner approval requested in repository issue #4; no I policy approval is implied.**
+
+## 1. Existing decision preservation
+
+The following previously decided operations remain normative and unchanged:
+1. ProducerClass registration and authenticated ProducerIdentity binding before admission.
+2. Producer WorkItem registration and durable receipt before enqueue, lease, protected source dereference or execution.
+3. ForgetFence installation and immutable barrier high-water capture in the same per-authority serialization order as producer admission.
+4. Complete dependency registration and immutable output-manifest version/digest before publication.
+5. Final Publish Gate revalidates latest applicable fence, complete dependency set, current work/attempt/lease, current manifest/inventory evidence, exact lineage/scope and I-authoritative authorization.
+6. Durable visibility commit and PublicationReceipt are one atomic observable outcome.
+7. Every read surface uses authoritative visibility; stale indexes/caches/replicas cannot bypass it.
+8. Producer terminality requires all outputs, attempts, child work and unknown outcomes accounted for.
+9. Retry/replay preserves WorkItemId, uses a new AttemptId and LeaseEpoch, and rechecks current fence/authorization.
+10. Late derivatives invalidate/reopen prior barrier evidence and are suppressed before exposure.
+
+No new semantic conflict was found in the reviewed baseline. The JF-01..JF-09 closure remains intact.
+
+## 2. Option comparison
+
+Rating is qualitative against the already-decided invariants, not a benchmark of an unspecified vendor.
+
+| Option | Atomicity / linearization | Crash recovery / ACK loss | Idempotency | Fence/Publish and Permission Revocation races | Local deployment complexity | Testability | Migration cost | Decision |
+|---|---|---|---|---|---|---|---|---|
+| Single transactional DB + per-authority coordinator row/serializable transaction | Strongest direct fit when all authoritative records share one transaction | Native commit outcome lookup; durable rows/receipts; recovery can query same key | Unique idempotency key + request digest in same DB | Fence, admission, dependency, visibility and terminal writes share one commit order; I permit freshness still requires I protocol | Lowest among valid options; DB HA/backup still material | High: deterministic two-connection tests and transaction traces | Medium: ledger/visibility schema and migration | **SELECTED BASELINE** |
+| CAS / conditional update | Linearizable for the CAS target only; does not atomically include unrelated writes by itself | Requires idempotent retry and read-after-CAS recovery | Good for versioned operations | Safe only when dependent ledger and visibility writes are inside the same transaction/atomic unit | Low-medium | High for single-record CAS; more complex across records | Medium | **USE INSIDE SELECTED DB TRANSACTIONS**, not standalone replacement |
+| Durable Work Ledger | Not a complete serialization mechanism by itself | Strong recovery/terminal accounting if durable and queryable | Natural stable WorkItemId + receipt lookup | Makes admission/barrier state durable but does not alone serialize visibility/fence | Medium (schema, compaction, reconciliation) | High | Medium-high for existing queue systems | **REQUIRED COMPONENT** |
+| Transactional Outbox | Atomic with source transaction only when same DB | Excellent ACK-loss and replay handling for notifications | Dedupe by event/operation ID | Does not itself gate publish or serialize a remote visibility store | Low-medium | High | Low-medium | **REQUIRED SUPPLEMENT**, never the visibility authority |
+| Serialized Coordinator service | Can linearize if backed by durable consensus/log and controls all participants | Requires durable decisions, participant recovery and in-doubt resolution | Must implement operation log/idempotency | Can serialize races only if commit participant enforces current fence and I authorization at final visibility point | High operational burden (HA, quorum, recovery, observability) | High but operationally expensive | High | **NOT SELECTED** while single DB is feasible |
+| Durable 2PC / distributed transaction | Can provide atomicity with durable prepare/commit across participants | In-doubt states and coordinator recovery are complex | Requires stable global operation IDs | Possible only with hidden prepare and final current-fence/authorization validation; no participant may expose prepared state | Very high | High complexity | High | **FALLBACK ONLY** if one DB transaction cannot span authority |
+| Eventual consistency / async reconciliation | Cannot provide required safety linearization | Stale reads and partial effects remain possible | Eventual dedupe does not repair exposure | Unsafe window for fence/publish and revocation | Superficially low | Cannot prove invariant | Low initially, high remediation | **REJECTED** |
+
+## 3. Selected logical deployment profile
+
+Select **one transactional database per Canonical Memory Authority**, using a per-authority coordinator row/lock and serializable (or formally proven equivalent strict-serializable) transactions.
+
+The selected database transaction domain must contain, or atomically govern:
+- ProducerClass registry/version/status;
+- Producer Work ledger, registration sequence and immutable request digest;
+- ForgetOperation, ForgetFence generation and immutable BarrierSnapshotReceipt;
+- dependency-set and frozen OutputManifest records;
+- AttemptId / LeaseEpoch fencing state;
+- idempotency operation/outcome records;
+- final publication decision and authoritative VisibilityPointer;
+- PublicationReceipt and terminal disposition receipt;
+- transactional outbox event and delivery state;
+- restore/reconciliation watermark and control-ledger references.
+
+### Object/blob storage
+
+Large artifact bytes may be stored outside the database only in a private, non-listable/non-queryable staging area. Object existence, object path, bucket listing, outbox event or index row never makes an artifact visible. The database VisibilityPointer is the sole publication authority. A consumer must resolve current visibility and current fence/authorization at response finalization; stale replica/cache use is denied for safety decisions.
+
+### CAS and conditional writes
+
+Use CAS/conditional updates for expected version, manifest version, fence generation, lease epoch and idempotency state transitions, but execute the safety-critical dependent writes in the same selected DB transaction. Standalone CAS on one row is not accepted as a substitute for the atomic ledger + visibility transaction.
+
+### Transactional outbox
+
+Write outbox entries in the same transaction as the corresponding durable source state. Delivery is at-least-once and idempotent. An outbox message is a notification, not proof of publication or completion.
+
+## 4. Transaction boundaries and race outcomes
+
+**Admission / fence transaction:** serialize ProducerWork registration and InstallForgetFence under the same authority/lineage coordinator. Registration-first means sequence is included in captured high-water; fence-first means ordinary admission is rejected/quarantined or cleanup-only.
+
+**Dependency transaction:** persist the complete dependency set and exact frozen manifest version/digest as one logical completeness unit. Partial dependency state is not publishable.
+
+**Visibility transaction:** atomically verify current D fence, barrier registration, current work/attempt/lease, exact dependency digest, frozen manifest version/digest, applicable I inventory seal reference, and commit-usable I authorization proof; then atomically change VisibilityPointer and write PublicationReceipt. If any predicate is unknown, stale or mismatched, commit is denied and artifact remains private.
+
+**Terminal transaction:** compare-and-set exact final frozen OutputManifestVersion/digest and prove all outputs, child work, attempts and commit outcomes are terminal before writing the immutable terminal receipt.
+
+**Read boundary:** authoritative read validates current visibility/fence/authorization at response finalization. An unavailable authoritative state means omit/deny affected content.
+
+### Permission revocation dependency
+
+The selected DB transaction does not magically serialize an external I policy service. The I-owned interface must provide either:
+1. I policy/epoch state in the same authoritative transaction domain; or
+2. an I-issued, audience/action/resource/scope/subject-bound authorization lease/fencing permit whose validity is serialized against revocation and cannot remain commit-usable after revocation becomes effective; or
+3. another formally proven recoverable protocol with equivalent ordering.
+
+The I Phase 3.6 source currently allows an online authoritative decision or an approved bounded authorization lease in principle, but its governance register I36-GOV-05/06 remains GOVERNANCE-BLOCKED. No commit permit, lease policy, revocation protocol or approval is assumed here. Until I supplies and approves the interface, final publication remains **BLOCKED / FAIL CLOSED**.
+
+## 5. Failure and recovery strategy
+
+| Failure | Required recovery |
+|---|---|
+| Before transaction commit | No durable admission/publication/fence effect; retry same key/digest only after authoritative outcome resolution |
+| Commit succeeds, ACK lost | `GetOperationOutcome(key,digest)` on authoritative DB returns original receipt and commit cursor |
+| Outcome indeterminate | Preserve UNKNOWN; do not infer abort, create a new key or terminalize; keep staged bytes hidden |
+| Crash after staging | Staged bytes remain private; reconcile same WorkItemId/AttemptId and rerun final checks |
+| Crash during dependency registration | Transaction commits complete set or no publishable set |
+| Crash after visibility commit before E ACK | Read authoritative VisibilityPointer + PublicationReceipt; idempotently recover E state |
+| Worker lease expires | Increment LeaseEpoch; stale worker cannot stage/publish/terminalize |
+| Fence advances before publish | Visibility transaction rejects; artifact remains private |
+| Publish commits before fence | Publication receipt and dependency are durable pre-fence state; fence reconciliation captures/suppresses them |
+| I revocation ordering unavailable | Deny final commit; do not accept stale/cached ALLOW |
+| Outbox delivery duplicate/out of order | Consumer dedupes stable event ID and preserves contiguous cursor; visibility remains DB-authoritative |
+| Failover/restore from stale snapshot | Enter RecoveryQuarantined; reconcile monotonic Forget control ledger and current I references before serving or publishing |
+
+## 6. Deployment assumptions and unresolved risks
+
+The repository contains Markdown design artifacts only on the inspected main, D, E and Storage tips; no source code, migrations, executable test project, CI workflow, database configuration or runtime deployment manifest was present. Therefore this is a **logical deployment profile selection**, not a concrete product deployment.
+
+Still OPEN:
+- database product, version, storage engine and schema;
+- transaction isolation/strict-serializability guarantee and lock semantics;
+- HA/replication/failover and primary-read consistency;
+- transaction size/contention and per-authority throughput limits;
+- object-store private ACL and exposure proof;
+- backup catalog, control-ledger independence and restore procedure;
+- I authorization permit / revocation serialization contract and governance approval;
+- production migration plan, backfill, dual-read/write, rollback and cutover criteria;
+- named independent Storage engineering approver and operational owner.
+
+No vendor, SQL dialect, isolation guarantee, deployment topology or migration compatibility is invented.
+
+## 7. Formal approval boundary
+
+- **Logical architecture decision:** selected by DE-S under the user's explicit joint delegation.
+- **D semantic acceptance:** D owner semantics unchanged; D does not approve I policy or claim physical implementation.
+- **E producer acceptance:** E consumes the selected DB transaction/receipt boundary; E does not claim an executable implementation.
+- **Storage implementation approval:** requires named engineering owner to verify exact database/version/configuration, transaction semantics, HA/failover/restore and test evidence.
+- **I governance approval:** I/security/privacy/legal/data authorities approve I-owned inventory, authorization, exception and completion policy. DE-S cannot approve it.
+- **Release/production approval:** separate service/product/security/data owners after implementation and test evidence.
+
+## 8. Verification status
+
+- D36 matrix: **NOT RUN**.
+- E36-01..E36-20: **NOT RUN**.
+- C01–C20: **NOT RUN**.
+- Authorization/revocation, manifest/inventory, read-response/fence, unknown-outcome and restore fault additions: **NOT RUN**.
+- Implementation Verified: **NO**.
+- Deployment Implemented: **NO**.
+- Production Ready: **NO**.
