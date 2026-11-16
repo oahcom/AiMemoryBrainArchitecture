@@ -3,7 +3,7 @@
 - Document: TAR-AI-001 / TAB-001 v0.1
 - Owner: H — BMCP Protocol Architect
 - Branch: `session-h-bmcp-protocol`
-- Reviewed branch HEAD: **PENDING exact parent-SHA verification during report publication**; H branch exists and branch-local protocol artifacts were fetched.
+- Reviewed source branch HEAD (pre-publication snapshot): `6e7cb95f6c99ef45af9ff4e26915f66141996075`; tree SHA: `f44e93e30130a213381587e005d2851722e74a1e`. The report publication commit is recorded separately in the final execution summary.nt-SHA verification during report publication**; H branch exists and branch-local protocol artifacts were fetched.
 - Review date: 2026-11-17
 - Report version: 1.0
 - Verdict: **CONDITIONAL PASS**
@@ -14,6 +14,19 @@
 H's BMCP design is a viable transport-independent protocol candidate. The envelope separates protocol version, payload schema version, ContextVersion, PermissionEpoch, ForgetFence and CapabilityEpoch; authenticated transport identity is distinct from payload ActorRef/producer claims; delivery lifecycle distinguishes Prepared, Delivered, Applied, Rejected, Expired, Superseded and Unknown; reconnect requires current authorization/fence/context reconciliation before replay. These are sound foundations.
 
 The design is not freeze-ready. JSON with RFC 8785 canonicalization is a candidate, not an approved wire encoding; HTTP, local IPC and gRPC need a workload/platform comparison; Principal/ActorRef/ScopeRef and PermissionEpoch depend on B/I; ContextVersion and Delivery semantics depend on G; final-request Applied proof depends on C and actual Agent runtime hooks. D's Forget fence and I's target/global completion policy remain separate authorities. A valid protocol document does not establish authenticated identity implementation, secure key management, adapter conformance, or reliable final-request evidence.
+
+## Upstream Owner Input Status (refreshed branch audit)
+
+The following owner branches were refreshed for this review. No separate TAR-AI-001 technology-review report was present in the B, I, D or E branch trees at the reviewed snapshots; their absence is recorded as **OPEN**, not treated as acceptance or as permission to infer conclusions.
+
+| Owner | Branch HEAD | TAR-AI-001 technology report | Relevant current input |
+|---|---|---|---|
+| B | `861fa9b2c3e1f572336543b15c7dc392493891db` | OPEN — not present | `ADR-001-fact-claim-semantics.md`, blob `a1024938ff5baba069cf128c69496a44e143330c`, remains **ADR-BLOCKED** |
+| I | `1fc3b3293ebf2077edfd6ad253647d382173d9fa` | OPEN — not present | PermissionEpoch formal confirmation, blob `bae6a24fe3a374bc816993979a8fa9af52517dea`, is normative I technical baseline; external governance profile approval remains blocked |
+| D | `9dd48eddb3c8f91d15dfa6981a7f53cc70bd4bf8` | OPEN — not present | Forget semantics, blob `1f0391bc49d007c44ec74165bd33d37412cc7990`, define D authority; D/E/Storage implementation closure remains open |
+| E | `4402549c39824b89a0dc49973226187c62e056c5` | OPEN — not present | Producer admission, blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a`, and derived publication, blob `00e37ba56596e710513c8d0568acd79141d9101b`, explicitly retain atomic registration/publication as OPEN / BLOCKING |
+
+These are current owner artifacts, not substitutes for the missing owner technology reviews. The Phase 3 D/E/H/I cross-module review remains a conditional integration review, not a closure of the D/E/Storage publication linearization gap.
 
 ## 2. Review Scope and Evidence
 
