@@ -746,3 +746,53 @@ I's decisive authority split: COC is the cross-owner causal-order and participan
 Binding amendments require COC to register a stable preallocated XID/operation/digest/boundary before Storage PREPARE, register Storage's signed PreparedParticipantReceipt after durable prepare, require I to linearly verify both before owner-final-gate decision, record I's signed terminal proof and Storage's same-XID resolution idempotently, and preserve forward-COMMIT/rollback-ABORT recovery direction. Ten new JF10-COC fault cases are specified in I artifact §10.8.
 
 **Gate status:** I's interface decision is RECORDED WITH BINDING AMENDMENTS; the current A COC artifact must be amended to include these bridge records/API and exact state transitions before it is fully reconciled. Multi-policy-domain atomicity remains BLOCKED. JF-10 remains P0 OPEN; JF10-COC-01..10 and other conformance remain SPECIFIED / NOT RUN; implementation NOT VERIFIED; no deployment or production approval.
+
+## 13.12 H recovery-batch schema addendum, I composition boundary and JF-10 model CI — 2026-11-16
+
+### H 1.1.0 recovery-batch schema candidate addendum
+
+H has published and read-back verified its recovery-batch field/message mapping:
+- H artifact: `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`
+- Blob: `d2759386ab1cd4e5518fdb1820e2ad7044ad1871`
+- Commit: `879d0f0248047482de3b7bf0fbc3f82a8acc6d1a`
+- New message families: `OWNER_LOCAL_PENDING_GATE`, `COC_RECOVERY_CUTOFF_BATCH`, `PRE_BATCH_PARTICIPANT_RECONCILIATION`, `OWNER_LOCAL_GATE_RELEASE`, `COC_RESTORE_FENCED`.
+- Required fields, conditional I/D owner refs, complete pre-batch participant set, owner high-water attestations, batch digest/prefix, owner-only gate release and restore-fenced behavior are specified.
+- H recovery-batch field-mapping exception is closed at the documentation/schema-candidate level for the exact A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819`.
+
+H schema remains candidate, NOT generated/frozen/interoperability-tested. Signature/MAC suite, key lifecycle and federation remain subject to I/Security approval. H-CO-17..23 are SPECIFIED / NOT RUN.
+
+### I COC / JF-10 composition boundary
+
+I has published an exact technical disposition:
+- Artifact: `09-security-governance/phase-3.6.2-i-coc-jf10-composition-boundary.md`
+- Blob: `9e1f66ddbe0952f17068b1638feb8ab0094588c3`
+- Commit: `2105ead17dfc21ea1a33c21865db24336d2b75da`
+
+I accepts COC as the CGH cross-authority causal-order evidence service with I-issued authorization/revocation evidence. I does **not** approve automatic COC↔JF-10 composition. JF-10 v2 remains separately governed by I's policy-domain owner-gate-participating 2PC protocol; multi-domain atomicity remains BLOCKED. Any future operation requiring both protocols needs a new exact-version joint bridge design. This is technical architecture disposition, not external I governance approval.
+
+### Storage exact COC interface decision
+
+Storage exact decision remains:
+- Artifact Blob: `a589d983ac145244962c22e5da3a55427aa35ff8`.
+- Decision: **CONFIRMED WITH CHANGES — ARCHITECTURE INTERFACE ONLY**.
+- COC, I JF-10 sequencer/2PC, and per-Canonical-Memory-authority Storage visibility remain separate consistency authorities. Combined atomicity is NOT PROVEN and remains fail-closed.
+
+### JF-10 reference-model CI result
+
+- Workflow run: `43895971452`
+- URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43895971452
+- Head commit: `684ac873bec331649c18a45a992007d04f211832`
+- Test source Blob: `a38d73b4a5e7c65210fb414a62fb91b30649b788`
+- 15 deterministic in-memory unittest methods: **CI SUCCESS**.
+
+This is only a logical Python reference-model pass. It does not verify production DB prepared-XID durability, I sequencer integration, COC quorum, D/Storage shared transactions, process crash, HA/failover/restore, object-store/reader behavior or production JF10/COC/Storage conformance. JF-10 P0 remains OPEN; G3 remains BLOCKED.
+
+### Current exact gates
+
+- CGH-APPLIED-1.1 recovery-batch exact C/D/I/H/G/B decisions: RECORDED WITH ENUMERATED EXCEPTIONS / APPROVE for exact package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` and COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
+- H recovery-batch schema documentation: candidate mapping published; production freeze NO.
+- Storage COC interface: CONFIRMED WITH CHANGES, architecture only.
+- I COC↔JF-10: no automatic composition; any combined flow remains BLOCKED pending new joint bridge.
+- Named COC operator / actual infrastructure / DB engine / RPO-RTO / SLO / KMS: OPEN / NOT VERIFIED.
+- COC-01..16, H-CO-17..23, JF10-01..17, Storage C01..C23, I-CO and G-CO: NOT RUN (except the separate in-memory reference-model suite above).
+- Applied Contract Frozen: NO; implementation verified: NO; G8 BLOCKED; G9 NOT RUN; G10 BLOCKED.
