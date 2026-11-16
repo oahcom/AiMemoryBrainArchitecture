@@ -1,169 +1,150 @@
-# Unified A–I Remediation & Evidence Register
+# Unified Remediation & Evidence Register — Current Snapshot
 
 - Register ID: P-UNIFIED-MBR-REMEDIATION-001
-- Date: 2026-11-17
-- Status: **OPEN — coordination register; no Owner decision is inferred**
-- Authority: Session P records dependencies and evidence. Module Owners retain their own decisions; I retains security/governance authority; Storage retains physical realization; designated ADR/Governance authority retains project-level decisions.
+- Revision: 2026-11-17 / current live-branch reconciliation
+- Status: **OPEN — coordination register only**
+- Supersedes: earlier cumulative snapshots and stale status rows in this file. Historical decisions remain immutable at their exact artifact/blob pins.
+- Authority: Session P coordinates and records evidence. A–I Owners retain module decisions; Storage retains physical storage realization; I retains security/governance authority; the authorized project governance body retains G0/PGA authority.
 
-## 1. Priority actions
+## 1. Decision and evidence rules
 
-| ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
-|---|---|---|---|---|---|
-| UMR-001 | P0 | Common CGH-APPLIED-1.1 package/schema freeze and executable closure | C, G, H jointly; I/D/B predicate authorities; A records | Exact A package 4961... + companion fc3... decisions recorded; however current A COC architecture file is now a3c51..., so the package's companion pin is stale and the canonical pair must be reconciled. C/D/G/H/I accepted old pair; B approves types; Storage confirms old pair interface. H schema remains candidate/not frozen | Freeze requires H complete production schema/crypto/compatibility evidence, named/deployed COC, I/D/C/G runtime binding, owner-authoritative tests and conformance; see applied-contract-1.1-exact-version-reconciliation.md |
-| UMR-002 | P0 | JF-10 v2 production adapter binding and recovery | Storage engineering + D/E; I for authorization/sequencer | PostgreSQL 18.7 current probe suite PASS 7/7 across pinned commits (PITR on d026..., prepared + five workflows on 83bd...); current Storage HEAD 9f78... has identical probe/workflow blobs and only later documentation changes. Gate A PARTIAL PASS / OPEN for remaining architecture specifications and exact cross-owner decisions; implementation binding explicitly deferred to engineering phase | Close remaining architecture-level transaction/visibility/recovery/HA specifications in Gate A. Runtime repository/adapter/build, production-equivalent tests, fencing, operator/runbook and RPO/RTO are DEFERRED_TO_ENGINEERING_PHASE |
-| UMR-003 | P0 | Formal ADR-001 Fact/Claim decision | Designated ADR/Architecture Governance authority; B owns domain recommendation | ADR-BLOCKED | Exact selected option, rationale, approver authority, timestamp, version, migration and affected-consumer acceptance |
-| UMR-004 | P0 | I security policy and Global Forget governance | I + named external governance approvers | GOVERNANCE-BLOCKED | I35-DEC/I36-GOV approved exact versions; signed inventory seal; target-state mapping; external recipient/backup/restore evidence; exception decisions |
-| UMR-005 | P1 | B/I/H typed identity + permission binding | B, I, H; consumers C/D/E/F/G/Storage | OPEN / PARTIAL DESIGN | Exact typed fields and trust chain, transport authentication binding, permission/epoch mapping, forged identity and stale/revoked negative tests, consumer acceptance |
-| UMR-006 | P1 | Owner baseline adoption and current evidence pins | Each A–I Owner; A tracks | All nine module proposals PROPOSED; no module baseline adoption recorded by this review | Owner-specific ADOPT / ADOPT WITH EXCEPTIONS / REVISE / REJECT record, proposal version, current HEAD, artifact blob SHA and affected-consumer acceptance |
-| UMR-007 | P1 | Baseline template applicability and structural normalization | Project Governance Authority / P until appointed | P template exists; not in main; governance not ratified | Exact template version adoption or approved replacement; each Owner maps all required sections and records deviations |
-| UMR-008 | P1 | Refresh technical-review / integration source HEAD provenance | A/C/F/G/H; B/D/E/I review coverage to be decided | TAB-001 reports B/C/F/G/H/I present; A/D/E missing. A Phase 3.6 closure tracker §13.43 and A context integration source pins are stale against current Owner HEADs | Refresh each report to current source HEAD/artifact blobs; distinguish exact Owner decision from implementation/test/deployment status; A to refresh closure tracker and gate vector |
-| UMR-009 | P1 | TAB-001 Owner technology review coverage for A/D/E | A/D/E Owners; A coordinates | Six reports present: B, C, F, G, H, I. A, D, E assigned reports remain missing. B/I reports state centralized delegated review, not independent human Owner attestation. | A/D/E publish owner-specific reviews at exact task-pack paths; refresh all report source HEADs/blueprint SHA and preserve the delegated-review caveat for B/I |
-| UMR-010 | P1 | Inspect PostgreSQL 18.7 capability probe workflow evidence | Storage Owner / CI operator | PR #12 closed; description limits evidence to single-node probe and disclaims production/failover proof; run result not yet verified here | CLOSED for current pinned PostgreSQL 18.7 CI capability profile (7/7); retain engine-fixture non-claims and link exact run/job/log pins in jf10-storage-evidence-assessment.md |
-| UMR-011 | P2 | Normalize document structure to 14-section template | Each Owner; governance template authority | A has 13 sections; B/C/G/H/I 14; D/E/F 15; template only on P | Owner-confirmed section map, distinct Evidence & Version History, deviations justified |
-| UMR-012 | P2 | Central gate vector and registry synchronization | A; P maintains governance rollout record | Tracking registry stale at review start | Current branch HEADs and artifact SHAs, owner decisions, cross-owner acceptances, governance, implementation and tests tracked independently |
+1. An artifact commit proves only that an artifact exists at a pinned blob.
+2. An Owner decision applies only to the exact source blob(s) it names.
+3. A role-simulated review authored by the coordinating ChatGPT session is a technical review input, **not an independent Owner signature**.
+4. ACCEPT WITH CONDITIONS is not unconditional acceptance, implementation approval, conformance PASS, production readiness or system freeze.
+5. Reference-model/schema tests do not prove production runtime, multi-process races, real adapters, physical erasure, restore safety or operational readiness.
+6. DEFERRED_TO_ENGINEERING_PHASE is not an architecture defect, but its future acceptance criteria must remain explicit.
+7. No project-wide freeze, G0 ratification or main-branch integration is inferred from module-level decisions.
 
+## 2. Current branch snapshot
 
-| UMR-013 | P0 | SQLite/PostgreSQL transaction-profile decision for JF-10 | D/E/Storage; I for policy/sequencer | PostgreSQL 18.7 native prepared-XID and enhanced CI profile now pass 7/7; stronger direct evidence than SQLite WAL for prepared participant semantics; no final DB selection | Bind engine capability to production runtime/adapter and operational profile; if SQLite retained, specify/prove an alternate durable participant protocol; keep TEC-003/004 OPEN pending Owner/ADR decision |
-| UMR-014 | P1 | Integrate G/F NVIDIA context-optimization and observation-archive research with TAB-001 | A coordinates; F/G own proposals; B/C/D/E/H/I/Storage consulted | A system integration review now defines F-owned Observation Archive + G-owned Context projection, no new service; F/G candidates remain PROPOSED and all cross-owner acceptances pending | Exact F/G Recall contract and owner approvals; classify archive producer/retention; map TSS/ObservationRef/compaction/fidelity/lineage/Forget to B-I/Storage; then run paired benchmarks and negative tests |
-| UMR-015 | P1 | Reconcile P/main branch divergence before any future integration | P coordinator + A; project governance authority when appointed | P is ahead 30 / behind 4 against main; main contains TAB-001 blueprint, task pack and roadmap update | Reviewed non-destructive reconciliation of four main-side files, fresh compare, no force update and no merge without explicit authorization |
+Observed GitHub branch refs at this refresh. These are point-in-time HEADs, not immutable decision pins.
 
-
-| UMR-016 | P0 | Bind PostgreSQL capability suite to canonical runtime implementation | Storage engineering + D/E/I; A coordinates | Production runtime/Canonical Authority DB adapter intentionally absent during architecture-design phase; IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE. CI fixtures use isolated jf10_* tables | DEFERRED_TO_ENGINEERING_PHASE. Preserve future binding criteria: canonical runtime repository/branch, adapter/schema/build SHA, I/D/E mapping, pointer/receipt/outbox, authoritative reader and production-equivalent suite. Not a Gate A blocker. |
-
-
-| UMR-017 | P1 | Refresh A Phase 3.6 closure tracking after current exact decisions and Storage regression | A Owner; P records discrepancy only | A closure tracker blob 554d4b85... and A context integration review blob b53db1... carry stale source pins; live B/I/Storage heads advanced. A must refresh the exact COC/Applied pair and current Gate A/B vector; P records but does not modify A's Owner record | A re-fetch exact current C/G/D/H/I/B/Storage branch artifacts and current Storage dossier, update exact blob/HEAD pins and gate vector; preserve Gate A PARTIAL PASS / OPEN for architecture specifications and exact Owner decisions; production runtime/adapter/operator/RPO/RTO are engineering/deployment-phase gates |
-
-
-| UMR-018 | P0 | Fix and rerun enhanced JF-10 PITR exact-WAL negative campaign | Storage Owner | CLOSED for tested code set: PITR probe blob 635068... passed on d026...; prepared probe/workflow blobs 184e.../fbcb... plus five supporting workflows passed on 83bd...; current Storage HEAD 9f78... retains identical code blobs; later commits changed docs only | Preserve passing assertions; any probe change requires rerun; Gate A still open for architecture design specs and exact Owner decisions; implementation/deployment deferred to engineering |
-
-
-| UMR-019 | P1 | Freeze F/G Observation Archive ↔ Context Recall contract | F/G jointly; B/C/D/E/H/I/Storage accept their own dependencies; A records | A system review selects F-owned Runtime Archive + G-owned Context projection and rejects a new service now; F/G research candidates are PROPOSED; F/G module baseline proposals do not yet mention Archive/TSS/fidelity/lineage; A decision register says same-version cross-owner acceptances pending | Joint exact-version RecallIntent/ObservationRecallResult, ArchiveLocator vs ContextObservationReference, cursor/receipt/completeness, source revision, TSS/ContextVersion and retention/Forget semantics; exact Owner decisions on each branch |
-| UMR-020 | P1 | Execute Context Optimization conformance plan after contract and implementation readiness | A test governance; F/G primary; C/D/E/H/I/Storage supporting | Plan blob 1c941c... is PROPOSED / NOT RUN; tests specified for archive capture/recall, cursor/EOF, Forget races, restore, cache, compaction fidelity, permissions, benchmarks | Pinned implementation/build; test ownership, seed/config/hardware/model; nominal/negative/concurrency/recovery suite; zero leakage/false completeness/epistemic upgrade; paired held-out performance evidence |
-
-
-| UMR-021 | P1 | Align F/G module baseline proposals with new Archive/TSS research candidates | F/G Owners; A coordinates; B/C/D/E/H/I/Storage review affected interfaces | F baseline proposal blob d4756c... and G baseline proposal blob fb2eb8... predate the new work and contain none of Observation Archive/ArchiveLocator/RecallSession or TSS/ContextObservationReference/compaction/fidelity terms | F/G publish revised PROPOSED baseline addenda on their own branches with exact owner-scoped boundaries, cross-owner dependencies and explicit OPEN/TO_VALIDATE statuses; then request exact consumer acceptance |
-
-
-| UMR-022 | P1 | Review and close Storage COC durable log/recovery protocol design | Storage + A/I/D/C/H; G where Applied semantics affected | Storage superseded preliminary blob cd556... with Phase 3.6.3 protocol Blob 4ac63... at current Storage HEAD fe7de...; it adds Raft/quorum proof, membership epoch, participant-set digest and RecoveryReconciliationReceipt. Exact Owner review remains pending; residual gaps: committed recovery-epoch completion record, H record/schema mapping, repeated cutoff batches, I-owned domain registry, external anti-rollback anchor custody and Applied companion pin drift. See P COC review §10. | Storage publishes amended exact blob; A/I/D/C/H/G record exact-version decisions; map every COC record to H schema and owner signer; keep Gate B acceptance OPEN until closure |
-| UMR-023 | P1 | Reconcile Gate B/C state vector in Storage readiness document | Storage + A | Readiness §23.1/§23.4 correctly says Gate B specification published / exact Owner review pending; §29 still says Gate B blocked until Gate A and deployment evidence. IMPLEMENTATION_BINDING is DEFERRED_TO_ENGINEERING_PHASE | Distinguish Gate B design AUTHORIZED, design acceptance OPEN, implementation NOT RUN, Gate C tests DEFERRED_TO_ENGINEERING_PHASE; remove stale contradictory state text |
-| UMR-024 | P0 | Reconcile Applied package companion pin with current A COC architecture | A; C/D/G/H/I/Storage reaccept affected exact version | A package 4961... still pins companion COC blob fc3...; current A file at same path is a3c51...; C/D/H/I/Storage have separate a3c51 decisions, G's Applied acceptance pins 4961+fc3 | A publishes canonical package/companion manifest or superseding exact package pin; determine if a3c51 supersedes fc3; obtain G and all affected Owner re-acceptances; no freeze until one canonical exact pair |
-
-
-| UMR-025 | P1 | Normalize Storage readiness gate state vector and phase language | Storage + A | Readiness §19 authorizes Gate B design and explicitly defers implementation binding, but later §21/§22 still say Gate B/C BLOCKED and older sections describe production runtime absence as Gate A blocker | One canonical vector: Gate A PARTIAL PASS / OPEN for architecture specs; Gate B design AUTHORIZED / acceptance OPEN; Gate C implementation tests DEFERRED_TO_ENGINEERING_PHASE; remove contradictory stale statements |
-
-## 2. Non-substitutable acceptance evidence
-
-The following evidence classes are independent:
-1. Artifact exists and can be read back.
-2. Module Owner adopts a specific proposal version.
-3. Affected consumer Owners accept the exact contract version.
-4. External/project governance authority approves the exact policy/baseline.
-5. Implementation exists at a pinned build/source SHA.
-6. Required tests execute and pass with reproducible logs.
-7. Deployment/operator readiness and recovery are evidenced.
-
-No row may be marked complete because a different row is complete. Static review, branch commit, PR closure, test specification and CI workflow creation are not test pass evidence.
-
-## 3. Gate snapshot
-
-| Gate | State | Reason |
+| Role | Branch | Observed HEAD |
 |---|---|---|
-| Nine module proposal documents | PASS — submitted as PROPOSED | All nine artifacts fetched from their Owner branches |
-| Nine module baseline Owner adoptions | OPEN | Explicit exact-version adoption not established by this review |
-| ABC boundary review | PASS WITH OPEN BLOCKERS | A/B/C authority boundaries align; ADR-001 and identity binding remain open |
-| DEF boundary review | PASS WITH OPEN BLOCKERS | D bounded JF-10 decision exists; Gate A architecture specs and Gate B COC protocol acceptance remain open; implementation tests deferred |
-| GHI boundary review | PASS WITH OPEN BLOCKERS | G/H semantics align directionally; Applied exact-version freeze and I governance remain open |
-| Common Applied freeze | DESIGN DECISIONS RECORDED WITH EXCEPTIONS; FREEZE BLOCKED | Exact package 4961+companion fc3 decisions exist, but current A COC file is a3c51; canonical pair/version manifest and affected Owner reacceptance required. H schema remains candidate |
+| A | session-a-integration-2026-11-16 | bccd8769e981310b85da4974fb4af98e41f9f374 |
+| B | session-b-domain-model-phase3 | 310f305575d6f406e80d5d6ebf951bcd9e79e35f |
+| C | session-c-agent-integration-2026-11-16 | 018de5044810e755d4e21cb21e982526c27eb9a8 |
+| D | session-d-memory-brain-2026-11-16 | a3ea0de75ca7b2297589293ec142f2cb07757282 |
+| E | session-e-memory-compiler-2026-11-16 | 5fb76b666fac49ceeb51ddb7c320fe5975313d99 |
+| F | session-f-memory-runtime | e4c26214b8f78169c0e20f1faae23f945c3afeb9 |
+| G | session-g-memory-context | b0c515399c6a336dcbf17a1ced6925413c804d5c |
+| H | session-h-bmcp-protocol | 26378ea59675f31ac0455d745e9cbedab898db8c |
+| I | session-i-security-governance-2026-11-16 | ba0d1dfcca9392f3a20c405169c83b41da3f12b7 |
+| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | 337fe8bffa178e64ad8e4750f1ede1d561424edc |
+| P | session-p-project-governance-baseline | d65075630d691889840acb7621f4a44fb9a05571 |
+| main | main | 3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f |
 
-| Gate B COC design activity | AUTHORIZED TO PROCEED | Storage published Phase 3.6.3 protocol blob 4ac63...; exact Owner review remains OPEN pending residual COC-REV-002/003/005/006/008, exact A/B/C/D/E/G/H/I/Storage decisions and pin reconciliation |
-| Gate C implementation fault injection | DEFERRED_TO_ENGINEERING_PHASE | No production implementation is expected in architecture phase; tests remain specified/not run until implementation exists |
-| ADR-001 | ADR-BLOCKED | No formal decision record |
-| JF-10 P0 | OPEN — Gate A PARTIAL PASS; Gate B design authorized | PostgreSQL 18.7 capability suite 7/7 for pinned code set. Gate A architecture specs/cross-owner decisions remain open; Gate B COC design may proceed in parallel; Gate C implementation tests deferred to engineering |
-| Global Forget | GOVERNANCE-BLOCKED | I approvals, sealed inventory and target-state evidence incomplete |
-| JF-10 PostgreSQL 18.7 CI evidence | PASS — current probe code set 7/7 | PITR probe 635068... PASS on d026...; prepared + five supporting workflows PASS on 83bd...; current Storage HEAD 9f78... retains identical code blobs. Isolated engine capability only |
-| TAB-001 Owner technology review | 6/9 reports present; 3/9 missing | B/C/F/G/H/I reports present; A/D/E missing. B/I reviews are delegated assistant reviews, not independent human-Owner attestations |
-| Project G0 / architecture freeze | GOVERNANCE-OPEN / NOT AUTHORIZED | No PGA appointment or exact G0 approval evidenced |
-| Production implementation/test sign-off | DEFERRED_TO_ENGINEERING_PHASE | No production implementation is expected during architecture design; conformance plan remains specified/not run |
+P vs main: **ahead 73 / behind 4 / diverged**. No merge, force-update or main write is authorized or performed.
 
-## 4. Operating sequence
+## 3. Current system gate vector
 
-1. Close UMR-001, UMR-003 and UMR-005 at the exact contract/ADR level without conflating their authority.
-2. Preserve the PostgreSQL 7/7 CI evidence; keep implementation binding deferred to engineering under UMR-016; decide the SQLite alternative under UMR-013 only after exact JF-10 invariants are mapped.
-3. Close UMR-022/023/024 COC design and exact package-pin alignment; advance UMR-019/021 F/G Archive–Context contract and baseline alignment; run UMR-020 only after Owner acceptances and an implementation build exist.
-4. Have A refresh stale Phase 3.6 and context-integration source pins under UMR-017; P cannot rewrite A's Owner record.
-5. Close UMR-002 and UMR-004 with real Storage and I implementation/governance evidence.
-6. Obtain each Owner's exact-version baseline disposition under UMR-006 and normalize documents/review coverage under UMR-007/008/009/011.
-7. A publishes an updated integration gate vector; P updates project tracking.
-8. Only a formally appointed Project Governance Authority may ratify G0 or authorize a project-wide architecture freeze.
+| Gate / decision | Current state | Meaning |
+|---|---|---|
+| Nine A–I module baseline proposals | **PROPOSED** | All nine proposals exist; no exact Owner baseline adoption is recorded. |
+| A–I baseline adoption | **OPEN** | Context/COC acceptance artifacts are not module baseline adoption. |
+| TAB-001 Owner technology reports | **8/8 PRESENT** | B/C/D/E/F/G/H/I reports exist. A's final report has a later conditional reassessment but stale front matter and source manifest still need consolidation. |
+| TAB-001 system direction | **CONDITIONAL PASS — architecture design only** | Candidate direction may proceed to controlled engineering planning; not a technology freeze. |
+| B Fact/Claim ADR-001 | **ADR-BLOCKED / P0** | No formal Architecture Governance decision. |
+| Applied 1.1 exact design bundle | **DESIGN DECISIONS RECORDED WITH EXCEPTIONS** | A's matrix distinguishes the immutable Applied package pair 4961ffef... + companion fc3bac39... from separate COC/JF-10 bridge architecture a3c51ec.... This resolves the former pin-role ambiguity; do not substitute one blob for the other. |
+| Applied schema / interface freeze | **NOT AUTHORIZED** | H schema remains candidate; final-request/runtime evidence and conformance remain open. |
+| Context optimization / Observation Archive | **CONDITIONAL DESIGN ACCEPTANCE** | A's final matrix records eight non-A Owner perspectives as ACCEPT WITH CONDITIONS. F/G joint Recall contract and module baseline updates remain open. |
+| JF-10 Gate A | **PARTIAL PASS / OPEN** | PostgreSQL 18.7 isolated capability evidence exists; remaining architecture decisions, I/D cross-owner semantics and operational profile remain open. |
+| JF-10 Gate B prior protocol 4ac63... | **DESIGN-LEVEL ACCEPTANCE WITH EXCEPTIONS** | Exact role-based acceptance matrix exists for that exact blob only. |
+| JF-10 current protocol 86ff3... | **PUBLISHED / FOCUSED RE-REVIEW PENDING** | §14 adds PreparedTransactionGID/native-XID mapping. Storage accepts with conditions; A/H/I role reviews are coordinator-simulated, H/I no approval; independent Owner decisions remain pending. |
+| Storage Design v2 4ed423... | **FRESH PROPOSAL / REVIEW OPEN** | Adds R1–R6 disposition, recovery epoch completion, repeated batches and GID mapping. Issue #16 remains open; no independent exact-v2 acceptance is established. |
+| Prepared-participant trust / wire envelope | **NOT APPROVED** | A conditional with amendments; H and I are CANDIDATE / NO APPROVAL in role-simulated reviews. |
+| JF-10 Gate C | **DEFERRED_TO_ENGINEERING_PHASE** | No production implementation/fault-injection PASS. |
+| JF-10 P0 / multi-PolicyDomain | **OPEN / BLOCKED** | Single-I-PolicyDomain architecture profile only; production activation not authorized. |
+| I Global Forget | **GOVERNANCE-BLOCKED / NOT COMPLETED** | I36-GOV-01..10 proposal only; no external governance approval, production inventory seal or target evidence. |
+| Project G0 / architecture freeze | **GOVERNANCE-OPEN / NOT AUTHORIZED** | No PGA appointment or exact G0 approval evidenced. |
 
-## 5. Change log
+## 4. Current COC / JF-10 exact-version map
 
-- 2026-11-17: Initial unified register prepared from live A–I branch reads, current baseline artifact blobs, A Phase 3.6 closure tracking, D JF-10 bounded acceptance and Storage PR #12 metadata.
+| Artifact | Exact pin | Current decision status |
+|---|---|---|
+| A COC/JF-10 bridge architecture | Blob a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d | Owner boundary decisions recorded with exceptions; A's separate R1–R6 review remains open. |
+| Common JF-10 v2 protocol | Blob 94679897e84a6f58fd8b9467b5249e1a885cb0b0 | Existing decisions apply only to this exact protocol; generic XID wording needs alignment with the newer GID/native-XID distinction. |
+| Phase 3.6.3 COC protocol prior revision | Blob 4ac63ac79491e79ec0c9114ef73941c73d7bbf25 | A/B/C/D/E/G/H/I/Storage exact role-based design decisions with enumerated exceptions. |
+| Phase 3.6.3 COC protocol amended revision | Blob 86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7 | Storage accepts with conditions. A/H/I role-simulated reviews exist; A has amendments, H/I no approval. Independent exact-version review pending. |
+| Storage Design v2 | Blob 4ed4234ce548a814a9496adf7a14c4459ea9f7ce | Fresh proposal. Includes R1–R6 disposition, recovery manifest/batches, owner gate release, GID/native-XID distinction. Issue #16 open. |
+| H JF-10 schema candidate | Blob a8a945cc3623c2907003b93625e3c79742150944 | Candidate only; opaque XID reference fields are not yet explicitly mapped to PreparedTransactionGID vs native XID or DatabaseIncarnationRef. |
+| A exact COC acceptance matrix | Blob 9a39e48a394fedbab16d15589056d59ef33f390f | Covers prior protocol Blob 4ac63..., not amended Blob 86ff... or Storage Design v2 4ed.... |
 
-- 2026-11-17 addendum: reconciled current TAB-001 v0.1 and A–I technology-review task pack. Main HEAD `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f`; TAB-001 blob `7b6f2d139217dbe13ab3a3af31bfbff525f20e71`; task pack blob `5a813edeccf7190d66dfd71a96ca581c48f8a4cb`. G research blobs `3fb9f011e24c93a748442018d48c5954584e4f43` and `eadefd4e0fe541ef8479a030a2a99a0d57dbcf8b`. P/main divergence: ahead 30 / behind 4.
+The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423.... The A/H/I role reviews of the two newer targets explicitly disclose coordinating-session provenance and are not independent signatures.
 
-- 2026-11-17 JF-10 evidence reconciliation: Storage branch `a1fbbd15d3a7993bbb61821ad44957e4f69d3ed1`, dossier blob `2f76ca8b8c19b84c37e7604cd254990dd93eb8b1`. Seven PostgreSQL 18.7 CI workflows succeeded on commit `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd`; see `00-governance/reviews/jf10-storage-evidence-assessment.md`. Gate A is PARTIAL PASS / OPEN, not closed.
+## 5. Executed evidence — separate suites, separate claims
 
-- 2026-11-17 Applied correction: live C/D/G/H/I exact-version decision artifacts and B type approval all pin A package `4961ffefc0f9920efb8425a9b2a7af42d8f64819` plus COC companion `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`; Storage confirms interface only. Applied freeze remains blocked by H candidate schema/deployment, COC operator, runtime implementation and conformance. See `applied-contract-1.1-exact-version-reconciliation.md`.
-- 2026-11-17 A source freshness: A closure tracker blob `554d4b85a94f433856506dce4c020b9c00183e69` ends at §13.43 and records old Storage head `df60b547...` / failed PITR; current Storage head is `3c8ab8ee4579a550300aa48aecab928149cf9370` with corrected seven-workflow regression pass. Gate A remains PARTIAL PASS / OPEN because production runtime/adapter, I/D integration, COC deployment/operator and operations remain unverified.
+| Area | Exact evidence | Result | Non-claim |
+|---|---|---|---|
+| Storage PostgreSQL 18.7 capability | Pinned PITR/prepared-XID workflow code set; runs 43958775001 and 43959079736; tested code commit 83bdacbafa840808dca9be7a8c76c4df83c63504; later Storage changes reviewed as documentation-only | **7/7 PASS** | Not production DB selection, COC implementation, production HA/fencing, real I/D ledger integration or production restore proof. |
+| F anti-resurrection reference model | Model Blob 33fa2ca2dc29771aca241e194f13e078a4f8d774; tests Blob c2575327a75577923440ef770d42122218a1e091; run 43961714501, job 133630540252, commit f1ba5c478e395da6b126423e32e20d0990e61920 | **19/19 PASS** | Logical reference model only; no actual ANN/index/cache/Working Set implementation, multi-process race, production reconnect or restore proof. |
+| H JF-10 schema + strict parser | Schema Blob a8a945cc3623c2907003b93625e3c79742150944; schema tests Blob 74bc4286abe1489ce29c2446c6fc22445784609f; parser Blob 3b9b3da645448c773c95a9dcd3c57c8c109bb2da; parser tests Blob f9c8f44da5c4d52efe78368c54a73eaa1286c374; run 43963251050, job 133635914698 | **23/23 PASS** | Candidate schema/reference parser only; no canonicalization profile, signature verification, key custody, GID/native-XID field mapping, generated SDK or live transport interoperability. |
+| I Global Forget inventory/completion model | Tests Blob 428e15c6263b5b2d730b93ce5412d55e782a449b; run 43963450717, job 133636592112, tested commit 8a6a6e67696c496e265b3d87f1a550fe5e8bb2a0 | **30/30 PASS** | Logical model only; no production inventory registry, real TargetInventorySeal, external recipient proof, physical erasure or governance approval. |
+| COC in-memory outage model / JF-10 semantic validator | A integration report records separate reference suites | **11 / 18 PASS** | Not a Raft/COC service, distributed fault injection or production conformance. |
 
-- 2026-11-17 current Storage regression: Storage HEAD `3c8ab8ee4579a550300aa48aecab928149cf9370`, enhanced PITR probe blob `7fa4bb3fb07eacc3f708f5682ea4c9e2019f267d`. Current branch batch: six workflows PASS, PITR run `43957456225` FAILURE because corrupt-WAL assertion did not accept the observed `invalid magic number`; incomplete-WAL case not reached. Earlier 7/7 on `8b8c749...` remains scoped to the older probe blob. See `00-governance/reviews/jf10-storage-evidence-assessment.md` §10 and UMR-018.
-
-- 2026-11-17 Storage correction: current branch HEAD `e6e578766b081b6d450d6af7fc4d6d673f8afd53`; current probe blob `9d2a85f9a5d53f91df247a310c38377e563d259d`; run `43957910909` SUCCESS; seven-workflow batch on `2d476dd32ac020d329e8290ee2aaaa1f0c057c92` 7/7 PASS. Current branch is three commits ahead with docs only; same probe blob. UMR-018 closed for this tested revision; Gate A still PARTIAL PASS / OPEN.
-- 2026-11-17 TAB-001 report coverage: B/C/F/G/H/I present (six); A/D/E missing. B and I reports explicitly say centralized delegated review, not independent human-owner attestation.
-- 2026-11-17 Context Optimization integration: A review blob `b53db1ecb7830a7f1057d09c8ef73aceab942cea` chooses F-owned Observation Archive + G-owned Context projection, no independent service; F/G candidates remain PROPOSED and cross-owner approvals pending. A conformance plan blob `1c941c3e55be1e539a76ef89f297c168296c7db2` is NOT RUN.
-
-- 2026-11-17 Owner proposal inventory refreshed: all nine A–I branches contain baseline/redlines proposals, all PROPOSED / not APPROVED. Exact paths and blob SHAs are recorded in the central tracking file. A 13 sections; B/C/G/H/I 14; D/E/F 15. The canonical P template is not on main; proposals record that template gap and are not treated as template-compliant approvals.
-- 2026-11-17 TAB-001 review coverage: B/C/F/G/H/I reports present (6/9); A/D/E missing. B and I reports are centralized delegated reviews, not independent human Owner attestations.
-- 2026-11-17 F/G baseline alignment gap: F and G proposal files contain no Archive/Recall/TSS/fidelity/lineage concepts despite new research and A integration candidate. UMR-021 requires Owner-authored proposal addenda.
-
-- 2026-11-17 architecture-phase correction: Storage readiness sets `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; production runtime/adapter absence is not a Gate A blocker. Gate A remains PARTIAL PASS for architecture specifications; Gate B design authorized in parallel; Gate B acceptance open; Gate C implementation fault-injection deferred.
-- 2026-11-17 COC design review: Storage proposal blob `cd5566b3d99b5204401ac713a5bb2dcf89a02726`; P review `00-governance/reviews/storage-coc-durable-log-recovery-design-review.md`, COC-REV-001..008. Gate B design activity authorized, acceptance pending.
-- 2026-11-17 exact pin drift: A Applied package `4961ffefc0f9920efb8425a9b2a7af42d8f64819` pins COC companion `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`, while current A COC architecture file is `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`. UMR-024 tracks canonical pair reconciliation.
-
-- 2026-11-17 phase clarification: Storage readiness now sets `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; production runtime absence is not a Gate A blocker. Gate B COC durable log/recovery design is authorized to proceed in parallel; acceptance pending COC-REV-001..008; Gate C implementation tests deferred.
-- 2026-11-17 current Storage HEAD `9f784a15ef33a6cde4b4cda1ab6fca2df8a705fa`; COC design blob `cd5566b3d99b5204401ac713a5bb2dcf89a02726`; PostgreSQL 18.7 code-set tests 7/7 across pinned commits (PITR run `43958775001` on d026 with unchanged PITR probe; prepared run `43959079736` plus five workflows on83bd; current branch 9f78 contains doc-only changes since83bd).
-- 2026-11-17 exact COC source pin: A Applied package `4961ffefc0f9920efb8425a9b2a7af42d8f64819` pins older companion `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`; current A COC architecture file is `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`. UMR-024 requires one canonical pair and affected Owner reacceptance.
-
-- 2026-11-17 Phase 3.6.3 COC protocol supersedes the preliminary Storage COC design: Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`, current Storage HEAD `fe7debe55da71e655eecfc46f25ec49eae43404a`. P review residual gaps: committed recovery completion event, exact H schema mapping, repeated cutoff batches, I-owned domain registry, external anti-rollback anchor custody, and exact Applied companion pin reconciliation.
-- 2026-11-17 readiness state inconsistency: §23.1/§23.4 says Gate B specification published / exact Owner review pending; §29 still says Gate B blocked pending Gate A and deployment evidence. UMR-023 requires one phase-correct vector.
-
-
-## 6. Live-source refresh — 2026-11-17
-
-The latest live branch tips and Owner decisions are reconciled in `00-governance/reviews/live-branch-refresh-and-phase36-owner-decision-status.md`. The previous UMR-022/024 entries are superseded by the following source-current notes:
-
-- Storage protocol current blob is `6154d6c345daf260e6c2552e2257d073f1675188` at Storage HEAD `9f784a15ef33a6cde4b4cda1ab6fca2df8a705fa`. P's prior review cites blob `cd5566b3d99b5204401ac713a5bb2dcf89a02726`; exact source re-pin and current-text re-review are required.
-- A's current exact-version review blob is `fdf63550696948f77dc37c0a3788276ac4d525f5`; Issue #14 remains OPEN with R1–R6 and no I/D/C/H response found at refresh.
-- D/F/G/I have conditional Context Optimization / Observation Archive acceptance records; E has a bounded JF-10 producer lifecycle acceptance; B has a bounded Applied typed-reference acceptance. These do not equal module baseline adoption or a frozen F/G contract.
-- Fresh P/main comparison is ahead 51 / behind 4 / diverged. No integration or merge performed.
+## 6. Active remediation actions
 
 | ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
 |---|---|---|---|---|---|
-| UMR-025 | P0 | Close A COC persistence exact-version findings R1–R6 | I, D, C, H; A integrates; Storage supports | OPEN. Issue #14 has A's exact review only; no I/D/C/H Owner response. Findings cover cutoff completeness, owner-local gate linearization, participant enumeration/gate release, C COMMIT_WON provider gate, same-XID recovery and exact-version/schema drift. | Each assigned Owner publishes append-only exact-blob decision and normative amendments on its branch; A publishes a reconciled new bundle and affected Owners reaccept exact versions. |
-| UMR-026 | P1 | Re-pin and re-review current Storage 3.6.3 COC protocol | Storage; A/I/D/C/E/G/H as affected | Current protocol blob `6154d6c345daf260e6c2552e2257d073f1675188`; P's earlier COC-REV-001..008 review cites `cd5566b3...`. Current text still leaves repeated cutoff batches, owner-local linearization, immutable participant manifest, RECOVERY_EPOCH_COMPLETED, H schema mapping, registry authority and anti-rollback anchor custody incomplete. | Storage publishes exact source/version reconciliation and amended protocol; P/A re-review current blob; affected Owners accept the exact new blob. |
-| UMR-027 | P1 | Close Applied package/COC companion exact-version mismatch | A; C/D/G/H/I/Storage, B as typed-boundary authority | A package `4961ffef...` pins companion `fc3bac39...`; current A COC architecture file is `a3c51ec...`. G's Applied decision pins `4961+fc3`; no silent substitution allowed. | A publishes canonical manifest or superseding exact package/companion pair; G and every affected Owner explicitly reaccept the exact new pair. |
+| UMR-001 | P0 | Resolve Fact/Claim ADR-001 | B recommends; designated Architecture Governance authority decides | ADR-BLOCKED | Exact option, rationale, approver authority, version, migration and consumer acceptance. |
+| UMR-002 | P0 | Close remaining JF-10 Gate A architecture decisions | Storage + D/E; I for authorization/sequencer; A integrates | PARTIAL PASS / OPEN | Exact producer admission, fence/lineage, prepared participant, visibility/receipt/outcome, restore and authoritative-reader contracts; exact Owner acceptance. |
+| UMR-003 | P0 | Focused exact review of current COC protocol 86ff3... | A/B/C/D/E/G/H/I as affected; Storage owns source | OPEN | Independent exact-blob decisions; no carry-forward from 4ac63...; reconcile §14 GID/native-XID fields and all affected consumer contracts. |
+| UMR-004 | P0 | Review Storage Design v2 4ed423... and close A R1–R6 | A/I/D/C/H; B/E/G targeted review; Storage owns source | OPEN — Issue #16 | Independent exact-v2 decisions; verify R1–R6, immutable manifest, repeated batches, owner gate release, GID tuple and normative relationship to protocol 86ff3.... |
+| UMR-005 | P0 | Close PreparedParticipant identity, trust and wire contract | A/B/H/I; C/D/E/Storage affected | NOT APPROVED | Governed non-reusable DatabaseIncarnationRef; PrepareAttemptRef/generation; durable participant-ledger version; authoritative PREPARED readback; original prepare vs recovery coordinates; exact I terminal receipt consumption; strict nominal types and signed bytes. |
+| UMR-006 | P0 | Establish canonical COC Gate B artifact manifest | A integrates; Storage/H/B/I own their respective contracts | OPEN | Pin protocol 86ff3..., Storage Design v2 4ed..., A bridge a3c51..., common JF-10 protocol 9467..., H schema and exact RecordType/BMCP mapping; state normative precedence and config-epoch/quorum proof inheritance. |
+| UMR-007 | P0 | Complete I Global Forget governance | I + authorized independent Privacy/Legal/Security/Identity governance approvers | GOVERNANCE-BLOCKED | Exact I36-GOV-01..10 approvals, sealed target inventory, recipient/backup/restore evidence, exception approvals and physical-erasure evidence where required. 30/30 model tests do not close this. |
+| UMR-008 | P1 | Update B typed model and E producer contract for GID tuple | B and E; H/I/D/C/Storage consume | OPEN | Distinct PreparedParticipantRef, PreparedTransactionGID, NativeXidObserved, DatabaseIncarnationRef, DBIdentity and PrepareAttempt types; exact immutable producer/participant tuple and replay rules. |
+| UMR-009 | P1 | Update H schema and strict wire envelope for new identity tuple | H; B/I/A review | OPEN | Explicit field mapping or new fields for GID vs native XID, DatabaseIncarnationRef, PrepareAttemptRef/generation, DB incarnation, receipt/proof payload, signer/audience/purpose; positive/negative tests. Current 23/23 tests do not cover these semantics. |
+| UMR-010 | P1 | Update Storage readiness §26.2, self-review and COC design pins | Storage | OPEN | Readiness currently says “preallocate exact XID” without GID/native-XID distinction; self-review still pins old 4ac63...; update to current 86ff3... + 4ed423... and one canonical version vector. |
+| UMR-011 | P0 | Obtain independent A/I/D/C/H decisions for A R1–R6 | A integrates; I/D/C/H decide their own authority | OPEN — Issue #14 | Each Owner pins exact A bundle and current Storage v2, addresses every finding, and posts append-only decision; Storage's v2 disposition alone is not Owner acceptance. |
+| UMR-012 | P1 | Reconcile A context-optimization decision register and closure tracker | A | STALE / OPEN | Record D/F/G conditional acceptances, new A final matrix, current COC versions and live branch heads; distinguish F/G design acceptance from joint Recall contract acceptance. |
+| UMR-013 | P1 | Consolidate A final TAB-001 system review | A | STALE / OPEN | Front matter still says NOT REVIEWABLE while §19.4 says CONDITIONAL PASS; §2.2 still says B/D/E/I reports missing; §19.2 source manifest has stale H/I heads. Refresh current evidence and exact version status. |
+| UMR-014 | P1 | Update F/G module baseline proposals | F and G | OPEN | F baseline must include Observation Archive/RecallSession/ReadCursor/ReadReceipt/completeness; G baseline must include TSS/ObservationRef/compaction/fidelity/lineage-loss/Forget invalidation. Current branch changes add acceptance/evidence docs, not baseline adoption. |
+| UMR-015 | P1 | Close F/G joint Recall contract | F/G; A coordinates; B/H/I/D consulted | CONDITIONAL / OPEN | One exact same-version F/G contract, field ownership, completeness, stale cursor, authorization, Forget invalidation and paired negative tests; separate conditional acceptances do not equal joint acceptance. |
+| UMR-016 | P1 | Promote F anti-resurrection model to runtime conformance | F + D/I/H/Storage | LOGICAL MODEL PASS / RUNTIME OPEN | Real index/cache/Working Set invalidation, multi-process race, offline/reconnect, restore and stale snapshot/Delta fault tests. |
+| UMR-017 | P1 | Refresh TAB-001 final report source pins and evidence | A | REVIEWABILITY PASS / REPORT CLEANUP OPEN | All eight Owner reports now exist; refresh branch HEADs and include H 23/23, I 30/30, F 19/19 with explicit non-claims; remove superseded missing-report text. |
+| UMR-018 | P1 | Reconcile COC record names and commit proof across protocol/v2/H | A/Storage/H/B | OPEN | Map v2 COC_RECOVERY_CUTOFF_BATCH, PARTICIPANT_SET_RECONCILIATION, OWNER_LOCAL_GATE_RELEASE, RECOVERY_EPOCH_COMPLETED to protocol RecordTypes and BMCP messages; align VoterConfigurationEpoch/COCCommitReceipt quorum proof. |
+| UMR-019 | P1 | Close CausalOrderDomain registry and anti-rollback authority | I + Storage + A | OPEN | Explicit I-owned PolicyDomain/CausalOrderDomain registry/version, change/revocation authority, anchor custody/failure domain and stale/restore behavior. |
+| UMR-020 | P1 | Refresh Storage readiness and dossier to latest v2 | Storage | OPEN | Pin v2 Blob 4ed423...; reconcile §§23–27 and old Gate B statements; separate Gate A partial, prior4ac accepted, current86ff re-review, v2 fresh review, Gate C deferred. |
+| UMR-021 | P1 | Refresh F/G context optimization integration evidence | A/F/G | CONDITIONAL DESIGN ACCEPTANCE | A final matrix has eight conditional Owner perspectives; update old decision register and preserve open F/G joint Recall, runtime and conformance blockers. |
+| UMR-022 | P1 | Update I Global Forget evidence record | I | 30/30 MODEL PASS / GOVERNANCE OPEN | Update evidence docs from 25/25 to 30/30; retain explicit non-claims and I36-GOV-01..10 proposal-only status. |
+| UMR-023 | P1 | Update H strict parser evidence record | H | 23/23 MODEL/SCHEMA PASS / WIRE APPROVAL OPEN | Evidence doc and current branch pins; strict parser remains reference-only and does not close signature/canonicalization or GID schema. |
+| UMR-024 | P2 | Preserve Applied package/COC artifact role reconciliation | A/P | **CLOSED — DESIGN DECISION LEVEL** | A matrix distinguishes immutable Applied pair 4961+fc3 from separate bridge architecture a3c51; do not silently substitute. |
+| UMR-025 | P1 | Normalize Gate A/B/C phase vector and remove stale status language | Storage + A | OPEN | Gate A PARTIAL PASS / OPEN; prior4ac design accepted with exceptions; current86ff focused re-review; v2 4ed fresh review; Gate B implementation NOT RUN; Gate C DEFERRED_TO_ENGINEERING_PHASE. |
+| UMR-026 | P1 | Preserve strict role/provenance boundary for all Owner decisions | A–I + P | OPEN | Role-simulated coordinator reviews are technical inputs only; obtain actual Owner-session confirmation or replace them with independently authored exact decisions. |
+| UMR-027 | P1 | Maintain no-merge integration boundary | P + A; governance authority when appointed | OPEN / SAFETY CONTROL | P/main diverged 73/4; reviewed non-destructive reconciliation required; no merge/force update without explicit authorization. |
+| UMR-028 | P1 | Complete module baseline adoption and governance ratification | A–I + Project Governance Authority | OPEN | Each Owner adopts/rejects exact proposal version; formal PGA appointment and G0 approval required before project-wide freeze. |
 
-### Updated gate vector
+## 7. Current issue trackers
 
-- Issue #14 R1–R6: OPEN.
-- Storage Gate B design activity: AUTHORIZED TO PROCEED; Gate B design acceptance: OPEN.
-- Gate C implementation fault injection: DEFERRED_TO_ENGINEERING_PHASE.
-- JF-10 P0: OPEN; PostgreSQL 18.7 capability suite 7/7 applies only to pinned isolated engine fixtures.
-- Applied 1.1: design decisions recorded with exceptions for the prior exact pair; canonical companion pin mismatch OPEN; freeze NO.
-- D/F/G/I Context Optimization / Observation Archive acceptances are conditional; F/G contract/schema, cross-owner dependencies and all 15 negative tests remain OPEN/NOT RUN.
-- Module baseline adoptions: all nine remain OPEN; proposal documents remain PROPOSED.
-- ADR-001 remains ADR-BLOCKED; I Global Forget remains GOVERNANCE-BLOCKED; G0 / architecture freeze NOT AUTHORIZED.
+| Issue | Scope | Current state |
+|---|---|---|
+| #11 | A–I module baseline rollout | Open; proposals remain PROPOSED; owner decisions and baseline adoption tracked separately. |
+| #14 | A COC persistence review R1–R6 | Open; Storage v2 includes a proposal disposition, but independent I/D/C/H decisions are still required. |
+| #15 | Current COC protocol 86ff3... focused review | Open; A/H/I role reviews are coordinator-simulated; no independent exact acceptance. |
+| #16 | Storage Design v2 4ed423... exact review | Open; A/I/H role reviews are coordinator-simulated; D/C and targeted B/E/G reviews remain required. |
+| #17 | Prepared GID / JF-10 / signed wire envelope | Open; A conditional with amendments; H/I no approval in role-simulated reviews; independent decisions required. |
 
+## 8. Required operating sequence
 
-## 7. Storage protocol source refresh and R1/R2 technical proposal — 2026-11-17
+1. Storage reconciles the normative relationship between protocol 86ff3... and Storage Design v2 4ed423..., updates readiness §26.2 and its self-review, and preserves exact immutable pins.
+2. B/E/G provide targeted type, producer and Applied-consumption review; H updates strict schema/nominal fields; I defines the security trust profile; D/C verify owner-local gate/provider semantics.
+3. A publishes a canonical Gate B manifest and updates its COC/context decision registers, closure tracker and final system review.
+4. I/D/C/H publish independent Issue #14 R1–R6 decisions; A integrates them. Role-simulated reviews do not close this gate.
+5. F/G update their own baseline proposals and close the exact joint Recall contract; F advances from model to runtime fault tests.
+6. I obtains authorized governance decisions for I36-GOV-01..10 and real Global Forget inventory/target evidence.
+7. Only after exact Owner decisions, formal governance authority and required engineering evidence may any project freeze or production activation be considered.
 
-A fresh read of Storage's live Phase 3.6.3 protocol now returns blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`, superseding the earlier `6154d6c3...` source pin. The protocol's §6.2 requires owner request sets, high-water marks and owner-controlled reopening, but still does not define the atomic owner-local transaction/CAS that closes admission with request acceptance, durable enumeration of pre-COC in-flight admissions, or repeated cutoff rounds for requests arriving during reconciliation.
+## 9. Non-claims
 
-P prepared a technical closure proposal at `00-governance/reviews/r1-r2-owner-gate-and-recovery-batch-linearization-proposal.md`. It is coordinator analysis only, not normative and not an I/D/Storage decision. The proposal specifies an owner-local serialization boundary, durable request and in-flight admission ledgers, signed seals with high-water/count/digest/empty-set proof, repeated recovery batch rounds, and owner-only CAS gate release.
+- No final database product selection is inferred from PostgreSQL 18.7 capability tests.
+- No COC/Raft service, production DB adapter, I sequencer, D ledger, F runtime archive, G Applied validator, H production parser/SDK or C provider integration is claimed implemented.
+- No global Forget completion, physical erasure, backup purge, external recipient deletion or legal/privacy approval is claimed.
+- No Gate C implementation/fault-injection PASS is claimed.
+- No module baseline is APPROVED; no G0/PGA ratification; no architecture freeze; no production activation.
+- No A–I branch or main merge has been performed by Session P.
 
-| ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
-|---|---|---|---|---|---|
-| UMR-028 | P0 | Precisely define R1/R2 Recovery Cutoff Batch closure and Owner-local Gate linearization | I and D own local gate semantics; Storage owns COC batch; H owns schema; C/A integrate their boundaries | OPEN. Current Storage blob `86ff3b24...` states high-water and completeness concepts but lacks exact owner-local linearization and repeated-batch/seal/release CAS semantics. P technical proposal is non-normative. | I and D publish exact owner-local transaction/CAS and in-flight admission contracts; Storage publishes multi-round COC batch/manifest protocol; H maps signed seal/release records; A reissues exact bundle and obtains exact-version acceptances. |
+## 10. Change log
 
-Source pin update: Storage current protocol `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`; previous P review source pin `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` is stale. Re-review against the current blob is required before any COC-REV closure.
+- 2026-11-17: Reconciled live A–I/Storage branches, exact COC/Applied/context decisions, TAB-001 report coverage, F/H/I model/schema tests and current issue #14–#17 status. Closed UMR-024 at design-decision level; all other active blockers remain tracked above.
