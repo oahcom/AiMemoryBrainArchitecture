@@ -412,3 +412,41 @@ I's exact-version confirmation separately requires an I CommitAuthorizationRecei
 - Applied Contract Frozen: **NO**.
 - CGH/I36/H36 tests: **NOT RUN**; implementation: **NOT VERIFIED**.
 - No branch merge or architecture freeze authorized.
+
+
+## 13.4 C / D / I owner causal-order contracts published — successor version proposed
+
+After the A proposal was published, fresh Owner-branch reads found three new, independently authored contract addenda:
+
+| Owner | Artifact | Blob SHA | Owner status |
+|---|---|---|---|
+| C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `543d04e10a95d1f5720c3da8050befe6d21cd0c6` | C-side contract specified; coordinator deployment and cross-owner acceptance OPEN |
+| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `1c60e7129c5b4255d6b9033bcb03e28e43b3b5af` | D-side fence/barrier contract specified; coordinator/Storage deployment and cross-owner acceptance OPEN |
+| I | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md` | `8a9d418593c7d6be12f072ec8eeb0b3a56eb4be8` | I-side receipt/ordering contract specified; service deployment, external governance and cross-owner acceptance OPEN |
+
+All three target:
+- `CausalOrderProfile/1.0`
+- H schema `bmcp.applied-ack/1.1.0`
+- proposed successor common package `CGH-APPLIED-1.1`
+
+This is a meaningful advance from a proposal-only state: C/D/I have independently specified compatible participant-reservation, receipt, barrier and fail-closed semantics. It is **not** cross-owner acceptance, deployment selection, implementation or test evidence. The original `CGH-APPLIED-1.0` package and its approvals remain pinned to Blob `122b164bcc0760b83bf555072a36fc55631623e1`; do not silently relabel those approvals as approval of 1.1.
+
+### Integration reconciliation still required before 1.1 can be baselined
+
+1. **Version transition:** A must create/pin an explicit `CGH-APPLIED-1.1` successor package before any 1.1 acceptance. C/D/I addenda are not themselves a shared package or a freeze.
+2. **Participant/receipt sequencing:** C's numbered sequence requests an I receipt before participant registration, while I requires the receipt to bind a ParticipantReservationRef or a pre-bound reservation nonce finalized before provider side effect. C/I/D must specify one deterministic issuance/registration/consumption order and its crash recovery.
+3. **Terminal semantics:** I's `COMMIT_WON` is the I sequencer outcome for the exact protected owner gate, not proof that the provider actually accepted the request. C's provider receipt and CSubmitOutcomeRef remain separately required before C may emit Final Request Submitted. G must consume both without conflating them.
+4. **Barrier coupling:** D keeps the participant/fence barrier open through unknown provider outcome and requires compatible I terminal evidence. I keeps revocation pending behind unresolved reservations. The common coordinator must prove these two barriers are the same durable transaction/reservation identity across failover/restore; no owner-local receipt alone is enough.
+5. **H:** Current H exact-version decision Blob `c0e10966e8dd95a9d1f5b1dfa156cb4b098b26e0` still says concrete wire schema is OPEN / NOT DELIVERED. H must publish the actual `bmcp.applied-ack/1.1.0` schema, including I CommitAuthorizationReceiptRef, IAuthorizationTerminalRef, DParticipantClearanceRef, ParticipantReservationRef, CSubmitOutcomeRef and CausalOrderTerminalProofRef, with exact conditional requiredness and authority mapping.
+6. **G:** G must explicitly accept the new terminal evidence and Full Applied predicate for 1.1. B's semantic type confirmation for 1.0 is not automatically an exact-version acceptance of a 1.1 package.
+7. **Storage/coordinator:** C/D/I specifications all leave coordinator deployment, durable participant registry, HA/failover/restore and production transaction integration open. These remain implementation blockers.
+
+### Updated status
+
+- C/D/I owner-side causal-order contract specifications: **PUBLISHED / READ BACK**.
+- Cross-owner acceptance of `CausalOrderProfile/1.0`: **OPEN**.
+- `CGH-APPLIED-1.1` common package: **PROPOSED / NOT YET BASELINED**.
+- H `bmcp.applied-ack/1.1.0`: **NOT YET DELIVERED / NOT FROZEN**.
+- G acceptance of 1.1 evidence mapping: **OPEN**.
+- Coordinator/participant implementation and conformance: **NOT VERIFIED / NOT RUN**.
+- Original `CGH-APPLIED-1.0` remains **NOT FROZEN**; no approval is transferred to 1.1.
