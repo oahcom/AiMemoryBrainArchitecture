@@ -1168,3 +1168,20 @@ This addendum supersedes the prior Gate A inventory note that no candidate engin
 5. Identify the actual production Canonical Authority DB deployment, storage/zone topology, operator/on-call owner, runbook, RPO/RTO and recovery ownership.
 
 Gate B persistent COC remains blocked until the complete Gate A profile is proven. Gate C remains blocked until Gate B. Do not parallelize later gates or claim physical deployment readiness from this single-node result. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
+
+
+## 13.26 Gate A — PostgreSQL 18.7 synchronous promotion proof — 2026-11-17
+
+Storage's PostgreSQL 18.7 candidate now has both a single-node hard-restart test and a two-node synchronous standby promotion test.
+
+Two-node evidence:
+- Pinned image: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+- Probe Blob: 23d8ea8546932e592093c5c17cd2b52f8a294720
+- Workflow Blob: f3c05f90c6065458b49879def10dce672685c850
+- Successful run: 43908428220; commit 7cd416a1f80364fe7de316f19716325b6503cbfa; job 133443444760.
+
+The test established synchronous standby state before PREPARE, prepared WAL replay, hard primary kill, standby promotion, exact same-XID recovery after promotion, prepared-lock retention and atomic VisibilityPointer + PublicationReceipt commit after primary loss. PostgreSQL hides pg_prepared_xacts during hot-standby recovery; the test inspects the exact XID after promotion completes.
+
+**Gate A remains PARTIAL PASS / OPEN.** Next required evidence: same-XID rollback after promotion; backup/restore and PITR; current Forget-control-ledger reconciliation before serving restored data; host/zone/storage failure behavior; production failover fencing/routing; actual Canonical Authority deployment and named human on-call/operator with RPO/RTO.
+
+Do not advance Gate B until these Gate A conditions pass. Gate C remains blocked until Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
