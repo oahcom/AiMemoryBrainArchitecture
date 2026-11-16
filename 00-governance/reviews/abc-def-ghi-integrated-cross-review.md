@@ -237,7 +237,7 @@ This direction is broadly compatible with A–I's documented logical architectur
 
 | Finding | Severity | Owner(s) | Required closure |
 |---|---|---|---|
-| TAB-REV-001 — Storage candidate-to-JF-10 proof gap | P0 | D, E, Storage, I | One reproducible comparison of SQLite and PostgreSQL transaction/locking/recovery against producer admission, fence installation, dependency registration, final publication, prepared-XID/PITR and failover requirements; keep final DB choice OPEN until evidence |
+| TAB-REV-001 — Storage candidate-to-JF-10 production binding gap | P0 | D, E, Storage, I | PostgreSQL 18.7 isolated CI capability suite is now 7/7 PASS; bind the suite to the actual canonical runtime/adapter, D/E/I ledgers, real reader path and production operations; keep final DB choice OPEN until this is evidenced |
 | TAB-REV-002 — Exact Applied/identity dependencies remain upstream blockers | P0 | B, C, G, H, I, D | Same exact version/digest, typed identity/permission binding, final-request proof, verifier and negative tests |
 | TAB-REV-003 — Five owner technology reports missing | P1 | A, B, D, E, I | Publish the five missing reports at assigned `reviews/technology/owner-*-technology-review.md` paths on their own branches |
 | TAB-REV-004 — Four existing reports need source refresh | P1 | C, F, G, H | Reports currently cite reviewed source snapshots C `0a81f370...`, F `61814ec3...`, G `270ac553...`, H `6e7cb95f...`; compare each source-to-current delta and add a current-branch impact addendum. C/F/H report-only modifications should be identified as publication changes; G additionally added research artifacts |
@@ -284,3 +284,38 @@ This is a genuine branch divergence, not a safe fast-forward. Do not merge or fo
 
 The nine module proposals are valid first-round review inputs. The P governance proposal and TAB-001 remain candidates. Five of nine TAB-001 Owner technology review reports are missing; four existing reports are conditional and require source refresh against later branch movement. G's new context optimization research is valuable candidate input but is not yet cross-owner accepted. The system technology stack is not frozen; JF-10, Applied, ADR-001, identity binding and Global Forget remain blockers.
 
+
+
+## 14. JF-10 Storage evidence reconciliation — 2026-11-17
+
+The earlier review wording that Storage had only a single-node capability probe is superseded. The current Storage Owner branch is `a1fbbd15d3a7993bbb61821ad44957e4f69d3ed1`; its evidence dossier blob is `2f76ca8b8c19b84c37e7604cd254990dd93eb8b1`. The executable conformance plan blob is `49056cd46fd30445c0e564c99e0e234f60f065c4`.
+
+Seven PostgreSQL 18.7 GitHub Actions workflows completed SUCCESS on exact evidence commit `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd`:
+- Prepared-XID + restart: run 43955195289.
+- Synchronous standby promotion: run 43955195323.
+- Physical backup/restore: run 43955195219.
+- Explicit-LSN WAL PITR: run 43955195388.
+- Prepared-XID PITR + archive negatives: run 43955195460.
+- Synchronous standby unavailable fail-closed: run 43955195197.
+- Old-primary rewind/rejoin: run 43955195256.
+
+Each run has a completed successful job and the probe step succeeded. The Storage dossier records detailed PASS markers, including prepared-XID and lock retention, same-XID resolution, pointer/receipt atomicity at PITR boundaries, and missing/corrupt/incomplete WAL fail-closed behavior. The current Storage HEAD is six commits ahead of the exact test commit and not behind it; the test evidence is correctly pinned to the earlier commit, not attributed to untested later source.
+
+A dedicated Storage probe uses isolated `jf10_*` fixture tables, not production COC or I/D tables. The Storage dossier explicitly limits the evidence to engine capability under a pinned single-runner Docker CI profile. It does not prove the production Canonical Authority adapter, I sequencer/COC, D fence/lineage state, E publication state, production reader path, real infrastructure STONITH/split-brain prevention, operator/runbook or RPO/RTO.
+
+The decisive remaining gap is now more specific: Storage's recursive tree audit found no production runtime source tree, Canonical Authority DB adapter, migration package or application deployment manifest in the inspected repository branch. The responsible Owner must identify the actual implementation repository/branch and exact runtime entrypoint, adapter and schema path, or explicitly designate this repository as implementation home and deliver those artifacts. Until then Gate A is **PARTIAL PASS / OPEN**, Gate B and C remain blocked, JF-10 P0 remains OPEN and production activation is NOT AUTHORIZED.
+
+### 14.1 Database candidate consequence
+
+The PostgreSQL 18 documentation describes a native external transaction-manager two-phase lifecycle: `PREPARE TRANSACTION` persists prepared state on disk, later sessions may `COMMIT PREPARED` or `ROLLBACK PREPARED`, and prepared transactions retain their locks. PostgreSQL also warns that long-lived prepared transactions can interfere with VACUUM and transaction-ID wraparound; the feature requires explicit `max_prepared_transactions` configuration.
+- https://www.postgresql.org/docs/18/sql-prepare-transaction.html
+- https://www.postgresql.org/docs/18/two-phase.html
+- https://www.postgresql.org/docs/18/runtime-config-resource.html
+
+SQLite WAL provides atomic commit and reader/writer concurrency on a same-host shared-memory arrangement, but SQLite documents one writer at a time. Its documented transaction/WAL interface is not the PostgreSQL external transaction-manager PREPARE/COMMIT PREPARED participant lifecycle.
+- https://www.sqlite.org/wal.html
+- https://www.sqlite.org/isolation.html
+
+Therefore PostgreSQL 18.7 now has materially stronger direct evidence for the JF-10 prepared-participant requirement than SQLite + WAL. This does **not** select PostgreSQL for production. SQLite may remain a single-node candidate only if the Owners specify and prove an alternate durable participant/intent protocol that preserves the same JF-10 invariants without assuming native prepared-XID support. TEC-003/004 remain CANDIDATE / TO_VALIDATE until production adapter and operational evidence is bound.
+
+The full bounded assessment is recorded at `00-governance/reviews/jf10-storage-evidence-assessment.md` on the P branch. It is Session P evidence reconciliation only, not Storage/D/E/I Owner acceptance or a database ADR.
