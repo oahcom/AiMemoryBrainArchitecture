@@ -173,3 +173,30 @@ Do not use one tokenizer estimate for all models. Unknown tokenizer requires con
 - C Final Inference Boundary blob: `f3b254fcfd9a652a0ec68921e801f78d93bb5163`
 - G design baseline commit recorded by Phase 2: `3d2c065be863bc1d349faaeece6f6eaa0047abae` (not asserted to be current HEAD)
 - No runtime, fault-injection, security, or performance tests executed in this review.
+
+
+## 14. Refresh Addendum — TAR-AI-001 branch revalidation (2026-11-17)
+
+This addendum refreshes the source snapshot and corrects the upstream-report inventory. It supplements, and does not silently rewrite, the original review findings or verdict. The source branch HEAD below is the exact commit resolved from the owner branch during this refresh; the listed design Blob is the exact file re-read at that ref.
+
+| Item | Exact branch / commit or Blob |
+|---|---|
+| TAB-001 v0.1 | main blob `7b6f2d139217dbe13ab3a3af31bfbff525f20e71` |
+| TAR-AI-001 v1.0 | main blob `5a813edeccf7190d66dfd71a96ca581c48f8a4cb` |
+| Phase 3 D/E/H/I contract review | main blob `edaccb802e0425f2d47bd4b613fab4dfde107144` |
+| B current branch / technology report | `session-b-domain-model-phase3` @ `310f305575d6f406e80d5d6ebf951bcd9e79e35f`; report blob `fd3e5723b81de10bed806896e4be71ceb7a1669b` |
+| I current branch / technology report | `session-i-security-governance-2026-11-16` @ `b4bffb45ba6a64770274a5888b00918fe68ed00f`; report blob `592baa4653e91287678a1e0926119ca94780bc08` |
+| D current branch / technology report | `session-d-memory-brain-2026-11-16` @ `ce20502aabb58bc524c23af1350e1638f47caa49`; report blob `0f43c8d633f0027a064ca920af0176ada8035287` |
+| E current branch / technology report | `session-e-memory-compiler-2026-11-16` @ `0d77d0ad6e564873127c53d7dd02edca09e822e1`; report blob `6a83d67ccabdded20d4d4ebf28b9fbfa7d8f8cc3` |
+
+**Upstream report status correction:** B, I, D and E TAR-AI-001 technology reports are present at the paths/Blob SHAs above. Their earlier absence in the original report's branch audit is superseded by this refreshed inventory. Presence does not imply acceptance of their recommendations or closure of their blocking findings. In particular, B Fact/Claim remains ADR-BLOCKED; D/E/Storage publication linearization remains implementation-blocking; I's global Forget and JF-10 deployment/security evidence remain unverified.
+
+**Evidence classification:** this is a branch-aware static document review. No new production runtime, transport, SDK, cryptographic, security, performance, tokenizer, crash-recovery, or cross-owner integration test was executed by this refresh. Any model/reference tests already present in owner branches are not represented as executed here unless accompanied by an actual run result and exact run artifact.
+
+### G-specific refreshed findings
+
+- Refreshed G source: `session-g-memory-context` @ `e8547303bc464dbfd42d8d402b538e2b32033934`; Applied/Forget reconciliation contract blob `aa3afa73d8a76cc6f025839c52bfbff6a983046a`.
+- G remains sole authority for ContextVersion, Context membership/order/budget, ChangeSet and desired Context. Delivery is a separate per-attempt lifecycle; Prepared/Delivered/Materialized are not Applied. Add/Update/Remove/Replace must remain atomic G-owned edit operations with expected-version/revision checks.
+- Context Remove is a membership edit, not Canonical Forget. Forget must invalidate/reconcile affected snapshots, deltas, pending deliveries and current-use eligibility against current D fence and I authorization. Historical Applied evidence may remain immutable while current-use is separately re-evaluated.
+- Full Applied requires a coherent G target/version plus C final-request submission evidence, H authenticated Adapter attestation/capability, I permission epoch and D Forget fence. G's own contract marks C/G/H Applied freeze BLOCKED and implementation/execution NOT VERIFIED. COC/JF-10 evidence is an input, not a substitute for the owner-specific proof tuple.
+- Tokenizer and context-window variation require per-request tokenizer/profile identity and conservative budget recomputation; numeric token/latency limits remain TO_VALIDATE.
