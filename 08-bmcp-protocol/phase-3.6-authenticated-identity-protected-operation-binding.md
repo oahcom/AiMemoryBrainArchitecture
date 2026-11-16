@@ -85,7 +85,7 @@ Every ACK MUST bind at least:
 - action, target/managed-region identity, coverage, result and postcondition;
 - immutable ACK ID, evidence digest/profile, observed time and anti-replay sequence/nonce.
 
-ACK idempotency: same ACK ID + same digest returns original result; same ID + different digest is conflict/security event. Old-session ACKs cannot mutate new-session state. ACKs after revocation, newer ContextVersion, newer delivery attempt, newer CapabilityEpoch or newer ForgetFence are historical only unless the owning authority independently validates their event-time ordering; they never roll back current state. H transports evidence; G/D/I decide authoritative state in their respective namespaces.
+ACK idempotency: same ACK ID + same digest returns original result; same ID + different digest is conflict/security event. Old-session ACKs cannot mutate new-session state. ACKs after revocation, newer ContextVersion, newer delivery attempt, newer CapabilityEpoch or newer ForgetFence are historical only if received after the relevant authoritative linearization point. Sender wall-clock event time is never ordering authority; trusted receiver receipt sequence plus the owning authority's commit cursor determines admissibility. If ordering is indeterminate, retain as evidence only and do not mutate authoritative state. H transports evidence; G/D/I decide authoritative state in their respective namespaces.
 
 ## 6. Failure taxonomy
 
@@ -134,10 +134,10 @@ For each executed test record build/commit, protocol version, Adapter instance/t
 
 ## 8. Owner and approval record
 
-- **B Owner Decision:** typed-reference meanings consumed as B proposal; B acceptance of exact H mapping remains OPEN.
-- **I Owner Decision:** trust/authorization/revocation/PermissionEpoch policy consumed as I candidate; formal policy and governance approval remain OPEN.
-- **H Owner Decision:** H wire proposal authored; no independent H approval/readback is inferred by this document.
-- **Cross-module Agreement:** OPEN until explicit B/I/H and affected consumer-owner decisions are recorded.
+- **B Owner Decision (current):** B semantic mapping is included in the delegated BIH technical baseline; downstream consumer acceptance remains OPEN.
+- **I Owner Decision (current):** I technical trust/authorization mapping is included in the delegated BIH baseline; external governance approval remains GOVERNANCE-BLOCKED.
+- **H Owner Decision (current):** Phase 3.6 protocol-binding technical design DECIDED under delegated joint authority; no separate H-session signature is claimed.
+- **Cross-module Agreement (current):** BIH Phase 3.6 technical design DECIDED under delegated joint authority; affected consumer-owner acceptance remains OPEN.
 - **Governance Approval:** GOVERNANCE-BLOCKED where I policy decisions require a named approver, durable decision ID, approval time and effective version.
 - **Implementation Evidence:** NOT PROVIDED / NOT VERIFIED; all H36 tests NOT RUN.
 - **Fact/Claim ADR-001:** remains independently ADR-BLOCKED; this wire proposal does not change Fact/Claim semantics.
@@ -208,3 +208,49 @@ The technical defaults above are deny-first interim rules, not substitutes for a
 | Fact/Claim ADR-001 | **ADR-BLOCKED — independent and unchanged** |
 
 This joint decision supersedes only B/I/H Phase 3.6 technical Candidate/Open labels for BIH36-JD-01..17. It does not supersede governance approvals, other Owner decisions, ADR-001 or implementation evidence requirements.
+
+## 10. Phase 3.6 Self-Review Remediation — Binding H Clarifications
+
+This section resolves H36-SR-01..07 and is normative for the H Phase 3.6 protocol binding. It does not freeze the global BMCP schema or claim runtime conformance.
+
+### 10.1 AuthenticationContextRef disposition (H36-SR-01)
+
+AuthenticationContextRef is a verifier-internal opaque handle jointly owned by the H/I authentication implementation boundary, not a public B domain Ref and not a sender-supplied wire field. It is never serialized in ordinary BMCP payloads, cannot be selected by a caller, is bound to one authenticated channel/session and verifier lifecycle, and is invalidated on session/channel closure, principal or workload rebinding, credential/issuer revocation, or verifier security-context reset. H may pass the handle only between trusted verifier components over protected internal interfaces. Raw credentials, bearer tokens and private keys are never copied into payload fields.
+
+### 10.2 Message, channel and session cryptographic binding (H36-SR-02)
+
+The authenticated channel MUST provide a channel-binding value from the negotiated secure transport (for TLS 1.3, a dedicated exporter label and context bound to protocol family, negotiated major version, server identity and fresh RuntimeSessionRef). For each protected message, H computes the canonical message digest over the complete security-relevant envelope and payload, excluding only the integrity proof field as specified by the versioned canonicalization profile. The integrity proof binds:
+`(channel_binding, RuntimeSessionRef, message_id, message_nonce, audience, protocol_major, canonicalization_profile, digest_algorithm, canonical_message_digest)`.
+The nonce is cryptographically unpredictable or monotonically unique within the session and is stored in a replay window. A proof captured on one channel/session/audience cannot validate on another. The receiver rejects channel/session mismatch, nonce reuse, audience mismatch, canonicalization ambiguity, duplicate keys and digest/signature mismatch. Transport channel binding and message-level integrity are complementary; neither alone establishes I authorization. The exact cryptographic algorithm suite is versioned in H's security profile and requires security review before production enablement.
+
+### 10.3 Operation-specific requiredness profiles (H36-SR-03)
+
+H MUST maintain a versioned Operation Requiredness Registry keyed by `(protocol_major, message_type, operation)`. For each operation it defines required, conditionally required and prohibited fields; the authoritative rule for determining applicability; identity roles; required policy domains; and the final owner boundary. The sender cannot declare a field “not applicable”. Applicability is derived from the registered resource/operation descriptor and authenticated routing context before payload execution.
+
+Minimum rules:
+- Producer admission / event ingress: authenticated IssuerRef, PrincipalRef, ProducerRef, ActorRef, AgentRef and concrete workload instance, RuntimeSessionRef, non-empty role-tagged ScopeBindingSet, EnvironmentRef when the event schema declares environment-bound semantics, current PermissionEpoch, event ID/sequence and owner-defined idempotency tuple.
+- Compiler publication: the verified producer/work identity, ActorRef, all dependency/resource Scope roles, required EnvironmentRef, current PermissionEpoch and D ForgetFence where the publication boundary requires it; E/D define final lineage and commit fields.
+- Retrieval: authenticated PrincipalRef/ActorRef, resource-derived ownership and applicability ScopeBindingSet, EnvironmentRef for environment-bound resources, current PermissionEpoch; deny before any candidate/snippet/count disclosure.
+- Context delivery / Applied ACK: authenticated Adapter application and concrete instance, Agent/runtime instance, RuntimeSessionRef, ActorRef, exact delivery/context identity, ScopeBindingSet, CapabilityEpoch, PermissionEpoch and G-owned ContextVersion; G owns applied-state semantics.
+- Forget ACK: all preceding adapter/session bindings plus D ForgetOperation/ForgetFence identity, exact region/coverage/action, PermissionEpoch, evidence digest and trusted receiver ordering metadata; D owns forget completion.
+- Reconnect: fresh authenticated transport/session, issuer/principal/workload resolution, capability negotiation, current PermissionEpoch and ForgetFence checks before stale-state suppression/reconciliation and resume.
+
+A missing required field, unknown profile, unsupported profile version, unresolvable applicability or sender/registry mismatch is rejected before protected content is disclosed or state is changed.
+
+### 10.4 Trusted ACK ordering after revocation (H36-SR-04)
+
+Adapter-supplied wall-clock timestamps are evidence metadata only and never determine whether an ACK preceded revocation. H assigns a trusted receiver receipt sequence and immutable receipt time at the authenticated ingress boundary. The owning state authority (D for Forget, G for Context Applied state, I for security revocation) orders ACK acceptance against its authoritative commit cursor/epoch. An ACK received after the revocation/fence/epoch linearization point is historical only, regardless of its claimed observed_at timestamp. An ACK received before that point is not automatically accepted: the owner validates session, epoch, operation identity, evidence and causal cursor, then commits it through its own sequencer. If trusted ordering cannot be established, retain as evidence only and do not mutate authoritative state. H never decides D/G/I semantic completion.
+
+### 10.5 ACK idempotency namespace and retention (H36-SR-05)
+
+The canonical ACK idempotency namespace is:
+`(authenticated IssuerRef, AdapterRef, AdapterInstanceRef, operation_family, operation_id, ACK_ID)`.
+RuntimeSessionRef is included in the signed evidence binding but is not part of the stable idempotency namespace, so reconnect cannot make a duplicate ACK new. The digest covers the canonical ACK body, authenticated identity bindings, evidence references and relevant epoch/fence/capability values. Same namespace + same digest returns the original receipt; same namespace + different digest is a conflict/security event. Retain the deduplication record and tombstone for at least the maximum of the configured message replay horizon, maximum offline queue lifetime, operation retention horizon and revocation/fence reconciliation horizon. If any horizon is unbounded or not governed, retain the tombstone indefinitely. Key rotation does not reset the namespace because issuer and registered Adapter identities remain stable; instance replacement creates a new instance namespace and cannot inherit old-session authority.
+
+### 10.6 H conformance test additions (H36-SR-07)
+
+Add mandatory cases: channel-binding mismatch; same message replayed across sessions/audiences; nonce reuse; canonicalization duplicate-key ambiguity; missing/unknown Operation Requiredness Registry profile; sender suppresses an applicable EnvironmentRef; cross-Adapter ACK ID collision; same ACK ID/different digest; ACK arrival racing revocation/fence advance in both orders; reconnect replay after Adapter instance replacement; capability downgrade with an old valid session. All are **SPECIFIED / NOT RUN** until runtime evidence is attached.
+
+### 10.7 H decision-state reconciliation (H36-SR-06)
+
+The older Section 9 Owner Decision and Cross-module Agreement lines are superseded as process status for the BIH technical design only. Current state: **H protocol-binding technical design DECIDED under the user's delegated joint decision.** This does not claim independent H-session signature, global BMCP schema freeze, external governance approval, C/D/E/F/G/Storage acceptance or implementation conformance. Those remain OPEN/BLOCKED as applicable. ADR-001 remains ADR-BLOCKED.
