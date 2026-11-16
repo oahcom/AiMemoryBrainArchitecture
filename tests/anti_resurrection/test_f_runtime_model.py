@@ -117,6 +117,8 @@ class RuntimeAntiResurrectionTests(unittest.TestCase):
         key = self.f.cache_key(self.good)
         self.f.cache[key] = self.good
         self.f.apply_forget("forget-1", "d1", ["mem-1"])
+        # Simulate a missed invalidation on a remote cache shard.
+        self.f.cache[key] = self.good
         self.assertIsNone(self.f.cache_get(key))
         self.assertEqual(self.f.stale_evictions, 1)
         self.assertIsNone(self.f.cache_get(("missing",)))
