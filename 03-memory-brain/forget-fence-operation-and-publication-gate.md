@@ -463,3 +463,21 @@ This Phase 3.6 addendum consumes the branch-aware sources recorded in the Phase 
 Source branch HEADs must be re-queried before any later integration sign-off. Historical SHAs embedded in older reports are not current branch evidence.
 
 **Non-claim:** this document is a D-owned semantic contract and static design artifact. It does not assert executable implementation, a deployed linearizable database, successful race/fault tests, global Forget completion, backup erasure or physical deletion.
+
+
+## 9. Exact source baseline manifest (pre-edit discovery snapshot)
+
+The following branch HEADs were queried before this D-owned Phase 3.6 edit. Blob SHAs identify the exact source artifacts read. These values are historical source snapshots for this work, not assertions that the other branches remain at these tips after this discovery.
+
+| Artifact | Owner | Source branch | Source branch HEAD (full SHA) | Path | Source blob SHA | Evidence status |
+|---|---|---|---|---|---|---|
+| Phase 3.5 Cross-Module Closure Review | A | `session-a-integration-2026-11-16` | `5ce61e0982ce8e22b29f1267ca67c9a085a96a06` | `reviews/integration/phase-3.5-cross-module-closure-review.md` | `a05f1d817514bbed7bddec1729d6598d0835ef3e` | Artifact Exists; A review conclusion BLOCKED |
+| D Forget Completion Contract (source before this edit) | D | `session-d-memory-brain-2026-11-16` | `da8e5882d0b238d765d00b2225b79eea45a483b1` | `03-memory-brain/forget-fence-and-completion-contract.md` | `cce2108899525c9ce6808716224641baa11faf4f` | Artifact Exists; D semantic decision DECIDED |
+| D Operation / Publication Gate (source before this edit) | D | `session-d-memory-brain-2026-11-16` | `da8e5882d0b238d765d00b2225b79eea45a483b1` | `03-memory-brain/forget-fence-operation-and-publication-gate.md` | `2c5b1358ff58f99af838b741a75966ccd07ad088` | Artifact Exists; D operation semantics DECIDED |
+| E Producer Admission | E | `session-e-memory-compiler-2026-11-16` | `a19feb57c85819cc0e49ab39abfd945b268aa51e` | `04-memory-compiler/compiler-state-and-producer-admission.md` | `e59f517fff161ab882aa0ddc4a5bda513964ae1a` | Artifact Exists; E-owned design, implementation OPEN |
+| E Derived Registration | E | `session-e-memory-compiler-2026-11-16` | `a19feb57c85819cc0e49ab39abfd945b268aa51e` | `04-memory-compiler/forget-fence-and-derived-registration.md` | `00e37ba56596e710513c8d0568acd79141d9101b` | Artifact Exists; interface/atomicity OPEN |
+| E Phase 3.6 Producer Publication Conformance | E | `session-e-memory-compiler-2026-11-16` | `a19feb57c85819cc0e49ab39abfd945b268aa51e` | `04-memory-compiler/phase-3.6-producer-publication-conformance.md` | `a21f81dfe53ae6998818d2cc59e865f5dd1b839d` | Artifact Exists; DESIGN COMPLETE / IMPLEMENTATION NOT VERIFIED |
+| Storage Forget Atomicity Realization Review | Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `3a14550648f21c0bc2725dac38b29e099c2f3196` | `reviews/storage-consistency/forget-atomicity-storage-realization-review.md` | `5e2d55c8b210997693a7f83d35a5a03588e4ae6b` | Artifact Exists; PROPOSED / NOT IMPLEMENTED / NOT VERIFIED |
+| I Global Forget Inventory and Completion Evidence | I | `session-i-security-governance-2026-11-16` | `d52cd47972bd9d1d17f0fe6f2ab09646d084a80b` | `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` | Artifact Exists; CANDIDATE; cross-owner conformance OPEN |
+
+Related branch tips also freshly discovered: B `66adf6bdcf5ec69a146fe75afe20ce3b85af8448`; C `a585307222b0169c007915c25ff8ed0da517f3e4`; F `f86f9b536ea69d8e0fbb4bf290c7023ef0eada76`; G `557c68fd863f73dd09f6fccb3b9e920740db2e9c`; H `1ee65928f123d92a4758b0de09bc8d6df1e46253`; main `8a6414158c9c056c1638222534e1993d1bbc99d2`. These are dependency context, not cross-module approval.
