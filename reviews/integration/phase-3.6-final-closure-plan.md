@@ -141,3 +141,14 @@ A shall:
 7. C/F/G/H/D/E/I/Storage: execute the integrated conformance and security suites; retain reproducible evidence.
 8. A: refresh source baselines, update approval ledger and issue final G0–G10 disposition.
 
+
+
+## 8. Phase 3.6.2 closure update — I JF-10 disposition consumed
+
+I has accepted the common D/E/Storage JF-10 v2 for a **single policy domain**, with binding clarifications. The exact I disposition is `b7b0287cde3922434a560fca90051cc5b418d987`; multi-policy-domain atomicity remains BLOCKED / NOT ACCEPTED. D/E/Storage have consumed the disposition in identical protocol files (Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`). Storage's deterministic conformance plan is published (Blob `634b856a878234bac186c55b2937344392f5d5ff`).
+
+This resolves the **I architecture decision** portion of the former JF-10 blocker. It does not close JF-10 P0, G2 or G3. Concrete DB/coordinator selection, named deployment approver, implementation, durable prepared-XID/failover/restore proof, executable harness and test execution remain outstanding. InventorySeal, I36-GOV-01..10 and Global Forget Completion remain I-owned blockers. The current safe profile is single policy domain only; multi-domain requests must reject or remain BLOCKED/UNKNOWN.
+
+The plan's gate interpretation is unchanged: G0 must be refreshed before each closure batch; G1 remains PASS; G2/G3 remain BLOCKED; G4 conditional; G5/G6/G8 remain BLOCKED; G7/G9 NOT RUN; G10 BLOCKED. No production readiness, implementation sign-off, Global Forget completion or Phase 3.6 freeze is authorized.
+
+Next DE-S work is implementation mapping and deployment selection, not another architecture redesign: name the accountable Storage engineering approver; select and prove the concrete DB/coordinator profile; map H01–H13 to implementation hooks; implement authoritative I lookup and same-XID recovery; then run the evidence-backed suite. A must continue the BIH governance/consumer and CFG Applied freeze work in parallel under their respective Owner authorities.
