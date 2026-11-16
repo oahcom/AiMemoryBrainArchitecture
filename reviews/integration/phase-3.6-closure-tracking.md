@@ -511,3 +511,14 @@ All ten currently discoverable Owner branches were enumerated via the repository
 | Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `2ff20e56a009f51e9b1e31868893c88d9063ef90` |
 
 G0 branch-discovery/HEAD enumeration is now refreshed for all ten known Owner branches. G0 is not yet PASS: the complete required artifact inventory, exact Blob SHA reconciliation for every gate input, and post-change revalidation are still required. This snapshot includes the JF-10 reference model and CI workflow on Storage's Owner branch; it does not mean the model workflow has passed.
+
+
+## Post-CI-wiring HEAD delta — 2026-11-16
+
+A re-resolved the branch tips after the latest evidence corrections. Current pre-ledger-write tips:
+- A: `e20422a06bf7c6d4fb3cd9657f103d4ea6b691c0`.
+- Storage: `83a34ad12aff5addf11f2097ca48245041e903d7`.
+- D remains `1751169d156e9ed62f80a8d44edab5754b22d7c1`.
+- E remains `530645a08b55716257cf4cde20b0900b628abb52`.
+
+Storage's latest plan now explicitly corrects the test evidence: 15 unittest methods are authored, but no local Python or GitHub Actions execution result is verified. Workflow definition exists; CI remains NOT RUN. G0's prior ten-branch table is a timestamped snapshot; the A and Storage tip delta above supersedes those two entries for the current pre-write snapshot.
