@@ -176,3 +176,13 @@ B Domain Model reference/time/scope semantics; D canonical object and version co
 - **CANDIDATE:** Evidence identity and Provenance node identity formulas.
 - **TO_VALIDATE:** lineage depth/fan-out limits, traversal latency and dependency discovery completeness.
 - **OPEN:** retention policy for digests and minimal tombstones when source content is forgotten.
+
+
+## 19. Durable dependency registration and Forget addendum
+
+- Every Evidence, EvidenceLink, ProvenanceNode/Edge, excerpt, normalized artifact and derived summary must retain transitive source lineage or an I-approved non-reversible dependency token.
+- Dependency registration is a publication prerequisite, not eventual metadata enrichment. Persist staged output privately, persist provenance, register all source dependencies with the D-owned Forget inventory/barrier, revalidate the fence, and only then make the object visible.
+- A provenance edge alone is not proof that D's completion barrier has accounted for an in-flight producer. E must register the producer/run and obtain durable dependency-registration acknowledgement.
+- Source content, excerpt refs, raw payload hashes and reversible payload URIs must not be copied into Forget tombstones. Tombstones contain only minimum non-reconstructive suppression evidence permitted by I.
+- On fence activation, block dereference and lineage expansion into forgotten sources; mark descendants suppressed/restricted and report incomplete/unreachable traversal as pending/unknown, never complete.
+- See `forget-fence-and-derived-registration.md` for the visibility gate, race protocol and failure matrix. Physical erasure and global completion remain I-owned.
