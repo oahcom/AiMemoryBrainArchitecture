@@ -45,3 +45,21 @@ The detailed unresolved decision list is maintained in `phase-3.5-global-identit
 
 
 | I35-DEC-13 | C Full Applied evidence is final-request/managed-region inclusion evidence and remains distinct from H Forget/Clear ACK | I evidence policy; C semantics / H transport / G Context | C + H + G + Security Governance | C Phase 3.5 attestation predicates, H integrity/CapabilityEpoch binding, G Context/Delivery validation, I PermissionEpoch and D fence validation, final-submit replay/race tests | Proposed | None |
+
+
+## Phase 3.6 Principal Trust / Authorization / Revocation decisions
+
+The detailed candidate contract is `phase-3.6-principal-trust-chain-authorization-revocation.md`. These entries supersede no Phase 3.5 approval and do not make policy effective.
+
+| ID | Governance decision | Owner | Required approver(s) | Evidence / approval basis | Status | Effective version |
+|---|---|---|---|---|---|---|
+| I36-GOV-01 | Trusted Issuer Registry admission, federation, trust-domain and key/credential rotation/compromise policy | I | Identity/Security Governance; issuer owner; Privacy/Legal where jurisdictional | Issuer inventory, key lifecycle, compromise/rotation drills, issuer-negative tests | GOVERNANCE-BLOCKED | None |
+| I36-GOV-02 | Delegation eligibility, depth, sub-delegation, audience/purpose, expiry and parent revocation | I | Security Governance; Identity Governance; Legal where applicable | Signed grant model, bounded-chain tests, revocation propagation | GOVERNANCE-BLOCKED | None |
+| I36-GOV-03 | Cross-Scope grants and any inheritance/sharing algebra | I policy / B typed-reference semantics | Security/Architecture Governance; B; data/tenant owner | Exact source/target ScopeRefs, action/resource grants and isolation tests | GOVERNANCE-BLOCKED | None |
+| I36-GOV-04 | Cross-Environment grants and federation boundaries | I | Security/Architecture Governance; environment owner; data/tenant owner | Registry-backed EnvironmentRefs, explicit grant and negative tests | GOVERNANCE-BLOCKED | None |
+| I36-GOV-05 | Revocation effective point, in-flight linearization, offline behavior and already-disclosed data handling | I | Security Governance; D/E/F/G/H/C boundary owners; service owner | Publish/retrieval/delivery/Applied race suite and durable owner receipts | GOVERNANCE-BLOCKED | None |
+| I36-GOV-06 | PermissionEpoch authority, policy-domain partitioning, increment/propagation and bounded authorization leases | I | Security Governance; identity/policy platform owner; all consumers | Epoch authority, consistency/continuity evidence, cache/lease negative tests | GOVERNANCE-BLOCKED | None |
+| I36-GOV-07 | Unsupported Adapter/producer policy, alternate controls, disablement and residual-risk handling | I | Security Governance; H; service/product owner; Privacy/Legal where relevant | Capability inventory, alternate-control evidence, scoped risk acceptance | GOVERNANCE-BLOCKED | None |
+| I36-GOV-08 | Global Forget Completion exceptions for external recipient, backup retention, unsupported/offline target and physical erasure | I | Privacy/Legal + Security Governance + data owner + storage/recipient owner | Exact target/scope, finite expiry, controls, restore/recipient/erasure evidence | GOVERNANCE-BLOCKED | None |
+
+No signed approval evidence was located for I36-GOV-01..08. A document commit, owner proposal or test specification is not approval. Append approval entries only after verifying the approving Principal/Issuer authority and exact approved text/hash.
