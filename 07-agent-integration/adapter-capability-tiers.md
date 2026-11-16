@@ -182,3 +182,27 @@ Acceptance:
 - **DECIDED:** No tier guarantees model comprehension.
 - **DECIDED:** Capability claims require conformance evidence; failures trigger explicit degradation.
 - **OPEN:** Wire-level negotiation belongs to Session H.
+
+## Phase 3 targeted remediation — capability negotiation alignment
+
+### 14. Capability declaration semantics
+
+C defines Agent-side capabilities and evidence ceilings. H defines BMCP capability fields, negotiation messages and wire encoding. A declaration is a testable assertion, not a permission grant or proof by itself. Each declaration binds Adapter identity/instance, Agent runtime version, capability epoch, supported Managed Region(s), operations and conformance evidence version. Capability loss/runtime upgrade invalidates prior evidence until renegotiated and revalidated.
+
+### 15. Tier classification
+
+| Dimension | Tier 1 — Full Context Boundary Integration | Tier 2 — Middleware Integration | Tier 3 — Event/Tool Compatibility Integration |
+|---|---|---|---|
+| Observability | Exact post-transformation final request and actual submit boundary | Controlled middleware insertion path; cannot see all final transformations/submission | Events/tool calls/Recall only; no final request boundary |
+| Execution | Applies complete isolated Managed Region; blocks stale/unauthorized state | Inserts data in controlled middleware slot on covered paths | Supplies scoped data to Agent/tool; Agent decides whether to include |
+| Proof | Full Applied only with exact request, region digest, Delivery, ContextVersion, Permission Epoch, ForgetFence and capability binding | Per-request Partial/Unknown/Bypassed only | Receipt/Recall/telemetry only; no proactive Applied |
+| Forget | Suppress, clear declared region/buffers/cache, cancel pending delivery, reconcile reconnect | Clear controlled middleware buffers/cache; host prompt copies may remain Unknown | Stop future Recall/delivery and invalidate supported tool cache; cannot clear arbitrary prompt state |
+| Reconnect | Authenticate, negotiate, revalidate policy/fence, reconcile before apply | Same fail-closed order; unobservable paths remain uncovered | Reauthenticate/re-authorize before Recall/replay |
+| Injection defense | Isolated data region, provenance/trust labels, tool authorization independent | Data-only middleware payload; cannot merge into privileged instruction slot | Returned data labeled untrusted; Agent applies own policy |
+| Cannot claim | Model attention, understanding, use, compliance or global Forget | Full Applied or complete request coverage | Context Applied, final-request inclusion or Full Applied |
+
+Tier 1 requires end-to-end boundary observation and submit correlation. Prompt hooks or tool APIs alone are insufficient. Tier 2 enumerates covered and bypassed request classes; per-request evidence is authoritative. Tier 3 cannot advertise proactive Context application or Applied attestation.
+
+### 16. Capability negotiation and downgrade
+
+Negotiation binds authenticated Adapter, Agent instance, Runtime Session and Capability Epoch. Effective capabilities are the intersection of runtime support, Adapter implementation, H protocol support and I-authorized operations. Unknown capabilities are unsupported. Downgrade takes effect before next managed application and pending deliveries are re-evaluated. Capability epoch changes invalidate stale Full Applied proofs. Upgrade requires conformance evidence, not a config flag. H encodes negotiation; G owns Context/Delivery; I owns authorization/revocation.
