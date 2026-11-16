@@ -1,117 +1,82 @@
 # Typed Cursor and Watermark Contract — Phase 3 Coordination Proposal
 
-- Status: **CANDIDATE** (integration proposal; not an approved ADR, schema freeze, or implementation guarantee)
-- Coordinators: Session A
-- Required reviewers/decision owners: D + Storage/Consistency (canonical commit), E (source Event/ingress), D (LifecycleEvent), index publisher/Storage with E/F (publication), I (Forget policy/epoch), G (ContextVersion/Delivery), H (Adapter capability), C/Agent runtime (InferenceRequestID)
-- Baseline refs: D `9dc08c63f6912320e290a963c634748ec44a81c8`; E `54df136d1e410af834461950e3c61c5c80abd6ad`; F `dad5deb6bfaa2df9956930d0b1372df354112567`; G `3d2c065be863bc1d349faaeece6f6eaa0047abae`.
+- Status: **CANDIDATE** (A coordination proposal; not a schema freeze or implementation guarantee)
+- Coordinator: Session A
+- Canonical cursor semantic authority: Session D
+- Required consumers/validators: E, F, G, Storage/Consistency; H transports opaque typed references; I governs policy epochs separately.
+- Current refs: A `session-a-integration-2026-11-16 @ f76cc558273fbc1a27bb930a2f1e8d940b717c80`; D `session-d-memory-brain-2026-11-16 @ 30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6`; E `session-e-memory-compiler-2026-11-16 @ 3dea6096eefa6779eb12e4e788bcf9429d2a3f83`; H `session-h-bmcp-protocol @ fcc5103399b4c322e52d642cae5a2414969399a7`; I `session-i-security-governance-2026-11-16 @ 8c91d99e450ab5e8862bd6a3301fa193e28e6cbb`.
 
-## 1. Purpose and hard rule
+## 1. Hard rule
 
-The word *cursor*, *sequence*, *generation* or *watermark* MUST NOT be used as an untyped integer across unrelated streams. Each token belongs to one namespace, owner, partition/scope and semantic clock. Numeric offsets are comparable only inside the same namespace, epoch and partition. Cross-stream ordering is expressed through explicit causal references or a vector of typed watermarks, never by comparing raw integers.
+A cursor, revision, watermark, generation, version, delivery sequence or permission epoch is a typed token in one explicitly owned namespace. Raw numeric values from different namespaces are never compared. Cross-stream causality is expressed by typed references or a vector, not scalar coercion.
 
-A cursor identifies a position in a stream. A revision identifies a version of one aggregate. A watermark states the progress of one named consumer/projection over a named source partition. An epoch is a fencing generation, not a stream offset. A ContextVersion is G's immutable desired state, not a cursor into canonical Memory. A Delivery sequence orders delivery attempts in one consumer stream; it is not an inference request number.
+D's domain-level semantic decision is authoritative for CanonicalCommitCursor. This document records that decision; A does not select or alter D's cursor scope.
 
-## 2. Typed contract inventory
+## 2. Normative typed inventory
 
-| Type | Authoritative owner | Namespace / scope | Monotonicity | Gap semantics | Resume / replay | Causal relation |
-|---|---|---|---|---|---|---|
-| **Source Event cursor** `SourceEventCursor` | E for Brain-assigned durable ingress position; source owns any producer sequence it supplies | `brain.event-log/{tenant-or-owner-scope}/{producer-stream-partition}`; partition key must be stable and authorized. Producer's optional `stream_sequence` is separate metadata, not this cursor | Strictly increasing committed offset within one partition/epoch; no global total order promised | Missing producer sequence may be legal/out-of-order. A gap in Brain committed offsets is not silently skipped; filtered/inaccessible records do not imply absence. Retention may make an old range unavailable explicitly | Resume with opaque typed token (namespace, partition, epoch, exclusive after-offset); at-least-once replay; dedupe EventID. If retention expired, return CURSOR_EXPIRED / coverage gap, never pretend caught up | EventID/ReceiptID → compile intent → zero or more derivative proposals → canonical commit(s). Source time does not order commits |
-| **Canonical commit cursor** `CanonicalCommitCursor` | D decides canonical semantics; Storage/Consistency implements durable ordering | Candidate: `brain.canonical-commit/{authority-epoch}/{partition}`; partition key and epoch rules require D + Storage approval | Strictly increasing committed offset per partition. No global order unless explicitly implemented and approved | Offsets are allocated/visible only on committed transactions; aborted attempts do not appear as committed positions. A gap in retained/replay range is explicit. Multi-partition snapshot is a vector, not max(offset) | Resume exclusive after typed partition offset; replay outbox/change feed at least once; idempotent by canonical Outbox/EventID. Expired history yields incomplete/blocked recovery, not guessed continuity | A commit references its source Event cursor(s), operation/idempotency key, aggregate revision(s), and Outbox EventID. Cursor is transaction visibility order within its partition, not truth-time order |
-| **Per-aggregate revision** `AggregateRevision` | D for Memory/Claim/Entity/Relation canonical aggregates; exact aggregate semantics for Claim ADR remain blocked | `brain.aggregate/{aggregate-type}/{aggregate-id}` | Strictly increasing per aggregate; one committed head; immutable revisions; never compare across aggregates | A skipped revision is integrity/recovery error unless explicit migration/fork record explains it. Concurrent proposals use expected-parent CAS; rejected attempts do not consume committed revision numbers | Read exact revision or head; replay parent chain/outbox by immutable revision ID; no blind replay onto a changed head | Commit cursor orders commits in a partition; aggregate revision orders one object's history. One commit may affect multiple aggregates, so no 1:1 assumption |
-| **LifecycleEvent cursor** `LifecycleEventCursor` | D owns append-only LifecycleEvent stream and lifecycle fold/projection | `brain.lifecycle/{memory-id}` (per-Memory aggregate); optional global lifecycle index is a derived consumer | Strictly increasing per Memory lifecycle stream; each event has immutable LifecycleEventID | No silent gaps in a complete per-Memory fold. Projection lag is represented by its own applied watermark. Missing event range blocks authoritative lifecycle reconstruction | Resume by MemoryID + exclusive lifecycle sequence; dedupe by LifecycleEventID; rebuild projection by ordered fold. If history is unavailable under Forget/retention, return explicit unavailable projection | LifecycleEvent may reference related MemoryVersion/CanonicalCommitCursor and ForgetOperationID. It is not interchangeable with MemoryVersion sequence or aggregate revision |
-| **Per-index/per-partition publication watermark** `IndexPublicationWatermark` | Named index publisher owns its progress; E owns compiler publication intent, F owns retrieval freshness interpretation; Storage/Consistency owns shared progress substrate if applicable | `index/{index-name}/{schema-generation}/{source-partition}` | Monotonic contiguous applied prefix per index partition and schema generation. A separate sparse set/in-flight position may exist but is not the completeness watermark | Watermark N means every eligible source offset through N has been applied or explicitly accounted for (e.g. tombstoned/filtered with durable disposition). If N+1 applied before N, watermark stays N. Unknown source disposition is a gap | Resume from first offset after contiguous prefix; replay at least once by source EventID; rebuild creates a new schema generation and starts with explicit checkpoint. Old generation remains distinguishable | Must identify source namespace/partition/epoch and canonical commit fence represented. F compares required canonical cursor vector to observed watermark vector; cannot compare unrelated offsets |
-| **Forget fence / epoch** `ForgetFenceEpoch` | D owns durable canonical ForgetOperation/fence record; I owns global authorization, retention and completion policy | Candidate scope: target typed object/family + affected ScopeRef set + policy domain; exact partition/epoch allocation needs D/I decision | Strictly increasing per fence namespace; never decreases or reuses epoch. Epoch change fences all work carrying older epoch | Epoch is not a cursor; gaps are allowed only as opaque monotonic generation jumps and do not represent missing events. Absence of an epoch value is not proof of no Forget | Consumers fetch current fence snapshot and subscribe/reconcile; stale cached epochs are rejected. Rebuild/replay must consult current fence before visibility. Offline consumer remains Unknown/blocked until refresh | A ForgetOperation installs suppression before cleanup. Every worker, index publication, cache read/write, Context reconciliation/delivery and Adapter application checks fence; target acknowledgements roll up into I policy completion |
-| **Context version** `ContextVersion` | G | `brain.context/{context-id}` | Strictly increasing per Context only after atomic ChangeSet CAS; immutable version | No committed sequence gaps expected for successful commits; rejected/prepared ChangeSets have no target version. Concurrent base mismatch is Conflict, not hidden gap | Resume by ContextID + exact version/ChangeSet chain; rebuild from committed snapshots/audit/outbox. Never replay a ChangeSet onto a different head without replanning | Version pins canonical MemoryVersion refs and canonical watermark vector observed at commit. It is desired Context state, not evidence of delivery/application |
-| **Delivery ID / sequence** `ContextDeliveryRef` + `DeliverySequence` | G owns Delivery record/ID and desired delivery sequence; H owns transport and Adapter-side receipt/attestation only | Candidate sequence namespace: `brain.delivery/{context-id}/{adapter-id}/{agent-context-session-id}` | DeliveryID immutable globally unique; sequence strictly increases within one Context+Adapter+AgentContextSession stream | Sequence gaps mean a delivery was superseded/cancelled/never dispatched only if explicit durable disposition exists; otherwise gap is unresolved. Duplicate sequence with different DeliveryID is integrity conflict | Retry same DeliveryID with same target payload; query by DeliveryID after timeout (Unknown). A new target/attempt requiring a new logical delivery gets new DeliveryID and next sequence | Delivery references ChangeSet/Base/Target ContextVersion, session, capability epoch and eventual InferenceRequestID. DeliverySequence is not ContextVersion or InferenceRequestID |
-| **Adapter capability epoch** `AdapterCapabilityEpoch` | H (not yet present); C/Agent runtime supplies observed integration boundary | `adapter/{adapter-id}/{adapter-instance-or-session}` | Strictly increases whenever negotiated capability, adapter binary/config identity or observable inference boundary changes; monotonic per Adapter instance identity | Epoch discontinuity requires fresh capability negotiation; missing current epoch means capability Unknown. No claim is inherited from stale epoch | Re-negotiate on connect/reconnect/restart/config change; old attestation accepted only as historical evidence for the exact old epoch, never as current capability | Applied proof must include the exact capability epoch. Tier claims cannot exceed observable final-request boundary |
-| **Inference request ID** `InferenceRequestID` | C/Agent inference runtime generates the request identity; H binds attestation to it; G records it | Agent-defined namespace, at minimum Agent + AgentInstance + Session (and provider/request namespace if needed) | Unique per actual inference submission; no numeric monotonicity required unless Agent runtime guarantees a sequence. Treat ID as opaque and immutable | Missing ID means final-request Applied cannot be proven at Tier 1; request retries/new submissions must not reuse ID unless the runtime defines them as the same actual request | Resolve by exact request ID and boundary attestation; no cursor resume semantics. Unknown/expired request evidence remains Unknown | Request is the final causal child of Delivery/application attempt; proof binds target ContextVersion + DeliveryID + capability epoch + actual submitted request/boundary |
+| Type | Authority / scope | Semantics | Does not mean |
+|---|---|---|---|
+| **CanonicalCommitCursor** | D; one globally ordered sequence per Canonical Memory Authority | Identifies successful canonical transactions in that authority's single total commit order. Domain reference includes authority identity and commit sequence. | No index application, Context update, Forget completion or physical erasure proof |
+| **AggregateRevision** | D; each aggregate independently | Monotonically increasing immutable revision sequence for one aggregate. | No global order across aggregates |
+| **LifecycleEventCursor** | D; each Memory independently | Monotonically increasing append-only lifecycle event sequence for one Memory; each event also references its enclosing CanonicalCommitCursor. | Not an aggregate revision or global cursor |
+| **IndexWatermark** | F; each index/channel partition | Contiguous prefix of canonical commits fully accounted for by that index partition, including explicit irrelevant/no-op coverage. | Not canonical authority, global cursor, or proof of deletion/Forget completion |
+| **ForgetFence Generation** | D canonical fence namespace, scoped to Forget operation/target set | Independent monotonically advancing fencing generation. Fence installation itself has a CanonicalCommitCursor for audit/replay, but the generation is not derived from or interchangeable with that cursor. | Not a cursor, commit offset, permission epoch or IndexWatermark |
+| **SourceEventCursor** | E; durable Brain ingress stream/partition | E-assigned source-ingress position; producer-supplied sequence remains separate source metadata. | Not CanonicalCommitCursor |
+| **ContextVersion / ChangeSet** | G; Context authority | Immutable desired Context version and its change record. | Not canonical Memory revision or delivery acknowledgement |
+| **Delivery ID/sequence; Adapter capability epoch; InferenceRequestID** | G/H/C by each owned field | Correlates delivery, adapter capability/configuration and exact inference request boundary. | Not canonical commit ordering |
+| **PermissionEpoch** | I; policy domain | Authorization-policy generation, with exact partitioning governed by I. | Not ForgetFence generation; no numeric comparison |
 
-## 3. Canonical commit cursor versus aggregate revision
+## 3. D-owned CanonicalCommitCursor decision (recorded, not re-decided by A)
 
-D's branch currently describes both a monotonic canonical commit sequence and a per-Memory sequence, while explicitly leaving sequence partitioning open. D-REV-P1-002 is therefore still OPEN.
+D has decided:
 
-**CANDIDATE recommendation for owner review:**
-1. Keep `AggregateRevision` as the authoritative per-object history number (MemoryVersion sequence; ClaimRevision only after INT-P0-01 ADR; equivalent Entity/Relation revision where owned).
-2. Define `CanonicalCommitCursor` as a partitioned durable commit-log position allocated by Storage/Consistency under D's canonical semantics. Do not claim a global total order unless engineering selects a single global sequencer and demonstrates its transaction semantics.
-3. Each canonical commit returns a cursor vector if it spans multiple partitions, plus exact aggregate revision IDs.
-4. A consumer requiring a consistent multi-partition read uses a typed vector/fence or snapshot token. It must not take the maximum integer across partitions.
-5. LifecycleEventCursor remains separate because LifecycleEvent is D's authoritative lifecycle transition stream; it can reference a canonical commit but is not the canonical commit cursor itself.
+1. One globally ordered `CanonicalCommitCursor` sequence per Canonical Memory Authority.
+2. Each aggregate has its own independently increasing `AggregateRevision`.
+3. Each Memory has its own independently increasing `LifecycleEventCursor`.
+4. F owns `IndexWatermark`, scoped by index/channel partition and advanced over a contiguous accounted-for canonical prefix.
+5. ForgetFence generation is a separate fencing namespace, not a cursor.
 
-This is not a final choice: D + Storage/Consistency must approve the partition key, authority epoch, transaction visibility and recovery rules. If they choose a single global commit stream, it must still remain a distinct type and not replace aggregate revisions or LifecycleEvent cursors.
+There is no per-aggregate or per-partition CanonicalCommitCursor in D's chosen semantic model. A MUST NOT replace D's global per-authority sequence with the superseded partitioned candidate. Multiple Brain authorities have separate sequences; this does not create a distributed global total order across authorities.
 
-## 4. Causal chain and ordering
+## 4. Causality and consumer rules
 
-Expected causal chain (not a single total order):
+- E stores and propagates D's CanonicalCommitCursor unchanged when referring to a committed canonical transaction. E's SourceEventCursor remains a different namespace.
+- F consumes canonical commit references and advances its own IndexWatermark independently for each index/channel partition. A partition watermark represents a contiguous accounted prefix; a gap blocks advancement.
+- G consumes immutable MemoryVersion references from D and retrieval/activation outputs from F. G's ContextVersion remains G-owned and is not derived by comparing cursor integers.
+- H transports owner-defined typed values opaquely; it does not reinterpret, serialize by assumption, or compare D/I generations.
+- I's PermissionEpoch and D's ForgetFence generation remain separate typed namespaces. I's global Forget proof is a typed vector of per-domain evidence, not one scalar.
+- Consumers must define duplicate handling, out-of-order staging, gap detection, replay/resume, snapshot bootstrap and stale/unknown behavior before declaring conformance.
 
-`Producer observation`
-→ `EventEnvelope`
-→ `EventID + ReceiptID + SourceEventCursor` (E durable acceptance)
-→ `CompileIntent / derivative registration`
-→ `CanonicalCommitCursor + AggregateRevision(s) + OutboxEventID` (D canonical commit)
-→ `LifecycleEventCursor` (if lifecycle transition occurs)
-→ `IndexPublicationWatermark[index, partition]` (publisher applies source event)
-→ `RetrievalResult freshness vector` (F)
-→ `ContextChangeSet + ContextVersion` (G)
-→ `DeliveryID + DeliverySequence` (G)
-→ `AdapterCapabilityEpoch + InferenceRequestID + boundary attestation` (H/C)
-  
-Forget is an orthogonal monotonic fence/epoch that can invalidate any stage in flight. It is not appended as the next numeric item in the chain. A fence check must occur before each state-changing publication or visibility boundary; a stale worker cannot publish merely because it holds an earlier valid lease.
+## 5. Explicitly OPEN — Storage/Consistency realization
 
-Causality is represented with immutable IDs and explicit parent/correlation/causation refs. Event time, ingestion time, valid time, commit time, publication time, delivery time and inference submission time are distinct clocks.
+D's semantic decision does **not** prove a storage implementation. The following remain OPEN and must not be inferred from the domain contract:
 
-## 5. Consumer requirements and failure semantics
+1. How Storage/Consistency allocates and serializes the single per-authority global sequence under concurrent writers.
+2. How transaction commit, cursor assignment, canonical visibility and outbox intent share one atomic or proven recoverable boundary.
+3. How crash recovery, WAL/replication failover, replay, snapshot bootstrap and restore preserve uniqueness, monotonicity and contiguous committed ordering.
+4. Whether aborted/rejected transactions consume no visible committed cursor and how gaps are represented after recovery.
+5. How multi-authority cursor identity is named, routed, authorized and retained without pretending there is a global order between authorities.
+6. How E, F and G consumers persist their own offsets/watermarks and handle gaps, duplicates, out-of-order delivery, replay and authority changes.
+7. How F maps one authority-wide canonical sequence into independent index/channel partition watermarks without advancing over missing relevant work.
 
-| Consumer | Must persist/observe | On gap/lag/epoch mismatch |
+No implementation or fault-injection evidence was supplied in the D semantic document. Storage validation remains **OPEN / NOT VERIFIED**.
+
+## 6. Conformance requirements (not yet passed)
+
+| Test | Required result | Status |
 |---|---|---|
-| D canonical store/lifecycle | Event references, expected aggregate head, canonical cursor, LifecycleEvent cursor, Forget fence | Reject stale CAS; rebuild projection from canonical append-only history; never infer lifecycle from stale projection |
-| E compiler | SourceEventCursor, EventID, idempotency receipt, compile intent, current Forget fence | Resume from durable offset; at-least-once stage replay; suppress stale-fence work; explicit expired source range |
-| F index/retrieval | Source/canonical cursor mapping and per-index watermark vector | Canonical read-through/bounded wait; else partial/stale/unavailable; no global top-k then post-filter; no index-only Forget guarantee |
-| G Context reconciler | Canonical cursor vector, per-index watermark vector, Forget fence epoch, policy epoch, ContextVersion | Mark Stale/ReconcileRequired/Blocked; validate affected entries directly; do not infer absence from missing index results |
-| H Adapter | DeliveryID/sequence, target ContextVersion, capability epoch, Forget/revocation epoch, InferenceRequestID | Timeout is Unknown; stale delivery/epoch rejected; reconnect requires re-auth, fence refresh and safe snapshot/clear |
-| I governance | ForgetOperation/fence state, policy epoch, per-target progress and exceptions | Do not declare completion while required target is unknown/failed; reauthorize async/irreversible steps |
+| Concurrent commits in one authority | Unique, strictly ordered canonical commit cursors; transaction visibility matches that order | NOT RUN |
+| Multi-aggregate transaction | One canonical cursor shared by transaction effects; each aggregate revision advances independently | NOT RUN |
+| Rejected/aborted transaction | No partially visible commit; cursor behavior matches the committed-sequence contract | NOT RUN |
+| Crash at cursor allocation/commit/outbox boundaries | Recovery yields no duplicate/reused visible cursor and no partially visible transaction | NOT RUN |
+| Failover/restore | Monotonic per-authority sequence and contiguous replay resume are preserved | NOT RUN |
+| Consumer gap/reordering | E/F/G stage or replay missing work; no contiguous watermark jumps the gap | NOT RUN |
+| Multiple authorities | Tokens route to the correct authority; no cross-authority numeric ordering assumption | NOT RUN |
+| Index partition lag | F partition watermark stops at first unaccounted canonical commit | NOT RUN |
+| Fence vs cursor vs permission epoch | Type checks reject cross-namespace substitution/comparison | NOT RUN |
 
-## 6. Required common envelope (semantic, not wire-format)
+## 7. Ownership and change control
 
-Every cross-boundary message should carry only the fields applicable to its operation, but must preserve:
-- immutable message/event/operation ID and schema version;
-- typed source cursor and/or typed target version (never generic `generation: u64`);
-- typed partition/scope identity;
-- ActorRef/producer identity resolved from authenticated transport (payload identity alone is not authority);
-- correlation_id and causation_id;
-- authorization/policy epoch where relevant;
-- Forget fence epoch or explicit “not applicable” determined by policy, not caller omission;
-- idempotency key and canonical request digest for state-changing operations;
-- explicit observed/required watermark vector and completeness where projections are consumed.
+D alone changes CanonicalCommitCursor semantic authority. F alone defines IndexWatermark operational semantics. G owns ContextVersion and ChangeSet. H owns wire representation/transport. I owns permission and global Forget policy. Storage/Consistency owns concrete persistence/transaction/recovery realization. A maintains this cross-module coordination proposal and records owner decisions without superseding them.
 
-H owns serialization and compatibility behavior. B/I own typed reference and authorization semantics. This section is a coordination requirement, not a BMCP schema.
-
-## 7. Conformance scenarios (planned; none passed)
-
-- Cursor tokens from two namespaces cannot be compared or substituted; API rejects type/namespace mismatch.
-- Resume is exclusive and stable across retry; at-least-once duplicate replay is deduped by immutable source event ID.
-- A producer-supplied sequence gap does not create a false Brain-ingress gap or imply missing Brain records.
-- Canonical transaction crash before commit exposes no cursor; crash after commit returns the same receipt/cursor on idempotent retry.
-- Per-aggregate CAS race allows one head advance; other proposal gets stale-parent conflict; aggregate revision never equals a global commit cursor by accidental reuse.
-- Lifecycle projection replay yields the same fold; missing per-Memory event range is explicit.
-- Index offset N+1 applied before N does not advance contiguous watermark past N-1.
-- A Forget epoch increment blocks stale compiler lease, DLQ replay, index rebuild, cache fill, Context delivery and late Adapter Applied.
-- Context version sequence is scoped to Context; Delivery sequence is scoped to its delivery stream; neither can be substituted for request ID.
-- Adapter capability change increments epoch; old Tier 1 attestation cannot certify a new capability epoch.
-- Missing or unobservable InferenceRequestID/final boundary produces Unknown/Partial, never Full Applied.
-
-## 8. Open decisions / owner actions
-
-| Question | Accountable owner | State |
-|---|---|---|
-| Canonical commit partition key, authority epoch and global-vs-partitioned order | D + Storage/Consistency (D accountable) | OPEN |
-| Event cursor partition key and retention/replay horizon | E | CANDIDATE |
-| LifecycleEvent retention and projection rebuild horizon | D + I | OPEN |
-| Index watermark source mapping, schema generation and filtered disposition | E + index engineering (E accountable for publication contract) | OPEN |
-| Forget fence namespace, epoch authority and producer barrier | D + I (I accountable for global policy) | OPEN |
-| Context canonical watermark vector representation | G | CANDIDATE |
-| Delivery sequence allocation/stream identity | G + H (G accountable for desired delivery record) | OPEN |
-| Adapter capability epoch definition | H | OPEN |
-| InferenceRequestID guarantee and final-request capture | C | OPEN |
-| Storage transaction, outbox/WAL, partition failover and cursor durability | Storage/Consistency owner TBD | OPEN |
-
-No test in this document is PASS. Performance, scalability, and physical-erasure guarantees are not assessed here.
+This update resolves only the A-vs-D semantic description mismatch. It does not close CR-P1-01, INT-P0-03, INT-X-01, D-REV-P1-003, or any Storage/consumer conformance item.
