@@ -280,3 +280,47 @@ The test proves that after a coordinator process dies between participant succes
 ## 14. Updated Gate A status — participant ACK-gap subtest passed
 
 The PostgreSQL 18.7 CI qualification now includes the four physical capability groups previously listed plus the coordinator ACK-gap recovery subtest. Gate A remains PARTIAL PASS / OPEN because the production deployment binding, real I/D control-ledger integration, production fencing/STONITH and split-brain prevention, host/zone/cloud storage durability, named human operator, approved runbook and RPO/RTO remain unverified. Gate B remains blocked pending full Gate A acceptance; Gate C remains blocked pending Gate B.
+
+
+## 15. Real TCP CommandComplete ACK-loss and same-XID reconciliation — PASS (2026-11-17)
+
+Storage added a one-shot TCP proxy that deliberately drops the PostgreSQL backend CommandComplete response frame after the server has executed the target command. The client therefore receives a broken connection / UNKNOWN result while the participant may already have changed durable state. Recovery reconnects directly and reconciles the exact original XID and visibility rows.
+
+Evidence:
+- Probe: reviews/storage-consistency/postgres_probe/jf10_postgres_tcp_ack_loss_probe.py
+- Probe Blob: db843927fb3fd2f37b15b7a56dee5ca4c9b4274c
+- Workflow: .github/workflows/jf10-postgres-tcp-ack-loss.yml
+- Workflow Blob: ae9cea590721630f3ebad6d9566de79ac188fd23
+- Pinned image: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+- Successful run: 43913477785
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43913477785
+- Run head commit: 9f3f9595fa5fec6003ece53bb289a5ff499f87ee
+- Job ID: 133461308120
+- Job conclusion: SUCCESS
+
+Observed raw-log PASS markers:
+- CLIENT_OBSERVED_UNKNOWN_AFTER_PREPARE_TRANSACTION=PASS
+- TCP_ACK_LOST_AFTER_PREPARE_SAME_XID_RECOVERED=PASS
+- PREPARE_LOST_ACK_NO_PUBLICATION=PASS
+- CLIENT_OBSERVED_UNKNOWN_AFTER_COMMIT_PREPARED=PASS
+- TCP_ACK_LOST_AFTER_COMMIT_SAME_XID_RECONCILED=PASS
+- COMMIT_POINTER_RECEIPT_ATOMIC_VISIBILITY=PASS
+- CLIENT_OBSERVED_UNKNOWN_AFTER_ROLLBACK_PREPARED=PASS
+- TCP_ACK_LOST_AFTER_ROLLBACK_SAME_XID_RECONCILED=PASS
+- ROLLBACK_NON_PUBLICATION=PASS
+- JF10_POSTGRESQL_TCP_ACK_LOSS_RECOVERY=PASS
+
+This is an actual TCP response-loss injection at the PostgreSQL protocol CommandComplete boundary, not merely a suppressed application result. After PREPARE ACK loss, the exact prepared XID remained discoverable, its lock remained held, and pointer/receipt remained private. After COMMIT ACK loss, the exact XID was absent and pointer + receipt were visible together. After ROLLBACK ACK loss, the exact XID was absent and neither row was visible.
+
+Scope limitation: this is a single-node PostgreSQL 18.7 CI proxy test. It does not establish production I sequencer/COC integration, coordinator quorum durability, real network partitions across production zones, production failover fencing or deployment readiness.
+
+## 16. Gate A updated disposition
+
+The PostgreSQL 18.7 candidate now has passing CI evidence for:
+1. single-node prepared-XID, lock retention, hard restart and same-XID commit/rollback;
+2. two-node synchronous WAL replay, primary hard loss, standby promotion and same-XID commit/rollback;
+3. physical pg_basebackup/restore with prepared-XID survival and stale-control fail-closed behavior;
+4. coordinator process crash after participant success but before ACK/checkpoint persistence;
+5. real TCP CommandComplete response loss after PREPARE, COMMIT PREPARED and ROLLBACK PREPARED, followed by exact same-XID reconciliation.
+
+Gate A remains PARTIAL PASS / OPEN because the actual Canonical Authority deployment, production I/D ledger integration, production failover fencing/STONITH and split-brain prevention, host/zone/cloud-storage durability, named human operator, runbook and RPO/RTO are not bound or verified. Gate B remains blocked until full Gate A acceptance; Gate C remains blocked until Gate B.
