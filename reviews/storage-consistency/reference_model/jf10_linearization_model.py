@@ -40,6 +40,15 @@ class AuthorizationReceipt:
     policy_domain: str
 
 
+@dataclass(frozen=True)
+class PublicationRecord:
+    manifest_digest: str
+    publication_receipt_id: str
+    owner_outcome: str
+    consumed_receipt_id: str
+    outbox_enqueued: bool
+
+
 @dataclass
 class Operation:
     operation_id: str
@@ -90,6 +99,12 @@ class CoordinatorModel:
 
     def lookup(self, operation_id: str) -> Decision:
         return self._decisions.get(operation_id, Decision.UNKNOWN)
+
+    def receipt_for(self, operation_id: str) -> Optional[AuthorizationReceipt]:
+        binding = self._bindings.get(operation_id)
+        if binding is None:
+            return None
+        return self._receipts.get(binding[2])
 
 
 class DPublicationGate:
@@ -147,6 +162,9 @@ class StorageParticipantModel:
         self.gate = gate
         self.operations: Dict[str, Operation] = {}
         self._xid_owner: Dict[str, str] = {}
+        # One record is the modeled atomic local commit point. The following maps
+        # are readback projections, not independent publication authorities.
+        self.publication_records: Dict[str, PublicationRecord] = {}
         self.visibility_pointers: Dict[str, str] = {}
         self.publication_receipts: Dict[str, str] = {}
         self.owner_outcomes: Dict[str, str] = {}
@@ -184,24 +202,35 @@ class StorageParticipantModel:
             op.state = ParticipantState.ABORTED
             self.gate.terminal(operation_id)
             return op.state
-        if op.receipt is None:
-            raise ProtocolError("COMMIT_WON requires the exact authorization receipt")
+        if op.receipt is None or coordinator.receipt_for(operation_id) != op.receipt:
+            raise ProtocolError("COMMIT_WON requires the exact I-bound authorization receipt")
         if op.receipt.receipt_id in self.consumed_receipts:
             if self.owner_outcomes.get(operation_id) == "COMMITTED":
                 return ParticipantState.COMMITTED
             raise ProtocolError("authorization receipt was already consumed")
-        # One modeled atomic local transaction. These facts become visible together.
-        self.visibility_pointers[operation_id] = op.manifest_digest
-        self.publication_receipts[operation_id] = op.receipt.receipt_id
-        self.owner_outcomes[operation_id] = "COMMITTED"
-        self.consumed_receipts.add(op.receipt.receipt_id)
-        self.outbox.add(operation_id)
+        # One modeled atomic local transaction: this single record insertion is
+        # the linearization point. The dictionaries below are projections.
+        record = PublicationRecord(
+            manifest_digest=op.manifest_digest,
+            publication_receipt_id=op.receipt.receipt_id,
+            owner_outcome="COMMITTED",
+            consumed_receipt_id=op.receipt.receipt_id,
+            outbox_enqueued=True,
+        )
+        self.publication_records[operation_id] = record
+        self.visibility_pointers[operation_id] = record.manifest_digest
+        self.publication_receipts[operation_id] = record.publication_receipt_id
+        self.owner_outcomes[operation_id] = record.owner_outcome
+        self.consumed_receipts.add(record.consumed_receipt_id)
+        if record.outbox_enqueued:
+            self.outbox.add(operation_id)
         op.state = ParticipantState.COMMITTED
         self.gate.terminal(operation_id)
         return op.state
 
     def reader_can_see(self, operation_id: str) -> bool:
-        return operation_id in self.visibility_pointers
+        # Visibility is derived only from the committed atomic publication record.
+        return operation_id in self.publication_records
 
 
 def make_operation(operation_id: str = "pub-001", work_item_id: str = "work-001",
