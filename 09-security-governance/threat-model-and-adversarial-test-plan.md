@@ -153,3 +153,40 @@ I may propose and document security risk. Acceptance authority is not automatica
 - external recipient/backup retention: only by authorized Privacy/Legal + data owner under a named PolicyException with expiry and disclosure;
 - operational availability trade-offs: service owner may accept bounded downtime, never silent protected-data disclosure.
 
+
+
+---
+
+## Phase 3.5 threat-model extension — identity, inventory and global Forget
+
+The following threats extend (and do not replace) SEC-001..SEC-026. Tests remain **NOT RUN**.
+
+| ID | Threat / race | Required prevention or detection | Fail-closed / completion consequence | Owner(s) |
+|---|---|---|---|---|
+| SEC-027 | Cross-tenant / cross-user / cross-project / cross-Agent / cross-instance / cross-task / cross-session / cross-environment ScopeRef confusion | Resolve every typed ScopeRef against authoritative versioned registry; authorize ownership and applicability independently; require explicit environment binding | Deny/Indeterminate; no candidate, dereference, delivery or inference assembly | B + I + consuming owner |
+| SEC-028 | Forged Principal, Issuer, ProducerIdentity, Agent instance, AdapterIdentity or ExternalRecipient identity | Verify issuer/key/audience/credential epoch and authenticated transport/workload binding; compare payload claims to authenticated identity | Reject/quarantine; audit security event; never create trusted inventory entry from payload claim | I + H + C |
+| SEC-029 | Permission revocation races with old Context, cached ALLOW, lease, queue, retry, DLQ or final commit | Current PermissionEpoch at every protected boundary and at commit/disclosure linearization; invalidate leases/cache/Context on epoch gap | Pause/abort protected action; old Context or TTL cannot authorize | I + all boundary owners |
+| SEC-030 | Old Context/snapshot/delta/ChangeSet or Applied/ACK replay after Forget/revocation | Bind to target, ContextVersion, delivery/request ID, session, PermissionEpoch and D fence; reject stale generations using owning authority | No reactivation or Full Applied; target remains Unknown/Pending until reconciled | G + H + I + C |
+| SEC-031 | D work-item barrier confused with I ProducerDomainInventoryEpoch | Maintain separate typed fields, authority and validators; reconcile both proofs in global evaluator | Either missing proof blocks completion; no scalar roll-up | I + D + E |
+| SEC-032 | New Producer/Recipient/backup route/Adapter region appears after inventory seal | Advance I inventory epoch, invalidate seal, enumerate target, reopen and reevaluate | Prior Completed proof becomes superseded/Reopened | I + domain owner |
+| SEC-033 | Backup restore or index rebuild resurrects forgotten content from stale snapshot/WAL/replica | Restore to quarantine; apply persistent current Forget/revocation control ledger before query/index/delivery; verify all paths | Block serving; failed restore suppression reopens Forget | Storage + I + D/F |
+| SEC-034 | External recipient or onward recipient retains an untracked copy | Authenticated recipient inventory, contractual/API obligations, target-bound deletion evidence and onward-copy accounting | Unknown or narrow PolicyException; never Confirmed from request receipt | I + Privacy/Legal + recipient owner |
+| SEC-035 | H ACK spoofing, wrong Adapter/session/target/Scope/managed-region or stale CapabilityEpoch | Verify authenticated Adapter identity, capability epoch, session-at-ACK, target, ScopeRef, managed region, D fence and integrity proof | Invalid evidence => Unknown/Failed; cannot satisfy mandatory target | H + I |
+| SEC-036 | Unsupported Adapter capability treated as successful purge | Map UNSUPPORTED to Unknown; require alternate control and independent exception approval | Completion blocked absent valid active PolicyException | H + I + risk approver |
+| SEC-037 | Late derivative or derivative-of-derivative appears after seal/completion | Lineage registration, D barrier terminality, I domain epoch monitoring and late-discovery invalidation | Reopen; suppress and reconcile descendant before reevaluation | D + E + I |
+| SEC-038 | PermissionEpoch, ForgetFenceGeneration, inventory epoch, ContextVersion or CapabilityEpoch numerically conflated | Typed namespace validation; owner-specific comparison APIs; reject unknown/mixed epoch | Fail closed; evidence invalid | I + D + F + G + H |
+| SEC-039 | ACK/evidence replay, delayed contradictory ACK or evidence outside validity window | Bind evidence to operation/target/action/attempt/session/capability and verifier; enforce action-specific validity | Stale/contradictory evidence Unknown pending reconciliation; preserve audit history | H + I |
+| SEC-040 | PolicyException used as broad bypass or remains after expiry | Exact target/scope/action binding, independent approval, hard expiry, compensating controls and expiry monitor | Expiry/revocation reopens; no ordinary retrieval/derivation/delivery | I + Privacy/Legal + data owner |
+| SEC-041 | Audit tombstone/log reconstructs forgotten payload or stable low-entropy digest | Minimize to random opaque IDs/coarse class/state; test dictionary/correlation reconstruction; bounded retention | Audit control failure; no claim that Forget evidence is privacy-safe | I + Audit/Privacy |
+| SEC-042 | Producer or Adapter identity revoked while an operation is in-flight | Invalidate credential/lease/session and reauthorize at each later boundary; preserve cleanup obligation under separate service authority | No protected work with revoked identity; global cleanup continues only under current delegated authority | I + H + E/D/G |
+
+### Phase 3.5 adversarial acceptance gates
+
+- Cross-scope tests must include distinct tenants, users, projects, Agent identities and instances, tasks, sessions and environments; negative tests must prove no side channel through counts, graph expansion, errors or timing.
+- Revocation tests must pause execution between admission, source dereference, stage commit, dependency registration, canonical commit, delivery and final inference submission.
+- ACK tests must vary Adapter, instance, capability epoch, session, ScopeRef, managed region, action, operation ID and evidence age independently.
+- Inventory tests must add/remove/retire a domain, rotate its issuer, change Scope/capability, add an onward recipient and discover a late derivative while a Forget operation is sealed or evaluated.
+- Restore tests must start from stale snapshots with old Context, queues, indexes and backups and prove control-ledger replay before any serving path.
+- Global completion tests must prove that each mandatory Unknown/Failed/Unsupported/missing target blocks Completed, and that expiry of an exception reopens it.
+
+A test PASS requires reproducible fixtures, environment, test version, expected/actual result, owner sign-off and non-sensitive evidence. No Phase 3.5 test execution is claimed.
