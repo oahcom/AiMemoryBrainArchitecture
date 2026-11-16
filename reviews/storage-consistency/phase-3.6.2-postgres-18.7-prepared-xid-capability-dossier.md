@@ -689,3 +689,18 @@ The seven-workflow regression evidence is:
 All seven jobs' final raw-log markers were independently inspected. The first prepared-XID workflow attempt on commit `d026add5...` failed only at the transient initdb readiness race; it is superseded by the successful run `43959079736` after the readiness fix and is not counted as passing evidence.
 
 This is a regression result for pinned PostgreSQL 18.7 CI fixtures, not production deployment acceptance. Gate A remains PARTIAL PASS / OPEN; Gate B and Gate C remain BLOCKED; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
+
+
+## 27. Default-branch and linked-repository audit for production runtime designation — NOT IDENTIFIED (2026-11-17)
+
+Storage rechecked the repository's default branch, not only the Storage feature branch:
+- Default branch: `main`
+- Commit: `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f`
+- Recursive tree: `748613c916ca795cb5b1af65f6fcdda81b928a9d`; 52 entries; `truncated=false`.
+- The tree contains architecture/governance/review Markdown only; zero executable/source-like files matching `.py/.go/.rs/.ts/.tsx/.js/.java/.sql/.yaml/.yml/.toml/.json`.
+
+Storage also searched the linked GitHub repository catalog for `AiMemoryBrain`, `Canonical Authority`, and `memory runtime`. Only `oahcom/AiMemoryBrainArchitecture` matched the project-specific query; no separate Canonical Authority or memory-runtime repository was identified by those searches. This is a bounded account/repository search, not proof that no external or unlinked repository exists.
+
+**Disposition:** the canonical production runtime, authoritative DB adapter, schema/migration path and deployment manifest remain NOT IDENTIFIED. Storage cannot truthfully claim production adapter conformance or bind the PostgreSQL 18.7 capability fixtures to an application path until A/C/designated implementation owner supplies the immutable implementation repository/commit and runtime entrypoint, or explicitly designates this repository as the implementation home and delivers the missing code.
+
+Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED; Gate C remains BLOCKED; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
