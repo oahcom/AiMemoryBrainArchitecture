@@ -37,7 +37,7 @@ A local buffer, middleware render, transport ACK, reservation receipt, provider-
 
 In addition to existing C Final Request Submission Evidence fields, require:
 - CausalOrderProfileRef, CausalOrderCoordinatorRef, CausalOrderTransactionRef;
-- ParticipantReservationRef and reservation coordinator epoch/position;
+- ParticipantIntentRef and its coordinator epoch/position; ParticipantReservationRef and final reservation position;
 - CommitAuthorizationReceiptRef and IAuthorizationTerminalRef;
 - ForgetFenceRef/generation, ForgetLineageCoverageRef and DParticipantClearanceRef;
 - CSubmitOutcomeRef, actual provider receipt ref, actual InferenceRequestId and FinalRequestBoundaryId;
