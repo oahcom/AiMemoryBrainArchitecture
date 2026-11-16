@@ -324,3 +324,37 @@ The PostgreSQL 18.7 candidate now has passing CI evidence for:
 5. real TCP CommandComplete response loss after PREPARE, COMMIT PREPARED and ROLLBACK PREPARED, followed by exact same-XID reconciliation.
 
 Gate A remains PARTIAL PASS / OPEN because the actual Canonical Authority deployment, production I/D ledger integration, production failover fencing/STONITH and split-brain prevention, host/zone/cloud-storage durability, named human operator, runbook and RPO/RTO are not bound or verified. Gate B remains blocked until full Gate A acceptance; Gate C remains blocked until Gate B.
+
+
+## 17. Required synchronous standby unavailable — PREPARE remains UNKNOWN/private — PASS (2026-11-17)
+
+Storage added a negative-path PostgreSQL 18.7 CI probe. It establishes a required synchronous standby with `synchronous_commit=remote_apply`, stops that standby, starts a protected transaction and attempts `PREPARE TRANSACTION`.
+
+Evidence:
+- Probe: `reviews/storage-consistency/postgres_probe/jf10_postgres_sync_unavailable_probe.py`
+- Probe Blob: `b6de4e4f461405107464ff8ad179520f9b028749`
+- Workflow: `.github/workflows/jf10-postgres-sync-unavailable.yml`
+- Workflow Blob: `32ed78aa702dfb6f45c73f94c81bd617b970976b`
+- Successful run: `43927416496`
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43927416496
+- Run commit: `4e4cf967d97254f1f6e8dea03f1afd1402ff0802`
+- Job ID: `133510446871`
+- Conclusion: SUCCESS
+
+Observed raw log markers:
+- `REQUIRED_SYNCHRONOUS_STANDBY_UNAVAILABLE=PASS`
+- `PREPARE_WAIT_EVENT=('IPC', 'SyncRep')`
+- `PREPARE_BLOCKED_ON_SYNCHRONOUS_REPLICATION=PASS`
+- `CLIENT_PREPARE_OUTCOME_UNKNOWN_AFTER_CONNECTION_LOSS=PASS`
+- `LOCAL_PREPARED_XID_REMAINS_IN_DOUBT=PASS`
+- `NO_PROTECTED_VISIBILITY=PASS`
+- `PREPARED_LOCK_RETAINED_DURING_UNKNOWN=PASS`
+- `SAME_XID_ROLLBACK_AFTER_TEST=PASS`
+- `NO_PUBLICATION_AFTER_ROLLBACK=PASS`
+- `JF10_SYNC_STANDBY_UNAVAILABLE_FAIL_CLOSED=PASS`
+
+**Important interpretation:** the PREPARE backend had already persisted the prepared XID locally when it entered the synchronous-replication wait. Terminating the backend while it waited produced client UNKNOWN, while the exact XID remained locally prepared and its lock remained held; the visibility row remained absent. This is not evidence that the prepared XID was absent or replicated. It proves the client cannot treat a lost PREPARE ACK as success and must preserve UNKNOWN / IN_DOUBT, keep publication private and prevent the I coordinator from advancing until the exact XID is reconciled against the authoritative recovery path. The test's final ROLLBACK PREPARED uses `synchronous_commit=local` solely for cleanup after all safety assertions; that cleanup override is not a production configuration.
+
+An earlier draft of this probe incorrectly expected the local prepared XID to be absent and failed. The final probe corrects that assertion to the actual PostgreSQL behavior above; the failed run is not counted as passing evidence.
+
+Gate A remains PARTIAL PASS / OPEN. This CI test does not prove production standby recovery, fencing, or safe promotion while the PREPARE ACK is outstanding. A production failover policy must not promote a standby that may lack the locally prepared XID and then claim a terminal participant outcome.
