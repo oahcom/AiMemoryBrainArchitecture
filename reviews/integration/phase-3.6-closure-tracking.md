@@ -577,3 +577,21 @@ A recorded integration reconciliation requirements:
 H's current exact-version decision remains Blob `c0e10966e8dd95a9d1f5b1dfa156cb4b098b26e0` and explicitly says concrete wire schema OPEN / NOT DELIVERED. No H 1.1.0 schema artifact has been verified. The previous `bmcp.applied-ack/1.0.0` candidate note does not satisfy the newly proposed 1.1.0 deliverable.
 
 Original CGH-APPLIED-1.0 remains not frozen. Proposed CGH-APPLIED-1.1 is not yet baselined. Tests remain NOT RUN; production implementation NOT VERIFIED.
+
+
+## CGH-APPLIED-1.1 A candidate package and corrected Owner pins — 2026-11-16
+
+A created the exact successor candidate:
+- `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`
+- Blob `07a403f89f8d5bf50fc76f139371fa1fd6e4eca3`
+- Commit `c121df7c4c398da2da27e5a5a60d488e57ee321a`
+- Status: **A CANDIDATE / OWNER REVIEW REQUIRED / NOT FROZEN**.
+- It does not alter CGH-APPLIED-1.0 or transfer 1.0 approvals.
+
+Corrected latest Owner pins after branch-head refresh:
+- C causal-order contract Blob `f0839e4f470588e6053c144b91ff318b6465e04c`, commit `96054e879abbd827f36ea8b766aa7ccaa4defef1`.
+- I causal-order contract Blob `1e4d2d43807981d73c2e5394a0b6020b9177a3f1`, commit `3fc7131f5b057b4f12fd2303a5a4a2440dff8d44`.
+- D causal-order contract Blob `1c60e7129c5b4255d6b9033bcb03e28e43b3b5af`, commit `99e13c308fe784508b70a48bea694493c00c12b2`.
+- H 1.1.0 schema candidate Blob `a23b9a879a3ec0e212645a8247a6797bd0055360`, commit `ceb20c0aa0318e2c4c82f7ffb90b05432bd87255`. This supersedes the earlier statement that no 1.1.0 schema artifact was found; H's current Owner file now contains the candidate schema and message families. It remains NOT PRODUCTION-FROZEN / NOT DEPLOYED.
+
+Exact-version acceptance by C/D/I/H/G/B, coordinator/Storage operator acceptance, deployment and tests remain open. Causal order production proof NOT VERIFIED; CGH-CO/I-CO/D-CO/H36-CO NOT RUN.
