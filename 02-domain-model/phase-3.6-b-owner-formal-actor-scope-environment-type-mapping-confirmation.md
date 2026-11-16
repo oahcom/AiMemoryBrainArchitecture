@@ -176,3 +176,14 @@ B confirms the candidate preserves the approved distinctions: ActorRef is verifi
 Reservations: (1) these typed refs are not credentials, permission grants, I authorization receipts, D clearances, coordinator positions or reusable capabilities; (2) cross-Scope and cross-Environment access remains deny-by-default absent authoritative registry resolution and I authorization; (3) H owns wire encoding, field names, canonicalization and requiredness, while consumers own internal field paths; (4) legacy untyped strings MUST NOT be silently cast to typed refs; (5) this B decision does not approve I governance, coordinator deployment, D lineage completeness, G Applied implementation, conformance or production readiness.
 
 This decision applies only to A candidate Blob `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`. It is semantic type acceptance, not wire-schema approval or implementation verification, and transfers no 1.0 decision.
+
+## B exact-version type confirmation — CGH-APPLIED-1.1 recovery-batch amendment
+
+- A package Blob: `4961ffefc0f9920efb8425a9b2a7af42d8f64819`
+- Companion COC Blob: `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`
+
+**Decision: APPROVE — B-owned typed-reference semantics remain unchanged for this exact 1.1 recovery-batch amendment.**
+
+The recovery batch adds no new B semantic type and does not change PrincipalRef/IssuerRef/ActorRef, role-labelled ScopeBindingSet, EnvironmentRef or typed source/target/lineage identity semantics. Existing B constraints remain: typed refs are identifiers/attribution, not credentials, authorization receipts, coordinator positions, fence clearances or reusable capabilities; cross-Scope/Environment access remains deny-by-default absent registry resolution and I authorization; no legacy untyped string is silently cast.
+
+Reservations: C/G/H own consumer field paths and wire representation; H must pin the recovery-batch wire encoding and requiredness. This B confirmation does not approve I governance, COC deployment, D lineage completeness, Storage visibility atomicity, tests or production readiness. It applies only to the exact A/COC Blob pair above.
