@@ -1049,3 +1049,19 @@ A refreshed the C, D, Storage and A Owner artifacts before this reconciliation. 
 **Physical realization and verification request:** Issue [#10](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/10) opens the next independent gates: (A) name and prove the concrete DB engine/version/configuration, durable prepared-XID/lock retention, same-XID recovery, atomic visibility and failover/restore; (B) implement/prove persistent COC quorum log, prefix, participant registry and recovery-cutoff batch; (C) execute deterministic crash/fault injection at every durable boundary, owner cutoff race, provider UNKNOWN, outage, stale replica, missing prefix and partial restore.
 
 The previous §13.19 semantic-validator CI PASS remains valid only for its dependency-free in-memory reference model (10 unit tests at commit `bd104eaf63c7234a45fd780d484bc41ae15dd988`). It is not real database, persistent coordinator, provider, crash/failover/restore or production conformance evidence. JF-10 P0 remains OPEN; implementation/deployment NOT VERIFIED; JF10-COC-01..10 and provider fault suites remain NOT RUN; multi-PolicyDomain atomicity BLOCKED; no production activation authorized.
+
+
+## 13.21 JF-10 COC validator negative-case expansion — 2026-11-17
+
+A extended the semantic-validator unit suite on the A Owner branch:
+- Test path: `tests/conformance/test_jf10_coc_semantic_validator.py`.
+- Previous Blob: `4826816617527024bca0a467e25ae598dccce58c`.
+- New test Blob: `0cff0fe77eda9fb017abad099822d909bf263bcb`.
+- Commit: `b154913a8594d04c799a05c799bbe7242f0e8651`.
+- Readback verified: new Blob `0cff0fe77eda9fb017abad099822d909bf263bcb`; 18 test methods are present.
+
+Eight additional negative cases cover missing lifecycle records, reordered lifecycle messages, UNKNOWN reconciliation falsely claiming D barrier satisfaction, I owner-lookup conflict, commit visibility pointer using a different XID, stale revocation references under NONE_AT_TERMINALIZATION, Storage owner-lookup conflict, and empty policy-domain reference.
+
+The existing workflow is configured for push events affecting `tests/conformance/**`, so this test-file commit should trigger the workflow. **The new 18-test revision has not yet had its GitHub Actions run and is NOT VERIFIED.** The previously recorded 10-test CI PASS in §13.19 remains valid only for the older tested commit; it must not be carried forward as proof for this expanded test revision.
+
+Coverage boundary remains: the reference validator does not authenticate signatures/quorum, call live owner authorities, test provider idempotency, exercise real prepared-XID/lock persistence, or simulate process/host/region crash, failover and restore. JF-10 P0 remains OPEN; production implementation/deployment NOT VERIFIED; multi-PolicyDomain atomicity BLOCKED.
