@@ -716,3 +716,18 @@ A independently re-read the six Owner artifacts from their respective Owner bran
 - G's decision is a contract/predicate acceptance, not proof that its validator or Applied persistence consumes the complete 1.1 evidence set.
 - C-CO/I-CO/D-CO/H36-CO/G conformance remains SPECIFIED / NOT RUN. Production causal proof and implementation remain NOT VERIFIED.
 - Therefore Applied Contract Frozen = NO; G8 remains BLOCKED, G9 NOT RUN, G10 BLOCKED. No branch merge or production activation is authorized.
+
+
+## Latest outage-cutoff amendment — exact package and coordinator pins (2026-11-16 23:10 +08)
+
+A refreshed the A branch again. The companion proposal and common package now include the fail-closed owner-local admission rule for coordinator outage:
+- Current COC artifact Blob: `65878e1e2b569b1dc6d0918f51a313da122236d4`, commit `56909a979239a57d04d7c6ce2e36a4a63dd96e60`.
+- Current CGH-APPLIED-1.1 package Blob: `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`, commit `e1113c3cd84787ad087a2ebb363cde165d563f1f`.
+
+When COC is unavailable, I locally suspends affected receipt issuance/consumption after receiving revocation; D locally closes affected lineage admission after receiving a fence request. Neither owner reopens admission until the cutoff is durably recorded in COC. This closes the owner-known-request invisibility window while preserving I/D authority. These exact SHAs supersede the earlier pins `9808b31f840606b329f1a794935dfc9c5084d63b` and `3f302a333f413e6ea7d5cbf1fe06473be6228a09` respectively.
+
+Correction requests posted:
+- Issue #3 comment `6920364402`: C/D/I/H/G/B must decide the current package and cite the current COC companion SHA.
+- Issue #2 comment `6920365466`: Storage/Consistency must decide the current COC exact Blob, identify operator/topology and reconcile JF-10 serialization/restore.
+
+**No approval transfers across these amendments.** Current status: A candidate / owner decisions pending / not frozen; COC proposed / operator not designated / not deployed; Storage and Security governance pending; COC-01..12 and consumer race tests NOT RUN; production causal proof NOT VERIFIED; G8 BLOCKED, G9 NOT RUN, G10 BLOCKED.
