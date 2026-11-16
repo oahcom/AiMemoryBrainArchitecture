@@ -84,3 +84,8 @@ The coordinator's linearized operation set MUST include output declaration, clos
 ### JF-08 — Outcome absence must be linearizably proven
 
 `GetOperationOutcome` may return NOT_COMMITTED only after a decision barrier ordered after the operation's possible commit point, resolving any in-flight transaction, coordinator decision and participant prepare/commit record for that key. Return the barrier cursor/epoch and durable proof reference with NOT_COMMITTED. An absent row on a lagging replica, a query racing an in-flight transaction, timeout or unavailable coordinator returns UNKNOWN. If a participant outcome is unresolved, the coordinator must preserve prepared state as hidden and keep the operation UNKNOWN; it must not guess abort. This barrier rule applies to registration, fence, dependency, publication and terminal operations.
+
+
+### JF-09 — Gate commit compares current inventory seal and manifest version
+
+The visibility transaction MUST compare the exact current frozen OutputManifestVersion/digest and applicable current InventorySealReceipt / ProducerDomainInventoryEpoch against the values bound to dependency registration and the publication request. These checks occur inside the visibility linearization boundary. A manifest reopen/version advance or inventory epoch advance before commit makes the old dependency receipt/gate stale and the artifact remains private until refreshed evidence is committed. This comparison is separate from, and in addition to, fence generation, PermissionEpoch permit, WorkItem/Attempt/Lease and dependency digest validation.
