@@ -58,7 +58,7 @@ def setup():
                 "wal_level",
             )
         }
-        assert version == "18.7", f"expected PostgreSQL 18.7, got {version}"
+        assert version.startswith("18.7 "), f"expected PostgreSQL 18.7 build, got {version}"
         assert int(settings["max_prepared_transactions"]) >= 8, settings
         for key in ("fsync", "synchronous_commit", "full_page_writes"):
             assert settings[key] == "on", settings
