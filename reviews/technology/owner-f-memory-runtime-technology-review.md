@@ -167,3 +167,11 @@ Required controls: per-session and global byte/item limits, queue bounds, admiss
 - F Working Set/cache blob: `a934491950c876701e8ac592a0e6aaea983b44e3`
 - F design baseline commit recorded by Phase 2: `dad5deb6bfaa2df9956930d0b1372df354112567` (not asserted to be current HEAD)
 - No runtime, fault-injection, security, or performance tests executed in this review.
+
+## 8. Reassessment — anti-resurrection logical reference model (2026-11-17)
+
+F added an in-memory deterministic reference model and CI suite. Evidence: `05-memory-runtime/phase-3.6-anti-resurrection-reference-model-evidence.md`, commit `b908f7aeffeb843dfcdb2231f40587bcd54f7cac`; model Blob `33fa2ca2dc29771aca241e194f13e078a4f8d774`; tests Blob `c2575327a75577923440ef770d42122218a1e091`; workflow run `43961714501`, job `133630540252`, commit `f1ba5c478e395da6b126423e32e20d0990e61920`.
+
+**Result: 19/19 logical reference-model tests PASS.** Covered targeted Forget suppression, unrelated candidate retention, stale cache eviction after missed invalidation, in-flight fill race, pre-Forget rebuild, watermark gaps, authority unavailability, Scope/Environment pre-filter, PermissionEpoch change, reconnect ordering, idempotency/conflict, cache key dimensions and F-local target evidence.
+
+Limit: these are in-memory logical tests only. F-RT-01..13 actual runtime/concurrency/rebuild/reconnect/ANN/security suites remain SPECIFIED / NOT RUN. No Anti-Resurrection or Global Forget completion is certified.
