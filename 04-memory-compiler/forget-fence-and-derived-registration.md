@@ -340,3 +340,21 @@ The above error names are D's semantic vocabulary; exact transport/wire encoding
 ### Typed sequence namespace correction
 
 ProducerRegistrationSequence / ProducerRegistrationHighWater and ProducerRegistryVersion are D-owned, distinct from CanonicalCommitCursor. They must be stored as typed values and never substituted for or numerically compared with CanonicalCommitCursor, AggregateRevision, LifecycleEventCursor, ForgetFenceGeneration, PermissionEpoch, IndexWatermark or ContextVersion.
+
+
+
+---
+## Phase 3.5 Addendum — OPEN Item Precision Correction
+
+This section supersedes the earlier OPEN-E/D-01 through OPEN-E/D-05 wording in §5 where it could be read as claiming that D has not specified operation-level inputs, outputs, idempotency, error outcomes or linearization. D's normative operation contract now specifies those semantic elements for all nine operations. The remaining gaps are narrower:
+
+| OPEN ID | Exact unresolved item | Owner / why still open |
+|---|---|---|
+| OPEN-API-01 | Callable API/transport schemas, serialization, authentication binding, compatibility/version negotiation and error-to-wire mapping for D semantic operations | D + H + B/I; D explicitly states semantic operation contracts do not assert public APIs or wire schemas |
+| OPEN-STORAGE-01 | Named accountable Storage/Consistency owner; chosen transaction/CAS/serializable protocol; durable hidden prepare/commit; replica/read consistency; crash/restore behavior; proof that fence installation serializes with visibility commit | Storage/Consistency owner unassigned in D review; semantic contract is not implementation evidence |
+| OPEN-I-AUTH-01 | I authoritative PermissionEpoch freshness/equality/decision lookup at final gate, decision validity and revocation propagation | I-owned; E cannot define policy semantics |
+| OPEN-REGISTRY-GLOBAL-01 | Reconcile D-local ProducerRegistryVersion/ProducerRegistrationHighWater with I's global producer/recipient inventory and A/module ownership registry; prove closed-world completeness | I/A + module owners; local D ledger alone does not prove global inventory completeness |
+| OPEN-RECOMPILE-01 | Exact linked child/re-admission identity rule for recompile and whether a distinct ProducerWorkItemId is required | D/E; D requires explicit linked child/re-admission decision but does not freeze E's run model |
+| OPEN-TEST-01 | Executable race/fault fixtures, storage fault injection, actual expected/observed outputs and owner sign-off | D/E/Storage + affected consumers; all matrices here remain design-only |
+
+The earlier phrases “exact fields”, “exact receipt/error schema”, “high-water type” and “serialization with InstallForgetFence” are no longer valid as statements that D's semantic contract is unspecified. D has specified the semantic fields and one-order race. What remains open is their callable transport/API realization, global inventory reconciliation and tested storage linearization. Do not invent D decisions to fill those implementation gaps.
