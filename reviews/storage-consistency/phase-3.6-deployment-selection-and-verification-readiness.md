@@ -304,3 +304,20 @@ Storage executed a separate PostgreSQL 18.7 probe in which a coordinator child p
 The recovery process reconciled the exact original XID without allocating a new one. PREPARE ambiguity retained private visibility and the prepared lock; COMMIT ambiguity reconciled to pointer + receipt visible together; ROLLBACK ambiguity reconciled to neither visible.
 
 **Important scope:** this is a deterministic coordinator process-crash / unrecorded-checkpoint test, not a TCP packet-drop test or production I sequencer/COC test. Its SQLite ledger is a test fixture. Gate A remains PARTIAL PASS / OPEN; production deployment binding, real I/D ledger integration, production fencing, host/zone durability, human operator, runbook and RPO/RTO remain open. Gate B/C remain blocked.
+
+
+## Gate A — real PostgreSQL TCP ACK-loss recovery PASS (2026-11-17)
+
+Storage added a one-shot TCP proxy that drops the PostgreSQL CommandComplete response frame after the server executes PREPARE TRANSACTION, COMMIT PREPARED or ROLLBACK PREPARED. The client sees a broken connection / UNKNOWN; recovery reconnects and reconciles the same original XID.
+
+- Probe Blob: db843927fb3fd2f37b15b7a56dee5ca4c9b4274c
+- Workflow Blob: ae9cea590721630f3ebad6d9566de79ac188fd23
+- Successful run: 43913477785
+- Run commit: 9f3f9595fa5fec6003ece53bb289a5ff499f87ee
+- Job: 133461308120
+
+PASS: client-observed UNKNOWN after PREPARE, COMMIT PREPARED and ROLLBACK PREPARED; exact prepared XID recovered after PREPARE response loss; COMMIT response loss reconciled to pointer + receipt together; ROLLBACK response loss reconciled to neither visible.
+
+This is actual PostgreSQL protocol TCP response-loss fault injection at the CommandComplete boundary, not merely an application result suppressed after receipt. Scope is single-node PostgreSQL 18.7 CI; it does not prove production I sequencer/COC integration, coordinator quorum durability, cross-zone network partition behavior, production fencing or deployment readiness.
+
+Gate A remains PARTIAL PASS / OPEN at production binding. Gate B/C remain blocked.
