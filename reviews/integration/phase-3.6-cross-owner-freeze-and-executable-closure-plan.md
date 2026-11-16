@@ -829,3 +829,17 @@ A amended `reviews/integration/phase-3.6-causal-order-coordinator-deployment-arc
 The amendment makes the authority boundary normative: COC orders and observes; I's policy-domain sequencer alone decides COMMIT/ABORT; Storage resolves the exact same XID; D owns ForgetFence and barrier semantics. It adds pre-PREPARE intent registration, Storage-signed PreparedParticipantReceipt registration before I's owner-final gate, exact tuple binding, typed non-comparable COC/I positions, same-XID recovery, outage handling and ten new conformance specifications.
 
 **Status correction:** A architecture text amended and readback-verified. This is not fresh I/C/D/H/Storage exact-Blob acceptance, not implementation evidence, not deployment/operator designation, and not a test pass. COC-01..12 and JF10-COC-01..10 remain NOT RUN; JF-10 remains P0 OPEN; multi-policy-domain atomicity remains BLOCKED. Next closure actions are fresh I and relevant Owner decisions on the new A Blob, plus explicit D barrier and Storage prepared-XID/same-XID recovery acceptance; H must approve any required 1.1.0 wire mapping.
+
+
+## 13.14 I-approved JF-10 ↔ COC bridge — C/D/Storage joint decision gate
+
+Formal exact-version Owner decision request is open as [Issue #8](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/8). The common review bundle pins:
+- I bridge disposition §10.1–10.9: `1dedce596761807b25d337daf4a0d21bb797a197`;
+- A COC architecture: `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`;
+- D and Storage shared JF-10 v2 protocol readback: `94679897e84a6f58fd8b9467b5249e1a885cb0b0`;
+- C C-submit contract: `a72a3eb1e5207f67c01f804508311f42db9a6e0a`;
+- Storage prior COC boundary decision: `a589d983ac145244962c22e5da3a55427aa35ff8`.
+
+**Gate state: C = PENDING; D = PENDING; Storage = PENDING.** No prior CGH/COC acceptance is inherited as acceptance of this bridge. Each Owner must issue an append-only decision on its own branch against the same bundle. A will verify exact Blob SHAs and update this ledger only after readback.
+
+The requested bridge preserves separate authority domains: COC causal-order/participant ledger; I policy-domain sequencer as sole JF-10 decision authority; Storage same-XID resolution and visibility authority; D fence/lineage/barrier authority. Scope is one I PolicyDomainRef. Multi-domain atomicity remains BLOCKED. Production implementation, deployment and conformance are not implied.
