@@ -100,10 +100,10 @@ A green reference-model test is not a substitute for any physical campaign test.
 | Gate | Status | Reason |
 |---|---|---|
 | Architecture/interface bridge | CLOSED WITH ENUMERATED EXCEPTIONS | Exact C/D/Storage/I/H owner decisions recorded; single I PolicyDomain only |
-| D + Storage full multi-artifact bundle confirmation | OPEN | Issue #9 has no Owner response yet |
-| Named Storage DB/operator | NOT DESIGNATED | No actual DB product/version or accountable operator in Storage artifact |
+| D + Storage full multi-artifact bundle confirmation | CLOSED | Issue #9 closed after exact D/Storage Owner decisions and A readback verification |
+| Storage candidate DB profile | PostgreSQL 18.7 candidate selected for qualification | Single-node CI profile pinned; production Canonical Authority deployment and human on-call remain undesignated |
 | Named COC operator/infrastructure | NOT DESIGNATED | No deployed consensus/log service or accountable operator |
-| DB prepared-XID/lock/visibility capability | NOT PROVEN | No executable capability probe or environment trace |
+| DB prepared-XID/lock/visibility capability | SINGLE-NODE CI PASS / HA OPEN | Run 43907296027 proves same-volume crash recovery; synchronous replication, promotion and restore remain NOT RUN |
 | Persistent COC | NOT IMPLEMENTED / NOT VERIFIED | Architecture proposal only |
 | Provider idempotency | NOT VERIFIED | No provider-specific implementation/probe evidence |
 | 18-test reference validator revision | COMMITTED / READBACK VERIFIED / CI PENDING | New commit should trigger push workflow; no run result read back yet |
