@@ -1004,3 +1004,15 @@ H additionally published machine-readable JSON Schema Draft 2020-12 candidate:
 - Parsed readback reports five message variants. This remains a candidate; semantic cross-message validation, signature/quorum proofs, SDK generation/interoperability and H-JF10 tests are not established.
 
 **Result: the C/D/Storage joint architecture/interface bridge acceptance is CLOSED WITH ENUMERATED EXCEPTIONS.** This does not close JF-10 P0. Selected DB durable prepared-XID/lock behavior, same-XID crash recovery, COC quorum/operator/deployment, provider idempotency, production conformance, crypto governance and schema interoperability remain OPEN / NOT VERIFIED / NOT RUN. Multi-PolicyDomain atomicity remains BLOCKED. No production activation or merge is authorized.
+
+
+## 13.18 JF-10 cross-message semantic validator and CI harness
+
+A has added a dependency-free Python reference semantic validator and 10 unit tests for one complete JF-10 COC lifecycle:
+- Validator: `tests/conformance/jf10_coc_semantic_validator.py`, Blob `98aae6611db461ac8c18bab1b7743959e9689a15`, commit `30275b9bf2ad1c4aa2fd6f5dbd8873959c44af88`.
+- Tests: `tests/conformance/test_jf10_coc_semantic_validator.py`, Blob `4826816617527024bca0a467e25ae598dccce58c`, commit `2c63a677daaf2b32305f2eb7807e6c81806da88a`.
+- CI workflow: `.github/workflows/jf10-coc-semantic.yml`, Blob `5efdb89804fd5b1f69da66a36fdaf93c6c2546f9`, commit `bd104eaf63c7234a45fd780d484bc41ae15dd988`.
+
+The validator checks five-message lifecycle order, immutable tuple equality, preallocated/same XID binding, exact COC prepare references, durable-private/locked prepared state, I terminal and revocation evidence, Storage COMMITTED versus ROLLED_BACK proof requirements, reconciliation against I/Storage lookup outcomes, D barrier terminality, and single-PolicyDomain scope. Ten tests cover valid terminal lifecycle and nine negative/conflict cases.
+
+CI is configured to compile and run the unittest suite on pushes to the A Owner branch affecting the test/workflow paths, pull requests, or manual dispatch. The GitHub workflow has been committed and fetched back; **a GitHub Actions run result has not yet been observed**, so tests remain NOT RUN / NOT VERIFIED in this ledger. The validator explicitly does not verify cryptographic signatures, COC quorum, owner-authoritative lookups, provider idempotency or real Storage engine behavior. Those remain integration/runtime gates.
