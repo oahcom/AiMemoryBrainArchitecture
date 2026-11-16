@@ -3,7 +3,7 @@
 - Document: TAR-AI-001 / TAB-001 v0.1
 - Owner: H — BMCP Protocol Architect
 - Branch: `session-h-bmcp-protocol`
-- Reviewed source branch HEAD (pre-publication snapshot): `6e7cb95f6c99ef45af9ff4e26915f66141996075`; tree SHA: `f44e93e30130a213381587e005d2851722e74a1e`. The report publication commit is recorded separately in the final execution summary.nt-SHA verification during report publication**; H branch exists and branch-local protocol artifacts were fetched.
+- Reviewed source branch HEAD (pre-publication snapshot): `6e7cb95f6c99ef45af9ff4e26915f66141996075`; tree SHA: `f44e93e30130a213381587e005d2851722e74a1e`. The report publication commit is recorded separately in the execution summary.
 - Review date: 2026-11-17
 - Report version: 1.0
 - Verdict: **CONDITIONAL PASS**
@@ -173,5 +173,4 @@ Enforce maximum message size, bounded decompression, queue count/bytes, per-Prin
 - H Capability/Applied blob: `ed6b43a29aa368d772c701ffc83309a5aadf3c00`
 - H Forget/Reconnect blob: `695909360782987781e259187041618f495f1c8c`
 - Historical H branch baseline in Phase 3 review: `fcc5103399b4c322e52d642cae5a2414969399a7` (not asserted current).
-- Current branch HEAD: pending exact commit-parent verification; no fabricated SHA.
 - No protocol, cryptographic, SDK, fault-injection or performance tests executed.
