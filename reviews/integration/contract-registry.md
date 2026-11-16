@@ -71,3 +71,61 @@ All ten refs below were freshly queried through GitHub branch endpoints on 2026-
 ## 5. Closure rule
 
 No finding is closed by this registry update. Closure requires an exact owner artifact and full live HEAD, explicit owner decision where applicable, cross-module sign-off by every affected owner, and (for implementation/conformance claims) reproducible execution evidence. A later commit invalidates source freshness and requires re-query. No branch is merged by this registry.
+
+
+---
+
+## Phase 3.6 Closure Baseline Reconciliation — 2026-11-16
+
+- Review owner: Session A — Principal Integration Architect
+- Status: **ACTIVE CLOSURE TRACKING; NO CONTRACT FREEZE**
+- Live branch refs were queried again; this addendum supersedes all historical HEAD tables above for Phase 3.6 closure tracking.
+- A records evidence and coordinates acceptance. A does not create Owner approval or change an Owner contract.
+
+### 1. Live branch baseline
+
+| Owner | Branch | Observed HEAD |
+|---|---|---|
+| main | `main` | `8a6414158c9c056c1638222534e1993d1bbc99d2` |
+| A | `session-a-integration-2026-11-16` | `9c3dafb97b97aee50a8b61fe60836ed0a8e92fe3` |
+| B | `session-b-domain-model-phase3` | `2148dcf1a53ff7aab194ba1bf799fa5a6a3b697f` |
+| C | `session-c-agent-integration-2026-11-16` | `3b6c1d9a5d648f61daa04f5874d887f33475f098` |
+| D | `session-d-memory-brain-2026-11-16` | `968ce314cf2e44f50e3efd711060e495374cac98` |
+| E | `session-e-memory-compiler-2026-11-16` | `e3afa99728f399d154767c959e37ff38f651b4b6` |
+| F | `session-f-memory-runtime` | `2da5209d7072272d5510d376c0f319bed0402a6f` |
+| G | `session-g-memory-context` | `ac32e980003aa41faf0ae958ffef3df5ab387984` |
+| H | `session-h-bmcp-protocol` | `59926f5090dfd2e2ad78d9c25d0bd9062b4bcabc` |
+| I | `session-i-security-governance-2026-11-16` | `6a92f49bd740f6e2db11568d9bd61e8c58132cbc` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `c0d01d81698fa6bc2a22e84b0e2ada66ce329815` |
+
+### 2. Phase 3.6 decision register
+
+| Contract / owner | Current artifact and Blob SHA | Source commit | Artifact / decision / approval / test |
+|---|---|---|---|
+| DE-S / D | `03-memory-brain/phase-3.6-joint-forget-linearization-decision.md` — `1b6a312ecffd3947bbb4df59f902242482c98a40` | `da5f543946b7198649e32d5277cce7037b916759` | Exists; delegated joint architecture decision; I/Storage external approvals open; D36 NOT RUN |
+| DE-S / D addendum | `03-memory-brain/phase-3.6.1-joint-defect-closure-d-addendum.md` — `585a00b7ca0c319914d2030690ef45a48c6ee1db` | `968ce314cf2e44f50e3efd711060e495374cac98` | Exists; JF-01..09 semantic closure; no implementation claim; D36 NOT RUN |
+| DE-S / E | `04-memory-compiler/phase-3.6-joint-producer-publication-decision.md` — `aaa15de9d6e3a6ce74b11fda376369d6a49659ab` | `6b464831a4d87a81262981b38d533f1e0267a2aa` | Exists; delegated joint architecture decision; Storage/I confirmations open; E36-01..20 NOT RUN |
+| DE-S / E conformance | `04-memory-compiler/phase-3.6-producer-publication-conformance.md` — `a21f81dfe53ae6998818d2cc59e865f5dd1b839d` | `9742bee605f18364a15a9b2e9d30bd12531586b9` | Exists; DESIGN CONTRACT COMPLETE; all E36-01..20 NOT RUN |
+| DE-S / Storage | `reviews/storage-consistency/phase-3.6-joint-durable-atomicity-decision.md` — `17071157152c7868d638383ec97543fe3d35e652` | `360619ac131bce20b56118803e2ef4053173e7e5` | Exists; logical architecture decided; deployment and implementation unverified |
+| DE-S / two-round review | `reviews/storage-consistency/phase-3.6.1-de-s-six-dimension-two-round-self-review.md` — `30abb437905eb9a932083a34e8b7a0d84aa170d7` | `c0d01d81698fa6bc2a22e84b0e2ada66ce329815` | Exists; both rounds six dimensions PASS, zero findings; design self-review CLOSED |
+| BIH / B | `02-domain-model/phase-3.6-typed-identity-trust-closure.md` — `0a6b78a842e550b58533b797cdfcd2d954ed6826` | `4d8635c6fa5163b3883266b1c3184e27ed5fcfd5` | Exists; BIH36-JD-01..17 joint technical baseline; governance/consumer approval open; tests NOT RUN |
+| BIH / I | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` — `0cbf6bb7480db873790c454817593a9b1c5548ba` | `28ad1ad8bfef64a9f75952bb769836ac0ce977f8` | Exists; joint technical baseline; I36-GOV-01..08 GOVERNANCE-BLOCKED; I36-01..15 NOT RUN |
+| BIH / H | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` — `9845c97ac43d7888732afafe12e28850ec02add8` | `836028661970c8118d06512b4703c3471ea3a254` | Exists; joint technical binding; governance/consumer acceptance open; H36-01..18 NOT RUN |
+| BIH consumer map / B | `02-domain-model/fact-claim-consumer-mapping.md` — `dd45a37199c9b69ab6b68f65e051a484a04691d4` | `ab19afbf92f67fe0a7679e9aa3a35b015fed89f4` | Exists; mapping candidate; ADR-001-dependent Fact/Claim portions remain blocked; not consumer acceptance |
+| BIH governance register / I | `09-security-governance/governance-decision-register.md` — `3718ae8b24940ff655a2652e908996635709c1ad` | `328c4712834b6fa7f22c57a0182306b74496982b` | Exists; I35-DEC-01..13 Proposed; no effective approval version |
+| I global inventory / I | `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` — `9100061fa986fb6676656169de3fcf9fc1c72664` | `cf886721f8b57cafe0d2efd905766bbd8141eda9` | Exists; Candidate contract; inventory seal and operational target evidence not supplied |
+| CFG / C | `07-agent-integration/phase-3.6-final-request-evidence-contract.md` — `8db1140f0dd19fe9267e3f2b44a9c1be75a6c32b` | `3b6c1d9a5d648f61daa04f5874d887f33475f098` | Exists; C semantic decisions; C/G/H freeze blocked; tests NOT RUN |
+| CFG / F | `05-memory-runtime/phase-3.6-runtime-forget-suppression-and-invalidation.md` — `176cd500bf5d9fa8519c5213e835a745567fcfad` | `2da5209d7072272d5510d376c0f319bed0402a6f` | Exists; F semantics decided; interfaces open; tests NOT RUN |
+| CFG / G | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` — `8f6b215de7b78bf0eec2281359d3e039e7c8d5f4` | `ac32e980003aa41faf0ae958ffef3df5ab387984` | Exists; G semantic decisions; Applied freeze blocked; tests NOT RUN |
+
+### 3. Approval and consumer status
+
+- **DE-S:** logical design decision is recorded under user-delegated joint authority; Storage engineering approver and deployment owner are not named. I owns global ProducerDomainInventoryEpoch and InventorySealReceipt, and I alone can attest the global producer/recipient inventory. D/E/Storage cannot self-issue this seal.
+- **BIH:** B/I/H share the same normative decision set BIH36-JD-01..17. This is a delegated technical baseline, not a separately signed governance approval. I35-DEC-01..13 remain Proposed in the governance register; I36-GOV-01..08 remain blocked pending named independent approvers, decision IDs, timestamps and effective policy versions.
+- **BIH downstream consumers:** C must accept protected Principal/Actor/Agent/RuntimeSession binding, Scope/Environment roles, PermissionEpoch and final-request evidence; D must accept typed Principal/Actor/Producer/Scope/Environment references, authorization permit/currentness and fence separation; E must accept producer/workload binding, lineage, Scope, inventory seal and commit permit; F must accept identity/Scope filters, current PermissionEpoch, D fence and final-return revalidation; G must accept authenticated delivery/ACK binding, exact ContextVersion, Scope/Environment, PermissionEpoch, ForgetFence and CapabilityEpoch; Storage must accept typed authorization/permit, inventory seal, WorkItem/Attempt/Lease, manifest/dependency and fence predicates at visibility commit. Each consumer requires an explicit owner acceptance record; reading a document is not acceptance.
+- **CFG:** C/G/H Applied contract has no shared pinned version or common approval record. C, G and H are three distinct artifacts/commits. A's prior approval ledger records C/G/H and D/I/B confirmations as PENDING. Applied Contract Frozen = NO.
+- **CFG tests:** CFG-01..20 and PI-01..08 are specified in the A joint report; Test Executed=NO and Test Passed=NO for every case. Required fixtures include stable IDs, authenticated identity, typed Scope/Environment, ContextVersion/Delivery attempt, PermissionEpoch, ForgetFenceGeneration, CapabilityEpoch, canonical lineage, controlled operation ordering, build/runner identity and retained evidence.
+
+### 4. Evidence hierarchy and freeze rule
+
+Artifact Exists, Design Complete, Owner/Delegated Decision, Cross-module Agreement, Governance Approved, Consumer Accepted, Implementation Complete, Test Executed, Test Passed and Contract Frozen are separate states. No commit or readback can promote one state into another. No closure finding is created or closed solely by this registry update. A future Owner branch advance invalidates the affected source snapshot and requires re-read.
