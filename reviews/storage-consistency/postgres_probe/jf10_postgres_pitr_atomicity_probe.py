@@ -139,6 +139,9 @@ def main() -> None:
     else:
         raise RuntimeError(docker("logs", PRIMARY, check=False))
 
+    docker("exec", PRIMARY, "bash", "-lc",
+           'echo "host replication postgres 0.0.0.0/0 trust" >> "$PGDATA/pg_hba.conf"')
+    psql("SELECT pg_reload_conf()")
     psql("""CREATE TABLE jf10_visibility_pointer (
         xid_name text PRIMARY KEY, artifact_id text NOT NULL, state text NOT NULL
     )""")
