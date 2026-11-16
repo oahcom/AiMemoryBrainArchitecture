@@ -184,8 +184,11 @@ def main() -> None:
     commit_lsn = scalar("SELECT pg_current_wal_lsn()")
     psql(f"ROLLBACK PREPARED '{xid_rollback}'")
     psql("INSERT INTO jf10_pitr_boundary_marker VALUES ('after-rollback')")
+    # Capture a target inside the WAL segment containing the rollback outcome.
+    # pg_switch_wal() returns the next segment boundary and can overshoot the
+    # final archived WAL when recovery is later asked to reach that boundary.
+    rollback_lsn = scalar("SELECT pg_current_wal_flush_lsn()")
     psql("SELECT pg_switch_wal()")
-    rollback_lsn = scalar("SELECT pg_current_wal_lsn()")
     for _ in range(120):
         try:
             docker("exec", PRIMARY, "bash", "-lc", f"test -f /archive/{prepared_wal}")
