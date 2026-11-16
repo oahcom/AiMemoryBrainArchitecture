@@ -1690,3 +1690,18 @@ A recorded these findings in Issue #10 comment `6928963460`. Storage owns the co
 - JF-10 P0: OPEN.
 - Production activation: NOT AUTHORIZED.
 - Multi-PolicyDomain: BLOCKED.
+
+
+## 13.43 Gate A — deep PITR remains unchanged; rollback WAL archive defect localized — 2026-11-17
+
+A re-refreshed the Storage branch after §13.42 and confirmed no new commit or workflow run. Storage HEAD remains `df60b547da69d5114347022680d1ee45c09f0494`; probe/workflow blobs remain `a53feffcc680a939964d630ccc87d4c034c2cc5a` / `a055d311c324d09eb6ebf4054247761116795eb7`. Latest run remains `43953479942`, FAILURE.
+
+A performed a further source-level diagnosis of the rollback failure:
+- Probe lines 187–188 call `pg_switch_wal()` and then sample `pg_current_wal_lsn()` as `rollback_lsn`.
+- The sampled target is in the newly active WAL segment; no subsequent WAL switch forces that target-containing segment into the archive.
+- Raw log confirms missing segment `000000010000000000000007` and recovery failure at target `0/7000000`.
+- A posted the concrete correction and per-target archive requirement to Issue #10 comment `6929127524`, verified by re-fetching the comment: after capturing each target LSN, force archive of the segment containing that target (e.g. subsequent `pg_switch_wal()`) and wait for that exact segment; publish target-to-segment mapping.
+
+The generic negative-case substring assertion remains too weak: it must assert the exact deliberately missing/corrupted/truncated segment and prove no writable/promoted/authoritative state. Pointer-only/receipt-only negative fixtures and authoritative reader-path checks are also still absent. Real I/D control-ledger integration and authenticated high-water restore quarantine remain separate unproven requirements.
+
+No Storage-owned file was changed. A will not alter the Storage-owned probe/dossier or mark this evidence class PASS. Gate A remains PARTIAL PASS / OPEN; deep PITR remains IMPLEMENTED / CI FAILING; Gate B/C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
