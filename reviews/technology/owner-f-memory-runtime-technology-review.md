@@ -3,7 +3,7 @@
 - Document: TAR-AI-001 / TAB-001 v0.1
 - Owner: F — Memory Runtime Architect
 - Branch: `session-f-memory-runtime`
-- Reviewed branch HEAD: **PENDING exact parent-SHA verification during report publication**. Branch existence and branch-local file reads were verified; the GitHub file reader returned blob SHAs but not the resolved ref commit SHA.
+- Reviewed source branch HEAD (pre-publication snapshot): `61814ec33e7c6851c8b64ed9a7ca581c1ebe0b21`; tree SHA: `5ec5f265d4197c9bf22127cc12548d1ec09e70a9`. The report publication commit is recorded separately in the final execution summary.nt-SHA verification during report publication**. Branch existence and branch-local file reads were verified; the GitHub file reader returned blob SHAs but not the resolved ref commit SHA.
 - Review date: 2026-11-17
 - Report version: 1.0
 - Verdict: **CONDITIONAL PASS**
@@ -13,7 +13,7 @@
 
 TAB-001's Runtime direction is viable as a local-first, modular Rust subsystem: structured filtering and lexical retrieval first, optional ANN/reranking later, disposable per-session Working Sets, and cache hits revalidated against current authorization and Forget state. F's ownership boundary is clear: F owns retrieval, ranking/fusion, freshness/completeness, Working Set/cache and ActivationRecommendation; it does not own Canonical Memory Version or G's ContextVersion.
 
-Conditional acceptance is limited to architecture direction. The first implementation must not freeze an index technology, numerical latency/SLO, cache TTL/capacity, or cross-module Forget completion semantics until representative workloads and D/E/I contracts are available. The current branch read confirms strong cache/Working Set suppression semantics, but the full five-document F design package and exact current branch HEAD were not independently enumerated by the available GitHub interface in this review. Phase 2's branch-aware reconciliation records five F documents and an F branch-local Conditional Pass at design commit `dad5deb6bfaa2df9956930d0b1372df354112567`; that is a historical design baseline, not proof of the current branch HEAD.
+Conditional acceptance is limited to architecture direction. The first implementation must not freeze an index technology, numerical latency/SLO, cache TTL/capacity, or cross-module Forget completion semantics until representative workloads and D/E/I contracts are available. The current branch read confirms strong cache/Working Set suppression semantics, but the F branch tree was enumerated at the exact HEAD recorded below; nine F-owned design artifacts were present (activation policy, module baseline, phase-3.5 suppression/cursor and reprocessing records, phase-3.6 suppression/invalidation, retrieval engine, runtime overview, scheduling, and Working Set/cache). Phase 2's branch-aware reconciliation records five F documents and an F branch-local Conditional Pass at design commit `dad5deb6bfaa2df9956930d0b1372df354112567`; that is a historical design baseline, not proof of the current branch HEAD.
 
 ### Blocking findings
 
@@ -21,6 +21,19 @@ Conditional acceptance is limited to architecture direction. The first implement
 - **F-TAR-P1-002 — Forget/revocation race closure:** cache/index suppression is directionally sound, but F cannot claim anti-resurrection closure while D/E/Storage's producer admission, dependency registration and final publication gate remain OPEN.
 - **F-TAR-P1-003 — Candidate technology selection is not evidence-backed:** FTS5/Tantivy/ANN candidates require workload benchmarks and deterministic rebuild/fence tests; no measured result was found.
 - **F-TAR-P1-004 — Retrieval completeness and cross-channel authorization:** every candidate-producing backend must filter before candidate emission, including graph edges, Evidence and Provenance dereference; a late response filter is insufficient.
+
+## Upstream Owner Input Status (refreshed branch audit)
+
+The following owner branches were refreshed for this review. No separate TAR-AI-001 technology-review report was present in the B, I, D or E branch trees at the reviewed snapshots; their absence is recorded as **OPEN**, not treated as acceptance or as permission to infer conclusions.
+
+| Owner | Branch HEAD | TAR-AI-001 technology report | Relevant current input |
+|---|---|---|---|
+| B | `861fa9b2c3e1f572336543b15c7dc392493891db` | OPEN — not present | `ADR-001-fact-claim-semantics.md`, blob `a1024938ff5baba069cf128c69496a44e143330c`, remains **ADR-BLOCKED** |
+| I | `1fc3b3293ebf2077edfd6ad253647d382173d9fa` | OPEN — not present | PermissionEpoch formal confirmation, blob `bae6a24fe3a374bc816993979a8fa9af52517dea`, is normative I technical baseline; external governance profile approval remains blocked |
+| D | `9dd48eddb3c8f91d15dfa6981a7f53cc70bd4bf8` | OPEN — not present | Forget semantics, blob `1f0391bc49d007c44ec74165bd33d37412cc7990`, define D authority; D/E/Storage implementation closure remains open |
+| E | `4402549c39824b89a0dc49973226187c62e056c5` | OPEN — not present | Producer admission, blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a`, and derived publication, blob `00e37ba56596e710513c8d0568acd79141d9101b`, explicitly retain atomic registration/publication as OPEN / BLOCKING |
+
+These are current owner artifacts, not substitutes for the missing owner technology reviews. The Phase 3 D/E/H/I cross-module review remains a conditional integration review, not a closure of the D/E/Storage publication linearization gap.
 
 ## 2. Review Scope and Evidence
 
