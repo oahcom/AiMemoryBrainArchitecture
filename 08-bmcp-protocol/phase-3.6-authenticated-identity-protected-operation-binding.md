@@ -393,3 +393,24 @@ The coordinator's concrete operator, durable store, HA/failover, retention, disa
 - H36-CO-10 wall-clock and H receiver sequence deliberately inverted; coordinator order remains decisive.
 
 All cases: **SPECIFIED / NOT RUN**. This addendum is a schema candidate and architecture proposal; it does not establish owner acceptance, coordinator deployment, implementation or test pass.
+
+## H Owner exact-version decision — CGH-APPLIED-1.1
+
+- A package: `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`
+- Exact A package Blob SHA: `9808b31f840606b329f1a794935dfc9c5084d63b`
+- Common contract: `CGH-APPLIED-1.1`
+- H schema target: `bmcp.applied-ack/1.1.0`
+- Causal profile: `CausalOrderProfile/1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within H's authority over BMCP schema/serialization, authenticated transport, ACK, integrity/replay, capability and reconnect.
+
+H accepts the 1.1 message/evidence separation and transport mapping for ParticipantIntent, ParticipantReservation, I CommitAuthorizationReceipt/AuthorizationTerminal, D fence-request/fence-effective/lineage-clearance, C SubmitOutcome and CausalOrderTerminalProof. H accepts that all such references remain owner-issued opaque typed references; H transports and integrity-protects them but does not mint or adjudicate I/D/C/G authority. Forget Action ACK remains distinct from Applied and C submit evidence. A 1.0 downgrade cannot satisfy 1.1 Full Applied.
+
+Exceptions and closure conditions:
+1. The 1.1.0 schema remains an H-owned candidate, not production-frozen, deployed or interoperably verified. Conditional requiredness, exact field types, canonicalization, unknown-critical-field behavior, compatibility and replay rules require final schema conformance evidence.
+2. Exact signature/MAC suite, key custody/rotation/compromise and federation remain subject to I/Security governance approval before production activation.
+3. H receiver sequence/ACK arrival order is not cross-authority causal proof. H must preserve the coordinator/owner terminal proof and may not synthesize missing I/D/C evidence.
+4. Durable ACK/evidence journal, reconnect, downgrade rejection and crash/replay behavior require H36/CO test execution; all remain NOT RUN.
+5. H does not approve coordinator deployment, provider idempotency, I/D sequencer/fence implementation or G Full Applied predicate.
+
+This decision applies only to the exact A Blob above. It does not assert schema freeze, production interoperability, test pass or transfer of any CGH-APPLIED-1.0 decision.
