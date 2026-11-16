@@ -16,17 +16,18 @@ A local buffer, middleware render, transport ACK, reservation receipt, provider-
 ## 2. Required pre-submit sequence
 
 1. Freeze the exact final request bytes/semantic canonical form and digest; bind actual ContextId/ContextVersion, DeliveryId/attempt, InferenceRequestId namespace, FinalRequestBoundaryId, ManagedRegion digest, authenticated Principal/Actor/Agent/Adapter/runtime/session, ScopeBindingSet, applicable EnvironmentRef and CapabilityEpoch.
-2. Obtain an I-issued single-use CommitAuthorizationReceipt bound to that exact operation, request digest, PolicyDomainRef/PermissionEpoch, full authorization tuple, CausalOrderTransactionRef and FinalRequestBoundaryId. A detached PermissionDecision/ALLOW is not enough.
-3. Obtain D-issued current ForgetFence and complete target/source/ancestor lineage coverage for the exact managed region.
-4. Before the provider side effect, register a durable participant reservation with the named CausalOrderCoordinator. The reservation binds the exact request digest and the I/D evidence refs. If reservation is unavailable, stale, mismatched or indeterminate, do not call the provider.
-5. Obtain I terminal consumption evidence and D participant clearance. Neither owner may be replaced by a coordinator-supplied assertion.
-6. Invoke the provider/runtime exactly once under the reservation's idempotency/attempt contract; capture the actual provider receipt and actual InferenceRequestId.
-7. Append CSubmitOutcomeRef. Obtain a CausalOrderTerminalProofRef that binds C, I and D terminal evidence.
-8. Emit Final Request Submitted evidence only when the actual provider outcome is successful and the terminal proof is determinate. Otherwise emit REJECTED / UNKNOWN / IN_DOUBT evidence and suppress Full Applied.
+2. Create CausalOrderTransactionRef and obtain a durable ParticipantIntentRef from the coordinator, bound to the exact request digest, boundary, identity/session, context/delivery and capability. This intent is registered before any provider side effect and is not permission to submit.
+3. Bind the exact intent to an I-issued single-use CommitAuthorizationReceipt; I consumes it once in its own sequencer and returns IAuthorizationTerminalRef. If revocation wins, abort. If authorization wins, later revocation cannot become effective past this unresolved participant until terminal outcome.
+4. Bind the same intent to D's ForgetFence and complete target/source/ancestor lineage. D returns DParticipantClearanceRef only if no earlier fence wins; any later fence remains pending behind this unresolved participant.
+5. Coordinator validates the exact I/D owner references and finalizes ParticipantReservationRef. If any owner proof is missing, stale or mismatched, do not call the provider.
+6. Invoke the provider/runtime exactly once under the finalized reservation's idempotency/attempt contract; capture actual provider receipt and actual InferenceRequestId.
+7. Append CSubmitOutcomeRef. Obtain CausalOrderTerminalProofRef binding C, I and D terminal evidence.
+8. Emit Final Request Submitted evidence only when actual provider outcome is successful and terminal proof is determinate. Otherwise emit REJECTED / UNKNOWN / IN_DOUBT and suppress Full Applied.
 
 ## 3. Race and barrier semantics
 
-- A D fence or I revocation requested after a valid participant reservation cannot become effective past that unresolved participant until C's exact submit outcome is durably terminal or a safe abort is authoritatively committed.
+- A D fence requested after ParticipantIntentRef cannot become effective past that unresolved intent until C's exact submit outcome is durably terminal or a safe abort is authoritatively committed.
+- An I revocation requested before I receipt consumption may win and force abort. Once I has terminalized the receipt as COMMIT_WON, later revocation effectiveness is held behind that participant until C's exact outcome is terminal.
 - If provider success is proven before the later effective fence/revocation, preserve the historical submit fact; later D/I transitions invalidate current-use.
 - If D fence or I revocation wins before reservation/authorization consumption, C MUST NOT invoke provider.
 - If provider outcome is unknown after timeout/crash, the participant remains IN_DOUBT. C MUST NOT retry as a new operation or report success; reconciliation must use the same transaction/reservation and provider idempotency key. D/I barriers remain open.
