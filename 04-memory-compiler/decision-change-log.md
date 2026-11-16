@@ -226,3 +226,63 @@ H and I advanced while this E remediation was being authored. Their latest branc
 The refreshed H/I documents continue to require authenticated transport binding, reject payload self-asserted producer/actor/scope identity as authentication, recheck current PermissionEpoch and ForgetFence on replay and at the commit/disclosure boundary, and keep local Adapter acknowledgement distinct from global Forget completion. H/I remain CANDIDATE, not frozen.
 
 The current A-branch tree and repository code search did not locate `reviews/integration/phase-3-defghi-cross-module-contract-review.md`; that named review remains unavailable and is not claimed as read.
+
+
+
+---
+## 9. Phase 3.5 — Authoritative supersession and current disposition
+
+This section is the current E-side source alignment. Earlier statements remain as historical audit records, but where they conflict with this section they are **SUPERSEDED** and must not be used as current status.
+
+### 9.1 Superseded historical statements
+
+| Historical statement / section | Status | Superseded by |
+|---|---|---|
+| §1 says D Forget fence/canonical cursor candidate was not verified and D sequence scope remained OPEN | **SUPERSEDED** | Phase 3 cross-module review plus D current Forget Fence and commit-cursor semantics; D CanonicalCommitCursor is per-authority global |
+| §7 says D barrier/atomic pre-publication gate was not closed and D-REV-P1-003 remains broadly undefined | **PARTIALLY SUPERSEDED** | D now specifies Producer Registration Barrier, register-before-visible and latest-fence publish-gate semantics; narrower D/E/Storage atomic operation/linearization remains OPEN |
+| §7 says H and I branches were absent | **SUPERSEDED** | H and I candidate packages exist at branch heads recorded in Phase 3 cross-module review; their contracts are not frozen/approved |
+| §1/§7 says I identity/retention and H wire/Adapter contracts unavailable | **SUPERSEDED AS PRESENCE CLAIM ONLY** | I/H candidate contracts have been read; identity, retention, ACK mapping and wire schemas remain candidate/open dependencies |
+| §1/§7 limitations on E five-file inventory and self-review | **SUPERSEDED ONLY TO THE EXTENT VERIFIED IN §8** | §8 records completed source inventory; this update does not claim runtime tests or implementation evidence |
+| Any wording that treats a local E fence precheck as sufficient for publication | **SUPERSEDED** | PublishDerivedIfFenceCurrent must be D-authoritative and serialize against fence installation; E local checks are defense-in-depth only |
+| Any wording that implies Accepted means compiled/committed/published | **SUPERSEDED** | AcceptedReceipt evidence matrix: Accepted is durable ingress only |
+
+### 9.2 Current branch/source baseline
+
+The Phase 3 cross-module review records these reviewed branch heads (full SHA):
+
+| Session | Branch | Reviewed HEAD | Current package status |
+|---|---|---|---|
+| A | session-a-integration-2026-11-16 | f76cc558273fbc1a27bb930a2f1e8d940b717c80 | Coordination artifacts; registry correction remains A-owned |
+| B | session-b-domain-model-phase3 | ab19afbf92f67fe0a7679e9aa3a35b015fed89f4 | Fact/Claim ADR remains ADR-BLOCKED; typed references not frozen |
+| D | session-d-memory-brain-2026-11-16 | 30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6 | Forget and cursor semantics present; D/E/Storage atomic realization OPEN |
+| E | session-e-memory-compiler-2026-11-16 | 3dea6096eefa6779eb12e4e788bcf9429d2a3f83 | E design package; Phase 3.5 updates are committed separately after this reviewed baseline |
+| H | session-h-bmcp-protocol | fcc5103399b4c322e52d642cae5a2414969399a7 | Candidate Forget ACK/reconnect package exists; not frozen |
+| I | session-i-security-governance-2026-11-16 | 8c91d99e450ab5e8862bd6a3301fa193e28e6cbb | Candidate global Forget/identity policy exists; not frozen |
+
+F and G are not part of the Phase 3 D/E/H/I review's recorded branch-head set. No F/G HEAD is inferred here. The E branch's post-review HEAD is the commit SHA reported by the Phase 3.5 delivery, not the historical reviewed baseline above.
+
+### 9.3 Current authoritative dependency decisions
+
+- **D Producer Barrier — DECIDED semantic requirement:** D's current Forget contract requires closed-world ProducerClass/ProducerWork registration, durable registration before execution/lease/retry/DLQ replay/publication, fence installation capturing producer-registration high-water, terminal disposition for all pre-fence work, durable dependency registration before visibility and latest-fence recheck immediately before publication.
+- **D/E/Storage operation contract — OPEN / BLOCKING:** exact inputs/outputs/errors and linearization for RegisterProducerWork, InstallForgetFence, RegisterDerivedDependency, PublishDerivedIfFenceCurrent and CompleteProducerWork must be jointly implementable and tested. D's semantic requirements are not proof of a callable API or transaction implementation.
+- **H/I — CANDIDATE PRESENT:** H has Adapter-local ACK and reconnect candidate contracts; I has global Forget inventory/completion, identity/authorization and retention/backup candidate contracts. H ACK is local evidence only; I alone owns global completion policy.
+- **B Fact/Claim — ADR-BLOCKED:** E continues to treat CandidateProposition/ExtractionIR as pre-canonical compiler artifacts. No canonical Fact/Claim mapping, schema freeze or wire field is approved by this update.
+- **CanonicalCommitCursor — D DECIDED:** one per-authority global sequence. AggregateRevision, LifecycleEventCursor, F IndexWatermark, D ForgetFenceGeneration, I PermissionEpoch and G ContextVersion are independent typed namespaces.
+- **Unverified implementation — NOT PASSED:** design documents and static reviews are not runtime conformance. No test is marked PASS without executable fixture, environment, expected/actual output and retained evidence.
+
+### 9.4 Phase 3.5 change inventory
+
+| E file | Change |
+|---|---|
+| compiler-state-and-producer-admission.md | ProducerClass vs WorkItem registration; lease/attempt/retry/DLQ/replay/recompile and terminal evidence; crash recovery |
+| forget-fence-and-derived-registration.md | Five D operation mapping; staging/visibility boundary; publish evidence; explicit OPEN contracts; 16 race/fault cases |
+| accepted-receipt-and-idempotency-contract.md | Accepted-to-publication state matrix; duplicate submission; ACK-loss recovery; cursor namespaces |
+| decision-change-log.md | Explicit supersession markers and current cross-module status |
+
+### 9.5 Gate disposition
+
+- CR-P1-01: **OPEN / BLOCKING** — D/E/Storage atomic registration, dependency visibility and final publish linearization remain unresolved and unimplemented.
+- INT-P0-03: **OPEN** — end-to-end Forget requires D/E/F/G/H/I and Storage evidence; this E documentation change cannot close it.
+- CR-P1-02 / INT-X-01: E semantic cursor descriptions are aligned to D's per-authority global decision; A/F/G/Storage integration and executable durability/recovery validation remain outside this E-only change.
+- INT-P0-01: **ADR-BLOCKED** — B Fact/Claim approval remains absent/unverified.
+- H/I: candidate package existence is acknowledged; no cross-module contract freeze or security approval is implied.
