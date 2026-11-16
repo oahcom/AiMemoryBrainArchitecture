@@ -184,3 +184,30 @@ D Canonical Memory/Lifecycle/Entity Manager; B Claim/epistemic/time/provenance s
 - **CANDIDATE:** deterministic blocking keys + semantic candidate generation + explicit review.
 - **TO_VALIDATE:** duplicate/conflict precision and recall, candidate fan-out, human review volume and latency.
 - **OPEN:** authorized human/Agent adjudicator and authoritative attestation (D/I).
+
+
+## 19. Cross-module interface contract details (CANDIDATE until owner approval)
+
+The following is the minimum semantic contract, not a replacement for D/F/G/H/I's owned specifications. All messages are versioned, typed, scope-bound, correlated, and replayable.
+
+| Consumer / producer | Required fields | Version and idempotency | Authorization | Errors | Recovery |
+|---|---|---|---|---|---|
+| D Canonical Write | request_id, schema_version, actor_ref, scope_refs, environment_scope_ref, source_event_refs, candidate refs, entity/relation refs, evidence_refs, provenance_refs, conflict/revision proposals, expected canonical version, operation key, policy/method refs, correlation/causation | schema_version + domain schema version; same operation key and same canonical payload returns same commit; same key/different payload conflicts | D/I authorize actor, action, all source/evidence refs, target scopes and Forget fence immediately before commit | SCOPE_MISMATCH, PERMISSION_DENIED, STALE_VERSION, INVALID_TRANSITION, MISSING_EVIDENCE, PROVENANCE_INCOMPLETE, CONFLICT_REQUIRES_REVIEW, IDEMPOTENCY_CONFLICT, FORGET_FENCE_ACTIVE | Query operation result after timeout; reload canonical version and re-propose on stale; never blind retry |
+| F Index Publication | event_id, schema_version, commit_id, canonical_generation, changed object refs/types, prior/new version refs, scope_refs, change_kind, provenance_refs, recorded_at, correlation/causation | event schema version; unique commit_id + generation; consumer checkpoint/watermark is monotonic | F filters every projection by Scope and per-object permissions; Evidence projections require separate authorization | INVALID_EVENT, SCOPE_DENIED, STALE_GENERATION, GAP_DETECTED, PROJECTION_UNAVAILABLE | At-least-once consume; deduplicate by event_id/commit_id; replay from durable canonical outbox; rebuild projection and publish watermark only after complete application |
+| G Context impact | event_id, schema_version, canonical_ref, prior/new version, lifecycle/change kind, scope_refs, generation, reason_code, occurred_at, correlation/causation | unique event_id + canonical generation; duplicate delivery is no-op | G/I re-check current access and Forget/revocation epoch before Context read/write or Adapter delivery | UNKNOWN_CONTEXT, SCOPE_DENIED, STALE_CONTEXT, RECONCILIATION_REQUIRED, FORGET_SUPPRESSED | G owns Context version and reconciliation; E replays event; no Context mutation by E; late/duplicate events cannot regress versions |
+| H Accepted / status | schema_version, authenticated producer identity, actor_ref, scope_refs, event/source identity, payload_ref/digest, idempotency_key, source times, retention/sensitivity, correlation/causation; receipt_id/event_id/accepted_at/status | protocol + envelope version; same key/same digest returns same receipt; same key/different digest returns conflict | H authenticates producer; I authorizes event.ingest; E rechecks worker permission | INVALID_ENVELOPE, UNAUTHENTICATED_PRODUCER, SCOPE_INVALID, PERMISSION_DENIED, IDEMPOTENCY_KEY_REUSE_CONFLICT, INGRESS_CAPACITY_EXCEEDED, RETRYABLE_UNAVAILABLE | receipt lookup; durable outbox reconstructs work; processing status is separate from Accepted; replay preserves event identity |
+| I authorization / Forget | principal/actor, action, resource refs, scope_refs, policy/revocation epoch, retention_class, forget_operation_ref, fence_epoch, dependency refs, audit correlation | governance policy version and fence epoch; repeated Forget operation is idempotent; monotonic stage progress | I is policy authority; E enforces returned decision at ingress, every worker stage, replay and canonical commit | PERMISSION_DENIED, POLICY_UNAVAILABLE, SCOPE_REVOKED, RETENTION_BLOCKED, FORGET_FENCE_ACTIVE, FORGET_IN_PROGRESS | Fail closed for protected operations; pause/retry workers after policy recovery; durable fence prevents resurrection; completion only from I's target evidence |
+
+### 19.1 Shared error and replay rules
+
+- Errors distinguish permanent rejection, retryable unavailability, stale-version conflict, policy denial, missing dependency and partial projection.
+- Error bodies do not disclose protected object existence, content, identifiers or candidate counts.
+- Every asynchronous message has stable event/operation identity, attempt metadata and correlation/causation.
+- At-least-once delivery is assumed; consumers must deduplicate and commit their checkpoint with their local effect or use an equivalent inbox/outbox protocol.
+- A replay is an execution attempt over an existing immutable source/operation identity, not permission to recreate deleted content.
+- A Forget fence or authorization revocation invalidates queued work and cached decisions before any further protected dereference or mutation.
+- No component may infer success from timeout. Query by stable operation/event ID and reconcile against the authoritative owner.
+
+### 19.2 Ownership and compatibility
+
+D owns canonical object semantics and write decisions; F owns index projection and watermark; G owns Context state; H owns protocol and producer authentication; I owns policy, revocation and retention. E is a producer/consumer at these boundaries, not a second authority. Breaking semantic changes require the owning module's version migration and cross-module conformance update; optional unknown extension fields may be ignored only when they do not alter required semantics.
