@@ -1488,3 +1488,52 @@ The authorized Desktop Commander device was offline during the prior attempted l
 Storage owns its dossier/readiness record and must reconcile any stale statements that still say no candidate engine was selected or omit the five passing CI classes. A does not edit Storage-owned artifacts. A's Issue #10 comment 6924704083 requests that Owner-side reconciliation and the remaining Storage evidence.
 
 **Current status:** Gate 0 CLOSED; Gate A PARTIAL PASS / OPEN; Gate B BLOCKED; Gate C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain BLOCKED.
+
+## 13.37 Gate A database candidate qualification — PostgreSQL 18.7 CI evidence reconciled; production binding still open — 2026-11-17
+
+A has refreshed the Storage Owner dossier and the Issue #10 execution record. This section supersedes any older tracking text that says no candidate engine has been selected or that the physical capability probes have not run.
+
+### Candidate decision boundary
+
+Storage selected PostgreSQL 18.7 as the **candidate engine for JF-10 capability qualification**, pinned to image digest `sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc`. This is a test-profile selection only. It does not identify the project's production Canonical Authority deployment, prove that the project currently runs PostgreSQL, or authorize production activation.
+
+Storage's candidate dossier:
+- `reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md`
+- Current Storage dossier Blob SHA read: `05894fe54dbc18ff2128f8d9f74b5b098cc29298`
+- Storage branch: `session-storage-consistency-forget-atomicity-2026-11-16`
+
+### Five physical CI evidence classes independently reconciled
+
+A's evidence review confirms the following successful CI runs for their exact pinned PostgreSQL 18.7 profiles:
+
+1. Single-node prepared-XID, lock retention, hard restart, same-XID commit/rollback — run `43907296027`.
+2. Two-node synchronous standby promotion, prepared-XID/lock recovery, same-XID commit/rollback — run `43908746695`.
+3. Physical `pg_basebackup` restore with unresolved prepared XID and stale-control fail-closed fixture — run `43909138634`.
+4. Coordinator process-crash / unrecorded-ACK checkpoint-gap reconciliation — run `43912857694`; SQLite is a test fixture, not the production coordinator.
+5. Actual PostgreSQL TCP CommandComplete response loss after PREPARE/COMMIT/ROLLBACK, with UNKNOWN and same-XID reconciliation — run `43913477785`.
+
+These are bounded engine/protocol capability results. The physical restore test is not WAL-archive PITR; its I/D control epoch is a test fixture; the HA test is not production-grade fencing or split-brain prevention; and the ACK-gap fixture does not prove persistent COC/I sequencer durability.
+
+### Residual Gate A blockers
+
+1. Actual AiMemoryBrainArchitecture Canonical Authority runtime, deployed DB profile and participant adapter remain NOT DESIGNATED.
+2. WAL-archive PITR and recovery-point continuity are not tested.
+3. Old-primary fencing/rejoin prevention and split-brain protection are not proven.
+4. Protected PREPARE behavior when the synchronous standby is unavailable is not evidenced.
+5. Production host/zone/cloud-volume durability, failover routing and monitoring are not bound.
+6. Production I/D control-ledger source/high-water integration is not demonstrated.
+7. Named production operator/on-call, approved runbook, RPO/RTO and operational acceptance are NOT DESIGNATED.
+
+Storage must reconcile its own dossier/readiness artifacts against the five successful evidence classes and close the remaining Storage-owned tests and deployment-binding fields. A will not edit Storage-owned files, choose the production DB on Storage's behalf, infer a production target, or substitute CI capability evidence for project deployment approval.
+
+### Sequential gate disposition
+
+- Gate 0 (D/Storage exact architecture-bundle decision): CLOSED.
+- Gate A (candidate engine capability): **PARTIAL PASS / OPEN** — five bounded CI evidence classes pass; project production binding and remaining operational proof are open.
+- Gate B (persistent COC implementation/deployment): BLOCKED until Gate A is accepted.
+- Gate C (end-to-end JF-10 fault campaign): BLOCKED until Gate B is accepted.
+- JF-10 P0: OPEN.
+- Production activation: NOT AUTHORIZED.
+- Multi-PolicyDomain: BLOCKED.
+
+This is an A integration evidence reconciliation only. It is not a Storage production-engine approval, deployment decision, or final JF-10 acceptance.
