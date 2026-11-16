@@ -138,3 +138,35 @@ No vendor, SQL dialect, isolation guarantee, deployment topology or migration co
 - Implementation Verified: **NO**.
 - Deployment Implemented: **NO**.
 - Production Ready: **NO**.
+
+
+## 9. I technical baseline refresh — CommitAuthorizationReceipt and JF-10
+
+A later branch-aware read found I HEAD `8d1ddadb6af70a7c387105d20ca8f2f6de80c5fb` and the new I artifact `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` (Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`).
+
+The I technical baseline now specifies:
+- one logical I linearizable commit sequencer per policy domain;
+- a single-use, non-transferable `CommitAuthorizationReceipt` bound to the full principal/actor/action/resource/purpose/audience/scope/environment/delegation/operation ID/payload digest/owner boundary/decision tuple;
+- the final owner commit/disclosure gate participates in the same per-domain commit ordering protocol as revocation;
+- terminal outcomes `COMMIT_WON`, `REVOCATION_WON`, `INDETERMINATE_ABORTED`;
+- offline authorization leases, stale-epoch grace and cached ALLOW without online currentness proof are prohibited in the Phase 3.6 baseline;
+- multi-policy-domain operations require an all-or-none common coordinator decision.
+
+DE-S adopts this exact receipt and outcome vocabulary. This is a technical baseline update, not a governance approval. The I document explicitly keeps external governance approvals GOVERNANCE-BLOCKED and C/D/E/F/G/Storage consumer acceptance OPEN.
+
+### JF-10 — cross-authority crash atomicity remains P0 OPEN
+
+The I document establishes ordering semantics but does not fully define the durable crash-recovery coupling between the I sequencer's COMMIT_WON and Storage's owner transaction that commits VisibilityPointer + PublicationReceipt. Required joint I/Storage specification:
+- durable shared operation correlation and immutable payload digest;
+- exact commit handshake/participant or coordinator protocol;
+- idempotent authoritative outcome lookup across I and Storage;
+- recovery for I sequencer COMMIT_WON followed by owner DB abort/crash;
+- recovery for owner transaction/ACK loss and duplicate receipt replay;
+- one authoritative terminal outcome and no visibility from one-sided evidence;
+- hidden prepared/ambiguous artifacts until both authorities reconcile.
+
+The selected local transactional DB remains the D/E/Storage baseline, but it does not alone prove I/Storage cross-authority atomicity. Final publication remains fail-closed until JF-10 is specified, jointly accepted and tested.
+
+### I inventory and Global Forget remain separate
+
+The latest I trust/authorization technical closure does not resolve the I-owned ProducerDomainInventoryEpoch / InventorySeal governance decision or Global Forget Completion approval. The inventory/completion artifact remains CANDIDATE and I36-GOV-07/08 remain GOVERNANCE-BLOCKED in the trust-policy approval register. Repository issue #4 tracks the I Owner response.
