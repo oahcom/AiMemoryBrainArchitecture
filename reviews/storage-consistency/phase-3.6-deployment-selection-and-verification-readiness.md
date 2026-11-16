@@ -720,3 +720,10 @@ Non-waived architecture/governance blockers remain: I36-GOV-01..10 are GOVERNANC
 - JF-10 runtime P0: **OPEN**.
 - TAB-001: **CANDIDATE / NOT FROZEN**.
 - Production activation: **NOT AUTHORIZED**.
+## 30. Restore high-water reference model — 25/25 CI PASS (2026-11-17)
+
+Storage added an in-memory restore/quarantine reference model and CI workflow. Evidence: `reviews/storage-consistency/phase-3.6.5-restore-highwater-reference-model-evidence.md`, Blob `bf991a8a098bfdacc24bace53d452b8ccf2078e6`; model Blob `be0aef6232c8ee2ed6179df7b0a74473c3e25b3b`; tests Blob `a9e1a96b449c6bf0e2b52c5fea394a8c32961a24`; run `43965501810`, job `133643756066`, commit `19798634fb0d55cb0c901c8f4194506fab96b75b`; **25/25 PASS**.
+
+The tests cover COC/I/D high-water freshness and completeness, I seal ↔ D operation binding, Storage same-GID/native-XID/database identity, WAL/timeline integrity, pointer/receipt atomicity, proof signature/key/audience, recheck-on-advance and the non-authority of RestoreReconciliationReceipt.
+
+This is logical model evidence only; no real backup/WAL restore, real owner proof API, cryptographic verification, old-primary fencing or measured RTO is claimed. Gate A's design disposition remains conditional; implementation/deployment remains deferred.
