@@ -13,7 +13,7 @@ Every WorkItem registration request binds producer class/instance, stable WorkIt
 
 ## 2. JF-02 — Authorization gate binding
 
-E supplies the exact action, principal/actor, artifact, source lineage, ScopeRef, WorkItemId, AttemptId, LeaseEpoch, DependencySetDigest and fence generation to the final gate. The gate must consume an I-authoritative AuthorizationCommitPermit bound to those exact values, PermissionEpoch, revocation watermark, policy version, audience, expiry and nonce.
+E supplies the exact action, principal/actor, artifact, source lineage, ScopeRef, WorkItemId, AttemptId, LeaseEpoch, DependencySetDigest and fence generation to the final gate. The gate must consume an I-authoritative CommitAuthorizationReceipt bound to those exact values, PermissionEpoch, revocation watermark, policy version, audience, expiry and nonce.
 
 A cached policy result, stale epoch, expired permit, mismatched scope, or unprovable revocation ordering is denial. E cannot mint or extend authorization. The permit must remain valid under a commit/revocation serialization protocol through the actual visibility linearization point; validation only when entering PublishGatePending is insufficient. If I cannot provide this guarantee, E leaves the artifact private and reports blocked/unknown, never Published.
 
@@ -71,3 +71,14 @@ E's queue, lease, retry, DLQ, replay, recompile and outbox are not authorities f
 This acceptance is a logical consumer mapping, not an executable E API, database deployment, or independent Storage engineering approval. The repository contains no E runtime, build/test harness, migration or database configuration. E36-01..20 remain NOT RUN.
 
 **I external dependency remains BLOCKED:** no approved I ProducerDomainInventoryEpoch/InventorySeal or commit-usable PermissionEpoch/revocation interface has been supplied. E remains private/non-terminal on missing, stale or unknown proof. The I Owner request is tracked in repository issue #4.
+
+
+## 10. I Phase 3.6 technical contract refresh — CommitAuthorizationReceipt
+
+E adopts the current I-owned `CommitAuthorizationReceipt` from `phase-3.6-identity-trust-policy-joint-closure.md` (I HEAD observed `8d1ddadb6af70a7c387105d20ca8f2f6de80c5fb`, Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`). This is the delegated technical baseline; I governance approval remains blocked and C/D/E/F/G/Storage consumer acceptance is not implied.
+
+The receipt is single-use, non-transferable and bound to policy_domain_id, PermissionEpoch, PrincipalRef, ActorRef, action, ResourceRef, purpose, audience, ScopeBindingSet digest, EnvironmentRef, DelegationChainRef, operation_id, operation_payload_digest, owner_boundary and decision_id. E supplies the exact operation identity/digest and submits the receipt to the final publication gate. The gate must participate in the same I per-domain linearizable sequencer that orders authorization decisions and revocation. E records receipt ID, I decision ID, sequencer position, epoch, operation digest, owner transaction/commit cursor and terminal outcome `COMMIT_WON`, `REVOCATION_WON` or `INDETERMINATE_ABORTED`.
+
+No offline authorization lease, stale-epoch grace or cached ALLOW is usable in this baseline. If the current I sequencer cannot be reached, the receipt is stale/mismatched/replayed, or ordering is indeterminate, E keeps bytes private and the WorkItem non-terminal.
+
+**JF-10 — I sequencer / Storage commit recovery protocol remains an integration blocker.** The I technical contract specifies the ordering requirement but the inspected artifact does not fully define recovery when the I sequencer has recorded COMMIT_WON and the Storage transaction/visibility commit crashes or its ACK is lost. E does not invent the cross-owner transaction protocol. I + Storage must define durable correlation, idempotent lookup, owner commit proof and reconciliation for both sequencer and owner transaction. Until that is defined and tested, E cannot acknowledge Published.
