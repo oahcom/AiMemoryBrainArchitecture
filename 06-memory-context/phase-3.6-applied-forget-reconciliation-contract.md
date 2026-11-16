@@ -255,3 +255,17 @@ G accepts the candidate's complete 1.1 predicate: exact G ContextVersion/Deliver
 G accepts the COC-outage admission safety rule as a mandatory fail-closed precondition: if coordinator ordering or owner cutoff reconciliation is unavailable/unknown, G must not commit a new Full Applied record and must suppress protected current use. G does not infer that no revocation/fence exists from missing coordinator evidence. Historical Applied, once validly committed, remains an immutable historical fact; current-use is separately recomputed against current Context head, I authorization/PermissionEpoch, D fence/lineage, scope/environment, session and capability.
 
 Exceptions: (1) coordinator/operator and durable participant/order service are not designated/deployed/verified; (2) G validator and Applied persistence implementation have not been shown consuming the full 1.1 evidence set; (3) idempotent same-identity/same-digest replay and changed-digest conflict behavior require executable recovery tests; (4) G-CO/Applied race suites remain SPECIFIED / NOT RUN. No implementation or production pass is claimed. This decision applies only to the exact A Blob above and does not transfer the 1.0 decision.
+
+## G exact-version Applied acceptance — CGH-APPLIED-1.1 recovery-batch amendment
+
+- A package Blob: `4961ffefc0f9920efb8425a9b2a7af42d8f64819`
+- Companion COC Blob: `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`
+- Profile: `CausalOrderProfile/1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within G's Full Applied predicate, durable Applied fact/idempotency and current-use projection authority.
+
+G accepts the recovery-cutoff batch and pre-batch participant reconciliation as mandatory evidence prerequisites for any new Full Applied promotion. If COC order, owner-local pending gate reconciliation, participant enumeration, I terminal outcome, D complete-lineage barrier or owner high-water proof is missing/unknown, G MUST NOT commit a new Full Applied record and MUST suppress protected current use. G will not infer that no revocation/fence exists from COC outage or missing owner messages. A recovery batch does not itself establish C provider success; exact CSubmitOutcome and determinate CausalOrderTerminalProof remain required.
+
+Historical Applied remains immutable only if it was validly committed under the evidence predicate at that time; current-use is independently recomputed against current I/D/Context/session/capability state.
+
+Exceptions: (1) G validator/Applied persistence implementation has not been shown consuming all recovery-batch evidence; (2) same-identity/digest replay, conflict quarantine and restore behavior require executable tests; (3) G-CO/Applied race suites remain SPECIFIED / NOT RUN; (4) no implementation or production pass is claimed. This decision applies only to the exact A/COC Blob pair above.
