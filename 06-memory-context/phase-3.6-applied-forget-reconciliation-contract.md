@@ -241,3 +241,17 @@ Exceptions and closure conditions:
 5. G-CO/Applied race and recovery conformance remains SPECIFIED / NOT RUN; no runtime pass is claimed.
 
 This decision applies only to the exact A Blob above and does not transfer the prior 1.0 decision, certify global Forget, or imply implementation/deployment.
+
+
+## G Owner exact-version reaffirmation — current CGH-APPLIED-1.1 candidate
+
+- A candidate Blob SHA: `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`
+- Profile: `CausalOrderProfile/1.0`; H schema: `bmcp.applied-ack/1.1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within G's sole authority over Full Applied, durable Applied idempotency and historical/current-use projection.
+
+G accepts the candidate's complete 1.1 predicate: exact G ContextVersion/Delivery attempt; actual C provider receipt and CSubmitOutcome; I single-use receipt and I sequencer terminal evidence with revocation request cutoff or explicit none; D intent-bound participant clearance, complete lineage, request cutoff and distinct effective position; H integrity-protected 1.1 transport; B typed-reference semantics; and a determinate CausalOrderTerminalProof binding the same transaction, digest, reservation and terminal result. G will not promote Full Applied from I COMMIT_WON, D clearance, intent, reservation or H ACK alone.
+
+G accepts the COC-outage admission safety rule as a mandatory fail-closed precondition: if coordinator ordering or owner cutoff reconciliation is unavailable/unknown, G must not commit a new Full Applied record and must suppress protected current use. G does not infer that no revocation/fence exists from missing coordinator evidence. Historical Applied, once validly committed, remains an immutable historical fact; current-use is separately recomputed against current Context head, I authorization/PermissionEpoch, D fence/lineage, scope/environment, session and capability.
+
+Exceptions: (1) coordinator/operator and durable participant/order service are not designated/deployed/verified; (2) G validator and Applied persistence implementation have not been shown consuming the full 1.1 evidence set; (3) idempotent same-identity/same-digest replay and changed-digest conflict behavior require executable recovery tests; (4) G-CO/Applied race suites remain SPECIFIED / NOT RUN. No implementation or production pass is claimed. This decision applies only to the exact A Blob above and does not transfer the 1.0 decision.
