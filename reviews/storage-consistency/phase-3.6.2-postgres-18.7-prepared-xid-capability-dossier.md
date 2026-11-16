@@ -358,3 +358,36 @@ Observed raw log markers:
 An earlier draft of this probe incorrectly expected the local prepared XID to be absent and failed. The final probe corrects that assertion to the actual PostgreSQL behavior above; the failed run is not counted as passing evidence.
 
 Gate A remains PARTIAL PASS / OPEN. This CI test does not prove production standby recovery, fencing, or safe promotion while the PREPARE ACK is outstanding. A production failover policy must not promote a standby that may lack the locally prepared XID and then claim a terminal participant outcome.
+
+
+## 18. WAL-archive point-in-time recovery to explicit LSN — PASS (2026-11-17)
+
+Storage added and executed a PostgreSQL 18.7 WAL-archive PITR campaign. The workflow creates a physical base backup, commits a target marker, captures its post-commit LSN, commits a later marker, archives the WAL segment, restores the base backup with archive recovery, and promotes at the explicit target LSN.
+
+Evidence:
+- Probe: `reviews/storage-consistency/postgres_probe/jf10_postgres_pitr_probe.py`
+- Probe Blob: `6e7721ee8f8708357610e0bc564e015872b8263c`
+- Workflow: `.github/workflows/jf10-postgres-pitr.yml`
+- Workflow Blob: `4c2175055ae43ccebb95f219952ec0480121e62d`
+- Successful run: `43927783471`
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43927783471
+- Run commit: `91117532adb25914bcaa49b0007f7c34ef49c787`
+- Job ID: `133511748345`
+- Conclusion: SUCCESS
+- Engine: PostgreSQL 18.7 (Debian 18.7-1.pgdg13+2)
+- Explicit recovery target LSN: `0/6000190`
+- Observed replay LSN: `0/7000000`
+- Promoted recovery timeline: `2`
+
+Raw log PASS markers:
+- `PITR_BASE_BACKUP_CREATED=PASS`
+- `PITR_TARGET_WAL_ARCHIVED=PASS`
+- `PITR_BASE_STATE_PRESENT=PASS`
+- `PITR_TARGET_STATE_PRESENT=PASS`
+- `PITR_POST_TARGET_STATE_ABSENT=PASS`
+- `PITR_EXACT_LSN_RECOVERY=PASS`
+- `JF10_POSTGRESQL_WAL_ARCHIVE_PITR=PASS`
+
+The test proves that the base state and target transaction are present after recovery while the transaction committed after the target LSN is absent. The restored server was promoted on timeline 2. The recovery image was configured with the same `max_prepared_transactions=16`, `wal_level=replica`, `fsync=on` and `full_page_writes=on` profile as the source; the restore explicitly removed any standby.signal and used recovery.signal plus the archived WAL.
+
+Scope: this is a single-node CI PITR capability test using a local Docker named volume and archive volume. It does not prove production archive retention, off-site immutability, backup catalog integrity, cross-zone recovery, RPO/RTO, key custody, or replay of the production I/D Forget-control ledger. Gate A remains PARTIAL PASS / OPEN.
