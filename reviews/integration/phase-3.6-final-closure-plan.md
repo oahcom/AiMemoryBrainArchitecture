@@ -196,3 +196,10 @@ Do not promote G3 based on this model or reduce Phase 3.6 exit criteria without 
 Storage Owner branch now contains 15 deterministic unittest cases in `reviews/storage-consistency/reference_model/test_jf10_linearization_model.py` (Blob `a38d73b4a5e7c65210fb414a62fb91b30649b788`) and a branch-scoped GitHub Actions workflow `.github/workflows/jf10-reference-model.yml` (Blob `bbd393a3cf58d4bccbf0079724acbaa09ed9960f`). Two added fault cases cover crash before the local publication linearization point and crash after atomic PublicationRecord insertion followed by reconstruction of readback projections. The model and test source read back successfully.
 
 No successful GitHub Actions run has been observed or verified. Therefore the suite remains **NOT RUN IN CI**; local semantic replay evidence is limited to 15 deterministic assertions against the reference model. This remains logical-model validation only, not a real database/process-crash or production conformance result. JF-10 P0 and G3 remain OPEN/BLOCKED.
+
+
+## 13. G0 branch-head refresh — all ten Owner branches enumerated
+
+A refreshed all ten currently discoverable Owner branch tips on 2026-11-16. Exact branch HEADs are recorded in `phase-3.6-closure-tracking.md` under “Full Owner branch-head snapshot”. G0 discovery/HEAD enumeration is refreshed, but G0 is not PASS until the full required artifact inventory and all gate-input Blob SHAs are reconciled and revalidated after final changes.
+
+The Storage branch HEAD in this snapshot includes the JF-10 logical model, 15-case unittest source, and branch-scoped CI workflow. No successful CI run has been verified. This is not production implementation evidence and does not close G3.
