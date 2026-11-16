@@ -315,7 +315,8 @@ All references below are opaque, typed, issuer-namespaced references. H transpor
 | `causal_order_coordinator_ref` | CausalOrderCoordinatorRef / designated coordinator registry | Identity of the common durable ordering authority |
 | `causal_order_transaction_ref` | CausalOrderTransactionRef / coordinator | One protected submission transaction |
 | `causal_order_position` | CausalOrderPosition / coordinator | Opaque total-order position; comparable only inside the named coordinator epoch |
-| `participant_reservation_ref` | ParticipantReservationRef / coordinator | Durable pre-side-effect reservation for C's exact submit obligation |
+| `participant_intent_ref` | ParticipantIntentRef / coordinator | Durable pre-side-effect intent; creates the participant barrier before I/D terminal checks |
+| `participant_reservation_ref` | ParticipantReservationRef / coordinator | Finalized reservation after I and D terminal evidence validates; required before C provider side effect |
 | `i_commit_authorization_receipt_ref` | CommitAuthorizationReceiptRef / I | Single-use I receipt bound to exact authorization tuple, request digest, transaction and C boundary |
 | `i_authorization_terminal_ref` | IAuthorizationTerminalRef / I | I sequencer terminal decision and effective ordering position for this operation |
 | `d_forget_fence_ref` | ForgetFenceRef / D | Exact applicable fence identity and generation |
@@ -330,10 +331,10 @@ All references below are opaque, typed, issuer-namespaced references. H transpor
 |---|---|---|
 | `CAUSAL_ORDER_INTENT` | C → coordinator | coordinator/profile refs, transaction ref, exact InferenceRequestId reservation namespace (or preallocated boundary correlation bound later), FinalRequestBoundaryId, immutable request digest, ContextVersion, DeliveryId/attempt, authenticated Principal/Actor/Adapter/runtime/session, ScopeBindingSet, EnvironmentRef if required, CapabilityEpoch, unique intent nonce |
 | `CAUSAL_ORDER_INTENT_RECEIPT` | coordinator → C/I/D | transaction ref, ParticipantIntentRef, durable coordinator epoch/position, exact digest, intent state |
-| `CAUSAL_ORDER_RESERVATION` | C → coordinator | transaction + ParticipantIntent refs, I CommitAuthorizationReceiptRef + I terminal ref, D fence + lineage + participant-clearance refs, exact digest and owner evidence digests; finalizes the pre-side-effect reservation only after all owner bindings validate |
+| `CAUSAL_ORDER_RESERVATION` | C → coordinator | transaction + ParticipantIntent refs, I CommitAuthorizationReceiptRef + I terminal ref, D fence + lineage + participant-clearance refs bound to ParticipantIntentRef, exact digest and owner evidence digests; finalizes the reservation only after all owner bindings validate |
 | `CAUSAL_ORDER_RESERVATION_RECEIPT` | coordinator → C | transaction ref, reservation ref, accepted coordinator epoch/position, exact evidence digest, reservation state, expiry policy (must not silently expire into success) |
 | `I_AUTHORIZATION_TERMINAL` | I → coordinator/C | CommitAuthorizationReceiptRef, I PolicyDomainRef/PermissionEpoch, exact operation and request digest, single-use consumption result, I sequencer terminal ref/position, COMMIT_WON or REVOCATION_WON or UNKNOWN/IN_DOUBT |
-| `D_FENCE_TERMINAL` | D → coordinator/C | ForgetOperationRef, ForgetFenceRef/generation, lineage coverage ref, participant reservation ref, D fence effective position, participant disposition, D clearance ref |
+| `D_FENCE_TERMINAL` | D → coordinator/C | ForgetOperationRef, ForgetFenceRef/generation, lineage coverage ref, ParticipantIntentRef, D fence effective position, participant disposition, D clearance ref |
 | `C_SUBMIT_OUTCOME` | C → coordinator | transaction/reservation refs, actual provider/runtime result, actual InferenceRequestId, FinalRequestBoundaryId, immutable final request digest, provider receipt ref, C evidence ref/digest, outcome ACCEPTED / REJECTED / UNKNOWN |
 | `CAUSAL_ORDER_TERMINAL_PROOF` | coordinator → C/G/H | coordinator/profile/transaction refs, reservation ref, I receipt + terminal refs, D fence + lineage + clearance refs, C submit outcome ref, ordered positions, terminal outcome, proof digest and coordinator signature/key ref |
 | `CAUSAL_ORDER_ACK` | H receiver → sender | original transaction/proof refs, receiver sequence, durable receipt disposition; explicitly transport durability only |
