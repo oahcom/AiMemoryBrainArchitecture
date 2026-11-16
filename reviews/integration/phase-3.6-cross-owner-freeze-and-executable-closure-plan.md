@@ -729,3 +729,20 @@ Storage/Consistency also published exact COC/package review:
 - COC-01..16, JF10-01..17, Storage C01..C23 and consumer conformance remain SPECIFIED / NOT RUN. Reference model is in-memory only; no production implementation verified.
 
 **Current gate:** exact 1.1 recovery-batch semantic owner decisions = RECORDED WITH ENUMERATED EXCEPTIONS; Storage COC interface = CONFIRMED WITH CHANGES. Applied Contract Frozen = NO; production coordinator/operator = NOT DESIGNATED; combined COC/JF-10/Storage atomicity = NOT PROVEN; implementation verified = NO; G8 BLOCKED, G9 NOT RUN, G10 BLOCKED. No merge or production activation authorized.
+
+
+## 13.11 I formal JF-10 prepared-participant ↔ COC bridge decision
+
+I has recorded a formal decision in `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md`:
+- Decision: **ACCEPT WITH BINDING BRIDGE AMENDMENTS — SINGLE I POLICY DOMAIN ONLY**.
+- I Owner commit: `dea5061a342ad328103c7aee0afc68b121563463`.
+- I artifact readback Blob: `1dedce596761807b25d337daf4a0d21bb797a197`.
+- Exact A COC proposal reviewed: Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
+- Exact D/Storage current JF-10 shared recovery contract reviewed: Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`.
+- Issue #4 decision comment: `6920679097` (readback verified).
+
+I's decisive authority split: COC is the cross-owner causal-order and participant-accounting log; I's policy-domain sequencer remains the sole durable COMMIT/ABORT decision coordinator for the prepared Storage XID; Storage alone resolves that exact XID and publishes VisibilityPointer/PublicationReceipt; D alone owns fence/lineage/barrier semantics. COC and I positions are distinct typed orders and cannot be compared or substituted.
+
+Binding amendments require COC to register a stable preallocated XID/operation/digest/boundary before Storage PREPARE, register Storage's signed PreparedParticipantReceipt after durable prepare, require I to linearly verify both before owner-final-gate decision, record I's signed terminal proof and Storage's same-XID resolution idempotently, and preserve forward-COMMIT/rollback-ABORT recovery direction. Ten new JF10-COC fault cases are specified in I artifact §10.8.
+
+**Gate status:** I's interface decision is RECORDED WITH BINDING AMENDMENTS; the current A COC artifact must be amended to include these bridge records/API and exact state transitions before it is fully reconciled. Multi-policy-domain atomicity remains BLOCKED. JF-10 remains P0 OPEN; JF10-COC-01..10 and other conformance remain SPECIFIED / NOT RUN; implementation NOT VERIFIED; no deployment or production approval.
