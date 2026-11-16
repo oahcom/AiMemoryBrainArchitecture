@@ -1,128 +1,103 @@
 # Phase 3 — Cross-Module Contract Registry
 
-- Role: Session A / Principal Integration Architect
-- Status: **CANDIDATE coordination register; not an ADR and not an approval to freeze schemas/wire contracts**
-- Repository baseline: `main @ 8e57f38e1f81a26280f0d56d6a40d6b98c5c6ac2`
-- D/E/F/G reviewed at the exact Phase 3 task-pack refs recorded below.
-- H/I: no formal design package was present in the inspected main tree. Their authority is intentionally not inferred.
+- Owner: Session A / Principal Integration Architect
+- Status: **CANDIDATE coordination register; not an ADR, contract freeze, or implementation approval**
+- Updated: 2026-11-16
+- A branch: `session-a-integration-2026-11-16`
+- Rule: this registry coordinates owners and evidence; it does not replace any module's authority.
 
-## 1. Authority and decision vocabulary
+## 1. State vocabulary and evidence levels
 
-This register coordinates interfaces; it does not supersede subsystem ownership.
+These are independent evidence dimensions, not interchangeable approval labels:
 
-- **DECIDED** — explicitly established by an approved governance baseline or an owner-approved normative decision in its own authority. This label does not imply implementation conformance.
-- **CANDIDATE** — proposed integration shape requiring owner review and/or ADR approval.
-- **ADR-BLOCKED** — cannot be finalized before a named ADR/decision authority acts.
-- **OPEN** — missing owner decision, definition, or evidence.
-- **TO_VALIDATE** — sufficiently specified to test, but no reproducible test evidence has been accepted.
+| Dimension | Meaning |
+|---|---|
+| **File present** | Artifact exists at the recorded branch/ref and can be read. |
+| **Owner decision** | The accountable module owner has explicitly decided the semantic point in an owned artifact. |
+| **Cross-module aligned** | All affected authority owners and consumers have reconciled the interface; no unresolved semantic mismatch remains. |
+| **Implementation/test verified** | Executable implementation and reproducible conformance evidence establish the behavior. |
 
-A cross-module recommendation in this document is never an approved ADR. Governance files are read-only in this workstream. No Fact/Claim, Forget, BMCP, Applied, identity, or Security contract is frozen here.
+A file can be present while its content remains CANDIDATE, OPEN or ADR-BLOCKED. Owner decision does not prove cross-module alignment. Cross-module alignment does not prove implementation or tests. No row is Contract Approved merely because files exist.
 
-## 2. Source baseline and authority map
+Decision labels: **DECIDED** (owner semantic decision), **CANDIDATE**, **ADR-BLOCKED**, **OPEN**, **TO_VALIDATE**. These labels do not collapse the four evidence dimensions above.
 
-| Area | Exact reviewed ref | Authoritative owner boundary | Integration consequence |
+## 2. Actual branch inventory (queried 2026-11-16)
+
+Full commit SHAs were re-resolved from the named branch refs at the start of this remediation. The reviewed main snapshot is recorded separately.
+
+| Session | Branch | Actual HEAD SHA | Formal package / key artifacts | Presence and status |
+|---|---|---|---|---|
+| A | `session-a-integration-2026-11-16` | `f76cc558273fbc1a27bb930a2f1e8d940b717c80` | `reviews/integration/contract-registry.md`; `reviews/integration/typed-cursor-and-watermark-contract.md`; `reviews/integration/cross-module-conformance-plan.md`; this remediation record | Present; coordination artifacts CANDIDATE |
+| B | `session-b-domain-model-phase3` | `ab19afbf92f67fe0a7679e9aa3a35b015fed89f4` | `02-domain-model/` domain model and Fact/Claim ADR work; review/task-pack references | Branch present; Fact/Claim ADR remains ADR-BLOCKED; exact approval not evidenced |
+| D | `session-d-memory-brain-2026-11-16` | `30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6` | `03-memory-brain/commit-cursor-semantics.md`; `03-memory-brain/forget-fence-and-completion-contract.md`; canonical store/version/lifecycle files; D review | Present; CanonicalCommitCursor semantics DECIDED by D; enforcement OPEN |
+| E | `session-e-memory-compiler-2026-11-16` | `3dea6096eefa6779eb12e4e788bcf9429d2a3f83` | `04-memory-compiler/decision-change-log.md`; `accepted-receipt-and-idempotency-contract.md`; `forget-fence-and-derived-registration.md`; five compiler design files; E review | Present; candidate package; stale historical statements explicitly superseded by E §8 and current D/H/I refs |
+| H | `session-h-bmcp-protocol` | `fcc5103399b4c322e52d642cae5a2414969399a7` | `08-bmcp-protocol/protocol-overview.md`; `message-envelope-and-versioning.md`; `context-delivery-and-acknowledgement.md`; `adapter-capability-and-applied-attestation.md`; `forget-revocation-and-reconnect.md`; `protocol-conformance-matrix.md` | **Design package exists; cross-module contract pending verification**. Candidate, not approved |
+| I | `session-i-security-governance-2026-11-16` | `8c91d99e450ab5e8862bd6a3301fa193e28e6cbb` | `09-security-governance/security-and-identity-overview.md`; `principal-actor-and-authorization-contract.md`; `scope-and-revocation-policy.md`; `forget-retention-backup-and-erasure-policy.md`; threat model; audit/exception governance | **Design package exists; cross-module contract pending verification**. Candidate, not approved |
+
+Main review snapshot: `main @ 8a6414158c9c056c1638222534e1993d1bbc99d2`. Parent four-way review: `reviews/integration/phase-3-defghi-cross-module-contract-review.md`. Task pack: `reviews/integration/phase-3-cross-module-remediation-task-pack.md`.
+
+F/G remain dependencies. Their older refs in prior registry/task-pack are historical baselines, not re-queried HEADs in this A remediation; A makes no current-HEAD claim for F/G here. Storage/Consistency implementation owner remains to be named by engineering.
+
+## 3. Issue register — CR findings
+
+| ID | Current state | Accountable owner | Dependencies | Required closure evidence |
+|---|---|---|---|---|
+| CR-P1-01 D/E producer admission, fence installation and publication linearization | **OPEN / blocking Forget conformance** | D + E jointly at boundary; Storage/Consistency implementation owner TBD | D producer-class and work-item registration; E staged derivative/lineage; atomic dependency registration; fence-aware publish gate | Normative operation/linearization contract, crash/recovery and lease/DLQ/replay rules, race matrix for both serializations, executable tests proving no late publication |
+| CR-P1-02 Canonical cursor mismatch | **A coordination correction delivered; integration remains OPEN** | D owns semantics; A coordinates; E/F/G/Storage consume | D global per-authority cursor; E representation; F/G consumer watermarks; Storage sequencing | A typed proposal aligned; E stale text reconciled by E; F/G consumer conformance; Storage transaction/recovery proof |
+| CR-P1-03 Registry stale source refs and H/I presence | **A registry correction delivered; ongoing registry freshness required** | A | Actual branch refs and package inventory | Re-queryable branch HEADs and artifact paths; H/I recorded as present candidate packages; evidence dimensions kept separate |
+| CR-P1-04 E decision/change-log supersession hygiene | **OPEN / E-owned** | E | D cursor decision; current H/I package refs; historical E statements | E adds explicit supersession/current-state notice while preserving history; E branch readback and owner review |
+| CR-P1-05 I global Forget vector / D-H-E target mapping | **OPEN / owner mapping required** | I (global policy); D/E/H/F/G own local evidence | H ACK-to-I target state mapping; Adapter identity/capability/session/region; producer-domain epoch vs work-item barrier; typed fence vs permission epoch | Owner-approved mapping table and negative/unknown/offline cases; no implicit success; conformance evidence |
+
+## 4. INT issue register
+
+| ID | State | Accountable owner | Dependencies | Closure conditions |
+|---|---|---|---|---|
+| INT-P0-01 Fact/Claim normative identity | **ADR-BLOCKED** | B + Architecture Governance | Domain alternatives; D/E/F/G consumers | Approved ADR and synchronized consumer mappings; no schema freeze before approval |
+| INT-P0-02 Principal/ActorRef/ScopeRef/permission binding | **OPEN / identity contract freeze blocked** | I (policy) with B (typed domain refs) and H (transport binding) | Producer identity, issuer/delegation, ScopeRef mapping, E idempotency namespace, D/E/F/G enforcement | Joint owner mapping and approved typed references; authenticated binding; cross-scope and stale-epoch negative tests |
+| INT-P0-03 Forget/retention completion and anti-resurrection | **OPEN / blocking** | I (global completion policy); D/E/F/G/H/Storage local enforcement | D fence; E admission/derivative barrier; F suppression; G reconciliation; H clear attestations; backup/external inventory | Atomic D/E/Storage gate; closed target inventory; all required target proofs; restore/replay and late-derivative tests |
+| INT-P0-04 Prompt-injection residual risk | **OPEN** | I security governance; C/H inference boundary | B/E provenance and trust labels; C/H protected prompt boundary; Agent tool authorization | Threat model, mitigations, explicit residual-risk acceptance authority and adversarial tests |
+| INT-P1-01 ContextVersion/ChangeSet authority | **CANDIDATE** | G | H delivery, C final request boundary, INT-P0-02/03 | G owner decision, H/C proof mapping, CAS/replay/late-ack tests |
+| INT-P1-02 Claim revision/ConflictSet/Merge/Split | **ADR-BLOCKED** | B | INT-P0-01; D persistence; E/F/G consumers | Approved Fact/Claim ADR and owner mappings/migration tests |
+| INT-P1-03 Telemetry identity/event/ordering | **CANDIDATE** | C | B refs, H envelope, I authenticated identity, E ingress | C owner decision and duplicate/out-of-order/correction tests |
+| INT-P1-04 Accepted durability/idempotency | **CANDIDATE** | E | H envelope, I identity/retention, Storage transaction/outbox | E/H/I owner approval and crash/replay evidence |
+| INT-P1-05 Applied final-request proof | **CANDIDATE** | G (consumer semantics); H/C produce evidence | Exact request/session/version/delivery/capability | Joint proof semantics and final-boundary conformance |
+| INT-P1-06 Provenance/Lifecycle/reference semantics | **OPEN** | B (domain semantics) with D/E | D lifecycle, E provenance, I retention, cursor contract | Typed refs/time/provenance owner alignment and traversal/Forget tests |
+
+## 5. INT-X and D-local coordination register
+
+| ID | State | Owner | Dependency / closure evidence |
 |---|---|---|---|
-| A/B/C | main @ `8e57f38e1f81a26280f0d56d6a40d6b98c5c6ac2` | A: system boundaries; B: domain semantics; C: Agent telemetry/inference boundary | Current main documents only |
-| D | `session-d-memory-brain-2026-11-16 @ 9dc08c63f6912320e290a963c634748ec44a81c8` | D: canonical Memory identity/version, LifecycleEvent, canonical Forget records/fence semantics | D does not own ContextVersion, wire protocol, global authorization or physical-erasure policy |
-| E | `session-e-memory-compiler-2026-11-16 @ 54df136d1e410af834461950e3c61c5c80abd6ad` | E: durable Event ingress, compilation, provenance/derivative production and publication intent | E does not own canonical commit, Runtime indexes or Context versions |
-| F | `session-f-memory-runtime @ dad5deb6bfaa2df9956930d0b1372df354112567` | F: retrieval, candidate generation, index freshness consumption, Working Set/cache and activation recommendation | F does not own canonical records or Context versions |
-| G | `session-g-memory-context @ 3d2c065be863bc1d349faaeece6f6eaa0047abae` | G: Context membership/order/budget, ContextVersion, ChangeSet, reconciliation and delivery intent | G does not own canonical Memory or Adapter wire execution |
-| H | Not present | Proposed owner: BMCP wire/Adapter SDK/delivery and final-request attestation | **OPEN**; no H artifact or approved authority contract assumed |
-| I | Not present | Proposed owner: global identity/authorization, revocation, retention, Forget completion and security governance | **OPEN**; no I artifact or approved authority contract assumed |
-| Storage / Consistency | No formal owner package identified in inspected paths | Durable transaction, partition/log mechanics, outbox, recovery and backup substrate | Engineering owner must be named before implementation sign-off |
+| INT-X-01 Typed cursor/watermark and causal ordering | **CANDIDATE; D semantic decision recorded** | A coordinates; D owns CanonicalCommitCursor | This typed contract aligned to D; Storage durability/recovery; E/F/G consumer conformance |
+| INT-X-02 Forget fence/barrier/completion | **OPEN** | I global; D/E/F/G/H local | CR-P1-01/05; target mapping and race tests |
+| INT-X-03 Principal/ActorRef/ScopeRef/permission epoch | **OPEN** | I + B + H by authority boundary | INT-P0-02 exact typed mapping and negative tests |
+| INT-X-04 Context delivery/Applied/clear/reconnect | **OPEN** | H (wire/Adapter) + G (Context) + C (inference boundary) | INT-P1-01/05; delivery/reconnect/final-request evidence |
+| INT-X-05 Canonical lifecycle/Claim revision/ConflictSet | **ADR-BLOCKED where dependent on Fact/Claim** | B; D owns canonical Memory lifecycle | INT-P0-01 and D owner alignment |
+| INT-X-06 Accepted/idempotency/replay/retention | **CANDIDATE** | E; H/I/Storage dependencies | INT-P1-04; crash/replay and retention approval |
+| INT-X-07 Shared conformance/fault-injection suite | **TO_VALIDATE** | A coordinates; testing owner TBD | Executable suite, declared environment/fixtures, raw logs and reproducible rerun |
+| INT-X-08 Workload benchmarks/resource budgets | **OPEN** | Engineering owner TBD | Stable contracts and reproducible workload/hardware measurements |
+| D-REV-P1-001 lifecycle/Forget vocabulary | **CANDIDATE pending D review evidence** | D | One consistent normative lifecycle table and I mapping |
+| D-REV-P1-002 canonical commit sequence scope | **D DECIDED; Storage/consumer validation OPEN** | D semantics; Storage implementation | Per-authority global cursor semantics; transaction visibility/gap/replay/recovery tests |
+| D-REV-P1-003 durable Forget fence and late-derivative barrier | **OPEN** | D + E; I global completion | Atomic producer admission/fence/publication gate and conformance race evidence |
 
-### Branch bookkeeping
+## 6. Cross-module dependency map
 
-The repository branch listing contained main and the four exact D/E/F/G branches, but no A-named branch. A dedicated branch `session-a-integration-2026-11-16` was therefore created from the inspected main HEAD above. No module branch was changed or merged.
-
-## 3. Decision register — Phase 1/2 INT issues
-
-Accountable owner is singular per row; contributors are not co-owners of that accountability. Closure requires owner-approved decision plus cited artifact and evidence where applicable.
-
-| ID | Accountable owner | State | Dependency | Closure evidence / exit criterion |
+| Dependency | Authority / producer | Consumer(s) | Version status | Open items |
 |---|---|---|---|---|
-| INT-P0-01 Fact vs Claim normative identity | Architecture Governance | ADR-BLOCKED | B domain alternatives; D/E/F consumer impact | Approved ADR; synchronized governance/README/terminology/domain references; consumer mapping; no schema freeze before approval |
-| INT-P0-02 Scope/Identity/Permission end-to-end | Session I (not yet staffed/package absent) | OPEN | B Scope semantics; C/H identity binding; D/E/F/G enforcement | Approved identity/permission authority contract; authenticated Principal/Actor binding; negative tests at every candidate/read/write/cache/delivery/replay boundary |
-| INT-P0-03 Forget/retention completion and anti-resurrection | Session I (not yet staffed/package absent) | OPEN | D durable fence/operation; E producer barrier/derivative registration; F index/cache suppression; G delivery/context clear; H adapter clear; storage/backup policy | Approved completion policy and per-target proof; race matrix; unknown/offline/backup/external exceptions visible; no completion from tombstone alone |
-| INT-P0-04 Memory prompt-injection residual risk | Session I (not yet staffed/package absent) | OPEN | B/E provenance and trust labels; C/H protected inference boundary; Agent tool authorization | Threat model and mitigations approved by security owner; adversarial tests; explicit residual-risk statement; no claim of complete prevention |
-| INT-P1-01 ContextVersion / ChangeSet authority | Session G | CANDIDATE | H delivery/retry contract; C final request boundary; INT-P0-02/03 | G owner-approved version/CAS/idempotency contract; H/C proof mapping; duplicate/base-conflict/late-ack tests |
-| INT-P1-02 Claim identity/revision, ConflictSet, Entity Merge/Split | Session B | ADR-BLOCKED | INT-P0-01; D persistence and E/F/G consumers | B/Governance-approved domain decision; D/E/F/G mapping; historical reference and migration tests |
-| INT-P1-03 Telemetry identity/event/ordering | Session C | CANDIDATE | B typed refs/Scope; H envelope; I authenticated identity; E durable ingress | C owner-approved event taxonomy and identity binding; out-of-order/duplicate/correction tests; plan-vs-outcome negatives |
-| INT-P1-04 Accepted durability/idempotency | Session E | CANDIDATE | H envelope; I identity/retention; Storage transaction/outbox | Durable receipt contract and crash evidence; same-key/same-digest replay; same-key/different-digest conflict; receipt retention decision |
-| INT-P1-05 Applied final-request proof | Session G | CANDIDATE | C inference boundary; H Adapter attestation; INT-P0-02/03 | H/C/G approved proof semantics; exact request/session/version/delivery/capability correlation; final-boundary conformance evidence |
-| INT-P1-06 Provenance/Lifecycle/reference semantics | Session B | OPEN | D LifecycleEvent authority; E provenance; I retention; typed cursor work | B domain reference/time/provenance semantics; D/E owner alignment; cycle/unknown-source/Forget traversal tests |
+| D → E: Canonical Memory, MemoryVersion, ForgetFence, Producer Barrier | D | E | D canonical semantics DECIDED; barrier operation OPEN | Exact admission/registration/fence/publication linearization |
+| E → D: Canonical Commit, Dependency Registration, Fence-aware Publication | D owns commit; E submits proposals and derivative registrations | D | Candidate interface; atomic boundary OPEN | Durable registration receipt, visibility gate, retries/recovery |
+| D/E → F: Canonical Cursor, Forget Suppression, Derived Memory Watermarks | D owns canonical cursor/fence; E supplies derived lineage/work; F owns IndexWatermark | F | D cursor DECIDED; F consumer mapping not verified | Index/channel partition watermarks, suppression/rebuild behavior |
+| F → G: RetrievalResult, ActivationRecommendation | F | G | F owns result semantics; consumer alignment not verified here | Freshness/completeness and immutable candidate refs |
+| D → G: immutable MemoryVersion references | D | G | D owns immutable version references | G must pin exact versions and revalidate lifecycle/Forget |
+| G → H: ContextVersion, ChangeSet, Delivery, Applied Attestation intent | G owns Context state/intent; H owns wire/Adapter ACK | H | Candidate boundary; cross-owner mapping OPEN | Delivery state, final-request proof and ACK semantics |
+| I → D/E/F/G/H: identity, authorization, retention, Forget Governance | I | D/E/F/G/H | I package present CANDIDATE; cross-module mapping OPEN | B typed refs; permission epoch; global target inventory and local evidence |
+| B → D/E/F/G/H: Fact/Claim, ActorRef, ScopeRef domain semantics | B | D/E/F/G/H | Fact/Claim ADR-BLOCKED; typed refs not frozen | B ADR and I/H mapping; no premature schema freeze |
 
-## 4. Decision register — INT-X work items
+## 7. H/I presence and approval statement
 
-| ID | Accountable owner | State | Dependency | Closure evidence / exit criterion |
-|---|---|---|---|---|
-| INT-X-01 Typed cursor/watermark namespaces and causal ordering | Session A coordinates; D is canonical-cursor decision owner | CANDIDATE | D-REV-P1-002; Storage/Consistency; E/F/G consumer review | Owner-reviewed typed contract; all namespaces and resume/gap semantics specified; interop tests pass with evidence |
-| INT-X-02 Forget fence, producer barrier, derivative registration and completion | Session I | OPEN | INT-P0-02/03; D/E/F/G/H boundary contracts | Approved global protocol; late-derivative race matrix; per-target acknowledgements and residual exceptions |
-| INT-X-03 Principal/ActorRef/ScopeRef/permission epoch/environment binding | Session I | OPEN | INT-P0-02; B domain refs; C/H transport; D/E/F/G enforcement | Authenticated binding contract and cross-scope negative tests |
-| INT-X-04 Context delivery, final-request Applied, clear/reconnect | Session H | OPEN | G Context model; C final inference boundary; INT-P1-01/05; INT-P0-03 | H package, G/C owner sign-off, delivery/reconnect/late-ack/final-request evidence |
-| INT-X-05 Canonical lifecycle authority, Claim revision and ConflictSet | Session B | ADR-BLOCKED | INT-P0-01; D lifecycle and canonical store; E/F/G consumers | Approved B ADR/domain semantics plus D owner alignment and migration/historical tests |
-| INT-X-06 Accepted receipt, idempotency, replay ordering and retention | Session E | CANDIDATE | INT-P1-03/04; H/I; Storage/Consistency | E/H/I owner-approved schema; crash/replay/retention evidence |
-| INT-X-07 Shared conformance and fault-injection suite | Session A coordinates; Testing owner TBD | TO_VALIDATE | INT-X-01..06 candidate contracts | Executable versioned suite, environment/data declaration, raw logs/artifacts, reproducible rerun; no PASS without evidence |
-| INT-X-08 Representative workload benchmarks/resource budgets | Engineering owner TBD | OPEN | Stable candidate interfaces; correct conformance first | Reproducible workloads/hardware/data/config and results; no SLO or performance claim before measurement |
+H and I design packages exist on their named branches at the exact HEADs in §2. Their existence is a repository fact only. It does **not** close INT-P0-02, INT-P0-03, INT-P0-04, INT-X-02, INT-X-03 or INT-X-04, and does not constitute Contract Approved. H/I cross-module contracts remain candidate/pending owner verification.
 
-## 5. D-local review remediation register
+## 8. Gate discipline
 
-| ID | Accountable owner | State | Dependency | Closure evidence / exit criterion |
-|---|---|---|---|---|
-| D-REV-P1-001 Forgetting vs Memory lifecycle vocabulary | Session D | CANDIDATE | D lifecycle owner approval; I completion policy | D branch contains one normative lifecycle table: in-progress work is ForgetOperation/fence, not a competing Memory lifecycle state; cross-doc consistency check |
-| D-REV-P1-002 canonical commit sequence scope | Session D | OPEN | Storage/Consistency; E/F/G cursor consumers | D selects and documents global/partitioned commit cursor and per-aggregate revision separately; transaction visibility, gaps, replay and lifecycle relation tested |
-| D-REV-P1-003 durable Forget fence and late-derivative barrier | Session D | OPEN | Session I global completion; E producer registration; F/G/H enforcement | Durable operation/fence plus producer inventory/barrier/watermarks; all in-flight and late derivative race tests; no resurrection |
+No item is closed by this registry. A closure requires the accountable owner, a versioned artifact, named dependencies, and evidence matching the row's exit condition. Implementation/test verification additionally requires executable test ID/version, environment, fixtures, expected/actual results, logs/artifact references and reproducible rerun. Static document review is not runtime proof.
 
-## 6. Interface matrix — ownership and operational contract
-
-This is a coordination matrix, not a wire schema. Immutable IDs and version fields below are semantic identifiers; serialization remains owned by the protocol owner.
-
-| Interface | Producer → consumer | Authoritative owner | Immutable ID / version | Consistency expectation | Failure behavior | Retry / idempotency |
-|---|---|---|---|---|---|---|
-| Source Event ingress | C/H Adapter → E | E owns accepted Event/receipt; I owns authorization | EventID, ReceiptID, schema version, source cursor | Accepted only after durable Event + payload ref + idempotency + compile intent | Reject/Unavailable before Accepted; post-accept work remains recoverable | Same authenticated producer + scope + key + digest returns same receipt; changed digest conflicts |
-| Canonical proposal/commit | E → D | D owns Memory/MemoryVersion and canonical commit | MemoryID, MemoryVersionID, per-aggregate revision, canonical cursor | Atomic/recoverable canonical commit and outbox; no partial visible commit | Stale base/conflict/reject; unknown outcome resolved by idempotency lookup | operation/idempotency key + request digest |
-| Lifecycle change | D → E/F/G/I | D owns LifecycleEvent stream; I owns policy | LifecycleEventID + per-Memory lifecycle cursor | Append-only, ordered within aggregate; projections may lag | Consumers mark stale/blocked; canonical lifecycle wins | At-least-once event delivery; dedupe by LifecycleEventID |
-| Canonical publication | D outbox/E publisher → F index | D owns canonical source; publisher owns per-index publication progress | Outbox EventID; index partition watermark | Per-index/partition contiguous applied prefix; lag explicit | Partial/stale; canonical read-through or bounded wait, else unavailable | Idempotent by source event ID + index generation |
-| Retrieval | F → G | D owns canonical facts; F owns RetrievalResult/ActivationRecommendation | RequestID, candidate MemoryVersion refs, freshness vector | Scope-before-candidate; canonical/Forget revalidation; partial completeness explicit | Fail closed on auth/Forget uncertainty; partial on non-security channel lag | Read retries bounded; no stale result cache reuse across epochs |
-| Context mutation | G → G | G owns Context/ContextVersion/ChangeSet | ContextID, ChangeSetID, immutable ContextVersion | CAS/per-Context serialization; atomic all-or-nothing commit | Base mismatch -> Conflict/replan; no partial target version | principal+context+operation family+key+payload hash |
-| Context delivery | G → H Adapter | G owns desired version and Delivery record; H owns transport/Adapter behavior | DeliveryID, delivery sequence, target ContextVersion | Per delivery/session evidence; Applied only at final inference boundary | timeout = Unknown; stale/forgotten target blocked | DeliveryID stable across retry; duplicate returns prior result; new sequence for new delivery |
-| Applied attestation | H/C inference boundary → G | H owns Adapter attestation; C owns inference request boundary; G records consumer history | DeliveryID, InferenceRequestID, capability epoch, boundary proof | Exact target fully materialized in managed region of exact submitted request | Partial/Bypassed/Unknown are not Full Applied | Attestation ID dedupe; late ack historical only, cannot roll back head |
-| Forget suppression/clear | D/I → E/F/G/H | D owns canonical fence record; I owns global policy/completion | ForgetOperationID, typed fence epoch, target refs | Suppression before cleanup; fence checked before read/write/publish/delivery/apply | Unknown target remains pending/exception; no false completion | Monotonic fence; per-target idempotent action; resumable saga |
-| Capability negotiation | H Adapter ↔ C/Agent runtime; G consumes | H owns Adapter capability epoch | AdapterID, capability epoch, negotiated tier | Epoch increments on capability/config identity change; proof bound to epoch | Unknown/unsupported capability lowers claim; never infer Tier 1 | Negotiation idempotent per adapter session; stale epoch rejected |
-| Authorization decision | I → all protected producers/consumers | I | Principal/ActorRef, ScopeRef, policy/permission epoch | Reauthorize at each security-sensitive boundary; scope != permission | Fail closed if authority unavailable or epoch stale | Decision ID/request ID dedupe; current epoch always rechecked |
-
-## 7. Coordination decisions and non-decisions
-
-### DECIDED (baseline facts only)
-- Brain is logical authority for canonical memory and managed Context; Agent owns reasoning/action/tool policy.
-- D owns canonical Memory identity/version and LifecycleEvent authority; G owns ContextVersion; F owns retrieval projections/results, not Context.
-- E Accepted is a durable receipt and is distinct from Compiled, CanonicalCommitted and Indexed.
-- Indexes and caches are projections/derivatives; they never override canonical lifecycle, authorization or Forget.
-- ContextVersion, Delivery and Applied are distinct state machines/facts.
-- Context Remove is not canonical Forget; Applied is not proof of model attention.
-- Memory payload is untrusted data; Scope and Permission remain distinct.
-- No performance claim without reproducible measurement.
-
-### CANDIDATE (requires owner review)
-- Partitioned canonical commit cursor plus per-aggregate revision (rather than a single overloaded integer).
-- E-owned source Event log cursor separate from source-provided producer sequence.
-- Per-index/per-partition contiguous publication watermarks.
-- Forget fence checked at every visibility/publication boundary and bound to a typed epoch.
-- Delivery ID/sequence and Adapter capability epoch kept distinct from ContextVersion and InferenceRequestID.
-
-### ADR-BLOCKED
-- Fact/Claim identity and any schema derived from it.
-- Claim revision/ConflictSet semantics dependent on Fact/Claim ADR.
-- Global authorization and Forget completion policy pending I and applicable governance approval.
-
-### OPEN / TO_VALIDATE
-- Storage partitioning, transaction/WAL implementation, retention horizon and outbox topology.
-- H BMCP wire envelope, exact Applied proof canonicalization and capability handshake.
-- I principal binding, permission epoch scope, revocation SLA, backup/external erasure policy.
-- Actual conformance, performance and hardware budgets.
-
-## 8. Gate discipline and evidence policy
-
-No row is closed by this registry alone. A row can move to DECIDED only when the accountable owner supplies an approved decision artifact and all dependencies are explicit. Security and erasure claims additionally require implementation evidence and policy approval. A test is **PASS** only with test ID/version, code or executable procedure, declared environment, input fixture, expected result, actual result, logs/artifact reference, and reproducible rerun. Otherwise use NOT_RUN, BLOCKED, FAIL, or TO_VALIDATE.
-
-H/I absence is a blocking dependency for their owned decisions, not a reason to invent defaults. D/E/F/G branches remain separate. This branch does not merge or edit any module/governance file.
+Historical task-pack baselines and earlier registry values are not current HEAD evidence. The branch SHAs in §2 are the refs re-resolved for this remediation. No module branch was modified or merged.
