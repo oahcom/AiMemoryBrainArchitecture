@@ -29,3 +29,8 @@ Workflow run `43962873109` concluded SUCCESS. The raw job log reports 25 tests i
 ## 3. Limits
 
 This is an in-memory logical reference model. It does not populate or authenticate a production ProducerDomainInventoryEpoch registry, create a real TargetInventorySeal, execute D/E/F/G/H/Storage APIs, verify real external recipient deletion, run a production backup restore, authorize I36-GOV-01..10, approve PolicyException, or prove physical erasure. Global Forget remains OPEN / NOT COMPLETED.
+## 4. Expanded terminal-state and reopening coverage — 2026-11-17
+
+The suite was extended with five additional cases: empty inventory cannot be sealed; a valid approved exception yields CompletedWithPolicyException; a positively evidenced NotApplicable target can satisfy only its own target slot; Failed target blocks completion; and a newly discovered target after a previously Completed operation forces Reopened. The updated test Blob is `428e15c6263b5b2d730b93ce5412d55e782a449b`.
+
+Latest exact CI: run `43963450717`, job `133636592112`, commit `8a6a6e67696c496e265b3d87f1a550fe5e8bb2a0`; **30/30 tests PASS**.
