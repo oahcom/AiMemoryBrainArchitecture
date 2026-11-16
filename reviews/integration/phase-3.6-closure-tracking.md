@@ -635,3 +635,32 @@ The latest C/D/I/H specs now consistently use pre-side-effect `ParticipantIntent
 Issue #7 implementation-location request refreshed with this evidence: comment `6920154270`. Issue #3 exact CGH-APPLIED-1.1 Owner decision request: comment `6920129025`.
 
 Status remains: exact 1.1 acceptance by C/D/I/H/G/B pending; coordinator/operator and Storage acceptance open; implementation NOT VERIFIED; CO conformance NOT RUN; Applied Contract Frozen NO.
+
+
+## Live refresh — CGH-APPLIED-1.1 exact-owner decision gate (2026-11-16 23:07 +08)
+
+This section supersedes any older point-in-time branch/artifact pins above for the listed files. Branch HEADs are not exposed by the branch-name lookup in this refresh; the following are verified live file readbacks from their named Owner branches, with exact Blob SHAs:
+
+| Owner | Branch | Artifact | Live Blob SHA | Current disposition for CGH-APPLIED-1.1 |
+|---|---|---|---|---|
+| C | `session-c-agent-integration-2026-11-16` | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `f2c5b379cacfedd81500e8496d3053b628e144a0` | C-side protocol specified; explicit acceptance of A candidate SHA `471c8ce86e93c036ad9a58a77d45d9daa0ab8af8` not recorded |
+| D | `session-d-memory-brain-2026-11-16` | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `317a9bc170c5a66720f738bf24bbf93c87385887` | D-side cutoff/barrier/lineage contract specified; exact A 1.1 acceptance not recorded |
+| I | `session-i-security-governance-2026-11-16` | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md` | `71779133a4f95d63a24c4c7e606af174763366f1` | I-side receipt/revocation cutoff contract specified; exact A 1.1 acceptance not recorded |
+| H | `session-h-bmcp-protocol` | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `5cbf0bb548a46671054cb22c6fab3c3d007365d4` | `bmcp.applied-ack/1.1.0` schema candidate exists; explicitly not production-frozen/deployed; exact A 1.1 acceptance not recorded |
+| G | `session-g-memory-context` | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `5406b3f2558daa3f5915f6bb46e808be8d90d3ca` | G's recorded decision is pinned to older package SHA `61d961c32138fd875069e8cbac4696bb031447c0`; no exact 1.1 decision |
+| B | `session-b-domain-model-phase3` | `02-domain-model/phase-3.6-b-owner-formal-actor-scope-environment-type-mapping-confirmation.md` | `729a706860b1259115816265e847a29683c3c233` | Typed semantic mapping approved; consumer field paths/wire encoding remain owner-bound; no exact 1.1 package decision |
+| A | `session-a-integration-2026-11-16` | `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md` | `471c8ce86e93c036ad9a58a77d45d9daa0ab8af8` | A candidate / OWNER REVIEW REQUIRED / NOT FROZEN |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `reviews/storage-consistency/reference_model/jf10_linearization_model.py` | `72fef7be1cd3f111a0151498c686d4556156339f` | In-memory logical reference model only; not common coordinator implementation or durable production participant registry |
+
+### Decision request and gate status
+
+A posted a focused exact-SHA decision call to Issue #3 (comment 6920276322), requiring C/D/I/H/G/B to record an attributable decision on their own Owner branches against A candidate Blob `471c8ce86e93c036ad9a58a77d45d9daa0ab8af8`. No response is presumed from the request itself.
+
+- C/D/I causal-order source contracts: SPECIFIED; exact A-package owner decisions NOT RECORDED.
+- H 1.1.0 schema: CANDIDATE; exact A-package owner decision NOT RECORDED; production freeze/deployment NOT VERIFIED.
+- G 1.1 Full Applied acceptance: NOT RECORDED; current G approval is for older package only.
+- B 1.1 typed-reference confirmation: NOT RECORDED; existing semantic type approval does not freeze consumer field mapping or wire schema.
+- Coordinator/operator, durable store, HA/failover/restore, recovery/retention and production deployment: NOT IDENTIFIED / NOT VERIFIED.
+- Executable cross-authority race/conformance tests: NOT RUN.
+
+**CGH-APPLIED-1.1 remains CANDIDATE / NOT OWNER-DECIDED / NOT FROZEN.** G8 remains BLOCKED; G9 NOT RUN; G10 BLOCKED. No 1.0 approval is transferred to 1.1. No implementation, deployment, test pass or production causal proof is claimed.
