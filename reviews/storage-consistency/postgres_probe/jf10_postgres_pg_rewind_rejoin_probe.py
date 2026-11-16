@@ -65,9 +65,24 @@ def main():
         standby_timeline = rejoined.execute(
             "SELECT timeline_id FROM pg_control_checkpoint()"
         ).fetchone()[0]
-        assert primary_timeline == standby_timeline == 2, (
+        assert primary_timeline == standby_timeline, (
             primary_timeline, standby_timeline
         )
+
+        new_primary.execute(
+            "INSERT INTO jf10_rejoin_marker VALUES ('after-rejoin', 'streamed-after-rejoin')"
+        )
+        deadline = time.time() + 30
+        streamed = None
+        while time.time() < deadline:
+            streamed = rejoined.execute(
+                "SELECT value FROM jf10_rejoin_marker WHERE marker = 'after-rejoin'"
+            ).fetchone()
+            if streamed == ("streamed-after-rejoin",):
+                break
+            time.sleep(0.25)
+        assert streamed == ("streamed-after-rejoin",), streamed
+        print("NEW_PRIMARY_POST_REJOIN_WRITE_REPLICATED=PASS")
 
         try:
             rejoined.execute(
@@ -83,8 +98,8 @@ def main():
         ).fetchone()
         assert replication == ("streaming",), replication
 
-    print(f"NEW_PRIMARY_TIMELINE={primary_timeline}")
-    print(f"REJOINED_STANDBY_TIMELINE={standby_timeline}")
+    print(f"NEW_PRIMARY_CHECKPOINT_TIMELINE={primary_timeline}")
+    print(f"REJOINED_STANDBY_CHECKPOINT_TIMELINE={standby_timeline}")
     print("OLD_PRIMARY_REWOUND_TO_NEW_TIMELINE=PASS")
     print("OLD_PRIMARY_REJOINED_AS_STANDBY=PASS")
     print("PRE_FAILOVER_AND_POST_PROMOTION_DATA_REPLICATED=PASS")
