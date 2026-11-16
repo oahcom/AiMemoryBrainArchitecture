@@ -373,3 +373,42 @@ Exact-version authority records have been committed to the respective Owner bran
 - CGH/I36/H36 tests: **NOT RUN**; implementation: **NOT VERIFIED**.
 - Applied Contract Frozen: **NO** until remaining exceptions, concrete wire/receipt mapping and causal proof are closed and A revalidates all exact artifact versions.
 - Issue #3 remains open. No branch merge is requested or authorized.
+
+
+## 13.3 C / I / D cross-authority causal-order bridge — proposal issued, decisions pending
+
+A published an integration-level proposal for the unresolved C final-submit / I PermissionEpoch-revocation / D ForgetFence ordering gap:
+
+- Proposal: `reviews/integration/phase-3.6-cgh-applied-cross-authority-causal-ordering-proposal.md`
+- Proposal Blob SHA: `6c858583aac8769d241a2bc53b026b972e65f91a`
+- Exact common package remains `CGH-APPLIED-1.0`, Blob `122b164bcc0760b83bf555072a36fc55631623e1`.
+- Issue #3 request for explicit C/I/D/G/H responses: comment `6919903078`.
+
+The proposal defines a candidate durable shared ordering gate with owner-controlled I and D transition events and C's two-phase final-submit reservation/terminalization:
+- `SUBMIT_WON` requires the actual provider-issued success receipt and exact request digest.
+- `ABORTED` requires definitive no-handoff proof.
+- `IN_DOUBT` is fail-closed and cannot promote Full Applied.
+- I retains authorization/PermissionEpoch authority; D retains ForgetFence/lineage/barrier authority; C retains final-submit evidence authority; G alone commits Applied; H transports opaque evidence only.
+
+This is an **A integration proposal only**. It is not an approved architecture, does not establish that a coordinator exists, and does not authorize modifications to I/D/C/H owner contracts. C, I and D must each explicitly accept, amend or reject the exact proposal Blob. G must confirm the minimum evidence consumed by Applied commit.
+
+### H schema evidence reconciliation — conflicting records, freeze remains blocked
+
+A re-read H's exact-version decision artifact:
+- `08-bmcp-protocol/phase-3.6-cgh-applied-contract-exact-version-h-owner-decision.md`
+- Blob SHA: `c0e10966e8dd95a9d1f5b1dfa156cb4b098b26e0`
+
+That current H decision explicitly says the concrete versioned BMCP Applied/Delivery schema is **OPEN / NOT FROZEN / NOT YET DELIVERED**, with H-EX-01 outstanding. It requires schema IDs, exact field names/types/requiredness, separate Forget ACK and Applied families, canonicalization, replay, cryptographic profile and capability/reconnect mapping.
+
+Earlier Issue #3 coordination comments and A's previous plan described `bmcp.applied-ack/1.0.0` as an owner-decided schema candidate. The current H branch tree inspected for this reconciliation does not expose a separately published concrete `bmcp.applied-ack/1.0.0` schema artifact. This is a **source-record discrepancy**, not grounds to infer that the schema never existed. H is asked to identify the authoritative artifact and Blob SHA or confirm that H-EX-01 remains undelivered. Until reconciled, the conservative gate is **CONCRETE H WIRE SCHEMA OPEN / NOT FROZEN**.
+
+I's exact-version confirmation separately requires an I CommitAuthorizationReceipt reference and I sequencer terminal-order proof to be explicitly mapped at the protected owner-final-gate. The H schema reconciliation must include those opaque evidence references and conditional requiredness; H must not mint or validate I/D authority.
+
+### Current disposition
+
+- C/I/D shared causal order: **PROPOSAL ISSUED / OWNER DECISIONS PENDING**.
+- Production coordinator: **NOT APPROVED / NOT IMPLEMENTATION-VERIFIED**.
+- H concrete versioned schema and I receipt mapping: **OPEN; authoritative artifact reconciliation required**.
+- Applied Contract Frozen: **NO**.
+- CGH/I36/H36 tests: **NOT RUN**; implementation: **NOT VERIFIED**.
+- No branch merge or architecture freeze authorized.
