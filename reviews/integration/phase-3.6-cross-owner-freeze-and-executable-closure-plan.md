@@ -935,3 +935,14 @@ Issue #8 now carries the corrected exact bundle and Owner readback:
 The previous H wire-mapping gap is closed at schema-candidate documentation level. H's current artifact `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, branch `session-h-bmcp-protocol`, Blob `1716b23741479740f9e12003cbf2bd1a80c63aab`, §12.10 explicitly ACCEPTS the five JF-10 ↔ COC bridge message-family mappings for exact A architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, with enumerated exceptions. The five families are prepare-intent registration, prepared-participant registration, I terminal-decision observation, Storage participant resolution and bridge reconciliation observation.
 
 This is not production schema freeze: generated JSON Schema/IDL, SDKs/interoperability and crypto/key governance remain open; H-JF10-01..10 are SPECIFIED / NOT RUN. Issue #8 was updated in comment `6921054285`. The overall bridge gate remains OPEN pending C's distinct exact-bundle decision and D/Storage clarification. JF-10 P0 remains OPEN; implementation/deployment NOT VERIFIED; multi-policy-domain atomicity BLOCKED.
+
+
+## 13.16 H JF-10 bridge schema-candidate decision
+
+H exact-version decision has been read back from its Owner branch:
+- `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, Blob `1716b23741479740f9e12003cbf2bd1a80c63aab`, §12.10.
+- Decision: ACCEPT the JF-10 bridge field-level wire mapping for exact A architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, with enumerated exceptions.
+
+H's five message-family mappings are recorded. The schema remains a candidate: generated schemas/SDKs and interoperability not produced/tested; crypto/key governance remains I/Security-owned; H-JF10-01..10 NOT RUN; production freeze NO.
+
+**Updated Owner gate: I ACCEPT; D ACCEPT; Storage ACCEPT; H ACCEPT (schema candidate only); C PENDING.** The remaining requested action is C's exact-version acceptance against the same A Blob. JF-10 P0, implementation, deployment and conformance remain OPEN / NOT VERIFIED / NOT RUN.
