@@ -153,3 +153,30 @@ Create an executable, deterministic **JF-10 reference state-machine model** unde
 - production-equivalent crash/recovery, failover and restore tests.
 
 The reference model is a development aid only. It must not change JF-10 P0, G3, or test-execution status.
+
+## 10. Reference model published — implementation boundary retained
+
+An executable logical reference model and deterministic unittest suite have been added on this Storage Owner branch:
+
+- `reviews/storage-consistency/reference_model/jf10_linearization_model.py` — Blob is recorded by the subsequent Owner readback.
+- `reviews/storage-consistency/reference_model/test_jf10_linearization_model.py`
+- `reviews/storage-consistency/reference_model/README.md`
+
+The model encodes one-policy-domain rejection; immutable coordinator terminal decision; stable operation/XID/manifest binding; PREPARED and UNKNOWN/IN_DOUBT behavior; same-XID recovery; modeled atomic publication facts; one-time receipt consumption; D fence-first and participant-first ordering; and E retry identity semantics.
+
+D and E Owner branches now each contain an explicit consumption/mapping note:
+- D: `03-memory-brain/phase-3.6.2-jf10-reference-model-consumption.md`
+- E: `04-memory-compiler/phase-3.6.2-jf10-reference-model-consumption.md`
+
+A local semantic replay of 12 deterministic assertions passed. **The committed unittest suite has not yet been run by a repository CI runner.** The reference model is in-memory and does not implement a durable coordinator, real database prepared transactions, shared serializable D/Storage state, I service, receipt cryptography, HA, failover, restore, or real reader/object-store integration.
+
+### Status correction
+
+- Logical reference model: **IMPLEMENTED**.
+- Deterministic unittest source: **AUTHORED / NOT RUN IN REPOSITORY CI**.
+- Production JF-10 implementation: **NOT IMPLEMENTED / NOT VERIFIED**.
+- Production conformance JF10-01..17: **NOT RUN**.
+- JF-10 P0: **OPEN**.
+- G3: **BLOCKED** pending authoritative runtime repository, accountable engineering owner, database/coordinator selection and production-equivalent evidence.
+
+The model is not a substitute for the production harness specified above.
