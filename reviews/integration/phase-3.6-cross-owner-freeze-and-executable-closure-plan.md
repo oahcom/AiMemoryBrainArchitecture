@@ -450,3 +450,60 @@ This is a meaningful advance from a proposal-only state: C/D/I have independentl
 - G acceptance of 1.1 evidence mapping: **OPEN**.
 - Coordinator/participant implementation and conformance: **NOT VERIFIED / NOT RUN**.
 - Original `CGH-APPLIED-1.0` remains **NOT FROZEN**; no approval is transferred to 1.1.
+
+
+## 13.3 C-submit / I-authorization / D-ForgetFence causal-order architecture — 2026-11-16
+
+This addendum addresses the previously open cross-authority causal bridge. It does not rewrite the immutable CGH-APPLIED-1.0 package or retroactively extend its Owner approvals. The proposed successor is **CGH-APPLIED-1.1**, with H profile **`bmcp.applied-ack/1.1.0`** and shared ordering profile **`CausalOrderProfile/1.0`**.
+
+### 13.3.1 Architecture resolution
+
+Independent I PermissionEpoch and D ForgetFenceGeneration sequences cannot be compared, and neither wall-clock time nor H receiver sequence proves the order of C's actual provider submit. The selected architecture is a **pre-side-effect participant-intent + owner-terminalization + participant-barrier protocol**:
+
+1. C freezes the exact final request and digest, then obtains a durable `ParticipantIntentRef` from a common `CausalOrderCoordinator` before invoking the provider/runtime. Intent is not authorization.
+2. I consumes a single-use `CommitAuthorizationReceipt` bound to the intent, exact authorization tuple, request digest and final boundary. I's own sequencer decides authorization-versus-revocation. If revocation wins, C aborts. If authorization wins, later revocation effectiveness is held behind this unresolved participant until its exact outcome is terminal.
+3. D binds the same intent to the exact ForgetOperation/Fence and complete target/source/ancestor lineage. If a fence was already effective, fence wins. A later fence remains pending behind the unresolved participant until submit outcome or safe abort is durably terminal.
+4. The coordinator validates the I and D owner-issued terminal/clearance evidence and finalizes a `ParticipantReservationRef`. Only then may C invoke the provider/runtime.
+5. C records the actual provider/runtime outcome under that reservation. The coordinator emits a terminal proof binding C submit outcome, I receipt/terminal order, D fence/lineage/participant clearance and the coordinator's durable order.
+6. A provider outcome that cannot be determined remains `IN_DOUBT`; the participant is not silently expired, retried as a new operation, or cleared. D/I barriers remain open until authoritative reconciliation.
+
+This protocol preserves authority separation: I remains the only authorization/PermissionEpoch authority; D remains the only ForgetFence/lineage authority; C remains the only producer of actual submit evidence; the coordinator supplies durable cross-authority order and participant accounting only; H transports and integrity-binds evidence; G alone decides Applied/current-use.
+
+### 13.3.2 Exact Owner artifacts and readback
+
+| Owner | Owner-branch artifact | Readback Blob SHA | Commit | Status |
+|---|---|---|---|---|
+| C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `f0839e4f470588e6053c144b91ff318b6465e04c` | `96054e879abbd827f36ea8b766aa7ccaa4defef1` | C-side contract specified; cross-owner acceptance pending |
+| I | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md` | `1e4d2d43807981d73c2e5394a0b6020b9177a3f1` | `3fc7131f5b057b4f12fd2303a5a4a2440dff8d44` | I receipt/terminalization contract specified; governance/deployment pending |
+| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `1c60e7129c5b4255d6b9033bcb03e28e43b3b5af` | `99e13c308fe784508b70a48bea694493c00c12b2` | D participant/fence barrier contract specified; deployment pending |
+| H | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `a23b9a879a3ec0e212645a8247a6797bd0055360` | `ceb20c0aa0318e2c4c82f7ffb90b05432bd87255` | H schema candidate 1.1.0 specified; not production-frozen |
+
+### 13.3.3 H 1.1.0 schema additions
+
+H's `bmcp.applied-ack/1.1.0` candidate adds typed references for:
+- CausalOrderProfileRef, CausalOrderCoordinatorRef, CausalOrderTransactionRef, CausalOrderPosition and ParticipantIntentRef/ParticipantReservationRef;
+- I CommitAuthorizationReceiptRef and IAuthorizationTerminalRef;
+- D ForgetFenceRef, ForgetLineageCoverageRef and DParticipantClearanceRef;
+- CSubmitOutcomeRef and CausalOrderTerminalProofRef.
+
+It adds message families `CAUSAL_ORDER_INTENT`, `CAUSAL_ORDER_INTENT_RECEIPT`, `CAUSAL_ORDER_RESERVATION`, `I_AUTHORIZATION_TERMINAL`, `D_FENCE_TERMINAL`, `C_SUBMIT_OUTCOME`, `CAUSAL_ORDER_TERMINAL_PROOF` and `CAUSAL_ORDER_ACK`. H transports these opaque owner-issued references and does not mint or semantically decide them. 1.0.0 remains historical/transport evidence only and is insufficient for Full Applied claims requiring this three-authority proof.
+
+### 13.3.4 Unresolved operational authority and gates
+
+The architecture resolves the protocol-level causal-order design, but the **common coordinator is not yet concretely designated, deployed or accepted**. Its operator, durable store, HA/failover, retention, restore fencing, signing/key trust, participant recovery and service SLO must be named and approved by C, I, D and the relevant Storage/operator owner. The coordinator must not become a shadow authorization or Forget authority.
+
+Required next gates:
+1. C, I, D and H explicitly accept the same `CausalOrderProfile/1.0` and `bmcp.applied-ack/1.1.0` exact artifact versions; G must accept the resulting Applied evidence/current-use predicate; Storage/operator must accept the coordinator durability/restore design.
+2. Specify coordinator API, durable schema, idempotency, participant recovery and monotonic restore/failover behavior.
+3. Run C-CO, I-CO, D-CO and H36-CO deterministic races, including both orders, unknown provider outcome, coordinator crash/restore, lost receipt, duplicate and conflicting terminal proof.
+4. Attach build/schema/deployment identity and raw reproducible logs; no test pass is implied by specification.
+
+Current state:
+- Cross-authority causal-order protocol: **SPECIFIED / OWNER-BOUND DRAFTS RECORDED**.
+- C/I/D/H successor-profile exact-version acceptance: **PENDING**.
+- Coordinator deployment/Storage acceptance: **OPEN**.
+- C-submit/I-revocation/D-fence production ordering proof: **NOT YET VERIFIED**.
+- C-CO/I-CO/D-CO/H36-CO tests: **SPECIFIED / NOT RUN**.
+- Applied Contract Frozen: **NO**.
+- Implementation Verified: **NO**.
+- Issue #3 remains open; no branch merge is authorized.
