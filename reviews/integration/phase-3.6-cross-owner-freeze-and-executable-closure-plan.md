@@ -421,7 +421,7 @@ After the A proposal was published, fresh Owner-branch reads found three new, in
 | Owner | Artifact | Blob SHA | Owner status |
 |---|---|---|---|
 | C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `543d04e10a95d1f5720c3da8050befe6d21cd0c6` | C-side contract specified; coordinator deployment and cross-owner acceptance OPEN |
-| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `99ca34b0c35d970a4135d8e79c5a743606b7bd34` | D-side fence/barrier contract specified; coordinator/Storage deployment and cross-owner acceptance OPEN |
+| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `317a9bc170c5a66720f738bf24bbf93c87385887` | D-side fence/barrier contract specified; coordinator/Storage deployment and cross-owner acceptance OPEN |
 | I | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md` | `8a9d418593c7d6be12f072ec8eeb0b3a56eb4be8` | I-side receipt/ordering contract specified; service deployment, external governance and cross-owner acceptance OPEN |
 
 All three target:
@@ -474,9 +474,9 @@ This protocol preserves authority separation: I remains the only authorization/P
 | Owner | Owner-branch artifact | Readback Blob SHA | Commit | Status |
 |---|---|---|---|---|
 | C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `f2c5b379cacfedd81500e8496d3053b628e144a` | `8f017a5a17620c21f3e7f0075a087c4b098baa8e` | C-side contract specified; cross-owner acceptance pending |
-| I | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md` | `1e4d2d43807981d73c2e5394a0b6020b9177a3f1` | `3fc7131f5b057b4f12fd2303a5a4a2440dff8d44` | I receipt/terminalization contract specified; governance/deployment pending |
-| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `99ca34b0c35d970a4135d8e79c5a743606b7bd34` | `ecc763bcdec5a56ade8eaf5f56703584856981d2` | D participant/fence barrier contract specified; deployment pending |
-| H | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `f5ba88e69ecf89d976e3c554a1d727fe38f41590` | `de75b9db383b8d740c2d91bf595ca9e0b1c03e19` | H schema candidate 1.1.0 specified; not production-frozen |
+| I | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md` | `71779133a4f95d63a24c4c7e606af174763366f1` | `2fb2bb9653350e83ebf2a6a56195a762d112189f` | I receipt/terminalization contract specified; governance/deployment pending |
+| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `317a9bc170c5a66720f738bf24bbf93c87385887` | `c0d51b3cc61f182a69632f008c43650e14c213ef` | D participant/fence barrier contract specified; deployment pending |
+| H | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `5cbf0bb548a46671054cb22c6fab3c3d007365d4` | `f5ecd8e649efb578a06cedfa5a5dbd4f8c7bc84a` | H schema candidate 1.1.0 specified; not production-frozen |
 
 ### 13.3.3 H 1.1.0 schema additions
 
@@ -527,8 +527,16 @@ This is **A CANDIDATE / OWNER REVIEW REQUIRED / NOT FROZEN**. It does not alter 
 
 The latest branch readbacks supersede the earlier C/I hashes recorded in the first discovery note:
 - C `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`: Blob `f0839e4f470588e6053c144b91ff318b6465e04c`, commit `96054e879abbd827f36ea8b766aa7ccaa4defef1`.
-- I `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md`: Blob `1e4d2d43807981d73c2e5394a0b6020b9177a3f1`, commit `3fc7131f5b057b4f12fd2303a5a4a2440dff8d44`.
+- I `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md`: Blob `71779133a4f95d63a24c4c7e606af174763366f1`, commit `2fb2bb9653350e83ebf2a6a56195a762d112189f`.
 - D `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md`: Blob `1c60e7129c5b4255d6b9033bcb03e28e43b3b5af`, commit `99e13c308fe784508b70a48bea694493c00c12b2`.
 - H `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`: Blob `a23b9a879a3ec0e212645a8247a6797bd0055360`, commit `ceb20c0aa0318e2c4c82f7ffb90b05432bd87255`. It now contains the `bmcp.applied-ack/1.1.0` schema candidate and message/field mapping; it remains NOT PRODUCTION-FROZEN / NOT DEPLOYED.
 
 The earlier H exact-version decision artifact for CGH-APPLIED-1.0 remains valid for 1.0 only. Its H-EX-01 schema exception is superseded for the 1.1 candidate by the new H 1.1.0 candidate section, but the new schema is still not a production freeze and still requires exact 1.1 package acceptance and conformance.
+
+
+### 13.3.5 Request-cutoff ordering refinement
+
+The common coordinator log must also order the *request* points, not only terminal completion:
+- D fence request is recorded with `DForgetFenceRequestRef` and a coordinator cutoff position. Any affected ParticipantIntentRef after that cutoff is rejected immediately, even if D's effective fence commit is delayed while earlier participants drain. D terminal evidence carries both request cutoff and effective positions.
+- I revocation request is recorded with `IRevocationRequestRef` and a coordinator cutoff position. It immediately blocks new receipts/authorizations in the affected domain. If it precedes intent or receipt consumption, it wins; if I has already terminalized a receipt as COMMIT_WON, effective PermissionEpoch advancement waits behind that unresolved participant. I remains the authority for the actual epoch advance.
+- The coordinator's common order is evidence of causality only. It does not issue I PermissionEpoch, D ForgetFenceGeneration, or owner terminal decisions.
