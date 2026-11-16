@@ -1461,3 +1461,38 @@ Source inspection shows the current PITR probe checks base/target row presence, 
 The Storage readiness document remains stale at Blob `cb74f6bc36b7ba799de6082ebbfcfcf203f2be1d`; A1 owner-side reconciliation is still outstanding. A4 production fencing/deployment binding also remains open.
 
 **Gate disposition:** Gate 0 CLOSED; Gate A PARTIAL PASS / OPEN (five prior bounded CI classes plus A2 now pass; A3 pending and A1/A4 plus production binding open); Gate B BLOCKED; Gate C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+## 13.39 Gate A — WAL-archive PITR explicit-LSN CI subtest PASS; full recovery gate remains OPEN — 2026-11-17
+
+A refreshed the Storage branch workflow run after the prior in-progress retry and inspected the completed run, job steps, raw logs, probe source and workflow source.
+
+Evidence:
+- Storage branch: `session-storage-consistency-forget-atomicity-2026-11-16`
+- Successful run: `43927783471`
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43927783471
+- Run source commit: `91117532adb25914bcaa49b0007f7c34ef49c787`
+- Job: `133511748345`
+- Workflow: `.github/workflows/jf10-postgres-pitr.yml`
+- Workflow Blob SHA: `4c2175055ae43ccebb95f219952ec0480121e62d`
+- Probe: `reviews/storage-consistency/postgres_probe/jf10_postgres_pitr_probe.py`
+- Probe Blob SHA: `6e7721ee8f8708357610e0bc564e015872b8263c`
+- Pinned image: `postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc`
+
+Raw job log confirms:
+- physical base backup and target WAL archive completed;
+- explicit target LSN was `0/6000190`;
+- recovery log states PITR started at that exact LSN, stopped after WAL location `0/6000190`, completed archive recovery and selected timeline 2;
+- base marker and target marker were present after restore;
+- post-target marker was absent;
+- probe assertions `PITR_BASE_STATE_PRESENT`, `PITR_TARGET_STATE_PRESENT`, `PITR_POST_TARGET_STATE_ABSENT`, `PITR_EXACT_LSN_RECOVERY` and `JF10_POSTGRESQL_WAL_ARCHIVE_PITR` all passed.
+
+**Disposition:** A3's bounded explicit-LSN WAL-archive PITR row-state subtest is PASS for this pinned CI profile. This supersedes the in-progress disposition recorded in §13.38.
+
+**Acceptance boundary / remaining A3 work:** The probe only restores ordinary marker rows. It does not prepare a participant XID or assert prepared-XID/lock/VisibilityPointer/PublicationReceipt recovery at the PITR boundary; does not test missing, corrupt or incomplete WAL archives; and does not test recovery quarantine against a newer external I/D control-ledger high-water. The prior stale-control test is a fixture, not real I/D integration. These required cases remain OPEN.
+
+**A1 remains OPEN:** The latest Storage readiness Blob is `23e3b53ba3dd6520c6228af3f91b6de3c65bcae8`. Although Storage appended A2 evidence, its opening status still says `LOGICAL DEPLOYMENT PROFILE SELECTED / CONCRETE ENGINE AND RUNTIME DEPLOYMENT BLOCKED`, which does not identify PostgreSQL 18.7 as the selected CI capability candidate or reconcile the stale framing. A1 is therefore not accepted.
+
+**A4 remains OPEN:** No evidence yet closes old-primary fencing/rejoin prevention, split-brain exclusion, actual Canonical Authority deployment binding, production I/D control-ledger integration, infrastructure failure-domain/failover/monitoring binding, named operator/on-call, approved runbook, RPO/RTO or independent operational acceptance.
+
+**Gate disposition:** Gate 0 CLOSED; Gate A PARTIAL PASS / OPEN (five prior evidence classes + A2 + narrow A3 PITR subtest pass; A1/A4 and full PITR recovery safety remain open); Gate B BLOCKED; Gate C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
