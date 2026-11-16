@@ -46,3 +46,13 @@ Failure taxonomy is strong and 18 adversarial tests are specified but not execut
 - P1: specify message/channel binding, auth-context reference disposition, per-operation requiredness, ACK ordering/namespace/retention and add adversarial tests.
 - Governance approval remains GOVERNANCE-BLOCKED; runtime conformance remains NOT RUN.
 - No BMCP schema freeze, production security certification or implementation PASS is claimed. ADR-001 remains ADR-BLOCKED.
+
+## 7. Remediation disposition — design-level closure
+
+The H findings H36-SR-01..07 have been addressed in the controlling H contract Section 10, committed separately on this branch. The contract now defines AuthenticationContextRef as verifier-internal, cryptographic channel/session/message binding, operation-specific Requiredness Registry, trusted receiver/owner-sequencer ACK ordering, stable ACK idempotency namespace and retention, additional conformance cases, and corrected delegated decision status.
+
+- H36-SR-01..06: **RESOLVED at protocol-contract level**.
+- H36-SR-07: **TEST CASES SPECIFIED; NOT RUN**.
+- Global BMCP schema freeze and production cryptographic profile approval: **NOT CLAIMED / OPEN**.
+- Runtime conformance: **NOT VERIFIED / NOT RUN**.
+- Overall: **DESIGN FINDINGS CLOSED; IMPLEMENTATION/GOVERNANCE CONDITIONAL**.
