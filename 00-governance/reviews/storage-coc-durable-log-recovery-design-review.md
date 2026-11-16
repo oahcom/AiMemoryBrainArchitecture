@@ -369,16 +369,16 @@ These may be complementary (COC service protocol + Storage recovery realization)
 ## 13. F/G and TAB-001 acceptance/evidence refresh
 
 A has now published a final NVIDIA context-optimization integration package:
-- System contract Blob `7394...`
-- Owner acceptance matrix Blob `3dcb...`
-- Governance gates Blob `1cf3...`
-- Final integration decision Blob `6380...`
+- System contract Blob `7394621b115f1bff3279c7e1ae5e01be03487df2`
+- Owner acceptance matrix Blob `3dcb736424e08f29925ec0c8bbc7b58f9e7eef13`
+- Governance gates Blob `1cf355117d49bd4b8e3e0136b67683b1aaef1ee3`
+- Final integration decision Blob `6380374b64d0c041fff2a5c2a592a88787f69944`
 
 The matrix records all eight non-A Owner perspectives as **ACCEPT WITH CONDITIONS** for the exact A context-optimization integration package. D/F/G have also published their exact acceptance artifacts. This is a design-level conditional acceptance, not an unconditional F/G Recall contract acceptance, implementation proof or conformance pass. A's older `context-optimization-owner-decision-register.md` still does not reflect the new D/F/G acceptance artifacts and must be reconciled.
 
-F has published a deterministic anti-resurrection runtime reference model with **19/19 tests passing** on its current branch. This is valuable model evidence, not production runtime or fault-injection evidence. F's module baseline proposal still omits the Observation Archive contract and needs Owner-authored update. G's module baseline proposal still omits TSS/ObservationRef/dynamic compaction/fidelity/lineage-loss semantics and needs Owner-authored update. The F/G joint Recall contract remains conditional; no same-version joint contract acceptance is established.
+F has published a deterministic anti-resurrection runtime reference model, evidence Blob `15049d448ace5ad24a6c02eba3fc906fcac149f6`, with **19/19 tests passing** on its current branch. This is valuable model evidence, not production runtime or fault-injection evidence. F's module baseline proposal still omits the Observation Archive contract and needs Owner-authored update. G's module baseline proposal still omits TSS/ObservationRef/dynamic compaction/fidelity/lineage-loss semantics and needs Owner-authored update. The F/G joint Recall contract remains conditional; no same-version joint contract acceptance is established.
 
-H has published a JF-10 bridge schema validation workflow with **11/11 structural tests passing**. The schema remains a candidate, not frozen. The tests do not yet validate the new PreparedTransactionGID/native-XID nominal distinction, DB incarnation binding or signed PreparedParticipantReceipt semantics. H must map or add fields explicitly; do not infer that opaque `storage_xid_ref` and `preallocated_storage_xid_ref` already implement the new type distinction.
+H has published a JF-10 bridge schema validation workflow Blob `5201c22b512bf7ed2c227b06c3e3aba0bba8b91a` and test Blob `74bc4286abe1489ce29c2446c6fc22445784609f`, with **11/11 structural tests passing**. The schema remains a candidate, not frozen. The tests do not yet validate the new PreparedTransactionGID/native-XID nominal distinction, DB incarnation binding or signed PreparedParticipantReceipt semantics. H must map or add fields explicitly; do not infer that opaque `storage_xid_ref` and `preallocated_storage_xid_ref` already implement the new type distinction.
 
 TAB-001 technology review coverage is now 8/8 Owner reports present (B/C/D/E/F/G/H/I). A's final system review has a §18.6 reassessment to CONDITIONAL PASS, but its front matter and earlier missing-report table still say NOT REVIEWABLE / B-D-E-I missing. A must consolidate the superseded text, refresh branch/source pins and include the new F 19/19 and H 11/11 model/schema evidence with their non-claims.
 
