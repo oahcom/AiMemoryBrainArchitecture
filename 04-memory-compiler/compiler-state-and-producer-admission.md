@@ -127,3 +127,69 @@ Required telemetry: EventRef, AcceptedReceiptId, CompileIntentId, ProducerWorkIt
 - D and E state transitions reconcile after crash/restore.
 
 **No runtime interface or implementation is claimed by this document.**
+
+
+
+---
+## Phase 3.5 — Producer Work Lifecycle and Admission Refinement
+
+**Status:** E-owned lifecycle semantics are CANDIDATE; D operation schemas and D/E/Storage linearization remain OPEN. No runtime implementation is claimed.
+
+### A. Producer-class registration versus work-item registration
+
+Producer-class registration and per-work-item admission are distinct:
+
+- **ProducerClass** identifies a derivative-capable producer boundary: compiler ingress, extraction/consolidation, retry scheduler, DLQ replay worker, operator replay/recompile worker, and any E-owned outbox dispatcher that can cause derivative work.
+- **ProducerClassRegistration** is a D-owned closed-world inventory declaration. It binds a stable class ID/version, owning module, authenticated ProducerIdentity class, source/derivative capabilities, Scope coverage, enabled/disabled state and registration schema. E must not execute a derivative-capable path until D confirms the class is registered and active.
+- **ProducerWorkItem** is one logical, durable unit admitted under a registered class. Its stable ProducerWorkItemId is persisted before queue insertion, lease acquisition or execution.
+- D's contract names RegisterProducerWork for per-work registration. Whether class registration has a separate D operation, and its exact request/response and version-transition semantics, is **OPEN-D-CLASS-01**. E does not invent that API.
+
+### B. Required E lifecycle and identity rules
+
+| Lifecycle concern | E rule | D barrier consequence |
+|---|---|---|
+| Initial admission | Persist CompileIntent + stable ProducerWorkItemId, then obtain durable D registration receipt before enqueue | D ledger contains work before execution |
+| Lease acquisition | New LeaseId + AttemptId; bind worker identity, expiry, observed PermissionEpoch and ForgetFenceCursor | Existing work remains open; lease is evidence, not a new admission |
+| Lease renewal | Same LeaseId/AttemptId; renew only after current authorization and fence revalidation; persist renewal result | Renewal cannot move admission beyond a fence or erase barrier membership |
+| Lease expiry | Mark lease expired; preserve work item and attempt history; reconcile owner/heartbeat before takeover | Expiry is never terminal and cannot close barrier |
+| Retry | Same ProducerWorkItemId and CompileIntentId; new AttemptId and LeaseId; fresh authorization/fence check | Same barrier member remains open |
+| DLQ | Durable parked record with reason, source lineage and replay policy; D registration remains open | DLQ is not terminal while replay remains possible |
+| DLQ replay | New AttemptId/LeaseId, same ProducerWorkItemId; resolve D registration by same ID/digest before dispatch | Replay cannot escape original barrier |
+| Operator replay | Authenticated, authorized action; preserve source lineage and work ID; audit operator/reason | No unregistered side channel |
+| Recompile | New DerivationRunId and immutable output identity; current policy/fence checks; link to original intent/run. Whether child attempt or separately registered child work is OPEN-D-RECOMPILE-01 | Never bypass source ancestry or prior fence |
+| Terminal disposition | Durable no-further-publication assertion plus reconciliation of all outputs/dependencies/publication outcomes | D closes barrier item only after accepting terminal evidence |
+
+Attempt identity is immutable and append-only. A retry/recovery never reuses AttemptId; a lease renewal never creates a new logical work item. WorkItem identity is not recomputed from payload text and is never deleted to hide a stuck item.
+
+### C. Terminal disposition vocabulary
+
+E may submit these explicit terminal dispositions to D, with evidence:
+
+- PUBLISHED_ALL_OUTPUTS: every output has a durable dependency receipt and PublicationReceipt; no unaccounted staged output remains.
+- CANONICAL_COMMITTED: D CanonicalCommitReceipt is durably resolved for the named canonical operation; this does not imply derived projection publication.
+- CANCELLED_NO_OUTPUT: cancellation is durable and no output was produced or can still be produced.
+- SUPPRESSED_NO_PUBLICATION: fence/authorization denial is durable; staged outputs are quarantined/invisible and all publication attempts are disabled.
+- REJECTED_PERMANENT: policy/schema/source rejection is final, with no replay path left enabled.
+- FAILED_PARKED: not terminal while replay or recovery remains possible; use only as a nonterminal DLQ status.
+
+A terminal assertion must include ProducerWorkItemId, registration receipt, terminal disposition, all DerivationRunIds/AttemptIds, output inventory digest, dependency/publication/canonical receipt references, latest observed fence and permission decision refs, timestamp, reason and evidence digest. D owns acceptance of terminal evidence. E must not mark a D barrier item closed based only on its local state.
+
+### D. Crash/recovery invariants
+
+1. Recover Accepted/CompileIntent/outbox before dispatch; do not infer successful D registration from a local queue row.
+2. On lost RegisterProducerWork ACK, query by ProducerWorkItemId + request digest; while outcome is unknown, do not lease or execute.
+3. On lost dependency-registration ACK, query the same DependencyRegistrationId + digest; staged artifact remains private.
+4. On lost publication ACK, query the same PublicationOperationId; do not expose until committed success is proven.
+5. On process crash after D registration, reconstruct work from durable intent + D receipt; keep the same work identity.
+6. On worker crash, expire/revoke the lease and create a new AttemptId only after current authorization/fence checks.
+7. On restore, reconcile current D fence and I PermissionEpoch before any staged artifact or replay is queryable.
+8. Outbox and DLQ replay are at-least-once; stable identities and idempotency, not queue exactly-once assumptions, prevent duplicate effects.
+
+### E. OPEN items owned outside E
+
+- OPEN-D-CLASS-01: D operation/schema and ordering for ProducerClass registration, class disable/revocation and class-registry version.
+- OPEN-D-REG-02: exact RegisterProducerWork request/response, high-water token, duplicate/conflict errors, and serialization with InstallForgetFence.
+- OPEN-D-RECOMPILE-01: whether recompile is a child work registration or a new ProducerWorkItemId linked to original lineage.
+- OPEN-D-TERMINAL-01: D's accepted terminal-disposition schema and evidence validation rules.
+- OPEN-I-AUTH-01: exact authenticated ProducerIdentity/ActorRef/ScopeRef binding remains subject to B/I/H agreement; B Fact/Claim remains ADR-BLOCKED.
+- OPEN-STORAGE-01: durable lease, staging, outbox, dependency and visibility transaction implementation is not selected or tested.
