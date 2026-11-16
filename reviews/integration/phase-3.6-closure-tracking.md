@@ -1183,3 +1183,17 @@ Storage dossier: reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-
 | JF-10 P0 / production activation | OPEN / NOT AUTHORIZED |
 
 The successful PostgreSQL run is not an application participant implementation, COC persistence, I sequencer, provider integration, HA/failover, restore, or end-to-end conformance result. No production activation is authorized; multi-PolicyDomain atomicity remains BLOCKED.
+
+
+## 13.26 Gate A PostgreSQL 18.7 HA / restore test specification — 2026-11-17
+
+A re-fetched Storage's dossier, probe source, workflow and raw successful job logs. The existing PostgreSQL 18.7 CI run `43907296027` (job `133439447210`) verifies single-node prepared-XID/lock survival across SIGKILL + restart on the same named volume, same-XID commit with joint pointer+receipt visibility and same-XID rollback/non-publication. It is not a replication/failover/restore test.
+
+A posted the exact next Storage-owned deliverables and acceptance protocol in Issue #10 comment `6922331167`:
+- two-node physical streaming replication with pinned image digest and named standby;
+- `synchronous_standby_names='FIRST 1 (jf10_standby)'`, `synchronous_commit=on`, observable synchronous state and WAL flush acknowledgement;
+- same-GID PREPARE, primary fencing, standby promotion, same-GID prepared-state/lock verification and same-GID commit/rollback;
+- lost-ACK UNKNOWN/IN_DOUBT behavior (absence is not inferred ABORT);
+- backup restore with unresolved prepared GID and stale-snapshot RecoveryQuarantined/control-ledger reconciliation.
+
+**Current status:** Gate A single-node profile PASS; Gate A HA/failover/backup/restore NOT RUN / OPEN; production Canonical Authority deployment and named human on-call OPEN / NOT DESIGNATED. Gate B remains BLOCKED until complete Gate A; Gate C remains BLOCKED until Gate B. This A-owned record specifies acceptance and tracks evidence; it does not modify Storage implementation or claim the requested HA campaign ran. JF-10 P0 remains OPEN.
