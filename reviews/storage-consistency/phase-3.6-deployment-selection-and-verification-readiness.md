@@ -727,3 +727,10 @@ Storage added an in-memory restore/quarantine reference model and CI workflow. E
 The tests cover COC/I/D high-water freshness and completeness, I seal ↔ D operation binding, Storage same-GID/native-XID/database identity, WAL/timeline integrity, pointer/receipt atomicity, proof signature/key/audience, recheck-on-advance and the non-authority of RestoreReconciliationReceipt.
 
 This is logical model evidence only; no real backup/WAL restore, real owner proof API, cryptographic verification, old-primary fencing or measured RTO is claimed. Gate A's design disposition remains conditional; implementation/deployment remains deferred.
+## 31. All-owner restore contract matrix and Gate A confirmation (2026-11-17)
+
+The complete A–I plus Storage acceptance matrix is `reviews/integration/phase-3.6.5-restore-highwater-owner-acceptance-matrix.md`, Blob `3b488ae3a7cf9aca9a70a659aba09ecba53ce17f`. All ten owner perspectives accepted the same exact restore contract Blob `4f656163aeba532a441eaed1d293a48e2363cb4a` with their own scope boundaries.
+
+The matrix also records the Storage restore reference-model CI result: 25/25 tests PASS, run `43965501810`, job `133643756066`, commit `19798634fb0d55cb0c901c8f4194506fab96b75b`.
+
+**Gate A architecture design remains CONDITIONAL PASS.** All owner semantic proof shapes, authority boundaries, fail-closed rules and restore high-water recheck order are accepted. Production/implementation/deployment readiness remains NOT PASSED / DEFERRED; no real restore, signature verification, proof API or measured RTO is claimed. Gate B amended §14 remains design-accepted with conditions; Gate C and JF-10 runtime remain deferred/open.
