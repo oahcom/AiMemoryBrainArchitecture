@@ -225,3 +225,11 @@ The current F module baseline proposal Blob `d4756cabda3151999cbe1ddde0adb554458
 
 This is not a contradiction in an approved baseline because both files are still PROPOSED. It is a required Owner-authored baseline update before any module baseline adoption. UMR-021 tracks this; Session P does not edit F/G Owner branches.
 
+
+
+## 13. Gate B COC protocol dependency — current Phase 3.6.3 specification
+
+Storage has published Phase 3.6.3 COC protocol Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` on current Storage branch HEAD `fe7debe55da71e655eecfc46f25ec49eae43404a`. This is a substantial architecture specification (Raft/quorum, membership epoch, immutable record envelope, participant registry, linearizable APIs, I/D outage gates, recovery batch, checkpoint/PITR/restore and fault matrix), but exact Owner review is pending.
+
+It is a dependency for F/G's cross-authority Recall and Forget lifecycle, not an implementation. Residual exact-review items include the committed recovery-epoch completion event, H record/schema mapping, repeated cutoff batches, I-owned domain registry authority, external anti-rollback anchor custody and the A Applied package companion pin drift. Gate B spec is published; acceptance remains open; Gate C implementation tests are deferred to engineering. Do not treat the presence of this spec as F/G interface acceptance or conformance evidence.
+
