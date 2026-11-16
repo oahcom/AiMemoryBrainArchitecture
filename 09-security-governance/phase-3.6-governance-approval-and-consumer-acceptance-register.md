@@ -143,3 +143,18 @@ The following artifacts were fetched from the listed live Owner branches during 
 | H | `session-h-bmcp-protocol` | `59926f5090dfd2e2ad78d9c25bd0d9062b4bcabc` | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `9845c97ac43d7888732afafe12e28850ec02add8` | H36-01..18 and H36-SR additions; NOT RUN |
 
 The live branch inventory also includes `main` at `8a6414158c9c056c1638222534e1993d1bbc99d2`; none of the above owner-branch artifacts is presumed to exist on main. No branches were merged.
+
+
+## 10. Additional identity and protocol source readback
+
+| Owner | Branch | Source HEAD | Artifact path | Blob SHA |
+|---|---|---|---|---|
+| B | `session-b-domain-model-phase3` | `2148dcf1a53ff7aab194ba1bf799fa5a6a3b697f` | `02-domain-model/typed-reference-and-scope-semantics.md` | `e9a6bd21e06bc02a5208619f5a949217860b1c00` |
+| B | `session-b-domain-model-phase3` | `2148dcf1a53ff7aab194ba1bf799fa5a6a3b697f` | `02-domain-model/principal-actor-binding-mapping.md` | `bbbef919e1e2ffe158cda8d9b2c5e718efaae969` |
+| I | `session-i-security-governance-2026-11-16` | `6a92f49bd740f6e2db11568d9bd61e8c58132cbc` | `09-security-governance/principal-actor-and-authorization-contract.md` | `03765efac4bb1153f303ce0030f9e277d602e81d` |
+| I | `session-i-security-governance-2026-11-16` | `6a92f49bd740f6e2db11568d9bd61e8c58132cbc` | `09-security-governance/scope-and-revocation-policy.md` | `71df6aaf21bb1767cd9fe5c947581b871325e023` |
+| H | `session-h-bmcp-protocol` | `59926f5090dfd2e2ad78d9c25bd0d9062b4bcabc` | `08-bmcp-protocol/message-envelope-and-versioning.md` | `5547ecd78d118bd63e571e5daad87194d9b694e4` |
+| H | `session-h-bmcp-protocol` | `59926f5090dfd2e2ad78d9c25bd0d9062b4bcabc` | `08-bmcp-protocol/adapter-forget-ack-and-target-binding.md` | `5e2b33898cbc6a9c95e271ecd1d8a092d04c67f8` |
+| H | `session-h-bmcp-protocol` | `59926f5090dfd2e2ad78d9c25bd0d9062b4bcabc` | `08-bmcp-protocol/forget-revocation-and-reconnect.md` | `695909360782987781e259187041618f495f1c8c` |
+
+These readbacks cover the typed identity/Scope model, Principal/Actor mapping, Principal/authorization policy, Scope/revocation policy, BMCP envelope/versioning, ACK target binding, and reconnect/revocation semantics. They remain design artifacts and do not constitute runtime proof or consumer-owner acceptance.
