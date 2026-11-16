@@ -682,3 +682,16 @@ H's 1.1.0 schema decision now includes field encoding, common envelope requireme
 A recorded the exact six-owner reconciliation on Issue #3 comment `6920517731` (readback verified).
 
 **Gate interpretation:** the six Owner contract/semantic decisions are RECORDED WITH ENUMERATED EXCEPTIONS. They do not close coordinator/Storage operator designation, durable participant store deployment, HA/failover/restore, key governance, implementation verification or conformance. C-CO/I-CO/D-CO/H36-CO/G remain SPECIFIED / NOT RUN. Applied Contract Frozen = NO; implementation verified = NO; G10 = BLOCKED. No merge or production activation is authorized.
+
+
+## 13.11 Storage Owner decision recorded — architecture interface accepted with changes
+
+Storage has issued a formal exact-Blob decision: `CONFIRMED WITH CHANGES — ARCHITECTURE INTERFACE ONLY`.
+
+Decision artifact `reviews/storage-consistency/phase-3.6-coc-storage-boundary-acceptance.md`, Blob `a589d983ac145244962c22e5da3a55427aa35ff8`, on Storage Owner branch `session-storage-consistency-forget-atomicity-2026-11-16` (HEAD/commit `7b83e61c44dd4b67fa2059a3bff83d453aeaf757`). It reviews exact A COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea` and exact CGH package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819`.
+
+The accepted boundary is three distinct authorities: (a) COC cross-authority causal-order ledger; (b) I policy-domain sequencer plus I-approved JF-10 owner-gate participating prepared transaction/2PC; and (c) one durable serializable (or proven equivalent) per-Canonical-Memory-Authority Storage transaction for D work/fence/dependency/final visibility/VisibilityPointer/PublicationReceipt/terminal disposition/outbox. Object bytes remain private until Storage's authoritative visibility transaction commits. Outbox and COC messages are notification/reconciliation evidence only. No cross-domain atomicity or publication is inferred from COC position, reservation, copied receipt or terminal proof.
+
+**Remaining hard blockers:** no named COC operator or actual infrastructure owner; actual voter/failure-domain/quorum/media implementation unverified; snapshot/rollback/total-loss restore unverified; operational retention, RPO/RTO, SLO, residency, KMS and escalation open; Canonical Authority DB product/isolation/HA/prepared-XID unselected; I's exact JF-10 2PC/COC bridge blocked; combined COC+JF-10+Storage visibility atomicity unproven; production code/tests not verified/run. Storage expressly says activation NOT AUTHORIZED and Applied Contract Frozen NO.
+
+Accordingly mark **Storage architecture-interface acceptance = CONFIRMED WITH CHANGES**, but keep Storage deployment/durability acceptance = OPEN, G8 BLOCKED, G9 NOT RUN, G10 BLOCKED. This decision is pinned only to the exact A SHAs above; any later A amendment requires fresh Storage review.
