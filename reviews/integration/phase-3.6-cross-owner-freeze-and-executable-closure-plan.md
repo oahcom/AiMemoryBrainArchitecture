@@ -962,3 +962,14 @@ C pins A `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, I `8069ff86988396442c8d9dc3
 C accepts the provider boundary: no protected provider invocation before durable COC prepare-intent registration, Storage-signed same-XID prepared receipt registration, and authoritative I terminal decision. C alone emits actual CSubmitOutcome. UNKNOWN/IN_DOUBT retains the same participant, XID and provider idempotency key; no retry-as-new-operation and no barrier release. D fence-first blocks provider invocation; participant-first remains in D barrier through I/Storage/C terminal evidence. Scope is one I PolicyDomain only.
 
 This closes the outstanding architecture/interface Owner-decision gate for the named bridge bundle. It does not close provider-specific idempotency proof, runtime implementation, DB capability, conformance, deployment or production gates. C-CO-01..10 and H-JF10-01..10 remain SPECIFIED / NOT RUN; H schema remains candidate/not production-frozen; Storage DB capability remains unproven; COC operator/deployment remains undesignated. JF-10 remains P0 OPEN; multi-PolicyDomain atomicity BLOCKED. The earlier §13.15 pending snapshot is historical and superseded by this §13.16 readback.
+
+
+## 13.17 C exact-version JF-10 ↔ COC bridge acceptance — architecture/interface gate closed
+
+C's Owner artifact has been read back from its branch:
+- `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`, Blob `45a48249717c8cddb07ab96197730ef93d406c22`.
+- Decision: ACCEPT the exact JF-10 ↔ COC bridge bundle with enumerated C-owned conditions, explicitly pinning the same A/I/D/Storage/H/common JF-10 source SHAs recorded in §13.17 of the A tracking ledger.
+
+**Architecture/interface gate is CLOSED WITH ENUMERATED EXCEPTIONS:** C ACCEPT; D ACCEPT; Storage ACCEPT; I ACCEPT (single I PolicyDomain); H ACCEPT (1.1.0 schema candidate only).
+
+This does not close JF-10 P0 or any production gate. Durable prepared-XID/lock behavior, same-XID recovery on selected DB, COC operator/quorum/deployment, provider idempotency/fault recovery, generated H schema and SDK interoperability, crypto governance and crash/recovery conformance remain OPEN / NOT VERIFIED / NOT RUN. Multi-PolicyDomain atomicity remains BLOCKED. No production activation or merge is implied.
