@@ -463,3 +463,12 @@ A regression run found the prepared-XID workflow could mistake the official imag
 Together with the prepared-XID PITR run `43958775001` / `133620265141` on the immediately preceding PITR probe commit, the complete seven-workflow Storage regression set is green: prepared-XID PITR, prepared-XID/restart, synchronous standby promotion, physical backup/restore, explicit-LSN PITR, synchronous-standby-unavailable fail-closed, and old-primary pg_rewind/rejoin. The six non-PITR workflows reran on the readiness-fix commit; the PITR workflow ran on its exact code commit. The initial transient-startup failure is superseded, not counted.
 
 This does not close production runtime/adapter binding, real I/D ledger integration, off-site/immutable archive, cross-zone durability, real fencing, production operator/runbook or RPO/RTO. Gate A remains PARTIAL PASS / OPEN; Gate B/C remain BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+## 22. Default-branch and linked-repository audit — production runtime remains NOT IDENTIFIED (2026-11-17)
+
+Storage checked the default `main` branch at commit `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f`, recursive tree `748613c916ca795cb5b1af65f6fcdda81b928a9d` (52 entries, not truncated). The tree contains architecture/governance/review Markdown only and zero executable/source-like files. A linked GitHub repository search for `AiMemoryBrain`, `Canonical Authority` and `memory runtime` identified no separate implementation repository; only `oahcom/AiMemoryBrainArchitecture` matched the project-specific search. This bounded search does not exclude an external or unlinked repository.
+
+The project-designated production runtime, authoritative DB adapter, schema/migration path and deployment manifest therefore remain NOT IDENTIFIED. A/C/designated implementation owner must provide the immutable implementation repository/commit and runtime entrypoint, or designate this repository as the implementation home and deliver executable artifacts. PostgreSQL 18.7 evidence remains engine-capability CI only, not production application-path conformance.
+
+Gate A remains PARTIAL PASS / OPEN; Gate B/C remain BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
