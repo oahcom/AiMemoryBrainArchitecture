@@ -936,7 +936,7 @@ What is not complete:
 
 ### 21.1 Amended COC protocol §14 — exact owner review now complete
 
-The current Storage COC protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` and A prepared-participant mapping Blob `a71251704851cacd15f67faa985a5bd50057e92a` have now been reviewed by all B/C/D/E/G/H/I/A/Storage owner perspectives. Exact matrix: `reviews/integration/phase-3.6.4-jf10-prepared-participant-gid-owner-acceptance-matrix.md`, Blob `c9e6da594b9dcf648502801cb214e883805bdfb1`.
+The current Storage COC protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` and A prepared-participant mapping Blob `a71251704851cacd15f67faa985a5bd50057e92a` have now been reviewed by all B/C/D/E/G/H/I/A/Storage owner perspectives. Exact matrix: `reviews/integration/phase-3.6.4-jf10-prepared-participant-gid-owner-acceptance-matrix.md`, Blob `dd7f00945b362b8d71b91d007e0335a8cffd96c2`.
 
 The accepted type split is PreparedParticipantRef (stable engine-neutral identity), PreparedTransactionGID (client-chosen PostgreSQL prepared handle, bound before COC intent), and EngineNativeTransactionXIDRef (observed after PREPARE). Storage PREPARE is prohibited until the exact COC intent is committed. The H 1.1.1 candidate schema Blob is `c0bbfc7611a8d88a39cee209831db32b62601fde`.
 
@@ -982,7 +982,7 @@ Storage Gate A architecture design is now **CONDITIONAL PASS** because its resto
 | G | `466e2bf5992ea5944ef6ecebd79a39eeb21cdc97` | `8b9ea4b4a63f7bbddbefdb0b14cf99943b3e7613` |
 | H | `a5fe5268fe846f2ec3c94448bda5592783ef7212` | `cb9d1d97604bdb71bc2f5bf47f6392e03f30ba99` |
 | I | `d66361dd88f07278340663b75bcb22e040d96965` | `c24f03aae6ce7bc76eaeb1ed33bb24fb7fcac624` |
-| Storage | `7f035e4275f2c9ee3264fadc2516e0cfbc8f14cf` | `555844c93da2dd255f042c8bf4cd874cb0af076c` |
+| Storage | `ec1a8bbbba53c67766e2eb415854dbc9bf9057ca` | `555844c93da2dd255f042c8bf4cd874cb0af076c` |
 
 ### 21.6 System verdict remains BLOCKED
 
