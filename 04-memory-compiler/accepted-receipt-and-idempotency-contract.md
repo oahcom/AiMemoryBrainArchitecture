@@ -223,3 +223,32 @@ All of these remain distinct typed evidence objects. None is interchangeable wit
 D's normative operation document now specifies semantic lookup and receipt behavior for RegisterProducerClass, RegisterProducerWork, InstallForgetFence, CaptureProducerRegistrationHighWater, RegisterDerivedDependency, PublishDerivedIfFenceCurrent, CompleteProducerWork, ResolveProducerWork and ReconcileForgetBarrier. Therefore OPEN-REC-04 is narrowed: D semantic lookup identities, receipt classes and error outcomes are specified; callable API/transport schemas, authentication serialization and wire error mapping remain OPEN under OPEN-API-01. Storage/Consistency atomic visibility and recovery remain OPEN under OPEN-STORAGE-01.
 
 The AcceptedReceipt's own durable commit profile remains separately OPEN under OPEN-REC-01. D producer-ledger receipt durability does not substitute for the E ingress transaction, and an AcceptedReceipt does not imply a D ProducerRegistrationReceipt.
+
+
+---
+
+## Phase 3.5 Revalidation — Receipt State Matrix and Replay
+
+| State / evidence | Durable fact established | Does not establish | Recovery rule |
+|---|---|---|---|
+| DurableIngestion | Immutable EventRef and payload bytes/reference/digest are durably stored and integrity-checked | AcceptedReceipt, compile intent/start or canonical effect unless separately committed | Recover by EventRef+payload digest; orphan private payload is not accepted work |
+| Accepted / AcceptedReceipt | Event + immutable payload ref/digest + authenticated idempotency row + AcceptedReceipt + CompileIntent/outbox committed atomically or by proven recoverable WAL | D ProducerWork registration, CompileStarted, CandidateProduced, CanonicalCommit, dependency registration or Published | Same authenticated namespace/key/digest returns original receipt and IDs; changed digest conflicts |
+| CompileStarted | Named DerivationRunId/AttemptId began after D admission and fresh auth/fence checks | Candidate, canonical commit or publication | Recover same WorkItem/CompileIntent; new AttemptId only for a new execution |
+| CandidateProduced | Candidate/staged artifact and provenance checkpoint exist in private staging | Runtime visibility, canonical commit, complete dependency inventory or publication | Resolve same artifact/version and dependency operation IDs; never expose staging |
+| CanonicalCommit | D CanonicalCommitReceipt confirms canonical transaction and returns D-issued CanonicalCommitCursor | Derived publication, F indexing, G Context or Forget completion | Resolve same canonical operation identity after lost ACK |
+| DerivedDependencyRegistered | D inventory durably records complete artifact/source/parent edge set and position | Visibility or publish-gate success | Resolve same DependencyRegistrationId+digest; partial/unknown remains private |
+| DerivedArtifactPublished | D final gate + atomic visibility boundary has durable PublicationReceipt and visibility commit identity | F IndexWatermark, G ContextVersion, global Forget completion or physical erasure | Resolve same PublicationOperationId+digest; ambiguous result remains private |
+| CompilerTerminal | D ProducerWorkTerminalReceipt accounts for every output and proves no attempt can publish later | Forget barrier drained unless D ReconcileForgetBarrier says so | Resolve same WorkItemId+terminal digest; conflict is immutable |
+
+### Duplicate submission and replay
+
+- Candidate idempotency namespace remains pending B/H/I agreement: authenticated issuer + Principal + ProducerIdentity + security domain + validated Scope binding + operation family + caller key. Payload ActorRef/ProducerId/ScopeRef are claims, never authentication.
+- Same namespace/key + same semantic digest returns original AcceptedReceiptId, EventRef, CompileIntentId, ProducerWorkItemId and current authorized status; no second event, registration, compile or canonical side effect.
+- Same namespace/key + different digest returns IDEMPOTENCY_CONFLICT and leaves original immutable.
+- Unknown receipt commit is resolved using the same namespace/key/digest; do not mint a new key, return optimistic success or dispatch duplicate work.
+- Receipt lookup is authorization-checked; another Principal cannot enumerate receipt existence or payload metadata.
+- Outbox/DLQ replay preserves EventRef, CompileIntentId and ProducerWorkItemId; AttemptId changes only for a new execution. Replay after Forget is reauthorized and re-fenced; it cannot reconstruct forgotten payload.
+- Recompile is not duplicate Accepted submission: new linked DerivationRunId, no new AcceptedReceipt, and OPEN-RECOMPILE-01 governs child WorkItem re-admission.
+- Lost D registration/dependency/publication/terminal ACKs use the original operation ID/digest. UNKNOWN keeps artifact private and work barrier-open.
+
+Canonical digest profile, typed identity serialization, retention horizon and post-Forget receipt disclosure remain OPEN with B/H/I/Storage. No wire schema or retention duration is frozen.
