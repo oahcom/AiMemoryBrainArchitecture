@@ -190,3 +190,27 @@ E persists the D-issued CanonicalCommitCursor unchanged as one global sequence p
 - OPEN-REC-03: idempotency/tombstone retention horizon and post-Forget disclosure-safe response policy (I-owned).
 - OPEN-REC-04: exact D lookup operations/error codes for producer registration, dependency registration, publication and terminal completion.
 - OPEN-REC-05: recompile registration shape (child work item vs new registered item) remains D-owned.
+
+
+
+---
+## Phase 3.5 Addendum — Producer Ledger Receipt Types
+
+D's ProducerRegistrationReceipt carries ProducerRegistryVersion and ProducerRegistrationSequence. The latter is a per-D producer-ledger ordering token used to prove inclusion in the Forget barrier. It is not the CanonicalCommitCursor and must never be stored in that field or interpreted as a canonical commit position.
+
+InstallForgetFence captures ProducerRegistryVersion + ProducerRegistrationHighWater at its fence-installation linearization point. CaptureProducerRegistrationHighWater returns an immutable BarrierSnapshotReceipt verifying that same cutoff; repeated capture cannot move it. E records both receipt identities and the D snapshot version used for terminal reconciliation.
+
+ResolveProducerWork is the read-only recovery path after lost registration/dependency/publication/terminal ACK. It uses the original stable WorkItemId and registration digest, with optional AttemptId/LeaseId and operation IDs. A missing/ambiguous result is UNKNOWN, not a reason to mint a new work or publication key.
+
+ReconcileForgetBarrier returns D's local barrier disposition and unresolved counts at explicit immutable checkpoints. E supplies complete evidence but does not declare the barrier drained itself. A later-discovered derivative or ledger gap requires a new append-only reconciliation checkpoint and invalidates any prior current proof.
+
+The receipt evidence matrix is therefore extended with:
+- ProducerClassRegistrationReceipt + ProducerRegistryVersion;
+- ProducerRegistrationReceipt + ProducerRegistrationSequence;
+- ForgetFenceCursor + installation CanonicalCommitCursor;
+- BarrierSnapshotReceipt + ProducerRegistrationHighWater;
+- DependencyRegistrationReceipt + dependency inventory position;
+- PublicationReceipt + visibility commit identity;
+- ProducerWorkTerminalReceipt + D barrier reconciliation cursor.
+
+All of these remain distinct typed evidence objects. None is interchangeable with AggregateRevision, LifecycleEventCursor, IndexWatermark, ForgetFenceGeneration, PermissionEpoch or ContextVersion.
