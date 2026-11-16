@@ -18,7 +18,7 @@ This summary supersedes historical interim status and “next test” statements
 
 **Deferred to engineering/deployment phase (not Gate A blockers):** production Canonical Authority deployment/runtime binding, live I/D/COC adapter integration, cloud/failure-domain placement, production fencing/routing/monitoring, archive retention/restore operations, named operator/on-call, runbook and measured RPO/RTO. Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`.
 
-Gate A remains PARTIAL PASS / OPEN. Gate B is SPECIFICATION PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED. Gate C is DEFERRED_TO_ENGINEERING_PHASE for executable distributed implementation/fault injection. JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED.
+Gate A remains PARTIAL PASS / OPEN. Gate B revision `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` is DESIGN-LEVEL OWNER ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS; current amended revision `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` is PUBLISHED / FOCUSED EXACT-OWNER RE-REVIEW REQUIRED / NOT YET ACCEPTED. Gate B implementation/conformance is NOT RUN. Gate C is DEFERRED_TO_ENGINEERING_PHASE for executable distributed implementation/fault injection. JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED.
 
 **Owner:** Storage / Consistency  
 **Decision date:** 2026-11-17  
@@ -802,7 +802,7 @@ Before production activation, Storage requires:
 
 **No production custodian/on-call commitment is implied.** The current repository contains no deployed COC service, no selected consensus implementation, no actual failure-domain map and no operational owner designation. The architecture-level Storage acceptance must not be read as deployment readiness.
 
-Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED until Gate A and COC deployment evidence pass; Gate C remains BLOCKED; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+Gate A remains PARTIAL PASS / OPEN; Gate B prior revision `4ac63ac...` is DESIGN-LEVEL OWNER ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS, while current revision `86ff3b...` requires focused exact-owner re-review; Gate C is DEFERRED_TO_ENGINEERING_PHASE; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
 
 
 The COC protocol reference has been updated to Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` (commit `1b70f164e4a5834d36dc4b3dd1644c57309312c2`); §13 clarifies the COC commit receipt and crash-fault/RPO boundary. This is architecture protocol evidence, not an implementation claim.
