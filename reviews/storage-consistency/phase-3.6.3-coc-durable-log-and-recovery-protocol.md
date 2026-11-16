@@ -278,3 +278,17 @@ The initial three-voter/two-quorum profile tolerates one crash/unavailable voter
 - CausalOrderTerminalProof is a cross-reference bundle over these independently authoritative facts; it cannot mint or upgrade any constituent fact.
 
 Any missing, invalid, stale or contradictory proof keeps the operation UNKNOWN/IN_DOUBT. No authority may infer another authority's decision from a COC index, common transaction ID or elapsed time.
+
+## 14. PostgreSQL prepared-participant identity mapping — Storage clarification
+
+The protocol term `preallocated XID` MUST be represented explicitly in engine-neutral APIs so it is not confused with an engine-assigned transaction number. For the PostgreSQL 18.7 candidate profile:
+
+1. `PreparedParticipantRef` is the stable cross-service participant identity.
+2. `PreparedTransactionGID` is the client-chosen PostgreSQL prepared-transaction GID. Storage allocates and durably binds this unique GID to the immutable `PublicationOperationId` / `RequestDigest` before `JF10_PREPARE_INTENT_REGISTERED`. This is the preallocated identifier carried in the COC prepare-intent record and reused for every lookup/retry/COMMIT PREPARED/ROLLBACK PREPARED.
+3. PostgreSQL's numeric `pg_prepared_xacts.transaction` value is an engine-assigned native XID allocated by PostgreSQL; the client cannot preallocate it. It MUST NOT be described as the preallocated cross-service XID or used as the sole participant identity. Storage records it as observed engine evidence after PREPARE.
+4. `PreparedParticipantReceipt` MUST bind at least: PreparedParticipantRef; PreparedTransactionGID; native XID as observed; CanonicalAuthorityDBRef; PostgreSQL cluster `system_identifier`; target database identity/OID; original prepare timeline and observed prepare LSN; participant digest; PublicationOperationId and RequestDigest; exact owner_boundary; CausalOrderDomainRef and PolicyDomainRef; COC prepare-intent position/digest; prepared state; Storage signer/key version and audience.
+5. The GID MUST be unique within the bound PostgreSQL cluster/database authority and MUST NOT be reassigned to a different operation after resolution. A same-GID/same-digest retry is lookup/replay; a same-GID/different-tuple request is CONFLICT.
+6. After a durable I terminal decision, `StorageResolutionProof` MUST bind the same GID and original participant tuple to the final COMMITTED or ROLLED_BACK state. On commit it includes the exact VisibilityPointer/PublicationReceipt transaction identity and receipt digest; on rollback it includes authoritative non-publication evidence. It also records the recovery timeline/LSN context without replacing the original prepare identity.
+7. Absence of a GID from `pg_prepared_xacts` is not, by itself, proof of commit or rollback. Storage MUST resolve through the durable participant outcome/idempotency ledger and authoritative DB readback. If those disagree or are unavailable, the result remains UNKNOWN/IN_DOUBT and protected reads stay closed.
+
+This clarification preserves the protocol's engine-neutral intent while making the PostgreSQL mapping implementable. Other database engines MUST define an equivalent stable prepared-participant identifier and separately typed engine-native transaction identifier. The exact field names and wire encoding require H review; the security tuple and same-participant recovery invariant are normative.
