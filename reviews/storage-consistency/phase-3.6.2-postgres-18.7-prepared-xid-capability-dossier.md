@@ -1,8 +1,26 @@
 # JF-10 Storage Gate A — PostgreSQL 18.7 Prepared-XID Capability Dossier
 
+
+## Current Gate A summary — controlling status (2026-11-17)
+
+This summary supersedes historical interim status and “next test” statements in earlier sections.
+
+**CI capability subtests PASS for the pinned PostgreSQL 18.7 profile:**
+1. Single-node prepared-XID persistence, lock retention, hard restart, same-XID commit/rollback.
+2. Two-node synchronous WAL replay, primary loss, standby promotion, same-XID commit/rollback.
+3. Physical pg_basebackup/restore with stale-control fail-closed fixture.
+4. Coordinator process crash in the participant-success / ACK-checkpoint gap.
+5. TCP CommandComplete response loss after PREPARE / COMMIT PREPARED / ROLLBACK PREPARED.
+6. Required synchronous standby unavailable: PREPARE waits on SyncRep; client outcome UNKNOWN; local prepared XID and lock remain; visibility remains private.
+7. WAL-archive PITR to explicit LSN; target state restored, post-target state excluded.
+
+**Still OPEN for Gate A:** production Canonical Authority deployment and DB profile NOT DESIGNATED; production I/D control-ledger integration; old-primary fencing/rejoin and split-brain prevention beyond the CI rejoin test (if/when passed); production host/zone/cloud-volume durability and failover routing/monitoring; backup archive retention and operational restore governance; named production operator/on-call, approved runbook, RPO/RTO and operational acceptance.
+
+Gate A remains PARTIAL PASS / OPEN. Gate B remains BLOCKED until Gate A acceptance; Gate C remains BLOCKED until Gate B acceptance; JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED.
+
 **Owner:** Storage / Consistency  
 **Decision date:** 2026-11-17  
-**Status:** CANDIDATE ENGINE PROFILE SELECTED FOR PHYSICAL CAPABILITY QUALIFICATION; SINGLE-NODE PREPARED-XID PROBE PASSED; PRODUCTION DEPLOYMENT / HA GATE NOT PASSED.
+**Status:** POSTGRESQL 18.7 CI CAPABILITY PROFILE QUALIFIED ACROSS PREPARED-XID, SYNC FAILOVER, ACK-LOSS, STANDBY-UNAVAILABLE UNKNOWN, PHYSICAL RESTORE AND WAL PITR SUBTESTS; PRODUCTION DEPLOYMENT / FENCING / OPERATIONS NOT ACCEPTED.
 
 ## 1. Candidate profile
 
@@ -75,7 +93,7 @@ Storage accepts PostgreSQL 18.7 as a viable candidate for the JF-10 prepared-XID
 
 This is evidence of the PostgreSQL engine behavior under the exact CI profile, not evidence that the application participant adapter, I sequencer, D shared serialization domain, C provider, or COC has been implemented.
 
-## 5. Remaining Gate A blockers — NOT PASSED
+## 5. Scope limitations of the original single-node probe (historical; later evidence in §§7–18)
 
 The probe does NOT test or prove:
 
@@ -89,14 +107,15 @@ The probe does NOT test or prove:
 
 wal_level=replica is a configuration prerequisite only; it is not proof of a functioning replication topology.
 
-## 6. Accountable role and next test
+## 6. Accountable role and current production boundary
 
-**Accountable technical role:** Storage DB Platform Operator (Storage Owner responsibility for the candidate profile).  
+**Accountable technical role:** Storage DB Platform Operator (Storage Owner responsibility for the candidate qualification profile).  
+**Production Canonical Authority deployment / DB profile:** NOT DESIGNATED.  
 **Production on-call identity / deployment operator:** NOT YET DESIGNATED; do not infer an individual or production service from this CI role.
 
-Next Gate A work is a two-node synchronous-replication and promotion campaign on the same pinned PostgreSQL 18.7 image, followed by backup/restore and prepared-XID recovery validation. Gate A remains OPEN until those production-relevant topology and operator conditions are satisfied.
+The pinned PostgreSQL 18.7 CI profile has since passed the two-node sync failover, same-XID commit/rollback after promotion, physical pg_basebackup restore, coordinator ACK-gap, TCP ACK-loss, required-standby-unavailable UNKNOWN/private/lock-retention, and WAL-archive PITR subtests (§§7–18). Remaining Gate A work is production binding, old-primary fencing/rejoin and split-brain prevention, production I/D ledger integration, infrastructure durability/routing/monitoring, and approved operator/runbook/RPO/RTO evidence.
 
-Gate B persistent COC remains BLOCKED until Gate A passes. Gate C end-to-end fault injection remains BLOCKED until Gate B passes. JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED; multi-PolicyDomain atomicity remains BLOCKED.
+Gate B persistent COC remains BLOCKED until full Gate A acceptance. Gate C end-to-end fault injection remains BLOCKED until Gate B passes. JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED; multi-PolicyDomain atomicity remains BLOCKED.
 
 
 ## 7. Two-node synchronous replication and primary-loss recovery — PASS (CI)
