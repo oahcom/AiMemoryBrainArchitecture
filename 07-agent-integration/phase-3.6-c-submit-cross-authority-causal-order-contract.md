@@ -98,3 +98,17 @@ C reaffirms the exact ordering and evidence chain for this candidate: durable Pa
 C accepts the current outage-cutoff safety rule as a necessary admission invariant: if COC is unavailable, C does not create or accept a new protected intent/reservation and does not call the provider. C relies on I/D to keep their local admission gates closed until their request cutoffs are durably committed to COC; C does not infer absence of revocation/fence from coordinator unavailability.
 
 Exceptions: (1) COC/operator and durable participant registry remain undesignated/undeployed/unverified; (2) provider-specific same-key idempotency and ambiguous-outcome recovery remain to be proven; (3) H 1.1.0 interoperability and I crypto/key governance remain open; (4) G acceptance and C-CO execution remain open/not run. This decision is only for the exact A Blob above; no 1.0 approval is transferred.
+
+## C exact-version acceptance — CGH-APPLIED-1.1 recovery-batch amendment
+
+- A package Blob: `4961ffefc0f9920efb8425a9b2a7af42d8f64819`
+- Companion COC Blob: `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`
+- Profile: `CausalOrderProfile/1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within C's actual final-request/provider boundary and C-owned submit evidence.
+
+C accepts the added COC-outage recovery-batch rule as a necessary fail-closed condition. While COC is unavailable, C MUST NOT create/accept a new protected intent or reservation and MUST NOT call the provider for a protected operation whose common causal order/cutoff status cannot be confirmed. C does not infer absence of I revocation or D fence from coordinator unavailability. On recovery, C must account for every pre-batch C-owned participant/outcome; an unknown provider result remains UNKNOWN/IN_DOUBT and cannot be converted into safe abort or retried as a new operation.
+
+C accepts that the recovery batch does not order I and D requests by their local clocks. C supplies exact immutable CSubmitOutcome evidence for each prior participant; it does not decide I revocation or D lineage/fence outcomes.
+
+Exceptions: (1) COC, participant registry and operator remain undesignated/undeployed; (2) provider-specific same-key idempotency and crash recovery remain unverified; (3) the package does not yet pin a production wire encoding for every recovery-batch evidence item; H owns that schema; (4) C-CO and provider fault tests remain NOT RUN. This decision applies only to the exact A/COC Blob pair above and does not transfer any 1.0 or prior 1.1 approval.
