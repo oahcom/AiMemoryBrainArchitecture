@@ -1596,3 +1596,33 @@ A inspected the raw job log. It confirms the old primary container was stopped b
 - Production activation: NOT AUTHORIZED.
 
 A1 does not designate the production target or operator. No production deployment, Gate A acceptance, Gate B/C execution or production activation is inferred from these CI runs.
+
+
+## 13.40 Gate A — Storage A1 reconciliation and old-primary rejoin subtest independently confirmed — 2026-11-17
+
+A refreshed Storage's owner branch and independently re-read the current readiness record, capability dossier, workflow/probe identities, and Issue #10 evidence comments.
+
+### A1 — readiness reconciliation: CLOSED as documentation-only
+- Storage branch HEAD reported by its latest evidence: `0f57f7a191f81d54a0bf1be9768fd91c00a2ef8d`.
+- Readiness Blob: `f7a34fa2057ae585f641c2f2d1d9c24ecc9b9d27`.
+- Capability dossier Blob: `63b0bd54c44c287c22adb886f602432be214f21f`.
+- Opening status names PostgreSQL 18.7 as the qualified CI capability candidate and explicitly leaves production Canonical Authority deployment NOT DESIGNATED.
+- Implementation Verified=NO; Production Deployment Bound=NO / NOT DESIGNATED; Production Ready=NO; human production operator/on-call NOT DESIGNATED.
+
+A1 is accepted only as correction of stale documentation. It does not approve a production engine, runtime, deployment, or Gate A.
+
+### A4 — pg_rewind/rejoin CI subtest: PASS within the pinned test harness
+- Probe Blob: `0fe6af4a8c9ef350ef9cbf0694a8f975e8f142f5`.
+- Workflow Blob: `7670ff9537054df1c1303d4eda4d46bffdfa3c4c`.
+- Run/job: `43930047054` / `133519705454`, SUCCESS; source commit `1eb9c9c08e3ae658fcbcfa568d1c2e1ab0e1999a`.
+- The old primary was stopped before promotion, recovered offline, rewound to the promoted timeline, and rejoined as a standby; post-rejoin primary writes replicated and direct writes to the standby were rejected.
+
+The CI fence is a stopped Docker container on one runner. Production STONITH/cloud-instance or storage fencing, independent failure-domain isolation, HA arbitration, production routing/monitoring and split-brain prevention remain OPEN.
+
+### Remaining Gate A blockers and sequence
+1. Deep PITR recovery boundary: prepared-XID/lock plus VisibilityPointer/PublicationReceipt atomic visibility at restore cut; missing/corrupt/incomplete WAL negative cases; quarantine against a newer real I/D control-ledger high-water. Existing fixture evidence is not real I/D integration.
+2. Bind the actual project Canonical Authority runtime and authoritative DB path, plus real I/D control-ledger source/high-water.
+3. Production failure-domain durability/fencing, failover routing/monitoring, backup retention/immutability and restore governance.
+4. Name accountable production operator/on-call; approve runbook, RPO/RTO and independent operational acceptance.
+
+Current disposition: Gate A PARTIAL PASS / OPEN; Gate B BLOCKED pending Gate A acceptance; Gate C BLOCKED pending Gate B; JF-10 P0 OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain BLOCKED. No Storage-owned file was changed by A.
