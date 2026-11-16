@@ -138,3 +138,16 @@ Any retention/deletion request to an inference provider is a separate provider-g
 - Late Applied ACK after Superseded/Expired.
 - Adapter cannot purge a local cache; must report unsupported/unknown, not success.
 - Provider-side retained prompt is outside Adapter control; no physical-deletion assertion is emitted.
+
+
+## 11. Normative ACK evidence and reconnect refinement
+
+The complete ACK status, postcondition, target mapping, identity tuple and evidence envelope are specified in adapter-forget-ack-and-target-binding.md; that contract is normative for H's Adapter-local evidence boundary and remains subject to I/D/G/B approval.
+
+The seven statuses are distinct: SUPPRESSED (durable future-use gate only), LOCAL_BUFFER_CLEARED (declared volatile buffers), LOCAL_CACHE_PURGED (declared cache namespaces/partitions), QUEUED_DELIVERY_CANCELLED (declared local queue), FAILED (definitive failed attempt), UNKNOWN (unverifiable outcome), UNSUPPORTED (capability absent). No status implies another status. Suppression is not purge, local queue cancellation is not G/Brain queue cancellation, and none is global completion.
+
+Each ACK MUST bind the authenticated Adapter Instance, Agent/runtime identity and Session, I-authenticated Principal/Issuer/ActorRef, B-typed ScopeRef, Managed Region and region revision, Context/Delivery IDs where applicable, ForgetOperation ID, D ForgetFence Generation, I Permission Epoch, Capability Set/Epoch, evidence time/sequence and integrity-protected action evidence. Payload self-asserted IDs are claims only.
+
+Reconnect is ordered: trusted transport authentication; identity/session binding; protocol/capability negotiation; current I Permission Epoch; current D ForgetFence; clear/suppress stale regions, caches and pending local deliveries; persist/submit local evidence; query G current Context/delivery ledger; validate Snapshot/Delta; reauthorize and recheck both epochs immediately before apply; apply only current authorized Context; emit Applied Attestation separately. Offline remains Pending/Unknown. If either authority state is unavailable or incomparable, fail closed.
+
+Permission Epoch and ForgetFence Generation are distinct owner-issued namespaces. H MUST NOT numerically compare, reuse, convert or cross-populate them. H cannot define I Target State aggregation or PolicyException. A local ACK may support only the exact Adapter-instance/session/Scope/Managed-Region/capability target slice validated by I.
