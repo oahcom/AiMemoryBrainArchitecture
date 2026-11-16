@@ -916,3 +916,15 @@ H has published an exact additive BMCP 1.1.0 schema-candidate mapping for A COC 
 H maps five distinct COC lifecycle records to five 1.1.0 message families: `JF10_PREPARE_INTENT_REGISTERED`, `JF10_PREPARED_PARTICIPANT_REGISTERED`, `I_JF10_TERMINAL_DECISION_OBSERVED`, `STORAGE_JF10_PARTICIPANT_RESOLVED`, and `JF10_BRIDGE_RECONCILIATION_RECORDED`. It specifies common envelope, typed opaque references, exact immutable tuple, separate COC/I/D/Storage positions, conditional requiredness, signatures/commit proofs, idempotency/conflict rules, fail-closed UNKNOWN behavior and H-JF10-01..10 conformance cases.
 
 This is schema-candidate documentation acceptance only. Generated JSON Schema/IDL/SDK bindings and interoperability have not been produced or tested. Crypto suite/key custody remains subject to I/Security governance. H does not approve deployment, implementation, database capability or production activation. H-JF10-01..10 remain NOT RUN; JF-10 remains P0 OPEN; multi-policy-domain atomicity remains BLOCKED.
+
+
+## 13.15 JF-10 ↔ COC bridge exact-version Owner reconciliation
+
+Issue #8 now carries the corrected exact bundle and Owner readback:
+- A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`.
+- I §11.2 exact-version ACCEPT: I artifact Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`, single-I-PolicyDomain only.
+- D exact-version ACCEPT: `forget-fence-operation-and-publication-gate.md`, Blob `5a56c406578fdf257509315eb3f6f3f75456116c`.
+- Storage exact-version ACCEPT: `forget-atomicity-storage-realization-review.md`, Blob `55c01f4512f2e3d8aac767dd004e768ae073178e`.
+- C decision remains pending for this exact A Blob; its current contract's recovery-batch decision is pinned to the older A/COC pair `4961ffefc0f9920efb8425a9b2a7af42d8f64819` / `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
+
+**Current exact bridge acceptance gate: I ACCEPT; D ACCEPT; Storage ACCEPT; C PENDING.** The outstanding action is an append-only C Owner decision on the amended A architecture exact Blob. No joint closure until C's artifact is published and read back. JF-10 P0, implementation, DB capability, COC deployment and conformance remain OPEN / NOT VERIFIED / NOT RUN.
