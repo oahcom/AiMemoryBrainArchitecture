@@ -1496,3 +1496,36 @@ Raw job log confirms:
 **A4 remains OPEN:** No evidence yet closes old-primary fencing/rejoin prevention, split-brain exclusion, actual Canonical Authority deployment binding, production I/D control-ledger integration, infrastructure failure-domain/failover/monitoring binding, named operator/on-call, approved runbook, RPO/RTO or independent operational acceptance.
 
 **Gate disposition:** Gate 0 CLOSED; Gate A PARTIAL PASS / OPEN (five prior evidence classes + A2 + narrow A3 PITR subtest pass; A1/A4 and full PITR recovery safety remain open); Gate B BLOCKED; Gate C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+## 13.37 Storage Gate A — synchronous-standby-unavailable UNKNOWN test and WAL-archive PITR PASS — 2026-11-17
+
+Storage has added two further physical CI evidence classes on the pinned PostgreSQL 18.7 image.
+
+### A. Required synchronous standby unavailable — PASS
+
+- Run: `43927416496`; job: `133510446871`; conclusion SUCCESS.
+- URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43927416496
+- Run commit: `4e4cf967d97254f1f6e8dea03f1afd1402ff0802`
+- Probe Blob: `b6de4e4f461405107464ff8ad179520f9b028749`
+- Workflow Blob: `32ed78aa702dfb6f45c73f94c81bd617b970976b`
+
+The required standby was stopped. PREPARE entered PostgreSQL wait event `IPC / SyncRep`. The client/backend was lost before PREPARE success acknowledgement. The exact prepared XID remained locally in-doubt, its row lock remained held, and protected visibility remained absent. Same-XID rollback was performed only after the safety assertions. This proves UNKNOWN/private/lock retention, not that the XID had reached the unavailable standby. Production must not let I advance on a missing PREPARE ACK or promote a standby without reconciling the exact participant XID.
+
+### B. WAL-archive PITR — PASS
+
+- Run: `43927783471`; job: `133511748345`; conclusion SUCCESS.
+- URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43927783471
+- Run commit: `91117532adb25914bcaa49b0007f7c34ef49c787`
+- Probe Blob: `6e7721ee8f8708357610e0bc564e015872b8263c`
+- Workflow Blob: `4c2175055ae43ccebb95f219952ec0480121e62d`
+- Target LSN: `0/6000190`; replay LSN: `0/7000000`; promoted timeline: `2`.
+
+The restored cluster retained base and target markers and excluded the marker committed after the target LSN. This closes the WAL-archive PITR subtest for the pinned CI profile only. It does not prove production archive retention, off-site immutability, backup catalog, cross-zone recovery, production I/D control-ledger replay or RPO/RTO.
+
+Storage Owner updated:
+- Capability dossier Blob: `b940839e051544bc51a7674a018e3b21891fc3c4`
+- Deployment/readiness Blob: `0dd880a56dcd223ba4102292ad8f9b8e1750102c`
+- Storage branch HEAD at reconciliation: `0267084bedb26fc9352282ec993bc5e81d1aa831`
+
+Remaining Gate A blockers: actual project Canonical Authority deployment/profile NOT DESIGNATED; production I/D control-ledger integration; old-primary fencing/rejoin and split-brain protection; production host/zone/cloud-volume durability and failover routing/monitoring; named operator/on-call, approved runbook, RPO/RTO and operational acceptance. Gate A remains PARTIAL PASS / OPEN. Gate B and Gate C remain BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
