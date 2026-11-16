@@ -1293,3 +1293,29 @@ Both prepared XIDs were synchronously replayed. After primary hard loss and stan
 This closes the rollback-after-promotion subtest for the pinned PostgreSQL 18.7 CI profile. Gate A remains PARTIAL PASS / OPEN because backup/restore + PITR, current Forget-control-ledger reconciliation before restored reads, real host/zone/storage durability, production failover fencing/routing, actual Canonical Authority deployment and named human operator/RPO/RTO remain open.
 
 Gate B persistent COC remains BLOCKED until full Gate A passes. Gate C remains BLOCKED until Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED. Issue #10 comment 6922528500 records this result.
+
+
+## 13.28 Gate A — physical backup/restore and stale-control fail-closed PASS — 2026-11-17
+
+Storage executed a physical PostgreSQL 18.7 pg_basebackup/restore probe while a participant XID was prepared and a previously visible artifact remained in the snapshot.
+
+- Probe Blob: 81072ea2411af12f29c7a7a4d984df3f870321ca
+- Workflow Blob: 38369ed197665c4ed99a9ba30602cb5e3b04ba75
+- Successful run: 43909138634
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43909138634
+- Run commit: 62033b9f90a28c4afdea07fafa0f575342b084e9
+- Job: 133445937783
+
+The run proved physical backup/restore startup, prepared-XID survival, same-XID commit after restore, and stale-snapshot fail-closed behavior. Local restored control epoch 0 could not serve reads against required authoritative epoch 1. After the test fixture replayed the newer Forget-control state, the forgotten artifact was suppressed, unrelated content remained readable, and the prepared XID was committed with pointer + receipt becoming visible together.
+
+**Gate A remains PARTIAL PASS / OPEN.** The external control epoch is a test fixture, not production I/D integration. Remaining: actual host/zone/cloud-volume durability, production failover fencing/routing and split-brain prevention, actual Canonical Authority deployment, named human operator/runbook and RPO/RTO.
+
+| Gate | Status |
+|---|---|
+| Gate 0 — D + Storage exact complete-bundle decisions | CLOSED |
+| Gate A — PostgreSQL 18.7 candidate physical capability | PARTIAL PASS / OPEN; single-node, synchronous failover, rollback-after-promotion and backup/restore CI subtests PASS |
+| Gate B — persistent COC/quorum log | BLOCKED until production Gate A is accepted |
+| Gate C — deterministic end-to-end fault campaign | BLOCKED until Gate B |
+| JF-10 P0 / production activation | OPEN / NOT AUTHORIZED |
+
+Issue #10 comment 6922597562 records the backup/restore result. No production DB deployment, operator readiness, I/D integration, COC persistence, provider integration or end-to-end JF-10 conformance pass is inferred.
