@@ -519,3 +519,13 @@ The prepared-XID PITR job proves exact prepared XID lock retention, same-XID COM
 ### 23.4 Supersession note
 
 This addendum supersedes the stale Gate B/C wording in §22 and any earlier wording that conditions architecture-phase Gate B design on a production runtime repository. It does not supersede any technical test limitation, production non-claim, owner authority boundary or production-activation prohibition.
+
+## 24. Storage Owner decision on COC custody — conditional architecture acceptance only
+
+Storage accepts A's proposed COC infrastructure-custody model at architecture level: a single logical append-only COC service, three-voter crash-fault-tolerant consensus across three independent failure domains, two-voter quorum, quorum-durable append, linearizable reads, digest-chained positions, certified checkpoints and fail-closed restore fencing. Raft or an equivalently proven consensus protocol is accepted as the protocol class; no concrete product/vendor is selected.
+
+Storage accepts technical stewardship of persistence/replication, snapshots/checkpoints, restore fencing, retention design, observability and SLO proposal. COC remains a neutral participant-accounting/order-observation service, not I's policy-domain sequencer or JF-10 COMMIT/ABORT authority. Storage alone resolves the exact prepared XID and local VisibilityPointer/PublicationReceipt transaction.
+
+**This is not production deployment or operational acceptance.** No actual failure domains, cloud/AZ, disk durability, consensus product/build, KMS/HSM, backup medium, retention period, data residency, RPO/RTO, SLO, runbook, named operator or on-call are designated. Production activation requires executable quorum/partition/restore/rollback tests, COC-13..16 outage-gate tests, JF10-COC-01..10 participant-bridge tests, Security/I key and admin approval, and signed operational ownership.
+
+Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED pending Gate A and COC deployment evidence; Gate C remains BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
