@@ -23,8 +23,6 @@ Before C invokes a provider/runtime submit side effect, the exact operation MUST
 
 D returns a signed DParticipantClearanceRef only after verifying the participant is included in the current fence/barrier accounting and no earlier effective fence suppresses it.
 
-## 3. Fence installation and terminality
-
 ## 2.1 Fence-request causal cutoff
 
 Every ForgetFence request affecting this target/lineage MUST be durably recorded with the common coordinator and carry an immutable DForgetFenceRequestRef plus coordinator request position. D remains the sole authority that commits the effective ForgetFenceGeneration and barrier terminality.
@@ -34,7 +32,7 @@ Every ForgetFence request affecting this target/lineage MUST be durably recorded
 - D terminal evidence binds both request cutoff position and effective fence position; these must not be conflated.
 - No new affected participant may be admitted after the fence request cutoff.
 
-
+## 3. Fence installation and terminality
 
 - A fence request is durably recorded in the coordinator/D authoritative barrier before it becomes effective. Its request position establishes the admission cutoff: any ParticipantIntentRef ordered after the fence request is rejected as FENCE_WON even while the fence is waiting for earlier participants to drain.
 - If a ParticipantIntentRef is ordered before the fence request, D MUST keep the fence barrier open until that participant has a durable C submit outcome and compatible I terminal evidence, or a safe abort is durably established. Only then may D commit the fence's effective position.
