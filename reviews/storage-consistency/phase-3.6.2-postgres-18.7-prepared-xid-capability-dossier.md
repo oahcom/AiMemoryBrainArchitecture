@@ -804,3 +804,33 @@ Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED until Gate A and COC 
 
 
 The COC protocol reference has been updated to Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` (commit `1b70f164e4a5834d36dc4b3dd1644c57309312c2`); §13 clarifies the COC commit receipt and crash-fault/RPO boundary. This is architecture protocol evidence, not an implementation claim.
+
+
+## 30. Prepared-XID / visibility / receipt PITR — successful bounded campaign (2026-11-17)
+
+**Result: PASS for the pinned PostgreSQL 18.7 CI fixture only.** Workflow run `43958775001` / job `133620265141` completed SUCCESS on tested source commit `d026add5cfaec0c395537e8763317cdbd8255398`. Current branch source blobs are identical to the tested blobs: probe `63506807be82b3203e7e682b0772452621c92558`; workflow `a055d311c324d09eb6ebf4054247761116795eb7`. [Run and logs](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43958775001).
+
+### Exact target capture
+
+| Recovery point | Target LSN | Timeline | Required archived WAL |
+|---|---|---:|---|
+| Prepared / in-doubt | `0/5004710` | 1 | `000000010000000000000005` |
+| After COMMIT | `0/6000000` | 1 | `000000010000000000000006` |
+| After ROLLBACK | `0/6000110` | 1 | `000000010000000000000006` |
+
+The probe emits and checks the exact target WAL archive file for each target before restore. The previous rollback target sampling/archive defect is therefore fixed for this tested fixture revision.
+
+### Verified invariants
+
+- The authoritative-reader fixture rejects pointer-only and receipt-only rows.
+- At the prepared target, both exact GIDs remain in `pg_prepared_xacts`, each retains its transaction-ID lock, and pointer/receipt rows remain private.
+- Resolving the restored exact GIDs by same-XID COMMIT and ROLLBACK produces the expected visible/absent states.
+- At the committed target, VisibilityPointer + PublicationReceipt + authoritative-reader row are all present together, while the rollback GID remains prepared.
+- At the rollback target, the rollback GID is resolved and neither pointer nor receipt exists.
+- Removing, corrupting or truncating the exact target WAL segment causes recovery to fail before reaching the configured target; no writable primary or authoritative service is exposed. Logs include exact missing-file, wrong-size/truncated-segment and invalid-WAL-magic/recovery-target failures.
+
+### Limits and disposition
+
+This probe uses synthetic local tables, a synthetic authoritative-reader view, isolated prepared transactions and disposable Docker volumes. It does not test the real production read path or any live COC, I or D service. It does not prove signed participant receipts, I's owner-final-gate/authorization consumption, COC participant registry/reconciliation, D fence/lineage serialization, authenticated owner high-water quarantine, production archive durability, independent failure-domain fencing or deployment operations.
+
+This PASS supersedes prior FAILURE results for this exact probe revision, not the wider JF-10 gate. Gate A remains PARTIAL PASS / OPEN; Gate B architecture specification PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED; Gate C deferred to engineering-phase executable integration/fault campaign; JF-10 P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
