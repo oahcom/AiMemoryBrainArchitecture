@@ -420,3 +420,42 @@ Issue #4 records the model publication and requests D/E/Storage review (comment 
 - **JF-10 P0 / G3:** OPEN / BLOCKED.
 
 The model is in-memory. It does not prove durable I sequencing, prepared-XID durability/lock retention, shared serializable D/Storage DB state, real receipt signing/verification, HA failover, backup/restore or reader/object-store/cache/index integration. The designated runtime implementation repository and accountable engineering owner are still required (issue #7). This tranche advances executable protocol validation but does not close G3 or authorize Architecture Freeze.
+
+
+## Issue #3 / Issue #6 — C/G/H Applied decision and C/F/G BIH consumer closure refresh (2026-11-16)
+
+This refresh records exact Owner-branch readbacks and does not promote design acceptance into runtime conformance or external governance approval.
+
+### Issue #3 — same-version C/G/H Applied Contract decision
+
+- Shared A decision package: `reviews/integration/phase-3.6-cgh-applied-contract-decision-package.md`, Blob `122b164bcc0760b83bf555072a36fc55631623e1`.
+- Common contract identifier: **CGH-APPLIED-1.0**.
+- C: **APPROVE WITH ENUMERATED EXCEPTIONS**; Owner file Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`.
+- G: **APPROVE WITH ENUMERATED EXCEPTIONS**; Owner file Blob `5406b3f2558daa3f5915f6bb46e808be8d90d3ca`.
+- H: **APPROVE WITH ENUMERATED EXCEPTIONS**; Owner file Blob `1ea5dccdf2d965103b1a8474b79f00810f639187`.
+- H wire profile candidate: `bmcp.applied-ack` version `1.0.0`, included in H's Owner artifact. It defines envelope, typed refs, Delivery/Materialization/Final-Request evidence/Applied ACK/Forget ACK/Capability/Reconnect message families, required fields, idempotency, receiver ordering, canonicalization and channel binding.
+- H cryptographic signature/MAC suite and key lifecycle require I/Security review before production activation. D fence/lineage, I authorization and B typed-reference semantics remain their respective authority domains.
+- Issue #3 coordination comment: `6919554401`.
+
+### Issue #6 — C/F/G BIH consumer acceptance
+
+- Shared A BIH package: `reviews/integration/phase-3.6-identity-trust-joint-architecture.md`, Blob `a45ae90b318a79bf009d14f4d917611881e9e214`.
+- C: **ACCEPT WITH ENUMERATED EXCEPTIONS**; Owner file Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`.
+- F: **ACCEPT WITH ENUMERATED EXCEPTIONS**; Owner file Blob `ce59252dbbdc5d10d016704797e9ba12d5a941bd`.
+- G: **ACCEPT WITH ENUMERATED EXCEPTIONS**; Owner file Blob `5406b3f2558daa3f5915f6bb46e808be8d90d3ca`.
+- Each decision records the consumed identity/Scope/Environment/PermissionEpoch mapping, verifier and authority source, enforcement boundary, fail-closed behavior, exceptions and negative conformance coverage. F consumes I's formal PermissionEpoch/authorization technical baseline.
+- Issue #6 coordination comment: `6919556745`.
+
+### Corrected gate interpretation
+
+| Gate / dimension | Updated disposition |
+|---|---|
+| C/G/H same-version Applied design decision | **COMPLETE — ACCEPTED WITH ENUMERATED EXCEPTIONS** for CGH-APPLIED-1.0 |
+| H versioned Applied/ACK wire profile | **OWNER-DECIDED CANDIDATE 1.0.0**; production cryptographic profile and implementation remain open |
+| C/F/G BIH consumer design acceptance | **COMPLETE — ACCEPTED WITH ENUMERATED EXCEPTIONS** |
+| C/F/G/CGH/H36/I36 runtime conformance | **SPECIFIED / NOT RUN** |
+| I36-GOV external governance approvals | **BLOCKED** |
+| D executable fence/lineage and DE-S proof | **OPEN / NOT VERIFIED** |
+| Overall Phase 3.6 G10 | **BLOCKED**; no final acceptance inferred |
+
+No branch merge is requested or implied. No implementation, test pass, security certification, global Forget completion or physical erasure is claimed.
