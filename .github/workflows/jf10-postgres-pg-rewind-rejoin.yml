@@ -105,17 +105,17 @@ jobs:
           CREATE TABLE jf10_fence_state (id integer PRIMARY KEY, epoch bigint NOT NULL);
           INSERT INTO jf10_fence_state VALUES (1, 1);
           CREATE FUNCTION jf10_guarded_write(p_epoch bigint, p_marker text, p_value text)
-          RETURNS void LANGUAGE plpgsql AS $
+          RETURNS void LANGUAGE plpgsql AS '
           DECLARE current_epoch bigint;
           BEGIN
             SELECT epoch INTO current_epoch FROM jf10_fence_state WHERE id = 1;
             IF current_epoch <> p_epoch THEN
-              RAISE EXCEPTION 'stale fencing epoch: expected %, current %', p_epoch, current_epoch
-                USING ERRCODE = '40001';
+              RAISE EXCEPTION ''stale fencing epoch: expected %, current %'', p_epoch, current_epoch
+                USING ERRCODE = ''40001'';
             END IF;
             INSERT INTO jf10_rejoin_marker(marker, value) VALUES (p_marker, p_value);
           END;
-          $;
+          ';
           SELECT jf10_guarded_write(1, 'before-failover', 'pre-failover-write');
           SQL
           for i in $(seq 1 90); do
