@@ -222,3 +222,10 @@ H created the additive BMCP schema 1.1.1 candidate, Blob `c0bbfc7611a8d88a39cee2
 **Result: 34/34 combined schema/parser tests PASS**, run `43964080044`, job `133638783610`, commit `576d86cef149110173f681a39cdc598e2ddafc4f`.
 
 Limit: H's schema and parser reference tests do not prove cross-message same-GID/participant consistency, DB uniqueness, alias equality at runtime, cryptographic signatures, channel binding, issuer trust, replay-resistant transport, generated SDK or live owner integration. Schema 1.1.1 remains candidate/not frozen; JF-10 runtime P0 remains open.
+## 11. Reassessment — restore proof transport/authority boundary (2026-11-17)
+
+H accepted the exact Storage restore contract Blob `4f656163aeba532a441eaed1d293a48e2363cb4a` and the I/D/B/A proof semantics at the transport boundary. Exact H acceptance Blob: `5a4b9a768d7396eb4be58d0d1ed3c6c0021955ea`.
+
+H confirms that COCCommittedPrefixProof, IControlHighWaterProof, DForgetControlHighWaterProof and StorageParticipantLedgerProof remain separate issuer-owned proof families; H only authenticates/transports them and never mints or flattens their authority. RestoreReconciliationReceipt remains `RECONCILED_BUT_FENCED`, not permission to serve.
+
+Wire schema for these restore proof families is deliberately deferred until exact semantic owners approve message names, required fields, canonical encoding, signature suite, replay and version negotiation. BMCP JF-10 schema 1.1.1 does not encode the entire restore proof family. No live H transport, cryptographic signature, channel binding or replay integration is claimed.
