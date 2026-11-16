@@ -41,6 +41,17 @@ Revocation remains effective at I's durable committed epoch-advance point. A rev
 
 If I cannot establish currentness or the terminal order, deny/pause and return UNKNOWN/IN_DOUBT. Never issue a favorable terminal proof from wall-clock or receiver sequence.
 
+## 3.1 Revocation request ordering and admission cutoff
+
+Every revocation request that can affect this protected operation MUST first be durably recorded with the common coordinator and carry an immutable IRevocationRequestRef plus coordinator request position. I remains the only authority that commits the effective PermissionEpoch advance in its own policy-domain sequencer; the coordinator position establishes only the cross-authority causal cutoff.
+
+- Revocation request position before ParticipantIntentRef: no new intent/receipt may be admitted for the affected policy domain and operation; the request is REVOCATION_WON for that candidate.
+- ParticipantIntentRef before revocation request but before receipt consumption: I may order revocation first in its own sequencer; receipt consumption returns REVOCATION_WON and C safely aborts.
+- Receipt consumption terminalized COMMIT_WON before revocation request: I immediately blocks new receipts/authorizations in the affected domain, records the revocation as pending, and does not commit its effective epoch advance past the unresolved participant until C's exact submit outcome or safe abort is terminal.
+- Unknown provider outcome keeps the revocation pending and the participant unresolved. No timeout or coordinator outage may silently clear it.
+
+IAuthorizationTerminalRef binds the applicable IRevocationRequestRef/cutoff position (or explicitly states that no earlier revocation request existed at the terminalization point), the I sequencer terminal position and ParticipantIntentRef. The coordinator cannot choose the I effective point.
+
 ## 4. Cross-authority protocol obligations
 
 - I validates the coordinator's registered identity/profile and verifies ParticipantIntentRef is durable and bound to the exact transaction/digest.
