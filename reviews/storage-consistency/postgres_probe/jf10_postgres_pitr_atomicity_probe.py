@@ -139,9 +139,11 @@ def main() -> None:
     else:
         raise RuntimeError(docker("logs", PRIMARY, check=False))
 
-    docker("exec", PRIMARY, "bash", "-lc",
-           'echo "host replication postgres 0.0.0.0/0 trust" >> "$PGDATA/pg_hba.conf"')
-    psql("SELECT pg_reload_conf()")
+    docker("exec", PRIMARY, "bash", "-c",
+           'echo "host replication postgres 0.0.0.0/0 trust" >> /var/lib/postgresql/18/docker/pg_hba.conf && '
+           'tail -n 2 /var/lib/postgresql/18/docker/pg_hba.conf')
+    reload_ok = scalar("SELECT pg_reload_conf()")
+    assert reload_ok == "True", reload_ok
     psql("""CREATE TABLE jf10_visibility_pointer (
         xid_name text PRIMARY KEY, artifact_id text NOT NULL, state text NOT NULL
     )""")
