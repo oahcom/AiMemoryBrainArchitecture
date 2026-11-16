@@ -112,3 +112,39 @@ C accepts the added COC-outage recovery-batch rule as a necessary fail-closed co
 C accepts that the recovery batch does not order I and D requests by their local clocks. C supplies exact immutable CSubmitOutcome evidence for each prior participant; it does not decide I revocation or D lineage/fence outcomes.
 
 Exceptions: (1) COC, participant registry and operator remain undesignated/undeployed; (2) provider-specific same-key idempotency and crash recovery remain unverified; (3) the package does not yet pin a production wire encoding for every recovery-batch evidence item; H owns that schema; (4) C-CO and provider fault tests remain NOT RUN. This decision applies only to the exact A/COC Blob pair above and does not transfer any 1.0 or prior 1.1 approval.
+
+
+## C Owner exact-version decision — JF-10 prepared participant ↔ COC bridge (Issue #8)
+
+Decision bundle reviewed as one exact cross-owner interface set:
+- A COC architecture: `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`, branch `session-a-integration-2026-11-16`, Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, §§12.1–12.8.
+- I JF-10 bridge disposition: `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md`, Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`, §11.2.
+- D/Storage common JF-10 v2 recovery protocol: Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`.
+- D bridge decision: `03-memory-brain/forget-fence-operation-and-publication-gate.md`, Blob `5a56c406578fdf257509315eb3f6f3f75456116c`.
+- Storage bridge decision: `reviews/storage-consistency/forget-atomicity-storage-realization-review.md`, Blob `55c01f4512f2e3d8aac767dd004e768ae073178e`.
+- H BMCP wire mapping: `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, Blob `1716b23741479740f9e12003cbf2bd1a80c63aab`, §12.10; additive `bmcp.applied-ack/1.1.0` candidate.
+- This C Owner contract before this append: Blob `a72a3eb1e5207f67c01f804508311f42db9a6e0a`.
+
+**C DECISION: ACCEPT THE EXACT JF-10 ↔ COC BRIDGE BUNDLE WITH ENUMERATED C-OWNED CONDITIONS.**
+
+This acceptance is limited to C's actual final-request/provider side-effect boundary and C-owned submit outcome evidence. It is not approval of I authorization semantics, D fence/lineage semantics, Storage transaction semantics, COC consensus/deployment, or H cryptographic governance.
+
+### Binding C integration rules
+
+1. C MUST NOT invoke a protected provider side effect until the exact participant has a quorum-committed `JF10_PREPARE_INTENT_REGISTERED`, a Storage-signed `PreparedParticipantReceipt` is durably registered as `JF10_PREPARED_PARTICIPANT_REGISTERED`, and the I owner-final gate has produced an authoritative terminal decision for the exact immutable tuple. C must preserve the same operation/digest, participant, policy domain, owner boundary, preallocated Storage XID and COC references throughout.
+2. C's provider invocation is still the irreversible external side-effect boundary. C MUST record its actual observed result as C-owned `CSubmitOutcome` bound to the exact final request digest, FinalRequestBoundaryId, transaction/reservation, provider idempotency key, actual provider receipt and actual InferenceRequestId where supplied. A COC record, I COMMIT_WON, D clearance, Storage prepared receipt, H ACK or reservation alone never proves provider success.
+3. Provider ACCEPTED is terminal only with determinate handoff evidence. Provider REJECTED is terminal only with definitive no-handoff evidence. Timeout, process death, lost response, contradictory provider evidence or inability to query the same provider idempotency key remains UNKNOWN/IN_DOUBT. C MUST NOT retry as a new transaction or mint a new XID; it retains the same participant and provider idempotency key for reconciliation, and I/D barriers remain held.
+4. C reports the exact CSubmitOutcome and evidence references into the COC lifecycle. COC's `I_JF10_TERMINAL_DECISION_OBSERVED` is an observation of I's signed decision, not a substitute for it. COC's `STORAGE_JF10_PARTICIPANT_RESOLVED` is an observation of Storage's same-XID result, not a substitute for Storage's authoritative outcome. C MUST NOT synthesize either.
+5. D fence-first ordering prevents C provider invocation. If prepare-intent precedes D fence cutoff, the participant remains in D's barrier until I terminal decision, Storage same-XID resolution, C provider outcome and applicable lineage obligations are authoritative. UNKNOWN never releases the barrier.
+6. C accepts H §12.10 as the additive wire-schema candidate mapping for the five bridge record families, subject to exact tuple validation and issuer/signature verification. H schema-candidate acceptance does not establish generated schema, SDK interoperability, cryptographic algorithm approval or production deployment.
+7. Scope is one I PolicyDomain only. C rejects any attempt to represent multi-PolicyDomain atomicity or partial per-domain aggregation as one successful operation.
+
+### C-owned exceptions and verification gates
+
+- Provider-specific idempotency and same-key outcome lookup/recovery MUST be proven for each production provider; generic exactly-once semantics are not assumed.
+- C provider adapter must demonstrate durable participant-to-provider-key binding across process crash, restart, failover and restore before production use.
+- C-CO-01..10 and H-JF10-01..10 remain SPECIFIED / NOT RUN; no implementation or interoperability pass is claimed.
+- C does not approve COC operator/quorum deployment, I sequencer implementation, D fence implementation, Storage DB/XA capability, key custody/rotation, or production activation.
+- Multi-PolicyDomain atomicity remains BLOCKED / NOT ACCEPTED. JF-10 remains P0 OPEN.
+
+This is C's independent exact-bundle architecture/interface acceptance only. It does not transfer any earlier CGH-APPLIED-1.0 or 1.1 decision to a different artifact SHA and does not close implementation, deployment or conformance gates.
