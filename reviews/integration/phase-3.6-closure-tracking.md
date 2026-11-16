@@ -185,3 +185,50 @@ Create a new Finding only if a current artifact or cross-module comparison demon
 - No branch was merged. `main` was not modified.
 - Approval is recorded only when the responsible authority explicitly supplies it.
 - Source HEADs and Blob SHAs are time-specific; refresh before each future gate decision.
+
+
+---
+
+## Live closure refresh — 2026-11-16 22:03 +08
+
+This section is the current branch-ref refresh and supersedes older branch HEAD snapshots in this tracking document. The A HEAD below is the pre-publication source snapshot; subsequent A-only report commits are delivery commits.
+
+| Owner | Branch | Live HEAD |
+|---|---|---|
+| main | main | 8a6414158c9c056c1638222534e1993d1bbc99d2 |
+| A | session-a-integration-2026-11-16 | 70552cb4d232da657a16dc469ebf6d5ca10f2624 |
+| B | session-b-domain-model-phase3 | 225c1f519c439d7bb87827e11d63185a5dcfe819 |
+| C | session-c-agent-integration-2026-11-16 | 3b6c1d9a5d648f61daa04f5874d887f33475f098 |
+| D | session-d-memory-brain-2026-11-16 | df1b415bcddbbd066d7db6316e0caa14b3097d92 |
+| E | session-e-memory-compiler-2026-11-16 | 2adc95ad4d6562f37d9bb6ed8743ce3514a1d615 |
+| F | session-f-memory-runtime | 2da5209d7072272d5510d376c0f319bed0402a6f |
+| G | session-g-memory-context | ac32e980003aa41faf0ae958ffef3df5ab387984 |
+| H | session-h-bmcp-protocol | 8747085d962877d8a99c6d2b5f09bfaa538fa97f |
+| I | session-i-security-governance-2026-11-16 | 3a04f31dcaa2e99095ecdcaeab23e6927f69ebb4 |
+| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | eea8e645b84f73a668428a298dded3313a82353d |
+
+### Corrected workstream disposition
+
+- DE-S: logical design and two-round six-dimension design review remain closed. I's correction requires the actual Storage final visibility gate to participate in the same I policy-domain order as revocation. The D/E JF-10 candidate does not prove this and remains P0 OPEN. Storage has selected a logical local transactional profile, but concrete engine/runtime deployment, named independent engineering approver and implementation remain blocked. Inventory Seal and Global Forget completion are not evidenced. D36/E36/C01-C20 are NOT RUN.
+- BIH: BIH36-JD-01..17 remain the delegated joint technical baseline. D/E/H/Storage have design-level consumer acceptance artifacts; C/F/G remain OPEN. I36-GOV-01..10 remain GOVERNANCE-BLOCKED. I36/H36 are NOT RUN. ADR-001 remains independently ADR-BLOCKED.
+- CFG: C/F/G semantics remain delivered and preserved. No common C/G/H Applied contract version/digest or same-version approval exists. D/I/B predicate confirmation and integrated runtime/security execution remain open. CFG-01..20 and PI-01..08 are NOT RUN.
+
+### G0–G8 final gate ledger
+
+| Gate | State | Evidence | Accountable Owner(s) | Unresolved condition | Next stage allowed |
+|---|---|---|---|---|---|
+| G0 Baseline Integrity | PASS (snapshot) | Live refs refreshed; Owner artifacts fetched with Blob SHAs; main not treated as authoritative for Owner work | A + all Owners | Refresh affected refs after any Owner commit | Continue closure work |
+| G1 Domain Model & Identity | CONDITIONAL | B typed identity baseline and BIH36-JD-01..17; H protected binding; D/E/H/Storage design acceptance | B/I/H; consumer Owners | I governance blocked; C/F/G acceptance open; Environment Registry Authority unassigned; ADR-001 blocked | Implementation preparation only under existing safe semantics |
+| G2 Forget Atomicity | BLOCKED | D/E joint JF-10 candidate; I owner-gate correction; Storage logical deployment profile | D/E/Storage/I | Same-order owner gate protocol, D fence race semantics, concrete deployment and implementation absent | Design refinement by D/E/Storage with I decision; no visibility implementation sign-off |
+| G3 Authorization & Governance | BLOCKED | I governance/consumer register; I JF-10 correction | I + named external governance approvers | I36-GOV-01..10 lack approval evidence/effective versions; inventory seal absent | Governance decision work only; no policy activation |
+| G4 BMCP & Applied Contract | BLOCKED | H protocol binding and ACK/reconnect; C and G stage contracts | C/G/H, with D/I/B confirmations | No common C/G/H Applied version/digest and explicit approvals | Versioned joint contract work |
+| G5 Runtime & Context Consistency | BLOCKED | F suppression and G reconciliation contracts | F/G/H/I/D/C | Implementations and runtime evidence absent; reconnect/late ACK/forget races untested | Implementation and test preparation only |
+| G6 Cross-Module Contract Convergence | BLOCKED (partial acceptance) | BIH D/E/H/Storage design acceptances; Owner-specific semantic decisions | A coordinates; each authority/consumer owns acceptance | C/F/G BIH acceptance open; JF-10 open; CFG Applied approvals absent | Continue owner acceptance campaign |
+| G7 Architecture Conformance | NOT RUN | D36/E36/C01-C20, I36/H36, CFG-01..20 and PI-01..08 specifications | D/E/Storage/I/H/C/F/G | No executable run/build/fixture/output/sign-off evidence | Test implementation and execution |
+| G8 Architecture Baseline Freeze | BLOCKED | All above evidence | A final integration acceptance; Owner/governance approvals remain with their authorities | G2–G7 not passed; ADR-001 independent block for Fact/Claim dependent scope | No Phase 3.6 architecture freeze |
+
+### Current overall decision
+
+**PHASE 3.6 FINAL ARCHITECTURE ACCEPTANCE: NOT ACCEPTED / FREEZE NOT AUTHORIZED.**
+
+This is not a rejection of delivered work. DE-S logical design, BIH technical baseline and C/F/G semantic contracts are preserved as completed at their respective levels. The blockers are specific external authority, same-order JF-10, consumer acceptance, common Applied version, deployment/implementation and executable conformance evidence. No branch merge or software-completion claim is made.
