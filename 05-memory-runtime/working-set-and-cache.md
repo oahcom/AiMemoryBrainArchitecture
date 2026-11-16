@@ -85,3 +85,7 @@ D canonical version/lifecycle/Forget identifiers; E index generation and rebuild
 
 ## 18. Open Questions
 OPEN: I's revocation epoch scope and propagation SLA; D/E Forget tombstone format and retention; G's minimal context summary; H session identity semantics. CANDIDATE: in-memory per-session Working Set + shared but strictly partitioned read-through caches. TO_VALIDATE: TTL, eviction algorithm, memory limits and hit-rate benefit on target hardware.
+
+
+## 19. Routing / Scheduling
+Working Set admission occurs only after request authorization and session binding. Retrieval may populate it only with candidates that passed Scope-before-Candidate and canonical/Forget revalidation. Scheduler enforces per-session/global entry and byte budgets before insertion, prioritizes interactive work over background warming, and cancels fills on session close, revocation or Forget. Cache fills are coalesced only when the complete authorization/freshness key matches; otherwise requests execute in isolated namespaces.
