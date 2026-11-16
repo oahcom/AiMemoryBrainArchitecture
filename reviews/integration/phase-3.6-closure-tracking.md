@@ -921,3 +921,23 @@ A opened [Issue #8](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/8
 **Status: REQUEST POSTED / ALL THREE OWNER DECISIONS PENDING.** Prior C/D acceptance of CGH-APPLIED-1.1 and prior Storage COC interface confirmation do not satisfy this new bridge decision. Each Owner must publish its own append-only exact-bundle decision and cite its commit/Blob. No A synthesis is counted as Owner acceptance.
 
 Acceptance scope is single-policy-domain only. COC does not decide JF-10 XID COMMIT/ABORT; I sequencer does. Storage resolves the exact prepared XID and owns visibility; D owns fence/lineage/barrier semantics. Multi-policy-domain operations remain BLOCKED. Implementation and bridge conformance remain NOT VERIFIED / NOT RUN.
+
+## 13.14 COC model invariant refinement and corrected CI — 2026-11-16
+
+A found one further logical invariant during model review: a committed recovery-cutoff batch must remain an admission cutoff after an owner-local outage gate is released. Clearing the local pending gate cannot erase the committed I/D request cutoff. The model was corrected so the batch position is retained in the cutoff ledger and subsequent affected intents/submits remain blocked.
+
+Current source pins:
+- Model Blob: `e96f6929436b10d6a23e9022c197951aa4ee596a`.
+- Test Blob: `d087d587f81eda83f1a0f7dff2affff10a2ef78f`.
+- Workflow Blob: `4f3e849f9f6861f6f0ed45fec8fc81631b65f933`.
+
+Corrected CI:
+- Run: `43897364938`.
+- URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43897364938
+- Head commit: `386b03f4ae76cc175ab18c6013437a9c726de8a5`.
+- Job: SUCCESS.
+- Test log: **11 tests passed** (`Ran 11 tests ... OK`).
+
+The new test proves that after the D owner-local pending gate is released, the batch-committed D cutoff still blocks later intents/submits in the affected lineage while unrelated lineage remains independently eligible after COC service recovery.
+
+The earlier COC model CI run `43897053156` (10 tests) is superseded by this corrected 11-test run. This remains an in-memory logical model only; it does not implement consensus durability, real I/D owner gates, participant storage, HA/failover/restore or production COC conformance. COC-01..16 remain NOT RUN and G10 remains BLOCKED.
