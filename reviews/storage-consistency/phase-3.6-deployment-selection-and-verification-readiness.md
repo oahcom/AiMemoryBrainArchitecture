@@ -241,3 +241,21 @@ Exact tested settings: max_prepared_transactions=16, fsync=on, synchronous_commi
 **Gate A disposition: PARTIAL PASS / OPEN.** The single-node PostgreSQL 18.7 prepared-XID, lock-retention, crash/restart and local atomic-visibility capability has physical CI evidence. Synchronous replication, standby promotion, failover, backup/restore, production storage semantics, actual Canonical Authority deployment configuration and named human on-call operator remain NOT VERIFIED / OPEN. wal_level=replica is not replication proof.
 
 Accountable technical role for the candidate qualification is Storage DB Platform Operator; the actual production on-call identity is not designated. Gate B remains blocked pending full Gate A. Gate C remains blocked pending Gate B. JF-10 P0 remains OPEN; no production activation is authorized.
+
+
+## 13. Gate A — PostgreSQL 18.7 synchronous standby promotion evidence (2026-11-17)
+
+Storage has now executed the two-node physical failover probe on the exact pinned image digest.
+
+- Probe Blob: 23d8ea8546932e592093c5c17cd2b52f8a294720
+- Workflow Blob: f3c05f90c6065458b49879def10dce672685c850
+- Successful run: 43908428220
+- Run commit: 7cd416a1f80364fe7de316f19716325b6503cbfa
+- Job: 133443444760
+- Topology: one PostgreSQL 18.7 primary + one physical streaming standby; primary configured synchronous_commit=remote_apply and synchronous_standby_names=FIRST 1 (jf10_standby); standby confirmed streaming/sync before PREPARE.
+
+The run proved that the prepared WAL was synchronously replayed, publication remained private on the hot standby, the primary was hard-killed, the standby was promoted, the same prepared XID became available after promotion recovery, the prepared row lock remained held, and COMMIT PREPARED on the original XID atomically exposed the visibility pointer and publication receipt.
+
+**Gate A remains PARTIAL PASS / OPEN.** PostgreSQL intentionally hides pg_prepared_xacts during hot-standby recovery; recovery of the prepared transaction is inspected and resolved only after promotion completes. The dossier records this behavior and exact evidence.
+
+Still open: rollback-after-promotion, backup/restore and point-in-time recovery, control-ledger replay before serving restored data, real host/zone/storage failure semantics, actual Canonical Authority deployment, production failover fencing/routing, human on-call/operator designation and RPO/RTO. The CI promotion command is not a production HA manager. Gate B and C remain blocked; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
