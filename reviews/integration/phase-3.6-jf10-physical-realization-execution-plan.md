@@ -150,3 +150,23 @@ These are requests to Storage, not A-owned implementation artifacts. A must not 
 - JF-10 P0: OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
 
 PostgreSQL 18 synchronous replication documentation supports the required configuration semantics: synchronous standby names plus synchronous_commit; two-phase transaction actions wait for synchronous replication. These docs guide the test but do not replace the physical promotion/restore proof.
+
+
+## 13.27 Storage PostgreSQL HA probe authored — code review blockers recorded — 2026-11-17
+
+A observed a new Storage-branch commit (branch head at review: `96a35a5e14738c50d1228c4443bb176b1eee583d`) adding:
+- `reviews/storage-consistency/postgres_probe/jf10_postgres_sync_failover_probe.py`, Blob `16b99bb051fdf18ccaeb5691be95a332d2f78b5d`;
+- `.github/workflows/jf10-postgres-ha-capability.yml`, Blob `5ef2773211bbe1e6c31629399f98e5616fdc5651`.
+
+This is real Gate A progress: the workflow pins the PostgreSQL 18.7 image digest, provisions a primary and physical standby, configures `synchronous_standby_names='FIRST 1 (jf10_standby)'`, uses `synchronous_commit=remote_apply`, checks synchronous state, prepares a transaction and attempts primary loss / standby promotion. The code itself states it does not cover backup/restore or production operator approval.
+
+A reviewed the probe source and posted blocking review findings in Issue #10 comment `6922369098`:
+1. `assert_prepared` and `assert_lock_blocked` accept a port parameter but call `conn(host)` without passing it. Their post-promotion invocations specify 5433 but actually connect to default 5432 (the killed primary), so promoted-node verification is broken. `assert_not_visible` has the same parameter-forwarding defect and should be corrected consistently.
+2. Only post-promotion COMMIT PREPARED is exercised; a separate post-promotion same-GID ROLLBACK PREPARED / non-publication case is required.
+3. Backup/restore/PITR remains unimplemented and explicitly excluded by the workflow.
+4. Lost-ACK / ambiguous PREPARE handling is not exercised; UNKNOWN/IN_DOUBT must remain fail-closed.
+5. Old-primary fencing/rejoin prevention needs explicit evidence before failover is accepted.
+
+The probe's `synchronous_commit=remote_apply` is stronger than `on` for standby replay visibility; this is acceptable if intentional, but the dossier must describe the actual tested setting exactly.
+
+**Current gate:** Gate A single-node profile PASS; HA probe source AUTHORED / REVIEW BLOCKED / NO PASS YET; backup/restore NOT RUN; production topology and human on-call NOT DESIGNATED. Gate B remains BLOCKED until full Gate A; Gate C remains BLOCKED until Gate B. JF-10 P0 remains OPEN.
