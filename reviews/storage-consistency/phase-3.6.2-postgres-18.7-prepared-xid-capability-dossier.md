@@ -571,3 +571,26 @@ The missing/corrupt/incomplete cases each target the exact segment required to r
 **Scope limitation:** the authoritative-reader check is an isolated SQL-view fixture that joins the pointer and receipt by XID and artifact identity; it rejects pointer-only and receipt-only rows in that fixture. It is not the project's production authoritative read adapter, which remains unidentified in this repository. The CI uses local Docker volumes and local archive storage; it does not prove production I/D control-ledger integration, archive immutability/off-site retention, cross-zone durability, production fencing, operator/runbook or RPO/RTO. Two earlier runs on intermediate commits failed because the corrupt-WAL assertion did not recognize PostgreSQL's exact `invalid magic number` diagnostic; those failures are not counted. The corrected run above is the passing evidence.
 
 Gate A remains PARTIAL PASS / OPEN. Gate B remains BLOCKED pending full Gate A acceptance; Gate C remains BLOCKED pending Gate B; JF-10 P0 remains OPEN; production activation remains NOT AUTHORIZED.
+
+## 25. Enhanced PITR exact-WAL regression re-pass — 7/7 SUCCESS (2026-11-17)
+
+The enhanced probe now checks exact target WAL segments for prepared, COMMIT and ROLLBACK recovery cuts; the fixture authoritative-reader view rejects pointer-only and receipt-only rows; and each missing/corrupt/incomplete archive case asserts the exact target segment and absence of a writable/authoritative service.
+
+The first enhanced run on commit `3c8ab8e` failed only because the harness did not recognize PostgreSQL's observed `invalid magic number D158` diagnostic. The assertion was corrected to recognize that diagnostic without weakening exact target-segment matching or the no-writable/no-authoritative-service check.
+
+Corrected evidence:
+- Source commit: `2d476dd32ac020d329e8290ee2aaaa1f0c057c92`.
+- Probe Blob: `9d2a85f9a5d53f91df247a310c38377e563d259d`.
+- Workflow Blob: `a055d311c324d09eb6ebf4054247761116795eb7`.
+- Run: `43957910909`; job: `133617253176`; SUCCESS.
+- Exact target LSN / timeline / WAL: prepared `0/5004710` / `1` / `000000010000000000000005`; COMMIT `0/6000000` / `1` / `000000010000000000000006`; ROLLBACK `0/6000110` / `1` / `000000010000000000000006`.
+
+Raw logs confirm pointer-only/receipt-only rejection; prepared XID privacy and lock retention; atomic pointer+receipt at COMMIT; neither at ROLLBACK; and all three exact-WAL negative cases fail closed without a writable or authoritative service.
+
+The six companion workflows on the same source commit also concluded SUCCESS: prepared-XID/restart `43957910975`; synchronous failover `43957911188`; backup/restore `43957911173`; explicit-LSN PITR `43957910971`; synchronous standby unavailable `43957911270`; old-primary rewind/rejoin `43957911036`. Enhanced current batch = **7/7 SUCCESS**. The intermediate failed harness run is not counted.
+
+Scope remains the pinned PostgreSQL CI/reference fixture only. The reader is a synthetic SQL view, not a production adapter. This is not production COC/I/D integration or deployment qualification.
+
+## 26. Gate B design sequencing after project-phase clarification
+
+The project is in architecture design; no production code repository/runtime is expected. Production implementation binding is `DEFERRED_TO_ENGINEERING_PHASE`, not a Gate A blocker. Gate B's persistent COC/quorum log/participant registry/recovery-cutoff protocol design may proceed now, in parallel with closure of remaining Gate A storage design specifications. This is design authorization only; Gate B is not implementation-PASS. Gate C executable fault injection remains deferred until implementation exists. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
