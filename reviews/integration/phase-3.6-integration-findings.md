@@ -45,3 +45,12 @@ Issue #6 comment `6919556745` records C, F and G each accepting the exact A BIH 
 **A36-P0-06 remains OPEN / P0.** C/F/G BIH consumer acceptance does not itself establish a common C/G/H Applied contract schema version/digest, same-version C/G/H acceptance, D/I/B predicate closure, or runtime conformance. Do not close this finding on the basis of Issue #6 comment 6919556745.
 
 No runtime suite is upgraded from NOT RUN. No governance approval, implementation conformance, production readiness or G10 closure is inferred.
+
+
+## A36-P0-06 update — CGH-APPLIED-1.1 successor source reconciliation (2026-11-16)
+
+The C/I/D causal-order protocol has advanced to published Owner specifications with explicit ParticipantIntentRef admission cutoff, I receipt-consumption outcome, D fence-request cutoff, final ParticipantReservationRef, actual C provider outcome and common terminal proof. This closes a specification ambiguity, not the cross-owner acceptance gate.
+
+The current A candidate is `CGH-APPLIED-1.1`, Blob `9808b31f840606b329f1a794935dfc9c5084d63b`. It pins C `f2c5b379cacfedd81500e8496d3053b628e144a0`, D `317a9bc170c5a66720f738bf24bbf93c87385887`, I `71779133a4f95d63a24c4c7e606af174763366f1`, and H `5cbf0bb548a46671054cb22c6fab3c3d007365d4`. Existing G and B decisions remain semantic/1.0 baselines and are not exact 1.1 acceptance.
+
+Issue #3 comment `6920297962` requests fresh exact-package decisions against this exact Blob from C/D/I/H/G/B. The coordinator/Storage operator remains unnamed and deployment/HA/failover/restore acceptance remains absent. H 1.1.0 is a schema candidate, not production-frozen or deployed. C-CO/I-CO/D-CO/H36-CO/G 1.1 conformance remains NOT RUN. **A36-P0-06 remains OPEN / P0**; Applied Contract Frozen NO.
