@@ -194,3 +194,38 @@ UMR-018 tracks the exact one-line assertion vocabulary correction and full rerun
 ### A integration tracker freshness
 
 A's live closure tracker blob `554d4b85a94f433856506dce4c020b9c00183e69` still records older Storage HEAD `df60b547...` and prior failed PITR attempt at §13.43. A must refresh its source pins and current regression vector; P does not modify A's Owner record.
+
+
+## Live branch and Owner decision refresh — 2026-11-17 (supersedes earlier point-in-time HEAD table)
+
+Fresh GitHub commit-ref reads:
+
+| Role | Branch | Observed HEAD |
+|---|---|---|
+| main | `main` | `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f` |
+| A | `session-a-integration-2026-11-16` | `bfdd091f7ced92bf67e18ab101f2040d9cc59381` |
+| B | `session-b-domain-model-phase3` | `30580b094b9cb0ac747ff2849bec5ad68db3e272` |
+| C | `session-c-agent-integration-2026-11-16` | `2e5776029bc4271c33525f04c7d0f0708e4bbae8` |
+| D | `session-d-memory-brain-2026-11-16` | `75629584e4b692c83121bebd09e9cb0ea7607226` |
+| E | `session-e-memory-compiler-2026-11-16` | `541f7b50f0e52021d6cb892318cc581d2cd8cde3` |
+| F | `session-f-memory-runtime` | `5a9816ce5732a3f437e24bbd9a82630a5f4f2c6f` |
+| G | `session-g-memory-context` | `4851b46b9de78ecae73186dc104b8be33bb4b519` |
+| H | `session-h-bmcp-protocol` | `242d8ab5da890181e762561bb3d3a662287fb63c` |
+| I | `session-i-security-governance-2026-11-16` | `001204ba7ed73242ac18c59f5de83c3470d2dfe6` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `9f784a15ef33a6cde4b4cda1ab6fca2df8a705fa` |
+| P | `session-p-project-governance-baseline` | `31d1ceed6ceb018b5bef2912646ccd7afddef435` before this tracking refresh commit |
+
+P vs main: ahead 51 / behind 4 / diverged. No merge/force update.
+
+The nine proposal artifact blobs were re-fetched and remain unchanged from the previous inventory: A `a43a8f2f...`, B `410d6cc6...`, C `c79da952...`, D `84e402f4...`, E `7f037a76...`, F `d4756cab...`, G `fb2eb805...`, H `a4d961ac...`, I `b0493cf0...`. All nine remain PROPOSED / not APPROVED; no module baseline adoption is inferred.
+
+New cross-owner decisions (not module baseline adoption):
+- B: bounded CGH-APPLIED-1.1 typed-reference acceptance; delegated review, not independent human signature.
+- D/F/G/I: conditional acceptance of the Context Optimization / Observation Archive architecture boundaries; not interface/schema freeze, implementation or conformance.
+- E: bounded JF-10 COC bridge producer-lifecycle acceptance; no production implementation or tests.
+- A: exact COC persistence review ACCEPT WITH BLOCKING CLARIFICATIONS / AMENDMENTS REQUIRED.
+- Storage: COC 3.6.3 durable log/recovery protocol is PROPOSED / NOT IMPLEMENTED; current blob `6154d6c3...`.
+
+Issue #14 remains OPEN with A R1–R6 review and no I/D/C/H response found at refresh. Applied package companion pin mismatch remains open. JF-10 P0 remains OPEN; Gate A PARTIAL PASS / OPEN; Gate B design activity authorized but acceptance open; Gate C deferred to engineering. Global Forget governance and ADR-001 remain blocked.
+
+This addendum supersedes stale earlier HEAD values in this tracking file. Historical values above are retained as point-in-time records, not current branch tips.
