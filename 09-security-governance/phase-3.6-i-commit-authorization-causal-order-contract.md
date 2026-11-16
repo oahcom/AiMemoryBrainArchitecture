@@ -14,14 +14,14 @@ I alone resolves issuer/principal/delegation trust, PolicyDomainRef, authorizati
 ## 2. CommitAuthorizationReceipt contract
 
 I issues an opaque, signed, single-use CommitAuthorizationReceipt only after online validation of the complete tuple:
-IssuerRef, PrincipalRef, ActorRef, action, ResourceRef, purpose, audience, ownership ScopeRef, applicability ScopeRef set, applicable EnvironmentRef, DelegationChainRef, PolicyDomainRef, PermissionEpoch, authenticated workload/instance, RuntimeSessionRef, CausalOrderTransactionRef, FinalRequestBoundaryId and immutable request digest.
+IssuerRef, PrincipalRef, ActorRef, action, ResourceRef, purpose, audience, ownership ScopeRef, applicability ScopeRef set, applicable EnvironmentRef, DelegationChainRef, PolicyDomainRef, PermissionEpoch, authenticated workload/instance, RuntimeSessionRef,  CausalOrderTransactionRef, pre-submit ParticipantIntentRef, FinalRequestBoundaryId and immutable request digest.
 
 Receipt MUST bind:
 - unique ReceiptRef and I issuer/key epoch;
 - exact operation/action/resource/purpose/audience;
 - complete typed identity and scope/environment/delegation tuple;
 - PolicyDomainRef and PermissionEpoch;
-- CausalOrderTransactionRef and ParticipantReservationRef (or a strictly pre-bound reservation nonce that is finalized before provider side effect);
+- CausalOrderTransactionRef and ParticipantIntentRef (the coordinator's durable pre-side-effect intent);
 - FinalRequestBoundaryId and exact request digest;
 - expiry/consumption rules that never turn timeout into successful authorization;
 - replay-protected single-use state.
@@ -43,10 +43,10 @@ If I cannot establish currentness or the terminal order, deny/pause and return U
 
 ## 4. Cross-authority protocol obligations
 
-- I validates the coordinator's registered identity/profile and verifies the participant reservation is durable and bound to the exact transaction/digest.
+- I validates the coordinator's registered identity/profile and verifies ParticipantIntentRef is durable and bound to the exact transaction/digest.
 - I signs its own authorization terminal evidence and sends the immutable ref to the coordinator/C. Coordinator positions are correlation/order evidence, not I authority.
 - I does not accept D's fence generation as a substitute for PermissionEpoch and does not accept C/H claims as proof of authorization.
-- I revocation completion must respect unresolved reservations registered before the revocation's effective ordering point. Unknown provider outcomes keep the participant unresolved until authoritative reconciliation.
+- I revocation requested before receipt consumption may win and force safe abort. Once I terminalizes receipt consumption as COMMIT_WON, later revocation effectiveness MUST wait behind that unresolved ParticipantIntentRef until C's provider outcome is terminal. Unknown provider outcomes keep the participant unresolved until authoritative reconciliation.
 - A terminal submit ordered before revocation remains historical only; it does not authorize later operations or current use.
 
 ## 5. Failure and security rules
