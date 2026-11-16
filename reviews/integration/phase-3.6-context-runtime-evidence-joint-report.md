@@ -223,3 +223,44 @@ These are adversarial specifications, **NOT RUN**.
 5. C/F/G/H/D/E/Storage/I execute the conformance matrix with reproducible artifacts and explicit owner sign-off.
 
 Until these gates are complete, retain BLOCKED/NOT RUN states. No branch merge is authorized by this report.
+
+
+---
+
+## 14. Concurrent DE-S baseline refresh (2026-11-16, post-report-write)
+
+After the first joint-report commit, the D, E and Storage Owner branches advanced concurrently. Their live branch tips were re-queried and the new Phase 3.6 artifacts were read. This section supersedes the earlier D/E/Storage HEAD values in §2.1 and refines CFG-P0-01 and §13; it does not imply these branches were modified by CFG.
+
+| Owner | Current branch | Refreshed HEAD | New Phase 3.6 artifact | Blob SHA |
+|---|---|---|---|---|
+| D | `session-d-memory-brain-2026-11-16` | `949c6e0f3ad0179369c4cb0c7662650069179e84` | `03-memory-brain/phase-3.6-joint-forget-linearization-decision.md` | `892e867ffb97949748700fe5b906d9c91c106a10` |
+| E | `session-e-memory-compiler-2026-11-16` | `21da0f06f1570420810078e28a9d26b37e2ab4b5` | `04-memory-compiler/phase-3.6-joint-producer-publication-decision.md` | `4444333e8b7231d251ab303d6c36476aa445fe4e` |
+| E | same | same | `04-memory-compiler/phase-3.6-producer-publication-conformance.md` | `a21f81dfe53ae6998818d2cc59e865f5dd1b839d` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `360619ac131bce20b56118803e2ef4053173e7e5` | `reviews/storage-consistency/phase-3.6-joint-durable-atomicity-decision.md` | `17071157152c7868d638383ec97543fe3d35e652` |
+
+### 14.1 Updated D/E/Storage disposition
+
+The new documents record a user-delegated DE-S joint architecture decision:
+- D decides stable root WorkItemId across retry/DLQ/replay/recovery, AttemptId and LeaseEpoch fencing, DerivationRunId semantics, exhaustive registration-vs-fence and publish-vs-fence outcomes, and the final publication predicate.
+- E maps the producer lifecycle to that identity model; requires D registration receipt before queue/lease/execute/source dereference; keeps staged bytes private; requires complete dependency registration; and only acknowledges Published after the authoritative visibility commit and PublicationReceipt.
+- Storage selects one durable linearizable serialization domain per Canonical Memory authority, ordering producer registry/admission, fence/high-water, complete dependency registration, final authorization/fence/work/lease validation, visibility commit and barrier terminality. A durable prepare/commit equivalent is permitted only with hidden prepared state and final fence/PermissionEpoch revalidation.
+
+This materially advances **logical architecture decision completeness**. It does not prove a deployed database, selected engine/version/configuration, real transaction boundary, cross-store visibility, recovery/failover/restore, executable D/E APIs, or passing tests. The DE-S decision documents explicitly say implementation is NOT VERIFIED and D36/E36/C01–C20 remain NOT RUN. The authority is described as a user-delegated joint architect decision, not independent approval by an absent Storage engineering approver.
+
+### 14.2 Refined open finding
+
+CFG-P0-01 is refined to:
+
+**Logical D/E/Storage architecture: DECIDED. Physical deployment/implementation and fault proof: BLOCKED / NOT VERIFIED.** The remaining work is to name/select the concrete transaction authority and deployment configuration, implement durable ledgers/receipts/dependency completeness/visibility marker/outbox/restore control, prove current I PermissionEpoch at final commit, and execute deterministic races/crashes/failover/restore.
+
+The earlier phrase “physical serialization ... not implemented/proven” remains correct as an implementation statement; it must not be read as saying the logical serialization model is undecided.
+
+### 14.3 Updated closure gates
+
+1. C/G/H still need explicit Applied evidence/wire/capability agreement; H's consumed Phase 3.5 contract remains CANDIDATE and its embedded source-baseline table is historical.
+2. B/I/H still need explicit authenticated Principal/ActorRef/ScopeRef/Environment binding approval and negative tests.
+3. D/E/Storage have selected the logical linearization architecture; implement and prove the concrete durable coordinator/transaction and reader visibility predicate, including crash, failover, replay and restore.
+4. I PermissionEpoch/revocation currentness and global ProducerDomainInventoryEpoch/TargetInventorySeal completion governance remain separate dependencies.
+5. C/F/G/H/D/E/Storage/I execute conformance suites with reproducible artifacts and owner sign-off.
+
+The report's overall conclusion remains unchanged: **Applied Contract Frozen = NO; Runtime Forget End-to-End Closed = NO; Test Passed = NO; Implementation Verified = NO.**
