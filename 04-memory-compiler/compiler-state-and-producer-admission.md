@@ -208,3 +208,19 @@ D InstallForgetFence captures ProducerRegistryVersion and ProducerRegistrationHi
 E recovery uses D ResolveProducerWork with the original ProducerWorkItemId and registration digest. D ReconcileForgetBarrier is the authoritative D-local roll-up over immutable barrier/dependency/target checkpoints. E supplies its receipts and terminal evidence; it cannot independently assert DRAINED or global completion.
 
 D's normative operation set also includes RegisterProducerClass, CaptureProducerRegistrationHighWater, ResolveProducerWork and ReconcileForgetBarrier in addition to RegisterProducerWork, InstallForgetFence, RegisterDerivedDependency, PublishDerivedIfFenceCurrent and CompleteProducerWork. Exact D semantic operation contracts are consumed from D's operation-level specification; API transport schemas remain OPEN.
+
+
+
+---
+## Phase 3.5 Addendum — Producer Admission OPEN Item Correction
+
+D's current operation-level specification already defines ProducerClass and ProducerWork registration inputs, outputs, idempotency, semantic errors and linearization. It also defines InstallForgetFence's captured ProducerRegistryVersion + ProducerRegistrationHighWater, CaptureProducerRegistrationHighWater's immutable snapshot receipt, ResolveProducerWork and ReconcileForgetBarrier. Accordingly, any earlier OPEN wording suggesting these D semantic elements are absent is SUPERSEDED.
+
+The remaining OPEN work is limited to:
+- callable API/transport schema and authenticated B/I/H identity serialization;
+- global completeness reconciliation between D's local ProducerClass registry and I/A producer/recipient inventories;
+- E's explicit recompile child/re-admission identity rule;
+- assignment and validation of the Storage/Consistency implementation owner and shared serialization/visibility boundary;
+- executable crash/race/fault tests and retained evidence.
+
+E must consume D's semantic fields unchanged. In particular, ProducerRegistrationSequence is the ordering position used for barrier inclusion; ProducerRegistryVersion identifies the class registry snapshot. Neither is a CanonicalCommitCursor or ForgetFenceGeneration.
