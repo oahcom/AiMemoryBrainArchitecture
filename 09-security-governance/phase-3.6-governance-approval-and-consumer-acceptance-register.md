@@ -123,3 +123,23 @@ H36-SR-02/SR-03/SR-04/SR-05/SR-07 additional cases remain mandatory and NOT RUN:
 ## 8. Exit criteria
 
 This phase cannot close until: (1) each I36-GOV-01..10 has formal approval evidence or remains explicitly blocked; (2) each consumer owner records acceptance/rejection against exact BIH commit; (3) I36/H36 tests execute on identified builds with reproducible fixtures/logs and owner sign-off; (4) cross-module discrepancies are resolved by the authority that owns the affected contract. No branch merge is authorized by this record.
+
+
+## 9. Consumer/source artifact manifest (readback evidence)
+
+The following artifacts were fetched from the listed live Owner branches during this review. Their presence proves only that the contracts/specifications exist; it does not establish acceptance.
+
+| Consumer | Branch | Branch HEAD at discovery | Read artifact path | Blob SHA | Evidence interpretation |
+|---|---|---|---|---|---|
+| C | `session-c-agent-integration-2026-11-16` | `3b6c1d9a5d648f61daa04f5874d887f33475f098` | `07-agent-integration/telemetry-event-and-identity-contract.md` | `2bd9e640bd0c1d2c8b768da1e06b06096bc2a79e` | Consumer identity contract; no explicit BIH acceptance |
+| C | `session-c-agent-integration-2026-11-16` | `3b6c1d9a5d648f61daa04f5874d887f33475f098` | `07-agent-integration/conformance-matrix.md` | `ae31eb8554f04b1d21f5aee80537425b1ddd5329` | Specification explicitly says tests not executed |
+| D | `session-d-memory-brain-2026-11-16` | `968ce314cf2e44f50e3efd711060e495374cac98` | `03-memory-brain/forget-fence-operation-and-publication-gate.md` | `b9f75456140eed6a34faa8d84be20436cd91c745` | D-owned operation/fence contract; no identity consumer sign-off |
+| E | `session-e-memory-compiler-2026-11-16` | `e3afa99728f399d154767c959e37ff38f651b4b6` | `04-memory-compiler/compiler-state-and-producer-admission.md` | `e59f517fff161ab882aa0ddc4a5bda513964ae1a` | Producer admission contract; no explicit BIH acceptance |
+| F | `session-f-memory-runtime` | `2da5209d7072272d5510d376c0f319bed0402a6f` | `05-memory-runtime/phase-3.6-runtime-forget-suppression-and-invalidation.md` | `176cd500bf5d9fa8519c5213e835a745567fcfad` | Runtime suppression contract; no explicit BIH acceptance |
+| G | `session-g-memory-context` | `ac32e980003aa41faf0ae958ffef3df5ab387984` | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `8f6b215de7b78bf0eec2281359d3e039e7c8d5f4` | Applied/Forget reconciliation contract; no explicit BIH acceptance |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `c0d01d81698fa6bc2a22e84b0e2ada66ce329815` | `reviews/storage-consistency/forget-atomicity-storage-realization-review.md` | `5e2d55c8b210997693a7f83d35a5a03588e4ae6b` | Proposed physical realization; explicitly not implemented/verified |
+| A | `session-a-integration-2026-11-16` | `9c3dafb97b97aee50a8b61fe60836ed0a8e92fe3` | `reviews/integration/contract-registry.md` | `fa1774b673819a597f2f3082764ef2369ecc2189` | A registry; expressly not an approval authority |
+| H | `session-h-bmcp-protocol` | `59926f5090dfd2e2ad78d9c25bd0d9062b4bcabc` | `08-bmcp-protocol/protocol-conformance-matrix.md` | `075b2ac6ebe9bda4ec83de04fad07e8027e6a440` | H protocol test specification; NOT RUN |
+| H | `session-h-bmcp-protocol` | `59926f5090dfd2e2ad78d9c25bd0d9062b4bcabc` | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `9845c97ac43d7888732afafe12e28850ec02add8` | H36-01..18 and H36-SR additions; NOT RUN |
+
+The live branch inventory also includes `main` at `8a6414158c9c056c1638222534e1993d1bbc99d2`; none of the above owner-branch artifacts is presumed to exist on main. No branches were merged.
