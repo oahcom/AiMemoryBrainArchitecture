@@ -83,9 +83,9 @@ Only these A-owned coordination artifacts were changed:
 
 | A-owned file | Write commit | Readback blob SHA |
 |---|---|---|
-| `reviews/integration/contract-registry.md` | `a3e7f49fc7d697a3ccd9ae908ad8fe05461f850b` | Pending final readback |
-| `reviews/integration/typed-cursor-and-watermark-contract.md` | `2d64c9add2173e25480677d230054489ac24b11e` | Pending final readback |
-| `reviews/integration/phase-3-session-a-targeted-remediation-record.md` | This record's write commit | Pending final readback |
+| `reviews/integration/contract-registry.md` | `a3e7f49fc7d697a3ccd9ae908ad8fe05461f850b` | `15985715f749b4d6d0dcda6a60334578b527f3ed` — readback verified |
+| `reviews/integration/typed-cursor-and-watermark-contract.md` | `2d64c9add2173e25480677d230054489ac24b11e` | `469416605d10f84dc450bc36e19503374f34f03d` — readback verified |
+| `reviews/integration/phase-3-session-a-targeted-remediation-record.md` | `f1b0a6dda1afb7b450628814c959f5f1c5963ae5` (superseded by this evidence refresh) | Readback of this final version verified after write; exact blob SHA reported in delivery response |
 
-The A branch's final HEAD is recorded after the last write and final ref re-query in the delivery response. This record intentionally distinguishes the pre-write A source HEAD from the post-write delivery HEAD; a registry cannot be self-referentially updated to its own future commit without producing another new HEAD.
+The A branch's final HEAD is recorded after this evidence refresh and final ref re-query in the delivery response. This record intentionally distinguishes the pre-write A source HEAD from the post-write delivery HEAD; a registry cannot be self-referentially updated to its own future commit without producing another new HEAD.
 
