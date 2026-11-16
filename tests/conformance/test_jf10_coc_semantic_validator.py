@@ -106,5 +106,52 @@ class BridgeValidatorTests(unittest.TestCase):
             validate_bridge(records)
 
 
+    def test_missing_lifecycle_record_rejected(self):
+        with self.assertRaisesRegex(BridgeValidationError, "exactly five"):
+            validate_bridge(valid_messages()[:-1])
+
+    def test_duplicate_or_reordered_lifecycle_rejected(self):
+        records = valid_messages()
+        records[2], records[3] = records[3], records[2]
+        with self.assertRaisesRegex(BridgeValidationError, "missing, duplicated, or out of COC order"):
+            validate_bridge(records)
+
+    def test_unknown_reconciliation_cannot_claim_d_barrier_satisfied(self):
+        records = valid_messages()
+        records[4].update(reconciliation_state="UNKNOWN", d_barrier_state="SATISFIED")
+        with self.assertRaisesRegex(BridgeValidationError, "cannot claim barrier satisfaction"):
+            validate_bridge(records)
+
+    def test_i_owner_lookup_must_match_observed_terminal_decision(self):
+        records = valid_messages()
+        records[4]["i_lookup_state"] = "REVOCATION_WON"
+        with self.assertRaisesRegex(BridgeValidationError, "I lookup conflicts"):
+            validate_bridge(records)
+
+    def test_commit_visibility_pointer_must_use_same_xid(self):
+        records = valid_messages()
+        records[3]["visibility_pointer_transaction_ref"] = "S:xid:other"
+        with self.assertRaisesRegex(BridgeValidationError, "same-XID visibility"):
+            validate_bridge(records)
+
+    def test_none_revocation_state_forbids_revocation_references(self):
+        records = valid_messages()
+        records[2]["i_revocation_request_ref"] = "I:revoke:stale"
+        with self.assertRaisesRegex(BridgeValidationError, "forbidden when state is NONE"):
+            validate_bridge(records)
+
+    def test_reconciliation_cannot_hide_storage_outcome_conflict(self):
+        records = valid_messages()
+        records[4]["storage_lookup_state"] = "ROLLED_BACK"
+        with self.assertRaisesRegex(BridgeValidationError, "Storage lookup conflicts"):
+            validate_bridge(records)
+
+    def test_policy_domain_reference_must_not_be_empty(self):
+        records = valid_messages()
+        records[0]["policy_domain_ref"] = ""
+        with self.assertRaisesRegex(BridgeValidationError, "policy_domain_ref"):
+            validate_bridge(records)
+
+
 if __name__ == "__main__":
     unittest.main()
