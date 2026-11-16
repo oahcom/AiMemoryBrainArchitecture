@@ -1,0 +1,30 @@
+name: JF-10 COC semantic conformance
+
+on:
+  push:
+    branches:
+      - session-a-integration-2026-11-16
+    paths:
+      - "tests/conformance/**"
+      - ".github/workflows/jf10-coc-semantic.yml"
+  pull_request:
+    paths:
+      - "tests/conformance/**"
+      - ".github/workflows/jf10-coc-semantic.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-validator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile validator and tests
+        run: python -m py_compile tests/conformance/jf10_coc_semantic_validator.py tests/conformance/test_jf10_coc_semantic_validator.py
+      - name: Run semantic conformance unit tests
+        run: python -m unittest discover -s tests/conformance -p "test_jf10_coc_semantic_validator.py" -v
