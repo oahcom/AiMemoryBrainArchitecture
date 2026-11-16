@@ -44,3 +44,16 @@ COMPLIANT = evidence supports the criterion at the stated review scope; PARTIALL
 - Main Phase 2 review blob `3cd31abeac88703de5b9a0b29bea5d82cd5fdee7`; Phase 3 D/E/H/I review blob `edaccb802e0425f2d47bd4b613fab4dfde107144`.
 
 A–C and F/G module-specific source documents were not all successfully retrieved by exact path in this pass. Their status is not inferred from absence; rows above are scoped to available project-level evidence and cross-module review. A complete branch-aware artifact inventory remains an OPEN follow-up before any final G0/G1 approval.
+
+
+## Additional branch-aware owner evidence retrieved in this pass
+
+- `session-b-domain-model-phase3`: `02-domain-model/typed-reference-registry.md` blob `08af297cb010f7e6ac5e3f29daa4469be112e12e`; `02-domain-model/ADR-001-fact-claim-semantics.md` blob `a1024938ff5baba069cf128c69496a44e143330c`. Typed-reference distinctions are owner-authored; Fact/Claim remains ADR-BLOCKED.
+- `session-c-agent-integration-2026-11-16`: `07-agent-integration/telemetry-event-and-identity-contract.md` blob `2bd9e640bd0c1d2c8b768da1e06b06096bc2a79e`; `07-agent-integration/security-and-untrusted-memory-boundary.md` blob `b32aeeb0b7b226cd3770d2af82b0ddfbf35a511d`. C semantic boundaries are DECIDED within C; runtime enforcement, I threat-model approval and identity binding remain OPEN.
+- `session-f-memory-runtime`: `05-memory-runtime/phase-3.5-forget-suppression-and-cursor-consumption.md` blob `99f950f9fabe97969b5ad580c9c80e52930a1423`. F safety semantics are DECIDED; API/backend realization and cancellation/conformance remain OPEN/TO_VALIDATE.
+- `session-g-memory-context`: `06-memory-context/context-reconciliation.md` blob `87063aceebed1c30b7840045ada8e3f348732688`. G safety ordering is DECIDED; workflow implementation remains CANDIDATE and cross-owner Applied mapping remains OPEN.
+- `session-i-security-governance-2026-11-16`: `09-security-governance/phase-3.5-global-identity-forget-governance.md` blob `a8632931396125019d1afccff39ea266f52a4d3a`. I global governance addendum remains CANDIDATE; cross-owner approval and implementation evidence OPEN.
+- H's `08-bmcp-protocol/message-envelope-and-versioning.md` blob `5547ecd78d118bd63e571e5daad87194d9b694e4` confirms candidate envelope fields and OPEN/ADR-BLOCKED identity fields. The attempted H Phase 3.5 path was not found and is not treated as evidence.
+- A's live coordination registry at `session-a-integration-2026-11-16` blob `b15a87e9e259de74df600defbdd449772b9b3daa` contains an embedded branch-head inventory, but those values are registry-reported snapshots, not a fresh independent HEAD read in this pass. They are not copied as current HEADs here.
+
+This addendum improves branch-aware design coverage but does not convert any module artifact into project approval. File blob SHAs prove the fetched file versions only, not the current branch tip. The matrix remains a static review; no runtime implementation, test, benchmark, fault-injection, security certification or operational readiness evidence was run by Session P.
