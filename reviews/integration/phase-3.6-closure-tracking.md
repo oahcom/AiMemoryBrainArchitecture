@@ -1379,3 +1379,22 @@ The recovery process reconciled the exact original XID without creating a replac
 **Scope limitation:** this is a deterministic coordinator process-crash/unrecorded-checkpoint window test, not TCP packet loss or production I sequencer/COC durability. The SQLite coordinator ledger is a CI fixture only.
 
 Gate A remains PARTIAL PASS / OPEN. Production Canonical Authority binding, actual I/D control-ledger integration, production fencing/STONITH and split-brain prevention, host/zone/cloud-storage durability, named human on-call, approved runbook and RPO/RTO remain open. Gate B remains BLOCKED until full Gate A acceptance; Gate C remains BLOCKED until Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
+
+
+## 13.32 Gate A — real TCP ACK-loss recovery PASS — 2026-11-17
+
+Storage executed a true TCP response-loss fault-injection test against the pinned PostgreSQL 18.7 profile. A one-shot proxy dropped the PostgreSQL CommandComplete response after the server executed PREPARE TRANSACTION, COMMIT PREPARED or ROLLBACK PREPARED. The client observed a broken connection / UNKNOWN outcome; recovery reconnected and reconciled the same original XID.
+
+Evidence:
+- Probe Blob: db843927fb3fd2f37b15b7a56dee5ca4c9b4274c
+- Workflow Blob: ae9cea590721630f3ebad6d9566de79ac188fd23
+- Successful run: 43913477785
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43913477785
+- Run commit: 9f3f9595fa5fec6003ece53bb289a5ff499f87ee
+- Job: 133461308120
+
+Raw log confirmed client-observed UNKNOWN after PREPARE, COMMIT PREPARED and ROLLBACK PREPARED; same-XID recovery after PREPARE ACK loss; COMMIT ACK loss reconciled to pointer + receipt atomically visible; ROLLBACK ACK loss reconciled to neither visible.
+
+This is a real PostgreSQL protocol TCP response-loss injection at the CommandComplete boundary, not merely application-level response suppression. Scope remains a single-node CI profile; no production I sequencer/COC integration, coordinator quorum durability, cross-zone network partition, production fencing or deployment readiness is inferred.
+
+Gate A remains PARTIAL PASS / OPEN because production Canonical Authority binding, real I/D control-ledger integration, production failover fencing and split-brain prevention, host/zone/cloud-storage durability, named human operator, runbook and RPO/RTO remain unverified. Gate B remains BLOCKED until full Gate A acceptance; Gate C remains BLOCKED until Gate B. JF-10 P0 OPEN; production activation NOT AUTHORIZED.
