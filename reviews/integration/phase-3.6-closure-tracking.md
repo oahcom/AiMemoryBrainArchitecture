@@ -1275,3 +1275,21 @@ This section supersedes the earlier §13.27 status that treated the HA probe as 
 | Gate C — end-to-end fault campaign | BLOCKED until Gate B passes |
 | JF-10 P0 / production activation | OPEN / NOT AUTHORIZED |
 
+
+
+## 13.27 Gate A — same-XID rollback after promotion PASS — 2026-11-17
+
+Storage extended the PostgreSQL 18.7 two-node synchronous failover test to prepare two independent participants before primary loss, then resolve one by COMMIT PREPARED and one by ROLLBACK PREPARED after standby promotion.
+
+- Probe Blob: cbe1f317479145dbf1467e426b0c0737a6ec054c
+- Workflow Blob: f3c05f90c6065458b49879def10dce672685c850
+- Successful run: 43908746695
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43908746695
+- Run commit: b59c0842dba86b581ded4d9519c4289b6a699fde
+- Job: 133444572245
+
+Both prepared XIDs were synchronously replayed. After primary hard loss and standby promotion, both exact XIDs and their row locks survived. Same-XID COMMIT exposed VisibilityPointer + PublicationReceipt atomically; same-XID ROLLBACK left both absent. Raw markers include SAME_XID_ROLLBACK_AFTER_PRIMARY_LOSS=PASS and ROLLBACK_NON_PUBLICATION_AFTER_PROMOTION=PASS.
+
+This closes the rollback-after-promotion subtest for the pinned PostgreSQL 18.7 CI profile. Gate A remains PARTIAL PASS / OPEN because backup/restore + PITR, current Forget-control-ledger reconciliation before restored reads, real host/zone/storage durability, production failover fencing/routing, actual Canonical Authority deployment and named human operator/RPO/RTO remain open.
+
+Gate B persistent COC remains BLOCKED until full Gate A passes. Gate C remains BLOCKED until Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED. Issue #10 comment 6922528500 records this result.
