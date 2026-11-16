@@ -449,7 +449,7 @@ This is a conditional acceptance of the architecture direction and owner-boundar
 
 1. B/I/D/E technology reviews are complete; the four reports distinguish candidate direction from decisions, implementation and test evidence.
 2. The exact CGH-APPLIED-1.1 / JF-10 bridge owner matrix is recorded at `reviews/integration/phase-3.6-cgh-applied-1.1-owner-acceptance-matrix.md`, commit `a480a713db358b30dc4cf7c9157025b3c116e439`.
-3. The COC durable log/participant/recovery protocol is pinned at Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`. All B/C/D/E/G/H/I/A/Storage owner perspectives have exact-Blob acceptance records. A's matrix is `reviews/integration/phase-3.6.3-coc-durable-protocol-acceptance-matrix.md`, commit `e5fad5b3e67662134c18e33090b08d874f161f41`.
+3. The COC durable log/participant/recovery protocol is pinned at Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`. All A/B/C/D/E/F/G/H/I/Storage owner perspectives have exact-Blob acceptance records. A's matrix is `reviews/integration/phase-3.6.3-coc-durable-protocol-acceptance-matrix.md`, commit `e5fad5b3e67662134c18e33090b08d874f161f41`.
 4. Storage Gate B is **DESIGN-LEVEL ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS**. Its consensus implementation, distributed failure tests and Gate C runtime conformance are deferred to engineering.
 5. PostgreSQL 18.7 is now a qualified prepared-XID capability candidate for the pinned CI profile; it is not a production deployment selection. The latest seven-workflow regression set is 7/7 SUCCESS: PITR `43958775001`; prepared-XID `43959079736`; synchronous promotion `43959079669`; backup/restore `43959079703`; WAL PITR `43959079745`; sync-unavailable fail-closed `43959079760`; pg_rewind/rejoin `43959079930`.
 6. COC in-memory outage-recovery reference model: 11 tests passed in run `43897364938`. JF-10/COC semantic validator: 18 tests passed in run `43905568915`. Neither proves a live COC quorum, owner-service integration or production runtime.
@@ -936,7 +936,7 @@ What is not complete:
 
 ### 21.1 Amended COC protocol §14 — exact owner review now complete
 
-The current Storage COC protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` and A prepared-participant mapping Blob `a71251704851cacd15f67faa985a5bd50057e92a` have now been reviewed by all B/C/D/E/G/H/I/A/Storage owner perspectives. Exact matrix: `reviews/integration/phase-3.6.4-jf10-prepared-participant-gid-owner-acceptance-matrix.md`, Blob `4059a228613cf2c72a7797f2a1427f843ef066a0`.
+The current Storage COC protocol Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` and A prepared-participant mapping Blob `a71251704851cacd15f67faa985a5bd50057e92a` have now been reviewed by all B/C/D/E/G/H/I/A/Storage owner perspectives. Exact matrix: `reviews/integration/phase-3.6.4-jf10-prepared-participant-gid-owner-acceptance-matrix.md`, Blob `c9e6da594b9dcf648502801cb214e883805bdfb1`.
 
 The accepted type split is PreparedParticipantRef (stable engine-neutral identity), PreparedTransactionGID (client-chosen PostgreSQL prepared handle, bound before COC intent), and EngineNativeTransactionXIDRef (observed after PREPARE). Storage PREPARE is prohibited until the exact COC intent is committed. The H 1.1.1 candidate schema Blob is `c0bbfc7611a8d88a39cee209831db32b62601fde`.
 
@@ -978,7 +978,7 @@ Storage Gate A architecture design is now **CONDITIONAL PASS** because its resto
 | C | `c408d2c138d1975eff1167bd5889ba45a13b126b` | `ee42c7192561261789a0c7b5bd16d32c0eaaf14c` |
 | D | `f5cbe59561b73c75708a52f28b0bf12707d75c71` | `97c049050d67dd12e0c64ef49b2b05795651608c` |
 | E | `fb063e15ee31569e501f5fa0a3198b3cf0b67a9c` | `c94f6a8e64ba3138a27e6f316f10411ef33b7ab8` |
-| F | `3cb98c5a8a60cfaf4ad446e53833fbabcaa0eddf` | `124cc9300442b0e3a1e83603910e1c332b4fae48` |
+| F | `86c013814fbbfff1829729eb18fdc3a5de265969` | `124cc9300442b0e3a1e83603910e1c332b4fae48` |
 | G | `466e2bf5992ea5944ef6ecebd79a39eeb21cdc97` | `8b9ea4b4a63f7bbddbefdb0b14cf99943b3e7613` |
 | H | `a5fe5268fe846f2ec3c94448bda5592783ef7212` | `cb9d1d97604bdb71bc2f5bf47f6392e03f30ba99` |
 | I | `d66361dd88f07278340663b75bcb22e040d96965` | `c24f03aae6ce7bc76eaeb1ed33bb24fb7fcac624` |
