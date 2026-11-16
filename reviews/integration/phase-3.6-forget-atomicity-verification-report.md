@@ -12,7 +12,7 @@
 |---|---|---|
 | Existing decision preservation | **CLOSED** | Previously decided Forget atomicity semantics retained; no redesign |
 | D/E/Storage six-dimension design review | **CLOSED** | Two consecutive zero-finding design-review rounds remain the baseline |
-| I Authorization dependency | **BLOCKED** | I policy candidate exists; formal governance approval and commit-usable freshness protocol absent |
+| I Authorization dependency | **BLOCKED** | I technical authorization baseline now specifies single-use CommitAuthorizationReceipt and per-domain sequencer; governance approval and I/Storage crash-atomic integration remain blocked |
 | I Global Producer Inventory dependency | **BLOCKED** | Inventory/epoch/seal semantics are documented as candidate; no approved authoritative registry/seal attestation |
 | Global Forget Completion policy | **BLOCKED** | Candidate Completion Evidence Vector exists; governance approval/exceptions remain blocked |
 | Logical deployment profile | **SELECTED** | Single transactional DB per Canonical Memory Authority; per-authority serialized/serializable transaction |
@@ -30,7 +30,7 @@ Discovery queried owner branches directly and fetched each branch HEAD and recur
 | D | `session-d-memory-brain-2026-11-16` | `6b89f6612c84c55c4c06bb305d9b2fc36956234e` | D canonical Forget contract; operation/publication gate; joint decision; D defect-closure addendum |
 | E | `session-e-memory-compiler-2026-11-16` | `4b5d22aa172290f7047e41644d0490be62b11110` | Producer admission/derived registration; E36 conformance suite; joint decision; E defect-closure addendum |
 | Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `798d8325049bba09b2661e185366508f707dd5fb` | Storage realization review; joint atomicity decision; Storage defect closure; two-round review; deployment selection record |
-| I (external dependency only) | `session-i-security-governance-2026-11-16` | `6a92f49bd740f6e2db11568d9bd61e8c58132cbc` | Producer inventory/completion evidence; Phase 3.6 trust/authorization/revocation; Principal/Actor/authorization; retention/backup/erasure; I six-dimension review |
+| I (external dependency only) | `session-i-security-governance-2026-11-16` | `8d1ddadb6af70a7c387105d20ca8f2f6de80c5fb` | Producer inventory/completion evidence; Phase 3.6 trust/authorization/revocation; Principal/Actor/authorization; retention/backup/erasure; I six-dimension review |
 | A (integration evidence only) | `session-a-integration-2026-11-16` | `9c3dafb97b97aee50a8b61fe60836ed0a8e92fe3` | Phase 3.6 baseline manifest; cross-module conformance plan; executable closure plan; second-stage gate review; CFG evidence joint report |
 | C (test context only) | `session-c-agent-integration-2026-11-16` | `3b6c1d9a5d648f61daa04f5874d887f33475f098` | Adapter conformance cases; C conformance matrix; Phase 3.6 final-request evidence |
 | F (consumer dependency context) | `session-f-memory-runtime` | `2da5209d7072272d5510d376c0f319bed0402a6f` | Phase 3.6 runtime Forget suppression/invalidation |
@@ -56,7 +56,7 @@ Main was inspected only as a comparison point (HEAD `8a6414158c9c056c1638222534e
 | Storage | `reviews/storage-consistency/phase-3.6.1-joint-defect-closure-storage-addendum.md` | latest revision must be read back after this report commit |
 | I | `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` |
 | I | `09-security-governance/phase-3.6-principal-trust-chain-authorization-revocation.md` | `74643a2f374179128d506c3b7e1d22da77119600` |
-| I | `09-security-governance/principal-actor-and-authorization-contract.md` | `03765efac4bb1153f303ce0030f9e277d602e81d` |
+| I | `09-security-governance/principal-actor-and-authorization-contract.md` | `03765efac4bb1153f303ce0030f9e277d602e81d` |\n| I | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | `0cbf6bb7480db873790c454817593a9b1c5548ba` |
 | A | `reviews/integration/phase-3.6-baseline-manifest.md` | `0a2dd28a1977f6e73340e2f5daafd8da5c8ff5c2` |
 | A | `reviews/integration/phase-3.6-second-stage-gate-review.md` | `c7fe089eb9670fd1fa5299dd05ea535bee8d129a` |
 
@@ -79,7 +79,7 @@ No new semantic contradiction was found requiring a redesign. The following deci
 | Retry / Recovery | Stable WorkItemId; new AttemptId/LeaseEpoch; same-key idempotency; unknown outcome remains unresolved | DECIDED; implementation OPEN |
 | Late Derivative Suppression | Late discovery suppresses/quarantines, invalidates prior proof and reopens reconciliation | DECIDED; implementation OPEN |
 
-JF-01 through JF-09 remain the closed design-defect register from the two-round review. No prior semantic decision is weakened by the deployment selection.
+JF-01 through JF-09 remain the closed design-defect register from the two-round review. The I technical baseline refresh exposed **JF-10**, a P0 cross-authority crash-atomic coupling gap between I's sequencer and Storage visibility commit. JF-10 is an integration blocker, not a reason to redesign the already-decided D/E semantics.
 
 ### 3.1 Decision-state classification
 
@@ -87,16 +87,16 @@ JF-01 through JF-09 remain the closed design-defect register from the two-round 
 |---|---|---|---|---|
 | D/E logical Forget atomicity | Yes | Joint architect decision under user delegation; not independent external Owner approval | No evidence | No |
 | Storage logical serialization profile | Yes, by this record | Production engineering approval pending | No evidence | No |
-| I authorization policy | Candidate semantics only | No; governance-blocked | No evidence | I36 tests not run |
+| I authorization technical baseline | Yes: BIH36-JD-01..17 and I CommitAuthorizationReceipt ordering semantics are recorded as delegated technical baseline | External governance approvals remain GOVERNANCE-BLOCKED; C/D/E/F/G/Storage consumer acceptance OPEN | No evidence | I36 tests not run |
 | I Producer Domain Inventory | Candidate semantics only | No; governance-blocked | No evidence | I-FGT tests not run |
 | Global Forget Completion Policy | Candidate evidence vector | No; governance-blocked | No evidence | I-FGT tests not run |
 | D36/E36/C01–C20 | Specified | Not applicable | No executable harness | Not run |
 
 ## 4. I External Dependency Resolution
 
-### 4.1 What I has specified (candidate, not approved)
+### 4.1 What I has specified
 
-The I branch currently defines:
+The latest I branch technical baseline defines:
 - `ProducerDomainInventoryEpoch` as the global catalogue epoch for producer/recipient domains and instances, including scope coverage, owner, capabilities and evidence obligations;
 - inventory sealing by epoch + canonical digest + signer + timestamp + evidence obligations, with relevant registry changes/late discovery invalidating the seal;
 - authenticated producer/recipient identity and typed scope binding; payload identity is only a claim;
@@ -115,7 +115,7 @@ The I branch currently defines:
 | Join/leave/change rules | Any relevant producer/recipient/capability/scope/owner/issuer/backup route change forces reconciliation | Candidate lifecycle specified; governance approval absent | BLOCKED |
 | Unknown producer default | Reject/quarantine/Unknown; no auto-registration or NotApplicable by omission | Candidate policy says fail closed; formal approval absent | BLOCKED |
 | Global Forget coverage | D high-water proves concrete admitted work only; I inventory proves closed-world producer/recipient domain only | Completion contract candidate; no approved coverage inventory | BLOCKED |
-| PermissionEpoch final commit | Storage must verify an I-authoritative current commit-usable proof; no cached ALLOW or caller-supplied epoch | PermissionEpoch contract candidate; I36-GOV-05/06 governance-blocked; no approved cross-service commit permit | BLOCKED |
+| PermissionEpoch final commit | Storage/E gate consumes I single-use CommitAuthorizationReceipt in same I policy-domain sequencer as revocation; no offline lease/cached ALLOW | Technical receipt/sequencer semantics now specified; governance approval blocked; crash-atomic coupling to owner VisibilityPointer/PublicationReceipt is not fully specified (JF-10) | BLOCKED |
 | Unsupported/offline targets | Unknown/Pending; no implicit success; exception must be exact, approved, unexpired | I36-GOV-07/08 governance-blocked | BLOCKED |
 | Global Forget Completion | D reports only canonical barrier proof; DE-S never declares global completion | Completion Evidence Vector candidate; formal approval and evidence absent | BLOCKED |
 
@@ -127,7 +127,7 @@ A GitHub issue was opened requesting the I Owner's formal decisions and append-o
 - State at report preparation: OPEN; no I Owner response/approval recorded.
 - Scope: authoritative inventory source; ProducerClass/ProducerIdentity; epoch/seal and join/leave rules; unknown producer; global coverage; PermissionEpoch/revocation commit ordering; unsupported/offline targets; Completion Evidence Vector and exception authority.
 
-This issue is a request, not an approval. DE-S did not modify any I-owned file and did not approve I policy.
+A later I branch refresh added `phase-3.6-identity-trust-policy-joint-closure.md` and clarified the technical receipt/sequencer contract; issue #4 was updated with that discovery and the remaining inventory/governance/JF-10 questions. This issue is a request, not an approval. DE-S did not modify any I-owned file and did not approve I policy.
 
 ## 5. Deployment Selection Record
 
@@ -327,3 +327,20 @@ These confirmations are the joint architect's decisions under user delegation. T
 - **Global Forget Completion:** NOT CLAIMED.
 
 This report is a status and decision record, not evidence of executed tests, implementation, production deployment, I approval, physical erasure or end-to-end Forget completion.
+
+
+## 11. I branch refresh and JF-10 integration finding
+
+During this work, a later live read found the I branch had advanced from the initial discovery HEAD to `8d1ddadb6af70a7c387105d20ca8f2f6de80c5fb`. The new I-owned `phase-3.6-identity-trust-policy-joint-closure.md` (Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`) records BIH36-JD-01..17 as a delegated technical baseline and provides the exact `CommitAuthorizationReceipt` protocol. This supersedes older I technical Candidate/Open wording for the BIH baseline only.
+
+The new I contract does not activate governance policy: I36-GOV-01..08 remain GOVERNANCE-BLOCKED, and C/D/E/F/G/Storage consumer acceptance remains OPEN. It also does not close the ProducerDomainInventoryEpoch / InventorySeal / Global Forget Completion candidate contract.
+
+### JF-10 — I sequencer / Storage visibility crash coupling (P0 OPEN)
+
+- **Affected decision:** final Publish Gate / Durable Commit / Artifact Visibility; I I36-SR-02 / I36-SR-05.
+- **Reproduction condition:** I sequencer records or returns `COMMIT_WON` for a single-use CommitAuthorizationReceipt, then Storage's VisibilityPointer + PublicationReceipt transaction crashes, aborts, or loses ACK; or Storage commits while I outcome/ACK remains unknown.
+- **Evidence:** I's new contract requires a single-use receipt and the owner gate to participate in the same per-domain sequencer, with terminal outcomes COMMIT_WON / REVOCATION_WON / INDETERMINATE_ABORTED and durable audit fields. It does not specify the full cross-authority crash-atomic recovery protocol binding the sequencer decision to the owner DB visibility transaction.
+- **Impact:** one-sided evidence could incorrectly claim publication authorized/committed, or leave an operation permanently ambiguous. This is P0 because it touches the revocation/publication safety boundary.
+- **Recommendation:** I + Storage define a durable commit handshake/participant or coordinator protocol, immutable correlation and operation digest, idempotent outcome lookup across both authorities, explicit recovery for each one-sided crash/ACK-loss ordering, and a single authoritative terminal outcome. Prepared/ambiguous artifacts remain hidden.
+- **Reapproval:** requires I owner/authority approval of its sequencer integration and Storage engineering approval of the exact commit/recovery implementation. DE-S cannot approve I policy.
+- **Status:** OPEN / BLOCKED; fail closed. No implementation or race test has run.
