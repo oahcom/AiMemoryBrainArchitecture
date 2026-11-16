@@ -77,4 +77,3 @@ Any missing or ambiguous authoritative state must remain UNKNOWN / IN_DOUBT / Re
 
 ## 6. Explicit exclusions
 
-This record does not designate Hermes, DKK, SSK, DBInstanceManagement, any helper SQLite file, or any other unrelated runtime as the Canonical Authority. Such a designation would require an explicit project decision and the appropriate Owner acceptance; no such decision is present in the controlling evidence reviewed for this record.
