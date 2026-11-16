@@ -66,3 +66,48 @@
 ## 6. Ownership non-regression
 
 This delivery does not define G ContextVersion, H BMCP wire/Adapter state machine, I global authorization/revocation policy, I retention/backup/external-copy policy or physical-erasure proof. It does not modify governance, A/B/C, E/F/G/H/I files or other branches. No implementation, security, performance or global Forget sign-off is asserted.
+
+
+## 7. Phase 3.5 — Forget Fence Atomicity & Producer Admission
+
+- **Issue:** CR-P1-01 / D-REV-P1-003.
+- **Status:** D operation semantics DECIDED; cross-module implementation and conformance OPEN.
+- **Reviewed D branch HEAD before this change:** 30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6.
+- **Reviewed E branch HEAD:** 3dea6096eefa6779eb12e4e788bcf9429d2a3f83.
+- **Reviewed cross-module review:** reviews/integration/phase-3-defghi-cross-module-contract-review.md, commit 8a6414158c9c056c1638222534e1993d1bbc99d2.
+- **Reviewed remediation task pack:** commit 3cae375aadfc2a8b2facce5cb006ff1e55c2dfe1.
+
+### 7.1 Decisions
+
+| ID | Status | Decision |
+|---|---|---|
+| D35-01 | DECIDED — D semantic contract | RegisterProducerClass and RegisterProducerWork are distinct; unknown/disabled classes fail closed; registration has stable idempotent identity and durable receipt. |
+| D35-02 | DECIDED — D semantic contract | RegisterProducerWork and InstallForgetFence share one linearizable serialization order. Accepted work is included in the captured high-water, or post-fence work is rejected/quarantined/cleanup-only. No third outcome. |
+| D35-03 | DECIDED — D semantic contract | InstallForgetFence atomically captures ProducerRegistryVersion and ProducerRegistrationHighWater with durable fence installation; CaptureProducerRegistrationHighWater verifies the immutable snapshot and cannot silently move it. |
+| D35-04 | DECIDED — D semantic contract | RegisterDerivedDependency durably registers artifact identity and complete direct/transitive lineage before visibility; partial/unknown registration remains private. |
+| D35-05 | DECIDED — D semantic contract | PublishDerivedIfFenceCurrent is linearized with the visibility transition and rechecks latest applicable fence plus current I authorization. An uncoordinated check-then-write or free-standing token is invalid. |
+| D35-06 | DECIDED — D semantic contract | CompleteProducerWork, ResolveProducerWork and ReconcileForgetBarrier define durable terminal evidence, ACK-loss recovery and immutable barrier reconciliation. Lease expiry/DLQ parking are not terminal. |
+| D35-07 | DECIDED — D evidence contract | PublicationReceipt binds WorkItemId/AttemptId, ProducerClass, source revisions, ScopeRefs, RegistrationReceipt, observed/authoritative fence, PermissionEpoch, DerivedArtifact and DependencyRegistrationEvidence. FenceGeneration and PermissionEpoch are distinct types. |
+| D35-08 | OPEN — Storage/Consistency | No formal Storage/Consistency Owner identified. Transaction/CAS/lock/serialization and crash-recovery realization must be assigned and validated externally; D does not approve an implementation. |
+| D35-09 | OPEN — E/I/H/B and registry coordination | E must map compiler state/attempt/replay behavior to D operations; I owns PermissionEpoch semantics/global producer inventory; H/I/B align authenticated ProducerIdentity/ActorRef/ScopeRef. |
+| D35-10 | NOT RUN | Ten required race/fault scenarios and additional replay/restore variants are specified; no runtime conformance evidence is claimed. |
+
+### 7.2 Changed paths in this delivery
+
+- Added: 03-memory-brain/forget-fence-operation-and-publication-gate.md
+- Updated: 03-memory-brain/forget-fence-and-completion-contract.md
+- Updated: 03-memory-brain/decision-change-log.md
+
+No E, I, H, A, F, G, B or governance files were modified. No branch was merged.
+
+### 7.3 Interface impact and OPEN owners
+
+- **E:** consumes D's semantic operations; E's current compiler contract already distinguishes stable ProducerWorkItemId, AttemptId, LeaseId, DependencyRegistrationId and PublicationOperationId, and requires hidden staging, ACK-loss lookup, retry identity preservation and final gate. D has now specified semantic linearization/evidence; E's API mapping and conformance remain OPEN / E-owned.
+- **Storage/Consistency:** must provide a named accountable owner and validate transaction/CAS/serialization, hidden prepare/commit if needed, replica consistency, crash recovery, restore and stale-token rejection. **Owner unassigned — OPEN.**
+- **I:** owns PermissionEpoch, current authorization/revocation, global producer/recipient inventory, exceptions and global Forget completion. D does not define numeric relation to FenceGeneration.
+- **H/B:** authenticated producer binding and typed ActorRef/ScopeRef semantics remain cross-owner OPEN; D consumes verified typed references only.
+- **F/G/H:** their derivative-producing and consumer boundaries remain owned by those modules and require their own conformance evidence.
+
+### 7.4 Non-claims
+
+This delivery is a D-owned documentation contract only. It does not prove a D API exists, a Storage transaction is implemented, E has adopted a final schema, any race test passed, downstream F/G/H enforcement passed, I approved global policy, or Forget is globally/physically complete. D-REV-P1-003 remains integration OPEN pending owner implementation and conformance evidence.
