@@ -1,0 +1,66 @@
+name: JF-10 PostgreSQL 18.7 Prepared-XID Capability
+
+on:
+  push:
+    branches:
+      - session-storage-consistency-forget-atomicity-2026-11-16
+    paths:
+      - "reviews/storage-consistency/postgres_probe/**"
+      - ".github/workflows/jf10-postgres-capability.yml"
+  pull_request:
+    paths:
+      - "reviews/storage-consistency/postgres_probe/**"
+      - ".github/workflows/jf10-postgres-capability.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-prepared-xid:
+    name: PostgreSQL 18.7 durable prepared-XID probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out Storage branch
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install psycopg
+        run: python -m pip install "psycopg[binary]>=3.2,<4"
+      - name: Start exact PostgreSQL profile
+        run: |
+          docker volume create jf10-pgdata
+          docker run -d --name jf10-postgres \
+            -e POSTGRES_PASSWORD=jf10-ci-only \
+            -e POSTGRES_DB=postgres \
+            -p 5432:5432 \
+            -v jf10-pgdata:/var/lib/postgresql \
+            postgres:18.7 \
+            -c max_prepared_transactions=16 \
+            -c fsync=on \
+            -c synchronous_commit=on \
+            -c full_page_writes=on \
+            -c wal_level=replica
+          for i in $(seq 1 60); do
+            if docker exec jf10-postgres pg_isready -U postgres -d postgres; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs jf10-postgres
+          exit 1
+      - name: Run physical prepared-XID probe
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: postgres
+          PGPASSWORD: jf10-ci-only
+          PGDATABASE: postgres
+        run: python reviews/storage-consistency/postgres_probe/jf10_postgres_prepared_xid_probe.py
+      - name: Capture PostgreSQL profile
+        if: always()
+        run: |
+          docker exec jf10-postgres psql -U postgres -d postgres -c "SELECT version(); SHOW max_prepared_transactions; SHOW fsync; SHOW synchronous_commit; SHOW full_page_writes; SHOW wal_level;" || true
+          docker logs jf10-postgres || true
