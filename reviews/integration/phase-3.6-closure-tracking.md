@@ -753,3 +753,16 @@ The decisions were read from the exact Owner artifacts and all name the same A p
 The package was subsequently amended for the COC-outage cutoff safety rule. The current candidate is now Blob `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`, paired with COC proposal Blob `65878e1e2b569b1dc6d0918f51a313da122236d4`. The six decisions above do **not** automatically approve either amended artifact. Fresh exact-Blob decisions are required against both current pins; A requested them in Issue #3 comment `6920364402`. Storage/Consistency's exact COC decision remains pending (Issue #2 comment `6920365466`); no named operator or actual deployment is established.
 
 **Current disposition:** six-way owner decision RECORDED for prior SHA `9808b31f...`; current SHA `d4eef4ae...` remains CANDIDATE / FRESH OWNER REVIEW REQUIRED / NOT FROZEN. Coordinator deployment NOT DESIGNATED / NOT VERIFIED. Tests NOT RUN. G8 BLOCKED; G9 NOT RUN; G10 BLOCKED.
+
+
+## Current recovery-batch amendment — exact review pins (2026-11-16 23:12 +08)
+
+A found and closed an incompleteness in the prior COC-outage amendment: local D/I gates alone did not spell out recovery of already committed ParticipantIntentRefs. The COC proposal now requires durable owner-local pending gates; one atomic recovery-cutoff batch for outage I/D requests without ordering their local clocks; enumeration of all affected pre-batch intents; I-specific receipt/revocation reconciliation; D complete-lineage barrier registration; owner high-water verification; and no local gate reopening until reconciliation is complete. Missing log prefix/intent/lineage/owner proof remains RESTORE_FENCED/UNKNOWN/IN_DOUBT. COC-13..16 were added as specified/not-run tests.
+
+Current exact A-owned artifacts:
+- CGH-APPLIED-1.1 package: `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`, Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819`.
+- Companion COC architecture: `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`, Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
+
+These supersede package `d4eef4aecf94f922f7933c1e1fec14a69ad17dec` / COC `65878e1e2b569b1dc6d0918f51a313da122236d4`. Six Owner decisions were verified for historical package Blob `9808b31f840606b329f1a794935dfc9c5084d63b` only (C/D/I/H/G accept with exceptions; B approves semantic type bindings). Those decisions do not approve the present recovery-batch amendment. Fresh exact-Blob decisions requested in Issue #3 comment `6920481902`; Storage's refreshed exact-Blob decision requested in Issue #2 comment `6920482983`.
+
+Current gate: latest package CANDIDATE / FRESH OWNER REVIEW REQUIRED / NOT FROZEN; COC proposal not designated/deployed; Storage/operator and Security approvals pending; COC-01..16 and consumer race suites NOT RUN; production causal proof NOT VERIFIED; G8 BLOCKED, G9 NOT RUN, G10 BLOCKED.
