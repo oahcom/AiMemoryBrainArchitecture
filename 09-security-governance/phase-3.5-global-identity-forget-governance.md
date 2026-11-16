@@ -211,3 +211,36 @@ A PASS requires fixture, test version/environment, expected and actual result, r
 ## 8. Non-claims
 
 This addendum is a candidate governance specification. It does not prove implementation, runtime enforcement, D/E/Storage atomicity, F/G/H conformance, recipient compliance, backup expiry, restore safety, physical erasure or production readiness. B retains typed reference authority; C retains Agent telemetry/inference semantics; H retains wire encoding; D/E/F/G retain local execution mechanisms.
+
+
+## 9. C Telemetry Identity and Applied Attestation consumption
+
+I consumes C's Phase 3.5 identity/attestation semantics without redefining them:
+
+- Agent self-reported Agent/instance IDs, Adapter IDs, Runtime IDs, Task IDs, Session IDs, ActorRef, ScopeRef and EnvironmentRef are claims/selectors until resolved against authenticated transport or authoritative registries.
+- Agent Principal and Adapter Principal are distinct identities. A service hosting an Agent does not collapse them; continuity across Adapter replacement requires an explicit I-authorized mapping.
+- Runtime Session is short-lived and bound to a concrete runtime instance and Agent Principal. Reconnect/session renewal does not renew prior permission, delivery or Context.
+- TaskRef is correlation/isolation metadata, not a Principal, Scope or permission. EnvironmentRef must resolve to an exact authoritative environment identity when applicable; C records its typed owner/contract as OPEN unless B/governance explicitly adopts it.
+- Telemetry distinguishes occurred_at, observed_at and Brain-assigned recorded_at; authenticated source identity does not imply truth or verification. Intent/PlanSummary are not outcomes; Tool Call request/return is not proof of external side effect; unknown remains explicit.
+
+### 9.1 Full Applied evidence is not Forget ACK
+
+C Full Applied is an Agent/inference-boundary claim for one exact final immutable request. H transports and binds the evidence; G validates ContextVersion/Delivery; I validates Principal/Issuer/ProducerIdentity, current PermissionEpoch and authorization; D validates the latest applicable ForgetFence; C defines the semantic claim ceiling.
+
+When I relies on a C Full Applied attestation, it must be bound to at least:
+- authenticated Agent Principal/instance and Adapter Principal/instance;
+- Runtime Session and exact InferenceRequest ID;
+- G Context ID/version, Delivery ID and attempt;
+- Managed Region ID/revision/coverage;
+- H CapabilityEpoch;
+- current I PermissionEpoch and authorization decision at submission;
+- D ForgetOperation/Fence reference applicable to the lineage;
+- exact managed-region content digest and digest profile;
+- final immutable request boundary ID, actual runtime/provider handoff evidence and submission time;
+- protected-region integrity evidence, anti-replay nonce/sequence and attestation integrity proof.
+
+This is evidence of boundary inclusion only. It does not prove model attention, comprehension, use, response quality or behavior. A pre-submit hook, intermediate buffer, local counter or transport receipt is not Full Applied.
+
+C Full Applied and H Forget/Clear ACK are different evidence families. Neither substitutes for the other: Applied does not prove suppression/clear/purge/cancel; a clear ACK does not prove a specific ContextVersion was included in a final inference request. A late Applied attestation cannot reactivate a superseded Context or a forgotten target. If any identity, permission, Context, delivery, capability, fence, region or final-submit binding is absent or stale, I records the result as non-Full/Unknown according to the owning evidence contract.
+
+This section consumes C's semantics and does not alter C, G or H schemas or their ownership.
