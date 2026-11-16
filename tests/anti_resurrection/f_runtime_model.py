@@ -91,10 +91,8 @@ class RuntimeModel:
             raise Blocked("I/D authoritative state unavailable")
         if self._blocked(entry):
             return False
-        if entry.fence_generation != self.fence_generation:
-            # A generation mismatch is stale unless a current authoritative lookup
-            # proves the target is unaffected. This model chooses fail-closed.
-            return False
+        # Index candidates are checked against the current target/lineage fence.
+        # A global generation change alone does not suppress unrelated index entries.
         return self._authorized(entry)
 
     def retrieve(self, candidates: Optional[Iterable[RuntimeEntry]] = None,
@@ -116,7 +114,7 @@ class RuntimeModel:
         entry = self.cache.get(key)
         if entry is None:
             return None
-        if not self.validate(entry):
+        if entry.fence_generation != self.fence_generation or not self.validate(entry):
             self.cache.pop(key, None)
             self.stale_evictions += 1
             return None
