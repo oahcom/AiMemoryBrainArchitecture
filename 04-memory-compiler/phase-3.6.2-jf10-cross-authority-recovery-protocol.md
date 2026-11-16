@@ -177,3 +177,167 @@ Until I publishes and accepts the owner-gate participation protocol:
 ## E. Status
 
 This addendum is a DE-S gap report and formal request for I's decision, not an I policy amendment or acceptance. The original candidate remains preserved for traceability. **JF-10 P0 OPEN; I36-SR-02 runtime NOT VERIFIED; no cross-authority atomicity proof; no Phase 3.6 final gate.**
+
+
+# Addendum v2 — Owner-Gate-Participating Durable 2PC Protocol (JF-10)
+
+- Status: **DE-S REVISED ARCHITECTURE PROPOSAL / READY FOR EXACT I OWNER REVIEW; NOT I-ACCEPTED; NOT IMPLEMENTED; NOT TESTED**
+- Supersedes: the split Phase-B/Phase-C interpretation in JF-10 candidate v1. Earlier I receipt binding, immutable operation identity, authoritative lookup, replay/conflict and terminal-outcome requirements remain in force.
+- This is the D/E/Storage owner-side proposal. It does not amend I policy or claim I approval.
+
+## A. Decision
+
+Adopt a **durable two-phase commit (2PC) participant protocol integrated with the I policy-domain sequencer** for protected publication. A standalone I authorization decision followed by an unrelated Storage transaction is rejected. The actual Storage final visibility gate submits the exact owner operation, with a durable prepared Storage participant, into the same I ordering protocol as revocation.
+
+The deployment profile is two-tier:
+
+1. Within one Canonical Memory Authority, D Forget/producer/dependency ledgers and Storage publication/visibility records share one transactional database and one serializable per-authority coordinator.
+2. Across the I policy domain and that owner database, the I sequencer is the durable ordering/2PC coordinator for the protected final owner-gate operation. The Storage database is a recoverable prepared participant. No best-effort coordinator or asynchronous authorization token is permitted.
+
+This is the minimum protocol proposed to satisfy I36-SR-02 while preserving D's independent fence authority and Storage's sole visibility authority. It is a protocol selection, not a concrete vendor/version/deployment approval.
+
+## B. Participants and authority
+
+| Participant | Authority and durable records | Required role |
+|---|---|---|
+| I policy-domain sequencer/coordinator | CommitAuthorizationReceipt, PermissionEpoch, revocation order, durable transaction decision and participant/XID registry | Orders the exact owner final-gate operation against revocation; records COMMIT/ABORT decision; drives participant recovery |
+| Canonical Authority DB (D + Storage) | D ForgetFence, ProducerClass/WorkItem/Dependency ledgers, Storage PublicationIntent, prepared XID, VisibilityPointer, PublicationReceipt, owner outcome, receipt-consumption record and outbox | Validates/locks D and owner predicates; prepares exact visibility transaction; commits/rolls back only from I's durable coordinator decision |
+| E Compiler | WorkItem/Attempt/Lease lifecycle, frozen output manifest, staged bytes, lineage and publication request | Calls final gate; remains non-terminal until authoritative Storage receipt confirms commit |
+| D Forget authority | Canonical ForgetOperation, fence generation, per-authority registration high-water, dependency/barrier proof | Serializes fence installation against prepared publication; never treats I authorization as a fence override |
+| I inventory registry | ProducerDomainInventoryEpoch, InventorySealReceipt and global target catalogue | Supplies closed-world producer/recipient coverage; remains separate from D work high-water |
+
+## C. JF-10 v2 protocol
+
+### C1. Immutable operation identity
+
+Before any I sequencer call, Storage durably assigns one stable PublicationOperationId and canonical RequestDigest. The digest binds the complete immutable operation: exact artifact/version and payload digest; WorkItemId, AttemptId and LeaseEpoch; ProducerClass/ProducerIdentity binding; source and transitive lineage; ScopeRefs; DependencySetDigest; frozen OutputManifestVersion/digest; D ForgetOperationId, applicable fence generation and target digest; current I inventory epoch/seal reference; policy_domain_id, PermissionEpoch, PrincipalRef, ActorRef, action, ResourceRef, purpose, audience, ScopeBindingSet digest, EnvironmentRef, DelegationChainRef; exact owner_boundary; and CommitAuthorizationReceipt/decision binding.
+
+Same ID + same digest is a lookup/replay of the same operation. Same ID + different digest or changed security-bound tuple is a hard conflict. No retry may mint a new ID to escape an unknown outcome.
+
+### C2. Phase 0 — prepare eligibility
+
+E must have a durable D RegistrationReceipt before enqueue, lease, source dereference or execution. E freezes its complete output manifest and lineage. D confirms complete dependency registration. Storage confirms the applicable I InventorySealReceipt is authentic, current and bound to the exact inventory epoch/digest required by I policy. These are preconditions, not publication permission.
+
+Candidate bytes remain in private staging. Object-store listing, path knowledge, signed staging URL, queue state, outbox delivery and E local state cannot make an artifact visible.
+
+### C3. Phase 1 — Storage participant prepare and D fence serialization
+
+The actual Storage final gate opens a serializable transaction in the Canonical Authority DB and prepares the exact visibility transaction. It must:
+
+1. Resolve PublicationOperationId + RequestDigest idempotently.
+2. Lock the per-authority coordinator and all affected target/lineage fence rows, ProducerWork/Attempt/Lease rows, dependency-set and frozen-manifest versions, inventory-seal reference, and expected VisibilityPointer generation.
+3. Verify the latest D fence for every source ancestor and target; verify WorkItem/Attempt/Lease fencing; verify complete immutable dependencies/manifest; verify current I seal reference and all owner-local predicates.
+4. Validate the exact CommitAuthorizationReceipt binding, without interpreting the receipt itself as a sequencer decision.
+5. Persist a durable prepared participant/XID and participant digest. The DB prepared state retains serialization locks across process restart and coordinator unavailability. No VisibilityPointer or PublicationReceipt is exposed; bytes remain private.
+
+D InstallForgetFence, RegisterProducerWork and RegisterDerivedDependency use the same per-authority serialization rows/keys. If a fence/registration/dependency transaction wins first, prepare sees that committed state and either rejects or binds the exact eligible state. If the publication participant prepares first, the conflicting D operation cannot pass the held serialization locks until I resolves commit or abort. Thus D fence and publication have exactly one order; lock timeout or participant uncertainty is UNKNOWN, never permission.
+
+If the selected DB cannot durably retain prepared state and locks across crash/restart, this protocol is not implementable on that DB profile and deployment is blocked; a formally equivalent durable participant protocol is required.
+
+### C4. Phase 2 — I sequencer orders the actual owner final gate
+
+Storage submits the prepared participant token, PublicationOperationId, RequestDigest, exact owner_boundary, receipt and participant identity to the I sequencer's **owner-final-gate operation**. This is not a separate preflight authorization call.
+
+I atomically orders this exact operation against revocation in the policy domain and durably records one coordinator decision:
+
+- COMMIT: the exact owner final-gate operation is ordered before conflicting revocation. The I terminal result is COMMIT_WON and includes sequencer position, receipt/decision binding, immutable digest and durable Storage participant/XID identity.
+- ABORT: revocation is ordered first or the operation is denied. The terminal result is REVOCATION_WON or INDETERMINATE_ABORTED as defined by I. No visibility is permitted.
+- UNKNOWN/IN_DOUBT: no terminal decision is yet recoverably established. Neither participant may infer commit or abort; the artifact remains private and affected ordering remains blocked pending coordinator recovery.
+
+I must not record COMMIT_WON for a free-standing authorization check detached from the prepared owner participant. The coordinator decision and participant identity are durable and recoverable. Revocation cannot pass an unresolved earlier final-gate operation by assuming abort; it must obtain the coordinator's durable decision or remain pending. This is the safety-over-availability rule for an in-doubt transaction.
+
+### C5. Phase 3 — participant completion and visibility
+
+On durable I COMMIT, the Storage participant recovery worker commits the exact prepared DB transaction. In that one local transaction, it atomically writes the VisibilityPointer, immutable PublicationReceipt, owner terminal outcome, idempotent receipt-consumption evidence and same-transaction outbox event. It records the I coordinator decision ID/position, receipt ID, RequestDigest, participant/XID, D fence generation, dependency and manifest digests, inventory epoch/seal, owner commit cursor and visibility generation.
+
+Only after this participant commit is authoritatively read back may Storage return PUBLISHED and E terminalize the work as Published. I COMMIT_WON alone is not publication success.
+
+On durable I ABORT, the participant rolls back; the artifact remains private and the operation becomes non-published only after participant abort is durably confirmed. D locks/reservations are released only after participant resolution. Outbox delivery is at-least-once notification/reconciliation and never the visibility authority.
+
+### C6. D fence interaction
+
+D fence installation and the Storage prepared participant share the same Canonical Authority DB serialization domain and target/lineage locks:
+
+- Fence commit wins before participant prepare: prepare observes the fence and rejects/quarantines the derivative.
+- Participant prepare wins: D fence installation is blocked behind the prepared participant. If I commits, Storage commits visibility first and the subsequent fence captures/suppresses that publication as pre-fence work. If I aborts, Storage rolls back and the fence may then install.
+- Unknown participant/coordinator state: neither visibility nor fence completion is inferred; the operation remains unresolved and the fence cannot claim a closed barrier while a conflicting prepared publication exists.
+
+This is not an I override of D. It is the shared local ordering mechanism that prevents a fence from slipping between the D check and the owner visibility commit.
+
+## D. Durable state machine
+
+| State | Authority | Legal next state | Forbidden shortcut |
+|---|---|---|---|
+| PRIVATE_STAGED | E/Storage | DEPENDENCIES_COMPLETE | Reader visibility or Published |
+| DEPENDENCIES_COMPLETE | D/E | OWNER_PREPARED or REJECTED | Publish without full lineage |
+| OWNER_PREPARED | Storage DB participant | I_ORDER_PENDING | Release locks or expose bytes |
+| I_ORDER_PENDING | I coordinator | I_COMMIT_DECIDED, I_ABORT_DECIDED or IN_DOUBT | Treat timeout as abort/success |
+| I_COMMIT_DECIDED | I coordinator | OWNER_COMMITTED after participant commit | Mint another ID; report Published before DB commit |
+| I_ABORT_DECIDED | I coordinator | OWNER_ABORTED after participant rollback | Publish or retry under changed digest |
+| IN_DOUBT | I + Storage recovery | I_COMMIT_DECIDED or I_ABORT_DECIDED after authoritative recovery | Release locks, advance revocation past unknown order, or expose bytes |
+| OWNER_COMMITTED | Storage | PUBLISHED receipt readback; E may terminalize | Duplicate visibility effect |
+| OWNER_ABORTED | Storage | REJECTED/SUPPRESSED after all outputs resolved | Reopen same intent with changed digest |
+
+COMMIT_WON is the I ordering/commit decision; PUBLISHED is the Storage participant commit plus exact PublicationReceipt readback. These are distinct states. The complete cross-authority operation is successful only when both are evidenced.
+
+## E. Recovery and crash matrix
+
+| Failure point | Required durable state | Recovery |
+|---|---|---|
+| Before owner prepare commit | No prepared participant; no visibility | Retry same ID/digest; no receipt means no admission |
+| After owner prepare, before I order | Prepared XID and locks; private bytes | I coordinator resolves/replays same request; no new ID |
+| I order request/ACK lost | I coordinator lookup by ID+digest and XID | Return exact decision/position or UNKNOWN |
+| I COMMIT durable, Storage participant not committed | Durable coordinator COMMIT + recoverable prepared XID | Forward-commit exact XID; readers stay closed until participant commit |
+| I ABORT durable, participant not rolled back | Durable ABORT + prepared XID | Roll back exact XID; readers stay closed until abort confirmed |
+| Storage participant committed, ACK lost | VisibilityPointer + PublicationReceipt + outcome + outbox committed atomically | Read back same receipt; no second publication |
+| I/Storage restart or replica lag | Coordinator log and participant XID recovered from authoritative durable state | No stale replica decisions; no serving until reconciliation |
+| Backup/restore | Restore manifest plus coordinator/participant decision log and D fence ledger | Quarantine partitions; replay decisions and current fences before serving |
+| Coordinator unavailable / partition | Prepared participant remains in doubt and locked | Fail closed; conflicting revocation/fence cannot pass unknown order; recover coordinator or remain blocked |
+| Duplicate same key | Original digest/decision | Return same result and sequencer position |
+| Changed digest/boundary | Original immutable row | Hard conflict and audit; no overwrite |
+
+No NOT_COMMITTED conclusion is allowed from row absence, timeout, stale replica, missing ACK or process death. A negative result requires an authoritative durable ABORT decision and participant rollback proof.
+
+## F. Storage and deployment decision
+
+- Selected local profile: one transactional DB per Canonical Memory Authority; D and Storage authoritative rows share serializable transactions and a per-authority coordinator.
+- Required records: Durable Work Ledger; ProducerClass registry/version; ProducerRegistrationHighWater; ForgetFence and BarrierSnapshotReceipt; dependency set/manifest; prepared participant/XID; PublicationIntent; VisibilityPointer; PublicationReceipt; owner outcome; idempotency/receipt-consumption ledger; transactional outbox; restore/reconciliation checkpoint.
+- CAS: required inside selected transactions for generation/version/lease checks; not a standalone cross-record atomicity mechanism.
+- Outbox: required in the same Storage commit transaction for downstream notifications; never visibility or completion proof.
+- Object storage: allowed only for private staged immutable bytes; DB VisibilityPointer is sole publication authority.
+- Serialized coordinator: no independent best-effort coordinator service is selected. The I sequencer is the durable coordinator for the I/Storage protected commit protocol; the local DB coordinator serializes D/Storage owner state.
+- 2PC: selected as the cross-authority JF-10 recovery mechanism. If I cannot provide durable coordinator decisions and participant recovery, or the DB cannot retain prepared XIDs/locks, JF-10 remains blocked; no weaker check-then-write substitute is permitted.
+- Concrete engine/version, XA/prepared-transaction support, isolation configuration, replication/quorum, failover and backup/restore topology: NOT SELECTED / NOT VERIFIED. Storage engineering approval and executable evidence are required.
+
+## G. Required I Owner decision (not presumed)
+
+I is requested to review this exact v2 artifact and either accept or amend:
+1. The owner-final-gate operation is the sequenced I operation and carries the prepared Storage participant/XID, immutable PublicationOperationId/RequestDigest and exact owner_boundary.
+2. I's durable coordinator decision is recoverable and controls participant COMMIT/ABORT; revocation cannot pass an in-doubt earlier gate.
+3. I defines coordinator log retention, participant registration, decision lookup, recovery ownership, failover/restore and multi-policy-domain all-or-none behavior.
+4. COMMIT_WON is not reader-visible publication; Storage must commit and return its PublicationReceipt.
+5. I retains sole authority for inventory epoch/seal, PermissionEpoch, authorization policy, exceptions and Global Forget Completion. DE-S does not activate or approve these policies.
+
+Until I accepts the exact revised protocol, JF-10 is **P0 OPEN / I REVIEW REQUIRED** and final protected publication remains fail-closed on unresolved cross-authority state.
+
+## H. Added conformance cases (all NOT RUN)
+
+| ID | Required scenario | Expected invariant |
+|---|---|---|
+| JF10-01 | Storage prepare enters I owner-gate sequencer while revocation races | Exactly one order; no standalone preflight decision |
+| JF10-02 | I COMMIT decision durable, Storage participant crashes before commit | Prepared XID recovered and forward-committed; no visibility before commit |
+| JF10-03 | I ABORT decision durable, Storage participant crashes before rollback | Prepared XID recovered and rolled back; no visibility |
+| JF10-04 | Storage participant commits, response/ACK is lost | Same receipt returned by readback; no duplicate visibility |
+| JF10-05 | Coordinator crashes before/after durable decision | Recover exact decision; unknown remains locked/private |
+| JF10-06 | D fence races prepared participant | Fence-first rejects; participant-first blocks fence until commit/abort; no third order |
+| JF10-07 | Multi-policy-domain operation | All-or-none decision; no partial visibility |
+| JF10-08 | Backup/restore loses local recent snapshot but coordinator decision survives | Quarantine and replay decision/fence before serving |
+| JF10-I-09 | Same ID/digest retry after receipt consumption | Identical outcome/position; no second consumption |
+| JF10-I-10 | Same ID with changed digest or owner_boundary | Hard conflict |
+| JF10-I-11 | I replica lag / unavailable lookup | UNKNOWN; no local ALLOW or NOT_COMMITTED inference |
+| JF10-I-12 | Revocation arrives during unresolved participant prepare | Revocation cannot pass unresolved ordering; recovery resolves commit/abort first |
+| JF10-I-13 | I sequencer failover/restore | Terminal decisions and participant XIDs remain monotonic and recoverable |
+
+## I. Non-claims and status
+
+This is an architecture proposal for exact I Owner review. It is not I approval, governance activation, concrete DB deployment, implementation, test result, production readiness decision, or Global Forget Completion. D36, E36-01..20, C01..C20 and JF10-01..13 remain NOT RUN until executable implementation and fault-injection environment exist.
