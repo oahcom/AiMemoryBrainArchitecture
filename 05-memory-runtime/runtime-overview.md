@@ -88,3 +88,16 @@ D canonical schema/lifecycle; E canonical commit/index publication/watermarks; G
 
 ## 18. Open Questions
 OPEN: D canonical read/lifecycle snapshot consistency; E watermark granularity/replay ordering; I permission epoch/revocation SLA; G candidate/evidence payload; H request envelope. CANDIDATE: modular-monolith task groups. TO_VALIDATE: routing quality, channel budgets, cache benefit and local hardware limits.
+
+
+## Phase 3.5 — Forget and Cursor Integration
+
+The normative F consumer matrix, retrieval-stage suppression matrix, cache/Working Set invalidation contract, index rebuild contract and ten conformance specifications are maintained in [phase-3.5-forget-suppression-and-cursor-consumption.md](phase-3.5-forget-suppression-and-cursor-consumption.md).
+
+Runtime consumes D's per-authority global CanonicalCommitCursor, per-aggregate AggregateRevision, per-Memory LifecycleEventCursor and ForgetFenceGeneration as separate types; F owns per-index/per-partition IndexWatermark; I owns PermissionEpoch; G owns ContextVersion. These values are not interchangeable. IndexWatermark is only contiguous projection freshness evidence and never proves Forget completion.
+
+Retrieval enforces Scope, current permission and latest applicable Forget Fence at candidate generation, index lookup, canonical validation, fusion, freshness, reranking, materialization and final return. Cache hits and Working Set reuse are reauthorized. Fence/revocation advancement cancels affected in-flight work; final disclosure still requires an authoritative recheck.
+
+F's index rebuild/backfill/replay is derivative-capable work: register before admission under D's Producer Registration contract, replay a contiguous canonical commit prefix, exclude fenced lineage, and use the authoritative final publication gate. If the D/E/Storage gate is unavailable or unresolved, keep the staged generation private/quarantined.
+
+ActivationRecommendation is advisory only. G alone decides Context mutations and ContextVersion; H/C own Adapter/final-request evidence. F does not claim Applied, global Forget completion or physical erasure.
