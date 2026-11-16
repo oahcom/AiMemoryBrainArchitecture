@@ -1,0 +1,121 @@
+name: JF-10 PostgreSQL 18.7 Synchronous Standby Unavailable Fail-Closed
+
+on:
+  push:
+    branches:
+      - session-storage-consistency-forget-atomicity-2026-11-16
+    paths:
+      - "reviews/storage-consistency/postgres_probe/**"
+      - ".github/workflows/jf10-postgres-sync-unavailable.yml"
+  pull_request:
+    paths:
+      - "reviews/storage-consistency/postgres_probe/**"
+      - ".github/workflows/jf10-postgres-sync-unavailable.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-sync-unavailable:
+    name: PostgreSQL 18.7 must fail closed when synchronous standby is unavailable
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out Storage branch
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install psycopg
+        run: python -m pip install "psycopg[binary]>=3.2,<4"
+      - name: Start pinned PostgreSQL 18.7 primary
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker network create jf10-ha-net
+          docker volume create jf10-primary-data
+          docker volume create jf10-standby-data
+          docker run -d --name jf10-primary --network jf10-ha-net \
+            -e POSTGRES_PASSWORD=jf10-ha-ci-only \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -p 5432:5432 \
+            -v jf10-primary-data:/var/lib/postgresql \
+            "$PG_IMAGE" \
+            -c max_prepared_transactions=16 \
+            -c wal_level=replica \
+            -c max_wal_senders=10 \
+            -c max_replication_slots=10 \
+            -c synchronous_commit=remote_apply \
+            -c fsync=on \
+            -c full_page_writes=on
+          for i in $(seq 1 90); do
+            if docker exec jf10-primary pg_isready -h 127.0.0.1 -p 5432 -U postgres -d postgres; then
+              break
+            fi
+            sleep 1
+          done
+          docker exec jf10-primary psql -U postgres -d postgres -c "SELECT version();"
+          docker exec jf10-primary bash -lc 'echo "host replication postgres 0.0.0.0/0 trust" >> "$PGDATA/pg_hba.conf"'
+          docker exec jf10-primary psql -U postgres -d postgres -c "SELECT pg_reload_conf()"
+      - name: Seed standby from primary
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker run --rm --user root -v jf10-standby-data:/var/lib/postgresql \
+            --entrypoint bash "$PG_IMAGE" -lc \
+            "chown -R postgres:postgres /var/lib/postgresql"
+          docker run --rm --user postgres --network jf10-ha-net \
+            -v jf10-standby-data:/var/lib/postgresql \
+            --entrypoint bash "$PG_IMAGE" -lc \
+            "mkdir -p /var/lib/postgresql/18/docker && pg_basebackup -d 'host=jf10-primary user=postgres application_name=jf10_standby' -D /var/lib/postgresql/18/docker -Fp -Xs -P -R"
+      - name: Start standby and enable synchronous replication
+        env:
+          PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+        run: |
+          docker run -d --name jf10-standby --network jf10-ha-net \
+            -e POSTGRES_PASSWORD=jf10-ha-ci-only \
+            -e POSTGRES_HOST_AUTH_METHOD=trust \
+            -p 5433:5432 \
+            -v jf10-standby-data:/var/lib/postgresql \
+            "$PG_IMAGE" \
+            -c max_prepared_transactions=16 \
+            -c hot_standby=on \
+            -c fsync=on \
+            -c full_page_writes=on
+          for i in $(seq 1 90); do
+            if docker exec jf10-standby pg_isready -h 127.0.0.1 -p 5432 -U postgres -d postgres; then
+              break
+            fi
+            sleep 1
+          done
+          docker exec jf10-primary psql -U postgres -d postgres \
+            -c "ALTER SYSTEM SET synchronous_standby_names = 'FIRST 1 (jf10_standby)'"
+          docker exec jf10-primary psql -U postgres -d postgres \
+            -c "SELECT pg_reload_conf()"
+          for i in $(seq 1 90); do
+            STATE=$(docker exec jf10-primary psql -U postgres -At -c \
+              "SELECT sync_state FROM pg_stat_replication WHERE application_name='jf10_standby'")
+            if [ "$STATE" = "sync" ]; then
+              echo "SYNCHRONOUS_STANDBY_STATE=sync"
+              exit 0
+            fi
+            sleep 1
+          done
+          docker exec jf10-primary psql -U postgres -c "SELECT * FROM pg_stat_replication"
+          exit 1
+      - name: Run synchronous-standby-unavailable fail-closed probe
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: "5432"
+          PGUSER: postgres
+          PGPASSWORD: jf10-ha-ci-only
+          PGDATABASE: postgres
+        run: python reviews/storage-consistency/postgres_probe/jf10_postgres_sync_unavailable_probe.py
+      - name: Capture primary and standby diagnostics
+        if: always()
+        run: |
+          docker exec jf10-primary psql -U postgres -c "SELECT version(); SELECT * FROM pg_stat_replication;" || true
+          docker exec jf10-standby psql -U postgres -c "SELECT version(); SELECT pg_is_in_recovery();" || true
+          docker logs jf10-primary || true
+          docker logs jf10-standby || true
