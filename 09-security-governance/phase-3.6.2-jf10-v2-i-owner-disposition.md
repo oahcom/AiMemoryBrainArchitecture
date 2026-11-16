@@ -142,3 +142,124 @@ JF-10 therefore remains **P0 OPEN** pending owner acknowledgements, implementati
 - I governance/registry authority: separately resolve ProducerDomainInventoryEpoch/InventorySeal and Global Forget approval dependencies.
 
 Silence, shared Blob identity, or this architecture acceptance must not be interpreted as owner implementation acceptance or governance approval.
+
+
+## 10. I Owner formal decision — JF-10 prepared participant ↔ COC bridge
+
+### 10.1 Exact versions reviewed
+
+I reviewed the following exact artifacts together:
+
+- A Causal Order Coordinator deployment architecture: `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`, Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
+- Common D/E/Storage JF-10 v2 prepared-participant proposal: original common proposal Blob `d544cc38a922b314e6dc45dd4db76aae6b47f5fc`; current D and Storage branch readbacks of the evolved shared recovery contract both Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`.
+- Existing I JF-10 v2 disposition: Blob `b7b0287cde3922434a560fca90051cc5b418d987`.
+- Applicable protocol profile: `CausalOrderProfile/1.0`; H transport target: `bmcp.applied-ack/1.1.0`.
+
+### 10.2 Decision
+
+**I DECISION: ACCEPT WITH BINDING BRIDGE AMENDMENTS — SINGLE I POLICY DOMAIN ONLY.**
+
+I accepts the COC as the cross-owner causal-order log and durable participant-accounting/observation service, subject to the normative bridge below. I does **not** accept COC as a replacement for, replica of, or second writer for the I policy-domain sequencer. I's existing JF-10 decision remains binding: the I policy-domain sequencer is the durable decision coordinator for the prepared Storage participant/XID and the actual owner-final-gate COMMIT/ABORT decision.
+
+This is a deliberate two-authority bridge, not two competing transaction coordinators:
+
+- **COC:** orders cross-owner intents and request cutoffs; records the existence, identity and lifecycle of the JF-10 participant; preserves cross-owner causal references and recovery observations. It never decides the JF-10 XID COMMIT/ABORT.
+- **I policy-domain sequencer:** alone consumes the single-use `CommitAuthorizationReceipt`, orders authorization against I revocation, and durably decides COMMIT/ABORT for the exact prepared participant/XID.
+- **Storage:** alone executes the exact XID forward-commit or rollback and atomically publishes VisibilityPointer + PublicationReceipt + owner outcome + receipt-consumption evidence + outbox in its local transaction.
+- **D:** alone owns ForgetFence, target/lineage registration and barrier/effective-fence semantics. COC positions do not mint D clearance or ForgetFenceGeneration.
+
+The A COC proposal is therefore **not accepted as a complete JF-10 bridge without the amendments in §§10.3–10.8**. The bridge interface is accepted conditionally; deployment and JF-10 closure are not.
+
+### 10.3 Required identity binding and prepare registration
+
+One immutable JF-10 operation tuple MUST bind all of the following without lossy conversion:
+
+- `CausalOrderCoordinatorRef`, `CausalOrderDomainRef`, COC epoch/index/entry digest;
+- `CausalOrderTransactionRef` and `ParticipantIntentRef`;
+- stable `PublicationOperationId`, canonical `RequestDigest`, exact `owner_boundary`;
+- stable Storage participant identity, preallocated XID, participant digest and Canonical Authority DB identity;
+- `PolicyDomainRef`, `PrincipalRef`, `ActorRef`, action, `ResourceRef`, purpose, audience, `ScopeBindingSet` digest, `EnvironmentRef`, delegation-chain digest;
+- single-use `CommitAuthorizationReceiptRef`, `PermissionEpoch` and I sequencer identity/epoch/position;
+- applicable `DForgetFenceRequestRef`, D target/source/ancestor lineage identity and D owner-predicate/clearance evidence;
+- when required by effective I policy, authoritative `ProducerDomainInventoryEpoch` and `InventorySealReceiptRef` identity/digest.
+
+Before Storage executes PREPARE, COC MUST durably append a `JF10_PREPARE_INTENT_REGISTERED` record containing the stable operation identity, preallocated XID, participant digest, owner boundary, policy domain, ParticipantIntentRef and exact COC position. This makes the prospective participant visible to any later D fence cutoff and I revocation cutoff even if Storage crashes during PREPARE.
+
+Storage then durably prepares that exact XID, retains the required private bytes and target/lineage serialization locks, and returns an authenticated `PreparedParticipantReceipt` binding the same XID, participant digest, operation ID/digest, DB identity and prepare state. COC MUST append `JF10_PREPARED_PARTICIPANT_REGISTERED` with that Storage-signed receipt before I may decide the owner-final gate. A lost response is recovered by authoritative lookup of the same preallocated XID; no new XID or operation identity is minted on retry.
+
+If COC becomes unavailable after the prepare-intent or after Storage PREPARE, the participant remains private, durable and locked. No I owner-final-gate decision is admitted until the required COC prefix and prepared-participant evidence can be read linearly. Recovery resumes the same XID.
+
+### 10.4 I owner-final-gate decision and receipt consumption
+
+The I owner-final-gate API MUST consume the exact COC-registered prepared participant. Before deciding, I MUST:
+
+1. authenticate COC identity/profile and obtain a linearizable quorum-confirmed read of the exact COC intent, prepare registration and current relevant I/D cutoff prefix;
+2. verify exact tuple equality across ParticipantIntentRef, PublicationOperationId, RequestDigest, owner_boundary, participant XID/digest, PolicyDomainRef and all security bindings;
+3. validate the current I authorization tuple, PermissionEpoch and single-use CommitAuthorizationReceipt;
+4. validate any policy-required authoritative InventorySealReceipt/ProducerDomainInventoryEpoch in I's own authoritative registry/sequencer path, not from a Storage-local cached copy;
+5. apply I's own policy-domain sequencer order against revocation and durably persist, in one I coordinator transaction, receipt consumption + participant/XID binding + operation identity/digest + owner boundary + COC position/digest + terminal decision identity and I sequencer position.
+
+The I sequencer is the sole source of I terminality. A COC position, COC reservation, H ACK or Storage PREPARE receipt alone is never an authorization decision. Conversely, a detached I preflight receipt consumption followed by a separate participant transaction is forbidden.
+
+### 10.5 Terminal decision and recovery bridge
+
+The only I terminal outcomes are:
+
+- `COMMIT_WON`: I's durable sequencer decision commits the exact prepared XID before the conflicting revocation. Storage MUST forward-commit that same XID. COC later records the signed I terminal proof as an observed owner decision; that observation is not a second commit.
+- `REVOCATION_WON`: I's sequencer orders the conflicting revocation first and durably decides ABORT for that exact XID. Storage MUST roll back the same XID and prove non-publication.
+- `INDETERMINATE_ABORTED`: I durably decides non-success/ABORT because a safe winning order cannot be established. Storage MUST roll back and MUST NOT reinterpret it as COMMIT_WON.
+- `UNKNOWN/IN_DOUBT`: no authoritative terminal decision is recoverably established. This is not terminal. Retain the prepared XID, private bytes and locks; block conflicting revocation progress and relevant D barrier completion; never infer an outcome from timeout, missing COC row, stale replica, process death or lost ACK.
+
+After a durable I decision, the recovery direction is irrevocable: COMMIT means forward-commit the exact XID; ABORT means roll back the exact XID. Heuristic commit/abort, alternate-XID recovery, or reversing an I terminal decision is forbidden.
+
+If I has durably committed COMMIT but COC is unavailable, Storage MUST still perform/recover the exact forward-commit. COC outage cannot reverse or suspend an already durable I decision. Once COC returns, it records the I-signed decision and Storage's exact PublicationReceipt/rollback proof through idempotent reconciliation. If I's decision is durable but Storage cannot recover the participant, remain blocked and escalate; do not rewrite I's decision.
+
+### 10.6 Cross-log ordering and cutoff rules
+
+COC and I sequencer positions are different typed orders and MUST NOT be numerically compared, lexically compared, merged into a synthetic total order, or substituted for one another. The bridge is the signed immutable tuple carrying both positions and digests.
+
+- D fence cutoff before `JF10_PREPARE_INTENT_REGISTERED`: reject the prepare for the affected lineage; no Storage XID may be prepared.
+- Prepare intent before D fence cutoff: D MUST register that prospective/prepared participant in its target/source/ancestor barrier. D cannot make the fence effective or close the barrier until I's exact ABORT/COMMIT and Storage's exact participant resolution are proven and all D lineage obligations are satisfied.
+- I revocation cutoff before prepare intent: no affected prepare or receipt consumption is admitted.
+- Prepare intent before revocation cutoff but no I terminal decision yet: I may order revocation first and return REVOCATION_WON/ABORT; Storage rolls back.
+- I COMMIT_WON before a later revocation: revocation is pending behind that exact participant until Storage resolution and required D barrier accounting are durable. It cannot rewrite the decision.
+- If I receives a revocation while COC is unavailable, I's owner-local pending gate remains durable and closed. It does not consume a new receipt or claim a cutoff order until COC records the request and recovery reconciles all earlier participants.
+- If D receives a fence while COC is unavailable, D's owner-local pending gate remains durable and closed. It does not admit a later affected prepare or claim effective fence completion until COC records the cutoff and D reconciles all earlier participants.
+
+### 10.7 Required COC bridge records and readback
+
+The COC schema/API MUST add or normatively map these records (names may be aliased only through an explicit versioned mapping):
+
+1. `JF10_PREPARE_INTENT_REGISTERED` — stable operation/XID identity, ParticipantIntentRef, digest, boundary, policy domain and pre-prepare COC position.
+2. `JF10_PREPARED_PARTICIPANT_REGISTERED` — Storage-signed PreparedParticipantReceipt and exact XID/digest/DB identity.
+3. `I_JF10_TERMINAL_DECISION_OBSERVED` — I-signed CommitAuthorizationReceipt consumption proof, IAuthorizationTerminalRef, decision ID, I sequencer position and same COC/XID/operation tuple.
+4. `STORAGE_JF10_PARTICIPANT_RESOLVED` — same-XID commit or rollback proof; on commit, exact PublicationReceipt and visibility transaction identity; on abort, authoritative non-publication proof.
+5. `JF10_BRIDGE_RECONCILIATION_RECORDED` — idempotent recovery observations linking COC prefix, I authoritative decision lookup, Storage XID state and D barrier state without synthesizing owner decisions.
+
+COC read APIs MUST return the quorum-confirmed log prefix and all unresolved JF-10 participant registrations for the domain. I read APIs MUST return authoritative linearizable sequencer decision/receipt-consumption state. Storage read APIs MUST return authoritative same-XID prepared/committed/rolled-back state and PublicationReceipt. Stale replicas and caches are never decision sources.
+
+### 10.8 Scope, rejection conditions and required proof
+
+This decision covers only a single I PolicyDomainRef. Multi-policy-domain atomicity remains **BLOCKED / NOT ACCEPTED**; reject or pause such operations as BLOCKED/UNKNOWN. Independent per-domain COMMIT_WON results, partial commit and best-effort aggregation are forbidden.
+
+The bridge MUST fail closed on: missing/unverifiable COC prefix; unregistered or mismatched XID; changed operation digest/boundary/security tuple; duplicate receipt consumption; stale PermissionEpoch or inventory seal; D fence cutoff that wins; unknown lineage; invalid owner signature; coordinator rollback/term reuse; ambiguous participant state; or inability to prove same-XID recovery.
+
+Required new conformance cases (all SPECIFIED / NOT RUN):
+- JF10-COC-01: crash after COC prepare-intent registration but before Storage PREPARE; retry uses same operation/XID identity.
+- JF10-COC-02: crash after Storage PREPARE but before COC prepared-receipt append; authoritative same-XID lookup repairs the COC record; no second XID.
+- JF10-COC-03: D cutoff races prepare-intent registration; exactly one COC order and correct D barrier membership.
+- JF10-COC-04: I revocation cutoff races prepare-intent and I owner-final-gate; exactly one I terminal decision, no detached preflight.
+- JF10-COC-05: I COMMIT durable, COC unavailable; Storage forward-commits same XID and later COC observation is idempotent.
+- JF10-COC-06: I ABORT durable, COC unavailable; Storage rolls back same XID and later observation cannot change decision.
+- JF10-COC-07: COC/I log positions differ, leader terms change and ACKs are lost; bridge preserves both typed positions and exact digests without synthetic comparison.
+- JF10-COC-08: participant remains IN_DOUBT through I/COC/Storage restart, replica lag and restore; no TTL, heuristic resolution or barrier release.
+- JF10-COC-09: Storage PublicationReceipt is durable but COC ACK is lost; authoritative readback records the same receipt, no duplicate visibility.
+- JF10-COC-10: required InventorySeal invalidates before/after I owner-final-gate; I validates authoritative currentness and binds exact seal snapshot.
+
+Evidence MUST include COC quorum log positions/digests, I sequencer terminal log/receipt-consumption proof, Storage database/XID transaction traces, D fence/barrier traces, exact build/schema/DB/runtime identities, deterministic fault-injection results and independent review. All cases remain NOT RUN; no runtime pass is claimed.
+
+### 10.9 Formal status
+
+I's formal decision is **ACCEPT WITH BINDING BRIDGE AMENDMENTS for the single-policy-domain JF-10 ↔ COC interface**. The A COC architecture requires the additions in §§10.3–10.7 before it can be considered fully reconciled with I's JF-10 protocol. This does not approve COC deployment, name a Storage operator, approve a concrete database engine, activate external governance, close InventorySeal/Global Forget, or establish implementation/conformance.
+
+JF-10 remains **P0 OPEN**; I/COC/Storage/D conformance remains **SPECIFIED / NOT RUN**; multi-policy-domain atomicity remains **BLOCKED**; production implementation remains **NOT VERIFIED**.
