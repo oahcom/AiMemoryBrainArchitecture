@@ -233,3 +233,47 @@ Storage has published Phase 3.6.3 COC protocol Blob `4ac63ac79491e79ec0c9114ef73
 
 It is a dependency for F/G's cross-authority Recall and Forget lifecycle, not an implementation. Residual exact-review items include the committed recovery-epoch completion event, H record/schema mapping, repeated cutoff batches, I-owned domain registry authority, external anti-rollback anchor custody and the A Applied package companion pin drift. Gate B spec is published; acceptance remains open; Gate C implementation tests are deferred to engineering. Do not treat the presence of this spec as F/G interface acceptance or conformance evidence.
 
+
+
+## 14. Current A final decision and evidence refresh — supersedes §§1/10/11 status
+
+A has now published a final context-optimization integration package:
+- System contract: Blob `7394621b115f1bff3279c7e1ae5e01be03487df2`.
+- Owner acceptance matrix: Blob `3dcb736424e08f29925ec0c8bbc7b58f9e7eef13`.
+- Governance gates: Blob `1cf355117d49bd4b8e3e0136b67683b1aaef1ee3`.
+- Final integration decision: Blob `6380374b64d0c041fff2a5c2a592a88787f69944`.
+
+The matrix records all eight non-A Owner perspectives as **ACCEPT WITH CONDITIONS** for the exact A integration package. This upgrades the earlier “cross-owner acceptances pending” statement in §§1/11: the design direction now has conditional role-based acceptance evidence. It does not create unconditional acceptance, a frozen F/G Recall schema, module baseline adoption, implementation, conformance or production approval. The matrix and acceptance records are branch artifacts produced under delegated role sessions; they are not independent human signatures.
+
+### 14.1 Current F/G contract disposition
+
+- F owns the Runtime Observation Archive and exact selective Recall.
+- G owns Context selection, TSS, compaction, fidelity and ContextVersion.
+- The read-only, revision-pinned Recall boundary is directionally accepted with conditions.
+- F/G exact same-version Recall contract remains CONDITIONAL / NOT FROZEN; A-CO-003 and the old decision register remain unresolved.
+- F and G module baseline proposals remain PROPOSED and still omit their respective new contracts. The new acceptance/evidence artifacts do not modify those baseline proposals.
+- A's older `context-optimization-owner-decision-register.md` does not yet reflect the newer D/F/G acceptance artifacts; A must reconcile it with the final matrix and preserve unresolved A-CO-003/A-CO-004/A-CO-005 conditions.
+
+### 14.2 New executable evidence
+
+- F anti-resurrection reference model: 19/19 PASS (run `43961714501`). Logical model only; production index/cache/Working Set runtime and fault tests remain open.
+- H JF-10 schema + strict parser reference tests: 23/23 PASS (run `43963251050`). Candidate schema/parser only; no signature, canonicalization, generated SDK or live transport proof.
+- I Global Forget inventory/completion reference model: 30/30 PASS (run `43963450717`). Logical model only; no production target inventory seal, recipient/backup proof, physical erasure or governance approval.
+- Storage PostgreSQL 18.7 capability suite: 7/7 PASS. Isolated capability profile only; not a production DB selection or deployed COC/adapter.
+- COC in-memory outage model and JF-10 semantic validator remain separate 11-test and 18-test reference suites, not a production distributed service.
+
+### 14.3 Current COC dependency boundary
+
+The exact prior COC protocol Blob `4ac63...` has role-based design acceptance with exceptions. The amended COC protocol Blob `86ff3...` and Storage Design v2 Blob `4ed423...` are new exact review targets:
+- Storage accepts `86ff3...` with conditions; A/H/I role-simulated reviews exist, with A conditional amendments and H/I no approval.
+- Storage Design v2 `4ed423...` contains a proposal disposition for A R1–R6, recovery epoch completion, repeated batches, owner-local gate release and PreparedTransactionGID/native-XID distinction. It still requires fresh exact Owner review.
+- A's Prepared GID review adds DatabaseIncarnationRef, immutable PrepareAttempt, authoritative PREPARED readback, original-vs-recovery coordinates and atomic I terminal receipt consumption.
+- H strict wire review and I signature/trust review are CANDIDATE / NO APPROVAL. These are coordinator-role simulations, not independent signatures.
+- Issue #14, #15, #16 and #17 remain open. Gate B implementation is NOT RUN; Gate C remains DEFERRED_TO_ENGINEERING_PHASE.
+
+### 14.4 Current source freshness and governance
+
+Current observed Owner branch heads are tracked in the P Module Baseline Rollout Tracking file. TAB-001 now has 8/8 B/C/D/E/F/G/H/I reports present. A's final system technology report has a §19.4 CONDITIONAL PASS reassessment, but its front matter still says NOT REVIEWABLE, earlier §2.2 still lists B/D/E/I as missing, and §19.2 has stale H/I source heads. A must consolidate it.
+
+Global Forget remains GOVERNANCE-BLOCKED / NOT COMPLETED despite the 30/30 model result. B ADR-001 remains ADR-BLOCKED. Project G0/PGA and architecture freeze remain unauthorized. No implementation, production activation or merge is inferred.
+
