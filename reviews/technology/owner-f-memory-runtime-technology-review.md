@@ -175,3 +175,29 @@ F added an in-memory deterministic reference model and CI suite. Evidence: `05-m
 **Result: 19/19 logical reference-model tests PASS.** Covered targeted Forget suppression, unrelated candidate retention, stale cache eviction after missed invalidation, in-flight fill race, pre-Forget rebuild, watermark gaps, authority unavailability, Scope/Environment pre-filter, PermissionEpoch change, reconnect ordering, idempotency/conflict, cache key dimensions and F-local target evidence.
 
 Limit: these are in-memory logical tests only. F-RT-01..13 actual runtime/concurrency/rebuild/reconnect/ANN/security suites remain SPECIFIED / NOT RUN. No Anti-Resurrection or Global Forget completion is certified.
+
+## 14. Refresh Addendum — TAR-AI-001 branch revalidation (2026-11-17)
+
+This addendum refreshes the source snapshot and corrects the upstream-report inventory. It supplements, and does not silently rewrite, the original review findings or verdict. The source branch HEAD below is the exact commit resolved from the owner branch during this refresh; the listed design Blob is the exact file re-read at that ref.
+
+| Item | Exact branch / commit or Blob |
+|---|---|
+| TAB-001 v0.1 | main blob `7b6f2d139217dbe13ab3a3af31bfbff525f20e71` |
+| TAR-AI-001 v1.0 | main blob `5a813edeccf7190d66dfd71a96ca581c48f8a4cb` |
+| Phase 3 D/E/H/I contract review | main blob `edaccb802e0425f2d47bd4b613fab4dfde107144` |
+| B current branch / technology report | `session-b-domain-model-phase3` @ `310f305575d6f406e80d5d6ebf951bcd9e79e35f`; report blob `fd3e5723b81de10bed806896e4be71ceb7a1669b` |
+| I current branch / technology report | `session-i-security-governance-2026-11-16` @ `b4bffb45ba6a64770274a5888b00918fe68ed00f`; report blob `592baa4653e91287678a1e0926119ca94780bc08` |
+| D current branch / technology report | `session-d-memory-brain-2026-11-16` @ `ce20502aabb58bc524c23af1350e1638f47caa49`; report blob `0f43c8d633f0027a064ca920af0176ada8035287` |
+| E current branch / technology report | `session-e-memory-compiler-2026-11-16` @ `0d77d0ad6e564873127c53d7dd02edca09e822e1`; report blob `6a83d67ccabdded20d4d4ebf28b9fbfa7d8f8cc3` |
+
+**Upstream report status correction:** B, I, D and E TAR-AI-001 technology reports are present at the paths/Blob SHAs above. Their earlier absence in the original report's branch audit is superseded by this refreshed inventory. Presence does not imply acceptance of their recommendations or closure of their blocking findings. In particular, B Fact/Claim remains ADR-BLOCKED; D/E/Storage publication linearization remains implementation-blocking; I's global Forget and JF-10 deployment/security evidence remain unverified.
+
+**Evidence classification:** this is a branch-aware static document review. No new production runtime, transport, SDK, cryptographic, security, performance, tokenizer, crash-recovery, or cross-owner integration test was executed by this refresh. Any model/reference tests already present in owner branches are not represented as executed here unless accompanied by an actual run result and exact run artifact.
+
+### F-specific refreshed findings
+
+- Refreshed F source: `session-f-memory-runtime` @ `f1ba5c478e395da6b126423e32e20d0990e61920`; Forget suppression/invalidation contract blob `ce59252dbbdc5d10d016704797e9ba12d5a941bd`.
+- F remains a consumer of D's one globally ordered CanonicalCommitCursor per Canonical Memory Authority. F owns only its per-index/channel/partition IndexWatermark vector and must expose contiguous coverage, gaps and generation; neither value may be substituted for ForgetFenceGeneration or PermissionEpoch.
+- RetrievalResult and ActivationRecommendation are evidence-bearing proposals only. G alone owns ContextVersion, ChangeSet and Context membership. F cannot mutate Canonical Memory or certify Context sufficiency/Applied.
+- The F runtime suppression contract itself marks cross-owner interfaces OPEN and implementation/execution NOT VERIFIED. Scope/Permission filtering must occur before candidate emission (including ANN, graph, evidence, counts and reranking), then canonical/fence/permission revalidation must occur before disclosure.
+- P1 remains: D/E/Storage producer-admission + fence-installation + dependency-registration + final-publication linearization is not proven; F's cache/index suppression cannot close that upstream race. FTS5/Tantivy/ANN choice and resource limits remain benchmark-dependent.
