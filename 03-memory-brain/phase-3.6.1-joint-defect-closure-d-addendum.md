@@ -98,3 +98,14 @@ An authoritative outcome lookup may return NOT_COMMITTED only after the coordina
 ### JF-09 — Publication must bind the current inventory seal and manifest version
 
 The final publication predicate is extended: the gate must bind the current valid InventorySealReceipt / ProducerDomainInventoryEpoch (where the D closed-world contract requires it) and the exact current frozen OutputManifestVersion/digest. A stale seal, inventory epoch advance, manifest reopen, superseded freeze or mismatched digest denies publication. The coordinator checks these values at the visibility linearization point, not only when the producer entered PublishGatePending. If the inventory epoch advances or the manifest reopens before visibility commit, the producer must reconcile and obtain fresh receipts; an earlier dependency-complete receipt is not a permit.
+
+
+## 9. Phase 3.6 deployment-profile consumption decision
+
+D preserves all previously decided operation and linearization semantics. For the physical realization, D accepts the Storage-selected **single transactional database per Canonical Memory Authority with per-authority coordinator/serializable transaction** as the preferred logical deployment profile. D requires ProducerWork registration, Fence installation/high-water capture, dependency completeness, final visibility commit and terminal disposition to participate in the same authoritative serialization domain exactly as already specified.
+
+CAS/conditional updates are acceptable as transaction-internal guards, not as a substitute for atomic dependent writes. A durable Work Ledger is required; a transactional outbox is a same-transaction delivery supplement, never visibility authority. Object/blob bytes remain private until the authoritative visibility pointer and PublicationReceipt commit.
+
+This is not a concrete database selection or deployment approval. No engine/version/configuration, schema, HA/replication, failover or restore implementation is present in the repository. D does not certify implementation or tests.
+
+**I external dependency remains BLOCKED:** I's current ProducerDomainInventoryEpoch/InventorySeal and PermissionEpoch/revocation commit contract are not governance-approved. Until I supplies current, commit-usable authorization evidence and inventory seal, D/E/Storage fail closed; D does not mint or approve I evidence. The I Owner request is tracked in repository issue #4.
