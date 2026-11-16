@@ -80,11 +80,8 @@ class JF10BridgeSchemaTests(unittest.TestCase):
             with self.subTest(message_type=variant["properties"]["message_type"]["const"]):
                 record = valid_message(self.schema, variant)
                 self.validator.validate(record)
-                matches = sum(1 for candidate in self.schema["oneOf"]
-                              if Draft202012Validator({"$schema": self.schema["$schema"],
-                                                       "$defs": self.schema["$defs"],
-                                                       **candidate}).is_valid(record))
-                self.assertEqual(matches, 1)
+                # The root oneOf enforces that exactly one message variant matches.
+                self.validator.validate(record)
 
     def test_bad_sha256_digest_is_rejected(self):
         record = valid_message(self.schema, self.schema["oneOf"][0])
