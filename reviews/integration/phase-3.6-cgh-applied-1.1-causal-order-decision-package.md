@@ -187,7 +187,7 @@ The current G Applied contract and B typed-reference confirmation were also re-r
 
 The companion deployment architecture is:
 - `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`
-- Blob `65878e1e2b569b1dc6d0918f51a313da122236d4`
+- Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`
 - Commit `a3e17f4f77d980bafab4268f8825a1cd61371d6e`
 
 The proposed initial realization is one logical Causal Order Coordinator backed by one strongly consistent append-only consensus log, with a target three-voter/two-quorum deployment across independent failure domains. The log's committed position is returned only after durable quorum commit. Minority partitions fail closed. Initial v1 deliberately avoids sharding and cross-log transactions.
@@ -205,4 +205,17 @@ This deployment profile is **PROPOSED / NOT DESIGNATED / NOT DEPLOYED**. Storage
 
 The companion coordinator proposal now requires owner-local fail-closed behavior for a request received while COC is unavailable: D locally closes affected lineage admission after receiving a fence request; I locally suspends affected receipt issuance/consumption after receiving a revocation request. Neither owner may reopen admission until its request cutoff is durably recorded in COC. This prevents a request known to an authority from remaining invisible to the common order during coordinator outage.
 
-Updated companion artifact Blob: `65878e1e2b569b1dc6d0918f51a313da122236d4`. This amendment is included in the current candidate package and requires fresh exact-Blob owner review.
+Updated companion artifact Blob: `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`. This amendment is included in the current candidate package and requires fresh exact-Blob owner review.
+
+
+## 9.2 COC-outage recovery batch and pre-existing participant reconciliation
+
+The companion COC deployment architecture now normatively specifies durable owner-local pending gates and a recovery batch for I/D requests received during COC outage. The exact companion artifact is `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`, Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
+
+For a D fence request received while COC is unavailable, D durably closes affected lineage admission and keeps it closed through restart. For an I revocation request received while COC is unavailable, I durably suspends affected receipt issuance/consumption and keeps it suspended through restart. Neither local state is represented as an effective fence or PermissionEpoch advance.
+
+On recovery, COC verifies the committed prefix and atomically records all outage I/D requests in one recovery-cutoff batch, without inventing a cross-owner order from local clocks. Every affected ParticipantIntentRef committed before the batch must be enumerated and reconciled: I resolves unconsumed receipts/revocation and preserves earlier COMMIT_WON participants until terminal C outcome; D includes all pre-batch affected intents in its complete-lineage barrier and cannot make the fence effective until they safely abort or reach terminal submit outcome. Owner-local gates reopen only after batch durability, participant reconciliation and owner high-water verification. Any missing prefix, intent, lineage or owner proof keeps the system RESTORE_FENCED/UNKNOWN/IN_DOUBT.
+
+New executable proof obligations COC-13..16 cover D/I outage requests, simultaneous I+D requests without invented local-time order, and restore/high-water mismatch. They are SPECIFIED / NOT RUN.
+
+This is an A candidate amendment. C/D/I/H/G/B and Storage/Security must make fresh exact-Blob decisions against this package and the companion COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`. Prior decisions against `9808b31f840606b329f1a794935dfc9c5084d63b` do not cover this amendment. The previous companion pin `65878e1e2b569b1dc6d0918f51a313da122236d4` is superseded.
