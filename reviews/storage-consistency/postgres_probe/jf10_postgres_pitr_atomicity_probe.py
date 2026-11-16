@@ -310,7 +310,7 @@ def main() -> None:
                     "recovery ended before configured recovery target" in lowered), logs[-5000:]
         elif mode == "corrupt":
             assert ("wrong size" in lowered or "invalid record" in lowered or
-                    "incorrect checksum" in lowered), logs[-5000:]
+                    "invalid magic number" in lowered or "incorrect checksum" in lowered), logs[-5000:]
         else:
             assert ("wrong size" in lowered or "invalid record" in lowered or
                     "recovery ended before configured recovery target" in lowered), logs[-5000:]
