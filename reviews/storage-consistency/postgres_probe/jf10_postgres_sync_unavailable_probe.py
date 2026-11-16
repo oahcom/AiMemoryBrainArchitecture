@@ -25,6 +25,7 @@ def conn():
         password="jf10-ha-ci-only",
         autocommit=True,
         connect_timeout=3,
+        options="-c statement_timeout=5000",
     )
 
 
@@ -68,12 +69,12 @@ def main():
 
     timed_out = False
     with conn() as c:
+        c.execute("SET statement_timeout = '5000ms'")
         c.execute("BEGIN ISOLATION LEVEL SERIALIZABLE")
         c.execute(
             "INSERT INTO jf10_sync_unavailable_visibility VALUES (%s, %s)",
             (OPERATION_ID, "must-remain-private"),
         )
-        c.execute("SET LOCAL statement_timeout = '3000ms'")
         try:
             c.execute(f"PREPARE TRANSACTION '{XID}'")
         except errors.QueryCanceled:
