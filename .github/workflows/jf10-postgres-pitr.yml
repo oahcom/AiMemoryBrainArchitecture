@@ -100,7 +100,7 @@ jobs:
         run: |
           docker stop jf10-pitr-primary
           docker run --rm --user postgres -v jf10-pitr-backup:/var/lib/postgresql \
-            --entrypoint bash "$PG_IMAGE" -lc "touch /var/lib/postgresql/18/docker/recovery.signal"
+            --entrypoint bash "$PG_IMAGE" -lc "rm -f /var/lib/postgresql/18/docker/standby.signal && touch /var/lib/postgresql/18/docker/recovery.signal"
       - name: Start PITR restore at the exact target LSN
         env:
           PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
