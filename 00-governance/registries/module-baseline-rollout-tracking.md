@@ -22,7 +22,7 @@ The following are live branch-tip SHAs fetched from GitHub branch metadata on 20
 | G | `session-g-memory-context` | `72a8066b4401f9586fe10775d545384b82736f07` | No | PROPOSED — Owner adoption open |
 | H | `session-h-bmcp-protocol` | `242d8ab5da890181e762561bb3d3a662287fb63c` | No | PROPOSED — Owner adoption open |
 | I | `session-i-security-governance-2026-11-16` | `1fc3b3293ebf2077edfd6ad253647d382173d9fa` | No | PROPOSED — Owner adoption open |
-| P | `session-p-project-governance-baseline` | `d9685601095841b3f5ec7b91ad12aa5028221395` | No | Coordination branch |
+| P | `session-p-project-governance-baseline` | Coordination branch — see latest P commit | No | Coordination branch |
 
 ## Owner deliverable status
 
@@ -101,3 +101,31 @@ Current consolidated findings:
 - No module baseline is marked APPROVED. No project G0 ratification, PGA appointment, Applied freeze, JF-10 P0 closure, Global Forget completion or architecture freeze is inferred.
 
 The unified review is a coordination/audit record only. It does not substitute for Owner decisions, consumer acceptance, external governance approval, implementation evidence or tests. No A–I branch or main was modified by Session P in this reconciliation.
+
+
+## TAB-001 mainline refresh and integration drift — 2026-11-17
+
+A new mainline technology architecture workstream was discovered and reviewed:
+- Main HEAD: `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f`.
+- TAB-001 candidate blueprint: `13-engineering-decisions/technology-architecture-blueprint.md`, blob `7b6f2d139217dbe13ab3a3af31bfbff525f20e71`.
+- TAB-001 Owner review task pack: `reviews/integration/tab-001-a-i-technology-architecture-review-task-pack.md`, blob `cf903cd5812cfed3a64a52b169a3bd84209ba3f5`.
+- Phase 1 review tasks: `reviews/technology/phase-1-a-i-technology-architecture-review-tasks.md`, blob `5a813edeccf7190d66dfd71a96ca581c48f8a4cb`.
+- Roadmap: `ARCHITECTURE_ROADMAP.md`, blob `29289361973ec4369f067706132190793cd57a6b`.
+
+TAB-001 remains CANDIDATE / NOT A TECHNOLOGY FREEZE. It recommends a local-first Rust modular monolith, SQLite + WAL as a first single-node prototype candidate, content-addressed blob storage, rebuildable lexical/vector indexes, bounded in-process cache and optional isolated inference worker. PostgreSQL is a comparison/evolution candidate; Storage's PostgreSQL 18.7 prepared-XID probe is not a final database selection or production-readiness proof. TEC-003/004 remain OPEN/TO_VALIDATE until D/E/Storage prove exact transaction, locking, recovery and workload requirements.
+
+TAB-001 Owner review coverage at the task-pack paths:
+- Present: C, F, G, H (static/conditional reviews).
+- Missing: A, B, D, E, I.
+- C/F/G/H reports cite pre-publication source snapshots. Their source-to-current comparisons show report updates; G additionally added two context-optimization research artifacts. Each must add a current-source impact note.
+
+G's current branch also contains:
+- `reviews/06-memory-context/nvidia-context-optimization-impact-assessment.md`, blob `3fb9f011e24c93a748442018d48c5954584e4f43`, RESEARCH ASSESSMENT / PROPOSED ONLY.
+- `reviews/06-memory-context/context-optimization-implementation-candidates.md`, blob `eadefd4e0fe541ef8479a030a2a99a0d57dbcf8b`, candidate register only.
+These are valuable design inputs but not a G baseline change or implementation result. Cross-owner dependencies are recorded in the unified review and UMR-014.
+
+## Main/P branch divergence
+
+At the review point, P compared with main is ahead 30 / behind 4. Main's four additional files/changes are the TAB-001 blueprint, its integration review task pack, the Phase 1 Owner review task document and the roadmap update. The branches are diverged; no merge or force update is authorized. UMR-015 tracks a reviewed, non-destructive reconciliation before any future integration.
+
+The unified report and remediation register have been updated to include this mainline workstream. No A–I Owner branch or main was modified by Session P.
