@@ -220,3 +220,28 @@ Type invariants:
 6. H 1.1.1 fields are wire encodings of these B semantic types, not new authority. Legacy 1.1.0 aliases are deprecated and do not change the type system.
 
 Disposition: **CANDIDATE / B TYPE SEMANTICS ACCEPTED FOR THIS EXACT MAPPING**. This does not close ADR-001, approve I identity governance, freeze a canonical schema, select a production database or certify runtime conformance.
+## 12. Phase 3.6.5 — Restore control-high-water proof types
+
+Exact Storage restore contract Blob: `4f656163aeba532a441eaed1d293a48e2363cb4a`; I proof acceptance Blob: `85d62b8858fc86addacd3b83f49476e42f49b785`; D proof acceptance Blob: `211e54acfb4573b1c51d96f07af297671dfc4c4b`; A integration acceptance Blob: `a80d90810425e94d752daa48c1b25dd78357e5aa`.
+
+Add these candidate proof/reference types:
+
+| Type | Authority | Meaning |
+|---|---|---|
+| `COCCommittedPrefixProofRef` | COC | Authenticated cluster/config/checkpoint/contiguous committed-prefix proof. |
+| `IControlHighWaterProofRef` | I | One PolicyDomainRef's current PermissionEpoch/sequencer/revocation state plus global ProducerDomainInventoryEpoch/registry digest and relevant target seals. |
+| `DForgetControlHighWaterProofRef` | D | Relevant ForgetOperation set, fence generation/request cutoff, producer registration high-water, lineage inventory and barrier terminal state. |
+| `StorageParticipantLedgerProofRef` | Storage | Restored DB's complete prepared participant/GID/native-XID and terminal outcome ledger proof. |
+| `RestoreReconciliationReceiptRef` | Storage | Storage's evidence that its restored snapshot reconciled against the exact owner proofs; state may be RECONCILED_BUT_FENCED. |
+| `RestoreOperationRef` | Storage | One immutable restore attempt, backup, target timeline/LSN and reconciliation run. |
+
+Non-substitution invariants:
+
+1. `CoordinatorIndex`, I sequencer epoch/position, PermissionEpoch, ProducerDomainInventoryEpoch, D ForgetFenceGeneration, ProducerRegistrationHighWater, Storage GID/native XID/LSN and F IndexWatermark remain distinct namespaces.
+2. IControlHighWaterProof is per PolicyDomainRef. Multiple proofs form a set; no cross-domain numeric max or comparison.
+3. DForgetControlHighWaterProof is per relevant ForgetOperation/lineage. One operation's barrier cannot cover another operation.
+4. Storage's RestoreReconciliationReceipt is not I authorization, D clearance, COC commit proof, Global Forget completion, physical-erasure evidence or permission to serve.
+5. A proof reference is opaque; its content and signature are verified by the owning authority. A caller cannot mint or upgrade another owner's proof.
+6. Missing, stale, gapped, audience-mismatched or unverifiable proof remains UNKNOWN and keeps restore fenced.
+
+Disposition: **B ACCEPTS THE TYPE/REFERENCE SEPARATION AS CANDIDATE SEMANTICS ONLY.** This does not approve I governance, create a real inventory seal, close Global Forget, or authorize production restore.
