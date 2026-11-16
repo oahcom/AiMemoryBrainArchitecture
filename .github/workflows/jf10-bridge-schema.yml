@@ -12,6 +12,7 @@ on:
   pull_request:
     paths:
       - "08-bmcp-protocol/schemas/**"
+      - "08-bmcp-protocol/runtime_reference/**"
       - "tests/schema/**"
       - ".github/workflows/jf10-bridge-schema.yml"
 
