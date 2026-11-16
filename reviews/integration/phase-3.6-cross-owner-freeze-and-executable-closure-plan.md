@@ -973,3 +973,17 @@ C's Owner artifact has been read back from its branch:
 **Architecture/interface gate is CLOSED WITH ENUMERATED EXCEPTIONS:** C ACCEPT; D ACCEPT; Storage ACCEPT; I ACCEPT (single I PolicyDomain); H ACCEPT (1.1.0 schema candidate only).
 
 This does not close JF-10 P0 or any production gate. Durable prepared-XID/lock behavior, same-XID recovery on selected DB, COC operator/quorum/deployment, provider idempotency/fault recovery, generated H schema and SDK interoperability, crypto governance and crash/recovery conformance remain OPEN / NOT VERIFIED / NOT RUN. Multi-PolicyDomain atomicity remains BLOCKED. No production activation or merge is implied.
+
+
+## 13.17 H machine-readable JF-10 bridge schema candidate
+
+Following H's exact wire-mapping decision (§13.15), H has published a machine-readable JSON Schema Draft 2020-12 candidate for the five JF-10 bridge message families:
+- Schema path: `08-bmcp-protocol/schemas/bmcp.applied-ack-1.1.0-jf10-bridge.schema.json`
+- Schema Blob: `a8a945cc3623c2907003b93625e3c79742150944`
+- Schema commit: `d1880f9de26e6ec29753ca847989926d8ea5d70e`
+- H source/disposition document Blob after recording the schema: `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248`
+- H source document commit: `08cca6341c3c44ad8502c215eba2b1941a8febb7`.
+
+The JSON file was fetched back from H Owner branch and parsed as JSON; it contains exactly five message variants. It expresses common required envelope fields, per-message required fields, state/outcome enums, opaque reference length and SHA-256 syntax, and conditional revocation/Storage outcome requirements.
+
+This is a schema candidate, not production-frozen or generated from an executable IDL pipeline. JSON Schema cannot prove signatures, quorum commit, exact tuple equality across messages, same-XID identity, causal ordering, owner authority or terminal reconciliation. Parser enforcement for duplicate keys/canonical bytes and semantic cross-message validators remain required. SDK generation, cross-implementation interoperability and H-JF10 conformance remain NOT RUN. The architecture/interface Owner-decision gate remains closed; implementation, runtime, DB/provider capability, conformance and production gates remain open. JF-10 P0 remains OPEN.
