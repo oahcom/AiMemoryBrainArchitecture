@@ -1450,7 +1450,7 @@ The record explicitly excludes Hermes and unrelated runtime repositories from th
 Disposition unchanged: Gate 0 CLOSED; Gate A CI capability subtests PASS but production deployment binding OPEN / NOT DESIGNATED; Gate B BLOCKED; Gate C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
 
 
-## 13.34 Gate A five-class physical CI evidence reconciliation and residual blockers — 2026-11-17
+## 13.36 Gate A five-class physical CI evidence reconciliation and residual blockers — 2026-11-17
 
 A independently fetched Storage source files and inspected raw Actions job logs for the HA rollback, physical backup/restore, coordinator ACK-gap and TCP ACK-loss runs. Verified completed/success jobs:
 
@@ -1461,8 +1461,8 @@ A independently fetched Storage source files and inspected raw Actions job logs 
 
 Together with the previously verified single-node run 43907296027, five Gate A CI evidence classes now pass for their exact pinned PostgreSQL 18.7 test profiles. The primary HA profile uses synchronous_commit=remote_apply; the promoted node's observed setting is on. The physical restore test is pg_basebackup restore, not WAL-archive PITR. Its control epoch is a test fixture, not production I/D integration.
 
-Remaining Gate A blockers are explicitly: (1) live Hermes memory-server executable and authoritative DB adapter/path not bound; PostgreSQL 18.7 is only a capability candidate; (2) WAL-archive PITR not tested; (3) old-primary fencing/rejoin and split-brain prevention not proven; (4) synchronous-standby-unavailable fail-closed negative test not evidenced; (5) actual host/zone/cloud-volume durability and failover routing/monitoring not bound; (6) production I/D control-ledger source/high-water not integrated; (7) named human operator/on-call, approved runbook, RPO/RTO and operational acceptance not designated.
+Remaining Gate A blockers are explicitly: (1) actual project-designated Canonical Authority runtime, database and participant-adapter deployment binding is NOT DESIGNATED; PostgreSQL 18.7 is only a capability candidate; (2) WAL-archive PITR not tested; (3) old-primary fencing/rejoin and split-brain prevention not proven; (4) synchronous-standby-unavailable fail-closed negative test not evidenced; (5) actual host/zone/cloud-volume durability and failover routing/monitoring not bound; (6) production I/D control-ledger source/high-water not integrated; (7) named human operator/on-call, approved runbook, RPO/RTO and operational acceptance not designated.
 
-The authorized Desktop Commander device MS-QSZMHWTHUAJW is OFFLINE; no live host inspection was performed. Issue #10 body was amended with the superseding five-class status; Storage follow-up comment 6924704083 requests owner-side dossier/readiness reconciliation and the remaining evidence. A execution-plan Blob is 26cbd002a247f198a36781de971fd7345fdd917d.
+The previously explored Hermes repository is explicitly excluded from the Canonical Authority designation absent a formal project decision; no runtime identity or dependency is inferred. The authorized Desktop Commander device MS-QSZMHWTHUAJW is OFFLINE; no live host inspection was performed. Issue #10 body was amended with the superseding five-class status; Storage follow-up comment 6924704083 requests owner-side dossier/readiness reconciliation and the remaining evidence. A execution-plan Blob is 26cbd002a247f198a36781de971fd7345fdd917d.
 
 **Gate A remains PARTIAL PASS / OPEN.** Gate B persistent COC remains BLOCKED until Gate A acceptance; Gate C remains BLOCKED until Gate B passes; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
