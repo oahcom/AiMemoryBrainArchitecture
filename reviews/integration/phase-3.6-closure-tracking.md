@@ -907,3 +907,17 @@ The first CI run exposed an incorrect test expectation: while the single global 
 Coverage includes I/D local pending gates, global outage fail-closed, affected-lineage gate after recovery, no new intent while pending, simultaneous I/D requests in one batch without local-time ordering, pre-batch participant enumeration, unresolved participant retention, owner-specific high-water checks before gate release, RESTORE_FENCED for missing prefix/incomplete request set, and immutable request digest conflict.
 
 **Strict limitation:** this is an in-memory logical reference model, not a Raft/quorum COC, durable owner-local gate, production I sequencer, D fence service, persistent participant registry, process crash/failover/restore, or cross-protocol atomicity test. It does not pass COC-01..16 production conformance or Phase 3.6 G10. Production COC remains NOT IMPLEMENTED / NOT VERIFIED; deployment/operator remains NOT DESIGNATED.
+
+
+## 13.14 I-approved JF-10 ↔ COC bridge — C/D/Storage exact joint acceptance request
+
+A opened [Issue #8](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/8) requesting independent C, D and Storage Owner decisions against one immutable bridge bundle:
+- I bridge disposition §10.1–10.9, Blob `1dedce596761807b25d337daf4a0d21bb797a197` (single I Policy Domain only; binding amendments).
+- A COC architecture, Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
+- Common D/E/Storage JF-10 v2 protocol, Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0` (identical D and Storage branch readbacks).
+- C Owner C-submit contract, Blob `a72a3eb1e5207f67c01f804508311f42db9a6e0a`.
+- Prior Storage COC boundary disposition, Blob `a589d983ac145244962c22e5da3a55427aa35ff8`, explicitly architecture-interface-only and not bridge acceptance.
+
+**Status: REQUEST POSTED / ALL THREE OWNER DECISIONS PENDING.** Prior C/D acceptance of CGH-APPLIED-1.1 and prior Storage COC interface confirmation do not satisfy this new bridge decision. Each Owner must publish its own append-only exact-bundle decision and cite its commit/Blob. No A synthesis is counted as Owner acceptance.
+
+Acceptance scope is single-policy-domain only. COC does not decide JF-10 XID COMMIT/ABORT; I sequencer does. Storage resolves the exact prepared XID and owns visibility; D owns fence/lineage/barrier semantics. Multi-policy-domain operations remain BLOCKED. Implementation and bridge conformance remain NOT VERIFIED / NOT RUN.
