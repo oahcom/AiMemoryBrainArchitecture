@@ -1115,3 +1115,14 @@ A refreshed Issue #9 and #10 comments and re-read the D and Storage Owner artifa
 The prior Issue #10 comment described Gate A as “ACTIVE NOW”. This was clarified by a subsequent A comment: the controlling sequential plan puts D + Storage full-bundle confirmation in Gate 0 before Gate A. Gate A is therefore NEXT but not started; preparatory work does not advance the gate ledger. This clarification preserves the user's strict sequential execution instruction and prevents parallel-gate claims.
 
 No Owner decision was inferred, no D/Storage Owner artifact was edited, and no physical capability or implementation test is claimed.
+
+
+## 13.23 JF-10 complete-bundle Owner decision closure — 2026-11-17
+
+Issue #9 is now **CLOSED / COMPLETED** after D and Storage each published an Owner-branch decision that pins the full exact JF-10 ↔ COC bundle and A fetched/readback-verified both artifacts.
+
+- D decision: `03-memory-brain/forget-fence-operation-and-publication-gate.md`, Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`, commit `1460fbd17ee38ea4044dc6c75cfe49039c7fc585`; **ACCEPT WITH ENUMERATED EXCEPTIONS**, D-owned fence/lineage/barrier semantics only.
+- Storage decision: `reviews/storage-consistency/forget-atomicity-storage-realization-review.md`, Blob `67d5d9b7c1f7979f5dda417ca30bb4b6f521cb45`, commit `a231b74e1ff3742435548ffe4efbcdeb8a59fccf`; **ACCEPT WITH ENUMERATED EXCEPTIONS — ARCHITECTURE / PARTICIPANT INTERFACE ONLY**.
+- Both decisions pin common JF-10 v2 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`, A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, I disposition Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`, C bridge Blob `45a48249717c8cddb07ab96197730ef93d406c22`, and current H mapping Blob `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248` plus H schema candidate Blob `a8a945cc3623c2907003b93625e3c79742150944`.
+
+**Gate transition:** Issue #9 decision layer is closed. Issue #10 Gate A remains the sole active next gate: Storage must identify the actual database product/version/configuration and accountable operator, then produce executable prepared-XID/lock-retention/same-XID recovery and atomic-visibility capability evidence. Gate B persistent COC and Gate C fault-injection remain blocked until Gate A passes. No database, operator, physical capability, production deployment or conformance pass is inferred. JF-10 P0 remains OPEN; multi-PolicyDomain remains BLOCKED.
