@@ -481,3 +481,20 @@ The following branch HEADs were queried before this D-owned Phase 3.6 edit. Blob
 | I Global Forget Inventory and Completion Evidence | I | `session-i-security-governance-2026-11-16` | `d52cd47972bd9d1d17f0fe6f2ab09646d084a80b` | `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` | Artifact Exists; CANDIDATE; cross-owner conformance OPEN |
 
 Related branch tips also freshly discovered: B `66adf6bdcf5ec69a146fe75afe20ce3b85af8448`; C `a585307222b0169c007915c25ff8ed0da517f3e4`; F `f86f9b536ea69d8e0fbb4bf290c7023ef0eada76`; G `557c68fd863f73dd09f6fccb3b9e920740db2e9c`; H `1ee65928f123d92a4758b0de09bc8d6df1e46253`; main `8a6414158c9c056c1638222534e1993d1bbc99d2`. These are dependency context, not cross-module approval.
+
+ 
+## Phase 3.6.2 — D owner acceptance of revised JF-10 v2
+
+**Status: D ACCEPTS THE D-OWNED SERIALIZATION AND FENCE PREDICATES IN THE DE-S v2 PROPOSAL; I ACCEPTANCE AND IMPLEMENTATION REMAIN OPEN.**
+
+D confirms the following as normative D-side requirements for the proposed owner-gate-participating 2PC protocol:
+
+1. D's ForgetOperation, ForgetFence, ProducerClass/ProducerWork ledger, Dependency inventory, BarrierSnapshotReceipt and canonical suppression proof remain D-owned.
+2. For each Canonical Memory Authority, RegisterProducerWork, RegisterDerivedDependency, InstallForgetFence and the Storage publication participant serialize on the same durable authority/target-lineage ordering rows. The fence transaction atomically persists its strictly increasing FenceGeneration, immutable target digest, ProducerRegistryVersion, ProducerRegistrationHighWater, BarrierSnapshotReceipt and installation CanonicalCommitCursor.
+3. ProducerRegistrationHighWater is scoped to the ProducerWork registration ledger for that Canonical Memory Authority. CanonicalCommitCursor is a separate per-Brain-authority commit-order/audit cursor. Neither is interchangeable with FenceGeneration, PermissionEpoch or I ProducerDomainInventoryEpoch.
+4. A prepared Storage participant retains the D fence/lineage serialization locks until I's durable coordinator decision is recovered and the Storage participant commits or aborts. Fence-first means publication prepare rejects; participant-first means fence installation cannot pass the unresolved participant. A timeout is UNKNOWN, not permission to publish or close a barrier.
+5. The D final predicate rechecks every source ancestor and target, exact dependency completeness, WorkItem/Attempt/Lease fencing and the latest applicable fence at the participant boundary. I COMMIT_WON never overrides a D fence.
+6. ForgetOperation phases remain Requested, FenceEstablished, InventoryOpen, BarrierDraining, TargetReconciliation, CanonicalSuppressionComplete, Blocked and Failed. D may declare CanonicalSuppressionComplete only when its own captured barrier is terminal, all required D-domain targets have suppression proof or an exact I-approved residual exception, and no D-owned unknown/gap/late derivative remains. This is not I Global Forget Completion or physical erasure.
+7. A late derivative, newly discovered producer, registry gap or restored stale task invalidates/reopens the relevant D proof and creates an audited reconciliation obligation; it never silently reuses a prior completion checkpoint.
+
+D accepts the v2 protocol only as a proposed cross-authority design subject to I's exact owner-gate review. D does not define I's sequencer implementation, approve I inventory/authorization/exception policy, select a concrete database engine, or claim runtime conformance.
