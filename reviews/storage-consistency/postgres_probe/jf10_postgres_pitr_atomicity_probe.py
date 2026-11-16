@@ -272,8 +272,8 @@ def main() -> None:
             print("PITR_ROLLBACK_NO_POINTER_NO_RECEIPT=PASS")
     print("JF10_PITR_PREPARED_XID_VISIBILITY_RECEIPT_BOUNDARIES=PASS")
 
-    # Negative archive probes: remove, corrupt, or truncate the segment needed
-    # to cross the prepared boundary. Recovery must never promote to writable.
+    # Negative archive probes: damage the exact WAL segment required to reach
+    # the rollback target. Recovery must never promote or serve authoritatively.
     for idx, mode in enumerate(("missing", "corrupt", "incomplete"), start=1):
         label = f"negative-{mode}"
         data = f"jf10-pitr-atomicity-{label}-data"
