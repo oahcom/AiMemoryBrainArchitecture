@@ -358,3 +358,21 @@ The following MUST prevent Completed:
 
 These are specification-level cases only. No PASS is claimed without executable fixtures, environment, expected/actual output, test artifact and owner sign-off.
 
+
+
+---
+
+## Phase 3.5 governance reconciliation
+
+The authoritative I-owned Producer/Recipient Domain Inventory, ACK-to-Target mapping and Global Forget Completion Vector are consolidated in `phase-3.5-global-identity-forget-governance.md` §§3–5 and the detailed target contract.
+
+For avoidance of doubt:
+- I's global `ProducerDomainInventoryEpoch` and D's per-Forget `ProducerRegistrationHighWater` / `WorkItemBarrier` are separate and both required.
+- H ACKs are target/action-bounded evidence, not global completion and not physical-erasure proof.
+- Unknown, Failed, Unsupported, stale, missing or contradictory evidence for a mandatory target blocks Completed.
+- A sealed inventory is invalidated by relevant epoch changes, late derivative/recipient discovery or restore resurrection.
+- Backup restore is quarantine-first and must apply the current independent Forget/revocation control ledger before any restored content is served, indexed, delivered or used for inference.
+- External recipient request receipt proves delivery of a request only. Provider-internal and onward copies remain Unknown absent verifiable target-bound evidence or an approved narrow exception.
+- Physical erasure remains a separate result requiring media/key-scope evidence under the applicable retention and jurisdiction policy.
+
+All policy decisions remain subject to the OPEN register. This document does not claim that any target has actually been cleared, any backup expired, or any content physically erased.
