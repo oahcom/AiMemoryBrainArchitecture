@@ -73,3 +73,14 @@ The single-transaction model is selected only if the actual D ledger and visibil
 ## 8. Verification boundary
 
 C01–C20 plus explicit authorization-revocation race, manifest-mutation race, read-response-vs-fence race, outcome-unknown recovery, and restore rollback tests are required. Record engine/version/configuration, isolation/replication settings, deterministic seeds, commit/lock/CAS traces, receipt IDs, read snapshots and recovery logs. None have been run. Storage deployment selection, production configuration and fault-injection evidence remain OPEN; no Implementation Verified or Production Ready claim is permitted.
+
+
+## 9. Round-1 self-review closure — JF-07 / JF-08
+
+### JF-07 — Serialize output-manifest transitions with terminality
+
+The coordinator's linearized operation set MUST include output declaration, close-discovery, manifest freeze, manifest reopen/version advance and root terminal disposition. A frozen manifest version is immutable. Freeze/reopen operations carry a WorkItemId, version, digest and idempotency key and are admitted only while the root is non-terminal. Terminal disposition conditionally commits against the exact frozen version/digest and proves no pending manifest mutation, child registration or unknown outcome exists. If mutation commits first, terminalization cannot commit against the old version; if terminalization commits first, later mutation is rejected. Any later independent work must be registered as a linked child obligation. This removes the post-terminal output race.
+
+### JF-08 — Outcome absence must be linearizably proven
+
+`GetOperationOutcome` may return NOT_COMMITTED only after a decision barrier ordered after the operation's possible commit point, resolving any in-flight transaction, coordinator decision and participant prepare/commit record for that key. Return the barrier cursor/epoch and durable proof reference with NOT_COMMITTED. An absent row on a lagging replica, a query racing an in-flight transaction, timeout or unavailable coordinator returns UNKNOWN. If a participant outcome is unresolved, the coordinator must preserve prepared state as hidden and keep the operation UNKNOWN; it must not guess abort. This barrier rule applies to registration, fence, dependency, publication and terminal operations.
