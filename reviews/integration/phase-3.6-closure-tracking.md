@@ -1421,3 +1421,16 @@ Full source pins and the reconciliation are in:
 **Correction to prior A inventory:** a relevant Hermes runtime repository and service-level deployment configuration do exist. However, they do not identify the live authoritative backing store, current process manager, host/zone, actual I/D control ledger, or production failover/operator profile. The authorized Desktop Commander device was OFFLINE during this run, so no live host inspection was possible.
 
 Gate A remains PARTIAL PASS / OPEN. PostgreSQL 18.7 is a capability-qualification candidate only; do not treat it as the production DB or infer that the Hermes service is PostgreSQL-backed. If the actual authoritative participant is SQLite-backed, it cannot satisfy JF-10 prepared-XID semantics without a different recoverable participant design or migration. Gate B remains BLOCKED; Gate C remains BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+## 13.34 Scope correction — Hermes is not an AiMemoryBrainArchitecture dependency — 2026-11-17
+
+The Hermes repository and service observations recorded in §13.33 were gathered during an exploratory inventory and are **OUT OF SCOPE for the JF-10 / COC architecture acceptance and Gate A decision**. No project requirement, Owner contract, approved deployment target, or user instruction establishes Hermes as the target runtime. Therefore:
+
+- Do not treat `oahcom/hermes-scripts`, DKK/SSK endpoints, Hermes helper SQLite paths, or Hermes service topology as an AiMemoryBrainArchitecture dependency, target deployment, or acceptance input.
+- Do not infer that the JF-10 Canonical Memory Authority is Hermes-backed, SQLite-backed, PostgreSQL-backed, or hosted by any Hermes service.
+- §13.33 is retained only as historical exploratory context; its Hermes-specific findings must not drive Gate A status, DB selection, deployment design, or P0 closure.
+- Gate A's remaining production-binding requirements remain those already defined by Issue #10 and the Storage capability dossier: the project must identify its own actual Canonical Authority deployment boundary, database profile, I/D control-ledger integration, failover/fencing, operator, runbook and RPO/RTO. If no such target has been designated within this project, record it as NOT DESIGNATED rather than searching unrelated repositories or assuming a runtime.
+- PostgreSQL 18.7 CI probes remain valid, bounded engine-capability evidence only. They do not select the project's production database or imply a Hermes integration.
+
+This correction supersedes any interpretation of §13.33 that connected Hermes to the architecture's dependency graph or treated Hermes inspection as a Gate A prerequisite. The architecture mainline proceeds solely from AiMemoryBrainArchitecture Owner artifacts, contracts and explicitly designated deployment evidence.
