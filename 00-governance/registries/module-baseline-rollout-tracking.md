@@ -5,7 +5,7 @@
 - Status: **FIRST-ROUND OWNER PROPOSALS SUBMITTED — FORMAL ADOPTION / CROSS-MODULE CLOSURE OPEN**
 - Authority: Session P coordinates only. Each Module Owner owns authorship and decision of its module baseline.
 - Project governance status: **PROPOSED / GOVERNANCE-OPEN**. No PGA appointment or formal G0 ratification is evidenced.
-- Main baseline rechecked: `8a6414158c9c056c1638222534e1993d1bbc99d2`.
+- Main baseline rechecked: `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f`.
 
 ## Fresh branch inventory
 
@@ -13,27 +13,46 @@ The following are live branch-tip SHAs fetched from GitHub branch metadata on 20
 
 | Module | Owner branch | Fresh HEAD SHA | Branch protected | Module baseline proposal |
 |---|---|---|---|---|
-| A | `session-a-integration-2026-11-16` | `fb061aee907c28f7da198e68161ff57ebac160b7` | No | PROPOSED — Owner adoption open |
-| B | `session-b-domain-model-phase3` | `861fa9b2c3e1f572336543b15c7dc392493891db` | No | PROPOSED — Owner adoption open |
-| C | `session-c-agent-integration-2026-11-16` | `2e5776029bc4271c33525f04c7d0f0708e4bbae8` | No | PROPOSED — Owner adoption open |
-| D | `session-d-memory-brain-2026-11-16` | `9dd48eddb3c8f91d15dfa6981a7f53cc70bd4bf8` | No | PROPOSED — Owner adoption open |
-| E | `session-e-memory-compiler-2026-11-16` | `4402549c39824b89a0dc49973226187c62e056c5` | No | PROPOSED — Owner adoption open |
-| F | `session-f-memory-runtime` | `a370d9a3bc0bd35a21a12dfe87d53c298237de8e` | No | PROPOSED — Owner adoption open |
-| G | `session-g-memory-context` | `72a8066b4401f9586fe10775d545384b82736f07` | No | PROPOSED — Owner adoption open |
-| H | `session-h-bmcp-protocol` | `242d8ab5da890181e762561bb3d3a662287fb63c` | No | PROPOSED — Owner adoption open |
-| I | `session-i-security-governance-2026-11-16` | `1fc3b3293ebf2077edfd6ad253647d382173d9fa` | No | PROPOSED — Owner adoption open |
+| A | `session-a-integration-2026-11-16` | `6caa6034c92c4d3dcf7b2d34ca899b62c3756f1f` | Not rechecked | PROPOSED — Owner adoption open |
+| B | `session-b-domain-model-phase3` | `13613ed38965c4961d6eed5eca7c91d31e455f9c` | Not rechecked | PROPOSED — Owner adoption open |
+| C | `session-c-agent-integration-2026-11-16` | `2e5776029bc4271c33525f04c7d0f0708e4bbae8` | Not rechecked | PROPOSED — Owner adoption open |
+| D | `session-d-memory-brain-2026-11-16` | `b42811141064e7445cd0326382af1789e77ff5b2` | Not rechecked | PROPOSED — Owner adoption open |
+| E | `session-e-memory-compiler-2026-11-16` | `65416706bc3fe94b469812ac8bb8d83cc4d146e1` | Not rechecked | PROPOSED — Owner adoption open |
+| F | `session-f-memory-runtime` | `714fe628fdcfe62b5e6ea901810b779c58ddddb3` | Not rechecked | PROPOSED — Owner adoption open |
+| G | `session-g-memory-context` | `72a8066b4401f9586fe10775d545384b82736f07` | Not rechecked | PROPOSED — Owner adoption open |
+| H | `session-h-bmcp-protocol` | `242d8ab5da890181e762561bb3d3a662287fb63c` | Not rechecked | PROPOSED — Owner adoption open |
+| I | `session-i-security-governance-2026-11-16` | `cdfaf4ebdef3f5cbe6d5a0d2229122930212377c` | Not rechecked | PROPOSED — Owner adoption open |
 | P | `session-p-project-governance-baseline` | Coordination branch — see latest P commit | No | Coordination branch |
+
+
+## Owner proposal artifact inventory — 2026-11-17
+
+| Module | Proposal path | Current proposal Blob SHA | Sections | Disposition |
+|---|---|---|---:|---|
+| A | `reviews/integration/module-a-integration-governance-baseline-and-redlines.md` | `a43a8f2fa3d31681d64b79d584364fdae80f8866` | 13 | PROPOSED — not APPROVED |
+| B | `02-domain-model/module-b-domain-model-baseline-and-redlines.md` | `410d6cc62294e1a7ee5efa0cfe4ef496a8179326` | 14 | PROPOSED — not APPROVED; ADR-001 blocked |
+| C | `07-agent-integration/module-c-agent-integration-baseline-and-redlines.md` | `c79da952efaa490083c88ccb4608d62f526fcbae` | 14 | PROPOSED — not APPROVED |
+| D | `03-memory-brain/module-baseline-and-redlines.md` | `84e402f471d452c7dab63a7db344f86b5b57bd7c` | 15 | PROPOSED — not APPROVED |
+| E | `04-memory-compiler/module-baseline-and-redlines.md` | `7f037a7684723fdbddd593b3d131c7c348e2ccbe` | 15 | PROPOSED — not APPROVED |
+| F | `05-memory-runtime/module-baseline-and-redlines.md` | `d4756cabda3151999cbe1ddde0adb554458004a1` | 15 | PROPOSED — not APPROVED; does not yet include new Observation Archive proposal |
+| G | `reviews/governance/g-module-baseline-and-redlines-proposal.md` | `fb2eb805be385469b5ab5f25c4ef76f234feb4c2` | 14 | PROPOSED — not APPROVED; does not yet include TSS/compaction/fidelity research proposal |
+| H | `reviews/governance/h-module-baseline-and-redlines-proposal.md` | `a4d961ac7b7e1a5fdf59422a4ebe21a6db95ace1` | 14 | PROPOSED — not APPROVED |
+| I | `reviews/governance/i-module-baseline-and-redlines-proposal.md` | `b0493cf0366159c99536ee8847996916bc21c606` | 14 | PROPOSED — not APPROVED |
+
+Structural normalization: A has 13 sections; B/C/G/H/I have 14; D/E/F have 15 including an Evidence section. No Owner proposal claims adoption of the P-only template. Preserve this as a governance/template decision rather than silently rewriting Owner artifacts.
+
+Separate Storage branch: `session-storage-consistency-forget-atomicity-2026-11-16`, current HEAD at inventory `d026add5cfaec0d395537e8763317cdbd8255398`; it is not one of the A–I modules.
 
 ## Owner deliverable status
 
-No module baseline/redlines deliverable has yet been submitted under the rollout contract. Existing module design documents, ADRs, contract decisions and review artifacts are source evidence; they are not automatically module baseline approvals.
+**All nine A–I Owner branches now contain a module baseline/redlines proposal**, and all nine were fetched and read back on 2026-11-17. Every artifact explicitly remains PROPOSED / not APPROVED; formal Owner adoption and affected-consumer acceptance remain OPEN. Existing module design documents, ADRs, contract decisions and review artifacts are source evidence, not automatic baseline approvals.
 
 Each Owner's submission must:
 1. Be authored on that Owner's branch.
-2. Use the project module baseline/redlines template.
+2. Use the canonical template only after it is formally published/adopted; the P template currently exists only on the P branch and is not on main or ratified. Current Owner proposals explicitly record this template gap.
 3. Mark each statement DECIDED / PROPOSED / OPEN / ADR-BLOCKED / TO_VALIDATE as appropriate.
-4. Cite exact source paths, current branch HEAD and relevant blob SHAs.
-5. Separate owner decisions from consumer acceptance, implementation and verification evidence.
+4. Cite exact source paths, source branch HEAD and relevant blob SHAs.
+5. Separate Owner decisions from consumer acceptance, implementation and verification evidence.
 6. Preserve open dependencies and explicitly identify non-owned semantics.
 7. Record the Owner's explicit decision and any required affected-consumer acceptance.
 
@@ -59,15 +78,15 @@ Nine module-specific 14-section proposal packages have been prepared from the so
 
 | Module | Proposal path | Prepared status | Owner action required |
 |---|---|---|---|
-| A | `00-governance/proposals/module-a-integration-governance-proposal.md` | PROPOSED / P-prepared | A Owner review, correct, adopt or reject on A branch |
-| B | `00-governance/proposals/module-b-domain-model-proposal.md` | PROPOSED / P-prepared | B Owner review, preserve ADR-001 blocker, adopt or reject on B branch |
-| C | `00-governance/proposals/module-c-agent-integration-proposal.md` | PROPOSED / P-prepared | C Owner review, adopt or reject on C branch |
-| D | `00-governance/proposals/module-d-memory-brain-proposal.md` | PROPOSED / P-prepared | D Owner review, preserve JF-10 boundaries, adopt or reject on D branch |
-| E | `00-governance/proposals/module-e-memory-compiler-proposal.md` | PROPOSED / P-prepared | E Owner review, preserve publication blockers, adopt or reject on E branch |
-| F | `00-governance/proposals/module-f-memory-runtime-proposal.md` | PROPOSED / P-prepared | F Owner review, preserve backend/cancellation validation, adopt or reject on F branch |
-| G | `00-governance/proposals/module-g-memory-context-proposal.md` | PROPOSED / P-prepared | G Owner review, preserve C/G/H Applied freeze blocker, adopt or reject on G branch |
-| H | `00-governance/proposals/module-h-bmcp-protocol-proposal.md` | PROPOSED / P-prepared | H Owner review, preserve B/I identity dependencies and H36 NOT RUN, adopt or reject on H branch |
-| I | `00-governance/proposals/module-i-security-governance-proposal.md` | PROPOSED / P-prepared | I Owner review, preserve external governance/consumer/test blockers, adopt or reject on I branch |
+| A | `00-governance/proposals/module-a-integration-governance-proposal.md` | `6caa6034c92c4d3dcf7b2d34ca899b62c3756f1f` | Not rechecked |
+| B | `00-governance/proposals/module-b-domain-model-proposal.md` | `13613ed38965c4961d6eed5eca7c91d31e455f9c` | Not rechecked |
+| C | `00-governance/proposals/module-c-agent-integration-proposal.md` | `2e5776029bc4271c33525f04c7d0f0708e4bbae8` | Not rechecked |
+| D | `00-governance/proposals/module-d-memory-brain-proposal.md` | `b42811141064e7445cd0326382af1789e77ff5b2` | Not rechecked |
+| E | `00-governance/proposals/module-e-memory-compiler-proposal.md` | `65416706bc3fe94b469812ac8bb8d83cc4d146e1` | Not rechecked |
+| F | `00-governance/proposals/module-f-memory-runtime-proposal.md` | `714fe628fdcfe62b5e6ea901810b779c58ddddb3` | Not rechecked |
+| G | `00-governance/proposals/module-g-memory-context-proposal.md` | `72a8066b4401f9586fe10775d545384b82736f07` | Not rechecked |
+| H | `00-governance/proposals/module-h-bmcp-protocol-proposal.md` | `242d8ab5da890181e762561bb3d3a662287fb63c` | Not rechecked |
+| I | `00-governance/proposals/module-i-security-governance-proposal.md` | `cdfaf4ebdef3f5cbe6d5a0d2229122930212377c` | Not rechecked |
 
 Readback verified all nine proposal files on P. Their current blob SHAs are recorded by the GitHub fetch evidence in the Session P work log. Each package includes mission, ownership, capabilities, domain ownership, interfaces, security, module redlines, forbidden cross-module actions, dependencies, conformance, acceptance, change authority, open decisions and non-claims.
 
