@@ -117,3 +117,63 @@ Each executed case must retain build SHA, database/runtime version, deterministi
 ## 9. Decision and non-claims
 
 This document is a DE-S candidate protocol for I review. It does not close JF-10, approve I governance, establish consumer acceptance, select a concrete database vendor, prove implementation, or pass any test. Until I accepts the required sequencer semantics and executable crash/recovery evidence exists, JF-10 remains **P0 OPEN**, final publication remains fail-closed on unknown outcomes, and Phase 3.6 cannot pass the final gate.
+
+
+---
+
+# Addendum — Reconciliation against I36-SR-02 owner-gate ordering (JF-10 P0)
+
+- Added: 2026-11-16
+- Status: **MATERIAL PROTOCOL GAP IDENTIFIED — I DECISION REQUIRED**
+- Applies to the candidate protocol above; it does not silently replace or reinterpret the earlier phases.
+
+## A. Newly confirmed I requirement
+
+The current I-owned joint trust policy (Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`), §10.2, requires:
+
+1. a single logical I authority and linearizable sequencer per policy domain;
+2. a single-use `CommitAuthorizationReceipt` bound to the full authorization tuple, operation ID/digest and owner boundary;
+3. the operation owner's final commit/disclosure gate to participate in the **same per-domain commit ordering protocol**;
+4. atomic ordering of the owner operation commit against revocation, yielding `COMMIT_WON`, `REVOCATION_WON` or `INDETERMINATE_ABORTED`.
+
+The receipt is not a transferable permission or offline lease. I's §10.2 also states that the implementation evidence is NOT VERIFIED.
+
+## B. Gap in the current JF-10 candidate
+
+The existing candidate's Phase B durably records I `COMMIT_WON` as an authorization-order result, after which Phase C independently commits Storage's VisibilityPointer + PublicationReceipt transaction.
+
+That split-phase sequence is useful for idempotency and forward recovery, but **the candidate has not demonstrated that Storage's final owner commit participates in the same I policy-domain ordering protocol**. A prior I decision followed later by an independent Storage transaction cannot be assumed to meet I36-SR-02 merely because Storage stores the receipt ID and sequencer position in its local transaction.
+
+Likewise, a local single-use receipt-consumption row does not by itself prove that receipt consumption and the owner commit are atomically ordered against a concurrent revocation in I's sequencer.
+
+Therefore:
+- JF-10 candidate v1 is **NOT YET SHOWN CONFORMANT** to I36-SR-02;
+- no claim is made that the existing Phase B/Phase C split is accepted by I;
+- JF-10 remains P0 OPEN and publication remains fail-closed for unknown/indeterminate outcomes.
+
+## C. I Owner decision required before protocol freeze
+
+I must publish an I-owned normative protocol decision that defines, at minimum:
+
+1. **Ordering participant:** how the Storage owner gate joins the same per-policy-domain sequencer order as revocation. Identify the protocol participants and the exact linearization point.
+2. **Receipt semantics:** whether `CommitAuthorizationReceipt` is a prepare/authorization token, a commit-order reservation, or another primitive; define exactly when and by whom it is consumed, and how consumption is bound to the terminal owner outcome.
+3. **Atomic outcome:** how the protocol guarantees that revocation and the Storage visibility commit cannot both win, including the precise meaning of each terminal result.
+4. **Crash matrix:** behavior if I crashes before/after recording an order, Storage crashes before/after local durable commit, either response is lost, a participant restarts, replicas lag, or failover/restore occurs.
+5. **Recovery authority:** which authority answers an authenticated lookup for the global operation outcome, what durable records are required, and how recovery resumes without minting a new operation ID.
+6. **Liveness vs safety:** whether the protocol uses a sequencer-mediated participant protocol, durable prepare/commit with recovery, 2PC or another formally specified mechanism. If no progress is possible during a partition, explicitly preserve safety and specify the blocked state; do not imply availability.
+7. **Evidence:** required I sequencer log, Storage transaction proof, participant recovery log, receipt-consumption proof and fault-injection cases.
+
+DE-S does not choose this I-owned cross-authority ordering mechanism or declare 2PC mandatory. I must ACCEPT a concrete protocol, REVISE with an I-owned normative design, or BLOCK with accountable owner and missing proof.
+
+## D. Interim DE-S safety rule
+
+Until I publishes and accepts the owner-gate participation protocol:
+- a standalone prior `COMMIT_WON` response is not sufficient evidence to make Storage data visible;
+- the final Storage gate must fail closed unless it can prove the I-approved ordering protocol has completed for the exact operation ID/digest and owner boundary;
+- missing, stale, replayed, mismatched or indeterminate receipt/outcome leaves staged data private;
+- D ForgetFence remains an independent owner-local ordering check;
+- no new operation ID may be minted to escape an unknown prior outcome.
+
+## E. Status
+
+This addendum is a DE-S gap report and formal request for I's decision, not an I policy amendment or acceptance. The original candidate remains preserved for traceability. **JF-10 P0 OPEN; I36-SR-02 runtime NOT VERIFIED; no cross-authority atomicity proof; no Phase 3.6 final gate.**
