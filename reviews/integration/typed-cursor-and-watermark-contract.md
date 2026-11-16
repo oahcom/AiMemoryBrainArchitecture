@@ -1,89 +1,73 @@
-# Typed Cursor and Watermark Contract — Phase 3 Coordination Proposal
+# Typed Cursor, Revision, Fence and Capability Registry — Phase 3.5
 
-- Status: **CANDIDATE** (A coordination proposal; not a schema freeze or implementation guarantee)
-- Coordinator: Session A
-- Canonical cursor semantic authority: Session D
-- Required consumers/validators: E, F, G, Storage/Consistency; H transports opaque typed references; I governs policy epochs separately.
-- Live source refs inspected for this re-execution: A pre-write `e270118dd22e47140a5232f5f131d97e965d39dc`; B `ab19afbf92f67fe0a7679e9aa3a35b015fed89f4`; D `30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6`; E `2dea3ae510c57987460d940224db569d43df78f1`; H `d46961254bc50995479bd43abed0ee6fe1cdcbb6`; I `4c7c5f953b166bc512064f6de3b7d18a742d0449`.
-- D authority artifact: `03-memory-brain/commit-cursor-semantics.md` blob `4688a0ca487bf4d853c7f0220408abe8d743d159`.
+- Owner: Session A / Principal Integration Architect
+- Status: **CANDIDATE coordination registry**; not a schema freeze or implementation guarantee.
+- Updated: 2026-11-16 against freshly queried A/B/C/D/E/F/G/H/I/Storage branch HEADs.
+- Authority: each token's named owner alone defines its semantics. A records the contract and prohibited cross-namespace operations.
 
-## 1. Hard rule
+## 1. Global hard rules
 
-A cursor, revision, watermark, generation, version, delivery sequence or permission epoch is a typed token in one explicitly owned namespace. Raw numeric values from different namespaces are never compared. Cross-stream causality is expressed by typed references or a vector, not scalar coercion.
+1. Every token is typed and namespaced. Preserve its type discriminator, issuing authority, scope, schema/version and provenance.
+2. Never compare raw numeric values, cast, increment, subtract, max, sort or substitute values from different namespaces.
+3. A consumer may order/validate a token only through its owner-defined operation and only within the exact declared scope.
+4. Cross-stream causality is represented by typed references, receipts or a vector of independently validated evidence, never by scalar coercion.
+5. A token is not proof of a different subsystem's work. Cursor progress is not Forget completion; ContextVersion is not Applied; AdapterCapabilityEpoch is not authorization.
+6. Owner decision and implementation are distinct. D's CanonicalCommitCursor semantics are DECIDED; Storage realization and consumer conformance remain OPEN.
 
-D's domain-level semantic decision is authoritative for CanonicalCommitCursor. This document records that decision; A does not select or alter D's cursor scope.
+## 2. Normative typed registry
 
-## 2. Normative typed inventory
+| Token | Owner | Namespace / scope | Ordering semantics | Consumers | Forbidden comparisons / conversions |
+|---|---|---|---|---|---|
+| **CanonicalCommitCursor** | D | One globally ordered sequence per Canonical Memory Authority (Brain authority). Identity includes authority + committed sequence. | D-defined total order within one authority; contiguous committed sequence. A gap blocks contiguous consumer advancement. Multiple authorities have independent sequences; no cross-authority total order. | E stores exact D-issued value; F consumes as canonical source position and IndexWatermark applied-through; G uses only where D supplies causal source references; Storage realizes sequencing; H transports opaquely; I may bind as evidence. | Never compare across authorities or with AggregateRevision, LifecycleEventCursor, IndexWatermark as an independent counter, ProducerRegistrationSequence, ForgetFenceGeneration, PermissionEpoch, ContextVersion or AdapterCapabilityEpoch. Never synthesize or allocate in a consumer. |
+| **AggregateRevision** | D | One aggregate identity (Memory/Entity/Relation aggregate). | Monotonic immutable revision order only within the same aggregate. A committed revision references its CanonicalCommitCursor. | E records exact revisions; F/G pin exact canonical versions; Storage persists aggregate head/revision. | No cross-aggregate ordering; not a global commit cursor, lifecycle cursor, watermark, fence or policy epoch. |
+| **LifecycleEventCursor** | D | One Memory identity's append-only lifecycle event stream. | Contiguous event sequence within that Memory; each event separately references enclosing CanonicalCommitCursor. | E/F/G consume lifecycle change evidence; Storage persists lifecycle append; I may use as evidence. | Not AggregateRevision or CanonicalCommitCursor; never compare across Memory identities or infer global ordering. |
+| **IndexWatermark** | F | One named index + channel/partition + coverage/schema version. It carries an applied-through CanonicalCommitCursor from D. | F advances only the contiguous prefix of canonical commits fully accounted for by that exact partition, including explicit irrelevant/no-op coverage. Gaps stop advancement. A multi-partition index is a vector/map, not one scalar. | F owns and advances; G consumes freshness/completeness; A records; I may consume per-target evidence. | Do not compare watermarks across unrelated partitions as one scalar. Do not treat it as CanonicalCommitCursor, target absence, cache purge, suppression, Context reconciliation, Forget completion or physical erasure. |
+| **ForgetFenceGeneration / ForgetFenceCursor** | D | D Forget authority; typed cursor tuple binds ForgetOperationId + generation + target-set digest / applicable lineage. | D generation monotonically advances in the fence namespace. Currentness/coverage is evaluated by D for exact target lineage and operation; installation also has a separate CanonicalCommitCursor for audit order. | D enforces; E/F/G/H consume; I validates global proof references; Storage persists. | Never compare or convert to CanonicalCommitCursor, ProducerRegistrationHighWater, AggregateRevision, LifecycleEventCursor, IndexWatermark, PermissionEpoch, ContextVersion or AdapterCapabilityEpoch. A current generation does not authorize a forgotten ancestor. |
+| **PermissionEpoch** | I | Named issuer/policy domain (and its declared subject/resource policy scope). | Opaque policy generation. Currentness, revocation and continuity are validated only under I's same-domain rules; no universal global scalar order is assumed. | D/E/F/G/H/C validate current authorization at protected boundaries; Storage binds decision evidence; A records. | Never compare numerically with ForgetFenceGeneration, ProducerDomainInventoryEpoch, cursors, ContextVersion or CapabilityEpoch. Not a lease, grant or proof absent an I decision. |
+| **ProducerDomainInventoryEpoch** | I | Global Producer/Recipient Domain Inventory catalogue, including classes/instances, owners, scopes, capabilities, recipients and backup/restore routes. | I-owned inventory generation changes when membership/coverage/capability/owner/route/evidence obligations change. A seal binds exact epoch + inventory digest; relevant changes reopen the seal. | I global Forget evaluator; D/E/F/G/H/Storage provide local target/work evidence; A coordinates. | Never substitute for D ProducerRegistryVersion or per-Forget ProducerRegistrationHighWater. Not a work-item sequence, canonical cursor or permission epoch. |
+| **ContextVersion** | G | One Context identity; immutable desired Context versions with explicit base/target and one authoritative head. | G-defined monotonic version sequence within that Context; ChangeSet commits atomically against exact Base Version (CAS/serialization). | G owns; H transports delivery target; C validates exact version in final Applied proof; F may carry as advisory correlation only; I evaluates policy separately. | Never compare across Context identities or with canonical revisions/cursors, delivery sequence, PermissionEpoch, ForgetFenceGeneration or CapabilityEpoch. Does not prove Delivered, Applied or execution. |
+| **AdapterCapabilityEpoch** | H | One registered Adapter instance/capability profile. | H-owned opaque epoch changes when implementation/configuration/capability proof coverage changes. Negotiated and validated for the exact Adapter instance/session. | H owns; C binds the epoch in final-request Applied evidence; G validates delivery/ACK compatibility; I uses it for target/action evidence. | Never compare across Adapter instances or with ContextVersion, PermissionEpoch, ForgetFenceGeneration, CanonicalCommitCursor or Delivery ID. It is not identity authentication or permission. |
 
-| Type | Authority / scope | Semantics | Does not mean |
+## 3. Supporting typed evidence (not substitutes for the nine registry tokens)
+
+| Type | Owner / scope | Semantics | Consumer rule / prohibited substitution |
 |---|---|---|---|
-| **CanonicalCommitCursor** | D; one globally ordered sequence per Canonical Memory Authority | Identifies successful canonical transactions in that authority's single total commit order. Semantic identity includes Brain authority and commit sequence. | No index application, Context update, Forget completion or physical erasure proof |
-| **AggregateRevision** | D; each aggregate independently | Monotonically increasing immutable revision sequence for one aggregate; each committed revision carries its CanonicalCommitCursor. | No global order across aggregates |
-| **LifecycleEventCursor** | D; each Memory independently | Contiguous append-only lifecycle event sequence for one Memory; each event also references its enclosing CanonicalCommitCursor. | Not an aggregate revision or global cursor |
-| **IndexWatermark** | F; each index/channel partition | Contiguous prefix of canonical commits fully accounted for by that index partition, including explicit irrelevant/no-op coverage; its applied-through value is a CanonicalCommitCursor. | Not canonical authority, global consumer progress, or proof of deletion/Forget completion |
-| **ForgetFence Generation / ForgetFenceRef** | D; scoped to Forget operation and target-set digest | Independent monotonically advancing fencing namespace. D's current semantic document calls the typed tuple `ForgetFenceCursor`; despite that name, the generation is not a stream cursor and is not derived from CanonicalCommitCursor. Fence installation itself has a CanonicalCommitCursor for audit/replay. | Not a commit offset, lifecycle cursor, aggregate revision, PermissionEpoch or IndexWatermark |
-| **SourceEventCursor** | E; durable Brain ingress stream/partition | E-assigned source-ingress position; producer-supplied sequence remains separate source metadata. | Not CanonicalCommitCursor |
-| **ContextVersion / ChangeSet** | G; Context authority | Immutable desired Context version and its change record. | Not canonical Memory revision or delivery acknowledgement |
-| **Delivery ID/sequence; Adapter capability epoch; InferenceRequestID** | G/H/C by each owned field | Correlates delivery, adapter capability/configuration and exact inference request boundary. | Not canonical commit ordering |
-| **PermissionEpoch** | I; named policy domain | Opaque authorization-policy generation; monotonic only within its issuer/domain and governed by I. | Not ForgetFence generation; no cross-domain numeric comparison |
-| **ProducerDomainInventoryEpoch** | I; global registered producer/recipient catalogue | Identifies the sealed catalogue generation used for global Forget target enumeration. | Not D's per-operation producer-registration high-water or work-item barrier |
+| ProducerRegistryVersion | D; producer-class registry | Immutable version of registered producer classes and enabled/disabled status. | Work admission must observe an enabled registered class. Not I's global ProducerDomainInventoryEpoch. |
+| ProducerRegistrationSequence / ProducerRegistrationHighWater | D; per-authority producer-work ledger and one ForgetOperation barrier | Monotonic work-admission sequence; fence captures immutable high-water. | Compare/membership only under D ledger rules. Not CanonicalCommitCursor or I inventory epoch. |
+| SourceEventCursor | E; declared ingress stream/partition | Durable accepted-source position. Producer-supplied source sequence remains separate metadata. | E ingress/replay only; never canonical commit or index watermark. |
+| DeliveryId / DeliveryAttemptId | G; logical delivery and its attempt | Stable delivery identity and per-attempt identity. | Correlation/idempotency only; no canonical or ContextVersion ordering inference. |
+| InferenceRequestId / FinalRequestBoundaryId | C/runtime evidence domain | Identifies exact final inference submission and observable boundary. | Required in Full Applied evidence; not proof by itself and not a cursor. |
+| RegistrationReceipt / DependencyRegistrationReceipt / PublicationReceipt | D; operation-specific durable receipts | Evidence of exact admission, dependency registration or visibility-gate outcome. | Resolve by stable ID + request digest; receipt types are not interchangeable and do not imply terminal work/global Forget. |
+| TargetInventorySeal / ForgetCompletionVector | I; one Forget operation + sealed target inventory | Typed vector of target/action states and module-owned proofs at a named inventory epoch. | Every mandatory target must be evaluated. Never collapse to one scalar or infer from D barrier alone. |
 
-## 3. D-owned CanonicalCommitCursor decision (recorded, not re-decided by A)
+## 4. Cross-module use constraints
 
-D has decided:
+### D → E/F/G/Storage
+- D's selected CanonicalCommitCursor is one global sequence per Canonical Memory Authority, not partitioned by aggregate or index.
+- E stores the D-issued cursor unchanged. E SourceEventCursor remains separate.
+- F's IndexWatermark is partition-local and records a contiguous applied-through canonical cursor.
+- G uses exact immutable MemoryVersion references and maintains its own ContextVersion.
+- Storage must prove uniqueness, atomic visibility, crash/failover/recovery and contiguous replay for D's per-authority sequence.
 
-1. One globally ordered `CanonicalCommitCursor` sequence per Canonical Memory Authority.
-2. Each aggregate has its own independently increasing `AggregateRevision`.
-3. Each Memory has its own independently increasing `LifecycleEventCursor`.
-4. F owns `IndexWatermark`, scoped by index/channel partition and advanced over a contiguous accounted-for canonical prefix.
-5. ForgetFence generation is a separate fencing namespace, not a cursor.
+### Forget and authorization
+- ForgetFenceGeneration is a fencing namespace; ProducerRegistrationHighWater is an admission ledger position; PermissionEpoch is a policy-domain generation; ProducerDomainInventoryEpoch is a global inventory generation.
+- A Forget completion proof must reconcile both I's sealed global inventory and D's per-operation work barrier, plus F/G/H and external/backup evidence as I policy requires.
+- No consumer may use “larger number wins” across these namespaces.
 
-There is no per-aggregate or per-partition CanonicalCommitCursor in D's chosen semantic model. A MUST NOT replace D's global per-authority sequence with the superseded partitioned candidate. Multiple Brain authorities have separate sequences; this does not create a distributed global total order across authorities.
+### Context and Applied
+- ContextVersion identifies G's immutable desired target. Delivery and Adapter ACK are separate.
+- Full Applied must bind the exact ContextVersion, Delivery/attempt, final InferenceRequestId/boundary, AdapterCapabilityEpoch, current PermissionEpoch and applicable D ForgetFence, plus identity/scope and integrity evidence.
+- Prepared, Delivered, materialized, final-request Submitted and Execution Started are distinct events. No cursor/epoch alone promotes a delivery to Applied.
 
-D's cursor artifact further states that the committed sequence is contiguous within one authority; a consumer gap blocks contiguous advancement; canonical data, aggregate revisions, lifecycle appends, commit record and outbox intent share one atomic or proven recoverable visibility boundary. These are D's semantic/contract statements, not evidence that a concrete Storage implementation has passed validation.
+## 5. Validation and conformance status
 
-## 4. Causality and consumer rules
-
-- E stores and propagates D's CanonicalCommitCursor unchanged when referring to a committed canonical transaction. E's SourceEventCursor remains a different namespace.
-- F consumes canonical commit references and advances its own IndexWatermark independently for each index/channel partition. A partition watermark represents a contiguous accounted prefix; a gap blocks advancement.
-- G consumes immutable MemoryVersion references from D and RetrievalResult/ActivationRecommendation from F. G's ContextVersion remains G-owned and is not derived by comparing cursor integers.
-- H transports owner-defined typed values opaquely; it does not reinterpret, serialize by assumption, or compare D/I generations.
-- I's PermissionEpoch and ProducerDomainInventoryEpoch are distinct from D's ForgetFence generation and D's work-item barrier. I's global Forget proof is a typed vector, not one scalar.
-- Consumers must define duplicate handling, out-of-order staging, gap detection, replay/resume, snapshot bootstrap and stale/unknown behavior before declaring conformance.
-
-## 5. Explicitly OPEN — Storage/Consistency realization and multi-authority routing
-
-D's semantic decision does **not** prove a storage implementation. The following remain OPEN and must not be inferred from the domain contract:
-
-1. How Storage/Consistency allocates and serializes the single per-authority global sequence under concurrent writers.
-2. How transaction commit, cursor assignment, canonical visibility and outbox intent share one atomic or proven recoverable boundary.
-3. How crash recovery, WAL/replication failover, replay, snapshot bootstrap and restore preserve uniqueness, monotonicity and contiguous committed ordering.
-4. Whether aborted/rejected transactions consume no visible committed cursor and how gaps are represented after recovery.
-5. How multi-authority cursor identity is named, routed, authorized and retained without pretending there is a global order between authorities.
-6. How E, F and G consumers persist their own offsets/watermarks and handle gaps, duplicates, out-of-order delivery, replay and authority changes.
-7. How F maps one authority-wide canonical sequence into independent index/channel partition watermarks without advancing over missing relevant work.
-8. How I's ProducerDomainInventoryEpoch and D's ProducerRegistrationHighWater/WorkItemBarrier are linked by typed evidence without substitution.
-9. How H transports the typed references and how I validates PermissionEpoch/ForgetFence without numeric comparison.
-
-No implementation or fault-injection evidence was supplied by the D semantic document. Storage validation remains **OPEN / NOT VERIFIED**.
-
-## 6. Conformance requirements (not yet passed)
-
-| Test | Required result | Status |
+| Validation | Required proof | Status at this review |
 |---|---|---|
-| Concurrent commits in one authority | Unique, strictly ordered canonical commit cursors; transaction visibility matches that order | NOT RUN |
-| Multi-aggregate transaction | One canonical cursor shared by transaction effects; each aggregate revision advances independently | NOT RUN |
-| Rejected/aborted transaction | No partially visible commit; cursor behavior matches the committed-sequence contract | NOT RUN |
-| Crash at cursor allocation/commit/outbox boundaries | Recovery yields no duplicate/reused visible cursor and no partially visible transaction | NOT RUN |
-| Failover/restore | Monotonic per-authority sequence and contiguous replay resume are preserved | NOT RUN |
-| Consumer gap/reordering | E/F/G stage or replay missing work; no contiguous watermark jumps the gap | NOT RUN |
-| Multiple authorities | Tokens route to the correct authority; no cross-authority numeric ordering assumption | NOT RUN |
-| Index partition lag | F partition watermark stops at first unaccounted canonical commit | NOT RUN |
-| Fence vs cursor vs permission epoch | Type checks reject cross-namespace substitution/comparison | NOT RUN |
-| Inventory epoch vs D work barrier | I inventory seal and D per-operation barrier remain distinct and reconcile by typed evidence | NOT RUN |
+| D per-authority CanonicalCommitCursor semantics | D owner artifact explicitly chooses single total order per authority | **DECIDED by D** |
+| Storage sequence realization | concurrent commit, atomic cursor/transaction/outbox, crash/failover/restore and gap tests | **OPEN / NOT RUN** |
+| E/F/G cursor consumption | each consumer preserves type, scope, gaps, duplicate/replay and partition semantics | **Partially specified; cross-consumer conformance OPEN / NOT RUN** |
+| Fence vs registration vs PermissionEpoch | type-check/negative tests reject namespace mixups and stale authorization | **Specified; NOT RUN** |
+| I inventory epoch vs D work barrier | sealed global inventory and per-operation barrier reconcile independently | **Specified as distinct; owner approval and execution OPEN** |
+| ContextVersion / AdapterCapabilityEpoch | exact delivery and final-request evidence, stale/late ACK behavior | **Specified; cross-owner approval and execution OPEN** |
 
-## 7. Ownership and change control
-
-D alone changes CanonicalCommitCursor semantic authority. F alone defines IndexWatermark operational semantics. G owns ContextVersion and ChangeSet. H owns wire representation/transport. I owns PermissionEpoch, ProducerDomainInventoryEpoch and global Forget policy. Storage/Consistency owns concrete persistence/transaction/recovery realization. A maintains this cross-module coordination proposal and records owner decisions without superseding them.
-
-This update aligns A's proposal to D's current global per-authority CanonicalCommitCursor decision. It does not close CR-P1-01, INT-P0-03, INT-X-01, D-REV-P1-003, Storage realization, or any F/G consumer conformance item.
+This registry records D's owner decision without claiming Storage or consumer implementation. It does not close CR-P1-01, CR-P1-02, INT-P0-02, INT-P0-03, INT-X-01, INT-X-04 or INT-X-07.
