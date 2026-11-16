@@ -388,3 +388,21 @@ This does not establish that no external implementation exists. It establishes t
 **Required next artifact:** A/C/Storage must identify the authoritative implementation repository and immutable branch/commit, runtime entrypoint, DB adapter, schema/migration path and deployment manifest. Storage then traces the actual canonical write/read path and binds the same-XID prepare/recovery and atomic VisibilityPointer + PublicationReceipt tests to that implementation. If this repository is intended to contain the implementation, the designated Owner must deliver the missing executable artifacts before conformance can be claimed.
 
 **Gate A remains PARTIAL PASS / OPEN.** Production runtime binding and adapter conformance are NOT IDENTIFIED / NOT VERIFIED. Gate B remains BLOCKED pending full Gate A acceptance; Gate C remains BLOCKED pending Gate B; JF-10 P0 remains OPEN; production activation remains NOT AUTHORIZED.
+
+
+## 18. Gate A — full seven-workflow PostgreSQL 18.7 regression batch PASS (2026-11-17)
+
+Commit `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd` triggered seven Storage workflows; all completed SUCCESS and their final raw-log markers were inspected:
+- Prepared-XID/restart: run `43955195289`, job `133607790416`.
+- Synchronous standby promotion: run `43955195323`, job `133607790413`.
+- Physical backup/restore: run `43955195219`, job `133607790737`.
+- Explicit-LSN WAL PITR: run `43955195388`, job `133607790699`.
+- Prepared-XID PITR + missing/corrupt/incomplete WAL negatives: run `43955195460`, job `133607791713`.
+- Required synchronous standby unavailable: run `43955195197`, job `133607790658`.
+- Old-primary pg_rewind/rejoin: run `43955195256`, job `133607790520`.
+
+All seven final markers report PASS. The synchronous promotion log confirms same-XID commit and rollback after primary loss; the synchronous-unavailable log confirms local prepared-XID remains in-doubt, lock retained and no unsafe terminal inference; the rejoin log confirms the old primary rejects writes after rejoining as standby.
+
+This is a full CI regression batch for the pinned PostgreSQL 18.7 profile only. The Docker stop/fence is not production STONITH, and the isolated test fixtures are not production Canonical Authority or I/D service integration.
+
+**Gate A remains PARTIAL PASS / OPEN** because the production runtime and DB adapter are not identified in this repository snapshot, and actual I/D ledger integration, infrastructure durability/fencing, accountable production operator/runbook and RPO/RTO remain unverified. Gate B remains BLOCKED; Gate C remains BLOCKED; JF-10 P0 remains OPEN; production activation remains NOT AUTHORIZED.
