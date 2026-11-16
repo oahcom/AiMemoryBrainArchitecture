@@ -284,3 +284,46 @@ The next closure order is now:
 5. A: update the integration control ledger only from exact owner artifact versions and evidence; no branch merge is authorized.
 
 No Owner approval is implied by A's synthesis. No test is passed by specification or static review. Applied Contract Frozen and Runtime Forget End-to-End Closed remain **NO**.
+
+
+## 13. Phase 3.6.3 live reconciliation — CGH-APPLIED-1.0 exact-version decisions
+
+Observed Owner-branch readbacks on 2026-11-16. This addendum supersedes stale process-status statements in §12 for the C/G/H Applied workstream; it does not alter the separately pinned A decision package.
+
+### Exact shared package and Owner decisions
+
+- A decision package: `reviews/integration/phase-3.6-cgh-applied-contract-decision-package.md`
+- Exact package Blob SHA: `122b164bcc0760b83bf555072a36fc55631623e1`
+- Common contract: **CGH-APPLIED-1.0**
+
+| Owner | Branch | Owner artifact | Readback Blob SHA | Decision |
+|---|---|---|---|---|
+| C | `session-c-agent-integration-2026-11-16` | `07-agent-integration/phase-3.6-final-request-evidence-contract.md` | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | APPROVE WITH ENUMERATED EXCEPTIONS |
+| G | `session-g-memory-context` | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `5406b3f2558daa3f5915f6bb46e808be8d90d3ca` | APPROVE WITH ENUMERATED EXCEPTIONS |
+| H | `session-h-bmcp-protocol` | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `1ea5dccdf2d965103b1a8474b79f00810f639187` | APPROVE WITH ENUMERATED EXCEPTIONS |
+
+C approves its final-request evidence and lifecycle clauses; G approves its Context/Delivery/Applied predicate, commit/idempotency and historical/current-use split; H approves its transport, authenticated binding, wire evidence and reconnect clauses. Each Owner explicitly pins the same A package Blob above. These are independent Owner decisions, not A's inferred approvals.
+
+### H versioned wire profile
+
+H now records **`bmcp.applied-ack / 1.0.0`**, protocol major 1/minor 0, associated with CGH-APPLIED-1.0. The H artifact defines the envelope; Delivery, Materialization, Final Request Submission, Applied ACK, Forget Action ACK, Capability Negotiation, Reconnect and ACK Receipt message families; ACK/result vocabularies; idempotency namespace and receiver sequence; canonicalization and SHA-256 digest requirements; and TLS 1.3 exporter channel binding.
+
+H explicitly marks this **SCHEMA CANDIDATE 1.0.0 / OWNER-DECIDED FOR CGH-APPLIED-1.0**, not production freeze or deployed interoperability. Exact signature/MAC suite, key custody, rotation and compromise policy require I/Security review before production activation. H36 suites remain SPECIFIED / NOT RUN.
+
+### Remaining authority and acceptance gates
+
+1. **I:** PermissionDecision/PermissionEpoch issuer, currentness and revocation ordering must be confirmed for this Applied gate; external I36-GOV-01..10 remain GOVERNANCE-BLOCKED. H cryptographic/key lifecycle approval is also pending I/Security.
+2. **D:** ForgetFence token, source-lineage coverage and authoritative ordering proof remain D-owned; the C/G/H decisions do not substitute for D confirmation or executable proof.
+3. **B:** B's ActorRef/ScopeRef/EnvironmentRef semantic mapping is approved (formal artifact Blob `729a706860b1259115816265e847a29683c3c233`); exact consumer field mapping remains owner-specific and is not a wire-format approval.
+4. **Runtime and conformance:** C-FR-01..12, CGH-01..20 and H36 cases remain SPECIFIED / NOT RUN. No deployed interoperability, implementation verification, test PASS, global Forget completion or physical erasure is claimed.
+
+### A integration disposition
+
+- C/G/H exact-version Owner decisions: **RECORDED WITH ENUMERATED EXCEPTIONS**.
+- H schema: **OWNER-DECIDED CANDIDATE 1.0.0; NOT PRODUCTION-FROZEN**.
+- Applied Contract Frozen: **NO** pending I/D authority confirmations, I/Security crypto approval, cross-owner field-level reconciliation and executable conformance.
+- Test Executed / Passed: **NO / NO**.
+- Implementation Verified: **NO**.
+- No branch merge is authorized.
+
+The exact A decision package Blob SHA `122b164bcc0760b83bf555072a36fc55631623e1` is deliberately not changed: changing it would invalidate the common-version pin and require fresh explicit decisions from C, G and H.
