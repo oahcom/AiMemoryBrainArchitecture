@@ -1,0 +1,32 @@
+name: I Global Forget Inventory Reference Model
+
+on:
+  push:
+    branches:
+      - session-i-security-governance-2026-11-16
+    paths:
+      - "09-security-governance/tests/**"
+      - ".github/workflows/i-global-forget-reference-model.yml"
+  pull_request:
+    paths:
+      - "09-security-governance/tests/**"
+      - ".github/workflows/i-global-forget-reference-model.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  global-forget-model:
+    name: Global Forget inventory and completion logical tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile model and tests
+        run: python -m py_compile 09-security-governance/tests/global_forget_model.py 09-security-governance/tests/test_global_forget_model.py
+      - name: Run Global Forget tests
+        working-directory: 09-security-governance/tests
+        run: python -m unittest discover -v
