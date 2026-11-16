@@ -73,3 +73,23 @@ Status: **SPECIFIED / NOT RUN**. I36-GOV-01..10 remain external GOVERNANCE-BLOCK
 ## 7. Acceptance boundary
 
 This artifact specifies I's required receipt and sequencer behavior. It does not establish deployment of the common coordinator, D fence implementation, C provider integration, H serialization acceptance or G Applied state. Exact cross-owner acceptance of `CausalOrderProfile/1.0` and `bmcp.applied-ack/1.1.0` remains required before `CGH-APPLIED-1.1` can be frozen.
+
+## I Owner exact-version decision — CGH-APPLIED-1.1
+
+- A package: `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`
+- Exact A package Blob SHA: `9808b31f840606b329f1a794935dfc9c5084d63b`
+- Common contract: `CGH-APPLIED-1.1`
+- Causal profile: `CausalOrderProfile/1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within I's authority over issuer/principal trust, authorization, single-use CommitAuthorizationReceipt, PermissionEpoch and revocation sequencing.
+
+I accepts the exact package's ParticipantIntent-bound, single-use CommitAuthorizationReceipt and authoritative consumption/terminalization. I accepts IAuthorizationTerminalRef binding the applicable IRevocationRequestRef and its request/cutoff position, or an explicit assertion that no earlier revocation request existed. A revocation request before intent blocks admission; after intent but before receipt consumption may win (REVOCATION_WON); after COMMIT_WON it remains pending behind that unresolved participant until safe terminal outcome. COMMIT_WON proves only the I owner gate ordering, never provider success.
+
+Exceptions and closure conditions:
+1. I receipt issuance/consumption service and sequencer deployment, durable reservation correlation and recovery are not verified. Acceptance is conditional on durable single-use consumption and monotonic revocation state across crash/failover/restore.
+2. The same durable participant transaction must be reconciled with D's fence barrier and C's provider outcome. No local timestamp, cached ALLOW, H receiver sequence or coordinator-only position substitutes for I's authoritative terminal evidence.
+3. Unknown provider outcome retains the participant and pending revocation; no automatic expiry, heuristic abort or retry-as-new-operation is permitted.
+4. Exact H signature/MAC suite, key custody/rotation/compromise and federation require separate I/Security governance approval before production activation. External I36-GOV approvals remain separately BLOCKED unless independently evidenced.
+5. Multi-PolicyDomain/all-or-none authorization remains BLOCKED unless I approves a complete domain-set protocol. I-CO and I36 conformance remain NOT RUN; production implementation NOT VERIFIED.
+
+This decision applies only to the exact A Blob above. It does not approve D authority, H deployment, G Applied, external governance, or transfer any 1.0 approval.
