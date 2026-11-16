@@ -178,7 +178,7 @@ These are owner technical decisions, not external governance approvals or runtim
 
 ## 11. DE-S executable linearization progress and G3 boundary
 
-A has recorded the Storage-branch JF-10 logical reference state machine and unittest source, plus D/E Owner mapping artifacts, in the closure tracking ledger. The model covers the protocol's logical single-domain, identity, recovery, receipt, visibility and D fence-ordering invariants. A local semantic replay of 15 deterministic assertions passed; the committed unittest suite has not yet been executed by repository CI.
+A has recorded the Storage-branch JF-10 logical reference state machine and unittest source, plus D/E Owner mapping artifacts, in the closure tracking ledger. The model covers the protocol's logical single-domain, identity, recovery, receipt, visibility and D fence-ordering invariants. 15 deterministic unittest methods are authored, but no execution result has been verified in a local Python runtime or GitHub Actions; the committed unittest suite has not yet been executed by repository CI.
 
 This is an executable reference model, not the production JF-10 implementation. It does not prove durable prepared-XID behavior, real I sequencer/receipt semantics, shared serializable D/Storage database transactions, HA/failover/restore or production reader/bypass behavior. Therefore:
 
