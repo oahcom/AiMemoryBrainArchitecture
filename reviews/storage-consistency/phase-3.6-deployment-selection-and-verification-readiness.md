@@ -585,3 +585,54 @@ The controlling vector is:
 - JF-10 runtime P0: OPEN; production activation: NOT AUTHORIZED; Multi-PolicyDomain: BLOCKED.
 
 Gate B design acceptance is not conditional on Gate A deployment evidence; however, no system-wide production activation follows from design acceptance.
+
+
+## 26. Storage Gate A architecture contract freeze — decisions and explicit residuals (2026-11-17)
+
+This section resolves Storage-owned architecture choices for the architecture-design phase. It does not claim a production deployment, implementation conformance or production operational acceptance. The exact PostgreSQL 18.7 image remains a pinned physical-capability candidate; runtime/deployment binding is `DEFERRED_TO_ENGINEERING_PHASE`.
+
+### 26.1 Canonical Authority database and transaction contract
+
+1. **Authority boundary:** one logical Canonical Authority transaction domain per authority boundary. Do not use a shared cross-authority transaction as a substitute for owner-local authority. The database is the sole durable publication authority for its local VisibilityPointer.
+2. **Isolation target:** PostgreSQL `SERIALIZABLE` for admission/fence/dependency/visibility/terminal safety transactions, with explicit row locks on the exact authority/fence/work/attempt/manifest/visibility/idempotency records participating in the decision. Serialization failures are retried as a whole transaction with the same idempotency key and immutable request digest; no partial side effects are accepted. The serializable workload/concurrency profile still requires engineering benchmarks and concurrency fault tests.
+3. **Admission/fence ordering:** admission and InstallForgetFence serialize through the authority-local coordinator/fence record. Registration-first is included in the captured high-water; fence-first rejects or quarantines ordinary admission. This lock is local to the Canonical Authority transaction domain and does not replace D's lineage barrier or I's policy-domain sequencer.
+4. **Publication boundary:** one local database transaction validates the current D fence/barrier reference, immutable work/attempt/lease/dependency/manifest versions and I authorization evidence accepted by I's contract, then writes VisibilityPointer + PublicationReceipt + local owner outcome/receipt-consumption evidence + outbox atomically. Unknown, stale, mismatched or unavailable predicates fail closed. Outbox delivery is notification only.
+5. **Read boundary:** only the authoritative primary/linearizable database path may decide visibility/fence/authorization. A stale replica, cache, object-store listing or outbox event cannot authorize content. At response finalization, current visibility and applicable owner controls are rechecked; unavailable authority means omit/deny.
+
+### 26.2 Prepared-XID participant contract
+
+1. Preallocate and durably bind the exact XID to PublicationOperationId, RequestDigest, owner boundary, participant digest and Canonical Authority identity before PREPARE.
+2. PREPARE is allowed only after the COC prepare-intent record exists. Storage returns an authenticated PreparedParticipantReceipt only after the exact XID is durably prepared; signing/verifying integration remains an engineering-phase deliverable.
+3. The prepared transaction retains the exact row/transaction locks needed to prevent conflicting local visibility/outcome mutation. Do not infer abort from timeout, lost ACK, coordinator restart or missing local response. Preserve UNKNOWN/IN_DOUBT and resolve only the same XID.
+4. I alone supplies the policy-domain terminal authorization. COC records ordering/participant accounting and does not decide COMMIT/ABORT. Storage executes the authorized terminal decision for its exact XID and commits local pointer/receipt/outcome evidence atomically.
+5. No heuristic commit/rollback, new-XID retry, TTL cleanup or operator force-clear is permitted for an unresolved participant.
+
+### 26.3 PostgreSQL 18.7 CI candidate durability and HA profile
+
+Pinned image: `postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc`.
+
+The capability profile uses durable local WAL/data settings (`fsync=on`, `full_page_writes=on`, `wal_level=replica`) and synchronous replication with `synchronous_commit=remote_apply` and `synchronous_standby_names=FIRST 1 (jf10_standby)`. If the required synchronous standby is unavailable, PREPARE must not be acknowledged as durable; client uncertainty remains UNKNOWN, local prepared state stays IN_DOUBT/private with locks retained, and no asynchronous/local fallback is allowed. These are CI candidate settings and bounded test results, not a production topology or measured durability guarantee.
+
+Failover design requirement: establish old-primary fencing before any promotion can become authoritative; promote only a replica whose acknowledged durable prefix is sufficient for the operation; stale/isolated primary must never serve writes or authoritative reads. A rejoining old primary must be rewound/rebuilt onto the promoted timeline and remain a standby. The CI container-stop/pg_rewind test is not production STONITH, cloud-volume fencing, independent failure-domain isolation or HA-manager arbitration.
+
+### 26.4 Backup, PITR and restore-quarantine contract
+
+1. A recovery point is valid only when its base backup, timeline history and every required WAL segment form a continuous, integrity-verified chain to the exact target LSN. Missing, corrupt, truncated or incomplete required WAL fails closed; no promotion or authoritative service is permitted.
+2. Restore starts fenced/quarantined. Before serving or publishing, the restore process must reconcile the complete COC committed prefix/checkpoint and authenticated I/D Forget-control high-water, owner lineage/fence and participant state. A local DB snapshot alone cannot establish that restored state is current.
+3. Recovery must preserve prepared-XID state and locks at an in-doubt target; terminal resolution uses the same XID. VisibilityPointer and PublicationReceipt must remain atomic across restore/recovery.
+4. Current PostgreSQL CI evidence covers the exact bounded fixtures in §§23.2 and 25. Production archive immutability/off-site retention, independent control-ledger custody, authenticated high-water proof and cross-zone restore remain unproven and are not inferred.
+
+### 26.5 Artifact staging, scale and migration boundaries
+
+- Artifact bytes may be staged only in a private, non-listable, non-queryable area. Object existence/path never means visible. Only the authoritative DB pointer plus receipt and current owner checks authorize reads.
+- Safety-critical state remains in the Canonical Authority transaction domain; CAS is an optimization/conditional guard, not a replacement for the atomic transaction. Outbox is at-least-once/idempotent notification.
+- Per-authority throughput, maximum transaction/manifest size, lock-wait budget, prepared-XID age/volume, WAL generation, archive bandwidth and restore duration are **TBD**. They must be measured under representative concurrency and worst-case forget/restore workloads before sizing or SLO claims.
+- Schema migration, backfill, dual-read/write, rollback and cutover are engineering-phase artifacts; no zero-downtime or rollback claim is made in this architecture decision.
+
+### 26.6 Residual decisions and Gate A disposition
+
+**Storage architecture decisions now specified:** authority-local transaction boundary; serializable isolation target and lock participation; exact prepared-XID lifecycle; synchronous durability/fail-closed behavior; pointer+receipt atomic publication; authoritative read exclusion; fail-closed PITR and restore quarantine; private artifact staging; explicit future performance/migration acceptance criteria.
+
+**Still open and owned by the proper authority:** I's authorization-permit/revocation serialization contract and governance approval; D's control-ledger/lineage high-water proof and restore authorization; exact cross-owner owner-final-gate and participant receipt API conformance; object-store ACL implementation evidence; representative performance/size budgets; production HA/fencing/independent failure-domain design and engineering validation; named implementation/operations approver, runbook, measured RPO/RTO and production release approval. Runtime, executable adapter and deployment remain deferred to the engineering phase by project decision, not treated as missing architecture code.
+
+**Disposition:** Gate A remains PARTIAL PASS / OPEN pending I/D-owned decisions, exact cross-owner acceptance of the Storage-owned details above, and closure of the enumerated architecture items. Gate B is DESIGN-LEVEL ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS, not implementation/conformance PASS. Gate C remains deferred to engineering-phase executable integration and distributed fault injection. JF-10 runtime P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
