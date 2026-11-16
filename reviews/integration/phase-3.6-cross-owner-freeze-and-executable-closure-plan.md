@@ -1210,3 +1210,20 @@ Storage's PostgreSQL 18.7 backup/restore probe succeeded:
 The run preserved a prepared XID through physical pg_basebackup/restore, kept pointer + receipt private, and resolved the same XID after restore. A stale restored control epoch failed closed until the newer authoritative Forget-control epoch was replayed; the forgotten artifact was then suppressed before reads, while unrelated content remained available.
 
 Gate A remains PARTIAL PASS / OPEN because the control epoch is a test fixture, not production I/D service integration. Remaining work is actual host/zone/cloud-volume durability, production fencing/routing/split-brain prevention, actual Canonical Authority deployment, named human operator/runbook and RPO/RTO. Gate B remains blocked until full production Gate A acceptance; Gate C remains blocked until Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
+
+
+## 13.29 Gate A evidence manifest — 2026-11-17
+
+The current Storage Owner evidence manifest is pinned:
+- Storage realization review Blob: 4e09fb3f5952f7676996968e2c0f20b5eb89f98e.
+- PostgreSQL 18.7 capability dossier Blob: d539bb37c677000010dac3571128beee5f475ee4.
+- Deployment/readiness Blob: 6aaee894e0eb08f9f4fbbc4f98d6880c397e9c34.
+
+Three executable evidence groups have successful CI runs:
+1. Single-node prepared-XID + hard restart + same-XID commit/rollback — run 43907296027.
+2. Two-node synchronous replication + primary loss + standby promotion + same-XID commit/rollback — run 43908746695.
+3. Physical backup/restore + prepared-XID recovery + stale-control fail-closed gate — run 43909138634.
+
+The latest reruns of single-node and HA workflows also passed (43909115285, 43909115273). Probe/workflow Blob SHAs are recorded in A tracking §13.29 and the Storage dossier.
+
+Gate A remains PARTIAL PASS / OPEN. Remaining production boundary: identify the actual Canonical Authority deployment, physical host/zone/cloud-storage semantics, production fencing/routing and split-brain prevention, named human on-call/operator, runbook and RPO/RTO. No production activation is authorized. Gate B remains blocked until these conditions pass; Gate C remains blocked until Gate B.
