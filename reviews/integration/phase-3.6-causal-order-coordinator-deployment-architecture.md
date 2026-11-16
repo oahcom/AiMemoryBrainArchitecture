@@ -169,3 +169,40 @@ Required explicit approvals:
 8. Production conformance passes COC-01..12 plus C/I/D/H/G consumer suites.
 
 Until then: **DESIGN PROPOSED / DEPLOYMENT NOT DESIGNATED / OWNER ACCEPTANCE PENDING / TESTS NOT RUN / PRODUCTION CAUSAL PROOF NOT VERIFIED**.
+
+
+## 11. COC-outage owner-local cutoff and recovery reconciliation
+
+This section is normative for every deployment claiming `CausalOrderProfile/1.0`. It closes the interval in which an owner has received a fence/revocation request but the common COC cannot accept a quorum-committed cutoff.
+
+### 11.1 Durable local pending gate
+
+- If D receives an applicable ForgetFence request while COC cannot confirm a quorum commit, D MUST first durably persist an owner-local `PENDING_COC_CUTOFF` record and close admission for the affected target/source/ancestor lineage. D reports PENDING/UNKNOWN, not an effective ForgetFenceGeneration or completed fence.
+- If I receives an applicable revocation request while COC cannot confirm a quorum commit, I MUST first durably persist an owner-local `PENDING_COC_CUTOFF` record and suspend affected receipt issuance and receipt consumption. I reports UNKNOWN/PENDING, not a committed PermissionEpoch advance.
+- The local gate survives process restart, failover and owner-service recovery. A request is not acknowledged as durably pending until its local gate is durable.
+- Neither owner may reopen affected admission/receipt processing until the pending request cutoff has been recorded in the quorum-committed COC log and the recovery reconciliation below is complete.
+- Owner-local sequence/time is audit metadata only. It does not establish order against the other owner or against COC positions.
+
+### 11.2 Recovery batch and pre-existing participant reconciliation
+
+When COC quorum service returns:
+
+1. Keep all owner-local pending gates closed. No new affected ParticipantIntentRef, I receipt issuance/consumption, reservation or provider submit may proceed.
+2. Read the latest quorum-confirmed log prefix and verify term, index and digest continuity. A stale/uncertain prefix enters `RESTORE_FENCED`.
+3. Collect every durable I/D request that arrived during the outage into one immutable recovery-cutoff batch. Append that batch atomically after the last committed pre-outage log entry. Do not infer an order between independent I and D requests received during the same outage; preserve each owner request identity and bind both to the batch position.
+4. Enumerate every affected ParticipantIntentRef already committed before the batch position. No such intent may be omitted from reconciliation merely because its I/D owner message was delayed or not yet delivered when the outage began.
+5. For I: reconcile each pre-batch participant against the authoritative I sequencer. An unconsumed receipt may terminalize as REVOCATION_WON; an earlier COMMIT_WON remains pending behind that participant until its exact C outcome or safe abort is durable. No epoch advance may leap over unresolved participants.
+6. For D: register every pre-batch affected intent in the exact target/source/ancestor barrier. D may clear only a proven safe abort or wait for the exact C outcome and compatible I terminal evidence. The effective fence cannot pass any unresolved pre-batch participant.
+7. Verify all owner-local pending requests are represented by the committed batch, all pre-batch participants are accounted for, and owner high-water marks are monotonic. Only then may I/D clear their local pending gates; the shared cutoffs continue blocking all later affected intents/receipts.
+8. Any missing intent, incomplete lineage, mismatched request digest, unavailable owner sequencer, or unprovable log prefix leaves the relevant local gate closed and the service in UNKNOWN/IN_DOUBT or RESTORE_FENCED.
+
+The recovery batch is a coordinator ordering fact, not an I authorization decision or D fence decision. I still commits PermissionEpoch; D still commits ForgetFenceGeneration and lineage completion. A coordinator append cannot clear either owner barrier by itself.
+
+### 11.3 Required outage conformance additions
+
+- COC-13: D fence request received during COC outage; durable local gate survives restart; no affected intent admitted; recovery batch records cutoff; all earlier affected intents are reconciled before fence effectiveness.
+- COC-14: I revocation request received during COC outage; local receipt issuance/consumption suspension survives restart; no receipt is consumed; recovery batch records cutoff; pre-existing COMMIT_WON participants remain pending and unconsumed receipts may resolve REVOCATION_WON.
+- COC-15: simultaneous I and D requests during one outage are represented in one recovery batch without inventing an order between the owner-local request times.
+- COC-16: COC restore with missing pre-outage log prefix or owner high-water mismatch enters RESTORE_FENCED; no local gate reopens.
+
+These cases are SPECIFIED / NOT RUN. This section does not claim the owner-local gates, recovery batch or reconciliation are implemented.
