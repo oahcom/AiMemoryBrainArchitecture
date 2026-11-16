@@ -20,9 +20,15 @@ class COCRecoveryModelTests(unittest.TestCase):
         self.assertFalse(self.coc.provider_submit_allowed("domain-A"))
         self.assertEqual(self.coc.position, 0)
 
-    def test_d_request_during_outage_blocks_affected_lineage_only(self):
+    def test_coc_outage_blocks_all_then_d_local_gate_blocks_affected_lineage(self):
         self.coc.set_outage()
         self.coc.record_owner_request(self.d_req)
+        # The single global COC log is unavailable: all protected submits fail closed.
+        self.assertFalse(self.coc.provider_submit_allowed("domain-A", ("memory-A",)))
+        self.assertFalse(self.coc.provider_submit_allowed("domain-A", ("unrelated-memory",)))
+        self.assertFalse(self.coc.provider_submit_allowed("domain-B", ("memory-A",)))
+        # Once COC is back, D's durable local gate still blocks only its affected lineage.
+        self.coc.available = True
         self.assertFalse(self.coc.provider_submit_allowed("domain-A", ("memory-A",)))
         self.assertTrue(self.coc.provider_submit_allowed("domain-A", ("unrelated-memory",)))
         self.assertTrue(self.coc.provider_submit_allowed("domain-B", ("memory-A",)))
