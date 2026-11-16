@@ -941,3 +941,19 @@ Corrected CI:
 The new test proves that after the D owner-local pending gate is released, the batch-committed D cutoff still blocks later intents/submits in the affected lineage while unrelated lineage remains independently eligible after COC service recovery.
 
 The earlier COC model CI run `43897053156` (10 tests) is superseded by this corrected 11-test run. This remains an in-memory logical model only; it does not implement consensus durability, real I/D owner gates, participant storage, HA/failover/restore or production COC conformance. COC-01..16 remain NOT RUN and G10 remains BLOCKED.
+
+
+## 13.15 JF-10 ↔ COC bridge Owner-decision refresh — 2026-11-16
+
+Issue [#8](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/8) was refreshed with exact Owner evidence. The A COC architecture remains Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` and the corrected single-policy-domain bridge bundle remains pinned to I Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`, common D/E/Storage JF-10 v2 Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`, and C artifact Blob `a72a3eb1e5207f67c01f804508311f42db9a6e0a`.
+
+| Owner | Current exact evidence | Disposition | Remaining qualification |
+|---|---|---|---|
+| I | `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md`, Blob `8069ff86988396442c8d9dc3fd58653683abe2f3` | ACCEPT amended A bridge with binding single-I-PolicyDomain limitation | Does not prove implementation, governance activation or conformance |
+| D | `03-memory-brain/forget-fence-operation-and-publication-gate.md`, Blob `5a56c406578fdf257509315eb3f6f3f75456116c` | ACCEPT A Blob `a3c51ec...` for D-owned fence/barrier semantics | Does not accept I implementation, DB capability, H schema or production activation |
+| Storage | `reviews/storage-consistency/forget-atomicity-storage-realization-review.md`, Blob `55c01f4512f2e3d8aac767dd004e768ae073178e` | ACCEPT Storage participant contract for A Blob `a3c51ec...` | Conditional on concrete DB capability/deployment proof; no engine/operator selected |
+| C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`, Blob `a72a3eb1e5207f67c01f804508311f42db9a6e0a` | Accepts CGH-APPLIED-1.1 recovery-batch package/companion pair | Distinct formal C decision on complete Issue #8 bridge bundle/A Blob `a3c51ec...` not yet present in current readback |
+
+A posted reconciliation comment on Issue #8 (comment ID `6921025964`) requesting C's exact-bundle decision and D/Storage clarification that their acceptances cover the complete corrected bundle. Until those responses are read back, the joint Issue #8 gate remains OPEN; do not infer a complete three-owner bridge acceptance.
+
+JF-10 P0 remains OPEN; production implementation and selected DB capability remain NOT VERIFIED; JF10-COC-01..10 remain NOT RUN; multi-policy-domain atomicity remains BLOCKED.
