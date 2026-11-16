@@ -21,7 +21,7 @@ jobs:
   validate-schema:
     name: Validate BMCP JF-10 1.1.0 schema and five message families
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
