@@ -1138,3 +1138,33 @@ Observed:
 A therefore did **not** infer SQLite as the JF-10 target. No accessible artifact establishes a selected Canonical Authority DB, prepared-XID durability, cross-process lock retention, same-XID recovery, atomic visibility/receipt transaction, or failover/restore capability. The discovery and boundary were recorded in Issue #10 comment 6922191590.
 
 **Gate A remains BLOCKED pending Storage's explicit candidate and accountable operator selection plus executable capability proof.** Gates B/C remain blocked; JF-10 P0 OPEN. This inventory does not prove that no other runtime repository or deployment exists.
+
+
+## 13.25 JF-10 Gate A candidate selection and physical proof update — 2026-11-17
+
+This addendum supersedes the prior Gate A inventory note that no candidate engine had been selected. Storage has now selected PostgreSQL 18.7 as the pinned candidate profile for capability qualification and has executed a physical single-node probe.
+
+### Candidate and evidence
+
+- Engine image: postgres:18.7
+- Observed server build: 18.7 (Debian 18.7-1.pgdg13+2)
+- Image digest: sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+- Settings: max_prepared_transactions=16; fsync=on; synchronous_commit=on; full_page_writes=on; wal_level=replica
+- Probe Blob: c15ea6e66a15be2fb96f737769f58b7b6c224b7e
+- Workflow Blob: 4eef5b24f6da1d596c34e0d072dc39d5008a1a25
+- Successful CI run: 43907296027; commit 8c9ef00364d93c383aba515923565f8dc04bf1b6; job 133439447210.
+- Raw log success markers: prepared lock retained; hard container/postmaster restart; same-XID commit after restart; atomic VisibilityPointer + PublicationReceipt; same-XID rollback and non-publication.
+
+### Gate decision
+
+**Gate A: PARTIAL PASS / OPEN.** This run proves prepared-XID persistence and same-XID recovery after a hard process/container restart on a single node using the same named volume. It does not prove synchronous replication, standby promotion/failover, primary-loss recovery from a standby, backup/restore, production storage guarantees, actual Canonical Authority deployment topology or named production on-call ownership. The Storage DB Platform Operator role is accountable for candidate qualification; a production on-call individual is not designated.
+
+### Next mandatory work — remain within Gate A
+
+1. Build a two-node PostgreSQL 18.7 synchronous replication test topology with pinned image digests and explicit synchronous_standby_names, synchronous_commit and replication-slot settings.
+2. Prepare the same XID on primary, prove prepared state is replayed to standby, hard-stop primary, promote standby, and resolve the exact same XID without heuristic decision or replacement.
+3. Prove rollback and commit visibility behavior after promotion, including private-before-terminal and atomic pointer+receipt visibility.
+4. Exercise backup/restore and point-in-time recovery; demonstrate that stale restored state cannot be served until current Forget control state and pending participant recovery are reconciled.
+5. Identify the actual production Canonical Authority DB deployment, storage/zone topology, operator/on-call owner, runbook, RPO/RTO and recovery ownership.
+
+Gate B persistent COC remains blocked until the complete Gate A profile is proven. Gate C remains blocked until Gate B. Do not parallelize later gates or claim physical deployment readiness from this single-node result. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
