@@ -159,3 +159,18 @@ Next DE-S work is implementation mapping and deployment selection, not another a
 The architecture repository's `README.md` (main Blob `dfb5bf8a91f4a3ba29b14d623fbd2083f0273508`) explicitly declares “Architecture definition” and “Implementation status: Not started by design”. Root checks found no common runtime build entry point. This is consistent with the repository's stated scope; it is not evidence that a separate implementation repository does not exist.
 
 Before G3 can proceed, A must identify the designated runtime implementation repository/branch, accountable engineering owner, build/CI and deployment topology, and contract traceability. Record this as blocker **G3-IMPL-REPO-01**. Do not add mock implementation to the architecture repository or mark implementation/test gates complete. Once the authoritative implementation location is supplied, map JF-10 H01–H13 to actual code and continue deterministic verification. G3 remains BLOCKED.
+
+
+## 10. BIH / CFG live owner evidence update
+
+The following technical owner confirmations are now recorded and must be reflected in future gate reconciliation:
+
+- B's formal ActorRef/ScopeRef/EnvironmentRef semantic mapping approval: issue #3 comment `6919299226`, Blob `729a706860b1259115816265e847a29683c3c233`.
+- I's formal PermissionEpoch/authorization technical confirmation: issue #5 comment `6919213602`, Blob `bae6a24fe3a374bc816993979a8fa9af52517dea`. This confirms technical currentness/revocation semantics only; I36-GOV-01..10 remain GOVERNANCE-BLOCKED.
+- H's exact A BIH package acceptance: issue #6 comment `6919218061`, Blob `fe437a3d44790f249f613d1e6cafc0db40d45b10`. H36 remains NOT RUN and this is not a C/G/H Applied wire schema freeze.
+- C's current final-request evidence contract Blob `45cab0f9c538fa653ac9e3ca8ddba3dee1b8383b` and G's current Applied/reconciliation contract Blob `6513932991fdbe13231b26e43440fc2c4fcbf7fa` record their respective semantic portions accepted with exceptions. Their explicit BIH consumer acceptance and exact C/G/H shared Applied package acceptance remain outstanding.
+- F's current runtime contract Blob `cd34244a3d92aff2ade1fc7758874cf30e512564`; F's explicit BIH consumer acceptance remains outstanding.
+
+A updated issue #3 (comment `6919370891`) and issue #6 (comment `6919372132`) with exact readbacks and remaining decisions. Applied Contract Frozen remains NO. G6 remains PARTIAL/BLOCKED; G7 remains NOT RUN.
+
+These are owner technical decisions, not external governance approvals or runtime evidence. They do not authorize G5, G7, G9 or G10 closure.
