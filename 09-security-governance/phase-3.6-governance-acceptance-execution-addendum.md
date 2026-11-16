@@ -82,3 +82,21 @@ Repository discovery across B/I/H/C/D/E/F/G/A/Storage branch trees found Markdow
 - Fact/Claim ADR-001: independently ADR-BLOCKED; no change.
 
 No branch merge or policy activation is authorized by this record.
+
+
+## 7. Consumer field-by-field acceptance matrix
+
+Legend: **OPEN** means no explicit acceptance evidence was found for this field/behavior on the consumer Owner branch. It is not a claim that the consumer implementation necessarily lacks the behavior. A source document or compatible implementation is not acceptance.
+
+| Consumer | PrincipalRef | ActorRef | ScopeRef | EnvironmentRef | Producer/Adapter Identity | Authenticated Transport Binding | PermissionEpoch Validation | Revocation | Forged Payload Identity Rejection | Unknown / Unsupported Handling |
+|---|---|---|---|---|---|---|---|---|---|---|
+| C Agent Integration | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN |
+| D Memory Brain | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN |
+| E Memory Compiler | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN |
+| F Memory Runtime | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN |
+| G Context Manager | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN |
+| H BMCP | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN |
+| Storage/Consistency | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN | OPEN |
+| A Integration Registry | N/A — registrar, not consumer approver | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
+
+For C/D/E/F/G/H/Storage, every cell remains OPEN pending an explicit statement by that Owner tied to the exact BIH contract version/commit. No acceptance is inferred from the documents read during this review.
