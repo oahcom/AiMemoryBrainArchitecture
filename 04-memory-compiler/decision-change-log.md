@@ -423,3 +423,50 @@ E-only file commits (each commit changes exactly the named path):
 Readback confirmed the updated files on the E branch, including the revalidation sections, D-to-E mapping, fault matrix, receipt state matrix, and typed cursor/fence-generation table. The final decision-log self-update commit and resulting branch HEAD are reported in the delivery record after refetch. No other path was changed by these commits.
 
 The readback is document/commit evidence only. It does not establish an executable D endpoint, a Storage transaction, runtime publication safety, or test PASS.
+
+ 
+---
+
+## Phase 3.6 — Fence-Enforced Compiler Publication and Durable Dependency Atomicity
+
+**Status:** DESIGN CONTRACT COMPLETE / IMPLEMENTATION NOT VERIFIED. This entry supersedes Phase 3.5 candidate wording only where the Phase 3.6 E-owned protocol below is more specific. It does not claim D/Storage/F/I approval or implementation.
+
+### 1. Source baseline read for this pass
+
+| Owner | Branch | HEAD read | Evidence / disposition |
+|---|---|---|---|
+| Integration review | main | `8a6414158c9c056c1638222534e1993d1bbc99d2` | `reviews/integration/phase-3-defghi-cross-module-contract-review.md`; Conditional Pass, CR-P1-01 OPEN/BLOCKING |
+| D | `session-d-memory-brain-2026-11-16` | `da8e5882d0b238d765d00b2225b79eea45a483b1` | D operation-level semantics; not yet a Phase 3.6-updated HEAD in this pass |
+| E | `session-e-memory-compiler-2026-11-16` | `c2f14408ba62447c11172d65b93a279fef96d175` | E source baseline before this Phase 3.6 change set |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `3a14550648f21c0bc2725dac38b29e099c2f3196` | Proposed shared serialization design only; not approved implementation |
+| F | `session-f-memory-runtime` | `f86f9b536ea69d8e0fbb4bf290c7023ef0eada76` | Rebuild/backfill/replay consumer contract and typed evidence matrix |
+| I | `session-i-security-governance-2026-11-16` | `5591ad3620ec3f5d74194bd79556dcf3e25bea07` | Global inventory branch HEAD; inventory artifact blob `9100061fa986fb6676656169de3fcf9fc1c72664` |
+
+The current D branch contains the Phase 3.5 operation-level contract, not a separately verified Phase 3.6 operation revision. Storage's branch report is a proposed realization, not an approved Storage authority. The integration review is historical and remains Conditional Pass; it is not an approval of this E update.
+
+### 2. D operation mapping consumed
+
+E consumes D semantic operations without inventing transport schemas: RegisterProducerClass, RegisterProducerWork, InstallForgetFence, CaptureProducerRegistrationHighWater, RegisterDerivedDependency, PublishDerivedIfFenceCurrent, CompleteProducerWork, ResolveProducerWork and ReconcileForgetBarrier. E's final gate requirement is that current fence validation, active work/attempt/lease validation, complete dependency receipts, current I authorization and the visibility transition share one serialization decision.
+
+### 3. Joint decisions requested
+
+- **D request:** confirm root WorkItemId stability across retry, DLQ replay, recompile and worker recovery; confirm that recompile uses a new DerivationRunId without changing the root barrier identity; confirm the exact current-fence/source-ancestor checks and publication-vs-fence race outcome.
+- **Storage request:** confirm the shared transaction/serialization authority and exact linearization point spanning D's fence/producer ledger, complete dependency registration and artifact visibility marker; or provide the approved durable prepare/commit coordinator, hidden-prepare invariant, fence/permission revalidation at final visibility CAS, participant recovery and restore protocol.
+- **I request:** confirm how current PermissionEpoch and revocation decision are made authoritative at the final visibility commit; E cannot independently assert currentness.
+- **F request:** confirm indexer/rebuild/backfill/replay consume only committed PUBLISHED artifacts and revalidate current fence/permission before indexing and serving.
+
+No response or approval is inferred from document presence. Confirmation status remains OPEN until an explicit owner decision is recorded.
+
+### 4. E-owned paths changed
+
+- `04-memory-compiler/compiler-state-and-producer-admission.md`
+- `04-memory-compiler/forget-fence-and-derived-registration.md`
+- `04-memory-compiler/accepted-receipt-and-idempotency-contract.md`
+- `04-memory-compiler/phase-3.6-producer-publication-conformance.md`
+- `04-memory-compiler/decision-change-log.md`
+
+No D, Storage, F, I or A path is modified by this change set.
+
+### 5. Verification boundary
+
+The documentation defines E's producer protocol, private staging, final publish gate, receipt semantics, retry/recovery rules and F handoff. It does not establish executable APIs, transaction isolation, atomic dependency registration, lease fencing, visibility enforcement, restore safety or runtime behavior. E36-01..20 are NOT RUN. Final commit/readback evidence is recorded in the delivery response after the E branch refetch.
