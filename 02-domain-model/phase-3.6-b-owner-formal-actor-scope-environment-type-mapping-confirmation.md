@@ -162,3 +162,17 @@ Reservations:
 5. B does not approve I governance, coordinator deployment, D lineage completeness, G Applied implementation, runtime conformance or any 1.0-to-1.1 approval transfer.
 
 This is an exact-version B semantic confirmation against the A Blob above, not a wire-schema approval or implementation claim.
+
+
+## B Owner exact-version confirmation — current CGH-APPLIED-1.1 candidate
+
+- A candidate Blob SHA: `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`
+- Profile: `CausalOrderProfile/1.0`; H schema: `bmcp.applied-ack/1.1.0`
+
+**Decision: APPROVE — B-owned semantic type mapping and role-preserving bindings for this exact 1.1 candidate.**
+
+B confirms the candidate preserves the approved distinctions: ActorRef is verifier-produced per-operation attribution bound to authenticated PrincipalRef/IssuerRef and exact operation/session; ScopeRef is a stable ownership/applicability boundary with owner, applicability, source, target and evidence roles kept distinct; EnvironmentRef is a stable authoritative external state-domain identity and is not interchangeable with ScopeRef or Environment ScopeRef. The 1.1 typed bindings and role-labelled ScopeBindingSet require no B semantic type substitution.
+
+Reservations: (1) these typed refs are not credentials, permission grants, I authorization receipts, D clearances, coordinator positions or reusable capabilities; (2) cross-Scope and cross-Environment access remains deny-by-default absent authoritative registry resolution and I authorization; (3) H owns wire encoding, field names, canonicalization and requiredness, while consumers own internal field paths; (4) legacy untyped strings MUST NOT be silently cast to typed refs; (5) this B decision does not approve I governance, coordinator deployment, D lineage completeness, G Applied implementation, conformance or production readiness.
+
+This decision applies only to A candidate Blob `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`. It is semantic type acceptance, not wire-schema approval or implementation verification, and transfers no 1.0 decision.
