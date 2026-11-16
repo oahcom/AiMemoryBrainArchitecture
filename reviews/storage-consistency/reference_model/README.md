@@ -41,3 +41,11 @@ coordinator and owners are identified and exercised.
 The test suite now injects a crash immediately before the modeled local publication commit and immediately after the atomic PublicationRecord insertion. Before-commit crash must leave the operation IN_DOUBT, invisible, and fenced/prepared. After-commit crash must preserve reader visibility through the atomic record; recovery reconstructs readback projections (VisibilityPointer, PublicationReceipt, owner outcome, receipt consumption and outbox) from that record. These are deterministic in-memory fault points, not process-kill or database crash tests.
 
 A branch-scoped GitHub Actions workflow is provided at `.github/workflows/jf10-reference-model.yml` to run the unittest suite on changes and pull requests. A workflow definition is not itself evidence of a successful CI run; retain NOT RUN until a concrete successful run is observed.
+
+## Phase 3.6 COC boundary clarification
+
+The JF-10 model is separate from the A Causal Order Coordinator (COC) model proposed for `CGH-APPLIED-1.1`. It models only the D/E/Storage single-policy-domain publication participant boundary described in this repository. It does not model COC quorum ordering, I/D outage recovery batches, a COC-to-JF-10 atomic bridge, production I sequencer behavior, or cross-system atomicity.
+
+The Storage Owner's exact COC boundary decision is recorded in `reviews/storage-consistency/phase-3.6-coc-storage-boundary-acceptance.md`. A passing JF-10 reference-model suite remains a logical-model result only and cannot close COC-01..16, JF10-01..17 production conformance, Storage C01..C23, or Phase 3.6 G10.
+
+This documentation update intentionally triggers the branch-scoped JF-10 logical-model CI workflow. The workflow result, if produced, must be recorded separately from production conformance.
