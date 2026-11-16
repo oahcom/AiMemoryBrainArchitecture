@@ -89,3 +89,26 @@ OPEN: I's revocation epoch scope and propagation SLA; D/E Forget tombstone forma
 
 ## 19. Routing / Scheduling
 Working Set admission occurs only after request authorization and session binding. Retrieval may populate it only with candidates that passed Scope-before-Candidate and canonical/Forget revalidation. Scheduler enforces per-session/global entry and byte budgets before insertion, prioritizes interactive work over background warming, and cancels fills on session close, revocation or Forget. Cache fills are coalesced only when the complete authorization/freshness key matches; otherwise requests execute in isolated namespaces.
+
+
+## Phase 3.5 — Forget Fence and Permission Invalidation Addendum (normative supplement)
+
+The detailed contract and conformance cases are in [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](phase-3.5-forget-suppression-and-cursor-consumption.md). This addendum supersedes earlier provisional wording where inconsistent.
+
+### Required cache/Working Set binding
+
+Every protected cache key and Working Set namespace binds, as applicable: authenticated Principal/issuer/security domain; canonical ScopeRef set; Agent/instance/task/session/environment; I PermissionEpoch; D ForgetFence reference/generation; exact Memory/Entity version or index+partition+generation+watermark+coverage/schema; query/filter fingerprint; retrieval configuration; temporal validity and Evidence access class. Missing required dimensions means no protected cache admission. The key is not authorization: every hit revalidates current I permission and D fence/lifecycle.
+
+### Invalidation postconditions
+
+- **Forget:** immediately deny target and descendant/lineage reads; evict or quarantine hot-memory/entity/query/index-derived entries; remove or render inaccessible matching Working Set refs/snippets; cancel in-flight retrieval/fills; recheck at fill publication and final return.
+- **Permission revocation:** immediately deny old-epoch access; invalidate affected Principal/Scope/resource namespaces and Working Sets even if physical eviction is delayed.
+- **Duplicates:** same event/operation ID + same target digest is idempotent; changed digest is a conflict. No duplicate can regress a tombstone or restore an entry.
+- **Lost notifications:** durable D/I state is authoritative. Every read revalidates; reconnect/anti-entropy reconciles contiguous checkpoints. A gap or unavailable authority quarantines affected namespaces until resync.
+- **Reconnect:** authenticate, obtain current I PermissionEpoch and D fence, reconcile G Context target, then restore only eligible entries. Never restore old Working Set first and clean later.
+
+### Cache Miss vs Stale Entry
+
+A **Cache Miss** means no entry exists for the complete key and permits a normal authorized source read. A **Stale Entry** exists but any authorization, fence, scope, version, watermark/schema, session or environment dimension is outdated or unverifiable; it must be dropped/quarantined and never returned. If D/I authority is unavailable, do not downgrade a stale hit to a miss and serve it.
+
+TTL is an optimization only; it is not a Forget or revocation mechanism. F-local invalidation evidence does not establish global completion or physical erasure.
