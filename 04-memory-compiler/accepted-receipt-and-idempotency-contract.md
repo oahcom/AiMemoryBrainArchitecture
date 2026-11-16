@@ -268,3 +268,73 @@ Canonical digest profile, typed identity serialization, retention horizon and po
 | ContextVersion | G; managed Context | Opaque downstream reference; E does not allocate it. |
 
 No arithmetic, numeric comparison, coercion or token substitution is permitted across these namespaces. In particular, a fence installation may itself carry an installation CanonicalCommitCursor for audit, but that cursor does not define or replace ForgetFenceGeneration.
+
+
+---
+
+## Phase 3.6 — Receipt Semantics and Durable Recovery
+
+### 1. Receipt stages are independent evidence
+
+| Stage | Receipt/evidence | What it proves | What it does not prove |
+|---|---|---|---|
+| Accepted | AcceptedReceipt | E durably accepted the authenticated logical submission under the declared ingress contract | Payload bytes durable unless the receipt contract explicitly includes that profile; D producer admission; compile start; candidate; canonical commit; dependency registration; publication |
+| Durable Ingestion | DurableIngestionReceipt / immutable EventRef + payload digest and storage durability evidence | Source bytes/reference and ingress metadata are durably recoverable under the declared storage profile | Accepted, queued, compile started or any canonical/derived effect |
+| Compile Started | CompileStarted evidence bound to WorkItemId, DerivationRunId, AttemptId, LeaseId | A named admitted attempt began after current authorization/fence checks | Candidate produced, dependency registered, canonical commit or publication |
+| Candidate Produced | CandidateProduced evidence | A candidate/IR/provenance checkpoint exists privately for the named run | Staging visibility, dependency completeness, canonical commit or publication |
+| Dependency Registered | D DependencyRegistrationReceipt | Complete artifact/version and required lineage edges are durably recorded in D inventory | Final gate passed or artifact visible |
+| Canonical Commit | D CanonicalCommitReceipt + CanonicalCommitCursor | D committed the named canonical mutation | Derived artifact publication, index application, Context activation or global Forget completion |
+| Derived Artifact Published | D/Storage PublicationReceipt + visibility commit identity | Exact artifact/version passed final gate and became visible at the atomic visibility commit | Canonical commit unless separately referenced; F IndexWatermark; G ContextVersion; global Forget completion or physical erasure |
+
+**CompilerCompletionReceipt** is an E roll-up referencing whichever stage receipts actually exist. It cannot upgrade CandidateProduced into DependencyRegistered, CanonicalCommit or Published. Each stage is append-only and independently resolvable.
+
+### 2. ACK semantics
+
+- Transport ACK / HTTP 2xx / queue ACK proves only the transport or queue's stated receipt.
+- Accepted is returned only after the E acceptance linearization point (Event + immutable payload ref/digest + idempotency row + AcceptedReceipt + CompileIntent/outbox) is durable under the declared transaction/WAL profile.
+- Durable Ingestion is separate when payload durability precedes metadata acceptance or uses a separate storage system.
+- RegistrationReceipt proves D admission only.
+- DependencyRegistrationReceipt proves complete dependency registration only.
+- PublicationReceipt proves the atomic visibility transition only.
+- F IndexAppliedAcknowledgement proves only the named F partition's contiguous applied prefix.
+
+### 3. Unknown outcomes and retry identity
+
+For every operation, timeout/lost ACK is UNKNOWN, not failure or success. Recovery uses the original operation ID and canonical request digest:
+
+- Accepted: authenticated idempotency namespace + caller key + semantic digest.
+- Producer registration: WorkItemId + registration digest.
+- Lease: WorkItemId + AttemptId + LeaseId/lease epoch.
+- Dependency registration: DependencyRegistrationId + dependency digest.
+- Canonical commit: D canonical operation ID + request digest.
+- Publication: PublicationOperationId + publication digest.
+- Terminal completion: WorkItemId + terminal digest.
+
+Same identity + same digest returns the original immutable receipt/outcome. Same identity + changed digest is a conflict. No timeout recovery mints a replacement WorkItemId or PublicationOperationId.
+
+### 4. Crash / replay matrix
+
+| Failure | Recovery behavior | Visibility/barrier rule |
+|---|---|---|
+| Accepted ACK lost | Resolve same idempotency namespace/key/digest and return original AcceptedReceipt if committed | Do not duplicate Event, receipt or CompileIntent |
+| Durable ingestion ACK lost | Resolve EventRef/payload digest and storage durability record | Orphan staged payload is not accepted work |
+| Worker crash | Expire/revoke lease; preserve WorkItemId; create new AttemptId/LeaseId after current auth/fence recheck | Old attempt cannot publish; work remains barrier-open |
+| Lease expiry | Treat old lease as invalid, not work terminal; resolve D state before takeover | No barrier closure |
+| Duplicate attempt | Enforce attempt/lease epoch and one active publication identity; stale attempt is rejected at final gate | No double publication |
+| DLQ replay | Same WorkItemId, new AttemptId/LeaseId; fresh auth/fence checks and same D registration | DLQ remains barrier-open until terminal receipt |
+| Outbox replay | At-least-once dispatch using stable outbox event/operation identity; resolve D receipt before action | No duplicate logical work |
+| Recompile | Same WorkItemId and original source lineage; new DerivationRunId and immutable artifact version; current auth/fence checks | Cannot reset fence applicability or receipt stage |
+| Dependency partial commit | Resolve same DependencyRegistrationId/digest; finish complete set or quarantine | No partial visibility |
+| Canonical commit ACK lost | Resolve same D canonical operation ID/digest | Never issue a second canonical mutation |
+| Publication ACK lost | Resolve same PublicationOperationId/digest; distinguish committed/aborted/unknown | Unknown remains private; committed returns original PublicationReceipt |
+| Crash after final transaction commit before local state update | Read authoritative visibility marker + PublicationReceipt by stable operation ID | If committed, reconcile local state; never republish |
+| Crash during separate-store prepare/commit | Recover coordinator and all participant records idempotently; prepared remains hidden until committed | No visibility from a prepare record or stale token |
+| Restore/rebuild | Quarantine projections/staging; replay current fence/permission control state before serving | No resurrection |
+
+### 5. Terminal and reconciliation
+
+A work item is not terminal merely because a worker returned, queue entry disappeared, lease expired, retry budget exhausted or a local completion event was written. E submits CompleteProducerWork only after every run, attempt, staged artifact, dependency registration, canonical operation, publication operation, outbox and DLQ replay path is resolved. D ProducerWorkTerminalReceipt is required before E marks D barrier disposition terminal.
+
+### 6. Conformance status
+
+The Phase 3.6 cases in `phase-3.6-producer-publication-conformance.md` are **NOT RUN**. Documentation and repository readback do not establish transaction correctness, no-resurrection behavior or runtime fault safety.
