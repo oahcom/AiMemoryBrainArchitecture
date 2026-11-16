@@ -109,6 +109,7 @@ class GlobalForgetModelTests(unittest.TestCase):
         self.g.register_target(target)
         self.assertIsNone(self.g.seal)
         self.seal()
+        self.g.record_evidence(self.evidence())
         self.g.record_evidence(Evidence("forget-op-1", "backup-1", "seal-1",
             self.g.inventory_epoch, "Storage-owner", "scope-A", "SUPPRESS",
             "backup-v1", "CONFIRMED", "suppress-only-proof"))
@@ -180,6 +181,7 @@ class GlobalForgetModelTests(unittest.TestCase):
                                       physical_erasure_required=True))
         self.assertIsNone(self.g.seal)
         self.seal()
+        self.g.record_evidence(self.evidence())
         self.g.record_evidence(Evidence("forget-op-1", "backup-2", "seal-1",
             self.g.inventory_epoch, "Storage-owner", "scope-A", "PHYSICAL_ERASURE",
             "backup-v1", "CONFIRMED", "erase-proof"))
