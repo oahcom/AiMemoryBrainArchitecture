@@ -286,7 +286,7 @@ The v2 header requests A/I/D/C/H review. Expand the exact review set:
 - A/I/D/C/H: integration, authorization, Forget lineage, provider side effects and wire mapping.
 - Storage: durable log/participant/recovery realization.
 
-The v2 still needs an explicit owner for the authoritative CausalOrderDomain registry (bind to I-owned PolicyDomain registry/version), and an exact BMCP field-level mapping. The v2 provides the required recovery-completion and repeated-batch semantics, but the protocol/v2 relationship must be settled before Gate B freeze.
+The v2 provides the required recovery-completion, repeated-batch and GID/native-XID semantics. Remaining issues are explicit I ownership/versioning of the CausalOrderDomain-to-PolicyDomain registry, exact BMCP field-level mapping and the protocol/v2 relationship. The H schema validation workflow now passes 11/11 structural tests, but it does not yet test GID/native-XID separation or receipt DB-incarnation binding.
 
 ### 11.4 Current exact-version acceptance vector
 
@@ -301,7 +301,7 @@ The v2 still needs an explicit owner for the authoritative CausalOrderDomain reg
 
 Current exact source pins:
 - Phase 3.6.3 COC protocol v1.1 with §14: Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`.
-- Storage Design v2: Blob `bb026fa79b617c4bab84de84c3ff2337ca5bf96c`.
+- Storage Design v2: Blob `4ed4234ce548a814a9496adf7a14c4459ea9f7ce`.
 - Storage readiness/Gate A contract: Blob `b9e664dfbed1c0f268b2b8b0d9c2ddcd29221bf1`.
 - Storage exact dossier: Blob `0aabf66848dc97deee028c571183c0d7204008c0`.
 - Storage self-review file: Blob `332de9192ccab6f18fc2a0d18700cc9585a98983`.
@@ -317,9 +317,11 @@ Phase 3.6.3 §14 correctly defines:
 2. `PreparedTransactionGID`: client-chosen PostgreSQL prepared-transaction GID, allocated/bound before COC prepare intent.
 3. PostgreSQL numeric native XID: engine-assigned after PREPARE, recorded only as observed evidence.
 
-But two current Storage documents still say “preallocate the exact XID” and bind the generic XID as the participant identity:
-- Storage Design v2 §7 uses “preallocated XID” / “same XID” without naming PreparedTransactionGID or separately typing native XID.
-- Storage readiness §26.2 says “Preallocate and durably bind the exact XID” before PREPARE, also without the GID/native-XID distinction.
+The revised Storage Design v2 §7.5 now incorporates the correct PreparedTransactionGID/native-XID distinction. The remaining cross-artifact mismatch is:
+- Storage readiness §26.2 still says “Preallocate and durably bind the exact XID” before PREPARE, without naming PreparedTransactionGID or separately typing native XID.
+- The common JF-10 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0` still uses generic “preallocated XID” / “same XID” language in its normative owner-final-gate/participant contract.
+- H schema candidate Blob `a8a945cc3623c2907003b93625e3c79742150944` exposes opaque `preallocated_storage_xid_ref` and `storage_xid_ref` fields but does not explicitly map them to GID versus native XID.
+- B's current typed-reference model does not yet define PreparedParticipantRef, PreparedTransactionGID, NativeXidObserved and DBIdentity as separate types.
 
 The common JF-10 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0` and H schema candidate Blob `a8a945cc3623c2907003b93625e3c79742150944` must be checked against this new distinction. H currently has opaque `preallocated_storage_xid_ref` and `storage_xid_ref` fields; no mapping may be inferred without H's explicit decision.
 
@@ -338,7 +340,7 @@ The same GID must be allocated and durably bound before COC prepare intent, reco
 The current COC protocol and Storage Design v2 overlap but use different RecordType/state names:
 - Protocol v1.1 uses `RECOVERY_CUTOFF_BATCH`, `RECOVERY_RECONCILIATION_RECORDED`, `VoterConfigurationEpoch` and `COCCommitReceipt`.
 - Storage Design v2 uses `COC_RECOVERY_CUTOFF_BATCH`, `PARTICIPANT_SET_RECONCILIATION`, `OWNER_LOCAL_GATE_RELEASE`, `RECOVERY_EPOCH_COMPLETED` and exact H bridge names.
-- The v2 record envelope does not clearly carry the same VoterConfigurationEpoch/quorum-proof fields as the protocol v1.1 envelope; it only binds a committed configuration epoch in the recovery prefix.
+- The v2 immutable envelope carries CoordinatorEpoch/Index and digest-chain fields, while protocol v1.1 additionally defines VoterConfigurationEpoch and COCCommitReceipt quorum proof. The v2 must explicitly inherit/map those protocol fields rather than leave the commit-proof boundary implicit.
 
 These may be complementary (COC service protocol + Storage recovery realization), but the repository needs one canonical manifest and a normative RecordType/API/wire mapping. A must state which artifact is normative for the COC service; Storage must state which v2 fields extend it; H must approve the exact schema; B must approve typed refs. Any conflicting names/fields must be versioned aliases or consolidated, not left as parallel normative definitions.
 
@@ -346,7 +348,7 @@ These may be complementary (COC service protocol + Storage recovery realization)
 
 - Blob `4ac63...`: role-based design acceptance from A/B/C/D/E/G/H/I/Storage with enumerated exceptions.
 - Blob `86ff3...`: Storage accepts with conditions (readiness §§26–27); A/B/C/D/E/G/H/I exact decisions still pin `4ac63...` and do not automatically carry forward.
-- Storage Design v2 Blob `bb026...`: fresh review required; no cross-owner acceptance yet.
+- Storage Design v2 Blob `4ed423...`: fresh review required; no cross-owner acceptance yet. Its §7.5 now aligns GID/native-XID semantics with protocol §14, but the common JF-10 protocol, readiness §26.2, B types and H schema remain to be aligned.
 - Storage self-review Blob `332de...` still pins old Blob `4ac63...`; the dossier/readiness have newer Storage acceptance of `86ff3...`. Storage should update the self-review or clearly mark it historical.
 - A's COC acceptance matrix covers Blob `4ac63...`, not `86ff3...` or Storage Design v2. A's context decision register and closure tracker also remain stale against new F/G/D and COC Owner decisions.
 
@@ -361,4 +363,22 @@ These may be complementary (COC service protocol + Storage recovery realization)
 7. A/B/C/D/E/G/H/I/Storage: exact-version review of the current amended protocol and Storage Design v2 as a single declared package or explicitly versioned complementary pair.
 
 **Disposition:** Gate B has a fully reviewed prior design revision (4ac63) with exceptions. The current protocol revision (86ff) has Storage-only conditional acceptance; the Storage Design v2 (bb026) is a fresh proposal. The GID/native-XID and protocol/v2 mapping are P0 cross-document blockers to freezing the current Gate B package. No implementation or Gate C pass is claimed.
+
+
+
+## 13. F/G and TAB-001 acceptance/evidence refresh
+
+A has now published a final NVIDIA context-optimization integration package:
+- System contract Blob `7394...`
+- Owner acceptance matrix Blob `3dcb...`
+- Governance gates Blob `1cf3...`
+- Final integration decision Blob `6380...`
+
+The matrix records all eight non-A Owner perspectives as **ACCEPT WITH CONDITIONS** for the exact A context-optimization integration package. D/F/G have also published their exact acceptance artifacts. This is a design-level conditional acceptance, not an unconditional F/G Recall contract acceptance, implementation proof or conformance pass. A's older `context-optimization-owner-decision-register.md` still does not reflect the new D/F/G acceptance artifacts and must be reconciled.
+
+F has published a deterministic anti-resurrection runtime reference model with **19/19 tests passing** on its current branch. This is valuable model evidence, not production runtime or fault-injection evidence. F's module baseline proposal still omits the Observation Archive contract and needs Owner-authored update. G's module baseline proposal still omits TSS/ObservationRef/dynamic compaction/fidelity/lineage-loss semantics and needs Owner-authored update. The F/G joint Recall contract remains conditional; no same-version joint contract acceptance is established.
+
+H has published a JF-10 bridge schema validation workflow with **11/11 structural tests passing**. The schema remains a candidate, not frozen. The tests do not yet validate the new PreparedTransactionGID/native-XID nominal distinction, DB incarnation binding or signed PreparedParticipantReceipt semantics. H must map or add fields explicitly; do not infer that opaque `storage_xid_ref` and `preallocated_storage_xid_ref` already implement the new type distinction.
+
+TAB-001 technology review coverage is now 8/8 Owner reports present (B/C/D/E/F/G/H/I). A's final system review has a §18.6 reassessment to CONDITIONAL PASS, but its front matter and earlier missing-report table still say NOT REVIEWABLE / B-D-E-I missing. A must consolidate the superseded text, refresh branch/source pins and include the new F 19/19 and H 11/11 model/schema evidence with their non-claims.
 
