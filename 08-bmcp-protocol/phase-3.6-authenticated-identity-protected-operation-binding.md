@@ -2,7 +2,7 @@
 
 - Owner: Session H — BMCP Protocol & Adapter Authentication
 - Branch: `session-h-bmcp-protocol`
-- Status: **CANDIDATE wire contract; B/I acceptance OPEN; implementation/conformance NOT VERIFIED**
+- Status: **JOINT-DECIDED technical baseline; governance and consumer acceptance OPEN; implementation/conformance NOT VERIFIED**
 - Date: 2026-11-16
 - Source baseline: H Phase 3.5 Identity/Applied/ACK/Reconnect contract, envelope/versioning, capability and ACK contracts; B Typed Reference Registry and Principal/Actor mapping; I Phase 3.6 Trust Chain proposal; C Telemetry Event and Identity; D/E protected-operation requirements; A Phase 3.5 Closure Review.
 - Authority: H owns BMCP envelope, serialization, Adapter authentication integration, ACK transport and reconnect. B owns domain Ref semantics. I owns trust and authorization policy. C/D/E/F/G retain their payload and enforcement semantics.
@@ -143,3 +143,68 @@ For each executed test record build/commit, protocol version, Adapter instance/t
 - **Fact/Claim ADR-001:** remains independently ADR-BLOCKED; this wire proposal does not change Fact/Claim semantics.
 
 This document does not claim a frozen BMCP schema, deployed authentication implementation, secure reconnect implementation, security certification or runtime conformance PASS.
+
+## 9. BIH Phase 3.6 — Joint Architect Decisions (authoritative technical baseline)
+
+- Decision authority: Joint BIH technical decision authority explicitly delegated by the project user to the Joint Decision Architect in this execution.
+- Decision state: **TECHNICALLY DECIDED — JOINT BASELINE**. This settles B/I/H design choices; it does not claim separate human signatures, external governance approval, implementation, or conformance.
+- Precedence: this section controls Phase 3.6 BIH design choices where earlier paragraphs label the same choices Candidate/Open. It does not override owner authority boundaries.
+
+### 9.1 Binding decisions
+
+| ID | Joint decision | Authority | Required behavior |
+|---|---|---|---|
+| BIH36-JD-01 | PrincipalRef, IssuerRef, ActorRef, AgentRef, AdapterRef, ProducerRef, ScopeRef, EnvironmentRef and RuntimeSessionRef remain distinct typed identities. No implicit casts or credential/permission substitution. | B semantics; I/H consume | Preserve type discriminator, issuer/authority namespace and security-domain dimensions. |
+| BIH36-JD-02 | A Ref is a selector/reference, never proof of identity, registration, authentication or permission. Payload identity fields are claims only. | B semantics; I trust; H transport | Deserialization and message integrity cannot promote a claim to authenticated identity. |
+| BIH36-JD-03 | Principal resolution is issuer-scoped by validated IssuerRef, trust/security domain, tenant namespace, principal kind and issuer subject. PrincipalRef is stable and never recycled; credential rotation does not change it. | I registry; B type semantics | No subject-only global lookup, payload-driven auto-registration or ambiguous resolution. |
+| BIH36-JD-04 | Issuer trust is explicit, locally admitted and non-transitive. Trust-on-first-use is disabled. Unknown, suspended, compromised, revoked or unverifiable issuer/key fails closed. | I | No payload-driven trust bootstrap or transitive trust inference. |
+| BIH36-JD-05 | ActorRef is immutable, verifier-produced, per-operation attribution binding resolved Principal, issuer, operation/session and validated delegation/acting-for context. It is not a credential, grant or reusable Principal alias. | B semantics; I validation; H binding | Caller-minted ActorRef is rejected; materially different operation/session/delegation attribution gets a distinct ActorRef. |
+| BIH36-JD-06 | AgentRef, AdapterRef and ProducerRef are separate registered workload/application identities. Their binding to PrincipalRef comes only from protected verifier context and authoritative registries. | B types; I Principal/Producer trust; H Adapter registry | Unknown, revoked, replaced or mismatched workload bindings are rejected/quarantined. |
+| BIH36-JD-07 | Delegation authority is the strict intersection of grantor authority, delegate eligibility and every parent grant. No amplification, cycles or represented-Principal fallback. Sub-delegation is disabled by default until an approved profile enables it. | I | Any chain requiring unapproved sub-delegation is denied; grant binds issuer, parties, actions, resources, exact boundaries, audience, purpose, validity and revocation. |
+| BIH36-JD-08 | Scope ownership and applicability roles remain distinct. Hierarchy, shared Agent, project, tenant label or session similarity never grants access. Cross-Scope access requires an explicit current grant naming exact source/target scopes and action/resource/purpose/audience. | B role semantics; I authorization | Each endpoint and Evidence/Provenance dereference is independently authorized. |
+| BIH36-JD-09 | Cross-Environment access is denied by default. A bridge resolves exact source/target EnvironmentRefs and binds permitted relation/action/resource, purpose, provenance, validity and explicit I authorization. | B type semantics; Environment registry owner; I | No display-label, coordinate, same-project or same-user fallback. |
+| BIH36-JD-10 | Every protected operation authorizes the complete tuple: PrincipalRef, ActorRef, action, ResourceRef, purpose, audience, ownership ScopeRef, applicability ScopeRef set, applicable EnvironmentRef, DelegationChainRef, policy domain and PermissionEpoch, plus authenticated workload/session bindings and owner-local fences. | I policy; operation owner enforcement | Missing, unresolved, mismatched or indeterminate required member means DENY/PAUSE; upstream ALLOW is not a blanket capability. |
+| BIH36-JD-11 | PermissionEpoch is an opaque, monotonically advancing token within an explicit I-owned policy domain. Cross-domain epochs are incomparable. I is sole logical authority; consumers validate currentness at their own protected boundary and at irreversible commit/disclosure when required. | I | Stale, gapped, unknown, incomparable or unverifiable epoch blocks the operation. |
+| BIH36-JD-12 | No offline/stale authorization lease is usable in this baseline. A bounded non-transferable lease requires a separately approved I governance profile specifying audience, resource/action/scope binding, maximum staleness, expiry and revocation behavior. | I + Governance | Until approved, inability to establish authoritative currentness fails closed. |
+| BIH36-JD-13 | PermissionEpoch and D ForgetFenceGeneration/ForgetFence are independent typed namespaces with independent authorities and checks. They are never compared, converted or substituted. | I for PermissionEpoch; D for ForgetFence | A boundary requiring both validates both independently. |
+| BIH36-JD-14 | BMCP authentication context is protected verifier/transport context outside untrusted payload claims. Payload mirrors and selectors never override protected issuer, principal, audience, session, Actor or workload bindings. | H wire/transport; I trust; B types | Integrity/signature proves message integrity only, not issuer trust, Principal registration or authorization. |
+| BIH36-JD-15 | Every ACK binds authenticated issuer/principal, Adapter application and concrete instance, Agent/runtime instance, fresh RuntimeSessionRef, verifier-resolved ActorRef, exact Scope roles, operation/delivery/forget identity, CapabilityEpoch, PermissionEpoch, applicable ForgetFence, action/region/coverage, immutable ACK ID and evidence digest. | H transport; I auth; operation owners | Same ACK ID+digest is idempotent; same ID+different digest is conflict. Old-session/stale/superseded/post-revocation ACKs are historical only and cannot roll back state. |
+| BIH36-JD-16 | Reconnect order is fixed: fresh Authenticate; Validate Issuer; Resolve Principal/workload bindings; Negotiate Capability; obtain current PermissionEpoch; obtain current ForgetFence; suppress/clear stale state; reconcile delivery/ACK journal; resume only after final-boundary authorization. | H protocol; I trust; D/G state | Any failed/indeterminate step keeps protected state suppressed/unavailable. Old sessions do not inherit ACK authority. |
+| BIH36-JD-17 | Unknown security-critical fields/enums, malformed refs, duplicate canonical keys, unsupported major version, identity mismatch, missing required scope/environment, stale epochs and ambiguous outcomes fail closed. No silent downgrade or payload fallback. | H wire; I policy; B types | Errors expose stable non-sensitive code/correlation metadata only. |
+
+### 9.2 Owner boundaries
+
+- B retains final semantic authority for Ref types, namespace/reference invariants, ActorRef meaning and ScopeRef role distinctions. B does not decide issuer trust, grants or PermissionEpoch policy.
+- I retains final policy authority for issuer admission, Principal/Producer registration, delegation, authorization, revocation, PermissionEpoch and governance exceptions. I does not redefine B domain types or H wire encoding.
+- H retains final protocol authority for BMCP envelope, field spelling/encoding, versioning, protected transport integration, Adapter instance binding, ACK transport and reconnect mechanics. H does not authenticate payload claims by itself or grant authorization.
+- C/D/E/F/G and Storage retain their own semantic and final enforcement/linearization boundaries. This record does not amend their owner-owned contracts or deem their acceptance complete.
+
+### 9.3 Governance gates — deliberately not cleared
+
+The following remain **GOVERNANCE-BLOCKED** until a named authority approves the exact policy text/hash, approver identity/authority, approval time, scope/jurisdiction, effective version and review/expiry conditions:
+
+- issuer admission/federation, key compromise and trust-domain profile;
+- Principal taxonomy and cross-issuer linking policy;
+- delegation eligibility, maximum chain depth and any sub-delegation;
+- cross-Scope sharing/inheritance and break-glass;
+- cross-Environment federation/bridges;
+- PermissionEpoch partitioning, revocation SLA and any bounded offline lease;
+- revocation effective point, in-flight operation treatment and already-disclosed data handling;
+- unsupported Adapter/producer exceptions and Global Forget completion exceptions.
+
+The technical defaults above are deny-first interim rules, not substitutes for approvals. No approver, signature or effective policy version is inferred from this commit.
+
+### 9.4 Acceptance and non-claims
+
+| Dimension | State |
+|---|---|
+| BIH technical design | **DECIDED — JOINT BASELINE** |
+| B/I/H cross-document consistency | **Design decided; branch readback required** |
+| External governance approvals | **GOVERNANCE-BLOCKED** |
+| C/D/E/F/G/Storage consumer acceptance | **OPEN — not approved by this record** |
+| BMCP schema/production policy freeze | **NOT CLAIMED** |
+| Runtime implementation and adversarial tests | **NOT VERIFIED / NOT RUN** |
+| Security certification | **NOT CLAIMED** |
+| Fact/Claim ADR-001 | **ADR-BLOCKED — independent and unchanged** |
+
+This joint decision supersedes only B/I/H Phase 3.6 technical Candidate/Open labels for BIH36-JD-01..17. It does not supersede governance approvals, other Owner decisions, ADR-001 or implementation evidence requirements.
