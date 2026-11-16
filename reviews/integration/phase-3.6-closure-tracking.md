@@ -409,7 +409,7 @@ D and E Owner branches each received their own mapping artifacts:
 - D Blob `a3555162827bd1cc7cf4c0918d4ab9b6ce94c8bb`.
 - E Blob `20770a84daea00ba9f38cc9a5bc43f153f09c3a7`.
 
-Issue #4 records the model publication and requests D/E/Storage review (comment `6919546496`). A local semantic replay of 15 deterministic assertions passed. The committed unittest suite has not yet been run by repository CI.
+Issue #4 records the model publication and requests D/E/Storage review (comment `6919546496`). 15 deterministic unittest methods are authored. No execution result has been verified in a local Python runtime or GitHub Actions; test status remains NOT RUN. The committed unittest suite has not yet been run by repository CI.
 
 ### Gate and claim boundaries
 
