@@ -1,0 +1,82 @@
+# Phase 3.6.1 — D Joint Defect Closure Addendum
+
+- Authority: user-delegated DE-S Joint Architect; D semantics only
+- Status: **JOINT SEMANTIC DECISIONS RECORDED / IMPLEMENTATION NOT VERIFIED**
+- Applies with and refines `phase-3.6-joint-forget-linearization-decision.md`.
+- Does not approve or modify I/F/G/H/B ownership contracts.
+
+## 1. JF-01 — Closed-world inventory is not the work high-water
+
+The following are distinct, non-substitutable evidence:
+
+1. `ProducerDomainInventoryEpoch`: I-authoritative closed-world inventory of producer/recipient classes and instances.
+2. `ProducerRegistryVersion`: D-local version of producer classes registered and enabled/disabled in the D Forget authority.
+3. `ProducerRegistrationHighWater`: D-local sequence cutoff of concrete WorkItems captured by one fence.
+4. `ForgetFenceGeneration`: monotonic suppression generation.
+
+A FenceSnapshotReceipt MUST bind all four values (and authority ID, ForgetOperationId, target-set digest, commit cursor and schema version). D MUST NOT infer global inventory completeness from a contiguous work sequence or a complete local producer registry.
+
+Before D may issue a closed-world barrier snapshot, it requires an I-authoritative InventorySealReceipt binding the exact ProducerDomainInventoryEpoch, inventory digest, included/excluded class and instance identities, and explicit status for every inventory member. Every included producer class must map to a D ProducerClass registration or a durable, owner-authorized disabled/retired disposition. Missing, stale, unknown or digest-mismatched inventory evidence leaves the barrier **InventoryUnsealed** and prevents CanonicalSuppressionComplete. A later inventory epoch or newly discovered producer invalidates the seal and reopens reconciliation.
+
+D owns validation and persistence of the seal reference; I alone defines and attests the global inventory. No I receipt means no global closed-world claim.
+
+## 2. JF-02 — Authorization freshness at visibility linearization
+
+D's Forget predicate and I's authorization predicate are separate mandatory predicates. The final visibility decision MUST bind an I-authoritative AuthorizationCommitPermit to the exact principal/actor, action, resource/artifact, source lineage, ScopeRef, ForgetOperationId/fence generation, WorkItemId, AttemptId, LeaseEpoch, DependencySetDigest, and intended visibility operation.
+
+The permit MUST carry PermissionEpoch, revocation watermark, decision ID, policy version, issuance/expiry, audience and unique nonce. It must be cryptographically verifiable and single-use/idempotently consumable. A cached authorization decision or a permit for another scope/action is invalid.
+
+Freshness cannot be manufactured by comparing a locally cached PermissionEpoch. The deployment MUST implement one of these equivalent safety mechanisms:
+- I and the visibility coordinator participate in the same linearizable commit domain; or
+- I issues a linearizable commit permit/fencing grant whose validity is serialized against revocation, and revocation cannot become effective while an older permit can still commit; or
+- a formally specified distributed commit protocol provides the same revocation-vs-publication ordering and crash recovery.
+
+If the selected I interface cannot prove that ordering, publication fails closed. D does not mint permits or decide authorization policy. I confirmation/integration remains an external dependency and is not claimed by this addendum.
+
+## 3. JF-03 — Output manifest freeze and root terminality
+
+Every root WorkItem MUST have a durable output manifest with monotonic `OutputManifestVersion`, immutable manifest digest, declared output identities/slots, expected output count or explicit open-ended marker, derivation/child lineage, and state.
+
+The manifest lifecycle is:
+`Open → Frozen(version,digest) → Reopened(new version) → Frozen(...)`.
+Only a frozen manifest may enter complete dependency registration and publication-gate evaluation. Any output addition/removal, changed output identity/digest, newly discovered child, or changed dependency set creates a new manifest version and invalidates dependent completeness/terminal receipts. A frozen manifest is never edited in place.
+
+An open-ended producer must first durably close discovery and freeze a complete manifest; elapsed time, queue emptiness or worker completion is not proof of completeness. Each output has its own visibility decision and PublicationReceipt; atomic simultaneous visibility of all outputs is not implied. Root terminality is separate: it requires every frozen output to have a durable terminal disposition, all child WorkItems accounted for, every attempt/replay path closed, and no stale lease or outstanding commit outcome capable of later publication.
+
+## 4. JF-04 — Commit outcome unknown is a first-class state
+
+Every registration, fence, dependency, visibility and terminal operation has a stable idempotency key plus immutable request digest. A timeout, connection reset or lost ACK after submission yields `OutcomeUnknown`, never `Failed` and never `Succeeded`.
+
+Recovery MUST query the authoritative linearization domain by the same key and digest:
+- committed: return the original immutable receipt and commit cursor;
+- durably rejected: return the original rejection receipt;
+- proven not committed: retry the same key/digest;
+- still indeterminate/unavailable: remain pending and fail closed.
+
+Same key with a different digest is a permanent conflict. A caller MUST NOT create a replacement key to escape an unknown result. Publication ACK recovery reads the authoritative visibility record by ArtifactId + publication idempotency key and verifies digest, fence generation and receipt. Root work cannot terminalize while any operation outcome is unknown.
+
+## 5. JF-05 — Canonical visibility applies to every read surface
+
+D defines one authoritative visibility predicate; all read surfaces must enforce it, including direct canonical reads, retrieval/candidate APIs, reference resolution, indexes, caches, materialized views, exports and downstream consumers. An index/cache may be a candidate accelerator, never an independent authority.
+
+Every returned artifact must be validated against its immutable ArtifactId/digest and current applicable ForgetFence/visibility state at response finalization. If the read path cannot prove current state, it returns no affected content (fail closed). Stale indexes may cause false negatives but must never cause false positives. Fence installation must invalidate or fence old cache/index generations; asynchronous invalidation alone is insufficient. F/F/G/H owner-specific enforcement remains their responsibility; D's contract does not claim their implementation.
+
+## 6. JF-06 — Restore/recovery control-ledger barrier
+
+The Forget control plane MUST be monotonic across data restore. Before any restored artifact, index, cache or replica serves reads or accepts publication, recovery must establish a control-ledger watermark at least as new as the authoritative pre-failure watermark and reconcile:
+- ForgetOperation ledger and idempotency receipts;
+- Fence generations and target-set digests;
+- InventorySealReceipt / ProducerDomainInventoryEpoch;
+- FenceSnapshotReceipt, registry versions and work high-waters;
+- dependency completeness and output-manifest versions;
+- publication/visibility and terminal receipts;
+- authorization epoch/revocation watermark references;
+- suppression and residual-exception references.
+
+The preferred realization is an independently durable, monotonic control ledger or authoritative log replay with verified continuity. Restoring an older backup is not allowed to roll back a fence. If the latest control watermark cannot be proven, the authority remains **RecoveryQuarantined**: no affected reads, new publication, barrier completion or Global Forget claim. Reconciliation must be idempotent and produce a signed/immutable RecoveryReconciliationReceipt before reopening service.
+
+## 7. D lifecycle and evidence consequences
+
+`CanonicalSuppressionComplete` requires a sealed global inventory where I policy requires it, no unresolved captured work/output/attempt/outcome, and D's canonical target suppression proof. It remains distinct from I's Global Forget completion and physical erasure. A newly observed inventory epoch, output manifest mutation, unknown commit outcome or restore mismatch reopens the relevant proof.
+
+These are architecture decisions, not implementation evidence. D36 race, recovery and fault tests remain **NOT RUN**.
