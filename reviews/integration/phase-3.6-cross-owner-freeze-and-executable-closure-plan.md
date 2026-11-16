@@ -421,7 +421,7 @@ After the A proposal was published, fresh Owner-branch reads found three new, in
 | Owner | Artifact | Blob SHA | Owner status |
 |---|---|---|---|
 | C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `543d04e10a95d1f5720c3da8050befe6d21cd0c6` | C-side contract specified; coordinator deployment and cross-owner acceptance OPEN |
-| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `1c60e7129c5b4255d6b9033bcb03e28e43b3b5af` | D-side fence/barrier contract specified; coordinator/Storage deployment and cross-owner acceptance OPEN |
+| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `99ca34b0c35d970a4135d8e79c5a743606b7bd34` | D-side fence/barrier contract specified; coordinator/Storage deployment and cross-owner acceptance OPEN |
 | I | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md` | `8a9d418593c7d6be12f072ec8eeb0b3a56eb4be8` | I-side receipt/ordering contract specified; service deployment, external governance and cross-owner acceptance OPEN |
 
 All three target:
@@ -473,10 +473,10 @@ This protocol preserves authority separation: I remains the only authorization/P
 
 | Owner | Owner-branch artifact | Readback Blob SHA | Commit | Status |
 |---|---|---|---|---|
-| C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `f0839e4f470588e6053c144b91ff318b6465e04c` | `96054e879abbd827f36ea8b766aa7ccaa4defef1` | C-side contract specified; cross-owner acceptance pending |
+| C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `f2c5b379cacfedd81500e8496d3053b628e144a` | `8f017a5a17620c21f3e7f0075a087c4b098baa8e` | C-side contract specified; cross-owner acceptance pending |
 | I | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md` | `1e4d2d43807981d73c2e5394a0b6020b9177a3f1` | `3fc7131f5b057b4f12fd2303a5a4a2440dff8d44` | I receipt/terminalization contract specified; governance/deployment pending |
-| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `1c60e7129c5b4255d6b9033bcb03e28e43b3b5af` | `99e13c308fe784508b70a48bea694493c00c12b2` | D participant/fence barrier contract specified; deployment pending |
-| H | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `a23b9a879a3ec0e212645a8247a6797bd0055360` | `ceb20c0aa0318e2c4c82f7ffb90b05432bd87255` | H schema candidate 1.1.0 specified; not production-frozen |
+| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `99ca34b0c35d970a4135d8e79c5a743606b7bd34` | `ecc763bcdec5a56ade8eaf5f56703584856981d2` | D participant/fence barrier contract specified; deployment pending |
+| H | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `f5ba88e69ecf89d976e3c554a1d727fe38f41590` | `de75b9db383b8d740c2d91bf595ca9e0b1c03e19` | H schema candidate 1.1.0 specified; not production-frozen |
 
 ### 13.3.3 H 1.1.0 schema additions
 
