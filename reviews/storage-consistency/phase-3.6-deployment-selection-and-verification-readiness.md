@@ -552,3 +552,11 @@ The negative logs contain concrete PostgreSQL failures for the deliberately dama
 **Scope restriction:** this is an isolated PostgreSQL 18.7 CI fixture, not production COC/I/D integration. The authoritative-reader view, pointer/receipt tables and prepared transactions are synthetic probe objects. It does not establish COC participant bridge implementation, authenticated PreparedParticipantReceipt, I owner-final-gate or CommitAuthorizationReceipt consumption, D lineage/fence serialization, external high-water restore quarantine, production archive custody, or deployment readiness.
 
 This success supersedes the prior PITR atomicity CI failure entries for this exact probe revision only. Gate A remains PARTIAL PASS / OPEN; Gate B architecture specification is PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED; Gate C remains deferred to engineering-phase integration and fault injection; JF-10 P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+
+## 24. Gate B exact cross-owner design acceptance complete (2026-11-17)
+
+The exact COC durable protocol Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` has now been reviewed and accepted at the B/C/D/E/G/H/I/A/Storage owner boundaries. The A integration matrix is `reviews/integration/phase-3.6.3-coc-durable-protocol-acceptance-matrix.md`, commit `e5fad5b3e67662134c18e33090b08d874f161f41`.
+
+Exact owner acceptance is recorded; no protocol artifact was changed after those reviews. Gate B is therefore **DESIGN-LEVEL ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS**. It is not an implementation or conformance PASS. Gate C remains deferred to engineering-phase executable services and distributed fault injection.
+
+Gate A remains PARTIAL PASS / OPEN for remaining architecture and deployment decision boundaries; production runtime binding is explicitly deferred to engineering phase. The seven-workflow PostgreSQL 18.7 capability regression is 7/7 SUCCESS as listed in §23.2. JF-10 runtime P0 remains OPEN; multi-policy-domain atomicity remains BLOCKED; Global Forget governance/inventory remains OPEN; production activation NOT AUTHORIZED.
