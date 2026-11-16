@@ -902,3 +902,17 @@ Issue #4 records both decisions in comment `6920938325`.
 The exact Owner evidence was refreshed and reconciled on Issue #8. I accepts A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` with the single-I-PolicyDomain limitation (I disposition Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`). D accepts that A Blob for D-owned fence/barrier semantics (D artifact Blob `5a56c406578fdf257509315eb3f6f3f75456116c`). Storage accepts the Storage participant contract for that A Blob, conditional on concrete database capability and deployment proof (Storage artifact Blob `55c01f4512f2e3d8aac767dd004e768ae073178e`). C's current artifact Blob `a72a3eb1e5207f67c01f804508311f42db9a6e0a` accepts the CGH-APPLIED-1.1 recovery-batch package/companion pair but does not yet record a distinct formal decision against the complete Issue #8 bridge bundle and A architecture Blob `a3c51ec...`.
 
 A posted Issue #8 reconciliation comment (ID `6921025964`) asking C for exact-bundle acceptance/amendment/rejection and asking D/Storage to confirm their exact acceptances cover the complete corrected bundle. The bridge gate therefore remains OPEN pending readback of those clarifications. No production implementation, database capability, operator/deployment or conformance is implied. JF-10 P0 remains OPEN; JF10-COC-01..10 NOT RUN; multi-policy-domain atomicity BLOCKED.
+
+## 13.15 H exact JF-10 bridge wire-schema decision
+
+H has published an exact additive BMCP 1.1.0 schema-candidate mapping for A COC architecture §12, exact Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`.
+
+- H artifact: `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`
+- H branch: `session-h-bmcp-protocol`
+- H exact readback Blob: `1716b23741479740f9e12003cbf2bd1a80c63aab`
+- H commit: `8a45a35e0993493e96e3e7e38dbaecf0927feee8`
+- Decision: **ACCEPT THE JF-10 BRIDGE WIRE MAPPING FOR THIS EXACT A BLOB, WITH ENUMERATED EXCEPTIONS**, H §12.10.
+
+H maps five distinct COC lifecycle records to five 1.1.0 message families: `JF10_PREPARE_INTENT_REGISTERED`, `JF10_PREPARED_PARTICIPANT_REGISTERED`, `I_JF10_TERMINAL_DECISION_OBSERVED`, `STORAGE_JF10_PARTICIPANT_RESOLVED`, and `JF10_BRIDGE_RECONCILIATION_RECORDED`. It specifies common envelope, typed opaque references, exact immutable tuple, separate COC/I/D/Storage positions, conditional requiredness, signatures/commit proofs, idempotency/conflict rules, fail-closed UNKNOWN behavior and H-JF10-01..10 conformance cases.
+
+This is schema-candidate documentation acceptance only. Generated JSON Schema/IDL/SDK bindings and interoperability have not been produced or tested. Crypto suite/key custody remains subject to I/Security governance. H does not approve deployment, implementation, database capability or production activation. H-JF10-01..10 remain NOT RUN; JF-10 remains P0 OPEN; multi-policy-domain atomicity remains BLOCKED.
