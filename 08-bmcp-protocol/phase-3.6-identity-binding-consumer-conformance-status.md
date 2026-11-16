@@ -102,3 +102,19 @@ All consumer-side identity fields not explicitly accepted remain unaccepted. In 
 ## 6. Exit criteria
 
 H36 cannot be marked conformant until every mandatory H36 and H36-SR case is executed on an identified build with authenticated fixtures, expected/actual result, retained non-sensitive logs and owner review. Cross-module consumer acceptance requires explicit acceptance from each consumer Owner. External governance approval must be supplied by the named governance authorities, not inferred from this commit. No branch merge is authorized by this record.
+
+
+## 7. Consumer acceptance status refresh — 2026-11-16
+
+The §4 table is the original discovery snapshot. The following current Owner artifacts now provide design-level acceptance evidence and supersede the prior OPEN status for those consumers only:
+
+| Consumer | Owner acceptance artifact | Blob SHA | Current design-acceptance state |
+|---|---|---|---|
+| D | `03-memory-brain/phase-3.6-bih-identity-consumer-acceptance.md` on `session-d-memory-brain-2026-11-16` | `184423d2d8191a12f2d4a869bc63f5e7fafaf96a` | DESIGN-ACCEPTED |
+| E | `04-memory-compiler/phase-3.6-bih-identity-consumer-acceptance.md` on `session-e-memory-compiler-2026-11-16` | `6f4100618695fcf971560fb784f7887a72798c96` | DESIGN-ACCEPTED |
+| H (self-consumer boundary) | `08-bmcp-protocol/phase-3.6-bih-identity-trust-consumer-acceptance.md` on `session-h-bmcp-protocol` | `ccbac2d30234df9b910565a7326d100d11a6494e` | DESIGN-ACCEPTED |
+| Storage | `reviews/storage-consistency/phase-3.6-bih-identity-consumer-acceptance.md` on `session-storage-consistency-forget-atomicity-2026-11-16` | `ec8e49d0d11c72d37ad0c291611a96a1122ba6f5` | DESIGN-ACCEPTED |
+
+Still OPEN: C, F and G. A remains registrar only. These acceptances cover design semantics only; runtime implementation and conformance remain NOT VERIFIED / NOT RUN. External I governance approvals remain GOVERNANCE-BLOCKED. JF-10 remains P0 OPEN and H does not accept the current split Phase-B/Phase-C candidate as conformant to I36-SR-02.
+
+This status refresh does not change BIH36-JD-01..17, claim a human signature, or close G6/G7/G10.
