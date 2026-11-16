@@ -18,10 +18,10 @@ XID = "jf10_pg187_sync_failover_commit_001"
 OPERATION_ID = "op-sync-failover-commit"
 
 
-def conn(host: str):
+def conn(host: str, port: int = 5432):
     return psycopg.connect(
         host=host,
-        port=5432 if host == "127.0.0.1" else 5433,
+        port=port,
         dbname="postgres",
         user="postgres",
         password="jf10-ha-ci-only",
@@ -30,12 +30,12 @@ def conn(host: str):
     )
 
 
-def wait_db(host: str, timeout: int = 90):
+def wait_db(host: str, port: int = 5432, timeout: int = 90):
     deadline = time.time() + timeout
     last = None
     while time.time() < deadline:
         try:
-            with conn(host) as c:
+            with conn(host, port) as c:
                 c.execute("SELECT 1")
             return
         except Exception as exc:
@@ -118,7 +118,7 @@ def prepare_on_primary():
     print(f"PRIMARY_PREPARED_XID={XID}")
 
 
-def assert_prepared(host: str):
+def assert_prepared(host: str, port: int = 5432):
     with conn(host) as c:
         row = c.execute(
             "SELECT gid FROM pg_prepared_xacts WHERE gid = %s", (XID,)
@@ -126,7 +126,7 @@ def assert_prepared(host: str):
         assert row == (XID,), f"{host} missing prepared XID: {row}"
 
 
-def assert_not_visible(host: str):
+def assert_not_visible(host: str, port: int = 5432):
     with conn(host) as c:
         p = c.execute(
             "SELECT 1 FROM jf10_ha_visibility WHERE operation_id = %s",
@@ -139,7 +139,7 @@ def assert_not_visible(host: str):
         assert p is None and r is None, (host, p, r)
 
 
-def assert_lock_blocked(host: str):
+def assert_lock_blocked(host: str, port: int = 5432):
     with conn(host) as c:
         c.execute("BEGIN")
         c.execute("SET LOCAL lock_timeout = '750ms'")
@@ -163,7 +163,7 @@ def promote_standby():
     deadline = time.time() + 90
     while time.time() < deadline:
         try:
-            with conn("127.0.0.1") as c:
+            with conn("127.0.0.1", 5433) as c:
                 recovery = c.execute("SELECT pg_is_in_recovery()").fetchone()[0]
                 if recovery is False:
                     print("STANDBY_PROMOTION=PASS")
@@ -175,8 +175,8 @@ def promote_standby():
 
 
 def verify_and_commit():
-    wait_db("127.0.0.1")
-    with conn("127.0.0.1") as c:
+    wait_db("127.0.0.1", port=5433)
+    with conn("127.0.0.1", 5433) as c:
         recovery = c.execute("SELECT pg_is_in_recovery()").fetchone()[0]
         assert recovery is False, "promoted server is still in recovery"
         settings = {
@@ -186,12 +186,12 @@ def verify_and_commit():
         assert settings["max_prepared_transactions"] == "16", settings
         print(f"PROMOTED_SETTINGS={settings}")
 
-    assert_prepared("127.0.0.1")
-    assert_not_visible("127.0.0.1")
-    assert_lock_blocked("127.0.0.1")
-    with conn("127.0.0.1") as c:
+    assert_prepared("127.0.0.1", 5433)
+    assert_not_visible("127.0.0.1", 5433)
+    assert_lock_blocked("127.0.0.1", 5433)
+    with conn("127.0.0.1", 5433) as c:
         c.execute(f"COMMIT PREPARED '{XID}'")
-    with conn("127.0.0.1") as c:
+    with conn("127.0.0.1", 5433) as c:
         p = c.execute(
             "SELECT visibility_pointer FROM jf10_ha_visibility WHERE operation_id = %s",
             (OPERATION_ID,),
@@ -208,8 +208,8 @@ def verify_and_commit():
 
 
 if __name__ == "__main__":
-    wait_db("127.0.0.1")
-    wait_db("127.0.0.1")  # primary is initially mapped to host port 5432
+    wait_db("127.0.0.1", port=5432)
+    wait_db("127.0.0.1", port=5433)
     # Standby is separately mapped to host port 5433.
     deadline = time.time() + 90
     while time.time() < deadline:
