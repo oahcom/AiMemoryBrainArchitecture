@@ -100,3 +100,8 @@ No formal approval record with approver PrincipalRef/Issuer, authority basis, ex
 The Global Forget inventory/completion logical reference model now has a successful CI run. Evidence: `phase-3.6.4-global-forget-reference-model-evidence.md`, commit `674b9496bcb866fdaf725108104ce55f6d127528`; model Blob `5233da028e409ec3f41848582dad73a923e7155b`; test Blob `091f9450adf49a2a9f9ec8a2fa4470918023f765`; run `43962873109`, job `133634616584`, commit `73a0bff13b531b5b9feaeeec1887db31d6266589`; **25/25 tests PASS**.
 
 This supersedes §5's statement that CI execution had not yet been observed. It does not change the limits in §§1–8: the model is in-memory, and no real inventory seal, production target evidence, external deletion, formal governance approval, PolicyException or physical erasure is claimed.
+## 10. Expanded Global Forget logical test result (2026-11-17)
+
+The I Global Forget reference model was extended to 30 cases and rerun successfully: **30/30 PASS**, run `43963450717`, job `133636592112`, commit `8a6a6e67696c496e265b3d87f1a550fe5e8bb2a0`; test Blob `428e15c6263b5b2d730b93ce5412d55e782a449b`. Added cases verify valid PolicyException completion, positive NotApplicable, Failed-target blocking, empty inventory rejection and reopening after post-completion target discovery.
+
+This supersedes the earlier 25-test count in §§5 and 9. All production/governance/physical-erasure limits remain unchanged.
