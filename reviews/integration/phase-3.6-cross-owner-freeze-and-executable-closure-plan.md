@@ -660,3 +660,25 @@ The current COC architecture Blob is `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`;
 Six Owner decisions exist for historical package Blob `9808b31f840606b329f1a794935dfc9c5084d63b` only: C/D/I/H/G accepted with enumerated exceptions and B approved semantic typed-reference bindings. Those approvals do not automatically cover the recovery-batch amendment. Fresh exact-Blob decisions are requested in Issue #3 comment `6920481902`; Storage's exact COC decision is requested in Issue #2 comment `6920482983`.
 
 Current gates: package A CANDIDATE / FRESH OWNER REVIEW REQUIRED / NOT FROZEN; coordinator proposal NOT DESIGNATED / NOT DEPLOYED; Storage operator/durability and Security/key governance PENDING; COC-01..16 and C/I/D/H/G consumer conformance NOT RUN; production causal proof NOT VERIFIED. G8 BLOCKED, G9 NOT RUN, G10 BLOCKED.
+
+
+## 13.10 Exact CGH-APPLIED-1.1 Owner decision reconciliation — 2026-11-16
+
+The current immutable candidate remains `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`, Blob `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`. Do not edit that candidate in place after Owner decisions; any amendment creates a new candidate SHA and requires fresh decisions.
+
+All six authority owners have now recorded a fresh decision against that exact same candidate Blob, with Owner-branch readback verified:
+
+| Owner | Decision | Owner artifact Blob | Commit |
+|---|---|---|---|
+| C | ACCEPT WITH ENUMERATED EXCEPTIONS | `323a3d2ce304a77d2751544da765f6365a32279e` | `108e6969a02afadd4f8a7ef36a8c7b1f619517e0` |
+| D | ACCEPT WITH ENUMERATED EXCEPTIONS | `b2ef7a235af8bef87d829a25057e50449d3a4be8` | `23864cd99abf6028c59da0c6bb422c54c2f7dc2b` |
+| I | ACCEPT WITH ENUMERATED EXCEPTIONS | `d1f234cd802e86a2bf291d2cc721fb5ae7894142` | `767440eab745a161711591da6553168636a06c2d` |
+| H | ACCEPT WITH ENUMERATED EXCEPTIONS | `01b102d66715b02889a8a8f59f3cc559704a9990` | `01d00d7db784051b7f2fa294038146a708fc1493` |
+| G | ACCEPT WITH ENUMERATED EXCEPTIONS | `aa38af8e4917af292e66ebd21266b775f6db0215` | `159735aa4d268080f3f6c341754a4ee8a69a9167` |
+| B | APPROVE — typed-reference semantics/role-preserving bindings | `504f8478ab7db3bf49fbaf778838e18e7a8a3470` | `7e81c4d521e9001d3783bc318e0e838a29a32b13` |
+
+H's 1.1.0 schema decision now includes field encoding, common envelope requirements, per-message requiredness, conditional I revocation reference presence/explicit none state, separate D request-cutoff/effective positions, outcome-conditional provider evidence, canonicalization/digest, replay/idempotency, unknown-critical-field rejection, reconnect preservation and downgrade rejection for 1.1 Full Applied.
+
+A recorded the exact six-owner reconciliation on Issue #3 comment `6920517731` (readback verified).
+
+**Gate interpretation:** the six Owner contract/semantic decisions are RECORDED WITH ENUMERATED EXCEPTIONS. They do not close coordinator/Storage operator designation, durable participant store deployment, HA/failover/restore, key governance, implementation verification or conformance. C-CO/I-CO/D-CO/H36-CO/G remain SPECIFIED / NOT RUN. Applied Contract Frozen = NO; implementation verified = NO; G10 = BLOCKED. No merge or production activation is authorized.
