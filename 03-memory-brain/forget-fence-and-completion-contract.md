@@ -148,3 +148,26 @@ ForgetOperation state is not Memory lifecycle. D operation phases are Requested,
 12. Proof includes no forgotten plaintext and does not claim backup/provider physical erasure.
 
 **Acceptance status:** semantics specified; implementation conformance, I policy approval and E/F/G/H enforcement evidence remain OPEN. This document does not close INT-P0-03 globally.
+
+
+## 10. Phase 3.5 operation-level atomicity contract
+
+The operation-level contract in [forget-fence-operation-and-publication-gate.md](forget-fence-operation-and-publication-gate.md) is normative for the D semantics of CR-P1-01 / D-REV-P1-003. It refines, and does not weaken, §§3–9 above.
+
+The normative operations are RegisterProducerClass, RegisterProducerWork, InstallForgetFence, CaptureProducerRegistrationHighWater, RegisterDerivedDependency, PublishDerivedIfFenceCurrent, CompleteProducerWork, ResolveProducerWork and ReconcileForgetBarrier. Their inputs, outputs, idempotency keys, error outcomes and linearization points are specified in the operation contract.
+
+### 10.1 Mandatory serialization rule
+
+RegisterProducerWork and InstallForgetFence must share one linearizable ordering domain. If registration commits first, its ProducerRegistrationSequence is at or below the immutable high-water captured by the fence and the work is included in the barrier. If fence installation commits first, ordinary derivative admission for a covered source is rejected/quarantined or explicitly cleanup-only. An accepted-but-uncaptured work item that can publish is forbidden.
+
+### 10.2 Mandatory visibility rule
+
+Dependency registration is durable before visibility. PublishDerivedIfFenceCurrent validates the complete dependency set, work/attempt identity, latest applicable ForgetFence, and I's current PermissionEpoch at the same externally observable atomic/linearizable boundary that changes the artifact from private to visible. An independent check-then-write or uncoordinated gate token is insufficient. Ambiguous outcomes remain private until ResolveProducerWork establishes the committed result.
+
+### 10.3 Evidence and type separation
+
+Publication evidence binds WorkItemId/AttemptId, ProducerClass, source MemoryVersion/Revision, ScopeRefs, RegistrationReceipt, observed and authoritative ForgetFenceCursor, PermissionEpoch and I decision reference, DerivedArtifact identity, and every DependencyRegistrationReceipt. ForgetFenceGeneration and PermissionEpoch are distinct typed namespaces and must never be numerically compared or mixed.
+
+### 10.4 Status
+
+D operation semantics and required race outcomes are DECIDED as a domain contract. E mapping, I authorization decision semantics, global producer inventory completeness and Storage/Consistency realization remain OPEN. No Storage/Consistency Owner was established in the reviewed package; this is an explicit OPEN ownership gap. Design conformance cases are specified but NOT RUN. This section does not close INT-P0-03 or assert end-to-end Forget completion.
