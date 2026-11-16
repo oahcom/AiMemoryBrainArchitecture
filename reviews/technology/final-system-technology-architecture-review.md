@@ -987,3 +987,14 @@ Storage Gate A architecture design is now **CONDITIONAL PASS** because its resto
 ### 21.6 System verdict remains BLOCKED
 
 The new exact-owner and logical-model evidence closes specific design-review gaps only. It does not justify system-level approval or freeze. **Final verdict remains BLOCKED — TAB-001 IS NOT READY FOR FORMAL APPROVAL OR FREEZE.** TAB-001 remains CANDIDATE / NOT FROZEN; JF-10 runtime P0 remains open; Global Forget is NOT COMPLETED; production activation is NOT AUTHORIZED.
+## 22. ADR-001 decision-readiness package prepared — approval remains blocked
+
+A consolidated decision/impact package is now available at `reviews/integration/phase-3.6.6-adr001-decision-readiness-and-impact-package.md`, Blob `3ddb18580563ac12607bd384d6d2b0930c5f0ff5`.
+
+A recommends Option A as the preferred candidate because it preserves the current governance distinction between Fact and Claim and provides an auditable independent-attestation object linked to exact immutable ClaimRevisionRefs. This is explicitly a recommendation, not an approval. Option B remains a viable alternative only if Architecture Governance explicitly amends I-04/P-04/README and terminology.
+
+The package records the exact B/D/E/F/G/H/I/C impacts, migration requirements, 15 consumer conformance scenarios and the formal approval evidence required. No named Architecture Governance authority or approver is currently recorded. A cannot self-approve ADR-001.
+
+**ADR-001 remains ADR-BLOCKED.** No canonical FactRef, Fact schema, API, wire field or production migration is frozen. Neutral CandidateProposition/ExtractionIR and Evidence/Provenance work may continue; canonical Fact/Claim identity remains blocked.
+
+The system verdict remains **BLOCKED — TAB-001 IS NOT READY FOR FORMAL APPROVAL OR FREEZE**. Storage Gate A's conditional design pass and exact COC/restore owner acceptances do not override ADR-001, I36 governance, Global Forget or JF-10 runtime blockers.
