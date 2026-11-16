@@ -235,3 +235,36 @@ Measure telemetry acceptance latency/durability, duplicate suppression, Recall p
 - **DECIDED:** Applied is not proof of model comprehension.
 - **DECIDED:** Memory remains untrusted data.
 - **OPEN:** BMCP wire details remain Session H's responsibility.
+
+## Phase 3 targeted remediation — cross-module contract alignment
+
+### 14. Identity and trust chain
+
+Agent integration consumes three layers: H-authenticated transport Principal/Adapter binding; untrusted Agent/Adapter/ActorRef/ScopeRef payload claims; and Brain-resolved canonical Principal/ActorRef/ProducerIdentity/ScopeRef plus current I authorization. C requires consistency checks and rejects mismatch. B typed ActorRef/ScopeRef is candidate; I Principal/Permission Epoch policy is candidate; H envelope is candidate. None is approved globally by C.
+
+### 15. Context-to-inference lifecycle
+
+The lifecycle is Context Prepared (G), Context Delivered (H transport), Context Applied (Agent Runtime managed-region operation), Final Inference Request Submitted (trusted final request boundary), and Model Execution Started (runtime/provider). G owns ContextVersion/ChangeSet/Delivery, H owns wire/ACK, and Agent Runtime proves exact request submission. Delivered is never Applied; Applied is not Submitted and does not prove model attention/use.
+
+### 16. Agent-side security boundary
+
+Memory, Evidence, Provenance, Retrieved Summary, Entity Description, Tool Observation, External Content, Historical Agent Output and Inferred Claim are untrusted data. They remain in a designated Managed Region and cannot modify System/Developer instructions, User Original Input, Agent Safety Policy, tool definitions or authorization. Imperative text does not acquire instruction privilege. Agent action/tool authorization remains independent and Agent-owned. C defines boundary/tests; I owns threat-model governance and risk acceptance.
+
+### 17. Cross-module ownership map
+
+| C-side concept | Authority | C responsibility |
+|---|---|---|
+| Principal / Authorization | I | Consume authenticated identity/current decision |
+| ActorRef / ScopeRef | B | Consume typed references, not credentials/grants |
+| Permission Epoch | I | Carry/revalidate current policy epoch |
+| ContextVersion / ChangeSet | G | Consume exact target and reject stale versions |
+| Delivery / Applied State | G | Supply Agent-side proof, not authoritative transition |
+| Applied ACK Wire | H | Supply semantic evidence inputs |
+| ForgetFence | D | Validate current fence before apply/submit/replay |
+| Adapter ACK | H | Distinguish receipt, clear and application |
+| Telemetry / Task State | C | Define semantic and temporal contract |
+| Canonical Memory | D | Consume refs only; no canonical write |
+| Compiler / Evidence lineage | E | Preserve telemetry provenance; no bypass |
+| Retrieval / Activation | F | Consume authorized scoped outputs |
+
+Non-C rows are owner dependencies, not C approvals. Freeze requires owner agreement and executable conformance evidence.
