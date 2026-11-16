@@ -491,3 +491,23 @@ Each Owner decision includes consumed field mapping, verifier/authority source, 
 | Overall G10 / architecture freeze | BLOCKED / NOT AUTHORIZED |
 
 A36-P0-05 is therefore partially advanced: its C/F/G consumer-acceptance subrequirement is complete, while governance approvals and runtime verification remain blocked/not run. A36-P0-06 (common C/G/H Applied contract) is not closed by these BIH decisions.
+
+
+## Full Owner branch-head snapshot — 2026-11-16 (G0 refresh)
+
+All ten currently discoverable Owner branches were enumerated via the repository branch listing and each branch tip was independently resolved using an identical-ref compare. This is a point-in-time HEAD snapshot; it does not replace per-artifact Blob SHA verification or future refresh before final freeze.
+
+| Owner | Branch | Resolved HEAD |
+|---|---|---|
+| A | `session-a-integration-2026-11-16` | `3f1883584cfff33075ea6ffe8ee1280f9fe93355` |
+| B | `session-b-domain-model-phase3` | `2a9db80a87c2da5f1af1ed24710dff55499e31dd` |
+| C | `session-c-agent-integration-2026-11-16` | `2c8f87665771cb33bb9e00420d9072d9a5f63a4a` |
+| D | `session-d-memory-brain-2026-11-16` | `1751169d156e9ed62f80a8d44edab5754b22d7c1` |
+| E | `session-e-memory-compiler-2026-11-16` | `530645a08b55716257cf4cde20b0900b628abb52` |
+| F | `session-f-memory-runtime` | `6cdc23f0835ea9576867f7cd1ac145e57f598c4b` |
+| G | `session-g-memory-context` | `4b33caf03c5ec48cfca4cb599bf103dfe51a9ac4` |
+| H | `session-h-bmcp-protocol` | `af714749e283758e1b3c0d146bb297c6ac9338ba` |
+| I | `session-i-security-governance-2026-11-16` | `98c8ed37b561c8b5ad589977bb3684e46037a343` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `2ff20e56a009f51e9b1e31868893c88d9063ef90` |
+
+G0 branch-discovery/HEAD enumeration is now refreshed for all ten known Owner branches. G0 is not yet PASS: the complete required artifact inventory, exact Blob SHA reconciliation for every gate input, and post-change revalidation are still required. This snapshot includes the JF-10 reference model and CI workflow on Storage's Owner branch; it does not mean the model workflow has passed.
