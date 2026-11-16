@@ -10,7 +10,7 @@
 | ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
 |---|---|---|---|---|---|
 | UMR-001 | P0 | Common CGH-APPLIED-1.1 package/schema freeze and executable closure | C, G, H jointly; I/D/B predicate authorities; A records | Exact A package 4961... + COC companion fc3... decisions recorded: C/D/G/H/I ACCEPT WITH EXCEPTIONS; B APPROVE; Storage CONFIRMED WITH CHANGES — interface only. H schema remains candidate/not frozen; COC deployment and runtime tests open | Freeze requires H complete production schema/crypto/compatibility evidence, named/deployed COC, I/D/C/G runtime binding, owner-authoritative tests and conformance; see applied-contract-1.1-exact-version-reconciliation.md |
-| UMR-002 | P0 | JF-10 v2 production adapter binding and recovery | Storage engineering + D/E; I for authorization/sequencer | PostgreSQL 18.7 isolated CI capability suite PARTIAL PASS (7/7 workflows); production runtime/adapter NOT IDENTIFIED; Gate A PARTIAL PASS / OPEN | Canonical runtime repo/branch, adapter/schema/build SHA; real I/D/E transaction mapping; production-equivalent fault/failover/PITR; real fencing, operator/runbook and RPO/RTO |
+| UMR-002 | P0 | JF-10 v2 production adapter binding and recovery | Storage engineering + D/E; I for authorization/sequencer | PostgreSQL 18.7 prior probe revision 7/7 PASS on commit 8b8c...; current HEAD 3c8... has six workflows PASS and enhanced PITR run FAILURE; production runtime/adapter NOT IDENTIFIED; Gate A PARTIAL PASS / OPEN | Canonical runtime repo/branch, adapter/schema/build SHA; real I/D/E transaction mapping; production-equivalent fault/failover/PITR; real fencing, operator/runbook and RPO/RTO |
 | UMR-003 | P0 | Formal ADR-001 Fact/Claim decision | Designated ADR/Architecture Governance authority; B owns domain recommendation | ADR-BLOCKED | Exact selected option, rationale, approver authority, timestamp, version, migration and affected-consumer acceptance |
 | UMR-004 | P0 | I security policy and Global Forget governance | I + named external governance approvers | GOVERNANCE-BLOCKED | I35-DEC/I36-GOV approved exact versions; signed inventory seal; target-state mapping; external recipient/backup/restore evidence; exception decisions |
 | UMR-005 | P1 | B/I/H typed identity + permission binding | B, I, H; consumers C/D/E/F/G/Storage | OPEN / PARTIAL DESIGN | Exact typed fields and trust chain, transport authentication binding, permission/epoch mapping, forged identity and stale/revoked negative tests, consumer acceptance |
@@ -32,6 +32,9 @@
 
 
 | UMR-017 | P1 | Refresh A Phase 3.6 closure tracking after current exact decisions and Storage regression | A Owner; P records discrepancy only | A closure tracker blob 554d4b85... still records older Storage HEAD df60... and failed deep PITR; live Storage HEAD 3c8ab8... now records corrected deep PITR and 7/7 regression pass; C/G/D/H/I/B exact 1.1 decisions and Storage interface confirmation are present on live branches | A re-fetch exact current C/G/D/H/I/B/Storage branch artifacts and current Storage dossier, update exact blob/HEAD pins and gate vector; preserve Gate A PARTIAL PASS / OPEN due no production runtime/adapter, operator, COC deployment, RPO/RTO and I/D integration |
+
+
+| UMR-018 | P0 | Fix and rerun enhanced JF-10 PITR exact-WAL negative campaign | Storage Owner | Current probe blob 7fa4bb...; run 43957456225 FAIL. Reader pointer-only/receipt-only, prepared/private, commit/rollback atomicity and missing-WAL checks passed; corrupt-WAL assertion failed to recognize PostgreSQL "invalid magic number"; incomplete-WAL case not reached | Accept exact "invalid magic number" diagnostic while preserving exact segment and no-writable/no-authoritative assertions; rerun all missing/corrupt/incomplete cases and seven-workflow batch on exact current source |
 
 ## 2. Non-substitutable acceptance evidence
 
@@ -57,9 +60,9 @@ No row may be marked complete because a different row is complete. Static review
 | GHI boundary review | PASS WITH OPEN BLOCKERS | G/H semantics align directionally; Applied exact-version freeze and I governance remain open |
 | Common Applied freeze | DESIGN DECISIONS RECORDED WITH EXCEPTIONS; FREEZE BLOCKED | C/D/G/H/I accept exact A package+COC pair; B approves types; Storage confirms interface only. H schema/deployment/implementation/tests remain open |
 | ADR-001 | ADR-BLOCKED | No formal decision record |
-| JF-10 P0 | OPEN — Gate A PARTIAL PASS | PostgreSQL 18.7 isolated capability suite passes 7/7; production adapter/runtime binding, I/D/E integration, real fencing and operations remain unverified |
+| JF-10 P0 | OPEN — Gate A PARTIAL PASS | Earlier seven-workflow batch passed on 8b8c; current HEAD 3c8 has six workflow passes and enhanced PITR failure 43957456225; production adapter/runtime binding, I/D/E integration, real fencing and operations remain unverified |
 | Global Forget | GOVERNANCE-BLOCKED | I approvals, sealed inventory and target-state evidence incomplete |
-| JF-10 PostgreSQL 18.7 CI evidence | PARTIAL PASS — 7/7 workflows | Engine capability only; not production adapter or end-to-end JF-10 conformance |
+| JF-10 PostgreSQL 18.7 CI evidence | PARTIAL PASS — earlier 7/7 on 8b8c; current HEAD 6/7 PASS, enhanced PITR FAIL | Current probe has meaningful new checks but corrupt-WAL diagnostic assertion failed; incomplete-WAL case not reached; no production adapter or end-to-end conformance |
 | TAB-001 Owner technology review | 4/9 reports present; 5/9 missing | A/B/D/E/I reports absent at assigned paths; C/F/G/H reports are conditional/static |
 | Project G0 / architecture freeze | GOVERNANCE-OPEN / NOT AUTHORIZED | No PGA appointment or exact G0 approval evidenced |
 | Production implementation/test sign-off | NOT VERIFIED / NOT RUN where applicable | No general end-to-end implementation and conformance evidence |
@@ -67,7 +70,7 @@ No row may be marked complete because a different row is complete. Static review
 ## 4. Operating sequence
 
 1. Close UMR-001, UMR-003 and UMR-005 at the exact contract/ADR level without conflating their authority.
-2. Bind the passing PostgreSQL capability suite to the actual runtime under UMR-016; decide the SQLite alternative under UMR-013 only after exact JF-10 invariants are mapped. Reconcile G research under UMR-014; do not merge P/main while UMR-015 remains open.
+2. Close UMR-018 and bind the corrected PostgreSQL capability suite to the actual runtime under UMR-016; decide the SQLite alternative under UMR-013 only after exact JF-10 invariants are mapped. Reconcile G research under UMR-014; do not merge P/main while UMR-015 remains open.
 3. Have A refresh its stale Phase 3.6 closure tracker under UMR-017; P cannot rewrite A's Owner record.
 3. Close UMR-002 and UMR-004 with real Storage and I evidence.
 4. Obtain each Owner's exact-version baseline disposition under UMR-006.
@@ -85,3 +88,5 @@ No row may be marked complete because a different row is complete. Static review
 
 - 2026-11-17 Applied correction: live C/D/G/H/I exact-version decision artifacts and B type approval all pin A package `4961ffefc0f9920efb8425a9b2a7af42d8f64819` plus COC companion `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`; Storage confirms interface only. Applied freeze remains blocked by H candidate schema/deployment, COC operator, runtime implementation and conformance. See `applied-contract-1.1-exact-version-reconciliation.md`.
 - 2026-11-17 A source freshness: A closure tracker blob `554d4b85a94f433856506dce4c020b9c00183e69` ends at §13.43 and records old Storage head `df60b547...` / failed PITR; current Storage head is `3c8ab8ee4579a550300aa48aecab928149cf9370` with corrected seven-workflow regression pass. Gate A remains PARTIAL PASS / OPEN because production runtime/adapter, I/D integration, COC deployment/operator and operations remain unverified.
+
+- 2026-11-17 current Storage regression: Storage HEAD `3c8ab8ee4579a550300aa48aecab928149cf9370`, enhanced PITR probe blob `7fa4bb3fb07eacc3f708f5682ea4c9e2019f267d`. Current branch batch: six workflows PASS, PITR run `43957456225` FAILURE because corrupt-WAL assertion did not accept the observed `invalid magic number`; incomplete-WAL case not reached. Earlier 7/7 on `8b8c749...` remains scoped to the older probe blob. See `00-governance/reviews/jf10-storage-evidence-assessment.md` §10 and UMR-018.
