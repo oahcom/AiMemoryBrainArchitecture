@@ -406,3 +406,13 @@ All seven final markers report PASS. The synchronous promotion log confirms same
 This is a full CI regression batch for the pinned PostgreSQL 18.7 profile only. The Docker stop/fence is not production STONITH, and the isolated test fixtures are not production Canonical Authority or I/D service integration.
 
 **Gate A remains PARTIAL PASS / OPEN** because the production runtime and DB adapter are not identified in this repository snapshot, and actual I/D ledger integration, infrastructure durability/fencing, accountable production operator/runbook and RPO/RTO remain unverified. Gate B remains BLOCKED; Gate C remains BLOCKED; JF-10 P0 remains OPEN; production activation remains NOT AUTHORIZED.
+
+## 19. Project phase correction — architecture-design acceptance boundary (2026-11-17)
+
+The project owner clarified that AiMemoryBrainArchitecture is currently in the architecture-design phase and has no production code repository/runtime. That is intentional and is not a defect or Gate A blocker. Section 17's observation that this repository tree has no production runtime or DB adapter remains accurate as a repository inventory, but its requirement to supply an implementation repository before Gate A can progress is superseded.
+
+Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Do not require production source code, a deployed adapter or a live host as an architecture-phase Gate A prerequisite. The PostgreSQL 18.7 CI suite is evidence for engine capabilities and isolated reference fixtures only; it is not production integration proof.
+
+Architecture Gate A must close the complete storage design contract: engine/version/profile rationale; isolation, D fence/lineage locks and visibility; prepared-XID durability and recovery; atomic VisibilityPointer/PublicationReceipt/owner outcome/receipt-consumption/outbox; authoritative reads and stale replica exclusion; PITR/WAL prefix continuity and fail-closed restore; HA/fencing/rejoin; failure-domain/topology constraints; and future implementation/operations conformance criteria (including RPO/RTO and named operational ownership). Unspecified items remain design gaps and must be resolved in architecture artifacts.
+
+**Gate transition:** Gate B COC persistence/quorum log/participant registry/recovery-cutoff design may proceed now, in parallel with closure of remaining Gate A design specifications. This is design authorization only. Gate C's full implementation fault-injection campaign remains for the engineering phase after Gate B protocol design and executable implementation are available. JF-10 P0 remains OPEN; no implementation, deployment or production activation is implied. Production activation NOT AUTHORIZED.
