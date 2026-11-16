@@ -64,3 +64,23 @@ Status: **SPECIFIED / NOT RUN**. No deployed coordinator, durable participant re
 ## 8. Acceptance boundary
 
 This artifact specifies D's required fence/participant behavior. It does not approve I authorization implementation, C provider integration, H wire encoding, coordinator operator or Storage durability. Exact cross-owner acceptance of `CausalOrderProfile/1.0` and `bmcp.applied-ack/1.1.0` remains required before `CGH-APPLIED-1.1` can be frozen.
+
+## D Owner exact-version decision — CGH-APPLIED-1.1
+
+- A package: `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`
+- Exact A package Blob SHA: `9808b31f840606b329f1a794935dfc9c5084d63b`
+- Common contract: `CGH-APPLIED-1.1`
+- Causal profile: `CausalOrderProfile/1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within D's authority over ForgetFence, lineage coverage, fence request cutoff/effective position and participant barrier semantics.
+
+D accepts that ParticipantIntentRef is bound to the exact ForgetOperation/Fence and complete target/source/ancestor lineage; a D fence request cutoff before intent denies clearance (FENCE_WON), while a later request includes the participant and remains pending through the exact C submit outcome or safe abort. D accepts that DParticipantClearanceRef is intent- and lineage-bound, and that request/cutoff position is distinct from eventual fence-effective position. D clearance is not provider success or I authorization.
+
+Exceptions and closure conditions:
+1. The common coordinator, durable participant registry/order store and accountable operator are not yet designated/deployed/verified. D's barrier acceptance is conditional on the same durable participant transaction being visible to D and I across crash, failover, restore and recovery.
+2. No lease expiry, timeout, worker loss, queue deletion, process death or coordinator outage may release a participant while provider outcome is UNKNOWN/IN_DOUBT. D's fence barrier remains open until immutable C outcome and reconciled terminal proof, or a proven safe abort, are durable.
+3. Complete lineage inventory/version and digest must be authoritative and closed against late-discovered ancestors/sources; incomplete or conflicting lineage yields UNKNOWN/denied clearance.
+4. Coordinator positions do not mint, replace or reinterpret D fence generation, request cutoff, effective position or lineage authority.
+5. D-CO tests and production coordinator/failover/restore conformance remain NOT RUN / NOT VERIFIED.
+
+This decision applies only to the exact A Blob above. It does not imply C/I/G/H/B acceptance, deployment, physical erasure, test pass or transfer of CGH-APPLIED-1.0 approval.
