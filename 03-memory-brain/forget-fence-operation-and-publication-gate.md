@@ -509,3 +509,18 @@ D accepts the v2 protocol only as a proposed cross-authority design subject to I
 | D36 §9 row 13 | Old Compiler task resumes after CanonicalSuppressionComplete | Current D fence suppresses it before publication; stable WorkItemId/lineage is preserved; any late derivative invalidates/reopens prior D proof and is audited | NOT RUN |
 
 These cases extend the original D36 §9 matrix; they do not renumber or weaken rows 1–10.
+
+
+## Phase 3.6.2 — D confirmation of Forget ordering at the Applied submission boundary
+
+D reviewed A's pinned C/G/H Applied Contract package (Blob SHA `61d961c32138fd875069e8cbac4696bb031447c0`) and confirms the following D-owned semantics:
+
+1. D issues and validates the authoritative ForgetOperation/Fence identity, generation/cursor, target digest and lineage coverage. A consumer must resolve the latest applicable fence for every relevant source ancestor and target; an observed token without complete lineage/currentness proof is insufficient.
+2. The final request submission boundary is a protected disclosure boundary. The applicable D fence must be checked in a causal/linearizable ordering with the actual submit event, not inferred by comparing opaque token values or independent wall-clock timestamps.
+3. If the successful submit is ordered before the applicable fence installation, D's later fence does not rewrite that historical submit fact; G may retain a historically valid Applied fact only if C's immutable submit evidence and I's authorization ordering are independently proven. Current-use eligibility is immediately invalidated by the fence.
+4. If fence installation is ordered before submit, the request is stale/ineligible and must not be promoted to Full Applied; the managed region remains suppressed.
+5. If submit/fence ordering, lineage coverage or fence currentness is unknown or incomparable, the result is Unknown and suppressed. No Full Applied promotion is permitted.
+6. A D fence receipt proves only D-owned fence/lineage facts. It does not prove I authorization, H Adapter purge, G Applied, global Forget completion, backup deletion or physical erasure.
+7. A committed fence/suppression obligation is not rolled back by later requester revocation; subsequent cleanup must proceed under a currently authorized I service/continuity principal. D does not define or approve that I principal policy.
+
+**D disposition:** **APPROVE D-OWNED FENCE/LINEAGE SEMANTICS WITH AUTHORITY RESERVATIONS** for the exact A package. I authorization and D/E/Storage executable linearization remain separate blockers. D36 and DE-S fault/race suites remain **SPECIFIED / NOT RUN**; no implementation or end-to-end completion is claimed.
