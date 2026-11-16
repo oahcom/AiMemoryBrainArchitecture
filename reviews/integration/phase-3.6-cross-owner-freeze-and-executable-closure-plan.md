@@ -339,3 +339,35 @@ A re-read I's formal PermissionEpoch/authorization confirmation on `session-i-se
 - It explicitly keeps external governance activation/approval BLOCKED and implementation/conformance NOT VERIFIED / NOT RUN.
 
 This is strong I-owned technical consumer-contract evidence, but the artifact does not pin A's exact C/G/H package Blob `122b164bcc0760b83bf555072a36fc55631623e1` as an Issue #3 decision. Therefore A records **I technical semantics CONFIRMED; exact Issue #3 package disposition NOT RECORDED**. No exact-package approval is inferred. I36-GOV-01..10 remain GOVERNANCE-BLOCKED.
+
+
+## 13.2 I Owner exact-version authority confirmation — CGH-APPLIED-1.0
+
+I has now issued an explicit decision against the exact A package and H schema candidate:
+
+- Exact A package Blob: `122b164bcc0760b83bf555072a36fc55631623e1`
+- I Owner branch: `session-i-security-governance-2026-11-16`
+- I artifact: `09-security-governance/phase-3.6-cgh-applied-1.0-i-owner-authoritative-confirmation.md`
+- I artifact readback Blob: `9b09a31b786c0d49669bffb2c8cca332308c7098`
+- I commit: `d65ba193fe31199d9bb9ec9c8a6f2647376932e9`
+- Decision: **I APPROVES CGH-APPLIED-1.0 WITH ENUMERATED I-OWNED EXCEPTIONS**.
+
+### Confirmed I-owned authority
+
+I confirms issuer/Principal trust, verifier-resolved Actor attribution, canonical I PolicyDomainRef, I-issued monotonic PermissionEpoch, online currentness, no offline/stale grace, complete authorization tuple, final-boundary enforcement, revocation effective point at I durable sequencer epoch advance, and exact-operation race outcomes. I confirms that H transports but does not mint, refresh, interpret or validate I authorization.
+
+### Binding exceptions
+
+1. H `bmcp.applied-ack / 1.0.0` carries PermissionDecision references and PermissionEpoch but does not yet explicitly carry the I CommitAuthorizationReceipt reference and I sequencer terminal-order proof needed for protected final-boundary disclosure. Receipt consumption and ordering evidence are mandatory at the actual owner-final-gate. C/H must reconcile an exact versioned opaque reference/evidence mapping; H must not synthesize or validate it.
+2. TLS 1.3 exporter binding and SHA-256 digest are acceptable design mechanisms, but exact signature/MAC suite, key custody, key rotation, compromise response and federation require separate I/Security governance approval.
+3. I36-GOV-01..10 remain GOVERNANCE-BLOCKED; ProducerDomainInventoryEpoch/InventorySeal remain CANDIDATE/OPEN where required; multi-policy-domain authorization remains BLOCKED/NOT ACCEPTED.
+4. D ForgetFence, lineage, barrier and cross-authority ordering remain D-owned and are not approved by I.
+5. I36/H36/CGH tests remain SPECIFIED / NOT RUN; implementation and production interoperability remain NOT VERIFIED.
+
+### Updated A integration gate
+
+- I exact-version authorization disposition: **RECORDED — APPROVE WITH ENUMERATED EXCEPTIONS**.
+- D exact-version ForgetFence/lineage/order confirmation: **STILL REQUIRED**.
+- H schema candidate 1.0.0: **NOT PRODUCTION-FROZEN**.
+- Applied Contract Frozen: **NO**.
+- Issue #3 remains OPEN; no branch merge authorized.
