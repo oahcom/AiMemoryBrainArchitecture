@@ -5,7 +5,7 @@
 - Owner boundary: I — Security, Identity & Governance
 - Execution: centralized delegated static architecture review; not an independent human-owner attestation.
 - Branch: `session-i-security-governance-2026-11-16`
-- **Reviewed branch HEAD:** `4b1ef1c607089db1c886ae9af82e8cab5d9c6af3`
+- **Reviewed branch HEAD (refreshed):** `0abd1a26008d90c15cbb7d6ebae0f7325f7c1c1b`
 - TAB-001 main HEAD: `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f`; blueprint blob: `7b6f2d139217dbe13ab3a3af31bfbff525f20e71`
 - TAR-AI-001 task blob: `5a813edeccf7190d66dfd71a96ca581c48f8a4cb`
 - I Principal/Actor/Authorization blob: `03765efac4bb1153f303ce0030f9e277d602e81d`
@@ -151,3 +151,41 @@ I added an in-memory Global Forget target-inventory/CEV reference model. Evidenc
 **Result: 25/25 logical reference-model tests PASS.** Covered inventory seal authority/gaps, epoch invalidation, target discovery, evidence binding, ACK-vs-delete distinction, Unknown/Unsupported, D barrier, backup restore quarantine/control replay, physical-erasure action, independent PolicyException approval/expiry, NotApplicable proof and owner-local evidence limits.
 
 Limit: no production inventory registry/seal, actual target API, external recipient evidence, production restore, formal I36 governance approval, PolicyException approval or physical-erasure proof is claimed. Global Forget remains OPEN / NOT COMPLETED.
+
+## 9. TAR-AI-001 reassessment — PreparedParticipantReceipt signature trust boundary (2026-11-17)
+
+The I branch advanced after the original technology review. This addendum consumes the current branch's security review:
+- Source: `reviews/security-governance/phase-3.6.3-prepared-participant-signature-trust-review.md`
+- Source commit: `0abd1a26008d90c15cbb7d6ebae0f7325f7c1c1b`
+- Source blob: `7545dc1f74e6cfda17701b9c053fe342a8b01d44`
+- Disposition: **CANDIDATE / NO APPROVAL**; role-simulated assessment, not an independently authenticated I-session signature.
+
+### Additional blocking findings
+
+1. **I-1 — Signed-byte contract is incomplete.** The PreparedParticipantReceipt/COC protocol does not yet define a normative complete signed envelope and exact signature preimage. The protected envelope must bind payload type/schema, issuer, subject, owner authority, audience, purpose, key identity/version, algorithm/canonicalization/digest profiles, payload digest and issue time. The signature must cover a domain-separated canonical representation of the protected header and complete payload. Duplicate keys, absent-vs-null, Unicode normalization, numeric encoding, field ordering and unknown critical fields require explicit rules.
+2. **I-2 — Trust context binding is incomplete.** Issuer, signing service, owner authority, exact Storage participant, target environment, audience, message purpose/type and protocol version must be bound. A valid signature alone does not establish authority to attest a particular participant or operation.
+3. **I-3 — Key lifecycle and historical verification are OPEN.** Generation/custody, activation, rotation, suspension, revocation, compromise, retirement, destruction, recovery, dual control, audit and historical key-status verification need normative policy.
+4. **I-4 — Revocation and verification-time semantics need closure.** Verification must distinguish signing-time validity from current trust, preserve verifiable key-status evidence and fail closed when trust history is unavailable or ambiguous.
+5. **I-5 — Receipt replay and cross-purpose substitution must be rejected.** Receipts must be bound to exact participant/GID/XID, operation, environment and single-use consumption state. A cloned/restored consumed-receipt snapshot must not authorize a second consumption.
+6. **I-6 — Authority types must remain non-substitutable.** Storage PREPARED evidence cannot be promoted into I COMMIT_WON authorization; a COC statement cannot be treated as I authorization; I terminal proof must bind the exact Storage participant and GID.
+
+### Updated technology and compatibility disposition
+
+- I owns authorization receipt issuance/consumption, PermissionEpoch, revocation ordering, terminal decision, I key policy and gate release.
+- Storage owns its prepared participant, GID/native XID mapping, database identity and visibility resolution.
+- H owns wire schema and canonical serialization implementation under I-approved policy.
+- COC stores references/proofs and orders events; it cannot mint or reinterpret I authority.
+- No cryptographic algorithm suite, canonicalization profile, key custody implementation or historical verification policy is approved by this addendum.
+- JF-10 single-PolicyDomain scope remains the accepted design profile; multi-PolicyDomain atomicity remains blocked.
+
+### Additional required ADRs and tests
+
+- Signed envelope, domain separation, canonicalization and digest-profile ADR jointly owned by I/H within their authority boundaries.
+- Key custody, lifecycle, revocation and historical verification ADR owned by I.
+- Participant/GID/XID binding and single-use receipt-consumption contract with Storage/COC.
+- Golden signed-byte vectors; duplicate-key and Unicode/numeric canonicalization tests; wrong issuer/audience/purpose/environment substitution tests; key rotation/revocation/compromise historical-verification tests; receipt replay after backup/restore; and same-XID prepared-participant recovery tests.
+
+### Updated verdict
+
+**CONDITIONAL PASS** for candidate security architecture direction; **BLOCKED** for deployable security acceptance, signed-receipt trust approval, JF-10 application recovery and Global Forget completion. This addendum does not approve the signature profile or claim implementation/security-test evidence.
+
