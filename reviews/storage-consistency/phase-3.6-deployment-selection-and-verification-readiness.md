@@ -170,3 +170,38 @@ The selected local transactional DB remains the D/E/Storage baseline, but it doe
 ### I inventory and Global Forget remain separate
 
 The latest I trust/authorization technical closure does not resolve the I-owned ProducerDomainInventoryEpoch / InventorySeal governance decision or Global Forget Completion approval. The inventory/completion artifact remains CANDIDATE and I36-GOV-07/08 remain GOVERNANCE-BLOCKED in the trust-policy approval register. Repository issue #4 tracks the I Owner response.
+
+ 
+## 10. Phase 3.6.2 — Storage deployment decision for JF-10 v2
+
+**Status: STORAGE ACCEPTS THE LOGICAL PARTICIPANT/RECOVERY MODEL; CONCRETE ENGINE SUPPORT AND I ACCEPTANCE REMAIN OPEN.**
+
+### 10.1 Selected topology
+
+Retain one transactional database per Canonical Memory Authority for D and Storage records. The same serializable transaction domain contains the D authority coordinator, ProducerWork/registration ledger, ForgetFence/barrier snapshot, dependency/manifest records, Storage PublicationIntent, VisibilityPointer, PublicationReceipt, owner outcome, idempotency receipt-consumption and outbox. Large immutable artifact bytes may be held in a separate object store only as private staging.
+
+For protected publication crossing into I's policy domain, select a durable 2PC protocol in which:
+- I's policy-domain sequencer is the durable coordinator for the exact owner-final-gate operation and revocation order;
+- the Canonical Authority DB is a prepared participant identified by a stable XID and immutable participant digest;
+- prepared state and target/lineage serialization locks survive process restart and coordinator outage;
+- I's durable COMMIT/ABORT decision drives forward commit/rollback of that exact participant;
+- VisibilityPointer, PublicationReceipt, owner outcome, receipt-consumption evidence and outbox commit atomically in the local DB;
+- PUBLISHED is reported only after participant commit and authoritative receipt readback.
+
+This supersedes the prior JF-10 split model of an independent I COMMIT_WON followed by an unrelated Storage visibility transaction. I COMMIT_WON alone is never visibility.
+
+### 10.2 Option disposition
+
+- Single local DB transaction: selected for D/Storage owner-local atomicity; insufficient alone for I policy-domain ordering.
+- Durable Work Ledger: required; it is accounting and recovery state, not a substitute for the coordinator.
+- Transactional Outbox: required in the same local commit; delivery is at-least-once and not visibility.
+- CAS/conditional update: required inside serializable transactions for generation, lease, manifest and visibility-version checks; not a standalone cross-record transaction.
+- Serialized coordinator: no separate best-effort coordinator service is selected. I sequencer owns policy-domain ordering; local DB coordinator owns D/Storage state order.
+- Cross-authority 2PC: selected for JF-10 because I requires the actual owner final gate to participate in the revocation order. Durable coordinator decision, prepared participant recovery and in-doubt blocking are mandatory.
+- Eventual consistency, process-local mutex, check-then-write, stale replica, outbox-only ordering and independent I decision followed by uncoordinated Storage commit are rejected.
+
+### 10.3 Operational constraints and gates
+
+The DB must support durable prepared transactions/XIDs (or a formally equivalent recoverable participant protocol), retaining required locks across crash/restart and supporting deterministic recovery from the I coordinator log. The I sequencer must persist participant identity, immutable request digest, terminal decision, sequencer position and recovery ownership. If either side cannot guarantee this, JF-10 remains P0 blocked and protected publication remains private.
+
+Concrete DB engine/version, XA/prepared-transaction semantics, transaction timeout/lock behavior, replication/quorum, failover, backup/restore, operator runbooks and production engineering approval are NOT SELECTED / NOT VERIFIED. These require a real target environment, migration, failure injection and independent Storage engineering sign-off.
