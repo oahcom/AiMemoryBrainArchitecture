@@ -217,3 +217,27 @@ The COC is accepted as a logical cross-authority causal-order ledger, but it is 
 A combined COC + JF-10 + Storage visibility flow remains BLOCKED/UNKNOWN until I specifies and approves an exact bridge, C/D/Storage accept the participant and recovery semantics, and the bridge is implemented and fault-tested. Outbox remains notification only.
 
 The review explicitly does NOT designate a real operator, voter topology, DB product/version, RPO/RTO, SLO, KMS/key custody or deployment. Those remain OPEN pending actual infrastructure and accountable engineering evidence. COC-01..16, JF10-01..17 and Storage C01..C23 remain SPECIFIED / NOT RUN; production implementation NOT VERIFIED.
+
+
+## 12. Gate A — PostgreSQL 18.7 candidate profile and physical probe result (2026-11-17)
+
+Storage selects PostgreSQL 18.7 as the concrete candidate engine for JF-10 capability qualification. This selection applies to the pinned test profile only; it does not assert that a production Canonical Memory Authority deployment is already on this engine.
+
+The Storage-owned dossier is:
+- Path: reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md
+- Candidate image: postgres:18.7
+- Observed build: 18.7 (Debian 18.7-1.pgdg13+2)
+- Image digest: sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+- Probe Blob: c15ea6e66a15be2fb96f737769f58b7b6c224b7e
+- Workflow Blob: 4eef5b24f6da1d596c34e0d072dc39d5008a1a25
+- Successful workflow run: 43907296027
+- Run commit: 8c9ef00364d93c383aba515923565f8dc04bf1b6
+- Job ID: 133439447210
+
+Exact tested settings: max_prepared_transactions=16, fsync=on, synchronous_commit=on, full_page_writes=on, wal_level=replica; SERIALIZABLE isolation; named persistent Docker volume.
+
+**Observed PASS:** prepared transaction stayed invisible; row lock remained held; same prepared XID survived SIGKILL + container restart on the same volume; same-XID COMMIT PREPARED exposed VisibilityPointer and PublicationReceipt together; same-XID ROLLBACK PREPARED left both absent.
+
+**Gate A disposition: PARTIAL PASS / OPEN.** The single-node PostgreSQL 18.7 prepared-XID, lock-retention, crash/restart and local atomic-visibility capability has physical CI evidence. Synchronous replication, standby promotion, failover, backup/restore, production storage semantics, actual Canonical Authority deployment configuration and named human on-call operator remain NOT VERIFIED / OPEN. wal_level=replica is not replication proof.
+
+Accountable technical role for the candidate qualification is Storage DB Platform Operator; the actual production on-call identity is not designated. Gate B remains blocked pending full Gate A. Gate C remains blocked pending Gate B. JF-10 P0 remains OPEN; no production activation is authorized.
