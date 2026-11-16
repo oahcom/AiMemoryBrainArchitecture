@@ -2,7 +2,7 @@
 
 **Owner:** Session F — MR-01  
 **Status:** DECIDED safety semantics; CANDIDATE routing/fusion; TO_VALIDATE scoring and latency.  
-**Contract note:** D/E are not yet present. Types are provisional logical contracts.
+**Phase 3.5 contract note:** D/E/I/G/H/C/B candidate contracts are present on their owner branches and were re-read for this reprocessing. F consumes their typed semantics without freezing cross-module schemas or claiming implementation conformance.
 
 ## 1. Purpose
 Retrieve authorized, current, evidence-bearing Memory candidates from heterogeneous representations. Retrieval is not synonymous with vector similarity and does not itself activate Context.
@@ -70,7 +70,7 @@ Scope filtering is mandatory inside each candidate-producing adapter. Permission
 ## 11. Version / Freshness and AR-004
 Canonical Store is authority; indexes are rebuildable projections. E should publish committed events with interpretable generation/watermark per partition; exact format OPEN pending E/I.
 
-For required fence F: if watermark >= F, channel may satisfy fence subject to canonical validation; if below F, perform bounded canonical delta/read-through for affected scope/keys; else wait within deadline then return partial with observed and required generation. Never claim strong read-your-write below fence.
+For required canonical snapshot/read position N: compare only the same partition's IndexWatermark.applied_through CanonicalCommitCursor with N using D's same-authority cursor semantics. If the watermark covers N, the partition may satisfy projection freshness subject to canonical/lifecycle/Scope/Permission/Forget revalidation. If it lags or has a gap, use a D-supported bounded canonical read-through/delta, wait within deadline, or return explicitly partial/degraded/unavailable. Never compare IndexWatermarks across partitions as one scalar, and never treat any watermark as Forget suppression/completion evidence.
 
 On disagreement, canonical status/version/Forget wins. Stale/orphan index hits are suppressed and queued for repair. Missing index entries may cause omission only when marked partial/stale under requested consistency. Rebuild replays canonical committed events and excludes Forgotten/retracted/retention-ineligible objects according to current authority.
 
@@ -122,3 +122,18 @@ F never casts, increments, numerically compares or substitutes these tokens. Sam
 Fence/revocation notifications cancel affected in-flight work and cache fills, but cancellation is not the safety proof. The final return/handoff recheck is mandatory. If the request cannot establish current authority state, it must not disclose affected content.
 
 ActivationRecommendation remains a proposal to G. It does not mutate ContextVersion, constitute delivery, or prove Applied.
+
+
+## Phase 3.5 reprocessing — current dependency alignment
+
+This section supersedes stale dependency-presence and provisional cursor wording above where inconsistent.
+
+- D's current owner decision is one globally ordered `CanonicalCommitCursor` per BrainAuthority, with independent per-aggregate `AggregateRevision`, per-Memory `LifecycleEventCursor`, and separate `ForgetFenceCursor/Generation`.
+- D's `ProducerRegistrationSequence/HighWater` is a further distinct ledger position. It is not a canonical cursor, Forget generation, PermissionEpoch or IndexWatermark.
+- F's `IndexWatermark` is a vector of per-index/per-channel/per-partition contiguous applied-through CanonicalCommitCursor positions, with explicit coverage/schema versions and gap state.
+- I's `PermissionEpoch` is opaque within its policy-domain/issuer. F uses I's currentness/authorization operation; it does not compare it with D tokens.
+- G's `ContextVersion` is per Context. Retrieval and ActivationRecommendation remain read-only with respect to G.
+- Candidate generation must bind trusted Scope and Permission filters inside each backend before candidate emission. Index hits remain exact refs until canonical version, lineage, lifecycle, current D fence and independent I authorization checks succeed.
+- The final return/handoff checkpoint is mandatory even after cancellation or earlier validation. If current authority ordering cannot be established, suppress affected content.
+
+Current source snapshot: D `da8e5882d0b238d765d00b2225b79eea45a483b1`; E `c2f14408ba62447c11172d65b93a279fef96d175`; I `5591ad3620ec3f5d74194bd79556dcf3e25bea07`; G `3d2c065be863bc1d349faaeece6f6eaa0047abae`; H `1ee65928f123d92a4758b0de09bc8d6df1e46253`; C `35de58ddc93c5f1e554596cdfc430cd6c392d355`; B `66adf6bdcf5ec69a146fe75afe20ce3b85af8448`.
