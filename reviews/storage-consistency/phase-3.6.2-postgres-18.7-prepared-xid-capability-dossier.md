@@ -748,7 +748,7 @@ Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED; Gate C remains BLOCK
 
 The project owner confirmed this is the architecture-design phase; no production code repository/runtime is expected yet. Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Production runtime/adapter absence is not a Gate A architecture blocker. The earlier statement that Gate B is blocked until production implementation/runtime binding is available is superseded for architecture design.
 
-Storage published the COC durable protocol specification at `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, Blob `6154d6c345daf260e6c2552e2257d073f1675188`. It defines the durable quorum log, membership epoch, immutable participant registry, linearizable read/write APIs, outage recovery batch, snapshot/restore fencing, compaction and crash matrix. Gate B is now **SPECIFICATION PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED**. Gate C remains deferred to engineering-phase executable integration and fault injection.
+Storage published the COC durable protocol specification at `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`. It defines the durable quorum log, membership epoch, immutable participant registry, linearizable read/write APIs, outage recovery batch, snapshot/restore fencing, compaction and crash matrix. Gate B is now **SPECIFICATION PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED**. Gate C remains deferred to engineering-phase executable integration and fault injection.
 
 The latest complete PostgreSQL 18.7 capability regression is 7/7 SUCCESS:
 
@@ -801,3 +801,6 @@ Before production activation, Storage requires:
 **No production custodian/on-call commitment is implied.** The current repository contains no deployed COC service, no selected consensus implementation, no actual failure-domain map and no operational owner designation. The architecture-level Storage acceptance must not be read as deployment readiness.
 
 Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED until Gate A and COC deployment evidence pass; Gate C remains BLOCKED; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+
+
+The COC protocol reference has been updated to Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` (commit `1b70f164e4a5834d36dc4b3dd1644c57309312c2`); §13 clarifies the COC commit receipt and crash-fault/RPO boundary. This is architecture protocol evidence, not an implementation claim.
