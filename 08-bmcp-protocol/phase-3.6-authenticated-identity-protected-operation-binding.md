@@ -461,3 +461,14 @@ This decision applies only to the exact A Blob above. It does not assert schema 
 
 This H decision applies only to A package Blob `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`. It supersedes no 1.0 decision and does not claim production freeze, deployment or test pass.
 
+## H exact-version acceptance — CGH-APPLIED-1.1 recovery-batch amendment
+
+- A package Blob: `4961ffefc0f9920efb8425a9b2a7af42d8f64819`
+- Companion COC Blob: `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`
+- H schema target: `bmcp.applied-ack/1.1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within H's transport/schema/integrity/replay authority.
+
+H accepts the recovery-batch semantics as transportable evidence: durable I/D owner-local pending-gate references, the COC recovery-cutoff batch identity/position/digest, the enumerated pre-batch ParticipantIntentRef set, I-specific reconciliation outcomes, D-specific lineage/barrier reconciliation outcomes, owner high-water attestations and the final gate-reopen eligibility result. H preserves I/D owner-issued evidence as opaque references and does not infer or synthesize either authority's decision. No local clock order is elevated to a causal position.
+
+Exceptions: (1) A's 1.1 package does not yet freeze exact wire field names, message requiredness and canonicalization for every recovery-batch evidence item; H must publish a schema addendum before production freeze; (2) signature/MAC suite, key custody/rotation/compromise and federation remain subject to I/Security approval; (3) schema generation/interoperability/replay/reconnect and H36-CO tests remain NOT RUN; (4) COC/operator deployment is not approved by H. This decision applies only to the exact A/COC Blob pair above and is not production schema freeze.
