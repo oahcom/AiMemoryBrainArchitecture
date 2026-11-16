@@ -257,3 +257,10 @@ Every protected boundary reauthorizes: ingress, compile and every source derefer
 
 I does not define or freeze ActorRef/ScopeRef wire or domain types. B owns their stable typed-reference semantics. The logical fields above are semantic assertions only. The Fact/Claim ADR remains **ADR-BLOCKED**; this remediation does not approve Fact, Claim, ClaimRevision, ConflictSet or any canonical schema. H owns transport/wire binding and must consume B/I decisions without treating payload claims as credentials.
 
+
+
+## Phase 3.5 explicit boundary requirements
+
+The Principal/Permission Mapping and Producer/Recipient inventory reconciliation are expanded in `phase-3.5-global-identity-forget-governance.md` §§2–3.
+
+Normative clarification: each protected operation is independently authorized at its own boundary using the current I policy decision and current PermissionEpoch. A previously authenticated Context, old cached ALLOW, queued-work admission decision, lease, session or accepted receipt is not a reusable grant. Revalidate before protected dereference, sensitive stage commit, dependency registration where protected, canonical commit, final publication, retrieval finalization, Context delivery, Adapter apply/reconnect, final inference submission, export, backup and restore. If current policy/epoch/revocation cannot be established, stop the protected action. B remains the authority for ActorRef/ScopeRef type semantics; H remains the transport binding authority.
