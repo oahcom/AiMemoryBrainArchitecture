@@ -358,3 +358,69 @@ This section supersedes the earlier OPEN-E/D-01 through OPEN-E/D-05 wording in �
 | OPEN-TEST-01 | Executable race/fault fixtures, storage fault injection, actual expected/observed outputs and owner sign-off | D/E/Storage + affected consumers; all matrices here remain design-only |
 
 The earlier phrases “exact fields”, “exact receipt/error schema”, “high-water type” and “serialization with InstallForgetFence” are no longer valid as statements that D's semantic contract is unspecified. D has specified the semantic fields and one-order race. What remains open is their callable transport/API realization, global inventory reconciliation and tested storage linearization. Do not invent D decisions to fill those implementation gaps.
+
+
+---
+
+## Phase 3.5 Revalidation — D-to-E Operation Mapping and Fault Conformance
+
+D's normative operation semantics are consumed as written; this table is not a replacement API or transport schema.
+
+| D operation | E invocation / evidence | D receipt/result E persists | E failure/unknown behavior |
+|---|---|---|---|
+| RegisterProducerWork | Before enqueue/lease/dereference/run; stable WorkItemId, ProducerClass/version, authenticated ProducerIdentity binding ref, source EventRef/exact revisions or lineage token, ScopeRefs, observed fence, PermissionEpoch decision ref, digest | RegistrationReceipt, ProducerRegistrationSequence, ProducerRegistryVersion, disposition | No enqueue/lease/run. Resolve same WorkItemId+digest; unknown remains unresolved. |
+| InstallForgetFence | D-owned; E consumes fence and barrier snapshot | ForgetFenceCursor, installation CanonicalCommitCursor, captured registry version/high-water, BarrierSnapshotReceipt | Stop affected admission/publication when authoritative fence is visible; reconcile pre-fence work. Never derive fence generation from cursor. |
+| RegisterDerivedDependency | After private staging and complete lineage, before any reader/index/downstream visibility | DependencyRegistrationReceipt(s), inventory position and complete edge-set evidence | Partial/unknown registration keeps all staged artifacts private; resolve same DependencyRegistrationId+digest. |
+| PublishDerivedIfFenceCurrent | Final visibility boundary; registration receipt, all dependency receipts, artifact/version, WorkItem/Run/Attempt/Lease, lineage, ScopeRefs, observed fence, current I decision/PermissionEpoch, PublicationOperationId/digest, private staging ref | PublicationReceipt, authoritative fence/permission decision, dependency evidence and visibility commit identity | Fail closed. No local precheck/cached fence is sufficient. Keep private until same PublicationOperationId lookup proves committed publication. |
+| CompleteProducerWork | After all outputs accounted and no attempt/replay can publish; terminal attempt/lease, receipts, disposition/reason/digest | ProducerWorkTerminalReceipt and barrier state | Keep barrier-open until D confirms terminal receipt; conflicting digest is immutable conflict. |
+
+Supporting operations: RegisterProducerClass (class enablement separate from work admission); CaptureProducerRegistrationHighWater (immutable snapshot verification, never moves cutoff); ResolveProducerWork (read-only lookup by original IDs/digest); ReconcileForgetBarrier (D's append-only DRAINED/OPEN/UNKNOWN checkpoint; E supplies evidence but does not self-close barrier).
+
+### Atomicity and visibility invariants
+
+1. RegisterProducerWork and InstallForgetFence share D's decided linearizable ordering: work is included at/below captured high-water or rejected/quarantined after the fence; no admitted-but-unaccounted state.
+2. Dependency registration is durable and complete before visibility. E-local provenance edges are not D dependency receipts.
+3. PublishDerivedIfFenceCurrent linearizes with authoritative visibility and serializes against fence installation. Publish-first is inventoried; fence-first rejects. Gate receipt followed by independent uncoordinated visibility write is invalid.
+4. I current authorization/PermissionEpoch is checked at the final protected boundary; it is never numerically compared with ForgetFenceGeneration.
+5. Candidate/Staged output, provenance, embeddings, excerpts and edges remain private/non-enumerable by Runtime/search/index/downstream until final PublicationReceipt and visibility commit.
+6. Any failed/unknown fence, authorization, dependency or publication check blocks visibility.
+
+### Exact OPEN items
+
+| OPEN ID | Unresolved item | Owner(s) |
+|---|---|---|
+| OPEN-API-01 | Callable API/transport schemas, serialization, auth binding, compatibility and D semantic error-to-wire mapping | D/H/B/I |
+| OPEN-STORAGE-01 | Named Storage owner; transaction/CAS/serializable or proven hidden-prepare protocol; read-after-commit, failover, replica and restore semantics; shared fence-to-visibility linearization evidence | Storage + D/E |
+| OPEN-I-AUTH-01 | I current PermissionEpoch/decision freshness and revocation proof at final gate | I + D/E |
+| OPEN-REGISTRY-GLOBAL-01 | Reconcile I ProducerDomainInventoryEpoch/A inventory with D ProducerRegistryVersion/ProducerRegistrationHighWater; prove closed-world completeness | I/A + D/E/H |
+| OPEN-RECOMPILE-01 | Linked child/re-admission identity and barrier accounting for recompile | D/E |
+| OPEN-TEST-01 | Executable fixtures, crash/failover injection, actual outputs and owner-reviewed evidence | D/E/Storage + consumers |
+
+These do not reopen D's semantic operation fields/errors/linearization; they are transport, identity, global inventory, Storage realization and verification gaps.
+
+### Fault conformance matrix — DESIGN ONLY, NOT RUN
+
+| ID | Race/fault | Required result | Status |
+|---|---|---|---|
+| D-RACE-01 | RegisterProducerWork before Fence | Included at/below captured high-water; barrier remains open | NOT RUN |
+| D-RACE-02 | Fence before RegisterProducerWork | Rejected/quarantined; no lease/dereference/run | NOT RUN |
+| D-RACE-03 | Dependency registration races Fence | Dependency-first inventoried; Fence-first rejects; artifact private | NOT RUN |
+| D-RACE-04 | Publish races Fence | Publish-first inventoried; Fence-first rejects; no stale visibility | NOT RUN |
+| D-FAULT-05 | Registration commit, ACK lost | Same RegistrationReceipt/sequence recovered by same ID/digest | NOT RUN |
+| D-FAULT-06 | Fence commit, ACK lost | Same fence generation/high-water recovered; no new generation | NOT RUN |
+| D-FAULT-07 | Lease expiry while worker paused | Old lease cannot publish/terminalize; WorkItem remains open | NOT RUN |
+| D-FAULT-08 | Queue deletion, worker loss or DLQ parking | D ledger still tracks WorkItem; no terminal inferred | NOT RUN |
+| D-FAULT-09 | Late derivative after barrier proof | Suppress/quarantine; invalidate proof and reopen reconciliation | NOT RUN |
+| D-FAULT-10 | Visibility commit crash / fence race | Reader sees private/absent or fully visible with receipts; never partial/stale | NOT RUN |
+| E-FAULT-11 | Compiler process crash around stage checkpoint | Recover same WorkItem/CompileIntent; new AttemptId as needed; completed stage/outbox idempotent | NOT RUN |
+| E-FAULT-12 | Duplicate/out-of-order outbox replay | Stable IDs/digests deduplicate; no duplicate side effects or cursor-gap skip | NOT RUN |
+| E-FAULT-13 | DLQ replay after Forget | Fresh auth/fence check rejects or quarantines; no resurrection | NOT RUN |
+| E-FAULT-14 | Recompile after Forget | Preserve ancestor lineage; linked child/re-admission required; covered ancestor cannot publish | NOT RUN |
+| E-FAULT-15 | Duplicate Accepted same key/digest | Original receipt and original logical IDs returned; no duplicate registration/compile | NOT RUN |
+| E-FAULT-16 | Lost registration/dependency/publication/completion ACK | Resolve same stable ID/digest; unknown stays private/barrier-open | NOT RUN |
+| E-FAULT-17 | Restore stale snapshot after Forget | Quarantine and replay current control ledger before serving/indexing | NOT RUN |
+| E-FAULT-18 | Partial dependency edges/incomplete lineage | No complete dependency receipt; artifact stays private | NOT RUN |
+| E-FAULT-19 | Permission revoked/unknown at final gate | Deny/quarantine; no visibility | NOT RUN |
+| E-FAULT-20 | Conflicting terminal digest | Preserve original terminal record; audit conflict; no silent overwrite | NOT RUN |
+
+A PASS requires executable fixture, named engine/configuration, deterministic interleaving/crash hooks, expected and actual outputs, retained evidence and owner sign-off. This matrix is a plan, not test evidence.
