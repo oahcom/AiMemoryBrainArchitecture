@@ -205,3 +205,87 @@ The digest is scoped to the declared managed region extracted from the final imm
 DeliveryId is stable across retransmission of one logical delivery; DeliveryAttemptId is unique for each attempt. InferenceRequestId is unique per actual submitted inference invocation; a retry that creates a new inference invocation receives a new request ID and new final-submission evidence. ACK identity/digest is immutable; same identity plus same digest is idempotent, same identity plus different digest is conflict.
 
 Delivery lifecycle includes Prepared, Delivered, Applied, Rejected, Expired, Superseded and Unknown. Unknown represents timeout, crash, offline or ambiguous outcome; it is not success. A late Applied ACK may be retained as historical evidence only if its ordering is provable before expiry/supersession/fence/revocation; it cannot restore current Context or roll the desired head backward.
+
+
+## 14. Phase 3.5 — Normative invalidation and evidence alignment
+
+### 14.1 Context invalidation matrix
+
+The matrix distinguishes logical eligibility from immutable audit retention. “Invalidate” means the object MUST NOT be used to plan, deliver, replay or apply protected content; it does not mean the historical record is physically erased.
+
+| Trigger | ContextEntry | ContextVersion / Snapshot | Delta | Delivery / Pending Delivery | Applied Context Reference |
+|---|---|---|---|---|---|
+| D ForgetFence covers source or transitive lineage | Immediately deny/tombstone matching entry; no new inclusion | Any version whose snapshot contains affected lineage becomes non-serving; retain only governed non-reconstructive audit metadata | Any delta adding/updating/reordering a covered entry is invalid for apply; reject replay | Prepared/Delivered attempts become Superseded or Cancelled where supported; no further apply; already-submitted outcome remains historical | Mark Invalidated for current use; retain historical attestation, never current |
+| I PermissionEpoch revocation/denial or epoch gap | Block affected entry and all protected dereference; do not infer canonical Forget | Version may remain structurally valid but is unauthorized/non-serving under old epoch; rebuild only after fresh authorization | Reject until current authorization and exact base are re-established | Pending attempt is cancelled/superseded; offline/unknown remains Unknown, never Applied | Mark AuthorizationStale/Unknown; old Applied evidence remains historical only |
+| Canonical supersession/revision/retraction from D | Mark StaleRevision/Superseded/Retracted as authoritative result dictates; pin exact old ref, do not silently float to latest | Affected snapshot becomes stale for current planning; rebuild if successor is explicitly validated | Delta based on old source/version is invalid for apply; create new delta from current safe base | Pending delivery superseded; late ACK cannot make old target current | Mark Stale/Invalidated for current use; preserve historical proof |
+| Scope change, scope retirement or binding mismatch | Block entry until exact ownership/applicability scopes re-resolve and authorize | Old scope fingerprint cannot authorize new scope; create new version after full reauthorization | Reject if scope fingerprint/base/recipient differs | Pending delivery cancelled/superseded; do not retarget an old delivery | Mark ScopeStale/Unknown; new session/target needs new attestation |
+| F IndexWatermark lag, truncation or retrieval incompleteness | Existing exact refs must be checked against D/I; do not remove merely because absent from index | Mark source coverage Stale/ReconcileRequired; no completeness claim | No delta may infer deletion from omission | Do not publish a delivery whose correctness depends on incomplete candidate coverage | Applied history unchanged; current eligibility independently checked |
+| Adapter capability/session/managed-region change | Entry may remain desired if still authorized | Version remains immutable; delivery package may require re-materialization | Re-negotiate/rebuild against exact current base and schema | Old attempt is not upgraded; new attempt uses current CapabilityEpoch | Old evidence remains bound to old session/region/CapabilityEpoch; new apply requires new evidence |
+| Context Remove (G operation) | Membership tombstone in the new ContextVersion | Old version remains immutable; new version omits membership | Old delta/snapshot that re-adds it is rejected/superseded | Pending delivery containing removed membership is superseded | Historical Applied reference remains historical; it does not become Canonical Forget |
+
+Rules:
+1. Forget suppression and permission denial take effect before reconciliation work; no read/plan/edit/snapshot/delta/replay/delivery/apply path may wait for a new ContextVersion.
+2. Canonical supersession and Scope change require exact owner resolution; G does not invent successor identity or broaden Scope.
+3. A Context Remove changes only G membership. It MUST NOT create a D ForgetOperation, advance a D ForgetFence, or be reported as canonical deletion.
+4. Historical ContextVersion, ChangeSet, Delivery and ACK records are retained only under I policy and must not retain reconstructive forgotten plaintext.
+5. A new safe ContextVersion is a new immutable version with a new sequence, parent=head observed at commit, freshly authorized exact refs, current typed authority vector and new dependency/publication receipts. Never mutate an old version or reset sequence.
+
+### 14.2 Delivery state machine and evidence
+
+Logical DeliveryId identifies one desired delivery. DeliveryAttemptId identifies one transmission/application attempt. A retry may reuse DeliveryId but MUST use a distinct attempt identity whenever a new attempt is created. A new InferenceRequestId is required for each actual inference invocation.
+
+| State | Entry condition / minimum evidence | Allowed next states | Forbidden interpretation |
+|---|---|---|---|
+| Prepared | Immutable target version and package staged privately; current authorization/fence checked; D dependency registration and final visibility gate evidence available before visibility/send | Delivered, Rejected, Expired, Superseded | Not sent; not Applied |
+| Delivered | H/transport receiver receipt bound to DeliveryId + AttemptId + receiver/session; transport receipt persisted | Applied, Rejected, Expired, Superseded, Unknown | Not proof of managed-region materialization or final inference submission |
+| Applied | C final-request predicates plus H integrity-protected evidence bind exact full target to final immutable request; G validates all fields and currentness | Terminal for that attempt; later invalidation creates a separate invalidation/currentness state, not retroactive mutation | Never inferred from Delivered, HTTP success, local buffer write, pre-submit hook or digest alone |
+| Rejected | Authenticated negative ACK / validation failure with reason and attempt identity | New attempt only after correction and current reauthorization; otherwise terminal for attempt | Not retryable success; must not advance applied reference |
+| Expired | Deadline elapsed before valid Full Applied; time source and expiry evidence recorded | New DeliveryId or explicitly authorized fresh attempt after rebuilding current target | Timeout alone is Unknown; expiration cannot be converted to Applied by late ACK |
+| Superseded | Newer Context target, ForgetFence, permission revocation, scope/capability change invalidates attempt before valid application | Terminal for attempt; create a new delivery from current safe version | Cannot return to Prepared/Delivered/Applied-current |
+| Unknown | Timeout, crash, offline Adapter, lost ACK or insufficient evidence; query/reconcile required | Applied only if valid evidence proves application occurred before invalidation and all ordering is provable; otherwise Rejected/Expired/Superseded after reconciliation | Never success; no current Applied pointer |
+
+State transitions are per attempt and monotonic in the audit log. A late ACK is accepted as historical evidence only when its authenticated event time/sequence and authority ordering prove it occurred before Expired, Superseded, ForgetFence or revocation. If ordering cannot be proven, preserve Unknown and block current use. A late ACK for an old target MUST NOT overwrite the Context head, current Applied reference, or a newer attempt's state.
+
+### 14.3 Applied Evidence Mapping (G consumes C/H; does not define their wire)
+
+G may set an attempt to Full Applied only when all rows below are present, integrity-valid, mutually consistent and current at the final submission boundary.
+
+| Evidence dimension | Required binding / source | G validation |
+|---|---|---|
+| Context | Exact ContextRef + immutable ContextVersion ID/sequence + target snapshot hash | Must equal the delivery target; target cannot be inferred from current head |
+| Delivery | DeliveryId + unique DeliveryAttemptId + payload digest + attempt status | Same logical delivery and exact attempt; dedupe repeated ACKs |
+| Agent/Adapter identity | Authenticated Agent Principal/instance and Adapter Principal/instance; issuer/transport binding | Match registered recipient, not payload self-assertions |
+| Runtime | Runtime instance + authenticated Runtime Session | Session must be exact and valid for the request |
+| Inference request | Exact InferenceRequestId + FinalRequestBoundaryId | Must identify the actual immutable request crossing trusted handoff |
+| Managed region | ManagedRegion ID/revision/inventory + FULL coverage | Must be the declared G-managed region; no unrelated prompt regions included |
+| Permission | I PermissionEpoch + authorization decision/reference | Current and authorized at final submission; no stale/gapped epoch |
+| Forget | D ForgetFenceCursor/Generation applicable to all source lineage | Current and no covered source in target; opaque owner validation only |
+| Content integrity | Exact managed-region digest + versioned canonicalization/digest profile | Digest matches extracted managed region; digest alone is insufficient |
+| Capability | H CapabilityEpoch + negotiated capability profile | Matches the Adapter instance/session and proof tier |
+| Final boundary | C final-request attestation and H transport/integrity evidence | Proves final immutable request was submitted, not merely prepared or buffered |
+| Anti-replay | ACK/attestation identity, monotonic sequence/nonce, timestamp and integrity proof | Duplicate same identity+digest is idempotent; same identity+different digest is conflict |
+
+Coverage outcomes:
+- **Full:** every target entry and required managed-region component is present; all evidence rows validate. Only this maps to Applied.
+- **Partial:** an identified subset is present; record exact coverage but do not set Applied.
+- **Bypassed:** inference proceeded without the Brain-managed region or via unmanaged fallback; do not set Applied.
+- **Unknown:** evidence missing, stale, contradictory, unverifiable, offline or boundary-unobservable; do not set Applied.
+
+Applied proves boundary inclusion only. It does not prove model attention, comprehension, use, response quality or behavioral compliance. Capability tier alone cannot upgrade evidence: if C's final-boundary predicates are not demonstrably met, record Partial/Bypassed/Unknown.
+
+### 14.4 Invalidation of an already Applied reference
+
+Applied is an immutable historical observation, not a permanent authorization lease. When Forget, Permission Revocation, Canonical Supersession, Scope Change or capability/session discontinuity occurs:
+- preserve the original attestation and its exact target/request/session binding as historical evidence;
+- mark its reference in the current-use projection Invalidated with the trigger, authority token and effective observation time;
+- prevent the old Applied reference from satisfying a later inference request or current delivery requirement;
+- require a fresh ContextVersion and new DeliveryAttempt/InferenceRequest/Applied evidence for any replacement;
+- never rewrite history to claim the old request was not submitted.
+
+### 14.5 Idempotency and commit invariants
+
+- ChangeSet idempotency is scoped by authenticated Principal + Context + operation family + key/retention window. Same key/same normalized payload hash returns the original outcome and TargetVersion; same key/different hash is IDEMPOTENCY_KEY_REUSE.
+- Delivery ACK idempotency is scoped by authenticated Adapter instance + DeliveryId + AttemptId + ACK identity. Same identity/same digest returns the prior outcome; same identity/different digest is a conflict/security signal.
+- Repeated ACKs do not create a new Applied record or alter the current pointer.
+- Context head advances once per successfully committed ChangeSet. A stale BaseVersion returns conflict and requires re-read/re-plan; no implicit merge.
+- The G head/version visibility transition for canonical-derived artifacts remains gated by D's dependency registration and PublishDerivedIfFenceCurrent semantics. Physical transaction/recoverable protocol is OPEN with D and Storage/Consistency; until proven, stage privately and do not publish/send.
