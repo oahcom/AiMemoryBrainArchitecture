@@ -70,7 +70,7 @@ def main():
         )
 
         new_primary.execute(
-            "INSERT INTO jf10_rejoin_marker VALUES ('after-rejoin', 'streamed-after-rejoin')"
+            "SELECT jf10_guarded_write(2, 'after-rejoin', 'streamed-after-rejoin')"
         )
         deadline = time.time() + 30
         streamed = None
@@ -83,6 +83,29 @@ def main():
             time.sleep(0.25)
         assert streamed == ("streamed-after-rejoin",), streamed
         print("NEW_PRIMARY_POST_REJOIN_WRITE_REPLICATED=PASS")
+
+        fence_epoch = new_primary.execute(
+            "SELECT epoch FROM jf10_fence_state WHERE id = 1"
+        ).fetchone()
+        rejoined_fence_epoch = rejoined.execute(
+            "SELECT epoch FROM jf10_fence_state WHERE id = 1"
+        ).fetchone()
+        assert fence_epoch == rejoined_fence_epoch == (2,), (
+            fence_epoch, rejoined_fence_epoch
+        )
+
+        try:
+            new_primary.execute(
+                "SELECT jf10_guarded_write(1, 'stale-epoch-write', 'must-fail')"
+            )
+        except errors.SerializationFailure:
+            print("NEW_PRIMARY_REJECTS_STALE_FENCE_EPOCH=PASS")
+        else:
+            raise AssertionError("new primary accepted a stale fencing epoch")
+        stale = new_primary.execute(
+            "SELECT 1 FROM jf10_rejoin_marker WHERE marker = 'stale-epoch-write'"
+        ).fetchone()
+        assert stale is None, stale
 
         try:
             rejoined.execute(
