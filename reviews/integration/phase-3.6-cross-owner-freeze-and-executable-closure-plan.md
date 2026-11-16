@@ -605,3 +605,16 @@ Storage/Consistency, C, I, D, H, G and Security/Governance must accept/revise th
 - COC-01..12 and consumer race suites: **SPECIFIED / NOT RUN**.
 - Production causal proof: **NOT VERIFIED**.
 - Applied Contract Frozen: **NO**.
+
+
+## 13.8 CGH-APPLIED-1.1 package linked to concrete coordinator profile
+
+The exact A successor package was updated to incorporate the companion coordinator deployment proposal:
+- Package: `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`
+- Package commit: `fd0da725bdc27bc082b4b87be142542245b5aa53`
+- Package Blob: `9be466004a93697828f92bf5d932037c6478da7c`
+- Companion coordinator architecture Blob: `3f302a333f413e6ea7d5cbf1fe06473be6228a09`
+
+This is a package amendment. Any previous exact-version acceptance of the older CGH-APPLIED-1.1 package Blob does not automatically approve this amended Blob. C/D/I/H/G/B and Storage/operator must make fresh exact-Blob decisions or explicitly state which unchanged clauses their prior decision covers and approve the amended package hash.
+
+Current status remains A CANDIDATE / OWNER REVIEW REQUIRED / NOT FROZEN; coordinator operator not designated; Storage acceptance pending; tests not run.
