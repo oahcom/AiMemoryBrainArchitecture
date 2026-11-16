@@ -56,7 +56,8 @@ Main was inspected only as a comparison point (HEAD `8a6414158c9c056c1638222534e
 | Storage | `reviews/storage-consistency/phase-3.6.1-joint-defect-closure-storage-addendum.md` | latest revision must be read back after this report commit |
 | I | `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` |
 | I | `09-security-governance/phase-3.6-principal-trust-chain-authorization-revocation.md` | `74643a2f374179128d506c3b7e1d22da77119600` |
-| I | `09-security-governance/principal-actor-and-authorization-contract.md` | `03765efac4bb1153f303ce0030f9e277d602e81d` |\n| I | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | `0cbf6bb7480db873790c454817593a9b1c5548ba` |
+| I | `09-security-governance/principal-actor-and-authorization-contract.md` | `03765efac4bb1153f303ce0030f9e277d602e81d` |
+| I | `09-security-governance/governance-decision-register.md` | `3718ae8b24940ff655a2652e908996635709c1ad` |\n| I | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | `0cbf6bb7480db873790c454817593a9b1c5548ba` |
 | A | `reviews/integration/phase-3.6-baseline-manifest.md` | `0a2dd28a1977f6e73340e2f5daafd8da5c8ff5c2` |
 | A | `reviews/integration/phase-3.6-second-stage-gate-review.md` | `c7fe089eb9670fd1fa5299dd05ea535bee8d129a` |
 
