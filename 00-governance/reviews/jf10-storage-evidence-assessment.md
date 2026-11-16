@@ -12,12 +12,12 @@ The prior description of Storage evidence as merely a single-node prepared-XID p
 
 The evidence supports the following bounded statement:
 
-> PostgreSQL 18.7 has demonstrated, in isolated CI fixtures, durable prepared-XID behavior, lock retention, same-XID resolution across tested process/primary-loss paths, synchronous-standby promotion, physical backup/restore, explicit-LSN PITR, prepared-XID PITR visibility boundaries, and fail-closed behavior for missing/corrupt/incomplete WAL on the earlier successful probe revision. The current enhanced probe adds authoritative-reader negative cases and stricter exact-WAL assertions, but its latest run is FAILING at the corrupt-WAL diagnostic assertion; the incomplete-WAL case has not yet run on that revision.
+> PostgreSQL 18.7 has demonstrated, in isolated CI fixtures, durable prepared-XID behavior, lock retention, same-XID resolution across tested process/primary-loss paths, synchronous-standby promotion, physical backup/restore, explicit-LSN PITR, prepared-XID PITR visibility boundaries, authoritative-reader rejection of pointer-only/receipt-only rows, and fail-closed behavior for missing/corrupt/incomplete WAL on the latest enhanced probe revision. The first enhanced run failed on an assertion-vocabulary mismatch; Storage corrected it and the complete seven-workflow batch now passes on the current probe blob.
 
 It does **not** prove the project has selected PostgreSQL, nor that the production Canonical Authority adapter, I sequencer/COC, D fence/lineage state, E publication state, production visibility/read path, real infrastructure fencing, named operator, runbook or RPO/RTO are implemented and verified.
 
 Therefore:
-- PostgreSQL 18.7: **STRONG JF-10 TRANSACTIONAL CANDIDATE / PARTIAL CI CAPABILITY PASS; CURRENT DEEP-PITR PROBE REVISION FAILING**.
+- PostgreSQL 18.7: **STRONG JF-10 TRANSACTIONAL CANDIDATE / CURRENT CI CAPABILITY BATCH 7/7 PASS**.
 - Gate A: **PARTIAL PASS / OPEN**.
 - Gate B: **BLOCKED pending Gate A full acceptance**.
 - Gate C: **BLOCKED pending Gate B**.
@@ -29,10 +29,10 @@ Therefore:
 
 Storage branch: `session-storage-consistency-forget-atomicity-2026-11-16`
 
-- Current Storage branch HEAD: `3c8ab8ee4579a550300aa48aecab928149cf9370`.
-- Current Storage dossier blob: `2f76ca8b8c19b84c37e7604cd254990dd93eb8b1`.
-- Current PITR probe blob: `7fa4bb3fb07eacc3f708f5682ea4c9e2019f267d`; workflow blob: `a055d311c324d09eb6ebf4054247761116795eb7`.
-- Current Storage HEAD is eight commits ahead of the successful evidence commit `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd`; the PITR probe has materially changed and must be re-run.
+- Current Storage branch HEAD: `e6e578766b081b6d450d6af7fc4d6d673f8afd53`.
+- Current Storage dossier blob: `3d1c66e61334764013ddd253f18c07b52714fc77`.
+- Current PITR probe blob: `9d2a85f9a5d53f91df247a310c38377e563d259d`; workflow blob: `a055d311c324d09eb6ebf4054247761116795eb7`.
+- Current probe blob is identical to the tested probe at commit `2d476dd32ac020d329e8290ee2aaaa1f0c057c92`; current branch is three commits ahead of that test commit, with changes only to the Storage boundary acceptance, deployment readiness and dossier documents.
 - Current executable conformance plan blob: `49056cd46fd30445c0e564c99e0e234f60f065c4`.
 - PITR atomicity probe blob: `8c0e281f1db4dd6190127f02ac71b1126da39903`.
 - Pinned image: `postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc`.
@@ -208,3 +208,41 @@ On current Storage HEAD `3c8ab8ee4579a550300aa48aecab928149cf9370`:
 - Enhanced prepared-XID PITR + exact-WAL negatives: run `43957456225` — FAILURE.
 
 Thus the earlier seven-workflow success batch remains valid for its exact older commit, but the current branch regression batch is **6/7 PASS, 1/7 FAIL**. The overall Gate A disposition remains PARTIAL PASS / OPEN. No production adapter, real I/D control-ledger integration, COC quorum deployment, production fencing, operator/runbook or RPO/RTO is proven.
+
+
+## 11. Current enhanced-probe retest — PASS; supersedes §10 failure state
+
+Storage corrected the corrupt-WAL diagnostic assertion to recognize PostgreSQL's actual `invalid magic number` diagnostic while retaining exact target-segment matching and mandatory no-writable/no-authoritative checks. The enhanced probe now completes the missing, corrupt and incomplete cases.
+
+Exact current evidence:
+- Current Storage branch HEAD: `e6e578766b081b6d450d6af7fc4d6d673f8afd53`.
+- Current dossier blob: `3d1c66e61334764013ddd253f18c07b52714fc77`.
+- Current PITR probe blob: `9d2a85f9a5d53f91df247a310c38377e563d259d`.
+- Tested commit: `2d476dd32ac020d329e8290ee2aaaa1f0c057c92`.
+- Current branch is three commits ahead of tested commit; compare shows only `phase-3.6-coc-storage-boundary-acceptance.md`, `phase-3.6-deployment-selection-and-verification-readiness.md`, and the dossier changed. The PITR probe blob is identical at test commit and current branch.
+- PITR run: `43957910909`, job `133617253176`, SUCCESS.
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43957910909
+
+Raw log confirms:
+- `AUTHORITATIVE_READER_REJECTS_POINTER_ONLY_AND_RECEIPT_ONLY=PASS`
+- `PITR_PREPARED_XID_PRIVATE_AND_LOCKED=PASS`
+- `PITR_COMMIT_POINTER_AND_RECEIPT_ATOMIC=PASS`
+- `PITR_ROLLBACK_NO_POINTER_NO_RECEIPT=PASS`
+- `PITR_MISSING_EXACT_WAL_FAILS_CLOSED=PASS`
+- `PITR_MISSING_NO_WRITABLE_OR_AUTHORITATIVE_SERVICE=PASS`
+- `PITR_CORRUPT_EXACT_WAL_FAILS_CLOSED=PASS`
+- `PITR_CORRUPT_NO_WRITABLE_OR_AUTHORITATIVE_SERVICE=PASS`
+- `PITR_INCOMPLETE_EXACT_WAL_FAILS_CLOSED=PASS`
+- `PITR_INCOMPLETE_NO_WRITABLE_OR_AUTHORITATIVE_SERVICE=PASS`
+- `JF10_PITR_WAL_NEGATIVE_CASES=PASS`
+- `JF10_POSTGRESQL_PITR_ATOMICITY_AND_NEGATIVES=PASS`
+
+The six other workflows on the same tested commit also completed SUCCESS:
+- Prepared-XID: run `43957910975`.
+- Synchronous failover: run `43957911188`.
+- Physical backup/restore: run `43957911173`.
+- Explicit-LSN WAL PITR: run `43957910971`.
+- Synchronous standby unavailable: run `43957911270`.
+- Old-primary rewind/rejoin: run `43957911036`.
+
+Thus the current enhanced probe revision and all six supporting workflows have a 7/7 CI PASS batch. This closes the test-harness defect recorded in §10 / UMR-018 for the pinned PostgreSQL 18.7 CI profile. It does **not** close Gate A overall: the production Canonical Authority runtime/adapter is still NOT IDENTIFIED in the inspected repository, production I/D ledger integration and COC quorum deployment are unverified, and real infrastructure fencing, operator/runbook, RPO/RTO and production operational acceptance remain open. Gate A PARTIAL PASS / OPEN; Gate B BLOCKED; Gate C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
