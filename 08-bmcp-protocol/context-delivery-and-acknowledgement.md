@@ -151,3 +151,12 @@ G supplies Context identity, authoritative version, Snapshot/Delta content, deli
 - Full Applied proof with exact final request ID and digest;
 - proof from internal buffer without runtime submission must fail Tier 1;
 - protected instruction/user/Agent policy/tool region remains unchanged.
+
+
+## 11. Forget-safe Adapter Apply gate
+
+Immediately before applying a Snapshot/Delta and again at the final inference submission boundary, the Adapter MUST validate current I authorization/Permission Epoch, current applicable D ForgetFence, G ContextVersion and Delivery status, expiry/supersession, authenticated Agent/runtime Session, ScopeRef, Managed Region and CapabilityEpoch. Both I and D values are independently checked; one cannot stand in for the other. An unavailable/indeterminate authority state blocks application.
+
+A Forget ACK is not an Applied ACK. Clear/suppression evidence and final-request application evidence have separate message/status families and predicates. A late Applied attestation may be retained as historical evidence only when ordering is verifiable; it cannot restore a superseded or forgotten target. Offline Adapter remains Unknown/Pending.
+
+See adapter-forget-ack-and-target-binding.md for the full ACK mapping, reconnect sequence and H-FRG-01..10 cases.
