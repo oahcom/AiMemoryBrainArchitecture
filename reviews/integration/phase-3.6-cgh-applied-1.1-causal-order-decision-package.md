@@ -52,11 +52,11 @@ The intent is a durable participant registration, **not permission to submit**. 
 
 ### 3.2 Owner authorization and fence participation
 
-1. **I:** I validates the complete authorization tuple online and issues a single-use CommitAuthorizationReceipt bound to the exact intent, transaction, boundary and request digest. I consumes it exactly once in its authoritative PolicyDomain sequencer and emits IAuthorizationTerminalRef:
-   - `COMMIT_WON`: the exact owner gate was ordered before a conflicting revocation;
+1. **I:** I validates the complete authorization tuple online and issues a single-use CommitAuthorizationReceipt bound to the exact intent, transaction, boundary and request digest. I consumes it exactly once in its authoritative PolicyDomain sequencer and emits IAuthorizationTerminalRef. The terminal ref binds the applicable IRevocationRequestRef and its request/cutoff position, or explicitly states that no earlier revocation request existed at terminalization. If a revocation request position precedes ParticipantIntentRef, no new intent/receipt is admitted for that affected operation. If intent precedes the revocation request but the receipt is not yet consumed, I may still order revocation first; receipt consumption returns REVOCATION_WON. Outcomes:
+   - `COMMIT_WON`: the exact owner gate was ordered before a conflicting revocation request/effective point;
    - `REVOCATION_WON`: revocation was ordered first; C must abort before provider side effect;
    - `UNKNOWN/IN_DOUBT`: no favorable inference.
-2. **D:** D binds the same intent to the exact ForgetOperation/Fence and complete target/source/ancestor lineage. D emits DParticipantClearanceRef only if no earlier effective fence suppresses the participant. A later fence request remains pending behind the unresolved participant.
+2. **D:** D binds the same ParticipantIntentRef to the exact ForgetOperation/Fence and complete target/source/ancestor lineage. Every applicable DForgetFenceRequestRef is durably recorded with its coordinator request/cutoff position. If a fence request position precedes the intent, D returns FENCE_WON and denies clearance even if effective fence commit is still draining older participants. If intent precedes the fence request, D includes the participant in the barrier and the later fence remains pending. DParticipantClearanceRef binds the intent, exact lineage inventory version and proof that no earlier fence request/effective fence suppresses it. D terminal evidence separately binds the fence-request cutoff and eventual fence-effective position; these positions must not be conflated.
 3. I retains its sequencer and effective-epoch authority. D retains its fence-generation, lineage and barrier authority. Coordinator positions never mint or replace either owner token.
 
 ### 3.3 Final reservation and provider boundary
@@ -76,10 +76,11 @@ The intent is a durable participant registration, **not permission to submit**. 
 
 | Race | Required order/result | Applied consequence |
 |---|---|---|
-| I revocation before I receipt consumption | REVOCATION_WON; C aborts before provider call | No Full Applied |
-| I revocation after I COMMIT_WON while participant unresolved | Revocation remains pending behind the exact participant until safe terminal outcome | If submit succeeds, historical fact precedes later revocation; current use invalidated |
-| D fence effective before participant intent | FENCE_WON; D denies clearance | No provider call / no Full |
-| D fence requested after participant intent | Fence remains pending until exact C outcome or safe abort is durable | Successful submit may be historical; current use invalidated by later fence |
+| I revocation request before ParticipantIntentRef | No new intent/receipt for the affected operation; REVOCATION_WON | No provider call / no Full |
+| ParticipantIntentRef before I revocation request, but receipt not yet consumed | I may order revocation first; receipt consumption returns REVOCATION_WON | C aborts before provider call |
+| I receipt consumed as COMMIT_WON before later revocation request | Revocation remains pending behind exact participant until safe terminal outcome | If submit succeeds, historical fact precedes later revocation; current use invalidated |
+| D fence request cutoff before ParticipantIntentRef | FENCE_WON; D denies clearance even if effective fence commit is still draining older participants | No provider call / no Full |
+| ParticipantIntentRef before D fence request cutoff | D records participant in barrier; fence remains pending until exact C outcome or safe abort is durable | Successful submit may be historical; current use invalidated by later fence |
 | Provider success with all owner evidence | CSubmitOutcome ACCEPTED; terminal proof determinate | Candidate Full Applied only after G validation |
 | Provider definitive no-handoff | CSubmitOutcome REJECTED; safe ABORTED terminal | No Full; release participant only with immutable proof |
 | Provider outcome unknown after timeout/crash | IN_DOUBT; same transaction/participant/provider idempotency key is recovered | No Full; D/I barriers remain open |
@@ -105,8 +106,8 @@ Required opaque references include:
 
 - `CausalOrderProfileRef`, `CausalOrderCoordinatorRef`, `CausalOrderTransactionRef`, `CausalOrderPosition`;
 - `ParticipantIntentRef`, `ParticipantReservationRef`;
-- I `CommitAuthorizationReceiptRef`, `IAuthorizationTerminalRef`;
-- D `ForgetFenceRef`, `ForgetLineageCoverageRef`, `DParticipantClearanceRef`;
+- I `CommitAuthorizationReceiptRef`, `IAuthorizationTerminalRef`, applicable `IRevocationRequestRef` and I request/cutoff position (or explicit no-earlier-request assertion);
+- D `DForgetFenceRequestRef` and request/cutoff position, `ForgetFenceRef` and effective position, `ForgetLineageCoverageRef`, `DParticipantClearanceRef` bound to ParticipantIntentRef;
 - C `CSubmitOutcomeRef`, actual provider receipt, actual InferenceRequestId and FinalRequestBoundaryId;
 - `CausalOrderTerminalProofRef`, terminal outcome and proof digest.
 
@@ -118,18 +119,19 @@ All cases below remain **SPECIFIED / NOT RUN** until reproducible fixtures, envi
 
 - CO-01: ParticipantIntent is durable before any provider side effect.
 - CO-02: wrong digest, wrong boundary, replayed I receipt or mismatched transaction is rejected.
-- CO-03: I revocation wins before receipt consumption; provider is never called.
-- CO-04: D fence wins before intent; no D clearance and no provider call.
-- CO-05: D fence requested after intent remains pending behind exact participant.
-- CO-06: I revocation after COMMIT_WON remains pending until participant terminal outcome.
-- CO-07: successful provider submit followed by later fence/revocation preserves history but invalidates current use.
-- CO-08: provider outcome unknown after crash; participant IN_DOUBT, no new transaction/retry, barriers remain open.
-- CO-09: coordinator failover/restore cannot regress positions or clear participants.
-- CO-10: wall-clock/receiver order deliberately inverted; common order and owner terminal evidence remain decisive.
-- CO-11: contradictory I/D/C terminal evidence and same-ID/different-digest are quarantined.
-- CO-12: incomplete/late-discovered source or ancestor lineage invalidates D clearance.
-- CO-13: G rejects a valid transport ACK or I COMMIT_WON without C provider success evidence.
-- CO-14: H 1.1.0 rejects unknown critical fields, downgrade to 1.0.0 for Full Applied, malformed opaque refs and missing conditional fields.
+- CO-03: I revocation request before ParticipantIntentRef blocks intent/receipt admission; provider is never called.
+- CO-04: I revocation request after intent but before receipt consumption returns REVOCATION_WON; provider is never called.
+- CO-05: D fence request cutoff before intent returns FENCE_WON; no D clearance and no provider call.
+- CO-06: D fence request after intent remains pending behind exact participant until submit/abort terminal.
+- CO-07: I revocation after COMMIT_WON remains pending until participant terminal outcome.
+- CO-08: successful provider submit followed by later fence/revocation preserves history but invalidates current use.
+- CO-09: provider outcome unknown after crash; participant IN_DOUBT, no new transaction/retry, barriers remain open.
+- CO-10: coordinator failover/restore cannot regress positions or clear participants.
+- CO-11: wall-clock/receiver order deliberately inverted; common order and owner terminal evidence remain decisive.
+- CO-12: contradictory I/D/C terminal evidence and same-ID/different-digest are quarantined.
+- CO-13: incomplete/late-discovered source or ancestor lineage invalidates D clearance.
+- CO-14: G rejects a valid transport ACK or I COMMIT_WON without C provider success evidence.
+- CO-15: H 1.1.0 rejects unknown critical fields, downgrade to 1.0.0 for Full Applied, malformed opaque refs and missing conditional fields.
 
 C-CO, I-CO, D-CO and H36-CO suites must align with these cases. G must add Applied acceptance/current-use cases for the exact 1.1 evidence set.
 
@@ -137,10 +139,10 @@ C-CO, I-CO, D-CO and H36-CO suites must align with these cases. G must add Appli
 
 | Owner | Current evidence | Status for this candidate |
 |---|---|---|
-| C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`, Blob `f0839e4f470588e6053c144b91ff318b6465e04c` | C-side specification published; exact A 1.1 package acceptance pending |
-| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md`, Blob `1c60e7129c5b4255d6b9033bcb03e28e43b3b5af` | D-side specification published; coordinator/Storage deployment and exact package acceptance pending |
-| I | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md`, Blob `1e4d2d43807981d73c2e5394a0b6020b9177a3f1` | I-side specification published; service deployment, external governance and exact package acceptance pending |
-| H | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, Blob `a23b9a879a3ec0e212645a8247a6797bd0055360` | H 1.1.0 schema candidate described; not production-frozen; exact package acceptance pending |
+| C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`, Blob `f2c5b379cacfedd81500e8496d3053b628e144a0` | C-side specification published; exact A 1.1 package acceptance pending |
+| D | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md`, Blob `317a9bc170c5a66720f738bf24bbf93c87385887` | D-side specification published; coordinator/Storage deployment and exact package acceptance pending |
+| I | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md`, Blob `71779133a4f95d63a24c4c7e606af174763366f1` | I-side specification published; service deployment, external governance and exact package acceptance pending |
+| H | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, Blob `5cbf0bb548a46671054cb22c6fab3c3d007365d4` | H 1.1.0 schema candidate described; not production-frozen; exact package acceptance pending |
 | G | Existing G exact decision is for CGH-APPLIED-1.0 only | Explicit 1.1 predicate/evidence acceptance required |
 | B | Existing B semantic confirmation is for CGH-APPLIED-1.0 only | Confirm whether unchanged typed semantics are accepted for exact 1.1 package |
 | Coordinator / Storage operator | No named/deployed operator or production durable service verified | OPEN; topology, store, HA, failover, restore, retention, key trust and SLO acceptance required |
