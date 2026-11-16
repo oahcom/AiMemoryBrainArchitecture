@@ -643,3 +643,54 @@ The repository branch collection was re-read after the three protocol commits. T
 D/E/Storage recursive trees were re-read at these tips: D has 39 blobs, E 40, Storage 42; all are Markdown and none is executable source, a migration, test fixture, runner or CI workflow. Thus the JF-10 proposal is verified as documentation delivery only. D36/E36/C01–C20 remain NOT RUN and implementation remains NOT VERIFIED.
 
 A's branch remains at `70552cb4d232da657a16dc469ebf6d5ca10f2624`; its existing Closure Tracking snapshot still predates the latest B/D/E/H/I/Storage tips and the new JF-10 proposal. A's integration ledger must refresh those source references before a final gate decision. This DE-S report does not modify A-owned files or claim A gate closure.
+
+
+## I external dependency disposition — refreshed after JF-10 candidate
+
+### Current I evidence snapshot
+
+Read from `session-i-security-governance-2026-11-16`:
+
+- I HEAD observed during this review: `7ef0a0fa71e02ffb0a67f0ebe927c91d0d5bd778`.
+- `phase-3.6-governance-acceptance-execution-addendum.md`, Blob `1f5d2e4aba7afa75c0696f3c8f025b0cb903e0ad`.
+- `phase-3.6-identity-trust-policy-joint-closure.md`, Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`.
+- `governance-decision-register.md`, Blob `3718ae8b24940ff655a2652e908996635709c1ad`.
+- `global-forget-target-inventory-and-completion-evidence.md`, Blob `9100061fa986fb6676656169de3fcf9fc1c72664`.
+
+| Dependency | Current evidence/status | DE-S handling / closure evidence required |
+|---|---|---|
+| JF-10 I sequencer ↔ Storage visibility | DE-S candidate protocol exists identically on D/E/Storage (Blob `0f016e4220b4b4b37a99c12c1a6a94ed480040a7)); no I acceptance/revision found | I-owned ACCEPT/REVISE/BLOCK disposition for stable operation key/digest, terminal lookup/replay, receipt consumption, decision retention and crash/failover semantics; then executable cross-authority fault tests |
+| I36-GOV-01 Trusted Issuer / federation / key lifecycle | GOVERNANCE-BLOCKED | Authorized governance/issuer approvals bound to exact policy hash and scope |
+| I36-GOV-02 Delegation / sub-delegation / revocation | GOVERNANCE-BLOCKED | Security/Identity Governance and Legal where applicable; signed bounded grant policy and tests |
+| I36-GOV-03 Cross-Scope grants | GOVERNANCE-BLOCKED | Security/Architecture Governance, B and data/tenant owner approval |
+| I36-GOV-04 Cross-Environment grants | GOVERNANCE-BLOCKED; Environment registry authority unassigned | Assign registry authority and approve bridge/federation semantics; until then cross-environment DENY |
+| I36-GOV-05 Revocation linearization / offline / disclosed data | GOVERNANCE-BLOCKED | Security Governance and consuming boundary owners; uncertain order pauses/denies |
+| I36-GOV-06 PermissionEpoch authority / partition / propagation | GOVERNANCE-BLOCKED | Security Governance/platform owner and affected consumers; no stale/offline lease |
+| I36-GOV-07 Unsupported capability / alternate controls / residual risk | GOVERNANCE-BLOCKED | Security/H/service owner and Privacy/Legal where applicable; unsupported stays Unknown/blocked |
+| I36-GOV-08 Global Forget exception / backup retention / physical erasure | GOVERNANCE-BLOCKED | Privacy/Legal, Security, data, Storage and recipient owners; scoped expiring exceptions only |
+| I36-GOV-09 Principal resolution / collision / alias migration | GOVERNANCE-BLOCKED | Identity + Security Governance and issuer migration assertion |
+| I36-GOV-10 ActorRef-Principal binding / verifier attribution | GOVERNANCE-BLOCKED | Identity/Security Governance plus H/I verifier-control owners |
+| ProducerDomainInventoryEpoch / TargetInventorySeal | Global inventory contract CANDIDATE; conformance OPEN | I must identify registry/system of record, accountable operator, signer/verifier, authenticated complete membership, epoch lifecycle, invalidation/reopen and gap-free evidence |
+| Global Forget CEV / completion state | CANDIDATE; no approved completion policy | I must approve mandatory component/target rollups, UNKNOWN/UNSUPPORTED/OFFLINE, backup/restore, external copy, physical erasure, exception approvers and Completed vs CompletedWithPolicyException |
+| C/D/E/F/G/H/Storage field-level acceptance | OPEN for all ten fields in every consumer row | Each consumer Owner must accept/reject against exact BIH versions and provide operation-boundary/runtime evidence |
+
+### Formal request to I
+
+DE-S posted a follow-up on repository Issue #4 requesting I's explicit ACCEPT / REVISE / BLOCK disposition for the exact JF-10 proposal Blob and a decision/evidence record for each I36-GOV-01..10, Inventory Seal and Global Forget CEV dependency.
+
+- Issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/4
+- Follow-up comment ID: `6918395167`
+- Comment URL: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/4#issuecomment-6918395167
+
+No I Owner acceptance or approval is inferred from posting this request. The issue remains OPEN. No new I approval evidence was present in the branch snapshot reviewed here.
+
+### Fail-closed interim rules
+
+Until each authority supplies the required evidence:
+- I authorization unavailable/unknown, stale epoch, missing receipt or unresolvable sequencer result => no publication; remain UNKNOWN/PENDING or DENY/QUARANTINE.
+- Inventory gap, invalid/stale seal, late target or unknown producer => no closed-world claim; reopen/reseal and reconcile D barrier.
+- Offline/UNSUPPORTED/missing external recipient or backup evidence => Unknown/Pending, never Confirmed; no silent NotApplicable.
+- Backup restore remains quarantined until the independent current Forget/revocation control ledger is replayed and verified.
+- No `Completed` or `CompletedWithPolicyException` claim without the I-approved CEV and exact approved exception evidence.
+
+These are DE-S consumption restrictions, not I policy approvals. Governance closure, consumer acceptance and JF-10 remain OPEN/BLOCKED. I36 tests remain NOT RUN. Phase 3.6 final gate and Contract Freeze remain unavailable.
