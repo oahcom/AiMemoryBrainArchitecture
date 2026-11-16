@@ -406,3 +406,20 @@ D operation-level semantic fields, result receipts, idempotency, error outcomes 
 - `04-memory-compiler/forget-fence-and-derived-registration.md` — five requested D operations + four supporting operations, visibility boundary, exact OPEN items and expanded fault matrix.
 - `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` — independent receipt state matrix, duplicate submission and recovery/replay semantics.
 - `04-memory-compiler/decision-change-log.md` — supersession ledger, branch HEAD inventory, source read evidence and OPEN register.
+
+
+### 10.7 Commit and readback evidence for this reprocessing
+
+E-only file commits (each commit changes exactly the named path):
+
+| File | Commit SHA |
+|---|---|
+| `compiler-state-and-producer-admission.md` | `2c11cca8ca2b68da53f8ede9e85acd56d8b34a96` |
+| `forget-fence-and-derived-registration.md` | `262d36d2cc551192d75cf510eb44e4ae1795c1a8` |
+| `accepted-receipt-and-idempotency-contract.md` | `07833bc582d63ba68000291fbf840cb97b42b575` |
+| `decision-change-log.md` — supersession/source/HEAD record | `09f5892d0999f0933a73ccc6ac784ce4dd54e8a0` |
+| `accepted-receipt-and-idempotency-contract.md` — explicit ForgetFenceGeneration namespace correction | `488621d0d2d8493bee2c098a791c96bbf3e3c954` |
+
+Readback confirmed the updated files on the E branch, including the revalidation sections, D-to-E mapping, fault matrix, receipt state matrix, and typed cursor/fence-generation table. The final decision-log self-update commit and resulting branch HEAD are reported in the delivery record after refetch. No other path was changed by these commits.
+
+The readback is document/commit evidence only. It does not establish an executable D endpoint, a Storage transaction, runtime publication safety, or test PASS.
