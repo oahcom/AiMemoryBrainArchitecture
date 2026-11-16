@@ -1095,3 +1095,19 @@ A refreshed Issue #2 and the current D/E/F/I/Storage Owner artifacts and posted 
 | Storage physical realization | `reviews/storage-consistency/forget-atomicity-storage-realization-review.md`, Blob `55c01f4512f2e3d8aac767dd004e768ae073178e` | Single-transaction/linearizable-coordinator realization remains a recommendation. DB engine/version, prepared-XID and lock durability, operator/topology, atomic visibility, crash/failover/restore proof remain OPEN / NOT VERIFIED. |
 
 Issue #2 remains OPEN. D/E semantics and F consumer rules are not promoted to physical atomicity. Explicit independent Owner dispositions, selected DB/deployment evidence and E36/D36/Storage fault conformance remain required. No implementation, test pass, or production readiness is inferred from this reconciliation.
+
+
+## 13.22 JF-10 physical realization execution plan published — 2026-11-17
+
+A published a dedicated Owner work-allocation and stop/go plan:
+- `reviews/integration/phase-3.6-jf10-physical-realization-execution-plan.md`
+- Commit: `51e61a59b099f427479ed492f55655054c8256df`
+- Readback Blob: `13ac4c9085bbb496552d40c2ae84a19a50fe4136`
+
+The plan separates Storage DB capability and same-XID prepared recovery, persistent COC/operator deployment, I sequencer/receipt persistence, D fence/lineage race proof, C provider idempotency, H generated parser/interoperability, and A cross-owner fault evidence. It defines explicit stop conditions and required raw evidence; it does not select a vendor, invent an operator or transfer Owner authority.
+
+Fresh readback of D Blob `5a56c406578fdf257509315eb3f6f3f75456116c` and Storage Blob `55c01f4512f2e3d8aac767dd004e768ae073178e` confirms the concrete DB engine/version, prepared-XID profile, operator and deployment remain unselected/unverified. Gate A is therefore BLOCKED pending Storage's actual candidate and accountable engineering/operator designation. COC operator/infrastructure is also NOT DESIGNATED.
+
+A linked the execution plan and requested the concrete candidate/operator/probe deliverable in Issue #10 comment `6922075418`. No response has yet been received. Issue #9 still has no D/Storage exact full-bundle response; its architecture-only acceptance must not be promoted to full-bundle confirmation.
+
+The expanded 18-test reference-validator file is committed and readback verified (Blob `0cff0fe77eda9fb017abad099822d909bf263bcb`, commit `b154913a8594d04c799a05c799bbe7242f0e8651`), but its CI run has not been observed. The prior 10-test PASS applies only to the earlier commit. Physical DB/COC/provider fault tests remain NOT RUN. JF-10 P0 remains OPEN; no production activation or merge authorized.
