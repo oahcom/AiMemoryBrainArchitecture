@@ -1,0 +1,78 @@
+# Phase 3.6 — Producer Publication Conformance
+
+- Owner: Session E — Memory Compiler
+- Status: **DESIGN CONTRACT COMPLETE / IMPLEMENTATION NOT VERIFIED**
+- Scope: E Producer Work, staging, dependency registration, final publish, receipts and F handoff
+- Evidence class: static document contract only; no executable tests or fault injection were run.
+
+## 1. Required invariants
+
+1. Every derivative-capable producer class is D-registered and enabled before work admission.
+2. Every WorkItemId is durable and stable across retry, DLQ, replay, recompile and worker recovery.
+3. D RegistrationReceipt exists before enqueue, lease, protected source dereference or execution.
+4. Candidate and Staged Artifact are private and unavailable to F, G, H, other producers and external consumers.
+5. Complete dependency registration is durable before final publish.
+6. Final publication validates current ForgetFenceGeneration, I PermissionEpoch, active work/attempt/lease, exact source MemoryVersion, ScopeRef, dependency receipts and artifact identity at the visibility commit.
+7. Fence installation and final visibility commit serialize in one shared authority or an explicitly approved equivalent recoverable protocol.
+8. Unknown outcomes remain private and barrier-open; stable IDs/digests reconcile them.
+9. No replay/rebuild/recompile/restore path can resurrect a covered source or descendant.
+10. F indexes only records whose committed visibility state and PublicationReceipt are verified.
+
+## 2. Producer / storage conformance matrix
+
+| ID | Scenario | Required result | Evidence to retain | Status |
+|---|---|---|---|---|
+| E36-01 | ProducerClass absent/disabled/registry incomplete | Admission rejected/quarantined; no queue/lease | D class receipt/error + no work dispatch | NOT RUN |
+| E36-02 | RegisterProducerWork races InstallForgetFence | Exactly one serialization order; admitted work is included in captured high-water, or post-fence work is rejected/quarantined | D registration/fence receipts + transaction trace | NOT RUN |
+| E36-03 | D registration ACK lost | Resolve same WorkItemId/digest; no enqueue while UNKNOWN | D ResolveProducerWork response | NOT RUN |
+| E36-04 | Worker crash after registration | Same WorkItemId recovered; old lease invalidated; new AttemptId | D registration + lease history | NOT RUN |
+| E36-05 | Lease expiry while old worker resumes | Old attempt cannot publish or terminalize | Lease epoch and rejected final gate receipt | NOT RUN |
+| E36-06 | Retry/DLQ/replay/recompile | Stable WorkItemId; new AttemptId; recompile new DerivationRunId; current fence/permission rechecked | lineage and attempt history | NOT RUN |
+| E36-07 | Candidate/staged object enumerated by F/other producer | No result; private ACL/visibility predicate denies access | authoritative reader tests | NOT RUN |
+| E36-08 | Dependency edge set partially committed | Artifact remains private; no PublicationReceipt | dependency inventory snapshot | NOT RUN |
+| E36-09 | Fence advances after staging, before publish | Final gate rejects/quarantines | fence receipt + final gate result | NOT RUN |
+| E36-10 | PermissionEpoch revoked after staging, before publish | Final gate rejects/quarantines | I decision + gate transaction trace | NOT RUN |
+| E36-11 | Publish races fence installation | Publish wins and is in durable inventory, or fence wins and publish rejects; no third state | serializable race trace | NOT RUN |
+| E36-12 | Publication ACK lost after commit | Resolve same PublicationOperationId; original PublicationReceipt; no duplicate visibility effect | coordinator/DB record + readback | NOT RUN |
+| E36-13 | Crash between prepare and final commit | Prepared artifact remains hidden; recovery commits or aborts idempotently | participant/coordinator logs | NOT RUN |
+| E36-14 | Crash after visibility commit before E local update | Reconcile committed marker/receipt; no second publish | DB marker + D receipt | NOT RUN |
+| E36-15 | Outbox replay duplicates publish request | Same operation ID/digest returns original receipt | outbox and D lookup | NOT RUN |
+| E36-16 | Terminal request while DLQ/replay/lease/publication unresolved | D refuses terminal; barrier remains open | D terminal error/reconcile receipt | NOT RUN |
+| E36-17 | Restore with old staged/published objects | Quarantine first; current fence/permission applied before serve | restore manifest + reader denial | NOT RUN |
+| E36-18 | Mixed canonical + derived commit | One approved serialization decision; no visible derivative if required canonical operation is aborted/fenced | D canonical + Publication receipts and transaction trace | NOT RUN |
+| E36-19 | Same idempotency key, changed digest | Conflict; immutable original unchanged | operation result | NOT RUN |
+| E36-20 | Late derivative/ancestor discovered after prior barrier checkpoint | D reconciliation reopens; stale completion not reused | new immutable checkpoint | NOT RUN |
+
+## 3. F consumer contract
+
+F may consume only artifacts whose authoritative visibility record is committed and whose D PublicationReceipt resolves to PUBLISHED for the exact artifact/version, lineage digest and WorkItemId. An E CandidateProduced, Staged, DependencyRegistered, CanonicalCommit or CompilerCompletionReceipt is not sufficient.
+
+For rebuild/backfill/replay:
+
+- D producer admission is required before derivative-capable rebuild work; F uses a stable WorkItemId and follows D barrier semantics.
+- Revalidate current D ForgetFence coverage and I PermissionEpoch before source dereference, before index segment commit and before disclosure.
+- Historical STAGED/PRIVATE/UNKNOWN records are quarantined and never indexed.
+- SUPPRESSED/REJECTED_FENCED records are excluded and invalidation is applied to affected index partitions, caches and Working Sets.
+- PUBLISHED records are not blindly trusted: re-read current fence/permission and source ancestry; if covered/revoked/unknown, suppress rather than index.
+- Only a committed, complete partition batch advances that partition's contiguous IndexWatermark; gaps stop the watermark.
+- A rebuild never converts historical existence or an old PublicationReceipt into current permission to expose.
+
+## 4. Joint decision requests
+
+| Owner | Explicit confirmation requested | Current status |
+|---|---|---|
+| D | Confirm WorkItemId remains the root barrier identity across retry, DLQ replay, recompile and worker recovery; confirm exact gate inputs and fence-winning race behavior | REQUESTED / NO RESPONSE RECORDED |
+| Storage/Consistency | Confirm one shared transaction/serialization authority covers D fence/work ledger, complete dependency registration and final visibility marker; or provide approved crash-safe equivalent and recovery protocol | REQUESTED / NO RESPONSE RECORDED |
+| I | Confirm current PermissionEpoch decision semantics can be validated at final visibility commit and define revocation freshness binding | OPEN / NOT CONFIRMED |
+| F | Confirm rebuild/backfill consumes only committed PUBLISHED records and performs current fence/permission checks at rebuild and index-commit boundaries | REQUESTED / NO RESPONSE RECORDED |
+
+## 5. Exit criteria
+
+- D semantic confirmation recorded.
+- Storage transaction owner, serialization domain, linearization point and recovery protocol explicitly confirmed.
+- I permission freshness semantics mapped to the final commit.
+- F consumer contract acknowledged by F owner.
+- Executable implementation and E36-01..20 fault/race suite run with retained traces.
+- E-only path scope verified; no D/Storage/F/I/A files changed.
+
+Until all applicable evidence exists, status remains **DESIGN CONTRACT COMPLETE / IMPLEMENTATION NOT VERIFIED**.
