@@ -570,3 +570,18 @@ The §14 clarification distinguishes the client-preallocated `PreparedTransactio
 **Corrected Gate B status:** prior protocol revision `4ac63ac...` — DESIGN-LEVEL OWNER ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS; current amended protocol revision `86ff3b...` — PUBLISHED / FOCUSED EXACT-OWNER RE-REVIEW REQUIRED / NOT YET ACCEPTED. Gate B implementation/conformance remains NOT RUN and is deferred to engineering phase.
 
 Gate A remains PARTIAL PASS / OPEN. Gate C executable distributed fault injection remains deferred to engineering phase. JF-10 runtime P0 remains OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+
+
+## 26. Gate sequencing wording normalization
+
+For avoidance of contradiction, the sentence in the earlier COC-custody discussion stating “Gate B remains BLOCKED pending Gate A and COC deployment evidence” is superseded. It incorrectly mixed architecture-design sequencing with engineering/deployment prerequisites. Gate B design work was authorized during the architecture phase and the prior exact protocol revision `4ac63ac...` completed exact Owner design review. Neither production runtime binding nor COC deployment is a prerequisite to design-level review/acceptance.
+
+The controlling vector is:
+- Gate A: PARTIAL PASS / OPEN — remaining Storage architecture decisions and cross-owner acceptance are not all closed.
+- Gate B prior revision `4ac63ac...`: DESIGN-LEVEL OWNER ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS.
+- Gate B current amended revision `86ff3b...`: FOCUSED EXACT-OWNER RE-REVIEW PENDING because §14 changed after the accepted Blob.
+- Gate B implementation/conformance: NOT RUN; deferred to engineering phase.
+- Gate C distributed implementation fault injection: DEFERRED TO ENGINEERING PHASE.
+- JF-10 runtime P0: OPEN; production activation: NOT AUTHORIZED; Multi-PolicyDomain: BLOCKED.
+
+Gate B design acceptance is not conditional on Gate A deployment evidence; however, no system-wide production activation follows from design acceptance.
