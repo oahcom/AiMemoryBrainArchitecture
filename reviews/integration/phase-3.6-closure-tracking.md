@@ -1705,3 +1705,26 @@ A performed a further source-level diagnosis of the rollback failure:
 The generic negative-case substring assertion remains too weak: it must assert the exact deliberately missing/corrupted/truncated segment and prove no writable/promoted/authoritative state. Pointer-only/receipt-only negative fixtures and authoritative reader-path checks are also still absent. Real I/D control-ledger integration and authenticated high-water restore quarantine remain separate unproven requirements.
 
 No Storage-owned file was changed. A will not alter the Storage-owned probe/dossier or mark this evidence class PASS. Gate A remains PARTIAL PASS / OPEN; deep PITR remains IMPLEMENTED / CI FAILING; Gate B/C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+
+
+## 13.39 COC persistence / Recovery Cutoff Batch / Owner-local Gate / JF-10 same-XID exact-version review — 2026-11-17
+
+A published an independent exact-version integration review:
+- Artifact: `reviews/integration/phase-3.6-coc-persistence-exact-version-review.md`
+- Commit: `25fb680a6d3e28e7a95b0acfc285f137d5c9ad0b`
+- A review disposition: **ACCEPT WITH BLOCKING CLARIFICATIONS / AMENDMENTS REQUIRED**.
+- Exact A architecture reviewed: Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`.
+- Exact I/D/C/H/common JF-10 protocol bundle is pinned in the review artifact.
+
+Six findings are submitted for independent Owner decisions:
+1. Recovery Cutoff Batch completeness, per-owner high-water attestations and closure boundary (R1).
+2. Owner-local Gate linearization against admission/in-flight work (R2).
+3. Complete pre-batch participant enumeration and independent I/D gate release (R3).
+4. C provider invocation must require I `COMMIT_WON`, not merely any terminal I outcome (R4).
+5. Exact same-XID state machine and owner-authoritative lookup/recovery after lost ACKs (R5).
+6. Stale I Blob reference in A §12 and H §12.9 recovery-batch schema applicability to current A §11 (R6).
+
+A opened Issue #14 for independent I/D/C/H reviews and exact-version responses:
+`https://github.com/oahcom/AiMemoryBrainArchitecture/issues/14`.
+
+**Current review gate: OPEN / WAITING FOR OWNER DECISIONS.** No Owner acceptance is inferred from prior broad bridge acceptance. The reviewed A Blob remains unchanged; any normative amendment will create a new A Blob and require fresh exact-version re-acceptance. Recovery Cutoff Batch, Owner-local Gate and same-XID bridge remain documentation-specified only; implementation/conformance is NOT VERIFIED. JF-10 P0 OPEN; Gate B/C sequencing unchanged; one I PolicyDomain only; multi-PolicyDomain BLOCKED.
