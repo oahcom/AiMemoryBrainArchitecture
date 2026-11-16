@@ -986,3 +986,18 @@ H defines five distinct additive `bmcp.applied-ack/1.1.0` message families: `JF1
 This closes H's exact field-mapping decision gap at schema-candidate documentation level. It does NOT freeze the schema or establish generated JSON Schema/IDL, SDK bindings, interoperability, cryptographic/key governance, implementation or conformance. H-JF10-01..10 remain SPECIFIED / NOT RUN; JF-10 P0 remains OPEN. A posted the exact H decision to Issue #8 in comment `6921054285`.
 
 **Issue #8 bridge gate remains OPEN** pending C's distinct exact-bundle decision and D/Storage clarification that their acceptances cover the complete corrected bundle. I/D/Storage/H architecture decisions do not imply production implementation or multi-policy-domain support.
+
+
+## 13.16 H JF-10 bridge schema-candidate decision
+
+H's exact-version wire mapping decision has been independently read back:
+- Artifact: `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`
+- Branch: `session-h-bmcp-protocol`
+- Blob: `1716b23741479740f9e12003cbf2bd1a80c63aab`
+- Decision: **ACCEPT THE JF-10 BRIDGE WIRE MAPPING FOR A Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, WITH ENUMERATED EXCEPTIONS** (§12.10).
+
+H maps five distinct 1.1.0 message families: prepare-intent registered, prepared participant registered, I terminal decision observed, Storage participant resolved and bridge reconciliation recorded. H preserves typed COC/I/D/Storage positions, exact tuple/XID identity, signatures, same-XID evidence, IN_DOUBT and single-I-PolicyDomain scope.
+
+Exceptions: schema remains candidate; generated JSON Schema/IDL/SDKs and cross-implementation interoperability not produced/tested; cryptographic/key lifecycle remains I/Security governance; H-JF10-01..10 SPECIFIED / NOT RUN; no production freeze or activation.
+
+**Updated Owner gate: I = ACCEPT; D = ACCEPT; Storage = ACCEPT; H = ACCEPT (schema candidate only); C = PENDING.** C remains the sole outstanding requested Owner decision for the exact A architecture Blob. JF-10 P0 remains OPEN; implementation, deployment and conformance remain NOT VERIFIED / NOT RUN.
