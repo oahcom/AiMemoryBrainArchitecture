@@ -605,3 +605,18 @@ Repository issue #4 remains OPEN, updated at `2026-11-16T13:27:02Z`, with one co
 | I36 adversarial execution | T01..T20 NOT RUN | NOT VERIFIED |
 
 No I-owned file was modified by DE-S. This final I refresh changes no D/E/Storage design decision and does not close JF-10 or any governance blocker.
+
+
+## Phase 3.6.2 — JF-10 candidate protocol
+
+A single DE-S engineering proposal has now been published identically on all three Owner branches. The three readbacks returned the same content Blob SHA `0f016e4220b4b4b37a99c12c1a6a94ed480040a7`.
+
+| Owner | Branch | Commit | Artifact |
+|---|---|---|---|
+| D | `session-d-memory-brain-2026-11-16` | `bf1c64a2797e287461bfc8ff03509e86d3bda3e6` | `03-memory-brain/phase-3.6.2-jf10-cross-authority-recovery-protocol.md` |
+| E | `session-e-memory-compiler-2026-11-16` | `c1f95853880591909eab8653195bc435d58c9602` | `04-memory-compiler/phase-3.6.2-jf10-cross-authority-recovery-protocol.md` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `b5de74d14729bedba259aaf1583fbb662dde2b06` | `reviews/storage-consistency/phase-3.6.2-jf10-cross-authority-recovery-protocol.md` |
+
+The proposal defines a durable owner-side publication intent, stable operation ID + immutable request digest, I sequencer terminal lookup/replay, owner-side atomic VisibilityPointer + PublicationReceipt + outcome + outbox commit, and forward recovery after lost acknowledgements or crashes. It explicitly preserves I authorization order, D fence order and Storage visibility order as separate authorities.
+
+**Disposition remains unchanged:** this is a DE-S candidate, not an I-approved protocol. I must accept or replace the sequencer lookup, terminal-retention, receipt-consumption and crash/failover semantics. JF-10 remains P0 OPEN; the eight proposed JF10 cases are NOT RUN. No implementation, production approval, consumer acceptance or Contract Freeze is claimed.
