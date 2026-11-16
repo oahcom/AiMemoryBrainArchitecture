@@ -1,16 +1,17 @@
 """Fail-closed test when the required synchronous standby disappears.
 
-This is a PostgreSQL 18.7 CI capability probe, not production fencing evidence.
-It proves the protected PREPARE boundary does not silently downgrade to local
-durability when synchronous_commit=remote_apply and the required synchronous
-standby is unavailable.
+The protected PREPARE is issued in a separate backend. The probe verifies that
+the backend is blocked specifically on SyncRep, then terminates that backend
+and proves no prepared XID or visibility escaped. PostgreSQL 18.7 CI only.
 """
 from __future__ import annotations
 
+import subprocess
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import psycopg
-from psycopg import errors
 
 XID = "jf10_sync_standby_unavailable_001"
 OPERATION_ID = "op-sync-standby-unavailable"
@@ -25,21 +26,19 @@ def conn():
         password="jf10-ha-ci-only",
         autocommit=True,
         connect_timeout=3,
-        options="-c statement_timeout=5000",
     )
 
 
-def wait_no_sync_standby():
-    deadline = time.time() + 30
-    while time.time() < deadline:
-        with conn() as c:
-            row = c.execute(
-                "SELECT count(*) FROM pg_stat_replication WHERE sync_state = 'sync'"
-            ).fetchone()
-            if row == (0,):
-                return
-        time.sleep(0.25)
-    raise AssertionError("synchronous standby still present")
+def prepare_in_backend(ready: threading.Event, pid_box: list[int]):
+    with conn() as c:
+        c.execute("BEGIN ISOLATION LEVEL SERIALIZABLE")
+        c.execute(
+            "INSERT INTO jf10_sync_unavailable_visibility VALUES (%s, %s)",
+            (OPERATION_ID, "must-remain-private"),
+        )
+        pid_box.append(c.execute("SELECT pg_backend_pid()").fetchone()[0])
+        ready.set()
+        c.execute(f"PREPARE TRANSACTION '{XID}'")
 
 
 def main():
@@ -60,29 +59,57 @@ def main():
     print(f"SERVER_VERSION={version}")
     print(f"PROTECTED_SYNC_SETTINGS={settings}")
 
-    # Stop the required synchronous standby. The primary must not silently
-    # convert remote_apply into local-only durability.
-    import subprocess
     subprocess.run(["docker", "stop", "jf10-standby"], check=True, capture_output=True, text=True)
-    wait_no_sync_standby()
+    deadline = time.time() + 30
+    while time.time() < deadline:
+        with conn() as c:
+            count = c.execute(
+                "SELECT count(*) FROM pg_stat_replication WHERE sync_state = 'sync'"
+            ).fetchone()[0]
+        if count == 0:
+            break
+        time.sleep(0.25)
+    else:
+        raise AssertionError("required synchronous standby remained connected")
     print("REQUIRED_SYNCHRONOUS_STANDBY_UNAVAILABLE=PASS")
 
-    timed_out = False
-    with conn() as c:
-        c.execute("SET statement_timeout = '5000ms'")
-        c.execute("BEGIN ISOLATION LEVEL SERIALIZABLE")
-        c.execute(
-            "INSERT INTO jf10_sync_unavailable_visibility VALUES (%s, %s)",
-            (OPERATION_ID, "must-remain-private"),
-        )
+    ready = threading.Event()
+    pid_box: list[int] = []
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        future = pool.submit(prepare_in_backend, ready, pid_box)
+        assert ready.wait(timeout=10), "PREPARE backend did not start"
+        pid = pid_box[0]
+        wait_event = None
+        deadline = time.time() + 15
+        while time.time() < deadline:
+            with conn() as c:
+                row = c.execute(
+                    "SELECT wait_event_type, wait_event FROM pg_stat_activity WHERE pid = %s",
+                    (pid,),
+                ).fetchone()
+            if future.done():
+                raise AssertionError(
+                    "PREPARE completed or failed before SyncRep wait was observed"
+                )
+            if row and row[1] == "SyncRep":
+                wait_event = row
+                break
+            time.sleep(0.2)
+        assert wait_event == ("IPC", "SyncRep"), wait_event
+        print(f"PREPARE_WAIT_EVENT={wait_event}")
+        print("PREPARE_BLOCKED_ON_SYNCHRONOUS_REPLICATION=PASS")
+
+        with conn() as c:
+            terminated = c.execute(
+                "SELECT pg_terminate_backend(%s)", (pid,)
+            ).fetchone()[0]
+        assert terminated is True, "could not terminate blocked PREPARE backend"
         try:
-            c.execute(f"PREPARE TRANSACTION '{XID}'")
-        except errors.QueryCanceled:
-            timed_out = True
-            c.execute("ROLLBACK")
-    assert timed_out, "PREPARE unexpectedly completed without synchronous standby"
-    print("PREPARE_BLOCKED_WITHOUT_SYNC_STANDBY=PASS")
-    print("PREPARE_TIMEOUT_FAIL_CLOSED=PASS")
+            future.result(timeout=10)
+        except psycopg.Error:
+            print("BLOCKED_PREPARE_BACKEND_TERMINATED=PASS")
+        else:
+            raise AssertionError("terminated PREPARE backend returned successfully")
 
     with conn() as c:
         prepared = c.execute(
