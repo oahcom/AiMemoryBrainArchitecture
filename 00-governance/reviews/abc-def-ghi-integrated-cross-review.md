@@ -178,7 +178,7 @@ Current technology architecture review reports found on Owner branches:
 - G — Memory Context Technology Architecture Review, static review / conditional.
 - H — BMCP Protocol Technology Architecture Review, static review / conditional.
 
-No separate TAR-AI-001 technology review report was found in the current B, I, D or E branch artifacts inspected for this review. This is an evidence-coverage gap, not an inference that those modules are technically rejected. Their architecture baselines and technology constraints still need to be checked against the A–I system blueprint; do not fabricate a technology verdict.
+Owner-specific TAB-001 technology review coverage at the assigned paths under `reviews/technology/` is: C, F, G and H present; A, B, D, E and I not found on their current Owner branches. The four present reports are static/conditional owner reviews and must be refreshed against the current blueprint and any later Owner changes. The five missing reports are outstanding deliverables, not rejections. Do not infer a technical verdict for a missing report.
 
 ## 9. Required unified actions
 
@@ -207,3 +207,80 @@ This report does not:
 - approve I security policy or external governance;
 - claim implementation, CI pass, conformance pass, production readiness or Global Forget completion;
 - authorize branch merge, main modification or architecture freeze.
+
+
+## 12. TAB-001 technology blueprint reconciliation (main refresh)
+
+### 12.1 Mainline source snapshot
+
+During this review, `main` advanced to `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f`. The current TAB-001 source is:
+- `13-engineering-decisions/technology-architecture-blueprint.md`, blob `7b6f2d139217dbe13ab3a3af31bfbff525f20e71`, TAB-001 v0.1, **CANDIDATE SYSTEM-WIDE BLUEPRINT — NOT A TECHNOLOGY FREEZE**.
+- `reviews/integration/tab-001-a-i-technology-architecture-review-task-pack.md`, blob `cf903cd5812cfed3a64a52b169a3bd84209ba3f5`.
+- `reviews/technology/phase-1-a-i-technology-architecture-review-tasks.md`, blob `5a813edeccf7190d66dfd71a96ca581c48f8a4cb`.
+- `ARCHITECTURE_ROADMAP.md`, blob `29289361973ec4369f067706132190793cd57a6b`.
+
+The task pack requires nine independent Owner reviews on the existing Owner branches, six dimensions R1–R6, exact reviewed branch HEAD and blueprint blob SHA, and one Owner-specific report at the assigned path. It explicitly says the task pack is not Owner acceptance, ADR approval or implementation sign-off.
+
+### 12.2 Technology direction consistency
+
+TAB-001's current candidate direction is a local-first Rust modular monolith, one transactional authority, content-addressed blob storage, rebuildable structured/lexical/vector indexes, bounded in-process cache, optional isolated inference worker, and versioned BMCP transport adapters. The blueprint explicitly keeps domain/Owner boundaries unchanged and all unvalidated technology decisions candidate/open.
+
+This direction is broadly compatible with A–I's documented logical architecture. The following are not contradictions, but they are mandatory proof obligations:
+- SQLite + WAL is recommended only as the first single-node prototype candidate; PostgreSQL is a comparison/evolution candidate. Neither is selected as the final production database.
+- Storage's PostgreSQL 18.7 prepared-XID probe is a capability experiment, not a production database selection. It does not negate TAB-001's SQLite prototype recommendation, nor prove that SQLite can implement JF-10's required atomicity. A D/E/Storage spike must explicitly compare the exact required transaction/locking/recovery semantics across the candidate database profiles.
+- TAB-001 itself states SQLite WAL alone does not prove the D/E Forget race contract and requires a real linearization point plus crash/race tests. This is the correct boundary and must remain a hard gate.
+- FTS5 is a first lexical comparison candidate; Tantivy and vector ANN/sqlite-vec remain candidates requiring benchmark evidence.
+- JSON, HTTP/local IPC, gRPC, cryptography/key custody, GPU/model backend and deployment splitting remain open or candidate and stay under H/I/affected Owner authority.
+- 12–16 GB VRAM and host-RAM profiles are planning envelopes, not verified user hardware or performance claims. Actual hardware, workload, concurrency, corpus, RTO/RPO and SLOs remain unknown.
+
+### 12.3 TAB-001 findings requiring action
+
+| Finding | Severity | Owner(s) | Required closure |
+|---|---|---|---|
+| TAB-REV-001 — Storage candidate-to-JF-10 proof gap | P0 | D, E, Storage, I | One reproducible comparison of SQLite and PostgreSQL transaction/locking/recovery against producer admission, fence installation, dependency registration, final publication, prepared-XID/PITR and failover requirements; keep final DB choice OPEN until evidence |
+| TAB-REV-002 — Exact Applied/identity dependencies remain upstream blockers | P0 | B, C, G, H, I, D | Same exact version/digest, typed identity/permission binding, final-request proof, verifier and negative tests |
+| TAB-REV-003 — Five owner technology reports missing | P1 | A, B, D, E, I | Publish the five missing reports at assigned `reviews/technology/owner-*-technology-review.md` paths on their own branches |
+| TAB-REV-004 — Four existing reports need source refresh | P1 | C, F, G, H | Reports currently cite reviewed source snapshots C `0a81f370...`, F `61814ec3...`, G `270ac553...`, H `6e7cb95f...`; compare each source-to-current delta and add a current-branch impact addendum. C/F/H report-only modifications should be identified as publication changes; G additionally added research artifacts |
+| TAB-REV-005 — G context optimization research not yet reconciled to TAB-001 | P1 | G, A; B/C/D/E/F/H/I/Storage consulted by their contracts | G's NVIDIA impact assessment and candidate register are PROPOSED only; map the TSS, ObservationRef, compaction, six-axis fidelity, archive/recall, Forget invalidation and cost gate to TAB-001's Context, storage, inference and resource decisions. No implementation or baseline change inferred |
+| TAB-REV-006 — Technology decision register needs owner dispositions | P1 | A coordinates; B–I decide own items | For TEC-001..018, capture accept/recommend/reject/defer/needs ADR, authority owner, source evidence and closure prototype; do not mark all recommendations approved |
+| TAB-REV-007 — T0–T5 gates need explicit integration with A–I governance | P1 | A + Project Governance Authority when appointed | Map T0 owner review and T1–T4 prototypes to module/consumer/governance/test gates; T5 approval remains blocked until exact Owner decisions, ADRs and evidence exist |
+
+### 12.4 G research addendum — context optimization
+
+The live G branch advanced beyond its earlier technology-review source snapshot and now contains:
+- `reviews/06-memory-context/nvidia-context-optimization-impact-assessment.md`, blob `3fb9f011e24c93a748442018d48c5954584e4f43`, 678 lines, RESEARCH ASSESSMENT / PROPOSED ONLY.
+- `reviews/06-memory-context/context-optimization-implementation-candidates.md`, blob `eadefd4e0fe541ef8479a030a2a99a0d57dbcf8b`, candidate register only.
+
+The research's central architecture inference is to separate a compact forward-looking working state from immutable, selectively recallable evidence history, and to evaluate compaction at meaningful state boundaries under explicit economic and correctness gates. It recommends extending existing G components rather than creating a new subsystem.
+
+The proposed candidates include boundary-triggered compaction evaluation, a dynamic economic decision record, conservative horizon/recovery-cost model, typed Task Semantic State (TSS), TSS lineage, six-axis fidelity validation, ObservationRef metadata, bounded exact range recall, compaction loss ledger, immutable ContextVersion per successful compaction, stale Snapshot/Delta rejection, expanded Forget invalidation, paired benchmark suites and held-out evaluation.
+
+The research correctly marks these as PROPOSED / OPEN / NEEDS_CROSS_OWNER_APPROVAL / NOT_IMPLEMENTED. It explicitly rejects direct transplantation of SoL-Pi thresholds, treating summaries as canonical truth, importing Action Fusion into G, and bypassing D/I/H gates. It is research evidence and design input, not an approved G baseline or measured AiMemoryBrain performance result.
+
+Cross-owner implications to retain:
+- B: typed ObservationRef/source-reference and TSS schema semantics.
+- C: task/subtask boundary signals and declared-versus-verified completion; no private chain-of-thought dependency.
+- D/E/Storage: derivative producer registration, source lineage, dependency registration, atomic/recoverable publication and Forget races.
+- F: exact range retrieval, completeness, recall cost/latency, index/cache invalidation.
+- H: Snapshot/Delta representation, delivery, stale ACK and reconnect semantics.
+- I: classification, authorization, retention, inventory and Global Forget.
+- A: benchmark acceptance, evidence policy and architecture integration.
+
+No candidate is promoted to DECIDED by this review.
+
+### 12.5 Main/P branch divergence and integration safety
+
+At the time of this refresh:
+- `main` HEAD: `3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f`.
+- P coordination branch HEAD before this addendum: `1d48297bf9449fded7450b61defb3f14f2533ace`.
+- Comparing P against main reports P ahead by 30 and behind by 4; the four main-side commits add TAB-001 and its review/task material and update the roadmap.
+- Comparing main against P identifies those four main-side changes as `13-engineering-decisions/technology-architecture-blueprint.md`, `reviews/integration/tab-001-a-i-technology-architecture-review-task-pack.md`, `reviews/technology/phase-1-a-i-technology-architecture-review-tasks.md`, and `ARCHITECTURE_ROADMAP.md`.
+
+This is a genuine branch divergence, not a safe fast-forward. Do not merge or force-update either branch. Before any future PR/merge, reconcile the four main-side files into the P workstream through a reviewed, non-destructive integration and re-run the comparison. This report is on P and does not modify main.
+
+## 13. Updated review verdict
+
+**PASS WITH MAJOR OPEN BLOCKERS — MODULE DOCUMENT / CROSS-BOUNDARY REVIEW AND TAB-001 RECONCILIATION ONLY.**
+
+The nine module proposals are valid first-round review inputs. The P governance proposal and TAB-001 remain candidates. Five of nine TAB-001 Owner technology review reports are missing; four existing reports are conditional and require source refresh against later branch movement. G's new context optimization research is valuable candidate input but is not yet cross-owner accepted. The system technology stack is not frozen; JF-10, Applied, ADR-001, identity binding and Global Forget remain blockers.
+
