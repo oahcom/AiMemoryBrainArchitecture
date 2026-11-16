@@ -195,3 +195,10 @@ The I branch advanced after the original technology review. This addendum consum
 The Global Forget reference model now passes **30/30 tests** after adding empty-inventory rejection, valid exception completion, NotApplicable completion, Failed-target blocking and post-completion target-discovery reopening. Exact run `43963450717`, job `133636592112`, commit `8a6a6e67696c496e265b3d87f1a550fe5e8bb2a0`; updated test Blob `428e15c6263b5b2d730b93ce5412d55e782a449b`.
 
 This remains in-memory logic evidence only. It does not approve I36-GOV-01..10 or establish a real inventory seal, target completion, external deletion, backup erasure or physical erasure.
+## 10. Reassessment — IControlHighWaterProof for restore (2026-11-17)
+
+I accepted the exact Storage restore contract Blob `4f656163aeba532a441eaed1d293a48e2363cb4a`. Exact I acceptance Blob: `85d62b8858fc86addacd3b83f49476e42f49b785`.
+
+IControlHighWaterProof is per PolicyDomainRef and binds PermissionEpoch, I sequencer position, revocation/control-ledger high-water, ProducerDomainInventoryEpoch/registry digest, relevant active Forget TargetInventorySeal refs/digests, signer/key version and audience. It is a control-state snapshot, not an authorization grant, D clearance, COC commit proof or Storage visibility receipt. Any advance during restore invalidates the captured proof.
+
+I36-GOV-01..10 remain GOVERNANCE-BLOCKED / NOT APPROVED. The technical restore proof acceptance does not approve issuer federation, delegation, cross-Scope/Environment grants, offline authorization, retention exceptions, Global Forget completion or physical erasure. I proof API/signature verification and real restore integration remain NOT IMPLEMENTED / NOT RUN.
