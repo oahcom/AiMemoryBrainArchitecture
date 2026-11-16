@@ -1,0 +1,32 @@
+name: COC Outage Recovery Logical Reference Model
+
+on:
+  push:
+    branches:
+      - session-a-integration-2026-11-16
+    paths:
+      - "reviews/integration/reference_model/**"
+      - ".github/workflows/coc-recovery-reference-model.yml"
+  pull_request:
+    paths:
+      - "reviews/integration/reference_model/**"
+      - ".github/workflows/coc-recovery-reference-model.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  coc-recovery-model:
+    name: Deterministic COC recovery-batch model tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run COC model unittest suite
+        working-directory: reviews/integration/reference_model
+        run: python -m unittest discover -v
