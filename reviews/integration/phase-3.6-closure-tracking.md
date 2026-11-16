@@ -731,3 +731,25 @@ Correction requests posted:
 - Issue #2 comment `6920365466`: Storage/Consistency must decide the current COC exact Blob, identify operator/topology and reconcile JF-10 serialization/restore.
 
 **No approval transfers across these amendments.** Current status: A candidate / owner decisions pending / not frozen; COC proposed / operator not designated / not deployed; Storage and Security governance pending; COC-01..12 and consumer race tests NOT RUN; production causal proof NOT VERIFIED; G8 BLOCKED, G9 NOT RUN, G10 BLOCKED.
+
+
+## Six Owner decisions verified — prior package pin only (2026-11-16 23:11 +08)
+
+A independently re-fetched the six Owner artifacts from their named Owner branches. All six decisions below are explicitly pinned to the same earlier A package Blob `9808b31f840606b329f1a794935dfc9c5084d63b` and therefore are valid only for that package revision:
+
+| Owner | Owner branch HEAD | Decision | Owner artifact | Readback Blob SHA |
+|---|---|---|---|---|
+| C | `c69d25c4589d984030980b1446ce87b5d133d21a` | ACCEPT WITH ENUMERATED EXCEPTIONS | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `5723dba00de54fcd73552d9b82734a8c044550ec` |
+| D | `99c0363da8c5d7c08a2f661325853258c136dbe2` | ACCEPT WITH ENUMERATED EXCEPTIONS | `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md` | `744b99942cdee437b85fdde90ff61ff09c391b05` |
+| I | `d7091bccbfc327dedd43675f26b812191b794a5a` | ACCEPT WITH ENUMERATED EXCEPTIONS | `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md` | `bb4987268381bcb8485276c2d4e4906fe1e20b03` |
+| H | `74ced1444f0a3bac81639e722d0b166411bb4fdf` | ACCEPT WITH ENUMERATED EXCEPTIONS | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `6686510bb8d8265d86ce9249286de8f49d90d178` |
+| G | `f892dc39196123c31b7e0f845a150270c56f2dcf` | ACCEPT WITH ENUMERATED EXCEPTIONS — 1.1 Full Applied predicate | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `a96c61fe203e9e02921d4360d6cac17ad6a7b506` |
+| B | `3a4e214b6ec98fa640589891d9d1c6617e7a2b6d` | APPROVE — typed-reference semantics / role-preserving bindings | `02-domain-model/phase-3.6-b-owner-formal-actor-scope-environment-type-mapping-confirmation.md` | `ac9a092b467f78f2122f4adf08d7ba445e40e927` |
+
+The decisions were read from the exact Owner artifacts and all name the same A package SHA `9808b31f840606b329f1a794935dfc9c5084d63b`. Key exceptions include: C provider-specific idempotency/recovery and no implementation; D complete lineage and non-expiring barrier; I sequencer/revocation recovery, multi-PolicyDomain block and separate security governance; H schema/crypto/replay interoperability remains candidate; G validator/persistence and conformance unverified; B approves semantic types only, not consumer field encoding or wire schema.
+
+### Superseding current revision
+
+The package was subsequently amended for the COC-outage cutoff safety rule. The current candidate is now Blob `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`, paired with COC proposal Blob `65878e1e2b569b1dc6d0918f51a313da122236d4`. The six decisions above do **not** automatically approve either amended artifact. Fresh exact-Blob decisions are required against both current pins; A requested them in Issue #3 comment `6920364402`. Storage/Consistency's exact COC decision remains pending (Issue #2 comment `6920365466`); no named operator or actual deployment is established.
+
+**Current disposition:** six-way owner decision RECORDED for prior SHA `9808b31f...`; current SHA `d4eef4ae...` remains CANDIDATE / FRESH OWNER REVIEW REQUIRED / NOT FROZEN. Coordinator deployment NOT DESIGNATED / NOT VERIFIED. Tests NOT RUN. G8 BLOCKED; G9 NOT RUN; G10 BLOCKED.
