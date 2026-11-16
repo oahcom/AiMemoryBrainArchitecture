@@ -1185,3 +1185,16 @@ The test established synchronous standby state before PREPARE, prepared WAL repl
 **Gate A remains PARTIAL PASS / OPEN.** Next required evidence: same-XID rollback after promotion; backup/restore and PITR; current Forget-control-ledger reconciliation before serving restored data; host/zone/storage failure behavior; production failover fencing/routing; actual Canonical Authority deployment and named human on-call/operator with RPO/RTO.
 
 Do not advance Gate B until these Gate A conditions pass. Gate C remains blocked until Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
+
+
+## 13.27 Gate A — rollback-after-promotion closed for pinned CI profile — 2026-11-17
+
+Storage's two-node PostgreSQL 18.7 probe now prepares two independent XIDs before primary loss and resolves one by COMMIT PREPARED and one by ROLLBACK PREPARED after promotion.
+
+- Probe Blob: cbe1f317479145dbf1467e426b0c0737a6ec054c
+- Workflow Blob: f3c05f90c6065458b49879def10dce672685c850
+- Successful run: 43908746695; commit b59c0842dba86b581ded4d9519c4289b6a699fde; job 133444572245.
+
+Both XIDs were synchronously replayed; both exact XIDs and locks survived primary loss/promotion; commit exposed pointer + receipt atomically; rollback exposed neither. The rollback-after-promotion subtest is now PASS for this exact CI profile.
+
+Remaining Gate A work is limited to backup/restore + PITR and stale-snapshot/control-ledger reconciliation, production host/zone/storage durability, failover fencing/routing, actual Canonical Authority deployment and named human operator/runbook/RPO/RTO. Gate A remains PARTIAL PASS / OPEN. Gate B remains blocked until Gate A fully passes; Gate C remains blocked until Gate B. JF-10 P0 remains OPEN and production activation NOT AUTHORIZED.
