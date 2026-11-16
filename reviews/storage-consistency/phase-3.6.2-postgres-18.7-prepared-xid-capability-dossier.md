@@ -502,3 +502,22 @@ Storage inspected the complete recursive Git tree for the exact branch head afte
 This is a repository-content observation, not a claim that no implementation exists in any external repository or deployment. The project-designated Canonical Authority runtime executable and its authoritative database access path therefore cannot be identified or inspected from this repository branch. The PostgreSQL 18.7 CI probes remain engine-capability fixtures and must not be described as exercising the production adapter.
 
 **Gate A stop condition:** the responsible Owner must provide the canonical implementation repository/branch and exact runtime entrypoint, DB adapter and schema/migration path, or explicitly designate this repository as the implementation home and deliver those artifacts. Storage must then trace the actual authoritative write/read path for prepared XID, D/lineage locks, VisibilityPointer, PublicationReceipt, owner outcome, receipt-consumption evidence and outbox, and run the conformance/fault suite against that path. Until then, production database binding and implementation conformance remain NOT IDENTIFIED / NOT VERIFIED; Gate A remains PARTIAL PASS / OPEN.
+
+
+## 23. Full seven-workflow PostgreSQL 18.7 regression batch — PASS (2026-11-17)
+
+The corrected PITR commit `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd` triggered the complete seven-workflow Storage regression batch. All seven runs completed with conclusion SUCCESS; the following raw job markers were independently re-read:
+
+| Capability | Run / Job | Observed final marker |
+|---|---|---|
+| Prepared-XID + restart | `43955195289` / `133607790416` | `JF10_POSTGRESQL_18_7_SINGLE_NODE_CAPABILITY=PASS` |
+| Synchronous standby promotion | `43955195323` / `133607790413` | `JF10_POSTGRESQL_18_7_SYNC_FAILOVER_CAPABILITY=PASS` |
+| Physical backup/restore | `43955195219` / `133607790737` | `JF10_POSTGRESQL_18_7_BACKUP_RESTORE_CAPABILITY=PASS` |
+| Explicit-LSN WAL PITR | `43955195388` / `133607790699` | `JF10_POSTGRESQL_WAL_ARCHIVE_PITR=PASS` |
+| Prepared-XID PITR + archive negatives | `43955195460` / `133607791713` | `JF10_POSTGRESQL_PITR_ATOMICITY_AND_NEGATIVES=PASS` |
+| Synchronous standby unavailable | `43955195197` / `133607790658` | `JF10_SYNC_STANDBY_UNAVAILABLE_FAIL_CLOSED=PASS` |
+| Old-primary rewind/rejoin | `43955195256` / `133607790520` | `JF10_POSTGRESQL_PG_REWIND_REJOIN=PASS` |
+
+The raw logs also show same-XID COMMIT/ROLLBACK after promotion, prepared lock retention, private visibility during synchronous-replication UNKNOWN, and the rewound old primary rejecting writes after rejoining as a standby. The rejoin evidence remains a single-runner Docker fencing simulation, not production STONITH or split-brain prevention.
+
+This batch provides regression confidence for the pinned PostgreSQL 18.7 CI profile. It does not change Gate A's overall disposition: production runtime/adapter binding, I/D ledger integration, real infrastructure durability/fencing, named operator/runbook and RPO/RTO remain open. Gate A PARTIAL PASS / OPEN; Gate B BLOCKED; Gate C BLOCKED; production activation NOT AUTHORIZED.
