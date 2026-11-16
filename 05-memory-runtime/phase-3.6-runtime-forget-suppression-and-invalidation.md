@@ -168,3 +168,15 @@ F reports only F-local candidate/freshness/index/cache/Working-Set suppression e
 ### 4. Conformance disposition
 
 The existing F-RT-01..13 and joint CFG-01..20 / PI-01..08 remain **SPECIFIED / NOT RUN**. No executable retrieval race, cache fault, rebuild/replay, reconnect, injection or provider-boundary evidence was supplied. This addendum records normative architecture, not implementation or test success.
+
+## Phase 3.6.3 — Issue #6 F BIH consumer acceptance
+
+- Owner: F — Retrieval, Index, Cache and Working Set.
+- Exact BIH package: reviews/integration/phase-3.6-identity-trust-joint-architecture.md, Blob SHA a45ae90b318a79bf009d14f4d917611881e9e214.
+- Disposition: **ACCEPT WITH ENUMERATED EXCEPTIONS** as a downstream consumer of BIH36-JD-01..17.
+- Mapping: authenticated PrincipalRef/IssuerRef and workload identity come from protected verifier context; ActorRef is verifier-produced and operation-bound; ProducerRef/AdapterRef/AgentRef remain distinct registered identities. F preserves typed ScopeRef ownership/applicability roles and EnvironmentRef binding through candidate generation, evidence/provenance dereference, fusion, ranking, cache and Working Set. PermissionEpoch is opaque and scoped to PolicyDomainRef; ForgetFence is a separate opaque authority.
+- Enforcement: identity, Scope and Environment filtering occurs before candidate generation can affect output, ranking, counts, traces or side channels. F revalidates current I authorization and D fence at candidate admission, protected dereference, cache hit/fill/write, final materialization and final return. Reconnect authenticates a fresh session, obtains current I epoch and D fence, reconciles per-domain/per-partition checkpoints and G target state, suppresses stale Working Set/fills, then restores only authorized refs.
+- Fail closed: unknown issuer/principal/workload, payload self-assertion, Actor mismatch, missing/ambiguous Scope or applicable Environment, invalid delegation, absent exact cross-Scope/Environment grant, stale/gapped/incomparable epoch, stale/unknown fence, missing capability/profile or unreconciled invalidation checkpoint => suppress affected content and return unavailable/incomplete; never disclose candidate/snippet/count or use stale cache.
+- F consumes I's formal PermissionEpoch/authorization technical confirmation as normative source; I owns policy decision and currentness. F does not mint, reinterpret or compare epochs across domains. IndexWatermark remains a separate F consistency cursor.
+- Exceptions: F does not own I issuer/Principal/delegation/grant policy, B typed identity definitions, H transport/wire/reconnect, D canonical Memory/ForgetFence, or G Applied/Delivery state. I36 governance activation and I36/H36/F test execution remain separate gates.
+- F-RT-01..13 remain **SPECIFIED / NOT RUN**.
