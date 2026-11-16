@@ -46,7 +46,7 @@ jobs:
             -c wal_level=replica \
             -c max_wal_senders=10 \
             -c max_replication_slots=10 \
-            -c wal_log_hints=on
+            -c wal_log_hints=on \
             -c wal_keep_size=512MB \
             -c synchronous_commit=remote_apply \
             -c synchronous_standby_names='FIRST 1 (jf10_standby)' \
@@ -81,7 +81,7 @@ jobs:
             -c wal_level=replica \
             -c max_wal_senders=10 \
             -c max_replication_slots=10 \
-            -c wal_log_hints=on
+            -c wal_log_hints=on \
             -c wal_keep_size=512MB \
             -c hot_standby=on \
             -c fsync=on \
@@ -139,7 +139,7 @@ jobs:
             -c wal_level=replica \
             -c max_wal_senders=10 \
             -c max_replication_slots=10 \
-            -c wal_log_hints=on
+            -c wal_log_hints=on \
             -c wal_keep_size=512MB \
             -c hot_standby=on \
             -c fsync=on \
