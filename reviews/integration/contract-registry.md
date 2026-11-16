@@ -129,3 +129,54 @@ No finding is closed by this registry update. Closure requires an exact owner ar
 ### 4. Evidence hierarchy and freeze rule
 
 Artifact Exists, Design Complete, Owner/Delegated Decision, Cross-module Agreement, Governance Approved, Consumer Accepted, Implementation Complete, Test Executed, Test Passed and Contract Frozen are separate states. No commit or readback can promote one state into another. No closure finding is created or closed solely by this registry update. A future Owner branch advance invalidates the affected source snapshot and requires re-read.
+
+ 
+---
+
+## Phase 3.6 live reconciliation addendum — 2026-11-16 22:03 +08
+
+This addendum supersedes historical source snapshots where live refs differ. It does not alter Owner authority or create approvals.
+
+### Live Owner refs
+
+| Owner | Branch | Live HEAD |
+|---|---|---|
+| A | session-a-integration-2026-11-16 | 70552cb4d232da657a16dc469ebf6d5ca10f2624 (pre-publication snapshot) |
+| B | session-b-domain-model-phase3 | 225c1f519c439d7bb87827e11d63185a5dcfe819 |
+| C | session-c-agent-integration-2026-11-16 | 3b6c1d9a5d648f61daa04f5874d887f33475f098 |
+| D | session-d-memory-brain-2026-11-16 | df1b415bcddbbd066d7db6316e0caa14b3097d92 |
+| E | session-e-memory-compiler-2026-11-16 | 2adc95ad4d6562f37d9bb6ed8743ce3514a1d615 |
+| F | session-f-memory-runtime | 2da5209d7072272d5510d376c0f319bed0402a6f |
+| G | session-g-memory-context | ac32e980003aa41faf0ae958ffef3df5ab387984 |
+| H | session-h-bmcp-protocol | 8747085d962877d8a99c6d2b5f09bfaa538fa97f |
+| I | session-i-security-governance-2026-11-16 | 3a04f31dcaa2e99095ecdcaeab23e6927f69ebb4 |
+| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | eea8e645b84f73a668428a298dded3313a82353d |
+| main | main | 8a6414158c9c056c1638222534e1993d1bbc99d2 |
+
+### Controlling artifact evidence
+
+| Workstream | Owner artifact | Source Commit | Blob SHA | Reconciled status |
+|---|---|---|---|---|
+| DE-S | D 03-memory-brain/phase-3.6.2-jf10-cross-authority-recovery-protocol.md | df1b415bcddbbd066d7db6316e0caa14b3097d92 | ff83abbad8172d4efec5a7f088064f31f21844b9 | Candidate; I36-SR-02 gap explicitly open |
+| DE-S | E 04-memory-compiler/phase-3.6.2-jf10-cross-authority-recovery-protocol.md | 2adc95ad4d6562f37d9bb6ed8743ce3514a1d615 | ff83abbad8172d4efec5a7f088064f31f21844b9 | Same candidate bytes as D; not accepted as conformant |
+| DE-S | I 09-security-governance/phase-3.6.2-jf10-commit-authorization-recovery-acceptance.md | f9dbe01be3670e1aab79103d9fbbf0f994a68eba | 77ffa8f019ea7734e22d785953e54f65c05208ac | I-owned interface portion accepted; superseded as acceptance of split owner-gate protocol |
+| DE-S | I 09-security-governance/phase-3.6.2-jf10-owner-gate-ordering-correction.md | 1d6aaad5a0ac673c883c1bd59d52464e7069d439 | 57474cfb0c5da07a2cbcbeff1fc792ced36c5dd6 | Normative correction: final owner gate must join same I policy-domain order; JF-10 remains P0 OPEN |
+| DE-S | Storage reviews/storage-consistency/phase-3.6-deployment-selection-and-verification-readiness.md | c5a2a5c73c64b3c0e0ee712c5dd8ab6f21a44c9d | 765b10978813680985a71600e82fc15caa75bf2c | Logical transactional deployment profile selected; concrete engine/runtime deployment and approver blocked |
+| BIH | B 02-domain-model/phase-3.6-typed-identity-trust-closure.md | 4d8635c6fa5163b3883266b1c3184e27ed5fcfd5 | 0a6b78a842e550b58533b797cdfcd2d954ed6826 | BIH36-JD-01..17 joint technical baseline; ADR-001 remains ADR-BLOCKED |
+| BIH | I 09-security-governance/phase-3.6-governance-approval-and-consumer-acceptance-register.md | 678a97ef6b43aed9f51f8ecdadf0955ea53915fa | 11c4bfde5de02a684cc6e5df46d1f9676f5a40a5 | I36-GOV-01..10 GOVERNANCE-BLOCKED; D/E/H/Storage design acceptance recognized; C/F/G OPEN |
+| BIH | H 08-bmcp-protocol/phase-3.6-bih-identity-trust-consumer-acceptance.md | 50b0247725c03ba2155678a1dfeae841056a6fb9 | ccbac2d30234df9b910565a7326d100d11a6494e | H design-level consumer acceptance; H36 NOT RUN |
+| CFG | C 07-agent-integration/phase-3.6-final-request-evidence-contract.md | 3b6c1d9a5d648f61daa04f5874d887f33475f098 | 8db1140f0dd19fe9267e3f2b44a9c1be75a6c32b | C semantics delivered; C/G/H Applied freeze blocked |
+| CFG | F 05-memory-runtime/phase-3.6-runtime-forget-suppression-and-invalidation.md | 2da5209d7072272d5510d376c0f319bed0402a6f | 176cd500bf5d9fa8519c5213e835a745567fcfad | F semantics decided; cross-owner interfaces open; tests NOT RUN |
+| CFG | G 06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md | ac32e980003aa41faf0ae958ffef3df5ab387984 | 8f6b215de7b78bf0eec2281359d3e039e7c8d5f4 | G semantics decided; C/G/H Applied freeze blocked |
+
+### Consumer acceptance reconciliation
+
+BIH design-level acceptance evidence is present for D (184423d2d8191a12f2d4a869bc63f5e7fafaf96a), E (6f4100618695fcf971560fb784f7887a72798c96), H (ccbac2d30234df9b910565a7326d100d11a6494e) and Storage (ec8e49d0d11c72d37ad0c291611a96a1122ba6f5). This is design acceptance only, conditional on I governance and implementation evidence. C, F and G remain OPEN. No runtime conformance is established.
+
+### DE-S disposition correction
+
+I's later owner-gate ordering correction controls over any broader reading of its earlier JF-10 interface acceptance. I requires the actual Storage final visibility gate to participate in the same per-policy-domain ordering protocol as revocation. A prior standalone I COMMIT_WON followed by an independent Storage transaction is not conformant. D/E/Storage must jointly revise the candidate with I; A does not choose that protocol. Inventory Seal/Global Forget remains candidate/open; I36-GOV-07/08 are blocked. Storage selected only a logical local transaction profile; no concrete DB engine, runtime deployment, named independent engineering approver or execution proof is recorded.
+
+### CFG disposition correction
+
+C/G/H do not yet have one common Applied contract version/digest and explicit same-version approval. Preserve the C, F and G Owner semantics. No Applied freeze, runtime end-to-end closure or global Forget completion is claimed.
