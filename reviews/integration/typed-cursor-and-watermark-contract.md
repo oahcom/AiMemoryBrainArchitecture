@@ -106,3 +106,34 @@ Current branch tips: A `9c3dafb97b97aee50a8b61fe60836ed0a8e92fe3`; B `2148dcf1a5
 - BIH36-JD-01..17 are a delegated joint technical baseline; governance and consumer acceptance are separate gates.
 - C/G/H do not share a pinned Applied schema/version or common approval record; Applied Contract Frozen remains NO.
 - Typed-cursor and cross-namespace conformance tests remain NOT RUN. No test result is implied by this registry.
+
+
+---
+
+## Phase 3.6 live authority namespace reconciliation — 2026-11-16
+
+The following typed authorities remain independent and non-comparable. This addendum records the latest Owner evidence; it does not change domain semantics or imply implementation.
+
+| Type / receipt | Authority | Purpose | Current state | Evidence / blocker |
+|---|---|---|---|---|
+| PermissionEpoch | I | Current policy-domain authorization/revocation | Technical semantics decided; governance blocked | I BIH baseline; I36-GOV-01..10 blocked; no production sequencer evidence |
+| CommitAuthorizationReceipt | I | Single-use authorization bound to exact protected owner operation | I interface semantics accepted; owner-gate protocol not accepted/frozen | I acceptance Blob 77ffa8f019ea7734e22d785953e54f65c05208ac; correction Blob 57474cfb0c5da07a2cbcbeff1fc792ced36c5dd6 requires actual owner final gate to join I sequencer order |
+| ProducerDomainInventoryEpoch / InventorySealReceipt | I | Closed-world producer/recipient/backup inventory and Global Forget scope | Candidate; no seal evidence | I inventory artifact remains candidate; I36-GOV-07/08 blocked |
+| ProducerRegistryVersion / ProducerRegistrationHighWater | D | D-local producer registration and per-operation admission boundary | D semantics decided; implementation unverified | Must not substitute for I global inventory epoch |
+| ForgetFenceGeneration / FenceSnapshotReceipt / work barrier | D | Canonical Forget ordering and captured work/dependency completeness | D semantics decided; physical realization unverified | Must be independently checked at owner final visibility/disclosure gate |
+| CanonicalCommitCursor | D | Ordered sequence per canonical authority | D semantics decided; Storage continuity/recovery proof absent | No cross-authority scalar comparison |
+| IndexWatermark | F | Partition-local contiguous accounted-through canonical cursor | F semantics decided; tests not run | Gaps/lag cannot be hidden by scalar max |
+| ContextVersion / DeliveryId / DeliveryAttemptId | G | Immutable Context target and attempt identity | G semantics decided; Applied freeze blocked | Must bind exact C request evidence and H authenticated delivery |
+| AdapterCapabilityEpoch / ACK identity | H | Adapter instance/session capability and action-specific ACK evidence | H technical design decided; consumer acceptance partial | ACK is not Applied; stale/old-session ACK cannot roll back state |
+| InferenceRequestId / FinalRequestBoundaryId | C | Exact immutable request and final submit boundary | C semantics delivered; joint freeze blocked | Requires common C/G/H Applied version and D/I/B predicate confirmations |
+
+### Cross-namespace invariants
+
+1. I PermissionEpoch, D ForgetFenceGeneration, F IndexWatermark, G ContextVersion, H AdapterCapabilityEpoch and D CanonicalCommitCursor are distinct typed domains; never compare, cast, substitute or infer ordering across them.
+2. I ProducerDomainInventoryEpoch is global closed-world inventory authority; D ProducerRegistrationHighWater is a D-local admission barrier. Neither replaces the other.
+3. A receipt proves only the operation and authority named by its type. CommitAuthorizationReceipt, InventorySealReceipt, FenceSnapshotReceipt, DependencyRegistrationReceipt, PublicationReceipt and ACK are not interchangeable.
+4. COMMIT_WON is not publication. Storage VisibilityPointer remains sole publication authority; JF-10 must prove the owner final gate joins I's policy-domain order and D fence is independently enforced.
+5. Final Request Submitted is C evidence; Applied is G's accepted historical fact; current-use validity is separately recomputed after revocation/Forget/session/capability changes.
+6. Reconnect must reauthenticate and reconcile current I/D/G/H authority before replaying or restoring any previous state.
+
+All cross-namespace race and recovery cases remain specified but NOT RUN. No test PASS or architecture freeze is implied.
