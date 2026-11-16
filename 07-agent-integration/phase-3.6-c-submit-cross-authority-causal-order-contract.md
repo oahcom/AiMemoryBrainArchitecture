@@ -63,3 +63,24 @@ Status: **SPECIFIED / NOT RUN**. No production provider integration or runtime c
 ## 7. Acceptance boundary
 
 This artifact specifies C's required integration behavior. It does not approve I's receipt implementation, D's barrier implementation, the coordinator operator/deployment, H wire schema, G Applied predicate or Storage durability. Cross-owner acceptance of the exact `CausalOrderProfile/1.0` and `bmcp.applied-ack/1.1.0` remains required before the proposed `CGH-APPLIED-1.1` can be frozen.
+
+## C Owner exact-version decision — CGH-APPLIED-1.1
+
+- A package: `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`
+- Exact A package Blob SHA: `9808b31f840606b329f1a794935dfc9c5084d63b`
+- Common contract: `CGH-APPLIED-1.1`
+- Causal profile: `CausalOrderProfile/1.0`
+- H schema target: `bmcp.applied-ack/1.1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within C's authority over the actual final-request/provider submit boundary and C-owned evidence.
+
+C accepts the normative ordering: durable ParticipantIntent before provider side effect; exact I receipt consumption/terminal and D lineage-bound clearance; coordinator-finalized reservation; actual provider handoff; immutable CSubmitOutcome; and common terminal proof. C accepts that I COMMIT_WON, D clearance, reservation, H ACK or coordinator intent alone never proves provider success. C alone emits CSubmitOutcome from the observed provider/runtime outcome, including actual provider receipt and InferenceRequestId; only determinate ACCEPTED handoff may support Final Request Submitted.
+
+Exceptions and closure conditions:
+1. Coordinator/operator, durable participant registry and monotonic order store are not designated/deployed/verified. C acceptance is conditional on one durable transaction/participant surviving process death, crash, failover and restore without releasing IN_DOUBT.
+2. Provider exactly-once semantics cannot be assumed generically. Production activation requires a provider-specific idempotency/recovery contract proving same transaction/key recovery and no retry-as-new-operation after ambiguous outcome.
+3. CSubmitOutcome and CausalOrderTerminalProof must bind the exact final request digest, boundary, transaction, reservation, actual provider receipt and outcome; missing/ambiguous provider result remains UNKNOWN/IN_DOUBT and must retain I/D barriers.
+4. H 1.1.0 field mapping and cryptographic/replay interoperability remain candidate/unverified; C does not approve H implementation or crypto governance.
+5. G alone validates and commits Applied; C acceptance does not establish G acceptance, tests, deployment or current-use eligibility.
+
+No C-CO execution or production implementation verification is claimed. This decision applies only to the exact A Blob above and does not transfer any CGH-APPLIED-1.0 approval.
