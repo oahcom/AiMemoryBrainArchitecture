@@ -274,3 +274,18 @@ Storage extended the two-node PostgreSQL 18.7 failover probe to prepare two inde
 Both prepared XIDs were synchronously replayed to the standby. After primary SIGKILL and promotion, both exact XIDs were recoverable; both locks remained held. The promoted standby committed one participant (pointer + receipt visible together) and rolled back the other (neither visible).
 
 **This closes the rollback-after-promotion subtest for the pinned CI profile. Gate A remains PARTIAL PASS / OPEN** because backup/restore + PITR, Forget-control-ledger reconciliation before restored reads, real host/zone/storage durability, production failover fencing/routing, actual Canonical Authority deployment and named human operator/RPO/RTO remain open. Gate B/C remain blocked; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+## 15. Gate A — physical backup/restore and stale-control gate PASS (2026-11-17)
+
+Storage executed a PostgreSQL 18.7 physical pg_basebackup/restore probe while a participant XID was prepared and a previously visible artifact remained in the backup snapshot.
+
+- Probe Blob: 81072ea2411af12f29c7a7a4d984df3f870321ca
+- Workflow Blob: 38369ed197665c4ed99a9ba30602cb5e3b04ba75
+- Successful run: 43909138634
+- Run commit: 62033b9f90a28c4afdea07fafa0f575342b084e9
+- Job ID: 133445937783
+
+The run proved the prepared XID survived physical backup/restore and could be committed by the same XID; the prepared visibility pointer and receipt remained private. A restored snapshot with local control epoch 0 failed closed against required authoritative epoch 1; the newer Forget-control state was replayed before reads; the forgotten artifact was suppressed while an unrelated artifact remained readable.
+
+**Gate A remains PARTIAL PASS / OPEN.** This CI test uses a fixture to represent the external I/D Forget-control ledger and does not prove production integration with those services. Remaining: actual host/zone/storage durability, production failover fencing/routing, exact Canonical Authority deployment profile, named human on-call/operator, approved runbooks and RPO/RTO. Gate B/C remain blocked; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
