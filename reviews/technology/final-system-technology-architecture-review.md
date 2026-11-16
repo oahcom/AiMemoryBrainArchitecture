@@ -421,3 +421,67 @@ No CI run, implementation test, fault-injection run, penetration test, benchmark
 **A — Principal Integration Architect**  
 **Decision: NOT REVIEWABLE**  
 **TAB-001: CANDIDATE / NOT FROZEN**
+
+## 18. Reassessment after Owner report completion and architecture-phase COC closure (2026-11-17)
+
+### 18.1 Superseding determination
+
+The original `NOT REVIEWABLE` verdict was driven in part by the absence of four mandatory Owner technology reports. That evidence gate is now closed: B, I, D and E reports have been created on their respective Owner branches, read back, and pinned by exact Blob SHA. All eight Owner technology reports (B/I/D/E/F/G/H/C) now exist. The original NOT REVIEWABLE verdict remains an accurate historical description of the earlier snapshot, but is **superseded for the current review state** by this reassessment.
+
+**Current A verdict: CONDITIONAL PASS — ARCHITECTURE DESIGN BASELINE ONLY; NOT FROZEN; PRODUCTION/RELEASE ACCEPTANCE BLOCKED.**
+
+This is a conditional acceptance of the architecture direction and owner-boundary design for continued engineering planning. It is not a production readiness decision, implementation PASS, security certification, global Forget completion, schema freeze or permission to merge/freeze TAB-001.
+
+### 18.2 Current Owner report and branch evidence
+
+| Owner | Current branch HEAD | Technology report Blob SHA | Disposition |
+|---|---|---|---|
+| B | `a5bf20b57ebb3db849f91c555b658f9a2ee09851` | `473c9bb1b8d010e9e20c16975864be7b2daa3253` | CONDITIONAL PASS; Fact/Claim ADR-001 remains blocked. |
+| I | `4b1ef1c607089db1c886ae9af82e8cab5d9c6af3` | `3558856fcc109efc6ed1cda3a53ac7900a89fd31` | CONDITIONAL PASS; Global Forget/security governance remains open. |
+| D | `06bce7f13bfe003d6d70b8d57c9522f5e46e2ed9` | `3dcb96b2e3ddb81df728a7b07398b78709e1f13d` | CONDITIONAL PASS; D semantics accepted, implementation deferred. |
+| E | `0d77d0ad6e564873127c53d7dd02edca09e822e1` | `6a83d67ccabdded20d4d4ebf28b9fbfa7d8f8cc3` | CONDITIONAL PASS; producer lifecycle accepted, runtime integration unverified. |
+| C | `d13aa06ba42820a27bba18ecb6eae13dc9071599` | `799aa6e533d10240ed8f6050e15f56e6646c0327` | CONDITIONAL PASS; provider-specific idempotency/runtime proof open. |
+| F | `5a9816ce5732a3f437e24bbd9a82630a5f4f2c6f` | `8437b5bbf676361feb2f4e62c21d9d8495f6e619` | CONDITIONAL PASS; index/cache/Anti-Resurrection tests open. |
+| G | `e8547303bc464dbfd42d8d402b538e2b32033934` | `6211845c21f40a8c4a51d450330dd1750e76e50b` | CONDITIONAL PASS; Applied validator/persistence unverified. |
+| H | `9c33237ecc4801a63d62d1c56184f3d48c53f65f` | `0f158555f1870c5a41273a41d35e2b05a7b39283` | CONDITIONAL PASS; schema candidate only, interoperability/runtime validation open. |
+
+### 18.3 Architecture and protocol decisions now closed at design level
+
+1. B/I/D/E technology reviews are complete; the four reports distinguish candidate direction from decisions, implementation and test evidence.
+2. The exact CGH-APPLIED-1.1 / JF-10 bridge owner matrix is recorded at `reviews/integration/phase-3.6-cgh-applied-1.1-owner-acceptance-matrix.md`, commit `a480a713db358b30dc4cf7c9157025b3c116e439`.
+3. The COC durable log/participant/recovery protocol is pinned at Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`. All B/C/D/E/G/H/I/A/Storage owner perspectives have exact-Blob acceptance records. A's matrix is `reviews/integration/phase-3.6.3-coc-durable-protocol-acceptance-matrix.md`, commit `e5fad5b3e67662134c18e33090b08d874f161f41`.
+4. Storage Gate B is **DESIGN-LEVEL ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS**. Its consensus implementation, distributed failure tests and Gate C runtime conformance are deferred to engineering.
+5. PostgreSQL 18.7 is now a qualified prepared-XID capability candidate for the pinned CI profile; it is not a production deployment selection. The latest seven-workflow regression set is 7/7 SUCCESS: PITR `43958775001`; prepared-XID `43959079736`; synchronous promotion `43959079669`; backup/restore `43959079703`; WAL PITR `43959079745`; sync-unavailable fail-closed `43959079760`; pg_rewind/rejoin `43959079930`.
+6. COC in-memory outage-recovery reference model: 11 tests passed in run `43897364938`. JF-10/COC semantic validator: 18 tests passed in run `43905568915`. Neither proves a live COC quorum, owner-service integration or production runtime.
+
+### 18.4 Updated blocking register
+
+| ID | Current status | Updated interpretation |
+|---|---|---|
+| A-TAR-P0-001 — missing B/I/D/E reports | **CLOSED** | All four reports exist on Owner branches with exact Blob and current branch HEAD evidence. |
+| A-TAR-P0-002 — Fact/Claim ADR | **OPEN / P0** | ADR-001 remains ADR-BLOCKED. No canonical schema or dependent wire freeze. |
+| A-TAR-P0-003 — producer admission/fence/dependency/publication linearization | **DESIGN ACCEPTED / IMPLEMENTATION P0 OPEN** | D/E/Storage/JF-10 exact contract and owner acceptance now exist; PostgreSQL capability tests pass. Real E/D/I/Storage application-path integration and Gate C race/crash/failover tests remain engineering release blockers. |
+| A-TAR-P0-004 — Global Forget completion and Anti-Resurrection | **OPEN / P0** | I target inventory, complete external/backup/recipient mapping, owner receipts and end-to-end suppression/rebuild/reconnect proof remain unclosed. |
+| A-TAR-P1-001 — identity/typed references | **DESIGN ACCEPTED WITH EXCEPTIONS** | B/I/H/C/E boundaries are documented; runtime authentication, issuer/delegation and stale-epoch negative tests remain. |
+| A-TAR-P1-002 — Full Applied final-request proof | **OPEN / P1** | C/G/H schema and owner predicates exist; real Agent final-submit hook and independent verifier are not implemented. |
+| A-TAR-P1-003 — index/cache Anti-Resurrection | **OPEN / P1** | F retrieval suppression, rebuild, cache fill/hit and stale-watermark race tests remain. |
+| A-TAR-P1-004 — Storage selection/recovery | **PARTIALLY RESOLVED** | PostgreSQL 18.7 is a qualified capability candidate with 7/7 CI; production engine/deployment profile and real I/D integration remain open. |
+| A-TAR-P1-005 — protocol/compatibility | **OPEN / P1** | H 1.1.0 schema candidate exists; generated IDL/SDK, canonical parser, crypto and interoperability tests remain. |
+| A-TAR-P1-006 — workload/resource benchmark | **OPEN / P1** | No representative corpus, throughput, latency, storage growth or VRAM/CPU benchmark. |
+| A-TAR-P1-007 — prompt-injection/threat model | **OPEN / P1** | Threat model and adversarial acceptance suite remain outstanding. |
+
+### 18.5 Architecture-phase gate interpretation
+
+The project is in architecture design; no production implementation repository/runtime is expected yet. Set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. Missing production code is not a design defect. Architecture contracts and owner decisions must nevertheless be complete before TAB-001 can be frozen. Executable integration, distributed fault injection, security validation, benchmarks, named deployment operators, numeric RTO and production runbooks remain engineering/deployment gates.
+
+### 18.6 Final disposition
+
+- **Reviewability gate:** PASS — all eight Owner reports exist and were verified.
+- **Architecture design:** CONDITIONAL PASS — owner-boundary contracts and COC Gate B design are accepted with explicit exceptions.
+- **TAB-001:** CANDIDATE / NOT FROZEN.
+- **Fact/Claim ADR-001:** BLOCKED.
+- **Global Forget governance/completion:** OPEN / BLOCKING.
+- **JF-10 implementation and Gate C:** OPEN / BLOCKING for production release.
+- **Production activation / merge / technology freeze:** NOT AUTHORIZED.
+
+This reassessment supersedes only the prior `NOT REVIEWABLE` verdict's missing-report rationale and the earlier P0-003 design-contract gap. It does not waive any P0/P1 item, owner authority, exact-version acceptance requirement or production evidence requirement.
