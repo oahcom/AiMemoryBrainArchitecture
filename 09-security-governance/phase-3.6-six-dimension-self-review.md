@@ -46,3 +46,13 @@ Fail-closed outcomes and 15 adversarial scenarios are specified. Governance appr
 - P1: specify epoch consistency/linearization, policy-domain derivation and multi-domain evaluation, lease precedence, in-flight revocation proof, Principal alias migration and missing adversarial tests.
 - Governance approvals remain GOVERNANCE-BLOCKED; no approver or policy activation is inferred.
 - Runtime tests remain NOT RUN; ADR-001 remains ADR-BLOCKED.
+
+## 7. Remediation disposition — design-level closure
+
+The I findings I36-SR-01..07 have been addressed in the controlling I contract Section 10, committed separately on this branch. The contract now defines issuer-scoped collision/alias migration, a linearizable policy-domain sequencer and single-use commit receipt, canonical policy-domain registry and atomic multi-domain evaluation, prohibition of offline/stale leases, revocation race evidence and additional adversarial cases, and corrected delegated decision status.
+
+- I36-SR-01..06: **RESOLVED at policy-contract level**.
+- I36-SR-07: **TEST CASES SPECIFIED; NOT RUN**.
+- External governance approvals: **GOVERNANCE-BLOCKED**; no approval or policy activation is inferred.
+- Runtime implementation and consistency guarantees: **NOT VERIFIED**.
+- Overall: **DESIGN FINDINGS CLOSED; IMPLEMENTATION/GOVERNANCE CONDITIONAL**.
