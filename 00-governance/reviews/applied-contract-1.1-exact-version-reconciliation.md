@@ -138,7 +138,7 @@ The A deployment-binding record correctly retains Gate A PARTIAL PASS / OPEN and
 This assessment corrects the prior version's false statement that C/H exact-version decisions were pending. It does not convert design acceptance into implementation, test, deployment or production approval.
 
 
-## 7. Subsequent COC companion pin drift — exact decisions must not be conflated
+## 7. COC companion and bridge architecture — distinct exact artifacts, decision reconciled
 
 The exact decision vector in §§1–3 remains valid for the exact pair:
 - CGH-APPLIED-1.1 package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819`;
@@ -151,6 +151,6 @@ Live Owner evidence:
 - C, D, G, H, I and Storage have exact-version decisions for Applied package Blob `4961...` + companion Blob `fc3...`; B approves unchanged B-owned type semantics.
 - G's exact Applied decision still pins `4961 + fc3` and does not mention `a3c51`.
 
-These are two related but distinct exact-version decision sets. No Owner decision may be silently transferred from one blob to the other. A must publish a canonical version manifest or superseding package that declares whether `a3c51` supersedes `fc3` or is an additive architecture record. If the Applied companion pin changes, obtain a fresh exact-version decision from G and every affected Owner. The new Storage COC durable-log design references `a3c51` and itself remains PROPOSED / OWNER ACCEPTANCE PENDING.
+A's current Owner acceptance matrix now explicitly distinguishes the roles and records exact decisions for both artifact sets: `4961 + fc3` is the immutable Applied package/companion pair; `a3c51` is the separate COC/JF-10 bridge architecture. The matrix records G's decision for both roles, alongside the other affected Owners. This resolves the prior ambiguity at the design-decision level. No package rewrite is required; do not substitute `a3c51` for the package's pinned `fc3` companion. The new Storage COC protocol/specification is a separate review target and is not covered by either older acceptance set.
 
-Therefore the earlier “design decisions recorded with exceptions” result remains true for the exact old pair, but the canonical current package/companion chain is not frozen. UMR-024 tracks this source-pin reconciliation.
+Therefore the earlier “design decisions recorded with exceptions” result remains true for the exact old pair, and the separate COC/JF-10 bridge architecture has its own exact acceptance vector. UMR-024 is CLOSED at the design-decision level. The contract is still not frozen because H schema, new COC protocol amendments, implementation and conformance remain open.
