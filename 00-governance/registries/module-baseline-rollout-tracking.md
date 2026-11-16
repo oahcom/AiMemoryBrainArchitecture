@@ -2,7 +2,7 @@
 
 - Tracking version: 0.1.0
 - Updated: 2026-11-17
-- Status: **IN PROGRESS — OWNER PROPOSALS NOT YET SUBMITTED**
+- Status: **FIRST-ROUND OWNER PROPOSALS SUBMITTED — FORMAL ADOPTION / CROSS-MODULE CLOSURE OPEN**
 - Authority: Session P coordinates only. Each Module Owner owns authorship and decision of its module baseline.
 - Project governance status: **PROPOSED / GOVERNANCE-OPEN**. No PGA appointment or formal G0 ratification is evidenced.
 - Main baseline rechecked: `8a6414158c9c056c1638222534e1993d1bbc99d2`.
@@ -13,15 +13,15 @@ The following are live branch-tip SHAs fetched from GitHub branch metadata on 20
 
 | Module | Owner branch | Fresh HEAD SHA | Branch protected | Module baseline proposal |
 |---|---|---|---|---|
-| A | `session-a-integration-2026-11-16` | `7d73102576660fb602376c7ce2f2522a0a8b29ad` | No | NOT SUBMITTED |
-| B | `session-b-domain-model-phase3` | `0cf703a3fec9921aeb8e6252a8ac4708b8b723b3` | No | NOT SUBMITTED |
-| C | `session-c-agent-integration-2026-11-16` | `702263dee9b40cf78fe95481731f52adb775c0d2` | No | NOT SUBMITTED |
-| D | `session-d-memory-brain-2026-11-16` | `1460fbd17ee38ea4044dc6c75cfe49039c7fc585` | No | NOT SUBMITTED |
-| E | `session-e-memory-compiler-2026-11-16` | `530645a08b55716257cf4cde20b0900b628abb52` | No | NOT SUBMITTED |
-| F | `session-f-memory-runtime` | `6cdc23f0835ea9576867f7cd1ac145e57f598c4b` | No | NOT SUBMITTED |
-| G | `session-g-memory-context` | `f6e7c46da9963ffee02c7805330b3f14291ab540` | No | NOT SUBMITTED |
-| H | `session-h-bmcp-protocol` | `08cca6341c3c44ad8502c215eba2b1941a8febb7` | No | NOT SUBMITTED |
-| I | `session-i-security-governance-2026-11-16` | `f16a52ebc0bddb707565c0393f378a4baa782e54` | No | NOT SUBMITTED |
+| A | `session-a-integration-2026-11-16` | `fb061aee907c28f7da198e68161ff57ebac160b7` | No | PROPOSED — Owner adoption open |
+| B | `session-b-domain-model-phase3` | `861fa9b2c3e1f572336543b15c7dc392493891db` | No | PROPOSED — Owner adoption open |
+| C | `session-c-agent-integration-2026-11-16` | `2e5776029bc4271c33525f04c7d0f0708e4bbae8` | No | PROPOSED — Owner adoption open |
+| D | `session-d-memory-brain-2026-11-16` | `9dd48eddb3c8f91d15dfa6981a7f53cc70bd4bf8` | No | PROPOSED — Owner adoption open |
+| E | `session-e-memory-compiler-2026-11-16` | `4402549c39824b89a0dc49973226187c62e056c5` | No | PROPOSED — Owner adoption open |
+| F | `session-f-memory-runtime` | `a370d9a3bc0bd35a21a12dfe87d53c298237de8e` | No | PROPOSED — Owner adoption open |
+| G | `session-g-memory-context` | `72a8066b4401f9586fe10775d545384b82736f07` | No | PROPOSED — Owner adoption open |
+| H | `session-h-bmcp-protocol` | `242d8ab5da890181e762561bb3d3a662287fb63c` | No | PROPOSED — Owner adoption open |
+| I | `session-i-security-governance-2026-11-16` | `1fc3b3293ebf2077edfd6ad253647d382173d9fa` | No | PROPOSED — Owner adoption open |
 | P | `session-p-project-governance-baseline` | `d9685601095841b3f5ec7b91ad12aa5028221395` | No | Coordination branch |
 
 ## Owner deliverable status
@@ -81,3 +81,23 @@ A and D advanced after the initial inventory while Session P was preparing the p
 - D current HEAD: `1460fbd17ee38ea4044dc6c75cfe49039c7fc585`; latest commit records exact JF-10 v2 acceptance with enumerated exceptions, limited to D-owned semantics. Implementation, DB capability, recovery/fault conformance and multi-domain remain open.
 
 The A and D proposal packages on P were refreshed with these live decisions. The other seven branch tips were rechecked and remained at the initially recorded SHAs at the time of the final inventory. Because branches are live, all Owners must pin their own HEAD again when adopting a proposal.
+
+
+## Unified review and remediation — 2026-11-17
+
+The first-round A–I Owner branch submissions have now been fetched and read back. Each module has a baseline/redlines proposal, all explicitly PROPOSED and not APPROVED. The live Owner branch HEADs and exact proposal blob SHAs are recorded in `00-governance/reviews/abc-def-ghi-integrated-cross-review.md`.
+
+Unified coordination artifacts added on this P branch:
+- `00-governance/reviews/abc-def-ghi-integrated-cross-review.md` — consolidated ABC, DEF and GHI cross-review, source freshness, template structure and shared blockers.
+- `00-governance/registries/unified-remediation-and-evidence-register.md` — priority actions UMR-001..012, independent evidence dimensions and gate snapshot.
+
+Current consolidated findings:
+- ABC: authority boundaries are directionally aligned; B ADR-001 remains ADR-BLOCKED and B/I/H typed identity/permission binding remains OPEN.
+- DEF: D has ACCEPT WITH ENUMERATED EXCEPTIONS for D-owned JF-10 v2 semantics only; Storage physical recovery, accountable deployment/operator, I authorization integration and conformance remain OPEN. Storage PR #12 is closed but its description only claims a single-node probe scope and does not establish production/failover readiness.
+- GHI: G/H Applied semantics are compatible in principle, but no common C/G/H schema version/digest and exact three-Owner acceptance has been evidenced. I governance and Global Forget remain GOVERNANCE-BLOCKED.
+- The 14-section template exists on P only (blob `408979f2125b67e7599118038b9a415a213399ee`), not on main. It is a proposed governance artifact, not an approved project-wide standard.
+- Current structural counts: A 13 sections; B/C/G/H/I 14; D/E/F 15. Owner mapping/normalization is required after the template authority is resolved.
+- C/F/G/H technology reports are static conditional reviews. No separate TAR-AI-001 report was found in inspected B/D/E/I artifacts; this is a coverage gap, not a rejection.
+- No module baseline is marked APPROVED. No project G0 ratification, PGA appointment, Applied freeze, JF-10 P0 closure, Global Forget completion or architecture freeze is inferred.
+
+The unified review is a coordination/audit record only. It does not substitute for Owner decisions, consumer acceptance, external governance approval, implementation evidence or tests. No A–I branch or main was modified by Session P in this reconciliation.
