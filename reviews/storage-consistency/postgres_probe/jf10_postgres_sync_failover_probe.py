@@ -235,10 +235,13 @@ if __name__ == "__main__":
         password="jf10-ha-ci-only", autocommit=True, connect_timeout=3
     ) as standby:
         assert standby.execute("SELECT pg_is_in_recovery()").fetchone()[0] is True
+        # PostgreSQL intentionally exposes no pg_prepared_xacts rows while
+        # a server is in hot-standby recovery. Verify private data here; verify
+        # the prepared XID after promotion has completed recovery.
         row = standby.execute(
             "SELECT gid FROM pg_prepared_xacts WHERE gid = %s", (XID,)
         ).fetchone()
-        assert row == (XID,), f"standby did not replay prepared XID: {row}"
+        assert row is None, f"hot standby unexpectedly exposed prepared XID: {row}"
         assert standby.execute(
             "SELECT 1 FROM jf10_ha_visibility WHERE operation_id = %s",
             (OPERATION_ID,),
@@ -247,7 +250,8 @@ if __name__ == "__main__":
             "SELECT 1 FROM jf10_ha_receipt WHERE operation_id = %s",
             (OPERATION_ID,),
         ).fetchone() is None
-    print("SYNCHRONOUS_STANDBY_PREPARED_XID_REPLAY=PASS")
+    print("SYNCHRONOUS_STANDBY_PREPARED_WAL_REPLAY=PASS")
+    print("HOT_STANDBY_PREPARED_XACT_VIEW_HIDDEN_AS_DOCUMENTED=PASS")
     promote_standby()
     verify_and_commit()
     print("JF10_POSTGRESQL_18_7_SYNC_FAILOVER_CAPABILITY=PASS")
