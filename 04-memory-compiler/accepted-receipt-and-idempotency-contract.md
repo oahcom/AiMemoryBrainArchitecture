@@ -1,183 +1,125 @@
-# Accepted Receipt and Idempotency Contract
+# Accepted Receipt, Compiler Completion and Idempotency Contract
 
-**Status:** CANDIDATE — E-owned semantics; storage realization and cross-module envelope remain OPEN pending Storage/Consistency, H and I approval.  
-**Owner:** Session E — Memory Compiler.  
-**Integration:** INT-P1-03, INT-P1-04, INT-P1-06, INT-X-01, INT-X-06.  
-**Authority boundary:** E owns ingress durability and compile intent. D owns canonical commit/cursor. F owns index publication/watermark. H owns wire envelope and authenticated transport. I owns identity, authorization, retention and audit policy.
+**Status:** CANDIDATE E contract; durable Storage realization, D producer APIs, H envelope and I policy approval remain OPEN.
+**Owner:** Session E — Memory Compiler.
+**Integration:** INT-P1-03, INT-P1-04, INT-P1-06, INT-X-01, INT-X-06.
+**Authority:** E owns durable ingress receipt and compiler execution evidence. D owns Producer Admission ledger, canonical commit and CanonicalCommitCursor. F owns IndexWatermark. H owns wire/transport binding. I owns identity, authorization, PermissionEpoch, retention and global Forget policy.
 
-## 1. Normative state distinctions
+## 1. Evidence is deliberately split
 
-These are separate milestones, not aliases and not a single success flag.
+These evidence objects prove different facts and MUST NOT be collapsed into one Accepted/Success boolean.
 
-| State | Meaning | Authority / evidence |
-|---|---|---|
-| Received | Request bytes/envelope reached an ingress process; may be volatile | No durability promise |
-| Accepted | Immutable source Event reference, payload reference/digest, idempotency receipt and compile intent are durably recoverable | E receipt lookup returns stable receipt; acceptance transaction committed |
-| Processed | A worker completed the configured source decode/validation and recorded its stage result | E stage journal |
-| Compiled | A versioned ExtractionIR/candidate bundle and its lineage were durably recorded | E compilation journal and provenance refs |
-| CanonicalCommitted | D confirmed the canonical write and returned its authoritative commit/version reference | D response/outcome lookup; E only records the reference |
-| Indexed | F confirmed application to the relevant index partition(s), with typed publication watermark(s) | F acknowledgement/watermark; E only records the reference |
-
-**Accepted MUST NOT mean Processed, Compiled, CanonicalCommitted or Indexed.** A timeout after the durable acceptance transaction does not undo Accepted. A caller can query/replay the original receipt by idempotency identity. No Accepted response is sent before the acceptance durability point.
-
-## 2. Ingress identity and idempotency
-
-### 2.1 Key scope
-
-The proposed idempotency namespace is the tuple:
-
-`(authenticated_issuer, authenticated_producer_ref, security_domain_ref, event_family, idempotency_key)`
-
-- `authenticated_issuer` and `authenticated_producer_ref` are bound by H's authenticated transport/session, not trusted from payload claims.
-- `security_domain_ref` is the tenant or equivalent isolation domain supplied/validated under I policy. Exact type and whether ScopeRef participates are **OPEN with I/B/H**.
-- `event_family` prevents accidental key collision between semantically distinct ingress APIs.
-- The key is not globally unique and is not scoped to a future canonical Memory ID.
-- The same key in a different authenticated producer namespace is a different idempotency identity, subject to I's delegation policy.
-
-The key must be stable across transport retries and caller reconnects. A new logical event requires a new key.
-
-### 2.2 Payload hash
-
-Compute a versioned digest over the immutable semantic request:
-
-- exact payload bytes or an immutable payload-object digest;
-- event family and source identity/version;
-- validated security-domain and Scope metadata;
-- semantically relevant source timestamps, environment binding and declared content type;
-- canonical envelope semantic fields after H-defined normalization.
-
-Exclude transport attempt number, retry timestamp, connection ID, trace/span IDs and other delivery-only metadata. Do not hash a mutable URL as a substitute for payload bytes. Store `hash_algorithm`, `canonicalization_version` and `payload_digest`; H must define the wire canonicalization before interoperability freeze.
-
-### 2.3 Required key outcomes
-
-| Existing idempotency identity | Incoming digest | Required result |
-|---|---|---|
-| No record | Any valid digest | Create one durable receipt/event/compile intent |
-| Existing | Same digest | Return the original receipt ID, Event ID, accepted_at and current processing status; do not create a second Event or intent |
-| Existing | Different digest | Reject with `IDEMPOTENCY_KEY_REUSE_CONFLICT`; do not overwrite or create another Event |
-| Existing content-free Forget tombstone | Same or different digest | Suppress replay and return a policy-safe forgotten/rejected outcome; never reconstruct payload or work |
-
-Comparison is against the stored digest and canonicalization version. A version mismatch must be resolved by a defined migration/compatibility path, never by silently treating the request as new.
-
-### 2.4 Receipt replay
-
-Receipt replay is a read/reconciliation of the original durable acceptance record. It returns the same receipt identity and current milestone references. It does not re-run parsing, create a new source event, renew retention, or bypass a Forget fence. A caller may separately request a controlled reprocess/recompile; that is a new attempt identity linked to the original Event and is subject to current policy and Forget checks.
-
-### 2.5 Retention horizon
-
-Receipt and idempotency retention MUST cover the maximum of:
-- supported client retry/reconnect horizon;
-- supported queue, lease and DLQ residence horizon;
-- supported operator replay/recovery horizon;
-- audit and dispute obligations imposed by I.
-
-The numeric horizon and legal hold/retention-class rules are **OPEN with I**. Expiration of payload content does not authorize key reuse while an idempotency tombstone is required. After Forget, retain only the minimum non-reconstructive suppression record required by I/D to prevent replay; do not retain source text, payload bytes, reversible references or content-derived metadata merely to support deduplication. The tombstone expiry/replay policy is I-owned.
-
-## 3. Durable acceptance protocol
-
-### 3.1 Preferred realization: immutable blob + transactional inbox/outbox
-
-Where payload bytes live in object storage and metadata lives in a transactional database:
-
-1. Authenticate producer and authorize `event.ingest` under I; validate envelope and size/type constraints.
-2. Write payload to immutable, content-addressed or otherwise immutable storage; verify durable completion and digest. A temporary/staged object is not Accepted.
-3. In one database transaction, insert:
-   - immutable Event row with stable Event ID and source identity;
-   - immutable payload reference, digest and retention classification;
-   - unique idempotency row with namespace tuple, digest and receipt ID;
-   - durable Accepted receipt with accepted_at and state=Accepted;
-   - compile-intent/outbox row with stable intent ID and initial status.
-4. Commit the transaction. **This commit is the Accepted linearization point.**
-5. Only after commit, return Accepted receipt to caller. Dispatcher consumes outbox at least once.
-
-The uniqueness constraint on the idempotency tuple serializes concurrent same-key requests. On a unique-key race, read the winner and apply same-digest replay or different-digest conflict. Never use check-then-insert without a uniqueness/serialization guarantee.
-
-An orphaned staged blob from a crash before step 3 is not Accepted and may be garbage-collected only after a safe grace period and reference check. A committed Event must never point to an unverified or mutable payload.
-
-### 3.2 Equivalent WAL/journal realization
-
-If a single transactional database is unavailable, use a durable write-ahead journal whose commit record atomically binds Event identity, payload digest/reference, idempotency identity, receipt and compile intent. Recovery must replay committed journal records idempotently and ignore incomplete records. The journal must be fsynced/replicated to the durability level promised by Accepted before acknowledging. A best-effort queue publish followed by a separate receipt write is not equivalent.
-
-### 3.3 Crash-window matrix
-
-| Crash window | Durable state | Recovery rule | Caller-visible result |
+| Evidence | Issuer / owner | What it proves | What it does not prove |
 |---|---|---|---|
-| Before immutable payload write | None | Caller retries same key | Not Accepted |
-| During payload write / before verification | Staged or incomplete blob only | Resume/clean staged object; no Event/receipt | Not Accepted |
-| After blob verified, before DB/journal commit | Orphan immutable blob possible | Retry same key; dedupe at transaction; later GC orphan | Not Accepted |
-| During acceptance transaction before commit | Transaction rolls back or journal lacks commit marker | Retry same key | Not Accepted |
-| After acceptance commit, before HTTP/transport response | Event + payload ref + idempotency + receipt + intent durable | Retry returns original receipt | Accepted |
-| After response, before dispatcher wakeup | Durable outbox remains pending | Poll/restart dispatcher | Accepted |
-| After worker lease, before stage commit | Lease may expire; no committed stage result | Reacquire with same intent/attempt fencing; recheck Forget | Accepted, not yet Processed |
-| After stage result, before next-stage dispatch | Stage result/outbox transaction durable | Outbox redelivery; consumer deduplicates | Milestone remains durable |
-| After D commit, before E records response | D may have committed | Query D by stable operation key; record same commit; never blind-create | CanonicalCommitted only after D evidence |
-| After F applied, before E records ACK | F may have applied | Query/replay by stable publication ID; F deduplicates | Indexed only after F evidence |
+| AcceptedReceipt | E | Immutable source Event, payload ref/digest, idempotency record and compile intent are durably recoverable | D admission, compiler completion, canonical commit, dependency registration, publication or indexing |
+| ProducerRegistrationReceipt | D | Stable ProducerWorkItem is durably admitted into D's producer ledger/barrier inventory | Work ran, output exists, dependency edges registered, or publication succeeded |
+| CompilerCompletionReceipt | E | A named compile run reached a durable terminal compiler outcome with stage/provenance refs | Canonical Memory committed or derived output visible |
+| CanonicalCommitReceipt | D | D accepted canonical transaction and committed canonical effects; includes D CanonicalCommitCursor and exact aggregate revision refs | Derived projection/index applied, Context updated or physical erasure |
+| DerivedRegistrationReceipt | D (or D-designated authoritative ledger) | Specific derived artifact/source dependency registrations are durably present in D dependency inventory | Artifact is visible or final publication allowed |
+| PublicationReceipt | Final gate authority; D/Storage ownership of receipt schema remains OPEN | Exact artifact/version passed final gate and atomic visibility transition committed | F IndexWatermark advanced or G ContextVersion changed |
+| IndexAppliedAcknowledgement | F | Named index/channel partition durably accounted for a canonical prefix and returns its typed IndexWatermark | Forget completion or physical deletion |
 
-## 4. Event ordering and typed cursors
+A transport ACK, HTTP 2xx, queue enqueue, AcceptedReceipt, CompilerCompletionReceipt, D RegistrationReceipt or local database commit is not a substitute for another row.
 
-Three cursor families are intentionally distinct:
+## 2. Accepted semantics and ingress linearization
 
-1. **Source Event cursor (E ingress-owned):** `SourceEventCursor{partition_id, offset}`. Monotonic only within a declared ingress/source partition. It orders durable acceptance records in that partition; it does not assert global real-world chronology or canonical commit order. Per-producer source sequence/timestamp is separate metadata and may be late, duplicated or out of order.
-2. **Canonical commit cursor (D-owned):** E stores the exact typed D cursor/commit reference returned by D. Its scope, global/per-aggregate shape, gap semantics and transaction visibility remain D + Storage/Consistency decisions. E MUST NOT allocate, increment, reinterpret or synthesize it.
-3. **Index publication watermark (F-owned):** `IndexPublicationWatermark{index_id, partition_id, applied_position}`. It advances only after the corresponding partition has durably applied all preceding required changes. E MUST NOT claim Indexed from an outbox dispatch or a D commit.
+`Received` means bytes reached a process and may be volatile. `Accepted` occurs only after immutable EventRef, verified immutable payload reference/digest, idempotency record, AcceptedReceipt and durable CompileIntent/outbox are committed atomically or through a proven recoverable WAL.
 
-An E outbox sequence/dispatch offset is a fourth E-local transport checkpoint; it is not a canonical cursor or F watermark. A scalar integer MUST NOT be copied across these namespaces.
+Preferred transaction:
+1. Authenticate transport context and resolve trusted ProducerIdentity through H/I; validate payload claims against it.
+2. Authorize ingress under current I policy and PermissionEpoch; resolve B-typed ScopeRefs and security domain.
+3. Persist immutable payload bytes/reference and verify digest before metadata commit.
+4. In one transaction, persist Event, payload reference/digest, idempotency uniqueness row, AcceptedReceipt and CompileIntent/outbox.
+5. Commit. This commit is the Accepted linearization point. Only then return receipt.
+6. Dispatch at least once; queue delivery is not a second acceptance.
 
-## 5. Retry and processing rules
+If payload storage and metadata DB are separate, the immutable payload is durably staged and verified first; metadata transaction references it. A crash can leave an orphan staged blob but cannot expose an Accepted event pointing to missing/mutable bytes. WAL alternative must have a durable commit marker binding all acceptance records. Exact Storage product/replication/fsync requirements remain OPEN.
 
-- At-least-once dispatch is assumed. Every consumer has a durable inbox/deduplication key and commits its local effect plus inbox/checkpoint atomically, or uses an equivalent recoverable journal.
-- Worker attempts are distinct from immutable Event and receipt identity. Attempt count, lease owner, lease expiry and retry schedule are operational metadata.
-- A retry never mutates the original payload or receipt. Changed payload is a new Event/key.
-- Unknown D commit outcome is resolved by querying D with the stable operation key. Never blind retry with a new key.
-- DLQ is a durable state of the same intent, not a new Event. Replay preserves Event ID, receipt ID and source digest, creates a new attempt ID, and reauthorizes under current policy/fence.
-- Recompile pins new compiler/schema/model/prompt versions and creates new IR/provenance revisions; it does not rewrite earlier outputs or renew expired permissions.
-- Model/provider outage cannot revoke Accepted durability.
+## 3. Idempotency and authenticated namespace
 
-## 6. Interface impact
+Candidate namespace:
 
-| Boundary | E provides/consumes | Authority not owned by E | Required failure behavior |
-|---|---|---|---|
-| H → E | Authenticated producer binding, versioned envelope, payload digest/ref, idempotency key, source identity, correlation IDs | H wire/serialization/authentication mechanism | Reject malformed/unauthenticated input; never trust payload actor assertion |
-| I → E | Authorization decision/epoch, retention class, ingest permission and current Forget state | I policy, delegation, revocation and retention | Fail closed for protected processing when policy/fence cannot be established |
-| E → D | Stable canonical write operation key, expected version, candidate/evidence/provenance refs | D canonical IDs, commit and canonical cursor | Query unknown outcome; record only D-confirmed commit |
-| E → F | Post-D-commit publication request/reference and source lineage metadata | F projection and index watermark | At-least-once replay; do not mark Indexed until F evidence |
-| E → G | Canonical change/outbox event reference where applicable | G ContextVersion and reconciliation | E does not write Context or infer Applied |
+`(issuer_ref, authenticated_principal_ref, producer_identity_ref, security_domain_ref, validated_scope_binding, operation_family, caller_idempotency_key)`
 
-## 7. Conformance tests
+- Principal and ProducerIdentity derive from authenticated transport/security context, never payload self-assertion.
+- ScopeRef is B's typed domain reference; Scope does not grant permission. I decides the authorized scope binding and whether/how a canonicalized ScopeRef set participates in the namespace.
+- Security domain is an I-governed isolation boundary; it is not inferred from arbitrary payload text.
+- Event/operation family prevents collision between distinct semantics.
+- Caller key remains stable across reconnects/retries for one logical submission.
 
-- Concurrent same key/same digest creates exactly one Event, receipt and compile intent.
-- Concurrent same key/different digest produces one winner and one conflict, never overwrite.
-- Crash after acceptance commit but before response returns the original receipt on retry.
-- Crash before acceptance commit never returns Accepted and cannot leave a visible compile intent.
-- Blob write succeeds but DB commit fails: retry creates one acceptance; orphan cleanup cannot delete a referenced payload.
-- Dispatcher duplicates, worker crashes, lease expiry and DLQ replay do not duplicate stage effects.
-- D commit succeeds but response is lost: operation lookup recovers the same canonical commit.
-- F applies but ACK is lost: publication replay is idempotent and watermark does not regress.
-- Payload expiry/Forget tombstone prevents same-key replay from reconstructing source or work.
-- Source sequence gaps, late timestamps and out-of-order arrivals do not corrupt canonical cursor or index watermark.
+The semantic request digest includes immutable payload bytes/digest, event family/schema, trusted producer binding, validated Scope/security-domain binding, source/environment identity and semantically relevant source time/content type. It excludes transport attempt, retry time and trace-only metadata. Algorithm and canonicalization profile are versioned; H's wire canonicalization remains CANDIDATE.
 
-## 8. Open dependencies
+| Existing key | Digest | Result |
+|---|---|---|
+| None | Valid | Create one Event, receipt and compile intent |
+| Existing | Same canonical semantic digest | Return original receipt/Event/intent/work identity and current status; no duplicate side effect |
+| Existing | Different digest | Idempotency conflict; preserve original |
+| Forget/retention tombstone | Any replay | Policy-safe suppress/reject; never reconstruct payload or work |
 
-- **OPEN — H:** BMCP envelope, canonicalization, producer binding, receipt wire representation and error encoding; H package must be read before these become normative.
-- **OPEN — I:** principal/security-domain binding, authorization epoch, retention classes, receipt/tombstone horizon, audit minimization and legal hold exceptions.
-- **OPEN — D + Storage/Consistency:** canonical cursor shape, commit operation lookup and atomicity boundary.
-- **OPEN — F:** exact per-index/per-partition watermark acknowledgement contract.
-- **OPEN — C:** source identity/sequence semantics and late-event policy.
-- **OPEN — Storage/Engineering:** database/outbox/WAL product and replication/fdatasync durability target.
-- **ADR-BLOCKED — B/Governance:** no CandidateProposition/ExtractionIR to canonical Claim mapping until ADR-001 is approved.
+Receipt replay reads the original record; it does not rerun compilation, renew retention or bypass current authorization/Forget. A controlled recompile is a new DerivationRunId and must pass current I/D checks.
 
+## 4. Compiler completion is a separate state machine
 
-## 9. Alignment with D candidate cursor contract (read on D branch)
+Compiler work lifecycle and D barrier mapping are defined normatively for E in `compiler-state-and-producer-admission.md`. Key rule: D registration must be durable before E queues, leases or executes derivative-capable work. E tracks Accepted, Queued, Leased, Running, Staged, DependencyRegistered, Retry, DeadLettered and Terminal; D tracks admission, barrier membership, dependency receipts and terminal disposition. DLQ/lease expiry is not terminal.
 
-D's `canonical-memory-store.md` describes a CanonicalCommit receipt with operation ID, idempotency key, request digest, expected/resulting version and `commit_sequence`; it proposes a monotonic sequence within the canonical authority and atomic/recoverable commit of immutable version, pointer, receipt and outbox. D's `memory-versioning.md` still leaves sequence scope **OPEN** (per aggregate vs global commit stream). Therefore E will store D's returned typed commit reference unchanged and will not assume a globally contiguous sequence or equate it to a Memory aggregate revision.
+A CompilerCompletionReceipt binds:
+- CompileIntentId, ProducerWorkItemId, DerivationRunId and final AttemptId;
+- EventRef and source lineage digest/reference;
+- compiler/extractor/normalizer/consolidator/model/prompt/schema versions;
+- stage outcomes, provenance references and terminal disposition;
+- any DerivedRegistrationReceipt IDs, PublicationReceipt IDs and CanonicalCommitReceipt reference, each as separate optional evidence;
+- observed PermissionEpoch and ForgetFenceCursor as historical observations, not current authorization;
+- completion time, structured result/error and idempotency digest.
 
-D's LifecycleEvent sequence is per Memory aggregate and is not the canonical commit cursor. E's source ingress partition offset and F's per-index/per-partition applied watermark remain separate namespaces. The exact D cursor type, partition key, gap and replay semantics require D + Storage/Consistency + A agreement before freeze.
+Candidate-only compilation may complete without CanonicalCommitReceipt or PublicationReceipt. It remains a compiler output and is not automatically a Canonical Claim/Fact.
 
+## 5. Typed cursor and epoch use
 
-## 10. H/I candidate alignment
+| Field | Correct type / owner | E rule |
+|---|---|---|
+| Source ingress position | SourceEventCursor / E | Per declared source/ingress partition; only for acceptance replay |
+| Canonical transaction position | CanonicalCommitCursor / D | One globally ordered sequence per Canonical Memory authority; store only D-returned value |
+| Object revision | AggregateRevision / D | Independent monotonic revision per aggregate; not globally comparable |
+| Lifecycle transition position | LifecycleEventCursor / D | Per Memory lifecycle stream; store separately from commit cursor |
+| Projection progress | IndexWatermark / F | Per index/channel/partition, applied-through CanonicalCommitCursor; E never allocates it |
+| Forget suppression generation | ForgetFenceCursor / D | Operation + target-set digest + generation; not a stream cursor |
+| Authorization freshness | PermissionEpoch / I | Independent policy/principal/security namespace; recheck at protected boundaries |
+| Context state | ContextVersion / G | Opaque downstream dependency; E does not create or increment it |
 
-H's envelope contract requires an owner-defined idempotency namespace/key/payload digest and states that the same key/same canonical digest returns the original operation/receipt while same key/different digest conflicts. H transports the E-owned namespace semantics; H does not own the E receipt's durability or retention. H proposes versioned canonical serialization (including JCS as a candidate) and distinct protocol/payload schema versions. Exact canonicalization profile and signature/integrity details remain candidate until H/I approval.
+A SourceEventCursor, outbox dispatch offset, AttemptId, AggregateRevision, LifecycleEventCursor, IndexWatermark, ForgetFenceCursor, PermissionEpoch or ContextVersion MUST NOT be copied into CanonicalCommitCursor. A CanonicalCommitCursor is assigned only at D's successful canonical transaction commit. D's contract states committed positions are contiguous within one Brain authority; rejected/aborted transactions receive no cursor.
 
-I's Principal/ActorRef candidate aligns the key namespace to authenticated producer + tenant/security domain + operation family + caller key. The request's payload ActorRef, producer_id, tenant, project or environment fields are claims/selectors only and must be compared to authenticated transport binding and authoritative registries. Receipt lookup and replay are authorized against current Principal, Scope and permission epoch; a receipt must not be exposed across principals or scopes.
+## 6. Retry, replay and unknown outcomes
 
-I requires Accepted to mean durable custody, not authorization forever. Every retry/replay revalidates current authorization and Forget fence. I requires idempotency metadata to cover the declared retry/replay horizon, but exact numeric retention periods are OPEN with I/Privacy/Legal. H/I do not change E's transaction linearization point.
+- At-least-once queue delivery is assumed. Stable EventRef/CompileIntentId/ProducerWorkItemId dedupe logical work; AttemptId is new per retry.
+- Retry, DLQ requeue, operator replay and recompile all reauthenticate and recheck current PermissionEpoch, Scope, retention and latest applicable ForgetFence.
+- A replay preserves source EventRef and original acceptance receipt; it cannot use a fresh queue message or new attempt to escape a prior fence.
+- If D admission/registration/commit/publication response is lost, query by the same stable operation identity and digest. Do not create a new key or infer success from timeout.
+- If D canonical commit succeeded but E lost ACK, query D by stable canonical operation key and record the exact original CanonicalCommitReceipt.
+- If publication outcome is unknown, keep artifact private until PublicationOperationId lookup proves committed success.
+- DLQ remains registered and barrier-open while replay/publication is possible. Only a durable terminal disposition can close it.
+- Dedup retention must cover supported retry, lease, DLQ, operator recovery and audit horizons; numeric duration and tombstone expiry remain I-owned OPEN decisions.
+
+## 7. Cross-module identity and permission
+
+H requires authenticated transport principal binding. Payload `producer_id`, `ActorRef`, `agent_id` and `scope_ref` are claims/selectors, not credentials. I's candidate ProducerIdentity binds authenticated Principal/issuer, registered producer/application, workload/instance, credential validity/epoch, permitted event families, security domain and revocation state. E requires mismatch rejection/quarantine and never treats payload ProducerId as authentication.
+
+ActorRef and ScopeRef use B/I typed semantics. PermissionEpoch is I-owned; authorization is checked at ingress, before protected source/evidence/provenance dereference, before sensitive stage commits, before D write submission and at final publication. If principal, permission, Scope, security domain or Forget state is unknown, fail closed.
+
+H/I/B packages are CANDIDATE; this document consumes their semantics without freezing wire fields or security policy.
+
+## 8. Conformance plan (NOT RUN)
+
+1. Same key/same digest under same authenticated namespace returns one AcceptedReceipt/EventRef/CompileIntentId.
+2. Same key/different digest conflicts without mutation.
+3. Lost acceptance ACK returns original receipt; no duplicate work.
+4. Accepted does not imply D Producer Registration or Compiler Completion.
+5. Compiler completion without canonical commit has no CanonicalCommitCursor.
+6. D canonical commit receipt has one D-issued global-per-authority CanonicalCommitCursor and independent AggregateRevision/LifecycleEventCursor.
+7. F IndexWatermark is only recorded after F acknowledgement.
+8. ACK loss for D registration, canonical commit, dependency registration or publication is recovered by stable operation lookup.
+9. Revoked permission or advanced ForgetFence blocks retry/replay/recompile and late result.
+10. DLQ and expired lease remain barrier-open until terminal disposition.
+11. Staged artifact is never consumer-visible before D registration receipts and final PublicationReceipt.
+12. B ADR remains ADR-BLOCKED; no candidate IR auto-promotes to Canonical Claim/Fact.
+
+**Acceptance:** design contract only. Storage atomicity, D callable APIs, runtime behavior and conformance results remain unverified.

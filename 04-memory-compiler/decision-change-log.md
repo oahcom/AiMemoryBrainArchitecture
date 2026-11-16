@@ -152,3 +152,63 @@ No approved B Fact/Claim ADR was verified in the reviewed inputs. Phase 2 and D 
 - **I present / CANDIDATE:** identity, authorization, retention and global Forget policy can inform enforcement, but no final policy freeze.
 - **D present / CANDIDATE:** canonical cursor and Forget fence shape remain owner-controlled; D-REV-P1-003 barrier gap remains blocking.
 - **B ADR absent/not approved:** mapping remains ADR-BLOCKED.
+
+
+## 9. Phase 3 targeted remediation — current branch HEAD reconciliation
+
+This section is appended as a correction to the historical notes above. Earlier statements are preserved as historical audit records; where they conflict with this section, this section records the newer inspection and superseding status.
+
+### 9.1 Exact current source refs read for this remediation
+
+| Owner | Branch | Current HEAD inspected | Result |
+|---|---|---|---|
+| E | `session-e-memory-compiler-2026-11-16` | `3dea6096eefa6779eb12e4e788bcf9429d2a3f83` | Current E package tree enumerated; all eight E design paths identified, core ingress/Forget/provenance/overview files read |
+| D | `session-d-memory-brain-2026-11-16` | `30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6` | Current ForgetFence, CanonicalCommitCursor and MemoryVersioning read |
+| H | `session-h-bmcp-protocol` | `fcc5103399b4c322e52d642cae5a2414969399a7` | Current envelope and Forget/Revocation package inspected; CANDIDATE only |
+| I | `session-i-security-governance-2026-11-16` | `8c91d99e450ab5e8862bd6a3301fa193e28e6cbb` | Current Principal/ActorRef/ProducerIdentity and Forget/Retention package inspected; CANDIDATE only |
+| B | `session-b-domain-model-phase3` | `ab19afbf92f67fe0a7679e9aa3a35b015fed89f4` | Current ADR-001 and typed ScopeRef semantics inspected; ADR remains ADR-BLOCKED |
+
+The requested `reviews/integration/phase-3-defghi-cross-module-contract-review.md` was not present in the current A branch tree and returned NOT_FOUND when fetched. It is not represented as read. The Phase 3 Task Pack was read from A's current branch; A's Contract Registry and Typed Cursor proposal were also read. The absence of the named review report remains a source-evidence limitation.
+
+### 9.2 D decisions now consumed — supersede older entries in §§1, 2, 7 and 8
+
+- **DECIDED — CanonicalCommitCursor:** one globally ordered sequence per Canonical Memory authority, allocated only at successful durable canonical transaction commit.
+- **DECIDED — AggregateRevision:** independent per-aggregate revision sequence; every committed revision carries its CanonicalCommitCursor.
+- **DECIDED — LifecycleEventCursor:** independent contiguous per-Memory lifecycle stream; each event also records its enclosing CanonicalCommitCursor.
+- **DECIDED — ForgetFenceCursor:** D-owned tuple `(forget_operation_id, fence_generation, target_set_digest)`; independent of canonical commit, lifecycle, permission and index positions.
+- **DECIDED — Producer barrier semantics:** D's producer registry captures a registration high-water mark at fence installation; every pre-fence registration must reach durable terminal disposition. Queue deletion, lease expiry, timeout or worker loss is not terminal.
+- **DECIDED — Register-before-visible principle:** derivative registration precedes visibility and final gate rechecks latest fence; this is a semantic requirement, not a published callable API.
+- **OPEN / BLOCKING — D/E/Storage atomicity:** D has not specified callable registration/dependency/publication operations, complete receipt fields, a transaction owner, or a proven linearization protocol coupling final gate and Storage visibility. D-REV-P1-003's implementation-level race remains open.
+
+### 9.3 H/I/B alignment and state
+
+- **H present / CANDIDATE:** authenticated transport principal binding is authoritative; payload ProducerId/ActorRef/ScopeRef are claims/selectors only. Permission epoch and Forget fence are distinct typed fields; replay rechecks both. No wire freeze.
+- **I present / CANDIDATE:** ProducerIdentity binds authenticated Principal/issuer, registered producer/application, workload/instance, credential validity/epoch, permitted event families, security domain and revocation status. PermissionEpoch is I-owned. Authorization must be rechecked at the operation's commit/disclosure linearization point. No policy freeze.
+- **B present / ADR-BLOCKED:** ScopeRef is a typed domain reference, not permission. ClaimRef/ClaimRevisionRef and Fact/Claim canonical mapping remain blocked by ADR-001. CandidateProposition/ExtractionIR must not auto-promote.
+- **H/I status correction:** historical statements that H/I branches were absent are superseded; formal candidate packages now exist.
+
+### 9.4 E decisions and supersession ledger
+
+| Historical item | Prior state | Current disposition |
+|---|---|---|
+| E-DEC-001 Accepted vs processing milestones | CANDIDATE | **CANDIDATE, sharpened**: AcceptedReceipt, CompilerCompletionReceipt, CanonicalCommitReceipt, DerivedRegistrationReceipt, PublicationReceipt and F Index ACK are distinct evidence |
+| E-DEC-002 Idempotency namespace | CANDIDATE | **CANDIDATE, sharpened**: bind authenticated Principal + ProducerIdentity + validated Scope binding + security domain + operation family + caller key; exact normalization awaits H/I/B |
+| E-DEC-003 same-key digest behavior | CANDIDATE | **CANDIDATE**: same key/same digest returns original; different digest conflicts |
+| E-DEC-004 acceptance linearization | CANDIDATE | **CANDIDATE**: durable Event + payload ref/digest + idempotency + receipt + compile intent in one transaction or proven WAL |
+| E-DEC-005 cursor separation | CANDIDATE | **D semantic decision consumed**: CanonicalCommitCursor global per Brain authority; AggregateRevision and LifecycleEventCursor independent; IndexWatermark F-owned; ForgetFenceCursor D-owned; PermissionEpoch I-owned; ContextVersion G-owned |
+| E-DEC-006 fence checks on async work | CANDIDATE | **CANDIDATE E enforcement**; final gate remains OPEN/BLOCKING |
+| E-DEC-007 dependency registration before visibility | CANDIDATE / blocking | **D semantic rule DECIDED; D/E/Storage atomic operation OPEN/BLOCKING** |
+| E-DEC-008 non-reconstructive tombstone | CANDIDATE | **CANDIDATE** subject to I's retention/audit approval |
+| E-DEC-009 Fact/Claim mapping | ADR-BLOCKED | **ADR-BLOCKED — unchanged** |
+
+### 9.5 Changed paths in this remediation
+
+- `04-memory-compiler/forget-fence-and-derived-registration.md` — rewritten to consume current D fence, producer barrier and cursor decisions; records exact missing D/E/Storage operations.
+- `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` — rewritten to split Accepted, Compiler Completion, Canonical Commit, Derived Registration, Publication and F Index evidence.
+- `04-memory-compiler/compiler-state-and-producer-admission.md` — new E-owned lifecycle and D admission mapping.
+- `04-memory-compiler/evidence-and-provenance.md` — append typed cursor and pre-visibility lineage registration requirements.
+- `04-memory-compiler/decision-change-log.md` — append this source/decision correction while preserving all earlier audit history.
+
+### 9.6 Tests and verification status
+
+All conformance scenarios in the updated E documents are **NOT RUN**. This delivery is design/documentation only. No Storage transaction, D endpoint, worker, queue, DLQ, fence service, permission service, publication gate or runtime test was executed. The E branch commit and post-write file readback are recorded in the final delivery report after commit creation.

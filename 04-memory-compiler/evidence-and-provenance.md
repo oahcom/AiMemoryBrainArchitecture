@@ -186,3 +186,17 @@ B Domain Model reference/time/scope semantics; D canonical object and version co
 - Source content, excerpt refs, raw payload hashes and reversible payload URIs must not be copied into Forget tombstones. Tombstones contain only minimum non-reconstructive suppression evidence permitted by I.
 - On fence activation, block dereference and lineage expansion into forgotten sources; mark descendants suppressed/restricted and report incomplete/unreachable traversal as pending/unknown, never complete.
 - See `forget-fence-and-derived-registration.md` for the visibility gate, race protocol and failure matrix. Physical erasure and global completion remain I-owned.
+
+
+## 19. Phase 3 producer-registration, cursor and visibility alignment
+
+This appendix consumes D `30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6` and does not freeze a cross-module schema.
+
+- Every Evidence/Provenance node and edge produced by a compiler run is a derivative. It is first persisted in private staging and is not queryable or traversable by Runtime/other consumers until all direct and transitive dependencies have durable D DerivedRegistrationReceipt(s) and the final Publication Gate succeeds.
+- The lineage record binds EventRef, source version refs, provenance parent refs, DerivationRunId, ProducerWorkItemId, exact ScopeRefs, lineage digest, observed ForgetFenceCursor and PermissionEpoch. The observed epochs are historical evidence, not authorization to publish later.
+- SourceEventCursor remains E's ingress partition position. CanonicalCommitCursor is D's single globally ordered per-Brain-authority committed transaction position. AggregateRevision is per aggregate. LifecycleEventCursor is per Memory. IndexWatermark is F-owned and applied-through a CanonicalCommitCursor. ForgetFenceCursor and PermissionEpoch are separate namespaces. No provenance field named generic `cursor` or `generation` may carry one of these without its explicit type.
+- When D confirms a canonical commit, Provenance records the returned CanonicalCommitCursor and exact AggregateRevision refs as separate fields. A LifecycleEventCursor is recorded only when a lifecycle event exists. Candidate-only extraction/provenance has none of these canonical fields.
+- Provenance persistence alone is not dependency registration. A local edge is not a D registration receipt. Any missing/partial/unknown D registration leaves the complete derivative lineage private and non-visible.
+- The atomic relationship between E Storage staging, D dependency inventory, D final gate and Storage visibility remains **OPEN / BLOCKING**. If these cannot be serialized in one transaction or a proven recoverable prepare/commit protocol, E must not expose the lineage or derivative.
+
+Conformance scenarios (NOT RUN): partial provenance edge registration; duplicate registration ACK loss; Forget between lineage staging and gate; PermissionEpoch change during traversal; derivative-of-derivative ancestor suppression; cursor-type substitution rejection.
