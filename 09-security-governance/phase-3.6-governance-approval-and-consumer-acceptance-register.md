@@ -203,3 +203,30 @@ This does not mean implementation exists or that the tests passed. It does not c
 G6 BIH Consumer Acceptance has advanced from no DE-S consumer acceptance evidence to **PARTIAL / BLOCKED**: D, E and Storage design-level acceptance is now recorded; C, F, G and H remain OPEN. H's BIH ownership/design baseline is not a substitute for its separate consumer acceptance record. Runtime conformance remains unverified for every consumer.
 
 No I36 governance decision is approved by this reconciliation. I36-GOV-01..10 remain GOVERNANCE-BLOCKED. JF-10 remains P0 OPEN and the corrective I owner-gate ordering decision is recorded separately. I36/H36/D36/E36 and Storage conformance remain NOT RUN.
+
+
+## 6. H owner-side consumer acceptance reconciliation — 2026-11-16
+
+H has now published an explicit delegated design-level consumer acceptance for its BMCP authentication, protected-message, ACK and reconnect boundary:
+
+- H branch: `session-h-bmcp-protocol`
+- H Owner HEAD: `50b0247725c03ba2155678a1dfeae841056a6fb9`
+- Artifact: `08-bmcp-protocol/phase-3.6-bih-identity-trust-consumer-acceptance.md`
+- Blob SHA: `ccbac2d30234df9b910565a7326d100d11a6494e`
+- Exact B/I/H source blobs and accepted field/behavior mapping are enumerated in the H artifact.
+
+I recognizes this as **H DESIGN ACCEPTANCE RECORDED** for BIH36-JD-01..17 at the H-owned boundary. It covers protected verifier context, typed Principal/Actor/Scope/Environment/Producer/Adapter identities, PermissionEpoch carriage/currentness handling, revocation, payload forgery rejection, fail-closed Unknown/Unsupported handling, ACK identity/digest binding and reconnect revalidation.
+
+This recognition is limited to design acceptance. H36 and H36-SR tests remain NOT RUN; no runtime conformance, external governance approval, or production BMCP schema freeze is inferred.
+
+### 6.1 Matrix and G6 consequence
+
+The H row in §4 is updated from OPEN to **DESIGN-ACCEPTED** for all ten identity/security behavior columns, against the exact source and acceptance Blob references above.
+
+G6 BIH Consumer Acceptance is now **PARTIAL / BLOCKED**:
+- Design acceptance recognized: D, E, H and Storage.
+- Still OPEN: C, F and G.
+- Runtime conformance: NOT VERIFIED / NOT RUN for every consumer.
+- A remains registrar only, not a consumer approver.
+
+I36-GOV-01..10 remain GOVERNANCE-BLOCKED. JF-10 remains P0 OPEN under the separate I36-SR-02 owner-gate ordering correction. This register update does not close G6, G5, G7 or G10.
