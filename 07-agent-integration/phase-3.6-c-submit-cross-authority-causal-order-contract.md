@@ -84,3 +84,17 @@ Exceptions and closure conditions:
 5. G alone validates and commits Applied; C acceptance does not establish G acceptance, tests, deployment or current-use eligibility.
 
 No C-CO execution or production implementation verification is claimed. This decision applies only to the exact A Blob above and does not transfer any CGH-APPLIED-1.0 approval.
+
+
+## C Owner exact-version reaffirmation — current CGH-APPLIED-1.1 candidate
+
+- A candidate Blob SHA: `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`
+- Profile: `CausalOrderProfile/1.0`; H schema: `bmcp.applied-ack/1.1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, limited to C's final-request/provider boundary and C-owned evidence.
+
+C reaffirms the exact ordering and evidence chain for this candidate: durable ParticipantIntentRef before provider side effect; I receipt consumption and IAuthorizationTerminalRef; D lineage-bound clearance and fence cutoff; coordinator-finalized ParticipantReservationRef; actual provider/runtime handoff; immutable CSubmitOutcomeRef; and CausalOrderTerminalProofRef. I COMMIT_WON, D clearance, reservation, coordinator intent and H ACK do not prove provider success. C alone emits CSubmitOutcome from actual provider observation, including provider receipt, actual InferenceRequestId, FinalRequestBoundaryId and exact request digest. UNKNOWN remains IN_DOUBT and must not be retried as a new transaction.
+
+C accepts the current outage-cutoff safety rule as a necessary admission invariant: if COC is unavailable, C does not create or accept a new protected intent/reservation and does not call the provider. C relies on I/D to keep their local admission gates closed until their request cutoffs are durably committed to COC; C does not infer absence of revocation/fence from coordinator unavailability.
+
+Exceptions: (1) COC/operator and durable participant registry remain undesignated/undeployed/unverified; (2) provider-specific same-key idempotency and ambiguous-outcome recovery remain to be proven; (3) H 1.1.0 interoperability and I crypto/key governance remain open; (4) G acceptance and C-CO execution remain open/not run. This decision is only for the exact A Blob above; no 1.0 approval is transferred.
