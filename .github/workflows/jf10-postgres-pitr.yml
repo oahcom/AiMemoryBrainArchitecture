@@ -64,6 +64,8 @@ jobs:
           done
           docker exec jf10-pitr-primary psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "CREATE TABLE jf10_pitr_marker (marker text PRIMARY KEY, value text NOT NULL)"
           docker exec jf10-pitr-primary psql -U postgres -d postgres -v ON_ERROR_STOP=1 -c "INSERT INTO jf10_pitr_marker VALUES ('base', 'base-visible')"
+          docker exec jf10-pitr-primary bash -lc 'echo "host replication postgres 0.0.0.0/0 trust" >> "$PGDATA/pg_hba.conf"'
+          docker exec jf10-pitr-primary psql -U postgres -d postgres -c "SELECT pg_reload_conf()"
       - name: Take physical base backup
         env:
           PG_IMAGE: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
