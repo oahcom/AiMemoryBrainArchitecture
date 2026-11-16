@@ -735,3 +735,16 @@ Enumerated exceptions:
 5. Multi-policy-domain atomicity remains BLOCKED / NOT ACCEPTED. This extension is single-I-PolicyDomain only.
 
 **H disposition:** the five JF-10 COC bridge record families have an exact additive 1.1.0 field-level mapping and conditional requiredness at the schema-candidate documentation level for the exact A Blob identified above. Production schema freeze remains NO; implementation/interoperability NOT VERIFIED; JF-10 P0 remains OPEN.
+
+
+### 12.10.5 Machine-readable JSON Schema candidate (documentation-derived)
+
+H has published a JSON Schema Draft 2020-12 candidate for the five JF-10 bridge message families:
+- Path: `08-bmcp-protocol/schemas/bmcp.applied-ack-1.1.0-jf10-bridge.schema.json`
+- Blob: `a8a945cc3623c2907003b93625e3c79742150944`
+- Commit: `d1880f9de26e6ec29753ca847989926d8ea5d70e`
+- Schema variants: exactly the five message types enumerated in §12.10.2.
+
+The artifact encodes common envelope requiredness, message-specific required fields, enumerated outcomes/states, opaque reference bounds (1..512 characters), lowercase SHA-256 digest shape, and conditional requirements for revocation evidence and COMMITTED versus ROLLED_BACK Storage evidence. The JSON was fetched back from the H Owner branch and parsed successfully; it contains five distinct message variants.
+
+**Limitations remain binding:** this is a documentation-derived schema candidate, not a generated schema from an executable IDL/source-of-truth pipeline. JSON Schema alone does not prove issuer identity, signature/channel-binding validity, quorum commit, exact cross-message tuple equality, COC/I/D/Storage authority semantics, same-XID identity, cross-message ordering, or terminal reconciliation truth. These require semantic validators and owner-authoritative lookups. Unknown critical extension handling, canonical JSON byte encoding and duplicate-key rejection also require parser/runtime enforcement. No interoperability, SDK generation, runtime validation or conformance pass is claimed. H-JF10-01..10 remain NOT RUN; production schema freeze remains NO.
