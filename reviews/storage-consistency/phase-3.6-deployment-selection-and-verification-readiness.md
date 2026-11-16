@@ -359,3 +359,21 @@ Storage executed a two-node PostgreSQL 18.7 failover/rejoin procedure:
 The old primary was hard-stopped, recovered offline with networking disabled, rewound to the promoted source using pg_rewind, then rejoined only as a standby. The rejoined standby rejected writes and received a new write made after rejoin from the promoted primary. This proves the tested rejoin procedure and no-dual-writer behavior in the CI harness.
 
 The container stop is not production STONITH or cloud/storage fencing. Production split-brain prevention, independent failure-domain fencing, HA-manager arbitration, connection routing and monitoring remain OPEN. Gate A remains PARTIAL PASS / OPEN.
+
+
+## 16. Gate A — prepared-XID / visibility / receipt PITR boundaries and WAL archive negatives PASS (2026-11-17)
+
+Storage completed the dedicated PostgreSQL 18.7 PITR atomicity campaign against the pinned image digest:
+- Probe: `reviews/storage-consistency/postgres_probe/jf10_postgres_pitr_atomicity_probe.py`; Blob `8c0e281f1db4dd6190127f02ac71b1126da39903`.
+- Workflow: `.github/workflows/jf10-postgres-pitr-atomicity.yml`.
+- Run: `43955195460`; job `133607791713`; SUCCESS.
+- Commit: `8b8c749017bf09d6aa01a7d858b48f910ec5b1bd`.
+- Prepared / commit / rollback target LSNs: `0/5004420` / `0/6000000` / `0/6000110`.
+
+Observed PASS: prepared XIDs remained private and locked at the prepared boundary; COMMIT recovery exposed VisibilityPointer and PublicationReceipt atomically; ROLLBACK recovery exposed neither; missing, corrupt and incomplete WAL each failed closed. The successful run follows a correction to capture the rollback flush LSN before `pg_switch_wal()`; the earlier harness failure is not counted.
+
+The same commit also reran:
+- Physical backup/restore: run `43955195219`, job `133607790737`, SUCCESS; final marker `JF10_POSTGRESQL_18_7_BACKUP_RESTORE_CAPABILITY=PASS`.
+- Explicit-LSN archive PITR: run `43955195388`, job `133607790699`, SUCCESS; target `0/5000190`, replay `0/6000000`, timeline `2`; base and target state present, post-target state absent, exact-LSN recovery PASS.
+
+**Gate A remains PARTIAL PASS / OPEN.** These are isolated PostgreSQL 18.7 CI fixtures, not production Canonical Authority deployment or production I/D ledger integration. They do not close production archive retention/immutability, off-site or cross-zone durability, real fencing/STONITH and split-brain prevention, operator/runbook, or RPO/RTO. Gate B remains BLOCKED pending full Gate A acceptance; Gate C remains BLOCKED pending Gate B; JF-10 P0 remains OPEN; production activation remains NOT AUTHORIZED.
