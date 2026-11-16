@@ -928,3 +928,10 @@ Issue #8 now carries the corrected exact bundle and Owner readback:
 - C decision remains pending for this exact A Blob; its current contract's recovery-batch decision is pinned to the older A/COC pair `4961ffefc0f9920efb8425a9b2a7af42d8f64819` / `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
 
 **Current exact bridge acceptance gate: I ACCEPT; D ACCEPT; Storage ACCEPT; C PENDING.** The outstanding action is an append-only C Owner decision on the amended A architecture exact Blob. No joint closure until C's artifact is published and read back. JF-10 P0, implementation, DB capability, COC deployment and conformance remain OPEN / NOT VERIFIED / NOT RUN.
+
+
+## 13.16 H exact-version JF-10 bridge wire mapping — 2026-11-16
+
+The previous H wire-mapping gap is closed at schema-candidate documentation level. H's current artifact `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, branch `session-h-bmcp-protocol`, Blob `1716b23741479740f9e12003cbf2bd1a80c63aab`, §12.10 explicitly ACCEPTS the five JF-10 ↔ COC bridge message-family mappings for exact A architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, with enumerated exceptions. The five families are prepare-intent registration, prepared-participant registration, I terminal-decision observation, Storage participant resolution and bridge reconciliation observation.
+
+This is not production schema freeze: generated JSON Schema/IDL, SDKs/interoperability and crypto/key governance remain open; H-JF10-01..10 are SPECIFIED / NOT RUN. Issue #8 was updated in comment `6921054285`. The overall bridge gate remains OPEN pending C's distinct exact-bundle decision and D/Storage clarification. JF-10 P0 remains OPEN; implementation/deployment NOT VERIFIED; multi-policy-domain atomicity BLOCKED.
