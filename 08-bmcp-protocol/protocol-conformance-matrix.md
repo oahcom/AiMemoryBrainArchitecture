@@ -147,3 +147,23 @@ No test in this matrix authorizes:
 - model-attention/use claim;
 - security certification;
 - performance sign-off.
+
+
+## 10. Targeted Forget ACK / reconnect conformance
+
+The following H-owned cases supplement FRG-001..012. These are design requirements, NOT RUN until implementation evidence is attached.
+
+| ID | Scenario | Allowed result | Forbidden result | Required evidence |
+|---|---|---|---|---|
+| H-FRG-01 | Normal online Adapter Clear | Separate SUPPRESSED / buffer / cache / queue ACKs for supported actions | One generic deleted/success ACK | Adapter/Agent/session/Scope/region, both epochs, capability epoch, per-action postcondition |
+| H-FRG-02 | Forget while Adapter offline | Target Pending/Unknown | Offline treated as cleared | Last session, unreachable state, absence of positive ACK |
+| H-FRG-03 | Reconnect with expired Permission Epoch | Reauthorize; block protected apply until current | Cached ALLOW or old Context replay | Old/current epoch, authorization result |
+| H-FRG-04 | Reconnect after ForgetFence advances | Suppress/clear first; reconcile G target | Apply pre-fence Snapshot/Delta | Old/current fence, clear evidence, stale rejection |
+| H-FRG-05 | Old Delivery resent after Clear | Reject stale/superseded; suppression persists | Reinsert forgotten content | Delivery ID, ContextVersion, fence, digest, rejection |
+| H-FRG-06 | Capability lacks complete Clear | UNSUPPORTED or narrower action-specific ACK | Claim complete purge or self-authorize exception | Capability/epoch, uncovered region classes, reason |
+| H-FRG-07 | ACK lost and command repeated | Replay same ACK/evidence idempotently or reconcile | Infer success/failure from missing ACK | Stable operation/ACK IDs, digest, attempts, durable journal |
+| H-FRG-08 | Adapter Instance replaced | New instance independently authenticated/inventoried | Transfer old ACK to replacement | Old/new instance refs, issuer/session |
+| H-FRG-09 | Managed Region changes | New region revision and capability epoch | Reuse old clear coverage | Region revisions, epoch transition, inventory |
+| H-FRG-10 | Permission revocation races Apply | Final-boundary recheck; block if revocation wins; preserve already-crossed submission as historical | Use stale lease or claim retroactive recall | Permission epochs, decision ID, linearization and request evidence |
+
+ACK evidence is scoped to one Adapter Instance + Agent/runtime Session + ScopeRef + Managed Region + CapabilityEpoch. FAILED, UNKNOWN and UNSUPPORTED never count as successful evidence. I alone decides target-state satisfaction and PolicyException. See adapter-forget-ack-and-target-binding.md.
