@@ -507,3 +507,28 @@ Current state:
 - Applied Contract Frozen: **NO**.
 - Implementation Verified: **NO**.
 - Issue #3 remains open; no branch merge is authorized.
+
+
+## 13.5 A exact successor package created — CGH-APPLIED-1.1 candidate
+
+A created and read back the explicit successor package:
+
+- Path: `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`
+- Blob SHA: `07a403f89f8d5bf50fc76f139371fa1fd6e4eca3`
+- Commit: `c121df7c4c398da2da27e5a5a60d488e57ee321a`
+- Profile: `CausalOrderProfile/1.0`
+- H schema target: `bmcp.applied-ack/1.1.0`
+
+The package integrates C/I/D participant-intent, I single-use receipt consumption, D fence/lineage clearance, durable reservation, actual C provider outcome and common terminal proof. It explicitly separates I COMMIT_WON from actual provider success and keeps G as sole Applied committer.
+
+This is **A CANDIDATE / OWNER REVIEW REQUIRED / NOT FROZEN**. It does not alter the CGH-APPLIED-1.0 package or transfer any 1.0 approval. Required next decisions: exact-version accept/amend/reject by C/D/I/H/G/B; named coordinator/Storage operator acceptance; then implementation and reproducible conformance.
+
+### Corrected latest Owner artifact pins
+
+The latest branch readbacks supersede the earlier C/I hashes recorded in the first discovery note:
+- C `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`: Blob `f0839e4f470588e6053c144b91ff318b6465e04c`, commit `96054e879abbd827f36ea8b766aa7ccaa4defef1`.
+- I `09-security-governance/phase-3.6-i-commit-authorization-causal-order-contract.md`: Blob `1e4d2d43807981d73c2e5394a0b6020b9177a3f1`, commit `3fc7131f5b057b4f12fd2303a5a4a2440dff8d44`.
+- D `03-memory-brain/phase-3.6-d-forget-fence-causal-participant-barrier-contract.md`: Blob `1c60e7129c5b4255d6b9033bcb03e28e43b3b5af`, commit `99e13c308fe784508b70a48bea694493c00c12b2`.
+- H `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`: Blob `a23b9a879a3ec0e212645a8247a6797bd0055360`, commit `ceb20c0aa0318e2c4c82f7ffb90b05432bd87255`. It now contains the `bmcp.applied-ack/1.1.0` schema candidate and message/field mapping; it remains NOT PRODUCTION-FROZEN / NOT DEPLOYED.
+
+The earlier H exact-version decision artifact for CGH-APPLIED-1.0 remains valid for 1.0 only. Its H-EX-01 schema exception is superseded for the 1.1 candidate by the new H 1.1.0 candidate section, but the new schema is still not a production freeze and still requires exact 1.1 package acceptance and conformance.
