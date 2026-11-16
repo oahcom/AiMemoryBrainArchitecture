@@ -69,3 +69,8 @@ Define Principal, Permission, delegation, revocation, retention, target inventor
 6. PGA/authorities review gate evidence; only then advance G1–G5.
 
 No branch merge is implied or authorized by this rollout plan.
+
+
+## Session continuation authorization (2026-11-17)
+
+The user has explicitly authorized Session P to continue preparatory rollout work. This authorization permits coordination, branch/evidence inventory, and preparation of owner-specific PROPOSED baseline/redline work packages. It is **not** evidence that the user has been appointed as PGA, does not appoint a PGA, does not ratify PB/PR/G0–G5, and does not authorize Session P or A to author/approve another Module Owner's internal baseline. Each A–I Owner must still author and decide its own module baseline on its own Owner branch. All project governance artifacts remain PROPOSED until the documented PGA appointment and formal approval process are completed.
