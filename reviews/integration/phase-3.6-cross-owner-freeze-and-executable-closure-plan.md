@@ -878,3 +878,20 @@ I Owner disposition readback:
 Issue #4 comment records the decision: `6920893505`.
 
 **Remaining independent gates:** D must accept fence/barrier membership and cutoff ordering; Storage must accept durable preallocated-XID preparation, signed PreparedParticipantReceipt and exact-XID recovery; H must decide any required wire-schema mapping. I's acceptance is architecture-interface only and does not establish implementation, deployment, conformance or production approval. COC-01..12 and JF10-COC-01..10 remain NOT RUN; JF-10 remains P0 OPEN; multi-policy-domain atomicity remains BLOCKED.
+
+## 13.14 D and Storage exact-version acceptance of JF-10 COC bridge
+
+Both Owners reviewed the exact A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, §12.1–12.8, and recorded independent decisions:
+
+| Owner | Decision artifact | Exact readback Blob | Commit | Disposition |
+|---|---|---|---|---|
+| D | `03-memory-brain/forget-fence-operation-and-publication-gate.md` on `session-d-memory-brain-2026-11-16` | `5a56c406578fdf257509315eb3f6f3f75456116c` | `edf35b8a80bb9d096748dab129cea5867561b5d3` | ACCEPT D-owned fence/barrier semantics for exact A Blob |
+| Storage | `reviews/storage-consistency/forget-atomicity-storage-realization-review.md` on `session-storage-consistency-forget-atomicity-2026-11-16` | `55c01f4512f2e3d8aac767dd004e768ae073178e` | `76ca854aa91db1c7b2fcf0bf4174606624c72a46` | ACCEPT Storage participant contract subject to DB capability/deployment proof |
+
+D confirms prepare-intent before fence cutoff is a barrier participant; fence-first rejects prepare; participant-first holds the barrier until I decision and Storage same-XID resolution; unknown never releases the barrier. D retains all ForgetFence/lineage/effective completion authority.
+
+Storage confirms preallocated XID, durable prepared participant and locks, Storage-signed PreparedParticipantReceipt, exact same-XID forward-commit/rollback, authoritative readback and atomic VisibilityPointer + PublicationReceipt + owner outcome + receipt-consumption evidence + outbox. Storage's acceptance is conditional on concrete database support; no engine/version, XA profile, operator or deployment has been selected or verified.
+
+Issue #4 records both decisions in comment `6920938325`.
+
+**Remaining gate:** H's exact 1.1.0 schema/wire mapping decision remains outstanding. Implementation, concrete DB capability, COC-01..12 and JF10-COC-01..10 conformance remain unverified/not run. JF-10 P0 remains OPEN; multi-policy-domain atomicity remains BLOCKED; production activation is NOT APPROVED.
