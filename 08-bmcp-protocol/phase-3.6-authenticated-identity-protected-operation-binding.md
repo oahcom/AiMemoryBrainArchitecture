@@ -598,3 +598,140 @@ Required new H conformance cases (SPECIFIED / NOT RUN):
 - H-CO-23: enforce idempotent same-digest replay and conflict on changed request set/digest.
 
 **H disposition:** the recovery-batch field mapping exception is resolved at the H schema-candidate documentation level for this exact A package. Production freeze remains NO; generated schema, implementation interoperability, crypto governance and H-CO-17..23 remain OPEN / NOT RUN.
+
+## 12.10 H JF-10 prepared participant ↔ COC bridge schema decision
+
+- Exact A architecture reviewed: `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`, A branch `session-a-integration-2026-11-16`, Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, §12.1–12.8.
+- Schema family: `bmcp.applied-ack/1.1.0`, protocol major 1/minor 1, existing authenticated canonical envelope and `CausalOrderProfile/1.0`.
+- This is an additive H schema-candidate extension. It does not change the already decided CGH-APPLIED-1.1 message meanings or the 12.9 recovery-batch mapping.
+
+**H DECISION: ACCEPT THE JF-10 BRIDGE WIRE MAPPING FOR THIS EXACT A BLOB, WITH ENUMERATED EXCEPTIONS.**
+
+H accepts the five COC lifecycle record families as five distinct 1.1.0 message families below. H preserves owner-issued evidence as opaque typed references and authenticates message integrity; it does not mint or decide I authorization, D fence/lineage, Storage transaction outcomes or COC causal order. The five messages are observations/registrations, not owner decisions.
+
+### 12.10.1 Common JF-10 bridge envelope and typed field rules
+
+Every message below MUST use the 1.1.0 authenticated envelope and include:
+- schema_id, schema_version=1.1.0, message_type, message_id, message_nonce, audience, authenticated RuntimeSessionRef, CausalOrderProfileRef, CausalOrderCoordinatorRef, CausalOrderDomainRef, CausalOrderTransactionRef;
+- canonicalization_profile_id, digest_algorithm=SHA-256, payload_digest, integrity_proof_ref, protected channel-binding proof and authenticated sender authority identity;
+- publication_operation_id, request_digest, owner_boundary, participant_intent_ref, policy_domain_ref, stable storage_participant_ref, storage_xid_ref, participant_digest and canonical storage_authority_db_ref.
+
+All Ref fields are non-empty opaque UTF-8 values (1..512 bytes), issuer-namespaced and typed by their field discriminator. H MUST preserve their exact decoded value and MUST NOT parse embedded identifiers, compare refs from different authorities, or synthesize an owner ref. XID and DB identity are opaque Storage-issued typed identifiers, not numeric wire values.
+
+All digest fields are 32-byte SHA-256 represented as 64 lowercase hexadecimal characters. The immutable bridge tuple is repeated or referenced by digest in every message; a tuple mismatch is CONFLICT, not a merge opportunity. Canonical JSON rules in §12.8.1 apply. Unknown critical fields, duplicate keys, malformed refs, wrong issuer, wrong message signer, digest mismatch or missing required fields are rejected before delivery to a consumer.
+
+The following are distinct typed positions and MUST occupy distinct fields:
+- COC causal_order_epoch, causal_order_position and causal_order_entry_digest;
+- I i_sequencer_ref, i_sequencer_epoch, i_sequencer_position and i_decision_digest;
+- D d_fence_request_cutoff_ref / d_fence_effective_position where applicable;
+- Storage storage_transaction_ref / storage_resolution_position where applicable.
+
+H MUST NOT numerically or lexically compare, sort, coerce or substitute positions across these namespaces. COC position orders COC records only. I position is authoritative only within I's policy-domain sequencer. D fence cutoff/effective evidence remains D-issued. Storage transaction position is Storage-local evidence.
+
+### 12.10.2 Message family field mapping and requiredness
+
+**A. JF10_PREPARE_INTENT_REGISTERED**
+
+Required:
+- common envelope and immutable bridge tuple;
+- prepare_intent_state=REGISTERED;
+- preallocated_storage_xid_ref (must equal storage_xid_ref);
+- participant_intent_ref;
+- prepare_intent_coc_position, prepare_intent_coc_epoch, prepare_intent_entry_digest;
+- policy_domain_ref, owner_boundary, participant_digest;
+- applicable_d_fence_request_refs as an explicit canonical set (empty only with D/COC completeness attestation);
+- registration_commit_proof_ref signed by COC.
+
+This record MUST be quorum-committed before Storage PREPARE. It is a prospective participant registration, not a Storage prepared receipt, I authorization, D clearance or permission to publish.
+
+**B. JF10_PREPARED_PARTICIPANT_REGISTERED**
+
+Required:
+- common envelope and exact same immutable bridge tuple;
+- prepared_participant_receipt_ref signed by Storage;
+- prepared_participant_receipt_digest;
+- storage_prepare_state=PREPARED_DURABLE;
+- storage_prepare_transaction_ref and Storage DB identity;
+- prepared_coc_position, prepared_coc_epoch, prepared_entry_digest;
+- prepare_intent_coc_position and prepare_intent_entry_digest copied unchanged from the earlier intent record;
+- storage_private_visibility_state=NOT_VISIBLE;
+- storage_lock_retention_state=RETAINED;
+- registration_commit_proof_ref signed by COC.
+
+The Storage receipt MUST bind the same XID, participant digest, operation ID/digest, owner boundary and canonical DB identity. Changed XID/digest/DB/operation is CONFLICT. This record does not imply I COMMIT_WON.
+
+**C. I_JF10_TERMINAL_DECISION_OBSERVED**
+
+Required:
+- common envelope and exact immutable bridge tuple;
+- i_authorization_terminal_ref, i_commit_authorization_receipt_ref, i_receipt_consumption_proof_ref;
+- i_sequencer_ref, i_sequencer_epoch, i_sequencer_position, i_decision_id, i_decision_digest;
+- i_terminal_outcome: COMMIT_WON, REVOCATION_WON or INDETERMINATE_ABORTED;
+- i_revocation_request_state: PRESENT or NONE_AT_TERMINALIZATION;
+- if PRESENT, i_revocation_request_ref and its I-owned cutoff proof are REQUIRED; if NONE_AT_TERMINALIZATION, the request ref is forbidden;
+- observed_coc_prepare_intent_position, observed_coc_prepared_position;
+- i_owner_signature_ref and COC observation commit proof.
+
+The I signature proves the observed I decision evidence; COC append position proves only when COC recorded the observation. H MUST NOT treat the COC observation position as I's decision position or infer COMMIT/ABORT from absence of an I message.
+
+**D. STORAGE_JF10_PARTICIPANT_RESOLVED**
+
+Required:
+- common envelope and exact immutable bridge tuple;
+- storage_resolution_outcome: COMMITTED or ROLLED_BACK;
+- storage_resolution_transaction_ref, storage_resolution_position, storage_resolution_digest;
+- storage_owner_outcome_ref, storage_owner_signature_ref;
+- storage_visibility_state: VISIBLE or NOT_VISIBLE;
+- storage_lock_release_state: RELEASED_AFTER_TERMINAL;
+- storage_same_xid_proof_ref proving the exact originally prepared XID was resolved;
+- storage_publication_receipt_ref and visibility_pointer_transaction_ref REQUIRED for COMMITTED and forbidden for ROLLED_BACK;
+- storage_nonpublication_proof_ref REQUIRED for ROLLED_BACK and forbidden for COMMITTED;
+- COC observation position/epoch/entry digest and COC commit proof.
+
+COMMITTED is valid only when the same XID's atomic visibility transaction and matching PublicationReceipt are durably proven. ROLLED_BACK is valid only with authoritative proof of non-publication. H validates schema and integrity only; it does not decide whether Storage proof is semantically sufficient.
+
+**E. JF10_BRIDGE_RECONCILIATION_RECORDED**
+
+Required:
+- common envelope and exact immutable bridge tuple;
+- reconciliation_id, reconciliation_digest, reconciliation_state: RECONCILED_TERMINAL, PENDING or UNKNOWN;
+- reconciled_coc_prefix_position and reconciled_coc_prefix_digest;
+- i_authoritative_lookup_ref and i_lookup_state: COMMIT_WON, REVOCATION_WON, INDETERMINATE_ABORTED, PENDING or UNKNOWN;
+- storage_authoritative_lookup_ref and storage_lookup_state: PREPARED, COMMITTED, ROLLED_BACK or UNKNOWN;
+- d_barrier_lookup_ref and d_barrier_state: OPEN, SATISFIED or UNKNOWN;
+- reconciliation_observation_ref and COC commit proof.
+
+RECONCILED_TERMINAL is allowed only when the I terminal decision, Storage same-XID resolution and applicable D barrier evidence are all authoritative, exact-tuple matched and terminal. Otherwise state MUST be PENDING or UNKNOWN. COC reconciliation never synthesizes a missing I decision, Storage outcome or D clearance.
+
+### 12.10.3 Conditional requirements, replay and state consistency
+
+1. Every message is idempotent by (CausalOrderCoordinatorRef, CausalOrderDomainRef, message_type, message_id, payload_digest). Same identity + same digest returns the original durable receipt. Same identity + changed digest, changed XID, changed owner boundary or changed immutable tuple is CONFLICT and quarantined.
+2. The intent and prepared-participant records are distinct and both required before I's owner-final-gate decision. A prepared receipt without the prior intent record is invalid. An I terminal observation without both COC records is invalid for this bridge profile.
+3. COC position is allocated by the COC commit service and cannot be supplied as a claimed sender timestamp. Owner signatures and COC quorum-commit proofs are separate required evidence.
+4. UNKNOWN/IN_DOUBT is nonterminal. No H ACK, timeout, missing message, receiver sequence, message expiry or reconnect may promote it to COMMITTED/ROLLED_BACK or release D/I/Storage locks.
+5. Multi-policy-domain transactions are unsupported by this profile. H MUST reject a message that claims one transaction atomically spans multiple I PolicyDomainRefs; no per-domain aggregation is accepted.
+6. The exact XID is stable through retry/reconnect/recovery. A new XID for the same immutable operation/participant tuple is a conflict, not a retry.
+7. JF10_BRIDGE_RECONCILIATION_RECORDED is an observation only. H does not emit owner gate release or alter any owner's state.
+
+### 12.10.4 H conformance additions and exceptions
+
+New required H cases (all **SPECIFIED / NOT RUN**):
+- H-JF10-01: reject Storage PREPARE receipt/record without prior durable COC prepare-intent registration.
+- H-JF10-02: reject changed XID, operation digest, owner boundary or canonical DB identity across intent and prepared receipt.
+- H-JF10-03: prove COC position and I sequencer position remain separate typed fields and are never compared/coerced.
+- H-JF10-04: reject I terminal observation lacking I signature, receipt-consumption proof or exact prior COC participant registrations.
+- H-JF10-05: accept Storage COMMITTED only with same-XID proof, visibility transaction and PublicationReceipt; reject missing/contradictory evidence.
+- H-JF10-06: accept Storage ROLLED_BACK only with same-XID proof and non-publication evidence; reject PublicationReceipt on rollback.
+- H-JF10-07: preserve IN_DOUBT across reconnect, lost ACK and missing observation; no terminal inference or gate release.
+- H-JF10-08: reject reconciliation claiming terminal while I, Storage or D remains PENDING/UNKNOWN.
+- H-JF10-09: reject multi-policy-domain atomicity claims and per-domain partial aggregation.
+- H-JF10-10: exact idempotent replay succeeds; same identity/different digest or alternate XID is CONFLICT.
+
+Enumerated exceptions:
+1. This is a wire-schema candidate decision; generated JSON Schema/IDL, SDK bindings and cross-implementation interoperability have not been produced or tested.
+2. Exact signature/MAC algorithms, key custody/rotation/compromise recovery and federation remain subject to I/Security governance approval.
+3. H does not approve COC deployment/operator, I sequencer implementation, D fence implementation, Storage database/XA capability or production activation.
+4. H-JF10-01..10 and related crash/reconnect suites remain NOT RUN. No conformance pass is claimed.
+5. Multi-policy-domain atomicity remains BLOCKED / NOT ACCEPTED. This extension is single-I-PolicyDomain only.
+
+**H disposition:** the five JF-10 COC bridge record families have an exact additive 1.1.0 field-level mapping and conditional requiredness at the schema-candidate documentation level for the exact A Blob identified above. Production schema freeze remains NO; implementation/interoperability NOT VERIFIED; JF-10 P0 remains OPEN.
