@@ -1,0 +1,35 @@
+name: BMCP JF-10 Bridge JSON Schema Validation
+
+on:
+  push:
+    branches:
+      - session-h-bmcp-protocol
+    paths:
+      - "08-bmcp-protocol/schemas/**"
+      - "tests/schema/**"
+      - ".github/workflows/jf10-bridge-schema.yml"
+  pull_request:
+    paths:
+      - "08-bmcp-protocol/schemas/**"
+      - "tests/schema/**"
+      - ".github/workflows/jf10-bridge-schema.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-schema:
+    name: Validate BMCP JF-10 1.1.0 schema and five message families
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned schema validator
+        run: python -m pip install jsonschema==4.23.0
+      - name: Compile schema tests
+        run: python -m py_compile tests/schema/test_jf10_bridge_schema.py
+      - name: Validate schema and message fixtures
+        run: python -m unittest discover -s tests/schema -v
