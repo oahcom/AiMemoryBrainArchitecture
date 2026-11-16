@@ -63,3 +63,7 @@ The detailed candidate contract is `phase-3.6-principal-trust-chain-authorizatio
 | I36-GOV-08 | Global Forget Completion exceptions for external recipient, backup retention, unsupported/offline target and physical erasure | I | Privacy/Legal + Security Governance + data owner + storage/recipient owner | Exact target/scope, finite expiry, controls, restore/recipient/erasure evidence | GOVERNANCE-BLOCKED | None |
 
 No signed approval evidence was located for I36-GOV-01..08. A document commit, owner proposal or test specification is not approval. Append approval entries only after verifying the approving Principal/Issuer authority and exact approved text/hash.
+
+## Phase 3.6.5 proposal-only reconciliation — 2026-11-17
+
+A consolidated conservative default proposal for I36-GOV-01..10 is available at `09-security-governance/phase-3.6.5-i36-governance-decision-proposal.md`. It is a recommendation packet only. **No decision status changes**: I36-GOV-01..10 remain GOVERNANCE-BLOCKED / NOT APPROVED until the authorized governance body records exact policy hash, approver PrincipalRef/IssuerRef, authority basis, independent review, scope/jurisdiction, effective version/time, expiry and revocation conditions. The proposal does not activate any issuer, delegation, cross-scope/environment grant, offline lease, exception or Global Forget completion threshold.
