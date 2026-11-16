@@ -180,3 +180,21 @@ D and E Owner branches now each contain an explicit consumption/mapping note:
 - G3: **BLOCKED** pending authoritative runtime repository, accountable engineering owner, database/coordinator selection and production-equivalent evidence.
 
 The model is not a substitute for the production harness specified above.
+
+## 11. JF-10 logical reference-model CI result — 2026-11-16
+
+A branch-scoped GitHub Actions run executed the committed deterministic unittest suite:
+
+- Workflow: `JF-10 Logical Reference Model`
+- Run: `43895971452`
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43895971452
+- Head commit: `684ac873bec331649c18a45a992007d04f211832`
+- Test source Blob: `a38d73b4a5e7c65210fb414a62fb91b30649b788`
+- Result: **SUCCESS**
+- Job: `Deterministic JF-10 reference-model tests`
+- Step `Run unittest suite`: **SUCCESS**
+- Authored unittest methods: **15**
+
+The 15 logical tests cover prepared-not-visible, I decision before Storage commit/IN_DOUBT, same-XID recovery, unknown decision fail-closed, crash before/after the modeled local commit, exact receipt binding, idempotent readback, abort, D fence-first and participant-first races, multi-domain rejection, stable operation/digest binding, E retry identity and immutable terminal decision.
+
+**Strict evidence boundary:** this is a successful CI run of the in-memory Python reference state machine only. It is not a real database, prepared-XID, I sequencer, COC consensus, D/Storage shared transaction, process-kill, HA/failover, backup/restore, object-store or reader integration test. It does not pass JF10-01..17 production conformance, COC-01..16, Storage C01..C23, I-CO or G-CO. JF-10 P0 remains OPEN; production implementation remains NOT IMPLEMENTED / NOT VERIFIED; G3 remains BLOCKED.
