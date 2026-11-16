@@ -3,7 +3,7 @@
 - Document: TAR-AI-001 / TAB-001 v0.1
 - Owner: C — Agent Integration Architect
 - Branch: `session-c-agent-integration-2026-11-16`
-- Reviewed branch HEAD: **PENDING exact parent-SHA verification during report publication**; branch-local C contract files were fetched.
+- Reviewed source branch HEAD (pre-publication snapshot): `0a81f370bfc331872897ff83b6cbe051806cfc7b`; tree SHA: `b83522caa7739dab6960442ac8ade81f24742505`. The report publication commit is recorded separately in the final execution summary.nt-SHA verification during report publication**; branch-local C contract files were fetched.
 - Review date: 2026-11-17
 - Report version: 1.0
 - Verdict: **CONDITIONAL PASS**
@@ -16,6 +16,19 @@ C's design correctly treats Agent integration as a real runtime boundary rather 
 The architecture is implementable across heterogeneous Agents only as a capability-tiered integration strategy. Tier 1 requires a framework/runtime hook at the final submit boundary, a unique inference request ID and verifiable request-bound evidence. Many middleware or event/tool integrations will only reach Tier 2/3. Embedded SDK, sidecar and remote gateway have different trust, latency and failure trade-offs; none can manufacture observability that the Agent runtime does not expose.
 
 Conditional acceptance is limited to design semantics. The critical dependencies remain OPEN: H wire/transport and ACK schema, I authenticated Principal/permission/revocation policy, G ContextVersion/Delivery authority, B typed references, and actual Agent framework final-submit hooks. C's conformance matrix explicitly states no cases were executed or passed. No Applied implementation claim, cross-framework compatibility or prompt-injection security certification is made.
+
+## Upstream Owner Input Status (refreshed branch audit)
+
+The following owner branches were refreshed for this review. No separate TAR-AI-001 technology-review report was present in the B, I, D or E branch trees at the reviewed snapshots; their absence is recorded as **OPEN**, not treated as acceptance or as permission to infer conclusions.
+
+| Owner | Branch HEAD | TAR-AI-001 technology report | Relevant current input |
+|---|---|---|---|
+| B | `861fa9b2c3e1f572336543b15c7dc392493891db` | OPEN — not present | `ADR-001-fact-claim-semantics.md`, blob `a1024938ff5baba069cf128c69496a44e143330c`, remains **ADR-BLOCKED** |
+| I | `1fc3b3293ebf2077edfd6ad253647d382173d9fa` | OPEN — not present | PermissionEpoch formal confirmation, blob `bae6a24fe3a374bc816993979a8fa9af52517dea`, is normative I technical baseline; external governance profile approval remains blocked |
+| D | `9dd48eddb3c8f91d15dfa6981a7f53cc70bd4bf8` | OPEN — not present | Forget semantics, blob `1f0391bc49d007c44ec74165bd33d37412cc7990`, define D authority; D/E/Storage implementation closure remains open |
+| E | `4402549c39824b89a0dc49973226187c62e056c5` | OPEN — not present | Producer admission, blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a`, and derived publication, blob `00e37ba56596e710513c8d0568acd79141d9101b`, explicitly retain atomic registration/publication as OPEN / BLOCKING |
+
+These are current owner artifacts, not substitutes for the missing owner technology reviews. The Phase 3 D/E/H/I cross-module review remains a conditional integration review, not a closure of the D/E/Storage publication linearization gap.
 
 ## 2. Review Scope and Evidence
 
