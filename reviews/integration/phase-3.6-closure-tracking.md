@@ -1001,3 +1001,20 @@ H maps five distinct 1.1.0 message families: prepare-intent registered, prepared
 Exceptions: schema remains candidate; generated JSON Schema/IDL/SDKs and cross-implementation interoperability not produced/tested; cryptographic/key lifecycle remains I/Security governance; H-JF10-01..10 SPECIFIED / NOT RUN; no production freeze or activation.
 
 **Updated Owner gate: I = ACCEPT; D = ACCEPT; Storage = ACCEPT; H = ACCEPT (schema candidate only); C = PENDING.** C remains the sole outstanding requested Owner decision for the exact A architecture Blob. JF-10 P0 remains OPEN; implementation, deployment and conformance remain NOT VERIFIED / NOT RUN.
+
+
+## 13.17 C exact-version JF-10 ↔ COC bridge acceptance — architecture/interface gate closed
+
+C has published and A has independently read back the exact bridge decision:
+- Owner artifact: `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`
+- Branch: `session-c-agent-integration-2026-11-16`
+- Blob: `45a48249717c8cddb07ab96197730ef93d406c22`
+- Decision: **ACCEPT THE EXACT JF-10 ↔ COC BRIDGE BUNDLE WITH ENUMERATED C-OWNED CONDITIONS**.
+
+C pins the same exact bundle: A architecture `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`; I disposition `8069ff86988396442c8d9dc3fd58653683abe2f3`; D acceptance `5a56c406578fdf257509315eb3f6f3f75456116c`; Storage acceptance `55c01f4512f2e3d8aac767dd004e768ae073178e`; H mapping `1716b23741479740f9e12003cbf2bd1a80c63aab`; common D/Storage JF-10 protocol `94679897e84a6f58fd8b9467b5249e1a885cb0b0`.
+
+C conditions include no provider side effect before COC prepare-intent + Storage prepared participant + I owner-final-gate decision; C-owned actual provider outcome; same provider idempotency key and same XID retained through UNKNOWN/IN_DOUBT; no new transaction retry; D barrier held until authoritative I/Storage/C/lineage resolution; one I PolicyDomain only.
+
+**Architecture/interface decision gate: CLOSED WITH ENUMERATED EXCEPTIONS.** C, D, Storage independently accept the exact A bridge; I accepts the same exact A Blob with single-domain limitation; H accepts the five-family additive 1.1.0 wire mapping as a schema candidate. This closes only the Owner architecture/interface decision layer.
+
+**Still OPEN / NOT VERIFIED / NOT RUN:** JF-10 P0; selected DB prepared-XID/lock durability and same-XID crash recovery; COC consensus/operator/deployment; provider-specific idempotency and fault recovery; generated H schema/IDL/SDK and interoperability; I crypto/key governance; C-CO-01..10, H-JF10-01..10, JF10-COC-01..10 and production conformance. Multi-PolicyDomain atomicity remains BLOCKED. No production activation is authorized.
