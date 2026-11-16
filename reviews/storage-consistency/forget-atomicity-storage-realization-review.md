@@ -436,3 +436,34 @@ Storage accepts the following Storage-owned requirements as the target architect
 **Implementation qualification:** this is architecture-level Storage acceptance, not proof that the selected database can provide durable prepared-XID/lock retention, crash-safe recovery, serializable D/Storage fence ordering or the required atomic visibility transaction. No concrete engine/version, XA profile, replication/failover topology, operator or deployment has been selected/verified by this decision. If the selected database cannot durably retain and recover the exact prepared XID and locks across crash/restart, implementation is blocked; no weaker check-then-write substitute is accepted.
 
 Storage does not accept or decide I authorization/PermissionEpoch/receipt semantics, D fence meaning, H wire schema or multi-policy-domain atomicity. JF10-COC-01..10 and storage crash/fault suites remain NOT RUN. JF-10 remains P0 OPEN; implementation and production deployment remain NOT VERIFIED.
+
+
+## Phase 3.6.2 — Storage exact acceptance of complete JF-10 ↔ COC decision bundle
+
+**Decision:** **ACCEPT WITH ENUMERATED EXCEPTIONS — ARCHITECTURE / PARTICIPANT INTERFACE ONLY.** This confirms Storage's target participant and recovery contract for the single-I-PolicyDomain JF-10 v2 profile. It is not a selected-database capability statement, deployment acceptance, or production conformance result.
+
+### Exact bundle reviewed
+- A COC architecture: `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`
+- I JF-10 v2 Owner disposition: `8069ff86988396442c8d9dc3fd58653683abe2f3`
+- D/E/Storage common JF-10 v2 recovery protocol: `94679897e84a6f58fd8b9467b5249e1a885cb0b0`
+- C bridge Owner contract: `45a48249717c8cddb07ab96197730ef93d406c22`
+- D fence/barrier Owner contract: `5a56c406578fdf257509315eb3f6f3f75456116c`
+- Storage realization / participant contract: `55c01f4512f2e3d8aac767dd004e768ae073178e`
+- H bridge wire mapping Owner contract (current branch readback): `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248`
+- H JSON Schema candidate: `a8a945cc3623c2907003b93625e3c79742150944`
+
+### Storage-owned accepted semantics
+1. Storage receives the immutable operation ID/digest, owner boundary, participant identity/digest, canonical DB identity and preallocated XID before PREPARE. Retries and recovery use the same XID; replacement XID or changed tuple is a hard conflict.
+2. Storage durably prepares that exact XID and retains private bytes plus required target/lineage serialization locks until the authoritative I terminal decision and same-XID resolution are recovered.
+3. Storage returns a Storage-signed PreparedParticipantReceipt binding the exact XID, participant digest, operation ID/digest, owner boundary and DB identity. Lost ACK is resolved by authoritative lookup of the same XID.
+4. I COMMIT drives forward-commit of that same prepared XID; I ABORT / REVOCATION_WON / INDETERMINATE_ABORTED drives rollback/non-publication. UNKNOWN/IN_DOUBT remains prepared, private and unresolved. No heuristic commit/abort, timeout inference or alternate-XID recovery is permitted.
+5. On commit, Storage atomically writes VisibilityPointer, immutable PublicationReceipt, owner outcome, receipt-consumption evidence and outbox in the same Canonical Authority DB transaction. Outbox is notification only. Authoritative reads must exclude stale replicas/caches as decision sources.
+6. D retains fence/lineage authority; I retains authorization/sequencer authority; C retains provider outcome authority; COC is ordering/participant-accounting evidence only. No COC append or I COMMIT alone makes Storage content visible.
+7. Acceptance is limited to one I PolicyDomain. Multi-PolicyDomain atomicity remains BLOCKED / NOT ACCEPTED.
+
+### Enumerated exceptions / closure conditions
+- The common protocol and bridge are accepted as architecture/interface only. The actual DB product/version/build, extensions/configuration, isolation/replication/failover profile, prepared-XID capability, lock durability, operator and deployment boundary are NOT SELECTED / NOT VERIFIED.
+- Storage has not executed a capability probe or crash/restart/failover/restore test. C01–C23 and JF10-01..13 remain NOT RUN.
+- The required one-transaction visibility boundary and same-XID recovery must be proven on the selected engine. If unsupported, stop and publish a blocking incompatibility plus a D/I-approved alternative; do not substitute check-then-write or a weaker independent transaction.
+- COC quorum/log durability, snapshot rollback protection, RPO/RTO, SLO, retention, KMS/key custody and operational ownership remain OPEN.
+- This decision does not approve I external governance, cryptographic suite/key lifecycle, H production schema freeze, C provider implementation, or production activation. JF-10 P0 remains OPEN.
