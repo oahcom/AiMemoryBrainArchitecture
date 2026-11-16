@@ -94,3 +94,31 @@ Backend tests assert scope predicate bound before ANN candidate IDs leave backen
 
 ## 18. Dependencies and Open Questions
 D canonical schema/lifecycle; E index/watermark; I permission/Forget authority; G output envelope; H request/auth envelope. OPEN: ANN true pre-filter semantics, watermark granularity, canonical delta API, Claim revision identity (INT-P1-02), Provenance graph constraints (INT-P1-06). TO_VALIDATE: RRF vs calibrated fusion, ranking quality, graph budgets, scoped ANN recall/latency and hardware capacity.
+
+
+## Phase 3.5 — Typed Cursor and Forget Suppression Addendum (normative supplement)
+
+The detailed owner/consumer contract is in [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](phase-3.5-forget-suppression-and-cursor-consumption.md). This supplement supersedes any earlier provisional wording in this file where the two differ.
+
+### Typed cursor discipline
+
+F consumes and stores these as distinct owner-issued types: D `CanonicalCommitCursor` (one global sequence per Brain authority), D `AggregateRevision` (per aggregate), D `LifecycleEventCursor` (per Memory), F `IndexWatermark` (per index/channel partition, applied through a D CanonicalCommitCursor), D `ForgetFenceGeneration/ForgetFenceCursor`, and I `PermissionEpoch`. G `ContextVersion` and H/C delivery/capability/request identifiers are additional independent namespaces.
+
+F never casts, increments, numerically compares or substitutes these tokens. Same-authority CanonicalCommitCursor continuity is interpreted only under D semantics; AggregateRevision and LifecycleEventCursor remain locally scoped. IndexWatermark is a contiguous freshness/completeness prefix for one partition only. It is not target-absence evidence, Forget suppression, cache purge or global Forget completion.
+
+### Suppression checkpoints
+
+| Retrieval stage | Mandatory F gate |
+|---|---|
+| Candidate Generation | Resolve authenticated Principal, trusted ScopeRefs, current I PermissionEpoch and D fence; bind Scope predicate inside every backend before candidate emission |
+| Index Lookup | Query scoped partition; validate its own watermark/coverage/schema; exact version refs only; never global top-K then post-filter |
+| Canonical Revalidation | Resolve exact version, lifecycle, source lineage and latest applicable D fence; authorize Memory, Entity, Relation, Evidence and Provenance independently |
+| Fusion | Admit only authorized, canonical-valid candidates; dedupe exact Memory+Version only; preserve conflicts and distinct versions |
+| Freshness | Evaluate each partition watermark independently against required CanonicalCommitCursor; lag means read-through/wait/partial, not Forget failure/success |
+| Reranking | Only validated candidates/evidence enter reranker; recheck if permission/fence changed during ranking |
+| Result Materialization | Reauthorize exact fields and Evidence dereferences; discard affected materialization if fence/revocation advances |
+| Final Return / G Handoff | Revalidate current I permission and D fence immediately before serialization/disclosure; cancel/drop affected results or fail closed when ordering is unknown |
+
+Fence/revocation notifications cancel affected in-flight work and cache fills, but cancellation is not the safety proof. The final return/handoff recheck is mandatory. If the request cannot establish current authority state, it must not disclose affected content.
+
+ActivationRecommendation remains a proposal to G. It does not mutate ContextVersion, constitute delivery, or prove Applied.
