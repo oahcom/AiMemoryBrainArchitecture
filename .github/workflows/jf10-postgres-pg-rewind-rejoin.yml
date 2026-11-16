@@ -139,7 +139,7 @@ jobs:
           docker run --rm --network none --user postgres \
             -v jf10-primary-data:/var/lib/postgresql \
             --entrypoint bash "$PG_IMAGE" -lc \
-            "/usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -o \"-c listen_addresses='' -c port=5544 -c wal_keep_size=512MB\" -w start && set +e; OUT=$( /usr/lib/postgresql/18/bin/psql -h /var/run/postgresql -p 5544 -U postgres -d postgres -v ON_ERROR_STOP=1 -c \"SELECT jf10_guarded_write(2, 'old-primary-stale-epoch-attempt', 'must-fail')\" 2>&1 ); STATUS=$?; set -e; echo \"$OUT\"; if [ $STATUS -eq 0 ]; then exit 1; fi; echo \"$OUT\" | grep -q 'stale fencing epoch'; echo OLD_PRIMARY_STALE_EPOCH_WRITE_REJECTED=PASS; /usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -m fast -w stop"
+            "/usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -o \"-c listen_addresses='' -c port=5544 -c wal_keep_size=512MB\" -w start && set +e; OUT=\$( /usr/lib/postgresql/18/bin/psql -h /var/run/postgresql -p 5544 -U postgres -d postgres -v ON_ERROR_STOP=1 -c \"SELECT jf10_guarded_write(2, 'old-primary-stale-epoch-attempt', 'must-fail')\" 2>&1 ); STATUS=\$?; set -e; echo \"\$OUT\"; if [ \$STATUS -eq 0 ]; then exit 1; fi; echo \"\$OUT\" | grep -q 'stale fencing epoch'; echo OLD_PRIMARY_STALE_EPOCH_WRITE_REJECTED=PASS; /usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker -m fast -w stop"
           echo "OLD_PRIMARY_OFFLINE_CRASH_RECOVERY=PASS"
           docker run --rm --user postgres --network jf10-rejoin-net \
             -v jf10-primary-data:/var/lib/postgresql \
