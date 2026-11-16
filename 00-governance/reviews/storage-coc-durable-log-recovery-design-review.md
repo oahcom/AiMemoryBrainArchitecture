@@ -21,7 +21,7 @@
 | Storage exact COC boundary acceptance for old pair | Storage branch | `9b297f0f76c9a054206cee5a6ee18200db3e1798` |
 | Storage realization review accepting A COC architecture a3c51 | Storage branch | `107d21bd2c604ee0b04feff2ee5580e1de9c7fce` |
 
-Storage branch HEAD at review: `1752a30d272d940a59735e0d96dc535c2319a3c8`.
+Storage branch HEAD at latest refresh: `9f784a15ef33a6cde4b4cda1ab6fca2df8a705fa`.
 
 ## 2. What is sound in the proposal
 
@@ -46,7 +46,7 @@ This is a strong architecture candidate and a reasonable next Gate B design arti
 
 ### COC-REV-001 — I terminal decision during COC outage must be worded precisely (P0)
 
-Storage proposal §7 says, in effect, that “I COMMIT during COC outage” means Storage forward-commits the same XID.
+Storage proposal §7 says, in effect, that “I COMMIT during COC outage” means Storage forward-commits the same XID. This is not necessarily a protocol contradiction, because A §12.4 and I §10.5 allow Storage to resolve a decision that was already durably committed before COC became unavailable. The proposal's wording is ambiguous and must say so explicitly.
 
 The authoritative A/I bridge is more precise:
 - If COC becomes unavailable after I has already durably decided COMMIT, Storage must still forward-commit that exact XID; COC later records the already-durable I decision and Storage proof idempotently.
@@ -153,3 +153,26 @@ The readiness document still contains stale later lines saying Gate B/C remain B
 **ACCEPT AS A STRONG GATE B DESIGN CANDIDATE WITH ENUMERATED BLOCKING AMENDMENTS.**
 
 Gate B design activity is authorized; the Storage proposal is not yet accepted/frozen. No consensus product, DB product/version, quorum topology, operator or deployment is selected. No COC implementation or conformance pass is claimed. JF-10 P0 remains OPEN; multi-policy-domain atomicity BLOCKED; production activation NOT AUTHORIZED.
+
+
+## 8. Exact A COC architecture acceptance versus Applied companion pin
+
+The current A COC architecture file at `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md` is Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`. The current A CGH-APPLIED-1.1 package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` still names companion COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea` at the same path.
+
+The live branch evidence shows:
+- C, D, H, I and Storage have separate exact-version acceptance/readback evidence for A COC architecture Blob `a3c51...`.
+- C, D, G, H, I and Storage have exact-version decisions for A package Blob `4961...` plus companion Blob `fc3...`; B approves unchanged B-owned type semantics.
+- G's exact Applied decision still pins the `4961 + fc3` pair and does not mention `a3c51`.
+
+This is a version-chain mismatch, not evidence that any Owner silently accepted the other blob. A must publish a canonical manifest/superseding exact package pin and determine whether `a3c51` supersedes `fc3` or is an independent additive architecture record. If the companion changes, G and all affected Owners must decide the new exact pair. UMR-024 tracks this.
+
+## 9. Gate vector correction
+
+Storage readiness blob `5da030123e76e523f681d1262b8a31483df0e6b3` explicitly authorizes Gate B COC design to proceed in parallel with Gate A architecture closure. Later lines in that same document still say Gate B/C remain BLOCKED. The intended vector must be normalized:
+- Gate A: PARTIAL PASS / OPEN — remaining architecture specifications and cross-owner decisions.
+- Gate B design activity: AUTHORIZED TO PROCEED.
+- Gate B design acceptance: OPEN pending COC-REV-001..008 and exact Owner decisions.
+- Gate B implementation: NOT RUN.
+- Gate C implementation fault-injection: DEFERRED_TO_ENGINEERING_PHASE.
+- JF-10 P0: OPEN; production activation NOT AUTHORIZED.
+
