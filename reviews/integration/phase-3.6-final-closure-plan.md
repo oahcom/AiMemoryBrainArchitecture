@@ -174,3 +174,18 @@ The following technical owner confirmations are now recorded and must be reflect
 A updated issue #3 (comment `6919370891`) and issue #6 (comment `6919372132`) with exact readbacks and remaining decisions. Applied Contract Frozen remains NO. G6 remains PARTIAL/BLOCKED; G7 remains NOT RUN.
 
 These are owner technical decisions, not external governance approvals or runtime evidence. They do not authorize G5, G7, G9 or G10 closure.
+
+
+## 11. DE-S executable linearization progress and G3 boundary
+
+A has recorded the Storage-branch JF-10 logical reference state machine and unittest source, plus D/E Owner mapping artifacts, in the closure tracking ledger. The model covers the protocol's logical single-domain, identity, recovery, receipt, visibility and D fence-ordering invariants. A local semantic replay of 12 deterministic assertions passed; the committed unittest suite has not yet been executed by repository CI.
+
+This is an executable reference model, not the production JF-10 implementation. It does not prove durable prepared-XID behavior, real I sequencer/receipt semantics, shared serializable D/Storage database transactions, HA/failover/restore or production reader/bypass behavior. Therefore:
+
+- Logical reference model: IMPLEMENTED.
+- Production implementation and G3: BLOCKED / NOT VERIFIED.
+- JF10-01..17 production conformance: NOT RUN.
+- JF-10 P0: OPEN.
+- Runtime repository, engineering owner and database/coordinator deployment selection: still required via issue #7.
+
+Do not promote G3 based on this model or reduce Phase 3.6 exit criteria without authorized governance approval.
