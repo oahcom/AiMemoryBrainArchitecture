@@ -310,3 +310,21 @@ D35-01 through D35-07 are DECIDED semantic contracts; D35-08 Storage/Consistency
 ProducerRegistrationSequence / ProducerRegistrationHighWater and ProducerRegistryVersion are separate D ledger types. They are not CanonicalCommitCursor or ForgetFenceGeneration. E stores each unchanged and does not compare across namespaces.
 
 The five operations explicitly requested in the Session E task are mapped in §1; this addendum supplies the four supporting operations required by D's current normative contract. CR-P1-01 and INT-P0-03 remain OPEN.
+
+
+
+---
+## 9.7 OPEN item precision — D semantic contract now specified
+
+This section supersedes the earlier §5/§9.3/§9.5 wording to the extent it implies D's operation-level semantic inputs, outputs, idempotency, error outcomes or linearization points are still unspecified.
+
+D's current normative file 03-memory-brain/forget-fence-operation-and-publication-gate.md specifies all nine semantic operations and their typed inputs/outputs, idempotency, error vocabulary and linearization points. D decision log §7 records D35-01 through D35-07 as DECIDED semantic contracts. In particular, RegisterProducerWork and InstallForgetFence share one linearizable order; fence installation captures ProducerRegistryVersion and ProducerRegistrationHighWater; CaptureProducerRegistrationHighWater verifies the immutable cutoff; PublishDerivedIfFenceCurrent is linearized with visibility; ResolveProducerWork and ReconcileForgetBarrier define recovery/reconciliation.
+
+Accordingly:
+- Any prior E OPEN item framed as “D has not defined operation inputs/outputs/errors/high-water/race ordering” is **SUPERSEDED**.
+- Remaining OPEN: callable API/transport schemas and wire error mapping; I/H/B authenticated identity and PermissionEpoch binding; I/A reconciliation of global producer/recipient inventory with D's local registry; exact E recompile child/re-admission identity; named Storage/Consistency owner and tested transaction/CAS/hidden-prepare implementation; executable conformance.
+- D35-08 is OPEN because Storage/Consistency ownership is unassigned and realization is unvalidated.
+- D35-09 is OPEN for E/I/H/B integration and global inventory coordination.
+- D35-10 is NOT RUN; design tables are not test results.
+
+No D semantic decision is changed by this E update. CR-P1-01 and INT-P0-03 remain OPEN.
