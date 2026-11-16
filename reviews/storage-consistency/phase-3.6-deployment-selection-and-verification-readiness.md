@@ -532,3 +532,23 @@ Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED pending Gate A and CO
 
 
 Protocol clarification: §13 now pins the COCCommitReceipt proof contents, separates COC/I/D/Storage/C authority namespaces, and scopes RPO 0 to the stated three-voter crash-fault model (one voter unavailable). Correlated majority loss or Byzantine/operator compromise remains outside that guarantee and requires externally anchored restore or RESTORE_FENCED.
+
+
+## 25. Deep prepared-XID PITR atomicity campaign — bounded CI PASS (2026-11-17)
+
+The Storage PITR atomicity probe now has a complete successful run:
+- Workflow: `.github/workflows/jf10-postgres-pitr-atomicity.yml`, Blob `a055d311c324d09eb6ebf4054247761116795eb7`.
+- Probe: `reviews/storage-consistency/postgres_probe/jf10_postgres_pitr_atomicity_probe.py`, Blob `63506807be82b3203e7e682b0772452621c92558`.
+- Tested source commit: `d026add5cfaec0d395537e8763317cdbd8255398`.
+- Workflow run `43958775001`, job `133620265141`, SUCCESS; [raw run](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43958775001).
+- Current Storage branch HEAD at this addendum: `fe7debe55da71e655eecfc46f25ec49eae43404a`; current probe/workflow blobs are byte-identical to the tested run's blobs.
+
+The log records target LSN/timeline/required WAL/archive confirmation for all three recovery points: prepared `0/5004710` on timeline 1 / `000000010000000000000005`; committed `0/6000000` / `000000010000000000000006`; rolled back `0/6000110` / `000000010000000000000006`. All three target segments are explicitly observed archived.
+
+Assertions passed: pointer-only and receipt-only reader rejection; exact prepared-XID locks retained; prepared state private after PITR; same-XID COMMIT/ROLLBACK after restore; committed pointer+receipt atomic visibility; rollback no pointer/no receipt; missing/corrupt/incomplete exact target-WAL negative cases; no writable or authoritative service on failed recovery.
+
+The negative logs contain concrete PostgreSQL failures for the deliberately damaged target segment (missing archive file, wrong-size/truncated archive segment, and invalid WAL magic number / recovery target not reached). The test also checks that failed recovery does not expose a writable primary; if a listener is queryable it must report recovery mode and transaction_read_only=on.
+
+**Scope restriction:** this is an isolated PostgreSQL 18.7 CI fixture, not production COC/I/D integration. The authoritative-reader view, pointer/receipt tables and prepared transactions are synthetic probe objects. It does not establish COC participant bridge implementation, authenticated PreparedParticipantReceipt, I owner-final-gate or CommitAuthorizationReceipt consumption, D lineage/fence serialization, external high-water restore quarantine, production archive custody, or deployment readiness.
+
+This success supersedes the prior PITR atomicity CI failure entries for this exact probe revision only. Gate A remains PARTIAL PASS / OPEN; Gate B architecture specification is PUBLISHED / EXACT OWNER REVIEW PENDING / NOT PASSED; Gate C remains deferred to engineering-phase integration and fault injection; JF-10 P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
