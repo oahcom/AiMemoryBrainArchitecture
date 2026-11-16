@@ -259,3 +259,18 @@ The run proved that the prepared WAL was synchronously replayed, publication rem
 **Gate A remains PARTIAL PASS / OPEN.** PostgreSQL intentionally hides pg_prepared_xacts during hot-standby recovery; recovery of the prepared transaction is inspected and resolved only after promotion completes. The dossier records this behavior and exact evidence.
 
 Still open: rollback-after-promotion, backup/restore and point-in-time recovery, control-ledger replay before serving restored data, real host/zone/storage failure semantics, actual Canonical Authority deployment, production failover fencing/routing, human on-call/operator designation and RPO/RTO. The CI promotion command is not a production HA manager. Gate B and C remain blocked; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+## 14. Gate A — rollback-after-promotion PASS (2026-11-17)
+
+Storage extended the two-node PostgreSQL 18.7 failover probe to prepare two independent XIDs before primary loss, then resolve one by COMMIT PREPARED and the other by ROLLBACK PREPARED after standby promotion.
+
+- Probe Blob: cbe1f317479145dbf1467e426b0c0737a6ec054c
+- Workflow Blob: f3c05f90c6065458b49879def10dce672685c850
+- Successful run: 43908746695
+- Run commit: b59c0842dba86b581ded4d9519c4289b6a699fde
+- Job ID: 133444572245
+
+Both prepared XIDs were synchronously replayed to the standby. After primary SIGKILL and promotion, both exact XIDs were recoverable; both locks remained held. The promoted standby committed one participant (pointer + receipt visible together) and rolled back the other (neither visible).
+
+**This closes the rollback-after-promotion subtest for the pinned CI profile. Gate A remains PARTIAL PASS / OPEN** because backup/restore + PITR, Forget-control-ledger reconciliation before restored reads, real host/zone/storage durability, production failover fencing/routing, actual Canonical Authority deployment and named human operator/RPO/RTO remain open. Gate B/C remain blocked; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
