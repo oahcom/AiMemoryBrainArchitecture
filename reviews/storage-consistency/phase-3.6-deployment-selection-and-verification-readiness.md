@@ -335,3 +335,15 @@ Storage added and executed the PostgreSQL 18.7 negative-path probe with a requir
 This is a PASS for the fail-closed UNKNOWN/private/lock-retention subtest, not proof that the prepared XID reached the unavailable standby. Production recovery must preserve the in-doubt XID and must not promote a stale standby or let I commit based on a PREPARE ACK that was never returned. The cleanup-only `synchronous_commit=local` setting is not a production recommendation.
 
 Gate A remains PARTIAL PASS / OPEN. The test does not close production fencing, split-brain prevention, actual deployment binding, or operational ownership.
+
+
+## 10. WAL-archive PITR capability — PASS for pinned CI profile (2026-11-17)
+
+A PostgreSQL 18.7 CI campaign completed physical base backup + WAL archive recovery to an explicit LSN:
+- Probe Blob: `6e7721ee8f8708357610e0bc564e015872b8263c`
+- Workflow Blob: `4c2175055ae43ccebb95f219952ec0480121e62d`
+- Run: `43927783471`; job: `133511748345`; conclusion SUCCESS.
+- Target LSN: `0/6000190`; observed replay LSN: `0/7000000`; promoted timeline: `2`.
+- Base marker and target marker were present; post-target marker was absent.
+
+This closes the WAL-archive PITR subtest for the exact pinned CI profile only. It does not establish production backup retention, off-site durability, immutable backup catalog, actual I/D Forget-control replay, RPO/RTO or cross-zone restore. Gate A remains PARTIAL PASS / OPEN.
