@@ -150,6 +150,7 @@ def main() -> None:
     psql("""CREATE TABLE jf10_publication_receipt (
         xid_name text PRIMARY KEY, artifact_id text NOT NULL, receipt text NOT NULL
     )""")
+    psql("CREATE TABLE jf10_pitr_boundary_marker (name text PRIMARY KEY)")
 
     xid_commit = "jf10-pitr-commit-" + uuid.uuid4().hex[:12]
     xid_rollback = "jf10-pitr-rollback-" + uuid.uuid4().hex[:12]
@@ -173,12 +174,15 @@ def main() -> None:
                  f"-h {PRIMARY} -U postgres -D /var/lib/postgresql/18/docker -Fp -Xs -P",
            check=True)
     psql("SELECT pg_switch_wal()")
+    psql("INSERT INTO jf10_pitr_boundary_marker VALUES ('after-backup-before-resolution')")
     prepared_lsn = scalar("SELECT pg_current_wal_lsn()")
     prepared_wal = scalar(f"SELECT pg_walfile_name('{prepared_lsn}'::pg_lsn)")
     psql(f"COMMIT PREPARED '{xid_commit}'")
+    psql("INSERT INTO jf10_pitr_boundary_marker VALUES ('after-commit-before-rollback')")
     psql("SELECT pg_switch_wal()")
     commit_lsn = scalar("SELECT pg_current_wal_lsn()")
     psql(f"ROLLBACK PREPARED '{xid_rollback}'")
+    psql("INSERT INTO jf10_pitr_boundary_marker VALUES ('after-rollback')")
     psql("SELECT pg_switch_wal()")
     rollback_lsn = scalar("SELECT pg_current_wal_lsn()")
     for _ in range(120):
