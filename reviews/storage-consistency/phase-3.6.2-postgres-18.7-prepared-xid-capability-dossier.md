@@ -97,3 +97,57 @@ wal_level=replica is a configuration prerequisite only; it is not proof of a fun
 Next Gate A work is a two-node synchronous-replication and promotion campaign on the same pinned PostgreSQL 18.7 image, followed by backup/restore and prepared-XID recovery validation. Gate A remains OPEN until those production-relevant topology and operator conditions are satisfied.
 
 Gate B persistent COC remains BLOCKED until Gate A passes. Gate C end-to-end fault injection remains BLOCKED until Gate B passes. JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED; multi-PolicyDomain atomicity remains BLOCKED.
+
+
+## 7. Two-node synchronous replication and primary-loss recovery — PASS (CI)
+
+A second physical workflow now qualifies the pinned PostgreSQL 18.7 image in a two-node primary/standby topology.
+
+Exact evidence:
+- Probe: reviews/storage-consistency/postgres_probe/jf10_postgres_sync_failover_probe.py
+- Probe Blob: 23d8ea8546932e592093c5c17cd2b52f8a294720
+- Workflow: .github/workflows/jf10-postgres-ha-capability.yml
+- Workflow Blob: f3c05f90c6065458b49879def10dce672685c850
+- Image: postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc
+- Run: 43908428220
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43908428220
+- Run head commit: 7cd416a1f80364fe7de316f19716325b6503cbfa
+- Job ID: 133443444760
+- Job conclusion: SUCCESS
+
+Exact topology/configuration:
+- One primary and one physical streaming standby on a dedicated Docker network, both using the same pinned image digest.
+- Primary: max_prepared_transactions=16, wal_level=replica, max_wal_senders=10, max_replication_slots=10, synchronous_commit=remote_apply, fsync=on, full_page_writes=on.
+- Standby application_name: jf10_standby.
+- Primary synchronous_standby_names: FIRST 1 (jf10_standby).
+- The workflow waited for pg_stat_replication to report state=streaming and sync_state=sync before preparing the participant.
+- Both nodes use separate named Docker volumes.
+
+Observed PASS markers from the raw job log:
+- SYNCHRONOUS_STANDBY=('jf10_standby', 'streaming', 'sync')
+- SYNCHRONOUS_STANDBY_PREPARED_WAL_REPLAY=PASS
+- HOT_STANDBY_PREPARED_XACT_VIEW_HIDDEN_AS_DOCUMENTED=PASS
+- PRIMARY_HARD_KILL=PASS
+- STANDBY_PROMOTION=PASS
+- PREPARED_LOCK_RETAINED_ON_127_0_0_1=PASS
+- PREPARED_XID_REPLAYED_TO_SYNC_STANDBY=PASS
+- SAME_XID_COMMIT_AFTER_PRIMARY_LOSS=PASS
+- ATOMIC_VISIBILITY_AFTER_PROMOTION=PASS
+- JF10_POSTGRESQL_18_7_SYNC_FAILOVER_CAPABILITY=PASS
+
+The exact XID was prepared on the primary only after the standby was confirmed synchronous with remote_apply. The standby replayed the prepared WAL while keeping the publication pointer and receipt private. PostgreSQL hot standby intentionally reports no pg_prepared_xacts rows during recovery; after primary hard-kill and standby promotion, the exact prepared XID was visible and resolvable. The promoted server retained the row lock. COMMIT PREPARED on the original XID exposed VisibilityPointer and PublicationReceipt together.
+
+## 8. Updated Gate A disposition
+
+**Gate A is now materially advanced: single-node crash/restart and two-node synchronous standby promotion/recovery are both physically demonstrated for the pinned PostgreSQL 18.7 CI topology. Gate A remains OPEN / PARTIAL PASS.**
+
+Still NOT VERIFIED:
+- same-XID ROLLBACK PREPARED after promotion (rollback is proven only by the single-node probe so far);
+- backup/restore and point-in-time recovery, including Forget-control-ledger replay before any restored data is served;
+- zone/host loss and persistent storage behavior outside ephemeral GitHub-hosted Docker volumes;
+- actual production Canonical Authority DB deployment, network/security profile, connection pool, failover manager and runbook;
+- named human production on-call/operator, RPO/RTO and operational ownership.
+
+The two-node workflow uses a simple CI promotion command and does not validate a production-grade fencing/STONITH system, quorum manager, split-brain prevention, DNS/connection routing, or external I sequencer decision log. No production HA approval is implied.
+
+Next Gate A action: add rollback-after-promotion and backup/restore recovery evidence, then identify the actual deployment and human operator. Gate B remains blocked until Gate A passes; Gate C remains blocked until Gate B passes.
