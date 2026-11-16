@@ -205,3 +205,15 @@ This supersedes the prior JF-10 split model of an independent I COMMIT_WON follo
 The DB must support durable prepared transactions/XIDs (or a formally equivalent recoverable participant protocol), retaining required locks across crash/restart and supporting deterministic recovery from the I coordinator log. The I sequencer must persist participant identity, immutable request digest, terminal decision, sequencer position and recovery ownership. If either side cannot guarantee this, JF-10 remains P0 blocked and protected publication remains private.
 
 Concrete DB engine/version, XA/prepared-transaction semantics, transaction timeout/lock behavior, replication/quorum, failover, backup/restore, operator runbooks and production engineering approval are NOT SELECTED / NOT VERIFIED. These require a real target environment, migration, failure injection and independent Storage engineering sign-off.
+
+## 11. COC / CGH-APPLIED-1.1 Storage boundary decision — exact amendment review
+
+Storage has published `reviews/storage-consistency/phase-3.6-coc-storage-boundary-acceptance.md`, Blob `a589d983ac145244962c22e5da3a55427aa35ff8`, commit `7b83e61c44dd4b67fa2059a3bff83d453aeaf757`.
+
+Decision: **CONFIRMED WITH CHANGES — ARCHITECTURE INTERFACE ONLY** for the exact A COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea` and CGH-APPLIED-1.1 package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819`.
+
+The COC is accepted as a logical cross-authority causal-order ledger, but it is not the per-Canonical-Memory-authority D/Storage visibility transaction and is not I's policy-domain sequencer or JF-10 2PC coordinator. Storage's one-transaction local visibility authority remains unchanged. I's owner-gate-participating JF-10 protocol remains a separate required approval; no COC append or copied receipt substitutes for I's sequencer decision or Storage's committed VisibilityPointer/PublicationReceipt.
+
+A combined COC + JF-10 + Storage visibility flow remains BLOCKED/UNKNOWN until I specifies and approves an exact bridge, C/D/Storage accept the participant and recovery semantics, and the bridge is implemented and fault-tested. Outbox remains notification only.
+
+The review explicitly does NOT designate a real operator, voter topology, DB product/version, RPO/RTO, SLO, KMS/key custody or deployment. Those remain OPEN pending actual infrastructure and accountable engineering evidence. COC-01..16, JF10-01..17 and Storage C01..C23 remain SPECIFIED / NOT RUN; production implementation NOT VERIFIED.
