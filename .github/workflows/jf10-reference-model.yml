@@ -1,0 +1,31 @@
+name: JF-10 Logical Reference Model
+
+on:
+  push:
+    branches:
+      - session-storage-consistency-forget-atomicity-2026-11-16
+    paths:
+      - "reviews/storage-consistency/reference_model/**"
+      - ".github/workflows/jf10-reference-model.yml"
+  pull_request:
+    paths:
+      - "reviews/storage-consistency/reference_model/**"
+      - ".github/workflows/jf10-reference-model.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  reference-model:
+    name: Deterministic JF-10 reference-model tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run unittest suite
+        run: python -m unittest discover -s reviews/storage-consistency/reference_model -v
