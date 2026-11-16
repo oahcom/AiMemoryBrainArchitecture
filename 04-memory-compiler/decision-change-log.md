@@ -286,3 +286,27 @@ F and G are not part of the Phase 3 D/E/H/I review's recorded branch-head set. N
 - CR-P1-02 / INT-X-01: E semantic cursor descriptions are aligned to D's per-authority global decision; A/F/G/Storage integration and executable durability/recovery validation remain outside this E-only change.
 - INT-P0-01: **ADR-BLOCKED** — B Fact/Claim approval remains absent/unverified.
 - H/I: candidate package existence is acknowledged; no cross-module contract freeze or security approval is implied.
+
+
+
+---
+## 9.6 D Phase 3.5 operation-level refinement — current
+
+The current D normative source is 03-memory-brain/forget-fence-operation-and-publication-gate.md (D branch session-d-memory-brain-2026-11-16; blob 2c5b1358ff58f99af838b741a75966ccd07ad088) and D's decision-change-log §7 (blob 1deecb7e97a35782aa48f9053398d8b3ff9b0932). This refinement supersedes any implication in §9.3 that only five D operations are defined.
+
+D's complete semantic operation set is:
+1. RegisterProducerClass
+2. RegisterProducerWork
+3. InstallForgetFence
+4. CaptureProducerRegistrationHighWater
+5. RegisterDerivedDependency
+6. PublishDerivedIfFenceCurrent
+7. CompleteProducerWork
+8. ResolveProducerWork
+9. ReconcileForgetBarrier
+
+D35-01 through D35-07 are DECIDED semantic contracts; D35-08 Storage/Consistency ownership and implementation is OPEN / owner unassigned; D35-09 E/I/H/B integration remains OPEN; D35-10 runtime fault tests are NOT RUN. D's operation contract expressly does not assert that APIs or a Storage transaction already exist.
+
+ProducerRegistrationSequence / ProducerRegistrationHighWater and ProducerRegistryVersion are separate D ledger types. They are not CanonicalCommitCursor or ForgetFenceGeneration. E stores each unchanged and does not compare across namespaces.
+
+The five operations explicitly requested in the Session E task are mapped in §1; this addendum supplies the four supporting operations required by D's current normative contract. CR-P1-01 and INT-P0-03 remain OPEN.
