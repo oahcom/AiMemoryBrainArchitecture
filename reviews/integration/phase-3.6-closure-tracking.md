@@ -1398,3 +1398,26 @@ Raw log confirmed client-observed UNKNOWN after PREPARE, COMMIT PREPARED and ROL
 This is a real PostgreSQL protocol TCP response-loss injection at the CommandComplete boundary, not merely application-level response suppression. Scope remains a single-node CI profile; no production I sequencer/COC integration, coordinator quorum durability, cross-zone network partition, production fencing or deployment readiness is inferred.
 
 Gate A remains PARTIAL PASS / OPEN because production Canonical Authority binding, real I/D control-ledger integration, production failover fencing and split-brain prevention, host/zone/cloud-storage durability, named human operator, runbook and RPO/RTO remain unverified. Gate B remains BLOCKED until full Gate A acceptance; Gate C remains BLOCKED until Gate B. JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+## 13.33 Gate A runtime binding correction — Hermes service repos discovered — 2026-11-17
+
+A's expanded repository inventory identified the private oahcom/hermes-scripts repository and its quality-gate branch (HEAD 9292ec97d572c4c56d2e4f4938c7d70ce0706afa). This supersedes the earlier statement that no relevant runtime repository was identified.
+
+Observed runtime evidence:
+- config/services.yaml declares local DKK and SSK memory HTTP endpoints on ports 9901 and 9902.
+- config/ports.yaml repeats those ports.
+- query_factstore.py calls the HTTP fact-search API; precipitate.py writes to both DKK and SSK.
+- default.yaml configures the memory-store plugin to use the DKK endpoint.
+- helper scripts episodic_memory.py, memory_md_refresh.py and memory_cleaner.py reference local SQLite files.
+- start_memory_server.sh points to an installed plugin memory_server.py outside the tracked repository and defaults to port 8901; hermes-ops.sh manages memory-server-dkk, memory-server-ssk and sister-mem services. This is an unresolved launcher/service topology mismatch.
+- The actual installed Holographic Memory Server source and its authoritative DB adapter are not in the inspected repository tree.
+- oahcom/DBInstanceManagement is a separate Django/Celery inventory app with SQLite default; no evidence connects it to Canonical Memory Authority.
+
+Full source pins and the reconciliation are in:
+- reviews/integration/phase-3.6-hermes-runtime-deployment-binding-assessment.md
+- Assessment Blob: 468fe9d1e3ba96e409c996d23ad3ce0bd96370c9
+
+**Correction to prior A inventory:** a relevant Hermes runtime repository and service-level deployment configuration do exist. However, they do not identify the live authoritative backing store, current process manager, host/zone, actual I/D control ledger, or production failover/operator profile. The authorized Desktop Commander device was OFFLINE during this run, so no live host inspection was possible.
+
+Gate A remains PARTIAL PASS / OPEN. PostgreSQL 18.7 is a capability-qualification candidate only; do not treat it as the production DB or infer that the Hermes service is PostgreSQL-backed. If the actual authoritative participant is SQLite-backed, it cannot satisfy JF-10 prepared-XID semantics without a different recoverable participant design or migration. Gate B remains BLOCKED; Gate C remains BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
