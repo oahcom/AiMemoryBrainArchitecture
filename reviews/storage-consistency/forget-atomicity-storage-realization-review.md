@@ -405,3 +405,14 @@ Required evidence per run: engine/version/configuration, isolation and replicati
 **Recommended realization:** one durable transaction/linearizable coordinator per Canonical Memory authority, with Durable Work Ledger, immutable barrier snapshot, complete dependency registration, authoritative visibility commit and transactional outbox. Use a distributed prepare/commit or equivalent only if a single transaction domain cannot cover D's fence ledger and the authoritative visibility store.
 
 **Gate:** DESIGN REVIEW / PROPOSED REALIZATION ONLY. D's semantic contract is substantially specified; Storage's physical serialization, replica/read behavior, restore safety and crash/fault conformance remain OPEN. INT-P0-03 and D-REV-P1-003 remain OPEN. No implementation, runtime or fault-injection verification is claimed.
+
+
+## 8. Phase 3.6.2 additional C-series verification cases
+
+| ID | Scenario | Required result | Evidence | Status |
+|---|---|---|---|---|
+| C21 | Offline producer/worker rejoin after fence | Original WorkItemId is resolved; latest fence is checked before dereference/lease/execute; no stale attempt publishes; unknown producer status blocks global proof | D registration/fence receipts, lease history, inventory state, reader snapshot | NOT RUN |
+| C22 | ProducerDomainInventoryEpoch changes during Forget | I seal invalidates/reopens; D local high-water remains a separate unchanged cursor; no Global Forget completion until a replacement seal and target reconciliation | old/new I epoch and seal, D barrier snapshot, completion evaluator output | NOT RUN |
+| C23 | Old Compiler task resumes after CanonicalSuppressionComplete | Current fence rejects/suppresses the task; late derivative reopens D proof; no post-fence visibility or stale completion reuse | WorkItemId/lineage, fence generation, participant/visibility trace, proof revision | NOT RUN |
+
+C01–C20 are preserved unchanged. C21–C23 are additive coverage, not replacements.
