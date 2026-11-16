@@ -178,3 +178,21 @@ ActorRef, AgentRef, AdapterRef and ProducerRef are never authentication credenti
 - **OPEN / C:** exact telemetry field profile and mandatory/optional identity fields.
 - **OPEN / D/E:** exact domain field mapping, durable producer admission interface and ActorRef/ScopeRef validation receipts.
 - **CANDIDATE / B:** the nine semantic definitions and fail-closed type separation in §9.1; this is not cross-module approval.
+
+
+## 10. Phase 3.6.2 — B decision on the pinned C/G/H Applied Contract package
+
+- Reviewed A package: `reviews/integration/phase-3.6-cgh-applied-contract-decision-package.md`
+- Exact package Blob SHA: `61d961c32138fd875069e8cbac4696bb031447c0`
+- B disposition: **APPROVE WITH ENUMERATED EXCEPTIONS — B-owned reference semantics only**.
+
+B confirms the package's use of distinct typed references and authority boundaries for PrincipalRef, IssuerRef, ActorRef, AgentRef, AdapterRef, ProducerRef, ScopeRef and EnvironmentRef; immutable ContextVersion/Delivery references remain G-owned values, while RuntimeSessionRef and CapabilityEpoch retain their H-owned identity/lifecycle. References are opaque typed selectors, not credentials, grants, permission decisions or proof of current authorization. Payload self-declaration never authenticates a Principal, Actor, Producer, Adapter, Scope or Environment. Cross-Scope and cross-Environment use requires explicit compatible relationships and current authorization; default is deny.
+
+Enumerated exceptions:
+
+1. B approves semantic meaning, namespace separation and validation order only. Exact wire discriminators, field names, canonical encoding and version negotiation remain H-owned and are not frozen by this decision.
+2. I alone approves issuer trust, Principal/Producer/Environment registration, delegation, authorization, revocation and PermissionEpoch policy. B's decision is not I approval and does not lift I's GOVERNANCE-BLOCKED state.
+3. The cross-Scope algebra, Environment bridge governance and formal registry authority/federation remain OPEN pending I/Governance decisions and authoritative registry evidence.
+4. Consumer-specific C/D/E field production, D durable admission receipts and executable negative tests remain under their respective owners; no conformance execution is claimed.
+
+**Decision consequence:** B's semantic portion of the exact A package is accepted with the exceptions above. B does not claim cross-owner schema freeze, I policy approval, runtime implementation or conformance. The prior Phase 3.6 Candidate dependent-authority items remain Candidate/Open; this decision only resolves B's semantic review of the pinned package.
