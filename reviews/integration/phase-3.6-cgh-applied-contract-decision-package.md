@@ -179,3 +179,30 @@ Stop and retain BLOCKED if any required owner has not approved; a field lacks a 
 7. A re-reads Owner decisions, records exact blob SHAs, resolves discrepancies and updates the integration finding.
 
 No Owner branch is modified by this package. No approval is implied. No branch merge is authorized.
+
+---
+
+## 14. Live Owner evidence reconciliation — 2026-11-16
+
+This addendum updates the evidence table without changing A's authority boundary or granting approval by implication.
+
+### Exact Owner readbacks
+
+| Owner | Current artifact Blob | Evidence-backed disposition | Still required |
+|---|---|---|---|
+| C | `07-agent-integration/phase-3.6-final-request-evidence-contract.md` — `45cab0f9c538fa653ac9e3ca8ddba3dee1b8383b` | C semantic portion accepted with enumerated exceptions; C/G/H freeze remains BLOCKED | Explicit C approval/rejection of this exact A package and the exact common Applied schema version |
+| G | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` — `6513932991fdbe13231b26e43440fc2c4fcbf7fa` | G semantic portion accepted with exceptions; G remains sole Applied authority; C/G/H freeze remains BLOCKED | Explicit G approval/rejection of this exact A package and exact common schema/predicate |
+| H | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` — `9845c97ac43d7888732afafe12e28850ec02add8` | H BIH technical baseline decided; H accepted exact A BIH package in issue #6 comment 6919218061 | Concrete versioned Applied/Delivery/ACK wire schema; explicit H decision on this C/G/H Applied package |
+| B | Formal typed mapping Blob `729a706860b1259115816265e847a29683c3c233` (issue #3 comment 6919299226) | B approves B-owned ActorRef/ScopeRef/EnvironmentRef semantic mapping | Consumer field-path mapping remains C/G/H; no wire approval implied |
+| I | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` — `0cbf6bb7480db873790c454817593a9b1c5548ba` | BIH technical policy design decided; I36-GOV-01..10 remain governance blocked | Explicit predicate confirmation for this exact Applied schema and external governance approvals |
+| D | Current D owner fence contract and JF-10 common protocol | D owns fence/lineage semantics; no A-package decision recorded in this package ledger | Explicit exact-version fence/order confirmation for the Applied submission boundary |
+
+### Coordination trail
+
+- Issue #3 updated with exact current refs and per-owner remaining decisions; A comment `6919370891`.
+- Issue #6 updated with C/F/G current refs and BIH consumer acceptance request; A comment `6919372132`.
+- B's formal type mapping and H's exact BIH package acceptance are separate decisions; neither freezes the C/G/H wire contract.
+
+### Current freeze disposition
+
+**Applied Contract Frozen = NO.** C and G have accepted their own semantic portions with exceptions, but neither has approved the exact common package/schema. H's exact BIH package acceptance is not a versioned Applied wire schema decision. B's typed mapping is confirmed. I/D confirmations and explicit C/G/H package decisions remain outstanding. No tests executed or implementation verified by this addendum.
