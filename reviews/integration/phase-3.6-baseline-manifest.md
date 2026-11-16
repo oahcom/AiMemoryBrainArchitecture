@@ -16,6 +16,7 @@
 5. A file absent from `main` but present on an Owner branch is an **Owner Branch Artifact**, not a missing artifact.
 6. Embedded baseline tables in older documents are historical snapshots. Where they differ from this manifest's live refs, this manifest's discovery-time refs take precedence for this baseline only. Re-query all refs before closure review.
 7. No branch was merged. No non-A-owned file was changed.
+8. The A HEAD listed in §2 is the source snapshot immediately before this manifest was published. The A-owned manifest publication commit is a separate delivery commit and is reported in the delivery evidence; it is not substituted for the pre-write source HEAD used to establish the baseline.
 
 ## 2. Live branch inventory
 
