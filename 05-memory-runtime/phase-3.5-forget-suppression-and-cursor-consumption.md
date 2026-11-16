@@ -40,6 +40,8 @@ All tokens are typed, owner-issued values. F stores and forwards each value unch
 | `AggregateRevision` | D; one aggregate | Pin exact aggregate revision when an object/aggregate is read | Only within the same aggregate identity under D semantics | Cross-aggregate order or global commit order |
 | `LifecycleEventCursor` | D; per Memory | Detect/consume lifecycle changes for the exact Memory; maintain per-Memory lifecycle projection | Only within that Memory's lifecycle stream; preserve enclosing CanonicalCommitCursor separately | Aggregate revision, index partition completeness, Forget completion |
 | `IndexWatermark` | F; one index/channel partition, with `applied_through: CanonicalCommitCursor` plus coverage/schema versions | Report contiguous canonical prefix accounted for by that exact partition; determine freshness/lag and replay resume point | F may compare same index+partition watermark's applied-through CanonicalCommitCursor using D cursor semantics; never compare watermarks across unrelated partitions as if one scalar | Target absence, cache purge, Forget suppression, Context reconciliation, global completion |
+| `ProducerRegistrationSequence` / `ProducerRegistrationHighWater` *(admission evidence, not a cursor)* | D; producer-registration ledger and per-Forget barrier in one D authority | F binds derivative-capable rebuild/backfill/replay work to the durable admission position and determines whether pre-fence work is included in the captured barrier | Only D-defined ordering/membership within the same producer-registration ledger; never compare with CanonicalCommitCursor, IndexWatermark, ForgetFenceGeneration or PermissionEpoch | Canonical commit order, derivative visibility/publication, index freshness, cache purge or global Forget completion |
+| `RegistrationReceipt` *(typed admission receipt, not a cursor)* | D; exact `ProducerWorkItemId` + canonical request digest | F must durably resolve it before enqueue, lease, canonical source dereference or execution; lost response is reconciled by stable work ID/digest | Exact receipt identity/idempotency through D's operation; no local inference from queue state | Work completion, publication success, barrier closure or Forget completion |
 | `ForgetFenceGeneration` / `ForgetFenceCursor` | D; Forget authority and exact target-set/lineage | Query whether exact target or any source ancestor is covered; bind cache/Working Set entries and invalidation records to observed fence | Only D's fence-coverage/currentness operation; opaque outside D | Commit ordering, index freshness, permission grant, physical erasure |
 | `PermissionEpoch` | I; named policy domain/issuer | Bind auth decisions and cache namespaces; revalidate resource/scope access at each boundary | Only I's same-domain epoch validation/continuity semantics | Forget fence ordering, canonical commit order, data deletion |
 | `ContextVersion` | G; per Context immutable target | Carry exact read-only target hint/activation correlation if supplied | Only G's version/base/target semantics | Canonical Memory revision, Adapter application, Forget completion |
@@ -263,7 +265,7 @@ Do not log forgotten plaintext, raw sensitive query/evidence, unauthorized IDs, 
 | I | `session-i-security-governance-2026-11-16` | `5591ad3620ec3f5d74194bd79556dcf3e25bea07` |
 | G | `session-g-memory-context` | `3d2c065be863bc1d349faaeece6f6eaa0047abae` |
 | H | `session-h-bmcp-protocol` | `1ee65928f123d92a4758b0de09bc8d6df1e46253` |
-| C | `session-c-agent-integration-2026-11-16` | `35de58ddc93c5f1e554596cdfc430cd6c392d355` |
+| C | `session-c-agent-integration-2026-11-16` | `a585307222b0169c007915c25ff8ed0da517f3e4` |
 | B | `session-b-domain-model-phase3` | `66adf6bdcf5ec69a146fe75afe20ce3b85af8448` |
 
 HEADs were read from branch-vs-main commit comparisons in this review. They are review-time snapshots, not pinned dependencies; re-read before merge/freeze.
@@ -297,7 +299,7 @@ This addendum supersedes the earlier source snapshot and OPEN descriptions only 
 - **E @ `c2f14408ba62447c11172d65b93a279fef96d175`:** F consumes E's private-staging, stable work/run/attempt identity, complete dependency registration, current auth/fence recheck, final publication gate and terminal receipt distinctions. E's detailed contract still cites an older D baseline (`30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6)); D's current operation-level contract above takes precedence. E must refresh that dependency baseline; F does not edit E-owned files.
 - **I @ `5591ad3620ec3f5d74194bd79556dcf3e25bea07`:** ProducerDomainInventoryEpoch/TargetInventorySeal/TargetId and global target/component states are I-owned. They are distinct from D ProducerRegistrationHighWater and F IndexWatermark. F supplies exact per-index/per-partition, cache and Working Set suppression/freshness evidence; I alone evaluates target confirmation, exceptions and global completion.
 - **H @ `1ee65928f123d92a4758b0de09bc8d6df1e46253`:** Adapter ACK classes remain bounded to exact authenticated Adapter instance/session/Scope/Managed Region/capability slice. SUPPRESSED, LOCAL_BUFFER_CLEARED, LOCAL_CACHE_PURGED, QUEUED_DELIVERY_CANCELLED, FAILED, UNKNOWN and UNSUPPORTED are non-equivalent. H cannot mint I TargetId or declare I Target State. The current H reprocessing contract remains CANDIDATE pending B/C/D/G/I approvals.
-- **C @ `35de58ddc93c5f1e554596cdfc430cd6c392d355`:** Full Applied requires exact final immutable request submission evidence at the trusted boundary and all required identity/context/permission/fence bindings. F does not observe or claim Applied, model attention or behavior.
+- **C @ `a585307222b0169c007915c25ff8ed0da517f3e4`:** Full Applied requires exact final immutable request submission evidence at the trusted boundary and all required identity/context/permission/fence bindings. F does not observe or claim Applied, model attention or behavior.
 - **G @ `3d2c065be863bc1d349faaeece6f6eaa0047abae`:** ContextVersion and reconciliation/delivery state remain G-owned. F output is only a candidate/recommendation envelope.
 - **B @ `66adf6bdcf5ec69a146fe75afe20ce3b85af8448`:** ActorRef/ScopeRef are typed domain references, not credentials/grants; the domain contract remains CANDIDATE pending required ADR/identity approval.
 
@@ -331,3 +333,30 @@ F emits evidence only for its own declared producer/consumer surfaces: index ID 
 ### 11.5 Verification boundary
 
 This reprocessing is static contract/document review and GitHub read-back only. No concurrent fence/revocation test, cache loss/reconnect test, index rebuild/replay test, ANN pre-filter test, performance benchmark, fault injection or production implementation validation is claimed.
+
+
+## 12. Re-review snapshot — 2026-11-16
+
+This snapshot supersedes the earlier C branch SHA recorded in §§10.1 and 11.1. The branch was re-read at the following current heads before this F documentation correction:
+
+| Owner | Branch | Re-read HEAD |
+|---|---|---|
+| A | `session-a-integration-2026-11-16` | `f18c64950a84385bd407752c7188e1bd52029a7b` |
+| B | `session-b-domain-model-phase3` | `66adf6bdcf5ec69a146fe75afe20ce3b85af8448` |
+| C | `session-c-agent-integration-2026-11-16` | `a585307222b0169c007915c25ff8ed0da517f3e4` |
+| D | `session-d-memory-brain-2026-11-16` | `da8e5882d0b238d765d00b2225b79eea45a483b1` |
+| E | `session-e-memory-compiler-2026-11-16` | `c2f14408ba62447c11172d65b93a279fef96d175` |
+| F | `session-f-memory-runtime` | `badc8b9998236c0075ab32c4ae8dc58c8c51984a` (pre-correction HEAD) |
+| G | `session-g-memory-context` | `3d2c065be863bc1d349faaeece6f6eaa0047abae` |
+| H | `session-h-bmcp-protocol` | `1ee65928f123d92a4758b0de09bc8d6df1e46253` |
+| I | `session-i-security-governance-2026-11-16` | `5591ad3620ec3f5d74194bd79556dcf3e25bea07` |
+| Storage/Consistency | `session-storage-consistency-forget-atomicity-2026-11-16` | `3a14550648f21c0bc2725dac38b29e099c2f3196` |
+| Integration baseline | `main` | `8a6414158c9c056c1638222534e1993d1bbc99d2` |
+
+The Cursor Consumer Matrix now explicitly includes D ProducerRegistrationSequence/ProducerRegistrationHighWater and RegistrationReceipt as typed producer-admission evidence, not as canonical cursors. This aligns §§5.1–5.2 and 11.2 with the matrix without changing D ownership or inventing a callable API.
+
+The Storage/Consistency branch contains a proposed realization review only; it is not an approved Storage authority or implementation evidence. D/E/Storage shared transaction/linearization and recovery remain OPEN. A's typed-cursor proposal is aligned to D's one-global-per-authority CanonicalCommitCursor decision, while Storage implementation and consumer conformance remain NOT VERIFIED.
+
+The Phase 3 D/E/H/I review on main is a historical coordination baseline at the exact main HEAD above; its Conditional Pass is not a contract-freeze or implementation sign-off. E's current detailed source contract still carries an older D source baseline and requires E-owner reconciliation; F does not edit E-owned files.
+
+**Re-review method:** branch HEAD/API metadata, source artifact fetch/read, static cross-contract comparison, F file fetch/read-back. **Not run:** runtime, concurrent, fault-injection, reconnect, rebuild/replay, ANN pre-filter, security integration or performance tests.
