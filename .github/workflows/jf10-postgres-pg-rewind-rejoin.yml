@@ -127,6 +127,11 @@ jobs:
           docker kill --signal=KILL jf10-primary
           test "$(docker inspect -f '{{.State.Running}}' jf10-primary)" = "false"
           echo "OLD_PRIMARY_HARD_FENCED=PASS"
+          if pg_isready -h 127.0.0.1 -p 5432 -U postgres -d postgres; then
+            echo "old primary endpoint still accepts connections after fence" >&2
+            exit 1
+          fi
+          echo "OLD_PRIMARY_ENDPOINT_UNREACHABLE_AFTER_FENCE=PASS"
           docker exec -u postgres jf10-standby /usr/lib/postgresql/18/bin/pg_ctl -D /var/lib/postgresql/18/docker promote
           for i in $(seq 1 90); do
             if [ "$(docker exec jf10-standby psql -U postgres -At -c 'SELECT NOT pg_is_in_recovery()')" = "t" ]; then break; fi
