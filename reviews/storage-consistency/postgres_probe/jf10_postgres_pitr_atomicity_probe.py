@@ -88,6 +88,7 @@ def start_restore(label: str, target_lsn: str, data_vol: str, wal_vol: str, port
            "-c", "fsync=on", "-c", "full_page_writes=on",
            "-c", "restore_command=cp /archive/%f %p",
            "-c", f"recovery_target_lsn={target_lsn}",
+           "-c", "recovery_target_inclusive=off",
            "-c", "recovery_target_action=promote",
            "-c", "recovery_target_timeline=latest")
     return name
