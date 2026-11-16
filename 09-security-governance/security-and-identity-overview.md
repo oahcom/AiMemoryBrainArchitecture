@@ -127,3 +127,15 @@ Current I-owned outcomes:
 
 **Open gates:** INT-P0-02 remains OPEN pending B typed-reference and H transport alignment. B Fact/Claim remains ADR-BLOCKED. INT-P0-03 remains OPEN pending D/E/Storage atomic registration/publication conformance and F/G/H implementation evidence. This document set is candidate governance policy, not implementation certification.
 
+
+
+## Phase 3.5 governance alignment
+
+The authoritative Phase 3.5 I-owned mapping is recorded in `phase-3.5-global-identity-forget-governance.md`; decision approval status is tracked in `governance-decision-register.md`.
+
+- Principal/Issuer/ProducerIdentity/AdapterIdentity are authenticated and issuer-bound; ActorRef/ScopeRef remain B-owned typed references.
+- Every protected operation revalidates current authorization at its boundary; old Context, cached ALLOW, lease or session is not a perpetual grant.
+- I Producer/Recipient Domain Inventory and its `ProducerDomainInventoryEpoch` are distinct from D's per-Forget WorkItemBarrier / ProducerRegistrationHighWater.
+- H ACKs are target/action/capability/session/Scope/managed-region bounded; UNKNOWN and UNSUPPORTED are not success.
+- Global Forget completion is a typed evidence vector spanning D/E/F/G/H, external recipients, backup/restore and physical erasure.
+- All Phase 3.5 policy decisions remain Proposed/OPEN pending their named approvers. This documentation does not certify implementation or deletion.
