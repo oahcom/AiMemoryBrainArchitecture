@@ -98,3 +98,17 @@ D accepts the candidate's intent-before-side-effect rule, exact target/source/an
 D explicitly accepts the outage-cutoff amendment: if D receives a fence request while COC is unavailable, D locally closes affected lineage admission and reports PENDING/UNKNOWN. D MUST NOT reopen admission or issue favorable clearance until that request cutoff is durably recorded in the common coordinator and reconciled against the same participant ledger. COC outage, process death, lease expiry, timeout or lost ACK cannot release an IN_DOUBT participant.
 
 Exceptions: (1) COC operator/store and durable participant registry are not designated/deployed/verified; (2) authoritative complete lineage inventory and late-discovery closure remain required; (3) D-CO/failover/restore conformance remains NOT RUN; (4) physical erasure/Global Forget completion is not implied. This decision applies only to the exact A Blob above.
+
+## D exact-version acceptance — CGH-APPLIED-1.1 recovery-batch amendment
+
+- A package Blob: `4961ffefc0f9920efb8425a9b2a7af42d8f64819`
+- Companion COC Blob: `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`
+- Profile: `CausalOrderProfile/1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within D's ForgetFence, lineage inventory and participant-barrier authority.
+
+D accepts the durable owner-local pending gate for any fence request received during COC outage; D keeps affected target/source/ancestor admission closed across restart and does not represent the local pending state as an effective fence. D accepts the single atomic recovery-cutoff batch for outage I/D requests without inferring order from local clocks. D requires enumeration of every affected pre-batch ParticipantIntentRef and inclusion of every matching participant in the complete lineage barrier before local gate release or fence effectiveness. D's own fence generation, request cutoff, effective position and lineage authority remain D-owned.
+
+D will not release an IN_DOUBT participant due to timeout, lease expiry, queue deletion, worker loss or missing ACK. Missing pre-batch intent, incomplete/late lineage, stale log prefix or owner high-water mismatch keeps D pending/UNKNOWN/RESTORE_FENCED.
+
+Exceptions: (1) complete authoritative lineage inventory and late-discovery closure remain required; (2) coordinator/operator and durable store remain undesignated/undeployed; (3) COC recovery-batch and D-CO crash/failover/restore tests remain NOT RUN; (4) this does not prove physical erasure or Global Forget completion. This decision applies only to the exact A/COC Blob pair above.
