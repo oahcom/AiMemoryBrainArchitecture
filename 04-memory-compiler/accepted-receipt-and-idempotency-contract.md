@@ -123,3 +123,70 @@ H/I/B packages are CANDIDATE; this document consumes their semantics without fre
 12. B ADR remains ADR-BLOCKED; no candidate IR auto-promotes to Canonical Claim/Fact.
 
 **Acceptance:** design contract only. Storage atomicity, D callable APIs, runtime behavior and conformance results remain unverified.
+
+
+
+---
+## Phase 3.5 — Receipt State Matrix and Recovery Refinement
+
+### 1. Independent evidence states
+
+| State/evidence | Durable fact established | Does NOT establish | Recovery owner |
+|---|---|---|---|
+| Accepted / AcceptedReceipt | Immutable event/payload reference+digest, idempotency record and CompileIntent/outbox are durable | D ProducerWork registration, compile start, candidate output, canonical commit, dependency registration or publication | E |
+| DurableIngestion | Source bytes/reference and ingress metadata are durably recoverable under declared storage profile | Compile has started or completed | E/Storage |
+| CompileStarted | A named DerivationRunId/AttemptId began after D admission and current auth/fence checks | Candidate exists or any canonical effect occurred | E |
+| CandidateProduced | A named candidate/staged artifact and provenance checkpoint exist privately | Runtime visibility, canonical commit, dependency completeness or publication | E |
+| CanonicalCommit | D CanonicalCommitReceipt confirms canonical transaction commit with D-issued CanonicalCommitCursor | Derived artifact publication, index application or Forget completion | D |
+| DerivedDependencyRegistered | D dependency inventory durably records exact artifact/source edges | Artifact is visible or publication gate passed | D / designated inventory owner |
+| DerivedArtifactPublished | Final gate and atomic visibility transition have durable PublicationReceipt | Canonical commit, F index watermark, G ContextVersion or global Forget completion | D/Storage ownership OPEN; E reconciles |
+
+Accepted is a custody/receipt assertion only. It must never be described as compiled, saved to memory, committed or published.
+
+### 2. Receipt and idempotency identity
+
+- AcceptedReceiptId is immutable for one accepted logical submission.
+- CallerIdempotencyKey is scoped by authenticated issuer + Principal + ProducerIdentity + security domain + validated Scope binding + operation family. Exact canonical ScopeRef encoding remains B/I/H OPEN.
+- SemanticRequestDigest binds immutable payload bytes/digest, event/schema family, authenticated producer binding, validated scope/security domain and semantic source/environment identity. It excludes retry count, transport attempt, timestamp of retry and trace-only metadata.
+- CompileIntentId and ProducerWorkItemId are persisted and returned/recovered with the original receipt. A retry does not mint a new logical work ID.
+- AttemptId is new for each execution attempt; DerivationRunId is new for each distinct recompile/run lineage.
+- Receipt lookup must be authorization-checked; one Principal/Scope must not learn another submitter's receipt existence or payload metadata.
+
+### 3. Duplicate submission and replay matrix
+
+| Condition | Required result | Side effects |
+|---|---|---|
+| First valid key + digest | Commit one AcceptedReceipt/Event/CompileIntent | One logical submission |
+| Duplicate key + same semantic digest | Return original AcceptedReceiptId, EventRef, CompileIntentId, ProducerWorkItemId and current state | No duplicate event, intent or D registration |
+| Duplicate key + different semantic digest | Idempotency conflict; original record unchanged | No new compile or canonical effect |
+| Duplicate arrives while receipt commit outcome unknown | Resolve by same key/digest; do not create a second key | Hold dispatch until resolution |
+| Duplicate after compilation started/completed | Return original receipt plus current evidence references/status | Do not implicitly rerun compile |
+| Explicit recompile | New DerivationRunId, current authorization/fence checks, linked to original source and intent; D work-registration shape remains OPEN | New run only; no new AcceptedReceipt |
+| Replay after Forget | Policy-safe suppress/reject; do not reconstruct payload or derivative; keep audit metadata non-reconstructive | No visibility or resurrection |
+| Receipt tombstone retained after payload expiry/Forget | Return only policy-safe non-content status if authorized | Never recreate Event bytes or compile intent |
+
+### 4. Lost acknowledgement and crash recovery
+
+| Lost/ambiguous boundary | Recovery key | Mandatory behavior |
+|---|---|---|
+| Accepted transaction ACK | authenticated idempotency namespace + semantic digest | Query existing receipt; do not duplicate acceptance |
+| D RegisterProducerWork ACK | ProducerWorkItemId + request digest | No enqueue/lease/run until D lookup returns durable accepted receipt or definitive rejection |
+| Compile start/outbox ACK | CompileIntentId + outbox event ID | At-least-once replay; preserve same logical work identity |
+| Dependency registration ACK | DependencyRegistrationId + request digest | Keep artifact private; query/resume same registration |
+| Publication ACK | PublicationOperationId + request digest | Keep artifact private until committed PublicationReceipt is found |
+| D CanonicalCommit ACK | stable canonical operation/idempotency key + digest | Query D and record original CanonicalCommitReceipt/Cursor; never issue a new semantic commit |
+| CompleteProducerWork ACK | ProducerWorkItemId + terminal request digest | Barrier remains unresolved locally until D confirms terminal acknowledgement |
+
+A process crash at any boundary must recover from durable intent + stable operation key. Timeouts and lost ACKs are UNKNOWN, never success. No recovery path changes the source lineage, idempotency namespace or fence applicability.
+
+### 5. Cursor namespace reaffirmation
+
+E persists the D-issued CanonicalCommitCursor unchanged as one global sequence per Canonical Memory authority. AggregateRevision remains independently scoped per aggregate; LifecycleEventCursor remains per Memory lifecycle stream; IndexWatermark remains F-owned per index/channel partition; ForgetFenceGeneration remains a D fencing namespace; PermissionEpoch remains I authorization freshness. No numeric comparison, coercion or cursor substitution is permitted across these namespaces.
+
+### 6. OPEN receipt decisions
+
+- OPEN-REC-01: Storage transaction/WAL durability, replication and crash-recovery profile for AcceptedReceipt + payload ref + idempotency row + CompileIntent/outbox.
+- OPEN-REC-02: canonical semantic digest algorithm/canonicalization version and B/H typed identity/scope serialization.
+- OPEN-REC-03: idempotency/tombstone retention horizon and post-Forget disclosure-safe response policy (I-owned).
+- OPEN-REC-04: exact D lookup operations/error codes for producer registration, dependency registration, publication and terminal completion.
+- OPEN-REC-05: recompile registration shape (child work item vs new registered item) remains D-owned.
