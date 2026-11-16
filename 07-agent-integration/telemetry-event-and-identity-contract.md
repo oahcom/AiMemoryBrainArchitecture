@@ -305,3 +305,72 @@ All telemetry, including signed Agent reports and tool outputs, is untrusted inp
 - Unauthorized, ambiguous or stale identity/scope/permission is rejected or quarantined.
 - Telemetry acceptance is not represented as canonical commit, indexing or verified truth.
 - Memory derived from telemetry remains untrusted data and cannot acquire instruction or tool authority.
+
+## Phase 3 targeted remediation — identity, scope, environment and temporal binding
+
+### 14. Complete logical identity tuple
+
+This is C's semantic consumption profile, not a BMCP schema. H owns wire expression; I owns authentication and authorization policy; B owns ActorRef/ScopeRef domain meaning.
+
+| Attribute | Meaning | Trust and validation |
+|---|---|---|
+| Authenticated Principal | Issuer-bound caller identity | H exposes authenticated transport evidence; I decides issuer trust and authorization |
+| Issuer | Identity authority/federation | Must be authenticated under I policy; payload issuer is only a claim |
+| Agent Identity | Registered Agent identity | Bound by H/I to authenticated producer registration; payload Agent ID is not proof |
+| Adapter Identity | Registered Adapter and instance | Bound to authenticated transport, audience and capability; self-report is not proof |
+| Agent Instance | Concrete execution instance | Bound to Agent identity and runtime session |
+| Runtime Session | Runtime session identity/lifecycle | Bound to Agent Instance and Adapter session |
+| Task Identity | Task/workflow correlation | Producer-scoped; never a principal or grant |
+| Environment Identity | World/tenant/project/save-file/simulation namespace | Mandatory for environment-dependent signals; no cross-environment reuse without explicit authorized mapping |
+| ActorRef | Typed actor/principal reference | B defines type; accepted only after authenticated resolution and I authorization |
+| ScopeRef | Typed ownership/applicability reference | B defines type; reference is not a grant |
+| Permission Epoch | Authorization policy epoch | I owns semantics/issuance; carry as opaque typed token, never compare numerically to other epochs |
+| Timestamp / Ordering | occurred/observed/recorded times, source sequence, stream epoch, clock quality | Preserve source and Brain time separately |
+| Telemetry Source | Agent, Adapter, Environment Adapter, Tool, User, External or Brain-derived | Bind reporter identity and source kind separately |
+| Provenance / Trust Level | Origin, transformation lineage, evidence and assertion quality | Preserve source chain; producer self-label cannot elevate trust |
+
+### 15. Three identity layers
+
+C MUST preserve three values:
+1. Transport-authenticated identity: Principal/issuer and authenticated Adapter/Agent binding established at H/I boundary.
+2. Payload identity claims: Agent ID, Adapter ID, Producer ID, ActorRef, ScopeRef, Environment ID, task and session assertions. These remain untrusted until validated.
+3. Brain-resolved canonical identity: normalized Principal/ActorRef/ProducerIdentity/ScopeRef association plus current authorization decision and Permission Epoch.
+
+Mismatch between transport identity and payload claims MUST be rejected or quarantined. Never silently select the convenient value. An unresolved identity is not a low-confidence canonical identity.
+
+B typed-reference semantics are CANDIDATE. I Principal/ActorRef and Permission Epoch policy is CANDIDATE. H envelope identity fields are CANDIDATE pending B/I/C agreement. No public schema or global identity contract is frozen here.
+
+### 16. Telemetry class binding and authorization
+
+| Telemetry | Required binding | Validation |
+|---|---|---|
+| Task State | Principal, Agent, instance, session, task, Scope, Permission Epoch, source sequence | Validate task ownership/session; task ID grants nothing |
+| Intent | Task binding, source, Scope, Environment where relevant, time | Prospective report only; ingest permission required |
+| Plan Summary | Intent binding plus plan ID/revision/provenance | Data-only; never proof of execution |
+| Active Entities | Agent/session/task, Environment, Scope, entity refs and provenance | Resolve each ref within authorized Scope/Environment |
+| Tool Call / Pending Action | Agent/session/task, tool/call ID, Environment, Scope, lifecycle state | Invocation record does not prove effect or tool authorization |
+| Observation | Authenticated reporter, source identity, Environment, Scope, observed time, method/evidence | Reporter is not necessarily observed actor; evidence independently authorized |
+| Outcome | Source, linked action/task, Environment, Scope, status/evidence | Agent-reported remains reported, not independently verified |
+| Uncertainty | Source, related signals, Scope/Environment, time and limitation | Preserve unknown/conflict; do not coerce |
+| Risk Signal | Reporter, taxonomy version, affected resource/Scope/Environment, time | Informs review; does not itself accept risk or grant authority |
+| Environment Delta | Environment, base state, resulting state/observation, source sequence, Scope | Reject missing/mismatched base or unauthorized Environment |
+
+Protected ingress validates current permission at the relevant boundary. Unknown issuer, unresolved Scope, stale Permission Epoch, environment mismatch or security-relevant sequence gap fails closed. C does not define I's authorization algorithm.
+
+### 17. Temporal ordering
+
+A logical record SHOULD carry producer-scoped event ID, stream ID, stream epoch, source sequence, occurred_at, observed_at, recorded_at, clock quality, and causal/correlation references. H serializes; E owns durable receipt/compilation; C defines semantics.
+
+- Duplicate with same authenticated producer namespace, stream epoch, event identity and payload digest is idempotent. Same identity with different digest is a conflict and is quarantined.
+- Out-of-order records preserve source sequence and causal links. Consumers may buffer within a bounded policy window or process as late, but cannot rewrite source order or infer causality from timestamps alone.
+- Late records preserve original occurred/observed time and late arrival/recorded time. They cannot silently overwrite newer state.
+- Gaps make stream completeness unknown; reconcile where supported. Do not claim complete history across a gap.
+- Corrections/retractions append a new revision referencing prior event and source. They are not physical deletion and require current authorization/Forget checks.
+- Clock skew preserves uncertainty; Brain recorded time remains distinct.
+- Environment switch requires a new Environment Identity or explicit authorized mapping.
+
+Invalid identity, Scope, permission, environment, integrity or ordering telemetry is rejected or quarantined and MUST NOT enter ordinary E compilation, D canonical commit, F retrieval or G Context assembly. Release requires fresh authorization and explicit validation.
+
+### 18. Compiler and canonicalization guardrail
+
+C telemetry is source material, not canonical Memory. E's normal ingestion, extraction, normalization, evidence/provenance and producer enforcement remain mandatory. D alone controls Canonical Memory commit/lifecycle and ForgetFence. Authentication proves source identity, not truth. No Agent-authenticated Intent, Plan Summary, Pending Action, Tool Call, Observation or self-reported Outcome may be promoted to verified fact solely due to authentication.
