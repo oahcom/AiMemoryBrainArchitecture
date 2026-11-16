@@ -271,3 +271,23 @@ Global Forget remains a separate evidence vector: D fence/barrier, E derived pub
 - Contract Freeze / implementation certification: **NOT AUTHORIZED by this I document**.
 
 No unapproved policy in this document is effective. No implementation behavior, test pass, global Forget completion or physical erasure is claimed.
+
+
+## Phase 3.6.2 — I review of the pinned C/G/H Applied Contract package
+
+- Reviewed A package: `reviews/integration/phase-3.6-cgh-applied-contract-decision-package.md`
+- Exact package Blob SHA: `61d961c32138fd875069e8cbac4696bb031447c0`
+- I disposition: **CANDIDATE / NO APPROVAL — authorization governance remains BLOCKED**.
+
+I confirms the required security predicate at the semantic level: the authenticated Principal/Issuer and validated delegation must resolve to an operation-bound ActorRef; typed ScopeRef/EnvironmentRef must be resolved before policy evaluation; the applicable I decision and PermissionEpoch must be current at the protected final boundary. PermissionEpoch is an opaque I-owned namespace, independent of D ForgetFenceGeneration, G ContextVersion and H CapabilityEpoch. A stale, missing, gapped, unknown or unverifiable decision is deny/indeterminate; payload identity claims, a valid message signature, ScopeRef possession or a stale ALLOW are not authorization.
+
+I cannot approve the package or freeze PermissionEpoch policy on the current evidence. The following remain explicit blockers:
+
+1. Issuer trust, Principal/Producer/Environment registry admission, federation and delegation authority lack the required formal I governance approval.
+2. PermissionEpoch partition/domain, issuer, monotonicity/lease or freshness protocol, fan-out, cache invalidation and exact revocation effective point are not yet an approved operational policy.
+3. Cross-Scope and cross-Environment grant algebra and exception authority remain GOVERNANCE-BLOCKED.
+4. The final-submit and final-visibility predicates need an authoritative I decision receipt whose currentness is provable at the same protected boundary; wall-clock timestamps or an uncoordinated cached decision are insufficient.
+5. Global Forget inventory/seal and exception policy remain separate from PermissionEpoch and are not approved by this Applied package review.
+6. I36 negative, revocation-race and cross-scope conformance cases remain **SPECIFIED / NOT RUN**; no deployed policy service, epoch store, signed governance approval or reproducible evidence is supplied.
+
+**Decision consequence:** I confirms the fail-closed semantic requirements but explicitly withholds approval. This addendum must not be interpreted as authorization to freeze I policy, accept an Applied event under a stale decision, or close global Forget. A must keep the I predicate finding **BLOCKED / GOVERNANCE-APPROVAL REQUIRED** until the named approvals and executable evidence exist.
