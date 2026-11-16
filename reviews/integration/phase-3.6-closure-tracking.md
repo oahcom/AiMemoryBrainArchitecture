@@ -342,3 +342,8 @@ A remains integration coordinator only. These owner decisions and issue requests
 - I JF-10 single-policy-domain acceptance remains the separate disposition Blob `b7b0287cde3922434a560fca90051cc5b418d987`, with multi-domain atomicity BLOCKED and JF-10 P0 OPEN.
 
 These decisions improve technical cross-owner acceptance evidence but do not close governance, implementation, runtime test or Applied schema freeze gates.
+
+
+## G3 implementation location escalation
+
+A opened issue #7: [Identify authoritative runtime implementation repository and accountable engineering owner](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/7). It requests the canonical implementation repository/branch, accountable engineering owners, build/CI commands, deployed topology, architecture-to-code traceability and a formal statement on whether implementation is in another repository or deferred. G3 remains BLOCKED until the project authority supplies this information. No runtime implementation was fabricated in this architecture repository.
