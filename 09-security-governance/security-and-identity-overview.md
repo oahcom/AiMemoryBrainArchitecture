@@ -109,3 +109,21 @@ All external input, model output, retrieved text, evidence, labels, provenance d
 Before implementation sign-off, owners must supply conformance evidence for the matrix in `threat-model-and-adversarial-test-plan.md`, plus storage/backup recovery evidence. Architecture documents are candidate specifications, not proof that deployed code enforces them.
 
 I does not implement local D/E/F/G Forget mechanisms, does not define H wire serialization, does not control Agent tool authorization, and cannot promise external LLM-provider internal physical erasure. Risk acceptance is governed in `audit-and-exception-governance.md`.
+
+---
+
+## Phase 3 targeted remediation status — 2026-11-16
+
+I has added the candidate governance contract `global-forget-target-inventory-and-completion-evidence.md` and refined the existing Forget, identity, scope/revocation and audit/exception policies.
+
+Current I-owned outcomes:
+- ProducerDomainInventoryEpoch is explicitly separated from D's ProducerRegistrationHighWater / per-Forget WorkItemBarrier; no numeric comparison or substitution is permitted.
+- Target Inventory Seal, stable TargetId, target coverage, seal invalidation/reopening and target evidence binding are specified.
+- Global Completion Evidence Vector separates immediate suppression, producer barrier, derived cleanup, runtime/context/adapter suppression, external copies, backup/restore and physical erasure.
+- All seven H ACK classes are mapped to bounded target actions. Offline, UNKNOWN and UNSUPPORTED remain Unknown by default.
+- PermissionEpoch, ForgetFenceGeneration, IndexWatermark, ContextVersion and AdapterCapabilityEpoch remain separate typed namespaces.
+- PolicyException requires target/scope binding, appropriate independent approver, rationale, expiry, risk owner, compensating controls and audit evidence. Expiry reopens the operation.
+- Twelve I-FGT test scenarios are specified; none are claimed executed.
+
+**Open gates:** INT-P0-02 remains OPEN pending B typed-reference and H transport alignment. B Fact/Claim remains ADR-BLOCKED. INT-P0-03 remains OPEN pending D/E/Storage atomic registration/publication conformance and F/G/H implementation evidence. This document set is candidate governance policy, not implementation certification.
+
