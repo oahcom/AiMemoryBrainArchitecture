@@ -78,3 +78,19 @@ No executable test environment, implementation build, command, fixture run, logs
 - No branch is merged by this record.
 - Fact/Claim ADR-001 remains independently ADR-BLOCKED and is not affected by this identity baseline.
 - This file records B-owned domain status only; it cannot sign for C/D/E/F/G/H/Storage/A or governance authorities.
+
+
+## 7. Owner-side consumer acceptance status refresh — 2026-11-16
+
+The §4 OPEN table is the original discovery snapshot and is superseded for current design-acceptance status by the following verified Owner artifacts. BIH36-JD-01..17 remain unchanged.
+
+| Consumer | Owner acceptance artifact | Blob SHA | Current design-acceptance state |
+|---|---|---|---|
+| D | `03-memory-brain/phase-3.6-bih-identity-consumer-acceptance.md` on `session-d-memory-brain-2026-11-16` | `184423d2d8191a12f2d4a869bc63f5e7fafaf96a` | DESIGN-ACCEPTED |
+| E | `04-memory-compiler/phase-3.6-bih-identity-consumer-acceptance.md` on `session-e-memory-compiler-2026-11-16` | `6f4100618695fcf971560fb784f7887a72798c96` | DESIGN-ACCEPTED |
+| H | `08-bmcp-protocol/phase-3.6-bih-identity-trust-consumer-acceptance.md` on `session-h-bmcp-protocol` | `ccbac2d30234df9b910565a7326d100d11a6494e` | DESIGN-ACCEPTED |
+| Storage | `reviews/storage-consistency/phase-3.6-bih-identity-consumer-acceptance.md` on `session-storage-consistency-forget-atomicity-2026-11-16` | `ec8e49d0d11c72d37ad0c291611a96a1122ba6f5` | DESIGN-ACCEPTED |
+
+Still OPEN: C, F and G. A is registrar only, not a consumer approver. The four accepted records are design-level owner evidence; none establishes executable implementation, runtime conformance or test PASS. I36 governance approvals remain GOVERNANCE-BLOCKED. JF-10 remains P0 OPEN; the I owner-gate ordering correction is recorded on I's Owner branch.
+
+This status refresh is an evidence reconciliation only. It does not revise B domain semantics or BIH36-JD-01..17, sign for any consumer, or close G6/G7/G10.
