@@ -2,7 +2,7 @@
 
 - Decision authority: user-delegated DE-S Joint Architect (ChatGPT acting across D, E and Storage)
 - Date: 2026-11-16
-- Status: **ARCHITECTURE DECIDED / IMPLEMENTATION NOT VERIFIED**
+- Status: **JOINT ARCHITECTURE DECISION RECORDED / IMPLEMENTATION NOT VERIFIED**
 - Branch: `session-e-memory-compiler-2026-11-16`
 - Scope: E-owned producer lifecycle, attempts, leases, derivations, dependency registration and publication enforcement.
 
