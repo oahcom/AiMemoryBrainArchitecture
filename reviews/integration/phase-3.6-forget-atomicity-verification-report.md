@@ -27,9 +27,9 @@ Discovery queried owner branches directly and fetched each branch HEAD and recur
 
 | Owner | Branch | HEAD at report preparation | Source artifacts read |
 |---|---|---|---|
-| D | `session-d-memory-brain-2026-11-16` | `6b89f6612c84c55c4c06bb305d9b2fc36956234e` | D canonical Forget contract; operation/publication gate; joint decision; D defect-closure addendum |
-| E | `session-e-memory-compiler-2026-11-16` | `4b5d22aa172290f7047e41644d0490be62b11110` | Producer admission/derived registration; E36 conformance suite; joint decision; E defect-closure addendum |
-| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `798d8325049bba09b2661e185366508f707dd5fb` | Storage realization review; joint atomicity decision; Storage defect closure; two-round review; deployment selection record |
+| D | `session-d-memory-brain-2026-11-16` | `2fb9d4aa07abbe7a6709dea4c99ec6363b0e627a` | D canonical Forget contract; operation/publication gate; joint decision; D defect-closure addendum |
+| E | `session-e-memory-compiler-2026-11-16` | `29f66cafaa1e51df72ef75df4da2f08f83724034` | Producer admission/derived registration; E36 conformance suite; joint decision; E defect-closure addendum |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `476fa2502cf58c57bc1d6385fa73376963201079` | Storage realization review; joint atomicity decision; Storage defect closure; two-round review; deployment selection record |
 | I (external dependency only) | `session-i-security-governance-2026-11-16` | `8d1ddadb6af70a7c387105d20ca8f2f6de80c5fb` | Producer inventory/completion evidence; Phase 3.6 trust/authorization/revocation; Principal/Actor/authorization; retention/backup/erasure; I six-dimension review |
 | A (integration evidence only) | `session-a-integration-2026-11-16` | `9c3dafb97b97aee50a8b61fe60836ed0a8e92fe3` | Phase 3.6 baseline manifest; cross-module conformance plan; executable closure plan; second-stage gate review; CFG evidence joint report |
 | C (test context only) | `session-c-agent-integration-2026-11-16` | `3b6c1d9a5d648f61daa04f5874d887f33475f098` | Adapter conformance cases; C conformance matrix; Phase 3.6 final-request evidence |
@@ -110,10 +110,10 @@ The latest I branch technical baseline defines:
 | Dependency | DE-S engineering consumer contract | I governance state | Disposition |
 |---|---|---|---|
 | Authoritative Producer Inventory source | D/E/Storage consume only authenticated I registry/seal evidence; never infer completeness from D work high-water | Registry/system of record and approval evidence not confirmed | BLOCKED |
-| ProducerClass / ProducerIdentity complete registration | No admission for unverified identity; D ProducerClass registry and I ProducerDomain inventory remain distinct | Candidate fields exist; cross-owner authenticated identity approval remains blocked | BLOCKED |
+| ProducerClass / ProducerIdentity complete registration | No admission for unverified identity; D ProducerClass registry and I ProducerDomain inventory remain distinct | BIH36-JD-06 records the technical ProducerRef/workload identity binding; global inventory completeness and governance approval remain blocked | BLOCKED |
 | Inventory epoch/seal | Final barrier/publication/completion bind current seal and epoch; epoch change invalidates proof | Candidate semantics exist; no signed/approved seal evidence | BLOCKED |
 | Join/leave/change rules | Any relevant producer/recipient/capability/scope/owner/issuer/backup route change forces reconciliation | Candidate lifecycle specified; governance approval absent | BLOCKED |
-| Unknown producer default | Reject/quarantine/Unknown; no auto-registration or NotApplicable by omission | Candidate policy says fail closed; formal approval absent | BLOCKED |
+| Unknown producer default | Reject/quarantine/Unknown; no auto-registration or NotApplicable by omission | I technical baseline records DENY/QUARANTINE for unknown or unregistered producer; formal governance activation and complete inventory proof remain absent | BLOCKED |
 | Global Forget coverage | D high-water proves concrete admitted work only; I inventory proves closed-world producer/recipient domain only | Completion contract candidate; no approved coverage inventory | BLOCKED |
 | PermissionEpoch final commit | Storage/E gate consumes I single-use CommitAuthorizationReceipt in same I policy-domain sequencer as revocation; no offline lease/cached ALLOW | Technical receipt/sequencer semantics now specified; governance approval blocked; crash-atomic coupling to owner VisibilityPointer/PublicationReceipt is not fully specified (JF-10) | BLOCKED |
 | Unsupported/offline targets | Unknown/Pending; no implicit success; exception must be exact, approved, unexpired | I36-GOV-07/08 governance-blocked | BLOCKED |
