@@ -174,3 +174,30 @@ Enforce maximum message size, bounded decompression, queue count/bytes, per-Prin
 - H Forget/Reconnect blob: `695909360782987781e259187041618f495f1c8c`
 - Historical H branch baseline in Phase 3 review: `fcc5103399b4c322e52d642cae5a2414969399a7` (not asserted current).
 - No protocol, cryptographic, SDK, fault-injection or performance tests executed.
+
+
+## 14. Refresh Addendum — TAR-AI-001 branch revalidation (2026-11-17)
+
+This addendum refreshes the source snapshot and corrects the upstream-report inventory. It supplements, and does not silently rewrite, the original review findings or verdict. The source branch HEAD below is the exact commit resolved from the owner branch during this refresh; the listed design Blob is the exact file re-read at that ref.
+
+| Item | Exact branch / commit or Blob |
+|---|---|
+| TAB-001 v0.1 | main blob `7b6f2d139217dbe13ab3a3af31bfbff525f20e71` |
+| TAR-AI-001 v1.0 | main blob `5a813edeccf7190d66dfd71a96ca581c48f8a4cb` |
+| Phase 3 D/E/H/I contract review | main blob `edaccb802e0425f2d47bd4b613fab4dfde107144` |
+| B current branch / technology report | `session-b-domain-model-phase3` @ `310f305575d6f406e80d5d6ebf951bcd9e79e35f`; report blob `fd3e5723b81de10bed806896e4be71ceb7a1669b` |
+| I current branch / technology report | `session-i-security-governance-2026-11-16` @ `b4bffb45ba6a64770274a5888b00918fe68ed00f`; report blob `592baa4653e91287678a1e0926119ca94780bc08` |
+| D current branch / technology report | `session-d-memory-brain-2026-11-16` @ `ce20502aabb58bc524c23af1350e1638f47caa49`; report blob `0f43c8d633f0027a064ca920af0176ada8035287` |
+| E current branch / technology report | `session-e-memory-compiler-2026-11-16` @ `0d77d0ad6e564873127c53d7dd02edca09e822e1`; report blob `6a83d67ccabdded20d4d4ebf28b9fbfa7d8f8cc3` |
+
+**Upstream report status correction:** B, I, D and E TAR-AI-001 technology reports are present at the paths/Blob SHAs above. Their earlier absence in the original report's branch audit is superseded by this refreshed inventory. Presence does not imply acceptance of their recommendations or closure of their blocking findings. In particular, B Fact/Claim remains ADR-BLOCKED; D/E/Storage publication linearization remains implementation-blocking; I's global Forget and JF-10 deployment/security evidence remain unverified.
+
+**Evidence classification:** this is a branch-aware static document review. No new production runtime, transport, SDK, cryptographic, security, performance, tokenizer, crash-recovery, or cross-owner integration test was executed by this refresh. Any model/reference tests already present in owner branches are not represented as executed here unless accompanied by an actual run result and exact run artifact.
+
+### H-specific refreshed findings
+
+- Refreshed H source: `session-h-bmcp-protocol` @ `9c33237ecc4801a63d62d1c56184f3d48c53f65f`; identity-binding consumer conformance status blob `8afb914731a34d8ab44331f54f1f39bfd8ec37ce`.
+- BMCP envelope keeps protocol version, payload schema version, ContextVersion, PermissionEpoch, ForgetFenceGeneration and Adapter CapabilityEpoch in separate typed namespaces. Principal/ActorRef/ScopeRef and epochs are opaque owner-issued references; authenticated transport identity is not inferred from payload claims.
+- Delivery ACK semantics must preserve Prepared/Delivered/Applied/Rejected/Expired/Superseded/Unknown. Timeout, process death and offline state remain Unknown until reconciled; retry retains logical delivery/idempotency identity and cannot revive superseded or fenced Context.
+- Full Applied must bind G ContextVersion/Delivery, C's exact final InferenceRequest and submission evidence, Adapter identity/capability epoch, I PermissionEpoch and D Forget fence. Tier 2/3 cannot claim Full Applied. H's current identity-binding status records H36 NOT RUN, consumer acceptance OPEN and governance approval blocked.
+- JSON/JCS and HTTP/IPC/gRPC remain candidates absent normative IDL, parser/signature/channel-binding tests and SDK interoperability evidence. Do not freeze schema from documentation-derived JSON Schema alone.
