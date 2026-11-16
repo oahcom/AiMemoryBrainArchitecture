@@ -132,3 +132,24 @@ Until then: **TEST DESIGN COMPLETE / EXECUTABLE HARNESS NOT PRESENT / ALL CASES 
 - [ ] Independent D/E/I/Storage evidence review complete
 - [ ] A accepts exact evidence bundle
 - [ ] No unresolved UNKNOWN/IN_DOUBT participant or missing evidence
+
+
+## 9. Executable reference-model implementation tranche — scope boundary
+
+### Repository and implementation-location finding
+
+The three Owner copies of the JF-10 common protocol currently read back to the same Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`. The Storage executable conformance plan is Blob `634b856a878234bac186c55b2937344392f5d5ff` and explicitly says **EXECUTABLE HARNESS NOT PRESENT / ALL CASES NOT RUN**. The repository README on main says this is an architecture-definition repository and implementation is not started by design. Organization repository discovery found only `AiMemoryBrainArchitecture`; no separate runtime implementation repository was identified.
+
+### Work that can proceed without fabricating production claims
+
+Create an executable, deterministic **JF-10 reference state-machine model** under the Storage-owned branch. It may validate logical ordering, stable identity, single-domain rejection, same-XID recovery rules, fail-closed IN_DOUBT behavior and the atomic publication invariant in a test model. It is explicitly not a production implementation and cannot prove database prepared-transaction durability, HA/failover, storage isolation, or real I sequencer integration.
+
+### Production implementation still requires
+
+- authoritative runtime repository and engineering owner;
+- selected canonical database/coordinator deployment and verified prepared-XID support;
+- I-owned sequencer API and durable receipt implementation;
+- D/E/Storage runtime module mapping;
+- production-equivalent crash/recovery, failover and restore tests.
+
+The reference model is a development aid only. It must not change JF-10 P0, G3, or test-execution status.
