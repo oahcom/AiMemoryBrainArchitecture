@@ -472,3 +472,129 @@ This H decision applies only to A package Blob `d4eef4aecf94f922f7933c1e1fec14a6
 H accepts the recovery-batch semantics as transportable evidence: durable I/D owner-local pending-gate references, the COC recovery-cutoff batch identity/position/digest, the enumerated pre-batch ParticipantIntentRef set, I-specific reconciliation outcomes, D-specific lineage/barrier reconciliation outcomes, owner high-water attestations and the final gate-reopen eligibility result. H preserves I/D owner-issued evidence as opaque references and does not infer or synthesize either authority's decision. No local clock order is elevated to a causal position.
 
 Exceptions: (1) A's 1.1 package does not yet freeze exact wire field names, message requiredness and canonicalization for every recovery-batch evidence item; H must publish a schema addendum before production freeze; (2) signature/MAC suite, key custody/rotation/compromise and federation remain subject to I/Security approval; (3) schema generation/interoperability/replay/reconnect and H36-CO tests remain NOT RUN; (4) COC/operator deployment is not approved by H. This decision applies only to the exact A/COC Blob pair above and is not production schema freeze.
+
+## 12.9 H schema addendum — COC outage recovery batch (1.1.0 candidate)
+
+- Applies to A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` and companion COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`.
+- Schema: `bmcp.applied-ack/1.1.0`.
+- Status: **H-OWNED SCHEMA CANDIDATE ADDENDUM / NOT FROZEN / NOT GENERATED / NOT INTEROPERABILITY-TESTED**.
+
+This addendum resolves H's enumerated exception about the recovery-batch field mapping. It defines the transport representation only. I and D remain the sole authorities for their owner-local pending gates, I authorization terminality, D fence/lineage state and gate reopening. COC is the authority for its committed batch/log position, not for I/D owner decisions.
+
+### 12.9.1 New message families
+
+The 1.1.0 candidate adds these message families:
+
+1. `OWNER_LOCAL_PENDING_GATE` — I or D reports a durable local pending gate created while COC is unavailable.
+2. `COC_RECOVERY_CUTOFF_BATCH` — COC reports the quorum-committed recovery batch containing all owner-known I/D outage requests.
+3. `PRE_BATCH_PARTICIPANT_RECONCILIATION` — owner evidence reports reconciliation of every affected pre-batch ParticipantIntentRef.
+4. `OWNER_LOCAL_GATE_RELEASE` — I or D reports its own gate disposition after reconciliation; COC cannot issue this message as an owner decision.
+5. `COC_RESTORE_FENCED` — COC reports that restore/prefix/high-water proof is incomplete and protected admission remains blocked.
+
+All five families use the authenticated 1.1.0 common envelope and existing profile/coordinator/transaction binding. Each message is independently integrity-protected and replay/idempotency checked. H does not synthesize a missing message or owner attestation.
+
+### 12.9.2 Field definitions and requiredness
+
+**A. OWNER_LOCAL_PENDING_GATE**
+
+Required:
+- `owner_authority`: enum `I` or `D`.
+- `owner_local_pending_gate_ref`: opaque owner-issued typed reference.
+- Exactly one applicable request reference: `i_revocation_request_ref` when owner_authority=I, or `d_forget_fence_request_ref` when owner_authority=D. The other field MUST be absent.
+- `causal_order_domain_ref`: opaque registry-resolved domain reference.
+- `owner_local_gate_state`: fixed enum `PENDING_COC_CUTOFF`.
+- `owner_local_request_digest`: SHA-256 digest of the immutable owner request binding.
+- `owner_local_durable_attestation_ref`: owner-issued proof that the local pending gate is durably persisted.
+- `affected_lineage_digest`: REQUIRED for D; forbidden for I unless I's own policy schema explicitly defines a distinct typed field.
+- `owner_local_sequence`: optional opaque audit metadata only; it MUST NOT be compared with another owner's sequence, a COC position, or a wall-clock value.
+
+No COC position is required or implied because the request has not yet been quorum-recorded. A pending-gate message MUST NOT be interpreted as an effective PermissionEpoch advance or ForgetFenceGeneration.
+
+**B. COC_RECOVERY_CUTOFF_BATCH**
+
+Required:
+- `recovery_batch_ref`: COC-issued opaque batch reference.
+- `recovery_batch_digest`: SHA-256 digest over the complete canonical batch.
+- `pre_batch_log_position` and `pre_batch_log_root_digest`: exact quorum-confirmed prefix boundary before the recovery batch.
+- `recovery_cutoff_position`: quorum-committed COC position of the batch.
+- `included_i_revocation_request_refs`: canonical set of every I request received during the outage; empty set is explicit when none.
+- `included_d_fence_request_refs`: canonical set of every D request received during the outage; empty set is explicit when none.
+- `owner_request_set_digest`: SHA-256 digest over the union of both canonical request sets.
+- `i_owner_batch_attestation_ref` and `d_owner_batch_attestation_ref`: required when the corresponding owner request set is non-empty; each attests completeness of that owner's outage requests.
+- `batch_commit_proof_ref`: COC quorum-commit proof for the exact batch position and digest.
+
+The I and D request arrays are canonicalized independently by opaque reference bytes and then included in the batch digest. Their array order MUST NOT be interpreted as a temporal order between I and D. Local request sequence/time is audit metadata only. Missing owner completeness attestation, missing request, prefix mismatch or digest mismatch makes the batch invalid and leaves owner gates closed.
+
+**C. PRE_BATCH_PARTICIPANT_RECONCILIATION**
+
+Required:
+- `recovery_batch_ref` and `recovery_batch_digest`.
+- `pre_batch_participant_set_digest`: digest of the complete set of affected ParticipantIntentRefs committed before the batch cutoff.
+- `participant_reconciliation_entries`: non-empty array unless the authoritative complete set is explicitly attested empty.
+- `participant_set_completeness_attestation_ref`: COC proof of enumeration against the committed prefix plus owner high-water attestations.
+- `owner_high_water_attestations`: non-empty array containing each applicable owner authority, its opaque high-water reference and its signed completeness proof.
+
+Each `participant_reconciliation_entries[]` item requires:
+- `participant_intent_ref`;
+- `causal_order_transaction_ref`;
+- `request_digest`;
+- `i_reconciliation_state`: `COMMIT_WON`, `REVOCATION_WON`, `PENDING`, `UNKNOWN`, or `NOT_APPLICABLE`;
+- `d_reconciliation_state`: `CLEARANCE_CONFIRMED`, `FENCE_WON`, `PENDING`, `UNKNOWN`, or `NOT_APPLICABLE`;
+- `c_reconciliation_state`: `ACCEPTED`, `REJECTED`, `UNKNOWN`, or `NOT_APPLICABLE`.
+
+Conditional owner evidence:
+- If I state is COMMIT_WON or REVOCATION_WON, `i_authorization_terminal_ref` is REQUIRED and must be I-issued. If I state is PENDING/UNKNOWN, any terminal ref is forbidden unless it explicitly represents that same nonterminal state under an I-owned schema.
+- If D state is CLEARANCE_CONFIRMED or FENCE_WON, `d_lineage_coverage_ref` and the corresponding D-issued terminal/clearance reference are REQUIRED. If PENDING/UNKNOWN, no favorable clearance may be inferred.
+- If C state is ACCEPTED or REJECTED, `c_submit_outcome_ref` is REQUIRED and must be C-issued. If UNKNOWN, the participant remains IN_DOUBT and cannot be treated as safely terminal.
+- `participant_terminal_proof_ref` is REQUIRED only when all required owner outcomes are determinate and reconciled; otherwise it MUST be absent and the entry remains pending/unknown.
+
+The message MUST explicitly distinguish an empty affected participant set from a missing or unenumerated set. An absent array is invalid; use an empty array plus the completeness attestation only when the authoritative set is proven empty.
+
+**D. OWNER_LOCAL_GATE_RELEASE**
+
+Required:
+- `owner_authority`: I or D.
+- `owner_local_pending_gate_ref`.
+- `recovery_batch_ref` and `recovery_batch_digest`.
+- `participant_set_completeness_attestation_ref`.
+- `owner_high_water_attestation_ref`.
+- `owner_reconciliation_digest`.
+- `owner_gate_disposition`: `REOPENED` or `REMAINS_CLOSED`.
+- `owner_gate_release_attestation_ref`: signed by the owner identified in `owner_authority`.
+
+Only I may emit an I gate release; only D may emit a D gate release. `REOPENED` is valid only after that owner verifies all its outage requests are in the batch, all affected pre-batch participants are reconciled for its authority, and its high-water mark is monotonic. COC cannot emit or infer owner gate release. `REMAINS_CLOSED` is a fail-closed state and cannot authorize protected admission.
+
+**E. COC_RESTORE_FENCED**
+
+Required:
+- `coordinator_ref`, `restore_attempt_ref`, `last_quorum_checkpoint_ref` if one is available;
+- `observed_log_term`, `observed_log_index` and `observed_root_digest` if available;
+- `restore_fence_reason`: enum `MISSING_PREFIX`, `CHECKPOINT_STALE`, `OWNER_HIGH_WATER_MISMATCH`, `PARTICIPANT_SET_INCOMPLETE`, `DIGEST_CONFLICT`, or `OWNER_UNAVAILABLE`;
+- `restore_fence_state`: fixed enum `RESTORE_FENCED`;
+- `reconciliation_required`: boolean true.
+
+Missing observed values are explicitly null, not fabricated. This message reports a COC state only; it does not clear I/D local gates.
+
+### 12.9.3 Canonicalization, integrity and replay
+
+- All new fields are covered by the existing 1.1.0 canonical envelope, canonicalization profile identifier, payload digest and message-level integrity proof.
+- Set-valued request-reference arrays and owner high-water attestations are sorted by canonical encoded opaque reference, not by local sequence/time. Participant reconciliation entries are sorted by ParticipantIntentRef canonical encoding; their semantic order is not inferred from array position.
+- Every digest covers the schema version, message family, transaction/domain binding, all required/conditional fields and explicit empty-set states.
+- Same message identity + same canonical digest is an idempotent replay; same identity + different digest is CONFLICT and quarantined. Recovery-batch identity cannot be rebound to a different request set or pre-batch prefix.
+- Missing owner completeness proof, missing participant-set proof, unknown critical field, invalid owner signer, inconsistent conditional field, or attempted inference from local clocks is rejected.
+- H receiver sequence and message arrival order remain transport metadata only. The batch's quorum-committed COC position is the sole COC ordering position; I/D owner terminal positions remain separately authoritative.
+
+### 12.9.4 Non-claims and conformance
+
+This schema addendum does not make the 1.1.0 schema production-frozen, does not select a cryptographic suite or key custody policy, and does not prove generated schema interoperability. Signature/MAC suite, key lifecycle, federation and coordinator workload identity remain subject to I/Security approval.
+
+Required new H conformance cases (SPECIFIED / NOT RUN):
+- H-CO-17: reject pending-gate message that includes a fabricated COC position or lacks owner durable attestation.
+- H-CO-18: reject recovery batch with missing owner request, missing owner completeness attestation or mismatched pre-batch prefix/root.
+- H-CO-19: prove I/D request arrays do not establish cross-owner time order.
+- H-CO-20: reject incomplete pre-batch participant enumeration or owner high-water mismatch.
+- H-CO-21: reject owner gate release emitted by COC or wrong owner.
+- H-CO-22: preserve RESTORE_FENCED across reconnect; no gate reopen on missing owner evidence.
+- H-CO-23: enforce idempotent same-digest replay and conflict on changed request set/digest.
+
+**H disposition:** the recovery-batch field mapping exception is resolved at the H schema-candidate documentation level for this exact A package. Production freeze remains NO; generated schema, implementation interoperability, crypto governance and H-CO-17..23 remain OPEN / NOT RUN.
