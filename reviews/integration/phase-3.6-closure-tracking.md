@@ -1537,3 +1537,44 @@ Storage must reconcile its own dossier/readiness artifacts against the five succ
 - Multi-PolicyDomain: BLOCKED.
 
 This is an A integration evidence reconciliation only. It is not a Storage production-engine approval, deployment decision, or final JF-10 acceptance.
+
+
+
+## 13.38 Gate A — synchronous-standby-unavailable fail-closed CI proof PASS — 2026-11-17
+
+A independently refreshed the Storage branch and inspected the latest completed GitHub Actions run, job steps, raw job log, workflow source and probe source.
+
+Evidence:
+- Storage branch: `session-storage-consistency-forget-atomicity-2026-11-16`
+- Storage source commit: `4e4cf967d97254f1f6e8dea03f1afd1402ff0802`
+- Probe: `reviews/storage-consistency/postgres_probe/jf10_postgres_sync_unavailable_probe.py`
+- Probe Blob SHA: `78d40d0d4e46dc9f286ca3f59bb159843c1dcf26`
+- Workflow: `.github/workflows/jf10-postgres-sync-unavailable.yml`
+- Workflow Blob SHA: `32ed78aa702dfb6f45c73f94c81bd617b970976b`
+- Successful run: `43927416496`
+- Run URL: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43927416496
+- Job: `133510446871`
+- Pinned image: `postgres:18.7@sha256:2ea8630df176ad090ec92136dee850397c5af8781e4bcf2e4162593691c61bbc`
+
+Raw log confirms:
+- Effective settings: synchronous_commit=remote_apply; synchronous_standby_names=FIRST 1 (jf10_standby); fsync=on.
+- Required standby was removed and no synchronous replica remained.
+- PREPARE waited on PostgreSQL wait event IPC/SyncRep.
+- Backend termination caused client-observed PREPARE outcome UNKNOWN.
+- The local prepared XID remained IN_DOUBT; protected visibility remained absent; prepared lock remained held.
+- The same XID was rolled back after the safety assertions; no publication followed.
+- Final probe assertion: JF10_SYNC_STANDBY_UNAVAILABLE_FAIL_CLOSED=PASS.
+
+The probe's `synchronous_commit=local` setting is applied only in test cleanup after UNKNOWN/private/locked assertions, to resolve the test fixture's prepared XID while the standby remains down. It is not the protected PREPARE path under test. The workflow's diagnostic step reports the stopped standby container as unavailable after the deliberate stop; this did not fail the probe or job.
+
+**Disposition:** A2's bounded PostgreSQL 18.7 CI negative test is PASS. This does not prove production coordinator integration, I authorization ordering, production failover, or deployed quorum behavior.
+
+### A3 WAL-archive PITR — run in progress; acceptance scope remains limited
+
+At this reconciliation, run `43927416568` is still in progress on the same Storage source commit. Its workflow has completed primary setup, base backup, target/post-target WAL generation and archive wait, and has started the PITR restore. No successful run result is yet available.
+
+Source inspection shows the current PITR probe checks base/target row presence, post-target row absence, replay LSN and promoted timeline. It does not yet exercise prepared-XID/visibility state at the recovery boundary, WAL gap/corruption/incomplete-archive negative cases, or RecoveryQuarantined against a newer external I/D control-ledger high-water. Therefore, even a passing run would qualify only the narrow explicit-LSN row-state PITR profile until those required cases and the real external control-ledger integration are separately evidenced. Any test-only ledger fixture remains a fixture.
+
+The Storage readiness document remains stale at Blob `cb74f6bc36b7ba799de6082ebbfcfcf203f2be1d`; A1 owner-side reconciliation is still outstanding. A4 production fencing/deployment binding also remains open.
+
+**Gate disposition:** Gate 0 CLOSED; Gate A PARTIAL PASS / OPEN (five prior bounded CI classes plus A2 now pass; A3 pending and A1/A4 plus production binding open); Gate B BLOCKED; Gate C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
