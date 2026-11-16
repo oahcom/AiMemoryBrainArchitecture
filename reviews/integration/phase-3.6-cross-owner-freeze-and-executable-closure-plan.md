@@ -562,3 +562,12 @@ Current Owner artifact readbacks supersede prior hashes:
 - H: `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, Blob `5cbf0bb548a46671054cb22c6fab3c3d007365d4`, branch HEAD `f5ecd8e649efb578a06cedfa5a5dbd4f8c7bc84a`.
 
 These are still owner-side specifications/schema candidate, not explicit acceptance of the exact A 1.1 package. G and B exact 1.1 dispositions remain pending. Coordinator/operator deployment, Storage durability/restore acceptance and conformance remain open.
+
+
+## 13.7 Live CGH-APPLIED-1.1 owner decision checkpoint — 2026-11-16 23:07 +08
+
+The exact A successor candidate remains Blob `471c8ce86e93c036ad9a58a77d45d9daa0ab8af8`. Fresh Owner-branch readbacks confirm C/D/I have specified the causal-order mechanisms and H has a `bmcp.applied-ack/1.1.0` schema candidate, but their source artifacts still describe cross-owner acceptance as open/candidate. G's recorded approval is pinned to older CGH-APPLIED package Blob `61d961c32138fd875069e8cbac4696bb031447c0`, and B's approval is limited to typed semantic mapping; neither is an exact 1.1 package decision.
+
+A requested exact-SHA ACCEPT / ACCEPT WITH ENUMERATED EXCEPTIONS / REJECT-REVISE decisions from C/D/I/H/G/B in Issue #3 comment `6920276322`. Each decision must be committed on its own Owner branch with artifact path, Blob SHA, exceptions and commit. A must not alter Owner branches or infer acceptance from source specifications.
+
+The coordinator/operator and production durable participant registry remain unidentified/unverified. Storage's JF-10 Python reference model is in-memory and cannot satisfy this implementation gate. HA/failover/restore, deterministic cross-authority conformance and production causal proof remain NOT VERIFIED / NOT RUN. CGH-APPLIED-1.1 is therefore CANDIDATE / NOT OWNER-DECIDED / NOT FROZEN; G8 BLOCKED, G9 NOT RUN, G10 BLOCKED.
