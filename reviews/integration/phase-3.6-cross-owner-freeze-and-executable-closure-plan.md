@@ -571,3 +571,37 @@ The exact A successor candidate remains Blob `471c8ce86e93c036ad9a58a77d45d9daa0
 A requested exact-SHA ACCEPT / ACCEPT WITH ENUMERATED EXCEPTIONS / REJECT-REVISE decisions from C/D/I/H/G/B in Issue #3 comment `6920276322`. Each decision must be committed on its own Owner branch with artifact path, Blob SHA, exceptions and commit. A must not alter Owner branches or infer acceptance from source specifications.
 
 The coordinator/operator and production durable participant registry remain unidentified/unverified. Storage's JF-10 Python reference model is in-memory and cannot satisfy this implementation gate. HA/failover/restore, deterministic cross-authority conformance and production causal proof remain NOT VERIFIED / NOT RUN. CGH-APPLIED-1.1 is therefore CANDIDATE / NOT OWNER-DECIDED / NOT FROZEN; G8 BLOCKED, G9 NOT RUN, G10 BLOCKED.
+
+
+## 13.7 Causal Order Coordinator deployment and durable recovery architecture proposal
+
+A has published a concrete deployment/operations proposal:
+- Artifact: `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`
+- Commit: `a3e17f4f77d980bafab4268f8825a1cd61371d6e`
+- Blob: `3f302a333f413e6ea7d5cbf1fe06473be6228a09`
+- Branch: `session-a-integration-2026-11-16`
+
+### Proposed deployment profile
+
+- One logical Causal Order Coordinator backed by one strongly consistent append-only replicated consensus log; initial deployment target is a three-voter group across three independent failure domains, quorum two, with durable quorum commit before returning a committed position.
+- Storage/Consistency is proposed as infrastructure custodian for replication, snapshots, restore fencing, retention and SLO, but this is NOT a designation or acceptance. Storage Owner must name the actual service operator and approve the durability/recovery contract.
+- C/I/D remain semantic authorities; coordinator only orders durable request cutoffs, participant intents, owner terminal evidence, final reservations, C outcomes and terminal proofs.
+- One log is deliberately selected for v1; sharding, multi-log and multi-policy-domain atomicity remain unsupported. Missing/ambiguous causal-domain mapping fails closed.
+- Unresolved/IN_DOUBT participants never expire or disappear during compaction, failover, restore or operator action.
+- Restore from an unprovable/stale checkpoint enters RESTORE_FENCED; no new intents, reservations, barrier releases or Full Applied until reconciliation.
+- Provider ambiguity reuses the same transaction/reservation/idempotency key; no retry-as-new-operation or heuristic commit/abort.
+
+### Exact acceptance requests
+
+Storage/Consistency, C, I, D, H, G and Security/Governance must accept/revise the exact proposal and profile. Storage must specifically identify actual failure-domain placement, durability class, retention, RPO/RTO, operator, key custody interfaces and restore authority. The three-voter topology is a proposed target, not a claim about existing infrastructure.
+
+### Current gate state
+
+- Coordinator deployment architecture: **PROPOSED / A ARTIFACT COMMITTED AND READBACK VERIFIED**.
+- Named operator / actual infrastructure: **NOT DESIGNATED**.
+- Storage/Consistency durability and restore acceptance: **PENDING**.
+- C/I/D/H/G exact proposal acceptance: **PENDING**.
+- Security/key/admin governance: **PENDING**.
+- COC-01..12 and consumer race suites: **SPECIFIED / NOT RUN**.
+- Production causal proof: **NOT VERIFIED**.
+- Applied Contract Frozen: **NO**.
