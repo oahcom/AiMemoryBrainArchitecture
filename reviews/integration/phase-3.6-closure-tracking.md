@@ -232,3 +232,41 @@ This section is the current branch-ref refresh and supersedes older branch HEAD 
 **PHASE 3.6 FINAL ARCHITECTURE ACCEPTANCE: NOT ACCEPTED / FREEZE NOT AUTHORIZED.**
 
 This is not a rejection of delivered work. DE-S logical design, BIH technical baseline and C/F/G semantic contracts are preserved as completed at their respective levels. The blockers are specific external authority, same-order JF-10, consumer acceptance, common Applied version, deployment/implementation and executable conformance evidence. No branch merge or software-completion claim is made.
+
+
+---
+
+## Live DE-S / JF-10 closure update — 2026-11-16 (post I disposition)
+
+This addendum supersedes the earlier DE-S JF-10 description above where it says the I owner-gate correction is still awaiting I decision. It does not supersede the unrelated governance, inventory, deployment, implementation or test blockers.
+
+### Verified new evidence
+
+- I Owner formal disposition: `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md`, Blob `b7b0287cde3922434a560fca90051cc5b418d987`. Single-policy-domain JF-10 v2 is **ACCEPTED WITH BINDING CLARIFICATIONS**. Multi-policy-domain atomicity is **BLOCKED / NOT ACCEPTED**. JF-10 P0 remains OPEN; this is not implementation/deployment approval or governance approval.
+- D/E/Storage common JF-10 protocol was updated to consume I's disposition and independently read back on all three Owner branches with identical Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`.
+- D's protocol: `03-memory-brain/phase-3.6.2-jf10-cross-authority-recovery-protocol.md`; E's: `04-memory-compiler/phase-3.6.2-jf10-cross-authority-recovery-protocol.md`; Storage's: `reviews/storage-consistency/phase-3.6.2-jf10-cross-authority-recovery-protocol.md`.
+- Storage published `reviews/storage-consistency/phase-3.6.2-jf10-executable-conformance-plan.md`, readback Blob `634b856a878234bac186c55b2937344392f5d5ff`. It defines H01–H13 and JF10-01..17 including D/E/I boundary cases and multi-domain rejection. It is a test design, not an executable harness or run.
+- Storage joint architecture report updated; Blob `d8bdf527257a15fbc0a6f48ea1a5f4ac83807309`.
+
+### Corrected DE-S gate interpretation
+
+- G1 / DE-S logical design remains closed. Do not reopen JF-01..09 without a new evidence-backed finding.
+- JF-10 **single-domain architecture acceptance** is now complete at the I + D/E/Storage design-contract level. The former blocker “I has not decided whether the v2 owner-final-gate protocol is acceptable” is resolved.
+- G2 remains **BLOCKED**: I36-GOV approvals, effective authorization/InventorySeal authority and complete global Producer/Recipient/Backup inventory are still absent; concrete DB/coordinator deployment and named independent Storage engineering approver are still absent; multi-domain remains blocked.
+- G3 remains **BLOCKED**: no production implementation/build, durable coordinator/participant evidence, all-reader gate proof, selected DB failover/restore proof or executed D36/E36/C01–C20 tests.
+- Architecture test design is advanced, but executable harness is not evidenced. JF10-01..17, D36, E36 and C01–C23 remain NOT RUN unless a later owner run artifact proves otherwise.
+- Global Forget Completion is NOT CLAIMED.
+
+### Updated DE-S next actions
+
+1. Storage engineering leadership must name the accountable deployment decision-maker and select a concrete DB/coordinator topology. Evaluate durable prepared XID, lock retention, failover, restore, authenticated authoritative I lookup and same-XID recovery.
+2. D/E/Storage/I implementation owners map H01–H13 to actual implementation hooks and create a deterministic executable harness. Keep test design and test execution as separate statuses.
+3. D/E/Storage provide runtime evidence for their own boundaries; I implementation owner provides coordinator durability/lookup/recovery evidence.
+4. I registry/governance authorities separately resolve InventorySeal, I36-GOV-01..10 and Global Forget CEV/completion policy. Do not infer these from JF-10 architecture acceptance.
+5. A refreshes all Owner source refs and exact Blob SHAs before any G2/G3/G6/G7 gate disposition. This update does not assert a complete all-Owner HEAD refresh.
+
+### Cross-workstream distance remains
+
+- BIH: D/E/H/Storage design-level consumer acceptance exists; C/F/G consumer acceptance remains open; I36-GOV-01..10 remain GOVERNANCE-BLOCKED; I36/H36 remain NOT RUN; ADR-001 remains independently ADR-BLOCKED.
+- CFG: C/F/G semantics remain delivered; no single version-pinned C/G/H Applied contract with explicit same-version approvals; D/I/B predicate confirmations and integrated CFG-01..20 / PI-01..08 execution remain open.
+- Overall G10 and architecture freeze remain BLOCKED / NOT AUTHORIZED.
