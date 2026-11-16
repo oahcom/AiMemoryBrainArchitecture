@@ -328,3 +328,81 @@ Accordingly:
 - D35-10 is NOT RUN; design tables are not test results.
 
 No D semantic decision is changed by this E update. CR-P1-01 and INT-P0-03 remain OPEN.
+
+
+---
+
+## 10. Phase 3.5 Reprocessing — Supersession, Source Evidence and Current OPEN Register
+
+This section is the current E-side status record. Historical entries above remain for audit; conflicting statements are superseded here.
+
+### 10.1 Superseded historical statements
+
+| Historical statement | Status | Replacement |
+|---|---|---|
+| D Forget barrier/producer semantics absent | **SUPERSEDED** | D operation contract defines nine semantic operations, typed receipts, idempotency, errors and linearization |
+| D operation inputs/outputs/errors/high-water/race order unspecified | **SUPERSEDED** | D35-01..07 semantic decisions; only callable transport/API and tested Storage realization remain OPEN |
+| H/I branches absent | **SUPERSEDED** | Current H/I candidate packages read at HEADs below; existence is not approval |
+| D CanonicalCommitCursor scope undecided or partitioned | **SUPERSEDED** | D decides one global sequence per Canonical Memory authority |
+| Local E fence precheck/cached token sufficient for publication | **SUPERSEDED** | D PublishDerivedIfFenceCurrent linearizes with visibility and serializes against Fence installation |
+| Lease expiry, queue deletion, worker loss or DLQ parking terminalizes work | **SUPERSEDED** | D barrier stays open until durable terminal receipt and reconciliation |
+| Accepted implies compilation, canonical commit or publication | **SUPERSEDED** | AcceptedReceipt is durable ingress/compile-intent evidence only |
+| E allocates CanonicalCommitCursor or IndexWatermark | **SUPERSEDED** | D owns CanonicalCommitCursor; F owns IndexWatermark; E stores owner-issued values unchanged |
+| E may freeze Fact/Claim mapping | **SUPERSEDED / ADR-BLOCKED** | B Fact/Claim ADR remains ADR-BLOCKED; CandidateProposition/ExtractionIR stay pre-canonical |
+
+### 10.2 Exact branch HEAD inventory read before this E commit
+
+| Owner | Branch | Full HEAD SHA | Read/status |
+|---|---|---|---|
+| Main | `main` | `8a6414158c9c056c1638222534e1993d1bbc99d2` | Required D/E/H/I review read |
+| A | `session-a-integration-2026-11-16` | `f18c64950a84385bd407752c7188e1bd52029a7b` | Read-only coordination input |
+| B | `session-b-domain-model-phase3` | `66adf6bdcf5ec69a146fe75afe20ce3b85af8448` | Fact/Claim ADR remains ADR-BLOCKED |
+| C | `session-c-agent-integration-2026-11-16` | `35de58ddc93c5f1e554596cdfc430cd6c392d355` | Not modified; no C decision inferred |
+| D | `session-d-memory-brain-2026-11-16` | `da8e5882d0b238d765d00b2225b79eea45a483b1` | Current Forget operations, cursor and decision log read |
+| E parent | `session-e-memory-compiler-2026-11-16` | `13a720724fcfae84f4c4abe36fbc44dd2820445d` | Parent HEAD for this E-only update |
+| F | `session-f-memory-runtime` | `8b16a3621cbe2be4badac1799822b64824532b25` | Not modified; no F implementation claim |
+| G | `session-g-memory-context` | `3d2c065be863bc1d349faaeece6f6eaa0047abae` | Not modified; no G implementation claim |
+| H | `session-h-bmcp-protocol` | `a830628ec0f15a960277412c67c2197565ca1dc4` | Forget/Revocation/Offline Reconnect read; CANDIDATE |
+| I | `session-i-security-governance-2026-11-16` | `5591ad3620ec3f5d74194bd79556dcf3e25bea07` | Global inventory/identity/Forget policy read; CANDIDATE |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `ec0e29d9b6e6e32728116514376214503aeb2434` | Proposed realization review; implementation OPEN |
+
+### 10.3 Required source files read
+
+- Cross-module review: `reviews/integration/phase-3-defghi-cross-module-contract-review.md` on main.
+- D: `03-memory-brain/forget-fence-operation-and-publication-gate.md`, `commit-cursor-semantics.md`, `decision-change-log.md`.
+- E: all five compiler design files, plus compiler-state, Forget/derived-registration, Accepted receipt/idempotency and this change log.
+- H: `08-bmcp-protocol/forget-revocation-and-reconnect.md` (CANDIDATE).
+- I: `09-security-governance/phase-3.5-global-identity-forget-governance.md`, `forget-retention-backup-and-erasure-policy.md`, `principal-actor-and-authorization-contract.md` (CANDIDATE).
+
+### 10.4 OPEN register
+
+| OPEN ID | Exact unresolved issue | Owner(s) |
+|---|---|---|
+| OPEN-API-01 | Callable D API/transport schemas, authenticated binding, serialization/versioning and semantic error-to-wire mapping | D/H/B/I |
+| OPEN-STORAGE-01 | Named Storage owner and validated transaction/CAS/serializable/hidden-prepare realization; fence-to-visibility shared linearization, durability, failover, replica/read and restore guarantees | Storage + D/E |
+| OPEN-I-AUTH-01 | Current I PermissionEpoch and authorization decision freshness/revocation proof at final publication boundary | I + D/E |
+| OPEN-REGISTRY-GLOBAL-01 | Reconcile I ProducerDomainInventoryEpoch and A/module inventory with D ProducerRegistryVersion/ProducerRegistrationHighWater; prove global closed-world completeness | I/A + D/E/H |
+| OPEN-RECOMPILE-01 | Explicit linked child/re-admission identity for recompile and barrier accounting | D/E |
+| OPEN-REC-01 | AcceptedReceipt + payload ref + idempotency + CompileIntent/outbox transaction/WAL durability and crash-recovery profile | E + Storage |
+| OPEN-REC-02 | Canonical semantic digest/canonicalization profile and B/H typed identity/Scope serialization | E + B/H/I |
+| OPEN-REC-03 | Idempotency/tombstone retention horizon and disclosure-safe post-Forget receipt lookup | I + E/Storage |
+| OPEN-TEST-01 | Executable race/fault fixtures, crash/failover injection, actual outputs and owner-reviewed evidence | D/E/Storage + consumers |
+
+D operation-level semantic fields, result receipts, idempotency, error outcomes and linearization are DECIDED; this OPEN register must not be read as reopening those decisions. D35-08 Storage ownership/realization, D35-09 cross-owner integration and D35-10 runtime fault tests remain OPEN/NOT RUN.
+
+### 10.5 Cross-owner disposition and non-claims
+
+- D producer barrier and operation semantics are DECIDED; D/E/Storage implementation and executable conformance remain OPEN.
+- CanonicalCommitCursor is one global sequence per Canonical Memory authority. AggregateRevision is per aggregate; LifecycleEventCursor per Memory; IndexWatermark per F index/channel partition; ForgetFenceGeneration is D's separate fencing namespace; PermissionEpoch is I-owned; ContextVersion is G-owned. No cross-namespace comparison or substitution.
+- H/I packages exist but remain CANDIDATE. H ACK is target/action/capability/session bounded; I owns global inventory, target aggregation and completion.
+- B Fact/Claim remains ADR-BLOCKED; no canonical schema/API/wire field is approved by this E update.
+- CR-P1-01 and INT-P0-03 remain OPEN/BLOCKING. Documentation does not prove atomic D/E/Storage enforcement or global Forget completion.
+- All fault/race cases are NOT RUN. No implementation, runtime, storage, security or performance test is claimed PASS.
+- Only E-owned files under `04-memory-compiler/` are modified; all other module files are read-only inputs.
+
+### 10.6 Files changed by this reprocessing
+
+- `04-memory-compiler/compiler-state-and-producer-admission.md` — lifecycle, stable identities, lease/retry/DLQ/replay/recompile/terminal semantics and corrected D decision status.
+- `04-memory-compiler/forget-fence-and-derived-registration.md` — five requested D operations + four supporting operations, visibility boundary, exact OPEN items and expanded fault matrix.
+- `04-memory-compiler/accepted-receipt-and-idempotency-contract.md` — independent receipt state matrix, duplicate submission and recovery/replay semantics.
+- `04-memory-compiler/decision-change-log.md` — supersession ledger, branch HEAD inventory, source read evidence and OPEN register.
