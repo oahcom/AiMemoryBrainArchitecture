@@ -44,7 +44,10 @@ jobs:
             -c full_page_writes=on \
             -c wal_level=replica
           for i in $(seq 1 60); do
-            if docker exec jf10-postgres pg_isready -U postgres -d postgres; then
+            # The postgres image briefly starts a temporary initdb server.
+            # Do not accept that first pg_isready result as the durable server.
+            ready_count="$(docker logs jf10-postgres 2>&1 | grep -c 'database system is ready to accept connections' || true)"
+            if [ "$ready_count" -ge 2 ] && docker exec jf10-postgres pg_isready -U postgres -d postgres; then
               exit 0
             fi
             sleep 1
