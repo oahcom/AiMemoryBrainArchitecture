@@ -763,3 +763,41 @@ The latest complete PostgreSQL 18.7 capability regression is 7/7 SUCCESS:
 | Old-primary pg_rewind/rejoin | `43959079930` | `133621314973` |
 
 These are pinned PostgreSQL 18.7 CI capability results and isolated fixtures, not production application-path or real I/D/COC service integration. Gate A remains PARTIAL PASS / OPEN pending architecture specification and exact owner acceptance; JF-10 P0 remains OPEN; production activation is NOT AUTHORIZED.
+
+## 29. Storage Owner decision — COC infrastructure custody accepted at architecture level only (2026-11-17)
+
+Storage has reviewed A's COC architecture proposal Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, including its three-voter quorum, linearizable append/read, durable checkpoints, restore fencing, owner-local outage gates and JF-10 participant bridge.
+
+**Decision: ACCEPT WITH CONDITIONS at the architecture/infrastructure-custody level. PRODUCTION DEPLOYMENT AND OPERATIONAL ACCEPTANCE NOT GRANTED.**
+
+### Accepted architecture profile
+
+1. One logical COC service backed by a crash-fault-tolerant replicated state machine, initially three voters across three genuinely independent failure domains with a two-voter quorum.
+2. Raft or an equivalently proven consensus protocol; no multi-leader, last-write-wins, async-replica acknowledgement or node-local commit semantics.
+3. A quorum-durable append-only log with immutable `CoordinatorEpoch`, `CoordinatorIndex`, `EntryDigest`, `PreviousEntryDigest` and `CausalOrderDomainRef`.
+4. Linearizable append and read. A committed position is returned only after quorum durable commit. Stale follower reads cannot authorize admission, finalization, barrier release or owner completion.
+5. Quorum-certified snapshots/checkpoints, full-prefix continuity verification, rollback protection and `RESTORE_FENCED` on missing/stale checkpoint, digest gap or owner high-water mismatch.
+6. Unresolved/IN_DOUBT participants, request cutoffs and owner high-water evidence are retained; no TTL, heuristic cleanup or operator force-clear.
+7. COC remains a neutral causal-order and participant-accounting/observation service. It is not I's policy-domain sequencer, does not decide JF-10 COMMIT/ABORT, does not mint owner proofs, and does not override C/I/D authority. Storage's Canonical Authority DB participant remains the sole executor of the exact XID and local atomic visibility transaction.
+
+### Storage custody accepted
+
+At the architecture level, Storage accepts responsibility to design and technically steward the COC persistence/replication substrate, checkpoint/snapshot lifecycle, restore-fencing mechanism, retention controls, observability and SLO proposal. This does not transfer ownership of COC record semantics, C/I/D decisions, H wire contracts, or G Applied semantics to Storage.
+
+### Conditions before concrete product selection or deployment
+
+No consensus product/vendor, cloud, region/AZ, disk durability class, KMS/HSM, network topology, backup medium, retention period, data residency, RPO/RTO, SLO, budget or named human operator/on-call is designated by this acceptance. These cannot be invented from a CI container or architecture diagram.
+
+Before production activation, Storage requires:
+- named three independent failure domains and a tested quorum-loss/leader-election/fencing profile;
+- concrete consensus implementation/version/build, config and durable-media profile;
+- workload identity, owner signing-key verification, encryption/key custody, key rotation and compromise response approved by Security/I;
+- two-person admin controls for restore, checkpoint rollback exception, key compromise and conflict reconciliation;
+- independently retained quorum-certified checkpoints plus complete log archive, freshness proof and rollback protection;
+- executable node/leader loss, minority partition, lost append/read ACK, duplicate append, stale follower, node replacement, snapshot restore, missing-prefix, corruption and total-cluster restore tests;
+- COC outage local pending gates and atomic recovery-cutoff batch conformance (COC-13..16) plus JF-10 bridge cases (JF10-COC-01..10);
+- signed retention, data residency, RPO/RTO, SLO, runbook, monitoring, escalation and named operator/on-call acceptance.
+
+**No production custodian/on-call commitment is implied.** The current repository contains no deployed COC service, no selected consensus implementation, no actual failure-domain map and no operational owner designation. The architecture-level Storage acceptance must not be read as deployment readiness.
+
+Gate A remains PARTIAL PASS / OPEN; Gate B remains BLOCKED until Gate A and COC deployment evidence pass; Gate C remains BLOCKED; JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
