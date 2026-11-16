@@ -201,3 +201,8 @@ This addendum refreshes the source snapshot and corrects the upstream-report inv
 - Delivery ACK semantics must preserve Prepared/Delivered/Applied/Rejected/Expired/Superseded/Unknown. Timeout, process death and offline state remain Unknown until reconciled; retry retains logical delivery/idempotency identity and cannot revive superseded or fenced Context.
 - Full Applied must bind G ContextVersion/Delivery, C's exact final InferenceRequest and submission evidence, Adapter identity/capability epoch, I PermissionEpoch and D Forget fence. Tier 2/3 cannot claim Full Applied. H's current identity-binding status records H36 NOT RUN, consumer acceptance OPEN and governance approval blocked.
 - JSON/JCS and HTTP/IPC/gRPC remain candidates absent normative IDL, parser/signature/channel-binding tests and SDK interoperability evidence. Do not freeze schema from documentation-derived JSON Schema alone.
+## 8. Reassessment — JF-10 bridge JSON Schema validation (2026-11-17)
+
+H added Draft 2020-12 schema validation and five message-family fixtures. Evidence: `08-bmcp-protocol/phase-3.6-jf10-bridge-schema-validation-evidence.md`, commit `599cdac6895e7bd37edde877d6996b7d0215f164`; schema Blob `a8a945cc3623c2907003b93625e3c79742150944`; tests Blob `74bc4286abe1489ce29c2446c6fc22445784609f`; CI run `43962364955`, job `133632849768`, commit `eab7ee9d196437daed31d5853570b7fb7acf08b6`.
+
+**Result: 11/11 schema/fixture tests PASS.** This closes the basic schema-structure validation gap for the candidate. It does not close canonical JSON duplicate-key handling, signature/channel binding, issuer trust, unknown critical extensions, generated IDL/SDK interoperability, cross-message owner consistency or runtime transport tests. Schema remains candidate/not frozen.
