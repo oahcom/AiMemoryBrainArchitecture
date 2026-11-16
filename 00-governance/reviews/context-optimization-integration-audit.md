@@ -177,8 +177,8 @@ Hard gates include zero unauthorized disclosure, zero false completeness, no epi
 |---|---|---|---|
 | CO-P0-01 | No joined Forget linearization proof for Archive + Context derivatives | D/F/G/I/H/C/Storage | Cannot prove no post-fence disclosure or stale restore |
 | CO-P0-02 | F producer classes and G derivative inventory not accepted | D/F/G/I/E | Unregistered producer/derived artifact can escape target inventory |
-| CO-P0-03 | Archive Restore/PITR and stale fence/permission replay not proven | I/D/F/Storage | Restored bytes could be served before control-state reconciliation |
-| CO-P0-04 | JF-10 production deployment remains NOT DESIGNATED | Storage/D/E/I/A | No authoritative runtime binding/COC production path |
+| CO-P0-03 | Archive Restore/PITR and stale fence/permission replay architecture not fully specified | I/D/F/Storage | Restored bytes must remain fenced until authoritative control-state reconciliation; implementation tests are engineering-phase evidence |
+| CO-P0-04 | JF-10 COC architecture/recovery protocol not yet accepted as one exact version | A/I/D/C/H/Storage; G where Applied semantics affected | Gate B design is authorized but the Storage protocol is still PROPOSED with COC-REV-001..008 open; F/G cross-authority operations cannot freeze against an unaccepted recovery contract |
 | CO-P1-01 | F/G Recall wire/data contract not frozen | F/G/B/H/I/D | No common fields/states/errors/idempotency/compatibility |
 | CO-P1-02 | TSS epistemic/temporal/type rules not accepted by B/C/D | B/C/D/G | Context may lose constraints or upgrade epistemic status |
 | CO-P1-03 | H/C telemetry and final-request binding not accepted | C/H/G/F | Dynamic compaction economics and final request evidence lack common telemetry |
@@ -217,3 +217,11 @@ A should refresh the integration review's source pin table before any freeze. Se
 - Production readiness: **NOT AUTHORIZED**.
 
 This audit is a coordinator's synthesis of Owner-authored proposals and delegated review artifacts. It does not make F/G/B/C/D/E/H/I/Storage decisions on their behalf.
+
+
+## 12. F/G baseline proposal alignment gap
+
+The current F module baseline proposal Blob `d4756cabda3151999cbe1ddde0adb554458004a1` contains none of the new Observation Archive / ArchiveLocator / RecallSession / ReadCursor / ReadReceipt / CompletenessMetadata concepts. The current G module baseline proposal Blob `fb2eb805be385469b5ab5f25c4ef76f234feb4c2` contains none of the new TSS / ContextObservationReference / dynamic compaction / six-axis fidelity / lineage-loss ledger concepts.
+
+This is not a contradiction in an approved baseline because both files are still PROPOSED. It is a required Owner-authored baseline update before any module baseline adoption. UMR-021 tracks this; Session P does not edit F/G Owner branches.
+
