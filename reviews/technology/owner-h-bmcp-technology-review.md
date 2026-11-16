@@ -206,3 +206,10 @@ This addendum refreshes the source snapshot and corrects the upstream-report inv
 H added Draft 2020-12 schema validation and five message-family fixtures. Evidence: `08-bmcp-protocol/phase-3.6-jf10-bridge-schema-validation-evidence.md`, commit `599cdac6895e7bd37edde877d6996b7d0215f164`; schema Blob `a8a945cc3623c2907003b93625e3c79742150944`; tests Blob `74bc4286abe1489ce29c2446c6fc22445784609f`; CI run `43962364955`, job `133632849768`, commit `eab7ee9d196437daed31d5853570b7fb7acf08b6`.
 
 **Result: 11/11 schema/fixture tests PASS.** This closes the basic schema-structure validation gap for the candidate. It does not close canonical JSON duplicate-key handling, signature/channel binding, issuer trust, unknown critical extensions, generated IDL/SDK interoperability, cross-message owner consistency or runtime transport tests. Schema remains candidate/not frozen.
+## 9. Reassessment — strict JSON parser and critical-extension reference tests (2026-11-17)
+
+H extended the schema suite with a strict JSON parser reference model. Evidence: `08-bmcp-protocol/phase-3.6-jf10-strict-parser-reference-evidence.md`, commit `403207a4306938426085c706de8ce1e07d3542f3`; parser Blob `3b9b3da645448c773c95a9dcd3c57c8c109bb2da`; parser tests Blob `f9c8f44da5c4d52efe78368c54a73eaa1286c374`; CI run `43963209651`, job `133635778980`, commit `a81c5c374ad20ac702a962418b50f65c6a16bb2c`.
+
+**Result: 23/23 tests PASS** (11 JSON Schema/fixture + 12 strict-parser cases). The reference model covers duplicate keys, invalid UTF-8, non-finite values, bounded size/depth, unknown critical extension rejection and opaque preservation of non-critical extensions.
+
+Limit: this is not the production BMCP parser/transport and does not prove cryptographic signatures, channel binding, issuer trust, replay resistance, normative canonicalization, generated SDK interoperability or live owner integration. H schema remains candidate/not frozen.
