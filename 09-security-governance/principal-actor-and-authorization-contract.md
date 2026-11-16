@@ -264,3 +264,10 @@ I does not define or freeze ActorRef/ScopeRef wire or domain types. B owns their
 The Principal/Permission Mapping and Producer/Recipient inventory reconciliation are expanded in `phase-3.5-global-identity-forget-governance.md` §§2–3.
 
 Normative clarification: each protected operation is independently authorized at its own boundary using the current I policy decision and current PermissionEpoch. A previously authenticated Context, old cached ALLOW, queued-work admission decision, lease, session or accepted receipt is not a reusable grant. Revalidate before protected dereference, sensitive stage commit, dependency registration where protected, canonical commit, final publication, retrieval finalization, Context delivery, Adapter apply/reconnect, final inference submission, export, backup and restore. If current policy/epoch/revocation cannot be established, stop the protected action. B remains the authority for ActorRef/ScopeRef type semantics; H remains the transport binding authority.
+
+
+## Phase 3.6 trust-chain and revocation closure addendum
+
+The end-to-end trust-chain sequence, Issuer Trust Registry requirements, Producer/Agent/Adapter/Runtime Session binding rules, complete authorization tuple, PermissionEpoch contract, revocation race matrix, Governance Decision Register and I36-T01..T20 test specifications are maintained in `phase-3.6-principal-trust-chain-authorization-revocation.md`.
+
+This addendum does not redefine B's ActorRef/ScopeRef types or H's transport/wire schema. It consumes the currently available B/C/D/E/H branch artifacts as provisional evidence. A's Phase 3.5 closure review still records INT-P0-02 OPEN and no formal cross-owner approval. Separate Phase 3.6 B/H/C owner artifacts were not present in the inspected branch trees; therefore the Phase 3.6 mapping remains **CANDIDATE / GOVERNANCE-BLOCKED**, and no Contract Freeze or implementation conformance is claimed.
