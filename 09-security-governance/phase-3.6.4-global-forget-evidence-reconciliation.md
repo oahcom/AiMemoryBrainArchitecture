@@ -95,3 +95,8 @@ No formal approval record with approver PrincipalRef/Issuer, authority basis, ex
 7. Re-seal inventory after every relevant epoch/target change and evaluate the full CEV. Never mark Completed while any mandatory target is Unknown, Failed, Pending or unapproved PolicyException.
 
 **Final:** this reconciliation narrows the technical unknowns and records new model/CI evidence, but Global Forget remains open. No real target inventory seal, global completion, external deletion or physical erasure is claimed.
+## 9. Reference-model CI result — superseding the pre-run note (2026-11-17)
+
+The Global Forget inventory/completion logical reference model now has a successful CI run. Evidence: `phase-3.6.4-global-forget-reference-model-evidence.md`, commit `674b9496bcb866fdaf725108104ce55f6d127528`; model Blob `5233da028e409ec3f41848582dad73a923e7155b`; test Blob `091f9450adf49a2a9f9ec8a2fa4470918023f765`; run `43962873109`, job `133634616584`, commit `73a0bff13b531b5b9feaeeec1887db31d6266589`; **25/25 tests PASS**.
+
+This supersedes §5's statement that CI execution had not yet been observed. It does not change the limits in §§1–8: the model is in-memory, and no real inventory seal, production target evidence, external deletion, formal governance approval, PolicyException or physical erasure is claimed.
