@@ -559,3 +559,14 @@ The negative logs contain concrete PostgreSQL failures for the deliberately dama
 **Scope restriction:** this is an isolated PostgreSQL 18.7 CI fixture, not production COC/I/D integration. The authoritative-reader view, pointer/receipt tables and prepared transactions are synthetic probe objects. It does not establish COC participant bridge implementation, authenticated PreparedParticipantReceipt, I owner-final-gate or CommitAuthorizationReceipt consumption, D lineage/fence serialization, external high-water restore quarantine, production archive custody, or deployment readiness.
 
 This success supersedes the prior PITR atomicity CI failure entries for this exact probe revision only. Gate A remains PARTIAL PASS / OPEN; Gate B DESIGN-LEVEL ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS (not implementation/conformance PASS); Gate C remains deferred to engineering-phase integration and fault injection; JF-10 runtime P0 OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
+
+
+## 25. Exact-version Gate B acceptance boundary after prepared-GID clarification (2026-11-17)
+
+A version-boundary audit found that the exact cross-owner acceptance matrix at A commit `e5fad5b3e67662134c18e33090b08d874f161f41` pins Storage protocol Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`. Storage subsequently amended the protocol in commit `71f0c745961cff7f75ef0ba2ac7bfd6f8aeccb66` (parent `60033fc324005e3a5a26e3e1bde859378d3db9be`) by adding §14, the PostgreSQL prepared-participant identity mapping. The current branch protocol Blob is `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`.
+
+The §14 clarification distinguishes the client-preallocated `PreparedTransactionGID` from PostgreSQL's engine-assigned native XID and defines the receipt/security tuple and same-GID recovery identity. It is a material protocol clarification after the previously accepted exact Blob. Therefore prior Owner decisions remain valid for Blob `4ac63ac...` only and MUST NOT be represented as acceptance of current Blob `86ff3b...`. The new §14 requires focused exact-version review, especially H for wire/type encoding, A for integration identity, I for signed participant binding, and D/C for cross-owner tuple compatibility. No silent carry-forward or contract freeze is permitted.
+
+**Corrected Gate B status:** prior protocol revision `4ac63ac...` — DESIGN-LEVEL OWNER ACCEPTANCE COMPLETE WITH ENUMERATED EXCEPTIONS; current amended protocol revision `86ff3b...` — PUBLISHED / FOCUSED EXACT-OWNER RE-REVIEW REQUIRED / NOT YET ACCEPTED. Gate B implementation/conformance remains NOT RUN and is deferred to engineering phase.
+
+Gate A remains PARTIAL PASS / OPEN. Gate C executable distributed fault injection remains deferred to engineering phase. JF-10 runtime P0 remains OPEN; production activation NOT AUTHORIZED; Multi-PolicyDomain BLOCKED.
