@@ -50,7 +50,7 @@ jobs:
             -c fsync=on \
             -c full_page_writes=on
           for i in $(seq 1 90); do
-            if docker exec jf10-primary pg_isready -U postgres -d postgres; then
+            if docker exec jf10-primary pg_isready -h 127.0.0.1 -p 5432 -U postgres -d postgres; then
               break
             fi
             sleep 1
@@ -84,7 +84,7 @@ jobs:
             -c fsync=on \
             -c full_page_writes=on
           for i in $(seq 1 90); do
-            if docker exec jf10-standby pg_isready -U postgres -d postgres; then
+            if docker exec jf10-standby pg_isready -h 127.0.0.1 -p 5432 -U postgres -d postgres; then
               break
             fi
             sleep 1
