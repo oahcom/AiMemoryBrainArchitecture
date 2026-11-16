@@ -341,3 +341,57 @@ Until I accepts the exact revised protocol, JF-10 is **P0 OPEN / I REVIEW REQUIR
 ## I. Non-claims and status
 
 This is an architecture proposal for exact I Owner review. It is not I approval, governance activation, concrete DB deployment, implementation, test result, production readiness decision, or Global Forget Completion. D36, E36-01..20, C01..C20 and JF10-01..13 remain NOT RUN until executable implementation and fault-injection environment exist.
+
+
+## Phase 3.6.2 — I Owner disposition consumed by D/E/Storage
+
+**Disposition source:** I Owner, `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md`, Blob `b7b0287cde3922434a560fca90051cc5b418d987`.
+
+**Status correction:** I ACCEPTS the JF-10 v2 architecture for a **single I policy domain with binding clarifications**. This supersedes the earlier §6 statement that I acceptance was still pending. It does not close JF-10 P0, approve implementation, or approve governance. Multi-policy-domain atomicity remains **BLOCKED / NOT ACCEPTED**.
+
+### A. Binding single-domain contract
+
+The owner-final-gate operation MUST bind, as one immutable authorization/participant tuple:
+
+- stable PublicationOperationId and canonical RequestDigest;
+- exact owner_boundary for the Storage VisibilityPointer commit gate;
+- durable Storage participant identity, XID and participant digest;
+- CommitAuthorizationReceipt ID and decision binding;
+- policy_domain_id, PermissionEpoch, PrincipalRef, ActorRef, action, ResourceRef, purpose, audience, ScopeBindingSet digest, EnvironmentRef and DelegationChainRef;
+- applicable D ForgetOperationId/fence reference and exact D owner-predicate evidence;
+- when required by effective I policy, authoritative ProducerDomainInventoryEpoch and InventorySealReceipt identity/digest.
+
+I coordinator COMMIT is the authorization/revocation ordering record for this exact participant. It is not publication. Storage MUST forward-commit that same XID after durable COMMIT and MUST NOT publish until the local visibility transaction and matching PublicationReceipt are durably read back.
+
+### B. Receipt consumption and replay
+
+I receipt consumption MUST be atomically bound to the coordinator transaction record, participant XID/digest, operation ID/digest, owner boundary, decision ID, policy domain, PermissionEpoch and sequencer position. A same-ID/same-digest/same-boundary replay returns the same durable state. Any changed digest, XID, boundary or security tuple is a hard conflict. A receipt cannot authorize a second owner operation.
+
+### C. Terminal outcome and in-doubt behavior
+
+- `COMMIT_WON`: durable coordinator decision; Storage forward-commits the exact participant. Not a visibility claim.
+- `REVOCATION_WON`: durable revocation-first result; Storage rolls back and proves non-publication.
+- `INDETERMINATE_ABORTED`: durable non-success terminal result; Storage rolls back.
+- `UNKNOWN/IN_DOUBT`: not terminal. Keep bytes private, retain prepared participant and required locks, and block conflicting revocation progress until authoritative recovery.
+
+No heuristic commit/abort, timeout-based inference, stale-replica decision, or operator override is permitted. I's authoritative lookup must be authenticated and linearizable. Coordinator log, participant identity, receipt consumption and terminal decision must survive failover/restore without loss, duplication, reordering or reversal.
+
+### D. Explicit D/E/Storage owner consumption
+
+- **D:** D's existing Phase 3.6.2 owner acceptance in `forget-fence-operation-and-publication-gate.md` is the D disposition for fence/registration/barrier ordering. D must keep an in-doubt participant inside the open barrier; fence-first rejects prepare; participant-first retains target/lineage serialization until resolution. I COMMIT never overrides D fence semantics.
+- **E:** E remains non-terminal until it reads the matching durable Storage PublicationReceipt. Stable PublicationOperationId/RequestDigest survive retry/recovery; AttemptId/LeaseEpoch only fence execution attempts and cannot mint a new logical publication.
+- **Storage:** Storage owns prepared-XID durability/recovery and atomic VisibilityPointer + PublicationReceipt + owner outcome + receipt-consumption evidence + outbox commit. It must prove same-XID forward commit/rollback, retained locks, no heuristic outcome, and restore/failover behavior on the selected DB.
+
+These are architecture-consumption requirements, not implementation evidence. Each owner must supply runtime evidence for its own boundary.
+
+### E. Inventory and multi-domain restrictions
+
+When policy requires InventorySeal, I must validate the current authoritative epoch, seal ID and digest inside the sequenced owner-final-gate operation. A Storage-local copy/lock does not establish currentness. Until I's inventory authority, signer/verifier, epoch/seal lifecycle and conformance are approved, missing/stale/unverifiable seal evidence remains BLOCKED/UNKNOWN.
+
+Any operation spanning more than one I policy domain MUST be rejected or paused as BLOCKED/UNKNOWN. Independent per-domain COMMIT_WON decisions and best-effort aggregation are forbidden until I publishes and the owners consume a normative global all-or-none coordinator protocol.
+
+### F. Conformance and closure status
+
+JF10-01..13 plus I's added coordinator/participant/receipt/inventory/fence cases remain **SPECIFIED / NOT RUN**. Required evidence includes coordinator PREPARE and terminal log positions, participant XID traces, receipt-consumption proof, D fence/barrier trace, Storage atomic transaction proof, inventory seal version, database/runtime identity, deterministic fault injection, and independent owner review.
+
+**Overall disposition:** single-domain architecture accepted with binding clarifications; multi-domain blocked; JF-10 P0 OPEN; implementation NOT VERIFIED; software tests NOT RUN; InventorySeal and Global Forget governance OPEN; Global Forget Completion NOT CLAIMED.
