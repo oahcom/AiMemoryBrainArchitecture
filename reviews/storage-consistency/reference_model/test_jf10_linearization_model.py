@@ -7,8 +7,8 @@ import unittest
 
 from jf10_linearization_model import (
     AuthorizationReceipt, Blocked, CoordinatorModel, Decision, DPublicationGate,
-    ParticipantState, ProducerManifest, ProtocolError, StorageParticipantModel,
-    make_operation,
+    ParticipantState, ProducerManifest, ProtocolError, SimulatedCrash,
+    StorageParticipantModel, make_operation,
 )
 
 
@@ -65,6 +65,42 @@ class JF10LinearizationModelTests(unittest.TestCase):
                          ParticipantState.IN_DOUBT)
         self.assertIn(self.op.operation_id, self.gate.prepared_operations)
         self.assertFalse(self.storage.reader_can_see(self.op.operation_id))
+
+    def test_crash_before_local_commit_keeps_operation_in_doubt_and_invisible(self):
+        self.prepare_and_decide()
+        with self.assertRaises(SimulatedCrash):
+            self.storage.recover(self.op.operation_id, self.coordinator,
+                                 fault_at="before_local_commit")
+        self.assertEqual(self.op.state, ParticipantState.IN_DOUBT)
+        self.assertNotIn(self.op.operation_id, self.storage.publication_records)
+        self.assertFalse(self.storage.reader_can_see(self.op.operation_id))
+        self.assertIn(self.op.operation_id, self.gate.prepared_operations)
+        self.assertNotIn(self.receipt.receipt_id, self.storage.consumed_receipts)
+
+    def test_crash_after_local_commit_recovers_atomic_record_projection(self):
+        self.prepare_and_decide()
+        with self.assertRaises(SimulatedCrash):
+            self.storage.recover(self.op.operation_id, self.coordinator,
+                                 fault_at="after_local_commit")
+        # The commit point has happened; reader visibility follows the record.
+        self.assertTrue(self.storage.reader_can_see(self.op.operation_id))
+        self.assertIn(self.op.operation_id, self.storage.publication_records)
+        # Simulate loss of volatile/readback projections after process restart.
+        self.storage.visibility_pointers.clear()
+        self.storage.publication_receipts.clear()
+        self.storage.owner_outcomes.clear()
+        self.storage.consumed_receipts.clear()
+        self.storage.outbox.clear()
+        self.assertEqual(self.storage.recover(self.op.operation_id, self.coordinator),
+                         ParticipantState.COMMITTED)
+        self.assertEqual(self.storage.visibility_pointers[self.op.operation_id],
+                         self.op.manifest_digest)
+        self.assertEqual(self.storage.publication_receipts[self.op.operation_id],
+                         self.receipt.receipt_id)
+        self.assertEqual(self.storage.owner_outcomes[self.op.operation_id], "COMMITTED")
+        self.assertIn(self.receipt.receipt_id, self.storage.consumed_receipts)
+        self.assertIn(self.op.operation_id, self.storage.outbox)
+        self.assertNotIn(self.op.operation_id, self.gate.prepared_operations)
 
     def test_recovery_rejects_receipt_not_bound_by_coordinator(self):
         self.op.receipt = self.receipt
