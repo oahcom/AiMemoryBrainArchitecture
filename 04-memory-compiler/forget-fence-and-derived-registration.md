@@ -424,3 +424,95 @@ These do not reopen D's semantic operation fields/errors/linearization; they are
 | E-FAULT-20 | Conflicting terminal digest | Preserve original terminal record; audit conflict; no silent overwrite | NOT RUN |
 
 A PASS requires executable fixture, named engine/configuration, deterministic interleaving/crash hooks, expected and actual outputs, retained evidence and owner sign-off. This matrix is a plan, not test evidence.
+
+
+---
+
+## Phase 3.6 — Staging Visibility and Final Publish Gate
+
+**Status:** E enforcement contract defined. D operation semantics are consumed from `03-memory-brain/forget-fence-operation-and-publication-gate.md`; Storage realization is a proposed design only. Cross-owner transaction confirmation and implementation verification remain OPEN.
+
+### 1. Private staging visibility contract
+
+Candidate, CandidateProposition, ExtractionIR, normalized output, consolidation proposal, evidence/provenance checkpoint and every Staged DerivedArtifactRef/version are **PRIVATE** until the final visibility transaction commits.
+
+Private means unavailable to:
+
+- F Indexer, retrieval, search, ANN/graph/temporal projection and rebuild/backfill consumers;
+- G Context activation, membership, ordering, budget and delivery-intent consumers;
+- H/Agent delivery and any external delivery path;
+- other ProducerClass instances, other WorkItemIds and independent compiler runs;
+- public object-store listing, generic event consumers, analytics/export, cache warming and any query path not explicitly scoped to the owning E attempt.
+
+Only the same authenticated WorkItemId/AttemptId execution may read its own private staged bytes for its internal next compiler step, subject to current authorization and fence checks. A separate producer must not consume a private candidate as if it were a committed source.
+
+Staging records and blobs must be marked private/quarantined at creation. Outbox messages may announce only that private work exists; they must not carry a consumer-actionable artifact reference before publication. No indexable/public URI, public object ACL, queryable row, committed projection event or cache fill may be emitted before the final gate.
+
+### 2. Database commit versus Artifact Visible
+
+A successful write of staged bytes, metadata, dependency edges, a gate decision, or an outbox intent does **not** mean Artifact Visible.
+
+`ArtifactVisible = true` only after the authoritative visibility commit has atomically validated the current D fence, current I authorization, active producer work/attempt/lease, complete dependency registration and exact artifact/version identity, and committed the visibility marker/record. Readers and consumers must filter on that committed visibility state; storage listing, staging existence, receipt existence or an earlier gate response is insufficient.
+
+A successful atomic transaction may make the artifact visible at its commit instant. If the transaction ACK is lost, the artifact's state is UNKNOWN to E and remains non-consumable until the same PublicationOperationId resolves to the committed PublicationReceipt. An implementation must not expose an artifact based on an uncommitted prepare or ambiguous coordinator state.
+
+### 3. Final Publish Gate inputs and invariants
+
+E invokes D's semantic `PublishDerivedIfFenceCurrent` with:
+
+- stable PublicationOperationId and canonical request digest;
+- ProducerClassId + ProducerRegistryVersion;
+- stable WorkItemId + D RegistrationReceipt;
+- current AttemptId + LeaseId + lease epoch/expiry;
+- exact source EventRef(s), MemoryRef(s) and source MemoryVersionRef(s);
+- exact ScopeRef/security-domain binding;
+- complete lineage digest and all direct/transitive dependency receipt IDs;
+- DerivedArtifactRef + immutable artifact version + private staging object/version reference;
+- observed ForgetFenceCursor/FenceGeneration;
+- current I PermissionEpoch and authoritative authorization-decision reference;
+- any D CanonicalCommitReceipt/operation reference required when the same compiler operation also proposes a canonical write.
+
+D and Storage must enforce all of the following at the final serialization boundary:
+
+1. **Fence Generation Check:** validate the latest applicable ForgetFenceCursor and every source ancestor/target lineage. A stale observed generation or any fence covering an ancestor rejects or quarantines the derivative.
+2. **PermissionEpoch Check:** validate current I authorization and PermissionEpoch under I semantics. A stale/revoked/unknown decision rejects. Never numerically compare PermissionEpoch with FenceGeneration.
+3. **Producer Work Validation:** verify WorkItemId registration/digest/class, nonterminal status, current AttemptId/LeaseId/lease epoch and no superseding/expired worker. Retry does not create a new WorkItemId.
+4. **Dependency Registration Validation:** verify all required direct and transitive dependency edges are durably registered as one complete artifact/version set, with matching lineage digest, ScopeRefs and source revisions. Partial, missing, conflicting or UNKNOWN receipts reject.
+5. **Canonical Commit / Derived Artifact Commit:** if a canonical Memory mutation is part of the same logical publication, its D canonical CAS/commit receipt and the derived artifact visibility commit must be coordinated under the same serialization decision. The two evidence types remain distinct. No canonical commit receipt may be inferred from a derived publish receipt, or vice versa.
+6. **Visibility Transition:** commit the authoritative visible marker and PublicationReceipt in the same atomic transaction/linearizable commit that performs checks 1–5. No intermediate “gate approved” state may be consumed as visibility permission.
+
+The final operation must serialize with concurrent D InstallForgetFence. Exactly two outcomes are legal: publication commits first and is included in the durable pre-fence dependency/target inventory; or fence commits first and publication is rejected. If order cannot be proven, outcome is UNKNOWN and artifact remains private.
+
+### 4. Storage operation mapping and required physical boundary
+
+| Logical operation | D semantic owner/operation | Storage responsibility | E behavior |
+|---|---|---|---|
+| Producer class admission | RegisterProducerClass | Durable versioned class registry and enabled/disabled state | No work until enabled receipt resolved |
+| Producer work admission | RegisterProducerWork | Atomic work row + digest + registration sequence in fence serialization domain | No enqueue/lease/run before durable receipt |
+| Fence installation | InstallForgetFence + immutable BarrierSnapshotReceipt | Commit effective fence + ProducerRegistryVersion + ProducerRegistrationHighWater together | Reconcile same fence/receipt; no local cutoff |
+| Dependency registration | RegisterDerivedDependency | Atomic complete artifact + all required edges, or hidden prepare/finalize protocol | Partial/unknown remains private |
+| Final publication | PublishDerivedIfFenceCurrent | Atomic validation + visibility marker + PublicationReceipt/commit identity | No visibility until committed receipt resolved |
+| Terminal work | CompleteProducerWork | Durable terminal record after all outputs/attempts/replays resolved | D receipt required before local terminal closure |
+| Unknown-outcome recovery | ResolveProducerWork / ReconcileForgetBarrier | Durable idempotency lookup and consistent snapshot reads | Reuse original IDs/digests; fail closed on UNKNOWN |
+
+**Preferred realization:** one durable transaction/serializable coordinator per Canonical Memory authority covering D's authoritative fence/producer ledger and the authoritative artifact visibility store. The same serialization domain must order RegisterProducerWork, InstallForgetFence, RegisterDerivedDependency, PublishDerivedIfFenceCurrent and CompleteProducerWork. The final visibility marker is committed in that domain.
+
+**Separate-store alternative:** a plain D-issued token followed by an independent E/object-store write is prohibited. An alternative is acceptable only if D and Storage explicitly approve a durable prepare/commit protocol or equivalent linearizable coordinator with: (a) durable hidden prepare; (b) prepare bound to WorkItemId, AttemptId/LeaseId, dependency digest, fence generation and PermissionEpoch decision; (c) fence installation serialized against final commit; (d) final visibility CAS/commit revalidating current fence and permission at its own commit point; (e) idempotent participant/coordinator recovery; (f) prepared/ambiguous artifacts invisible on every read path; and (g) no stale commit token replay after fence advancement. If these properties cannot be proven, fail closed and do not publish.
+
+### 5. Canonical and derived commit relationship
+
+CanonicalCommitReceipt and Derived PublicationReceipt are separate facts. When compiler output both changes canonical Memory and publishes a derivative, the operation must have one D/Storage serialization decision that atomically orders the canonical commit and derivative visibility against ForgetFence installation. If they cannot be committed atomically, the approved coordinator must guarantee that no derived artifact becomes visible before the canonical commit outcome is durable and that a fence winning the race prevents both late canonical mutation and derived publication as required by D's operation semantics. The precise all-or-nothing policy for mixed canonical/derived operations requires explicit D/Storage confirmation; E does not invent it.
+
+### 6. Failure and recovery invariants
+
+- Registration/dependency/publication ACK loss: query same stable operation ID + digest through D ResolveProducerWork; UNKNOWN remains private and barrier-open.
+- Worker crash/lease expiry: revoke old attempt's publish capability; same WorkItemId, new AttemptId/LeaseId only after current auth/fence checks.
+- Duplicate AttemptId/Lease: reject stale or conflicting owner; never allow two attempts to publish same immutable artifact version.
+- DLQ/outbox replay: same WorkItemId and operation IDs where replaying the same semantic operation; new AttemptId only for a new execution. A recompile uses new DerivationRunId and immutable artifact version, same WorkItemId.
+- Partial dependency registration: retry idempotently with same DependencyRegistrationId/digest; no partial edge set is publishable.
+- Partial commit recovery: inspect authoritative transaction/coordinator record. If final visibility commit exists, return original PublicationReceipt; if abort is proven, retry same logical operation under fresh authorization/fence; if outcome is unknown, keep private and reconcile.
+- Restore: quarantine all staging and visible projection materializations; replay current D fence and I permission/revocation control state before any content is served.
+
+### 7. Explicit non-claims
+
+This document is not evidence that D callable endpoints, Storage transaction/CAS, distributed coordinator, outbox, lease fencing, object-store ACL enforcement, index gating, or fault recovery exist. Storage's proposed report is design evidence only. No race/fault tests are claimed passed.
