@@ -271,7 +271,6 @@ Do not use “closed”, “complete”, “atomic”, “secure”, “fully ap
 
 **No branch merge is authorized by this plan. No owner approval is implied by its publication.**
 
-
 ## 12. Phase 3.6.2 control-plan reconciliation
 
 The C/G/H package decision request has received explicit same-version decisions: C, G and H each recorded APPROVE WITH ENUMERATED EXCEPTIONS against A package Blob SHA `61d961c32138fd875069e8cbac4696bb031447c0`. B separately accepted typed-reference semantics with exceptions; D confirmed D-owned fence/lineage semantics; I explicitly recorded CANDIDATE / NO APPROVAL.
@@ -284,7 +283,6 @@ The next closure order is now:
 5. A: update the integration control ledger only from exact owner artifact versions and evidence; no branch merge is authorized.
 
 No Owner approval is implied by A's synthesis. No test is passed by specification or static review. Applied Contract Frozen and Runtime Forget End-to-End Closed remain **NO**.
-
 
 ## 13. Phase 3.6.3 live reconciliation — CGH-APPLIED-1.0 exact-version decisions
 
@@ -328,7 +326,6 @@ H explicitly marks this **SCHEMA CANDIDATE 1.0.0 / OWNER-DECIDED FOR CGH-APPLIED
 
 The exact A decision package Blob SHA `122b164bcc0760b83bf555072a36fc55631623e1` is deliberately not changed: changing it would invalidate the common-version pin and require fresh explicit decisions from C, G and H.
 
-
 ### 13.1 I technical confirmation evidence — exact-package scope distinction
 
 A re-read I's formal PermissionEpoch/authorization confirmation on `session-i-security-governance-2026-11-16`:
@@ -339,7 +336,6 @@ A re-read I's formal PermissionEpoch/authorization confirmation on `session-i-se
 - It explicitly keeps external governance activation/approval BLOCKED and implementation/conformance NOT VERIFIED / NOT RUN.
 
 This is strong I-owned technical consumer-contract evidence, but the artifact does not pin A's exact C/G/H package Blob `122b164bcc0760b83bf555072a36fc55631623e1` as an Issue #3 decision. Therefore A records **I technical semantics CONFIRMED; exact Issue #3 package disposition NOT RECORDED**. No exact-package approval is inferred. I36-GOV-01..10 remain GOVERNANCE-BLOCKED.
-
 
 ## 13.2 I / D / B Owner-branch authority confirmations — CGH-APPLIED-1.0
 
@@ -373,7 +369,6 @@ Exact-version authority records have been committed to the respective Owner bran
 - CGH/I36/H36 tests: **NOT RUN**; implementation: **NOT VERIFIED**.
 - Applied Contract Frozen: **NO** until remaining exceptions, concrete wire/receipt mapping and causal proof are closed and A revalidates all exact artifact versions.
 - Issue #3 remains open. No branch merge is requested or authorized.
-
 
 ## 13.3 C / I / D cross-authority causal-order bridge — proposal issued, decisions pending
 
@@ -413,7 +408,6 @@ I's exact-version confirmation separately requires an I CommitAuthorizationRecei
 - CGH/I36/H36 tests: **NOT RUN**; implementation: **NOT VERIFIED**.
 - No branch merge or architecture freeze authorized.
 
-
 ## 13.4 C / D / I owner causal-order contracts published — successor version proposed
 
 After the A proposal was published, fresh Owner-branch reads found three new, independently authored contract addenda:
@@ -450,7 +444,6 @@ This is a meaningful advance from a proposal-only state: C/D/I have independentl
 - G acceptance of 1.1 evidence mapping: **OPEN**.
 - Coordinator/participant implementation and conformance: **NOT VERIFIED / NOT RUN**.
 - Original `CGH-APPLIED-1.0` remains **NOT FROZEN**; no approval is transferred to 1.1.
-
 
 ## 13.3 C-submit / I-authorization / D-ForgetFence causal-order architecture — 2026-11-16
 
@@ -508,7 +501,6 @@ Current state:
 - Implementation Verified: **NO**.
 - Issue #3 remains open; no branch merge is authorized.
 
-
 ## 13.5 A exact successor package created — CGH-APPLIED-1.1 candidate
 
 A created and read back the explicit successor package:
@@ -533,14 +525,12 @@ The latest branch readbacks supersede the earlier C/I hashes recorded in the fir
 
 The earlier H exact-version decision artifact for CGH-APPLIED-1.0 remains valid for 1.0 only. Its H-EX-01 schema exception is superseded for the 1.1 candidate by the new H 1.1.0 candidate section, but the new schema is still not a production freeze and still requires exact 1.1 package acceptance and conformance.
 
-
 ### 13.3.5 Request-cutoff ordering refinement
 
 The common coordinator log must also order the *request* points, not only terminal completion:
 - D fence request is recorded with `DForgetFenceRequestRef` and a coordinator cutoff position. Any affected ParticipantIntentRef after that cutoff is rejected immediately, even if D's effective fence commit is delayed while earlier participants drain. D terminal evidence carries both request cutoff and effective positions.
 - I revocation request is recorded with `IRevocationRequestRef` and a coordinator cutoff position. It immediately blocks new receipts/authorizations in the affected domain. If it precedes intent or receipt consumption, it wins; if I has already terminalized a receipt as COMMIT_WON, effective PermissionEpoch advancement waits behind that unresolved participant. I remains the authority for the actual epoch advance.
 - The coordinator's common order is evidence of causality only. It does not issue I PermissionEpoch, D ForgetFenceGeneration, or owner terminal decisions.
-
 
 ## 13.6 CGH-APPLIED-1.1 cutoff-order refinement and current Owner pins
 
@@ -563,7 +553,6 @@ Current Owner artifact readbacks supersede prior hashes:
 
 These are still owner-side specifications/schema candidate, not explicit acceptance of the exact A 1.1 package. G and B exact 1.1 dispositions remain pending. Coordinator/operator deployment, Storage durability/restore acceptance and conformance remain open.
 
-
 ## 13.7 Live CGH-APPLIED-1.1 owner decision checkpoint — 2026-11-16 23:07 +08
 
 The exact A successor candidate remains Blob `471c8ce86e93c036ad9a58a77d45d9daa0ab8af8`. Fresh Owner-branch readbacks confirm C/D/I have specified the causal-order mechanisms and H has a `bmcp.applied-ack/1.1.0` schema candidate, but their source artifacts still describe cross-owner acceptance as open/candidate. G's recorded approval is pinned to older CGH-APPLIED package Blob `61d961c32138fd875069e8cbac4696bb031447c0`, and B's approval is limited to typed semantic mapping; neither is an exact 1.1 package decision.
@@ -571,7 +560,6 @@ The exact A successor candidate remains Blob `471c8ce86e93c036ad9a58a77d45d9daa0
 A requested exact-SHA ACCEPT / ACCEPT WITH ENUMERATED EXCEPTIONS / REJECT-REVISE decisions from C/D/I/H/G/B in Issue #3 comment `6920276322`. Each decision must be committed on its own Owner branch with artifact path, Blob SHA, exceptions and commit. A must not alter Owner branches or infer acceptance from source specifications.
 
 The coordinator/operator and production durable participant registry remain unidentified/unverified. Storage's JF-10 Python reference model is in-memory and cannot satisfy this implementation gate. HA/failover/restore, deterministic cross-authority conformance and production causal proof remain NOT VERIFIED / NOT RUN. CGH-APPLIED-1.1 is therefore CANDIDATE / NOT OWNER-DECIDED / NOT FROZEN; G8 BLOCKED, G9 NOT RUN, G10 BLOCKED.
-
 
 ## 13.7 Causal Order Coordinator deployment and durable recovery architecture proposal
 
@@ -606,7 +594,6 @@ Storage/Consistency, C, I, D, H, G and Security/Governance must accept/revise th
 - Production causal proof: **NOT VERIFIED**.
 - Applied Contract Frozen: **NO**.
 
-
 ## 13.8 CGH-APPLIED-1.1 package linked to concrete coordinator profile
 
 The exact A successor package was updated to incorporate the companion coordinator deployment proposal:
@@ -618,7 +605,6 @@ The exact A successor package was updated to incorporate the companion coordinat
 This is a package amendment. Any previous exact-version acceptance of the older CGH-APPLIED-1.1 package Blob does not automatically approve this amended Blob. C/D/I/H/G/B and Storage/operator must make fresh exact-Blob decisions or explicitly state which unchanged clauses their prior decision covers and approve the amended package hash.
 
 Current status remains A CANDIDATE / OWNER REVIEW REQUIRED / NOT FROZEN; coordinator operator not designated; Storage acceptance pending; tests not run.
-
 
 ## 13.9 Coordinator outage cutoff safety and latest package pins
 
@@ -652,7 +638,6 @@ A independently re-read the six Owner artifacts from their respective Owner bran
 - C-CO/I-CO/D-CO/H36-CO/G conformance remains SPECIFIED / NOT RUN. Production causal proof and implementation remain NOT VERIFIED.
 - Therefore Applied Contract Frozen = NO; G8 remains BLOCKED, G9 NOT RUN, G10 BLOCKED. No branch merge or production activation is authorized.
 
-
 ## 13.10 COC outage recovery batch — current exact package checkpoint
 
 The current COC architecture Blob is `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`; the current companion CGH-APPLIED-1.1 package Blob is `4961ffefc0f9920efb8425a9b2a7af42d8f64819`. The package binds the exact companion pin and adds durable I/D owner-local pending gates for requests received during COC outage, one atomic recovery-cutoff batch (without deriving cross-owner order from local clocks), enumeration of all affected pre-batch ParticipantIntentRefs, I receipt/revocation reconciliation, D lineage-barrier reconciliation and owner high-water verification before gates reopen. Missing log prefix, intent, lineage or owner proof keeps the system RESTORE_FENCED/UNKNOWN/IN_DOUBT.
@@ -660,7 +645,6 @@ The current COC architecture Blob is `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`;
 Six Owner decisions exist for historical package Blob `9808b31f840606b329f1a794935dfc9c5084d63b` only: C/D/I/H/G accepted with enumerated exceptions and B approved semantic typed-reference bindings. Those approvals do not automatically cover the recovery-batch amendment. Fresh exact-Blob decisions are requested in Issue #3 comment `6920481902`; Storage's exact COC decision is requested in Issue #2 comment `6920482983`.
 
 Current gates: package A CANDIDATE / FRESH OWNER REVIEW REQUIRED / NOT FROZEN; coordinator proposal NOT DESIGNATED / NOT DEPLOYED; Storage operator/durability and Security/key governance PENDING; COC-01..16 and C/I/D/H/G consumer conformance NOT RUN; production causal proof NOT VERIFIED. G8 BLOCKED, G9 NOT RUN, G10 BLOCKED.
-
 
 ## 13.10 Exact CGH-APPLIED-1.1 Owner decision reconciliation — 2026-11-16
 
@@ -682,7 +666,6 @@ H's 1.1.0 schema decision now includes field encoding, common envelope requireme
 A recorded the exact six-owner reconciliation on Issue #3 comment `6920517731` (readback verified).
 
 **Gate interpretation:** the six Owner contract/semantic decisions are RECORDED WITH ENUMERATED EXCEPTIONS. They do not close coordinator/Storage operator designation, durable participant store deployment, HA/failover/restore, key governance, implementation verification or conformance. C-CO/I-CO/D-CO/H36-CO/G remain SPECIFIED / NOT RUN. Applied Contract Frozen = NO; implementation verified = NO; G10 = BLOCKED. No merge or production activation is authorized.
-
 
 ## 13.11 Storage Owner decision recorded — architecture interface accepted with changes
 
@@ -729,7 +712,6 @@ Storage/Consistency also published exact COC/package review:
 - COC-01..16, JF10-01..17, Storage C01..C23 and consumer conformance remain SPECIFIED / NOT RUN. Reference model is in-memory only; no production implementation verified.
 
 **Current gate:** exact 1.1 recovery-batch semantic owner decisions = RECORDED WITH ENUMERATED EXCEPTIONS; Storage COC interface = CONFIRMED WITH CHANGES. Applied Contract Frozen = NO; production coordinator/operator = NOT DESIGNATED; combined COC/JF-10/Storage atomicity = NOT PROVEN; implementation verified = NO; G8 BLOCKED, G9 NOT RUN, G10 BLOCKED. No merge or production activation authorized.
-
 
 ## 13.11 I formal JF-10 prepared-participant ↔ COC bridge decision
 
@@ -830,7 +812,6 @@ The amendment makes the authority boundary normative: COC orders and observes; I
 
 **Status correction:** A architecture text amended and readback-verified. This is not fresh I/C/D/H/Storage exact-Blob acceptance, not implementation evidence, not deployment/operator designation, and not a test pass. COC-01..12 and JF10-COC-01..10 remain NOT RUN; JF-10 remains P0 OPEN; multi-policy-domain atomicity remains BLOCKED. Next closure actions are fresh I and relevant Owner decisions on the new A Blob, plus explicit D barrier and Storage prepared-XID/same-XID recovery acceptance; H must approve any required 1.1.0 wire mapping.
 
-
 ## 13.14 I-approved JF-10 ↔ COC bridge — C/D/Storage joint decision gate
 
 Formal exact-version Owner decision request is open as [Issue #8](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/8). The common review bundle pins:
@@ -896,7 +877,6 @@ Issue #4 records both decisions in comment `6920938325`.
 
 **Remaining gate:** H's exact 1.1.0 schema/wire mapping decision remains outstanding. Implementation, concrete DB capability, COC-01..12 and JF10-COC-01..10 conformance remain unverified/not run. JF-10 P0 remains OPEN; multi-policy-domain atomicity remains BLOCKED; production activation is NOT APPROVED.
 
-
 ## 13.15 JF-10 ↔ COC bridge decision refresh — 2026-11-16
 
 The exact Owner evidence was refreshed and reconciled on Issue #8. I accepts A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` with the single-I-PolicyDomain limitation (I disposition Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`). D accepts that A Blob for D-owned fence/barrier semantics (D artifact Blob `5a56c406578fdf257509315eb3f6f3f75456116c`). Storage accepts the Storage participant contract for that A Blob, conditional on concrete database capability and deployment proof (Storage artifact Blob `55c01f4512f2e3d8aac767dd004e768ae073178e`). C's current artifact Blob `a72a3eb1e5207f67c01f804508311f42db9a6e0a` accepts the CGH-APPLIED-1.1 recovery-batch package/companion pair but does not yet record a distinct formal decision against the complete Issue #8 bridge bundle and A architecture Blob `a3c51ec...`.
@@ -917,7 +897,6 @@ H maps five distinct COC lifecycle records to five 1.1.0 message families: `JF10
 
 This is schema-candidate documentation acceptance only. Generated JSON Schema/IDL/SDK bindings and interoperability have not been produced or tested. Crypto suite/key custody remains subject to I/Security governance. H does not approve deployment, implementation, database capability or production activation. H-JF10-01..10 remain NOT RUN; JF-10 remains P0 OPEN; multi-policy-domain atomicity remains BLOCKED.
 
-
 ## 13.15 JF-10 ↔ COC bridge exact-version Owner reconciliation
 
 Issue #8 now carries the corrected exact bundle and Owner readback:
@@ -929,13 +908,11 @@ Issue #8 now carries the corrected exact bundle and Owner readback:
 
 **Current exact bridge acceptance gate: I ACCEPT; D ACCEPT; Storage ACCEPT; C PENDING.** The outstanding action is an append-only C Owner decision on the amended A architecture exact Blob. No joint closure until C's artifact is published and read back. JF-10 P0, implementation, DB capability, COC deployment and conformance remain OPEN / NOT VERIFIED / NOT RUN.
 
-
 ## 13.16 H exact-version JF-10 bridge wire mapping — 2026-11-16
 
 The previous H wire-mapping gap is closed at schema-candidate documentation level. H's current artifact `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, branch `session-h-bmcp-protocol`, Blob `1716b23741479740f9e12003cbf2bd1a80c63aab`, §12.10 explicitly ACCEPTS the five JF-10 ↔ COC bridge message-family mappings for exact A architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, with enumerated exceptions. The five families are prepare-intent registration, prepared-participant registration, I terminal-decision observation, Storage participant resolution and bridge reconciliation observation.
 
 This is not production schema freeze: generated JSON Schema/IDL, SDKs/interoperability and crypto/key governance remain open; H-JF10-01..10 are SPECIFIED / NOT RUN. Issue #8 was updated in comment `6921054285`. The overall bridge gate remains OPEN pending C's distinct exact-bundle decision and D/Storage clarification. JF-10 P0 remains OPEN; implementation/deployment NOT VERIFIED; multi-policy-domain atomicity BLOCKED.
-
 
 ## 13.16 H JF-10 bridge schema-candidate decision
 
@@ -946,7 +923,6 @@ H exact-version decision has been read back from its Owner branch:
 H's five message-family mappings are recorded. The schema remains a candidate: generated schemas/SDKs and interoperability not produced/tested; crypto/key governance remains I/Security-owned; H-JF10-01..10 NOT RUN; production freeze NO.
 
 **Updated Owner gate: I ACCEPT; D ACCEPT; Storage ACCEPT; H ACCEPT (schema candidate only); C PENDING.** The remaining requested action is C's exact-version acceptance against the same A Blob. JF-10 P0, implementation, deployment and conformance remain OPEN / NOT VERIFIED / NOT RUN.
-
 
 ## 13.16 C exact-bundle acceptance — JF-10 prepared participant ↔ COC bridge
 
@@ -963,7 +939,6 @@ C accepts the provider boundary: no protected provider invocation before durable
 
 This closes the outstanding architecture/interface Owner-decision gate for the named bridge bundle. It does not close provider-specific idempotency proof, runtime implementation, DB capability, conformance, deployment or production gates. C-CO-01..10 and H-JF10-01..10 remain SPECIFIED / NOT RUN; H schema remains candidate/not production-frozen; Storage DB capability remains unproven; COC operator/deployment remains undesignated. JF-10 remains P0 OPEN; multi-PolicyDomain atomicity BLOCKED. The earlier §13.15 pending snapshot is historical and superseded by this §13.16 readback.
 
-
 ## 13.17 C exact-version JF-10 ↔ COC bridge acceptance — architecture/interface gate closed
 
 C's Owner artifact has been read back from its branch:
@@ -973,7 +948,6 @@ C's Owner artifact has been read back from its branch:
 **Architecture/interface gate is CLOSED WITH ENUMERATED EXCEPTIONS:** C ACCEPT; D ACCEPT; Storage ACCEPT; I ACCEPT (single I PolicyDomain); H ACCEPT (1.1.0 schema candidate only).
 
 This does not close JF-10 P0 or any production gate. Durable prepared-XID/lock behavior, same-XID recovery on selected DB, COC operator/quorum/deployment, provider idempotency/fault recovery, generated H schema and SDK interoperability, crypto governance and crash/recovery conformance remain OPEN / NOT VERIFIED / NOT RUN. Multi-PolicyDomain atomicity remains BLOCKED. No production activation or merge is implied.
-
 
 ## 13.17 H machine-readable JF-10 bridge schema candidate
 
@@ -987,7 +961,6 @@ Following H's exact wire-mapping decision (§13.15), H has published a machine-r
 The JSON file was fetched back from H Owner branch and parsed as JSON; it contains exactly five message variants. It expresses common required envelope fields, per-message required fields, state/outcome enums, opaque reference length and SHA-256 syntax, and conditional revocation/Storage outcome requirements.
 
 This is a schema candidate, not production-frozen or generated from an executable IDL pipeline. JSON Schema cannot prove signatures, quorum commit, exact tuple equality across messages, same-XID identity, causal ordering, owner authority or terminal reconciliation. Parser enforcement for duplicate keys/canonical bytes and semantic cross-message validators remain required. SDK generation, cross-implementation interoperability and H-JF10 conformance remain NOT RUN. The architecture/interface Owner-decision gate remains closed; implementation, runtime, DB/provider capability, conformance and production gates remain open. JF-10 P0 remains OPEN.
-
 
 ## 13.18 Final exact-version bridge reconciliation — 2026-11-16
 
@@ -1005,7 +978,6 @@ H additionally published machine-readable JSON Schema Draft 2020-12 candidate:
 
 **Result: the C/D/Storage joint architecture/interface bridge acceptance is CLOSED WITH ENUMERATED EXCEPTIONS.** This does not close JF-10 P0. Selected DB durable prepared-XID/lock behavior, same-XID crash recovery, COC quorum/operator/deployment, provider idempotency, production conformance, crypto governance and schema interoperability remain OPEN / NOT VERIFIED / NOT RUN. Multi-PolicyDomain atomicity remains BLOCKED. No production activation or merge is authorized.
 
-
 ## 13.18 JF-10 cross-message semantic validator and CI harness
 
 A has added a dependency-free Python reference semantic validator and 10 unit tests for one complete JF-10 COC lifecycle:
@@ -1016,7 +988,6 @@ A has added a dependency-free Python reference semantic validator and 10 unit te
 The validator checks five-message lifecycle order, immutable tuple equality, preallocated/same XID binding, exact COC prepare references, durable-private/locked prepared state, I terminal and revocation evidence, Storage COMMITTED versus ROLLED_BACK proof requirements, reconciliation against I/Storage lookup outcomes, D barrier terminality, and single-PolicyDomain scope. Ten tests cover valid terminal lifecycle and nine negative/conflict cases.
 
 CI is configured to compile and run the unittest suite on pushes to the A Owner branch affecting the test/workflow paths, pull requests, or manual dispatch. The GitHub workflow has been committed and fetched back; **a GitHub Actions run result has not yet been observed**, so tests remain NOT RUN / NOT VERIFIED in this ledger. The validator explicitly does not verify cryptographic signatures, COC quorum, owner-authoritative lookups, provider idempotency or real Storage engine behavior. Those remain integration/runtime gates.
-
 
 ## 13.19 JF-10 COC semantic validator — first GitHub Actions execution PASS
 
@@ -1032,7 +1003,6 @@ The ten passing tests cover valid terminal bridge lifecycle, changed-XID conflic
 **Evidence boundary:** this PASS is limited to the dependency-free in-memory Python semantic reference validator and its ten unit tests at commit `bd104eaf...`. It does not validate JSON Schema at runtime, canonical-byte/duplicate-key parser enforcement, cryptographic signatures, COC quorum/prefix, authoritative live I/D/Storage lookups, real DB prepared-XID/lock durability, provider idempotency, crash/failover/restore, cross-process interoperability or production integration. JF10-COC-01..10 and C-CO/H-JF10 production conformance remain NOT RUN; JF-10 P0 remains OPEN; implementation/deployment NOT VERIFIED; multi-PolicyDomain atomicity BLOCKED.
 
 The CI run was read back from GitHub Actions, including all five job steps and full test log. This replaces the prior §13.18 statement that no run result had yet been observed; the historical note is retained as the state at the time it was written.
-
 
 ## 13.20 JF-10 exact bundle confirmation and physical realization gates — 2026-11-17
 
@@ -1050,7 +1020,6 @@ A refreshed the C, D, Storage and A Owner artifacts before this reconciliation. 
 
 The previous §13.19 semantic-validator CI PASS remains valid only for its dependency-free in-memory reference model (10 unit tests at commit `bd104eaf63c7234a45fd780d484bc41ae15dd988`). It is not real database, persistent coordinator, provider, crash/failover/restore or production conformance evidence. JF-10 P0 remains OPEN; implementation/deployment NOT VERIFIED; JF10-COC-01..10 and provider fault suites remain NOT RUN; multi-PolicyDomain atomicity BLOCKED; no production activation authorized.
 
-
 ## 13.21 JF-10 COC validator negative-case expansion — 2026-11-17
 
 A extended the semantic-validator unit suite on the A Owner branch:
@@ -1066,7 +1035,6 @@ The existing workflow is configured for push events affecting `tests/conformance
 
 Coverage boundary remains: the reference validator does not authenticate signatures/quorum, call live owner authorities, test provider idempotency, exercise real prepared-XID/lock persistence, or simulate process/host/region crash, failover and restore. JF-10 P0 remains OPEN; production implementation/deployment NOT VERIFIED; multi-PolicyDomain atomicity BLOCKED.
 
-
 ## 13.21 Sequential execution control — 2026-11-17
 
 The user directed A to proceed sequentially without asking for a choice at each step. A therefore enforces this order:
@@ -1081,7 +1049,6 @@ Storage artifact inventory confirms: no concrete engine/version, XA profile, rep
 
 Issue #10 has been commented to mark Gate A ACTIVE and Gates B/C BLOCKED until prior gate proof. This is an execution-order control, not a technical pass. No physical DB capability, persistent COC, crash recovery or production conformance is verified at this point.
 
-
 ## 13.22 Issue #2 D/E/Storage publication boundary reconciliation — 2026-11-17
 
 A refreshed Issue #2 and the current D/E/F/I/Storage Owner artifacts and posted the evidence reconciliation as Issue #2 comment 6922062473.
@@ -1095,7 +1062,6 @@ A refreshed Issue #2 and the current D/E/F/I/Storage Owner artifacts and posted 
 | Storage physical realization | `reviews/storage-consistency/forget-atomicity-storage-realization-review.md`, Blob `55c01f4512f2e3d8aac767dd004e768ae073178e` | Single-transaction/linearizable-coordinator realization remains a recommendation. DB engine/version, prepared-XID and lock durability, operator/topology, atomic visibility, crash/failover/restore proof remain OPEN / NOT VERIFIED. |
 
 Issue #2 remains OPEN. D/E semantics and F consumer rules are not promoted to physical atomicity. Explicit independent Owner dispositions, selected DB/deployment evidence and E36/D36/Storage fault conformance remain required. No implementation, test pass, or production readiness is inferred from this reconciliation.
-
 
 ## 13.22 JF-10 physical realization execution plan published — 2026-11-17
 
@@ -1112,7 +1078,6 @@ A linked the execution plan and requested the concrete candidate/operator/probe 
 
 The expanded 18-test reference-validator file is committed and readback verified (Blob `0cff0fe77eda9fb017abad099822d909bf263bcb`, commit `b154913a8594d04c799a05c799bbe7242f0e8651`), but its CI run has not been observed. The prior 10-test PASS applies only to the earlier commit. Physical DB/COC/provider fault tests remain NOT RUN. JF-10 P0 remains OPEN; no production activation or merge authorized.
 
-
 ## 13.23 JF-10 complete-bundle Owner decision closure — 2026-11-17
 
 Issue #9 is now **CLOSED / COMPLETED** after D and Storage each published an Owner-branch decision that pins the full exact JF-10 ↔ COC bundle and A fetched/readback-verified both artifacts.
@@ -1122,23 +1087,6 @@ Issue #9 is now **CLOSED / COMPLETED** after D and Storage each published an Own
 - Both decisions pin common JF-10 v2 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`, A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, I disposition Blob `8069ff86988396442c8d9dc3fd58653683abe2f3`, C bridge Blob `45a48249717c8cddb07ab96197730ef93d406c22`, and current H mapping Blob `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248` plus H schema candidate Blob `a8a945cc3623c2907003b93625e3c79742150944`.
 
 **Gate transition:** Issue #9 decision layer is closed. Issue #10 Gate A remains the sole active next gate: Storage must identify the actual database product/version/configuration and accountable operator, then produce executable prepared-XID/lock-retention/same-XID recovery and atomic-visibility capability evidence. Gate B persistent COC and Gate C fault-injection remain blocked until Gate A passes. No database, operator, physical capability, production deployment or conformance pass is inferred. JF-10 P0 remains OPEN; multi-PolicyDomain remains BLOCKED.
-
-
-## 13.24 Gate A cross-repository runtime inventory — 2026-11-17
-
-A inspected the accessible `oahcom/hermes-scripts` `quality-gate` branch as a possible runtime context before asking for a database choice.
-
-Observed:
-- `scripts/episodic_memory.py` uses Python SQLite for a local episodic-memory DB at `~/.hermes/data/state/episodic_memory.db` by default.
-- `scripts/audit_test_db.py` and `scripts/audittestdb.py` are stubs, not capability tests.
-- `config/services.yaml` lists memory-server endpoints but does not establish the backing Canonical Memory Authority database.
-- `MEMORY.md` mentions a local `fact_store/memory_store.db`, but does not establish the engine/version/configuration or whether it is the Canonical Memory Authority participant store.
-- The separate `oahcom/hermes-by-dkk` repository contains only 13 tracked paths, none identifying a DB implementation or JF-10 runtime.
-
-A therefore did **not** infer SQLite as the JF-10 target. No accessible artifact establishes a selected Canonical Authority DB, prepared-XID durability, cross-process lock retention, same-XID recovery, atomic visibility/receipt transaction, or failover/restore capability. The discovery and boundary were recorded in Issue #10 comment 6922191590.
-
-**Gate A remains BLOCKED pending Storage's explicit candidate and accountable operator selection plus executable capability proof.** Gates B/C remain blocked; JF-10 P0 OPEN. This inventory does not prove that no other runtime repository or deployment exists.
-
 
 ## 13.25 JF-10 Gate A candidate selection and physical proof update — 2026-11-17
 
@@ -1169,7 +1117,6 @@ This addendum supersedes the prior Gate A inventory note that no candidate engin
 
 Gate B persistent COC remains blocked until the complete Gate A profile is proven. Gate C remains blocked until Gate B. Do not parallelize later gates or claim physical deployment readiness from this single-node result. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
 
-
 ## 13.26 Gate A — PostgreSQL 18.7 synchronous promotion proof — 2026-11-17
 
 Storage's PostgreSQL 18.7 candidate now has both a single-node hard-restart test and a two-node synchronous standby promotion test.
@@ -1186,7 +1133,6 @@ The test established synchronous standby state before PREPARE, prepared WAL repl
 
 Do not advance Gate B until these Gate A conditions pass. Gate C remains blocked until Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
 
-
 ## 13.27 Gate A — rollback-after-promotion closed for pinned CI profile — 2026-11-17
 
 Storage's two-node PostgreSQL 18.7 probe now prepares two independent XIDs before primary loss and resolves one by COMMIT PREPARED and one by ROLLBACK PREPARED after promotion.
@@ -1199,7 +1145,6 @@ Both XIDs were synchronously replayed; both exact XIDs and locks survived primar
 
 Remaining Gate A work is limited to backup/restore + PITR and stale-snapshot/control-ledger reconciliation, production host/zone/storage durability, failover fencing/routing, actual Canonical Authority deployment and named human operator/runbook/RPO/RTO. Gate A remains PARTIAL PASS / OPEN. Gate B remains blocked until Gate A fully passes; Gate C remains blocked until Gate B. JF-10 P0 remains OPEN and production activation NOT AUTHORIZED.
 
-
 ## 13.28 Gate A — physical backup/restore and stale-control gate PASS — 2026-11-17
 
 Storage's PostgreSQL 18.7 backup/restore probe succeeded:
@@ -1210,7 +1155,6 @@ Storage's PostgreSQL 18.7 backup/restore probe succeeded:
 The run preserved a prepared XID through physical pg_basebackup/restore, kept pointer + receipt private, and resolved the same XID after restore. A stale restored control epoch failed closed until the newer authoritative Forget-control epoch was replayed; the forgotten artifact was then suppressed before reads, while unrelated content remained available.
 
 Gate A remains PARTIAL PASS / OPEN because the control epoch is a test fixture, not production I/D service integration. Remaining work is actual host/zone/cloud-volume durability, production fencing/routing/split-brain prevention, actual Canonical Authority deployment, named human operator/runbook and RPO/RTO. Gate B remains blocked until full production Gate A acceptance; Gate C remains blocked until Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
-
 
 ## 13.29 Gate A evidence manifest — 2026-11-17
 
@@ -1228,7 +1172,6 @@ The latest reruns of single-node and HA workflows also passed (43909115285, 4390
 
 Gate A remains PARTIAL PASS / OPEN. Remaining production boundary: identify the actual Canonical Authority deployment, physical host/zone/cloud-storage semantics, production fencing/routing and split-brain prevention, named human on-call/operator, runbook and RPO/RTO. No production activation is authorized. Gate B remains blocked until these conditions pass; Gate C remains blocked until Gate B.
 
-
 ## 13.30 Gate A production binding remains the only blocking boundary — 2026-11-17
 
 A inspected the default branch and available Owner branch inventory. The default main branch is HEAD 8a6414158c9c056c1638222534e1993d1bbc99d2 with a complete 47-entry tree; no Docker/Compose, Helm/Kubernetes, Terraform, Patroni, PostgreSQL deployment, DB migration or production deployment artifacts exist. The Storage branch contains only the JF-10 probes/workflows and review artifacts, not a deployed Canonical Authority runtime or actual production DB topology. No separate Canonical Authority runtime repository was identified in the accessible repository inventory.
@@ -1236,7 +1179,6 @@ A inspected the default branch and available Owner branch inventory. The default
 Therefore all current PostgreSQL 18.7 physical test results remain CI qualification evidence only. Gate A cannot be closed until the real Canonical Authority deployment is bound: exact DB build/configuration, host/zone/cloud-storage topology, production failover fencing/routing, actual I/D control-ledger source, named human on-call/operator, approved runbook and RPO/RTO. The proven probes must then be run against that deployment.
 
 Do not start Gate B until this deployment binding is supplied and Gate A is accepted. Gate C remains blocked by Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED. Issue #10 comment 6922650120 records the repository inventory.
-
 
 ## 13.31 Gate A — coordinator crash-window / unrecorded-ACK recovery PASS — 2026-11-17
 
@@ -1266,7 +1208,6 @@ The recovery process reconciled the exact original XID without creating a replac
 
 Gate A remains PARTIAL PASS / OPEN. Production Canonical Authority binding, actual I/D control-ledger integration, production fencing/STONITH and split-brain prevention, host/zone/cloud-storage durability, named human on-call, approved runbook and RPO/RTO remain open. Gate B remains BLOCKED until full Gate A acceptance; Gate C remains BLOCKED until Gate B. JF-10 P0 remains OPEN; production activation NOT AUTHORIZED.
 
-
 ## 13.32 Gate A — real TCP ACK-loss recovery PASS — 2026-11-17
 
 Storage executed a true TCP response-loss fault-injection test against the pinned PostgreSQL 18.7 profile. A one-shot proxy dropped the PostgreSQL CommandComplete response after the server executed PREPARE TRANSACTION, COMMIT PREPARED or ROLLBACK PREPARED. The client observed a broken connection / UNKNOWN outcome; recovery reconnected and reconciled the same original XID.
@@ -1285,25 +1226,3 @@ This is a real PostgreSQL protocol TCP response-loss injection at the CommandCom
 
 Gate A remains PARTIAL PASS / OPEN because production Canonical Authority binding, real I/D control-ledger integration, production failover fencing and split-brain prevention, host/zone/cloud-storage durability, named human operator, runbook and RPO/RTO remain unverified. Gate B remains BLOCKED until full Gate A acceptance; Gate C remains BLOCKED until Gate B. JF-10 P0 OPEN; production activation NOT AUTHORIZED.
 
-
-## 13.33 Gate A runtime binding correction — Hermes service repos discovered — 2026-11-17
-
-A's expanded repository inventory identified the private oahcom/hermes-scripts repository and its quality-gate branch (HEAD 9292ec97d572c4c56d2e4f4938c7d70ce0706afa). This supersedes the earlier statement that no relevant runtime repository was identified.
-
-Observed runtime evidence:
-- config/services.yaml declares local DKK and SSK memory HTTP endpoints on ports 9901 and 9902.
-- config/ports.yaml repeats those ports.
-- query_factstore.py calls the HTTP fact-search API; precipitate.py writes to both DKK and SSK.
-- default.yaml configures the memory-store plugin to use the DKK endpoint.
-- helper scripts episodic_memory.py, memory_md_refresh.py and memory_cleaner.py reference local SQLite files.
-- start_memory_server.sh points to an installed plugin memory_server.py outside the tracked repository and defaults to port 8901; hermes-ops.sh manages memory-server-dkk, memory-server-ssk and sister-mem services. This is an unresolved launcher/service topology mismatch.
-- The actual installed Holographic Memory Server source and its authoritative DB adapter are not in the inspected repository tree.
-- oahcom/DBInstanceManagement is a separate Django/Celery inventory app with SQLite default; no evidence connects it to Canonical Memory Authority.
-
-Full source pins and the reconciliation are in:
-- reviews/integration/phase-3.6-hermes-runtime-deployment-binding-assessment.md
-- Assessment Blob: 468fe9d1e3ba96e409c996d23ad3ce0bd96370c9
-
-**Correction to prior A inventory:** a relevant Hermes runtime repository and service-level deployment configuration do exist. However, they do not identify the live authoritative backing store, current process manager, host/zone, actual I/D control ledger, or production failover/operator profile. The authorized Desktop Commander device was OFFLINE during this run, so no live host inspection was possible.
-
-Gate A remains PARTIAL PASS / OPEN. PostgreSQL 18.7 is a capability-qualification candidate only; do not treat it as the production DB or infer that the Hermes service is PostgreSQL-backed. If the actual authoritative participant is SQLite-backed, it cannot satisfy JF-10 prepared-XID semantics without a different recoverable participant design or migration. Gate B remains BLOCKED; Gate C remains BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
