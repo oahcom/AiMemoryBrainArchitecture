@@ -76,3 +76,20 @@ For rebuild/backfill/replay:
 - E-only path scope verified; no D/Storage/F/I/A files changed.
 
 Until all applicable evidence exists, status remains **DESIGN CONTRACT COMPLETE / IMPLEMENTATION NOT VERIFIED**.
+
+ 
+## Phase 3.6.2 — E owner acceptance of revised JF-10 v2
+
+**Status: E ACCEPTS THE E-OWNED PRODUCER/PUBLISH CONSUMPTION CONTRACT; I ACCEPTANCE AND IMPLEMENTATION REMAIN OPEN.**
+
+E confirms:
+
+1. Accepted Receipt means durable ingress acceptance/idempotency only. It does not mean Canonical Memory commit, derived dependency registration, publication or reader visibility.
+2. E obtains D's durable ProducerWork RegistrationReceipt before enqueue, lease, protected source dereference, execution, retry, DLQ replay or recompile. WorkItemId and lineage remain stable across attempts; AttemptId and LeaseEpoch fence stale workers; DerivationRunId identifies a recompile and cannot reset the Forget barrier.
+3. E freezes an immutable output manifest and complete direct/transitive lineage. Dependency registration must be complete and durable before publication prepare. Partial/unknown dependency state remains private.
+4. E submits the exact immutable PublicationOperationId/RequestDigest and prepared participant binding to the actual final Storage gate. It does not treat CommitAuthorizationReceipt, I COMMIT_WON, queue delivery, outbox event or E-local state as Published.
+5. E becomes Published only after authoritative readback of the matching Storage PublicationReceipt and VisibilityPointer outcome. Lost ACK/replay resolves the same operation ID/digest; changed digest is a hard conflict.
+6. Fence, inventory-seal, permission, work/attempt/lease, manifest, dependency or participant state that is stale/unknown blocks visibility. No offline ALLOW, stale PermissionEpoch grace, direct object-store exposure or unregistered child work is permitted.
+7. After Forget completion, an old task resumed from retry/DLQ/replay/backup must re-resolve the original WorkItemId and source lineage against the current D fence and I authorization/inventory evidence. It cannot create a new WorkItemId to escape the fence.
+
+E accepts the JF-10 v2 proposal's E caller/recovery role and the requirement to remain non-terminal through I/Storage IN_DOUBT. This is a technical owner-side acceptance, not evidence of an executable Compiler, queue, lease service, database participant or passing E36 test.
