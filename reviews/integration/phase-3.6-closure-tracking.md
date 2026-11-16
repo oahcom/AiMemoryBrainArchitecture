@@ -332,3 +332,13 @@ These are exact file Blob readbacks. They do not claim that each Owner branch HE
 - C/G/H Applied contract remains NOT FROZEN; CFG-01..20 and PI-01..08 remain NOT RUN.
 
 A remains integration coordinator only. These owner decisions and issue requests do not authorize A to approve their contracts or merge branches.
+
+
+## Additional I / B formal technical decisions — reconciled (2026-11-16)
+
+- I formal PermissionEpoch/authorization technical confirmation is recorded in issue #5 comment `6919213602`, artifact `09-security-governance/phase-3.6-permission-epoch-and-authorization-formal-confirmation.md`, Blob `bae6a24fe3a374bc816993979a8fa9af52517dea`. I confirms opaque per-policy-domain monotonic PermissionEpoch, I as sole logical authority, online authoritative currentness at protected boundaries, fail-closed stale/gapped/unknown state, revocation at durable I sequencer epoch-advance, and single-use CommitAuthorizationReceipt bound to exact operation/digest/owner boundary. This is technical confirmation only; I36-GOV-01..10 remain GOVERNANCE-BLOCKED.
+- B formal ActorRef/ScopeRef/EnvironmentRef mapping approval is recorded in issue #3 comment `6919299226`, artifact Blob `729a706860b1259115816265e847a29683c3c233`. This confirms B-owned semantics only; consumer field paths and H wire encoding remain open.
+- H exact A-package BIH acceptance is recorded in issue #6 comment `6919218061`, artifact Blob `fe437a3d44790f249f613d1e6cafc0db40d45b10`. H36 remains NOT RUN; no C/G/H Applied wire schema freeze is implied.
+- I JF-10 single-policy-domain acceptance remains the separate disposition Blob `b7b0287cde3922434a560fca90051cc5b418d987`, with multi-domain atomicity BLOCKED and JF-10 P0 OPEN.
+
+These decisions improve technical cross-owner acceptance evidence but do not close governance, implementation, runtime test or Applied schema freeze gates.
