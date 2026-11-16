@@ -25,8 +25,9 @@ D returns a signed DParticipantClearanceRef only after verifying the participant
 
 ## 3. Fence installation and terminality
 
-- A fence request is durably recorded as pending before it becomes effective.
-- If a ParticipantIntentRef is ordered before the fence's effective point, D MUST keep the fence barrier open until that participant has a durable C submit outcome and compatible I terminal evidence, or a safe abort is durably established.
+- A fence request is durably recorded in the coordinator/D authoritative barrier before it becomes effective. Its request position establishes the admission cutoff: any ParticipantIntentRef ordered after the fence request is rejected as FENCE_WON even while the fence is waiting for earlier participants to drain.
+- If a ParticipantIntentRef is ordered before the fence request, D MUST keep the fence barrier open until that participant has a durable C submit outcome and compatible I terminal evidence, or a safe abort is durably established. Only then may D commit the fence's effective position.
+- D terminal evidence carries both the fence-request position/cutoff and the eventual fence-effective position; these are not interchangeable.
 - A participant cannot be dropped because of process death, timeout, lease expiry, queue deletion, DLQ movement, worker replacement, coordinator disconnection or lost ACK.
 - If provider outcome is unknown, participant state is IN_DOUBT and fence effectiveness/completion remains blocked. Recovery must reconcile the same transaction/reservation and provider idempotency identity.
 - If the fence is effective before ParticipantIntentRef, D returns FENCE_WON and C cannot submit.
