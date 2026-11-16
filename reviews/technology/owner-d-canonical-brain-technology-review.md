@@ -102,3 +102,12 @@ Keep CanonicalCommitCursor, AggregateRevision, LifecycleEventCursor, ForgetFence
 ## 8. Final recommendation and non-claims
 
 Conditionally accept TAB-001's local transactional-store direction. Do not freeze SQLite, PostgreSQL, a KV engine, or a split-store coordinator. The joint D/E/Storage semantic decision is recorded, but no storage implementation, race test, crash-recovery test, benchmark, backup/restore drill or production deployment was validated by this review.
+## 9. Reassessment — Storage and COC architecture evidence (2026-11-17)
+
+The original verdict's phrase 'BLOCKED for storage selection' is superseded for architecture design by the following exact evidence:
+- Storage selected PostgreSQL 18.7 as the concrete prepared-XID capability candidate for the pinned CI profile; it is not production deployment approval.
+- Seven-workflow regression set is 7/7 SUCCESS: PITR run `43958775001`/job `133620265141`; prepared-XID `43959079736`/`133621314502`; synchronous promotion `43959079669`/`133621315610`; backup/restore `43959079703`/`133621314624`; WAL PITR `43959079745`/`133621314724`; sync-unavailable fail-closed `43959079760`/`133621315188`; pg_rewind/rejoin `43959079930`/`133621314973`.
+- Exact COC durable protocol Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` has exact D acceptance in `03-memory-brain/phase-3.6.3-d-coc-durable-protocol-acceptance.md`, Blob `e2a74d138ccebfb4266d19ea0c0c03f58a815bf5`.
+- Storage Gate B protocol design is exact-owner-reviewed; A records the matrix in `reviews/integration/phase-3.6.3-coc-durable-protocol-acceptance-matrix.md`.
+
+Updated D disposition: **CONDITIONAL PASS — D semantic and architecture contract accepted; runtime implementation and end-to-end conformance deferred to engineering.** D does not certify PostgreSQL production deployment, I sequencer integration, D ledger implementation, physical erasure or Global Forget completion. JF-10 implementation P0 remains OPEN.
