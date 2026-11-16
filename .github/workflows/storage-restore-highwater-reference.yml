@@ -1,0 +1,32 @@
+name: Storage Restore Control High-Water Reference Model
+
+on:
+  push:
+    branches:
+      - session-storage-consistency-forget-atomicity-2026-11-16
+    paths:
+      - "reviews/storage-consistency/restore_reference/**"
+      - ".github/workflows/storage-restore-highwater-reference.yml"
+  pull_request:
+    paths:
+      - "reviews/storage-consistency/restore_reference/**"
+      - ".github/workflows/storage-restore-highwater-reference.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  restore-highwater:
+    name: Restore quarantine and owner high-water reference tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile model and tests
+        run: python -m py_compile reviews/storage-consistency/restore_reference/restore_highwater_model.py reviews/storage-consistency/restore_reference/test_restore_highwater_model.py
+      - name: Run restore high-water tests
+        working-directory: reviews/storage-consistency/restore_reference
+        run: python -m unittest discover -v
