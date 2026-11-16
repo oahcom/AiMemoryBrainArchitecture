@@ -524,3 +524,18 @@ Storage's physical backup/restore probe passed:
 The probe took pg_basebackup while an XID was prepared, restored to a separate PostgreSQL 18.7 instance, verified the exact prepared XID survived and remained private, and resolved it using the same XID. It also restored a stale control snapshot and proved the read gate stayed closed until a newer authoritative Forget-control epoch was replayed; only then was the forgotten artifact suppressed and unrelated content made readable.
 
 **Gate A remains PARTIAL PASS / OPEN.** The control epoch is a test fixture standing in for I/D's external authority, not production service integration. Actual host/zone/storage durability, production failover fencing/routing, Canonical Authority deployment, human operator/runbook and RPO/RTO remain open. Gate B/C remain blocked; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+## Gate A — coordinator crash-window / unrecorded-ACK recovery PASS (2026-11-17)
+
+Storage executed a separate PostgreSQL 18.7 probe in which a coordinator child process dies after participant PREPARE / COMMIT PREPARED / ROLLBACK PREPARED succeeds but before the coordinator records the acknowledgement in its durable test ledger.
+
+- Probe Blob: 51cf8c7a9fa169aff8b0a5fd8a7ec5f934ad35a2
+- Workflow Blob: 7b612223f309ef0b963d262a94845a083e79ec7c
+- Successful run: 43912857694
+- Run commit: 5f342adb95f95208e8f1e2cc52538cf0944aa9e3
+- Job: 133459107145
+
+The recovery process reconciled the exact original XID without allocating a new one. PREPARE ambiguity retained private visibility and the prepared lock; COMMIT ambiguity reconciled to pointer + receipt visible together; ROLLBACK ambiguity reconciled to neither visible.
+
+**Important scope:** this is a deterministic coordinator process-crash / unrecorded-checkpoint test, not a TCP packet-drop test or production I sequencer/COC test. Its SQLite ledger is a test fixture. Gate A remains PARTIAL PASS / OPEN; production deployment binding, real I/D ledger integration, production fencing, host/zone durability, human operator, runbook and RPO/RTO remain open. Gate B/C remain blocked.
