@@ -378,7 +378,51 @@ The matrix records all eight non-A Owner perspectives as **ACCEPT WITH CONDITION
 
 F has published a deterministic anti-resurrection runtime reference model, evidence Blob `15049d448ace5ad24a6c02eba3fc906fcac149f6`, with **19/19 tests passing** on its current branch. This is valuable model evidence, not production runtime or fault-injection evidence. F's module baseline proposal still omits the Observation Archive contract and needs Owner-authored update. G's module baseline proposal still omits TSS/ObservationRef/dynamic compaction/fidelity/lineage-loss semantics and needs Owner-authored update. The F/G joint Recall contract remains conditional; no same-version joint contract acceptance is established.
 
-H has published a JF-10 bridge schema validation workflow Blob `5201c22b512bf7ed2c227b06c3e3aba0bba8b91a` and test Blob `74bc4286abe1489ce29c2446c6fc22445784609f`, with **11/11 structural tests passing**. The schema remains a candidate, not frozen. The tests do not yet validate the new PreparedTransactionGID/native-XID nominal distinction, DB incarnation binding or signed PreparedParticipantReceipt semantics. H must map or add fields explicitly; do not infer that opaque `storage_xid_ref` and `preallocated_storage_xid_ref` already implement the new type distinction.
+H has published JF-10 schema validation evidence Blob `318c433d5b96966ecd47e6d1b265a0b12b28e581` and strict parser evidence Blob `d974ee1b166af4a94ab8ad7601744f40f32f98c6`, with **23/23 combined schema/parser reference tests passing**. The schema remains a candidate, not frozen. The tests do not yet validate the new PreparedTransactionGID/native-XID nominal distinction, DB incarnation binding or signed PreparedParticipantReceipt semantics. H must map or add fields explicitly; do not infer that opaque `storage_xid_ref` and `preallocated_storage_xid_ref` already implement the new type distinction.
 
-TAB-001 technology review coverage is now 8/8 Owner reports present (B/C/D/E/F/G/H/I). A's final system review has a §18.6 reassessment to CONDITIONAL PASS, but its front matter and earlier missing-report table still say NOT REVIEWABLE / B-D-E-I missing. A must consolidate the superseded text, refresh branch/source pins and include the new F 19/19 and H 11/11 model/schema evidence with their non-claims.
+TAB-001 technology review coverage is now 8/8 Owner reports present (B/C/D/E/F/G/H/I). A's final system review has a §19.4 reassessment to CONDITIONAL PASS, but its front matter and earlier missing-report table still say NOT REVIEWABLE / B-D-E-I missing. A must consolidate the superseded text, refresh branch/source pins and include the new F 19/19 and H 11/11 model/schema evidence with their non-claims.
+
+
+
+## 14. Latest A/H/I Prepared GID review and test evidence
+
+Current exact review artifacts:
+- A integration review: `reviews/integration/phase-3.6.3-prepared-gid-jf10-bridge-integration-review.md`, Blob `c869cf594e8d5b6fcd6343992836da178227ebf5`, disposition **ACCEPT WITH ENUMERATED AMENDMENTS**.
+- H strict wire review: `reviews/bmcp/phase-3.6.3-prepared-participant-strict-wire-envelope-review.md`, Blob `db0379c3a0ab598c7d2e47229309d2a075ccd3cb`, disposition **CANDIDATE / NO APPROVAL**.
+- I signature/trust review: `reviews/security-governance/phase-3.6.3-prepared-participant-signature-trust-review.md`, Blob `7545dc1f74e6cfda17701b9c053fe342a8b01d44`, disposition **CANDIDATE / NO APPROVAL**.
+
+All three artifacts explicitly state they are coordinating-session role simulations, not independent Owner signatures. Issue #17 records this provenance and remains open.
+
+### 14.1 A's enumerated amendments
+
+A identifies five blocking amendments before integration freeze:
+1. Governed, globally unique, non-reusable `DatabaseIncarnationRef` bound through every receipt/proof/lookup.
+2. Immutable, replay-safe PrepareAttempt identity and generation; retry must not silently create a new prepared participant.
+3. PREPARED receipt only after authoritative database readback proves the exact GID is prepared.
+4. Preserve original prepare timeline/LSN separately from recovery-time observation coordinates.
+5. I's terminal decision must atomically consume/bind the exact signed Storage receipt, participant, DB incarnation and operation digest.
+
+### 14.2 H's wire blockers
+
+H requires a strict nominal wire model for `PreparedParticipantRef`, `PreparedTransactionGID`, `NativeXidObserved`, `DatabaseIncarnationRef`, PrepareAttempt identity/generation, DB identity and signed receipt/proof payload. It also requires canonical signed-byte definition, issuer/subject/audience/purpose binding, replay/idempotency behavior and negative vectors. H does not approve the current schema candidate.
+
+H's test evidence is now:
+- Schema shape suite: 11/11 PASS.
+- Strict JSON parser reference suite: 12/12 PASS.
+- Combined: **23/23 PASS**, workflow run `43963251050`.
+These are structural/reference tests only. They do not implement JCS or another canonicalization profile, signature verification, key custody, generated SDK interoperability or live transport.
+
+### 14.3 I's trust blockers and Global Forget evidence
+
+I's security review requires a canonical signature envelope, explicit issuer/subject/audience/purpose, key lifecycle and historical verification, revocation behavior, anti-replay/substitution/GID-reuse defenses, restore anti-rollback and atomic consumption of the signed PreparedParticipantReceipt. It explicitly grants **no security approval** to the current proposal.
+
+I's Global Forget logical model now passes **30/30** tests (run `43963450717`, job `133636592112`, evidence Blob `206e65689d17c0fb1f57bc20aea72c6e7fd4752a`). This is model evidence only; I36-GOV-01..10 remain proposal-only and Global Forget remains GOVERNANCE-BLOCKED / NOT COMPLETED.
+
+### 14.4 Cross-artifact closure implications
+
+The current Storage Design v2 Blob `4ed423...` predates these A/H/I review findings. It does contain GID/native-XID separation, but it does not yet close all new amendments: DatabaseIncarnationRef governance, PrepareAttempt identity/generation, authoritative PREPARED readback, original-vs-recovery coordinates and I's atomic terminal proof consumption must be made explicit and then re-reviewed.
+
+The H schema candidate Blob `a8a945...` remains unchanged and does not yet expose/validate the full nominal tuple. The common JF-10 protocol Blob `946798...` still uses generic preallocated-XID wording; Storage readiness §26.2 also uses generic “exact XID”. B's typed-reference model must define the new nominal types. These are coordinated P0/P1 cross-artifact tasks, not approvals.
+
+A's final TAB-001 report now records F 19/19, H 23/23 and I 30/30 reference/model evidence, but its front matter still says NOT REVIEWABLE while §19.4 says CONDITIONAL PASS; its source manifest has stale H/I heads. A must consolidate that report and update the current COC/GID status.
 
