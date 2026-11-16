@@ -537,3 +537,71 @@ These are the joint architect's confirmations under user delegation, not signatu
 | Global Forget Completion | NOT CLAIMED |
 
 No branch merge was performed. I-owned files were read only. This addendum records the live baseline and execution blockers; it does not assert deployment, implementation, test pass, production readiness, physical erasure or Global Forget completion.
+
+
+## 13. I branch final refresh — field-level consumer acceptance and governance execution
+
+A final branch refresh after §12 found that I advanced again. The current I tip at this read is:
+
+- Branch: `session-i-security-governance-2026-11-16`
+- HEAD: `7ef0a0fa71e02ffb0a67f0ebe927c91d0d5bd778`
+- Parent: `3db65260aee46efc252f647c5926c3deb623c7f6`
+- Commit: `docs(I): add field-level consumer acceptance matrix`
+- New I-owned artifact: `09-security-governance/phase-3.6-governance-acceptance-execution-addendum.md`
+- New artifact Blob SHA: `1f5d2e4aba7afa75c0696f3c8f025b0cb903e0ad`
+
+This refresh supersedes the earlier I HEAD value in §12.4 as the latest inspected I branch tip. The technical authorization contract Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`, governance register Blob `3718ae8b24940ff655a2652e908996635709c1ad`, and inventory/CEV candidate Blob `9100061fa986fb6676656169de3fcf9fc1c72664` remain unchanged in the new I tree.
+
+### 13.1 Governance status
+
+The new I-owned addendum explicitly records:
+- technical policy baseline: JOINT-DECIDED;
+- all external governance approvals: GOVERNANCE-BLOCKED;
+- consumer acceptance: OPEN;
+- I36 execution: NOT RUN.
+
+Existing I36-GOV-01..08 remain GOVERNANCE-BLOCKED. The addendum also preserves decision-ID continuity and adds two further blocked governance topics:
+- I36-GOV-09: Principal resolution, collision/alias migration and stable identity policy;
+- I36-GOV-10: ActorRef / Principal binding and verifier attribution policy.
+
+No named approving authority, signed approval, effective policy version or approval evidence was located. I explicitly states that an owner-authored record cannot approve its own policy. This reinforces, rather than clears, the I governance blocker.
+
+### 13.2 Explicit consumer acceptance result
+
+The new I field-level matrix says acceptance requires an explicit statement from each consumer Owner tied to the exact BIH contract version/commit. Document presence, code presence, compatibility or A registration is not acceptance.
+
+For each of D, E and Storage, every one of these fields/behaviors remains **OPEN**:
+- PrincipalRef;
+- ActorRef;
+- ScopeRef;
+- EnvironmentRef;
+- Producer/Adapter identity;
+- authenticated transport binding;
+- PermissionEpoch validation;
+- revocation;
+- forged payload identity rejection;
+- Unknown / Unsupported handling.
+
+Therefore I has not accepted the DE-S consumer contract on behalf of D/E/Storage, and the DE-S engineering consumption mapping is not an independent I Owner approval. D/E/Storage must supply their own explicit field-level acceptance evidence; until then, consumer acceptance remains OPEN.
+
+### 13.3 I test execution
+
+The new I addendum records I36-T01..T20 as NOT RUN. Its repository discovery reports Markdown-only artifacts with no executable source, test runner, fixtures or workflow definitions. No I36 result is treated as PASS or FAIL.
+
+### 13.4 Issue #4 recheck
+
+Repository issue #4 remains OPEN, updated at `2026-11-16T13:27:02Z`, with one comment from the repository author. No distinct I Owner response, approval attachment or signed governance evidence appeared. The issue remains a request, not an approval.
+
+### 13.5 Updated I disposition
+
+| Dependency | Latest I status | DE-S disposition |
+|---|---|---|
+| CommitAuthorizationReceipt / policy-domain sequencer | Technical contract decided; implementation NOT VERIFIED; governance blocked | Consume exact receipt; JF-10 remains P0 OPEN pending crash-atomic cross-authority recovery |
+| ProducerDomainInventoryEpoch / InventorySeal | CANDIDATE; no governance approval | BLOCKED; no closed-world/global coverage claim |
+| ProducerClass / ProducerIdentity global coverage | Technical identity binding described; full inventory approval/consumer acceptance absent | BLOCKED for unknown/unregistered/incomplete producer paths |
+| Unknown / Unsupported / Offline | Fail-closed technical baseline; exception governance blocked | DENY/QUARANTINE/UNKNOWN or PENDING; no inferred success |
+| Global Forget Completion / CEV | CANDIDATE; I36-GOV-08 blocked | NOT APPROVED / NOT CLAIMED |
+| D/E/Storage identity consumer acceptance | All ten fields/behaviors OPEN for each consumer | OPEN; explicit Owner acceptance still required |
+| I36 adversarial execution | T01..T20 NOT RUN | NOT VERIFIED |
+
+No I-owned file was modified by DE-S. This final I refresh changes no D/E/Storage design decision and does not close JF-10 or any governance blocker.
