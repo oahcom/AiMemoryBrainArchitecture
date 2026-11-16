@@ -143,3 +143,11 @@ Measure CPU overhead for encryption/decryption, p95/p99 policy-sequencer latency
 | I COC durable protocol acceptance | `4b1ef1c607089db1c886ae9af82e8cab5d9c6af3` | `528945f82e3e25258052240a7a4ba43753ae6cf8` |
 
 This report does not approve TAB-001, declare global Forget complete, or claim implementation/security-test evidence.
+
+## 8. Reassessment — Global Forget target inventory reference model (2026-11-17)
+
+I added an in-memory Global Forget target-inventory/CEV reference model. Evidence: `09-security-governance/phase-3.6.4-global-forget-reference-model-evidence.md`, commit `674b9496bcb866fdaf725108104ce55f6d127528`; model Blob `5233da028e409ec3f41848582dad73a923e7155b`; tests Blob `091f9450adf49a2a9f9ec8a2fa4470918023f765`; CI run `43962873109`, job `133634616584`, commit `73a0bff13b531b5b9feaeeec1887db31d6266589`.
+
+**Result: 25/25 logical reference-model tests PASS.** Covered inventory seal authority/gaps, epoch invalidation, target discovery, evidence binding, ACK-vs-delete distinction, Unknown/Unsupported, D barrier, backup restore quarantine/control replay, physical-erasure action, independent PolicyException approval/expiry, NotApplicable proof and owner-local evidence limits.
+
+Limit: no production inventory registry/seal, actual target API, external recipient evidence, production restore, formal I36 governance approval, PolicyException approval or physical-erasure proof is claimed. Global Forget remains OPEN / NOT COMPLETED.
