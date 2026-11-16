@@ -766,3 +766,39 @@ Current exact A-owned artifacts:
 These supersede package `d4eef4aecf94f922f7933c1e1fec14a69ad17dec` / COC `65878e1e2b569b1dc6d0918f51a313da122236d4`. Six Owner decisions were verified for historical package Blob `9808b31f840606b329f1a794935dfc9c5084d63b` only (C/D/I/H/G accept with exceptions; B approves semantic type bindings). Those decisions do not approve the present recovery-batch amendment. Fresh exact-Blob decisions requested in Issue #3 comment `6920481902`; Storage's refreshed exact-Blob decision requested in Issue #2 comment `6920482983`.
 
 Current gate: latest package CANDIDATE / FRESH OWNER REVIEW REQUIRED / NOT FROZEN; COC proposal not designated/deployed; Storage/operator and Security approvals pending; COC-01..16 and consumer race suites NOT RUN; production causal proof NOT VERIFIED; G8 BLOCKED, G9 NOT RUN, G10 BLOCKED.
+
+
+## Storage Owner formal decision — authoritative COC persistence/recovery boundary (2026-11-16)
+
+**Formal Owner decision verified by exact readback:** `CONFIRMED WITH CHANGES — ARCHITECTURE INTERFACE ONLY`.
+
+- Storage Owner branch: `session-storage-consistency-forget-atomicity-2026-11-16`
+- Owner branch HEAD / decision commit: `7b83e61c44dd4b67fa2059a3bff83d453aeaf757`
+- Decision artifact: `reviews/storage-consistency/phase-3.6-coc-storage-boundary-acceptance.md`
+- Decision Blob SHA: `a589d983ac145244962c22e5da3a55427aa35ff8`
+- Exact A COC Blob reviewed: `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`
+- Exact A CGH-APPLIED-1.1 package reviewed: `4961ffefc0f9920efb8425a9b2a7af42d8f64819`
+
+### Confirmed Storage authority and persistence boundary
+
+1. COC is a distinct cross-authority causal-order ledger, not the Canonical Memory Authority database, not D's producer-work/fence/dependency/visibility transaction, not Storage's VisibilityPointer/PublicationReceipt authority, and not I's policy-domain sequencer or JF-10 2PC coordinator.
+2. Per Canonical Memory Authority, Storage retains one durable serializable (or formally proven equivalent) transaction domain for D work admission, registration sequence, fence/high-water snapshot, complete dependency registration, final visibility gate, VisibilityPointer, PublicationReceipt, terminal disposition and transactional outbox.
+3. Object/blob bytes remain private until the authoritative Storage visibility transaction commits. Object listing, cache/index, replica, outbox delivery, COC append/reservation or copied receipt do not establish visibility or publication.
+4. COC quorum append/linearizable read, durable owner-local outage gates, recovery-cutoff batch, pre-batch ParticipantIntentRef enumeration/reconciliation, non-expiring IN_DOUBT and RESTORE_FENCED are confirmed as logical architecture/design targets.
+5. COC, I JF-10 owner-gate 2PC and Storage visibility remain three distinct consistency/authority boundaries. No combined activation until I approves the exact bridge and C/D/Storage accept it. No heuristic saga/compensation substitutes for the missing proof.
+
+### Mandatory open items — not confirmed as deployed
+
+- Actual named COC operator and infrastructure owner: OPEN / NOT DESIGNATED.
+- Actual three-voter/failure-domain placement, quorum durability, durable media and linearizable implementation: OPEN / NOT VERIFIED. Three-voter/two-quorum is a design target only.
+- Snapshot/checkpoint integrity, external rollback protection, total-cluster-loss restore and RESTORE_FENCED implementation: OPEN.
+- Actual retention/compaction configuration: OPEN (only semantic non-dropping requirement confirmed).
+- RPO/RTO, SLO, data residency, encryption/KMS/key custody and escalation: OPEN.
+- Canonical Authority DB product/version/isolation/HA/prepared-XID support: OPEN.
+- I-approved JF-10 owner-gate prepared participant/2PC and explicit COC bridge: BLOCKED / REQUIRED.
+- COC ↔ Storage cross-domain atomicity: NOT SPECIFIED / NOT PROVEN.
+- Production implementation and conformance: NOT VERIFIED / NOT RUN.
+
+Storage explicitly records JF-10 reference model as in-memory logical model only; 15 unittest methods authored but not run in repository CI; JF-10 production implementation not implemented/not verified; COC-01..16 specified/not run; production activation not authorized; Applied Contract Frozen = NO.
+
+**A disposition:** Storage's logical authority/persistence/recovery boundary is formally CONFIRMED WITH CHANGES for the two exact A artifacts above. This closes the Storage *architecture-interface decision* only. It does not close deployment selection, operational durability, I bridge, production implementation, or conformance gates. Any subsequent A amendment requires a fresh Storage exact-Blob decision.
