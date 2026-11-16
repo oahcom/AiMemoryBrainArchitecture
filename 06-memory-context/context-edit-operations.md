@@ -127,3 +127,31 @@ A ChangeSet already committed before the fence remains immutable history, but it
 ### 4.3 No partial visibility
 
 Operation-level diagnostics may identify which precondition failed, but the desired Context head changes only if the complete ordered operation set, D dependency registration and D final publication gate all succeed. A failed or unknown cross-owner gate leaves the target artifact private and the current head unchanged. Adapter partial coverage is an application outcome, not a partial ChangeSet commit.
+
+
+## 5. Phase 3.5 — ChangeSet concurrency and replay hardening
+
+### 5.1 Duplicate and concurrent mutation handling
+
+1. Resolve the idempotency namespace only after authenticating the caller and resolving the exact Context/Scope. The namespace includes Principal, Context, operation family and key retention window.
+2. Normalize the complete ordered operation list and compute a canonical payload hash before execution.
+3. Existing key + same hash returns the original immutable result, including the original TargetVersion. Do not execute operations again.
+4. Existing key + different hash rejects with IDEMPOTENCY_KEY_REUSE and emits a consistency/security audit event.
+5. Verify BaseVersion equals the authoritative Context head at the commit linearization point. A mismatch rejects with BASE_VERSION_MISMATCH; caller must reload and create a new ChangeSet.
+6. Validate every operation against one staged working copy. Commit ChangeSet, immutable ContextVersion, audit and outbox atomically as one G-owned logical transition.
+7. Concurrent writers serialize per Context or use equivalent CAS. Exactly one writer may commit against a given BaseVersion; losers re-read and re-plan. No implicit merge or BaseVersion+1 prediction.
+8. A committed ChangeSet is immutable. A retry after Forget/revocation does not regain authority from the earlier ALLOW: current permission and fence are rechecked at every protected read, derivation, publication and delivery boundary.
+
+### 5.2 Remove, Forget and replay distinction
+
+Remove creates a G membership tombstone in a new ContextVersion. It does not create a canonical ForgetOperation and does not advance D's ForgetFence. An older Snapshot/Delta/ChangeSet replay that would restore the removed membership is rejected or superseded by the current Context head. A canonical Forget event independently tombstones all matching G entries by exact source lineage and Scope, even if no Remove ChangeSet has yet committed.
+
+### 5.3 Cross-owner visibility gate
+
+A G ChangeSet may be logically validated and staged while D/Storage publication evidence is pending, but the staged artifact is private. It is not a public Context head, a sendable Snapshot/Delta or a Prepared Delivery until:
+- D has durably registered every source/dependency edge;
+- the current D ForgetFence and I PermissionEpoch have been revalidated at the visibility linearization point;
+- D's final publication-gate decision/receipt is available and bound to this exact artifact/digest;
+- G's own Context BaseVersion CAS succeeds without a competing head advance.
+
+If any condition is Unknown, failed or stale, do not expose the target or send. This is an explicit cross-owner implementation gate; no callable D API or Storage transaction is implied by this prose.
