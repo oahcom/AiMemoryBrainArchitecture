@@ -524,3 +524,20 @@ D reviewed A's pinned C/G/H Applied Contract package (Blob SHA `61d961c32138fd87
 7. A committed fence/suppression obligation is not rolled back by later requester revocation; subsequent cleanup must proceed under a currently authorized I service/continuity principal. D does not define or approve that I principal policy.
 
 **D disposition:** **APPROVE D-OWNED FENCE/LINEAGE SEMANTICS WITH AUTHORITY RESERVATIONS** for the exact A package. I authorization and D/E/Storage executable linearization remain separate blockers. D36 and DE-S fault/race suites remain **SPECIFIED / NOT RUN**; no implementation or end-to-end completion is claimed.
+
+## Phase 3.6.2 — D exact-version acceptance of JF-10 prepared participant ↔ COC bridge
+
+**Reviewed exact A artifact:** `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`, A branch `session-a-integration-2026-11-16`, Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, §12.1–12.8.
+
+**D DECISION: ACCEPT — D-OWNED FENCE/BARRIER SEMANTICS FOR THIS EXACT A BLOB, WITH AUTHORITY RESERVATIONS.**
+
+D accepts the bridge's prospective-participant ordering and barrier requirements as consistent with D's existing fence contract, subject to these binding D interpretations:
+
+1. A quorum-committed `JF10_PREPARE_INTENT_REGISTERED` before a D fence cutoff makes the prospective participant a member of the affected target/source/ancestor barrier, even if Storage PREPARE or the signed prepared receipt has not yet been registered.
+2. A D fence cutoff ordered before prepare-intent registration rejects the affected prepare; no Storage XID may be prepared for that lineage.
+3. D retains exclusive authority over ForgetOperation, ForgetFence, target/lineage registration, ProducerRegistrationHighWater, BarrierSnapshotReceipt, D fence generation and effective-fence/suppression completion. COC records and positions are evidence of cross-owner ordering; they do not mint D state or clear D obligations.
+4. A pre-cutoff participant remains in the D barrier until the I sequencer's exact terminal decision and Storage's same-XID commit/rollback resolution are authoritatively proven and all D lineage obligations are satisfied.
+5. An unresolved or ambiguous participant keeps the barrier open. COC/I/Storage outage, timeout, missing row, stale replica or lost ACK cannot release the participant or permit effective fence completion.
+6. D and COC positions are typed, separate orders. D does not compare opaque values or infer order from wall-clock time; D consumes the authenticated bridge tuple and its own canonical fence/lineage evidence.
+
+This is D's exact-version architecture acceptance for D-owned fence/barrier semantics only. It does not approve I's sequencer implementation, Storage's database/XA capability, COC deployment/operator, H schema, implementation, conformance or production activation. D36 and JF10-COC-01..10 remain NOT RUN. JF-10 remains P0 OPEN; multi-policy-domain atomicity remains BLOCKED.
