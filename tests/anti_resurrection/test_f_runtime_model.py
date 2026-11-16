@@ -21,6 +21,8 @@ class RuntimeAntiResurrectionTests(unittest.TestCase):
         key = self.f.cache_key(self.good)
         self.f.cache[key] = self.good
         self.f.apply_forget("forget-1", "d1", ["mem-1"])
+        # Simulate a node that missed the invalidation notification and still holds the old entry.
+        self.f.cache[key] = self.good
         self.assertIsNone(self.f.cache_get(key))
         self.assertEqual(self.f.stale_evictions, 1)
 
