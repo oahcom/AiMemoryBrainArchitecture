@@ -381,3 +381,26 @@ C telemetry is source material, not canonical Memory. E's normal ingestion, extr
 See `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md` §§2–3. This addendum clarifies that Transport-authenticated Principal, self-reported Agent identity, Adapter identity, Runtime Session, Task Identity, ActorRef, ScopeRef, EnvironmentRef and PermissionEpoch are distinct values with different issuers and proof ceilings. Payload identity fields are claims only. H binds transport identity; I resolves trust/authorization and PermissionEpoch; B owns typed ActorRef/ScopeRef semantics. No C field definition approves B/I/H candidates.
 
 The mandatory telemetry profile now explicitly covers Task State, Intent, Plan Summary, Tool Call, Observation, Outcome, Uncertainty, Risk Signal and Environment Delta with identity, scope, environment, time, provenance and trust requirements. Intent/Plan are prospective; Tool Call is not Tool Result or side-effect proof; Observation is not automatically Verified. Authenticated reporting never upgrades a signal to canonical Fact/Claim. ADR-001 remains ADR-BLOCKED.
+
+
+## Phase 3.5 identity revalidation addendum (2026-11-16)
+
+The identity chain is intentionally not a single producer identity string. For every applicable event, consumers distinguish:
+
+| Logical value | Meaning / owner | C ingestion rule |
+|---|---|---|
+| Authenticated Principal + Issuer | I security subject and trusted issuer, authenticated at H transport boundary | Consume only the verifier-resolved protected transport binding; payload mirrors are claims |
+| Agent Principal | I-registered security subject for the logical Agent | Must be bound to AgentRef and, where applicable, an Agent instance; never inferred from model name |
+| AgentRef | B-owned logical Agent typed reference / registry binding | Payload agent_id is a selector to resolve, not authentication |
+| Adapter Principal / AdapterRef | I security subject plus H-registered Adapter/application/instance | Distinct from Agent and Producer; bind concrete instance and CapabilityEpoch |
+| ProducerIdentity / ProducerRef | I producer registry identity and source/workload registration; B's cross-module ProducerRef mapping remains candidate | Payload producer_id must match authenticated registered ProducerIdentity; D work registration is a separate per-work-item barrier |
+| Runtime Session | H/I authenticated, expiring session bound to runtime/Agent/Adapter | Session ID is correlation until validated; reconnect requires a new current binding |
+| Task Identity | Brain-issued or authenticated task binding; Agent-local task ID may be a claim | Correlation/isolation only; never a capability or permission |
+| ActorRef | B typed per-operation attribution; I validates issuer/authentication/delegation assertions | Verifier-issued binding only; never accept caller-constructed ActorRef as proof |
+| ScopeRef | B typed ownership/applicability reference; I resolves and authorizes | Scope is not permission; no wildcard or implicit parent/child grant |
+| EnvironmentRef | Authoritative Environment registry / authenticated Environment Adapter; exact B type/owner remains OPEN | Require exact binding for environment-dependent signals; no free-text label or cross-environment inference |
+| PermissionEpoch | I opaque policy-domain epoch | Carry unchanged and revalidate at each protected boundary; never compare to other epochs |
+
+ProducerDomainInventoryEpoch (I's global producer/recipient catalogue) and D's ProducerRegistrationHighWater / WorkItemBarrier are separate. The first bounds which producer/recipient classes and instances exist; the second accounts for concrete work admitted for one Forget operation. A producer event receipt, Adapter queue watermark or C telemetry sequence cannot substitute for either.
+
+The C telemetry semantics remain DECIDED; exact wire fields, canonical type IDs, issuer/delegation approval and E durable acceptance mapping remain owner-controlled OPEN/CANDIDATE. This addendum is semantic consumption only, not a wire schema or I authorization decision.

@@ -16,7 +16,7 @@ Capability tiers classify what an integration can reliably observe, request, rec
 | Active Recall | Yes | Yes | Yes |
 | Proactive context delivery | Yes | Yes, to middleware slot | Not guaranteed |
 | Apply before inference submission | Yes | Yes on controlled paths | No |
-| Applied version attestation | Yes | Yes on controlled paths | No |
+| Applied version attestation | Full only with final-submit proof | Local materialization evidence only; Partial/Unknown | No Applied claim |
 | Snapshot/delta reconciliation | Full | Middleware-supported subset | Not applicable |
 | Observe task/session changes | If exposed | Middleware-visible | Explicitly submitted only |
 | Environment telemetry | Supported | If instrumented | Optional |
@@ -58,7 +58,7 @@ Integration occurs through middleware, orchestration hook, prompt/context builde
 - Maintain applied-version record for the controlled slot.
 
 ### Guarantees
-**DECIDED:** Tier 2 can attest insertion of a specified context version into a request that passed through its controlled assembly hook, if it can inspect the final outgoing request representation.
+**DECIDED:** Tier 2 can attest only the specified ContextVersion's materialization in its locally controlled Managed Region at its own middleware boundary. It cannot prove actual final immutable request submission or provider/runtime handoff. Tier 2 MUST report Partial or Unknown and MUST NOT claim Full Applied, even if it can inspect a locally rendered outgoing representation.
 
 ### Non-guarantees
 No guarantee for bypassed paths, complete Agent state, hidden/provider-managed context, all task/environment transitions, or model comprehension. Do not claim Tier 1 coverage without equivalent boundary observability and control.
@@ -211,3 +211,12 @@ Negotiation binds authenticated Adapter, Agent instance, Runtime Session and Cap
 ## Phase 3.5 tier clarification — supersedes conflicting Tier 2 language
 
 The definitive tier ceiling is in `phase-3.5-agent-identity-applied-attestation-untrusted-memory.md` §8 and the final-request contract §4. A Tier 1 integration must observe the exact final immutable request and actual runtime/provider submission, bind the actual request ID and complete Managed Region digest, and pass per-request freshness/authorization/fence checks. Tier 2 can observe/materialize its Managed Region but cannot prove actual final submission and therefore MUST NOT claim Full Applied. Tier 3 reports transport/receipt/Recall only and makes no Applied claim. Product names, middleware labels and declared capabilities do not establish tier; reproducible conformance evidence does.
+
+
+## Phase 3.5 alignment note — final request and Forget evidence
+
+The capability tier is a ceiling, not a declaration of successful conformance. Full Applied is a per-inference-request claim and requires an authenticated Adapter/runtime integration to observe the final immutable request after all transformations and the actual successful handoff, bind the InferenceRequest ID, exact G ContextVersion and Delivery/attempt, Managed Region coverage/digest, H CapabilityEpoch, I PermissionEpoch/decision, D ForgetFenceGeneration and final boundary evidence. If any component is unavailable or unverifiable, no Full claim is allowed.
+
+Forget actions are independent capabilities: Suppress, Clear, Purge and Cancel each require an explicitly declared local coverage inventory and separate postcondition evidence. A transport ACK or one action's evidence cannot imply another action, global Forget completion or physical erasure. Reconnect must reauthenticate, renegotiate, obtain current I/D/G state, persist suppression, clear/purge/cancel supported local state, reconcile deliveries and revalidate immediately before reuse.
+
+Upstream identity, ACK, Context and Forget proposals remain candidate/open until their owners approve. C does not freeze H wire fields or I policy.

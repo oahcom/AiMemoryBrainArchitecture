@@ -30,9 +30,11 @@ Candidate status in any upstream document remains candidate here. A static C doc
 | Identity / reference | Authoritative source | What C/Adapter may observe | What it proves | What it does not prove |
 |---|---|---|---|---|
 | Transport-authenticated Principal + Issuer | H authenticates channel/credential; I defines trusted issuer and Principal policy | H-provided authenticated binding and authentication-context reference | Which authenticated security subject presented the transport credential under the configured trust policy | Payload Agent identity, truth of telemetry, permission for every requested action |
-| Agent self-reported identity | Agent payload/configuration | Agent ID, Agent instance ID, model/runtime labels | Producer's declaration only | Authentication or authorization |
-| Adapter identity | I registration/policy; H binds concrete Adapter instance to authenticated transport | Registered Adapter Principal/instance/workload binding and credential epoch | Which registered Adapter instance is acting, if H/I validation succeeds | Identity of the Agent unless separately bound |
-| Runtime Session | H/I authenticated session binding; session lifecycle authority | SessionRef, runtime instance, authenticated binding and validity | Which runtime session is the current recipient/source context | Task ownership outside its bound session or perpetual validity |
+| Agent Principal / AgentRef | I establishes the Agent Principal; B defines typed AgentRef semantics and the Agent registry binds the logical Agent | Authenticated Agent Principal binding plus separately resolved AgentRef; payload agent_id is only a selector | Identifies the security subject and logical Agent only after the I/B binding is validated | Agent instance, Adapter, ProducerIdentity, Runtime Session, task ownership or permission |
+| Agent self-reported identity | Agent payload/configuration | Agent ID, Agent instance ID, model/runtime labels | Producer's declaration only; may be compared with registered AgentRef/Principal binding | Authentication or authorization |
+| Adapter Principal / AdapterRef | I establishes the Adapter Principal and trust; H owns Adapter registration/instance and authenticated transport binding; B's cross-module AdapterRef mapping remains candidate | Authenticated Adapter Principal + registered AdapterRef/instance + capability profile/epoch | Which registered Adapter implementation/instance is acting, only after H/I validation | Logical Agent identity, ProducerIdentity, or permission for a protected operation |
+| ProducerIdentity / ProducerRef | I producer registry and trust policy; B's ProducerRef cross-module mapping is candidate; H binds the authenticated workload/session | Authenticated Principal/Issuer + registered ProducerIdentity/instance + payload producer claim | Attribution to an admitted producer and its permitted source/event families after I validation | Payload producer_id, queue name, or a D work-item registration receipt alone |
+| Runtime Session | H/I authenticated session binding and session lifecycle authority | Authenticated SessionRef bound to runtime instance, Agent Principal and Adapter instance | Which live runtime session is the current source/recipient context | Durable Agent identity, task authority, permission lease or reconnect continuity |
 | Task Identity | Brain-issued or authenticated task binding under I policy; Agent may declare a local task correlation | TaskRef/Task ID and issuer/source | Correlation and task isolation when validated | Grant, Principal, Scope or permission |
 | ActorRef | B defines typed semantics; I validates security assertions; H binds authenticated principal to operation | Resolved typed ActorRef plus auth-context/delegation references | Attribution of an operation to an authenticated/authorized actor chain when validated | Bearer credential; self-authentication; permission by itself |
 | ScopeRef | B defines typed scope semantics; I resolves and authorizes it | Typed ScopeRef and authorization decision reference | A resolved ownership/applicability namespace when authorized | Access grant, wildcard, implicit parent/child visibility |
@@ -50,6 +52,7 @@ Candidate status in any upstream document remains candidate here. A static C doc
 7. ActorRef is an attribution reference, not a credential. A producer-supplied ActorRef cannot authenticate the producer.
 8. PermissionEpoch is opaque, issuer-scoped and validated by I. C/H MUST NOT compare it numerically with ForgetFenceGeneration, CapabilityEpoch, ContextVersion, CanonicalCommitCursor or source sequence.
 9. If any required binding is absent, mismatched, expired, revoked, unknown or unverifiable, the protected operation fails closed. Telemetry may be quarantined as untrusted evidence where policy permits, but it must not be used to disclose/apply protected Memory.
+10. I ProducerDomainInventoryEpoch identifies the global closed-world Producer/Recipient class-and-instance inventory. D ProducerRegistrationHighWater / per-Forget WorkItemBarrier identifies concrete work admitted for one Forget operation. They are distinct levels and namespaces; neither substitutes for the other. H/C carry references unchanged and never compare them numerically.
 
 ### 2.3 Identity evidence envelope
 
@@ -71,6 +74,8 @@ This is a logical evidence requirement, not a BMCP field list. H owns wire repre
 
 Every telemetry item MUST carry or resolve:
 - immutable event ID and exactly one primary semantic kind;
+- authenticated ProducerIdentity binding reference, distinct from payload producer_id;
+- AgentRef/Agent Principal, AdapterRef/Adapter Principal and ActorRef bindings where the operation requires attribution;
 - schema version, authenticated producer binding reference and payload producer claims;
 - Agent/instance, Runtime Session and Task identity when applicable;
 - typed ScopeRef; EnvironmentRef for environment-dependent signals;
@@ -207,6 +212,7 @@ Suppress, Clear, Purge and Cancel are distinct postconditions. One ACK cannot im
 10. Apply only current authorized Context to the isolated Managed Region.
 11. Emit Forget ACK and Applied Attestation as separate evidence families.
 12. If any authority is unavailable, stale, unknown or incomparable, fail closed for protected memory. Do not replay last-known-good context.
+13. I ProducerDomainInventoryEpoch and D per-Forget ProducerRegistrationHighWater/WorkItemBarrier remain independent. Reconnect must not treat a local queue scan or Adapter ACK as proof that D's producer barrier or I's global producer/recipient inventory is complete.
 
 ## 6. Prompt injection and untrusted memory containment
 
@@ -257,6 +263,23 @@ Test evidence must include fixture ID/hash, Adapter tier and CapabilityEpoch, pr
 | Prompt injection | Data-only region rules and observable tests | Enforces region isolation and reports capability | Filters Context membership/target and delivery freshness | Authorizes disclosure and risk policy | Suppresses forgotten lineage | Typed scope/actor refs prevent ambiguous cross-domain binding |
 
 **Status discipline:** B ADR-001 remains ADR-BLOCKED. I Principal/Authorization and H Envelope/ACK/Capability are candidate unless their owners approve. G Context/Applied semantics and D ForgetFence semantics are consumed from their owner branches, not re-authored by C. No row in this table is an approval by C of another module's schema.
+
+
+### 7.1 H ACK to I target-state consumption (owner mapping; not C approval)
+
+H's current candidate ACK vocabulary is consumed only as Adapter-local evidence. I alone decides the I target state and whether evidence satisfies the sealed target inventory.
+
+| H ACK | C-observable local claim ceiling | I target-state mapping described by I/H candidates | Required C/Adapter evidence | Prohibited inference |
+|---|---|---|---|---|
+| SUPPRESSED | Future selection/assembly blocked within exact Adapter + Managed Region | May confirm only an I target whose required action is logical suppression/inaccessibility | TargetId/inventory version, operation/fence, exact scope/region, Adapter instance, capability epoch, durable gate proof | No buffer/cache purge or physical erasure claim |
+| LOCAL_BUFFER_CLEARED | Enumerated volatile buffers in declared session/region cleared or inaccessible | Conditional confirmation only for a complete matching buffer target | Complete buffer inventory, postcondition, region/session, watermark | No persistent cache or provider-copy claim |
+| LOCAL_CACHE_PURGED | Enumerated Adapter-managed cache namespaces/partitions purged | Conditional confirmation only for exact complete cache target | Namespace/partition inventory, purge result, watermark and integrity evidence | No unenumerated cache or global deletion claim |
+| QUEUED_DELIVERY_CANCELLED | Enumerated local queued/retry/persisted deliveries made non-replayable | Conditional confirmation only for this Adapter-local queue target | Queue namespace, Delivery IDs, complete scan/drain watermark and durable disposition | No cancellation of Brain/G or remote queues |
+| FAILED | Attempt failed; no postcondition | I evaluates as Failed or Unknown | Stage, reason and immutable attempt evidence | Never success |
+| UNKNOWN | Postcondition cannot be established | I target remains Unknown/Pending | Offline/timeout/crash/ambiguous evidence and reconciliation key | Never success |
+| UNSUPPORTED | Capability absent at this CapabilityEpoch | I target remains Unknown unless I separately approves scoped PolicyException | Exact unsupported action, Adapter instance and capability epoch | Adapter/H/C cannot self-authorize exception |
+
+I target states are Pending, Confirmed, Failed, Unknown and PolicyException. C does not set them. H ACK, C Full Applied Attestation and G Delivery state are separate evidence families. A Full Applied attestation is not a Forget ACK; a Forget ACK does not prove a request was submitted or that G considers a delivery Applied.
 
 ## 8. Tier 1 / Tier 2 / Tier 3 capability matrix
 
@@ -310,15 +333,23 @@ For every claimed conformance result record: test ID; source commit and artifact
 
 A test is PASS only after reproducible execution with matching expected and actual behavior. Document completion, branch commit or static inspection is not runtime evidence. No test may be marked PASS based solely on a design statement.
 
-## 11. Source branch snapshot
 
-| Module | Branch | HEAD consumed by this C review | Status |
-|---|---|---|---|
-| C | session-c-agent-integration-2026-11-16 | 067b51b6d2e51d15c9fe0959cecd1ee135beac9b | Current baseline before this commit |
-| B | session-b-domain-model-phase3 | ab19afbf92f67fe0a7679e9aa3a35b015fed89f4 | Candidate; ADR-001 ADR-BLOCKED |
-| I | session-i-security-governance-2026-11-16 | 4c7c5f953b166bc512064f6de3b7d18a742d0449 | Candidate policy; no C promotion |
-| H | session-h-bmcp-protocol | d46961254bc50995479bd43abed0ee6fe1cdcbb6 | Candidate wire/Adapter package |
-| G | session-g-memory-context | 3d2c065be863bc1d349faaeece6f6eaa0047abae | Owner Context/Applied semantics |
-| D | session-d-memory-brain-2026-11-16 | 30dbffdc7d47af0888ecf7b42cfa686d2ec0c9d6 | Owner ForgetFence semantics; implementation OPEN |
+## 11. Reprocessed source branch snapshot (2026-11-16)
 
-This snapshot records the exact branch heads read during this task. It does not assert those branches are merged or that all cross-module contracts are approved.
+The exact remote branch refs below were fetched for this reprocessing. These are branch HEADs at inspection time, not merged approvals. The C HEAD shown is the pre-change parent of this commit.
+
+| Owner | Branch/ref | Full HEAD / commit SHA | Inspected owner artifacts (blob SHA) | Authority/status consumed |
+|---|---|---|---|---|
+| Cross-module review | main | 8a6414158c9c056c1638222534e1993d1bbc99d2 | reviews/integration/phase-3-defghi-cross-module-contract-review.md = edaccb802e0425f2d47bd4b613fab4dfde107144 | Static review: conditional integration pass only; not contract freeze or implementation sign-off |
+| B | session-b-domain-model-phase3 | 66adf6bdcf5ec69a146fe75afe20ce3b85af8448 | Typed Reference = 7c4517ee16e824f91c04306e000457662430ef69; Principal/Actor mapping = f20dc0cbd99b5eaf6451b5b8daf1af7c297102c6; ADR-001 = a1024938ff5baba069cf128c69496a44e143330c | Candidate typed-reference and identity mapping; ADR-001 remains ADR-BLOCKED |
+| C | session-c-agent-integration-2026-11-16 | 35de58ddc93c5f1e554596cdfc430cd6c392d355 (pre-change HEAD) | Phase 3.5 contract = 714b2701171ba43123d3ca3c36184678af7d8fea | C-owned baseline re-read; updated by this commit |
+| D | session-d-memory-brain-2026-11-16 | da8e5882d0b238d765d00b2225b79eea45a483b1 | Forget contract = cce2108899525c9ce6808716224641baa11faf4f; operation/publication gate = 2c5b1358ff58f99af838b741a75966ccd07ad088 | D semantic operation contract DECIDED; D/E/Storage realization and cross-owner conformance OPEN |
+| G | session-g-memory-context | 3d2c065be863bc1d349faaeece6f6eaa0047abae | Context Versioning = ebdabb3e9e32a577f498b59046e34ed206c8fb70; Reconciliation = f02ac1bae543c61b5fc06af75b9cce52ed5fc9ae | G safety ordering DECIDED; object encoding/workflow implementation candidate |
+| H | session-h-bmcp-protocol | 1ee65928f123d92a4758b0de09bc8d6df1e46253 | Phase 3.5 H contract = ceefd59fdf587fb7b4c01c7e5f9c5d6239d5b7bc; Forget ACK = 5e2b33898cbc6a9c95e271ecd1d8a092d04c67f8; capability/Applied = ed6b43a29aa368d772c701ffc83309a5aadf3c00 | H candidate wire/ACK/capability/reconnect proposal; no joint approval |
+| I | session-i-security-governance-2026-11-16 | 5591ad3620ec3f5d74194bd79556dcf3e25bea07 | Principal/Authorization = b0af3c700a4d88b58db26660b5fb7ac84af1f672; Phase 3.5 governance = a8632931396125019d1afccff39ea266f52a4d3a | I candidate policy; cross-owner approval and implementation evidence OPEN |
+
+Review path reconciliation: the required phase-3-defghi-cross-module-contract-review.md exists on main at the SHA above, but was absent from the C branch tree at the inspected C HEAD. It was read from main; this C change does not copy or modify it. Its disposition is limited to D/E/H/I plus coordination findings and must not be read as approval of B/C/G or implementation.
+
+H branch self-reported SHA discrepancy: H's Phase 3.5 document records its own reprocessed HEAD as a830628ec0f15a960277412c67c2197565ca1dc4; the live H branch ref fetched for this review is 1ee65928f123d92a4758b0de09bc8d6df1e46253. The live ref is recorded above; H's document remains a candidate artifact and is not silently treated as approval.
+
+No candidate upstream definition is promoted by C. No implementation, security test, fault-injection test, performance test, backup erasure or physical-erasure result is inferred from document inspection.
