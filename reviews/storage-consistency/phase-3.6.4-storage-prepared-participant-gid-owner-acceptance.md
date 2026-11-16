@@ -25,3 +25,6 @@ The PostgreSQL 18.7 capability probe already exercises client-chosen GIDs across
 Storage accepts the H 1.1.1 candidate wire mapping for exact owner review; alias equality and cross-message identity consistency must be enforced by semantic validation and Storage's durable ledger, not JSON Schema alone.
 
 **Disposition:** Storage §14 and the A integration mapping are accepted at architecture level. No production PostgreSQL deployment, COC service, Storage adapter, named human operator, KMS, end-to-end integration or Gate C fault injection is claimed. JF-10 runtime P0 remains OPEN; production activation NOT AUTHORIZED.
+## 1.1 Storage issuance of PreparedParticipantRef
+
+Storage clarifies and accepts the A mapping's allocation boundary: the authenticated Storage preallocation operation returns a Storage-issued PreparedParticipantRef and PreparedTransactionGID, or durably adopts a caller-supplied candidate PreparedParticipantRef only after collision/tuple/authority verification. The canonical ref is immutable once persisted; callers cannot mint an authoritative ref by assertion. The ledger records the pair in ALLOCATED_NOT_PREPARED before the COC prepare-intent commit.
