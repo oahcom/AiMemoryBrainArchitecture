@@ -152,3 +152,10 @@ This resolves the **I architecture decision** portion of the former JF-10 blocke
 The plan's gate interpretation is unchanged: G0 must be refreshed before each closure batch; G1 remains PASS; G2/G3 remain BLOCKED; G4 conditional; G5/G6/G8 remain BLOCKED; G7/G9 NOT RUN; G10 BLOCKED. No production readiness, implementation sign-off, Global Forget completion or Phase 3.6 freeze is authorized.
 
 Next DE-S work is implementation mapping and deployment selection, not another architecture redesign: name the accountable Storage engineering approver; select and prove the concrete DB/coordinator profile; map H01–H13 to implementation hooks; implement authoritative I lookup and same-XID recovery; then run the evidence-backed suite. A must continue the BIH governance/consumer and CFG Applied freeze work in parallel under their respective Owner authorities.
+
+
+## 9. G3 implementation repository prerequisite
+
+The architecture repository's `README.md` (main Blob `dfb5bf8a91f4a3ba29b14d623fbd2083f0273508`) explicitly declares “Architecture definition” and “Implementation status: Not started by design”. Root checks found no common runtime build entry point. This is consistent with the repository's stated scope; it is not evidence that a separate implementation repository does not exist.
+
+Before G3 can proceed, A must identify the designated runtime implementation repository/branch, accountable engineering owner, build/CI and deployment topology, and contract traceability. Record this as blocker **G3-IMPL-REPO-01**. Do not add mock implementation to the architecture repository or mark implementation/test gates complete. Once the authoritative implementation location is supplied, map JF-10 H01–H13 to actual code and continue deterministic verification. G3 remains BLOCKED.
