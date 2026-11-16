@@ -416,3 +416,23 @@ Required evidence per run: engine/version/configuration, isolation and replicati
 | C23 | Old Compiler task resumes after CanonicalSuppressionComplete | Current fence rejects/suppresses the task; late derivative reopens D proof; no post-fence visibility or stale completion reuse | WorkItemId/lineage, fence generation, participant/visibility trace, proof revision | NOT RUN |
 
 C01–C20 are preserved unchanged. C21–C23 are additive coverage, not replacements.
+
+## Phase 3.6.2 — Storage exact-version acceptance of JF-10 prepared participant ↔ COC bridge
+
+**Reviewed exact A artifact:** `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md`, A branch `session-a-integration-2026-11-16`, Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, §12.1–12.8.
+
+**Storage DECISION: ACCEPT THE STORAGE PARTICIPANT CONTRACT FOR THIS EXACT A BLOB, SUBJECT TO CONCRETE DATABASE CAPABILITY AND DEPLOYMENT PROOF.**
+
+Storage accepts the following Storage-owned requirements as the target architecture:
+
+1. Storage MUST receive a stable preallocated XID and participant identity before PREPARE; the operation ID, canonical RequestDigest, owner boundary, participant digest and canonical authority DB identity remain immutable across retries.
+2. Storage MUST durably prepare that exact XID and retain private bytes and required target/lineage serialization locks until authoritative I COMMIT/ABORT recovery and participant resolution.
+3. Storage MUST return an authenticated, Storage-signed `PreparedParticipantReceipt` binding the same XID, participant digest, operation ID/digest, DB identity and prepared state. A lost response is resolved through authoritative lookup of the same XID; no replacement XID is permitted.
+4. Storage MUST execute forward-commit or rollback only for the same prepared XID in the direction of I's durable terminal decision. No heuristic commit/abort, timeout inference, alternate-XID recovery or reversal is permitted.
+5. On commit, Storage atomically publishes VisibilityPointer, PublicationReceipt, owner outcome, receipt-consumption evidence and outbox in the same Canonical Authority DB transaction. On abort, Storage proves non-publication. COC observation/reconciliation is not the visibility authority.
+6. Storage's authoritative read API returns the same-XID prepared/committed/rolled-back state and exact PublicationReceipt from the authoritative database; stale replicas and caches are not decision sources.
+7. Storage accepts COC as participant-accounting/observation only. COC does not decide the I transaction or authorize visibility.
+
+**Implementation qualification:** this is architecture-level Storage acceptance, not proof that the selected database can provide durable prepared-XID/lock retention, crash-safe recovery, serializable D/Storage fence ordering or the required atomic visibility transaction. No concrete engine/version, XA profile, replication/failover topology, operator or deployment has been selected/verified by this decision. If the selected database cannot durably retain and recover the exact prepared XID and locks across crash/restart, implementation is blocked; no weaker check-then-write substitute is accepted.
+
+Storage does not accept or decide I authorization/PermissionEpoch/receipt semantics, D fence meaning, H wire schema or multi-policy-domain atomicity. JF10-COC-01..10 and storage crash/fault suites remain NOT RUN. JF-10 remains P0 OPEN; implementation and production deployment remain NOT VERIFIED.
