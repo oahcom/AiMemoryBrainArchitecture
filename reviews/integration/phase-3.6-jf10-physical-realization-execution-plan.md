@@ -114,3 +114,39 @@ A green reference-model test is not a substitute for any physical campaign test.
 ## 6. Change control
 
 Any change to I terminal authority, exact-XID semantics, D fence ordering, Storage visibility atomicity, C provider idempotency, COC committed-prefix semantics or H wire meaning requires the owning authority's append-only decision and a new exact bundle SHA. A coordinates the reconciliation and does not override Owner authority.
+ 
+
+## 7. Gate A PostgreSQL 18.7 HA / restore qualification — next executable tranche (2026-11-17)
+
+**Current evidence boundary:** Storage's PostgreSQL 18.7 single-node probe is a verified physical PASS for the exact one-node CI profile only. Probe Blob `c15ea6e66a15be2fb96f737769f58b7b6c224b7e`; workflow Blob `4eef5b24f6da1d596c34e0d072dc39d5008a1a25`; run `43907296027`; job `133439447210`. A re-fetched raw job log confirms lock retention before/after SIGKILL, exact prepared GID after same-volume restart, same-GID COMMIT PREPARED and pointer+receipt joint visibility, and same-GID ROLLBACK PREPARED/non-publication.
+
+**Gate A remains PARTIAL PASS / OPEN.** The single-node workflow has no standby, no synchronous replication, no promotion, no backup/restore and no production topology/operator.
+
+### Required Storage-owned files
+- `reviews/storage-consistency/postgres_probe/jf10_postgres_sync_failover_restore_probe.py`
+- `.github/workflows/jf10-postgres-sync-failover-restore.yml`
+- `reviews/storage-consistency/phase-3.6.2-postgres-18.7-ha-restore-capability-dossier.md`
+
+These are requests to Storage, not A-owned implementation artifacts. A must not edit Storage-owned source or claim its execution.
+
+### Acceptance protocol
+1. Pin primary and standby to the same PostgreSQL 18.7 image digest; record exact server build on both.
+2. Configure physical streaming replication, named replication slot, `synchronous_standby_names='FIRST 1 (jf10_standby)'`, `synchronous_commit=on`; prove `pg_stat_replication` reports connected/streaming/synchronous and record WAL flush LSN. A nonempty synchronous standby configuration is required; `wal_level=replica` alone is not replication evidence.
+3. Execute PREPARE TRANSACTION using the exact immutable XID/GID, participant digest and operation tuple. Capture synchronous flush acknowledgement for the PREPARE record before the failover point.
+4. Fence the old primary to prevent split brain, hard-stop it, promote the standby and verify exact GID in `pg_prepared_xacts` plus retained lock behavior.
+5. Exercise same-GID COMMIT PREPARED and ROLLBACK PREPARED as separate cases. Before terminal resolution the pointer and receipt remain invisible; after commit both appear together; after rollback neither appears. No replacement XID or heuristic outcome.
+6. Drop client acknowledgements around PREPARE and terminal resolution. If promoted state cannot authoritatively prove exact participant state, classify UNKNOWN/IN_DOUBT; absence of a row/GID is not proof of ABORT.
+7. Restore a physical backup containing an unresolved prepared GID; verify exact GID and same-GID resolution. Separately restore a stale snapshot predating newer D Forget control / I terminal state; keep service in RecoveryQuarantined until authoritative external control high-water and unresolved participant reconciliation complete.
+8. Record image digests, configuration SHA, deterministic seed, XID/GID, operation/participant digests, replication state/LSNs, promotion/fencing trace, pg_prepared_xacts/lock evidence, restore timeline/WAL range/recovery LSN, reader visibility, raw logs and invariant output.
+9. With standby unavailable, prove protected PREPARE blocks or fails closed; no local-only success downgrade is permitted.
+
+### Gate sequence
+- Gate 0 (D + Storage exact full-bundle decisions): CLOSED.
+- Gate A single-node PostgreSQL capability: PASS for the pinned CI profile.
+- Gate A HA/failover/backup/restore: NOT RUN / OPEN.
+- Gate A actual Canonical Authority deployment + named human production on-call: OPEN / NOT DESIGNATED.
+- Gate B persistent COC: BLOCKED until all Gate A requirements pass.
+- Gate C end-to-end fault injection: BLOCKED until Gate B passes.
+- JF-10 P0: OPEN; production activation NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
+
+PostgreSQL 18 synchronous replication documentation supports the required configuration semantics: synchronous standby names plus synchronous_commit; two-phase transaction actions wait for synchronous replication. These docs guide the test but do not replace the physical promotion/restore proof.
