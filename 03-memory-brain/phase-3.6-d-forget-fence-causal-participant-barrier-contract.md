@@ -84,3 +84,17 @@ Exceptions and closure conditions:
 5. D-CO tests and production coordinator/failover/restore conformance remain NOT RUN / NOT VERIFIED.
 
 This decision applies only to the exact A Blob above. It does not imply C/I/G/H/B acceptance, deployment, physical erasure, test pass or transfer of CGH-APPLIED-1.0 approval.
+
+
+## D Owner exact-version reaffirmation — current CGH-APPLIED-1.1 candidate
+
+- A candidate Blob SHA: `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`
+- Profile: `CausalOrderProfile/1.0`; H schema: `bmcp.applied-ack/1.1.0`
+
+**Decision: ACCEPT WITH ENUMERATED EXCEPTIONS**, within D's ForgetFence, lineage and participant-barrier authority.
+
+D accepts the candidate's intent-before-side-effect rule, exact target/source/ancestor lineage binding, DForgetFenceRequestRef admission cutoff, DParticipantClearanceRef, and separate fence-request cutoff versus fence-effective position. A fence request before ParticipantIntentRef yields FENCE_WON even while earlier participants drain; a later request remains pending behind that participant until exact C outcome or safe abort is durable. D clearance never proves I authorization or provider success.
+
+D explicitly accepts the outage-cutoff amendment: if D receives a fence request while COC is unavailable, D locally closes affected lineage admission and reports PENDING/UNKNOWN. D MUST NOT reopen admission or issue favorable clearance until that request cutoff is durably recorded in the common coordinator and reconciled against the same participant ledger. COC outage, process death, lease expiry, timeout or lost ACK cannot release an IN_DOUBT participant.
+
+Exceptions: (1) COC operator/store and durable participant registry are not designated/deployed/verified; (2) authoritative complete lineage inventory and late-discovery closure remain required; (3) D-CO/failover/restore conformance remains NOT RUN; (4) physical erasure/Global Forget completion is not implied. This decision applies only to the exact A Blob above.
