@@ -287,3 +287,73 @@ The readiness document §23.1/§23.4 says Gate B spec published / exact Owner re
 - Implementation binding: DEFERRED_TO_ENGINEERING_PHASE.
 - JF-10 P0 OPEN; production activation NOT AUTHORIZED.
 
+
+
+## 14. Current COC / JF-10 source and gate reconciliation — supersedes earlier Gate B wording
+
+### 14.1 Current Storage source pins
+
+- Current Storage branch HEAD: `337fe8bffa178e64ad8e4750f1ede1d561424edc`.
+- Phase 3.6.3 COC protocol with §14 PreparedTransactionGID clarification: Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`.
+- Current Storage Design v2 proposal: Blob `4ed4234ce548a814a9496adf7a14c4459ea9f7ce`.
+- Current Storage readiness document Blob: `b9e664dfbed1c0f268b2b8b0d9c2ddcd29221bf1`.
+- Current Storage prepared-XID dossier Blob: `0aabf66848dc97deee028c571183c0d7204008c0`.
+- Storage COC self-review Blob `332de9192ccab6f18fc2a0d18700cc9585a98983` still pins prior COC protocol Blob `4ac63...`; it is historical/stale against the newer Storage acceptance in the dossier.
+
+### 14.2 Exact gate vector
+
+The earlier statements in §§1/12/13 that Gate B is simply “blocked pending Gate A” are superseded by the current Storage readiness vector:
+- Gate A: **PARTIAL PASS / OPEN**.
+- Gate B prior COC protocol Blob `4ac63...`: **DESIGN-LEVEL ACCEPTANCE WITH EXCEPTIONS**.
+- Gate B amended COC protocol Blob `86ff3...`: **PUBLISHED / FOCUSED EXACT-OWNER REVIEW PENDING**. Storage accepts with conditions; A/H/I role-simulated reviews exist, but A has enumerated amendments and H/I have no approval. Independent exact-version decisions remain pending.
+- Storage Design v2 Blob `4ed423...`: **FRESH PROPOSAL / EXACT OWNER REVIEW PENDING**. It is not accepted by the old `4ac63...` matrix.
+- Gate B implementation/conformance: **NOT RUN / DEFERRED_TO_ENGINEERING_PHASE**.
+- Gate C distributed fault-injection: **DEFERRED_TO_ENGINEERING_PHASE**.
+- JF-10 P0: **OPEN**; Multi-PolicyDomain: **BLOCKED**; production activation: **NOT AUTHORIZED**.
+
+### 14.3 Storage Design v2 advances
+
+The current v2 Blob `4ed423...` materially addresses the earlier design gaps and contains a Storage proposal disposition for A's R1–R6 findings:
+- immutable participant manifest and two-stage recovery-batch commit;
+- explicit repeated cutoff-batch behavior for requests arriving after a snapshot;
+- per-owner signed local gate release and explicit RECOVERY_EPOCH_COMPLETED;
+- exact C/I/D/Storage participant and provider-invocation gates;
+- PreparedParticipantRef / PreparedTransactionGID / NativeXidObserved separation and DB identity evidence.
+
+It remains a proposal requiring fresh exact Owner review. Issue #16 is open; A/I/H reviews are role-simulated, D/C decisions are still required, and B/E/G should provide targeted type/producer/Applied-consumption review.
+
+### 14.4 Prepared participant trust / wire blockers
+
+A's Prepared GID review Blob `c869cf594e8d5b6fcd6343992836da178227ebf5` is ACCEPT WITH ENUMERATED AMENDMENTS, including:
+1. non-reusable DatabaseIncarnationRef;
+2. immutable PrepareAttempt identity/generation;
+3. authoritative PREPARED readback before a signed receipt;
+4. original prepare coordinates separated from recovery observations;
+5. atomic I terminal proof consumption of the exact Storage receipt/participant/DB incarnation/operation digest.
+
+H's strict wire review Blob `db0379c3a0ab598c7d2e47229309d2a075ccd3cb` and I's signature/trust review Blob `7545dc1f74e6cfda17701b9c053fe342a8b01d44` both conclude CANDIDATE / NO APPROVAL. All three reviews disclose coordinating-session role simulation, not independent signatures.
+
+Remaining cross-artifact gaps:
+- Common JF-10 protocol Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0` still uses generic preallocated-XID / same-XID language.
+- Storage readiness §26.2 still says “preallocate the exact XID” without the GID/native-XID distinction.
+- H schema Blob `a8a945cc3623c2907003b93625e3c79742150944` has opaque `preallocated_storage_xid_ref` and `storage_xid_ref`; H must explicitly map or replace these with nominal types and receipt fields.
+- B typed-reference model has not yet added PreparedParticipantRef, PreparedTransactionGID, NativeXidObserved, DatabaseIncarnationRef and PrepareAttempt types.
+- v2 record names and commit-proof envelope must be mapped to protocol `86ff3...` and H BMCP RecordTypes, including VoterConfigurationEpoch / COCCommitReceipt semantics.
+
+### 14.5 Current model/test evidence — bounded claims
+
+- PostgreSQL 18.7 capability suite: **7/7 PASS** for the pinned isolated fixture/code set. This remains strong capability evidence, not production selection/deployment.
+- F anti-resurrection reference model: **19/19 PASS**; logical model only.
+- H schema + strict parser reference tests: **23/23 PASS**; candidate schema/parser only.
+- I Global Forget reference model: **30/30 PASS**; logical model only.
+- COC in-memory outage model and JF-10 semantic validator are separate reference suites (11 and 18 tests), not a distributed COC/Raft service.
+
+I36-GOV-01..10 remain proposal-only; no external governance approval, production target inventory seal, recipient/backup evidence or physical-erasure proof is established.
+
+### 14.6 Current issue state
+
+- Issue #14: A R1–R6 remains open; Storage v2's disposition is not independent Owner acceptance.
+- Issue #15: exact review of amended protocol Blob `86ff3...` remains open.
+- Issue #16: exact review of Storage Design v2 Blob `4ed423...` remains open.
+- Issue #17: Prepared GID / signed wire / trust review remains open; A conditional, H/I no approval in role-simulated artifacts.
+
