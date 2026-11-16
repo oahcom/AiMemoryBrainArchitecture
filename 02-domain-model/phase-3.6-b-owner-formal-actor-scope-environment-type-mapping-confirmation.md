@@ -142,3 +142,23 @@ A may record:
 - Implementation/runtime conformance: NOT VERIFIED.
 
 A must not infer H wire-schema freeze, I governance approval, C/D/E consumer schema acceptance, production readiness or runtime conformance from this B decision.
+
+## B Owner exact-version typed-reference confirmation — CGH-APPLIED-1.1
+
+- A package: `reviews/integration/phase-3.6-cgh-applied-1.1-causal-order-decision-package.md`
+- Exact A package Blob SHA: `9808b31f840606b329f1a794935dfc9c5084d63b`
+- Common contract: `CGH-APPLIED-1.1`
+- Causal profile: `CausalOrderProfile/1.0`
+
+**Decision: APPROVE — B-owned typed-reference semantics and role-preserving bindings for this exact 1.1 package**, with the bounded reservations below.
+
+B confirms ActorRef remains verifier-produced per-operation attribution bound to authenticated PrincipalRef/IssuerRef and exact operation/session; ScopeRef remains a stable ownership/applicability boundary with role-labelled source/target/evidence bindings kept distinct; EnvironmentRef remains a stable authoritative external state-domain identity, distinct from ScopeRef and environment-scoped data boundaries. The 1.1 package's Actor/Principal/Issuer, role-labelled ScopeBindingSet and EnvironmentRef bindings do not require a B semantic type change.
+
+Reservations:
+1. Typed references are identifiers/attribution types, not credentials, permission grants, authorization receipts, coordinator positions, fence clearances or reusable capabilities.
+2. B does not authorize cross-Scope or cross-Environment access; those remain deny-by-default absent exact registry resolution and I authorization.
+3. B confirms semantic types and role preservation only. C/G/H own their consumer field paths, schema field encoding, canonicalization and wire requiredness; this decision does not freeze those representations.
+4. Legacy untyped strings must not be silently cast to typed refs; registry-backed authoritative resolution remains required.
+5. B does not approve I governance, coordinator deployment, D lineage completeness, G Applied implementation, runtime conformance or any 1.0-to-1.1 approval transfer.
+
+This is an exact-version B semantic confirmation against the A Blob above, not a wire-schema approval or implementation claim.
