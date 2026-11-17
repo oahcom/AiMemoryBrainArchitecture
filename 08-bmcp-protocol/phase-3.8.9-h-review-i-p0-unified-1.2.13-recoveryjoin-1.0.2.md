@@ -3,7 +3,7 @@
 
 - Reviewer: H — BMCP Protocol and Interoperability
 - Exact I successor P0 addendum: `09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md`
-- I successor P0 Blob: `8e72d8bd78c5272659563e5afba1e80e75f417eb`
+- I successor P0 Blob: `5c0e2049513d391dfc118f4f629a5ec95de456d6`
 - H Unified schema 1.2.13 Blob: `8e7f6a6c9663388863db88548f9c37d0fdb1bd97`
 - H RecoveryJoin schema 1.0.2 Blob: `4b664e3bce465499bcdfd93796349a4ba7074002`
 - I Owner Snapshot Attestation schema 1.0.0 Blob: `ecf9971b089ca5fab9a92915663dc913c8ab1ba6`
@@ -45,9 +45,9 @@ For an I proof, the required binding includes:
 - owner gate/generation, scope/generation/binding digest;
 - operation identity/digest and request digest;
 - anti-rollback anchor and key-status generation;
-- signature profile, key ID/version, canonicalization/digest profile and stable signature ref.
+- signature profile, key ID/version, canonicalization/digest profile; `signature_ref` is an external signature locator, not a P0 field.
 
-Only `proof_digest` is excluded from P0 and computed from the domain-separated JCS(P0); the signature projection includes P0 plus that digest. H rejects a wrong owner, purpose, unknown field or tuple mismatch as INVALID. Missing I ledger/snapshot/key-status/anti-rollback evidence remains UNKNOWN.
+Both derived `proof_digest` and external `signature_ref` are excluded from P0. `proof_digest` is computed from domain-separated JCS(P0), and the signature projection includes P0 plus that digest. `signature_ref` only locates the signature bytes; it is not signed into its own P0. H rejects a wrong owner, purpose, unknown field or tuple mismatch as INVALID. Missing I ledger/snapshot/key-status/anti-rollback evidence remains UNKNOWN.
 
 Namespace separation is mandatory: I `owner_sequence_namespace` is not C `sequence_namespace_ref`, COC quorum position, D local sequence, Storage attempt identity or the database serialization anchor. No cross-domain counter comparison is allowed.
 
@@ -65,7 +65,7 @@ The following exact vectors are required before L3 closure:
 7. mismatch membership proof owner ledger row, sequence namespace, admission ref, snapshot digest, attestation digest, gate/scope or operation tuple → INVALID;
 8. unavailable key-status, I trust root, ledger pagination or anti-rollback checkpoint → UNKNOWN;
 9. use C `sequence_namespace_ref` in an I proof or compare I/C/D/COC counters → INVALID;
-10. mutate COC-appended quorum proof without changing I P0 → I P0 remains byte-identical, but independent COC proof verification rejects the envelope.
+10. mutate external `signature_ref` → P0 remains byte-identical, but the resolved signature must verify against the exact signed P0; wrong ref is INVALID and unavailable ref is UNKNOWN.\n11. mutate COC-appended quorum proof without changing I P0 → I P0 remains byte-identical, but independent COC proof verification rejects the envelope.
 
 No full differential P0 vector run is claimed by this review. At least two independent implementations must produce byte-identical P0, digest and signature preimage for every I message family and standalone proof type.
 
