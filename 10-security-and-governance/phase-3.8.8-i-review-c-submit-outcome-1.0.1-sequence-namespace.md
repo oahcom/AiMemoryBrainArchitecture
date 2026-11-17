@@ -2,7 +2,7 @@
 
 - Owner: I — Security and Governance
 - C schema 1.0.1 Blob: `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`
-- C 1.0.1 amendment: Blob `73d98b532b7f9cadbeee12448d035c3285db9cd7`
+- C 1.0.1 amendment: Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`
 - C 1.0.1 expected crypto vectors: Blob `34e49a49551390f52198b1fa557e15a32a3f6ee2`
 - C key-status event schema: Blob `908b293eba337e9fa75864cea3704e28a1a8d82e`
 - I key-status governance review: Blob `57d1b1ca616eaec6df1dee82ddaccc66519caca2`
