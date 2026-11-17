@@ -256,6 +256,15 @@ def authenticate_outer_envelope(
     if invalid:
         return {"status": "INVALID", "errors": invalid, "unknown": []}
 
+    # C_PROVIDER_OUTCOME_RECORDED is a C-originated event. An H gateway
+    # receipt may be additive, but cannot authenticate this C origin message.
+    if protected_context.authority_kind != "C" or envelope.get("owner_authority") != "C":
+        return {
+            "status": "INVALID",
+            "errors": ["C provider outcome requires an authenticated C origin principal"],
+            "unknown": [],
+        }
+
     unknown: list[str] = []
     if checks.verify_envelope_signature is not None:
         _call_bool(
