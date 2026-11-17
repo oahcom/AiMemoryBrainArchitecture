@@ -178,14 +178,17 @@ class UnifiedManifest1215SchemaTests(unittest.TestCase):
         }.issubset(required))
         self.assertNotIn("postgresql_native_xid", required)
 
-    def test_16_common_envelope_binds_origin_and_signing_sequence(self):
+    def test_16_common_envelope_declares_origin_and_signing_sequence_metadata(self):
         required = set(self.common["required"])
+        properties = set(self.common["properties"])
         self.assertTrue({
             "schema_artifact_revision", "schema_version", "issuer_ref",
             "sender_authority_ref", "sender_subject_ref", "audience",
+        }.issubset(required))
+        self.assertTrue({
             "signing_sequence_namespace_ref", "signing_record_sequence",
             "origin_transport_context_ref", "origin_received_bytes_digest",
-        }.issubset(required))
+        }.issubset(properties))
 
     def test_17_every_message_branch_rejects_unevaluated_properties(self):
         for branch in SCHEMA["oneOf"]:
