@@ -116,3 +116,49 @@ C's exact review correctly preserves the C ProviderIdempotencyKey as a C-owned n
 The H test correction addressed a test-fixture issue only. The original JPF-08 fixture returned UNKNOWN because it required unrelated I/D evidence that the test did not supply; the corrected fixture isolates the duplicate C primary-admission invariant. This did not weaken production validator behavior. The CI result remains a test-harness pass, not an implementation proof.
 
 **Storage disposition unchanged:** logical bidirectional JoinProof accepted with enumerated amendments; physical serialization topology remains ADR-BLOCKED. T1–T8 and STORAGE-RJ-01..05 remain OPEN. No production DB/topology, visibility gate, deployment, or TAB-001 freeze is approved.
+
+
+## 9. Exact-pin refresh after H 66-test execution and Storage JoinProof revision
+
+This addendum supersedes the earlier target pins in §§1 and 8 only for the artifacts explicitly listed below. The review remains a delegated Storage-role simulation, not an independent Owner signature.
+
+### 9.1 Current exact targets
+
+| Artifact | Branch | Current Blob / Run |
+|---|---|---|
+| D Phase 3.8 publication participant contract | `session-d-memory-brain-2026-11-16` | `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` |
+| E Phase 3.8 orchestration contract | `session-e-memory-compiler-2026-11-16` | `475fee41e5eea527af4edefbfe88c58c86967d0a` |
+| I Phase 3.8 authorization proof contract | `session-i-security-governance-2026-11-16` | `54bab0484bd232a5a258e65e34cc7425288b39a6` |
+| Storage Phase 3.8 visibility contract | `session-storage-consistency-forget-atomicity-2026-11-16` | `175ee7b1349cfdb79a19898b311a88391ed88010` |
+| Storage Phase 3.6.11 bidirectional JoinProof contract | same Storage branch | `2daea020808b174460d69ba1c0c4a0a3f6b3e8e2` |
+| Storage COC protocol v3.2.2 companion | same Storage branch | `ce3c41adf826a622a3717eca481b5d53e6549196` |
+| H RecoveryJoin schema 1.0.0 | `session-h-bmcp-protocol` | `dd3234aa1c74caf6d0e335875cd96e0b2b64082f` |
+| H semantic validator contract | same H branch | `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80` |
+| HRC/JPF suite | same H branch | `60a2f4db4bd12f2131ecd147db9bbe328da6db50` |
+| Wire suite | same H branch | `1a4e754ba9bfa57eb973c6d39731e9f89443b323` |
+| Schema integrity suite | same H branch | `67aba74c120f2916d768e7b01c45408ee2624f3a` |
+| H workflow run | GitHub Actions | [44040502709 — SUCCESS](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709), commit `1c6ddd301d538652ceea22ea665d50c5fad8178e` |
+
+### 9.2 Updated Storage assessment
+
+The current JoinProof artifact now explicitly includes the H schema's separate request/admission source sets, row-level OwnerAdmissionRef vs OwnerEntryRef, owner request dispositions, typed D/I/C/Storage evidence, JF-10 sub-join, currentness checks and both directional relations. The current H test bundle has 66 methods and a successful GitHub Actions run.
+
+This does not close the production/integration gaps:
+- HRC/JPF tests run against a normalized reference model and HRC-TEST-v1, not live signed I/D/C owner snapshots or the authoritative COC quorum prefix.
+- Schema integrity tests inspect required schema shape; they do not run a production JSON Schema-to-semantic adapter or verify signatures.
+- Storage has not executed the live prefix enumeration, complete pagination/readback, durable JoinProof quorum append, or real owner-ledger joins.
+- Owner-local I/D/C currentness CAS is not implemented or proven by the H suite.
+- JF-10 same-GID/DB-incarnation behavior is not exercised by the 66 H tests.
+- Phase 3.8.2 physical D/Storage topology remains ADR-BLOCKED; Option A is conditional, Option B requires a named durable coordinator and proof, Option C remains rejected.
+
+### 9.3 I authority boundary retained
+
+The I review artifact `reviews/security-governance/phase-3.6.9-i-recovery-cutoff-wire-authority-review.md` Blob `5a95e1764c3fb812046c8f725a3dd325d9385b17` records **CANDIDATE / NO I WIRE APPROVAL** for the reviewed Recovery Cutoff 1.0.1 schema because PolicyDomain, typed Scope, global inventory/TargetInventorySeal, restore-attempt and exact Storage tuple fields were underrepresented. That review is not an approval or rejection of the later RecoveryJoin 1.0.0 schema, but it is a binding warning: H/Storage must not claim I wire approval or infer that generic owner snapshot fields prove I global-inventory currentness. I must review the exact integrated schema and its explicit I subrecord before any I acceptance.
+
+C's exact RecoveryJoin/provider-side-effect review remains a delegated role simulation and keeps ProviderIdempotencyKey, ProviderAttemptRef and CSubmitOutcome separate from Storage GID/XID. It does not prove a real provider adapter.
+
+### 9.4 Revised disposition
+
+**ACCEPT WITH ENUMERATED AMENDMENTS** remains the Storage-role disposition for the logical bidirectional JoinProof and Phase 3.8 composition. This exact-pin refresh does not upgrade the status to independent Owner acceptance, wire/schema freeze, physical topology approval, implementation/conformance PASS or production activation.
+
+STORAGE-RJ-01..05, C-RJ-01..08, I authority/currentness proof, H production wire/crypto interoperability, and Storage topology T1–T8 remain OPEN unless separately closed by exact current Owner evidence.
