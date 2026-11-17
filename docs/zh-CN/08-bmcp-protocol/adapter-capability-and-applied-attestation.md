@@ -1,4 +1,4 @@
-<!-- 源文件：session-h-bmcp-protocol / 08-bmcp-protocol/adapter-capability-and-applied-attestation.md / Blob db59b63e322d7255b8b400f47859dcac32bb3027 -->
+<!-- 源文件：session-h-bmcp-protocol / 08-bmcp-protocol/adapter-capability-and-applied-attestation.md / Blob 0dca3dc5463a02be0e19524811afbae87795baf5 -->
 <!-- 状态镜像：CANDIDATE — final-request 证明配置与 C 的对齐仍 OPEN；授权绑定与 I 的对齐仍 OPEN。 -->
 <!-- English companion: ../../en/08-bmcp-protocol/adapter-capability-and-applied-attestation.md -->
 
@@ -313,3 +313,32 @@ Wall-clock 时间戳是描述性信息，不得单独用于建立 C Submit、I �
 - 只有上述字段语义获接受后，H 才发布对应的版本化 Wire Schema/SDK 映射。
 
 相关一致性测试在附带可执行 fixture、确定性顺序、预期/实际输出及持久化 Owner 证据之前，全部保持 **SPECIFIED / NOT RUN**。本补充条款不构成 H Schema 冻结、密码学批准、互操作、实现正确性、C/G/H 全局冻结或生产就绪证明。
+
+
+### 11.8 CGH-APPLIED-1.1 因果顺序与 recovery-batch 证据桥接 — 候选
+
+G 当前的精确版本决议历史包含 CGH-APPLIED-1.1 因果顺序配置及 recovery-batch 修订。上述 Tier 1 证据映射是必要条件，但不足以满足该配置。H 若要声称 1.1 Applied ACK 映射完整，H 消息/证据配置 MUST 携带或不可变地引用以下 Owner 签发证据集：
+
+- `causal_order_profile_ref`、`causal_order_coordinator_ref`、`causal_order_domain_ref` 和 `causal_order_transaction_ref`；
+- `causal_order_terminal_proof_ref` 及其 digest，绑定精确 transaction、不可变 request/participant digest、reservation 和确定的 terminal outcome；
+- `recovery_batch_ref` 和 `recovery_batch_digest`；
+- `pre_batch_participant_set_digest`、`participant_set_completeness_attestation_ref` 以及完整的 `owner_high_water_attestations` 集合；
+- 完整的 `participant_reconciliation_entries` 集合，或经明确证明的空集合；每个条目保留精确 ParticipantIntentRef、causal-order transaction、request digest，以及相互独立的 I/D/C reconciliation 状态；
+- I 签发的 `i_authorization_terminal_ref`、`i_sequencer_ref`、`i_sequencer_epoch`、`i_sequencer_position`、`i_decision_digest`，以及 revocation cutoff 证据，或在 terminalization 时由 I 明确证明不存在撤销请求；
+- D 签发的 `d_lineage_coverage_ref`、`d_fence_request_cutoff_ref` 和 `d_fence_effective_position`，保留完整 lineage，并区分 request cutoff 与 effective fence position；
+- 若 recovery participant set 包含 Storage，则需提供适用 Storage 合同要求的 Storage 签发 same-XID resolution 和 terminal visibility/non-publication proof 引用。
+
+H 可以认证 H envelope、验证 message-family/Schema 完整性并保留这些 Owner 签发的 opaque 引用。H MUST NOT 签发或推断 COC terminal proof、I 授权结果、D clearance/fence、C Provider outcome，或 Storage commit/rollback/visibility。关键 Owner 证据缺失或未知时必须保持 UNKNOWN/IN_DOUBT，不能提升 Full Applied，也不能释放 Owner-local gate。
+
+以下顺序域 MUST 保持相互独立；H MUST NOT 比较、强制转换或相互替代：
+
+1. COC causal-order epoch/position/entry digest；
+2. I sequencer reference/epoch/position/decision digest；
+3. D request cutoff 和 effective fence position；
+4. Storage transaction/resolution position。
+
+COC position 仅对 COC 记录排序。I position 仅在 I policy-domain sequencer 内具有权威性。D positions 必须由 D 签发。Storage positions 保持为 Storage 本地证据。Wall-clock 时间戳、H receiver sequence、消息到达顺序、timeout、ACK 缺失或 reconnect 均不能建立跨权威顺序。
+
+对于 recovery-batch 配置，消息 MUST 区分“已证明为空的 pre-batch participant set”和“缺失/不完整的枚举”。若缺少 participant-set completeness attestation、owner high-water proof、participant reconciliation 不完整、I/D/Storage outcome 未知，或 transaction/digest 不匹配，则必须拒绝或保持 UNKNOWN/IN_DOUBT。COC recovery observation 本身不能释放 I/D Owner-local pending gate；只有对应 Owner 签名的 gate disposition 才能释放。
+
+本 §11.8 是针对 G 精确版本 CGH-APPLIED-1.1 决议历史的候选映射保留条款。它不声称当前 H JSON Schema/SDK 已包含这些字段，不声称 COC 或 recovery-batch 基础设施已部署，也不声称 JF-10/COC 一致性测试已执行。H 必须发布精确的增量 Schema 版本，并取得相关 C/G/I/D/Storage 确认后，才能声称该桥接已完成。
