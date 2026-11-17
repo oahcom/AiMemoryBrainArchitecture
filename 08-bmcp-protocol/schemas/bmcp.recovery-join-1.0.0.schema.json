@@ -250,7 +250,10 @@
         "anti_rollback_anchor_ref": {
           "$ref": "#/$defs/ref"
         },
-        "enumeration_status": {
+        "signature_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "request_enumeration_status": {
           "enum": [
             "COMPLETE_EMPTY",
             "COMPLETE_NON_EMPTY",
@@ -260,8 +263,15 @@
             "UNKNOWN"
           ]
         },
-        "signature_ref": {
-          "$ref": "#/$defs/ref"
+        "admission_enumeration_status": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "PARTIAL",
+            "NOT_ENUMERATED",
+            "UNAVAILABLE",
+            "UNKNOWN"
+          ]
         }
       },
       "required": [
@@ -278,8 +288,9 @@
         "gate_generation",
         "scope_generation",
         "anti_rollback_anchor_ref",
-        "enumeration_status",
-        "signature_ref"
+        "signature_ref",
+        "request_enumeration_status",
+        "admission_enumeration_status"
       ]
     },
     "ownerSnapshots": {
@@ -354,6 +365,9 @@
         },
         "cardinality_rule_ref": {
           "$ref": "#/$defs/ref"
+        },
+        "participant_position_ref": {
+          "$ref": "#/$defs/ref"
         }
       },
       "required": [
@@ -371,7 +385,8 @@
         "participant_position",
         "participant_manifest_ref",
         "participant_manifest_record_digest",
-        "cardinality_rule_ref"
+        "cardinality_rule_ref",
+        "participant_position_ref"
       ]
     },
     "noParticipantDisposition": {
@@ -429,6 +444,25 @@
         "reason",
         "terminal_state",
         "owner_signature_ref"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "terminal_state": {
+                "const": "NO_EFFECT_PROVEN"
+              }
+            },
+            "required": [
+              "terminal_state"
+            ]
+          },
+          "then": {
+            "required": [
+              "no_effect_proof_ref"
+            ]
+          }
+        }
       ]
     },
     "participantEvidenceJoin": {
@@ -534,6 +568,25 @@
         "evidence_ref",
         "evidence_digest",
         "disposition"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "disposition": {
+                "const": "NOT_APPLICABLE_WITH_PROOF"
+              }
+            },
+            "required": [
+              "disposition"
+            ]
+          },
+          "then": {
+            "required": [
+              "not_applicable_proof_ref"
+            ]
+          }
+        }
       ]
     },
     "jf10Join": {
@@ -640,6 +693,28 @@
         "i_terminal_state",
         "storage_prepared_receipt_ref",
         "storage_terminal_state"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "storage_terminal_state": {
+                "enum": [
+                  "COMMITTED",
+                  "ROLLED_BACK"
+                ]
+              }
+            },
+            "required": [
+              "storage_terminal_state"
+            ]
+          },
+          "then": {
+            "required": [
+              "storage_resolution_proof_ref"
+            ]
+          }
+        }
       ]
     },
     "completeness": {
@@ -653,21 +728,42 @@
             "UNKNOWN"
           ]
         },
-        "i_owner_sets": {
+        "i_request_set": {
           "enum": [
             "COMPLETE_EMPTY",
             "COMPLETE_NON_EMPTY",
             "UNKNOWN"
           ]
         },
-        "d_owner_sets": {
+        "i_admission_set": {
           "enum": [
             "COMPLETE_EMPTY",
             "COMPLETE_NON_EMPTY",
             "UNKNOWN"
           ]
         },
-        "c_owner_sets": {
+        "d_request_set": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "UNKNOWN"
+          ]
+        },
+        "d_admission_set": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "UNKNOWN"
+          ]
+        },
+        "c_request_set": {
+          "enum": [
+            "COMPLETE_EMPTY",
+            "COMPLETE_NON_EMPTY",
+            "UNKNOWN"
+          ]
+        },
+        "c_admission_set": {
           "enum": [
             "COMPLETE_EMPTY",
             "COMPLETE_NON_EMPTY",
@@ -680,9 +776,12 @@
       },
       "required": [
         "coc_participant_set",
-        "i_owner_sets",
-        "d_owner_sets",
-        "c_owner_sets",
+        "i_request_set",
+        "i_admission_set",
+        "d_request_set",
+        "d_admission_set",
+        "c_request_set",
+        "c_admission_set",
         "all_required_edges_resolved"
       ]
     },
