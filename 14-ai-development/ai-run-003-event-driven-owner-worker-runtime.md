@@ -375,6 +375,8 @@ Detailed decision records: [ADR-RUN-001 — Durable Store and Transaction Bounda
 
 以上 ADR 未获正式批准前，不得将候选方案描述为已决议架构。
 
+The storage-neutral logical schema, entity contracts, TX-01..TX-08 mapping and migration rules are specified in [Runtime Data Model and Migration Contract](runtime-schema/runtime-data-model-and-migration-contract.md). It remains PROPOSED and requires Storage/Consistency reconciliation with ADR-RUN-001 before physical schema or migration implementation.
+
 ## 16. Stop conditions / 停止条件
 
 Stop autonomous execution immediately if any of the following occurs:
