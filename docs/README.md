@@ -32,7 +32,6 @@ Domain Model, Canonical Memory Brain, Compiler, Runtime, Memory Context, BMCP, A
 ### L3 — Build and verify / 工程实现与验证
 Exact schemas, protocol fields, state machines, transaction boundaries, failure recovery, ADRs, prototypes, benchmarks, conformance tests, and acceptance gates.
 
-CI execution environment and runner operations / CI 执行环境与 Runner 运维：[中文](zh-CN/14-ai-development/ci-runner-operations.md) · [English](en/14-ai-development/ci-runner-operations.md)
 
 ## Source specifications / 原始规范
 
