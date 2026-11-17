@@ -5,7 +5,7 @@
 - Review date: 2026-11-17
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Requested baseline: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
-- Final observed main HEAD: `901e38ba7b45ed1822eaefddc2da8d765cf8985c`
+- Final observed main HEAD: `b3c666e67982cb3d3374e759cfb6552c7765aacb`
 - Main tree SHA at both commits: `7096e0bc3fdc9a390fccff388f9261522fa424f2`
 - Review branch: `review/session-4-a-rx-fdp-currentness-refresh-2026-11-17`
 - Status: **CURRENT-SOURCE RECONCILIATION COMPLETE FOR THE PINNED ARTIFACTS BELOW; SYSTEM-WIDE APPROVAL AND G1 COMPLETION NOT ESTABLISHED**
@@ -27,7 +27,7 @@ The refreshed system picture is:
 
 ## 1. Main baseline and delta
 
-The requested SHA `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` and final observed main HEAD `901e38ba7b45ed1822eaefddc2da8d765cf8985c` have the identical Git tree SHA `7096e0bc3fdc9a390fccff388f9261522fa424f2`. Two commits intervene in history: `ca69d50...` briefly added a research-only B bilingual parity audit and `901e38b...` reverted it. The transient file was read during the G1 audit but is not in current main. Thus the net file delta from the user's requested baseline to current main is zero.
+The requested SHA `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` and final observed main HEAD `b3c666e67982cb3d3374e759cfb6552c7765aacb` have the identical Git tree SHA `7096e0bc3fdc9a390fccff388f9261522fa424f2`. After `901e38b...`, main advanced through four commits; the latest commit `b3c666e...` reverts an accidentally added R/X/F/D/P note. The earlier `ca69d50...` / `901e38b...` pair also added and then reverted a research-only B bilingual parity audit. These intermediate additions were inspected, but neither is present in final main. The final net file delta from the user's requested baseline to current main is zero.
 
 This does not make Owner branches current or approved. Main tree equality is a source-baseline fact, not a proof of Owner adoption.
 
