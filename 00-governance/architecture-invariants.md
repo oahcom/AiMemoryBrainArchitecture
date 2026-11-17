@@ -26,7 +26,14 @@ These invariants are normative constraints for all subsystem specifications and 
 | I-20 | Forgetting and retention governance cover derived records and secondary representations according to declared policy. |
 | I-21 | A subsystem boundary does not imply a separate process, service, or crate. |
 | I-22 | Performance claims require reproducible measurement on declared hardware, data, and workload. |
+| I-23 | Every architecture design or semantic architecture change must include Chinese and English documentation in the same change set, subject only to the governed temporary exception in GOV-DOC-001. |
+| I-24 | Architecture documentation acceptance requires bilingual semantic parity, stable-identifier parity, matching decision status, and traceable source revisions. |
 
 ## Enforcement expectation
 
 Each subsystem specification must identify which invariants it enforces, which it relies on, and how violations are detected and handled. An implementation review must not waive an invariant implicitly; a change requires an explicit architecture decision record and impact analysis.
+
+
+## Bilingual documentation enforcement
+
+All architecture Owners must comply with [GOV-DOC-001 Bilingual Architecture Documentation Policy](bilingual-documentation-policy.md). A temporary STALE exception must be explicit, time-bounded, and tracked.
