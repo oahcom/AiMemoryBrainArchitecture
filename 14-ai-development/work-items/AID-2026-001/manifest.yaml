@@ -1,14 +1,22 @@
 work_item_id: AID-2026-001
 title: Define the ChatGPT-native AI development execution model
 class: ARCH
-risk: R2
+risk: R3
+risk_rationale: Normative security-identity, authorization, privacy/retention/audit and Forget/deletion boundary changes; highest applicable risk governs the Work Item.
+security_scope: SEC — cross-cutting normative security and Forget governance boundaries
 status: PROPOSED
 sponsor: project user
 accountable_owner: A
 implementing_ai_session: AID-2026-001-EXEC-001
 execution_record_ref: 14-ai-development/work-items/AID-2026-001/execution-record-001.md
-independent_reviewer: PENDING — separate ChatGPT conversation required
-integration_reviewer: A
+independent_reviewer: PENDING — genuinely new ChatGPT conversation required; must not have participated in implementation
+integration_reviewer: PENDING — distinct non-implementing ChatGPT conversation; A is accountable Owner/coordinator/implementer and MUST NOT integration-review own work
+r3_specialist_reviews:
+  security_specialist: PENDING — Owner I role in a genuinely new non-implementing ChatGPT conversation
+  forget_domain_specialist: PENDING — Owner D role in a genuinely new non-implementing ChatGPT conversation
+r3_test_matrix: 14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md
+r3_test_evidence_status: NOT_RUN_NOT_EVIDENCED
+acceptance_blocker: R3 specialist reports and reproducible R3 contract-test evidence are mandatory before acceptance
 acceptance_authority: project governance authority
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
@@ -19,8 +27,9 @@ dependency_refs:
   - 14-ai-development/prompt-and-evidence-template.md
   - 00-governance/bilingual-documentation-policy.md
 prompt_id: AID-2026-001-PROMPT
-prompt_version: v1
-prompt_sha256: c32448736986cc9902c796af11cec5562191a4daeec390835e39dcc4d26dae12
+prompt_version: v2
+prompt_sha256: c49b09af16fd34941926665b450b8cd0788283240f4b31b2877695bc5b8b1cb7
+historical_prompt_v1: 14-ai-development/work-items/AID-2026-001/prompt-v1.md
 created_at: 2026-11-17
 updated_at: 2026-11-17
 implementation_branch: design/chatgpt-native-execution-model
@@ -85,6 +94,12 @@ implementation_commits:
   - dca13b927c99679e0e3b5aa4b522f7c7aeade780
   - 633c1b9c37b95e135b7b609d8662b8f8edd768a4
   - ecef5ca8adcb3d5bd7088853bdd2c1a3d9bc9bfa
+  - c40d9c5bb501ca04aff7c404172db21a1bfe18d9
+  - e5e14a035b7738ea0b430c8cc1330a9621cec816
+  - 3261599eaa817877dd62b0b4c86eb4b5a7013917
+  - 7dffd3730d5990e55a304931d6e052764f89527c
+  - 7ca1c7826dbb079f3db7461b545d7abd6bbd9373
+  - 1a76afb67c15ffbd96eddf900859bbcb6f4c2275
 changed_paths:
   - 14-ai-development/prompt-and-evidence-template.md
   - 14-ai-development/README.md
@@ -110,6 +125,8 @@ changed_paths:
   - 14-ai-development/work-items/AID-2026-001/execution-record-001.md
   - 14-ai-development/work-items/AID-2026-001/governance-decision-NR-001.md
   - 14-ai-development/work-items/AID-2026-001/prompt-v1.md
+  - 14-ai-development/work-items/AID-2026-001/prompt-v2.md
+  - 14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md
   - 14-ai-development/work-items/AID-2026-001/self-review-v1.md
   - 14-ai-development/work-items/INDEX.md
 verification:
@@ -122,6 +139,8 @@ traceability_exclusions:
     reason: Manifest-only governance inventory reconciliation; metadata bookkeeping, not implementation.
   - sha: 1e11b787f4bdfd2979642d4633f89fa84049ae62
     reason: Manifest-only reconciliation of changed paths and commit accounting; metadata bookkeeping, not implementation.
+  - sha: 706f582338c8f4feac7f2c8517fbb390f58256f8
+    reason: Manifest-only re-review remediation traceability reconciliation; metadata bookkeeping, not implementation.
   - sha: 2ce0bfad35fcd7a3e0b6a150b6a141e25aa67218
     reason: Manifest-only commit-inventory reconciliation; metadata bookkeeping, not implementation.
   - sha: 08ed26cf3496ccc52382583f2e05a7fef0017547
@@ -155,10 +174,12 @@ self_review:
   reviewed_head_before_self_review: 5a3536aa1bfa2cdf375c470cf8c8e2b219de7e3b
   findings: [SR-001, SR-002, SR-003, SR-004, SR-005]
 review:
-  status: COMPLETED_CHANGES_REQUIRED
-  report_ref: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6944757645
-  reviewed_head_sha: d0540edbebd7b4c518ecb03d23fe1b40fa04d70e
-  findings: [IR-001, IR-002, IR-003]
+  status: COMPLETED_FAIL
+  report_ref: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#pullrequestreview-5937629228
+  reviewed_head_sha: 1d6ab39375136d8649235feebeb6232609001222
+  findings: [IR-004, IR-005, IR-006, IR-007, IR-008]
+  next_review_status: PENDING_AFTER_REMEDIATION
+  next_review_target: exact PR Head after remediation commits and manifest self-update
 acceptance:
   status: PENDING
   record_ref: ""
@@ -170,6 +191,25 @@ pull_request: 42
 pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42
 
 review_history:
+  - reviewer_report: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#pullrequestreview-5937629228
+    reviewed_head_sha: 1d6ab39375136d8649235feebeb6232609001222
+    result: FAIL
+    findings:
+      IR-001: VERIFIED_FIXED
+      IR-002: VERIFIED_FIXED
+      IR-003: VERIFIED_FIXED
+      IR-004: OPEN_P1_R2_R3_CLASSIFICATION_CONFLICT
+      IR-005: OPEN_P1_ONE_UNACCOUNTED_COMMIT_706F582
+      IR-006: OPEN_P2_STALE_PRIMARY_REVIEW_STATUS
+      IR-007: OPEN_P2_V1_PROMPT_HISTORICAL_METADATA_INCONSISTENT
+      IR-008: OPEN_P2_A_INTEGRATION_REVIEWER_ROLE_COLLISION
+      NR-001: VERIFIED_OPTION_A_ACCEPTED
+    r3_specialist_review: NOT_EVIDENCED
+    reproducible_r3_test_evidence: NOT_EVIDENCED
+    ci: NOT_RUN
+    yaml_parse_schema_validation: NOT_RUN
+    manifest_verification: NOT_RUN
+    disposition: FAIL; do not accept or merge; remediation and fresh exact-Head review required.
   - reviewer_report: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945250593
     reviewed_head_sha: 0708e25d8e008b1044679ff29ba7ae34977bc08c
     result: CHANGES_REQUIRED
@@ -186,6 +226,14 @@ review_history:
     disposition: Historical review retained; follow-up remediation tracked in subsequent commits.
 
 remediation:
+  latest_review: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#pullrequestreview-5937629228
+  latest_reviewed_head: 1d6ab39375136d8649235feebeb6232609001222
+  status:
+    IR-004: FIXED_CLASSIFICATION_AND_PROMPT_V2; SPECIALIST_EVIDENCE_PENDING
+    IR-005: FIXED_MISSING_SHA_706F582_CLASSIFIED_AS_MANIFEST_ONLY
+    IR-006: FIXED_PRIMARY_REVIEW_POINTER_UPDATED; NEXT_HEAD_REVIEW_PENDING
+    IR-007: FIXED_B_D_I_V1_HISTORICAL_METADATA
+    IR-008: FIXED_A_REMOVED_AS_INTEGRATION_REVIEWER; DISTINCT_REVIEWER_ASSIGNMENT_PENDING
   source_review: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945250593
   source_reviewed_head: 0708e25d8e008b1044679ff29ba7ae34977bc08c
   status:
@@ -198,7 +246,7 @@ remediation:
   remediation_commits:
     - 206c14c2d9b8785e5cd0e6704c4900ce3daaed25
     - 201a6f5784bae2f75b20a05303bb1a703883f86f
-  note: IR-001 and NR-002/NR-003 changes are author-side remediation only; they do not supersede the independent reviewer disposition. A fresh review of the new Head is required. NR-001 is resolved by the explicit OPTION A governance decision recorded in governance-decision-NR-001.md; this does not approve the architecture or waive R3 specialist review.
+  note: All IR-004 through IR-008 document corrections are author-side remediation only and require independent verification. IR-004 remains acceptance-blocking until Owner I/Owner D specialist reports and reproducible R3 test evidence are recorded. IR-008 remains pending until a distinct integration-review conversation is actually assigned and completes its review. The latest FAIL disposition remains historical and must not be overwritten.
 
 
 governance_decisions:
