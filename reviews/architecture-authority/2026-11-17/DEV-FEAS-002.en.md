@@ -16,7 +16,7 @@
 | C Agent Integration | FEASIBLE_WITH_CONDITIONS | L–XL | C | Final request boundary, provider side-effect idempotency and UNKNOWN recovery |
 | H BMCP | FEASIBLE_WITH_CONDITIONS | L | H | Exact schema, canonicalization, signature, crypto and interoperability decisions |
 | I Security/Governance | BLOCKED for policy closure; mechanisms conditionally feasible | XL | I + external governance authorities | I36-GOV-01..10, InventorySeal, revocation and trust approvals |
-| Storage/Consistency | BLOCKED for production topology; prototype feasible | XL | Storage | L1 Option A logical topology selected; actual DB engine/adapter, persistent COC, same-XID recovery, failover/restore proof remain open |
+| Storage/Consistency | BLOCKED for production topology; prototype feasible | XL | Storage | Option A is conditionally accepted as the L1 logical direction only; A-01..A-05 and exact D adoption remain open; actual DB engine/adapter, persistent COC, same-XID recovery, failover/restore proof remain open |
 | Index/Cache | FEASIBLE_WITH_CONDITIONS | M–L | F + D + Storage | Derived-only authority, rebuild, stale suppression and Forget safety |
 | End-to-end system | NOT PROVEN | XL | All Owners; A integrates | Exact owner contracts + physical P0 proof + conformance |
 
