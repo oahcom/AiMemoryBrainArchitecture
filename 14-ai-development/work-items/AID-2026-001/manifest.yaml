@@ -487,7 +487,8 @@ latest_reconciliation:
     implementation_binding: DEFERRED_TO_ENGINEERING_PHASE
     engineering_phase_repository_and_code_owners: PENDING
     issue_7_disposition: OPEN_FOR_ENGINEERING_PHASE_ENTRY_PLAN_NOT_CURRENT_ARCHITECTURE_GATE
-    full_manifest_yaml_and_schema_validation: NOT_RUN
+    full_manifest_yaml_parse_and_required_field_path_check: PASS_PR147_EXACT_HEAD_RUN_44189279179
+    formal_json_schema_validation: NOT_RUN
     acceptance: BLOCKED_PENDING
     production_activation: NOT_AUTHORIZED
   preliminary_review:
@@ -501,3 +502,23 @@ latest_reconciliation:
     readme_md: 7aa163719978f253685931b2eb001bb6a7228c6f
     workflow_yml: 9f261aa8c00b1a144cee50c049bae8d437fd0eea
   note: PR #141 integration and its 24/24 reference-model result do not change any production R3, specialist approval, independent review, acceptance or G3 gate.
+
+
+post_merge_manifest_validation:
+  observed_main_head_before_followup: d38c8379392e56fa095ad7577e96c46b8ff202f3
+  pr_147:
+    state: CLOSED_MERGED
+    head_sha: d3dbc5321ccf97429b3003b19a28d8100330fda9
+    merge_commit_sha: 56336bd16b4dcab1b600eb7ab12e171fda0553a1
+    workflow_run: 44189279179
+    workflow_conclusion: SUCCESS
+    yaml_full_parse: PASS
+    required_top_level_fields: PASS
+    referenced_path_existence: PASS
+    formal_json_schema_validation: NOT_RUN
+  production_r3_and_dfi_001_to_022: NOT_RUN_NOT_EVIDENCED
+  owner_d_approval: PENDING
+  owner_i_approval: PENDING
+  independent_specialist_reviews: PENDING_NOT_EVIDENCED
+  production_activation: NOT_AUTHORIZED
+  note: Run #44189279179 executed on exact PR Head d3dbc5321ccf97429b3003b19a28d8100330fda9. This proves YAML parsing and repository-local required-field/path checks only; it is not formal schema validation or production conformance.
