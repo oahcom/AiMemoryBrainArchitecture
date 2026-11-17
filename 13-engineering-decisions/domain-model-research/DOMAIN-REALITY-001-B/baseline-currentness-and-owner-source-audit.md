@@ -565,3 +565,28 @@ The two labels must never be conflated. The current B Fact/Claim Option A does n
 B2 remains **IN PROGRESS / NOT PASSED**. The consumer-source review identifies no downstream acceptance that can substitute for the missing formal Fact/Claim decision. B4 schema freeze remains NOT READY.
 
 B2 仍为 **IN PROGRESS / NOT PASSED**。消费者来源审查未发现任何可替代正式 Fact/Claim 决议缺失的下游验收。B4 Schema 冻结仍 NOT READY。
+
+
+## Latest post-merge reconciliation — 2026-11-18 05:22 Asia/Singapore / 最新合并后核对
+
+This section supersedes prior live-status claims in this file wherever they describe PR #55 as Open/Draft or the research package as absent from main.
+
+- PR #55: CLOSED / MERGED at `2026-11-17T19:12:47Z`, merged by `oahcom`; merge commit `07ee5702cab0d12d6136fe3c024bde9a7af44a97`; merged head `e9554bd36bb2848441965bcf587413e7280482ed`.
+- Current main HEAD: `a2b8babb1cacfcfbcd590b147bdf34ce162944c2`; tree `16df623723013aa615e9a51765a444835d4b9cad`.
+- The merge commit is an ancestor of main; compare merge commit to main is 23 ahead / 0 behind.
+- Recursive main-tree inspection confirms the complete DOMAIN-REALITY-001-B research directory is present.
+- PR review listing: 10 COMMENTED, 0 APPROVED. Comments are not approval.
+- B0 PARTIAL / NOT PASSED; B1 IN PROGRESS; B2 IN PROGRESS / NOT PASSED; B3 NOT PASSED; B4 NOT READY; B5 BLOCKED / NOT PASSED; B6 INDEPENDENT_REVIEW_PENDING.
+- No formal Architecture Governance approval for B Fact/Claim Option A was found. D Claim Identity Option A remains a separate candidate. No Claim/Fact/ClaimRevision/ConflictSet schema is frozen.
+
+本节取代本文档中将 PR #55 描述为 Open/Draft 或声称研究包不存在于 main 的旧实时状态记录。
+
+- PR #55：于 `2026-11-17T19:12:47Z` CLOSED / MERGED，操作者 `oahcom`；Merge Commit `07ee5702cab0d12d6136fe3c024bde9a7af44a97`；合并时 Head 为 `e9554bd36bb2848441965bcf587413e7280482ed`。
+- 当前 main HEAD：`a2b8babb1cacfcfbcd590b147bdf34ce162944c2`；Tree `16df623723013aa615e9a51765a444835d4b9cad`。
+- Merge Commit 是 main 的祖先；从 Merge Commit 比较到 main 为领先 23 / 落后 0。
+- 对 main Tree 的递归检查确认完整 DOMAIN-REALITY-001-B 研究目录存在。
+- PR Review 列表：10 条 COMMENTED、0 条 APPROVED。评论不等于批准。
+- B0 PARTIAL / NOT PASSED；B1 IN PROGRESS；B2 IN PROGRESS / NOT PASSED；B3 NOT PASSED；B4 NOT READY；B5 BLOCKED / NOT PASSED；B6 INDEPENDENT_REVIEW_PENDING。
+- 未发现正式 Architecture Governance 对 B Fact/Claim Option A 的批准。D Claim Identity Option A 是独立候选。未冻结 Claim/Fact/ClaimRevision/ConflictSet Schema。
+
+See `post-merge-currentness-and-governance-reconciliation.md` for the full evidence, review limitations and execution boundary.
