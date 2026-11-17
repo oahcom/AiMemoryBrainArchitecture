@@ -50,7 +50,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | D Memory Versioning | 03-memory-brain/memory-versioning.md | docs/zh-CN/03-memory-brain/memory-versioning.md | docs/en/03-memory-brain/memory-versioning.md | COMPLETE — source-aligned pair |
 | D Canonical Commit Cursor Semantics | 03-memory-brain/commit-cursor-semantics.md | docs/zh-CN/03-memory-brain/commit-cursor-semantics.md | docs/en/03-memory-brain/commit-cursor-semantics.md | COMPLETE — source-aligned pair |
 | D Forget Fence and Completion Contract | 03-memory-brain/forget-fence-and-completion-contract.md | docs/zh-CN/03-memory-brain/forget-fence-and-completion-contract.md | docs/en/03-memory-brain/forget-fence-and-completion-contract.md | COMPLETE — source-aligned pair |
-| D Forget Fence Operation and Publication Gate | 03-memory-brain/forget-fence-operation-and-publication-gate.md | Pending | Owner-branch English source | NOT STARTED — large normative operation contract remains to translate |
+| D Forget Fence Operation and Publication Gate | 03-memory-brain/forget-fence-operation-and-publication-gate.md | docs/zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md + parts 1–4 | docs/en/03-memory-brain/forget-fence-operation-and-publication-gate.md + parts 1–4 | COMPLETE — long source split into four parallel bilingual parts |
 | E Memory Compiler Overview | 04-memory-compiler/compiler-overview.md | docs/zh-CN/04-memory-compiler/compiler-overview.md | docs/en/04-memory-compiler/compiler-overview.md | COMPLETE — source-aligned pair |
 | E Accepted Receipt and Idempotency Contract | 04-memory-compiler/accepted-receipt-and-idempotency-contract.md | docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | COMPLETE — source-aligned pair |
 | E Compiler State and D Producer Admission | 04-memory-compiler/compiler-state-and-producer-admission.md | docs/zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md | docs/en/04-memory-compiler/compiler-state-and-producer-admission.md | COMPLETE — source-aligned pair |
@@ -93,7 +93,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 
 ### Batch 3 — Domain and canonical memory / 第三批：领域模型与权威记忆
 - D Canonical Memory reader guide: COMPLETE — includes D/E/F/G/H/I ownership split, cursor namespaces, and Forget boundary.
-- D: 7 of 8 core specifications now have bilingual companions; the large Forget Fence Operation/Publication Gate remains pending. Refresh D branch head before translating it.
+- D: 8 of 8 core specifications now have bilingual companions; the long Forget Fence Operation/Publication Gate is split into four parallel bilingual parts. Refresh D branch head before translating it.
 - Domain Model reader guide: COMPLETE.
 - B's six main source specifications: COMPLETE — source-aligned bilingual pairs added. Phase 3 typed-reference/identity extensions and ADR-001 decision package remain NOT STARTED; preserve ADR-BLOCKED status.
 - D Canonical Memory detailed bilingual work: pending source-branch reconciliation.
