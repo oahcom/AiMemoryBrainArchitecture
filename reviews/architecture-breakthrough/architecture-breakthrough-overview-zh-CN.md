@@ -3,7 +3,7 @@
 - Research ID: ABR-SESSION-0-2026-11-18
 - Status: **CANDIDATE / TO_VALIDATE；非架构批准**
 - Research branch: `research/architecture-breakthrough-session-0-2026-11-18`
-- Baseline: `main@b3c666e67982cb3d3374e759cfb6552c7765aacb`
+- Baseline: `main@28fb37e21fa4ba2b871f7816fe669128618c063e`
 - Date: 2026-11-18
 
 ## 1. 执行摘要
@@ -26,7 +26,7 @@
 
 | 来源 | 当前分支 HEAD | 本轮读取的文件 / Blob SHA |
 |---|---|---|
-| main | `b3c666e67982cb3d3374e759cfb6552c7765aacb` | `01-system-architecture/system-overview.md` / `995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256` |
+| main | `28fb37e21fa4ba2b871f7816fe669128618c063e` | `01-system-architecture/system-overview.md` / `995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256`; 新增 B-02 Phase 8 / `8a0a428ebf9cd8c8fe00562d2267ff490d5c3205` |
 | A | `session-a-integration-2026-11-16` @ `6e05831d264040e0e3b3359245b1e01ea613b46c` | responsibility matrix / `fbeb6935fe874e6c843c25c3a891d6b3242cbfd3`; governance baseline / `a43a8f2fa3d31681d64b79d584364fdae80f8866` |
 | B | `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | Fact/Claim ADR / `a1024938ff5baba069cf128c69496a44e143330c`; consumer mapping / `dd45a37199c9b69ab6b68f65e051a484a04691d4` |
 | D | `session-d-memory-brain-2026-11-16` @ `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | Forget contract / `1f0391bc49d007c44ec74165bd33d37412cc7990`; publication gate / `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` |
@@ -231,3 +231,10 @@ IR 中的 Fact/Claim 类型必须遵守 B 的 ADR 状态；在 B ADR-BLOCKED 期
 - Linux cgroup v2 memory controller: https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html
 - Redis eviction: https://redis.io/docs/latest/develop/reference/eviction/
 - OpenTelemetry context propagation: https://opentelemetry.io/docs/concepts/context-propagation/
+
+
+## 11. Main 基线增量核验（2026-11-18）
+
+研究期间 main 从 `b3c666e...` 前进一个提交至 `28fb37e21fa4ba2b871f7816fe669128618c063e`，只新增 A 的 B-02 Phase 8 纠偏报告（Blob `8a0a428ebf9cd8c8fe00562d2267ff490d5c3205`）。研究分支已通过双父 merge commit `a1bf0d0b6d4a79d0690941218bcf57461aa8d258` 纳入该 main 更新，没有覆盖 main。
+
+该报告修正了 H 1.2.15 证据表述：C/I 已对 schema 与纠正后的签发顺序作有条件合同审查；I 生产 Profile/Issuer/Trust 注册仍 OPEN；H 接收端 Validator 存在但独立 Issuer 签发执行链未找到；D 对当前 H 1.2.15 的精确审查仍 OPEN。此项说明合同审查、可执行 Issuer、生产信任注册和 Owner 独立采纳必须分开记账。
