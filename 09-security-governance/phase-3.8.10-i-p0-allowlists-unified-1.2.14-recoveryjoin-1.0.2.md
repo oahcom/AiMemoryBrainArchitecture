@@ -4,7 +4,7 @@
 - Owner: I — Security, Identity and Governance
 - Branch: `session-i-security-governance-2026-11-16`
 - Profile candidate: `AIMBA-I-CRYPTO-1.0`, Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`
-- H unified schema 1.2.14: Blob `fee452efb99ab4fe0ceccb347c46eeef1521bd28`
+- H unified schema 1.2.14: Blob `09fcd1fa29fe24255fbd87cae79dafb406594a59`
 - H RecoveryJoin schema 1.0.2: Blob `4b664e3bce465499bcdfd93796349a4ba7074002`
 - Status: **I-OWNED NORMATIVE P0 PROJECTION CANDIDATE — EXACT FIELDS DEFINED; PROFILE/PRODUCTION APPROVAL SEPARATE**
 - English and Chinese are normative peers.
