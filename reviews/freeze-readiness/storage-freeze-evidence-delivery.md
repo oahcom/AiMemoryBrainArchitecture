@@ -93,17 +93,26 @@ This is a material blocker clarification: PostgreSQL CI capability evidence does
 
 **Decision:** Storage evidence delivery is complete for the database-capability/documentary stage. Storage freeze-readiness remains **BLOCKED** until ST-FR-01 through ST-FR-08 are satisfied.
 
-## 7. Exact RecoveryJoin and C provider boundary evidence refresh / RecoveryJoin 与 C Provider 证据刷新
 
-- Storage bidirectional JoinProof contract: `4520860b28429d35cdb2ca947a56d0ccb64226a3`.
-- Storage exact review after H/C refresh: `4cb3a6c71497cc68ffbb947cd47c4e67c6590bc2`.
-- Storage topology ADR: `080433f8e13a500522bc2754da64057edb0ae9d8` — **ADR-BLOCKED / NO TOPOLOGY SELECTED**.
-- H RecoveryJoin schema: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
-- HRC/JPF suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
-- H CI run [44040312711](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040312711): **66/66 PASS**, reference candidate only.
-- C exact RecoveryJoin/provider-side-effect review: `d5be3be10f7144476ddc61a94f29faff67424292`.
-- I exact RecoveryJoin trust/currentness review: `4a72cecd7769be7017b699ab102b127fab516101`.
+## 7. Exact RecoveryJoin, bidirectional Owner Admission join and H CI evidence refresh
 
-The H CI pass does not execute Storage's live COC prefix read, quorum-committed Batch/Manifest ordering, durable JoinProof commit, D/Storage shared transaction boundary, VisibilityPointer/PublicationReceipt/outcome/outbox atomicity, or physical HA/restore. C ProviderIdempotencyKey remains a C-owned namespace and cannot be replaced by PreparedTransactionGID/native XID.
+- Storage controlling bidirectional JoinProof contract: `reviews/storage-consistency/phase-3.6.11-storage-bidirectional-coc-owner-admission-join-proof.md`, Blob `2daea020808b174460d69ba1c0c4a0a3f6b3e8e2`.
+- Storage COC protocol v3.2.2 companion: `reviews/storage-consistency/phase-3.6-coc-durable-log-and-recovery-protocol-storage-design-v3.2.2.md`, Blob `ce3c41adf826a622a3717eca481b5d53e6549196`.
+- Storage exact review / topology disposition: `reviews/storage-consistency/phase-3.8.2-storage-exact-review-and-topology-disposition.md`, Blob `ebc8b2f0b05e3d59b098ed3ca8a2f31bb32fa36f`.
+- Storage topology ADR: Blob `080433f8e13a500522bc2754da64057edb0ae9d8` — **ADR-BLOCKED / NO TOPOLOGY SELECTED**.
+- H RecoveryJoin schema 1.0.0: Blob `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- H semantic validator contract: Blob `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80`.
+- HRC/JPF suite: Blob `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- H Wire suite: Blob `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
+- H Schema integrity suite: Blob `67aba74c120f2916d768e7b01c45408ee2624f3a`.
+- H CI run [44040502709](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709), commit `1c6ddd301d538652ceea22ea665d50c5fad8178e`: **66/66 PASS**, candidate reference suite only.
+- C delegated exact RecoveryJoin/provider-side-effect review: Blob `a7b57bd5531222559666f0f1d9df59a259cde61a`; provider implementation remains unverified.
+- I recovery-cutoff wire-authority review: Blob `5a95e1764c3fb812046c8f725a3dd325d9385b17`; that review is **CANDIDATE / NO I WIRE APPROVAL** for its exact 1.0.1 target and does not approve RecoveryJoin 1.0.0.
 
-Storage accepts the logical digest chain and two-direction join as a proposed contract with STORAGE-RJ-01..05 amendments. The physical topology is still unselected: Option A is conditional on proof of one actual Serializable transaction domain; Option B requires a named durable linearizable coordinator and its own failover proof; Option C remains rejected. No topology, deployment, production activation or freeze is approved.
+The Storage JoinProof contract specifies the acyclic ContentDigest → BatchDigest → ManifestRecordDigest → JoinProofDigest chain, exact COC prefix enumeration, six independent I/D/C request/admission sets, both directional typed joins, OwnerAdmissionRef vs OwnerEntryRef row identity, request-row dispositions, explicit difference sets, JF-10 same-GID/DB-incarnation sub-join and independent owner-local currentness CAS.
+
+The H 66/66 CI result proves only that the checked-in Python HRC/JPF/WIRE/SCHEMA candidate suite passed on GitHub Actions. It does not execute live COC quorum prefix enumeration, real owner ledger adapters, owner signatures/key-status verification, Storage durable JoinProof commit, owner-local CAS, JF-10 same-XID physical resolution, or production multi-language interoperability.
+
+C ProviderIdempotencyKey remains a C-owned namespace and cannot be replaced by Storage PreparedTransactionGID or PostgreSQL native XID. C provider outcome remains C-owned. I/D/C each independently own their gate-release decisions. Storage/COC cannot issue them.
+
+**Current disposition:** logical JoinProof accepted with enumerated amendments in delegated role review; physical topology and integrated conformance remain OPEN. No DB topology selection, implementation PASS, production activation or freeze is claimed.
