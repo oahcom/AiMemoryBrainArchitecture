@@ -1,6 +1,6 @@
 # 架构复杂度评估 — ARCH-CX-002
 
-- 版本：1.0.0；基线：`main@6470f25ca23b8d35c06f60be2326867066418d18`
+- 版本：1.0.0；基线：历史评估快照 `6470f25ca23b8d35c06f60be2326867066418d18`（历史评估快照，非当前 Main）（非当前 Main）
 - X 来源：PR #49，Commit `131f91743bd506517ee354d58c277501ca447929`，英文 Blob `c509120644d6f7c7223decf3f9f0ee33b0548bb7`，中文 Blob `981a376ddf283ace1e891795c813b17ac4aa3d8b`。
 - A 裁决：复杂度可控性 **NOT PROVEN**。
 
@@ -49,3 +49,8 @@ B 协议候选（H 1.2.14 / wire 1.3.0 + CSubmitOutcome 1.0.1）也增加精确�
 ## 结论
 
 系统复杂度高，复杂度可控性 **NOT PROVEN**。可以降低不必要的部署复杂度，但 P0 证明负担仍然很高。参见 SYS-RISK-002、DEV-FEAS-002、DEP-DAG-002 和 GATE-002。
+
+
+## 当前 Main HEAD
+
+本次发布独立观察到的当前 Main HEAD 为 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。此前的 `6470f25...` / `b372b62...` 均为历史评估快照，不是当前 Main。本套文件尚未完成针对当前 Main 的逐来源完整差异审计；G1 仍为 PARTIAL，所有 Gate/冻结限制继续有效。
