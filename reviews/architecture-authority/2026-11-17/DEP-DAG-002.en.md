@@ -85,3 +85,8 @@ See SYS-RISK-002, DEV-FEAS-002, PRIORITY-002 and GATE-002.
 ## Source freshness / assessed baseline
 
 This assessment's source-evidence baseline is pinned to main commit `b372b62c640a2b656e54b6db62a4ee67d7d8c001`. At publication, the observed main HEAD is `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` (a later revert commit); this later HEAD is not silently substituted for the assessed baseline. Before any Gate closure or freeze decision, refresh every cited Owner artifact and repeat the delta review against that HEAD. The Storage L1 topology source is separately pinned to Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`, branch `session-storage-consistency-forget-atomicity-2026-11-16`; §8 selects Option A for L1, while L4 physical conformance remains OPEN.
+
+
+## Current main HEAD / 当前 Main HEAD
+
+Current main HEAD observed for this publication: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. Earlier `6470f25...` / `b372b62...` values are historical snapshots, not current main. A full source-by-source delta audit against current main is not complete; G1 remains PARTIAL and Gate/freeze restrictions remain in force.
