@@ -2,15 +2,16 @@
 
 - Authority: A integration assessment; no Owner authority is substituted.
 - Date: 2026-11-17
-- Controlling main HEAD at this addendum: `901e38ba7b45ed1822eaefddc2da8d765cf8985c`
-- Parent: `ca69d50d1fc6c19a930128de700b0f2328bf32fb`
+- Controlling main HEAD at this addendum: `b3c666e67982cb3d3374e759cfb6552c7765aacb`
+- Content tree: `7096e0bc3fdc9a390fccff388f9261522fa424f2` (identical to the tree at `901e38...`; subsequent add/delete cleanup commits changed history but restored the same tree).
+- Previous baseline parent: `ca69d50d1fc6c19a930128de700b0f2328bf32fb`
 - Change: `revert(domain): remove research-only bilingual audit from main`
 - A review branch: `review/session-4-a-final-architecture-authority-current-2026-11-17`
 - Supersedes: FINAL-A-003 only for current-main freshness and B-audit availability; it does not erase prior findings or Owner decisions.
 
 ## 1. Baseline correction
 
-The previous FINAL-A-003 baseline `ca69d50d1fc6c19a930128de700b0f2328bf32fb` is no longer current. Main now points to `901e38ba7b45ed1822eaefddc2da8d765cf8985c`.
+The previous FINAL-A-003 baseline `ca69d50d1fc6c19a930128de700b0f2328bf32fb` is no longer current. Main now points to `b3c666e67982cb3d3374e759cfb6552c7765aacb`.
 
 The latest commit removes exactly:
 `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md`
