@@ -111,3 +111,8 @@ The current exact H candidate bundle remains:
 Latest run [44040502709](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709), commit `1c6ddd301d538652ceea22ea665d50c5fad8178e`, job `semantic-and-wire-tests`: **66 tests ran, OK**. This supersedes earlier 61/56-method inventories and the previous successful run 44039990464 as the latest recorded H candidate CI evidence.
 
 This result is limited to the checked-in Python reference semantic, wire-negative and schema-integrity candidate tests. It does not close H-FR-01/02/04/06/07: exact schema 1.2.6 approval, CSubmitOutcome schema acceptance, two independent production canonical-byte/signature implementations, I-approved cryptographic trust, SDK/transport interoperability and one immutable integrated H/I/C/D/Storage/A bundle remain OPEN. H freeze remains **BLOCKED — NOT FROZEN / NOT INTEROPERABILITY-VERIFIED**.
+
+
+## 9. Latest rerun superseding prior H CI pin / 最新重跑结果
+
+The newest verified H candidate run is [44041110983](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041110983), job `133895653293`, checking out H branch commit `0a131b5cfcda78c4d5414aea9f99957ebc95955e`. Raw log: **66 tests, OK**. This supersedes run 44040502709 as the latest H candidate CI evidence. Scope remains the same Python reference semantic, wire-negative and schema-integrity suite; it does not close production canonicalization/signatures, independent-language interoperability, live owner/COC adapters or physical JF-10.
