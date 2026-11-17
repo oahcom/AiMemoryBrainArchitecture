@@ -93,7 +93,7 @@ Counterexample classes: producer registration racing with fence installation; pa
 
 ### 3.4 Preliminary disposition
 
-**CANDIDATE: TLA+ as the primary model, Alloy as a relational supplement.** Do not start by adopting a generic distributed transaction framework or creating another coordinator. First determine whether D Producer Registration, Fence Install, Dependency Registration and Visibility Commit can share one physical transaction / linearization anchor. If not, compare recoverable prepare/commit with the COC protocol.
+**CANDIDATE: TLA+ as the primary model, Alloy as a relational supplement.** Storage's current topology ADR §§8.2–8.7 has already marked the L1 logical topology DECIDED: one Serializable Transaction Domain and one CanonicalAuthoritySerializationAnchor per BrainAuthorityRef. Option B is not an automatic v1 fallback and requires a successor ADR. This research does not reopen that L1 choice; it tests D/E/I adoption of the exact contract, whether the actual DB/adapter satisfies L4, and whether physical Fence/Admission/Dependency/Visibility tests match the model.
 
 ## 4. Workstream B — Memory Operating System
 
