@@ -171,3 +171,29 @@ E AcceptedReceipt → 持久化 D RegistrationReceipt → Queue/Lease/Run → Pr
 D Registration 持久化前不得 Queue/Lease/Execution。Retry 保持 ProducerWorkItemId 和请求摘要不变，AttemptId/LeaseId 轮换。Recompile 使用新 DerivationRunId 和明确的 D-linked Child/Re-admission 决策，不得重置 Lineage。Staged Bytes 必须保持 Private。Dependency Set 与 Lineage Digest 必须作为完整不可变单元提交。只有在权威原子提交中检查当前 D Fence、I 授权、D Registration、完整依赖、活动 Attempt/Lease、Scope 和精确 Artifact Digest 后，Visibility 才能改变。ACK 丢失必须用同一稳定 Operation ID+Digest 查询；UNKNOWN 时 Artifact 保持 Private、Barrier 保持开放。所有 Output/Attempt/Replay Path 核清并取得 D Terminal Receipt 后才能关闭终态。
 
 E 不接受 D Approved 消息后接无约束 Object Store 写入。若无共享 ACID 域，E 要求 D+Storage 批准持久化 Prepare/Commit、一次性 Final Visibility CAS、提交时当前 Fence 验证、崩溃恢复和 UNKNOWN 时隐藏。
+
+## 10. D/I/Storage final publication sequence — no detached gate token
+
+E adopts two independent in-flight barriers for protected derivative publication:
+
+1. E completes private staging and the complete dependency set.
+2. D admits a D-owned PublicationParticipantRef against the current ForgetFence and records it as unresolved in the D barrier.
+3. Storage durably creates a hidden StorageVisibilityParticipantRef bound to PublicationOperationId/digest, artifact/version, WorkItemId, attempt/lease, dependency digest and D PublicationParticipantRef.
+4. I consumes a single-use CommitAuthorizationReceipt in its own PolicyDomain sequencer, bound to that exact publication and Storage participant. REVOCATION_WON/UNKNOWN blocks visibility. COMMIT_WON is not visibility; I holds later revocation behind the unresolved participant.
+5. Storage commits visibility only after validating exact D participant currentness and I terminal proof at the final boundary, in the D/Storage serialization domain. The commit records immutable PublicationReceipt and participant outcome.
+6. D and I independently consume the authoritative Storage outcome: COMMITTED_VISIBLE or proven NO_PUBLICATION closes their respective participant; UNKNOWN keeps both barriers open and artifact private.
+
+D Fence and I revocation are independent gates. D publication intent first means a later D fence waits for this participant; I receipt consumption first means a later revocation waits for this participant. If either authority wins first, publication is rejected or safely aborted. No cross-authority numeric epoch comparison is permitted.
+
+### 中文规范
+
+E 采用受保护 Derivative 发布所需的两个独立进行中 Barrier：
+
+1. E 完成 Private Staging 和完整 Dependency Set。
+2. D 根据当前 ForgetFence 准入 D-owned PublicationParticipantRef，并将其记为未解决 Barrier Participant。
+3. Storage 持久化创建隐藏的 StorageVisibilityParticipantRef，绑定精确 PublicationOperationId/Digest、Artifact/Version、WorkItemId、Attempt/Lease、Dependency Digest 和 D PublicationParticipantRef。
+4. I 在自己的 PolicyDomain Sequencer 中单次消费 CommitAuthorizationReceipt，绑定精确 Publication 与 Storage Participant。REVOCATION_WON/UNKNOWN 阻断 Visibility；COMMIT_WON 仍不等于 Visibility，I 必须让后续 Revocation 等待该未解决 Participant。
+5. Storage 仅在最终边界验证精确 D Participant 当前性和 I Terminal Proof 后，才在 D/Storage 序列化域提交 Visibility，同时记录不可变 PublicationReceipt 和 Participant 结果。
+6. D 与 I 分别消费权威 Storage Outcome：COMMITTED_VISIBLE 或已证明的 NO_PUBLICATION 关闭各自 Participant；UNKNOWN 保持两个 Barrier 开放且 Artifact Private。
+
+D Fence 与 I Revocation 是独立 Gate。D Publication Intent 先发生，则后来的 D Fence 等待该 Participant；I Receipt Consumption 先发生，则后来的 Revocation 等待该 Participant。任一权威先赢，都必须拒绝或安全中止发布。禁止跨权威 Epoch 数值比较。
