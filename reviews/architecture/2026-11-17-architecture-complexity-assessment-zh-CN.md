@@ -334,7 +334,7 @@ Reference Model 测试通过不代表测试套件完成。逻辑模型、数据�
 - **X-AC-04：** 模块不得仅凭另一个模块的传输或局部 ACK 声称跨模块终态。
 - **X-AC-05：** Typed Cursor/Epoch 在 Schema、代码和测试中 MUST 保持名义类型区分。
 - **X-AC-06：** 首个检索切片 SHOULD 使用 Structured + Lexical；新增通道必须有实测质量/延迟依据。
-- **X-AC-07：** 只有 C/G/H 最终请求证明谓词满足时 MUST 才能提供 Full Applied；否则报告实际较窄的 Delivery State。
+- **X-AC-07：** 除非 C/G/H 最终请求证明谓词全部满足，否则 MUST 不提供 Full Applied；只能报告实际较窄的 Delivery State。
 - **X-AC-08：** Restore MUST 从 Fenced/Quarantined 开始，且仅在当前 Control-ledger 和 Owner Proof 协调后才能服务。
 - **X-AC-09：** 每个新增 Protocol Version、State、Epoch、Cursor 或 Receipt MUST 说明精确兼容需求和 Supersession 路径。
 - **X-AC-10：** 复杂度评分变化 MUST 引用被删除/合并的机制或缩小的证明面；不接受只改评分的优化。
