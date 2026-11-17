@@ -415,3 +415,88 @@ This overlay corrects §12's forecast: PR #164 was opened concurrently with §12
 - Issue #25 仍 OPEN，等待独立 D/E/I/Storage Owner 决策和生产证明。Issue #26 仍 OPEN / SECURITY_ACCEPTANCE_BLOCKED；PR #162 只更正证据分类，手动 Diagnostics 仍 NOT RUN。PR-GOVERNANCE-001 已 ADOPTED，但 Issue #130 仍 OPEN 等待会话覆盖审计。Issue #134 仍 OPEN / P0；经典分支保护关闭，Rulesets 仍未核实。
 - 本追加不构成独立审查、Owner 验收、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
 - 135 条记录是 API 快照的元数据完整盘点，不是对全部 135 条历史 PR Diff 重新逐行进行语义/代码审查。
+
+
+---
+
+## 14. Latest live inventory and I/Storage authority-separation follow-up / 最新实时盘点与 I/Storage 权威分离后续（2026-11-18）
+
+This overlay supersedes §13's count for this later snapshot only. It preserves all earlier inventories as historical snapshots.
+
+### 14.1 Current repository state / 当前仓库状态
+
+- Main HEAD at this snapshot: `2fabe07640e2f3cee69b213275c9f5a7b17edd5d`.
+- Refreshed GitHub `state=all` inventory (API pages 1–2, `per_page=100`): **138 PR records = 113 merged + 25 closed-unmerged + 0 open**.
+- The inventory is metadata-complete for the API result pages. It is not a fresh line-by-line semantic/code review of all 138 PR diffs.
+- Main branch API reports `protected=false`, `protection.enabled=false`, required status checks `enforcement_level=off`, and no required contexts/checks. The direct branch-protection endpoint returns HTTP 403 to this integration. Do not claim branch protection or Ruleset enforcement is active.
+
+### 14.2 PRs after the 135-record snapshot / 135 条快照之后的 PR
+
+Three PR records followed the §13 snapshot:
+
+1. **PR #166** — merged at `c52034a6e1cb5b8243bc7046e28663470b6f7016`. It published the 135-record live inventory and NO_PUBLICATION hardening overlay. This is the canonical merged recovery-report update for that snapshot.
+2. **PR #167** — closed unmerged, no merge commit. It was a parallel 135-record inventory/fenced-publication overlay based on the same pre-PR168 main. Its unique purpose was superseded by merged PR #166; no unique accepted contract or implementation is lost by its unmerged closure.
+3. **PR #168** — merged at `2fabe07640e2f3cee69b213275c9f5a7b17edd5d`. Exact Head `206909f5af9834b993cfc198b2f171c54bc7cd3f`; Publication Protocol workflow #44194106522 SUCCESS (28 tests / OK); GOV-DOC-001 #44194106534 SUCCESS.
+
+### 14.3 PR #168 — correction to the publication reference model / 发布参考模型的权威边界修正
+
+Post-merge review of PR #163/#164 identified a model mismatch: the earlier model treated I authorization consumption as part of Storage final commit and rejected consumed authorization as inconsistent with NO_PUBLICATION, although the Owner contract requires I COMMIT_WON to consume authorization before Storage's terminal outcome.
+
+PR #168 separates the two transitions:
+- I sequencer `COMMIT_WON` consumes the single-use authorization and creates a pending I participant.
+- Storage validates that exact prior I proof and then commits visibility/outcome/receipt/outbox; Storage does not consume I authorization.
+- Revocation before I COMMIT_WON wins. Revocation after COMMIT_WON remains pending and cannot cancel the winner; I closeout releases it after the exact Storage outcome.
+- A known crash before Storage commit preserves I consumption/pending but creates no Storage visibility, receipt or outbox; same immutable operation retry can succeed.
+- UNKNOWN blocks recommit until authoritative reconciliation.
+- NO_PUBLICATION preserves consumed I authorization and the pending I participant; it creates no visibility/receipt/outbox. D/I close only against the same exact Storage terminal outcome.
+
+Evidence ceiling remains strict: this is a deterministic in-memory reference model and typed test seam, not production I/Storage implementation, authenticated Storage evidence, a signed wire schema, DB durability, multi-process concurrency, cryptographic authenticity, crash/failover/restore or production conformance. Independent D/E/I/Storage Owner decisions remain OPEN. Issue #25 remains OPEN and Phase 3.8 remains NOT FROZEN.
+
+### 14.4 Other open control findings / 其他开放控制问题
+
+- Issue #25: independent D/E/I/Storage Owner decisions, H wire/crypto, physical serialization topology and production conformance remain pending.
+- Issue #26: remains OPEN / SECURITY_ACCEPTANCE_BLOCKED. PR #162 corrected evidence classification only; manual read-only diagnostics remain NOT RUN / NOT EVIDENCED.
+- Issue #130: PR-GOVERNANCE-001 is ADOPTED as repository process policy, but the operational session-coverage audit remains OPEN.
+- Issue #134: remains OPEN / P0. Main has no active required-check enforcement. PR templates and process policy are not a hard merge gate.
+- No PR merge establishes independent review, Owner acceptance, production R3/DFI conformance, Worker security acceptance or production authorization.
+
+### 中文规范
+
+本追加仅更新第 13 节之后的实时状态，不改写此前历史快照。
+
+#### 14.1 当前仓库状态
+
+- 本次快照 Main HEAD：`2fabe07640e2f3cee69b213275c9f5a7b17edd5d`。
+- GitHub `state=all` 盘点（API 第 1–2 页，`per_page=100`）：**138 条 PR = 113 条已合并 + 25 条关闭未合并 + 0 条开放**。
+- 该盘点覆盖本次 API 返回的元数据，不代表对全部 138 条 PR Diff 重新逐行进行语义/代码审查。
+- Main 分支 API 显示 `protected=false`、`protection.enabled=false`、必需状态检查 `enforcement_level=off`，且没有必需检查上下文。当前集成无法访问分支保护端点（HTTP 403）。不得声称分支保护或 Ruleset 强制执行已启用。
+
+#### 14.2 135 条快照之后的 PR
+
+第 13 节快照之后增加了三条 PR 记录：
+
+1. **PR #166**：合并提交 `c52034a6e1cb5b8243bc7046e28663470b6f7016`。它发布了 135 条实时盘点及 NO_PUBLICATION 加固覆盖层，是该快照对应的正式合并报告。
+2. **PR #167**：关闭但未合并，没有 merge commit。它是与 PR #166 并行的 135 条盘点/Fence 发布覆盖层，基于相同的 PR #168 之前 Main。其独立目的已被已合并的 PR #166 替代；关闭它没有丢失独立接受的契约或实现。
+3. **PR #168**：合并提交 `2fabe07640e2f3cee69b213275c9f5a7b17edd5d`。精确 Head `206909f5af9834b993cfc198b2f171c54bc7cd3f`；Publication Protocol 工作流 #44194106522 SUCCESS（28 项测试）；GOV-DOC-001 #44194106534 SUCCESS。
+
+#### 14.3 PR #168——发布参考模型的权威边界修正
+
+对 PR #163/#164 的合并后审查发现模型不一致：此前模型将 I 授权消费视为 Storage 最终提交的一部分，并将已消费授权视为与 NO_PUBLICATION 冲突；但 Owner 契约要求 I COMMIT_WON 在 Storage 终态之前消费授权。
+
+PR #168 将两个转换分离：
+- I Sequencer 的 `COMMIT_WON` 消费单次授权并创建待关闭的 I Participant。
+- Storage 验证此前的精确 I 证明，然后提交可见性/终态/Receipt/Outbox；Storage 不消费 I 授权。
+- I COMMIT_WON 之前发生撤权，准入失败；COMMIT_WON 之后发生撤权，撤权保持待处理，不能取消已胜出的决策；I 在精确 Storage 终态后关闭时释放撤权。
+- Storage 提交前已知崩溃会保留 I 授权消费和待关闭状态，但不会创建 Storage 可见性、Receipt 或 Outbox；相同不可变操作可以重试。
+- UNKNOWN 在权威对账前禁止重新提交。
+- NO_PUBLICATION 保留已消费 I 授权和待关闭 I Participant，不创建可见性/Receipt/Outbox。D/I 只能针对同一个精确 Storage 终态关闭。
+
+证据边界仍然严格：这是确定性内存参考模型和类型化测试接缝，不是生产 I/Storage 实现、经认证 Storage 证据、签名 Wire Schema、数据库持久性、多进程并发、密码学真实性、崩溃/故障切换/恢复或生产符合性证明。独立 D/E/I/Storage Owner 决策仍 OPEN。Issue #25 仍 OPEN，Phase 3.8 仍 NOT FROZEN。
+
+#### 14.4 其他开放控制问题
+
+- Issue #25：独立 D/E/I/Storage Owner 决策、H Wire/密码学、物理序列化拓扑及生产符合性仍待完成。
+- Issue #26：仍 OPEN / SECURITY_ACCEPTANCE_BLOCKED。PR #162 只更正证据分类；手动只读 Diagnostics 仍 NOT RUN / NOT EVIDENCED。
+- Issue #130：PR-GOVERNANCE-001 已作为仓库流程规范 ADOPTED，但会话覆盖运营审计仍 OPEN。
+- Issue #134：仍 OPEN / P0。Main 没有启用必需检查强制执行。PR 模板和流程规范不是硬合并门禁。
+- 任何 PR 合并都不等于独立审查、Owner 验收、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
