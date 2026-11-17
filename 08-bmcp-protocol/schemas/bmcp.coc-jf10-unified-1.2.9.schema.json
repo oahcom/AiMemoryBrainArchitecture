@@ -2770,12 +2770,10 @@
           "$ref": "#/$defs/opaqueRef"
         },
         "owner_local_sequence": {
-          "type": "string",
-          "pattern": "^(0|[1-9][0-9]*)$"
+          "$ref": "#/$defs/opaqueRef"
         },
         "owner_high_water": {
-          "type": "string",
-          "pattern": "^(0|[1-9][0-9]*)$"
+          "$ref": "#/$defs/opaqueRef"
         },
         "owner_entry_digest": {
           "$ref": "#/$defs/sha256"
@@ -2803,6 +2801,9 @@
         },
         "coc_participant_intent_ref": {
           "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_membership_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
         }
       },
       "required": [
@@ -2821,7 +2822,8 @@
         "owner_snapshot_attestation_digest",
         "operation_digest",
         "scope_binding_digest",
-        "coc_participant_intent_ref"
+        "coc_participant_intent_ref",
+        "owner_snapshot_membership_proof_ref"
       ]
     },
     "ownerLocalAdmissionMember": {
@@ -2864,12 +2866,10 @@
           "$ref": "#/$defs/opaqueRef"
         },
         "owner_local_sequence": {
-          "type": "string",
-          "pattern": "^(0|[1-9][0-9]*)$"
+          "$ref": "#/$defs/opaqueRef"
         },
         "owner_high_water": {
-          "type": "string",
-          "pattern": "^(0|[1-9][0-9]*)$"
+          "$ref": "#/$defs/opaqueRef"
         },
         "owner_entry_digest": {
           "$ref": "#/$defs/sha256"
@@ -2935,6 +2935,9 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 1024
+        },
+        "owner_snapshot_membership_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
         }
       },
       "required": [
@@ -2960,7 +2963,8 @@
         "admission_state",
         "effect_boundary",
         "coc_participant_intent_ref",
-        "coc_absence_reason"
+        "coc_absence_reason",
+        "owner_snapshot_membership_proof_ref"
       ]
     },
     "ownerSnapshotRoot": {
@@ -3138,9 +3142,9 @@
           "items": {
             "$ref": "#/$defs/ownerAdmissionBinding"
           },
-          "minItems": 1,
+          "minItems": 0,
           "uniqueItems": true,
-          "description": "Every owner admission already joined to this COC participant. Each binding repeats the parent participant_intent_ref and resolves to the exact frozen owner snapshot."
+          "description": "Zero or more exact owner-local admissions already joined to this COC participant. If an applicable frozen owner admission exists, it must appear exactly once; if none exists, the array is explicitly empty."
         }
       },
       "required": [
