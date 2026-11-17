@@ -221,10 +221,11 @@ class PublicationProtocolTests(unittest.TestCase):
         with self.assertRaises(Rejected):
             p.commit(**self.commit_args())
 
-    def test_authorization_is_single_use(self):
+    def test_authorization_is_single_use_across_distinct_operations(self):
         p = self.prepared()
         args = self.commit_args()
         p.commit(**args)
+        args["operation_id"] = "op-2"
         with self.assertRaises(Rejected):
             p.commit(**args)
 
