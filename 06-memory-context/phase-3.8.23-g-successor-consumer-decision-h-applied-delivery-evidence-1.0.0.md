@@ -166,3 +166,23 @@ H Evidence 只是 G Evidence Revision 的一个组成部分，不能自己创建
 - G Durable Applied Persistence/Restore：**NOT IMPLEMENTED / NOT VERIFIED**。
 - Full Applied：**NOT ACCEPTED / NOT PROVEN**。
 - 全局 C/G/H Freeze 和生产激活：**NO / NOT AUTHORIZED**。
+
+
+## 9. Current H-head and C/G consumer recheck — 2026-11-18
+
+The H branch has advanced from the exact snapshot reviewed by this delegated G-role decision (`9fb2097905ef653b3a2048ac5f6804fc94178d8d`) to current H HEAD `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`.
+
+Current H pins:
+- Schema: `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608`
+- Validator: `8febb915ec321cc37cf159b2f5b917a3f945726c`
+- Tests: `77cb66b895c5293a2f4883b1d5cb69775e71d00c` (29 test methods)
+- C join addendum: `9ff4ac5b64b354f63add21a5d16d37da46835c07`
+- Hardening addendum: `4c220e998fc6ba700157598b0384dc3134cf8575`
+
+The current H code separates replay disclosure checks into two independent callbacks: I current authorization/PermissionEpoch/key/principal/audience/scope, and D current ForgetOperation/Fence/lineage. Each is tri-state and both must pass before returning `original_result_ref`. The H validator also contains the reference C resolver and exact field mapping.
+
+The exact CI evidence in this decision (26/26, run `44180835412`) is for the earlier H head `9fb2097...`, not current H head `b14e388...`. The current 29-test suite has no verified exact-head run in this review. This G-role decision remains a delegated candidate consumer acceptance only; it is not a real G Owner signature, production integration acceptance or G persistence proof.
+
+H 分支已从本委派 G 角色决议审查的精确快照 `9fb2097...` 前进至当前 Head `b14e388...`。当前 H Validator 已将 Replay Disclosure 检查拆分为两个独立 Callback：I 当前授权/PermissionEpoch/Key/Principal/Audience/Scope，以及 D 当前 ForgetOperation/Fence/Lineage。二者均为 Tri-state，必须同时通过后才能返回 `original_result_ref`。H Validator 也包含 C Resolver 和精确字段映射参考实现。
+
+本决议引用的 26/26 CI Run `44180835412` 属于旧 H Head `9fb2097...`，不是当前 `b14e388...`。当前 29 项测试尚无本审查可核实的精确 Head Run。因此本 G 角色决议仍仅为委派候选消费者接受，不是真实 G Owner 签名、生产集成验收或 G 持久化证明。
