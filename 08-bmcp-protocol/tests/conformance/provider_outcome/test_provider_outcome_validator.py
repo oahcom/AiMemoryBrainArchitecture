@@ -21,6 +21,7 @@ from provider_outcome_validator import (  # noqa: E402
     parse_strict_json,
     SCHEMA_ARTIFACT_REVISION,
     WIRE_SCHEMA_VERSION,
+    validate_provider_outcome,
 )
 from jsonschema import Draft202012Validator, FormatChecker
 
@@ -226,6 +227,19 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertNotIn("participant_intent_ref", WIRE_TO_C)
         self.assertEqual(WIRE_TO_C["coc_participant_intent_ref"], "COCParticipantIntentRef")
         self.assertEqual(WIRE_TO_C["c_submit_outcome_digest"], "payload_digest")
+
+    def test_15_wrong_loaded_schema_uris_are_rejected(self):
+        result = validate_provider_outcome(
+            envelope={},
+            c_object={},
+            envelope_schema={"$id": "urn:wrong:bmcp"},
+            c_object_schema={"$id": "urn:wrong:c-object"},
+            checks=AuthorityChecks(),
+        )
+        self.assertEqual(result["status"], "INVALID")
+        self.assertIn("wrong BMCP schema_id", result["errors"])
+        self.assertIn("wrong loaded BMCP schema artifact URI", result["errors"])
+        self.assertIn("wrong loaded C object schema artifact URI", result["errors"])
 
 
 if __name__ == "__main__":
