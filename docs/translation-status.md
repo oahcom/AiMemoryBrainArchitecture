@@ -302,3 +302,15 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 ## C36-AP-01 disposition correction — 2026-11-17
 
 The earlier OPEN entry is superseded. C's separate cross-authority causal-order source Blob `45a48249717c8cddb07ab96197730ef93d406c22` explicitly accepts the exact CGH-APPLIED-1.1 recovery-batch amendment with enumerated exceptions and defines CSubmitOutcome/provider evidence. **C36-AP-01: RESOLVED at C source-decision level.** This does not close H36-AP-09, H wire Schema/SDK mapping, coordinator/provider implementation, or conformance.
+
+
+## 15. Corrected current C/G/H exact-version review — 2026-11-17
+
+- Corrected cross-owner report (supersedes the earlier false-positive gap assessment): [EN](../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md) / [中文](../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.zh-CN.md).
+- C exact current evidence: recovery-batch Owner decision Blob `45a48249717c8cddb07ab96197730ef93d406c22`; normative C provider outcome contract Blob `819705037da89834e10b6dd2ec6e66c1b8c70886`; CSubmitOutcome 1.0.1 schema Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`; current 38-test review Blob `24337b79cfea6264a8a6f11fa414578fc559716c`.
+- H exact current evidence: Unified 1.2.14 Blob `09fcd1fa29fe24255fbd87cae79dafb406594a59`; C/H mapping Blob `1cbe74eba69325510d6b1019d971661f965eabf8`; validator/test/fixture Blobs `eab961a08d41e871f38543b18ee60cf024977414` / `540056d7c4f290c31290b17c264c69cfd76b1cb2` / `c80247a6ecfbb4a29ff0993e8e2aea4829d00626`; H full-path closure Blob `cda025fb157815570b3280fa5ff168d5e62453b1`.
+- Exact H CI run `44070924346`, commit `77a9d5e2e716ba33387f0beb1195f864ed8ac54f`, job `133996627914` SUCCESS; 38 methods (32 H validator unit/fixture + 6 C crypto interop). All ten authority callbacks remain deterministic test doubles; production trust/authority integration is not proven.
+- G delegated current consumer review Blob `1894860c76336f8739d354b72beed3992cffd17e`; G ACCEPTS WITH ENUMERATED G-OWNED APPLIED CONDITIONS at L1/L2 only; not an independent human G Owner signature, not frozen.
+- Bilingual PR companions added for G Phase 3.8.18 and C Phase 3.8.19. These are review artifacts, not new normative core-contract coverage counts.
+- Earlier CSubmitOutcome closure proposal is marked SUPERSEDED by actual C Owner contract/decision artifacts. The earlier cross-owner report has been corrected; do not use its initial XCH-36-001..003 false-positive status.
+- Gate: C/H L1/L2 local full-path PASS; G delegated consumer review accepted with conditions; global Applied contract NOT FROZEN; production authority integration OPEN/NOT VERIFIED; G Applied persistence NOT VERIFIED; L3/L4 NOT RUN.
