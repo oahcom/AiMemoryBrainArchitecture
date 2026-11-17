@@ -6,7 +6,7 @@
 - Real provider tests: NOT RUN.
 - Real tool side-effect/recovery tests: NOT RUN.
 - C/H cryptographic profile registration: NOT RUN / NOT REGISTERED.
-- H Unified 1.2.15 exact validator CI: VERIFIED as historical bounded evidence at H ancestor `0d363244...` (91 Provider Outcome tests; 288 Recovery Cutoff tests, 22 skipped); artifacts are not present in current H HEAD `0277a8b...`, and this is not C integration CI.
+- H Unified 1.2.15 exact validator CI: historical bounded evidence at `0d363244...` (91 Provider Outcome tests; 288 Recovery Cutoff tests, 22 skipped). Current restored H HEAD `4e65a2...` contains the restored 1.2.15 artifacts and separate Applied Delivery Evidence 1.0.0 candidate; exact H candidate CI run `44130722532` passed 11/11. This is not C/H integration CI or production trust.
 - G Applied end-to-end tests: NOT RUN / NOT VERIFIED.
 - Forget-vs-late-result fault injection: NOT RUN.
 - Performance benchmarks: NOT RUN.
@@ -29,7 +29,7 @@ No production secrets, live user memory or real personal data may be used in syn
 ## 中文验证资产说明
 
 ### 当前状态
-验证设计已定义 22 个场景（V01–V22）。Provider Adapter 可执行测试、真实 Provider 测试、真实 Tool 副作用/恢复测试均 NOT RUN。C/H 密码配置 NOT REGISTERED。H Unified 1.2.15 精确 Validator CI 已在历史 H Commit `0d363244...` 作为有限证据核验（Provider Outcome 91 项；Recovery Cutoff 288 项、22 项跳过）；这些工件不在当前 H HEAD `0277a8b...` 中，也不是 C 集成 CI。G Applied 端到端测试 NOT RUN/NOT VERIFIED。Forget 与迟到结果故障注入 NOT RUN。性能基准 NOT RUN。
+验证设计已定义 22 个场景（V01–V22）。恢复后的 C Owner HEAD `88992da...` 上，C Provider Outcome 候选符合性 CI `44129914790` 为 19/19 PASS；但 Agent/Provider/Tool/Brain 端到端集成、真实 Provider 测试、真实 Tool 副作用/恢复测试均 NOT RUN。C/H 密码配置 NOT REGISTERED。H Unified 1.2.15 的旧 CI 是历史有限证据（Provider Outcome 91 项；Recovery Cutoff 288 项、22 项跳过）。当前恢复后的 H HEAD `4e65a2...` 已包含恢复后的 1.2.15 工件和独立 Applied Delivery Evidence 1.0.0 候选；精确 H 候选 CI `44130722532` 为 11/11 通过。这不是 C/H 集成 CI 或生产信任证明。G Applied 端到端测试 NOT RUN/NOT VERIFIED。Forget 与迟到结果故障注入 NOT RUN。性能基准 NOT RUN。
 
 ### 后续必须准备的资产
 1. 每个 Provider/Model 的固定版本能力 Fixture。
@@ -54,3 +54,6 @@ These are H local reference tests only. C Agent/Provider/Tool/Brain end-to-end t
 
 ### 中文
 H 精确 HEAD 的本地测试已通过 GitHub Actions 实际日志核验，但不是由 C 本研究分支执行：Provider Outcome 91 项、0 失败；Recovery Cutoff 288 项、22 项跳过、0 失败。它们仅是 H 本地参考测试。C 的 Agent/Provider/Tool/Brain 端到端测试、C/H/I 生产 Trust 测试、Forget 与迟到结果集成测试以及 C 基准测试仍全部 NOT RUN。
+
+
+C/H candidate evidence / 候选证据：C Owner HEAD `88992da...` CI run `44129914790` (19/19); H Owner HEAD `4e65a2...` Applied Delivery Evidence 1.0.0 CI run `44130722532` (11/11). H tests use injected authority callbacks and mock durable dispositions; no production trust or C/H integration is established.
