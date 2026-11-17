@@ -590,3 +590,10 @@ This section supersedes prior live-status claims in this file wherever they desc
 - 未发现正式 Architecture Governance 对 B Fact/Claim Option A 的批准。D Claim Identity Option A 是独立候选。未冻结 Claim/Fact/ClaimRevision/ConflictSet Schema。
 
 See `post-merge-currentness-and-governance-reconciliation.md` for evidence and limitations.
+
+
+## Latest Owner source refresh — 2026-11-18 / 最新 Owner 来源刷新
+
+Exact current branch tips and selected B/D/E/F/G plus A/C/H/I/Storage source Blobs have been re-read. The detailed source matrix and evidence ceilings are in `latest-cross-owner-source-reconciliation.md`. Important deltas from earlier pins: D HEAD is now `7e6d0b133dae88f442665e7b05a54060e047647e`; G HEAD is now `ed6ad0b316b721e49d2fe560ae9f7e6c647ca661`; H HEAD is `eaee480d35ee5c2778cd1150a137558a2635de2d`; I HEAD is `ea949896f891f0a08ef5fe9358edadc8a49e546f`; Storage HEAD is `f6887cc9ea5bfa5293c1bc47e9f10e582830cba3`. These changes do not alter B2/B3 dispositions. B Fact/Claim Option A remains ADR-BLOCKED; D Claim Identity Option A remains a separate candidate; H 1.2.15 issuer/trust/replay and Storage successor evidence remain open; D/I/Storage Phase 3.9 Forget artifacts remain proposals/conditional review, not normative acceptance.
+
+已重新读取精确当前分支 Tip 及 B/D/E/F/G、A/C/H/I/Storage 的选定来源 Blob。详细来源矩阵与证据上限见 `latest-cross-owner-source-reconciliation.md`。相较此前 Pin 的重要变化：D HEAD 现为 `7e6d0b133dae88f442665e7b05a54060e047647e`；G HEAD 为 `ed6ad0b316b721e49d2fe560ae9f7e6c647ca661`；H HEAD 为 `eaee480d35ee5c2778cd1150a137558a2635de2d`；I HEAD 为 `ea949896f891f0a08ef5fe9358edadc8a49e546f`；Storage HEAD 为 `f6887cc9ea5bfa5293c1bc47e9f10e582830cba3`。这些变化不改变 B2/B3 结论。B Fact/Claim Option A 仍 ADR-BLOCKED；D Claim Identity Option A 仍是独立候选；H 1.2.15 Issuer/Trust/Replay 和 Storage 后继证据仍开放；D/I/Storage Phase 3.9 Forget 工件仍是提案/有条件审查，不是规范验收。
