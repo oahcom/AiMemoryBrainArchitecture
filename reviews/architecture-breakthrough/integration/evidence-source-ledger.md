@@ -197,3 +197,9 @@ Verified successful runs:
 - Run `44140042792`, SUCCESS, exact tested commit `6b762b8cbcb5ca235ee230e0111322628661b7e0`; model and unittest steps both SUCCESS.
 - Earlier run `44139591931` failed because the model state count had expanded to 28,383 while the old assertion expected 27,472. Subsequent baseline/test fixes are covered by the later successful runs; failure history retained.
 - Run `44140003348` and `44139992597` also failed during intermediate sequential commits (stale count / stale test references). They are superseded by the successful later runs and are not hidden.
+
+
+### README CI pointer refresh
+
+- Current model README Blob: `4316d7e59cb2ec6668e4a68f79000b2ac28987e9`, commit `5f92e2301def1770499efccfff93c4b7cb769e65`; it now points to successful run `44140051181` and records 14 tests.
+- Documentation-only README commit triggered a fresh workflow run `44140438929`, which was queued/in progress at last readback. This later run is not yet claimed as passed; the model code/test success remains the exact run `44140051181`.
