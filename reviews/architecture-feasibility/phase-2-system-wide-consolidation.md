@@ -53,6 +53,7 @@ flowchart TB
   I -. "protected-boundary authorization" .-> E
   I -. "protected-boundary authorization" .-> F
   I -. "protected-boundary authorization" .-> G
+  Q -. "quorum prefix / batch / manifest" .-> S
   S -. "durability / visibility / recovery" .-> D
   S -. "durability / visibility / recovery" .-> E
   S -. "durability / visibility / recovery" .-> F
