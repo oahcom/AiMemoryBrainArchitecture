@@ -590,3 +590,34 @@ A reviewed:
 A accepts the candidate construction and independent test agreement. I has not registered `AIMBA-C-CRYPTO-1.0`, approved C trust roots/key custody or authorized production use. The deterministic seed is public test-only material. H authority callbacks are not production-connected. C owner ledger, provider issuer authentication, adapter race/fault/idempotency tests and deployment-grade COC/Storage joins remain open.
 
 No production egress, Full Applied, Global Forget Completion, universal exactly-once or final freeze is authorized.
+
+
+## 18. C key-status lifecycle, I governance review and H callback binding (2026-11-17)
+
+### 18.1 Exact artifacts
+
+| Owner | Artifact | Exact Blob |
+|---|---|---|
+| C | CKeyStatusEvent 1.0.0 JSON Schema | `908b293eba337e9fa75864cea3704e28a1a8d82e` |
+| C | Phase 3.11.0 key lifecycle/anti-rollback contract | `9339b168165a7a3dd34def5236ad61cfd3163418` |
+| C | Key-status schema/state-machine tests | `d72828461692975b89cf015ab8e669bc3aaf0de1` |
+| I | Phase 3.8.7 key-status/governance signature review | `57d1b1ca616eaec6df1dee82ddaccc66519caca2` |
+| H | Validator core with `verify_key_status` callback | `c8717869d066543b1272780014ab1e42310c6951` |
+| H | Key-status schema/callback unit tests | `46267648309823e1c20f1b07acb4b3dd66d9f60b` |
+| H | Current wire mapping | `eb183ee4f2191a7cd977710175dab93d5442704b` |
+| H | Current validator contract | `ac800ddbb1fb13aa7eaef415e2282db971d73ff4` |
+
+### 18.2 Executed bounded tests
+
+- C run `44059137081`, commit `6b7b9c4a24d81ae45dcb7ddcdbe49c9617e3e4da`: SUCCESS, 12 tests. Includes five key-status schema/state-machine tests.
+- H run `44058962672`, commit `f6a632c76efe50d8514a8b94bd1b134f064445c8`: SUCCESS, 11 tests. Includes key-status schema closure and explicit fail-closed behavior when the key-status callback is absent.
+
+The tests cover schema validity/closure, separate C data and I governance profile identifiers, allowed state transitions, sequence-scoped status-at-signing evaluation, duplicate sequence/wrong namespace rejection and H callback fail-closed semantics.
+
+### 18.3 I decision and evidence ceiling
+
+I accepts the lifecycle model and separate governance-signature construction as candidates only. `AIMBA-C-CRYPTO-1.0` and `AIMBA-I-KEY-GOVERNANCE-1.0` remain NOT REGISTERED. No I governance trust root, C key registry, HSM/KMS custody, external anti-rollback service, append-only production key-status ledger or revocation/compromise drill is evidenced.
+
+The C/H CI runs are schema/state-machine/unit evidence only. They do not authenticate governance signatures, prove registry durability or authorize any production key. Missing key status or checkpoint remains UNKNOWN; no implicit ACTIVE fallback is allowed.
+
+**Disposition: KEY STATUS DESIGN AND BOUNDED TESTS ACCEPTED; TRUST ROOT, REGISTRATION, CUSTODY AND PRODUCTION AUTHORITY OPEN.**
