@@ -1,0 +1,39 @@
+name: Bootstrap AI Owner Worker labels
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  labels:
+    name: Create or verify AI task labels
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Create missing labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          create_label() {
+            local name="$1" color="$2" description="$3"
+            local encoded
+            encoded="$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1], safe=""))' "$name")"
+            if gh api "repos/$GITHUB_REPOSITORY/labels/$encoded" >/dev/null 2>&1; then
+              echo "present: $name"
+              return 0
+            fi
+            gh api --method POST "repos/$GITHUB_REPOSITORY/labels" \
+              -f name="$name" -f color="$color" -f description="$description" >/dev/null
+            echo "created: $name"
+          }
+          create_label "ai:ready" "1d76db" "Human-approved issue eligible for bounded AI Owner execution"
+          for owner in a b c d e f g h i; do
+            create_label "owner:$owner" "5319e7" "Accountable project Owner $owner"
+          done
+          create_label "risk:r0" "0e8a16" "Low-risk work"
+          create_label "risk:r1" "fbca04" "Moderate-low risk work; bounded pilot only"
+          create_label "work:doc" "c2e0c6" "Documentation-only work"
+          create_label "work:arch" "bfdadc" "Architecture documentation-only work"
