@@ -27,7 +27,7 @@ P0-01 运行时仓库、具名负责人、可复现构建
   ↓
 P0-02 B Identity/Domain 语义 + I Policy/Inventory 前置条件
   ↓
-P0-03 已选定并证明的 Storage 事务与 COC 拓扑
+P0-03 L1 Option A 逻辑配置已选定；证明 L4 物理 DB/Adapter 与 COC 拓扑
   ↓
 P0-04 D/E/I/Storage Admission + Lineage + Fence + Visibility 合同
   ↓
@@ -60,7 +60,7 @@ P0-08 集成 Race/Crash/Replay/Failover/Restore 符合性
 
 ## 关键路径与并行工作
 
-关键路径：指定实现权威 → 关闭 B/I 及其他 Owner 语义 → 选定并证明 Storage/COC 物理拓扑 → 证明 D/E/I/Storage Publication/Forget 边界 → 证明 Durable Canonical 纵向切片 → 安全 Retrieval/Context → Applied → Recovery/Restore 符合性。
+关键路径：指定实现权威 → 关闭 B/I 及其他 Owner 语义 → 完成已选定 Storage Option A 与 COC 拓扑的 L4 物理实现 → 证明 D/E/I/Storage Publication/Forget 边界 → 证明 Durable Canonical 纵向切片 → 安全 Retrieval/Context → Applied → Recovery/Restore 符合性。
 
 可并行的有界工作：Synthetic Data Retrieval 基准；DB/COC 候选比较；故障测试框架脚手架；不冻结候选 Schema 的 Validator；双语一致性和精确版本自动化；硬件/工作负载盘点；可观测性/Runbook 草案。这些工作不解除依赖 Gate。
 
