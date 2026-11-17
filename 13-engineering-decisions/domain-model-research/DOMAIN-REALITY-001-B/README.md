@@ -400,3 +400,16 @@ PR #120 于 `2026-11-17T21:29:04Z` 由 `oahcom` 合并，Merge Commit 为 `6c325
 The statements above that the H 29-test suite had no exact-head CI result were accurate at the time of the earlier source refresh, but are now superseded for the bounded reference-candidate test run. PR #131 Head `40c52edb97f1a103bb92b89f5a68bd895565bb7b` triggered GitHub Actions run [#44182801145](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44182801145). Job `applied-delivery-evidence` completed SUCCESS, including the step `Run Applied Delivery Evidence schema and semantic conformance tests`; the log records **Ran 29 tests ... OK**. This proves the 29-method reference suite ran successfully on PR #131's exact Head. It does not prove that the H Owner branch Head itself was directly tested, nor does it establish independent Owner approval, production cryptographic trust, live C Owner Ledger resolution, real I/D authority-ledger wiring, durable H replay, G Applied persistence/restore, multi-replica recovery, Full Applied, or production readiness. The older 26/26 run #44180835412 remains evidence for its earlier H Head only.
 
 此前关于 H 29 项测试没有精确 Head CI 结果的表述，在当时来源刷新时是准确的；但对于有界参考候选测试运行而言，现已被后续证据取代。PR #131 的 Head `40c52edb97f1a103bb92b89f5a68bd895565bb7b` 触发 GitHub Actions Run [#44182801145](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44182801145)。Job `applied-delivery-evidence` 成功完成，其中 `Run Applied Delivery Evidence schema and semantic conformance tests` 步骤成功；日志明确记录 **Ran 29 tests ... OK**。这证明 29 项参考套件已在 PR #131 的精确 Head 上成功运行。但这不证明 H Owner 分支 Head 本身直接经过测试，也不代表独立 Owner 批准、生产密码学信任、真实 C Owner Ledger 解析、真实 I/D 权威账本接线、H Durable Replay、G Applied Persistence/Restore、多副本恢复、Full Applied 或生产就绪。较早的 26/26 Run #44180835412 仍只适用于其对应的旧 H Head。
+
+
+### Bilingual change manifest / 双语变更清单
+
+**BILINGUAL-MANIFEST: COMPLETE**
+
+The evidence correction above is written in paired English and Chinese sections in the same four changed files. Stable commit/run identifiers, test counts, evidence scope, and remaining blockers are identical across both languages:
+- `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md`
+- `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/baseline-currentness-and-owner-source-audit.md`
+- `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/latest-cross-owner-source-reconciliation.md`
+- `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/post-merge-currentness-and-governance-reconciliation.md`
+
+上述证据修正已在四个变更文件中以中英文配对章节发布。稳定 Commit/Run 标识、测试数量、证据范围和剩余阻塞在两种语言中保持一致，文件清单如上。
