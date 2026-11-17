@@ -17,7 +17,7 @@
 | I Phase 3.6.8 | `929b30ba10ac627927d3959e0777b467846b268d` |
 | D Phase 3.6.8 | `0668667daeb936bf223ab049277ea2a4117c3b09` |
 | C Phase 3.6.9 provider gate amendment | `9609b252fc38fd5ba7b2f8c0992b7bd33a13c5bb` |
-| C Phase 3.6.11 provider outcome review | Pending exact readback at decision authoring |
+| C Phase 3.6.11 provider outcome review | `19519a9dabe8aea66897c01493ab5b65ed8af4aa` |
 | H Recovery Cutoff schema 1.0.4 predecessor | `d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1` |
 | H Recovery Cutoff schema 1.0.5 | `3d451778b9867c3b54779c5cd478522993719025` |
 | H two-phase wire/validator addendum | `5a3def4f7e84ed489993681455b6840b93ecc282` |
