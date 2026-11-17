@@ -78,6 +78,8 @@
 
 反例搜索必须覆盖：注册与 fence 竞态、依赖注册部分成功、可见性提交后 ACK 丢失、旧 Worker lease 过期后继续执行、DLQ 重放、索引 rebuild、Adapter 离线后旧 Context 重连、Restore 回滚、Permission revocation 与 final commit 竞态。
 
+**当前 TLA+ 文件只是第一阶段骨架，不是上述完整模型：** 它目前只抽象单一目标集、Producer 注册、Fence high-water 捕获、依赖登记、可见性抑制、终结和控制高水位恢复覆盖；尚未编码 ACK 丢失、Lease/Attempt、DLQ/Replay、PermissionEpoch、I 全局库存、索引/Context/Adapter 状态，也尚未运行 TLC。上述场景是下一轮扩展清单，不是本次已验证的覆盖范围。
+
 ### 3.3 工具判断
 
 - **TLA+/TLC：CANDIDATE，优先。** 适合并发状态机与时序性质；可直接检查安全与活性，输出反例轨迹。模型需限制有限状态空间。
