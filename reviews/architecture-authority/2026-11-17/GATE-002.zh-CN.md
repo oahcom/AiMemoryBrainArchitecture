@@ -1,6 +1,6 @@
 # Gate 准入与退出标准 — GATE-002
 
-- 版本：1.0.0；基线 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`。
+- 版本：1.0.0；基线 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。
 - 本文件保留两层独立门禁：Issue #43 集成 Gate G1–G8 与 JF-10 物理 Gate A/B/C。两者不可互换。
 
 ## Issue #43 集成 Gate
@@ -17,6 +17,10 @@
 | G8 冻结建议 | 基于 G1–G7 明确 READY / READY WITH ENUMERATED BLOCKERS / NOT READY | NOT READY |
 
 不能仅凭文档存在、角色模拟、Schema-only 测试或候选参考模型测试判定 G1–G8 通过。
+
+**Option A 子 Gate：** L1 方向仅有条件接受；L1 关闭等待 A-01/A-02/A-03 和 D 精确接受。L2 OPEN，等待共享 Transaction/UoW 和 I COMMIT_WON/COC/JF-10 组合（A-04/A-05）。L3 OPEN，等待实际执行的并发/参考模型/故障证据。L4 OPEN，等待真实 DB/Adapter/Deployment/Operator/HA/PITR/Read-path 和物理演练。
+
+**B 协议子 Gate：** H 1.2.14/C 1.0.1 是候选，不是当前联合 Bundle。Storage v3.2.9 已过期；G1/G2 关闭前必须有后继 Manifest 和 C/H/D/I 精确采纳。
 
 ## JF-10 物理 Gate（保持原定义并独立）
 
