@@ -46,7 +46,7 @@ No Provider/Agent framework selection, schema freeze, production activation, Bra
 | C validation scenarios | V01–V22 defined; not executed |
 | C Owner branch restored | `88992da...`; 136 blobs |
 | C Provider Outcome candidate CI | run `44129914790`; 19 tests, 0 failures |
-| H Owner branch restored | `4e65a2...`; 215 blobs |
+| H Owner branch current | `6608cde...`; 216 blobs (code tested at `4e65a2...`) |
 | H Applied Delivery Evidence 1.0.0 CI | run `44130722532`; 11 tests, 0 failures |
 | C/H integration mapping tests | NOT RUN / NOT IMPLEMENTED |
 | C Provider/Tool/Brain integration tests | NOT RUN |
@@ -58,7 +58,7 @@ All 17 PR #69 paths were enumerated from GitHub and fetched at the exact PR HEAD
 
 ### CR-001 — Stale baseline and source pins [C-owned, HIGH]
 
-The package README and baseline described `b3c666...` as current main and contained an intermediate C branch SHA `274f5ec...` as the refresh snapshot, while live PR metadata identified C HEAD `1a1d6f2...` and current main had advanced to `e52594f...`. The current-main comparison reports 6 commits ahead / 2 behind.
+The package README and baseline described `b3c666...` as current main and contained an intermediate C branch SHA `274f5ec...` as the refresh snapshot, while live PR metadata first identified C HEAD `1a1d6f2...` and later advanced to `a69007a...`; current main is `e52594f...`. The latest current-main comparison reports 7 commits ahead / 2 behind.
 
 **Risk:** reviewers cannot reproduce which exact baseline was reviewed; downstream merges may be evaluated against an obsolete base.
 
@@ -68,9 +68,9 @@ The package README and baseline described `b3c666...` as current main and contai
 
 The cross-owner matrix pinned G at `3367438...` and H at `0d363244...`. Live branch reads show:
 - G current HEAD: `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8`; the G Applied Persistence EN contract Blob is `bd297873...`, and the latest Chinese companion Blob is `82553a47...`.
-- H incident snapshot: `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; restored current H Owner HEAD: `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`.
+- H incident snapshot: `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; restored H code HEAD: `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`; current docs HEAD: `6608cde89d959257db612d8ff8080f631333f3f3`.
 
-At the incident snapshot H's latest commit had parent `0d363244...` and removed the prior Unified 1.2.15 schema, Gateway/Provider validators, conformance tests and most of the previous H branch tree. The H Owner branch was subsequently restored at `4e65a2...` with 215 blobs, including those artifacts and the new Applied Delivery Evidence 1.0.0 candidate.
+At the incident snapshot H's latest commit had parent `0d363244...` and removed the prior Unified 1.2.15 schema, Gateway/Provider validators, conformance tests and most of the previous H branch tree. The H Owner branch was subsequently restored at `4e65a2...` with 215 blobs and advanced docs-only to `6608cde...` with 216 blobs, including those artifacts and the new Applied Delivery Evidence 1.0.0 candidate.
 
 **Risk:** the C matrix and validation index could be read as asserting that old H schema/validator artifacts are current branch contents. Historical CI is not current branch conformance and is not production trust proof.
 
@@ -159,9 +159,9 @@ No H/D/G/I/Storage authoritative contract was modified. No C executable tests or
 
 - PR #69: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/69
 - Current main: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/e52594f181d2edb77448adcfed64a0fbdffaf3aa
-- C reviewed HEAD: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/1a1d6f26a793fc285a1806edf21b696f748a8fed
+- C reviewed HEAD: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/a69007a016aea4fcd60a05dfebf5a66ccf7f2538
 - G current HEAD: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/763b3d31e910db8fd29c6e4dbaff9273b7fb66b8
-- H current HEAD: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6
+- H current HEAD: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/6608cde89d959257db612d8ff8080f631333f3f3
 - H historical 1.2.15 evidence commit: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/0d36324457e39bd50ad56ae902d477c4ea765b61
 - H Phase 3.8.23 mapping decision: https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-h-bmcp-protocol/08-bmcp-protocol/phase-3.8.23-h-exact-review-g-applied-delivery-evidence-mapping.md
 - G Phase 3.8.22 Applied Persistence contract: https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-g-memory-context/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md
@@ -172,8 +172,8 @@ No H/D/G/I/Storage authoritative contract was modified. No C executable tests or
 ### Owner branch restoration
 A review PR #91 reported that C/H Owner branches had lost large portions of their trees. Subsequent exact branch reads show restoration commits:
 - C `session-c-agent-integration-2026-11-16` HEAD `88992da30331121b81cf2773acab11d921daf281`, 136 blobs; Provider Outcome CI run `44129914790` passed 19/19.
-- H `session-h-bmcp-protocol` HEAD `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`, 215 blobs; Applied Delivery Evidence CI run `44130722532` passed 11/11 and Recovery Cutoff workflow also succeeded.
-- PR #69 remains on its distinct research branch HEAD `1a1d6f2...`; the restored C Owner branch is not automatically incorporated into PR #69 or PR #92.
+- H `session-h-bmcp-protocol` current HEAD `6608cde89d959257db612d8ff8080f631333f3f3`, 216 blobs (schema/validator/tests unchanged from code-tested `4e65a2...`); Applied Delivery Evidence CI run `44130722532` passed 11/11 and Recovery Cutoff workflow also succeeded.
+- PR #69 remains on its distinct research branch HEAD `a69007a...`; the restored C Owner branch is not automatically incorporated into PR #69 or PR #92.
 
 ### CR-009 — C/H 1.0.0 mapping is not executable end-to-end [Cross-owner, BLOCKING]
 H 1.0.0 schema correctly exposes all seven `HDeliveryBindingIdentity` fields and seven `HObservationRecordIdentity` fields, plus `evidence_kind`. It also exposes C linkage fields `c_submit_outcome_ref`, `c_outcome_record_ref`, `c_outcome_record_sequence`, and `c_outcome_payload_digest`. CSubmitOutcome 1.0.1 defines `COutcomeRecordIdentity = (issuer_authority_ref, sequence_namespace_ref, record_ref, record_sequence)` and includes `FinalRequestBoundaryRef`.
