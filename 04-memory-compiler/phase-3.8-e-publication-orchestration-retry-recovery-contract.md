@@ -38,7 +38,7 @@ Retrying the same transport or resolving a lost ACK preserves the operation iden
 10. Ask Storage to persist hidden StorageVisibilityParticipantRef bound to the immutable publication tuple.
 11. Ask D to admit PublicationParticipantRef bound to that exact durable Storage participant.
 12. Ask I to consume the single-use CommitAuthorization operation in its PolicyDomain sequencer, bound to the exact D and Storage participant refs.
-13. Ask Storage to perform the final visibility transaction, validating exact D current participant/fence and I terminal proof.
+13. Ask Storage to perform the final visibility transaction, validating exact D current participant/fence and the consumed I CommitAuthorizationReceipt / ICommitAuthorizationProof (not post-commit ITerminalProof).
 14. Resolve authoritative Storage outcome by the same PublicationOperationId + tuple digest.
 15. D and I independently close their participants only after validating the same Storage COMMITTED_VISIBLE or NO_PUBLICATION outcome.
 16. E updates its local output accounting only after owner receipts are resolved. E local status does not close D ProducerWork.
