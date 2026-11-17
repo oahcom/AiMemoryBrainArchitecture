@@ -317,3 +317,41 @@ The H semantic contract has since received documentation-only exact-pin/run-resu
 - Exact suite source pins: HRC/JPF `60a2f4db4bd12f2131ecd147db9bbe328da6db50`; Wire `1a4e754ba9bfa57eb973c6d39731e9f89443b323`; Schema Integrity `67aba74c120f2916d768e7b01c45408ee2624f3a`; RecoveryJoin schema `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
 
 This is the first recorded CI execution of the current 66-method candidate inventory. It does not change the overall H freeze disposition: **BLOCKED / NOT INTEROPERABILITY-VERIFIED**. The run does not execute production adapters, validate live quorum prefix enumeration, verify I-approved signatures/key status, prove owner-ledger currentness CAS, exercise PostgreSQL same-GID recovery, or compare two independent language implementations. HRC-TEST-v1 remains test-only.
+
+
+### 11.11 Expanded executable recovery and cross-language suite
+
+The H branch has expanded beyond the original 66-method suite. Current candidate inventory:
+
+| Suite | Cases | Methods |
+|---|---|---:|
+| Recovery Cutoff semantic | HRC-01..25 | 25 |
+| Bidirectional RecoveryJoin | JPF-01..19 | 19 |
+| Strict wire parser | WIRE-01..10 | 10 |
+| Schema candidate integrity | SCHEMA-01..12 | 12 |
+| Two-phase Batch/Manifest recovery | TPH-01..26 | 26 |
+| Python ↔ Node differential wire vectors | XLANG-01 | 1 |
+| **Total** | | **93** |
+
+Exact current source pins:
+- HRC/JPF suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- Two-phase semantic reference: `08-bmcp-protocol/runtime_reference/recovery_cutoff_semantics.py`, Blob `4c8dcafdb49db5279a1d1190b832a9c6c05d6b67`.
+- Two-phase recovery suite: `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_two_phase_recovery.py`, Blob `690ab42b4f8f7e61adf38fd7b6006f20cc71a7f5`.
+- Wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
+- Python/Node differential test: `1b32fdf81530353b8bd4571fe6d4f77119a0458b`.
+- Node reference: `992585d3bc323dc0224d0075ef14abd992980f65`.
+- Shared fixed vectors: `cc7e98c729db8d9f615e17a9542b3cb63f459922`.
+- Schema integrity suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
+- RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+
+The expanded suite passed GitHub Actions run [44041900859](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041900859), commit `3e42b2c535f095acd9e7cc6cf021a2c3f0629dda`, job `133898213531`: **93 tests ran, OK**. This includes the 26 TPH vectors for ContentDigest → BatchDigest → ManifestRecordDigest ordering, exact backlink/prefix/count validation, quorum/readback UNKNOWN handling, owner-release binding/currentness, and restore-fenced state transitions. XLANG-01 independently compares Python and Node.js implementations against fixed UTF-8 and test-domain digest vectors.
+
+The workflow now explicitly pins Node.js 22 using `actions/setup-node@v4` for XLANG-01. A subsequent run on the workflow-updated commit is required before treating the pinned-runtime workflow as verified.
+
+Important limits:
+- HRC-TEST-v1 and all fixed digest vectors remain test-only; they are not a production canonicalization/signature profile.
+- XLANG-01 proves only agreement between the two test implementations for the three fixed vectors, not complete BMCP SDK interoperability.
+- TPH tests exercise the deterministic reference model, not a real COC quorum log, linearizable prefix read, durable Batch/Manifest append, DB failover or restore.
+- The H unified schema 1.2.7 exact review is a separate structural review; this 93-test suite does not validate schema 1.2.7 or its signature_profile_id semantics.
+
+**Status:** 93/93 reference-candidate methods PASS on the recorded run; production semantic adapters, I trust/crypto, live owner/COC authority adapters, actual COC durability and physical JF-10 remain OPEN.
