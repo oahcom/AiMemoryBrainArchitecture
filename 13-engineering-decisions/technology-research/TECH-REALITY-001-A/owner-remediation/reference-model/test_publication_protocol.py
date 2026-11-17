@@ -63,6 +63,8 @@ class Protocol:
     authorizations: dict = field(default_factory=dict)
     revoked: set = field(default_factory=set)
     consumed: set = field(default_factory=set)
+    i_pending: dict = field(default_factory=dict)
+    revocation_pending: set = field(default_factory=set)
     outcomes: dict = field(default_factory=dict)
     visibility: dict = field(default_factory=dict)
     receipts: dict = field(default_factory=dict)
@@ -152,14 +154,48 @@ class Protocol:
 
     def revoke(self, auth_id):
         self.revoked.add(auth_id)
+        if any(binding[0] == auth_id for binding in self.i_pending.values()):
+            self.revocation_pending.add(auth_id)
+
+    def consume_i_commit_won(self, operation_id, auth_id, publication_id,
+                             storage_id, d_proof):
+        i_proof = ("I_COMMIT_WON", auth_id, publication_id, storage_id)
+        binding = (auth_id, publication_id, storage_id, d_proof, i_proof)
+        # A replay after COMMIT_WON returns the same proof even if revocation
+        # arrived later; the sequencer decision already won.
+        if operation_id in self.i_pending:
+            if self.i_pending[operation_id] != binding:
+                raise Rejected("I participant identity rebound")
+            return i_proof
+        if operation_id in self.i_closed:
+            if self.operation_bindings.get(operation_id) != binding:
+                raise Rejected("closed I participant identity rebound")
+            return i_proof
+        if operation_id in self.private_unknown or operation_id in self.outcomes:
+            raise Rejected("operation is already UNKNOWN or terminal")
+        if auth_id not in self.authorizations or auth_id in self.revoked:
+            raise Rejected("authorization absent or revocation won before I consumption")
+        if self.authorizations[auth_id] != (publication_id, storage_id):
+            raise Rejected("authorization not bound to exact participants")
+        if publication_id not in self.publication_participants:
+            raise Rejected("D publication proof missing")
+        if self.publication_participants[publication_id][1] != storage_id:
+            raise Rejected("D proof does not bind exact Storage participant")
+        if d_proof != ("D_ADMITTED", publication_id, storage_id):
+            raise Rejected("invalid D publication proof")
+        prior = self.operation_bindings.get(operation_id)
+        if prior is not None and prior != binding:
+            raise Rejected("operation identity rebound before Storage commit")
+        if auth_id in self.consumed:
+            raise Rejected("single-use authorization already consumed")
+        self.consumed.add(auth_id)
+        self.i_pending[operation_id] = binding
+        self.operation_bindings[operation_id] = binding
+        return i_proof
 
     def commit(self, operation_id, auth_id, publication_id, storage_id,
                d_proof, i_commit_won_proof, *, fail_before_commit=False):
-        # Idempotent retry is valid only for the exact immutable operation tuple.
-        # Reusing an operation ID with different participants/proofs is a conflict.
         binding = (auth_id, publication_id, storage_id, d_proof, i_commit_won_proof)
-        # An UNKNOWN operation must be reconciled against authoritative Storage
-        # before any retry can attempt a new commit; keep it private and fail closed.
         if operation_id in self.private_unknown:
             prior = self.operation_bindings.get(operation_id)
             if prior is not None and prior != binding:
@@ -171,10 +207,12 @@ class Protocol:
             return self.receipts[operation_id]
         if operation_id in self.outcomes:
             raise Rejected("operation already terminal as NO_PUBLICATION; use a new operation ID")
-        if auth_id not in self.authorizations or auth_id in self.revoked:
-            raise Rejected("authorization absent or revoked")
-        if auth_id in self.consumed:
-            raise Rejected("single-use authorization already consumed")
+        # Storage consumes no I authorization: it validates the exact prior
+        # COMMIT_WON decision made by the independent I sequencer.
+        if self.i_pending.get(operation_id) != binding:
+            raise Rejected("exact I COMMIT_WON participant has not been consumed")
+        if auth_id not in self.authorizations or auth_id not in self.consumed:
+            raise Rejected("authorization or I consumption missing")
         if self.authorizations[auth_id] != (publication_id, storage_id):
             raise Rejected("authorization not bound to exact participants")
         if publication_id not in self.publication_participants:
@@ -186,18 +224,14 @@ class Protocol:
         if i_commit_won_proof != ("I_COMMIT_WON", auth_id, publication_id, storage_id):
             raise Rejected("invalid pre-commit I COMMIT_WON proof")
         if fail_before_commit:
-            raise RuntimeError("simulated crash before atomic transaction commit")
+            raise RuntimeError("simulated crash before Storage transaction commit")
 
-        # One indivisible modeled Storage transaction boundary.
         receipt = ("RECEIPT", operation_id, publication_id, storage_id)
         outcome = ("COMMITTED", operation_id, publication_id, storage_id)
-        self.consumed.add(auth_id)
         self.visibility[publication_id] = "VISIBLE"
         self.outcomes[operation_id] = outcome
         self.receipts[operation_id] = receipt
-        self.operation_bindings[operation_id] = binding
         self.outbox[operation_id] = ("PUBLISH", receipt)
-        self.private_unknown.discard(operation_id)
         return receipt
 
     def _validate_unknown_binding(self, binding):
@@ -221,12 +255,13 @@ class Protocol:
     def mark_unknown(self, operation_id, binding=None):
         if operation_id in self.outcomes or operation_id in self.receipts:
             raise Rejected("cannot mark a terminal operation UNKNOWN")
+        if operation_id not in self.i_pending:
+            raise Rejected("UNKNOWN Storage outcome requires pending I COMMIT_WON")
         if binding is not None:
             self._validate_unknown_binding(binding)
             prior = self.operation_bindings.get(operation_id)
             if prior is not None and prior != binding:
                 raise Rejected("UNKNOWN operation identity rebound")
-            self.operation_bindings[operation_id] = binding
         self.private_unknown.add(operation_id)
 
     def resolve_no_publication(self, operation_id, proof):
@@ -234,6 +269,8 @@ class Protocol:
             raise Rejected("NO_PUBLICATION reconciliation requires an UNKNOWN operation")
         if operation_id in self.outcomes or operation_id in self.receipts:
             raise Rejected("operation already has a terminal outcome")
+        if operation_id not in self.i_pending:
+            raise Rejected("NO_PUBLICATION reconciliation requires pending I COMMIT_WON")
         if not isinstance(proof, StorageNoPublicationProof):
             raise Rejected("NO_PUBLICATION proof must use the typed test-seam record")
         binding = self.operation_bindings.get(operation_id)
@@ -246,8 +283,8 @@ class Protocol:
             raise Rejected("NO_PUBLICATION proof participant identity mismatch")
         if not self.fence_installed or publication_id not in self.fence_pending:
             raise Rejected("NO_PUBLICATION reconciliation requires the active ForgetFence participant barrier")
-        if publication_id in self.visibility or operation_id in self.outbox or auth_id in self.consumed:
-            raise Rejected("local state contradicts NO_PUBLICATION absence proof")
+        if publication_id in self.visibility or operation_id in self.outbox or auth_id not in self.consumed:
+            raise Rejected("local state contradicts NO_PUBLICATION proof or missing I COMMIT_WON consumption")
         if not proof.complete():
             raise Rejected("Storage NO_PUBLICATION proof is incomplete")
         outcome = ("NO_PUBLICATION", operation_id, publication_id, storage_id)
@@ -266,7 +303,16 @@ class Protocol:
     def close_i(self, operation_id, authoritative_outcome):
         if self.outcomes.get(operation_id) != authoritative_outcome:
             raise Rejected("I closeout requires exact authoritative Storage outcome")
+        binding = self.i_pending.get(operation_id)
+        if binding is None or authoritative_outcome[2:4] != binding[1:3]:
+            raise Rejected("I closeout requires its exact unresolved participant")
         self.i_closed[operation_id] = authoritative_outcome
+        del self.i_pending[operation_id]
+        auth_id = binding[0]
+        if auth_id in self.revocation_pending and not any(
+            pending[0] == auth_id for pending in self.i_pending.values()
+        ):
+            self.revocation_pending.remove(auth_id)
 
 
 class PublicationProtocolTests(unittest.TestCase):
@@ -286,6 +332,14 @@ class PublicationProtocolTests(unittest.TestCase):
             d_proof=("D_ADMITTED", "publication-1", "storage-1"),
             i_commit_won_proof=("I_COMMIT_WON", "auth-1", "publication-1", "storage-1"),
         )
+
+    def consume_i(self, p, args=None):
+        args = dict(args or self.commit_args())
+        args["i_commit_won_proof"] = p.consume_i_commit_won(
+            args["operation_id"], args["auth_id"], args["publication_id"],
+            args["storage_id"], args["d_proof"],
+        )
+        return args
 
     def no_publication_proof(self, *, operation_binding=None, **overrides):
         args = self.commit_args()
@@ -336,8 +390,10 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_publication_already_closed_by_d_before_fence_is_not_pending(self):
         p = self.prepared()
-        p.commit(**self.commit_args())
+        args = self.consume_i(p)
+        p.commit(**args)
         outcome = p.outcomes["op-1"]
+        p.close_i("op-1", outcome)
         p.close_d("op-1", outcome)
         p.install_forget_fence()
         self.assertNotIn("publication-1", p.fence_pending)
@@ -346,7 +402,8 @@ class PublicationProtocolTests(unittest.TestCase):
         p = self.prepared()
         p.install_forget_fence()
         self.assertIn("publication-1", p.fence_pending)
-        receipt = p.commit(**self.commit_args())
+        args = self.consume_i(p)
+        receipt = p.commit(**args)
         outcome = p.outcomes["op-1"]
         p.close_i("op-1", outcome)
         self.assertIn("publication-1", p.fence_pending)
@@ -390,44 +447,50 @@ class PublicationProtocolTests(unittest.TestCase):
     def test_revocation_wins_before_commit(self):
         p = self.prepared()
         p.revoke("auth-1")
-        with self.assertRaises(Rejected):
-            p.commit(**self.commit_args())
+        with self.assertRaisesRegex(Rejected, "revocation won"):
+            self.consume_i(p)
 
     def test_commit_wins_before_later_revocation(self):
         p = self.prepared()
-        receipt = p.commit(**self.commit_args())
-        outcome = p.outcomes["op-1"]
+        args = self.consume_i(p)
         p.revoke("auth-1")
+        self.assertIn("auth-1", p.revocation_pending)
+        self.assertEqual(self.consume_i(p, args)["i_commit_won_proof"], args["i_commit_won_proof"])
+        receipt = p.commit(**args)
+        outcome = p.outcomes["op-1"]
         self.assertEqual(p.receipts["op-1"], receipt)
         self.assertEqual(p.outcomes["op-1"], outcome)
-        args = self.commit_args()
-        args["operation_id"] = "op-2"
-        with self.assertRaises(Rejected):
-            p.commit(**args)
+        args2 = self.commit_args()
+        args2["operation_id"] = "op-2"
+        with self.assertRaisesRegex(Rejected, "revocation won|single-use"):
+            self.consume_i(p, args2)
+        p.close_i("op-1", outcome)
+        self.assertNotIn("auth-1", p.revocation_pending)
 
     def test_authorization_is_single_use_across_distinct_operations(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         p.commit(**args)
-        args["operation_id"] = "op-2"
-        with self.assertRaises(Rejected):
-            p.commit(**args)
+        args2 = self.commit_args()
+        args2["operation_id"] = "op-2"
+        with self.assertRaisesRegex(Rejected, "single-use"):
+            self.consume_i(p, args2)
 
     def test_final_storage_commit_requires_both_exact_proofs(self):
         p = self.prepared()
         args = self.commit_args()
         args["d_proof"] = ("D_ADMITTED", "publication-1", "wrong-storage")
         with self.assertRaises(Rejected):
-            p.commit(**args)
+            self.consume_i(p, args)
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         args["i_commit_won_proof"] = ("I_TERMINAL", "auth-1")
         with self.assertRaises(Rejected):
             p.commit(**args)
 
     def test_crash_before_commit_leaves_no_partial_visibility_or_receipt(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         args["fail_before_commit"] = True
         with self.assertRaises(RuntimeError):
             p.commit(**args)
@@ -435,11 +498,18 @@ class PublicationProtocolTests(unittest.TestCase):
         self.assertEqual(p.outcomes, {})
         self.assertEqual(p.receipts, {})
         self.assertEqual(p.outbox, {})
-        self.assertEqual(p.consumed, set())
+        self.assertEqual(p.consumed, {"auth-1"})
+        self.assertIn("op-1", p.i_pending)
+        args.pop("fail_before_commit")
+        receipt = p.commit(**args)
+        self.assertEqual(p.receipts["op-1"], receipt)
 
-    def test_commit_atomically_records_visibility_outcome_receipt_and_outbox(self):
+    def test_storage_commit_records_visibility_outcome_receipt_and_outbox_after_i_consumption(self):
         p = self.prepared()
-        receipt = p.commit(**self.commit_args())
+        args = self.consume_i(p)
+        receipt = p.commit(**args)
+        self.assertEqual(p.consumed, {"auth-1"})
+        self.assertIn("op-1", p.i_pending)
         self.assertEqual(p.visibility["publication-1"], "VISIBLE")
         self.assertEqual(p.outcomes["op-1"][0], "COMMITTED")
         self.assertEqual(p.receipts["op-1"], receipt)
@@ -447,39 +517,46 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_lost_ack_retry_is_idempotent(self):
         p = self.prepared()
-        first = p.commit(**self.commit_args())
-        second = p.commit(**self.commit_args())
+        args = self.consume_i(p)
+        first = p.commit(**args)
+        second = p.commit(**args)
         self.assertEqual(first, second)
         self.assertEqual(len(p.receipts), 1)
         self.assertEqual(len(p.outbox), 1)
 
     def test_operation_id_reuse_with_changed_participant_binding_conflicts(self):
         p = self.prepared()
-        p.commit(**self.commit_args())
-        args = self.commit_args()
-        args["storage_id"] = "storage-substituted"
-        args["d_proof"] = ("D_ADMITTED", "publication-1", "storage-substituted")
-        args["i_commit_won_proof"] = ("I_COMMIT_WON", "auth-1", "publication-1", "storage-substituted")
+        args = self.consume_i(p)
+        p.commit(**args)
+        changed = dict(args)
+        changed["storage_id"] = "storage-substituted"
+        changed["d_proof"] = ("D_ADMITTED", "publication-1", "storage-substituted")
+        changed["i_commit_won_proof"] = ("I_COMMIT_WON", "auth-1", "publication-1", "storage-substituted")
         with self.assertRaises(Rejected):
-            p.commit(**args)
+            p.commit(**changed)
         self.assertEqual(len(p.receipts), 1)
         self.assertEqual(len(p.outbox), 1)
 
 
     def test_unknown_operation_id_cannot_be_recommitted(self):
         p = self.prepared()
+        args = self.consume_i(p)
         p.mark_unknown("op-1")
         with self.assertRaisesRegex(Rejected, "UNKNOWN"):
-            p.commit(**self.commit_args())
+            p.commit(**args)
         self.assertIn("op-1", p.private_unknown)
         self.assertEqual(p.visibility, {})
         self.assertEqual(p.outcomes, {})
         self.assertEqual(p.receipts, {})
         self.assertEqual(p.outbox, {})
-        self.assertEqual(p.consumed, set())
+        self.assertEqual(p.consumed, {"auth-1"})
+        self.assertIn("op-1", p.i_pending)
 
     def test_unknown_stays_private_and_cannot_close_out(self):
         p = self.prepared()
+        args = self.commit_args()
+        args["operation_id"] = "op-unknown"
+        self.consume_i(p, args)
         p.mark_unknown("op-unknown")
         self.assertIn("op-unknown", p.private_unknown)
         self.assertNotIn("publication-1", p.visibility)
@@ -491,7 +568,7 @@ class PublicationProtocolTests(unittest.TestCase):
     def test_no_publication_requires_every_storage_absence_and_fence_fact(self):
         p = self.prepared()
         p.install_forget_fence()
-        args = self.commit_args()
+        args = self.consume_i(p)
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.mark_unknown("op-1", binding)
@@ -518,12 +595,12 @@ class PublicationProtocolTests(unittest.TestCase):
                 self.assertEqual(p.visibility, {})
                 self.assertEqual(p.receipts, {})
                 self.assertEqual(p.outbox, {})
-                self.assertEqual(p.consumed, set())
+                self.assertEqual(p.consumed, {"auth-1"})
 
     def test_no_publication_proof_must_bind_exact_unknown_operation(self):
         p = self.prepared()
         p.install_forget_fence()
-        args = self.commit_args()
+        args = self.consume_i(p)
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.mark_unknown("op-1", binding)
@@ -544,7 +621,7 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_no_publication_unknown_binding_must_match_registered_participants(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         invalid_bindings = (
@@ -566,11 +643,11 @@ class PublicationProtocolTests(unittest.TestCase):
         self.assertIn("op-1", p.private_unknown)
 
     def test_no_publication_rejects_local_state_contradicting_absence_proof(self):
-        for state_name in ("visibility", "outbox", "consumed"):
+        for state_name in ("visibility", "outbox", "missing_i_consumption"):
             with self.subTest(state=state_name):
                 p = self.prepared()
                 p.install_forget_fence()
-                args = self.commit_args()
+                args = self.consume_i(p)
                 binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                            args["d_proof"], args["i_commit_won_proof"])
                 p.mark_unknown("op-1", binding)
@@ -580,7 +657,7 @@ class PublicationProtocolTests(unittest.TestCase):
                 elif state_name == "outbox":
                     p.outbox["op-1"] = ("PUBLISH", ("RECEIPT", "op-1"))
                 else:
-                    p.consumed.add("auth-1")
+                    p.consumed.remove("auth-1")
                 with self.assertRaisesRegex(Rejected, "local state contradicts"):
                     p.resolve_no_publication("op-1", self.no_publication_proof())
                 self.assertIn("op-1", p.private_unknown)
@@ -588,7 +665,7 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_no_publication_reconciliation_requires_active_fence_barrier(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.mark_unknown("op-1", binding)
@@ -603,7 +680,7 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_no_publication_reconciles_unknown_and_allows_exact_d_i_closeout(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.install_forget_fence()
@@ -616,9 +693,11 @@ class PublicationProtocolTests(unittest.TestCase):
         self.assertEqual(p.visibility, {})
         self.assertEqual(p.receipts, {})
         self.assertEqual(p.outbox, {})
-        self.assertEqual(p.consumed, set())
+        self.assertEqual(p.consumed, {"auth-1"})
+        self.assertIn("op-1", p.i_pending)
         self.assertIn("publication-1", p.fence_pending)
         p.close_i("op-1", outcome)
+        self.assertNotIn("op-1", p.i_pending)
         self.assertIn("publication-1", p.fence_pending)
         p.close_d("op-1", outcome)
         self.assertNotIn("publication-1", p.fence_pending)
@@ -626,7 +705,7 @@ class PublicationProtocolTests(unittest.TestCase):
     def test_no_publication_is_terminal_and_requires_new_operation_id(self):
         p = self.prepared()
         p.install_forget_fence()
-        args = self.commit_args()
+        args = self.consume_i(p)
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.mark_unknown("op-1", binding)
@@ -640,7 +719,8 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_d_and_i_close_only_on_same_authoritative_storage_outcome(self):
         p = self.prepared()
-        p.commit(**self.commit_args())
+        args = self.consume_i(p)
+        p.commit(**args)
         outcome = p.outcomes["op-1"]
         p.close_d("op-1", outcome)
         p.close_i("op-1", outcome)
