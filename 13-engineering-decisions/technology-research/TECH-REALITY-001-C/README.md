@@ -3,7 +3,7 @@
 
 - Task: TECH-REALITY-001-C | Owner: C | Review: R2
 - Repository: `oahcom/AiMemoryBrainArchitecture`
-- Baseline: `main@b3c666e67982cb3d3374e759cfb6552c7765aacb`
+- Baseline at research-branch creation: `main@b3c666e67982cb3d3374e759cfb6552c7765aacb`; current main observed 2026-11-18: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`
 - Branch: `research/tech-reality-001-c`
 - Status: **RESEARCH IN PROGRESS; NOT FROZEN; INDEPENDENT REVIEW PENDING**
 - Overall disposition: **CONDITIONALLY READY FOR FURTHER REVIEW ONLY AFTER OWNER RECONCILIATION; NOT IMPLEMENTATION READY**
@@ -61,8 +61,18 @@ Gate 状态：C0 PARTIAL（尚未穷尽所有 PR/Issue 和源文件）；C1/C2 �
 
 
 ## Current-source refresh / 当前性刷新
-- Latest branch commit (2026-11-18 refresh): `274f5ec59127c582882b5d3ff6d31f31d811f6f5` was the pre-refresh snapshot; consult live PR #69 metadata for current head.
-- Open PR/Issue scan: 40 open PRs and 24 open Issues. Directly relevant PRs #67/#73/#66/#68/#71 are included in baseline and conflict register.
-- H 1.2.15 local exact-head CI has been independently verified (91 Provider Outcome tests; 288 Recovery Cutoff tests, 22 skipped); production trust and cross-owner freeze remain open.
+- PR #69 initial reviewed HEAD: `1a1d6f26a793fc285a1806edf21b696f748a8fed`; latest PR head: `a69007a016aea4fcd60a05dfebf5a66ccf7f2538` (includes the C Phase 3.8.22 field-mapping addendum). The `274f5ec...` value is an intermediate historical commit.
+- PR #69 merge base / original base snapshot: `b3c666e67982cb3d3374e759cfb6552c7765aacb`; current main HEAD: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`. Compare current main...C head: 7 commits ahead / 2 behind; rebase and conflict validation remain required before merge.
+- Repository-wide PR/Issue counts in this package are historical scan values, not a current inventory. Directly relevant PRs #67/#73/#66/#68/#71 are included in baseline and conflict register; current state must be re-read before any Gate decision.
+- H 1.2.15 local exact-head CI was verified at historical H commit `0d36324457e39bd50ad56ae902d477c4ea765b61` (91 Provider Outcome tests; 288 Recovery Cutoff tests, 22 skipped). At the branch-integrity incident snapshot, H HEAD was `0277a8b9ee63be850acc0b8b1b08625524aaa33b` and its tree was truncated. The Owner branch was subsequently restored at `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`; the old CI remains historical bounded evidence, not production trust.
 - B PR #55 current head refreshed to `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`.
-- C0 remains PARTIAL; C5 remains BLOCKED/PARTIAL; C6 includes 22 design scenarios and all C end-to-end tests NOT RUN.
+- G current branch HEAD: `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8`; G Applied Persistence contract Blob remains `bd297873bc1e593280484a43cb44b56058d9c4ff`.
+- H Owner branch current HEAD is `6608cde89d959257db612d8ff8080f631333f3f3` (216 blobs; the schema/validator/tests remain unchanged from tested code commit `4e65a2...`); Applied Delivery Evidence 1.0.0 schema/validator candidate exists and its exact-head CI passed 11/11. C Owner branch was restored to `88992da30331121b81cf2773acab11d921daf281` (136 files); C Provider Outcome CI passed 19/19. These are bounded branch-local conformance results, not C/H service integration or production trust. H wire mapping remains NOT FROZEN. C workflow trigger fix is proposed in Draft PR #94; schema-only trigger execution remains pending.
+- C0 remains PARTIAL; C5 remains BLOCKED/PARTIAL; C6 includes 22 design scenarios and all C Agent/Provider/Tool/Brain end-to-end scenarios NOT RUN. C research PR #69 current HEAD is `a69007a...` (7 commits ahead / 2 behind current main); it is distinct from the restored C Owner branch `88992da...`. PR #92 is now based on the latest C research HEAD `a69007a...`.
+
+
+### C-REVIEW-001 refresh — Owner tree restoration and H 1.0.0 candidate
+
+- C Owner branch `session-c-agent-integration-2026-11-16` HEAD `88992da30331121b81cf2773acab11d921daf281`; recursive tree: 136 blobs. Commit message: restore complete branch tree and retain Phase 3.8.23 owner decisions. Exact C Provider Outcome CI run `44129914790`: 19 tests, 0 failures.
+- H Owner branch `session-h-bmcp-protocol` current HEAD `6608cde89d959257db612d8ff8080f631333f3f3`; recursive tree: 216 blobs. Schema/validator/tests remain unchanged from tested code commit `4e65a2...`. H Applied Delivery Evidence 1.0.0 schema Blob `2ce8776...`, validator Blob `2f6de24...`, test Blob `bb2bb6c...`, candidate decision Blob `36dff0b...`. Exact H CI run `44130722532`: 11 tests, 0 failures; H Recovery Cutoff workflow also completed successfully.
+- H 1.0.0 is implemented as a test/conformance candidate only. C/H final-boundary and COutcomeRecord mapping is not accepted/frozen; injected callbacks and mocked replay do not prove deployed authority or durable replay.
