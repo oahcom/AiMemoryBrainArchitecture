@@ -320,3 +320,45 @@ After this refresh:
 - More candidate artifacts do not, by themselves, reduce risk. Risk can be downgraded only after exact-version adoption, authority approval and reproducible verification.
 - No new evidence found in this pass is sufficient to mark any Critical/High risk CLOSED.
 
+
+
+## 14. R-01 live source delta — 2026-11-17 / supersedes stale topology wording
+
+A targeted live refresh of the D and Storage Owner branches changes the *L1 logical-decision* status of R-01. It does not close R-01 as a whole.
+
+### 14.1 Exact current source pins
+
+| Owner | Branch | Current HEAD read | Exact artifact | Blob SHA | Directly read disposition |
+|---|---|---|---|---|---|
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md` | `bb544ba2f346bdc130d524bd5c7310d86f367988` | L1 logical Option A selected in §§8–8.7; L4 engine/deployment remains OPEN |
+| Storage | same HEAD | same | `reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md` | `175ee7b1349cfdb79a19898b311a88391ed88010` | Storage-role logical proposal; its §7 candidate wording is superseded for L1 only by the later ADR addendum; implementation proof remains OPEN |
+| D | `session-d-memory-brain-2026-11-16` | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | `03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md` | `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | D-role proposal; D/Storage physical serialization authority, independent D approval, callable API and conformance remain OPEN |
+
+### 14.2 Corrected R-01 assessment
+
+The Storage ADR's §8 addendum selects **Option A as the normative v1 L1 logical architecture**: one logical serializable transaction domain and one durable `CanonicalAuthoritySerializationAnchor` per `BrainAuthorityRef`. Its §8.7 makes the anchor concrete: protected D admission/dependency/participant/fence transitions and Storage final visibility/NO_PUBLICATION transitions update the same anchor and append the transition record in the same transaction. The transaction commit is the linearization point. It also preserves the semantic authority split: D owns ForgetFence and participant semantics; Storage owns physical serialization and visibility; I remains the independent PolicyDomain authority; COC remains a separate quorum log.
+
+This supersedes the ADR's earlier pre-addendum “no option selected” wording **for L1 only**. The old R-01 statement that the Storage topology ADR is wholly ADR-BLOCKED is stale and must not be repeated as the current L1 status.
+
+However, the D artifact still labels itself a D-role proposal and explicitly leaves D/Storage physical serialization authority and independent D approval OPEN. The Storage visibility contract also remains a logical proposal with implementation proof OPEN. Therefore the Storage-side L1 selection is **VERIFIED as text in the current Storage artifact**, but cross-owner D adoption/approval is **NOT PROVEN**. It is not a jointly approved D+Storage contract and not an implemented topology.
+
+### 14.3 R-01 status by layer
+
+| Layer | Updated status | Reason |
+|---|---|---|
+| L1 logical topology choice | PARTIALLY VERIFIED | Storage's current ADR selects Option A and defines the anchor; D's current proposal has not adopted/approved the common physical serialization authority |
+| Cross-owner semantic/transaction boundary | NOT PROVEN | Exact D/Storage row ownership, API, transaction boundary and independent D approval remain open |
+| L3 deterministic logical/physical race proof | NOT PROVEN | Required interleavings and lost-ACK/restore cases are specified, but no exact current-head joint proof bundle was verified in this pass |
+| L4 engine/deployment/conformance | BLOCKED / OPEN | Actual DB product/configuration, deployment, operator, HA/PITR, authoritative read path, old-primary fencing and physical crash/failover/restore drills remain open |
+
+R-01 remains **Critical / OPEN** and continues to block architecture freeze and final implementation of the visibility/Forget path. The risk is narrowed: the missing item is no longer “no L1 topology proposal/choice anywhere”; it is cross-owner adoption plus L3/L4 proof and conformance. No risk downgrade or gate pass is authorized.
+
+### 14.4 Required next closure evidence
+
+1. D explicitly reviews and adopts/rejects the exact Storage ADR Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`, including §8.7 anchor identity, protected transition list, nominal type boundaries and fail-closed behavior.
+2. D and Storage publish a joint exact-version transaction/row-ownership/API contract, including the authority that owns each row and who may append each transition.
+3. Demonstrate both serial orders for Fence vs ProducerWork admission, dependency registration, PublicationParticipant admission and final Visibility commit; include I REVOCATION_WON vs COMMIT_WON, serialization retry, lost ACK, primary failover, stale-primary rejoin and restore rollback.
+4. Tie deterministic test results to the exact D/Storage source HEADs and schema/adapter revisions; no historical CI run substitutes.
+5. Keep L4 OPEN until actual engine/configuration, authoritative read-path, HA/PITR, operator and physical fault/restore evidence are named and verified.
+
+**No Owner approval is inferred from this R review.** This addendum is an independent risk-status correction only.
