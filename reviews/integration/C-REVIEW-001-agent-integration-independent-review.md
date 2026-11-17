@@ -3,7 +3,7 @@
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Target: PR #69 — `research/tech-reality-001-c`
-- Review baseline: PR #69 HEAD `1a1d6f26a793fc285a1806edf21b696f748a8fed`
+- Review baseline: PR #69 HEAD `a69007a016aea4fcd60a05dfebf5a66ccf7f2538`
 - PR base / merge-base at review: `b3c666e67982cb3d3374e759cfb6552c7765aacb`
 - Current main at review: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`
 - Remediation branch: `review/c-review-001-remediation-2026-11-18`
@@ -36,10 +36,10 @@ No Provider/Agent framework selection, schema freeze, production activation, Bra
 | Item | Verified value |
 |---|---|
 | PR #69 | Open, Draft, not merged |
-| PR #69 HEAD | `1a1d6f26a793fc285a1806edf21b696f748a8fed` |
+| PR #69 HEAD | `a69007a016aea4fcd60a05dfebf5a66ccf7f2538` |
 | Original base / merge-base | `b3c666e67982cb3d3374e759cfb6552c7765aacb` |
 | Current main | `e52594f181d2edb77448adcfed64a0fbdffaf3aa` |
-| Compare current main...C head | 6 commits ahead / 2 behind |
+| Compare current main...C head | 7 commits ahead / 2 behind |
 | Changed files | 17 |
 | Additions / deletions | 1,247 / 0 |
 | PR reviews / inline comments / conversation comments | none returned at review time |
@@ -189,3 +189,10 @@ The restored C workflow Blob `a1f0b8f...` watches `07-agent-integration/schemas/
 
 ### Updated disposition
 H successor schema/validator candidate: **IMPLEMENTED / CANDIDATE CI PASS 11/11**. C Provider Outcome candidate CI: **PASS 19/19**. C/H exact field mapping: **NOT ACCEPTED / NOT VERIFIED**. Production cryptographic trust, durable H replay, G Applied persistence, Storage successor binding, D/I Forget ordering and V01–V22 end-to-end tests remain open.
+
+
+### CR-011 — G Phase 3.8.22 overstates missing H field [G-owned correction, HIGH]
+
+C's exact-source addendum added in PR #69 head `a69007a...` inspects H Unified 1.2.15's `C_PROVIDER_OUTCOME_RECORDED` oneOf branch and the Gateway validator P0 allowlist. Both contain `final_request_boundary_id`; the schema branch requires it. The G Phase 3.8.22 contract Blob `bd297873...` states that this field is absent. The G statement appears to have inspected only root-level schema properties and missed the nested oneOf branch. C must not edit G's authoritative contract; G should publish a successor correction. `actual_inference_request_id` is also present but is not automatically equivalent to G's `inference_request_id`; five other HDeliveryBindingIdentity members remain absent as first-class 1.2.15 fields.
+
+**Disposition:** HIGH evidence inconsistency; C5 remains blocked pending G correction and exact H/C/G consumer agreement.
