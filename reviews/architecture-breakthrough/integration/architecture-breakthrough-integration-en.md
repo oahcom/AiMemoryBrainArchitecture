@@ -122,7 +122,7 @@ Synthetic experiment (30 tasks, 720 candidates, 9,000-token budget):
 - Direct Top-K: Recall 0.5333; Precision 0.4741; Jain fairness 0.8325; 1 task starved.
 - Rerank + Budget: Recall 0.5417; Precision 0.2863; Jain 0.8141; no starvation.
 - Unified RM: Recall 0.5083; Precision 0.2699; Jain 0.8554; no starvation.
-- Unified RM local selection latency median 0.324 ms versus 0.099 ms for Direct Top-K.
+- Direct Top-K median 0.095 ms, Rerank + Budget 0.119 ms, and Unified RM 0.306 ms. These are single-threaded local Python microbenchmark values, not service latency.
 
 The experiment therefore shows better fairness and no starvation, but lower Recall/Precision and higher local selection latency. It does **not** support a claim that Unified RM is universally better than the current design.
 
@@ -184,7 +184,7 @@ Session 0's three research directions broadly align with A/B/C, but their eviden
 2. Resource Manager Option B: candidate, with quality/latency trade-offs in the synthetic experiment; do not describe complexity reduction as proven.
 3. Shadow Typed IR: candidate, below formal adoption threshold; Fact/Claim ADR remains blocked.
 4. Whether the new architecture is superior: UNRESOLVED.
-5. L1 Storage topology: Session 0 cites the Storage topology ADR's DECIDED single Serializable Transaction Domain / CanonicalAuthoritySerializationAnchor. This review does not reopen that decision and does not treat the research as proof of its physical implementation. L4 database/HA/recovery capability still requires independent evidence.
+5. L1 Storage topology: the exact Storage ADR Blob `bb544ba...` §8.6 addendum selects Option A as the normative v1 logical architecture and explicitly supersedes the §3 pre-addendum “no option selected” historical text; the v3.3.2 manifest Blob `5c614375...` also says it corrects the ADR status. L1 logical topology is therefore DECIDED. This is not L4 physical database/HA/recovery proof; L4 remains OPEN. A later finding in A PR #102 that the ADR is internally contradictory must be reconciled against the explicit §8.6 supersession language rather than ignoring that addendum.
 
 ## 8. Conflict and risk register
 
