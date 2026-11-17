@@ -278,3 +278,11 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 - New finding **C36-AP-01 — OPEN**: current C source Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` accepts the pinned CGH-APPLIED-1.0 package and BIH consumer package, but contains no explicit C Owner acceptance of G's later CGH-APPLIED-1.1 recovery-batch amendment or complete CSubmitOutcome/provider-receipt mapping for that profile.
 - G 1.1 requires actual C provider receipt and immutable CSubmitOutcome. H §§11.8–11.9 only propose carrying C-issued references; H cannot substitute for C's producer decision.
 - C must publish exact-version acceptance/mapping for C provider receipt, CSubmitOutcome, terminal reference, UNKNOWN/IN_DOUBT and causal binding. Until then C/G/H 1.1 acceptance remains BLOCKED.
+
+
+## 14. H current-source refresh and CSubmitOutcome closure proposal — 2026-11-17
+
+- H source moved again to Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`; current EN/zh-CN companions pin this exact Blob and include §§11.8–11.9. Structural readback: 24/24 headings and 33/33 table rows across source/EN/zh-CN; EN companion contains exact source content. §11.9 now explicitly maps C-issued `c_provider_receipt_ref` / `c_submit_outcome_ref`, participant terminal proof eligibility and I/D-exclusive gate release, but remains CANDIDATE.
+- Cross-owner audit refreshed to H Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`: [EN](../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md) / [中文](../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.zh-CN.md).
+- C source remains Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` and still does not define the C-issued Provider receipt/CSubmitOutcome object or record exact-version acceptance of the G recovery-batch 1.1 package. A bounded non-normative closure proposal was added: [EN](../reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal.md) / [中文](../reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal.zh-CN.md). This is NOT a C Owner decision and does not amend C source.
+- C/G/H joint 1.1 freeze remains BLOCKED; H schema/SDK freeze NOT ESTABLISHED; implementation NOT VERIFIED; conformance NOT RUN.
