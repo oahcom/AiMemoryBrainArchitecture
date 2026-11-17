@@ -54,6 +54,17 @@ Recorded At、Transaction Time 和 Created At 在简单事务中可能相同，�
 
 OPEN: proposed TimeValue shape (lower_bound, upper_bound, precision, timezone, certainty, source_text) is not an approved canonical schema. Distinguish unknown, approximate, range, open-ended and not-applicable.
 
+### 中文精度、不确定性与空值规则
+
+- 未知必须显式表达；null/unknown 不表示无时间限制、所有时间或零。
+- 相关时保留来源原始短语、时区、精度和 Provenance。
+- “五月初”“下午三点左右”等近似表达不得规范化为虚假的精确时间点。
+- 推断时间必须携带方法/来源 Provenance 和不确定性边界。
+- 当前来源区间约定为半开区间 [from, to)；只有 Schema 明确区分时，开放边界才表示未知/无界。
+- 不得使用墙上时钟时间填补未知的 Occurred At 或 Valid Time。
+
+OPEN：提议的 TimeValue 结构（lower_bound、upper_bound、precision、timezone、certainty、source_text）尚不是已批准的规范 Schema。必须区分 unknown、approximate、range、open-ended 和 not-applicable。
+
 ## 3. Bitemporal suitability / 双时态适用性
 
 ### Decision proposal
@@ -128,6 +139,8 @@ Evidence 可用性可根据保留/Forget 策略变化，但不得改写“该 Ev
 
 Evidence availability can change under retention/Forget policy without rewriting the historical fact that the evidence once existed. Permitted non-content audit metadata must not preserve reconstructive forgotten content.
 
+Evidence 可用性可随保留/Forget 策略变化，但不得改写 Evidence 曾经存在的历史事实。允许保留的非内容审计元数据不得保留可重建的已遗忘内容。
+
 ## 5. Source vs Evidence vs Provenance / Source、Evidence 与 Provenance
 
 | Concept | Meaning | Example |
@@ -152,9 +165,13 @@ A mutable URL alone is not durable Evidence. Source retention may be restricted;
 
 For a derived Memory/Claim/Relation, Provenance must make it possible to answer: exact source object and version(s); exact source portion/locator where available; transformation/derivation kind; method/component/model/rule version; derived-at time; input digests; parent provenance references; unavailable/redacted reason where incomplete.
 
+对于派生 Memory/Claim/Relation，Provenance 必须能够回答：精确来源对象及版本；可用时的来源片段/Locator；转换/派生类型；方法/组件/模型/规则版本；派生时间；输入摘要；父级 Provenance 引用；以及信息不完整时的 unavailable/redacted 原因。
+
 对于派生 Memory/Claim/Relation，Provenance 必须能够回答：精确来源对象及版本、可用时的来源片段/定位、转换/派生类型、方法/组件/模型/规则版本、派生时间、输入摘要、父级溯源引用，以及信息不完整时的不可用/脱敏原因。
 
 A method reference explains how an artifact was produced; it does not prove correctness. Do not require metadata the system cannot obtain or verify.
+
+方法引用解释产物如何生成，但不证明其正确性。不得要求系统无法获得或验证的元数据。
 
 方法引用解释产物如何生成，不证明其正确性。不得要求系统无法获得或验证的元数据。
 
