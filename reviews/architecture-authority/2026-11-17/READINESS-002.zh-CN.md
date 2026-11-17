@@ -13,7 +13,7 @@
 | 领域语义就绪度 | NOT READY | B Fact/Claim ADR 仍为 ADR-BLOCKED |
 | 权威/责任就绪度 | NOT READY | Issue #7 尚未指定 Canonical Runtime Repo 和具名工程负责人 |
 | 安全/治理就绪度 | NOT READY | I36-GOV-01..10 和闭世界 Inventory 仍为治理阻塞 |
-| 物理一致性就绪度 | NOT READY | Storage 拓扑 ADR 仍 ADR-BLOCKED；JF-10 Gate A 部分通过/开放，B/C 阻塞 |
+| 物理一致性就绪度 | NOT READY | Storage §8 已选择 L1 Option A（每个 Canonical Memory Authority 一个 Serializable Transaction Domain）；L4 物理引擎/部署、Adapter、HA/Fencing 和 Restore 证明仍开放；JF-10 Gate A 部分通过/开放，B/C 阻塞 |
 | 跨模块正确性 | NOT PROVEN | Forget/Publication/Recovery 与 Applied 证明链缺少完整集成物理证据 |
 | 复杂度可控性 | NOT PROVEN | X 评为 High Complexity；八维序数分不是工期估算 |
 | 实现就绪度 | BLOCKED | P0 权威/证明前置条件未完成；运行时仓库/责任人缺失 |
