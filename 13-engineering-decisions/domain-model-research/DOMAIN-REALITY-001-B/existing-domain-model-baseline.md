@@ -29,7 +29,7 @@ However, the source set is not internally ready for a new freeze. The Fact/Claim
 | Default branch | `main` |
 | Original main HEAD at research start | `b372b62c640a2b656e54b6db62a4ee67d7d8c001` |
 | Current main HEAD after branch-isolation correction | `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` |
-| HEAD commit message | `docs: remove superseded runner operations tracking row` |
+| HEAD commit message | `revert(domain): remove research artifact mistakenly written to main` |
 | HEAD commit date | 2026-11-17T09:25:41Z |
 | Repository README Blob | `429e873bd5bf081e10a449b27e3495428e1046f1` |
 | Roadmap Blob | `29289361973ec4369f067706132190793cd57a6b` |
