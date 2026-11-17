@@ -5,8 +5,8 @@
 - Wire schema version: `1.3.0`; schema artifact revision: `1.2.12`
 - C immutable object schema: `schemas/c-submit-outcome-1.0.1.schema.json`, Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`
 - C key-status event schema: Blob `908b293eba337e9fa75864cea3704e28a1a8d82e`
-- C 1.0.1 sequence namespace amendment: Blob `fdea588f52d17806793eb8c2e9035495686539ad`
-- I 1.0.1 sequence namespace review: Blob `a93febf867b8da2f23e7ee3cb5334bf491872637`
+- C 1.0.1 sequence namespace amendment: Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`
+- I 1.0.1 sequence namespace review: Blob `0d78e5b2bfcf66cae6b757314cead84b9c942601`
 - H validator core: Blob `1a92c0cf7146e2884bd38232005dd9a55d558a85`
 - Status: PROPOSED exact mapping; validator integration core exists but is not production-connected.
 - Provenance: delegated H-role simulation at user's direction; not independent human H Owner approval.
@@ -21,7 +21,7 @@ The 1.2.12 branch requires:
 `message_type`, `c_submit_outcome_ref`, `c_submit_outcome_digest`, `provider_outcome`, `provider_ref`, `provider_adapter_ref`, `provider_idempotency_key_ref`, `final_request_boundary_id`, `request_digest`, `transaction_ref`, `provider_outcome_evidence_ref`, `owner_signature_ref`, `coc_commit_proof_ref`, `coc_record_ref`, `coc_record_position`, `coc_entry_digest`, `owner_admission_ref`, `owner_admission_digest`, `owner_ledger_ref`, `owner_ledger_version`, `owner_local_sequence`, `owner_high_water`, `owner_ledger_root`, `coc_participant_intent_ref`.
 
 Optional branch fields include:
-`provider_request_ref`, `provider_receipt_ref`, `actual_inference_request_id`, `final_request_boundary_id` (already required), `participant_reservation_ref`, `participant_intent_ref`, `prepared_participant_ref`, `prepare_attempt_ref`, `prepare_attempt_generation`, `participant_ledger_ref`, `participant_ledger_version`, `participant_tuple_digest`, `i_terminal_decision_ref`, `d_clearance_ref`, `storage_resolution_proof_ref`, `provider_lookup_proof_ref`, `provider_no_handoff_proof_ref`, `not_invoked_proof_ref`, `unknown_reason_ref`, `coc_absence_reason`.
+`provider_request_ref`, `provider_receipt_ref`, `actual_inference_request_id`, `participant_reservation_ref`, `participant_intent_ref`, `prepared_participant_ref`, `prepare_attempt_ref`, `prepare_attempt_generation`, `participant_ledger_ref`, `participant_ledger_version`, `participant_tuple_digest`, `i_terminal_decision_ref`, `d_clearance_ref`, `storage_resolution_proof_ref`, `provider_lookup_proof_ref`, `provider_no_handoff_proof_ref`, `not_invoked_proof_ref`, `unknown_reason_ref`, `coc_absence_reason`.
 
 The branch is closed by `unevaluatedProperties=false`. H validates the entire envelope against exact schema Blob 1.2.12 before semantic processing.
 
@@ -116,3 +116,10 @@ C and H candidate crypto tests exist, but I has not registered either profile or
 - H expected candidate vectors Blob `34e49a49551390f52198b1fa557e15a32a3f6ee2`.
 
 The run verifies the required 1.0.1 sequence namespace, five candidate signatures, all present P0 member mutations and H Python/Node agreement. It does not validate a deployed sequencer, key-status service, governance root, anti-rollback checkpoint or production provider evidence.
+
+
+## 9. Exact source pin direction and currentness
+
+This H mapping consumes the exact C source amendment Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb` and the exact I sequence-namespace review Blob `0d78e5b2bfcf66cae6b757314cead84b9c942601`. C's source amendment intentionally does not pin this H consumer mapping; the Storage successor manifest binds both source and consumer artifacts without a cyclic reference. The previous C/I Blob pins in this file are superseded by the exact pins above.
+
+**中文：** 本 H Mapping 消费精确 C 源修订 Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb` 与 I Sequence Namespace Review Blob `0d78e5b2bfcf66cae6b757314cead84b9c942601`。C 源修订不反向绑定 H 消费方 Mapping；Storage 后继清单负责同时绑定源与消费工件，避免循环引用。本文件旧 C/I Blob 引用由本节精确绑定取代。
