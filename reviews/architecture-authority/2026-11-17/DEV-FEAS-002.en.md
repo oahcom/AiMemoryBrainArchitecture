@@ -38,7 +38,7 @@ F/D/P uses relative sizes (S/M/L/XL), not person-days. No reliable calendar or s
 2. B closes normative identity/Fact-Claim/temporal semantics; consumers bind exact version.
 3. I and external authorities close security/governance decisions and signed closed-world producer/recipient/backup inventory.
 4. D/E/I/Storage agree on exact admission → dependency registration → fence → final visibility semantics and prove both race orders and crash windows.
-5. Storage selects and proves actual DB/COC topology; C/G/H close final-request and Applied/provider outcome contracts.
+5. Storage completes L4 physical realization and proves the selected L1 Option A profile (actual DB/adapter, COC, same-XID recovery, failover/restore); C/G/H close final-request and Applied/provider outcome contracts.
 
 ## Bounded engineering work
 
