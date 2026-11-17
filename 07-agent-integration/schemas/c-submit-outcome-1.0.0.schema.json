@@ -66,7 +66,8 @@
     "key_version",
     "signature",
     "ProviderEvidenceIssuerRef",
-    "ProviderEvidenceType"
+    "ProviderEvidenceType",
+    "message_type"
   ],
   "properties": {
     "schema_id": {
@@ -330,6 +331,9 @@
       "type": "string",
       "minLength": 1,
       "maxLength": 128
+    },
+    "message_type": {
+      "const": "C_PROVIDER_OUTCOME_RECORDED"
     }
   },
   "$defs": {
