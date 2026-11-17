@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve()
-H_ROOT = ROOT.parents[4]
+H_ROOT = ROOT.parents[3]
 sys.path.insert(0, str(H_ROOT / "validators"))
 
 from provider_outcome_validator import (  # noqa: E402
