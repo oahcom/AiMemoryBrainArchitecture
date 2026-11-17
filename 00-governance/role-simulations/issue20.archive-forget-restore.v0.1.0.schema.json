@@ -120,8 +120,7 @@
           "type": "string",
           "minLength": 1
         }
-      },
-      "additionalProperties": false
+      }
     },
     "ProducerInstanceRef": {
       "type": "object",
@@ -201,7 +200,8 @@
             }
           }
         }
-      ]
+      ],
+      "unevaluatedProperties": false
     },
     "DForgetBarrierProof": {
       "allOf": [
@@ -281,7 +281,8 @@
             }
           }
         }
-      ]
+      ],
+      "unevaluatedProperties": false
     },
     "IInventorySeal": {
       "allOf": [
@@ -358,7 +359,8 @@
             }
           }
         }
-      ]
+      ],
+      "unevaluatedProperties": false
     },
     "ICommitAuthorizationReceipt": {
       "allOf": [
@@ -414,7 +416,8 @@
             }
           }
         }
-      ]
+      ],
+      "unevaluatedProperties": false
     },
     "StorageVisibilityParticipantRef": {
       "allOf": [
@@ -473,7 +476,8 @@
             }
           }
         }
-      ]
+      ],
+      "unevaluatedProperties": false
     },
     "StorageOutcomeProof": {
       "allOf": [
@@ -527,7 +531,8 @@
             }
           }
         }
-      ]
+      ],
+      "unevaluatedProperties": false
     },
     "FRecallCursor": {
       "allOf": [
@@ -579,7 +584,8 @@
             }
           }
         }
-      ]
+      ],
+      "unevaluatedProperties": false
     },
     "EPublicationRequest": {
       "allOf": [
@@ -641,7 +647,8 @@
             }
           }
         }
-      ]
+      ],
+      "unevaluatedProperties": false
     },
     "GContextLineageManifest": {
       "allOf": [
@@ -695,7 +702,8 @@
             }
           }
         }
-      ]
+      ],
+      "unevaluatedProperties": false
     },
     "RestoreProofBundle": {
       "allOf": [
@@ -761,7 +769,8 @@
             }
           }
         }
-      ]
+      ],
+      "unevaluatedProperties": false
     }
   }
 }
