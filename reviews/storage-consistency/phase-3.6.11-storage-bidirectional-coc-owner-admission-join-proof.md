@@ -261,7 +261,7 @@ H has now committed the following candidate artifacts to its owner branch:
 - H semantic validator contract 3.6.10 latest: Blob `142425b6280f7e0fe517489bc87bc81db892225a`
 - H recovery-cutoff structural schema 1.0.4: Blob `d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1`
 - H RecoveryJoin structural schema candidate 1.0.0: Blob `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`
-- H executable HRC semantic suite: Blob `ee0f47095df10786da358bed193d6f8491a5eb2c`
+- H executable HRC semantic suite: Blob `60a2f4db4bd12f2131ecd147db9bbe328da6db50`
 - H wire interoperability candidate suite: Blob `18e50957848178f3f35593b3e618dfa9b90cdb31`
 
 The semantic suite contains HRC-01..25 plus JPF-01..12. The wire suite contains WIRE-01..10. These are committed test candidates, not CI execution evidence. The test-only digest helper is not a production canonicalization profile.
@@ -313,4 +313,4 @@ These structural conditions reduce ambiguous joins but do not prove that referen
 
 ## 15. Owner admission identity separation tests
 
-HRC/JPF now explicitly tests both sides of the OwnerAdmissionRef vs OwnerEntryRef distinction. OwnerAdmissionRef is the stable admission identity referenced by the COC participant's primary owner_admission_ref. OwnerEntryRef is the exact member row in the signed owner snapshot. The JoinProof binds both plus the snapshot row digest and owner-local sequence. JPF-18/JPF-19 reject substituting one for the other. Latest HRC/JPF suite Blob: ee0f47095df10786da358bed193d6f8491a5eb2c.
+HRC/JPF now explicitly tests both sides of the OwnerAdmissionRef vs OwnerEntryRef distinction. OwnerAdmissionRef is the stable admission identity referenced by the COC participant's primary owner_admission_ref. OwnerEntryRef is the exact member row in the signed owner snapshot. The JoinProof binds both plus the snapshot row digest and owner-local sequence. JPF-18/JPF-19 reject substituting one for the other. Latest HRC/JPF suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
