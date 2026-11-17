@@ -53,10 +53,15 @@ jobs:
           [[ "$issue_number" =~ ^[0-9]+$ ]] || { echo "::error::invalid issue number"; exit 2; }
           gh api "repos/${GITHUB_REPOSITORY}/issues/${issue_number}" > /tmp/issue.json
           python3 scripts/ai_worker/prepare_task.py /tmp/issue.json .ai-worker/task.json
-          echo "issue_number=$issue_number" >> "$GITHUB_OUTPUT"
-          echo "owner=$(python3 -c 'import json;print(json.load(open(".ai-worker/task.json"))["owner"])')" >> "$GITHUB_OUTPUT"
-          echo "title=$(python3 -c 'import json;print(json.load(open(".ai-worker/task.json"))["title"].replace("%","%25").replace("\n","%0A"))')" >> "$GITHUB_OUTPUT"
-          echo "base_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, subprocess
+          task = json.load(open(".ai-worker/task.json", encoding="utf-8"))
+          print(f"issue_number={task['issue_number']}")
+          print(f"owner={task['owner']}")
+          title = task["title"].replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+          print(f"title={title}")
+          print(f"base_sha={subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()}")
+          PY
 
       - name: Test task admission validator
         run: python3 -m unittest discover -s scripts/ai_worker -p "test_*.py" -v
@@ -109,16 +114,17 @@ jobs:
           test -s /tmp/ai-owner-worker.patch
           echo "changed=true" >> "$GITHUB_OUTPUT"
           printf '%s\n' "$changed" > /tmp/changed-files.txt
+          mkdir -p /tmp/ai-owner-worker-artifact
+          cp /tmp/ai-owner-worker.patch /tmp/ai-owner-worker-artifact/ai-owner-worker.patch
+          cp /tmp/changed-files.txt /tmp/ai-owner-worker-artifact/changed-files.txt
+          cp .ai-worker/final-message.txt /tmp/ai-owner-worker-artifact/final-message.txt
 
       - name: Upload proposed patch and evidence
         if: steps.patch.outputs.changed == 'true'
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
           name: ai-owner-worker-${{ steps.task.outputs.issue_number }}-${{ github.run_id }}
-          path: |
-            /tmp/ai-owner-worker.patch
-            /tmp/changed-files.txt
-            .ai-worker/final-message.txt
+          path: /tmp/ai-owner-worker-artifact/*
           if-no-files-found: error
           retention-days: 7
 
