@@ -1,0 +1,29 @@
+name: Publication Protocol Reference Model
+
+on:
+  push:
+    branches:
+      - fix/publication-fence-admission-order
+    paths:
+      - "13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/reference-model/test_publication_protocol.py"
+      - ".github/workflows/publication-protocol-reference-model.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/reference-model/test_publication_protocol.py"
+      - ".github/workflows/publication-protocol-reference-model.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  publication-protocol-reference-model:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run D/E/Storage/I publication protocol reference tests
+        run: python -m unittest discover -s 13-engineering-decisions/technology-research/TECH-REALITY-001-A/owner-remediation/reference-model -p 'test_publication_protocol.py' -v
