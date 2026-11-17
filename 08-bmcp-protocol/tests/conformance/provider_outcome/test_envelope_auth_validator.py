@@ -81,10 +81,8 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
             ("issuer_ref", "C/authority/attacker"),
             ("sender_authority_ref", "C/authority/attacker"),
             ("sender_subject_ref", "C/adapter/attacker"),
-            ("subject_ref", "C/adapter/attacker"),
             ("audience", "COC/other-service"),
             ("channel_binding_proof_ref", "C/channel-binding/other-session"),
-            ("owner_authority", "D"),
         ):
             with self.subTest(field=field):
                 self.envelope[field] = value
@@ -195,6 +193,31 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         result = authenticate_outer_envelope(self.raw(), self.context, checks)
         self.assertEqual(result["status"], "UNKNOWN", result)
         replay.assert_not_called()
+
+    def test_17_gateway_signer_may_transport_c_owned_record_only_if_registry_allows(self):
+        gateway_context = ProtectedTransportContext(
+            issuer_ref="H/gateway/issuer",
+            authority_ref="H/gateway/authority",
+            authority_kind="H",
+            subject_ref="H/gateway/instance-7",
+            audience=self.context.audience,
+            runtime_session_ref="H/session/gateway-7",
+            authentication_context_ref="I/auth-context/gateway-7",
+            channel_binding_proof_ref=self.context.channel_binding_proof_ref,
+        )
+        self.envelope["issuer_ref"] = "H/gateway/issuer"
+        self.envelope["sender_authority_ref"] = "H/gateway/authority"
+        self.envelope["sender_subject_ref"] = "H/gateway/instance-7"
+        self.envelope["subject_ref"] = "C/authority/agent-runtime"
+        self.envelope["owner_authority"] = "C"
+        result = authenticate_outer_envelope(self.raw(), gateway_context, self.checks())
+        self.assertEqual(result["status"], "AUTHENTICATED_NEW", result)
+
+    def test_18_subject_and_owner_authority_are_checked_by_registry_not_sender_string_equality(self):
+        checks = self.checks()
+        checks.verify_identity_binding = lambda env, ctx: False
+        result = authenticate_outer_envelope(self.raw(), self.context, checks)
+        self.assertEqual(result["status"], "INVALID", result)
 
 
 if __name__ == "__main__":
