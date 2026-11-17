@@ -5,7 +5,13 @@ This index is the entry point for all governed AI development tasks.
 | Work Item ID | Title | Owner | Class/Risk | Status | Prompt | Implementation | Review | Acceptance |
 |---|---|---|---|---|---|---|---|---|
 | [AID-2026-001](AID-2026-001/manifest.yaml) | Define ChatGPT-native execution model | A | ARCH/R3 | REMEDIATION_IN_PROGRESS | [prompt-v2](AID-2026-001/prompt-v2.md) | [Draft PR](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42) | FAIL at 1d6ab393; re-review pending | BLOCKED_PENDING_R3_EVIDENCE |
-| PR-GOVERNANCE-001 | Mandatory session delivery traceability | Integration Owner | DOC/R1 | IN_PROGRESS | Chat instruction (no immutable prompt hash recorded) | `fix/pr-governance-001-session-traceability` (PR pending) | Pending independent review | Pending acceptance |
+| [PR-GOVERNANCE-001](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/130) | Mandatory session delivery traceability | Integration Owner | DOC/R1 | IN_PROGRESS | Chat instruction (immutable prompt hash: NOT RECORDED) | [PR #132](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/132) — `fix/pr-governance-001-session-traceability` | Same-author COMMENT only; independent review pending | PROPOSED; adoption decision pending |
+
+## Session-level delivery records / 会话级交付记录
+
+| Session record | Work Item | Owning Issue | Related PR | Branch / exact Head | Prompt identity | Work and evidence | Status / closeout |
+|---|---|---|---|---|---|---|---|
+| `2026-11-18-GITHUB-CONTINUATION-PR132` | PR-GOVERNANCE-001 | [#130](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/130) | [#132](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/132) | `fix/pr-governance-001-session-traceability` / see current PR Head; updated by this index commit | Prompt ID/version/hash: NOT RECORDED | Re-fetched PR metadata, five changed paths, review submissions/threads, exact-Head workflow run; remediating stale closeout and traceability gaps | IN_PROGRESS; exact-head independent review and final closeout pending |
 
 ## Registration rules
 
