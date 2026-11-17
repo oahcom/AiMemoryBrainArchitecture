@@ -1,0 +1,47 @@
+name: Ubuntu Worker - Read-only Diagnostics
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ubuntu-worker-diagnostics
+  cancel-in-progress: false
+
+jobs:
+  diagnostics:
+    # This job must run only on the explicitly registered, dedicated runner.
+    # Never add untrusted pull_request triggers to this workflow.
+    runs-on: [self-hosted, linux, x64, ai-worker]
+    timeout-minutes: 5
+    steps:
+      - name: Read-only host diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== Runner identity ==="
+          printf 'hostname=%s\n' "$(hostname)"
+          printf 'kernel='
+          uname -sr
+          printf 'architecture='
+          uname -m
+          echo "=== Operating system ==="
+          if [ -r /etc/os-release ]; then
+            . /etc/os-release
+            printf 'os=%s version=%s\n' "${ID:-unknown}" "${VERSION_ID:-unknown}"
+          fi
+          echo "=== Resource summary ==="
+          printf 'cpu_count='
+          nproc
+          free -h
+          df -h /
+          echo "=== Time synchronization ==="
+          timedatectl show -p NTPSynchronized --value 2>/dev/null || true
+          echo "=== Tailscale service state (no peer inventory) ==="
+          systemctl is-enabled tailscaled 2>/dev/null || true
+          systemctl is-active tailscaled 2>/dev/null || true
+          echo "=== Runner account ==="
+          id
+          echo "Diagnostics complete. No environment variables, secrets, peer list, or user files were read."
