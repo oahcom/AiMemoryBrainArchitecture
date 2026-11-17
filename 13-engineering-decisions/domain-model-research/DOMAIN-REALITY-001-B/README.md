@@ -106,3 +106,11 @@ Any unresolved identity collision, contradictory state meaning, unowned lifecycl
 B0 remains PARTIAL / NOT PASSED; B2 remains IN PROGRESS; B3 remains NOT PASSED; B4 remains NOT READY; B6 remains INDEPENDENT_REVIEW_PENDING. No merge is requested.
 
 B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪；B6 等待独立审查。本次不请求合并。
+
+
+## 9. Bilingual parity gate / 双语一致性门禁
+
+- Added `bilingual-semantic-parity-audit.md`: the 21-file package screen flags 135 English-only substantive sections across 20 files. This is a screening result, not a semantic translation verdict.
+- B-CONFLICT-016 remains OPEN; B5 is BLOCKED / NOT PASSED until P0/P1/P2 bilingual remediation and manual semantic comparison are complete.
+- 新增 `bilingual-semantic-parity-audit.md`：21 个文件中，20 个文件被筛查出 135 个仅英文实质章节。该结果是筛查，不是语义翻译终审。
+- B-CONFLICT-016 仍 OPEN；P0/P1/P2 双语修复及人工语义对照完成前，B5 保持 BLOCKED / NOT PASSED。
