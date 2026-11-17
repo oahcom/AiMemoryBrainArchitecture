@@ -234,3 +234,34 @@ This addendum updates the current-state source pin only; all earlier observation
 - AID-2026-001 的初始状态对账已存在于该 `main` Head。本 PR 剩余变更仅刷新追加式当前 main 证据快照，并保留 PR #42/#72 的准确合并事实。
 - PR #132、#136 和 #133 已进入当前 mainline，详见前一条对账记录。
 - AID-2026-001 仍为 ARCH/R3、REMEDIATION_IN_PROGRESS。新独立审查、独立集成审查、Owner D/I 批准、其他执行方确认、可复现 R3 合约测试、YAML/Schema 验证及 Acceptance 仍按实际情况保持 PENDING / NOT RUN / NOT EVIDENCED；生产激活仍 NOT AUTHORIZED。
+
+
+## PR #141 — reference-model test expansion and exact-Head CI / 参考模型测试扩展与精确 Head CI
+
+- PR: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/141
+- Final PR Head: `d5702426147456f0bf00e0aec9ad5916200cebef`.
+- Merge commit: `9edc746c001f1f82950edad7ce130342db53ff67`.
+- Scope: non-production in-memory Forget reference model, 24 deterministic unit tests, and exact-Head GitHub Actions workflow.
+- Exact-Head model CI: [run #44188134319](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44188134319) — SUCCESS. Job log: `Ran 24 tests`; `OK`.
+- Exact-Head bilingual documentation gates: [#44188134357](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44188134357) and [#44188136170](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44188136170) — SUCCESS.
+- Model corrections include: empty D-domain inventory cannot complete vacuously; canonical request hashing uses structured JSON-array encoding to prevent delimiter ambiguity.
+- This does NOT execute production DFI-001…DFI-022. No production DB/WAL, distributed concurrency, replicas, queues, index/cache, Adapter, Context, backup/restore, authentication provider or production authorization service was tested.
+- PR review was a same-conversation implementation self-review COMMENT under the repository owner's standing integration direction; it is NOT an independent review or Owner D/I approval.
+- Non-independent Owner D/I preliminary findings were recorded in Issue #41 comment [#6962603446](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/41#issuecomment-6962603446). Runtime repository/G3 blocker recheck was recorded in Issue #7 comment [#6962604585](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/7#issuecomment-6962604585).
+- Owner D/I formal approvals and separate-conversation specialist reviews remain PENDING / NOT EVIDENCED. Independent integration review remains PENDING. Issue #7 remains OPEN; canonical runtime repository and accountable code owners remain unidentified in accessible evidence.
+- AID-2026-001 remains ARCH/R3, REMEDIATION_IN_PROGRESS and BLOCKED_PENDING_R3_EVIDENCE. Production activation remains NOT AUTHORIZED.
+
+## PR #141 — 参考模型测试扩展与精确 Head CI
+
+- PR：https://github.com/oahcom/AiMemoryBrainArchitecture/pull/141
+- 最终 PR Head：`d5702426147456f0bf00e0aec9ad5916200cebef`。
+- 合并提交：`9edc746c001f1f82950edad7ce130342db53ff67`。
+- 范围：非生产内存 Forget 参考模型、24 项确定性单元测试及精确 Head GitHub Actions 工作流。
+- 精确 Head 模型 CI：[Run #44188134319](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44188134319)，SUCCESS；Job 日志明确显示 `Ran 24 tests`、`OK`。
+- 同一 Head 的双语文档门禁：[Run #44188134357](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44188134357) 和 [#44188136170](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44188136170)，均 SUCCESS。
+- 模型修复包括：空 D 域目标清单不得空集合通过；规范请求哈希改用结构化 JSON 数组编码，避免分隔符歧义。
+- 本次没有执行生产 DFI-001…DFI-022；没有测试生产 DB/WAL、分布式并发、Replica、Queue、Index/Cache、Adapter、Context、Backup/Restore、认证服务或生产授权。
+- PR 审查为同一实现协调会话提交的 COMMENT，依据仓库 Owner 的持续集成指令执行；不构成独立审查或 Owner D/I 批准。
+- D/I 非独立初步发现已登记在 Issue #41 评论 [#6962603446](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/41#issuecomment-6962603446)。运行时仓库/G3 阻塞复核已登记在 Issue #7 评论 [#6962604585](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/7#issuecomment-6962604585)。
+- Owner D/I 正式批准及独立新会话专业审查仍 PENDING / NOT EVIDENCED；独立集成审查仍 PENDING。Issue #7 仍 OPEN；可访问证据尚未确定规范运行时仓库及其负责代码 Owner。
+- AID-2026-001 仍为 ARCH/R3、REMEDIATION_IN_PROGRESS、BLOCKED_PENDING_R3_EVIDENCE；生产激活仍 NOT AUTHORIZED。
