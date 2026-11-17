@@ -4,7 +4,7 @@
 - Exact schema: `08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.11.schema.json`, Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`
 - Wire family: `schema_version=1.3.0`; exact artifact revision `schema_artifact_revision=1.2.11`
 - C semantic amendment: Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`
-- C projection proposal: Phase 3.8.8 Blob `39ff523c41f10e3a82442d4746dd7ca7763d271c`
+- C projection proposal: Phase 3.8.8 Blob `a0e38c781d8aa2da5242dfce121e74b5141663d8`
 - C crypto candidate review: Blob `794d1dc49f034152407e3a42ba5ac937ea3539f8`
 - I governance disposition: Phase 3.8.5 Blob `41fc0f508ae75e8c16012966160e9e2a1e368881`
 - H validator contract: Phase 3.8.5 Blob `d1ab8c102f097100ed3948c5283dabc4e5e8690e`
@@ -132,9 +132,9 @@ No executable validator, test fixtures, cross-language execution, provider adapt
 ## 8. C immutable object schema 1.0.0 binding
 
 C has now published the proposed immutable object schema:
-- C schema `urn:aimba:schema:c-submit-outcome:1.0.0`, Blob `b0e324ffa46d7afb1bf4687ae51202e3e220ae67`.
-- C schema/conformance contract Phase 3.8.9, Blob `054b28bc8fcbf7f29c0755eac941441972581829`.
-- C structural/semantic fixture pack, Blob `d2ce9176e82e0b311e2145fa03d2dede4a50a675`.
+- C schema `urn:aimba:schema:c-submit-outcome:1.0.0`, Blob `09725d3a90e4c130b38400e8e2d613f755f3806a`.
+- C schema/conformance contract Phase 3.8.9, Blob `eac5a6b02405aa554bd53095303e364bf25479de`.
+- C structural/semantic fixture pack, Blob `88bef7ddddff3b9f07c453e0af999f2c23af01bc`.
 - C Python harness, Blob `92e8e9e607566eafa6ad89110202dbeed0fc43cb`; dependency pin Blob `89099e36f214d8d0e0c7d4aacc19e2b4450f0744`.
 
 The dereference target of `c_submit_outcome_ref` MUST validate against this exact schema revision and object digest. The object contains the complete C gate/attempt/provider/account/endpoint/region/API/idempotency/request tuple absent from the BMCP 1.2.11 inline branch. H must compare all duplicated wire fields to the dereferenced object.
@@ -151,3 +151,8 @@ H accepts the C schema as a proposed dereference contract for validator implemen
 - provider adapter and Storage deployment evidence remain open.
 
 C schema structural validity and BMCP envelope structural validity are separate gates; both must pass before semantic joins.
+
+
+## 9. I exact C object crypto review
+
+I Phase 3.8.6 review Blob `0a3bca042f8922f589028ce57a6b8bec91e637d8` accepts the C object structure and candidate digest/signature construction only. It explicitly does not register/deploy the profile or approve trust roots/custody. The H implementation must enforce strict UTF-8, duplicate-key rejection, JCS, exact C-P0 field coverage, 86-character Base64url structural screening plus strict decoding to 64 bytes, and the exact message_type domain component. The C test signatures remain placeholders and no cryptographic vector execution is claimed.
