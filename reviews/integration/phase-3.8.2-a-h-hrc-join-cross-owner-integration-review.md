@@ -240,3 +240,23 @@ Updated exact pins:
 - Storage freeze evidence: `cddbb2f9a09b16f4f6e022fcee4477e139c89ac3`.
 
 The H unified schema 1.2.7 review is a separate structural review and is not covered by this 93-test RecoveryJoin suite. Production signature_profile_id enforcement and I trust-registry resolution remain open.
+
+
+### 9.5 H 95-test current source refresh
+
+Latest H CI [44042568297](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042568297), commit `b832679d1143e2806cba30e77dd8d0b240334fdc`, job `133900417567`: **95 tests ran, OK**.
+
+Inventory: HRC 25 + JPF 19 + WIRE 10 + SCHEMA 14 + TPH 26 + XLANG 1. SCHEMA-13/14 are structural checks for unified schema 1.2.7 version distinction and signature_profile_id field shape; they do not enforce production semantic requiredness or I trust-registry resolution.
+
+Current H pins:
+- Semantic contract: `99ccf2b637b6a87be045ed8342c88b15b8816604`.
+- Schema suite: `fa4fc9f7d3bf64a90bc992453b13fc1fb3c11879`.
+- Unified schema 1.2.7: `e9748a5b904d2b975e47a32a0cbb31de31636854`.
+- Workflow (Node.js 22): `55d877499010f6a776ae432c1fb2a3a31bae5f11`.
+
+Current Storage pins:
+- JoinProof contract: `0deffc2dcead5f88264417c2ae0ae231a38cfb6f`.
+- Storage exact review: `2c9327e89d37e8955d9774a18d2575273000d2a2`.
+- Storage freeze evidence: `14edfdea384be257f90fe87effc3362a3864b172`.
+
+This remains candidate reference-model/schema/test-profile evidence. HRC-TEST-v1 is not a production canonicalization/signature profile; TPH does not exercise a live COC quorum log; XLANG-01 covers fixed vectors only. Production adapters, I trust/crypto, real owner-ledger CAS, JF-10 physical recovery and the A physical campaign remain OPEN.
