@@ -110,12 +110,12 @@ D 的权威领域契约覆盖：
 
 ## 10. D 的详细源规范
 
-- [Memory Brain 总览](../../../03-memory-brain/memory-brain-overview.md)
-- [Canonical Memory Store](../../../03-memory-brain/canonical-memory-store.md)
-- [Memory Lifecycle Manager](../../../03-memory-brain/memory-lifecycle-manager.md)
-- [Entity and Relationship Manager](../../../03-memory-brain/entity-and-relationship-manager.md)
-- [Memory Versioning](../../../03-memory-brain/memory-versioning.md)
-- [Forget Fence and Completion Contract](../../../03-memory-brain/forget-fence-and-completion-contract.md)
-- [Canonical Commit Cursor Semantics](../../../03-memory-brain/commit-cursor-semantics.md)
+- [Memory Brain 总览](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/memory-brain-overview.md)
+- [Canonical Memory Store](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/canonical-memory-store.md)
+- [Memory Lifecycle Manager](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/memory-lifecycle-manager.md)
+- [Entity and Relationship Manager](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/entity-and-relationship-manager.md)
+- [Memory Versioning](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/memory-versioning.md)
+- [Forget Fence and Completion Contract](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/forget-fence-and-completion-contract.md)
+- [Canonical Commit Cursor Semantics](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/commit-cursor-semantics.md)
 
 本指南让职责边界和关键不变量更易理解；它不声称 Storage 原子操作或端到端 Forget 已经实现或验证。
