@@ -1,6 +1,6 @@
 # Complexity Reduction Analysis
 
-- Baseline: `main@b3c666e67982cb3d3374e759cfb6552c7765aacb`
+- Baseline: `main@28fb37e21fa4ba2b871f7816fe669128618c063e`
 - Status: evidence-backed hypotheses; no measured complexity reduction claimed
 
 ## 1. What complexity is essential
