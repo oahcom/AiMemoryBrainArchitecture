@@ -690,15 +690,6 @@ class HRCConformance(unittest.TestCase):
         self.assertEqual(validate_request_dispositions({"I":[],"D":[],"C":[req]},
                                                        {"I":[],"D":[],"C":[edge]}), VALID)
 
-def reject_duplicates(pairs):
-    out = {}
-    for k, v in pairs:
-        if k in out:
-            raise ValueError("duplicate JSON key: " + k)
-        out[k] = v
-    return out
-
-
     # JPF-18: the primary OwnerEntryRef must not be substituted with OwnerAdmissionRef.
     def test_JPF_18(self):
         p = participant(required=["C"])
@@ -713,5 +704,12 @@ def reject_duplicates(pairs):
         a["owner_admission_ref"] = "C/admit/other"
         self.assertEqual(validate_join({"C": [a]}, manifest([p])), INVALID)
 
+def reject_duplicates(pairs):
+    out = {}
+    for k, v in pairs:
+        if k in out:
+            raise ValueError("duplicate JSON key: " + k)
+        out[k] = v
+    return out
 if __name__ == "__main__":
     unittest.main(verbosity=2)
