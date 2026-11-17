@@ -32,7 +32,13 @@ Reasons:
 5. Independent reviewer clean-room/provenance requirements need operational detail.
 6. Nine attributable Owner reports are pending; the coordinator's role-lens assessment cannot replace them.
 
-## 4. Required closure sequence
+## 4. Additional GitHub and automation integration
+
+GitHub Issue [#24](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/24) tracks the requested extension. PR [#23](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/23) contains the governance review package and the proposed additions to AI-AUTO-001 and AI-PROMPT-STD-001. These additions remain PROPOSED until the A–I independent reviews and Project Governance Authority decision are complete.
+
+The default model is one scheduled task per active Owner, but no scheduled task has been created. Cadence, timezone, GitHub access, execution environment and notification policy are not yet configured. No automation creation or execution is claimed.
+
+## 5. Required closure sequence
 
 | Order | Owner | Required output | Gate |
 |---|---|---|---|
@@ -45,7 +51,7 @@ Reasons:
 | 7 | A | Reconcile all nine reports, preserve dissent, issue final integration recommendation | Integration report |
 | 8 | Project Governance Authority | Explicit approve/reject decision for exact document versions and effective date | Formal baseline gate |
 
-## 5. Prohibited status upgrades
+## 6. Prohibited status upgrades
 
 Until closure:
 - AI-STD-001, AI-PROC-001 and AI-TPL-001 remain PROPOSED.
@@ -54,7 +60,7 @@ Until closure:
 - Existing work is not retroactively certified.
 - No prior branches are merged by this decision.
 
-## 6. Final decision record fields (to be completed after review)
+## 7. Final decision record fields (to be completed after review)
 
 - A–I report paths and reviewed SHAs:
 - Finding disposition matrix:
