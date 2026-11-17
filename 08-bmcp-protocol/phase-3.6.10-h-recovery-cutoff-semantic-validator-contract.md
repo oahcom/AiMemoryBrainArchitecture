@@ -306,3 +306,14 @@ The run checked out these exact source blobs:
 The raw job log reports HRC-01..25, JPF-01..19, SCHEMA-01..12 and WIRE-01..10 individually as OK, followed by “Ran 66 tests” and “OK”. This is a verified pass of the checked-in Python candidate suite on that runner. It is NOT proof of production cryptographic canonicalization, I key/trust policy, two-language interoperability, live COC quorum enumeration, real I/D/C owner-ledger adapters, Storage JF-10 physical behavior or deployed transaction topology.
 
 The H semantic contract has since received documentation-only exact-pin/run-result updates. The tested schema and test source blobs above remain the exact CI inputs.
+
+
+### 11.10 First executed CI evidence — candidate suite only
+
+- Workflow run: [44040139351](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040139351)
+- Trigger commit: `d36874c2656b08d1d7e10c367f32660241645e6a`
+- Job: `semantic-and-wire-tests` / job ID `133892431245`
+- Result: **SUCCESS — 66 tests ran, OK**
+- Exact suite source pins: HRC/JPF `60a2f4db4bd12f2131ecd147db9bbe328da6db50`; Wire `1a4e754ba9bfa57eb973c6d39731e9f89443b323`; Schema Integrity `67aba74c120f2916d768e7b01c45408ee2624f3a`; RecoveryJoin schema `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+
+This is the first recorded CI execution of the current 66-method candidate inventory. It does not change the overall H freeze disposition: **BLOCKED / NOT INTEROPERABILITY-VERIFIED**. The run does not execute production adapters, validate live quorum prefix enumeration, verify I-approved signatures/key status, prove owner-ledger currentness CAS, exercise PostgreSQL same-GID recovery, or compare two independent language implementations. HRC-TEST-v1 remains test-only.
