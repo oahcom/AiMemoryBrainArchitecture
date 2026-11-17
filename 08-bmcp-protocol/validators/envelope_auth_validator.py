@@ -184,6 +184,13 @@ def authenticate_outer_envelope(
         unknown,
     )
 
+    # Do not reserve replay state for unauthenticated, contradictory or
+    # unverifiable messages. Replay reservation is the final auth-stage step.
+    if invalid:
+        return {"status": "INVALID", "errors": invalid, "unknown": unknown}
+    if unknown:
+        return {"status": "UNKNOWN", "errors": [], "unknown": unknown}
+
     replay_result: Optional[ReplayCheck] = None
     if checks.check_and_reserve_replay is None:
         unknown.append("durable replay/idempotency verifier not configured")
