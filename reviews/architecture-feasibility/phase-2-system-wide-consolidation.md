@@ -121,6 +121,10 @@ Fact/Claim ADR 仍为 ADR-BLOCKED。在 B 正式解决之前，任何共享 Sche
 
 The sequence is logically coherent in the current proposals, including the correction that post-commit ITerminalProof cannot be required by the commit that creates the Storage outcome. It is not yet a selected physical serialization topology or an end-to-end verified protocol.
 
+COC and JF-10 must remain separate in the system model. COC is a quorum-committed causal-order log for recovery cutoffs and participant manifests; it records owner evidence but cannot issue owner decisions. JF-10 is a separately gated I/Storage prepared-participant bridge using the exact same prepared GID/participant identity for resolution. Storage v3.2.3 explicitly says prior COC acceptance does not approve automatic COC↔JF-10 composition, and COC does not become the JF-10 coordinator. Issue #10 currently records Gate A PARTIAL PASS after five PostgreSQL 18.7 capability CI classes; Gate B persistent COC and Gate C deterministic fault-injection remain BLOCKED. The CI results do not identify a project-designated Canonical Authority deployment or close JF-10.
+
+COC 与 JF-10 必须在系统模型中保持分离。COC 是用于恢复截止点和 Participant Manifest 的 Quorum 因果顺序日志；它记录 Owner 证据，但不能签发 Owner 决议。JF-10 是单独设门的 I/Storage Prepared Participant 桥接协议，使用同一个精确 Prepared GID/Participant 身份进行解析。Storage v3.2.3 明确指出，既有 COC 接受不等于自动批准 COC↔JF-10 组合，COC 也不会成为 JF-10 Coordinator。Issue #10 当前记录 PostgreSQL 18.7 五类能力 CI 后 Gate A PARTIAL PASS；持久化 COC 的 Gate B 和确定性故障注入 Gate C 仍 BLOCKED。这些 CI 结果没有指定项目 Canonical Authority 的实际部署，也没有关闭 JF-10。
+
 当前提案的逻辑顺序基本自洽，尤其已经修正了不能要求 Storage 提交前先获得提交后 ITerminalProof 的循环依赖。但它仍不是已经选定的物理序列化拓扑，也不是经过端到端验证的协议。
 
 ### 3.2 Recall, Context and inference / 召回、上下文与推理
