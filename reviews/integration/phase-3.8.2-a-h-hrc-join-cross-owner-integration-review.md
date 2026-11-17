@@ -184,3 +184,43 @@ Storage 已明确 COC ParticipantManifest 与 I/D/C Request/Admission Ledger 的
 66/66 仅证明 Python 候选语义/结构测试通过，不证明生产密码学、跨语言 Canonical Bytes、真实 COC Quorum、Owner Ledger Adapter、C Provider Side Effect、JF-10 生产物理行为或 D/Storage 事务拓扑。
 
 最终裁决：**接受为逻辑一致的提案组合，且 H 候选测试通过；保留所有生产与物理实现阻塞项。Storage 拓扑 ADR 仍 BLOCKED，不冻结、不合并、不启用生产。**
+
+
+## 9. Exact-pin refresh after latest H CI and Storage JoinProof amendment
+
+This section supersedes earlier H/Storage pins in §§1–3 where they differ. It does not transfer any role simulation into an independent Owner signature.
+
+| Artifact | Branch | Current exact Blob / Run |
+|---|---|---|
+| H RecoveryJoin schema 1.0.0 | `session-h-bmcp-protocol` | `dd3234aa1c74caf6d0e335875cd96e0b2b64082f` |
+| H semantic validator contract | same H branch | `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80` |
+| HRC/JPF suite | same H branch | `60a2f4db4bd12f2131ecd147db9bbe328da6db50` |
+| Wire suite | same H branch | `1a4e754ba9bfa57eb973c6d39731e9f89443b323` |
+| Schema integrity suite | same H branch | `67aba74c120f2916d768e7b01c45408ee2624f3a` |
+| H freeze evidence delivery | same H branch | `b8a622cab01120941a8f6d98172c8bfacf6ed4aa` |
+| H CI run | GitHub Actions | [44040502709 — 66/66 PASS](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709), commit `1c6ddd301d538652ceea22ea665d50c5fad8178e`, job `133893645184` |
+| Storage bidirectional JoinProof | `session-storage-consistency-forget-atomicity-2026-11-16` | `364bf7e7833af3d97bc676f7f356e79251ea6cb4` |
+| Storage COC v3.2.2 companion | same Storage branch | `ce3c41adf826a622a3717eca481b5d53e6549196` |
+| Storage exact review / topology disposition | same Storage branch | `0fc74ef747b6e45f8a7d7fcbe8657b88ba67e82d` |
+| Storage topology ADR | same Storage branch | `080433f8e13a500522bc2754da64057edb0ae9d8` — ADR-BLOCKED |
+| I RecoveryJoin trust/currentness role review | `session-i-security-governance-2026-11-16` | `01d4514c1c0979ea878a89f36213a7db3c3c1003` |
+| C RecoveryJoin/provider-side-effect role review | `session-c-agent-integration-2026-11-16` | `a7b57bd5531222559666f0f1d9df59a259cde61a` |
+
+### 9.1 Updated integration assessment
+
+- H's 66/66 run is verified from the raw GitHub Actions job log: 66 tests ran and the job ended OK. It is a Python reference-candidate pass, not production wire/crypto or authority-adapter conformance.
+- Storage's current JoinProof artifact preserves the acyclic digest chain and both directional relations; the latest Storage role review remains a delegated role simulation and must be re-reviewed by actual Owners against Blob 364bf7e.
+- I's exact role review accepts the proposed typed envelope with amendments but keeps I-RJ-01..05 open, especially signature/key status, owner-signed empty/out-of-scope proofs, currentness CAS and exact JF-10 same-tuple verification.
+- C's exact role review preserves the C-owned ProviderIdempotencyKey and actual provider outcome boundary; it does not approve provider runtime behavior.
+- Storage physical topology remains ADR-BLOCKED. Option A is conditional on proof of the real shared Serializable transaction domain; Option B requires a named durable linearizable coordinator; Option C remains rejected.
+
+### 9.2 Remaining blockers
+
+1. Actual independent H/I/D/C/Storage Owner decisions against the current exact Blobs.
+2. Production H wire-to-normalized adapters, approved canonical bytes/signature/key-status profile and at least two independent implementations.
+3. Live quorum COC prefix enumeration and durable Batch → Manifest → JoinProof commit/readback.
+4. Real I/D/C owner ledger enumeration, signed evidence dereference and owner-local currentness CAS.
+5. JF-10 same PreparedParticipantRef/GID/DB-incarnation physical recovery and terminal pairing.
+6. Selected physical topology, D/Storage linearization, read-path enforcement, failover/restore and deterministic race/crash campaign.
+
+**A disposition remains:** ACCEPT AS A COHERENT PROPOSED COMPOSITION WITH BLOCKING AMENDMENTS. No schema freeze, physical conformance PASS, merge, production activation, Global Forget completion or physical-erasure claim.
