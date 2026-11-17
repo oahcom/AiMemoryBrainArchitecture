@@ -2,15 +2,16 @@
 
 - 权威：A 集成评估；不替代任何 Owner 权威。
 - 日期：2026-11-17
-- 本补充锁定的 Main 当前 HEAD：`901e38ba7b45ed1822eaefddc2da8d765cf8985c`
-- 父提交：`ca69d50d1fc6c19a930128de700b0f2328bf32fb`
+- 本补充锁定的 Main 当前 HEAD：`b3c666e67982cb3d3374e759cfb6552c7765aacb`
+- 内容 Tree：`7096e0bc3fdc9a390fccff388f9261522fa424f2`（与 `901e38...` 时的 Tree 完全相同；后续添加/删除清理提交改变了历史链，但恢复了相同文件树）。
+- 前一基线父提交：`ca69d50d1fc6c19a930128de700b0f2328bf32fb`
 - 变更：`revert(domain): remove research-only bilingual audit from main`
 - A 审查分支：`review/session-4-a-final-architecture-authority-current-2026-11-17`
 - 替代范围：FINAL-A-004 仅在当前 Main 时效性和 B 审计文件可用性方面取代 FINAL-A-003；不抹除此前发现或 Owner 决策。
 
 ## 1. 基线更正
 
-此前 FINAL-A-003 的基线 `ca69d50d1fc6c19a930128de700b0f2328bf32fb` 已不再是当前版本。Main 当前指向 `901e38ba7b45ed1822eaefddc2da8d765cf8985c`。
+此前 FINAL-A-003 的基线 `ca69d50d1fc6c19a930128de700b0f2328bf32fb` 已不再是当前版本。Main 当前指向 `b3c666e67982cb3d3374e759cfb6552c7765aacb`。
 
 最新提交恰好删除以下文件：
 `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md`
