@@ -26,7 +26,7 @@ The previous D `206ead...`, E `bad04d...`, and Storage `1ad895...` pins are supe
 2. Register-before-work remains mandatory: D durable RegistrationReceipt precedes queue insertion, lease, protected source dereference, execution, retry/replay or publication.
 3. Complete dependency registration is an immutable complete-set operation. Partial sets never produce a dependency-complete receipt and cannot publish.
 4. Retry preserves ProducerWorkItemId and request digest; AttemptId/LeaseId are attempt-scoped and fenced. Changed logical input or compiler configuration requires a new DerivationRun/input identity and fresh gates.
-5. The final visibility boundary is conjunctive: current D publication participant/fence AND I sequencer consumption proof (`CommitAuthorizationReceipt` / `ICommitAuthorizationProof`), not post-commit `ITerminalProof` AND exact Storage participant/outcome. No detached reusable token authorizes a later write.
+5. The final visibility boundary is conjunctive: current D publication participant/fence, the pre-commit I sequencer consumption proof (`CommitAuthorizationReceipt` / `ICommitAuthorizationProof`), and the exact durable Storage participant. Post-commit `ITerminalProof` is not a precondition to visibility. No detached reusable token authorizes a later write.
 6. Crash-safe ordering is **Storage hidden durable participant → D PublicationParticipant admission → I single-use receipt consumption → Storage final visibility commit → D/I independent closeout**.
 7. UNKNOWN/IN_DOUBT remains private and barrier-open. Missing rows, timeout, lease expiry, process death, age, stale replicas, queue deletion and lost ACK never imply abort or success.
 8. D PublicationParticipantRef, I CommitAuthorizationReceipt, StorageVisibilityParticipantRef, C ParticipantIntentRef and Storage PreparedParticipantRef/GID/XID are distinct nominal types and idempotency scopes.
@@ -94,7 +94,7 @@ D terminalization accepts only authoritative Storage COMMITTED_VISIBLE or NO_PUB
 - `sequencer_position`, `consumed_at`, `issued_at`, `accept_before`
 - `signature_profile_id`, `signature`
 
-The logical receipt is the signed, single-use sequencer result. If the implementation separates an authorization request/token from the consumption result, those MUST be distinct nominal types; do not put a caller-supplied decision into a signed bearer token. I consumes the authorization exactly once in its PolicyDomain sequencer. Revocation-first yields REVOCATION_WON. COMMIT_WON creates an unresolved I participant and holds subsequent applicable revocation until the same Storage terminal outcome. UNKNOWN holds. `accept_before` constrains first consumption only; it cannot expire or release an already-consumed COMMIT_WON participant. A consumed receipt is not a bearer token for an independent Storage write.
+The logical receipt is the signed, single-use sequencer result and is the pre-commit ICommitAuthorizationProof. `ITerminalProof` is a separate post-commit closeout proof. If the implementation separates an authorization request/token from the consumption result, those MUST be distinct nominal types; do not put a caller-supplied decision into a signed bearer token. I consumes the authorization exactly once in its PolicyDomain sequencer. Revocation-first yields REVOCATION_WON. COMMIT_WON creates an unresolved I participant and holds subsequent applicable revocation until the same Storage terminal outcome. UNKNOWN holds. `accept_before` constrains first consumption only; it cannot expire or release an already-consumed COMMIT_WON participant. A consumed receipt is not a bearer token for an independent Storage write.
 
 `ITerminalProof` binds the receipt, both participant refs, tuple digest and exact Storage outcome proof. I closes only after validating COMMITTED_VISIBLE or authoritative NO_PUBLICATION. Issuer/key status, policy version, audience, replay and anti-rollback rules remain I/H owner decisions and are not silently decided here.
 
@@ -106,7 +106,7 @@ The logical receipt is the signed, single-use sequencer result. If the implement
 - `outcome`: COMMITTED_VISIBLE | NO_PUBLICATION | UNKNOWN
 - `visibility_transaction_ref`, `visibility_pointer_ref` (required only for COMMITTED_VISIBLE)
 - exact D current-participant/fence proof reference
-- exact I sequencer consumption proof (`CommitAuthorizationReceipt` / `ICommitAuthorizationProof`), not post-commit `ITerminalProof` reference
+- exact pre-commit ICommitAuthorizationProofRef (the consumed CommitAuthorizationReceipt; distinct from post-commit ITerminalProof)
 - `outbox_event_ref`, `committed_at`, `outcome_digest`
 
 The visibility linearization point is the durable transaction that validates the exact D participant/fence proof and ICommitAuthorizationProof, then changes the authoritative visibility pointer/outcome atomically. NO_PUBLICATION requires positive authoritative proof that no visibility pointer was installed and no delayed publisher/outbox/retry can later install it. UNKNOWN has no terminal semantics and leaves the artifact private.
