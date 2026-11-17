@@ -12,13 +12,13 @@
 
 ## 1. Executive disposition / 总体结论
 
-**PR #69 is not implementation-ready and is not merge-ready.** The research package contains useful and mostly cautious separation of Agent, Model, Provider, Tool, Request/Attempt, Brain commit, and G Applied semantics. However, the current-source evidence is stale in important places, the H Applied Delivery Evidence contract is not implemented/frozen, and C integration tests/benchmarks remain unrun.
+**PR #69 is not implementation-ready and is not merge-ready.** The research package contains useful and mostly cautious separation of Agent, Model, Provider, Tool, Request/Attempt, Brain commit, and G Applied semantics. However, the current-source evidence is stale in important places, the H Applied Delivery Evidence 1.0.0 test candidate now exists and passes its bounded CI, but exact C/H field mapping remains unaccepted/unverified; C end-to-end integration tests/benchmarks remain unrun.
 
 Disposition:
 - C0 Baseline: **PARTIAL** — refreshed source pins; PR branch still diverges from current main.
 - C1 Boundary: **CANDIDATE** — no cross-owner architecture approval inferred.
 - C2 Inference: **CANDIDATE / OPEN** — B/D/E/I typed semantics and trust dependencies remain.
-- C3 Provider Outcome: **BLOCKED** — H Applied Delivery Evidence successor mapping is not implemented; C/H/I/Storage binding is not frozen.
+- C3 Provider Outcome: **BLOCKED** — H 1.0.0 schema/validator candidate exists (11/11 CI), but C/H COutcomeRecord/final-boundary mapping is not accepted; C/H/I/Storage binding is not frozen.
 - C4 Telemetry/Failure: **RESEARCHED / OPEN** — I privacy/retention approval and executable redaction evidence remain.
 - C5 Cross-owner: **BLOCKED / PARTIAL** — exact H/G delta creates an explicit missing wire-mapping gate; Storage and trust mismatches remain.
 - C6 Validation: **PLAN READY / NOT RUN** — no C end-to-end tests or benchmarks are claimed.
@@ -44,6 +44,11 @@ No Provider/Agent framework selection, schema freeze, production activation, Bra
 | Additions / deletions | 1,247 / 0 |
 | PR reviews / inline comments / conversation comments | none returned at review time |
 | C validation scenarios | V01–V22 defined; not executed |
+| C Owner branch restored | `88992da...`; 136 blobs |
+| C Provider Outcome candidate CI | run `44129914790`; 19 tests, 0 failures |
+| H Owner branch restored | `4e65a2...`; 215 blobs |
+| H Applied Delivery Evidence 1.0.0 CI | run `44130722532`; 11 tests, 0 failures |
+| C/H integration mapping tests | NOT RUN / NOT IMPLEMENTED |
 | C Provider/Tool/Brain integration tests | NOT RUN |
 | C benchmarks | NOT RUN |
 
@@ -71,13 +76,13 @@ H's latest commit has parent `0d363244...` and removes the prior Unified 1.2.15 
 
 **Remediation:** C baseline and matrix now pin the current G/H heads and explicitly label H 1.2.15/CI as historical evidence. C must not recreate or edit H-owned schema/validator files.
 
-### CR-003 — H Applied Delivery Evidence is a separate, unimplemented message family [Cross-owner, BLOCKING]
+### CR-003 — H Applied Delivery Evidence is a separate message family; candidate implemented, C/H mapping still open [Cross-owner, BLOCKING]
 
 H Phase 3.8.23 (EN Blob `be308261c3e000e712a3cdbd3dbf60507156127b`; zh-CN Blob `641abd9b5a4ed271c3c4b561747c99d7cde79463`) explicitly distinguishes:
 - Unified 1.2.15 `C_PROVIDER_OUTCOME_RECORDED` Gateway Attestation; and
 - Adapter/Runtime Applied Delivery Evidence.
 
-H states that the existing P0 allowlist/schema/validator must not be widened in place. H accepts the semantic identity tuples with enumerated exceptions, but requires a separately versioned `bmcp.applied-delivery-evidence` successor schema and validator. Those artifacts are **NOT YET IMPLEMENTED / NOT VERIFIED**; wire mapping is **NOT FROZEN**.
+H states that the existing P0 allowlist/schema/validator must not be widened in place. H Phase 3.8.24 now supplies a separate `bmcp.applied-delivery-evidence` 1.0.0 schema (Blob `2ce8776...`), validator (Blob `2f6de24...`) and tests (Blob `bb2bb6c...`). Exact-head GitHub Actions run `44130722532` passed 11/11 tests. The artifact is explicitly a test/conformance candidate, not production crypto or durable replay. Wire mapping remains **NOT FROZEN**.
 
 **Required closure:**
 1. H publishes the exact successor schema, validator, P0 vectors, and CI.
@@ -160,3 +165,27 @@ No H/D/G/I/Storage authoritative contract was modified. No C executable tests or
 - H historical 1.2.15 evidence commit: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/0d36324457e39bd50ad56ae902d477c4ea765b61
 - H Phase 3.8.23 mapping decision: https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-h-bmcp-protocol/08-bmcp-protocol/phase-3.8.23-h-exact-review-g-applied-delivery-evidence-mapping.md
 - G Phase 3.8.22 Applied Persistence contract: https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-g-memory-context/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md
+
+
+## 7. Post-restoration exact C/H candidate review / 恢复后的 C/H 候选精确审查
+
+### Owner branch restoration
+A review PR #91 reported that C/H Owner branches had lost large portions of their trees. Subsequent exact branch reads show restoration commits:
+- C `session-c-agent-integration-2026-11-16` HEAD `88992da30331121b81cf2773acab11d921daf281`, 136 blobs; Provider Outcome CI run `44129914790` passed 19/19.
+- H `session-h-bmcp-protocol` HEAD `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`, 215 blobs; Applied Delivery Evidence CI run `44130722532` passed 11/11 and Recovery Cutoff workflow also succeeded.
+- PR #69 remains on its distinct research branch HEAD `1a1d6f2...`; the restored C Owner branch is not automatically incorporated into PR #69 or PR #92.
+
+### CR-009 — C/H 1.0.0 mapping is not executable end-to-end [Cross-owner, BLOCKING]
+H 1.0.0 schema correctly exposes all seven `HDeliveryBindingIdentity` fields and seven `HObservationRecordIdentity` fields, plus `evidence_kind`. It also exposes C linkage fields `c_submit_outcome_ref`, `c_outcome_record_ref`, `c_outcome_record_sequence`, and `c_outcome_payload_digest`. CSubmitOutcome 1.0.1 defines `COutcomeRecordIdentity = (issuer_authority_ref, sequence_namespace_ref, record_ref, record_sequence)` and includes `FinalRequestBoundaryRef`.
+
+The H schema has no first-class C `issuer_authority_ref` or C `sequence_namespace_ref` fields. H documentation does not specify whether `c_submit_outcome_ref` resolves an immutable C record containing these omitted identity components, nor does it normatively define equality between duplicated H C fields and the resolved C record. `final_request_boundary_id` must equal the exact C `FinalRequestBoundaryRef`; the H validator only invokes injected `verify_c_final_boundary`, while all current test callbacks return True. No mismatch fixture tests boundary substitution, wrong C issuer/namespace, record sequence mismatch or payload digest mismatch.
+
+**Disposition:** C/H mapping **NOT ACCEPTED / NOT VERIFIED**. H must define exact reference resolution or add the missing C identity fields; C/H must add real cross-schema positive and negative vectors that prove exact equality. H's current test run remains bounded reference-validator evidence only.
+
+### CR-010 — C CI trigger omits the 1.0.1 schema [C-owned, MEDIUM]
+The restored C workflow Blob `a1f0b8f...` watches `07-agent-integration/schemas/c-submit-outcome-1.0.0.schema.json` but not `c-submit-outcome-1.0.1.schema.json`, even though its test suite validates 1.0.1. A change limited to the 1.0.1 schema therefore does not match the schema path filter and may not trigger this workflow.
+
+**Required fix:** include the 1.0.1 schema path and verify a schema-only change triggers the workflow. This is a C-owned workflow defect, not a reason to claim the current 19/19 run is invalid; it limits future change detection.
+
+### Updated disposition
+H successor schema/validator candidate: **IMPLEMENTED / CANDIDATE CI PASS 11/11**. C Provider Outcome candidate CI: **PASS 19/19**. C/H exact field mapping: **NOT ACCEPTED / NOT VERIFIED**. Production cryptographic trust, durable H replay, G Applied persistence, Storage successor binding, D/I Forget ordering and V01–V22 end-to-end tests remain open.
