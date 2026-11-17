@@ -1,189 +1,157 @@
-# Phase 3.8.8 — H Exact C Provider Outcome Mapping for Unified Schema 1.2.14
-# Phase 3.8.8 — H Unified Schema 1.2.13 的 C Provider Outcome 精确映射
+# Phase 3.8.10 — H Exact C Provider Outcome Mapping: Unified 1.2.14 × CSubmitOutcome 1.0.1
+# Phase 3.8.10 — H 精确 C Provider Outcome 映射：Unified 1.2.14 × CSubmitOutcome 1.0.1
 
 - Owner perspective: H — BMCP Protocol / Schema and Interoperability
-- Status: **SUCCESSOR MAPPING CANDIDATE / DELEGATED H-ROLE REVIEW / NOT FROZEN**
+- Status: **ACCEPT AS L1/L2 MAPPING CANDIDATE WITH ENUMERATED L3 / TRUST / STORAGE BLOCKERS; NOT FROZEN**
 - Project phase: **ARCHITECTURE DESIGN**
-- H unified schema 1.2.13: `08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.13.schema.json`, Blob `fee452efb99ab4fe0ceccb347c46eeef1521bd28`
-- H predecessor schema 1.2.12: Blob `9aa366d857d0229687df7e44e8e70d2097a99237` (historical; C outcome branch requires revision)
-- CSubmitOutcome schema 1.0.1: Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`
-- C Phase 3.8.9 contract (1.0.0 historical semantic source): Blob `2ecdf44cae1bf71e9611dd5367c8f7bcf25dd7ac`\n- C Phase 3.11.1 sequence namespace amendment: Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`\n- I Phase 3.8.8 sequence namespace review: Blob `0d78e5b2bfcf66cae6b757314cead84b9c942601`
-- C Phase 3.8.11 exact compatibility review of H 1.2.13 × C 1.0.1: Blob `3ca46be90c98e47b24dd7914573b9068d0e15abd`
-- C Phase 3.8.6 semantic amendment: Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`
-- C Phase 3.8.8 signature projection: Blob `06d9264124d85896ccd44ef7789d9af245d8255b`
-- I C-crypto candidate addendum: Blob `1bcddbaaa4a9ca730d492a6554941becac305668`\n- H validator core: Blob `910e2a8f0b22adb4a192b3dbb7483e52a881e993`\n- H validator tests: Blob `17a1bb69ea3aab39182ae9761e400f0ebfc02fbc`
-- Provenance: delegated H-role review in the coordinating session; **not an independent human H Owner signature**.
+- Exact H Unified schema 1.2.14 / wire 1.3.0: Blob 09fcd1fa29fe24255fbd87cae79dafb406594a59
+- H RecoveryJoin schema 1.0.2: Blob 4b664e3bce465499bcdfd93796349a4ba7074002
+- H RecoveryCutoff schema 1.0.5: Blob 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7
+- Exact CSubmitOutcome schema 1.0.1: Blob a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda
+- C Phase 3.11.1 sequence namespace amendment: Blob 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb
+- C key-status event schema 1.0.0: Blob 908b293eba337e9fa75864cea3704e28a1a8d82e
+- C key-status lifecycle contract: Blob 9339b168165a7a3dd34def5236ad61cfd3163418
+- I sequence namespace review: Blob 0d78e5b2bfcf66cae6b757314cead84b9c942601
+- C profile identifier decision: Blob 5067dadb9c646a054d78f03c56e635facc36311a
+- I C profile naming clarification: Blob 1e86a1349d371a1cdb4a56d69f783e0f316c7203
+- H validator core: Blob 910e2a8f0b22adb4a192b3dbb7483e52a881e993
+- H validator test source: Blob 9ceab387e114f9a28f9dfc12602e57f3ec5a3f43
+- Exact H conformance run: 44067402639, tested commit 2068dd4f89245f9a4913ac069a169a2bed5471be, job 133984532592
+- Provenance: delegated H-role review; **not an independent human H Owner signature**.
 
-## 1. Exact version and supersession / 精确版本与替代关系
+## 1. Exact version / 精确版本
 
-This successor mapping binds:
-- `schema_id = bmcp.coc-jf10-unified`;
-- wire `schema_version = 1.3.0`;
-- exact artifact `schema_artifact_revision = 1.2.13`;
-- `message_type = C_PROVIDER_OUTCOME_RECORDED`.
+The current candidate pair is:
+- H Unified schema artifact revision 1.2.14, wire schema_version 1.3.0;
+- CSubmitOutcome schema/version/artifact revision 1.0.1.
 
-H 1.2.13 supersedes the H 1.2.12 C Provider Outcome branch only for this successor candidate. It does not silently rebind RecoveryCutoff 1.0.5 or RecoveryJoin 1.0.2, and it does not claim those companion schemas are changed.
+The exact H schema URI is https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.14. The exact C object schema URI is urn:aimba:schema:c-submit-outcome:1.0.1. The H validator checks schema_id, loaded schema URI, artifact revision, wire version, C object schema identity/version/revision and message type. The deployment loader must additionally pin the exact immutable schema Blob/content hash; $id is not a content-integrity proof.
 
-本后继映射绑定：
-- `schema_id = bmcp.coc-jf10-unified`；
-- Wire `schema_version = 1.3.0`；
-- 精确工件 `schema_artifact_revision = 1.2.13`；
-- `message_type = C_PROVIDER_OUTCOME_RECORDED`。
+当前候选版本对为 H Unified 1.2.14 / Wire 1.3.0 与 CSubmitOutcome 1.0.1。H/C Schema URI、Artifact Revision、Wire Version、Object Identity/Version/Revision 和 Message Type 均需精确匹配。H Validator 检查 URI/ID；部署 Loader 还必须绑定不可变 Blob/内容哈希，$id 本身不是内容完整性证明。
 
-H 1.2.13 仅在本后继候选范围内替代 H 1.2.12 的 C Provider Outcome 分支；不隐式改绑 RecoveryCutoff 1.0.5 或 RecoveryJoin 1.0.2，也不声称这两个伴随 Schema 已变更。
+H 1.2.14 changes the prior 1.2.13 artifact metadata description and adds the required D-only owner high-water field described in §6. The C Provider Outcome branch retains the corrected 1.2.13 semantics. No C object schema change is implied.
 
-## 2. Schema 1.2.13 corrections / Schema 1.2.13 修正
+## 2. Exact duplicated field mapping / 重复字段精确映射
 
-Two corrections are normative for this candidate:
+| H wire field | C immutable object field | Rule |
+|---|---|---|
+| c_submit_outcome_ref | record_ref | Exact immutable object identity |
+| c_submit_outcome_digest | payload_digest | Exact equality and recomputation under C profile |
+| provider_outcome | Outcome | Exact enum equality |
+| provider_ref | ProviderRef | Exact typed identity |
+| provider_adapter_ref | AdapterRef | Exact typed identity |
+| provider_idempotency_key_ref | IdempotencyKeyRef | Key only; namespace remains C-object-only |
+| final_request_boundary_id | FinalRequestBoundaryRef | Exact boundary |
+| request_digest | RequestDigest | Exact digest |
+| transaction_ref | CausalOrderTransactionRef | Exact transaction |
+| provider_outcome_evidence_ref | OutcomeEvidenceRef | Exact evidence reference |
+| provider_request_ref | ProviderRequestRef | Exact when applicable |
+| provider_receipt_ref | ProviderReceiptRef | Exact when applicable |
+| provider_lookup_proof_ref | ProviderLookupProofRef | Exact when applicable |
+| provider_no_handoff_proof_ref | ProviderNoHandoffProofRef | Exact when present/required |
+| not_invoked_proof_ref | NotInvokedProofRef | Exact for NOT_INVOKED |
+| unknown_reason_ref | UnknownReasonRef | Exact for UNKNOWN / IN_DOUBT |
+| owner_signature_ref | OwnerSignatureRef | Exact C signature evidence reference |
+| owner_admission_ref/digest | CAdmissionRef/CAdmissionDigest | Exact C admission |
+| owner_ledger_ref/version | COwnerLedgerRef/COwnerLedgerVersion | C ledger, not Storage ledger |
+| owner_local_sequence/high-water/root | COwnerLocalSequence/COwnerHighWater/COwnerLedgerRoot | Exact C ledger tuple |
+| coc_participant_intent_ref | COCParticipantIntentRef | Single authoritative nullable COC intent |
+| participant_reservation_ref | COCParticipantReservationRef | Exact reservation |
+| coc_absence_reason | COCAbsenceReason | Exact when intent/reservation are absent |
 
-1. For `HANDOFF_REJECTED`, the structural schema requires `provider_request_ref` and `provider_outcome_evidence_ref`; it does **not** unconditionally require `provider_no_handoff_proof_ref`.
-2. The ambiguous optional `participant_intent_ref` property is removed from the C outcome branch. `coc_participant_intent_ref` is the single authoritative nullable COC intent field; it is paired with `participant_reservation_ref` and `coc_absence_reason`.
+All duplicated values are exact equality assertions. A mismatch is INVALID; an unavailable object, ledger, verifier or currentness source is UNKNOWN. H 1.2.14 does not contain the legacy participant_intent_ref alias. It must not be accepted or normalized.
 
-The H schema retains `provider_no_handoff_proof_ref` as a field. The semantic validator requires it when C's dereferenced `SideEffectStatus=PROVEN_NONE` is used to establish no handoff; it does not require it for `POSSIBLE_OR_UNKNOWN` or `PROVEN_OCCURRED`.
+## 3. Mandatory C-object dereference / 强制 C 对象解引用
 
-本候选的两个规范修正：
-1. HANDOFF_REJECTED 结构上要求 `provider_request_ref` 和 `provider_outcome_evidence_ref`，不再无条件要求 `provider_no_handoff_proof_ref`；
-2. 从 C Outcome 分支删除语义重复且未定义的可选 `participant_intent_ref`，只保留权威 nullable 字段 `coc_participant_intent_ref`，并与 Reservation/AbsenceReason 成对校验。
+The following are mandatory C object fields even when not inlined in H:
+- CGateRef/CGateGeneration/CGateCommitRef/CGateCommitDigest;
+- ProviderAttemptRef/ProviderAttemptGeneration;
+- ProviderAccountRef/AdapterBuildRef/EndpointRef/RegionRef/ApiOperation;
+- IdempotencyNamespaceRef/ProviderCapabilityRecordRef/ProviderCapabilityDigest;
+- FinalRequestBoundaryType/RequestContentType/RequestMethod;
+- SideEffectStatus/OutcomeObservedAt/OutcomeEvidenceDigest/ProviderEvidenceIssuerRef/ProviderEvidenceType;
+- sequence_namespace_ref;
+- prior/supersession/reconciliation observation links.
 
-Schema 保留 `provider_no_handoff_proof_ref` 字段。只有当 C 解引用对象的 SideEffectStatus=PROVEN_NONE 并据此证明无交接时，语义验证器才要求该证明；POSSIBLE_OR_UNKNOWN 或 PROVEN_OCCURRED 不得被强制转为无交接。
+CSubmitOutcome 1.0.1 sequence_namespace_ref must equal the authenticated CKeyStatusEvent sequence namespace and the namespace of the authoritative C signing sequencer. H's key-status callback must prove record_sequence and event_sequence are allocated in that same durable monotonic namespace. A proven mismatch is INVALID; unavailable sequencer/key-status/anti-rollback evidence is UNKNOWN.
 
-## 3. Exact object/wire mapping / 对象与 Wire 精确映射
+C ProviderAttempt is not Storage prepare_attempt; C OwnerLedger is not Storage participant_ledger. COC, I, D and Storage proof references remain independent typed authorities.
 
-The equality mapping from H Phase 3.8.7 remains applicable, with the following canonical fields:
-- `c_submit_outcome_ref` ↔ C `record_ref`;
-- `c_submit_outcome_digest` ↔ C `payload_digest`;
-- `provider_outcome` ↔ C `Outcome`;
-- `provider_ref` ↔ C `ProviderRef`;
-- `provider_adapter_ref` ↔ C `AdapterRef`;
-- `provider_idempotency_key_ref` ↔ C `IdempotencyKeyRef`;
-- `final_request_boundary_id` ↔ C `FinalRequestBoundaryRef`;
-- `request_digest` ↔ C `RequestDigest`;
-- `transaction_ref` ↔ C `CausalOrderTransactionRef`;
-- `provider_outcome_evidence_ref` ↔ C `OutcomeEvidenceRef`;
-- `owner_admission_ref/digest` ↔ C `CAdmissionRef/CAdmissionDigest`;
-- `owner_ledger_ref/version`, `owner_local_sequence`, `owner_high_water`, `owner_ledger_root` ↔ C `COwnerLedgerRef/Version/LocalSequence/HighWater/LedgerRoot`;
-- `coc_participant_intent_ref` ↔ C `COCParticipantIntentRef`;
-- `participant_reservation_ref` ↔ C `COCParticipantReservationRef`.
+## 4. Outcome semantic predicates / Outcome 语义谓词
 
-All duplicated values are exact equality assertions. A mismatch is INVALID; an unavailable object, ledger, verifier or currentness source is UNKNOWN. The C object's remaining tuple members (CGateRef/Generation/Commit, ProviderAttemptRef/Generation, ProviderAccountRef, AdapterBuildRef, EndpointRef, RegionRef, ApiOperation, IdempotencyNamespaceRef, ProviderCapabilityRecord/Digest, FinalRequestBoundaryType, request method/content type, SideEffectStatus and evidence digest/issuer/type) remain mandatory C-object dereference fields. CSubmitOutcome 1.0.1 additionally requires `sequence_namespace_ref`; it is not a BMCP duplicate field and MUST be verified against the authenticated CKeyStatusEvent namespace and the same durable C signing sequencer.
-
-H Phase 3.8.7 的字段映射继续适用，规范字段如上。所有重复字段均为严格相等断言；不匹配为 INVALID；对象、Ledger、Verifier 或当前性来源不可用为 UNKNOWN。C 对象中的剩余 Gate/ProviderAttempt/Account/Endpoint/Region/API/Idempotency Namespace/Capability/Request Type/SideEffectStatus/Evidence Digest 等字段仍必须解引用，不能因 H 未内联而视为可选。
-
-## 4. Digest and signature domains / 摘要与签名域
-
-- H `c_submit_outcome_digest` equals C object `payload_digest` and is recomputed under the exact I-registered C profile.
-- H common-envelope `payload_digest` protects the BMCP envelope and is a separate digest domain.
-- C `OutcomeEvidenceDigest` binds the provider evidence and is a third separate digest domain.
-- C object's signature and the BMCP envelope signature are separately validated protected objects; neither signature is inferred from the other.
-- `AIMBA-C-CRYPTO-1.0` remains candidate/unregistered until I issues a formal profile registration and trust/key lifecycle decision.
-
-H `c_submit_outcome_digest` 等于 C 对象 `payload_digest`，并须在 I 注册 C 配置后按该配置重新计算。H 信封 `payload_digest` 与 C `OutcomeEvidenceDigest` 是另外两个独立摘要域。C 对象签名与 BMCP 信封签名必须分别验证，不得相互推断。AIMBA-C-CRYPTO-1.0 仍是未注册候选配置。
-
-## 5. Outcome semantic rules / Outcome 语义规则
-
-| C Outcome | Required C semantic state | H structural fields | H semantic result |
+| C Outcome | C SideEffectStatus | Required evidence | H semantic result |
 |---|---|---|---|
-| HANDOFF_ACCEPTED | `SideEffectStatus=PROVEN_OCCURRED`; request + receipt + outcome evidence; COC reservation/intent | provider request, receipt, outcome evidence, participant reservation | VALID only after C object/provider evidence and all authority joins verify |
-| HANDOFF_REJECTED + PROVEN_NONE | provider request + outcome evidence + authoritative no-handoff proof | provider request, outcome evidence, provider no-handoff proof | May prove no side effect after proof verification |
-| HANDOFF_REJECTED + POSSIBLE_OR_UNKNOWN | provider request + outcome evidence; no fabricated no-handoff proof | provider request, outcome evidence; no-handoff proof not required | Nonterminal / blocking; never safe retry-as-new |
-| HANDOFF_REJECTED + PROVEN_OCCURRED | provider request + outcome evidence | provider request, outcome evidence | Reconcile observed side effect; never classify as no handoff |
-| NOT_INVOKED | `SideEffectStatus=PROVEN_NONE`; no-handoff + not-invoked proofs | not-invoked proof; no provider receipt | VALID only after same-serialization-authority no-invocation proof |
-| UNKNOWN / IN_DOUBT | `SideEffectStatus=POSSIBLE_OR_UNKNOWN`; unknown reason | unknown reason | UNKNOWN / IN_DOUBT; preserve original attempt/key/request tuple |
+| HANDOFF_ACCEPTED | PROVEN_OCCURRED | provider request + receipt + outcome evidence + COC reservation/intent | VALID only after C/provider evidence and all owner joins verify |
+| HANDOFF_REJECTED | PROVEN_NONE | provider request + outcome evidence + ProviderNoHandoffProofRef | No-side-effect only after authoritative proof verifies |
+| HANDOFF_REJECTED | POSSIBLE_OR_UNKNOWN | provider request + outcome evidence; no fabricated no-handoff proof | Nonterminal/blocking; never safe retry-as-new |
+| HANDOFF_REJECTED | PROVEN_OCCURRED | provider request + outcome evidence | Preserve occurred side effect and reconcile |
+| NOT_INVOKED | PROVEN_NONE | ProviderNoHandoffProofRef + NotInvokedProofRef; no provider receipt | Requires same durable gate serialization authority proof |
+| UNKNOWN / IN_DOUBT | POSSIBLE_OR_UNKNOWN | unknown reason | Preserve original attempt/key/request tuple; no retry-as-new |
 
-H semantic validation must not infer C side-effect status from the H enum. It must dereference the C object and verify the evidence. A provider rejection is not automatically a no-handoff result.
+A provider rejection label does not prove no handoff. HANDOFF_REJECTED + PROVEN_NONE requires ProviderNoHandoffProofRef only; it does not require NotInvokedProofRef. NOT_INVOKED requires both proofs. H must read C SideEffectStatus from the immutable C object and never infer it from the H enum.
 
-H 语义验证器不得从 H Outcome 枚举推断 C SideEffectStatus，必须解引用 C 对象并验证证据。Provider 拒绝不自动等于没有交接。
+Provider 拒绝标签不证明没有交接。HANDOFF_REJECTED + PROVEN_NONE 只要求 ProviderNoHandoffProofRef，不要求 NotInvokedProofRef；NOT_INVOKED 才要求两种 Proof。H 必须读取不可变 C 对象中的 SideEffectStatus，不得从 H 枚举推断。
 
-## 6. Nominal type and authority separation / 名义类型与权威隔离
+## 5. Digest and profile separation / 摘要与 Profile 隔离
 
-- C `ProviderAttemptRef/Generation` is distinct from Storage `prepare_attempt_ref/generation`.
-- C `COwnerLedgerRef/Version` is distinct from Storage `participant_ledger_ref/version`.
-- C Provider Idempotency Namespace and Key are separate; H inline key reference does not replace the namespace.
-- H `i_terminal_decision_ref`, `d_clearance_ref`, `storage_resolution_proof_ref`, and COC commit/record proofs are independent owner evidence, not C-owned outcome facts.
-- C owns provider truth; I owns authorization/revocation and C profile governance; D owns ForgetFence/lineage clearance; Storage owns prepared participant and same-GID resolution; H owns wire and semantic mapping.
+- C c_submit_outcome_digest equals C object payload_digest.
+- BMCP envelope payload_digest is a separate digest domain.
+- C OutcomeEvidenceDigest is a third separate digest domain.
+- C object signature and BMCP envelope signature are separately verified.
+- C profile candidate is AIMBA-C-CRYPTO-1.0; I profile is AIMBA-I-CRYPTO-1.0.
+- C has not adopted AIMBA-C-OUTCOME-CRYPTO-1.0; it is a non-normative example only.
+- I may govern trust registration/status within I's authority but cannot rename C's profile.
+- Both profiles remain non-production until their trust/key lifecycle and anti-rollback requirements are approved and deployed.
 
-## 7. Required semantic vectors / 必需语义向量
+## 6. H 1.2.14 D high-water delta / H 1.2.14 D 高水位变化
 
-The H12-C01..C18 vectors from Phase 3.8.7 remain required, with these additions:
-- H13-C19: HANDOFF_REJECTED + PROVEN_NONE without no-handoff proof → INVALID.
-- H13-C20: HANDOFF_REJECTED + POSSIBLE_OR_UNKNOWN without no-handoff proof → accepted as a nonterminal outcome, never treated as no-handoff.
-- H13-C21: HANDOFF_REJECTED + PROVEN_OCCURRED → preserve occurred-side-effect evidence; no no-handoff classification.
-- H13-C22: legacy `participant_intent_ref` present in the 1.2.13 C branch → INVALID as unknown/forbidden field.
-- H13-C23: c_submit_outcome_digest equals BMCP envelope payload_digest but differs from C object payload_digest → INVALID.
+H 1.2.14 adds required ownerSpecificHighWatersD.forget_fence_generation_high_water. It is distinct from owner_gate_generation and barrier_generation. It captures D's authoritative ForgetFenceGeneration high-water and is bound by the D owner snapshot attestation and owner_specific_high_waters_digest. It is not a C field, not part of C's P0 and not comparable with C GateGeneration, I PermissionEpoch, COC term/index or Storage LSN.
 
-These are specified vectors. The H validator core and test source have now been rebound to 1.2.13 / C 1.0.1; execution of the exact 1.2.13 conformance workflow is still required and is not claimed by this mapping document.
+H 1.2.14 新增必需字段 ownerSpecificHighWatersD.forget_fence_generation_high_water，与 owner_gate_generation、barrier_generation 严格区分。该字段由 D Snapshot Attestation 与 owner_specific_high_waters_digest 绑定，不属于 C 字段或 C P0，不得与 C GateGeneration、I PermissionEpoch、COC term/index 或 Storage LSN 比较。
 
-## 8. Review disposition / 审查结论
+## 7. RecoveryJoin and owner membership / RecoveryJoin 与 Owner Membership
 
-**Delegated H-role disposition: ACCEPT AS A SUCCESSOR MAPPING CANDIDATE WITH ENUMERATED BLOCKERS; NOT FROZEN.**
+H RecoveryJoin 1.0.2 uses a closed generic ownerSnapshotMembershipProof object with additionalProperties=false. C/D/I-specific facts are committed by each owner's exact owner entry, operation, scope and snapshot digests; no ad hoc untyped properties are added. The C, D and I owner-specific crosswalks are:
+- C Phase 3.8.13 RecoveryJoin P0 crosswalk: Blob df12af95e6859a389ba71eb1b7dba512b9feb8f6.
+- D Phase 3.8.6 RecoveryJoin P0 crosswalk: Blob bf35b7f047a374268920b99199c06fc2a78dabb7.
+- I Phase 3.8.10 P0 allowlists: Blob 35e6843da8becbf3b152512a561b05cf5486819b.
+- H Phase 3.8.11 C/D/I cross-review: Blob 36c9e53dbec3b1e71eea22ddcb52a5d1d9f459c8.
 
-Remaining blockers:
-1. C must review and accept/revise this exact 1.2.13 mapping.
-2. H semantic validator and exact test source are updated to 1.2.13 / C 1.0.1; the exact workflow is now verified in §10.
-3. I crypto profile registration, trust roots, key lifecycle, historical verification and anti-rollback remain OPEN.
-4. Independent Python/JavaScript canonical-byte and signature interoperability against the registered profile remains OPEN.
-5. Provider-specific same-key lookup/idempotency and actual adapter fault/race tests remain OPEN.
-6. Storage must bind the exact C outcome object and H envelope into the bidirectional RecoveryJoin proof.
-7. A must perform exact-version integration review after fresh I/D/C/H decisions.
+C, D and I retain their own authority. H verifies exact typed references/digests and owner-specific high-water summaries; it does not synthesize owner facts or issue owner releases. L3 per-owner P0 vectors, full pagination/currentness proofs and independent human Owner approvals remain open.
 
-**JF-10 P0 remains OPEN.** No wire/crypto freeze, implementation/conformance PASS, provider exactly-once, production activation, Multi-PolicyDomain, Global Forget completion or physical Forget is claimed.
+## 8. Exact CI evidence / 精确 CI 证据
 
-**角色模拟 H 侧结论：有条件接受为后继映射候选，尚有明确阻断项，不冻结。** H13 语义向量尚未执行；I 配置注册/密钥治理、跨语言互操作、Provider Adapter 实测、Storage RecoveryJoin 与 A 集成复审均未完成。JF-10 P0 仍 OPEN。
+- Workflow: H Provider Outcome Conformance.
+- Run: 44067402639.
+- Tested commit: 2068dd4f89245f9a4913ac069a169a2bed5471be.
+- Job: provider-outcome / 133984532592.
+- Result: **SUCCESS — 22 tests passed, 0 failed**.
+- Exact schema at tested commit: H Unified 1.2.14 Blob 09fcd1fa29fe24255fbd87cae79dafb406594a59.
+- Validator core: Blob 910e2a8f0b22adb4a192b3dbb7483e52a881e993.
+- Test source: Blob 9ceab387e114f9a28f9dfc12602e57f3ec5a3f43.
 
+The run covers H 1.2.14 artifact revision, D ForgetFenceGeneration high-water distinctness, C 1.0.1 sequence namespace, conditional HANDOFF_REJECTED semantics, legacy intent alias removal, Python/Node candidate signature agreement and field-mutation rejection.
 
-## 9. CSubmitOutcome 1.0.1 migration and source pins / CSubmitOutcome 1.0.1 迁移与源绑定
+该 Run 精确覆盖 H 1.2.14 当前 Schema Blob、C 1.0.1 Sequence Namespace、D Fence High-Water 区分、HANDOFF_REJECTED 条件语义、旧 Intent Alias 移除、Python/Node 候选验签一致性与字段篡改拒绝，22/22 PASS。
 
-This mapping now consumes CSubmitOutcome schema 1.0.1 Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`, C Phase 3.11.1 amendment Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`, I Phase 3.8.8 review Blob `0d78e5b2bfcf66cae6b757314cead84b9c942601`, and C Phase 3.8.11 review Blob `3ca46be90c98e47b24dd7914573b9068d0e15abd`. The C 1.0.1 object adds required signed `sequence_namespace_ref`; H verifies exact namespace equality with the authenticated CKeyStatusEvent and proves `record_sequence` and `event_sequence` share the same durable C sequencer. The C object's schema version and artifact revision must both equal 1.0.1; 1.0.0 is historical and is not silently upgraded.
+**Evidence ceiling:** candidate structural/semantic/crypto-vector conformance only. It does not register C/I profiles, deploy production trust roots/key custody/anti-rollback, prove provider truth, execute live C egress races, prove D fence currentness, close COC/Storage bidirectional RecoveryJoin or authorize production activation.
 
-The current H validator core is Blob `910e2a8f0b22adb4a192b3dbb7483e52a881e993`, pinned to BMCP artifact revision 1.2.13 and C object 1.0.1. It no longer maps the legacy `participant_intent_ref` alias. The current test source is Blob `17a1bb69ea3aab39182ae9761e400f0ebfc02fbc`; it includes structural checks for the corrected H 1.2.13 branch and local conditional side-effect proof semantics. Its execution remains a separate CI evidence gate.
+## 9. Remaining blockers / 剩余阻断项
 
-**中文：** 本 Mapping 现消费 CSubmitOutcome 1.0.1 Schema、C Phase 3.11.1、I Phase 3.8.8 及 C Phase 3.8.11 精确 Blob。C 1.0.1 新增必需签名字段 sequence_namespace_ref；H 必须与认证 CKeyStatusEvent Namespace 精确相等，并证明 record_sequence 与 event_sequence 属于同一个持久化 C Sequencer。C 对象 schema version/artifact revision 必须均为 1.0.1；1.0.0 仅作历史版本，不得静默升级。
+1. C exact review of H Unified 1.2.14 C Provider Outcome mapping is required; earlier C review pins H 1.2.13.
+2. H full-envelope positive/negative fixtures and every duplicated-field mutation matrix remain incomplete.
+3. Exact schema Blob/content hash must be enforced by the trusted deployment loader/release manifest.
+4. I per-family P0 L3 vectors, profile registration, trust roots, key lifecycle, historical verification and anti-rollback deployment remain OPEN.
+5. C profile registration, C key-status production service, C sequencer and provider-specific same-key lookup/idempotency remain OPEN.
+6. Provider adapter lost-ACK, timeout, partial-write, SDK retry, failover and close-vs-send race evidence remains OPEN.
+7. Storage must bind C/H/I/D proof tuples into a bidirectional RecoveryJoin and prove same-GID resolution, quorum persistence and linearizable readback.
+8. D lineage completeness, late-discovery tests and final release CAS remain OPEN.
+9. A must perform a fresh exact-version integration review after C/D/I/H and Storage pin the same current bundle.
 
-当前 H Validator Core 已绑定 BMCP 1.2.13 与 C 对象 1.0.1，并移除旧 participant_intent_ref Alias。测试源包含 H 1.2.13 修正分支和 SideEffectStatus 条件证明语义的结构检查，但其执行仍是独立 CI 证据门禁。
+## 10. H disposition / H 侧结论
 
+**Delegated H-role decision: ACCEPT H Unified 1.2.14 × CSubmitOutcome 1.0.1 AS THE CURRENT L1/L2 MAPPING CANDIDATE WITH ENUMERATED L3/TRUST/STORAGE BLOCKERS. NOT FROZEN.**
 
-## 10. Executed H 1.2.13 / C 1.0.1 conformance / 已执行符合性验证
+JF-10 P0 remains OPEN. No provider exactly-once, production egress, Gate B/C, Multi-PolicyDomain, Global Forget completion, physical Forget or production activation is claimed.
 
-- Workflow: `H Provider Outcome Conformance`, run `44067402639`.
-- Exact tested commit: `2068dd4f89245f9a4913ac069a169a2bed5471be`.
-- GitHub Actions job: `provider-outcome`, job ID `133984532592`, completed SUCCESS.
-- Exact log: Python unittest discovery completed with **SUCCESS; 22 tests passed, 0 failed**.
-- Included: five C 1.0.1 candidate crypto vectors; Ed25519 signature verification and field mutation rejection; Python/Node independent implementation agreement; C 1.0.1 schema/sequence namespace; H 1.2.13 artifact pin; no ambiguous `participant_intent_ref`; conditional HANDOFF_REJECTED / SideEffectStatus semantics.
-
-The tested commit includes the exact schema Blob `fee452efb99ab4fe0ceccb347c46eeef1521bd28`, validator core Blob `910e2a8f0b22adb4a192b3dbb7483e52a881e993`, and test source Blob `17a1bb69ea3aab39182ae9761e400f0ebfc02fbc`. The later mapping-document-only commit does not change those tested source files.
-
-**Evidence ceiling:** candidate schema/semantic/crypto-vector conformance only. The run does not register `AIMBA-C-CRYPTO-1.0` or `AIMBA-I-KEY-GOVERNANCE-1.0`; it does not prove production sequencer/key-status services, trust roots, HSM/KMS custody, provider issuer truth, live provider adapter race/fault behavior, COC quorum durability, Storage deployment or production activation.
-
-**中文：** H Provider Outcome Conformance Run `44067402639`，精确测试 Commit `2068dd4f89245f9a4913ac069a169a2bed5471be`，Job `133984532592`，状态 SUCCESS。Python unittest 共执行 **20 项，20 通过，0 失败**。覆盖 C 1.0.1 五组候选密码学向量、Ed25519 验签/字段篡改拒绝、Python/Node 独立实现一致性、C 1.0.1 Sequence Namespace、H 1.2.13 版本绑定、移除歧义 Alias 及 HANDOFF_REJECTED/SideEffectStatus 条件语义。
-
-该 Run 精确覆盖 Schema Blob `fee452efb99ab4fe0ceccb347c46eeef1521bd28`、Validator Blob `910e2a8f0b22adb4a192b3dbb7483e52a881e993`、Test Blob `17a1bb69ea3aab39182ae9761e400f0ebfc02fbc`。后续仅修改 Mapping 文档的 Commit 不改变这些已测源文件。
-
-证据上限仍是候选 Schema/语义/密码学向量符合性；不代表 C/I Profile 注册、生产 Sequencer/Key Status、Trust Root、HSM/KMS、Provider Truth、真实 Adapter Race/Fault、COC Quorum、Storage 部署或生产激活。
-
-
-## 11. Unified 1.2.14 D Fence high-water / Unified 1.2.14 D Fence 高水位
-
-H Unified 1.2.14 adds required `ownerSpecificHighWatersD.forget_fence_generation_high_water`. This field is intentionally distinct from top-level `owner_gate_generation` and owner-specific `barrier_generation`. It captures the D-authoritative ForgetFenceGeneration high-water in the owner snapshot; the complete D snapshot attestation and owner-specific high-waters digest bind the exact value. H MUST NOT alias any of these three generations.
-
-H RecoveryJoin 1.0.2 remains the current generic membership-proof envelope. The D owner mapping must bind the exact D fence generation and per-operation fence cursor through the D owner entry digest, operation digest, scope-binding digest, snapshot attestation and the new D fence high-water. C/D/I owner-specific proof semantics remain owner-owned; H only verifies exact typed refs/digests and does not synthesize owner authority.
-
-**中文：** H Unified 1.2.14 新增必需字段 `ownerSpecificHighWatersD.forget_fence_generation_high_water`。该字段与顶层 `owner_gate_generation`、D 专属 `barrier_generation` 严格区分，记录 D 权威 ForgetFenceGeneration 高水位，并由完整 D Snapshot Attestation 与 Owner-Specific High-Waters Digest 绑定。H 不得将三种 Generation 混为别名。
-
-RecoveryJoin 1.0.2 仍是当前通用 Membership Proof Envelope。D Owner 映射必须通过 D Owner Entry Digest、Operation Digest、Scope-Binding Digest、Snapshot Attestation 及新增 Fence High-Water 绑定精确 D Fence Generation 与逐操作 Fence Cursor。C/D/I 专属语义仍由各 Owner 负责，H 只验证精确类型化引用/摘要，不合成 Owner 权威。
-
-
-
-## 12. Executed H 1.2.14 / C 1.0.1 conformance / 已执行 H 1.2.14 / C 1.0.1 符合性验证
-
-- Workflow: `H Provider Outcome Conformance`, run `44067402639`.
-- Exact tested commit: `2068dd4f89245f9a4913ac069a169a2bed5471be`.
-- Job: `provider-outcome`, job ID `133984532592`, completed SUCCESS.
-- Test log: **22 tests, 22 passed, 0 failed**.
-- Exact source Blobs: H Unified 1.2.14 schema `fee452efb99ab4fe0ceccb347c46eeef1521bd28`; H validator core `910e2a8f0b22adb4a192b3dbb7483e52a881e993`; test source `9ceab387e114f9a28f9dfc12602e57f3ec5a3f43`.
-- The run includes 1.2.14 schema revision, D ForgetFenceGeneration high-water distinctness, C 1.0.1 sequence namespace, conditional HANDOFF_REJECTED semantics, removal of legacy participant intent alias, Python/Node candidate signature agreement and field-mutation rejection.
-
-Evidence ceiling: candidate structural/semantic/crypto-vector conformance only. It does not deploy D/C/I ledgers, prove real D fence currentness, register C/I profiles, provide production trust/key custody, certify provider truth, close COC/JF-10 or establish Storage durability/production activation.
-
-**中文：** H Provider Outcome Conformance Run `44067402639`，精确 Commit `2068dd4f89245f9a4913ac069a169a2bed5471be`，Job `133984532592`，SUCCESS，**22 项测试全部通过**。精确覆盖 H Unified 1.2.14 Schema Blob `fee452efb99ab4fe0ceccb347c46eeef1521bd28`、Validator Blob `910e2a8f0b22adb4a192b3dbb7483e52a881e993` 和 Test Blob `9ceab387e114f9a28f9dfc12602e57f3ec5a3f43`。覆盖 Artifact Revision、D ForgetFenceGeneration High-Water 区分、C 1.0.1 Sequence Namespace、HANDOFF_REJECTED 条件语义、旧 Alias 移除、Python/Node 候选验签一致性及字段篡改拒绝。
-
-证据上限仍是候选结构/语义/密码学向量符合性，不代表 D/C/I Ledger 部署、真实 D Fence Currentness、C/I Profile 注册、生产 Trust/Key Custody、Provider Truth、COC/JF-10 关闭或 Storage 持久化/生产激活。
+**角色模拟 H 侧结论：接受 H Unified 1.2.14 × CSubmitOutcome 1.0.1 作为当前 L1/L2 Mapping 候选，L3/Trust/Storage 阻断项仍 OPEN，不冻结。** JF-10 P0 仍 OPEN。
