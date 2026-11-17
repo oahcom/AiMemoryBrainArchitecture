@@ -18,8 +18,8 @@ def fixtures():
           "owner_snapshot_attestation_ref":o+"/att/1","owner_snapshot_attestation_digest":hexchar*64,
           "owner_gate_generation":"7","request_high_water":"12","admission_high_water":"18","request_count":1,"admission_count":1,
           "request_ledger_root":hexchar*64,"admission_ledger_root":hexchar*64,
-          "owner_ledger_root":o.lower()*64,"anti_rollback_anchor_ref":o+"/anchor/7",
-          "owner_specific_high_waters_digest":o.lower()*64,"ledger_available":True,"pagination_complete":True}
+          "owner_ledger_root":hexchar*64,"anti_rollback_anchor_ref":o+"/anchor/7",
+          "owner_specific_high_waters_digest":hexchar*64,"ledger_available":True,"pagination_complete":True}
     def admission(owner,ref,pref):
         s=snaps[owner]
         return {"owner_kind":owner,"owner_admission_ref":owner+"/"+ref,"owner_entry_ref":owner+"/"+ref+"/row",
