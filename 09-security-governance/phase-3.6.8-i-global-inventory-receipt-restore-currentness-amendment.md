@@ -168,3 +168,69 @@ No missing COC row, expired lease, absent worker, timeout or stale cache is term
 ## 10. Provenance
 
 This document is an assistant-authored role-based proposal committed at the user's direction. It is not a cryptographic signature and does not prove independent human I Owner authorship or approval.
+
+
+## 11. I36.8-R1..R4 — Mandatory owner-local revision (append-only)
+
+This section is a normative append-only refinement of §§2–7. Where an earlier sentence is less specific or inconsistent with this section, this section controls for the revised Phase 3.6.8 proposal. The previously reviewed source Blob remains immutable historical evidence.
+
+### 11.1 I36.8-R1 — Atomic I Gate-close and request admission
+
+For each affected PolicyDomain, I MUST execute Gate close through one authoritative serializable sequencer transaction. That single transaction MUST:
+1. append the stable IRevocationRequestRef and immutable RequestDigest to the I request ledger;
+2. set the affected I Gate state to PENDING_COC_CUTOFF;
+3. increment IGateGeneration;
+4. capture the exact request-set count, canonical digest/root, IRequestHighWater and owner cursor;
+5. persist the anti-rollback anchor bound to the resulting sequencer position and generation;
+6. commit all of the above atomically, and only after that commit acknowledge the revocation request as pending.
+
+The request is not acknowledged as pending before the close transaction commits. There is no intermediate state in which a request is accepted but absent from the authoritative I request ledger or in which the Gate remains OPEN at the old generation after the request is acknowledged.
+
+Every affected receipt issue and receipt consume operation MUST serialize through the same PolicyDomain sequencer. Its final authoritative transaction MUST compare the current Gate state and IGateGeneration in-transaction, and MUST be ordered either before the close transaction (and therefore included in the captured request/in-flight accounting) or after it (and therefore rejected unless it is an explicitly authorized typed recovery/cleanup action). A prior read, cached OPEN value, worker lease or detached token is not sufficient. Lost acknowledgement is resolved by stable request identity and ledger readback; it is not evidence that the close did not commit.
+
+### 11.2 I36.8-R2 — Exact Storage owner-final-gate participant and terminal proof
+
+Whenever I terminalizes a Storage owner-final visibility-gate participant, the I terminal decision MUST be one authoritative I sequencer transaction that validates and atomically consumes the exact participant and authorization tuple. The proof MUST bind all of the following:
+- stable StorageFinalGateParticipantRef identifying the exact owner-final visibility-gate participant;
+- owner_boundary and PolicyDomainRef;
+- ISequencerPosition at which the terminal decision linearized;
+- terminal outcome enum: COMMIT_WON, REVOCATION_WON or INDETERMINATE_ABORTED; UNKNOWN and IN_DOUBT are explicitly nonterminal and MUST NOT be encoded as a terminal result;
+- exact CommitAuthorizationReceiptRef and digest, plus its single-use consumption identity and ledger evidence;
+- PreparedParticipantRef, PreparedTransactionGID, CanonicalAuthorityDBRef, DatabaseIncarnationRef, PostgreSQLSystemIdentifier and PostgreSQLDatabaseOID where defined, PostgreSQLNativeXID when known;
+- PrepareAttemptRef and PrepareAttemptGeneration, ParticipantLedgerRef and ParticipantLedgerVersion, PreparedParticipantReceiptRef and digest, and the complete ParticipantTupleDigest;
+- PublicationOperationId, RequestDigest, COC PrepareIntentRef, typed COC position and entry digest;
+- the relevant PermissionEpoch, exact scope binding and owner-local references needed to validate the decision.
+
+The final I transaction MUST reject a mismatched participant, attempt, database incarnation, XID, ledger version, receipt digest, authorization receipt or COC intent. CommitAuthorizationReceipt consumption and I terminal-proof issuance are atomic and single-use. The resulting proof authorizes only the exact bound participant and cannot be detached and replayed to authorize another Storage commit. Storage remains the authority for same-XID resolution and its PublicationReceipt/VisibilityPointer or authoritative non-publication proof; I terminality does not itself prove Storage visibility.
+
+### 11.3 I36.8-R3 — Shared reconciliation-attempt join envelope
+
+IReconciliationTuple MUST carry an interoperable join identity with these exact typed fields:
+- ReconciliationAttemptRef and monotonically increasing AttemptGeneration;
+- TupleSchemaId, TupleSchemaVersion and CanonicalizationProfileRef;
+- canonical tuple digest computed over the versioned canonical representation;
+- I-signed subrecord reference and digest, and D-signed subrecord reference and digest;
+- D FenceGeneration and D FenceInstallationCursor, plus the applicable D work/producer high-waters and barrier membership root/generation;
+- exact COC RecoveryEpoch, committed-prefix/position reference, RecoveryCutoffBatchRef/digest and ParticipantManifestRef/digest;
+- the I inventory and permission fields already required by §§2–3, and the Storage participant join fields where applicable.
+
+The same ReconciliationAttemptRef, AttemptGeneration, schema/version and canonicalization profile MUST be used by I and D for a given join attempt. Each Owner signs only its own subrecord. The envelope joins independently authoritative evidence; it is not a globally atomic cross-owner snapshot and must not imply simultaneous sampling.
+
+Any change to a bound owner generation, high-water, fence installation cursor, inventory epoch, target seal, completeness proof, scope mapping, key-status generation, COC recovery reference, participant manifest or signed subrecord digest invalidates the affected attempt. The owners MUST append a new attempt generation and recapture/reconcile the affected evidence; they MUST NOT mutate or silently refresh the old signed tuple in place. The exact COC and participant-manifest references remain mandatory even while their cross-document ordering conflict is unresolved; this amendment does not declare that conflict solved.
+
+### 11.4 I36.8-R4 — Cryptographic lifecycle separation and fail-closed terminality
+
+This Phase 3.6.8 revision does not select or freeze a cryptographic/key lifecycle profile. I MUST publish that profile as a separately versioned normative artifact defining, at minimum, issuer, subject, audience, purpose, canonical signed bytes, algorithm agility, key custody, rotation, revocation, compromise response, historical verification, signer authorization and anti-rollback behavior. H must map the wire representation to that separately approved profile; a tuple digest or signature field alone is not a complete cryptographic policy.
+
+Stale or unavailable key status, unknown or conflicting terminal outcome, missing owner proof, changed digest, unavailable sequencer/registry authority, uncertain restore, participant mismatch or incomplete reconciliation MUST yield UNKNOWN/CONFLICT and keep the affected I Gate closed. UNKNOWN and IN_DOUBT are durable blocking states, not terminal enums. Timeout, lease expiry, missing COC row, absent worker, lost ACK or operator assertion cannot manufacture terminality or release authority.
+
+### 11.5 Added conformance obligations — specified, not executed
+
+- prove the serializable close transaction commits all six R1 effects before the pending acknowledgement is emitted;
+- race receipt issue and receipt consumption against Gate close and show that each operation is serialized on the same sequencer;
+- verify a lost close acknowledgement is recovered by stable request identity without duplicate close or receipt consumption;
+- reject terminal proof with wrong StorageFinalGateParticipantRef, owner boundary, ISequencerPosition, authorization receipt, participant tuple, XID, attempt or ledger version;
+- reject UNKNOWN/IN_DOUBT as terminal and keep the Gate closed;
+- verify I and D use the same attempt generation, schema, canonicalization profile and signed-subrecord digests, including D FenceInstallationCursor;
+- invalidate and restart the attempt after any bound owner generation or evidence digest changes;
+- verify stale/revoked/unknown key status blocks terminalization and release.
