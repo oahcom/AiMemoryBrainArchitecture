@@ -25,7 +25,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | fact-claim-identity-adr.md | Most main sections have Chinese peers; alternatives/decision matrix and several evidence rows are English-only | PARTIAL | Translate every matrix cell, ADR status, authority and consequence; perform clause-by-clause semantic parity |
 | canonical-domain-entity-inventory.md | Bilingual headings and narrative; most entity/classification tables are English-only | PARTIAL | Translate each concept row, rationale, status and open question |
 | canonical-identity-semantics.md | Bilingual headings and selected explanatory sections; identity and serialization type tables are English-only | PARTIAL | Translate all typed-ref definitions, namespace rules, constraints and decisions |
-| canonical-state-semantics.md | Bilingual headings and selected paragraphs; state and authority matrices are English-only | PARTIAL | Translate every state definition, authority, proof boundary and transition rule |
+| canonical-state-semantics.md | Full Chinese peer text added for state matrices, critical terms, ordering, state-machine requirements, owner evidence and blockers; Blob `2c42b4b9d8311e218d0e6fadd7b1f3a7d9c10017` | REMEDIATED — MANUAL REVIEW PENDING | Independently verify every state/authority/proof boundary and the new B-STATE-007 alignment |
 | canonical-temporal-evidence-semantics.md | Bilingual headings and selected paragraphs; time/evidence tables and much of the provenance section are English-only | PARTIAL | Translate all field definitions, alternatives, invariants and open decisions |
 | canonical-domain-relationships.md | Bilingual headings and short explanations; relationship/cardinality matrix is English-only | PARTIAL | Translate every relation, cardinality, owner, deletion and tenant rule |
 | domain-model-complexity-assessment.md | Bilingual headings and selected narrative; entity and complexity tables are English-only | PARTIAL | Translate every assessment row, classification and recommendation |
@@ -83,3 +83,7 @@ A file is bilingual-complete only when the full normative content is present in 
 
 - `canonical-state-semantics.md` has also been rewritten with Chinese peer text for all state matrices, critical execution terms, ordering constraints, state-machine requirements, cross-owner evidence and blockers. Current Blob: `2c42b4b9d8311e218d0e6fadd7b1f3a7d9c10017`.
 - `canonical-state-semantics.md` 也已为所有状态矩阵、关键执行术语、顺序约束、状态机要求、跨 Owner 证据和阻塞项补齐中文对应内容。当前 Blob：`2c42b4b9d8311e218d0e6fadd7b1f3a7d9c10017`。
+
+
+- `canonical-state-semantics.md` current Blob: `2c42b4b9d8311e218d0e6fadd7b1f3a7d9c10017`; full Chinese peer text has been added, including B-STATE-007 for the I-10 ACK sufficiency ambiguity.
+- `canonical-state-semantics.md` 当前 Blob：`2c42b4b9d8311e218d0e6fadd7b1f3a7d9c10017`；已补齐完整中文对应内容，包括针对 I-10 ACK 充分性歧义的 B-STATE-007。
