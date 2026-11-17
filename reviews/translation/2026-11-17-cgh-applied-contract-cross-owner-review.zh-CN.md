@@ -112,3 +112,11 @@ H 候选源文件进一步新增 §11.8。当前精确 H 源 Blob：`0dca3dc5463
 H 候选源文件现已包含 §11.9，当前精确 Blob 为 `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`。它明确绑定 C 签发的 Provider receipt 和不可变 CSubmitOutcome，保留 UNKNOWN/IN_DOUBT，仅在所有 Owner outcome 均确定后才要求/允许 participant terminal proof，并将 Owner-local gate release attestation 保留给相应的 I 或 D authority。
 
 **新增发现 H36-AP-09 — OPEN：** 候选文本已保留正确的证据/权威边界，但精确 H Wire message-family Schema/SDK 映射和消费者接受仍缺失。C/G/I/D/Storage 必须确认同一个精确公共版本；任何 H ACK 或 COC observation 均不得替代 C Provider outcome 或 I/D Owner 签名的 gate release。H36-AP-01..09 在精确版本 Owner 决议及 Schema/一致性证据到位前仍为 OPEN。
+
+## 10. C 精确版本 recovery-batch 接受缺口 — 2026-11-17
+
+**新增发现 C36-AP-01 — OPEN：** C 当前 Phase 3.6 源文件仍为 Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`。它包含 C 对精确 CGH-APPLIED-1.0 package 的 Issue #3 接受，以及 Issue #6 BIH 消费方接受；但没有 C Owner 对 G 后续 CGH-APPLIED-1.1 recovery-batch 修订的明确接受，也没有针对该 recovery 配置的完整精确版本 CSubmitOutcome/Provider receipt 映射。
+
+G 当前源文件明确要求实际 C Provider receipt 和不可变 CSubmitOutcome，作为 1.1 因果顺序/recovery 谓词的一部分。H §§11.8–11.9 已提议携带 C 签发引用，但 H 提案不能替代 C 自身的 producer 决议或 Provider 证据合同。
+
+必须由 C 发布精确版本决议或源文件补充，固定到同一个 A/COC package 版本，并定义 C 签发的 Provider receipt/CSubmitOutcome、条件性 terminal 引用、UNKNOWN/IN_DOUBT 行为，以及与 InferenceRequestId/FinalRequestBoundaryId/request digest/participant identity 的因果绑定。在此之前，H36-AP-09 和 C36-AP-01 均保持 OPEN；不得推断 1.1 跨 Owner 已接受。
