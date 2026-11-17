@@ -446,3 +446,108 @@ A CSubmitOutcome remains C-owned. Batch membership, manifest membership, Storage
 ### 16.5 Conformance boundary
 
 The digest projections, schema mapping and semantic validators are specified contracts. They are **not executed or interoperability-verified** by this amendment. H must publish executable validators and cross-implementation canonical-byte fixtures; C must verify provider-specific same-key behavior. No schema freeze, crypto freeze, provider exactly-once claim or production activation follows from this text.
+
+
+## 17. Normative union-manifest and dual-ledger snapshot amendment — Storage v3.2.2 / H unified schema 1.2.5
+
+This section is an append-only normative supersession of the participant-membership and owner-snapshot portions of §§15–16. It preserves the two-record ordering and three-digest dependency defined there, while aligning the COC protocol with Storage Design v3.2.2's complete union manifest. Where §15.1 step 3 or §16.2 describes only COC ParticipantIntentRef enumeration or H Recovery Cutoff schema 1.0.5, this §17 controls.
+
+### 17.1 Owner snapshots freeze two separate ledgers before prefix P
+
+At S0a, each of I, D and C MUST independently close its own affected Gate and atomically freeze BOTH:
+1. its request/receipt/Forget-request ledger; and
+2. its protected admission/effect ledger, including work not yet represented by a COC ParticipantIntentRef.
+
+Each signed owner snapshot MUST carry distinct request and admission values:
+- request high-water, count, digest/root;
+- admission high-water, count, digest/root;
+- owner ledger root and snapshot generation;
+- owner Gate ref/generation, scope generation, anti-rollback anchor and owner signature;
+- owner-specific high-waters required by that authority.
+
+Owner-specific minimums:
+- **I:** receipt issue and consume high-waters, PermissionEpoch, ProducerDomainInventoryEpoch, registry snapshot digest and relevant inventory-entry set root/generations.
+- **D:** producer-registration, WorkItem and Attempt high-waters, FenceGeneration, barrier generation/root and dependency-closure cursor/root.
+- **C:** reservation, provider-attempt and provider-outcome high-waters, provider idempotency namespace reference and final-request boundary generation.
+
+Request and admission counters/roots are not aliases. Owner-local counters are not compared across I/D/C. A single undifferentiated request_set_digest cannot prove admission completeness.
+
+Only after all required owner snapshots are durably frozen may S0b freeze exact quorum-confirmed COC prefix P. If any owner ledger advances, becomes ambiguous or cannot be authenticated, restart the recovery attempt under a new generation while keeping every affected Gate closed.
+
+### 17.2 Canonical union manifest membership
+
+At S1, the manifest member set MUST be the canonical union of:
+
+A. every COC ParticipantIntentRef committed at or before exact prefix P; AND
+
+B. every applicable I/D/C owner-local admission ledger entry at or below that owner's frozen admission high-water that can affect a protected participant, receipt, producer/work lineage, provider reservation/attempt, external side effect or terminal outcome, including entries not yet registered in COC.
+
+The manifest uses exactly two typed member variants:
+
+- `COC_PARTICIPANT`: exact ParticipantIntentRef, COC position/entry digest, TransactionRef, RequestDigest, owner boundary, PolicyDomain, participant tuple digest and participant owner. It MAY carry an OwnerAdmissionRef/digest only where an authoritative typed immutable join proves identity with the corresponding owner-ledger entry.
+- `OWNER_LOCAL_ADMISSION`: OwnerKind I/D/C, OwnerAdmissionRef/digest, owner-ledger ref/version, owner-local sequence, frozen owner admission high-water and ledger root, request/operation digest, scope/owner boundary, admission state and optional participant tuple digest. If no COC registration exists, `coc_participant_intent_ref` MUST be explicit null with a non-empty `coc_absence_reason`. If registered, the exact COC ParticipantIntentRef is carried and the absence reason MUST be absent.
+
+A missing COC ParticipantIntentRef MUST NOT exclude an owner-local admission. A missing owner-ledger member MUST NOT be inferred from an empty COC prefix. Every frozen owner admission and every applicable COC participant MUST occur exactly once or have an owner-signed, scope-specific exclusion proof. Deduplication is allowed only by an authoritative typed cross-reference proving the same immutable operation/attempt; matching TransactionRef, timestamp, provider key text or payload similarity is insufficient.
+
+The canonical union's count/root/digest cover both member variants and the exact RecoveryEpoch, prefix P and frozen owner snapshot roots. An explicit empty union is an empty array with count zero and canonical empty root; a missing array is INVALID.
+
+### 17.3 Batch and Manifest Record binding
+
+The S2 Recovery Cutoff Batch MUST bind:
+- exact RecoveryEpoch and prefix P;
+- exactly one I, one D and one C signed owner snapshot;
+- each owner's distinct request and admission high-waters, counts, digests/roots, Gate generation, scope generation and anti-rollback anchor;
+- the stable ManifestId, canonical union ManifestDigest, total member count and COC enumeration high-water;
+- schema/canonicalization profile identifiers, stable batch idempotency identity and quorum commit proof.
+
+The S3 Participant Manifest Record MUST:
+- reference the exact preceding Batch record position and entry digest;
+- repeat exact RecoveryEpoch, P, ManifestId, ManifestDigest, count and enumeration high-water;
+- carry the complete canonical union member array (both variants);
+- prove the canonical payload digest matches the digest already committed by the Batch;
+- carry its own immutable COC position, previous-entry digest and quorum commit proof.
+
+The digest chain remains:
+`ParticipantManifestContentDigest / ManifestDigest → RecoveryBatchDigest → ParticipantManifestRecordDigest`.
+The final Manifest Record back-reference is excluded from the content digest to avoid a circular dependency. The final record digest remains separately identified by its committed COC entry/payload digest and is resolved by exact record reference.
+
+### 17.4 Owner release and RecoveryEpoch completion
+
+Each I/D/C OWNER_LOCAL_GATE_RELEASE MUST bind:
+- exact Batch record ref, position and entry digest;
+- exact Manifest Record ref, position and entry digest;
+- exact ManifestId/ManifestDigest and reconciliation root;
+- the releasing owner's current Gate generation;
+- request high-water/count/digest/root AND admission high-water/count/digest/root;
+- owner-specific currentness values, scope generation, anti-rollback anchor and owner signature.
+
+RECOVERY_EPOCH_COMPLETED MUST bind the exact Batch/Manifest pair, all required owner releases and the final all-participant reconciliation root. COC completion is an observation only; it cannot mint an owner release.
+
+### 17.5 H unified schema 1.2.5 mapping
+
+The exact H structural candidate is:
+`08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.5.schema.json`.
+
+It MUST represent:
+- `COC_PARTICIPANT` and `OWNER_LOCAL_ADMISSION` as distinct member variants;
+- explicit nullable COC ParticipantIntentRef plus absence reason for not-yet-registered owner admissions;
+- distinct request and admission high-waters, counts, digests and ledger roots in each I/D/C owner snapshot;
+- owner-specific high-waters;
+- owner releases binding both owner-local ledgers and exact Batch/Manifest record positions/digests;
+- outcome-dependent C Provider Outcome proof requirements.
+
+The schema artifact revision `1.2.5` is distinct from the current on-wire protocol-family `schema_version` `1.2.0`; H MUST document and validate this distinction. The schema is structural only. Semantic validators MUST prove exact owner set completeness, member uniqueness/exclusion, S0a-before-S0b order, prefix enumeration, digest equality, Batch-before-Manifest order, currentness and S4 read-back.
+
+### 17.6 C Provider Outcome remains C-authoritative
+
+Every C owner-local admission that has crossed or may have crossed the provider boundary MUST be represented in the union manifest and reconciled against C's immutable CSubmitOutcome or authoritative non-invocation/no-handoff proof. C alone creates that outcome. Batch/Manifest membership, Storage resolution, I terminality, D clearance, H ACK and COC quorum proof cannot synthesize provider success.
+
+C keeps its provider gate closed through S2 and S3 and until S4 exact pair read-back succeeds. UNKNOWN/IN_DOUBT remains nonterminal; no retry-as-new-operation is permitted. Provider-specific same-key lookup/idempotency remains an activation prerequisite.
+
+### 17.7 Supersession and conformance boundary
+
+This §17 supersedes any narrower owner-snapshot/participant-membership interpretation in §§15–16. It does not alter the already defined two-record commit order, immutable IDs, crash/replay rules or three-digest dependency.
+
+Required vectors: omitted pre-COC owner admission; duplicate union member; wrong owner-ledger root/high-water; request set complete but admission set incomplete; owner Gate close racing prefix P; exact C Provider Outcome missing for a crossed side effect; Batch/Manifest mismatch; crash between S2/S3; and attempted release without both request and admission roots. These are **SPECIFIED / NOT RUN**.
+
+No schema freeze, crypto approval, COC quorum deployment, provider exactly-once behavior, runtime conformance, production activation or Global Forget Completion is claimed.
