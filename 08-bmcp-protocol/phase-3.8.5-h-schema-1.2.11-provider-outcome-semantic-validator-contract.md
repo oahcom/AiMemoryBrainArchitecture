@@ -130,7 +130,7 @@ No tests, production readiness, provider-specific exactly-once or implementation
 
 ## 10. Exact 1.2.11 wire mapping and current cross-owner inputs
 
-The exact JSON Pointer/requiredness inventory and inline-versus-dereference matrix are maintained in H Phase 3.8.6, Blob `4f0e2a04009f2ac2f0c1e67d8ea6c104b07780e3`. It confirms that the 1.2.11 C branch does **not** inline CGateRef/CGateGeneration, ProviderAttemptRef/Generation, provider account, endpoint, region or API operation. These values MUST be obtained from the immutable C object referenced by `c_submit_outcome_ref`, then compared to provider evidence and all duplicated wire values. Missing members in an authoritative C object are INVALID; unavailable dereference/currentness is UNKNOWN.
+The exact JSON Pointer/requiredness inventory and inline-versus-dereference matrix are maintained in H Phase 3.8.6, Blob `e4dca3765e1557a4d29866c6e1289cea1db4ab7a`. It confirms that the 1.2.11 C branch does **not** inline CGateRef/CGateGeneration, ProviderAttemptRef/Generation, provider account, endpoint, region or API operation. These values MUST be obtained from the immutable C object referenced by `c_submit_outcome_ref`, then compared to provider evidence and all duplicated wire values. Missing members in an authoritative C object are INVALID; unavailable dereference/currentness is UNKNOWN.
 
 Current C/I dependencies:
 - C exact semantic signature projection proposal: Phase 3.8.8 Blob `a0e38c781d8aa2da5242dfce121e74b5141663d8`.
