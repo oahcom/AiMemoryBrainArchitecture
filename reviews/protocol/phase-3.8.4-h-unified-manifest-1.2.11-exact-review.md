@@ -17,11 +17,13 @@
 | I crypto profile proposal | `5eeb011032c53c2f7897d699d6f512b26f07d0a2` |
 | I crypto artifact-revision amendment | `9db3976ed9a891e9395d0e7edf949e75cb4422aa` |
 | H RecoveryJoin schema 1.0.2 | `4b664e3bce465499bcdfd93796349a4ba7074002` |
-| H semantic reference module | `4a7c22ed15dff0a688559f79e4facbffca6527cd` |
-| H schema/semantic tests | `c95bea3d7a7bee5f419bfabe914ea56be79fc8ad` |
+| H semantic reference module | `6710bd7876be5f2c60640f21090729b8859a7a3e` |
+| H Unified Schema 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
+| H Unified Schema 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
+| H RecoveryJoin 1.0.2 tests | `6afa788da2a899f03de8207cb700c40e0533aba1` |
 | I P0 vector set | `4657f0c81e9c8692d29ac183380f3d7e074a4e4c` |
 | I Python/Node crypto test | `7658edc6f51dac203742ecc1ecf00d41bd676908` |
-| H CI | Run `44048157932`, commit `05812faf5cfd4360803d660ebf5ffb8d48cba6b1`, **209 tests PASS** |
+| H CI | Run `44050250038`, commit `34fb4ccf8b1580321d38eda1340cf53f73b83f24`, **281 tests: 259 passed, 22 skipped, 0 failed** |
 
 ## 2. H findings / H 审查发现
 
@@ -42,6 +44,7 @@ H accepts the following protocol/schema candidate properties:
 ## 3. Executable evidence / 可执行证据
 
 The exact CI run passed 209 tests, including:
+- RecoveryJoin 1.0.2 owner-signed membership-proof payload schema validation;
 - Draft 2020-12 meta-schema validation of the full Unified Schema 1.2.11 document;
 - structural validation of COC participant, owner-local admission, owner-admission binding and owner snapshot root fixtures;
 - union completeness, duplicate/missing/fabricated member and membership-proof vectors;
@@ -51,7 +54,7 @@ The exact CI run passed 209 tests, including:
 
 Earlier failed runs were test-harness defects (fixture setup and non-hex test root values); the corrected exact commit above passed. No protocol failure was hidden or reclassified as a pass.
 
-The semantic digest module uses `BMCP-*-TEST-v1` normalized test digests. It is not the production canonical digest profile. The tests do not call real COC quorum, I/D/C ledgers, production signature/key registry, provider APIs or Storage database adapters.
+The semantic digest module uses `BMCP-*-TEST-v1` normalized test digests. The 22 skipped tests are the superseded legacy Unified Schema 1.2.10 semantic fixture class; current 1.2.11 and 1.2.12 suites are active. It is not the production canonical digest profile. The tests do not call real COC quorum, I/D/C ledgers, production signature/key registry, provider APIs or Storage database adapters.
 
 ## 4. Enumerated amendments / 保留修订
 
@@ -95,3 +98,15 @@ H now provides RecoveryJoin 1.0.2 structural proof payloads and requires each jo
 The old 1.2.10 semantic fixture is retained as a historical skipped suite because the shared current reference validator now enforces later owner-snapshot/high-water requirements. Current 1.2.11 and 1.2.12 suites exercise the callback seam.
 
 RecoveryJoin 1.0.2 and the new verifier seam remain candidate-level. Actual I/D/C key registries, proof signers, ledger queries, pagination and anti-rollback adapters are not connected.
+
+
+## 6. Final membership-proof exact bundle addendum
+
+- RecoveryJoin 1.0.2 schema: `4b664e3bce465499bcdfd93796349a4ba7074002`.
+- RecoveryJoin 1.0.2 tests: `6afa788da2a899f03de8207cb700c40e0533aba1`.
+- Unified Schema 1.2.11 tests: `7582091c22ad7f75ed51dba7fbbd02d43af06933`.
+- Unified Schema 1.2.12 tests: `5b444aa11ffb86c145ec745752204e623c1c2b41`.
+- Semantic reference module requiring an injected owner proof verifier: `6710bd7876be5f2c60640f21090729b8859a7a3e`.
+- Exact CI: [Run 44050250038](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44050250038), H HEAD `34fb4ccf8b1580321d38eda1340cf53f73b83f24`, 281 tests, 259 passed, 22 skipped, 0 failed.
+
+The 22 skipped tests belong to the historical 1.2.10 semantic suite and are superseded by active 1.2.11/1.2.12 suites. No production owner signer/verifier is connected. Candidate CI PASS is not production cryptographic conformance.
