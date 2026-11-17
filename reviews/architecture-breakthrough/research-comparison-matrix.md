@@ -1,6 +1,6 @@
 # Research Comparison Matrix — Architecture Breakthrough
 
-- Baseline: `main@b3c666e67982cb3d3374e759cfb6552c7765aacb`
+- Baseline: `main@28fb37e21fa4ba2b871f7816fe669128618c063e`
 - Research branch: `research/architecture-breakthrough-session-0-2026-11-18`
 - Status: candidate comparison, not decisions
 
