@@ -144,6 +144,49 @@ B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪�
 - B1 仍进行中；B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。
 
 
+## 14. Chinese gate and deliverable mirror / 中文门禁与交付物对照
+
+| Gate | 中文退出条件 | 当前状态的中文含义 |
+|---|---|---|
+| B0 | 已读取真实仓库基线、精确来源 Pin、相关 PR/Issue 和权威文件。 | PARTIAL / NOT PASSED：基线已部分核验，但完整 Owner 契约、PR Diff 和最新版本协调未完成。 |
+| B1 | 候选实体已分类，重复和遗漏已评估。 | IN PROGRESS：候选清单与复杂度评估已发布，尚未得到全部 Owner 确认。 |
+| B2 | Identity、State、Time、Evidence、Provenance 和 Relationships 已协调一致。 | IN PROGRESS：Fact/Claim 与 Claim 身份 ADR 仍是决策请求，未冻结 Schema。 |
+| B3 | A/C/D/E/F/G/H/I/Storage/Testing 的跨 Owner 矩阵和冲突登记已完成。 | NOT PASSED：Owner 验收和后继版本 Pin 仍需协调；认证入口和 Storage L4 仍阻塞。 |
+| B4 | 不变量、Schema、Fixtures 和验证规范一致。 | NOT READY：目前仅有规范；Schema 和可执行测试尚未获授权/运行。 |
+| B5 | GitHub 提交、PR、精确读回、Blob 核验及双语语义对等完成。 | BLOCKED：双语语义对等未完成；见 bilingual-parity-audit.md；仍需最后完整读回。 |
+| B6 | 真正独立的审查和治理裁决完成。 | INDEPENDENT_REVIEW_PENDING：当前作者会话不能充当独立审查者。 |
+
+### 核心交付物中文说明
+
+1. existing-domain-model-baseline.md：现有领域模型基线和源文件审计。
+2. canonical-domain-entity-inventory.md：候选领域对象清单、分类和存在性理由。
+3. canonical-identity-semantics.md：身份、命名空间、类型化引用和稳定性。
+4. canonical-state-semantics.md：规范状态词汇、状态机和执行证明边界。
+5. canonical-temporal-evidence-semantics.md：时间、Evidence 和 Provenance 语义。
+6. canonical-domain-relationships.md：关系类型、基数、所有权、Forget 和 Tenant 边界。
+7. domain-model-complexity-assessment.md：实体复杂度、重复抽象、合并/延后/拒绝。
+8. mature-domain-model-research.md：DDD、Event Sourcing、Temporal、Graph、标准和成熟项目研究。
+9. cross-owner-canonical-semantics-matrix.md：跨 Owner 语义矩阵和精确来源 Pin。
+10. domain-semantics-conflict-register.md：冲突、权威、解除条件和 Gate。
+11. canonical-domain-invariants.md：可验证不变量和正/负测试条件。
+12. canonical-domain-glossary.md：规范中英文词汇及禁止混淆。
+13. canonical-domain-model.md：最小/推荐规范模型和关系图。
+14. domain-model-decision-record.md：决策依据、备选方案、后果和未决事项。
+15. validation/README.md：Schema、Fixtures、正/负例和测试计划。
+16. evidence/README.md：外部官方来源索引及证据局限。
+
+补充文件用于时效性审计、Owner 分支快照勘误、Fact/Claim ADR 决策请求、外部来源核验和双语对等审计。文件名和稳定 ID 在中英文版本中保持一致。
+
+### 中文当前执行状态
+
+- 本研究仅建立候选规范语义，不替代 D/E/F/G/H/I/Storage 的 Owner 权威。
+- Fact 与 Claim 保持概念区分；是否独立对象/类型仍 ADR-BLOCKED。
+- C Origin Signature、H Transport Authentication、I Trust/Authorization 和 Storage Durable Ingress/Replay 是不同证明边界；生产入口仍 BLOCKING。
+- Serialization Anchor 是 Storage 物理实现细节，不是规范领域实体或全局时钟。
+- PR #55 为 Open/Draft；不请求合并。分支隔离纠正已经记录，main 中 13 个误写路径已核验不存在。
+- 双语改写仅是作者侧工作；没有独立双语验收。
+- 不宣称实现、生产就绪、Schema 冻结或最终 ACCEPTED。
+
 ## 13. Complexity assessment bilingual remediation / 复杂度评估双语整改
 
 - `domain-model-complexity-assessment.md` now has a full Chinese semantic mirror for qualitative assessment dimensions, entity/value-object/derived-view classifications, merge/defer/reject decisions, aggregate analysis, complexity risks, Storage serialization-anchor classification, model tiers and gate status. Exact Blob: `38bee7501e52798152524665778c69659be6cf33`.
