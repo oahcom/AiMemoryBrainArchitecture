@@ -140,3 +140,14 @@ These source Blob SHAs were re-read from the named B Owner branch in this turn. 
 | `07-agent-integration/phase-3.6-final-request-evidence-contract.md` | `session-c-agent-integration-2026-11-16` | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | EN + zh-CN | C semantic decisions recorded; C/G/H cross-owner freeze BLOCKED; implementation/execution NOT VERIFIED; C-FR-01..12 NOT RUN |
 
 This is 1 of 10 C detailed core specifications, not completion of the C set. C's approval with enumerated exceptions does not approve H wire, G Applied state authority, I authorization, D Forget fence or runtime implementation.
+
+
+## 10. C/G/H Phase 3.6 Applied cross-owner review — 2026-11-17
+
+| Owner | Source path | Branch | Exact source Blob SHA | Companion status | Preserved source state |
+|---|---|---|---|---|---|
+| C | `07-agent-integration/phase-3.6-final-request-evidence-contract.md` | `session-c-agent-integration-2026-11-16` | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | EN + zh-CN pair present; targeted parity review PASS | C semantic decisions recorded; C/G/H freeze BLOCKED; C-FR-01..12 NOT RUN; implementation NOT VERIFIED |
+| G | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `session-g-memory-context` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | Pair NOT YET CREATED; cross-owner semantic review recorded | G decisions recorded; C/G/H freeze BLOCKED; implementation/execution NOT VERIFIED |
+| H | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `session-h-bmcp-protocol` | `ed6b43a29aa368d772c701ffc83309a5aadf3c00` | Pair BLOCKED pending H/C exact field mapping; H36-AP-01..07 OPEN | CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I |
+
+Cross-owner report: `reviews/translation/2026-11-17-cgh-applied-contract-cross-owner-review.md` and Chinese companion. The six-stage lifecycle and historical/current-use semantics align; H's exact wire field mapping is not yet sufficient for a faithful normative translation. This report is not Owner approval, wire freeze, implementation verification or conformance execution.
