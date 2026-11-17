@@ -87,7 +87,7 @@ class GatewayAttestationSchemaTests(unittest.TestCase):
             ),
             verify_h_signature=lambda env, preimage, ctx: (
                 env.get("signature") == "TEST-ONLY-H-GATEWAY-SIGNATURE"
-                and preimage.startswith(b"AIMBA-H-GATEWAY-ATTEST-P0\\x00v1\\x00")
+                and preimage.startswith(b"AIMBA-H-GATEWAY-ATTEST-P0\x00v1\x00")
             ),
             verify_integrity_evidence=lambda env, digest, ctx: (
                 env.get("integrity_proof_ref") == "H/integrity-proof/1"
