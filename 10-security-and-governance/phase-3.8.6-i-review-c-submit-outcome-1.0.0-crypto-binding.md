@@ -3,7 +3,7 @@
 - Owner: I — Security, Identity and Governance
 - C schema: `urn:aimba:schema:c-submit-outcome:1.0.0`, Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`
 - C projection proposal: Phase 3.8.8 current Blob `06d9264124d85896ccd44ef7789d9af245d8255b`
-- C schema/conformance contract: Phase 3.8.9 Blob `f8a1cf608b937c77595df797fd1875332caf5c10`
+- C schema/conformance contract: Phase 3.8.9 Blob `2ecdf44cae1bf71e9611dd5367c8f7bcf25dd7ac`
 - Prior I governance disposition: Phase 3.8.5 Blob `41fc0f508ae75e8c16012966160e9e2a1e368881`
 - Status: **STRUCTURAL CRYPTO BINDING ACCEPTED WITH CONDITIONS; PROFILE REGISTRATION NOT APPROVED**
 - Provenance: delegated I-role simulation at user's direction; not independent human I Owner approval.
@@ -110,3 +110,18 @@ The five outcome-family candidate signatures verify, all present C-P0 member mut
 This does NOT satisfy profile registration conditions. The deterministic seed is public test-only material; there is no deployed C trust root, authenticated key-status ledger, custody/HSM/KMS evidence, revocation/compromise drill, anti-rollback anchor or independent operational key lifecycle proof. The C profile remains **NOT REGISTERED / NOT APPROVED FOR PRODUCTION**.
 
 **Updated I disposition: candidate crypto construction ACCEPTED FOR FURTHER IMPLEMENTATION; registration and deployment remain NOT APPROVED.**
+
+
+## 10. I review of independent H candidate verification
+
+H independently reran the five C candidate vectors in its own branch:
+- H CI run `44057944517`, commit `b8a22cecdf6238c81f08338d30776be250fd69a4`: SUCCESS, 10 tests.
+- H Python verifier Blob `a49d588ea6f840927fe21ad8c41cd8089dceac29`.
+- H Node oracle Blob `c35ddea3ecaf5e452b14fb57fb20327ad80703cc`.
+- H used the byte-identical C schema, outcome fixtures, vector manifest and expected fingerprints.
+
+I accepts this as a second owner-side execution of the candidate JCS/SHA-256/Ed25519 construction and signed-field mutation checks. It materially reduces the risk that C's own two implementations share an implementation-specific defect.
+
+It still does not establish profile registration or operational trust. The test seed is public; no deployed C key authority, key-status ledger, custody attestation, compromise/revocation drill or anti-rollback anchor has been demonstrated. No production signature may be trusted on the basis of these candidate vectors.
+
+**Updated I disposition remains: candidate construction and cross-owner test agreement ACCEPTED; profile registration, trust activation and production deployment NOT APPROVED.**
