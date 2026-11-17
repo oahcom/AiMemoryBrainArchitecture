@@ -3,7 +3,7 @@
 - Owner perspective: H — BMCP Protocol Architect
 - Status: **PROPOSED H WIRE CONTRACT — EXACT-VERSION H / I / A REVIEW REQUIRED**
 - Project phase: ARCHITECTURE DESIGN; NOT IMPLEMENTED / NOT INTEROPERABILITY-VERIFIED
-- Schema companion: `schemas/bmcp.recovery-cutoff/1.0.0.schema.json`
+- Schema companion: `schemas/bmcp.recovery-cutoff-1.0.1.schema.json`
 
 ## 0. Exact normative source bundle
 
@@ -20,7 +20,7 @@ The H schema is a candidate mapping of the exact A §§11–12 recovery semantic
 
 ## 1. Message families
 
-The schema defines six strict message families:
+The current schema candidate is **1.0.1**. It supersedes the first 1.0.0 draft because the first draft combined owner request and admission sets under one root and represented the COC participant manifest as a bare ref list. Version 1.0.1 separates request and admission enumerations and gives every COC participant a typed entry with operation identity, digest and prefix coordinates. The 1.0.0 file is retained as historical drafting evidence, not the current review target.\n\nThe schema defines six strict message families:
 
 1. `OWNER_ADMISSION_SNAPSHOT_ATTESTATION` — I/D/C owner-local request/admission snapshot, including explicit complete-empty state.
 2. `COC_PARTICIPANT_MANIFEST` — exact enumeration of ParticipantIntentRefs in a quorum-confirmed COC prefix.
@@ -102,3 +102,21 @@ The JSON Schema enforces structural requiredness, enums, strict additional-prope
 - I owns signature trust policy and cryptographic profile approval; H implements but does not unilaterally select it.
 
 **Status:** H wire proposal only. Exact H Owner acceptance, I trust-policy approval, A integration acceptance, canonical-byte interoperability and executable validator tests remain OPEN. No schema freeze, runtime conformance, deployment or production activation is claimed.
+
+
+## 8. 1.0.1 schema refinement and current review target
+
+The 1.0.0 candidate was found insufficient during coordinator self-review: it used one owner member array/root despite distinct request and admission high-waters, and its COC participant manifest contained only opaque participant refs. Those shapes could not independently prove request-set completeness, admission-set completeness and per-participant operation binding.
+
+The 1.0.1 candidate corrects this by:
+- separate `request_members` and `admission_members`, each with independent enumeration status, count and root;
+- explicit scope generation in the owner snapshot;
+- richer owner admission entries binding operation identity/digest, scope, effect boundary, source/lineage/attempt/reservation/provider/idempotency evidence where applicable;
+- a typed `participant_entries` manifest with owner kind, operation identity, participant digest, COC term/index and entry digest;
+- required I, D and C snapshot references and digests in the recovery batch;
+- release attestations that bind both request and admission roots and scope generation;
+- at least three owner release references before a COC recovery epoch can be recorded completed.
+
+The JSON Schema remains structural. Count-to-array equality, canonical ordering, root calculation, cryptographic signature verification, prefix completeness, cross-owner joins and final owner-local CAS currentness require executable semantic validators and positive/negative interoperability fixtures.
+
+**Current H review target:** `schemas/bmcp.recovery-cutoff-1.0.1.schema.json`. Schema 1.0.0 is superseded for new review.
