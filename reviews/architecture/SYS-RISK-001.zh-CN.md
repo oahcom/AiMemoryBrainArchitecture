@@ -466,3 +466,66 @@ R-03 继续为 **Critical / NOT PROVEN**。逻辑 Owner 合同和内存回归模
 7. 获取外部接收方和 Backup/Physical Erasure 证据，或取得明确、限定范围、独立批准且未过期的政策例外。
 
 任何本地 Owner 模型、角色模拟、候选政策或历史 CI 都不能关闭 R-03。本报告不声称 Global Forget 已完成。
+
+
+## 17. R-04 实时来源增量 — Provider Outcome / Publication / Applied 权威证据链 / 2026-11-17
+
+### 17.1 当前精确来源锚点
+
+| Owner | 当前分支 HEAD | 工件 | Blob SHA | 直接观察到的状态 |
+|---|---|---|---|---|
+| C | `71047cdb51139ca4080ac67f451e38a48698859d` | `07-agent-integration/phase-3.8.27-c-rereview-h-gateway-attestation-ordering.md` | `3ca06dbfd7d59483e9604b7a68df924c719f60aa` | 委托 C 角色复审接受 C 验证 → H 签名 → Receiver 验证 → Durable Ingress 顺序；明确不是独立人工 C Owner 签名 |
+| C | 同一 HEAD | `07-agent-integration/phase-3.8.26-c-exact-review-h-unified-1.2.15-gateway-attestation-schema.md` | `c5ff68814be49ec5e6e2c081004e7fa058d276fa` | 有条件接受 1.2.15 结构；本 C 复审尚未审 Validator/CI |
+| C | 同一 HEAD | `07-agent-integration/phase-3.8.4-c-normative-provider-submit-outcome-contract.md` | `819705037da89834e10b6dd2ec6e66c1b8c70886` | C 语义合同仍待精确 Owner 审查；未冻结共享 Wire |
+| C | 同一 HEAD | `07-agent-integration/schemas/c-submit-outcome-1.0.1.schema.json` | `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` | 精确不可变 CSubmitOutcome 1.0.1 结构 Schema |
+| E | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | `04-memory-compiler/phase-3.8-e-publication-orchestration-retry-recovery-contract.md` | `475fee41e5eea527af4edefbfe88c58c86967d0a` | E 角色提案；D/I/Storage 精确 API 和独立 Owner 批准 OPEN |
+| D | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | `03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md` | `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | D 角色提案；精确 Owner 批准、可调用 API 和符合性 OPEN |
+| G | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G 语义决策已记录；C/G/H Applied 合同 FREEZE BLOCKED；实现/执行 NOT VERIFIED |
+| H | `0d36324457e39bd50ad56ae902d477c4ea765b61` | `08-bmcp-protocol/phase-3.8.21-h-exact-schema-mapping-unified-1.2.15-gateway-attestation.md` | `2dc30f193d9c4f4bdc05ca4c137103687db28924` | H 1.2.15 Schema 候选；需要 C/I 精确复审；Mapping 未声称 Validator/CI；未冻结 |
+| H | 同一 HEAD | `08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.15.schema.json` | `860fc4cec658db7d2703cd6adf72aa31a2723f6d` | 仅结构 Schema；Semantic Validator 与 Trust 依赖仍独立 |
+| H | 同一 HEAD | `08-bmcp-protocol/validators/provider_outcome_validator_1_2_15.py` | `90a2d4b6f5b05590e3e0a7daecb5a01d9bf525c0` | 本地 Validator 实现；源文件说明它不是安全 Ingress Acceptance，且需要部署 Callback |
+| H | 同一 HEAD | `08-bmcp-protocol/validators/gateway_attestation_validator.py` | `9cc426d4c26deb452f39daff34c1008dd535e969` | Gateway Validator 参考实现；Trust/Origin/Key/Replay Callback 是部署接缝，不是生产 Trust 实现 |
+| H | 同一 HEAD | `08-bmcp-protocol/tests/conformance/provider_outcome/test_gateway_attestation_validator.py` | `9a5051b001a6e59d7b71e6dd175e84bb7d01d252` | 21 项本地 Gateway Attestation 测试；Authority Callback 为确定性 Test Double |
+| H | 同一 HEAD | `08-bmcp-protocol/validators/provider_outcome_validator.py` 与 `tests/.../test_provider_outcome_validator.py` | Validator Blob 不作为 1.2.15 证明；Test Blob `da1454ed985c84160c4cb6a0462df9d1225fab7f` | 36 项测试导入旧 1.2.14 Validator，不是 1.2.15 Validator 符合性 |
+| H | 同一 HEAD | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `74be8374a67da385a5f0f8e34c7aef2b38b72bcf` | CANDIDATE；Final-request Proof Profile 与 C 仍 OPEN；Authorization Binding 与 I 仍 OPEN |
+| H | 同一 HEAD | `.github/workflows/h-provider-outcome-conformance.yml` | `2ad679952ce5499a16c8fffa0a1543e26460e6eb` | Workflow 已包含 1.2.15 文件/测试，但当前 H Mapping 未声称精确 1.2.15 CI 通过 |
+
+### 17.2 语义边界更清楚，但终态权威尚未集成
+
+C 的 Provider Outcome 代数正确区分：
+- HANDOFF_ACCEPTED：Provider 接受 Handoff，仅对 Handoff 事实终态；
+- HANDOFF_REJECTED / NOT_INVOKED：只有具备所需正向证据才可终态；
+- UNKNOWN：尚不能确定是否越过 Handoff Boundary；
+- IN_DOUBT：可能已经发生副作用，非终态且不自动过期。
+
+C 明确禁止把 Timeout、ACK 缺失、进程崩溃、队列为空或 Provider Lookup 故障转换成 NOT_INVOKED。UNKNOWN/IN_DOUBT 禁止新 Attempt，并保留同一 Attempt/Provider Idempotency Key。
+
+D 的 PublicationParticipantRef 是 Forget Barrier 中的进行中 Participant，不是 Visibility Permission。D 只能依据 Storage 权威 COMMITTED_VISIBLE 或正向 NO_PUBLICATION 终态化；UNKNOWN 必须保持 Participant 和 Fence 开放。E 的生命周期顺序为 Hidden Storage Prepare → D Admission → I Consumption → Storage Final Visibility → D/I Closeout，E 本地状态不是跨 Owner 证明。G Applied 要求在精确 Submission Boundary 同时具备 C Final-request Evidence、H Authenticated Delivery/Capability、I 当前授权和 D 当前 Fence；历史 Applied 与当前可用性分离。
+
+这些权威边界是正确方向，但 C/D/E/G/H 的源文件状态仍然是 Proposed/Blocked。尚未建立一个同时覆盖 C Outcome、H Gateway Envelope、D Publication Participant、Storage Outcome、I Proof、G Applied Record 和 E Orchestration 的精确当前联合采纳版本包。
+
+### 17.3 H 1.2.15 证据上限
+
+H 当前分支包含 1.2.15 Schema、Provider Validator、Gateway-attestation Validator、Tests 和 Workflow。这比“没有代码”更进一步，但仍不等于符合性通过：
+
+- H 的 1.2.15 Mapping 明确将 Schema 标记为候选，未声称 Validator/CI 通过。
+- 新 1.2.15 Provider Validator 声明：直接调用 Validator 不会认证外层 BMCP Envelope、Transport Principal、Channel Binding 或 Replay；安全 Ingress 必须调用 Gateway Validator 并提供真实 Owner-authority Verifier。
+- Gateway Validator 自称 Reference Integration Implementation。Profile Registration、Key Status、H Signature、Integrity、Identity Binding、Origin Transport Receipt、Durable Replay Commit 和 Replay Disclosure Authorization 均通过注入 Callback 提供。缺少 Callback 必须 UNKNOWN。
+- 21 项 Gateway 测试使用确定性 Callback/Test Double。它们证明这些 Double 下的本地编排和 Fail-closed Predicate，不证明真实密码学身份、I Registry、C Adapter Registry、Durable Replay 或已部署 Transport。
+- 独立 36 项 Provider Test 导入旧 `provider_outcome_validator.py`（1.2.14），而不是 1.2.15 Validator。文档中 63/63 精确 HEAD CI 明确针对 1.2.14 Schema，Commit 为 `a36c34897545316942c7cda8da5d8bea7dacec5b`；不能重新标记为 1.2.15 符合性。
+- C 的 Phase 3.8.27 只以委托 C 角色决议接受顺序，明确不是独立人工 C Owner 签名。C 的 1.2.15 Schema Review 也说明当时尚未审查 Validator/CI。
+
+### 17.4 R-04 结论与关闭条件
+
+R-04 继续为 **High / NOT PROVEN**。合同已更清晰地区分 Provider Handoff、Canonical Publication、Storage Visibility、Transport Delivery、Final-request Submission 和 Applied。但精确跨 Owner 采纳、当前 1.2.15 验证、Trust Callback、Durable Replay、Storage Outcome 与 G Applied 符合性尚未联合证明。
+
+关闭条件：
+1. C 正式接受其不可变 CSubmitOutcome 1.0.1 语义合同，并针对精确 H 1.2.15 Mapping 签署确认，包括先 C 验证再 H 签名的修正顺序。
+2. I 批准 H Signer/Profile Registry、Gateway-to-C Delegation、Key Status/History、Anti-rollback 和 Durable Replay/Disclosure Policy；使用真实 Verifier 替换所有 Test Double。
+3. H 将 1.2.15 Schema、1.2.15 Validator、Gateway P0 和精确 C 1.0.1 Object 绑定为一个版本包；在该精确 HEAD 上运行 Workflow，并发布 Raw Log 和 Mutation Coverage。
+4. D 与 Storage 批准精确 Publication/Visibility Participant Tuple、最终 Linearization Proof 和不可变 COMMITTED_VISIBLE/NO_PUBLICATION/UNKNOWN Resolution；D Terminal Receipt 必须消费同一 Storage Outcome Digest。
+5. E 的 Retry/Recovery 实现必须在 Crash/Lost ACK 后保留同一 Operation/Attempt/Idempotency Tuple；E 本地状态不得终结 D/C/G。
+6. G/C/H 联合证明 Prepared→Delivered→Materialized→FinalRequestSubmitted→Applied，并绑定 Request/Region Digest、Session、Capability Epoch、PermissionEpoch 和 ForgetFence Currentness；Tier 2/3 永不得声称 Full Applied。
+7. 执行 Duplicate Callback、Delayed/Late Evidence、Lost ACK、Provider Side Effect 后 Timeout、Stale Authorization/Fence、Replay Reservation Crash、Gateway Restart 和 Storage Outcome Ambiguity 的端到端故障测试。
+
+任何角色模拟 Owner 决议、Schema 存在或本地 Validator 测试都不能关闭 R-04。
