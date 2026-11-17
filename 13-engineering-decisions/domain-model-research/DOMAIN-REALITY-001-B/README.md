@@ -32,7 +32,7 @@ B 文档不得静默取代其他 Owner 的权威契约。冲突必须登记并�
 | B2 | Identity, state, temporal, evidence, provenance and relationships reconciled / 身份、状态、时间、证据、溯源与关系完成协调 | IN PROGRESS — candidate identity/state/temporal/relationship semantics published; owner reconciliation open |
 | B3 | A/C/D/E/F/G/H/I/Storage/Testing cross-owner matrix and conflict register / 跨 Owner 矩阵及冲突登记完成 | NOT PASSED — first-pass matrix and conflict register published; owner acceptances open |
 | B4 | Invariants, schemas, fixtures and validation specifications consistent / 不变量、Schema、Fixtures 与验证规范一致 | NOT READY — invariant/test specs published; schemas/tests intentionally not frozen or run |
-| B5 | GitHub commits, PR, exact readback and Blob verification / GitHub 提交、PR、精确读回与 Blob 核验完成 | NOT STARTED |
+| B5 | GitHub commits, PR, exact readback and Blob verification / GitHub 提交、PR、精确读回与 Blob 核验完成 | IN PROGRESS — draft PR #55 created; final inventory/readback pending |
 | B6 | Truly separate independent review and governance disposition / 真正独立审查与治理裁决完成 | INDEPENDENT_REVIEW_PENDING |
 
 ## 4. Required deliverables / 必需交付物
@@ -90,3 +90,10 @@ The actual `main` baseline is pinned in the baseline report. The repository is a
 Any unresolved identity collision, contradictory state meaning, unowned lifecycle transition, cross-tenant reference ambiguity, Forget/Deletion/Visibility contradiction, or incompatible temporal definition blocks the affected normative contract. Owner decisions are never inferred from silence, summaries, or another Owner's synthesis.
 
 任何未解决的身份冲突、互斥状态含义、无权威归属的生命周期转换、跨 Tenant 引用歧义、Forget/Deletion/Visibility 矛盾或不兼容时间定义，均阻塞受影响的规范契约。不得从沉默、摘要或其他 Owner 的综合意见推断 Owner 决策。
+
+
+## 7. Branch isolation correction / 分支隔离纠正记录
+
+A subset of initial create-file operations landed on main because the branch parameter was omitted. The exact affected research files were copied to this isolated branch, then removed from main through explicit delete commits. All 13 affected main paths were subsequently checked and returned NOT_FOUND; the branch contains the full 17-file research package. Main was not rewritten and historical commits remain auditable. This correction is recorded transparently; it is not treated as a clean initial write.
+
+部分初始 create-file 操作因遗漏 branch 参数而写入 main。受影响的研究文件已复制到本隔离分支，再通过明确的删除提交从 main 移除。随后对 13 个受影响的 main 路径逐一核验，均返回 NOT_FOUND；研究分支包含完整 17 个文件。main 未被重写，历史提交仍可审计。本纠正过程如实记录，不将其描述为从一开始就正确隔离。
