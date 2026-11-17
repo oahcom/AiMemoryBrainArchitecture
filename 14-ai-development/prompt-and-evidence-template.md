@@ -101,13 +101,13 @@ Each criterion MUST be objectively verifiable. Avoid “high quality”, “robu
 ## Verification plan
 List exact commands, tests, fixtures, expected results and required fault/security cases. Mark unavailable checks as NOT RUN with a reason.
 
-## Bilingual documentation requirement (mandatory for architecture-significant work)
+## Mandatory bilingual requirement for every AI developer (GOV-DOC-001)
 
-Read GOV-DOC-001. Before implementation/design work, list the Chinese and English paths for every architecture-significant artifact. Deliver both versions in the same change set, preserve normative force and decision status, keep stable identifiers unchanged, and update the glossary/translation coverage register when required. A missing counterpart must be marked STALE with owner, source revision, due date, and approved exception; it is not a completed deliverable.
+Every AI developer/session MUST read GOV-DOC-001 before starting. This applies to architecture, implementation, testing, security, storage, protocol, performance, migration, operations, and review work. Inspect both language counterparts for affected contracts. If the task creates or changes architecture meaning, constraints, interfaces, behavior, tests, acceptance criteria, technology decisions or implementation guidance, update/create both Chinese and English versions in this same change set. If code/tests reveal a contract change, update the owning specification rather than treating the task as implementation-only. Preserve normative force, decision status and stable identifiers. Update the coverage register. A missing counterpart is NOT DONE unless a formally approved, time-bounded STALE exception records owner, source revision, due date and tracking issue.
 
-## 双语文档要求（架构类任务强制）
+## 所有 AI 开发者的强制双语要求（GOV-DOC-001）
 
-阅读 GOV-DOC-001。在开始设计/实现前，列出每项重要架构交付物的中英文路径，并在同一变更集中交付。两种语言必须保持规范效力和决策状态一致，稳定标识不得改写；必要时同步更新术语表和双语覆盖登记表。缺少对应版本时必须登记 STALE、责任人、源版本、截止日期和获批例外，不能视为完成。
+每位 AI 开发者/会话在开始前 MUST 阅读 GOV-DOC-001。本要求覆盖架构、实现、测试、安全、存储、协议、性能、迁移、运维和审查工作。检查受影响契约的中英文版本。如果任务新增或改变架构含义、约束、接口、行为、测试、验收条件、技术决策或实现指导，必须在同一个变更集中创建/更新中英文版本。如果代码/测试揭示契约发生变化，必须更新所属规范，不能将任务视为纯实现工作。保持规范效力、决策状态和稳定标识一致，并更新覆盖登记表。缺少对应版本时属于 NOT DONE，除非正式批准有期限的 STALE 例外，并记录责任人、源版本、截止日期和跟踪 Issue。
 
 ## Required deliverables
 - Chinese documentation paths:
