@@ -12,6 +12,7 @@ This directory defines how all AI developers work on AiMemoryBrainArchitecture. 
 3. [AI Work Item and Prompt Record Template](prompt-and-evidence-template.md) — immutable prompt versions, task manifest and evidence bundle.
 4. [Owner Automation Operating Model](owner-automation-operating-model.md) — GitHub Issue/PR collaboration and per-Owner scheduled execution.
 5. [AI Prompt Authoring Standard](prompt-authoring-standard.md) — A's prompt-authoring process, Owner approvals, quality gates and hashing.
+6. [Continuous Owner Runtime Architecture](continuous-owner-runtime-architecture.md) — event-driven A–I workers, durable queues, leases, recovery and 24/7 operation gates.
 
 ## Required usage
 
