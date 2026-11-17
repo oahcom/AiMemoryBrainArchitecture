@@ -131,3 +131,12 @@ Full findings and disposition: [Phase 3.6 identity / Applied / Storage source au
 | `02-domain-model/principal-actor-binding-mapping.md` | `session-b-domain-model-phase3` | `bbbef919e1e2ffe158cda8d9b2c5e718efaae969` | EN + zh-CN companions | CANDIDATE; INT-P0-02 / INT-X-03 OPEN; no identity freeze |
 
 These source Blob SHAs were re-read from the named B Owner branch in this turn. They are file Blob SHAs, not branch HEADs or approval evidence. Translation pairing does not approve I policy, H wire fields, D/E schema migrations, or ADR-001.
+
+
+## 9. C Phase 3.6 final-request evidence pair — 2026-11-17
+
+| Owner source | Branch | Exact Blob SHA | Paired docs | Source state |
+|---|---|---|---|---|
+| `07-agent-integration/phase-3.6-final-request-evidence-contract.md` | `session-c-agent-integration-2026-11-16` | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | EN + zh-CN | C semantic decisions recorded; C/G/H cross-owner freeze BLOCKED; implementation/execution NOT VERIFIED; C-FR-01..12 NOT RUN |
+
+This is 1 of 10 C detailed core specifications, not completion of the C set. C's approval with enumerated exceptions does not approve H wire, G Applied state authority, I authorization, D Forget fence or runtime implementation.
