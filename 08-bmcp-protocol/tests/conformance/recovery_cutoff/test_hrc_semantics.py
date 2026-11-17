@@ -258,7 +258,7 @@ def validate_request_dispositions(requests_by_owner, dispositions_by_owner):
         edges = dispositions_by_owner[owner]
         row_map = {x.get("owner_entry_ref"): x for x in rows}
         edge_map = {x.get("owner_entry_ref"): x for x in edges}
-        if len(row_map) != len(rows) or len(edge_map) != len(edges):
+        if len(row_map) != len(rows) or len(edge_map) != len(edges) or None in row_map or None in edge_map:
             return INVALID
         if set(row_map) != set(edge_map):
             return INVALID
