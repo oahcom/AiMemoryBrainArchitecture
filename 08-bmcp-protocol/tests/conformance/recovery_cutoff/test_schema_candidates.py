@@ -62,6 +62,19 @@ class SchemaCandidateIntegrity(unittest.TestCase):
         self.assertIn("participant_position_ref", props)
         self.assertIn("participant_position", props)
 
+    def test_SCHEMA_08_join_proof_covers_owner_request_ledger_rows(self):
+        self.assertIn("owner_request_dispositions", self.join["required"])
+        req = self.join["$defs"]["requestDisposition"]
+        self.assertIn("owner_entry_ref", req["required"])
+        self.assertIn("owner_request_digest", req["required"])
+
+    def test_SCHEMA_09_join_edges_bind_admission_ref_and_ledger_row_ref(self):
+        edge = self.join["$defs"]["admissionJoin"]
+        self.assertIn("owner_admission_ref", edge["required"])
+        self.assertIn("owner_entry_ref", edge["required"])
+        participant = self.join["$defs"]["participantEvidenceJoin"]
+        self.assertIn("primary_owner_entry_ref", participant["required"])
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
