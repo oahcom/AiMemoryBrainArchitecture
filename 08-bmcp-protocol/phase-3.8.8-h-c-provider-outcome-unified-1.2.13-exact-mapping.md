@@ -4,14 +4,14 @@
 - Owner perspective: H — BMCP Protocol / Schema and Interoperability
 - Status: **SUCCESSOR MAPPING CANDIDATE / DELEGATED H-ROLE REVIEW / NOT FROZEN**
 - Project phase: **ARCHITECTURE DESIGN**
-- H unified schema 1.2.13: `08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.13.schema.json`, Blob `88a33e26f3dbfa9b2f7286e72a5d98caae90dc67`
+- H unified schema 1.2.13: `08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.13.schema.json`, Blob `8e7f6a6c9663388863db88548f9c37d0fdb1bd97`
 - H predecessor schema 1.2.12: Blob `9aa366d857d0229687df7e44e8e70d2097a99237` (historical; C outcome branch requires revision)
-- CSubmitOutcome schema 1.0.0: Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`
-- C Phase 3.8.9 contract: Blob `2ecdf44cae1bf71e9611dd5367c8f7bcf25dd7ac`
-- C Phase 3.8.10 exact compatibility review: Blob `3a01f4e605d0d6def574cffd8fedd77eae5d24bd`
+- CSubmitOutcome schema 1.0.1: Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`
+- C Phase 3.8.9 contract (1.0.0 historical semantic source): Blob `2ecdf44cae1bf71e9611dd5367c8f7bcf25dd7ac`\n- C Phase 3.11.1 sequence namespace amendment: Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`\n- I Phase 3.8.8 sequence namespace review: Blob `0d78e5b2bfcf66cae6b757314cead84b9c942601`
+- C Phase 3.8.10 exact compatibility review: Blob `3ca46be90c98e47b24dd7914573b9068d0e15abd`
 - C Phase 3.8.6 semantic amendment: Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`
 - C Phase 3.8.8 signature projection: Blob `06d9264124d85896ccd44ef7789d9af245d8255b`
-- I C-crypto candidate addendum: Blob `1bcddbaaa4a9ca730d492a6554941becac305668`
+- I C-crypto candidate addendum: Blob `1bcddbaaa4a9ca730d492a6554941becac305668`\n- H validator core: Blob `241657140375c93acd90d107724b54c612d99597`\n- H validator tests: Blob `418f0a78ea363286f143ae414af4b92e9a3e89bf`
 - Provenance: delegated H-role review in the coordinating session; **not an independent human H Owner signature**.
 
 ## 1. Exact version and supersession / 精确版本与替代关系
@@ -65,7 +65,7 @@ The equality mapping from H Phase 3.8.7 remains applicable, with the following c
 - `coc_participant_intent_ref` ↔ C `COCParticipantIntentRef`;
 - `participant_reservation_ref` ↔ C `COCParticipantReservationRef`.
 
-All duplicated values are exact equality assertions. A mismatch is INVALID; an unavailable object, ledger, verifier or currentness source is UNKNOWN. The C object's remaining tuple members (CGateRef/Generation/Commit, ProviderAttemptRef/Generation, ProviderAccountRef, AdapterBuildRef, EndpointRef, RegionRef, ApiOperation, IdempotencyNamespaceRef, ProviderCapabilityRecord/Digest, FinalRequestBoundaryType, request method/content type, SideEffectStatus and evidence digest/issuer/type) remain mandatory C-object dereference fields.
+All duplicated values are exact equality assertions. A mismatch is INVALID; an unavailable object, ledger, verifier or currentness source is UNKNOWN. The C object's remaining tuple members (CGateRef/Generation/Commit, ProviderAttemptRef/Generation, ProviderAccountRef, AdapterBuildRef, EndpointRef, RegionRef, ApiOperation, IdempotencyNamespaceRef, ProviderCapabilityRecord/Digest, FinalRequestBoundaryType, request method/content type, SideEffectStatus and evidence digest/issuer/type) remain mandatory C-object dereference fields. CSubmitOutcome 1.0.1 additionally requires `sequence_namespace_ref`; it is not a BMCP duplicate field and MUST be verified against the authenticated CKeyStatusEvent namespace and the same durable C signing sequencer.
 
 H Phase 3.8.7 的字段映射继续适用，规范字段如上。所有重复字段均为严格相等断言；不匹配为 INVALID；对象、Ledger、Verifier 或当前性来源不可用为 UNKNOWN。C 对象中的剩余 Gate/ProviderAttempt/Account/Endpoint/Region/API/Idempotency Namespace/Capability/Request Type/SideEffectStatus/Evidence Digest 等字段仍必须解引用，不能因 H 未内联而视为可选。
 
@@ -111,7 +111,7 @@ The H12-C01..C18 vectors from Phase 3.8.7 remain required, with these additions:
 - H13-C22: legacy `participant_intent_ref` present in the 1.2.13 C branch → INVALID as unknown/forbidden field.
 - H13-C23: c_submit_outcome_digest equals BMCP envelope payload_digest but differs from C object payload_digest → INVALID.
 
-These are specified vectors only; no 1.2.13 validator run is claimed.
+These are specified vectors. The H validator core and test source have now been rebound to 1.2.13 / C 1.0.1; execution of the exact 1.2.13 conformance workflow is still required and is not claimed by this mapping document.
 
 ## 8. Review disposition / 审查结论
 
@@ -129,3 +129,14 @@ Remaining blockers:
 **JF-10 P0 remains OPEN.** No wire/crypto freeze, implementation/conformance PASS, provider exactly-once, production activation, Multi-PolicyDomain, Global Forget completion or physical Forget is claimed.
 
 **角色模拟 H 侧结论：有条件接受为后继映射候选，尚有明确阻断项，不冻结。** H13 语义向量尚未执行；I 配置注册/密钥治理、跨语言互操作、Provider Adapter 实测、Storage RecoveryJoin 与 A 集成复审均未完成。JF-10 P0 仍 OPEN。
+
+
+## 9. CSubmitOutcome 1.0.1 migration and source pins / CSubmitOutcome 1.0.1 迁移与源绑定
+
+This mapping now consumes CSubmitOutcome schema 1.0.1 Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`, C Phase 3.11.1 amendment Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`, I Phase 3.8.8 review Blob `0d78e5b2bfcf66cae6b757314cead84b9c942601`, and C Phase 3.8.11 review Blob `3ca46be90c98e47b24dd7914573b9068d0e15abd`. The C 1.0.1 object adds required signed `sequence_namespace_ref`; H verifies exact namespace equality with the authenticated CKeyStatusEvent and proves `record_sequence` and `event_sequence` share the same durable C sequencer. The C object's schema version and artifact revision must both equal 1.0.1; 1.0.0 is historical and is not silently upgraded.
+
+The current H validator core is Blob `241657140375c93acd90d107724b54c612d99597`, pinned to BMCP artifact revision 1.2.13 and C object 1.0.1. It no longer maps the legacy `participant_intent_ref` alias. The current test source is Blob `418f0a78ea363286f143ae414af4b92e9a3e89bf`; it includes structural checks for the corrected H 1.2.13 branch and local conditional side-effect proof semantics. Its execution remains a separate CI evidence gate.
+
+**中文：** 本 Mapping 现消费 CSubmitOutcome 1.0.1 Schema、C Phase 3.11.1、I Phase 3.8.8 及 C Phase 3.8.11 精确 Blob。C 1.0.1 新增必需签名字段 sequence_namespace_ref；H 必须与认证 CKeyStatusEvent Namespace 精确相等，并证明 record_sequence 与 event_sequence 属于同一个持久化 C Sequencer。C 对象 schema version/artifact revision 必须均为 1.0.1；1.0.0 仅作历史版本，不得静默升级。
+
+当前 H Validator Core 已绑定 BMCP 1.2.13 与 C 对象 1.0.1，并移除旧 participant_intent_ref Alias。测试源包含 H 1.2.13 修正分支和 SideEffectStatus 条件证明语义的结构检查，但其执行仍是独立 CI 证据门禁。
