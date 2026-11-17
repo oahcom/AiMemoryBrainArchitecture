@@ -577,3 +577,434 @@ No product adoption or ADR approval should occur until the relevant criteria bel
 - **READ BACK / 已读回:** exact source content was retrieved; this is not independent approval.
 - **INDEPENDENT REVIEW PENDING / 等待独立审查:** a separate reviewer must verify the exact final commit and Blob.
 
+
+
+---
+
+# 中文完整对应版本 / Complete Chinese Peer Version
+
+## 1. 基线与架构边界
+
+本研究基于 `main@b3c666e67982cb3d3374e759cfb6552c7765aacb`。README 声明当前仓库是架构定义项目，生产实现尚未开始，这是有意安排。TAB-001 是候选技术蓝图，不是技术冻结。技术选型必须经过原型、基准测试、ADR 和明确门禁。
+
+核心不变量包括：Event、Memory、Fact/Claim、Entity、Relation、Evidence 必须区分；派生 Memory 必须保留 Provenance；Scope 与 Permission 独立强制执行；Event Time、Recorded Time、Valid Time 不得混淆；Forget 必须覆盖派生记录和二级表示；子系统边界不意味着必须拆进程、服务或 Crate；性能结论必须来自可复现测量。
+
+Storage ADR 的精确 Blob 为 `bb544ba2f346bdc130d524bd5c7310d86f367988`。其状态必须精确理解为：
+
+- **L1 已决议：** 每个 Canonical Memory Authority 使用一个逻辑 Serializable Transaction Domain，即 Option A。
+- **L4 未决：** 实际数据库产品/版本/配置、部署清单、Operator/On-call、集群故障域、HA/PITR、受保护读路径、生产密钥托管和物理故障恢复演练。
+- D 仍负责 ProducerWork Admission、ForgetFence、Lineage/Dependency 完整性、PublicationParticipant 和 D Terminality。
+- Storage 仍负责 PREPARED_HIDDEN、VisibilityPointer、Storage Outcome、PublicationReceipt 和 Outbox 持久化。
+- I 仍负责身份、认证、Permission、Authorization、Revocation 顺序及 CommitAuthorizationReceipt。
+- COC 仍是独立 Quorum Log；不属于数据库事务，也不构成 XA。
+- C 和 E 分别保留 Provider 与 Compiler 权威。
+
+Pointer、Receipt、Outcome、Outbox 必须原子提交。隐藏 Participant 在精确 D/I Proof 验证之前不能公开。UNKNOWN/IN_DOUBT 必须保持私有并维持 Barrier。丢失 ACK 必须通过同一个不可变 Operation/Participant Tuple 恢复。陈旧副本和缓存不能绕过权威 Pointer/Fence。恢复或故障切换的序列化历史不确定时必须进入 RESTORE_FENCED。
+
+**当前 main 的基线缺口：** 精确递归 Git Tree 有 126 个条目，但不存在根级 `09-storage-and-index/`、`03-memory-brain/`、`04-memory-compiler/`、`05-memory-runtime/`、`06-memory-context/`、`08-protocols/`、`10-security-and-governance/`、`11-consistency-and-recovery/`、`12-testing-and-acceptance/` 目录。README/文档入口仍将这些目录描述为详细规范源。因此，本报告可以绑定 Storage ADR Blob 并审查当前 Domain/Technology 文件，但不能声称已经从当前 main 完整读回缺失的 Storage/Forget 源规范。这是当前性和文档可用性发现，不代表相关 Blob 从未存在于其他分支。
+
+## 2. PR 与 Owner 契约状态
+
+- **PR #45：** 技术现实性研究，历史 Base 为 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`，研究 Head 为 `6c7c5919c1b50f38c4d24be679a3885ee3c15b97`。它是历史候选研究包，不是当前 main 权威，也不是技术批准。
+- **PR #56：** 对 #45 的独立审查，结论为 REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY。它指出 #45 的当前性和 Storage ADR 引用问题。它证明的是 #45 的审查状态，不替代本次对当前 main 的精确核验。
+- **PR #73：** 基于当前 main `b3c666e67982cb3d3374e759cfb6552c7765aacb` 的 Open Draft 修复，Head 为 `7b4771b3766c616fa932b30b21c3bc0dc742f564`。它修正 Storage ADR 引用并携带 Phase 3.8/3.8.3 当前源增量，但属于角色模拟修复，不选择 L4 引擎，也不证明物理符合性。
+- **PR #66、#68、#71：** D Forget、I/D Terminalization 和 Storage 审查的 Draft 提案，位于独立 Owner 分支。其正文明确说明并非最终 Owner 批准、生产实现、Forget 完成或物理擦除。不能将其提案当作 mainline 规范变更。
+- **PR #52：** 较旧 Base 上的 Draft A 集成审查。它对逻辑 Option A 方向作条件接受，同时保留 L4 和精确 Owner 复审缺口，不构成当前 main 的 L4 批准。
+
+当前逻辑 Domain 与 Option A 约束足以开展产品评估。当前 main 中尚未证明 Storage 实现契约、生产 DB Adapter、运行时部署、代表性工作负载和物理符合性。产品能力的官方文档证据较充分，但项目适配性必须等待工作负载和物理测试。
+
+## 3. 存储产品比较
+
+### 3.1 PostgreSQL 18
+
+**定位：** 服务端 Canonical Transactional Store 的首选候选，不是已批准产品。
+
+优势：
+- 成熟的关系约束、事务、索引、JSON、范围/时间类型、递归 SQL、Generated Column 和 Transactional Outbox 模式。
+- 支持 Serializable Isolation，但应用必须处理 Serialization Failure 并安全重试；重试必须保持相同不可变 Operation Identity，不能重复外部副作用。
+- PostgreSQL 18 支持基于 WAL 的备份和 PITR；能力强，但需要演练 Base Backup、WAL 保留和 Timeline 恢复流程。
+- 原生 FTS 提供 `tsvector`、`tsquery`、GIN/GiST；很多工作负载中 GIN 是首选全文索引。
+- RLS 可以按数据库角色限制行可见性；启用后没有匹配 Policy 时默认拒绝。
+
+风险和成本：
+- 它是独立服务，需要负责升级、Vacuum/Autovacuum、WAL 增长、连接池、备份保留、复制、监控、容量和 On-call。
+- Serializable 事务可能因竞争而 Abort，必须定义明确的重试策略。
+- RLS 只能作为纵深防御，不能成为唯一授权边界：Superuser、BYPASSRLS 角色可绕过；表 Owner 通常也可绕过，除非启用 FORCE ROW LEVEL SECURITY；参照完整性检查也绕过 RLS。
+- 采用 PostgreSQL 不会自动证明符合 Storage ADR 的单一序列化域。必须实现并测试 D/Storage 行归属、Transaction/UoW、Authority Anchor、Commit Path 和受保护读路径。
+- 未经正式接受的强一致性 Profile，不得使用逻辑复制或异步副本处理 Fence/Currentness 敏感决策。
+
+许可证和采用成本：
+- PostgreSQL 使用 PostgreSQL License，属于宽松、类似 BSD/MIT 的许可证。pgvector 上游元数据也指向 PostgreSQL License 条款。采用时仍须核对精确 Release、Extension 打包、支持的 PostgreSQL Major 和部署镜像。
+
+**结论：** PREFERRED SERVER CANDIDATE / L4 OPEN。每个 Canonical Memory Authority 的 D 与 Storage 物理序列化记录应共用一个 DB Transaction Domain，不能为组织边界方便而拆到两个数据库。
+
+### 3.2 SQLite + WAL
+
+**定位：** 嵌入式、本地优先、单主机候选。
+
+优势：
+- 进程内嵌入，无需独立 DB Server 或 DBA 服务。
+- 支持 ACID 和 Serializable Write；通过串行化写入实现隔离。WAL 允许读者与一个写入者并行。
+- FTS5 支持全文查询、短语/前缀/NEAR/布尔查询、BM25 辅助排序，以及 External-Content 模式。
+- Online Backup API 可以在正常访问仍继续的情况下创建一致快照。
+- 适合桌面、本地 Agent、单用户、离线部署，运维占用很低。
+
+硬限制：
+- 每个数据库同一时刻只有一个 Writer。高并发 Ingestion/Compiler/Publication 会排队。
+- WAL 要求所有使用数据库的进程位于同一主机；不能运行在 Network Filesystem 上。
+- 不是多主机 HA/Replication 底座，不能把 WAL 文件放在 NFS/共享网络存储上，也不能作为分布式事务协调器。
+- 应用必须负责 Migration、文件权限、静态加密、备份轮换、磁盘满处理、损坏检测和 Restore Fencing。
+- 某些 SQLite 构建方式需要显式启用 FTS5，必须验证所有目标平台捆绑的精确 SQLite Library。
+
+**结论：** 仅作为嵌入式单主机 Profile 的 CANDIDATE。如果 D 与 Storage 使用同一 SQLite DB/Connection Transaction Domain，且所有权威记录与读路径服从同一 Serialization Anchor，则可能满足 Option A。它本身不能满足多主机 Authority 拓扑。
+
+### 3.3 其他关系数据库
+
+MySQL/InnoDB 和 SQL Server 都是成熟关系数据库，但目前没有足够的项目特定优势来抵消第三套 SQL 方言、不同 Serializable/Locking 语义、Adapter/测试矩阵和运维多样性成本。只有目标部署环境或 Operator 要求带来实质优势时才重新评估。第一阶段不建议采用。
+
+## 4. 搜索产品比较
+
+### 4.1 PostgreSQL FTS
+
+- 支持文档/查询分词、词元归一化、排序、Highlight 和 GIN/GiST。
+- 结构化 Canonical Filter、Authorization Join、Temporal Filter 与 Lexical Query 可以留在同一个 DB Query Plan。
+- 对基础词法检索，Canonical Version/Outbox 与索引更新可以减少跨系统延迟。
+- 语言词典和 Tokenizer 质量各不相同。中文、日文形态学和项目专用分词必须评估，不能默认英语能力足够。
+- FTS Index 是派生结构，可以从批准的 Canonical Text Field 和 Version 重建。
+
+**结论：** 服务端第一词法候选。它减少组件和一致性边界，但不代表能满足所有语言和相关性需求。
+
+### 4.2 SQLite FTS5
+
+- 非常适合嵌入式本地优先检索。
+- 支持短语、前缀、NEAR、布尔表达式、BM25 辅助排序、Snippet 和 Highlight。
+- External-Content Table 可以索引存储在别处的内容，但同步一致性由应用负责。
+- FTS5 Shadow Table 属于内部结构，应用代码不应直接修改。
+- Tokenizer 的中文/日文分词质量需要评估；jieba/lindera 系扩展会增加依赖、词典打包和版本复现成本。
+
+**结论：** SQLite 被选为 Profile 时，FTS5 是第一嵌入式词法方案；索引行必须可重建。
+
+### 4.3 Tantivy
+
+- 受 Lucene 启发的 Rust 全文检索库，具备 BM25、短语查询、可配置 Tokenizer、增量索引、多线程索引、Mmap Directory、Facet 和范围查询。
+- 中文、日文、韩文存在第三方 Tokenizer，但会引入依赖、词典/数据打包、版本管理和可复现性问题。
+- Tantivy 是 Library，不是开箱即用的分布式搜索服务；其本身明确不提供分布式搜索。
+- 索引更新采用 Delete + Reindex；Commit 和 Reader Reload 会影响可见性。
+- 独立 Tantivy Index 是第二份持久化工件，必须处理 Rebuild、Snapshot/Version、Scope Filter、Forget Suppression 和 Watermark。
+
+**结论：** 暂缓。只有 PostgreSQL FTS/FTS5 在标注语料评估中无法满足 Tokenizer、排序控制、吞吐或延迟时才重新评估。不能仅因为主应用是 Rust 就引入 Tantivy。
+
+### 4.4 pgvector
+
+- 在 PostgreSQL 中存储 Vector Type，支持 Exact Nearest Neighbor（完美召回）以及 HNSW、IVFFlat Approximate Search。
+- HNSW 通常以更高内存/构建成本换取较好的速度与召回折中；IVFFlat 通常内存更低、构建更快，但需要数据感知调优。
+- 常见执行计划中，Approximate Index Filter 在 ANN Scan 之后执行。选择性 Tenant/Scope Filter 可能使结果数量不足，需要 Iterative Scan、Partial Index 或 Partition。
+- 共享 ANN Index 可能使一个 Tenant 的 Vector 影响另一个 Tenant 的 Recall 和 Query Speed。需根据规模和威胁模型选择 Partition 或独立 Table。
+- pgvector 在 PostgreSQL 内运行，减少独立服务数量，并能与 Canonical Row 共用事务、备份、Role 和 Schema 管理；但 Vector 不因此成为 Canonical Fact。
+
+**结论：** Lexical Baseline 之后的默认向量候选，非第一阶段正确性的必需品。先用标注语料比较 Exact Search 与小规模 HNSW。Approximate Search 的准入必须考察 Recall@k、Precision@k、Latency、Memory、Filtered Recall、Update/Delete/Rebuild 和 Forget 测试。
+
+### 4.5 Qdrant
+
+- 专用 Vector Database/Search Engine，具备 Payload Filter、HNSW、Snapshot、Sharding、Replication 和 Distributed Deployment。
+- Distributed Mode 不等于自动 Replication：Self-hosted Operator 必须创建 Shard Replica 并管理 Shard Placement/Rebalancing；Replication Factor 和 Transfer Method 都重要。
+- Qdrant 文档明确描述了 Shard Transfer 的一致性折中。Stream Records 可能具有较弱顺序且需要重新索引；Snapshot Transfer 可保留 Index/Quantization，但有额外空间和运维成本，并能提供更强顺序保证。
+- Multi-tenancy 支持 Payload Filter、User-defined Sharding、Tiered Multitenancy；每 Tenant 独立 Collection 在 Tenant 数量大时会产生资源负担。
+- Qdrant 上游使用 Apache-2.0；Cloud/托管服务条款与 OSS Server 许可证应分开审查。
+
+价值：
+- 独立 Vector 扩展、专用 ANN、Payload Filter、向量运维控制和托管 Cloud。
+- 当向量负载、吞吐、内存、Index Size 或隔离需求超过关系数据库可接受范围时有价值。
+
+成本：
+- 第二套读写系统、Outbox Consumer、投递 Watermark、Replay/Idempotency、Snapshot/Restore 协调、Tenant Filter 正确性及 Forget Tombstone/Purge。
+- PostgreSQL Canonical Visibility 与 Qdrant Index 更新之间没有原子事务。安全模式是 Canonical Commit + Outbox + 异步 Projection；查询结果必须在披露前重新由 Canonical Authority 校验。
+- Qdrant 可用性不能决定 Memory 是否存在、可见、Forgotten 或已授权。
+
+**结论：** 不纳入最小技术栈。只有向量专属需求的测量结果和 Failure/Forget/Restore 证明足以支持额外系统时才引入。
+
+### 4.6 LanceDB
+
+- Apache-2.0 OSS 项目，定位为基于 Lance 列式格式的 Embedded/Serverless Retrieval Database/Library，面向 Vector 与多模态数据。
+- 适合本地/嵌入式向量与多模态检索实验及列式数据集。
+- 不能仅因采用它就替代 Storage ADR 的事务权威。其存储/索引生命周期、事务隔离、多进程/多主机保证、恢复语义，以及与 D/Storage Serialization Anchor 的集成仍需单独核验。
+- 上游 Workspace Metadata 变化较快，可能要求较新的 Rust Toolchain；采用前应固定精确 Release 和 MSRV。
+
+**结论：** 暂缓/实验性替代方案，不作为 Canonical Transactional Store。
+
+### 4.7 Cache 与其他组件
+
+- **Moka：** 适合本地模块化单体中的进程内有界缓存。必须识别 Generation/Fence，设置 TTL，且可随时丢弃。Cache Hit 不能绕过 I Authorization 或 D Forget Read Suppression。
+- **Redis：** 第一阶段本地模块化单体不需要。只有确有跨进程缓存/协调需求时再引入，不能成为 Durable Canonical Memory 或 Forget Authority。
+- **Elasticsearch/OpenSearch/Quickwit：** 能力强，但会增加服务、索引管线、集群运维、备份、Tenant Security 和 Forget Propagation。当前没有工作负载证据证明需要。
+- **Tantivy 与 Quickwit：** Tantivy 是 Rust Library；Quickwit 是基于 Tantivy 的分布式搜索引擎，不能把 Tantivy 本身称为分布式服务。
+
+## 5. 物理部署拓扑
+
+| 拓扑 | 组件 | 优点 | 主要风险 | 结论 |
+|---|---|---|---|---|
+| T0 嵌入式本地 | Rust 模块化单体 + SQLite/WAL + FTS5 + 本地内容寻址 Blob + Moka | 最小部署、离线可用、单次安装 | 单写者、同主机、单节点恢复责任 | 单用户本地 Profile 候选 |
+| T1 单数据库服务 | Rust 模块化单体 + PostgreSQL + FTS + 可选 pgvector + Blob + Outbox Worker | 事务与关系集成强，一致性边界较少 | DB 运维、Serializable Retry、RLS/Tenant 设计、HA/Restore | 服务端首选候选 |
+| T2 DB + Vector Service | PostgreSQL Canonical + Qdrant 派生向量投影 + Blob | 向量独立扩展/隔离 | 双存储投影延迟、Forget/Restore 编排 | 仅规模驱动 |
+| T3 DB + Tantivy | PostgreSQL/SQLite Canonical + Tantivy 嵌入式索引 | BM25/Tokenizer 控制强、Rust 集成 | 自定义索引生命周期、Snapshot/Rebuild、跨存储延迟 | 原生 FTS 评估失败时 |
+| T4 多服务分布式 | PostgreSQL + Qdrant + 分布式搜索 + Broker + Cache Cluster + Object Store | 独立扩展和故障域 | 一致性权威过多，运维昂贵，故障面扩大 | 第一阶段拒绝 |
+
+所有拓扑都必须满足 Option A：一个 Canonical Memory Authority 的 D Admission/Fence 与 Storage Visibility/Outcome 权威行必须共享精确逻辑 Serializable Transaction Domain。T2/T3 可以增加派生搜索存储，但不能把这些权威行移出该域。COC 仍是独立 Quorum Log，不声称跨日志 XA 原子性。
+
+### 5.1 Profile 建议
+
+1. **Local Embedded：** SQLite/WAL + FTS5，仅用于明确单主机、写入并发适中的部署。所有 D/Storage Authority Record 必须位于同一 DB Transaction Domain；禁止 Network-mounted WAL。
+2. **Server：** PostgreSQL 作为单一 Authority DB。先用模块化单体；D 与 Storage 可以是独立 Rust Module，但受保护提交路径不能分属独立物理事务域。
+3. **Search Scale-out：** PostgreSQL 保持 Canonical；仅在规模需要时通过 Outbox 增加 Qdrant/Tantivy 等派生投影。
+4. **Blob：** 单机先用内容寻址本地文件系统；多主机共享耐久容量确有需要时再用 S3-compatible/Object Storage。Canonical DB 保存 Digest、Size、Media Type、Encryption Metadata、Retention Class 和 Authority Ref。Object URL 不是权威。
+5. **Cache：** 初期进程内 Moka；没有测量证据不引入 Redis。
+
+## 6. 数据权威映射
+
+| 数据/表示 | 权威 | 物理候选 | 重复策略 |
+|---|---|---|---|
+| Event Identity、分类、Recorded Time、Source/Idempotency | Event/Capture 契约 | Canonical 关系表 | 一个权威 Event；相同 Key+Digest 返回同一结果 |
+| Evidence Identity、Source Ref、Locator、Availability、Integrity | Evidence/Provenance 权威 | 关系元数据 + 不可变内容引用 | 一个 Evidence Identity；允许按 Digest 保留一份源内容 |
+| Memory/MemoryVersion/Claim | Canonical Memory 权威 | 关系表和不可变版本表 | 不可变版本；一个 Current Pointer |
+| Entity/Relation/Typed Temporal Edge | Domain/Entity 权威 | 带类型引用和时间列的关系表 | Canonical Typed Edge，不是 Embedding/共现 |
+| Provenance/Source Edge | Evidence & Provenance 权威 | 关系边表 | 保留 Source Lineage，不得抹平来源 |
+| D Admission、ForgetFence、Dependency Set、PublicationParticipant | D | 同一 Option-A 事务域 | Cache/Index 不得建立第二个 D 权威 |
+| Storage Hidden Participant、VisibilityPointer、Receipt、Outcome、Outbox | Storage | 同一 Option-A 事务域 | Pointer+Receipt+Outcome+Outbox 原子提交 |
+| I Auth/PermissionEpoch/Revocation/CommitAuthorizationReceipt | I | I 权威 Store/Sequencer | 独立权威；数据库共置不转移语义 |
+| COC Quorum Prefix/Batch/Manifest | COC | 独立 Quorum Log | 不得静默并入 SQL 或声称 XA |
+| Lexical Index | 派生投影 | Postgres FTS / FTS5 / Tantivy | 可重建；绑定 Source ID/Version/Digest/Watermark |
+| Vector Embedding/ANN Graph | 派生投影 | pgvector / Qdrant / LanceDB | 可重建；绑定 Model/Version/Dimension/Input Digest |
+| Graph Traversal 加速 | 派生投影 | 关系索引/可选图引擎 | Typed Relation 仍由关系权威保存 |
+| Blob Bytes | Blob/Content Retention 权威 | 内容寻址文件系统/Object Store | 保留策略允许时每 Digest 一份不可变内容 |
+| Cache Entry | 无权威 | Moka / 可选 Redis | 可丢弃；按 Version/Fence/Permission Generation 标识 |
+| Backup Snapshot | Recovery Artifact | DB Backup + Blob Snapshot + 外部证据 | 恢复对账前不得直接服务 |
+
+### 6.1 避免重复事实
+
+只有明确声明为派生、版本化投影，或带完整性/保留元数据的内容寻址物理副本，才允许重复。不能存在两份可独立编辑的 Canonical Proposition。
+
+- Canonical Claim 不得复制到第二张具有独立生命周期的“Fact Table”。
+- Evidence Metadata 不是重复 Claim；Evidence 通过 Typed Link 支持、反驳或限定 Claim。
+- Vector Embedding 是指定 Source Version 和 Embedding Model 的派生表示，不是新事实。
+- Search Document 是查询投影，不是新的 MemoryVersion。
+- 不能仅凭共现或向量相似度创建 Relation。
+- Blob Metadata 和 Blob Bytes 可以物理分离，但必须由 Content Digest 绑定；可变 URL 不构成 Durable Evidence。
+- 反规范化读模型必须携带 Source ID、Version、Digest 和 Projection Watermark，并能丢弃重建。
+
+## 7. Forget、Restore 与索引重建
+
+### 7.1 Forget 流程
+
+1. D 在定义的线性化点提交权威 ForgetFence/Suppression Transition。所有受保护读路径必须检查当前 Authority 或等价的非陈旧 Fence Proof。
+2. Canonical DB Transaction 立即使对象失去服务资格。不能因为旧 Search Row、Vector、Cache Key、Blob URL、副本或预计算结果仍存在而披露内容。
+3. Transactional Outbox 与相关状态变更在同一 Canonical Transaction 中记录投影失效工作。
+4. Cache Invalidation 使用单调 Authority/Fence/Permission Generation；Generation 不确定时绕过缓存。
+5. Lexical/Vector/Graph Projection 接收幂等 Tombstone/Purge 命令。进度按 Target、精确 Source Version、Operation ID、Target Identity 和 ACK 跟踪。
+6. Blob Retention/Physical Erasure 按适用 Retention 和 Evidence Policy 单独处理。删除索引行不能证明备份、副本、Snapshot 或 Object Version 中的字节已擦除。
+7. Projection Cleanup 的 UNKNOWN/IN_DOUBT 不能释放 D/I Barrier，也不能允许服务。陈旧投影可以被忽略，但不能作为 Forget 完成证明。
+8. Audit Evidence 记录 Suppression、Target Enumeration、Projection Cleanup、Backup Expiry/Key Destruction 及剩余例外。
+
+### 7.2 Restore 与 Anti-rollback
+
+- 将 DB、Blob Storage 和派生 Search Index 恢复到隔离、不可服务环境。
+- 设置 `RESTORE_FENCED`；不得接受写入、暴露 Signed URL 或提供受保护搜索结果。
+- 对照独立当前 Witness，对账 COC Committed Prefix、D/I/C Owner-local Request/Admission/Effect High-water、ForgetFence Generation、Revocation/PermissionEpoch 和 Storage Visibility Outcome。
+- High-water 落后、Proof 缺失或 Commit/Participant Identity 模糊的恢复状态必须拒绝或隔离。
+- 只有完成对账后，才能从 Canonical State 重建派生索引；排除 Forgotten/Suppressed 内容，并绑定新 Index Generation 与恢复后的 Authority Generation。
+- Restore 后使所有进程内和分布式 Cache 失效；任何 Cache Snapshot 都不能被视为权威。
+- 只有相应 Owner 可以释放自己的 Gate。数据库 Restore 成功不等于获准服务。
+
+### 7.3 索引重建要求
+
+可重建投影必须具备：
+- 稳定 Canonical Source ID 和不可变 Version；
+- Source Content Digest 和 Projection Schema/Version；
+- 对应的 Embedding Model ID/Version/Dimension；
+- Tenant/Scope Metadata 和 Policy Generation；
+- 单调 Outbox Sequence / Projection Watermark；
+- 幂等 Upsert/Delete；
+- 确定性的重建输入和 Tokenizer/Config Pin；
+- Shadow Index Build + Validation + Atomic Generation Switch；
+- 构建期间变更的 Reconciliation；
+- Index Publication 前以及结果披露前的 Forget Suppression 复核。
+
+重建可以暂时降低搜索可用性，但不能提升权威，也不能复活已 Forget 内容。
+
+## 8. 多租户、授权和隔离
+
+**权威边界：**
+- Domain Model 拥有 Scope 语义与对象关系。
+- I 拥有认证、授权、PermissionEpoch、Revocation 和 Authorization Proof。
+- Brain Access/Read Path 执行授权结果与 D Forget Suppression。
+- Storage 拥有持久化和 Visibility Commit，不拥有 Permission Policy。
+- Search Engine 执行 Tenant/Scope Filter 作为纵深防御，不是 Authorization Truth。
+
+**必需控制：**
+- Tenant/Scope Identity 必须来自已认证 Principal 和授权 Scope Resolution，不能只信任用户可控 Query Parameter。
+- 每个 Canonical Read、Evidence Dereference、Blob Retrieval、Lexical/Vector Candidate、Graph Traversal、Cache Hit、Export 和 Backup Restore Path 都必须 Scope-filter。
+- PostgreSQL RLS 可以纵深防御，但 Application Role 不应是 Table Owner/Superuser/BYPASSRLS；必须测试 FORCE ROW LEVEL SECURITY 和特权维护路径。RLS 不替代 I Authorization 或 D Suppression。
+- 高隔离 Tenant 应评估独立 DB/Schema/Collection/Shard；大量小 Tenant 可考虑 Partition 和严格 Filter。必须记录 Noisy Neighbor 和 Index Recall Leakage 风险。
+- pgvector 的 Approximate Filter 可能发生在 ANN Candidate Scan 之后。Tenant Filter 在逻辑上正确，不代表结果数量和隔离影响都合格；必要时采用 Per-tenant Partition/Index。
+- Qdrant Payload Filter 必须用于每条 Query；Collection-per-tenant 有资源开销；少量大型 Tenant 可以评估 User-defined Sharding。
+- Search Candidate 在取内容或披露前，必须由 Canonical Authorization 和 Forget 状态重新验证。
+- 跨租户聚合、唯一性约束、外键错误、时间、计数和 Debug Trace 都应检查 Side-channel。
+- Backup 和 Support Tool 必须有明确的 Tenant-aware Access 与特权审计。
+
+## 9. 按能力的产品决策
+
+| 能力 | 最小实现 | 产品引入触发条件 | 状态 |
+|---|---|---|---|
+| Canonical Storage | PostgreSQL 或 SQLite Profile | 写入并发、HA、Operator、多主机需求 | L4 OPEN |
+| Event/Evidence Storage | 关系元数据 + 内容寻址 Blob 引用 | 大型不可变 Payload/对象保留 | 候选 |
+| Relational Data | SQL 表、约束、事务 | 核心必需 | RECOMMENDED |
+| Vector Search | 初期省略或 pgvector Exact/HNSW Spike | 标注 Recall/Latency 证明 ANN 价值 | OPEN/TO_VALIDATE |
+| Full-text Search | PostgreSQL FTS 或 SQLite FTS5 | Tokenizer/相关性/规模测试未达标 | 首选 |
+| Hybrid Search | SQL Lexical + Vector Candidate Fusion + Canonical Revalidation | 检索评估证明收益 | TO_VALIDATE |
+| Temporal Query | Valid Time + Recorded Time + Range Predicate/Index | 专门时序负载证明必要 | 先 SQL |
+| Graph/Relationship | Typed Relational Edge + Recursive Query | 深路径遍历/图分析超出 SQL | 先 SQL |
+| Blob Storage | 初期内容寻址本地 FS | 多主机耐久/容量需求 | 候选 |
+| Cache | Moka 进程内、有界、可丢弃 | 测量证明跨进程需求 | 候选 |
+| Index Rebuild | Outbox + Source Watermark + Shadow Generation | 生产服务索引前必须具备 | REQUIRED |
+| Backup/Restore | SQLite Online Backup 或 PostgreSQL Base Backup/WAL PITR + Blob Snapshot | 随物理引擎确定 | REQUIRED |
+| Multi-tenancy | I Authorization + Scope Filter + DB/Search 纵深防御 | Tenant 数量/隔离 Profile | REQUIRED |
+| Replication | 本地 Profile 不复制；按需采用 PostgreSQL HA | RPO/RTO 与可用性目标 | L4 OPEN |
+| Migration | 版本化 SQL Migration、Expand/Contract | 每次 Schema 演进 | REQUIRED |
+
+## 10. 采用矩阵
+
+| 产品 | Canonical DB | Search/Index | 第一阶段 | 后续触发 | 建议 |
+|---|---:|---:|---:|---|---|
+| PostgreSQL 18 | 是，候选 | 原生 FTS | 服务端 Profile | 多写入/服务端/HA | PREFERRED SERVER CANDIDATE |
+| SQLite + WAL | 是，候选 | 原生 FTS5 | 嵌入式 Profile | 本地/离线/单主机 | CANDIDATE |
+| pgvector | 否 | Vector Projection | 仅可选评估 | Vector Benchmark 通过 | DEFAULT VECTOR CANDIDATE |
+| Qdrant | 否 | Vector Service | 否 | 专用扩展/过滤/Sharding | DEFER |
+| Tantivy | 否 | Lexical Index Library | 否 | Native FTS 评估失败 | DEFER |
+| LanceDB | 未批准为事务权威 | Embedded Vector/Multimodal | 否 | 嵌入式 ANN 实验 | EXPERIMENTAL |
+| Redis | 否 | Cache/Coordination | 否 | 跨进程 Cache 需求 | DEFER |
+| Neo4j/Graph DB | 否 | Graph Projection | 否 | 复杂图遍历/分析需求 | DEFER |
+| S3-compatible Object Store | 否 | Blob Bytes | 先本地 FS | 多主机/Object Lifecycle | LATER |
+| Elasticsearch/OpenSearch/Quickwit | 否 | Search Service | 否 | 实测分布式检索需求 | DEFER |
+
+本矩阵不批准或冻结任何产品。
+
+## 11. 推荐最小技术栈
+
+### Profile A：本地优先嵌入式候选
+
+- Rust 模块化单体；子系统边界保持 Module，不强制成为 Service。
+- SQLite + WAL 作为每 Authority 一个事务域，使用单写者队列和明确 Busy/Retry 行为。
+- FTS5 负责词法检索。
+- 内容寻址本地文件系统保存不可变 Blob；SQLite 保存 Metadata 和 Digest。
+- Moka 提供有界进程内 Cache，识别 Generation/Fence；Cache 不具权威。
+- DB-backed Transactional Outbox/Work Queue；第一阶段不使用 Redis/NATS/Kafka。
+- 初期省略 Vector Search；若确有需要，单独受控评估 Exact SQL Scan/pgvector Server Profile 与一个嵌入式 ANN Library。
+
+### Profile B：服务端候选
+
+- Rust 模块化单体。
+- PostgreSQL 18 作为相关 Canonical Memory Authority 的单一事务域；D + Storage Serialization Row 和 Anchor 必须参与同一个 Serializable Commit Boundary。
+- PostgreSQL FTS 提供初始词法检索。
+- pgvector 仅在标注检索评估后可选共置；先 Exact Search，再考虑 HNSW/IVFFlat。
+- 内容寻址 Object Storage（初期本地 FS；多主机运维需要时 S3-compatible）。
+- Moka 本地 Cache。只有跨进程需求有测量依据才加 Redis。
+- Transactional Outbox + DB-backed Worker；外部 Projection 异步且可重建。
+- Qdrant/Tantivy 只能在 Outbox 和 Canonical Revalidation 后引入，并经过独立 Failure/Forget/Restore Gate。
+
+**为什么有两个 Profile：** 产品定位本地优先且 Agent/Model 无关。SQLite 与 PostgreSQL 是不同部署 Profile，不是同一 Authority 的双活写入数据库。一个 Canonical Memory Authority 只有一个活动 Serialization Domain。跨 Profile 迁移属于受控 Authority Migration，不是实时双写真相。
+
+**明确不做：**
+- 不因 D、Storage、Index、Vector、Cache、Blob、Search 是独立 Module 就拆微服务。
+- 不对 PostgreSQL 与 Qdrant 进行双重 Canonical Write。
+- 未有 Typed Relation Query 工作负载证据前不加 Graph DB。
+- 不把 Search Engine 作为 Canonical Truth。
+- 不用 Redis/Broker 替代 DB Transaction、Forget Fence 或 COC Quorum。
+- 不假设 Object Store/Index 删除等于 Physical Forget 完成。
+
+## 12. 复杂度削减机会
+
+1. **一个 Canonical Transaction Domain：** v1 避免 D 与 Storage 使用不同数据库；保留语义 Owner 区分，共享 L1 Option A 物理序列化底座。
+2. **先原生词法检索：** 在语料证据要求前，不同时运维 FTS 和 Tantivy。
+3. **Vector 作为派生能力：** Embedding Metadata/ANN Row 是 Projection；没有规模和 Recall 证据前不建 Qdrant Cluster。
+4. **先用关系模型表达图：** Typed Edge Table + Recursive SQL 可以避免图服务，同时保留 Relation 语义。
+5. **Blob 间接引用而非复制：** 内容寻址不可变对象 + Metadata Ref，避免 Evidence Payload 多份完整复制。
+6. **DB-backed Outbox/Worker：** 第一阶段模块化单体不需要 Kafka/NATS，除非吞吐或消费者隔离证据要求。
+7. **先 Moka 后 Redis：** 避免分布式 Cache Invalidation 和额外故障域。
+8. **统一 Migration Framework：** 所有 Profile 使用版本化 SQL Migration、Expand/Contract、Compatibility Check 和 Checksum。
+9. **不单独引入 Temporal DB：** 在关系 Schema 中保留 Valid Time、Recorded Time、Event Time 和 Transaction Time；只有测量证明 SQL 不够时再评估专门产品。
+10. **统一 Projection Generation/Watermark：** 为 FTS、Vector、Graph、Cache 使用通用 Projection Lifecycle Contract，减少定制清理逻辑，但不合并语义。
+11. **明确 Profile 矩阵：** 每个 Authority 选择嵌入式 SQLite 或服务端 PostgreSQL，不同时运行两套 Source of Truth。
+12. **保留类型化 Owner 边界：** 削减物理产品不能合并 Event/Memory/Claim/Evidence/Relation、D/Storage/I/COC 权威，或 Canonical/Derived 表示。
+
+## 13. 验收标准
+
+任何产品采用或 ADR 批准前，必须满足对应标准。除明确标记为源码核验的内容外，以下测试均为本研究会话 **NOT RUN**。
+
+### 13.1 Storage 与 Transaction
+
+- [ ] 固定精确 DB 产品、版本、构建、配置、Adapter、部署清单、Operator/On-call 和 Authority Identity。
+- [ ] D Admission、D ForgetFence、Storage PREPARED_HIDDEN、VisibilityPointer、Receipt、Outcome、Outbox 的行归属和事务边界经 Owner 批准。
+- [ ] 实现精确 `CanonicalAuthoritySerializationAnchor`，绑定正确的 `BrainAuthorityRef`、`SerializationDomainRef` 和 DB Incarnation。
+- [ ] Serializable Conflict/Retry 测试保持不可变 Operation Identity，并拒绝相同 Idempotency Key 携带冲突 Digest。
+- [ ] Fence-first 与 Participant-first Race 证明正确顺序。
+- [ ] Pointer + Receipt + Outcome + Outbox 原子提交，无部分可见状态。
+- [ ] Lost ACK、Commit 前崩溃、Commit 后 ACK 前崩溃、重复请求和模糊结果都通过相同 Operation/Participant Tuple 解决。
+- [ ] Stale Replica/Cache 和 Protected Read Path 测试不能在 Pointer Commit 前或 Forget Suppression 后服务。
+- [ ] Primary Loss、Promotion、Old-primary Rejoin Fencing、Split-brain Attempt 和 DB-incarnation Mismatch 测试通过。
+- [ ] Restore/PITR 在 COC/D/I/Storage Prefix 与 Anti-rollback Witness 对账前保持 RESTORE_FENCED。
+
+### 13.2 Search 与 Index
+
+- [ ] 标注语料包括中文、日文、英文、多语言查询、别名、时间限定、否定/冲突 Claim 和 Scope/Tenant 分布。
+- [ ] ANN 之前先有 SQL Structured Filter 和 Native Lexical Search 基线。
+- [ ] 对 PostgreSQL FTS、FTS5、Tantivy 比较 Recall@k、Precision@k、nDCG/MRR、延迟百分位、索引构建时间、增量更新、删除和重建。
+- [ ] 比较 Exact Vector Search 与 pgvector HNSW/IVFFlat，包含 Filtered Recall、内存、构建、写放大和删除行为。
+- [ ] 若提议 Qdrant，必须证明 Outbox Lag/Replay、重复投递、Target Restore、Shard Move、Filtered Multi-tenant Query、Canonical Revalidation 和 Forget Cleanup。
+- [ ] 每条 Index Row 绑定 Source ID/Version/Digest、Model/Tokenizer Version、Scope、Policy/Fence Generation 和 Projection Watermark。
+- [ ] Shadow Rebuild/Generation Switch 不得暴露陈旧或 Forgotten 内容。
+- [ ] Search Outage/Lag 只能返回安全降级结果，不能改变 Canonical Existence/Visibility。
+
+### 13.3 Forget、安全和多租户
+
+- [ ] Fence Linearization 立即阻断 Search、Cache、Blob、Graph、Export 和 Replica 等所有受保护读路径。
+- [ ] Index/Cache Tombstone/Purge 幂等、可观测、可重试，不能单独释放 Owner Barrier。
+- [ ] Physical Erasure 与 Backup Expiry/Key Destruction 和 Logical Suppression 分开跟踪。
+- [ ] Restore 不能复活备份快照之后已 Forget 的内容。
+- [ ] 跨租户负向测试覆盖 SQL、RLS、FTS、Vector、Qdrant Payload Filter、Blob、Cache、Graph Traversal、Export 和 Privileged Tool。
+- [ ] Authorization 由 I 签发/验证；Search Filter/RLS 仅为纵深防御。
+- [ ] 不接受陈旧 Authorization/Fence Cache 或 Replica 作受保护决策依据。
+
+### 13.4 运维、迁移和许可证
+
+- [ ] Backup/Restore Drill 确立 RPO/RTO；在精确选定构建上演练 PostgreSQL WAL/PITR 或 SQLite Online Backup。
+- [ ] Disk Full、Blob Corrupt、Object Missing、WAL Growth、Migration Failure 和 Index Rebuild 中断都有确定安全行为。
+- [ ] Schema Migration 版本化、有 Checksum、适当幂等、Expand/Contract，并兼容 Restore。
+- [ ] Index 能从 Canonical Record 和明确 Event/Outbox Watermark 重建，不把 Index 当 Source of Truth。
+- [ ] 核对精确 Release Tag、MSRV、Extension、Tokenizer Dictionary、Build Flag、传递依赖许可证及 Cloud/Service 条款。
+- [ ] 独立审查读回精确 Source Blob 和双语语义对等。
+- [ ] 不从案头研究报告推导 Implementation PASS、Gate Closure、Production Activation 或 Technology Freeze。
+
+## 14. 未解决事项与关闭条件
+
+| ID | 未解决问题 | 影响 | 关闭条件 |
+|---|---|---|---|
+| S03-OPEN-01 | 目标部署是单用户本地、多用户本地还是服务端 | 决定 SQLite/PostgreSQL 和 Operator 模型 | 明确产品/运维决策与用户/负载假设 |
+| S03-OPEN-02 | Corpus、写入速率、并发、Tenant 数、Blob 大小、Retention | 没有数据无法可靠选容量/性能 | 实测工作负载模型和代表性数据集 |
+| S03-OPEN-03 | 当前 main 缺少 Storage 源目录 | 无法认证完整规范当前性 | 恢复/发布规范源路径或提供精确权威引用，并重新读取相关规范 |
+| S03-OPEN-04 | L4 DB Engine/Version/Config/Operator | Storage ADR T1/T6/T7 要求 | L4 ADR、部署清单、On-call、HA/PITR 和读路径证据 |
+| S03-OPEN-05 | D/Storage Serialization Anchor、行归属和 Transaction/UoW | Option A 不等于同 DB 名称 | 精确 Schema/事务图及经 D/Storage 接受的 Race/Fault 测试 |
+| S03-OPEN-06 | I/COC Bridge 与 Restore Anti-rollback Witness | 不能声称跨日志原子性 | 精确 Owner 契约及 Restore/Recovery Drill |
+| S03-OPEN-07 | 中文/日文 Tokenizer 和相关性质量 | 原生 FTS 可能不足 | 标注多语言检索评估并选择 FTS5/Postgres FTS/Tantivy |
+| S03-OPEN-08 | Vector 价值与 Filtered ANN 质量 | 无证据证明需要独立 Vector Service | Lexical-only 基线与 Scope-filtered Vector 对比 |
+| S03-OPEN-09 | Blob Retention、Encryption、Key Custody、Backup Erasure | Forget/Evidence 生命周期依赖 | I/Storage 批准的 Retention/Key/Backup Policy 和测试 |
+| S03-OPEN-10 | Tenant 隔离等级 | 影响 RLS/Partition/独立 DB/Collection | Threat Model 和 Tenant Size/Isolation Profile |
+| S03-OPEN-11 | Replication、RPO/RTO、Region 要求 | 决定 HA 产品拓扑 | Ops 负责的 SLO 和故障切换/恢复方案 |
+| S03-OPEN-12 | Phase 3.9 Forget Terminalization 提案的 Owner 批准状态 | 提案不是规范 | 精确 D/I/Storage 决策和独立审查 |
+
+### 最终处置
+
+- **现在采用：** 不新增外部存储/搜索服务；保留当前逻辑模型、每 Authority 一个 Option A 序列化域、Transactional Outbox 和可重建派生索引契约。
+- **下一步原型：** 嵌入式 Profile 验证 SQLite/WAL + FTS5；服务端 Profile 验证 PostgreSQL 18 + FTS + 可选 pgvector。必须在同一标注工作负载和故障测试套件上比较。
+- **暂缓：** Qdrant、Tantivy、LanceDB、Redis、Neo4j、Elasticsearch/OpenSearch/Quickwit，除非测量证明有必要且运维/Forget 证明齐备。
+- **不得冻结：** PostgreSQL、SQLite、pgvector、Qdrant、任何 Schema、拓扑或索引引擎。L4 仍 OPEN。
+- **不改变语义：** Canonical Truth、Evidence、D Forget、I Authorization、Storage Visibility 和 COC 权威均不变。
+- **研究验证：** 已检查官方产品文档，已读取项目精确基线/ADR Blob；未执行原型、基准、故障注入、安全审计或生产部署；等待独立审查。
