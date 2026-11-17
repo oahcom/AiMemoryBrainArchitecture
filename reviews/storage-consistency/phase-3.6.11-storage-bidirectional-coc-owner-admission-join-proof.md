@@ -435,3 +435,37 @@ H 当前候选 Schema 为 Recovery Cutoff 1.0.5（`75cd1fedefd50a6ed570b5afaa2d1
 Storage 的双向 JoinProof 权威边界不变：每个 I/D/C Owner Admission Row 必须被正向处置；每个 COC Participant 必须反向解析到主 C Admission Anchor 和所有适用的 I/D/C/Storage Typed Evidence；六个 Request/Admission 集合分别完整枚举；OwnerAdmissionRef 与 OwnerEntryRef、OwnerRequestDigest 与 OwnerEntryDigest 不得混用；差集必须显式存在且 COMPLETE 时全部为空；I/D/C 必须各自在自己的权威域执行 Currentness CAS 和 Gate Release。Storage/COC 不得代替 Owner 释放 Gate。
 
 97 项通过只证明候选参考模型/结构/Wire 测试在 CI 中运行成功，不证明真实 COC Quorum、Owner Ledger Adapter、签名验证、JoinProof 持久化、Currentness CAS、JF-10 物理同 GID 恢复或 D/Storage 事务拓扑。HRC-TEST-v1 仍不是生产密码学规范；物理拓扑及集成符合性仍 OPEN。
+
+
+## 21. H 101-test candidate suite including I RFC 8785 / Ed25519 vectors
+
+The H candidate suite now contains **101 methods**:
+- HRC-01..25: 25;
+- JPF-01..19: 19;
+- WIRE-01..10: 10;
+- SCHEMA-01..16: 16;
+- TPH-01..26: 26;
+- XLANG-01: 1;
+- CRYPTO-01..04: 4.
+
+Latest H test/crypto sources:
+- H semantic contract: `4c5c3771575979061e674e40f1f5f3d9b4645bd9`.
+- I crypto candidate tests: `05c36b9d01340e0cc9fe504208b6ebc66fcf95bf`.
+- Independent Node JCS/Ed25519 oracle: `851484fee665f5a559b61ceae92a07c5082a3986`.
+- Fixed test-only crypto vector: `f1ec9fdca8ca7a124ef63a99d8f50c4dc57fa219`.
+- I profile proposal: `5eeb011032c53c2f7897d699d6f512b26f07d0a2` (CANDIDATE / NOT APPROVED).
+- H crypto wire mapping: `b132e6a01bcfe13f92020b9778ee3f7ddbf65753` (wire-mapping candidate with amendments).
+- I exact review R3: `93afe9c9e06d20de5ce1c2a0f676b4785123fbcf` (ACCEPT WITH ENUMERATED AMENDMENTS; not independent Owner signature).
+- CI workflow: `2a6d875c69006bcc37dcc65ce6954e3cd4f135db`, pins Python rfc8785 0.1.4, cryptography 44.0.2, Node.js 22 and canonicalize 2.1.0.
+
+Latest run [44044062849](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44044062849), H commit `bfdc836da0cd64e290df7320eb552583dc95db43`, job `133905301392`: **101 tests ran, OK**. CRYPTO-01 compares Python and Node outputs for P0 JCS bytes, payload digest, signature projection/preimage, Ed25519 public key and deterministic signature; CRYPTO-02..04 cover object/array order, Unicode normalization behavior and non-finite numbers.
+
+This is stronger test-profile evidence than the earlier SHA-only XLANG vectors, but it remains TEST-ONLY. The private seed is deterministic and MUST NEVER be used in production. The test does not approve I trust roots, HSM/KMS, key lifecycle, historical trust, revocation propagation, anti-rollback deployment, production per-message P0 allowlists, real owner-signed snapshots or Storage's final visibility verification. The I profile and H mapping remain candidates with amendments, not frozen or deployed.
+
+### 21.1 中文规范：I 密码学跨语言候选测试
+
+H 当前共有 101 项候选测试：HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1、CRYPTO 4。最近运行 44044062849 在 Commit `bfdc836da0cd64e290df7320eb552583dc95db43` 上 101/101 PASS。
+
+新增 CRYPTO-01 使用 Python RFC 8785 / Ed25519 与独立 Node.js JCS / Ed25519 实现，比较 P0 Canonical Bytes、Payload Digest、Signature Projection/Preimage、公钥和确定性签名；CRYPTO-02..04 检查 Object/Array 顺序、Unicode 不自动归一化和 NaN/Infinity 拒绝。CI 固定 rfc8785 0.1.4、cryptography 44.0.2、Node.js 22、canonicalize 2.1.0。
+
+这些仍是 I 候选 Profile 的测试向量，不是生产批准。测试私钥 Seed 仅用于测试，严禁生产复用。测试不证明 Trust Root、HSM/KMS、Key Lifecycle、历史信任、撤权传播、Anti-rollback 部署、生产逐消息 P0 Allowlist、真实 Owner Snapshot 签名或 Storage 最终 Visibility Gate 已实现。I Profile 与 H Wire Mapping 仍为带修订项的候选提案，未冻结、未部署。
