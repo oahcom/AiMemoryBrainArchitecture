@@ -122,7 +122,7 @@ C publishes this as the exact semantic projection proposal and accepts responsib
 
 ## 8. Exact candidate digest and signature preimage (not registered)
 
-The C candidate construction is now pinned to the immutable object schema `urn:aimba:schema:c-submit-outcome:1.0.0`, Blob `09725d3a90e4c130b38400e8e2d613f755f3806a`. The schema requires `message_type=C_PROVIDER_OUTCOME_RECORDED`, `signature_profile_id=AIMBA-C-CRYPTO-1.0`, `payload_digest`, `key_id_ref`, `key_version` and `signature`.
+The C candidate construction is now pinned to the immutable object schema `urn:aimba:schema:c-submit-outcome:1.0.0`, Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`. The schema requires `message_type=C_PROVIDER_OUTCOME_RECORDED`, `signature_profile_id=AIMBA-C-CRYPTO-1.0`, `payload_digest`, `key_id_ref`, `key_version` and `signature`.
 
 Subject to I's future profile registration, the candidate construction from I Phase 3.8.4 is:
 - `P0Bytes = JCS(C-P0)`, where C-P0 is every present schema-allowed object member except `payload_digest` and `signature`.
