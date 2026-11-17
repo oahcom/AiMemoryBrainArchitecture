@@ -13,7 +13,7 @@
 | Domain semantic readiness | NOT READY | B Fact/Claim ADR remains ADR-BLOCKED |
 | Authority/ownership readiness | NOT READY | Issue #7 has no designated canonical runtime repo and accountable engineering lead |
 | Security/governance readiness | NOT READY | I36-GOV-01..10 and closed-world inventory remain governance-blocked |
-| Physical consistency readiness | NOT READY | Storage §8 has selected L1 Option A (one serializable transaction domain per Canonical Memory authority); L4 physical engine/deployment, adapter, HA/fencing and restore proof remain open; JF-10 Gate A partial/open, B/C blocked |
+| Physical consistency readiness | NOT READY | Option A is conditionally accepted as the v1 L1 direction only; A-01..A-05 clarifications, exact D acceptance, L2 composition, L3 proof and L4 engine/deployment remain open; JF-10 Gate A partial/open, B/C blocked |
 | Cross-module correctness | NOT PROVEN | Forget/publication/recovery and Applied proof chains lack full integrated physical evidence |
 | Complexity controllability | NOT PROVEN | X rates complexity High; eight-dimension ordinal scores are not a delivery estimate |
 | Implementation readiness | BLOCKED | No full P0 authority/proof prerequisites; runtime repo/owner absent |
@@ -29,7 +29,7 @@
 4. D/E/I/Storage close the exact admission/lineage/fence/visibility semantics and supply race/crash/recovery proofs.
 5. Storage completes physical topology and JF-10 evidence; C/G/H close final-request/provider/Applied semantics with independent consumer approvals.
 
-## Bounded authorization
+| B protocol alignment | CANDIDATE / NOT JOINTLY CURRENT | H 1.2.14 + CSubmitOutcome 1.0.1 candidate; H mapping/C review/D crosswalk/I P0 exist, but Storage v3.2.9 exact manifest is stale and no v3.3.0 successor is jointly accepted |
 
 Allowed: isolated synthetic-data feasibility experiments, contract-neutral test harnesses, exact-source refresh, bilingual parity automation, Storage candidate comparison, hardware/workload inventory, retrieval quality benchmarks on synthetic fixtures.
 
