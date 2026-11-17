@@ -154,3 +154,28 @@ This is 93/93 for the checked-in Python/Node candidate test harness. The differe
 H has also published Phase 3.8.3 wire mapping Blob `c30e8ccbecb75b7e27ddceb0cf088afbbb26f562` for I proposal `AIMBA-I-CRYPTO-1.0` (I proposal Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`) and schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`. H accepts this as a wire-mapping candidate with blocking amendments only. I exact review Blob `446109f4867268fe7dca3c7e114346f3c1a74b61` accepts with enumerated amendments; exact per-message P0 allowlists, key registry/runtime trust, profile lifecycle and independent production implementation vectors remain OPEN.
 
 The 93-case run does not validate unified schema 1.2.7 itself, production Ed25519 signatures, HSM/KMS, live I key-status, real owner/COC adapters or physical JF-10/Storage topology. H freeze remains **BLOCKED**.
+
+
+## 13. Latest 95-test RecoveryJoin / unified schema candidate evidence
+
+The current H candidate suite contains 95 methods:
+- HRC-01..25: 25;
+- JPF-01..19: 19;
+- WIRE-01..10: 10;
+- SCHEMA-01..14: 14;
+- TPH-01..26: 26;
+- XLANG-01: 1.
+
+Latest verified run before this evidence update: [44042568297](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042568297), commit `b832679d1143e2806cba30e77dd8d0b240334fdc`, job `133900417567`: 95 tests ran, OK.
+
+Exact current H pins:
+- H semantic contract: `99ccf2b637b6a87be045ed8342c88b15b8816604`.
+- RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- HRC/JPF suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- Two-phase reference/tests: `4c8dcafdb49db5279a1d1190b832a9c6c05d6b67` / `690ab42b4f8f7e61adf38fd7b6006f20cc71a7f5`.
+- Wire / differential / Node reference / vectors: `1a4e754ba9bfa57eb973c6d39731e9f89443b323` / `1b32fdf81530353b8bd4571fe6d4f77119a0458b` / `992585d3bc323dc0224d0075ef14abd992980f65` / `cc7e98c729db8d9f615e17a9542b3cb63f459922`.
+- Schema suite: `fa4fc9f7d3bf64a90bc992453b13fc1fb3c11879`.
+- Unified COC/JF-10 schema 1.2.7: `e9748a5b904d2b975e47a32a0cbb31de31636854`.
+- Workflow with Node.js 22: `55d877499010f6a776ae432c1fb2a3a31bae5f11`.
+
+SCHEMA-13/14 validate only the 1.2.7 artifact/wire version distinction and presence/compatibility shape of signature_profile_id. They do not validate protected-message semantic requiredness, I trust-registry lookup or production cryptographic verification. The 95 methods are candidate reference-model and test-profile evidence; HRC-TEST-v1 is not production. Live COC/owner adapters, two production implementations, I crypto trust, JF-10 physical behavior and deployed topology remain OPEN. H remains **NOT FROZEN / NOT INTEROPERABILITY-VERIFIED**.
