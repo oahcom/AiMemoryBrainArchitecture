@@ -9,7 +9,7 @@
 - D owner snapshot membership proof contract: Blob d80dabe7210e681bc4e2290355a38f8b67be9ddd
 - D publication participant/terminal contract: Blob 17e53890dd6cce9bea9eacc1be2e64b0ef55ac78
 - H Phase 3.8.10 I P0 review: Blob 0b6eeadb1cfac415e77ec1358b9fdf99fde11d41
-- C Phase 3.8.12 H/C mapping review: Blob c1dcc4049205b8b9315e3b284433625e9893a711
+- C Phase 3.8.14 successor H/C mapping review: Blob dd4fb61536bead57d5c8db0a58abae93b368b72e
 - Provenance: delegated D-role review; **not an independent human D Owner signature**.
 
 ## 1. Exact structural review / 精确结构复审
