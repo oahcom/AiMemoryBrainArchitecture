@@ -131,3 +131,54 @@ Storage has already selected Option A as the L1 logical topology. Phase A must r
 - L1 logical correctness separated from L4 engine/deployment/operator/fault-campaign acceptance.
 
 A must not treat the existence of the ADR as proof of physical feasibility or deployment readiness.
+
+
+## 9. Superseding B snapshot — Storage v3.2.9 / 更新后的 B 快照
+
+This section supersedes the earlier v3.2.7 / v3.2.8 candidate snapshot. Current successor: Storage **v3.2.9**, manifest Blob **bf323a1682f2bfadc3ff41ea4f86883d678a77e3**.
+
+### 9.1 Current Owner branch HEADs / 当前 Owner 分支 HEAD
+
+| Owner | Current branch HEAD | Latest action |
+|---|---|---|
+| A | 0bb77a3df8023ef0a5e27d79a0a9c49509a5b3f7 | Exact integration review of Storage v3.2.8; v3.2.9 still requires fresh A review |
+| C | 81f1e81307315a31c3bbeae17eb801e8a4f47e10 | Corrected exact H schema pin in Phase 3.8.18 review |
+| H | 362cc113cfb5b595a4002a6f6e980d19ae2d2d15 | Full local H/C path fixture and exact CI binding; 32 test methods |
+| D | 7d01732521a8b9db202f10cde2c2547e50071d58 | Corrected exact H schema pin in D full-path/clearance review |
+| I | a68bb3587fe88aa72398e2dc8d136f94cee9a63f | Corrected exact H schema pin in I full-path/terminal review |
+| Storage | 39a1e0429f6b4b08c6c437c8e3f5ace582a7315f | Storage v3.2.9 exact bundle manifest |
+
+### 9.2 What is now aligned at L1/L2 candidate level / 已完成的 L1/L2 候选收敛
+
+- H Unified 1.2.14 Blob `09fcd1fa29fe24255fbd87cae79dafb406594a59` is now the exact common pin across H mapping, C review, D review, I review and Storage v3.2.9.
+- H integrated Authority-Join mapping Blob `1cbe74eba69325510d6b1019d971661f965eabf8` is reviewed by C, H, D and I role artifacts.
+- CSubmitOutcome 1.0.1 remains the exact immutable C source; 1.0.0 is historical for new records.
+- RecoveryJoin 1.0.2 and RecoveryCutoff 1.0.5 remain separately pinned.
+- Storage v3.2.9 binds the exact C/H/I/D source and review set and H full-path test evidence.
+
+### 9.3 Full local path CI — improved evidence, not production authority / 本地完整路径 CI
+
+Storage v3.2.9 binds:
+- H Unified schema 1.2.14: `09fcd1fa29fe24255fbd87cae79dafb406594a59`
+- H integrated mapping: `1cbe74eba69325510d6b1019d971661f965eabf8`
+- H validator core: `eab961a08d41e871f38543b18ee60cf024977414`
+- H full-path test source: `dccf8c099c18807ec072870d32604d0912209f01`
+- H full positive fixture: `c80247a6ecfbb4a29ff0993e8e2aea4829d00626`
+- H full-path source/CI closure: `804bfd3214b015c80340575c1eb467d756ad0699`
+- H CI run `44069777296`, tested commit `9eb06313e94e762f0fde4a606633a6dbe1bf8262`, job `133992753552`: 32 test methods, success.
+
+Tests 21–25 execute the actual local H envelope + CSubmitOutcome 1.0.1 schema/semantic/digest path without mocking those local primitives. They cover a positive fixture, wire/object mismatch, C payload digest mutation, missing authority callbacks → UNKNOWN and contradictory callback → INVALID.
+
+**Evidence ceiling:** the ten C/I/D/Storage authority callbacks in the positive fixture remain deterministic test doubles. They are not production issuer-signed proof payloads or connected authority stores. This is full local validation-path evidence, not production trust/authority integration or distributed fault proof.
+
+### 9.4 B disposition / B 阶段裁决
+
+**B is now CONDITIONALLY ALIGNED at L1/L2 candidate level against Storage v3.2.9.** The earlier exact-pin and missing C integrated-mapping review discrepancies are corrected by the latest C/H/D/I source set and v3.2.9 manifest.
+
+B is handed to Phase A for exact review of (a) Storage v3.2.9 and (b) the separate Option A per-BrainAuthority serialization topology ADR. A's earlier review of v3.2.8 does not transfer to v3.2.9 or to the topology ADR.
+
+Still open: independent human Owner/governance signatures; production C/I trust/key-status and D/Storage proof adapters; full D lineage and release CAS; bidirectional COC↔I/D/C joins; same-GID recovery; R1/R2; JF-10; Gate B/C; production activation.
+
+**B 现可在 L1/L2 候选层标记为 CONDITIONALLY ALIGNED，基线为 Storage v3.2.9。** 早期精确 Pin 与 C 集成 Mapping 审查缺口，已由最新 C/H/D/I 源文件和 v3.2.9 Manifest 修正。现交由 A 对 (a) Storage v3.2.9 和 (b) 独立的 Option A per-BrainAuthority Serialization Topology ADR 做精确审查。A 对 v3.2.8 的旧审查不自动转移到 v3.2.9，也不等于拓扑 ADR 审查。
+
+仍未关闭：独立人类 Owner/治理签署；生产 C/I Trust/Key Status 与 D/Storage Proof Adapter；完整 D Lineage/Release CAS；双向 COC↔I/D/C Join；Same-GID Recovery；R1/R2；JF-10；Gate B/C；生产激活。
