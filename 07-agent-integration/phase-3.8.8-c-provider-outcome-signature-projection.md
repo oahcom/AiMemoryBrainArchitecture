@@ -118,3 +118,17 @@ Do not infer JSON Pointer names from prose. The mapping must be derived from the
 C publishes this as the exact semantic projection proposal and accepts responsibility for the C-owned field inventory. It does not claim I approval, H wire conformance, signature implementation, key registration, test execution, adapter certification, production readiness or exactly-once delivery.
 
 **Disposition: PROPOSED — C projection defined; I profile approval, H schema mapping, executable vectors and independent execution remain open.**
+
+
+## 8. Exact candidate digest and signature preimage (not registered)
+
+The C candidate construction is now pinned to the immutable object schema `urn:aimba:schema:c-submit-outcome:1.0.0`, Blob `09725d3a90e4c130b38400e8e2d613f755f3806a`. The schema requires `message_type=C_PROVIDER_OUTCOME_RECORDED`, `signature_profile_id=AIMBA-C-CRYPTO-1.0`, `payload_digest`, `key_id_ref`, `key_version` and `signature`.
+
+Subject to I's future profile registration, the candidate construction from I Phase 3.8.4 is:
+- `P0Bytes = JCS(C-P0)`, where C-P0 is every present schema-allowed object member except `payload_digest` and `signature`.
+- `payload_digest = SHA-256(ASCII("AIMBA-C-PAYLOAD-v1") || 0x00 || P0Bytes)`, lowercase hex.
+- `P = C-P0 + {payload_digest}`; `PBytes = JCS(P)`.
+- `signature_preimage = ASCII("AIMBA-C-SIGNATURE-v1") || 0x00 || ASCII("AIMBA-C-CRYPTO-1.0") || 0x00 || ASCII(message_type) || 0x00 || PBytes`.
+- Ed25519 signature encoded as unpadded Base64url.
+
+The H validator MUST use `message_type`, not message_id, as the message-family domain component. The exact projection allowlist is schema-closed by `additionalProperties=false`; any schema evolution requires a new immutable schema/profile revision. This is a candidate construction only: I has not registered the profile, and no C signature vectors have been executed.
