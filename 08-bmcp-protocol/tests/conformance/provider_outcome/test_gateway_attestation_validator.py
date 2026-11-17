@@ -79,12 +79,30 @@ class GatewayAttestationSchemaTests(unittest.TestCase):
 
     def gateway_checks(self):
         return GatewayAttestationChecks(
-            verify_profile_registration=lambda env, ctx: True,
-            verify_key_status=lambda env, ctx: True,
-            verify_h_signature=lambda env, preimage, ctx: True,
-            verify_integrity_evidence=lambda env, digest, ctx: True,
-            verify_identity_binding=lambda env, ctx: True,
-            verify_origin_transport_receipt=lambda env, raw, obj, ctx: True,
+            verify_profile_registration=lambda env, ctx: env.get("signature_profile_id") == H_PROFILE_ID,
+            verify_key_status=lambda env, ctx: (
+                env.get("signing_sequence_namespace_ref") == "H/gateway/signing-sequence/1"
+                and env.get("signing_record_sequence") == "17"
+                and env.get("key_version") == "h-gateway-v1"
+            ),
+            verify_h_signature=lambda env, preimage, ctx: (
+                env.get("signature") == "TEST-ONLY-H-GATEWAY-SIGNATURE"
+                and preimage.startswith(b"AIMBA-H-GATEWAY-ATTEST-P0\\x00v1\\x00")
+            ),
+            verify_integrity_evidence=lambda env, digest, ctx: (
+                env.get("integrity_proof_ref") == "H/integrity-proof/1"
+                and env.get("payload_digest") == digest
+            ),
+            verify_identity_binding=lambda env, ctx: (
+                env.get("owner_authority") == "C"
+                and env.get("issuer_ref") == ctx.issuer_ref
+                and env.get("subject_ref") == "C/subject/provider-outcome"
+            ),
+            verify_origin_transport_receipt=lambda env, raw, obj, ctx: (
+                env.get("origin_sender_subject_ref") == "C/adapter/adapter-7"
+                and env.get("origin_received_bytes_digest") == hashlib.sha256(raw).hexdigest()
+                and obj.get("AdapterRef") == "C/adapter/test"
+            ),
             commit_authenticated_ingress=lambda env, digest, ctx: DurableIngressDecision("NEW"),
             verify_replay_disclosure_authorization=lambda env, ctx: True,
         )
@@ -250,6 +268,35 @@ class GatewayAttestationSchemaTests(unittest.TestCase):
         checks.commit_authenticated_ingress = lambda env, digest, ctx: DurableIngressDecision("UNKNOWN")
         result = self.invoke(gateway_checks=checks)
         self.assertEqual(result["status"], "UNKNOWN", result)
+
+
+    def test_18_every_present_p0_field_is_digest_bound(self):
+        from gateway_attestation_validator import P0_FIELDS
+
+        for field in P0_FIELDS:
+            if field not in self.envelope:
+                continue
+            with self.subTest(field=field):
+                old = self.envelope[field]
+                if isinstance(old, str):
+                    self.envelope[field] = old + "-mutated"
+                elif old is None:
+                    self.envelope[field] = "mutated"
+                else:
+                    self.envelope[field] = {"mutated": True}
+                result = self.invoke()
+                self.assertEqual(result["status"], "INVALID", result)
+                self.envelope[field] = old
+
+    def test_19_signature_and_integrity_reference_are_independently_verified(self):
+        self.envelope["signature"] = "MUTATED-SIGNATURE"
+        result = self.invoke()
+        self.assertEqual(result["status"], "INVALID", result)
+
+        self.setUp()
+        self.envelope["integrity_proof_ref"] = "H/integrity-proof/attacker"
+        result = self.invoke()
+        self.assertEqual(result["status"], "INVALID", result)
 
     def test_17_missing_protected_h_gateway_context_is_unknown(self):
         raw_env = json.dumps(self.envelope, separators=(",", ":"), sort_keys=True).encode("utf-8")
