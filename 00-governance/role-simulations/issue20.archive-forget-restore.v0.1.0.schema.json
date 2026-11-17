@@ -8,7 +8,7 @@
       "$ref": "#/$defs/DRegistrationReceipt"
     },
     {
-      "$ref": "#/$defs/DPublicationParticipantReceipt"
+      "$ref": "#/$defs/DPublicationParticipantAdmissionReceipt"
     },
     {
       "$ref": "#/$defs/DForgetBarrierProof"
@@ -39,6 +39,12 @@
     },
     {
       "$ref": "#/$defs/IReconciliationTuple"
+    },
+    {
+      "$ref": "#/$defs/DPublicationTerminalReceipt"
+    },
+    {
+      "$ref": "#/$defs/ITerminalProof"
     }
   ],
   "$defs": {
@@ -284,6 +290,9 @@
             },
             "suppressionAcknowledgementSetDigest": {
               "$ref": "#/$defs/Digest"
+            },
+            "ownerSnapshotMembershipProofSetDigest": {
+              "$ref": "#/$defs/Digest"
             }
           }
         }
@@ -380,7 +389,29 @@
             "permissionEpoch",
             "iGateGeneration",
             "sequencerPosition",
-            "decision"
+            "decision",
+            "nonce",
+            "policyVersion",
+            "issuerKeyVersion",
+            "issuerKeyStatusRef",
+            "subjectRef",
+            "actorRef",
+            "workloadRef",
+            "delegationChainDigest",
+            "action",
+            "artifactRef",
+            "artifactVersion",
+            "artifactContentDigest",
+            "purpose",
+            "environmentRef",
+            "ownerBoundary",
+            "finalVisibilityGateRef",
+            "publicationTupleDigest",
+            "dPublicationParticipantRef",
+            "storageVisibilityParticipantRef",
+            "consumedAt",
+            "canonicalizationProfileRef",
+            "signatureProfileRef"
           ],
           "properties": {
             "messageType": {
@@ -412,9 +443,79 @@
               "enum": [
                 "COMMIT_WON",
                 "REVOCATION_WON",
-                "INDETERMINATE_ABORTED",
                 "UNKNOWN_IN_DOUBT"
               ]
+            },
+            "nonce": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "policyVersion": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "issuerKeyVersion": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "issuerKeyStatusRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "subjectRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "actorRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "workloadRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "delegationChainDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "action": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "artifactRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "artifactVersion": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "artifactContentDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "purpose": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "environmentRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "ownerBoundary": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "finalVisibilityGateRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "publicationTupleDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "dPublicationParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "storageVisibilityParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "consumedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "acceptBefore": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "canonicalizationProfileRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "signatureProfileRef": {
+              "$ref": "#/$defs/OpaqueRef"
             }
           }
         }
@@ -438,7 +539,8 @@
             "participantLedgerVersion",
             "publicationOperationId",
             "requestDigest",
-            "participantTupleDigest"
+            "participantTupleDigest",
+            "state"
           ],
           "properties": {
             "messageType": {
@@ -475,6 +577,9 @@
             },
             "participantTupleDigest": {
               "$ref": "#/$defs/Digest"
+            },
+            "state": {
+              "const": "PREPARED_HIDDEN"
             }
           }
         }
@@ -850,58 +955,6 @@
       ],
       "unevaluatedProperties": false
     },
-    "DPublicationParticipantReceipt": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/SignedEnvelope"
-        },
-        {
-          "type": "object",
-          "required": [
-            "messageType",
-            "forgetOperationRef",
-            "publicationOperationId",
-            "requestDigest",
-            "producerWorkItemId",
-            "scopeRef",
-            "sourceLineageDigest",
-            "storageVisibilityParticipantRef",
-            "forgetFenceGeneration"
-          ],
-          "properties": {
-            "messageType": {
-              "const": "D_PUBLICATION_PARTICIPANT_RECEIPT"
-            },
-            "forgetOperationRef": {
-              "$ref": "#/$defs/OpaqueRef"
-            },
-            "publicationOperationId": {
-              "$ref": "#/$defs/OpaqueRef"
-            },
-            "requestDigest": {
-              "$ref": "#/$defs/Digest"
-            },
-            "producerWorkItemId": {
-              "$ref": "#/$defs/OpaqueRef"
-            },
-            "scopeRef": {
-              "$ref": "#/$defs/OpaqueRef"
-            },
-            "sourceLineageDigest": {
-              "$ref": "#/$defs/Digest"
-            },
-            "storageVisibilityParticipantRef": {
-              "$ref": "#/$defs/OpaqueRef"
-            },
-            "forgetFenceGeneration": {
-              "type": "integer",
-              "minimum": 0
-            }
-          }
-        }
-      ],
-      "unevaluatedProperties": false
-    },
     "IReconciliationTuple": {
       "allOf": [
         {
@@ -925,7 +978,10 @@
             "cocRecoveryEpochRef",
             "cocPrefixDigest",
             "recoveryCutoffBatchDigest",
-            "participantManifestDigest"
+            "participantManifestDigest",
+            "iSnapshotMembershipProofSetDigest",
+            "dSnapshotMembershipProofSetDigest",
+            "ownerSnapshotRootsDigest"
           ],
           "properties": {
             "messageType": {
@@ -989,6 +1045,248 @@
             },
             "checkpointDigest": {
               "$ref": "#/$defs/Digest"
+            },
+            "iSnapshotMembershipProofSetDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "dSnapshotMembershipProofSetDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "ownerSnapshotRootsDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "recoveryCutoffBatchRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "recoveryCutoffBatchEntryDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "participantManifestRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "participantManifestContentDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "participantManifestRecordEntryDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "memberSetRoot": {
+              "$ref": "#/$defs/Digest"
+            },
+            "manifestMemberCount": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cocParticipantCount": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "ownerLocalAdmissionCount": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "DPublicationParticipantAdmissionReceipt": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "forgetOperationRef",
+            "publicationOperationId",
+            "requestDigest",
+            "producerWorkItemId",
+            "scopeRef",
+            "sourceLineageDigest",
+            "storageVisibilityParticipantRef",
+            "forgetFenceGeneration"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "D_PUBLICATION_PARTICIPANT_RECEIPT"
+            },
+            "forgetOperationRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "publicationOperationId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "requestDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "producerWorkItemId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "scopeRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "sourceLineageDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "storageVisibilityParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "forgetFenceGeneration": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "DPublicationTerminalReceipt": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "publicationParticipantRef",
+            "publicationOperationId",
+            "publicationTupleDigest",
+            "storageVisibilityParticipantRef",
+            "artifactRef",
+            "artifactVersion",
+            "artifactContentDigest",
+            "storageOutcomeDigest",
+            "outcome",
+            "forgetFenceGeneration",
+            "dTerminalPosition"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "D_PUBLICATION_TERMINAL_RECEIPT"
+            },
+            "publicationParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "publicationOperationId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "publicationTupleDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "storageVisibilityParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "artifactRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "artifactVersion": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "artifactContentDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "storageOutcomeDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "outcome": {
+              "enum": [
+                "COMMITTED_VISIBLE",
+                "NO_PUBLICATION"
+              ]
+            },
+            "forgetFenceGeneration": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "dTerminalPosition": {
+              "$ref": "#/$defs/DPosition"
+            },
+            "visibilityPointerRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "nonPublicationEvidenceDigest": {
+              "$ref": "#/$defs/Digest"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false,
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "COMMITTED_VISIBLE"
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "then": {
+        "required": [
+          "visibilityPointerRef"
+        ]
+      },
+      "else": {
+        "required": [
+          "nonPublicationEvidenceDigest"
+        ]
+      }
+    },
+    "ITerminalProof": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "authorizationReceiptRef",
+            "policyDomainRef",
+            "publicationOperationId",
+            "publicationTupleDigest",
+            "dPublicationParticipantRef",
+            "storageVisibilityParticipantRef",
+            "storageOutcomeDigest",
+            "storageOutcome",
+            "iSequencerPosition"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "I_TERMINAL_PROOF"
+            },
+            "authorizationReceiptRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "policyDomainRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "publicationOperationId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "publicationTupleDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "dPublicationParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "storageVisibilityParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "storageOutcomeDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "storageOutcome": {
+              "enum": [
+                "COMMITTED_VISIBLE",
+                "NO_PUBLICATION"
+              ]
+            },
+            "iSequencerPosition": {
+              "$ref": "#/$defs/IPosition"
             }
           }
         }
