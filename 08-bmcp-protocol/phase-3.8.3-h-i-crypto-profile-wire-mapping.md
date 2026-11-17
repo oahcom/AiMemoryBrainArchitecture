@@ -2,7 +2,7 @@
 # Phase 3.8.3 — H 对 I 密码学配置的 Wire 映射
 
 - Owner: H — BMCP Protocol and Adapter Authentication
-- Exact I proposal: `AIMBA-I-CRYPTO-1.0`, Blob `30967b2c58ef0aaf760a22fe61192e70744d5964`
+- Exact I proposal: `AIMBA-I-CRYPTO-1.0`, Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`
 - Exact H schema: `bmcp.coc-jf10-unified/1.2.7`, Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`
 - On-wire family version: `schema_version = 1.2.0` (unchanged)
 - H decision: **ACCEPT AS WIRE-MAPPING CANDIDATE WITH BLOCKING AMENDMENTS**
