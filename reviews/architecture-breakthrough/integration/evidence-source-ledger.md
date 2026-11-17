@@ -89,3 +89,59 @@ Current main: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; tree `7096e0bc3fdc9a39
 - GitHub Actions run: `44136327645`, SUCCESS; tested commit `89a680bbad7246952d51c61c137b0c3611f52a06`.
 - Result: 27,472 state/depth pairs through depth 14; 11 weakened-guard mutants; model command and unittest suite passed.
 - Model result is bounded logical evidence only; it is not TLC, unbounded proof, or physical/production evidence.
+
+
+## Independent A review evidence pins — ABR-AUDIT-007 / PR #100
+
+- A source audit report: `reviews/architecture-authority/2026-11-18/ABR-INTEGRATION-SOURCE-AUDIT-007.en.md`, Blob `2bbe3e0a7ba237c082764e7ec9a4b73bd7f73afc`.
+- PR #100 disposition: APPROVED_WITH_CONDITIONS for research integration accuracy only; not architecture approval.
+- PR #86 RM prototype: `memory-operating-system/prototype.py`, Blob `72b9f493b58cb42791c39cde5a78f2163235002e`.
+- PR #86 exact benchmark report: `prototype-and-benchmarks.md`, Blob `2053e4de179c80878fbdeee4f4874de5ad04057c`.
+- Exact median latency: Direct Top-K 0.095 ms; Rerank + Budget 0.119 ms; Unified RM 0.306 ms. Single-threaded local Python microbenchmark, not service latency.
+- PR #85 IR prototype: `prototype/memory_ir_prototype.py`, Blob `bd27e93e90aceacf1857ebdf56b97e59ae34eb32`.
+- PR #85 synthetic fixture: `prototype/sample_experiences.json`, Blob `657268696ed95a481bf2836e9750fd59183d83e3`.
+- PR #85 prototype README: Blob `f2a293a084942cbc77b7f9025b6e4d442757a56d`.
+- PR #85 Direct-vs-IR report: Blob `087212cb9713d37d91fce8943efaf6d80249b87c`.
+- PR #88 Python bounded model: `forget-formal-verification/model/forget_model.py`, Blob `8e75f2978a0b85b3f0311ac0a189d40125b8d461`.
+- PR #88 F1–F8 invariants: Blob `14eb422c4ac7763d4682adacacd50b42b34fda6c`.
+- PR #88 model results: Blob `2082e4a547dbe76c319d58bdd75022ccc532b6e2`.
+- PR #88 state machine: Blob `4868832dab421f6d76caf4d3366da68e960abe99`.
+- PR #88 counterexample catalog: Blob `254ab3c7c467ab9acfcae88ffe1dc92d1045e3aa`.
+- PR #88 remediation proposals: Blob `9baef6654783182dc825f34a6d35426286541a66`.
+- PR #84 TLA+ skeleton: `forget-model/ForgetModel.tla`, Blob `8b069efcafaf0d7ab7e42f3c4953ad3f4836cb29`.
+- PR #84 TLC config: `forget-model/ForgetModel.cfg`, Blob `0e6e1bf9321a22afd856a4592efb3d23146d0119`.
+
+## A exact H Applied review — PR #98
+
+- Report: `reviews/architecture-authority/2026-11-18/H-APPLIED-DELIVERY-EVIDENCE-006.en.md`, Blob `44f79fc037a3aa15d171781fecf5a924e10a0388`.
+- Disposition: DEFERRED — CANDIDATE IMPLEMENTATION WITH OPEN P0 CONDITIONS.
+- H-ADE-001: duplicate top-level/nested JSON object keys are not rejected before standard JSON object materialization.
+- H-ADE-002: CSubmitOutcome 1.0.1 semantic/identity/final-boundary/digest join is not explicit in H validator contract.
+- H-ADE-003: current I authorization/PermissionEpoch, key status, audience/scope and D Forget fence must be rechecked before SAME_DIGEST_REPLAY returns original result ref.
+- H schema/validator/test/workflow and H Phase 3.8.24 exact Blobs remain as listed in prior ledger section.
+
+## C/I gateway-attestation order reviews — exact scope distinction
+
+- C Phase 3.8.27: `07-agent-integration/phase-3.8.27-c-rereview-h-gateway-attestation-ordering.md`, Blob `3ca06dbfd7d59483e9604b7a68df924c719f60aa`.
+- I Phase 3.8.23: `09-security-governance/phase-3.8.23-i-rereview-h-gateway-attestation-replay-acceptance-order.md`, Blob `85cdbad04ae4b688338cdf2b667c21d2f02d8b96`.
+- These delegated role reviews accept C verification before H Unified 1.2.15 Gateway Attestation signing and the durable replay order. They do **not** accept the separate H Applied Delivery Evidence 1.0.0 message family.
+
+## Storage Option A ADR status — exact supersession evidence
+
+- Option A topology ADR: `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md`, Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`.
+- §3 contains pre-addendum “no option selected” text; §8.6 explicitly marks that historical status superseded and states L1 is closed by the ADR with Option A selected as the normative v1 logical topology.
+- Storage v3.3.2 exact-version manifest: `reviews/storage-consistency/phase-3.6.22-storage-v3.3.2-option-a-status-corrected-exact-version-manifest.md`, Blob `5c614375e10698e4931d83deb57d20321445e068`; its scope says it corrects Option A status to match the exact ADR, while the bundle remains NOT JOINTLY ACCEPTED / NOT FROZEN and L4 remains open.
+- A PR #102 reports an L1 contradiction; this integration review disputes that interpretation because the exact ADR contains an explicit §8.6 supersession. Owner/A reconciliation requested.
+- Direct commit metadata fetch for E HEAD `ee098e14747d9915de5b3efb63b3a8dd77f670ed` succeeded in this pass; returned tree `59d99c828c91bfdb28fc1ca353f1db38ae85c35e`, message “E: review per-authority Storage serialization anchor”. A PR #102's E lookup anomaly did not reproduce.
+
+## B dual ADR source pins
+
+- `02-domain-model/ADR-001-fact-claim-semantics.md`, Blob `a1024938ff5baba069cf128c69496a44e143330c`.
+- `02-domain-model/adr/ADR-001-fact-claim-canonical-model.md`, Blob `df77e4a93cb8fef689ae7c828888d960cbf381d6`.
+- Both remain ADR-BLOCKED; the branch contains two related exact source artifacts and neither records a formal approving authority or approved option.
+
+## Current integration branch audit responses
+
+- ABR-AUDIT-007 / PR #100: exact RM latency correction applied; model/prototype/fixture Blob pins added; bounded-vs-production evidence classes retained.
+- A-H-ADE-006 / PR #98: H-ADE-001..003 integrated; additional `integrity_proof_ref` P0 binding question tracked separately as an integration candidate finding.
+- A-OWNER-SOURCE-REFRESH-004 / PR #102: Storage ADR §8.6 supersession and E commit metadata fetch rechecked; two findings require A/Storage reconciliation rather than silent adoption.
