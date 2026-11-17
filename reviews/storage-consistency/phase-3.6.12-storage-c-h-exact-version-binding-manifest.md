@@ -259,7 +259,7 @@ No production readiness, universal exactly-once, Full Applied or Global Forget C
 | H RecoveryJoin 1.0.2 tests | `6afa788da2a899f03de8207cb700c40e0533aba1` |
 | H Unified 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
 | H Unified 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
-| H candidate CI | Run `44051045877`, commit `ccecb8b6b80dff1e8ef7af10caac67c2f3c77929`, 282 total / 260 passed / 22 skipped / 0 failed |
+| H candidate CI | Run `44051257901`, commit `07cacfbc208a566a784389f4eef60bc8e5d1281f`, 282 total / 260 passed / 22 skipped / 0 failed |
 
 ### 10.2 Owner-owned proof contracts and reviews
 
