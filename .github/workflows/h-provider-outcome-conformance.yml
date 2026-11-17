@@ -1,5 +1,5 @@
 name: H Provider Outcome Conformance
-# revision: rerun against synchronized CSubmitOutcome 1.0.0 schema and vectors
+# revision: BMCP Unified 1.2.13 + CSubmitOutcome 1.0.1 conditional outcome conformance
 
 on:
   push:
