@@ -2,13 +2,13 @@
 # Phase 3.8.11 — H 对 C/D/I Membership P0 Crosswalk 的交叉复审
 
 - Reviewer: H — BMCP Protocol and Interoperability
-- H Unified schema 1.2.14 Blob: `fee452efb99ab4fe0ceccb347c46eeef1521bd28`
+- H Unified schema 1.2.14 Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a59`
 - H RecoveryJoin schema 1.0.2 Blob: `4b664e3bce465499bcdfd93796349a4ba7074002`
 - C Phase 3.8.13 membership P0 crosswalk Blob: `df12af95e6859a389ba71eb1b7dba512b9feb8f6`
 - D Phase 3.8.6 membership P0 crosswalk Blob: `c4adf827dd62d44c43b8e871dec4835581508adf`
-- I Phase 3.8.10 P0 successor Blob: `35e6843da8becbf3b152512a561b05cf5486819b`
+- I Phase 3.8.10 P0 successor Blob: `44986f5f864bcdc1a79d34978273644d381a68c0`
 - CSubmitOutcome 1.0.1 schema Blob: `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`
-- H Provider Outcome mapping Phase 3.8.10 Blob: `7739d8159b32702024583669f40974a80801782b`
+- H Provider Outcome mapping Phase 3.8.10 Blob: `579dd2a91edf47b86e744e897ba6668b839944bd`
 - Status: **ACCEPT AS L1/L2 GENERIC-ENVELOPE + OWNER-DIGEST MAPPING CANDIDATE; L3 PROOFS OPEN**
 - Provenance: delegated H-role cross-review; **not independent human C/D/H/I Owner signatures**.
 
@@ -61,7 +61,7 @@ The following are required before L3 closure:
 
 ## 6. Current exact review set / 当前精确复审集合
 
-The D crosswalk pin in this review is the current D Phase 3.8.6 Blob `c4adf827dd62d44c43b8e871dec4835581508adf`; D's current exact H 1.2.14 review is separately pinned by the system manifest. H Provider Outcome mapping is current Blob `7739d8159b32702024583669f40974a80801782b`.
+The D crosswalk pin in this review is the current D Phase 3.8.6 Blob `c4adf827dd62d44c43b8e871dec4835581508adf`; D's current exact H 1.2.14 review is separately pinned by the system manifest. H Provider Outcome mapping is current Blob `579dd2a91edf47b86e744e897ba6668b839944bd`.
 
 ## 7. H disposition / H 侧结论
 
