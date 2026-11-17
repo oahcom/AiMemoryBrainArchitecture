@@ -73,6 +73,7 @@ class Target:
                                TargetState.FAILED, TargetState.UNKNOWN,
                                TargetState.UNSUPPORTED}
             and self.fence_generation == generation
+            and self.capability != "unsupported"
             and bool(self.evidence_ref)
             and bool(self.evidence_kind)
         )
@@ -161,7 +162,7 @@ class ForgetOperation:
         if self.phase not in {Phase.CLEANUP_IN_PROGRESS,
                               Phase.DOMAIN_COMPLETION_EVALUATED}:
             raise ContractError("domain evaluation requires cleanup")
-        accepted = {TargetState.CLEANED, TargetState.ERASED, TargetState.EXPIRED}
+        accepted = {TargetState.CLEANED, TargetState.ERASED}
         complete = all(
             t.state in accepted and t.has_current_evidence(self.fence_generation)
             for t in self.domain_targets.values()
@@ -216,7 +217,10 @@ class ForgetOperation:
         inventory = self.domain_targets if domain_target else self.cross_system_targets
         inventory[target.target_id] = target
         target.fence_generation = self.fence_generation
-        self.phase = Phase.CLEANUP_IN_PROGRESS
+        if domain_target:
+            self.phase = Phase.CLEANUP_IN_PROGRESS
+        # A cross-system-only expansion invalidates I's assessment but must not
+        # rewrite D's already-completed domain result.
         self.governance = Governance.PENDING
 
     def acquire_lease(self) -> int:
