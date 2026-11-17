@@ -118,3 +118,6 @@ The canonical Restate Server repository LICENSE is Business Source License 1.1 (
 No Brain prototype, benchmark, production deployment, production security audit, HSM/KMS integration, live Owner Ledger adapter test, C/G/H Applied end-to-end test, JF-10 physical conformance, or production activation is claimed. Candidate CI is not production proof. Role simulation is not a real Owner signature. No architecture freeze, Gate release, merge approval or deployment authorization is issued.
 
 **中文：** 不声称已有 Brain 原型、Benchmark、生产部署、生产安全审计、HSM/KMS 集成、真实 Owner Ledger Adapter 测试、C/G/H Applied 端到端测试、JF-10 物理符合性或生产激活。候选 CI 不是生产证明。角色模拟不是真实 Owner 签名。不批准架构冻结、Gate 释放、合并或部署。
+
+
+Canonical license source for independent re-fetch: https://github.com/restatedev/restate/blob/main/LICENSE . The Server license must be read from the Server repository root LICENSE at the reviewed commit; do not substitute repository API license metadata or the separate Rust SDK LICENSE. Legal interpretation for a proposed commercial distribution model remains outside this technical role simulation.
