@@ -179,3 +179,20 @@ Exact current H pins:
 - Workflow with Node.js 22: `55d877499010f6a776ae432c1fb2a3a31bae5f11`.
 
 SCHEMA-13/14 validate only the 1.2.7 artifact/wire version distinction and presence/compatibility shape of signature_profile_id. They do not validate protected-message semantic requiredness, I trust-registry lookup or production cryptographic verification. The 95 methods are candidate reference-model and test-profile evidence; HRC-TEST-v1 is not production. Live COC/owner adapters, two production implementations, I crypto trust, JF-10 physical behavior and deployed topology remain OPEN. H remains **NOT FROZEN / NOT INTEROPERABILITY-VERIFIED**.
+
+
+## 17. H 101-test I cryptographic differential candidate evidence
+
+H's current candidate suite contains 101 methods: HRC 25 + JPF 19 + WIRE 10 + SCHEMA 16 + TPH 26 + XLANG 1 + CRYPTO 4.
+
+Latest verified run [44044062849](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44044062849), commit `bfdc836da0cd64e290df7320eb552583dc95db43`, job `133905301392`: 101 tests ran, OK.
+
+CRYPTO-01 compares independent Python RFC 8785 / Ed25519 and Node.js JCS / Ed25519 implementations for the candidate I P0 projection, payload digest, signature preimage, public key and deterministic test signature. CRYPTO-02..04 cover JCS object/array ordering, Unicode non-normalization and non-finite-number rejection. The workflow pins Python rfc8785 0.1.4, cryptography 44.0.2, Node.js 22 and canonicalize 2.1.0.
+
+The private seed is TEST-ONLY and MUST NOT be reused in production. The I profile proposal and H wire mapping remain candidate with amendments, not approved/deployed. The 101 tests do not prove production trust roots, HSM/KMS, key lifecycle, historical trust, revocation propagation, anti-rollback, real I/D/C owner signatures, COC quorum, Storage JoinProof durability, currentness CAS or physical JF-10. H remains NOT FROZEN / NOT PRODUCTION-INTEROPERABILITY-VERIFIED.
+
+### 17.1 中文结论
+
+H 当前 101 项候选测试包括 HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1、CRYPTO 4。Run 44044062849 在 Commit `bfdc836da0cd64e290df7320eb552583dc95db43` 上 101/101 PASS。
+
+CRYPTO 测试比较 Python RFC 8785/Ed25519 与 Node.js JCS/Ed25519 候选实现，覆盖 P0、Payload Digest、Signature Preimage、公钥和测试签名，并检查 JCS 排序、Unicode 与非有限数字。测试 Seed 仅供测试，严禁生产复用。I Profile 与 H Mapping 仍未批准、未部署；真实 Trust Root、HSM/KMS、Key Lifecycle、撤权/防回滚、Owner/COC Adapter、Storage JoinProof、Currentness CAS 和 JF-10 物理验证均 OPEN。H 尚未冻结或达到生产互操作通过。
