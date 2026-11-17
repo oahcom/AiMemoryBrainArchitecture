@@ -17,7 +17,7 @@ A 仅允许有界准备工作。这不构成 Gate 通过、受保护路径实现
 
 ## 五项根本风险
 
-1. 尚未选定物理序列化与可见性权威（Storage/D/I）。
+1. Storage Option A 已选定 L1 逻辑序列化配置；实际 L4 物理引擎/部署与可见性证明仍开放（Storage/D/I）。
 2. B 的 Fact/Claim/Identity/Temporal 语义仍 ADR-BLOCKED。
 3. Forget/Revocation/Restore 缺少端到端防复活证明和完整 Inventory。
 4. I36 Governance、Trust 和 Authorization 批准仍开放。
