@@ -457,3 +457,47 @@ current_status_snapshot:
     manifest_schema_validation: NOT_RUN
     current_main_full_r3_ci: NOT_EVIDENCED
   note: Historical review and execution entries above are preserved as historical records. The merge facts above do not convert any review, approval, test, acceptance or production gate to PASS.
+
+
+latest_reconciliation:
+  observed_main_head_before_this_documentation_update: 7bd425de62fa2dc66c2d2df03fac58e02bb68ad5
+  observed_at: 2026-11-18
+  pr_141:
+    state: CLOSED_MERGED
+    final_head_sha: d5702426147456f0bf00e0aec9ad5916200cebef
+    merge_commit_sha: 9edc746c001f1f82950edad7ce130342db53ff67
+    scope: non_production_forget_reference_model_tests_and_exact_head_ci
+    model_test_result:
+      workflow_run: 44188134319
+      status: SUCCESS
+      tests_passed: 24
+      tests_failed: 0
+      exact_head: d5702426147456f0bf00e0aec9ad5916200cebef
+    bilingual_docs_runs:
+      - 44188134357
+      - 44188136170
+    limitation: model_level_only_not_production_R3_or_DFI_conformance
+  current_gates:
+    production_DFI_001_to_DFI_022: NOT_RUN_NOT_EVIDENCED
+    owner_d_approval: PENDING
+    owner_i_approval: PENDING
+    owner_d_independent_specialist_review: NOT_EVIDENCED
+    owner_i_independent_specialist_review: NOT_EVIDENCED
+    independent_integration_review: PENDING
+    implementation_binding: DEFERRED_TO_ENGINEERING_PHASE
+    engineering_phase_repository_and_code_owners: PENDING
+    issue_7_disposition: OPEN_FOR_ENGINEERING_PHASE_ENTRY_PLAN_NOT_CURRENT_ARCHITECTURE_GATE
+    full_manifest_yaml_and_schema_validation: NOT_RUN
+    acceptance: BLOCKED_PENDING
+    production_activation: NOT_AUTHORIZED
+  preliminary_review:
+    type: NON_INDEPENDENT_DESK_REVIEW_ONLY
+    issue_41_comment: 6962603446
+    issue_7_comment: 6962604585
+    note: This conversation participated in implementation coordination and cannot satisfy NR-001 separate-conversation review requirements.
+  current_main_blobs:
+    forget_model_py: cd623d67400c8870a729f79f88a4413f37bb335a
+    test_forget_model_py: 633e12db094b703b5f4a431950c3df369dababb0
+    readme_md: 7aa163719978f253685931b2eb001bb6a7228c6f
+    workflow_yml: 9f261aa8c00b1a144cee50c049bae8d437fd0eea
+  note: PR #141 integration and its 24/24 reference-model result do not change any production R3, specialist approval, independent review, acceptance or G3 gate.
