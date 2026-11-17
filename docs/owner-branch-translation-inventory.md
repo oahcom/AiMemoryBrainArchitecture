@@ -232,3 +232,13 @@ No common CGH-APPLIED-1.1 cross-owner acceptance is established.
 | G Applied / Forget / Reconciliation | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G 1.1 recovery-batch acceptance remains with enumerated exceptions; implementation NOT VERIFIED; conformance NOT RUN |
 
 Cross-owner review current H pin: `reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md` and Chinese companion. C closure proposal (non-normative; NOT an Owner decision): `reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal.md` and Chinese companion. The prior H pin `0dca3dc5463a02be0e19524811afbae87795baf5` is superseded by `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`.
+
+
+
+## C cross-authority causal-order companion — 2026-11-17
+
+| Owner | Source path | Branch | Exact source Blob SHA | EN companion | zh-CN companion | Review / source state |
+|---|---|---|---|---|---|---|
+| C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `session-c-agent-integration-2026-11-16` | `45a48249717c8cddb07ab96197730ef93d406c22` | `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | 14/14 headings; 0 tables; targeted parity PASS; exact CGH-APPLIED-1.1 recovery-batch acceptance recorded; C-CO/JF-10 NOT RUN; implementation NOT VERIFIED |
+
+C detailed core companion coverage: 2/10. C36-AP-01 resolved at source-decision level. H36-AP-09 remains OPEN for H wire Schema/SDK and cross-owner consumer interoperability.
