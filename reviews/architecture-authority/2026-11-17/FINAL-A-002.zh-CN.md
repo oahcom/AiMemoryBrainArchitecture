@@ -3,7 +3,7 @@
 - 权威角色：A — 首席系统架构权威
 - 版本：1.0.0
 - 日期：2026-11-17
-- 精确 Main 基线：`b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- 精确 Main 基线：`6470f25ca23b8d35c06f60be2326867066418d18`
 - 审查分支：`review/session-4-a-final-architecture-authority-2026-11-17`
 - 统一跟踪入口：Issue #43
 - 整体决策结果：**DEFERRED**
@@ -17,7 +17,7 @@ A 仅允许有界准备工作。这不构成 Gate 通过、受保护路径实现
 
 ## 五项根本风险
 
-1. Storage Option A 已选定 L1 逻辑序列化配置；实际 L4 物理引擎/部署与可见性证明仍开放（Storage/D/I）。
+1. Option A 仅作为 v1 逻辑方向获得有条件接受；A-01..A-05 和 D 精确采纳仍开放，L2/L3/L4 证明也未完成。
 2. B 的 Fact/Claim/Identity/Temporal 语义仍 ADR-BLOCKED。
 3. Forget/Revocation/Restore 缺少端到端防复活证明和完整 Inventory。
 4. I36 Governance、Trust 和 Authorization 批准仍开放。
