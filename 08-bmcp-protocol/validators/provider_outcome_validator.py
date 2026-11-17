@@ -17,7 +17,10 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 SCHEMA_ARTIFACT_REVISION = "1.2.13"
 WIRE_SCHEMA_VERSION = "1.3.0"
+BMCP_SCHEMA_ID = "bmcp.coc-jf10-unified"
+BMCP_SCHEMA_URI = "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.13"
 C_OBJECT_SCHEMA_ID = "urn:aimba:schema:c-submit-outcome:1.0.1"
+C_OBJECT_SCHEMA_URI = "urn:aimba:schema:c-submit-outcome:1.0.1"
 C_PROFILE_ID = "AIMBA-C-CRYPTO-1.0"
 
 # Wire field -> immutable C object field. The exact H schema remains the
@@ -170,6 +173,12 @@ def validate_provider_outcome(
     invalid = []
     unknown = []
 
+    if envelope.get("schema_id") != BMCP_SCHEMA_ID:
+        invalid.append("wrong BMCP schema_id")
+    if envelope_schema.get("$id") != BMCP_SCHEMA_URI:
+        invalid.append("wrong loaded BMCP schema artifact URI")
+    if c_object_schema.get("$id") != C_OBJECT_SCHEMA_URI:
+        invalid.append("wrong loaded C object schema artifact URI")
     if envelope.get("schema_artifact_revision") != SCHEMA_ARTIFACT_REVISION:
         invalid.append("wrong BMCP schema_artifact_revision")
     if envelope.get("schema_version") != WIRE_SCHEMA_VERSION:
