@@ -265,3 +265,14 @@ This addendum updates the current-state source pin only; all earlier observation
 - D/I 非独立初步发现已登记在 Issue #41 评论 [#6962603446](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/41#issuecomment-6962603446)。运行时仓库/G3 阻塞复核已登记在 Issue #7 评论 [#6962604585](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/7#issuecomment-6962604585)。
 - Owner D/I 正式批准及独立新会话专业审查仍 PENDING / NOT EVIDENCED；独立集成审查仍 PENDING。Issue #7 仍 OPEN；可访问证据尚未确定规范运行时仓库及其负责代码 Owner。
 - AID-2026-001 仍为 ARCH/R3、REMEDIATION_IN_PROGRESS、BLOCKED_PENDING_R3_EVIDENCE；生产激活仍 NOT AUTHORIZED。
+
+
+## Runtime implementation binding deferral correction / 运行时实现绑定延期状态更正（2026-11-18）
+
+Issue #7 comment #6962269783 records the explicit project-owner direction `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`. The architecture repository is intentionally architecture-definition-only during the current phase; the absence of a production runtime tree here is not a current architecture-phase implementation blocker and no placeholder runtime code is to be added.
+
+The engineering-phase entry plan still needs to identify the canonical implementation repository/branch, accountable code owners, build/test/deployment authority and physical topology before production implementation or conformance work begins. This deferral does not convert any production R3/DFI test to PASS. Production R3 tests remain NOT RUN / NOT EVIDENCED; Owner D/I approval and independent specialist review remain pending; production activation remains NOT AUTHORIZED.
+
+中文：Issue #7 评论 #6962269783 已记录项目 Owner 的明确决定 `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`。当前阶段仓库按架构定义仓库运行；本仓库没有生产运行时代码并非当前架构阶段的实现阻塞，也不得在此仓库添加占位运行时实现。
+
+进入工程阶段前仍需确定规范实现仓库/分支、负责代码 Owner、构建/测试/部署权威和物理拓扑。该延期不代表任何生产 R3/DFI 测试通过；生产 R3 测试仍 NOT RUN / NOT EVIDENCED，Owner D/I 批准及独立专业审查仍待完成，生产激活仍未授权。
