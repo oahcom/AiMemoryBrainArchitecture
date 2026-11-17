@@ -5,7 +5,7 @@
 - Status / 状态: IN_PROGRESS — B0 PARTIAL / NOT PASSED; no canonical freeze
 - Branch / 分支: `research/domain-reality-001-b`
 - Historical merge base / 历史合并基点: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- Current main HEAD observed / 当前 main HEAD 观察值: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
+- Current main HEAD observed / 当前 main HEAD 观察值: `901e38ba7b45ed1822eaefddc2da8d765cf8985c`
 - Current research branch HEAD at this document revision / 本文档修订时研究分支 HEAD: `c35379b83edec457b1f7925203d369dfc5ef6c03` (this commit advances the branch; refresh PR metadata for the live tip)
 - PR: #55 — Open / Draft; no merge requested
 - Research date / 研究日期: 2026-11-17
