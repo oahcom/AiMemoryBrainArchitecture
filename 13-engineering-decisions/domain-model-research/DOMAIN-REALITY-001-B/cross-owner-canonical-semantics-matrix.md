@@ -288,3 +288,31 @@ PRODUCT-FIRST-001 集成审查 Blob `3e7f0fc604761533ddd521924ff69d2039a63282` �
 B2 remains **IN PROGRESS / NOT PASSED**. The current preferred Fact/Claim candidate is Option A, but formal Architecture Governance approval is missing; ClaimRef/ClaimRevisionRef, FactRevision and ConflictSet schemas remain unfrozen. B3 remains **NOT PASSED**: H issuer implementation, integrated H/C/I/D authority join, I production trust registration, D 1.2.15 review, Storage successor manifest, durable replay, Applied and Forget evidence remain open.
 
 B2 仍为 **IN PROGRESS / NOT PASSED**。当前优先 Fact/Claim 候选是 Option A，但缺少正式 Architecture Governance 批准；ClaimRef/ClaimRevisionRef、FactRevision 和 ConflictSet Schema 均未冻结。B3 仍 **NOT PASSED**：H Issuer 实现、H/C/I/D 集成权威联结、I 生产信任注册、D 1.2.15 复审、Storage 后继 Manifest、Durable Replay、Applied 和 Forget 证据仍开放。
+
+
+## 9. D/E/F/G exact consumer-source alignment / D/E/F/G 精确消费者来源对齐 — 2026-11-18
+
+| Owner | Exact live source / 实时精确来源 | What the source says / 来源结论 | Cross-owner disposition / 跨 Owner 处置 |
+|---|---|---|---|
+| D | Canonical Store Blob `6b37c91033fda21f072e2a3bde6f274663b1e76e`; Memory Versioning Blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb`; branch HEAD `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | Fact/Claim persistence ADR-BLOCKED; only neutral PropositionRef allowed; stable Claim ID + immutable ClaimRevision is a candidate; Claim/Fact schema and ConflictSet remain blocked. | D accepts no final B Fact/Claim semantics yet. D owns canonical IDs, persistence and commit mechanics after ADR approval. |
+| E | Extraction/Normalization Blob `c18780403de2d1dbcf471bdb8abdaa009a4a78e1`; Evidence/Provenance Blob `38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963`; branch HEAD `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | ExtractionIR/CandidateProposition is deliberately pre-canonical; E excludes Fact/Claim identity and truth adjudication. Evidence/Provenance final contracts depend on D/B/I. | E is aligned with neutral proposal boundary; not an approval of Option A or Claim identity. |
+| F | Retrieval Engine Blob `1fbfc0ff07b66c0ff68c3cea5271261c9d7fc0af`; branch HEAD `1908ce4d233b20f7cafd00cb679affd01bd15174` | D owns Memory/Version/Claim/Entity/Relation/Evidence identity and canonical status; F cannot resolve disputed claims; Claim revision identity is OPEN. | F consumes canonical exact refs only; no truth adjudication or schema acceptance. |
+| G | Context Versioning Blob `05c0739d0c22576a1fd5affc7d73c078c89049b1`; branch HEAD `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8` | ContextEntry pins exact MemoryVersion; ContextVersion/ChangeSet are G-owned; canonical revision watermark schema remains candidate/open. | G's version pin does not approve ClaimRef/ClaimRevisionRef or FactRevision; no Claim/Fact identity is minted by Context. |
+
+### 9.1 Two different “Option A” labels — do not conflate / 两个不同的 “Option A” 编号——不得混淆
+
+- **B Fact/Claim Option A:** separate Claim proposition thread + independently addressable Fact attestation object. B's preferred CANDIDATE under INT-P0-01; still ADR-BLOCKED.
+- **D Claim identity Option A:** stable Claim ID + immutable ClaimRevision for corrections, versus D Option B (new Claim ID per correction/successor). D's candidate under INT-P1-02; still pending the Fact/Claim ADR.
+
+- **B Fact/Claim Option A：** Claim 命题线程 + 独立可寻址 Fact Attestation 对象。B 在 INT-P0-01 下优先推荐的 CANDIDATE；仍 ADR-BLOCKED。
+- **D Claim Identity Option A：** 稳定 Claim ID + 不可变 ClaimRevision 用于更正；D 的 Option B 则是每次更正/后继创建新 Claim ID。D 在 INT-P1-02 下的候选；仍等待 Fact/Claim ADR。
+
+These labels are from different decision records and are not interchangeable. B's Fact/Claim Option A does not approve D's Claim identity Option A. Both remain candidates; no Claim/Fact/ClaimRevision/ConflictSet schema, DDL, API or wire contract is frozen.
+
+这两个编号来自不同决策记录，不可互换。B 的 Fact/Claim Option A 不会批准 D 的 Claim Identity Option A。两者仍是候选；Claim/Fact/ClaimRevision/ConflictSet Schema、DDL、API 或 Wire 契约均未冻结。
+
+### 9.2 B2 disposition / B2 结论
+
+The live D/E/F/G consumer artifacts consistently preserve the blocked boundary: D does not accept final Claim/Fact identity; E remains neutral pre-canonical; F does not adjudicate claims; G pins MemoryVersion only. No downstream Owner acceptance substitutes for the missing formal Architecture Governance decision. B2 remains **IN PROGRESS / NOT PASSED** and B4 **NOT READY**.
+
+实时 D/E/F/G 消费者工件一致保留阻塞边界：D 不接受最终 Claim/Fact 身份；E 保持规范化前中立状态；F 不裁决 Claim；G 仅固定 MemoryVersion。没有任何下游 Owner 验收能够替代缺失的正式 Architecture Governance 决议。B2 仍 **IN PROGRESS / NOT PASSED**，B4 **NOT READY**。
