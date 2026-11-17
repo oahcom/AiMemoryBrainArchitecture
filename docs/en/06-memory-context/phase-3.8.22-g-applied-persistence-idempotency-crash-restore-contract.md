@@ -21,3 +21,5 @@ Merged PR [#139](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/139) a
 ## Evidence ceiling
 
 This reference model is not production G runtime code or G Owner acceptance. It uses one local SQLite database and caller-supplied gate booleans. It does not prove multi-replica linearization, distributed restore fencing, current-use revalidation after later I/D changes, live C/H/COC/I/D/Storage authority resolution, cryptographic authentication or production durability topology. Production G Applied and cross-owner Full Applied remain **NOT VERIFIED / NOT FROZEN**.
+
+This reader summary is paired with the canonical bilingual G Phase 3.8.22 source contract and does not replace it.
