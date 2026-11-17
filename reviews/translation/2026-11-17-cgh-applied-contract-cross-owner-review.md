@@ -98,3 +98,11 @@ No cross-owner acceptance is inferred from another Owner's decision.
 After this review identified H36-AP-01..07, H's Owner branch added §11 to `adapter-capability-and-applied-attestation.md`. The live exact Blob is now `db59b63e322d7255b8b400f47859dcac32bb3027`; the previously reviewed `ed6b43a29aa368d772c701ffc83309a5aadf3c00` is superseded for currentness. The addendum proposes explicit request/boundary identity, target/attempt mapping, region inventory/coverage, verifier-bound identity, I/D authority references, provenance, per-request bypass coverage, replay identity and temporal rules.
 
 Disposition: **candidate gap response drafted, not closed**. C and G have not accepted this exact Blob; I/D/B authority confirmations, H wire schema, generated SDK/interoperability, and conformance remain OPEN / NOT RUN. The six-stage semantic alignment finding remains valid; the seven field-mapping findings are now addressed by a proposal but are not marked RESOLVED until owner acceptance.
+
+## 8. H recovery-batch amendment follow-up — 2026-11-17
+
+H's candidate source was further updated with §11.8. Current exact H source Blob: `0dca3dc5463a02be0e19524811afbae87795baf5` (supersedes `db59b63e322d7255b8b400f47859dcac32bb3027`). The §11.8 proposal addresses the CGH-APPLIED-1.1 recovery-batch evidence expected by G: COC terminal proof, recovery-batch and participant-set completeness, owner high-water attestations, participant reconciliation, I terminal/revocation evidence, D lineage/cutoff/effective-position evidence, and Storage same-XID terminal evidence.
+
+**New finding H36-AP-08 — OPEN:** the candidate mapping is now described, but the H wire schema/SDK and exact ACK message-family binding have not been updated or generated. H must preserve COC, I, D and Storage ordering domains as distinct; missing owner evidence remains UNKNOWN/IN_DOUBT. G's recovery-batch acceptance is exact-version and conditional; H cannot infer COC deployment or owner gate release. C/G/I/D/Storage confirmation and schema/conformance remain pending.
+
+The §11.8 response is a candidate proposal only. H36-AP-01..08 are not marked RESOLVED until the corresponding owners accept the exact common package and the versioned H schema mapping is produced. C/G/H freeze remains BLOCKED.
