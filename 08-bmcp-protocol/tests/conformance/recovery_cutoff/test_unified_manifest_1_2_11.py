@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[3]
 SCHEMA_PATH=ROOT/"schemas"/"bmcp.coc-jf10-unified-1.2.11.schema.json"
 sys.path.insert(0,str(ROOT/"runtime_reference"))
 from unified_manifest_semantics import (VALID,INVALID,UNKNOWN,td,snapshot_root,content_digest,
-    validate_union,validate_pair,validate_release,validate_epoch_completed,validate_profile,validate_provider_outcome)
+    validate_union as _validate_union,validate_pair,validate_release,validate_epoch_completed,validate_profile,validate_provider_outcome)
 
 
 def fixtures():
@@ -61,7 +61,7 @@ def fixtures():
     proofs={}
     for row in (a,z):
         key=(row["owner_kind"],row["owner_admission_ref"])
-        proofs[key]={"available":True,"valid":True,"owner_ledger_root":row["owner_ledger_root"],
+        proofs[key]={"available":True,"valid":True,"test_signature_verified":True,"owner_ledger_root":row["owner_ledger_root"],
           "owner_entry_digest":row["owner_entry_digest"],"owner_snapshot_digest":row["owner_snapshot_digest"],
           "owner_snapshot_attestation_digest":row["owner_snapshot_attestation_digest"],
           "owner_local_sequence":row["owner_local_sequence"],"owner_high_water":row["owner_high_water"],
@@ -74,6 +74,9 @@ class Schema1211Tests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):cls.schema=json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
     def setUp(self):self.m,self.prefix,self.admissions,self.snaps,self.proofs=fixtures()
+    def self.validate_union(self,*args,**kwargs):
+        kwargs["verify_membership_proof"]=lambda proof,owner,snapshot: proof.get("test_signature_verified") is True
+        return _validate_union(*args,**kwargs)
     def msg(self,t):
         return next(x["allOf"][1] for x in self.schema["oneOf"] if x["allOf"][1]["properties"]["message_type"]["const"]==t)
     def test_SCHEMA1211_01_artifact_vs_wire_version(self):
