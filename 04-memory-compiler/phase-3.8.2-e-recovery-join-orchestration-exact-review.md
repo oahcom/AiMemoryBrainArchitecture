@@ -12,8 +12,8 @@
 - I Phase 3.8 contract: Blob 54bab0484bd232a5a258e65e34cc7425288b39a6.
 - Storage Phase 3.8 contract: Blob 175ee7b1349cfdb79a19898b311a88391ed88010.
 - Storage RecoveryJoin contract: Blob 41f80b1aacfebdb1f652b16144afbf83ce950e82.
-- H RecoveryJoin schema candidate: Blob f531c1d4b89a48457188c4988f140952759223a6.
-- H semantic suite: Blob d14e66a2196303374f31a4285244a0f77a3ad328.
+- H RecoveryJoin schema candidate: Blob dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
+- H semantic suite: Blob f28834d73e055be411060f0c1093bd3dc0d865b9.
 - A deterministic conformance matrix: Blob c0f8ae699a42de46d12d0d311892e5670014e0f1.
 
 ## 2. E disposition
@@ -68,3 +68,11 @@ Queue ACK, E AcceptedReceipt, private object existence, local Published/Complete
 E 接受 Storage→D→I→Storage 的可见性编排，但要求 Restore 后先完成精确 RecoveryJoin 和 I/D/C Owner Release，再允许 Queue Dispatch、Protected Source Dereference、Lease Execution、Retry Replay 或 Publication。Request 与 Admission 必须分离；同一操作恢复沿用原 ID，NO_PUBLICATION 后新尝试使用新 PublicationOperationId。E 本地状态不能替代 Owner Proof。
 
 本文件是本集成会话中的 E 角色模拟审查，不是独立 Owner 签名。
+
+
+## 7. H/Storage follow-up
+
+The latest RecoveryJoin schema adds explicit owner request dispositions, row-level identity/digest binding and typed D/I/C/Storage evidence. This improves E's ability to distinguish pending requests from admitted work and to reconcile exact recovery inventory. It does not implement E-RJ-01: E still needs a runtime gate that blocks queue dispatch, protected source dereference, lease execution, retry replay and publication until exact RecoveryJoin, current owner releases and restore reconciliation are proven.
+
+Updated H RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
+Updated HRC suite Blob: f28834d73e055be411060f0c1093bd3dc0d865b9.
