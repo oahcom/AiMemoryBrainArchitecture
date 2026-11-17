@@ -139,8 +139,10 @@ The following successful runs were read back from GitHub Actions logs and are pi
 - F Runtime anti-resurrection logical model: run `43961714501`, commit `f1ba5c478e395da6b126423e32e20d0990e61920`, 19 tests, SUCCESS.
 - Storage restore control high-water model: run `43965501810`, commit `19798634fb0d55cb0c901c8f4194506fab96b75b`, 25 tests, SUCCESS.
 - Storage PostgreSQL 18.7 isolated physical backup/restore experiment: run `43959079703`, commit `83bdacbafa840808dca9be7a8c76c4df83c63504`. Logs report base backup/restore, prepared-XID survival, same-XID commit after restore, stale restore read gate, replay of current Forget controls before reads, forgotten-artifact suppression, unrelated artifact readability and restored prepared visibility pointer + receipt all PASS. This is a capability experiment, not deployed-topology or production acceptance.
-- P supplemental Issue #20 reference-model/schema: run `44054221711`, commit `fcafce4c316c49dd4f2f78740d1a19d0ef7aa13d`, 69 tests, SUCCESS.
+- P supplemental Issue #20 reference-model/schema: run `44055384398`, commit `ac932d152f20c8db1ae4416efb75361be601b5d6`, 78 tests, SUCCESS. It includes C provider intent admission, exact D participant/I COMMIT_WON binding, same-key timeout lookup, conflicting terminal callback quarantine and submit-time PermissionEpoch revalidation.
 
 Current branch heads at the time of this matrix refresh: C `f2ff6ee552ed63094acbf8f36095431f0e1964b3`; D `f0672a4e9ab95b8cd94d28b52153f54a05e17a73`; E `df3f56cdebbb4bb85999e2e04b666dacf77da810`; F `348b5ec84c44a8a067122ce0aa72a594b9c06b66`; G `69ba55c5ffd473ced1ccb569e9bbf7fea48566aa`; H `46a7c534b5068e274c21c460feaf333060cb45a2`; I `de29ebcf2bb901c7ce9cca63b7d7d21c9495e491`; Storage `bd6c1d23ed685db8d4bd13a75821611e04d138ba`; P `8698ebd35809c92c0508fd6829abcc157f6ee134`. Re-fetch before future exact-version acceptance.
 
 C's new P reference-model tests are supplemental only. The C Owner branch still has no dedicated provider-outcome membership integration suite found in the inspected tree; exact Owner-local provider side-effect/idempotency tests remain required.
+
+P supplemental C reference-model CI run `44055384398` passed 78 tests at commit `ac932d152f20c8db1ae4416efb75361be601b5d6`. This still does not replace C's own provider adapter tests, side-effect ledger, or exact Owner adoption.
