@@ -12,14 +12,14 @@ D is the sole authority for canonical Memory admission, ProducerClass registry, 
 2. Producer registration and ForgetFence admission share a linearizable D admission/barrier domain. A fence snapshot accounts for all earlier admitted producers; affected later work is rejected or quarantined.
 3. Every immutable derivative registers complete direct and transitive dependencies before visibility.
 4. Only D accepts terminal-no-publication evidence and closes its barrier. DLQ, timeout, missing row, lease expiry, worker death and local cancel are insufficient.
-5. EventRef-only ingress before canonical Memory exists is quarantined metadata, not D admission. E acceptance is not D registration.
+5. EventRef-only ingress before canonical Memory exists MAY be D-registered when the complete conditions in §8 are met. E acceptance is not D registration. Section 8 is the controlling replacement for the earlier blanket quarantine-only wording.
 6. C provider submit requires an exact D ParticipantIntentRef admitted into the causal participant barrier and bound to immutable request/digest, G ContextId/ContextVersion, DeliveryId/Attempt, region digest, Adapter/session, Scope/Environment and I authorization evidence. G DeliveryId and H ACK are not substitutes.
 
 ## 2. ProducerClass Registry
 Each immutable registry version identifies ProducerClassId, owner/workload identity, accepted source-reference classes, output/derivative classes, allowed capabilities (normal, replay, rebuild, cleanup-only), enabled state, effective registry epoch and applicable Scope/PolicyDomain constraints. Registry eligibility is not a work registration. A separate RegistrationReceipt binds stable ProducerWorkItemId, request digest, source refs, Scope, known lineage, admission position and observed fence. Same identity+digest is idempotent; changed digest is conflict; unknown result blocks.
 
-## 3. EventRef-only ingress
-Before canonical Memory exists, an EventRef may be stored only as QuarantinedIngressRef. It is not a canonical Memory ref, RegistrationReceipt, dependency registration or barrier participant and grants no protected dereference, queue, execution, publication or replay permission. A future PreCanonicalIngressRegistration requires a separate versioned D contract covering source trust, identity, scope, policy, lineage placeholder, fence participation, deduplication, expiry and terminalization. Until then E stops at quarantined metadata.
+## 3. EventRef-only ingress — superseded by §8
+The original quarantine-only rule in this section is withdrawn. The controlling rule is §8: D may register EventRef-only ProducerWork before Canonical MemoryRef exists when authenticated producer binding, enabled ProducerClass/version, exact Scope, canonical request digest and D-approved opaque lineage token/digest are complete. Such work receives a durable D RegistrationReceipt and ProducerRegistrationSequence and is included in ForgetFence high-water. It does not grant protected payload dereference; I authorization remains independently required. E must link exact Canonical MemoryRef/MemoryVersionRef identities and revisions before dependency registration or publication. Missing or invalid admission bindings remain REJECTED/QUARANTINED with no execution capability.
 
 ## 4. ParticipantIntentRef and terminality
 C must present the exact D-admitted ParticipantIntentRef before provider submit. Missing, stale, mismatched, revoked or unknown bindings block submit. G cannot mint/infer it; H only transports it. D accepts terminal-no-publication only when evidence proves no worker, lease, retry, replay, staged artifact, outbox or delayed publisher can later publish. This semantic proposal does not freeze wire schema or prove Storage/C crash safety.
@@ -31,12 +31,12 @@ D 是 Canonical Memory 准入、ProducerClass Registry、Producer Ledger、Depen
 2. Producer 注册与 ForgetFence 准入必须处于 D 线性一致的 Admission/Barrier 域。Fence 快照覆盖此前所有已准入 Producer；之后受影响工作必须拒绝或隔离。
 3. 每个不可变 Derivative 在可见前必须注册完整直接及传递依赖。
 4. 只有 D 接受 TerminalNoPublication 证据并关闭 Barrier。DLQ、超时、行缺失、租约过期、Worker 死亡和本地取消均不足。
-5. Canonical Memory 形成前的 EventRef-only 入口只能作为隔离元数据，不能视为 D 准入。E Accepted 不等于 D Registered。
+5. Canonical Memory 形成前的 EventRef-only 入口，在满足 §8 全部条件时可以由 D 正式注册。E Accepted 不等于 D Registered。§8 是对早期“一律隔离”表述的控制性替代。
 6. C Provider Submit 前必须有精确 D ParticipantIntentRef，已进入因果 Participant Barrier，并绑定不可变 Request/Digest、G ContextId/ContextVersion、DeliveryId/Attempt、Region Digest、Adapter/Session、Scope/Environment 和 I 授权证据。G DeliveryId 与 H ACK 不可替代。
 
 ProducerClass 每个不可变版本必须标识 ProducerClassId、Owner/Workload 身份、允许的 SourceRef 类型、输出/Derivative 类型、normal/replay/rebuild/cleanup-only 能力、启用状态、生效 Registry Epoch 和 Scope/PolicyDomain 约束。Registry 资格不等于 Work 注册；单独的 RegistrationReceipt 绑定稳定 WorkItemId、请求摘要、源引用、Scope、已知 Lineage、准入位置和观测 Fence。同身份同摘要幂等；同身份不同摘要冲突；结果未知时阻断。
 
-Canonical Memory 形成前，EventRef 只能保存为 QuarantinedIngressRef。它不是 Canonical Memory Ref、RegistrationReceipt、Dependency Registration 或 Barrier Participant，也不授予受保护解引用、入队、执行、发布或重放权限。未来 PreCanonicalIngressRegistration 必须由 D 另行版本化，明确源信任、身份、Scope、Policy、Lineage 占位、Fence 参与、去重、过期和终态化。此前 E 只能停留在隔离元数据。
+本节原“一律隔离”规则已由 §8 撤销。控制性规则为：当经认证 Producer Binding、启用的 ProducerClass/Version、精确 Scope、规范请求摘要及 D 批准的不透明 Lineage Token/Digest 完整时，D 可以在 Canonical MemoryRef 形成前注册 EventRef-only ProducerWork，签发持久化 D RegistrationReceipt 和 ProducerRegistrationSequence，并纳入 ForgetFence High-water。该注册不授予受保护 Payload Dereference；仍须独立满足 I 当前授权。E 必须在 Dependency Registration/Publish 前关联精确 Canonical MemoryRef/MemoryVersionRef 身份和 Revision。缺少或无效绑定仍须 REJECTED/QUARANTINED，不授予执行能力。
 
 C 必须在 Provider Submit 前提交精确 D-admitted ParticipantIntentRef。绑定缺失、陈旧、不匹配、撤销或未知均阻断 Submit。G 不得制造/推断；H 只能传输。只有证据证明 Worker、Lease、Retry、Replay、Staged Artifact、Outbox 或延迟 Publisher 均不可能再发布时，D 才接受 TerminalNoPublication。本提案不冻结 Wire Schema，也不证明 Storage/C 崩溃安全。
 
