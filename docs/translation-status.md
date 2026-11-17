@@ -314,3 +314,12 @@ The earlier OPEN entry is superseded. C's separate cross-authority causal-order 
 - Bilingual PR companions added for G Phase 3.8.18 and C Phase 3.8.19. These are review artifacts, not new normative core-contract coverage counts.
 - Earlier CSubmitOutcome closure proposal is marked SUPERSEDED by actual C Owner contract/decision artifacts. The earlier cross-owner report has been corrected; do not use its initial XCH-36-001..003 false-positive status.
 - Gate: C/H L1/L2 local full-path PASS; G delegated consumer review accepted with conditions; global Applied contract NOT FROZEN; production authority integration OPEN/NOT VERIFIED; G Applied persistence NOT VERIFIED; L3/L4 NOT RUN.
+
+
+## 16. Final PR structural readback after C/G review pairs — 2026-11-17
+
+- G Phase 3.8.18 companion parity: source bilingual 9 headings / 16 table rows; EN and zh-CN each 8 headings / 8 table rows (source has two language title headings). Exact source Blob `1894860c76336f8739d354b72beed3992cffd17e`.
+- C Phase 3.8.19 companion parity: source bilingual 6 headings; EN and zh-CN each 5 headings (source has two language title headings). Exact source Blob `24337b79cfea6264a8a6f11fa414578fc559716c`.
+- H Phase 3.8.14 full-path closure Chinese test count/scope corrected to match English: 38 total methods = 32 H validator unit/fixture + 6 C crypto interop. Current closure Blob `cda025fb157815570b3280fa5ff168d5e62453b1`; exact CI run `44070924346` SUCCESS.
+- PR #28 current head `8431312367a44b70246912884547a377cf69116c`; workflow run `44072368844` / Run #114, job GOV-DOC-001 structural checks: **SUCCESS**. This proves paired-document/manifest structure only, not semantic review, architecture approval, implementation or conformance.
+- PR remains Draft/Open, 158 files changed; no merge authorized.
