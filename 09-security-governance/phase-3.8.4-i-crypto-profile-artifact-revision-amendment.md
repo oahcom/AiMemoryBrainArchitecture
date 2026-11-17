@@ -14,8 +14,9 @@
 | H crypto wire mapping 3.8.4 | `bf160288d7529b37ad1b56924c1583748922aa25` |
 | I P0 vector set | `4657f0c81e9c8692d29ac183380f3d7e074a4e4c` |
 | I Python/Node vector test | `7658edc6f51dac203742ecc1ecf00d41bd676908` |
-| H unified manifest semantic test file | `1eb90da6bea5e6bba062fa59f7b22f79105f46c7` |
+| H unified manifest semantic test file | `c95bea3d7a7bee5f419bfabe914ea56be79fc8ad` |
 | H semantic union validator module | `4a7c22ed15dff0a688559f79e4facbffca6527cd` |
+| H CI | Run `44048157932`, commit `05812faf5cfd4360803d660ebf5ffb8d48cba6b1`, **209 tests PASS** |
 
 ## 2. Signed schema version binding / 签名 Schema 版本绑定
 
