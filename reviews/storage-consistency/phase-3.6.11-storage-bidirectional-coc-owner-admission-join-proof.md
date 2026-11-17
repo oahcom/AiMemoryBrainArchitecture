@@ -424,3 +424,14 @@ The 97 candidate methods are HRC 25 + JPF 19 + WIRE 10 + SCHEMA 16 + TPH 26 + XL
 Latest verified H run [44043100543](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44043100543), job `133902179251`: **97 tests ran, OK**. This run includes the current 97-test candidate suite. It is not production owner-signature verification, live I/D/C ledger enumeration, COC quorum durability, Storage JoinProof persistence, currentness CAS or physical JF-10 conformance.
 
 The Storage bidirectional JoinProof semantics do not change: exact two-way membership and six independent owner sets remain required. The newer schema versions improve the typed envelope but do not close live source completeness, signatures, owner release CAS or topology T1–T8.
+
+
+## 20.1 中文规范：H 97 项测试与双向 JoinProof 的边界
+
+H 当前候选 Schema 为 Recovery Cutoff 1.0.5（`75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`）、RecoveryJoin 1.0.1（`f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`）和 Unified COC/JF-10 1.2.8（`70b892797d07489936300a26c0dedfafe1d6e746`）。H 的 97 项候选测试由 HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1 组成；最近验证运行是 44043100543，97 项全部通过。
+
+这些测试覆盖语义参考模型、双向 Join 关系、Batch/Manifest 两阶段摘要和顺序、Schema 结构、Wire 负例，以及 Python/Node 固定测试向量。SCHEMA-15/16 只验证 Owner Snapshot Attestation 与 RecoveryJoin 1.0.1 的 COMPLETE_EMPTY / OUT_OF_SCOPE 字段结构，不验证真实 Owner 签名、I Key Status 或真实 Ledger 完整性。
+
+Storage 的双向 JoinProof 权威边界不变：每个 I/D/C Owner Admission Row 必须被正向处置；每个 COC Participant 必须反向解析到主 C Admission Anchor 和所有适用的 I/D/C/Storage Typed Evidence；六个 Request/Admission 集合分别完整枚举；OwnerAdmissionRef 与 OwnerEntryRef、OwnerRequestDigest 与 OwnerEntryDigest 不得混用；差集必须显式存在且 COMPLETE 时全部为空；I/D/C 必须各自在自己的权威域执行 Currentness CAS 和 Gate Release。Storage/COC 不得代替 Owner 释放 Gate。
+
+97 项通过只证明候选参考模型/结构/Wire 测试在 CI 中运行成功，不证明真实 COC Quorum、Owner Ledger Adapter、签名验证、JoinProof 持久化、Currentness CAS、JF-10 物理同 GID 恢复或 D/Storage 事务拓扑。HRC-TEST-v1 仍不是生产密码学规范；物理拓扑及集成符合性仍 OPEN。
