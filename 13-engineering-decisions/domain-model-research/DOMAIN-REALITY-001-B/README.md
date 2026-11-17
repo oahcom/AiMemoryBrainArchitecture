@@ -35,7 +35,7 @@ B 文档不得静默取代其他 Owner 的权威契约。冲突必须登记并�
 | B2 | Identity, state, temporal, evidence, provenance and relationships reconciled / 身份、状态、时间、证据、溯源与关系完成协调 | IN PROGRESS — Fact/Claim and Claim identity ADR remains a decision request |
 | B3 | A/C/D/E/F/G/H/I/Storage/Testing cross-owner matrix and conflict register / 跨 Owner 矩阵及冲突登记完成 | NOT PASSED — owner acceptance and successor-pin reconciliation open |
 | B4 | Invariants, schemas, fixtures and validation specifications consistent / 不变量、Schema、Fixtures 与验证规范一致 | NOT READY — specification only; schemas and executable tests not authorized/run |
-| B5 | GitHub commits, PR, exact readback and Blob verification / GitHub 提交、PR、精确读回与 Blob 核验完成 | IN PROGRESS — branch and selected files read back; full 21-file final semantic parity audit pending |
+| B5 | GitHub commits, PR, exact readback and Blob verification / GitHub 提交、PR、精确读回与 Blob 核验完成 | BLOCKED — bilingual semantic parity incomplete; see bilingual-parity-audit.md; final full-file readback still required |
 | B6 | Truly separate independent review and governance disposition / 真正独立审查与治理裁决完成 | INDEPENDENT_REVIEW_PENDING |
 
 ## 4. Required and supplemental deliverables / 必需与补充交付物
@@ -61,6 +61,7 @@ Core deliverables / 核心交付物：
 Supplemental audit/decision deliverables / 补充审计与决策交付物：
 - `baseline-currentness-and-owner-source-audit.md`
 - `baseline-owner-branch-snapshot-errata.md`
+- `bilingual-parity-audit.md`
 - `fact-claim-identity-adr.md`
 - `evidence/official-reference-validation.md`
 
