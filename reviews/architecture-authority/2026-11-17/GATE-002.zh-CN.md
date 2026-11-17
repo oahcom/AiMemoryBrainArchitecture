@@ -20,7 +20,7 @@
 
 ## JF-10 物理 Gate（保持原定义并独立）
 
-**Gate A — 真实数据库能力。** 必须指定所选产品/版本/Build/配置及实际 Canonical Authority DB Adapter/Path；证明事务隔离、Prepared-XID（或明确获批的等效机制）、锁保留、重启后同 XID Commit/Rollback、VisibilityPointer + PublicationReceipt + Owner Outcome + Receipt-consumption Evidence + Outbox 原子性、权威读一致性、故障切换 Fencing、WAL Archive PITR/Restore、陈旧快照隔离和部署持久性。Issue #10 最新状态：**PARTIAL PASS / OPEN**。有限 PostgreSQL 18.7 能力探测不能关闭实际运行时、同步备库/提升、旧主 Fencing、PITR、Control Ledger 和操作员/Runbook 证据要求。
+**Gate A — 真实数据库能力。** 必须指定所选产品/版本/Build/配置及实际 Canonical Authority DB Adapter/Path；证明事务隔离、Prepared-XID（或明确获批的等效机制）、锁保留、重启后同 XID Commit/Rollback、VisibilityPointer + PublicationReceipt + Owner Outcome + Receipt-consumption Evidence + Outbox 原子性、权威读一致性、故障切换 Fencing、WAL Archive PITR/Restore、陈旧快照隔离和部署持久性。Storage §8 已选择 L1 Option A（每个 Canonical Memory Authority 一个 Serializable Transaction Domain）。Issue #10 最新 Gate A 状态：**PARTIAL PASS / OPEN**。有限 PostgreSQL 18.7 能力探测不能关闭实际运行时 DB Adapter/产品/配置、同步备库/提升、旧主 Fencing、PITR、Control Ledger 和操作员/Runbook 证据要求。
 
 **Gate B — 持久化 COC Coordinator。** 必须选择 Durable Log/Consensus 实现，提供 Quorum 确认的 Digest-chained Prefix、单调 Term/Index、持久 Participant Intent Registry 与预分配 XID 绑定、故障期间 Recovery-cutoff Batch、未决 Participant 枚举/协调、带回滚保护的 Snapshot/Restore，以及 Prefix 缺失时 Fail-closed。当前：**等待 Gate A 全部通过，故 BLOCKED**。
 
