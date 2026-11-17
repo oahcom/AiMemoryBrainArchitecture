@@ -12,7 +12,7 @@
 | Storage | COC Durable Log, Participant Registry & Recovery Protocol (contains normative §§15–17) | `5b950a3a29bd7a5276b92a49a9114d700718b987` | Fetched from Storage branch and inspected |
 | Storage companion | Storage Design v3.2.2 / Recovery Cutoff Ordering Amendment | `9704d110a06d0c2ee98be960054e0396d0b68546` | Exact blob referenced by COC §16.1 and §17; companion file was not independently re-fetched in this pass |
 | H | `08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.5.schema.json` | `164ec3c436558d5d93032edc51e127d15e03db4d` | Fetched from H branch and structurally inspected |
-| C | Provider Outcome / CSubmitOutcome owner artifact | NOT PINNED | C owner artifact path/blob not recovered in this pass; no exact-owner acceptance claimed |
+| C | C Provider Outcome composable normative source set | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` + `45a48249717c8cddb07ab96197730ef93d406c22` + `9609b252fc38fd5ba7b2f8c0992b7bd33a13c5bb` + `a8d1cfc4d2171c9b0a0ced10e53fc6b110479aca` | Located in exact C branch tree, fetched by Blob SHA; C exact-owner delegated decision recorded in Blob `1ac84f2b2991e414e2447d16a746ac19328978ed`; ACCEPT WITH ENUMERATED C-OWNED EXCEPTIONS |
 | Historical COC source | `8ac17816476f280ab6fb3afca0688aa03e37de1d` | historical source blob | Superseded by Storage protocol §§15–17 for ordering and digest semantics |
 
 The Storage v3.2.2 amendment blob `9704d110a06d0c2ee98be960054e0396d0b68546` was fetched directly via GitHub blob retrieval and its complete 13,682-character content inspected. It is titled “Phase 3.6.4 — COC Recovery Cutoff Batch / Participant Manifest Ordering Amendment”; it explicitly binds base COC `8ac178...`, Storage Design v3.1 `d5bdc72...`, and H schema 1.0.5 candidate. It defines the three-digest model and two-phase commit order. The later COC protocol blob `5b950a3...` extends this with §17 dual-ledger union membership and supersedes narrower §§15–16 interpretations. Do not treat `9704d...` as a standalone current complete bundle: it is the ordering amendment source, while `5b950a...` is the later integrated COC protocol. The H schema artifact revision 1.2.5 while protocol-family `schema_version` remains 1.2.0; distinct concepts.
@@ -79,7 +79,7 @@ The schema field-presence check is not proof that outcome-dependent evidence con
 ## 6. Blocking conditions and review boundary
 
 1. H schema 1.2.5 structurally represents the Batch-before-Manifest-record order, three distinct digests and dual-ledger union member types. Outcome enum and proof-reference fields were inspected; H owner semantic acceptance and interoperability-vector execution remain pending.
-2. C Provider Outcome fields are present in H schema 1.2.5, and Storage COC §16.4 assigns C the gate across the Batch/Manifest interval. C owner artifact exact blob was not located in this pass; C exact-version approval is therefore pending.
+2. C Provider Outcome fields are present in H schema 1.2.5, and Storage COC §16.4/§17 assigns C the gate and owner-local admission accounting across the Batch/Manifest interval. The former C source-discovery blocker is closed by the exact C source set and delegated C decision pinned below. H schema 1.2.5 remains a historical structural pin; C's review also references a 1.2.7 signature-profile amendment, which A/H must pin as the current H bundle before freeze.
 3. The Storage v3.1 companion blob is cited by the current COC protocol but was not independently fetched in this pass. A must verify that pin before freezing the bundle.
 4. Any schema or protocol change creates a new exact bundle and requires affected-owner re-review.
 
@@ -91,3 +91,52 @@ No implementation, conformance test execution, provider sandbox verification, pr
 Storage amendment blob `9704d110a06d0c2ee98be960054e0396d0b68546` was fetched directly by SHA using GitHub's blob retrieval and inspected in full (13,682 characters). Its content confirms the exact title, three-digest projection, non-circular dependency, and two-phase Batch-before-Manifest-record sequence. It explicitly names Storage Design v3.1 blob `d5bdc72f193fcdaa654e4f07f865b77c578673ca` and base COC blob `8ac17816476f280ab6fb3afca0688aa03e37de1d`. The later integrated COC blob `5b950a3a29bd7a5276b92a49a9114d700718b987` adds §17 dual-ledger union-manifest requirements.
 
 C owner artifact discovery remains unresolved: the C branch's prior review report is present, but the canonical C Provider Outcome contract/schema source could not be located or pinned by exact path/blob in this pass. Consequently C's conditional boundary review must not be promoted to an exact-version Owner acceptance. This is an explicit freeze blocker, not an inferred approval.
+
+
+## 8. Follow-up — C source discovery, exact pin and Storage cross-check (2026-11-17)
+
+### 8.1 Exact C branch evidence
+
+The C branch was resolved to HEAD `afacd82a4bf03118f40cd010bff6060837132985`; its recursive Git Tree was fetched by exact tree SHA `f5ac9546c6aa7c13443485e50db92a10af320c77`. The following normative source files were present in that tree and fetched by their exact Blob SHAs:
+
+| C source | Path | Blob |
+|---|---|---|
+| Final Request Evidence Contract | `07-agent-integration/phase-3.6-final-request-evidence-contract.md` | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` |
+| C-submit / I-authorization / D-ForgetFence causal-order contract | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `45a48249717c8cddb07ab96197730ef93d406c22` |
+| C owner-local admission / recovery-release amendment | `07-agent-integration/phase-3.6.9-c-owner-local-admission-gate-recovery-release-amendment.md` | `9609b252fc38fd5ba7b2f8c0992b7bd33a13c5bb` |
+| Concrete Provider Egress Gate Adapter contract | `07-agent-integration/provider-egress-gate-adapter-contract.md` | `a8d1cfc4d2171c9b0a0ced10e53fc6b110479aca` |
+
+Corroborating C reviews:
+- Phase 3.6.11 Provider Outcome × Recovery Batch/Manifest: Blob `19519a9dabe8aea66897c01493ab5b65ed8af4aa`.
+- Phase 3.8.2 RecoveryJoin / provider-side-effect review: Blob `a7b57bd5531222559666f0f1d9df59a259cde61a`.
+- Phase 3.8.3 exact Provider Egress Gate review: Blob `5a27f79087d3a5e01dd23e818d8c7ea0fdb61d1d`.
+
+C's delegated exact-owner binding decision:
+- Path: `07-agent-integration/phase-3.8.4-c-provider-outcome-exact-owner-binding-decision.md`
+- Commit: `fd245b83865bbf7192e8b24366b89590ade3f3fc`
+- Blob: `1ac84f2b2991e414e2447d16a746ac19328978ed`
+- Decision: **ACCEPT WITH ENUMERATED C-OWNED EXCEPTIONS**.
+- Provenance: assistant-authored role simulation at the user's direction; not an independent human C Owner signature.
+
+The canonical C authority is a composable normative source set, not one standalone file. The earlier statement “C owner artifact not located” is superseded. The review report `ce191163...` remains a review artifact and is not substituted for the normative C sources.
+
+### 8.2 Storage independent cross-check
+
+Storage's independent cross-check of the C source set confirms the following integration invariants are mutually consistent with Storage COC §§15–17 and the exact Storage v3.2.2 ordering amendment:
+
+1. C owner-local admission inventory is distinct from the COC participant prefix. Every admitted C operation is represented in C's frozen ledger; where no COC ParticipantIntentRef exists, the manifest carries an explicit null plus reason rather than fabricating a COC participant.
+2. CSubmitOutcome is C-authored provider-boundary truth. COC Batch/Manifest membership, Storage Prepared/COMMITTED/PublicationReceipt, I COMMIT_WON, D clearance and H ACK cannot synthesize provider success.
+3. C distinguishes provider handoff from COC admission/reservation and from Storage visibility. `HANDOFF_ACCEPTED` is not durable Memory Brain visibility, model execution, user delivery or G Applied.
+4. Provider invocation/retry remains blocked after Batch or Manifest commit alone; C requires S4 exact pair readback and semantic join before recovery reconciliation.
+5. Ambiguous handoff remains UNKNOWN/IN_DOUBT and is reconciled only under the same immutable request/attempt and provider idempotency key. Generic exactly-once is not assumed.
+6. Storage does not author or release C Provider Outcome. C's exact semantic acceptance is recorded as a delegated role decision and remains bounded by provider-specific and runtime evidence exceptions.
+
+### 8.3 Remaining freeze blockers
+
+- Provider-specific idempotency namespace, same-key authoritative lookup, receipt authenticity and no-handoff proof must be established for each production provider.
+- C durable Gate/ledger serialization, multi-replica race behavior, crash/restart/restore and real transport Adapter conformance remain unimplemented/unverified.
+- H schema 1.2.5 is only the earlier exact structural pin; C review references schema 1.2.7 signature-profile changes. A/H must pin and validate the current H schema + semantic validator + canonical-byte/signature fixtures as one exact bundle.
+- A must perform final cross-owner integration review against current I/D/Storage/H heads and preserve all owner-specific release authorities.
+- No implementation, provider sandbox test, production activation, universal exactly-once, Full Applied or Global Forget Completion is claimed.
+
+This update closes the document-discovery blocker only. It does not close implementation, provider-specific, H-currentness, conformance or final A acceptance gates.
