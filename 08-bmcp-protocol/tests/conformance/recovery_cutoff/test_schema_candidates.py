@@ -17,7 +17,8 @@ class SchemaCandidateIntegrity(unittest.TestCase):
 
     def test_SCHEMA_01_recovery_schema_is_draft_2020_12_and_closed_root(self):
         self.assertEqual(self.recovery["$schema"], "https://json-schema.org/draft/2020-12/schema")
-        self.assertFalse(self.recovery.get("additionalProperties", True))
+        for name in ("ownerSnapshot", "participantManifest", "recoveryBatch", "admissionEntry", "gateRelease", "epochCompleted"):
+            self.assertFalse(self.recovery["$defs"][name].get("additionalProperties", True))
 
     def test_SCHEMA_02_recovery_schema_contains_six_message_families(self):
         refs = {x["$ref"].split("/")[-1] for x in self.recovery["oneOf"]}
