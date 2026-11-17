@@ -32,13 +32,13 @@ D may append `Memory.lifecycle = Forgotten` only when both conditions hold:
 D 只有在以下两个条件同时满足时，才可追加 `Memory.lifecycle = Forgotten`：
 
 1. D has a current, durable `CanonicalSuppressionComplete` proof for the exact Memory identity/version family, scope and ForgetOperation.
-2. I supplies a current, authenticated governance decision that explicitly authorizes the D lifecycle terminalization under the applicable policy version and permission epoch.
+2. I supplies a current, authenticated, single-use `ForgetTerminalizationAuthorizationReceipt` with `COMMIT_WON`, bound to the exact LifecycleEvent digest and D suppression proof. The receipt semantics are proposed in the companion I/D contract (PR #68); until D and I accept the same exact version, this remains a cross-owner proposal, not an implemented authorization primitive.
 
-The LifecycleEvent MUST carry typed references to both proofs and their exact digests. It MUST NOT copy forgotten payload. The event records logical terminalization, not physical erasure.
+The LifecycleEvent MUST carry typed references to the D suppression proof and the exact I authorization receipt, including their digests and I sequencer result. I's later closeout proof binds the exact D terminalization/no-terminalization outcome. It MUST NOT copy forgotten payload. The event records logical terminalization, not physical erasure.
 
 LifecycleEvent 必须携带上述两项证明的类型化引用及精确摘要，不得复制被遗忘内容。该事件记录逻辑终态化，不代表物理擦除。
 
-If either proof is stale, revoked, unknown, scope-mismatched or digest-mismatched at the commit point, the event MUST NOT commit. The operation remains blocked/resumable; the fence is not rolled back.
+If the I sequencer returns `REVOCATION_WON` or `UNKNOWN / IN_DOUBT`, or if the D proof/fence is stale, scope-mismatched or digest-mismatched at D's CAS point, the event MUST NOT commit. The operation remains blocked/resumable; the fence is not rolled back. If I has returned `COMMIT_WON`, its exact authorization participant remains unresolved until D returns an authenticated terminalization or no-terminalization outcome.
 
 如果任一证明在提交点已过期、撤销、未知、Scope 不匹配或摘要不匹配，则不得提交该事件。Operation 保持阻塞/可恢复状态；Fence 不得回滚。
 
@@ -79,6 +79,28 @@ ForgetOperation 阶段建议统一为以下单调序列：
 - `FENCE_INSTALLED` 之后禁止取消或回滚。失败保持阻塞/可恢复；操作者不得降低 Fence 以制造完成假象。
 - Fence 后的永久策略例外不构成隐式成功，必须引用精确的 I 所有者例外，并在证明中保持可见。
 
+
+### 2.2 Legacy vocabulary mapping / 历史词汇映射
+
+The following mapping is required when reading or migrating existing D artifacts. It is a semantic mapping, not evidence that any source schema or implementation has already been migrated.
+
+阅读或迁移现有 D 制品时，必须使用以下映射。该映射是语义映射，不代表任何源 Schema 或实现已经迁移。
+
+| Existing vocabulary / 现有词汇 | Proposed canonical representation / 建议规范表示 | Rule / 规则 |
+|---|---|---|
+| `Requested` / `REQUESTED` | `REQUESTED` | Same durable request identity; normalize case only at schema boundary. / 相同持久化请求身份；仅在 Schema 边界规范大小写。 |
+| `FenceEstablished` / `FENCE_INSTALLED` | `FENCE_INSTALLED` | Must bind the committed fence generation and admission high-water. / 必须绑定已提交 Fence Generation 与 Admission High-water。 |
+| `InventoryOpen` / `CLOSURE_OPEN` | `INVENTORY_RECONCILIATION` | Open inventory/lineage reconciliation; never implies coverage complete. / Inventory/Lineage 核对开放；不代表覆盖完整。 |
+| `BarrierDraining` / `BARRIER_DRAINING` | `BARRIER_DRAINING` | Same phase; all pre-fence members remain accountable. / 相同阶段；所有 Fence 前成员均须核算。 |
+| `BARRIER_DRAINED` | Barrier terminal evidence within `BARRIER_DRAINING` | Evidence checkpoint, not a separate operation phase. / 证据检查点，不是独立 Operation 阶段。 |
+| `TargetReconciliation` | `TARGET_RECONCILIATION` | Same phase; per-target unknown/failed remains blocking. / 相同阶段；逐目标 Unknown/Failed 仍阻塞。 |
+| `COVERAGE_BLOCKED` | `COVERAGE_BLOCKED` | Pre-fence condition only; no Fence is installed while coverage is blocked. / 仅 Fence 前条件；覆盖阻塞时不得安装 Fence。 |
+| `COVERED` | Coverage proof attached to transition into `FENCE_INSTALLED` | Durable proof/checkpoint, not an additional phase. / 持久化证明/检查点，不是额外阶段。 |
+| `CANONICAL_SUPPRESSION_COMPLETE` | `CANONICAL_SUPPRESSION_COMPLETE` | Exact D terminal phase; no global or physical-erasure meaning. / 精确 D 终态阶段；不含全局或物理擦除含义。 |
+| `Blocked` | `execution_condition=BLOCKED` plus typed reason | Orthogonal to phase and resumable where safe. / 与阶段正交；安全时可恢复。 |
+| `Failed` | `FAILED_PRE_FENCE` only before Fence; otherwise `execution_condition=BLOCKED` or explicit I-approved policy disposition | A post-fence failure cannot clear or roll back the Fence. / Fence 后失败不能清除或回滚 Fence。 |
+| `CANCELLED` | `CANCELLED_PRE_FENCE` | Requires durable proof that no fence/protected work was admitted. / 必须证明 Fence/受保护 Work 均未准入。 |
+
 ### 2.1 Field typing / 字段类型
 
 Replace ambiguous generic completion fields in the D Forget contract with typed fields:
@@ -87,6 +109,7 @@ D Forget 契约中含义模糊的通用完成字段应替换为类型化字段�
 
 - `d_canonical_suppression_proof_ref`
 - `canonical_suppression_completed_at`
+- `forget_terminalization_authorization_receipt_ref` (I-owned, single-use receipt; exact event-bound `COMMIT_WON` only)
 - `global_forget_attestation_ref` (I-owned reference only; D cannot mint it)
 - `physical_erasure_evidence_refs[]` (external authority references only; D cannot mint them)
 - `lifecycle_terminal_event_ref`
