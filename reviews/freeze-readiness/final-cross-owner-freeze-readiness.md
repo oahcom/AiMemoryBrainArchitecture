@@ -23,7 +23,7 @@ These results improve evidence maturity but do **not** establish a production im
 | Owner | Branch | Snapshot HEAD |
 |---|---|---|
 | I | `session-i-security-governance-2026-11-16` | `384167787665d3f3689f0989dfb8f29b17140663` |
-| H | `session-h-bmcp-protocol` | `0a131b5cfcda78c4d5414aea9f99957ebc95955e` |
+| H | `session-h-bmcp-protocol` | `5e75e5085d80ca7b86823d12733bbbef240d9901` |
 | C | `session-c-agent-integration-2026-11-16` | `d1e8514ae740ff98b0bdac05a6c5dff2d06b3ab3` |
 | Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `6bdf00a31827cac8aa7872d80be800d694a47b98` |
 | A | `session-a-integration-2026-11-16` | `07f8908a2c0302b6d185608594f5adeab719a477` |
@@ -36,7 +36,7 @@ These are source snapshots used for this review. Subsequent evidence-report publ
 |---|---|---|
 | I | `reviews/freeze-readiness/i-freeze-evidence-delivery.md` | `1bb0209bcad2a2cb8c2529276f4c25c0f91b3025` |
 | I | Phase 3.8.2 RecoveryJoin trust/currentness exact review | `01d4514c1c0979ea878a89f36213a7db3c3c1003` |
-| H | `reviews/freeze-readiness/h-freeze-evidence-delivery.md` | `de98f0cc6b9ffd5c243849447e84bcc61eb966b3` |
+| H | `reviews/freeze-readiness/h-freeze-evidence-delivery.md` | `483fd974cfdd756f19505bad4d0e003facef0082` |
 | H | Recovery Cutoff semantic validator contract | `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80` |
 | H | RecoveryJoin schema 1.0.0 | `dd3234aa1c74caf6d0e335875cd96e0b2b64082f` |
 | H | HRC/JPF suite | `60a2f4db4bd12f2131ecd147db9bbe328da6db50` |
@@ -44,7 +44,7 @@ These are source snapshots used for this review. Subsequent evidence-report publ
 | H | Schema integrity suite | `67aba74c120f2916d768e7b01c45408ee2624f3a` |
 | C | `reviews/freeze-readiness/c-freeze-evidence-delivery.md` | `35c7b602a7c255a0382e8dfd86e2319941961b6c` |
 | C | Phase 3.8.2 RecoveryJoin/provider-side-effect exact review | `a7b57bd5531222559666f0f1d9df59a259cde61a` |
-| Storage | `reviews/freeze-readiness/storage-freeze-evidence-delivery.md` | `16278d16cf77a0fb7d1507cb0792b6d992214502` |
+| Storage | `reviews/freeze-readiness/storage-freeze-evidence-delivery.md` | `86e221980bbfcf7edfce8109cf3961aa1ffbf09f` |
 | Storage | Bidirectional COC/Owner Admission JoinProof | `668faeb20e3e9cb907a8d1061635b12162f3dbe2` |
 | Storage | Phase 3.8.2 exact review / topology disposition | `2726f0a2a5168f126d25eb48b857d8921a09031e` |
 | Storage | Serialization topology ADR | `080433f8e13a500522bc2754da64057edb0ae9d8` |
@@ -54,14 +54,14 @@ These are source snapshots used for this review. Subsequent evidence-report publ
 
 | Area | Run | Result | Strict scope |
 |---|---|---|---|
-| H HRC/JPF/WIRE/SCHEMA candidate | [44041110983](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041110983) | **66/66 PASS** | Python reference semantics, schema integrity and wire candidate vectors |
+| H HRC/JPF/WIRE/SCHEMA candidate | [44041359883](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041359883) | **66/66 PASS** | Python reference semantics, schema integrity and wire candidate vectors |
 | I Global Forget reference model | [43963450717](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43963450717) | **30/30 PASS** | In-memory logical inventory/completion model |
 | Storage restore high-water reference model | [43965501810](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43965501810) | **25/25 PASS** | Logical restore quarantine/high-water model |
 | Storage PostgreSQL capability | [43959079736](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43959079736), [43908746695](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43908746695), [43927416496](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43927416496), [43930047054](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43930047054), [43912857694](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43912857694), [43913477785](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43913477785), [43955195219](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43955195219), [43955195388](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43955195388), [43958775001](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43958775001) | Successful pinned capability runs | PostgreSQL engine/CI profile only; not application integration or production topology |
 
 ### H test failure and correction / H 测试失败与修正
 
-The first current-bundle run [44039825581](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44039825581) failed JPF-08. The validator returned UNKNOWN because the test fixture required unrelated I/D evidence but supplied only C evidence; the intended duplicate-C-primary-admission assertion was never reached. H corrected the fixture to require only C evidence for that isolated vector. No validator rule was weakened. The corrected exact candidate suite passed 66/66 in run 44039990464 and was re-confirmed by run 44041110983.
+The first current-bundle run [44039825581](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44039825581) failed JPF-08. The validator returned UNKNOWN because the test fixture required unrelated I/D evidence but supplied only C evidence; the intended duplicate-C-primary-admission assertion was never reached. H corrected the fixture to require only C evidence for that isolated vector. No validator rule was weakened. The corrected exact candidate suite passed 66/66 in run 44039990464 and was re-confirmed by run 44041359883.
 
 首轮 H 测试 JPF-08 失败，原因是夹具额外要求 I/D 证据，却只提供 C 证据，导致在执行目标断言前返回 UNKNOWN。H 将该测试隔离为仅验证 C Primary Admission 唯一性，没有放宽 Validator。随后 66/66 通过，并由后续 CI 再次确认。
 
@@ -163,8 +163,13 @@ The next review must be evidence-driven: exact source Blobs, reproducible CI run
 
 The current owner evidence-delivery reports have been refreshed and re-read:
 - I report Blob `1bb0209bcad2a2cb8c2529276f4c25c0f91b3025`.
-- H report Blob `de98f0cc6b9ffd5c243849447e84bcc61eb966b3`.
+- H report Blob `483fd974cfdd756f19505bad4d0e003facef0082`.
 - C report Blob `35c7b602a7c255a0382e8dfd86e2319941961b6c`.
-- Storage report Blob `16278d16cf77a0fb7d1507cb0792b6d992214502`.
+- Storage report Blob `86e221980bbfcf7edfce8109cf3961aa1ffbf09f`.
 
-The latest H push-triggered CI [44041110983](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041110983), job `133895653293`, again reports **66 tests, OK**. This is the latest H candidate run used by this final report.
+The latest H push-triggered CI [44041359883](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041359883), job `133896455127`, again reports **66 tests, OK**. This is the latest H candidate run used by this final report.
+
+
+## 10. Latest H confirmation / H 最新复验
+
+H's newest push-triggered run [44041359883](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041359883), job `133896455127`, checked out commit `5e75e5085d80ca7b86823d12733bbbef240d9901` and reported **66 tests, OK**. H report publication Blob is now `483fd974cfdd756f19505bad4d0e003facef0082`; Storage report publication Blob is `86e221980bbfcf7edfce8109cf3961aa1ffbf09f`. The verdict remains BLOCKED because the outstanding items are implementation/authority/topology gaps, not H candidate test failures.
