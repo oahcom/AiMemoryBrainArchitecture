@@ -399,3 +399,17 @@ The current inventory is **97 methods**:
 Latest verified run [44042997885](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042997885), commit `5592ba9f993e358d826902660b64775b1eb3ee1b`, job `133901859735`: **97 tests ran, OK**. The earlier 1.2.8 fixture drift failure is retained in CI history; the test assertion was corrected to 1.2.8 without weakening it, and the subsequent exact commit passed.
 
 The new SCHEMA-15/16 checks are structural only. They do not prove production owner attestation signatures, I key-status verification, currentness CAS, live pagination/quorum, or production semantic behavior. HRC-TEST-v1 remains test-only; the 97-method suite does not validate a production signature/canonicalization profile or deployed COC/Storage behavior.
+
+
+### 11.14 中文规范：Recovery Cutoff 1.0.5 / RecoveryJoin 1.0.1 / Unified 1.2.8
+
+H 分支当前候选 Schema 精确版本：
+- Recovery Cutoff 1.0.5：`75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`。
+- RecoveryJoin 1.0.1：`f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`。
+- Unified COC/JF-10 1.2.8：`70b892797d07489936300a26c0dedfafe1d6e746`。
+
+当前 97 项候选测试由 HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1 组成。SCHEMA-15 检查 Owner Snapshot Attestation 的内容绑定；SCHEMA-16 检查 RecoveryJoin 1.0.1 的 COMPLETE_EMPTY 与 OUT_OF_SCOPE 证明字段结构。两者均为结构检查，不验证 Owner 签名、I Key Status 或真实 Ledger 完整性。
+
+最近已验证 CI：Run `44043100543`，Job `133902179251`，97 项全部通过。此前 1.2.8 版本升级造成的旧测试断言失败已保留在 CI 历史中；修正断言以匹配精确 1.2.8 后，后续运行通过，没有降低验证要求。
+
+该 97 项测试仍属于 Reference Model / Schema / Test Profile 证据。HRC-TEST-v1 不是生产 Canonicalization 或 Signature Profile；TPH 未运行真实 COC Quorum Log；XLANG-01 只验证固定测试向量。真实 COC/Owner Adapter、生产密码学、I/D/C Currentness CAS、JF-10 物理恢复和部署拓扑仍 OPEN。H 尚未冻结，也未达到生产互操作通过。
