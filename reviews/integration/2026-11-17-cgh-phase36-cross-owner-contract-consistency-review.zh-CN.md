@@ -7,7 +7,7 @@
 - 精确源基线：
   - C：`07-agent-integration/phase-3.6-final-request-evidence-contract.md`，分支 `session-c-agent-integration-2026-11-16`，Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`。
   - G：`06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md`，分支 `session-g-memory-context`，Blob `aa3afa73d8a76cc6f025839c52bfbff6a983046a`。
-  - H：`08-bmcp-protocol/adapter-capability-and-applied-attestation.md`，分支 `session-h-bmcp-protocol`，当前 Blob `0dca3dc5463a02be0e19524811afbae87795baf5`。
+  - H：`08-bmcp-protocol/adapter-capability-and-applied-attestation.md`，分支 `session-h-bmcp-protocol`，当前 Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`。
 - G 相关精确决议锚点：
   - CGH-APPLIED-1.1 candidate A package Blob：`d4eef4aecf94f922f7933c1e1fec14a69ad17dec`。
   - Recovery-batch A package Blob：`4961ffefc0f9920efb8425a9b2a7af42d8f64819`。
@@ -17,7 +17,7 @@
 
 **C/G/H 跨 Owner 契约：尚不可冻结。**
 
-六阶段生命周期语义一致，权威边界总体正确：C 生产最终请求/Provider 侧证据；H 负责 Adapter 协议/能力并保留经过认证的 Owner 证据；只有 G 接受 Applied。但 G 最新 CGH-APPLIED-1.1 recovery-batch 决议要求的证据，当前 C producer 合同尚未定义为 C 签发的输出或明确消费的引用集合。H §11.8 已识别新增证据桥接，但仍是候选映射保留条款，不是冻结的 Schema 或已实现 Wire 合同。
+六阶段生命周期语义一致，权威边界总体正确：C 生产最终请求/Provider 侧证据；H 负责 Adapter 协议/能力并保留经过认证的 Owner 证据；只有 G 接受 Applied。但 G 最新 CGH-APPLIED-1.1 recovery-batch 决议要求的证据，当前 C producer 合同尚未定义为 C 签发的输出或明确消费的引用集合。H §§11.8–11.9 现已映射因果顺序/recovery-batch 证据桥接、由 C 签发的 Provider receipt/outcome 引用、participant terminal proof 条件，以及仅由 I/D 签发的 Owner gate release。但两节仍是候选映射，不是冻结 Schema 或已实现 Wire 合同。
 
 这是实质性 P1 契约缺口，不是翻译缺陷。本复审不提升任何 Owner 决议或实现状态。
 
@@ -54,13 +54,13 @@ G 最新 recovery-batch 修订至少要求：
 
 闭合前，G 不能安全地认为当前 C producer 合同已满足完整 1.1 谓词。
 
-### XCH-36-002 — H §11.8 是候选映射，不是冻结或已实现的 1.1 Wire 合同
+### XCH-36-002 — H §§11.8–11.9 是候选映射，不是冻结或已实现的 1.1 Wire 合同
 
 **严重级别：P1 — 冻结阻塞**
 
 当前 H 源 Blob `0dca3d...` 包含 §11.8，枚举 causal-order、recovery-batch、participant completeness、Owner high-water、I terminal、D lineage/cutoff/effective-position，以及有条件的 Storage same-XID 证据引用。它正确禁止 H 签发或推断 COC、I、D、C Provider 或 Storage outcome，并要求不同顺序域保持独立。
 
-但 §11.8 明确仍是候选保留条款。它说明不能据此证明当前 JSON Schema/SDK 已包含这些字段，并要求 H 在相关 C/G/I/D/Storage 确认后发布精确增量 Schema 版本。G 将 `bmcp.applied-ack/1.1.0` 列为目标，但本次审查没有在 H 源文件中发现该目标已经作为已发布、冻结的 Schema/SDK 实现的证据。
+§11.8 和 §11.9 均明确仍是候选保留条款。§11.9 进一步要求由 C 签发的 `c_provider_receipt_ref` 和不可变 `c_submit_outcome_ref`，将 `participant_terminal_proof_ref` 限定为所有确定性 outcome 完成 reconciliation 后才可出现，并将 `owner_gate_release_attestation_ref` 独占保留给 I 或 D。这部分缩小了字段映射歧义，但并未修订 C 的 Owner 合同，也不构成 C 接受。它说明不能据此证明当前 JSON Schema/SDK 已包含这些字段，并要求 H 在相关 C/G/I/D/Storage 确认后发布精确增量 Schema 版本。G 将 `bmcp.applied-ack/1.1.0` 列为目标，但本次审查没有在 H 源文件中发现该目标已经作为已发布、冻结的 Schema/SDK 实现的证据。
 
 **必要闭合动作**
 1. H 发布 1.1 证据桥接的精确版本化 Schema 和 SDK 字段映射。
@@ -106,9 +106,9 @@ C conformance、G-36/CGH 和 H conformance 案例仍为 SPECIFIED / NOT RUN。G 
 | Adapter capability / ACK / session / Wire integrity | H | 拥有并认证 | 消费；不得仅凭 ACK 提升 Applied |
 | Applied fact 和 current-use projection | G | 无权威 | 唯一所有者 |
 
-## 5. H 当前源 pin 修正与旧报告取代
+## 5. H 当前源 pin 修正与候选补充条款
 
-已重新读取当前 H Owner 源文件，Blob 为 `0dca3dc5463a02be0e19524811afbae87795baf5`。当前 EN 和 zh-CN companion 均固定到该 Blob，并包含 §11.8。本 PR 先前发布的 H parity 报告使用旧源 SHA `db59b63e322d7255b8b400f47859dcac32bb3027`；该报告由本次当前源复审取代，不得再作为当前 H 源修订的证据。
+已重新读取当前 H Owner 源文件，Blob 为 `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`。当前 EN 和 zh-CN companion 均固定到该 Blob，并包含 §§11.8–11.9。§11.9 明确映射 C 签发的 Provider receipt/outcome 引用、participant terminal proof 的资格，以及 I/D 独占签发 Owner gate release。这些仍是候选要求。此前针对 `db59b63e322d7255b8b400f47859dcac32bb3027` 的 H parity 报告已由当前 Blob 的更新复审取代。
 
 ## 6. 最终判定
 
