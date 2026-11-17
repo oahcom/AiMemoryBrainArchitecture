@@ -107,3 +107,48 @@ G Phase 3.8.22 已规定 Durable Applied Identity、不可变 Evidence Revision�
 但 SQLite 单文件不是生产 Storage 拓扑，也不证明 PostgreSQL Serializable；Proof 是测试输入而非真实权威签名；Restore High-water 是测试参数而非外部签名 Checkpoint；并发仅为单进程六个 SQLite Connection，不是多进程/多主机/多副本；未测试断电、文件系统损坏、备份快照、PITR、Failover 或生产运维。该模型也没有关闭完整 G-AP-P01..P18。
 
 最终状态：SQLite 参考模型 **PASS 14/14**；G Durable Applied 仍是 **REFERENCE MODEL ONLY**；生产 Schema/SDK/Unique Index/DB Adapter **NOT IMPLEMENTED / NOT VERIFIED**；生产 Crash/Restore/Multi-replica 证明 **OPEN**；Full Applied/全局冻结/生产激活 **NOT PROVEN / NOT AUTHORIZED**。
+
+
+## 8. Current test-head reconciliation — 2026-11-18
+
+The original §3 test count and Blob are historical. The G Owner branch subsequently expanded the model from 14 to 17 tests.
+
+- Current G Owner branch HEAD observed: `2c53a9d872ad4d57d99bd24a860ca695b9e3a661`.
+- Exact code/test commit: `470d4c1934999263bfb8a4822b13c2ff854c3dfd`.
+- Current test file Blob: `e77d2375506e423bf53d8341fe9aecf2719d0609`.
+- Workflow Blob: `045f7b76783d0aa5d6b7cd0dc9bec42a5f6140be`.
+- Exact CI run [#44188852578](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44188852578): SUCCESS; job log explicitly reports `Ran 17 tests`, `OK`.
+- The two additional cases beyond the earlier 14-test snapshot reject restore snapshots whose epoch or high-water is ahead of the trusted external anchor.
+- A further case proves that while the restore fence is active, a new Full Applied write is rejected and the pre-existing ledger/outbox remain unchanged.
+
+This is a bounded local SQLite reference-model result only. It does not prove PostgreSQL/Serializable behavior, multi-process or multi-host linearizability, signed external anchor authenticity, real C/H/COC/I/D/Storage proof resolution, power-loss recovery, production backup/PITR/failover or G Owner acceptance. G-AP-P01..P18 remain SPECIFIED / NOT RUN for production.
+
+### Updated disposition
+
+- SQLite reference model: **PASS 17/17** on exact code commit `470d4c1...`.
+- Production G schema/SDK/unique index/database adapter: **NOT IMPLEMENTED / NOT VERIFIED**.
+- Production crash/restart/restore/multi-replica proof: **OPEN**.
+- Full Applied / global C/G/H freeze / production activation: **NOT PROVEN / NOT AUTHORIZED**.
+
+---
+
+## 9. 中文：当前测试 Head 对账 — 2026-11-18
+
+原 §3 的测试数量和 Blob 已是历史快照。G Owner 分支随后将模型从 14 项扩展至 17 项。
+
+- 当前 G Owner 分支 HEAD：`2c53a9d872ad4d57d99bd24a860ca695b9e3a661`。
+- 精确代码/测试提交：`470d4c1934999263bfb8a4822b13c2ff854c3dfd`。
+- 当前测试文件 Blob：`e77d2375506e423bf53d8341fe9aecf2719d0609`。
+- Workflow Blob：`045f7b76783d0aa5d6b7cd0dc9bec42a5f6140be`。
+- 精确 CI Run [#44188852578](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44188852578)：SUCCESS；Job 日志明确为 `Ran 17 tests`、`OK`。
+- 相较早期 14 项快照，新增两项测试：当 Restore Snapshot 的 Epoch 或 High-water 超前于 Trusted External Anchor 时必须保持 Fenced。
+- 另新增一项测试：Restore Fence 激活期间必须拒绝新的 Full Applied 写入，并保持既有 Ledger/Outbox 不变。
+
+该结果仍仅是本地 SQLite 有界参考模型。它不证明 PostgreSQL/Serializable 行为、多进程/多主机 Linearizability、签名外部 Anchor 真实性、真实 C/H/COC/I/D/Storage 证明解析、断电恢复、生产 Backup/PITR/Failover 或 G Owner 验收。生产级 G-AP-P01..P18 仍为 SPECIFIED / NOT RUN。
+
+### 更新后的结论
+
+- SQLite 参考模型：精确代码提交 `470d4c1...` 上 **PASS 17/17**。
+- 生产 G Schema/SDK/Unique Index/Database Adapter：**NOT IMPLEMENTED / NOT VERIFIED**。
+- 生产 Crash/Restart/Restore/Multi-replica 证明：**OPEN**。
+- Full Applied/全局 C/G/H Freeze/生产激活：**NOT PROVEN / NOT AUTHORIZED**。
