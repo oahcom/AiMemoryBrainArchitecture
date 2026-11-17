@@ -5,14 +5,14 @@
 - 审查角色：A — 首席系统架构权威（委托集成审查角色）
 - 日期：2026-11-17
 - 用户指定不可变基线：`8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
-- 审计时观察到的 main HEAD：`ca69d50d1fc6c19a930128de700b0f2328bf32fb`
+- 最终审计时观察到的 main HEAD：`901e38ba7b45ed1822eaefddc2da8d765cf8985c`
 - 审查分支：`review/session-4-a-g1-currentness-audit-2026-11-17`
 - 状态：**G1 PARTIAL — main 差异已完整枚举；已刷新部分 Owner 来源 Pin；Owner 全量逐源语义审查与同 Bundle 采纳审查仍未完成。**
 - 本文件是证据审计，不是 Owner 批准、架构冻结、实现授权或生产验收。
 
 ## 1. 执行结论
 
-用户指定的 SHA `8c0c5b1...` 是真实 main 提交，但审计时已不再是当前 main。审计快照中的 main 为 `ca69d50...`，仅领先一个提交。比较 `8c0c5b1...` 至 `ca69d50...` 的结果是新增一个文件，无修改、无删除。
+用户指定的 SHA `8c0c5b1...` 是真实 main 提交。最终审计快照中的 main 为 `901e38ba...`，提交历史领先两个提交。中间提交 `ca69d50...` 曾短暂新增一个仅属研究用途的双语对等审计文件；随后 `901e38ba...` 将其撤回。因此 `901e38ba...` 的最终文件树与 `8c0c5b1...` 完全相同（Tree SHA `7096e0bc3fdc9a390fccff388f9261522fa424f2`）。指定基线到当前 main 的最终净文件差异为零。
 
 **G1 仍为 PARTIAL，不能 PASS。** Main 差异已完整识别并读取，但：
 1. R、X、F/D/P 正式评估稿仍声明历史 main 基线 `b372b62...`。
@@ -34,15 +34,15 @@
 
 被删除文件是研究工件，不是 B Owner 的正式 ADR 批准。删除它并没有解决 Fact/Claim 决策；当前 B Owner 分支仍保留两份明确标记 ADR-BLOCKED 的记录（见 §4）。
 
-### 2.2 指定 SHA 到审计时当前 main 的精确差异
+### 2.2 指定 SHA 到最终审计时当前 main 的精确差异
 
-| 路径 | 变更 | 精确 Blob | 审计结论 |
+| 路径 | 两提交之间的历史变化 | 精确 Blob | 审计结论 |
 |---|---|---|---|
-| `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md` | 由 `ca69d50...` 新增（+131 行） | `a877ceff906da01e70e277a81b95978982af3ede` | 已读取。结论为 B5 **NOT PASSED / BLOCKED**；多数研究文件仍需双语对等复审。这是研究审计，不是 Owner 决策或架构规范修订。 |
+| `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md` | 由 `ca69d50...` 新增（+131 行），随后由 `901e38b...` 删除 | `a877ceff906da01e70e277a81b95978982af3ede`（中间版本） | 已从中间提交读取。其结论为 B5 **NOT PASSED / BLOCKED**；多数研究文件仍需双语对等复审。这是研究审计，不是 Owner 决策或架构规范修订，且最终 main 中已不存在。 |
 
-文件树计数：`8c0c5b1...` 有 82 个 Blob；`ca69d50...` 有 83 个 Blob；当前递归树未截断。这次单提交比较没有其他路径变更。
+文件树计数：`8c0c5b1...` 为 82 个 Blob；中间版本 `ca69d50...` 为 83 个 Blob；最终版本 `901e38b...` 为 82 个 Blob。最终 Tree SHA 与用户指定基线完全相同：`7096e0bc3fdc9a390fccff388f9261522fa424f2`；净文件差异为零。
 
-新增双语审计本身也是一项证据警告：翻译标题或部分中文段落不等于双语对等。独立逐条/逐行对等检查仍待完成。不能因文件存在就推断 G6 PASS。
+该短暂双语审计仍是研究分支证据：中文标题或部分翻译不能证明双语对等。其 B5 结论在研究分支上仍为 BLOCKED。不能推断 G6 PASS，也不能声称该文件属于当前 main。
 
 ## 3. R / X / F-D-P 评估审计
 
@@ -132,7 +132,7 @@ D、I、C 均读取了同一个精确 ADR Blob，并在各自权威边界内接�
 | #60 | A current-main 最终评估 | `8c0c5b1...` | `d476db8...` | OPEN / DRAFT |
 | #61 | A B-02 / H 1.2.15 差异复审 | `8c0c5b1...` | `4726d93...` | OPEN / DRAFT |
 
-PR #57–#61 均以用户指定 SHA 为 main base，但 main 已推进到 `ca69d50...`，因此它们比当前 main 落后一个提交。PR #51/#54 以审查分支为 base，是堆叠 PR，不是直接以当前 main 为基线。本审计未重定向、合并或关闭任何现有 PR。
+PR #57–#61 均以 `8c0c5b1...` 为 main base；最终 main 已为 `901e38b...`，提交历史领先两个提交，但文件树与旧 base 完全相同。它们的 Base Commit 在历史上较旧，尽管当前文件树没有净内容差异。PR #63 创建时的 Base SHA 为 `901e38b...`，仅包含两份 G1 审计文件。PR #51/#54 以审查分支为 base，是堆叠 PR，不是直接以当前 main 为基线。本审计未重定向、合并或关闭任何现有 PR。
 
 ## 6. Issue 审计
 
