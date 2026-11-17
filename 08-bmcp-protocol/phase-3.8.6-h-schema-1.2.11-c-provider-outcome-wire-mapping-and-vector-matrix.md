@@ -227,3 +227,19 @@ I has accepted the lifecycle/governance-signature design as a candidate only. Ne
 - C CI run `44059137081`, commit `6b7b9c4a24d81ae45dcb7ddcdbe49c9617e3e4da`: SUCCESS, 12 tests.
 
 These runs cover schema closure, state-transition unit predicates, sequence-scoped status evaluation and fail-closed missing key-status callback. They do not authenticate the governance signature, trust root, registry durability, HSM/KMS custody or external anti-rollback service. No key activation is implied.
+
+
+## 15. CSubmitOutcome 1.0.1 sequence namespace binding
+
+The current immutable C dereference target is now **CSubmitOutcome 1.0.1**, schema Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`. The 1.0.0 schema remains historical and MUST NOT be silently treated as 1.0.1.
+
+Exact 1.0.1 dependencies:
+- C 1.0.1 fixture pack Blob `c447f8c2908469c52cb52a448101495a331277c5`.
+- C 1.0.1 candidate vector manifest Blob `3a5fb8502091636135a298de5891d728b550ba50`.
+- C 1.0.1 expected crypto vectors Blob `34e49a49551390f52198b1fa557e15a32a3f6ee2`.
+- C 1.0.1 sequence namespace amendment Blob `fdea588f52d17806793eb8c2e9035495686539ad`.
+- I 1.0.1 sequence namespace review Blob `a93febf867b8da2f23e7ee3cb5334bf491872637`.
+
+H requires `sequence_namespace_ref` in the immutable object. The H key-status callback MUST compare it exactly to the authenticated CKeyStatusEvent sequence namespace and prove that `record_sequence` and `event_sequence` are allocated by the same durable C authority sequencer. A mismatch is INVALID; unavailable sequencer/key-status/checkpoint evidence is UNKNOWN. Wall-clock comparison is forbidden.
+
+H validator core Blob `1a92c0cf7146e2884bd38232005dd9a55d558a85` now requires C object schema/artifact revision 1.0.1. The 1.0.0 validator contract and test records remain historical evidence only.
