@@ -72,3 +72,7 @@ F: exact revision-pinned recall and completeness. D/E/Storage: derivative regist
 Interface freeze: NOT AUTHORIZED. Implementation: NOT AUTHORIZED.
 
 **Final G decision: ACCEPT WITH CONDITIONS** for Context ownership, non-canonical TSS, distinct ContextObservationReference, versioned compaction and evidence lineage.
+
+## Decision provenance clarification — 2026-11-18
+
+This acceptance record is a delegated G-role decision prepared centrally under the user's instruction. It is not an independent human Owner signature. The recorded source pin `72a8066b4401f9586fe10775d545384b82736f07` is the last explicitly evidenced G branch HEAD in the source record, not a verified current branch tip. This acceptance is limited to the G-owned Context optimization boundary, remains conditional, and does not authorize interface freeze, implementation, benchmark claims, global Forget completion or cross-owner production acceptance.
