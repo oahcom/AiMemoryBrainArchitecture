@@ -1,6 +1,6 @@
 # Development Feasibility Matrix — DEV-FEAS-002
 
-- Version: 1.0.0; baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- Version: 1.0.0; baseline: `main@6470f25ca23b8d35c06f60be2326867066418d18`
 - Source: F/D/P PR #46, branch `review/session-3-engineering-planning-2026-11-17`, commit `8b9ff8efa92a88dacc8f97b5faba5918fe5d2edc`, EN Blob `081610b1734ec08dc7c35c75fae1cae3ca713be4`, ZH Blob `834dc39998342dc2f292fe1dfed411768b3ed156`.
 - A verdict: **FEASIBLE_WITH_CONDITIONS in principle; current implementation entry BLOCKED**.
 
@@ -31,6 +31,12 @@ F/D/P uses relative sizes (S/M/L/XL), not person-days. No reliable calendar or s
 - PostgreSQL 18.7 evidence is a bounded engine-capability probe, not proof of selected production topology or integrated D/I/COC operation.
 - Durable ingress/outbox, canonical cursor, Forget/publication, JF-10 recovery and Applied require separate evidence boundaries.
 - Vector/ANN, reranking and graph-backend expansion are not prerequisites for a safe first vertical slice.
+
+## Current B→A feasibility update
+
+- B's canonical identity and entity inventory artifacts now exist on main but remain CANDIDATE; B1 is in progress and Fact/Claim remains ADR-BLOCKED. They improve the research basis but do not close domain semantics or permit schema freeze.
+- H Unified 1.2.14 / wire 1.3.0 + CSubmitOutcome 1.0.1 are a coherent L1/L2 candidate. C accepts the exact H mapping; D accepts the H high-water/RecoveryJoin carrier; I has an anchor review. However, H's mapping status still says C review required, H/I/D exact pins are not all current in one bundle, and Storage v3.2.9 is stale. Protocol freeze remains blocked until Storage v3.3.0 or equivalent is reviewed by C/H/D/I and A.
+- Storage Option A is the preferred v1 logical direction but only conditionally accepted; A-01..A-05 and exact D acceptance remain open. L2/L3/L4 are not closed.
 
 ## Five engineering prerequisites
 
