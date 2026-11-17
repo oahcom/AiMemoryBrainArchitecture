@@ -126,3 +126,16 @@ Execution record must identify exact schema/validator/vector blobs, language/run
 This contract is PROPOSED. It does not freeze 1.2.11 because the current schema's structural message does not alone carry every C gate/attempt semantic value and no exact C signature profile/vector bundle is yet pinned. H will only accept a later exact bundle after C's amendment, I candidate profile addendum Blob `1bcddbaaa4a9ca730d492a6554941becac305668`; C candidate review Blob `794d1dc49f034152407e3a42ba5ac937ea3539f8`. H schema/validator updates, independent cross-language execution and Storage/A exact pin review.
 
 No tests, production readiness, provider-specific exactly-once or implementation acceptance are claimed.
+
+
+## 10. Exact 1.2.11 wire mapping and current cross-owner inputs
+
+The exact JSON Pointer/requiredness inventory and inline-versus-dereference matrix are maintained in H Phase 3.8.6, Blob `de3db907b4077e0e4d37df19d289cf1bf51afbad`. It confirms that the 1.2.11 C branch does **not** inline CGateRef/CGateGeneration, ProviderAttemptRef/Generation, provider account, endpoint, region or API operation. These values MUST be obtained from the immutable C object referenced by `c_submit_outcome_ref`, then compared to provider evidence and all duplicated wire values. Missing members in an authoritative C object are INVALID; unavailable dereference/currentness is UNKNOWN.
+
+Current C/I dependencies:
+- C exact semantic signature projection proposal: Phase 3.8.8 Blob `39ff523c41f10e3a82442d4746dd7ca7763d271c`.
+- I governance disposition: Phase 3.8.5 Blob `41fc0f508ae75e8c16012966160e9e2a1e368881`, conditional acceptance of the suite in principle only; no profile registration or deployment approval.
+- C review of I candidate: Phase 3.8.7 Blob `794d1dc49f034152407e3a42ba5ac937ea3539f8`.
+- C semantic amendment: Phase 3.8.6 Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`.
+
+The profile remains unregistered. C outcome records cannot be declared VALID merely because the common envelope carries SHA-256 and a signature; exact C profile registration, authenticated C key-status evidence, H projection implementation and independent vector execution remain mandatory.
