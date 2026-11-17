@@ -78,3 +78,14 @@ Current main: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; tree `7096e0bc3fdc9a39
 - H workflow: `.github/workflows/h-applied-delivery-evidence-conformance.yml`, Blob `7bd9bf3a4141d1e239d0f165e2e98fdd25961254`.
 - C exact identity review: `07-agent-integration/phase-3.8.23-c-exact-review-g-applied-persistence-identity.md`, Blob `4860c627b4d7e84e23fb39ad83411674f3b88c7b`; this does not accept the new H 1.0.0 wire mapping.
 - No exact G or C consumer acceptance of H 1.0.0 was found in current Owner trees.
+
+
+## ABR-INTEGRATION-003 — Cross-owner Forget model and CI pins
+
+- Model: `reviews/architecture-breakthrough/integration/model/forget_cross_owner_model.py`, Blob `d45807b0b165e53aa6e92d211c221cc93b46ca60`.
+- Regression tests: `reviews/architecture-breakthrough/integration/model/test_forget_cross_owner_model.py`, Blob `64ee823eb1d3d81e020e73ef97817208326f42b5`.
+- Bounded model README: `reviews/architecture-breakthrough/integration/model/README.md`, Blob `c7dc620b3486e496de1792147cbf441a51cb3af0`.
+- Branch-only workflow: `.github/workflows/abr-forget-cross-owner-model.yml`, Blob `31304a8718c464065ae735d35f5120edee418217`.
+- GitHub Actions run: `44136327645`, SUCCESS; tested commit `89a680bbad7246952d51c61c137b0c3611f52a06`.
+- Result: 27,472 state/depth pairs through depth 14; 11 weakened-guard mutants; model command and unittest suite passed.
+- Model result is bounded logical evidence only; it is not TLC, unbounded proof, or physical/production evidence.
