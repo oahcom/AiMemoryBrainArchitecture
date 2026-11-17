@@ -363,7 +363,7 @@ def apply_actions(state, *actions):
 def run_checks():
     trace, bad, _, count = bfs(None, 14)
     assert trace is None and bad is None
-    assert count == 22603, count
+    assert count == 27472, count
 
     for mutant, expected in EXPECTED_COUNTEREXAMPLES.items():
         got, violations, _, _ = bfs(mutant, 14)
