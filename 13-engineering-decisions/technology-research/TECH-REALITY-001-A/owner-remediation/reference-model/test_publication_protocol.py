@@ -36,6 +36,7 @@ class Protocol:
     private_unknown: set = field(default_factory=set)
     d_closed: dict = field(default_factory=dict)
     i_closed: dict = field(default_factory=dict)
+    fence_pending: set = field(default_factory=set)
 
     @staticmethod
     def digest(items):
@@ -54,6 +55,9 @@ class Protocol:
     def install_forget_fence(self):
         self.fence_generation += 1
         self.fence_installed = True
+        # Publications admitted before the fence remain barrier-counted until
+        # D observes the exact authoritative Storage terminal outcome.
+        self.fence_pending = set(self.publication_participants)
         return self.fence_generation
 
     def register_dependencies(self, work_id, dependencies):
@@ -77,6 +81,11 @@ class Protocol:
         self.storage_participants[storage_id] = binding
 
     def admit_publication(self, publication_id, work_id, storage_id):
+        work = self.producer_work.get(work_id)
+        if work is None:
+            raise Rejected("producer work not registered")
+        if self.fence_installed or work["generation"] != self.fence_generation:
+            raise Rejected("D fence installed or producer registration generation stale")
         if storage_id not in self.storage_participants:
             raise Rejected("exact hidden storage participant missing")
         if self.storage_participants[storage_id][0] != work_id:
@@ -144,6 +153,8 @@ class Protocol:
         if self.outcomes.get(operation_id) != authoritative_outcome:
             raise Rejected("D closeout requires exact authoritative Storage outcome")
         self.d_closed[operation_id] = authoritative_outcome
+        if isinstance(authoritative_outcome, tuple) and len(authoritative_outcome) >= 3:
+            self.fence_pending.discard(authoritative_outcome[2])
 
     def close_i(self, operation_id, authoritative_outcome):
         if self.outcomes.get(operation_id) != authoritative_outcome:
@@ -181,6 +192,27 @@ class PublicationProtocolTests(unittest.TestCase):
         p.install_forget_fence()
         with self.assertRaises(Rejected):
             p.register_producer("after", p.fence_generation)
+
+    def test_fence_first_rejects_publication_after_work_and_storage_registration(self):
+        p = Protocol()
+        p.register_producer("work-1", 0)
+        p.register_dependencies("work-1", ["root", "child-a"])
+        p.create_hidden_storage_participant("storage-1", "work-1")
+        p.install_forget_fence()
+        with self.assertRaises(Rejected):
+            p.admit_publication("publication-1", "work-1", "storage-1")
+
+    def test_publication_first_remains_fence_barrier_until_d_closeout(self):
+        p = self.prepared()
+        p.install_forget_fence()
+        self.assertIn("publication-1", p.fence_pending)
+        receipt = p.commit(**self.commit_args())
+        outcome = p.outcomes["op-1"]
+        p.close_i("op-1", outcome)
+        self.assertIn("publication-1", p.fence_pending)
+        p.close_d("op-1", outcome)
+        self.assertNotIn("publication-1", p.fence_pending)
+        self.assertEqual(p.receipts["op-1"], receipt)
 
     def test_stale_generation_rejected(self):
         p = Protocol()
