@@ -80,7 +80,7 @@ G 必须区分稳定 H Delivery Binding、每一种 Evidence Kind 与每条不�
 
 以上均为**建议的标准化消费方元组**。共享冻结前，C 和 H 必须明确确认精确字段名、Requiredness、Canonicalization，以及它们与当前 H 1.2.15 Schema/Validator 的映射。G 不声称现有 H Schema 或 Validator 已经冻结这些元组。
 
-**已观察到的映射缺口：**本次读取的 H 1.2.15 JSON Schema 并未将完整 HDeliveryBindingIdentity 暴露为一等 Schema Property：`adapter_instance_ref`、`runtime_session_ref`、`delivery_id`、`delivery_attempt_id`、`inference_request_id`、`final_request_boundary_id` 和 `adapter_capability_epoch` 均未出现在本次审查读取的 Schema Property 集合中。Gateway Validator 的 Signed P0 Allowlist 虽包含 `provider_adapter_ref`、`actual_inference_request_id` 和 `final_request_boundary_id`，但它本身尚未建立上述完整元组。H 必须选择：(a) 在版本化 Signed P0 Mapping 中新增并验证缺失字段；或 (b) 绑定一份承载完整元组、经过认证且不可变的 H Owner Evidence Record，并提供精确 Schema/Validator 映射。在 C/H 接受该精确映射之前，HEvidenceIdentity 只是 G 消费方要求/提案，不是已冻结的 H Wire Contract。
+**已观察到的映射缺口（根据 H 精确源码 Pin 修正）：** H Unified 1.2.15 的 `C_PROVIDER_OUTCOME_RECORDED` oneOf 分支确实要求 `final_request_boundary_id`，Gateway Validator 的签名 P0 Allowlist 也包含该字段。此前将该字段与 Schema 中完全不存在的字段并列描述，范围过宽。**但这并不证明完整的 `HDeliveryBindingIdentity` 元组已被定义。** 已检查的 Schema/Allowlist 暴露的是 `provider_adapter_ref` 和 `actual_inference_request_id`；二者不能自动等同于 G 所需的 `adapter_instance_ref` 和 `inference_request_id`。完整元组仍需要精确、版本化、经认证的 H 映射，覆盖 `adapter_instance_ref`、`runtime_session_ref`、`delivery_id`、`delivery_attempt_id`、Inference Request 标识映射、`final_request_boundary_id` 和 `adapter_capability_epoch`。H 必须：(a) 在版本化签名 P0 映射中增加并验证缺失字段；或 (b) 绑定携带完整元组且具有精确 Schema/Validator 映射的不可变、经认证 H Owner Evidence Record。在 C/H 接受该精确映射前，HEvidenceIdentity 仍是 G Consumer 要求/提案，不是已冻结的 H Wire Contract。
 
 HDeliveryBindingIdentity 和 HEvidenceIdentity 均不包含 Digest。H P0 Digest 是不可变内容，必须与 HObservationRecordIdentity 分开比较：
 
