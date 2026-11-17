@@ -1,6 +1,6 @@
 # Architecture Decision Conflict Register — CONFLICT-002
 
-- Version: 1.0.0; baseline `b372b62c640a2b656e54b6db62a4ee67d7d8c001`.
+- Version: 1.0.0; baseline `6470f25ca23b8d35c06f60be2326867066418d18`.
 - Status: A integration dispositions; Owner-owned normative decisions are not replaced.
 
 | ID | Apparent conflict / ambiguity | A disposition | Authority / required action | Gate |
@@ -17,6 +17,10 @@
 | AC-10 | Candidate schema/technology artifacts vs. freeze claims | Candidate and bounded CI status do not imply normative freeze or production conformance | Respective Owner/ADR authority decides; A requires exact-head evidence | G1/G2/G5 |
 
 | AC-11 | Storage topology ADR retains pre-addendum prose saying no option is selected, while §8 explicitly supersedes it for L1 | §8 controls: Option A is selected at L1; historical §3 text is not a current blocker but should be explicitly marked/simplified to prevent ambiguity | Storage | Before G1/G5 freeze review | G1/G5 |
+
+| AC-12 | Storage v3.2.9 manifest presented as current although later C/D/I review pins and H CI changed | Exact candidate semantics remain coherent, but manifest is stale; Storage must publish v3.3.0/equivalent, C/H/D/I review the identical Blob, then A re-reviews | Storage + C/H/D/I; A integrates | G1/G2/G6 |
+| AC-13 | New B identity/entity artifacts could be mistaken for closed domain semantics | They are CANDIDATE/B1 IN PROGRESS; Fact/Claim remains ADR-BLOCKED; no dependent schema freeze | B; I/C/H consumers | G2/G3 |
+| AC-14 | Option A logical selection could be mistaken for completed L1/L2 | Conditional L1 direction only; A-01..A-05 and exact D adoption remain open; L2/L3/L4 separate | Storage/D/I + A | G2/G3/G4/G5 |
 
 ## Explicit A boundary
 
