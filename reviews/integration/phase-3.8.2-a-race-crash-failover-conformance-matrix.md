@@ -14,7 +14,7 @@
 | I | Phase 3.8 I Commit Authorization Receipt and Revocation Sequencer Contract | session-i-security-governance-2026-11-16 | 54bab0484bd232a5a258e65e34cc7425288b39a6 |
 | Storage | Phase 3.8 Storage Visibility Participant and Atomic Outcome Contract | session-storage-consistency-forget-atomicity-2026-11-16 | 175ee7b1349cfdb79a19898b311a88391ed88010 |
 | Storage | Phase 3.6.11 Bidirectional COC/Owner Admission Join Proof | session-storage-consistency-forget-atomicity-2026-11-16 | 41f80b1aacfebdb1f652b16144afbf83ce950e82 |
-| Storage | Phase 3.8.2 Serialization Topology ADR | session-storage-consistency-forget-atomicity-2026-11-16 | pending exact readback |
+| Storage | Phase 3.8.2 Serialization Topology ADR | session-storage-consistency-forget-atomicity-2026-11-16 | 080433f8e13a500522bc2754da64057edb0ae9d8 |
 | H | HRC semantic validator contract | session-h-bmcp-protocol | c93560fcda947aef0a611b3096fb1c1994d41cd0 |
 | H | Recovery-cutoff schema 1.0.4 | session-h-bmcp-protocol | d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1 |
 | H | RecoveryJoin schema candidate 1.0.0 | session-h-bmcp-protocol | f531c1d4b89a48457188c4988f140952759223a6 |
