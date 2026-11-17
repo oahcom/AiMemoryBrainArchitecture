@@ -23,7 +23,7 @@ Read the complete contents of:
 - `14-ai-development/work-items/INDEX.md`
 - root `README.md`
 
-Also read your domain's current authoritative design and the latest relevant integration findings on your own branch. Record exact branch name, branch HEAD SHA, file paths and blob SHAs. If a referenced source cannot be read, mark NOT REVIEWABLE for that question; do not infer its contents.
+Also read your domain's current authoritative design and the latest relevant integration findings on your own branch. For the governance operating model, additionally read `14-ai-development/owner-automation-operating-model.md` and `14-ai-development/prompt-authoring-standard.md`. Record exact branch name, branch HEAD SHA, file paths and blob SHAs. If a referenced source cannot be read, mark NOT REVIEWABLE for that question; do not infer its contents.
 
 ### Independence and attribution
 
@@ -68,6 +68,8 @@ Do not edit the governance standard, do not merge branches, and do not claim tes
 
 ## A — Principal Integration Architect
 
+In addition to the domain review, evaluate whether A's prompt-authoring and portfolio-coordination role is sufficiently bounded by AI-PROMPT-STD-001 and AI-AUTO-001. A drafts task prompts, but the accountable Owner must approve domain semantics and acceptance criteria; A cannot self-approve A-owned implementation prompts.
+
 Focus on:
 - A's authority to maintain the Contract Registry and adjudicate cross-module conflicts versus project governance authority to approve the AI Development Standard itself;
 - parent/child Work Item model for cross-module tasks, owner sign-offs and integration evidence;
@@ -78,6 +80,8 @@ Focus on:
 Decide whether the current standard gives A too much, too little, or correctly bounded authority. Propose an explicit governance approval path and decision record schema.
 
 ## B — Domain Model Architect
+
+Review whether A's prompt authoring process preserves B's right to approve domain semantics, schema/ADR status and compatibility constraints before a task becomes READY.
 
 Focus on:
 - protection of canonical domain semantics and the rule that Owners decide only within their domains;
@@ -156,6 +160,8 @@ Propose mandatory protocol review, schema compatibility and golden-vector gates.
 
 ## I — Security & Governance Architect
 
+Review whether scheduled-task credentials, prompt content, GitHub comments, run logs, permission revalidation and residual-risk approval satisfy least privilege and security governance.
+
 Focus on:
 - principal authentication, ActorRef/ScopeRef, delegation, authorization, permission epochs and least privilege;
 - untrusted memory/evidence and prompt-injection defense;
@@ -174,7 +180,8 @@ This is a second, distinct A session from the A domain-review session above. It 
 A acts as Principal Integration Architect, not as a substitute for the nine domain reviews.
 
 A must:
-1. Verify each report's provenance, source SHAs and independent-session declaration.
+1. Draft any required revised prompts under AI-PROMPT-STD-001, with exact Issue/PR references and pinned SHAs; obtain each affected Owner's approval before READY.
+2. Verify each report's provenance, source SHAs and independent-session declaration.
 2. Build a finding matrix with owner, severity, overlap, conflict and closure condition.
 3. Separate domain decisions from project-wide governance decisions.
 4. Resolve wording conflicts only within A's integration authority; escalate authority/policy questions to the Project Governance Authority.
