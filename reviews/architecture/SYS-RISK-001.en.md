@@ -412,3 +412,58 @@ The candidate mapping has useful safeguards (exact ClaimRevision targeting, evid
 6. Publish migration/compatibility and conformance vectors for creation, correction, retraction, conflict, expiry/revocation, temporal validity and as-of reads.
 
 R-02 remains **Critical / BLOCKED** and blocks canonical schema/identity freeze. No option is selected by this R review; no governance authority is simulated or replaced.
+
+
+## 16. R-03 live source delta — Forget / Revocation / Restore anti-resurrection / 2026-11-17
+
+### 16.1 Exact live source pins
+
+| Owner | Current branch HEAD | Exact artifact | Blob SHA | Directly observed status |
+|---|---|---|---|---|
+| D | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | `03-memory-brain/forget-fence-and-completion-contract.md` | `1f0391bc49d007c44ec74165bd33d37412cc7990` | D canonical Forget semantics DECIDED; cross-module execution and global completion policy OPEN / I-owned |
+| D | same | `03-memory-brain/forget-fence-operation-and-publication-gate.md` | `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` | D operation semantics DECIDED; D/E interface schema, Storage realization and cross-owner conformance OPEN |
+| I | `0d071bf1ee7cc71912398c6ae57e4496e08f44ab` | `09-security-governance/forget-retention-backup-and-erasure-policy.md` | `f14cb2149ca3f817229533005ab89dbdc7f0b3a8` | CANDIDATE global governance contract; D/E/F/G/H implementation and external-recipient proof OPEN |
+| I | same | `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` | CANDIDATE inventory/completion contract; owner conformance OPEN |
+| I | same | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | `e3b1b5d99eb36ac0b395854d8c19287d2b64b752` | I semantic enforcement proposal; token schema and conformance OPEN |
+| Storage | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | `reviews/storage-consistency/phase-3.6.5-restore-control-highwater-and-quarantine-contract.md` | `4f656163aeba532a441eaed1d293a48e2363cb4a` | Architecture contract candidate; exact I/D/A review required |
+| Storage | same | `reviews/storage-consistency/phase-3.6.5-storage-restore-highwater-owner-acceptance.md` | `d3923fe42bec04d9f5233c7a810303da80b73bc2` | Storage technical acceptance only; I/D/A acceptance and physical restore drill remain open |
+| Storage | same | `reviews/integration/phase-3.6-forget-atomicity-verification-report.md` | `9f224722a40844686d275e44a8ab6ba72fa1ddb8` | Historical verification report explicitly says I governance blocked, tests blocked/not run, implementation not verified and Global Forget not claimed; its embedded branch snapshot is older than current tips |
+| F | `1908ce4d233b20f7cafd00cb679affd01bd15174` | `05-memory-runtime/phase-3.6-runtime-forget-suppression-and-invalidation.md` | `ce59252dbbdc5d10d016704797e9ba12d5a941bd` | F runtime semantics DECIDED; cross-owner interfaces OPEN; implementation/execution NOT VERIFIED |
+| F | same | `05-memory-runtime/phase-3.6-anti-resurrection-reference-model-evidence.md` | `15049d448ace5ad24a6c02eba3fc906fcac149f6` | 19/19 logical tests reported at older F commit `f1ba5c478e395da6b126423e32e20d0990e61920`; explicit non-production limits |
+| G | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G semantic decisions recorded; C/G/H Applied contract FREEZE BLOCKED; implementation/execution NOT VERIFIED |
+
+### 16.2 What is specified, and what is not proved
+
+**D canonical fence/barrier semantics are substantially specified.** The current D contract distinguishes immediate logical suppression, asynchronous derivative cleanup and physical erasure. It defines a durable monotonic fence, closed-world producer registration, barrier high-water capture, dependency inventory, register-before-visible, late-derivative proof invalidation and fail-closed handling of UNKNOWN. D's operation contract requires a shared linearizable ordering domain for ProducerWork registration and Fence installation, plus a final fence check at the same boundary that changes an artifact from private to visible.
+
+**I global completion remains candidate governance, not an approved operating authority.** The I policy requires a closed-world Producer Domain Inventory, immutable Target Inventory Seal, per-target authenticated evidence, explicit exceptions, and a typed completion vector across D/E/F/G/H, external recipients, backups/replicas and audit. It distinguishes suppression, cleanup and physical erasure; offline/unsupported/timeout remains Unknown. But both the global policy and inventory contract are marked CANDIDATE, and the current I restore enforcement document leaves token schema/conformance OPEN. This is a direct governance blocker for any claim of Global Forget completion.
+
+**F local anti-resurrection has useful bounded logical evidence.** The current F model/test/workflow Blobs are respectively `33fa2ca2dc29771aca241e194f13e078a4f8d774`, `c2575327a75577923440ef770d42122218a1e091` and `c0fac9eff93ca46e466cda5fe04613bd4565e9b3`. The evidence document reports 19/19 tests passing on commit `f1ba5c478e395da6b126423e32e20d0990e61920`, not the current F branch HEAD `1908ce4d233b20f7cafd00cb679affd01bd15174`. The model/test source Blobs match the current branch, but the CI run is not an exact-current-HEAD run. More importantly, the model is in-memory and does not exercise real indexes, caches, concurrent processes, Storage transactions, network partitions, Adapter reconnect, external targets or backup restore. It explicitly does not certify Global Forget.
+
+**I and Storage logical models also have bounded test evidence, not production proof.** I's current model/test Blobs are `5233da028e409ec3f41848582dad73a923e7155b` and `428e15c6263b5b2d730b93ce5412d55e782a449b`; its evidence records 30/30 tests on older commit `8a6a6e67696c496e265b3d87f1a550fe5e8bb2a0`. The current model/test Blobs match that evidence, but the run is not on current I HEAD `0d071bf1ee7cc71912398c6ae57e4496e08f44ab`. Storage's current restore model/test Blobs `be0aef6232c8ee2ed6179df7b0a74473c3e25b3b` / `a9e1a96b449c6bf0e2b52c5fea394a8c32961a24` match its evidence reporting 25/25 tests on older commit `19798634fb0d55cb0c901c8f4194506fab96b75b`. Both are in-memory logical models; neither performs real proof API verification, database restore, old-primary fencing, external key verification or production recovery.
+
+**G's contract is not a purge proof.** It requires Context tombstones, snapshot/delta invalidation, delivery cancellation, Applied historical/current-use separation and reconciliation. It explicitly does not claim F index/cache purge, H Adapter local purge or I global completion. Its own status remains implementation/execution NOT VERIFIED.
+
+### 16.3 R-03 failure-path gaps that remain open
+
+1. **Cross-owner atomic ordering:** D fence/producer barrier, Storage final visibility, I revocation/PolicyDomain sequencer and COC recovery log remain separate authorities. The exact current joint deployment/API and crash protocol must prove every relevant ordering; no cross-log atomicity may be inferred.
+2. **Closed-world completeness:** I's inventory is candidate. A late producer, external recipient, backup path, new replica or unregistered derivative can invalidate a prior seal/completion result.
+3. **In-flight work and delayed publication:** D/E semantics specify stable WorkItem identity, attempts/leases, retry/DLQ/replay and delayed publisher handling, but actual E queues/workers and Storage outbox handlers have not been shown to obey the same fence under concurrency and process crash.
+4. **Runtime and Context local cleanup:** F/G models/contracts do not prove every production partition, cache shard, Working Set, snapshot, delta, offline Adapter and pending delivery has been suppressed or physically cleared.
+5. **Restore anti-rollback:** Storage restore contract requires quarantine and fresh COC/I/D/Storage high-water reconciliation, but it is still a candidate requiring I/D/A review. The model's successful receipt is RECONCILED_BUT_FENCED and does not release serving.
+6. **Physical erasure and external copies:** I policy distinguishes logical suppression from physical erasure; provider, human export, external recipient, backup expiry and legal-hold evidence remain policy/operational obligations. No external deletion or physical media erasure was executed or verified here.
+
+### 16.4 R-03 disposition and closure criteria
+
+R-03 remains **Critical / NOT PROVEN**. Logical owner contracts and in-memory regression models reduce ambiguity, but there is no end-to-end evidence that a forgotten target cannot reappear through producer retry, dependency expansion, index rebuild, cache fill, Context replay, Adapter reconnect, external provider copy, backup restore or delayed outbox delivery.
+
+Closure requires:
+1. I formally approves the global inventory, completion vector, exception, retention and external-copy policy; every target class and instance is registered under an accountable authority.
+2. D/E/Storage jointly adopt exact current versions for producer registration, barrier snapshot, complete dependency inventory, visibility linearization and no-publication proof; the D/Storage anchor adoption from R-01 is explicit.
+3. F/G/H publish exact per-target suppression/cleanup/clear evidence with typed scope, authority, attempt, watermark and capability bindings; UNKNOWN/offline remains unresolved.
+4. Restore uses current signed COC/I/D/Storage high-water proofs, quarantines before service, fences the old primary, reconciles all participants and rechecks controls immediately before release.
+5. Deterministic adversarial tests cover both serial orders and crash points for publish-vs-forget, retry/DLQ/replay, late derivative, cache fill, index rebuild, Context delta, Adapter reconnect, outbox replay, backup restore, stale primary and registry expansion.
+6. Bind every test to exact current source/schema/adapter/database revisions; then run implementation-level concurrency/crash/fault campaigns and a witnessed restore drill.
+7. Obtain external recipient and backup/physical-erasure evidence or explicit, scoped, independently approved and unexpired policy exceptions.
+
+No local Owner model, role simulation, candidate policy or historical CI run closes R-03. No Global Forget completion is claimed.
