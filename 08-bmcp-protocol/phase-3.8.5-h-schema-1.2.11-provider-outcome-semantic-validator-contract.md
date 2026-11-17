@@ -139,3 +139,21 @@ Current C/I dependencies:
 - C semantic amendment: Phase 3.8.6 Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`.
 
 The profile remains unregistered. C outcome records cannot be declared VALID merely because the common envelope carries SHA-256 and a signature; exact C profile registration, authenticated C key-status evidence, H projection implementation and independent vector execution remain mandatory.
+
+
+## 11. CSubmitOutcome immutable object schema and test-harness binding
+
+C's immutable object schema is `urn:aimba:schema:c-submit-outcome:1.0.0`, exact Blob `b0e324ffa46d7afb1bf4687ae51202e3e220ae67`. C's schema/conformance contract is Blob `054b28bc8fcbf7f29c0755eac941441972581829`.
+
+The proposed H dereference pipeline MUST:
+1. Validate the BMCP 1.2.11 envelope against exact schema Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`.
+2. Resolve `c_submit_outcome_ref` under authenticated C object-store authority; reject a payload-supplied object as a trust anchor.
+3. Validate the dereferenced object against exact C schema Blob `b0e324ffa46d7afb1bf4687ae51202e3e220ae67`.
+4. Recompute and verify the object digest using the final registered C profile; current profile remains unregistered, so this gate is presently blocked.
+5. Compare every duplicated wire member to the immutable C object, including provider/adapter/idempotency/request/outcome/evidence/COC and owner-ledger fields.
+6. Validate C gate generation, provider attempt generation, provider account, endpoint, region and API operation from the C object and correlate provider evidence to the exact same tuple.
+7. Independently verify C owner ledger membership/currentness, provider evidence issuer trust and COC intent/reservation/quorum joins.
+
+C fixture pack Blob `d2ce9176e82e0b311e2145fa03d2dede4a50a675` contains ten synthetic structural/semantic cases. C harness Blob `92e8e9e607566eafa6ad89110202dbeed0fc43cb` uses JSON Schema Draft 2020-12 plus selected semantic predicates. It does not verify signatures, provider issuer trust, ledger inclusion, gate linearizability or COC quorum. Fixture signatures are placeholders. The harness is NOT EXECUTED.
+
+H must classify an absent required C object member or a proven digest/identity contradiction as INVALID. Unavailable object retrieval, currentness, key status or external authoritative proof is UNKNOWN. Both outcomes fail closed. No cross-language or production acceptance is implied.
