@@ -31,9 +31,8 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | System component map | 01-system-architecture/component-map.md | docs/zh-CN/01-system-architecture/component-map.md | docs/en/01-system-architecture/component-map.md | COMPLETE |
 | System design principles/interactions/flows/boundaries/quality reader guide | 00-governance/ and 01-system-architecture/ | docs/zh-CN/01-system-architecture/system-design-guide.md | docs/en/01-system-architecture/system-design-guide.md | COMPLETE — synthesis guide only |
 | Principal Integration / contract governance guide (A) | A owner branch: reviews/integration/ | docs/zh-CN/01-system-architecture/integration-governance-guide.md | docs/en/01-system-architecture/integration-governance-guide.md | COMPLETE — reader guide only |
-| Detailed design principles | 00-governance/design-principles.md | docs/zh-CN/00-governance/design-principles.md | docs/en/00-governance/design-principles.md | COMPLETE — source-aligned pair |
-| Detailed system architecture overview | 01-system-architecture/system-overview.md | docs/zh-CN/01-system-architecture/system-architecture-specification.md | docs/en/01-system-architecture/system-architecture-specification.md | COMPLETE — source-aligned pair |
-| Detailed design principles, component interactions, data flows, quality attributes | Source specifications under 00-governance/ and 01-system-architecture/ | Pending | Existing English sources | NOT STARTED — full source-level translation pending |
+| Component interaction source specification | 01-system-architecture/component-interactions.md | docs/zh-CN/01-system-architecture/component-interactions.md | docs/en/01-system-architecture/component-interactions.md | COMPLETE — source-aligned pair |
+| System data flow source specification | 01-system-architecture/data-flows.md | docs/zh-CN/01-system-architecture/data-flows.md | docs/en/01-system-architecture/data-flows.md | COMPLETE — source-aligned pair |
 | Subsystem responsibility matrix | 01-system-architecture/responsibility-matrix.md | docs/zh-CN/01-system-architecture/responsibility-matrix.md | docs/en/01-system-architecture/responsibility-matrix.md | COMPLETE |
 | Domain Model reader guide | 02-domain-model/ | docs/zh-CN/02-domain-model/domain-model-guide.md | docs/en/02-domain-model/domain-model-guide.md | COMPLETE — overview guide only |
 | Domain Model overview | 02-domain-model/domain-model-overview.md | docs/zh-CN/02-domain-model/domain-model-overview.md | docs/en/02-domain-model/domain-model-overview.md | COMPLETE — source-aligned pair |
@@ -73,7 +72,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 
 ### Batch 2 — Governance and system map / 第二批：治理基线与系统地图
 - Status: COMPLETE for reader guides and core maps.
-- Detailed component interactions, data flows, boundaries, and quality-attribute source documents: NOT STARTED — full source-level bilingual versions remain pending.
+- Detailed design principles, system overview, component interactions, data flows, system boundaries, and quality-attribute source documents: COMPLETE — source-aligned bilingual pairs.
 - GOV-DOC-001 is present on main as the normative repository-wide policy and applies to new architecture work.
 - Architecture principles, invariants, terminology source reconciliation.
 - Component map, responsibility matrix, system workflows.
@@ -147,4 +146,4 @@ A document is not bilingual-complete merely because it has been translated. Each
 
 A integration governance and conformance reader guides are available in both languages. The detailed A registry, complete test catalogue, and Owner-specific review reports remain to be translated as source-level documents.
 
-Batches 1 and 2 provide the orientation, shared language, governance invariants, component map, and responsibility matrix. This is still not a full translation of all subsystem specifications. Root-level Owner documents remain the detailed source specifications until their paired bilingual versions are completed and reviewed. GOV-DOC-001 is already part of the main governance baseline. This batch adds source-aligned pairs for design principles and the detailed system architecture overview.
+Batches 1 and 2 provide the orientation, shared language, governance invariants, component map, responsibility matrix, and the source-aligned system-level specifications. The six core Domain Model source specifications are also paired. This is not yet a full translation of all Owner branch contracts, technology decisions, detailed test plans, or review reports. GOV-DOC-001 is already part of the main governance baseline.
