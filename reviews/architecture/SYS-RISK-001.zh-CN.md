@@ -277,3 +277,45 @@ R 不替 Owner 作出这些决定。本评估只明确决策内容和所需证�
 
 ---
 **最终状态：暂不具备架构冻结条件。** 这是风险评估裁决，不是 Gate 关闭决策。
+
+
+## 13. 2026-11-17 实时源刷新与风险状态校正
+
+本节补充本次 R 会话对关键 Owner 文件的精确回读。它不覆盖前述风险 ID，也不把候选提案升级为批准决策。Owner HEAD 与 Blob 如下：
+
+| Owner | 当前分支 HEAD | 精确工件 Path | Blob SHA | 本轮直接读取确认的状态 |
+|---|---|---|---|---|
+| B | 0df144ae25c2039c9934395fc88b2d17080eb119 | 02-domain-model/ADR-001-fact-claim-semantics.md | a1024938ff5baba069cf128c69496a44e143330c | ADR-BLOCKED；无正式治理主体、批准人、时间与决策；B 推荐仍是 Candidate |
+| C | f3251081c49e697fe4739a252e27f59e2ecd0a8f | 07-agent-integration/phase-3.8.12-c-final-review-h-unified-1.2.13-csubmitoutcome-1.0.1-mapping.md | 92ed89a308ad97f6846960bb7182e0916949978e | C 对 H 1.2.13 / CSubmitOutcome 1.0.1 映射的当前复审工件已存在；不能由此推导所有消费者批准或当前 CI 通过 |
+| C | 同上 | 07-agent-integration/phase-3.8.12-c-exact-review-h-1.2.13-c-submit-outcome-1.0.1-validator.md | c1dcc4049205b8b9315e3b284433625e9893a711 | Validator 精确复审工件存在；需以当前分支 CI 和 Owner 正式决定作为单独证据 |
+| D | 97e68fbd225bdf0ac71860c01077481afc162d50 | 03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md | 17e53890dd6cce9bea9eacc1be2e64b0ef55ac78 | D-role proposal；独立 D Owner 批准、Callable API、Conformance OPEN；UNKNOWN/IN_DOUBT 保持 Barrier 开放 |
+| E | fdb4f67a83083d995930b88f93975b5ee36080f3 | 04-memory-compiler/phase-3.8-e-publication-orchestration-retry-recovery-contract.md | 475fee41e5eea527af4edefbfe88c58c86967d0a | E-role proposal；D/I/Storage API 与独立 Owner 批准 OPEN；本地状态不构成 D ProducerWork 终态 |
+| F | 8d5ef89ce9b1ff1471ffd1a03fe4f289addb0af3 | 05-memory-runtime/phase-3.7-f-local-lifecycle-producer-derivative-queue-recall-context-restore.md | 29e9504c75d737c2dd200ebc3306eda555f0b0ac | F-local proposal；跨 Owner 接口/实现 OPEN；IndexWatermark 是分区本地连续覆盖，不是 Forget 完成证明 |
+| G | f9ca0ddc36e17f74041506f17039f0202d13042e | 06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md | c1de241ec69834377d9b0e24aa4770a809796d4b | G-local proposal；C/G/H 交付和跨 Owner 接口 OPEN；Transport ACK 不等于 Applied |
+| H | f809be092a6c04db7982cc1bdbdd9c88787a4286 | 08-bmcp-protocol/phase-3.8.9-h-exact-mapping-unified-1.2.13-c-submit-outcome-1.0.1.md | 32bf9b0fd42abe8b58749b858b1d5c9aef39c5fd | CURRENT SUCCESSOR MAPPING CANDIDATE；exact CI rerun required；not frozen；最新测试未绑定本次读取的精确 HEAD 运行 |
+| I | 28df608b075e619563c6367a8a1c171185c1faaf | 09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md | 5c0e2049513d391dfc118f4f629a5ec95de456d6 | I-owned P0 projection candidate；生产 Profile、Trust Roots、Key Custody、anti-rollback 和完整 P0 vectors 仍未完成 |
+| Storage | 17be31915b06d98d7f822e6e5270b8cde39eb0bb | reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md | 1ef47d4e5711c7db73a24d249adf1992be1f6aa4 | ADR-BLOCKED；候选选项而非已选拓扑；T1–T8 全部 OPEN |
+| Storage | 同上 | reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md | 175ee7b1349cfdb79a19898b311a88391ed88010 | 逻辑事务提案；物理拓扑、跨 Owner API、读路径执行和实现证明 OPEN |
+| Storage | 同上 | reviews/storage-consistency/phase-3.6.15-storage-v3.2.5-protocol-bundle-exact-version-manifest.md | bea90697e7a61d43bed00543d636a5cdf40cf5ca | successor bundle published；NOT JOINTLY ACCEPTED / NOT FROZEN |
+| A | 4f3181fdf9d5b7785887381fde83e33026308c31 | reviews/architecture-feasibility/phase-2-system-wide-consolidation.md | 6f5fbe13a5c12ab6cad833b2326ae595f8d047d0 | A Phase 2 历史整合快照；不能替代本轮 Owner HEAD 精确复核 |
+| A | 同上 | reviews/architecture-feasibility/phase-2-exact-evidence-ledger.md | 8be676b28d32efd1f214f8644010f187eb6b3c17 | 记录精确证据和历史版本；必须按 Blob 变化刷新 |
+| A | 同上 | reviews/architecture-feasibility/phase-2-contradiction-register.md | 0fb013e7148acfc3d042dd6be310c61c9632ad3d | ARC-01 至 ARC-10 作为集成矛盾线索，不替代 R 根因风险模型 |
+
+### 13.1 证据边界与 CI 解读
+
+- H 当前 Mapping 文件明确标记 **CANDIDATE / EXACT CI RE-RUN REQUIRED / NOT FROZEN**。本次看到的 H Recovery Cutoff CI run 44042074640 对应 head `fb9a2ab8b528c2b7010d935372f76a14d6676755`，并非本轮读取的 H HEAD `f809be092a6c04db7982cc1bdbdd9c88787a4286`，因此不能证明当前 H 1.2.13/C 1.0.1 组合。
+- H Provider Outcome CI run 44063916718 对应 head `c326e561145e9558f48f199128814643d8720e45`，同样不是本轮 C 分支 HEAD `f3251081c49e697fe4739a252e27f59e2ecd0a8f` 的 exact-head 端到端证明。
+- Storage 的 PostgreSQL 18.7 Prepared-XID/PITR 能力运行记录（run 43958775001）是受限引擎能力证据。它不证明真实 Canonical Authority 拓扑、COC/JF-10/I/D 集成、生产读路径或生产部署。
+- D/E/F/G 当前文件都明确区分本地提案与跨 Owner 接受/实现符合性。不得将角色模拟视为独立 Owner 签署。
+- Issue #43 仍为 Open；R 本报告不替代 A 的 G1–G8 集成裁决，也不关闭任何 Owner Gate。
+
+### 13.2 对原风险登记册的状态校正
+
+原登记册的十项风险 ID 保持不变：R-01 物理序列化、R-02 Canonical 语义、R-03 Forget/反复活、R-04 Applied/Publication/Provider Outcome、R-05 精确版本、R-06 Identity/Scope、R-07 Recovery/Cursor、R-08 Authorization TOCTOU、R-09 生产 DR、R-10 治理复杂度。
+
+本次刷新后：
+- R-01、R-02、R-03 仍为 **Critical / BLOCKED 或 NOT PROVEN**。
+- R-04 至 R-10 仍为 **High / NOT PROVEN 或 BLOCKED**；其中 R-04 的语义边界已更清晰，但 exact bundle、跨 Owner 批准和端到端证明仍未闭环。
+- 当前存在更多候选工件，不等于风险下降；只有精确版本采用、权威批准和可复现验证完成后，才能下调风险。
+- 本次没有发现足以将任何 Critical/High 风险标记为 CLOSED 的新证据。
+
