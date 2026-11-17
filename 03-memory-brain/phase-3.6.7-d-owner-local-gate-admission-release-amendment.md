@@ -8,7 +8,7 @@
 
 D alone owns Forget request registration, ForgetFenceGeneration, affected producer/work admission, lineage closure, barrier membership and D Gate release. I owns global policy/permission Gate and global Producer/Recipient inventory membership. COC records typed order and recovery evidence; it does not mint D Fence or D Release. Storage proves its own prepared participant and visibility outcome; it does not decide D clearance.
 
-This amendment is scoped to Storage Design v2 Blob `4ed4234ce548a814a9496adf7a14c4459ea9f7ce` and COC companion Blob `8ac17816476f280ab6fb3afca0688aa03e37de1d`.
+This amendment is scoped to the current Storage Design v3.1 Blob `d5bdc72f193fcdaa654e4f07f865b77c578673ca` and COC companion Blob `8ac17816476f280ab6fb3afca0688aa03e37de1d`. Storage Design v2 Blob `4ed4234ce548a814a9496adf7a14c4459ea9f7ce` is retained as historical predecessor only; it lacks the §§15.1–15.7 required by the current COC protocol.
 
 ## 2. Atomic D Gate linearization
 
