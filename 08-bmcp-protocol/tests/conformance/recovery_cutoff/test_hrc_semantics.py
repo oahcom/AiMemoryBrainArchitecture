@@ -61,7 +61,7 @@ def admission(ref, owner, status="REGISTERED", participant_ref="COC/P1",
     }
     if status == "REGISTERED":
         item.update({"participant_intent_ref": participant_ref,
-                     "participant_digest": participant_digest,
+                     "participant_entry_digest": participant_digest,
                      "participant_position": position})
     return item
 
