@@ -120,6 +120,10 @@ class Protocol:
 
     def commit(self, operation_id, auth_id, publication_id, storage_id,
                d_proof, i_commit_won_proof, *, fail_before_commit=False):
+        # An UNKNOWN operation must be reconciled against authoritative Storage
+        # before any retry can attempt a new commit; keep it private and fail closed.
+        if operation_id in self.private_unknown:
+            raise Rejected("operation outcome UNKNOWN; authoritative reconciliation required")
         # Idempotent retry is valid only for the exact immutable operation tuple.
         # Reusing an operation ID with different participants/proofs is a conflict.
         binding = (auth_id, publication_id, storage_id, d_proof, i_commit_won_proof)
@@ -343,6 +347,19 @@ class PublicationProtocolTests(unittest.TestCase):
             p.commit(**args)
         self.assertEqual(len(p.receipts), 1)
         self.assertEqual(len(p.outbox), 1)
+
+
+    def test_unknown_operation_id_cannot_be_recommitted(self):
+        p = self.prepared()
+        p.mark_unknown("op-1")
+        with self.assertRaisesRegex(Rejected, "UNKNOWN"):
+            p.commit(**self.commit_args())
+        self.assertIn("op-1", p.private_unknown)
+        self.assertEqual(p.visibility, {})
+        self.assertEqual(p.outcomes, {})
+        self.assertEqual(p.receipts, {})
+        self.assertEqual(p.outbox, {})
+        self.assertEqual(p.consumed, set())
 
     def test_unknown_stays_private_and_cannot_close_out(self):
         p = self.prepared()
