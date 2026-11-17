@@ -559,7 +559,7 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_no_publication_requires_every_storage_absence_and_fence_fact(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.mark_unknown("op-1", binding)
@@ -585,11 +585,11 @@ class PublicationProtocolTests(unittest.TestCase):
                 self.assertEqual(p.visibility, {})
                 self.assertEqual(p.receipts, {})
                 self.assertEqual(p.outbox, {})
-                self.assertEqual(p.consumed, set())
+                self.assertEqual(p.consumed, {"auth-1"})
 
     def test_no_publication_proof_must_bind_exact_unknown_operation(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.mark_unknown("op-1", binding)
@@ -610,7 +610,7 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_no_publication_unknown_binding_must_match_registered_participants(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         invalid_bindings = (
