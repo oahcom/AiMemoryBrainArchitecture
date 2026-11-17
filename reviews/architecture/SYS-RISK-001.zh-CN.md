@@ -1,0 +1,279 @@
+# R — 首席全系统架构风险评估
+
+- 评估 ID：SYS-RISK-001
+- 审查日期：2026-11-17
+- 仓库：`oahcom/AiMemoryBrainArchitecture`
+- Main 基线：`b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- 审查分支：`review/session-1-system-wide-risk-2026-11-17`
+- 状态：**全系统风险初步评估——不构成架构批准**
+- 范围：A–I、Storage、跨 Owner 协议、治理和生产可运维性影响。
+- 证据规则：Owner 分支工件只能作为候选证据；分支中存在不等于已批准、已采用、已实现或已证明。
+- 语言：中文；对应英文文档：[SYS-RISK-001.en.md](SYS-RISK-001.en.md)。
+
+## 1. 总体结论
+
+**裁决：NOT PROVEN / 尚不具备架构冻结条件。** 当前逻辑分工具有合理性，但尚未证明架构能够在完整的写入、发布、召回、撤销/遗忘、恢复和还原路径中持续保持不变量。最高系统性风险并非某个模块缺失，而是：尚未选定物理序列化基础，也尚未形成一套精确、跨 Owner 统一的状态与权威模型，无法证明其在并发、部分失败、重试和恢复条件下仍然安全。
+
+本评估区分以下证据状态：
+- **VERIFIED（已验证）**：引用的仓库工件或 API 状态直接证明了该事实。
+- **PARTIALLY VERIFIED（部分验证）**：部分内容有证据，但端到端结论未得到证明。
+- **NOT PROVEN（尚未证明）**：本次审查证据不足以支持该结论。
+- **BLOCKED（阻塞）**：必要的上游决策或证据明确未解决。
+
+文档、Schema、候选 Manifest、静态测试向量或 CI 结果本身均不能证明运行时行为。本次没有执行 Rust 实现验证、数据库事务测试、并发压力测试、崩溃注入、安全渗透、恢复演练或生产基准测试。
+
+### 1.1 全系统结论
+
+| 领域 | 评估状态 | 原因 |
+|---|---|---|
+| 逻辑职责划分 | PARTIALLY VERIFIED | A 的整合文档描述了 Canonical Memory、投影/Context、Provider 副作用、授权、Wire 合同和 Storage 的合理分离。 |
+| 领域真值与认识语义 | BLOCKED | B 的 Fact/Claim ADR 仍为 ADR-BLOCKED，下游类型语义不能视为完全确定。 |
+| 物理原子性/序列化 | BLOCKED | Storage 拓扑 ADR 明确尚未选定拓扑。 |
+| 精确协议/Schema 兼容性 | PARTIALLY VERIFIED | 存在更新的候选工件，但历史证据记录了版本绑定不一致；当前 Owner 分支 HEAD 已变化，需要重新完整核验版本包。 |
+| Forget/撤销与恢复安全 | NOT PROVEN | 已有合同和 Gate，但尚未证明副本、衍生物、缓存、备份和重放路径上的端到端不复活。 |
+| Applied/Publication 终态真实性 | NOT PROVEN | 候选 Outcome/Participant 合同尚未证明所有 Owner 共享一条完整权威证明链。 |
+| Identity/Scope/Authorization 组合 | PARTIALLY VERIFIED | I 拥有相关策略和执行合同，但尚未端到端证明无绕过路径和 TOCTOU 闭环。 |
+| 生产可运维性/灾难恢复 | NOT PROVEN | 尚未确立物理拓扑、部署/运维模型、恢复目标或经过测试的还原流程。 |
+
+## 2. 审查基线与证据局限
+
+### 2.1 Main 基线
+
+审查开始时 Main HEAD：`b372b62c640a2b656e54b6db62a4ee67d7d8c001`。
+
+已从该 Main Commit 创建独立审查分支：
+`review/session-1-system-wide-risk-2026-11-17`。
+
+创建分支不会修改 Main，不会合并任何 Owner 分支，不会批准 ADR、关闭 Gate 或授权实现。
+
+### 2.2 本次读取的 Owner 分支快照
+
+| Owner | 分支 | 读取的 HEAD |
+|---|---|---|
+| A | `session-a-integration-2026-11-16` | `d72dbac6e0f739cd00ac986176b78ec5cd385d88` |
+| B | `session-b-domain-model-phase3` | `0df144ae25c2039c9934395fc88b2d17080eb119` |
+| C | `session-c-agent-integration-2026-11-16` | `f3251081c49e697fe4739a252e27f59e2ecd0a8f` |
+| D | `session-d-memory-brain-2026-11-16` | `97e68fbd225bdf0ac71860c01077481afc162d50` |
+| E | `session-e-memory-compiler-2026-11-16` | `fdb4f67a83083d995930b88f93975b5ee36080f3` |
+| F | `session-f-memory-runtime` | `8d5ef89ce9b1ff1471ffd1a03fe4f289addb0af3` |
+| G | `session-g-memory-context` | `f9ca0ddc36e17f74041506f17039f0202d13042e` |
+| H | `session-h-bmcp-protocol` | `f809be092a6c04db7982cc1bdbdd9c88787a4286` |
+| I | `session-i-security-governance-2026-11-16` | `28df608b075e619563c6367a8a1c171185c1faaf` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `17be31915b06d98d7f822e6e5270b8cde39eb0bb` |
+
+这些是快照标识，并不表示本次逐行穷尽审查了每个分支中的所有工件。尤其是持续变化的分支，最终冻结决策前必须重新固定版本。A 分支早先的 Phase 2 证据登记册记录的是旧快照，并明确指出 Blob 变化后必须重新审查。因此 Phase 2 是历史证据，不能替代本次实时快照。
+
+### 2.3 主要来源工件
+
+- A：`reviews/architecture-feasibility/phase-2-system-wide-consolidation.md`、`phase-2-exact-evidence-ledger.md`（A 分支；精确 Blob 见登记册）。
+- A：`reviews/architecture-feasibility/phase-2-contradiction-register.md`（A 分支；ARC-01 起）。
+- B：`02-domain-model/ADR-001-fact-claim-semantics.md`（B 分支；作为规范绑定使用前，须对当前分支确认精确路径和 Blob）。
+- C：`07-agent-integration/phase-3.8.12-c-final-review-h-unified-1.2.13-csubmitoutcome-1.0.1-mapping.md` 及关联 Validator Review（C 分支）。
+- D：`03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md`（D 分支）。
+- E：`04-memory-compiler/phase-3.8-e-publication-orchestration-retry-recovery-contract.md`（E 分支）。
+- F：`05-memory-runtime/phase-3.7-f-local-lifecycle-producer-derivative-queue-recall-context-restore.md`（F 分支）。
+- G：`06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md`（G 分支）。
+- H：`08-bmcp-protocol/phase-3.8.9-h-exact-mapping-unified-1.2.13-c-submit-outcome-1.0.1.md`（H 分支）。
+- I：`09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md`（I 分支）。
+- Storage：`reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md`、`phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md`、`phase-3.6.15-storage-v3.2.5-protocol-bundle-exact-version-manifest.md`（Storage 分支）。
+
+**证据局限：** 上述 B/D/E/F/G/H/I/Storage 工件路径已在各自分支树中定位；但本轮并未逐行重新读取所有被引用工件的完整内容。因此，凡缺少完整规范回读或精确绑定的具体结论，均按 BLOCKED 或 NOT PROVEN 处理。这一限制是有意保留的，不得用自信措辞掩盖。
+
+## 3. 风险评级方法
+
+概率采用定性评估，依据：(a) 根因是否明确未解决；(b) 必须协同工作的独立组件数量；(c) 是否存在确定性证明或强制执行点。影响依据对 Canonical Truth、机密性、完整性、可用性和可恢复性的后果评估。
+
+- **Critical：** 可能破坏核心系统不变量，或造成不可逆/跨 Scope 数据损坏；阻塞架构冻结。
+- **High：** 可能导致严重集成、安全、恢复或生产故障；阻塞受影响 Gate。
+- **Medium：** 影响重大但边界相对明确，存在可信的控制路径。
+- **Low：** 影响有限，且当前证据显示不存在系统性传播。
+
+概率分档：High 表示根因明确未决或存在大量未同步依赖；Medium 表示风险合理存在且受到部分约束；Low 表示证据表明已有较强控制，但仍有边缘残余风险。风险等级不是简单数字相乘，也不能从文档长度推导。
+
+## 4. 全系统风险登记册
+
+| ID | 风险/根因 | 影响组件 | 概率/影响/等级 | 触发条件与失败后果 | 缓解措施/所需架构决策 | 责任 Owner | 验证证据与残余风险 | 阻塞 Gate |
+|---|---|---|---|---|---|---|---|---|
+| R-01 | **物理序列化权威未选定。** 定义了逻辑可见性/原子结果，却没有选定物理序列化拓扑。 | D、I、Storage、E、F、G | High / 灾难性 / **Critical** | 发布与 Forget/撤销并发、写入间崩溃、陈旧读取或重试。可能暴露部分提交状态、撤销后仍发布，或产生冲突终态。 | 选择并批准一种拓扑（例如每个 Canonical Memory 权威域采用 Serializable Transaction，或使用持久化线性协调器）；定义线性化点、锁/Hold 归属、原子写集合、隔离级别、读权威、超时与恢复语义。禁止用进程内 Mutex、Check-then-write 代替。 | Storage（物理拓扑）、D（Canonical 发布/Fence）、I（撤销策略）、A（集成 Gate） | A 的矛盾登记册指出 Storage 拓扑 ADR 明确为 ADR-BLOCKED / 未选拓扑。关闭需有选定 ADR、可执行确定性参考模型和对抗性交错证明。残余风险：真实 DB/集群行为仍属于 L4。 | **阻塞架构冻结和最终可见性/遗忘路径实现。** |
+| R-02 | **Canonical 语义真值未完全闭环。** Fact/Claim 区分及 Evidence/时间语义仍依赖未决领域决策。 | B、D、E、F、G、C | Medium–High / 灾难性 / **Critical** | 冲突 Claim、来源撤回、时间修正、不确定推断或身份合并。错误断言可能成为 Canonical，污染召回/Context 且难以撤销。 | B 必须确定规范 Fact/Claim/Evidence/Confidence/valid-time/recorded-time 语义、来源、修正和矛盾规则；下游 Owner 必须明确采用精确决策版本。 | B（领域权威）、D/E/F/G（采用）、A（跨 Owner 验证） | Phase 2 矛盾登记册标记 Fact/Claim ADR 阻塞；当前 B 分支存在领域工件，但本轮未证明存在最终 ADR 决议。残余风险：Ontology 演进与迁移。 | **阻塞 Canonical Schema 冻结和语义一致性验收。** |
+| R-03 | **Forget/撤销缺少端到端不复活证明。** 多种生命周期、衍生、缓存、还原和备份路径必须遵守同一个撤销/Fence 状态。 | I、D、Storage、E、F、G、H、C | Medium–High / 灾难性 / **Critical** | Forget 与发布竞争、投影重建、缓存回填、重放、备份还原或延迟 Provider 结果竞争。已删除/撤销数据可能重新出现或仍可召回。 | 定义唯一权威 Forget 状态和单调 Fence；枚举每份副本/衍生物/消费者；读、写、重放、还原、重建索引均须 Fail-closed 检查；规定 Retention/备份密码学擦除和证明 Receipt；定义其与在途 Provider 操作的顺序。 | I（全局策略/授权）、D（Canonical Fence）、Storage（持久化顺序）、E/F/G/C/H（消费者执行） | 存在合同和 Participant 工件，但本轮未验证覆盖所有路径的端到端证明。残余风险：外部备份和 Provider 保留策略难以控制。 | **阻塞 Forget/Restore 安全 Gate 和生产数据处理批准。** |
+| R-04 | **Applied/Publication/Provider Outcome 可能存在权威分裂。** Receipt、Participant Intent、Provider 副作用和 Canonical 发布是不同事实，但终态证明链可能未统一。 | C、D、E、G、H、Storage、I | High / 严重 / **High** | Provider 副作用已发生但超时、重复回调、Receipt 丢失、Participant 部分提交、已确认送达但 Canonical 未 Apply。系统可能报告虚假成功或重复不可逆副作用。 | 分别定义 Provider Outcome、Publication、Canonical Commit、Delivery 和 Applied Ack 的状态机及权威证据；绑定 Idempotency Key、Attempt Identity、Revision、Principal 和因果 Receipt；定义 UNKNOWN/IN_DOUBT 和对账语义。 | C（Provider 真值）、D（Canonical 发布）、E（编排）、G（送达/Applied）、H（Wire）、Storage（持久化） | 存在候选 Schema/合同；尚未建立精确跨 Owner 终态映射和端到端故障证明。残余风险：Provider API 幂等能力不足。 | **阻塞端到端写入/Apply 验收和外部副作用工作流。** |
+| R-05 | **Owner 间精确版本漂移。** Schema、Validator、Mapping、Manifest 和 Adoption 可独立推进。 | C、D、E、H、I、Storage、A | High / 严重 / **High** | 一个 Owner 验证 Schema N，另一个发出 N+1；旧批准被错误地认为覆盖后继版本。可能导致字段静默丢失、状态解释不兼容或授权绕过。 | 建立机器可校验的发布/绑定 Manifest，列出精确 Artifact Blob、Schema Revision、Validator Revision、Owner 决议和兼容范围；任何 Blob 变化都必须重新取得 Owner 采用确认并运行正负向向量。 | H（Wire Schema）、C（Outcome Schema）、Storage（Bundle Manifest）、各采用 Owner、A（治理） | Phase 2 精确证据登记册记录 H 1.2.12/1.2.11 和 CSubmitOutcome 1.0.1/1.0.0 的版本绑定不一致；当前 Owner 分支发现了 1.2.13/1.0.1 候选文件。仍需重新完整核验所有 Owner 的精确绑定。残余风险：协调发布期间的版本偏斜。 | **阻塞合同冻结和多 Owner 发布。** |
+| R-06 | **Identity、Scope、Principal、Actor、Environment 尚未证明构成端到端统一安全上下文。** 策略权威和各边界执行可能分散。 | B、C、D、E、F、G、H、I、Storage | Medium / 灾难性 / **High** | Delegation、Tenant 切换、异步任务、Replay、Restore 或 Confused Deputy 路径丢失/替换 Principal、Scope、Actor 或 Environment。可能跨用户或跨 Tenant 访问数据。 | 定义规范身份元组和信任转换；将 Principal/Scope/Actor/Environment 密码学绑定到请求、Receipt、Event 和衍生对象；规定 Delegation、撤销、服务身份及每个受保护边界的不可绕过执行。 | I（安全权威）、B（身份语义）、C/H（入口/Wire）、D/E/F/G/Storage（执行） | I 的授权工件和 Allowlist 存在，但本轮未验证所有路径或对抗性 Confused Deputy 证明。残余风险：凭证生命周期和外部身份提供方被攻破。 | **阻塞安全架构验收和 Tenant 隔离声明。** |
+| R-07 | **Recovery/Replay/Cursor/Revision/Manifest 语义可能分叉。** 持久化顺序、恢复 Cutoff、Replay 位置和投影 Revision 必须构成一致模型。 | Storage、D、E、F、G、H、I | Medium–High / 严重 / **High** | 持久化追加后、投影前崩溃；Cursor 陈旧；Manifest 部分写入；Replay 越过 Forget Fence；Event 重复/乱序。可能丢失、重复或复活状态。 | 规定 Event Identity 和排序范围；持久化 Commit 点；Cursor 单调性；Revision/Manifest 绑定；Replay 幂等；Recovery Cutoff；从权威重建规则；Gap 和 Poison Event 处理。 | Storage（Durable Log/Manifest）、D（Canonical Revision）、E（编译/Replay 编排）、F/G（投影/Context）、H（Wire） | Phase 2 指出 Publication/Forget/Recovery 参考模型证据不完整。存在更新的 RecoveryJoin 工件，但本轮未验证完整崩溃/Replay 模型。残余风险：存储引擎与副本故障行为。 | **阻塞恢复正确性 Gate 和灾难恢复验收。** |
+| R-08 | **异步发布中的授权/策略 TOCTOU。** Admission 时授权检查通过，不代表发布或 Restore 时授权仍有效。 | I、C、D、E、Storage、H | Medium–High / 严重 / **High** | 撤销/权限变更与排队或在途任务竞争；过期 Receipt 或旧 Policy Epoch 被接受。导致未授权发布或 Provider 操作。 | 定义 Policy Epoch 和 Receipt 有效期；在发布时原子验证授权或与发布序列化；规定撤销切换点、在途取消/补偿语义；策略权威不可用时 Fail-closed。 | I（策略）、D/Storage（线性化）、C/E/H（执行边界） | 存在授权 Receipt 合同；未验证完整 TOCTOU 交错证明。残余风险：外部副作用不一定可补偿。 | **阻塞敏感发布与 Provider Egress。** |
+| R-09 | **相对于安全声明，运维架构和灾难恢复定义不足。** 尚无选定物理拓扑或经过证明的运维恢复模型。 | Storage、I、D、A；所有 Runtime Owner | Medium / 严重 / **High** | Region 故障、密钥丢失、Coordinator 故障、部分还原、操作员错误、Schema 回滚或长时间分区。服务可能不可用或恢复出不安全数据。 | L1 拓扑决策后，定义部署单元、故障域、RPO/RTO、密钥托管/轮换、备份/还原顺序、Failover Fencing、可观测性、Runbook 和已测试还原演练。 | Storage（平台拓扑）、I（密钥/安全策略）、A（运维 Gate）、服务 Owner | NOT PROVEN：本轮未建立部署架构、已测试 DR 演练、RPO/RTO 或生产证据。这属于后续 L4 Gate，本身不代表合理 L1 设计不可行。 | **阻塞生产部署和运维就绪。** |
+| R-10 | **治理/合同复杂度可能超过工程收益。** 多 Owner、阶段、精确版本 Manifest 和交叉审查可能形成第二套系统，其维护成本超过产品收益。 | A–I、Storage、工程治理 | Medium / 高 / **High** | 后继 Manifest 和局部修订不断增加，却没有可执行一致性验证；审查队列增长；Owner 优化文档状态而非产品不变量；实现停滞或分叉。 | 衡量治理成本与缺陷预防收益；合并重复状态机和工件；定义最小规范核心、机器可校验合同和按风险分级的 Gate；为候选文档设置废止/过期机制。不得为减少文书而削弱安全不变量。 | A（治理）、所有 Owner（合同简化）、工程负责人（交付经济性） | Phase 2 证据登记册指出分支工件和候选文件必须重新固定版本；跨 Owner 精确绑定仍在持续。没有交付和缺陷数据，实际成本收益仍为 NOT PROVEN。残余风险：过度简化导致治理不足。 | **阻塞可持续交付，但单独而言不否定核心正确性。** |
+
+## 5. 根因优先排序与核心问题答复
+
+### A. 最根本的十项风险
+上表 R-01 至 R-10 按系统依赖关系排序，而非按模块目录排序。R-01 至 R-03 威胁正确 Canonical 系统能否成立；R-04 至 R-08 威胁跨组件正确性与安全；R-09 威胁生产运行；R-10 威胁长期工程可持续性。
+
+### B. 可能使系统正确性无法成立的风险
+R-01、R-02、R-03 是正确性关键风险。R-04、R-06、R-07、R-08 也可能在特定交错下破坏正确性或机密性。在其证明义务关闭之前，系统正确性状态为 **NOT PROVEN**。
+
+### C. 尚未闭环的架构决策
+1. Storage 序列化拓扑和线性化权威。
+2. B 的 Fact/Claim 及 Evidence/Temporal 语义决策。
+3. Canonical State Authority 与 Event/Revision/Cursor/Manifest 的精确关系。
+4. Publication/Applied/Provider Outcome 的终态和 Receipt 权威。
+5. Global Forget/Revocation 与在途发布、Replay、衍生重建和 Restore 的顺序。
+6. 异步边界的 Identity Tuple、Delegation 和 Policy Epoch 语义。
+7. H/C 及所有消费者的精确版本包采用关系。
+8. 部署/故障域与恢复目标（L4，必须在 L1 拓扑决策后确定）。
+
+### D. 集成时会放大的风险
+R-01、R-03、R-04、R-05、R-06、R-07、R-08 具有乘数效应。局部合同分别正确，组合后仍可能对以下问题产生分歧：哪个 Event 权威、操作是否 Commit、验证哪个版本、哪个 Principal 授权、Forget Fence 是否支配 Replay，以及超时代表失败还是未知结果。
+
+### E. 现在不解决会造成重大实现返工的风险
+最终 Schema、持久化布局、Queue、Index、Cache、Receipt、Provider Adapter 和迁移实现前，应先解决 R-01/R-02/R-04/R-05/R-06/R-07。否则存储和服务边界可能固化互不兼容的假设，最终需要破坏性迁移或协议重构。
+
+### F. 生产部署阻塞项
+R-01 是架构阻塞；R-03/R-06/R-08 阻塞安全声明；R-07/R-09 阻塞恢复与可运维验收。真实部署证据（数据库行为、密钥运维、DR 演练、SLO）属于 L4，不能由设计文档替代。
+
+### G. 看似安全但缺少证明的机制
+- ForgetFence/Deny-list/Allowlist：必须证明所有读、写、Replay、Restore 和衍生路径都检查同一个权威 Fence。
+- Receipt/Quorum/Manifest：必须证明其与所认证状态原子绑定，且不能跨 Principal、Revision 或 Epoch 重放。
+- Applied/Terminal Outcome：必须区分送达、Provider 副作用、Canonical 发布和用户可见应用。
+- Idempotency：必须证明稳定 Key 的作用域及“副作用已发生但超时”时的行为。
+- RecoveryJoin/Cursor：必须证明单调性、Gap 处理、Cutoff 和 Replay 优先级。
+- Encryption/Crypto-erasure：必须证明密钥层级、备份副本、轮换和不可恢复性，而不只是字段存在。
+
+### H. 局部正确、组合错误的典型情况
+1. D 在本地 Admission 检查后发布，而 I 的撤销同时 Commit。
+2. Storage 已持久化 Participant，但 D 的 Canonical Pointer 尚不可见；重试观察到不同终态。
+3. H Validator 接受新 Schema，而 C/D/I 仍按旧 Projection 解释。
+4. D 已推进 ForgetFence 后，F 又从 Event Stream 重建衍生数据。
+5. G 标记 Context 已 Delivered/Applied，但 Canonical Publication 仍处于 IN_DOUBT。
+6. 还原的备份含有 Forget 前快照，在 Fence Replay 完成前即被暴露。
+7. Provider 操作成功但 Receipt 丢失，重试导致外部副作用重复。
+
+### I. 治理复杂度风险
+存在，评级为 **High**，但目前仅 PARTIALLY VERIFIED。风险不在于“文档多”本身，而在于治理机制可能变成一套平行控制面：依赖人工维护版本、重复描述合同，却没有可执行的唯一事实源。应跟踪交付 Lead Time、审查等待时间、重复工件、过期文档比例、一致性自动化覆盖率和跨 Owner 缺陷逃逸率。只有在不变量可机器验证后，才可简化流程。
+
+## 6. Critical 架构风险分析
+
+### 6.1 R-01 — 原子性必须建立在已选定的物理权威上，而不是图示上
+逻辑上的最终可见性事务不足以保证正确性，除非一个物理序列化权威能够决定 Publication、Forget 和 Revocation 的胜负。ADR 必须规定序列化域，以及哪些操作被一起线性化。进程内 Mutex、单进程 Queue、乐观 Check-then-write 或最终一致副本，均不能为独立写入者和恢复提供全局顺序。
+
+**关闭证明：** 选定拓扑 ADR；形式化状态转移/线性化模型；枚举全部冲突操作；模型检查或确定性交错测试；每次持久化写入前后的崩溃点；重试和恢复一致性测试。生产 DB 验证仍属于独立 L4 Gate。
+
+### 6.2 R-02 — Canonical Memory 的确定性不能高于其认识论基础
+如果 Fact、Claim、Evidence、Inference、Confidence、valid time 和 recorded time 没有规范区分，系统可能把不确定或已被取代的信息提升为 Canonical Truth，污染所有召回和 Context 消费者。Schema 冻结前必须规定修正、矛盾、来源撤回和时间查询语义。
+
+**关闭证明：** B 决议及稳定语义定义；正例和反例；下游采用矩阵；覆盖矛盾、过时、推断和撤回 Claim 的一致性向量；迁移策略。
+
+### 6.3 R-03 — Forget 必须支配所有未来路径，而不只是删除一行数据
+Forget 是时间和分布式不变量。删除 Canonical 内容，却保留能够重新生成它的 Event、Cache、Vector Index、Summary、Context、Backup 或在途任务，不构成成功遗忘。Restore 不得让已遗忘内容哪怕短暂重新可见。
+
+**关闭证明：** 完整数据副本/衍生物清单；唯一权威单调 Fence；Publication/Replay/Restore 协议；不确定状态下 Fail-closed；备份/密钥策略；包含 Fence 前后 Restore、延迟 Queue、重复 Event 和 Index 重建的对抗性测试。
+
+### 6.4 R-04 — “Applied” 不得把不同事实合并
+Provider 执行、Provider Receipt、Canonical Publication、持久化 Commit、Context Delivery 和 Consumer Application 是不同事实。使用单一 Boolean 或含义过载的 Receipt 会造成虚假成功和重复副作用。
+
+**关闭证明：** Owner 批准的独立状态机；唯一 Operation/Attempt/Idempotency Identity；明确 UNKNOWN/IN_DOUBT 和对账机制；绑定 Principal、Revision、Payload Digest 和 Policy Epoch 的证明；每个边界的故障注入测试。
+
+## 7. 风险依赖关系图
+
+```mermaid
+flowchart TD
+  T[ R-01 物理序列化拓扑 ] --> P[ R-04 Publication / Applied 证明 ]
+  T --> F[ R-03 Forget / 撤销顺序 ]
+  T --> A[ R-08 授权 TOCTOU ]
+  S[ R-02 领域语义 ] --> V[ R-05 版本 / 合同采用 ]
+  S --> D[ R-07 Event / Cursor / Revision 恢复 ]
+  P --> V
+  P --> D
+  F --> D
+  F --> O[ R-09 生产 Restore / DR ]
+  A --> O
+  V --> I[ 跨 Owner 集成正确性 ]
+  D --> O
+  G[ R-10 治理复杂度 ] -. 交付压力 .-> V
+  G -. 证明债务 .-> P
+```
+
+依赖规则：下游实现不能通过增加局部代码来关闭上游架构阻塞。例如，增加 Retry 不能解决未定义的线性化点；增加 Manifest 不能确定领域语义；删除 Cache 不能证明 Restore 安全。
+
+## 8. 未决架构决策
+
+| 决策 ID | 所需决策 | 决策权威 | 当前状态 | 关闭要求 |
+|---|---|---|---|---|
+| UAD-01 | 物理序列化拓扑和线性化点 | Storage + D + I；A 集成 | BLOCKED | 选择拓扑；明确事务域、Fencing、持久化协调器（如有）、读一致性和恢复。 |
+| UAD-02 | Fact/Claim/Evidence/Temporal 语义 | B | BLOCKED | 批准 ADR；下游采用；一致性案例。 |
+| UAD-03 | Canonical Event/Revision/Cursor/Manifest 权威 | D + Storage + E/F/G/H | NOT PROVEN | 规范 Identity、顺序、Commit 和 Replay 规则。 |
+| UAD-04 | Provider Outcome 与 Publication/Applied 终态 | C + D + E + G + H + Storage | NOT PROVEN | 状态机组合及故障模型。 |
+| UAD-05 | Forget/Revocation 与在途 Publication/Restore | I + D + Storage | NOT PROVEN | 线性化切换及端到端不复活证明。 |
+| UAD-06 | Principal/Scope/Actor/Environment 和 Delegation 模型 | I + B + C/H | PARTIALLY VERIFIED | 精确身份上下文和边界一致性。 |
+| UAD-07 | 精确兼容协议/Schema 版本包 | H + C + Storage + 采用 Owner | PARTIALLY VERIFIED | 新的精确版本 Manifest 和 Owner 批准。 |
+| UAD-08 | 部署、Failover、Backup 和 DR 目标 | Storage + I + A | NOT PROVEN（L4） | 部署 ADR、RPO/RTO、密钥托管、Restore 演练和 Runbook。 |
+| UAD-09 | 最小可行治理控制面 | A + 所有 Owner | NOT PROVEN | 成本收益指标和可执行一致性验证策略。 |
+
+R 不替 Owner 作出这些决定。本评估只明确决策内容和所需证据。
+
+## 9. 风险关闭标准
+
+风险不能仅凭编写文档或合并 PR 关闭。必须满足：
+1. 指定权威作出所需决策，并明确状态。
+2. 固定精确源 Blob/Commit 和下游采用版本。
+3. 所有受影响 Owner 确认语义兼容；不得推定采用。
+4. 适用时具备正向、负向、并发、崩溃、重试和恢复案例。
+5. 证据可复现，并经过独立回读。
+6. 明确残余风险、适用范围和运行假设。
+7. Gate Owner 单独记录裁决；不得自动关闭 Gate。
+
+### 各风险最低关闭条件
+- **R-01：** 拓扑 ADR + 线性化模型 + 交错/崩溃/重试证明。
+- **R-02：** B 规范 ADR + 类型语义 + 矛盾/时间向量 + 下游采用。
+- **R-03：** 完整数据血缘清单 + 包含 Restore 和衍生路径的不复活证明。
+- **R-04：** 分离状态机 + 精确 Receipt/幂等绑定 + 故障注入/对账证明。
+- **R-05：** 机器可读精确版本包 + 全 Owner 重新审查 + 版本偏斜测试。
+- **R-06：** 规范身份/Delegation 模型 + 全边界授权矩阵 + Confused Deputy 测试。
+- **R-07：** Event/Cursor/Revision/Manifest 参考模型 + 崩溃/Replay/Gap/重复测试。
+- **R-08：** Policy Epoch/Receipt 有效性 + 撤销与发布交错证明。
+- **R-09：** 部署与威胁模型 + RPO/RTO + 密钥托管 + 成功的 Restore/Failover 演练。
+- **R-10：** 治理指标 + 自动一致性覆盖 + 重复/人工工作下降且安全性不降低的证据。
+
+## 10. 根因优先整改建议
+
+1. **冻结依赖未决 B 语义或 Storage 拓扑的新下游规范承诺；** 不依赖这些问题的研究可继续。
+2. **首先解决 UAD-01：** Storage/D/I 联合选定物理序列化和可见性权威。任何实现捷径都不能替代这一决策。
+3. **解决 UAD-02：** B 关闭 Fact/Claim 与 Temporal/Evidence 语义；下游 Owner 明确采用。
+4. **组合 Publication 与安全状态机：** C/D/E/G/H/I/Storage 对 Operation Identity、Principal、Policy Epoch、Provider Outcome、Canonical Commit 和 Applied 语义达成一致。
+5. **证明 Forget 支配性：** 枚举 Canonical 和衍生副本，证明写入/Replay/Restore 无法复活 Fence 内容。
+6. **收敛精确版本：** 从精确 Blob 重新生成唯一权威 Bundle Manifest，并要求 Owner 重新审查；明确废止旧引用。
+7. **证明恢复正确性：** 定义 Event/Cursor/Revision/Manifest 顺序，并针对选定拓扑测试全部崩溃/重试边界。
+8. **只有之后才冻结面向实现的合同，** 再进入 L4 部署、性能、安全运维和 DR 验证。
+9. **通过自动化降低治理成本：** 机器检查精确引用、双语一致性、Schema、状态转移和一致性向量；不能用状态标签替代证据。
+
+## 11. 范围边界与明确非结论
+
+- 本评估不宣称项目不可行；本快照下核心正确性为 **NOT PROVEN**。
+- 本评估不声称已经发生生产数据泄露、数据丢失或 Provider 重复执行。
+- 本评估不声称 Rust 代码、测试或 CI 的存在能够证明或否定架构。
+- 本评估不批准、否决或改写任何 Owner 的规范 ADR。
+- 本评估不合并 Owner 分支、不关闭 Issue #43、不批准架构冻结，也不授权生产部署。
+- 本评估不判断详细基准可行性或真实云/Provider 成本；这些需要先选定拓扑并建立工程工作负载。
+
+## 12. 来源引用
+
+所有引用均限定分支。后续 Gate 决策使用前，必须重新读取精确工件和 Blob。
+
+1. Main 基线：`b372b62c640a2b656e54b6db62a4ee67d7d8c001`。
+2. A Phase 2 整合：`reviews/architecture-feasibility/phase-2-system-wide-consolidation.md`；A 审查分支 `review/arch-consol-001-system-wide-2026-11-17` 上 Blob `6f5fbe13a5c12ab6cad833b2326ae595f8d047d0`。
+3. A 精确证据登记册：`phase-2-exact-evidence-ledger.md`；同一分支 Blob `8be676b28d32efd1f214f8644010f187eb6b3c17`。
+4. A 矛盾登记册：`phase-2-contradiction-register.md`；同一分支 Blob `0fb013e7148acfc3d042dd6be310c61c9632ad3d`。ARC-01 将 Storage 拓扑 ADR Blob `080433f8e13a500522bc2754da64057edb0ae9d8` 记为 ADR-BLOCKED / 未选拓扑；ARC-02/03 记录 H/C 版本绑定漂移。
+5. B 分支 HEAD：`0df144ae25c2039c9934395fc88b2d17080eb119`；作为规范依据前须确认 Fact/Claim ADR 的精确路径/Blob。
+6. C 分支 HEAD：`f3251081c49e697fe4739a252e27f59e2ecd0a8f`；Phase 3.8.12 Mapping 和 Validator 工件。
+7. D 分支 HEAD：`97e68fbd225bdf0ac71860c01077481afc162d50`；Phase 3.8 Publication Participant/Terminal 合同。
+8. E 分支 HEAD：`fdb4f67a83083d995930b88f93975b5ee36080f3`；Phase 3.8 Publication Orchestration/Retry/Recovery 合同。
+9. F 分支 HEAD：`8d5ef89ce9b1ff1471ffd1a03fe4f289addb0af3`；Phase 3.7 Lifecycle/Derivative/Restore 工件。
+10. G 分支 HEAD：`f9ca0ddc36e17f74041506f17039f0202d13042e`；Phase 3.7 Lifecycle/Context/Restore 工件。
+11. H 分支 HEAD：`f809be092a6c04db7982cc1bdbdd9c88787a4286`；Unified 1.2.13 Mapping 工件。
+12. I 分支 HEAD：`28df608b075e619563c6367a8a1c171185c1faaf`；Authorization Allowlist/RecoveryJoin 工件。
+13. Storage 分支 HEAD：`17be31915b06d98d7f822e6e5270b8cde39eb0bb`；拓扑 ADR、Visibility 合同和 v3.2.5 Manifest。
+14. 双语规范：`00-governance/bilingual-documentation-policy.md`；Main 上 Blob `b51b054b9f1022133666542680df74dfe19de2fb`。该规范要求架构文档中英文成对交付并保持语义一致。
+
+---
+**最终状态：暂不具备架构冻结条件。** 这是风险评估裁决，不是 Gate 关闭决策。
