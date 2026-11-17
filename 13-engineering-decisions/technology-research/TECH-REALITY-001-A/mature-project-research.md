@@ -468,3 +468,35 @@ Source: https://opentelemetry.io/docs/languages/rust/
 7. OTel Rust Traces 与 Metrics/Logs 成熟度不同，Observability 不能作为统一“已成熟”依赖处理。
 
 No benchmark, integration or fault test was run. All recommendations remain conditional candidates, not ADR decisions.
+
+
+### 3.5 PydanticAI durable execution / PydanticAI 持久执行
+
+- Official documentation: https://pydantic.dev/docs/ai/capabilities/durable_execution/overview/
+- Source documentation snapshot consulted: https://github.com/pydantic/pydantic-ai/blob/main/docs/durable_execution/overview.md
+- PydanticAI is a Python Agent framework, not a Rust Brain runtime. Its current durable-execution integration documents Temporal, DBOS, Prefect, Restate and additional engines (including AWS Lambda, Absurd, pgtask, Azure Durable Task and Airflow integrations).
+- The integration journals model requests and wrapped tool calls as durable units. A restarted run replays completed operations from the journal and retries the in-flight operation, subject to each engine's semantics.
+- PydanticAI explicitly distinguishes durable execution from persistence: step snapshots/checkpoint persistence can save and resume settled steps without providing crash-safe mid-step execution. It also documents one durable execution engine per Agent.
+- This is useful evidence that Agent execution durability can be delegated to an engine behind an Agent adapter. It does not make the workflow engine the Brain's canonical memory store, does not atomically commit Brain SQL state, and does not own Forget/authorization/Applied semantics.
+
+**Applicable lessons**
+- Keep Agent run durability outside the Brain's canonical transaction authority.
+- Prefer one durable engine per Agent execution path; avoid layering multiple independent journals over the same operation.
+- Persisted Agent step state and durable in-flight execution are different guarantees and should not be conflated.
+
+**Do not copy**
+- Do not make PydanticAI a core Rust dependency.
+- Do not assume engine journaling proves provider side effects exactly once or makes them atomic with Brain canonical publication.
+- Do not let Agent workflow history replace Brain Evidence, CanonicalCommitCursor, ContextVersion or Applied proof.
+
+### 3.5 中文补充：PydanticAI 持久执行
+
+- 官方文档：https://pydantic.dev/docs/ai/capabilities/durable_execution/overview/
+- PydanticAI 是 Python Agent 框架，不是 Rust Brain Runtime。其当前持久执行集成支持 Temporal、DBOS、Prefect、Restate，以及 AWS Lambda、Absurd、pgtask、Azure Durable Task、Airflow 等引擎。
+- 集成会把模型请求和被包装的工具调用记录为持久执行单元；进程重启后从 Journal 重放已完成操作，并重试正在执行的操作，具体行为受各引擎语义约束。
+- PydanticAI 明确区分 Durable Execution 与 Persistence：步骤快照可以保存/恢复已完成步骤，但不等于在步骤中途崩溃时具备持久执行；并且一个 Agent 只能绑定一个 Durable Execution Engine。
+- 这说明 Agent 执行持久性可以委托给 Agent Adapter 后面的成熟引擎，但不会让该引擎成为 Brain Canonical Memory Store，也不会自动原子提交 Brain SQL 状态，更不拥有 Forget、Authorization 或 Applied 语义。
+
+**可借鉴：** 将 Agent Run Durability 留在 Brain Canonical Transaction Authority 之外；一个 Agent 执行路径避免叠加多个独立 Journal；区分已完成步骤快照与在途执行恢复。
+
+**不可照搬：** 不把 PydanticAI 变成 Rust 核心依赖；不把 Engine Journal 当作 Provider Side Effect exactly-once 或 Brain 原子发布证明；不以 Agent Workflow History 代替 Brain Evidence、CanonicalCommitCursor、ContextVersion 或 Applied 证明。
