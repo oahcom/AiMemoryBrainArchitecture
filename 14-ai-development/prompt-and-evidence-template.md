@@ -221,3 +221,31 @@ See [Prompt Library](../prompts/README.md).
 ```
 
 For a multi-owner parent task, use one parent folder with child work items or explicit Owner-specific child IDs. Keep each prompt and evidence bundle immutable and linkable. Do not store secrets, credentials, private user data or raw sensitive production data in prompts or reports.
+
+
+## 7. GitHub delivery carrier and closeout / GitHub 交付载体与结项记录
+
+Before execution, fill in the owning Issue/PR URL and Work Item ID. Prefer an existing carrier; do not open a duplicate PR for the same integration unit. During work, update the carrier with material progress, decisions, changed commits/paths, verification evidence and blockers.
+
+Required closeout fields:
+- Session ID / Prompt ID / version / SHA-256:
+- Work Item ID:
+- Owning Issue URL:
+- Related PR URL(s):
+- Accountable Owner / Implementing session / Independent Reviewer:
+- Repository / branch / base SHA / final Head SHA:
+- Changed paths and commit SHAs:
+- Work performed:
+- Decisions and authority (PROPOSED / ACCEPTED / REJECTED / UNRESOLVED):
+- Verification commands, environment, exact tested SHA, result and evidence links:
+- Required checks NOT RUN and reasons:
+- Review/integration disposition and reviewer-independence disclosure:
+- Dependencies, blockers, follow-up Owner and closure condition:
+- Merge status / target branch / merge commit SHA / post-merge checks:
+- Work Item index row updated: YES / NO.
+
+A blocked or no-change assigned session still records its outcome against the carrier. Never fabricate a prompt hash, test result, review, Owner approval or merge record.
+
+执行前填写归属 Issue/PR URL 和 Work Item ID。优先复用现有载体；同一集成单元不得重复开 PR。工作期间及时更新重要进展、决策、变更 Commit/路径、验证证据和阻塞。
+
+结项必须填写以上全部字段。受阻或无变更的已分配会话仍须在载体中记录结果。禁止伪造提示词哈希、测试结果、审查、Owner 批准或合并记录。
