@@ -132,7 +132,10 @@ def run_once():
         return
 
 if __name__=="__main__":
-    while True:
-        try: run_once()
-        except Exception as e: print("worker cycle failed: "+type(e).__name__,flush=True)
-        time.sleep(int(os.getenv("POLL_SECONDS","60")))
+    if os.getenv("RUN_ONCE","0")=="1":
+        run_once()
+    else:
+        while True:
+            try: run_once()
+            except Exception as e: print("worker cycle failed: "+type(e).__name__,flush=True)
+            time.sleep(int(os.getenv("POLL_SECONDS","60")))
