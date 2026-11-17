@@ -575,3 +575,200 @@ The project should proceed by resolving root correctness prerequisites before ad
 This report does not close Issue #43 or any Owner gate. It is submitted for independent review and reconciliation with A's Phase 2 integration report.
 
 本报告不关闭 Issue #43 或任何 Owner Gate，提交目的为独立复审，并与 A 的 Phase 2 集成报告进行收敛。
+
+
+---
+
+## 2.1 中文风险登记册完整镜像 / Complete Chinese Mirror of the Risk Register
+
+本节是 §2 英文风险登记册的完整中文语义镜像。Risk ID、等级、概率、影响、责任权威、证据状态和关闭门禁必须与英文部分一致。
+
+### RSK-01 — 权威发布缺少已选定的物理线性化拓扑
+
+- **概率：高。** Storage 拓扑 ADR 明确保持 ADR-BLOCKED，且声明尚未选定部署拓扑。
+- **影响/严重度：致命。** 如果 ForgetFence 与最终可见性之间不存在统一线性化边界，可能在 ForgetFence 已生效后仍发布衍生工件，或使权威提交结果无法判定。
+- **风险等级：CRITICAL。**
+- **描述：** D 要求 ProducerWork 注册、依赖完整性、PublicationParticipant 准入和 ForgetFence 安装具有同一个权威顺序。Storage 要求最终可见性指针、Receipt、Outcome 和 Outbox 原子提交。当前逻辑合同尚未指定一个已选定的物理基础，能够证明 D Fence 决策与 Storage 可见性提交共享唯一线性化点。
+- **影响组件：** B、D、E、I、Storage、F/G 读路径，以及消费恢复证据的 COC。
+- **根本原因：** 语义权威与物理事务权威的分离是合理的，但共享的物理序列化机制仍是候选方案。Option A（每个 Canonical Memory Authority 一个 Serializable Transaction Domain）与 Option B（独立服务加持久化线性协调器）仍是备选。Option C Check-then-write 已被拒绝。
+- **触发条件：** D 与 Storage 分别部署；使用过期副本或缓存；D Fence 在检查与提交之间变化；ACK 丢失；进程/主库在持久化步骤之间故障；或可见性读取绕过权威 Pointer。
+- **失败后果：** 已遗忘或未授权的衍生数据可能变得可见；Barrier 可能在发布仍可发生时关闭；Pointer、Receipt、Outcome 可能不一致；恢复无法判断发布是否发生。
+- **缓解策略：** Storage 与 D 必须共同选择并完整定义 Option A 或 B。明确事务/锁/共识边界、精确数据行权属、读权威、Participant Tuple、幂等、过期副本/缓存排除、故障恢复与防回滚。除非显式 ADR 证明，否则 COC 与 I PolicyDomain Sequencer 必须继续作为不同类型的权威。
+- **必需架构决策：** Storage 拓扑 ADR，并取得 D、I 的精确版本接受和 A 集成裁决。偏好方案不等于正式决策。
+- **责任 Owner：** Storage（物理基础）、D（ForgetFence 语义）、I（授权证明）、A（集成门禁）；任何单一 Owner 均不得替其他 Owner 决策。
+- **验证证据：** Storage 分支 HEAD 17be31915b06d98d7f822e6e5270b8cde39eb0bb；拓扑 ADR Blob 1ef47d4e5711c7db73a24d249adf1992be1f6aa4；Visibility Contract Blob 175ee7b1349cfdb79a19898b311a88391ed88010；Issue #10、#25。ADR 中 T1–T8 均为 OPEN，且明确 NO DEPLOYED TOPOLOGY SELECTED。
+- **证据状态：** 拓扑决策为 **BLOCKED**；系统线性化能力为 **NOT PROVEN**。
+- **剩余风险：** 即使 ADR 获批，真实数据库、副本、缓存、恢复和运维行为仍可能偏离模型，仍需物理故障证据。
+- **阻塞门禁：** Issue #43 G4、G5；架构冻结必须继续阻塞。
+- **来源：** Storage Topology ADR、Storage Visibility Contract、D ForgetFence Contract、Issues #10、#25、#43。
+
+### RSK-02 — 跨 Owner 发布状态机缺少集成对抗性证明
+
+- **概率：高。** 合同描述了顺序，但现有证据尚未将所有跨 Owner 顺序及崩溃窗口证明为一个完整模型。
+- **影响/严重度：致命。** 各 Owner 局部终态不兼容，可能在缺少必要条件时产生可见数据，或导致 Barrier 永久无法解决。
+- **风险等级：CRITICAL。**
+- **描述：** 当前提议顺序为 Storage PREPARE hidden → D PublicationParticipant 准入 → I 单次授权消费 → Storage 最终可见性提交 → D/I 独立关闭。每个参与方都有自己的 Ledger、Identity、Receipt 和终态。完整端到端证明必须覆盖整个 Tuple 的所有竞争双向顺序和崩溃/ACK 丢失行为。
+- **影响组件：** D、E、I、Storage、H、COC、F、G、A。
+- **根本原因：** Owner 局部合同和有限参考测试本身不能证明它们的组合正确。集成证明必须覆盖所有持久化边界、独立权威、重试、过期 Lease、UNKNOWN 状态及读可见性。
+- **触发条件：** Hidden Prepare 后崩溃；D Admission ACK 丢失；I COMMIT_WON 与 Revocation 竞争；Storage Commit ACK 丢失；Participant Row 缺失；Lease 过期；相同请求重复但 Digest 改变；延迟 Outbox；未解决 Participant 时恢复。
+- **失败后果：** D 认为 Participant 已 Hold，但 Storage 无法找到它；I 认为授权已消费，但 Storage Outcome 未知；一个模块关闭而另一个仍开放；工件提前暴露或长期不可用。
+- **缓解策略：** 基于精确 Owner 合同建立一个集成可执行/参考状态机。枚举 Fence/Participant、Revocation/COMMIT_WON、Close/Send、Prepare/Commit、Restore/Replay 的双向顺序。在每个持久化写入和 ACK 前后注入崩溃。每条 Trace 都检查 Pointer、Receipt、Outcome、Outbox、D Barrier、I Hold、C Outcome 和 COC Prefix。UNKNOWN 绝不能转为成功、Abort 或终态。
+- **必需架构决策：** 系统级状态/因果模型和明确的跨 Owner 状态转换合同；每个 Owner 只接受自己负责的谓词。
+- **责任 Owner：** A 负责协调；D/E/I/Storage 负责各自状态转换；H 负责 Wire 证据；C 负责 Provider Truth。
+- **验证证据：** D Blob 17e53890dd6cce9bea9eacc1be2e64b0ef55ac78；E Blob 475fee41e5eea527af4edefbfe88c58c86967d0a；I Blob 54bab0484bd232a5a258e65e34cc7425288b39a6；Storage Blob 175ee7b1349cfdb79a19898b311a88391ed88010；Issue #25、#29 仍开放。Issue #29 记录了候选 H Recovery Suite，但明确说明其不能证明 Live COC Quorum、真实 Owner Ledger Adapter、部署拓扑或物理恢复。
+- **证据状态：** Owner 局部语义合同和有限参考测试为 **PARTIALLY VERIFIED**；跨 Owner 集成正确性为 **NOT PROVEN**。
+- **剩余风险：** 如果模型缺少显式不变量、有限状态穷举和独立复审，仍可能存在状态空间爆炸和隐藏交错。
+- **阻塞门禁：** Issue #43 G3/G4；Issues #25、#29。
+- **来源：** 上述 D/E/I/Storage 精确工件；Issues #25、#29、#43。
+
+### RSK-03 — Forget、Inventory 与 Restore 尚不能证明全系统防复活
+
+- **概率：高。** Global Forget 清单/治理审批和跨 Owner Restore 证明仍未完成。
+- **影响/严重度：致命。** 已遗忘或撤销的信息可能通过衍生数据、备份、接收方、Replay、Restore 或迟发现 Producer 重新出现。
+- **风险等级：CRITICAL。**
+- **描述：** Forget 安全远不止删除 Canonical Row。必须覆盖所有可生成衍生数据的 Producer、直接/传递 Lineage、索引、Embedding、Cache、Summary、Context Snapshot、Queue、DLQ/Replay、Export、Recipient、Replica、Backup 和恢复副本。D 的局部 Fence 与 I 的全局 Inventory Epoch 是不同权威，任何一方单独都不能证明完整覆盖范围。
+- **影响组件：** D、I、E、F、G、H、Storage、C/Agent 集成、外部接收方及备份/恢复系统。
+- **根本原因：** 架构依赖封闭世界、已认证且当前有效的 Producer/Recipient/Backup Inventory，以及完整 Lineage 和 Owner-local Release Proof。全局 Registry、覆盖审批、例外策略及端到端组合尚未正式闭环。
+- **触发条件：** 新 Producer 或 Recipient 加入；Scope/Capability/Owner 变化；迟发现 Lineage；Inventory 外存在 Backup/Export；恢复旧 Snapshot；从旧数据重建 Index/Cache；Forget 后重放 Queue/DLQ。
+- **失败后果：** 已遗忘信息重新进入 Retrieval 或 Context；错误报告 Global Forget 已完成；外部 Recipient 或 Backup 超期保留数据。
+- **缓解策略：** I 必须定义并批准权威封闭世界 Inventory、Target Seal、Inventory Epoch、加入/离开/变更失效规则和不支持目标策略。D 必须定义 Lineage 与 Barrier 完整性。E/F/G 必须把每条衍生和 Replay 路径映射到 D Lineage。Storage 必须以 RESTORE_FENCED 启动恢复，并在任何 Serving 前核对 D/I Ledger、COC Prefix、Owner High-water 和精确 RestoreReadinessManifest。未知状态保持隔离。
+- **必需架构决策：** I Global Inventory 与 Global Forget 治理决议；D Producer/Lineage 覆盖决议；Storage Restore/Readiness 协议；Issue #20 跨 Owner 接受。
+- **责任 Owner：** I（Inventory 与 Global Forget Policy）、D（ForgetFence 与 Lineage）、E/F/G（Producer/Derivative 语义）、Storage（物理恢复）、H（证据 Schema）。
+- **验证证据：** D ForgetFence Blob 4da0b61ba3656a768ea56b4a2a24e09da4e21cd5；E Lifecycle Blob 4fb9e58511941f59b4d777336f8f85ad88ecccf1；F Lifecycle Blob 29e9504c75d737c2dd200ebc3306eda555f0b0ac；G Lifecycle Blob c1de241ec69834377d9b0e24aa4770a809796d4b；I Authorization/Restore Blob e3b1b5d99eb36ac0b395854d8c19287d2b64b752；Issues #4、#5、#20 仍开放。
+- **证据状态：** Owner-local Fail-closed 规则为 **PARTIALLY VERIFIED**；治理审批为 **BLOCKED**；端到端防复活为 **NOT PROVEN**。
+- **剩余风险：** 物理擦除、离线 Recipient、依法保留的 Backup 和外部转发副本，即使逻辑抑制得到证明，也可能需要政策例外及独立审计证据。
+- **阻塞门禁：** Issue #43 G2/G3/G4/G7；Issues #4、#5、#20。
+- **来源：** D/E/F/G/I 精确工件；Storage v3.2.3 规范正文和 v3.2.5 Manifest；Issues #4、#5、#20、#29。
+
+### RSK-04 — Fact/Claim 领域权威仍有冲突且 ADR 阻塞
+
+- **概率：高。** ADR 明确记录尚无正式决策权威、无审批人、无已批准选项。
+- **影响/严重度：高。** Canonical Identity、Revision、Evidence Attachment、Conflict Handling 和下游 Schema 可能建立在互不兼容的语义上。
+- **风险等级：HIGH。**
+- **描述：** 治理不变量 I-04 和设计原则 P-04 将 Fact 与 Claim 描述为不同概念；当前 Domain Overview 却将 Claim 建模为规范命题，将 Fact 视为限定解释。B 的 ADR 比较了独立 Fact Attestation 与仅 Claim Qualification 两种方案，并明确保持 ADR-BLOCKED。
+- **影响组件：** B、D、E、F、G、H、I，以及所有 Canonical Storage/API/Schema 消费方。
+- **根本原因：** 语义选择会改变 Identity、Revision、Attestation Authority、Provenance、Conflict Link、Authorization 和 Consumer Behavior。不能通过命名约定或下游 Schema 解决。
+- **触发条件：** D 冻结 Canonical ID 或持久化 Schema；E 分配 Canonical Reference；F/G/H 发布 Typed Field；Consumer 假设存在 FactRef，或将 Claim Qualification 当作独立 Attestation。
+- **失败后果：** 重复或不兼容 Identity；迁移破坏；推断 Claim 被提升为 Fact；Evidence 附着到错误对象；无法重建历史裁决。
+- **缓解策略：** 正式治理权威必须选择 Option A 或 B，记录理由和影响分析，协调 I-04/P-04/README/Terminology，并取得 B/D/E/F/G/H/I Consumer 决议。在此之前，相关 Canonical Identity Field 必须保持 Candidate/Blocked。
+- **必需架构决策：** 由 Architecture Governance 正式决定 ADR-001 Fact/Claim；B 提供建议，Consumer 进行影响复审。
+- **责任 Owner：** B 负责领域建议；正式指定的 Architecture Governance 负责决策；D/E/F/G/H/I 负责消费影响。
+- **验证证据：** B Branch HEAD 0df144ae25c2039c9934395fc88b2d17080eb119；ADR Blob a1024938ff5baba069cf128c69496a44e143330c；Canonical Model ADR Blob df77e4a93cb8fef689ae7c828888d960cbf381d6。ADR 明确 Formal Authority/Approver NOT RECORDED，Approved Option NONE。
+- **证据状态：****BLOCKED**。
+- **剩余风险：** 即使决议完成，历史数据迁移和语义解释仍需兼容规则及回归 Fixture。
+- **阻塞门禁：** Issue #43 G2/G3；相关字段不得冻结 Canonical Schema。
+- **来源：** B ADR-001 工件；main I-04/P-04；Domain Overview；Issue #43。
+
+### RSK-05 — Identity、Scope、Principal 与 PolicyDomain 治理尚未完整授权
+
+- **概率：高。** I36-GOV-01..10 仍为 GOVERNANCE-BLOCKED，外部 Inventory 决策仍开放。
+- **影响/严重度：** 跨 Scope 授权失效可能为致命；跨域工作流被阻塞为高影响。
+- **风险等级：HIGH。**
+- **描述：** Typed Principal、Actor、Scope、Environment、Issuer、Delegation、Cross-issuer Linking、PolicyDomain 和 PermissionEpoch 必须保持一致组合。I 负责 Authorization 与 Revocation；B 负责领域类型语义；其他 Owner 消费这些类型。Multi-PolicyDomain Atomicity 明确阻塞；PermissionEpoch 属于 PolicyDomain 本地权威，不得跨域比较。
+- **影响组件：** B、C、D、E、F、G、H、I、Storage、Agent 和 Environment Adapter。
+- **根本原因：** 技术分类与候选 Proof Contract 不等于正式治理审批。Trusted Issuer Admission、Delegation、Scope Inheritance、Environment Federation、Emergency Access、Revocation SLA 和 Actor/Principal Binding 都需要可问责的外部权威。
+- **触发条件：** 跨 Scope 共享；跨 Environment Memory；Delegated Workload；Principal 重新关联；Issuer Key Rotation/Revocation；Break-glass；Forget 或 Publication 跨越多个 PolicyDomain。
+- **失败后果：** 未授权披露或修改；身份归属错误；接受过期授权；跨域部分完成被错误报告为原子完成；Fail-closed 行为使合法操作长期阻塞。
+- **缓解策略：** 由具备权限的主体关闭 I36-GOV-01..10，并提供签名证据。定义硬性支持边界（除非另有独立批准的 Coordinator，否则单个原子操作只支持一个 PolicyDomain）。规定跨域部分结果编排和类型化、不可比较的本地 Epoch。未知 Identity 或 Scope 必须保持 DENY/QUARANTINE/UNKNOWN。
+- **必需架构决策：** I Identity/Trust Governance 决议、PolicyDomain Atomicity ADR，以及 B Typed Identity/Scope Mapping 接受。
+- **责任 Owner：** I（Authorization/Governance）；B（Domain Types）；A（Integration）。
+- **验证证据：** I Branch HEAD 28df608b075e619563c6367a8a1c171185c1faaf；I Authorization Contract Blob e3b1b5d99eb36ac0b395854d8c19287d2b64b752；Issues #4、#5 明确列出未决 Inventory 与 I36-GOV-01..10；Issue #29/#10 保留 Multi-PolicyDomain BLOCKED。
+- **证据状态：** 治理审批为 **BLOCKED**；技术 Fail-closed 语义为 **PARTIALLY VERIFIED**。
+- **剩余风险：** 外部 Issuer、法律辖区和紧急审批人可能引入当前技术模型未覆盖的策略约束。
+- **阻塞门禁：** Issue #43 G2/G4/G7；Issues #4、#5。
+- **来源：** I Authorization/Restore Contract；I Principal/Actor Contract；Issues #4、#5、#10、#29。
+
+### RSK-06 — Applied 与 Provider Outcome 尚未形成统一冻结的端到端证据链
+
+- **概率：高。** Issue #3 明确记录 Applied Contract Frozen = NO，Test Executed/Passed = NO/NO。
+- **影响/严重度：高。** 可能错误声明 Applied、重复 Provider 副作用、将过期或已遗忘 Context 发送给 Provider，或无法确认实际提交的 Request。
+- **风险等级：HIGH。**
+- **描述：** Context Delivery、Adapter Materialization、Final Immutable Inference Request、Provider Handoff、Provider Acceptance、Model Execution 和 User Delivery 是不同事件。系统必须将精确 Final Request 绑定到 G ContextVersion/Delivery、C Egress Admission/Attempt/Outcome、H Authenticated Adapter Evidence、I Current Authorization 和 D Forget/Lineage Clearance。任何单个本地 ACK 都不能证明整条链。
+- **影响组件：** C、G、H、I、D、Agent Adapter、具体 Provider Transport Adapter。
+- **根本原因：** 各权威证明的是不同事实。精确 Final-request Identity、完整 Managed-region Digest、Applied Predicate、Provider Outcome Schema/Validator 和 Current-use 语义必须共同冻结；角色模拟映射不是独立 Owner 批准，也不是 Runtime 证明。
+- **触发条件：** Delivery 后 Context 被转换；Reconnect/Replay；最终 Request 与已确认 Context 不一致；Gate Close 与 Send 竞争；Provider Timeout/Lost Response；Provider 不支持 Idempotency Lookup；后续 Forget/Revocation 改变 Current-use Eligibility。
+- **失败后果：** 系统在没有最终 Request 证明时报告 Applied；重试造成重复外部副作用；历史 Applied 被误当作当前授权；含糊 Provider Handoff 被错误视为未发送。
+- **缓解策略：** 所有转换完成后冻结唯一 Immutable Final-request Boundary 和 Digest。明确 G Applied Predicate 及历史 Applied 与当前可用性的区别。C 的 Immutable Provider Outcome 必须绑定同一个 Request 和 Provider Idempotency Key。H 必须发布精确版本 Wire/Validator 和 Negative Vector。执行真实 Adapter Close-vs-Send 与 Provider Same-key Recovery 测试。UNKNOWN/IN_DOUBT 必须继续阻塞。
+- **必需架构决策：** C/G/H/I/D 联合冻结 Applied 与 Provider Outcome，并由各 Owner 独立决策；H 1.2.13 / CSubmitOutcome 1.0.1 映射目前只是候选，不是生产授权。
+- **责任 Owner：** G（Context-side Applied）；C（Provider Side-effect Truth）；H（Wire/Authenticated Evidence）；I（Authorization）；D（Forget/Lineage）。
+- **验证证据：** Issue #3 仍开放，并明确 Frozen NO / Tests NO / Implementation NO。C Egress Review Blob 5a27f79087d3a5e01dd23e818d8c7ea0fdb61d1d 表示 Adapter Implementation/Runtime Conformance OPEN，15 个 Vector SPECIFIED/NOT RUN。C Phase 3.8.12 Mapping Blob 92ed89a308ad97f6846960bb7182e0916949978e 仅为 L1/L2 Candidate。H Run 44063916718 在 Commit c326e561145e9558f48f199128814643d8720e45 上完成 SUCCESS；C 工件报告 20/20 测试。这只是有限 Provider Outcome Conformance，不是实际 Provider Adapter 竞争测试，也不是完整 Applied 证明。
+- **证据状态：** Schema/Reference Mapping 为 **PARTIALLY VERIFIED**；完整 Applied 与真实 Provider Side-effect 行为为 **NOT PROVEN**。
+- **剩余风险：** Provider 的 Idempotency、Request Lookup、Timeout 语义和 Execution Report 各不相同，不能假设存在通用 Exactly-once 保证。
+- **阻塞门禁：** Issue #43 G2/G3/G4/G7；Issue #3。
+- **来源：** C Egress Review；C Phase 3.8.12 Mapping；H 1.2.13 Schema/Mapping；G Lifecycle Contract；Issue #3；Run 44063916718。
+
+### RSK-07 — COC 与 JF-10 恢复域各自设计不等于整体恢复已证明
+
+- **概率：高。** Issue #10 Gate A 仍为 PARTIAL PASS/OPEN，Gate B/C 仍阻塞；Issue #29 保留物理拓扑和集成阻塞。
+- **影响/严重度：** 错误恢复决策可能为致命；Fail-closed 导致长期不可用则为高影响。
+- **风险等级：HIGH。**
+- **描述：** COC 是用于 Recovery Batch/Manifest 和 Participant Accounting 的 Quorum-committed Causal-order Log。JF-10 是独立门控的 I/Storage Prepared-participant Same-XID Bridge。COC 不是 I Sequencer，也不决定 JF-10 COMMIT/ABORT。保持权威分离是正确的，但端到端 Bridge、持久化证据交换和 Restore 顺序仍必须被证明。
+- **影响组件：** A/COC、Storage、I、D、C、H、E 及 Restore Control Path。
+- **根本原因：** 多个持久化权威具有独立 Position、Prefix、Participant Identity 和 Failure Domain。系统不得比较它们的 Counter，也不得假设 COC Prefix 就代表 I Authorization、D ForgetFence Clearance 或 Storage Publication Outcome。当前部分证据是能力 CI 或参考 Fixture，而不是 Live Persistent COC 与 Owner Ledger 集成。
+- **触发条件：** COC Quorum Outage；停机期间 I/D Request 到达；Prepared Participant 跨重启保留；Coordinator 丢失 ACK；旧 Primary 重新加入；Snapshot Rollback；Participant 只出现在一个 Authority 中。
+- **失败后果：** Participant 缺失、重复 Resolution、错误 XID Resolution、提前释放 Gate、Split-brain Publication 或长期 IN_DOUBT。
+- **缓解策略：** 保持 COC、JF-10、I、D 和 Storage 状态机相互独立。明确 Bridge Identity 与 Digest Binding。证明 Cutoff Batch Completeness、双向 JoinProof、Same-XID Resolution、Old-primary Fencing、Quorum Loss/Recovery、Snapshot Rollback 和 Owner-local Release。不得把 Engine Capability CI 当作 Live COC 证明。
+- **必需架构决策：** A/Storage/I/D 精确版本 Bridge 与 Recovery Acceptance；确定持久化 COC 实现配置和 Operator 责任；明确 COC-to-JF-10 组合合同。
+- **责任 Owner：** A（COC Integration）、Storage（Durable COC 与 Prepared XID）、I（Terminal Authorization）、D（Forget Barrier）、H（Wire Evidence）、C（Provider Outcome）。
+- **验证证据：** Issue #10 仍开放：Gate A PARTIAL PASS/OPEN；Gate B Persistent COC 与 Gate C Deterministic Fault Injection BLOCKED。Issue #29 记录了 H Reference Suite 和 Candidate JoinProof，但明确不能证明 Live COC Quorum 或物理拓扑。Issue #43 Comment 6944732092 明确区分 COC 与 JF-10。
+- **证据状态：** 有界 PostgreSQL 18.7 能力探针和参考测试为 **PARTIALLY VERIFIED**；完整 Live COC/JF-10/Owner-ledger Recovery 为 **NOT PROVEN**。
+- **剩余风险：** 即使故障测试通过，其结论也受所选 Consensus、Storage、Network 和 Operator Failure Model 限制；灾难恢复与人工运维仍需独立证据。
+- **阻塞门禁：** Issue #43 G3/G4/G5；Issue #10 Gate B/C；Issue #29。
+- **来源：** Issue #10；Issue #29；Issue #43 Comments 6944704060、6944732092；Storage v3.2.3 与 v3.2.5 Manifest。
+
+### RSK-08 — 精确版本当前性与证据时效尚未形成闭环控制
+
+- **概率：高。** Live Owner HEAD 已经超出 Phase 2 Evidence Ledger 的版本；当前 Successor Manifest 明确尚未联合接受或冻结。
+- **影响/严重度：高。** Consumer 可能验证一个 Schema/Contract，而其他 Owner 依赖另一个修订或已被替代的证明。
+- **风险等级：HIGH。**
+- **描述：** Branch Name 可变；Path 不是版本；Schema Artifact Revision 不一定等于 Wire-family Version；对某个 Blob 的决议不会自动适用于其后继版本。Phase 2 Ledger 是历史快照，不是 Currentness Oracle。当前 Live Head 已出现 H Unified 1.2.13、C Phase 3.8.12 和 Storage v3.2.5 Manifest，而旧 Ledger 描述的是较早基线。
+- **影响组件：** A–I、Storage、所有 Schema、Validator、Manifest、跨 Owner Review 和 CI Evidence。
+- **根本原因：** 虽然记录了精确 Pin，但没有一个持续强制执行的统一机制，在任何 Source Blob、Schema、Validator、Policy 或 Branch HEAD 改变时自动使依赖批准失效并阻止 Merge/Freeze。
+- **触发条件：** Owner 推送后继版本；Schema Version 前进；Manifest 更新但 Consumer 未全部复审；Branch 被 Force-update；旧 CI Run 被用于新 Blob；双语版本分别修改。
+- **失败后果：** 过期证据造成虚假批准；Schema/Validator 不匹配；一个 Owner 误认为另一个 Owner 接受了后继版本；审计无法重建实际审查的合同。
+- **缓解策略：** 建立机器可检查的 Evidence Ledger，记录 Branch HEAD、Commit、Path、Blob SHA、Artifact Version、Wire-family Version、Status、Approving Authority、Consumer Set、CI-tested Commit 和 Supersession Edge。每个 Gate 都重新读取所有源文件，Pin 改变时 Fail-closed。不得从 Successor Manifest 的存在推断审批。
+- **必需架构决策：** 仓库级 Currentness/Supersession Policy，并要求每项 Owner 接受都绑定到不可变 Source Set。
+- **责任 Owner：** A（集成 Ledger/Gate）；各 Owner（自己的 Source 与 Acceptance）；H/Storage（Wire 与 Successor Manifest）。
+- **验证证据：** Main HEAD b372b62c640a2b656e54b6db62a4ee67d7d8c001；Phase 2 Review Branch HEAD d7a3379fd51660912200a6131bcd037c0f53583c；本报告 §3 的 Live Owner HEAD；Storage v3.2.5 Manifest Blob bea90697e7a61d43bed00543d636a5cdf40cf5ca 明确 NOT JOINTLY ACCEPTED / NOT FROZEN，并声明旧决议不自动转移。
+- **证据状态：** 历史 Ledger 相对于本次 Live Snapshot 已过时这一事实为 **VERIFIED**；所有依赖批准是否持续失效和刷新仍为 **NOT PROVEN**。
+- **剩余风险：** 审查读回后 Commit 仍可能立即前进；最终 Gate 必须采用可复现 Snapshot/CAS 流程。
+- **阻塞门禁：** Issue #43 G1/G2/G6/G7。
+- **来源：** Phase 2 Exact Evidence Ledger；Live Owner Branch HEAD；Storage v3.2.5 Manifest；Issue #43。
+
+### RSK-09 — 生产信任、密码配置与防回滚权威仍属候选
+
+- **概率：高。** I36 Governance Approval 仍阻塞，I Crypto Profile 仍被标为 Candidate，而非 Production Approval。
+- **影响/严重度：** 伪造 Owner Evidence 或接受回滚可能为致命；无法跨恢复验证签名证据为高影响。
+- **风险等级：HIGH。**
+- **描述：** H Wire Schema 与 I Signed P0 Projection 定义了哪些字段受保护，但生产信任还需要明确 Issuer Authority、Root Admission、Key Custody、Rotation/Revocation、Historical Verification、Canonicalization Agreement、Anti-rollback Anchor 和职责分离。Schema 正确及测试用签名 Helper 不等于生产 Trust Service。
+- **影响组件：** I、H、C、Storage、COC、D 和所有 Owner Receipt Verifier。
+- **根本原因：** 密码对象结构和语义投影进度领先于正式信任治理和生产托管决策。单语言候选测试不能证明独立语言实现、外部 Trust Root 和 Anti-rollback Anchor。
+- **触发条件：** Key Compromise；Issuer Rotation；历史 Receipt 验证；跨语言 Canonicalization 不一致；恢复到旧 Key-status Snapshot；缺少外部 Anti-rollback Anchor；Signer 或 Audience 被替换。
+- **失败后果：** 接受伪造或重放的 Owner Evidence；拒绝有效历史证据；恢复状态回滚 Trust 或 Revocation；基于过期 Trust 释放 Gate。
+- **缓解策略：** I 与 Security Governance 批准 Issuer/Principal/Key Lifecycle 和 Custody。H 与 I 冻结 Canonicalization/Signature Profile 和精确 P0 Allowlist。要求独立实现对 Canonical Bytes、Digest、Signature Input 和 Error Behavior 达成一致。将 Anti-rollback 锚定在数据库恢复故障域之外，并测试 Revocation/Rotation/Restore。
+- **必需架构决策：** 正式批准 I36-GOV-01..10 和 Production Crypto/Trust Profile；H/I 精确版本互操作接受。
+- **责任 Owner：** I（Trust/Governance）、H（Wire/Canonicalization）、Storage（Durable Key/Anti-rollback Integration）、C/D（Consumer Verification）。
+- **验证证据：** I Phase 3.8.9 Blob 5c0e2049513d391dfc118f4f629a5ec95de456d6 将 P0 Projection 标为 Candidate，并将 Profile/Production Approval 分开；Issue #5 仍开放。H Schema/Reference CI 只是有界证据，不是 Production Trust Root 或 Custody 证据。
+- **证据状态：** 精确签名字段投影和有界 Validator 为 **PARTIALLY VERIFIED**；治理为 **BLOCKED**；生产 Trust 与 Anti-rollback 为 **NOT PROVEN**。
+- **剩余风险：** HSM、Cloud KMS、Issuer Federation 和 Operator Control 会引入部署相关故障模式。
+- **阻塞门禁：** Issue #43 G2/G4/G5/G7；Issue #5。
+- **来源：** I Phase 3.8.9；I Crypto Profile；H Unified 1.2.13 与 Validator；Issue #5；Issue #29。
+
+### RSK-10 — 架构治理与协议复杂度可能超过工程及运维承载能力
+
+- **概率：中。** 当前已经能观察到大量权威、Gate、Ledger 和精确版本绑定，但实际工程能力与目标 Workload 尚未确定。
+- **影响/严重度：高。** 可能导致协调成本过高、交付缓慢、运维脆弱、故障难以排查，以及安全协议复杂到无法被正确实现和运维。
+- **风险等级：HIGH。**
+- **描述：** 架构横跨 A–I、Storage、COC、JF-10、多个 Owner-local Ledger、Typed Cursor/Epoch、Signed Receipt、Manifest、Recovery Join、Private Staging、多重 Gate 和独立 Terminal Proof。这种复杂度可能由安全要求合理驱动，但尚无证据证明整个协议是满足要求的最小充分设计，也没有证明未来工程/运维团队能够可靠实现、测试、观测和恢复它。
+- **影响组件：** 全系统；Architecture Governance、Owner Workflow、Runtime Engineering、Storage/COC Operations、Security 与 Support。
+- **根本原因：** 各模块安全要求和跨 Owner Proof Obligation 持续累积，但缺少全系统复杂度预算、运维人员模型、受限初始部署范围和已证明的 Vertical Slice。技术蓝图仍为 CANDIDATE，Issue #7 尚未指定 Runtime Implementation Repository 和责任工程 Owner。
+- **触发条件：** 每个新工作流再增加独立 Sequencer、Epoch、Proof、Gate 或 Manifest；跨 Owner Review 延迟增长；Crash 组合数量超过测试工具能力；运维人员无法解释操作为何处于 IN_DOUBT；端到端事故处理无人负责。
+- **失败后果：** 实现停滞；团队绕过 Gate；出现隐藏耦合；Runbook 无法运维；Latency/Cost 不可接受；恢复依赖少数人理解未文档化状态交互。
+- **缓解策略：** 每增加 Authority、Ledger、Coordinator 或 Proof，都必须进行明确复杂度和可运维性评估。建立最小可行安全边界和有限 Pilot：一个 Canonical Memory Authority、一个 PolicyDomain、一个 Producer Class、一类 Index、一条 Context/Adapter 路径和一个 Provider。证明端到端行为前，不增加 Multi-domain 或 Multi-region 功能。定义 Operator Action、IN_DOUBT 处理、Observability、RPO/RTO 和 Staffing。选择拓扑前测量资源预算与 Workload。
+- **必需架构决策：** A 技术/拓扑决策包，必须包含 Complexity Budget、Deployment Mode、Operational Ownership、Failure Model、Resource/Performance Budget 和分阶段能力边界。
+- **责任 Owner：** A（系统集成与复杂度控制）；所有 Owner（证明局部协议负担的必要性）；指定工程/运维权威（实现与可运维性）。
+- **验证证据：** README 声明 Architecture Definition、Implementation Not Started by Design；ARCHITECTURE_ROADMAP 要求技术评估先于实现；Issue #43 将 TAB-001 标为 CANDIDATE；Issue #7 要求指定 Canonical Runtime Repository 和责任工程 Owner；Storage Topology ADR 的 T1–T8 仍开放。审查基线中未发现已测量的复杂度/可运维性证据。
+- **证据状态：** Architecture-only 状态和 Issue #7 未指定事项为 **VERIFIED**；复杂度是否超过未来承载能力为 **NOT PROVEN**（没有 Capacity/Benchmark/Operability Evidence）。
+- **剩余风险：** 有纪律的 Pilot 可能证明复杂度必要且可管理；反之，在没有 Threat Model 的情况下删除 Proof Obligation 可能削弱正确性。
+- **阻塞门禁：** Issue #43 G5/G8；Issue #7；TAB-001。
+- **来源：** README；ARCHITECTURE_ROADMAP；TAB-001；Issue #7；Storage Topology ADR；Issue #43。
