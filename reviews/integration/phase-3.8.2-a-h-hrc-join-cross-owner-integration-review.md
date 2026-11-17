@@ -260,3 +260,22 @@ Current Storage pins:
 - Storage freeze evidence: `14edfdea384be257f90fe87effc3362a3864b172`.
 
 This remains candidate reference-model/schema/test-profile evidence. HRC-TEST-v1 is not a production canonicalization/signature profile; TPH does not exercise a live COC quorum log; XLANG-01 covers fixed vectors only. Production adapters, I trust/crypto, real owner-ledger CAS, JF-10 physical recovery and the A physical campaign remain OPEN.
+
+
+### 9.6 H 97-test / Recovery Cutoff 1.0.5 / RecoveryJoin 1.0.1 refresh
+
+Latest H candidate run [44043100543](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44043100543), job `133902179251`, completed **97 tests / OK**. The exact current schema-family targets are:
+- Recovery Cutoff 1.0.5: `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`.
+- RecoveryJoin 1.0.1: `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`.
+- Unified COC/JF-10 1.2.8: `70b892797d07489936300a26c0dedfafe1d6e746`.
+- H semantic contract: `b32f4a0fe665feefa6eadd3f10c70deb28fe0ba5`.
+- Schema test suite: `ff2b735ccdbf5d45f3c6b2ee9a25d14db2e3c7ad`.
+
+The 97 methods are HRC 25 + JPF 19 + WIRE 10 + SCHEMA 16 + TPH 26 + XLANG 1. SCHEMA-15/16 check owner-snapshot attestation content binding and RecoveryJoin 1.0.1 complete-empty/out-of-scope proof structure. They are not cryptographic or live-ledger proofs.
+
+Current Storage exact evidence:
+- Bidirectional JoinProof: `eaa117aff6635597109c10745f2d70e63e6e0308`.
+- Storage exact review: `6610062306ec28fb6d0e127d3422923835e5faf3`.
+- Storage freeze evidence: `1a5c9f03e1abc999b96ad59d67598c4bd32cee23`.
+
+This 97-test pass remains a candidate reference-model/schema/test-profile result. It does not close live COC/owner-ledger enumeration, owner signatures/key status, owner-local CAS, real JF-10 physical resolution, D/Storage topology or the 36 physical cases in A's matrix.
