@@ -17,7 +17,7 @@
 | G 精确 Full-Path 消费审查 | G 分支 / `06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md` | `1894860c76336f8739d354b72beed3992cffd17e` | 明确绑定 H 1.2.14 × CSubmitOutcome 1.0.1 |
 | C 规范 Provider Submit Outcome | C 分支 / `07-agent-integration/phase-3.8.4-c-normative-provider-submit-outcome-contract.md` | `819705037da89834e10b6dd2ec6e66c1b8c70886` | C 语义权威 |
 | CSubmitOutcome 1.0.1 Schema | C 分支 / `07-agent-integration/schemas/c-submit-outcome-1.0.1.schema.json` | `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` | 不可变 C 对象 Schema |
-| H JF-10 Applied ACK Schema | H 分支 / `08-bmcp-protocol/schemas/bmcp.applied-ack-1.1.0-jf10-bridge.schema.json` | 见 H Schema 目录中的独立工件 | JF-10 Bridge Applied ACK，不是 Provider Outcome |
+| H JF-10 Applied ACK Schema | H 分支 / `08-bmcp-protocol/schemas/bmcp.applied-ack-1.1.0-jf10-bridge.schema.json` | `a8a945cc3623c2907003b93625e3c79742150944`；独立 Schema 家族 | JF-10 Bridge Applied ACK，不是 Provider Outcome |
 
 本次读取时观察到的分支 HEAD：C `71047cdb51139ca4080ac67f451e38a48698859d`、G `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe`、H `e3e4cab0aab2c68f9db98bd50bc387b1895c3773`。
 
