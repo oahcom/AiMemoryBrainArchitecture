@@ -43,7 +43,7 @@ The project maintains a reader-oriented Chinese/English documentation set. Start
 
 **Normative requirement:** Every architecture design or semantic architecture change MUST include Chinese and English documentation in the same change set. Both versions must preserve identical meaning, constraints, decision status, stable identifiers, failure cases, and acceptance criteria. A one-language-only architecture PR cannot pass documentation acceptance unless a time-bounded, tracked **STALE** exception is approved under the policy.
 
-**规范性要求：** 每一项架构设计或改变架构语义的修改，都必须在同一个变更集中提供中文和英文文档。两种语言必须保持相同的含义、约束、决策状态、稳定标识、故障场景和验收条件。只有经过批准、明确登记责任人和期限的 **STALE** 临时例外，才允许暂时缺少一种语言版本；否则单语架构 PR 不得通过文档验收。
+**面向所有 AI 开发者的规范性要求：** 每一位 AI 开发者/会话——无论负责架构、编码、测试、安全、协议、存储、性能、迁移、运维还是审查——都 MUST 阅读并遵守 GOV-DOC-001。任何新增或改变架构含义、面向实现的契约的变更，都 MUST 在同一个变更集中同步更新中文和英文文档。两种语言必须保持相同的含义、约束、决策状态、稳定标识、故障场景和验收条件。缺少或实质不一致的对应版本意味着 NOT DONE，不得通过验收；只有正式批准且有明确期限、责任人和跟踪记录的 **STALE** 例外才可临时豁免。
 
 See [GOV-DOC-001 Bilingual Architecture Documentation Policy](00-governance/bilingual-documentation-policy.md) and the [bilingual documentation portal](docs/README.md).
 
@@ -67,7 +67,17 @@ See [GOV-DOC-001 Bilingual Architecture Documentation Policy](00-governance/bili
 | `13-engineering-decisions/` | Technology evaluation and Rust engineering architecture |
 | `14-ai-development/` | AI development governance, iteration lifecycle, versioned prompts and evidence records |
 
-## AI development governance\n\nThis repository is developed through named AI Module Owners under a controlled, evidence-based workflow. Every substantive task must have a versioned prompt, an accountable Owner, an isolated change, reproducible verification and independent review. See [AI Development Standard](14-ai-development/ai-development-standard.md), [Iteration Lifecycle](14-ai-development/iteration-lifecycle.md), and [Prompt & Evidence Template](14-ai-development/prompt-and-evidence-template.md).\n\n## How decisions are documented
+## AI development governance
+
+This repository is developed through named AI Module Owners under a controlled, evidence-based workflow. Every substantive task must have a versioned prompt, an accountable Owner, an isolated change, reproducible verification and independent review.
+
+All AI developers/sessions MUST use the [canonical Prompt Library](prompts/README.md): global prompts are stored directly under `prompts/`, while A–I Owner-specific prompts are stored in their respective `prompts/A/` through `prompts/I/` directories. The exact prompt version used must be preserved in the Work Item evidence bundle. See [AI Development Standard](14-ai-development/ai-development-standard.md), [Iteration Lifecycle](14-ai-development/iteration-lifecycle.md), and [Prompt & Evidence Template](14-ai-development/prompt-and-evidence-template.md).
+
+本仓库通过明确的 AI 模块 Owner 和可追溯证据流程进行开发。每项实质性任务都必须具有版本化提示词、责任 Owner、隔离变更、可复现验证和独立审查。
+
+所有 AI 开发者/会话 MUST 使用[规范提示词目录](prompts/README.md)：全局提示词直接存放在 `prompts/` 根目录，A–I Owner 专属提示词分别存放在 `prompts/A/` 至 `prompts/I/`。实际执行的准确提示词版本必须保存在 Work Item 证据包中。
+
+## How decisions are documented
 
 Every significant design statement must be classified as one of:
 

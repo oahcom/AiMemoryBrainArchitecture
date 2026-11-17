@@ -14,9 +14,15 @@ Chinese and English are maintained as equivalent reading versions. Normative arc
 | Evaluate technology / 技术选型 | [中文技术架构总览](zh-CN/13-engineering-decisions/technology-architecture-overview.md) · [English Technology Overview](en/13-engineering-decisions/technology-architecture-overview.md) |
 | Look up terms / 查术语 | [Bilingual Glossary / 中英术语表](glossary/architecture-glossary.md) |
 
-**Coverage and migration plan / 覆盖与迁移计划：** [Bilingual Documentation Status](translation-status.md)
+**Coverage and migration plan / 覆盖与迁移计划：** [Bilingual Documentation Status](translation-status.md) · [Owner Branch Migration Inventory](owner-branch-translation-inventory.md)
 
-**Mandatory project rule / 项目强制规范：** Every architecture design and semantic change must be documented in Chinese and English in the same change set. See [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md).
+**Mandatory rule for every AI developer / 所有 AI 开发者强制规则：** Every AI developer/session—whether doing architecture, implementation, tests, security, storage, protocols, performance, migrations, operations or reviews—MUST read and follow [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md). Any change to architecture meaning or implementation-facing contracts requires synchronized Chinese and English updates in the same change set. Missing or materially divergent counterparts mean NOT DONE unless a formally approved, time-bounded STALE exception exists. See also [AI Development Standard](../14-ai-development/ai-development-standard.md) and the [Prompt & Evidence Template](../14-ai-development/prompt-and-evidence-template.md).
+
+
+
+**Canonical AI prompt library / AI 提示词规范目录：** Every AI session MUST start from the repository [Prompt Library](../prompts/README.md): global prompts live directly under `prompts/`, and Owner-specific prompts live under `prompts/A/` through `prompts/I/`. Each task must preserve the exact executed prompt version in its Work Item evidence bundle.
+
+**AI 提示词规范目录：** 每个 AI 会话 MUST 从仓库的[提示词目录](../prompts/README.md)开始：全局提示词直接放在 `prompts/` 根目录，Owner 专属提示词分别放在 `prompts/A/` 至 `prompts/I/`。每项任务必须将实际执行的准确提示词版本保存在 Work Item 证据包中。
 
 ## Documentation layers / 文档层次
 
@@ -46,7 +52,7 @@ Bilingual guides explain and navigate these specifications; they do not silently
 3. Translation must never turn CANDIDATE, OPEN, or TO_VALIDATE into DECIDED or APPROVED.
 4. Normative decisions are governed by source specifications and the owner/ADR process—not by whichever language page was edited last.
 5. Each paired document records its ID, version, source revision, status, and counterpart path.
-6. A contract change requires both language versions to be updated in the same change set, or the untranslated counterpart must be marked STALE.
+6. Every AI developer/session must check both language counterparts before work and include bilingual parity in its task plan, prompt, review and completion evidence.\n7. A contract change requires both language versions to be updated in the same change set, or the untranslated counterpart must be marked STALE under a formally approved, time-bounded exception.
 
 ## Status vocabulary / 状态词汇
 

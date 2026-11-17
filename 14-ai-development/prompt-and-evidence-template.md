@@ -33,6 +33,14 @@ updated_at: ""
 implementation_branch: ""
 implementation_commits: []
 changed_paths: []
+documentation:
+  architecture_significant: true
+  policy_id: "GOV-DOC-001"
+  chinese_paths: []
+  english_paths: []
+  source_revision: ""
+  parity_review: "NOT_STARTED"
+  coverage_register_updated: false
 verification:
   status: "NOT_RUN"
   commit_sha: ""
@@ -93,7 +101,19 @@ Each criterion MUST be objectively verifiable. Avoid “high quality”, “robu
 ## Verification plan
 List exact commands, tests, fixtures, expected results and required fault/security cases. Mark unavailable checks as NOT RUN with a reason.
 
+## Mandatory bilingual requirement for every AI developer (GOV-DOC-001)
+
+Every AI developer/session MUST read GOV-DOC-001 before starting. This applies to architecture, implementation, testing, security, storage, protocol, performance, migration, operations, and review work. Inspect both language counterparts for affected contracts. If the task creates or changes architecture meaning, constraints, interfaces, behavior, tests, acceptance criteria, technology decisions or implementation guidance, update/create both Chinese and English versions in this same change set. If code/tests reveal a contract change, update the owning specification rather than treating the task as implementation-only. Preserve normative force, decision status and stable identifiers. Update the coverage register. A missing counterpart is NOT DONE unless a formally approved, time-bounded STALE exception records owner, source revision, due date and tracking issue.
+
+## 所有 AI 开发者的强制双语要求（GOV-DOC-001）
+
+每位 AI 开发者/会话在开始前 MUST 阅读 GOV-DOC-001。本要求覆盖架构、实现、测试、安全、存储、协议、性能、迁移、运维和审查工作。检查受影响契约的中英文版本。如果任务新增或改变架构含义、约束、接口、行为、测试、验收条件、技术决策或实现指导，必须在同一个变更集中创建/更新中英文版本。如果代码/测试揭示契约发生变化，必须更新所属规范，不能将任务视为纯实现工作。保持规范效力、决策状态和稳定标识一致，并更新覆盖登记表。缺少对应版本时属于 NOT DONE，除非正式批准有期限的 STALE 例外，并记录责任人、源版本、截止日期和跟踪 Issue。
+
 ## Required deliverables
+- Chinese documentation paths:
+- English documentation paths:
+- Bilingual parity checklist/evidence:
+- Coverage register update:
 - Modified/new files:
 - Decision/change log:
 - Tests:
@@ -128,7 +148,8 @@ Stop and report if:
 7. Independent-review handoff notes.
 8. Open questions, risks and dependencies.
 9. Commit SHA and read-back verification.
-10. Honest final status: IMPLEMENTED / VERIFIED / BLOCKED / PARTIAL.
+10. Bilingual parity status and Chinese/English paths (or approved STALE exception).
+11. Honest final status: IMPLEMENTED / VERIFIED / BLOCKED / PARTIAL.
 
 ## 3. Prompt versioning rules / 提示词版本规则
 
@@ -154,7 +175,19 @@ Each completed implementation task should contain, as applicable:
 - `integration-report.md` — cross-owner acceptance;
 - links to PR, commits and CI runs.
 
-## 5. Suggested repository layout / 建议目录
+## 5. Canonical prompt library and evidence layout / 规范提示词库与证据目录
+
+Reusable prompts MUST first be stored in the repository-root `prompts/` library:
+- Global prompts: directly under `prompts/`.
+- Owner prompts: `prompts/A/` through `prompts/I/`.
+- Every task prompt MUST reference the global prompts and applicable Owner prompt IDs.
+- Before execution, copy the exact prompt text into the work-item evidence bundle, compute SHA-256, and never overwrite an executed version.
+
+See [Prompt Library](../prompts/README.md).
+
+可复用提示词必须先存入仓库根目录的 `prompts/`：全局提示词直接放在根目录，Owner 专属提示词放入各自目录。每项任务提示词必须引用全局提示词和适用的 Owner 提示词 ID。执行前将准确提示词复制到 Work Item 证据包并计算 SHA-256；已执行版本不得覆盖。
+
+## 6. Suggested repository layout / 建议目录
 
 ```text
 14-ai-development/
