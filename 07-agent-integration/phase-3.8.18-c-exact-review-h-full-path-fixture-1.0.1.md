@@ -6,10 +6,10 @@
 - H authority-join mapping Blob: `1cbe74eba69325510d6b1019d971661f965eabf8`
 - CSubmitOutcome 1.0.1 schema Blob: `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`
 - H validator core Blob: `eab961a08d41e871f38543b18ee60cf024977414`
-- H validator test Blob: `dccf8c099c18807ec072870d32604d0912209f01`
+- H validator test Blob: `540056d7c4f290c31290b17c264c69cfd76b1cb2`
 - H full positive fixture Blob: `c80247a6ecfbb4a29ff0993e8e2aea4829d00626`
-- H full-path closure Blob: `f9c8d797d9a1ae9ea500c22534e98eb2f98cdff4`
-- H exact CI run: `44069777296`, tested commit `9eb06313e94e762f0fde4a606633a6dbe1bf8262`, job `133992753552`: **SUCCESS**.
+- H full-path closure Blob: `3fe848b315ba6c069785ef9c47d329a054ca9392`
+- H exact CI run: `44070924346`, tested commit `77a9d5e2e716ba33387f0beb1195f864ed8ac54f`, job `133996627914`: **SUCCESS**.
 - Provenance: delegated C-role review; **not an independent human C Owner signature**.
 - English and Chinese are normative peers.
 
@@ -33,11 +33,11 @@ The local fixture and tests are consistent with C's authority boundary:
 
 ## 3. Exact CI and limitations / 精确 CI 与限制
 
-H run `44069777296` completed successfully on exact commit `9eb063...`. The current suite contains 32 test methods across three Python files: 26 H validator unit/fixture methods and six C crypto interoperability methods.
+H run `44070924346` completed successfully on exact commit `9eb063...`. The current suite contains 38 test methods across three Python files: 32 H validator unit/fixture methods and six C crypto interoperability methods.
 
 The full-path tests use deterministic True/False/None test callbacks for authority-dependent checks. They do not authenticate a production C signature/key status, provider evidence issuer, C owner-ledger inclusion or live C sequencer. They also do not prove provider same-key lookup, adapter race/fault behavior, multi-replica egress linearization or production exactly-once.
 
-H Run `44069777296` 在精确 Commit 上成功。当前套件共 32 个测试方法，分布于三个 Python 文件：26 个 H Validator Unit/Fixture 方法和 6 个 C Crypto Interop 方法。
+H Run `44070924346` 在精确 Commit 上成功。当前套件共 32 个测试方法，分布于三个 Python 文件：26 个 H Validator Unit/Fixture 方法和 6 个 C Crypto Interop 方法。
 
 Full-Path Test 对 Authority-dependent Check 使用确定性 True/False/None Callback。它们不认证生产 C Signature/Key Status、Provider Evidence Issuer、C Owner Ledger Inclusion 或实时 C Sequencer；也不证明 Provider Same-Key Lookup、Adapter Race/Fault、多副本 Egress 线性化或生产 Exactly-once。
 
@@ -48,3 +48,10 @@ Full-Path Test 对 Authority-dependent Check 使用确定性 True/False/None Cal
 This review supersedes the previous C callback-seam-only evidence scope for the current H test source. It does not authorize provider egress or exactly-once claims.
 
 **角色模拟 C 侧决议：接受精确本地 H Envelope + CSubmitOutcome 1.0.1 Schema/Semantic/Digest 路径作为 L1/L2 候选证据。生产 C Trust、Provider Evidence 与 Egress Safety 仍 OPEN，不冻结。** 本文件替代此前对当前 H Test Source 仅 Callback-Seam 的证据范围，不授权 Provider Egress 或 Exactly-once 声明。
+
+
+## Expanded full-path mutation evidence / 扩展全路径篡改证据
+
+The exact H test Blob `540056d7c4f290c31290b17c264c69cfd76b1cb2` adds tests 26–31: every present duplicated wire field mutation, joint C-P0 + wire mutation followed by digest recomputation, C sequence namespace mismatch, I COMMIT_WON predicate, exact D ForgetOperation/Fence binding, and Storage DB incarnation/GID/PrepareAttempt/participant-ledger binding. H run `44070924346` passed on exact commit `77a9d5e2e716ba33387f0beb1195f864ed8ac54f` (job `133996627914`). The suite contains 38 methods total: 32 H validator unit/fixture methods plus six Python/Node crypto interoperability methods.
+
+The authority callbacks remain deterministic test doubles. This extends local negative-path coverage; it does not authenticate real I/D/Storage proofs or prove production authority integration.
