@@ -114,3 +114,11 @@ B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪�
 - B-CONFLICT-016 remains OPEN; B5 is BLOCKED / NOT PASSED until P0/P1/P2 bilingual remediation and manual semantic comparison are complete.
 - 新增 `bilingual-parity-audit.md`：22 个文件中，20 个文件被筛查出 135 个仅英文实质章节。该结果是筛查，不是语义翻译终审。
 - B-CONFLICT-016 仍 OPEN；P0/P1/P2 双语修复及人工语义对照完成前，B5 保持 BLOCKED / NOT PASSED。
+
+
+## 10. Bilingual remediation progress / 双语整改进度
+
+- Author-side bilingual rewrites completed for `canonical-domain-invariants.md`, `canonical-state-semantics.md` and `validation/README.md`; exact Blob pins and manual-review status are recorded in `bilingual-parity-audit.md`.
+- These rewrites are not independent parity acceptance. B5 remains BLOCKED / NOT PASSED until remaining P0/P1/P2 files are completed and a separate reviewer verifies semantic equivalence.
+- 已完成 `canonical-domain-invariants.md`、`canonical-state-semantics.md` 和 `validation/README.md` 的作者侧双语改写；精确 Blob Pin 及人工复审状态记录在 `bilingual-parity-audit.md`。
+- 这些改写不构成独立双语验收。剩余 P0/P1/P2 文件完成并由独立审查者验证语义等价前，B5 仍 BLOCKED / NOT PASSED。
