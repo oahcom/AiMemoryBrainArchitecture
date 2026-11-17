@@ -149,3 +149,25 @@ The review must distinguish present but incomplete Storage/JF-10 refresh from mi
 此外，Owner Synthesis、Capability Matrix、Recommendation 和 Handoff 仍引用旧 Storage ADR Blob 1ef47d4e5711c7db73a24d249adf1992be1f6aa4，而独立重新读取的当前 ADR Blob 为 bb544ba2f346bdc130d524bd5c7310d86f367988；Handoff 的第 13/14 项路径仍带多余右括号。Evidence Register 的 Restate Server 行仍只记 API 元数据 NOASSERTION，没有披露规范 Server LICENSE 的 BSL 1.1 Additional Use Grant；Rust SDK 的 MIT 许可证不能替代 Server 许可证审查。
 
 因此应明确区分“已存在但不完整的 Storage/JF-10 刷新”和“缺失的跨 Owner Phase 3.8/3.8.3 集成”。P1 当前性与许可证问题仍开放；P2 ADR Pin/Handoff 问题仍开放。精确研究 HEAD 未变化，尚无新修订提交可供独立关闭。裁决维持 REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY。
+## 7. Current-main ancestry and PR-base drift / 当前 Main 祖先关系与 PR 基线漂移
+
+A commit comparison was performed against the live default branch after the exact-HEAD revalidation:
+
+- Current main HEAD: `ca69d50d1fc6c19a930128de700b0f2328bf32fb`.
+- PR #45 base: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`.
+- PR #45 head remains: `6c7c5919c1b50f38c4d24be679a3885ee3c15b97`.
+- `b372b62...` → `main`: 27 commits ahead, 0 behind; the compare endpoint reports one added file, `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md` (131 additions).
+- `main` → PR #45 head: diverged; PR #45 is 51 commits ahead and 27 commits behind, with the merge base still exactly `b372b62...`.
+- The PR #45-specific comparison against its original base still reports the same 14 research files and 51 commits ahead.
+
+This establishes that the PR's base is historically stale and its branch has not incorporated 27 commits now on main. The one file surfaced in the base-to-main comparison is outside the TECH-REALITY-001-A research package; therefore this ancestry result alone does not prove a direct same-file conflict or invalidate the research content. It does mean the review/merge process must rebase or otherwise reconcile the branch against current main and re-run exact-base/current-source checks before acceptance. Do not treat the PR metadata `mergeable` boolean as a substitute for that reconciliation.
+
+**中文：** 针对实时默认分支进行了提交比较：当前 Main HEAD 为 `ca69d50d1fc6c19a930128de700b0f2328bf32fb`；PR #45 Base 仍是 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`；PR #45 Head 仍是 `6c7c5919c1b50f38c4d24be679a3885ee3c15b97`。从旧 Base 到 Main 已前进 27 个提交、落后 0 个，比较接口显示其中新增一个文件 `DOMAIN-REALITY-001-B/bilingual-parity-audit.md`（131 行）。Main 与 PR #45 Head 的关系为分叉：PR 分支领先 51 个提交、落后 27 个提交，Merge Base 仍为旧 Base。PR 相对原始 Base 的 14 个研究文件和 51 个领先提交没有变化。
+
+这证明 PR 基线已经过时，且分支尚未纳入 Main 上的 27 个提交。但比较结果显示的唯一 Main 新增文件不在 TECH-REALITY-001-A 研究包内，因此不能仅凭祖先关系断言存在同文件冲突或研究内容失效。它意味着接受前必须 Rebase 或以其他方式对齐当前 Main，并重新执行精确 Base/当前源核验。PR 元数据中的 `mergeable` 布尔值不能代替这一对齐工作。
+
+### Required next action / 必须执行的下一步
+
+Before asking for another content-only review, the research owner should publish a refreshed branch based on current main, preserve the old exact research snapshot as historical provenance, apply the Phase 3.8/3.8.3 and license/pin/path corrections, then provide the new base SHA, head SHA, changed-file list and CI evidence. The independent reviewer must review that new exact pair; no approval is carried forward from this stale base.
+
+**中文：** 在再次进行纯内容复审之前，研究 Owner 应先从当前 Main 建立刷新分支，保留旧精确研究快照作为历史溯源，应用 Phase 3.8/3.8.3、许可证、Pin 和路径修正，然后提供新的 Base SHA、Head SHA、变更文件清单和 CI 证据。独立审查必须针对新的精确 Base/Head 对重新执行，旧基线上的任何结论都不能自动转移为批准。
