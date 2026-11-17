@@ -321,3 +321,10 @@ P published `00-governance/role-simulations/issue-20-h-gateway-envelope-authenti
 - A `9bdf938b980413f592a4db9fe94f4bf2c299fb01`; C `2e8414f361b0b5d7de959be8a971aadc9e62d6a9`; D `76fcc92225666a11893b7241825261319edb621e`; H `8e24342048d29ef29195b153b8b9ec53ba7c75d9`; I `9dd97ea81669ea832ca72a84004541611cf4782b`; Storage `431138e7c7af8bee716f3d8dcbc20114c046bd36`.
 - H Provider Outcome run `44073888935`: 60 tests, SUCCESS; exact tested commit `0e212731073b36e4fa9ffda8467e60806da1b380`.
 - No Owner branch or `main` is modified by this P update.
+
+
+## 18. H/C outer P0 JSON-Pointer inventory completeness — 2026-11-17
+
+| ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
+|---|---|---|---|---|---|
+| UMR-048 | P1 | Add the missing explicit excluded `/coc_previous_entry_digest` row to H Phase 3.8.20 exact JSON-Pointer inventory | H (C review if semantics change) | OPEN — mechanical schema-to-table comparison found 69 composed properties and 68 pointer rows; the sole omitted row is an intentionally excluded coordinator-appended COC field | P audit `issue-20-h-c-envelope-p0-json-pointer-completeness-audit-v0.1.0.md`. H schema Blob `09fcd1...`; H mapping Blob `4ba7e...`; C corrected P0 Blob `310e7e...`. Add row with Outer P0 = No, then refresh H mapping Blob and downstream exact reviews. |
