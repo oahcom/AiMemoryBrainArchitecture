@@ -64,7 +64,7 @@ This run validates the candidate construction for 1.0.1. It does not register th
 
 **C ACCEPTS 1.0.1 AS THE CURRENT PROPOSED IMMUTABLE OBJECT REVISION FOR EXPLICIT SEQUENCE-NAMESPACE BINDING. NOT FROZEN.**
 
-H must update the dereference validator and wire mapping to require 1.0.1 and verify the namespace join. I must review the 1.0.1 signed field inventory and governance key-status binding. A must review exact C/H/I/Storage pins before any freeze decision.
+H owns the exact BMCP 1.2.12 → CSubmitOutcome 1.0.1 wire mapping and validator. Its consumer artifact is bound by the Storage successor bundle manifest rather than cross-pinned here. I reviews the signed field inventory and governance key-status binding. A reviews the exact C/H/I/Storage bundle before any freeze decision.
 
 No production egress, profile registration, key activation, exactly-once property or production readiness is claimed.
 
@@ -73,7 +73,7 @@ No production egress, profile registration, key activation, exactly-once propert
 
 H has updated its validator to require CSubmitOutcome 1.0.1 and the explicit sequence namespace:
 - BMCP schema 1.2.12 Blob `a54f66914a819d77f00c6af04e76453ff9f654ee`.
-- H exact mapping Phase 3.8.7 Blob `f4d50d09179005e941703a58323740a6d424777f`.
+- H exact mapping is a separate H-owned consumer artifact; its current exact Blob is bound in the Storage successor bundle manifest. C does not pin H's consumer artifact here, avoiding a cyclic source/consumer reference.
 - H validator core Blob `1a92c0cf7146e2884bd38232005dd9a55d558a85`.
 - H independent Python 1.0.1 verifier Blob `5559fb7a612c8dd92345ceae3a6aa62f4faae41a`.
 - H Node 1.0.1 oracle Blob `07c34b03aff94e1dfbbd1aa056ac849debeb3348`.
@@ -82,3 +82,10 @@ H has updated its validator to require CSubmitOutcome 1.0.1 and the explicit seq
 H's 17-test run validated the 1.0.1 schema namespace field, recomputed all five 1.0.1 candidate crypto vectors, verified signatures and field mutations, matched H Python/Node output to static expected values, and retained the earlier 1.0.0/key-status tests as historical checks.
 
 This is independent candidate-only validation. It does not prove a production C sequencer, key-status ledger, governance trust root or anti-rollback checkpoint exists.
+
+
+## 8. Source/consumer pinning rule
+
+C's immutable object schema and this C-owned semantic amendment are source artifacts. H's wire mapping and validator are consumer artifacts. To avoid a cyclic Blob-reference graph, C does not pin H's mapping Blob; the Storage successor exact-version manifest binds both independently. H MUST pin this exact C source Blob and the applicable I review Blob. I's review pins the C source Blob but does not pin H's mapping. A consumes the Storage bundle manifest and reviews the exact join.
+
+**中文：** C 的不可变对象 Schema 与本修订是源权威工件；H 的 Wire Mapping/Validator 是消费方工件。为避免 Blob 引用形成循环，C 不反向绑定 H 的 Mapping Blob；由 Storage 后继精确版本清单分别绑定两者。H 必须绑定本 C 源 Blob 与适用的 I Review Blob；I Review 绑定 C 源 Blob，不反向绑定 H Mapping；A 最终审查 Storage Bundle Manifest 中的精确 Join。
