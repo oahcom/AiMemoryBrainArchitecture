@@ -81,3 +81,12 @@ C confirms the COC Batch/Manifest pair is ordering and membership evidence only.
 The C source contract set is now exactly located and pinned. The C semantic decision is **ACCEPT WITH ENUMERATED C-OWNED EXCEPTIONS**. The previous blocker “canonical C Provider Outcome source not located” is closed as a document-discovery issue, but provider-specific proof, implementation, H current-schema alignment and A final integration review remain open.
 
 This is a delegated role-simulated architecture decision authored at the user's direction. It is not an independent human Owner signature, cryptographic signature, test result or production authorization.
+
+
+## 7. Addendum — H current-head discovery after C decision / H 当前版本发现后的补充
+
+A subsequent exact read of H branch `session-h-bmcp-protocol` resolved its current HEAD to `80ba6748f4c7442f162102a30cfefacefdec0db9`. Its current recursive tree contains schema artifact `08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.11.schema.json`, Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`. The schema declares artifact revision 1.2.11 and on-wire protocol-family version 1.3.0, retains the typed union of COC participants and I/D/C owner-local admissions, and retains Provider Outcome enum support.
+
+C has not yet completed a semantic exact-version rereview of H schema 1.2.11 together with the matching H semantic validator, signature/canonicalization profile, canonical-byte fixtures and interoperability vectors. Therefore the ACCEPT decision above remains limited to the exact C-owned source set and the previously reviewed H mapping; it MUST NOT be read as C acceptance of H 1.2.11 or as a current cross-owner wire freeze. A new C/H exact-bundle review is required before freeze.
+
+This addendum changes no C-owned outcome authority and does not relax any C exception or implementation gate.
