@@ -214,8 +214,13 @@ class AppliedStore:
         try:
             conn.execute("BEGIN IMMEDIATE")
             complete = all(owner_currentness.get(name) is True for name in REQUIRED_AUTHORITIES)
-            stale = snapshot_epoch < trusted_epoch or snapshot_highwater < trusted_highwater
-            if stale or not complete:
+            # A snapshot ahead of the trusted external anchor is not proof of
+            # newer state; it may be an unanchored fork or rollback-manipulated image.
+            # This reference model requires exact epoch/high-water equality before
+            # serving can be re-enabled. A production protocol may advance only with
+            # a separately authenticated contiguous-prefix proof.
+            anchor_mismatch = snapshot_epoch != trusted_epoch or snapshot_highwater != trusted_highwater
+            if anchor_mismatch or not complete:
                 conn.execute("UPDATE g_meta SET value=0 WHERE key='serving_enabled'")
                 conn.commit()
                 return "FENCED"
@@ -401,6 +406,26 @@ class GAppliedPersistenceReferenceTests(unittest.TestCase):
                     self.commit(c_outcome=outcome, side_effect_status=side_effect)
         self.assertEqual(self.store.snapshot()["ledger"], [])
 
+
+    def test_15_snapshot_epoch_ahead_of_trusted_anchor_keeps_restore_fenced(self):
+        self.commit()
+        result = self.store.reconcile_restore(
+            snapshot_epoch=3, snapshot_highwater=1,
+            trusted_epoch=2, trusted_highwater=1,
+            owner_currentness={name: True for name in REQUIRED_AUTHORITIES},
+        )
+        self.assertEqual(result, "FENCED")
+        self.assertFalse(self.store.current_use_allowed("g-applied:context-1:delivery-4:request-9"))
+
+    def test_16_snapshot_highwater_ahead_of_trusted_anchor_keeps_restore_fenced(self):
+        self.commit()
+        result = self.store.reconcile_restore(
+            snapshot_epoch=2, snapshot_highwater=2,
+            trusted_epoch=2, trusted_highwater=1,
+            owner_currentness={name: True for name in REQUIRED_AUTHORITIES},
+        )
+        self.assertEqual(result, "FENCED")
+        self.assertFalse(self.store.current_use_allowed("g-applied:context-1:delivery-4:request-9"))
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
