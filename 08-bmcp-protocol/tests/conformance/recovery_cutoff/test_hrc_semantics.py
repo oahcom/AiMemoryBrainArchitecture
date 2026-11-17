@@ -71,7 +71,7 @@ def participant(ref="COC/P1", owner="C", admission_ref="C/admit/1",
     return {
         "participant_intent_ref": ref, "owner_kind": owner,
         "owner_admission_ref": admission_ref, "operation_id": "op/C/admit/1",
-        "operation_digest": "b" * 64, "participant_digest": digest,
+        "operation_digest": "b" * 64, "participant_digest": digest, "scope_ref": "scope/test",
         "term": 1, "index": position, "entry_digest": "c" * 64,
         "required_owner_evidence": list(required),
         "owner_evidence": {"C": ["C/admit/1"], "I": ["I/receipt/1"], "D": ["D/barrier/1"]},
@@ -255,7 +255,9 @@ def validate_join(admissions_by_owner, m):
             if (p.get("participant_digest") != a.get("participant_entry_digest") or
                 p.get("index") != a.get("participant_position") or
                 p.get("operation_id") != a.get("operation_id") or
-                p.get("operation_digest") != a.get("operation_digest")):
+                p.get("operation_digest") != a.get("operation_digest") or
+                p.get("scope_ref") != a.get("scope_ref") or
+                p.get("participant_intent_ref") != a.get("participant_intent_ref")):
                 return INVALID
             # C admission is the primary manifest anchor; I/D evidence may be many-to-one.
             if owner == "C" and p.get("owner_admission_ref") != ref:
@@ -505,9 +507,9 @@ def reject_duplicates(pairs):
 
     # JPF-01: owner-to-participant and participant-to-primary-C joins both resolve.
     def test_JPF_01(self):
-        p = participant()
+        p = participant(required=["C"])
         a = admission("C/admit/1", "C")
-        self.assertEqual(validate_join({"C": [a], "I": [], "D": []}, manifest([p])), VALID)
+        self.assertEqual(validate_join({"C": [a]}, manifest([p])), VALID)
 
     # JPF-02: two distinct I evidence entries may join one participant.
     def test_JPF_02(self):
@@ -517,6 +519,10 @@ def reject_duplicates(pairs):
         i1 = admission("I/issue/1", "I")
         i2 = admission("I/consume/1", "I", seq=2)
         d1 = admission("D/barrier/1", "D")
+        for x in (i1, i2, d1):
+            x["operation_id"] = p["operation_id"]
+            x["operation_digest"] = p["operation_digest"]
+            x["scope_ref"] = p["scope_ref"]
         self.assertEqual(validate_join({"C": [a], "I": [i1, i2], "D": [d1]}, manifest([p])), VALID)
 
     # JPF-03: D evidence must be in the exact owner ledger.
@@ -525,6 +531,9 @@ def reject_duplicates(pairs):
         p["owner_evidence"]["D"] = ["D/barrier/1"]
         a = admission("C/admit/1", "C")
         d1 = admission("D/barrier/1", "D")
+        d1["operation_id"] = p["operation_id"]
+        d1["operation_digest"] = p["operation_digest"]
+        d1["scope_ref"] = p["scope_ref"]
         self.assertEqual(validate_join({"C": [a], "D": [d1]}, manifest([p])), VALID)
 
     # JPF-04: REGISTERED owner admission with no manifest participant is invalid.
