@@ -7,7 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 RECOVERY_SCHEMA = ROOT / "schemas" / "bmcp.recovery-cutoff-1.0.4.schema.json"
 JOIN_SCHEMA = ROOT / "schemas" / "bmcp.recovery-join-1.0.0.schema.json"
-UNIFIED_SCHEMA = ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.7.schema.json"
+UNIFIED_SCHEMA = ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.8.schema.json"
+JOIN_SCHEMA_101 = ROOT / "schemas" / "bmcp.recovery-join-1.0.1.schema.json"
 
 
 class SchemaCandidateIntegrity(unittest.TestCase):
@@ -16,6 +17,7 @@ class SchemaCandidateIntegrity(unittest.TestCase):
         cls.recovery = json.loads(RECOVERY_SCHEMA.read_text(encoding="utf-8"))
         cls.join = json.loads(JOIN_SCHEMA.read_text(encoding="utf-8"))
         cls.unified = json.loads(UNIFIED_SCHEMA.read_text(encoding="utf-8"))
+        cls.join_101 = json.loads(JOIN_SCHEMA_101.read_text(encoding="utf-8"))
 
     def test_SCHEMA_01_recovery_schema_is_draft_2020_12_and_closed_root(self):
         self.assertEqual(self.recovery["$schema"], "https://json-schema.org/draft/2020-12/schema")
@@ -93,8 +95,8 @@ class SchemaCandidateIntegrity(unittest.TestCase):
         no = self.join["$defs"]["noParticipantDisposition"]
         self.assertTrue({"operation_identity_ref", "operation_digest", "scope_ref", "gate_generation", "scope_generation"}.issubset(set(no["required"])))
 
-    def test_SCHEMA_13_unified_1_2_7_artifact_and_wire_versions_are_distinct(self):
-        self.assertEqual(self.unified["$id"], "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.7")
+    def test_SCHEMA_13_unified_1_2_8_artifact_and_wire_versions_are_distinct(self):
+        self.assertEqual(self.unified["$id"], "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.8")
         self.assertIn("1.2.7", self.unified["title"])
         common = self.unified["$defs"]["commonEnvelope"]
         self.assertIn("1.2.7", common["description"])
@@ -105,6 +107,24 @@ class SchemaCandidateIntegrity(unittest.TestCase):
         self.assertIn("signature_profile_id", common["properties"])
         self.assertNotIn("signature_profile_id", common["required"])
         self.assertEqual(common["properties"]["digest_algorithm"]["const"], "SHA-256")
+
+    def test_SCHEMA_15_owner_snapshot_attestation_is_content_bound(self):
+        owner = self.unified["$defs"]["ownerSnapshot"]["properties"]
+        self.assertIn("owner_snapshot_attestation_ref", owner)
+        self.assertEqual(owner["owner_snapshot_attestation_digest"]["pattern"], "^[0-9a-f]{64}$")
+
+    def test_SCHEMA_16_recovery_join_101_types_complete_empty_and_out_of_scope_proofs(self):
+        self.assertEqual(self.join_101["$id"], "https://schemas.aimemorybrainarchitecture.invalid/bmcp.recovery-join/1.0.1")
+        empty = self.join_101["$defs"]["completeEmptyProof"]
+        out = self.join_101["$defs"]["outOfScopeProof"]
+        self.assertFalse(empty.get("additionalProperties", True))
+        self.assertFalse(out.get("additionalProperties", True))
+        self.assertTrue({"ledger_query_ref", "owner_high_water", "pagination_complete", "count", "canonical_empty_root", "key_status_generation", "anti_rollback_anchor_ref", "signature_ref"}.issubset(set(empty["required"])))
+        self.assertTrue({"request_ref", "operation_identity_ref", "scope_ref", "applicability_policy_ref", "decision", "owner_high_water", "ledger_query_ref", "key_status_generation", "anti_rollback_anchor_ref", "signature_ref"}.issubset(set(out["required"])))
+        snap = self.join_101["$defs"]["ownerSnapshot"]["properties"]
+        self.assertIn("request_pagination_complete", snap)
+        self.assertIn("admission_pagination_complete", snap)
+        self.assertIn("key_status_generation", snap)
 
 
 if __name__ == "__main__":
