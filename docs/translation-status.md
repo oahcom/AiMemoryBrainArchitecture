@@ -53,7 +53,8 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | D Forget Fence Operation and Publication Gate | 03-memory-brain/forget-fence-operation-and-publication-gate.md | Pending | Owner-branch English source | NOT STARTED — large normative operation contract remains to translate |
 | E Memory Compiler Overview | 04-memory-compiler/compiler-overview.md | docs/zh-CN/04-memory-compiler/compiler-overview.md | docs/en/04-memory-compiler/compiler-overview.md | COMPLETE — source-aligned pair |
 | E Accepted Receipt and Idempotency Contract | 04-memory-compiler/accepted-receipt-and-idempotency-contract.md | docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | COMPLETE — source-aligned pair |
-| E remaining detailed contracts | 04-memory-compiler/ | Pending | Owner-branch English sources | NOT STARTED — 6 of 8 core specs remain |
+| E Compiler State and D Producer Admission | 04-memory-compiler/compiler-state-and-producer-admission.md | docs/zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md | docs/en/04-memory-compiler/compiler-state-and-producer-admission.md | COMPLETE — source-aligned pair |
+| E remaining detailed contracts | 04-memory-compiler/ | Pending | Owner-branch English sources | IN PROGRESS — 3 of 8 core specs paired; 5 remain |
 | Memory Runtime detailed contracts (5 core specifications) | F owner branch; audited head 348b5ec84c44a8a067122ce0aa72a594b9c06b66 | Pending | Owner-branch English sources | NOT STARTED — 5 core specs are English-only |
 | Memory Context detailed contracts (6 core specifications) | G owner branch; audited head 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa | Pending | Owner-branch English sources | NOT STARTED — 6 core specs are English-only |
 | Agent Integration detailed contracts (10 core specifications) | C owner branch; audited head 0f1df3b9c8bdfbb7991cd9e18842c56c521665c4 | Pending | Owner-branch English sources | NOT STARTED — 10 core specs are English-only |
@@ -102,7 +103,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 
 ### Batch 4 — Memory production and runtime / 第四批：记忆生产与运行时
 - E and F reader guides: COMPLETE.
-- E: 2 of 8 core specifications have bilingual companions; 6 remain. F: 5 core specifications remain. Refresh source SHAs before each translation.
+- E: 3 of 8 core specifications have bilingual companions; 5 remain. F: 5 core specifications remain. Refresh source SHAs before each translation.
 - E Compiler, ingestion, extraction, evidence, consolidation.
 - F retrieval, activation, working set, scheduling, anti-resurrection.
 - Acceptance: Accepted/Compiled/Canonical Committed/Indexed remain distinct; cursor and Forget semantics stay aligned.
