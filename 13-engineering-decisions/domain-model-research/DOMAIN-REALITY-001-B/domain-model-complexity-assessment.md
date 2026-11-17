@@ -111,7 +111,13 @@ These are candidates for owner-side transaction analysis, not a B mandate. Cross
 | Cross-tenant implicit inheritance | Security leakage | Explicit namespace and per-reference authorization |
 | Unverifiable provenance metadata | False audit guarantees | Mark unavailable; only require obtainable/verified evidence |
 
-## 9. Minimum and recommended models / 最小模型与推荐模型
+## 9. Physical serialization anchor classification / 物理序列化锚点分类
+
+The per-authority Storage serialization anchor and its nominal references are IMPLEMENTATION_DETAIL, not CANONICAL_ENTITY. B's Phase 3.8.6 review approves the type boundary only; it does not make SerializationRevision a domain clock or introduce a global counter. The anchor adds physical consistency complexity and must remain under Storage authority. E/F accept with conditions; Storage v3.2.11 remains not jointly accepted/frozen and needs fresh A review plus L4 DB/HA/recovery proof.
+
+每 Authority Storage Serialization Anchor 及其名义引用属于 IMPLEMENTATION_DETAIL，而非 CANONICAL_ENTITY。B Phase 3.8.6 复审仅批准类型边界；不将 SerializationRevision 变成领域时钟，也不引入全局计数器。Anchor 增加物理一致性复杂度，必须归 Storage 权威。E/F 有条件接受；Storage v3.2.11 仍未联合接受/冻结，需要 A 新复审和 L4 DB/HA/恢复证据。
+
+## 10. Minimum and recommended models / 最小模型与推荐模型
 
 ### Minimum canonical model
 - Event
@@ -151,7 +157,7 @@ Minimum model plus:
 - Applied = Delivered/ACK/Recorded;
 - Forgotten = Deleted = Purged.
 
-## 10. Gate status / 门禁状态
+## 11. Gate status / 门禁状态
 
 B1 is IN PROGRESS. The assessment identifies a minimum and recommended candidate model but does not finalize Fact/Claim, Claim identity, aggregate boundaries or Owner-local schemas. No implementation cost estimates or performance measurements were run; complexity comparisons are qualitative.
 
