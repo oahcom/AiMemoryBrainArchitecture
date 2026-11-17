@@ -78,3 +78,26 @@ If an owner-owned semantic contract is missing or conflicting, mark the affected
 - C/G/H Applied Contract Frozen = NO。
 - I Global Forget Target Inventory 和治理审批仍阻塞。
 - JF-10 Gate B 修订协议需要精确 Owner 复审，Gate C 延后到工程阶段，Runtime P0 仍 OPEN。
+
+
+## 6. Current successor-bundle dependency update — 2026-11-17 / 后继 Bundle 依赖更新
+
+Storage v3.2.6 manifest Blob `dbfa37617d109d5891a067769e858085e2ce547a` binds the current candidate interfaces, but explicitly records **NOT JOINTLY FROZEN** and H 1.2.13 exact CI OPEN. This is a delegated Storage-role manifest, not independent human Owner approval.
+
+- **C:** CSubmitOutcome 1.0.1 candidate CI (19 tests) is recorded SUCCESS; provider-specific idempotency and UNKNOWN outcome recovery remain OPEN.
+- **D:** structural carrier candidate reviewed; lineage completeness, late-discovery and final release CAS remain OPEN.
+- **H:** Unified 1.2.13 / wire 1.3.0, RecoveryJoin 1.0.2 and RecoveryCutoff 1.0.5 are pinned; exact 1.2.13 CI is NOT RUN, despite predecessor H 1.2.12 CI.
+- **I:** structural I P0 candidate and crypto profile architecture are recorded; L3 family vectors, production trust/key status, anti-rollback and production activation remain OPEN.
+- **Storage:** PostgreSQL 18.7 has seven isolated CI capability subtests PASS; Gate A remains PARTIAL PASS / OPEN. Live COC/I/D application integration and production deployment are not proven.
+
+These statuses refine the earlier TAR currentness snapshot; they do not replace Owner authority or authorize a technology choice.
+
+Storage v3.2.6 Manifest 绑定当前候选接口，但明确记录 **NOT JOINTLY FROZEN**，H 1.2.13 精确 CI OPEN。该 Manifest 是委派 Storage 角色工件，不是独立人工 Owner 批准。
+
+- **C：** CSubmitOutcome 1.0.1 候选 CI（19 项）记录为 SUCCESS；Provider 特定幂等和 UNKNOWN 结果恢复仍 OPEN。
+- **D：** 结构载体候选已有审查；Lineage 完整性、迟到发现和最终 Barrier Release CAS 仍 OPEN。
+- **H：** Unified 1.2.13 / wire 1.3.0、RecoveryJoin 1.0.2、RecoveryCutoff 1.0.5 已绑定；精确 1.2.13 CI 未运行，旧 H 1.2.12 CI 不可转移。
+- **I：** I P0 结构候选和 Crypto Profile 架构已有记录；L3 家族向量、生产信任/密钥状态、防回滚和生产激活仍 OPEN。
+- **Storage：** PostgreSQL 18.7 七项隔离 CI 能力子测试 PASS；Gate A 仍 PARTIAL PASS / OPEN。实时 COC/I/D 应用集成和生产部署未证明。
+
+这些状态用于细化此前 TAR 当前性快照，不替代 Owner 权威，也不授权技术选型。
