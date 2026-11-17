@@ -504,14 +504,6 @@ class HRCConformance(unittest.TestCase):
         self.assertEqual(strict_wire('{"schema_version":"1.0.4"}', "1.0.4", ["new_critical"], {"schema_version"}), INVALID)
 
 
-def reject_duplicates(pairs):
-    out = {}
-    for k, v in pairs:
-        if k in out:
-            raise ValueError("duplicate JSON key: " + k)
-        out[k] = v
-    return out
-
     # JPF-01: owner-to-participant and participant-to-primary-C joins both resolve.
     def test_JPF_01(self):
         p = participant(required=["C"])
@@ -602,6 +594,16 @@ def reject_duplicates(pairs):
         self.assertEqual(exact_jf10("COMMIT_WON", "COMMITTED", True, True, True), VALID)
         self.assertEqual(exact_jf10("COMMIT_WON", "COMMITTED", True, False, True), INVALID)
         self.assertEqual(exact_jf10("COMMIT_WON", "ROLLED_BACK", True, True, True), INVALID)
+
+
+def reject_duplicates(pairs):
+    out = {}
+    for k, v in pairs:
+        if k in out:
+            raise ValueError("duplicate JSON key: " + k)
+        out[k] = v
+    return out
+
 
 
 if __name__ == "__main__":
