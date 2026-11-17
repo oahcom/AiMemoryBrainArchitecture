@@ -89,3 +89,10 @@ B 当前优先候选仍为 **B Fact/Claim Option A**：独立 Claim 命题线程
 This addendum records the already-observed merge and corrects stale status claims. It does not reverse the merge or write to main. Subsequent author-side corrections remain on a new branch based on current main and require a separate review path. No schema, implementation or production activation work is authorized.
 
 本补充文件记录已发生的合并并纠正过期状态，不回滚合并，也不直接写入 main。后续作者侧修订在基于当前 main 的新分支中进行，并需单独审查。本补充文件不授权 Schema、实现或生产启用工作。
+
+
+## 7. Subsequent PR #120 merge / 后续 PR #120 合并
+
+A later documentation-only follow-up, PR #120, was merged at `2026-11-17T21:29:04Z` by `oahcom`. Merge commit: `6c325804027b88de1014ab3364cdda7e0c023ba6`; merged head: `069984b5c3915334d6fa2d3ec409d4c7e36fe549`. Main was subsequently observed at `ab1fa87d74ca4a632155aa19569533ea560109d5`. PR #120 incorporated the post-PR-55 status corrections. The later latest cross-owner source refresh is a separate, unmerged follow-up and is not included in PR #120.
+
+后续仅文档类 PR #120 于 `2026-11-17T21:29:04Z` 由 `oahcom` 合并。Merge Commit：`6c325804027b88de1014ab3364cdda7e0c023ba6`；合并时 Head：`069984b5c3915334d6fa2d3ec409d4c7e36fe549`。此后观察到的 main 为 `ab1fa87d74ca4a632155aa19569533ea560109d5`。PR #120 纳入 PR #55 后的状态纠偏。后续最新跨 Owner 来源刷新是独立、尚未合并的后续工作，不包含在 PR #120 中。
