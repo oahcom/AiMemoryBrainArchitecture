@@ -235,6 +235,7 @@ class OwnerSnapshot:
     anti_rollback: bool = False
     complete_empty_proof: bool = False
     sealed: bool = False
+    completeness_invalidated: bool = False
 
     @staticmethod
     def ordered_root(rows):
@@ -246,6 +247,8 @@ class OwnerSnapshot:
         return generation == self.generation and row in self.rows
 
     def seal_complete(self, declared_count, declared_root):
+        if self.completeness_invalidated:
+            raise ProtocolError("late discovery invalidated prior snapshot attestation")
         if not self.pagination_complete or not self.attested or not self.anti_rollback:
             raise ProtocolError("snapshot completeness evidence missing")
         if declared_count != len(self.rows):
@@ -263,6 +266,7 @@ class OwnerSnapshot:
         if row not in self.rows:
             self.rows.append(row)
             self.sealed = False
+            self.completeness_invalidated = True
 
 
 @dataclass
