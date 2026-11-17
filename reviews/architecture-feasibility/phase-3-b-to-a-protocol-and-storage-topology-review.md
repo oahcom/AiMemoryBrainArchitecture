@@ -63,7 +63,7 @@ HEADs were read from the named live branches. The review does not treat old A re
 | C | `07-agent-integration/schemas/c-submit-outcome-1.0.1.schema.json` | `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` | Immutable C object schema 1.0.1 |
 | H | `08-bmcp-protocol/phase-3.8.11-h-exact-mapping-unified-1.2.14-c-submit-outcome-1.0.1.md` | `c196fdc7a9d88e344d37ba2810a9bce1803f8b96` | Exact H wire/object mapping candidate |
 | C | `07-agent-integration/phase-3.8.16-c-exact-rereview-h-mapping-1.2.14-csubmitoutcome-1.0.1.md` | `f2d33a8998f8a6906c9bef8be6f9e880c61a0c8c` | C accepts the exact H mapping candidate |
-| C | `07-agent-integration/phase-3.11.1-csubmitoutcome-1.0.1-explicit-sequence-namespace-amendment.md` (source identity) | `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb` | Adds signed `sequence_namespace_ref`; exact schema 1.0.1 |
+| C | Phase 3.11.1 explicit sequence-namespace amendment (exact Blob; path not resolved in this readback) | `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb` | Adds signed `sequence_namespace_ref`; exact schema 1.0.1 |
 | I | `09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md` | `44986f5f864bcdc1a79d34978273644d381a68c0` | Current I P0 successor; now pins corrected H schema 1.2.14 |
 | I | `09-security-governance/phase-3.8.11-i-review-storage-serialization-anchor.md` | `b3df8ae7f82a4c7ddc38568a965f8d39cecfad45` | I accepts Option A with strict PolicyDomain separation; its P0 pin needs refresh |
 | D | `03-memory-brain/phase-3.8.7-d-exact-review-h-1.2.14-recoveryjoin-1.0.2.md` | `55ae7bc33b37f0e729949fdd2a694eb6211bbc55` | D accepts current H 1.2.14 / RecoveryJoin 1.0.2 carrier as L1/L2 candidate |
