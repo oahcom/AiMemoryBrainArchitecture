@@ -10,6 +10,9 @@ from jsonschema import Draft202012Validator
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "validators"))
 SCHEMA = json.loads((ROOT / "schemas" / "bmcp.applied-delivery-evidence-1.0.0.schema.json").read_text())
+C_VECTOR_PATH = ROOT / "tests" / "conformance" / "provider_outcome" / "fixtures" / "c_submit_outcome_1_0_1_vectors.json"
+C_VECTORS = json.loads(C_VECTOR_PATH.read_text())
+C_ACCEPTED_RECORD = next(v["record"] for v in C_VECTORS["vectors"] if v["id"] == "CPO-01-accepted")
 from applied_delivery_evidence_validator import (  # noqa: E402
     AppliedDeliveryChecks, DurableObservationDecision, P0_EXCLUDED,
     build_h_p0, canonical_p0_bytes, delivery_binding_identity,
@@ -26,7 +29,7 @@ def fixture():
         "signature_profile_id":"TEST-ONLY","key_id_ref":"H/key/1","key_version":"test-key-v1",
         "adapter_instance_ref":"H/adapter-instance/1","runtime_session_ref":"R/session/1",
         "delivery_id":"G/delivery/1","delivery_attempt_id":"G/delivery-attempt/1",
-        "inference_request_id":"R/request/1","final_request_boundary_id":"C/boundary/1",
+        "inference_request_id":"R/request/1","final_request_boundary_id":"C/final-boundary/CPO-01-accepted",
         "adapter_capability_epoch":"H/capability-epoch/1","evidence_kind":"FINAL_REQUEST_SUBMITTED","evidence_tier":"TIER_1",
         "adapter_ref":"H/adapter/1","runtime_instance_ref":"R/runtime/1","context_id":"G/context/1",
         "context_version":"G/context-version/7","materialized_context_version":"G/context-version/7",
@@ -36,15 +39,16 @@ def fixture():
         "evidence_issuer_ref":"H/adapter-evidence/issuer","evidence_schema_version":"1.0.0",
         "submission_observed_at":"2026-11-18T00:00:00Z","submission_monotonic_sequence":"9",
         "correlation_ref":"G/delivery/1","causation_ref":"C/boundary/1","audit_ref":"H/audit/1",
-        "c_submit_outcome_ref":"C/submit-outcome/1","c_outcome_record_ref":"C/outcome-record/1",
-        "c_outcome_record_sequence":"17","c_outcome_payload_digest":"c"*64,
+        "c_submit_outcome_ref":"C/outcome/CPO-01-accepted","c_outcome_record_ref":"C/outcome/CPO-01-accepted",
+        "c_outcome_record_sequence":"41","c_outcome_payload_digest":"1"*64,
         "payload_digest":"0"*64,"signature":"TEST-SIGNATURE","integrity_proof_ref":"H/integrity/1"
     }
     value["payload_digest"] = hashlib.sha256(canonical_p0_bytes(value)).hexdigest()
     return value
 
 
-def checks(disposition="NEW", replay_authorization=True):
+def checks(disposition="NEW", replay_authorization=True, c_record=None, c_verification=True, resolver_available=True):
+    resolved_record = copy.deepcopy(C_ACCEPTED_RECORD if c_record is None else c_record)
     return AppliedDeliveryChecks(
         verify_profile_registration=lambda e: True, verify_key_status=lambda e: True,
         verify_signature=lambda e,p: True, verify_protected_identity_binding=lambda e: True,
@@ -52,6 +56,8 @@ def checks(disposition="NEW", replay_authorization=True):
         verify_capability_epoch=lambda e: True,
         commit_observation=lambda e,d: DurableObservationDecision(disposition, "H/result/1" if disposition=="SAME_DIGEST_REPLAY" else None),
         verify_current_replay_authorization=lambda e,r: replay_authorization,
+        resolve_c_submit_outcome=lambda ref: resolved_record if resolver_available else None,
+        verify_c_submit_outcome_record=lambda record: c_verification,
     )
 
 
@@ -141,6 +147,43 @@ class AppliedDeliveryEvidenceTests(unittest.TestCase):
         result=self.validate(fixture(),c)
         self.assertEqual(result["status"],"UNKNOWN")
         self.assertNotIn("original_result_ref",result)
+
+    def test_17_exact_c_submit_outcome_1_0_1_fixture_is_joined(self):
+        self.assertEqual(self.validate(fixture())["status"],"VALID_NEW")
+
+    def test_18_c_record_ref_mismatch_rejected(self):
+        record=copy.deepcopy(C_ACCEPTED_RECORD); record["record_ref"]="C/outcome/attacker"
+        self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"INVALID")
+
+    def test_19_c_record_sequence_mismatch_rejected(self):
+        record=copy.deepcopy(C_ACCEPTED_RECORD); record["record_sequence"]="42"
+        self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"INVALID")
+
+    def test_20_c_payload_digest_mismatch_rejected(self):
+        record=copy.deepcopy(C_ACCEPTED_RECORD); record["payload_digest"]="2"*64
+        self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"INVALID")
+
+    def test_21_c_final_request_boundary_mismatch_rejected(self):
+        record=copy.deepcopy(C_ACCEPTED_RECORD); record["FinalRequestBoundaryRef"]="C/final-boundary/attacker"
+        self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"INVALID")
+
+    def test_22_actual_inference_request_id_mismatch_rejected_when_c_supplies_it(self):
+        record=copy.deepcopy(C_ACCEPTED_RECORD); record["ActualInferenceRequestId"]="R/request/other"
+        self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"INVALID")
+
+    def test_23_c_record_resolver_unavailable_fails_closed(self):
+        result=self.validate(fixture(),checks(resolver_available=False))
+        self.assertEqual(result["status"],"UNKNOWN")
+
+    def test_24_c_record_authentication_denial_rejected(self):
+        self.assertEqual(self.validate(fixture(),checks(c_verification=False))["status"],"INVALID")
+
+    def test_25_c_record_authentication_unknown_fails_closed(self):
+        self.assertEqual(self.validate(fixture(),checks(c_verification=None))["status"],"UNKNOWN")
+
+    def test_26_c_record_missing_issuer_identity_rejected(self):
+        record=copy.deepcopy(C_ACCEPTED_RECORD); record.pop("issuer_authority_ref")
+        self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"INVALID")
 
 
 if __name__ == "__main__":
