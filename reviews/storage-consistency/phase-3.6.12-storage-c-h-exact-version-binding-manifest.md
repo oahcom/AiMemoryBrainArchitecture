@@ -211,7 +211,7 @@ No provider implementation, executed conformance, production activation, univers
 | Owner | Artifact | Exact Blob | Disposition |
 |---|---|---|---|
 | C | Phase 3.8.6 Provider Outcome Gate/Attempt/Idempotency Amendment | `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4` | PROPOSED C semantic amendment; NOT TESTED |
-| C | Phase 3.8.7 review of I C-scoped crypto proposal | `[C review file blob pending pin]` | Candidate construction accepted only; I approval and H wire mapping open |
+| C | Phase 3.8.7 review of I C-scoped crypto proposal | `794d1dc49f034152407e3a42ba5ac937ea3539f8` | Candidate construction accepted only; I approval and H wire mapping open |
 | I | Phase 3.8.4 C Provider Outcome crypto profile addendum | `1bcddbaaa4a9ca730d492a6554941becac305668` | PROPOSED AIMBA-C-CRYPTO-1.0; not registered/approved/frozen |
 | H | Phase 3.8.5 exact 1.2.11 Provider Outcome semantic validator contract | `26e529327ae15f57b8169cdec48d9c18fef12097` | PROPOSED; not implemented or executed |
 | H | Schema artifact 1.2.11 | `4f1e103ab4b2ac961d77179dba0b65093532ea40` | Structural candidate only |
