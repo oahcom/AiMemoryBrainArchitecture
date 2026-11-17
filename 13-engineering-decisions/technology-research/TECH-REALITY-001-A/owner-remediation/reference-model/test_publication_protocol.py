@@ -495,6 +495,7 @@ class PublicationProtocolTests(unittest.TestCase):
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.mark_unknown("op-1", binding)
+        p.install_forget_fence()
         required_facts = (
             "visibility_pointer_absent",
             "outbox_absent",
@@ -573,6 +574,7 @@ class PublicationProtocolTests(unittest.TestCase):
                 binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                            args["d_proof"], args["i_commit_won_proof"])
                 p.mark_unknown("op-1", binding)
+                p.install_forget_fence()
                 if state_name == "visibility":
                     p.visibility["publication-1"] = "VISIBLE"
                 elif state_name == "outbox":
@@ -628,6 +630,7 @@ class PublicationProtocolTests(unittest.TestCase):
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.mark_unknown("op-1", binding)
+        p.install_forget_fence()
         p.resolve_no_publication("op-1", self.no_publication_proof())
         with self.assertRaisesRegex(Rejected, "already terminal"):
             p.commit(**args)
