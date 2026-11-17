@@ -180,3 +180,12 @@ Storage's JoinProof remains a logical proposal accepted with amendments. The 95-
 - Latest H CI [44043100543](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44043100543): **97 tests ran, OK**.
 
 The 97 methods comprise HRC 25, JPF 19, WIRE 10, SCHEMA 16, TPH 26 and XLANG 1. The newest schema vectors cover owner snapshot attestation content binding and RecoveryJoin 1.0.1 complete-empty/out-of-scope proof shape. They do not prove production signatures or live owner/COC behavior. Storage topology, JF-10 physical same-GID, durable JoinProof, currentness CAS and independent Owner acceptance remain OPEN.
+
+
+## 15. 中文规范：Storage 冻结证据与 H 97 项测试边界
+
+H 当前候选套件为 97 项：HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1。最近已验证运行 44043100543 为 97/97 PASS。Schema 版本为 Recovery Cutoff 1.0.5、RecoveryJoin 1.0.1 和 Unified COC/JF-10 1.2.8。
+
+该结果只证明候选参考模型、Schema 结构、Wire 负例和固定 Python/Node 测试向量在 CI 中通过。它不证明生产签名、I Key Status、真实 COC Quorum、Owner Ledger 完整性、Storage JoinProof 持久化、Owner Currentness CAS、JF-10 物理同 GID 恢复或实际 D/Storage 事务拓扑。
+
+Storage JoinProof 仍为逻辑提案并附带明确修订项；Storage 不能代替 I/D/C 释放 Gate。物理拓扑 ADR 仍 BLOCKED，T1–T8、STORAGE-RJ-01..05 和集成 JF-10 符合性仍 OPEN。没有声明 Storage Freeze、生产启用或独立 Owner 正式批准。
