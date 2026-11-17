@@ -25,5 +25,11 @@ jobs:
           cache-dependency-path: 07-agent-integration/tests/conformance/provider_outcome/requirements.txt
       - name: Install pinned test dependencies
         run: python -m pip install -r 07-agent-integration/tests/conformance/provider_outcome/requirements.txt
-      - name: Run CSubmitOutcome schema and semantic vectors
+      - name: Set up Node.js 22 for independent C crypto oracle
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned Node.js JCS oracle
+        run: npm install --no-save --prefix 07-agent-integration/tests/conformance/provider_outcome canonicalize@2.1.0
+      - name: Run CSubmitOutcome schema and crypto candidate vectors
         run: python -m unittest discover -s 07-agent-integration/tests/conformance/provider_outcome -p 'test_*.py' -v
