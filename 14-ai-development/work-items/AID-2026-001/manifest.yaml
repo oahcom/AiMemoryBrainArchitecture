@@ -15,6 +15,9 @@ r3_specialist_reviews:
   security_specialist: PENDING — Owner I role in a genuinely new non-implementing ChatGPT conversation
   forget_domain_specialist: PENDING — Owner D role in a genuinely new non-implementing ChatGPT conversation
 r3_test_matrix: 14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md
+  r3_security_specialist_prompt: 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-i-prompt.md
+  r3_forget_specialist_prompt: 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-d-prompt.md
+  integration_reviewer_prompt: 14-ai-development/work-items/AID-2026-001/integration-review-prompt.md
 r3_test_evidence_status: NOT_RUN_NOT_EVIDENCED
 acceptance_blocker: R3 specialist reports and reproducible R3 contract-test evidence are mandatory before acceptance
 acceptance_authority: project governance authority
@@ -102,6 +105,9 @@ implementation_commits:
   - 1a76afb67c15ffbd96eddf900859bbcb6f4c2275
   - dd53185b2b7e9b27e1d67ab656a79d8f0ec84ec6
   - bcc507d20ba2482881400c37c437f1c08af3cee4
+  - 01ff08d4c34553bad4f66455fba2308b5a54ea72
+  - 54fe95d5d40fb8f42a9e2efa1fce6575902d75e6
+  - 282bc7dcec816a1ffbee23f07ad3e06fa44ad5d5
 changed_paths:
   - 14-ai-development/prompt-and-evidence-template.md
   - 14-ai-development/README.md
@@ -129,6 +135,9 @@ changed_paths:
   - 14-ai-development/work-items/AID-2026-001/prompt-v1.md
   - 14-ai-development/work-items/AID-2026-001/prompt-v2.md
   - 14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md
+  - 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-i-prompt.md
+  - 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-d-prompt.md
+  - 14-ai-development/work-items/AID-2026-001/integration-review-prompt.md
   - 14-ai-development/work-items/AID-2026-001/self-review-v1.md
   - 14-ai-development/work-items/INDEX.md
 verification:
@@ -147,6 +156,8 @@ traceability_exclusions:
     reason: Historical manifest-only current-head self-update; now superseded by later PR commits and classified as bookkeeping.
   - sha: 41e62d17e7db7d9778d5ee036f4aaf66f8a620e7
     reason: Manifest-only update recording IR-004 through IR-008 remediation state; metadata bookkeeping, not implementation.
+  - sha: 31de7d07c697b7fa6baa3f1f92c835055c83c0b0
+    reason: Manifest-only final inventory update before specialist-review handoff prompts; metadata bookkeeping, not implementation.
   - sha: 2ce0bfad35fcd7a3e0b6a150b6a141e25aa67218
     reason: Manifest-only commit-inventory reconciliation; metadata bookkeeping, not implementation.
   - sha: 08ed26cf3496ccc52382583f2e05a7fef0017547
