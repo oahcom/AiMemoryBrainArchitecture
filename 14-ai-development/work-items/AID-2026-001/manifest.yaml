@@ -151,3 +151,19 @@ merge:
   status: NOT_MERGED
 pull_request: 42
 pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42
+
+review_history:
+  - reviewer_report: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945250593
+    reviewed_head_sha: 0708e25d8e008b1044679ff29ba7ae34977bc08c
+    result: CHANGES_REQUIRED
+    findings:
+      IR-001: PARTIALLY_FIXED
+      IR-002: VERIFIED_FIXED
+      IR-003: VERIFIED_FIXED
+      NR-001: OPEN_GOVERNANCE_AUTHORITY_DECISION_REQUIRED
+      NR-002: OPEN_PR_DESCRIPTION_STATISTICS_STALE
+      NR-003: OPEN_MANIFEST_REVIEW_HISTORY_NOT_RECORDED
+    ci: NOT_RUN
+    yaml_parse_schema_validation: NOT_RUN
+    manifest_verification: NOT_RUN
+    disposition: Historical review retained; follow-up remediation tracked in subsequent commits.
