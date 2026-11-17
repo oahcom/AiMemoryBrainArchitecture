@@ -113,3 +113,16 @@ Every executed test must pin the schema, source/build, key test fixture, exact c
 **PROPOSED — KEY STATUS AND ANTI-ROLLBACK CONTRACT DEFINED; NO PROFILE REGISTRATION OR PRODUCTION KEY AUTHORIZATION.**
 
 This contract does not claim that a C key registry, I governance root, HSM/KMS, append-only ledger, external checkpoint, production verifier or operational drill exists. I must review and approve the exact schema, trust-root ownership, governance signing profile and lifecycle before C can register `AIMBA-C-CRYPTO-1.0`.
+
+
+## 9. Executed key-status schema/state-machine CI
+
+- C key-status schema Blob: `908b293eba337e9fa75864cea3704e28a1a8d82e`.
+- C key-status unit tests Blob: `d72828461692975b89cf015ab8e669bc3aaf0de1`.
+- C CI run: `44059137081`.
+- Exact tested commit: `6b7b9c4a24d81ae45dcb7ddcdbe49c9617e3e4da`.
+- Result: SUCCESS; 12 tests total across CSubmitOutcome and CKeyStatusEvent suites.
+
+The five key-status tests validate Draft 2020-12 schema closure, separation of C data profile from I governance profile, permitted state transitions, sequence-scoped status-at-signing behavior, and fail-closed handling of duplicate sequence/wrong namespace.
+
+These are structural/state-machine unit tests only. They do not verify governance signatures, I trust root, C key registry durability, HSM/KMS custody, key-status event append-only storage, external anti-rollback checkpoint or operational revocation/compromise drills. No key is activated by this test run.
