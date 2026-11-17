@@ -2,7 +2,7 @@
 # Phase 3.8.10 — D 复审：H Full-Path Fixture 与 D Forget Clearance Callback 边界
 
 - Owner: D — Memory Brain / ForgetFence Authority
-- H Unified 1.2.14 schema Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a4a`
+- H Unified 1.2.14 schema Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a59`
 - H authority-join mapping Blob: `1cbe74eba69325510d6b1019d971661f965eabf8`
 - D RecoveryJoin P0 crosswalk Blob: `c4adf827dd62d44c43b8e871dec4835581508adf`
 - D exact H authority-join review Blob: `40fee15d7e42d68da231ea161896f85df2921669`
