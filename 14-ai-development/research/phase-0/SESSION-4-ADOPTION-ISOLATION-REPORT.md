@@ -11,7 +11,7 @@
 | Session / Owner | Session 4 — Product Adoption, Platform Reality & Architecture Isolation |
 | Report status | Research findings and recommendations; not an architecture approval |
 | Evidence refresh | 2026-11-18 (UTC+08:00) |
-| Repository baseline | `main@e52594f181d2edb77448adcfed64a0fbdffaf3aa` |
+| Repository baseline | `main@4bee3e886cc0dec4a8d03817acd180ba979f8ceb` |
 | Language | English and Chinese; both languages contain substantive findings |
 | Scope | Read-only research; publication does not authorize Phase 1 implementation |
 
@@ -27,7 +27,7 @@
 
 **PROPOSED — Phase 1 should start with a human-initiated ordinary ChatGPT conversation and GitHub Issues/branches/commits/PRs as durable evidence. The currently recorded Issue #41 execution boundary excludes Codex/local AI coding agents and local-computer relay; therefore they are research alternatives only, not a recommended or authorized Phase 1 execution channel. A custom durable AI Worker Runtime is not justified for the Phase 1 MVP.**
 
-**建议：Phase 1 采用“人工启动普通 ChatGPT 对话 + GitHub 持久化任务与证据 + 可选的开发者本地编码工具”。当前没有足够的业务需求证明必须部署自建 Durable AI Worker Runtime。**
+**建议：Phase 1 采用“人工启动普通 ChatGPT 对话 + GitHub 持久化任务与证据 + 由人类开发者控制的手动文件修改”。当前 Issue #41 排除 Codex/本地 AI 编码 Agent 及本地电脑中继，未经正式治理修订不得将其作为 Phase 1 执行渠道。当前没有足够的业务需求证明必须部署自建 Durable AI Worker Runtime。**
 
 The product and repository evidence supports a low-infrastructure workflow. Ordinary ChatGPT is a user-triggered reasoning and coordination surface, not an always-on daemon. GitHub provides durable task/change/review history. Human developers may manually edit files in their normal workflow, but that is distinct from authorizing a local AI coding agent. Issue #41 currently excludes Codex and local-computer relay. Deterministic CI may be added separately after workflow and security review; no AI system should receive business architecture approval authority merely because it can edit files or publish evidence.
 
@@ -45,7 +45,7 @@ The product and repository evidence supports a low-infrastructure workflow. Ordi
 
 ### 2.3 Critical limitations / 关键限制
 
-- Current repository baseline is `main@e52594f181d2edb77448adcfed64a0fbdffaf3aa`.
+- Current repository baseline is `main@4bee3e886cc0dec4a8d03817acd180ba979f8ceb`.
 - PR #42, #23 and #27 are proposals on separate, divergent heads, not merged normative decisions.
 - The documented ChatGPT GitHub retrieval connection is read-only. It is distinct from the repository's separately installed write-capable GitHub App integration used for authorized PR/issue operations. These are different execution paths and must not be conflated.
 - Product eligibility for Work, event triggers and Codex varies by plan/workspace and must be verified at execution time; do not persist account-specific plan state as a durable architecture fact.
@@ -87,7 +87,7 @@ The study refreshed the live repository baseline and inspected current main-bran
 
 ### 4.1 Repository baseline / 仓库基线
 
-**VERIFIED:** repository `oahcom/AiMemoryBrainArchitecture` is private and uses `main` as its default branch. The refreshed main HEAD is `e52594f181d2edb77448adcfed64a0fbdffaf3aa`.
+**VERIFIED:** repository `oahcom/AiMemoryBrainArchitecture` is private and uses `main` as its default branch. The refreshed main HEAD is `4bee3e886cc0dec4a8d03817acd180ba979f8ceb`.
 
 Key current-main source files:
 - `00-governance/architecture-invariants.md` — Blob `33b037318e459ebb73bea33b3186f31a41d5dcfe`.
@@ -129,7 +129,7 @@ The PRs above have diverged histories relative to the refreshed main. Their exis
 | Codex local | Coding agent for local repository work, edits and tests. | Requires local setup and user-controlled environment; plan usage limits apply. |
 | Codex Cloud | Isolated cloud coding environments and managed tasks. | Plan/workspace eligibility varies and must be verified live; not a baseline dependency here. |
 | Scheduled Tasks | One-time and recurring tasks exist. | Active-task limits, recurrence and execution windows vary by plan/product rollout; verify current eligibility before relying on them. |
-| Work GitHub event triggers | Eligible Work surfaces can react to supported GitHub PR activity. | Paid-plan/workspace eligibility applies; not available as a Free/Go assumption and not a general arbitrary webhook service. |
+| Work GitHub event triggers | Eligible Work surfaces can react to supported GitHub PR activity. | Plan/workspace/rollout eligibility must be verified live; this is not a general arbitrary webhook service. |
 | GitHub Issues / PRs | Durable task discussion, source changes, commit history and review records. | Repository permissions and policy apply; PR approval is not automatically business acceptance. |
 | GitHub Actions | Event-driven deterministic workflows and checks. | Requires reviewed workflow files, permissions and runner configuration; untrusted PR content is a security boundary. |
 | API agents | Technically possible with API credentials and external compute. | Separate API billing from ChatGPT subscription; introduces key, runtime and operational responsibilities. |
@@ -139,7 +139,7 @@ The PRs above have diverged histories relative to the refreshed main. Their exis
 
 Ordinary conversation is the dependable baseline under the currently stated execution boundary. Work and event-trigger availability are plan/workspace dependent and must be verified at execution time. Codex local and Codex Cloud remain distinct researched alternatives, but neither is authorized by Issue #41. ChatGPT subscription billing must not be confused with API billing.
 
-当前账户上下文为 Free，因此普通对话是可靠基线；不能假设可使用 Work 或 Work 事件触发；必须区分 Codex 本地与 Codex Cloud；ChatGPT 订阅也不包含 API 平台账单。
+普通对话是当前执行边界下的可靠基线。Work 和事件触发能力须按执行时的套餐、工作区与产品 rollout 资格核验；不得把账户套餐状态写成长期架构事实。Codex 本地与 Codex Cloud 是不同产品，但 Issue #41 当前均未授权为执行渠道。ChatGPT 订阅也不包含 API 平台账单。
 
 ### 5.3 GitHub capabilities / GitHub 能力
 
@@ -312,7 +312,7 @@ Current main has no observed `.github/` directory and no status contexts were re
 | C-02 | Repository-stored prompt requirement vs low-risk adoption friction. | Main AI development docs are present; status is PROPOSED. | Session 0 decides whether risk-tiered prompt/evidence records are allowed; do not silently bypass current text. |
 | C-03 | Separate conversation as independent review. | Separate context is possible, but not proof of independent personnel/provider/statistical review. | Define reviewer independence and conflict-of-interest requirements. |
 | C-04 | Issue #41 excludes Codex despite product availability. | Product availability does not override the repository's recorded execution boundary. | Keep Codex research-only unless the authorized governance owner explicitly amends Issue #41. |
-| C-05 | Scheduled Tasks vs continuous event-driven runtime. | Official task docs distinguish scheduled tasks, event triggers and Codex automations; Free/Go limitations apply. | Do not treat reminders or scheduled tasks as a durable event runtime. |
+| C-05 | Scheduled Tasks vs continuous event-driven runtime. | Official task docs distinguish scheduled tasks, event triggers and Codex automations; plan/workspace eligibility and limits must be verified live. | Do not treat reminders or scheduled tasks as a durable event runtime. |
 | C-06 | Engineering metadata may leak into business domain. | Architecture invariants and three-layer proposal. | Session 0 with A/I/affected Owners confirms strict separation and any explicit domain mapping. |
 | C-07 | Self-hosted runner may be confused with AI worker runtime. | PR #27 and Issues #24/#26 are open proposals/pilot discussions. | Separate deterministic CI runner from privileged AI worker; require independent security acceptance. |
 | C-08 | Branch protection and ruleset state unavailable. | API read returned 403. | Repository administrator supplies current settings and enforcement evidence. |
@@ -368,7 +368,7 @@ Defer the following until a measurable requirement and independent approval exis
 
 | ID | Source | Exact revision | Evidence |
 |---|---|---|---|
-| R-01 | Main branch | `e52594f181d2edb77448adcfed64a0fbdffaf3aa` | Live baseline refreshed 2026-11-18. |
+| R-01 | Main branch | `4bee3e886cc0dec4a8d03817acd180ba979f8ceb` | Live baseline refreshed 2026-11-18. |
 | R-02 | `00-governance/architecture-invariants.md` | Blob `33b037318e459ebb73bea33b3186f31a41d5dcfe` | I-03, I-12, I-13, I-21, I-23, I-24 and ADR/impact requirement. |
 | R-03 | `14-ai-development/README.md` | Blob `9593fd66f2b830748d826d754ce3e6da00e6f144` | Engineering OS scope, work-item and prompt conventions; proposed status. |
 | R-04 | `14-ai-development/ai-development-standard.md` | Blob `f46867f97fc1860015adbe2a1f7b8262640c16fd` | Owner authority, review, prompt lifecycle and acceptance vocabulary; proposed status. |
