@@ -48,7 +48,7 @@ F 拥有 Retrieval、Activation、Working Set 和 Memory Reference 有效性。A
 G 拥有 ContextVersion、Applied Predicate 和 Applied Record。G 当前 HEAD 为 `763b3d...`；Applied Persistence EN/zh-CN Blobs 为 `bd297873...` / `82553a47...`。C 提供最终请求提交证据，H 提供独立的 Adapter/Runtime/Delivery Evidence，I 提供授权，D 提供 Forget Fence。G 明确表示跨 Owner 冻结阻塞，执行未验证。
 
 ### H — BMCP
-H 拥有 Wire Schema、Envelope、Validator、Transport、Adapter/Runtime/Delivery Evidence 和 ACK。H 当前分支 HEAD 为 `0277a8b...`；Unified 1.2.15 Schema/Validator/Mapping 的旧 Blob 只存在于历史祖先 `0d363244...`，当前分支树已删除这些旧文件。H Phase 3.8.23 EN/zh-CN 决议 Blob 为 `be308261...` / `641abd9b...`：接受身份语义但列出例外；独立 Applied Delivery Evidence 后继 Schema/Validator 尚未实现，Wire Mapping 未冻结。C 不得擅自修改 H 字段。
+H 拥有 Wire Schema、Envelope、Validator、Transport、Adapter/Runtime/Delivery Evidence 和 ACK。当前 H Owner HEAD 为恢复后的 `4e65a2...`（215 blobs），Unified 1.2.15 工件已恢复；Phase 3.8.24 独立 Applied Delivery Evidence 1.0.0 Schema/Validator/Test 候选存在，精确 CI 11/11 通过。该候选不证明生产信任或持久 Replay，C/H Wire Mapping 仍未冻结。C 不得擅自修改 H 字段。
 
 ### I — Security
 I 拥有 Principal/Delegation Trust、PolicyDomain、PermissionEpoch、Authorization 和 Revocation。I 的治理登记表为 Candidate；文档提交不等于生效批准。
@@ -63,7 +63,7 @@ Storage 拥有 Durable Commit/Visibility 和恢复机制。Option A 仅选择 L1
 ## Live H / D / I / Storage delta / H、D、I、Storage 当前增量
 
 ### H — BMCP / Provider Outcome
-Historical H ancestor `0d36324457e39bd50ad56ae902d477c4ea765b61` contained Unified 1.2.15 schema, mapping, local C Provider Outcome validator and Gateway Attestation validator. Exact historical CI: run 44079842914 = 91/91; run 44079842878 = 288, 22 skipped, 0 failures. Current H branch HEAD is `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; its latest commit removed these prior schema/validator/test files. A review PR #67 disposition DEFERRED. The bounded tests do not prove production trust, signing issuance, durable replay or live I/D/Storage. C Phase 3.8.27 and I Phase 3.8.23 accept corrected ordering as reference contracts, not production deployment. Storage v3.3.2 still pins H 1.2.14. **Status: local CI PASS; joint wire freeze / production trust OPEN.**
+Historical H ancestor `0d36324457e39bd50ad56ae902d477c4ea765b61` contained Unified 1.2.15 schema, mapping, local C Provider Outcome validator and Gateway Attestation validator. Exact historical CI: run 44079842914 = 91/91; run 44079842878 = 288, 22 skipped, 0 failures. A subsequent branch-integrity incident snapshot `0277a8b...` removed these artifacts temporarily; they are restored at current H Owner HEAD `4e65a2...` (215 blobs). A review PR #67 disposition DEFERRED. The bounded tests do not prove production trust, signing issuance, durable replay or live I/D/Storage. C Phase 3.8.27 and I Phase 3.8.23 accept corrected ordering as reference contracts, not production deployment. Storage v3.3.2 still pins H 1.2.14. **Status: local CI PASS; joint wire freeze / production trust OPEN.**
 
 ### D/I/Storage — Phase 3.9 Forget proposal
 D PR #66, I PR #68 and Storage PR #71 propose a common terminalization path:
@@ -77,7 +77,7 @@ These are proposals only; D/I/Storage exact-owner concurrence, implementation an
 B PR #55 branch head is now `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`; the eight key model/identity/state/temporal/invariant/matrix/conflict files were re-read at this current branch ref and their Blob SHAs match the pins in the baseline. B0/B5 status remains not passed.
 
 ### 中文结论
-H 旧 HEAD `0d363244...` 的 1.2.15 本地 CI 曾真实通过，但当前 H HEAD `0277a8b...` 已删除旧 Schema/Validator/Test 文件；该 CI 只能作为历史有限证据。H Phase 3.8.23 明确 Applied Delivery Evidence 后继 Schema/Validator 尚未实现，Wire Mapping 未冻结；生产 Trust 和联合 Wire Freeze 仍开放。D/I/Storage 的 Phase 3.9 提案提出“Fence 立即读抑制—Barrier Drain—D Forgotten LifecycleEvent—I 单次授权收据—Storage 原子终态提交”的分离链路，但所有提案均未成为规范。B 分支 Head 已刷新为 8ba14b99，关键领域文件 Blob 与本研究记录一致。跨 Owner Gate 仍未关闭。
+H 旧 HEAD `0d363244...` 的 1.2.15 本地 CI 曾通过；之后 `0277a8b...` 出现分支树完整性事件，现已在 H HEAD `4e65a2...` 恢复 Unified 1.2.15 文件。H Phase 3.8.24 Applied Delivery Evidence 1.0.0 候选 CI 11/11 通过，但 Wire Mapping、生产 Trust 和联合 Wire Freeze 仍开放。D/I/Storage 的 Phase 3.9 提案提出“Fence 立即读抑制—Barrier Drain—D Forgotten LifecycleEvent—I 单次授权收据—Storage 原子终态提交”的分离链路，但所有提案均未成为规范。B 分支 Head 已刷新为 8ba14b99，关键领域文件 Blob 与本研究记录一致。跨 Owner Gate 仍未关闭。
 
 
 ## C/H Phase 3.8.24 consumer review snapshot / C/H 3.8.24 消费方审查快照
