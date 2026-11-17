@@ -211,3 +211,13 @@ PostgreSQL 18.7 Prepared-XID 档案（Blob `0aabf66848dc97deee028c571183c0d72040
 ### 9.6 条件性建议
 
 Profile S 应先试验本地模块化单体，因为它最少独立故障域和事务域；这不是正式选型。若 D/E/Storage Fence/Publication 无法在 SQLite 安全实现，应评估 PostgreSQL 或调整物理事务边界，不得削弱 Forget。当前 Storage ADR 已选择每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain 作为 v1 序列化档案；PostgreSQL 18.7 是 JF-10 Prepared-XID 能力的领先资格候选，但不是生产 DB 批准。Profile M 可在多写者/远程访问被测量证明后选择 B；Profile L 无当前证据支持。
+
+## 6. Current-source constraints on all candidate stacks / 当前源对所有候选技术栈的约束
+
+No stack recommendation may assume that a workflow engine, broker, SQL database or crypto library implements the Brain-owned D/E/I/Storage protocol. The current Phase 3.8 sequence is a cross-owner proposal: E durable ingress; D registration and complete lineage; Storage hidden participant; D publication admission; I single-use authorization; Storage final serializable atomic visibility/outcome/receipt/outbox; D/I closeout after the same Storage outcome. UNKNOWN remains private and barrier-held.
+
+Storage ADR selects Option A only for L1 logical serialization per Canonical Memory authority. L4 physical engine/deployment is OPEN; therefore neither SQLite nor PostgreSQL is approved by this ADR. H candidate schema CI and I crypto candidate are not production evidence. C/G/H Applied remains not frozen, not tested and not implementation-verified. Restate Server license must be evaluated as BSL 1.1 with Additional Use Grant separately from the MIT Rust SDK.
+
+**中文：** 所有候选栈均不得假设 Workflow Engine、Broker、SQL 数据库或 Crypto 库已经实现 Brain 自有的 D/E/I/Storage 协议。当前 Phase 3.8 顺序仍是跨 Owner 提案。Storage ADR 仅为每个 Canonical Memory Authority 的 L1 逻辑序列化选择 Option A；L4 物理引擎/部署 OPEN，因此该 ADR 没有批准 SQLite 或 PostgreSQL。H Schema CI 和 I Crypto 候选不是生产证据；C/G/H Applied 仍未冻结、未测试、未验证实现。Restate Server BSL 1.1 与 MIT Rust SDK 必须分开评估。
+
+Full status: [OWNER-REMEDIATION-001](owner-remediation/OWNER-REMEDIATION-001.md).
