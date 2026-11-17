@@ -115,3 +115,42 @@ The new tests are wired into the existing H workflow with Python 3.12 and jsonsc
 ## 8. Provenance
 
 This is an H-role technical wire review prepared by the delegated B/I/H joint developer session at the user's direction. It is not an independently authenticated human signature. The schema and tests are candidates, not a production transport or cryptographic implementation.
+
+
+## 9. Cross-document and CGH wire-coverage addendum
+
+### H-V3-06 — Storage companion §14 does not carry the complete v3 identity tuple
+
+The exact companion protocol §14 Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` was re-read. It carries PreparedParticipantRef, GID, native XID, canonical DB authority, cluster/database metadata, original prepare coordinates, operation/request digest, owner boundary, CausalOrderDomainRef/PolicyDomainRef and COC prepare-intent position/digest. It does not enumerate DatabaseIncarnationRef, PrepareAttemptRef/Generation, ParticipantLedgerRef/Version or ParticipantTupleDigest as distinct required fields, while Storage v3 §§15.1–15.7 Blob `4a60420d457f359780c568dce42b8bef000026ca` does.
+
+The new H schema implements the v3 fields, not the older §14-only tuple. Storage must amend §14 or explicitly supersede it for the v3 PostgreSQL profile. H will not treat a schema candidate as authority to silently change Storage's normative contract.
+
+### H-V3-07 — Five H 1.1.0 JF-10 variants do not yet map every CGH-APPLIED-1.1 evidence family
+
+A CGH-APPLIED-1.1 package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` §4 enumerates eight evidence families:
+- CAUSAL_ORDER_INTENT and CAUSAL_ORDER_INTENT_RECEIPT;
+- CAUSAL_ORDER_RESERVATION;
+- I_AUTHORIZATION_TERMINAL;
+- D_FENCE_TERMINAL;
+- C_SUBMIT_OUTCOME;
+- CAUSAL_ORDER_TERMINAL_PROOF;
+- CAUSAL_ORDER_ACK.
+
+The H schema candidate `bmcp.applied-ack/1.1.0` Blob `a8a945cc3623c2907003b93625e3c79742150944` has five variants only:
+- JF10_PREPARE_INTENT_REGISTERED;
+- JF10_PREPARED_PARTICIPANT_REGISTERED;
+- I_JF10_TERMINAL_DECISION_OBSERVED;
+- STORAGE_JF10_PARTICIPANT_RESOLVED;
+- JF10_BRIDGE_RECONCILIATION_RECORDED.
+
+The I terminal has a clear semantic counterpart. The current five-variant schema does not explicitly encode ParticipantReservation, DParticipantClearance/D fence terminal, CSubmitOutcome, CausalOrderTerminalProof or a distinct COC ACK. The first JF10 intent/prepared records are not automatically equivalent to the full CGH intent/reservation/terminal proof families. H must either add versioned message families or publish an exact mapping to another versioned schema/transport for every missing family. Until then, 1.1.0 is a JF-10 bridge candidate, not the complete CGH Applied wire contract.
+
+### H-V3-08 — The Storage proof schema is a separate family, not a substitute for missing Applied messages
+
+The new `bmcp.storage-prepared-participant-proof/1.0.0` Blob `6327d9d387bdc0d6610aba08ff3e51ca9da17f5d` defines only Storage.PreparedParticipantReceipt and Storage.StorageResolutionProof. It does not define the missing C/D/G/COC messages, and it is not referenced by the existing Applied ACK 1.1.0 schema. The exact integration must identify whether BMCP carries these proofs inline, by typed reference + digest, or as a separate proof family, and bind the selected representation to the same CausalOrderTransactionRef, ParticipantIntentRef, participant tuple, request digest and owner boundary.
+
+The 47-test structural CI PASS remains valid for this schema's shape only. It does not close H36, CGH interoperability, signature/canonicalization, semantic joins or the complete Applied message registry.
+
+## 10. Updated H disposition
+
+H accepts the Storage v3 prepared-proof field shape with the enumerated amendments, and the structural schema/parser suite is 47/47 PASS. H does **not** accept the older companion §14 as equivalent to v3, does not freeze the full CGH-APPLIED-1.1 wire contract, and does not infer that the five JF-10 schema variants cover the eight CGH evidence families. Storage §14 reconciliation and a complete, version-pinned C/G/H message-family mapping remain required before G8 can close.
