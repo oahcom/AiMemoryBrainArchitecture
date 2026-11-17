@@ -11,8 +11,8 @@
 - C sequence namespace amendment Blob: `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`
 - C RecoveryJoin membership P0 crosswalk Blob: `df12af95e6859a389ba71eb1b7dba512b9feb8f6`
 - H validator core Blob: `eab961a08d41e871f38543b18ee60cf024977414`
-- H validator tests Blob: `53774aca0224fd9a727dfa625ba142825f1754b0`
-- H Provider Outcome CI: run `44068247661`, exact tested commit `0701b12c3f43e1e6d5706c8eb2747e1c583d60b7`, **SUCCESS / 25 tests**.
+- H validator tests Blob: `70a3796446553464e71999f916b76bc22e47da11`
+- H Provider Outcome CI: run `44068869146`, exact tested commit `e0d89f1b6dac3bdcf1f0ab4e3f062dd7bc53fdf8`, **SUCCESS / 27 tests**.
 - Provenance: delegated C-role review; **not an independent human C Owner signature**.
 - English and Chinese are normative peers.
 
@@ -36,11 +36,11 @@ I terminal decision, D Forget clearance and Storage resolution are independent f
 
 ## 3. Callback test ceiling / 回调测试证据上限
 
-H run `44068247661` completed SUCCESS with 25 tests on exact commit `0701b12c3f43e1e6d5706c8eb2747e1c583d60b7`. The added orchestration tests call `validate_provider_outcome` and demonstrate separate I, D and Storage callback slots; missing callbacks yield UNKNOWN.
+H run `44068869146` completed SUCCESS with 27 tests on exact commit `e0d89f1b6dac3bdcf1f0ab4e3f062dd7bc53fdf8`. The added orchestration tests call `validate_provider_outcome` and demonstrate separate I, D and Storage callback slots; missing callbacks yield UNKNOWN.
 
 However, the callback orchestration tests mock schema validation, semantic validation and candidate digest/preimage calculation. They do not constitute a complete unmocked positive H envelope + C object validation, real I/D/Storage proof authentication, production trust or Storage persistence proof. This evidence is bounded orchestration evidence only.
 
-H Run `44068247661` 在精确 Commit 上 25 项测试通过。新增编排测试调用 `validate_provider_outcome`，验证 I、D、Storage 回调槽独立，缺失回调返回 UNKNOWN。但这些编排测试 Mock 了 Schema、语义与 Digest/Preimage 计算，不构成完整未 Mock 的 H Envelope + C Object 验证，也不认证真实 I/D/Storage Proof 或生产 Trust/Storage Persistence。
+H Run `44068869146` 在精确 Commit 上 27 项测试通过。新增编排测试调用 `validate_provider_outcome`，验证 I、D、Storage 回调槽独立，缺失回调返回 UNKNOWN。但这些编排测试 Mock 了 Schema、语义与 Digest/Preimage 计算，不构成完整未 Mock 的 H Envelope + C Object 验证，也不认证真实 I/D/Storage Proof 或生产 Trust/Storage Persistence。
 
 ## 4. Remaining C blockers / C 侧剩余阻断项
 
@@ -59,3 +59,10 @@ H Run `44068247661` 在精确 Commit 上 25 项测试通过。新增编排测试
 This supersedes prior C reviews of H 1.2.13 and earlier 1.2.14 mapping/validator Blobs. It is not an independent human C Owner signature.
 
 **角色模拟 C 侧决议：接受 H Authority-Join Mapping Blob `1cbe74...` 与 H 1.2.14 / C 1.0.1 作为 L1/L2 协议候选，保留上述阻断项；不冻结、不授权生产。** 本文件替代针对 H 1.2.13 及更早 1.2.14 Mapping/Validator Blob 的 C 复审，但不是独立人类 C Owner 签名。
+
+
+## H current-source CI addendum / H 当前源 CI 补充
+
+H Phase 3.8.13 current-head closure Blob `9083ad54581352c83be21ac981aea845cd307382` supersedes the prior H test-source pin. The current exact test Blob is `70a3796446553464e71999f916b76bc22e47da11`; validator Blob remains `eab961a08d41e871f38543b18ee60cf024977414`. H run `44068869146` completed SUCCESS on exact commit `e0d89f1b6dac3bdcf1f0ab4e3f062dd7bc53fdf8`. The run is bounded unit/schema/fixture/reference-model evidence; callback orchestration cases mock schema, semantic and digest/preimage primitives and do not prove production authority integration or a full unmocked envelope/object path.
+
+H Phase 3.8.13 当前 HEAD 闭环 Blob `9083ad...` 替代此前 H Test Source 绑定。当前 Test Blob 为 `70a379...`，Validator Blob 仍为 `eab961...`。H Run `44068869146` 在精确 Commit `e0d89f...` 上 SUCCESS。该 Run 仅为有限 Unit/Schema/Fixture/Reference-Model 证据；回调编排用例 Mock Schema、语义与 Digest/Preimage 基础函数，不证明生产权威集成或完整未 Mock Envelope/Object 路径。
