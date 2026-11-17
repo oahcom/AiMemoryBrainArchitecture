@@ -160,3 +160,12 @@ Cross-owner report: `reviews/translation/2026-11-17-cgh-applied-contract-cross-o
 | H | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `session-h-bmcp-protocol` | `db59b63e322d7255b8b400f47859dcac32bb3027` | §11 candidate field-mapping proposal added; C/G acceptance and I/D/B authority confirmations pending; wire/schema freeze NO; implementation/conformance NOT VERIFIED / NOT RUN |
 
 The prior reviewed Blob `ed6b43a29aa368d772c701ffc83309a5aadf3c00` is superseded for currentness by the exact live Blob above. This is a candidate revision, not an Owner approval or C/G/H freeze. H bilingual companions remain pending until exact-version review and acceptance.
+
+
+## H Adapter Capability / Applied Attestation bilingual pair — 2026-11-17
+
+| Owner | Source path | Branch | Exact source Blob SHA | EN companion | zh-CN companion | Review / source state |
+|---|---|---|---|---|---|---|
+| H | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `session-h-bmcp-protocol` | `db59b63e322d7255b8b400f47859dcac32bb3027` | `docs/en/08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `docs/zh-CN/08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | 22/22 headings; 33/33 table rows; targeted parity PASS; source CANDIDATE; C proof profile OPEN; I authorization binding OPEN; NOT FROZEN |
+
+Review reports: `reviews/translation/2026-11-17-h-adapter-capability-applied-bilingual-review.md` and Chinese companion. This is 1 of H's 7 detailed core specifications, not H-set completion. C/G/I/D/B approvals and implementation/conformance evidence remain separate.
