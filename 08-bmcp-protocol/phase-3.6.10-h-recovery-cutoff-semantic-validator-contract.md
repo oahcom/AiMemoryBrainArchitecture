@@ -376,3 +376,26 @@ The H branch candidate inventory is now **95 methods**:
 Latest run [44042401245](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042401245), commit `a39c87a62b5cbe911c096b010146685d779eecae`, job `133899868784`: **95 tests ran, OK**. The run includes the Node.js 22 setup and the two new unified-schema structural checks.
 
 The 1.2.7 tests are structural only. They do not prove that signature_profile_id is semantically mandatory for protected records, that the identifier resolves through an I-controlled trust registry, or that production key status/signature verification works. The 95-test suite remains candidate reference-model/schema/wire evidence; H freeze and production interoperability remain BLOCKED.
+
+
+### 11.13 Recovery Cutoff 1.0.5 / RecoveryJoin 1.0.1 / Unified 1.2.8 refresh
+
+The H branch has advanced the exact schema candidates:
+- Recovery Cutoff 1.0.5: Blob `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`.
+- RecoveryJoin 1.0.1: Blob `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`.
+- Unified COC/JF-10 schema 1.2.8: Blob `70b892797d07489936300a26c0dedfafe1d6e746`.
+- Schema candidate test suite: Blob `ff2b735ccdbf5d45f3c6b2ee9a25d14db2e3c7ad`.
+
+SCHEMA-13/14 now assert unified 1.2.8 artifact revision vs wire-family version and signature_profile_id structural shape. SCHEMA-15 checks owner snapshot attestation content binding. SCHEMA-16 checks RecoveryJoin 1.0.1 complete-empty and out-of-scope proof structures, including query completeness, owner high-water, key-status generation and anti-rollback anchors.
+
+The current inventory is **97 methods**:
+- HRC-01..25: 25;
+- JPF-01..19: 19;
+- WIRE-01..10: 10;
+- SCHEMA-01..16: 16;
+- TPH-01..26: 26;
+- XLANG-01: 1.
+
+Latest verified run [44042997885](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042997885), commit `5592ba9f993e358d826902660b64775b1eb3ee1b`, job `133901859735`: **97 tests ran, OK**. The earlier 1.2.8 fixture drift failure is retained in CI history; the test assertion was corrected to 1.2.8 without weakening it, and the subsequent exact commit passed.
+
+The new SCHEMA-15/16 checks are structural only. They do not prove production owner attestation signatures, I key-status verification, currentness CAS, live pagination/quorum, or production semantic behavior. HRC-TEST-v1 remains test-only; the 97-method suite does not validate a production signature/canonicalization profile or deployed COC/Storage behavior.
