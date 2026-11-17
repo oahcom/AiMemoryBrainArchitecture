@@ -32,7 +32,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | mature-domain-model-research.md | Bilingual executive synthesis and selected conclusions; detailed external-reference findings and tables are mostly English-only | PARTIAL | Provide complete Chinese equivalent for every DDD/ES/Temporal/Graph/standard/project finding |
 | cross-owner-canonical-semantics-matrix.md | Bilingual headings and selected explanation; source ledger and semantic matrix are English-only | PARTIAL | Translate every Owner, artifact pin, concept row, status and conflict |
 | domain-semantics-conflict-register.md | Bilingual headings and some explanatory text; conflict rows and resolution conditions are English-only | PARTIAL | Translate all conflict records and decision authority/closure conditions |
-| canonical-domain-invariants.md | Bilingual headings; invariant tables and test catalogue are English-only | PARTIAL | Translate each invariant, positive/negative condition, test and owner |
+| canonical-domain-invariants.md | Full English/Chinese peer columns added for identity, relation, temporal, evidence, state, Forget, protocol, authentication, serialization invariants and all candidate tests; new Blob `51792426bb71609ceecf8d13491f9ab0b36c91eb` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently compare every ID/row and confirm no semantic drift; do not treat author translation as independent verification |
 | canonical-domain-glossary.md | Chinese term column exists; definitions, non-definitions, owners and status columns are English-only | PARTIAL | Translate every definition, non-definition, related concept and status |
 | canonical-domain-model.md | Bilingual headings and selected narrative; entity lists, ownership tables and blocking issues are English-only | PARTIAL | Full Chinese equivalent for model, diagrams, owner boundaries and gate constraints |
 | domain-model-decision-record.md | Bilingual headings and selected decisions; detailed ADR context/alternatives/consequences are English-only | PARTIAL | Translate every decision record field and rejected alternative |
@@ -70,3 +70,12 @@ A file is bilingual-complete only when the full normative content is present in 
 - B5: BLOCKED — bilingual parity incomplete.
 - B6: INDEPENDENT_REVIEW_PENDING.
 - No review/acceptance/merge status may be inferred from this audit.
+
+
+## 6. Remediation progress / 整改进展
+
+- `canonical-domain-invariants.md` has been rewritten with Chinese peers for every invariant row, positive/negative condition, candidate test setup/result and validation/gate statement. Current Blob: `51792426bb71609ceecf8d13491f9ab0b36c91eb`.
+- This is author-side remediation only. It is not an independent semantic parity pass. B5 remains BLOCKED until the remaining P0/P1/P2 files are translated and a separate reviewer checks exact clause/row equivalence.
+
+- `canonical-domain-invariants.md` 已为每条不变量、正/负条件、候选测试前置条件/预期结果以及验证/门禁说明补齐中文对应内容。当前 Blob：`51792426bb71609ceecf8d13491f9ab0b36c91eb`。
+- 这仅是作者侧整改，不构成独立语义一致性验收。剩余 P0/P1/P2 文件完成翻译并由独立审查者逐条核对后，B5 才能解除阻塞。
