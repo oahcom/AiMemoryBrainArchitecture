@@ -70,3 +70,25 @@ AI-RUN-003 runtime architecture and ADR chain is stacked, open and proposed. PR 
 - Reproducible storage, workflow, search and inference prototypes on declared hardware.
 - Full DB + blob + index backup/restore with current Forget/revocation replay before serving.
 - Independent review by the responsible Owners and a separate independent technology reviewer.
+
+
+## 5. Current Owner branch drift and Storage ADR update / 当前 Owner 分支漂移与 Storage ADR 更新
+
+The current Owner branch HEADs read directly on 2026-11-17 are newer than the exact branch pins recorded in PR #44's Phase 2 evidence ledger. The current heads are:
+- B `8f83e4b172bc6bb41df60de58c1884886b22e617`
+- C `667bbf84b89dc1a54ddc02852477a74083d2d89b`
+- D `97e68fbd225bdf0ac71860c01077481afc162d50`
+- E `fdb4f67a83083d995930b88f93975b5ee36080f3`
+- F `8d5ef89ce9b1ff1471ffd1a03fe4f289addb0af3`
+- G `f9ca0ddc36e17f74041506f17039f0202d13042e`
+- H `f809be092a6c04db7982cc1bdbdd9c88787a4286`
+- I `28df608b075e619563c6367a8a1c171185c1faaf`
+- Storage `17be31915b06d98d7f822e6e5270b8cde39eb0bb`
+
+PR #44's evidence ledger records earlier branch heads (B `0df144...`, C `fecd925...`, D `73bcfa...`, E `df3f56...`, F `348b5e...`, G `69ba55...`, H `c50809...`, I `80ecf0...`, Storage `ce07f5...`). Its Phase 2 report therefore requires a fresh exact-version/currentness refresh before it can be treated as a current cross-owner bundle.
+
+A further important update: current Storage ADR Blob `1ef47d4e5711c7db73a24d249adf1992be1f6aa4` has a 2026-11-17 addendum selecting Storage-ADR Option A as the normative v1 **logical serialization profile**. This supersedes the older ADR text's "NO TOPOLOGY SELECTED" only at the abstract architecture level. Physical DB/deployment selection and Gate A–C remain open as specified in the dossier.
+
+本次直接读取的 Owner 分支 HEAD 均比 PR #44 Phase 2 Evidence Ledger 记录的精确分支 Pin 更新。当前 HEAD 列表见上。PR #44 的 Evidence Ledger 仍记录较旧分支 HEAD，因此必须先刷新精确版本/当前性，才能将其视为当前跨 Owner 绑定清单。
+
+另一个重要更新：当前 Storage ADR Blob `1ef47d4e5711c7db73a24d249adf1992be1f6aa4` 的 2026-11-17 补充条款选择 Storage-ADR Option A 作为 v1 规范**逻辑序列化档案**。该补充条款仅在抽象架构层面取代旧正文的“NO TOPOLOGY SELECTED”；物理数据库/部署选型以及 Gate A–C 仍按能力档案保持 OPEN。
