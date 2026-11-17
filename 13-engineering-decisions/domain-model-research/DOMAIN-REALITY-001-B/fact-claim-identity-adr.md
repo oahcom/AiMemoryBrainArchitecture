@@ -140,14 +140,14 @@ Advantages: preserves one proposition model; supports Reported, Inferred, Disput
 
 ## 8. Required examples / 必须验证的例子
 
-1. Same proposition repeated in a new MemoryVersion with only a changed display label: stable `claim_id` under I1; new snapshot/revision, no semantic identity change.
-2. Same proposition gains new Evidence and changes Reported → Verified: same `claim_id` only if the proposition itself is unchanged; new immutable revision/snapshot; verification method and Evidence required.
-3. Subject changes from Entity A to Entity B: new `claim_id` unless a formally approved identity rule says otherwise; explicit lineage.
-4. Predicate polarity changes from positive to negative: distinct proposition identity; never overwrite prior snapshot.
-5. Valid Time is corrected while Recorded At remains later: preserve both temporal histories and explain correction provenance.
-6. Claim is Disputed then Retracted: retain prior status/snapshot; retraction authority/reason and conflicting position references required.
-7. One Claim appears in two MemoryVersions: both snapshots remain independently immutable; no mutable shared object can retroactively change either version.
-8. Forget one Memory lineage: D/I/Storage decide target inventory and erasure; B's Claim identity does not authorize retaining reconstructive forgotten content in a shared Claim object.
+1. Same proposition repeated in a new MemoryVersion with only a changed display label: stable `claim_id` under I1; new snapshot/revision, no semantic identity change. / 同一命题仅更改显示标签并出现在新的 MemoryVersion 中：按 I1 保持 `claim_id` 稳定；创建新的 Snapshot/Revision，但不改变语义身份。
+2. Same proposition gains new Evidence and changes Reported → Verified: same `claim_id` only if the proposition itself is unchanged; new immutable revision/snapshot; verification method and Evidence required. / 同一命题获得新 Evidence，状态从 Reported 变为 Verified：只有命题本身未改变时才保持相同 `claim_id`；必须创建新的不可变 Revision/Snapshot，并提供验证方法和 Evidence。
+3. Subject changes from Entity A to Entity B: new `claim_id` unless a formally approved identity rule says otherwise; explicit lineage. / Subject 从 Entity A 变为 Entity B：除非正式批准的身份规则另有规定，否则必须创建新的 `claim_id` 并建立显式谱系。
+4. Predicate polarity changes from positive to negative: distinct proposition identity; never overwrite prior snapshot. / Predicate 极性从肯定变为否定：属于不同命题身份；不得覆盖先前 Snapshot。
+5. Valid Time is corrected while Recorded At remains later: preserve both temporal histories and explain correction provenance. / 修正 Valid Time，但 Recorded At 仍较晚：必须保留两条时间历史，并说明修正 Provenance。
+6. Claim is Disputed then Retracted: retain prior status/snapshot; retraction authority/reason and conflicting position references required. / Claim 先变为 Disputed 再变为 Retracted：保留先前状态/Snapshot；必须记录撤回权威、原因及冲突立场引用。
+7. One Claim appears in two MemoryVersions: both snapshots remain independently immutable; no mutable shared object can retroactively change either version. / 同一 Claim 出现在两个 MemoryVersion 中：两个 Snapshot 均须独立保持不可变；不得通过可变共享对象追溯性修改任一版本。
+8. Forget one Memory lineage: D/I/Storage decide target inventory and erasure; B's Claim identity does not authorize retaining reconstructive forgotten content in a shared Claim object. / 对一个 Memory 谱系执行 Forget：由 D/I/Storage 决定目标清单和擦除；B 的 Claim 身份规则不授权在共享 Claim 对象中保留可重建的已遗忘内容。
 
 ## 9. Complexity and risk assessment / 复杂度与风险评估
 
