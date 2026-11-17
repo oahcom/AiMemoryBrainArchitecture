@@ -44,7 +44,8 @@ The audit below checked the core Markdown specifications in each module director
 - B main Domain Model specifications: 6/6 paired; Phase 3 typed-reference/identity addenda and ADR-001 remain pending.
 - D Memory Brain core specifications: 8/8 bilingual companions present in PR #28, including the four-part operation/publication gate. Source-branch reconciliation and semantic acceptance remain pending.
 - E Memory Compiler core specifications: 7/8 paired; Compiler Overview, Event Ingestion, Extraction/Normalization, Consolidation/Conflict Resolution, Evidence/Provenance, Accepted Receipt and Producer Admission are paired. Only Forget Fence/Derived Registration remains.
-- F Memory Runtime: 5/5 detailed core specifications paired in PR #28; independent semantic review pending.\n- G/C/H/I detailed core specifications: not yet paired; reader guides only.
+- F Memory Runtime: 5/5 detailed core specifications paired in PR #28; independent semantic review pending.
+- G/C/H/I detailed core specifications: not yet paired; reader guides only.
 
 All translated Owner documents retain their exact source blob SHA. Refresh branch HEAD and re-read source files before translating remaining artifacts. Pair presence is not semantic approval or source-branch integration.
 
