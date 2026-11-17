@@ -143,3 +143,12 @@ Storage exact review now includes the signature-profile boundary (current Storag
 The latest H candidate inventory is 93 methods: HRC-01..25, JPF-01..19, WIRE-01..10, SCHEMA-01..12, TPH-01..26 and XLANG-01. The 26 TPH vectors exercise the reference-model Batch/Manifest two-record digest/order/readback/fenced-restore contract. XLANG-01 compares Python and Node.js outputs over three fixed HRC-TEST-v1 canonical UTF-8/digest vectors. GitHub Actions run 44042074640 reports 93 tests, OK, with Node.js 22 configured.
 
 This is a candidate reference-model/differential test pass only. It does not execute a production COC quorum, authoritative owner ledgers, I signatures/key registry, Storage JoinProof persistence, owner currentness CAS, physical JF-10 or actual D/Storage topology. HRC-TEST-v1 remains non-production. Storage freeze remains BLOCKED.
+
+
+## 12. H/I Phase 3.8.3 crypto profile and expanded candidate suite / 密码学配置与扩展候选套件
+
+The latest H workflow [44042093922](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042093922) reports 93/93 candidate tests PASS, including HRC/JPF, two-phase Batch/Manifest, Python/Node fixed-vector differential, wire and RecoveryJoin schema candidates. This remains test-harness evidence and does not validate physical Storage or production signatures.
+
+I candidate crypto profile Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`; H wire mapping Blob `c30e8ccbecb75b7e27ddceb0cf088afbbb26f562`; H schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`; I exact review Blob `446109f4867268fe7dca3c7e114346f3c1a74b61`. Storage accepts profile identifiers as immutable references only; it cannot resolve trust or select algorithms. I remains the trust authority. H's two-language fixed-vector test is not proof of two independent production implementations.
+
+The new crypto profile does not resolve the physical D/Storage serialization topology. Storage T1–T8 and JF-10 integrated conformance remain OPEN; topology ADR remains BLOCKED.
