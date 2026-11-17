@@ -55,7 +55,7 @@ security:
   require_password_rotation_before_bootstrap: true
   require_out_of_band_host_fingerprint_verification: true
   require_least_privilege_service_account: true
-  least_privilege_service_account_status: "ACCEPTED_DEVIATION"
+  least_privilege_service_account_status: "OWNER_REVIEW_REQUIRED"
   require_untrusted_pr_isolation: true
   prohibit_secrets_in_git: true
   admission_control:
