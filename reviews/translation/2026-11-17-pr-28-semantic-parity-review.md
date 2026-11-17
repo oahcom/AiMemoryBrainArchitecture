@@ -16,7 +16,7 @@ The reviewed high-risk English/Chinese pairs are substantially aligned on their 
 
 本轮抽查的高风险中英文文档，在核心权威边界、状态区分、Fail-closed 要求和非保证事项上总体一致。抽查范围内未发现 Owner 权限、安全策略或 Forget 完成语义被翻译反转的 Critical 级问题。
 
-The review is **not** a blanket approval of all 124 changed files. It is a targeted pass over domain epistemic/time semantics, lifecycle, scope/permission, D Forget/cursor/publication contracts, E receipt/producer-admission/provenance contracts, and F retrieval/activation/cache/scheduling contracts, plus the associated coverage metadata.
+The review is **not** a blanket approval of all 125 changed files. It is a targeted pass over domain epistemic/time semantics, lifecycle, scope/permission, D Forget/cursor/publication contracts, E receipt/producer-admission/provenance contracts, and F retrieval/activation/cache/scheduling contracts, plus the associated coverage metadata.
 
 本结论**不代表对 PR 中全部 124 个变更文件的整体批准**。本轮重点覆盖领域认知/时间语义、生命周期、Scope/Permission、D Forget/Cursor/Publication 契约、E Receipt/Producer Admission/Provenance 契约、F Retrieval/Activation/Cache/Scheduling 契约及其覆盖状态元数据。
 
