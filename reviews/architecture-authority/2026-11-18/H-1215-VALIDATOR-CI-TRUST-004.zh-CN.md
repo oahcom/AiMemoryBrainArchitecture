@@ -110,3 +110,8 @@ Storage v3.3.2 Blob `5c614375...` 绑定的是 H Unified 1.2.14 Blob `09fcd1...`
 - 推进 Gate B/C、合并 PR、关闭 Issue 或授权生产。
 
 下一步应由 H 发布精确 Bundle 并关闭 Issuer-side 缺口，然后 C 精确审查可执行实现/CI，I 精确审查 Trust/Registration，Storage 发布 Successor Manifest，最后 A 对同一精确 Bundle 复审。
+
+
+## 发布边界澄清 — 2026-11-18
+
+本 PR 发布的是审查记录本身。上文关于“不得合并 PR”的表述，指不得将 H 1.2.15 实现候选 PR 当作已批准或生产就绪的变更合并；并不禁止发布这份非规范性审计工件。合并本文档 PR 不会关闭任何发现项，不授权受保护操作，不冻结 Schema，不推进 Gate，也不批准生产使用。
