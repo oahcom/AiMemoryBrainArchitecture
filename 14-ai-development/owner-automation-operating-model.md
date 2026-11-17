@@ -186,3 +186,8 @@ This model is PROPOSED. Existing tasks may be linked retrospectively, with missi
 - 定时任务不得默认合并、发布、执行破坏性迁移或绕过 CI。构建、测试和合并门禁应由 GitHub Actions/CI 等确定性机制执行。
 - 如果没有可用 GitHub 权限、代码执行环境或可信基线，必须停止并报告 BLOCKED/NOT RUN，不能假设自动化具有这些能力。
 - 定时任务频率、时区、通知策略和执行权限必须显式配置；未创建成功前 automation ID 必须为 NOT_CREATED。
+
+
+## 12. Continuous operation target / 不间断运行目标
+
+The project target is event-driven continuous progress. Scheduled ChatGPT tasks can provide periodic reconciliation only within their supported cadence; they are not always-on workers. For the 24/7 target, use the event-driven architecture in [AI-RUN-001](continuous-owner-runtime-architecture.md), with GitHub webhooks, durable queue, isolated Owner workers, leases, idempotency, watchdog recovery and operational monitoring. Do not claim continuous operation before deployment and acceptance tests.
