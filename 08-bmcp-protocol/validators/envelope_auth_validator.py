@@ -155,7 +155,6 @@ _REQUIRED_AUTH_FIELDS = (
     "schema_artifact_revision",
     "schema_version",
     "message_type",
-    "signature_profile_id",
     "message_id",
     "message_nonce",
     "audience",
