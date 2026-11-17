@@ -132,7 +132,7 @@ All statuses below were read from live PR metadata. None was merged at audit tim
 | #60 | A current-main final assessment | `ca69d50...` | `292b84c...` | OPEN / DRAFT |
 | #61 | A B-02 / H 1.2.15 delta review | `8c0c5b1...` | `4726d93...` | OPEN / DRAFT |
 
-PR #57–#61 all target main at `8c0c5b1...`; final main is now `901e38b...`, two commits ahead in history but with an identical tree. Their base commit is therefore historically behind, even though the current tree has no net content delta from their base. PR #63 was created with base SHA `901e38b...` and contains only the two G1 audit documents. PR #51/#54 are stacked on review branches, not direct current-main baselines. No existing PR was retargeted, merged or closed in this audit.
+PR #57, #58, #59 and #61 target main at `8c0c5b1...`; PR #60 targets main at the intermediate `ca69d50...`. Final main is now `901e38b...`: it is two commits ahead of the `8c0c5b1...` base and one commit ahead of the `ca69d50...` base. The final tree is identical to `8c0c5b1...`, but PR #60's base contains the transient research-only file that was later reverted. PR #63 was created with base SHA `901e38b...` and contains only the two G1 audit documents. PR #51/#54 are stacked on review branches, not direct current-main baselines. No existing PR was retargeted, merged or closed in this audit.
 
 ## 6. Issue audit
 
