@@ -120,3 +120,16 @@ H's candidate source now includes §11.9 and has current exact Blob `74be8374a67
 G's current source explicitly requires actual C provider receipt and immutable CSubmitOutcome as part of the 1.1 causal-order/recovery predicate. H §§11.8–11.9 now propose carrying C-issued references, but an H proposal cannot substitute for C's own producer decision or provider evidence contract.
 
 Required: C must publish an exact-version decision or source addendum pinning the same A/COC package version and defining the C-issued provider receipt/CSubmitOutcome, conditional terminal reference, UNKNOWN/IN_DOUBT behavior and causal binding to InferenceRequestId/FinalRequestBoundaryId/request digest/participant identity. Until then, H36-AP-09 and C36-AP-01 remain OPEN; no 1.1 cross-owner acceptance is inferred.
+
+## 11. Correction — C exact-version acceptance located in separate Owner contract
+
+The earlier C36-AP-01 finding is **RESOLVED at the C source-decision level**. The review initially examined C's Final Request Evidence contract only and did not include C's separate cross-authority causal-order contract. Re-read of `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` on `session-c-agent-integration-2026-11-16` returned exact Blob `45a48249717c8cddb07ab96197730ef93d406c22`.
+
+That C Owner artifact explicitly records **ACCEPT WITH ENUMERATED EXCEPTIONS** for the exact CGH-APPLIED-1.1 recovery-batch amendment, pinning A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` and companion COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`. It requires C-issued CSubmitOutcome, actual provider receipt, actual InferenceRequestId/FinalRequestBoundaryId, immutable request digest, UNKNOWN/IN_DOUBT handling and same-key recovery. C's JF-10 Issue #8 bridge decision is also recorded with exact artifact pins and enumerated C-owned conditions.
+
+A complete EN/zh-CN pair and targeted parity review were added:
+- `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`
+- `docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`
+- [EN review](2026-11-17-c-submit-causal-order-bilingual-review.md) / [中文 review](2026-11-17-c-submit-causal-order-bilingual-review.zh-CN.md)
+
+This correction does not resolve H36-AP-09: H's versioned wire message-family Schema/SDK mapping and C/G/I/D/Storage consumer interoperability remain open. It also does not imply coordinator deployment, Provider implementation verification, or C-CO/JF-10 test execution.
