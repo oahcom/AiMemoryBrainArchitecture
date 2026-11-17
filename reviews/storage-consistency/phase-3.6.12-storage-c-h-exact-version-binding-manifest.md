@@ -376,3 +376,16 @@ H's reference module now validates the actual RecoveryJoin membership proof payl
 - RecoveryJoin test Blob: `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a`.
 - CI Run `44051676055`: 288 total / 266 passed / 22 skipped / 0 failed.
 This remains candidate reference validation; the verifier callback is TEST-ONLY and is not connected to real owner signers or ledgers.
+
+
+### 10.8 A exact review refresh
+
+A's exact review was refreshed to pin the latest H/I/D/C/Storage evidence:
+- A review Blob: `81d8956eedceb0b8842034c4ea1989e765dd6e4e`
+- H exact review Blob: `6f091840f5106bb0bb37118ae4b77c6c6b58625d`
+- I exact review Blob: `a9599742e80818be4053da382e750557b35dacef`
+- D exact review Blob: `0edd96d07960292d938656d5d8a20095750f4cf1`
+- C exact review Blob: `ea2e11519646225679eadc8b33af0d755998d92e`
+- Storage binding manifest reviewed by A: `74c3db219ec5badbf86c033d1aa3b2d0ab65f05a`
+
+A's decision remains ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS. This refresh does not close R1/R2 or any implementation/production gate.
