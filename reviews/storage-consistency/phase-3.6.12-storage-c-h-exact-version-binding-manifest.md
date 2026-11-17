@@ -157,3 +157,48 @@ Storage's binding therefore records:
 - C delegated semantic decision: **ACCEPT WITH ENUMERATED C-OWNED EXCEPTIONS**, scoped to its exact source set and previously reviewed mapping.
 - Current H 1.2.11 cross-owner acceptance: **OPEN**.
 - Provider-specific implementation/conformance and A final integration acceptance: **OPEN**.
+
+
+## 10. Exact C/H cross-review of current H schema 1.2.11 (2026-11-17)
+
+### 10.1 Exact reviewed pins
+
+| Owner | Artifact | Exact Blob | Result |
+|---|---|---|---|
+| H | Unified COC/JF-10/Provider Outcome schema artifact 1.2.11 (wire family 1.3.0) | `4f1e103ab4b2ac961d77179dba0b65093532ea40` | Exact schema inspected; structural candidate only |
+| H | Phase 3.6.10 semantic validator contract | `4c5c3771575979061e674e40f1f5f3d9b4645bd9` | Earlier proposed contract; not an exact 1.2.11 semantic acceptance |
+| H | Phase 3.6.10 exact-version validator decision | `1de7d30f3ca81bc579b396acb0f05e2ead5fe9dd` | Earlier 1.0.4 candidate decision; not current 1.2.11 freeze |
+| H | Phase 3.8.3 H/I crypto wire mapping (schema 1.2.8) | `b132e6a01bcfe13f92020b9778ee3f7ddbf65753` | I-specific mapping; not C signature profile and not aligned to 1.2.11 / wire 1.3.0 |
+| H | Python wire test | `1a4e754ba9bfa57eb973c6d39731e9f89443b323` | HRC-TEST-v1 / recovery-cutoff 1.0.4 test profile |
+| H | JS reference | `992585d3bc323dc0224d0075ef14abd992980f65` | Bespoke test canonicalizer, not production JCS proof |
+| H | Wire vectors | `cc7e98c729db8d9f615e17a9542b3cb63f459922` | Three generic recovery/join vectors; no C Provider Outcome cases |
+| C | Phase 3.8.5 exact H 1.2.11 Provider Outcome cross-review | `55ebbf340e816b7df5faf4299187bff257a81a92` | Conditional structural acceptance; semantic/wire freeze blocked |
+| H | Phase 3.8.4 exact H 1.2.11 Provider Outcome cross-review | `aae5dcb1d0c1ad95c306e469e6fbd96aef67b309` | Structural candidate accepted; semantic/wire freeze blocked |
+
+C review commit: `3e86abf9459c621a19ed986734ddcdbf0ae8a7b7` on `session-c-agent-integration-2026-11-16`.
+H review commit: `300a590dd181173e6e8fe22ee3ea937efc18163e` on `session-h-bmcp-protocol`.
+
+### 10.2 C/H cross-review findings
+
+The 1.2.11 schema structurally contains `C_PROVIDER_OUTCOME_RECORDED`, exact outcome enum `HANDOFF_ACCEPTED | HANDOFF_REJECTED | NOT_INVOKED | UNKNOWN | IN_DOUBT`, immutable outcome ref/digest, provider/adapter/idempotency-key references, final request boundary/digest, outcome-specific evidence refs, C owner admission/ledger/high-water/root, COC record proof and nullable COC ParticipantIntentRef with an explicit absence reason.
+
+The schema's outcome conditionals are useful: ACCEPTED requires reservation/provider request/receipt/evidence; REJECTED requires reservation/no-handoff proof/evidence; NOT_INVOKED requires not-invoked proof and excludes provider receipt; UNKNOWN/IN_DOUBT requires a reason. These are structural requirements only.
+
+C identifies unresolved semantic requirements: explicit or transitively proven `CGateGeneration` and provider-attempt identity/generation; authoritative same-provider/account/namespace same-key lookup bound to the same immutable attempt/request digest; no-handoff and rejection truth; append-only outcome immutability and contradictory-field rejection; and a C-specific signature profile/projection. H independently identifies the need for a 1.2.11 / wire-family 1.3.0 semantic validator, current envelope/crypto mapping, C-specific signature projection, canonical-byte fixtures and C Provider Outcome vectors.
+
+The available H interop test artifacts are explicitly a recovery-cutoff 1.0.4 / HRC-TEST-v1 profile. Python uses sorted-key JSON serialization and JavaScript uses a bespoke canonicalizer; neither establishes RFC 8785 JCS or production signature bytes. The three visible vectors do not test Provider Outcome semantics, same-key recovery or C gate races. No exact 1.2.11 C-PO execution evidence was established in this review.
+
+### 10.3 Binding disposition and blockers
+
+- H schema 1.2.11: **PINNED; STRUCTURAL CANDIDATE ONLY**.
+- C cross-review: **CONDITIONAL STRUCTURAL ACCEPTANCE; SEMANTIC AND WIRE FREEZE BLOCKED**.
+- H cross-review: **STRUCTURAL SCHEMA ACCEPTED AS CANDIDATE; SEMANTIC/WIRE FREEZE BLOCKED**.
+- H 1.2.11-specific semantic validator and decision: **OPEN**.
+- C gate-generation/provider-attempt transitive binding and provider-specific idempotency/lookup semantics: **OPEN**.
+- C-specific signature profile/projection and current H envelope alignment: **OPEN**.
+- 1.2.11 canonical-byte/signature/provider-outcome vectors and executed cross-language/real-Adapter conformance: **OPEN**.
+- A final integration acceptance: **OPEN**.
+
+This section supersedes any earlier implication that the historical H 1.2.5 or 1.2.8 pins constitute the current H wire bundle. Historical sections remain retained as provenance. The current exact H schema pin is 1.2.11 Blob `4f1e103...`; it is not a cross-owner wire freeze.
+
+No provider implementation, executed conformance, production activation, universal exactly-once, Full Applied or Global Forget Completion is claimed. C/H decisions are delegated role simulations authored at the user's direction, not independent human Owner signatures.
