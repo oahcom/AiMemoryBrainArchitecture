@@ -102,7 +102,35 @@ The following is the B/I/H semantic dependency order; it is not a wire schema or
 - PermissionEpoch ≠ D ForgetFenceGeneration; neither may be compared, converted or substituted.
 - Domain Entity identity ≠ Security Principal identity, even when a person/Agent is represented in both domains.
 
-## 7. Unresolved namespace questions / 未决命名空间问题
+## 7. Physical serialization identity is not domain identity / 物理序列化身份不等于领域身份
+
+B Phase 3.8.6 exact review approves the per-authority nominal type boundary for Storage Option A (B review Blob e2bc4c8dde9706bfbe443269b702f1b5aa6965f6; exact Storage ADR Blob bb544ba2f346bdc130d524bd5c7310d86f367988). This is a delegated B-role technical review, not an independent human B Owner signature, and is limited to L1/L2 type-system approval.
+
+B Phase 3.8.6 精确复审批准 Storage Option A 的 per-authority 名义类型边界（B 复审 Blob e2bc4c8dde9706bfbe443269b702f1b5aa6965f6；Storage ADR Blob bb544ba2f346bdc130d524bd5c7310d86f367988）。这是委托 B 角色技术复审，不是独立人类 B Owner 签字，范围限于 L1/L2 类型系统批准。
+
+| Type | Meaning | Must not alias |
+|---|---|---|
+| BrainAuthorityRef | Canonical Memory semantic authority | StorageAuthorityRef, PolicyDomainRef |
+| SerializationDomainRef | Physical/logical transaction domain | BrainAuthorityRef, COC domain |
+| AuthoritySerializationAnchorRef | One physical anchor row per BrainAuthority | SerializationDomainRef, D Fence, VisibilityPointer |
+| SerializationTransitionRef | Stable idempotent physical transition identity | PublicationOperationId, PreparedTransactionGID |
+| SerializationRevision | Monotonic physical revision local to one anchor/domain | D FenceGeneration, GateGeneration, BarrierGeneration, I PermissionEpoch, C sequence, COC position, XID |
+| PreparedTransactionGID | Stable prepared transaction identity | EngineNativeXIDRef, SerializationTransitionRef |
+| D PublicationParticipantRef | D barrier admission identity | StorageVisibilityParticipantRef, COC ParticipantIntentRef |
+| I CommitAuthorizationReceiptRef | I single-use sequencer decision | PermissionEpoch, SerializationRevision |
+| PublicationOperationId | Logical publication operation | WorkItemId, AttemptId, SerializationTransitionRef |
+| ParticipantTupleDigest | Exact cross-owner participant tuple digest | RequestDigest, ArtifactDigest |
+| VisibilityPointerRef | Public Storage visibility root | PrivateStageRef, PublicationReceiptRef |
+
+Rules: one AuthoritySerializationAnchorRef per BrainAuthorityRef/SerializationDomainRef; SerializationRevision orders only physical transitions within that anchor and is not comparable across authorities. D ForgetFenceGeneration, owner_gate_generation and barrier_generation remain distinct D types. I PermissionEpoch, C sequence namespace/record sequence, COC quorum position, Storage PreparedTransactionGID and engine-native XID remain separate. Storage physically owns the anchor but cannot create or interpret D/I/C/COC semantic decisions. Same SerializationTransitionRef + same immutable digest is idempotent; same ref with a different digest is an integrity incident.
+
+规则：每个 BrainAuthorityRef/SerializationDomainRef 对应一个 AuthoritySerializationAnchorRef；SerializationRevision 只排序该锚点内的物理转换，不能跨 Authority 比较。D ForgetFenceGeneration、owner_gate_generation、barrier_generation 是不同 D 类型；I PermissionEpoch、C sequence namespace/record sequence、COC quorum position、Storage PreparedTransactionGID 和 Engine-native XID 也必须分离。Storage 物理拥有锚点，但不能创建或解释 D/I/C/COC 语义决策。相同 SerializationTransitionRef + 相同不可变 Digest 才幂等；相同 Ref 配不同 Digest 属于完整性事件。
+
+The anchor is an IMPLEMENTATION_DETAIL / physical serialization primitive, not a new canonical domain entity or universal global counter. E accepts with E lifecycle conditions; F accepts with read-path/cache conditions; Storage v3.2.11 remains candidate, not jointly accepted/frozen, and requires fresh A review. Physical DB, HA/restore, serializable behavior and production implementation remain L4 OPEN.
+
+该 Anchor 属于 IMPLEMENTATION_DETAIL / 物理序列化原语，不是新的规范领域实体，也不是全局计数器。E 在 E 生命周期条件下接受；F 在读路径/缓存条件下接受；Storage v3.2.11 仍为候选，未获联合接受/冻结，且需要 A 新一轮复审。物理数据库、HA/Restore、Serializable 行为和生产实现仍为 L4 OPEN。
+
+## 8. Unresolved namespace questions / 未决命名空间问题
 
 1. Canonical Tenant vs Workspace vs Project vs User Scope taxonomy and parent/child algebra: OPEN; I/A confirmation required.
 2. Whether one Principal may be federated across multiple tenant/security domains and under which issuer mapping: I GOVERNANCE-BLOCKED.
@@ -113,7 +141,7 @@ The following is the B/I/H semantic dependency order; it is not a wire schema or
 7. Claim identity across Memory Versions: B ADR OPEN.
 8. Whether Session and Conversation are separate domain entities: C/G OPEN; do not conflate with RuntimeSessionRef or Session ScopeRef.
 
-## 8. Conflict and decision status / 冲突与决策状态
+## 9. Conflict and decision status / 冲突与决策状态
 
 - B Phase 3.6 typed identity proposal Blob `0a6b78...` labels itself JOINT-DECIDED technical baseline, but explicitly says no separate B-session signature is claimed and implementation tests were not run.
 - I's current identity-trust closure Blob `0cbf6bb...` says technical baseline JOINT-DECIDED but external governance approvals remain GOVERNANCE-BLOCKED and implementation/conformance NOT VERIFIED.
@@ -121,7 +149,7 @@ The following is the B/I/H semantic dependency order; it is not a wire schema or
 - B formally APPROVED ActorRef/ScopeRef/EnvironmentRef semantic type mapping for the exact BIH package (A Blob `a45ae90b318a79bf009d14f4d917611881e9e214`) and exact CGH-APPLIED-1.1 recovery-batch pair above. C/F/G BIH consumer design decisions were recorded ACCEPT WITH ENUMERATED EXCEPTIONS; H ACCEPTED the BIH package. The separate CGH-APPLIED-1.1 C/D/G/H/I/B decisions are also recorded with enumerated exceptions, while Storage confirmed its architecture interface with changes.
 - These are exact-version semantic/design acceptances only. They do not freeze H wire encoding, close I36-GOV-01..10, prove runtime conformance or production readiness. Applied Contract Frozen remains NO; COC/Storage physical implementation and fault tests remain open.
 
-## 9. Decision record / 决策记录
+## 10. Decision record / 决策记录
 
 **B-ID-DEC-001 — Preserve distinct typed references and separate reference from trust**
 - Context: payload identity, authenticated principal, domain scope and authorization had been at risk of being conflated.
@@ -132,7 +160,7 @@ The following is the B/I/H semantic dependency order; it is not a wire schema or
 - Reversal condition: only a documented domain case proving two concepts are semantically identical without loss of namespace, lifecycle, authority or trust semantics.
 - Status: CANDIDATE FOR B CANONICAL MODEL; existing delegated technical decision retained as evidence, no new cross-owner approval inferred.
 
-## 10. Gate status / 门禁状态
+## 11. Gate status / 门禁状态
 
 B identity semantics are sufficiently explicit for continued model reconciliation, but B2/B3 remain open. This document does not resolve Fact/Claim, Tenant/Workspace, external governance, cross-owner wire binding or runtime conformance. No schema freeze or authorization for implementation is claimed.
 
