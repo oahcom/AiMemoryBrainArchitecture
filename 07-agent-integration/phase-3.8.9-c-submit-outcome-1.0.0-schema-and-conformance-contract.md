@@ -136,3 +136,17 @@ The test-only deterministic seed is public and must never be reused. Five outcom
 - Crypto candidate tests: five test-only signatures verified; every present P0 field mutation rejected by Ed25519 verification; Python and Node outputs matched; 64-byte signatures/32-byte public keys checked.
 
 This is executed candidate cryptographic construction/interoperability evidence only. It does NOT register `AIMBA-C-CRYPTO-1.0`, approve C trust roots/key custody, validate deployed key status/anti-rollback, authenticate provider evidence, prove owner-ledger/COC inclusion or certify production use. The public test seed is not a production secret and the candidate suite remains unregistered.
+
+
+## 10. Independent H-side candidate crypto verification
+
+H has independently vendored the exact C schema, fixture, candidate vector manifest and expected fingerprints, then executed its own Python and Node verification:
+- H test run `44057944517`, exact commit `b8a22cecdf6238c81f08338d30776be250fd69a4`: SUCCESS, 10 tests.
+- H Python verifier Blob `a49d588ea6f840927fe21ad8c41cd8089dceac29`.
+- H Node oracle Blob `c35ddea3ecaf5e452b14fb57fb20327ad80703cc`.
+- H workflow Blob `4050dabce5b02df14b84b500cc6e7236c65457f0`.
+- H used byte-identical C schema `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`, C outcome fixtures `b4c32dc8cd7072a04843c2db74c7f96c6de001a4`, candidate vector manifest `88a16f0d9aaa8a5e46af857c2cd34c2bcedd07ae` and expected vector file `a4bfe0b431d5e710ac99d604e7b1bce49c044d23`.
+
+H independently recomputed the five expected vector fingerprints, verified the test-only Ed25519 signatures, checked that every present C-P0 field mutation invalidates the original signature, and matched its Python and Node outputs to the pinned expected values.
+
+This is stronger independent candidate-construction evidence, but still not I profile registration, C key trust/custody/anti-rollback, provider evidence authentication, owner ledger/COC validation or production integration. The profile remains NOT REGISTERED.
