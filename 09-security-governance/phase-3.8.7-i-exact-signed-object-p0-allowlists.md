@@ -17,7 +17,7 @@ This addendum closes the previously open I-H-CRYPTO-01 requirement by defining e
 
 ## 2. Common I-signed P0 envelope / I 签名对象通用 P0 Envelope
 
-For every I-signed object below, the common P0 envelope includes every present field from this exact allowlist:
+For the BMCP message families in §§3.1–3.3 only, the common P0 envelope includes every present field from this exact allowlist. The referenced proof objects in §§4–6 (IOwnerSnapshotAttestation, ICompleteEmptyProof, IOutOfScopeProof, ICommitAuthorizationReceipt and ITerminalProof) are standalone I-signed proof objects and use only their own exact P0 field lists; they do not inherit BMCP common-envelope fields unless a future exact schema version explicitly wraps them in such an envelope.
 
 - `schema_id`
 - `schema_version`
@@ -43,7 +43,7 @@ For every I-signed object below, the common P0 envelope includes every present f
 - `created_at`
 - `owner_signature_ref` when the message family uses the common owner signature reference
 
-Common exclusions:
+Common exclusions for the BMCP message families in §§3.1–3.3:
 - `payload_digest` (computed from P0);
 - `signature` (signature output);
 - `integrity_proof_ref` and `channel_binding_proof_ref` (external integrity/transport locators verified separately);
@@ -272,3 +272,11 @@ It does **not** by itself approve production trust roots, algorithm regulatory s
 本补充定义了精确 I P0 白名单及引用证明合同，供 H 进行精确审查，并取代指定消息族的泛化投影表述。
 
 本文件不代表生产 Trust Root、算法监管适用性、Key Custody、HSM/KMS、轮换/泄露仪式、实时 Sequencer 部署、外部 Anti-rollback 基础设施或生产符合性已获批准。
+
+
+## 11. Scope correction / 范围修正
+
+The common envelope in §2 applies only to the three BMCP message families in §§3.1–3.3. Standalone referenced proof objects in §§4–6 do not inherit fields such as `schema_id`, `message_nonce`, `causal_order_coordinator_ref` or `owner_signature_ref` unless their own exact schema explicitly defines them. Their signed projections are exactly the object-specific field lists in their sections, including the preassigned `signature_ref` where listed.
+
+第 2 节 Common Envelope 仅适用于 §§3.1–3.3 的三个 BMCP Message Family。§§4–6 的独立引用 Proof Object 不自动继承 `schema_id`、`message_nonce`、`causal_order_coordinator_ref` 或 `owner_signature_ref` 等字段，除非其自身精确 Schema 明确规定。它们的签名投影严格采用各自章节列出的对象专属字段，包括预分配的 `signature_ref`。
+
