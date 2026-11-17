@@ -167,7 +167,9 @@ Propose mandatory security review triggers, adversarial tests and who may accept
 
 ---
 
-## A final integration review — execute only after A–I reports are present
+## A final integration review — separate A session, execute only after A–I reports are present
+
+This is a second, distinct A session from the A domain-review session above. It must not author the A domain-review report, and it must not be the session that authored the governance documents or this review package. The A domain review and A final integration adjudication are separate duties and separate session records.
 
 A acts as Principal Integration Architect, not as a substitute for the nine domain reviews.
 
