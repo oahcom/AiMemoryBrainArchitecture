@@ -2,9 +2,11 @@
 # DOMAIN-REALITY-001-B — 规范领域模型研究
 
 - Owner / 负责人: B — Principal Domain Model & Canonical Semantics Authority
-- Status / 状态: IN_PROGRESS — B0 baseline partially verified; no canonical freeze
+- Status / 状态: IN_PROGRESS — B0 PARTIAL / NOT PASSED; no canonical freeze
 - Branch / 分支: `research/domain-reality-001-b`
-- Base commit / 基线提交: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- Historical research ancestor / 历史研究祖先: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- Current main HEAD at 2026-11-17 audit / 本次审计时 main HEAD: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
+- Latest currentness addendum / 最新时效性补充: `baseline-currentness-and-owner-source-audit.md`
 - Research date / 研究日期: 2026-11-17
 
 ## 1. Purpose / 目的
@@ -78,8 +80,10 @@ Published on this branch so far / 本分支已发布：
 - domain-model-decision-record.md
 - validation/README.md
 - evidence/README.md
+- evidence/official-reference-validation.md
+- baseline-currentness-and-owner-source-audit.md
 
-Remaining work includes full exact-version Owner/PR/Issue audit, explicit relationship and state owner acceptance, schema/fixture design after semantic closure, and independent review. / 剩余工作包括完整精确版本 Owner/PR/Issue 审计、关系与状态的 Owner 明确验收、语义闭合后的 Schema/Fixture 设计，以及独立审查。
+Remaining work includes completion of A and Testing/Quality source inventory, full exact-version PR/Issue diff audit, explicit relationship and state owner acceptance, schema/fixture design after semantic closure, final readback, and independent review. / 剩余工作包括补齐 A 与 Testing/Quality 源清单、完整精确版本 PR/Issue Diff 审计、关系与状态的 Owner 明确验收、语义闭合后的 Schema/Fixture 设计、最终读回及独立审查。
 
 The actual `main` baseline is pinned in the baseline report. The repository is an architecture-definition repository; README explicitly says implementation has not started by design. The existing B branch is `session-b-domain-model-phase3`; it is not the requested research branch and its Scope/Permission source Blob differs from current main. The new research branch was created from the verified main HEAD without modifying main or the existing B branch.
 
