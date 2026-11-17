@@ -244,6 +244,8 @@ class Protocol:
             raise Rejected("NO_PUBLICATION proof does not bind the exact UNKNOWN operation")
         if publication_id != proof.publication_id or storage_id != proof.storage_id:
             raise Rejected("NO_PUBLICATION proof participant identity mismatch")
+        if not self.fence_installed or publication_id not in self.fence_pending:
+            raise Rejected("NO_PUBLICATION reconciliation requires the active ForgetFence participant barrier")
         if publication_id in self.visibility or operation_id in self.outbox or auth_id in self.consumed:
             raise Rejected("local state contradicts NO_PUBLICATION absence proof")
         if not proof.complete():
@@ -578,6 +580,21 @@ class PublicationProtocolTests(unittest.TestCase):
                     p.resolve_no_publication("op-1", self.no_publication_proof())
                 self.assertIn("op-1", p.private_unknown)
                 self.assertNotIn("op-1", p.outcomes)
+
+    def test_no_publication_reconciliation_requires_active_fence_barrier(self):
+        p = self.prepared()
+        args = self.commit_args()
+        binding = (args["auth_id"], args["publication_id"], args["storage_id"],
+                   args["d_proof"], args["i_commit_won_proof"])
+        p.mark_unknown("op-1", binding)
+        proof = self.no_publication_proof()
+        with self.assertRaisesRegex(Rejected, "active ForgetFence participant barrier"):
+            p.resolve_no_publication("op-1", proof)
+        self.assertIn("op-1", p.private_unknown)
+        self.assertNotIn("op-1", p.outcomes)
+        p.install_forget_fence()
+        outcome = p.resolve_no_publication("op-1", proof)
+        self.assertEqual(outcome, ("NO_PUBLICATION", "op-1", "publication-1", "storage-1"))
 
     def test_no_publication_reconciles_unknown_and_allows_exact_d_i_closeout(self):
         p = self.prepared()
