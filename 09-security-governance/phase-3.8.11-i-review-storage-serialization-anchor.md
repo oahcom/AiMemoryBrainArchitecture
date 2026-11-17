@@ -3,8 +3,8 @@
 
 - Owner: I — Security Governance / Authorization
 - Exact Storage ADR Blob: `bb544ba2f346bdc130d524bd5c7310d86f367988`
-- I P0 successor addendum: `35e6843da8becbf3b152512a561b05cf5486819b`
-- H review of I P0: `daf3ea5bb812e2b6a9f3a6000cdb580d6bee0c24`
+- I P0 successor addendum: `44986f5f864bcdc1a79d34978273644d381a68c0`
+- H review of I P0: `a3abb0021edd9a691bfcb428979f1a479f5b3940`
 - Decision: **ACCEPT WITH STRICT POLICYDOMAIN SEPARATION**
 - Provenance: delegated I-role review, not independent human I Owner approval.
 
