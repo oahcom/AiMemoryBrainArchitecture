@@ -311,3 +311,26 @@ B 决策记录现已加入精确来源 B2 检查点。该检查点确认部分�
 B2 remains IN PROGRESS / NOT PASSED; B4 remains NOT READY. No schema freeze or cross-owner acceptance is inferred.
 
 B2 仍 IN PROGRESS / NOT PASSED；B4 仍 NOT READY。不推断 Schema 冻结或跨 Owner 验收。
+
+
+## 20. Current B Owner Fact/Claim ADR reconciliation / 当前 B Owner Fact/Claim ADR 对账 — 2026-11-18
+
+The current B Owner branch `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` now provides the controlling B recommendation:
+- Summary ADR Blob: `a1024938ff5baba069cf128c69496a44e143330c`.
+- Detailed canonical ADR Blob: `df77e4a93cb8fef689ae7c828888d960cbf381d6`.
+- Consumer mapping Blob: `dd45a37199c9b69ab6b68f65e051a484a04691d4`.
+- B typed-reference approval Blob: `3a1e77889cd9a90cd5822d9f0cb3437880868706` (separate scope; does not approve Fact/Claim).
+
+当前 B Owner 分支 `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` 已提供当前 B 推荐基线：
+- 摘要 ADR Blob：`a1024938ff5baba069cf128c69496a44e143330c`。
+- 详细规范 ADR Blob：`df77e4a93cb8fef689ae7c828888d960cbf381d6`。
+- 消费者映射 Blob：`dd45a37199c9b69ab6b68f65e051a484a04691d4`。
+- B 类型化引用批准 Blob：`3a1e77889cd9a90cd5822d9f0cb3437880868706`（独立范围，不批准 Fact/Claim）。
+
+**Current B preference: Option A — separate Claim proposition thread and independently addressable Fact attestation object.** This supersedes the earlier C2/Option B preference in the research ADR. Option A remains CANDIDATE / NOT APPROVED. The formal Architecture Governance authority and approval record are not present; I-04/P-04, main Domain Overview and terminology still contain inconsistent formulations. Both current bilingual domain guides retain ADR-BLOCKED. Issue #43 remains OPEN.
+
+**当前 B 倾向：Option A——Claim 命题线程与独立可寻址 Fact Attestation 对象分离。** 这取代研究 ADR 此前倾向 C2/Option B 的建议。Option A 仍为 CANDIDATE / NOT APPROVED。正式 Architecture Governance 权威和批准记录尚不存在；I-04/P-04、Main Domain Overview 和术语文件仍有不一致表述。当前中英文领域指南均保留 ADR-BLOCKED。Issue #43 仍 OPEN。
+
+Stable ClaimRef + immutable ClaimRevisionRef and ConflictSet over exact ClaimRevisionRefs remain candidates, not frozen schemas. D owns canonical identity allocation/commit and ConflictSet persistence after approval; E keeps neutral CandidateProposition/ExtractionIR; F/G do not assume unapproved Fact/Claim identities; H wire fields remain unfrozen. B2 remains IN PROGRESS / NOT PASSED and B4 NOT READY.
+
+稳定 ClaimRef + 不可变 ClaimRevisionRef，以及按精确 ClaimRevisionRef 构建 ConflictSet，仍是候选，不是冻结 Schema。批准后 D 负责规范身份分配/Commit 和 ConflictSet 持久化；E 保持中立 CandidateProposition/ExtractionIR；F/G 不得假定未批准的 Fact/Claim 身份；H Wire 字段仍未冻结。B2 仍 IN PROGRESS / NOT PASSED，B4 仍 NOT READY。
