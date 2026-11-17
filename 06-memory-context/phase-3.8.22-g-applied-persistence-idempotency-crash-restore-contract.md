@@ -54,34 +54,40 @@ The H 1.2.15 local test/CI result is candidate-level evidence only. Its callback
 
 ### 3.1 CSubmitOutcome identity (C-owned)
 
-For an immutable C outcome object, G MUST bind at least:
+G MUST distinguish the stable logical provider attempt from each immutable C outcome observation:
 
-`COutcomeIdentity = (issuer_authority_ref, sequence_namespace_ref, record_ref, record_sequence, ProviderAttemptRef, ProviderAttemptGeneration)`
+`CProviderAttemptIdentity = (issuer_authority_ref, sequence_namespace_ref, ProviderAttemptRef, ProviderAttemptGeneration, ProviderRef, ProviderAccountRef, IdempotencyNamespaceRef, IdempotencyKeyRef, RequestDigest)`
 
-The object MUST also bind the exact `ProviderRef`, authenticated provider account/tenant, endpoint/model/API operation, `IdempotencyNamespaceRef`, `IdempotencyKeyRef`, `FinalRequestBoundaryRef`, `RequestDigest`, `ActualInferenceRequestId` when assigned, `CausalOrderTransactionRef`, COC intent/reservation refs, and the applicable outcome/evidence refs.
+`COutcomeRecordIdentity = (issuer_authority_ref, sequence_namespace_ref, record_ref, record_sequence)`
 
-- `record_ref` and the immutable C sequence/attempt tuple identify the C record.
-- `payload_digest`, `OutcomeEvidenceDigest` and `RequestDigest` are content/integrity values, not substitutes for C identity.
-- Same C identity + same immutable C payload digest is the same record.
-- Same C identity + changed payload digest or changed immutable tuple is a hard integrity conflict; quarantine it.
-- A late receipt or same-key lookup MUST be a new append-only C observation/successor linked by C's prior/supersedes/reconciliation references. It MUST NOT rewrite the original C record.
+The C object MUST bind the exact `AdapterRef`, `EndpointRef`, API operation, `FinalRequestBoundaryRef`, `RequestDigest`, `ActualInferenceRequestId` when assigned, `CausalOrderTransactionRef`, COC intent/reservation refs, and applicable outcome/evidence refs.
+
+- `CProviderAttemptIdentity` is stable across append-only outcome observations for one logical provider attempt.
+- `COutcomeRecordIdentity` identifies one immutable C ledger record. `payload_digest`, `OutcomeEvidenceDigest` and `RequestDigest` are content/integrity values, not identity substitutes.
+- Same COutcomeRecordIdentity + same immutable C payload digest is the same record. Same record identity + changed payload digest or changed immutable record tuple is a hard integrity conflict; quarantine it.
+- A late receipt or same-key lookup MUST be a new append-only C observation/successor with a new COutcomeRecordIdentity, explicitly linked to the same CProviderAttemptIdentity by C's prior/supersedes/reconciliation references. It MUST NOT rewrite the original C record or create a new provider attempt.
 - `UNKNOWN` and `IN_DOUBT` are nonterminal. They MUST retain the same ProviderAttempt and provider idempotency key; no retry-as-new is permitted.
 
 Only C's determinate successful handoff outcome (currently `HANDOFF_ACCEPTED` with all required provider and participant proof) is eligible for Full Applied evaluation. `HANDOFF_REJECTED`, `NOT_INVOKED`, `UNKNOWN` and `IN_DOUBT` cannot produce Full Applied.
 
 ### 3.2 H evidence identity (H-owned protocol evidence)
 
-For G's cross-owner Applied join, the proposed stable H evidence identity is:
+G MUST distinguish the stable H delivery binding from each evidence kind and immutable H ingress observation:
 
-`HEvidenceIdentity = (adapter_instance_ref, runtime_session_ref, delivery_id, delivery_attempt_id, inference_request_id, final_request_boundary_id, evidence_kind, adapter_capability_epoch)`
+`HDeliveryBindingIdentity = (adapter_instance_ref, runtime_session_ref, delivery_id, delivery_attempt_id, inference_request_id, final_request_boundary_id, adapter_capability_epoch)`
 
-This is the **proposed normalized consumer tuple**. C and H MUST explicitly confirm its exact field names, requiredness, canonicalization and mapping against the current H 1.2.15 schema/validator before shared freeze. G does not claim that the existing H schema or validator has already frozen this tuple.
+`HEvidenceIdentity = (HDeliveryBindingIdentity, evidence_kind)`
 
-The H identity tuple MUST NOT contain a digest. The corresponding canonical H payload/P0 digest is stored and compared separately:
+`HObservationRecordIdentity = (issuer_ref, sender_authority_ref, sender_subject_ref, message_id, message_nonce, signing_sequence_namespace_ref, signing_record_sequence)`
 
-- same H identity + same H P0 digest + same authenticated immutable receipt/result ref → exact replay; return the original durable H disposition;
-- same H identity + changed H P0 digest → `CONFLICT`, quarantine both observations, no last-write-wins;
-- changed H identity (for example a new DeliveryAttempt, RuntimeSession or CapabilityEpoch) is a different evidence identity and cannot be rebound to the old Applied attempt.
+These are **proposed normalized consumer tuples**. C and H MUST explicitly confirm exact field names, requiredness, canonicalization and mapping against the current H 1.2.15 schema/validator before shared freeze. G does not claim that the existing H schema or validator has already frozen these tuples.
+
+Neither HDeliveryBindingIdentity nor HEvidenceIdentity contains a digest. H P0 digest is immutable content and is compared against HObservationRecordIdentity separately:
+
+- same HObservationRecordIdentity + same H P0 digest + same authenticated immutable receipt/result ref → exact replay; return the original durable H disposition;
+- same HObservationRecordIdentity + changed H P0 digest → `CONFLICT`, quarantine both observations, no last-write-wins;
+- a new HObservationRecordIdentity may append a successor observation under the same HDeliveryBindingIdentity only when H's authenticated owner ledger explicitly links it to the same delivery binding; the new observation is a new evidence revision, not a new G Applied attempt;
+- changed HDeliveryBindingIdentity (for example a new DeliveryAttempt, RuntimeSession or CapabilityEpoch) is a different logical delivery and cannot be rebound to the old Applied attempt.
 
 H ingress replay protection is a separate layer. H's message identity/nonce and H P0 digest protect authenticated envelope ingestion/replay; they are not G Applied identity and are not C ProviderAttempt identity. A successful H `IDEMPOTENT_REPLAY` proves only an authorized replay of the same H ingress result, not a new G Applied commit.
 
@@ -103,7 +109,7 @@ Where present, the binding also includes the original prepare timeline/LSN, publ
 
 G MUST derive one stable logical identity for the intended Applied fact:
 
-`GAppliedIdentity = (ContextId, ContextVersion, DeliveryId, DeliveryAttemptId, InferenceRequestId, FinalRequestBoundaryId, COutcomeIdentity, HEvidenceIdentity, COCParticipantIdentity)`
+`GAppliedIdentity = (ContextId, ContextVersion, DeliveryId, DeliveryAttemptId, InferenceRequestId, FinalRequestBoundaryId, CProviderAttemptIdentity, HDeliveryBindingIdentity, COCParticipantIdentity)`
 
 The durable unique key is:
 
@@ -125,8 +131,8 @@ Every evaluation of one GAppliedIdentity MUST reference an immutable evidence re
 
 The evidence set MUST include, as applicable:
 
-- exact CSubmitOutcome record ref, C identity tuple, C payload digest, C RequestDigest and provider outcome evidence refs;
-- exact H evidence identity, H schema artifact revision, H P0 digest, authenticated receipt/result ref, materialization/managed-region inventory and digest;
+- exact COutcomeRecordIdentity, its C payload digest, stable CProviderAttemptIdentity, C RequestDigest and provider outcome evidence refs;
+- exact H HEvidenceIdentity and HObservationRecordIdentity, H schema artifact revision, H P0 digest, authenticated receipt/result ref, materialization/managed-region inventory and digest;
 - exact COC transaction/participant/reservation/GID identity, terminal proof ref/digest, recovery-batch ref/digest, participant completeness and owner high-water vector;
 - I decision/receipt/PermissionEpoch proof refs and digests;
 - D fence generation, lineage proof, request cutoff and effective position as separate fields and proof refs;
@@ -139,10 +145,10 @@ Normative duplicate handling:
 |---|---|
 | Same GAppliedIdentityKey + same revision number + same EvidenceSetDigest | Return the original durable disposition and receipt; no second Applied row, no timestamp rewrite |
 | Same key + same revision number + different EvidenceSetDigest | Hard conflict; quarantine both evidence sets; never last-write-wins |
-| Same H EvidenceIdentity + changed H P0 digest | H evidence conflict; G MUST NOT promote |
-| Same COutcomeIdentity + changed C payload digest or immutable request/attempt tuple | C evidence conflict; G MUST NOT promote |
+| Same HObservationRecordIdentity + changed H P0 digest | H evidence conflict; G MUST NOT promote |
+| Same COutcomeRecordIdentity + changed C payload digest or immutable record tuple | C evidence conflict; G MUST NOT promote |
 | Same COCParticipantIdentity + changed participant/terminal digest or contradictory terminal result | COC/Storage conflict; G MUST NOT promote |
-| New, valid C successor observation or H evidence revision explicitly linked to the same logical attempt | Append a new evidence revision; retain the prior revision and disposition; re-evaluate the same GAppliedIdentity, never mint a new attempt identity |
+| New, valid C successor observation or H successor observation explicitly linked to the same CProviderAttemptIdentity/HDeliveryBindingIdentity | Append a new evidence revision; retain the prior revision and disposition; re-evaluate the same GAppliedIdentity, never mint a new attempt identity |
 | Late evidence for an already committed Full Applied | Append historical enrichment only; never rewrite the original Applied record or retroactively change the predicate snapshot |
 
 A new evidence revision is permitted only when the source authority has issued a new immutable successor/observation linked to the same original attempt. A caller cannot submit altered bytes under an existing source identity and label them a new revision.
@@ -241,8 +247,8 @@ The implementation MUST persist at least the following immutable fields (names a
 
 - `g_applied_identity_key`, `identity_canonicalization_profile`, `identity_schema_revision`;
 - exact ContextId/ContextVersion, DeliveryId/DeliveryAttemptId, InferenceRequestId and FinalRequestBoundaryId;
-- COutcomeIdentity, CSubmitOutcomeRef, CSubmitOutcomeDigest, RequestDigest, ProviderAttemptRef/generation and provider idempotency namespace/key refs;
-- HEvidenceIdentity, H schema artifact revision, H P0 digest, authenticated H receipt/result ref, Adapter/Runtime/Session/CapabilityEpoch;
+- CProviderAttemptIdentity, COutcomeRecordIdentity, CSubmitOutcomeRef, CSubmitOutcomeDigest, RequestDigest, ProviderAttemptRef/generation and provider idempotency namespace/key refs;
+- HDeliveryBindingIdentity, HEvidenceIdentity, HObservationRecordIdentity, H schema artifact revision, H P0 digest, authenticated H receipt/result ref, Adapter/Runtime/Session/CapabilityEpoch;
 - COCParticipantIdentity, CausalOrderTransactionRef, ParticipantIntent/Reservation refs, PreparedParticipantRef, PreparedTransactionGID, DB incarnation and ParticipantTupleDigest;
 - COC terminal proof, recovery-batch proof, participant-completeness and owner high-water refs/digests;
 - I authorization/receipt/PermissionEpoch refs and digest;
@@ -260,8 +266,8 @@ Unknown or unavailable proof is represented explicitly as UNKNOWN with a reason 
 |---|---|---|
 | G-AP-P01 | Same identity/revision/digest submitted twice | One durable Applied fact; second call returns original receipt |
 | G-AP-P02 | Same identity/revision with changed aggregate digest | Conflict/quarantine; no overwrite |
-| G-AP-P03 | Same H EvidenceIdentity with changed H P0 digest | Conflict/quarantine; no Full Applied |
-| G-AP-P04 | Same COutcomeIdentity with changed C payload digest | Conflict/quarantine; no Full Applied |
+| G-AP-P03 | Same HObservationRecordIdentity with changed H P0 digest | Conflict/quarantine; no Full Applied |
+| G-AP-P04 | Same COutcomeRecordIdentity with changed C payload digest | Conflict/quarantine; no Full Applied |
 | G-AP-P05 | Same COC participant identity with contradictory terminal digest/outcome | Conflict/UNKNOWN; no Full Applied |
 | G-AP-P06 | C UNKNOWN/IN_DOUBT after possible provider side effect | Same ProviderAttempt/key; no Full Applied; barriers held |
 | G-AP-P07 | Crash after provider handoff before C outcome persistence | IN_DOUBT; same-key recovery only |
