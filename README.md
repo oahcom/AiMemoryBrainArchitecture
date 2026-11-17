@@ -39,6 +39,14 @@ The project maintains a reader-oriented Chinese/English documentation set. Start
 
 项目提供中英双语、分层阅读的架构文档。建议从[双语文档入口](docs/README.md)开始，再阅读[中文系统架构总览](docs/zh-CN/01-system-architecture/system-overview.md)或[英文系统架构总览](docs/en/01-system-architecture/system-overview.md)。入口页说明阅读顺序、术语、决策状态和双语一致性规则。
 
+## Bilingual architecture documentation policy / 架构双语文档规范
+
+**Normative requirement:** Every architecture design or semantic architecture change MUST include Chinese and English documentation in the same change set. Both versions must preserve identical meaning, constraints, decision status, stable identifiers, failure cases, and acceptance criteria. A one-language-only architecture PR cannot pass documentation acceptance unless a time-bounded, tracked **STALE** exception is approved under the policy.
+
+**规范性要求：** 每一项架构设计或改变架构语义的修改，都必须在同一个变更集中提供中文和英文文档。两种语言必须保持相同的含义、约束、决策状态、稳定标识、故障场景和验收条件。只有经过批准、明确登记责任人和期限的 **STALE** 临时例外，才允许暂时缺少一种语言版本；否则单语架构 PR 不得通过文档验收。
+
+See [GOV-DOC-001 Bilingual Architecture Documentation Policy](00-governance/bilingual-documentation-policy.md) and the [bilingual documentation portal](docs/README.md).
+
 ## Documentation map
 
 | Path | Purpose |
