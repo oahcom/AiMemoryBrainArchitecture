@@ -845,3 +845,64 @@ R-09 为 **High / PARTIALLY SPECIFIED；PRODUCTION READINESS NOT PROVEN**。阶�
 
 **关闭状态：** 仅架构候选 Profile；生产部署/运维 NOT DESIGNATED；Production Activation NOT AUTHORIZED。
 
+
+
+## 24. R-10 实时治理复杂度、集成吞吐与基线控制审查 — 2026-11-18
+
+### 24.1 当前仓库事实
+
+| 指标 | 实时观察 | 解释 |
+|---|---|---|
+| Main HEAD | b3c666e67982cb3d3374e759cfb6552c7765aacb | Main 较本次 Review 原始 b372 基线前进 32 个 Commit |
+| Main Tree Identity | b372 与 b3c666 均解析为 Tree 7096e0bc3fdc9a390fccff388f9261522fa424f2；Compare API 没有净文件变化 | 重要更正：Main SHA 前进，但跟踪内容树与锁定 R 基线完全相同；对 PR #50 而言这是历史漂移，不是内容漂移 |
+| Main 跟踪文件 | 82 个文件，全部 Markdown；无可执行源码、Schema、Migration 或生产部署代码 | 与 README/Roadmap 一致：按设计尚未开始实现；本身不是缺陷 |
+| Main 模块分布 | 00 Governance 4；01 System 7；02 Domain 6；07 Agent Integration 4；13 Engineering Decisions 1；14 AI Development 5；docs 38；reviews 15；root 2 | Main 是紧凑基线/入口，详细 Owner 合同仍分散在各分支 |
+| Open PR | 共 40 个；38 个 Draft；2 个非 Draft | WIP 队列较大，多数工作尚未达到集成接受 |
+| Open Issue | 24 个 | 多个决策/审查轨道仍未解决 |
+| Main-target PR | 30 个目标为 main；其中 25 个 Base SHA 与当前 Main 不同 | Base Lineage 分散；SHA 不同本身不证明内容冲突 |
+| 重复 Risk Assessment | PR #48 和 #50 都发布 Session 1 System-wide Risk Assessment，且使用相同 b372 内容基线 | 形成竞争性交付物/事实来源风险；未发现明确 Supersession 决议 |
+| 重复 Complexity Assessment | PR #47 和 #49 都发布独立双语 Architecture Complexity Assessment，且使用相同 b372 内容基线 | 形成竞争 X 交付物/事实来源风险；未发现明确 Supersession 决议 |
+| Consolidation/Topology 轨道 | PR #44/#51（Consolidation）、#52/#54（B→A/Topology）、#65/#67/#70/#73（Current-source、H Validator、B-02 与 Technology Remediation）仍并行开放 | 多条相互依赖的 Review/Remediation Chain 可能互相使精确 Pin 失效 |
+
+### 24.2 项目文件自身的说明及其含义
+
+README 明确将仓库标记为 Architecture Definition，当前阶段为 System Architecture Baseline，Implementation Not Started by Design。因此没有生产代码不是复杂度缺陷，也不能作为错误失败指标。
+
+但 Roadmap 自身要求每个组件具有有界职责、输入/输出、依赖和已知开放问题；Phase 3 要求 System Contract 与可度量 Acceptance；Phase 4 的技术选型仍为 CANDIDATE/TO_VALIDATE。当前并行精确版本 Review 和未合并 Owner 工件的增加，构成另一种集成/治理风险。
+
+### 24.3 复杂度风险信号
+
+**R10-1 — Review 工件重复，缺少唯一权威 Supersession Chain。** PR #47 与 #49 目的/标题属于同一系列，但路径、篇幅和评分结构不同；PR #48 与 #50 是两份独立 R 全系统风险评估。两组均为 Draft，且共享原始 b372 基线。当前 Main 中未发现选定其中一个作为 Canonical 或明确 Supersede 另一个的决议。读者可能得到不同结论或关闭条件。
+
+**R10-2 — WIP 数量超过可见集成吞吐。** 40 个 Open PR 中 38 个为 Draft，另有 24 个 Open Issue。该数量不能证明工程生产率低，因为项目处于设计阶段，许多 Draft 是有意的；但它证明大部分工作尚未进入单一被接受基线。如果每个 Draft 都产生一份竞争合同，审查对象数量可能快于已解决决策数量增长。
+
+**R10-3 — Main/Owner Branch 分裂形成双层架构。** Main 只有紧凑的 82 个 Markdown 基线文件；详细 B/C/D/E/F/G/H/I/Storage 合同位于独立 Owner Branch 和 Draft PR。审查者必须协调 Current Main、Branch HEAD、嵌入式 Source Pin、PR Base SHA 和 Supersession Note。只有在存在唯一权威版本 Ledger 和严格 Stale-review Invalidation 规则时，这种方式才可控。
+
+**R10-4 — 版本变更可能压过语义进展。** H 1.2.12/1.2.14/1.2.15、Recovery Cutoff 1.0.4/1.0.5、Storage v3.1/v3.2.3/v3.3.2、COC Revision 和 JF-10 Bridge Amendment 形成大量精确 Pin。安全/权威变更确实需要版本管理，但如果每次文字或映射修正都生成并行后继版本，却没有机器可读兼容图，成本会很高。
+
+**R10-5 — 尚未有一个 Vertical Slice，Proof Object/State Machine 数量已经很高。** 设计区分 PermissionEpoch、ForgetFenceGeneration、COC Position、Participant GID/XID、RecoveryCutoff Batch/Manifest/JoinProof、PublicationOperationId、AttemptId、Provider Idempotency Key、Applied Request Digest、Capability Epoch 和多种 Owner Receipt。这些区分通常有必要，不应随意合并。风险在于尚未证明一个有界端到端 Slice，就实现所有组合状态。
+
+**R10-6 — Governance Gate 很多，但 Owner 决策吞吐不均。** I36-GOV-01..10、I36 Consumer Acceptance、D/C Gate Amendment、Storage Topology、COC/RecoveryJoin 和 Applied Freeze 各有独立批准轨道。部分决议仅为委托角色模拟或架构级接受。若没有明确授权批准人、生效 Policy Version 和关闭条件，系统可能积累大量形式上详细、实际永远无法执行的 Gate。
+
+**R10-7 — 技术与运维假设仍为候选。** TAB-001 为 v0.1 CANDIDATE；Storage PostgreSQL 18.7 是 CI Capability Profile；COC Topology 是提案；RPO/RTO/Capacity 未批准。尚未通过测量证明这些 State Machine、Log、Index、Backup 和验证流程能适应目标工作负载或工程团队承载能力。
+
+### 24.4 R-10 结论
+
+R-10 继续为 **High / PARTIALLY VERIFIED（治理/集成风险）；是否已经形成经济或工程承载失败 NOT PROVEN**。架构正确性机制不天然等于无谓复杂度。Typed Authority Separation、Immutable Evidence、Anti-resurrection、Prepared Participant Recovery 和 Fail-closed 语义都有明确安全目的。当前证据不支持删除这些保护。
+
+已证明的风险是流程和集成开销：重复报告、大量并行 Draft PR、未决 Owner Decision、多版本族，以及在一个集成 Vertical Slice 被接受前就存在很大的精确证据负担。尚未测量真实工程成本、认知负荷、Runtime Performance 或 Support Burden，因此不能无依据声称架构复杂度已经超过业务价值。
+
+### 24.5 根本性简化与关闭条件
+
+1. 建立唯一 Canonical Review Registry：一个 Current Main SHA/Tree、一份 Current Owner HEAD 表、一份精确 Artifact/Blob Ledger、每个决策族一个 PR/Issue，并建立明确 Supersession Link。不得删除历史证据。
+2. 解决重复 X/R 交付物：选择一份 Canonical Complexity Assessment 和一份 Canonical System Risk Assessment，或明确记录两者不重叠的范围。其他 Draft 只能通过明确 Owner 决议标记 Superseded/Merged/Closed。
+3. 每个语义权威使用一个 Append-only Decision Record。优先在一个 Canonical Contract 上追加 Amendment 和版本化兼容矩阵，而不是创建近似重复文件。
+4. 定义第一版正确性 Slice：一个 Canonical Authority Boundary、一个 I PolicyDomain、一个 Provider Adapter、一条有界 Memory→Compiler→Storage Publication Path、一个 Forget Fence、一条 Retrieval/Context Suppression Path 和一个 Restore-quarantine Path。明确延后 Multi-domain Atomicity、Multi-region Active-active、Generalized Adapter Tier 和广泛 External-recipient Erasure Guarantee。
+5. 维护 Complexity Budget，记录独立 State Machine、Proof Object、Protocol Version、同步 Cross-owner Call、Registry、Durable Log 和 Mandatory Test 的数量与理由。每个新机制必须说明现有权威为什么无法保持该 Invariant。
+6. 每个 Owner 先提供自己权威范围的最小 Executable Contract Harness 和 Failure Matrix，再增加更多集成层；先端到端跑通第一个 Vertical Slice，再扩大合同面。
+7. 跟踪 Decision Throughput：每周关闭的精确 Owner Decision 数、阻塞决议年龄、Stale Pin 数、PR Rebase/Review Cycle、重复工件和测试维护负担。不要用文档数量或代码量衡量成功。
+8. Engineering Pilot 后测量代表性工作负载、p95/p99 Latency、Storage/WAL 增长、Index Rebuild 成本、Prepared-XID Age、Recovery Time、Operator Hours 和 Review/Maintenance Effort。只有之后才能判断复杂度是否超过收益。
+9. 明确保留 2026-11-18 Main History Correction：b3c666 比 b372 多 32 个 Commit，但 Tree SHA 相同。PR #50 的 b372 Base 与当前 Main 内容一致，不应误报为内容过期。未来 Main 内容发生变化时仍必须刷新精确来源。
+
+**关闭状态：NOT CLOSED。** 尚无证据证明该设计在经济上不可行；在继续扩大协议面之前，需要先整合治理/集成控制系统。
+
