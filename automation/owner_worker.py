@@ -104,8 +104,6 @@ def run_once():
         n=int(item["number"])
         candidate_labels={x["name"] for x in item.get("labels",[])}
         if item.get("pull_request") or OWNER not in candidate_labels or ACTIVE in candidate_labels: continue
-        candidate_labels={x["name"] for x in item.get("labels",[])}
-        if item.get("pull_request") or OWNER not in candidate_labels or ACTIVE in candidate_labels: continue
         if not ledger.claim(n): continue
         try:
             issue=gh.issue(n)
