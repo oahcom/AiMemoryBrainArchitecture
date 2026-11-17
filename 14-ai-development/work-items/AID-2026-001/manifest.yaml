@@ -453,7 +453,7 @@ current_status_snapshot:
     acceptance: PENDING_BLOCKED
     production_activation: NOT_AUTHORIZED
   validation:
-    manifest_yaml_parser: NOT_RUN
+    manifest_yaml_parser: PASS_STRICT_UNIQUE_KEYS_PR152_EXACT_HEAD_08C017AF
     manifest_schema_validation: NOT_RUN
     current_main_full_r3_ci: NOT_EVIDENCED
   note: Historical review and execution entries above are preserved as historical records. The merge facts above do not convert any review, approval, test, acceptance or production gate to PASS.
@@ -487,7 +487,10 @@ latest_reconciliation:
     implementation_binding: DEFERRED_TO_ENGINEERING_PHASE
     engineering_phase_repository_and_code_owners: PENDING
     issue_7_disposition: OPEN_FOR_ENGINEERING_PHASE_ENTRY_PLAN_NOT_CURRENT_ARCHITECTURE_GATE
-    full_manifest_yaml_and_schema_validation: NOT_RUN
+    full_manifest_yaml_parse_and_required_field_path_check: PASS_PR147_EXACT_HEAD_RUN_44189279179
+    strict_unique_key_yaml_validation: PASS_PR152_EXACT_HEAD_RUN_44189789286
+    duplicate_key_integrity: FIXED_TWO_REMEDIATION_STATUS_MAPS_RENAMED
+    formal_json_schema_validation: NOT_RUN
     acceptance: BLOCKED_PENDING
     production_activation: NOT_AUTHORIZED
   preliminary_review:
@@ -501,3 +504,36 @@ latest_reconciliation:
     readme_md: 7aa163719978f253685931b2eb001bb6a7228c6f
     workflow_yml: 9f261aa8c00b1a144cee50c049bae8d437fd0eea
   note: PR #141 integration and its 24/24 reference-model result do not change any production R3, specialist approval, independent review, acceptance or G3 gate.
+
+
+post_merge_manifest_validation:
+  pr_147:
+    state: CLOSED_MERGED
+    exact_head_sha: d3dbc5321ccf97429b3003b19a28d8100330fda9
+    merge_commit_sha: 56336bd16b4dcab1b600eb7ab12e171fda0553a1
+    workflow_run: 44189279179
+    workflow_conclusion: SUCCESS
+    yaml_full_parse: PASS
+    required_top_level_fields: PASS
+    referenced_path_existence: PASS
+    duplicate_key_rejection: NOT_IMPLEMENTED_IN_THIS_RUN
+    limitation: PyYAML_safe_load_silently_accepts_duplicate_mapping_keys
+  pr_152:
+    state: CLOSED_MERGED
+    exact_head_sha: 08c017af689eb98ffc8e114e54ed46314cfbf757
+    merge_commit_sha: bc6ab890aea68ea33f4de42e442d7ac22fcbf26b
+    workflow_run: 44189789286
+    workflow_conclusion: SUCCESS
+    strict_unique_key_yaml_parse: PASS
+    duplicate_top_level_and_nested_negative_fixtures: PASS
+    actual_manifest_required_fields_and_paths: PASS
+    defect_discovered_by_prior_failed_run: 44189624240
+    defect: duplicate_status_keys_in_remediation_mapping
+    remediation: renamed_to_latest_review_status_and_source_review_status_preserving_both_maps
+  formal_json_schema_validation: NOT_RUN
+  production_r3_and_dfi_001_to_022: NOT_RUN_NOT_EVIDENCED
+  owner_d_approval: PENDING
+  owner_i_approval: PENDING
+  independent_specialist_reviews: PENDING_NOT_EVIDENCED
+  production_activation: NOT_AUTHORIZED
+  note: PR #147's permissive YAML parse PASS is historical and does not prove duplicate-key rejection. PR #152 provides the strict unique-key structural validation. Neither run is formal JSON Schema validation or production R3/DFI conformance.
