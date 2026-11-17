@@ -43,23 +43,63 @@ def snapshot():
     }
 
 
+def owner_snapshot_root(s):
+    fields = (
+        "owner_snapshot_ref", "owner_snapshot_digest",
+        "owner_snapshot_attestation_ref", "owner_snapshot_attestation_digest",
+        "owner_gate_generation", "scope_generation_ref",
+        "request_high_water", "admission_high_water",
+        "request_ledger_root", "admission_ledger_root", "owner_ledger_root",
+        "anti_rollback_anchor_ref", "owner_specific_high_waters_digest",
+    )
+    return {key: s[key] for key in fields}
+
+
 def batch():
+    s = snapshot()
     return {
         "recovery_epoch_ref": "epoch:22",
         "coc_record_ref": "COC:batch:41",
         "payload_digest": "4" * 64,
         "coc_record_position": "41",
         "coc_entry_digest": "5" * 64,
+        "prefix": {
+            "coordinator_epoch": "term:4",
+            "coordinator_index": 40,
+            "entry_digest": "a" * 64,
+            "committed_configuration_epoch": "config:2",
+        },
+        "owner_snapshots": {"I": s},
+        "manifest_id": "manifest:stable:1",
+        "manifest_content_digest": "7" * 64,
+        "enumeration_high_water": "enum:40",
+        "coc_participant_count": 0,
+        "owner_local_admission_count": 0,
+        "manifest_member_count": 0,
+        "member_set_root": "9" * 64,
     }
 
 
 def manifest():
+    b = batch()
+    s = snapshot()
     return {
         "recovery_epoch_ref": "epoch:22",
+        "prefix": dict(b["prefix"]),
+        "batch_record_ref": b["coc_record_ref"],
+        "batch_position": 41,
+        "batch_entry_digest": b["coc_entry_digest"],
+        "manifest_id": b["manifest_id"],
+        "enumeration_high_water": b["enumeration_high_water"],
         "coc_record_ref": "COC:manifest:42",
         "coc_record_position": "42",
         "coc_entry_digest": "6" * 64,
-        "manifest_content_digest": "7" * 64,
+        "manifest_content_digest": b["manifest_content_digest"],
+        "coc_participant_count": b["coc_participant_count"],
+        "owner_local_admission_count": b["owner_local_admission_count"],
+        "manifest_member_count": b["manifest_member_count"],
+        "member_set_root": b["member_set_root"],
+        "owner_snapshot_roots": {"I": owner_snapshot_root(s)},
         "manifest_members": [],
     }
 
@@ -139,8 +179,8 @@ class OwnerGateRelease1217SemanticTests(unittest.TestCase):
     def test_07_currentness_cas_unavailable_stays_unknown(self):
         self.assertEqual(validate(current=None), UNKNOWN)
 
-    def test_08_stale_currentness_cas_stays_unknown(self):
-        self.assertEqual(validate(current=False), UNKNOWN)
+    def test_08_stale_currentness_cas_is_invalid(self):
+        self.assertEqual(validate(current=False), INVALID)
 
     def test_09_owner_snapshot_ref_substitution_is_invalid(self):
         r = release(); r["owner_snapshot_ref"] = "I:snapshot:other"
@@ -197,6 +237,66 @@ class OwnerGateRelease1217SemanticTests(unittest.TestCase):
     def test_22_wrong_manifest_record_position_is_invalid(self):
         m = manifest(); m["coc_record_position"] = "44"
         self.assertEqual(validate(m=m), INVALID)
+
+    def test_23_manifest_must_backlink_to_exact_batch_record(self):
+        m = manifest(); m["batch_record_ref"] = "COC:batch:other"
+        self.assertEqual(validate(m=m), INVALID)
+
+    def test_24_manifest_must_bind_exact_batch_position(self):
+        m = manifest(); m["batch_position"] = 39
+        self.assertEqual(validate(m=m), INVALID)
+
+    def test_25_manifest_must_bind_exact_batch_entry_digest(self):
+        m = manifest(); m["batch_entry_digest"] = "a" * 64
+        self.assertEqual(validate(m=m), INVALID)
+
+    def test_26_manifest_and_batch_must_share_manifest_id(self):
+        m = manifest(); m["manifest_id"] = "manifest:other"
+        self.assertEqual(validate(m=m), INVALID)
+
+    def test_27_manifest_and_batch_must_share_content_digest(self):
+        m = manifest(); m["manifest_content_digest"] = "b" * 64
+        self.assertEqual(validate(m=m), INVALID)
+
+    def test_28_manifest_and_batch_must_share_exact_prefix(self):
+        m = manifest(); m["prefix"]["coordinator_index"] = 39
+        self.assertEqual(validate(m=m), INVALID)
+
+    def test_29_manifest_must_commit_after_batch(self):
+        m = manifest(); m["coc_record_position"] = "40"
+        self.assertEqual(validate(m=m), INVALID)
+
+    def test_30_batch_must_contain_exact_owner_snapshot(self):
+        b = batch(); b["owner_snapshots"]["I"]["scope_generation_ref"] = "scope:other"
+        self.assertEqual(validate(b=b), INVALID)
+
+    def test_31_manifest_owner_snapshot_root_must_match_snapshot(self):
+        m = manifest(); m["owner_snapshot_roots"]["I"]["owner_snapshot_digest"] = "9" * 64
+        self.assertEqual(validate(m=m), INVALID)
+
+    def test_32_owner_signature_callback_exception_is_unknown(self):
+        self.assertEqual(validate_owner_gate_release(
+            release(), batch(), manifest(), snapshot(),
+            verify_owner_signature=lambda *_: (_ for _ in ()).throw(RuntimeError("I unavailable")),
+            verify_coc_commit_proof=lambda *_: True,
+            currentness_cas=lambda *_: True,
+        ), UNKNOWN)
+
+    def test_33_coc_proof_callback_exception_is_unknown(self):
+        self.assertEqual(validate_owner_gate_release(
+            release(), batch(), manifest(), snapshot(),
+            verify_owner_signature=lambda *_: True,
+            verify_coc_commit_proof=lambda *_: (_ for _ in ()).throw(RuntimeError("COC unavailable")),
+            currentness_cas=lambda *_: True,
+        ), UNKNOWN)
+
+    def test_34_currentness_callback_exception_is_unknown(self):
+        self.assertEqual(validate_owner_gate_release(
+            release(), batch(), manifest(), snapshot(),
+            verify_owner_signature=lambda *_: True,
+            verify_coc_commit_proof=lambda *_: True,
+            currentness_cas=lambda *_: (_ for _ in ()).throw(RuntimeError("owner currentness unavailable")),
+        ), UNKNOWN)
 
 
 if __name__ == "__main__":
