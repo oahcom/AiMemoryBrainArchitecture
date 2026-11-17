@@ -252,3 +252,12 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 - H EN/zh-CN companions refreshed. Structural readback: 23/23 headings and 33/33 table rows across source/EN/zh-CN; targeted parity PASS pending updated final report readback.
 - H §11.8 adds candidate mapping for CGH-APPLIED-1.1 COC terminal proof, recovery-batch completeness, owner high-water, participant reconciliation, I/D owner evidence and Storage same-XID terminal proof.
 - New H36-AP-08 remains OPEN: no updated/generated H wire schema/SDK or exact ACK message-family binding; C/G/I/D/Storage confirmations and conformance remain pending. H source remains CANDIDATE; C/G/H freeze BLOCKED.
+
+
+
+## H provider outcome / owner gate mapping refresh — 2026-11-17
+
+- Current H source Blob: `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`, superseding `0dca3dc5463a02be0e19524811afbae87795baf5`.
+- H EN/zh-CN companions refreshed; structural parity now 24/24 headings and 33/33 table rows across source/EN/zh-CN.
+- §11.9 requires C-issued provider receipt and immutable CSubmitOutcome; terminal proof only after all owner outcomes are determinate; I/D exclusively issue their own gate-release attestations.
+- H36-AP-09 remains OPEN because the exact H wire message-family Schema/SDK mapping and consumer acceptance are not present. H candidate remains CANDIDATE; C/G/I/D/Storage acceptance and conformance remain pending; C/G/H freeze BLOCKED.
