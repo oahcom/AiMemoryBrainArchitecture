@@ -186,14 +186,43 @@ def validate_pair(batch, manifest, batch_position, manifest_position, linearizab
     return VALID
 
 
-def validate_release(r,b,m):
-    if r.get("owner_kind") not in {"I","D","C"} or r.get("release_type")!="OUTAGE_ADMISSION_GATE_ONLY":return INVALID
-    expected={"batch_record_ref":b.get("coc_record_ref"),"batch_entry_digest":b.get("coc_entry_digest"),
-              "manifest_record_ref":m.get("coc_record_ref"),"manifest_content_digest":m.get("manifest_content_digest"),
-              "manifest_record_entry_digest":m.get("coc_entry_digest")}
-    if any(r.get(k)!=v for k,v in expected.items()):return INVALID
-    return VALID if r.get("final_currentness_cas_valid") is True else UNKNOWN
+def owner_reconciliation_root(manifest, owner):
+    projected=[]
+    for member in manifest.get("manifest_members",[]):
+        if member.get("member_kind")=="COC_PARTICIPANT":
+            bindings=[x for x in member.get("owner_admission_bindings",[]) if x.get("owner_kind")==owner]
+            if bindings:
+                projected.append({"participant_intent_ref":member.get("participant_intent_ref"),
+                                  "owner_admission_bindings":bindings})
+        elif member.get("member_kind")=="OWNER_LOCAL_ADMISSION" and member.get("owner_kind")==owner:
+            projected.append(member)
+    return td("OWNER-RECONCILIATION", projected)
 
+
+def validate_release(r,b,m):
+    owner=r.get("owner_kind")
+    if owner not in {"I","D","C"} or r.get("release_type")!="OUTAGE_ADMISSION_GATE_ONLY":
+        return INVALID
+    snapshots=b.get("owner_snapshots")
+    if not isinstance(snapshots,dict) or owner not in snapshots:
+        return UNKNOWN
+    s=snapshots[owner]
+    expected={
+      "batch_record_ref":b.get("coc_record_ref"),"batch_digest":b.get("payload_digest"),
+      "batch_position":b.get("coc_record_position"),"batch_entry_digest":b.get("coc_entry_digest"),
+      "manifest_record_ref":m.get("coc_record_ref"),"manifest_record_position":m.get("coc_record_position"),
+      "manifest_content_digest":m.get("manifest_content_digest"),
+      "manifest_record_entry_digest":m.get("coc_entry_digest"),
+      "owner_gate_ref":s.get("owner_gate_ref"),"owner_gate_generation":s.get("owner_gate_generation"),
+      "owner_request_high_water":s.get("request_high_water"),
+      "owner_admission_high_water":s.get("admission_high_water"),
+      "request_set_digest":s.get("request_set_digest"),"admission_set_digest":s.get("admission_set_digest"),
+      "request_ledger_root":s.get("request_ledger_root"),"admission_ledger_root":s.get("admission_ledger_root"),
+      "reconciliation_root":owner_reconciliation_root(m,owner),
+    }
+    if any(r.get(k)!=v for k,v in expected.items()):
+        return INVALID
+    return VALID if r.get("final_currentness_cas_valid") is True else UNKNOWN
 
 def validate_profile(message, protected, registry, owner, audience, purpose):
     if not protected:return VALID
