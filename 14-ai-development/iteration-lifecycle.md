@@ -233,3 +233,50 @@ A failed iteration is useful evidence. Concealing it destroys the learning loop.
 ## 7. Initial adoption / 初始采用
 
 Apply this process to new work immediately. For in-flight Phase 3 work, create retrospective Work Item records where practical; mark missing prompt versions or test evidence as NOT RECORDED rather than fabricating them. Existing review reports and commit SHAs remain valid historical evidence within their original scope.
+
+
+## 8. GitHub carrier and closeout checklist / GitHub 载体与结项清单
+
+The task carrier is part of the delivery, not optional administration.
+
+### Intake
+- [ ] Reuse or create the owning GitHub Issue; record its URL and Work Item ID.
+- [ ] Link the intended PR (existing preferred) and dependencies before implementation.
+- [ ] Record Owner, session/prompt version and hash, branch/base SHA, scope, risk and acceptance criteria.
+
+### In progress
+- [ ] Update the Issue/PR when material decisions, commits, changed paths, test results, blockers or handoffs occur.
+- [ ] Keep source pins and tested Head SHAs exact; distinguish unrun, failed and passed checks.
+- [ ] Link related work rather than creating duplicate carriers.
+
+### Closeout
+- [ ] Publish the complete closeout record from AI-STD-001 §13.
+- [ ] Link prompt, manifest, implementation, test, review and decision artifacts.
+- [ ] Disclose same-author reviews and delegated role simulations; do not represent them as independent Owner approval.
+- [ ] Record exact merge target and merge SHA only when actually merged; include post-merge verification.
+- [ ] Update `14-ai-development/work-items/INDEX.md`.
+- [ ] For blocked/no-change work, record the blocker, accountable resolver and objective exit condition.
+
+The Integration Owner checks the index for orphan sessions, missing closeouts, stale SHAs and unlinked PRs at each integration checkpoint. This traceability check does not replace technical review, Owner authority or merge gates.
+
+工作载体是交付物的一部分，不是可选的行政手续。
+
+### 接收登记
+- [ ] 复用或创建归属 GitHub Issue，记录 URL 和 Work Item ID。
+- [ ] 在实现前关联目标 PR（优先复用现有 PR）及依赖。
+- [ ] 记录 Owner、会话/提示词版本与哈希、分支/Base SHA、范围、风险和验收标准。
+
+### 执行期间
+- [ ] 发生重要决策、Commit、变更路径、测试结果、阻塞或交接时更新 Issue/PR。
+- [ ] 保持来源 Pin 和测试 Head SHA 精确；区分未运行、失败和通过。
+- [ ] 关联相关工作，不创建重复载体。
+
+### 结项
+- [ ] 发布 AI-STD-001 §13 要求的完整 Closeout。
+- [ ] 关联提示词、Manifest、实现、测试、审查和决策工件。
+- [ ] 披露同作者审查和委派角色模拟，不得冒充独立 Owner 批准。
+- [ ] 仅在确实合并后记录准确目标分支和 Merge SHA，并补充合并后验证。
+- [ ] 更新 `14-ai-development/work-items/INDEX.md`。
+- [ ] 对受阻/无变更工作，记录阻塞、负责解决者和客观退出条件。
+
+Integration Owner 在每个集成检查点核对索引中的孤立会话、缺失 Closeout、过期 SHA 和未关联 PR。本追溯检查不替代技术审查、Owner 权限或合并门禁。
