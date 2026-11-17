@@ -282,6 +282,12 @@ A commit or successful unit test is not system acceptance. A scheduled run is no
 
 ## 11. Storage decision remains open / 存储选型仍开放
 
+Detailed decision record: [ADR-RUN-001 — Durable Store and Transaction Boundaries](adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md). The ADR is PROPOSED: it defines transaction invariants, candidate comparison, benchmark/fault matrix and acceptance gates; it does not select or deploy a database.
+
+详细决策记录：[ADR-RUN-001 — 持久化存储与事务边界](adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md)。该 ADR 处于 PROPOSED：定义事务不变量、候选方案比较、基准/故障矩阵和验收 Gate；不代表已选择或部署数据库。
+
+## 11. Storage decision remains open / 存储选型仍开放
+
 The pilot requires a durable transactional store for inbox, deduplication, queue state, leases, run ledger and outbox. The technology is intentionally **not decided here**.
 
 试点需要事务型持久化存储，承载 Inbox、去重、队列状态、租约、Run Ledger 和 Outbox。本文件**不在此决定**具体技术。
