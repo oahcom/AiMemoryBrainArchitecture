@@ -1,0 +1,7 @@
+{
+  "profile_id": "AIMBA-C-CRYPTO-1.0",
+  "schema_version": "1.0.1",
+  "status": "CANDIDATE_TEST_ONLY_NOT_REGISTERED",
+  "seed_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+  "vectors": []
+}
