@@ -6,7 +6,7 @@
 - Exact I P0 addendum: `09-security-governance/phase-3.8.7-i-exact-signed-object-p0-allowlists.md`
 - I P0 Blob: `739dc15e3cca33aef3f012f713b988e5528d4ad9`
 - Exact H owner-snapshot attestation schema: `08-bmcp-protocol/schemas/bmcp.i-owner-snapshot-attestation-1.0.0.schema.json`
-- H schema Blob: `REPLACE_AFTER_READBACK`
+- H schema Blob: ``d0ce72f59511c115e53974a23c3e3c5e83101871``
 - H unified schema 1.2.8: Blob `70b892797d07489936300a26c0dedfafe1d6e746`
 - H RecoveryJoin 1.0.1: Blob `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`
 - Decision: **ACCEPT WITH ENUMERATED AMENDMENTS — P0 FIELD CONTRACT; SNAPSHOT SCHEMA CANDIDATE**
