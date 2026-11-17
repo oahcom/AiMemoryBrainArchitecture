@@ -63,6 +63,8 @@ class Protocol:
     authorizations: dict = field(default_factory=dict)
     revoked: set = field(default_factory=set)
     consumed: set = field(default_factory=set)
+    i_pending: dict = field(default_factory=dict)
+    revocation_pending: set = field(default_factory=set)
     outcomes: dict = field(default_factory=dict)
     visibility: dict = field(default_factory=dict)
     receipts: dict = field(default_factory=dict)
@@ -152,14 +154,48 @@ class Protocol:
 
     def revoke(self, auth_id):
         self.revoked.add(auth_id)
+        if any(binding[0] == auth_id for binding in self.i_pending.values()):
+            self.revocation_pending.add(auth_id)
+
+    def consume_i_commit_won(self, operation_id, auth_id, publication_id,
+                             storage_id, d_proof):
+        i_proof = ("I_COMMIT_WON", auth_id, publication_id, storage_id)
+        binding = (auth_id, publication_id, storage_id, d_proof, i_proof)
+        # A replay after COMMIT_WON returns the same proof even if revocation
+        # arrived later; the sequencer decision already won.
+        if operation_id in self.i_pending:
+            if self.i_pending[operation_id] != binding:
+                raise Rejected("I participant identity rebound")
+            return i_proof
+        if operation_id in self.i_closed:
+            if self.operation_bindings.get(operation_id) != binding:
+                raise Rejected("closed I participant identity rebound")
+            return i_proof
+        if operation_id in self.private_unknown or operation_id in self.outcomes:
+            raise Rejected("operation is already UNKNOWN or terminal")
+        if auth_id not in self.authorizations or auth_id in self.revoked:
+            raise Rejected("authorization absent or revocation won before I consumption")
+        if self.authorizations[auth_id] != (publication_id, storage_id):
+            raise Rejected("authorization not bound to exact participants")
+        if publication_id not in self.publication_participants:
+            raise Rejected("D publication proof missing")
+        if self.publication_participants[publication_id][1] != storage_id:
+            raise Rejected("D proof does not bind exact Storage participant")
+        if d_proof != ("D_ADMITTED", publication_id, storage_id):
+            raise Rejected("invalid D publication proof")
+        prior = self.operation_bindings.get(operation_id)
+        if prior is not None and prior != binding:
+            raise Rejected("operation identity rebound before Storage commit")
+        if auth_id in self.consumed:
+            raise Rejected("single-use authorization already consumed")
+        self.consumed.add(auth_id)
+        self.i_pending[operation_id] = binding
+        self.operation_bindings[operation_id] = binding
+        return i_proof
 
     def commit(self, operation_id, auth_id, publication_id, storage_id,
                d_proof, i_commit_won_proof, *, fail_before_commit=False):
-        # Idempotent retry is valid only for the exact immutable operation tuple.
-        # Reusing an operation ID with different participants/proofs is a conflict.
         binding = (auth_id, publication_id, storage_id, d_proof, i_commit_won_proof)
-        # An UNKNOWN operation must be reconciled against authoritative Storage
-        # before any retry can attempt a new commit; keep it private and fail closed.
         if operation_id in self.private_unknown:
             prior = self.operation_bindings.get(operation_id)
             if prior is not None and prior != binding:
@@ -171,10 +207,12 @@ class Protocol:
             return self.receipts[operation_id]
         if operation_id in self.outcomes:
             raise Rejected("operation already terminal as NO_PUBLICATION; use a new operation ID")
-        if auth_id not in self.authorizations or auth_id in self.revoked:
-            raise Rejected("authorization absent or revoked")
-        if auth_id in self.consumed:
-            raise Rejected("single-use authorization already consumed")
+        # Storage consumes no I authorization: it validates the exact prior
+        # COMMIT_WON decision made by the independent I sequencer.
+        if self.i_pending.get(operation_id) != binding:
+            raise Rejected("exact I COMMIT_WON participant has not been consumed")
+        if auth_id not in self.authorizations or auth_id not in self.consumed:
+            raise Rejected("authorization or I consumption missing")
         if self.authorizations[auth_id] != (publication_id, storage_id):
             raise Rejected("authorization not bound to exact participants")
         if publication_id not in self.publication_participants:
@@ -186,18 +224,14 @@ class Protocol:
         if i_commit_won_proof != ("I_COMMIT_WON", auth_id, publication_id, storage_id):
             raise Rejected("invalid pre-commit I COMMIT_WON proof")
         if fail_before_commit:
-            raise RuntimeError("simulated crash before atomic transaction commit")
+            raise RuntimeError("simulated crash before Storage transaction commit")
 
-        # One indivisible modeled Storage transaction boundary.
         receipt = ("RECEIPT", operation_id, publication_id, storage_id)
         outcome = ("COMMITTED", operation_id, publication_id, storage_id)
-        self.consumed.add(auth_id)
         self.visibility[publication_id] = "VISIBLE"
         self.outcomes[operation_id] = outcome
         self.receipts[operation_id] = receipt
-        self.operation_bindings[operation_id] = binding
         self.outbox[operation_id] = ("PUBLISH", receipt)
-        self.private_unknown.discard(operation_id)
         return receipt
 
     def _validate_unknown_binding(self, binding):
@@ -221,12 +255,13 @@ class Protocol:
     def mark_unknown(self, operation_id, binding=None):
         if operation_id in self.outcomes or operation_id in self.receipts:
             raise Rejected("cannot mark a terminal operation UNKNOWN")
+        if operation_id not in self.i_pending:
+            raise Rejected("UNKNOWN Storage outcome requires pending I COMMIT_WON")
         if binding is not None:
             self._validate_unknown_binding(binding)
             prior = self.operation_bindings.get(operation_id)
             if prior is not None and prior != binding:
                 raise Rejected("UNKNOWN operation identity rebound")
-            self.operation_bindings[operation_id] = binding
         self.private_unknown.add(operation_id)
 
     def resolve_no_publication(self, operation_id, proof):
@@ -234,6 +269,8 @@ class Protocol:
             raise Rejected("NO_PUBLICATION reconciliation requires an UNKNOWN operation")
         if operation_id in self.outcomes or operation_id in self.receipts:
             raise Rejected("operation already has a terminal outcome")
+        if operation_id not in self.i_pending:
+            raise Rejected("NO_PUBLICATION reconciliation requires pending I COMMIT_WON")
         if not isinstance(proof, StorageNoPublicationProof):
             raise Rejected("NO_PUBLICATION proof must use the typed test-seam record")
         binding = self.operation_bindings.get(operation_id)
@@ -246,8 +283,8 @@ class Protocol:
             raise Rejected("NO_PUBLICATION proof participant identity mismatch")
         if not self.fence_installed or publication_id not in self.fence_pending:
             raise Rejected("NO_PUBLICATION reconciliation requires the active ForgetFence participant barrier")
-        if publication_id in self.visibility or operation_id in self.outbox or auth_id in self.consumed:
-            raise Rejected("local state contradicts NO_PUBLICATION absence proof")
+        if publication_id in self.visibility or operation_id in self.outbox or auth_id not in self.consumed:
+            raise Rejected("local state contradicts NO_PUBLICATION proof or missing I COMMIT_WON consumption")
         if not proof.complete():
             raise Rejected("Storage NO_PUBLICATION proof is incomplete")
         outcome = ("NO_PUBLICATION", operation_id, publication_id, storage_id)
@@ -266,7 +303,16 @@ class Protocol:
     def close_i(self, operation_id, authoritative_outcome):
         if self.outcomes.get(operation_id) != authoritative_outcome:
             raise Rejected("I closeout requires exact authoritative Storage outcome")
+        binding = self.i_pending.get(operation_id)
+        if binding is None or authoritative_outcome[2:4] != binding[1:3]:
+            raise Rejected("I closeout requires its exact unresolved participant")
         self.i_closed[operation_id] = authoritative_outcome
+        del self.i_pending[operation_id]
+        auth_id = binding[0]
+        if auth_id in self.revocation_pending and not any(
+            pending[0] == auth_id for pending in self.i_pending.values()
+        ):
+            self.revocation_pending.remove(auth_id)
 
 
 class PublicationProtocolTests(unittest.TestCase):
