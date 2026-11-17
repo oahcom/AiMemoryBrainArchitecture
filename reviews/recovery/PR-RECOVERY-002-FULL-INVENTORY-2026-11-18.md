@@ -317,3 +317,37 @@ This overlay supersedes the live-count statement in §9 for the later snapshot o
 - Issue #130 仍 OPEN，尽管 PR-GOVERNANCE-001 已作为仓库流程规范 ADOPTED。Issue #134 仍 OPEN / P0；Main 分支元数据报告 `protected=false`，保护端点仍不可用（HTTP 403），Rulesets 状态未核实。
 - 本追加中的任何 PR 合并都不构成独立审查、Owner 验收、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
 - 125 条记录是元数据完整的状态盘点，不是对全部 125 条历史 PR Diff 重新逐行进行语义/代码审查。
+
+---
+
+## 11. Latest live inventory and publication-model follow-up / 最新实时盘点与发布模型后续（2026-11-18）
+
+This overlay supersedes §10's count for this later snapshot only. It preserves the 107-, 116- and 125-record inventories as historical snapshots.
+
+- Main HEAD at this overlay's base: `05fe0f9551ef3149d1c54b6f3a5e2f0ba6672551`.
+- Refreshed GitHub `state=all` inventory: **129 PR records = 105 merged + 24 closed-unmerged + 0 open** (API pages 1–2, `per_page=100`).
+- Four PRs followed the §10 snapshot:
+  - PR #156 — closed unmerged as superseded by PR #155's already-merged current-Main reconciliation; no unique accepted content was lost.
+  - PR #157 — appended the 125-record live inventory and AID-2026-001 follow-up dispositions; merged at `962df750b07fe5e88f6f904abde9fd1a4c6ddfc3`; exact-head GOV-DOC-001 run #44190902915 SUCCESS.
+  - PR #158 — restored three missing AID-2026-001 session traceability rows for PRs #147, #152 and #155; exact-head GOV-DOC-001 run #44190918626 SUCCESS; merged at `4f6d863bf245895b577c16ddf55aa9bf28f66d24`.
+  - PR #159 — made UNKNOWN publication operations fail closed before retry can create visibility, outcome, receipt or outbox state; exact-head reference-model run #44191060992 SUCCESS (21 tests), GOV-DOC-001 #44191060993 SUCCESS; merged at `05fe0f9551ef3149d1c54b6f3a5e2f0ba6672551`.
+- Issue #25 remains OPEN. PRs #151/#153/#159 are bounded in-memory reference-model corrections; the model does not implement authoritative Storage reconciliation for UNKNOWN, and none proves production database durability, distributed transaction ordering, crash/failover/restore, multi-process concurrency or deployed D/E/I/Storage integration.
+- Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED; no new host-side reboot, Emergency Stop, least-privilege, untrusted-PR isolation or independent credential-rotation evidence was supplied.
+- Issue #130 remains OPEN although PR-GOVERNANCE-001 is ADOPTED as repository process policy. Issue #134 remains OPEN / P0; Main branch metadata reports `protected=false`; Rulesets remain unverified because the protection endpoint is unavailable (HTTP 403).
+- No merge in this overlay establishes independent review, Owner acceptance, production R3/DFI conformance, worker security acceptance or production authorization.
+- The 129-record count is a metadata-complete state inventory, not a fresh line-by-line semantic/code review of all 129 historical PR diffs.
+
+本追加仅更新第 10 节之后的实时状态，不改写原始 107、116、125 条历史快照。
+
+- 本追加的 Main 基线：`05fe0f9551ef3149d1c54b6f3a5e2f0ba6672551`。
+- GitHub `state=all` 最新盘点：**129 条 PR = 105 条已合并 + 24 条关闭未合并 + 0 条开放**（API 第 1–2 页，`per_page=100`）。
+- 第 10 节快照之后的四条 PR 处置如下：
+  - PR #156：由于 PR #155 已将等效的最新 Main 证据合入，作为已被替代的文档更新关闭未合并；无独有已接受内容丢失。
+  - PR #157：追加 125 条实时盘点和 AID-2026-001 后续处置；合并提交 `962df750b07fe5e88f6f904abde9fd1a4c6ddfc3`；精确 Head GOV-DOC-001 Run #44190902915 SUCCESS。
+  - PR #158：恢复 PR #147、#152、#155 的三个 AID-2026-001 会话追踪行；精确 Head GOV-DOC-001 Run #44190918626 SUCCESS；合并提交 `4f6d863bf245895b577c16ddf55aa9bf28f66d24`。
+  - PR #159：使 UNKNOWN 发布操作在重试产生可见性、Outcome、Receipt 或 Outbox 状态前 Fail-Closed；精确 Head 参考模型 Run #44191060992 SUCCESS（21 项测试），GOV-DOC-001 #44191060993 SUCCESS；合并提交 `05fe0f9551ef3149d1c54b6f3a5e2f0ba6672551`。
+- Issue #25 仍 OPEN。PR #151/#153/#159 仅是有界内存参考模型修正；模型尚未实现针对 UNKNOWN 的权威 Storage 对账机制，任何一项都不能证明生产数据库持久性、分布式事务顺序、崩溃/故障切换/恢复、多进程并发或已部署 D/E/I/Storage 集成。
+- Issue #26 仍 OPEN / SECURITY_ACCEPTANCE_BLOCKED；本轮未提供新的 Host 重启、Emergency Stop、最小权限、不可信 PR 隔离或独立凭据轮换证据。
+- Issue #130 仍 OPEN，尽管 PR-GOVERNANCE-001 已作为仓库流程规范 ADOPTED。Issue #134 仍 OPEN / P0；Main 分支元数据报告 `protected=false`；由于保护端点 HTTP 403，Rulesets 仍未核实。
+- 本追加中的任何合并都不构成独立审查、Owner 验收、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
+- 129 条记录是元数据完整的状态盘点，不是对全部 129 条历史 PR Diff 重新逐行进行语义/代码审查。
