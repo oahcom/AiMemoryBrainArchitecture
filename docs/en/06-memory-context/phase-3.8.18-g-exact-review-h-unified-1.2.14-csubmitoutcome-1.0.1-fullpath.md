@@ -69,4 +69,8 @@ All ten authority callbacks in the positive fixture are deterministic test doubl
 - G Applied persistence/validator implementation and G adversarial race/reconnect/replay/restore suites remain SPECIFIED / NOT RUN.
 - Production C/I trust, provider idempotency, COC deployment, Storage topology and H production key custody remain OPEN.
 
-**ACCEPT WITH ENUMERATED G-OWNED APPLIED CONDITIONS — L1/L2 C/H CONSUMER MAPPING CANDIDATE; NOT FROZEN.** This delegated review is not an independent human G Owner signature and does not approve production activation or global Forget completion.
+## 7. Final G disposition
+
+**ACCEPT WITH ENUMERATED G-OWNED APPLIED CONDITIONS — L1/L2 C/H CONSUMER MAPPING CANDIDATE; NOT FROZEN.**
+
+This delegated G-role review is exact-version and limited to G's Applied consumer semantics. It is not an independent human G Owner signature, does not close G L3/L4, does not verify G persistence/runtime implementation, and does not approve production activation or global Forget completion.
