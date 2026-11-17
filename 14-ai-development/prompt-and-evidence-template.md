@@ -21,6 +21,14 @@ implementing_ai_session: ""
 independent_reviewer: ""
 integration_reviewer: ""
 acceptance_authority: ""
+github_issue: ""
+github_prs: []
+automation:
+  owner_key: ""
+  automation_id: "NOT_CREATED"
+  cadence: "NOT_CONFIGURED"
+  timezone: ""
+  run_ids: []
 repository: "oahcom/AiMemoryBrainArchitecture"
 base_branch: ""
 base_commit_sha: ""
@@ -28,6 +36,10 @@ dependency_refs: []
 prompt_id: ""
 prompt_version: "v1"
 prompt_sha256: ""
+prompt_blob_sha: ""
+prompt_byte_length: 0
+prompt_approved_by: []
+prompt_approval_status: "PENDING"
 created_at: ""
 updated_at: ""
 implementation_branch: ""
@@ -130,7 +142,13 @@ Stop and report if:
 9. Commit SHA and read-back verification.
 10. Honest final status: IMPLEMENTED / VERIFIED / BLOCKED / PARTIAL.
 
-## 3. Prompt versioning rules / 提示词版本规则
+## 3. GitHub and automation links / GitHub 与自动化链接
+
+Each Work Item SHOULD record its GitHub Issue number/URL, implementation and review PRs, and any scheduled Owner automation ID. An automation ID MUST remain NOT_CREATED until the scheduler confirms creation. Record each run ID and link its output to the Issue or PR. GitHub remains the source of truth for task state and approval.
+
+For a multi-Owner task, use one parent Issue and Owner-specific child Issues when work can proceed independently. Each child records its Owner, prompt approval, branch, PR and evidence. The parent tracks cross-owner dependencies and A's integration decision.
+
+## 4. Prompt versioning rules / 提示词版本规则
 
 - Use immutable prompt versions: `prompt-v1.md`, `prompt-v2.md`, etc.
 - Compute SHA-256 for each approved prompt file and store it in the manifest.
@@ -140,7 +158,7 @@ Stop and report if:
 - Never overwrite a prompt version that has already been executed.
 - If a run used an unrecorded conversational clarification, append it as a dated run addendum and assess whether a new prompt version is required.
 
-## 4. Required evidence bundle / 必需证据包
+## 5. Required evidence bundle / 必需证据包
 
 Each completed implementation task should contain, as applicable:
 
@@ -154,7 +172,7 @@ Each completed implementation task should contain, as applicable:
 - `integration-report.md` — cross-owner acceptance;
 - links to PR, commits and CI runs.
 
-## 5. Suggested repository layout / 建议目录
+## 6. Suggested repository layout / 建议目录
 
 ```text
 14-ai-development/
@@ -168,6 +186,7 @@ Each completed implementation task should contain, as applicable:
       manifest.yaml
       prompt-v1.md
       prompt.sha256
+      automation-runs/ (if scheduled execution is enabled)
       implementation-report.md
       test-report.md
       review-report.md
