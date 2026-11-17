@@ -233,3 +233,43 @@ This append-only overlay supersedes the earlier Main snapshot and queue statemen
 - 最新读取时 PR #138 的 mergeable 为 true，但精确 Head 的 `GOV-DOC-001 structural checks` 仍为 IN_PROGRESS，综合 Commit Status 为 PENDING。必须等待检查成功并重新核对 Diff 后才能考虑合并。
 - 传统 Main Branch Protection 仍未启用；Rulesets 因 API 403 无法核实。
 - Issue #26 仍为 OPEN / SECURITY_ACCEPTANCE_BLOCKED。
+
+---
+
+## 9. Post-recovery live inventory overlay / 恢复后实时盘点追加（2026-11-18）
+
+This append-only overlay updates the live repository status after PRs #138–#146. It does not rewrite the original 107-record snapshot or claim a fresh line-by-line review of every historical PR diff.
+
+- Current Main HEAD at overlay creation: `7bd425de62fa2dc66c2d2df03fac58e02bb68ad5`.
+- Refreshed GitHub `state=all` inventory: **116 PR records = 95 merged + 21 closed-unmerged + 0 open** (API pages 1–2, `per_page=100`).
+- The original 107-record inventory remains a valid historical snapshot. The nine later PR records are:
+  - PR #138 — full inventory report; merged at `8b9d896d714e6037a7856a77a9d2d3ec0179f117`.
+  - PR #139 — bounded G Applied SQLite reference model; merged at `af3b0380e35a5834f8b5cdca92dfa0f8fcd8e1bf`.
+  - PR #140 — corrected PR #135 final disposition, 20 closed-unmerged count and PR #138 historical pins; merged at `266d622be088c0707dbfde989a21f05d759b393d`.
+  - PR #141 — Forget reference model expanded to 24 tests, including empty-inventory fail-closed and unambiguous identity hashing; exact-Head 24/24 run #44188134319 SUCCESS; merged at `9edc746c001f1f82950edad7ce130342db53ff67`.
+  - PR #142 — closed unmerged as a duplicate/superseded factual correction; its intended unique correction was already published by PR #140.
+  - PR #143 — bilingual G Applied reference evidence and paired reader summaries; final-head GOV-DOC-001 run #44188326130 SUCCESS; merged at `69c43ae126353616d64b66d7abc8f159219c1742`. Earlier failed runs remain historical.
+  - PR #144 — PR-GOVERNANCE-001 standard and synchronized PR templates; merged at `3754d049db840b049728afd814faac968bf10749`.
+  - PR #145 — reconciled PR-GOVERNANCE-001 status/index to ADOPTED under Issue #130 comment #6962523529; merged at `41367e8230cd906ce0548df37bbb77027b26124d`.
+  - PR #146 — corrected the remaining English/Chinese §7 verdict contradiction about PR #135; exact-head GOV-DOC-001 run #44188622831 SUCCESS; merged at `7bd425de62fa2dc66c2d2df03fac58e02bb68ad5`.
+- Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED. No new host-side diagnostic, reboot, emergency-stop, privilege-boundary, isolation or independent credential-rotation evidence was supplied in this execution.
+- Issue #130 remains OPEN although PR-GOVERNANCE-001 is ADOPTED as repository process policy. Issue #134 remains OPEN / P0; Main branch API reports `protected=false`, and the branch-protection endpoint returns HTTP 403, so Rulesets remain unverified.
+- No merge in this overlay implies Owner approval, security acceptance, architecture freeze, production conformance or deployment proof.
+
+本追加仅更新 PR #138–#146 合入后的实时仓库状态，不改写原始 107 条历史盘点，也不声称已对全部历史 PR Diff 重新进行逐行审查。
+
+- 本追加创建时的 Main HEAD：`7bd425de62fa2dc66c2d2df03fac58e02bb68ad5`。
+- GitHub `state=all` 最新盘点：**116 条 PR = 95 条已合并 + 21 条关闭未合并 + 0 条开放**（API 第 1–2 页，`per_page=100`）。
+- 原始 107 条清单继续作为有效历史快照保留。之后新增的九条 PR 处置如下：
+  - PR #138：全量盘点报告，合并提交 `8b9d896d714e6037a7856a77a9d2d3ec0179f117`。
+  - PR #139：有界 G Applied SQLite 参考模型，合并提交 `af3b0380e35a5834f8b5cdca92dfa0f8fcd8e1bf`。
+  - PR #140：更正 PR #135 最终状态、20 条关闭未合并计数及 PR #138 历史版本，合并提交 `266d622be088c0707dbfde989a21f05d759b393d`。
+  - PR #141：Forget 参考模型扩展至 24 项测试，补充空清单 Fail-Closed 和无歧义身份哈希；精确 Head 24/24 测试 run #44188134319 SUCCESS；合并提交 `9edc746c001f1f82950edad7ce130342db53ff67`。
+  - PR #142：作为重复/已被替代的事实更正关闭，拟更正内容已由 PR #140 发布。
+  - PR #143：双语 G Applied 参考证据和配对阅读摘要；最终 Head 的 GOV-DOC-001 run #44188326130 SUCCESS；合并提交 `69c43ae126353616d64b66d7abc8f159219c1742`。早期失败运行保留为历史记录。
+  - PR #144：PR-GOVERNANCE-001 规范及同步 PR 模板，合并提交 `3754d049db840b049728afd814faac968bf10749`。
+  - PR #145：根据 Issue #130 评论 #6962523529，将 PR-GOVERNANCE-001 状态和索引更新为 ADOPTED；合并提交 `41367e8230cd906ce0548df37bbb77027b26124d`。
+  - PR #146：更正第 7 节关于 PR #135 的中英文事实矛盾；精确 Head GOV-DOC-001 run #44188622831 SUCCESS；合并提交 `7bd425de62fa2dc66c2d2df03fac58e02bb68ad5`。
+- Issue #26 仍为 OPEN / SECURITY_ACCEPTANCE_BLOCKED。本轮未取得新的 Host 诊断、重启、Emergency Stop、权限边界、隔离或独立密码轮换证据。
+- Issue #130 仍为 OPEN，尽管 PR-GOVERNANCE-001 已作为仓库流程规范 ADOPTED。Issue #134 仍为 OPEN / P0；Main Branch API 显示 `protected=false`，分支保护端点返回 HTTP 403，因此 Rulesets 仍无法核实。
+- 本追加中的任何合并均不代表 Owner 批准、安全验收、架构冻结、生产符合性或部署证明。
