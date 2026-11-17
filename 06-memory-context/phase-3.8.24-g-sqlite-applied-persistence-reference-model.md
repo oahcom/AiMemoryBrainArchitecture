@@ -5,10 +5,10 @@
 - Mode: delegated G-role reference implementation; **not a production implementation or independent human G Owner signature**.
 - Normative contract: Phase 3.8.22 Blob \`bd297873bc1e593280484a43cb44b56058d9c4ff\`.
 - Source file: \`06-memory-context/reference_model/test_g_applied_persistence.py\`.
-- Test Blob: \`b0174414adb49f7a6d326032a6b9e44dfaa4eb3d\`.
+- Test Blob: \`84b54693311d2d09430bba731bcc0a702abf17cd\`.
 - Workflow Blob: \`045f7b76783d0aa5d6b7cd0dc9bec42a5f6140be\`.
-- Exact commit: \`30193e13e4f11ce717778aaa1274342e3dbdbf39\`.
-- CI: [G Applied Persistence Reference Model run 44182514060](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44182514060) — **SUCCESS, 12/12 tests**.
+- Exact commit: \`a244cb5e7d80e000300150345b1417e9edc57cf6\`.
+- CI: [G Applied Persistence Reference Model run 44182845249](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44182845249) — **SUCCESS, 14/14 tests**.
 - Status: **BOUNDED SQLITE REFERENCE MODEL PASS; PRODUCTION G APPLIED PERSISTENCE NOT IMPLEMENTED / NOT VERIFIED**.
 
 ## 1. Purpose and evidence ceiling
@@ -28,7 +28,7 @@ The reference model uses:
 - append-only current-use invalidation events while preserving the historical Applied row;
 - a restore fence that keeps serving disabled when the snapshot epoch/high-water is stale or any required owner-currentness input is absent.
 
-The test model requires C, H, COC, I, D and Storage proof statuses to be exactly VALID before writing a Full Applied row. UNKNOWN, missing or non-VALID proof rejects the write.
+The test model requires C, H, COC, I, D and Storage proof statuses to be exactly VALID before writing a Full Applied row. It additionally requires C Outcome=HANDOFF_ACCEPTED and SideEffectStatus=PROVEN_OCCURRED. UNKNOWN, IN_DOUBT, HANDOFF_REJECTED, NOT_INVOKED, missing or non-VALID proof rejects the write.
 
 ## 3. Executed bounded cases
 
@@ -46,7 +46,10 @@ The exact workflow ran 12 tests:
 11. Missing owner-currentness proof keeps restore fenced.
 12. Exact restore epoch/high-water and all owner-currentness inputs permit the modeled serving flag to be re-enabled.
 
-Result: **12/12 PASS** on the exact commit above.
+13. C Outcome UNKNOWN/IN_DOUBT with POSSIBLE_OR_UNKNOWN side effect blocks Full Applied.
+14. C Outcome HANDOFF_REJECTED or NOT_INVOKED blocks Full Applied.
+
+Result: **14/14 PASS** on the exact commit above.
 
 ## 4. Limitations — what this does not prove
 
@@ -70,7 +73,7 @@ Result: **12/12 PASS** on the exact commit above.
 
 ## 6. Final disposition
 
-- SQLite bounded reference model: **PASS 12/12**.
+- SQLite bounded reference model: **PASS 14/14**.
 - G durable Applied algorithm: **REFERENCE MODEL ONLY**.
 - Production G schema/SDK/unique index/database adapter: **NOT IMPLEMENTED / NOT VERIFIED**.
 - Production crash/restart/restore/multi-replica proof: **OPEN**.
@@ -99,8 +102,8 @@ G Phase 3.8.22 已规定 Durable Applied Identity、不可变 Evidence Revision�
 - 缺失 Owner Currentness Proof 阻止 Restore；
 - 完整 Currentness 可恢复模型 Serving Flag。
 
-结果：**12/12 PASS**。
+结果：**14/14 PASS**。
 
 但 SQLite 单文件不是生产 Storage 拓扑，也不证明 PostgreSQL Serializable；Proof 是测试输入而非真实权威签名；Restore High-water 是测试参数而非外部签名 Checkpoint；并发仅为单进程六个 SQLite Connection，不是多进程/多主机/多副本；未测试断电、文件系统损坏、备份快照、PITR、Failover 或生产运维。该模型也没有关闭完整 G-AP-P01..P18。
 
-最终状态：SQLite 参考模型 **PASS 12/12**；G Durable Applied 仍是 **REFERENCE MODEL ONLY**；生产 Schema/SDK/Unique Index/DB Adapter **NOT IMPLEMENTED / NOT VERIFIED**；生产 Crash/Restore/Multi-replica 证明 **OPEN**；Full Applied/全局冻结/生产激活 **NOT PROVEN / NOT AUTHORIZED**。
+最终状态：SQLite 参考模型 **PASS 14/14**；G Durable Applied 仍是 **REFERENCE MODEL ONLY**；生产 Schema/SDK/Unique Index/DB Adapter **NOT IMPLEMENTED / NOT VERIFIED**；生产 Crash/Restore/Multi-replica 证明 **OPEN**；Full Applied/全局冻结/生产激活 **NOT PROVEN / NOT AUTHORIZED**。
