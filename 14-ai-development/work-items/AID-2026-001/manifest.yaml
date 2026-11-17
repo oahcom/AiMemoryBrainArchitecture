@@ -34,7 +34,7 @@ prompt_version: v2
 prompt_sha256: c49b09af16fd34941926665b450b8cd0788283240f4b31b2877695bc5b8b1cb7
 historical_prompt_v1: 14-ai-development/work-items/AID-2026-001/prompt-v1.md
 created_at: 2026-11-17
-updated_at: 2026-11-17
+updated_at: 2026-11-18
 implementation_branch: design/chatgpt-native-execution-model
 implementation_commits:
   - b3a6bd612cb310d0b116db6d8cbd7bdff37c7ccf
@@ -117,6 +117,9 @@ implementation_commits:
   - ddd04f95b6d5f4f5b911344c7e7c6c62157efb3f
   - 0cfba423f5d6c17f8be23e02e4006873f33437b7
   - 6ed56b8fcb8bac6c59eac7ba824be4387e22e944
+  - c4c70ebf7c3728a08c88233caa25a0d833aff001
+  - f04f0272e2e520a6cf7df61be64a1adc46cb8ea4
+  - a7678934064c5c8305613e4f94ece9dbf616e8a2
 changed_paths:
   - 14-ai-development/prompt-and-evidence-template.md
   - 14-ai-development/README.md
@@ -140,6 +143,7 @@ changed_paths:
   - 14-ai-development/prompts/owners/README.md
   - 14-ai-development/work-items/AID-2026-001/manifest.yaml
   - 14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md
+  - 14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md
   - 14-ai-development/work-items/AID-2026-001/execution-record-001.md
   - 14-ai-development/work-items/AID-2026-001/governance-decision-NR-001.md
   - 14-ai-development/work-items/AID-2026-001/prompt-v1.md
@@ -160,6 +164,8 @@ verification:
 traceability_exclusions:
   - sha: 13410d37958b3bf5b3c1e5bd9d604fab61fbe4c3
     reason: Previous manifest self-update for the I-PRE-001/I-PRE-004 remediation inventory; superseded by the current manifest self-update.
+  - sha: 4f8c5218c8d33f5fdb690a7c4bdb671639ebb807
+    reason: Previous current-head manifest self-update and inventory reconciliation; superseded by subsequent identity-audit remediation commits and this manifest update.
   - sha: 3fb10eef38d88b83b48edf5e2818e2ca5ae8ee9e
     reason: Previous current-head manifest self-update; now superseded by subsequent remediation commits and classified as historical manifest-only bookkeeping.
   - sha: c97e3de7ac37158ef60526d7b8703c4574ed042a
@@ -267,6 +273,8 @@ remediation:
     IR-006: FIXED_PRIMARY_REVIEW_POINTER_UPDATED; NEXT_HEAD_REVIEW_PENDING
     IR-007: FIXED_B_D_I_V1_HISTORICAL_METADATA
     IR-008: FIXED_A_REMOVED_AS_INTEGRATION_REVIEWER; DISTINCT_REVIEWER_ASSIGNMENT_PENDING
+    I-PRE-002: DOCUMENTED_OPEN_BHI_JOINT_CONTRACT_AND_IMPLEMENTATION_GAP; SPECIALIST_APPROVAL_AND_CONFORMANCE_PENDING
+    I-PRE-005: FIXED_CHINESE_FORGETFENCE_TERMINOLOGY_PENDING_INDEPENDENT_REVIEW
   source_review: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945250593
   source_reviewed_head: 0708e25d8e008b1044679ff29ba7ae34977bc08c
   status:
