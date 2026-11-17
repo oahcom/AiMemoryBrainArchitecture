@@ -23,7 +23,7 @@
 |---|---|---|
 | H RecoveryCutoff schema 1.0.4 | session-h-bmcp-protocol | d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1 |
 | H RecoveryJoin schema 1.0.0 candidate | session-h-bmcp-protocol | dd3234aa1c74caf6d0e335875cd96e0b2b64082f |
-| H semantic validator contract | session-h-bmcp-protocol | 121717c5f303b1a2e864f2b95664f51f51ba4b48 |
+| H semantic validator contract | session-h-bmcp-protocol | 6f66a72a2d0aa43af338ff9e22d650d47aa2bd80 |
 | HRC/JPF executable semantic suite | session-h-bmcp-protocol | 60a2f4db4bd12f2131ecd147db9bbe328da6db50 |
 | Wire interop candidate suite | session-h-bmcp-protocol | 1a4e754ba9bfa57eb973c6d39731e9f89443b323 |
 | Schema integrity suite | session-h-bmcp-protocol | 5292d56661e938c905c61455e9ed53c4ff674c54 |
@@ -170,7 +170,7 @@ JPF-18/JPF-19 explicitly reject substitution between stable OwnerAdmissionRef an
 The H candidate test bundle was executed by its push-triggered workflow after the JPF-08 fixture was corrected:
 
 - H RecoveryJoin schema: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
-- H semantic contract: `121717c5f303b1a2e864f2b95664f51f51ba4b48`.
+- H semantic contract: `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80`.
 - HRC/JPF suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
 - Wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
 - Schema suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
