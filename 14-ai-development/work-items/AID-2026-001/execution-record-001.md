@@ -138,3 +138,29 @@ Subsequent commits that address IR-001, NR-002 and NR-003 must be appended here 
 - YAML Parser/Schema 验证：NOT RUN。Manifest 验证：NOT RUN。CI/Workflow 与 Status Check 尚未在本追加记录后重新核验。
 - R3 可执行安全测试：NOT RUN。专业审查报告：NOT EVIDENCED。本轮整改不构成独立验证或 R3 PASS。
 - PR 仍为 Open/Draft/Not Merged；Acceptance 仍 BLOCKED；Merge NOT AUTHORIZED。
+
+
+## Identity binding audit appendendum — I-PRE-002 / 身份绑定审计追加记录
+
+- Execution date: 2026-11-18.
+- Starting PR Head: `4f8c5218c8d33f5fdb690a7c4bdb671639ebb807`.
+- I-PRE-002 audit: added `i-pre-002-identity-binding-audit.md` as an author-side, evidence-linked field-by-field trace. It records the candidate trust order and authority split across Authenticated Transport, Issuer, Principal, ProducerIdentity, ActorRef, Delegation, ScopeRef/ScopeBinding, Permission/PolicyDecision and PermissionEpoch.
+- Key result: PR #42's DOC-SEC-001 and BMCP guide correctly leave B/H/I typed-reference and authenticated transport binding subject to joint approval. A more detailed I candidate contract exists on `session-i-security-governance-2026-11-16`, but is not included in PR #42 and remains candidate/governance-blocked. It is not evidence of a frozen wire contract or production trust implementation.
+- I-PRE-005 terminology correction: Chinese DOC-SEC-001 now translates "canonical suppression generation" as “规范抑制代次”, not “规范抑制代数”.
+- Commits:
+  - `c4c70ebf7c3728a08c88233caa25a0d833aff001` — I-PRE-002 bilingual identity-binding audit.
+  - `f04f0272e2e520a6cf7df61be64a1adc46cb8ea4` — Chinese ForgetFence terminology correction.
+- This is author-side document reconciliation only. No B/H/I joint approval, independent Owner I review, production implementation, or R3 PASS is claimed.
+- YAML/schema/Manifest validation, CI, and R3 executable tests: NOT RUN.
+- Acceptance remains BLOCKED; merge NOT AUTHORIZED.
+
+### 中文记录
+
+- 执行日期：2026-11-18。
+- 本轮起始 PR Head：`4f8c5218c8d33f5fdb690a7c4bdb671639ebb807`。
+- I-PRE-002：新增 `i-pre-002-identity-binding-audit.md`，作为带证据引用的作者侧逐字段追踪，覆盖 Authenticated Transport、Issuer、Principal、ProducerIdentity、ActorRef、Delegation、ScopeRef/ScopeBinding、Permission/PolicyDecision 和 PermissionEpoch 的候选信任顺序与权威分工。
+- 关键结论：PR #42 的 DOC-SEC-001 与 BMCP 指南正确地将 B/H/I 类型引用及认证 Transport 绑定留待联合批准。更详细的 I 候选契约存在于 `session-i-security-governance-2026-11-16`，但不属于 PR #42 当前变更集，且仍为 Candidate / Governance-blocked。它不能作为 Wire 契约已冻结或生产 Trust 已实现的证据。
+- I-PRE-005 术语修正：中文 DOC-SEC-001 已将 “canonical suppression generation” 统一译为“规范抑制代次”，不再使用“规范抑制代数”。
+- 本轮仅完成作者侧文档核对，不声称取得 B/H/I 联合批准、Owner I 独立审查、生产实现或 R3 PASS。
+- YAML/Schema/Manifest 验证、CI 和 R3 可执行测试：NOT RUN。
+- Acceptance 仍 BLOCKED；Merge NOT AUTHORIZED。
