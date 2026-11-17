@@ -273,3 +273,47 @@ This append-only overlay updates the live repository status after PRs #138–#14
 - Issue #26 仍为 OPEN / SECURITY_ACCEPTANCE_BLOCKED。本轮未取得新的 Host 诊断、重启、Emergency Stop、权限边界、隔离或独立密码轮换证据。
 - Issue #130 仍为 OPEN，尽管 PR-GOVERNANCE-001 已作为仓库流程规范 ADOPTED。Issue #134 仍为 OPEN / P0；Main Branch API 显示 `protected=false`，分支保护端点返回 HTTP 403，因此 Rulesets 仍无法核实。
 - 本追加中的任何合并均不代表 Owner 批准、安全验收、架构冻结、生产符合性或部署证明。
+
+---
+
+## 10. Live inventory and AID-2026-001 follow-up overlay / 实时盘点与 AID-2026-001 后续追加（2026-11-18）
+
+This overlay supersedes the live-count statement in §9 for the later snapshot only. It preserves the original 107-record inventory and the 116-record §9 snapshot as historical evidence.
+
+- Main HEAD at this overlay's base: `9bddaf72e71b1826b22e013523bc19be4315f097`.
+- Refreshed GitHub `state=all` inventory: **125 PR records = 102 merged + 23 closed-unmerged + 0 open** (API pages 1–2, `per_page=100`).
+- The nine PRs after the §9 snapshot are:
+  - PR #147 — AID-2026-001 PR #141 evidence, D/I handoff prompt updates and initial Manifest YAML parse/required-field/path workflow; merged at `56336bd16b4dcab1b600eb7ab12e171fda0553a1`. Its initial PyYAML `safe_load` accepted duplicate mapping keys and is not treated as strict unique-key validation.
+  - PR #148 — closed unmerged as duplicate/superseded evidence delivery; no unique implementation or acceptance decision was merged from it.
+  - PR #149 — corrected bilingual recovery snapshot labels and PR #138 Head pins; merged at `35631c376396dfb2647bf0b09e8476c5c8c7f726`.
+  - PR #150 — appended the 116-record live inventory overlay; merged at `797d0e278528b8b5e390573a93e7892edfe30329`.
+  - PR #151 — bounded D/E/Storage/I publication reference-model fence-first admission ordering; exact-head reference-model run #44189326003 reported 18/18 tests; merged at `d38c8379392e56fa095ad7577e96c46b8ff202f3`.
+  - PR #152 — strict unique-key YAML validation, top-level/nested duplicate-key negative fixtures and correction of two actual duplicate Manifest keys; exact-head run #44189789286 SUCCESS; merged at `bc6ab890aea68ea33f4de42e442d7ac22fcbf26b`.
+  - PR #153 — immutable operation-tuple idempotent replay and exclusion of D-closed participants from later fence barriers; exact-head run #44189742535 reported 20/20 tests; merged at `be90d5c5d04dab65123f53a153cadd562242daa1`.
+  - PR #154 — closed unmerged after its strict parser run exposed the still-duplicated Manifest keys in that branch; the complete duplicate-key correction and passing strict validation were delivered by PR #152. No unique accepted result was lost.
+  - PR #155 — bilingual execution-record, manifest and index reconciliation for PR #147's initial parser limitation and PR #152's strict unique-key result; final-head strict Manifest run #44190500707 and GOV-DOC-001 run #44190500724 SUCCESS; merged at `9bddaf72e71b1826b22e013523bc19be4315f097`.
+- Issue #25 remains OPEN for independent D/E/I/Storage Owner decisions, H wire schema/cryptography, physical topology and production integration/fault evidence. PRs #151/#153 are deterministic in-memory reference-model changes only.
+- Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED. This execution supplied no new host-side reboot, Emergency Stop, least-privilege, untrusted-PR isolation or independent credential-rotation evidence.
+- Issue #130 remains OPEN although PR-GOVERNANCE-001 is ADOPTED as repository process policy. Issue #134 remains OPEN / P0; Main branch metadata reports `protected=false`; the protection endpoint remains unavailable (HTTP 403), so Rulesets are unverified.
+- No PR merge in this overlay establishes independent review, Owner acceptance, production R3/DFI conformance, worker security acceptance or production authorization.
+- The 125-record count is a metadata-complete state inventory, not a fresh line-by-line semantic/code review of all 125 historical PR diffs.
+
+本追加仅更新第 9 节之后的实时状态，不改写原始 107 条盘点或第 9 节的 116 条历史快照。
+
+- 本追加的 Main 基线：`9bddaf72e71b1826b22e013523bc19be4315f097`。
+- GitHub `state=all` 最新盘点：**125 条 PR = 102 条已合并 + 23 条关闭未合并 + 0 条开放**（API 第 1–2 页，`per_page=100`）。
+- 第 9 节快照之后的九条 PR 处置如下：
+  - PR #147：AID-2026-001 PR #141 证据、D/I 交接提示词修订及初始 Manifest YAML 解析/必需字段/路径工作流；合并提交 `56336bd16b4dcab1b600eb7ab12e171fda0553a1`。其初始 PyYAML `safe_load` 会接受重复映射键，不作为严格唯一键校验证据。
+  - PR #148：作为重复/已被替代的证据交付关闭，未合入独有实现或验收决定。
+  - PR #149：更正双语恢复快照标签和 PR #138 Head 引用，合并提交 `35631c376396dfb2647bf0b09e8476c5c8c7f726`。
+  - PR #150：追加 116 条实时盘点，合并提交 `797d0e278528b8b5e390573a93e7892edfe30329`。
+  - PR #151：有界 D/E/Storage/I 发布参考模型的 Fence-first admission 顺序；精确 Head 参考模型 Run #44189326003 报告 18/18 测试；合并提交 `d38c8379392e56fa095ad7577e96c46b8ff202f3`。
+  - PR #152：严格唯一键 YAML 验证、顶层/嵌套重复键负向测试，并修正 Manifest 中两处真实重复键；精确 Head Run #44189789286 SUCCESS；合并提交 `bc6ab890aea68ea33f4de42e442d7ac22fcbf26b`。
+  - PR #153：不可变 operation tuple 幂等重放，以及避免将已由 D 关闭的参与者重新加入后续 Fence barrier；精确 Head Run #44189742535 报告 20/20 测试；合并提交 `be90d5c5d04dab65123f53a153cadd562242daa1`。
+  - PR #154：严格解析器在该分支中发现 Manifest 重复键仍未修复后关闭未合并；完整重复键修复和通过的严格验证由 PR #152 交付。没有丢失已接受的独有成果。
+  - PR #155：双语执行记录、Manifest 和索引对齐 PR #147 初始解析限制及 PR #152 严格唯一键结果；最终 Head 严格 Manifest Run #44190500707 和 GOV-DOC-001 Run #44190500724 SUCCESS；合并提交 `9bddaf72e71b1826b22e013523bc19be4315f097`。
+- Issue #25 仍 OPEN，等待独立 D/E/I/Storage Owner 决策、H Wire Schema/密码学、物理拓扑及生产集成/故障证据。PR #151/#153 仅是确定性的内存参考模型修改。
+- Issue #26 仍 OPEN / SECURITY_ACCEPTANCE_BLOCKED。本轮没有新的 Host 重启、Emergency Stop、最小权限、不可信 PR 隔离或独立凭据轮换证据。
+- Issue #130 仍 OPEN，尽管 PR-GOVERNANCE-001 已作为仓库流程规范 ADOPTED。Issue #134 仍 OPEN / P0；Main 分支元数据报告 `protected=false`，保护端点仍不可用（HTTP 403），Rulesets 状态未核实。
+- 本追加中的任何 PR 合并都不构成独立审查、Owner 验收、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
+- 125 条记录是元数据完整的状态盘点，不是对全部 125 条历史 PR Diff 重新逐行进行语义/代码审查。
