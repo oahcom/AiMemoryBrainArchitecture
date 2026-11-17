@@ -100,6 +100,47 @@ The full repository listing also contains other open PRs/issues. This register i
 
 仓库完整列表还包含其他 Open PR/Issue。本表是按 B 当前依赖选出的相关子集，不声称已逐项审查所有无关项目记录。
 
+## 3A. 中文 Owner 分支与来源 Pin 快照
+
+| Owner | 当前观察分支 | HEAD Commit SHA | 最新复审工件 Blob | 中文结论 |
+|---|---|---|---|---|
+| B | session-b-domain-model-phase3 | 2faf8ec38f14dba49e7263d7a60804dae1a74ee2 | e2bc4c8dde9706bfbe443269b702f1b5aa6965f6 | 批准 Per-authority 名义类型边界；仅 L1/L2，不代表 Storage 物理实现已批准。 |
+| C | session-c-agent-integration-2026-11-16 | 2e8414f361b0b5d7de959be8a971aadc9e62d6a9 | 8fd6052cabf58a78962cc2e776398b2a40604bcd | 接受 H Reference Ingress Gate/60 项测试边界；Signer/Attestation 和 Crypto Profile 仍 OPEN。 |
+| D | session-d-memory-brain-2026-11-16 | 76fcc92225666a11893b7241825261319edb621e | 152627e00b96355e2ff370acd643a51168c4c78c | H 仅为上游接口；D Forget/RecoveryJoin 权威保持不变。 |
+| E | session-e-memory-compiler-2026-11-16 | ee098e14747d9915de5b3efb63b3a8dd77f670ed | 19d708bc29b6115d7bccb7d320781f452ee28b78 | 在 E 生命周期条件下接受 Anchor；L4 实现 OPEN。 |
+| F | session-f-memory-runtime | 1908ce4d233b20f7cafd00cb679affd01bd15174 | 122238146830db6188f00a9788e018a82bfb3f90 | 在读路径/Cache 条件下接受 Anchor；L4 实现 OPEN。 |
+| G | session-g-memory-context | 3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe | 1894860c76336f8739d354b72beed3992cffd17e | 接受有限 L1/L2 C/H 映射；Applied Contract 未冻结，38 项测试使用 Authority Double。 |
+| H | session-h-bmcp-protocol | 8e24342048d29ef29195b153b8b9ec53ba7c75d9 | 4ba7e1699215d02224f805a15484b1da2e40c03f | 修正 C Envelope P0 Proof Locator；可执行认证和 Durable Replay 仍 OPEN。 |
+| I | session-i-security-governance-2026-11-16 | 2afe0e17f8c0929d9e642ccbe2cad112b5fd43a9 | b6d1ea45825a1c2090abfba42474814f02f073a3 | 接受 C Origin Signer/P0 分离为候选；Crypto Suite/Trust 注册未批准。 |
+| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | 431138e7c7af8bee716f3d8dcbc20114c046bd36 | 54a4f0dab7ab24f1f6fb01f8cc5c7da292f02c57 | v3.2.11 精确候选包已绑定复审，但未联合接受/冻结，需要 A 新审查。 |
+| A | session-a-integration-2026-11-16 | 9bdf938b980413f592a4db9fe94f4bf2c299fb01 | e12cd7b5c79e2234178014243fd51f2e7d51272e | 将 Outer Envelope Authentication 明确列为阻塞架构缺口，要求不得冻结。 |
+
+这些值是 2026-11-17 的 Owner 分支观察快照；它们不是永久 HEAD，也不是 Owner 批准。最终验收前必须重新读取实时 Ref。
+
+## 4A. 中文相关 PR 与 Issue 状态摘要
+
+| 记录 | 读取时状态 | 中文相关性 |
+|---|---|---|
+| PR #55 | Open / Draft | B 研究草稿；不是规范验收。 |
+| PR #52 | Open / Draft | B→A 协议收敛和 Storage 拓扑审查；B 决定仍是候选。 |
+| PR #51 | Open / Draft | 跨 Owner 协议对齐；H 1.2.14 / CSubmitOutcome 1.0.1 候选，本地 Callback 仍为 Test Double。 |
+| PR #53 | Closed / Not Merged | A 最终评估为 DEFERRED；Fact/Claim ADR 和 B 语义仍阻塞。 |
+| PR #50 | Open / Draft | 系统风险评估影响语义就绪。 |
+| PR #49 / #47 | Open / Draft | 复杂度评估；仅为上下文证据，不代表 B 批准。 |
+| PR #46 | Open / Draft | 工程依赖和实现可行性。 |
+| PR #45 | Open / Draft | 技术现实研究；不转移领域权威。 |
+| PR #28 | Open / Draft | 双语架构覆盖和语义对等。 |
+| Issue #3 | Open | C/G/H Applied 证据和 BMCP Wire 契约；要求 B 类型化引用映射，其他证明由各 Owner 拥有。 |
+| Issue #5 | Open | I36-GOV-01..10 仍 GOVERNANCE-BLOCKED。 |
+| Issue #6 | Closed | C/F/G 对精确 BIH Package 设计验收，带列明例外；G 后继 Blob 需重新确认。 |
+| Issue #7 | Open | Runtime 实现仓库和负责 Engineering Owner 未确定。 |
+| Issue #10 | Open | JF-10 P0 物理能力/故障恢复未建立。 |
+| Issue #25 | Open | D/E/I/Storage Publication Gate 仍按 Owner 边界开放。 |
+| Issue #29 | Open | HRC/RecoveryJoin/拓扑的本地 CI 证据有边界，不证明生产信任或物理 JF-10。 |
+| Issue #43 | Open | 系统级整合控制 Issue；A 仍推迟架构冻结。 |
+
+Issue #6 的关闭仅表示精确 BIH 设计级消费者验收，不代表 I36 治理批准或 Runtime 认证。C/F 的验收 Pin 与当前源 Blob 一致；G 当前 Blob 已变化，需后继版本确认。
+
 ## 5. Source-level semantic observations / 源级语义观察
 
 1. **C:** The exact C review says CSubmitOutcome object authentication does not automatically authenticate the outer BMCP envelope. C's immutable outcome identity, sequence namespace, final-request boundary and provider evidence remain C-owned. The review is a delegated C-role record, not an independent human C Owner signature.
