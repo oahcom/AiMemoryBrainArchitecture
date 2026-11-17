@@ -3,8 +3,8 @@
 
 - Owner: D — Memory Brain / ForgetFence
 - Exact Storage ADR Blob: `bb544ba2f346bdc130d524bd5c7310d86f367988`
-- H Unified 1.2.14 Blob: `fee452efb99ab4fe0ceccb347c46eeef1521bd28`
-- D RecoveryJoin P0 crosswalk: `bf35b7f047a374268920b99199c06fc2a78dabb7`
+- H Unified 1.2.14 Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a59`
+- D RecoveryJoin P0 crosswalk: `c4adf827dd62d44c43b8e871dec4835581508adf`
 - Decision: **ACCEPT AS D FENCE/PARTICIPANT SERIALIZATION SUBSTRATE**
 - Provenance: delegated D-role review, not independent human D Owner approval.
 
