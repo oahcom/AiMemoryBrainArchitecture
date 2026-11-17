@@ -15,13 +15,13 @@ The current model is conceptually rich and covers real requirements (identity, e
 ## 2. Assessment dimensions / 评估维度
 
 Each concept is assessed qualitatively:
-- Domain Necessity: essential to answer a real domain question?
-- Independent Identity: must it be referenced independently over time?
-- Lifecycle Necessity: does it have distinct allowed/forbidden transitions?
-- Referential Value: do other objects need to refer to it?
-- Semantic Distinction: would merging lose meaning/invariants?
-- Implementation Cost: identity registry, persistence, indexes, migration, authorization and tests.
-- Future Optionality: is it justified only by a speculative future use?
+- Domain Necessity: essential to answer a real domain question? / **领域必要性：** 是否为回答真实领域问题所必需？
+- Independent Identity: must it be referenced independently over time? / **独立身份：** 是否需要在时间维度上被独立引用？
+- Lifecycle Necessity: does it have distinct allowed/forbidden transitions? / **生命周期必要性：** 是否具有独立的允许/禁止状态转换？
+- Referential Value: do other objects need to refer to it? / **引用价值：** 其他对象是否需要引用它？
+- Semantic Distinction: would merging lose meaning/invariants? / **语义差异：** 合并是否会丢失含义或不变量？
+- Implementation Cost: identity registry, persistence, indexes, migration, authorization and tests. / **实现成本：** 身份注册表、持久化、索引、迁移、授权和测试成本。
+- Future Optionality: is it justified only by a speculative future use? / **未来可选性：** 是否仅由推测性的未来用途支撑？
 
 ## 3. Keep as canonical entities / 保留为规范实体
 
