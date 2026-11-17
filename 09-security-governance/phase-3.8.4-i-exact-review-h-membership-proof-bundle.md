@@ -18,14 +18,14 @@
 | H RecoveryJoin Schema 1.0.2 | `4b664e3bce465499bcdfd93796349a4ba7074002` |
 | H I crypto wire mapping 3.8.4 | `a692a790a4c7abef94dba6da9c22b5e06417879a` |
 | H unified Manifest contract 3.8.4 | `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175` |
-| H semantic reference validator | `6710bd7876be5f2c60640f21090729b8859a7a3e` |
+| H semantic reference validator | `e26379d38825ee13d15f652d3bd019c4091da37d` |
 | H Unified Schema 1.2.11 tests | `3e993400cba7a0e744e865434fb1bb90c48fd525` |
-| H RecoveryJoin 1.0.2 schema tests | `83435af0f75d9e0bea64e2a331571356c3c1c26b` |
+| H RecoveryJoin 1.0.2 schema tests | `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a` |
 | I Python/Node P0 vectors | `9210219a85afe1f48da0ea253a073aba8b2e138c` |
 | I Python/Node crypto tests | `01239e06e8f4464f49acd34241dc00899befe424` |
 | D owner proof contract candidate | `d80dabe7210e681bc4e2290355a38f8b67be9ddd` |
 | C owner proof contract candidate | `5e37185610869951c3b392c9ad143a72b4c702ac` |
-| H CI candidate run | `44051257901` (H HEAD `07cacfbc208a566a784389f4eef60bc8e5d1281f`; 282 tests total, 260 passed, 22 skipped, 0 failed) |
+| H CI candidate run | `44051676055` (H test commit `16c0e63458a3e3773cd38ef86bfb4f7fe44dd0b4`; 288 tests total, 266 passed, 22 skipped, 0 failed) |
 
 ## 2. I findings
 
@@ -83,10 +83,10 @@ The exact H review and wire mapping were refreshed after adding RecoveryJoin 1.0
 - H exact review Blob: `b91c645d54ddbcc16aba84fbd83436bcb106bd98`.
 - H wire mapping Blob: `a692a790a4c7abef94dba6da9c22b5e06417879a`.
 - H union contract Blob: `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175`.
-- RecoveryJoin 1.0.2 test Blob: `83435af0f75d9e0bea64e2a331571356c3c1c26b`.
+- RecoveryJoin 1.0.2 test Blob: `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a`.
 - Unified 1.2.11 test Blob: `3e993400cba7a0e744e865434fb1bb90c48fd525`.
 - Unified 1.2.12 test Blob: `91f7cc668d55ce3cfa4d4b9af079dfb118c320d7`.
-- H semantic reference module Blob: `6710bd7876be5f2c60640f21090729b8859a7a3e`.
+- H semantic reference module Blob: `e26379d38825ee13d15f652d3bd019c4091da37d`.
 
 The reference validator now requires an explicit owner-proof verifier callback for any non-empty admission set. The test adapter is marked TEST-ONLY. It is not a production I/D/C signature verification implementation.
 
@@ -108,3 +108,8 @@ The exact I membership-proof P0 projection is now represented as the sixth cross
 - H CI run `44051045877`: 282 tests total, 260 passed, 22 skipped, 0 failed.
 
 The vector is TEST-ONLY and does not approve production I signing, key trust, ledger completeness or anti-rollback. D/C continue to own their own proof profiles and signatures.
+
+
+## 9. Exact proof payload validation
+
+H's RecoveryJoin proof validator now validates actual proof payload fields against the exact owner row and frozen snapshot and requires the owner-authoritative verifier callback. The exact H semantic module is `e26379d38825ee13d15f652d3bd019c4091da37d`; RecoveryJoin tests are `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a`. CI Run `44051676055` passed 288 tests (266 passed, 22 skipped, 0 failed). This is a reference/test seam only; production I trust/key/ledger verification remains open.
