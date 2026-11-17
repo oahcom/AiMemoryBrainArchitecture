@@ -33,11 +33,15 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Memory Compiler detailed contracts | E owner branch: 04-memory-compiler/ | Pending | Owner-branch English sources | NOT STARTED — field/stage-level translation pending |
 | Memory Runtime reader guide | F owner branch: 05-memory-runtime/ | docs/zh-CN/05-memory-runtime/memory-runtime-guide.md | docs/en/05-memory-runtime/memory-runtime-guide.md | COMPLETE — overview guide only |
 | Memory Runtime detailed contracts | F owner branch: 05-memory-runtime/ | Pending | Owner-branch English sources | NOT STARTED — field/policy-level translation pending |
-| Memory Context (G) | 06-memory-context/ | Pending | Existing English sources | NOT STARTED |
-| Agent Integration (C) | 07-agent-integration/ | Pending | Existing English sources | NOT STARTED |
-| BMCP Protocol (H) | 08-protocols/ | Pending | Existing English sources | NOT STARTED |
+| Memory Context reader guide | G owner branch: 06-memory-context/ | docs/zh-CN/06-memory-context/memory-context-guide.md | docs/en/06-memory-context/memory-context-guide.md | COMPLETE — overview guide only |
+| Memory Context detailed contracts | G owner branch: 06-memory-context/ | Pending | Owner-branch English sources | NOT STARTED — detailed state/field translation pending |
+| Agent Integration reader guide | C owner branch: 07-agent-integration/ | docs/zh-CN/07-agent-integration/agent-integration-guide.md | docs/en/07-agent-integration/agent-integration-guide.md | COMPLETE — overview guide only |
+| Agent Integration detailed contracts | C owner branch: 07-agent-integration/ | Pending | Owner-branch English sources | NOT STARTED — detailed capability/telemetry translation pending |
+| BMCP Protocol reader guide | H owner branch: 08-bmcp-protocol/ | docs/zh-CN/08-bmcp-protocol/bmcp-guide.md | docs/en/08-bmcp-protocol/bmcp-guide.md | COMPLETE — overview guide only |
+| BMCP Protocol detailed contracts | H owner branch: 08-bmcp-protocol/ | Pending | Owner-branch English sources | NOT STARTED — wire/schema translation pending |
 | Storage and Index | 09-storage-and-index/ | Pending | Existing English sources | NOT STARTED |
-| Security and Governance (I) | 10-security-and-governance/ | Pending | Existing English sources | NOT STARTED |
+| Security & Governance reader guide | I owner branch: 09-security-governance/ | docs/zh-CN/09-security-governance/security-governance-guide.md | docs/en/09-security-governance/security-governance-guide.md | COMPLETE — overview guide only |
+| Security & Governance detailed contracts | I owner branch: 09-security-governance/ | Pending | Owner-branch English sources | NOT STARTED — policy/identity/Forget detail translation pending |
 | Consistency and Recovery | 11-consistency-and-recovery/ | Pending | Existing English sources | NOT STARTED |
 | Testing and Acceptance | 12-testing-and-acceptance/ | Pending | Existing English sources | NOT STARTED |
 | Detailed technology and Rust engineering | 13-engineering-decisions/ | Pending | Existing English sources | NOT STARTED |
@@ -76,12 +80,16 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 - Acceptance: Accepted/Compiled/Canonical Committed/Indexed remain distinct; cursor and Forget semantics stay aligned.
 
 ### Batch 5 — Context and Agent boundary / 第五批：上下文与 Agent 边界
+- G Context, C Agent Integration, and H BMCP reader guides: COMPLETE.
+- Detailed G/C/H contracts: NOT STARTED — schemas, state machines, capability tiers, and proof fields remain to be translated.
 - G Context Manager, versioning, edit operations, reconciliation, budget.
 - H BMCP schemas and state machines.
 - C Adapter integration and inference-boundary Applied proof.
 - Acceptance: ContextVersion, Delivery, Applied, PermissionEpoch, and ForgetFenceGeneration remain distinct.
 
 ### Batch 6 — Governance, storage, and recovery / 第六批：治理、存储与恢复
+- I Security & Governance reader guide: COMPLETE.
+- Detailed I policies and contracts: NOT STARTED — principal, authorization, Forget target inventory, backup/erasure and threat model remain to be translated.
 - I identity, authorization, Forget, retention, audit.
 - Storage/index/cache.
 - Consistency/Recovery and COC.
