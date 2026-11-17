@@ -1,0 +1,418 @@
+work_item_id: AID-2026-001
+title: Define the ChatGPT-native AI development execution model
+class: ARCH
+risk: R3
+risk_rationale: Normative security-identity, authorization, privacy/retention/audit and Forget/deletion boundary changes; highest applicable risk governs the Work Item.
+security_scope: SEC — cross-cutting normative security and Forget governance boundaries
+status: REMEDIATION_IN_PROGRESS
+sponsor: project user
+accountable_owner: A
+implementing_ai_session: AID-2026-001-EXEC-001
+execution_record_ref: 14-ai-development/work-items/AID-2026-001/execution-record-001.md
+independent_reviewer: PENDING — genuinely new ChatGPT conversation required; must not have participated in implementation
+integration_reviewer: PENDING — distinct non-implementing ChatGPT conversation; A is accountable Owner/coordinator/implementer and MUST NOT integration-review own work
+r3_specialist_reviews:
+  security_specialist: PENDING — Owner I role in a genuinely new non-implementing ChatGPT conversation
+  forget_domain_specialist: PENDING — Owner D role in a genuinely new non-implementing ChatGPT conversation
+r3_test_matrix: 14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md
+r3_security_specialist_prompt: 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-i-prompt.md
+r3_forget_specialist_prompt: 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-d-prompt.md
+integration_reviewer_prompt: 14-ai-development/work-items/AID-2026-001/integration-review-prompt.md
+r3_test_evidence_status: NOT_RUN_NOT_EVIDENCED
+acceptance_blocker: R3 specialist reports and reproducible R3 contract-test evidence are mandatory before acceptance
+acceptance_authority: project governance authority
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: b372b62c640a2b656e54b6db62a4ee67d7d8c001
+dependency_refs:
+  - 14-ai-development/ai-development-standard.md
+  - 14-ai-development/iteration-lifecycle.md
+  - 14-ai-development/prompt-and-evidence-template.md
+  - 00-governance/bilingual-documentation-policy.md
+prompt_id: AID-2026-001-PROMPT
+prompt_version: v2
+prompt_sha256: c49b09af16fd34941926665b450b8cd0788283240f4b31b2877695bc5b8b1cb7
+historical_prompt_v1: 14-ai-development/work-items/AID-2026-001/prompt-v1.md
+created_at: 2026-11-17
+updated_at: 2026-11-18
+implementation_branch: design/chatgpt-native-execution-model
+implementation_commits:
+  - b3a6bd612cb310d0b116db6d8cbd7bdff37c7ccf
+  - adefecb47c81511bfc0f8c2f3f4210eba50fe419
+  - 7b94ab7431eb0a65af9380fa3ab40686c5a633e5
+  - e455450cbc719991bcd5146a7595efd9666a1718
+  - d86799af23dfdd4d783dff06bc05a6bd11e201ef
+  - 884972fe6adde0ec511d94162613bf48b76fab53
+  - 49824dbe44c689ba45c8051b490441ae459039f0
+  - 7da7d9735de7bcbde636493f10a84480dd5c292f
+  - a64646a2ded7dca9f0e40b231f14ecf333b67e13
+  - dc9d3efc352dd6788f29692345e427bb3c1a0a54
+  - a2bfcc6feeae063159d8aa65bfd0b9e5442bf507
+  - ae4ca4405a2d79b0984dd5517601f4a3e95aea56
+  - 4a6f2092ddec25d199f55f1f0c56a79d271bd7dc
+  - 859abf7dafd8d6d8863ed07c9003ba97d77c44ca
+  - 9a4fd94ba533f3f491f540056694a616ef024194
+  - 13a308f832cbb953e185e5cf6825c6aed571e95a
+  - b8de91cdd5ed84e826da3b4ff6673c2e43ffc869
+  - 74a524f0d56326c403f6a2f7c8f943269c5c49f9
+  - f7322826361cd5ef37ef85c5fa966f0f5e65d51a
+  - d9df1c71b23cef669ef8dfb156b618ca0caaab05
+  - 5362a97befab71d3071e4491c2a7cdec0557e314
+  - 66a0ddf9a1440817ff5d128fd5648bb450aa9b4e
+  - 635a6d0dacd3440e7508cde7a755a4ad0231fc69
+  - 1791e8ea60c5df34f95378754b226a6ec208b5c8
+  - 5013e71154529ad31cefe25071ee1657872eac0a
+  - 49896316d1b2b874086b35d7af29c51388a823d2
+  - 5a0c4b80a2d324e854e210cb5492ac5ad36d436f
+  - 99dfcf3ea00bd18a9305960ba05bf55059cb0990
+  - 27bdd62cc993da77d72c45d669d1355fdc6476e3
+  - 5a3536aa1bfa2cdf375c470cf8c8e2b219de7e3b
+  - 717c92c5d55c8b0c5a2824871833f7ed43425736
+  - 8c205cb61728c4c930014135bf639279e7bd9b11
+  - 46e678cd9580d7fa0dfc8e806cf384f04c294f85
+  - 75bb7fa19a1a4b1dd37564272a88790d9f82ca26
+  - 2efd289e8baad6d16213febd1b54c326e3dfc77c
+  - d3a7a603066ee6f1d9ef140a7215f060297a5f90
+  - 53ffb4c948f9a9a6a38478c4c62a54eb36b78fc0
+  - 6716bcfbc6722a9ac3f14650617ac0fef7120b2c
+  - 332433244cc1053d24a7d0eccc8413b00cc2df2a
+  - 6abfd3ffc6eee9beeae8566183425379eef1d81b
+  - 96fc85d5f14946626e4c5b1547bbaca4cb76d9f4
+  - 4a6df12eb61c28a5b7c34d9773a6a65b5f148077
+  - d9cae5ce9468dd7b60fd777f9baf84c13e682e2d
+  - 26186b4f84496fcf6c75054a0cf6bd1341e9e99e
+  - 9097ed97c2e231a1ea427e5718dcfc6f67130496
+  - ec952c7a07ca578c2aea03e057db3ef4b087a738
+  - 446473b3f6056983bec58a19a31d0b4695e35c17
+  - 54a07988f4ac93c09b6f9c7a17ddf8ac49c323b4
+  - 8f6cd36af808b1e40cb717beef4cb4633dd27589
+  - 21c8497fc71a0608889dbeba67b131af8dcfcabc
+  - d77f019e4078fd37d5c919c88ebb97891723a323
+  - 176df68068dfb60ceed10581c4467c15c1ed0e74
+  - fc2dfc072d7ad23be4a942c995579e3e3ae5c4fb
+  - 206c14c2d9b8785e5cd0e6704c4900ce3daaed25
+  - 201a6f5784bae2f75b20a05303bb1a703883f86f
+  - 83bfd4f53af5f0e19e0b6772d18f2158e67a7a19
+  - 1228f84e64845e4ca5d467ca3e70058b18077085
+  - dca13b927c99679e0e3b5aa4b522f7c7aeade780
+  - 633c1b9c37b95e135b7b609d8662b8f8edd768a4
+  - ecef5ca8adcb3d5bd7088853bdd2c1a3d9bc9bfa
+  - c40d9c5bb501ca04aff7c404172db21a1bfe18d9
+  - e5e14a035b7738ea0b430c8cc1330a9621cec816
+  - 3261599eaa817877dd62b0b4c86eb4b5a7013917
+  - 7dffd3730d5990e55a304931d6e052764f89527c
+  - 7ca1c7826dbb079f3db7461b545d7abd6bbd9373
+  - 1a76afb67c15ffbd96eddf900859bbcb6f4c2275
+  - dd53185b2b7e9b27e1d67ab656a79d8f0ec84ec6
+  - bcc507d20ba2482881400c37c437f1c08af3cee4
+  - 01ff08d4c34553bad4f66455fba2308b5a54ea72
+  - 54fe95d5d40fb8f42a9e2efa1fce6575902d75e6
+  - 282bc7dcec816a1ffbee23f07ad3e06fa44ad5d5
+  - 4e9d58a0a7a8a789cf7c9cd84ebe03083346135b
+  - ccdc697b4f12e3f61d2b3f9a305b1d6496435c20
+  - c8309ab05a3f8bd32f7e8edff75039f91ecb175e
+  - bbd555bc145b31832ec227d10d7c27ffc627792d
+  - 9740b4888c5a875b87d9062100917f8c1f587628
+  - f0f455ec3aa41825074a57c9eb65e1e067e1db77
+  - ddd04f95b6d5f4f5b911344c7e7c6c62157efb3f
+  - 0cfba423f5d6c17f8be23e02e4006873f33437b7
+  - 6ed56b8fcb8bac6c59eac7ba824be4387e22e944
+  - c4c70ebf7c3728a08c88233caa25a0d833aff001
+  - f04f0272e2e520a6cf7df61be64a1adc46cb8ea4
+  - a7678934064c5c8305613e4f94ece9dbf616e8a2
+changed_paths:
+  - 14-ai-development/prompt-and-evidence-template.md
+  - 14-ai-development/README.md
+  - 14-ai-development/ai-development-standard.md
+  - 14-ai-development/chatgpt-native-execution-model.en.md
+  - 14-ai-development/chatgpt-native-execution-model.zh-CN.md
+  - 14-ai-development/prompts/global/chatgpt-session-contract-v1.md
+  - 14-ai-development/prompts/global/independent-reviewer-session-v1.md
+  - 14-ai-development/prompts/owners/A/owner-session-v1.md
+  - 14-ai-development/prompts/owners/B/owner-session-v1.md
+  - 14-ai-development/prompts/owners/B/owner-session-v2.md
+  - 14-ai-development/prompts/owners/C/owner-session-v1.md
+  - 14-ai-development/prompts/owners/D/owner-session-v1.md
+  - 14-ai-development/prompts/owners/D/owner-session-v2.md
+  - 14-ai-development/prompts/owners/E/owner-session-v1.md
+  - 14-ai-development/prompts/owners/F/owner-session-v1.md
+  - 14-ai-development/prompts/owners/G/owner-session-v1.md
+  - 14-ai-development/prompts/owners/H/owner-session-v1.md
+  - 14-ai-development/prompts/owners/I/owner-session-v1.md
+  - 14-ai-development/prompts/owners/I/owner-session-v2.md
+  - 14-ai-development/prompts/owners/README.md
+  - 14-ai-development/work-items/AID-2026-001/manifest.yaml
+  - 14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md
+  - 14-ai-development/work-items/AID-2026-001/i-pre-002-identity-binding-audit.md
+  - 14-ai-development/work-items/AID-2026-001/execution-record-001.md
+  - 14-ai-development/work-items/AID-2026-001/governance-decision-NR-001.md
+  - 14-ai-development/work-items/AID-2026-001/prompt-v1.md
+  - 14-ai-development/work-items/AID-2026-001/prompt-v2.md
+  - 14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md
+  - 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-i-prompt.md
+  - 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-d-prompt.md
+  - 14-ai-development/work-items/AID-2026-001/integration-review-prompt.md
+  - 14-ai-development/work-items/AID-2026-001/self-review-v1.md
+  - 14-ai-development/work-items/INDEX.md
+  - docs/en/09-security-governance/security-governance-guide.md
+  - docs/zh-CN/09-security-governance/security-governance-guide.md
+verification:
+  status: NOT_RUN
+  commit_sha: ""
+  commands: []
+  evidence_refs: []
+traceability_exclusions:
+  - sha: 13410d37958b3bf5b3c1e5bd9d604fab61fbe4c3
+    reason: Previous manifest self-update for the I-PRE-001/I-PRE-004 remediation inventory; superseded by the current manifest self-update.
+  - sha: 4f8c5218c8d33f5fdb690a7c4bdb671639ebb807
+    reason: Previous current-head manifest self-update and inventory reconciliation; superseded by subsequent identity-audit remediation commits and this manifest update.
+  - sha: 3fb10eef38d88b83b48edf5e2818e2ca5ae8ee9e
+    reason: Previous current-head manifest self-update; now superseded by subsequent remediation commits and classified as historical manifest-only bookkeeping.
+  - sha: c97e3de7ac37158ef60526d7b8703c4574ed042a
+    reason: Manifest-only governance inventory reconciliation; metadata bookkeeping, not implementation.
+  - sha: 1e11b787f4bdfd2979642d4633f89fa84049ae62
+    reason: Manifest-only reconciliation of changed paths and commit accounting; metadata bookkeeping, not implementation.
+  - sha: 706f582338c8f4feac7f2c8517fbb390f58256f8
+    reason: Manifest-only re-review remediation traceability reconciliation; metadata bookkeeping, not implementation.
+  - sha: 1d6ab39375136d8649235feebeb6232609001222
+    reason: Historical manifest-only current-head self-update; now superseded by later PR commits and classified as bookkeeping.
+  - sha: 41e62d17e7db7d9778d5ee036f4aaf66f8a620e7
+    reason: Manifest-only update recording IR-004 through IR-008 remediation state; metadata bookkeeping, not implementation.
+  - sha: 31de7d07c697b7fa6baa3f1f92c835055c83c0b0
+    reason: Manifest-only final inventory update before specialist-review handoff prompts; metadata bookkeeping, not implementation.
+  - sha: 2ce0bfad35fcd7a3e0b6a150b6a141e25aa67218
+    reason: Manifest-only commit-inventory reconciliation; metadata bookkeeping, not implementation.
+  - sha: 08ed26cf3496ccc52382583f2e05a7fef0017547
+    reason: Manifest-only commit-order maintenance; metadata bookkeeping, not implementation.
+  - sha: 5ea920140a3a0455f0340f45d84c97b9672e402e
+    reason: Manifest-only traceability-exclusion update; metadata bookkeeping, not implementation.
+  - sha: 76e4765a13a7a6d69bd355c036702b1bea7bc9aa
+    reason: Manifest-only Owner I v2 inventory update; metadata bookkeeping, not implementation.
+  - sha: af2eae80a560b875f05ef4b9f0798a1976f2e250
+    reason: Manifest-only final inventory refresh; metadata bookkeeping, not implementation.
+  - sha: d0540edbebd7b4c518ecb03d23fe1b40fa04d70e
+    reason: Historical manifest-only self-update commit after the first inventory snapshot; metadata bookkeeping, not implementation.
+  - sha: e148ed7f2c479e142ecbbcbaf5a78ede503f80f0
+    reason: Manifest-only review-disposition and execution-traceability update; metadata bookkeeping, not implementation.
+  - sha: 6d6933b3d8a5744b7a01d382cb771db0461a68e6
+    reason: Manifest-only reconciliation of the expanded commit inventory and historical exclusions; metadata bookkeeping, not implementation.
+  - sha: 48ae0d421704b2682fa5be2a747572a86c6243fb
+    reason: Manifest-only commit-inventory reconciliation; metadata bookkeeping, not implementation.
+  - sha: c38914dec04aeb8956a5a8c9fe052b94e0ed4daa
+    reason: Manifest-only bookkeeping reconciliation; metadata bookkeeping, not implementation.
+  - sha: bdc92b7f1442df495881edd119cee7b363de632f
+    reason: Manifest-only final bookkeeping reconciliation; metadata bookkeeping, not implementation.
+  - sha: 0708e25d8e008b1044679ff29ba7ae34977bc08c
+    reason: Prior manifest-only inventory finalization; superseded by subsequent review/remediation records.
+  - sha: 1e31308e079a2f82925c9a3930e269edf266e09e
+    reason: Manifest-only append of the independent re-review history; superseded by this manifest self-update.
+  - current_manifest_self_update: Excluded by definition to avoid self-reference.
+self_review:
+  status: RECORDED_NOT_INDEPENDENT
+  report_ref: 14-ai-development/work-items/AID-2026-001/self-review-v1.md
+  reviewed_head_before_self_review: 5a3536aa1bfa2cdf375c470cf8c8e2b219de7e3b
+  findings: [SR-001, SR-002, SR-003, SR-004, SR-005]
+review:
+  status: COMPLETED_FAIL
+  report_ref: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#pullrequestreview-5937629228
+  reviewed_head_sha: 1d6ab39375136d8649235feebeb6232609001222
+  findings: [IR-004, IR-005, IR-006, IR-007, IR-008]
+  next_review_status: PENDING_AFTER_REMEDIATION
+  next_review_target: exact PR Head after remediation commits and manifest self-update
+acceptance:
+  status: PENDING
+  record_ref: ""
+merge:
+  target_branch: main
+  merge_commit_sha: ""
+  status: NOT_MERGED
+pull_request: 42
+pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42
+
+review_history:
+  - reviewer_report: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#pullrequestreview-5937629228
+    reviewed_head_sha: 1d6ab39375136d8649235feebeb6232609001222
+    result: FAIL
+    findings:
+      IR-001: VERIFIED_FIXED
+      IR-002: VERIFIED_FIXED
+      IR-003: VERIFIED_FIXED
+      IR-004: OPEN_P1_R2_R3_CLASSIFICATION_CONFLICT
+      IR-005: OPEN_P1_ONE_UNACCOUNTED_COMMIT_706F582
+      IR-006: OPEN_P2_STALE_PRIMARY_REVIEW_STATUS
+      IR-007: OPEN_P2_V1_PROMPT_HISTORICAL_METADATA_INCONSISTENT
+      IR-008: OPEN_P2_A_INTEGRATION_REVIEWER_ROLE_COLLISION
+      NR-001: VERIFIED_OPTION_A_ACCEPTED
+    r3_specialist_review: NOT_EVIDENCED
+    reproducible_r3_test_evidence: NOT_EVIDENCED
+    ci: NOT_RUN
+    yaml_parse_schema_validation: NOT_RUN
+    manifest_verification: NOT_RUN
+    disposition: FAIL; do not accept or merge; remediation and fresh exact-Head review required.
+  - reviewer_report: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945250593
+    reviewed_head_sha: 0708e25d8e008b1044679ff29ba7ae34977bc08c
+    result: CHANGES_REQUIRED
+    findings:
+      IR-001: PARTIALLY_FIXED
+      IR-002: VERIFIED_FIXED
+      IR-003: VERIFIED_FIXED
+      NR-001: OPEN_GOVERNANCE_AUTHORITY_DECISION_REQUIRED
+      NR-002: OPEN_PR_DESCRIPTION_STATISTICS_STALE
+      NR-003: OPEN_MANIFEST_REVIEW_HISTORY_NOT_RECORDED
+    ci: NOT_RUN
+    yaml_parse_schema_validation: NOT_RUN
+    manifest_verification: NOT_RUN
+    disposition: Historical review retained; follow-up remediation tracked in subsequent commits.
+
+remediation:
+  latest_review: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#pullrequestreview-5937629228
+  latest_reviewed_head: 1d6ab39375136d8649235feebeb6232609001222
+  status:
+    IR-004: FIXED_CLASSIFICATION_AND_PROMPT_V2; SPECIALIST_EVIDENCE_PENDING
+    IR-005: FIXED_MISSING_SHA_706F582_CLASSIFIED_AS_MANIFEST_ONLY
+    IR-006: FIXED_PRIMARY_REVIEW_POINTER_UPDATED; NEXT_HEAD_REVIEW_PENDING
+    IR-007: FIXED_B_D_I_V1_HISTORICAL_METADATA
+    IR-008: FIXED_A_REMOVED_AS_INTEGRATION_REVIEWER; DISTINCT_REVIEWER_ASSIGNMENT_PENDING
+    I-PRE-002: DOCUMENTED_OPEN_BHI_JOINT_CONTRACT_AND_IMPLEMENTATION_GAP; SPECIALIST_APPROVAL_AND_CONFORMANCE_PENDING
+    I-PRE-005: FIXED_CHINESE_FORGETFENCE_TERMINOLOGY_PENDING_INDEPENDENT_REVIEW
+  source_review: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945250593
+  source_reviewed_head: 0708e25d8e008b1044679ff29ba7ae34977bc08c
+  status:
+    IR-001: FIXED_PENDING_INDEPENDENT_REVIEW
+    IR-002: VERIFIED_FIXED_BY_INDEPENDENT_REVIEW
+    IR-003: VERIFIED_FIXED_BY_INDEPENDENT_REVIEW
+    NR-001: RESOLVED_BY_GOVERNANCE_DECISION_OPTION_A
+    NR-002: FIXED_PR_DESCRIPTION_UPDATED
+    NR-003: FIXED_REVIEW_HISTORY_APPENDED
+  remediation_commits:
+    - 206c14c2d9b8785e5cd0e6704c4900ce3daaed25
+    - 201a6f5784bae2f75b20a05303bb1a703883f86f
+  note: All IR-004 through IR-008 document corrections are author-side remediation only and require independent verification. IR-004 remains acceptance-blocking until Owner I/Owner D specialist reports and reproducible R3 test evidence are recorded. IR-008 remains pending until a distinct integration-review conversation is actually assigned and completes its review. The latest FAIL disposition remains historical and must not be overwritten.
+
+
+governance_decisions:
+  - decision_id: AID-2026-001-GOV-NR-001
+    finding_id: NR-001
+    decision: OPTION_A_ACCEPTED
+    status: RESOLVED_BY_GOVERNANCE_DECISION
+    decision_record: 14-ai-development/work-items/AID-2026-001/governance-decision-NR-001.md
+    decision_request: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945859120
+    decision_date: 2026-11-17
+    scope: AI-STD-001 section 3.2 interpretation for ChatGPT-native independent review
+    independence_claim: conversation_context_isolation_only
+    explicitly_not_claimed:
+      - model_independence
+      - provider_independence
+      - runtime_environment_independence
+      - statistical_independence
+      - multi_model_consensus
+    r3_requirements: UNCHANGED_MANDATORY
+    acceptance_authority: UNCHANGED
+    implementation_review_acceptance_merge: DISTINCT_GATES
+    rationale: A genuinely new ChatGPT conversation, not involved in implementation and independently reading exact GitHub artifacts, meets the separate-session requirement while disclosing its limited independence.
+    recorded_by: project_governance_decision_supplied_in_chat_and_linked_pr_discussion
+
+follow_up_remediation:
+  pull_request: 72
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/72
+  branch: remediation/aid-2026-001-forget-contract-closure-2026-11-18
+  target_base_branch: design/chatgpt-native-execution-model
+  target_base_head: 84d91b10e9069a575b479f6925d3b143757e82cb
+  reconciled_after_base_advance: true
+  proposal_content_head_before_manifest_update: 84a5e25c39c7fc29aac2c8d834b20243568be377
+  status: PROPOSAL_SUBMITTED_PENDING_OWNER_APPROVAL
+  findings:
+    D-F01: PROPOSED_RESOLUTION_PENDING_D_I_APPROVAL_AND_EXECUTOR_ACKNOWLEDGEMENTS
+    D-F02: PROPOSED_RESOLUTION_PENDING_D_I_APPROVAL_AND_CONFORMANCE_TESTS
+    D-F03: PROPOSED_RESOLUTION_PENDING_SCHEMA_IMPLEMENTATION_OWNER_EVIDENCE_AND_TESTS
+    D-F04: PROPOSED_RESOLUTION_PENDING_IMPLEMENTATION_AND_FAULT_INJECTION_TESTS
+  artifacts:
+    joined_contract_proposal: 14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md
+    r3_test_matrix: 14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md
+    owner_d_i_authority_matrix: 14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md
+    d_lifecycle_model: 02-domain-model/lifecycle-model.md
+    i_security_guide_en: docs/en/09-security-governance/security-governance-guide.md
+    i_security_guide_zh: docs/zh-CN/09-security-governance/security-governance-guide.md
+  owner_approvals:
+    owner_d: PENDING
+    owner_i: PENDING
+    owner_e: PENDING
+    owner_f: PENDING
+    owner_g: PENDING
+    owner_h: PENDING
+    owner_c: PENDING
+    storage: PENDING
+  bilingual_semantic_parity: PENDING
+  r3_test_evidence: NOT_RUN_NOT_EVIDENCED
+  ci: NOT_RUN
+  yaml_schema_validation: NOT_RUN
+  integration_review: PENDING_DISTINCT_NON_IMPLEMENTING_REVIEWER
+  acceptance: PENDING
+  merge: NOT_MERGED
+  note: Proposal and author-side remediation only. This manifest update records pre-update branch Head 13e9c03976d3728bdfedf02e72e1875fbb937933; the resulting manifest self-update commit is excluded from self-reference. Verify exact branch Head from GitHub before review.
+
+
+execution_boundary_extension:
+  proposal_status: PROPOSED_PENDING_ACCOUNTABLE_OWNER_ACKNOWLEDGEMENTS
+  source_baseline: 84d91b10e9069a575b479f6925d3b143757e82cb
+  owner_contracts:
+    path: 14-ai-development/work-items/AID-2026-001/owner-execution-boundary-contracts-v1.md
+    commit_before_manifest_update: 5d1364a579e38c57b952c347f04acf118f03e420
+    sha256_or_blob_sha: 008b625bdb29ee65fe136f21c0e9be6396228e4b
+    owner_acknowledgements:
+      E: PENDING
+      F: PENDING
+      G: PENDING
+      H: PENDING
+      C: PENDING
+      storage_backup_operator: PENDING_OPERATOR_ASSIGNMENT_AND_ACK
+  added_conformance_cases:
+    test_matrix_path: 14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md
+    test_matrix_commit_before_manifest_update: 5394f94d670fd1ffbf0ac10d5e7e8c8201cff48a
+    blob_sha: 0dac44f65a47541bf5dca90563c90ade6a5d4331
+    cases: DFI-013..DFI-022
+    execution_status: NOT_RUN_NOT_EVIDENCED
+  joined_contract_updated:
+    path: 14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md
+    commit_before_manifest_update: 7e5a8c7bb015114633f7df39a7fe45aa5cfa2720
+    blob_sha: 96882570d44f6a3c6d60a30b1edb0e405bde5efc
+    status: PROPOSAL_LINKS_DETAILED_OWNER_CONTRACTS
+  implementation_status: NOT_CHANGED_NOT_CLAIMED
+  ci_status: NOT_RUN_OR_NO_STATUS_RETURNED
+  bilingual_semantic_parity: PENDING_INDEPENDENT_REVIEW
+  integration_review: PENDING_DISTINCT_NON_IMPLEMENTING_REVIEWER
+  acceptance: PENDING
+  merge: NOT_MERGED
+  note: These are author-side contract and test-specification changes only. They do not constitute E/F/G/H/C/Storage approvals or executed conformance evidence. PR #72 was reconciled onto target branch Head 84d91b10e9069a575b479f6925d3b143757e82cb; manifest changes from that base were preserved.
+
+
+reference_model_validation:
+  classification: NON_PRODUCTION_EXECUTABLE_REFERENCE_MODEL
+  status: PASS_MODEL_ONLY
+  runtime_conformance_status: NOT_RUN_NOT_EVIDENCED
+  path: 14-ai-development/work-items/AID-2026-001/reference-model/
+  model:
+    file: 14-ai-development/work-items/AID-2026-001/reference-model/forget_model.py
+    git_blob_sha: d06df53bb5ec24f77848df21c65bb07b9574c272
+  tests:
+    file: 14-ai-development/work-items/AID-2026-001/reference-model/test_forget_model.py
+    git_blob_sha: 5d09c6717a81428a23235fb0c87ccf3ade1671d9
+    discovered: 14
+    passed: 14
+    failed: 0
+    errors: 0
+  execution_record:
+    file: 14-ai-development/work-items/AID-2026-001/reference-model/EXECUTION-RECORD.md
+    git_blob_sha: d5d9f538029c91afac17f8bdc1ebf8390965e0cf
+  environment:
+    python: 3.13.5
+    framework: standard_library_unittest
+    command: python -m unittest discover -s /tmp/forget-reference-model -v
+    executed_at: 2026-11-18
+  explicit_limits:
+    - in_memory_reference_model_only
+    - no_database_transaction_or_WAL
+    - no_parallel_scheduler_or_distributed_race
+    - no_production_E_F_G_H_C_Storage_components
+    - DFI_001_to_DFI_022_runtime_tests_not_run
+    - no_CI_or_acceptance_claim

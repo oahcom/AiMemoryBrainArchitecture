@@ -11,7 +11,7 @@
 
 Security is not established by one query filter, cache key, tombstone, or Adapter acknowledgement. It depends on authenticated identity, explicit Scope, policy decisions, reauthorization at trust boundaries, revocation propagation, Forget barriers, and verifiable evidence.
 
-I owns global identity/authorization policy, delegation and revocation, retention, audit governance, backup/external-copy policy, global Forget completion policy, and physical-erasure requirements. D/E/F/G/H/C retain their local enforcement mechanisms and boundary-specific evidence.
+I owns global identity/authorization policy, delegation and revocation, retention, audit governance, backup/external-copy policy, cross-system Forget governance evaluation policy, evidence-acceptance criteria, and physical-erasure requirements. D alone owns canonical Forget lifecycle semantics and the D-domain completion predicate. I's cross-system governance evaluation MUST NOT redefine D's canonical states or declare D-domain completion. D/E/F/G/H/C retain their local enforcement mechanisms and boundary-specific evidence.
 
 ## 2. Three governance planes
 
@@ -60,7 +60,7 @@ Suppressed does not mean Cleaned. Cleaned does not necessarily mean all backups 
 | Owner | Responsibility |
 |---|---|
 | D | Canonical ForgetOperation, target references, Forget Fence/generation, dependency inventory contract |
-| I | Initiation/approval authority, target inventory policy, completion criteria, exceptions, legal hold, retention, backup/external-copy rules, audit and erasure evidence |
+| I | Initiation/approval authority, cross-system target inventory policy, governance evidence-acceptance criteria, policy exceptions, legal hold, retention, backup/external-copy rules, audit and erasure evidence; does not define D-domain completion |
 | E | Compiler work/derivative registration, queue/lease/retry/DLQ/replay suppression and publication gate |
 | F | Retrieval candidates, in-flight reads, cache/Working Set, index/rebuild suppression |
 | G | Context entries, snapshots/deltas, delivery invalidation and reconciliation |
@@ -76,7 +76,7 @@ Recommended phases are Requested → Authorized → SuppressionCommitted → Inv
 
 The operation phase is not the Memory lifecycle. A tombstone or canonical state change alone does not prove global completion.
 
-The global result is a per-target evidence vector, not a single boolean. It must distinguish suppression, derivative cleanup, controlled-storage erasure, backup expiry, external-recipient acknowledgement, and approved residual exceptions. UNKNOWN, FAILED, or UNSUPPORTED targets cannot silently become success.
+The global governance result is a per-target evidence vector, not a single boolean. D supplies the canonical D-domain operation state and predicate; I evaluates cross-system evidence and policy compliance without rewriting D's state. The vector must distinguish suppression, derivative cleanup, controlled-storage erasure, backup expiry, external-recipient acknowledgement, and approved residual exceptions. UNKNOWN, FAILED, or UNSUPPORTED targets cannot silently become success.
 
 ## 8. Security threats and untrusted memory
 
@@ -102,3 +102,14 @@ This is a CANDIDATE governance contract, not a production security certification
 Validation must include identity spoofing, delegation expiry/revocation, cross-Scope denial, stale permission epoch, Forget race/fault injection, backup restore, external recipient exceptions, and zero unauthorized disclosure.
 
 See the [I owner branch](https://github.com/oahcom/AiMemoryBrainArchitecture/tree/session-i-security-governance-2026-11-16/09-security-governance) for detailed candidate governance contracts.
+
+
+## 11. Joined Forget contract proposal — pending D/I approval
+
+The bilingual joined contract proposal is recorded at `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`. The related [Owner D/I authority matrix](../../../14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md) is also a proposal; neither artifact is normative until D and I approve the exact same version/SHA.
+
+D owns canonical Memory lifecycle, ForgetOperation/Fence semantics and the D-domain completion predicate. I owns authentication/authorization, privacy/retention/legal-hold policy, cross-system inventory policy, evidence-acceptance criteria and the cross-system governance assessment. I must not rewrite D's canonical state or predicate; D must not waive I policy or declare cross-system governance compliance. Each executor reports only its own capability-bounded action and evidence.
+
+The cross-system governance assessment is separate from D-domain completion. `CompletedWithPolicyException` is a derived public projection only when D has independently recorded `Completed` and I has recorded `CompliantWithException`. Unknown, failed, unsupported or unaccounted-for mandatory targets block I's `Compliant` assessment. Neither a tombstone nor an ACK proves physical erasure.
+
+**Status:** PROPOSED / D-I APPROVAL PENDING / R3 TESTS NOT RUN.

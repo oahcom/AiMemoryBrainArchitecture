@@ -11,7 +11,7 @@
 
 安全不能由单个 Query Filter、Cache Key、Tombstone 或 Adapter ACK 证明。它依赖认证身份、明确 Scope、策略决策、信任边界上的重新授权、撤销传播、Forget 屏障和可核验证据。
 
-I 拥有全局身份/授权策略、Delegation 和 Revocation、Retention、Audit Governance、备份/外部副本策略、全局 Forget 完成策略和物理擦除要求。D/E/F/G/H/C 仍负责各自边界的本地执行机制和证据。
+I 拥有全局身份/授权策略、Delegation 和 Revocation、Retention、Audit Governance、备份/外部副本策略、跨系统 Forget 治理评估策略、证据接受条件和物理擦除要求。D 单独拥有规范 Forget 生命周期语义及 D 领域完成判定条件。I 的跨系统治理评估不得重定义 D 的规范状态或宣告 D 领域操作完成。D/E/F/G/H/C 仍负责各自边界的本地执行机制和证据。
 
 ## 2. 三个治理平面
 
@@ -33,7 +33,7 @@ I 拥有全局身份/授权策略、Delegation 和 Revocation、Retention、Audi
 - ScopeRef 是领域命名空间/归属或适用范围引用，不等于 Permission。
 - Permission 是策略下针对某个 Resource 的指定 Action 的允许/拒绝。
 - PermissionEpoch 用于使过期授权决策和 Lease 失效。
-- ForgetFence 是 D 的规范抑制代数，不等于 PermissionEpoch。
+- ForgetFence 是 D 的规范抑制代次，不等于 PermissionEpoch。
 
 准确的类型引用语义和 Wire 字段仍需 B/I/H 联合批准。调用方自行构造的 ActorRef 不能证明身份认证；H 必须绑定认证 Transport Principal，I 定义信任策略。
 
@@ -60,7 +60,7 @@ Suppressed 不等于 Cleaned。Cleaned 不一定意味着所有备份均已过�
 | Owner | 职责 |
 |---|---|
 | D | Canonical ForgetOperation、目标引用、Forget Fence/Generation、依赖清单契约 |
-| I | 发起/批准授权、目标清单策略、完成条件、例外、Legal Hold、Retention、备份/外部副本规则、审计和擦除证据 |
+| I | 发起/批准授权、跨系统目标清单策略、治理证据接受条件、策略例外、Legal Hold、Retention、备份/外部副本规则、审计和擦除证据；不定义 D 领域完成条件 |
 | E | Compiler Work/派生物登记、Queue/Lease/Retry/DLQ/Replay 抑制和发布门 |
 | F | Retrieval Candidate、在途读取、Cache/Working Set、Index/Rebuild 抑制 |
 | G | Context Entry、Snapshot/Delta、Delivery 失效和协调 |
@@ -76,7 +76,7 @@ Suppressed 不等于 Cleaned。Cleaned 不一定意味着所有备份均已过�
 
 Operation Phase 不等于 Memory Lifecycle。仅有 Tombstone 或 Canonical 状态变更不能证明全局完成。
 
-全局结果必须是逐目标证据向量，而不是单一 Boolean。它必须区分抑制、派生物清理、受控存储擦除、备份过期、外部接收方 ACK 和批准的残留例外。UNKNOWN、FAILED 或 UNSUPPORTED 目标不能静默算作成功。
+全局治理结果必须是逐目标证据向量，而不是单一 Boolean。D 提供规范 D 领域操作状态及完成判定；I 评估跨系统证据和策略合规性，但不得改写 D 的状态。证据向量必须区分抑制、派生物清理、受控存储擦除、备份过期、外部接收方 ACK 和批准的残留例外。UNKNOWN、FAILED 或 UNSUPPORTED 目标不能静默算作成功。
 
 ## 8. 安全威胁与不可信记忆
 
@@ -102,3 +102,14 @@ Memory、Evidence、摘要和模型生成的提取结果都是不可信数据，
 验证必须覆盖身份伪造、Delegation 过期/撤销、跨 Scope 拒绝、Permission Epoch 过期、Forget 竞态/故障注入、备份恢复、外部接收方例外以及零未授权泄露。
 
 详细候选治理契约见 [I Owner 分支](https://github.com/oahcom/AiMemoryBrainArchitecture/tree/session-i-security-governance-2026-11-16/09-security-governance)。
+
+
+## 11. Forget 联合契约提案——待 D/I 批准
+
+双语联合契约提案记录于 `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`。相关的 [Owner D/I Forget 权责矩阵](../../../14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md) 同样是提案；在 D 与 I 对同一版本/SHA 明确批准前，两份文件都不具有规范效力。
+
+D 拥有规范 Memory 生命周期、ForgetOperation/Fence 语义及 D 领域完成判定条件。I 拥有认证/授权、隐私/Retention/Legal Hold 策略、跨系统目标清单策略、证据接受标准和跨系统治理评估。I 不得改写 D 的规范状态或判定条件；D 不得豁免 I 的策略或声明跨系统治理合规。每个执行方只报告其能力范围内的动作和证据。
+
+跨系统治理评估独立于 D 领域完成。只有 D 已独立记录 `Completed` 且 I 已记录 `CompliantWithException` 时，才可派生公开展示 `CompletedWithPolicyException`。未知、失败、不支持或未纳入清单的强制目标都会阻止 I 评估为 `Compliant`。Tombstone 或 ACK 均不能证明物理擦除。
+
+**状态：** PROPOSED / 待 D-I 批准 / R3 测试未执行。
