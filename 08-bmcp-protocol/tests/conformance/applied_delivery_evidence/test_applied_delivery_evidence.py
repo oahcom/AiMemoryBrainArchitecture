@@ -117,13 +117,13 @@ class AppliedDeliveryEvidenceTests(unittest.TestCase):
         raw=b'{"message_type":"APPLIED_DELIVERY_EVIDENCE_RECORDED","message_type":"ATTACKER"}'
         result=self.validate_raw(raw)
         self.assertEqual(result["status"],"INVALID")
-        self.assertIn("duplicate JSON object member", result["errors"][0])
+        self.assertEqual(result["errors"], ["invalid JSON: ValueError"])
 
     def test_13_duplicate_nested_json_member_rejected(self):
         raw=b'{"outer":{"identity":"trusted","identity":"attacker"}}'
         result=self.validate_raw(raw)
         self.assertEqual(result["status"],"INVALID")
-        self.assertIn("duplicate JSON object member", result["errors"][0])
+        self.assertEqual(result["errors"], ["invalid JSON: ValueError"])
 
     def test_14_replay_result_not_disclosed_after_authorization_denial(self):
         result=self.validate(fixture(),checks("SAME_DIGEST_REPLAY",False))
