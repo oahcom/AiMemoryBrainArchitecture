@@ -261,7 +261,7 @@ H has now committed the following candidate artifacts to its owner branch:
 - H semantic validator contract 3.6.10 latest: Blob `142425b6280f7e0fe517489bc87bc81db892225a`
 - H recovery-cutoff structural schema 1.0.4: Blob `d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1`
 - H RecoveryJoin structural schema candidate 1.0.0: Blob `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`
-- H executable HRC semantic suite: Blob `f28834d73e055be411060f0c1093bd3dc0d865b9`
+- H executable HRC semantic suite: Blob `ee0f47095df10786da358bed193d6f8491a5eb2c`
 - H wire interoperability candidate suite: Blob `18e50957848178f3f35593b3e618dfa9b90cdb31`
 
 The semantic suite contains HRC-01..25 plus JPF-01..12. The wire suite contains WIRE-01..10. These are committed test candidates, not CI execution evidence. The test-only digest helper is not a production canonicalization profile.
@@ -290,12 +290,12 @@ The H schema keeps the COC ParticipantManifest's owner_admission_ref as the prim
 
 Latest H pins:
 - RecoveryJoin schema candidate: f531c1d4b89a48457188c4988f140952759223a6
-- H semantic validator contract: 9a2c3b856d1319e780932d75d2b0165021faf816
+- H semantic validator contract: b3218298f58cff9b92cb1c38e453af6fd4d0dd50
 - HRC semantic suite: 794ac0c34aaad921e5d4a5bcc42b6601f7caf817
 - Wire interop suite: 1a4e754ba9bfa57eb973c6d39731e9f89443b323
 - Schema integrity suite: 67aba74c120f2916d768e7b01c45408ee2624f3a
 
-The test inventory is 64 unittest methods: 25 HRC, 17 JPF, 10 wire and 12 schema-integrity. The tests remain unrun; these are executable candidates only.
+The test inventory is 66 unittest methods: 25 HRC, 19 JPF, 10 wire and 12 schema-integrity. The tests remain unrun; these are executable candidates only.
 
 
 ## 14. Typed owner-evidence refinements
@@ -309,3 +309,8 @@ The latest H RecoveryJoin schema makes the owner evidence edges typed rather tha
 - Request dispositions bind both logical OwnerRequestDigest and exact OwnerEntryDigest.
 
 These structural conditions reduce ambiguous joins but do not prove that referenced owner records are genuine/current. Runtime adapters must resolve and verify each signed evidence record in its owner authority. Latest H schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
+
+
+## 15. Owner admission identity separation tests
+
+HRC/JPF now explicitly tests both sides of the OwnerAdmissionRef vs OwnerEntryRef distinction. OwnerAdmissionRef is the stable admission identity referenced by the COC participant's primary owner_admission_ref. OwnerEntryRef is the exact member row in the signed owner snapshot. The JoinProof binds both plus the snapshot row digest and owner-local sequence. JPF-18/JPF-19 reject substituting one for the other. Latest HRC/JPF suite Blob: ee0f47095df10786da358bed193d6f8491a5eb2c.
