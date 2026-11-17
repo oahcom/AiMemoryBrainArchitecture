@@ -51,11 +51,11 @@ Artifact 1.2.8 曾在 `$defs.commonEnvelope` 增加可选 `signature_profile_id`
 
 The unified schema requires both `schema_artifact_revision=1.2.11` and `schema_version=1.3.0`. They are distinct, mandatory common-envelope fields. The artifact revision identifies the exact H schema artifact selected by the receiver; the wire version identifies the protocol-family contract. Both are owner-authored immutable identity fields and MUST be included in I P0 for all I-signed unified-schema message families.
 
-RecoveryJoin 1.0.1 remains a separate schema artifact. Its nested `completeEmptyProof` and `outOfScopeProof` projections are governed by their own exact H field maps and are not assigned the unified schema's artifact revision.
+RecoveryJoin 1.0.2 remains a separate schema artifact. Its nested `completeEmptyProof` and `outOfScopeProof` projections are governed by their own exact H field maps and are not assigned the unified schema's artifact revision.
 
 统一 Schema 强制要求 `schema_artifact_revision=1.2.11` 与 `schema_version=1.3.0`。两者是不同且必填的 Common Envelope 字段：Artifact Revision 标识接收方解析的精确 H Schema 工件；Wire Version 标识协议族合同。两者均属于 Owner-authored 不可变身份字段，必须纳入所有 I 签名 Unified Schema 消息的 P0。
 
-RecoveryJoin 1.0.1 是独立 Schema 工件，其嵌套 `completeEmptyProof` 与 `outOfScopeProof` 使用各自精确 H Field Map，不继承 Unified Schema 的 Artifact Revision。
+RecoveryJoin 1.0.2 是独立 Schema 工件，其嵌套 `completeEmptyProof` 与 `outOfScopeProof` 使用各自精确 H Field Map，不继承 Unified Schema 的 Artifact Revision。
 
 ## 3. Owner signature projection / Owner 签名投影
 
@@ -192,7 +192,7 @@ These vectors are **SPECIFIED / NOT RUN**. The existing HRC/JPF/WIRE/SCHEMA 66/6
 ## 9. Blocking amendments / 阻断修订
 
 1. I must issue a fresh exact-version decision on the updated mapping and review the exact profile Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`; algorithm/regulatory suitability remains a separate I/governance decision.
-2. H must publish a separate exact-version decision for schema 1.2.11 Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`, RecoveryJoin 1.0.1 Blob `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c` and this mapping revision.
+2. H must publish a separate exact-version decision for schema 1.2.11 Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`, RecoveryJoin 1.0.2 Blob `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c` and this mapping revision.
 3. I/H must confirm the exact snapshot attestation digest binding, empty-set/out-of-scope proof references and P0 allowlists above against the final schema artifacts.
 4. At least two independent canonicalization/signature implementations and byte-for-byte vectors must pass.
 5. I must approve trust-root/key custody/rotation/compromise/anti-rollback operations and the external checkpoint mechanism.
@@ -225,3 +225,22 @@ H accepts the additive schema envelope field and the separation between owner si
 **ACCEPT AS WIRE-MAPPING CANDIDATE WITH BLOCKING AMENDMENTS.** This is a delegated H-role simulation, not an independent human H Owner signature. I must review this exact mapping and vector bundle. No production cryptographic freeze, deployment or Storage acceptance is implied.
 
 **作为 Wire Mapping 候选接受，但保留阻断修订。** 本决议是协调会话的 H 角色模拟，不是独立人工 H Owner 签署。I 必须审查本精确 Mapping 与 Vector Bundle。不代表生产密码学冻结、部署或 Storage 接受。
+
+
+## 12. Owner snapshot membership proof wire mapping / Owner Snapshot Membership Proof Wire 映射
+
+The companion RecoveryJoin schema is now 1.0.2, Blob `4b664e3bce465499bcdfd93796349a4ba7074002`. It defines `ownerSnapshotMembershipProof` as a separate owner-authored proof payload and requires every admissionJoin and noParticipantDisposition to bind its immutable proof ref/digest.
+
+The wire payload includes owner kind/authority, issuer/subject/audience/purpose, exact ledger/version/entry/admission identity, owner-local namespace/sequence/high-water, ledger root, immutable snapshot and attestation refs/digests, gate/scope generations, operation/request identity, anti-rollback anchor, key-status generation, signature profile/key/version, canonicalization/digest profile, proof digest and signature ref.
+
+H owns only the typed schema and reference mapping. I/D/C independently own their proof P0, key trust, signature and completeness semantics. A schema-valid proof is not accepted until the relevant owner authority verifies its signature and exact snapshot inclusion. Missing verifier result is UNKNOWN; mismatched owner/entry/root/snapshot/high-water/scope is INVALID.
+
+RecoveryJoin 1.0.2 does not inherit Unified Schema artifact revision 1.2.11 or wire 1.3.0. It remains an independently pinned companion artifact.
+
+配套 RecoveryJoin Schema 升级为 1.0.2，Blob `4b664e3bce465499bcdfd93796349a4ba7074002`。它将 `ownerSnapshotMembershipProof` 定义为独立 Owner-authored Proof Payload，并要求每个 admissionJoin 与 noParticipantDisposition 绑定不可变 Proof Ref/Digest。
+
+Wire Payload 包含 Owner Kind/Authority、Issuer/Subject/Audience/Purpose、精确 Ledger/Version/Entry/Admission 身份、Owner-local Namespace/Sequence/High-water、Ledger Root、Snapshot/Attestation Ref/Digest、Gate/Scope Generation、Operation/Request 身份、Anti-rollback Anchor、Key-status Generation、Signature Profile/Key/Version、Canonicalization/Digest Profile、Proof Digest 与 Signature Ref。
+
+H 只拥有 Typed Schema 与引用映射。I/D/C 分别拥有自己的 Proof P0、Key Trust、Signature 与 Completeness 语义。Schema 有效不代表 Proof 已接受；相关 Owner Authority 必须验证签名与精确 Snapshot Inclusion。缺少 Verifier 结果为 UNKNOWN；Owner/Entry/Root/Snapshot/High-water/Scope 不匹配为 INVALID。
+
+RecoveryJoin 1.0.2 不继承 Unified Schema Artifact Revision 1.2.11 或 Wire 1.3.0，仍是独立绑定的配套工件。
