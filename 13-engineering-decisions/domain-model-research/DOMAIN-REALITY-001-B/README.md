@@ -28,10 +28,10 @@ B 文档不得静默取代其他 Owner 的权威契约。冲突必须登记并�
 | Gate | Exit condition / 退出条件 | Status |
 |---|---|---|
 | B0 | Actual repository baseline, exact source pins, relevant PRs/issues and authority documents verified / 真实仓库基线、精确来源 Pin、相关 PR/Issue 与权威文档已核验 | PARTIAL |
-| B1 | Entity inventory classified; duplication and omissions assessed / 实体清单分类，重复与遗漏完成评估 | NOT STARTED |
-| B2 | Identity, state, temporal, evidence, provenance and relationships reconciled / 身份、状态、时间、证据、溯源与关系完成协调 | NOT STARTED |
-| B3 | A/C/D/E/F/G/H/I/Storage/Testing cross-owner matrix and conflict register / 跨 Owner 矩阵及冲突登记完成 | NOT STARTED |
-| B4 | Invariants, schemas, fixtures and validation specifications consistent / 不变量、Schema、Fixtures 与验证规范一致 | NOT STARTED |
+| B1 | Entity inventory classified; duplication and omissions assessed / 实体清单分类，重复与遗漏完成评估 | IN PROGRESS — candidate inventory + complexity assessment published |
+| B2 | Identity, state, temporal, evidence, provenance and relationships reconciled / 身份、状态、时间、证据、溯源与关系完成协调 | IN PROGRESS — candidate identity/state/temporal/relationship semantics published; owner reconciliation open |
+| B3 | A/C/D/E/F/G/H/I/Storage/Testing cross-owner matrix and conflict register / 跨 Owner 矩阵及冲突登记完成 | NOT PASSED — first-pass matrix and conflict register published; owner acceptances open |
+| B4 | Invariants, schemas, fixtures and validation specifications consistent / 不变量、Schema、Fixtures 与验证规范一致 | NOT READY — invariant/test specs published; schemas/tests intentionally not frozen or run |
 | B5 | GitHub commits, PR, exact readback and Blob verification / GitHub 提交、PR、精确读回与 Blob 核验完成 | NOT STARTED |
 | B6 | Truly separate independent review and governance disposition / 真正独立审查与治理裁决完成 | INDEPENDENT_REVIEW_PENDING |
 
@@ -60,6 +60,26 @@ Every normative deliverable must contain full Chinese and English semantics in t
 每项规范交付物必须在同一文件/变更集中提供完整中英文语义。未决事项必须保留 OPEN、CANDIDATE、TO_VALIDATE 或 DEFERRED 状态。
 
 ## 5. Current execution status / 当前执行状态
+
+Published on this branch so far / 本分支已发布：
+- existing-domain-model-baseline.md
+- canonical-domain-entity-inventory.md
+- canonical-identity-semantics.md
+- canonical-state-semantics.md
+- canonical-temporal-evidence-semantics.md
+- canonical-domain-relationships.md
+- domain-model-complexity-assessment.md
+- mature-domain-model-research.md
+- cross-owner-canonical-semantics-matrix.md
+- domain-semantics-conflict-register.md
+- canonical-domain-invariants.md
+- canonical-domain-glossary.md
+- canonical-domain-model.md
+- domain-model-decision-record.md
+- validation/README.md
+- evidence/README.md
+
+Remaining work includes full exact-version Owner/PR/Issue audit, explicit relationship and state owner acceptance, schema/fixture design after semantic closure, and independent review. / 剩余工作包括完整精确版本 Owner/PR/Issue 审计、关系与状态的 Owner 明确验收、语义闭合后的 Schema/Fixture 设计，以及独立审查。
 
 The actual `main` baseline is pinned in the baseline report. The repository is an architecture-definition repository; README explicitly says implementation has not started by design. The existing B branch is `session-b-domain-model-phase3`; it is not the requested research branch and its Scope/Permission source Blob differs from current main. The new research branch was created from the verified main HEAD without modifying main or the existing B branch.
 
