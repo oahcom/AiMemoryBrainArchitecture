@@ -86,9 +86,24 @@ D status: prior dispositions are delegated simulations against earlier bundle ve
 | C causal submit contract | 07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md | 45a48249717c8cddb07ab96197730ef93d406c22 | CSubmitOutcome ownership and I/D/COC ordering |
 | C owner-local admission/recovery amendment | 07-agent-integration/phase-3.6.9-c-owner-local-admission-gate-recovery-release-amendment.md | 9609b252fc38fd5ba7b2f8c0992b7bd33a13c5bb | C admission ledger, gate close, attempt and recovery release |
 | C transport-owning egress adapter | 07-agent-integration/provider-egress-gate-adapter-contract.md | a8d1cfc4d2171c9b0a0ced10e53fc6b110479aca | Final durable CAS immediately before transport handoff |
-| CSubmitOutcome schema/conformance contract | 07-agent-integration/phase-3.8.9-c-submit-outcome-1.0.0-schema-and-conformance-contract.md | 7939c84e950b50f3ec44e4e2fbe5e7f93e544c2e | Proposed immutable object schema and bounded structural/semantic tests |
+| CSubmitOutcome schema/conformance contract | 07-agent-integration/phase-3.8.9-c-submit-outcome-1.0.0-schema-and-conformance-contract.md | 2ecdf44cae1bf71e9611dd5367c8f7bcf25dd7ac | Current contract text; contains stale H 1.2.11 references that block 1.2.12 compatibility acceptance |
 | C R1/R2 candidate | 07-agent-integration/phase-3.6-r1-r2-c-owner-gate-linearization-decision-candidate.md | 5c37ebea98436fc985a94f17063b50b4df7ad7a6 | Owner-local candidate source; not independent approval |
 | C Provider Egress exact review | 07-agent-integration/phase-3.8.3-c-provider-egress-gate-exact-review.md | 5a27f79087d3a5e01dd23e818d8c7ea0fdb61d1d | Exact review of C Adapter contract; delegated review |
+| C Provider Outcome recovery review | 07-agent-integration/phase-3.6.11-c-exact-version-provider-outcome-recovery-review.md | 19519a9dabe8aea66897c01493ab5b65ed8af4aa | Recovery/Provider Outcome review; scoped to older H schema and older Storage bundle |
+| C RecoveryJoin/provider side-effect review | 07-agent-integration/phase-3.8.2-c-recovery-join-provider-side-effect-exact-review.md | a7b57bd5531222559666f0f1d9df59a259cde61a | C-owned provider-side-effect boundary; amendments remain open |
+| C membership proof contract | 07-agent-integration/phase-3.8.4-c-owner-snapshot-membership-proof-contract.md | 5e37185610869951c3b392c9ad143a72b4c702ac | Candidate C-owned admission/attempt/outcome snapshot proof |
+| C review of H membership proof | 07-agent-integration/phase-3.8.4-c-exact-review-h-owner-membership-proof.md | ea2e11519646225679eadc8b33af0d755998d92e | Conditional C-role review against H 1.2.11-era bundle |
+| C gate/attempt/idempotency amendment | 07-agent-integration/phase-3.8.6-c-provider-outcome-gate-attempt-idempotency-amendment.md | 392a3fd43790db59cb8aa5b3c919ca98e4bcddb4 | Immutable attempt tuple and shared gate/send serialization; references H 1.2.11 |
+| C crypto profile review | 07-agent-integration/phase-3.8.7-c-review-of-i-c-crypto-profile-proposal.md | 794d1dc49f034152407e3a42ba5ac937ea3539f8 | Candidate construction accepted only; profile registration/trust/wire freeze OPEN |
+| C signature projection | 07-agent-integration/phase-3.8.8-c-provider-outcome-signature-projection.md | 06d9264124d85896ccd44ef7789d9af245d8255b | C-owned P0 projection; requires exact H mapping and I profile registration |
+| C SubmitOutcome JSON Schema | 07-agent-integration/schemas/c-submit-outcome-1.0.0.schema.json | b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c | Immutable C object structural schema |
+| C outcome vectors | 07-agent-integration/tests/conformance/provider_outcome/c_submit_outcome_1_0_0_vectors.json | b4c32dc8cd7072a04843c2db74c7f96c6de001a4 | Synthetic fixtures; signatures are placeholders |
+| C structural/semantic test | 07-agent-integration/tests/conformance/provider_outcome/test_c_submit_outcome_1_0_0.py | 92e8e9e607566eafa6ad89110202dbeed0fc43cb | Bounded schema/semantic test; not provider or crypto certification |
+| C crypto vector manifest | 07-agent-integration/tests/conformance/provider_outcome/c_crypto_profile_vector.json | 88a16f0d9aaa8a5e46af857c2cd34c2bcedd07ae | TEST-ONLY candidate vectors; public deterministic seed must never be reused |
+| C expected crypto vectors | 07-agent-integration/tests/conformance/provider_outcome/c_crypto_profile_expected_vectors.json | a4bfe0b431d5e710ac99d604e7b1bce49c044d23 | TEST-ONLY expected fingerprints/signatures |
+| C Python crypto tests | 07-agent-integration/tests/conformance/provider_outcome/test_c_crypto_profile.py | 2e1f572facc644c378ee1880a553c27a72ed2cc4 | Candidate Ed25519/JCS test implementation |
+| C Node crypto oracle | 07-agent-integration/tests/conformance/provider_outcome/c_crypto_profile_reference.mjs | 31c8ac889766f9574725357ae6134a901bfb5f33 | Independent TEST-ONLY Node oracle |
+| C test dependency pins | 07-agent-integration/tests/conformance/provider_outcome/requirements.txt | 305d9bf5ae883a16e22dde83d97005f2b0be902e | Test dependencies only |
 
 C mandatory rule: the transport-owning C Adapter is the final side-effect boundary. C final egress CAS must validate current CGateGeneration, exact C admission/request digest, COC reservation, I COMMIT_WON for the exact operation, D clearance/current Fence, and one-use ProviderAttemptRef. Only that CAS winner may invoke the bound transport. UNKNOWN/IN_DOUBT remains blocking; ambiguous handoff requires same-key provider lookup. No COC or H record may synthesize C provider truth.
 
@@ -116,7 +131,13 @@ H owns wire shape, exact typed joins, canonical field mapping, versioning and in
 
 H 负责 Wire、Typed Join、字段映射、版本与互操作；I/D/C 分别负责自己的证明 P0、签名配置、Key Status、账本完整性和 Anti-Rollback。当前 H Verifier 仍只是接口/参考实现，不能冒充生产验证器。证据缺失必须返回 UNKNOWN。
 
-## 7. Currentness correction and superseded pins / 当前性纠正与废止绑定
+## 7. C/H compatibility blocker / C/H 兼容性阻断项
+
+The current C Provider Outcome contract set (Phase 3.8.6 amendment Blob 392a3fd43790db59cb8aa5b3c919ca98e4bcddb4, Phase 3.8.7 review Blob 794d1dc49f034152407e3a42ba5ac937ea3539f8, Phase 3.8.8 projection Blob 06d9264124d85896ccd44ef7789d9af245d8255b, and Phase 3.8.9 contract Blob 2ecdf44cae1bf71e9611dd5367c8f7bcf25dd7ac) explicitly references H Unified 1.2.11. C's Phase 3.8.5 cross-review also accepted only structural elements of H 1.2.11 and explicitly left semantic/wire freeze blocked. H 1.2.12 must not be treated as a compatible drop-in until C publishes an exact amendment covering the actual schema fields, CSubmitOutcome dereference, duplicated-field equality, C GateGeneration/ProviderAttempt identity, signature projection/profile and negative vectors, and H publishes matching schema/validator cross-review. The prior H 1.2.11 cross-review does not satisfy this requirement.
+
+当前 C Provider Outcome 合同仍明确引用 H Unified 1.2.11；C 对 H 1.2.11 的旧交叉审查也只作结构性条件接受，并明确语义与 Wire Freeze 尚未通过。不得将 H 1.2.12 默认为兼容替代版本。C 必须发布精确修订，覆盖字段、CSubmitOutcome 解引用、重复字段一致性、GateGeneration/ProviderAttempt、签名投影/配置和负向向量；H 必须对修订后的精确 Schema/Validator 再审。旧版 1.2.11 审查不能替代该工作。
+
+## 8. Currentness correction and superseded pins / 当前性纠正与废止绑定
 
 The following pins in Storage v3.2.3 §§21.1–21.5 are superseded for the successor review bundle:
 
@@ -129,7 +150,7 @@ The following pins in Storage v3.2.3 §§21.1–21.5 are superseded for the succ
 
 No superseded Blob is deleted or rewritten. It remains historical review evidence only.
 
-## 8. Cross-owner semantic joins required for review / 跨 Owner 语义 Join 审查要求
+## 9. Cross-owner semantic joins required for review / 跨 Owner 语义 Join 审查要求
 
 C, H, I and D must review these exact joins:
 
@@ -141,7 +162,7 @@ C, H, I and D must review these exact joins:
 6. Storage ordering: immutable RecoveryRound; Batch quorum commit before Manifest quorum commit; exact Batch backlink; linearizable readback; post-snapshot advances require a successor round; owner release is signed and issued only by that owner.
 7. Restore: start fenced; replay current I/D/C controls independently; verify anti-rollback and owner snapshots; reconcile COC participants and owner-local admissions; no serving or provider invocation before all required owner releases and COC completion predicates.
 
-## 9. Exact review and adoption matrix / 精确复审与采纳矩阵
+## 10. Exact review and adoption matrix / 精确复审与采纳矩阵
 
 | Owner | Current evidence | Required action on this exact manifest |
 |---|---|---|
@@ -156,7 +177,7 @@ Existing I/D/C/A review artifacts are delegated role simulations, not independen
 
 现有 I/D/C/A 审查工件均为协调会话中的角色模拟，不是真正独立 Owner 签署。本清单不冒充独立批准。任何源文件发生变化，都必须更新精确绑定并由受影响 Owner 重新审查。
 
-## 10. Gate state and non-claims / Gate 状态与非声明
+## 11. Gate state and non-claims / Gate 状态与非声明
 
 - Storage Gate A architecture: CONDITIONAL PASS within documented design scope; deployment, operations and production durability remain separate evidence gates.
 - Gate B COC persistence: BLOCKED pending Gate A acceptance and actual deployment binding.
@@ -169,7 +190,7 @@ Existing I/D/C/A review artifacts are delegated role simulations, not independen
 
 本清单不声称存在生产 Owner 签名、已部署 COC quorum、真实 I/D/C sequencer CAS、生产 Membership Verifier、Provider 认证、通用 exactly-once、分布式故障注入通过、物理 Forget/擦除、Global Forget Completion 或生产就绪。
 
-## 11. Required next sequence / 后续执行顺序
+## 12. Required next sequence / 后续执行顺序
 
 1. I and D independently review this exact manifest and publish their own exact-Blob decisions on their own branches.
 2. C reviews the exact C source set and H 1.2.12 mapping, then publishes its exact-Blob decision.
@@ -178,7 +199,7 @@ Existing I/D/C/A review artifacts are delegated role simulations, not independen
 5. A reviews the exact same manifest plus all four fresh I/D/C/H decisions and publishes a new integration disposition.
 6. Keep Issue #14 R1/R2 and JF-10 P0 open until acceptance predicates and implementation/deployment gates are actually met.
 
-## 12. Provenance / 来源说明
+## 13. Provenance / 来源说明
 
 This manifest was authored by the coordinating session in delegated Storage-role mode. All listed Blob IDs were read from the named owner branches or exact file readbacks during this run. It is a version-binding and review-routing artifact, not an independent Storage Owner signature. No implementation files, schemas or runtime code were changed by this manifest.
 
