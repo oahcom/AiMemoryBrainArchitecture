@@ -2,7 +2,7 @@
 
 - Owner: I — Security and Governance
 - C schema 1.0.1 Blob: `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`
-- C 1.0.1 amendment: Blob `fdea588f52d17806793eb8c2e9035495686539ad`
+- C 1.0.1 amendment: Blob `73d98b532b7f9cadbeee12448d035c3285db9cd7`
 - C 1.0.1 expected crypto vectors: Blob `34e49a49551390f52198b1fa557e15a32a3f6ee2`
 - C key-status event schema: Blob `908b293eba337e9fa75864cea3704e28a1a8d82e`
 - I key-status governance review: Blob `57d1b1ca616eaec6df1dee82ddaccc66519caca2`
@@ -57,3 +57,12 @@ The public test-only seed and CI candidate vectors do not meet these requirement
 **ACCEPT CSubmitOutcome 1.0.1 SEQUENCE-NAMESPACE FIELD AS REQUIRED AND SIGNED. DO NOT REGISTER OR DEPLOY.**
 
 Both `AIMBA-C-CRYPTO-1.0` and `AIMBA-I-KEY-GOVERNANCE-1.0` remain NOT REGISTERED. No production key, provider egress or final freeze is authorized.
+
+
+## 6. Review of independent H 1.0.1 execution
+
+H run `44060704553` at commit `8c377a7218b70621d2348b47341d4cf4755b3733` passed 17 tests. It validated CSubmitOutcome 1.0.1 schema/sequence namespace, independently recomputed and verified the five candidate signatures, checked every P0 field mutation, and matched H Python/Node outputs to the static expected vectors.
+
+I accepts this as independent test agreement for the 1.0.1 candidate field inventory and sequence namespace construction. It does not demonstrate a production C sequencer, key-status ledger, I governance root, anti-rollback checkpoint or key custody.
+
+**The 1.0.1 namespace binding is accepted as a required signed design field. Profile registration and production key authorization remain NOT APPROVED.**
