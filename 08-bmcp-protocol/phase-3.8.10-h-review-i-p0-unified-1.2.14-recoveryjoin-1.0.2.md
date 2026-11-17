@@ -3,10 +3,11 @@
 
 - Reviewer: H — BMCP Protocol and Interoperability
 - Exact I successor P0 addendum: `09-security-governance/phase-3.8.10-i-p0-allowlists-unified-1.2.14-recoveryjoin-1.0.2.md`
-- I successor P0 Blob: `35e6843da8becbf3b152512a561b05cf5486819b`
-- H Unified schema 1.2.14 Blob: `fee452efb99ab4fe0ceccb347c46eeef1521bd28`
+- I successor P0 Blob: `44986f5f864bcdc1a79d34978273644d381a68c0`
+- H Unified schema 1.2.14 Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a59`
 - H RecoveryJoin schema 1.0.2 Blob: `4b664e3bce465499bcdfd93796349a4ba7074002`
 - I Owner Snapshot Attestation schema 1.0.0 Blob: `ecf9971b089ca5fab9a92915663dc913c8ab1ba6`
+- I Phase 3.8.13 callback semantics review: Blob `373c1d1fc38018cdc138764e67bed141143dddda`
 - Prior H review for Unified 1.2.13: Blob `c16063197766a495feb98776c7516ebcbe4b7441`
 - Status: **ACCEPT WITH ENUMERATED L3 OBLIGATIONS — EXACT L1 FIELD CONTRACT CANDIDATE; NOT FROZEN**
 - Provenance: delegated H-role review; **not an independent human H Owner signature**.
@@ -64,3 +65,10 @@ The I common-envelope P0 now binds H 1.2.14's artifact revision; I's owner-speci
 **有条件接受：** I Common Envelope P0 已绑定 H 1.2.14 Artifact Revision；I 专属 High-Water 和 RecoveryJoin Membership Proof 结构精确；D-only Fence High-Water 未混入 I Namespace。L3 差分向量、I Profile 注册、Trust Root、密钥生命周期/托管、历史验证及 Anti-Rollback 部署仍 OPEN。
 
 This is a delegated H-role technical review, not an independent human H Owner signature. It does not close JF-10, Global Forget or authorize production.
+
+
+## 7. I callback authority review / I Callback Authority 复审
+
+I Phase 3.8.13 accepts H's verify_i_terminal_decision callback only as a fail-closed interface. The callback must independently resolve and verify I's exact COMMIT_WON/REVOCATION_WON/UNKNOWN terminal evidence, PolicyDomain/XID/request scope, key status and anti-rollback. H cannot issue I authorization, and C/D/Storage/COC evidence cannot substitute. The I review does not register or deploy production I trust services.
+
+I Phase 3.8.13 接受 H 的 verify_i_terminal_decision 回调，但仅作为 Fail-Closed 接口。回调必须独立解析并验证 I 的 COMMIT_WON/REVOCATION_WON/UNKNOWN 终态、PolicyDomain/XID/Request 范围、Key Status 和 Anti-Rollback。H 不能签发 I 授权，C/D/Storage/COC 证据不能替代 I。I 复审不代表生产 I Trust Service 已注册或部署。
