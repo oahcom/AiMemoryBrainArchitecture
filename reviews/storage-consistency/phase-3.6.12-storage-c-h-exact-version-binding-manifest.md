@@ -389,3 +389,23 @@ A's exact review was refreshed to pin the latest H/I/D/C/Storage evidence:
 - Storage binding manifest reviewed by A: `74c3db219ec5badbf86c033d1aa3b2d0ab65f05a`
 
 A's decision remains ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS. This refresh does not close R1/R2 or any implementation/production gate.
+
+
+### 10.9 R1/R2 owner-specific gate linearization candidates (2026-11-17)
+
+The coordinator prepared owner-scoped candidate addenda against P-COC-R1-R2-TECH-001 (source Blob `eac0b079f43da8c52521397e0cd256fda3fd3333`) and A review Blob `fdf63550696948f77dc37c0a3788276ac4d525f5`:
+
+| Owner | Candidate artifact | Branch | Blob |
+|---|---|---|---|
+| I | `09-security-governance/phase-3.6-r1-r2-i-owner-gate-linearization-decision-candidate.md` | `session-i-security-governance-2026-11-16` | `57ef6c4352d79577ae53a77895f73bce434c5fca` |
+| D | `03-memory-brain/phase-3.6-r1-r2-d-owner-gate-linearization-decision-candidate.md` | `session-d-memory-brain-2026-11-16` | `a7cba2c72720bb7873d77f1a9d151df974605a9e` |
+| C | `07-agent-integration/phase-3.6-r1-r2-c-owner-gate-linearization-decision-candidate.md` | `session-c-agent-integration-2026-11-16` | `5c37ebea98436fc985a94f17063b50b4df7ad7a6` |
+| H | `08-bmcp-protocol/phase-3.8.5-h-owner-authority-membership-verifier-adapter-contract.md` | `session-h-bmcp-protocol` | `5b462c79082a27b64a03f9c8b6da1d4e93075b89` |
+
+These are coordinator-authored role-specific candidates, not independent Owner decisions. They make the intended concurrency boundaries explicit:
+- I: revocation/request acceptance serializes with authorization admission and receipt issue/consume.
+- D: ForgetFence/request acceptance serializes with producer/work/queue/lease/retry/replay/derivative admission.
+- C: provider send admission serializes with egress-gate close at the transport-owning adapter; only I `COMMIT_WON` plus D predicates permits invocation.
+- H: an explicit owner-authority verifier adapter contract maps owner verification to VALID/INVALID/UNKNOWN without taking over I/D/C cryptographic or ledger authority.
+
+No executable owner-local sequencer, durable in-flight ledger, owner signer/verifier, production adapter, or race/fault-injection test is established by these documents. R1/R2 remain OPEN until each actual Owner independently adopts/amends/rejects the exact candidate, Storage/H map the sealed record families to the current wire contract, and A performs a new exact-version integration review. Gate A remains PARTIAL PASS / OPEN; Gate B/C remain blocked; JF-10 P0 remains OPEN; production activation remains NOT AUTHORIZED.
