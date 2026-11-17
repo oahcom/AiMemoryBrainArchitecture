@@ -24,7 +24,7 @@ Chinese and English are maintained as equivalent reading versions. Normative arc
 Mission, scope, non-goals, Brain vs. Agent, system map, main data and control flows.
 
 ### L2 — Understand subsystem architecture / 理解子系统
-Start with the [Domain Model Guide](zh-CN/02-domain-model/domain-model-guide.md), [Canonical Memory Brain Guide](zh-CN/03-memory-brain/memory-brain-guide.md), [Memory Compiler Guide](zh-CN/04-memory-compiler/memory-compiler-guide.md), and [Memory Runtime Guide](zh-CN/05-memory-runtime/memory-runtime-guide.md) before reading detailed B/D/E/F/G/C/H/I specifications.
+Start with the [Domain Model](zh-CN/02-domain-model/domain-model-guide.md), [Canonical Brain](zh-CN/03-memory-brain/memory-brain-guide.md), [Compiler](zh-CN/04-memory-compiler/memory-compiler-guide.md), [Runtime](zh-CN/05-memory-runtime/memory-runtime-guide.md), [Context](zh-CN/06-memory-context/memory-context-guide.md), [Agent Integration](zh-CN/07-agent-integration/agent-integration-guide.md), [BMCP](zh-CN/08-bmcp-protocol/bmcp-guide.md), and [Security & Governance](zh-CN/09-security-governance/security-governance-guide.md) guides before reading detailed Owner contracts.
 Domain Model, Canonical Memory Brain, Compiler, Runtime, Memory Context, BMCP, Agent Integration, Security, Storage, Consistency, and Recovery.
 
 ### L3 — Build and verify / 工程实现与验证
