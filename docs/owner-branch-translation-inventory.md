@@ -25,8 +25,8 @@ The audit below checked the core Markdown specifications in each module director
 | Owner | Branch | Inspected head SHA | Core English-only specs | Bilingual status |
 |---|---|---|---:|---|
 | B — Domain Model | session-b-domain-model-phase3 | 0df144ae25c2039c9934395fc88b2d17080eb119 | 10 Phase 3 identity/typed-reference/ADR artifacts | Core six main source specs paired; Phase 3 extensions pending |
-| D — Memory Brain | session-d-memory-brain-2026-11-16 | 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3 | 8 | NOT STARTED — core contracts |
-| E — Memory Compiler | session-e-memory-compiler-2026-11-16 | a1b8ba129ef7d5f4463bd4229667f0b2bf6d9886 | 8 | NOT STARTED — core contracts |
+| D — Memory Brain | session-d-memory-brain-2026-11-16 | 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3 | 8 | 7/8 core specs paired; large operation/publication gate pending |
+| E — Memory Compiler | session-e-memory-compiler-2026-11-16 | a1b8ba129ef7d5f4463bd4229667f0b2bf6d9886 | 8 | 2/8 core specs paired; 6 remain |
 | F — Memory Runtime | session-f-memory-runtime | 348b5ec84c44a8a067122ce0aa72a594b9c06b66 | 5 | NOT STARTED — core contracts |
 | G — Memory Context | session-g-memory-context | 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa | 6 | NOT STARTED — core contracts |
 | C — Agent Integration | session-c-agent-integration-2026-11-16 | 0f1df3b9c8bdfbb7991cd9e18842c56c521665c4 | 10 | NOT STARTED — core contracts |
@@ -38,7 +38,17 @@ The audit below checked the core Markdown specifications in each module director
 
 **审计限制：** 上述数量仅统计按模块目录筛选的核心 Markdown 规范，不包括阶段报告、变更日志、基线提案、Python 参考模型和 Schema。它们不是仓库全部架构文件的总数。
 
-## 3. Migration order / 迁移顺序
+## 3. Translation progress / 当前翻译进度
+
+- System-level specifications: paired for the current source set.
+- B main Domain Model specifications: 6/6 paired; Phase 3 typed-reference/identity addenda and ADR-001 remain pending.
+- D Memory Brain core specifications: 7/8 paired; the large operation-level Forget Fence/publication-gate contract remains pending.
+- E Memory Compiler core specifications: 2/8 paired; Accepted Receipt and Compiler Overview are paired.
+- F/G/C/H/I detailed core specifications: not yet paired.
+
+All translated Owner documents retain their exact source blob SHA. Refresh branch HEAD and re-read source files before translating remaining artifacts.
+
+## 4. Migration order / 迁移顺序
 
 ### Batch A — Canonical Memory and Compiler correctness
 - D: memory-brain-overview, canonical-memory-store, memory-lifecycle-manager, entity-and-relationship-manager, memory-versioning, commit-cursor-semantics, Forget Fence/completion, publication gate.
@@ -64,7 +74,7 @@ The audit below checked the core Markdown specifications in each module director
 - Storage/Consistency: COC, JF-10, prepared participant identity, restore high-water, PostgreSQL capability evidence, executable reference models and test reports.
 - Preserve distinctions among domain decision, storage design, executable reference model, test execution, and production evidence.
 
-## 4. Translation acceptance / 翻译验收
+## 5. Translation acceptance / 翻译验收
 
 For every source artifact:
 1. Record exact source branch and blob SHA.
@@ -76,7 +86,7 @@ For every source artifact:
 7. Update docs/translation-status.md in the same change set.
 8. Do not mark an unmerged owner-branch proposal as an approved main baseline.
 
-## 5. Review/report migration / 审查报告迁移
+## 6. Review/report migration / 审查报告迁移
 
 Architecture review reports, Owner acceptance reports, ADRs, and integration decisions are architecture artifacts under GOV-DOC-001. They are migrated after their source contracts are paired, in order to preserve the exact decision context and avoid translating superseded proposals as current requirements.
 
