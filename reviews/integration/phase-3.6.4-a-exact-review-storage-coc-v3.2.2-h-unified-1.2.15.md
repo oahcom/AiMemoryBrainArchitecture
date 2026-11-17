@@ -131,3 +131,20 @@ Storage COC v3.2.2 §§14–17 作为架构层持久 Participant/Recovery Contra
 - Gate B Persistent COC：**BLOCKED**。
 - Gate C 物理 Fault Injection：**BLOCKED**。
 - 生产 JF-10 / Global Forget / 多域原子性：**NOT AUTHORIZED**。
+
+
+## 5. Append-only currentness correction — H Unified 1.2.16
+
+The later H exact-source reconciliation found that 1.2.15 did not explicitly carry four categories required by Storage §17.1: owner scope generation, I PermissionEpoch distinct from ProducerDomainInventoryEpoch, D dependency-closure cursor/root, and C provider idempotency namespace/final-request-boundary generation.
+
+H has published schema artifact revision **1.2.16** (wire version 1.3.0), Blob `3ed43c4d0d067d4db98a2fa94f4d232280b4bbf5`, with dedicated test Blob `70e1169cc05295f18cde95ce8e66a0498bc74902`. Exact H Head `5545f45fb78af385c72269a0cb850980b7570cd7` passed run [#44191375797](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44191375797): **317 tests**, including 11 dedicated 1.2.16 checks.
+
+Storage Owner appended §19 (Storage protocol Blob `1f8fac86886dc28f2d7727de430ee8a24473e1d0`) to supersede §18's 1.2.15 pin. The earlier 1.2.15 finding above is historical; current A review should use 1.2.16. This improves structural completeness only; live I/D/C ledger issuance/signing, H semantic validation, COC quorum and physical JF-10 remain open.
+
+### 中文补充
+
+后续 H 精确源码对照发现 1.2.15 未显式携带 Storage §17.1 要求的四类字段：Owner Scope Generation、独立于 ProducerDomainInventoryEpoch 的 I PermissionEpoch、D Dependency-closure Cursor/Root，以及 C Provider Idempotency Namespace/Final-request-boundary Generation。
+
+H 已发布 Schema Artifact Revision **1.2.16**（Wire Version 1.3.0），Blob `3ed43c4d0d067d4db98a2fa94f4d232280b4bbf5`，专用测试 Blob `70e1169cc05295f18cde95ce8e66a0498bc74902`。H 精确 Head `5545f45fb78af385c72269a0cb850980b7570cd7` 在 Run [#44191375797](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44191375797) 中 **317 项通过**，其中包括 11 项 1.2.16 专用检查。
+
+Storage Owner 已追加 §19（Storage Protocol Blob `1f8fac86886dc28f2d7727de430ee8a24473e1d0`），取代 §18 的 1.2.15 Pin。上文关于 1.2.15 的发现现为历史记录；当前 A 审查应使用 1.2.16。这只提高结构完整性，不关闭实时 I/D/C Ledger 签发/签名、H Semantic Validation、COC Quorum 或物理 JF-10。
