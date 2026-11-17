@@ -118,6 +118,10 @@ verification:
   commands: []
   evidence_refs: []
 traceability_exclusions:
+  - sha: c97e3de7ac37158ef60526d7b8703c4574ed042a
+    reason: Manifest-only governance inventory reconciliation; metadata bookkeeping, not implementation.
+  - sha: 1e11b787f4bdfd2979642d4633f89fa84049ae62
+    reason: Manifest-only reconciliation of changed paths and commit accounting; metadata bookkeeping, not implementation.
   - sha: 2ce0bfad35fcd7a3e0b6a150b6a141e25aa67218
     reason: Manifest-only commit-inventory reconciliation; metadata bookkeeping, not implementation.
   - sha: 08ed26cf3496ccc52382583f2e05a7fef0017547
