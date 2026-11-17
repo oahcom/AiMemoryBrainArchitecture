@@ -66,7 +66,8 @@ D's canonical Memory lifecycle vocabulary includes Forgotten. D's separate Forge
 | Committed | The owning transaction/authority durably committed the defined state change and can resolve it after recovery | It does not universally imply indexing, Context application, or reader visibility in unrelated projections | Transaction/authority owner |
 | Visible | The object is eligible for reader disclosure through the authoritative visibility mechanism after policy/scope checks | Staged bytes, queue/outbox state, object-store path, I COMMIT_WON alone, or local compiler state do not make it visible | Storage visibility authority; reader enforcement also applies |
 | Published | The Storage-owned visibility transaction committed and the exact PublicationReceipt/VisibilityPointer can be authoritatively read back; E may then terminalize its work as Published | I COMMIT_WON alone, E local state, ACK or staged bytes do not prove Published | Storage owns publication; E consumes receipt |
-| Acknowledged | A recipient/adapter reports the specific protocol action covered by its ACK class | Does not prove any stronger operation than that ACK's declared coverage | H/recipient |
+| Acknowledged | A recipient/adapter reports the specific protocol action covered by its ACK class | Does not prove any stronger operation than that ACK's declared coverage; may be necessary but is not sufficient for Applied | H/recipient |
+| Authenticated | A verifier establishes the exact sender/issuer/credential/transport context under an approved trust profile | Does not prove authorization, C provider truth, Applied, or Storage publication | H transport; I trust/profile; C origin signature |
 | Superseded | A successor replaces an object for current use while historical identity/version remains retained subject to policy | Does not imply deletion or invalidity of every historical assertion | Domain object's lifecycle owner |
 | Invalidated | A specified result/claim/proof/lease is no longer eligible under a named invalidation rule | Does not erase history or necessarily alter parent object's lifecycle | Owner of invalidated artifact/state |
 | Deleted | A defined logical record/content reference has been removed under a stated deletion operation | Does not prove all replicas, backups, exports or derivatives are physically erased | Deleting subsystem / Storage |
@@ -91,7 +92,7 @@ Do not define one universal total order among Recorded, Applied, Committed, Visi
 
 Verified constraints from current source:
 1. A source/evidence record may be Recorded before any downstream Claim/Memory is committed.
-2. A Context delivery ACK is weaker than Applied; Applied requires the G/C/H owner-defined evidence chain and must bind the actual final request boundary where Full Applied is claimed.
+2. A Context delivery ACK is weaker than Applied; Applied requires the G/C/H/I/D owner-defined evidence chain and must bind the actual final request boundary where Full Applied is claimed. Architecture invariant I-10 currently says explicit Adapter acknowledgement is required; B proposes clarifying it as a necessary but insufficient condition, with G's complete predicate remaining authoritative.
 3. In the Storage JF-10 candidate, I's COMMIT_WON is an authorization-order decision, not publication. Storage must resolve the same XID and atomically commit VisibilityPointer + PublicationReceipt + outcome + outbox; only after authoritative receipt readback may Storage return PUBLISHED.
 4. The visibility pointer is the Storage publication authority. Outbox delivery is notification/reconciliation only.
 5. If the result is unknown or in doubt, keep bytes private; do not infer commit/abort from timeout, row absence, stale replica, missing ACK or process death.
@@ -125,6 +126,7 @@ The exact CGH-APPLIED-1.1 recovery-batch package and companion COC architecture 
 - **B-STATE-004:** I COMMIT_WON vs Storage Published distinction is critical to JF-10; implementation and conformance NOT VERIFIED.
 - **B-STATE-005:** Forgotten vs Deleted vs Purged/global completion remains D/I/Storage split; do not claim physical erasure from logical state.
 - **B-STATE-006:** Context/ChangeSet/ContextVersion state transitions need G's exact current Owner contract pin; not yet reconciled here.
+- **B-STATE-007:** Architecture invariant I-10 Applied wording may be misread as Adapter ACK sufficient. G requires a complete per-request predicate and exact final-request evidence; A must clarify the global invariant. Until then, ACK alone MUST NOT be promoted to Applied.
 
 ## 9. Gate status / 门禁状态
 
