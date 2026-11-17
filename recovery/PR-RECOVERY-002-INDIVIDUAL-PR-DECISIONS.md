@@ -275,3 +275,18 @@ All other initial-inventory rows not individually discussed above retain metadat
 - PR #112/#113 were maintenance-only synchronization merges from main into recovery/Session 4 branches; neither changed main.
 - PR #94's technical trigger validation is complete with three SUCCESS workflow runs, but its author-account-only COMMENTED review remains a governance provenance gap.
 - #110/#111 are the only Ready Open PRs. Neither has a current-head independent APPROVE or current-head status/check-run evidence. The recovery-session technical re-checks are not independent approvals.
+
+
+## Live merged-PR reconciliation — 2026-11-18
+
+The REST closed-PR census confirms 15 of the original 76 tracked PRs are merged. All 15 remain classified `MERGED_REVIEW_GAP` until retrospective independent review/Owner disposition is recorded:
+
+- **Zero formal PR review submissions:** #32, #33, #34, #35, #51, #54, #66, #68, #71, #72, #92. Each was merged into a non-main runtime, Owner, architecture-review or research branch. Exact merge SHAs and target branches are in the merge log.
+- **Author-account COMMENTED only:** #94, #108, #109, #110. None has an independent APPROVE in the PR review API.
+- #94 has three SUCCESS workflow runs for merge commit, controlled schema-only trigger and restore. This validates the C workflow trigger behavior but does not replace C Owner/independent review.
+- #108/#109 are research publication merges into main. #110 is a research publication merge into main at `4a0acc1608f0909bafb64ac90f0a724b8223d546`; the merge commit has no status contexts or PR workflow runs.
+- Current main: `4a0acc1608f0909bafb64ac90f0a724b8223d546`.
+- Current Open PRs: 61 (60 Draft, 1 Ready); all target main. #111 is the only Ready PR.
+- #111 was rebased onto current main without changing the report blob. Exact current head: `9a7ba7ac8cfc6d3de0d732bb7e677ff2288a4ca5`; compare 1 ahead / 0 behind. No current-head status/check evidence or independent review.
+- #105 recovery package was compacted/rebased onto current main. It remains Draft, contains only the eight recovery artifacts and cannot self-review or self-approve.
+- The authenticated GitHub identity is `oahcom`, which authored all 61 current Open PRs. The Recovery Principal Reviewer role can conduct technical re-checks but cannot create a separate GitHub identity or satisfy the source standard's separate-session/agent requirement by assertion.
