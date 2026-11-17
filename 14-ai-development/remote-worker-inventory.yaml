@@ -3,8 +3,8 @@
 # webhook secrets, or model-provider credentials to this file.
 
 schema_version: "1.1"
-worker_id: "ubuntu-primary-01"
-display_name: "Primary Ubuntu AI development worker"
+worker_id: null
+display_name: "User-managed remote worker (details withheld)"
 provider: "user-managed-remote-host"
 endpoint:
   host: null # Redacted from public repository; keep endpoint in an access-controlled operations record.
@@ -86,7 +86,7 @@ governance:
   runner_runbook: "14-ai-development/ubuntu-self-hosted-runner-bootstrap.md (AI-RUN-002-RUNBOOK v1.1)"
   operations_design: "docs/zh-CN/14-ai-development/ci-runner-operations.md and docs/en/14-ai-development/ci-runner-operations.md (DOC-OPS-001)"
   status_claims:
-    tailscale_connected: true
+    tailscale_connected: null # Connectivity state is withheld from the public inventory.
     runner_online: true
     runner_executed_real_job: true
     worker_runtime_online: false
