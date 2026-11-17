@@ -220,7 +220,7 @@ This append-only overlay supersedes the earlier Main snapshot and queue statemen
 - Updated Main tree: `0aad576605be44f4eb595070c2c3d8effd836f1e`.
 - The 107-record inventory above was captured immediately before creating PR #138; it therefore correctly reports zero open PRs at that inventory instant.
 - Recovery report PR #138 was the sole open PR at this snapshot: `docs(recovery): publish PR-RECOVERY-002 full inventory and closeout`, pre-correction Head `ecc39eba505aaa867cb3820fbbd3bc38acc0099b`, Base `5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`. The final corrective Head is recorded in the PR closeout.
-- PR #138 is mergeable at the latest read, but its `GOV-DOC-001 structural checks` are still IN_PROGRESS and combined commit status is PENDING. Do not merge until the exact-head check completes successfully and the diff/readback remains unchanged.
+- At the time of this overlay, PR #138's `GOV-DOC-001 structural checks` were IN_PROGRESS; the exact-Head run #194 subsequently completed SUCCESS, and PR #138 merged at `8b9d896d714e6037a7856a77a9d2d3ec0179f117`. This status line is a historical snapshot, not a claim that PR #138 remains open.
 - Legacy branch protection remains disabled. Rulesets remain unverified because the protection endpoint returns 403.
 - Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED.
 
