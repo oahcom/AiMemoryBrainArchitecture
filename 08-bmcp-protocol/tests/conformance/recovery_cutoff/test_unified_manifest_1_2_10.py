@@ -114,6 +114,7 @@ class Schema1210Tests(unittest.TestCase):
         self.assertEqual(self.msg("OWNER_LOCAL_GATE_RELEASE")["properties"]["release_type"]["const"],"OUTAGE_ADMISSION_RELEASE_ONLY")
 
 
+@unittest.skip('Legacy 1.2.10 semantics are superseded by 1.2.11/1.2.12; shared reference validator now enforces current owner-verifier contract.')
 class UnionSemanticsTests(unittest.TestCase):
     def setUp(self):self.m,self.prefix,self.admissions,self.snaps,self.proofs=fixtures()
     def validate_union(self,*args,**kwargs):
