@@ -242,3 +242,53 @@ I proposes a separate C-scoped cryptographic bundle `AIMBA-C-CRYPTO-1.0`, with d
 - A final integration acceptance: **OPEN**.
 
 No production readiness, universal exactly-once, Full Applied or Global Forget Completion is claimed. These role artifacts are delegated simulations, not independent human Owner signatures.
+
+
+## 10. Phase 3.8.4 — Owner Snapshot Membership Proof exact binding / Owner Snapshot Membership Proof 精确绑定
+
+### 10.1 H exact protocol/schema bundle
+
+| Artifact | Exact Blob / Evidence |
+|---|---|
+| H Unified Schema 1.2.11 / wire 1.3.0 | `4f1e103ab4b2ac961d77179dba0b65093532ea40` |
+| H RecoveryJoin 1.0.2 | `4b664e3bce465499bcdfd93796349a4ba7074002` |
+| H wire mapping 3.8.4 | `a692a790a4c7abef94dba6da9c22b5e06417879a` |
+| H union Manifest contract 3.8.4 | `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175` |
+| H exact review | `f5ab9a9232b04720faf552a70d5d2962343f843f` |
+| H semantic reference module | `6710bd7876be5f2c60640f21090729b8859a7a3e` |
+| H RecoveryJoin 1.0.2 tests | `6afa788da2a899f03de8207cb700c40e0533aba1` |
+| H Unified 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
+| H Unified 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
+| H candidate CI | Run `44050250038`, commit `34fb4ccf8b1580321d38eda1340cf53f73b83f24`, 281 total / 259 passed / 22 skipped / 0 failed |
+
+### 10.2 Owner-owned proof contracts and reviews
+
+| Owner | Proof contract Blob | Exact review Blob | Decision boundary |
+|---|---|---|---|
+| I | `b1e39c92252eadf8ca592f9a8dc6879cf44fd593` | `658ed437ecd05d226a6658a3f159ce28449b0b36` | Candidate security/wire acceptance with blocking conditions |
+| D | `d80dabe7210e681bc4e2290355a38f8b67be9ddd` | `fe4ba71dd3a07d0775e17dbb90e8aeccc3bc71c0` | Accept with conditions; D signer/ledger implementation open |
+| C | `5e37185610869951c3b392c9ad143a72b4c702ac` | `c6b317f5050bca745bb6308ad6f77ba7d8284f77` | Accept with enumerated C-owned conditions; provider adapter open |
+
+These are coordinator-authored role-simulated review artifacts, not independent human Owner signatures. Each Owner remains the sole authority for its proof semantics, signature, key status, ledger completeness and anti-rollback.
+
+### 10.3 Storage assessment
+
+Storage accepts the separation of proof authorities and the typed RecoveryJoin 1.0.2 wire envelope as an architecture candidate:
+
+1. A membership proof establishes one exact owner row's inclusion in one exact frozen owner snapshot and that row's owner-local sequence is within the captured high-water.
+2. Membership does not establish full-ledger completeness. Each owner must separately attest complete query identity, pagination, count, ordered root/set digest, high-water vector and anti-rollback anchor.
+3. H validates structure and exact joins; it must not trust caller-supplied `valid=true`. Its current reference validator requires an injected owner-proof verifier callback. The current CI callback is TEST-ONLY.
+4. I, D and C independently sign and verify only their own rows. No owner compares numeric high-waters with another owner or with COC positions.
+5. Empty owner sets require a separate owner-signed COMPLETE_EMPTY proof. Count=0, empty array, missing COC ParticipantIntent or queue emptiness are not proof.
+6. Late-discovered pre-fence D work or late C provider-attempt evidence invalidates the affected snapshot/reconciliation and keeps the relevant gate closed.
+
+### 10.4 Remaining blockers
+
+- Production I/D/C proof signers, key registries, snapshot queries, pagination and anti-rollback adapters are not implemented or verified.
+- H semantic validator's callback is not connected to actual owner trust authorities.
+- Storage's COC quorum append, prefix completeness, Batch/Manifest ordering, linearizable S4 readback and production topology remain separate Gate A/B blockers.
+- C provider-specific same-key lookup, send-vs-close serialization and real CSubmitOutcome remain unimplemented.
+- D producer/worker/derivative ledger and Storage visibility linearization remain unimplemented.
+- JF-10 P0 remains OPEN; Multi-PolicyDomain atomicity remains BLOCKED; production activation remains NOT AUTHORIZED.
+
+**Storage disposition: ACCEPT AS ARCHITECTURE/WIRE CANDIDATE WITH BLOCKING IMPLEMENTATION AND OWNER-AUTHORITY CONDITIONS.** No Storage Gate A acceptance, COC deployment, JF-10 closure or production activation is inferred.
