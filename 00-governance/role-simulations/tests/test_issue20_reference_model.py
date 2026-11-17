@@ -2,7 +2,7 @@ import unittest
 from issue20_reference_model import (
     DAuthority, IAuthority, StorageAuthority, Publication, Protocol,
     RestoreGate, ProtocolError, UnknownOutcome, FRecallProjection,
-    EDerivation, GContextVersion
+    EDerivation, GContextVersion, CProviderOutcome
 )
 
 
@@ -348,6 +348,76 @@ class GContextLineageTests(unittest.TestCase):
         g.create_delivery("delivery-1", 1, 3)
         with self.assertRaises(ProtocolError):
             g.replay_delivery("delivery-1", 4)
+
+
+class CProviderOutcomeTests(unittest.TestCase):
+    def authorized_i_receipt(self):
+        return {"receipt_ref": "i-receipt-1", "outcome": "COMMIT_WON",
+                "permission_epoch": "perm-7"}
+
+    def test_provider_submit_requires_d_and_current_i_proofs(self):
+        c = CProviderOutcome()
+        with self.assertRaises(ProtocolError):
+            c.admit_intent("intent-1", "request-digest", None,
+                           self.authorized_i_receipt(), "perm-7")
+        with self.assertRaises(ProtocolError):
+            c.admit_intent("intent-1", "request-digest", "d-participant-1",
+                           self.authorized_i_receipt(), "perm-8")
+
+    def test_submit_requires_prior_exact_intent_admission(self):
+        c = CProviderOutcome()
+        with self.assertRaises(ProtocolError):
+            c.submit("intent-1", "provider-key-1")
+
+    def test_same_intent_and_same_request_are_idempotent(self):
+        c = CProviderOutcome()
+        first = c.admit_intent("intent-1", "request-digest", "d-participant-1",
+                               self.authorized_i_receipt(), "perm-7")
+        second = c.admit_intent("intent-1", "request-digest", "d-participant-1",
+                                self.authorized_i_receipt(), "perm-7")
+        self.assertEqual(first, second)
+
+    def test_same_intent_with_changed_request_conflicts(self):
+        c = CProviderOutcome()
+        c.admit_intent("intent-1", "request-digest", "d-participant-1",
+                       self.authorized_i_receipt(), "perm-7")
+        with self.assertRaises(ProtocolError):
+            c.admit_intent("intent-1", "changed-digest", "d-participant-1",
+                           self.authorized_i_receipt(), "perm-7")
+
+    def test_timeout_lookup_uses_same_provider_idempotency_key(self):
+        c = CProviderOutcome()
+        c.admit_intent("intent-1", "request-digest", "d-participant-1",
+                       self.authorized_i_receipt(), "perm-7")
+        first = c.submit("intent-1", "provider-key-1")
+        self.assertEqual(first["state"], "SUBMITTED_UNKNOWN")
+        self.assertEqual(c.lookup_after_timeout("intent-1", "provider-key-1"),
+                         {"outcome": "UNKNOWN"})
+        self.assertEqual(c.submit("intent-1", "provider-key-1"), first)
+        with self.assertRaises(ProtocolError):
+            c.submit("intent-1", "provider-key-2")
+
+    def test_exact_terminal_callback_is_idempotent(self):
+        c = CProviderOutcome()
+        c.admit_intent("intent-1", "request-digest", "d-participant-1",
+                       self.authorized_i_receipt(), "perm-7")
+        c.submit("intent-1", "provider-key-1")
+        first = c.record_outcome("intent-1", "provider-key-1",
+                                 "SUCCEEDED", "provider-outcome-digest")
+        self.assertEqual(first, c.record_outcome(
+            "intent-1", "provider-key-1", "SUCCEEDED", "provider-outcome-digest"))
+
+    def test_conflicting_terminal_callbacks_quarantine_intent(self):
+        c = CProviderOutcome()
+        c.admit_intent("intent-1", "request-digest", "d-participant-1",
+                       self.authorized_i_receipt(), "perm-7")
+        c.submit("intent-1", "provider-key-1")
+        c.record_outcome("intent-1", "provider-key-1",
+                         "SUCCEEDED", "outcome-a")
+        with self.assertRaises(ProtocolError):
+            c.record_outcome("intent-1", "provider-key-1",
+                             "FAILED_NO_SIDE_EFFECT", "outcome-b")
+        self.assertIn("intent-1", c.quarantined)
 
 
 if __name__ == "__main__":
