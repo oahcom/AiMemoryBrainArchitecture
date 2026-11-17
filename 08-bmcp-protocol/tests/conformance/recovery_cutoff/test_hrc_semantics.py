@@ -243,6 +243,43 @@ def validate_batch(b):
     return VALID
 
 
+def request_entry(row_ref, owner, request_ref=None, digest="d" * 64, seq=1):
+    return {"owner_entry_ref": row_ref, "owner_entry_kind": "REQUEST", "owner": owner,
+            "request_ref": request_ref or ("request/" + row_ref), "request_digest": digest,
+            "sequence": seq, "scope_ref": "scope/test"}
+
+
+def validate_request_dispositions(requests_by_owner, dispositions_by_owner):
+    required_owners = {"I", "D", "C"}
+    if set(requests_by_owner) != required_owners or set(dispositions_by_owner) != required_owners:
+        return UNKNOWN
+    for owner in required_owners:
+        rows = requests_by_owner[owner]
+        edges = dispositions_by_owner[owner]
+        row_map = {x.get("owner_entry_ref"): x for x in rows}
+        edge_map = {x.get("owner_entry_ref"): x for x in edges}
+        if len(row_map) != len(rows) or len(edge_map) != len(edges):
+            return INVALID
+        if set(row_map) != set(edge_map):
+            return INVALID
+        for row_ref, row in row_map.items():
+            edge = edge_map[row_ref]
+            if (edge.get("owner_kind") != owner or
+                edge.get("owner_request_ref") != row.get("request_ref") or
+                edge.get("owner_request_digest") != row.get("request_digest") or
+                edge.get("owner_sequence") != row.get("sequence") or
+                edge.get("scope_ref") != row.get("scope_ref")):
+                return INVALID
+            if edge.get("disposition") == "OUT_OF_SCOPE_WITH_PROOF":
+                if not edge.get("proof_ref") or not edge.get("owner_signature_valid"):
+                    return INVALID
+            elif edge.get("disposition") == "IN_BATCH_REQUEST_SET":
+                if not edge.get("owner_signature_valid"):
+                    return UNKNOWN
+            else:
+                return INVALID
+    return VALID
+
 def validate_join(admissions_by_owner, m):
     mr = validate_manifest(m)
     if mr != VALID:
@@ -607,6 +644,48 @@ class HRCConformance(unittest.TestCase):
         self.assertEqual(exact_jf10("COMMIT_WON", "COMMITTED", True, False, True), INVALID)
         self.assertEqual(exact_jf10("COMMIT_WON", "ROLLED_BACK", True, True, True), INVALID)
 
+    # JPF-13: every owner request row must have exactly one JoinProof disposition.
+    def test_JPF_13(self):
+        reqs = {o: [] for o in ("I", "D", "C")}
+        reqs["C"] = [request_entry("C/request-row/1", "C")]
+        edges = {o: [] for o in ("I", "D", "C")}
+        self.assertEqual(validate_request_dispositions(reqs, edges), INVALID)
+
+    # JPF-14: OUT_OF_SCOPE_WITH_PROOF requires owner-signed proof.
+    def test_JPF_14(self):
+        req = request_entry("C/request-row/1", "C")
+        edge = {"owner_kind":"C","owner_entry_ref":"C/request-row/1","owner_request_ref":req["request_ref"],
+                "owner_request_digest":req["request_digest"],"owner_sequence":1,"scope_ref":"scope/test",
+                "disposition":"OUT_OF_SCOPE_WITH_PROOF","owner_signature_valid":True}
+        reqs = {"I":[],"D":[],"C":[req]}; edges = {"I":[],"D":[],"C":[edge]}
+        self.assertEqual(validate_request_dispositions(reqs, edges), INVALID)
+
+    # JPF-15: changed request digest is a conflict, not an alias.
+    def test_JPF_15(self):
+        req = request_entry("C/request-row/1", "C")
+        edge = {"owner_kind":"C","owner_entry_ref":"C/request-row/1","owner_request_ref":req["request_ref"],
+                "owner_request_digest":"f"*64,"owner_sequence":1,"scope_ref":"scope/test",
+                "disposition":"IN_BATCH_REQUEST_SET","owner_signature_valid":True}
+        self.assertEqual(validate_request_dispositions({"I":[],"D":[],"C":[req]},
+                                                       {"I":[],"D":[],"C":[edge]}), INVALID)
+
+    # JPF-16: ledger row identity cannot be substituted by the stable request identity.
+    def test_JPF_16(self):
+        req = request_entry("C/request-row/1", "C")
+        edge = {"owner_kind":"C","owner_entry_ref":"request/C/request-row/1","owner_request_ref":req["request_ref"],
+                "owner_request_digest":req["request_digest"],"owner_sequence":1,"scope_ref":"scope/test",
+                "disposition":"IN_BATCH_REQUEST_SET","owner_signature_valid":True}
+        self.assertEqual(validate_request_dispositions({"I":[],"D":[],"C":[req]},
+                                                       {"I":[],"D":[],"C":[edge]}), INVALID)
+
+    # JPF-17: exact owner request rows may be captured independently of admission rows.
+    def test_JPF_17(self):
+        req = request_entry("C/request-row/1", "C")
+        edge = {"owner_kind":"C","owner_entry_ref":"C/request-row/1","owner_request_ref":req["request_ref"],
+                "owner_request_digest":req["request_digest"],"owner_sequence":1,"scope_ref":"scope/test",
+                "disposition":"IN_BATCH_REQUEST_SET","owner_signature_valid":True}
+        self.assertEqual(validate_request_dispositions({"I":[],"D":[],"C":[req]},
+                                                       {"I":[],"D":[],"C":[edge]}), VALID)
 
 def reject_duplicates(pairs):
     out = {}
