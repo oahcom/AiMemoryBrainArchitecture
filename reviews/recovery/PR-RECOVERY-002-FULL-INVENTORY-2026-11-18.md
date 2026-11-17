@@ -201,7 +201,7 @@ Important rule: PRs targeting Owner/research/recovery branches are not candidate
 
 ## 7. Recovery verdict / 恢复结论
 
-**PR QUEUE: EMPTY. / PR 队列：已清空。**
+**PR QUEUE AT THE 107-RECORD SNAPSHOT: EMPTY. / 107 条盘点快照时的 PR 队列：为空。**
 
 **PROJECT ACCEPTANCE: NOT COMPLETE. / 项目验收：未完成。**
 
@@ -229,7 +229,7 @@ This append-only overlay supersedes the earlier Main snapshot and queue statemen
 - 当前 `main` HEAD 更新为：`5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`。
 - 当前 Main Tree：`0aad576605be44f4eb595070c2c3d8effd836f1e`。
 - 上述 107 项盘点是在创建 PR #138 之前完成，因此“0 个 Open PR”只代表当时的盘点瞬间。
-- 恢复报告 PR #138 已成为唯一开放 PR：Head `7aa4a4c32fcc0cd768bd3eb08e7a1e2d645ef264`，Base `5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`。
+- 在该历史快照时，PR #138 是唯一开放 PR：合并前最终 Head `ecc39eba505aaa867cb3820fbbd3bc38acc0099b`，Base `5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`；随后以 `8b9d896d714e6037a7856a77a9d2d3ec0179f117` 合并。
 - 最新读取时 PR #138 的 mergeable 为 true，但精确 Head 的 `GOV-DOC-001 structural checks` 仍为 IN_PROGRESS，综合 Commit Status 为 PENDING。必须等待检查成功并重新核对 Diff 后才能考虑合并。
 - 传统 Main Branch Protection 仍未启用；Rulesets 因 API 403 无法核实。
 - Issue #26 仍为 OPEN / SECURITY_ACCEPTANCE_BLOCKED。
