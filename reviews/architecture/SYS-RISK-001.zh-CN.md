@@ -723,3 +723,66 @@ R-07 为 **组件能力层面 PARTIALLY VERIFIED；端到端 NOT PROVEN**。说�
 
 **关闭状态：NOT CLOSED。** JF-10 Runtime P0 与生产 Restore 仍 OPEN。
 
+
+
+## 22. R-08 实时异步授权 / TOCTOU / 最终边界线性化审查 — 2026-11-18
+
+### 22.1 当前精确来源锚点
+
+| Owner | 分支 HEAD | 工件 / Blob | 状态 / 证据上限 |
+|---|---|---|---|
+| I | 0d071bf1ee7cc71912398c6ae57e4496e08f44ab | CommitAuthorizationReceipt / Causal-order Contract 5a5304d48aa912dcf6f817099bd5659371d8cdc8 | I Receipt/Ordering 语义已定义；Service Deployment、External Governance 和跨 Owner Acceptance OPEN；CausalOrderProfile/1.0 为提案，未冻结 |
+| I | 同一 HEAD | Phase 3.8 Receipt/Revocation Sequencer Contract 54bab0484bd232a5a258e65e34cc7425288b39a6 | I 角色提案；精确 Owner 批准、Crypto Profile 和 Conformance OPEN |
+| I | 同一 HEAD | I Owner-local Atomic Gate Amendment 0d0b4fb0f5921e63b6ebfd70b62afa31d3d5fdf7 | Candidate；要求独立 I Review；未实现/验证 |
+| C | 71047cdb51139ca4080ac67f451e38a48698859d | C Provider-side-effect Gate Candidate 896b6538eeeaf0905fee994d210e43d435b0a5a5 | Coordinator-prepared C 角色候选；要求独立 C Review；未实现/部署/运行 |
+| C | 同一 HEAD | C Local Admission/Recovery Amendment 9609b252fc38fd5ba7b2f8c0992b7bd33a13c5bb | C 本地提案；要求精确版本 C 复审；无符合性 |
+| D | 194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f | D Owner-local Forget Gate Candidate 84f6875ce382fb37f35b01140c19a482fcfa9fab | Candidate；要求独立 D Review；未实现/验证 |
+| D | 同一 HEAD | Joint Forget Linearization Decision 1b6a312ecffd3947bbb4df59f902242482c98a40 | 用户委托的 DE-S 联合架构决议；实现未验证；不是独立 Owner 批准 |
+| E | ee098e14747d9915de5b3efb63b3a8dd77f670ed | Publication Orchestration/Retry/Recovery Contract 475fee41e5eea527af4edefbfe88c58c86967d0a | E 角色提案；D/I/Storage 精确 API 和独立 Owner 批准 OPEN |
+| Storage | 830a559bd2f4ec72608f5a51e1a0b43779f2b989 | JF-10 Reference Model 72fef7be1cd3f111a0151498c686d4556156339f；Tests a38d73b4a5e7c65210fb414a62fb91b30649b788；Workflow bbd393a3cf58d4bccbf0079724acbaa09ed9960f | Run 43895971452 / Job 133399514028 / Commit 684ac873bec331649c18a45a992007d04f211832：15/15 确定性逻辑测试 PASS；Model 明确无 I/O，不是生产 Coordinator/DB Participant |
+| Storage | 同一 HEAD | PostgreSQL Prepared-XID / Sync Failover / Restore Probes | R-07 证据仅证明 Engine-level Capability；没有执行 I Receipt Service、D Gate 或 C Provider Egress CAS |
+
+### 22.2 已经写清楚的正确架构顺序
+
+审查过的合同已明确区分正确的权威边界：
+- I 是当前授权、PermissionEpoch、撤权顺序、单次 CommitAuthorizationReceipt 和 I Terminal Proof 的唯一权威。
+- D 是 ForgetFenceGeneration、Lineage/Barrier Membership 和 D Release 的唯一权威。
+- C 管理 Provider-side-effect Admission Gate、真实 Provider Egress/Outcome。Reservation 或 Dispatch Authorization 不能证明请求字节已经越过 Provider Boundary。
+- Storage 管理 Prepared Participant/GID Resolution 和最终 Visibility Transaction。
+- E 编排不可变 Operation/Attempt Tuple，但不能签发 I Authorization、D Clearance 或 Storage Visibility。
+
+I 的 Causal-order 语义区分 REVOCATION_WON 和 COMMIT_WON。Intent 前撤权阻断 Admission；Intent 后、Receipt Consumption 前撤权仍可能获胜；I COMMIT_WON 后的撤权必须在精确未解决 Participant 后等待，直到 C Outcome 或 Safe Abort 持久化。I Receipt 绑定精确 Operation/Action/Resource/Purpose/Audience、Final Request Boundary、Request Digest、D/Storage Participant Ref 和 Single-use State。Storage 在 Visibility Linearization Point 验证已消费的 Pre-commit I Proof；I Terminal Proof 仅在 Commit 后用于 Closeout，避免循环依赖。
+
+D 计划使用同一 Serialization Domain 覆盖 RegisterProducerWork、InstallForgetFence、完整 Dependency Registration、最终 Publication Visibility 和 Barrier Terminal Disposition。C 计划在 Provider Egress 最终边界、Outbound Request Bytes 释放前检查同一当前 CGateGeneration。每个 Owner Gate 必须有自己的持久化 Linearization Point；Read-then-act、Cache Flag、Process Mutex、Queue Pause、Timestamp 或 Detached Token 均不足。
+
+### 22.3 缺口在实现与共同版本采纳，不在文案
+
+**R08-1 — I Receipt Service 仍是提案。** 当前 I Phase 3.8 Receipt Contract 明确写明精确 Owner 批准、Crypto Profile 和 Conformance OPEN。它要求权威 PolicyDomain Sequencer、单次 Receipt Consumption、Replay Protection、精确 Tuple Binding、Key Status 和 Storage 后置 Terminal Closeout。本轮没有证明已部署 Sequencer、Durable Receipt Store、真实 Key Lifecycle 或 Storage Proof Verifier。
+
+**R08-2 — D/C Gate 代码仍是 Candidate。** D Phase 3.6.7 与 C Phase 3.6.7/3.6.9 要求持久化 Local CAS/Transaction、Captured High-water 和每个 Protected Boundary 的同 Generation 检查，但仍为 Candidate/Proposed，独立 Owner Review 未完成，所有 Conformance Case 未运行。D Joint Linearization Decision 明确是用户委托的架构工作，不是独立 D Owner 批准。
+
+**R08-3 — E Orchestrator 没有已接受的 Callable API Bundle。** E 列出了期望顺序 Storage Prepare → D Publication Admission → I Single-use Sequencer Consumption → Storage Final Visibility → D/I Closeout，但 D/I/Storage 精确 Callable API 与独立 Owner 批准仍 OPEN。E-local Label/Queue ACK 不能建立权威。
+
+**R08-4 — Gate Amendment 绑定前序 Storage/COC 版本。** C/D/I Phase 3.6.7 Gate Amendment 将 Storage Design v3.1 Blob d5bdc72... 和 COC Companion Blob 8ac178... 作为精确目标。当前 Storage 分支已推进至 v3.3.2，并出现更新的 COC/Recovery Amendment。Gate 文件没有证据表明其适用性自动转移到当前 Storage v3.3.2/COC；必须针对当前 Serialization/Participant API 进行新的精确版本 Owner Review。
+
+**R08-5 — JF-10 Model 15/15 仅为逻辑测试。** Run 43895971452 通过 15 项测试，覆盖 Participant-first/Fence-first、Storage Commit 前 COMMIT_WON、Same-XID Recovery、Commit 前后 Crash、Immutable Terminal Decision、Receipt Binding 和 Multi-domain Rejection。Model Docstring 明确它是无 I/O 的确定性 State Machine，不是生产 Coordinator/DB Participant。Test File 也明确不执行真实 DB、Prepared Transaction、I Service 或 HA Stack。Model/Test/Workflow Blob 在测试 Commit 与当前 Storage HEAD 完全相同，因此逻辑证据适用于这些当前文件，但证据上限仍是逻辑模型。
+
+**R08-6 — Multi-PolicyDomain Atomic Authorization 仍阻塞。** Logical Model 明确拒绝 Multi-domain Atomicity。I 合同保留每个 PolicyDomain 独立的 PermissionEpoch 与 Sequencer Order；没有建立全局总序或跨域原子授权。这是刻意保留的边界，不应通过比较不透明 Epoch 或 Timestamp 掩盖。
+
+### 22.4 R-08 结论
+
+R-08 继续为 **High / PARTIALLY SPECIFIED；部署执行 NOT PROVEN**。已有一致的 Causal-order/Local-gate 设计、15/15 Logical Reference Test 和真实 PostgreSQL Engine Capability Test。但尚未证明 I Sequencer、D Gate、C Final Egress CAS、Storage Final Proof Verification 和 E Orchestration 在同一当前精确版本包中共同运行。因此不能声称撤权/发布/Provider Submit 无竞态、Provider Side Effect Exactly-once 或生产 TOCTOU 已关闭。
+
+### 22.5 关闭条件
+
+1. I 批准并部署精确 CommitAuthorizationReceipt/ITerminalProof Schema、Key/Profile Lifecycle、PolicyDomain Sequencer、Durable Single-use Consumption、Replay/Restore 和 Currentness API。
+2. D 批准并部署 Gate/Fence Linearization Transaction、完整 Lineage/Work Inventory 和 Monotonic Gate Release。
+3. C 批准并部署 Final Provider-egress Gate CAS，证明 Gate Close 后不释放任何 Request Bytes；Ambiguous Send 必须使用同一 Provider Idempotency Key 直到权威解析。
+4. Storage 证明 Pre-commit I Proof、D Participant/Fence 和 Prepared Storage Participant Tuple 在同一 Physical Visibility Linearization Point 被验证；Post-commit I Terminal Proof 不得循环地成为前置条件。
+5. E 将 Retry/Recovery Orchestration 绑定到精确 Owner API 和不可变 OperationId/TupleDigest/ParticipantRefs；本地状态不得关闭 Owner Gate。
+6. 将 C/D/I Gate Amendment 从 Storage v3.1/COC 8ac 前序 Pin 刷新到当前精确 Storage/COC 版本，并取得独立 Owner Acceptance。
+7. 执行跨服务并发/故障测试：Revoke-vs-Intent、Revoke-vs-Receipt-consume、Gate-close-vs-Admission、Gate-close-vs-Final-Egress、Lost ACK、每个 Linearization Point 前后 Process Crash、Duplicate Receipt、Changed Digest、Sequencer Rollback、Key Rotation/Revocation、D Fence Advance、Storage Outcome UNKNOWN 和 Provider Side Effect 后 Timeout。
+8. 先证明单一 PolicyDomain 端到端；Multi-PolicyDomain All-or-none 作为独立阻塞决策，不得假定自动扩展。
+
+**关闭状态：NOT CLOSED。** 不声称生产 Authorization、Publication 或 Provider-egress Race-freedom。
+
