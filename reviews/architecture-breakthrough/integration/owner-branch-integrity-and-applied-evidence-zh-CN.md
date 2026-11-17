@@ -116,7 +116,7 @@ H Phase 3.8.24 将 Applied Delivery Evidence 1.0.0 明确标为 **TEST/CONFORMAN
 | C | Phase 3.8.23 C/G identity review Blob `4860c627...` | 仅接受 G 3.8.22 中 C-owned identity semantics；明确未接受 H wire mapping |
 | I | PermissionEpoch formal confirmation Blob `bae6a24...`；I 3.8 Commit Authorization proposal Blob `54bab048...` | PermissionEpoch 技术基线已确认；Applied 1.0.0 signer/profile/key registration、crypto profile、canonicalization 与生产 trust 仍未形成完整接受 |
 | D | Forget Fence / Publication Gate Blob `4da0b61...` | D operation semantics DECIDED；D/E interface schema、Storage realization、cross-owner conformance OPEN |
-| Storage | Option A topology ADR Blob `bb544ba...`；atomic producer/dependency/visibility review Blob `2ab899...` | L1 logical topology selected；D adoption、L3 adversarial proof、L4 physical realization/conformance仍 OPEN |
+| Storage | Option A topology ADR Blob `bb544ba...`；atomic producer/dependency/visibility review Blob `2ab899...` | L1 Option A logical topology DECIDED by ADR §8.6 supersession；D adoption、L3 adversarial proof、L4 physical realization/conformance 仍 OPEN |
 
 ### 5.2 不能越过的边界
 
@@ -145,7 +145,7 @@ H Phase 3.8.24 将 Applied Delivery Evidence 1.0.0 明确标为 **TEST/CONFORMAN
 - E `forget-fence-and-derived-registration.md`：E enforcement contract 仍 CANDIDATE；所有 derivative 在 durable D dependency registration、当前 PermissionEpoch/Fence 和最终 Publication Gate 成功前必须 private/non-queryable。
 - I `global-forget-target-inventory-and-completion-evidence.md`：Global inventory/completion 仍 CANDIDATE；D/E/F/G/H/Storage conformance OPEN。I PermissionEpoch 技术确认是 normative baseline，但外部治理 profile approval 仍 BLOCKED。
 - I `phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md`：仍是 I-role proposal；exact Owner approval、crypto profile、conformance OPEN。
-- Storage `phase-3.7-storage-atomic-producer-registration-dependency-visibility-realization.md`：提供候选原子实现设计；不等于物理拓扑部署证明。Storage L1 Option A ADR 已选，不代表 L3/L4。
+- Storage `phase-3.7-storage-atomic-producer-registration-dependency-visibility-realization.md`：提供候选原子实现设计；不等于物理拓扑部署证明。Storage L1 Option A 由 ADR §8.6 addendum 选为 normative v1 logical architecture，并明确 supersede §3 历史文字；v3.3.2 manifest 也确认该修正。L3/L4 仍开放。A PR #102 的 conflict finding 需要与此显式 supersession 文字核对。
 - Storage Restore high-water contract与 reference model 仍需结合真实数据库备份、PITR、failover、rejoin、restore 的物理证据。
 
 因此 ABR-INTEGRATION-001 对 Forget 的 P0 / NOT READY 判断维持不变，但 P0 需要更精确地表述为“逻辑 Owner 合同部分已存在；跨 Owner 原子组合、精确接口采纳、物理实现和故障证明仍未闭合”，不能简单说所有原子顺序都没有合同。
@@ -158,7 +158,7 @@ H Phase 3.8.24 将 Applied Delivery Evidence 1.0.0 明确标为 **TEST/CONFORMAN
 | G2 Owner authority/consumer acceptance | H/C 恢复不等于 Applied 1.0.0 C/G/I 接受；B ADR blocked | BLOCKED |
 | G3 end-to-end state/causal model | Forget 逻辑合同已读；尚未对所有 Owner 做全序列与交叉 race/crash 证明 | BLOCKED |
 | G4 P0/P1 proof | H/C tree restored; JF-10/Forget/Applied/Restore P0/P1 仍开放 | BLOCKED |
-| G5 technology feasibility | Storage L1 Option A 已选；L3/L4 与 JF-10 物理证据不足 | BLOCKED |
+| G5 technology feasibility | Storage L1 Option A 已由 §8.6 addendum 决定；L3/L4 与 JF-10 物理证据不足 | BLOCKED |
 | G6 bilingual parity | 本轮未做所有 Owner 双语逐条语义 parity | PARTIAL |
 | G7 A integration disposition | 两份集成报告已提交研究 Draft PR；Owner 决议仍须各自授权方确认 | PARTIAL |
 | G8 freeze recommendation | 当前仍不具备架构冻结条件 | NOT READY |
@@ -206,4 +206,38 @@ H Phase 3.8.24 将 Applied Delivery Evidence 1.0.0 明确标为 **TEST/CONFORMAN
 - **模型精化：**单独的 stale cache fill 不是外部 disclosure 的充分条件，只要最终 read gate 仍强制检查 Fence/Permission；stale cache 内容仍违反 cache freshness/fill 合同，但安全不变量应直接检查是否发生披露。原 A 模型把缓存回填本身作为反例，本模型把“残留字节”和“实际披露”区分开。
 
 此模型仍然是单 Producer/单 lineage/单 Fence 的有限抽象；不覆盖完整 producer/recipient/backup inventory、任意依赖 DAG、真实 MVCC/WAL/2PC、COC/G Applied 实现、I/Storage 多副本恢复和真实物理拓扑。**不是 TLC、无界证明或生产安全认证。**
+
+
+
+## 10. Independent A review reconciliation / 独立 A 审查对账
+
+### ABR-AUDIT-007 / PR #100
+
+A 的独立源审查将 PR #93 的研究整合准确性评为 **APPROVED_WITH_CONDITIONS**，不是架构批准。已落实两项条件：
+- RM latency 已更正为 PR #86 exact report Blob `2053e4de179c80878fbdeee4f4874de5ad04057c` 的 Direct Top-K 0.095 ms、Rerank + Budget 0.119 ms、Unified RM 0.306 ms；
+- Evidence ledger 增加底层可执行源/fixture 的 exact Blob pins（见 ledger ABR-AUDIT-007 section）。
+
+A 指出的 Forget 原始模型限制已被本报告新增模型覆盖部分补强，但仍然是单 Producer/单 lineage/单 Fence 有界抽象；不覆盖多 Producer、重叠 Forget、任意 DAG、Split Brain、真实 DB/HA/PITR 和物理实现。
+
+### A-H-ADE-006 / PR #98
+
+A 的精确 H 审查将 H Applied 1.0.0 判为 **DEFERRED — CANDIDATE IMPLEMENTATION WITH OPEN P0 CONDITIONS**，明确要求 H-ADE-001..003：
+- H-ADE-001：拒绝 JSON 顶层及嵌套重复 object keys；
+- H-ADE-002：CSubmitOutcome 1.0.1 的 outcome/side-effect/final-boundary/request-digest/identity/lineage 语义 join 必须有版本化 tri-state verifier；
+- H-ADE-003：SAME_DIGEST_REPLAY 返回原始 result ref 前，必须重新检查当前 I Authorization/PermissionEpoch、key status、audience/scope 和适用 D Forget fence。
+
+本集成审查补充的 `integrity_proof_ref` P0 exclusion 是额外待裁决问题，不替代这三个 A blocker。
+
+C Phase 3.8.27 Blob `3ca06db...` 与 I Phase 3.8.23 Blob `85cdbad...` 接受的是 **H Unified 1.2.15 Gateway Attestation** 的 C-before-H-signing / replay durable acceptance 顺序；它们不是对新 H Applied Delivery Evidence 1.0.0 wire family 的接受。
+
+### A-OWNER-SOURCE-REFRESH-004 / PR #102 — Storage ADR finding reconciliation
+
+A PR #102 将 Storage Option A ADR 判为 L1 conflict。此次集成复核直接读回同一 ADR Blob `bb544ba...`，发现：
+- §3 是 pre-addendum “no option selected” 文本；
+- 后续 §8.6 明确标记该历史状态 superseded，并写明 “L1 CLOSED BY THIS ADR” / Option A selected as normative v1 logical topology；
+- v3.3.2 manifest Blob `5c614375...` 明确声明修正 Option A 状态以匹配 exact ADR。
+
+因此本报告不采纳“当前 ADR 仍无决议”的结论；当前 L1 logical Option A 为 DECIDED。L4 physical engine/deployment、HA/PITR、旧主 fencing、read-after-commit 和 restore continuity 仍 OPEN。请 A/Storage 在 PR #102 线程确认是否认可 §8.6 的 supersession 解释。
+
+A PR #102 还报告 E commit-object lookup anomaly；本轮直接读取 `GET /commits/ee098e14747d9915de5b3efb63b3a8dd77f670ed` 已成功返回 commit metadata 和 tree SHA，因此该 lookup anomaly 在本轮未复现。
 
