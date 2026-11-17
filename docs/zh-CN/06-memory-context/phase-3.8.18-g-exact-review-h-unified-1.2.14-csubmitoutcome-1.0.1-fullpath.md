@@ -69,4 +69,8 @@ C 验证 C Outcome/Profile/Key Status/Provider Evidence/Owner Ledger；COC 只�
 - G Applied 持久化/Validator 实现，以及 G adversarial race/reconnect/replay/restore 测试仍为 SPECIFIED / NOT RUN。
 - 生产 C/I Trust、Provider 幂等、COC 部署、Storage 拓扑和 H 生产密钥托管仍 OPEN。
 
-**ACCEPT WITH ENUMERATED G-OWNED APPLIED CONDITIONS — L1/L2 C/H 消费映射候选；NOT FROZEN。** 本委托复审不是独立人类 G Owner 签字，也不批准生产激活或全局 Forget 完成。
+## 7. G 最终结论
+
+**ACCEPT WITH ENUMERATED G-OWNED APPLIED CONDITIONS — L1/L2 C/H 消费映射候选；NOT FROZEN。**
+
+本委托 G 角色复审绑定精确版本，范围仅限 G Applied 消费语义。它不是独立人类 G Owner 签字，不关闭 G L3/L4，不验证 G 持久化/Runtime 实现，也不批准生产激活或全局 Forget 完成。
