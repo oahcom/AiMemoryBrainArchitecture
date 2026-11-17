@@ -846,3 +846,64 @@ Architecture design may preserve IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_
 
 **Closure status:** Architecture candidate profile only; production deployment/operations NOT DESIGNATED; production activation NOT AUTHORIZED.
 
+
+
+## 24. R-10 live governance complexity, integration throughput and baseline-control assessment — 2026-11-18
+
+### 24.1 Current repository facts
+
+| Measure | Live observation | Interpretation |
+|---|---|---|
+| Main HEAD | b3c666e67982cb3d3374e759cfb6552c7765aacb | Main advanced 32 commits from the review's original b372 baseline |
+| Main tree identity | Both b372 and b3c666 resolve to tree 7096e0bc3fdc9a390fccff388f9261522fa424f2; compare API reports no net changed files | Important correction: the main SHA advanced, but its tracked content tree is identical to the locked R baseline; this is history drift, not content drift for PR #50 |
+| Main tracked files | 82 files, all Markdown; no executable source, schema, migration or production deployment code | Consistent with README/roadmap: implementation not started by design; not itself a defect |
+| Main module distribution | 00 Governance 4; 01 System 7; 02 Domain 6; 07 Agent Integration 4; 13 Engineering Decisions 1; 14 AI Development 5; docs 38; reviews 15; root 2 | Main is a compact baseline/portal, while detailed Owner contracts remain distributed across branches |
+| Open PRs | 40 total; 38 Draft; 2 non-Draft | Large WIP queue; most work has not reached accepted integration |
+| Open Issues | 24 | Multiple active decision/review tracks remain unresolved |
+| Main-target PRs | 30 target main; 25 have a base SHA different from current main | Base lineage is fragmented; SHA difference alone is not proof of content conflict |
+| Duplicate risk assessments | PR #48 and PR #50 both publish Session 1 system-wide risk assessment from the same b372 content baseline | Competing deliverables/source-of-truth risk; no recorded supersession decision found |
+| Duplicate complexity assessments | PR #47 and PR #49 both publish independent bilingual architecture complexity assessments from the same b372 content baseline | Competing X deliverables/source-of-truth risk; no recorded supersession decision found |
+| Consolidation/topology tracks | PR #44/#51 (consolidation), #52/#54 (B→A/topology), #65/#67/#70/#73 (current-source, H validator, B-02 and technology remediation) remain open in parallel | Multiple dependent review/remediation chains can invalidate one another's exact pins |
+
+### 24.2 What the project documents say — and what that means
+
+README explicitly labels the repository as Architecture Definition, current phase System Architecture Baseline, and Implementation Not Started by Design. The roadmap measures progress by architectural clarity and verifiable acceptance criteria, and defers prototypes/implementation until logical architecture is stable. Therefore the absence of production code is not a complexity defect and must not be used as a false failure metric.
+
+However, the roadmap's own exit criteria require each component to have bounded responsibility, inputs/outputs, dependencies and known open questions; Phase 3 requires system contracts and measurable acceptance; Phase 4 technology choices remain CANDIDATE/TO_VALIDATE. The current proliferation of parallel exact-version reviews and unmerged Owner artifacts creates a separate integration/governance risk.
+
+### 24.3 Complexity risk signals
+
+**R10-1 — Review artifacts are duplicated without one authoritative supersession chain.** PR #47 and #49 have the same purpose/title family but different paths, sizes and scoring structures; PR #48 and #50 are two separate R system-wide assessments. Both pairs are Draft and share the original b372 baseline. No accepted decision in the current main tree designates one as canonical or explicitly supersedes the other. Readers can therefore select different conclusions or closure criteria.
+
+**R10-2 — WIP volume exceeds visible integration throughput.** 38 of 40 open PRs are Draft and 24 issues remain open. The count does not prove low engineering productivity, because the project is in design phase and many drafts are deliberate. It does prove that most work has not become a single accepted baseline. If every draft produces a new competing contract, the number of review objects can grow faster than the number of resolved decisions.
+
+**R10-3 — Main/Owner branch split creates a two-level architecture.** Main contains a compact 82-file Markdown baseline; detailed B/C/D/E/F/G/H/I/Storage contracts are in separate Owner branches and draft PRs. A reviewer must reconcile current main, branch HEADs, embedded source pins, PR base SHAs and supersession notes. This is manageable only while there is one authoritative version ledger and a strict stale-review invalidation rule.
+
+**R10-4 — Version churn can dominate semantic progress.** H 1.2.12/1.2.14/1.2.15, Recovery Cutoff 1.0.4/1.0.5, Storage v3.1/v3.2.3/v3.3.2, COC revisions and JF-10 bridge amendments create many exact pins. This is justified when a change affects security/authority, but costly if every wording or mapping correction creates a parallel successor without a machine-readable compatibility graph.
+
+**R10-5 — Proof-object/state-machine count is high before a vertical slice exists.** The design distinguishes PermissionEpoch, ForgetFenceGeneration, COC positions, participant GID/XID, RecoveryCutoff Batch/Manifest/JoinProof, PublicationOperationId, AttemptId, Provider Idempotency Key, Applied request digest, capability epoch and multiple owner receipts. These distinctions are often necessary and must not be collapsed. The risk is implementing every cross-product before proving one bounded end-to-end slice.
+
+**R10-6 — Governance gates are extensive but ownership/decision throughput remains uneven.** I36-GOV-01..10, I36 consumer acceptance, D/C gate amendments, Storage topology, COC/RecoveryJoin and Applied freeze have separate approval tracks. Several documents are accepted only as delegated role simulations or architecture-only decisions. Without an explicit authorized approver, effective policy version and due condition, the system can accumulate formally detailed but permanently non-executable gates.
+
+**R10-7 — Technology/operating assumptions remain candidate.** TAB-001 is v0.1 CANDIDATE, Storage PostgreSQL 18.7 is a CI capability profile, COC topology is a proposal, and RPO/RTO/capacity are unapproved. The design has not yet measured whether the required state machines, logs, indexes, backups and verification workflows fit the intended workload or engineering team.
+
+### 24.4 R-10 disposition
+
+R-10 remains **High / PARTIALLY VERIFIED as a governance/integration risk; NOT PROVEN as an economic or engineering-capacity failure**. The architecture's correctness mechanisms are not automatically unnecessary complexity. Typed authority separation, immutable evidence, anti-resurrection, prepared participant recovery and fail-closed semantics have clear safety purposes. The current evidence does not justify deleting those protections.
+
+The demonstrated risk is process and integration overhead: duplicate reports, many parallel draft PRs, unresolved owner decisions, multiple version families and a large exact-evidence burden before one integrated vertical slice is accepted. The project has not yet measured actual engineering cost, cognitive load, runtime performance or support burden, so a claim that architecture complexity already exceeds business value would be unsupported.
+
+### 24.5 Root-first simplification and closure criteria
+
+1. Establish one canonical review registry: one current main SHA/tree, one current Owner HEAD table, one exact artifact/Blob ledger, one PR/Issue per decision family and explicit supersession links. Do not delete historical evidence.
+2. Resolve duplicate X/R deliverables: select one canonical complexity assessment and one canonical system risk assessment, or record the exact non-overlapping scope of each. Mark the other Draft as superseded/merged/closed only through explicit owner action.
+3. Use a single append-only decision record per semantic authority. Prefer amendments to one canonical contract plus versioned compatibility matrix over parallel near-duplicate documents.
+4. Define a first-release correctness slice: one Canonical Authority boundary, one I PolicyDomain, one provider adapter, one bounded Memory→Compiler→Storage publication path, one Forget fence, one retrieval/context suppression path, one restore-quarantine path. Explicitly defer multi-domain atomicity, multi-region active-active, generalized adapter tiers and broad external-recipient erasure guarantees.
+5. Maintain a complexity budget with counts and rationale for independent state machines, proof objects, protocol versions, synchronous cross-owner calls, registries, durable logs and mandatory tests. Every new mechanism must identify which invariant cannot be preserved by an existing authority.
+6. Require each Owner to provide a minimal executable contract harness and failure matrix for its own authority before adding more integration layers; run the first vertical slice end-to-end before expanding the contract surface.
+7. Track decision throughput: number of exact owner decisions closed per week, age of blocked decisions, number of stale pins, PR rebase/review cycles, duplicate artifacts and test maintenance burden. Do not use document count or code volume as the success metric.
+8. After the engineering pilot, measure representative workload, p95/p99 latency, storage/WAL growth, index rebuild cost, prepared-XID age, recovery time, operator hours and review/maintenance effort. Only then decide whether complexity exceeds value.
+9. Keep the 2026-11-18 main history correction explicit: b3c666 is 32 commits ahead of b372 but has the same tree SHA. PR #50's b372 base is content-identical to current main; do not misreport it as content-stale. Future main changes must still trigger exact source refresh.
+
+**Closure status:** NOT CLOSED. No evidence yet demonstrates that the design is economically unviable; the governance/integration control system needs consolidation before the project expands the protocol surface further.
+
