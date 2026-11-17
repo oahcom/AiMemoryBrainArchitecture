@@ -532,18 +532,23 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_unknown_operation_id_cannot_be_recommitted(self):
         p = self.prepared()
+        args = self.consume_i(p)
         p.mark_unknown("op-1")
         with self.assertRaisesRegex(Rejected, "UNKNOWN"):
-            p.commit(**self.commit_args())
+            p.commit(**args)
         self.assertIn("op-1", p.private_unknown)
         self.assertEqual(p.visibility, {})
         self.assertEqual(p.outcomes, {})
         self.assertEqual(p.receipts, {})
         self.assertEqual(p.outbox, {})
-        self.assertEqual(p.consumed, set())
+        self.assertEqual(p.consumed, {"auth-1"})
+        self.assertIn("op-1", p.i_pending)
 
     def test_unknown_stays_private_and_cannot_close_out(self):
         p = self.prepared()
+        args = self.commit_args()
+        args["operation_id"] = "op-unknown"
+        self.consume_i(p, args)
         p.mark_unknown("op-unknown")
         self.assertIn("op-unknown", p.private_unknown)
         self.assertNotIn("publication-1", p.visibility)
@@ -627,10 +632,10 @@ class PublicationProtocolTests(unittest.TestCase):
         self.assertIn("op-1", p.private_unknown)
 
     def test_no_publication_rejects_local_state_contradicting_absence_proof(self):
-        for state_name in ("visibility", "outbox", "consumed"):
+        for state_name in ("visibility", "outbox", "missing_i_consumption"):
             with self.subTest(state=state_name):
                 p = self.prepared()
-                args = self.commit_args()
+                args = self.consume_i(p)
                 binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                            args["d_proof"], args["i_commit_won_proof"])
                 p.mark_unknown("op-1", binding)
@@ -639,7 +644,7 @@ class PublicationProtocolTests(unittest.TestCase):
                 elif state_name == "outbox":
                     p.outbox["op-1"] = ("PUBLISH", ("RECEIPT", "op-1"))
                 else:
-                    p.consumed.add("auth-1")
+                    p.consumed.remove("auth-1")
                 with self.assertRaisesRegex(Rejected, "local state contradicts"):
                     p.resolve_no_publication("op-1", p.no_publication_proof())
                 self.assertIn("op-1", p.private_unknown)
@@ -647,7 +652,7 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_no_publication_reconciles_unknown_and_allows_exact_d_i_closeout(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.install_forget_fence()
@@ -660,16 +665,18 @@ class PublicationProtocolTests(unittest.TestCase):
         self.assertEqual(p.visibility, {})
         self.assertEqual(p.receipts, {})
         self.assertEqual(p.outbox, {})
-        self.assertEqual(p.consumed, set())
+        self.assertEqual(p.consumed, {"auth-1"})
+        self.assertIn("op-1", p.i_pending)
         self.assertIn("publication-1", p.fence_pending)
         p.close_i("op-1", outcome)
+        self.assertNotIn("op-1", p.i_pending)
         self.assertIn("publication-1", p.fence_pending)
         p.close_d("op-1", outcome)
         self.assertNotIn("publication-1", p.fence_pending)
 
     def test_no_publication_is_terminal_and_requires_new_operation_id(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.mark_unknown("op-1", binding)
@@ -682,7 +689,8 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_d_and_i_close_only_on_same_authoritative_storage_outcome(self):
         p = self.prepared()
-        p.commit(**self.commit_args())
+        args = self.consume_i(p)
+        p.commit(**args)
         outcome = p.outcomes["op-1"]
         p.close_d("op-1", outcome)
         p.close_i("op-1", outcome)
