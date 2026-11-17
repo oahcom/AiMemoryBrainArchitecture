@@ -2,7 +2,7 @@
 # AID-2026-001 独立专业审查交接
 
 **Repository:** oahcom/AiMemoryBrainArchitecture
-**PR:** #42 — https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42
+**Historical PR:** #42 — merged; provenance only — https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42
 **Review mode:** Read-only independent specialist review in a genuinely new ChatGPT conversation.
 **Governance:** NR-001 OPTION A ACCEPTED. This is conversation/context isolation only—not model, provider, runtime/environment or statistical independence. Do not describe it as multi-model consensus.
 **Risk:** ARCH / R3.
@@ -50,3 +50,24 @@ Do not perform an implementation review outside this Forget/lifecycle scope. Do 
 ## 中文职责
 
 你仅作为本 Work Item 的独立 Owner D Forget/记忆生命周期专业审查者。重点审查 Forget 的规范含义和完整性、删除阶段及完成语义、部分失败/重试/幂等/恢复、完成证明，以及与 I 所有的授权、隐私、保留、法律保留和审计治理边界。确认联合契约需要 D/I 双边同意。没有可执行、可复现测试证据时，必须标记 NOT EVIDENCED。
+
+
+## Current review-target clarification / 当前审查目标澄清
+
+PR #42 is historical and MERGED; it is not the current review target. The review operator must provide an immutable target tuple before this prompt is used:
+- `target_kind`: `main` or `pull_request`;
+- `expected_base_sha`: exact base SHA;
+- `expected_head_sha`: exact candidate SHA (for main review, this is the exact main SHA);
+- `review_scope`: the exact paths/contracts required for this specialist role.
+
+For `target_kind=main`, fetch the current `main` ref and verify it equals `expected_head_sha`. For `target_kind=pull_request`, fetch PR metadata and verify both base and head SHAs exactly. If either differs, STOP and request a refreshed handoff; never silently follow a moving ref. The historical PR #42 reference above is retained only to explain provenance.
+
+## 当前审查目标澄清
+
+PR #42 已是历史记录并且已经合并，不再是当前审查目标。使用本提示词前，交接方必须提供不可变目标元组：
+- `target_kind`：`main` 或 `pull_request`；
+- `expected_base_sha`：准确 Base SHA；
+- `expected_head_sha`：准确候选 SHA（审查 main 时即准确 main SHA）；
+- `review_scope`：本专业角色必须审查的准确路径/契约。
+
+当 `target_kind=main` 时，读取当前 `main` 引用并确认等于 `expected_head_sha`。当 `target_kind=pull_request` 时，读取 PR 元数据并确认 Base/Head SHA 均完全一致。任一不一致都必须停止并要求刷新交接，不得静默跟随移动引用。上方 PR #42 仅保留为历史来源说明。
