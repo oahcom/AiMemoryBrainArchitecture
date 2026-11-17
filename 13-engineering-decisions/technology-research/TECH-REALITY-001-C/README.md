@@ -3,7 +3,7 @@
 
 - Task: TECH-REALITY-001-C | Owner: C | Review: R2
 - Repository: `oahcom/AiMemoryBrainArchitecture`
-- Baseline: `main@b3c666e67982cb3d3374e759cfb6552c7765aacb`
+- Baseline at research-branch creation: `main@b3c666e67982cb3d3374e759cfb6552c7765aacb`; current main observed 2026-11-18: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`
 - Branch: `research/tech-reality-001-c`
 - Status: **RESEARCH IN PROGRESS; NOT FROZEN; INDEPENDENT REVIEW PENDING**
 - Overall disposition: **CONDITIONALLY READY FOR FURTHER REVIEW ONLY AFTER OWNER RECONCILIATION; NOT IMPLEMENTATION READY**
@@ -61,8 +61,11 @@ Gate 状态：C0 PARTIAL（尚未穷尽所有 PR/Issue 和源文件）；C1/C2 �
 
 
 ## Current-source refresh / 当前性刷新
-- Latest branch commit (2026-11-18 refresh): `274f5ec59127c582882b5d3ff6d31f31d811f6f5` was the pre-refresh snapshot; consult live PR #69 metadata for current head.
-- Open PR/Issue scan: 40 open PRs and 24 open Issues. Directly relevant PRs #67/#73/#66/#68/#71 are included in baseline and conflict register.
-- H 1.2.15 local exact-head CI has been independently verified (91 Provider Outcome tests; 288 Recovery Cutoff tests, 22 skipped); production trust and cross-owner freeze remain open.
+- PR #69 exact HEAD observed 2026-11-18 UTC: `1a1d6f26a793fc285a1806edf21b696f748a8fed`; the `274f5ec...` value is an intermediate historical commit, not the current PR head.
+- PR #69 merge base / original base snapshot: `b3c666e67982cb3d3374e759cfb6552c7765aacb`; current main HEAD: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`. Compare current main...C head: 6 commits ahead / 2 behind; rebase and conflict validation remain required before merge.
+- Repository-wide PR/Issue counts in this package are historical scan values, not a current inventory. Directly relevant PRs #67/#73/#66/#68/#71 are included in baseline and conflict register; current state must be re-read before any Gate decision.
+- H 1.2.15 local exact-head CI was verified at historical H commit `0d36324457e39bd50ad56ae902d477c4ea765b61` (91 Provider Outcome tests; 288 Recovery Cutoff tests, 22 skipped). H's current branch HEAD is now `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; its latest commit removed the prior schema/validator/test tree. The old CI remains historical bounded evidence, not current branch contents or production trust.
 - B PR #55 current head refreshed to `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`.
+- G current branch HEAD: `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8`; G Applied Persistence contract Blob remains `bd297873bc1e593280484a43cb44b56058d9c4ff`.
+- H current branch HEAD: `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; latest H decision says Applied Delivery Evidence requires a separate successor schema/validator and remains NOT IMPLEMENTED / NOT VERIFIED / WIRE MAPPING NOT FROZEN.
 - C0 remains PARTIAL; C5 remains BLOCKED/PARTIAL; C6 includes 22 design scenarios and all C end-to-end tests NOT RUN.
