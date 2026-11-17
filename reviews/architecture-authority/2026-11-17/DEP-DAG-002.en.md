@@ -1,6 +1,6 @@
 # Architecture and Implementation Dependency DAG — DEP-DAG-002
 
-- Version: 1.0.0; baseline `b372b62c640a2b656e54b6db62a4ee67d7d8c001`.
+- Version: 1.0.0; baseline `6470f25ca23b8d35c06f60be2326867066418d18`.
 - Authority: A integration; Owner-specific semantics remain with named Owners.
 
 ## Architecture decision DAG
@@ -57,6 +57,12 @@ Exact source pins and Owner authority evidence
   → Gate-specific acceptance
   → production operational authorization
 ```
+
+## Updated B→A closure sequence
+
+**Wave B — exact protocol bundle:** H updates the 1.2.14 mapping to the current D crosswalk; C re-reviews that successor mapping; H reviews current I P0; I refreshes its anchor review; H records C acceptance and current CI; Storage publishes v3.3.0 or equivalent binding the exact current C/H/D/I/Storage Blobs and run/commit/job; C/H/D/I review that identical manifest; A re-reads the successor manifest and source heads. No protocol freeze before this chain closes.
+
+**Wave A — Option A L1/L2:** Storage proposes an ADR successor addressing A-01/A-06 doc clarity; D makes an exact decision on the Storage ADR and shared-anchor contract; D/Storage define the shared transaction executor/UoW and row-write authorization boundary; D maps EffectPermit to all fence-sensitive lifecycle transitions; constrain each v1 atomic operation to one BrainAuthorityRef; I/Storage define COMMIT_WON replay/revocation/crash semantics; Storage/I define an independent restore anti-rollback witness; D/I/Storage/H clarify COC/JF-10 proof ordering without cross-log atomicity. A re-reviews exact successor Blobs. L1 closes only after A-01/A-03 and D acceptance; L2 requires A-04/A-05 composition; L3 requires executed deterministic concurrency/reference-model/fault evidence; L4 remains physical deployment.
 
 ## Critical path and parallelism
 
