@@ -21,9 +21,11 @@
 
 ## Risk register
 
+**Live Storage source correction (2026-11-17):** `session-storage-consistency-forget-atomicity-2026-11-16`, `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md`, Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`. Section 8 selects Option A for L1 logical architecture; L4 physical engine/deployment remains OPEN. The branch commit SHA was not exposed by the file-read operation and remains a G1 evidence item.
+
 | ID | Risk | Level | Blocking | Accountable authority | Minimum closure evidence | Gate |
 |---|---|---:|---|---|---|---|
-| AR-01 | No selected physical serialization/visibility topology | Critical | Yes | Storage + D + I; A integrates | Approved topology ADR; explicit linearization point, transaction/lock boundary, authoritative reads; crash/race/failover proof | G3/G4; JF-10 A/B/C |
+| AR-01 | L1 logical serialization profile selected; L4 physical engine/deployment proof incomplete | Critical | Yes | Storage + D + I; A integrates | Storage §8 Option A per-Canonical-Authority serializable transaction domain; prove actual DB adapter/product/config, anchor/transition persistence, HA/old-primary fencing, authoritative reads, PITR/restore and physical race/failover | G3/G4; JF-10 A/B/C |
 | AR-02 | Fact/Claim/Evidence/temporal semantics not normatively closed | Critical | Yes | B | B-authorized ADR, typed definitions, correction/conflict cases, downstream exact-version adoption | G2/G3 |
 | AR-03 | Forget/revocation/restore lacks end-to-end no-resurrection proof | Critical | Yes | I + D + Storage; E/F/G/C/H consumers | Closed-world inventory and owner proofs; both race orders; replay/index/cache/backup/restore tests | G4; Forget gate |
 | AR-04 | Publication, provider outcome and Applied proofs do not yet form a complete chain | High | Yes for Applied workflow | C/G/H with I/D/Storage dependencies | Exact owner contracts, final-request boundary, same-key UNKNOWN recovery, conformance | G2/G4 |
@@ -36,7 +38,7 @@
 
 ## Five root risks
 
-1. Physical serialization and final visibility are not grounded in a selected authoritative topology.
+1. L1 logical serialization is selected (Storage Option A); actual L4 engine/deployment, authoritative adapter, HA/fencing and restore conformance remain unproven.
 2. Canonical domain truth (especially Fact/Claim and temporal/evidence semantics) is not closed by B.
 3. Forget and revocation do not yet dominate every derivative, cache, replay, backup and restore path with proof.
 4. Identity/security governance and global inventory lack required external approvals.
