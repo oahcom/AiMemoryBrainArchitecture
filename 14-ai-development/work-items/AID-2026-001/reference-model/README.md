@@ -10,7 +10,7 @@ It is intentionally isolated from production architecture and runtime code. The 
 python -m unittest discover -s 14-ai-development/work-items/AID-2026-001/reference-model -v
 ```
 
-The model uses only the Python standard library. The observed local result: 14/14 model-level tests passed under Python 3.13.5 (2026-11-18). This does not imply production conformance..
+The model uses only the Python standard library. Historical baseline: 14/14 model-level tests passed under Python 3.13.5 (2026-11-18), before the expanded regression cases below. This historical result is not the current suite count and does not imply production conformance.
 
 ## Covered invariants
 
@@ -32,11 +32,11 @@ No concurrency scheduler, database transaction, WAL, distributed replica, Adapte
 
 ## Expanded regression suite
 
-The standard-library suite now contains 23 model-level unit tests. A dedicated GitHub Actions workflow runs this suite against the exact pull-request or main commit when the reference-model files change.
+The current standard-library suite contains 23 model-level unit tests. A dedicated GitHub Actions workflow checks out the exact pull-request head SHA (or the pushed commit SHA on main) and runs this suite when the reference-model files change.
 
 This CI is deliberately scoped to the in-memory reference model. A green run proves only that this abstract model's tests passed. It does not prove production authentication, authorization, persistence, concurrency, replica, index, cache, queue, adapter, context, backup or restore behavior. DFI-001…DFI-022 remain NOT EVIDENCED against production components until the authoritative runtime repository and accountable implementation owners are identified and tested.
 
-The 22 model-level cases are not a substitute for Owner D/Owner I approvals, independent specialist review, independent integration review, full Manifest/schema validation or architecture acceptance.
+The 23 model-level cases are not a substitute for Owner D/Owner I approvals, independent specialist review, independent integration review, full Manifest/schema validation or architecture acceptance.
 
 
 ### Model review correction
