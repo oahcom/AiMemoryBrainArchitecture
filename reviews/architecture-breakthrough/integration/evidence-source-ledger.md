@@ -161,3 +161,11 @@ Current main: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; tree `7096e0bc3fdc9a39
   - `reviews/architecture-breakthrough/integration/forget-cross-owner-model-audit-en.md`, commit `c89900275ffacbddac76354bb8cd583e8f944918`.
 - Findings: M-01 global_complete overclaims relative to I Completed; M-02 no normal terminal proof path for registered-but-never-started work; M-03 only one Fence generation modeled; M-04 physical crash cut points remain unmodeled; M-05 liveness/fairness must be separated from safety.
 - Disposition: bounded research model accepted with conditions; global Forget and JF-10 remain NOT PROVEN.
+
+
+### M-02 source refinement — E pre-execution terminal candidate
+
+- E current source: `04-memory-compiler/forget-fence-and-derived-registration.md`, branch `session-e-memory-compiler-2026-11-16`, Blob `00e37ba56596e710513c8d0568acd79141d9101b`.
+- E source status: CANDIDATE E enforcement contract; D/E/Storage atomic registration and final publication gate OPEN/BLOCKING.
+- E §3.2 has Cancelled/Rejected durable terminal disposition and no-publication semantics; E §7 Producer terminal acknowledgement remains OPEN (D response schema + reconciliation semantics).
+- Refined M-02: the semantic candidate exists, but exact E→D terminal receipt mapping, pre-execution cancellation authority, idempotency, late-worker fencing and D barrier-ledger linearization remain OPEN; integration model has no corresponding transition.
