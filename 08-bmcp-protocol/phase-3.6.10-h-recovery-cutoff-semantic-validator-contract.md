@@ -215,7 +215,7 @@ Those remain runtime semantic validators and owner-authority checks.
 2. Validate each raw message against its exact JSON Schema before semantic evaluation.
 3. Implement the six validators in §1 as production modules, with injected H canonicalization and I trust-verifier interfaces.
 4. Replace test-only digest helper with the exact H/I-approved profile only after formal approval.
-5. Run the 47 existing structural parser cases plus HRC-01..25, JPF-01..12 and WIRE-01..10 in CI.
+5. Run the current checked-in suite with `python -m unittest discover -s 08-bmcp-protocol/tests/conformance/recovery_cutoff -p "test_*.py" -v`: HRC-01..25 (25), JPF-01..19 (19), WIRE-01..10 (10), and SCHEMA-01..12 (12), total 66 test methods. The older 47-parser / JPF-01..12 count is superseded.
 6. Add differential vectors in at least two independent implementations; compare canonical bytes, digests, signature input bytes, error codes and replay behavior.
 7. Publish raw CI logs, deterministic seeds, source/schema hashes and independent H/I/D/C/Storage review.
 
@@ -261,3 +261,27 @@ Latest schema integrity suite Blob: 67aba74c120f2916d768e7b01c45408ee2624f3a.
 JPF-18 and JPF-19 explicitly verify that the stable OwnerAdmissionRef and the exact OwnerEntryRef row identity cannot substitute for one another in either direction. The C primary admission anchor must resolve by OwnerAdmissionRef, while the captured owner snapshot row must match the separately bound OwnerEntryRef and row digest.
 
 Latest HRC/JPF suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
+
+
+### 11.9 Current exact executable inventory and run contract
+
+The current H branch source-of-truth inventory is:
+- H semantic + bidirectional JoinProof: `tests/conformance/recovery_cutoff/test_hrc_semantics.py`, Blob `ee0f47095df10786da358bed193d6f8491a5eb2c`; HRC-01..25 and JPF-01..19 = 44 methods.
+- Wire candidate: `tests/conformance/recovery_cutoff/test_wire_interop.py`, Blob `1a4e754ba9bfa57eb973c6d39731e9f89443b323`; WIRE-01..10 = 10 methods.
+- Schema integrity: `tests/conformance/recovery_cutoff/test_schema_candidates.py`, Blob `67aba74c120f2916d768e7b01c45408ee2624f3a`; SCHEMA-01..12 = 12 methods.
+- RecoveryJoin schema: `schemas/bmcp.recovery-join-1.0.0.schema.json`, Blob `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- Workflow: `.github/workflows/h-recovery-cutoff-conformance.yml`, Blob `ea7a3d9c365b84352d3bac69da94fe0d510e46a4`.
+
+**Current total: 66 test methods.** The older 61-method inventory (JPF-01..17 + 9 schema checks) and 56-method inventory are historical and superseded by the exact current source pins above. The workflow is configured on push to `session-h-bmcp-protocol`, pull request to that branch, and manual dispatch. This contract update will trigger the push workflow; its run result must be fetched and assessed before any PASS claim.
+
+The executable command is:
+
+```bash
+python -m unittest discover \
+  -s 08-bmcp-protocol/tests/conformance/recovery_cutoff \
+  -p "test_*.py" -v
+```
+
+The 66 methods remain candidate tests until the workflow actually completes. A successful run proves only the committed Python candidate suite on that CI runner. It does not prove production canonicalization, I-approved signatures/key status, real COC quorum completeness, real I/D/C owner-ledger adapters, Storage JF-10 same-XID behavior, independent implementation interoperability or physical topology.
+
+HRC-TEST-v1 remains test-only. Production validators must consume raw versioned wire messages, validate the exact schema, resolve authoritative owner/COC sources, perform cryptographic verification under I policy, and then run semantic validators. A normalized-model unit test alone is not an end-to-end wire/authority test.
