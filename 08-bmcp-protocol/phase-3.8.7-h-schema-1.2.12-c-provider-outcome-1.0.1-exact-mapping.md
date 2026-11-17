@@ -104,3 +104,15 @@ Missing authority callback or unavailable proof is UNKNOWN. Proven contradiction
 **ACCEPT THIS AS THE CURRENT 1.2.12 / C OBJECT 1.0.1 MAPPING PROPOSAL. NOT FROZEN.**
 
 C and H candidate crypto tests exist, but I has not registered either profile or trust root. No production key registry, HSM/KMS custody, provider adapter test, COC/Storage deployment proof or production readiness is claimed.
+
+
+## 8. Executed H 1.0.1 conformance
+
+- H run `44060704553`, commit `8c377a7218b70621d2348b47341d4cf4755b3733`: SUCCESS, 17 tests.
+- H 1.0.1 Python verifier Blob `5559fb7a612c8dd92345ceae3a6aa62f4faae41a`.
+- H 1.0.1 Node oracle Blob `07c34b03aff94e1dfbbd1aa056ac849debeb3348`.
+- H current validator core Blob `1a92c0cf7146e2884bd38232005dd9a55d558a85`.
+- H C 1.0.1 schema and fixture blobs are byte-identical to C: `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` and `c447f8c2908469c52cb52a448101495a331277c5`.
+- H expected candidate vectors Blob `34e49a49551390f52198b1fa557e15a32a3f6ee2`.
+
+The run verifies the required 1.0.1 sequence namespace, five candidate signatures, all present P0 member mutations and H Python/Node agreement. It does not validate a deployed sequencer, key-status service, governance root, anti-rollback checkpoint or production provider evidence.
