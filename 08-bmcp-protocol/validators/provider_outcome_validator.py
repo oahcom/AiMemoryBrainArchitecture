@@ -19,7 +19,7 @@ SCHEMA_ARTIFACT_REVISION = "1.2.13"
 WIRE_SCHEMA_VERSION = "1.3.0"
 BMCP_SCHEMA_ID = "bmcp.coc-jf10-unified"
 BMCP_SCHEMA_URI = "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.13"
-C_OBJECT_SCHEMA_ID = "urn:aimba:schema:c-submit-outcome:1.0.1"
+C_OBJECT_SCHEMA_ID = "CSubmitOutcome"
 C_OBJECT_SCHEMA_URI = "urn:aimba:schema:c-submit-outcome:1.0.1"
 C_PROFILE_ID = "AIMBA-C-CRYPTO-1.0"
 
@@ -191,7 +191,7 @@ def validate_provider_outcome(
     if invalid:
         return {"status": "INVALID", "errors": invalid, "unknown": []}
 
-    if (c_object.get("schema_id") != "CSubmitOutcome"
+    if (c_object.get("schema_id") != C_OBJECT_SCHEMA_ID
             or c_object.get("schema_version") != "1.0.1"
             or c_object.get("schema_artifact_revision") != "1.0.1"):
         invalid.append("wrong immutable C object schema identity/revision; require 1.0.1")
