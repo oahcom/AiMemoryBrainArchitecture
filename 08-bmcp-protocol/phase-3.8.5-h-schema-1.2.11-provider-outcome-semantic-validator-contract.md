@@ -244,3 +244,14 @@ H implementation core Blob `1a92c0cf7146e2884bd38232005dd9a55d558a85` now requir
 C 1.0.1 fixtures Blob `c447f8c2908469c52cb52a448101495a331277c5`, candidate vector manifest Blob `3a5fb8502091636135a298de5891d728b550ba50` and expected crypto fingerprints Blob `34e49a49551390f52198b1fa557e15a32a3f6ee2` are vendored in H byte-identically.
 
 I 1.0.1 review Blob `a93febf867b8da2f23e7ee3cb5334bf491872637` accepts this as a required signed field. It does not register either C data or I governance profile. Production trust, key-status ledger, anti-rollback and callback integration remain open.
+
+
+## 20. Current H schema 1.2.12 / C object 1.0.1 integration evidence
+
+The active validator target is BMCP schema artifact revision `1.2.12`, wire version `1.3.0`, exact schema Blob `a54f66914a819d77f00c6af04e76453ff9f654ee`. The current C dereference object is schema `urn:aimba:schema:c-submit-outcome:1.0.1`, Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`. C object 1.0.0 and BMCP 1.2.11 references in earlier sections are historical only.
+
+The current H validator core Blob `1a92c0cf7146e2884bd38232005dd9a55d558a85` rejects C object versions other than 1.0.1 and requires the explicit `sequence_namespace_ref`. The key-status callback must compare that namespace with CKeyStatusEvent and prove both sequence streams use the same durable C sequencer.
+
+H run `44060704553`, commit `8c377a7218b70621d2348b47341d4cf4755b3733`, passed 17 tests, including the 1.0.1 schema/namespace test and H's independent Python/Node candidate crypto verification against static expected vectors.
+
+I review of the 1.0.1 namespace is Blob `40d223c55473fc7d101b6d16858ad6405d9db5ee`. I accepts the namespace as a required signed design field but does not register the C data profile or I governance profile. No production sequencer, key-status ledger, trust root, anti-rollback service, H authority callback adapter or provider integration is claimed.
