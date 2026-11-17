@@ -14,7 +14,7 @@ Each Owner has a separate ChatGPT conversation prompt. The prompt defines only t
 | F — Memory Runtime Architect | [owner-session-v1.md](F/owner-session-v1.md) |
 | G — Memory Context Architect | [owner-session-v1.md](G/owner-session-v1.md) |
 | H — BMCP Protocol Architect | [owner-session-v1.md](H/owner-session-v1.md) |
-| I — Security & Governance Architect | [owner-session-v1.md](I/owner-session-v1.md) |
+| I — Security & Governance Architect | [owner-session-v2.md](I/owner-session-v2.md) — security/Forget governance boundary clarified |
 
 Prompts are PROPOSED until reviewed and accepted. Executed versions must never be overwritten; create v2 for material changes.
 
