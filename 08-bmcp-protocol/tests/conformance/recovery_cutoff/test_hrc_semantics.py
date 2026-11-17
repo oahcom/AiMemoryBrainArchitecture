@@ -674,7 +674,7 @@ class HRCConformance(unittest.TestCase):
     def test_JPF_16(self):
         req = request_entry("C/request-row/1", "C")
         edge = {"owner_kind":"C","owner_entry_ref":"request/C/request-row/1","owner_request_ref":req["request_ref"],
-                "owner_request_digest":req["request_digest"],"owner_sequence":1,"scope_ref":"scope/test",
+                "owner_request_digest":req["request_digest"],"owner_entry_digest":req["entry_digest"],"owner_sequence":1,"scope_ref":"scope/test",
                 "disposition":"IN_BATCH_REQUEST_SET","owner_signature_valid":True}
         self.assertEqual(validate_request_dispositions({"I":[],"D":[],"C":[req]},
                                                        {"I":[],"D":[],"C":[edge]}), INVALID)
@@ -683,7 +683,7 @@ class HRCConformance(unittest.TestCase):
     def test_JPF_17(self):
         req = request_entry("C/request-row/1", "C")
         edge = {"owner_kind":"C","owner_entry_ref":"C/request-row/1","owner_request_ref":req["request_ref"],
-                "owner_request_digest":req["request_digest"],"owner_sequence":1,"scope_ref":"scope/test",
+                "owner_request_digest":req["request_digest"],"owner_entry_digest":req["entry_digest"],"owner_sequence":1,"scope_ref":"scope/test",
                 "disposition":"IN_BATCH_REQUEST_SET","owner_signature_valid":True}
         self.assertEqual(validate_request_dispositions({"I":[],"D":[],"C":[req]},
                                                        {"I":[],"D":[],"C":[edge]}), VALID)
