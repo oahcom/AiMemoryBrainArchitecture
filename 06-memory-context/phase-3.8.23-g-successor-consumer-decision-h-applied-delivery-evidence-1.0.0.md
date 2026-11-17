@@ -287,3 +287,60 @@ For G Full Applied:
 - G Durable Applied Schema/SDK/Unique Index/Atomic Commit/Crash-Restore/Multi-replica：NOT IMPLEMENTED / NOT VERIFIED；G-AP-P01..P18 仍 SPECIFIED / NOT RUN。
 - Full Applied：NOT ACCEPTED / NOT PROVEN。
 - 全局 C/G/H Freeze 和生产激活：NO / NOT AUTHORIZED。
+
+
+## 12. H Unified 1.2.16 / 1.2.17 recovery-owner snapshot successor — separate from Applied Evidence 1.0.0
+
+H has added a separate COC/JF-10 Unified schema family successor. Do not conflate it with H Applied Delivery Evidence 1.0.0:
+- Unified 1.2.16 schema Blob: `91c4fd70cb1e1cff76d733baa180325bd2da84c1`.
+- Unified 1.2.17 schema Blob: `1b8f44675f30919764481d33755c566ef5cf1ea8`.
+- H 1.2.17 owner-gate semantic reference validator Blob: `60cd1b686eaa9ac364c69a708353fa0e5f635197`.
+- H 1.2.17 semantic tests Blob: `24d3cf0730a138f25719cb1e29de28f833a00cdf`.
+- Exact H code Head `f08dadd27b743b2a31fce859d6ed2c438438d1e1`; Recovery Cutoff run #44193331446 SUCCESS, 390 tests, 22 skipped.
+
+H 1.2.16 adds distinct I/D/C owner-specific snapshot high-waters:
+- I: `permission_epoch`, `producer_domain_inventory_epoch_ref`, receipt issue/consume high-waters, registry snapshot digest and relevant entry-set root.
+- D: `forget_fence_generation_high_water`, `dependency_closure_cursor`, `dependency_closure_root`, plus producer/work/attempt and barrier high-waters.
+- C: `provider_idempotency_namespace_ref`, `final_request_boundary_generation`, plus reservation/provider-attempt/provider-outcome high-waters.
+- Common: `scope_generation_ref`, separate from OwnerGateGeneration.
+
+The original I conditional alias defect (`inventory_epoch_ref` vs `producer_domain_inventory_epoch_ref`) was corrected and actual I/D/C Owner Snapshot instances are now tested. This proves H schema structure only.
+
+### G consumer constraints
+
+1. G must preserve the authority split: I PermissionEpoch and ProducerDomainInventoryEpoch are I-owned; D ForgetFenceGeneration and dependency closure are D-owned; C provider idempotency namespace and final-request-boundary generation are C-owned. G may not mint, compare across domains or infer these values.
+2. A G recovery/Applied consumer must bind the exact owner snapshot reference/digest/attestation/root and ScopeGeneration to the same Batch/Manifest pair before using any owner release.
+3. The C final-request-boundary generation is a new C snapshot field. C's current CSubmitOutcome 1.0.1 schema does not define it; do not treat it as already C-approved or as a substitute for FinalRequestBoundaryRef, RequestDigest, ActualInferenceRequestId or C ProviderAttempt lineage.
+4. H 1.2.17 semantic validator now checks exact Batch↔Manifest backlink, ManifestId/content digest/prefix/count/root equality, Batch-before-Manifest order, and exact owner snapshot equality across Batch and Manifest roots. It remains a test-profile reference with injected signature, COC proof and currentness callbacks.
+5. G's own SQLite Applied model remains a separate 17-test local reference model (run #44188852578). Neither H's 390-test suite nor G's 17-test suite proves production Owner Ledger, COC quorum, PostgreSQL/Storage, multi-replica or physical JF-10 behavior.
+
+**G disposition:** H Unified 1.2.16/1.2.17 is a separate candidate consumer dependency. G's owner-specific field semantics require exact C/D/I owner acceptance and Storage successor-manifest binding before G can consume them as normative recovery evidence. No G Applied or current-use acceptance is implied.
+
+---
+
+## 13. 中文：H Unified 1.2.16 / 1.2.17 Recovery Owner Snapshot 后继 — 与 Applied Evidence 1.0.0 分离
+
+H 新增了独立的 COC/JF-10 Unified Schema Family 后继，不得与 H Applied Delivery Evidence 1.0.0 混淆：
+- Unified 1.2.16 Schema Blob：`91c4fd70cb1e1cff76d733baa180325bd2da84c1`。
+- Unified 1.2.17 Schema Blob：`1b8f44675f30919764481d33755c566ef5cf1ea8`。
+- H 1.2.17 Owner Gate Semantic Reference Validator Blob：`60cd1b686eaa9ac364c69a708353fa0e5f635197`。
+- H 1.2.17 Semantic Tests Blob：`24d3cf0730a138f25719cb1e29de28f833a00cdf`。
+- H 精确代码 Head `f08dadd...`；Recovery Cutoff Run #44193331446 SUCCESS，390 项，22 项 skipped。
+
+H 1.2.16 新增不同 Owner 的专属 Snapshot High-water：
+- I：`permission_epoch`、`producer_domain_inventory_epoch_ref`、Receipt Issue/Consume High-water、Registry Snapshot Digest、Relevant Entry-set Root。
+- D：`forget_fence_generation_high_water`、`dependency_closure_cursor`、`dependency_closure_root`，以及 Producer/Work/Attempt 与 Barrier High-water。
+- C：`provider_idempotency_namespace_ref`、`final_request_boundary_generation`，以及 Reservation/Provider Attempt/Provider Outcome High-water。
+- 通用字段：`scope_generation_ref`，与 OwnerGateGeneration 分离。
+
+原 I 条件别名缺陷（`inventory_epoch_ref` 与 `producer_domain_inventory_epoch_ref` 不一致）已修正，并新增真实 I/D/C Owner Snapshot 实例验证。但这只证明 H Schema 结构。
+
+### G 消费约束
+
+1. G 必须保留权威分离：I PermissionEpoch/ProducerDomainInventoryEpoch 归 I；D ForgetFenceGeneration/Dependency Closure 归 D；C Provider Idempotency Namespace/Final-request-boundary Generation 归 C。G 不得签发、跨域比较或推断这些值。
+2. G Recovery/Applied Consumer 在使用 Owner Release 前，必须把精确 Owner Snapshot Ref/Digest/Attestation/Root 与 ScopeGeneration 绑定到同一 Batch/Manifest Pair。
+3. C Final-request-boundary Generation 是新的 C Snapshot 字段。C 当前 CSubmitOutcome 1.0.1 Schema 未定义该字段；不得视为 C 已批准，也不得替代 FinalRequestBoundaryRef、RequestDigest、ActualInferenceRequestId 或 C ProviderAttempt Lineage。
+4. H 1.2.17 Semantic Validator 现检查精确 Batch↔Manifest Backlink、ManifestId/Content Digest/Prefix/Count/Root 一致性、Batch 先于 Manifest，以及 Batch/Manifest 中 Owner Snapshot 精确一致。它仍是使用注入 Signature/COC Proof/Currentness Callback 的测试 Profile 参考实现。
+5. G 自身 SQLite Applied Model 仍是独立的 17 项本地参考模型（Run #44188852578）。H 390 项测试和 G 17 项测试均不证明生产 Owner Ledger、COC Quorum、PostgreSQL/Storage、多副本或物理 JF-10。
+
+**G 处置：** H Unified 1.2.16/1.2.17 是独立候选消费者依赖。G 要将这些字段作为规范 Recovery Evidence 消费，必须先获得精确 C/D/I Owner 接受，并由 Storage Successor Manifest 绑定。此更新不代表 G Applied 或 Current-use 接受。
