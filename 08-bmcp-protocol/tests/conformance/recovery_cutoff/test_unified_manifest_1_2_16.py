@@ -9,7 +9,7 @@ import json
 import unittest
 from pathlib import Path
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, ValidationError
 
 ROOT = Path(__file__).resolve().parents[3]
 SCHEMA = json.loads(
@@ -118,6 +118,95 @@ class UnifiedManifest1216SchemaTests(unittest.TestCase):
 
     def test_11_schema_is_valid_draft_2020_12(self):
         Draft202012Validator.check_schema(SCHEMA)
+
+
+
+    def _owner_snapshot_fixture(self, owner):
+        common = {
+            "owner": owner,
+            "owner_gate_ref": f"{owner}/gate/1",
+            "owner_gate_generation": "1",
+            "scope_generation_ref": f"{owner}/scope-generation/1",
+            "request_high_water": "1",
+            "request_count": 0,
+            "request_set_digest": "a" * 64,
+            "owner_snapshot_attestation_ref": f"{owner}/snapshot-attestation/1",
+            "anti_rollback_anchor_ref": f"{owner}/anti-rollback/1",
+            "owner_ledger_root": "b" * 64,
+            "admission_high_water": "1",
+            "admission_count": 0,
+            "admission_set_digest": "c" * 64,
+            "request_ledger_root": "d" * 64,
+            "admission_ledger_root": "e" * 64,
+            "owner_snapshot_attestation_digest": "f" * 64,
+            "owner_specific_high_waters_digest": "0" * 64,
+        }
+        if owner == "I":
+            common["owner_specific_high_waters"] = {
+                "receipt_issue_high_water": "1",
+                "receipt_consume_high_water": "1",
+                "permission_epoch": "I/permission-epoch/1",
+                "producer_domain_inventory_epoch_ref": "I/producer-domain-inventory/1",
+                "registry_snapshot_digest": "1" * 64,
+                "relevant_entry_set_root": "2" * 64,
+            }
+        elif owner == "D":
+            common["owner_specific_high_waters"] = {
+                "producer_registration_high_water": "1",
+                "work_item_high_water": "1",
+                "attempt_high_water": "1",
+                "barrier_generation": "1",
+                "barrier_root": "3" * 64,
+                "forget_fence_generation_high_water": "1",
+                "dependency_closure_cursor": "D/dependency-cursor/1",
+                "dependency_closure_root": "4" * 64,
+            }
+        elif owner == "C":
+            common["owner_specific_high_waters"] = {
+                "reservation_high_water": "1",
+                "provider_attempt_high_water": "1",
+                "provider_outcome_high_water": "1",
+                "provider_idempotency_namespace_ref": "C/provider-idempotency-namespace/1",
+                "final_request_boundary_generation": "1",
+            }
+        return common
+
+    def _owner_snapshot_validator(self):
+        return Draft202012Validator({
+            "$schema": SCHEMA["$schema"],
+            "$defs": self.defs,
+            "$ref": "#/$defs/ownerSnapshot",
+        })
+
+    def test_12_actual_i_d_c_owner_snapshot_instances_validate(self):
+        validator = self._owner_snapshot_validator()
+        for owner in ("I", "D", "C"):
+            with self.subTest(owner=owner):
+                validator.validate(self._owner_snapshot_fixture(owner))
+
+    def test_13_i_snapshot_rejects_missing_producer_domain_inventory_epoch(self):
+        snapshot = self._owner_snapshot_fixture("I")
+        del snapshot["owner_specific_high_waters"]["producer_domain_inventory_epoch_ref"]
+        with self.assertRaises(ValidationError):
+            self._owner_snapshot_validator().validate(snapshot)
+
+    def test_14_i_snapshot_rejects_legacy_inventory_epoch_alias(self):
+        snapshot = self._owner_snapshot_fixture("I")
+        snapshot["owner_specific_high_waters"]["inventory_epoch_ref"] = "I/legacy-epoch/1"
+        with self.assertRaises(ValidationError):
+            self._owner_snapshot_validator().validate(snapshot)
+
+    def test_15_d_snapshot_rejects_missing_dependency_closure_root(self):
+        snapshot = self._owner_snapshot_fixture("D")
+        del snapshot["owner_specific_high_waters"]["dependency_closure_root"]
+        with self.assertRaises(ValidationError):
+            self._owner_snapshot_validator().validate(snapshot)
+
+    def test_16_c_snapshot_rejects_missing_provider_idempotency_namespace(self):
+        snapshot = self._owner_snapshot_fixture("C")
+        del snapshot["owner_specific_high_waters"]["provider_idempotency_namespace_ref"]
+        with self.assertRaises(ValidationError):
+            self._owner_snapshot_validator().validate(snapshot)
 
 
 if __name__ == "__main__":
