@@ -3,8 +3,8 @@
 - 权威角色：A — 首席系统架构权威
 - 版本：1.0.0
 - 日期：2026-11-17
-- 精确 Main 基线：`b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- 审查分支：`review/session-4-a-final-architecture-authority-2026-11-17`
+- 精确 Main 基线：`8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
+- 审查分支：`review/session-4-a-final-architecture-authority-current-2026-11-17`
 - 统一跟踪入口：Issue #43
 - 整体决策结果：**DEFERRED**
 - 架构状态：**ARCHITECTURE_NOT_READY**
@@ -13,7 +13,7 @@
 
 架构**原则上合理，但尚未证明完整系统在语义、物理实现、验证和维护层面成立**。本项目并未被判定为不可行。由于不可豁免的语义、权威、原子性、安全和恢复前置条件仍未关闭，架构冻结和全面实现准入暂缓。
 
-A 仅允许有界准备工作。这不构成 Gate 通过、受保护路径实现授权、Schema/Technology Freeze、部署批准或生产授权。
+A 仅允许有界准备工作。范围限定的 APPROVED_WITH_CONDITIONS 仅适用于 Option A 作为 v1 逻辑方向（A-01..A-05 和 D 精确采纳仍开放），以及 H 1.2.14/CSubmitOutcome 1.0.1 作为 L1/L2 协议候选（B-01..B-04 仍开放）。两项均不代表 Gate 通过、L1/L2 关闭、受保护路径实现授权、Schema/Technology Freeze、部署批准或生产授权。
 
 ## 五项根本风险
 
@@ -21,7 +21,7 @@ A 仅允许有界准备工作。这不构成 Gate 通过、受保护路径实现
 2. B 的 Fact/Claim/Identity/Temporal 语义仍 ADR-BLOCKED。
 3. Forget/Revocation/Restore 缺少端到端防复活证明和完整 Inventory。
 4. I36 Governance、Trust 和 Authorization 批准仍开放。
-5. D/E/I/Storage Publication、JF-10 Recovery 和 C/G/H Applied/Provider Outcome 尚无端到端验证。
+5. B 协议精确 Manifest 漂移（v3.2.9 已过期，需要 v3.3.0 后继版本），以及 D/E/I/Storage Publication、JF-10 Recovery 和 C/G/H Applied/Provider Outcome 仍未解决。
 
 ## 五项复杂度瓶颈
 
@@ -33,7 +33,7 @@ A 仅允许有界准备工作。这不构成 Gate 通过、受保护路径实现
 
 ## 工程前置条件与关键路径
 
-P0-01 实现仓库/责任人 → P0-02 B 领域语义及 P0-03 I 治理/Inventory → P0-04 D/E/I/Storage 原子 Publication/Forget 合同 → P0-05 Storage/COC/JF-10 物理证明 → P0-06 C/G/H Applied 合同 → P0-07 有界 Durable Canonical 切片 → P0-08 安全 Retrieval/Rebuild → P1 Context/Adapter/Applied → 集成 Recovery 和 Conformance。该顺序并非完全串行：Synthetic Benchmark、Harness 脚手架、源刷新、双语自动化和候选 DB 实验可以并行。
+P0-01 实现仓库/责任人 → P0-02 B 领域语义及 P0-03 I 治理/Inventory → B-01..B-04 H/C/D/I/Storage 精确 Manifest 关闭 → A-01..A-05 Option A L1/L2 澄清及 D 精确采纳 → P0-04 D/E/I/Storage 原子 Publication/Forget 合同 → P0-05 Storage/COC/JF-10 物理证明 → P0-06 C/G/H Applied 合同 → P0-07 有界 Durable Canonical 切片 → P0-08 安全 Retrieval/Rebuild → P1 Context/Adapter/Applied → 集成 Recovery 和 Conformance。该顺序并非完全串行：Synthetic Benchmark、Harness 脚手架、源刷新、双语自动化和候选 DB 实验可以并行。
 
 ## 决策记录
 
@@ -47,7 +47,9 @@ P0-01 实现仓库/责任人 → P0-02 B 领域语义及 P0-03 I 治理/Inventor
 
 ### 已批准条件
 
-仅 COND-NB-01：延后 Vector/ANN 生产能力；允许 F 负责 Synthetic Benchmark。完整记录见 DEFERRED-002。没有任何 Critical 条件被豁免。
+- Option A：仅有条件接受为 v1 逻辑方向；A-01..A-05 仍阻塞，后继 ADR 和 D/Storage/I 精确复审满足前不得关闭 L1。
+- B 协议：仅有条件接受 H Unified 1.2.14 / wire 1.3.0 + CSubmitOutcome 1.0.1 为 L1/L2 候选；B-01..B-04 仍阻塞；v3.2.9 已过期，需由 C/H/D/I 和 A 复审 v3.3.0/等效版本。
+- COND-NB-01：延后 Vector/ANN 生产能力；允许 F 负责 Synthetic Benchmark。这是唯一接受的非阻塞残余事项，完整记录见 DEFERRED-002。没有任何 Critical 正确性/安全条件被豁免。
 
 ### 被拒绝条件
 
@@ -100,4 +102,4 @@ P0-01 实现仓库/责任人 → P0-02 B 领域语义及 P0-03 I 治理/Inventor
 
 ## 证据与交叉引用
 
-R PR #50；X PR #49；F/D/P PR #46；Issues #3、#5、#7、#10、#25、#29、#43；精确来源见 SYS-RISK-002。配套文件：ARCH-CX-002、DEV-FEAS-002、DEP-DAG-002、PRIORITY-002、READINESS-002、CONFLICT-002、GATE-002、DEFERRED-002。本评估不合并 PR、不关闭 Issue #43，也不授权生产。
+R PR #50；X PR #49；F/D/P PR #46；B 协议 PR #51；B→A 审查 PR #52；Option A 审查 PR #54；当前 Main `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`；Issues #3、#5、#7、#10、#25、#29、#43；精确来源见 SYS-RISK-002。配套文件：ARCH-CX-002、DEV-FEAS-002、DEP-DAG-002、PRIORITY-002、READINESS-002、CONFLICT-002、GATE-002、DEFERRED-002。本评估不合并 PR、不关闭 Issue #43，也不授权生产。
