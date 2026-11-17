@@ -1,0 +1,7 @@
+[
+  {"source_id":"src-001","event_id":"evt-001","subject":"Mira","predicate":"lives_in","value":"Tokyo","valid_from":"2025-01-01","valid_to":null,"epistemic":"reported","confidence":0.72,"text":"Mira lives in Tokyo.","authority":"user_report","scope":"personal","source_digest":"sha256:synthetic-001"},
+  {"source_id":"src-002","event_id":"evt-002","subject":"Mira","predicate":"lives_in","value":"Osaka","valid_from":"2025-01-01","valid_to":null,"epistemic":"reported","confidence":0.68,"text":"Mira lives in Osaka.","authority":"user_report","scope":"personal","source_digest":"sha256:synthetic-002"},
+  {"source_id":"src-003","event_id":"evt-003","subject":"Mira","predicate":"prefers","value":"concise answers","valid_from":"2025-02-01","valid_to":null,"epistemic":"observed","confidence":0.95,"text":"Please keep answers concise.","authority":"direct_user","scope":"personal","source_digest":"sha256:synthetic-003"},
+  {"source_id":"src-004","event_id":"evt-004","subject":"Mira","predicate":"plans_to_move_to","value":"Kyoto","valid_from":"2026-01-01","valid_to":null,"epistemic":"reported","confidence":0.81,"text":"Mira plans to move to Kyoto next year.","authority":"user_report","scope":"personal","source_digest":"sha256:synthetic-004"},
+  {"source_id":null,"event_id":"evt-005","subject":"Mira","predicate":"works_at","value":"Acme","valid_from":"2024-01-01","valid_to":null,"epistemic":"reported","confidence":0.7,"text":"Mira works at Acme.","authority":"user_report","scope":"personal","source_digest":"sha256:synthetic-005"}
+]
