@@ -123,7 +123,8 @@ class Protocol:
             raise Rejected("storage participant identity rebound")
         self.storage_participants[storage_id] = binding
 
-    def admit_publication(self, publication_id, work_id, storage_id):
+    def admit_publication(self, publication_id, work_id, storage_id,
+                          request_digest, owner_boundary):
         work = self.producer_work.get(work_id)
         if work is None:
             raise Rejected("producer work not registered")
@@ -133,20 +134,28 @@ class Protocol:
             raise Rejected("exact hidden storage participant missing")
         if self.storage_participants[storage_id][0] != work_id:
             raise Rejected("storage participant belongs to another work")
-        binding = (work_id, storage_id, self.storage_participants[storage_id][1])
+        if not request_digest or not owner_boundary:
+            raise Rejected("canonical request digest and owner boundary are required")
+        binding = (
+            work_id, storage_id, self.storage_participants[storage_id][1],
+            request_digest, owner_boundary,
+        )
         prior = self.publication_participants.get(publication_id)
         if prior is not None and prior != binding:
             raise Rejected("publication participant identity rebound")
         self.publication_participants[publication_id] = binding
 
-    def authorize_commit(self, auth_id, publication_id, storage_id):
+    def authorize_commit(self, auth_id, publication_id, storage_id,
+                         request_digest, owner_boundary):
         if auth_id in self.revoked:
             raise Rejected("authorization revoked")
         if publication_id not in self.publication_participants:
             raise Rejected("publication participant missing")
         if self.publication_participants[publication_id][1] != storage_id:
             raise Rejected("authorization participant binding mismatch")
-        binding = (publication_id, storage_id)
+        if self.publication_participants[publication_id][3:] != (request_digest, owner_boundary):
+            raise Rejected("authorization request digest or owner boundary mismatch")
+        binding = (publication_id, storage_id, request_digest, owner_boundary)
         prior = self.authorizations.get(auth_id)
         if prior is not None and prior != binding:
             raise Rejected("authorization identity rebound")
@@ -158,9 +167,15 @@ class Protocol:
             self.revocation_pending.add(auth_id)
 
     def consume_i_commit_won(self, operation_id, auth_id, publication_id,
-                             storage_id, d_proof):
-        i_proof = ("I_COMMIT_WON", auth_id, publication_id, storage_id)
-        binding = (auth_id, publication_id, storage_id, d_proof, i_proof)
+                             storage_id, request_digest, owner_boundary, d_proof):
+        i_proof = (
+            "I_COMMIT_WON", auth_id, publication_id, storage_id,
+            request_digest, owner_boundary,
+        )
+        binding = (
+            auth_id, publication_id, storage_id, request_digest, owner_boundary,
+            d_proof, i_proof,
+        )
         # A replay after COMMIT_WON returns the same proof even if revocation
         # arrived later; the sequencer decision already won.
         if operation_id in self.i_pending:
@@ -175,13 +190,20 @@ class Protocol:
             raise Rejected("operation is already UNKNOWN or terminal")
         if auth_id not in self.authorizations or auth_id in self.revoked:
             raise Rejected("authorization absent or revocation won before I consumption")
-        if self.authorizations[auth_id] != (publication_id, storage_id):
-            raise Rejected("authorization not bound to exact participants")
+        if self.authorizations[auth_id] != (
+            publication_id, storage_id, request_digest, owner_boundary
+        ):
+            raise Rejected("authorization not bound to exact participants, digest and owner boundary")
         if publication_id not in self.publication_participants:
             raise Rejected("D publication proof missing")
-        if self.publication_participants[publication_id][1] != storage_id:
-            raise Rejected("D proof does not bind exact Storage participant")
-        if d_proof != ("D_ADMITTED", publication_id, storage_id):
+        if self.publication_participants[publication_id][1:] != (
+            storage_id, self.publication_participants[publication_id][2],
+            request_digest, owner_boundary,
+        ):
+            raise Rejected("D proof does not bind exact Storage participant, digest and owner boundary")
+        if d_proof != (
+            "D_ADMITTED", publication_id, storage_id, request_digest, owner_boundary
+        ):
             raise Rejected("invalid D publication proof")
         prior = self.operation_bindings.get(operation_id)
         if prior is not None and prior != binding:
@@ -194,8 +216,12 @@ class Protocol:
         return i_proof
 
     def commit(self, operation_id, auth_id, publication_id, storage_id,
-               d_proof, i_commit_won_proof, *, fail_before_commit=False):
-        binding = (auth_id, publication_id, storage_id, d_proof, i_commit_won_proof)
+               request_digest, owner_boundary, d_proof, i_commit_won_proof,
+               *, fail_before_commit=False):
+        binding = (
+            auth_id, publication_id, storage_id, request_digest, owner_boundary,
+            d_proof, i_commit_won_proof,
+        )
         if operation_id in self.private_unknown:
             prior = self.operation_bindings.get(operation_id)
             if prior is not None and prior != binding:
@@ -213,15 +239,24 @@ class Protocol:
             raise Rejected("exact I COMMIT_WON participant has not been consumed")
         if auth_id not in self.authorizations or auth_id not in self.consumed:
             raise Rejected("authorization or I consumption missing")
-        if self.authorizations[auth_id] != (publication_id, storage_id):
-            raise Rejected("authorization not bound to exact participants")
+        if self.authorizations[auth_id] != (
+            publication_id, storage_id, request_digest, owner_boundary
+        ):
+            raise Rejected("authorization not bound to exact participants, digest and owner boundary")
         if publication_id not in self.publication_participants:
             raise Rejected("D publication proof missing")
         if self.publication_participants[publication_id][1] != storage_id:
             raise Rejected("D proof does not bind exact Storage participant")
-        if d_proof != ("D_ADMITTED", publication_id, storage_id):
+        if self.publication_participants[publication_id][3:] != (request_digest, owner_boundary):
+            raise Rejected("D participant digest or owner boundary mismatch")
+        if d_proof != (
+            "D_ADMITTED", publication_id, storage_id, request_digest, owner_boundary
+        ):
             raise Rejected("invalid D publication proof")
-        if i_commit_won_proof != ("I_COMMIT_WON", auth_id, publication_id, storage_id):
+        if i_commit_won_proof != (
+            "I_COMMIT_WON", auth_id, publication_id, storage_id,
+            request_digest, owner_boundary,
+        ):
             raise Rejected("invalid pre-commit I COMMIT_WON proof")
         if fail_before_commit:
             raise RuntimeError("simulated crash before Storage transaction commit")
@@ -235,20 +270,30 @@ class Protocol:
         return receipt
 
     def _validate_unknown_binding(self, binding):
-        if not isinstance(binding, tuple) or len(binding) != 5:
-            raise Rejected("UNKNOWN operation binding must be an immutable five-tuple")
-        auth_id, publication_id, storage_id, d_proof, i_commit_won_proof = binding
-        if self.authorizations.get(auth_id) != (publication_id, storage_id):
+        if not isinstance(binding, tuple) or len(binding) != 7:
+            raise Rejected("UNKNOWN operation binding must be an immutable seven-tuple")
+        auth_id, publication_id, storage_id, request_digest, owner_boundary, d_proof, i_commit_won_proof = binding
+        if self.authorizations.get(auth_id) != (
+            publication_id, storage_id, request_digest, owner_boundary
+        ):
             raise Rejected("UNKNOWN operation authorization binding mismatch")
         publication = self.publication_participants.get(publication_id)
-        if publication is None or publication[1] != storage_id:
-            raise Rejected("UNKNOWN operation publication/Storage participant mismatch")
+        if (
+            publication is None or publication[1] != storage_id
+            or publication[3:] != (request_digest, owner_boundary)
+        ):
+            raise Rejected("UNKNOWN operation publication/Storage/digest/boundary mismatch")
         storage = self.storage_participants.get(storage_id)
         if storage is None or storage[0] != publication[0]:
             raise Rejected("UNKNOWN operation Storage participant belongs to another work")
-        if d_proof != ("D_ADMITTED", publication_id, storage_id):
+        if d_proof != (
+            "D_ADMITTED", publication_id, storage_id, request_digest, owner_boundary
+        ):
             raise Rejected("UNKNOWN operation D admission proof mismatch")
-        if i_commit_won_proof != ("I_COMMIT_WON", auth_id, publication_id, storage_id):
+        if i_commit_won_proof != (
+            "I_COMMIT_WON", auth_id, publication_id, storage_id,
+            request_digest, owner_boundary,
+        ):
             raise Rejected("UNKNOWN operation I COMMIT_WON proof mismatch")
         return auth_id, publication_id, storage_id
 
