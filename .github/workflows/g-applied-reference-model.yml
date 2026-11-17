@@ -1,0 +1,26 @@
+name: G Applied durable-ledger reference model
+
+on:
+  pull_request:
+    paths:
+      - "06-memory-context/reference-model/**"
+      - ".github/workflows/g-applied-reference-model.yml"
+  push:
+    branches: [main]
+    paths:
+      - "06-memory-context/reference-model/**"
+      - ".github/workflows/g-applied-reference-model.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  g-applied-reference-model:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run G Applied reference-model tests
+        run: python -m unittest discover -s 06-memory-context/reference-model -p "test_*.py" -v
