@@ -106,3 +106,9 @@ H's candidate source was further updated with §11.8. Current exact H source Blo
 **New finding H36-AP-08 — OPEN:** the candidate mapping is now described, but the H wire schema/SDK and exact ACK message-family binding have not been updated or generated. H must preserve COC, I, D and Storage ordering domains as distinct; missing owner evidence remains UNKNOWN/IN_DOUBT. G's recovery-batch acceptance is exact-version and conditional; H cannot infer COC deployment or owner gate release. C/G/I/D/Storage confirmation and schema/conformance remain pending.
 
 The §11.8 response is a candidate proposal only. H36-AP-01..08 are not marked RESOLVED until the corresponding owners accept the exact common package and the versioned H schema mapping is produced. C/G/H freeze remains BLOCKED.
+
+## 9. H provider-outcome / owner-gate clarification — 2026-11-17
+
+H's candidate source now includes §11.9 and has current exact Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`. It explicitly binds C-issued provider receipt and immutable CSubmitOutcome, preserves UNKNOWN/IN_DOUBT, requires participant terminal proof only after all owner outcomes are determinate, and reserves owner-local gate release attestations to the respective I or D authority.
+
+**New finding H36-AP-09 — OPEN:** the candidate text now reserves the correct evidence/authority boundaries, but the exact H wire message-family schema/SDK mapping and consumer acceptance remain absent. C/G/I/D/Storage must confirm the exact common version; no H ACK or COC observation may substitute for C provider outcome or I/D owner-signed gate release. H36-AP-01..09 remain OPEN pending exact-version owner decisions and schema/conformance evidence.
