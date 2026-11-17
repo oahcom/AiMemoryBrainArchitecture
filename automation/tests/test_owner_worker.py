@@ -1,3 +1,6 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import unittest
 from owner_worker import safe_path, validate_files, WorkerError
 
