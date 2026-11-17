@@ -460,7 +460,7 @@ current_status_snapshot:
 
 
 latest_reconciliation:
-  observed_main_head_before_this_documentation_update: 7bd425de62fa2dc66c2d2df03fac58e02bb68ad5
+  observed_main_head_before_this_documentation_update: d38c8379392e56fa095ad7577e96c46b8ff202f3
   observed_at: 2026-11-18
   pr_141:
     state: CLOSED_MERGED
