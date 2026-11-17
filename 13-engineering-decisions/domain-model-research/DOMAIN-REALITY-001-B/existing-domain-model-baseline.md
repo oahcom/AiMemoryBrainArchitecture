@@ -175,6 +175,111 @@ The old branch head SHA and complete branch diff were not returned by the branch
 
 对已识别的 main 分支领域源文件及其 Blob Pin，置信度为 **MEDIUM**；对穷尽跨 Owner 规范契约、所有相关 PR/Issue 历史、当前分支列表未提供的分支 HEAD，以及运行时实现，置信度为 **LOW / NOT VERIFIED**。
 
+## 12. Full Chinese baseline mirror / 中文基线完整对照
+
+### 12.1 仓库与分支证据
+
+| 项目 | 已核验值 | 中文说明 |
+|---|---|---|
+| Repository | oahcom/AiMemoryBrainArchitecture | 本次研究仓库。 |
+| Visibility | Private | 私有仓库。 |
+| Default branch | main | 默认分支。 |
+| 原始研究基线 HEAD | b372b62c640a2b656e54b6db62a4ee67d7d8c001 | 创建 B 研究分支时的历史祖先。 |
+| 分支隔离纠正后的当前 main HEAD | 8c0c5b11abf56a6f580fcf2a99c8043d3057da4f | 已通过显式删除提交从 main 清除误写研究文件；main 历史未重写。 |
+| Repository README Blob | 429e873bd5bf081e10a449b27e3495428e1046f1 | 当前仓库 README 的精确内容版本。 |
+| Roadmap Blob | 29289361973ec4369f067706132190793cd57a6b | 当前路线图的精确内容版本。 |
+| Existing B branch | session-b-domain-model-phase3 | 原 B Owner 分支；不得与本研究分支混同。 |
+| Research branch | research/domain-reality-001-b | 从精确历史基线建立的独立研究分支。 |
+
+### 12.2 领域源文件 Pin
+
+以下文件均从 main 读取；SHA 为 Git Blob SHA。
+
+| 文件 | Blob SHA | 中文观察结论 |
+|---|---|---|
+| domain-model-overview.md | 4d1debc0ec19b3917f9e76d04bb66da4df4cd346 | 基线定义部分 DECIDED；Fact 被描述为限定 Claim；仍有多个 OPEN 项。 |
+| core-entities.md | 8cb5a674eec8eac1f3c4d83c400dc08d00166f23 | 定义逻辑字段和不透明 ID；包含 Claim、Entity、Relation、Evidence、Provenance、Context。 |
+| epistemic-and-temporal-semantics.md | 8c03a20db1ed54c90db1d5c4c64f5ea7b1324ed7 | 核心区分 DECIDED；校准和不确定时间仍部分 OPEN。 |
+| lifecycle-model.md | 81c48c928cb5f9c76ca29d493fbd9479079e62f7 | 状态词汇 DECIDED；阈值/转换仍 OPEN。 |
+| relationships-and-provenance.md | e762f84c59f69de7a44baad2123aed46e1ffea16 | 核心语义 DECIDED；图表示和压缩仍 CANDIDATE/OPEN。 |
+| scope-and-permission-model.md | b5215ae27bd65a6c89c185b496f730b6cd52efa9 | Scope 与 Permission 分离 DECIDED；策略/继承边界情况仍 OPEN。 |
+
+双语领域指南：
+- 中文：docs/zh-CN/02-domain-model/domain-model-guide.md，Blob a9f53a453aec25c47c58c4aea75adc43c83028d3。
+- 英文：docs/en/02-domain-model/domain-model-guide.md，Blob 8a19cebacf5aefb0aded5fdbfeaff406291a5cf1。
+
+共享来源：
+- 架构不变量：00-governance/architecture-invariants.md，Blob 33b037318e459ebb73bea33b3186f31a41d5dcfe。
+- 责任矩阵：01-system-architecture/responsibility-matrix.md，Blob fbeb6935fe874e6c843c25c3a891d6b3242cbfd3。
+- 架构术语表：docs/glossary/architecture-glossary.md，Blob 394ad3822c1bd437662e1d6e46d06d9f412c6ee9。
+- AI Development Standard：14-ai-development/ai-development-standard.md，Blob f46867f97fc1860015adbe2a1f7b8262640c16fd。
+
+### 12.3 跨 Owner 指南 Pin
+
+这些是 main 上的说明性指南，不能替代 Owner 分支规范契约。
+
+| Owner | 中文指南 Blob | 英文指南 Blob |
+|---|---|---|
+| D | fa3f0fbe1ccc551a7805d4d5c670b588d2471be7 | bb63d28d6243524193c2f9c2fc2e19774aaf08fd |
+| E | 84af043e306c54114e1129141ebe128f153c74e6 | 24e34121fb7e61ed89a9cb010c2f69bbd1902812 |
+| F | 0e0df43de9c55f8e41d6ed596d50471798fb23cc | a45b868efe1367fb9934c17191109d8d87f48fab |
+| G | 87686788903dd7593844761e119d9fbecded6323 | 29385171ade4414257467b370becf690564d2095 |
+| C | b68f90f70ccf0c79bc8063e70b9a084b605ba9bf | c4e076887634a9e8e46df076efb0f4b70d816e0a |
+| H | fb25bbd1c1c90871c9d9682992ca6bcd8098c661 | 228d28671955c977f653bef5b537554e431f9137 |
+| I | 57423eaab9053f7b59869a493fedec583601f7fb | 3d3fa33c016c1c601374bab1e621cfec8b2b403d |
+
+### 12.4 相关 PR / Issue 中文状态
+
+| 记录 | 读取时状态 | 对 B 的影响 |
+|---|---|---|
+| PR #53 | CLOSED / NOT MERGED | A 结论为 DEFERRED / ARCHITECTURE_NOT_READY；Fact/Claim ADR、I36 治理、JF-10 和 C/G/H Applied/Provider 证据仍阻塞。 |
+| PR #52 | OPEN / DRAFT | B 协议收敛仍是候选，未冻结；H Unified 1.2.14 / Wire 1.3.0 + CSubmitOutcome 1.0.1 为候选配对；L4 物理实现 OPEN。 |
+| PR #42 | Open PR result | 包含 B v2 责任区分：领域身份与安全身份不同；治理决定和新审查要求仍适用。 |
+| Issue #3 | OPEN | C/G/H Applied 证据与 BMCP Wire 契约；要求 B 提供 ActorRef/ScopeRef/EnvironmentRef 类型映射。 |
+| Issue #5 | OPEN | I36 治理批准；Principal 分类、跨 Issuer 身份和 ActorRef 绑定影响 B/I 边界。 |
+| Issue #6 | CLOSED | C/F/G 对精确 BIH Package 作设计级消费者验收，带列明例外；G 后继 Blob 需重新确认。 |
+| Issue #7 | OPEN | 规范 Runtime 实现仓库和负责 Engineering Owner 未确定。 |
+| Issue #10 | OPEN | JF-10 P0 数据库/COC 物理能力与故障恢复未建立。 |
+| Issue #11 | OPEN | A–I 基线/Redline 推进仍待完成。 |
+| Issue #21 | OPEN | F/E/G 局部生命周期协调仍开放。 |
+| Issue #43 | OPEN | 系统级整合控制 Issue；A 仍推迟架构冻结。 |
+
+以上为相关记录子集，不代表已穷尽所有 PR/Issue。B0 通过前仍需完整搜索和读取相关 Diff/Commit/Blob。
+
+### 12.5 重大语义冲突中文摘要
+
+**B-BASE-001 — Fact / Claim 权威不一致：** 根 Overview 将 Fact 描述为限定 Claim 并标记 DECIDED；架构不变量 I-04 要求 Fact 保持不同领域概念；双语 Guide 将 Fact/Claim ADR 保持 ADR-BLOCKED，并禁止下游 Schema 冻结。当前仅能暂时确认概念区分；Fact 是否独立对象/类型，还是限定 Claim 表示，仍 OPEN。严重级别：Schema 冻结 BLOCKING。权威：B 提出领域语义；A 登记；D/E 验收下游影响。
+
+**B-BASE-002 — 领域身份与安全身份：** Domain Entity 身份与 I Principal/ActorRef/ProducerIdentity 是不同语义问题。B 定义类型化引用/命名空间映射；I 保留认证、信任和授权权威。严重级别 HIGH；缺少安全类型映射的契约不得继续。
+
+**B-BASE-003 — Scope / Tenant / Workspace / Environment：** 现有领域源定义 Agent Scope 和 Environment Scope；I 指南使用 Tenant/User/Project/Agent/Session 等维度。规范 Scope 分类、Ownership 与 Applicability、Tenant 与 Workspace 关系及跨 Tenant 引用规则仍需 I/A 协调。未解决前必须 Fail Closed。严重级别 HIGH。
+
+**B-BASE-004 — Applied / Recorded / Committed / Visible / Published：** 架构不变量 I-10 要求 Adapter acknowledgement，但 H/C 资料区分 Delivery ACK 和 Final-request Applied 证明。B 定义词汇边界；C/G/H 拥有最终请求/Provider 证明；Storage 拥有持久可见性/提交。I-10 应澄清 ACK 是必要但不充分条件。严重级别 BLOCKING。
+
+**B-BASE-005 — Forget / Deleted / Forgotten / Purged：** D 拥有规范 ForgetOperation/Fence；I 拥有全局完成策略；Storage/备份操作方拥有物理擦除。逻辑抑制不等于物理 Purge。声称全局完成或物理擦除前必须有目标级证据。严重级别 BLOCKING。
+
+### 12.6 缺失定义中文对照
+
+- 跨模块规范类型化引用语法和命名空间范围：OPEN / NOT YET PINNED。
+- Claim 跨 Memory Version 的身份策略：OPEN。
+- 时间不确定性模型和双时态适用范围：OPEN / TO_VALIDATE。
+- Tenant / Workspace / Project / Environment Scope 关系：OPEN。
+- 精确 Fact/Claim 决策及 Schema 后果：BLOCKED。
+- B Domain Actor/Scope/Environment 引用到 I Authenticated Principal 和 H Wire Identity 的稳定映射：OPEN。
+- C/G/H/Storage 之间 Applied 词汇和证明权威拆分：系统级 OPEN。
+- Forget、Superseded、Invalidated、Purged 下的终态性与重新出现语义：需 D/I/Storage 协调。
+- A/C/D/E/F/G/H/I/Storage 所有 Owner 的局部规范契约和精确版本 Pin：NOT COMPLETE。
+- 相关 PR/Issue 穷尽清单及完整 Diff：NOT VERIFIED。
+- Runtime 实现仓库和可执行一致性证据：NOT VERIFIED；Issue #7 仍 OPEN。
+
+### 12.7 基线置信度与 B0 结论
+
+对已识别 main 分支领域源文件及所列 Blob Pin 的置信度为 **MEDIUM**；对穷尽跨 Owner 规范契约、全部相关 PR/Issue 历史、未暴露 HEAD 的分支以及 Runtime 实现，置信度为 **LOW / NOT VERIFIED**。
+
+**B0 = PARTIAL / NOT PASSED。** 已核验仓库身份、main HEAD、主要领域源文件、双语指南 Pin、共享不变量、责任矩阵、术语表和部分相关 PR/Issue。仍需补齐完整 Owner 规范契约、穷尽 PR/Issue Diff、精确 Commit/Blob Pin 和源级语义协调。Phase 3.8 新证据另增加阻塞性身份/信任问题：H 1.2.14 外层认证仅为 Reference Gate；C Signer/P0 为候选；I Crypto Suite/Trust 注册未批准；Storage v3.2.11 未联合接受/冻结；A 明确记录阻塞缺口。
+
+不宣称最终领域冻结、Schema 冻结、下游实现授权或 ACCEPTED。PR #53 已 CLOSED / NOT MERGED，A 决定为 DEFERRED / ARCHITECTURE_NOT_READY；PR #52 仍 OPEN / DRAFT。
+
 ## 11. Gate B0 disposition / B0 门禁结论
 
 **B0 = PARTIAL / NOT PASSED.** Repository identity, main HEAD, major domain source files, bilingual guide pins, shared invariants, responsibility matrix, glossary, and selected relevant PR/issues are verified. Full Owner normative contract inventory, exhaustive related PR/Issue audit, exact PR diffs/commits/blob pins and source-level semantic reconciliation are still required. New Phase 3.8 current branch-head evidence adds a material blocking identity/trust issue: H 1.2.14 outer-envelope authentication is reference-only, C signer/P0 is candidate, I cryptographic suite/trust registration is not approved, Storage v3.2.11 is not jointly accepted/frozen, and A explicitly records a blocking gap.
