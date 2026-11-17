@@ -36,6 +36,11 @@ Independent review performed in this pass:
 - Read the EN/ZH SYS-RISK-002, ARCH-CX-002, DEV-FEAS-002, DEP-DAG-002, PRIORITY-002, READINESS-002, CONFLICT-002, GATE-002, DEFERRED-002 and FINAL-A-002 pairs from the exact A review branch.
 - Confirmed that the ten pairs preserve matching document identity and broad decision structure.
 - Identified currentness drift: all ten baseline documents and FINAL-A-002 still identify `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`; FINAL-A-003 identifies `ca69d50d1fc6c19a930128de700b0f2328bf32fb`; both are historical relative to current main `901e38...`.
+
+
+### Finding A-PARITY-001 — PRIORITY-002 P0-05 under-translation (corrected)
+The Chinese P0-05 row omitted the English requirements to close A-01..A-05 L1/L2 clarifications, obtain exact D adoption, and then complete L3/L4 physical proof. It had narrowed the action to L4 physical DB/COC/JF-10 proof. This could incorrectly imply that L1/L2 clarification and D acceptance were not part of the priority. The Chinese row has now been corrected on this branch to restore all three requirements. This is one confirmed semantic-parity defect; it does not establish that the remaining pairs are defect-free.
+
 - Full sentence-by-sentence semantic parity, every table cell, and every cross-document status/owner/deadline alignment have **not** been completed. Equal structure is not proof of semantic equivalence.
 
 ## 4. R/X/F/D/P refresh dependency
