@@ -34,6 +34,34 @@
 
 Branch tips/commit SHAs are NOT VERIFIED for the live owner branches in this matrix; only the exact fetched Blob SHAs are asserted. Issue #21's G phase 3.7 pin is an older Blob (d6d18684ba8a31a538e2e719be3f6e1b715cadf8); the current fetched branch file is c1de241ec69834377d9b0e24aa4770a809796d4b. Do not carry older acceptance/pins forward.
 
+
+## 1A. Current branch heads and latest Phase 3.8 source pins / 当前分支 HEAD 与最新 Phase 3.8 来源 Pin
+
+| Owner | Current branch HEAD | Latest exact review artifact | Blob SHA | Finding |
+|---|---|---|---|---|
+| B | 2faf8ec38f14dba49e7263d7a60804dae1a74ee2 | phase-3.8.6-b-storage-serialization-anchor-nominal-types.md | e2bc4c8dde9706bfbe443269b702f1b5aa6965f6 | Approves per-authority nominal type boundary with clarifications; delegated role review, not independent human signature; L1/L2 only |
+| C | 2e8414f361b0b5d7de959be8a971aadc9e62d6a9 | phase-3.8.22-c-exact-review-h-authenticated-ingress-1.2.14-60-tests.md | 8fd6052cabf58a78962cc2e776398b2a40604bcd | Accepts H reference gate/test boundary; signer/attestation open; not crypto-frozen; 60 tests are deterministic callback orchestration evidence |
+| D | 76fcc92225666a11893b7241825261319edb621e | phase-3.8.13-d-review-h-outer-envelope-authenticated-ingress-gate.md | 152627e00b96355e2ff370acd643a51168c4c78c | Accepts H as upstream interface only; D Forget/RecoveryJoin authority unchanged |
+| E | ee098e14747d9915de5b3efb63b3a8dd77f670ed | phase-3.8.6-e-review-storage-serialization-anchor.md | 19d708bc29b6115d7bccb7d320781f452ee28b78 | Accepts anchor with E lifecycle conditions; implementation L4 open |
+| F | 1908ce4d233b20f7cafd00cb679affd01bd15174 | phase-3.8.6-f-review-storage-serialization-anchor.md | 122238146830db6188f00a9788e018a82bfb3f90 | Accepts anchor with read-path/cache conditions; implementation L4 open |
+| G | 3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe | phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md | 1894860c76336f8739d354b72beed3992cffd17e | Accepts bounded L1/L2 C/H consumer mapping with G-owned Applied conditions; NOT FROZEN; 38-method full-path fixture still uses ten deterministic authority test doubles |
+| H | 8e24342048d29ef29195b153b8b9ec53ba7c75d9 | phase-3.8.20-h-exact-c-envelope-p0-correction-and-json-pointer-mapping.md | 4ba7e1699215d02224f805a15484b1da2e40c03f | Corrects C P0 proof-locator omission; mapping candidate; executable authentication still open |
+| I | 2afe0e17f8c0929d9e642ccbe2cad112b5fd43a9 | phase-3.8.18-i-review-c-outer-envelope-signer-p0-trust-registration.md | b6d1ea45825a1c2090abfba42474814f02f073a3 | Accepts separation/signer ownership as candidate; crypto suite and trust registration not approved |
+| Storage | 431138e7c7af8bee716f3d8dcbc20114c046bd36 | phase-3.6.21-storage-v3.2.11-exact-version-bundle-manifest.md | 54a4f0dab7ab24f1f6fb01f8cc5c7da292f02c57 | Exact candidate bundle bound; C/H/I/D reviews recorded; fresh A review required; not jointly accepted/frozen |
+| A | 9bdf938b980413f592a4db9fe94f4bf2c299fb01 | phase-3.8.19-a-review-h-outer-envelope-authentication-c-i-boundary.md | e12cd7b5c79e2234178014243fd51f2e7d51272e | Accepts outer-envelope auth as a blocking architecture gap; do not freeze |
+
+## 1B. New cross-owner identity and ingress boundaries / 新的跨 Owner 身份与入口边界
+
+- B's per-authority serialization anchor review approves distinct physical nominal types, but the anchor is an implementation primitive, not a canonical domain entity or global counter.
+- C owns origin-signed message semantics and exact C envelope P0; H owns wire extraction/verification; I owns trust profile, issuer/key registration, revocation, anti-rollback and authorization; Storage owns durable authenticated ingress/replay persistence. H does not become C signer; I does not rewrite C P0; a gateway attestation is distinct from C origin signature.
+- The H 1.2.14 / CSubmitOutcome 1.0.1 reference ingress path is not production authentication. H 60-test CI uses deterministic callback doubles; G's 38-method full-path fixture also uses deterministic authority doubles. H P0 extraction/signature verification, production trust registry, durable replay, C envelope signer profile and Storage durable ingress are still open.
+- A's current Phase 3.8.19 review explicitly marks this as a blocking architecture gap. This issue supersedes older summaries that described only a 42-test local validator gap; the 42-test scope remains valid only for its original limited C-object/local-validation claim.
+
+- B 的 per-authority Serialization Anchor 复审批准不同物理名义类型，但 Anchor 属于实现原语，不是规范领域实体或全局计数器。
+- C 负责 Origin-signed Message 语义和精确 C Envelope P0；H 负责 Wire 提取/验证；I 负责 Trust Profile、Issuer/Key 注册、撤销、Anti-rollback 和授权；Storage 负责认证后持久 Ingress/Replay。H 不成为 C Signer；I 不得改写 C P0；Gateway Attestation 与 C Origin Signature 不同。
+- H 1.2.14 / CSubmitOutcome 1.0.1 Reference Ingress 路径不是生产认证。H 60 项 CI 使用确定性 Callback Double；G 的 38 项 Full-path Fixture 也使用确定性 Authority Double。H P0 提取/签名验证、生产 Trust Registry、持久 Replay、C Envelope Signer Profile 和 Storage Durable Ingress 仍未完成。
+- A 当前 Phase 3.8.19 复审明确将其列为阻塞性架构缺口。这一问题更新了旧摘要：42 项本地 Validator 测试仅在其原始 C-object/本地校验范围内有效。
+
 ## 2. Semantic matrix / 语义矩阵
 
 | Concept | B canonical position | Owner-local position | Status / conflict |
@@ -53,6 +81,8 @@ Branch tips/commit SHAs are NOT VERIFIED for the live owner branches in this mat
 | Forget / Forgotten / Deleted / Purged | Memory Forgotten is lifecycle state; ForgetOperation distinct; logical suppression not physical purge | D operation/fence/barrier; I global completion/retention; Storage/backup physical erasure; G/F/H local cleanup | **BLOCKING** for global completion/physical purge; no single owner can claim global success |
 | Event Time / Observed At / Recorded At / Valid Time | Distinct temporal dimensions; valid-time and record-time history retained | C/E capture source times; D commit cursor; Storage transaction time | Compatible conceptually; exact Record vs Transaction Time field authority and fuzzy-time encoding OPEN |
 | Provider Outcome / Final Request Submitted | Execution/provider boundary evidence is not a generic Event or protocol ACK | C alone emits actual provider submit outcome; H transports; G consumes | Compatible; provider outcome semantics and exact causal order remain C/I/D/Storage dependencies |
+| Outer Envelope Authentication / C Origin Signature | Authentication proof and origin-signed message semantics are separate from ActorRef/PrincipalRef payload references | C owns origin signer/P0; H extracts/verifies wire; I owns profile/trust/key lifecycle; Storage owns durable authenticated ingress/replay | **BLOCKING**: H reference gate only; C signer/P0 candidate; I crypto suite/trust registration not approved; A says do not freeze |
+| Serialization Anchor / SerializationRevision | Physical per-authority serialization primitive, not a canonical domain identity or global clock | B approves nominal type boundaries; Storage owns physical anchor; E/F accept with conditions; D/I/C/COC counters remain distinct | HIGH: Storage v3.2.11 exact candidate bundle not jointly accepted/frozen; fresh A review and L4 DB/HA/recovery proof open |
 | Audit / Governance Decision / Consent / Forget Request | Distinct records, not Memory lifecycle flags | I owns policy, approvals, audit and global Forget | B must not absorb these into generic state; I36 external approvals still blocked |
 
 ## 3. Exact owner boundaries / Owner 权威边界
@@ -89,6 +119,8 @@ Branch tips/commit SHAs are NOT VERIFIED for the live owner branches in this mat
 8. **XOWN-HIGH-004 — Context identity/state:** ContextVersion, F Working Set, E compiler input bundle, MemoryVersion and Applied are distinct; exact G schemas/predicates still require consumer acceptance.
 9. **XOWN-MED-001 — Provenance identity/cycles:** edge record vs provenance object granularity and graph cycle policy remain open.
 10. **XOWN-MED-002 — Source/Observation/Evidence:** confirm whether Source is first-class entity or typed origin ref; Evidence has its own identity.
+11. **XOWN-BLOCK-005 — Outer-envelope authenticated ingress:** C origin signer/P0, H extraction/verification, I trust/profile/key lifecycle and Storage durable replay must close as one exact-version boundary; current H reference gate and local test doubles are insufficient. Owner authority C/H/I/Storage; A integration; blocks Gate A/B and production ingress.
+12. **XOWN-HIGH-005 — Per-authority serialization anchor:** B-approved nominal type distinctions are not a physical implementation decision; Storage v3.2.11 is not jointly accepted/frozen, and fresh A review plus L4 proof are required.
 
 ## 6. B3 gate / B3 门禁
 
