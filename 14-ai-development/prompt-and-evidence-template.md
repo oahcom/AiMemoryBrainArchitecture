@@ -162,6 +162,19 @@ Each completed implementation task should contain, as applicable:
   ai-development-standard.md
   iteration-lifecycle.md
   prompt-and-evidence-template.md
+  prompts/
+    global/
+      chatgpt-session-contract-v1.md
+    owners/
+      A/owner-session-v1.md
+      B/owner-session-v1.md
+      C/owner-session-v1.md
+      D/owner-session-v1.md
+      E/owner-session-v1.md
+      F/owner-session-v1.md
+      G/owner-session-v1.md
+      H/owner-session-v1.md
+      I/owner-session-v1.md
   work-items/
     INDEX.md
     AID-YYYY-NNN/
