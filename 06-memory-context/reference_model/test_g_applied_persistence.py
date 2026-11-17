@@ -138,6 +138,12 @@ class AppliedStore:
                 conn.commit()
                 return receipt
 
+            serving_enabled = conn.execute(
+                "SELECT value FROM g_meta WHERE key='serving_enabled'"
+            ).fetchone()[0]
+            if serving_enabled != 1:
+                raise Rejected("restore fence active: new Full Applied commit is blocked")
+
             seq = conn.execute(
                 "SELECT value FROM g_meta WHERE key='ledger_highwater'"
             ).fetchone()[0] + 1
@@ -425,6 +431,21 @@ class GAppliedPersistenceReferenceTests(unittest.TestCase):
             owner_currentness={name: True for name in REQUIRED_AUTHORITIES},
         )
         self.assertEqual(result, "FENCED")
+        self.assertFalse(self.store.current_use_allowed("g-applied:context-1:delivery-4:request-9"))
+
+    def test_17_restore_fence_blocks_new_full_applied_commit(self):
+        self.commit()
+        result = self.store.reconcile_restore(
+            snapshot_epoch=1, snapshot_highwater=0,
+            trusted_epoch=2, trusted_highwater=1,
+            owner_currentness={name: True for name in REQUIRED_AUTHORITIES},
+        )
+        self.assertEqual(result, "FENCED")
+        with self.assertRaisesRegex(Rejected, "restore fence active"):
+            self.commit(identity_key="g-applied:new-context:new-delivery:new-request")
+        snap = self.store.snapshot()
+        self.assertEqual(len(snap["ledger"]), 1)
+        self.assertEqual(len(snap["outbox"]), 1)
         self.assertFalse(self.store.current_use_allowed("g-applied:context-1:delivery-4:request-9"))
 
 if __name__ == "__main__":
