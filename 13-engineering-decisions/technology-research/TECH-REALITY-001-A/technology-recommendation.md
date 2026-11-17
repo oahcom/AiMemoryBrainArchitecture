@@ -134,3 +134,80 @@ PostgreSQL 18.7 Prepared-XID 档案（Blob `0aabf66848dc97deee028c571183c0d72040
 - 将 PostgreSQL 18.7 视为 JF-10 Prepared-XID 桥接的领先引擎能力候选，不是已批准的生产 Canonical Authority 数据库。
 - SQLite WAL 仅保留为适用于单写者、同主机事务组的有限本地原型候选；不得声称其满足跨外部 I Sequencer 的 JF-10 Prepared-XID 恢复。
 - 在真实 Adapter、D/I/COC 集成、权威读路径、故障切换/隔离、备份恢复和 Operator/Runbook 证据通过前，不批准数据库产品或生产拓扑。
+
+## 9. 完整中文版本 / Chinese Version
+
+### 9.1 决策边界
+
+本文件只给出系统级候选方案，不批准 ADR、不冻结依赖、不选择正式部署拓扑，也不覆盖 B–I/Storage 的领域决策。所有建议必须经过 Owner 审查和原型验证。
+
+### 9.2 方案一：最小可行技术栈（Profile S）
+
+- Core：Rust + Tokio。
+- Storage：SQLite + WAL，通过 SQLx 或 rusqlite（二选一），Blob 使用内容寻址本地文件系统 + SQL Metadata。
+- Event：SQL Transactional Outbox + 有界 DB Worker。
+- Workflow：DB Work Table、Lease、Fence、Retry；只有 DB Worker 不足时再评估 Temporal/Restate。
+- Search：结构化 SQL + FTS5；FTS5 不足再评估 Tantivy。
+- Vector：首个纵向切片不引入，只有检索评估证明收益后才选一个。
+- Cache：Moka 可选且有界；在失效契约证明前不缓存更安全。
+- Agent：Brain 自有 Provider Port 和 Adapter；Rig 仅作为 Agent 侧可选库。
+- Protocol：H 定义版本化 JSON + 认证 HTTP/本地 IPC 候选。
+- Security：I 拥有身份/权限/撤销；可评估嵌入式 Cedar。
+- Observability：Rust tracing、结构化脱敏日志、基础 Metrics。
+- Deployment：单一 Rust 进程，可选推理进程；systemd/OCI，不要求 Kubernetes。
+- Backup：SQLite Backup API/一致快照 + Blob Manifest/Checksum + 隔离恢复 + Forget Replay。
+
+限制：SQLite WAL 只有单写者、同主机。只有 D/E/Storage 关键竞争能在同一事务/锁模型中线性化，且 Profile S 实测通过时才可行。SQLite 目前没有跨外部 I Sequencer 的 JF-10 Prepared-XID 恢复证明。
+
+### 9.3 方案二：平衡型技术栈（Profile M）
+
+- Rust + Tokio 模块化单体；按需要拆独立 Worker。
+- PostgreSQL 作为多写者/远程访问时的事务权威。
+- 内容寻址 Blob + Manifest。
+- PostgreSQL Outbox + Worker；独立 Consumer/Replay/复制需求成立时再评估 NATS。
+- 长任务先用 SQL Durable Jobs；只有复杂 Timer/Retry/独立 Worker 有实测价值才选择 Temporal 或 Restate。
+- PostgreSQL 结构过滤 + FTS5（SQLite 本地配置）或 Tantivy。
+- pgvector 或 Qdrant 作为派生投影（二选一）；LanceDB 需 Beta 风险评估。
+- Moka 本地 Cache；Redis 只有跨进程共享缓存有实测价值才引入。
+- BMCP 版本化协议，HTTP/JSON 初始候选；gRPC 只有流式/SDK 需要时。
+- Cedar 嵌入式候选；OpenFGA/SpiceDB 只有关系授权成为独立服务需求时。
+- tracing + OTel Collector，Prometheus/Grafana 可选。
+- Brain Core + 可选 Compiler/Index/Inference Worker；OCI/systemd。
+- PostgreSQL PITR/备份 + Blob Snapshot + Index Rebuild + Forget/Revocation Restore Gate。
+
+限制：PostgreSQL 多写者能力不解决跨服务原子性、Blob 原子性、外部 Provider 或 Forget 目标完整性。
+
+### 9.4 方案三：高扩展型技术栈（Profile L）
+
+- Rust 独立服务，严格 Contract 和独立 Owner。
+- PostgreSQL 按权威域持久化；需要时 Partition/Replica。
+- Object Storage 保存不可变 Evidence/Blob。
+- Kafka/Redpanda 或 NATS JetStream 按 Partition、Replay、Consumer 需求选择。
+- Temporal 或 Restate 承担 Durable Workflow。
+- Tantivy/OpenSearch/Qdrant 作为独立派生索引，避免多个系统重复承担同一检索职责。
+- Qdrant Cluster 仅在语料、QPS、可用性需要时采用。
+- Moka 本地 Cache；Redis 仅在共享热点有实测收益时。
+- Agent Gateway + 多语言 SDK；BMCP over gRPC/HTTP2 或等效协议。
+- OpenFGA/SpiceDB 用于关系授权，OPA 用于策略分发，Cedar 可用于本地 Enforcement；由 I 决定。
+- OTel Collector、Prometheus、Grafana、集中式 Trace/Log。
+- OCI 容器；Kubernetes 只有多节点运维确实需要时采用。
+- DB PITR/复制、Object Versioning、Index Snapshot/Rebuild 和跨区域恢复演练。
+
+限制：研发、运维和分布式一致性成本最高，当前没有工作负载证据证明必要。
+
+### 9.5 三套方案比较
+
+| 维度 | 最小型 | 平衡型 | 高扩展型 |
+|---|---|---|---|
+| 研发复杂度 | 低–中 | 中–高 | 很高 |
+| 运维复杂度 | 低 | 中–高 | 很高 |
+| 一致性风险 | 单 DB 边界证明后最低 | 外部服务和投影增多 | 分布式权威最多，最高 |
+| 性能潜力 | 本地中等 | 高 | 大规模潜力高 |
+| 部署成本 | 最低 | 中 | 最高 |
+| Rust 生态成熟度 | Core/Storage 高，向量/推理各异 | 高–中 | 各服务/SDK 混合 |
+| 迁移成本 | 初始最低 | 中 | 高 |
+| 适用阶段 | Profile S 原型 | Profile M 演进 | Profile L 有证据后 |
+
+### 9.6 条件性建议
+
+Profile S 应先试验本地模块化单体，因为它最少独立故障域和事务域；这不是正式选型。若 D/E/Storage Fence/Publication 无法在 SQLite 安全实现，应评估 PostgreSQL 或调整物理事务边界，不得削弱 Forget。当前 Storage ADR 已选择每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain 作为 v1 序列化档案；PostgreSQL 18.7 是 JF-10 Prepared-XID 能力的领先资格候选，但不是生产 DB 批准。Profile M 可在多写者/远程访问被测量证明后选择 B；Profile L 无当前证据支持。
