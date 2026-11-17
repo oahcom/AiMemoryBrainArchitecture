@@ -42,3 +42,8 @@ The H membership proof does not replace D's CanonicalProducerAdmissionProof, DGa
 ## 4. D disposition
 
 **ACCEPT WITH CONDITIONS** for the exact candidate wire contract. The D proof contract is not production-approved, no D signer or ledger adapter is deployed, and no D race/fault conformance PASS is claimed. Forget completion and production activation remain unauthorized.
+
+
+## 5. H semantic payload validator follow-up
+
+H now has an exact-payload validator that binds the proof to the D owner row and snapshot and requires the D-authoritative signature verifier callback. Exact module Blob: `e26379d38825ee13d15f652d3bd019c4091da37d`; RecoveryJoin tests Blob: `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a`. H CI Run `44051676055` passed 288 tests (266 passed, 22 skipped, 0 failed). The callback remains TEST-ONLY; D's real signer, ledger query and anti-rollback remain unimplemented. D's prior ACCEPT WITH CONDITIONS is unchanged.
