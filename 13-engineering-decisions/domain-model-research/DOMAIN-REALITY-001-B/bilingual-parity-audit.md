@@ -279,3 +279,37 @@ This section supersedes the earlier 9274e28 and other historical snapshot tables
 - B6 仍为 **INDEPENDENT_REVIEW_PENDING**。
 - 22 文件 Blob 表仅证明文件身份/读回，不证明翻译完整性或语义等价。
 - Schema 验证及可执行 Unit/Integration/Property/Fault-injection 测试仍为 **NOT RUN**。
+
+
+## 8. Cross-owner conflict remediation parity refresh / 跨 Owner 冲突登记后双语 Pin 刷新 — 2026-11-18
+
+Following the A/Storage successor reconciliation, four package files were updated and re-read. The other 17 non-audit package files retain the exact Blob/line values in §7. This audit file's pre-update self Blob was `588fd798ba2b2eaf5888e249d0c2ce2f67628100`; it must be read again after this write for its resulting Blob.
+
+A/Storage 后继版本协调后，研究包内四份文件已更新并重新读回。其余 17 份非审计文件保持 §7 中记录的精确 Blob/行数。本审计文件更新前的自身 Blob 为 `588fd798ba2b2eaf5888e249d0c2ce2f67628100`；本次写入后必须再次读取以获得最终 Blob。
+
+| File / 文件 | New exact Blob SHA / 新精确 Blob SHA | Lines / 行数 | Status / 状态 |
+|---|---|---:|---|
+| README.md | `932a1affb2d4dee9181e8f7b3688eddff3cb4d2d` | 264 | Author-side conflict/gate mirror updated; independent parity pending |
+| baseline-currentness-and-owner-source-audit.md | `3ca5468171a81dda8bb3ed7bf770052642a9bacb` | 382 | Live successor source reconciliation and B-CONFLICT-017 evidence added |
+| cross-owner-canonical-semantics-matrix.md | `a7c38ec2de0a289cfd936159b8bee68bed55c30e` | 246 | H/I 1.2.15, Storage v3.3.1 and A Phase 3.12.1 boundaries added |
+| domain-semantics-conflict-register.md | `20c63d5242526adcc4b4ee34b6b272c0949956af` | 113 | B-CONFLICT-017 added as BLOCKING / OPEN |
+| bilingual-parity-audit.md | `588fd798ba2b2eaf5888e249d0c2ce2f67628100` (pre-update self Blob) | 282 | Self Blob changes on this update; final readback required |
+| evidence/official-reference-validation.md | `ef4a0cf448e474b08bf5ff6b80c32dbae705b002` | 208 | 2026-11-18 official-source revalidation retained |
+
+### 8.1 New bilingual content / 新增双语内容
+
+The new conflict finding, exact source pins, authority boundaries, successor-version caveats and closure conditions were authored in English and Chinese in the same change set. This is an author-side bilingual mirror only. It has not been independently checked clause by clause.
+
+新增冲突发现、精确来源 Pin、权威边界、后继版本限制及解除条件均在同一变更集中以中英文编写。这仅是作者侧双语对照，尚未经过独立逐条核验。
+
+### 8.2 Gate / 门禁
+
+- B-CONFLICT-017 is BLOCKING / OPEN. B3 remains NOT PASSED.
+- B5 remains BLOCKED / NOT PASSED pending independent semantic parity review of all normative clauses, tables and status values.
+- B6 remains INDEPENDENT_REVIEW_PENDING.
+- Exact Blob readback does not establish semantic equivalence, Owner acceptance or independent review.
+
+- B-CONFLICT-017 为 BLOCKING / OPEN。B3 仍 NOT PASSED。
+- B5 仍 BLOCKED / NOT PASSED，等待对全部规范条款、表格和状态值进行独立语义对等审查。
+- B6 仍 INDEPENDENT_REVIEW_PENDING。
+- 精确 Blob 读回不代表语义等价、Owner 验收或独立审查。
