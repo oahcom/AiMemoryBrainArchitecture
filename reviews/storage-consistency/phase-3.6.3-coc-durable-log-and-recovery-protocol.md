@@ -641,3 +641,36 @@ The 1.2.15 pin in §18 remains historical evidence only. **H Unified 1.2.16 is t
 I PermissionEpoch 是不透明的 I-local Authority Value，绝不得与 D 或 Storage Position 做数值比较。ProducerDomainInventoryEpoch 是独立的 I Inventory Currentness Value。D Dependency-closure Cursor/Root 绑定精确冻结的依赖清单。C Provider Idempotency Namespace 和 Final-request-boundary Generation 绑定 C 的 Provider Attempt 与 Final Request Boundary 状态。Scope Generation 独立冻结，并同时纳入 Owner Snapshot 和 Snapshot Root 绑定。
 
 §18 的 1.2.15 Pin 仅保留为历史证据。**H Unified 1.2.16 是当前结构候选。** 结构测试不证明实时 I/D/C Owner Ledger 已生成/签署这些值，不证明 H 已语义验证 Membership/Root Proof，也不证明 COC 已部署持久 Quorum 或物理 JF-10 已达到生产就绪。
+
+
+## 20. Owner Gate Release snapshot-completeness correction — H Unified 1.2.17
+
+This section supersedes the H schema pin and Owner Gate Release field mapping in §19. It does not change the owner snapshot and union-manifest requirements in §§17–19.
+
+Storage §17.4 requires each I/D/C Owner Gate Release to bind the exact frozen owner snapshot, scope generation, anti-rollback anchor, request/admission ledgers and complete owner-specific currentness values. H Unified 1.2.16 carried the gate generation and request/admission high-waters/digests/roots, but did not structurally require the owner snapshot attestation, scope generation, anti-rollback anchor, full owner-specific high-water object/digest or owner ledger root in the release itself.
+
+H Unified schema artifact revision **1.2.17** / wire version **1.3.0** corrects this:
+- Schema Blob: `1b8f44675f30919764481d33755c566ef5cf1ea8`;
+- Dedicated structural test Blob: `861fbdb0919d33cdaa9500108f2b30f0ca927f89`;
+- Exact H code Head: `3e3968cd0b32fbc6170472975e08e8dc39093dda`;
+- H Recovery Cutoff workflow [#44191987303](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44191987303): **329 tests PASS**, including 12 dedicated 1.2.17 checks.
+
+The OWNER_LOCAL_GATE_RELEASE message now requires exact owner snapshot ref/digest, owner snapshot attestation ref/digest, owner ledger root, scope generation, anti-rollback anchor, the full typed I/D/C owner-specific high-water object and its digest, in addition to the existing gate generation, request/admission high-waters/counts/digests/roots, exact Batch/Manifest refs/positions/digests, reconciliation root, owner signature and COC commit proof.
+
+The 1.2.16 pin in §19 remains historical evidence only. **H Unified 1.2.17 is the current structural candidate.** Structural checks do not prove real owner signatures, current key status, live owner-ledger completeness, H semantic verification, COC quorum deployment or physical JF-10 behavior.
+
+### 中文：Owner Gate Release Snapshot 完整性修正
+
+本节取代 §19 的 H Schema Pin 和 Owner Gate Release 字段映射，不改变 §§17–19 中的 Owner Snapshot 与 Union Manifest 要求。
+
+Storage §17.4 要求每个 I/D/C Owner Gate Release 绑定精确冻结的 Owner Snapshot、Scope Generation、Anti-rollback Anchor、Request/Admission Ledger 和完整 Owner-specific Currentness Values。H Unified 1.2.16 虽然携带 Gate Generation 与 Request/Admission High-water/Digest/Root，但未在 Release 本身结构性强制 Owner Snapshot Attestation、Scope Generation、Anti-rollback Anchor、完整 Owner-specific High-water Object/Digest 或 Owner Ledger Root。
+
+H Unified Schema Artifact Revision **1.2.17** / Wire Version **1.3.0** 已修正：
+- Schema Blob：`1b8f44675f30919764481d33755c566ef5cf1ea8`；
+- 专用结构测试 Blob：`861fbdb0919d33cdaa9500108f2b30f0ca927f89`；
+- H 精确代码 Head：`3e3968cd0b32fbc6170472975e08e8dc39093dda`；
+- H Recovery Cutoff Workflow [#44191987303](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44191987303)：**329 项测试 PASS**，其中包括 12 项 1.2.17 专用检查。
+
+OWNER_LOCAL_GATE_RELEASE Message 现在强制要求精确 Owner Snapshot Ref/Digest、Owner Snapshot Attestation Ref/Digest、Owner Ledger Root、Scope Generation、Anti-rollback Anchor、完整类型化 I/D/C Owner-specific High-water Object 及其 Digest；同时保留原有 Gate Generation、Request/Admission High-water/Count/Digest/Root、精确 Batch/Manifest Ref/Position/Digest、Reconciliation Root、Owner Signature 和 COC Commit Proof。
+
+§19 的 1.2.16 Pin 仅保留为历史证据。**H Unified 1.2.17 是当前结构候选。** 结构检查不证明真实 Owner Signature、当前 Key Status、实时 Owner Ledger 完整性、H Semantic Verification、COC Quorum 部署或物理 JF-10 行为。
