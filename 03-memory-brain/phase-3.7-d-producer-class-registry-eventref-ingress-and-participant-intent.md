@@ -102,3 +102,34 @@ D 准入时绑定 PublicationOperationId/规范请求摘要、ProducerWorkItemId
 - D 只有在权威 Storage Outcome 回读后才签发终态/清除证明。Queue/Worker/Transport ACK 均不是终态证据。
 
 I Gate 独立且必须合取满足：I 的单次授权 Receipt/Terminal Decision 必须绑定相同 PublicationOperationId/Digest 和精确 Storage Visibility Participant。D PublicationParticipantRef 不授予 I Authorization；I COMMIT_WON 也不能绕过 D Fence。
+
+
+## 11. Crash-window correction — Storage participant precedes D publication admission
+
+The exact crash-window review requires the durable hidden StorageVisibilityParticipantRef to exist before D admits PublicationParticipantRef. This supersedes any earlier sequence that placed D admission first.
+
+Required order:
+1. Storage creates a durable, hidden StorageVisibilityParticipantRef bound to PublicationOperationId/digest, WorkItemId, artifact/version, AttemptId/LeaseId, complete dependency digest and private stage identity. No visibility or I authorization is implied.
+2. D admits PublicationParticipantRef only when it can bind that exact durable StorageVisibilityParticipantRef. D records the publication as unresolved in its fence/barrier domain.
+3. I consumes its single-use CommitAuthorizationReceipt bound to both exact participant refs and the immutable publication tuple.
+4. Storage performs final visibility commit only after both D and I proofs validate.
+5. D/I close their respective participants only after authoritative Storage COMMITTED_VISIBLE or NO_PUBLICATION evidence.
+
+If a crash occurs after Storage prepare but before D admission, the Storage participant remains private and cannot publish. It is not a D barrier participant. If D admission succeeds, the Storage participant already exists and can be resolved by stable ID/digest. Missing Storage state after successful D admission is a ledger inconsistency and UNKNOWN, never proof of abort.
+
+D's PublicationParticipantRef MUST bind StorageVisibilityParticipantRef as an exact typed field. It remains distinct from C ParticipantIntentRef and Storage PreparedParticipantRef.
+
+### 中文规范
+
+精确崩溃窗口审查要求：持久化隐藏的 StorageVisibilityParticipantRef 必须先于 D 接受 PublicationParticipantRef。此前任何将 D Admission 放在前面的顺序均由本节替代。
+
+强制顺序：
+1. Storage 先创建持久化、隐藏的 StorageVisibilityParticipantRef，绑定 PublicationOperationId/Digest、WorkItemId、Artifact/Version、AttemptId/LeaseId、完整 Dependency Digest 和 Private Stage 身份。不代表 Visibility 或 I Authorization。
+2. D 只有在能够绑定该精确且已持久化的 StorageVisibilityParticipantRef 时，才接受 PublicationParticipantRef，并将发布登记为 Fence/Barrier 域内未解决操作。
+3. I 单次消费绑定两个精确 Participant Ref 和不可变 Publication Tuple 的 CommitAuthorizationReceipt。
+4. 只有 D/I 两份证明均验证通过后，Storage 才执行最终 Visibility Commit。
+5. D/I 只有在取得权威 Storage COMMITTED_VISIBLE 或 NO_PUBLICATION 证据后，才分别关闭自己的 Participant。
+
+若 Storage Prepare 后、D Admission 前发生崩溃，Storage Participant 保持 Private 且不能发布；它尚不是 D Barrier Participant。若 D Admission 成功，则 Storage Participant 必须已经存在，可按稳定 ID/Digest 恢复。D Admission 成功后 Storage 状态缺失属于 Ledger Inconsistency，结果为 UNKNOWN，绝不能据此推断 Abort。
+
+D 的 PublicationParticipantRef 必须将 StorageVisibilityParticipantRef 作为精确类型字段绑定。它仍不同于 C ParticipantIntentRef 和 Storage PreparedParticipantRef。
