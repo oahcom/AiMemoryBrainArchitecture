@@ -116,3 +116,8 @@ The H 66/66 CI result proves only that the checked-in Python HRC/JPF/WIRE/SCHEMA
 C ProviderIdempotencyKey remains a C-owned namespace and cannot be replaced by Storage PreparedTransactionGID or PostgreSQL native XID. C provider outcome remains C-owned. I/D/C each independently own their gate-release decisions. Storage/COC cannot issue them.
 
 **Current disposition:** logical JoinProof accepted with enumerated amendments in delegated role review; physical topology and integrated conformance remain OPEN. No DB topology selection, implementation PASS, production activation or freeze is claimed.
+
+
+## 8. Current Storage exact review pin / Storage 当前精确审查版本
+
+The latest readback of the Storage Phase 3.8.2 exact review is Blob `2726f0a2a5168f126d25eb48b857d8921a09031e`; the latest bidirectional JoinProof contract is Blob `668faeb20e3e9cb907a8d1061635b12162f3dbe2`. The topology ADR remains `080433f8e13a500522bc2754da64057edb0ae9d8`, ADR-BLOCKED / NO TOPOLOGY SELECTED. H CI [44040312711](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040312711) is 66/66 candidate PASS, not live Storage/COC integration. T1–T8 and STORAGE-RJ-01..05 remain OPEN.
