@@ -234,3 +234,30 @@ This addendum updates the current-state source pin only; all earlier observation
 - AID-2026-001 的初始状态对账已存在于该 `main` Head。本 PR 剩余变更仅刷新追加式当前 main 证据快照，并保留 PR #42/#72 的准确合并事实。
 - PR #132、#136 和 #133 已进入当前 mainline，详见前一条对账记录。
 - AID-2026-001 仍为 ARCH/R3、REMEDIATION_IN_PROGRESS。新独立审查、独立集成审查、Owner D/I 批准、其他执行方确认、可复现 R3 合约测试、YAML/Schema 验证及 Acceptance 仍按实际情况保持 PENDING / NOT RUN / NOT EVIDENCED；生产激活仍 NOT AUTHORIZED。
+
+
+---
+
+## PR #141 — Forget reference-model regression and exact-Head CI / PR #141 — Forget 参考模型回归与精确 Head CI（2026-11-18）
+
+- Work Item / Issue: AID-2026-001 / Issue #41.
+- PR: [#141](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/141).
+- Branch: `test/aid-2026-001-reference-model-coverage-22`.
+- Exact PR Head: `d5702426147456f0bf00e0aec9ad5916200cebef`.
+- Merge commit: `9edc746c001f1f82950edad7ce130342db53ff67`.
+- Model workflow: [run #44188134319](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44188134319), SUCCESS; job log confirms 24 tests / OK and checks out the exact PR Head SHA.
+- GOV-DOC-001 runs #44188134357 and #44188136170: SUCCESS on the same exact Head.
+- Model changes include nine additional regression cases, including structured JSON idempotency-key encoding to prevent delimiter-collision ambiguity and rejection of vacuous completion from an empty canonical D-domain inventory.
+- Current main Blob pins after merge: model `cd623d67400c8870a729f79f88a4413f37bb335a`; tests `633e12db094b703b5f4a431950c3df369dababb0`; README `7aa163719978f253685931b2eb001bb6a7228c6f`; workflow `9f261aa8c00b1a144cee50c049bae8d437fd0eea`.
+
+### Evidence ceiling / 证据边界
+
+This is a non-production executable reference model only. It does not execute DFI-001…DFI-022 against production services and does not prove production D/I authority wiring, persistent distributed fencing, concurrent races, replica recovery, backup restore, or runtime conformance. Owner D/I approvals, other executor acknowledgements, distinct integration review, fresh independent review and acceptance remain pending. Issue #7 remains the authoritative blocker for identifying the runtime implementation repository and accountable engineering owner. Production activation remains NOT AUTHORIZED.
+
+Review disclosure: same-author technical review under the user's owner-directed integration instruction; no independent Owner approval is claimed.
+
+### 中文结论
+
+PR #141 已合并至 main。Forget 参考模型扩展为 24 项测试，精确 PR Head 的模型测试与双语文档门禁全部成功。新增结构化 JSON 幂等键编码，消除分隔符拼接导致的身份元组碰撞风险；空 D 域规范目标清单不能再被误判为完成。
+
+该结果仅属于非生产可执行参考模型，不是 DFI-001…DFI-022 生产测试，不证明 D/I 权威接线、分布式持久化、并发/恢复、备份还原或运行时符合性。Owner D/I 批准、其他执行方确认、独立集成审查、当前 Head 独立审查和正式验收仍待完成；生产激活仍未授权。
