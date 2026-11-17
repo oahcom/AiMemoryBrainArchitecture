@@ -37,6 +37,6 @@ Not allowed: canonical production writes, protected production-data retrieval, f
 
 ## Status transitions
 
-ARCHITECTURE_NOT_READY may advance to ARCHITECTURE_READY_WITH_CONDITIONS only after every non-waivable semantic/authority prerequisite is closed or explicitly remains a Gate-blocking item under an approved bounded scope. ARCHITECTURE_READY_FOR_IMPLEMENTATION requires the implementation authority, owner contracts and implementation-entry proofs. ARCHITECTURE_READY_FOR_FREEZE requires G1–G8 and all relevant Owner decisions/evidence. None of these states implies production authorization.
+ARCHITECTURE_NOT_READY may advance to ARCHITECTURE_READY_WITH_CONDITIONS only after every non-waivable semantic, authority, atomicity and security prerequisite required for the stated architecture scope is satisfied; only fully recorded non-blocking residual conditions may remain. A Gate-blocking P0/P1 item cannot be re-labelled as an accepted condition. ARCHITECTURE_READY_FOR_IMPLEMENTATION additionally requires the implementation authority, exact Owner contracts and implementation-entry proofs. ARCHITECTURE_READY_FOR_FREEZE requires G1–G8 and all relevant Owner decisions/evidence. None of these states implies production authorization.
 
 See FINAL-A-002 and GATE-002.
