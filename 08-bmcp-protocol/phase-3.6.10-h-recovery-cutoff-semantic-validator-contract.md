@@ -164,3 +164,59 @@ The completion record is a COC observation, not an owner gate release or a subst
 This contract specifies H's semantic validation obligations. It does not implement the validators or establish canonical-byte/signature interoperability. H exact-version acceptance, I trust-policy approval, C/D/Storage owner review, A integration acceptance and executable tests remain required.
 
 No protocol/schema/cryptographic freeze, runtime conformance, deployment, production activation or JF-10 P0 closure is claimed.
+
+
+## 11. Executable candidate suite and RecoveryJoin wire candidate
+
+The following implementation artifacts have been added on the H branch:
+
+| Artifact | Path | Current Blob | Purpose |
+|---|---|---|---|
+| HRC semantic suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_hrc_semantics.py` | `794ac0c34aaad921e5d4a5bcc42b6601f7caf817` | 25 HRC unittest cases plus 12 JPF bidirectional-join cases |
+| Wire interop candidate suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_wire_interop.py` | `18e50957848178f3f35593b3e618dfa9b90cdb31` | Strict JSON parsing, duplicate-key rejection, absent/null distinction, canonical test bytes, counter encoding and critical-field behavior |
+| RecoveryJoin schema candidate | `08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.0.schema.json` | `9a0aa3f2b5165a12e4326437c95e91d9f1adbe75` | Strict structural candidate for both directional edge sets, owner snapshots, JF-10 sub-join and difference sets |
+
+Run the dependency-free candidate suite from the test directory:
+
+```bash
+python -m unittest -v test_hrc_semantics.py test_wire_interop.py
+```
+
+The HRC suite has 37 unittest methods: HRC-01..25 and JPF-01..12. The wire suite has 10 additional methods. The code is committed as an executable candidate, but **has not yet been run in CI or independently reproduced**. No PASS is claimed.
+
+### 11.1 Semantic model vs wire model
+
+The HRC test harness operates on a normalized semantic projection of the 1.0.4 message family. It is not a replacement for JSON Schema validation or signature verification. A production adapter must map exact wire fields into the normalized model without dropping:
+- request vs admission enumeration status and independent roots/counts;
+- owner-specific high-waters and namespace identity;
+- COC prefix position, participant entry digest and mandatory primary C admission ref;
+- additional I/D evidence edges and JF-10 participant tuple;
+- exact Batch, Manifest record and JoinProof identities/digests.
+
+The candidate helper digest profile named HRC-TEST-v1 is test-only. It MUST NOT be used as a production canonicalization or signature profile. Production canonical bytes and cryptographic trust require H approval and I security approval.
+
+### 11.2 Join Proof schema boundary
+
+The new RecoveryJoin schema is a candidate extension, not a change to recovery-cutoff 1.0.4 or JF-10 bridge 1.1.0. It carries separate OwnerAdmissionToParticipant and ParticipantToOwnerEvidence relations. The current recovery-cutoff 1.0.4 participant entry's owner_admission_ref remains the primary C admission anchor; it does not encode all I/D receipt, work, attempt, barrier or lineage evidence. Those are represented as explicit typed edges in RecoveryJoinProof.
+
+Schema validity alone cannot prove:
+- prefix completeness against the live quorum log;
+- owner-ledger completeness or empty-set truth;
+- signature/key status and anti-rollback;
+- both directional set equality;
+- currentness CAS at owner gate release;
+- same-XID I/Storage terminal coupling.
+
+Those remain runtime semantic validators and owner-authority checks.
+
+### 11.3 Required next implementation increment
+
+1. Add a wire-to-normalized adapter for all six 1.0.4 message families.
+2. Validate each raw message against its exact JSON Schema before semantic evaluation.
+3. Implement the six validators in §1 as production modules, with injected H canonicalization and I trust-verifier interfaces.
+4. Replace test-only digest helper with the exact H/I-approved profile only after formal approval.
+5. Run the 47 existing structural parser cases plus HRC-01..25, JPF-01..12 and WIRE-01..10 in CI.
+6. Add differential vectors in at least two independent implementations; compare canonical bytes, digests, signature input bytes, error codes and replay behavior.
+7. Publish raw CI logs, deterministic seeds, source/schema hashes and independent H/I/D/C/Storage review.
+
+Until then, status is **EXECUTABLE CANDIDATE COMMITTED / NOT RUN / NOT CONFORMANCE-VERIFIED**.
