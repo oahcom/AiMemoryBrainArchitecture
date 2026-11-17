@@ -1,6 +1,6 @@
 # 架构决策冲突登记册 — CONFLICT-002
 
-- 版本：1.0.0；基线 `6470f25ca23b8d35c06f60be2326867066418d18`。
+- 版本：1.0.0；基线 `6470f25ca23b8d35c06f60be2326867066418d18`（历史评估快照，非当前 Main）。
 - 状态：A 集成裁决；不替代 Owner 领域规范决策。
 
 | ID | 表面冲突/歧义 | A 裁决 | 权威/所需行动 | Gate |
@@ -25,3 +25,8 @@
 ## A 的明确边界
 
 A 决定全局顺序、范围、跨 Owner 兼容性和 Gate 证据充分性。A 不批准 B 领域语义、I 治理策略、D Canonical Lifecycle/Fence 语义、C Provider Outcome、G Applied 语义、H Wire Schema/Cryptography 或 Storage 物理拓扑。凡 Owner 决策或物理证明缺失，不得标记冲突已关闭。
+
+
+## 当前 Main HEAD
+
+本次发布独立观察到的当前 Main HEAD 为 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。此前的 `6470f25...` / `b372b62...` 均为历史评估快照，不是当前 Main。本套文件尚未完成针对当前 Main 的逐来源完整差异审计；G1 仍为 PARTIAL，所有 Gate/冻结限制继续有效。
