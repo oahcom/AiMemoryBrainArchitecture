@@ -225,7 +225,7 @@ This is a bounded repository-tree observation, not a claim that no tests exist o
 
 | ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
 |---|---|---|---|---|---|
-| UMR-038 | P0 | Reconcile CSubmitOutcome 1.0.1 / BMCP Unified 1.2.12 / RecoveryJoin 1.0.2 exact-version bundle and publish Storage successor manifest | C/H/Storage/I/D/A | OPEN — exact-version currentness mismatch; no common bundle acceptance | Session P cross-review: `00-governance/role-simulations/issue-20-c-h-storage-provider-outcome-wire-currentness-review-v0.1.0.md`. Storage v3.2.4 manifest Blob `6fc0bedaf5421d1be5a9ab5fb4d8cfab2871d7d7` pins C 1.0.0 Blob `b5e87...` and H Unified 1.2.12 Blob `a54f...`; current C 1.0.1 schema is `a631bc7...` and current H 1.2.12 schema is `9aa366d...`. C 3.8.10 Blob `b112444...` still describes 1.0.0; C 3.11.1 Blob `6fa67af...` introduces 1.0.1. H mapping Blob `fad28f1...` maps 1.0.1 but still pins old H schema Blob. Require C/H immutable amendments, Storage successor manifest and exact I/D/C/H/Storage/A re-review. Candidate CI PASS does not close this issue. |
+| UMR-038 | P0 | Complete current CSubmitOutcome 1.0.1 × H Unified 1.2.14 × RecoveryJoin 1.0.2 × I/D proof × Storage successor exact-version bundle; refresh C/H closure pins, issue Storage v3.2.7 and obtain fresh A review | C/H/Storage/I/D/A | OPEN — L1/L2 composition coherent, but no common current manifest or joint acceptance | Current audit: `00-governance/role-simulations/issue-20-current-bundle-exact-version-audit-v0.2.0.md`. H current mapping Blob `c196fdc7a9d88e344d37ba2810a9bce1803f8b96` binds H Unified 1.2.14 `09fcd1fa29fe24255fbd87cae79dafb406594a59`, CSubmitOutcome 1.0.1 `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`, RecoveryJoin 1.0.2 `4b664e3bce465499bcdfd93796349a4ba7074002`, RecoveryCutoff 1.0.5 `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`. C Phase 3.8.15 `28d604...` and H Phase 3.8.12 closure `d9c09...` still pin prior H mapping `8c5c22...`; C/H refresh proposals are in P only. I Phase 3.8.12 `fbd44...` and D Phase 3.8.8 `6aca...` accept current schema/mapping candidates. Storage v3.2.6 `dbfa...` still binds H 1.2.13; no Storage Owner-issued v3.2.7 or fresh A review exists. H CI: 22/22 run `44067666900`, later 25-test run `44068247661`, RecoveryCutoff 266 passed / 22 legacy skipped run `44068545618`; C candidate CI 19 tests run `44059935858`. Candidate CI does not close profile/trust, provider adapter, owner-ledger, COC quorum, Storage L4 or production gates. |
 
 
 ### Latest P/main compare — 2026-11-17
@@ -236,3 +236,15 @@ Live GitHub compare after the latest P coordination commits: `session-p-project-
 ### A-role currentness integration review — 2026-11-17
 
 P published `00-governance/role-simulations/issue-20-a-provider-outcome-currentness-integration-review-v0.1.0.md`. Simulated A disposition: **ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS; DO NOT FREEZE**. This is not independent A Owner approval. It confirms the C/H/Storage exact-version bundle mismatch, requires C/H immutable mapping corrections and a Storage-issued successor manifest, and keeps I profile registration, C provider adapter tests, H production authority callbacks and Storage deployment/topology evidence open. P CI run `44064079821` at commit `0806a3bf7746641fce111cd72cd7dcd640cc4275`: SUCCESS, 92 tests.
+
+
+### Current Provider Outcome bundle refresh — 2026-11-17
+
+P published the currentness audit and six role-simulation artifacts:
+- `00-governance/role-simulations/issue-20-c-phase-3.8.16-review-current-h-mapping-v0.1.0.md` — simulated C re-review of the one-line RecoveryCutoff pin correction.
+- `00-governance/role-simulations/issue-20-h-phase-3.8.13-current-mapping-closure-addendum-v0.1.0.md` — simulated H closure refresh to current mapping Blob `c196fd...`.
+- `00-governance/role-simulations/issue-20-d-phase-3.8.9-storage-anchor-schema-currentness-addendum-v0.1.0.md` — refreshes D's old H schema pin and records L1 Option A / L4 open distinction.
+- `00-governance/role-simulations/issue-20-storage-v3.2.7-successor-exact-version-bundle-manifest-draft-v0.1.0.md` — Storage successor draft, not Storage Owner-issued.
+- `00-governance/role-simulations/issue-20-a-current-1.2.14-bundle-integration-review-v0.1.0.md` — A-role conditional disposition, not independent A approval.
+
+The actual C/H/Storage/A branches were not modified. UMR-038 remains OPEN until C and H publish exact refreshes, Storage publishes v3.2.7, and A reviews that exact Storage manifest. I/D current structural reviews do not activate production trust or prove complete live owner ledgers. Storage ADR `bb544...` selects Option A only as L1 logical architecture; L4 engine/deployment remains OPEN.
