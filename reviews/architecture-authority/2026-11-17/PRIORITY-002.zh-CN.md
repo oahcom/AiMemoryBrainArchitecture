@@ -11,7 +11,7 @@
 | P0-02 | 关闭 Domain Identity、Fact/Claim、Evidence 和 Temporal 语义 | B；消费者采用 | 已批准 B ADR、精确 Blob、类型案例、消费者采用 | G2/G3 |
 | P0-03 | 关闭 I 安全治理、Trust、Revocation 和闭世界 Inventory | I + 外部权威 | 签署 I36-GOV-01..10 决策、InventorySealReceipt、Target/Backup/Recipient 枚举 | G2/G4 |
 | P0-04 | 关闭 D/E/I/Storage Admission、Lineage、Forget Fence 和 Visibility 组合 | D/E/I/Storage | 精确 Owner 决策、两种竞态顺序、Crash/ACK-loss/Stale Lease、UNKNOWN 时保持隐藏 | G3/G4 |
-| P0-05 | 选定并证明 Storage/COC/JF-10 物理拓扑 | Storage + A/COC + I/D | Gate A 完整；Gate B 持久 COC；Gate C 故障活动；同 XID 证明 | JF-10 A/B/C |
+| P0-05 | 完成已选定 L1 Option A 的 L4 物理 DB/COC/JF-10 证明 | Storage + A/COC + I/D | Gate A 完整；Gate B 持久 COC；Gate C 故障活动；同 XID 证明 | JF-10 A/B/C |
 | P0-06 | 关闭 C/G/H Final Request、Provider Outcome 和 Applied 合同 | C/G/H + I/D 消费者 | 精确合同批准、Provider Close-vs-Send、相同 Idempotency Key、负向符合性 | G2/G4 |
 | P0-07 | 有界 Durable Ingress → Canonical Commit/Cursor 纵向切片 | E/D/Storage；工程负责人 | Durable ACK、Outbox、幂等 Replay、Canonical Cursor 原子性、恢复证明；仅在 P0-02..05 后 | 实现准入 |
 | P0-08 | 安全 Structured/Lexical Retrieval 与 Forget-safe Index/Cache Rebuild | F + D/I/Storage | Ranking 前 Permission/Fence、陈旧投影抑制、Rebuild/Restore 证明 | 实现验证 |
