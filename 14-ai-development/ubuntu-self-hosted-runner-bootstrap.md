@@ -62,9 +62,19 @@ Use GitHub's displayed commands for the current runner release rather than pinni
 
 ## 4. Configure as a non-root service
 
-As `actions-runner`, configure the runner for this repository with a distinctive label such as `ai-worker`. Supply the one-time token interactively; do not put it in shell command history, process listings, or logs.
+As `actions-runner`, configure the runner for this repository with a distinctive label such as `ai-worker`. GitHub's runner configuration interface requires the short-lived token to be supplied to `config.sh`; when passed with `--token`, it is a command-line argument and may be visible to sufficiently privileged/local process inspection during the brief configuration window. Do **not** claim that this method hides the token from process listings.
 
-Example shape only (replace values interactively; never commit the token):
+Bound that exposure as follows:
+
+- Use a trusted administrative console on the host; do not perform registration while untrusted local users or jobs can inspect processes.
+- Issue the registration token immediately before configuration and use it once.
+- Disable shell history for the registration shell before entering the command; never paste the token into chat, tickets, logs, or Git.
+- Keep the configuration window as short as practical. Do not run unrelated jobs concurrently.
+- Do not enable shell tracing (`set -x`) or capture terminal transcripts during token entry.
+- After successful registration, unset any shell variables holding the token and close the temporary shell.
+- If exposure is suspected, remove/re-register the runner with a newly issued token and follow GitHub's credential revocation guidance.
+
+Example shape only; replace the placeholder locally and never commit or share the real token:
 
 ```bash
 ./config.sh --url https://github.com/oahcom/AiMemoryBrainArchitecture --token <ONE_TIME_TOKEN> --name ubuntu-primary-01 --labels ai-worker --work _work
@@ -93,7 +103,7 @@ Do not mark the host WORKER_ONLINE until all are evidenced:
 - [ ] Host identity verified out-of-band.
 - [ ] Disclosed password rotated.
 - [ ] Dedicated non-root runner account and directory ownership verified.
-- [ ] Runner visible Online with expected labels.
+- [x] Runner visible Online with expected labels — operator-confirmed; not independently queried by deployment controller.
 - [ ] Harmless diagnostic workflow succeeds.
 - [ ] Runner service survives reboot and reconnects.
 - [ ] No secrets in Git, logs, artifacts, Issues or PR comments.
@@ -112,4 +122,4 @@ Even after these pass, the status is only **RUNNER_ONLINE**. It is not proof of 
 
 ## Current status
 
-The operator confirmed Tailscale is enabled and active at `100.108.116.118`. The ChatGPT execution environment is not currently joined to that Tailnet and has not remotely accessed the host. Runner installation and all acceptance checks remain **NOT RUN**.
+The operator confirmed that Tailscale is enabled and active at `100.108.116.118`, and that the GitHub self-hosted runner is **Online** with its Ubuntu service started. These are operator-confirmed statements, not independent host/API observations by this deployment controller. The read-only diagnostic workflow, reboot recovery, untrusted-PR isolation, and emergency-stop acceptance checks remain **NOT VERIFIED**. The ChatGPT execution environment is not a Tailnet member and has not remotely accessed the host. A–I Owner workers remain **NOT DEPLOYED**.
