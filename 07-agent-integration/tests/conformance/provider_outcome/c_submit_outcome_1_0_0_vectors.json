@@ -1,5 +1,5 @@
 {
-  "schema_blob": "b0e324ffa46d7afb1bf4687ae51202e3e220ae67",
+  "schema_blob": "09725d3a90e4c130b38400e8e2d613f755f3806a",
   "schema_version": "1.0.0",
   "profile_status": "PROPOSED_NOT_REGISTERED",
   "signature_values": "TEST_FIXTURE_PLACEHOLDERS_NOT_CRYPTOGRAPHICALLY_VALID",
@@ -70,7 +70,8 @@
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "ProviderRequestRef": "Provider/request/55",
-        "ProviderReceiptRef": "Provider/receipt/55"
+        "ProviderReceiptRef": "Provider/receipt/55",
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
       }
     },
     {
@@ -138,7 +139,8 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "ProviderRequestRef": "Provider/request/55"
+        "ProviderRequestRef": "Provider/request/55",
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
       }
     },
     {
@@ -207,7 +209,8 @@
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "ProviderNoHandoffProofRef": "C/no-handoff/55",
-        "NotInvokedProofRef": "C/not-invoked/55"
+        "NotInvokedProofRef": "C/not-invoked/55",
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
       }
     },
     {
@@ -275,7 +278,8 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "UnknownReasonRef": "C/unknown/55"
+        "UnknownReasonRef": "C/unknown/55",
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
       }
     },
     {
@@ -343,7 +347,8 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "UnknownReasonRef": "C/in-doubt/55"
+        "UnknownReasonRef": "C/in-doubt/55",
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
       }
     },
     {
@@ -411,7 +416,8 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "ProviderRequestRef": "Provider/request/55"
+        "ProviderRequestRef": "Provider/request/55",
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
       }
     },
     {
@@ -478,7 +484,8 @@
         "payload_digest": "1111111111111111111111111111111111111111111111111111111111111111",
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
-        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
       }
     },
     {
@@ -545,7 +552,8 @@
         "payload_digest": "1111111111111111111111111111111111111111111111111111111111111111",
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
-        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
       }
     },
     {
@@ -612,7 +620,8 @@
         "payload_digest": "1111111111111111111111111111111111111111111111111111111111111111",
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
-        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
       }
     },
     {
@@ -679,7 +688,8 @@
         "payload_digest": "1111111111111111111111111111111111111111111111111111111111111111",
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
-        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
       },
       "wire_request_digest": "8888888888888888888888888888888888888888888888888888888888888888"
     }
