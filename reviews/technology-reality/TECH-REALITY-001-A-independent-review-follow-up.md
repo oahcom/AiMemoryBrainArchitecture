@@ -171,3 +171,25 @@ This establishes that the PR's base is historically stale and its branch has not
 Before asking for another content-only review, the research owner should publish a refreshed branch based on current main, preserve the old exact research snapshot as historical provenance, apply the Phase 3.8/3.8.3 and license/pin/path corrections, then provide the new base SHA, head SHA, changed-file list and CI evidence. The independent reviewer must review that new exact pair; no approval is carried forward from this stale base.
 
 **中文：** 在再次进行纯内容复审之前，研究 Owner 应先从当前 Main 建立刷新分支，保留旧精确研究快照作为历史溯源，应用 Phase 3.8/3.8.3、许可证、Pin 和路径修正，然后提供新的 Base SHA、Head SHA、变更文件清单和 CI 证据。独立审查必须针对新的精确 Base/Head 对重新执行，旧基线上的任何结论都不能自动转移为批准。
+
+## 8. Revalidation against the latest live main HEAD / 针对最新 Main HEAD 的再次核验
+
+A new live read on 2026-11-18 (local review session) shows main has advanced since §7:
+
+- Current main HEAD is `b3c666e67982cb3d3374e759cfb6552c7765aacb`, commit message: `revert(review): remove accidentally added R-X-F-D-P note from main`.
+- Relative to the prior observed main HEAD `ca69d50d1fc6c19a930128de700b0f2328bf32fb`, main is 5 commits ahead, 0 behind. The net tree comparison reports one removed file: `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md` (131 deletions). This is outside the TECH-REALITY-001-A research package.
+- Relative to PR #45's original base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`, current main is 32 commits ahead, 0 behind; the compare endpoint reports no net changed files. This means the current main tree has no net file delta against that old base in the comparison result, despite the additional commit ancestry.
+- PR #45 remains OPEN/Draft with base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`, head `6c7c5919c1b50f38c4d24be679a3885ee3c15b97`, and the same 14 changed research files. Against current main, the compare remains diverged: PR #45 is 51 commits ahead / 32 commits behind, with the old base still the merge base.
+- PR #56 remains OPEN/Draft, based on `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`, head `3e0209e0c084711fa2bbe7e2f97da26277c8742f`. No new review-branch commit or PR #45 remediation commit is visible. The latest PR #45 discussion remains the previously recorded reviewer comments; no Owner response or refreshed-head announcement appears in the fetched comment list.
+
+### Interpretation / 解释
+
+The new comparison corrects the numeric ancestry count in §7: the current main is now 32 commits, not 27 commits, ahead of PR #45's old base. The five-commit advance since the prior check nets to a removal of a separate DOMAIN-REALITY-001-B audit file; the complete old-base-to-current-main tree comparison reports no net changed files. Therefore this latest main movement does **not** establish a new direct conflict with the TECH-REALITY-001-A files. However, PR #45 still has not refreshed its base ancestry and still has not published any remediation. The existing substantive findings (Phase 3.8/3.8.3 integration, Restate Server BSL 1.1 disclosure, stale Storage ADR pins, malformed handoff paths, section/parity defects) remain unclosed on the unchanged exact HEAD.
+
+**中文：** 2026-11-18 再次读取实时 Main：当前 HEAD 已推进至 `b3c666e67982cb3d3374e759cfb6552c7765aacb`，提交说明为撤销误加到 Main 的 R-X-F-D-P 备注。相较此前观察的 `ca69d50...`，Main 前进 5 个提交；净树差异是删除一个 DOMAIN-REALITY-001-B 双语一致性审计文件（131 行），与 TECH-REALITY-001-A 无关。相较 PR #45 旧 Base，当前 Main 共领先 32 个提交，但比较接口显示净文件差异为空。PR #45 对当前 Main 仍为分叉：领先 51、落后 32，Merge Base 仍是旧 Base。PR #45 仍是同一 Base/Head 和 14 个文件；PR #56 也仍为原 Base/Head 的 Open/Draft。没有看到作者答复或修订提交。
+
+因此将 §7 的数字更正为当前 Main 领先 32 个提交，而不是 27 个。最新 Main 变化没有形成 TECH-REALITY-001-A 文件的新增直接冲突证据；但 PR #45 仍未刷新祖先关系，也没有发布整改。Phase 3.8/3.8.3 集成、Restate Server BSL 1.1 披露、Storage ADR 旧 Pin、Handoff 错误路径、章节编号及双语逐行一致性等既有发现，在未变化的精确 Head 上仍未关闭。
+
+### Updated disposition / 更新裁决
+
+**REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY.** No approval is carried forward. Re-review is triggered only after a new exact PR base/head and complete changed-file set are published.
