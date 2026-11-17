@@ -197,11 +197,11 @@ This section supersedes earlier H/Storage pins in §§1–3 where they differ. I
 | HRC/JPF suite | same H branch | `60a2f4db4bd12f2131ecd147db9bbe328da6db50` |
 | Wire suite | same H branch | `1a4e754ba9bfa57eb973c6d39731e9f89443b323` |
 | Schema integrity suite | same H branch | `67aba74c120f2916d768e7b01c45408ee2624f3a` |
-| H freeze evidence delivery | same H branch | `b8a622cab01120941a8f6d98172c8bfacf6ed4aa` |
-| H CI run | GitHub Actions | [44040502709 — 66/66 PASS](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709), commit `1c6ddd301d538652ceea22ea665d50c5fad8178e`, job `133893645184` |
-| Storage bidirectional JoinProof | `session-storage-consistency-forget-atomicity-2026-11-16` | `364bf7e7833af3d97bc676f7f356e79251ea6cb4` |
+| H freeze evidence delivery | same H branch | `483fd974cfdd756f19505bad4d0e003facef0082` |
+| H CI run | GitHub Actions | [44041395001 — 66/66 PASS](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709), commit `b4d7ed2798fcd6514892ac91d8f3ae6c06f0a338`, job `133893645184` |
+| Storage bidirectional JoinProof | `session-storage-consistency-forget-atomicity-2026-11-16` | `d5a84aa22e90d7b8689b23cd8af2fc82125368c4` |
 | Storage COC v3.2.2 companion | same Storage branch | `ce3c41adf826a622a3717eca481b5d53e6549196` |
-| Storage exact review / topology disposition | same Storage branch | `0fc74ef747b6e45f8a7d7fcbe8657b88ba67e82d` |
+| Storage exact review / topology disposition | same Storage branch | `9d5aa6cc08cdf9230296c362d1aa44804a92afbe` |
 | Storage topology ADR | same Storage branch | `080433f8e13a500522bc2754da64057edb0ae9d8` — ADR-BLOCKED |
 | I RecoveryJoin trust/currentness role review | `session-i-security-governance-2026-11-16` | `01d4514c1c0979ea878a89f36213a7db3c3c1003` |
 | C RecoveryJoin/provider-side-effect role review | `session-c-agent-integration-2026-11-16` | `a7b57bd5531222559666f0f1d9df59a259cde61a` |
