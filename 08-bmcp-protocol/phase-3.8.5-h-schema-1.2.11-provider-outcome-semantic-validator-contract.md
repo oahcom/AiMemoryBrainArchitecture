@@ -182,3 +182,10 @@ H unit/fixture tests:
 The H Provider Outcome workflow run `44055334361` completed SUCCESS at commit `4837831c6c22973aba15be18e5376e56266b697b`, with 7 tests passing. That run predates the latest C schema fields `OwnerSignatureRef` and `ActualInferenceRequestId`, the complete optional wire mapping and the latest H callback changes. It is historical evidence only; it is NOT current validation of the latest code.
 
 A new run is required after the latest H/C fixture synchronization. No signature, provider issuer, C ledger, COC quorum or production integration test is covered by these 7 unit/fixture tests.
+
+
+## 14. I exact C schema review
+
+I Phase 3.8.6 exact review Blob `cdfaa1c112210d65f9fd24fc1f5eb3caf8514fec` accepts the structural C object crypto binding only. It does not register/deploy the profile, trust root or key custody. It requires strict UTF-8/JCS/I-JSON handling, duplicate-key rejection, exact C-P0 coverage, strict Base64url decoding to 64 bytes, message_type domain binding, anti-rollback and independent cross-language signature vectors.
+
+The H implementation core is Blob `e8f737326bc4791e8d7acf917b4725dbb7171fad`; the H unit/fixture test is Blob `1f17bdcef6004eca165644ce96bcf35d3b10c3f8`. The core exposes injected tri-state authority callbacks and must return UNKNOWN when profile registration or trust/currentness callbacks are absent. The COC and owner proof callbacks receive both envelope and immutable C object so they can validate independent COC/Storage/I/D refs without incorrectly folding them into C-P0.
