@@ -1,122 +1,89 @@
-# C/G/H Phase 3.6 跨 Owner 契约一致性复审
+# C/G/H 跨 Owner 契约一致性复审 — 当前基线修正版
 
 - 日期：2026-11-17
-- 复审类型：独立跨 Owner 契约审计（不是单纯翻译复审）
-- 仓库：`oahcom/AiMemoryBrainArchitecture`
-- PR：#28，`docs/bilingual-coverage-completion`
-- 精确源基线：
-  - C：`07-agent-integration/phase-3.6-final-request-evidence-contract.md`，分支 `session-c-agent-integration-2026-11-16`，Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`。
-  - G：`06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md`，分支 `session-g-memory-context`，Blob `aa3afa73d8a76cc6f025839c52bfbff6a983046a`。
-  - H：`08-bmcp-protocol/adapter-capability-and-applied-attestation.md`，分支 `session-h-bmcp-protocol`，当前 Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`。
-- G 相关精确决议锚点：
-  - CGH-APPLIED-1.1 candidate A package Blob：`d4eef4aecf94f922f7933c1e1fec14a69ad17dec`。
-  - Recovery-batch A package Blob：`4961ffefc0f9920efb8425a9b2a7af42d8f64819`。
-  - 配套 COC Blob：`fc3bac39ec64fda68b8cba5e1aada4e719e5acea`。
+- 复审：在读取独立精确版本 Owner 补充决议、H 当前 Full-Path 闭环和 C/G 当前复审后，对跨 Owner 审计作出修正。
+- PR #28 仍为 Draft/Open。
+- 本版本取代同路径此前报告。早期审计只读取 C/G/H 基础合同，遗漏独立精确版本 C 补充决议、H Schema/Mapping 决议及后续 Full-Path 工件，因此产生了错误的缺口判断。
 
-## 1. 总体结论
+## 1. 当前精确证据基线
 
-**C/G/H 跨 Owner 契约：尚不可冻结。**
+| 权威方 | 工件 | 精确 Blob / 证据 |
+|---|---|---|
+| C 精确 CGH-APPLIED-1.1 recovery-batch 接受 | C Phase 3.6 C-submit / I / D 因果顺序补充合同 | 45a48249717c8cddb07ab96197730ef93d406c22 |
+| C 规范 Provider Outcome 语义 | C Phase 3.8.4 Provider Submit Outcome 规范合同 | 819705037da89834e10b6dd2ec6e66c1b8c70886 |
+| C 不可变对象 Schema | CSubmitOutcome 1.0.1 JSON Schema | a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda |
+| C 当前 Full-Path 复审 | C Phase 3.8.19 对 H 38-test 闭环的复审 | 24337b79cfea6264a8a6f11fa414578fc559716c |
+| H Wire Schema | Unified 1.2.14 / wire 1.3.0 | 09fcd1fa29fe24255fbd87cae79dafb406594a59 |
+| H Authority-Join Mapping | H Phase 3.8.10 / integrated mapping | 579dd2a91edf47b86e744e897ba6668b839944bd / 1cbe74eba69325510d6b1019d971661f965eabf8 |
+| H Full-Path Validator/Test/Fixture | Validator / Test / Fixture | eab961a08d41e871f38543b18ee60cf024977414 / 540056d7c4f290c31290b17c264c69cfd76b1cb2 / c80247a6ecfbb4a29ff0993e8e2aea4829d00626 |
+| H Full-Path 闭环 | H Phase 3.8.14 | cda025fb157815570b3280fa5ff168d5e62453b1 |
+| H 精确 CI | Run / commit / job | 44070924346 / 77a9d5e2e716ba33387f0beb1195f864ed8ac54f / 133996627914 SUCCESS |
+| G 当前消费者复审 | G Phase 3.8.18 委托角色复审 | 1894860c76336f8739d354b72beed3992cffd17e |
+| G Applied 源文件 | G Phase 3.6 Applied / Forget 合同 | aa3afa73d8a76cc6f025839c52bfbff6a983046a |
 
-六阶段生命周期语义一致，权威边界总体正确：C 生产最终请求/Provider 侧证据；H 负责 Adapter 协议/能力并保留经过认证的 Owner 证据；只有 G 接受 Applied。但 G 最新 CGH-APPLIED-1.1 recovery-batch 决议要求的证据，当前 C producer 合同尚未定义为 C 签发的输出或明确消费的引用集合。H §§11.8–11.9 现已映射因果顺序/recovery-batch 证据桥接、由 C 签发的 Provider receipt/outcome 引用、participant terminal proof 条件，以及仅由 I/D 签发的 Owner gate release。但两节仍是候选映射，不是冻结 Schema 或已实现 Wire 合同。
+辅助候选 Schema 包括 H RecoveryCutoff 1.0.5（Blob 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7）和 RecoveryJoin 1.0.2（Blob 4b664e3bce465499bcdfd93796349a4ba7074002）。它们属于独立 Schema 家族，不替代 H Unified 1.2.14 或 CSubmitOutcome 1.0.1。
 
-这是实质性 P1 契约缺口，不是翻译缺陷。本复审不提升任何 Owner 决议或实现状态。
+## 2. 修正后的总体结论
 
-## 2. 已对齐且成立的跨 Owner 语义
+**C/G/H 设计级消费者映射：在委托 L1/L2 层面已 ACCEPT WITH ENUMERATED CONDITIONS；NOT FROZEN。**
 
-| 主题 | C | H | G | 结果 |
-|---|---|---|---|---|
-| 生命周期 | 区分 Prepared、Delivered、Materialized、Final Request Submitted、Applied、Execution Started | 区分传输、物化、提交证据和 Applied 证明 | 定义相同六阶段并拥有 Applied | 对齐 |
-| 最终提交权威 | 仅在精确变换后请求跨越成功 Runtime/Provider Submit 边界后产生证据 | H 不得推断 C Provider outcome | G 要求 C 证据并验证谓词 | 原则上对齐 |
-| Applied 权威 | C 明确不修改 Applied | H 明确不拥有 Applied 接受权 | G 是唯一 Applied 权威 | 对齐 |
-| 能力上限 | Tier 2/3、bypass/unknown 不得声称 Full | Tier 1/2/3 能力上限；Full 要求最终请求可观测 | Full Applied 拒绝不完整/未知 coverage | 对齐 |
-| 历史/当前使用分离 | 保留历史证据；后续撤销/fence 使当前使用失效 | 后续 Forget/撤销使当前使用失效，不改写有效历史 | 历史 Applied 不可变；独立重新计算当前使用投影 | 对齐 |
-| 重复与迟到证据 | 相同 identity/digest 幂等；digest 改变冲突；迟到证据不能回滚 | 相同 identity/digest 与 replay 规则 | 相同 identity/digest 幂等且不得回滚 | 对齐 |
-| Forget 顺序 | 顺序未知 => Unknown/抑制 | 不得从接收顺序/时间/ACK 推断跨权威顺序 | 顺序未知 => 不产生新的 Full Applied，并抑制当前使用 | 原则上对齐 |
+此前关于 C 没有精确 1.1 recovery-batch 决议、没有 CSubmitOutcome 对象合同的 P1 判断是错误的。C 已在独立 Owner 补充工件中，对精确 A/COC recovery-batch pair 作出 ACCEPT WITH ENUMERATED EXCEPTIONS；C 的规范 Provider Outcome 合同和 1.0.1 Schema 已定义 C 自有不可变 Provider Outcome。C 明确保留 Provider 专属 same-key 幂等和 crash recovery 作为未验证条件。
 
-## 3. 发现项
+此前关于 H 没有具体 Schema 的判断也过于宽泛。H 已有 Unified 1.2.14 / wire 1.3.0、精确 C Object Mapping、完整本地 H Envelope + C Object Validator 路径，以及文档派生的 JSON Schema 候选。H 当前 Full-Path Run 报告 38 个方法：32 个 H Validator Unit/Fixture 方法，以及 6 个 C Crypto Interop 方法；精确 Provider Outcome Job 在固定 Commit 上通过。
 
-### XCH-36-001 — C producer 合同未定义 G 的 CGH-APPLIED-1.1 C 证据集
+G 也已针对精确 CSubmitOutcome 1.0.1 × H Unified 1.2.14 映射发布委托 G 角色消费者复审，保留 G 对 Applied 的独占权威，并明确 Outcome × SideEffectStatus 映射。但这不是独立人类 G Owner 签字。
 
-**严重级别：P1 — 冻结阻塞**
+## 3. 跨 Owner 语义检查
 
-G 最新 recovery-batch 修订至少要求：
-- 精确的 C Provider receipt 和不可变的 `CSubmitOutcome`；
-- 确定的 `CausalOrderTerminalProof`，绑定相同 transaction、request/participant digest、reservation 和 terminal outcome；
-- 在任何新的 Full Applied 提升前，提供 recovery-batch 证据、完整 pre-batch participant 枚举/协调结果、Owner high-water attestations，以及 I/D/Storage 各自的 terminal evidence。
+| 主题 | 当前结果 | 边界 |
+|---|---|---|
+| C Provider Outcome 与 SideEffect 语义 | 合同/Schema 层 PASS | C 拥有不可变 Outcome；Outcome 与 SideEffectStatus 分离 |
+| H Wire Mapping 与本地 Full-Path Validator | L1/L2 候选层 PASS | 精确 Schema/Object Join/Digest/负向篡改已本地测试 |
+| G Applied 消费 | 委托复审 ACCEPT WITH G 自有条件 | 只有 G 决定 Full Applied 和 current-use projection |
+| I/D/Storage/COC 权威分离 | 接口架构 PASS | 测试 Callback 不是生产权威验证 |
+| 历史 Applied 与 current-use | 合同层 PASS | 后续撤销/Fence 使当前使用失效，不改写有效历史 |
+| Forget/late work/unknown ordering | 合同要求 fail closed | 未知或缺失 Proof 不得提升 Applied 或释放 Barrier |
+| Execution Started/model use/completion | 独立证据族 | Provider 接受不证明执行或模型注意 |
 
-当前 C 源文件（Blob `fd2f47...`）要求真实的 Runtime/Provider 分配的 `InferenceRequestId`、成功 Submit 边界和通用 submission outcome，但没有定义 `CSubmitOutcome` 证据对象、实际 Provider receipt 合同，或精确的 1.1 causal-order/recovery-batch 证据绑定与引用。C 当前最新明确的精确版本 Owner 决议仍是 CGH-APPLIED-1.0；该源文件没有记录 C 对精确 1.1 recovery-batch package 的接受。
+重要 Digest 区分：C RequestDigest 绑定完整不可变 Final Request；G Managed Region Digest/Inventory 绑定完整 Managed Memory Region；C Object Digest 和 H Envelope Payload Digest 又是独立范围。它们必须 Join 到同一个 Request，但不得混淆或假定相等。
 
-**必要闭合动作**
-1. C Owner 定义 C 所有的 Provider handoff receipt 和不可变 `CSubmitOutcome` 字段、identity、digest、成功/失败/未知语义、幂等及 replay 行为。
-2. C 将 outcome 明确绑定到精确 request、FinalRequestBoundaryId、delivery attempt、participant intent/request digest，以及适用时的 causal-order transaction。
-3. C 只消费/引用 COC terminal proof 和 recovery-batch/participant 证据，不得自行签发这些证据。COC、I、D、Storage 证据仍分别归其权威所有。
-4. C Owner 必须针对当前 1.1 recovery-batch package 发布精确版本决议（或发布 successor package 并重新绑定决议）。
+## 4. 发现项 — 更新后的状态
 
-闭合前，G 不能安全地认为当前 C producer 合同已满足完整 1.1 谓词。
+### XCH-36-001 — C Producer 证据合同
+**在 L1/L2 合同定义层面 CLOSED。** C 精确 recovery-batch 决议、规范 CSubmitOutcome 合同和 1.0.1 Schema 已固定。**Provider 专属 same-key lookup/幂等、crash/restart/failover 恢复及真实 Provider Issuer Truth 仍 OPEN。**
 
-### XCH-36-002 — H §§11.8–11.9 是候选映射，不是冻结或已实现的 1.1 Wire 合同
+### XCH-36-002 — H Wire/Schema/Full-Path Mapping
+**在 L1/L2 Schema/Validator 候选层面 CLOSED。** H Unified 1.2.14、CSubmitOutcome 1.0.1 Mapping 和 38-method Full-Path CI 已固定。**生产 Schema/IDL 生成、生产 Trust/Key Governance、实时 Authority Callback 和互操作/部署仍 OPEN。**
 
-**严重级别：P1 — 冻结阻塞**
+### XCH-36-003 — 精确版本 C/G/H 消费者接受
+**在委托技术复审层面 CLOSED，但有明确限制。** C 和 H 的精确 Mapping 复审已存在；G Phase 3.8.18 在 G 权威范围内接受同一精确 C/H Mapping。**独立人类 Owner 签字和全局冻结尚未成立。**
 
-当前 H 源 Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf` 包含 §§11.8–11.9，枚举 causal-order、recovery-batch、participant completeness、Owner high-water、I terminal、D lineage/cutoff/effective-position、有条件的 Storage same-XID 证据引用、C 签发的 Provider receipt/outcome 引用、participant terminal proof 条件，以及 I/D 独占的 Owner gate release。它正确禁止 H 签发或推断 COC、I、D、C Provider 或 Storage outcome，并要求不同顺序域保持独立。
+### XCH-36-004 — 跨权威顺序与 Digest 命名空间
+**在本次复审的设计层面 CLOSED。** COC、I、D、Storage、C Request、Managed Region 和 H Envelope Digest/Position 域保持独立；任何本地时钟、Receiver Sequence 或其他权威 Cursor 均不得替代所需 Owner Proof。保留精确版本绑定；不得跨权威比较或合并 opaque position。
 
-§11.8 和 §11.9 均明确仍是候选保留条款。§11.9 进一步要求由 C 签发的 `c_provider_receipt_ref` 和不可变 `c_submit_outcome_ref`，将 `participant_terminal_proof_ref` 限定为所有确定性 outcome 完成 reconciliation 后才可出现，并将 `owner_gate_release_attestation_ref` 独占保留给 I 或 D。这部分缩小了字段映射歧义，但并未修订 C 的 Owner 合同，也不构成 C 接受。它说明不能据此证明当前 JSON Schema/SDK 已包含这些字段，并要求 H 在相关 C/G/I/D/Storage 确认后发布精确增量 Schema 版本。G 将 `bmcp.applied-ack/1.1.0` 列为目标，但本次审查没有在 H 源文件中发现该目标已经作为已发布、冻结的 Schema/SDK 实现的证据。
+### XCH-36-005 — Runtime 与生产证据
+**OPEN。** L1/L2 本地 Full-Path 测试已通过，但正向 Fixture 的十个 Authority Callback 全部是确定性 Test Double。尚未证明生产 Trust Root、实时 C Sequencer/Key Status Ledger、Provider Truth/Same-Key Lookup、实时 I/D/Storage Proof Verification、COC Quorum Durability、Storage Same-GID 物理恢复、G Applied Persistence、多副本 Egress Serialization 或生产部署。G adversarial race/reconnect/replay/restore Suite 仍为 SPECIFIED / NOT RUN。
 
-**必要闭合动作**
-1. H 发布 1.1 证据桥接的精确版本化 Schema 和 SDK 字段映射。
-2. H 提供机器可读的必需/可选/条件字段规则、空集合证明语义、UNKNOWN/IN_DOUBT 处理、完整性覆盖、replay identity 和兼容规则。
-3. H 获得 C/G/I/D/Storage 精确版本确认；不得把这些确认解释为权威转移给 H。
-4. H 提供可执行的 Schema/序列化/验证 fixture。没有证据前状态保持 NOT RUN。
+## 5. 剩余生产 Gate
 
-### XCH-36-003 — 跨 Owner 精确版本决议链不完整
+1. I Governance Trust Root/Profile 注册、C Key Lifecycle、HSM/KMS 托管、Key Rotation/Revocation 和 Anti-Rollback。
+2. Provider 专属权威 Idempotency 和 Same-Key Lookup，包括 Crash/Restart/Failover，以及不确定 Handoff 后禁止 Retry-as-New。
+3. 实时 I/D/Storage Authority Verifier 与 Proof-Currentness Join；不得用 Test Double 替代。
+4. 指定 COC Operator、Durable Quorum/Participant Registry、Outage Recovery、Restore 和 High-Water Proof。
+5. 选定 Storage 拓扑及物理 Same-GID Prepared/Commit/Rollback、Visibility/Non-publication 和 Restore 保证。
+6. G Applied Durable Persistence/Validator 实现和 L3/L4 Adversarial Conformance。
+7. 独立人类 Owner/Governance 批准、共享 Release Manifest 和生产授权。
+8. Multi-PolicyDomain Atomicity 仍 BLOCKED / NOT ACCEPTED。
 
-**严重级别：P1 — 冻结阻塞**
+## 6. 最终 Gate
 
-G 已在列明例外的前提下接受自身 Applied 谓词和 recovery-batch 前置条件。H 将 1.1 桥接记录为候选。C 当前源文件记录的是 CGH-APPLIED-1.0 决议，并未记录对精确 1.1 recovery-batch 证据配置的接受。因此，最新 G 决议没有形成可证明的 C/G/H 精确版本联合接受链。
+- C/H L1/L2 本地 Full-Path Validation：**PASS**。
+- G L1/L2 Consumer Review：**ACCEPT WITH ENUMERATED CONDITIONS（委托角色复审）**。
+- C/G/H 全局 Applied Contract Frozen：**NO**。
+- 生产 Authority Integration：**OPEN / NOT VERIFIED**。
+- G Applied Runtime/Persistence：**NOT VERIFIED**。
+- L3/L4 端到端 Conformance：**NOT RUN / OPEN**。
+- 生产激活 / Provider Egress 授权：**NOT AUTHORIZED**。
+- PR #28：**Draft/Open；未授权合并**。
 
-**必要闭合动作：** 一个共享 package/version 必须固定精确 C、G、H 源 Blob，以及精确 A/COC 决议 package Blob。每个 Owner 必须在自身权威范围内明确接受同一个 package/version，并列出例外。不得从下游消费者映射或先前 1.0 决议推断接受。
-
-### XCH-36-004 — 1.1 之前的顺序措辞需要明确的取代规则
-
-**严重级别：P2 — 规范歧义**
-
-较早的 G/C 条款引用 Owner commit cursor、可信接收方 receipt sequence，以及通用 boundary timestamp/monotonic sequence。1.1 H 桥接正确规定 COC、I、D、Storage 顺序域相互独立，不得比较或替代；wall-clock、H receiver sequence、消息到达顺序、timeout、ACK 缺失或 reconnect 均不能建立跨权威顺序。
-
-后续 1.1 决议似乎旨在细化较早的通用措辞，但本次审查的源文件集合没有提供一条简洁的优先级声明，明确指出哪些旧顺序规则在 1.1 中被取代。
-
-**必要闭合动作：** G/C/H 发布规范性优先级说明：对于 CGH-APPLIED-1.1，只有指定 profile 下的精确 Owner 签发证据和 CausalOrderTerminalProof 才能建立所需的跨参与方 terminal disposition；本地 sequence 只在本地有效，绝不做数值比较。旧 1.0 行为仅适用于精确的 1.0 package。
-
-### XCH-36-005 — Execution、recovery 和 Forget 竞争证据仍未执行
-
-**严重级别：P1（生产就绪阻塞）；不是翻译阻塞**
-
-C conformance、G-36/CGH 和 H conformance 案例仍为 SPECIFIED / NOT RUN。G 明确表示 coordinator/operator 和 durable participant/order service 尚未指定/部署/验证，且尚未证明 G validator/persistence 消费完整 recovery-batch 证据集。没有声称任何实现或生产通过。
-
-**必要闭合动作：** 执行确定性测试，覆盖 Provider handoff outcomes、same-XID resolution、recovery-cutoff batches、缺失/不完整 participant enumeration、I revocation race、D fence race、Storage terminal visibility/non-publication、replay、digest 改变、reconnect 和 unknown-order suppression。附加持久化证据和 Owner 签字。合同接受不等于 Runtime 验证。
-
-## 4. 权威与证据归属矩阵
-
-| 证据 | 生产者/权威 | H 职责 | G 职责 |
-|---|---|---|---|
-| 最终不可变请求 / Provider handoff / CSubmitOutcome | C + 实际 Runtime/Provider receipt | 认证 envelope 并保留 opaque evidence | 验证；不得合成 |
-| CausalOrderTerminalProof / recovery batch | COC coordinator/order authority | 验证 Schema/完整性并保留引用 | 新 Full Applied 前必须具备 |
-| I authorization terminal / sequencer / revocation cutoff | I | 保留认证引用 | 验证；不得推断策略 |
-| D lineage / fence request cutoff / effective position | D | 保留认证引用 | 验证；不得推断 fence |
-| Storage same-XID terminal resolution / visibility | Storage | 保留认证引用 | Storage 参与时必须要求 |
-| Adapter capability / ACK / session / Wire integrity | H | 拥有并认证 | 消费；不得仅凭 ACK 提升 Applied |
-| Applied fact 和 current-use projection | G | 无权威 | 唯一所有者 |
-
-## 5. H 当前源 pin 修正与候选补充条款
-
-已重新读取当前 H Owner 源文件，Blob 为 `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`。当前 EN 和 zh-CN companion 均固定到该 Blob，并包含 §§11.8–11.9。§11.9 明确映射 C 签发的 Provider receipt/outcome 引用、participant terminal proof 的资格，以及 I/D 独占签发 Owner gate release。这些仍是候选要求。此前针对 `db59b63e322d7255b8b400f47859dcac32bb3027` 的 H parity 报告已由当前 Blob 的更新复审取代。
-
-## 6. 最终判定
-
-- C/G/H 六阶段生命周期与核心权威边界语义：**PASS WITH ENUMERATED EXCEPTIONS**。
-- CGH-APPLIED-1.1 recovery-batch 证据在 C/G/H 之间的完整性：**BLOCKED**。
-- H 1.1 Schema/SDK 冻结：**尚未成立**。
-- 精确版本 C/G/H 联合接受：**尚未成立**。
-- Runtime/conformance/production 验证：**NOT VERIFIED / NOT RUN**。
-- PR #28 继续保持 Draft/Open；本复审不授权合并。
-
-本报告任何发现均不提升 Owner 状态，不批准实现，不证明全局 Forget 完成，也不证明物理擦除。
+本修正版不声称全局 Forget 完成、物理擦除、Provider Exactly-once、模型注意或生产就绪。
