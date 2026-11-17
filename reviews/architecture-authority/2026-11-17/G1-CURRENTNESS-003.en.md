@@ -5,14 +5,14 @@
 - Reviewer: A — Principal System Architecture Authority (delegated integration role)
 - Review date: 2026-11-17
 - Requested immutable baseline: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
-- Main HEAD observed during audit: `ca69d50d1fc6c19a930128de700b0f2328bf32fb`
+- Main HEAD observed during audit: `901e38ba7b45ed1822eaefddc2da8d765cf8985c`
 - Review branch: `review/session-4-a-g1-currentness-audit-2026-11-17`
 - Status: **G1 PARTIAL — main delta is fully enumerated; selected Owner source pins are refreshed; exhaustive source-by-source semantic and same-bundle adoption audit remains open.**
 - This is an evidence audit, not an Owner approval, architecture freeze, implementation authorization or production acceptance.
 
 ## 1. Executive result
 
-The requested SHA `8c0c5b1...` was a real main commit, but it is no longer current main. At the audit snapshot, main is `ca69d50...`, exactly one commit ahead. The comparison `8c0c5b1... `...`ca69d50...` reports one added file and no modifications or deletions.
+The requested SHA `8c0c5b1...` is a real main commit. At the final audit snapshot, main is `901e38ba...`, two commits ahead in history. The intervening commit `ca69d50...` briefly added one research-only bilingual parity audit file; `901e38ba...` then reverted that file. The final tree at `901e38ba...` is exactly the same tree as at `8c0c5b1...` (tree SHA `7096e0bc3fdc9a390fccff388f9261522fa424f2`). Thus the net file delta from the requested baseline to current main is zero.
 
 **G1 remains PARTIAL, not PASS.** The mainline delta is completely identified and read. However:
 1. R, X and F/D/P formal assessment submissions still declare the historical main baseline `b372b62...`.
@@ -34,15 +34,15 @@ Commit `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` is the commit:
 
 The removed file was a research artifact, not a formal B Owner ADR approval. Its removal does not resolve the Fact/Claim decision; the live B Owner branch still carries two explicit ADR-BLOCKED records (see §4).
 
-### 2.2 Exact delta from requested SHA to observed current main
+### 2.2 Exact delta from requested SHA to final observed current main
 
-| Path | Change | Exact Blob | Audit result |
+| Path | History between the two commits | Exact Blob | Audit result |
 |---|---|---|---|
-| `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md` | Added by `ca69d50...` (+131 lines) | `a877ceff906da01e70e277a81b95978982af3ede` | Read. Reports B5 **NOT PASSED / BLOCKED**; most research files still require parity review. It is a research audit, not an Owner decision or architecture-spec amendment. |
+| `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/bilingual-parity-audit.md` | Added by `ca69d50...` (+131 lines), then removed by `901e38b...` | `a877ceff906da01e70e277a81b95978982af3ede` (transient) | Read from the intermediate commit. It reports B5 **NOT PASSED / BLOCKED**; most research files still require parity review. It is a research audit, not an Owner decision or architecture-spec amendment, and is not present in final main. |
 
-Tree counts: 82 blobs at `8c0c5b1...`; 83 blobs at `ca69d50...`; recursive current tree was not truncated. No other path changed in this one-commit comparison.
+Tree counts: 82 blobs at `8c0c5b1...`; 83 blobs at intermediate `ca69d50...`; 82 blobs at final `901e38b...`. The final tree SHA is identical to the requested baseline tree SHA `7096e0bc3fdc9a390fccff388f9261522fa424f2`; the net file delta is zero.
 
-The added parity audit is itself an evidence warning: translated headings or partial Chinese text do not establish bilingual parity. Independent clause/row parity review remains pending. Do not infer G6 PASS from the existence of this file.
+The transient parity audit remains relevant as research-branch evidence: translated headings or partial Chinese text do not establish bilingual parity. Its B5 conclusion remains BLOCKED on that research branch. Do not infer G6 PASS, and do not claim this file is part of current main.
 
 ## 3. R / X / F-D-P assessment audit
 
@@ -132,7 +132,7 @@ All statuses below were read from live PR metadata. None was merged at audit tim
 | #60 | A current-main final assessment | `8c0c5b1...` | `d476db8...` | OPEN / DRAFT |
 | #61 | A B-02 / H 1.2.15 delta review | `8c0c5b1...` | `4726d93...` | OPEN / DRAFT |
 
-PR #57–#61 all target main at the requested SHA, but main has since advanced by one commit to `ca69d50...`. They are therefore one commit behind the current main base. PR #51/#54 are stacked on review branches, not direct current-main baselines. No existing PR was retargeted, merged or closed in this audit.
+PR #57–#61 all target main at `8c0c5b1...`; final main is now `901e38b...`, two commits ahead in history but with an identical tree. Their base commit is therefore historically behind, even though the current tree has no net content delta from their base. PR #63 was created with base SHA `901e38b...` and contains only the two G1 audit documents. PR #51/#54 are stacked on review branches, not direct current-main baselines. No existing PR was retargeted, merged or closed in this audit.
 
 ## 6. Issue audit
 
