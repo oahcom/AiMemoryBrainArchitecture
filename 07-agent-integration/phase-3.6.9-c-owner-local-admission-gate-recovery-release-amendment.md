@@ -205,3 +205,32 @@ This proposal addresses the missing C-local R1/R2 contribution identified in the
 - A must perform the final cross-owner integration review after all exact-version decisions.
 
 **Status:** C proposal only; no C independent approval, no A integration acceptance, no H schema freeze, no runtime conformance, no deployment and no production activation. JF-10 P0 remains OPEN; Multi-PolicyDomain remains BLOCKED.
+
+
+## 10. Provider egress linearization — dispatch is not invocation
+
+A reservation or durable provider-attempt record does not prove that request bytes crossed the actual provider boundary. C MUST distinguish:
+
+`NOT_DISPATCHED` → `DISPATCH_AUTHORIZED` → `SENT_OR_AMBIGUOUS` → `OUTCOME_KNOWN`
+
+with `UNKNOWN/IN_DOUBT` retained whenever send/result evidence is ambiguous.
+
+The C Gate linearization contract applies at the actual egress boundary, not only when a worker creates a reservation or queues a provider job:
+
+1. The provider egress adapter/gateway MUST serialize its final send authorization against the same authoritative `CGateGeneration` used by C gate closure.
+2. Immediately before releasing request bytes to the provider transport, it MUST atomically verify current gate generation, exact CAdmissionRef, exact reservation, I `COMMIT_WON`, D clearance, request digest and the one-use provider-attempt identity, then durably record the send-boundary transition.
+3. If Gate close commits first, no outbound provider request bytes may be released. A reservation or `DISPATCH_AUTHORIZED` record is not an exception.
+4. If the provider-send boundary commits first, the attempt is a pre-close in-flight participant. Gate closure captures it; C reconciles the same provider idempotency key and exact attempt until the actual outcome is authoritative.
+5. If the gateway cannot serialize the final send boundary against Gate close, or cannot prove whether bytes were sent, it MUST return UNKNOWN and suppress further sends. A process-local check followed by an unrelated network call is not sufficient proof of ordering.
+
+During a COC outage, no new provider-send boundary may commit after C's local pending gate closes. Pre-existing `SENT_OR_AMBIGUOUS` attempts are reconciled using the same key; pre-existing `NOT_DISPATCHED` or merely reserved attempts remain unsent until the recovery batch and C gate release permit a fresh currentness check. They may not be silently treated as already invoked.
+
+This is an explicit adapter boundary requirement. Generic exactly-once provider behavior is not assumed; each adapter must prove that the gateway's send record and provider's idempotency/outcome lookup compose safely. If the provider offers no authoritative same-key lookup, an ambiguous send remains IN_DOUBT indefinitely and blocks C release.
+
+Required additional vectors:
+17. Reservation exists but provider send has not crossed egress; Gate close wins; assert zero provider requests.
+18. Provider send boundary wins immediately before Gate close; attempt appears in sealed C inventory and is reconciled with the same key.
+19. Gate close races final egress generation compare; exactly one serialization order is observed.
+20. Egress gateway cannot reach authoritative C Gate; no provider bytes are sent.
+21. Provider transport ACK is lost after send; same-key lookup only, no new attempt.
+22. Reserved/queued attempt during COC outage remains NOT_DISPATCHED until recovery release.
