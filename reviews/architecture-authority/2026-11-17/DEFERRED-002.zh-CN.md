@@ -1,6 +1,6 @@
 # 延后能力登记册 — DEFERRED-002
 
-- 版本：1.0.0；基线 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`。
+- 版本：1.0.0；基线 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。
 - 延后不代表豁免核心正确性、授权、一致性、Forget 或强制 Gate 要求。
 
 | ID | 延后能力 | Owner | 风险 | 是否阻塞 | 允许范围 | 禁止范围 | 关闭标准/证据 | 期限/Gate |
@@ -12,6 +12,7 @@
 | DEF-05 | 多种 Vector/Graph/Search Backend | F | Medium | 非阻塞 | 对比基准 | 无实测需求却引入多后端生产复杂度 | 工作负载支撑的 ADR 和运维预算 | P2 前 |
 | DEF-06 | 分布式服务拆分、多地域和自动扩缩容 | Engineering/Storage | High | 生产规模化声明阻塞 | 拓扑研究和负载模型 | 过早微服务、多地域写入或规模化声明 | 实测负载、已选拓扑、故障域和 DR 证明 | P3 前 |
 | DEF-07 | Multi-PolicyDomain Atomicity | I + Storage | Critical | BLOCKED；不接受 | 仅限单 Domain 设计 | 跨 Domain 事务或暗示原子性 | 新 I/Storage 规范设计、安全策略、物理拓扑和独立符合性 | 未来单独架构决策 |
+| DEF-08 | 跨 BrainAuthority 原子 Publication/Forget 事务 | D + Storage + I | Critical | v1 中 BLOCKED | 拆分为每个 BrainAuthority 独立操作；只有每个 Authority 都有终态证明且 Inventory 完整后才允许全局完成 | 一个操作跨多个 BrainAuthorityRef；根据全局协调器推断跨 Authority 原子性 | 后继规范 ADR，明确范围/协调器、顺序、部分完成、Restore/Recovery 和独立物理符合性 | 未来单独架构决策；任何多 Authority 能力前 |
 
 ## 有条件接受的非阻塞条件
 
