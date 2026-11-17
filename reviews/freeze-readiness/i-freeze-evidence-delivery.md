@@ -87,3 +87,8 @@ This update does not approve a production trust profile, revoke/commit ordering 
 ## 8. Latest exact I review pin / I 最新精确审查版本
 
 The current Phase 3.8.2 I RecoveryJoin trust/currentness review is Blob `01d4514c1c0979ea878a89f36213a7db3c3c1003`. It accepts typed RecoveryJoin field shape with amendments only; I-RJ-03/04/05, production cryptographic trust, real PolicyDomain sequencer, receipt consumption/revocation race and owner-local release CAS remain OPEN. The latest H candidate CI [44040312711](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040312711) passed 66/66 but does not close these I obligations.
+
+
+## 9. H schema 1.2.7 trust-profile review / H Schema 1.2.7 信任配置审查
+
+I's latest exact review of the RecoveryJoin trust/currentness contract including the signature-profile authority boundary is Blob `a6682c3d5ff6653f066aab17950950615e60ac10`. H schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854` and H exact review Blob `8bed0b05cd631014bf5af7cb5a8dafdd932940e9` add `signature_profile_id` separately from canonicalization. I owns the trusted registry and must reject payload-defined profile/key trust. The field is optional in JSON Schema but must be semantically required for protected signed records. No production signature suite or registry implementation is approved; I-FR-01 remains OPEN.
