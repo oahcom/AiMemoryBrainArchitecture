@@ -51,7 +51,16 @@
     "owner_high_water": "41",
     "owner_ledger_root": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "coc_participant_intent_ref": "COC/intent/CPO-01-accepted",
-    "participant_reservation_ref": "COC/reservation/CPO-01-accepted"
+    "participant_reservation_ref": "COC/reservation/CPO-01-accepted",
+    "i_terminal_decision_ref": "I/terminal/COMMIT_WON/operation-41",
+    "d_clearance_ref": "D/clearance/forget-op-41/fence-19",
+    "storage_resolution_proof_ref": "Storage/resolution/gid/pg-inc-7/gid-41",
+    "prepared_participant_ref": "Storage/prepared-participant/41",
+    "prepare_attempt_ref": "Storage/prepare-attempt/41",
+    "prepare_attempt_generation": "1",
+    "participant_ledger_ref": "Storage/participant-ledger/1",
+    "participant_ledger_version": "v1",
+    "participant_tuple_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
   },
   "c_submit_outcome": {
     "schema_id": "CSubmitOutcome",
