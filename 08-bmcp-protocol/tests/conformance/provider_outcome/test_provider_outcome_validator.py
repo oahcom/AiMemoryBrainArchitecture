@@ -242,6 +242,19 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertIn("wrong loaded C object schema artifact URI", result["errors"])
 
 
+
+    def test_15_unified_1_2_14_binds_d_forget_fence_generation(self):
+        schema_path = H_ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.14.schema.json"
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        self.assertEqual(schema["$defs"]["commonEnvelope"]["properties"]["schema_artifact_revision"]["const"], "1.2.14")
+        d_highwaters = schema["$defs"]["ownerSpecificHighWatersD"]
+        self.assertIn("forget_fence_generation_high_water", d_highwaters["required"])
+        self.assertIn("barrier_generation", d_highwaters["required"])
+        self.assertIn("barrier_generation", d_highwaters["properties"])
+        self.assertIn("owner_gate_generation", schema["$defs"]["ownerSnapshot"]["properties"])
+        self.assertNotIn("forget_fence_generation_high_water", schema["$defs"]["ownerSnapshot"]["properties"])
+        self.assertEqual(d_highwaters["properties"]["forget_fence_generation_high_water"]["type"], "string")
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
 
