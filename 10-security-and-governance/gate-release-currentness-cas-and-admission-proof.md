@@ -110,3 +110,59 @@ For strict immediate revocation, one of these realizations is required:
 A time-bounded authorization lease is a weaker, explicitly bounded-revocation profile; it MUST NOT be described as immediate revocation. Its maximum stale-authorization window, clock assumptions, renewal and partition behavior must be declared in policy.
 
 If an enforcement point is offline/unreachable, strict revocation remains PENDING and global completion remains blocked unless I records a policy-approved residual exception. A cached signed decision alone does not prove currentness.
+
+
+## 11. Controlling clarification — I-local CAS and cross-owner release barrier
+
+**This section controls over any earlier wording in §§2–3 or §10 that could be read as requiring one atomic CAS across independent owner authorities.** I, D, C, H and Storage do not share one implied transaction domain. A digest containing several owner epochs is a reconciliation tuple, not a globally atomic snapshot. Owner-local counters are opaque and must never be numerically compared.
+
+### 11.1 I-local serialization domain
+
+I's PolicyDomain Sequencer is authoritative only for I-owned state: IGateGeneration, PermissionEpoch, authorization-policy revision, I inventory epochs/digests, revocation request sequence, and I-issued authorization/commit receipts. CommitIGateRelease MUST atomically compare and persist those I-owned values, proposal nonce/expiry, evidence-manifest digest, target-set digest and I gate revision. It MUST NOT claim that a D FenceGeneration, C CGateGeneration, H CapabilityEpoch, Storage transaction position or COC RecoveryEpoch was atomically compared in the I transaction.
+
+Foreign owner evidence is represented by exact typed refs, immutable digests, issuer/key identity, owner-local generation, scope, target mapping, validity and status. I verifies signatures and queries currentness where required. A foreign proof is never converted into an I epoch or treated as a globally ordered position.
+
+### 11.2 Cross-owner release is a barrier protocol
+
+A global release/reopen that depends on several owner gates MUST use a staged protocol:
+1. I creates a GLOBAL_RELEASE_PROPOSAL bound to exact I state and the complete mandatory owner/recipient inventory.
+2. Each affected owner prepares its own gate release against its own current local state and returns a signed OWNER_RELEASE_PREPARED receipt. Prepare does not open that owner gate.
+3. I commits its I-local release decision by CAS. If I currentness changed, abort the proposal; all owner gates remain closed.
+4. I issues a one-use GLOBAL_RELEASE_COMMIT bound to the exact proposal and prepared-receipt set. Each owner performs its own local CAS and returns a durable OWNER_RELEASE_COMMITTED receipt.
+5. I marks global release EFFECTIVE only after all mandatory owner acknowledgements are verified against the closed-world inventory. Missing/offline/unknown owner remains PENDING; an exception must be explicit, scoped, time-bounded where applicable, and policy-approved.
+
+If an owner changes local gate generation between prepare and commit, its local CAS rejects. I must not infer release from a sent message or transport ACK. This protocol is not a distributed ACID transaction; it is a recoverable barrier with explicit partial states. No owner may accept a stale or replayed global release token.
+
+### 11.3 Per-operation authorization and C causal order
+
+I authorization for a protected side effect is not granted by global Gate Release. For C provider submission, I's PolicyDomain Sequencer orders the exact operation's single-use authorization receipt consumption against revocation:
+- REVOCATION_WON before consumption: C MUST NOT invoke the provider.
+- COMMIT_WON consumption first: the exact operation is held as an I in-flight participant; later revocation cannot become effective past it until C supplies authoritative terminal outcome or an approved recovery disposition.
+- UNKNOWN/IN_DOUBT: no provider invocation if authorization terminality is unknown; keep the relevant barrier held.
+
+The I receipt binds exact Publication/ParticipantIntent identity as applicable, request digest, C admission/request identity, D lineage/fence evidence, Storage participant where applicable, PolicyDomain, principal, scope, purpose, target, issuer/key and one-use consumption. COC/RecoveryJoin transports and reconciles evidence; it does not mint I authorization. The exact C causal-order contract controls provider submit sequencing.
+
+### 11.4 Currentness and admission proof semantics
+
+I Gate Release proves only the I-owned transition. I AdmissionReceipt proves only I authorization/admission for its exact operation and digest. It does not prove D admission, C egress, Storage visibility, provider execution, Adapter application or Forget completion. Owner-local close receipts and in-flight snapshots remain owner-issued. I global drain/completion is a verified join of those receipts plus the complete I inventory, not a synthesized global counter.
+
+### 11.5 Required tests / 强制测试
+
+1. I PermissionEpoch changes between I Prepare and I Commit: I CAS rejects.
+2. D/C/H owner gate generation changes after OWNER_RELEASE_PREPARED: that owner's local commit rejects.
+3. I commits global release but one owner is offline: global state remains PENDING, never EFFECTIVE.
+4. Duplicate GLOBAL_RELEASE_COMMIT with same digest is idempotent; changed owner set/digest conflicts.
+5. Revocation wins before I single-use authorization consumption: C records no provider invocation.
+6. I COMMIT_WON wins before revocation: revocation remains held until exact C terminal outcome.
+7. C provider outcome UNKNOWN: I target/participant remains unresolved.
+8. Inventory epoch changes after release prepare: I CAS rejects or requires a fresh proposal.
+9. Foreign owner counters are intentionally non-comparable: validator accepts exact refs/digests only, never numeric ordering.
+10. Missing, invalidated, offline or key-revoked owner evidence blocks global effectiveness unless an explicit I exception is recorded.
+
+**Disposition:** This is the controlling I semantic refinement. I-local CAS and the recoverable cross-owner barrier are specified; implementation, exact H wire schema, inventory completeness, cryptographic profile and race execution remain OPEN. No global release or Forget completion is claimed.
+
+### 中文规范摘要
+
+本节明确：I 的 CAS 只原子比较 I 自己的 PolicyDomain 状态；D Fence、C Gate、H Capability、Storage 事务位置和 COC RecoveryEpoch 均是独立权威值。跨 Owner Release 采用可恢复的分阶段 Barrier：Owner 先本地 Prepare，I 本地 CAS 后发出一次性 Commit，各 Owner 再执行本地 CAS；所有强制 Owner 的持久化确认齐备后，I 才能标记 Global Release EFFECTIVE。部分成功、离线或未知状态只能是 PENDING。
+
+对 C Provider Submit，I 单次授权消费与撤销由 I PolicyDomain Sequencer 排序：REVOCATION_WON 禁止发送；COMMIT_WON 将精确操作纳入在途参与者，后续撤销等待 C 的权威终态；UNKNOWN 不得推断授权或发送。I Receipt 不替代 D Admission、C Egress、Storage Visibility 或 Provider Outcome。
