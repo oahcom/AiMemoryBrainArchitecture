@@ -487,7 +487,8 @@ latest_reconciliation:
     implementation_binding: DEFERRED_TO_ENGINEERING_PHASE
     engineering_phase_repository_and_code_owners: PENDING
     issue_7_disposition: OPEN_FOR_ENGINEERING_PHASE_ENTRY_PLAN_NOT_CURRENT_ARCHITECTURE_GATE
-    strict_manifest_yaml_unique_key_parse_and_required_field_path_checks: PASS_PR152_EXACT_HEAD_RUN_44189789286
+    full_manifest_yaml_parse_and_required_field_path_check: PASS_PR147_EXACT_HEAD_RUN_44189279179
+    strict_unique_key_yaml_validation: PASS_PR152_EXACT_HEAD_RUN_44189789286
     formal_json_schema_validation: NOT_RUN
     acceptance: BLOCKED_PENDING
     production_activation: NOT_AUTHORIZED
@@ -504,23 +505,32 @@ latest_reconciliation:
   note: PR #141 integration and its 24/24 reference-model result do not change any production R3, specialist approval, independent review, acceptance or G3 gate.
 
 
-strict_manifest_validation_follow_up:
-  pr_147_initial_parse:
+post_merge_manifest_validation:
+  observed_main_head_before_followup: be90d5c5d04dab65123f53a153cadd562242daa1
+  pr_147:
+    state: CLOSED_MERGED
     head_sha: d3dbc5321ccf97429b3003b19a28d8100330fda9
-    run: 44189279179
-    result: YAML_PARSE_AND_REQUIRED_PATH_CHECKS_PASSED_BUT_DEFAULT_SAFELOADER_DID_NOT_REJECT_DUPLICATE_KEYS
-    disposition: HISTORICAL_INCOMPLETE_VALIDATION_SUPERSEDED_BY_PR_152
+    merge_commit_sha: 56336bd16b4dcab1b600eb7ab12e171fda0553a1
+    workflow_run: 44189279179
+    workflow_conclusion: SUCCESS
+    yaml_full_parse: PASS
+    required_top_level_fields: PASS
+    referenced_path_existence: PASS
+    limitation: PyYAML_safe_load_did_not_reject_duplicate_keys
   pr_152:
     state: CLOSED_MERGED
     head_sha: 08c017af689eb98ffc8e114e54ed46314cfbf757
     merge_commit_sha: bc6ab890aea68ea33f4de42e442d7ac22fcbf26b
     workflow_run: 44189789286
-    result: SUCCESS
-    checks:
-      duplicate_top_level_keys: REJECTED
-      duplicate_nested_keys: REJECTED
-      full_manifest_unique_key_parse: PASS
-      required_fields: PASS
-      referenced_paths: PASS
-    formal_json_schema_validation: NOT_RUN
-  note: PR #152 supersedes the initial PR #147 parser implementation. The successful PR #147 run remains historical but is not treated as duplicate-key-safe validation.
+    workflow_conclusion: SUCCESS
+    strict_unique_key_yaml_parse: PASS
+    duplicate_top_level_key_negative_fixture: PASS
+    duplicate_nested_key_negative_fixture: PASS
+    actual_manifest_required_fields_and_paths: PASS
+  formal_json_schema_validation: NOT_RUN
+  production_r3_and_dfi_001_to_022: NOT_RUN_NOT_EVIDENCED
+  owner_d_approval: PENDING
+  owner_i_approval: PENDING
+  independent_specialist_reviews: PENDING_NOT_EVIDENCED
+  production_activation: NOT_AUTHORIZED
+  note: PR #147 established full-file YAML parse and required-path checks but used PyYAML safe_load, which accepts duplicate keys. PR #152 fixed actual duplicate keys and added strict duplicate-key rejection; its exact-Head run passed. Neither run is formal JSON Schema validation or production conformance.
