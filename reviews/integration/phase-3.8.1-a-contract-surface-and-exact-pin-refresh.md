@@ -283,3 +283,100 @@ Storage validates this ICommitAuthorizationProof at the visibility linearization
 Storage 在 Visibility Linearization Point 验证 ICommitAuthorizationProof。只有 Storage 产生 COMMITTED_VISIBLE 或权威 NO_PUBLICATION 后，I 才能签发 ITerminalProof，用于关闭自己的进行中 Authorization Participant，并按规则释放等待中的 Revocation。
 
 Storage 不得要求 ITerminalProof 来执行产生该证明所依赖 Storage Outcome 的提交，否则形成循环依赖。已消费 CommitAuthorizationReceipt 与提交后 ITerminalProof 是两个不同证明阶段，所有 API/Wire Schema 必须保持类型隔离。
+
+
+## 14. Current Phase 3.8 Owner-source refresh and bounded publication-model evidence (2026-11-18)
+
+### 14.1 Exact current Owner branch pins
+
+The following branch tips and Phase 3.8 contract artifacts were fetched again after PR #151/#153 integration. The branch tips are the observed source snapshot for this refresh; the Blob SHAs identify the exact files read.
+
+| Owner | Branch | Observed branch HEAD | Phase 3.8 contract Blob |
+|---|---|---|---|
+| D | `session-d-memory-brain-2026-11-16` | `0ddfbb0b7582c4600c9c92007414dd933d5d2bac` | `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` |
+| E | `session-e-memory-compiler-2026-11-16` | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | `475fee41e5eea527af4edefbfe88c58c86967d0a` |
+| I | `session-i-security-governance-2026-11-16` | `8758fc8caf6412ce8a7c6d5178fb70d43569ac76` | `54bab0484bd232a5a258e65e34cc7425288b39a6` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `f6887cc9ea5bfa5293c1bc47e9f10e582830cba3` | `175ee7b1349cfdb79a19898b311a88391ed88010` |
+| A | `session-a-integration-2026-11-16` | `6e05831d264040e0e3b3359245b1e01ea613b46c` | this addendum, prior to §14 refresh |
+
+All four Owner contracts still explicitly leave independent Owner approval, exact wire/canonicalization, cryptographic/key lifecycle, physical serialization topology and conformance open. The observed branch heads are not Owner approvals. The role-authored artifacts were read from their named branches and must not be treated as independently signed decisions.
+
+### 14.2 Mainline reference-model changes since the prior integration review
+
+Two bounded reference-model PRs are now merged:
+
+1. PR #151, exact Head `31a48f53b85929482ec1ef39a9ad2b254c64af00`, merge `d38c8379392e56fa095ad7577e96c46b8ff202f3`. Exact-head publication workflow #44189403281 completed SUCCESS with 18 tests.
+2. PR #153, exact Head `faf90302fb519c6f3e86946fe854b12639cc1423`, merge `be90d5c5d04dab65123f53a153cadd562242daa1`. Exact-head publication workflow #44189766480 completed SUCCESS with 20 tests.
+
+The model now exercises these bounded rules:
+
+- Fence-first: after D installs ForgetFence, a previously registered ProducerWork and hidden Storage participant cannot obtain a new PublicationParticipant.
+- Publication-first: a PublicationParticipant admitted before the fence remains in the modeled fence barrier until D closes it against the exact modeled Storage outcome.
+- Later fence: a publication already D-closed before a later fence is not reintroduced into the pending barrier.
+- Idempotent replay: an existing operation ID returns its receipt only for the same immutable tuple of auth ID, publication participant, Storage participant, D admission proof and I COMMIT_WON proof. A changed tuple conflicts.
+
+These are deterministic, in-memory reference-model tests. They do not establish database serializability, real multi-process concurrency, distributed transaction atomicity, proof authenticity, actual D/I/Storage adapters, crash/failover/restore behavior or production conformance. The test double's methods represent durable transitions; they are not themselves durable transactions.
+
+### 14.3 Updated integration disposition
+
+The Phase 3.8 composition remains **COHERENT PROPOSED CONTRACT / NOT FROZEN**.
+
+The two PRs reduce ambiguity in the reference model but do not close any Owner authority gate. The following remain OPEN:
+
+- independent exact-version D/E/I/Storage Owner decisions on the Phase 3.8 source Blobs above;
+- H wire schema, canonical encoding, signature and cross-language interoperability;
+- I trust-root/key lifecycle, revocation propagation, nonce consumption and authoritative PolicyDomain sequencer proof;
+- Storage's selected physical serialization/transaction topology and actual final visibility linearization proof;
+- D/Storage crash, lost-ACK, concurrent race, failover, restore and anti-rollback conformance;
+- end-to-end COC/participant registry and real owner-ledger integration;
+- explicit production engineering entry, which remains deferred by project authority to the engineering phase.
+
+No architecture freeze, Owner approval, production implementation, Forget completion, deployment or production activation is claimed.
+
+### 14.4 中文规范
+
+#### 14.4.1 当前 Phase 3.8 Owner 分支精确版本
+
+本次在 PR #151/#153 集成后重新读取了以下 Owner 分支及 Phase 3.8 契约文件。分支 Head 是本次观察到的源快照；Blob SHA 标识实际读取的文件。
+
+| Owner | 分支 | 观察到的分支 HEAD | Phase 3.8 契约 Blob |
+|---|---|---|---|
+| D | `session-d-memory-brain-2026-11-16` | `0ddfbb0b7582c4600c9c92007414dd933d5d2bac` | `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` |
+| E | `session-e-memory-compiler-2026-11-16` | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | `475fee41e5eea527af4edefbfe88c58c86967d0a` |
+| I | `session-i-security-governance-2026-11-16` | `8758fc8caf6412ce8a7c6d5178fb70d43569ac76` | `54bab0484bd232a5a258e65e34cc7425288b39a6` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `f6887cc9ea5bfa5293c1bc47e9f10e582830cba3` | `175ee7b1349cfdb79a19898b311a88391ed88010` |
+| A | `session-a-integration-2026-11-16` | `6e05831d264040e0e3b3359245b1e01ea613b46c` | 本文件 §14 更新前版本 |
+
+四个 Owner 契约仍明确保留独立 Owner 批准、精确 Wire/规范化、密码学/密钥生命周期、物理序列化拓扑及符合性验证等 OPEN 项。观察到的分支 Head 不等于 Owner 批准。角色会话撰写的文件不能冒充独立签署的决策。
+
+#### 14.4.2 自上次集成审查以来的主线参考模型变化
+
+两个有界参考模型 PR 已合并：
+
+1. PR #151，精确 Head `31a48f53b85929482ec1ef39a9ad2b254c64af00`，合并提交 `d38c8379392e56fa095ad7577e96c46b8ff202f3`。精确 Head 的 Publication 工作流 #44189403281 SUCCESS，共 18 项测试。
+2. PR #153，精确 Head `faf90302fb519c6f3e86946fe854b12639cc1423`，合并提交 `be90d5c5d04dab65123f53a153cadd562242daa1`。精确 Head 的 Publication 工作流 #44189766480 SUCCESS，共 20 项测试。
+
+当前模型覆盖：
+
+- Fence-first：D 安装 ForgetFence 后，即使 ProducerWork 和隐藏 Storage participant 之前已注册，也不能再取得新的 PublicationParticipant。
+- Publication-first：Fence 前已准入的 PublicationParticipant 必须持续保留在模型中的 Forget barrier，直到 D 根据精确的模型 Storage 终态完成关闭。
+- 后续 Fence：在后续 Fence 安装前已由 D 关闭的 publication，不会重新进入待处理 barrier。
+- 幂等重放：已有 operation ID 只有在 auth ID、publication participant、Storage participant、D 准入证明和 I COMMIT_WON 证明组成的不可变元组完全一致时才返回原 receipt。任何元组变化都冲突。
+
+以上仅为确定性的内存参考模型测试，不能证明数据库可串行化、真实多进程并发、分布式事务原子性、证明真实性、真实 D/I/Storage 适配器、崩溃/故障切换/恢复行为或生产符合性。模型方法只是模拟持久化转换，并不是真正的持久事务。
+
+#### 14.4.3 更新后的集成裁决
+
+Phase 3.8 组合仍为 **契约层面一致的提案 / 未冻结**。
+
+两个 PR 降低了参考模型中的语义歧义，但没有关闭任何 Owner 权威门禁。以下事项仍 OPEN：
+
+- D/E/I/Storage 对上述 Phase 3.8 精确 Blob 的独立 Owner 决策；
+- H Wire Schema、规范编码、签名及跨语言互操作；
+- I 信任根/密钥生命周期、撤权传播、Nonce 消费及权威 PolicyDomain Sequencer 证明；
+- Storage 已选定的物理序列化/事务拓扑及真实最终可见性线性化证明；
+- D/Storage 崩溃、ACK 丢失、并发竞态、故障切换、恢复及防回滚符合性；
+- 端到端 COC/Participant Registry 与真实 Owner Ledger 集成；
+- 生产工程实施入口；项目负责人仍明确将其延期至工程阶段。
+
+本次不宣称架构冻结、Owner 批准、生产实现、Forget 完成、部署或生产激活。
