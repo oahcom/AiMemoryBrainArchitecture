@@ -105,8 +105,8 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertEqual(set(schema["properties"]["state"]["enum"]), {"PENDING","ACTIVE","RETIRED","REVOKED","COMPROMISED","DESTROYED"})
 
 
-    def test_10_validator_is_pinned_to_unified_1_2_13(self):
-        self.assertEqual(SCHEMA_ARTIFACT_REVISION, "1.2.13")
+    def test_10_validator_is_pinned_to_unified_1_2_14(self):
+        self.assertEqual(SCHEMA_ARTIFACT_REVISION, "1.2.14")
         self.assertEqual(WIRE_SCHEMA_VERSION, "1.3.0")
         schema_path = H_ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.13.schema.json"
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
@@ -244,3 +244,13 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+    def test_15_unified_1_2_14_binds_d_forget_fence_generation(self):
+        schema_path = H_ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.14.schema.json"
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        self.assertEqual(schema["$defs"]["commonEnvelope"]["properties"]["schema_artifact_revision"]["const"], "1.2.14")
+        d_highwaters = schema["$defs"]["ownerSpecificHighWatersD"]
+        self.assertIn("forget_fence_generation_high_water", d_highwaters["required"])
+        self.assertIn("barrier_generation", d_highwaters["required"])
+        self.assertNotEqual("forget_fence_generation_high_water", "barrier_generation")
+        self.assertEqual(d_highwaters["properties"]["forget_fence_generation_high_water"]["type"], "string")
