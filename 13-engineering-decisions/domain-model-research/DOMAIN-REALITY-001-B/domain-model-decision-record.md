@@ -125,7 +125,31 @@
 - Reversal conditions: none while ownership and proof scopes remain different.
 - Status: DECIDED semantic split; global completion and physical proof OPEN.
 
-## 2. Rejected alternatives / 被拒绝方案
+## B-DEC-011 — Keep Physical Serialization Anchor Types Separate from Domain Identity
+- Context: Storage Option A proposes a per-authority serialization anchor; B reviewed exact Storage ADR Blob bb544ba2f346bdc130d524bd5c7310d86f367988.
+- Problem: physical serialization revisions could be mistaken for domain identity, ForgetFence, PermissionEpoch or a global order.
+- Alternatives: universal counter; reuse D/I/C/COC epochs; separate per-authority physical anchor and nominal refs.
+- Evidence: B review Blob e2bc4c8dde9706bfbe443269b702f1b5aa6965f6; E review Blob 19d708bc29b6115d7bccb7d320781f452ee28b78; F review Blob 122238146830db6188f00a9788e018a82bfb3f90; Storage v3.2.11 manifest Blob 54a4f0dab7ab24f1f6fb01f8cc5c7da292f02c57.
+- Decision: approve nominal type separation as an L1/L2 semantic boundary; classify anchor as IMPLEMENTATION_DETAIL, not canonical domain entity or global counter.
+- Consequences: preserves authority-local order; Storage still must prove physical DB, same-GID recovery, HA/restore and read-path correctness.
+- Complexity: additional types but prevents invalid cross-authority comparison and ownership leakage.
+- Affected owners: B/C/D/E/F/I/Storage/COC/A.
+- Reversal conditions: none unless authority boundaries and causal semantics are formally changed by all affected owners.
+- Status: B delegated technical approval with enumerated clarifications; Storage v3.2.11 not jointly accepted/frozen; fresh A review and L4 evidence required.
+
+## B-DEC-012 — Keep Origin Signature, Transport Authentication and Authorization Separate
+- Context: H 1.2.14 adds a reference authenticated-ingress gate; C defines provider outcome and outer envelope P0; I owns trust/profile/key governance.
+- Problem: a payload sender claim, transport authentication, C origin signature and authorization could be conflated.
+- Alternatives: reuse C object P0 for envelope; treat H transport sender as C origin signer; separate C origin signature/P0, H protected transport context, I trust registry and Storage durable ingress.
+- Evidence: C review Blob 8fd6052cabf58a78962cc2e776398b2a40604bcd; H correction Blob 4ba7e1699215d02224f805a15484b1da2e40c03f; I review Blob b6d1ea45825a1c2090abfba42474814f02f073a3; Storage manifest Blob 54a4f0dab7ab24f1f6fb01f8cc5c7da292f02c57; A blocking review Blob e12cd7b5c79e2234178014243fd51f2e7d51272e.
+- Decision: B preserves typed identity distinctions; C owns origin-signed message semantics/P0; H owns wire parsing and verification orchestration; I owns trust profile/issuer/key policy; Storage owns durable authenticated ingress/replay. No layer substitutes for another.
+- Consequences: secure separation, but production ingress cannot be frozen until C/H/I/Storage contracts and tests close.
+- Complexity: high, security-critical; requires exact P0, trust profile, protected context, channel binding, replay persistence and independent tests.
+- Affected owners: B/C/H/I/Storage/A.
+- Reversal conditions: only an explicit jointly approved profile proving equivalent signer, trust, transport and authorization semantics.
+- Status: semantic boundary CANDIDATE/RECOMMENDED; production crypto/trust/ingress BLOCKED; A says do not freeze.
+
+## 3. Rejected alternatives / 被拒绝方案
 
 - Universal status enum — loses subject-specific authority and state transitions.
 - Universal Event Sourcing — no demonstrated benefit across all bounded contexts; replay/Forget/external side-effect cost.
@@ -136,7 +160,7 @@
 - Bitemporal fields on every object — over-models non-temporal identities and runtime state.
 - Schema freeze before Fact/Claim and cross-owner acceptance — explicitly conflicts with open ADRs and owner authority.
 
-## 3. Open decisions / 未决决策
+## 4. Open decisions / 未决决策
 
 - Fact/Claim and Claim identity across versions.
 - Tenant/Workspace/Project/Scope/Environment taxonomy and registry authority.
@@ -147,7 +171,7 @@
 - Fuzzy-time encoding and Record vs Transaction Time mapping.
 - Runtime implementation repository and accountable engineering owner (Issue #7).
 
-## 4. Gate status / 门禁状态
+## 5. Gate status / 门禁状态
 
 This register does not close any blocking ADR, owner acceptance or implementation gate. All recommendations remain subject to exact-version owner review and independent review.
 
