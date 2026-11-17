@@ -225,3 +225,12 @@ H's current candidate schema/test pins:
 Latest run [44043100543](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44043100543), job `133902179251`, reports **97 tests ran, OK**. SCHEMA-15/16 add owner-snapshot attestation and typed empty/out-of-scope proof shape checks; they do not verify signatures, complete live pagination, I key status or actual currentness CAS.
 
 Storage accepts the expanded schema candidate shape as a logical proposal only. It does not change the bidirectional JoinProof authority split or close live COC/owner enumeration, signed proof dereference, durable JoinProof append/readback, I/D/C release CAS, JF-10 same-GID physical resolution or topology. No physical conformance PASS or independent Storage Owner signature is claimed.
+
+
+## 15. 中文规范：H 97 项测试与 Storage JoinProof 审查结论
+
+Storage 当前 JoinProof 合同仍为逻辑提案，最近 H 候选运行 44043100543 显示 97 项测试全部通过。测试由 HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1 组成。Schema 版本分别为 Recovery Cutoff 1.0.5、RecoveryJoin 1.0.1 和 Unified COC/JF-10 1.2.8。
+
+新增 SCHEMA-15/16 只检查 Owner Snapshot Attestation 内容绑定和 RecoveryJoin 1.0.1 的 COMPLETE_EMPTY / OUT_OF_SCOPE 证明结构；不证明生产 Owner 签名、I Key Status、真实分页完整性或 Currentness CAS。TPH 使用确定性参考模型，不是实际 COC Quorum Log；XLANG-01 只比较固定测试向量。
+
+Storage 接受双向 JoinProof 的逻辑结构，但不因此批准物理实现。仍需真实 COC Prefix/Quorum 枚举、六个 I/D/C Request/Admission Ledger 的签名快照、Owner Evidence Dereference、Storage JoinProof 原子持久化与回读、I/D/C 各自 Currentness CAS、JF-10 同 GID/DB Incarnation 物理恢复，以及明确的 D/Storage 序列化拓扑。拓扑 ADR 仍 BLOCKED。该审查是本集成会话的 Storage 角色模拟，不是独立 Storage Owner 签署，也不是实现或生产符合性 PASS。
