@@ -25,11 +25,28 @@ This is a project-assigned, stable execution-record identifier. It is **not** a 
 
 ## Verification status
 
-- Static content and link read-back: pending
-- YAML parse / schema validation: pending
+- Static content and link read-back: completed at corrected branch Head (see manifest and PR commits)
+- YAML parse / schema validation: pending independent/tool-backed validation
 - CI/build/test: NOT RUN; this documentation-only correction does not claim CI evidence
 - Independent re-review of corrected Head: REQUIRED
 - Architecture acceptance / merge: NOT APPROVED / NOT MERGED
+
+### Applied correction commits
+
+- Owner D v2: 26186b4f84496fcf6c75054a0cf6bd1341e9e99e
+- Execution record: 9097ed97c2e231a1ea427e5718dcfc6f67130496
+- EN architecture B v2 binding: ec952c7a07ca578c2aea03e057db3ef4b087a738
+- ZH architecture B v2 binding: 446473b3f6056983bec58a19a31d0b4695e35c17
+- Prompt template B v2 binding: 54a07988f4ac93c09b6f9c7a17ddf8ac49c323b4
+- Owner index D v2 binding: 8f6cd36af808b1e40cb717beef4cb4633dd27589
+- Manifest review/traceability update: e148ed7f2c479e142ecbbcbaf5a78ede503f80f0
+
+Additional current-version alignment commits:
+- 21c8497fc71a0608889dbeba67b131af8dcfcabc
+- d77f019e4078fd37d5c919c88ebb97891723a323
+- 176df68068dfb60ceed10581c4467c15c1ed0e74
+
+These are documentation and traceability changes only. They do not constitute architecture approval.
 
 ## Change log
 
