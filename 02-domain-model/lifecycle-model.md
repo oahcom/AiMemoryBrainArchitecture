@@ -145,3 +145,18 @@ Acceptance:
 - Store confirms atomic lifecycle/version/current-pointer semantics.
 - Governance confirms Forget workflow/completion proof.
 - Runtime/MCM confirms behavior for Superseded, Archived, Forgotten references.
+
+
+## 13. Forget contract alignment proposal — pending D/I approval
+
+The bilingual joined contract proposal is recorded at `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`. This reference is a proposal, not a normative amendment until D and I approve the exact same version/SHA.
+
+Proposed clarification:
+- `Forgotten` is terminal for the canonical Memory identity and means the durable suppression/fence decision has linearized.
+- `Forgotten` does not assert physical erasure, backup expiry, external-recipient compliance, or global Forget completion.
+- The Forget Operation phase is a separate state machine. In particular, a Memory may be `Forgotten` while its operation remains `InventorySealed` or `CleanupInProgress`.
+- `SuppressionCommitted` is the canonical linearization event: the tombstone, ForgetFence generation and operation/outbox record must be durably committed together. After that point, cancellation/rollback cannot remove the fence or restore ordinary access.
+- D owns canonical Memory/Forget semantics and fence ordering. I owns authorization, retention/legal-hold policy, inventory policy and global completion/exception evaluation. Executors own only their local action and evidence.
+- Failed or incomplete cleanup leaves suppression active and resumable; it never reopens the Memory identity.
+
+**Status:** PROPOSED / D-I APPROVAL PENDING / R3 TESTS NOT RUN.
