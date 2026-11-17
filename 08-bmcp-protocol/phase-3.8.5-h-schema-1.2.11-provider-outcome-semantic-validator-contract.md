@@ -123,6 +123,6 @@ Execution record must identify exact schema/validator/vector blobs, language/run
 
 ## 9. Freeze gate
 
-This contract is PROPOSED. It does not freeze 1.2.11 because the current schema's structural message does not alone carry every C gate/attempt semantic value and no exact C signature profile/vector bundle is yet pinned. H will only accept a later exact bundle after C's amendment, I candidate profile addendum Blob `1bcddbaaa4a9ca730d492a6554941becac305668` plus C candidate review Blob `, H schema/validator updates, independent cross-language execution and Storage/A exact pin review.
+This contract is PROPOSED. It does not freeze 1.2.11 because the current schema's structural message does not alone carry every C gate/attempt semantic value and no exact C signature profile/vector bundle is yet pinned. H will only accept a later exact bundle after C's amendment, I candidate profile addendum Blob `1bcddbaaa4a9ca730d492a6554941becac305668`; C candidate review Blob `, H schema/validator updates, independent cross-language execution and Storage/A exact pin review.
 
 No tests, production readiness, provider-specific exactly-once or implementation acceptance are claimed.
