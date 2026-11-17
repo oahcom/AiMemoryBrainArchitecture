@@ -96,9 +96,9 @@ This is a material blocker clarification: PostgreSQL CI capability evidence does
 
 ## 7. Exact RecoveryJoin, bidirectional Owner Admission join and H CI evidence refresh
 
-- Storage controlling bidirectional JoinProof contract: `reviews/storage-consistency/phase-3.6.11-storage-bidirectional-coc-owner-admission-join-proof.md`, Blob `2daea020808b174460d69ba1c0c4a0a3f6b3e8e2`.
+- Storage controlling bidirectional JoinProof contract: `reviews/storage-consistency/phase-3.6.11-storage-bidirectional-coc-owner-admission-join-proof.md`, Blob `364bf7e7833af3d97bc676f7f356e79251ea6cb4`.
 - Storage COC protocol v3.2.2 companion: `reviews/storage-consistency/phase-3.6-coc-durable-log-and-recovery-protocol-storage-design-v3.2.2.md`, Blob `ce3c41adf826a622a3717eca481b5d53e6549196`.
-- Storage exact review / topology disposition: `reviews/storage-consistency/phase-3.8.2-storage-exact-review-and-topology-disposition.md`, Blob `ebc8b2f0b05e3d59b098ed3ca8a2f31bb32fa36f`.
+- Storage exact review / topology disposition: `reviews/storage-consistency/phase-3.8.2-storage-exact-review-and-topology-disposition.md`, Blob `0fc74ef747b6e45f8a7d7fcbe8657b88ba67e82d`.
 - Storage topology ADR: Blob `080433f8e13a500522bc2754da64057edb0ae9d8` — **ADR-BLOCKED / NO TOPOLOGY SELECTED**.
 - H RecoveryJoin schema 1.0.0: Blob `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
 - H semantic validator contract: Blob `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80`.
