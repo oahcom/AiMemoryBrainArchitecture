@@ -88,6 +88,24 @@ class IProfileCrossLanguageVectors(unittest.TestCase):
         with self.assertRaises(Exception):
             rfc8785.dumps({"value": float("nan")})
 
+    def test_CRYPTO_05_unified_p0_binds_exact_artifact_and_wire_versions(self):
+        vector = json.loads(VECTOR.read_text(encoding="utf-8"))
+        unified = [v for v in vector["vectors"] if v["message_type"] in {
+            "OWNER_LOCAL_PENDING_GATE", "OWNER_LOCAL_GATE_RELEASE",
+            "JF10_I_TERMINAL_DECISION_OBSERVED"
+        }]
+        self.assertEqual(len(unified), 3)
+        for v in unified:
+            self.assertEqual(v["p0"]["schema_artifact_revision"], "1.2.11")
+            self.assertEqual(v["p0"]["schema_version"], "1.3.0")
+
+    def test_CRYPTO_06_gate_release_distinguishes_manifest_content_and_record_digest(self):
+        vector = json.loads(VECTOR.read_text(encoding="utf-8"))
+        release = next(v["p0"] for v in vector["vectors"] if v["message_type"] == "OWNER_LOCAL_GATE_RELEASE")
+        self.assertIn("manifest_content_digest", release)
+        self.assertIn("manifest_record_entry_digest", release)
+        self.assertNotIn("manifest_digest", release)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
