@@ -828,7 +828,7 @@ Retries MUST use the original immutable BatchId, ManifestId and canonical payloa
 
 ### 20.4 Exact-version bundle and downstream review gate
 
-This v3.2.1 proposal is bound to:
+This v3.2.2 proposal is bound to:
 - parent Storage v3.2 Blob: `e7ab80cdf8af5e0d50c407b06a5deb618d1e2ae6`;
 - parent Storage v3.1 Blob: `d5bdc72f193fcdaa654e4f07f865b77c578673ca`;
 - current companion COC / PostgreSQL protocol Blob: `8ac17816476f280ab6fb3afca0688aa03e37de1d`;
@@ -837,4 +837,4 @@ This v3.2.1 proposal is bound to:
 
 The C and H exact reviews of Storage v3.2/v3.2.1 are predecessor review artifacts only and do not transfer to v3.2.2. C and H MUST re-review the exact v3.2.2 Blob and the current I/D blobs pinned above. H's unified schema must represent both COC-committed participants and owner-local pre-COC admissions as distinct typed manifest member variants. A must review the final exact-version binding manifest after C/H re-reviews are committed.
 
-**Status:** v3.2.1 is a documentation proposal only. No implementation, quorum crash test, canonical-byte interoperability, provider idempotency, same-XID runtime recovery, owner release, production activation or Global Forget completion is claimed.
+**Status:** v3.2.2 is a documentation proposal only. No implementation, quorum crash test, canonical-byte interoperability, provider idempotency, same-XID runtime recovery, owner release, production activation or Global Forget completion is claimed.
