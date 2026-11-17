@@ -196,9 +196,9 @@ class Protocol:
             raise Rejected("authorization not bound to exact participants, digest and owner boundary")
         if publication_id not in self.publication_participants:
             raise Rejected("D publication proof missing")
-        if self.publication_participants[publication_id][1:] != (
-            storage_id, self.publication_participants[publication_id][2],
-            request_digest, owner_boundary,
+        publication_binding = self.publication_participants[publication_id]
+        if publication_binding[1] != storage_id or publication_binding[3:] != (
+            request_digest, owner_boundary
         ):
             raise Rejected("D proof does not bind exact Storage participant, digest and owner boundary")
         if d_proof != (
