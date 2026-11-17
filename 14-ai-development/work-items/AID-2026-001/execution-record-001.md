@@ -85,3 +85,21 @@ Subsequent commits that address IR-001, NR-002 and NR-003 must be appended here 
 - Acceptance authority and merge authorization: UNCHANGED / DISTINCT GATES.
 - NR-001 status: RESOLVED_BY_GOVERNANCE_DECISION.
 - Current PR/architecture acceptance, fresh independent review of current Head, CI, YAML/schema and manifest verification: NOT implied; remain separately pending/not run.
+
+
+## Remediation execution appendendum — IR-004 through IR-008
+
+- Source independent review: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#pullrequestreview-5937629228
+- Exact source reviewed Head: `1d6ab39375136d8649235feebeb6232609001222`
+- Remediation classification: ARCH / R3. Prompt v1 remains historical; prompt v2 is the active remediation prompt.
+- Prompt v2 SHA-256: `c49b09af16fd34941926665b450b8cd0788283240f4b31b2877695bc5b8b1cb7` (recomputed from GitHub read-back).
+- Exact PR commit reconciliation: GitHub `GET /pulls/42/commits?per_page=100&page=1` returned 77 SHAs. Manifest had 60 implementation SHAs + 15 historical bookkeeping exclusions + current self-update, leaving SHA `706f582338c8f4feac7f2c8517fbb390f58256f8` unclassified. It is a manifest-only reconciliation commit and is now recorded as such. No duplicate classifications were found.
+- IR-004: Work Item and remediation prompt reclassified ARCH/R3; Owner I security and Owner D Forget specialist reviews explicitly pending; R3 contract test matrix created. Specialist reports and executed test evidence remain NOT EVIDENCED.
+- IR-005: Missing SHA `706f582338c8f4feac7f2c8517fbb390f58256f8` classified as manifest-only bookkeeping. Full 77-SHA reconciliation will be repeated at the final remediation Head.
+- IR-006: Latest completed review is now explicitly recorded as FAIL at `1d6ab39375136d8649235feebeb6232609001222`; next review is separately PENDING after remediation. Historical reviews retained.
+- IR-007: B/D/I v1 prompt headers and bilingual Owner index now identify all three as SUPERSEDED/HISTORICAL; substantive historical clauses were not rewritten.
+- IR-008: A remains accountable Owner/coordinator/implementer. Integration Reviewer changed to PENDING and must be a distinct non-implementing ChatGPT conversation; assignment and evidence remain pending.
+- R3 test matrix: `r3-contract-test-matrix.md`; specification only, NOT EXECUTED.
+- CI, YAML/schema parsing and full Manifest validation: NOT RUN.
+- Acceptance: BLOCKED pending named specialist reports, reproducible R3 test evidence, distinct integration review, fresh independent review and explicit acceptance authority decision.
+- Merge/deployment: NOT AUTHORIZED.
