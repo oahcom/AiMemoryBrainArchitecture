@@ -68,16 +68,22 @@ H run `44068247661` 是真实 GitHub Actions 成功，且测试的 Validator/Tes
 
 ## 4. Owner review/adoption matrix / Owner 精确审查与采纳矩阵
 
-| Owner | Current exact evidence | Required decision against this v3.2.7 bundle |
-|---|---|---|
-| H | Phase 3.8.10 mapping Blob 1cbe74eba69325510d6b1019d971661f965eabf8; CI 44068247661 | Fresh H exact review of schema + validator + tests + CI; independent H Owner adoption still outstanding |
-| C | C schema 1.0.1 Blob a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda; amendment Blob 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb; prior H 1.2.13 review only | Fresh C exact review of H 1.2.14 mapping and callback requirements; v3.2.13/1.2.13 review does not transfer |
-| I | I namespace review Blob 0d78e5b2bfcf66cae6b757314cead84b9c942601 | Fresh I review of H 1.2.14 proof carrier and exact terminal-decision callback boundary; profile registration remains separate and NOT APPROVED |
-| D | D H 1.2.13 / RecoveryJoin 1.0.2 proof-carrier review is historical for this schema revision | Fresh D exact review of 1.2.14 ForgetFenceGeneration / barrier-generation carrier and D clearance verifier boundary |
-| Storage | This v3.2.7 candidate manifest | Storage source review and actual bidirectional COC↔I/D/C join / same-GID evidence remain outstanding |
-| A | Prior v3.2.6 integration review Blob d34e19f239c8e3c59ec5fbc3ec795b6e3c1453ea | Fresh A exact integration review of this v3.2.7 manifest required; prior A decision does not transfer |
+| Owner | Exact review artifact / Blob | Exact scope actually reviewed | Current bundle disposition |
+|---|---|---|---|
+| C | Phase 3.8.15 review, Blob `28d6044ed702565ebfbad9b93555759aaf5fdbe1` | Accepts H Phase 3.8.11 Blob `8c5c22aaf18d32e9a16e9116f0a3d178c4bb5cc2`, H schema 1.2.14 and C object 1.0.1; CI run 44067666900, 22/22 | **NOT transferable** to current H mapping Blob `c196fdc7a9d88e344d37ba2810a9bce1803f8b96`, authority-join mapping Blob `1cbe74eba69325510d6b1019d971661f965eabf8`, validator/test Blobs or later CI. Fresh C review required |
+| I | Phase 3.8.12 review, current Blob `fbd44d57bdb4fc15c4c254fcd9d8ac4c58d365fc` | Accepts H schema Blob `09fcd1...`, H mapping Blob `c196fd...`, RecoveryJoin 1.0.2 and I P0 structural candidate | Current schema/mapping structural review exists; fresh I decision on the new explicit I terminal-decision callback contract and exact authority-join mapping Blob `1cbe74...` remains required. Trust/profile/L3 remain OPEN |
+| D | Phase 3.8.8 review, Blob `6aca7d020caecf3c69debf614c903bf469583260` | Accepts H schema Blob `09fcd1...`, H mapping Blob `c196fd...`, RecoveryJoin 1.0.2 and D Fence high-water as D P0 L1/L2 candidate | D proof-carrier review exists; fresh D decision on the exact H authority-join callback mapping Blob `1cbe74...` remains required. L3/currentness/lineage/release remain OPEN |
+| H | Phase 3.8.10 authority-join mapping, Blob `1cbe74eba69325510d6b1019d971661f965eabf8`; Phase 3.8.11 mapping, Blob `c196fdc7a9d88e344d37ba2810a9bce1803f8b96`; Phase 3.8.13 D cross-review, Blob `6d45398885a842b0e5effc860bc97d7ecd3a8435` | Delegated H-role mapping and cross-review; exact CI run 44068247661 covers current validator/test/schema source Blobs | Not an independent human H Owner signature; full unmocked validation path remains OPEN |
+| Storage | This v3.2.7 manifest, Blob `4435fc0340a4fce10751679a95f3b4c821bdae4d` | Exact-version bundle binding and review routing | Not an independent Storage Owner signature |
+| A | No fresh A review of this exact v3.2.7 manifest | Not reviewed | **FRESH A EXACT-VERSION INTEGRATION REVIEW REQUIRED** |
 
-All previous role reviews were delegated simulations in the coordinating session, not independent human Owner signatures. Silence is not approval. This matrix records required adoption work; it does not manufacture it.
+The earlier H Phase 3.8.12 closure Blob `d9c09f0eab9d0ca23e01627e2bd399363d20e2cd` is historical evidence only. It binds C's acceptance of mapping Blob `8c5c22...` and H Provider Outcome CI run `44067666900` at commit `9892c21...` (22/22), not the current H mapping/authority-join mapping or the later callback-seam CI run `44068247661` (25/25). C's exact acceptance does not transfer to the changed mapping Blob. I's current review is exact for the H schema and Phase 3.8.11 mapping Blob, but it does not yet constitute approval of the separate new authority-join mapping or production verifier adapters.
+
+H Phase 3.8.12 Closure Blob `d9c09f...` 仅作为历史证据。它绑定 C 对 Mapping Blob `8c5c22...` 的接受，以及 Commit `9892c21...` 上的 H CI（22/22）；不绑定当前 H Mapping/Authority-Join Mapping 或后续 Callback-Seam CI（Run `44068247661`，25/25）。C 对旧 Blob 的接受不能转移到变更后的 Mapping。I 当前审查精确覆盖 H Schema 与 Phase 3.8.11 Mapping Blob，但尚不构成对独立 Authority-Join Mapping 或生产 Verifier Adapter 的批准。
+
+All these review artifacts are delegated role reviews in this coordinating workflow, not independent human Owner signatures. They establish technical review scope only; no silence, path match or shared version label is acceptance.
+
+所有这些审查工件均来自本协调工作流中的角色审查，不是真正独立人类 Owner 签署。它们只界定技术审查范围；沉默、路径相同或版本标签相同均不构成接受。
 
 ## 5. Required semantic and operational joins / 必需语义与运行 Join
 
