@@ -150,8 +150,6 @@ class Protocol:
                          request_digest, owner_boundary, final_visibility_gate_id):
         if auth_id in self.revoked:
             raise Rejected("authorization revoked")
-        if publication_id in self.publication_commit_winners:
-            raise Rejected("publication participant already has a COMMIT_WON operation")
         if publication_id not in self.publication_participants:
             raise Rejected("publication participant missing")
         if self.publication_participants[publication_id][1] != storage_id:
@@ -160,8 +158,12 @@ class Protocol:
             raise Rejected("authorization request digest or owner boundary mismatch")
         binding = (publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id)
         prior = self.authorizations.get(auth_id)
-        if prior is not None and prior != binding:
-            raise Rejected("authorization identity rebound")
+        if prior is not None:
+            if prior != binding:
+                raise Rejected("authorization identity rebound")
+            return
+        if publication_id in self.publication_commit_winners:
+            raise Rejected("publication participant already has a COMMIT_WON operation")
         self.authorizations[auth_id] = binding
 
     def revoke(self, auth_id):
@@ -505,6 +507,24 @@ class PublicationProtocolTests(unittest.TestCase):
         p = self.prepared()
         with self.assertRaises(Rejected):
             p.authorize_commit("wrong-auth", "publication-1", "other-storage", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
+
+    def test_authorization_replay_remains_idempotent_after_commit_won(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        p.authorize_commit(
+            args["auth_id"], args["publication_id"], args["storage_id"],
+            args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"],
+        )
+        self.assertEqual(p.publication_commit_winners["publication-1"], "op-1")
+
+    def test_new_authorization_is_rejected_after_commit_won(self):
+        p = self.prepared()
+        self.consume_i(p)
+        with self.assertRaisesRegex(Rejected, "already has a COMMIT_WON operation"):
+            p.authorize_commit(
+                "auth-2", "publication-1", "storage-1",
+                "request-digest-1", "owner-boundary-1", "visibility-gate-1",
+            )
 
     def test_publication_participant_has_one_i_commit_winner_across_operation_ids(self):
         p = self.prepared()
