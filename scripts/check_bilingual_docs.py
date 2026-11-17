@@ -38,11 +38,27 @@ def changed_paths() -> set[str]:
 def approved_exception(body: str) -> bool:
     if "BILINGUAL-EXCEPTION: APPROVED" not in body:
         return False
-    required = ("Exception Owner:", "Authoritative language/version:",
-                "Missing counterpart path:", "Exact source revision:",
-                "Due date (YYYY-MM-DD):", "Tracking Issue/PR:",
-                "Approval evidence:")
-    return all(item in body for item in required)
+    labels = (
+        "Exception Owner:", "Authoritative language/version:",
+        "Missing counterpart path:", "Exact source revision:",
+        "Due date (YYYY-MM-DD", "Tracking Issue/PR:",
+        "Approval evidence",
+    )
+    values: dict[str, str] = {}
+    lines = body.splitlines()
+    for label in labels:
+        value = ""
+        for line in lines:
+            if line.strip().startswith("- " + label):
+                value = line.split(":", 1)[1].strip() if ":" in line else ""
+                break
+        values[label] = value
+    if not all(values.values()):
+        return False
+    due = values["Due date (YYYY-MM-DD"]
+    if len(due) < 10 or not due[:10].count("-") == 2:
+        return False
+    return True
 
 
 def main() -> int:
