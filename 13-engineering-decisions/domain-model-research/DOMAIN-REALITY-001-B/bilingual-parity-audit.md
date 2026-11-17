@@ -18,7 +18,7 @@ A file is bilingual-complete only when the full normative content is present in 
 
 | File | Current language coverage | Parity status | Required action |
 |---|---|---|---|
-| README.md | Bilingual purpose and governance sections; work-plan tables and some status details are English-only | PARTIAL | Translate all table cells, gate explanations and remaining-work statements |
+| README.md | Chinese mirrors added for B0–B6 exit conditions, all core deliverable descriptions, governance boundaries and current blockers; Blob `a77061e0032d771e704e04f1a3ea081c0368ab87` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Refresh live PR/head metrics; verify all gate statuses and branch-isolation claims against current records |
 | existing-domain-model-baseline.md | Full Chinese mirror added for repository/branch facts, all six domain source pins, bilingual guide pins, Owner branch heads, PR/Issue state, five major conflicts, missing definitions, confidence and B0 disposition; Blob `2b3739c62e039f8c8824aa464ccabb52216c2c8f` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Verify exact SHA values and reconcile the current-main HEAD/date with live commit metadata; verify Fact/Claim/I-04 nuance |
 | baseline-currentness-and-owner-source-audit.md | Chinese mirrors added for main/domain Blob pins, current Owner heads, PR/Issue state, Phase 3.8 evidence, governance/testing authority and BIH acceptance correction; Blob `6183923c6d90b3eaf0b471e6707b2e3e21659e36` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Re-read live branch/PR refs; verify every status and exact Blob pin against current GitHub state |
 | baseline-owner-branch-snapshot-errata.md | Chinese mirror added for all ten Owner branch heads, exact artifact pins and acceptance limits; Blob `a96860efd61962633a5ad9e55b3353c151785411` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Re-read live refs before final acceptance; ensure no snapshot is misrepresented as approval |
@@ -103,6 +103,7 @@ A file is bilingual-complete only when the full normative content is present in 
 - `baseline-currentness-and-owner-source-audit.md` now has Chinese mirrors for main/domain pins, Owner heads, PR/Issue states, Phase 3.8 evidence, governance/testing authority and BIH acceptance currentness. Current Blob: `6183923c6d90b3eaf0b471e6707b2e3e21659e36`.
 - `existing-domain-model-baseline.md` now has a full Chinese mirror for repository/branch facts, source pins, Owner guides, PR/Issue status, conflicts, missing definitions and B0 disposition. Current Blob: `2b3739c62e039f8c8824aa464ccabb52216c2c8f`.
 - `mature-domain-model-research.md` now has Chinese mirrors for DDD, Event Sourcing, PROV-O, bitemporal, RDF/OWL, mature projects, recommendations and limitations. Current Blob: `5091ce19a4a71648cb769676a8ae09a63c83b60e`.
+- `README.md` now has Chinese mirrors for B0–B6 exit conditions, core deliverable descriptions, governance boundaries and current blockers. Current Blob: `a77061e0032d771e704e04f1a3ea081c0368ab87`.
 - `canonical-identity-semantics.md` 已为全部表格、规则、解析步骤、未决问题和决策记录补齐中文对应内容。当前 Blob：`bc8816eadcd14a1dd01ae03ed68de553b2bb1483`。
 - `fact-claim-identity-adr.md` 已为证据表、决策矩阵、Owner 验收要求和全部八个验证示例补齐中文对应内容。当前 Blob：`0bbea0beec6a5828c2db5ae267fac40f59ad7f1f`。
 - `evidence/README.md` 已为所有来源标题、来源用途说明、证据局限和版本注意事项补齐中文对应内容。当前 Blob：`bda915327a0ee77fb78e9a52bc094986254a1a60`。
@@ -117,6 +118,7 @@ A file is bilingual-complete only when the full normative content is present in 
 - `baseline-currentness-and-owner-source-audit.md` 已为 main/领域 Pin、Owner HEAD、PR/Issue 状态、Phase 3.8 证据、治理/测试权威和 BIH 验收时效性补齐中文对照。当前 Blob：`6183923c6d90b3eaf0b471e6707b2e3e21659e36`。
 - `existing-domain-model-baseline.md` 已为仓库/分支事实、源文件 Pin、Owner 指南、PR/Issue 状态、冲突、缺失定义和 B0 结论补齐完整中文对照。当前 Blob：`2b3739c62e039f8c8824aa464ccabb52216c2c8f`。
 - `mature-domain-model-research.md` 已为 DDD、Event Sourcing、PROV-O、双时态、RDF/OWL、成熟项目、建议和局限补齐中文对照。当前 Blob：`5091ce19a4a71648cb769676a8ae09a63c83b60e`。
+- `README.md` 已为 B0–B6 退出条件、核心交付物描述、治理边界和当前阻塞补齐中文对照。当前 Blob：`a77061e0032d771e704e04f1a3ea081c0368ab87`。
 
 
 - `canonical-domain-model.md` has received a full Chinese peer for its normative prose, object inventories, ownership matrix, minimum/recommended/deferred/rejected model tiers, architecture fit, authenticated-ingress boundaries and blockers. Exact readback Blob: `ce441336e2fbba7c7a28c0b4c75482d524a4ade7`.
