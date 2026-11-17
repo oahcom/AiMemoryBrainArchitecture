@@ -202,3 +202,33 @@ This is deliberately different from “blocked because not implemented.” The e
 这与“因为尚未实现所以阻塞”有本质区别。现有证据已经建立若干合理的架构原则，但本次审查仍发现 L1/L2 问题尚未闭环，且 B/D/E/F/G 的 Owner 专项审查和全量跨 Owner 证明矩阵尚未完成。在架构义务闭环前，不得宣称已冻结。
 
 ---
+
+
+## 9. Closed-Issue reality check / 已关闭 Issue 的真实解决情况复核
+
+A fetched the complete bodies and comment histories for the four closed Issues returned by the repository's closed-issue search. Closure is interpreted only within each issue's expressly defined decision scope.
+
+A 已读取仓库关闭 Issue 搜索返回的四个 Issue 的完整正文及评论历史。关闭状态仅按每个 Issue 明确限定的决策范围解释。
+
+| Issue | Actual closure evidence / 实际关闭证据 | Architecture-level conclusion / 架构层结论 |
+|---|---|---|
+| #6 — BIH consumer acceptance | C/F/G each published exact-version ACCEPT WITH ENUMERATED EXCEPTIONS against A BIH package Blob `a45ae90b318a79bf009d14f4d917611881e9e214`; C/F/G artifact SHAs are recorded in the final reconciliation comment. H and I decisions were separately pinned. | **Narrow design-consumer acceptance is genuinely closed.** Do not reopen merely because runtime suites were NOT RUN. Do not interpret this as runtime conformance or all later schema versions being approved. |
+| #8 — C/D/Storage JF-10 ↔ COC bridge | I, D, Storage, C and H each recorded exact bundle decisions; C's final exact bridge decision Blob `45a48249717c8cddb07ab96197730ef93d406c22`; H schema candidate Blob `a8a945cc3623c2907003b93625e3c79742150944`; A records the owner design/interface gate closed. A later reference semantic validator run reports 10/10 tests. | **The named single-I-PolicyDomain architecture/interface bridge acceptance is genuinely closed with enumerated exceptions.** The reference validator is bounded L3 evidence. Multi-PolicyDomain atomicity remains explicitly BLOCKED; COC quorum, cryptographic authority and live participant integration are separate later evidence. |
+| #9 — complete pinned JF-10 ↔ COC decision bundle | D Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` and Storage Blob `67d5d9b7c1f7979f5dda417ca30bb4b6f521cb45` both ACCEPT WITH ENUMERATED EXCEPTIONS, architecture/participant interface only, pinning the complete bundle. | **The exact bundle acceptance request is genuinely closed.** Do not carry this same owner-decision request forward as an open architecture blocker. Later protocol revisions require their own currentness review. |
+| #39 — ChatGPT-authenticated Codex CLI POC | Explicitly closed as superseded/not planned; the issue says the project uses ChatGPT ordinary-conversation workflow and no Codex quota/API-key/DC dependency. | Not a memory architecture feasibility issue. Keep as historical AI-development workflow governance, not an L1/L2/L3 blocker. |
+
+### Important distinction / 重要区别
+
+Issues #6, #8 and #9 prove that specific historical architecture/interface decision requests were completed. They do **not** prove that every later artifact revision (for example H unified schema 1.2.7, I crypto profile 1.0, newer Storage Phase 3.8 visibility contracts, or the newer C Provider Outcome boundary) inherits those decisions. Conversely, their separately stated NOT RUN implementation/runtime work must not be used to reopen an already-closed architecture decision unless a new architecture contradiction or changed contract is demonstrated.
+
+Issue #6、#8、#9 证明的是特定历史架构/接口决策请求已经完成；它们不意味着后续每个工件版本（例如 H Unified Schema 1.2.7、I Crypto Profile 1.0、更新的 Storage Phase 3.8 Visibility 合同、更新的 C Provider Outcome 边界）自动继承批准。反过来，旧 Issue 中另行列出的 NOT RUN 实现/运行时工作，也不得在没有新架构矛盾或合同变更证据的情况下，重新打开已经关闭的架构决策。
+
+## 10. Next exact audit actions / 下一轮精确审查动作
+
+1. Fetch and inspect the exact D Forget/Fence, E compiler provenance/consolidation, F retrieval/invalidation, G context/applied-state, and B domain-model Owner artifacts on their respective branches. README-only snapshots are insufficient.
+2. Reconcile the Phase 3.6 closed bridge decisions (#6/#8/#9) with the later Phase 3.8 revisions; record only changed semantics as new review obligations.
+3. Re-evaluate Storage's current topology ADR as an abstract architecture decision, not as a demand for production database deployment.
+4. Re-evaluate I/H crypto/schema changes as architecture/contract questions; keep HSM/KMS, production key custody and deployed registry in L4.
+5. Require C's newer Provider Outcome source contract only if the newer cross-protocol outcome boundary is intended to supersede or extend the older C-submit causal-order contract; explicitly state the relation between the two.
+6. Publish a revised A contradiction register with severity (P0/P1/P2), level (L1/L2/L3/L4), affected exact blobs, counterexample, owning Owner and closure proof.
+
