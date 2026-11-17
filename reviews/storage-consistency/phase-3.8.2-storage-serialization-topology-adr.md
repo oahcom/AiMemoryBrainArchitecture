@@ -115,3 +115,83 @@ Issue #10 的 PostgreSQL 18.7 CI 仅证明指定测试 Profile 的能力，不�
 ## 7. Disposition
 
 **ADR-BLOCKED / NO TOPOLOGY SELECTED.** Storage may not claim the Phase 3.8 final visibility boundary is physically realized until T1–T8 are evidenced and independently reviewed.
+
+
+## 8. Architecture-level decision addendum / 架构层决策补充（2026-11-17）
+
+- Decision scope: **logical serialization architecture only**.
+- Disposition: **OPTION A SELECTED AS THE NORMATIVE V1 ARCHITECTURE PROFILE; PHYSICAL DEPLOYMENT/ENGINE SELECTION REMAINS L4**.
+- This addendum supersedes the previous phrase “NO TOPOLOGY SELECTED” only for the abstract architecture decision. It does not claim a database product, executable deployment, operator or runtime topology has been selected.
+
+### 8.1 Decision / 决策
+
+For v1, each Canonical Memory authority MUST use one logical serializable transaction domain for D's authoritative producer-admission/fence/dependency/publication-participant records and Storage's authoritative hidden participant / final VisibilityPointer / PublicationReceipt / outcome / outbox records.
+
+The transaction domain is the **physical serialization substrate**, not a merged semantic authority:
+
+- D remains the sole semantic authority for ProducerClass, ProducerWork admission, ProducerRegistrationSequence, ForgetFence, lineage/dependency completeness, PublicationParticipantRef and D terminality.
+- Storage remains the sole semantic authority for PREPARED_HIDDEN, VisibilityPointer, Storage visibility outcome, PublicationReceipt and outbox durability.
+- I remains the sole authority for authentication, PermissionEpoch, authorization, revocation order and I CommitAuthorizationReceipt.
+- COC remains a separate quorum-ordered causal/recovery log; it is not silently included in this transaction and does not become I's sequencer or Storage's visibility authority.
+- C remains the sole authority for provider handoff/outcome; E remains the compiler lifecycle authority.
+
+每个 Canonical Memory Authority 的 v1 架构 MUST 使用一个逻辑 Serializable Transaction Domain，覆盖 D 的 Producer Admission/Fence/Dependency/PublicationParticipant 权威记录，以及 Storage 的 Hidden Participant / 最终 VisibilityPointer / PublicationReceipt / Outcome / Outbox 权威记录。
+
+该 Transaction Domain 只是**物理序列化底座**，不合并语义权威：D 仍唯一拥有 Producer/Fence/Lineage/PublicationParticipant 语义；Storage 仍唯一拥有 PREPARED_HIDDEN、VisibilityPointer 和 Storage Outcome；I 仍唯一拥有身份/授权/撤销；COC 仍是独立 Quorum Log；C/E 分别保留 Provider 和 Compiler 权威。
+
+### 8.2 Normative operation order / 规范操作顺序
+
+1. D registers the derivative-capable ProducerWorkItem and captures the D admission order before E queues, leases, dereferences protected source data or executes.
+2. E creates immutable compiler output in private staging and submits the complete direct/transitive dependency set to D as one immutable completeness unit.
+3. Storage persists the exact immutable publication tuple as PREPARED_HIDDEN and returns a durable StorageVisibilityParticipantRef. No public pointer, signed serving URL, index event or cache-visible entry exists.
+4. D admits PublicationParticipantRef bound to that exact StorageVisibilityParticipantRef and tuple digest, serialized against D InstallForgetFence. Fence-first rejects; participant-first creates an unresolved barrier participant.
+5. I consumes the single-use CommitAuthorizationReceipt in its own PolicyDomain sequencer, bound to the exact D and Storage participant references. Only COMMIT_WON can proceed; REVOCATION_WON forbids visibility; UNKNOWN/IN_DOUBT remains blocked.
+6. Storage performs the final serializable transaction. It verifies the exact PREPARED_HIDDEN participant, D participant identity and D fence-order proof (including whether the participant precedes a later pending fence), the consumed I COMMIT_WON proof, exact artifact/version/digest/dependencies/Scope and current attempt/lease. It atomically commits VisibilityPointer, COMMITTED_VISIBLE outcome, PublicationReceipt and outbox.
+7. If the final transaction proves no pointer/outcome can exist and no delayed writer can publish, Storage records authoritative NO_PUBLICATION. Ambiguous result remains UNKNOWN and private.
+8. D and I independently close their own participants only after reading the same exact Storage COMMITTED_VISIBLE or NO_PUBLICATION outcome. Post-outcome I terminal proof is not a precondition to the Storage commit.
+
+### 8.3 Fence/visibility ordering proof obligation / Fence 与 Visibility 顺序证明
+
+The shared transaction domain must serialize D fence installation and Storage final visibility commit. D's participant admission is also serialized with fence installation.
+
+- If fence installation linearizes before D participant admission, D rejects/quarantines; Storage cannot publish.
+- If participant admission linearizes first, the participant is durably present in D's barrier. A later fence may be recorded but cannot become effective past that unresolved participant. The final Storage transaction may complete that already-admitted participant only after validating the exact D ordering proof and I COMMIT_WON proof.
+- If Storage final visibility commits first, the immutable publication is part of the pre-fence work set and D/I closeout records the exact outcome.
+- If the fence is effective first, or proof ordering is unknown, no visibility pointer is committed.
+- There is no valid state in which an admitted participant is absent from the D barrier, or a visible artifact lacks the exact D/I proof pair.
+
+共享 Transaction Domain 必须对 D Fence 安装与 Storage 最终 Visibility Commit 提供序列化。D Participant Admission 也必须与 Fence 安装在同一 D 权威顺序中。
+
+- Fence 先于 Participant Admission：D 拒绝/隔离，Storage 不得发布。
+- Participant Admission 先发生：该 Participant 已持久进入 D Barrier；后续 Fence 可登记，但在该 Participant 未终结前不能越过它生效。Storage 只有验证精确 D 顺序证明和 I COMMIT_WON 后才能完成该已准入 Participant。
+- Storage Visibility 先提交：不可变发布属于 Fence 前工作集，D/I 按精确结果关闭各自 Barrier。
+- Fence 已生效或顺序 UNKNOWN：不得提交 VisibilityPointer。
+- 不允许“已准入 Participant 不在 D Barrier”或“可见 Artifact 缺少精确 D/I Proof”的状态。
+
+### 8.4 Explicit non-goals and scope / 明确不包含与范围
+
+- This is one Canonical Memory authority per serialization domain and one I PolicyDomain per JF-10 owner-gate operation. Cross-PolicyDomain atomicity is **NOT SUPPORTED / BLOCKED** in v1.
+- The I sequencer and COC quorum log remain independent consistency authorities. No cross-log atomic commit is claimed; unresolved participants remain held until authoritative reconciliation.
+- The separate JF-10 PreparedTransactionGID / DB-incarnation same-XID protocol remains a distinct COC ↔ I ↔ Storage bridge. It must not be conflated with StorageVisibilityParticipantRef.
+- Option B is not a v1 fallback. It requires a successor ADR that proves an equivalent durable protocol, operator, failure model and all crash/recovery invariants before substitution.
+- Option C remains rejected.
+
+### 8.5 Proof assumptions and failure behavior / 证明假设与故障行为
+
+The architecture assumes the selected transaction engine can provide serializable transactions (or a formally equivalent strict-serializable mechanism), durable commit acknowledgement, unique/idempotent operation constraints, atomic pointer/receipt/outcome/outbox commit, and authoritative read-after-commit for the relevant authority.
+
+If any assumption is not met by a future engine, the deployment is non-conforming; it MUST NOT silently weaken to check-then-write, process mutex, queue order, outbox-only or stale-token validation.
+
+Crash before final commit => PREPARED_HIDDEN remains private; same PublicationOperationId/tuple lookup recovers. Crash after commit but before ACK => authoritative readback returns the same immutable COMMITTED_VISIBLE outcome. Lost/ambiguous commit acknowledgement => UNKNOWN until same-operation lookup resolves. Conflicting terminal outcomes => quarantine/integrity incident. Restore or failover with uncertain serialization history => RESTORE_FENCED until D/I/COC/Storage evidence is reconciled.
+
+### 8.6 L1 vs L4 separation / L1 与 L4 分离
+
+**L1 CLOSED BY THIS ADR:** a single serializable transaction domain per Canonical Memory authority is the normative v1 logical topology; D and Storage semantic authorities remain distinct; I and COC remain independent; exact pre/post-commit proof ordering is specified; Option C is rejected and Option B requires a successor proof.
+
+**L4 STILL OPEN:** actual DB product/version/configuration, deployment manifest, operator/on-call, cluster/failure-domain placement, HA/PITR, real read-path enforcement, production key custody, and physical crash/failover/restore drills. These do not invalidate the architecture decision; they are implementation conformance obligations.
+
+**本 ADR 关闭 L1：** 每个 Canonical Memory Authority 使用一个 Serializable Transaction Domain 作为 v1 规范逻辑拓扑；D/Storage 语义权威分离；I 与 COC 保持独立；提交前/后的证明顺序明确；Option C 拒绝，Option B 必须重新提交后继 ADR 证明。
+
+**L4 仍 OPEN：** 实际数据库产品/版本/配置、部署清单、Operator/On-call、集群故障域、HA/PITR、真实读路径、生产密钥托管、物理崩溃/故障切换/恢复演练。这些是实现符合性义务，不否定架构决策本身。
+
+---
