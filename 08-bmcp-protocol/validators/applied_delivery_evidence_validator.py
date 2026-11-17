@@ -1,0 +1,173 @@
+"""Strict semantic reference validator for BMCP Applied Delivery Evidence 1.0.0.
+
+This module is a TEST/CONFORMANCE reference. It does not implement durable storage,
+production key discovery, cryptographic trust, or an owner ledger. Those authorities
+are injected and must return True/False/None (VALID/INVALID/UNKNOWN).
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Callable
+
+from jsonschema import Draft202012Validator, FormatChecker
+
+SCHEMA_PATH = Path(__file__).resolve().parents[1] / "schemas" / "bmcp.applied-delivery-evidence-1.0.0.schema.json"
+SCHEMA = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+P0_EXCLUDED = frozenset({"payload_digest", "signature", "integrity_proof_ref"})
+P0_FIELDS = tuple(name for name in SCHEMA["properties"] if name not in P0_EXCLUDED)
+IDENTITY_FIELDS = (
+    "issuer_ref", "sender_authority_ref", "sender_subject_ref", "message_id",
+    "message_nonce", "signing_sequence_namespace_ref", "signing_record_sequence",
+)
+DELIVERY_BINDING_FIELDS = (
+    "adapter_instance_ref", "runtime_session_ref", "delivery_id",
+    "delivery_attempt_id", "inference_request_id", "final_request_boundary_id",
+    "adapter_capability_epoch",
+)
+
+
+@dataclass(frozen=True)
+class DurableObservationDecision:
+    disposition: str
+    original_result_ref: str | None = None
+
+
+@dataclass
+class AppliedDeliveryChecks:
+    verify_profile_registration: Callable[[dict[str, Any]], bool | None]
+    verify_key_status: Callable[[dict[str, Any]], bool | None]
+    verify_signature: Callable[[dict[str, Any], bytes], bool | None]
+    verify_protected_identity_binding: Callable[[dict[str, Any]], bool | None]
+    verify_c_final_boundary: Callable[[dict[str, Any]], bool | None]
+    verify_g_delivery_binding: Callable[[dict[str, Any]], bool | None]
+    verify_capability_epoch: Callable[[dict[str, Any]], bool | None]
+    commit_observation: Callable[[dict[str, Any], str], DurableObservationDecision]
+    verify_current_replay_authorization: Callable[[dict[str, Any], str], bool | None]
+
+
+def _reject_duplicate_object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Build every JSON object while rejecting duplicate member names."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON object member: {key}")
+        result[key] = value
+    return result
+
+
+def build_h_p0(envelope: dict[str, Any]) -> dict[str, Any]:
+    unknown = set(envelope) - set(P0_FIELDS) - P0_EXCLUDED
+    if unknown:
+        raise ValueError("unrecognized Applied Delivery Evidence members: " + ", ".join(sorted(unknown)))
+    return {key: envelope[key] for key in P0_FIELDS if key in envelope}
+
+
+def canonical_p0_bytes(envelope: dict[str, Any]) -> bytes:
+    # Deterministic test reference only. Production must use the H-approved canonicalization profile.
+    return json.dumps(build_h_p0(envelope), ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def _tri_state(name: str, callback: Callable[..., bool | None], *args: Any) -> tuple[str | None, str | None]:
+    try:
+        value = callback(*args)
+    except Exception as exc:  # callback failure cannot become acceptance
+        return "UNKNOWN", f"{name} verifier exception: {type(exc).__name__}"
+    if value is True:
+        return None, None
+    if value is False:
+        return "INVALID", f"{name} verifier rejected evidence"
+    return "UNKNOWN", f"{name} verifier result is indeterminate"
+
+
+def validate_applied_delivery_evidence(
+    raw_envelope: bytes,
+    schema: dict[str, Any],
+    checks: AppliedDeliveryChecks,
+) -> dict[str, Any]:
+    try:
+        envelope = json.loads(
+            raw_envelope.decode("utf-8"),
+            object_pairs_hook=_reject_duplicate_object_pairs,
+        )
+    except Exception as exc:
+        return {"status": "INVALID", "errors": [f"invalid JSON: {type(exc).__name__}"], "unknown": []}
+    if not isinstance(envelope, dict):
+        return {"status": "INVALID", "errors": ["envelope must be an object"], "unknown": []}
+
+    errors = sorted(Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(envelope), key=lambda e: list(e.path))
+    if errors:
+        return {"status": "INVALID", "errors": [f"{'/'.join(map(str, e.path))}: {e.message}" for e in errors], "unknown": []}
+
+    if envelope["evidence_tier"] == "TIER_1":
+        if envelope["managed_region_coverage"] != "COMPLETE":
+            return {"status": "INVALID", "errors": ["Tier 1 requires COMPLETE managed-region coverage"], "unknown": []}
+        if envelope["materialized_context_version"] != envelope["context_version"]:
+            return {"status": "INVALID", "errors": ["materialized_context_version differs from G context_version"], "unknown": []}
+    if envelope["evidence_kind"] == "FINAL_REQUEST_SUBMITTED":
+        if envelope.get("submission_monotonic_sequence") is None:
+            return {"status": "INVALID", "errors": ["final-request evidence requires submission_monotonic_sequence"], "unknown": []}
+
+    try:
+        p0 = canonical_p0_bytes(envelope)
+        digest = hashlib.sha256(p0).hexdigest()
+    except Exception as exc:
+        return {"status": "INVALID", "errors": [f"P0 construction failed: {type(exc).__name__}"], "unknown": []}
+    if digest != envelope["payload_digest"]:
+        return {"status": "INVALID", "errors": ["payload_digest mismatch"], "unknown": []}
+
+    unknown = []
+    for name, callback in (
+        ("profile registration", checks.verify_profile_registration),
+        ("key status", checks.verify_key_status),
+        ("signature", checks.verify_signature),
+        ("protected identity binding", checks.verify_protected_identity_binding),
+        ("C final boundary", checks.verify_c_final_boundary),
+        ("G delivery binding", checks.verify_g_delivery_binding),
+        ("Adapter capability epoch", checks.verify_capability_epoch),
+    ):
+        status, detail = _tri_state(name, callback, envelope, p0) if name == "signature" else _tri_state(name, callback, envelope)
+        if status == "INVALID":
+            return {"status": "INVALID", "errors": [detail], "unknown": unknown}
+        if status == "UNKNOWN":
+            unknown.append(detail)
+
+    if unknown:
+        return {"status": "UNKNOWN", "errors": [], "unknown": unknown, "h_p0_digest": digest}
+
+    try:
+        decision = checks.commit_observation(envelope, digest)
+    except Exception as exc:
+        return {"status": "UNKNOWN", "errors": [], "unknown": [f"durable observation commit indeterminate: {type(exc).__name__}"]}
+    if decision.disposition == "CONFLICT":
+        return {"status": "INVALID", "errors": ["observation identity reused with changed digest or immutable tuple"], "unknown": []}
+    if decision.disposition == "SAME_DIGEST_REPLAY":
+        if not decision.original_result_ref:
+            return {"status": "UNKNOWN", "errors": [], "unknown": ["same-digest replay lacks original durable result reference"]}
+        # A historical replay result is not perpetual authorization to disclose it.
+        # Recheck current I authorization/epoch, key status, audience/scope and the
+        # applicable D fence through the owner-authority adapter before disclosure.
+        status, detail = _tri_state(
+            "current replay authorization",
+            checks.verify_current_replay_authorization,
+            envelope,
+            decision.original_result_ref,
+        )
+        if status == "INVALID":
+            return {"status": "INVALID", "errors": [detail], "unknown": []}
+        if status == "UNKNOWN":
+            return {"status": "UNKNOWN", "errors": [], "unknown": [detail], "h_p0_digest": digest}
+        return {"status": "VALID_REPLAY", "errors": [], "unknown": [], "original_result_ref": decision.original_result_ref, "h_p0_digest": digest}
+    if decision.disposition != "NEW":
+        return {"status": "UNKNOWN", "errors": [], "unknown": [f"unsupported durable disposition: {decision.disposition}"]}
+    return {"status": "VALID_NEW", "errors": [], "unknown": [], "h_p0_digest": digest}
+
+
+def observation_identity(envelope: dict[str, Any]) -> tuple[str, ...]:
+    return tuple(envelope[field] for field in IDENTITY_FIELDS)
+
+
+def delivery_binding_identity(envelope: dict[str, Any]) -> tuple[str, ...]:
+    return tuple(envelope[field] for field in DELIVERY_BINDING_FIELDS)
