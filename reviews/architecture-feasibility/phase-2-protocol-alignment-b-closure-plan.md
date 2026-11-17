@@ -201,3 +201,35 @@ Storage v3.2.9 Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3 still binds the ear
 This is exact-currentness/provenance drift, not a demonstrated schema or semantic regression. The H 1.2.14 / C 1.0.1 source target remains unchanged.
 
 **中文修正：** 最新 C/D/I 分支分别修正了 Full-Path Review 中的 H Schema Pin；H 将 CI 绑定更新到 Run 44069941327 / Commit ba2c934... / Job 133993324484。Storage v3.2.9 仍绑定旧 C/D/I Review Blob 和旧 H CI Run。因此 B 在语义/源文件候选层已对齐，但 v3.2.9 不再是当前精确 Review Bundle。必须由 Storage 发布后继 v3.3.0（或等效版本），绑定修正后的 C/D/I Review Blob 和当前 H CI Run/Commit/Job；C/H/D/I 对同一 Manifest 复审，再由 A 精确复审。该问题属于精确当前性/来源漂移，不是已证明的 Schema/Semantic 回退。
+
+
+## 11. Storage v3.3.0 exact bundle consolidation / Storage v3.3.0 精确 Bundle 收敛
+
+Storage has now published a monotonic successor manifest:
+- Manifest path: reviews/storage-consistency/phase-3.6.20-storage-v3.3.0-successor-exact-version-bundle-manifest.md
+- Exact Blob: c8407c9f10049d65426a3598ad20b6aa70f83c32
+- Predecessor: v3.2.9 Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3
+- Additional source evidence: v3.2.7 manifest Blob f7a3acc1845f4322b2b38264eb0d4bae92623bac, which contains the 42-test C/H/D/I evidence set but retained an earlier predecessor label.
+- It explicitly supersedes v3.2.7, v3.2.8 and v3.2.9 for current exact candidate bundle binding, resolving the divergent version-lineage ambiguity.
+
+### 11.1 Current exact H/C/D/I evidence / 当前精确证据
+
+- H Unified 1.2.14: 09fcd1fa29fe24255fbd87cae79dafb406594a59.
+- H integrated authority mapping: 1cbe74eba69325510d6b1019d971661f965eabf8.
+- H RecoveryJoin 1.0.2 / RecoveryCutoff 1.0.5: 4b664e3bce465499bcdfd93796349a4ba7074002 / 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7.
+- CSubmitOutcome 1.0.1 / C sequence namespace amendment: a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda / 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb.
+- H validator core/test/fixture: eab961a08d41e871f38543b18ee60cf024977414 / da1454ed985c84160c4cb6a0462df9d1225fab7f / f911027c848d21dd36fb87ba64a201a1455787a7.
+- H exact CI: run 44072037563, commit c6faee294e503f32a802ba51f3f3b3eb4bee2cd7, job 134000402978; 42 tests (36 validator + 6 Python/Node crypto interop).
+- H closure: 82f06005e49505c7b33e72e65387dcd9f991dc01; exact CI closure 431d049184ae4622e1dcac3f71176ab1cfc9aa8b.
+- C review: 61ff3716c9c3d3101a0058963c58f089aa1448b0.
+- D review: 2bf4514fe7972b72f6c1f904e461f86488d04cda.
+- I review: 2851d31e4f8caf48348944b885b493c607ca79e1.
+- A review of this exact v3.3.0 Blob is now the next required step.
+
+### 11.2 Corrected B disposition / B 阶段修正裁决
+
+The v3.2.9 exact-currentness gap is resolved at the manifest-binding level by v3.3.0. B is **CONDITIONALLY ALIGNED at L1/L2 candidate level** against exact manifest Blob c8407c9f10049d65426a3598ad20b6aa70f83c32, subject to A's fresh review and the evidence ceilings in §4–§6.
+
+This does not mean production trust, authority adapters, COC quorum durability, JF-10, same-GID recovery, Gate B/C, Global Forget, Full Applied or production activation are complete.
+
+中文：Storage 已发布单调后继 v3.3.0 Manifest，精确 Blob c8407c9f10049d65426a3598ad20b6aa70f83c32，明确替代 v3.2.7/v3.2.8/v3.2.9 的当前候选 Bundle 绑定，解决版本谱系分叉。B 可在 L1/L2 候选层标记 **CONDITIONALLY ALIGNED**，基线为 v3.3.0，但仍需 A 对该精确 Blob 做新审查，且生产信任/Authority Adapter、COC Quorum、JF-10、Same-GID Recovery、Gate B/C、Global Forget、Full Applied 和生产激活仍未完成。
