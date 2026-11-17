@@ -145,7 +145,7 @@ H semantic validation MUST enforce all of the following in addition to JSON Sche
 
 1. The C object and H envelope have the same outcome enum and exact operation/request/owner-admission identity.
 2. `HANDOFF_ACCEPTED` requires the exact provider request, provider receipt, outcome evidence, COC participant intent/reservation, and C `SideEffectStatus=PROVEN_OCCURRED`.
-3. `HANDOFF_REJECTED` requires a provider no-handoff proof and outcome evidence. The dereferenced C object must carry a compatible side-effect status; a provider rejection label alone is not proof of no handoff.
+3. `HANDOFF_REJECTED` in C schema 1.0.0 requires `ProviderRequestRef` and permits `SideEffectStatus` values `PROVEN_NONE`, `POSSIBLE_OR_UNKNOWN` or `PROVEN_OCCURRED`. H schema 1.2.12 instead unconditionally requires `provider_no_handoff_proof_ref`. This is a BLOCKING semantic incompatibility: a no-handoff proof cannot be required when C explicitly records a possible or occurred side effect. Proposed H correction for the next schema artifact: require `provider_request_ref` and `provider_outcome_evidence_ref` for `HANDOFF_REJECTED`; require `provider_no_handoff_proof_ref` only when the dereferenced C object says `SideEffectStatus=PROVEN_NONE`. `POSSIBLE_OR_UNKNOWN` remains nonterminal/blocking and must not be treated as safe no-handoff; `PROVEN_OCCURRED` must be reconciled as an observed side effect. The current 1.2.12 schema does not satisfy this rule.
 4. `NOT_INVOKED` requires both C `NotInvokedProofRef` and H `not_invoked_proof_ref`, C `SideEffectStatus=PROVEN_NONE`, and no provider receipt.
 5. `UNKNOWN` / `IN_DOUBT` requires an immutable unknown reason, preserves the original provider attempt/key/request tuple and MUST NOT be upgraded by timeout, COC status or Storage resolution.
 6. If `coc_participant_intent_ref` is null, `coc_absence_reason` is mandatory and must equal the C object's `COCAbsenceReason`; a handoff outcome with no COC participant/reservation is INVALID.
@@ -203,15 +203,16 @@ These vectors are specified only. No new test run is claimed.
 
 ## 9. Review disposition / 审查结论
 
-**Delegated H-role disposition: ACCEPT AS A VERSIONED MAPPING CANDIDATE WITH BLOCKERS. NOT FROZEN.**
+**Delegated H-role disposition: NEEDS REVISION for exact compatibility with CSubmitOutcome 1.0.0. The mapping table is a candidate; H schema 1.2.12 is NOT ACCEPTED as a compatible C outcome branch. NOT FROZEN.**
 
 Blocking before joint wire/crypto freeze:
-1. C must publish an exact 1.2.12 compatibility addendum and confirm the C object field semantics above.
-2. H must implement the semantic dereference/join validator and run the 1.2.12 vectors.
-3. I must register or reject the C signature profile and approve key-status/trust/anti-rollback policy.
-4. H must resolve the semantic distinction, if any, between `participant_intent_ref` and `coc_participant_intent_ref`.
-5. C/H must bind independent Python/JavaScript canonical-byte vectors to the exact current schema and registered profile.
-6. A must re-review the same exact bundle after I/D/C/H decisions.
+1. H must publish a successor schema artifact correcting the HANDOFF_REJECTED conditional so it does not equate provider rejection with proof of no side effect.
+2. H must resolve the semantic distinction, if any, between `participant_intent_ref` and `coc_participant_intent_ref`.
+3. C must publish an exact compatibility addendum pinning the successor H schema and confirm all object-to-wire mappings.
+4. H must implement the semantic dereference/join validator and run the exact-version vectors.
+5. I must register or reject the C signature profile and approve key-status/trust/anti-rollback policy.
+6. C/H must bind independent Python/JavaScript canonical-byte vectors to the exact current schema and registered profile.
+7. A must re-review the same exact bundle after I/D/C/H decisions.
 
 **JF-10 P0 remains OPEN.** This review does not approve Gate B/C implementation, production activation, Multi-PolicyDomain, Global Forget completion, provider exactly-once, or physical Forget.
 
