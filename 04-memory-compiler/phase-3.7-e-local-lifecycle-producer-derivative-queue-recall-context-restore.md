@@ -89,13 +89,12 @@ Required tests: register-before-enqueue crash; enqueue-before-ACK; duplicate del
 
 ## 10. Phase 3.7 cross-owner reconciliation amendments (EN)
 
-**Disposition:** E-local amendment proposal for LIF-01/02/04/05/08/09/10. D-owned EventRef-only ingress semantics remain a blocking dependency; this text does not invent or pre-approve D's decision.
+**Disposition:** E-local amendment proposal for LIF-01/02/04/05/08/09/10. D's §8 EventRef-only registration rule is the controlling D decision for this proposal set; E consumes that rule but does not mint D admission.
 
 ### 10.1 ProducerClass and EventRef-only ingress
 - E's local producer taxonomy is not an admission grant. Every derivative-capable CompileIntent MUST be covered by a D-issued, versioned, enabled ProducerClass registration specifying owner, accepted source-reference classes, output/derivative classes and permitted capabilities (normal, replay, rebuild, cleanup-only).
 - E ingress acceptance (AcceptedReceipt) and D producer admission (RegistrationReceipt) are distinct and neither substitutes for the other.
-- **EventRef-only ingress is not admitted for derivative-capable execution yet.** Until D publishes an explicit registration/ledger disposition for pre-canonical EventRef ingress, E may record the received reference only as quarantined ingress metadata. E MUST NOT dereference it as an admitted source, enqueue/lease/execute derivative work, create derivative output or imply D barrier coverage. This is a blocking interface, not an E-local policy choice.
-- Once D defines the path, E MUST bind registration to stable ProducerWorkItemId, CompileIntentId, source EventRef, request digest, Scope, known lineage, admission cursor, observed fence and I authorization. Unknown registration blocks execution.
+- **EventRef-only ingress follows D §8 and is eligible for D registration before Canonical MemoryRef exists** only when authenticated producer, enabled ProducerClass/version, exact Scope, canonical request digest and D-approved opaque lineage token/digest are complete. E MUST obtain the durable D RegistrationReceipt before queue/lease/execute. E MUST NOT treat the receipt as protected-payload authorization; current I authorization is separately required. Before dependency registration/publication, E MUST link exact Canonical MemoryRef/MemoryVersionRef identities and revisions to the original EventRef lineage. Missing/invalid bindings remain quarantined with no execution capability.
 
 ### 10.2 Derivation, retries and terminal disposition
 - Retry preserves logical ProducerWorkItemId and request digest; AttemptId/LeaseId rotate. Recompile creates a new immutable DerivationRun/output version linked to predecessor/source lineage through a D-governed relation; it cannot shed prior dependencies or fences.
@@ -114,8 +113,7 @@ Required tests: register-before-enqueue crash; enqueue-before-ACK; duplicate del
 ### 10.1 ProducerClass 与仅含 EventRef 的入口
 - E 本地 Producer 分类不构成准入授权。每个可产生 Derivative 的 CompileIntent 都必须由 D 的版本化、启用状态 ProducerClass 注册覆盖，并明确 Owner、允许的 SourceRef 类型、输出/Derivative 类型和能力（normal、replay、rebuild、cleanup-only）。
 - E 持久化入口接收证明（AcceptedReceipt）与 D Producer 准入证明（RegistrationReceipt）必须区分，彼此不能替代。
-- **仅含 EventRef 的入口尚未获准进行 Derivative-capable 执行。** D 发布 Canonical Memory 形成前 EventRef 入口的明确注册/账本处置前，E 只能将收到的引用记录为隔离状态的入口元数据。不得将其作为已准入源解引用、入队/分配租约/执行 Derivative 工作、生成 Derivative 输出，也不得暗示其已计入 D Barrier。这是阻塞接口，不是 E 可自行决定的本地策略。
-- D 定义路径后，E 必须将注册绑定到稳定 ProducerWorkItemId、CompileIntentId、源 EventRef、请求摘要、Scope、已知 Lineage、准入游标、观测到的 Fence 和 I 授权。注册结果未知时必须阻断执行。
+- **仅含 EventRef 的入口遵循 D §8，可在 Canonical MemoryRef 形成前由 D 注册**，但前提是经认证 Producer、启用 ProducerClass/Version、精确 Scope、规范请求摘要及 D 批准的不透明 Lineage Token/Digest 完整。E 必须在 Queue/Lease/Execute 前取得持久化 D RegistrationReceipt。该 Receipt 不构成受保护 Payload 授权；仍须独立验证 I 当前授权。Dependency Registration/Publish 前，E 必须将精确 Canonical MemoryRef/MemoryVersionRef 身份和 Revision 关联到原 EventRef Lineage。缺失/无效绑定仍须隔离且不授予执行能力。
 
 ### 10.2 Derivation、重试与终态处置
 - 重试保留逻辑 ProducerWorkItemId 和请求摘要，AttemptId/LeaseId 每次轮换。重新编译创建新的不可变 DerivationRun/输出版本，并通过 D 管理的关系关联前序运行/源 Lineage；不得丢弃旧依赖或 Fence。
