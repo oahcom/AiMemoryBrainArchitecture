@@ -2,12 +2,12 @@
 # C-REVIEW-001 补充审查 — Phase 3.8.24 H Applied Delivery Evidence 1.0.0 消费方审查
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
-- C Owner branch reviewed: `session-c-agent-integration-2026-11-16@88992da30331121b81cf2773acab11d921daf281`
-- H Owner branch reviewed: `session-h-bmcp-protocol@4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`
+- C Owner branch reviewed: `session-c-agent-integration-2026-11-16@88992da30331121b81cf2773acab11d921daf281`; C research PR #69 current HEAD `a69007a016aea4fcd60a05dfebf5a66ccf7f2538`
+- H Owner branch reviewed: `session-h-bmcp-protocol@6608cde89d959257db612d8ff8080f631333f3f3` (216 blobs; schema/validator/tests unchanged from tested code commit `4e65a2...`)
 - G contract reviewed: `06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md` Blob `bd297873bc1e593280484a43cb44b56058d9c4ff`
 - C/G decision: `07-agent-integration/phase-3.8.23-c-exact-review-g-applied-persistence-identity.md` Blob `4860c627b4d7e84e23fb39ad83411674f3b88c7b`
 - H decision: Phase 3.8.23 Blob `be308261c3e000e712a3cdbd3dbf60507156127b`
-- H candidate: Phase 3.8.24 Blob `36dff0b2ca17773ebc2ef0252d17b2632ffe1b06`
+- H candidate: Phase 3.8.24 EN Blob `f193113f142506b0d0848c7131f780db93a83aef`; zh-CN Blob `2c612ff11f9e3da784eeb5a9033aceb5bf01b55f`
 - H schema: `bmcp.applied-delivery-evidence-1.0.0.schema.json` Blob `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608`
 - H validator: Blob `2f6de24eea737cf75a16ead7495bea4627bb1bb4`
 - H tests: Blob `bb2bb6c94cc73293f736c6dcd450ab32bffc6ee5`
@@ -158,3 +158,8 @@ No merge, schema freeze, production activation, Provider/Adapter egress authoriz
 - C CI run: https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44129914790
 - C workflow fix PR #94: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/94
 - C review remediation PR #92: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/92
+
+
+## 7.1 Related C/G/H Unified 1.2.15 source correction / 相关 C/G/H 1.2.15 源码纠正
+
+C PR #69's latest head `a69007a...` adds a separate Phase 3.8.22 field-level source comparison. It verifies that H Unified 1.2.15's `C_PROVIDER_OUTCOME_RECORDED` oneOf branch requires `final_request_boundary_id`, and the H Gateway Attestation validator P0 allowlist includes it. G Phase 3.8.22 Blob `bd297873...` incorrectly says this field is absent. The C addendum is source-level evidence only; G must correct its own contract. The same H branch contains `actual_inference_request_id`, but this is not automatically aliased to G's `inference_request_id`. This Unified 1.2.15 issue is distinct from the separate Applied Delivery Evidence 1.0.0 mapping reviewed above.
