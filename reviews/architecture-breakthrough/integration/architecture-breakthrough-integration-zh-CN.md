@@ -122,7 +122,7 @@ PR #86 提出的 Option B 比完整 Memory OS 内核更克制：一个 Runtime �
 - Direct Top-K：Recall 0.5333；Precision 0.4741；Jain fairness 0.8325；1 task starvation。
 - Rerank + Budget：Recall 0.5417；Precision 0.2863；Jain 0.8141；无 starvation。
 - Unified RM：Recall 0.5083；Precision 0.2699；Jain 0.8554；无 starvation。
-- Unified RM local selection latency median 0.324 ms，Direct Top-K 为 0.099 ms。
+- Direct Top-K median 0.095 ms，Rerank + Budget 0.119 ms，Unified RM 0.306 ms。该数值来自单线程本地 Python microbenchmark，不是服务端延迟。
 
 因此该实验显示公平性与无饥饿改善，但 Recall/Precision 下降、局部选择延迟增加。它**不能**支持“Unified RM 全面优于现状”的结论。
 
@@ -184,7 +184,7 @@ Session 0 的三项研究方向与 A/B/C 原始报告基本一致，但应按以
 2. Resource Manager Option B：候选，且实验结果有质量/延迟 trade-off；不应表述为已证实的复杂度减少。
 3. Shadow Typed IR：候选，尚未达到正式采用门槛；Fact/Claim ADR 仍阻断。
 4. “新架构是否优于现有架构”：UNRESOLVED。
-5. L1 Storage topology：Session 0 报告引用 Storage topology ADR 中已 DECIDED 的单一 Serializable Transaction Domain / CanonicalAuthoritySerializationAnchor；本研究不重开该决定，也不将研究建议视为对其物理实现的证明。L4 数据库/HA/恢复能力仍需独立证据。
+5. L1 Storage topology：精确 Storage ADR Blob `bb544ba...` 的 §8.6 addendum 将 Option A 选为 normative v1 logical architecture，并明确 supersede §3 的 pre-addendum “no option selected” 历史文字；v3.3.2 manifest Blob `5c614375...` 也明确称其修正 ADR 状态。因此 L1 逻辑拓扑是 DECIDED；这不构成 L4 物理数据库/HA/恢复能力证明，L4 仍 OPEN。A PR #102 后续提出的“同一 ADR 自相矛盾”需要与 §8.6 的显式 supersession 文字对读，不应忽略该后续 addendum。
 
 ## 8. 冲突与风险登记
 
