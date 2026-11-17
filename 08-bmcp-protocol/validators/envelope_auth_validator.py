@@ -133,6 +133,9 @@ class EnvelopeAuthChecks:
     verify_envelope_integrity: Optional[
         Callable[[bytes, dict[str, Any], ProtectedTransportContext], Optional[bool]]
     ] = None
+    verify_envelope_signature: Optional[
+        Callable[[dict[str, Any], bytes, ProtectedTransportContext], Optional[bool]]
+    ] = None
     verify_key_status: Optional[
         Callable[[dict[str, Any], ProtectedTransportContext], Optional[bool]]
     ] = None
@@ -148,6 +151,11 @@ class EnvelopeAuthChecks:
 
 
 _REQUIRED_AUTH_FIELDS = (
+    "schema_id",
+    "schema_artifact_revision",
+    "schema_version",
+    "message_type",
+    "signature_profile_id",
     "message_id",
     "message_nonce",
     "audience",
@@ -210,6 +218,21 @@ def authenticate_outer_envelope(
             "unknown": [],
         }
 
+    try:
+        computed_digest, signature_preimage = outer_envelope_digest_and_preimage(envelope)
+    except Exception as exc:
+        return {
+            "status": "INVALID",
+            "errors": ["outer-envelope P0/digest construction failed: " + type(exc).__name__ + ": " + str(exc)],
+            "unknown": [],
+        }
+    if computed_digest != envelope.get("payload_digest"):
+        return {
+            "status": "INVALID",
+            "errors": ["outer-envelope payload_digest mismatch"],
+            "unknown": [],
+        }
+
     if protected_context is None:
         return {
             "status": "UNKNOWN",
@@ -235,13 +258,22 @@ def authenticate_outer_envelope(
         return {"status": "INVALID", "errors": invalid, "unknown": []}
 
     unknown: list[str] = []
-    _call_bool(
-        "outer envelope canonical digest/signature/profile",
-        checks.verify_envelope_integrity,
-        (raw_envelope, envelope, protected_context),
-        invalid,
-        unknown,
-    )
+    if checks.verify_envelope_signature is not None:
+        _call_bool(
+            "outer envelope signature/profile",
+            checks.verify_envelope_signature,
+            (envelope, signature_preimage, protected_context),
+            invalid,
+            unknown,
+        )
+    else:
+        _call_bool(
+            "outer envelope signature/profile",
+            checks.verify_envelope_integrity,
+            (raw_envelope, envelope, protected_context),
+            invalid,
+            unknown,
+        )
     _call_bool(
         "issuer key status / revocation / anti-rollback",
         checks.verify_key_status,
