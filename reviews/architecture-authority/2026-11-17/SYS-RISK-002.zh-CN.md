@@ -3,8 +3,8 @@
 - 权威角色：A — 首席系统架构权威
 - 版本：1.0.0（候选集成基线）
 - 日期：2026-11-17
-- Main 基线：`b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- A 审查分支：`review/session-4-a-final-architecture-authority-2026-11-17`
+- Main 基线：`8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
+- A 审查分支：`review/session-4-a-final-architecture-authority-current-2026-11-17`
 - 来源评估：R PR #50；X PR #49；F/D/P PR #46
 - 决策状态：架构冻结 DEFERRED；仅允许有边界的准备工作。
 
@@ -36,6 +36,8 @@
 | AR-09 | 生产 DR、密钥托管、操作员及 RPO/RTO 未明确 | High | 生产阻塞 | Storage + I + 项目运维权威 | 部署 ADR、具名操作员、密钥生命周期、备份/PITR/Restore 演练、RPO/RTO | 生产验收 |
 | AR-10 | 治理/合同负担可能超过可维护预算 | High | 有界准备不阻塞；规模化承诺阻塞 | A + 全体 Owner + 工程负责人 | 度量审查成本、自动符合性收益；在不损失不变量前提下减少重复状态机 | G5/G7 后续 |
 
+| AR-11 | B/H/C/D/I/Storage 精确协议 Bundle 过期或未完整联结 | High | 协议冻结阻塞 | H + C + D + I + Storage；A 集成 | H 更新当前 D Crosswalk Mapping 并由 C 复审；H 复审当前 I P0、I 刷新 Anchor Review；H 更新 Mapping 状态/CI 当前性；Storage 发布 v3.3.0 后继版本并由 C/H/D/I 与 A 复审 | G1/G2/G6 |
+
 ## 五项根本风险
 
 1. L1 逻辑序列化已选择（Storage Option A）；实际 L4 Engine/Deployment、权威 Adapter、HA/Fencing 和 Restore 符合性仍未证明。
@@ -49,6 +51,16 @@
 任何 Critical 风险均不接受、不豁免。AR-04、AR-07、AR-08、AR-10 在涉及强制正确性或冻结准入时仍然阻塞。只有 Deferred Capabilities Register 明确列出的能力延期，才可作为有界非阻塞工作开展。
 
 A 可以接受全局范围和顺序风险，但不能代替 B、D、I、C、G、H 或 Storage 接受其领域风险。每项风险必须由对应权威提供上述证据，并由相关 Gate Owner 单独记录裁决后才能关闭。
+
+## 基于 main@8c0c5b 的当前源刷新（2026-11-17）
+
+- 当前 Main HEAD `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` 撤销了 Commit `6470f25...`、`67f1122...` 和 `e723222...` 短暂引入的三份 B 研究工件。这些工件不属于当前 Main 基线，也不是规范证据。B Fact/Claim ADR 仍 ADR-BLOCKED。
+- B→A 审查 PR #52：分支 HEAD `2727bd8544f812d796186769f86cf92aba244dee`，报告 Blob `b59b2ef745330f901027f59b69c68b99097c604b`。
+- Option A 审查 PR #54：分支 HEAD `208c5e84f64ec68338045b963407bcb6d2463faf`，报告 Blob `ff782d7ab32bdbe66f01a2057c516c5a855abdd3`；提案修订 Blob `f5ad30c8570d480f60bc9b02ee53c06317b41525` 尚 NOT ADOPTED。
+- B 协议 PR #51：分支 HEAD `042f60217903215b75251bc36a650d7a4c994704`，证据 Ledger Blob `247b6644a3f1c61078e19befc7428be78d789d5c`。H 1.2.14 / wire 1.3.0 + CSubmitOutcome 1.0.1 是 L1/L2 候选；Storage v3.2.9 Manifest Blob `bf323a1682f2bfadc3ff41ea4f86883d678a77e3` 已过期。
+- 精确候选 Blob：H Schema `09fcd1fa29fe24255fbd87cae79dafb406594a59`；C Schema `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`；H Mapping `c196fdc7a9d88e344d37ba2810a9bce1803f8b96`；C Re-review `f2d33a8998f8a6906c9bef8be6f9e880c61a0c8c`；D Review `55ae7bc33b37f0e729949fdd2a694eb6211bbc55`；I P0 `44986f5f864bcdc1a79d34978273644d381a68c0`；I Anchor Review `f22d31dec3a95f094c2942ab816c830f007e830e`；Storage 拓扑 ADR `bb544ba2f346bdc130d524bd5c7310d86f367988`。
+- H CI 当前 Pin：Run `44069941327`，Commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251`，Job `133993324484`；H HEAD `362cc113cfb5b595a4002a6f6e980d19ae2d2d15`；Storage HEAD `39a1e0429f6b4b08c6c437c8e3f5ace582a7315f`（均按 PR #51 Ledger）。
+- Storage v3.2.9 相对修正后的 C/D/I Review Pin 和 H CI 已过期。Storage 必须发布 v3.3.0 或等效版本；C/H/D/I 对同一 Manifest 复审，A 再回读。精确 Path/Commit 必须由 Storage 发布。
 
 ## 交叉引用
 
