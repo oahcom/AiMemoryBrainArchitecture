@@ -50,6 +50,15 @@ implementation_commits:
   - 27bdd62cc993da77d72c45d669d1355fdc6476e3
   - 1791e8ea60c5df34f95378754b226a6ec208b5c8
   - 5013e71154529ad31cefe25071ee1657872eac0a
+  - 5362a97befab71d3071e4491c2a7cdec0557e314
+  - 49896316d1b2b874086b35d7af29c51388a823d2
+  - 5a0c4b80a2d324e854e210cb5492ac5ad36d436f
+  - 5a3536aa1bfa2cdf375c470cf8c8e2b219de7e3b
+  - 717c92c5d55c8b0c5a2824871833f7ed43425736
+  - 8c205cb61728c4c930014135bf639279e7bd9b11
+  - 46e678cd9580d7fa0dfc8e806cf384f04c294f85
+  - 75bb7fa19a1a4b1dd37564272a88790d9f82ca26
+  - 2efd289e8baad6d16213febd1b54c326e3dfc77c
 changed_paths:
   - 14-ai-development/prompt-and-evidence-template.md
   - 14-ai-development/README.md
@@ -59,6 +68,7 @@ changed_paths:
   - 14-ai-development/prompts/global/independent-reviewer-session-v1.md
   - 14-ai-development/prompts/owners/A/owner-session-v1.md
   - 14-ai-development/prompts/owners/B/owner-session-v1.md
+  - 14-ai-development/prompts/owners/B/owner-session-v2.md
   - 14-ai-development/prompts/owners/C/owner-session-v1.md
   - 14-ai-development/prompts/owners/D/owner-session-v1.md
   - 14-ai-development/prompts/owners/E/owner-session-v1.md
@@ -69,12 +79,18 @@ changed_paths:
   - 14-ai-development/prompts/owners/README.md
   - 14-ai-development/work-items/AID-2026-001/manifest.yaml
   - 14-ai-development/work-items/AID-2026-001/prompt-v1.md
+  - 14-ai-development/work-items/AID-2026-001/self-review-v1.md
   - 14-ai-development/work-items/INDEX.md
 verification:
   status: NOT_RUN
   commit_sha: ""
   commands: []
   evidence_refs: []
+self_review:
+  status: RECORDED_NOT_INDEPENDENT
+  report_ref: 14-ai-development/work-items/AID-2026-001/self-review-v1.md
+  reviewed_head_before_self_review: 5a3536aa1bfa2cdf375c470cf8c8e2b219de7e3b
+  findings: [SR-001, SR-002, SR-003, SR-004]
 review:
   status: NOT_STARTED
   report_ref: ""
