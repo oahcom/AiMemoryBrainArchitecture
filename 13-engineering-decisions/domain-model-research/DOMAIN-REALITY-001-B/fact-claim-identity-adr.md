@@ -1,0 +1,186 @@
+# B ADR — Fact / Claim Semantics and Identity Across Memory Versions
+# B ADR — Fact / Claim 语义与跨 Memory Version 身份
+
+- ADR: B-ADR-FACT-CLAIM-001
+- Status: DECISION REQUEST / CANDIDATE — NOT DECIDED, NOT ACCEPTED, NOT SCHEMA-FROZEN
+- Domain authority: B
+- Required consumers: D (canonical lifecycle/versioning), E (compiler derivation), F (runtime retrieval), G (Context references), Storage (immutable persistence), A (contract registry)
+- Date: 2026-11-17
+
+## 1. Problem statement / 问题陈述
+
+The current main domain overview marks Fact as a qualified Claim and labels the decision DECIDED. The bilingual domain guide and A's current integration assessment retain Fact/Claim as ADR-BLOCKED and prohibit downstream schema freeze. The core entity schema calls the object “Claim (canonical Fact/Claim object)”, assigns a required `claim_id` described as stable under a declared identity policy, and stores `ClaimSnapshot[]` inside immutable MemoryVersion. The identity policy across Memory Versions is not specified.
+
+当前 main 领域总览将 Fact 定义为带限定的 Claim，并标记为 DECIDED。双语领域指南和 A 当前集成评估仍将 Fact/Claim 保留为 ADR-BLOCKED，并禁止下游 Schema 冻结。核心实体 Schema 将对象称为“Claim（规范 Fact/Claim 对象）”，要求 `claim_id`，但其稳定性依赖尚未声明的身份策略，并在不可变 MemoryVersion 内存储 `ClaimSnapshot[]`。跨 Memory Version 的身份策略尚未定义。
+
+This ADR separates two questions that must not be collapsed:
+1. **Conceptual semantics:** whether “Fact” is a separate domain object or a qualified Claim.
+2. **Identity/version semantics:** whether a Claim keeps one stable identity across Memory Versions, or each snapshot is version-local with explicit lineage.
+
+本 ADR 将两个不得混为一谈的问题分开：
+1. **概念语义：**“Fact”是独立领域对象，还是带限定的 Claim。
+2. **身份/版本语义：**Claim 是否跨 Memory Version 保持同一稳定身份，还是每个 Snapshot 都是版本局部对象并通过显式谱系关联。
+
+## 2. Exact source evidence / 精确来源证据
+
+| Source | Exact main Blob | Relevant statement |
+|---|---|---|
+| `02-domain-model/domain-model-overview.md` | `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` | Fact/Claim decision is marked DECIDED; Memory contains multiple Claims; epistemic and temporal qualifications belong to each Claim |
+| `02-domain-model/core-entities.md` | `8cb5a674eec8eac1f3c4d83c400dc08d00166f23` | Claim has required claim_id; MemoryVersion stores immutable ClaimSnapshot[]; identity policy remains referenced but unspecified |
+| `02-domain-model/epistemic-and-temporal-semantics.md` | `8c03a20db1ed54c90db1d5c4c64f5ea7b1324ed7` | Epistemic status is orthogonal to lifecycle, confidence, relevance, trust and evidence strength |
+| `02-domain-model/lifecycle-model.md` | `81c48c928cb5f9c76ca29d493fbd9479079e62f7` | Claim epistemic lifecycle is separate from Memory lifecycle; corrections/retractions preserve history |
+| `02-domain-model/relationships-and-provenance.md` | `e762f84c59f69de7a44baad2123aed46e1ffea16` | Claims participate in typed Relations and evidence/provenance lineage |
+| B research conflict register | `a3cc523b67c2433a8e53bdb0ebfff121705618c6` | B-CONFLICT-001 / 006 remain BLOCKING / HIGH; no closure claimed |
+| A assessment | PR #53 and current B baseline audit | Fact/Claim ADR remains a blocker to B2/B3 and dependent schema freeze |
+
+The five main-domain Blob SHAs above were re-fetched from current main during this audit. Their file contents match the recorded pins.
+
+以上五个 main 领域文件 Blob SHA 已在本次审计中从当前 main 重新读取，文件内容与登记 Pin 一致。
+
+## 3. Non-negotiable invariants / 不可妥协的不变量
+
+Regardless of the selected option:
+
+无论选择何种方案，均必须满足：
+
+1. A Claim is a proposition, not a guarantee of truth. A Memory is a retained knowledge asset, not a truth guarantee.
+2. Epistemic status (Observed/Reported/Inferred/Verified/Disputed/Retracted), Memory lifecycle, valid time, confidence, relevance, source trust and Evidence strength remain orthogonal dimensions.
+3. Intent, plan, prediction and pending action are not completed outcomes without outcome Evidence.
+4. A Claim's subject, predicate, object, polarity, qualifiers, scope and temporal meaning must be explicit and typed; free-text paraphrase is not a canonical identity.
+5. Claim correction/retraction never silently rewrites historical MemoryVersion snapshots.
+6. Evidence and Provenance remain separately addressable; evidence availability/retention does not silently rewrite the historical assertion that it existed.
+7. MemoryVersion remains immutable. Current pointer advancement and version persistence are governed by D/Storage, not by this ADR.
+8. No schema is frozen by a B candidate or by absence of Owner objection.
+
+1. Claim 是命题，不保证为真。Memory 是保留的知识资产，不保证为真。
+2. 认知状态（Observed/Reported/Inferred/Verified/Disputed/Retracted）、Memory 生命周期、有效时间、置信度、相关性、来源信任和 Evidence 强度保持正交。
+3. 没有结果 Evidence 时，意图、计划、预测和待处理动作不得视为已完成结果。
+4. Claim 的 Subject、Predicate、Object、Polarity、Qualifiers、Scope 和时间语义必须显式且类型化；自由文本改写不是规范身份。
+5. Claim 更正/撤回不得静默改写历史 MemoryVersion Snapshot。
+6. Evidence 与 Provenance 保持独立寻址；Evidence 可用性/保留变化不得静默改写其曾存在这一历史断言。
+7. MemoryVersion 保持不可变。当前指针推进和版本持久化由 D/Storage 管辖，不由本 ADR 决定。
+8. B 候选或 Owner 未反对，不构成 Schema 冻结。
+
+## 4. Conceptual alternatives / 概念方案
+
+### C1 — Fact is a separate canonical entity
+
+Fact has an independent identity and lifecycle; Claim is a broader proposition or draft/qualified assertion.
+
+Advantages: may distinguish a proposition from an accepted factual record. Disadvantages: creates a second semantic object adjacent to Claim, requires a precise admission/verification threshold, and risks treating “Fact” as truth by name. It can duplicate epistemic status and Memory lifecycle.
+
+方案优点：可能区分一般命题与被接纳的事实记录。缺点：在 Claim 旁增加第二个语义对象，需要精确定义准入/验证门槛，并有因名称而把 Fact 误解为真理的风险；也可能重复认知状态和 Memory 生命周期。
+
+### C2 — Fact is a qualified Claim (candidate recommendation)
+
+There is one canonical proposition concept: Claim. “Fact” is either a human-facing label for a Claim satisfying a declared epistemic predicate, or a view/query category; it is not a second identity-bearing entity.
+
+Advantages: preserves one proposition model; supports Reported, Inferred, Disputed and Retracted propositions without implying truth. Disadvantages: requires careful language to avoid treating Fact as a synonym for Verified; user-facing “fact” terminology may need qualification.
+
+方案优点：保留单一命题模型；可容纳 Reported、Inferred、Disputed、Retracted 命题而不暗示真理。缺点：必须谨慎定义术语，避免把 Fact 当作 Verified 的同义词；面向用户的“事实”表述可能需要限定。
+
+**B recommendation:** C2, subject to explicit ADR acceptance and consumer review. This is a recommendation, not a decision or freeze.
+
+**B 建议：**倾向 C2，但须经明确 ADR 验收和消费者复审。这是建议，不是决定或冻结。
+
+## 5. Identity/version alternatives / 身份/版本方案
+
+### I1 — Stable Claim identity + immutable Claim revisions/snapshots (candidate recommendation)
+
+- `claim_id` identifies the continuing proposition lineage within its declared identity scope.
+- Each immutable MemoryVersion embeds a `ClaimSnapshot` containing `claim_id`, a version-local `claim_revision_id` (or equivalent immutable revision identity), canonical proposition payload, epistemic status and temporal/evidence references as of that MemoryVersion.
+- A semantic change that changes proposition identity (for example, subject/predicate/object/polarity beyond declared correction rules) creates a new `claim_id` and explicit predecessor/successor lineage. A non-identity-changing annotation/epistemic update may create a new revision under the same `claim_id`.
+- A Claim may be referenced by multiple MemoryVersions only if the identity and snapshot semantics are explicit and no historical snapshot is overwritten.
+
+优点：稳定引用和跨版本追踪；历史 Snapshot 不变；更正可明确区分同一命题的修订与新命题。成本：需要 Claim Identity Policy、revision identity、change classification、concurrency and retention rules.
+
+### I2 — Version-local ClaimSnapshot identity
+
+- Every MemoryVersion owns its own ClaimSnapshot identity.
+- Cross-version continuity is represented only by explicit `supersedes_claim_snapshot_ref`, `derived_from_claim_snapshot_ref` or correction lineage.
+- No globally stable `claim_id` is implied unless a separate identity service/object is later approved.
+
+优点：版本边界清晰，较少跨版本共享身份语义。成本：查询同一持续命题需要遍历 lineage；跨 Memory、Context、Relation 和 Evidence 的引用复杂度增加。
+
+### I3 — Independent canonical Claim object plus MemoryVersion references
+
+- Claim is independently persisted and versioned as a canonical object.
+- MemoryVersion stores references to exact Claim revision IDs rather than embedding snapshots.
+- Storage and D must define atomic consistency between MemoryVersion commit and Claim revision/reference updates.
+
+优点：Claim 可独立寻址、共享和版本化。成本：增加独立生命周期、并发写入、事务边界、Forget 传播、引用完整性及存储复杂度；可能超出当前需求。
+
+**B recommendation:** I1 as the least-complex candidate consistent with the current embedded immutable `ClaimSnapshot[]` model. I2 remains a viable alternative if D/E demonstrate that stable Claim identity creates unacceptable coupling. I3 is not recommended without a demonstrated independent lifecycle/use case.
+
+**B 建议：**优先 I1，作为与当前嵌入式不可变 `ClaimSnapshot[]` 模型一致且复杂度最低的候选。如果 D/E 证明稳定 Claim 身份带来不可接受的耦合，I2 仍可选。除非证明存在独立生命周期/使用场景，否则不建议 I3。
+
+## 6. Decision matrix / 决策矩阵
+
+| Criterion | C1 separate Fact | C2 Fact=qualified Claim | I1 stable identity + snapshots | I2 version-local snapshots | I3 independent Claim store |
+|---|---|---|---|---|---|
+| Single proposition vocabulary | No | Yes | Yes | Yes | Yes |
+| Avoid “Fact means true” hazard | Weak | Strong if qualified | Strong | Strong | Strong |
+| Historical immutability | Possible | Possible | Native | Native | Requires cross-object transaction |
+| Cross-version reference simplicity | N/A | N/A | Strong | Lineage traversal | Strong |
+| Storage/Forget complexity | Higher | Lowest | Medium | Low/medium | Highest |
+| Fit to current core schema | Requires changes | Fits terminology intent | Fits snapshots with added revision semantics | Requires claim_id policy change | Requires major redesign |
+| Current status | Not selected | Recommended candidate | Recommended candidate | Alternative | Deferred |
+
+## 7. Required decisions by authority / 各权威必须作出的决定
+
+| Owner | Explicit question | Acceptance evidence required |
+|---|---|---|
+| B | C2 vs C1; I1 vs I2 vs I3; define identity-changing vs non-identity-changing Claim updates | B-authored signed/explicit ADR disposition with exact version and examples |
+| D | Does MemoryVersion own the authoritative immutable ClaimSnapshot set? How do correction, retraction, supersession and Forget affect snapshot identity/lineage? | D exact-version acceptance or enumerated exceptions; lifecycle/Forget race semantics retained |
+| E | Can compiler output preserve stable Claim identity/revision without inferring truth? How are re-extraction, deduplication and provenance bound? | E exact-version producer contract acceptance and fixtures |
+| F | How do retrieval and conflict detection group Claim revisions without collapsing different scope/time/modality? | F exact-version consumer acceptance; ranking cannot alter canonical identity/status |
+| G | Are ContextEntry references to MemoryVersion only, or can they address ClaimSnapshot/revision? What does a ContextVersion freeze? | G exact-version schema/consumer acceptance |
+| Storage | Can immutable snapshots and identity lineage be committed with the owning MemoryVersion/current pointer without a new independent Claim transaction? | Storage exact-version interface and atomicity acceptance; no L4 claim without engine evidence |
+| A | Register accepted ADR and exact consumer pins; maintain gate impact | A registry update after Owner decisions, not before |
+
+## 8. Required examples / 必须验证的例子
+
+1. Same proposition repeated in a new MemoryVersion with only a changed display label: stable `claim_id` under I1; new snapshot/revision, no semantic identity change.
+2. Same proposition gains new Evidence and changes Reported → Verified: same `claim_id` only if the proposition itself is unchanged; new immutable revision/snapshot; verification method and Evidence required.
+3. Subject changes from Entity A to Entity B: new `claim_id` unless a formally approved identity rule says otherwise; explicit lineage.
+4. Predicate polarity changes from positive to negative: distinct proposition identity; never overwrite prior snapshot.
+5. Valid Time is corrected while Recorded At remains later: preserve both temporal histories and explain correction provenance.
+6. Claim is Disputed then Retracted: retain prior status/snapshot; retraction authority/reason and conflicting position references required.
+7. One Claim appears in two MemoryVersions: both snapshots remain independently immutable; no mutable shared object can retroactively change either version.
+8. Forget one Memory lineage: D/I/Storage decide target inventory and erasure; B's Claim identity does not authorize retaining reconstructive forgotten content in a shared Claim object.
+
+## 9. Complexity and risk assessment / 复杂度与风险评估
+
+- C1 creates semantic duplication and an additional truth-admission threshold: HIGH semantic complexity.
+- C2 + I1 retains one proposition vocabulary and local immutable snapshots: MEDIUM complexity; requires explicit revision/identity policy.
+- C2 + I2 has simpler local persistence but higher cross-version lineage/query complexity: MEDIUM complexity.
+- C2 + I3 adds cross-object transactional and Forget propagation coupling: HIGH to VERY HIGH complexity.
+- The dominant risk is not the number of fields. It is identity ambiguity causing false merges, false splits, evidence misattribution, stale Context references, or resurrection after Forget.
+
+- C1 会造成语义重复并增加事实准入门槛：语义复杂度 HIGH。
+- C2 + I1 保留单一命题词汇和局部不可变 Snapshot：复杂度 MEDIUM，但需要明确修订/身份策略。
+- C2 + I2 持久化较简单，但跨版本谱系/查询复杂度较高：复杂度 MEDIUM。
+- C2 + I3 增加跨对象事务与 Forget 传播耦合：复杂度 HIGH 至 VERY HIGH。
+- 主导风险不是字段数量，而是身份歧义导致错误合并/拆分、Evidence 错误归属、Context 引用过期或 Forget 后复活。
+
+## 10. Interim rule and gate / 临时规则与门禁
+
+Until explicit decisions and consumer acceptances are recorded:
+
+在明确决定及消费者验收记录完成前：
+
+- Preserve `Claim` as the working proposition term; do not create a separate Fact entity.
+- Keep the current `claim_id` identity policy OPEN; do not assume globally stable identity or version-local identity.
+- Keep `ClaimSnapshot` immutable and do not change the persisted schema.
+- Do not issue JSON Schema, database migration, implementation authorization or downstream contract freeze based on this candidate.
+- Treat a Claim reference whose identity semantics are ambiguous as unresolved; do not deduplicate or merge by text similarity alone.
+
+- 暂以 `Claim` 作为工作命题术语；不创建独立 Fact 实体。
+- `claim_id` 身份策略继续 OPEN；不得假定全局稳定身份或版本局部身份。
+- 保持 `ClaimSnapshot` 不可变，不修改持久化 Schema。
+- 不得基于本候选发布 JSON Schema、数据库迁移、实现授权或下游契约冻结。
+- 身份语义不明确的 Claim 引用视为未解决；不得仅凭文本相似度去重或合并。
+
+**ADR status:** CANDIDATE / DECISION REQUEST. B2/B3 remain OPEN until B's explicit decision and required D/E/F/G/Storage consumer acceptance are exact-version pinned. B4 remains NOT READY. No Owner approval is inferred from silence or role simulation.
+
+**ADR 状态：**CANDIDATE / DECISION REQUEST。B 作出明确决定并完成 D/E/F/G/Storage 消费者精确版本验收前，B2/B3 保持 OPEN。B4 仍 NOT READY。不得从沉默或角色模拟推断 Owner 批准。
