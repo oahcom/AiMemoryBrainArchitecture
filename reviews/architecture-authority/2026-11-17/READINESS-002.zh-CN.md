@@ -1,7 +1,7 @@
 # 架构就绪度评估 — READINESS-002
 
 - 版本：1.0.0
-- 基线：`main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- 基线：`main@6470f25ca23b8d35c06f60be2326867066418d18`
 - 整体架构状态：**ARCHITECTURE_NOT_READY**
 - 决策结果：架构冻结及全面实现准入 **DEFERRED**。
 
@@ -13,7 +13,7 @@
 | 领域语义就绪度 | NOT READY | B Fact/Claim ADR 仍为 ADR-BLOCKED |
 | 权威/责任就绪度 | NOT READY | Issue #7 尚未指定 Canonical Runtime Repo 和具名工程负责人 |
 | 安全/治理就绪度 | NOT READY | I36-GOV-01..10 和闭世界 Inventory 仍为治理阻塞 |
-| 物理一致性就绪度 | NOT READY | Storage §8 已选择 L1 Option A（每个 Canonical Memory Authority 一个 Serializable Transaction Domain）；L4 物理引擎/部署、Adapter、HA/Fencing 和 Restore 证明仍开放；JF-10 Gate A 部分通过/开放，B/C 阻塞 |
+| 物理一致性就绪度 | NOT READY | Option A 仅有条件接受为 v1 L1 方向；A-01..A-05 澄清、D 精确接受、L2 组合、L3 证明和 L4 Engine/Deployment 仍开放；JF-10 Gate A 部分通过/开放，B/C 阻塞 |
 | 跨模块正确性 | NOT PROVEN | Forget/Publication/Recovery 与 Applied 证明链缺少完整集成物理证据 |
 | 复杂度可控性 | NOT PROVEN | X 评为 High Complexity；八维序数分不是工期估算 |
 | 实现就绪度 | BLOCKED | P0 权威/证明前置条件未完成；运行时仓库/责任人缺失 |
@@ -29,7 +29,7 @@
 4. D/E/I/Storage 关闭精确 Admission/Lineage/Fence/Visibility 语义，并提供竞态/崩溃/恢复证明。
 5. Storage 完成物理拓扑与 JF-10 证据；C/G/H 关闭 Final Request/Provider/Applied 语义并获得独立消费者批准。
 
-## 有界授权
+| B 协议对齐 | CANDIDATE / NOT JOINTLY CURRENT | H 1.2.14 + CSubmitOutcome 1.0.1 候选；H Mapping/C Review/D Crosswalk/I P0 已存在，但 Storage v3.2.9 精确 Manifest 已过期，尚无共同接受的 v3.3.0 后继版本 |
 
 允许：隔离 Synthetic Data 可行性实验、与合同无关的测试框架、精确源刷新、双语一致性自动化、Storage 候选比较、硬件/工作负载盘点、Synthetic Fixtures 上的 Retrieval 质量基准。
 
