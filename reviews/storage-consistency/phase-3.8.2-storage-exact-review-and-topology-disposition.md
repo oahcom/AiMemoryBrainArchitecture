@@ -234,3 +234,22 @@ Storage 当前 JoinProof 合同仍为逻辑提案，最近 H 候选运行 440431
 新增 SCHEMA-15/16 只检查 Owner Snapshot Attestation 内容绑定和 RecoveryJoin 1.0.1 的 COMPLETE_EMPTY / OUT_OF_SCOPE 证明结构；不证明生产 Owner 签名、I Key Status、真实分页完整性或 Currentness CAS。TPH 使用确定性参考模型，不是实际 COC Quorum Log；XLANG-01 只比较固定测试向量。
 
 Storage 接受双向 JoinProof 的逻辑结构，但不因此批准物理实现。仍需真实 COC Prefix/Quorum 枚举、六个 I/D/C Request/Admission Ledger 的签名快照、Owner Evidence Dereference、Storage JoinProof 原子持久化与回读、I/D/C 各自 Currentness CAS、JF-10 同 GID/DB Incarnation 物理恢复，以及明确的 D/Storage 序列化拓扑。拓扑 ADR 仍 BLOCKED。该审查是本集成会话的 Storage 角色模拟，不是独立 Storage Owner 签署，也不是实现或生产符合性 PASS。
+
+
+## 16. H 101-test I crypto differential evidence / H 101 项 I 密码学差分测试
+
+The current controlling Storage JoinProof contract is Blob `eac350ed5cb53094bdd5626f49e6f82ebea1f78c`. H's latest run [44044062849](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44044062849), job `133905301392`, completed **101 tests, OK**.
+
+Four new CRYPTO vectors compare Python RFC 8785 / Ed25519 and an independent Node.js JCS / Ed25519 implementation. The workflow pins Python rfc8785 0.1.4, cryptography 44.0.2, Node.js 22 and canonicalize 2.1.0. This tests the candidate AIMBA-I-CRYPTO-1.0 projection/preimage for a deterministic TEST-ONLY vector and several JCS edge cases.
+
+Storage accepts this as useful test evidence only. The I profile proposal remains NOT APPROVED / NOT FROZEN / NOT DEPLOYED; I review R3 is ACCEPT WITH AMENDMENTS, not an independent Owner signature. The deterministic private seed is test-only and must never be used in production. This suite does not prove I trust roots, HSM/KMS custody, key lifecycle, historical verification, anti-rollback deployment, live key-status, actual I PolicyDomain sequencer or Storage final-gate proof verification.
+
+The 101 tests still do not execute live COC prefix/quorum enumeration, I/D/C ledger adapters, Storage durable JoinProof commit/readback, owner currentness CAS, JF-10 physical same-GID resolution or D/Storage topology. Storage remains **ACCEPT WITH ENUMERATED AMENDMENTS** for the logical JoinProof only; physical conformance remains OPEN.
+
+### 16.1 中文结论
+
+H 的 101 项候选测试在 Run 44044062849 全部通过。新增 4 项 CRYPTO 测试使用 Python RFC 8785 / Ed25519 与独立 Node.js JCS / Ed25519 实现，对一个固定测试向量及 JCS 边界行为进行比较。CI 固定 Python/Node 依赖版本。
+
+该结果仅是 I 候选密码学 Profile 的测试证据。Profile 仍未批准、未冻结、未部署；测试 Seed 严禁生产复用。测试不证明 I Trust Root、HSM/KMS、Key Lifecycle、历史验签、Anti-rollback、实时 Key Status、PolicyDomain Sequencer 或 Storage 最终 Gate 已实现。
+
+Storage 双向 JoinProof 仍仅在逻辑层面附条件接受。真实 COC/Owner Ledger、JoinProof 持久化、Currentness CAS、JF-10 物理同 GID 和 D/Storage 拓扑仍 OPEN。
