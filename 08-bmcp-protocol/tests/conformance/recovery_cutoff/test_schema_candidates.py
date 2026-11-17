@@ -50,6 +50,18 @@ class SchemaCandidateIntegrity(unittest.TestCase):
         self.assertIn("gate_generation", owner)
         self.assertIn("anti_rollback_anchor_ref", owner)
 
+    def test_SCHEMA_06_owner_request_and_admission_completeness_are_independent(self):
+        props = self.join["$defs"]["ownerSnapshot"]["properties"]
+        self.assertIn("request_enumeration_status", props)
+        self.assertIn("admission_enumeration_status", props)
+        required = set(self.join["$defs"]["ownerSnapshot"]["required"])
+        self.assertTrue({"request_enumeration_status", "admission_enumeration_status"}.issubset(required))
+
+    def test_SCHEMA_07_admission_join_carries_wire_position_reference_and_resolved_position(self):
+        props = self.join["$defs"]["admissionJoin"]["properties"]
+        self.assertIn("participant_position_ref", props)
+        self.assertIn("participant_position", props)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
