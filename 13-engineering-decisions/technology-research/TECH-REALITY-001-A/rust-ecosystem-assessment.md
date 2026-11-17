@@ -81,3 +81,43 @@ Cedar is the most direct Rust-native embedded authorization candidate among the 
 5. Run one inference model on the actual target GPU and capture VRAM, context, startup and tail latency.
 6. Test Cedar policy evaluation against I-owned test vectors before selecting a policy language.
 7. Evaluate Temporal and Restate with one end-to-end compiler workflow including cancellation, retry, crash, replay and Forget fence checks.
+
+## 6. 完整中文版本 / Chinese Version
+
+### 6.1 评估规则
+
+本评估区分 Rust 原生实现、官方 Rust SDK、社区 SDK、FFI 绑定和 HTTP/gRPC 网络接入。Crate 存在不代表成熟可用。MSRV、Tokio 兼容性、Windows/Linux/macOS、许可证和安全公告必须针对固定版本重新检查。本阶段没有运行完整平台构建、安全审计或依赖 SBOM。
+
+### 6.2 核心候选
+
+| 技术 | 版本/证据 | 集成方式 | 许可证 | 适用性 |
+|---|---|---|---|---|
+| Tokio | 1.54.1，HEAD `02ed9178a471f27ac03a46595e68c7e0a015bfc0` | Rust 原生 Runtime | MIT | 生态成熟，MSRV 1.85，推荐候选 |
+| SQLx | 0.9.0 | 异步 Rust SQL；SQLite 通过 libsqlite3 C API | MIT/Apache-2.0 | 支持 Tokio、PostgreSQL、MySQL、SQLite；适合异步 SQL Adapter |
+| rusqlite | 0.43.0 | SQLite C 库的 Rust Wrapper | MIT/Apache-2.0 | 同步 API；可用专用 DB 线程或 spawn_blocking，适合直接控制 SQLite 事务 |
+| Tantivy | Release 0.26.1；HEAD Manifest 0.27.0 | Rust 原生全文检索 | MIT | MSRV 1.91；适合需要可控 Analyzer/Ranking 的词法检索 |
+| Qdrant | 1.20.2，HEAD `23065a0bf6857c3e5da45f6c8939cc746cc0580e` | Rust Server + HTTP/gRPC | Apache-2.0 | 完整向量服务，HEAD MSRV 1.98，需独立运维 |
+| LanceDB | 0.42.0-beta.18 | Rust SDK + 嵌入式/分布式引擎 | Apache-2.0 | 检索能力有吸引力，但当前 Release 为 Beta |
+| Moka | 0.12.16 | Rust 原生 Cache | Apache-2.0 | MSRV 1.71.1，支持容量、权重、TTL/TTI；不能做权威状态 |
+| Rig | 0.46.0 | Rust Agent/LLM 库 | MIT | 可作为 Agent 侧可选库，不是 Durable Workflow 或 Brain Store |
+| Temporal Rust SDK | 1.2.0 | 官方 Rust SDK + 独立 Temporal Service | MIT | 可处理长期 Workflow；不替代 Canonical SQL |
+| Restate Rust SDK | Release 0.12.1；HEAD Manifest 0.13.0，MSRV 1.90 | 官方 SDK + Restate Server | MIT | Durable Handler/Virtual Object 候选；生态较新且增加服务 |
+| Cedar | CLI Tag v4.15.0；Crate docs.rs 4.14.1 | Rust 原生 Policy Engine | Apache-2.0 | 嵌入式授权候选；不负责身份和撤销流程 |
+| OpenTelemetry Rust | 0.33.1 | Rust API/SDK/Exporter | Apache-2.0 | Metrics/Logs 稳定，Tracing 组件仍需按官方状态检查 |
+| ort | 2.0.0-rc.15 | ONNX Runtime FFI | MIT/Apache-2.0 | 当前为 RC；算子、Execution Provider、GPU 包装需实测 |
+| Candle | 0.11.1 | Rust 原生 ML | Apache-2.0/MIT | CPU/CUDA/Metal 能力依模型与算子而定 |
+| usearch | C++ + Rust Bindings | FFI | Apache-2.0 | 需审查 ABI、构建和平台差异 |
+| sqlite-vec | 0.1 系列 | SQLite C Extension | MIT/Apache-2.0（需按产物核实） | 扩展加载和平台二进制包装仍需验证 |
+
+### 6.3 生态判断
+
+- Tokio 是最低风险异步 Runtime 候选。
+- SQLx 与 rusqlite 是 Storage Adapter 层替代方案，不需要同时采用。即使连接池支持多连接，也必须明确唯一事务权威。
+- FTS5 的部署负担最低；Tantivy 是 Rust 原生词法搜索；Qdrant 是独立向量服务；LanceDB 当前版本仍为 Beta。
+- Temporal Rust SDK 具有较完整实现，但需要外部 Temporal Service。Restate Rust SDK 版本较新，HEAD 与最新 Release 不一致。两者都不替代 SQL 事务和 Forget Fence。
+- Cedar 是 Rust 原生嵌入式授权候选；OpenFGA/SpiceDB 是关系授权服务；OPA 是通用策略系统。I 必须决定。
+- ort 是 FFI 且为 RC；Candle 是 Rust 原生，但模型覆盖需要验证。可通过隔离进程接入 llama.cpp，保持 Brain Core 与推理引擎解耦。
+
+### 6.4 平台与维护风险
+
+Rust Target 支持不代表每个原生依赖或 GPU Provider 都能在 Windows/Linux/macOS 正常工作。SQLite WAL 需要同主机共享内存，不可放在网络文件系统。FFI 需要 ABI、原生库、动态加载、打包和崩溃审查。Qdrant/Tantivy 的 MSRV 可能影响 Workspace Toolchain。Restate HEAD 不应在未经批准时替代发布 Tag。许可证表不构成完整法律审查。本阶段未运行 cargo-audit、cargo-deny、SBOM、跨平台 CI 或性能基准。
