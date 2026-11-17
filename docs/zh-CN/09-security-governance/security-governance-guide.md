@@ -33,7 +33,7 @@ I 拥有全局身份/授权策略、Delegation 和 Revocation、Retention、Audi
 - ScopeRef 是领域命名空间/归属或适用范围引用，不等于 Permission。
 - Permission 是策略下针对某个 Resource 的指定 Action 的允许/拒绝。
 - PermissionEpoch 用于使过期授权决策和 Lease 失效。
-- ForgetFence 是 D 的规范抑制代数，不等于 PermissionEpoch。
+- ForgetFence 是 D 的规范抑制代次，不等于 PermissionEpoch。
 
 准确的类型引用语义和 Wire 字段仍需 B/I/H 联合批准。调用方自行构造的 ActorRef 不能证明身份认证；H 必须绑定认证 Transport Principal，I 定义信任策略。
 
