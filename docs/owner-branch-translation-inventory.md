@@ -43,7 +43,7 @@ The audit below checked the core Markdown specifications in each module director
 - System-level specifications: paired for the current source set.
 - B main Domain Model specifications: 6/6 paired; Phase 3 typed-reference/identity addenda and ADR-001 remain pending.
 - D Memory Brain core specifications: 7/8 paired; the large operation-level Forget Fence/publication-gate contract remains pending.
-- E Memory Compiler core specifications: 3/8 paired; Compiler Overview, Accepted Receipt and Producer Admission are paired.
+- E Memory Compiler core specifications: 6/8 paired; Compiler Overview, Event Ingestion, Extraction/Normalization, Consolidation/Conflict Resolution, Accepted Receipt and Producer Admission are paired.
 - F/G/C/H/I detailed core specifications: not yet paired.
 
 All translated Owner documents retain their exact source blob SHA. Refresh branch HEAD and re-read source files before translating remaining artifacts.
