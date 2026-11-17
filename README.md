@@ -35,6 +35,8 @@ The Brain is not an Agent framework. It does not own planning, tool execution, o
 
 ## Bilingual documentation / 双语架构文档
 
+**Mandatory project rule / 项目强制规范：** Every architecture design and change MUST ship synchronized Chinese and English documentation in the same change set. See [GOV-DOC-BILINGUAL-001](00-governance/bilingual-architecture-documentation-policy.md).
+
 The project maintains a reader-oriented Chinese/English documentation set. Start with the [Documentation Portal](docs/README.md), then read the paired [System Architecture Overview (中文)](docs/zh-CN/01-system-architecture/system-overview.md) / [System Architecture Overview (English)](docs/en/01-system-architecture/system-overview.md). The portal explains reading paths, terminology, decision-status labels, and bilingual parity rules.
 
 项目提供中英双语、分层阅读的架构文档。建议从[双语文档入口](docs/README.md)开始，再阅读[中文系统架构总览](docs/zh-CN/01-system-architecture/system-overview.md)或[英文系统架构总览](docs/en/01-system-architecture/system-overview.md)。入口页说明阅读顺序、术语、决策状态和双语一致性规则。
