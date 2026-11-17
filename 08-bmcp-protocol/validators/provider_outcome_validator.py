@@ -33,6 +33,15 @@ WIRE_TO_C = {
     "request_digest": "RequestDigest",
     "transaction_ref": "CausalOrderTransactionRef",
     "provider_outcome_evidence_ref": "OutcomeEvidenceRef",
+    "provider_request_ref": "ProviderRequestRef",
+    "provider_receipt_ref": "ProviderReceiptRef",
+    "provider_lookup_proof_ref": "ProviderLookupProofRef",
+    "provider_no_handoff_proof_ref": "ProviderNoHandoffProofRef",
+    "not_invoked_proof_ref": "NotInvokedProofRef",
+    "unknown_reason_ref": "UnknownReasonRef",
+    "actual_inference_request_id": "ActualInferenceRequestId",
+    "owner_signature_ref": "OwnerSignatureRef",
+    "participant_intent_ref": "COCParticipantIntentRef",
     "owner_admission_ref": "CAdmissionRef",
     "owner_admission_digest": "CAdmissionDigest",
     "owner_ledger_ref": "COwnerLedgerRef",
@@ -142,10 +151,10 @@ class AuthorityChecks:
     # (unavailable/unknown). No callback may trust a payload-supplied key.
     verify_profile_registration: Optional[Callable[[dict], Optional[bool]]] = None
     verify_c_signature: Optional[Callable[[dict, bytes], Optional[bool]]] = None
-    verify_provider_evidence: Optional[Callable[[dict], Optional[bool]]] = None
-    verify_owner_ledger: Optional[Callable[[dict], Optional[bool]]] = None
-    verify_coc_join: Optional[Callable[[dict], Optional[bool]]] = None
-    verify_currentness: Optional[Callable[[dict], Optional[bool]]] = None
+    verify_provider_evidence: Optional[Callable[[dict, dict], Optional[bool]]] = None
+    verify_owner_ledger: Optional[Callable[[dict, dict], Optional[bool]]] = None
+    verify_coc_join: Optional[Callable[[dict, dict], Optional[bool]]] = None
+    verify_currentness: Optional[Callable[[dict, dict], Optional[bool]]] = None
 
 
 def validate_provider_outcome(
@@ -205,10 +214,10 @@ def validate_provider_outcome(
     callbacks = (
         ("C profile registration", checks.verify_profile_registration, (c_object,)),
         ("C signature/key status", checks.verify_c_signature, (c_object, preimage)),
-        ("provider evidence issuer", checks.verify_provider_evidence, (c_object,)),
-        ("C owner ledger inclusion/currentness", checks.verify_owner_ledger, (c_object,)),
-        ("COC intent/reservation join", checks.verify_coc_join, (c_object,)),
-        ("anti-rollback/currentness", checks.verify_currentness, (c_object,)),
+        ("provider evidence issuer", checks.verify_provider_evidence, (envelope, c_object)),
+        ("C owner ledger inclusion/currentness", checks.verify_owner_ledger, (envelope, c_object)),
+        ("COC intent/reservation/quorum join", checks.verify_coc_join, (envelope, c_object)),
+        ("anti-rollback/currentness", checks.verify_currentness, (envelope, c_object)),
     )
     for label, callback, args in callbacks:
         if callback is None:
