@@ -160,6 +160,11 @@ class AuthorityChecks:
     verify_owner_ledger: Optional[Callable[[dict, dict], Optional[bool]]] = None
     verify_coc_join: Optional[Callable[[dict, dict], Optional[bool]]] = None
     verify_currentness: Optional[Callable[[dict, dict], Optional[bool]]] = None
+    # Separate owner authorities: a COC join callback cannot impersonate I, D or Storage.
+    # Each callback verifies issuer, exact proof, digest, scope, currentness and joins.
+    verify_i_terminal_decision: Optional[Callable[[dict, dict], Optional[bool]]] = None
+    verify_d_clearance: Optional[Callable[[dict, dict], Optional[bool]]] = None
+    verify_storage_resolution_proof: Optional[Callable[[dict, dict], Optional[bool]]] = None
 
 
 def validate_provider_outcome(
@@ -232,6 +237,9 @@ def validate_provider_outcome(
         ("C owner ledger inclusion/currentness", checks.verify_owner_ledger, (envelope, c_object)),
         ("COC intent/reservation/quorum join", checks.verify_coc_join, (envelope, c_object)),
         ("anti-rollback/currentness", checks.verify_currentness, (envelope, c_object)),
+        ("I terminal decision / COMMIT_WON authority", checks.verify_i_terminal_decision, (envelope, c_object)),
+        ("D Forget clearance / fence authority", checks.verify_d_clearance, (envelope, c_object)),
+        ("Storage resolution proof / same-GID authority", checks.verify_storage_resolution_proof, (envelope, c_object)),
     )
     for label, callback, args in callbacks:
         if callback is None:
@@ -275,4 +283,5 @@ def validate_raw_provider_outcome(
 # authority callback must compare it with the authenticated CKeyStatusEvent
 # sequence_namespace_ref and prove event_sequence and record_sequence share the
 # same durable C authority sequencer. Missing callback remains UNKNOWN; this
-# local core never infers namespace equivalence.
+# local core never infers namespace equivalence. I terminal, D clearance and Storage
+# resolution are separate authority seams; COC join validation does not subsume them.
