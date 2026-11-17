@@ -97,9 +97,9 @@ class SchemaCandidateIntegrity(unittest.TestCase):
 
     def test_SCHEMA_13_unified_1_2_8_artifact_and_wire_versions_are_distinct(self):
         self.assertEqual(self.unified["$id"], "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.8")
-        self.assertIn("1.2.7", self.unified["title"])
+        self.assertIn("1.2.8", self.unified["title"])
         common = self.unified["$defs"]["commonEnvelope"]
-        self.assertIn("1.2.7", common["description"])
+        self.assertIn("1.2.8", common["description"])
         self.assertEqual(common["properties"]["schema_version"]["const"], "1.2.0")
 
     def test_SCHEMA_14_signature_profile_id_is_explicit_but_compatibility_optional(self):
