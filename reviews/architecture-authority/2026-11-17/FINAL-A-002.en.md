@@ -3,8 +3,8 @@
 - Authority: A — Principal System Architecture Authority
 - Version: 1.0.0
 - Date: 2026-11-17
-- Exact main baseline: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- Review branch: `review/session-4-a-final-architecture-authority-2026-11-17`
+- Exact main baseline: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
+- Review branch: `review/session-4-a-final-architecture-authority-current-2026-11-17`
 - Controlling tracker: Issue #43
 - Overall decision outcome: **DEFERRED**
 - Architecture state: **ARCHITECTURE_NOT_READY**
@@ -13,7 +13,7 @@
 
 The architecture is **plausible in principle but not yet proven coherent, physically realizable, verifiable and maintainable as a complete system**. The project is not rejected as infeasible. It is deferred from architecture freeze and full implementation entry because non-waivable semantic, authority, atomicity, security and recovery prerequisites remain open.
 
-A grants bounded preparatory work only. This is not a Gate pass, implementation authorization for protected paths, schema/technology freeze, deployment approval or production authorization.
+A grants bounded preparatory work only. Scoped APPROVED_WITH_CONDITIONS applies solely to Option A as the v1 logical direction (A-01..A-05 and exact D adoption remain open) and H 1.2.14/CSubmitOutcome 1.0.1 as an L1/L2 candidate (B-01..B-04 remain open). Neither scope means Gate passage, L1/L2 closure, protected-path implementation authorization, schema/technology freeze, deployment approval or production authorization.
 
 ## Five fundamental risks
 
@@ -21,7 +21,7 @@ A grants bounded preparatory work only. This is not a Gate pass, implementation 
 2. B Fact/Claim/identity/temporal semantics remain ADR-BLOCKED.
 3. Forget/revocation/restore lacks end-to-end no-resurrection proof and complete inventory.
 4. I36 governance, trust and authorization approvals remain open.
-5. D/E/I/Storage publication, JF-10 recovery and C/G/H Applied/provider-outcome proof are not end-to-end verified.
+5. B protocol exact-manifest drift (v3.2.9 stale; v3.3.0 successor required), plus D/E/I/Storage publication, JF-10 recovery and C/G/H Applied/provider-outcome proof remain unresolved.
 
 ## Five complexity bottlenecks
 
@@ -33,7 +33,7 @@ A grants bounded preparatory work only. This is not a Gate pass, implementation 
 
 ## Engineering prerequisites and critical path
 
-P0-01 implementation repo/owner → P0-02 B domain semantics and P0-03 I governance/inventory → P0-04 D/E/I/Storage atomic publication/Forget contract → P0-05 Storage/COC/JF-10 physical proof → P0-06 C/G/H Applied contract → P0-07 bounded durable canonical slice → P0-08 safe retrieval/rebuild → P1 Context/Adapter/Applied → integrated recovery and conformance. This ordering is not fully serial: synthetic benchmarks, harness scaffolding, source refresh, bilingual automation and candidate DB experiments may run in parallel.
+P0-01 implementation repo/owner → P0-02 B domain semantics and P0-03 I governance/inventory → B-01..B-04 exact H/C/D/I/Storage manifest closure → A-01..A-05 Option A L1/L2 clarification and D exact adoption → P0-04 D/E/I/Storage atomic publication/Forget contract → P0-05 Storage/COC/JF-10 physical proof → P0-06 C/G/H Applied contract → P0-07 bounded durable canonical slice → P0-08 safe retrieval/rebuild → P1 Context/Adapter/Applied → integrated recovery and conformance. This ordering is not fully serial: synthetic benchmarks, harness scaffolding, source refresh, bilingual automation and candidate DB experiments may run in parallel.
 
 ## Decision record
 
@@ -47,7 +47,9 @@ Decision outcomes are restricted to:
 
 ### Approved condition
 
-COND-NB-01 only: vector/ANN production capability deferred; synthetic benchmark may proceed under F ownership. Full record is in DEFERRED-002. No Critical condition is waived.
+- Option A: conditionally accepted only as the v1 logical direction; A-01..A-05 remain blocking and L1 is not closed until the successor ADR and exact D/Storage/I reviews satisfy them.
+- B protocol: H Unified 1.2.14 / wire 1.3.0 + CSubmitOutcome 1.0.1 conditionally accepted only as an L1/L2 candidate; B-01..B-04 remain blocking; v3.2.9 is stale and requires v3.3.0/equivalent reviewed by C/H/D/I and A.
+- COND-NB-01: vector/ANN production capability deferred; synthetic benchmark may proceed under F ownership. This is the only accepted non-blocking residual issue; full record is in DEFERRED-002. No Critical correctness/security condition is waived.
 
 ### Rejected conditions
 
@@ -100,4 +102,4 @@ All Critical risks remain open. Any accepted condition is automatically suspende
 
 ## Evidence and cross-references
 
-R PR #50; X PR #49; F/D/P PR #46; Issues #3, #5, #7, #10, #25, #29 and #43; source pins in SYS-RISK-002. Companion documents: ARCH-CX-002, DEV-FEAS-002, DEP-DAG-002, PRIORITY-002, READINESS-002, CONFLICT-002, GATE-002, DEFERRED-002. This assessment does not merge PRs, close Issue #43 or authorize production.
+R PR #50; X PR #49; F/D/P PR #46; B protocol PR #51; B→A review PR #52; Option A review PR #54; current main `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`; Issues #3, #5, #7, #10, #25, #29 and #43; source pins in SYS-RISK-002. Companion documents: ARCH-CX-002, DEV-FEAS-002, DEP-DAG-002, PRIORITY-002, READINESS-002, CONFLICT-002, GATE-002, DEFERRED-002. This assessment does not merge PRs, close Issue #43 or authorize production.
