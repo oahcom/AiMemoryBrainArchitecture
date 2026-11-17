@@ -1,0 +1,66 @@
+# Project Prompt Library / 项目提示词库
+
+- Library ID: PROMPT-LIBRARY-001
+- Version: 1.0
+- Status: PROPOSED — pending governance-baseline adoption
+- Repository: `oahcom/AiMemoryBrainArchitecture`
+
+This is the canonical repository location for reusable AI prompts. Store prompts here before execution; do not rely on chat history as the only copy.
+
+本目录是项目可复用 AI 提示词的规范存放位置。提示词必须在执行前存入仓库，不能只依赖聊天记录保存。
+
+## 1. Directory rules / 目录规则
+
+- Files directly under `prompts/` are **global prompts**. They apply across Owners and work types.
+- `prompts/A/` through `prompts/I/` contain prompts owned by the corresponding Owner only.
+- Do not put Owner-specific prompts at the root.
+- Do not duplicate global policy text in Owner prompts. Reference the global prompt IDs and paths; Owner prompts may add stricter domain-specific requirements.
+- Cross-owner work uses a global prompt plus one or more relevant Owner prompts. A multi-owner task must identify one accountable integration Owner and each participating Owner's bounded responsibility.
+- Keep executed prompt versions immutable. Material changes create a new versioned file; never silently overwrite a prompt already used.
+
+- `prompts/` 根目录中的文件属于**全局提示词**，适用于所有 Owner 和工作类型。
+- `prompts/A/` 至 `prompts/I/` 仅存放对应 Owner 负责的专属提示词。
+- Owner 专属提示词不得放在根目录。
+- 不要在 Owner 提示词中复制全局规范全文；应引用全局提示词 ID 和路径。Owner 提示词可以增加更严格的领域要求。
+- 跨 Owner 任务使用全局提示词，并组合相关 Owner 提示词。多 Owner 任务必须指定一个集成责任 Owner，并明确每个参与 Owner 的职责边界。
+- 已执行的提示词版本必须不可变。实质性修改应创建新版本文件，不得静默覆盖已执行版本。
+
+## 2. Global prompts / 全局提示词
+
+| Prompt ID | Path | Purpose |
+|---|---|---|
+| GLB-DEV-001 | [global-project-developer.md](global-project-developer.md) | Mandatory baseline for every AI developer/session |
+| GLB-REV-001 | [global-architecture-reviewer.md](global-architecture-reviewer.md) | Independent architecture review and evidence discipline |
+| GLB-DOC-001 | [global-bilingual-documentation.md](global-bilingual-documentation.md) | Bilingual documentation execution requirements |
+
+## 3. Owner prompts / Owner 专属提示词
+
+| Owner | Directory | Responsibility |
+|---|---|---|
+| A | [A/](A/) | Principal integration architecture and system-wide contract reconciliation |
+| B | [B/](B/) | Domain model, canonical semantics and ADRs |
+| C | [C/](C/) | Agent integration, telemetry and inference boundary |
+| D | [D/](D/) | Canonical Memory Brain authority and lifecycle |
+| E | [E/](E/) | Event ingestion, compilation and derivative publication |
+| F | [F/](F/) | Retrieval, activation, working set and runtime scheduling |
+| G | [G/](G/) | Memory Context, versioning, delivery and reconciliation |
+| H | [H/](H/) | BMCP protocol, wire contract and conformance |
+| I | [I/](I/) | Security, identity, permission and governance |
+
+## 4. Mandatory execution sequence / 强制执行顺序
+
+1. Read this index and the applicable global prompts.
+2. Read `00-governance/bilingual-documentation-policy.md` (GOV-DOC-001) and the relevant Chinese/English contract counterparts.
+3. Read the applicable Owner prompt(s) and refresh all referenced branch heads, files and SHAs.
+4. Copy the selected prompt into an immutable work-item record under `14-ai-development/work-items/` before execution; record Prompt ID, version and SHA-256.
+5. Execute only within the authorized Owner boundary and assigned branch.
+6. Return exact changed paths, branch/base/head SHAs, tests, review evidence, open issues and bilingual manifest.
+7. Read back every changed artifact. Never claim tests, reviews, approvals or merges that did not occur.
+
+## 5. Versioning and authority / 版本与权威
+
+Prompt files guide task execution; they do not override approved governance, Owner authority, ADRs, or normative architecture specifications. If a prompt conflicts with a newer approved source, stop, report the conflict, and request prompt maintenance.
+
+提示词用于指导任务执行，不能覆盖已批准治理规范、Owner 权限、ADR 或规范性架构文档。如果提示词与更新的已批准规范冲突，必须停止并报告冲突，先维护提示词。
+
+The prompts in this directory are PROPOSED until adopted through the repository's approved governance process. A prompt's presence does not itself grant implementation, merge, security-risk-acceptance, or contract-freeze authority.
