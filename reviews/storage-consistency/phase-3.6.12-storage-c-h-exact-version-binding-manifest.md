@@ -446,3 +446,49 @@ A-role integration artifact:
 The review finds the I/D/C owner-local serialization boundaries, H schema crosswalk and Storage immutable RecoveryRound/Batch-before-Manifest/release ordering mutually composable. It retains blockers for actual independent Owner adoption, durable owner-local sequencers/ledgers, trusted owner verifiers, C transport adapter integration, Storage quorum/readback/restore/operator evidence and executable race/fault-injection.
 
 **Provenance limitation:** this A artifact is a coordinator-authored A-role simulation, not independent A Owner acceptance. It does not refresh or supersede the controlling A review for Issue #14, does not close R1/R2, and does not change Gate A/B/C or production status.
+
+
+## 14. CSubmitOutcome 1.0.0 schema, H validator and executed structural CI (2026-11-17)
+
+This is the current exact pin set for the immutable C Provider Outcome object and the H validator implementation. It supersedes older draft pins in Sections 11–13 for the artifacts listed here.
+
+### 14.1 C artifacts
+
+| Artifact | Exact Blob | Commit / evidence |
+|---|---|---|
+| CSubmitOutcome 1.0.0 JSON Schema | `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c` | C schema commit `00568f8db6c222b48ac21502772a28771fcf63e3` |
+| C structural/semantic vectors (10 cases) | `e14eab2bed41f30af10a073b8e6523512128e78e` | C vector commit `00568f8db6c222b48ac21502772a28771fcf63e3` |
+| C schema/conformance contract Phase 3.8.9 | `7939c84e950b50f3ec44e4e2fbe5e7f93e544c2e` | C commit `56bdfaf5ad3c70f3c199572cd4e44395550e3945` |
+| C signature projection Phase 3.8.8 | `06d9264124d85896ccd44ef7789d9af245d8255b` | C commit `95efcd02a632d6e25f626146b1f0f8d0b6ab4411` |
+| C test harness | `92e8e9e607566eafa6ad89110202dbeed0fc43cb` | C test harness commit `e7f015cc575b269bd41ce7c356962fec439391c3` |
+| C test dependency pin | `89099e36f214d8d0e0c7d4aacc19e2b4450f0744` | C requirements commit `dc39c92ef98630f1e0da3eeb56aa0e9a3e8cb788` |
+| C CI workflow | `bc47b8c4ba83b3703064df6818d12ee2849c26f0` | C workflow commit `a0c197fa94e71c52758fadaa335a686815485dd7` |
+| I review of C schema/crypto binding | `a4d0be0e5bbf6122e2d86e59a48e62586869fd23` | I review commit `48decd0a9580335e88d1fbe9efb59b607e21c6ab` |
+
+### 14.2 H artifacts
+
+| Artifact | Exact Blob | Commit / evidence |
+|---|---|---|
+| H fail-closed validator core | `e8f737326bc4791e8d7acf917b4725dbb7171fad` | H validator commit `44a6858b2531b2b26def3976ad7a468da2c9fccd` |
+| H unit/fixture tests | `1f17bdcef6004eca165644ce96bcf35d3b10c3f8` | H test commit `cccef3c6fd0fe09d446cb2b19638510e13cb58cc` |
+| H test dependency pin | `a90afd258a50582c33f0f7c7f5e979600322ae86` | H requirements commit `f11d7b532f53ae4417f4869f29ddd0c03a05a079` |
+| H vendored C schema | `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c` | Exact content/blob equality with C branch |
+| H vendored C vectors | `e14eab2bed41f30af10a073b8e6523512128e78e` | Exact content/blob equality with C branch |
+| H exact wire mapping Phase 3.8.6 | `248ded774fcc5504289636daa39a50d5f17b0d62` | H mapping commit `ad71b071eafca12a9fa50c70cdbfa609c57ee9c1` |
+| H semantic validator contract Phase 3.8.5 | `9152cff0564446f27c29d14e02b1532b0ebe7c9d` | H contract commit `9f5034309eceba46a03a6b0a4b021e60f42af893` |
+| H CI workflow | `267f9bce0ee501864d6c83bacf84d747639ceadf` | H workflow revision commit `7d5c7324cabde76d99df49c55220219a491e03c0` |
+
+### 14.3 Executed CI evidence
+
+- C schema/semantic run `44055965702`: SUCCESS; commit `a0c197fa94e71c52758fadaa335a686815485dd7`; Python 3.12; 3 tests passed. Covers Draft 2020-12 schema self-validation and ten synthetic structural/semantic vectors.
+- H Provider Outcome run `44055791045`: SUCCESS; commit `7d5c7324cabde76d99df49c55220219a491e03c0`; Python 3.12; 7 tests passed. Covers strict JSON parsing, malformed UTF-8/non-finite rejection, candidate digest/preimage message-type domain binding, high-water semantic checks, fail-closed missing authority callbacks and all ten vendored C schema/vector cases.
+
+The H run used exact validator core `e8f737326bc4791e8d7acf917b4725dbb7171fad`, test file `1f17bdcef6004eca165644ce96bcf35d3b10c3f8`, C schema `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`, and C vectors `e14eab2bed41f30af10a073b8e6523512128e78e`.
+
+### 14.4 Explicit evidence ceiling and remaining blockers
+
+The CI runs establish structural/semantic unit checks only. They do NOT execute C Ed25519 signature verification, profile registration, C key-status/trust/custody, provider issuer proof authentication, C gate race/fault injection, owner ledger membership, COC quorum/Storage durability, cross-language C-profile crypto agreement or production provider adapter tests.
+
+The H validator is a fail-closed integration core with injected tri-state authority callbacks; production authority adapters are not wired. I's C profile remains unregistered. The C fixture signatures are placeholders. A must not freeze this bundle based on these CI runs.
+
+**Disposition: DESIGN + STRUCTURAL/SEMANTIC CI EVIDENCE ONLY; CRYPTO, AUTHORITY, ADAPTER AND PRODUCTION GATES OPEN.**
