@@ -106,3 +106,9 @@ H 候选源文件进一步新增 §11.8。当前精确 H 源 Blob：`0dca3dc5463
 **新增发现 H36-AP-08 — OPEN：** 候选映射已有文字定义，但 H Wire Schema/SDK 和精确 ACK message-family 绑定尚未更新或生成。H 必须将 COC、I、D 和 Storage 顺序域保持独立；Owner 证据缺失时保持 UNKNOWN/IN_DOUBT。G 的 recovery-batch 接受仅适用于精确版本且带条件；H 不得推断 COC 已部署或 Owner gate 已释放。C/G/I/D/Storage 确认以及 Schema/一致性测试仍待完成。
 
 §11.8 响应仍只是候选提案。在对应 Owner 接受同一个精确公共 package 且生成版本化 H Schema 映射前，H36-AP-01..08 均不得标记 RESOLVED。C/G/H 冻结仍 BLOCKED。
+
+## 9. H Provider outcome / Owner gate 澄清 — 2026-11-17
+
+H 候选源文件现已包含 §11.9，当前精确 Blob 为 `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`。它明确绑定 C 签发的 Provider receipt 和不可变 CSubmitOutcome，保留 UNKNOWN/IN_DOUBT，仅在所有 Owner outcome 均确定后才要求/允许 participant terminal proof，并将 Owner-local gate release attestation 保留给相应的 I 或 D authority。
+
+**新增发现 H36-AP-09 — OPEN：** 候选文本已保留正确的证据/权威边界，但精确 H Wire message-family Schema/SDK 映射和消费者接受仍缺失。C/G/I/D/Storage 必须确认同一个精确公共版本；任何 H ACK 或 COC observation 均不得替代 C Provider outcome 或 I/D Owner 签名的 gate release。H36-AP-01..09 在精确版本 Owner 决议及 Schema/一致性证据到位前仍为 OPEN。
