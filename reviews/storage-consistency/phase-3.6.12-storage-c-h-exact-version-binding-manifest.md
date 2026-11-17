@@ -252,20 +252,20 @@ No production readiness, universal exactly-once, Full Applied or Global Forget C
 |---|---|
 | H Unified Schema 1.2.11 / wire 1.3.0 | `4f1e103ab4b2ac961d77179dba0b65093532ea40` |
 | H RecoveryJoin 1.0.2 | `4b664e3bce465499bcdfd93796349a4ba7074002` |
-| H wire mapping 3.8.4 | `a692a790a4c7abef94dba6da9c22b5e06417879a` |
+| H wire mapping 3.8.4 | `1a64a7be3ec4190643809897519afdf73ed69c1d` |
 | H union Manifest contract 3.8.4 | `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175` |
-| H exact review | `f5ab9a9232b04720faf552a70d5d2962343f843f` |
+| H exact review | `b91c645d54ddbcc16aba84fbd83436bcb106bd98` |
 | H semantic reference module | `6710bd7876be5f2c60640f21090729b8859a7a3e` |
 | H RecoveryJoin 1.0.2 tests | `6afa788da2a899f03de8207cb700c40e0533aba1` |
 | H Unified 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
 | H Unified 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
-| H candidate CI | Run `44050250038`, commit `34fb4ccf8b1580321d38eda1340cf53f73b83f24`, 281 total / 259 passed / 22 skipped / 0 failed |
+| H candidate CI | Run `44051045877`, commit `ccecb8b6b80dff1e8ef7af10caac67c2f3c77929`, 282 total / 260 passed / 22 skipped / 0 failed |
 
 ### 10.2 Owner-owned proof contracts and reviews
 
 | Owner | Proof contract Blob | Exact review Blob | Decision boundary |
 |---|---|---|---|
-| I | `b1e39c92252eadf8ca592f9a8dc6879cf44fd593` | `658ed437ecd05d226a6658a3f159ce28449b0b36` | Candidate security/wire acceptance with blocking conditions |
+| I | `88209bbea0ab600880c5c630cfe83af31ee16dd7` | `658ed437ecd05d226a6658a3f159ce28449b0b36` | Candidate security/wire acceptance with blocking conditions |
 | D | `d80dabe7210e681bc4e2290355a38f8b67be9ddd` | `fe4ba71dd3a07d0775e17dbb90e8aeccc3bc71c0` | Accept with conditions; D signer/ledger implementation open |
 | C | `5e37185610869951c3b392c9ad143a72b4c702ac` | `c6b317f5050bca745bb6308ad6f77ba7d8284f77` | Accept with enumerated C-owned conditions; provider adapter open |
 
@@ -356,3 +356,14 @@ All Owner decisions above are delegated role simulations authored at the user's 
 - No production activation, provider egress authorization, Full Applied, Global Forget Completion or exactly-once guarantee is granted.
 
 The current design-level bundle is now pinned through A review. Any subsequent freeze request MUST replace the relevant PROPOSED/NOT EXECUTED evidence with exact implementation, registration and execution artifacts, then obtain a new A review.
+
+
+### 10.6 I membership proof cross-language vector
+
+I added `I_ADMISSION_SNAPSHOT_MEMBERSHIP_PROOF` as a sixth Python/Node RFC 8785 / Ed25519 test family:
+- Vector Blob: `9210219a85afe1f48da0ea253a073aba8b2e138c`
+- Python/Node test Blob: `01239e06e8f4464f49acd34241dc00899befe424`
+- I proof contract current Blob: `88209bbea0ab600880c5c630cfe83af31ee16dd7`
+- I exact review current Blob: `27b355ff4174fed20033b78d2e77f5c1e8d3177a`
+
+The vector binds the full I owner proof P0 identity. It remains TEST-ONLY. H run 44051045877 completed 282 tests: 260 passed, 22 skipped, 0 failed. Production I proof signing/key trust and real owner ledger inclusion remain unimplemented.
