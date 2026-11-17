@@ -1,6 +1,6 @@
 # Gate Entry and Exit Criteria — GATE-002
 
-- Version: 1.0.0; baseline `6470f25ca23b8d35c06f60be2326867066418d18`.
+- Version: 1.0.0; historical assessment snapshot `6470f25ca23b8d35c06f60be2326867066418d18` (not current main).
 - This document preserves two separate layers: Issue #43 integration gates G1–G8 and JF-10 physical gates A/B/C. They are not interchangeable.
 
 ## Issue #43 integration gates
@@ -37,3 +37,8 @@ Gate A partial pass does not imply B or C pass. Gate B/C do not authorize produc
 Requires all applicable Owner approvals, selected and deployed topology, security/identity governance, physical conformance, tested backup/restore and DR, named accountable operator/on-call, approved runbooks, monitoring, RPO/RTO, explicit production authorization. No current evidence satisfies this.
 
 See SYS-RISK-002, READINESS-002 and FINAL-A-002.
+
+
+## Current main HEAD / 当前 Main HEAD
+
+The current main HEAD independently observed for this publication is `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The earlier `6470f25...` / `b372b62...` values are historical assessment snapshots, not current main. This package has not completed a full source-by-source delta audit against current main; G1 remains PARTIAL and all Gate/freeze restrictions remain in force.
