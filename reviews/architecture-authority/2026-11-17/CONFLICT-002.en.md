@@ -1,11 +1,11 @@
 # Architecture Decision Conflict Register — CONFLICT-002
 
-- Version: 1.0.0; baseline `b372b62c640a2b656e54b6db62a4ee67d7d8c001`.
+- Version: 1.0.0; baseline `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`.
 - Status: A integration dispositions; Owner-owned normative decisions are not replaced.
 
 | ID | Apparent conflict / ambiguity | A disposition | Authority / required action | Gate |
 |---|---|---|---|---|
-| AC-01 | Modular monolith recommendation vs. selected Storage L1 logical profile and open L4 deployment | No contradiction. Modular monolith is a deployment shape; Storage §8 has selected L1 Option A (one serializable transaction domain per Canonical Memory authority). L4 engine/deployment conformance remains Storage/D/I-owned and open | Storage + D + I prove L4 realization of Option A; A integrates | G3/G5; JF-10 |
+| AC-01 | Modular monolith recommendation vs. selected Storage L1 logical profile and open L4 deployment | No contradiction. Modular monolith is a deployment shape; Option A is conditionally accepted as the v1 logical direction only. A-01..A-05 and exact D adoption remain open; L2/L3/L4 are separate | Storage + D + I prove L4 realization of Option A; A integrates | G3/G5; JF-10 |
 | AC-02 | P0 durable vertical slice vs. unresolved P0 semantic/atomicity prerequisites | P0-07 is conditional and downstream of P0-02..05; only harness/fixture work may run earlier | F/D/P roadmap corrected by A; D/E/Storage own prerequisites | implementation entry |
 | AC-03 | Delivery/transport ACK vs. Applied | Must remain separate facts; ACK cannot establish final-request crossing or provider outcome | C/G/H own final-request and Applied contract; I/D own authorization/fence inputs | G2/G4; Issue #3 |
 | AC-04 | COC order vs. I commit decision vs. Storage visibility | Preserve separate authority: COC orders/records; I PolicyDomain sequencer decides JF-10 COMMIT/ABORT; Storage resolves same XID and owns visibility; D owns ForgetFence | A coordinates only; no synthesized authority | JF-10 A/B/C |
@@ -17,6 +17,10 @@
 | AC-10 | Candidate schema/technology artifacts vs. freeze claims | Candidate and bounded CI status do not imply normative freeze or production conformance | Respective Owner/ADR authority decides; A requires exact-head evidence | G1/G2/G5 |
 
 | AC-11 | Storage topology ADR retains pre-addendum prose saying no option is selected, while §8 explicitly supersedes it for L1 | §8 controls: Option A is selected at L1; historical §3 text is not a current blocker but should be explicitly marked/simplified to prevent ambiguity | Storage | Before G1/G5 freeze review | G1/G5 |
+
+| AC-12 | Storage v3.2.9 manifest is stale against later C/D/I reviews and H CI run 44069941327 | Storage must publish v3.3.0/equivalent; C/H/D/I review identical manifest; A re-reads | Storage + C/H/D/I; A integrates | G1/G2/G6 |
+| AC-13 | Interim B identity/entity research artifacts were reverted from current main | They are not current baseline evidence; Fact/Claim remains ADR-BLOCKED; no schema freeze | B; I/C/H consumers | G2/G3 |
+| AC-14 | Option A L1 selection could be mistaken for completed L1/L2 | Conditional direction only; A-01..A-05 and exact D acceptance remain open; L2/L3/L4 separate | Storage/D/I + A | G2/G3/G4/G5 |
 
 ## Explicit A boundary
 
