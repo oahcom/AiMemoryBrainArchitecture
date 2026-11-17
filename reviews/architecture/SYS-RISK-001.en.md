@@ -724,3 +724,66 @@ R-07 is **PARTIALLY VERIFIED at component-capability level; NOT PROVEN end-to-en
 
 **Closure status: NOT CLOSED.** JF-10 runtime P0 and production restore remain open.
 
+
+
+## 22. R-08 live asynchronous authorization / TOCTOU / final-boundary linearization assessment — 2026-11-18
+
+### 22.1 Exact current source pins
+
+| Owner | Branch HEAD | Artifact / Blob | Status / evidence ceiling |
+|---|---|---|---|
+| I | 0d071bf1ee7cc71912398c6ae57e4496e08f44ab | CommitAuthorizationReceipt / causal-order contract 5a5304d48aa912dcf6f817099bd5659371d8cdc8 | I-side receipt/order semantics specified; service deployment, external governance and cross-owner acceptance open; common CausalOrderProfile/1.0 proposed, not frozen |
+| I | same | Phase 3.8 receipt/revocation sequencer contract 54bab0484bd232a5a258e65e34cc7425288b39a6 | I-role proposal; exact Owner approval, crypto profile and conformance open |
+| I | same | I owner-local atomic gate amendment 0d0b4fb0f5921e63b6ebfd70b62afa31d3d5fdf7 | Candidate; independent I review required; not implemented/verified |
+| C | 71047cdb51139ca4080ac67f451e38a48698859d | C provider-side-effect gate candidate 896b6538eeeaf0905fee994d210e43d435b0a5a5 | Coordinator-prepared C-role candidate; independent C review required; not implemented/deployed/run |
+| C | same | C local admission/recovery amendment 9609b252fc38fd5ba7b2f8c0992b7bd33a13c5bb | Proposed C-local amendment; exact-version C re-review required; no conformance |
+| D | 194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f | D owner-local Forget Gate candidate 84f6875ce382fb37f35b01140c19a482fcfa9fab | Candidate; independent D review required; not implemented/verified |
+| D | same | Joint Forget linearization decision 1b6a312ecffd3947bbb4df59f902242482c98a40 | User-delegated DE-S joint architecture decision; implementation not verified; not independent Owner approval |
+| E | ee098e14747d9915de5b3efb63b3a8dd77f670ed | Publication orchestration/retry/recovery contract 475fee41e5eea527af4edefbfe88c58c86967d0a | E-role proposal; exact D/I/Storage APIs and independent Owner approval open |
+| Storage | 830a559bd2f4ec72608f5a51e1a0b43779f2b989 | JF-10 reference model 72fef7be1cd3f111a0151498c686d4556156339f; tests a38d73b4a5e7c65210fb414a62fb91b30649b788; workflow bbd393a3cf58d4bccbf0079724acbaa09ed9960f | Run 43895971452 / job 133399514028 / commit 684ac873bec331649c18a45a992007d04f211832: 15/15 deterministic logical tests PASS; model explicitly has no I/O and is not a production coordinator/DB participant |
+| Storage | same | PostgreSQL prepared-XID, sync failover and restore probes | R-07 evidence applies to engine-level capability only; it does not execute I receipt service, D gate or C provider egress CAS |
+
+### 22.2 Sound architectural ordering already specified
+
+The reviewed contracts do identify the correct distinct authority boundaries:
+- I is the only authority for current authorization, PermissionEpoch, revocation ordering, single-use CommitAuthorizationReceipt and I terminal proof.
+- D is the only authority for ForgetFenceGeneration, lineage/barrier membership and D release.
+- C owns the provider-side-effect admission gate and actual provider egress/outcome. A reservation or dispatch authorization is not proof that request bytes crossed the provider boundary.
+- Storage owns prepared participant/GID resolution and final visibility transaction.
+- E orchestrates immutable operation/attempt tuples but cannot mint I authorization, D clearance or Storage visibility.
+
+I's causal-order semantics distinguish REVOCATION_WON from COMMIT_WON. Revocation before intent blocks admission; after intent but before receipt consumption it may win; after I COMMIT_WON, revocation remains pending behind the exact unresolved participant until C outcome or safe abort is durable. I's receipt binds exact operation/action/resource/purpose/audience, final request boundary, request digest, D and Storage participant refs, and single-use state. Storage validates the consumed pre-commit I proof at the visibility linearization point; I terminal proof is post-commit closeout only, avoiding a circular dependency.
+
+D's intended serialization domain covers RegisterProducerWork, InstallForgetFence, complete dependency registration, final publication visibility and barrier terminal disposition. C's intended final egress serialization must check the same current CGateGeneration immediately before outbound request bytes are released. Every owner gate must use its own durable linearization point; a read-then-act, cache flag, process mutex, queue pause, timestamp or detached token is insufficient.
+
+### 22.3 The gap is implementation and common-version adoption, not missing prose
+
+**R08-1 — I receipt service remains a proposal.** The current I Phase 3.8 receipt contract explicitly says exact Owner approval, crypto profile and conformance OPEN. It requires an authoritative PolicyDomain sequencer, single-use receipt consumption, replay protection, exact tuple binding, key status, and post-Storage terminal closeout. No deployed sequencer, durable receipt store, real key lifecycle or Storage proof verifier was demonstrated.
+
+**R08-2 — D and C gate code is still candidate.** D Phase 3.6.7 and C Phase 3.6.7/3.6.9 require durable local CAS/transaction, captured high-water and same-generation checks at every protected boundary, but remain candidate/proposed, with independent Owner review and all conformance cases not run. D's joint linearization decision is explicitly user-delegated architecture work, not independent D Owner approval.
+
+**R08-3 — E's orchestrator has no accepted callable API bundle.** E lists the desired order Storage Prepare → D Publication Admission → I single-use sequencer consumption → Storage final visibility → D/I closeout, but exact D/I/Storage callable APIs and independent Owner approvals remain open. E-local labels/queue ACK do not establish authority.
+
+**R08-4 — The gate amendments are pinned to predecessor Storage/COC versions.** The C/D/I Phase 3.6.7 gate amendments identify Storage Design v3.1 Blob d5bdc72... and COC companion Blob 8ac178... as their exact target. Current Storage branch has advanced to v3.3.2 and newer COC/recovery amendments. No evidence in these gate files transfers their applicability automatically to current Storage v3.3.2/COC. They need fresh exact-version owner re-review against the current serialization/participant APIs.
+
+**R08-5 — 15/15 JF-10 model tests are logical only.** Run 43895971452 passed 15 tests for participant-first/fence-first ordering, COMMIT_WON before Storage commit, same-XID recovery, crash-before/after-local-commit, immutable terminal decision, receipt binding and multi-domain rejection. The model's docstring explicitly says deterministic state machine with no I/O, not a production coordinator/database participant. The test file explicitly says it does not exercise a real DB, prepared transaction, I service or HA stack. Its model/test/workflow Blobs are identical at the tested commit and current Storage HEAD, so the logical evidence is current for those files, but its evidence ceiling remains logical.
+
+**R08-6 — Multi-PolicyDomain atomic authorization remains blocked.** The logical model explicitly rejects multi-domain atomicity. I's contracts preserve per-PolicyDomain PermissionEpoch and sequencer order; no global total order or cross-domain atomic authorization is established. This is a deliberate boundary, not something to paper over by comparing opaque epoch numbers or timestamps.
+
+### 22.4 R-08 disposition
+
+R-08 remains **High / PARTIALLY SPECIFIED; NOT PROVEN in deployed execution**. There is a coherent causal-order and local-gate design, plus 15/15 logical reference tests and real PostgreSQL engine-capability tests. But the I sequencer, D gate, C final egress CAS, Storage final proof verification and E orchestration have not been shown running together under a single current exact-version bundle. Therefore no claim of race-free revocation/publication/provider-submit ordering, exactly-once provider effect, or production TOCTOU closure is justified.
+
+### 22.5 Closure criteria
+
+1. I approves and deploys exact CommitAuthorizationReceipt/ITerminalProof schema, key/profile lifecycle, PolicyDomain sequencer, durable single-use consumption, replay/restore and currentness APIs.
+2. D approves and deploys its gate/fence linearization transaction, complete lineage/work inventory and monotonic gate release.
+3. C approves and deploys final provider-egress gate CAS, proving no request bytes leave after gate close and ambiguous sends retain same provider idempotency key until authoritative resolution.
+4. Storage proves the exact pre-commit I proof, D participant/fence and prepared Storage participant tuple are validated at the same physical visibility linearization point; post-commit I terminal proof must not be circularly required.
+5. E binds its retry/recovery orchestration to the exact owner APIs and immutable OperationId/TupleDigest/ParticipantRefs; local state cannot close owner gates.
+6. Refresh C/D/I gate amendments from Storage v3.1/COC 8ac predecessor pins to current exact Storage/COC versions and secure independent Owner acceptance.
+7. Execute cross-service concurrency/fault tests for revoke-vs-intent, revoke-vs-receipt-consume, gate-close-vs-admission, gate-close-vs-final egress, lost ACK, process crash before/after each linearization point, duplicate receipt, changed digest, sequencer rollback, key rotation/revocation, D fence advance, Storage outcome UNKNOWN and provider timeout after possible side effect.
+8. Demonstrate a single PolicyDomain end-to-end proof first; treat multi-PolicyDomain all-or-none semantics as a separate blocked decision, not an assumed extension.
+
+**Closure status: NOT CLOSED.** No production authorization, publication or provider-egress race-freedom claim is made.
+
