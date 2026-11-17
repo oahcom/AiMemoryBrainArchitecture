@@ -176,6 +176,9 @@ class OwnerSnapshotCompletenessTests(unittest.TestCase):
 
     def test_membership_does_not_imply_complete_enumeration(self):
         snap = self.snapshot(["producer-A"])
+        snap.pagination_complete = False
+        snap.attested = False
+        snap.anti_rollback = False
         self.assertTrue(snap.proves_membership("producer-A", 4))
         with self.assertRaises(ProtocolError):
             snap.seal_complete(1, snap.ordered_root(snap.rows))
