@@ -35,7 +35,8 @@ The central rule is: use mature, simple and verifiable technology to satisfy exi
 | `owner-dependency-register.md` | Required B–I/Storage/Testing/Operations inputs | Drafted; responses pending |
 | `research-evidence-register.md` | Exact source snapshots, releases, licenses, paths and docs | Drafted; further evidence may be added |
 | `open-questions.md` | Blockers and evidence needed to close | Drafted |
-| `owner-technology-review-synthesis.md` | Current B–I TAR findings, branch-head drift and Storage/PostgreSQL evidence | Drafted; currentness review required |\n| `independent-review-handoff.md` | Separate-session reviewer mandate and exact checks | Prepared; review not started |
+| `owner-technology-review-synthesis.md` | Current B–I TAR findings, branch-head drift and Storage/PostgreSQL evidence | Drafted; currentness review required |
+| `independent-review-handoff.md` | Separate-session reviewer mandate and exact checks | Prepared; review not started |
 
 All research documents contain English and Chinese sections in the same file/change set. The repository's GOV-DOC-001 policy remains normative.
 
