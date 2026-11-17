@@ -3,9 +3,9 @@ name: Runner Guard Self-Test
 # Proves, from inside a real job, that the self-hosted runner executes work and
 # that the L1 admission hook admitted it. Read-only; prints no secrets.
 #
-# The push trigger is scoped to this file so the workflow runs when it is added
-# or revised and stays dormant otherwise. Documented in AI-RUN-002-RUNBOOK
-# section 4.1 and DOC-OPS-001 section 13.
+# Documented in DOC-OPS-001 section 13 and AI-RUN-002-RUNBOOK section 4.1.
+# Triggered by changes to this file and by manual dispatch. The temporary cron
+# entry is removed once the admission hook is verified against live job context.
 
 on:
   push:
@@ -13,6 +13,8 @@ on:
     paths:
       - '.github/workflows/runner-guard-selftest.yml'
   workflow_dispatch:
+  schedule:
+    - cron: '*/5 * * * *'
 
 permissions:
   contents: read
@@ -49,10 +51,15 @@ jobs:
             echo "::error::guard log not readable at ${log}; L1 admission control is not installed"
             exit 1
           fi
-          echo "Last three guard decisions:"
+          echo "Last guard decisions:"
           tail -n 3 "$log"
-          if ! grep -qE 'ALLOW event=(push|workflow_dispatch)' "$log"; then
-            echo "::error::no ALLOW decision found in the guard log"
+          if ! grep -q 'ALLOW ref=refs/heads/main' "$log"; then
+            echo "::error::no ALLOW decision for refs/heads/main in the guard log"
             exit 1
+          fi
+          dump="${HOME}/actions-runner/hooks/context-dump.txt"
+          if [ -r "$dump" ]; then
+            echo "Hook context source (first lines of the diagnostic capture):"
+            head -n 12 "$dump"
           fi
           echo "Admission guard admitted this job."
