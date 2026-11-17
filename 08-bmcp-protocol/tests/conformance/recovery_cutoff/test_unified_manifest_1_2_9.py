@@ -157,6 +157,8 @@ class UnionSemanticsTests(unittest.TestCase):
         snaps["D"]["admission_high_water"]="opaque/cursor/18";rows[1]["owner_high_water"]="opaque/cursor/18"
         proofs[("D","D/work-9")]["owner_high_water"]="opaque/cursor/18"
         m=deepcopy(self.m);m["owner_snapshot_roots"]["D"]["admission_high_water"]="opaque/cursor/18"
+        m["manifest_members"][1]["owner_high_water"]="opaque/cursor/18"
+        m["member_set_root"]=td("MANIFEST-MEMBER-SET",m["manifest_members"])
         m["manifest_content_digest"]=content_digest(m)
         self.assertEqual(validate_union(m,self.prefix,rows,snaps,proofs),VALID)
     def test_UNION_19_empty_owner_binding_is_valid_when_no_owner_admission_applies(self):
