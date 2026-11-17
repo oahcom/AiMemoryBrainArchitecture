@@ -109,7 +109,7 @@ class Issue20SchemaStructureTests(unittest.TestCase):
         )
         envelope = {
             "schemaId": "issue20.archive-forget-restore",
-            "schemaVersion": "0.1.0",
+            "schemaVersion": "0.1.1",
             "messageId": "msg-i-1",
             "issuer": "I",
             "audience": "STORAGE",
@@ -174,7 +174,7 @@ class Issue20SchemaStructureTests(unittest.TestCase):
         )
         base = {
             "schemaId": "issue20.archive-forget-restore",
-            "schemaVersion": "0.1.0",
+            "schemaVersion": "0.1.1",
             "messageId": "msg-d-terminal",
             "issuer": "D",
             "audience": "AUDIT",
