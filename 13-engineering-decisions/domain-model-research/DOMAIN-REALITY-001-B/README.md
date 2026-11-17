@@ -85,9 +85,9 @@ Published on this branch so far / 本分支已发布：
 
 Remaining work includes completion of A and Testing/Quality source inventory, full exact-version PR/Issue diff audit, explicit relationship and state owner acceptance, schema/fixture design after semantic closure, final readback, and independent review. / 剩余工作包括补齐 A 与 Testing/Quality 源清单、完整精确版本 PR/Issue Diff 审计、关系与状态的 Owner 明确验收、语义闭合后的 Schema/Fixture 设计、最终读回及独立审查。
 
-The actual `main` baseline is pinned in the baseline report. The repository is an architecture-definition repository; README explicitly says implementation has not started by design. The existing B branch is `session-b-domain-model-phase3`; it is not the requested research branch and its Scope/Permission source Blob differs from current main. The new research branch was created from the verified main HEAD without modifying main or the existing B branch.
+The actual `main` baseline is pinned in the baseline report. The repository is an architecture-definition repository; README explicitly says implementation has not started by design. The existing B branch is `session-b-domain-model-phase3`; it is not the requested research branch and its Scope/Permission source Blob differs from current main. The research branch's historical merge-base is `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; current main later advanced to `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The branch is therefore historically based on the former, not the latter. Current main and this research branch are divergent; PR #55 remains Draft and no merge/rebase is requested.
 
-真实 `main` 基线已在基线报告中 Pin。仓库是架构定义仓库；README 明确说明按设计尚未开始实现。已有 B 分支为 `session-b-domain-model-phase3`，它不是本次研究分支，且其 Scope/Permission 源 Blob 与当前 main 不同。新研究分支从已核验的 main HEAD 创建，没有修改 main 或既有 B 分支。
+真实 `main` 基线已在基线报告中 Pin。仓库是架构定义仓库；README 明确说明按设计尚未开始实现。已有 B 分支为 `session-b-domain-model-phase3`，它不是本次研究分支，且其 Scope/Permission 源 Blob 与当前 main 不同。研究分支的历史 Merge Base 为 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`；当前 main 后续推进至 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。因此该分支基于前者，而非后者。当前 main 与研究分支存在分叉；PR #55 保持 Draft，不请求合并或 Rebase。
 
 ## 6. Stop conditions / 停止条件
 
@@ -98,6 +98,6 @@ Any unresolved identity collision, contradictory state meaning, unowned lifecycl
 
 ## 7. Branch isolation correction / 分支隔离纠正记录
 
-A subset of initial create-file operations landed on main because the branch parameter was omitted. The exact affected research files were copied to this isolated branch, then removed from main through explicit delete commits. All 13 affected main paths were subsequently checked and returned NOT_FOUND; the branch contains the full 17-file research package. Main was not rewritten and historical commits remain auditable. This correction is recorded transparently; it is not treated as a clean initial write.
+A subset of initial create-file operations landed on main because the branch parameter was omitted. The exact affected research files were copied to this isolated branch, then removed from main through explicit delete commits. All 13 affected main paths were subsequently checked and returned NOT_FOUND; the branch contains the 19-file research package. Main was not rewritten and historical commits remain auditable. This correction is recorded transparently; it is not treated as a clean initial write.
 
 部分初始 create-file 操作因遗漏 branch 参数而写入 main。受影响的研究文件已复制到本隔离分支，再通过明确的删除提交从 main 移除。随后对 13 个受影响的 main 路径逐一核验，均返回 NOT_FOUND；研究分支包含完整 17 个文件。main 未被重写，历史提交仍可审计。本纠正过程如实记录，不将其描述为从一开始就正确隔离。
