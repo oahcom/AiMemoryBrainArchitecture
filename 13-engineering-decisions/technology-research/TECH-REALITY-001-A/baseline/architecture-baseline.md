@@ -143,3 +143,68 @@ Open issues relevant to technology and feasibility include #43 (system-wide cons
 - 本文件不声称已经审查所有开放 PR 的完整差异。
 - 第三方技术实现证据另行登记在 `research-evidence-register.md`。
 - 本阶段未运行 Brain 原型基准测试（`NOT RUN`）。
+
+## 10. 完整中文版本 / Chinese Version
+
+### 10.1 基线范围与仓库快照
+
+本基线在 2026-11-17 直接读取 GitHub 的 `main`，精确 HEAD 为 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`。研究分支从该提交创建。仓库是 Private，默认分支为 main。README 明确表示项目处于系统架构基线阶段，按设计尚未开始生产实现。本结论只适用于该仓库快照，不表示其他仓库或外部原型不存在。
+
+### 10.2 已读取的规范文档
+
+| 领域 | 文件 | Blob SHA | 基线判断 |
+|---|---|---|---|
+| 架构不变量 | `00-governance/architecture-invariants.md` | `33b037318e459ebb73bea33b3186f31a41d5dcfe` | I-01 至 I-24 |
+| 设计原则 | `00-governance/design-principles.md` | `192e6ba6e9287792a02b679dda0d391844270228` | P-01 至 P-16 标记 DECIDED |
+| 双语规范 | `00-governance/bilingual-documentation-policy.md` | `b51b054b9f1022133666542680df74dfe19de2fb` | GOV-DOC-001，双语文档为规范要求 |
+| 系统组件图 | `01-system-architecture/component-map.md` | `ddb7a1571463cadce83d89f62b03526c4f9693e8` | 逻辑边界，不等于进程/Crate 划分 |
+| 系统总览 | `01-system-architecture/system-overview.md` | `995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256` | Brain 权威及系统责任 |
+| 系统边界 | `01-system-architecture/system-boundaries.md` | `ad9ea5ce00e74dba89d325601677270a50f30926` | 信任、权威与依赖边界 |
+| 数据流 | `01-system-architecture/data-flows.md` | `9cc45d2e593c186123ddc43dcdfdf1881017684a` | Ingress、Recall、Context、Forget |
+| 组件交互 | `01-system-architecture/component-interactions.md` | `07a35c31921d08a3da832a71cd11db99c0f85922` | 跨子系统协作 |
+| 职责矩阵 | `01-system-architecture/responsibility-matrix.md` | `fbeb6935fe874e6c843c25c3a891d6b3242cbfd3` | Owner 与逻辑责任 |
+| 质量属性 | `01-system-architecture/system-quality-attributes.md` | `4350733173d29451a8ea4aa6a544de46526b4fd7` | 质量目标存在，量化 SLO 未建立 |
+| 领域总览 | `02-domain-model/domain-model-overview.md` | `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` | 领域对象模型 |
+| 核心实体 | `02-domain-model/core-entities.md` | `8cb5a674eec8eac1f3c4d83c400dc08d00166f23` | 实体与对象定义 |
+| 时间/认知语义 | `02-domain-model/epistemic-and-temporal-semantics.md` | `8c03a20db1ed54c90db1d5c4c64f5ea7b1324ed7` | 不同时间和认知维度 |
+| 生命周期 | `02-domain-model/lifecycle-model.md` | `81c48c928cb5f9c76ca29d493fbd9479079e62f7` | 记忆生命周期与状态 |
+| Scope/权限 | `02-domain-model/scope-and-permission-model.md` | `b5215ae27bd65a6c89c185b496f730b6cd52efa9` | Scope 与 Authorization 分离 |
+| Provenance | `02-domain-model/relationships-and-provenance.md` | `e762f84c59f69de7a44baad2123aed46e1ffea16` | 来源与关系语义 |
+| Agent 集成 | `07-agent-integration/agent-integration-overview.md` | `073ff4ddf71fbcaf959107bb06ab724bfa48e63b` | Agent 管推理/动作，Brain 管记忆/Context |
+| 技术蓝图 | `13-engineering-decisions/technology-architecture-blueprint.md` | `7b6f2d139217dbe13ab3a3af31bfbff525f20e71` | TAB-001 v0.1，CANDIDATE，不是冻结 |
+| Roadmap | `ARCHITECTURE_ROADMAP.md` | `29289361973ec4369f067706132190793cd57a6b` | 先架构后实现 |
+| 双语覆盖 | `docs/translation-status.md` | `7b15c5000c324729fd16f82f4b247de4e411d51e` | Owner 详细契约双语覆盖不完整 |
+| AI 开发规范 | `14-ai-development/ai-development-standard.md` | `f46867f97fc1860015adbe2a1f7b8262640c16fd` | Owner 工作流受治理约束 |
+
+### 10.3 TAB-001 技术决策状态
+
+TAB-001 明确标注为“候选系统级蓝图，非技术冻结”。Rust 是已决定方向；Tokio 为推荐；SQLite+WAL、PostgreSQL、FTS5/Tantivy、ANN、ONNX Runtime、llama.cpp、JSON/HTTP、Moka、Outbox/Worker、模块化单体等均处于候选、推荐或待验证状态，不能因为出现在蓝图中就视为批准。
+
+| ID | 技术领域 | 蓝图状态 | 关键验证 |
+|---|---|---|---|
+| TEC-001 | Rust | DECIDED 方向 | 现有架构基线 |
+| TEC-002 | Tokio | RECOMMENDED | Runtime 原型与依赖审查 |
+| TEC-003 | SQLite + WAL | CANDIDATE / TO_VALIDATE | D/E Forget 竞争、事务、恢复与并发测试 |
+| TEC-004 | PostgreSQL | CANDIDATE | 工作负载阈值和迁移比较 |
+| TEC-005 | 内容寻址 Blob | RECOMMENDED | 崩溃一致性、完整性和备份恢复 |
+| TEC-006 | FTS5/Tantivy | CANDIDATE | 检索质量、吞吐、更新删除与重建 |
+| TEC-007 | ANN/sqlite-vec | OPEN | Recall、延迟、内存和重建 |
+| TEC-008 | Moka | RECOMMENDED | Generation 失效与内存限制 |
+| TEC-009 | ONNX Runtime | CANDIDATE | 模型算子与 CPU/GPU 基准 |
+| TEC-010 | llama.cpp | CANDIDATE | 目标 GPU、上下文、VRAM 与延迟 |
+| TEC-011 | Provider Adapter | RECOMMENDED 架构 | 契约与 Provider Conformance |
+| TEC-012 | JSON | OPEN / H-owned | Schema、兼容性与负载基准 |
+| TEC-013 | HTTP/IPC | OPEN / H-owned | 安全、流式、重连与跨平台 |
+| TEC-014 | tracing/metrics/OTel | RECOMMENDED | 跨模块关联与敏感信息审查 |
+| TEC-015 | Secrets/crypto | OPEN / I-owned | 威胁模型、密钥生命周期和平台矩阵 |
+| TEC-016 | 模块化单体 + 推理 Worker | CANDIDATE | 故障隔离和资源基准 |
+| TEC-017 | SQL Migration | RECOMMENDED | 升级/回滚/恢复测试 |
+| TEC-018 | Outbox + DB Worker | CANDIDATE | Admission/Fence 线性化与重放测试 |
+
+### 10.4 实现覆盖与风险
+
+主分支没有根目录 `Cargo.toml`，也没有 Brain Rust 应用工作区；README 说明实现尚未开始。部分 Owner 详细契约、Storage、Consistency、Testing 双语文件仍未完成。TAB-001 的关键未决项包括 D/E/Storage Producer Admission/Fence/Dependency/Publication、B Fact/Claim ADR、C/G/H Applied、I Forget 目标清单、加密与密钥托管，以及真实工作负载/SLO。
+
+### 10.5 基线结论
+
+**NOT YET PROVEN（尚未证明）**。逻辑架构足以支持严肃技术研究，但当前仓库不能证明已有可执行 Rust 实现、正式部署拓扑、物理事务原子性、真实负载适配或完整 Owner 契约闭环。TAB-001 的基线提交为 `8a6414158c9c056c1638222534e1993d1bbc99d2`，早于本次 main HEAD；这是追溯性缺陷，必须在后续 ADR/研究中记录精确提交与 Blob。
