@@ -364,3 +364,17 @@ This consumer alignment is source-backed but is not D/E/F/G approval of B's pref
 **Live status at 2026-11-18 05:22 Asia/Singapore:** PR #55 is CLOSED / MERGED (merged 2026-11-17T19:12:47Z; merge commit `07ee5702cab0d12d6136fe3c024bde9a7af44a97`). Current main HEAD is `a2b8babb1cacfcfbcd590b147bdf34ce162944c2`, and the research package is present in the main tree. The PR review listing contains 10 COMMENTED records and no APPROVED record. The merge does not close B0–B6, grant Architecture Governance approval, or freeze any schema. See [Post-Merge Currentness & Governance Reconciliation](post-merge-currentness-and-governance-reconciliation.md). This section supersedes earlier Open/Draft and “package absent from main” status snapshots.
 
 **截至 2026-11-18 05:22（新加坡时间）的实时状态：** PR #55 已 CLOSED / MERGED（合并时间 2026-11-17T19:12:47Z；Merge Commit `07ee5702cab0d12d6136fe3c024bde9a7af44a97`）。当前 main HEAD 为 `a2b8babb1cacfcfbcd590b147bdf34ce162944c2`，研究包存在于 main Tree。PR Review 列表有 10 条 COMMENTED 记录，没有 APPROVED 记录。该合并不关闭 B0–B6，不代表 Architecture Governance 批准，也不冻结任何 Schema。详见[合并后当前性与治理状态核对](post-merge-currentness-and-governance-reconciliation.md)。本节取代此前 Open/Draft 及“研究包不在 main”的状态快照。
+
+
+## 20. Latest cross-owner source reconciliation / 最新跨 Owner 来源协调
+
+The exact current B/D/E/F/G and A/C/H/I/Storage branch heads and source Blob pins were refreshed on 2026-11-18. The detailed B2/B3 status, H 1.2.15 evidence ceiling, I production trust registration gap, D/I/Storage Forget proposal disposition and unchanged gate states are recorded in [Latest Cross-Owner Source Reconciliation](latest-cross-owner-source-reconciliation.md). This is a source audit, not Owner acceptance or Governance approval.
+
+2026-11-18 已刷新 B/D/E/F/G 与 A/C/H/I/Storage 的精确当前分支 Head 和来源 Blob Pin。B2/B3 状态、H 1.2.15 证据上限、I 生产 Trust 注册缺口、D/I/Storage Forget 提案状态及未变化的门禁状态，详见[最新跨 Owner 来源协调](latest-cross-owner-source-reconciliation.md)。该文件是来源审计，不是 Owner 验收或 Governance 批准。
+
+
+## 21. PR #120 merge reconciliation / PR #120 合并状态核对
+
+PR #120 was merged at `2026-11-17T21:29:04Z` by `oahcom`, merge commit `6c325804027b88de1014ab3364cdda7e0c023ba6`. The merged head was `069984b5c3915334d6fa2d3ec409d4c7e36fe549`. Current main was subsequently observed at `ab1fa87d74ca4a632155aa19569533ea560109d5`. PR #120 carried the post-PR-55 merge-status correction; the latest cross-owner source refresh in section 20 is a later isolated follow-up and is not part of PR #120's merged head. The merge does not close B0–B6 or approve any architecture decision.
+
+PR #120 于 `2026-11-17T21:29:04Z` 由 `oahcom` 合并，Merge Commit 为 `6c325804027b88de1014ab3364cdda7e0c023ba6`；合并时 Head 为 `069984b5c3915334d6fa2d3ec409d4c7e36fe549`。此后观察到的 main 为 `ab1fa87d74ca4a632155aa19569533ea560109d5`。PR #120 携带 PR #55 合并状态纠偏；第 20 节的最新跨 Owner 来源刷新是之后隔离进行的后续工作，不属于 PR #120 已合并的 Head。该合并不关闭 B0–B6，也不批准任何架构决策。
