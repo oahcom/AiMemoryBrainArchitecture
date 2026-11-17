@@ -21,20 +21,16 @@ Describe the observable change and why it is needed.
 - [ ] Reciprocal links and `docs/translation-status.md` were updated where applicable.
 - [ ] A bilingual reviewer checked semantic parity.
 
-Set exactly one machine-readable status below:
+Set the status line to `BILINGUAL-MANIFEST: COMPLETE` when both language versions are updated and reviewed. If a formally approved exception is being used, replace that status line with the approved-exception marker and complete every exception field below. Do not use an exception without actual approval evidence.
 
-`BILINGUAL-MANIFEST: COMPLETE`
-
-or, only with formal approval:
-
-`BILINGUAL-EXCEPTION: APPROVED`
-- Exception Owner:
-- Authoritative language/version:
-- Missing counterpart path:
-- Exact source revision:
-- Due date (YYYY-MM-DD):
-- Tracking Issue/PR:
-- Approval evidence:
+`BILINGUAL-MANIFEST: PENDING`
+- Exception Owner (required):
+- Authoritative language/version (required):
+- Missing counterpart path (required):
+- Exact source revision (required):
+- Due date (YYYY-MM-DD, required):
+- Tracking Issue/PR (required):
+- Approval evidence / approving governance record (required):
 
 ## Verification
 
