@@ -457,3 +457,40 @@ current_status_snapshot:
     manifest_schema_validation: NOT_RUN
     current_main_full_r3_ci: NOT_EVIDENCED
   note: Historical review and execution entries above are preserved as historical records. The merge facts above do not convert any review, approval, test, acceptance or production gate to PASS.
+
+
+latest_reconciliation:
+  observed_main_head_before_this_documentation_update: 7bd425de62fa2dc66c2d2df03fac58e02bb68ad5
+  observed_at: 2026-11-18
+  pr_141:
+    state: CLOSED_MERGED
+    final_head_sha: d5702426147456f0bf00e0aec9ad5916200cebef
+    merge_commit_sha: 9edc746c001f1f82950edad7ce130342db53ff67
+    scope: non_production_forget_reference_model_tests_and_exact_head_ci
+    model_test_result:
+      workflow_run: 44188134319
+      status: SUCCESS
+      tests_passed: 24
+      tests_failed: 0
+      exact_head: d5702426147456f0bf00e0aec9ad5916200cebef
+    bilingual_docs_runs:
+      - 44188134357
+      - 44188136170
+    limitation: model_level_only_not_production_R3_or_DFI_conformance
+  current_gates:
+    production_DFI_001_to_DFI_022: NOT_RUN_NOT_EVIDENCED
+    owner_d_approval: PENDING
+    owner_i_approval: PENDING
+    owner_d_independent_specialist_review: NOT_EVIDENCED
+    owner_i_independent_specialist_review: NOT_EVIDENCED
+    independent_integration_review: PENDING
+    authoritative_runtime_repository_and_code_owners: UNIDENTIFIED_ISSUE_7_OPEN
+    full_manifest_yaml_and_schema_validation: NOT_RUN
+    acceptance: BLOCKED_PENDING
+    production_activation: NOT_AUTHORIZED
+  preliminary_review:
+    type: NON_INDEPENDENT_DESK_REVIEW_ONLY
+    issue_41_comment: 6962603446
+    issue_7_comment: 6962604585
+    note: This conversation participated in implementation coordination and cannot satisfy NR-001 separate-conversation review requirements.
+  note: PR #141 integration and its 24/24 reference-model result do not change any production R3, specialist approval, independent review, acceptance or G3 gate.
