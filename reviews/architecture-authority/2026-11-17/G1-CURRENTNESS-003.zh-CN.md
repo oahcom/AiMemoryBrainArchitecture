@@ -129,7 +129,7 @@ D、I、C 均读取了同一个精确 ADR Blob，并在各自权威边界内接�
 | #57 | A 最终评估 v3 | `8c0c5b1...` | `d354ec4...` | OPEN / DRAFT |
 | #58 | A Clean-base 评估 v2 | `8c0c5b1...` | `dbec207...` | OPEN / DRAFT |
 | #59 | A Phase 4 当前性复审 | `8c0c5b1...` | `26fd171...` | OPEN / DRAFT |
-| #60 | A current-main 最终评估 | `8c0c5b1...` | `d476db8...` | OPEN / DRAFT |
+| #60 | A current-main 最终评估 | `ca69d50...` | `292b84c...` | OPEN / DRAFT |
 | #61 | A B-02 / H 1.2.15 差异复审 | `8c0c5b1...` | `4726d93...` | OPEN / DRAFT |
 
 PR #57–#61 均以 `8c0c5b1...` 为 main base；最终 main 已为 `901e38b...`，提交历史领先两个提交，但文件树与旧 base 完全相同。它们的 Base Commit 在历史上较旧，尽管当前文件树没有净内容差异。PR #63 创建时的 Base SHA 为 `901e38b...`，仅包含两份 G1 审计文件。PR #51/#54 以审查分支为 base，是堆叠 PR，不是直接以当前 main 为基线。本审计未重定向、合并或关闭任何现有 PR。
