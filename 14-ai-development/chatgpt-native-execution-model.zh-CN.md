@@ -59,6 +59,8 @@ Ubuntu **禁止**：
 
 GitHub Actions 可以响应仓库事件启动确定性 CI。CI 结果是 ChatGPT 可以检查的证据，不是 AI 调用机制。
 
+**当前仓库状态：** 清理后的 `main` 分支目前不包含任何 `.github/workflows/` 文件。主机上的自托管 Runner 可以继续保持注册状态，但本提案不声称仓库 CI 工作流已经配置或正在运行。只有在新增、审查并实际执行确定性工作流且取得证据后，CI 才能从 **NOT CONFIGURED / NOT RUN** 更新状态。
+
 ## 4. A–I 对话模型
 
 每个 Owner 使用独立的 ChatGPT 对话上下文和版本化 Owner 提示词：
