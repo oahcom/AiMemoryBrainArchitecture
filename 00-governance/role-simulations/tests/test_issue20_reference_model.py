@@ -166,5 +166,92 @@ class RestoreGateTests(unittest.TestCase):
         self.assertEqual(gate.release(), "SERVING")
 
 
+class OwnerSnapshotCompletenessTests(unittest.TestCase):
+    def snapshot(self, rows=None):
+        return __import__("issue20_reference_model").OwnerSnapshot(
+            "I", 4, "i:100", list(rows or []),
+            pagination_complete=True, attested=True, anti_rollback=True
+        )
+
+    def test_membership_does_not_imply_complete_enumeration(self):
+        snap = self.snapshot(["producer-A"])
+        self.assertTrue(snap.proves_membership("producer-A", 4))
+        with self.assertRaises(ProtocolError):
+            snap.seal_complete(1, snap.ordered_root(snap.rows))
+
+    def test_complete_snapshot_requires_all_independent_evidence(self):
+        snap = self.snapshot(["producer-A"])
+        proof = snap.seal_complete(1, snap.ordered_root(snap.rows))
+        self.assertEqual(proof["count"], 1)
+        self.assertTrue(snap.sealed)
+
+    def test_empty_snapshot_requires_explicit_complete_empty_proof(self):
+        snap = self.snapshot([])
+        with self.assertRaises(ProtocolError):
+            snap.seal_complete(0, snap.ordered_root([]))
+        snap.complete_empty_proof = True
+        self.assertEqual(snap.seal_complete(0, snap.ordered_root([]))["count"], 0)
+
+    def test_late_discovered_row_invalidates_previous_snapshot_seal(self):
+        snap = self.snapshot(["producer-A"])
+        snap.seal_complete(1, snap.ordered_root(snap.rows))
+        snap.discover_late_row("producer-B")
+        self.assertFalse(snap.sealed)
+        with self.assertRaises(ProtocolError):
+            snap.seal_complete(2, snap.ordered_root(snap.rows))
+
+    def test_snapshot_membership_is_generation_bound(self):
+        snap = self.snapshot(["producer-A"])
+        self.assertTrue(snap.proves_membership("producer-A", 4))
+        self.assertFalse(snap.proves_membership("producer-A", 5))
+
+
+class RecoveryManifestTests(unittest.TestCase):
+    def test_cutoff_must_commit_before_manifest_reconciliation(self):
+        manifest = __import__("issue20_reference_model").RecoveryManifest()
+        with self.assertRaises(ProtocolError):
+            manifest.reconcile([], [])
+
+    def test_union_uses_coc_prefix_and_independent_owner_high_waters(self):
+        manifest = __import__("issue20_reference_model").RecoveryManifest()
+        manifest.commit_cutoff("batch-1", "batch-digest-1", 10,
+                               {"D": 20, "I": 35, "C": 8})
+        result = manifest.reconcile(
+            [{"participant_ref": "p-1", "coc_position": 10}],
+            [{"owner": "D", "admission_ref": "d-1", "owner_position": 20},
+             {"owner": "I", "admission_ref": "i-1", "owner_position": 35}]
+        )
+        self.assertNotEqual(result["member_set_root"], result["manifest_content_digest"])
+        self.assertNotEqual(result["manifest_record_entry_digest"], result["batch_entry_digest"])
+
+    def test_member_beyond_coc_prefix_is_rejected(self):
+        manifest = __import__("issue20_reference_model").RecoveryManifest()
+        manifest.commit_cutoff("batch-1", "digest-1", 10, {"D": 20})
+        with self.assertRaises(ProtocolError):
+            manifest.reconcile(
+                [{"participant_ref": "p-1", "coc_position": 11}], [])
+
+    def test_owner_admission_beyond_its_own_high_water_is_rejected(self):
+        manifest = __import__("issue20_reference_model").RecoveryManifest()
+        manifest.commit_cutoff("batch-1", "digest-1", 10, {"D": 20, "I": 35})
+        with self.assertRaises(ProtocolError):
+            manifest.reconcile([], [
+                {"owner": "D", "admission_ref": "d-1", "owner_position": 21}
+            ])
+
+    def test_cutoff_and_manifest_are_idempotent_across_recovery(self):
+        manifest = __import__("issue20_reference_model").RecoveryManifest()
+        cutoff = manifest.commit_cutoff("batch-1", "digest-1", 10, {"D": 20})
+        same = manifest.commit_cutoff("batch-1", "digest-1", 10, {"D": 20})
+        self.assertEqual(cutoff, same)
+        first = manifest.reconcile([], [])
+        self.assertEqual(first, manifest.reconcile([], []))
+        with self.assertRaises(ProtocolError):
+            manifest.commit_cutoff("batch-2", "digest-2", 11, {"D": 21})
+        with self.assertRaises(ProtocolError):
+            manifest.reconcile(
+                [{"participant_ref": "late", "coc_position": 9}], [])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
