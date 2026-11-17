@@ -8,7 +8,7 @@
 
 1. Forget → Producer Admission → Dependency/Derivative Registration → Final Publication Gate。X 对该跨模块链的八个维度均评为 5/5。
 2. Global Forget Completion 覆盖 Canonical、衍生物、索引、缓存、Context、Adapter、副本和备份；这些对象具有不同证明和终态语义。
-3. Storage/Consistency 的事务、可见性、COC/JF-10 恢复与故障切换。Storage 模块八维均为 5/5；因拓扑未决，置信度为 Low。
+3. Storage/Consistency 的事务、可见性、COC/JF-10 恢复与故障切换。Storage 模块八维均为 5/5；L1 Option A 已选定，但 L4 物理引擎/部署仍开放，因此置信度为 Low。
 4. D/E/Storage 跨模块的 Durable Ingress、Outbox、Lease、Retry、Replay 和 Canonical Cursor 协调。
 5. C/G/H 的 Applied/Provider Outcome 与 I/D 授权和 Fence 证据组合。
 
@@ -20,7 +20,7 @@ X 使用八个序数维度：内部、依赖、状态、并发、恢复、验证
 
 - 必须保留不同证明对象：Accepted、Compiler Completion、Canonical Commit、Index Applied、Context Applied、Applied、Forget Completion、PublicationReceipt 和 Provider Outcome。
 - 不得在没有量化需求时，为每个逻辑概念新增独立服务、数据库、队列、协议或版本边界。
-- Local-first Rust Modular Monolith 是首期工程切片的优先候选部署形态，不是拓扑批准，也不意味着合并 Owner 权威。
+- Local-first Rust Modular Monolith 是首期工程切片的优先候选部署形态。Storage 已另行选择 L1 Option A（每个 Canonical Memory Authority 一个 Serializable Transaction Domain）；实际 L4 Engine/Deployment 符合性仍开放。这不合并 Owner 权威。
 - 每项跨模块操作必须指定一个 Operation ID、各状态权威、有限 Participant 集合、线性化点、可重试阶段、终态和恢复动作。
 - 每个 Receipt/Manifest/Applied/Watermark 必须标明签发者、主体、Scope、Generation/Version、持久性、时效和明确的非声明。
 - Derived Index/Cache 不能成为第二权威；陈旧状态必须可检测、可重建。
