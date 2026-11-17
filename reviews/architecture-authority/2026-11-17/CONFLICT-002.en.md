@@ -1,6 +1,6 @@
 # Architecture Decision Conflict Register — CONFLICT-002
 
-- Version: 1.0.0; baseline `6470f25ca23b8d35c06f60be2326867066418d18`.
+- Version: 1.0.0; historical assessment snapshot `6470f25ca23b8d35c06f60be2326867066418d18` (not current main).
 - Status: A integration dispositions; Owner-owned normative decisions are not replaced.
 
 | ID | Apparent conflict / ambiguity | A disposition | Authority / required action | Gate |
@@ -25,3 +25,8 @@
 ## Explicit A boundary
 
 A decides global sequencing, scope, cross-owner compatibility and Gate evidence sufficiency. A does not approve B domain semantics, I governance policy, D canonical lifecycle/fence semantics, C provider outcomes, G Applied semantics, H wire schema/cryptography, or Storage physical topology. No conflict is marked closed where an Owner decision or physical proof remains missing.
+
+
+## Current main HEAD / 当前 Main HEAD
+
+The current main HEAD independently observed for this publication is `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The earlier `6470f25...` / `b372b62...` values are historical assessment snapshots, not current main. This package has not completed a full source-by-source delta audit against current main; G1 remains PARTIAL and all Gate/freeze restrictions remain in force.
