@@ -225,7 +225,7 @@ B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪�
 - All ten named Owner branch refs were re-read. Selected successor evidence now includes H Unified 1.2.15 mapping, I's exact review of 1.2.15, Storage v3.3.1 and A Phase 3.12.1 review. Exact pins and caveats are in `baseline-currentness-and-owner-source-audit.md`.
 - Issue #7 was re-read and remains OPEN; runtime implementation repository, accountable engineering owner, reproducible build/test entry points and deployment topology remain unresolved.
 - Official reference validation was refreshed on 2026-11-18. Mem0's detailed official page timed out and remains explicitly NOT REVALIDATED.
-- The full 22-file exact Blob/line-count snapshot is in `bilingual-parity-audit.md`; currentness audit Blob is `8641268f6cb93e8154ae1693ace37cc72498a4b8`; official-reference validation Blob is `ef4a0cf448e474b08bf5ff6b80c32dbae705b002`. The parity audit records its own latest exact Blob and all cross-file pins; its self Blob changes whenever it is updated.
+- The full 22-file exact Blob/line-count snapshot is in `bilingual-parity-audit.md`; currentness audit Blob is `92b3f6d1b0c6236f245195337129f1d69a5bd499`; official-reference validation Blob is `ef4a0cf448e474b08bf5ff6b80c32dbae705b002`. The parity audit records its own latest exact Blob and all cross-file pins; its self Blob changes whenever it is updated.
 
 - 实时 `main` HEAD：`b3c666e67982cb3d3374e759cfb6552c7765aacb`。
 - 本 README 更新前的实时研究分支 HEAD：`f95b479b223ebb63c8aebcfca13a4cd9b28d5331`。
@@ -261,3 +261,28 @@ A 对 Storage v3.3.1 的精确 Phase 3.12.1 复审发现 Option A 状态存在�
 No Storage correction, A independent human approval, production authentication, global Forget completion, Applied freeze, L4 deployment or independent QA result is claimed.
 
 不宣称 Storage 已整改、A 独立人类批准、生产认证、Global Forget 完成、Applied 冻结、L4 部署或独立 QA 结果。
+
+
+## 18. Option A manifest consistency closure / Option A Manifest 一致性关闭 — 2026-11-18
+
+Storage published v3.3.2 and A issued Phase 3.12.2 exact re-review:
+- Storage v3.3.2 manifest Blob: `5c614375e10698e4931d83deb57d20321445e068`.
+- A Phase 3.12.2 re-review Blob: `eb3c946065aff4fbc6d76f384402fb9f75fa32dc`.
+- The successor corrects Option A to “selected as normative v1 logical architecture; L4 physical engine/deployment OPEN” and removes unsupported A-01–A-05 references.
+- A marks the prior v3.3.1 Option A status inconsistency **CLOSED at manifest-consistency level** and accepts v3.3.2 as a consistent exact-version candidate with enumerated release blockers.
+- B-CONFLICT-017 is therefore **CLOSED — MANIFEST CONSISTENCY REMEDIATED**, with the explicit caveat that Storage and A artifacts are delegated-role outputs, not independent human Owner signatures.
+- Storage v3.3.2 / A 3.12.2 bind H 1.2.14 / C 1.0.1 and predecessor C/I reviews. They do not include H 1.2.15; successor binding and fresh A review remain required.
+- B3 remains NOT PASSED. Authenticated ingress, I trust/profile/key registration, durable replay, G Applied freeze, D Forget, and Storage L4 remain open.
+
+Storage 已发布 v3.3.2，A 已发布 Phase 3.12.2 精确复审：
+- Storage v3.3.2 Manifest Blob：`5c614375e10698e4931d83deb57d20321445e068`。
+- A Phase 3.12.2 复审 Blob：`eb3c946065aff4fbc6d76f384402fb9f75fa32dc`。
+- 后继版本将 Option A 修正为“已选择 v1 规范逻辑架构；L4 物理引擎/部署 OPEN”，并删除无依据的 A-01–A-05 引用。
+- A 将此前 v3.3.1 Option A 状态不一致判为 **Manifest 一致性层面 CLOSED**，并接受 v3.3.2 为带列明 Release Blocker 的一致精确版本候选。
+- 因此 B-CONFLICT-017 更新为 **CLOSED — MANIFEST CONSISTENCY REMEDIATED**，但明确注明 Storage 与 A 工件均为委派角色产物，不是独立人类 Owner 签名。
+- Storage v3.3.2 / A 3.12.2 绑定 H 1.2.14 / C 1.0.1 和前序 C/I 复审，不包含 H 1.2.15；后继绑定及 A 新复审仍需要。
+- B3 仍 NOT PASSED。Authenticated Ingress、I Trust/Profile/Key 注册、Durable Replay、G Applied 冻结、D Forget 和 Storage L4 仍开放。
+
+This closes one document-consistency conflict only. It does not close any production, governance, runtime or physical-storage gate.
+
+这只关闭一项文档一致性冲突，不关闭任何生产、治理、运行时或物理存储门禁。
