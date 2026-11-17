@@ -288,3 +288,37 @@ H 当前候选测试为 97 项：HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26�
 Storage 双向 JoinProof 明确要求：Owner Admission → ParticipantManifest 和 ParticipantManifest → Owner Evidence 两个方向均可验证；I/D/C 的 Request Set 与 Admission Set 六个集合分别完整枚举；OwnerAdmissionRef 与 OwnerEntryRef、OwnerRequestDigest 与 OwnerEntryDigest 严格区分；差集显式且 COMPLETE 时全部为空；JF-10 同一 PreparedParticipantRef/GID/DB Incarnation 作为独立子 Join；I/D/C 在自己的权威域执行最终 Currentness CAS 和 Gate Release。
 
 A 的集成结论仍是：**逻辑组合可接受，但保留阻塞修订项**。97 项是候选参考模型/结构/Wire 测试 PASS，不是生产密码学、真实 COC/Owner Adapter、JF-10 物理恢复或事务拓扑通过。HRC-TEST-v1 不是生产 Profile，36 项物理 Race/Crash/Failover/Restore 测试尚未执行。所有 Owner 的独立精确版本批准仍需完成。
+
+
+### 9.8 H 101-test I crypto-profile differential evidence
+
+The H branch now reports **101 candidate tests PASS** in [run 44044062849](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44044062849), commit `bfdc836da0cd64e290df7320eb552583dc95db43`, job `133905301392`.
+
+Inventory: HRC 25 + JPF 19 + WIRE 10 + SCHEMA 16 + TPH 26 + XLANG 1 + CRYPTO 4.
+
+The four CRYPTO cases compare Python RFC 8785 / Ed25519 and an independent Node.js JCS / Ed25519 implementation for the candidate AIMBA-I-CRYPTO-1.0 P0 projection, payload digest, signature preimage, public key and deterministic test signature; they also test JCS object/array ordering, Unicode normalization behavior and non-finite number rejection. CI pins Python rfc8785 0.1.4, cryptography 44.0.2, Node.js 22 and canonicalize 2.1.0.
+
+Exact pins:
+- H semantic contract: `4c5c3771575979061e674e40f1f5f3d9b4645bd9`.
+- H I crypto test: `05c36b9d01340e0cc9fe504208b6ebc66fcf95bf`.
+- Node crypto oracle: `851484fee665f5a559b61ceae92a07c5082a3986`.
+- Fixed test vector: `f1ec9fdca8ca7a124ef63a99d8f50c4dc57fa219`.
+- I profile proposal: `5eeb011032c53c2f7897d699d6f512b26f07d0a2` (candidate only).
+- H crypto wire mapping: `b132e6a01bcfe13f92020b9778ee3f7ddbf65753`.
+- I exact review R3: `93afe9c9e06d20de5ce1c2a0f676b4785123fbcf`.
+- H workflow: `2a6d875c69006bcc37dcc65ce6954e3cd4f135db`.
+
+The deterministic private seed is test-only and must never be reused. The 101-test pass does not approve I trust roots, HSM/KMS, key lifecycle, historical verification, revocation propagation, anti-rollback deployment, production per-message P0 allowlists, real owner snapshots or Storage final-gate verification. I profile and H mapping remain candidate with amendments.
+
+Current Storage pins:
+- Bidirectional JoinProof: `eac350ed5cb53094bdd5626f49e6f82ebea1f78c`.
+- Storage exact review: `a92f56da78bef63ed28128c319eb277b5a7b7aa7`.
+- Storage freeze evidence: `8b8c1c15636eb6ad24214d05ca5e86d4bf8667e4`.
+
+### 9.9 中文结论：101 项与 I 密码学差分测试
+
+H 当前共有 101 项候选测试：HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1、CRYPTO 4。Run 44044062849 在 Commit `bfdc836da0cd64e290df7320eb552583dc95db43` 上 101/101 PASS。
+
+新增 CRYPTO 测试使用 Python RFC 8785 / Ed25519 与独立 Node.js JCS / Ed25519 实现，对 AIMBA-I-CRYPTO-1.0 候选 P0、Payload Digest、Signature Preimage、公钥及测试签名进行比较，并检查 JCS 顺序、Unicode 和非有限数字。CI 固定依赖版本。
+
+测试私钥 Seed 仅供测试，严禁生产复用。该 PASS 不代表 I Profile、Trust Root、HSM/KMS、Key Lifecycle、历史验签、撤权传播、Anti-rollback、生产逐消息 P0 Allowlist、真实 Owner Snapshot 或 Storage 最终 Gate 已批准/实现。Storage 双向 JoinProof 仍仅逻辑层面附条件接受；真实 COC/Owner Ledger、Currentness CAS、JF-10 物理恢复和 D/Storage 拓扑仍 OPEN。
