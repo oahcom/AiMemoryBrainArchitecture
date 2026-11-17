@@ -1,6 +1,6 @@
 # Architecture Complexity Assessment — ARCH-CX-002
 
-- Version: 1.0.0; baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- Version: 1.0.0; baseline: `main@6470f25ca23b8d35c06f60be2326867066418d18`
 - X source: PR #49, commit `131f91743bd506517ee354d58c277501ca447929`, EN Blob `c509120644d6f7c7223decf3f9f0ee33b0548bb7`, ZH Blob `981a376ddf283ace1e891795c813b17ac4aa3d8b`.
 - A disposition: complexity controllability **NOT PROVEN**.
 
@@ -39,6 +39,12 @@ Before any P0/P1 invariant is called verified: direct negative tests, crash-befo
 **CAN DEFER:** vector/ANN, reranking, graph backend proliferation, multiple providers/backends, multi-PolicyDomain atomicity, distributed service decomposition, advanced autoscaling.
 
 **MUST NOT INTRODUCE:** cross-domain cursor comparison, cache/index as authority, generic Success replacing distinct terminal facts, heuristic JF-10 resolution, process mutex as durable atomicity, microservices without measured need.
+
+## New Option A complexity obligations (PR #54)
+
+Option A reduces avoidable distributed-coordinator complexity, but it does not make the workflow simple. Five additional complexity obligations remain: (1) shared transaction executor and D/Storage row-write capabilities without authority collapse; (2) D EffectPermit coverage for admission, lease/attempt, retry/replay, protected source-read/execution, late dependency and terminalization; (3) strict one-BrainAuthority-per-atomic-operation scope; (4) I COMMIT_WON immutable tuple, revocation and crash-recovery semantics; (5) independently verifiable anchor checkpoint/DatabaseIncarnation restore anti-rollback witness. The amendment text is a proposal, not adopted Owner contract.
+
+The B protocol candidate (H 1.2.14 / wire 1.3.0 + CSubmitOutcome 1.0.1) also adds exact-version join complexity: current H mapping, C re-review, D crosswalk, I P0 and Storage manifest must bind the same current artifacts. Storage v3.2.9 is stale; v3.3.0 or equivalent is required before same-manifest closure.
 
 ## Conclusion
 
