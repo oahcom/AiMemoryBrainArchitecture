@@ -8,6 +8,7 @@ It is not production cryptography or a deployed trust service.
 from __future__ import annotations
 
 import hashlib
+import re
 from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
@@ -200,6 +201,10 @@ def validate_gateway_attested_provider_outcome(
         invalid.append("owner_record_ref must equal c_submit_outcome_ref")
     if envelope.get("signature_profile_id") != H_PROFILE_ID:
         invalid.append("wrong H gateway attestation profile identifier")
+    if envelope.get("canonicalization_profile_id") != "RFC8785-JCS-1.0":
+        invalid.append("wrong H gateway canonicalization profile identifier")
+    if not isinstance(envelope.get("signature"), str) or not re.fullmatch(r"[A-Za-z0-9_-]{86}", envelope["signature"]):
+        invalid.append("H Ed25519 signature must be 86-character unpadded Base64url")
 
     if raw_origin_bytes is None or not isinstance(raw_origin_bytes, bytes):
         unknown.append("original C-to-H ingress bytes unavailable")
