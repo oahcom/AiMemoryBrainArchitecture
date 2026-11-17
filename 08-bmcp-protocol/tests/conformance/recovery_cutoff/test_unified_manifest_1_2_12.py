@@ -204,7 +204,7 @@ class UnionSemanticsTests(unittest.TestCase):
         proofs=deepcopy(self.proofs);proofs.pop(("D","D/work-9"))
         self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),UNKNOWN)
     def test_UNION_17_invalid_membership_proof_is_invalid(self):
-        proofs=deepcopy(self.proofs);proofs[("C","C/admit-1")]["valid"]=False
+        proofs=deepcopy(self.proofs);proofs[("C","C/admit-1")]["test_signature_verified"]=False
         self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),INVALID)
     def test_UNION_18_non_numeric_owner_sequences_are_not_arithmetically_compared(self):
         snaps=deepcopy(self.snaps);rows=deepcopy(self.admissions);proofs=deepcopy(self.proofs)
