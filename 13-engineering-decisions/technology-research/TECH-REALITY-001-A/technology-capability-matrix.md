@@ -131,3 +131,17 @@ Storage 当前分支的序列化 ADR 补充条款（Blob `1ef47d4e5711c7db73a24d
 ### 7.5 决策规则
 
 矩阵不会自动把任何技术改成 DECIDED。每个选型必须进入对应 Owner ADR，并完成精确契约 Pin、竞争方案比较、最小原型、崩溃/竞争/故障测试、迁移恢复计划和独立审查。
+
+## 5. Current Phase 3.8 owner-contract capability delta / 当前 Phase 3.8 Owner 契约能力差异
+
+| Capability | Current proposal evidence | Actual capability boundary | Remaining proof / status |
+|---|---|---|---|
+| D producer admission and ForgetFence | D Phase 3.8 Blob `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | D owns admission, fence order, dependency inventory and publication participant; not Storage writes or I authorization | Exact API/Owner approval and both serial-order race tests OPEN |
+| E durable compiler lifecycle | E Phase 3.8 Blob `475fee41e5eea527af4edefbfe88c58c86967d0a` | E owns ingress, immutable run/attempt, private staging and recovery orchestration | D/I/Storage exact APIs and execution/fault proof OPEN |
+| I commit authorization/revocation | I Phase 3.8 Blob `54bab0484bd232a5a258e65e34cc7425288b39a6` | I owns PolicyDomain, authorization, PermissionEpoch and revocation sequencer; not visibility | Owner approval, production trust/key lifecycle and conformance OPEN |
+| Storage visibility/atomic outcome | Storage Phase 3.8 Blob `175ee7b1349cfdb79a19898b311a88391ed88010` | Durable hidden participant and final serializable visibility outcome | L1 Option A selected; L4 physical engine/deployment and JF-10 OPEN |
+| C/G/H Applied | Issue #3; H candidate schema/CI and C review evidence | Candidate schema tests do not prove final-request Applied | Frozen = NO; Test Executed/Passed = NO/NO; Implementation Verified = NO |
+
+**中文：** Phase 3.8 的 D/E/I/Storage 能力边界和精确 Blob、所需测试及 OPEN 状态见上表。不能把 Owner 角色提案当成批准，也不能把 H 候选 Schema CI 当成 C/G/H Applied 端到端证明。Storage 仅 L1 Option A 已选，L4 仍开放。
+
+See [OWNER-REMEDIATION-001](owner-remediation/OWNER-REMEDIATION-001.md) for the full sequence and acceptance conditions.
