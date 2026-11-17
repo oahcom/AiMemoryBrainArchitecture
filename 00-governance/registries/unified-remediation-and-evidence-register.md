@@ -119,6 +119,8 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 
 | UMR-030 | P0 | Close Issue #20 Archive × Forget × Inventory × Restore exact-version owner reviews | D/I/F/E/G/H independently; A integrates; Storage owns realization | OPEN — Issue #20 | Target Storage Blob 6f4b003b0a398c15b1f22a03c612f2c58afa3e7d. Session P created six role-separated review-input artifacts and an A-style integration readiness assessment on P branch only; these are coordinator simulations, NOT independent Owner decisions. D/I/G/H simulated NEEDS REVISION; F/E simulated ACCEPT WITH ENUMERATED CONDITIONS. Require exact Owner artifacts on their own branches, D/I semantic closure, F/E/G local lifecycle/release, H schemas + I security profile, Storage revised bundle and A formal integration. Issue #4 governance and JF-10 P0 remain separate. |
 
+| UMR-031 | P0 | Resolve Issue #20 D/I semantic boundary and downstream lifecycle/schema/restore contracts | D/I/F/E/G/H/Storage/A | OPEN — Issue #20 | Session P role simulations drafted D ProducerWork/Fence semantics, I inventory/seal semantics, D/I typed identity and independent-generation reconciliation, F/E/G lifecycle, H schema prerequisites, Storage restore/serving CAS and A freeze criteria. Exact artifacts are coordinator-authored proposals only; no Owner decision or implementation. Require each Owner's independent exact-version adoption/amendment and evidence. |
+
 ## 7. Current issue trackers
 
 | Issue | Scope | Current state |
@@ -157,3 +159,5 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 
 
 - 2026-11-17: Added Issue #20 Owner Remediation Execution Pack (coordinator proposal), exact review target Blob `6f4b003b0a398c15b1f22a03c612f2c58afa3e7d`, P commit `ee661045f5820e9029ad19f2dba4f558dcb0682d`, file Blob `6ac0d9296747491b815d531acfe06f7a974eb6ca`. It converts simulated findings into bounded D/I/F/E/G/H/Storage/A deliverables; no Owner decisions or implementation are inferred.
+
+- 2026-11-17: Added UMR-031 and four Issue #20 role-simulation artifacts (D, I, D/I cross-review, F/E/G/H/Storage/A integrated proposals) to P branch; exact Storage target remains 6f4b003b0a398c15b1f22a03c612f2c58afa3e7d. All remain coordinator-authored, non-normative and not Owner decisions.
