@@ -116,3 +116,13 @@ This result is limited to the checked-in Python reference semantic, wire-negativ
 ## 9. Latest rerun superseding prior H CI pin / 最新重跑结果
 
 The newest verified H candidate run is [44041110983](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041110983), job `133895653293`, checking out H branch commit `0a131b5cfcda78c4d5414aea9f99957ebc95955e`. Raw log: **66 tests, OK**. This supersedes run 44040502709 as the latest H candidate CI evidence. Scope remains the same Python reference semantic, wire-negative and schema-integrity suite; it does not close production canonicalization/signatures, independent-language interoperability, live owner/COC adapters or physical JF-10.
+
+
+## 10. Unified schema 1.2.5 exact review / 统一 Schema 1.2.5 精确审查
+
+H has added an exact structural review for unified COC/JF-10 schema artifact 1.2.5:
+- Review Blob: `369b8fd50e5f5ebdd28d24b110c87ce83b58970f`.
+- Reviewed schema Blob: `164ec3c436558d5d93032edc51e127d15e03db4d`.
+- Decision: **ACCEPT WITH ENUMERATED AMENDMENTS** for structural mapping only; semantic and interoperability gates remain OPEN.
+
+The branch also contains schema artifact 1.2.6 (Blob `ea8d644df17ea88ed368980b7d5930cd33934fd2`). The 1.2.5 decision does not transfer to 1.2.6. The current 1.2.6 artifact still lacks an exact H review in this evidence set. Provider Outcome wire shape is present in 1.2.5, but C's canonical owner contract and provider-specific evidence vectors are still required. No schema freeze or CSubmitOutcome implementation acceptance is implied.
