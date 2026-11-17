@@ -179,3 +179,17 @@ The earlier sections describe the initial PR #44 / Issue #43 and initial JF-10 e
 
 前文记录了 PR #44 / Issue #43 的初始状态和初始 JF-10 证据快照。以上四个精确 Storage 工件是之后直接读回的当前证据，应用于校正旧快照。当前逻辑序列化档案已选择，但生产 DB 拓扑未选；PostgreSQL 18.7 七项隔离 CI 子测试 PASS，Gate A 仍 PARTIAL PASS / OPEN；v3.2.6 Bundle 已绑定但未联合冻结；C 候选 19 项测试成功，H 1.2.13 精确 CI 未运行；D Lineage/Release 和 I L3/信任仍 OPEN；Gate B 仅设计级接受，Gate C NOT RUN；JF-10 Runtime P0 OPEN，生产激活未授权，多 PolicyDomain BLOCKED。
 
+## 6. Updated owner closure questions / 更新后的 Owner 关闭问题
+
+1. D: What are the exact callable APIs and durable linearization points for ProducerWork admission, ForgetFence, complete dependency registration and PublicationParticipant admission? Where are both serial-order race tests?
+2. E: What executable evidence proves durable ingress-before-execution, immutable run/attempt identity, lease fencing, private staging and retry/lost-ACK recovery?
+3. I: Who approves the crypto profile, production trust/key custody, issuer/key status, revocation ordering, historical verification and anti-rollback/restore model?
+4. Storage: Which physical engine/deployment realizes L1 Option A? Where is the L4/JF-10 physical proof, HA/failover/restore and UNKNOWN barrier evidence?
+5. C/G/H: Where is the frozen final-request Applied contract and end-to-end evidence for lost ACK, stale delivery, reconnect, provider side effects, Forget and revocation races?
+6. B: When is Fact/Claim ADR no longer ADR-BLOCKED, and which canonical type/identity constraints can be frozen?
+7. License: What is the intended Restate Server distribution/use model, and has BSL 1.1 Additional Use Grant been reviewed for it?
+8. Parity: Where is the line-by-line English/Chinese semantic parity checklist and independent review?
+
+Until evidence is attached, these remain OPEN. See [OWNER-REMEDIATION-001](owner-remediation/OWNER-REMEDIATION-001.md).
+
+**中文：** 以上问题分别要求 D/E/I/Storage/C/G/H/B 提供精确 API、可执行竞争/恢复测试、生产密钥与撤销证据、L4/JF-10 物理证明、Final-request Applied 端到端证明、Fact/Claim 决策、BSL 使用模式法律审查和逐行双语语义一致性审计。在证据提交前均保持 OPEN。
