@@ -442,3 +442,10 @@ Explicit non-claims (what was not implemented or proven):
 ## Coordinator instruction
 
 Do not ask all sessions to independently produce a global architecture rewrite. The task is bounded remediation of identified gaps. When two sessions disagree, record the conflict and route it to the authoritative owner/ADR; do not resolve it by silently editing the other session's document. Main integration and final contract freeze happen only after the cross-module review.
+
+
+## Mandatory architecture delivery rule / 架构交付强制规则
+
+This task is governed by GOV-DOC-BILINGUAL-001. The Owner MUST produce or update Chinese and English counterparts in the same change set for the review report and every architecture-significant proposal or specification changed during this task. Both versions must preserve the same findings, severity, verdict, evidence, open issues, and non-claims. Update docs/translation-status.md. A report with a missing or stale language counterpart is not a complete deliverable.
+
+本任务受 GOV-DOC-BILINGUAL-001 约束。Owner 必须在同一变更集中为审查报告及本任务修改的所有重要架构提案/规范提供或更新中英文版本。两种语言必须保持相同的发现、严重级别、结论、证据、未决事项和非声明，并更新 docs/translation-status.md。缺少或过期语言版本的报告不构成完整交付。
