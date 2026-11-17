@@ -246,3 +246,21 @@ Nominal identity separation is mandatory:
 - PublicationOperationId, CausalOrderTransactionRef, PreparedParticipantRef, ProducerWorkItemId, DerivationRunId, AttemptId and LeaseId remain distinct types and idempotency scopes.
 
 The D/I/Storage composition in §§9–10 is a candidate joint protocol. It does not inherit C/G Applied acceptance or JF-10 prepared-participant acceptance by analogy. Each exact interface and wire mapping requires its own review.
+
+
+## 12. Crash-window correction — durable Storage participant must precede D barrier admission
+
+This section supersedes the D-first order in §9.
+
+The physical order is now:
+1. Persist a hidden StorageVisibilityParticipantRef and its complete immutable tuple/ledger row first.
+2. D admits PublicationParticipantRef bound to that exact Storage participant. D admission is impossible if the Storage participant is not authoritatively durable.
+3. I consumes a single-use receipt bound to both refs.
+4. Storage final visibility commit validates the D participant/current fence and I terminal proof.
+5. Storage writes COMMITTED_VISIBLE or authoritative NO_PUBLICATION; D/I close their respective participants only after verifying the same outcome.
+
+A crash between steps 1 and 2 leaves an orphan private Storage participant, which has no D admission and no path to visibility. It can remain quarantined for later same-ID reconciliation; it must not be garbage-collected based only on age. A crash after D admission cannot be resolved by a missing Storage row: it is UNKNOWN/ledger inconsistency, and D/I gates remain held.
+
+The D PublicationParticipantRef must include the exact StorageVisibilityParticipantRef. The Storage ledger row is the recovery anchor that prevents an admitted D barrier participant from existing without a recoverable Storage operation identity.
+
+This order does not weaken D fence-first or I revocation-first behavior. It only closes the prepare/admission crash window.
