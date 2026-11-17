@@ -5,7 +5,7 @@
 
 | ID | Apparent conflict / ambiguity | A disposition | Authority / required action | Gate |
 |---|---|---|---|---|
-| AC-01 | Modular monolith recommendation vs. unresolved Storage physical topology | No contradiction. Modular monolith is a deployment shape; Storage §8 has selected L1 Option A (one serializable transaction domain per Canonical Memory authority). L4 engine/deployment conformance remains Storage/D/I-owned and open | Storage + D + I select/prove topology; A integrates | G3/G5; JF-10 |
+| AC-01 | Modular monolith recommendation vs. selected Storage L1 logical profile and open L4 deployment | No contradiction. Modular monolith is a deployment shape; Storage §8 has selected L1 Option A (one serializable transaction domain per Canonical Memory authority). L4 engine/deployment conformance remains Storage/D/I-owned and open | Storage + D + I prove L4 realization of Option A; A integrates | G3/G5; JF-10 |
 | AC-02 | P0 durable vertical slice vs. unresolved P0 semantic/atomicity prerequisites | P0-07 is conditional and downstream of P0-02..05; only harness/fixture work may run earlier | F/D/P roadmap corrected by A; D/E/Storage own prerequisites | implementation entry |
 | AC-03 | Delivery/transport ACK vs. Applied | Must remain separate facts; ACK cannot establish final-request crossing or provider outcome | C/G/H own final-request and Applied contract; I/D own authorization/fence inputs | G2/G4; Issue #3 |
 | AC-04 | COC order vs. I commit decision vs. Storage visibility | Preserve separate authority: COC orders/records; I PolicyDomain sequencer decides JF-10 COMMIT/ABORT; Storage resolves same XID and owns visibility; D owns ForgetFence | A coordinates only; no synthesized authority | JF-10 A/B/C |
@@ -15,6 +15,8 @@
 | AC-08 | F/D/P simulated roles vs. independent Owner approval | F/D/P are analytical roles in one session; not three independent Owner approvals | Actual B/C/D/E/F/G/H/I/Storage authority decisions remain required | G2 |
 | AC-09 | Architecture repository vs. implementation ownership | README confirms architecture-only intent; Issue #7 remains open for canonical runtime repo/engineering lead | Project authority answers Issue #7; no code is added here as implementation | G5/G7 |
 | AC-10 | Candidate schema/technology artifacts vs. freeze claims | Candidate and bounded CI status do not imply normative freeze or production conformance | Respective Owner/ADR authority decides; A requires exact-head evidence | G1/G2/G5 |
+
+| AC-11 | Storage topology ADR retains pre-addendum prose saying no option is selected, while §8 explicitly supersedes it for L1 | §8 controls: Option A is selected at L1; historical §3 text is not a current blocker but should be explicitly marked/simplified to prevent ambiguity | Storage | Before G1/G5 freeze review | G1/G5 |
 
 ## Explicit A boundary
 
