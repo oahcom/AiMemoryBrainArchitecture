@@ -80,6 +80,8 @@ Safety properties:
 
 Counterexample classes: producer registration racing with fence installation; partial dependency registration; lost ACK after visibility commit; expired lease with a still-running stale worker; DLQ replay; index rebuild; offline Adapter reconnect with old Context; restore rollback; and Permission revocation racing final commit.
 
+**The current TLA+ file is only a first-stage skeleton, not the complete model above:** it currently abstracts one target set, producer registration, fence high-water capture, dependency registration, visibility suppression, terminalization and restore control-high-water overlay. It does not yet encode lost ACK, Lease/Attempt, DLQ/Replay, PermissionEpoch, I's global inventory, index/Context/Adapter state, and TLC has not been run. Those scenarios are the next extension backlog, not coverage already verified in this submission.
+
 ### 3.3 Tool selection
 
 - **TLA+/TLC — CANDIDATE, preferred first.** Suitable for concurrent state machines and temporal properties; checks safety and liveness and produces counterexample traces. State space must be bounded.
