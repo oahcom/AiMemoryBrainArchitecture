@@ -89,7 +89,7 @@ class EAttemptLeaseAndReplayObligationTests(unittest.TestCase):
     def test_inflight_or_unknown_publication_cannot_spawn_new_attempt(self):
         for state in ("PRIVATE_STAGED", "STORAGE_PREPARED_HIDDEN", "D_ADMITTED", "UNKNOWN_IN_DOUBT"):
             e = EDerivation("work-4", "request-digest")
-        e.register_producer("d-registration:" + e.work_item_id)
+            e.register_producer("d-registration:" + e.work_item_id)
             e.retry("request-digest")
             e.state = state
             with self.assertRaises(ProtocolError, msg=state):
