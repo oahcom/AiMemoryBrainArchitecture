@@ -194,3 +194,8 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 | Bilingual semantics note | `00-governance/role-simulations/issue-20-d-e-g-conformance-expansion-v0.1.0.md` | PROPOSED; exact semantic scope and non-claims recorded in Chinese and English. |
 
 UMR-037 remains OPEN until D/E/G publish independently attributable Owner-local conformance tests and exact source decisions. P model results cannot close that gap.
+
+
+### Cross-owner correction — E producer registration ordering
+
+The D/E/G reference expansion exposed and corrected a P-model sequencing omission: E's Phase 3.6 producer contract requires a durable D Producer Registration receipt before enqueue, lease, protected dereference or execution. The P model now represents this as a distinct immutable `d_registration_ref`, separate from the later D publication-participant admission that follows hidden Storage Prepare. New negative coverage proves no E Attempt/Lease may begin without the prior producer registration. This correction aligns the candidate model with E contract Blob `a17f065e69e809fceacb51873d6a36a8b0f5c235`; it does not constitute E Owner acceptance or implementation evidence.

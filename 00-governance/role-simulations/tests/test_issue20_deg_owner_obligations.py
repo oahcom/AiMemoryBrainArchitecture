@@ -48,6 +48,13 @@ class DProducerWorkObligationTests(unittest.TestCase):
 
 
 class EAttemptLeaseAndReplayObligationTests(unittest.TestCase):
+    def test_d_producer_registration_must_precede_first_attempt(self):
+        e = EDerivation("work-unregistered", "request-digest")
+        with self.assertRaises(ProtocolError):
+            e.retry("request-digest")
+        e.register_producer("d-registration:work-unregistered")
+        self.assertEqual(e.retry("request-digest"), 1)
+
     def test_expiry_is_exact_attempt_bound_and_preserves_work_identity(self):
         e = EDerivation("work-1", "request-digest")
         e.retry("request-digest")

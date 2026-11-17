@@ -14,9 +14,9 @@ D 参考模型覆盖迟发现派生工作重新打开屏障：派生工作必须
 
 ## E — WorkItem, Attempt, Lease, DLQ and replay
 
-Lease expiry is bound to the exact current lease/attempt. An expired attempt may enter DLQ and replay under the same stable WorkItem/request identity with a new attempt number. DLQ and lease expiry are not terminal no-publication evidence. Once private staging, Storage prepare, D admission, or UNKNOWN is reached, a new attempt is blocked until the exact publication is reconciled.
+D Producer Registration is a prerequisite to every E enqueue/lease/attempt and remains bound to the stable WorkItem across retries. The later publication-participant admission is a distinct join after hidden Storage prepare. Lease expiry is bound to the exact current lease/attempt. An expired attempt may enter DLQ and replay under the same stable WorkItem/request identity with a new attempt number. DLQ and lease expiry are not terminal no-publication evidence. Once private staging, Storage prepare, D admission, or UNKNOWN is reached, a new attempt is blocked until the exact publication is reconciled.
 
-Lease 过期绑定精确当前 lease/attempt。过期尝试可进入 DLQ，并以相同 WorkItem/request 身份重放、递增 attempt。DLQ/过期不构成 NO_PUBLICATION 终态证明。进入私有暂存、Storage Prepare、D Admission 或 UNKNOWN 后，必须先对原发布操作进行精确对账，不得创建新尝试。
+D Producer Registration 必须先于 E 入队、Lease 和 Attempt，并在重试中绑定稳定 WorkItem；发布阶段的 D PublicationParticipant Admission 则是 Storage 隐藏 Prepare 后的另一项独立 Join。Lease 过期绑定精确当前 lease/attempt。过期尝试可进入 DLQ，并以相同 WorkItem/request 身份重放、递增 attempt。DLQ/过期不构成 NO_PUBLICATION 终态证明。进入私有暂存、Storage Prepare、D Admission 或 UNKNOWN 后，必须先对原发布操作进行精确对账，不得创建新尝试。
 
 ## G — fragment lineage, ContextVersion and reconnect
 

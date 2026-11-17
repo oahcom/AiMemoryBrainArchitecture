@@ -376,6 +376,7 @@ class EDerivation:
     """Stable WorkItem/Attempt identity; expiry and DLQ never prove no publication."""
     work_item_id: str
     request_digest: str
+    d_registration_ref: str | None = None
     attempt: int = 0
     lease_id: str | None = None
     state: str = "REGISTERED"
@@ -384,9 +385,22 @@ class EDerivation:
     d_admission: str | None = None
     terminal_outcome: str | None = None
 
+    def register_producer(self, registration_ref):
+        """Bind the stable D producer registration before any E attempt/lease."""
+        if not registration_ref:
+            raise ProtocolError("D Producer Registration receipt is required")
+        if self.d_registration_ref and self.d_registration_ref != registration_ref:
+            raise ProtocolError("stable WorkItem cannot change D Producer Registration")
+        if self.attempt and not self.d_registration_ref:
+            raise ProtocolError("late D Producer Registration cannot authorize an existing attempt")
+        self.d_registration_ref = registration_ref
+        return self.d_registration_ref
+
     def retry(self, request_digest):
         if request_digest != self.request_digest:
             raise ProtocolError("stable WorkItem identity changed request digest")
+        if not self.d_registration_ref:
+            raise ProtocolError("D Producer Registration must precede enqueue/lease/attempt")
         if self.state in {"PUBLISHED", "NO_PUBLICATION"}:
             return self.attempt
         if self.state in {"PRIVATE_STAGED", "STORAGE_PREPARED_HIDDEN",
