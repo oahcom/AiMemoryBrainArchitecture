@@ -462,8 +462,11 @@ class CProviderOutcome:
                      i_receipt, current_permission_epoch):
         old = self.intents.get(intent_id)
         if old:
-            if old["request_digest"] != request_digest:
-                raise ProtocolError("C intent immutable request digest conflict")
+            if (old["request_digest"] != request_digest
+                    or old["d_participant_ref"] != d_participant_ref
+                    or old["i_receipt_ref"] != (i_receipt or {}).get("receipt_ref")
+                    or old["permission_epoch"] != current_permission_epoch):
+                raise ProtocolError("C intent immutable request/authority binding conflict")
             return old
         if not d_participant_ref:
             raise ProtocolError("C provider intent requires exact D participant")
@@ -479,7 +482,7 @@ class CProviderOutcome:
         }
         return self.intents[intent_id]
 
-    def submit(self, intent_id, provider_idempotency_key):
+    def submit(self, intent_id, provider_idempotency_key, current_permission_epoch):
         intent = self.intents.get(intent_id)
         if not intent:
             raise ProtocolError("provider submit without admitted C intent")
@@ -488,6 +491,8 @@ class CProviderOutcome:
             if old["idempotency_key"] != provider_idempotency_key:
                 raise ProtocolError("unknown provider outcome must reuse same idempotency key")
             return old
+        if intent["permission_epoch"] != current_permission_epoch:
+            raise ProtocolError("C provider submit requires current I PermissionEpoch")
         call = {"idempotency_key": provider_idempotency_key,
                 "state": "SUBMITTED_UNKNOWN"}
         self.provider_calls[intent_id] = call
