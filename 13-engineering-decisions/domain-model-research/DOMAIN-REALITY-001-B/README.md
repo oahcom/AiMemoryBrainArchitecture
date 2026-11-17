@@ -357,3 +357,10 @@ The live consumer contracts preserve the ADR-blocked boundary:
 This consumer alignment is source-backed but is not D/E/F/G approval of B's preferred Fact/Claim Option A. B2 remains IN PROGRESS / NOT PASSED; B4 remains NOT READY.
 
 该消费者对齐有来源支持，但不代表 D/E/F/G 已批准 B 优先推荐的 Fact/Claim Option A。B2 仍 IN PROGRESS / NOT PASSED；B4 仍 NOT READY。
+
+
+## 19. Post-merge currentness and governance reconciliation / 合并后当前性与治理状态核对
+
+**Live status at 2026-11-18 05:22 Asia/Singapore:** PR #55 is CLOSED / MERGED (merged 2026-11-17T19:12:47Z; merge commit `07ee5702cab0d12d6136fe3c024bde9a7af44a97`). Current main HEAD is `a2b8babb1cacfcfbcd590b147bdf34ce162944c2`, and the research package is present in the main tree. The PR review listing contains 10 COMMENTED records and no APPROVED record. The merge does not close B0–B6, grant Architecture Governance approval, or freeze any schema. See [Post-Merge Currentness & Governance Reconciliation](post-merge-currentness-and-governance-reconciliation.md). This section supersedes earlier Open/Draft and “package absent from main” status snapshots.
+
+**截至 2026-11-18 05:22（新加坡时间）的实时状态：** PR #55 已 CLOSED / MERGED（合并时间 2026-11-17T19:12:47Z；Merge Commit `07ee5702cab0d12d6136fe3c024bde9a7af44a97`）。当前 main HEAD 为 `a2b8babb1cacfcfbcd590b147bdf34ce162944c2`，研究包存在于 main Tree。PR Review 列表有 10 条 COMMENTED 记录，没有 APPROVED 记录。该合并不关闭 B0–B6，不代表 Architecture Governance 批准，也不冻结任何 Schema。详见[合并后当前性与治理状态核对](post-merge-currentness-and-governance-reconciliation.md)。本节取代此前 Open/Draft 及“研究包不在 main”的状态快照。
