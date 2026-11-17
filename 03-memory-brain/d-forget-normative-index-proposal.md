@@ -64,6 +64,17 @@ All Blob SHAs below were read from the D source branch at the baseline commit. S
 
 ---
 
+
+## 2.1 Cross-owner governance reference / 跨 Owner 治理参考
+
+| Artifact / 制品 | Exact source / 精确来源 | Classification / 分类 | Effect on D index / 对 D 索引的影响 |
+|---|---|---|---|
+| `14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md` | PR #42 Head `4f8c5218c8d33f5fdb690a7c4bdb671639ebb807`; Blob `6c6b3715f95f0aa9c29ad2fd42d15d8b2bae77b2` | Proposed clarification; explicitly not D/I approval or implementation evidence. / 提议澄清；明确不是 D/I 批准或实现证据。 | Supports the D/I authority split and bilateral approval requirement, but does not close D-005. / 支持 D/I 权责划分及双边批准要求，但不关闭 D-005。 |
+
+The matrix correctly states that D owns canonical lifecycle/domain completion semantics and I owns security/governance policy and cross-system evidence acceptance. It also expressly says the matrix is PROPOSED and not approved by D/I. It therefore aligns with the Phase 3.9 proposals but is not a bilateral sign-off.
+
+该矩阵正确指出 D 拥有规范生命周期/领域完成语义，I 拥有安全/治理策略及跨系统证据接受标准；同时明确声明矩阵仍是 PROPOSED，尚未获得 D/I 批准。因此它与 Phase 3.9 提案方向一致，但不是双边签署。
+
 ## 3. Controlling interpretation / 当前控制性解释
 
 Until the required exact-version approvals are recorded, use the following conservative interpretation:
