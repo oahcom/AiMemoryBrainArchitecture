@@ -386,3 +386,32 @@ This overlay supersedes §11's count for this later snapshot only. It preserves 
 - Issue #130 仍 OPEN，等待会话覆盖审计，尽管 PR-GOVERNANCE-001 已 ADOPTED。Issue #134 仍 OPEN / P0；Main 经典分支保护关闭，当前私有仓库计划下 Rulesets 仍未核实。
 - 本追加中的任何合并都不构成独立审查、Owner 验收、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
 - 133 条记录是该 API 快照的元数据完整盘点，不是对全部 133 条历史 PR Diff 重新逐行进行语义/代码审查。
+
+
+---
+
+## 13. Latest live inventory and NO_PUBLICATION hardening / 最新实时盘点与 NO_PUBLICATION 加固（2026-11-18）
+
+This overlay corrects §12's forecast: PR #164 was opened concurrently with §12 and merged after it, so the expected 134-record post-merge count was not the final state.
+
+- Main HEAD at this snapshot: `ab74033142bc5bbc2983aa4cd1aefc166a93bea7`.
+- Refreshed GitHub `state=all` inventory: **135 PR records = 111 merged + 24 closed-unmerged + 0 open** (API pages 1–3, `per_page=100`).
+- Two PRs followed §12:
+  - PR #164 — NO_PUBLICATION binding/state/fence hardening; exact Head `155f10b746021316be902c3506a10131f570ab1f`; Publication Protocol run #44192890762 SUCCESS (28 tests); GOV-DOC-001 #44192890650 SUCCESS; merged at `ab74033142bc5bbc2983aa4cd1aefc166a93bea7`.
+  - PR #165 — appended §12 and refreshed the integration-session index row; exact Head `e868716532b50c903fb2846bb46eb56184143ee7`; GOV-DOC-001 #44192552179 SUCCESS; merged at `70928d6832162c89f24a52dbb62220dae8e508c2`.
+- PR #164 makes the NO_PUBLICATION model require registered auth/publication/Storage participant and D/I proof binding, a typed test-seam proof, an active ForgetFence participant barrier, and local state consistent with absence. This remains model-only; no authenticated production Storage proof or deployed conformance is established.
+- Issue #25 remains OPEN for independent D/E/I/Storage Owner decisions and production proof. Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED; PR #162 only corrected evidence classification, and manual diagnostics remain NOT RUN. Issue #130 remains OPEN for the operational session-coverage audit although PR-GOVERNANCE-001 is ADOPTED. Issue #134 remains OPEN / P0; classic branch protection is disabled and Rulesets remain unverified.
+- No merge here establishes independent review, Owner acceptance, production R3/DFI conformance, Worker security acceptance or production authorization.
+- The 135-record inventory is a metadata-complete API snapshot, not a fresh line-by-line semantic/code review of all 135 historical PR diffs.
+
+本追加更正第 12 节的预测：PR #164 与第 12 节并发创建并在其后合并，因此合并后预计的 134 条记录不是最终状态。
+
+- 本次快照 Main HEAD：`ab74033142bc5bbc2983aa4cd1aefc166a93bea7`。
+- GitHub `state=all` 盘点：**135 条 PR = 111 条已合并 + 24 条关闭未合并 + 0 条开放**（API 第 1–3 页，`per_page=100`）。
+- 第 12 节之后新增两条 PR：
+  - PR #164：NO_PUBLICATION 绑定/状态/Fence 加固；精确 Head `155f10b746021316be902c3506a10131f570ab1f`；Publication Protocol Run #44192890762 SUCCESS（28 项测试）；GOV-DOC-001 #44192890650 SUCCESS；合并提交 `ab74033142bc5bbc2983aa4cd1aefc166a93bea7`。
+  - PR #165：追加第 12 节并刷新集成会话索引；精确 Head `e868716532b50c903fb2846bb46eb56184143ee7`；GOV-DOC-001 #44192552179 SUCCESS；合并提交 `70928d6832162c89f24a52dbb62220dae8e508c2`。
+- PR #164 使 NO_PUBLICATION 模型必须验证已登记的 Auth/Publication/Storage participant 和 D/I proof 绑定、类型化测试证明、活动 ForgetFence participant barrier，以及与“无发布”一致的本地状态。该结果仍是模型级，不证明已认证生产 Storage 证明或部署符合性。
+- Issue #25 仍 OPEN，等待独立 D/E/I/Storage Owner 决策和生产证明。Issue #26 仍 OPEN / SECURITY_ACCEPTANCE_BLOCKED；PR #162 只更正证据分类，手动 Diagnostics 仍 NOT RUN。PR-GOVERNANCE-001 已 ADOPTED，但 Issue #130 仍 OPEN 等待会话覆盖审计。Issue #134 仍 OPEN / P0；经典分支保护关闭，Rulesets 仍未核实。
+- 本追加不构成独立审查、Owner 验收、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
+- 135 条记录是 API 快照的元数据完整盘点，不是对全部 135 条历史 PR Diff 重新逐行进行语义/代码审查。
