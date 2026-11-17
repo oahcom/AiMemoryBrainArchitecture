@@ -4,7 +4,7 @@
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Review baseline: `main@ab1fa87d74ca4a632155aa19569533ea560109d5`
 - Main commit date: 2026-11-17T21:33:55Z
-- Main tree: `68b855373b46ed780d615be0e184f62042c16f52` (665 entries; recursive tree not truncated)
+- Main tree: `a1d349f4f9b5c26eab2e1236cb0d1040aea209ec` (678 entries; recursive tree not truncated)
 - Status: **DRAFT / CURRENTNESS CORRECTION / NON-NORMATIVE**
 - Purpose: supersede stale live-status and source-tree observations in earlier ARCH-CONVERGENCE-001 documents.
 - Authority: this addendum changes no Owner contract, ADR, schema, implementation Gate, or production authorization.
