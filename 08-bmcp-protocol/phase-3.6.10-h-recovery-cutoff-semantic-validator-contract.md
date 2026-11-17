@@ -413,3 +413,45 @@ H 分支当前候选 Schema 精确版本：
 最近已验证 CI：Run `44043100543`，Job `133902179251`，97 项全部通过。此前 1.2.8 版本升级造成的旧测试断言失败已保留在 CI 历史中；修正断言以匹配精确 1.2.8 后，后续运行通过，没有降低验证要求。
 
 该 97 项测试仍属于 Reference Model / Schema / Test Profile 证据。HRC-TEST-v1 不是生产 Canonicalization 或 Signature Profile；TPH 未运行真实 COC Quorum Log；XLANG-01 只验证固定测试向量。真实 COC/Owner Adapter、生产密码学、I/D/C Currentness CAS、JF-10 物理恢复和部署拓扑仍 OPEN。H 尚未冻结，也未达到生产互操作通过。
+
+
+### 11.15 I candidate RFC 8785 / Ed25519 cross-language profile vectors
+
+The H test directory now includes an additional four-method candidate suite for the proposed I profile `AIMBA-I-CRYPTO-1.0`:
+- `test_i_crypto_profile.py`: Blob `05c36b9d01340e0cc9fe504208b6ebc66fcf95bf`, CRYPTO-01..04.
+- Independent Node.js JCS/Ed25519 oracle: `i_crypto_profile_reference.mjs`, Blob `851484fee665f5a559b61ceae92a07c5082a3986`.
+- Fixed TEST-ONLY vector: `i_crypto_profile_vector.json`, Blob `f1ec9fdca8ca7a124ef63a99d8f50c4dc57fa219`.
+- Exact I profile proposal: Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`.
+- H crypto wire mapping R3: Blob `b132e6a01bcfe13f92020b9778ee3f7ddbf65753`.
+- I exact review R3: Blob `93afe9c9e06d20de5ce1c2a0f676b4785123fbcf`.
+
+The suite checks Python/Node equality for RFC 8785 JCS canonical payload bytes, SHA-256 domain-separated payload digest, signature projection/preimage, Ed25519 public key and deterministic test signature; it also checks object-key order, array order, Unicode non-normalization and non-finite number rejection. The CI workflow pins Python `rfc8785==0.1.4`, `cryptography==44.0.2`, Node.js 22 and Node `canonicalize@2.1.0`.
+
+The current H suite therefore contains **101 methods**:
+- HRC-01..25: 25;
+- JPF-01..19: 19;
+- WIRE-01..10: 10;
+- SCHEMA-01..16: 16;
+- TPH-01..26: 26;
+- XLANG-01: 1;
+- CRYPTO-01..04: 4.
+
+Latest verified run [44043797393](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44043797393), H commit `3e582f45d9a1df3cc98c847ca6071667f3c06dd8`, job `133904440718`: **101 tests ran, OK**.
+
+Security boundary: the deterministic Ed25519 seed is explicitly TEST-ONLY and MUST NEVER be reused. The suite validates independent Python/Node test implementations for one fixed candidate vector and a small set of JCS edge cases. It does not approve I's profile, trust roots, HSM/KMS custody, key lifecycle, historical trust, revocation propagation, production per-message P0 allowlists, real owner-signed snapshots or Storage final-gate verification. I proposal and H mapping remain CANDIDATE / ACCEPT WITH AMENDMENTS, not frozen or deployed.
+
+### 11.16 中文规范：I 候选 RFC 8785 / Ed25519 跨语言向量
+
+H 测试目录新增 I 候选 Profile `AIMBA-I-CRYPTO-1.0` 的四项测试：
+- Python 测试 `test_i_crypto_profile.py`，Blob `05c36b9d01340e0cc9fe504208b6ebc66fcf95bf`，CRYPTO-01..04。
+- Node.js 独立 JCS/Ed25519 实现，Blob `851484fee665f5a559b61ceae92a07c5082a3986`。
+- 固定测试向量，Blob `f1ec9fdca8ca7a124ef63a99d8f50c4dc57fa219`。
+- I Profile 提案 Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`。
+- H Wire Mapping R3 Blob `b132e6a01bcfe13f92020b9778ee3f7ddbf65753`。
+- I Exact Review R3 Blob `93afe9c9e06d20de5ce1c2a0f676b4785123fbcf`。
+
+测试比较 Python 与 Node 的 RFC 8785 JCS Canonical Payload Bytes、SHA-256 Domain-separated Payload Digest、Signature Projection/Preimage、Ed25519 Public Key 和确定性测试签名；同时覆盖对象 Key 顺序、数组顺序、Unicode 不自动归一化及非有限数字拒绝。CI 固定 Python `rfc8785==0.1.4`、`cryptography==44.0.2`、Node.js 22 和 Node `canonicalize@2.1.0`。
+
+当前 H 候选套件共 **101 项**：HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1、CRYPTO 4。最近已验证运行 44043797393，在 Commit `3e582f45d9a1df3cc98c847ca6071667f3c06dd8` 上 101 项全部通过。
+
+安全边界：Ed25519 私钥 Seed 是测试专用，严禁生产复用。测试仅证明两套测试实现对一个固定候选向量及少量 JCS 边界行为一致，不代表 I Profile、Trust Root、HSM/KMS、Key Lifecycle、历史信任、撤权传播、生产逐消息 P0 Allowlist、真实 Owner Snapshot 签名或 Storage 最终 Gate 验证已批准。I 提案与 H 映射仍是 CANDIDATE / 有条件接受修订，尚未冻结或部署。
