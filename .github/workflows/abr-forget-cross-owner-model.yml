@@ -25,3 +25,9 @@ jobs:
       - name: Run model regression tests
         working-directory: reviews/architecture-breakthrough/integration/model
         run: python -m unittest -v test_forget_cross_owner_model.py
+      - name: Run overlapping two-operation Forget model
+        working-directory: reviews/architecture-breakthrough/integration/model
+        run: python overlapping_forget_model.py
+      - name: Run overlapping Forget regression tests
+        working-directory: reviews/architecture-breakthrough/integration/model
+        run: python -m unittest -v test_overlapping_forget_model.py
