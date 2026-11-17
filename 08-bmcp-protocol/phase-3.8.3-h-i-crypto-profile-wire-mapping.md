@@ -3,7 +3,7 @@
 
 - Owner: H — BMCP Protocol and Adapter Authentication
 - Exact I proposal: `AIMBA-I-CRYPTO-1.0`, Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`
-- Exact H schema: `bmcp.coc-jf10-unified/1.2.7`, Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`
+- Exact H schema: `bmcp.coc-jf10-unified/1.2.7`, Blob `70b892797d07489936300a26c0dedfafe1d6e746`
 - On-wire family version: `schema_version = 1.2.0` (unchanged)
 - H decision: **ACCEPT AS WIRE-MAPPING CANDIDATE WITH BLOCKING AMENDMENTS**
 - Status: **NOT FROZEN / NOT INTEROPERABILITY-VERIFIED / NOT IMPLEMENTED**
@@ -12,7 +12,7 @@
 
 ## 1. H disposition / H 决议
 
-H accepts the I proposal as a candidate cryptographic input and accepts schema artifact 1.2.7 as an additive envelope revision. H does not approve I's algorithm choice, trust roots, key custody, key lifecycle, historical trust or anti-rollback policy. Those remain I/governance decisions.
+H accepts the I proposal as a candidate cryptographic input and accepts schema artifact 1.2.8 as an additive envelope revision. H does not approve I's algorithm choice, trust roots, key custody, key lifecycle, historical trust or anti-rollback policy. Those remain I/governance decisions.
 
 H accepts the following exact identifiers for the proposed I mapping only:
 
@@ -27,7 +27,7 @@ H accepts the following exact identifiers for the proposed I mapping only:
 
 H 将 I 提案接受为候选密码学输入，并接受 Schema Artifact 1.2.7 作为可向后兼容的 Envelope 增量修订。H 不批准 I 的算法选择、Trust Root、Key Custody、Key Lifecycle、历史信任或 Anti-rollback 策略；这些仍由 I/治理决策。
 
-## 2. Schema 1.2.7 exact change / Schema 1.2.7 精确变更
+## 2. Schema 1.2.8 exact change / Schema 1.2.7 精确变更
 
 Artifact 1.2.7 adds optional `signature_profile_id` to `$defs.commonEnvelope`. It deliberately keeps the on-wire family `schema_version=1.2.0` unchanged and leaves the new field optional at structural-schema level for compatibility with older message producers.
 
@@ -104,7 +104,22 @@ For the snapshot reference, H must not treat the nested `ownerSnapshot` JSON obj
 
 ### 4.1 Owner snapshot attestation binding / Owner Snapshot Attestation 绑定
 
-The current schema's `owner_snapshot_attestation_ref` is a locator. H semantic validation must dereference it, verify the I signature and compare the returned immutable snapshot's owner, gate/scope generation, request/admission high-waters, counts, roots, digests, inventory epoch and anti-rollback anchor to the COC-embedded `ownerSnapshot`. A locator alone is not proof. If the immutable referenced snapshot digest is not available from the resolved object/registry, the validator returns UNKNOWN; H must add an explicit digest field in a later schema revision if the reference resolver cannot guarantee immutable digest addressing.
+Schema 1.2.8 adds `owner_snapshot_attestation_digest`. H semantic validation must dereference `owner_snapshot_attestation_ref`, verify the I signature, recompute the referenced immutable object's SHA-256 digest and compare it to this field, then compare owner, gate/scope generation, request/admission high-waters, counts, roots, inventory epoch and anti-rollback anchor to the COC-embedded `ownerSnapshot`. Missing digest, mutable locator, mismatch or unavailable object returns UNKNOWN/INVALID and keeps the recovery gate closed.
+
+### 4.2 COMPLETE_EMPTY and OUT_OF_SCOPE proof schemas / 空集合与范围外证明 Schema
+
+RecoveryJoin schema 1.0.1 defines two separately dereferenced proof objects:
+
+- `$defs.completeEmptyProof`: binds owner authority, REQUEST_SET/ADMISSION_SET, Scope/ScopeGeneration, exact owner ledger/version, ledger query ref, owner-local high-water, `pagination_complete=true`, `count=0`, canonical empty root, key-status generation, anti-rollback anchor, signature profile/ref and proof digest.
+- `$defs.outOfScopeProof`: binds exact request/operation identity and digest, target class, Scope/ScopeGeneration, applicability policy, `OUT_OF_SCOPE_WITH_PROOF` decision, reason code, owner ledger/version/high-water, complete query/pagination, key-status generation, anti-rollback anchor, signature profile/ref and proof digest.
+
+For an I proof, `signature_profile_ref` MUST resolve to `AIMBA-ED25519-SHA256-1.0` under bundle `AIMBA-I-CRYPTO-1.0`; the resolved proof is verified with the exact I P0/JCS/Ed25519 construction. A zero count without its matching signed empty proof is UNKNOWN. An OUT_OF_SCOPE disposition without its exact signed proof ref+digest is UNKNOWN. No missing or unavailable evidence is interpreted as empty or out-of-scope.
+
+RecoveryJoin Schema 1.0.1 新增两个独立解引用 Proof Object：
+- `completeEmptyProof` 绑定 Owner、Request/Admission Set、Scope/Generation、Owner Ledger/Version、Query Ref、Owner High-water、完整分页、Count=0、Canonical Empty Root、Key Status Generation、Anti-rollback Anchor、Signature Profile/Ref 和 Proof Digest。
+- `outOfScopeProof` 绑定 Request/Operation Identity/Digest、Target Class、Scope/Generation、Applicability Policy、OUT_OF_SCOPE 决策、Reason、Owner Ledger/Version/High-water、完整 Query/Pagination、Key Status、Anti-rollback、Signature Profile/Ref 和 Proof Digest。
+
+I Proof 的 `signature_profile_ref` 必须解析到 `AIMBA-ED25519-SHA256-1.0` 与 Bundle `AIMBA-I-CRYPTO-1.0`，并按 I 精确 P0/JCS/Ed25519 规则验签。Count=0 但缺少匹配签名 Empty Proof，或 OUT_OF_SCOPE 缺少精确签名 Proof Ref+Digest，均为 UNKNOWN。缺失/不可用证据绝不能解释为空或范围外。
 
 ## 5. Message-family authority mapping / 消息族 Authority 映射
 
@@ -126,7 +141,7 @@ The profile MUST NOT be applied to C/D/Storage/COC signatures merely because tho
 
 该配置只应用于 I 撰写的记录。C/D/Storage/COC 记录即使共用 Common Envelope，也不得自动套用 I Profile。各 Authority 必须发布自己的批准配置，或明确引用经联合批准的配置，同时保留自己的 Key Status Authority。
 
-## 6. Required H validator behavior / H Validator 强制行为
+## 7. Required H validator behavior / H Validator 强制行为
 
 H semantic validation MUST:
 
@@ -143,7 +158,7 @@ H semantic validation MUST:
 
 H Semantic Validator 必须按认证 Owner Authority 与精确 Profile ID 选择配置；在构造 JSON Object 前拒绝重复 Key；按消息类型精确 Allowlist 重建 P0；重新计算 Digest/Signature Preimage；验证 Base64url 与 Ed25519；独立验证嵌套 I Proof、Transport Channel Binding 和 COC Quorum；Key Status/历史 Checkpoint/Anti-rollback/Proof 不可用时返回 UNKNOWN 并阻断 Gate；拒绝 Profile 降级、Key Version 替换、跨 Audience Replay 和 Message Family 替换。JSON Schema 通过不等于签名、Trust、Currentness 或 Owner Authority 通过。
 
-## 7. Required exact vectors / 精确测试向量
+## 8. Required exact vectors / 精确测试向量
 
 H must extend the candidate suite with:
 - exact P0 extraction for all I-signed message families;
@@ -161,7 +176,7 @@ These vectors are **SPECIFIED / NOT RUN**. The existing HRC/JPF/WIRE/SCHEMA 66/6
 
 上述向量目前均为**已定义、未执行**。现有 HRC/JPF/WIRE/SCHEMA 66/66 仍是独立的 Test-only Candidate 结果，不覆盖本 Profile Mapping。
 
-## 8. Blocking amendments / 阻断修订
+## 9. Blocking amendments / 阻断修订
 
 1. I must issue an exact-version decision on Blob `30967b2c58ef0aaf760a22fe61192e70744d5964`, including algorithm/regulatory suitability and the exact P0 trust semantics.
 2. H must publish a separate exact-version decision for schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854` and this mapping revision; this document is the H candidate mapping decision, not a second independent signature.
@@ -171,7 +186,7 @@ These vectors are **SPECIFIED / NOT RUN**. The existing HRC/JPF/WIRE/SCHEMA 66/6
 6. Storage must accept the exact proof-verification contract for its actual visibility linearization point.
 7. No profile is production-active until independent human Owner/governance approval and runtime conformance are recorded.
 
-## 9. Final H decision / H 最终决议
+## 10. Final H decision / H 最终决议
 
 I exact review of this mapping: Blob `446109f4867268fe7dca3c7e114346f3c1a74b61` — **ACCEPT WITH ENUMERATED AMENDMENTS**.
 
