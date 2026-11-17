@@ -81,6 +81,8 @@ A coordinates work but MUST NOT replace a domain Owner's decisions. Each Owner m
 
 A separate ChatGPT conversation performs independent review using the frozen prompt, task record, diff, exact SHAs, test evidence, and applicable contracts. It must not rely on the implementer's unrecorded chat context.
 
+**Governance decision NR-001 — OPTION A ACCEPTED:** A genuinely new, separate ChatGPT conversation satisfies AI-STD-001 §3.2's “separate AI session/agent” requirement when the reviewer did not participate in the implementation and independently retrieves the exact frozen Head, source contracts, diff, and evidence from GitHub. This is conversation/context isolation only—not model, provider, runtime/environment, or statistical independence, and not multi-model consensus. The reviewer MUST disclose this limitation. All R3 specialist-review and reproducible-test requirements remain fully mandatory; this decision does not waive acceptance authority or permit self-approval. See [Governance Decision NR-001](work-items/AID-2026-001/governance-decision-NR-001.md).
+
 **Independence limitation:** separate conversations provide context separation and a fresh review pass; they do not provide a different model, provider, or statistical independence. The project MUST NOT describe this as multi-model consensus. High-risk acceptance remains subject to the project's explicit security and governance authority.
 
 The system does not automatically create or launch nine conversations. The user starts the required Owner/reviewer conversations in ChatGPT and supplies the corresponding prompt. GitHub provides durable handoff between them.
@@ -165,7 +167,7 @@ The supported operating mode is **user-triggered ChatGPT conversations + GitHub-
 ## 10. Open decisions
 
 1. Whether the project accepts user-triggered conversation orchestration as the operating mode under the no-quota/no-API constraint.
-2. Whether the existing governance standard should be amended to explicitly define “separate ChatGPT conversation” as context-independent review, with its model-independence limitation.
+2. **DECIDED — NR-001 / OPTION A:** a genuinely separate, newly started ChatGPT conversation satisfies the separate-session requirement under the controls and limitations recorded in the governance decision. This does not establish model/provider/statistical independence and does not waive any R3 specialist-review or evidence requirement.
 3. Which exact repository contracts and test suites each Owner prompt must load by default.
 
 Until these are decided, AI-ARCH-002 remains **PROPOSED** and does not authorize production automation or autonomous execution.
