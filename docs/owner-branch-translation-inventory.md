@@ -209,3 +209,15 @@ Supersedes H Blob `0dca3dc5463a02be0e19524811afbae87795baf5`. H companion remain
 | H | `0dca3dc5463a02be0e19524811afbae87795baf5` | §11.8 maps 1.1 evidence bridge as candidate; schema/SDK freeze not established |
 
 Cross-owner report: `reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md` and Chinese companion. Result: lifecycle/authority split aligned; joint 1.1 contract BLOCKED; exact C/G/H acceptance chain NOT ESTABLISHED. This audit does not change Owner statuses.
+
+
+
+## C/G/H recovery-batch acceptance status — 2026-11-17
+
+| Owner | Current source Blob | Exact-version recovery-batch disposition |
+|---|---|---|
+| C | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | C accepts CGH-APPLIED-1.0 and BIH consumer package; explicit C acceptance/CSubmitOutcome mapping for G's CGH-APPLIED-1.1 recovery-batch amendment not present; C36-AP-01 OPEN |
+| G | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G accepts exact CGH-APPLIED-1.1 recovery-batch amendment with enumerated exceptions; implementation NOT VERIFIED; tests NOT RUN |
+| H | `74be8374a67da385a5f0f8e34c7aef2b38b72bcf` | §§11.8–11.9 candidate mapping only; H36-AP-08/09 OPEN pending exact H schema and C/G/I/D/Storage acceptance |
+
+No common CGH-APPLIED-1.1 cross-owner acceptance is established.
