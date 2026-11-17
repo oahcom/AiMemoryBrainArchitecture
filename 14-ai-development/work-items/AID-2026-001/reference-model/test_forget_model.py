@@ -146,5 +146,94 @@ class ForgetReferenceModelTests(unittest.TestCase):
         self.assertEqual(op.fence_generation, 0)
 
 
+    def test_domain_completion_rejects_stale_generation_evidence(self):
+        op = self.operation()
+        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+        op.domain_targets["canonical"].fence_generation -= 1
+        self.assertFalse(op.evaluate_domain())
+        self.assertNotEqual(op.phase, Phase.COMPLETED)
+
+    def test_domain_completion_requires_evidence_reference_and_kind(self):
+        op = self.operation()
+        op.record_target("canonical", TargetState.CLEANED, "", "", domain_target=True)
+        self.assertFalse(op.evaluate_domain())
+        self.assertEqual(op.phase, Phase.DOMAIN_COMPLETION_EVALUATED)
+
+    def test_unknown_domain_target_blocks_domain_completion(self):
+        op = self.operation()
+        op.record_target("canonical", TargetState.UNKNOWN, "unknown-receipt", "provider-status", domain_target=True)
+        self.assertFalse(op.evaluate_domain())
+        self.assertEqual(op.phase, Phase.DOMAIN_COMPLETION_EVALUATED)
+
+    def test_cross_system_inventory_expansion_invalidates_governance_only(self):
+        op = self.operation()
+        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+        self.assertTrue(op.evaluate_domain())
+        op.record_target("index", TargetState.ERASED, "ev-f", "erase-proof")
+        op.record_target("adapter", TargetState.ERASED, "ev-h", "erase-proof")
+        self.assertEqual(op.evaluate_governance(), Governance.COMPLIANT)
+        op.expand_inventory(Target("late-copy", "H", "erase"))
+        self.assertEqual(op.phase, Phase.COMPLETED)
+        self.assertEqual(op.governance, Governance.PENDING)
+        self.assertEqual(op.public_result(), "Incomplete")
+
+    def test_domain_inventory_expansion_reopens_domain_completion(self):
+        op = self.operation()
+        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+        self.assertTrue(op.evaluate_domain())
+        op.expand_inventory(Target("late-derived", "D", "cleanup"), domain_target=True)
+        self.assertEqual(op.phase, Phase.CLEANUP_IN_PROGRESS)
+        self.assertFalse(op.evaluate_domain())
+        self.assertNotEqual(op.phase, Phase.COMPLETED)
+
+    def test_idempotency_hash_binds_every_authority_dimension(self):
+        baseline = ForgetOperation.canonical_request_hash("mem", "principal", "scope", "purpose", "forget")
+        variants = [
+            ForgetOperation.canonical_request_hash("other-mem", "principal", "scope", "purpose", "forget"),
+            ForgetOperation.canonical_request_hash("mem", "other-principal", "scope", "purpose", "forget"),
+            ForgetOperation.canonical_request_hash("mem", "principal", "other-scope", "purpose", "forget"),
+            ForgetOperation.canonical_request_hash("mem", "principal", "scope", "other-purpose", "forget"),
+            ForgetOperation.canonical_request_hash("mem", "principal", "scope", "purpose", "erase"),
+        ]
+        self.assertTrue(all(value != baseline for value in variants))
+        self.assertEqual(len(set([baseline, *variants])), 6)
+
+    def test_target_outside_sealed_inventory_cannot_be_recorded(self):
+        op = self.operation()
+        with self.assertRaises(ContractError):
+            op.record_target("unregistered", TargetState.ERASED, "ev", "erase-proof")
+
+    def test_unapproved_retention_exception_is_non_compliant(self):
+        op = self.operation()
+        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+        op.evaluate_domain()
+        op.record_target("index", TargetState.ERASED, "ev-f", "erase-proof")
+        retained = op.cross_system_targets["adapter"]
+        retained.state = TargetState.POLICY_RETAINED
+        retained.fence_generation = op.fence_generation
+        retained.evidence_ref = "retention-proof"
+        retained.evidence_kind = "policy-retention"
+        retained.exception_approved = False
+        retained.exception_expires = 100
+        self.assertEqual(op.evaluate_governance(now=1), Governance.NON_COMPLIANT)
+        self.assertEqual(op.public_result(), "Incomplete")
+
+
+    def test_idempotency_hash_uses_unambiguous_field_encoding(self):
+        left = ForgetOperation.canonical_request_hash("a|b", "c", "d", "e", "forget")
+        right = ForgetOperation.canonical_request_hash("a", "b|c", "d", "e", "forget")
+        self.assertNotEqual(left, right)
+
+    def test_empty_domain_inventory_cannot_claim_completion(self):
+        op = ForgetOperation("op-empty", "mem", "p", "s", "forget")
+        op.authorize(True)
+        op.suppress()
+        op.seal_inventory([], [])
+        op.start_cleanup()
+        self.assertFalse(op.evaluate_domain())
+        self.assertEqual(op.phase, Phase.DOMAIN_COMPLETION_EVALUATED)
+        self.assertEqual(op.public_result(), "Incomplete")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

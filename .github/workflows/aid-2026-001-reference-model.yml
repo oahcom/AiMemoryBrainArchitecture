@@ -1,0 +1,32 @@
+name: AID-2026-001 Reference Model Tests
+
+on:
+  pull_request:
+    paths:
+      - "14-ai-development/work-items/AID-2026-001/reference-model/**"
+      - ".github/workflows/aid-2026-001-reference-model.yml"
+  push:
+    branches: [main]
+    paths:
+      - "14-ai-development/work-items/AID-2026-001/reference-model/**"
+      - ".github/workflows/aid-2026-001-reference-model.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  reference-model:
+    name: Non-production reference model unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out exact commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Run reference model tests
+        run: |
+          python -m unittest discover -s 14-ai-development/work-items/AID-2026-001/reference-model -v
