@@ -261,3 +261,12 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 - H EN/zh-CN companions refreshed; structural parity now 24/24 headings and 33/33 table rows across source/EN/zh-CN.
 - §11.9 requires C-issued provider receipt and immutable CSubmitOutcome; terminal proof only after all owner outcomes are determinate; I/D exclusively issue their own gate-release attestations.
 - H36-AP-09 remains OPEN because the exact H wire message-family Schema/SDK mapping and consumer acceptance are not present. H candidate remains CANDIDATE; C/G/I/D/Storage acceptance and conformance remain pending; C/G/H freeze BLOCKED.
+
+
+## 13. C/G/H cross-owner Phase 3.6 contract audit — 2026-11-17
+
+- Independent cross-owner audit: `reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md` and Chinese companion.
+- Exact baselines: C `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`; G `aa3afa73d8a76cc6f025839c52bfbff6a983046a`; H current `0dca3dc5463a02be0e19524811afbae87795baf5`.
+- Result: six-stage lifecycle and core authority split aligned; **CGH-APPLIED-1.1 recovery-batch evidence chain BLOCKED**. C source does not yet define the required CSubmitOutcome/provider receipt contract or record exact-version acceptance of the 1.1 recovery-batch package. H §11.8 is a candidate mapping, not frozen schema/SDK. Exact-version C/G/H joint acceptance is not established.
+- Findings XCH-36-001..005; P1 blockers and P2 ordering-language ambiguity detailed in the cross-owner report. All conformance remains NOT RUN / implementation NOT VERIFIED.
+- H current companion pin is `0dca3dc5463a02be0e19524811afbae87795baf5`; earlier H parity report against `db59b63e322d7255b8b400f47859dcac32bb3027` is superseded for current-source evidence.
