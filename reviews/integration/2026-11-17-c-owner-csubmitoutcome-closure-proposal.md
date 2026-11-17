@@ -1,5 +1,7 @@
 # C Owner Closure Proposal — Provider Receipt and Immutable CSubmitOutcome for CGH-APPLIED-1.1
 
+> **SUPERSEDED — retained for audit history only.** C has since published an exact recovery-batch Owner decision (ACCEPT WITH ENUMERATED EXCEPTIONS) and the normative CSubmitOutcome 1.0.1 contract/schema. Current authority artifacts are C Phase 3.6 addendum Blob `45a48249717c8cddb07ab96197730ef93d406c22`, C normative provider outcome contract Blob `819705037da89834e10b6dd2ec6e66c1b8c70886`, and CSubmitOutcome 1.0.1 schema Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`. This proposal no longer represents an open producer-contract gap.
+
 - Date: 2026-11-17
 - Status: **PROPOSAL FOR C OWNER REVIEW — NOT AN OWNER DECISION**
 - C source baseline: `07-agent-integration/phase-3.6-final-request-evidence-contract.md`, Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`.
