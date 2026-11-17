@@ -25,7 +25,7 @@
 | I Python/Node crypto tests | `01239e06e8f4464f49acd34241dc00899befe424` |
 | D owner proof contract candidate | `d80dabe7210e681bc4e2290355a38f8b67be9ddd` |
 | C owner proof contract candidate | `5e37185610869951c3b392c9ad143a72b4c702ac` |
-| H CI candidate run | `44051676055` (H test commit `16c0e63458a3e3773cd38ef86bfb4f7fe44dd0b4`; 288 tests total, 266 passed, 22 skipped, 0 failed) |
+| H CI candidate run | `44051851164` (H exact review HEAD `ba99eea9334d77c2a014ed45d9287ef514a4d895`; 288 tests total, 266 passed, 22 skipped, 0 failed) |
 
 ## 2. I findings
 
