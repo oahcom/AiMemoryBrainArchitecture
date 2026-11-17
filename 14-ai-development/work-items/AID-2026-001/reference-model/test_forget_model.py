@@ -218,6 +218,12 @@ class ForgetReferenceModelTests(unittest.TestCase):
         self.assertEqual(op.evaluate_governance(now=1), Governance.NON_COMPLIANT)
         self.assertEqual(op.public_result(), "Incomplete")
 
+
+    def test_idempotency_hash_uses_unambiguous_field_encoding(self):
+        left = ForgetOperation.canonical_request_hash("a|b", "c", "d", "e", "forget")
+        right = ForgetOperation.canonical_request_hash("a", "b|c", "d", "e", "forget")
+        self.assertNotEqual(left, right)
+
     def test_empty_domain_inventory_cannot_claim_completion(self):
         op = ForgetOperation("op-empty", "mem", "p", "s", "forget")
         op.authorize(True)
