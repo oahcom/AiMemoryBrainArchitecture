@@ -215,3 +215,26 @@ B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪�
 - 逐文件审计将其标记为 `REMEDIATED — MANUAL PARITY REVIEW PENDING`；其中历史分支/Issue 快照在验收前仍须实时刷新。
 - B0 remains PARTIAL / NOT PASSED; B5 remains BLOCKED / NOT PASSED; B6 remains INDEPENDENT_REVIEW_PENDING.
 - B0 仍为 PARTIAL / NOT PASSED；B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。
+
+
+## 16. Live baseline and evidence refresh / 实时基线与证据刷新 — 2026-11-18
+
+- Live `main` HEAD: `b3c666e67982cb3d3374e759cfb6552c7765aacb`.
+- Live research branch HEAD before this README update: `f95b479b223ebb63c8aebcfca13a4cd9b28d5331`.
+- PR #55 remains Open / Draft; live PR head matched the research branch before this update. Base SHA remains `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`. Current compare is DIVERGED (145 ahead / 32 behind), merge base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; GitHub reports `mergeable=false`, cause unverified.
+- All ten named Owner branch refs were re-read. Selected successor evidence now includes H Unified 1.2.15 mapping, I's exact review of 1.2.15, Storage v3.3.1 and A Phase 3.12.1 review. Exact pins and caveats are in `baseline-currentness-and-owner-source-audit.md`.
+- Issue #7 was re-read and remains OPEN; runtime implementation repository, accountable engineering owner, reproducible build/test entry points and deployment topology remain unresolved.
+- Official reference validation was refreshed on 2026-11-18. Mem0's detailed official page timed out and remains explicitly NOT REVALIDATED.
+- The full 22-file exact Blob/line-count snapshot is in `bilingual-parity-audit.md`; currentness audit Blob is `f94836b337b6b59915f3ba55810642da5f44e1d6`, official-reference validation Blob is `ef4a0cf448e474b08bf5ff6b80c32dbae705b002`, and parity-audit Blob after its refresh is `588fd798ba2b2eaf5888e249d0c2ce2f67628100`.
+
+- 实时 `main` HEAD：`b3c666e67982cb3d3374e759cfb6552c7765aacb`。
+- 本 README 更新前的实时研究分支 HEAD：`f95b479b223ebb63c8aebcfca13a4cd9b28d5331`。
+- PR #55 仍为 Open / Draft；本次更新前实时 PR Head 与研究分支一致。Base SHA 仍为 `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`。当前 Compare 为 DIVERGED（领先 145 / 落后 32），Merge Base 为 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`；GitHub 返回 `mergeable=false`，原因未核实。
+- 已重新读取十个指定 Owner 分支 Ref。选定后继证据现包括 H Unified 1.2.15 Mapping、I 对 1.2.15 的精确复审、Storage v3.3.1 和 A Phase 3.12.1 复审。精确 Pin 和限制见 `baseline-currentness-and-owner-source-audit.md`。
+- Issue #7 已重新读取，仍 OPEN；运行时实现仓库、负责工程 Owner、可复现 Build/Test 入口及部署拓扑仍未解决。
+- 官方参考资料已于 2026-11-18 刷新。Mem0 详细官方页面读取超时，仍明确标记为本轮未重新验证。
+- 全部 22 个文件的精确 Blob/行数快照见 `bilingual-parity-audit.md`；当前性审计 Blob 为 `f94836b337b6b59915f3ba55810642da5f44e1d6`，官方参考核验 Blob 为 `ef4a0cf448e474b08bf5ff6b80c32dbae705b002`，本轮刷新后的双语审计 Blob 为 `588fd798ba2b2eaf5888e249d0c2ce2f67628100`。
+
+Gate disposition remains unchanged: B0 PARTIAL / NOT PASSED; B1 IN PROGRESS; B2 IN PROGRESS; B3 NOT PASSED; B4 NOT READY; B5 BLOCKED / NOT PASSED pending independent semantic parity review; B6 INDEPENDENT_REVIEW_PENDING. No schema freeze, implementation authorization, Owner approval, merge or Ready transition is claimed.
+
+门禁结论不变：B0 PARTIAL / NOT PASSED；B1 进行中；B2 进行中；B3 未通过；B4 未就绪；B5 因等待独立语义对等审查而 BLOCKED / NOT PASSED；B6 INDEPENDENT_REVIEW_PENDING。不宣称 Schema 冻结、实现授权、Owner 批准、合并或转为 Ready。
