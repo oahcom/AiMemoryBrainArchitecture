@@ -1,9 +1,11 @@
 """Non-production executable reference model for the AID-2026-001 Forget proposal.
 
-This models contract-level invariants only. It is not a runtime implementation,
-persistence engine, authorization service, or proof of production behavior.
+This model intentionally represents only contract-level invariants. It is not a
+runtime implementation, persistence engine, authorization service, or proof of
+production behavior.
 """
 from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
 from hashlib import sha256
@@ -95,6 +97,7 @@ class ForgetOperation:
     cross_system_targets: Dict[str, Target] = field(default_factory=dict)
     checkpoints: Dict[str, str] = field(default_factory=dict)
     lease_fence: int = 0
+    _request_hash: str = ""
 
     @staticmethod
     def canonical_request_hash(memory_id: str, principal: str, scope: str,
@@ -114,7 +117,8 @@ class ForgetOperation:
     def suppress(self) -> int:
         if self.phase != Phase.AUTHORIZED:
             raise ContractError("suppression requires Authorized")
-        # Abstract atomic commit of Memory state, Fence and operation phase.
+        # Abstract atomic commit: Memory terminal state, fence and operation phase
+        # are treated as one indivisible model transition.
         self.fence_generation += 1
         self.memory_state = MemoryState.FORGOTTEN
         self.phase = Phase.SUPPRESSION_COMMITTED
@@ -126,8 +130,9 @@ class ForgetOperation:
                           Phase.DOMAIN_COMPLETION_EVALUATED,
                           Phase.COMPLETED, Phase.FAILED}:
             raise ContractError("cancel cannot remove suppression after linearization")
-        if self.phase != Phase.CANCELLED:
-            self.phase = Phase.CANCELLED
+        if self.phase == Phase.CANCELLED:
+            return
+        self.phase = Phase.CANCELLED
 
     def seal_inventory(self, domain_targets: Iterable[Target],
                        cross_system_targets: Iterable[Target]) -> None:
@@ -188,6 +193,7 @@ class ForgetOperation:
                     and target.exception_expires > now):
                 exception_used = True
                 continue
+            # ACK is accepted only for a notify action; it never means erase.
             if target.state == TargetState.ACKNOWLEDGED and target.required_action == "notify":
                 continue
             all_accepted = False
@@ -234,9 +240,11 @@ class ForgetOperation:
         self.checkpoints[checkpoint_id] = evidence_ref
 
     def restore_is_queryable(self, restored_fence_generation: int) -> bool:
+        # A restored copy must apply the latest fence before serving.
         return restored_fence_generation >= self.fence_generation
 
     def context_remove(self, context_entries: set[str], entry_id: str) -> set[str]:
+        # Context Remove is intentionally not a canonical Forget operation.
         updated = set(context_entries)
         updated.discard(entry_id)
         return updated
