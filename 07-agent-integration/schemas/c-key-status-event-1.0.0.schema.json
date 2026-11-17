@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:aimba:schema:c-key-status-event:1.0.0",
+  "title": "CKeyStatusEvent",
+  "description": "Append-only C data-plane signing key lifecycle event. Structural schema only; governance signature, trust chain, transition validity and anti-rollback require semantic validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "event_ref",
+    "event_id",
+    "event_sequence",
+    "sequence_namespace_ref",
+    "created_at",
+    "c_key_authority_ref",
+    "governance_authority_ref",
+    "key_id_ref",
+    "key_version",
+    "profile_id",
+    "algorithm",
+    "public_key_base64url",
+    "public_key_fingerprint",
+    "purpose",
+    "audience",
+    "state",
+    "reason_code",
+    "previous_event_ref",
+    "previous_event_digest",
+    "anti_rollback_anchor_ref",
+    "anti_rollback_anchor_digest",
+    "governance_key_id_ref",
+    "governance_key_version",
+    "governance_signature_profile_id",
+    "governance_signature",
+    "message_type",
+    "event_digest"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "CKeyStatusEvent"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "event_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "event_sequence": {
+      "$ref": "#/$defs/sequence"
+    },
+    "sequence_namespace_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "c_key_authority_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "governance_authority_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "key_id_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "key_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "profile_id": {
+      "const": "AIMBA-C-CRYPTO-1.0"
+    },
+    "algorithm": {
+      "const": "Ed25519"
+    },
+    "public_key_base64url": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$"
+    },
+    "public_key_fingerprint": {
+      "$ref": "#/$defs/sha256"
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "audience": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "state": {
+      "enum": [
+        "PENDING",
+        "ACTIVE",
+        "RETIRED",
+        "REVOKED",
+        "COMPROMISED",
+        "DESTROYED"
+      ]
+    },
+    "reason_code": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "previous_event_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 512
+    },
+    "previous_event_digest": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "anti_rollback_anchor_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "anti_rollback_anchor_digest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "governance_key_id_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "governance_key_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "governance_signature_profile_id": {
+      "const": "AIMBA-I-KEY-GOVERNANCE-1.0"
+    },
+    "governance_signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{86}$"
+    },
+    "message_type": {
+      "const": "C_KEY_STATUS_EVENT"
+    },
+    "event_digest": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "sequence": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "maxLength": 40
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}
