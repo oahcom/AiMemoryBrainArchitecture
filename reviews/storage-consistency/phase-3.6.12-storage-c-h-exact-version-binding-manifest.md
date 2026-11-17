@@ -508,3 +508,68 @@ A confirms that the immutable C object schema, H envelope dereference design and
 Freeze blockers remain: I profile registration and C trust/key lifecycle; real Ed25519/JCS vectors and independent Python/JavaScript crypto agreement; H production authority callback wiring; C append-only owner ledger/currentness; provider-specific adapter race/fault/idempotency tests; deployment-grade COC/Storage joins and readback.
 
 No production egress, Full Applied, Global Forget Completion, universal exactly-once or final freeze is authorized.
+
+
+## 16. C candidate crypto vectors and independent H execution (2026-11-17)
+
+This section supersedes the earlier crypto-candidate evidence ceiling in Section 14 while preserving the explicit non-registration status.
+
+### 16.1 C candidate artifacts
+
+| Artifact | Exact Blob | Commit |
+|---|---|---|
+| CSubmitOutcome schema 1.0.0 | `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c` | C schema branch current |
+| C ten semantic vectors | `b4c32dc8cd7072a04843c2db74c7f96c6de001a4` | C fixture branch current |
+| C crypto candidate manifest / public test-only seed | `88a16f0d9aaa8a5e46af857c2cd34c2bcedd07ae` | C candidate vector commit `4600732445ef0953cdc4943969c2a76e3db1c3bd` |
+| C static expected fingerprints/signatures | `a4bfe0b431d5e710ac99d604e7b1bce49c044d23` | C expected vector commit `461f0f7e2726751362c3f83aebf604a4dff0aafe` |
+| C Python crypto test | `2e1f572facc644c378ee1880a553c27a72ed2cc4` | C test correction commit `08ae2649c3be812ef425fb7a958d41a62f933850` |
+| C Node JCS/Ed25519 oracle | `31c8ac889766f9574725357ae6134a901bfb5f33` | C Node oracle commit `1be2cf2f55369e97acbe74b2322d93b8d1e0ea89` |
+| C requirements | `305d9bf5ae883a16e22dde83d97005f2b0be902e` | C dependency update commit `6712193539742d43a4f36d7c8d4b3f484e193c2c` |
+| C conformance contract Phase 3.8.9 | `2ecdf44cae1bf71e9611dd5367c8f7bcf25dd7ac` | C contract commit `8e21bc91646a801845d60a3821c2809e88c28b01` |
+| C workflow | `a1f0b8f884f0f294fb3ec96da7c4f11e294e5142` | C workflow commit `5938c2ed3eb5e12687449e5050c7be55164c599d` |
+
+### 16.2 C executed candidate crypto CI
+
+- Run: `44057463855`.
+- Exact commit: `08ae2649c3be812ef425fb7a958d41a62f933850`.
+- Result: SUCCESS; 7 tests.
+- Runtime: Python 3.12 and Node.js 22.
+- Five outcome families received deterministic test-only Ed25519 signatures.
+- Every present C-P0 field mutation invalidated the original signature.
+- Python RFC 8785/Ed25519 and Node JCS/Ed25519 outputs matched the pinned expected fingerprints/signatures.
+- Public test seed is explicitly not for production reuse.
+
+### 16.3 Independent H execution
+
+| Artifact | Exact Blob |
+|---|---|
+| H Python independent verifier | `a49d588ea6f840927fe21ad8c41cd8089dceac29` |
+| H Node independent oracle | `c35ddea3ecaf5e452b14fb57fb20327ad80703cc` |
+| H current exact wire mapping | `f929e3be358b7f73fbfc1fb11179dd4578bdef19` |
+| H current validator contract | `e67ed63b6dcbd0530c0343bde9245b8cf96c3c4d` |
+| H validator core | `e8f737326bc4791e8d7acf917b4725dbb7171fad` |
+| H Provider Outcome workflow | `4050dabce5b02df14b84b500cc6e7236c65457f0` |
+
+- H run: `44057944517`.
+- Exact commit: `b8a22cecdf6238c81f08338d30776be250fd69a4`.
+- Result: SUCCESS; 10 tests.
+- H independently recomputed the five expected candidate vectors, verified Ed25519 signatures, checked field mutations, and matched its Python/Node outputs to the C static expected values.
+- H vendored C schema, fixtures, crypto manifest and expected fingerprints as byte-identical Git blobs.
+
+### 16.4 I updated disposition
+
+- I Phase 3.8.6 current review Blob: `b2e37b0ba9137f2ef1b9fd65bf815bc136ca28c8`.
+- I accepts candidate construction and cross-owner test agreement.
+- I explicitly does NOT register `AIMBA-C-CRYPTO-1.0`, activate C trust roots, approve key custody or authorize production use.
+
+### 16.5 Remaining blockers and evidence ceiling
+
+These runs establish candidate JCS/SHA-256/Ed25519 construction and independent Python/Node agreement with a public test-only seed. They do NOT establish:
+- I profile registration or deployed C trust/key-status lifecycle;
+- H production Ed25519 verifier and authenticated trust/key-status callbacks;
+- C append-only owner ledger inclusion/currentness and anti-rollback;
+- provider evidence issuer authentication or provider-specific capability truth;
+- C adapter close/send race, crash, partial-write, lost-ACK, same-key recovery, expiry/failover and hidden SDK retry tests;
+- COC quorum and deployment-grade Storage Batch/Manifest/owner-ledger joins.
+
+**Disposition: CANDIDATE CRYPTO CONSTRUCTION AND CROSS-OWNER TEST AGREEMENT VERIFIED; PROFILE REGISTRATION, AUTHORITY, ADAPTER AND PRODUCTION GATES OPEN.**
