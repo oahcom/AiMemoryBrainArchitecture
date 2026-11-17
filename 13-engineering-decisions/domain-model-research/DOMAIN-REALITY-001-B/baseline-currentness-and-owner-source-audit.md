@@ -129,3 +129,44 @@ B0 仍为 **PARTIAL / NOT PASSED**。当前 main HEAD、领域源 Blob Pin、Own
 No canonical freeze, schema freeze, implementation authorization, Owner approval, independent review or ACCEPTED status is claimed.
 
 不宣称规范冻结、Schema 冻结、实现授权、Owner 批准、独立审查或 ACCEPTED 状态。
+
+
+## 7. BIH consumer acceptance currentness correction / BIH 消费方验收时效性纠正
+
+The earlier I BIH addendum Blob `475044ed4c6d468be26459e6201018dd57b3fc80` states that C/F/G remain OPEN. That statement is stale relative to the later Issue #6 closure evidence and must not be repeated as the current Issue #6 state.
+
+较早的 I BIH 补充文件 Blob `475044ed4c6d468be26459e6201018dd57b3fc80` 写明 C/F/G 仍为 OPEN。相对于后续 Issue #6 关闭证据，该表述已过时，不得继续作为 Issue #6 当前状态引用。
+
+Issue #6 was fetched directly and is **CLOSED**. Its comments include:
+- Comment `6919556745`: C/F/G each published an Owner-branch design acceptance against exact A BIH package Blob `a45ae90b318a79bf009d14f4d917611881e9e214`.
+- Comment `6919649724`: A reports exact Blob readback for C `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`, F `ce59252dbbdc5d10d016704797e9ba12d5a941bd`, G `5406b3f2558daa3f5915f6bb46e808be8d90d3ca`; all were recorded as ACCEPT WITH ENUMERATED EXCEPTIONS.
+- The B typed-reference mapping is pinned by the B formal confirmation and the exact A package; H's exact acceptance is separately recorded in Issue #6 comment `6919218061`.
+
+已直接读取 Issue #6，其状态为 **CLOSED**。其评论包括：
+- 评论 `6919556745`：C/F/G 均针对精确 A BIH Package Blob `a45ae90b318a79bf009d14f4d917611881e9e214` 发布了 Owner 分支设计验收。
+- 评论 `6919649724`：A 报告已精确读回 C `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`、F `ce59252dbbdc5d10d016704797e9ba12d5a941bd`、G `5406b3f2558daa3f5915f6bb46e808be8d90d3ca` Blob；三者均记录为 ACCEPT WITH ENUMERATED EXCEPTIONS。
+- B typed-reference mapping 由 B 正式确认文件和精确 A Package Pin；H 的精确验收另见 Issue #6 评论 `6919218061`。
+
+Current source comparison / 当前源版本比较:
+- C's current `phase-3.6-final-request-evidence-contract.md` remains Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`, matching the Issue #6 accepted pin.
+- F's current `phase-3.6-runtime-forget-suppression-and-invalidation.md` remains Blob `ce59252dbbdc5d10d016704797e9ba12d5a941bd`, matching the Issue #6 accepted pin.
+- G's current `phase-3.6-applied-forget-reconciliation-contract.md` is now Blob `aa3afa73d8a76cc6f025839c52bfbff6a983046a`, whereas the Issue #6 accepted pin was `5406b3f2558daa3f5915f6bb46e808be8d90d3ca`. The current G file contains later amendments; the historical BIH acceptance remains evidence for the exact earlier version only. Re-confirm that the BIH-relevant clauses are unchanged before treating the acceptance as applying to the current G successor.
+- I36-GOV-01..10 remain GOVERNANCE-BLOCKED; I36/H36 and consumer runtime conformance remain NOT RUN. Issue #6 closure is design-level BIH consumer acceptance, not governance approval or runtime certification.
+
+当前源版本比较：
+- C 当前 `phase-3.6-final-request-evidence-contract.md` 仍为 Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`，与 Issue #6 已验收 Pin 一致。
+- F 当前 `phase-3.6-runtime-forget-suppression-and-invalidation.md` 仍为 Blob `ce59252dbbdc5d10d016704797e9ba12d5a941bd`，与 Issue #6 已验收 Pin 一致。
+- G 当前 `phase-3.6-applied-forget-reconciliation-contract.md` 已更新为 Blob `aa3afa73d8a76cc6f025839c52bfbff6a983046a`，而 Issue #6 验收 Pin 为 `5406b3f2558daa3f5915f6bb46e808be8d90d3ca`。当前 G 文件包含后续修订；历史 BIH 验收仅证明其精确旧版本。将该验收应用于当前 G 后继版本前，必须确认 BIH 相关条款未发生变化。
+- I36-GOV-01..10 仍 GOVERNANCE-BLOCKED；I36/H36 和消费者运行时符合性仍 NOT RUN。Issue #6 关闭仅代表设计级 BIH 消费方验收，不代表治理批准或运行时认证。
+
+Disposition / 处置：
+- Mark C/F BIH design acceptance as exact-version VERIFIED.
+- Mark G BIH acceptance as VERIFIED FOR HISTORICAL PIN; SUCCESSOR RECONFIRMATION REQUIRED.
+- Do not reopen Issue #6 on the basis of later governance/runtime gates; track those separately.
+- Keep B3 NOT PASSED until successor pins, remaining cross-owner conflicts and all required Owner acceptances are reconciled.
+
+处置：
+- C/F BIH 设计验收标记为精确版本 VERIFIED。
+- G BIH 验收标记为历史 Pin 已验证；后继版本需要重新确认。
+- 不因后续治理/运行时门禁而重开 Issue #6；这些事项应单独跟踪。
+- 在后继 Pin、剩余跨 Owner 冲突及所有必要 Owner 验收协调完成前，B3 保持 NOT PASSED。
