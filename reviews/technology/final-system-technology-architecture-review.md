@@ -1004,9 +1004,9 @@ The system verdict remains **BLOCKED — TAB-001 IS NOT READY FOR FORMAL APPROVA
 A has completed a fresh I/H/C/Storage evidence reconciliation. The controlling report is:
 
 - `reviews/freeze-readiness/final-cross-owner-freeze-readiness.md`
-- Blob: `15cb8f420e2ac3459b087b92cf33a5007b30c8ae`
+- Blob: `544533f8bb4299998a92d494f3c678c1df6d66c9`
 - Decision: **BLOCKED — NOT FROZEN**.
 
-Latest H RecoveryJoin/HRC/WIRE/SCHEMA candidate CI [44041359883](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041359883) passed 66/66; I Global Forget logical model 30/30 and Storage restore high-water logical model 25/25 remain bounded model results. These do not close I production trust/sequencer, C provider adapter/Applied, Storage physical D/Storage topology, or integrated JF-10/COC runtime. TAB-001 remains CANDIDATE / NOT APPROVED / NOT FROZEN. No mainline merge or production activation is authorized.
+Latest H RecoveryJoin/HRC/WIRE/SCHEMA candidate CI [44041614106](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041359883) passed 66/66; I Global Forget logical model 30/30 and Storage restore high-water logical model 25/25 remain bounded model results. These do not close I production trust/sequencer, C provider adapter/Applied, Storage physical D/Storage topology, or integrated JF-10/COC runtime. TAB-001 remains CANDIDATE / NOT APPROVED / NOT FROZEN. No mainline merge or production activation is authorized.
 
 中文：A 已完成 I/H/C/Storage 新一轮证据校准。最新 H 候选套件 66/66 通过，I Global Forget 逻辑模型 30/30、Storage Restore High-water 逻辑模型 25/25 通过；这些都不是生产实现验收。I 信任/Sequencer、C Provider/Applied、Storage 物理拓扑、集成 JF-10/COC Runtime 仍阻断冻结。TAB-001 维持候选、未批准、未冻结；不授权合并主线或生产激活。
