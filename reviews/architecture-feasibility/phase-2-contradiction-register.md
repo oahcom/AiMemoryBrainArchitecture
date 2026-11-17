@@ -94,6 +94,17 @@
 
 **中文：** 各模块局部规则较强：派生 Producer 先登记后工作、完整 Lineage 先于可见性、Restore 先隔离、Queue ACK/DLQ/Timeout/行缺失不代表终态、索引/缓存是派生物、Context Remove 不等于 Forget。缺少的是一份系统级 Target/Recipient/Backup/Restore 全量宇宙，以及证明迟到 Producer、重放、重建、重连不能复活受保护内容的完整轨迹。必须明确 Inventory 权威和 Scope，枚举所有类别，区分 NotApplicable 与 Unknown，并覆盖迟发现 Lineage、旧快照恢复、WAL/Prefix 缺失、旧队列重放、索引重建和离线 Adapter 重连。I 管理 Global Forget 完成，D 管理单 Memory Fence/Lineage，其余模块只提供各自证据。
 
+## ARC-10 — COC and JF-10 are separate protocols; composition remains gated
+**Severity:** P1 · **Level:** L1 + L2 + L3 · **Owners:** A/COC, I, D, C, H, Storage
+
+**Evidence:** Storage v3.2.3 Blob 5cee0d58575adc0fb3dd20a5c7ab68c2a2711792 explicitly labels the JF-10 same-XID bridge as separately gated and says prior COC disposition does not approve automatic COC↔JF-10 composition. COC companion Blob 5b950a3a29bd7a5276b92a49a9114d700718b987 defines its own quorum log, Recovery Cutoff Batch/Manifest and restore protocol. Issue #10 reports Gate A PARTIAL PASS after five PostgreSQL 18.7 capability CI classes; Gate B persistent COC and Gate C fault-injection remain BLOCKED.
+
+**Finding:** COC quorum positions, I PolicyDomain positions, D fence positions and Storage prepared GID/XID are different authorities and identities. COC may record and join owner evidence but cannot make I/D/C decisions or act as the JF-10 coordinator. A prior COC acceptance or a PostgreSQL capability test cannot close the separately governed JF-10 bridge.
+
+**Required closure:** Keep COC quorum prefix/batch/manifest, I terminal decision, D fence, C provider outcome and Storage same-GID resolution separate. Obtain fresh exact I/D/C/Storage/H bridge decisions; prove the COC outage/recovery batch and JF-10 same-XID state machine independently; then prove their exact join without cross-domain counter comparison or authority synthesis. Gate B/C remain later physical/operational gates.
+
+**中文：** Storage v3.2.3 明确将 JF-10 Same-XID Bridge 设为单独门禁，既有 COC 决议不代表自动批准 COC↔JF-10 组合。COC 自己拥有 Quorum Log、Recovery Cutoff Batch/Manifest 和恢复协议。Issue #10 的 Gate A 在五类 PostgreSQL 18.7 能力 CI 后为 PARTIAL PASS；持久化 COC 的 Gate B 与故障注入 Gate C 仍 BLOCKED。COC Quorum Position、I PolicyDomain Position、D Fence Position 和 Storage Prepared GID/XID 属于不同权威/身份。COC 只能记录和 Join Owner 证据，不能代替 I/D/C 决议，也不能成为 JF-10 Coordinator。必须保持这些状态机分离，取得 I/D/C/Storage/H 精确桥接决议，分别证明 COC Outage/Recovery 与 JF-10 Same-XID 状态机，再证明它们的精确 Join；不得跨域比较计数器或合成权威。
+
 ## ARC-09 — Role simulation is not independent Owner/governance approval
 **Severity:** Governance gate · **Level:** approval provenance · **Owners:** A and the relevant Owner/governance authorities
 
