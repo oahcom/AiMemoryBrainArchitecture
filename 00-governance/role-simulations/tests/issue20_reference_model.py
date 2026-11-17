@@ -448,3 +448,71 @@ class GContextVersion:
         if not item or self.stale or item["d_generation"] != current_d_generation:
             raise ProtocolError("old delivery/ACK is not replay authority")
         return True
+
+
+@dataclass
+class CProviderOutcome:
+    """C may submit only an exact D-admitted, I-authorized immutable request."""
+    intents: dict = field(default_factory=dict)
+    provider_calls: dict = field(default_factory=dict)
+    outcomes: dict = field(default_factory=dict)
+    quarantined: set = field(default_factory=set)
+
+    def admit_intent(self, intent_id, request_digest, d_participant_ref,
+                     i_receipt, current_permission_epoch):
+        old = self.intents.get(intent_id)
+        if old:
+            if old["request_digest"] != request_digest:
+                raise ProtocolError("C intent immutable request digest conflict")
+            return old
+        if not d_participant_ref:
+            raise ProtocolError("C provider intent requires exact D participant")
+        if (not i_receipt or i_receipt.get("outcome") != "COMMIT_WON"
+                or i_receipt.get("permission_epoch") != current_permission_epoch):
+            raise ProtocolError("C provider intent requires current I COMMIT_WON proof")
+        self.intents[intent_id] = {
+            "request_digest": request_digest,
+            "d_participant_ref": d_participant_ref,
+            "i_receipt_ref": i_receipt.get("receipt_ref"),
+            "permission_epoch": current_permission_epoch,
+            "state": "ADMITTED"
+        }
+        return self.intents[intent_id]
+
+    def submit(self, intent_id, provider_idempotency_key):
+        intent = self.intents.get(intent_id)
+        if not intent:
+            raise ProtocolError("provider submit without admitted C intent")
+        old = self.provider_calls.get(intent_id)
+        if old:
+            if old["idempotency_key"] != provider_idempotency_key:
+                raise ProtocolError("unknown provider outcome must reuse same idempotency key")
+            return old
+        call = {"idempotency_key": provider_idempotency_key,
+                "state": "SUBMITTED_UNKNOWN"}
+        self.provider_calls[intent_id] = call
+        intent["state"] = "SUBMITTED_UNKNOWN"
+        return call
+
+    def record_outcome(self, intent_id, provider_idempotency_key, outcome, digest):
+        if outcome not in {"SUCCEEDED", "FAILED_NO_SIDE_EFFECT"}:
+            raise ProtocolError("provider outcome must be a declared terminal outcome")
+        call = self.provider_calls.get(intent_id)
+        if not call or call["idempotency_key"] != provider_idempotency_key:
+            raise ProtocolError("provider outcome does not bind exact invocation")
+        previous = self.outcomes.get(intent_id)
+        candidate = {"outcome": outcome, "digest": digest,
+                     "idempotency_key": provider_idempotency_key}
+        if previous and previous != candidate:
+            self.quarantined.add(intent_id)
+            raise ProtocolError("conflicting provider terminal outcomes")
+        self.outcomes[intent_id] = candidate
+        call["state"] = outcome
+        self.intents[intent_id]["state"] = outcome
+        return candidate
+
+    def lookup_after_timeout(self, intent_id, provider_idempotency_key):
+        call = self.provider_calls.get(intent_id)
+        if not call or call["idempotency_key"] != provider_idempotency_key:
+            raise ProtocolError("authoritative lookup must use same invocation key")
+        return self.outcomes.get(intent_id, {"outcome": "UNKNOWN"})
