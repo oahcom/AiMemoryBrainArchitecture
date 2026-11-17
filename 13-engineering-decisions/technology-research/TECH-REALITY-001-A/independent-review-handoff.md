@@ -30,8 +30,8 @@ Required set:
 10. `owner-dependency-register.md`
 11. `research-evidence-register.md`
 12. `open-questions.md`
-13. `owner-technology-review-synthesis.md)
-14. `independent-review-handoff.md)
+13. `owner-technology-review-synthesis.md`
+14. `independent-review-handoff.md`
 
 Check bilingual semantic parity, not merely presence of Chinese and English characters.
 
