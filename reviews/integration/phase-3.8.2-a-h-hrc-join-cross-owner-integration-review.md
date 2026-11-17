@@ -38,8 +38,8 @@
 |---|---|---|---|---|
 | D | phase-3.8.2-d-recovery-join-and-visibility-exact-review.md | D branch | 1ef3a736cdbf59b27a017d6dd4aee9fe7be0b940 | ACCEPT WITH AMENDMENTS |
 | E | phase-3.8.2-e-recovery-join-orchestration-exact-review.md | E branch | c2beb133de40e7c8281933dfa175ac7fa289bd5f | ACCEPT WITH AMENDMENTS |
-| I | phase-3.8.2-i-recovery-join-trust-currentness-exact-review.md | I branch | 4a72cecd7769be7017b699ab102b127fab516101 | ACCEPT WITH AMENDMENTS |
-| Storage | phase-3.8.2-storage-exact-review-and-topology-disposition.md | Storage branch | 4cb3a6c71497cc68ffbb947cd47c4e67c6590bc2 | ACCEPT WITH AMENDMENTS; ADR BLOCKED |
+| I | phase-3.8.2-i-recovery-join-trust-currentness-exact-review.md | I branch | 01d4514c1c0979ea878a89f36213a7db3c3c1003 | ACCEPT WITH AMENDMENTS |
+| Storage | phase-3.8.2-storage-exact-review-and-topology-disposition.md | Storage branch | 2726f0a2a5168f126d25eb48b857d8921a09031e | ACCEPT WITH AMENDMENTS; ADR BLOCKED |
 
 These are assistant-authored role simulations at the user's direction. They are not independently attributable repository Owner signatures or cryptographic attestations.
 
@@ -139,7 +139,7 @@ No schema freeze, implementation/conformance PASS, merge, production activation,
 
 ## 8. 中文集成裁决
 
-A 认为 HRC-01..25 与 RecoveryJoin 的逻辑组合方向成立。当前 JoinProof 已同时覆盖 COC ParticipantManifest、I/D/C Request Ledger、I/D/C Admission Ledger，并区分 OwnerAdmissionRef 与 OwnerEntryRef，明确 C Primary Admission Anchor、I/D/C 证据边、NOT_REGISTERED 无副作用证明及 JF-10 同一 Prepared Participant 终态映射。61 个 unittest 候选已提交，但尚无 CI 执行结果。
+A 认为 HRC-01..25 与 RecoveryJoin 的逻辑组合方向成立。当前 JoinProof 已同时覆盖 COC ParticipantManifest、I/D/C Request Ledger、I/D/C Admission Ledger，并区分 OwnerAdmissionRef 与 OwnerEntryRef，明确 C Primary Admission Anchor、I/D/C 证据边、NOT_REGISTERED 无副作用证明及 JF-10 同一 Prepared Participant 终态映射。66 个 unittest 候选已提交；后续精确 CI 已 66/66 PASS（见 §8–§10）。
 
 四方精确版本角色审查均为 ACCEPT WITH AMENDMENTS 的模拟结论，不是独立 Owner 签名。D 的 per-Fence Lineage Proof、E 的 Restore/Dispatch Gate、I 的 Cryptographic Trust/Currentness、Storage 的真实事务拓扑和 HA/Restore、H 的 Wire Adapter/Canonicalization/跨语言互操作仍为阻塞项。
 
@@ -157,7 +157,7 @@ H has added row-digest and typed owner-evidence requirements to RecoveryJoin 1.0
 
 The latest H schema Blob is dd3234aa1c74caf6d0e335875cd96e0b2b64082f. The latest HRC suite Blob is 60a2f4db4bd12f2131ecd147db9bbe328da6db50. The Storage JoinProof contract is now Blob 668faeb20e3e9cb907a8d1061635b12162f3dbe2.
 
-These are schema and test-candidate refinements only. No CI run, cross-language interop PASS or owner signature is claimed.
+These are schema and test-candidate refinements only. H candidate CI 66/66 PASS is now recorded in §8–§10; cross-language interop PASS and independent owner signatures are still not claimed.
 
 
 ### Owner identity edge test update
@@ -175,9 +175,9 @@ The H candidate test bundle was executed by its push-triggered workflow after th
 - Wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
 - Schema suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
 - Exact CI: [run 44039990464](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44039990464), test commit `da94bcc1796cb350eed12845e49cbc3663faab9c`, job `133891944149`, **66/66 PASS**.
-- C exact RecoveryJoin/provider-side-effect review: `07-agent-integration/phase-3.8.2-c-recovery-join-provider-side-effect-exact-review.md`, commit `d5be3be10f7144476ddc61a94f29faff67424292`.
-- Storage exact review addendum: Blob `4cb3a6c71497cc68ffbb947cd47c4e67c6590bc2`.
-- I exact review addendum: Blob `4a72cecd7769be7017b699ab102b127fab516101`.
+- C exact RecoveryJoin/provider-side-effect review: `07-agent-integration/phase-3.8.2-c-recovery-join-provider-side-effect-exact-review.md`, commit `a7b57bd5531222559666f0f1d9df59a259cde61a`.
+- Storage exact review addendum: Blob `2726f0a2a5168f126d25eb48b857d8921a09031e`.
+- I exact review addendum: Blob `01d4514c1c0979ea878a89f36213a7db3c3c1003`.
 
 The first run [44039825581](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44039825581) failed only at JPF-08 because its fixture unintentionally required absent I/D rows before testing duplicate C primary admission. The fixture was narrowed to require only C evidence for that isolated invariant; validator behavior was not weakened. The corrected run passed all 66 methods.
 
@@ -194,3 +194,18 @@ GitHub Actions run 44039990464, job 133891944149, checked out H commit da94bcc17
 ### 10.1 H candidate CI evidence
 
 GitHub Actions run 44039990464 completed 66/66 HRC/JPF/WIRE/SCHEMA candidate tests successfully on H commit da94bcc1796cb350eed12845e49cbc3663faab9c. This upgrades the test inventory from committed/unrun to candidate-suite PASS. It does not close production wire/crypto, independent implementation interoperability, live owner-ledger/COC adapters, JF-10 physical behavior or Storage topology/HA/restore blockers.
+
+
+## 11. Exact owner artifact pin reconciliation / Owner 精确制品绑定校准
+
+The current exact review artifacts after owner-branch updates are:
+- I RecoveryJoin trust/currentness review: `01d4514c1c0979ea878a89f36213a7db3c3c1003`.
+- H Recovery Cutoff semantic validator contract: `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80`.
+- H RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- H HRC/JPF test suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- Storage bidirectional JoinProof contract: `668faeb20e3e9cb907a8d1061635b12162f3dbe2`.
+- Storage exact review: `2726f0a2a5168f126d25eb48b857d8921a09031e`.
+- Storage topology ADR: `080433f8e13a500522bc2754da64057edb0ae9d8`.
+- C RecoveryJoin/provider-side-effect exact review: `a7b57bd5531222559666f0f1d9df59a259cde61a`.
+
+The HCI run [44040312711](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040312711) completed 66/66 tests successfully on the current H branch snapshot. This remains a reference candidate pass. The actual C egress adapter, I sequencer/crypto profile and Storage physical topology remain unimplemented/unaccepted. The authoritative freeze disposition remains **BLOCKED**.
