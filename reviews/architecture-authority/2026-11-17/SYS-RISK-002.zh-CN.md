@@ -64,12 +64,12 @@ A 可以接受全局范围和顺序风险，但不能代替 B、D、I、C、G、
 
 ## 交叉引用
 
-参见 ARCH-CX-002、DEV-FEAS-002、DEP-DAG-002、PRIORITY-002、READINESS-002、CONFLICT-002、GATE-002、DEFERRED-002、FINAL-A-002。全部绑定同一 Main 基线 SHA。
+参见 ARCH-CX-002、DEV-FEAS-002、DEP-DAG-002、PRIORITY-002、READINESS-002、CONFLICT-002、GATE-002、DEFERRED-002、FINAL-A-002。全部绑定同一历史评估快照，并非当前 Main。
 
 
 ## 源版本时效与评估基线
 
-本评估的来源证据基线固定为 main Commit `b372b62c640a2b656e54b6db62a4ee67d7d8c001`。发布时观察到的 main HEAD 为 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`（后续 Revert Commit）；本评估不会将该 HEAD 偷换为已完成审查的基线。在任何 Gate 关闭或架构冻结决策前，必须针对该 HEAD 刷新所有引用的 Owner 工件并重新执行差异审查。Storage L1 拓扑另行固定为分支 `session-storage-consistency-forget-atomicity-2026-11-16`、Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`；§8 已为 L1 选择 Option A，L4 物理符合性仍为 OPEN。
+本评估引用的历史来源快照为 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`（非当前 Main）。发布时观察到的 main HEAD 为 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`（后续 Revert Commit）；本评估不会将该 HEAD 偷换为已完成审查的基线。在任何 Gate 关闭或架构冻结决策前，必须针对该 HEAD 刷新所有引用的 Owner 工件并重新执行差异审查。Storage L1 拓扑另行固定为分支 `session-storage-consistency-forget-atomicity-2026-11-16`、Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`；§8 已为 L1 选择 Option A，L4 物理符合性仍为 OPEN。
 
 
 ## 当前 Main HEAD
