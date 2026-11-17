@@ -1,7 +1,7 @@
 # Technical Selection Recommendations
 
 - Status: candidate recommendations only; no ADR approval
-- Baseline: `main@b3c666e67982cb3d3374e759cfb6552c7765aacb`
+- Baseline: `main@28fb37e21fa4ba2b871f7816fe669128618c063e`
 
 ## 1. Recommended first-implementation posture
 
