@@ -294,7 +294,7 @@
           "const": "bmcp.recovery-cutoff"
         },
         "schema_version": {
-          "const": "1.0.0"
+          "const": "1.0.5"
         },
         "message_type": {
           "const": "OWNER_ADMISSION_SNAPSHOT_ATTESTATION"
@@ -633,7 +633,7 @@
           "const": "bmcp.recovery-cutoff"
         },
         "schema_version": {
-          "const": "1.0.0"
+          "const": "1.0.5"
         },
         "message_type": {
           "const": "COC_PARTICIPANT_MANIFEST"
@@ -774,7 +774,7 @@
           "const": "bmcp.recovery-cutoff"
         },
         "schema_version": {
-          "const": "1.0.0"
+          "const": "1.0.5"
         },
         "message_type": {
           "const": "RECOVERY_CUTOFF_BATCH"
@@ -890,7 +890,7 @@
           "const": "bmcp.recovery-cutoff"
         },
         "schema_version": {
-          "const": "1.0.0"
+          "const": "1.0.5"
         },
         "message_type": {
           "const": "OWNER_ADMISSION_ENTRY"
@@ -1045,7 +1045,7 @@
           "const": "bmcp.recovery-cutoff"
         },
         "schema_version": {
-          "const": "1.0.0"
+          "const": "1.0.5"
         },
         "message_type": {
           "const": "OWNER_GATE_RELEASE_ATTESTATION"
@@ -1162,7 +1162,7 @@
           "const": "bmcp.recovery-cutoff"
         },
         "schema_version": {
-          "const": "1.0.0"
+          "const": "1.0.5"
         },
         "message_type": {
           "const": "RECOVERY_EPOCH_COMPLETED"
