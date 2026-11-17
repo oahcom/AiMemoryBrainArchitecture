@@ -41,7 +41,7 @@ Evidence: repeated invariant statements, incompatible transition descriptions, e
 ### C-04 — Protocol and recovery layering
 COC log, Prepared XID, local owner gates, single-use receipts, recovery cutoff manifests and Adapter ACK evidence can be individually justified. The unresolved question is whether all layers are needed for the selected v1 physical topology.
 
-**Candidate reduction:** compare (A) a single PostgreSQL transactional authority for canonical gate operations with (B) the proposed COC + prepared participant + owner gates. Same safety matrix, same fault cases, same operational assumptions. Do not assume a simpler design works without executing the race suite.
+**Candidate reduction:** do not reopen the Storage L1 ADR, which selects Option A: one SERIALIZABLE transaction domain and per-BrainAuthorityRef serialization anchor. Reduce complexity by validating whether the actual DB/adapter can satisfy that selected topology with the smallest schema and transition set. Option B (separate services/coordinator) is only a successor-ADR path if Option A cannot meet L4; it is not a parallel v1 option. COC and I sequencer remain independent authorities.
 
 Evidence: number of independently durable state stores, cross-store reconciliation paths, recovery procedures, operational roles, fault cases and p95 write latency.
 
