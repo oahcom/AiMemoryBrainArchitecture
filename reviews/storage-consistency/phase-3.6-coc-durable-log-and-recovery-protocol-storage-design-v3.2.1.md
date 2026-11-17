@@ -786,7 +786,7 @@ The batch record MUST NOT inline a mutable or partial participant set as a subst
 **S3 — Commit the separate Participant Manifest Record second.** Append and quorum-commit a distinct `PARTICIPANT_SET_RECONCILIATION` / Participant Manifest Record. It MUST:
 - reference the exact quorum-committed Batch Record position and EntryDigest from S2;
 - repeat the same RecoveryEpoch, P, ManifestId, ManifestDigest, count and enumeration high-water;
-- carry the canonical manifest member payload (including an explicit empty array when count is zero);
+- carry the canonical union member payload, including both COC participants and pre-COC owner-local admissions; use an explicit empty array only when the complete union is truly empty;
 - prove that hashing the canonical payload under the pinned profile yields the ManifestDigest already committed in S2;
 - include the immutable record's own COC position, previous-entry digest and quorum commit proof.
 
@@ -837,4 +837,4 @@ This v3.2.1 proposal is bound to:
 
 The Phase 3.6.8 C and H reviews of Storage v3.2 are predecessor review artifacts only and do not transfer to v3.2.1. C and H MUST re-review the exact v3.2.1 Blob. H's unified schema must represent both COC-committed participants and owner-local pre-COC admissions as distinct typed manifest member variants. A must review the final exact-version binding manifest after C/H re-reviews are committed.
 
-**Status:** v3.2 is a documentation proposal only. No implementation, quorum crash test, canonical-byte interoperability, provider idempotency, same-XID runtime recovery, owner release, production activation or Global Forget completion is claimed.
+**Status:** v3.2.1 is a documentation proposal only. No implementation, quorum crash test, canonical-byte interoperability, provider idempotency, same-XID runtime recovery, owner release, production activation or Global Forget completion is claimed.
