@@ -5,7 +5,7 @@
 - Status: **ACCEPT AS D-PROOF L1/L2 CANDIDATE; L3 CURRENTNESS/FAULT VECTORS OPEN; NOT FROZEN**
 - Exact H Unified 1.2.14 current schema Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a59`
 - Superseded H 1.2.14 pre-correction schema Blob: `fee452efb99ab4fe0ceccb347c46eeef1521bd28`
-- H Phase 3.8.11 exact mapping Blob: `8c5c22aaf18d32e9a16e9116f0a3d178c4bb5cc2`
+- H Phase 3.8.11 exact mapping Blob: `c196fdc7a9d88e344d37ba2810a9bce1803f8b96`
 - H RecoveryJoin 1.0.2 Blob: `4b664e3bce465499bcdfd93796349a4ba7074002`
 - H RecoveryCutoff 1.0.5 Blob: `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`
 - D Phase 3.8.6 membership P0 crosswalk Blob: `bf35b7f047a374268920b99199b1d5c9aef39c5fd`
