@@ -104,6 +104,38 @@ Owner 分支 HEAD 是本次评估期间读取的实时引用；Blob 用于标识
 
 **置信度：** B/D/E/F/G/H/I/Storage 对所引用源样本为中高；A/C 为中低。以上是架构设计评分，不是实现测量结果。
 
+### 各模块评分依据与复杂度控制
+
+下表逐项说明各模块八个维度为何获得相应评分。前面的矩阵是紧凑评分视图；本表补充每个维度的理由、放大因素、可简化部分、不可删除的正确性约束和置信度。
+
+| 模块 | 维度评分依据（I；D；S；C；R；V；O；K） | 放大因素 | 可简化部分 | 不可删除的正确性约束 | 置信度 |
+|---|---|---|---|---|---|
+| B | I4 多种领域/认知概念；D4 被 D/E/F/G/H/I 消费的 B 引用；S5 Fact/Claim + 时间/认知/生命周期语义；C3 并发 Revision/身份绑定；R3 来源追溯和历史修正；V4 ADR/Schema 依赖；O2 未证明需要独立运行时；K5 稳定术语和双语语义 | Fact/Claim ADR 与 Typed-reference 决策仍开放 | 合并术语表和 Typed-reference Registry；ADR 前延期 Schema 变体 | Source Event 与 Claim/Fact 的区分、Provenance、时间及认知状态 | 中 |
+| C | I4 Telemetry/Adapter/最终请求职责；D5 C/G/H/I/Provider/Agent 耦合；S4 Request/Session/Capability/Application 状态；C4 最终请求与 Revocation/Forget 竞争；R4 离线/重连/迟到结果；V5 实际最终请求证据；O3 Adapter 部署/升级；K5 多 Owner 证明 | Provider-specific Outcome 和 Middleware 可见性 | 首先只支持一个 Adapter 和一种明确声明的 Capability Profile | 不得从传输回执推断最终请求已提交或模型已使用内容 | 中低 |
+| D | I5 Canonical 生命周期/血缘/Fence；D5 E/F/G/H/I/Storage/COC；S5 Object、Revision、Cursor、Fence、Producer Barrier；C5 Registration 与 Fence 竞争及最终 Publication；R5 Barrier 恢复和迟到 Derivative；V5 串行顺序/崩溃/血缘证明；O4 权威 DB 和 Restore；K5 多个 Typed Authority 和 Owner 交接 | 封闭世界 Producer 和 Derivative Descendant | 一个 Canonical Authority；首发减少 Producer Class | Canonical Authority、Fence 单调性、Register-before-visible、Unknown 时 Fail-closed | 中高 |
+| E | I5 Ingestion/Compiler 阶段和不可变 Artifact；D5 D/B/H/I/F/Storage；S5 Receipt/Work/Attempt/Lease/Run/Artifact/Publication 状态；C5 Retry 和最终 Gate 与 Forget 竞争；R5 DLQ/Replay/Lost ACK；V5 阶段和跨 Owner 证明；O4 Durable Queue/Blob/DB 协调；K5 多种 Receipt 区分 | 同一 Work Identity 跨 Queue、Lease、Replay、Publication | 一个 Worker 底座；延期高级 Extraction/Consolidation 模式 | Durable Accepted、稳定 Idempotency、权威 Gate 前不得暴露 Derivative | 中高 |
+| F | I5 混合检索、排序、Graph 和 Freshness；D5 D/I/E/G/H/Index Backend；S5 Channel Watermark/Cache/Session/Fence/Permission；C5 Query/Rerank 期间 Revocation/Forget；R5 Rebuild/Replay/Cache 防复活；V5 每个 Channel 的隔离和 Stale 测试；O4 Index/Cache 生命周期；K5 多 Channel 和授权检查点 | 多个 Retrieval Channel 各自重复安全/Freshness 检查 | 首先 Structured + Lexical；不使用分布式 Cache | Scope-before-candidate、披露时复核当前授权/Fence、Index 不是权威 | 中高 |
+| G | I5 Context Planning/Versioning/Reconciliation；D5 C/D/E/F/H/I；S5 ContextVersion/ChangeSet/Delivery/Applied/Consumer 状态；C5 CAS 与并发编辑/迟到 ACK；R5 离线 Consumer 和 Restore/Reconciliation；V5 Applied Predicate 和按 Session 证据；O4 Delivery 持久化和 Adapter 运维；K5 多个相互重叠但不同的 Version 轴 | 每个 Consumer 的 Applied 历史和大量 Reconciliation 触发器 | 首先一种 Context 类型和一个 Consumer Profile | Immutable Desired Version、CAS/串行化、Applied 与 Delivery 分离、Stale Entry 阻塞 | 中高 |
+| H | I5 Envelope/Negotiation/ACK/Attestation/Recovery Schema；D5 C/G/I/D/Storage/COC；S5 Protocol Version/Capability/Delivery/Participant/Recovery 状态；C5 Retry/Reconnect/Ordering/Commit Gate；R5 Unknown ACK/Replay/Recovery Cutoff；V5 Schema/Parser/Crypto/Interop Vector；O4 Key/Adapter 生命周期；K5 精确 Schema 和 Bundle Pin | Schema 系列演进及密码学信任耦合 | 从规范定义生成 Schema/Validator；限制首发 Profile | Strict Parsing、认证身份绑定、低于证据门槛不得 Full Applied、Typed Opaque Ref | 中高 |
+| I | I5 Identity/Trust/Authorization/Retention/Global Proof；D5 所有 Producer、Consumer、Storage 和外部域；S5 Epoch/Inventory Seal/Gate/Exception/Proof Vector；C5 Authorization/Revocation 与 Inventory 竞争；R5 Backup/Restore/Recipient 协调；V5 Trust/Negative/Global Evidence；O5 Key Lifecycle、Operator、Backup 和外部接收方；K5 广泛治理归属 | 每增加 Producer、Recipient、Backup 和 Restore Target，封闭世界 Inventory 都扩大 | 一个 PolicyDomain 和有限 Target Class；延期外部 Recipient 广度 | Authenticated Issuer、Least Privilege、Revocation、Unknown 阻塞、Global/Physical Completion 证据 | 中高 |
+| Storage / COC | I5 Prepared Participant、Atomic Visibility、COC 和 Restore 协议；D5 D/I/C/H/E/COC；S5 Participant/XID/GID/Prefix/Batch/Manifest/Restore 状态；C5 Serialization 和 Same-XID Resolution；R5 Crash/ACK Loss/Quorum Loss/Failover/PITR；V5 物理 DB 和应用级故障活动；O5 DB/COC/HA/Backup/On-call；K5 多个不可变协议版本和精确 Bundle Pin | Two-phase Participant Protocol、COC Quorum 和 Owner-local Gate | 一个事务域；除非证据要求，否则延期分布式协调器 | Same Participant Identity、Atomic Visibility/Outcome、UNKNOWN 保持 Barrier、Restore Quarantine | 中高 |
+| A | I4 Integration Registry/Sequence/Conformance Orchestration；D5 所有 Owner 和精确分支；S4 Source Status 和 Evidence Lifecycle；C4 并行 Branch 演进和 Stale Pin；R4 源变化后的 Supersession/Re-review；V5 独立 Owner Evidence 和 Parity；O3 治理控制；K5 全局协调 | Source Drift 和 Coordination Register 过期 | 一个 Manifest 和生成式 Index；避免重复规范性摘要 | Owner 权威保持局部；不得推断 Acceptance 或使用过期 Source Approval | 中低 |
+
+### 各跨模块机制的评分依据与控制
+
+| 机制 | 评分依据（I；D；S；C；R；V；O；K） | 放大因素 | 可简化部分 | 必须保留 |
+|---|---|---|---|---|
+| E/D/Storage Publication | 5 个操作阶段；5 三个权威依赖；5 Work/Fence/Participant/Outcome 状态；5 竞争线性化；5 崩溃/Lost ACK；5 Race Proof；4 单 DB 拓扑；5 跨 Owner 语义 | Admission 与 Visibility 是两个独立持久化权威 | 在 Owner 批准时将物理串行化收敛到一个事务域 | 最终 Gate 复核当前 Fence 和 I Proof；不得暴露暂存内容 |
+| Global Forget | 5 Inventory/Proof 算法；5 六个以上 Owner；5 独立 Epoch 和局部 ACK；5 新 Producer/Recipient 竞争；5 离线/Restore；5 Global Evidence；5 外部 Backup/Operator；5 全局推理 | 每条 Copy/Consumer/Restore 路径都会扩大 Inventory | 限定首发 Inventory 和 PolicyDomain | Unknown 不等于成功；Suppression/Cleanup/Erasure 必须区分 |
+| C/G/H Applied | 4 Adapter Assembly；5 三个 Owner 加 I；5 按 Delivery/Session/Request 的状态；4 Late ACK/Revocation；4 Offline/Reconnect；5 实际最终请求证明；3 单 Adapter 运维；5 证明语义 | Capability Tier 可能夸大 Adapter 的可观测能力 | 一个 Adapter Profile 和狭窄 Managed Region | Full Applied 必须有精确最终提交证据 |
+| JF-10/COC | 5 分布式 Participant 协议；5 C/D/I/H/Storage/COC；5 Participant/XID/Prefix/Gate；5 串行顺序和 Quorum；5 Same-XID Recovery；5 确定性故障活动；5 生产运维；5 精确 Bundle 治理 | Prepared DB Transaction + 独立 Coordinator + Owner Ledger | 延期 COC 部署，或限制在一个已证明拓扑内 | 不允许启发式决议；Same-XID；UNKNOWN 保持 Barrier |
+| Typed Positions | 4 类型 Registry；5 Consumers；5 不同位置语义；4 排序错误；5 Replay/Gap Recovery；5 类型误用测试；3 运行时运维；5 认知命名空间负担 | 相似整数/Version 字段容易被意外强制转换 | 集中 Registry 和代码生成 | 名义类型区分及由权威方负责比较 |
+| Restore | 5 Reconciliation 协议；5 DB/COC/I/D/Storage/Owner；5 Epoch/Prefix/Participant/Seal；5 Stale Primary/Rollback 竞争；5 Partial Restore；5 Negative Evidence；5 Operator/DR；5 证据解释 | 数据平面可能在控制平面之前被恢复 | 一种 Restore 拓扑和自动 Manifest 验证 | 从 Fenced 开始；独立 Ledger 和 Owner Release 前不服务 |
+| 双语治理 | 3 文档流程；5 Owner/Branch；4 Source/Translation 状态；2 运行时竞争；3 Supersession/Re-review；5 语义一致性；3 CI/Review 运维；5 人工认知负担 | 阅读指南被误当作规范源文件、Blob Pin 过期 | 一份双语报告/Manifest；结构检查自动化 | 语义一致性、稳定 ID、精确源版本和权威状态 |
+
+置信度表示基于所引用源样本对评分的置信度，不表示模块正确或已达到可实现状态。
+
+
 ### 模块结论
 
 - **最高内部状态负担：** D、E、G、H、I。即使不考虑跨模块组合，其局部状态机也已较大。
