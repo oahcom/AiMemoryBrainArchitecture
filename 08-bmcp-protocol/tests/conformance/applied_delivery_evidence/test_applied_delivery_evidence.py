@@ -91,7 +91,7 @@ class AppliedDeliveryEvidenceTests(unittest.TestCase):
         value=fixture()
         self.assertEqual(len(observation_identity(value)),7)
         self.assertEqual(len(delivery_binding_identity(value)),7)
-        self.assertNotIn("payload_digest",P0_EXCLUDED)
+        self.assertIn("payload_digest",P0_EXCLUDED)
         self.assertNotIn("payload_digest",build_h_p0(value))
 
     def test_08_unknown_trust_result_fails_closed(self):
