@@ -67,5 +67,12 @@ Gate 状态：C0 PARTIAL（尚未穷尽所有 PR/Issue 和源文件）；C1/C2 �
 - H 1.2.15 local exact-head CI was verified at historical H commit `0d36324457e39bd50ad56ae902d477c4ea765b61` (91 Provider Outcome tests; 288 Recovery Cutoff tests, 22 skipped). H's current branch HEAD is now `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; its latest commit removed the prior schema/validator/test tree. The old CI remains historical bounded evidence, not current branch contents or production trust.
 - B PR #55 current head refreshed to `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`.
 - G current branch HEAD: `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8`; G Applied Persistence contract Blob remains `bd297873bc1e593280484a43cb44b56058d9c4ff`.
-- H current branch HEAD: `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; latest H decision says Applied Delivery Evidence requires a separate successor schema/validator and remains NOT IMPLEMENTED / NOT VERIFIED / WIRE MAPPING NOT FROZEN.
-- C0 remains PARTIAL; C5 remains BLOCKED/PARTIAL; C6 includes 22 design scenarios and all C end-to-end tests NOT RUN.
+- H Owner branch was restored to `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6` (215 files); Applied Delivery Evidence 1.0.0 schema/validator candidate exists and its exact-head CI passed 11/11. C Owner branch was restored to `88992da30331121b81cf2773acab11d921daf281` (136 files); C Provider Outcome CI passed 19/19. These are bounded branch-local conformance results, not C/H service integration or production trust. H wire mapping remains NOT FROZEN.
+- C0 remains PARTIAL; C5 remains BLOCKED/PARTIAL; C6 includes 22 design scenarios and all C Agent/Provider/Tool/Brain end-to-end scenarios NOT RUN. C research PR #69 remains pinned to `1a1d6f2...`; it is distinct from the restored C Owner branch `88992da...`.
+
+
+### C-REVIEW-001 refresh — Owner tree restoration and H 1.0.0 candidate
+
+- C Owner branch `session-c-agent-integration-2026-11-16` HEAD `88992da30331121b81cf2773acab11d921daf281`; recursive tree: 136 blobs. Commit message: restore complete branch tree and retain Phase 3.8.23 owner decisions. Exact C Provider Outcome CI run `44129914790`: 19 tests, 0 failures.
+- H Owner branch `session-h-bmcp-protocol` HEAD `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`; recursive tree: 215 blobs. H Applied Delivery Evidence 1.0.0 schema Blob `2ce8776...`, validator Blob `2f6de24...`, test Blob `bb2bb6c...`, candidate decision Blob `36dff0b...`. Exact H CI run `44130722532`: 11 tests, 0 failures; H Recovery Cutoff workflow also completed successfully.
+- H 1.0.0 is implemented as a test/conformance candidate only. C/H final-boundary and COutcomeRecord mapping is not accepted/frozen; injected callbacks and mocked replay do not prove deployed authority or durable replay.
