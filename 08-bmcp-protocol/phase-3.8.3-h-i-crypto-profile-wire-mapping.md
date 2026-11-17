@@ -41,11 +41,11 @@ For protected I-signed records, the semantic validator MUST require all of:
 
 Missing `signature_profile_id` is a semantic rejection for a protected I-signed record, even though the additive structural schema can parse a legacy envelope. No downgrade or fallback is permitted.
 
-Artifact 1.2.7 also corrects the stale common-envelope description that referred to artifact revision 1.2.5. The `$id` and title now consistently identify artifact revision 1.2.8. Artifact revision and on-wire family version remain distinct.
+Artifact 1.2.8 also corrects the stale common-envelope description that referred to artifact revision 1.2.5. The `$id` and title now consistently identify artifact revision 1.2.8. Artifact revision and on-wire family version remain distinct.
 
-Artifact 1.2.7 在 `$defs.commonEnvelope` 增加可选 `signature_profile_id`。为兼容旧消息生产方，Wire Family `schema_version=1.2.0` 保持不变，结构层暂不强制新字段。
+Artifact 1.2.8 在 `$defs.commonEnvelope` 增加可选 `signature_profile_id`。为兼容旧消息生产方，Wire Family `schema_version=1.2.0` 保持不变，结构层暂不强制新字段。
 
-但所有受保护的 I 签名记录，Semantic Validator 必须强制要求上述四个精确配置值、Key ID/Version、消息专属 Projection 以及 I Owner Authority。结构 Schema 能解析旧 Envelope，不代表 I 安全语义接受旧 Envelope；缺失 Profile ID 必须拒绝，不得降级。Artifact 1.2.7 同时修正 commonEnvelope 描述中错误引用 1.2.5 的问题。Artifact Revision 与 Wire Family Version 仍是不同概念。
+但所有受保护的 I 签名记录，Semantic Validator 必须强制要求上述四个精确配置值、Key ID/Version、消息专属 Projection 以及 I Owner Authority。结构 Schema 能解析旧 Envelope，不代表 I 安全语义接受旧 Envelope；缺失 Profile ID 必须拒绝，不得降级。Artifact 1.2.8 同时修正 commonEnvelope 描述中错误引用 1.2.5 的问题。Artifact Revision 与 Wire Family Version 仍是不同概念。
 
 ## 3. Owner signature projection / Owner 签名投影
 
@@ -115,6 +115,8 @@ RecoveryJoin schema 1.0.1 defines two separately dereferenced proof objects:
 - `$defs.outOfScopeProof`: binds exact request/operation identity and digest, target class, Scope/ScopeGeneration, applicability policy, `OUT_OF_SCOPE_WITH_PROOF` decision, reason code, owner ledger/version/high-water, complete query/pagination, key-status generation, anti-rollback anchor, signature profile/ref and proof digest.
 
 For an I proof, `signature_profile_ref` MUST resolve to `AIMBA-ED25519-SHA256-1.0` under bundle `AIMBA-I-CRYPTO-1.0`; the resolved proof is verified with the exact I P0/JCS/Ed25519 construction. A zero count without its matching signed empty proof is UNKNOWN. An OUT_OF_SCOPE disposition without its exact signed proof ref+digest is UNKNOWN. No missing or unavailable evidence is interpreted as empty or out-of-scope.
+
+For both proof definitions, the exact I P0 projection is every schema-defined proof field except `proof_digest` (computed from P0). `signature_ref` is included only as a stable preallocated locator and MUST NOT be derived from signature bytes. Compute `proof_digest = SHA-256(ASCII("AIMBA-I-PAYLOAD-v1") || 0x00 || JCS(P0))`; then sign the projection plus proof_digest using the I signature preimage, with fixed message types `I_COMPLETE_EMPTY_PROOF` and `I_OUT_OF_SCOPE_PROOF` respectively. The schema's `signature_profile_ref` must resolve to the exact I signature profile and key-status generation. A proof ref/digest mismatch is INVALID; missing query, pagination, high-water, key status or anti-rollback evidence is UNKNOWN.
 
 RecoveryJoin Schema 1.0.1 新增两个独立解引用 Proof Object：
 - `completeEmptyProof` 绑定 Owner、Request/Admission Set、Scope/Generation、Owner Ledger/Version、Query Ref、Owner High-water、完整分页、Count=0、Canonical Empty Root、Key Status Generation、Anti-rollback Anchor、Signature Profile/Ref 和 Proof Digest。
