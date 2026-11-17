@@ -243,3 +243,48 @@ v3.3.2 / A 3.12.2 精确版本配对绑定 H 1.2.14 和 C 1.0.1。H 1.2.15 与 I
 B3 remains **NOT PASSED**. B-CONFLICT-017 is closed at manifest-consistency level only. Authenticated ingress, H 1.2.15 successor binding, I trust/profile/key registration, durable replay, G Applied freeze, D Forget completion and Storage L4 implementation remain open. No independent QA result, production authentication or physical purge is claimed.
 
 B3 仍为 **NOT PASSED**。B-CONFLICT-017 仅在 Manifest 一致性层面关闭。Authenticated Ingress、H 1.2.15 后继绑定、I Trust/Profile/Key 注册、Durable Replay、G Applied 冻结、D Forget 完成和 Storage L4 实现仍开放。不宣称独立 QA 结果、生产认证或物理清除。
+
+
+## 8. Current B2/B3 owner-source reconciliation — 2026-11-18 / 当前 B2/B3 Owner 来源协调 — 2026-11-18
+
+### 8.1 Fact / Claim and Claim identity / Fact、Claim 与 Claim 身份
+
+| Item / 项目 | Current authoritative evidence / 当前权威证据 | Disposition / 处置 |
+|---|---|---|
+| Fact vs Claim / Fact 与 Claim | B Owner summary ADR Blob `a1024938ff5baba069cf128c69496a44e143330c`; detailed ADR Blob `df77e4a93cb8fef689ae7c828888d960cbf381d6`; consumer map Blob `dd45a37199c9b69ab6b68f65e051a484a04691d4`; B branch `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | B's current preferred candidate is **Option A: separate Claim proposition thread and independently addressable Fact attestation object**. This supersedes the earlier C2/Option B preference in the B research ADR. It remains CANDIDATE / ADR-BLOCKED; Architecture Governance authority and approval are not recorded. |
+| Claim identity / Claim 身份 | Detailed B ADR above; consumer map above | Stable ClaimRef + immutable ClaimRevisionRef is candidate only. D owns canonical ID allocation, persistence, revision commit and ConflictSet lifecycle/commit shape after ADR approval. No Claim identity/schema freeze. |
+| Evidence / Provenance / ConflictSet | Detailed B ADR §6; consumer map §4 | Evidence is exact-revision-targeted; Provenance describes derivation, not truth; ConflictSet groups incompatible exact ClaimRevisionRefs and remains candidate pending D canonical commit approval. |
+| E / F / G consumers | Consumer map Blob `dd45a37199c9b69ab6b68f65e051a484a04691d4` | E retains neutral CandidateProposition/ExtractionIR and may not mint canonical IDs; F preserves exact revision/currentness and cannot adjudicate truth; G pins MemoryVersionRef and only exposes exact ClaimRevisionRef when directly represented. These are candidate mappings, not consumer approvals. |
+| Governance baseline / 治理基线 | Main I-04 Blob `33b037318e459ebb73bea33b3186f31a41d5dcfe`; P-04 Blob `192e6ba6e9287792a02b679dda0d391844270228`; Domain Overview Blob `4d1debc0ec19b3917f9e76d04bb66da4df4cd346`; EN/ZH guides Blobs `8a19cebacf5aefb0aded5fdbfeaff406291a5cf1` / `a9f53a453aec25c47c58c4aea75adc43c83028d3` | I-04/P-04 distinguish Fact and Claim; overview still describes Fact as qualified Claim; both guides retain ADR-BLOCKED. The normative baseline remains internally inconsistent. Option B would require explicit governance amendment; no option is approved. |
+
+### 8.2 H 1.2.15 ingress correction / H 1.2.15 入口状态纠偏
+
+A Phase 8 B-02 integration reconciliation Blob `8a0a428ebf9cd8c8fe00562d2267ff490d5c3205` corrects two overbroad statements in the preceding A report:
+- I has reviewed the H 1.2.15 schema, P0 encoding and corrected replay/acceptance order as a trust-carrier/reference contract **ACCEPT WITH CONDITIONS**; I has **not** registered a production profile, issuer, trust root, keys, revocation, anti-rollback or production transport identity.
+- C has reviewed the corrected issuance/receiver/replay order as a reference contract **ACCEPT WITH CONDITIONS**; that is not an exact review of the current H receiver validator/CI or an executable H issuer.
+- D's prior review is limited to the 1.2.14 outer-auth boundary; exact H 1.2.15 currentness/Forget/lineage review remains OPEN.
+- H receiver validator and tests exist, but A found no distinct issuer/signing-pipeline implementation entrypoint. H issuer pre-sign execution chain and integrated authority-join successor remain OPEN / NOT FOUND.
+- Storage v3.3.2 remains a historical bundle pinned to H 1.2.14 / C 1.0.1. A new Storage successor must bind exact H/C/I/D artifacts and receive fresh A review.
+
+A Phase 8 B-02 集成协调 Blob `8a0a428ebf9cd8c8fe00562d2267ff490d5c3205` 修正了前一份 A 报告中两项过度概括：
+- I 已对 H 1.2.15 Schema、P0 编码和修正后的 Replay/Acceptance 顺序作了 Trust-Carrier/Reference 契约级 **ACCEPT WITH CONDITIONS** 审查；但 I **尚未**注册生产 Profile、Issuer、Trust Root、Keys、Revocation、Anti-Rollback 或生产 Transport Identity。
+- C 已对修正后的 Issuance/Receiver/Replay 顺序作了 Reference 契约级 **ACCEPT WITH CONDITIONS** 审查；这不等于对当前 H Receiver Validator/CI 或可执行 H Issuer 的精确复审。
+- D 先前的复审仅限 1.2.14 Outer-Auth 边界；H 1.2.15 的 Currentness/Forget/Lineage 精确复审仍 OPEN。
+- H Receiver Validator 和测试已经存在，但 A 未发现独立 Issuer/Signing-Pipeline 实现入口。H Issuer Pre-sign 执行链和 Integrated Authority-Join 后继版本仍 OPEN / NOT FOUND。
+- Storage v3.3.2 仍是绑定 H 1.2.14 / C 1.0.1 的历史 Bundle。新的 Storage 后继版本必须绑定精确 H/C/I/D 工件并取得 A 新复审。
+
+The separate A exact review Blob `582ed576f73d9096dcc77b3a559df8c3b997b895` reports local H 1.2.15 validator/CI evidence (Provider Outcome workflow 91 tests, 0 failures; Recovery Cutoff workflow 288 tests, 22 skipped, 0 failures) on H commit `0d36324457e39bd50ad56ae902d477c4ea765b61`. Its evidence ceiling is deterministic callback orchestration and local reference conformance; it does not prove production cryptographic trust, issuer signing order, I registration, durable replay, or end-to-end deployment. A's overall disposition remains DEFERRED.
+
+独立 A 精确复审 Blob `582ed576f73d9096dcc77b3a559df8c3b997b895` 报告了 H 1.2.15 本地 Validator/CI 证据（Provider Outcome Workflow 91 项测试、0 失败；Recovery Cutoff Workflow 288 项测试、22 项跳过、0 失败），测试 Commit 为 H Commit `0d36324457e39bd50ad56ae902d477c4ea765b61`。其证据上限是确定性 Callback 编排和本地 Reference Conformance；不能证明生产密码学信任、Issuer 签名顺序、I 注册、Durable Replay 或端到端部署。A 的总体处置仍为 DEFERRED。
+
+### 8.3 Research maturity and non-promotion / 研究成熟度与禁止提升为规范
+
+PRODUCT-FIRST-001 integration review Blob `3e7f0fc604761533ddd521924ff69d2039a63282` is explicitly NON-NORMATIVE / DRAFT and confirms the Fact/Claim ADR remains blocked; it authorizes no ADR, technology freeze or implementation. Memory Operating System research Blob `00e09d91ad3e7f08a9b7f7a26e30ebc98160d9c5` and Memory IR research Blob `084fc03bc5f09393bdd1ea6e8af3d8a6b703d3fc` state that their baselines are pinned but design/prototype work is not yet complete. They are research inputs only and cannot change B canonical identity, Scope, Evidence or lifecycle semantics.
+
+PRODUCT-FIRST-001 集成审查 Blob `3e7f0fc604761533ddd521924ff69d2039a63282` 明确为 NON-NORMATIVE / DRAFT，并确认 Fact/Claim ADR 仍阻塞；它不批准 ADR、技术冻结或实现。Memory Operating System 研究 Blob `00e09d91ad3e7f08a9b7f7a26e30ebc98160d9c5` 和 Memory IR 研究 Blob `084fc03bc5f09393bdd1ea6e8af3d8a6b703d3fc` 均声明基线已 Pin，但设计/原型工作尚未完成。它们仅是研究输入，不能改变 B 规范身份、Scope、Evidence 或生命周期语义。
+
+### 8.4 B2/B3 disposition / B2/B3 结论
+
+B2 remains **IN PROGRESS / NOT PASSED**. The current preferred Fact/Claim candidate is Option A, but formal Architecture Governance approval is missing; ClaimRef/ClaimRevisionRef, FactRevision and ConflictSet schemas remain unfrozen. B3 remains **NOT PASSED**: H issuer implementation, integrated H/C/I/D authority join, I production trust registration, D 1.2.15 review, Storage successor manifest, durable replay, Applied and Forget evidence remain open.
+
+B2 仍为 **IN PROGRESS / NOT PASSED**。当前优先 Fact/Claim 候选是 Option A，但缺少正式 Architecture Governance 批准；ClaimRef/ClaimRevisionRef、FactRevision 和 ConflictSet Schema 均未冻结。B3 仍 **NOT PASSED**：H Issuer 实现、H/C/I/D 集成权威联结、I 生产信任注册、D 1.2.15 复审、Storage 后继 Manifest、Durable Replay、Applied 和 Forget 证据仍开放。
