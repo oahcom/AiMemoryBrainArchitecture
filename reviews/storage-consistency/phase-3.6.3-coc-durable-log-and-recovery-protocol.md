@@ -396,3 +396,53 @@ This is a substantive ordering correction, not a wording clarification. The old 
 - verify both records are quorum-read back and cross-bound before PARTICIPANTS_RECONCILING;
 - verify no owner release or protected serving occurs with batch-only state;
 - verify UNKNOWN, incomplete enumeration or prefix mismatch remains RESTORE_FENCED.
+
+
+## 16. Digest projection and H 1.0.5 wire alignment
+
+This section refines §15's Batch/Manifest contract and is normative for the current COC candidate. It adopts the typed digest model specified in the Storage-owned Recovery Cutoff Batch / Participant Manifest Ordering Amendment, exact Blob `9704d110a06d0c2ee98be960054e0396d0b68546`, and H Phase 3.6.11 Addendum / schema 1.0.5. If generic terms such as "manifest digest" in §§6 or 15 are ambiguous, the three distinct digest types below control.
+
+### 16.1 Three non-interchangeable digests
+
+1. **ParticipantManifestContentDigest** — computed before Batch commit over the domain-separated canonical immutable manifest-content projection: stable ManifestId, RecoveryEpoch/round, exact prefix P (term/index/root/configuration epoch), previous-prefix digest, enumeration status, canonical ordered participant entries, count and participant-set root. It excludes RecoveryBatchRef/RecoveryBatchDigest, future quorum proof, signature envelope and transport metadata.
+2. **RecoveryBatchDigest** — computed over the canonical RecoveryCutoffBatch payload, including stable BatchId, RecoveryEpoch/round, exact P, I/D/C owner snapshot refs and digests, scope binding, reconciliation-attempt generation, previous-batch digest, ManifestId and ParticipantManifestContentDigest.
+3. **ParticipantManifestRecordDigest** — the protected payload digest of the final quorum-committed Participant Manifest record, including exact RecoveryBatchRef + RecoveryBatchDigest and ParticipantManifestContentDigest, plus the record's prefix/entries and protected envelope fields under the approved H profile.
+
+The dependency order is strictly:
+`ParticipantManifestContentDigest → RecoveryBatchDigest → ParticipantManifestRecordDigest`.
+The batch MUST NOT contain the future manifest-record digest. The manifest record MUST NOT be committed before its referenced batch. This avoids a circular digest dependency.
+
+### 16.2 Exact wire-field mapping
+
+For H Recovery Cutoff schema 1.0.5:
+- `RECOVERY_CUTOFF_BATCH` carries `participant_manifest_ref` and `participant_manifest_content_digest`; it MUST NOT carry the future ParticipantManifestRecordDigest.
+- `COC_PARTICIPANT_MANIFEST` carries the same stable ManifestId/message_id and content digest plus exact `recovery_batch_ref`, `recovery_batch_digest` and its own quorum commit proof reference.
+- `OWNER_GATE_RELEASE_ATTESTATION` binds RecoveryBatchRef/RecoveryBatchDigest and both ParticipantManifestContentDigest and ParticipantManifestRecordDigest, in addition to the owner's current gate/snapshot/high-water/root/scope/anti-rollback evidence.
+- `RECOVERY_EPOCH_COMPLETED` binds the final batch and both manifest digests, all-rounds root and required owner release references.
+
+No new wire version may use an unqualified `participant_manifest_digest` where the content digest and record digest could be confused. H owns exact field spelling/schema and canonical wire encoding; I owns cryptographic trust policy.
+
+### 16.3 Semantic pair validation
+
+The coordinator and H semantic validator MUST verify:
+- Batch.participant_manifest_ref equals Manifest.message_id;
+- Batch.participant_manifest_content_digest equals Manifest.participant_manifest_content_digest;
+- Manifest.recovery_batch_ref and recovery_batch_digest identify the exact committed Batch;
+- RecoveryEpoch/round and exact prefix P are identical in both records;
+- content digest recomputes from the defined content projection;
+- count, root, enumeration status and canonical entries match the staged payload;
+- Batch log position is strictly earlier than Manifest log position;
+- Manifest record digest equals the protected payload digest and is separately carried by owner release/completion;
+- both records have quorum proof and are linearly read back before PARTICIPANTS_RECONCILING.
+
+A structurally valid JSON message without these semantic joins is not a verified pair. Any mismatch is INVALID; unavailable or incomplete authoritative evidence is UNKNOWN. Neither permits release.
+
+### 16.4 C provider boundary during the two-record interval
+
+C MUST keep provider invocation/retry closed after Batch commit but before Manifest Record commit, and also after Manifest commit but before exact pair readback. Only after both records are quorum-confirmed, linearly read back and semantically joined may C begin provider lookup/reconciliation, and only under C's own current gate plus exact I/D/Storage predicates.
+
+A CSubmitOutcome remains C-owned. Batch membership, manifest membership, Storage resolution, I terminality, D clearance or transport ACK cannot substitute for provider handoff evidence. Unknown provider outcome remains UNKNOWN/IN_DOUBT.
+
+### 16.5 Conformance boundary
+
+The digest projections, schema mapping and semantic validators are specified contracts. They are **not executed or interoperability-verified** by this amendment. H must publish executable validators and cross-implementation canonical-byte fixtures; C must verify provider-specific same-key behavior. No schema freeze, crypto freeze, provider exactly-once claim or production activation follows from this text.
