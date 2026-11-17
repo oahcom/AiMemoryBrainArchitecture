@@ -319,3 +319,128 @@ class RecoveryManifest:
                 (self.cutoff["batch_digest"] + ":entry").encode()).hexdigest()
         }
         return self.reconciliation
+
+
+@dataclass
+class FRecallProjection:
+    """F candidates are hints only; every page is revalidated at the final gate."""
+    candidates: dict = field(default_factory=dict)
+    invalidated: set = field(default_factory=set)
+
+    def index(self, ref, source_digest):
+        self.candidates[ref] = {"source_digest": source_digest, "visible": True}
+
+    def invalidate(self, ref):
+        self.invalidated.add(ref)
+        if ref in self.candidates:
+            self.candidates[ref]["visible"] = False
+
+    def return_page(self, refs, current_d, current_i, integrity_ok=True):
+        returned = []
+        for ref in refs:
+            candidate = self.candidates.get(ref)
+            if (not candidate or not candidate["visible"] or ref in self.invalidated
+                    or ref not in current_d or ref not in current_i or not integrity_ok):
+                continue
+            returned.append(ref)
+        return returned
+
+
+@dataclass
+class EDerivation:
+    """Stable WorkItem/Attempt identity; expiry and DLQ never prove no publication."""
+    work_item_id: str
+    request_digest: str
+    attempt: int = 0
+    lease_id: str | None = None
+    state: str = "REGISTERED"
+    staged_digest: str | None = None
+    storage_participant: str | None = None
+    d_admission: str | None = None
+    terminal_outcome: str | None = None
+
+    def retry(self, request_digest):
+        if request_digest != self.request_digest:
+            raise ProtocolError("stable WorkItem identity changed request digest")
+        if self.state in {"PUBLISHED", "NO_PUBLICATION"}:
+            return self.attempt
+        self.attempt += 1
+        self.lease_id = f"{self.work_item_id}:lease:{self.attempt}"
+        self.state = "LEASED"
+        return self.attempt
+
+    def stage_private(self, digest):
+        if self.state != "LEASED":
+            raise ProtocolError("attempt must hold a current lease before staging")
+        self.staged_digest = digest
+        self.state = "PRIVATE_STAGED"
+
+    def prepare_storage(self, participant_ref):
+        if self.state != "PRIVATE_STAGED":
+            raise ProtocolError("private stage required before Storage prepare")
+        self.storage_participant = participant_ref
+        self.state = "STORAGE_PREPARED_HIDDEN"
+
+    def admit_d(self, admission_ref):
+        if self.state != "STORAGE_PREPARED_HIDDEN":
+            raise ProtocolError("D publication admission requires durable Storage prepare")
+        self.d_admission = admission_ref
+        self.state = "D_ADMITTED"
+
+    def resolve(self, outcome):
+        if outcome not in {"COMMITTED_VISIBLE", "NO_PUBLICATION"}:
+            self.state = "UNKNOWN_IN_DOUBT"
+            raise UnknownOutcome("nonterminal outcome retains private stage and admission")
+        if not self.storage_participant or not self.d_admission:
+            raise ProtocolError("terminal resolution lacks Storage/D participant join")
+        self.terminal_outcome = outcome
+        self.state = "PUBLISHED" if outcome == "COMMITTED_VISIBLE" else "NO_PUBLICATION"
+        return self.state
+
+
+@dataclass
+class GContextVersion:
+    """G ContextVersion is non-canonical and every fragment retains D lineage."""
+    version: int = 1
+    fragments: dict = field(default_factory=dict)
+    stale: bool = False
+    deliveries: dict = field(default_factory=dict)
+
+    def materialize(self, fragment_ref, source_refs, d_generation):
+        if not source_refs:
+            raise ProtocolError("Context derivative requires source lineage")
+        if self.stale:
+            raise ProtocolError("stale ContextVersion cannot be extended")
+        self.fragments[fragment_ref] = {
+            "source_refs": tuple(source_refs), "d_generation": d_generation}
+        return self.version
+
+    def apply_delta(self, base_version, fragment_ref, source_refs, d_generation):
+        if base_version != self.version:
+            raise ProtocolError("stale Snapshot/Delta base version")
+        self.materialize(fragment_ref, source_refs, d_generation)
+        self.version += 1
+        return self.version
+
+    def forget(self, forgotten_sources, current_d_generation):
+        for fragment in self.fragments.values():
+            if set(fragment["source_refs"]) & set(forgotten_sources):
+                self.stale = True
+        if self.stale:
+            self.version += 1
+            self.deliveries.clear()
+        return {"version": self.version, "stale": self.stale,
+                "d_generation": current_d_generation}
+
+    def create_delivery(self, delivery_id, context_version, d_generation):
+        if self.stale or context_version != self.version:
+            raise ProtocolError("stale ContextVersion cannot be delivered")
+        self.deliveries[delivery_id] = {
+            "version": context_version, "d_generation": d_generation}
+        return delivery_id
+
+    def replay_delivery(self, delivery_id, current_d_generation):
+        item = self.deliveries.get(delivery_id)
+        if not item or self.stale or item["d_generation"] != current_d_generation:
+            raise ProtocolError("old delivery/ACK is not replay authority")
+        return True
