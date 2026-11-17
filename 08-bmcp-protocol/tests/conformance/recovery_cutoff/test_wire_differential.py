@@ -25,7 +25,7 @@ class CrossLanguageWireDifferential(unittest.TestCase):
         for vector in vectors:
             canonical = python_canonical(vector["value"])
             digest = hashlib.sha256(
-                vector["domain"].encode("utf-8") + b"\\0" + canonical.encode("utf-8")
+                vector["domain"].encode("utf-8") + b"\0" + canonical.encode("utf-8")
             ).hexdigest()
             self.assertEqual(canonical, vector["expected_canonical_utf8"])
             self.assertEqual(digest, vector["expected_digest_sha256"])
