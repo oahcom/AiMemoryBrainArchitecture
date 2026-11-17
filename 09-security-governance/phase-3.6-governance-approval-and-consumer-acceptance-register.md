@@ -265,3 +265,47 @@ The explicit BIH design-consumer acceptance subrequirement for C/D/E/F/G/Storage
 - Global Forget completion, Runtime Forget E2E closure or physical erasure.
 
 A is the final G0–G10 registrar/acceptance authority and must update its own closure plan/ledger before treating G6 as closed. This I register does not rewrite A's gate state or approve on behalf of any consumer.
+
+
+## 6. Phase 3.6.3 evidence reconciliation — BIH consumer acceptance (2026-11-17)
+
+This append-only reconciliation supersedes the **discovery-time consumer status rows in Section 4 only**. It does not change BIH36-JD-01..17, I governance policy, external approval status, or test status.
+
+### 6.1 Exact A-package acceptance
+
+The exact A BIH package is `reviews/integration/phase-3.6-identity-trust-joint-architecture.md`, Blob SHA `a45ae90b318a79bf009d14f4d917611881e9e214`.
+
+GitHub Issue #6 comment `6919556745` records C/F/G exact-version Owner decisions. A's subsequent reconciliation comment `6919649724` records the exact branch readbacks. The following Owner artifacts were independently fetched from their named branches in this reconciliation:
+
+| Consumer | Owner artifact | Verified current Blob SHA | Disposition | Evidence |
+|---|---|---|---|---|
+| C | `07-agent-integration/phase-3.6-final-request-evidence-contract.md` | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | ACCEPT WITH ENUMERATED EXCEPTIONS | Issue #6 comments 6919556745 / 6919649724; exact BIH package pin in Owner artifact |
+| F | `05-memory-runtime/phase-3.6-runtime-forget-suppression-and-invalidation.md` | `ce59252dbbdc5d10d016704797e9ba12d5a941bd` | ACCEPT WITH ENUMERATED EXCEPTIONS | Issue #6 comments 6919556745 / 6919649724; exact BIH package pin in Owner artifact |
+| G | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | ACCEPT WITH ENUMERATED EXCEPTIONS | Issue #6 comments 6919556745 / 6919649724; current artifact retains the BIH acceptance section and subsequent G-owned Applied decisions |
+| H | `08-bmcp-protocol/phase-3.6-a-package-exact-version-h-owner-acceptance.md` | `fe437a3d44790f249f613d1e6cafc0db40d45b10` | ACCEPTED WITH BINDING H-OWNED PROTOCOL BOUNDARIES | Issue #6 comment 6919218061; exact H Owner decision artifact read back |
+
+The G artifact has advanced beyond the Blob SHA recorded in A's earlier reconciliation (`5406b3f2558daa3f5915f6bb46e808be8d90d3ca`). The current Blob was fetched and its retained Phase 3.6.3 BIH acceptance section was verified. Its additional G-owned Applied decisions are not treated as BIH changes or as transferable approvals for a different Applied package.
+
+### 6.2 Corrected consumer status
+
+- C: design-level BIH consumer acceptance complete, with enumerated exceptions.
+- F: design-level BIH consumer acceptance complete, with enumerated exceptions.
+- G: design-level BIH consumer acceptance complete, with enumerated exceptions.
+- H: exact A-package BIH design acceptance complete, with binding H-owned protocol boundaries.
+- D, E and Storage: this addendum makes no new claim about their acceptance; retain their separately evidenced status until exact Owner evidence is reconciled into this register.
+- A: coordinator/registrar only; not a consumer approval authority.
+
+The Section 4 discovery-time OPEN entries for C/F/G/H are therefore historical and superseded by this addendum. No cross-owner acceptance is inferred for any other consumer.
+
+### 6.3 Gates not changed by this reconciliation
+
+1. I36-GOV-01..10 remain **GOVERNANCE-BLOCKED**. No external approver, effective policy version, signed approval, Environment Registry Authority designation or policy activation is created by the consumer decisions.
+2. I36-01..20, H36-01..18, F runtime cases, G Applied/COC cases, CFG-01..20 and PI-01..08 remain **SPECIFIED / NOT RUN** unless a separate executable run record proves otherwise.
+3. No implementation, interoperability, deployment, security certification, Contract Freeze, Global Forget completion or physical-erasure status is advanced.
+4. This update is an I-owned evidence-register correction only. A must independently refresh the integration ledger and overall G0–G10 disposition; this I record does not make A's final integration decision.
+
+### 6.4 Next actions
+
+- I: continue obtaining the named external authorities, effective policy approvals, Environment Registry Authority designation and I36 execution evidence.
+- D/E/Storage: provide or refresh their exact-version BIH consumer acceptance evidence if still required by the A gate.
+- A: consume this updated I register Blob and the exact C/F/G/H artifacts in the next integration reconciliation; do not reuse the earlier I register Blob.
