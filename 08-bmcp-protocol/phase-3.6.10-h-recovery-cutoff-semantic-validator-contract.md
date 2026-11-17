@@ -173,7 +173,7 @@ The following implementation artifacts have been added on the H branch:
 | Artifact | Path | Current Blob | Purpose |
 |---|---|---|---|
 | HRC semantic suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_hrc_semantics.py` | `794ac0c34aaad921e5d4a5bcc42b6601f7caf817` | 25 HRC unittest cases plus 12 JPF bidirectional-join cases |
-| Wire interop candidate suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_wire_interop.py` | `18e50957848178f3f35593b3e618dfa9b90cdb31` | Strict JSON parsing, duplicate-key rejection, absent/null distinction, canonical test bytes, counter encoding and critical-field behavior |
+| Wire interop candidate suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_wire_interop.py` | `1a4e754ba9bfa57eb973c6d39731e9f89443b323` | Strict JSON parsing, duplicate-key rejection, absent/null distinction, canonical test bytes, counter encoding and critical-field behavior |
 | RecoveryJoin schema candidate | `08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.0.schema.json` | `f531c1d4b89a48457188c4988f140952759223a6` | Strict structural candidate for both directional edge sets, owner snapshots, JF-10 sub-join and difference sets |
 
 Run the dependency-free candidate suite from the test directory:
@@ -182,7 +182,7 @@ Run the dependency-free candidate suite from the test directory:
 python -m unittest -v test_hrc_semantics.py test_wire_interop.py
 ```
 
-The HRC suite has 37 unittest methods: HRC-01..25 and JPF-01..12. The wire suite has 10 additional methods. The code is committed as an executable candidate, but **has not yet been run in CI or independently reproduced**. No PASS is claimed.
+The HRC suite has 37 unittest methods: HRC-01..25 and JPF-01..12. The wire suite has 10 methods and the schema-integrity suite has 9 methods, for 56 unittest methods total. The branch workflow is `.github/workflows/h-recovery-cutoff-conformance.yml` (Blob `ea7a3d9c365b84352d3bac69da94fe0d510e46a4`). No workflow run is available for this candidate yet; the code is committed as an executable candidate but **has not been run in CI or independently reproduced**. No PASS is claimed.
 
 ### 11.1 Semantic model vs wire model
 
@@ -226,7 +226,7 @@ Until then, status is **EXECUTABLE CANDIDATE COMMITTED / NOT RUN / NOT CONFORMAN
 
 The RecoveryJoin 1.0.0 candidate was revised to preserve request-set and admission-set completeness independently for each of I, D and C. It now requires six separate owner-set statuses rather than one collapsed per-owner status. It also carries both the original participant_position_ref from recovery-cutoff 1.0.4 and the resolved COC term/index/entry-digest tuple in the JoinProof edge. Conditional requirements now bind NO_EFFECT_PROVEN to a no-effect proof, NOT_APPLICABLE_WITH_PROOF to its proof reference, and terminal Storage outcomes to StorageResolutionProof.
 
-Latest RecoveryJoin schema Blob: 044fb07ad53d6778c135ea6918de9c69eb178982.
+The earlier RecoveryJoin schema Blob 044fb07ad53d6778c135ea6918de9c69eb178982 is superseded by the row-level identity and request-disposition amendment below.
 Latest schema integrity test Blob: 5292d56661e938c905c61455e9ed53c4ff674c54.
 
 
