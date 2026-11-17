@@ -172,7 +172,7 @@ The following implementation artifacts have been added on the H branch:
 
 | Artifact | Path | Current Blob | Purpose |
 |---|---|---|---|
-| HRC semantic suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_hrc_semantics.py` | `ee0f47095df10786da358bed193d6f8491a5eb2c` | 25 HRC unittest cases plus 19 JPF bidirectional-join cases |
+| HRC semantic suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_hrc_semantics.py` | `60a2f4db4bd12f2131ecd147db9bbe328da6db50` | 25 HRC unittest cases plus 19 JPF bidirectional-join cases |
 | Wire interop candidate suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_wire_interop.py` | `1a4e754ba9bfa57eb973c6d39731e9f89443b323` | Strict JSON parsing, duplicate-key rejection, absent/null distinction, canonical test bytes, counter encoding and critical-field behavior |
 | RecoveryJoin schema candidate | `08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.0.schema.json` | `dd3234aa1c74caf6d0e335875cd96e0b2b64082f` | Strict structural candidate for both directional edge sets, owner snapshots, JF-10 sub-join and difference sets |
 
@@ -260,4 +260,4 @@ Latest schema integrity suite Blob: 67aba74c120f2916d768e7b01c45408ee2624f3a.
 
 JPF-18 and JPF-19 explicitly verify that the stable OwnerAdmissionRef and the exact OwnerEntryRef row identity cannot substitute for one another in either direction. The C primary admission anchor must resolve by OwnerAdmissionRef, while the captured owner snapshot row must match the separately bound OwnerEntryRef and row digest.
 
-Latest HRC/JPF suite Blob: ee0f47095df10786da358bed193d6f8491a5eb2c.
+Latest HRC/JPF suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
