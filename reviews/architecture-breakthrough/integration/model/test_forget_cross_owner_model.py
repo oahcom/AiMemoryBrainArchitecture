@@ -33,7 +33,7 @@ class ForgetCrossOwnerModelTests(unittest.TestCase):
         trace, violations, _, count = bfs(None, 14)
         self.assertIsNone(trace)
         self.assertIsNone(violations)
-        self.assertEqual(count, 27472)
+        self.assertEqual(count, 28383)
 
     def test_all_mutants_have_expected_shortest_counterexample(self):
         for mutant, expected in EXPECTED_COUNTEREXAMPLES.items():
@@ -111,7 +111,7 @@ class ForgetCrossOwnerModelTests(unittest.TestCase):
         state = apply_actions(State(), "install_fence", "close_barrier")
         state = apply_actions(state, "inventory_gap")
         self.assertFalse(state.barrier_closed)
-        self.assertFalse(state.global_complete)
+        self.assertFalse(state.core_barrier_ready)
 
     def test_restore_releases_only_after_current_fence_highwater_replay(self):
         state = apply_actions(State(), "install_fence", "restore_backup", "replay_fence_highwater", "reconcile_restore")
@@ -122,6 +122,10 @@ class ForgetCrossOwnerModelTests(unittest.TestCase):
         state = apply_actions(State(), "install_fence", "restore_backup")
         state = step(state, "reconcile_restore")
         self.assertFalse(state.restore_released)
+
+    def test_core_barrier_predicate_is_not_global_forget_completion(self):
+        state = apply_actions(State(), "install_fence", "close_barrier", "mark_core_barrier_ready")
+        self.assertTrue(state.core_barrier_ready)
 
     def test_run_all_assertions(self):
         run_checks()
