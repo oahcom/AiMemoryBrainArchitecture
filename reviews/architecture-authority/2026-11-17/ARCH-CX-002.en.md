@@ -1,6 +1,6 @@
 # Architecture Complexity Assessment — ARCH-CX-002
 
-- Version: 1.0.0; baseline: `main@6470f25ca23b8d35c06f60be2326867066418d18`
+- Version: 1.0.0; baseline: `historical assessment snapshot `6470f25ca23b8d35c06f60be2326867066418d18` (not current main)`
 - X source: PR #49, commit `131f91743bd506517ee354d58c277501ca447929`, EN Blob `c509120644d6f7c7223decf3f9f0ee33b0548bb7`, ZH Blob `981a376ddf283ace1e891795c813b17ac4aa3d8b`.
 - A disposition: complexity controllability **NOT PROVEN**.
 
@@ -49,3 +49,8 @@ The B protocol candidate (H 1.2.14 / wire 1.3.0 + CSubmitOutcome 1.0.1) also add
 ## Conclusion
 
 The system is high-complexity and its controllability is **NOT PROVEN**. The architecture can reduce avoidable deployment complexity, but the P0 proof burden remains high. See SYS-RISK-002, DEV-FEAS-002, DEP-DAG-002 and GATE-002.
+
+
+## Current main HEAD / 当前 Main HEAD
+
+The current main HEAD independently observed for this publication is `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The earlier `6470f25...` / `b372b62...` values are historical assessment snapshots, not current main. This package has not completed a full source-by-source delta audit against current main; G1 remains PARTIAL and all Gate/freeze restrictions remain in force.
