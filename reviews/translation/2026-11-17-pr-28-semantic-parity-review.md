@@ -5,7 +5,7 @@
 - Review version: 1.0
 - Reviewed PR: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/28
 - Reviewed branch: `docs/bilingual-coverage-completion`
-- Reviewed snapshot: `b66703cd63bcf45082bc5d544a61345567eb5249`
+- Reviewed snapshot: `9b525f400c45e701c6888e99d3ff2b200ef46f27` (includes follow-up P2 fixes and cross-module identity/Applied/Storage review)
 - Review date: 2026-11-17
 - Review mode: targeted independent semantic review of high-risk contracts and status semantics
 - Overall disposition: **CONDITIONAL PASS FOR THE REVIEWED HIGH-RISK PAIRS; NOT A FULL BILINGUAL PARITY SIGN-OFF; NOT APPROVED FOR MERGE**
@@ -176,7 +176,7 @@ Storage 契约要求先持久化隐藏 Participant，绑定准确 D Participant/
   - The PR description reports E as 6/8 paired, while `docs/translation-status.md` reports 7/8. The remaining Forget/Derived Registration scope needs an exact split/source inventory before the count is changed.
   - `docs/translation-status.md` and the PR description report D as 8/8 paired, while `docs/owner-branch-translation-inventory.md` still reports 7/8 and says the operation/publication gate is pending, despite the bilingual wrapper and Parts 1–4 being present.
 - Risk: reviewers and AI developers could rely on contradictory coverage statements.
-- Resolution: `docs/translation-status.md` now has an explicit PR #28 branch overlay distinguishing file-pair presence from semantic review/source reconciliation; it records B 6/6, D 8/8, E 7/8 and F 5/5, with G/C/H/I detailed pairs and Storage/Consistency correctly pending. `docs/owner-branch-translation-inventory.md` now preserves historical source-branch audit SHAs while separately recording D 8/8 and F 5/5 companion presence in PR #28. The PR description will be aligned to this same scope.
+- Resolution: `docs/translation-status.md` now has an explicit PR #28 branch overlay distinguishing file-pair presence from semantic review/source reconciliation; it records B 6/6, D 8/8, E 7/8 and F 5/5, with G/C/H/I detailed pairs and Storage/Consistency correctly pending. `docs/owner-branch-translation-inventory.md` now preserves historical source-branch audit SHAs while separately recording D 8/8 and F 5/5 companion presence in PR #28. The PR description has been aligned to this same scope and explicitly retains Draft status.
 
 ### BSR-28-003 — PR validation summary was stale; corrected
 - Severity: **P3 — review metadata**
