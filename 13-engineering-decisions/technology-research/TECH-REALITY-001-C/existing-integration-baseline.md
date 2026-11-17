@@ -150,7 +150,7 @@ A direct GitHub API listing in the original research pass reported **40 OPEN PRs
 
 | PR | State | Head SHA | C relevance / observed disposition |
 |---|---|---|---|
-| #69 C research | OPEN / DRAFT | `1a1d6f26a793fc285a1806edf21b696f748a8fed` | Current PR head; original base/merge-base `b3c666...`; current main `e52594...`; compare 6 ahead / 2 behind |
+| #69 C research | OPEN / DRAFT | `a69007a016aea4fcd60a05dfebf5a66ccf7f2538` | Current PR head; original base/merge-base `b3c666...`; current main `e52594...`; compare 7 ahead / 2 behind |
 | #67 H validator/CI/trust review | OPEN / DRAFT | `abd9156d3e9aa171eeb03693b2be1e722e8d33ff` | A review disposition DEFERRED; local exact-head CI verified, production trust/replay open |
 | #73 A current-source remediation | OPEN / DRAFT | `7b4771b3766c616fa932b30b21c3bc0dc742f564` | A role-simulated remediation; REVISE / NOT YET PROVEN |
 | #66 D Phase 3.9 Forget closure | OPEN / DRAFT | `a085190360a27404ecb24e6f6b2103e72659307c` | D proposal, not normative; requires D/Storage/I concurrence |
@@ -190,9 +190,9 @@ All three are DRAFT proposals, not normative contracts, and none claims physical
 ## C-REVIEW-001 currentness correction / 当前性纠正
 
 - Current `main` HEAD is `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; original C merge base is `b3c666e67982cb3d3374e759cfb6552c7765aacb`.
-- GitHub compare `main@e52594f...research/tech-reality-001-c@1a1d6f2` reports **6 commits ahead / 2 behind**. All 17 C research paths are additions relative to main; this does not waive the need to validate the updated base before merge.
+- GitHub compare `main@e52594f...research/tech-reality-001-c@a69007a` reports **7 commits ahead / 2 behind**. All 17 C research paths are additions relative to main; this does not waive the need to validate the updated base before merge.
 - G branch HEAD is `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8`; the English Applied Persistence contract Blob is unchanged at `bd297873...`, and the latest Chinese companion is `82553a47...`.
-- At the incident snapshot H HEAD was `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; the tree was truncated. It was subsequently restored at current Owner HEAD `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6` (215 blobs), including the Unified 1.2.15 artifacts and the new Applied Delivery Evidence 1.0.0 candidate.
+- At the incident snapshot H HEAD was `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; the tree was truncated. It was subsequently restored at Owner HEAD `4e65a2...` (215 blobs) and advanced docs-only to current HEAD `6608cde...` (216 blobs), including the Unified 1.2.15 artifacts and the new Applied Delivery Evidence 1.0.0 candidate.
 - H Phase 3.8.23 EN/zh-CN Blobs `be308261...` / `641abd9b...` accept the G identity semantics with enumerated exceptions and leave wire mapping NOT FROZEN. H Phase 3.8.24 now implements the separate 1.0.0 schema/validator/test candidate; exact-head CI passed 11/11, but production trust and durable replay remain open.
 - These are cross-owner blockers. C may refresh its source pins and consume the exact H mapping requirement; C must not recreate or edit H-owned schema/validator artifacts.
 
@@ -200,7 +200,7 @@ All three are DRAFT proposals, not normative contracts, and none claims physical
 ## C-REVIEW-001 post-restoration Owner branch snapshot / 恢复后的 Owner 分支快照
 
 - C Owner branch `session-c-agent-integration-2026-11-16` HEAD `88992da30331121b81cf2773acab11d921daf281`; parent `a5dff993e5c2928a28deb777c41023cfe923366f`; commit message `Restore complete branch tree and retain Phase 3.8.23 owner decisions`; recursive tree contains 136 blobs, including the CSubmitOutcome 1.0.1 schema, ten-vector fixture, conformance tests, and Phase 3.8.23 C/G identity decision. CI run `44129914790` succeeded; log reports 19 tests, 0 failures.
-- H Owner branch `session-h-bmcp-protocol` HEAD `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`; parent `0e15dd1b0695687a9eabd8c03d5d21384af1688c`; recursive tree contains 215 blobs, including Unified 1.2.15, the separate Applied Delivery Evidence 1.0.0 schema/validator/test and H workflows. CI run `44130722532` succeeded; log reports 11 Applied Delivery Evidence tests, 0 failures. Recovery Cutoff run `44130722851` also succeeded.
+- H Owner branch `session-h-bmcp-protocol` current HEAD `6608cde89d959257db612d8ff8080f631333f3f3` (docs-only advance from tested code commit `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`); recursive tree contains 216 blobs, including Unified 1.2.15, the separate Applied Delivery Evidence 1.0.0 schema/validator/test and H workflows. CI run `44130722532` succeeded; log reports 11 Applied Delivery Evidence tests, 0 failures. Recovery Cutoff run `44130722851` also succeeded.
 - H Applied Delivery Evidence 1.0.0 exact artifacts: decision `36dff0b2ca17773ebc2ef0252d17b2632ffe1b06`; schema `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608`; validator `2f6de24eea737cf75a16ead7495bea4627bb1bb4`; tests `bb2bb6c94cc73293f736c6dcd450ab32bffc6ee5`.
 - These restored Owner branches are separate from PR #69's research head `1a1d6f26a793fc285a1806edf21b696f748a8fed` and PR #92's remediation branch. Do not silently substitute one branch's content for another.
 - The 11 H tests use injected verifier/commit callbacks; the positive fixture supplies all-True trust/identity callbacks and mocked `NEW`/replay/conflict dispositions. This is reference conformance only, not deployed crypto, durable observation ledger, or C/H integration.
