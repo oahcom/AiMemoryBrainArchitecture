@@ -12,18 +12,18 @@ class Issue20SchemaStructureTests(unittest.TestCase):
 
     def test_d_i_storage_and_module_contract_types_exist(self):
         required = {
-            "ProducerInstanceRef", "DRegistrationReceipt", "DPublicationParticipantReceipt",
+            "ProducerInstanceRef", "DRegistrationReceipt", "DPublicationParticipantAdmissionReceipt", "DPublicationTerminalReceipt",
             "DForgetBarrierProof", "IInventorySeal", "ICommitAuthorizationReceipt",
             "IReconciliationTuple", "StorageVisibilityParticipantRef", "StorageOutcomeProof",
             "FRecallCursor", "EPublicationRequest", "GContextLineageManifest",
-            "RestoreProofBundle"
+            "RestoreProofBundle", "ITerminalProof"
         }
         self.assertTrue(required.issubset(set(self.schema["$defs"])))
 
     def test_receipt_outcomes_are_explicit_and_typed(self):
         decisions = self.schema["$defs"]["ICommitAuthorizationReceipt"]["allOf"][1]["properties"]["decision"]["enum"]
         self.assertEqual(set(decisions), {
-            "COMMIT_WON", "REVOCATION_WON", "INDETERMINATE_ABORTED", "UNKNOWN_IN_DOUBT"
+            "COMMIT_WON", "REVOCATION_WON", "UNKNOWN_IN_DOUBT"
         })
         outcomes = self.schema["$defs"]["StorageOutcomeProof"]["allOf"][1]["properties"]["outcome"]["enum"]
         self.assertEqual(set(outcomes), {"COMMITTED_VISIBLE", "NO_PUBLICATION"})
@@ -83,6 +83,24 @@ class Issue20SchemaStructureTests(unittest.TestCase):
         extra_field = dict(receipt)
         extra_field["untypedPermissionEpoch"] = "not-allowed"
         self.assertFalse(validator.is_valid(extra_field))
+
+
+    def test_i_precommit_receipt_and_postcommit_terminal_proof_are_distinct(self):
+        receipt = self.schema["$defs"]["ICommitAuthorizationReceipt"]["allOf"][1]["properties"]
+        terminal = self.schema["$defs"]["ITerminalProof"]["allOf"][1]["properties"]
+        self.assertIn("decision", receipt)
+        self.assertIn("authorizationReceiptRef", terminal)
+        self.assertIn("storageOutcomeDigest", terminal)
+        self.assertEqual(set(terminal["storageOutcome"]["enum"]),
+                         {"COMMITTED_VISIBLE", "NO_PUBLICATION"})
+        self.assertNotIn("ITerminalProof", json.dumps(receipt))
+
+    def test_owner_local_positions_reject_cross_authority_substitution(self):
+        validator = jsonschema.Draft202012Validator(self.schema)
+        dpos = {"authority": "D", "positionRef": "d:10"}
+        ipos = {"authority": "I", "positionRef": "i:10"}
+        validator.validate(dpos, self.schema["$defs"]["DPosition"])
+        self.assertFalse(validator.is_valid(ipos, self.schema["$defs"]["DPosition"]))
 
 
 if __name__ == "__main__":
