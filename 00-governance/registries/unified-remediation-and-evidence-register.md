@@ -225,7 +225,7 @@ This is a bounded repository-tree observation, not a claim that no tests exist o
 
 | ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
 |---|---|---|---|---|---|
-| UMR-038 | P0 | Complete current CSubmitOutcome 1.0.1 × H Unified 1.2.14 × RecoveryJoin 1.0.2 × I/D proof × Storage successor exact-version bundle | C/H/Storage/I/D/A | PARTIALLY ADVANCED — Storage v3.2.7 exists as candidate; joint exact acceptance remains OPEN | P audit `issue-20-v3.2.7-callback-seam-currentness-audit-v0.3.0.md`. C/H base mapping is coherent; Storage v3.2.7 Blob `4435fc0...` pins superseded H test Blob `53774ac...` / 25-test run `44068247661`. Current H test Blob `70a3796...` / run `44068869146` is 27/27 PASS. C/D/I owner decisions are not all current to the callback mapping and current proof source Blobs. Require v3.2.8 and same-manifest C/D/I/H/Storage/A review. |
+| UMR-038 | P0 | Reconcile Storage v3.2.7 current manifest Owner matrix and obtain same-manifest C/H/I/D/Storage/A review; issue corrected v3.2.8 successor before freeze | C/H/Storage/I/D/A | OPEN — L1/L2 local full-path evidence advanced; current Storage manifest remains documentary-stale and A review is predecessor-bound | P audit: `00-governance/role-simulations/issue-20-v3.2.7-owner-review-matrix-and-currentness-audit-v0.4.0.md`. Current Storage manifest Blob `c4ce39e25bf57d97c28db4e2133087d4eca1fbb8` binds H mapping `1cbe74...`, validator `eab961...`, test `dccf8...`, fixture `c80247...`, and H full-path closure `5f4873...`; canonical H CI run `44069941327` on `ba2c934...` passed 32 tests (26 H validator + 6 crypto interop). C Phase 3.8.18 `4be9c1...`, I Phase 3.8.14 `7c6565...`, D Phase 3.8.10 `ccdae9...` review the integrated mapping/full-path sources. Storage §4 still lists older C/I/D reviews and H callback-seam run, duplicates the fixture row, and omits current review pins. A Phase 1.F `85cd97...` reviews predecessor manifest `4435fc...`, not current `c4ce39...`. Require Storage v3.2.8 corrected matrix + duplicate removal + canonical run pin, followed by fresh A exact review. Production trust/adapters, owner ledger completeness, provider adapter, COC quorum, Storage L4, JF-10 P0 and Gate B/C remain OPEN. |
 
 
 ### Latest P/main compare — 2026-11-17
@@ -257,3 +257,8 @@ P role-simulation artifacts:
 - `issue-20-a-phase-1g-review-v3.2.8-bundle-draft-v0.1.0.md`
 
 UMR-038 remains OPEN. The actual I/D branches must refresh their exact reviews, H must canonicalize the duplicate mapping path, Storage must issue v3.2.8, and A must review that actual manifest Blob. H callback CI remains bounded/test-double orchestration; production authority, provider adapter, COC quorum and Storage L4 deployment remain open.
+
+
+### Storage v3.2.7 currentness and owner-matrix audit — 2026-11-17
+
+P re-read current Owner branch heads and exact review Blobs. C Phase 3.8.18 (`4be9c1...`), I Phase 3.8.14 (`7c6565...`) and D Phase 3.8.10 (`ccdae9...`) now review H integrated authority-join mapping `1cbe74...` and the full-path test/fixture source set. H Phase 3.8.14 closure `5f4873...` binds the 32-test exact CI run `44069941327`. Storage v3.2.7 manifest `c4ce39...` contains stale Owner matrix entries and a duplicate fixture row. A Phase 1.F review `85cd97...` binds an earlier manifest `4435fc...` and 25-test suite; it does not review `c4ce39...`. P published a currentness audit and simulated A Phase 1.G review. Require Storage Owner publication of corrected v3.2.8 and a fresh A review; no Owner branch or main was modified.
