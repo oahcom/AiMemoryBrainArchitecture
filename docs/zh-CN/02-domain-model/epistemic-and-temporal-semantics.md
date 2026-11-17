@@ -96,7 +96,7 @@ Agent 说“我将拯救这个世界”，只能支持一条 Reported Intent/Pla
 
 ### Recorded At
 
-由 Brain 在可靠接收时赋值，不可变。Replay 保留原 Recorded At，并添加重放元数据。
+由 Brain 在持久化接受成功提交时赋值，不可变。Replay 保留原 Recorded At，并添加重放元数据。
 
 ### Valid Time
 
@@ -131,7 +131,7 @@ Agent 说“我将拯救这个世界”，只能支持一条 Reported Intent/Pla
 工作流：
 1. 保留来源时间表达和归属。
 2. 只规范化 Evidence 能支持的内容。
-3. 在可靠接收时赋值 Recorded At。
+3. 在持久化接受成功提交时赋值 Recorded At。
 4. 在保留来源链和不确定性的前提下推导 Event Time。
 5. 只有声明本身支持时才赋值 Valid Time。
 6. 根据 Evidence/处理过程分配 Epistemic Status，而不是根据相似度。
