@@ -4,7 +4,7 @@ This index is the entry point for all governed AI development tasks.
 
 | Work Item ID | Title | Owner | Class/Risk | Status | Prompt | Implementation | Review | Acceptance |
 |---|---|---|---|---|---|---|---|---|
-| [AID-2026-001](AID-2026-001/manifest.yaml) | Define ChatGPT-native execution model | A | ARCH/R2 | PROPOSED | [prompt-v1](AID-2026-001/prompt-v1.md) | [Draft PR](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/PLACEHOLDER) | Pending | Pending |
+| [AID-2026-001](AID-2026-001/manifest.yaml) | Define ChatGPT-native execution model | A | ARCH/R2 | PROPOSED | [prompt-v1](AID-2026-001/prompt-v1.md) | [Draft PR](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42) | Pending | Pending |
 
 ## Registration rules
 
