@@ -67,7 +67,8 @@
     "signature",
     "ProviderEvidenceIssuerRef",
     "ProviderEvidenceType",
-    "message_type"
+    "message_type",
+    "OwnerSignatureRef"
   ],
   "properties": {
     "schema_id": {
@@ -334,6 +335,14 @@
     },
     "message_type": {
       "const": "C_PROVIDER_OUTCOME_RECORDED"
+    },
+    "OwnerSignatureRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ActualInferenceRequestId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
     }
   },
   "$defs": {
