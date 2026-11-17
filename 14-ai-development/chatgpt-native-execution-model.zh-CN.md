@@ -68,7 +68,7 @@ GitHub Actions 可以响应仓库事件启动确定性 CI。CI 结果是 ChatGPT
 | Owner | 对话职责 |
 |---|---|
 | A | 任务接收、提示词编写、依赖排序、跨 Owner 集成、决策与证据登记 |
-| B | 领域模型与规范领域语义 |
+| B | 领域模型与领域身份语义（不含安全身份） |
 | C | Agent 集成、遥测、推理边界要求 |
 | D | Canonical Memory Brain、记忆生命周期、Forget 语义 |
 | E | Memory Compiler 与派生记忆生产 |
