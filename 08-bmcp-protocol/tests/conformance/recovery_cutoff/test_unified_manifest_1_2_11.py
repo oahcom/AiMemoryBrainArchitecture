@@ -73,6 +73,7 @@ def fixtures():
 class Schema1211Tests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):cls.schema=json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    def setUp(self):self.m,self.prefix,self.admissions,self.snaps,self.proofs=fixtures()
     def msg(self,t):
         return next(x["allOf"][1] for x in self.schema["oneOf"] if x["allOf"][1]["properties"]["message_type"]["const"]==t)
     def test_SCHEMA1211_01_artifact_vs_wire_version(self):
