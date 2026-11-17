@@ -84,7 +84,7 @@ The review is **not** a blanket approval of all 125 changed files. It is a targe
 - Ranking 不得静默裁决冲突 Claim；必须保留 Support/Refute Evidence 和 Conflict Marker。
 - Partial/Degraded/Unavailable 与 Complete 状态不同；Scheduling/Cancellation 不得把部分结果变成完整结果。
 
-## 5. Focused cross-module identity, Applied and Storage/Consistency review / 跨模块身份、Applied 与 Storage/Consistency 专项复审
+## 3. Focused cross-module identity, Applied and Storage/Consistency review / 跨模块身份、Applied 与 Storage/Consistency 专项复审
 
 ### 5.1 Reviewed bilingual pairs / 已复审双语配对
 
@@ -151,7 +151,7 @@ Storage 契约要求先持久化隐藏 Participant，绑定准确 D Participant/
 - 风险：读者可能误将系统指南理解为已冻结、完整的跨 Owner 契约；但上述权威源文件仍处于 CANDIDATE/BLOCKED/OPEN/NOT VERIFIED 状态。
 - 要求：PR #28 必须继续明确其范围；不得将 Identity、Applied、Storage Topology、JF-10 或 Restore 标记为双语完成或已验收。后续批次必须按准确源 SHA 创建双语配对，并保留每份源文件的 Candidate/Blocking/Not-run 状态。
 
-## 6. Findings / 发现项
+## 4. Findings / 发现项
 
 ### BSR-28-001 — Recorded At wording weakens the durability qualifier
 - Severity: **P2 — terminology precision**
@@ -186,7 +186,7 @@ Storage 契约要求先持久化隐藏 Participant，绑定准确 D Participant/
 - Risk: PR readers could otherwise see an obsolete validation status.
 - Resolution: PR body now records the current-head structural gate result and explicitly states that structural CI does not prove semantic parity.
 
-## 7. Review boundaries and non-findings / 复审边界与未发现事项
+## 5. Review boundaries and non-findings / 复审边界与未发现事项
 
 - No Critical/P0 semantic reversal was found in the targeted high-risk pairs reviewed above.
 - The source/environment identity digest requirement is present in both languages; no finding is raised for it.
@@ -200,7 +200,7 @@ Storage 契约要求先持久化隐藏 Participant，绑定准确 D Participant/
 - 本复审没有执行 Rust 测试、故障注入测试、Storage 崩溃/恢复测试或跨 Owner Conformance Suite。源文档标记为 NOT RUN 的测试仍然是 NOT RUN。
 - 本复审不批准架构冻结、实现签收、分支保护或合并。
 
-## 8. Recommended disposition / 建议处置
+## 6. Recommended disposition / 建议处置
 
 1. BSR-28-001 and BSR-28-002 are resolved in the current PR branch; keep their resolution evidence traceable.
 2. BSR-28-003 is resolved in the PR description and current-head CI record.
