@@ -128,6 +128,18 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
 
     def test_10_legacy_1_2_11_is_not_the_current_validator_revision(self):
         self.assertNotEqual(SCHEMA_ARTIFACT_REVISION, "1.2.11")
+    def test_09_c_submit_outcome_1_0_1_schema_requires_sequence_namespace(self):
+        fixture_dir = ROOT.parent / "fixtures"
+        schema = json.loads((fixture_dir / "c-submit-outcome-1.0.1.schema.json").read_text(encoding="utf-8"))
+        vectors = json.loads((fixture_dir / "c_submit_outcome_1_0_1_vectors.json").read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(schema)
+        validator = Draft202012Validator(schema, format_checker=FormatChecker())
+        self.assertEqual(schema["$id"], "urn:aimba:schema:c-submit-outcome:1.0.1")
+        self.assertIn("sequence_namespace_ref", schema["required"])
+        for vector in vectors["vectors"]:
+            self.assertEqual(vector["record"]["sequence_namespace_ref"], "C/sequencer/provider-outcome")
+            self.assertFalse(list(validator.iter_errors(vector["record"])))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
