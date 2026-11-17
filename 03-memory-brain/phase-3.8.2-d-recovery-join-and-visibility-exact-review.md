@@ -85,3 +85,8 @@ The latest H RecoveryJoin schema now has typed D evidence requirements for LINEA
 Updated H RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
 Updated H semantic contract Blob: 121717c5f303b1a2e864f2b95664f51f51ba4b48.
 Updated HRC suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
+
+
+## Verified H candidate CI result
+
+GitHub Actions run 44039990464, job 133891944149, checked out H commit da94bcc1796cb350eed12845e49cbc3663faab9c and completed 66/66 candidate tests successfully (Ubuntu 26.04 / CPython 3.12.16). This is a PASS for the committed Python HRC/JPF/WIRE/SCHEMA candidate suite only. It does not prove production signatures, cross-language canonical bytes, live owner/COC adapters, physical JF-10 behavior or deployed Storage topology/HA/restore.
