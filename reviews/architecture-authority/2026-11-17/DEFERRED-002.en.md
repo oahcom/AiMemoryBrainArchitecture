@@ -12,6 +12,7 @@
 | DEF-05 | Multiple vector/graph/search backends | F | Medium | Non-blocking | Comparative benchmark only | Multi-backend production complexity without measured demand | Workload-backed ADR and operational budget | Before P2 |
 | DEF-06 | Distributed service decomposition, multi-region and autoscaling | Engineering/Storage | High | Blocking for production scale claims | Topology research and load model | Premature microservices, multi-region writes or scale claims | Measured workload, selected topology, failure-domain and DR proof | Before P3 |
 | DEF-07 | Multi-PolicyDomain atomicity | I + Storage | Critical | BLOCKED; not accepted | Single-domain design only | Cross-domain transaction or implied atomicity | New I/Storage normative design, security policy, physical topology and independent conformance | Separate future architecture decision |
+| DEF-08 | Cross-BrainAuthority atomic publication/Forget transaction | D + Storage + I | Critical | BLOCKED in v1 | Fan out into independent per-BrainAuthority operations; global completion only after each authority's terminal proof and complete inventory | One atomic operation spanning multiple BrainAuthorityRefs; cross-authority atomicity inferred from a global coordinator | Successor normative ADR with explicit scope/coordinator, ordering, partial completion, restore/recovery and independent physical conformance | Separate future architecture decision; before any multi-authority capability |
 
 ## Conditionally accepted non-blocking condition
 
