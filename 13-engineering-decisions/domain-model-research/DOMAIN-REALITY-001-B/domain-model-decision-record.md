@@ -268,3 +268,22 @@ Option A 尚未获批。Architecture Governance 未记录具名决策权威、�
 Claim identity remains a separate unresolved question. Stable ClaimRef + immutable ClaimRevisionRef is a candidate; D owns canonical identity allocation, persistence and revision commit after approval. ConflictSet remains a candidate grouping of exact ClaimRevisionRefs with D-owned canonical lifecycle/commit shape. E retains neutral CandidateProposition/ExtractionIR and cannot mint canonical IDs. F/G consume only neutral or exact version-pinned references while blocked.
 
 Claim 身份仍是独立未决问题。稳定 ClaimRef + 不可变 ClaimRevisionRef 仍为候选；批准后由 D 负责规范身份分配、持久化和 Revision Commit。ConflictSet 仍是按精确 ClaimRevisionRef 分组的候选概念，其规范生命周期/Commit 形态由 D 负责。E 继续保留中立 CandidateProposition/ExtractionIR，不得创建规范 ID。阻塞期间 F/G 只能消费中立引用或精确版本绑定引用。
+
+
+### 7.4 Exact D/E/F/G consumer alignment / D/E/F/G 精确消费者对齐
+
+The live Owner contracts confirm that no downstream acceptance has closed the B Fact/Claim ADR:
+- D Canonical Store Blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` permits only neutral PropositionRef while INT-P0-01 is blocked. D Versioning Blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb` proposes stable Claim ID + immutable ClaimRevision as D's **Option A**, still candidate.
+- E Extraction Blob `c18780403de2d1dbcf471bdb8abdaa009a4a78e1` keeps CandidateProposition/ExtractionIR pre-canonical and neutral; E does not assign Fact/Claim identity.
+- F Retrieval Blob `1fbfc0ff07b66c0ff68c3cea5271261c9d7fc0af` assigns canonical identity/status to D and explicitly does not adjudicate disputed Claims.
+- G Context Versioning Blob `05c0739d0c22576a1fd5affc7d73c078c89049b1` pins exact MemoryVersion in ContextEntry; G owns ContextVersion/ChangeSet, not Claim/Fact identity.
+
+实时 Owner 契约确认，没有任何下游验收解除 B Fact/Claim ADR：
+- D Canonical Store Blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` 在 INT-P0-01 阻塞期间只允许中立 PropositionRef。D Versioning Blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb` 将稳定 Claim ID + 不可变 ClaimRevision 作为 D 的 **Option A** 提出，仍为候选。
+- E Extraction Blob `c18780403de2d1dbcf471bdb8abdaa009a4a78e1` 保持 CandidateProposition/ExtractionIR 为规范化前中立表示；E 不分配 Fact/Claim 身份。
+- F Retrieval Blob `1fbfc0ff07b66c0ff68c3cea5271261c9d7fc0af` 将规范身份/状态权威分配给 D，并明确不裁决争议 Claim。
+- G Context Versioning Blob `05c0739d0c22576a1fd5affc7d73c078c89049b1` 在 ContextEntry 中固定精确 MemoryVersion；G 拥有 ContextVersion/ChangeSet，不拥有 Claim/Fact 身份。
+
+**Option-label warning:** D's Option A (stable Claim ID + immutable ClaimRevision) is not B's Option A (separate Fact attestation object + Claim proposition thread). These are separate decisions. Neither is approved; no Claim/Fact/ClaimRevision/ConflictSet schema is frozen.
+
+**方案编号警告：** D 的 Option A（稳定 Claim ID + 不可变 ClaimRevision）不是 B 的 Option A（独立 Fact Attestation 对象 + Claim 命题线程）。这是两个独立决策。两者均未获批；不得冻结 Claim/Fact/ClaimRevision/ConflictSet Schema。
