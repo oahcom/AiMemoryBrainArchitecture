@@ -68,7 +68,7 @@ class IProfileCrossLanguageVectors(unittest.TestCase):
             {v["message_type"] for v in vector["vectors"]},
             {"OWNER_LOCAL_PENDING_GATE", "OWNER_LOCAL_GATE_RELEASE",
              "JF10_I_TERMINAL_DECISION_OBSERVED", "I_COMPLETE_EMPTY_PROOF",
-             "I_OUT_OF_SCOPE_PROOF"}
+             "I_OUT_OF_SCOPE_PROOF", "I_ADMISSION_SNAPSHOT_MEMBERSHIP_PROOF"}
         )
 
     def test_CRYPTO_02_jcs_object_order_is_irrelevant_but_array_order_is_not(self):
@@ -105,6 +105,22 @@ class IProfileCrossLanguageVectors(unittest.TestCase):
         self.assertIn("manifest_content_digest", release)
         self.assertIn("manifest_record_entry_digest", release)
         self.assertNotIn("manifest_digest", release)
+
+    def test_CRYPTO_07_membership_proof_p0_binds_exact_owner_snapshot_and_row(self):
+        vector = json.loads(VECTOR.read_text(encoding="utf-8"))
+        proof = next(v["p0"] for v in vector["vectors"] if v["message_type"] == "I_ADMISSION_SNAPSHOT_MEMBERSHIP_PROOF")
+        required = {"owner_authority_ref","owner_ledger_ref","owner_ledger_version","owner_entry_ref",
+            "owner_entry_digest","owner_admission_ref","owner_sequence_namespace","owner_local_sequence",
+            "owner_high_water","owner_ledger_root","owner_snapshot_ref","owner_snapshot_digest",
+            "owner_snapshot_attestation_ref","owner_snapshot_attestation_digest","owner_gate_ref",
+            "owner_gate_generation","scope_ref","scope_generation","scope_binding_digest",
+            "operation_identity_ref","operation_digest","request_digest","anti_rollback_anchor_ref",
+            "key_status_generation","signature_profile_ref","key_id","key_version",
+            "canonicalization_profile_ref","digest_profile_ref"}
+        self.assertTrue(required.issubset(proof))
+        self.assertNotIn("proof_digest", proof)
+        self.assertNotIn("signature_ref", proof)
+        self.assertEqual(proof["purpose"], "COC_RECOVERY_CUTOFF_MANIFEST_MEMBERSHIP")
 
 
 if __name__ == "__main__":
