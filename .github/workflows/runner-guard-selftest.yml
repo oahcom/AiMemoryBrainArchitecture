@@ -1,0 +1,58 @@
+name: Runner Guard Self-Test
+
+# Proves, from inside a real job, that the self-hosted runner executes work and
+# that the L1 admission hook admitted it. Read-only; prints no secrets.
+#
+# The push trigger is scoped to this file so the workflow runs when it is added
+# or revised and stays dormant otherwise. Documented in AI-RUN-002-RUNBOOK
+# section 4.1 and DOC-OPS-001 section 13.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/runner-guard-selftest.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: runner-guard-selftest
+  cancel-in-progress: false
+
+jobs:
+  self-test:
+    name: Verify runner execution and admission
+    runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 5
+    steps:
+      - name: Report execution context
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'event=%s\n' "${GITHUB_EVENT_NAME}"
+          printf 'ref=%s\n' "${GITHUB_REF}"
+          printf 'actor=%s\n' "${GITHUB_ACTOR}"
+          printf 'runner=%s\n' "${RUNNER_NAME}"
+          printf 'hostname=%s\n' "$(hostname)"
+          printf 'architecture=%s\n' "$(uname -m)"
+          printf 'user=%s\n' "$(id -un)"
+          df -h / | tail -1
+
+      - name: Confirm the admission guard recorded this job
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="${HOME}/actions-runner/hooks/guard.log"
+          if [ ! -r "$log" ]; then
+            echo "::error::guard log not readable at ${log}; L1 admission control is not installed"
+            exit 1
+          fi
+          echo "Last three guard decisions:"
+          tail -n 3 "$log"
+          if ! grep -qE 'ALLOW event=(push|workflow_dispatch)' "$log"; then
+            echo "::error::no ALLOW decision found in the guard log"
+            exit 1
+          fi
+          echo "Admission guard admitted this job."
