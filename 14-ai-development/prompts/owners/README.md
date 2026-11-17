@@ -24,4 +24,8 @@ Prompts are PROPOSED until reviewed and accepted. Executed versions must never b
 ## Historical prompt versions / 历史提示词版本
 
 - **Owner B v1 — SUPERSEDED / HISTORICAL.** Retained unchanged for audit and historical replay only. It is not a current execution entry point. All new Owner B work MUST use [owner-session-v2.md](B/owner-session-v2.md).
+- **Owner D v1 — SUPERSEDED / HISTORICAL.** Retained for audit only; not a current execution entry point. All new Owner D work MUST use [owner-session-v2.md](D/owner-session-v2.md).
+- **Owner I v1 — SUPERSEDED / HISTORICAL.** Retained for audit only; not a current execution entry point. All new Owner I work MUST use [owner-session-v2.md](I/owner-session-v2.md).
 - **Owner B v1 — 已被取代 / 历史版本。** 原文件保持不变，仅用于审计和历史回放，不得作为当前执行入口。所有新的 Owner B 工作必须使用 [owner-session-v2.md](B/owner-session-v2.md)。
+- **Owner D v1 — 已被取代 / 历史版本。** 仅用于审计，不得作为当前执行入口。所有新的 Owner D 工作必须使用 [owner-session-v2.md](D/owner-session-v2.md)。
+- **Owner I v1 — 已被取代 / 历史版本。** 仅用于审计，不得作为当前执行入口。所有新的 Owner I 工作必须使用 [owner-session-v2.md](I/owner-session-v2.md)。
