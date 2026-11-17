@@ -3,9 +3,9 @@
 **Observed:** 2026-11-18 UTC | **Repository:** `oahcom/AiMemoryBrainArchitecture`
 
 ## Main baseline / Main 基线
-- Default branch: `main`; HEAD: `b3c666e67982cb3d3374e759cfb6552c7765aacb`.
+- Default branch: `main`; HEAD at original C branch creation: `b3c666e67982cb3d3374e759cfb6552c7765aacb`; current main HEAD at review refresh: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`.
 - Repository is private; connected GitHub permissions observed: admin/maintain/push/pull.
-- Research branch created from this exact main SHA: `research/tech-reality-001-c`.
+- Research branch `research/tech-reality-001-c` was created from the historical main SHA `b3c666e67982cb3d3374e759cfb6552c7765aacb`; it is not based on current main.
 - Historical C branch `session-c-agent-integration-2026-11-16`: HEAD `71047cdb51139ca4080ac67f451e38a48698859d`; compare against main is DIVERGED, 167 ahead / 56 behind, 104 changed files. It is not the new research base.
 
 ## Main source pins / Main 源文件
@@ -40,15 +40,16 @@
 | D | `session-d-memory-brain-2026-11-16` | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | Forget contract `1f0391bc49d007c44ec74165bd33d37412cc7990` |
 | E | `session-e-memory-compiler-2026-11-16` | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | Local lifecycle producer `4fb9e58511941f59b4d777336f8f85ad88ecccf1` |
 | F | `session-f-memory-runtime` | `1908ce4d233b20f7cafd00cb679affd01bd15174` | Local lifecycle/runtime `29e9504c75d737c2dd200ebc3306eda555f0b0ac` |
-| G | `session-g-memory-context` | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | Applied/Forget contract `aa3afa73d8a76cc6f025839c52bfbff6a983046a` |
-| H | `session-h-bmcp-protocol` | `0d36324457e39bd50ad56ae902d477c4ea765b61` | Unified 1.2.15 schema `860fc4cec658db7d2703cd6adf72aa31a2723f6d`; mapping `2dc30f193d9c4f4bdc05ca4c137103687db28924` |
+| G | `session-g-memory-context` | `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8` | Applied/Forget baseline `aa3afa73d8a76cc6f025839c52bfbff6a983046a`; Applied persistence EN `bd297873bc1e593280484a43cb44b56058d9c4ff`; zh-CN `82553a47fae2d5e796e0742b46231afe465e75b2` |
+| H | `session-h-bmcp-protocol` | `0277a8b9ee63be850acc0b8b1b08625524aaa33b` | Latest H Applied Delivery Evidence decision EN `be308261c3e000e712a3cdbd3dbf60507156127b`; zh-CN `641abd9b5a4ed271c3c4b561747c99d7cde79463`. Unified 1.2.15 schema `860fc4...`, gateway validator `9cc426...` and mapping `2dc30f...` are historical artifacts at ancestor `0d363244...`, not present in current H branch tree. |
 | I | `session-i-security-governance-2026-11-16` | `0d071bf1ee7cc71912398c6ae57e4496e08f44ab` | Governance register `f5fd2558c657f4ef49396a7a00cdbcd0f226f853`; commit authorization `5a5304d48aa912dcf6f817099bd5659371d8cdc8` |
 | Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | Option A ADR `bb544ba2f346bdc130d524bd5c7310d86f367988`; v3.3.2 manifest `5c614375e10698e4931d83deb57d20321445e068` |
 
 ## Verified gaps / 已确认缺口
 - Current main is a consolidated baseline and does not contain the full historical D/E/F/G/H/I owner trees. Those owner snapshots are separate branches, not main-merged contracts.
 - C historical branch diverges materially and is not current main.
-- H 1.2.15 is a schema candidate; Storage v3.3.2 explicitly binds H 1.2.14 and CSubmitOutcome 1.0.1, not 1.2.15.
+- H 1.2.15 schema/validator/CI artifacts are historical evidence at H ancestor `0d363244...`; current H branch HEAD `0277a8b...` removed the prior protocol/schema/validator/test tree. H Phase 3.8.23 now states a separate Applied Delivery Evidence successor schema/validator is NOT YET IMPLEMENTED and wire mapping is NOT FROZEN.
+- Storage v3.3.2 explicitly binds H 1.2.14 and CSubmitOutcome 1.0.1, not H 1.2.15 or the proposed Applied Delivery Evidence successor.
 - C crypto profile `AIMBA-C-CRYPTO-1.0` and I governance signature profile remain NOT REGISTERED in C Phase 3.11.0.
 - G states Applied contract freeze BLOCKED and implementation/execution NOT VERIFIED.
 - I governance register is candidate; no policy decision is effective merely because a document exists.
@@ -145,11 +146,11 @@ Issue #7's current body says this repository is intentionally an architecture re
 ## Live PR/Issue and current-source refresh / 实时 PR、Issue 与当前性刷新
 
 ### Open repository work / 仓库开放工作
-A direct GitHub API listing on 2026-11-18 returned **40 OPEN PRs** and **24 OPEN Issues**. This C task reviewed the directly relevant current PRs below; the remaining repository-wide PR/Issue population was not exhaustively reviewed.
+A direct GitHub API listing in the original research pass reported **40 OPEN PRs** and **24 OPEN Issues**. These are historical scan values, not asserted as the current totals in this review. The repository-wide population was not exhaustively reviewed.
 
 | PR | State | Head SHA | C relevance / observed disposition |
 |---|---|---|---|
-| #69 C research | OPEN / DRAFT | `274f5ec59127c582882b5d3ff6d31f31d811f6f5` (superseded by subsequent readback commits; consult live PR #69 metadata for current head) | This research package |
+| #69 C research | OPEN / DRAFT | `1a1d6f26a793fc285a1806edf21b696f748a8fed` | Current PR head; original base/merge-base `b3c666...`; current main `e52594...`; compare 6 ahead / 2 behind |
 | #67 H validator/CI/trust review | OPEN / DRAFT | `abd9156d3e9aa171eeb03693b2be1e722e8d33ff` | A review disposition DEFERRED; local exact-head CI verified, production trust/replay open |
 | #73 A current-source remediation | OPEN / DRAFT | `7b4771b3766c616fa932b30b21c3bc0dc742f564` | A role-simulated remediation; REVISE / NOT YET PROVEN |
 | #66 D Phase 3.9 Forget closure | OPEN / DRAFT | `a085190360a27404ecb24e6f6b2103e72659307c` | D proposal, not normative; requires D/Storage/I concurrence |
@@ -184,3 +185,13 @@ All three are DRAFT proposals, not normative contracts, and none claims physical
 
 ### 中文当前性结论
 截至本次刷新，仓库有 40 个开放 PR、24 个开放 Issue。A 的 PR #73、H 的 PR #67、D/I/Storage 的 Phase 3.9 PR #66/#68/#71 均为 Draft。H 1.2.15 已有精确 HEAD 的 91 项 Provider Outcome 测试通过，以及 288 项 Recovery Cutoff 测试（22 项跳过）通过，但这些只是本地参考验证，不是生产信任、Durable Replay 或跨 Owner 证明。Storage v3.3.2 仍绑定 H 1.2.14。Phase 3.9 的 Fence 读抑制和 Forgotten 终态授权是提案，必须等待 D/I/Storage 精确版本批准。
+
+
+## C-REVIEW-001 currentness correction / 当前性纠正
+
+- Current `main` HEAD is `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; original C merge base is `b3c666e67982cb3d3374e759cfb6552c7765aacb`.
+- GitHub compare `main@e52594f...research/tech-reality-001-c@1a1d6f2` reports **6 commits ahead / 2 behind**. All 17 C research paths are additions relative to main; this does not waive the need to validate the updated base before merge.
+- G branch HEAD is `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8`; the English Applied Persistence contract Blob is unchanged at `bd297873...`, and the latest Chinese companion is `82553a47...`.
+- H branch HEAD is `0277a8b9ee63be850acc0b8b1b08625524aaa33b`. Its latest commit removes the prior Unified 1.2.15 schema, gateway/provider validators, tests, and most prior H branch files; the current tree contains only the two Phase 3.8.23 decision documents and three workflow files. The previous 1.2.15 artifacts remain addressable by immutable historical commit `0d363244...`, but are not current branch files.
+- H Phase 3.8.23 EN/zh-CN Blobs `be308261...` / `641abd9b...` accept the G identity semantics with enumerated exceptions, but explicitly leave Applied Delivery Evidence wire mapping NOT FROZEN and the separate successor schema/validator NOT IMPLEMENTED.
+- These are cross-owner blockers. C may refresh its source pins and consume the exact H mapping requirement; C must not recreate or edit H-owned schema/validator artifacts.
