@@ -197,3 +197,44 @@ E 采用受保护 Derivative 发布所需的两个独立进行中 Barrier：
 6. D 与 I 分别消费权威 Storage Outcome：COMMITTED_VISIBLE 或已证明的 NO_PUBLICATION 关闭各自 Participant；UNKNOWN 保持两个 Barrier 开放且 Artifact Private。
 
 D Fence 与 I Revocation 是独立 Gate。D Publication Intent 先发生，则后来的 D Fence 等待该 Participant；I Receipt Consumption 先发生，则后来的 Revocation 等待该 Participant。任一权威先赢，都必须拒绝或安全中止发布。禁止跨权威 Epoch 数值比较。
+
+
+## 11. Crash-window correction — Storage prepare before D PublicationParticipant admission
+
+This section supersedes the ordering in §10 where D admission preceded Storage prepare.
+
+The required sequence is:
+1. Storage first persists a hidden StorageVisibilityParticipantRef bound to the immutable PublicationOperationId/digest, WorkItemId, artifact/version, AttemptId/LeaseId, complete dependency digest and private stage identity.
+2. D then admits PublicationParticipantRef bound to that exact already-durable StorageVisibilityParticipantRef and records it as unresolved in the D fence/barrier.
+3. I consumes the single-use CommitAuthorizationReceipt bound to both exact refs and the complete immutable publication tuple.
+4. Storage commits visibility only after exact D and I proofs validate at the final boundary.
+5. D and I close their own participants only after authoritative Storage COMMITTED_VISIBLE or NO_PUBLICATION evidence.
+
+Crash semantics:
+- Storage prepare exists, D admission not yet accepted: remain private; no D barrier participant and no publication capability. D rejection is resolved by the same D operation ID/digest.
+- D admission ACK unknown: resolve the same PublicationParticipantRef + digest; do not create another Storage participant.
+- D admission accepted: its exact Storage participant must already exist. Missing participant state is UNKNOWN/ledger inconsistency, not safe abort.
+- I receipt consumed COMMIT_WON: later revocation remains pending until Storage terminal outcome.
+- Any unknown outcome keeps artifact private and all already-admitted barriers open.
+
+D PublicationParticipantRef and I CommitAuthorizationReceipt both bind the exact StorageVisibilityParticipantRef. This participant is not C ParticipantIntentRef or Storage PreparedParticipantRef/GID.
+
+### 中文规范
+
+本节替代 §10 中 D Admission 先于 Storage Prepare 的顺序。
+
+强制顺序：
+1. Storage 首先持久化隐藏的 StorageVisibilityParticipantRef，绑定不可变 PublicationOperationId/Digest、WorkItemId、Artifact/Version、AttemptId/LeaseId、完整 Dependency Digest 和 Private Stage 身份。
+2. D 随后接受 PublicationParticipantRef，并绑定该精确且已持久化的 StorageVisibilityParticipantRef，将其记录为 Fence/Barrier 内未解决操作。
+3. I 单次消费绑定两个精确 Ref 和完整不可变 Publication Tuple 的 CommitAuthorizationReceipt。
+4. 只有在最终边界验证精确 D/I 证明后，Storage 才提交 Visibility。
+5. D/I 只有取得权威 Storage COMMITTED_VISIBLE 或 NO_PUBLICATION 证据后，才关闭各自 Participant。
+
+崩溃语义：
+- Storage Prepare 已存在但 D Admission 尚未接受：保持 Private；尚无 D Barrier Participant，也无发布能力。D 拒绝通过同一 D Operation ID/Digest 解析。
+- D Admission ACK 未知：查询同一 PublicationParticipantRef+Digest，不得创建第二个 Storage Participant。
+- D Admission 已接受：其精确 Storage Participant 必须已存在。Participant 状态缺失是 UNKNOWN/Ledger Inconsistency，不是安全 Abort。
+- I Receipt 已消费为 COMMIT_WON：后续 Revocation 必须等待 Storage 终态。
+- 任一结果未知，Artifact 保持 Private，所有已准入 Barrier 保持开放。
+
+D PublicationParticipantRef 和 I CommitAuthorizationReceipt 均绑定精确 StorageVisibilityParticipantRef。该 Participant 不等于 C ParticipantIntentRef 或 Storage PreparedParticipantRef/GID。
