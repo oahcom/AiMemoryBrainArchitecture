@@ -313,3 +313,10 @@ The new conflict finding, exact source pins, authority boundaries, successor-ver
 - B5 仍 BLOCKED / NOT PASSED，等待对全部规范条款、表格和状态值进行独立语义对等审查。
 - B6 仍 INDEPENDENT_REVIEW_PENDING。
 - 精确 Blob 读回不代表语义等价、Owner 验收或独立审查。
+
+
+### 8.3 Currentness-audit cross-reference correction / 当前性审计交叉引用更正
+
+After §8 was written, the currentness audit was amended to name B-CONFLICT-017 explicitly. Its resulting exact Blob is `8641268f6cb93e8154ae1693ace37cc72498a4b8` (382 lines). This supersedes the earlier currentness-audit Blob `3ca5468171a81dda8bb3ed7bf770052642a9bacb` recorded in §8's table. The currentness file was re-read from the research branch after the write.
+
+§8 写入后，当前性审计再次修订，明确引用 B-CONFLICT-017。其最终精确 Blob 为 `8641268f6cb93e8154ae1693ace37cc72498a4b8`（382 行）。该值取代 §8 表格中记录的旧当前性审计 Blob `3ca5468171a81dda8bb3ed7bf770052642a9bacb`。该文件写入后已从研究分支重新读回。
