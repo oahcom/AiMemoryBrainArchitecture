@@ -16,11 +16,11 @@
 | H | I crypto wire mapping 3.8.4 | `1a64a7be3ec4190643809897519afdf73ed69c1d` |
 | H | Unified Manifest union contract 3.8.4 | `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175` |
 | H | H exact review | `f5ab9a9232b04720faf552a70d5d2962343f843f` |
-| H | Semantic reference validator | `6710bd7876be5f2c60640f21090729b8859a7a3e` |
-| H | RecoveryJoin 1.0.2 tests | `6afa788da2a899f03de8207cb700c40e0533aba1` |
+| H | Semantic reference validator | `e26379d38825ee13d15f652d3bd019c4091da37d` |
+| H | RecoveryJoin 1.0.2 tests | `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a` |
 | H | Unified 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
 | H | Unified 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
-| H | Candidate CI | Run `44051257901`, commit `07cacfbc208a566a784389f4eef60bc8e5d1281f`, 282 total / 260 passed / 22 skipped / 0 failed |
+| H | Candidate CI | Run `44051676055`, commit `16c0e63458a3e3773cd38ef86bfb4f7fe44dd0b4`, 288 total / 266 passed / 22 skipped / 0 failed |
 | I | Crypto profile proposal | `5eeb011032c53c2f7897d699d6f512b26f07d0a2` |
 | I | Artifact revision / manifest digest amendment | `35c47cc56c9d5e7ab72fdddb7ef9032aa3661ff9` |
 | I | Owner membership proof contract | `88209bbea0ab600880c5c630cfe83af31ee16dd7` |
@@ -119,3 +119,8 @@ It does not close R1/R2, Storage Gate A/B/C, JF-10 P0, multi-domain atomicity or
 ### A addendum — sixth I membership proof P0 vector
 
 The I proof P0 now has a sixth Python/Node RFC 8785 + Ed25519 test vector, exact Blob `9210219a85afe1f48da0ea253a073aba8b2e138c`, test Blob `01239e06e8f4464f49acd34241dc00899befe424`. CI Run `44051045877` passed 282 tests (260 passed, 22 skipped, 0 failed). This is TEST-ONLY cryptographic fixture evidence and does not change the production trust/key/ledger boundary.
+
+
+### A addendum — exact proof-payload verifier
+
+H's reference module now validates the RecoveryJoin 1.0.2 proof payload against the exact owner row/snapshot and requires an injected owner-authoritative signature verifier. CI Run `44051676055` passed 288 tests (266 passed, 22 skipped, 0 failed). The verifier remains TEST-ONLY; this improves candidate semantic specificity but does not close owner implementation, ledger completeness or production cryptographic gates.
