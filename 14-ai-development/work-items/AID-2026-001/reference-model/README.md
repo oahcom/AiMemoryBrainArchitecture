@@ -32,8 +32,13 @@ No concurrency scheduler, database transaction, WAL, distributed replica, Adapte
 
 ## Expanded regression suite
 
-The standard-library suite now contains 22 model-level unit tests. A dedicated GitHub Actions workflow runs this suite against the exact pull-request or main commit when the reference-model files change.
+The standard-library suite now contains 23 model-level unit tests. A dedicated GitHub Actions workflow runs this suite against the exact pull-request or main commit when the reference-model files change.
 
 This CI is deliberately scoped to the in-memory reference model. A green run proves only that this abstract model's tests passed. It does not prove production authentication, authorization, persistence, concurrency, replica, index, cache, queue, adapter, context, backup or restore behavior. DFI-001…DFI-022 remain NOT EVIDENCED against production components until the authoritative runtime repository and accountable implementation owners are identified and tested.
 
 The 22 model-level cases are not a substitute for Owner D/Owner I approvals, independent specialist review, independent integration review, full Manifest/schema validation or architecture acceptance.
+
+
+### Model review correction
+
+The regression suite now also rejects vacuous D-domain completion when the sealed canonical target inventory is empty. Without this guard, Python's `all([])` semantics would allow a zero-target operation to appear D-domain complete. This is a reference-model correction only; production inventory completeness still requires implementation-level proof.
