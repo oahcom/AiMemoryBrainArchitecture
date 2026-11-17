@@ -490,6 +490,7 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_no_publication_requires_every_storage_absence_and_fence_fact(self):
         p = self.prepared()
+        p.install_forget_fence()
         args = self.commit_args()
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
@@ -520,6 +521,7 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_no_publication_proof_must_bind_exact_unknown_operation(self):
         p = self.prepared()
+        p.install_forget_fence()
         args = self.commit_args()
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
@@ -566,6 +568,7 @@ class PublicationProtocolTests(unittest.TestCase):
         for state_name in ("visibility", "outbox", "consumed"):
             with self.subTest(state=state_name):
                 p = self.prepared()
+                p.install_forget_fence()
                 args = self.commit_args()
                 binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                            args["d_proof"], args["i_commit_won_proof"])
@@ -620,6 +623,7 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_no_publication_is_terminal_and_requires_new_operation_id(self):
         p = self.prepared()
+        p.install_forget_fence()
         args = self.commit_args()
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
