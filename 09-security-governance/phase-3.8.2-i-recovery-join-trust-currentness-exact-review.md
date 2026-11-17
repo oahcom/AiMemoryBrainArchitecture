@@ -13,7 +13,7 @@
 - Storage Phase 3.8 contract: Blob 175ee7b1349cfdb79a19898b311a88391ed88010.
 - Storage RecoveryJoin contract: Blob 41f80b1aacfebdb1f652b16144afbf83ce950e82.
 - H RecoveryJoin schema: Blob dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
-- H semantic contract: Blob b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
+- H semantic contract: Blob 121717c5f303b1a2e864f2b95664f51f51ba4b48.
 - HRC semantic suite: Blob 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
 
 ## 2. I disposition
@@ -84,7 +84,7 @@ I 接受 JoinProof 作为跨权威完整性账本，但它不是授权 Token。I
 The latest H RecoveryJoin schema separates OwnerAdmissionRef and OwnerEntryRef, binds request/admission row digests, and requires typed I receipt/terminal evidence to carry PolicyDomainRef, PermissionEpoch, ProducerDomainInventoryEpoch, issuer key and authorization receipt. This addresses schema-shape requirements only. I still must verify signature/key status, historical trust, issuer/audience, policy/registry continuity and currentness inside the I PolicyDomain sequencer at the release CAS. H's test digest profile is not an approved I signature profile. I-RJ-03..05 and runtime trust/currentness remain OPEN.
 
 Updated H RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
-Updated H semantic contract Blob: b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
+Updated H semantic contract Blob: 121717c5f303b1a2e864f2b95664f51f51ba4b48.
 Updated HRC suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
 
 
@@ -93,7 +93,7 @@ Updated HRC suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
 The H branch now pins this exact candidate set:
 
 - RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`
-- H semantic validator contract: `b3218298f58cff9b92cb1c38e453af6fd4d0dd50`
+- H semantic validator contract: `121717c5f303b1a2e864f2b95664f51f51ba4b48`
 - HRC/JPF suite after JPF-08 fixture correction: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`
 - Wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`
 - Schema integrity suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`
