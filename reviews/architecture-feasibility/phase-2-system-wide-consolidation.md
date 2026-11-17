@@ -230,7 +230,7 @@ Freeze requires L1 + L2 + L3:
 ## 8. Ordered next actions / 后续推进顺序
 
 1. Storage + D: resolve the abstract serialization topology (Option A vs Option B), define the exact D/Storage transaction and visibility boundary, and explicitly scope the SQLite prototype.
-2. C + H + D + I + Storage: close the 1.2.12 / RecoveryJoin 1.0.2 / CSubmitOutcome 1.0.1 exact-version migration and publish fresh exact cross-reviews.
+2. C + H + D + I + Storage: close same-manifest review of H 1.2.14 / RecoveryJoin 1.0.2 / RecoveryCutoff 1.0.5 / CSubmitOutcome 1.0.1, including both H mapping artifacts.
 3. D + E + I + Storage: build the integrated producer/fence/publication reference model with adversarial ordering and crash-window tests.
 4. I + D + E + F + G + Storage: prove Global Forget inventory, restore/replay cutoff and anti-resurrection across all derivative classes.
 5. C + G + H + I + D: close the final-request-bound Applied evidence chain and provider outcome semantics.
@@ -238,7 +238,7 @@ Freeze requires L1 + L2 + L3:
 7. A: refresh all exact pins, complete bilingual parity review and issue a final L1/L2/L3 freeze disposition.
 
 1. Storage + D：解决抽象序列化拓扑（Option A 或 Option B），定义精确 D/Storage 事务及可见性边界，并明确 SQLite 原型的适用范围。
-2. C + H + D + I + Storage：闭环 1.2.12 / RecoveryJoin 1.0.2 / CSubmitOutcome 1.0.1 精确版本迁移，并发布新的精确交叉审查。
+2. C + H + D + I + Storage：闭环 H 1.2.14 / RecoveryJoin 1.0.2 / RecoveryCutoff 1.0.5 / CSubmitOutcome 1.0.1 的同一 Manifest 审查，必须包含两种 H Mapping。
 3. D + E + I + Storage：建立集成 Producer/Fence/Publication 参考模型，覆盖对抗性顺序和崩溃窗口。
 4. I + D + E + F + G + Storage：证明 Global Forget Inventory、Restore/Replay Cutoff 和所有派生物的防复活。
 5. C + G + H + I + D：闭环最终请求绑定的 Applied 证据链及 Provider Outcome 语义。
