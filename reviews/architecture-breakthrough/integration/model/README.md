@@ -26,7 +26,7 @@ The model uses only the Python standard library.
 
 ## Bounded result / 有界结果
 
-- Safe transition graph: **22,603 state/depth pairs**, maximum depth 14; no modeled invariant violation.
+- Safe transition graph: **27,472 state/depth pairs**, maximum depth 14; no modeled invariant violation.
 - 11 weakened-guard mutants produce shortest counterexamples (see script output).
 - Manual serial-order assertions cover I COMMIT_WON-before-revocation, revocation-before-commit, Fence-before-visibility, visibility-before-Fence, UNKNOWN participant handling and lost-ACK receipt replay.
 - Cache negative control: a stale cache fill by itself is not an external disclosure if the final read gate still checks current Fence/Permission. A stale read after Fence/revocation is a violation. Cache-fill freshness remains a separate F contract requirement.
@@ -39,7 +39,7 @@ The model uses only the Python standard library.
 4. I PermissionEpoch is compared only within the I namespace. It is never numerically compared with D Fence generation, Storage cursor or G ContextVersion.
 5. I COMMIT_WON holds applicable revocation until the exact Storage participant reaches a terminal outcome. UNKNOWN remains open.
 6. D final visibility gate rechecks the current Fence and dependency registration; an I receipt alone does not authorize visibility.
-7. Restore release compares D-local restored Fence high-water against D-local durable high-water. Real I/COC/Storage high-waters are separate and are not collapsed into one counter.
+7. Restore release is blocked for a stale snapshot and succeeds only after replaying the current D-local Fence high-water. Real I/COC/Storage high-waters are separate and are not collapsed into one counter.
 8. Lost ACK changes caller knowledge only; same operation key + normalized request digest resolves to the original durable receipt.
 
 ## Not modeled / 未建模
