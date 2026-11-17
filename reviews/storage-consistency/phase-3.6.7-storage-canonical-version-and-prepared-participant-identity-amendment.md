@@ -15,13 +15,13 @@ This amendment reconciles the following immutable artifacts:
 | Current COC persistence protocol | `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md` | `8ac17816476f280ab6fb3afca0688aa03e37de1d` |
 | Superseded companion clarification | same COC protocol path, earlier immutable version | `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` |
 
-**Canonical version relationship (normative proposal):**
+**Canonical version relationship (corrected after exact cross-reference inspection):**
 
-1. Storage Design v2 blob `4ed4234...` is the Storage design/recovery contract for this review set.
-2. COC protocol blob `8ac1781...` is its sole current companion protocol for COC ordering, participant registration, recovery cutoff and the PostgreSQL prepared-participant identity mapping.
-3. The Design v2 header's reference to `86ff3...` is historical provenance only. It MUST NOT be treated as the current companion version or as an independently selectable alternative.
-4. For prepared-participant identity and recovery, the more complete typed tuple and lifecycle in COC protocol §§14.1–14.5 are normative over the abbreviated mapping in Design v2 §7.5. Design v2 §7.5 remains an explanatory summary and MUST be interpreted consistently with that companion.
-5. Neither artifact overwrites the other. The pair is an exact-version bundle: `StorageDesignBlob=4ed4234...` + `COCProtocolBlob=8ac1781...`. Any change to either member creates a new bundle revision and requires affected-owner exact-blob re-review. No floating “latest” reference is allowed.
+1. Storage Design v2 Blob `4ed4234ce548a814a9496adf7a14c4459ea9f7ce` is a preserved historical predecessor, not the current companion target for COC protocol `8ac178...`.
+2. Storage Design v3.1 Blob `d5bdc72f193fcdaa654e4f07f865b77c578673ca` is the current Storage design candidate on this branch and contains the §§15.1–15.7 explicitly required by COC protocol §14.
+3. COC protocol Blob `8ac17816476f280ab6fb3afca0688aa03e37de1d` is the current companion candidate. Its §14.1–14.5 provides the corresponding COC-side identity and recovery contract.
+4. The current exact review bundle is therefore `StorageDesignBlob=d5bdc72...` + `COCProtocolBlob=8ac178...`. The v3.1 header's older `86ff3...` companion note is historical provenance; this amendment explicitly binds the later `8ac178...` companion for this bundle.
+5. The v2 pair `4ed423...` + `8ac178...` is NOT a coherent normative pair because v2 lacks the referenced §§15.1–15.7. Any change to either member of the current bundle creates a new immutable bundle revision and requires affected-owner exact-blob re-review. No floating “latest” reference is allowed.
 
 This is a version-binding amendment, not a claim that either artifact has been accepted by A/I/D/C/H or frozen.
 
