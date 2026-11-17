@@ -334,3 +334,12 @@ The exact 1.2.11 schema requires inline C outcome ref/digest, five-value outcome
 **Current disposition: PROPOSED / DESIGN-LEVEL ONLY.** Protected C Provider Outcome cannot be declared VALID for release until profile registration, immutable C object dereference, H validator implementation, independent vector execution, provider adapter evidence and A final integration acceptance are all complete.
 
 All Owner decisions above are delegated role simulations authored at the user's direction, not independent human Owner signatures.
+
+
+### 10.5 A integration decision
+
+- A Phase 3.8.4 cross-owner review: `reviews/integration/phase-3.8.4-a-membership-proof-cross-owner-integration-review.md`
+- Exact Blob: `e6da7d17e0a347c54b44a9345916cf8e33ff3e7e`
+- Decision: **ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS**.
+- R1/R2 remain OPEN; Storage Gate A remains PARTIAL PASS / OPEN; Gate B and Gate C remain BLOCKED; JF-10 P0 remains OPEN; Multi-PolicyDomain atomicity remains BLOCKED; production activation remains NOT AUTHORIZED.
+- Provenance is delegated A-role simulation in the coordinating session, not independent human A Owner/governance sign-off.
