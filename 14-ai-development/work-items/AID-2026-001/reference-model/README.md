@@ -32,11 +32,11 @@ No concurrency scheduler, database transaction, WAL, distributed replica, Adapte
 
 ## Expanded regression suite
 
-The current standard-library suite contains 23 model-level unit tests. A dedicated GitHub Actions workflow checks out the exact pull-request head SHA (or the pushed commit SHA on main) and runs this suite when the reference-model files change.
+The current standard-library suite contains 24 model-level unit tests. A dedicated GitHub Actions workflow checks out the exact pull-request head SHA (or the pushed commit SHA on main) and runs this suite when the reference-model files change.
 
 This CI is deliberately scoped to the in-memory reference model. A green run proves only that this abstract model's tests passed. It does not prove production authentication, authorization, persistence, concurrency, replica, index, cache, queue, adapter, context, backup or restore behavior. DFI-001…DFI-022 remain NOT EVIDENCED against production components until the authoritative runtime repository and accountable implementation owners are identified and tested.
 
-The 23 model-level cases are not a substitute for Owner D/Owner I approvals, independent specialist review, independent integration review, full Manifest/schema validation or architecture acceptance.
+The 24 model-level cases are not a substitute for Owner D/Owner I approvals, independent specialist review, independent integration review, full Manifest/schema validation or architecture acceptance.
 
 
 ### Model review correction
