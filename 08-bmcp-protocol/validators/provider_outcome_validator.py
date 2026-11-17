@@ -1,4 +1,4 @@
-"""Fail-closed validator core for BMCP 1.2.13 C Provider Outcome records.
+"""Fail-closed validator core for BMCP 1.2.14 C Provider Outcome records.
 
 The module is an integration seam, not a production-ready trust implementation.
 All authority-dependent checks are injected callbacks and MUST be supplied by
@@ -15,7 +15,7 @@ import rfc8785
 from jsonschema import Draft202012Validator, FormatChecker
 
 
-SCHEMA_ARTIFACT_REVISION = "1.2.13"
+SCHEMA_ARTIFACT_REVISION = "1.2.14"
 WIRE_SCHEMA_VERSION = "1.3.0"
 BMCP_SCHEMA_ID = "bmcp.coc-jf10-unified"
 BMCP_SCHEMA_URI = "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.13"
