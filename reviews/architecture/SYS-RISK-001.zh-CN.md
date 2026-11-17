@@ -319,3 +319,45 @@ R 不替 Owner 作出这些决定。本评估只明确决策内容和所需证�
 - 当前存在更多候选工件，不等于风险下降；只有精确版本采用、权威批准和可复现验证完成后，才能下调风险。
 - 本次没有发现足以将任何 Critical/High 风险标记为 CLOSED 的新证据。
 
+
+
+## 14. R-01 实时来源增量审查 — 2026-11-17 / 取代过期拓扑表述
+
+对 D 与 Storage Owner 分支进行定向实时刷新后，R-01 的 **L1 逻辑决策**状态需要修正。但这并不意味着 R-01 整体关闭。
+
+### 14.1 当前精确来源锚点
+
+| Owner | 分支 | 本轮读取的当前 HEAD | 精确工件 | Blob SHA | 直接读回的状态 |
+|---|---|---|---|---|---|
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md` | `bb544ba2f346bdc130d524bd5c7310d86f367988` | §§8–8.7 选择 L1 逻辑 Option A；L4 引擎/部署仍 OPEN |
+| Storage | 同一 HEAD | 同上 | `reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md` | `175ee7b1349cfdb79a19898b311a88391ed88010` | Storage 角色逻辑提案；§7 的候选措辞仅在 L1 范围内被后续 ADR 补充取代；实现证明仍 OPEN |
+| D | `session-d-memory-brain-2026-11-16` | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | `03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md` | `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | D 角色提案；D/Storage 物理序列化权威、D 独立批准、可调用 API 与符合性仍 OPEN |
+
+### 14.2 R-01 修正后的评估
+
+Storage ADR 的 §8 补充条款已将 **Option A 选为 v1 规范 L1 逻辑架构**：每个 `BrainAuthorityRef` 使用一个逻辑 Serializable Transaction Domain 和一个持久化 `CanonicalAuthoritySerializationAnchor`。§8.7 将锚点具体化：D Admission/Dependency/Participant/Fence 受保护变更，以及 Storage 最终 Visibility/NO_PUBLICATION 变更，必须在同一事务中更新同一锚点并追加 Transition Record。事务提交即线性化点。同时保留语义权威边界：D 拥有 ForgetFence 与 Participant 语义；Storage 拥有物理序列化和可见性；I 仍是独立 PolicyDomain 权威；COC 仍是独立 Quorum Log。
+
+这在 **仅限 L1 的范围内**取代了 ADR 补充条款之前“尚未选择 Option”的旧措辞。此前 R-01 中“Storage 拓扑 ADR 整体仍 ADR-BLOCKED”的表述已经过期，不应继续作为当前 L1 状态引用。
+
+但 D 当前工件仍标记为 D 角色提案，并明确将 D/Storage 物理序列化权威及 D 独立批准列为 OPEN。Storage Visibility Contract 也仍是逻辑提案，实现证明 OPEN。因此，Storage 当前工件中的 L1 选择可标记为**文本证据 VERIFIED**；跨 Owner 的 D 采纳/批准则是 **NOT PROVEN**。这不是 D+Storage 联合批准的合同，更不是已实现的拓扑。
+
+### 14.3 按层划分的 R-01 状态
+
+| 层级 | 更新后的状态 | 原因 |
+|---|---|---|
+| L1 逻辑拓扑选择 | PARTIALLY VERIFIED | Storage 当前 ADR 选择 Option A 并定义锚点；D 当前提案尚未采纳/批准共同物理序列化权威 |
+| 跨 Owner 语义/事务边界 | NOT PROVEN | D/Storage 精确行归属、API、事务边界和 D 独立批准仍未关闭 |
+| L3 确定性逻辑/物理竞态证明 | NOT PROVEN | 已规定所需交错与 Lost-ACK/Restore 场景，但本轮未验证绑定当前双方 HEAD 的联合证明包 |
+| L4 引擎/部署/符合性 | BLOCKED / OPEN | 实际 DB 产品/配置、部署、Operator、HA/PITR、权威读路径、旧主隔离及物理崩溃/故障切换/恢复演练仍 OPEN |
+
+R-01 继续保持 **Critical / OPEN**，仍阻塞架构冻结和 Visibility/Forget 路径的最终实现。风险范围已收窄：缺失项不再是“没有任何 L1 拓扑提案/选择”，而是跨 Owner 采纳，以及 L3/L4 证明和符合性。不得据此降级风险或放行 Gate。
+
+### 14.4 下一步关闭条件
+
+1. D 必须明确审查并采纳或拒绝精确 Storage ADR Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`，包括 §8.7 的锚点身份、受保护变更清单、名义类型边界和 Fail-closed 行为。
+2. D 与 Storage 发布联合精确版本事务/行归属/API 合同，明确每一行由谁拥有、每一类 Transition 由谁有权追加。
+3. 证明 Fence 与 ProducerWork Admission、Dependency Registration、PublicationParticipant Admission、最终 Visibility Commit 的两个串行顺序；覆盖 I REVOCATION_WON 与 COMMIT_WON、序列化重试、Lost ACK、主库故障切换、旧主重新加入及 Restore Rollback。
+4. 确定性测试结果必须绑定精确 D/Storage 源 HEAD 与 Schema/Adapter Revision；历史 CI 不可替代。
+5. 在实际引擎/配置、权威读路径、HA/PITR、Operator 和物理故障/恢复证据被明确并验证前，L4 必须保持 OPEN。
+
+**本 R 审查不推定任何 Owner 已批准。** 本补充仅修正独立风险状态。
