@@ -8,6 +8,9 @@
       "$ref": "#/$defs/DRegistrationReceipt"
     },
     {
+      "$ref": "#/$defs/DPublicationParticipantReceipt"
+    },
+    {
       "$ref": "#/$defs/DForgetBarrierProof"
     },
     {
@@ -33,6 +36,9 @@
     },
     {
       "$ref": "#/$defs/RestoreProofBundle"
+    },
+    {
+      "$ref": "#/$defs/IReconciliationTuple"
     }
   ],
   "$defs": {
@@ -189,7 +195,7 @@
               "$ref": "#/$defs/OpaqueRef"
             },
             "registrationCursor": {
-              "$ref": "#/$defs/AuthorityPosition"
+              "$ref": "#/$defs/DPosition"
             },
             "forgetFenceGeneration": {
               "type": "integer",
@@ -254,7 +260,7 @@
               "$ref": "#/$defs/OpaqueRef"
             },
             "producerRegistrationHighWater": {
-              "$ref": "#/$defs/AuthorityPosition"
+              "$ref": "#/$defs/DPosition"
             },
             "barrierMembershipDigest": {
               "$ref": "#/$defs/Digest"
@@ -263,7 +269,7 @@
               "$ref": "#/$defs/Digest"
             },
             "dependencyClosureCursor": {
-              "$ref": "#/$defs/AuthorityPosition"
+              "$ref": "#/$defs/DPosition"
             },
             "reopenGeneration": {
               "type": "integer",
@@ -318,7 +324,7 @@
               "$ref": "#/$defs/Digest"
             },
             "producerDomainInventoryEpoch": {
-              "$ref": "#/$defs/AuthorityPosition"
+              "$ref": "#/$defs/IPosition"
             },
             "registrySnapshotDigest": {
               "$ref": "#/$defs/Digest"
@@ -337,11 +343,7 @@
               "minimum": 1
             },
             "completenessStatus": {
-              "enum": [
-                "COMPLETE",
-                "INCOMPLETE",
-                "UNKNOWN"
-              ]
+              "const": "COMPLETE"
             },
             "signerKeyStatusGeneration": {
               "type": "integer",
@@ -355,7 +357,7 @@
               "minimum": 1
             },
             "iRequestHighWater": {
-              "$ref": "#/$defs/AuthorityPosition"
+              "$ref": "#/$defs/IPosition"
             }
           }
         }
@@ -404,7 +406,7 @@
               "minimum": 1
             },
             "sequencerPosition": {
-              "$ref": "#/$defs/AuthorityPosition"
+              "$ref": "#/$defs/IPosition"
             },
             "decision": {
               "enum": [
@@ -527,7 +529,7 @@
               ]
             },
             "storageCommitPosition": {
-              "$ref": "#/$defs/AuthorityPosition"
+              "$ref": "#/$defs/StoragePosition"
             }
           }
         }
@@ -580,7 +582,7 @@
               "minimum": 0
             },
             "cursorPosition": {
-              "$ref": "#/$defs/AuthorityPosition"
+              "$ref": "#/$defs/FPosition"
             }
           }
         }
@@ -766,6 +768,227 @@
             },
             "antiRollbackAnchor": {
               "$ref": "#/$defs/OpaqueRef"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "DPosition": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/AuthorityPosition"
+        },
+        {
+          "type": "object",
+          "required": [
+            "authority"
+          ],
+          "properties": {
+            "authority": {
+              "const": "D"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "IPosition": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/AuthorityPosition"
+        },
+        {
+          "type": "object",
+          "required": [
+            "authority"
+          ],
+          "properties": {
+            "authority": {
+              "const": "I"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "FPosition": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/AuthorityPosition"
+        },
+        {
+          "type": "object",
+          "required": [
+            "authority"
+          ],
+          "properties": {
+            "authority": {
+              "const": "F"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "StoragePosition": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/AuthorityPosition"
+        },
+        {
+          "type": "object",
+          "required": [
+            "authority"
+          ],
+          "properties": {
+            "authority": {
+              "const": "STORAGE"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "DPublicationParticipantReceipt": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "forgetOperationRef",
+            "publicationOperationId",
+            "requestDigest",
+            "producerWorkItemId",
+            "scopeRef",
+            "sourceLineageDigest",
+            "storageVisibilityParticipantRef",
+            "forgetFenceGeneration"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "D_PUBLICATION_PARTICIPANT_RECEIPT"
+            },
+            "forgetOperationRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "publicationOperationId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "requestDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "producerWorkItemId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "scopeRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "sourceLineageDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "storageVisibilityParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "forgetFenceGeneration": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "IReconciliationTuple": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "policyDomainRef",
+            "iGateGeneration",
+            "iRequestHighWater",
+            "permissionEpoch",
+            "producerDomainInventoryEpoch",
+            "registrySnapshotDigest",
+            "targetInventorySealDigest",
+            "dForgetOperationRef",
+            "dFenceGeneration",
+            "dProducerRegistrationHighWater",
+            "dBarrierMembershipDigest",
+            "cocRecoveryEpochRef",
+            "cocPrefixDigest",
+            "recoveryCutoffBatchDigest",
+            "participantManifestDigest"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "I_RECONCILIATION_TUPLE"
+            },
+            "policyDomainRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "iGateGeneration": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "iRequestHighWater": {
+              "$ref": "#/$defs/IPosition"
+            },
+            "permissionEpoch": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "producerDomainInventoryEpoch": {
+              "$ref": "#/$defs/IPosition"
+            },
+            "registrySnapshotDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "targetInventorySealDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "dForgetOperationRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "dFenceGeneration": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "dProducerRegistrationHighWater": {
+              "$ref": "#/$defs/DPosition"
+            },
+            "dBarrierMembershipDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "cocRecoveryEpochRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "cocPrefixDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "recoveryCutoffBatchDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "participantManifestDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "preparedParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "participantTupleDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "restoreAttemptRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "checkpointDigest": {
+              "$ref": "#/$defs/Digest"
             }
           }
         }
