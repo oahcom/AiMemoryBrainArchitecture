@@ -70,3 +70,18 @@ This record is append-only in intent. Subsequent commits and verification outcom
 ### Follow-up correction tracking / 后续修正跟踪
 
 Subsequent commits that address IR-001, NR-002 and NR-003 must be appended here with exact SHAs after read-back. NR-001 remains blocked until an explicit governance-authority decision is recorded.
+
+
+## Governance decision appendendum — NR-001 / 治理决议追加记录
+
+- Decision ID: AID-2026-001-GOV-NR-001
+- Decision date: 2026-11-17
+- Decision: OPTION A ACCEPTED
+- Decision record: `14-ai-development/work-items/AID-2026-001/governance-decision-NR-001.md`
+- Decision request: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945859120
+- Meaning: a genuinely new ChatGPT conversation, with no implementation participation and independent GitHub artifact/evidence retrieval, satisfies the separate-session requirement.
+- Limitation: conversation/context isolation only; no model/provider/runtime/statistical independence and no multi-model consensus.
+- R3 specialist review and reproducible test evidence: UNCHANGED / MANDATORY.
+- Acceptance authority and merge authorization: UNCHANGED / DISTINCT GATES.
+- NR-001 status: RESOLVED_BY_GOVERNANCE_DECISION.
+- Current PR/architecture acceptance, fresh independent review of current Head, CI, YAML/schema and manifest verification: NOT implied; remain separately pending/not run.
