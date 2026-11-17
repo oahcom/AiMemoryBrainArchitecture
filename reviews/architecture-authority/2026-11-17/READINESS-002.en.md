@@ -29,6 +29,12 @@
 4. D/E/I/Storage close the exact admission/lineage/fence/visibility semantics and supply race/crash/recovery proofs.
 5. Storage completes physical topology and JF-10 evidence; C/G/H close final-request/provider/Applied semantics with independent consumer approvals.
 
+| B protocol alignment | CANDIDATE / NOT JOINTLY CURRENT | H 1.2.14 + CSubmitOutcome 1.0.1 candidate; H mapping/C review/D crosswalk/I P0 exist, but Storage v3.2.9 exact manifest is stale and no v3.3.0 successor is jointly accepted |
+
+## Current baseline delta
+
+Current main 8c0c5b11... reverted interim B identity/entity research artifacts; they are not baseline evidence. Fact/Claim remains ADR-BLOCKED. PR #51/#52/#54 advance protocol and Option A design but do not close exact manifest, Owner adoption, L1/L2/L3 or L4. Overall state remains ARCHITECTURE_NOT_READY.
+
 ## Bounded authorization
 
 Allowed: isolated synthetic-data feasibility experiments, contract-neutral test harnesses, exact-source refresh, bilingual parity automation, Storage candidate comparison, hardware/workload inventory, retrieval quality benchmarks on synthetic fixtures.
