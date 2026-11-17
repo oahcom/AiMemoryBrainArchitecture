@@ -143,3 +143,26 @@ The earlier sections record the Phase 2 initial snapshot. The following exact Ow
 **B disposition:** L1/L2 candidate alignment substantially exists; exact same-manifest Owner adoption and C review of the integrated H mapping remain OPEN. Do not mark protocol frozen.
 
 **B 阶段结论：** L1/L2 候选对齐已基本形成；同一 Manifest 的 Owner 联合采纳，以及 C 对 H 集成 Mapping 的审查仍 OPEN。不得标记协议冻结。
+
+
+## 9. Superseding exact bundle — Storage v3.2.9 / 后继精确 Bundle
+
+The v3.2.9 manifest supersedes the v3.2.8 B snapshot for H full-path source/test/CI and refreshed C/H/I/D review pins.
+
+- Storage v3.2.9 exact manifest: Blob `bf323a1682f2bfadc3ff41ea4f86883d678a77e3`.
+- H Unified 1.2.14: `09fcd1fa29fe24255fbd87cae79dafb406594a59`.
+- H Authority-Join mapping: `1cbe74eba69325510d6b1019d971661f965eabf8`.
+- H RecoveryJoin 1.0.2 / RecoveryCutoff 1.0.5: `4b664e3bce465499bcdfd93796349a4ba7074002` / `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`.
+- H validator core: `eab961a08d41e871f38543b18ee60cf024977414`.
+- H full-path test source / fixture: `dccf8c099c18807ec072870d32604d0912209f01` / `c80247a6ecfbb4a29ff0993e8e2aea4829d00626`.
+- H full-path source/CI closure: `804bfd3214b015c80340575c1eb467d756ad0699`.
+- H CI run `44069777296`, tested commit `9eb06313e94e762f0fde4a606633a6dbe1bf8262`, job `133992753552`, 32 test methods, success.
+- C Phase 3.8.18 full-path review: `4be9c1cd8f116086bab58340f07e38ddfc223e21`.
+- I Phase 3.8.14 full-path/terminal callback review: `7c65650a37c8c0f270451fb0419e93259fc38151`.
+- D Phase 3.8.10 full-path/clearance callback review: `ccdae9b45affb23c6741b5cceb27004b35a8e03e`.
+- C/I/D role reviews are delegated simulations, not independent human Owner approvals.
+- Storage v3.2.9 status: exact candidate bundle bound; not jointly frozen; A review pending.
+
+**B status:** L1/L2 candidate alignment is conditionally aligned. Full-path tests do not authenticate production I/D/Storage proofs because authority callbacks remain test doubles; production adapters, C/I trust, D lineage/release, COC/Storage joins, JF-10, R1/R2 and Gate B/C remain open.
+
+**B 状态：** L1/L2 候选对齐已条件满足。Full-Path 测试未认证生产 I/D/Storage Proof，因为 Authority Callback 仍为 Test Double；生产 Adapter、C/I Trust、D Lineage/Release、COC/Storage Join、JF-10、R1/R2 和 Gate B/C 仍 OPEN。
