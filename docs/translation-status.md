@@ -286,3 +286,13 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 - Cross-owner audit refreshed to H Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`: [EN](../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md) / [中文](../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.zh-CN.md).
 - C source remains Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` and still does not define the C-issued Provider receipt/CSubmitOutcome object or record exact-version acceptance of the G recovery-batch 1.1 package. A bounded non-normative closure proposal was added: [EN](../reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal.md) / [中文](../reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal.zh-CN.md). This is NOT a C Owner decision and does not amend C source.
 - C/G/H joint 1.1 freeze remains BLOCKED; H schema/SDK freeze NOT ESTABLISHED; implementation NOT VERIFIED; conformance NOT RUN.
+
+
+
+## C cross-authority causal-order companion — 2026-11-17
+
+- Exact C source: `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`, branch `session-c-agent-integration-2026-11-16`, Blob `45a48249717c8cddb07ab96197730ef93d406c22`.
+- Pair: `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` and `docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`.
+- Structural readback: 14/14 headings; no tables in source/EN/zh-CN; EN exact source content. Targeted parity: [EN report](../reviews/translation/2026-11-17-c-submit-causal-order-bilingual-review.md) / [中文报告](../reviews/translation/2026-11-17-c-submit-causal-order-bilingual-review.zh-CN.md) — PASS for this exact Blob.
+- C explicitly ACCEPTS WITH ENUMERATED EXCEPTIONS the exact CGH-APPLIED-1.1 recovery-batch amendment, A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` and COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`. C36-AP-01 is RESOLVED at source-decision level; this does not resolve H wire/schema mapping or deployment/test gates.
+- C detailed core companion coverage is now 2/10 (Final Request Evidence + C-submit causal-order).
