@@ -25,10 +25,10 @@ Observed GitHub branch refs at this refresh. These are point-in-time HEADs, not 
 | A | session-a-integration-2026-11-16 | 6d6f08ae7704e0fa0cf0f2eee0512bf5e3eb624f |
 | B | session-b-domain-model-phase3 | 0df144ae25c2039c9934395fc88b2d17080eb119 |
 | C | session-c-agent-integration-2026-11-16 | 76ac41427b8183d5a1cfe7b3046bdb75564349a7 |
-| D | session-d-memory-brain-2026-11-16 | f0672a4e9ab95b8cd94d28b52153f54a05e17a73 |
+| D | session-d-memory-brain-2026-11-16 | 73bcfaac2e4984dd9bb6f14a878146dd092b7e02 |
 | E | session-e-memory-compiler-2026-11-16 | df3f56cdebbb4bb85999e2e04b666dacf77da810 |
 | F | session-f-memory-runtime | 348b5ec84c44a8a067122ce0aa72a594b9c06b66 |
-| G | session-g-memory-context | 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa |
+| G | session-g-memory-context | 7608f076b28cebe9d930c93264196063bd82dcdf |
 | H | session-h-bmcp-protocol | 54ab10af211dd92f641d2f30f511dc0a3043b9c5 |
 | I | session-i-security-governance-2026-11-16 | 958565e4395ed5153cf4bafeedfbc57ca13c788f |
 | Storage | session-storage-consistency-forget-atomicity-2026-11-16 | 5220ec33aee63220d50c362e51e76f5e86b1f233 |
@@ -199,3 +199,23 @@ UMR-037 remains OPEN until D/E/G publish independently attributable Owner-local 
 ### Cross-owner correction — E producer registration ordering
 
 The D/E/G reference expansion exposed and corrected a P-model sequencing omission: E's Phase 3.6 producer contract requires a durable D Producer Registration receipt before enqueue, lease, protected dereference or execution. The P model now represents this as a distinct immutable `d_registration_ref`, separate from the later D publication-participant admission that follows hidden Storage Prepare. New negative coverage proves no E Attempt/Lease may begin without the prior producer registration. This correction aligns the candidate model with E contract Blob `a17f065e69e809fceacb51873d6a36a8b0f5c235`; it does not constitute E Owner acceptance or implementation evidence.
+
+
+### D/E/G Owner-local test-tree refresh — 2026-11-17
+
+Recursive Git tree inspection at the observed Owner heads found no `tests/`, `test/`, Python test, or `.spec.ts` paths on the D, E, or G branches at this refresh:
+
+| Owner | Observed branch HEAD | Owner-local test paths found |
+|---|---|---|
+| D | `73bcfaac2e4984dd9bb6f14a878146dd092b7e02` | 0 |
+| E | `df3f56cdebbb4bb85999e2e04b666dacf77da810` | 0 |
+| G | `7608f076b28cebe9d930c93264196063bd82dcdf` | 0 |
+
+This is a bounded repository-tree observation, not a claim that no tests exist outside the inspected branches or paths. UMR-037 remains OPEN. The P reference suite is not a substitute for Owner-local tests.
+
+### Latest D/E/G coordinator model CI
+
+- Commit: `a8d62818e47782182ecd9fc6c06f9e77c5cbd486`
+- Workflow run: `44061041427` — **SUCCESS, 92 tests**.
+- Includes the correction that D Producer Registration precedes every E Attempt/Lease and is distinct from D publication-participant admission.
+- Scope remains deterministic single-process coordinator reference model only.
