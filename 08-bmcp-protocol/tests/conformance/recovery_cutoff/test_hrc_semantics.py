@@ -145,6 +145,9 @@ def validate_snapshot(s):
             return INVALID
         if s.get(root_name) != test_digest(entries, "owner-request-set" if name.startswith("request") else "owner-admission-set"):
             return INVALID
+        expected_kind = "REQUEST" if name.startswith("request") else "ADMISSION"
+        if any(e.get("owner_entry_kind") != expected_kind for e in entries):
+            return INVALID
     owner = s.get("owner")
     required = {
         "I": {"receipt_issue", "receipt_consume", "producer_domain_inventory_epoch"},
@@ -272,10 +275,11 @@ def validate_join(admissions_by_owner, m):
             refs = p.get("owner_evidence", {}).get(required, [])
             if not refs:
                 return UNKNOWN
-            if required in admissions_by_owner:
-                known = {a.get("owner_entry_ref") for a in admissions_by_owner[required]}
-                if any(ref not in known for ref in refs):
-                    return UNKNOWN
+            if required not in admissions_by_owner:
+                return UNKNOWN
+            known = {a.get("owner_entry_ref") for a in admissions_by_owner[required]}
+            if any(ref not in known for ref in refs):
+                return UNKNOWN
     return VALID
 
 
@@ -498,6 +502,90 @@ def reject_duplicates(pairs):
             raise ValueError("duplicate JSON key: " + k)
         out[k] = v
     return out
+
+    # JPF-01: owner-to-participant and participant-to-primary-C joins both resolve.
+    def test_JPF_01(self):
+        p = participant()
+        a = admission("C/admit/1", "C")
+        self.assertEqual(validate_join({"C": [a], "I": [], "D": []}, manifest([p])), VALID)
+
+    # JPF-02: two distinct I evidence entries may join one participant.
+    def test_JPF_02(self):
+        p = participant(required=["C", "I", "D"])
+        p["owner_evidence"]["I"] = ["I/issue/1", "I/consume/1"]
+        a = admission("C/admit/1", "C")
+        i1 = admission("I/issue/1", "I")
+        i2 = admission("I/consume/1", "I", seq=2)
+        d1 = admission("D/barrier/1", "D")
+        self.assertEqual(validate_join({"C": [a], "I": [i1, i2], "D": [d1]}, manifest([p])), VALID)
+
+    # JPF-03: D evidence must be in the exact owner ledger.
+    def test_JPF_03(self):
+        p = participant(required=["C", "D"])
+        p["owner_evidence"]["D"] = ["D/barrier/1"]
+        a = admission("C/admit/1", "C")
+        d1 = admission("D/barrier/1", "D")
+        self.assertEqual(validate_join({"C": [a], "D": [d1]}, manifest([p])), VALID)
+
+    # JPF-04: REGISTERED owner admission with no manifest participant is invalid.
+    def test_JPF_04(self):
+        a = admission("C/admit/1", "C")
+        self.assertEqual(validate_join({"C": [a]}, manifest()), INVALID)
+
+    # JPF-05: participant without primary C admission is unknown/quarantined.
+    def test_JPF_05(self):
+        p = participant()
+        self.assertEqual(validate_join({"C": [], "I": [], "D": []}, manifest([p])), UNKNOWN)
+
+    # JPF-06: NOT_REGISTERED must not carry any participant locator.
+    def test_JPF_06(self):
+        a = admission("C/a", "C", status="NOT_REGISTERED")
+        a["no_effect_or_pending_proof"] = True
+        a["participant_position"] = 1
+        self.assertEqual(validate_join({"C": [a]}, manifest()), INVALID)
+
+    # JPF-07: NOT_REGISTERED with possible effect and no no-effect proof blocks.
+    def test_JPF_07(self):
+        a = admission("C/a", "C", status="NOT_REGISTERED")
+        self.assertEqual(validate_join({"C": [a]}, manifest()), UNKNOWN)
+
+    # JPF-08: one owner admission identity cannot bind two participants.
+    def test_JPF_08(self):
+        p1 = participant(ref="COC/P1")
+        p2 = participant(ref="COC/P2", position=2)
+        p2["owner_admission_ref"] = "C/admit/1"
+        p2["entry_digest"] = "e" * 64
+        a = admission("C/admit/1", "C")
+        self.assertEqual(validate_join({"C": [a]}, manifest([p1, p2])), INVALID)
+
+    # JPF-09: changed operation/digest/scope is not an alias join.
+    def test_JPF_09(self):
+        p = participant()
+        a = admission("C/admit/1", "C")
+        a["scope_ref"] = "scope/other"
+        self.assertEqual(validate_join({"C": [a]}, manifest([p])), INVALID)
+
+    # JPF-10: currentness changes invalidate release after JoinProof creation.
+    def test_JPF_10(self):
+        current = deepcopy(self.snaps["D"])
+        current["request_highwaters"]["barrier"] += 1
+        self.assertEqual(validate_release(release("D", self.b), current, self.b), STALE)
+
+    # JPF-11: valid manifest without required I/D evidence is UNKNOWN.
+    def test_JPF_11(self):
+        p = participant(required=["C", "I", "D"])
+        a = admission("C/admit/1", "C")
+        self.assertEqual(validate_join({"C": [a], "I": [], "D": []}, manifest([p])), UNKNOWN)
+
+    # JPF-12: same GID/DB incarnation and exact I/Storage terminal tuple required.
+    def test_JPF_12(self):
+        def exact_jf10(i, s, same_participant, same_gid, same_db):
+            if not (same_participant and same_gid and same_db):
+                return INVALID
+            return validate_jf10(i, s)
+        self.assertEqual(exact_jf10("COMMIT_WON", "COMMITTED", True, True, True), VALID)
+        self.assertEqual(exact_jf10("COMMIT_WON", "COMMITTED", True, False, True), INVALID)
+        self.assertEqual(exact_jf10("COMMIT_WON", "ROLLED_BACK", True, True, True), INVALID)
 
 
 if __name__ == "__main__":
