@@ -17,28 +17,26 @@
 
 **中文：** Storage 拓扑 ADR 明确为 ADR-BLOCKED / NO TOPOLOGY SELECTED，列出 Option A（每个 Canonical Memory Authority 一个 Serializable Transaction Domain）与 Option B（D/Storage 分离并由持久化线性协调器协调），明确拒绝 Check-then-write。Phase 3.8 定义了逻辑最终可见性事务，但尚未选择物理序列化基础。必须选择 A 或 B，明确序列化域、D/I Hold、Storage Pointer/Outcome/Outbox 原子性、读路径、幂等和恢复语义，并在冻结前提供确定性参考模型。实际部署数据库和运维责任人属于 L4。
 
-## ARC-02 — H 1.2.14 exact mapping and same-manifest adoption remain open
-**Severity:** P1 · **Level:** L2 · **Owners:** C, H, D, I, Storage
+## ARC-02 — C/H/D/I protocol bundle is conditionally aligned; A review and independent approval remain
+**Severity:** P2 · **Level:** L2 · **Owners:** A, C, H, D, I, Storage
 
-**Evidence:** H Unified 1.2.14 Blob 09fcd1fa29fe24255fbd87cae79dafb406594a59; RecoveryJoin 1.0.2 Blob 4b664e3bce465499bcdfd93796349a4ba7074002; RecoveryCutoff 1.0.5 Blob 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7; CSubmitOutcome 1.0.1 Blob a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda. H Provider Outcome mapping Blob 7739d8159b32702024583669f40974a80801782b; H integrated authority-join mapping Blob 1cbe74eba69325510d6b1019d971661f965eabf8. C Phase 3.8.16 review commit 8d7298d7f56b1df48229799ff6462a8db634e7ed accepts the Provider Outcome mapping but pins H schema Blob fee452efb99ab4fe0ceccb347c46eeef1521bd28, whereas current H schema and H mapping pin 09fcd... (the two schema blobs differ only in descriptive revision text). Storage v3.2.7 manifest Blob 4435fc0340a4fce10751679a95f3b4c821bdae4d binds the integrated mapping but still requires fresh Owner reviews and A integration review.
+**Evidence:** Storage v3.2.9 manifest Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3 binds H Unified 1.2.14 Blob 09fcd1fa29fe24255fbd87cae79dafb406594a59, CSubmitOutcome 1.0.1, H integrated authority-join mapping 1cbe74eba69325510d6b1019d971661f965eabf8, RecoveryJoin 1.0.2, RecoveryCutoff 1.0.5, and refreshed C/H/I/D role reviews. H full local path CI run 44069777296 passed 32 test methods. The manifest explicitly requires a fresh A review and is NOT JOINTLY FROZEN.
 
-**Finding:** L1/L2 version migration substantially exists. The remaining blocker is that C has not yet reviewed the integrated authority-join mapping used by Storage, and C's exact schema pin differs from H's current Blob. The bundle is not jointly accepted.
+**Finding:** The earlier C schema pin mismatch and missing C review of the integrated mapping have been corrected by the latest Owner artifacts. B is CONDITIONALLY ALIGNED at L1/L2 candidate level. The remaining B governance gap is A's exact review of v3.2.9 and independent human Owner/governance acceptance; production proof adapters remain later gates.
 
-**Required closure:** C reviews exact integrated mapping 1cbe... and corrects the schema pin to 09fcd...; H confirms current C/D/I exact source set; D/I/Storage bind the same successor manifest; H callback tests must not be represented as unmocked end-to-end authority proof.
+**Required closure:** A reviews exact v3.2.9 and the Option A topology ADR; authorized human Owners separately approve where required. Do not transfer the A v3.2.8 review to v3.2.9.
 
-**中文：** 当前 L1/L2 版本迁移已基本形成：H 1.2.14、RecoveryJoin 1.0.2、RecoveryCutoff 1.0.5、CSubmitOutcome 1.0.1 均有精确工件；H 也分别有 Provider Outcome Mapping 与集成 Authority-Join Mapping。剩余阻断是 C 尚未审查 Storage 使用的集成 Mapping，且 C 最新审查的 H Schema Blob 与 H 当前精确 Blob 不一致。Storage v3.2.7 仍是候选 Bundle，尚未联合接受。
-
-## ARC-03 — CSubmitOutcome 1.0.1 is selected as proposed current revision; joint adoption remains open
+**中文：** Storage v3.2.9 已绑定 H 1.2.14、CSubmitOutcome 1.0.1、集成 Authority-Join Mapping、RecoveryJoin/RecoveryCutoff 和更新后的 C/H/I/D 角色审查；H 本地完整路径 CI 32 项通过。早期 C Schema Pin 不一致和 C 未审查集成 Mapping 的问题已由最新 Owner 工件修正。B 可在 L1/L2 候选层标记 CONDITIONALLY ALIGNED，但 v3.2.9 仍需 A 精确审查和独立人类 Owner/治理批准，且不继承 A 对 v3.2.8 的旧审查。
+## ARC-03 — CSubmitOutcome 1.0.1 is the current proposed immutable revision
 **Severity:** P2 · **Level:** L2 · **Owners:** C, H, I, Storage
 
-**Evidence:** C Phase 3.11.1 amendment Blob 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb explicitly supersedes 1.0.0 for new records; schema Blob a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda; I namespace review Blob 0d78e5b2bfcf66cae6b757314cead84b9c942601; H Provider Outcome mapping Blob 7739d8159b32702024583669f40974a80801782b. Storage v3.2.7 binds C 1.0.1.
+**Evidence:** C Phase 3.11.1 amendment Blob 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb; C schema Blob a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda; H integrated mapping Blob 1cbe74eba69325510d6b1019d971661f965eabf8; Storage v3.2.9 manifest Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3.
 
-**Finding:** C's proposed immutable version selection is explicit; 1.0.0 is historical, not silently upgraded. The remaining issue is same-manifest review and that C's Phase 3.8.16 review has not reviewed the integrated H authority-join mapping.
+**Finding:** C 1.0.1 is selected as the current proposed immutable object revision for new records; 1.0.0 remains historical. The exact source/consumer candidate bundle is now pinned. This does not register production C/I crypto profiles or establish provider issuer truth.
 
-**Required closure:** Keep 1.0.0 historical; bind C 1.0.1 schema/amendment/vectors in the successor manifest and obtain C/H/D/I exact reviews against that same manifest. Production C/I profiles remain unregistered until I governance gates pass.
+**Required closure:** Keep 1.0.0 historical; complete independent governance for C/I profile registration, trust roots, key custody, historical verification and anti-rollback. Keep provider-specific idempotency, same-key lookup and adapter race/fault proof as C-owned later gates.
 
-**中文：** C Phase 3.11.1 已明确 1.0.1 是新记录的候选不可变版本，1.0.0 保留为历史；I 已审查 Sequence Namespace，H 已映射 1.0.1，Storage v3.2.7 也绑定 1.0.1。剩余问题是同一 Manifest 的联合审查，以及 C 尚未审查集成 H Authority-Join Mapping。生产 C/I Profile 仍须等待 I Governance Gate。
-
+**中文：** C 1.0.1 已作为新记录的当前候选不可变对象版本，1.0.0 保留为历史；精确源/消费候选 Bundle 已绑定。但这不等于生产 C/I Crypto Profile 已注册，也不证明 Provider Issuer Truth。生产 Profile、Trust Root、Key Custody、历史验证和 Anti-Rollback 仍需独立治理；Provider 幂等、Same-Key Lookup 与 Adapter Race/Fault 仍属于 C 后续 Gate。
 ## ARC-04 — Integrated D/E/I/Storage publication race proof is incomplete
 **Severity:** P0 · **Level:** L1 + L3 · **Owners:** D, E, I, Storage, H, A
 
