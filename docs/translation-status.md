@@ -243,3 +243,12 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 - Structural readback: 21/21 headings and 37/37 table rows across source, EN and zh-CN; EN companion contains exact source content.
 - Targeted semantic parity: [EN report](../reviews/translation/2026-11-17-g-phase36-applied-forget-bilingual-review.md) / [中文报告](../reviews/translation/2026-11-17-g-phase36-applied-forget-bilingual-review.zh-CN.md) — PASS for this exact Blob.
 - G source status remains semantic decisions recorded; C/G/H Applied freeze BLOCKED; implementation/execution NOT VERIFIED; G-36-01..15 SPECIFIED / NOT RUN.
+
+
+
+## H recovery-batch source refresh — 2026-11-17
+
+- Current H source Blob: `0dca3dc5463a02be0e19524811afbae87795baf5`, superseding `db59b63e322d7255b8b400f47859dcac32bb3027`.
+- H EN/zh-CN companions refreshed. Structural readback: 23/23 headings and 33/33 table rows across source/EN/zh-CN; targeted parity PASS pending updated final report readback.
+- H §11.8 adds candidate mapping for CGH-APPLIED-1.1 COC terminal proof, recovery-batch completeness, owner high-water, participant reconciliation, I/D owner evidence and Storage same-XID terminal proof.
+- New H36-AP-08 remains OPEN: no updated/generated H wire schema/SDK or exact ACK message-family binding; C/G/I/D/Storage confirmations and conformance remain pending. H source remains CANDIDATE; C/G/H freeze BLOCKED.
