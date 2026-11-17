@@ -220,7 +220,7 @@ The authority barriers are conjunctive, not numerically merged. D fence-first or
 
 ### 中文规范
 
-D/Storage 序列化域本身不能解决独立 I Revocation 竞态，因此强制采用上述组合：D 将精确 PublicationParticipantRef 纳入自身 Fence/Barrier；Storage 创建隐藏 Visibility Participant；I 在自己的 PolicyDomain Sequencer 单次消费绑定 D/Storage Participant 的 CommitAuthorizationReceipt；Storage 最终 Visibility Transaction 同时验证 D 当前参与状态/Fence 和精确 I Terminal Proof。Storage 提交后产生不可变 COMMITTED_VISIBLE 证明；安全中止产生 NO_PUBLICATION 证明；D/I 只有验证同一 Storage Outcome 后才能分别关闭自己的 Participant。UNKNOWN 时两个 Gate 均保持开放且 Artifact Private。
+D/Storage 序列化域本身不能解决独立 I Revocation 竞态，因此强制采用上述组合：Storage 首先持久化隐藏 StorageVisibilityParticipantRef；D 再将绑定该 Participant 的精确 PublicationParticipantRef 纳入自身 Fence/Barrier；I 在自己的 PolicyDomain Sequencer 单次消费绑定 D/Storage Participant 的 CommitAuthorizationReceipt；Storage 最终 Visibility Transaction 同时验证 D 当前参与状态/Fence 和精确 I Terminal Proof。Storage 提交后产生不可变 COMMITTED_VISIBLE 证明；安全中止产生 NO_PUBLICATION 证明；D/I 只有验证同一 Storage Outcome 后才能分别关闭自己的 Participant。UNKNOWN 时两个 Gate 均保持开放且 Artifact Private。
 
 两个权威 Barrier 必须合取满足，不得合并成数值序列。D Fence-first 或 I Revocation-first 均不得 Visibility。D Publication Participant 或 I COMMIT_WON 单独存在都不是 Visibility Permission。本协议仍须 D/I/Storage 精确 Owner 接受和确定性 Crash/Race 测试；尚未实现或验证。
 
