@@ -63,6 +63,10 @@ For every non-trivial task, assign:
 
 One AI session adopting several personas does NOT constitute independent review. A simulated panel is useful for brainstorming but is not evidence of independent approval.
 
+**Governance interpretation for this repository's ChatGPT-native execution model (NR-001):** A genuinely new, separate ChatGPT conversation may satisfy “a separate AI session/agent” when the reviewer did not participate in the implementation and independently reads the exact frozen artifacts and evidence from GitHub. This provides conversation/context isolation only; it does not establish model, provider, runtime/environment, or statistical independence and MUST NOT be described as multi-model consensus. The reviewer MUST disclose this limitation. All R3 requirements remain unchanged: independent security/domain specialist review and reproducible test evidence are still required before acceptance. This interpretation does not waive acceptance authority or permit self-approval.
+
+**本仓库 ChatGPT 原生执行模型的治理解释（NR-001）：** 真正新建的独立 ChatGPT 对话，在 Reviewer 未参与实现且从 GitHub 独立读取准确冻结工件和证据时，可以满足“独立 AI 会话/Agent”的要求。这仅提供对话/上下文隔离，不构成模型、服务商、运行环境或统计意义上的独立，且**不得**描述为多模型共识。Reviewer **必须**披露这一限制。所有 R3 要求保持不变：验收前仍须进行独立安全/领域专业审查并提供可复现的测试证据。本解释不豁免验收授权，也不允许自我批准。
+
 For low-risk documentation-only changes, one reviewer may cover several review dimensions, but author and reviewer MUST remain distinct. Security, data deletion, authorization, consistency, recovery and public protocol changes require independent specialist review.
 
 ## 4. Task classification and gates / 任务分类与门禁
