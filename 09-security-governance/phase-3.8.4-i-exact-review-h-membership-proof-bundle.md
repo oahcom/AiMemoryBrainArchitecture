@@ -16,16 +16,16 @@
 | I owner membership-proof contract | `b1e39c92252eadf8ca592f9a8dc6879cf44fd593` |
 | H Unified Schema 1.2.11 / wire 1.3.0 | `4f1e103ab4b2ac961d77179dba0b65093532ea40` |
 | H RecoveryJoin Schema 1.0.2 | `4b664e3bce465499bcdfd93796349a4ba7074002` |
-| H I crypto wire mapping 3.8.4 | `bf160288d7529b37ad1b56924c1583748922aa25` |
-| H unified Manifest contract 3.8.4 | `0b7251d63ba5a585e55e74a10c4c3113d17188bc` |
-| H semantic reference validator | `4a7c22ed15dff0a688559f79e4facbffca6527cd` |
-| H Unified Schema 1.2.11 tests | `c95bea3d7a7bee5f419bfabe914ea56be79fc8ad` |
+| H I crypto wire mapping 3.8.4 | `a692a790a4c7abef94dba6da9c22b5e06417879a` |
+| H unified Manifest contract 3.8.4 | `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175` |
+| H semantic reference validator | `6710bd7876be5f2c60640f21090729b8859a7a3e` |
+| H Unified Schema 1.2.11 tests | `3e993400cba7a0e744e865434fb1bb90c48fd525` |
 | H RecoveryJoin 1.0.2 schema tests | `83435af0f75d9e0bea64e2a331571356c3c1c26b` |
 | I Python/Node P0 vectors | `4657f0c81e9c8692d29ac183380f3d7e074a4e4c` |
 | I Python/Node crypto tests | `7658edc6f51dac203742ecc1ecf00d41bd676908` |
 | D owner proof contract candidate | `d80dabe7210e681bc4e2290355a38f8b67be9ddd` |
 | C owner proof contract candidate | `5e37185610869951c3b392c9ad143a72b4c702ac` |
-| H CI candidate run | `44048969058` (new RecoveryJoin 1.0.2 tests; final status to be verified before freeze) |
+| H CI candidate run | `44049931110` (exact run against H HEAD `9fe480da1e610392bd277e8f8692f7ed6922d45d`; status recorded after final check) |
 
 ## 2. I findings
 
@@ -75,3 +75,17 @@ I accepts the direction of H Unified Schema 1.2.11 and RecoveryJoin 1.0.2 as the
 - Production activation: NOT AUTHORIZED.
 
 **候选 Security/Wire 合同有条件接受；跨 Owner Freeze 与生产密码学启用仍不批准。**
+
+
+## 5. Exact H bundle refresh
+
+The exact H review and wire mapping were refreshed after adding RecoveryJoin 1.0.2 and the owner-verifier callback:
+- H exact review Blob: `cb82758dcf01f95a43d6ecb37a8f82cce41c7396`.
+- H wire mapping Blob: `a692a790a4c7abef94dba6da9c22b5e06417879a`.
+- H union contract Blob: `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175`.
+- RecoveryJoin 1.0.2 test Blob: `83435af0f75d9e0bea64e2a331571356c3c1c26b`.
+- Unified 1.2.11 test Blob: `3e993400cba7a0e744e865434fb1bb90c48fd525`.
+- Unified 1.2.12 test Blob: `91f7cc668d55ce3cfa4d4b9af079dfb118c320d7`.
+- H semantic reference module Blob: `6710bd7876be5f2c60640f21090729b8859a7a3e`.
+
+The reference validator now requires an explicit owner-proof verifier callback for any non-empty admission set. The test adapter is marked TEST-ONLY. It is not a production I/D/C signature verification implementation.
