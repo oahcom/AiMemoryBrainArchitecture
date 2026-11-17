@@ -19,6 +19,8 @@ from provider_outcome_validator import (  # noqa: E402
     _candidate_digest_and_preimage,
     _semantic_errors,
     parse_strict_json,
+    SCHEMA_ARTIFACT_REVISION,
+    WIRE_SCHEMA_VERSION,
 )
 from jsonschema import Draft202012Validator, FormatChecker
 
@@ -101,6 +103,31 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertEqual(schema["properties"]["governance_signature_profile_id"]["const"], "AIMBA-I-KEY-GOVERNANCE-1.0")
         self.assertEqual(set(schema["properties"]["state"]["enum"]), {"PENDING","ACTIVE","RETIRED","REVOKED","COMPROMISED","DESTROYED"})
 
+
+    def test_09_validator_is_pinned_to_unified_1_2_12(self):
+        self.assertEqual(SCHEMA_ARTIFACT_REVISION, "1.2.12")
+        self.assertEqual(WIRE_SCHEMA_VERSION, "1.3.0")
+        schema_path = H_ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.12.schema.json"
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        self.assertTrue(schema["$id"].endswith("/1.2.12"))
+        provider_branch = next(
+            branch for branch in schema["oneOf"]
+            if any(part.get("properties", {}).get("message_type", {}).get("const") == "C_PROVIDER_OUTCOME_RECORDED"
+                   for part in branch.get("allOf", []))
+        )
+        properties = {}
+        required = set()
+        for part in provider_branch["allOf"]:
+            properties.update(part.get("properties", {}))
+            required.update(part.get("required", []))
+        self.assertTrue({"c_submit_outcome_ref", "c_submit_outcome_digest", "provider_outcome",
+                         "provider_request_ref", "provider_receipt_ref", "owner_admission_ref"}.issubset(properties))
+        self.assertIn("c_submit_outcome_ref", required)
+        self.assertIn("c_submit_outcome_digest", required)
+        self.assertIn("owner_admission_ref", required)
+
+    def test_10_legacy_1_2_11_is_not_the_current_validator_revision(self):
+        self.assertNotEqual(SCHEMA_ARTIFACT_REVISION, "1.2.11")
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
