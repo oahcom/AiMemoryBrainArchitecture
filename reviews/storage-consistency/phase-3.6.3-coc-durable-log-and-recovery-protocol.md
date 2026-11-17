@@ -332,3 +332,67 @@ The receipt proves only that this exact Storage participant was authoritatively 
 ### 14.5 Trust and wire ownership
 
 H owns exact wire spelling, nominal encoding, requiredness, nullability, canonical serialization, schema evolution and interoperability vectors. I owns the signature algorithm/profile, issuer/subject authorization, key lifecycle, revocation, historical verification and anti-rollback policy. Until both approve the same versioned envelope and profile, the fields above are a semantic contract candidate, not a cryptographic or wire freeze.
+
+
+## 15. Normative supersession — Recovery Cutoff Batch / Participant Manifest ordering (Storage v3.1 alignment)
+
+- Amendment class: append-only normative correction to §6.2 and the `AppendRecoveryBatch` API contract.
+- Governing Storage companion: Storage Design v3.1, exact Blob `d5bdc72f193fcdaa654e4f07f865b77c578673ca`, §§5.2–5.6.
+- Superseded COC source Blob: `8ac17816476f280ab6fb3afca0688aa03e37de1d`.
+- This section controls over any inconsistent ordering in §6.2 or earlier API prose. It does not rewrite historical records or claim runtime implementation.
+
+### 15.1 Required ordering and immutable identities
+
+The Recovery Cutoff protocol MUST use the following order. The order is normative and MUST NOT be rearranged:
+
+1. **Keep all affected I/D/C gates closed and freeze owner snapshots.** I, D and C durably close their respective admission/receipt/provider boundaries and capture their own request/participant high-waters, request-set digests, gate generations/cursors and anti-rollback anchors. Each owner signs only its own attestation. A request acknowledged after the snapshot cannot be omitted; it remains behind the closed gate and requires a subsequent batch or authoritative out-of-scope proof under §5.6.
+2. **Establish exact committed prefix P.** Verify the quorum-confirmed COC term/index/configuration epoch, contiguous prefix root and external anti-rollback/checkpoint anchor. Any uncertainty remains RESTORE_FENCED.
+3. **Enumerate and precompute the complete participant manifest before committing the batch.** Against immutable P, perform linearizable prefix-bound enumeration of every ParticipantIntentRef committed at or before P. Include delayed owner-message delivery, unresolved/prepared JF-10 participants and every participant class discoverable through the authoritative COC registry. Produce the deterministic canonical manifest, explicit empty-set representation, count, root/digest, retrieval locator, enumeration high-water and provenance. Independently re-read and verify the manifest against P. This prepared payload is immutable as a candidate but is not yet an authoritative committed record and cannot authorize release.
+4. **Commit COC_RECOVERY_CUTOFF_BATCH.** The quorum-committed batch binds RecoveryEpoch, exact P, complete I/D/C owner snapshot attestations and request-set digests, owner high-waters/gate generations, stable batch idempotency identity, manifest_id, manifest_digest, participant count and enumeration high-water. No protected post-recovery intent, reservation, finalization or favorable read may pass before the required batch/manifest sequence is complete.
+5. **Commit PARTICIPANT_SET_RECONCILIATION as a separate immutable manifest record.** This record references the exact committed batch position/digest and repeats RecoveryEpoch, P, manifest_id, manifest_digest, count and enumeration high-water. Its canonical participant-set payload MUST hash to the digest already bound by the batch. Duplicate, omission, count/root/prefix mismatch or changed payload enters RESTORE_FENCED.
+6. **Linearizable readback of both records.** Read back the exact batch and exact manifest record from the authoritative quorum log and verify all cross-bindings, prefix, owner attestations, count and digests. Only after both records are confirmed may the coordinator enter PARTICIPANTS_RECONCILING.
+7. **Reconcile participants and obtain owner-local releases.** Reconcile each manifest member against its owning I/D/C/Storage evidence. Each Owner independently verifies its own high-water and completeness, and only that Owner may issue its outage-Gate release. COC cannot mint Owner authorization or release.
+8. **Complete the RecoveryEpoch only after all required evidence.** Append RECOVERY_EPOCH_COMPLETED only after all manifest participants are accounted for, all required owner-local reconciliations and signed outage-Gate releases are durable, and the exact batch/manifest references and reconciliation root are verified.
+
+### 15.2 Record and API contract
+
+`AppendRecoveryBatch(batch)` MUST reject a request unless it includes the already computed immutable manifest identity and digest, participant count, enumeration high-water, exact prefix P and complete owner snapshot attestations. It appends only the COC_RECOVERY_CUTOFF_BATCH record; it MUST NOT perform participant enumeration after batch commit as the authoritative source of the batch-bound manifest.
+
+The separate `PARTICIPANT_SET_RECONCILIATION` append MUST be idempotent on the stable batch identity plus manifest identity/digest. A retry after a lost ACK performs linearizable same-key lookup and either confirms the exact prior record or resumes the same immutable payload. It MUST NOT mint a replacement batch ID, manifest ID or digest.
+
+The coordinator MUST expose or internally implement an operation equivalent to:
+- FreezeAndReadOwnerSnapshots();
+- VerifyCommittedPrefix();
+- EnumerateAndPrepareManifest(prefix, ownerSnapshots);
+- AppendRecoveryBatch(batchWithManifestBinding);
+- AppendParticipantSetReconciliation(batchRef, exactManifestPayload);
+- ReadBackAndVerifyBatchAndManifest(batchRef, manifestRef);
+- BeginParticipantReconciliation();
+
+These names describe required semantic steps, not a mandate for a particular programming-language API.
+
+### 15.3 Crash, retry and late-arrival rules
+
+- Crash before batch commit: no batch exists; remain fenced and resume from the same frozen owner snapshots/prefix only if their anchors remain current, otherwise restart the recovery attempt.
+- Batch committed but manifest record absent: remain RESTORE_FENCED; next leader performs same-key lookup and commits/verifies the exact precomputed manifest payload under the same batch identity.
+- Manifest record committed but ACK lost: linearizable lookup by exact batch and manifest identity/digest; never create a replacement.
+- Batch/manifest cross-binding mismatch or incomplete enumeration: RESTORE_FENCED; no owner release, serving or protected admission.
+- Request arriving after an owner snapshot: keep that Owner's gate closed; do not silently mutate the existing batch or manifest. Use a subsequent Recovery Cutoff Batch with a new snapshot/manifest, or prove authoritatively that the request was outside scope and never admitted.
+- UNKNOWN participant, delayed message, projection lag, stale replica, missing owner evidence or unresolved prepared XID: remain blocking; absence is not a terminal outcome.
+
+### 15.4 Explicit correction to §6.2
+
+The former §6.2 step 4 ("append RECOVERY_CUTOFF_BATCH") followed by step 5 ("enumerate every affected ParticipantIntentRef") is superseded. The correct order is: freeze owner snapshots; establish P; enumerate and precompute the complete manifest; commit the batch binding the manifest digest/count/high-water; commit the separate manifest record; read back and verify both; then reconcile participants.
+
+This is a substantive ordering correction, not a wording clarification. The old COC Blob `8ac17816476f280ab6fb3afca0688aa03e37de1d` remains immutable historical evidence and MUST NOT be used as the current normative companion for a joint freeze.
+
+### 15.5 Conformance obligations — specified, not executed
+
+- assert the participant enumeration and manifest digest exist before the batch append is invoked;
+- assert the batch binds exact manifest ID/digest/count/enumeration high-water and owner snapshots;
+- crash after batch commit but before manifest commit and prove all gates remain closed while the same manifest identity is resumed;
+- lose the manifest ACK and prove exact same-key readback without replacement identity;
+- inject duplicate, omitted, delayed and post-snapshot participants and prove mismatch or subsequent-batch behavior;
+- verify both records are quorum-read back and cross-bound before PARTICIPANTS_RECONCILING;
+- verify no owner release or protected serving occurs with batch-only state;
+- verify UNKNOWN, incomplete enumeration or prefix mismatch remains RESTORE_FENCED.
