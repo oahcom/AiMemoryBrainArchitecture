@@ -23,12 +23,12 @@
 |---|---|---|
 | H RecoveryCutoff schema 1.0.4 | session-h-bmcp-protocol | d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1 |
 | H RecoveryJoin schema 1.0.0 candidate | session-h-bmcp-protocol | dd3234aa1c74caf6d0e335875cd96e0b2b64082f |
-| H semantic validator contract | session-h-bmcp-protocol | 9a2c3b856d1319e780932d75d2b0165021faf816 |
-| HRC/JPF executable semantic suite | session-h-bmcp-protocol | f28834d73e055be411060f0c1093bd3dc0d865b9 |
+| H semantic validator contract | session-h-bmcp-protocol | b3218298f58cff9b92cb1c38e453af6fd4d0dd50 |
+| HRC/JPF executable semantic suite | session-h-bmcp-protocol | ee0f47095df10786da358bed193d6f8491a5eb2c |
 | Wire interop candidate suite | session-h-bmcp-protocol | 1a4e754ba9bfa57eb973c6d39731e9f89443b323 |
 | Schema integrity suite | session-h-bmcp-protocol | 5292d56661e938c905c61455e9ed53c4ff674c54 |
 | H branch test workflow | session-h-bmcp-protocol | ea7a3d9c365b84352d3bac69da94fe0d510e46a4 |
-| Storage bidirectional JoinProof contract | session-storage-consistency-forget-atomicity-2026-11-16 | 2882fa8eb4d5e7faca035866572cbe48ac5eeae0 |
+| Storage bidirectional JoinProof contract | session-storage-consistency-forget-atomicity-2026-11-16 | 4520860b28429d35cdb2ca947a56d0ccb64226a3 |
 | Storage serialization topology ADR | session-storage-consistency-forget-atomicity-2026-11-16 | 080433f8e13a500522bc2754da64057edb0ae9d8 |
 | A deterministic conformance matrix | session-a-integration-2026-11-16 | c556125b279271c1cc57fca0b49584b5b1f302b2 |
 
@@ -46,11 +46,11 @@ These are assistant-authored role simulations at the user's direction. They are 
 ## 2. H disposition — HRC-01..25 executable candidate
 
 H has converted the existing 25 semantic scenarios into named unittest methods and added:
-- JPF-01..17: bidirectional request/admission/participant joins, owner row identity, no-effect/out-of-scope dispositions, cardinality, currentness and JF-10 same-participant terminal mapping;
+- JPF-01..19: bidirectional request/admission/participant joins, owner row identity, no-effect/out-of-scope dispositions, cardinality, currentness and JF-10 same-participant terminal mapping;
 - WIRE-01..10: strict duplicate-key parsing, absent/null distinction, deterministic test bytes, counter representation, unknown critical field, GID typing and domain separation;
 - SCHEMA-01..09: six recovery message families, strict object boundaries, RecoveryJoin required edge sets, JF-10 tuple and owner request/admission completeness.
 
-Total committed candidate suite: **64 unittest methods** (25 HRC + 17 JPF + 10 WIRE + 9 SCHEMA).
+Total committed candidate suite: **66 unittest methods** (25 HRC + 19 JPF + 10 WIRE + 12 SCHEMA).
 
 The RecoveryJoin schema now has:
 - six separate owner request/admission completeness states (I/D/C request and I/D/C admission);
@@ -114,7 +114,7 @@ A's matrix includes:
 - 12 two-order race cases;
 - 12 crash / ACK-loss cases;
 - 12 failover / restore cases;
-- mapping to HRC-01..25, JPF-01..17, WIRE-01..10 and SCHEMA-01..09.
+- mapping to HRC-01..25, JPF-01..19, WIRE-01..10 and SCHEMA-01..09.
 
 Tests must assert actual authoritative ledgers, owner-local high-waters, participant identity, DB incarnation/GID, visibility pointer, private staging, outbox/provider side effects and exact proof digests. Unknown remains UNKNOWN; timeout/missing row/lease expiry/process death never infers terminality.
 
@@ -155,6 +155,11 @@ H has added row-digest and typed owner-evidence requirements to RecoveryJoin 1.0
 - I receipt/terminal evidence requires PolicyDomain, PermissionEpoch, inventory epoch, issuer key and authorization receipt;
 - C provider and Storage prepared/resolution evidence carry their owner-specific tuple fields.
 
-The latest H schema Blob is dd3234aa1c74caf6d0e335875cd96e0b2b64082f. The latest HRC suite Blob is f28834d73e055be411060f0c1093bd3dc0d865b9. The Storage JoinProof contract is now Blob 2882fa8eb4d5e7faca035866572cbe48ac5eeae0.
+The latest H schema Blob is dd3234aa1c74caf6d0e335875cd96e0b2b64082f. The latest HRC suite Blob is ee0f47095df10786da358bed193d6f8491a5eb2c. The Storage JoinProof contract is now Blob 4520860b28429d35cdb2ca947a56d0ccb64226a3.
 
 These are schema and test-candidate refinements only. No CI run, cross-language interop PASS or owner signature is claimed.
+
+
+### Owner identity edge test update
+
+JPF-18/JPF-19 explicitly reject substitution between stable OwnerAdmissionRef and exact OwnerEntryRef row identity. The latest HRC/JPF suite contains 44 methods (HRC-01..25 + JPF-01..19) and the full candidate inventory is 66 methods.
