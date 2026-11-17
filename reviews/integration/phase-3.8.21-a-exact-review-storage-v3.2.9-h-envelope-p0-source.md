@@ -2,13 +2,13 @@
 # Phase 3.8.21 — A 精确复审：Storage v3.2.9 / H 外层 Envelope P0 源码候选
 
 - Reviewer perspective: A — Principal Integration Architect
-- Exact Storage v3.2.9 manifest Blob: 02833bb44876b014753d04f46eacf5766a086607
+- Exact Storage v3.2.9 manifest Blob: 147ccedbf38427bce4595ba9d767b95fa138a6ca
 - H envelope auth validator Blob: 571f69d326be51fd80acfe0c5a3f5f2dddce61f4
-- H envelope auth test Blob: e4639b8c7389aea59e09fce897afa3ea56e6e388
+- H envelope auth test Blob: babe51825d6aa13693e9cf844740104c74f598d8
 - H H-envelope mapping Blob: 4ba7e1699215d02224f805a15484b1da2e40c03f
 - C corrected signer/P0 candidate Blob: 310e7e0073d3c32f594bc151f10c249c828ce30f
 - I corrected P0 review Blob: 63d7bfc4ad08bd75e8c0a16c34b3c4ca95e76d00
-- H exact source branch HEAD at binding: 7a666e93c08424e21342bea5f6f291a59f93f34e
+- H exact source branch HEAD at binding: 39dce3db0375bec6af4804c2403e1248fee2171f
 - CI status: **NOT OBSERVED FOR THIS EXACT SOURCE HEAD; NO TEST PASS CLAIM**
 - Decision: **ACCEPT AS A COHERENT REFERENCE IMPLEMENTATION CANDIDATE WITH BLOCKING CONDITIONS — DO NOT FREEZE**
 - Provenance: delegated A-role exact integration review; not an independent human A Owner acceptance.
