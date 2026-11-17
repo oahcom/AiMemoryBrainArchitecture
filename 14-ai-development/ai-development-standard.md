@@ -275,3 +275,16 @@ This document is a proposed baseline until explicitly approved by the project's 
 - Review report:
 - Acceptance record:
 - Final state:
+
+
+## 13. GitHub collaboration and scheduled Owner automation
+
+The project MUST use GitHub as the durable engineering source of truth. Every substantive Work Item MUST link to a GitHub Issue; every code or normative-document change MUST use a PR unless an approved emergency procedure applies. Issue/PR conversation may clarify work, but material instruction changes MUST be versioned into a new approved prompt before execution.
+
+A MUST coordinate cross-Owner work and draft prompts under AI-PROMPT-STD-001. The accountable Owner MUST approve its domain scope and acceptance criteria before READY. A's prompt authorship does not transfer domain authority or implementation acceptance. A MUST NOT be the sole author and approver of an A-owned task prompt.
+
+The default automation topology MAY use one scheduled task per active Owner. Each task MUST have a bounded Owner identity, approved prompt version/hash, configured cadence/timezone, GitHub selection rules, permission preflight, idempotency rules, action limits, stop conditions and run evidence. A schedule does not confer an independent reviewer identity or project authority.
+
+Scheduled tasks MUST read current GitHub state before acting and publish durable progress/evidence back to Issues/PRs. They MUST NOT bypass independent review, CI, acceptance or merge protection. Deterministic builds/tests and merge gates SHOULD be enforced by GitHub Actions/CI; scheduled tasks coordinate and perform bounded work only within available capabilities.
+
+See [AI-AUTO-001](owner-automation-operating-model.md) and [AI-PROMPT-STD-001](prompt-authoring-standard.md). Both remain PROPOSED until explicit governance approval.
