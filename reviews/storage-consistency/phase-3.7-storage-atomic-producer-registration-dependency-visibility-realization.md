@@ -205,3 +205,21 @@ ProducerClass Version/Status 必须先持久化，并由同一 Admission Order �
 Storage 对 D/E 语义合同给出 **附条件接受**，不是独立 Owner 批准或实现成功声明。仍须 D 确认 EventRef 修正，E 确认生命周期映射，I 定义 Visibility Commit 处授权当前性的线性化及撤权竞态，D/Storage 指定实际共享事务域，H 冻结精确 Wire Schema，并由工程团队执行确定性 Race/Crash/Failover/Restore 测试。
 
 本提案不选择数据库产品，不声称 D/E API 已存在，不声称共享事务域已部署，也不声称测试通过。不授权 Schema Freeze、合并、实现符合性 PASS、生产启用或 Global Forget 完成。
+
+## 9. Joint D/I in-flight gate composition — mandatory before visibility commit
+
+The D/Storage serialization domain alone does not resolve the independent I revocation race. The following composition is mandatory and supersedes any reading of §4.4 that treats a detached I current-ALLOW snapshot as sufficient.
+
+1. D admits an exact PublicationParticipantRef into its own fence/barrier order. A later D fence cannot become effective past it until terminal Storage outcome.
+2. Storage creates a durable hidden StorageVisibilityParticipantRef bound to the same PublicationOperationId/digest and D participant.
+3. I consumes a single-use CommitAuthorizationReceipt in its own PolicyDomain sequencer, bound to that exact Storage participant and D participant. Revocation-first rejects; COMMIT_WON holds later revocation until Storage terminal outcome.
+4. Storage final visibility transaction validates both the active D publication participant/current D fence and the exact I terminal proof. The D/Storage transaction is the physical visibility linearization point; the I sequencer establishes the independent authorization/revocation order.
+5. On commit, Storage emits immutable COMMITTED_VISIBLE proof. On proven abort, it emits NO_PUBLICATION proof. D and I close their respective in-flight participants only after verifying the same Storage outcome. UNKNOWN leaves both gates open and artifact private.
+
+The authority barriers are conjunctive, not numerically merged. D fence-first or I revocation-first means no visibility. A D publication participant or I COMMIT_WON alone is never visibility permission. Exact D/I/Storage owner acceptance and deterministic crash/race tests remain required; this protocol is not implemented or verified.
+
+### 中文规范
+
+D/Storage 序列化域本身不能解决独立 I Revocation 竞态，因此强制采用上述组合：D 将精确 PublicationParticipantRef 纳入自身 Fence/Barrier；Storage 创建隐藏 Visibility Participant；I 在自己的 PolicyDomain Sequencer 单次消费绑定 D/Storage Participant 的 CommitAuthorizationReceipt；Storage 最终 Visibility Transaction 同时验证 D 当前参与状态/Fence 和精确 I Terminal Proof。Storage 提交后产生不可变 COMMITTED_VISIBLE 证明；安全中止产生 NO_PUBLICATION 证明；D/I 只有验证同一 Storage Outcome 后才能分别关闭自己的 Participant。UNKNOWN 时两个 Gate 均保持开放且 Artifact Private。
+
+两个权威 Barrier 必须合取满足，不得合并成数值序列。D Fence-first 或 I Revocation-first 均不得 Visibility。D Publication Participant 或 I COMMIT_WON 单独存在都不是 Visibility Permission。本协议仍须 D/I/Storage 精确 Owner 接受和确定性 Crash/Race 测试；尚未实现或验证。
