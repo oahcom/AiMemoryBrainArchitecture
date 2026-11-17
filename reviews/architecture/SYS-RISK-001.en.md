@@ -362,3 +362,53 @@ R-01 remains **Critical / OPEN** and continues to block architecture freeze and 
 5. Keep L4 OPEN until actual engine/configuration, authoritative read-path, HA/PITR, operator and physical fault/restore evidence are named and verified.
 
 **No Owner approval is inferred from this R review.** This addendum is an independent risk-status correction only.
+
+
+## 15. R-02 live source delta — Fact / Claim canonical semantics / 2026-11-17
+
+### 15.1 Exact current B source pins
+
+| Source | Current B branch HEAD | Exact path | Blob SHA | Directly observed status |
+|---|---|---|---|---|
+| B ADR-001 | `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | `02-domain-model/ADR-001-fact-claim-semantics.md` | `a1024938ff5baba069cf128c69496a44e143330c` | ADR-BLOCKED; no formal decision authority, approver, timestamp, approved option or approval record |
+| Domain Model Overview | same HEAD | `02-domain-model/domain-model-overview.md` | `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` | DECIDED baseline text says Claim is canonical proposition object and Fact is a qualified interpretation, not a separate object type at this stage |
+| Architecture Invariants | same HEAD | `00-governance/architecture-invariants.md` | `66266667bdbb1cf15a2644fa98db5ecaaf3bb23b` | I-04 states Event, Memory, Fact, Entity, Relation and Evidence are distinct domain concepts |
+| Design Principles | same HEAD | `00-governance/design-principles.md` | `192e6ba6e9287792a02b679dda0d391844270228` | P-04 states Event, Memory, Fact, Entity, Relation and Evidence are different objects |
+| Consumer Mapping | same HEAD | `02-domain-model/fact-claim-consumer-mapping.md` | `dd45a37199c9b69ab6b68f65e051a484a04691d4` | CANDIDATE; canonical Fact/Claim portions explicitly ADR-BLOCKED |
+
+The ADR's own “Last reviewed baseline” is `ab19afbf92f67fe0a7679e9aa3a35b015fed89f4`, not the current B HEAD. The current branch readback above controls this assessment; the embedded baseline label is stale and must not be treated as a current source pin.
+
+### 15.2 Normative conflict and current decision state
+
+The conflict is substantive:
+
+- Governance I-04 and P-04 name Fact and Claim as distinct domain concepts / objects.
+- The current Domain Model Overview says Claim is the canonical proposition object and “Fact” is a qualified interpretation of a Claim, not a separate object type at this stage.
+- ADR-001 explicitly records this as a normative baseline conflict, not a naming-only discrepancy, and says B cannot resolve it unilaterally.
+- B recommends Option A (separate Fact attestation object) as a candidate, conditional on a real independent-attestation use case and D/I agreement. It is not a decision.
+- The consumer mapping keeps both branches conditional and explicitly prohibits canonical Fact/Claim identity fields from being frozen before ADR approval.
+
+Therefore R-02 is **BLOCKED at governance decision level**, not merely underspecified. Neither Option A nor Option B is normative. The current overview wording cannot silently amend I-04/P-04, and B's Option A recommendation cannot silently approve a new canonical Fact identity.
+
+### 15.3 Cross-owner impact
+
+Until a formal decision is recorded:
+- E must keep CandidateProposition / ExtractionIR neutral and must not assign canonical ClaimRef or FactRef.
+- D must not freeze canonical Fact/Claim schema, IDs, storage or API shape.
+- F/G must not assume FactRef or collapse a fact-qualified view into a stable canonical field.
+- H must not freeze Fact/Claim wire fields.
+- C telemetry remains source/producer observation, not Fact attestation.
+- Consumer mapping remains candidate; no consumer branch artifact or implementation is evidence of governance approval.
+
+The candidate mapping has useful safeguards (exact ClaimRevision targeting, evidence/provenance linkage, no confidence-only Fact promotion, immutable correction/retraction history and conflict preservation). These are design constraints, not a substitute for choosing the canonical object model.
+
+### 15.4 R-02 closure criteria
+
+1. Name the formal Architecture Governance authority and decision rights in a normative governance artifact.
+2. Record a timestamped Option A or Option B decision with named authorized approver(s), rationale and accepted use cases.
+3. If Option A: define Fact/FactRevision identity, exact ClaimRevisionRefs, attestor ActorRef, method/version, evidence, Scope, validity, revocation/supersession and I authorization; D owns canonical commit.
+4. If Option B: formally amend I-04/P-04 and every affected baseline/terminology reference through authorized change control; define the exact ClaimRevision qualification object and historical semantics.
+5. Obtain explicit B/D/E/F/G/H/I consumer mapping acceptance against exact artifact Blobs; preserve no-inference boundaries for C telemetry and extraction confidence.
+6. Publish migration/compatibility and conformance vectors for creation, correction, retraction, conflict, expiry/revocation, temporal validity and as-of reads.
+
+R-02 remains **Critical / BLOCKED** and blocks canonical schema/identity freeze. No option is selected by this R review; no governance authority is simulated or replaced.
