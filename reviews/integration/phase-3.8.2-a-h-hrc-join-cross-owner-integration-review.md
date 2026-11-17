@@ -279,3 +279,12 @@ Current Storage exact evidence:
 - Storage freeze evidence: `1a5c9f03e1abc999b96ad59d67598c4bd32cee23`.
 
 This 97-test pass remains a candidate reference-model/schema/test-profile result. It does not close live COC/owner-ledger enumeration, owner signatures/key status, owner-local CAS, real JF-10 physical resolution, D/Storage topology or the 36 physical cases in A's matrix.
+
+
+### 9.7 中文集成结论：H 97 项与 Storage 双向 JoinProof
+
+H 当前候选测试为 97 项：HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1。最近验证运行 44043100543 为 97/97 PASS。Recovery Cutoff 1.0.5、RecoveryJoin 1.0.1、Unified COC/JF-10 1.2.8 已进入候选 Schema。新增 SCHEMA-15/16 只检查 Owner Snapshot Attestation 与 COMPLETE_EMPTY / OUT_OF_SCOPE 字段结构，不代表签名或真实 Ledger 验证。
+
+Storage 双向 JoinProof 明确要求：Owner Admission → ParticipantManifest 和 ParticipantManifest → Owner Evidence 两个方向均可验证；I/D/C 的 Request Set 与 Admission Set 六个集合分别完整枚举；OwnerAdmissionRef 与 OwnerEntryRef、OwnerRequestDigest 与 OwnerEntryDigest 严格区分；差集显式且 COMPLETE 时全部为空；JF-10 同一 PreparedParticipantRef/GID/DB Incarnation 作为独立子 Join；I/D/C 在自己的权威域执行最终 Currentness CAS 和 Gate Release。
+
+A 的集成结论仍是：**逻辑组合可接受，但保留阻塞修订项**。97 项是候选参考模型/结构/Wire 测试 PASS，不是生产密码学、真实 COC/Owner Adapter、JF-10 物理恢复或事务拓扑通过。HRC-TEST-v1 不是生产 Profile，36 项物理 Race/Crash/Failover/Restore 测试尚未执行。所有 Owner 的独立精确版本批准仍需完成。
