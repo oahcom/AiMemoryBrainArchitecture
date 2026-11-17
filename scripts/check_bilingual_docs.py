@@ -20,6 +20,8 @@ NORMATIVE_ROOTS = {
     "13-engineering-decisions",
 }
 EXEMPT_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".drawio"}
+# This normative policy intentionally contains both languages in one source file.
+EMBEDDED_BILINGUAL_SOURCES = {"00-governance/bilingual-documentation-policy.md"}
 ROOT = Path.cwd()
 
 
@@ -90,6 +92,7 @@ def main() -> int:
 
     bilingual_doc_changes = any(
         path.startswith("docs/en/") or path.startswith("docs/zh-CN/")
+        or path in {"docs/README.md", "docs/translation-status.md"}
         for path in changed
     )
     if bilingual_doc_changes and not complete and not exception:
@@ -118,6 +121,8 @@ def main() -> int:
 
     if normative_changes and complete:
         for source in normative_changes:
+            if source in EMBEDDED_BILINGUAL_SOURCES:
+                continue
             en = f"docs/en/{source}"
             zh = f"docs/zh-CN/{source}"
             if en not in changed or zh not in changed:
