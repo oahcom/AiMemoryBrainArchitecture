@@ -1,6 +1,7 @@
 import unittest
 
 from forget_cross_owner_model import (
+    ACTIONS,
     EXPECTED_COUNTEREXAMPLES,
     State,
     apply_actions,
@@ -11,6 +12,17 @@ from forget_cross_owner_model import (
 
 
 class ForgetCrossOwnerModelTests(unittest.TestCase):
+    def test_registered_fenced_never_started_has_no_pre_execution_terminal_transition(self):
+        # E has a candidate Cancelled/Rejected disposition, but this model
+        # does not yet map it to an authoritative D terminal receipt.
+        state = apply_actions(State(), "register", "install_fence")
+        self.assertEqual(state.work, "REGISTERED")
+        self.assertEqual(state.i_decision, "NONE")
+        self.assertNotIn("cancel_before_execution", ACTIONS)
+        self.assertIsNone(step(state, "terminalize"))
+        self.assertIsNone(step(state, "resolve_no_publication"))
+        self.assertIsNone(step(state, "close_barrier"))
+
     def test_safe_graph_has_no_counterexample(self):
         trace, violations, _, count = bfs(None, 14)
         self.assertIsNone(trace)
