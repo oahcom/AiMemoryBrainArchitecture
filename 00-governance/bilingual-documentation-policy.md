@@ -1,7 +1,7 @@
 # Bilingual Architecture Documentation Policy / 架构双语文档规范
 
 - Policy ID: GOV-DOC-001
-- Version: 1.0
+- Version: 1.1
 - Status: **NORMATIVE — REQUIRED FOR ALL ARCHITECTURE WORK**
 - Owner: A — Principal Integration / Architecture Governance
 - Applies to: All Owners (A–I), contributors, architecture reviews, ADRs, specifications, and implementation-facing contract changes
@@ -33,6 +33,50 @@ The requirement applies to, at minimum:
 Code comments, generated API references, machine-generated schema dumps, and raw test logs may remain in their natural technical language when duplicating them would be harmful or mechanically misleading. However, their architecture meaning, usage constraints, and interpretation MUST be explained in both language versions of the owning specification.
 
 代码注释、自动生成的 API 参考、机器生成的 Schema 转储和原始测试日志，在重复翻译会造成误导或破坏机器可读性的情况下，可以保留其技术原文；但所属规范必须用中英文解释其架构含义、使用约束和解读方式。
+
+## 2.1 Mandatory duties for every AI developer / 所有 AI 开发者的强制职责
+
+This policy applies to **every AI developer, AI coding agent, AI reviewer, AI architecture agent, and AI session** working in this repository—not only the A–I Owners and not only the documentation role. The accountable Owner remains responsible for ensuring that every delegated AI session receives and follows this requirement.
+
+Every AI developer MUST, before starting a task:
+
+1. Read this policy and the relevant bilingual portal/style/glossary guidance.
+2. Locate the current Chinese and English counterparts of every architecture contract affected by the task.
+3. Identify which language files are authoritative source specifications and which are reader guides or translations; never assume a translated guide overrides an approved source contract.
+4. Include bilingual-documentation work explicitly in its task plan, prompt, scope and acceptance criteria.
+
+During the task, every AI developer MUST:
+
+1. Create or update both language versions in the same change set whenever it creates or changes architecture meaning, constraints, interfaces, state, security, failure behavior, compatibility, technology decisions, resource assumptions, tests or acceptance criteria.
+2. Keep both versions aligned as the design evolves; do not defer translation until an informal later cleanup.
+3. Preserve stable identifiers, decision status, open issues, evidence references and exact source revision.
+4. Update reciprocal links and the documentation coverage/status register.
+5. If source material is incomplete, conflicting or not approved, preserve that uncertainty in both languages and escalate to the accountable Owner. Translation is not authority to decide.
+
+Before reporting a task complete, every AI developer MUST provide a bilingual change manifest and verify counterpart existence, semantic parity, identifier parity, status parity and links. A task that changes architecture semantics is **NOT DONE** while its counterpart is missing, stale without an approved exception, or materially inconsistent.
+
+AI reviewers and integration agents MUST check this requirement as an explicit review dimension. They MUST raise a finding and block documentation acceptance when the requirement is not met. A task prompt that omits this requirement is incomplete and MUST be corrected before execution or acceptance.
+
+本规范适用于在本仓库工作的**每一位 AI 开发者、AI 编码 Agent、AI 审查者、AI 架构 Agent 和每一个 AI 会话**，而不只是 A–I Owner 或文档岗位。委派任务的责任 Owner 必须确保每个 AI 会话收到并遵守本要求。
+
+每位 AI 开发者在开始任务前 MUST：
+
+1. 阅读本规范以及相关双语入口、写作规范和术语表。
+2. 找到任务涉及的每份架构契约当前的中文和英文对应版本。
+3. 确认哪些文件是权威源规范，哪些是阅读指南或翻译；不得假设翻译版指南可以覆盖已批准的源契约。
+4. 在任务计划、提示词、工作范围和验收标准中明确列入双语文档工作。
+
+执行任务期间，每位 AI 开发者 MUST：
+
+1. 只要新增或改变架构含义、约束、接口、状态、安全、故障行为、兼容性、技术决策、资源假设、测试或验收条件，就必须在同一个变更集中创建或更新中英文两个版本。
+2. 随设计演进同步维护两种语言，不得把翻译推迟到某个非正式的后续清理阶段。
+3. 保留稳定标识、决策状态、未决事项、证据引用和准确源版本。
+4. 更新双向链接和文档覆盖/状态登记表。
+5. 如果源材料不完整、存在冲突或尚未批准，必须在两种语言中保留其不确定性并升级给责任 Owner。翻译不构成决策授权。
+
+在报告任务完成前，每位 AI 开发者 MUST 提供双语变更清单，并验证对应文件存在、语义一致、标识一致、状态一致且链接有效。凡改变架构语义的任务，只要另一语言版本缺失、未经批准的例外而过期，或存在实质不一致，就属于 **NOT DONE**。
+
+AI 审查者和集成 Agent MUST 将本要求作为明确的审查维度。未满足时 MUST 提出 Finding 并阻止文档验收。遗漏本要求的任务提示词属于不完整提示词，必须在执行或验收前修正。
 
 ## 3. Required parity / 双语一致性要求
 
@@ -106,6 +150,6 @@ A bilingual architecture deliverable is complete only when:
 
 ## 8. Enforcement / 执行
 
-This policy is effective for new architecture work from its adoption into the repository's approved governance baseline. All A–I Owners MUST apply it to future design proposals, review reports, specifications, ADRs, and material revisions. Existing documents will be migrated in tracked batches; unmigrated items MUST be listed as NOT STARTED or STALE rather than represented as bilingual-complete.
+This policy is effective for new architecture work from its adoption into the repository's approved governance baseline. All A–I Owners and **all AI developers/sessions** MUST apply it to future design proposals, review reports, specifications, ADRs, implementation-facing contract changes, technology decisions, test/acceptance changes, and material revisions. The task Owner MUST put this requirement into every delegated prompt and verify the returned bilingual manifest. Reviewers MUST treat missing or materially divergent counterparts as a blocking documentation finding. No AI developer may waive this policy on its own; only the authorized project governance authority may approve a time-bounded exception under Section 5. Existing documents will be migrated in tracked batches; unmigrated items MUST be listed as NOT STARTED or STALE rather than represented as bilingual-complete.
 
-本规范自正式纳入仓库已批准治理基线后，对新的架构工作生效。A–I 所有 Owner 必须在后续设计提案、审查报告、规范、ADR 和重要修订中执行。既有文档按登记批次迁移；尚未迁移的文档必须标记为 NOT STARTED 或 STALE，不得宣称已经完成双语化。
+本规范自正式纳入仓库已批准治理基线后，对新的架构工作生效。A–I 所有 Owner 以及**所有 AI 开发者/会话**必须在后续设计提案、审查报告、规范、ADR、面向实现的契约变更、技术决策、测试/验收变更和重要修订中执行。任务 Owner 必须把本要求写入每一份委派提示词，并核验 AI 返回的双语变更清单。审查者必须把缺失或实质不一致的对应版本视为阻断性文档 Finding。任何 AI 开发者不得自行豁免本规范；只有获授权的项目治理机构可以依照第 5 节批准有期限的例外。既有文档按登记批次迁移；尚未迁移的文档必须标记为 NOT STARTED 或 STALE，不得宣称已经完成双语化。
