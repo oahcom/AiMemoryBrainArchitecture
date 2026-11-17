@@ -32,7 +32,9 @@
     "governance_key_id_ref",
     "governance_key_version",
     "governance_signature_profile_id",
-    "governance_signature"
+    "governance_signature",
+    "message_type",
+    "event_digest"
   ],
   "properties": {
     "schema_id": {
@@ -145,6 +147,12 @@
     "governance_signature": {
       "type": "string",
       "pattern": "^[A-Za-z0-9_-]{86}$"
+    },
+    "message_type": {
+      "const": "C_KEY_STATUS_EVENT"
+    },
+    "event_digest": {
+      "$ref": "#/$defs/sha256"
     }
   },
   "$defs": {
