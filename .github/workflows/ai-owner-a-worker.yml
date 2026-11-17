@@ -1,0 +1,39 @@
+name: AI Owner A worker
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+concurrency:
+  group: ai-owner-a-worker
+  cancel-in-progress: false
+jobs:
+  owner-a:
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Prepare durable worker state
+        run: |
+          install -d -m 0700 "$HOME/.local/state/ai-owner-worker"
+      - name: Process one eligible Owner A issue
+        env:
+          GITHUB_TOKEN: \${{ github.token }}
+          GITHUB_REPOSITORY: \${{ github.repository }}
+          OPENAI_API_KEY: \${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: gpt-5
+          OWNER_LABEL: owner-a
+          READY_LABEL: ai-ready
+          ACTIVE_LABEL: ai-in-progress
+          WORKER_DB: \${{ runner.temp }}/../_work/ai-owner-worker.sqlite3
+          RUN_ONCE: "1"
+        run: python automation/owner_worker.py
