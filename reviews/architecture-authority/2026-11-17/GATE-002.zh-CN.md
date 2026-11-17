@@ -1,6 +1,6 @@
 # Gate 准入与退出标准 — GATE-002
 
-- 版本：1.0.0；基线 `6470f25ca23b8d35c06f60be2326867066418d18`。
+- 版本：1.0.0；基线 `6470f25ca23b8d35c06f60be2326867066418d18`（历史评估快照，非当前 Main）。
 - 本文件保留两层独立门禁：Issue #43 集成 Gate G1–G8 与 JF-10 物理 Gate A/B/C。两者不可互换。
 
 ## Issue #43 集成 Gate
@@ -37,3 +37,8 @@ Gate A 部分通过不意味着 B 或 C 通过。Gate B/C 通过也不授权生�
 要求所有适用 Owner 批准、已选定并部署的拓扑、安全/身份治理、物理符合性、经过测试的 Backup/Restore 和 DR、具名负责操作员/On-call、批准的 Runbook、Monitoring、RPO/RTO 及明确生产授权。当前没有证据满足这些条件。
 
 参见 SYS-RISK-002、READINESS-002 和 FINAL-A-002。
+
+
+## 当前 Main HEAD
+
+本次发布独立观察到的当前 Main HEAD 为 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。此前的 `6470f25...` / `b372b62...` 均为历史评估快照，不是当前 Main。本套文件尚未完成针对当前 Main 的逐来源完整差异审计；G1 仍为 PARTIAL，所有 Gate/冻结限制继续有效。
