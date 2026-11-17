@@ -46,3 +46,35 @@ Each Owner's domain decision remains with that Owner. A's role is to map depende
 ## 4. Escalation rule / 升级规则
 
 If an owner-owned semantic contract is missing or conflicting, mark the affected technology recommendation **BLOCKED**. Do not fill the gap with a library default, a model inference, or a simulated owner approval.
+
+## 5. 完整中文版本 / Chinese Version
+
+### 5.1 Owner 输入需求
+
+| Owner | 必须确认的事项 | A 需要回答的问题 | 技术影响 | 是否阻塞 |
+|---|---|---|---|---|
+| B 领域模型 | Fact/Claim ADR、Typed ID、Scope/Principal/Actor 映射、时间/认知约束 | 哪些 Canonical Type 和唯一性约束必须持久化？哪些字段被 Fact/Claim 阻塞？ | SQL Schema、Key、Index、Protocol、Migration | Schema 冻结阻塞 |
+| C Agent 集成 | Adapter Tier、Final Inference Request Applied、Provider Egress | 各 Tier 能力和最终请求边界是什么？ | Protocol、SDK、部署、Auth、Provider 副作用 | Applied/Adapter 拓扑阻塞 |
+| D Canonical Memory | CanonicalCommitCursor、Lifecycle、Forget Fence | Producer Admission 与 Forget Fence 的线性化点是什么？ | SQL Transaction、Lock/CAS、Cursor、Restore | 严重阻塞 |
+| E Compiler | Accepted Event、Idempotency、Work State、Lease/Retry、Derivative | Event+Outbox+Blob 如何持久且不产生虚假 Accepted？ | Outbox/Worker、Queue、Inference、Blob | 严重阻塞 |
+| F Retrieval | 检索通道、Ranking、Activation、Watermark、Cache/Fence | 首个切片的最小通道是什么？候选前如何权威过滤？ | FTS5/Tantivy/Vector/Cache | Search 选型阻塞 |
+| G Context | ContextVersion、ChangeSet、Delivery、Applied | 哪些状态持久化，哪些可重建？Applied 如何验证？ | Context DB、Outbox、Snapshot/Delta | Context 同步阻塞 |
+| H Protocol | Wire Schema/Version、Capability、ACK | 编码/传输/兼容规则是什么？ACK 如何绑定 C Final Request？ | JSON/CBOR/gRPC/HTTP/IPC | Protocol 冻结阻塞 |
+| I Security | Principal/Actor、Scope/Permission、PermissionEpoch、Revocation、Forget Inventory、Key Custody | Cedar 是否符合 I 语义？撤销和 Restore 要求是什么？ | Policy、Auth、Cache、Audit、Crypto | 严重阻塞 |
+| Storage/Consistency | 物理事务拓扑、COC/JF-10、Prepared XID | 批准何种 DB/拓扑？哪些证据证明跨 Owner 操作？ | SQLite/PostgreSQL、Lock、Recovery | 严重阻塞 |
+| Testing | Reference Model、Race/Fault Matrix、Conformance | 哪些 Harness 能证明双向竞争、崩溃、Replay、Restore？ | Prototype、CI、Fault Injection | 严重阻塞 |
+| Observability | Correlation、Redaction、Queue/Index/Forget/Applied Metrics | 必须记录哪些指标？哪些 SLO 可测？ | tracing、OTel、Dashboard | SLO 基线阻塞 |
+| Release/Ops | OS、Packaging、Upgrade、Backup、RTO/RPO | 首发支持哪些平台？谁负责运维？ | systemd/OCI、Migration、Key、Backup | 部署验收阻塞 |
+
+### 5.2 Owner 回答格式
+
+每个 Owner 必须给出精确 Source Branch/Commit/Path/Blob、状态（DECIDED/CANDIDATE/OPEN/ADR-BLOCKED/TO_VALIDATE）、规范契约及不保证项、物理技术能力要求、测试证据、跨 Owner 依赖和未解决冲突。A 只负责集成映射和暴露不兼容，不代替领域决策。
+
+### 5.3 当前已知阻塞
+
+- B Fact/Claim ADR 仍 ADR-BLOCKED。
+- D/Storage 序列化物理实现和 JF-10 应用桥接仍未闭合；Storage 最新 ADR 只关闭逻辑 v1 序列化档案。
+- D/E/Storage Producer Admission、Fence、Dependency、Publication 仍是关键 OPEN。
+- C/G/H Applied Contract Frozen = NO。
+- I Global Forget Target Inventory 和治理审批仍阻塞。
+- JF-10 Gate B 修订协议需要精确 Owner 复审，Gate C 延后到工程阶段，Runtime P0 仍 OPEN。
