@@ -38,3 +38,23 @@ Schema Artifact Revision 1.2.16 保留 Wire Family 1.3.0，并新增：
 本次关闭了 H Schema 候选相对于 Storage §17.1 的结构字段遗漏。但这不证明 I/D/C 生产 Owner Ledger 实际生成并签署这些值，也不证明 H 已语义验证 Root/Membership Proof，或 COC Quorum Log/物理 JF-10 已部署。生产 Crypto、Anti-rollback、Semantic Pair Validation、真实 Owner Ledger Adapter、Gate B/C 和生产激活仍为 OPEN。
 
 **处置：** H Unified 1.2.16 Owner Snapshot 结构候选 — **PASS（专用检查 11/11）**。H Recovery Cutoff 完整候选套件 — **PASS（317 项）**。生产 JF-10 / COC / Global Forget — **NOT AUTHORIZED**。
+
+
+## 5. 当前精确 Head 修正 — 2026-11-18
+
+当前来源的实例级审查发现：原 1.2.16 中 Owner=I 的条件校验要求旧字段 `inventory_epoch_ref`，而 I 专属封闭 Schema 实际定义的是 `producer_domain_inventory_epoch_ref`。由于 I 专属对象设置了 `additionalProperties: false`，这会导致 I Owner Snapshot 结构无法满足 Schema。
+
+修正内容：
+- Schema 条件现要求 `producer_domain_inventory_epoch_ref`，与 I 专属属性及 I 的 ProducerDomainInventoryEpoch 权威定义一致。
+- 新增 I、D、C 三类真实 Owner Snapshot 实例的 Draft 2020-12 验证。
+- 新增负向实例测试：缺少 I ProducerDomainInventoryEpoch、使用禁止的旧别名、缺少 D Dependency-closure Root、缺少 C Provider Idempotency Namespace。
+
+当前 H Owner 分支精确 HEAD：`b2bc200193127fbb05f74cc208d4831188601fd3`。
+- Schema Blob：`91c4fd70cb1e1cff76d733baa180325bd2da84c1`。
+- 1.2.16 专项测试 Blob：`e1667b0f9526884c56c311bf1bcf8af6af0b9477`。
+- 1.2.16 专项实例/结构测试：**16 项**。
+- 完整 H Recovery Cutoff Run [#44192602325](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44192602325)：SUCCESS；精确 Head Job 日志报告 **356 tests**，OK，22 项 skipped。
+
+此前 317 项测试/11 项专项检查是修正前 1.2.16 版本的历史结果。新结果仅证明结构及实例级 Schema 符合性；不证明 I/D/C 生产 Owner Ledger 实际生成/签署这些值，不证明 Root/Membership 语义验证、COC Quorum 部署或物理 JF-10。
+
+**更新结论：** Unified 1.2.16 Owner Snapshot 结构 — **精确 Head 上 16 项专项测试通过，并包含于完整 356 项 H 套件**。生产 JF-10 / COC / Global Forget — **NOT AUTHORIZED**。
