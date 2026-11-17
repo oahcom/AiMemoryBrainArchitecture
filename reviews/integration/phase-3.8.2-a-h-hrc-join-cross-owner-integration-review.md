@@ -38,8 +38,8 @@
 |---|---|---|---|---|
 | D | phase-3.8.2-d-recovery-join-and-visibility-exact-review.md | D branch | 1ef3a736cdbf59b27a017d6dd4aee9fe7be0b940 | ACCEPT WITH AMENDMENTS |
 | E | phase-3.8.2-e-recovery-join-orchestration-exact-review.md | E branch | c2beb133de40e7c8281933dfa175ac7fa289bd5f | ACCEPT WITH AMENDMENTS |
-| I | phase-3.8.2-i-recovery-join-trust-currentness-exact-review.md | I branch | 83cacf7575c2800593104ddb9a6e72f521a9576b | ACCEPT WITH AMENDMENTS |
-| Storage | phase-3.8.2-storage-exact-review-and-topology-disposition.md | Storage branch | 7c09cfad1ca77ed51cf282dc0826c62d91eea4dd | ACCEPT WITH AMENDMENTS; ADR BLOCKED |
+| I | phase-3.8.2-i-recovery-join-trust-currentness-exact-review.md | I branch | 4a72cecd7769be7017b699ab102b127fab516101 | ACCEPT WITH AMENDMENTS |
+| Storage | phase-3.8.2-storage-exact-review-and-topology-disposition.md | Storage branch | 4cb3a6c71497cc68ffbb947cd47c4e67c6590bc2 | ACCEPT WITH AMENDMENTS; ADR BLOCKED |
 
 These are assistant-authored role simulations at the user's direction. They are not independently attributable repository Owner signatures or cryptographic attestations.
 
@@ -163,3 +163,24 @@ These are schema and test-candidate refinements only. No CI run, cross-language 
 ### Owner identity edge test update
 
 JPF-18/JPF-19 explicitly reject substitution between stable OwnerAdmissionRef and exact OwnerEntryRef row identity. The latest HRC/JPF suite contains 44 methods (HRC-01..25 + JPF-01..19) and the full candidate inventory is 66 methods.
+
+
+## 8. Exact CI result and C review refresh / 精确 CI 结果与 C 审查刷新
+
+The H candidate test bundle was executed by its push-triggered workflow after the JPF-08 fixture was corrected:
+
+- H RecoveryJoin schema: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- H semantic contract: `b3218298f58cff9b92cb1c38e453af6fd4d0dd50`.
+- HRC/JPF suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- Wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
+- Schema suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
+- Exact CI: [run 44039990464](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44039990464), test commit `da94bcc1796cb350eed12845e49cbc3663faab9c`, job `133891944149`, **66/66 PASS**.
+- C exact RecoveryJoin/provider-side-effect review: `07-agent-integration/phase-3.8.2-c-recovery-join-provider-side-effect-exact-review.md`, commit `d5be3be10f7144476ddc61a94f29faff67424292`.
+- Storage exact review addendum: Blob `4cb3a6c71497cc68ffbb947cd47c4e67c6590bc2`.
+- I exact review addendum: Blob `4a72cecd7769be7017b699ab102b127fab516101`.
+
+The first run [44039825581](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44039825581) failed only at JPF-08 because its fixture unintentionally required absent I/D rows before testing duplicate C primary admission. The fixture was narrowed to require only C evidence for that isolated invariant; validator behavior was not weakened. The corrected run passed all 66 methods.
+
+**Updated A decision:** ACCEPT the logical HRC/RecoveryJoin/JoinProof composition as a coherent proposed contract and accept the 66/66 reference-candidate CI result. Do NOT accept implementation/conformance, production canonicalization/signatures, live owner ledger completeness/currentness CAS, provider adapter behavior, or physical D/Storage linearization. Storage topology ADR remains BLOCKED; no freeze or activation.
+
+中文：HRC/RecoveryJoin 逻辑组合及 66/66 候选 CI 通过可接受为设计与参考模型证据。JPF-08 首次失败是测试夹具同时要求缺失 I/D 证据，修正后仅隔离 C 主 Admission 唯一性断言，没有放宽 Validator。该通过不代表真实 Owner Ledger、密码学、Provider Adapter、Storage 物理线性化或跨语言互操作通过。Storage 拓扑 ADR 仍 BLOCKED，禁止冻结和生产激活。
