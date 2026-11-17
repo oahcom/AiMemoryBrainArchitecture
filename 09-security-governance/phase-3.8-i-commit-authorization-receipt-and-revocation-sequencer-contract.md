@@ -102,7 +102,7 @@ An expired accept-before blocks first consumption only. It must not silently ter
 
 ## 7. Storage final-boundary proof semantics
 
-Storage must validate an I terminal authorization proof whose meaning remains valid at the actual visibility linearization point. A detached signed ALLOW snapshot or unconsumed token is insufficient.
+Storage must validate the consumed I CommitAuthorizationReceipt / ICommitAuthorizationProof whose COMMIT_WON result remains valid at the actual visibility linearization point. This is pre-commit sequencer evidence. ITerminalProof is issued only after the Storage outcome and is closeout evidence; it MUST NOT be required by the same Storage commit. A detached signed ALLOW snapshot or unconsumed token is insufficient.
 
 I and Storage must define how Storage can verify:
 - proof issuer and key status;
@@ -158,7 +158,7 @@ Revocation-first 返回 REVOCATION_WON。COMMIT_WON-first 创建未解决 Partic
 I 必须明确 Key Rotation/Revocation/Compromise、Audience/OwnerBoundary、Nonce 唯一消费、跨 Artifact/Version/Scope/Attempt/Storage Participant/Tuple 的 Replay 防护、PolicyDomain Rollback/Sequencer Gap、Canonical Digest/Signature Profile、Receipt Retention 和 Unknown 时 Fail-closed。accept-before 只限制首次消费，不能让已消费 COMMIT_WON 自动过期释放。
 
 ### 11.6 Storage 最终验证
-Storage 必须在真实 Visibility Linearization Point 验证 I Terminal Authorization Proof 的签发者/Key Status、PolicyDomain/Currentness、精确 D/Storage Participant、Tuple Digest、COMMIT_WON 及未解决 Participant 状态。Detached ALLOW Snapshot 不足。若无法独立验证，必须采用经 I/Storage 批准的在线验证或可验证 Sequencer Proof。禁止跨域比较 PermissionEpoch。
+Storage 必须在真实 Visibility Linearization Point 验证 I 已消费的 CommitAuthorizationReceipt / ICommitAuthorizationProof 的签发者/Key Status、PolicyDomain/Currentness、精确 D/Storage Participant、Tuple Digest、COMMIT_WON 及未解决 Participant 状态。ITerminalProof 只能在 Storage Outcome 后签发用于 Closeout，不得成为同一次 Storage Commit 的前置条件。Detached ALLOW Snapshot 不足。若无法独立验证，必须采用经 I/Storage 批准的在线验证或可验证 Sequencer Proof。禁止跨域比较 PermissionEpoch。
 
 ### 11.7 恢复与未决事项
 I 仅在读取同一 Publication Operation/Tuple/Participant 的权威 Storage Outcome 后签发 ITerminalProof。Restore 必须核对 Sequencer Continuity、Policy/Registry/Key Status、In-flight Participant 和 Storage Outcome。密码算法、Wire Canonicalization、Key Status Distribution、Revocation Propagation、Nonce Retention、Sequencer Implementation 和 Storage Proof Verification 仍 OPEN。
