@@ -36,6 +36,7 @@ class State:
     # Storage visibility and downstream projections
     visible: bool = False
     published_fence_gen: int = -1
+    published_after_revocation: bool = False
     suppressed: bool = False
     cached: bool = False
     disclosure_after_fence: bool = False
