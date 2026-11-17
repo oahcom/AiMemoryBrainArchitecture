@@ -8,13 +8,13 @@
 - CSubmitOutcome 1.0.1 schema Blob: `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`
 - H authority-join mapping Blob: `1cbe74eba69325510d6b1019d971661f965eabf8`
 - H validator core Blob: `eab961a08d41e871f38543b18ee60cf024977414`
-- H validator unit/fixture test Blob: `dccf8c099c18807ec072870d32604d0912209f01`
+- H validator unit/fixture test Blob: `540056d7c4f290c31290b17c264c69cfd76b1cb2`
 - Full positive H envelope + C object fixture Blob: `c80247a6ecfbb4a29ff0993e8e2aea4829d00626`
 - C crypto interop test Blobs: `5559fb7a612c8dd92345ceae3a6aa62f4faae41a` and `a49d588ea6f840927fe21ad8c41cd8089dceac29`
 - H workflow Blob: `4459d19f5b4eea058377d9819e48e81eed5c8c4b`
-- Exact H Provider Outcome CI run: `44069941327`
-- Exact tested commit: `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251`
-- Exact job: `133993324484` (`provider-outcome`) — **completed / success**
+- Exact H Provider Outcome CI run: `44070924346`
+- Exact tested commit: `77a9d5e2e716ba33387f0beb1195f864ed8ac54f`
+- Exact job: `133996627914` (`provider-outcome`) — **completed / success**
 - Provenance: delegated H-role source review and CI readback; **not an independent human H Owner signature**.
 - English and Chinese are normative peers.
 
@@ -26,7 +26,7 @@ The current H source set is the exact set listed above. The current validator so
 
 ## 2. Full local validation path / 完整本地验证路径
 
-Tests 21–25 in the exact validator test source load the fixture and the real H/C JSON Schemas, then call the actual `validate_provider_outcome` implementation without patching its schema validator, semantic predicate function or candidate digest/preimage calculation. The tests cover:
+Tests 21–31 in the exact validator test source load the fixture and the real H/C JSON Schemas, then call the actual `validate_provider_outcome` implementation without patching its schema validator, semantic predicate function or candidate digest/preimage calculation. The tests cover:
 - full H envelope + C object schema validation, C object dereference/equality, C semantic predicates and recomputed C-P0 digest → VALID when authority test doubles return True;
 - mutate duplicated wire `provider_ref` while retaining the C object → INVALID;
 - mutate C `payload_digest` and matching wire digest while retaining the signed P0 content → INVALID after recomputation;
@@ -42,11 +42,11 @@ Tests 21–25 in the exact validator test source load the fixture and the real H
 
 ## 3. Exact CI readback / 精确 CI 读回
 
-GitHub Actions run `44069941327` completed with status/conclusion `completed/success` on exact commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251`. Job `133993324484` (`provider-outcome`) completed successfully. The workflow runs Python unittest discovery across all `test_*.py` files in the provider_outcome directory and installs the pinned Python and Node/JCS test dependencies.
+GitHub Actions run `44070924346` completed with status/conclusion `completed/success` on exact commit `77a9d5e2e716ba33387f0beb1195f864ed8ac54f`. Job `133996627914` (`provider-outcome`) completed successfully. The workflow runs Python unittest discovery across all `test_*.py` files in the provider_outcome directory and installs the pinned Python and Node/JCS test dependencies.
 
-The current suite has 32 test methods across three Python test files: 26 H validator unit/fixture methods and six C crypto interoperability methods. The full-path fixture is loaded by the H validator test source pinned above.
+The current suite has 38 test methods across three Python test files: 32 H validator unit/fixture methods and six C crypto interoperability methods. The full-path fixture is loaded by the H validator test source pinned above.
 
-GitHub Actions Run `44069941327` 在精确 Commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251` 上完成成功，Job `133993324484` 成功。Workflow 对 provider_outcome 目录全部 `test_*.py` 执行 Python unittest discovery，并安装固定版本 Python/Node/JCS 测试依赖。
+GitHub Actions Run `44070924346` 在精确 Commit `77a9d5e2e716ba33387f0beb1195f864ed8ac54f` 上完成成功，Job `133996627914` 成功。Workflow 对 provider_outcome 目录全部 `test_*.py` 执行 Python unittest discovery，并安装固定版本 Python/Node/JCS 测试依赖。
 
 当前套件共 32 个测试方法，分布于三个 Python 测试文件：26 个 H Validator Unit/Fixture 方法和 6 个 C Crypto Interop 方法。完整路径 Fixture 由本文件绑定的 H Validator Test Source 加载。
 
@@ -77,3 +77,20 @@ This supersedes the earlier H Phase 3.8.13 callback-seam-only CI status for the 
 **角色模拟 H 侧结论：接受完整本地 Schema/Semantic/Digest 路径作为 L1/L2 证据。所有生产 Authority Integration、L3 Completeness、Storage/COC Durability 与部署 Gate 仍 OPEN，不冻结。**
 
 本文件替代 H Phase 3.8.13 对当前 Validator/Test Source 的仅 Callback-Seam CI 状态陈述，不替代 C/I/D Owner 事实，也不授权任何 Gate 状态迁移。
+
+
+## 3.1 Expanded full-path mutation vectors / 扩展全路径篡改向量
+
+The current H test source adds tests 26–31:
+- test 26 mutates every present duplicated wire field in turn and requires INVALID;
+- test 27 mutates a C-P0 member and its matching wire field together, then requires recomputed-digest mismatch INVALID;
+- test 28 mutates C sequence_namespace_ref, recomputes digest, and requires key-status namespace contradiction INVALID;
+- test 29 proves I terminal must be the exact COMMIT_WON decision for provider invocation;
+- test 30 binds D clearance to the exact ForgetOperation/Fence tuple;
+- test 31 binds Storage resolution to exact DB incarnation, GID, PrepareAttempt and participant-ledger tuple.
+
+The updated suite has 32 H validator unit/fixture methods plus six Python/Node crypto interoperability methods: 38 methods across three test files. Exact run 44070924346 passed on commit 77a9d5e2e716ba33387f0beb1195f864ed8ac54f.
+
+当前 H Test Source 新增 Test 26–31：逐个篡改所有存在的 Wire 重复字段并要求 INVALID；同时篡改 C-P0 成员及对应 Wire 字段后要求重算 Digest 不一致；篡改 C Sequence Namespace 并重算 Digest 后要求 Key Status Namespace 矛盾为 INVALID；验证 I Terminal 必须精确为 COMMIT_WON；D Clearance 必须绑定精确 ForgetOperation/Fence；Storage Resolution 必须绑定精确 DB Incarnation/GID/PrepareAttempt/Participant Ledger。
+
+更新后的套件包含 32 个 H Validator Unit/Fixture 方法与 6 个 Python/Node Crypto Interop 方法，共三个测试文件、38 个方法。精确 Run 44070924346 在 Commit 77a9d5e2... 上通过。
