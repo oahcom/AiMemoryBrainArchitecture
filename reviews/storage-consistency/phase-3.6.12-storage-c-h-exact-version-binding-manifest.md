@@ -573,3 +573,20 @@ These runs establish candidate JCS/SHA-256/Ed25519 construction and independent 
 - COC quorum and deployment-grade Storage Batch/Manifest/owner-ledger joins.
 
 **Disposition: CANDIDATE CRYPTO CONSTRUCTION AND CROSS-OWNER TEST AGREEMENT VERIFIED; PROFILE REGISTRATION, AUTHORITY, ADAPTER AND PRODUCTION GATES OPEN.**
+
+
+## 17. A Phase 3.10.0 review of candidate crypto and independent H execution (2026-11-17)
+
+- A review: `01-architecture/phase-3.10.0-a-review-c-crypto-candidate-and-h-independent-verification.md`
+- Exact Blob: `45972b8c728b1a1733a4b66b840adc432d54893e`
+- Commit: `acbbe7581e03018c773848c7b8a9e6ef7da9a826`
+- Disposition: **ACCEPT CANDIDATE CRYPTO CONSTRUCTION + INDEPENDENT TEST AGREEMENT; DO NOT REGISTER OR FREEZE**.
+
+A reviewed:
+- C candidate crypto CI run `44057463855`: SUCCESS, 7 tests; five test-only outcome signatures, every-field mutation rejection, Python/Node differential agreement and static expected fingerprints.
+- H independent crypto CI run `44057944517`: SUCCESS, 10 tests; H's separate Python/Node implementations recomputed and verified the same five signatures/fingerprints and field mutations.
+- I Phase 3.8.6 current crypto governance review Blob `b2e37b0ba9137f2ef1b9fd65bf815bc136ca28c8`.
+
+A accepts the candidate construction and independent test agreement. I has not registered `AIMBA-C-CRYPTO-1.0`, approved C trust roots/key custody or authorized production use. The deterministic seed is public test-only material. H authority callbacks are not production-connected. C owner ledger, provider issuer authentication, adapter race/fault/idempotency tests and deployment-grade COC/Storage joins remain open.
+
+No production egress, Full Applied, Global Forget Completion, universal exactly-once or final freeze is authorized.
