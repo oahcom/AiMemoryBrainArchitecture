@@ -22,11 +22,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install pinned Python crypto test dependencies
+        run: python -m pip install rfc8785==0.1.4 cryptography==44.0.2
       - name: Set up Node.js 22 for independent wire differential tests
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - name: Run HRC, Join Proof, wire and schema candidate tests
+      - name: Install pinned Node.js JCS oracle
+        run: npm install --no-save --prefix 08-bmcp-protocol/tests/conformance/recovery_cutoff canonicalize@2.1.0
+      - name: Run HRC, Join Proof, wire, schema and I crypto candidate tests
         run: |
           python -m unittest discover \
             -s 08-bmcp-protocol/tests/conformance/recovery_cutoff \
