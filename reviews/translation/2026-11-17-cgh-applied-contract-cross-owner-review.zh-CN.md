@@ -91,3 +91,10 @@ H 源文件明确为 CANDIDATE，并注明 final-request proof profile 与 C 的
 5. 在各自证据门禁通过前，保持 C/G/H freeze 为 BLOCKED，所有实现/一致性状态维持 NOT VERIFIED / NOT RUN。
 
 **结论：** 六阶段架构语义一致，但 H 当前 Adapter Capability/Applied Attestation 候选文件尚不是覆盖 C 最终请求证明和 G Applied 接受的完整字段级合同。翻译不得掩盖这一缺口。
+
+
+## 7. H 候选修订跟进 — 2026-11-17
+
+本复审识别 H36-AP-01..07 后，H Owner 分支在 `adapter-capability-and-applied-attestation.md` 新增了 §11。当前 live 精确 Blob 为 `db59b63e322d7255b8b400f47859dcac32bb3027`；此前复审的 `ed6b43a29aa368d772c701ffc83309a5aadf3c00` 已不再是当前版本。补充条款提议明确请求/边界身份、目标/attempt 映射、Region inventory/coverage、verifier 身份绑定、I/D 权威引用、证据来源信息、逐请求 bypass 覆盖、重放身份和时间顺序规则。
+
+处理状态：**已起草候选缺口响应，但尚未关闭**。C 和 G 尚未接受该精确 Blob；I/D/B 权威确认、H Wire Schema、生成 SDK/互操作及一致性测试仍 OPEN / NOT RUN。六阶段语义一致结论仍成立；七项字段映射发现已由提案回应，但在 Owner 接受前不得标记 RESOLVED。
