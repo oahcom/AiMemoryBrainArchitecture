@@ -18,6 +18,8 @@ Chinese and English are maintained as equivalent reading versions. Normative arc
 
 **Mandatory project rule / 项目强制规范：** Every architecture design and semantic change must be documented in Chinese and English in the same change set. See [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md).
 
+**Mandatory policy / 强制规范：** [GOV-DOC-BILINGUAL-001 — Bilingual Architecture Documentation Governance](../00-governance/bilingual-architecture-documentation-policy.md). All architecture changes require paired Chinese and English deliverables in the same change set.
+
 ## Documentation layers / 文档层次
 
 The [Cross-Module Conformance Guide](zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md) explains how architecture contracts are verified and what evidence is required before a PASS can be claimed.
