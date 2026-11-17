@@ -621,3 +621,51 @@ I accepts the lifecycle model and separate governance-signature construction as 
 The C/H CI runs are schema/state-machine/unit evidence only. They do not authenticate governance signatures, prove registry durability or authorize any production key. Missing key status or checkpoint remains UNKNOWN; no implicit ACTIVE fallback is allowed.
 
 **Disposition: KEY STATUS DESIGN AND BOUNDED TESTS ACCEPTED; TRUST ROOT, REGISTRATION, CUSTODY AND PRODUCTION AUTHORITY OPEN.**
+
+
+## 19. CSubmitOutcome 1.0.1 / BMCP 1.2.12 sequence namespace closure (2026-11-17)
+
+This section supersedes the 1.0.0 C object and 1.2.11 BMCP mapping as the current design target. Historical schemas remain immutable and are not silently upgraded.
+
+### 19.1 C current revision
+
+| Artifact | Exact Blob |
+|---|---|
+| CSubmitOutcome 1.0.1 schema | `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` |
+| C 1.0.1 ten-case fixture pack | `c447f8c2908469c52cb52a448101495a331277c5` |
+| C 1.0.1 crypto vector manifest | `3a5fb8502091636135a298de5891d728b550ba50` |
+| C 1.0.1 static expected crypto vectors | `34e49a49551390f52198b1fa557e15a32a3f6ee2` |
+| C 1.0.1 structural tests | `0357c7fc22c714ce50ed4ce4771510431f2b1637` |
+| C 1.0.1 Python crypto tests | `c798379b43e77f264782a4b5ea7ad8282d779d8d` |
+| C 1.0.1 Node oracle | `27d2e512db86bfd1cf6b9227280ee18a3a791d19` |
+| C Phase 3.11.1 sequence namespace amendment | `73d98b532b7f9cadbeee12448d035c3285db9cd7` |
+| I Phase 3.8.8 review of 1.0.1 | `40d223c55473fc7d101b6d16858ad6405d9db5ee` |
+
+The new required `sequence_namespace_ref` binds C `record_sequence` to the same C authority sequence namespace used by CKeyStatusEvent `event_sequence`. This is included in C-P0 and changes all 1.0.1 digest/signature values. CSubmitOutcome 1.0.0 remains historical.
+
+### 19.2 H current BMCP and C object target
+
+| Artifact | Exact Blob |
+|---|---|
+| BMCP schema 1.2.12 / wire 1.3.0 | `a54f66914a819d77f00c6af04e76453ff9f654ee` |
+| H exact mapping Phase 3.8.7 (1.2.12 ↔ C 1.0.1) | `7d9c4f11446b5ec4ea5640725e17dfa5d03c25b2` |
+| H validator core pinned to BMCP 1.2.12 and C 1.0.1 | `1a92c0cf7146e2884bd38232005dd9a55d558a85` |
+| H current semantic validator contract | `b3b203d140b7e785411f1b862c71fadfa66a0c91` |
+| H 1.0.1 schema/namespace unit tests | `a90b5c4042581b3962e36e0728983bfce441bdd1` |
+| H 1.0.1 independent Python crypto verifier | `5559fb7a612c8dd92345ceae3a6aa62f4faae41a` |
+| H 1.0.1 independent Node oracle | `07c34b03aff94e1dfbbd1aa056ac849debeb3348` |
+
+The H mapping confirms the BMCP C branch's field names/types are unchanged from 1.2.11 to 1.2.12, but the common envelope/current validator revision is 1.2.12. The validator rejects a C object other than 1.0.1 and requires the explicit namespace equality through the key-status callback.
+
+### 19.3 Executed C/H 1.0.1 evidence
+
+- C CI run `44059935858`, exact commit `b49966361b4b3121a2ebf4105b4e0c57a612e945`: SUCCESS, 19 tests. Includes 1.0.1 schema/semantic cases, five candidate Ed25519 signatures, all-field mutation rejection, static expected vectors and Python/Node agreement.
+- H CI run `44060704553`, exact commit `8c377a7218b70621d2348b47341d4cf4755b3733`: SUCCESS, 17 tests. Includes C 1.0.1 schema/namespace checks, H independent five-signature verification, all-field mutation rejection and H Python/Node agreement.
+
+### 19.4 Decision and remaining blockers
+
+I accepts `sequence_namespace_ref` as a required signed field and accepts candidate crypto construction/interoperability evidence. I has NOT registered `AIMBA-C-CRYPTO-1.0` or `AIMBA-I-KEY-GOVERNANCE-1.0`, activated a trust root, approved custody or authorized production use.
+
+Still open: production C sequencer and key-status ledger; I governance trust root and key lifecycle; external anti-rollback checkpoint; H production key-status/signature/provider/ledger/COC callback wiring; provider-specific adapter race/fault/idempotency tests; deployment-grade COC/Storage join and readback; final A freeze decision.
+
+**Disposition: C 1.0.1 / BMCP 1.2.12 design and bounded cross-owner candidate tests accepted; no registration, deployment or freeze.**
