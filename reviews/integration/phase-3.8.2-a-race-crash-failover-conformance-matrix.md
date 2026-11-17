@@ -96,6 +96,7 @@ Any unknown authority, incomplete enumeration, signature/key uncertainty, stale 
 - HRC-23..25: idempotency, digest conflict, strict wire/downgrade/duplicate-key behavior.
 - JPF-01..12: participant/admission bidirectional join, NOT_REGISTERED semantics, evidence cardinality, scope/currentness and JF-10 tuple.
 - JPF-13..17: request-ledger disposition completeness and OwnerEntryRef / OwnerRequestRef binding.
+- JPF-18..19: explicit OwnerAdmissionRef vs OwnerEntryRef substitution rejection.
 - WIRE-01..10: deterministic test serialization, duplicate key, absent/null, counter, critical field, GID typing and digest domain separation.
 - SCHEMA-01..09: schema-family inventory, strict definitions, independent request/admission statuses, JF-10 typed tuple and row identity fields.
 
@@ -118,3 +119,6 @@ The current test code uses a TEST-ONLY canonical digest helper. It does not veri
 任何缺失、未知、签名/Key 状态不明、分页不完整、High-water 变化、陈旧副本或分裂脑可能性都必须返回 UNKNOWN/IN_DOUBT 并 Fail Closed。超时、行缺失、Lease 过期、进程死亡不能作为终态证据。COC 只能记录 Owner 证据，不能创造 I/D/C 决策。
 
 Exit 条件包括：H 六类消息与 RecoveryJoin 的 Wire Adapter；Schema 结构验证；HRC/JPF/WIRE/SCHEMA 全部 CI 执行；至少两种独立语言实现的 Canonical Bytes/Digest/Signature Input 互操作；I/D/C 独立批准；Storage 实际事务拓扑、HA/Restore 证据；最后 A 对精确 Blob 复审。
+
+
+Current executable candidate inventory: 66 unittest methods (25 HRC + 19 JPF + 10 WIRE + 12 SCHEMA). No CI run or conformance PASS is available.
