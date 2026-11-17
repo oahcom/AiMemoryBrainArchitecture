@@ -18,7 +18,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 SCHEMA_ARTIFACT_REVISION = "1.2.14"
 WIRE_SCHEMA_VERSION = "1.3.0"
 BMCP_SCHEMA_ID = "bmcp.coc-jf10-unified"
-BMCP_SCHEMA_URI = "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.13"
+BMCP_SCHEMA_URI = "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.14"
 C_OBJECT_SCHEMA_ID = "CSubmitOutcome"
 C_OBJECT_SCHEMA_URI = "urn:aimba:schema:c-submit-outcome:1.0.1"
 C_PROFILE_ID = "AIMBA-C-CRYPTO-1.0"
@@ -270,7 +270,7 @@ def validate_raw_provider_outcome(
     return validate_provider_outcome(envelope, c_object, envelope_schema, c_object_schema, checks)
 
 
-# BMCP 1.2.13 removes the ambiguous participant_intent_ref alias from the C branch.
+# BMCP 1.2.13+ removes the ambiguous participant_intent_ref alias from the C branch.
 # CSubmitOutcome 1.0.1 requires sequence_namespace_ref. The verify_key_status
 # authority callback must compare it with the authenticated CKeyStatusEvent
 # sequence_namespace_ref and prove event_sequence and record_sequence share the
