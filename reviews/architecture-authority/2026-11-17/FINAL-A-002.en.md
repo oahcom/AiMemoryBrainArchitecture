@@ -3,7 +3,7 @@
 - Authority: A — Principal System Architecture Authority
 - Version: 1.0.0
 - Date: 2026-11-17
-- Exact main baseline: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- Exact main baseline: `6470f25ca23b8d35c06f60be2326867066418d18`
 - Review branch: `review/session-4-a-final-architecture-authority-2026-11-17`
 - Controlling tracker: Issue #43
 - Overall decision outcome: **DEFERRED**
@@ -13,7 +13,7 @@
 
 The architecture is **plausible in principle but not yet proven coherent, physically realizable, verifiable and maintainable as a complete system**. The project is not rejected as infeasible. It is deferred from architecture freeze and full implementation entry because non-waivable semantic, authority, atomicity, security and recovery prerequisites remain open.
 
-A grants bounded preparatory work only. This is not a Gate pass, implementation authorization for protected paths, schema/technology freeze, deployment approval or production authorization.
+A grants bounded preparatory work only. Scoped `APPROVED_WITH_CONDITIONS` applies solely to (1) Option A as the v1 logical direction, subject to A-01..A-05 and exact D adoption, and (2) H 1.2.14/CSubmitOutcome 1.0.1 as an L1/L2 protocol candidate, subject to B-01..B-04. Neither scope means L1/L2 closure, Gate passage, implementation authorization for protected paths, schema/technology freeze, deployment approval or production authorization.
 
 ## Five fundamental risks
 
@@ -27,13 +27,13 @@ A grants bounded preparatory work only. This is not a Gate pass, implementation 
 
 1. Forget fence × producer admission × dependency registration × publication.
 2. Global Forget across canonical, derivatives, indexes, cache, context, adapter, replicas and backups.
-3. Storage/COC/JF-10 transaction, same-XID recovery, quorum, failover and restore.
+3. Storage/COC/JF-10 transaction, same-XID recovery, quorum, failover and restore, compounded by shared transaction executor, EffectPermit lifecycle coverage and anchor anti-rollback obligations.
 4. D/E durable ingress, outbox, lease, retry, replay and cursor composition.
 5. C/G/H final request, provider side effect and Applied proof coupled to I/D authority.
 
 ## Engineering prerequisites and critical path
 
-P0-01 implementation repo/owner → P0-02 B domain semantics and P0-03 I governance/inventory → P0-04 D/E/I/Storage atomic publication/Forget contract → P0-05 Storage/COC/JF-10 physical proof → P0-06 C/G/H Applied contract → P0-07 bounded durable canonical slice → P0-08 safe retrieval/rebuild → P1 Context/Adapter/Applied → integrated recovery and conformance. This ordering is not fully serial: synthetic benchmarks, harness scaffolding, source refresh, bilingual automation and candidate DB experiments may run in parallel.
+P0-01 implementation repo/owner → P0-02 B domain semantics and P0-03 I governance/inventory → B-01..B-04 exact H/C/D/I/Storage manifest closure → A-01..A-05 Option A L1/L2 clarification and D exact adoption → P0-04 D/E/I/Storage atomic publication/Forget contract → P0-05 Storage/COC/JF-10 L3/L4 physical proof → P0-06 C/G/H Applied contract → P0-07 bounded durable canonical slice → P0-08 safe retrieval/rebuild → P1 Context/Adapter/Applied → integrated recovery and conformance. This ordering is not fully serial: synthetic benchmarks, harness scaffolding, source refresh, bilingual automation and candidate DB experiments may run in parallel.
 
 ## Decision record
 
@@ -66,7 +66,7 @@ None of the five independent assessments is rejected as a whole. Any proposal to
 | AR-07 source freshness | Each Owner; A tracks | Before G1/G2 and each freeze review | Not accepted; blocking |
 | AR-08 cursor/replay | D/E/Storage | Before canonical end-to-end conformance | Not accepted; blocking |
 | AR-09 production DR | Storage + I + operations authority | Before production authorization | Not accepted; blocking |
-| AR-10 governance economics | A + all Owners + engineering lead | Before scale/operating-model commitment | Residual risk open; not a core semantic waiver |
+| AR-10 governance economics | A + all Owners + engineering lead | Before scale/operating-model commitment | Residual risk open; not a core semantic waiver |\n| AR-11 B protocol exact-currentness | H + C + D + I + Storage; A integrates | Before G1/G2 and protocol closure | Not accepted; blocking |
 
 ## Mandatory open condition records — not accepted as residual risk
 
@@ -180,4 +180,4 @@ All Critical risks remain open. Any accepted condition is automatically suspende
 
 ## Evidence and cross-references
 
-R PR #50; X PR #49; F/D/P PR #46; Issues #3, #5, #7, #10, #25, #29 and #43; source pins in SYS-RISK-002. Companion documents: ARCH-CX-002, DEV-FEAS-002, DEP-DAG-002, PRIORITY-002, READINESS-002, CONFLICT-002, GATE-002, DEFERRED-002. This assessment does not merge PRs, close Issue #43 or authorize production.
+R PR #50; X PR #49; F/D/P PR #46; B protocol PR #51; B→A review PR #52; Option A topology review PR #54; current main `6470f25ca23b8d35c06f60be2326867066418d18`; Issues #3, #5, #7, #10, #25, #29 and #43; exact source pins in SYS-RISK-002. Companion documents: ARCH-CX-002, DEV-FEAS-002, DEP-DAG-002, PRIORITY-002, READINESS-002, CONFLICT-002, GATE-002, DEFERRED-002. This assessment does not merge PRs, close Issue #43 or authorize production.
