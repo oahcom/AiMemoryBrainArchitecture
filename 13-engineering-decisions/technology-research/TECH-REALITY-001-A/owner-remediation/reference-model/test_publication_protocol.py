@@ -33,6 +33,7 @@ class Protocol:
     visibility: dict = field(default_factory=dict)
     receipts: dict = field(default_factory=dict)
     operation_bindings: dict = field(default_factory=dict)
+    publication_operations: dict = field(default_factory=dict)
     outbox: dict = field(default_factory=dict)
     private_unknown: set = field(default_factory=set)
     d_closed: dict = field(default_factory=dict)
@@ -135,6 +136,9 @@ class Protocol:
             raise Rejected("authorization not bound to exact participants")
         if publication_id not in self.publication_participants:
             raise Rejected("D publication proof missing")
+        prior_operation = self.publication_operations.get(publication_id)
+        if prior_operation is not None and prior_operation != operation_id:
+            raise Rejected("publication participant already consumed by another operation")
         if self.publication_participants[publication_id][1] != storage_id:
             raise Rejected("D proof does not bind exact Storage participant")
         if d_proof != ("D_ADMITTED", publication_id, storage_id):
@@ -152,6 +156,7 @@ class Protocol:
         self.outcomes[operation_id] = outcome
         self.receipts[operation_id] = receipt
         self.operation_bindings[operation_id] = binding
+        self.publication_operations[publication_id] = operation_id
         self.outbox[operation_id] = ("PUBLISH", receipt)
         self.private_unknown.discard(operation_id)
         return receipt
@@ -223,10 +228,10 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_publication_first_remains_fence_barrier_until_d_closeout(self):
         p = self.prepared()
-        p.install_forget_fence()
-        self.assertIn("publication-1", p.fence_pending)
         receipt = p.commit(**self.commit_args())
         outcome = p.outcomes["op-1"]
+        p.install_forget_fence()
+        self.assertIn("publication-1", p.fence_pending)
         p.close_i("op-1", outcome)
         self.assertIn("publication-1", p.fence_pending)
         p.close_d("op-1", outcome)
@@ -339,6 +344,19 @@ class PublicationProtocolTests(unittest.TestCase):
         args["storage_id"] = "storage-substituted"
         args["d_proof"] = ("D_ADMITTED", "publication-1", "storage-substituted")
         args["i_commit_won_proof"] = ("I_COMMIT_WON", "auth-1", "publication-1", "storage-substituted")
+        with self.assertRaises(Rejected):
+            p.commit(**args)
+        self.assertEqual(len(p.receipts), 1)
+        self.assertEqual(len(p.outbox), 1)
+
+    def test_publication_participant_cannot_be_committed_by_two_operation_ids(self):
+        p = self.prepared()
+        p.commit(**self.commit_args())
+        p.authorize_commit("auth-2", "publication-1", "storage-1")
+        args = self.commit_args()
+        args["operation_id"] = "op-2"
+        args["auth_id"] = "auth-2"
+        args["i_commit_won_proof"] = ("I_COMMIT_WON", "auth-2", "publication-1", "storage-1")
         with self.assertRaises(Rejected):
             p.commit(**args)
         self.assertEqual(len(p.receipts), 1)
