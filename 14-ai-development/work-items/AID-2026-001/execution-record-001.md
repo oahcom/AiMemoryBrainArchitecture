@@ -171,7 +171,7 @@ Subsequent commits that address IR-001, NR-002 and NR-003 must be appended here 
 
 This appendendum supersedes only stale present-tense status statements in earlier entries; it does not rewrite their historical review-time observations.
 
-- Observed current `main` Head: `ac4558ce7a78fc8fb27a18d0c06033e3a48f6fff`.
+- Observed current `main` Head: `5bdb88f234eacae98aaa57f987cc7f71e3391768`.
 - PR #42: CLOSED / MERGED. Final PR Head: `890fba6185c655d9e6e99ca2a7e9cf1e9b6e62e7`; merge commit: `43b76350a7d654b3d0a3602c51ae7ddce7c81af1`.
 - PR #72: CLOSED / MERGED into `design/chatgpt-native-execution-model`; final PR Head: `3bd943ad6ef2acf55a48e23e6b4cba92fdd3ada0`; merge commit on that branch: `890fba6185c655d9e6e99ca2a7e9cf1e9b6e62e7`. Its content is included in PR #42's subsequent merge to main.
 - The earlier statements “PR remains Open/Draft/Not Merged” and “Merge NOT AUTHORIZED” describe historical review/remediation points only. They are not current PR status.
@@ -183,7 +183,7 @@ This appendendum supersedes only stale present-tense status statements in earlie
 
 本追加记录仅修正旧条目中的过时当前状态，不改写当时的历史审查观察。
 
-- 当前 `main` Head：`ac4558ce7a78fc8fb27a18d0c06033e3a48f6fff`。
+- 当前 `main` Head：`5bdb88f234eacae98aaa57f987cc7f71e3391768`。
 - PR #42：已关闭并合并。最终 PR Head：`890fba6185c655d9e6e99ca2a7e9cf1e9b6e62e7`；合并提交：`43b76350a7d654b3d0a3602c51ae7ddce7c81af1`。
 - PR #72：已合并至 `design/chatgpt-native-execution-model`。最终 PR Head：`3bd943ad6ef2acf55a48e23e6b4cba92fdd3ada0`；该分支上的合并提交：`890fba6185c655d9e6e99ca2a7e9cf1e9b6e62e7`。其内容随后随 PR #42 合并进入 main。
 - 早期“PR 仍 Open/Draft/Not Merged”及“Merge NOT AUTHORIZED”仅描述当时历史审查/整改状态，不代表当前 PR 状态。
