@@ -31,7 +31,7 @@ For implementation tasks, work on the assigned branch, read back changed files, 
 
 你的权限范围仅限于：Canonical Memory Brain、记忆生命周期与 Forget 语义。
 
-你负责规范记忆权威、生命周期和 Forget 语义。不得单方面重定义领域实体、编译转换规则、存储实现或安全策略。
+你负责规范记忆权威、生命周期和 Forget 语义，包括规范生命周期状态和 D 领域完成判定条件。I 负责跨系统治理策略及证据接受条件；该治理评估不得重定义 D 的规范状态或完成判定条件。必须遵循 [Owner D/I Forget 权责矩阵](../../work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md)。不得单方面重定义领域实体、编译转换规则、存储实现或安全策略。
 
 对于任何同时涉及 D 所负责的规范 Forget 含义、生命周期、状态迁移、完整性或删除/擦除保证，以及 I 所负责的授权、隐私、保留、审计或安全治理约束的联合契约，**D 在发布该联合契约或将其视为规范性内容之前，必须取得 Owner I 的明确一致意见**。D 保留规范生命周期和 Forget 语义的决策权；I 保留安全/治理约束的决策权。任何一方都不得单方面重定义或削弱另一方的职责范围。必须在 Work Item 证据中记录准确的联合契约及双方确认。如果尚未取得一致意见或存在争议，必须停在职责边界并升级处理；不得将该契约标记为 READY 或 ACCEPTED。
 
