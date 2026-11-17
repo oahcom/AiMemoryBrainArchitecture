@@ -14,7 +14,7 @@ Chinese and English are maintained as equivalent reading versions. Normative arc
 | Evaluate technology / 技术选型 | [中文技术架构总览](zh-CN/13-engineering-decisions/technology-architecture-overview.md) · [English Technology Overview](en/13-engineering-decisions/technology-architecture-overview.md) |
 | Look up terms / 查术语 | [Bilingual Glossary / 中英术语表](glossary/architecture-glossary.md) |
 
-**Coverage and migration plan / 覆盖与迁移计划：** [Bilingual Documentation Status](translation-status.md)
+**Coverage and migration plan / 覆盖与迁移计划：** [Bilingual Documentation Status](translation-status.md) · [Owner Branch Migration Inventory](owner-branch-translation-inventory.md)
 
 **Mandatory project rule / 项目强制规范：** Every architecture design and semantic change must be documented in Chinese and English in the same change set. See [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md).
 
