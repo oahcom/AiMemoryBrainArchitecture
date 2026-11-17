@@ -37,8 +37,10 @@ def member_key(m):
     return ("9","")
 
 
-def validate_union(m, prefix_rows, admission_rows, snapshots, complete=True):
+def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=None, complete=True):
     if not complete:
+        return UNKNOWN
+    if membership_proofs is None:
         return UNKNOWN
     if not isinstance(snapshots,dict) or set(snapshots)!={"I","D","C"}:
         return UNKNOWN
@@ -64,77 +66,103 @@ def validate_union(m, prefix_rows, admission_rows, snapshots, complete=True):
         if key[0] not in {"I","D","C"} or not key[1] or key in amap:
             return INVALID
         s=snapshots[key[0]]
-        try:
-            seq, high=int(a["owner_local_sequence"]),int(a["owner_high_water"])
-            captured=int(s["admission_high_water"])
-        except (KeyError,TypeError,ValueError):
-            return INVALID
-        if seq<0 or seq>high:
-            return INVALID
-        if high>captured:
+        if a.get("owner_high_water") != s.get("admission_high_water"):
             return UNKNOWN
+        proof=membership_proofs.get(key)
+        if proof is None or proof.get("available") is not True:
+            return UNKNOWN
+        if proof.get("valid") is not True:
+            return INVALID
+        if proof.get("owner_ledger_root") != a.get("owner_ledger_root"):
+            return INVALID
+        if proof.get("owner_entry_digest") != a.get("owner_entry_digest"):
+            return INVALID
+        if proof.get("owner_snapshot_digest") != a.get("owner_snapshot_digest"):
+            return INVALID
+        if proof.get("within_frozen_high_water") is not True:
+            return INVALID
         for field in ("owner_snapshot_ref","owner_snapshot_digest","owner_snapshot_attestation_ref",
                       "owner_snapshot_attestation_digest","owner_ledger_root"):
             if a.get(field)!=s.get(field):
                 return INVALID
+        if not a.get("owner_snapshot_membership_proof_ref"):
+            return INVALID
         amap[key]=a
     cm={}
     lm={}
     for x in members:
         if x.get("member_kind")=="COC_PARTICIPANT":
             ref=x.get("participant_intent_ref")
-            if not ref or ref in cm:return INVALID
+            if not ref or ref in cm:
+                return INVALID
             cm[ref]=x
         elif x.get("member_kind")=="OWNER_LOCAL_ADMISSION":
             if x.get("coc_participant_intent_ref","MISSING") is not None or not x.get("coc_absence_reason"):
                 return INVALID
             key=(x.get("owner_kind"),x.get("owner_admission_ref"))
-            if key in lm:return INVALID
+            if key in lm:
+                return INVALID
             lm[key]=x
-        else:return INVALID
-    if set(cm)!=set(pmap):return INVALID
+        else:
+            return INVALID
+    if set(cm)!=set(pmap):
+        return INVALID
     for ref,p in pmap.items():
         x=cm[ref]
         for field in ("transaction_ref","request_digest","owner_boundary_ref","policy_domain_ref",
                       "participant_tuple_digest","participant_owner"):
-            if x.get(field)!=p.get(field):return INVALID
+            if x.get(field)!=p.get(field):
+                return INVALID
         bindings=x.get("owner_admission_bindings")
-        if not isinstance(bindings,list) or not bindings:return INVALID
+        if not isinstance(bindings,list):
+            return INVALID
         seen=[]
         for b in bindings:
             key=(b.get("owner_kind"),b.get("owner_admission_ref"))
             a=amap.get(key)
-            if a is None or a.get("coc_participant_intent_ref")!=ref:return INVALID
+            if a is None or a.get("coc_participant_intent_ref")!=ref:
+                return INVALID
             for field in ("owner_entry_ref","owner_ledger_ref","owner_ledger_version","owner_local_sequence",
                           "owner_high_water","owner_entry_digest","owner_ledger_root","owner_snapshot_ref",
                           "owner_snapshot_digest","owner_snapshot_attestation_ref","owner_snapshot_attestation_digest",
-                          "operation_digest","scope_binding_digest"):
-                if b.get(field)!=a.get(field):return INVALID
-            if b.get("coc_participant_intent_ref")!=ref:return INVALID
+                          "owner_snapshot_membership_proof_ref","operation_digest","scope_binding_digest"):
+                if b.get(field)!=a.get(field):
+                    return INVALID
+            if b.get("coc_participant_intent_ref")!=ref:
+                return INVALID
             seen.append(key)
         expected={k for k,a in amap.items() if a.get("coc_participant_intent_ref")==ref}
-        if set(seen)!=expected or len(seen)!=len(set(seen)):return INVALID
+        if set(seen)!=expected or len(seen)!=len(set(seen)):
+            return INVALID
     expected_local={k for k,a in amap.items() if a.get("coc_participant_intent_ref") is None}
-    if set(lm)!=expected_local:return INVALID
+    if set(lm)!=expected_local:
+        return INVALID
     for key,x in lm.items():
         a=amap[key]
         for field in ("owner_kind","owner_admission_ref","owner_entry_ref","owner_entry_kind","owner_ledger_ref",
                       "owner_ledger_version","owner_local_sequence","owner_high_water","owner_entry_digest",
                       "owner_ledger_root","owner_snapshot_ref","owner_snapshot_digest","owner_snapshot_attestation_ref",
-                      "owner_snapshot_attestation_digest","operation_identity_ref","operation_digest","request_digest",
-                      "scope_binding_digest","admission_state","effect_boundary"):
-            if x.get(field)!=a.get(field):return INVALID
+                      "owner_snapshot_attestation_digest","owner_snapshot_membership_proof_ref",
+                      "operation_identity_ref","operation_digest","request_digest","scope_binding_digest",
+                      "admission_state","effect_boundary"):
+            if x.get(field)!=a.get(field):
+                return INVALID
     roots=m.get("owner_snapshot_roots")
-    if not isinstance(roots,dict) or set(roots)!={"I","D","C"}:return INVALID
+    if not isinstance(roots,dict) or set(roots)!={"I","D","C"}:
+        return INVALID
     for owner,s in snapshots.items():
-        if roots.get(owner)!=snapshot_root(s):return INVALID
+        if roots.get(owner)!=snapshot_root(s):
+            return INVALID
     coc,local=len(cm),len(lm)
-    if m.get("coc_participant_count")!=coc or m.get("owner_local_admission_count")!=local:return INVALID
-    if m.get("manifest_member_count")!=len(members) or len(members)!=coc+local:return INVALID
-    if m.get("member_set_root")!=td("MANIFEST-MEMBER-SET",members):return INVALID
-    if m.get("manifest_content_digest")!=content_digest(m):return INVALID
+    if m.get("coc_participant_count")!=coc or m.get("owner_local_admission_count")!=local:
+        return INVALID
+    if m.get("manifest_member_count")!=len(members) or len(members)!=coc+local:
+        return INVALID
+    if m.get("member_set_root")!=td("MANIFEST-MEMBER-SET",members):
+        return INVALID
+    if m.get("manifest_content_digest")!=content_digest(m):
+        return INVALID
     return VALID
-
 
 def validate_pair(batch, manifest, batch_position, manifest_position, linearizable=True):
     if not linearizable:return UNKNOWN
@@ -148,6 +176,12 @@ def validate_pair(batch, manifest, batch_position, manifest_position, linearizab
     if manifest.get("batch_record_ref")!=batch.get("coc_record_ref"):return INVALID
     if manifest.get("batch_position")!=batch_position[1] or manifest.get("batch_entry_digest")!=batch.get("coc_entry_digest"):return INVALID
     if manifest.get("manifest_content_digest")!=content_digest(manifest):return INVALID
+    owner_snaps=batch.get("owner_snapshots")
+    roots=manifest.get("owner_snapshot_roots")
+    if not isinstance(owner_snaps,dict) or set(owner_snaps)!={"I","D","C"}:return UNKNOWN
+    if not isinstance(roots,dict) or set(roots)!={"I","D","C"}:return INVALID
+    for owner,snap in owner_snaps.items():
+        if roots.get(owner)!=snapshot_root(snap):return INVALID
     if manifest.get("coc_entry_digest")!=manifest.get("envelope_payload_digest"):return INVALID
     return VALID
 
