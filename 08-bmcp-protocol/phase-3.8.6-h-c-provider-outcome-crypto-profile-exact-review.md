@@ -4,7 +4,7 @@
 - Reviewer: H — BMCP Protocol and Adapter Authentication
 - Branch: `session-h-bmcp-protocol`
 - Exact C profile/P0 artifact: `07-agent-integration/phase-3.8.6-c-provider-outcome-signature-profile-and-p0.md`
-- C profile/P0 Blob: `a9b891a109c47422b2387919a42d25172b6c09e0`
+- C profile/P0 Blob: `44641b4b01d721c47e08ae9380ffe645bb3ccda0`
 - H schema 1.2.8 Blob: `70b892797d07489936300a26c0dedfafe1d6e746`
 - H crypto mapping Blob: `b132e6a01bcfe13f92020b9778ee3f7ddbf65753`
 - Decision: **ACCEPT AS C-SPECIFIC CRYPTO PROFILE CANDIDATE WITH ENUMERATED AMENDMENTS**
