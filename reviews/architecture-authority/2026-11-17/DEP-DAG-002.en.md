@@ -1,6 +1,6 @@
 # Architecture and Implementation Dependency DAG — DEP-DAG-002
 
-- Version: 1.0.0; baseline `b372b62c640a2b656e54b6db62a4ee67d7d8c001`.
+- Version: 1.0.0; baseline `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`.
 - Authority: A integration; Owner-specific semantics remain with named Owners.
 
 ## Architecture decision DAG
@@ -57,6 +57,12 @@ Exact source pins and Owner authority evidence
   → Gate-specific acceptance
   → production operational authorization
 ```
+
+## Updated B→A closure sequence
+
+**Wave B — protocol bundle:** H updates mapping to current D crosswalk; C re-reviews the successor; H reviews current I P0; I refreshes anchor review; H updates mapping status and current CI pin; Storage publishes v3.3.0 or equivalent binding exact current C/H/D/I/Storage Blobs and run/commit/job; C/H/D/I review that same manifest; A independently re-reads it. No protocol freeze before closure.
+
+**Wave A — Option A:** Storage resolves A-01 document clarity; D gives exact acceptance of Storage ADR Blob `bb544...`; D/Storage define shared transaction executor/UoW and row-write permissions; D maps EffectPermit across every fence-sensitive lifecycle transition; v1 operation scope is one BrainAuthorityRef; I/Storage define COMMIT_WON crash/revocation/replay; Storage/I define independent restore anti-rollback witness; D/I/Storage/H specify COC/JF-10 ordering without cross-log atomicity. A re-reviews successor Blobs. L1 closes only after A-01/A-02/A-03 and D exact acceptance; L2 requires A-04/A-05; L3 requires executed concurrency/fault proof; L4 remains physical deployment.
 
 ## Critical path and parallelism
 
