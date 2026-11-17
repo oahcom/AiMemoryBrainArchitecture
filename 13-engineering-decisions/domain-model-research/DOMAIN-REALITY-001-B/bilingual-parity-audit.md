@@ -320,3 +320,10 @@ The new conflict finding, exact source pins, authority boundaries, successor-ver
 After §8 was written, the currentness audit was amended to name B-CONFLICT-017 explicitly. Its resulting exact Blob is `8641268f6cb93e8154ae1693ace37cc72498a4b8` (382 lines). This supersedes the earlier currentness-audit Blob `3ca5468171a81dda8bb3ed7bf770052642a9bacb` recorded in §8's table. The currentness file was re-read from the research branch after the write.
 
 §8 写入后，当前性审计再次修订，明确引用 B-CONFLICT-017。其最终精确 Blob 为 `8641268f6cb93e8154ae1693ace37cc72498a4b8`（382 行）。该值取代 §8 表格中记录的旧当前性审计 Blob `3ca5468171a81dda8bb3ed7bf770052642a9bacb`。该文件写入后已从研究分支重新读回。
+
+
+### 8.4 Final README pin correction / README 最终 Pin 更正
+
+README was updated after §8.3 to point at the final currentness-audit Blob and to avoid hard-coding this audit's own self Blob. The resulting README exact Blob is `ad412b941fc7d3e656cdc1262686f64f0c428964` (264 lines). The final currentness-audit Blob remains `8641268f6cb93e8154ae1693ace37cc72498a4b8` (382 lines). This section supersedes the earlier README Blob `932a1affb2d4dee9181e8f7b3688eddff3cb4d2d`.
+
+README 在 §8.3 后再次更新，改为引用最终当前性审计 Blob，并避免在 README 中硬编码本审计文件自身的 Blob。最终 README 精确 Blob 为 `ad412b941fc7d3e656cdc1262686f64f0c428964`（264 行）。最终当前性审计 Blob 仍为 `8641268f6cb93e8154ae1693ace37cc72498a4b8`（382 行）。本节取代此前 README Blob `932a1affb2d4dee9181e8f7b3688eddff3cb4d2d`。
