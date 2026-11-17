@@ -67,3 +67,18 @@ This run validates the candidate construction for 1.0.1. It does not register th
 H must update the dereference validator and wire mapping to require 1.0.1 and verify the namespace join. I must review the 1.0.1 signed field inventory and governance key-status binding. A must review exact C/H/I/Storage pins before any freeze decision.
 
 No production egress, profile registration, key activation, exactly-once property or production readiness is claimed.
+
+
+## 7. H independent 1.0.1 verification
+
+H has updated its validator to require CSubmitOutcome 1.0.1 and the explicit sequence namespace:
+- BMCP schema 1.2.12 Blob `a54f66914a819d77f00c6af04e76453ff9f654ee`.
+- H exact mapping Phase 3.8.7 Blob `f4d50d09179005e941703a58323740a6d424777f`.
+- H validator core Blob `1a92c0cf7146e2884bd38232005dd9a55d558a85`.
+- H independent Python 1.0.1 verifier Blob `5559fb7a612c8dd92345ceae3a6aa62f4faae41a`.
+- H Node 1.0.1 oracle Blob `07c34b03aff94e1dfbbd1aa056ac849debeb3348`.
+- H CI run `44060704553`, exact commit `8c377a7218b70621d2348b47341d4cf4755b3733`: SUCCESS, 17 tests.
+
+H's 17-test run validated the 1.0.1 schema namespace field, recomputed all five 1.0.1 candidate crypto vectors, verified signatures and field mutations, matched H Python/Node output to static expected values, and retained the earlier 1.0.0/key-status tests as historical checks.
+
+This is independent candidate-only validation. It does not prove a production C sequencer, key-status ledger, governance trust root or anti-rollback checkpoint exists.
