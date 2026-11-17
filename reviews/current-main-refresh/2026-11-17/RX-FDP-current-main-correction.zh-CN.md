@@ -1,7 +1,8 @@
 # R/X/F/D/P — 当前 Main 更正补充（2026-11-17）
 
-- 控制性 Main HEAD：`901e38ba7b45ed1822eaefddc2da8d765cf8985c`
-- 父提交：`ca69d50d1fc6c19a930128de700b0f2328bf32fb`
+- 控制性 Main HEAD：`b3c666e67982cb3d3374e759cfb6552c7765aacb`
+- 内容 Tree：`7096e0bc3fdc9a390fccff388f9261522fa424f2`（与 `901e38...` 时的 Tree 完全相同；后续添加/删除清理提交恢复了相同文件树）。
+- 前一基线父提交：`ca69d50d1fc6c19a930128de700b0f2328bf32fb`
 - 变更：`revert(domain): remove research-only bilingual audit from main`
 - 历史刷新 PR：#62，原始基线为 `ca69d50d1fc6c19a930128de700b0f2328bf32fb`
 - 状态：当前 Main 增量更正；不替代完整 Owner 源刷新。
