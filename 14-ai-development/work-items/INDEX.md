@@ -11,7 +11,7 @@ This index is the entry point for all governed AI development tasks.
 
 | Session record | Work Item | Owning Issue | Related PR | Branch / exact Head | Prompt identity | Work and evidence | Status / closeout |
 |---|---|---|---|---|---|---|---|
-| `2026-11-18-GITHUB-CONTINUATION-PR132` | PR-GOVERNANCE-001 | [#130](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/130) | [#132](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/132) | `fix/pr-governance-001-session-traceability` / see current PR Head; updated by this index commit | Prompt ID/version/hash: NOT RECORDED | Re-fetched PR metadata, five changed paths, review submissions/threads, exact-Head workflow run; remediating stale closeout and traceability gaps | IN_PROGRESS; exact-head independent review and final closeout pending |
+| `2026-11-18-GITHUB-CONTINUATION-PR132` | PR-GOVERNANCE-001 | [#130](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/130) | [#132](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/132) | `fix/pr-governance-001-session-traceability` / session review baseline `1efb1e349b7f2df7bc5682bb55d709d71ff30b80` (exact implementation Head reviewed for this session) | Prompt ID/version/hash: NOT RECORDED | Re-fetched PR metadata, five changed paths, review submissions/threads, exact-Head workflow run; remediating stale closeout and traceability gaps | IN_PROGRESS; exact-head independent review and final closeout pending |
 
 ## Registration rules
 
