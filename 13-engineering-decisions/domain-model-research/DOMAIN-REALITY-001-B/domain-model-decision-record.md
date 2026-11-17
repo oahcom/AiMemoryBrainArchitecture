@@ -46,7 +46,7 @@
 - Problem: downstream consumers could freeze incompatible Claim/Fact schemas.
 - Alternatives: adopt overview; adopt guide blocker; silently treat Fact as Claim subtype.
 - Evidence: overview Blob 4d1debc0ec19b3917f9e76d04bb66da4df4cd346; guide Blobs a9f53a453aec25c47c58c4aea75adc43c83028d3 and 8a19cebacf5aefb0aded5fdbfeaff406291a5cf1; A PR #53.
-- Decision: preserve ADR-BLOCKED; do not use old overview wording to freeze dependent schema.
+- Decision: preserve ADR-BLOCKED; do not use old overview wording to freeze dependent schema. Supplemental decision request B-ADR-FACT-CLAIM-001 (fact-claim-identity-adr.md, Blob 96a2ee7d595fcd4a214201a7c7b6b2a9c3deb961) recommends C2 (Fact as qualified Claim concept) + I1 (stable Claim lineage with immutable version-local snapshots), but explicitly remains CANDIDATE / NOT DECIDED / NOT ACCEPTED / NOT SCHEMA-FROZEN.
 - Consequences: Claim/Fact identity and version representation remain open.
 - Complexity: delays schema but avoids false certainty.
 - Affected owners: B/D/E/A.
