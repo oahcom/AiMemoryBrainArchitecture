@@ -376,6 +376,6 @@ The current Storage v3.3.1 manifest binds H 1.2.14 and its 60-test reference-gat
 5. A 对后继 Manifest 和变更后的来源 Pin 执行精确版本集成复审。
 6. D/G/Storage 仍须分别关闭 ForgetFence/Lineage、Applied Predicate/Persistence、Durable Recovery 和 L4 物理门禁；Manifest 修正不会自动关闭这些事项。
 
-Disposition: add a BLOCKING cross-owner conflict to B's register and matrix. B3 remains NOT PASSED. This is a delegated A-role review and exact source reconciliation, not an independent human A Owner approval or a Storage Owner decision.
+Disposition: registered as **B-CONFLICT-017 — BLOCKING / OPEN** in B's conflict register and cross-owner matrix. B3 remains NOT PASSED. This is a delegated A-role review and exact source reconciliation, not an independent human A Owner approval or a Storage Owner decision.
 
-处置：将该问题作为 BLOCKING 跨 Owner 冲突加入 B 冲突登记和矩阵。B3 仍 NOT PASSED。本结论基于委派 A 角色复审和精确来源协调，不是独立人类 A Owner 批准，也不是 Storage Owner 决议。
+处置：已在 B 冲突登记和跨 Owner 矩阵中登记为 **B-CONFLICT-017 — BLOCKING / OPEN**。B3 仍 NOT PASSED。本结论基于委派 A 角色复审和精确来源协调，不是独立人类 A Owner 批准，也不是 Storage Owner 决议。
