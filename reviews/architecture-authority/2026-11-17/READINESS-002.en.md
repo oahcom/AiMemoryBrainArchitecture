@@ -13,7 +13,7 @@
 | Domain semantic readiness | NOT READY | B Fact/Claim ADR remains ADR-BLOCKED |
 | Authority/ownership readiness | NOT READY | Issue #7 has no designated canonical runtime repo and accountable engineering lead |
 | Security/governance readiness | NOT READY | I36-GOV-01..10 and closed-world inventory remain governance-blocked |
-| Physical consistency readiness | NOT READY | Storage topology ADR remains ADR-BLOCKED; JF-10 Gate A partial/open, B/C blocked |
+| Physical consistency readiness | NOT READY | Storage §8 has selected L1 Option A (one serializable transaction domain per Canonical Memory authority); L4 physical engine/deployment, adapter, HA/fencing and restore proof remain open; JF-10 Gate A partial/open, B/C blocked |
 | Cross-module correctness | NOT PROVEN | Forget/publication/recovery and Applied proof chains lack full integrated physical evidence |
 | Complexity controllability | NOT PROVEN | X rates complexity High; eight-dimension ordinal scores are not a delivery estimate |
 | Implementation readiness | BLOCKED | No full P0 authority/proof prerequisites; runtime repo/owner absent |
