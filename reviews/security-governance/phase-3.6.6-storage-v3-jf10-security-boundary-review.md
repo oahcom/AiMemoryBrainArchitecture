@@ -186,3 +186,24 @@ No I service implementation, independent anchor service, signed fixtures, execut
 ## 6. Provenance
 
 This is an I-role technical review and candidate policy addendum prepared by the delegated B/I/H joint developer session at the user's direction. It is not an independently authenticated human signature or external Security/Identity/Privacy/Legal approval. No cryptographic algorithm, production key custody system or effective governance policy is approved by this artifact.
+
+
+## 7. Cross-document / wire-coverage addendum — exact companion and Applied schema readback
+
+### I-V3-09 — Storage companion §14 omits the v3 attempt/incarnation/ledger tuple
+
+The current Storage companion protocol §14 Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` was re-read. It binds the earlier participant/GID/native-XID/DB/operation/request/owner/COC tuple, but does not explicitly carry DatabaseIncarnationRef, PrepareAttemptRef/Generation, ParticipantLedgerRef/Version or ParticipantTupleDigest as required v3 fields. Storage v3 §§15.1–15.7 Blob `4a60420d457f359780c568dce42b8bef000026ca` does.
+
+I requires the exact PreparedParticipantReceipt consumed by I to bind the complete v3 tuple (or a signed digest that unambiguously covers it) and requires the companion §14 contract to be amended or explicitly superseded. An I terminal proof cannot authorize a GID-only or attempt-ambiguous participant. The Storage owner must reconcile the two documents before exact protocol freeze.
+
+### I-V3-10 — CGH-APPLIED-1.1 package and H 1.1.0 schema family coverage are not yet one-to-one
+
+The current A CGH-APPLIED-1.1 package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` §4 enumerates eight causal-order evidence families, including CausalOrderIntent/Receipt, Reservation, I Authorization Terminal, D Fence Terminal, C Submit Outcome, CausalOrder Terminal Proof and CausalOrder ACK. The H `bmcp.applied-ack/1.1.0` schema Blob `a8a945cc3623c2907003b93625e3c79742150944` currently has five JF-10 bridge message variants: JF10_PREPARE_INTENT_REGISTERED, JF10_PREPARED_PARTICIPANT_REGISTERED, I_JF10_TERMINAL_DECISION_OBSERVED, STORAGE_JF10_PARTICIPANT_RESOLVED and JF10_BRIDGE_RECONCILIATION_RECORDED. It does not expose explicit message variants/required fields for ParticipantReservation, DParticipantClearance/D fence terminal, CSubmitOutcome, CausalOrderTerminalProof or COC ACK.
+
+This may be an intentional separation between the CGH Applied evidence families and the JF-10 bridge schema, but the package and H schema do not currently provide an explicit one-to-one mapping or identify the authoritative alternate schema/transport for the missing families. H must either add/version the missing message families or publish a field-by-field mapping to an exact other schema. Until then, H 1.1.0 remains a JF-10 bridge candidate, not the complete CGH-APPLIED-1.1 wire contract.
+
+### I-V3-11 — The new Storage proof schema does not silently close the Applied schema gap
+
+H's new `bmcp.storage-prepared-participant-proof/1.0.0` candidate Blob `6327d9d387bdc0d6610aba08ff3e51ca9da17f5d` encodes Storage PreparedParticipantReceipt and StorageResolutionProof shapes and has 47 structural tests passing. It is a separate proof family; it does not add the missing C/D/G/CausalOrder message families to `bmcp.applied-ack/1.1.0`, nor does it establish signature validity or semantic tuple equality. The H schema candidate must be linked into the exact CGH/JF-10 message registry or treated as a separate referenced proof family with explicit binding fields.
+
+I's acceptance of the I-owned causal-order semantics remains valid only within I authority and the exact CGH-APPLIED-1.1 package pin. These cross-document and H wire-coverage gaps prevent an unconditional package/wire freeze. No I governance approval or G8 freeze is claimed.
