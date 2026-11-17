@@ -166,3 +166,17 @@ The new crypto profile does not resolve the physical D/Storage serialization top
 The 95 methods include 25 HRC, 19 JPF, 10 WIRE, 14 SCHEMA, 26 TPH and 1 XLANG. The two added schema checks cover only unified 1.2.7 artifact/wire version separation and signature_profile_id field shape. They do not implement production semantic signature_profile_id requiredness or I trust-registry resolution.
 
 Storage's JoinProof remains a logical proposal accepted with amendments. The 95-test CI result does not prove live COC prefix/quorum completeness, signed I/D/C ledger enumeration, Storage JoinProof durability, owner currentness CAS, JF-10 physical same-GID resolution, or selected D/Storage topology. Storage freeze remains BLOCKED; T1–T8, STORAGE-RJ-01..05 and integrated JF-10 conformance remain OPEN.
+
+
+## 14. H 97-test / RecoveryJoin 1.0.1 refresh
+
+- Storage JoinProof current Blob: `eaa117aff6635597109c10745f2d70e63e6e0308`.
+- Storage exact review current Blob: `6610062306ec28fb6d0e127d3422923835e5faf3`.
+- H Recovery Cutoff 1.0.5: `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`.
+- H RecoveryJoin 1.0.1: `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`.
+- H unified COC/JF-10 1.2.8: `70b892797d07489936300a26c0dedfafe1d6e746`.
+- H semantic contract: `b32f4a0fe665feefa6eadd3f10c70deb28fe0ba5`.
+- H schema test suite: `ff2b735ccdbf5d45f3c6b2ee9a25d14db2e3c7ad`.
+- Latest H CI [44043100543](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44043100543): **97 tests ran, OK**.
+
+The 97 methods comprise HRC 25, JPF 19, WIRE 10, SCHEMA 16, TPH 26 and XLANG 1. The newest schema vectors cover owner snapshot attestation content binding and RecoveryJoin 1.0.1 complete-empty/out-of-scope proof shape. They do not prove production signatures or live owner/COC behavior. Storage topology, JF-10 physical same-GID, durable JoinProof, currentness CAS and independent Owner acceptance remain OPEN.
