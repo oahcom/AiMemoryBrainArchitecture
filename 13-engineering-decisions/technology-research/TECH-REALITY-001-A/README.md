@@ -87,3 +87,54 @@ Storage's latest ADR addendum selects a single logical serializable transaction 
 进一步直接审查 Owner 分支发现：B–I 均已有 TAR-AI-001 报告，但报告记录的审查 HEAD 早于 2026-11-17 读取的分支 HEAD。精确分支 HEAD、报告 Blob SHA 和发现见 `owner-technology-review-synthesis.md`。Storage 没有独立 TAR 报告；本研究直接读取了其当前 Storage ADR 和 PostgreSQL 18.7 能力档案。
 
 Storage 最新 ADR 补充条款选择每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain，作为 v1 规范性**序列化架构档案**。这不是生产数据库或部署选型。PostgreSQL 18.7 已有针对 Prepared-XID/恢复的有限 CI 引擎能力证据；JF-10 应用集成和生产部署仍未关闭。该更新纠正“完全没有逻辑序列化档案”的简单解读，同时保留物理 L4 阻塞。
+
+## 8. 完整中文版本 / Chinese Version
+
+### 8.1 目的
+
+本目录判断当前 AI Memory Brain 逻辑架构能否通过真实成熟技术实现、部署、测试、运维和持续演进。它不是扩充架构、生产实现、技术冻结或 ADR 批准。核心原则是以成熟、简单、可验证技术满足现有不变量，不能为了适配某个工具削弱 Canonical Truth、Evidence、Security、Context Applied 或 Forget。
+
+### 8.2 交付物
+
+| 文件 | 内容 | 状态 |
+|---|---|---|
+| README | 任务说明与目录索引 | 已编写，读回核验 |
+| baseline/architecture-baseline.md | main 精确基线、架构和决策状态 | 已编写，读回核验 |
+| mature-project-research.md | Mem0、Graphiti、Letta、Hermes、LangGraph、Temporal、Restate、NATS、Storage、Retrieval、Auth、Observability | 已编写，需持续证据审查 |
+| technology-capability-matrix.md | 架构能力与成熟机制映射 | 已编写 |
+| deployment-topology-comparison.md | A/B/C 部署拓扑比较 | 已编写 |
+| architecture-complexity-audit.md | 过度设计与重复权威审计 | 已编写 |
+| rust-ecosystem-assessment.md | Rust Crate/SDK/Runtime 成熟度 | 已编写 |
+| workload-model.md | S/M/L 假设档位与基准计划 | 已编写，待 Owner 确认假设 |
+| technology-recommendation.md | 最小/平衡/高扩展候选技术栈 | 已编写，未批准 |
+| owner-dependency-register.md | B–I/Storage/Testing/Ops 输入 | 已编写，等待回应 |
+| research-evidence-register.md | 精确源码快照、Release、License、路径和文档 | 已编写，可继续增加证据 |
+| open-questions.md | 阻塞项与关闭证据 | 已编写 |
+| owner-technology-review-synthesis.md | B–I TAR、分支漂移、Storage/PostgreSQL 证据 | 已编写，当前性需持续更新 |
+| independent-review-handoff.md | 独立会话审查任务 | 已准备，尚未审查 |
+
+所有研究文档包含英文与中文完整章节，GOV-DOC-001 仍为规范依据。
+
+### 8.3 初步发现
+
+1. 逻辑架构足够详细，可开展技术研究，但仓库尚未形成 Brain Rust 实现。
+2. TAB-001 是候选蓝图，不是技术冻结；数据库、索引、推理、协议、安全和部署决策仍有候选/开放项。
+3. Storage 当前 ADR 已选择每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain 作为 v1 序列化架构档案，但物理数据库/部署仍开放。
+4. PostgreSQL 18.7 有限 CI 引擎能力测试通过，但没有证明 Brain 的 D/I/COC 应用集成或生产部署。
+5. SQLite WAL 是单写者、同主机候选，不能描述为分布式事务。
+6. 搜索应先结构化/词法，向量设施须由检索质量基准证明价值。
+7. Durable Workflow 和 Broker 不能替代 Canonical SQL 或 Forget Barrier。
+8. 最大可避免复杂度是过早分布式拆分和重复状态权威；核心语义区别必须保留。
+9. Owner TAR 报告虽为 CONDITIONAL PASS，但 Reviewed HEAD 早于当前分支，必须重审。
+
+### 8.4 执行顺序
+
+完成精确源码读回和当前性检查；重新审查 PR #44 与 Owner Source Pin；补齐成熟项目源码证据；通过 Dependency Register 获取 Owner 输入；完善能力矩阵、复杂度和拓扑比较；制定原型/基准计划；创建研究 PR；准备独立审查交接。不得自我宣布独立审查通过。
+
+### 8.5 非声明
+
+本研究没有批准任何技术，没有创建 Brain 生产实现，没有运行原型、性能基准、故障注入、安全审计或跨平台构建，没有合并 PR，也没有请求架构冻结。作者不能声明独立审查通过。
+
+### 8.6 研究结论
+
+**NOT YET PROVEN（尚未证明）**。项目存在合理的本地优先 Rust 模块化单体路径，但在物理事务/Forget 协议、工作负载、检索价值、Applied 证明、安全模型和恢复拓扑得到证明前，不能称为工程可行。
