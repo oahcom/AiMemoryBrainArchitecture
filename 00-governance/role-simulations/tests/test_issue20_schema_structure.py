@@ -1,6 +1,7 @@
 import json
 import unittest
 from pathlib import Path
+import jsonschema
 
 
 class Issue20SchemaStructureTests(unittest.TestCase):
@@ -11,9 +12,9 @@ class Issue20SchemaStructureTests(unittest.TestCase):
 
     def test_d_i_storage_and_module_contract_types_exist(self):
         required = {
-            "ProducerInstanceRef", "DRegistrationReceipt", "DForgetBarrierProof",
-            "IInventorySeal", "ICommitAuthorizationReceipt",
-            "StorageVisibilityParticipantRef", "StorageOutcomeProof",
+            "ProducerInstanceRef", "DRegistrationReceipt", "DPublicationParticipantReceipt",
+            "DForgetBarrierProof", "IInventorySeal", "ICommitAuthorizationReceipt",
+            "IReconciliationTuple", "StorageVisibilityParticipantRef", "StorageOutcomeProof",
             "FRecallCursor", "EPublicationRequest", "GContextLineageManifest",
             "RestoreProofBundle"
         }
@@ -39,6 +40,49 @@ class Issue20SchemaStructureTests(unittest.TestCase):
         all_defs = json.dumps(self.schema["$defs"], sort_keys=True)
         self.assertNotIn('"globalHighWater"', all_defs)
         self.assertNotIn('"unifiedHighWater"', all_defs)
+
+    def test_draft_2020_12_schema_is_valid(self):
+        jsonschema.Draft202012Validator.check_schema(self.schema)
+
+    def test_d_registration_receipt_validates_and_rejects_wrong_authority(self):
+        validator = jsonschema.Draft202012Validator(
+            self.schema, format_checker=jsonschema.FormatChecker()
+        )
+        receipt = {
+            "schemaId": "issue20.archive-forget-restore",
+            "schemaVersion": "0.1.0",
+            "messageId": "msg-1",
+            "issuer": "D",
+            "audience": "E",
+            "issuedAt": "2026-11-17T00:00:00Z",
+            "signatureProfileId": "profile-1",
+            "keyId": "key-1",
+            "signature": "signed",
+            "messageType": "D_REGISTRATION_RECEIPT",
+            "producerInstanceRef": {
+                "policyDomainRef": "pd-1",
+                "producerDomainRef": "domain-1",
+                "producerId": "producer-1",
+                "producerInstanceId": "instance-1",
+                "identityGeneration": 1
+            },
+            "producerClassRef": "class-1",
+            "producerWorkItemId": "work-1",
+            "requestDigest": "sha256:" + "a" * 64,
+            "scopeRef": "scope-1",
+            "registrationCursor": {"authority": "D", "positionRef": "d:42"},
+            "forgetFenceGeneration": 0,
+            "sourceLineageDigest": "sha256:" + "b" * 64
+        }
+        validator.validate(receipt)
+        wrong_owner_position = dict(receipt)
+        wrong_owner_position["registrationCursor"] = {
+            "authority": "I", "positionRef": "i:42"
+        }
+        self.assertFalse(validator.is_valid(wrong_owner_position))
+        extra_field = dict(receipt)
+        extra_field["untypedPermissionEpoch"] = "not-allowed"
+        self.assertFalse(validator.is_valid(extra_field))
 
 
 if __name__ == "__main__":
