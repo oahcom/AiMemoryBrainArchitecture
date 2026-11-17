@@ -7,7 +7,7 @@
 - Exact source baselines:
   - C `07-agent-integration/phase-3.6-final-request-evidence-contract.md`, branch `session-c-agent-integration-2026-11-16`, Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`.
   - G `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md`, branch `session-g-memory-context`, Blob `aa3afa73d8a76cc6f025839c52bfbff6a983046a`.
-  - H `08-bmcp-protocol/adapter-capability-and-applied-attestation.md`, branch `session-h-bmcp-protocol`, current Blob `0dca3dc5463a02be0e19524811afbae87795baf5`.
+  - H `08-bmcp-protocol/adapter-capability-and-applied-attestation.md`, branch `session-h-bmcp-protocol`, current Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`.
 - Related exact G decision anchors:
   - CGH-APPLIED-1.1 candidate A package Blob `d4eef4aecf94f922f7933c1e1fec14a69ad17dec`.
   - Recovery-batch A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819`.
@@ -17,7 +17,7 @@
 
 **C/G/H cross-owner contract: NOT READY TO FREEZE.**
 
-The six-stage lifecycle is semantically aligned, and authority boundaries are mostly consistent: C produces final-request/provider-side evidence, H owns Adapter protocol/capability and preserves authenticated owner evidence, and G alone accepts Applied. However, G's latest CGH-APPLIED-1.1 recovery-batch decision requires evidence that the current C producer contract does not yet define as a C-issued output or explicit consumed reference set. H §11.8 recognizes the new evidence bridge but remains a candidate mapping reservation, not a frozen schema or implemented wire contract.
+The six-stage lifecycle is semantically aligned, and authority boundaries are mostly consistent: C produces final-request/provider-side evidence, H owns Adapter protocol/capability and preserves authenticated owner evidence, and G alone accepts Applied. However, G's latest CGH-APPLIED-1.1 recovery-batch decision requires evidence that the current C producer contract does not yet define as a C-issued output or explicit consumed reference set. H §§11.8–11.9 now map the causal-order/recovery-batch evidence bridge, explicit C-issued provider receipt/outcome references, participant terminal proof conditions and I/D-only owner-gate release. Both sections remain candidate mappings, not a frozen schema or implemented wire contract.
 
 This is a substantive P1 contract gap, not a translation defect. No Owner decision or implementation status is upgraded by this review.
 
@@ -54,13 +54,13 @@ The current C source (Blob `fd2f47...`) requires an actual runtime/provider-assi
 
 Until closed, G cannot safely treat the C producer contract as satisfying the complete 1.1 predicate.
 
-### XCH-36-002 — H §11.8 is a candidate mapping, not a frozen or implemented 1.1 wire contract
+### XCH-36-002 — H §§11.8–11.9 are candidate mappings, not a frozen or implemented 1.1 wire contract
 
 **Severity: P1 — freeze blocker**
 
 The current H source Blob `0dca3d...` includes §11.8 and enumerates the causal-order, recovery-batch, participant completeness, owner high-water, I terminal, D lineage/cutoff/effective-position and conditional Storage same-XID evidence references. It correctly prohibits H from minting or inferring COC, I, D, C-provider or Storage outcomes and keeps the ordering domains distinct.
 
-But §11.8 explicitly remains a candidate reservation. It states that the current JSON Schema/SDK is not thereby proven to contain the fields and requires H to publish an exact additive schema version after relevant C/G/I/D/Storage confirmations. G names `bmcp.applied-ack/1.1.0` as a target, but this audit found no evidence in the reviewed H source that this target is already a published, frozen schema/SDK implementation.
+Sections 11.8 and 11.9 explicitly remain candidate reservations. Section 11.9 improves the mapping by requiring C-issued `c_provider_receipt_ref` and immutable `c_submit_outcome_ref`, constraining `participant_terminal_proof_ref` to fully reconciled determinate outcomes, and reserving `owner_gate_release_attestation_ref` to I or D. This closes part of the field-mapping ambiguity, but it does not amend C's Owner contract or constitute C acceptance. It states that the current JSON Schema/SDK is not thereby proven to contain the fields and requires H to publish an exact additive schema version after relevant C/G/I/D/Storage confirmations. G names `bmcp.applied-ack/1.1.0` as a target, but this audit found no evidence in the reviewed H source that this target is already a published, frozen schema/SDK implementation.
 
 **Required closure**
 1. H publishes the exact versioned schema and SDK field mapping for the 1.1 evidence bridge.
@@ -106,9 +106,9 @@ C conformance, G-36/CGH and H conformance cases remain SPECIFIED / NOT RUN. G ex
 | Adapter capability / ACK / session / wire integrity | H | Own and authenticate | Consume; no Applied promotion from ACK alone |
 | Applied fact and current-use projection | G | No authority | Sole owner |
 
-## 5. Corrected H source pin and prior report supersession
+## 5. Corrected H source pin and current candidate addenda
 
-The current H Owner source was re-read at Blob `0dca3dc5463a02be0e19524811afbae87795baf5`. The current EN and zh-CN companions both pin this exact Blob and contain §11.8. The earlier H parity report published in this PR used the prior source SHA `db59b63e322d7255b8b400f47859dcac32bb3027`; it is superseded by the current-source review and must not be used as evidence for the current H source revision.
+The current H Owner source was re-read at Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`. The current EN and zh-CN companions both pin this exact Blob and contain §§11.8–11.9. §11.9 explicitly maps C-issued provider receipt/outcome references, participant terminal proof eligibility and I/D-exclusive owner gate release. These are still candidate requirements. The earlier H parity report against `db59b63e322d7255b8b400f47859dcac32bb3027` is superseded by the refreshed H parity report for the current Blob.
 
 ## 6. Final decision
 
