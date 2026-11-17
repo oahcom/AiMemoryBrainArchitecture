@@ -133,17 +133,17 @@ C run `44129914790` passed **19/19** C Provider Outcome candidate tests. These a
 
 | Gate | Status | Reason |
 |---|---|---|
-| HDeliveryBindingIdentity shape | <badge>ACCEPT CANDIDATE</badge> | All seven fields present |
-| HObservationRecordIdentity shape | <badge>ACCEPT CANDIDATE</badge> | All seven fields present |
-| HEvidenceIdentity / evidence_kind | <badge>ACCEPT CANDIDATE</badge> | Closed evidence enum |
-| COutcomeRecordIdentity mapping | <badge>NOT ACCEPTED</badge> | C issuer/namespace resolution absent or undefined |
-| FinalRequestBoundary equality | <badge>NOT VERIFIED</badge> | Injected callback; no negative mismatch vector |
-| H local reference conformance | <badge>PASS 11/11</badge> | Exact H branch CI |
-| C local candidate conformance | <badge>PASS 19/19</badge> | Exact C branch CI |
-| Durable H observation replay | <badge>NOT IMPLEMENTED</badge> | Mock callback only |
-| Production trust / I registration | <badge>NOT REGISTERED</badge> | Candidate profiles only |
-| C/H interoperability | <badge>BLOCKED</badge> | Exact cross-schema mapping and tests absent |
-| Global G Applied / Storage freeze | <badge>BLOCKED</badge> | Separate Owner decisions and implementation remain open |
+| HDeliveryBindingIdentity shape | ACCEPT CANDIDATE | All seven fields present |
+| HObservationRecordIdentity shape | ACCEPT CANDIDATE | All seven fields present |
+| HEvidenceIdentity / evidence_kind | ACCEPT CANDIDATE | Closed evidence enum |
+| COutcomeRecordIdentity mapping | NOT ACCEPTED | C issuer/namespace resolution absent or undefined |
+| FinalRequestBoundary equality | NOT VERIFIED | Injected callback; no negative mismatch vector |
+| H local reference conformance | PASS 11/11 | Exact H branch CI |
+| C local candidate conformance | PASS 19/19 | Exact C branch CI |
+| Durable H observation replay | NOT IMPLEMENTED | Mock callback only |
+| Production trust / I registration | NOT REGISTERED | Candidate profiles only |
+| C/H interoperability | BLOCKED | Exact cross-schema mapping and tests absent |
+| Global G Applied / Storage freeze | BLOCKED | Separate Owner decisions and implementation remain open |
 
 No merge, schema freeze, production activation, Provider/Adapter egress authorization or Full Applied acceptance is requested.
 
