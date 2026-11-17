@@ -4,7 +4,7 @@
 - Delivery stage: **STRUCTURAL SCHEMA + REFERENCE PARSER EVIDENCE DELIVERED**
 - Freeze disposition: **BLOCKED — NOT FROZEN / NOT INTEROPERABILITY-VERIFIED**
 - Snapshot branch: `session-h-bmcp-protocol`
-- Snapshot HEAD: `b8bdc0a57da1abb90ad38f8261dbdb60a668ee5c`
+- Snapshot HEAD: `3ea9b3c3ed14a2352ce85663e8af72306bab8701`
 - Owner technology review Blob: `cb9d1d97604bdb71bc2f5bf47f6392e03f30ba99`
 - Provenance: assistant-authored delegated H-role delivery at the user's direction; not an independent human Owner signature.
 
@@ -57,12 +57,19 @@ The latest H branch and A cross-owner review identify the following exact candid
 |---|---|---|
 | RecoveryJoin schema 1.0.0 | `dd3234aa1c74caf6d0e335875cd96e0b2b64082f` | Typed bidirectional owner/participant edges and row identity |
 | H semantic validator contract | `b3218298f58cff9b92cb1c38e453af6fd4d0dd50` | HRC/JPF/WIRE/SCHEMA execution contract |
-| HRC semantic suite | `ee0f47095df10786da358bed193d6f8491a5eb2c` | 25 HRC + 19 JPF = 44 methods |
+| HRC semantic suite | `60a2f4db4bd12f2131ecd147db9bbe328da6db50` | 25 HRC + 19 JPF = 44 methods (JPF-08 fixture corrected) |
 | Wire interop candidate suite | `1a4e754ba9bfa57eb973c6d39731e9f89443b323` | 10 methods |
 | Schema integrity candidate suite | `67aba74c120f2916d768e7b01c45408ee2624f3a` | 12 methods |
 | CI workflow | `.github/workflows/h-recovery-cutoff-conformance.yml`, Blob `ea7a3d9c365b84352d3bac69da94fe0d510e46a4` | Runs all `test_*.py` under `08-bmcp-protocol/tests/conformance/recovery_cutoff` |
 
-**Total: 66 unittest methods specified in the current candidate code (25 HRC + 19 JPF + 10 WIRE + 12 SCHEMA).** This is a count of test methods, not a test result. At the time this evidence document was prepared, no run for the exact current H candidate bundle had been verified. The subsequent push-triggered workflow result must be appended only after reading its run, jobs, and logs.
+**Total: 66 unittest methods specified in the current candidate code (25 HRC + 19 JPF + 10 WIRE + 12 SCHEMA).**
+
+- First exact candidate run [44039825581](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44039825581) exposed one failure: JPF-08 returned UNKNOWN before reaching its intended duplicate-primary-admission assertion because the fixture also required absent I/D evidence.
+- H corrected the fixture to isolate the C primary-admission invariant (the test does not weaken production validation): test file Blob `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- Rerun [44039990464](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44039990464), exact test commit `da94bcc1796cb350eed12845e49cbc3663faab9c`, job `133891944149`: **66 tests PASS**.
+- This is a reference-model/schema/wire-candidate CI pass only. It does not exercise live owner ledgers, quorum COC, I cryptographic trust, C provider adapter, D fence CAS, Storage physical visibility transaction or multi-language independent implementation.
+
+
 
 The HRC/WIRE candidate uses TEST-ONLY canonical digest helpers. It is not an approved production canonicalization, signature, key-trust or cross-language byte profile. Passing this candidate suite cannot by itself close H-FR-04/H-FR-06 or I-RJ-05.
 
