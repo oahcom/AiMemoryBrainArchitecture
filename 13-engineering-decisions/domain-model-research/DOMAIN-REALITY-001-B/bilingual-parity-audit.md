@@ -34,7 +34,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | domain-semantics-conflict-register.md | Bilingual headings and some explanatory text; conflict rows and resolution conditions are English-only | PARTIAL | Translate all conflict records and decision authority/closure conditions |
 | canonical-domain-invariants.md | Full English/Chinese peer columns added for identity, relation, temporal, evidence, state, Forget, protocol, authentication, serialization invariants and all candidate tests; new Blob `51792426bb71609ceecf8d13491f9ab0b36c91eb` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently compare every ID/row and confirm no semantic drift; do not treat author translation as independent verification |
 | canonical-domain-glossary.md | Full Chinese definition mirror added for all canonical terms and forbidden distinctions; Blob `2dbf2e7c402eb551bace71039120975783128f08` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Verify terminology against Owner contracts and ensure all owner/status metadata remains equivalent |
-| canonical-domain-model.md | Bilingual headings and selected narrative; entity lists, ownership tables and blocking issues are English-only | PARTIAL | Full Chinese equivalent for model, diagrams, owner boundaries and gate constraints |
+| canonical-domain-model.md | Full Chinese peer text added for design principles, identity/value/reference objects, derived views, owner matrix, model tiers, architecture fit, ingress/ordering boundaries and blockers; Blob `ce441336e2fbba7c7a28c0b4c75482d524a4ade7` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently compare every principle, entity definition, owner boundary, diagram meaning and blocker; verify no recommendation was promoted to decision |
 | domain-model-decision-record.md | Bilingual headings and selected decisions; detailed ADR context/alternatives/consequences are English-only | PARTIAL | Translate every decision record field and rejected alternative |
 | validation/README.md | Full Chinese peer text added for test scope, schema prerequisites, future validation and current result; Blob `a2bb3d494fadd5ae411d9b8227d83dd50a16a895` | REMEDIATED — MANUAL REVIEW PENDING | Verify test-section reference and clause equivalence against invariants/owner contracts |
 | evidence/README.md | Chinese peers added for all source titles, section descriptions, evidence limitations and version caveats; Blob `bda915327a0ee77fb78e9a52bc094986254a1a60` | REMEDIATED — MANUAL REVIEW PENDING | Verify official URLs, product-version scope and no stronger claims than source evidence |
@@ -103,3 +103,9 @@ A file is bilingual-complete only when the full normative content is present in 
 - `canonical-domain-relationships.md` 已为关系类型、全部关系/基数行、引用完整性不变量和建模问题补齐中文对照。当前 Blob：`277e7955d3c111ef43d5eda94c65647228f6`。
 - `canonical-temporal-evidence-semantics.md` 已为时间字段、双时态方案、Evidence/Provenance、精度、谱系、Owner 影响、不变量和未决事项补齐中文对照。当前 Blob：`636c28a4d06e61702665ec4e6d7c5a6f034aba1c`。
 - `domain-model-complexity-assessment.md` 已为评估维度、分类表、聚合分析、复杂度风险和模型建议补齐中文对照。当前 Blob：`c878b817e8f9dbaa6c25232ac250245dc5a70cc8`。
+
+
+- `canonical-domain-model.md` has received a full Chinese peer for its normative prose, object inventories, ownership matrix, minimum/recommended/deferred/rejected model tiers, architecture fit, authenticated-ingress boundaries and blockers. Exact readback Blob: `ce441336e2fbba7c7a28c0b4c75482d524a4ade7`.
+- `canonical-domain-model.md` 已为规范原则、对象清单、权威矩阵、最小/推荐/延后/拒绝模型层级、架构适配、认证入口边界和阻塞项补齐中文对应内容。精确读回 Blob：`ce441336e2fbba7c7a28c0b4c75482d524a4ade7`。
+- This remains author-side remediation. Independent clause-by-clause semantic parity review is pending; B5 remains BLOCKED.
+- 本次仍属于作者侧整改。逐条独立语义对等复审尚未完成；B5 继续保持 BLOCKED。
