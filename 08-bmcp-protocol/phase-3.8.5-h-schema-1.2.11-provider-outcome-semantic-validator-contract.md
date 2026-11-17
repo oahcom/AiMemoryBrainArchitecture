@@ -255,3 +255,19 @@ The current H validator core Blob `1a92c0cf7146e2884bd38232005dd9a55d558a85` rej
 H run `44060704553`, commit `8c377a7218b70621d2348b47341d4cf4755b3733`, passed 17 tests, including the 1.0.1 schema/namespace test and H's independent Python/Node candidate crypto verification against static expected vectors.
 
 I review of the 1.0.1 namespace is Blob `40d223c55473fc7d101b6d16858ad6405d9db5ee`. I accepts the namespace as a required signed design field but does not register the C data profile or I governance profile. No production sequencer, key-status ledger, trust root, anti-rollback service, H authority callback adapter or provider integration is claimed.
+
+
+## 21. Current exact-version disposition / 当前精确版本状态
+
+The historical title and §§1–18 describe the superseded BMCP 1.2.11 / CSubmitOutcome 1.0.0 validation target. They remain immutable historical context and MUST NOT be used as the current wire binding. §§19–20 record the 1.0.1 migration and candidate CI evidence. The current exact consumer mapping is H Phase 3.8.7 Blob `fad28f1b62f6a686669e209ebe30d69df6330d75`, which binds BMCP schema 1.2.12 Blob `a54f66914a819d77f00c6af04e76453ff9f654ee`, CSubmitOutcome 1.0.1 Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`, current C semantic amendment Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`, and current I sequence namespace review Blob `0d78e5b2bfcf66cae6b757314cead84b9c942601`.
+
+The exact C/H candidate CI evidence remains bounded:
+- C run `44059935858`, tested commit `b49966361b4b3121a2ebf4105b4e0c57a612e945`, 19 tests, SUCCESS.
+- H run `44060704553`, tested commit `8c377a7218b70621d2348b47341d4cf4755b3733`, 17 tests, SUCCESS.
+- The runs are verified GitHub Actions jobs. They prove candidate schema/semantic/crypto-vector construction only, not profile registration, production sequencer/key-status service, trust-root/custody, provider truth, COC quorum, Storage durability or deployment.
+
+**Disposition:** current 1.2.12 / 1.0.1 structural and candidate cross-language mapping is ACCEPTED AS A PROPOSAL; protocol freeze, production trust registration and production activation remain NOT APPROVED.
+
+**中文：** 历史标题及 §1–18 描述已被取代的 BMCP 1.2.11 / CSubmitOutcome 1.0.0 验证目标，仅保留为历史上下文，不得继续作为当前 Wire Binding。§19–20 记录 1.0.1 迁移与候选 CI 证据。当前精确消费映射为 H Phase 3.8.7 Blob `fad28f1b62f6a686669e209ebe30d69df6330d75`，绑定 BMCP 1.2.12、CSubmitOutcome 1.0.1、当前 C 语义修订及 I Sequence Namespace Review。C 的 19 项与 H 的 17 项 GitHub Actions 测试均已核验为 SUCCESS，但只证明候选 Schema/语义/跨语言密码学向量构造；不证明 Profile 注册、生产 Sequencer/Key Status、Trust Root/密钥托管、Provider Truth、COC Quorum、Storage 持久化或部署。
+
+**结论：** 1.2.12 / 1.0.1 结构与候选跨语言映射可作为提案接受；协议冻结、生产信任注册与生产激活仍未获批准。
