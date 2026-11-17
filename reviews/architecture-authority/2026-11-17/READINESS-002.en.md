@@ -40,3 +40,8 @@ Not allowed: canonical production writes, protected production-data retrieval, f
 ARCHITECTURE_NOT_READY may advance to ARCHITECTURE_READY_WITH_CONDITIONS only after every non-waivable semantic, authority, atomicity and security prerequisite required for the stated architecture scope is satisfied; only fully recorded non-blocking residual conditions may remain. A Gate-blocking P0/P1 item cannot be re-labelled as an accepted condition. ARCHITECTURE_READY_FOR_IMPLEMENTATION additionally requires the implementation authority, exact Owner contracts and implementation-entry proofs. ARCHITECTURE_READY_FOR_FREEZE requires G1–G8 and all relevant Owner decisions/evidence. None of these states implies production authorization.
 
 See FINAL-A-002 and GATE-002.
+
+
+## Current main HEAD / 当前 Main HEAD
+
+The current main HEAD independently observed for this publication is `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The earlier `6470f25...` / `b372b62...` values are historical assessment snapshots, not current main. This package has not completed a full source-by-source delta audit against current main; G1 remains PARTIAL and all Gate/freeze restrictions remain in force.
