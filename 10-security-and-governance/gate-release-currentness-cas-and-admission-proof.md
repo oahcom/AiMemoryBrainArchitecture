@@ -96,3 +96,17 @@ Evidence is immutable, integrity-protected, typed and replay-safe. Conflicting r
 I owns governance vector, authorization/revocation semantics, inventory completeness policy, release/close evidence and global completion criteria. D supplies canonical Forget/fence and producer-barrier evidence. E/F/G/H supply owner-local producer/recipient admission and terminal evidence. C owns Provider Egress Gate and Adapter send semantics. Storage/Consistency must prove linearizable ordering and crash recovery; this contract chooses no database.
 
 **PROPOSED.** This closes the semantic gap only after exact gate profiles, vector schema, evidence mapping and owner confirmations are recorded. No implementation, race test, inventory completeness or global Forget completion is claimed.
+
+
+## 10. Cross-authority revocation linearization / 跨权威撤销线性化
+
+A local CAS cannot atomically compare an I-owned PermissionEpoch if the gate/admission authority and I governance authority are independent stores. The design MUST NOT describe such a read-then-write as an atomic cross-service CAS.
+
+For strict immediate revocation, one of these realizations is required:
+1. a shared linearizable authorization/gate sequencer that orders PermissionEpoch changes, release, admission and final side-effect commitment; or
+2. a distributed transaction/consensus protocol with an equivalent proof; or
+3. a revocation-barrier protocol in which I marks revocation PENDING, sends a higher fencing epoch to every enforcement gate, receives durable close/fence acknowledgements from the complete recipient/producer inventory, and only then declares revocation EFFECTIVE. Every gate must reject older epochs at its own side-effect linearization point.
+
+A time-bounded authorization lease is a weaker, explicitly bounded-revocation profile; it MUST NOT be described as immediate revocation. Its maximum stale-authorization window, clock assumptions, renewal and partition behavior must be declared in policy.
+
+If an enforcement point is offline/unreachable, strict revocation remains PENDING and global completion remains blocked unless I records a policy-approved residual exception. A cached signed decision alone does not prove currentness.
