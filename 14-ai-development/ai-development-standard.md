@@ -285,3 +285,42 @@ This document is a proposed baseline until explicitly approved by the project's 
 - Review report:
 - Acceptance record:
 - Final state:
+
+
+## 13. Session delivery traceability / 会话交付可追溯性
+
+Every substantive AI session MUST use a durable GitHub Issue or Pull Request as its work carrier. A chat transcript, local note, or unlinked commit is not a project delivery record. Prefer the existing owning Issue/PR; create a new carrier only for an independently reviewable work item. Do not create duplicate PRs for the same integration unit.
+
+Before work starts, record the Work Item ID, owning Issue/PR, accountable Owner, intended branch/base, scope, dependencies, prompt ID/version/hash, risk class, and acceptance criteria. During multi-step work, update the carrier when a material decision, changed file/commit, verification result, blocker, dependency, or handoff occurs. Do not defer all evidence until closeout.
+
+Every completed or blocked session MUST publish a closeout comment or linked report containing:
+1. Session/prompt identifier, prompt version/hash, role and accountable Owner.
+2. Work Item ID and links to the owning Issue and related PRs.
+3. Exact repository, branch, base SHA, final Head SHA and changed paths.
+4. Actual work performed and decisions, each labeled PROPOSED, ACCEPTED, REJECTED or UNRESOLVED with the decision authority.
+5. Verification commands, environment, exact tested SHA, results and evidence links; list every required check not run and why.
+6. Independent review and integration status; identify when a review is a same-author/delegated simulation rather than independent approval.
+7. Dependencies, blockers, risks, follow-up Owner and objective closure condition.
+8. Merge state; if merged, target branch, merge commit SHA and post-merge verification. Never infer merge or approval from PR closure alone.
+
+The Integration Owner MUST maintain `14-ai-development/work-items/INDEX.md` as a session → Work Item → Issue/PR traceability index. Each active or completed substantive session has one row; related sessions and PRs link bidirectionally where practical. Missing carriers, missing closeouts, stale source pins, and unrecorded outcomes are delivery defects and remain OPEN until corrected. For blocked/no-change assigned work, record a concise BLOCKED or NO_CHANGE closeout rather than fabricating implementation.
+
+Architecture decisions remain subject to their existing Owner/ADR authority. A session record, PR merge, delegated role simulation, or AI-generated conclusion does not itself approve another Owner's domain decision or close a technical gate.
+
+每个产生实质工作的 AI 会话 MUST 使用 GitHub Issue 或 Pull Request 作为持久工作载体。聊天记录、本地笔记或未关联的 Commit 均不构成项目交付记录。优先复用现有归属 Issue/PR；只有形成独立可审查工作单元时才新建载体。同一集成单元不得重复创建 PR。
+
+工作开始前，记录 Work Item ID、归属 Issue/PR、责任 Owner、目标分支与基线、范围、依赖、Prompt ID/版本/哈希、风险等级和验收标准。多步骤工作期间，一旦出现重要决策、文件/Commit 变化、验证结果、阻塞、依赖或交接，必须及时更新载体，不得把全部证据拖到最后。
+
+每个完成或受阻的会话 MUST 发布 Closeout 评论或链接报告，包含：
+1. 会话/提示词标识、提示词版本/哈希、角色和责任 Owner。
+2. Work Item ID，以及归属 Issue 和相关 PR 链接。
+3. 准确的仓库、分支、Base SHA、最终 Head SHA 和变更路径。
+4. 实际工作和决策；每项标记 PROPOSED、ACCEPTED、REJECTED 或 UNRESOLVED，并注明决策权威。
+5. 验证命令、环境、准确测试 SHA、结果和证据链接；逐项列出未运行的必需检查及原因。
+6. 独立审查和集成状态；若审查属于同一作者或委派角色模拟，必须明确披露，不得冒充独立批准。
+7. 依赖、阻塞、风险、后续 Owner 和客观关闭条件。
+8. 合并状态；若已合并，记录目标分支、Merge Commit SHA 和合并后验证。不得仅凭 PR 关闭状态推断已合并或已批准。
+
+Integration Owner MUST 维护 `14-ai-development/work-items/INDEX.md`，建立会话 → Work Item → Issue/PR 可追溯索引。每个进行中或已完成的实质会话均应有一行记录；相关会话和 PR 应尽可能双向链接。缺少载体、缺少 Closeout、来源 Pin 过期或结果未记录均属于交付缺陷，必须保持 OPEN 直至修复。对于受阻或无变更的已分配任务，应记录简明 BLOCKED 或 NO_CHANGE Closeout，不得伪造实现。
+
+架构决策仍受既有 Owner/ADR 权限约束。会话记录、PR 合并、委派角色模拟或 AI 生成的结论，均不能自行批准其他 Owner 的领域决策或关闭技术 Gate。
