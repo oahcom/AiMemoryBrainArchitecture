@@ -53,7 +53,7 @@ def owner_snapshot(owner="I", requests=None, admissions=None, highwaters=None,
 
 
 def admission(ref, owner, status="REGISTERED", participant_ref="COC/P1",
-              participant_digest="a" * 64, position=1, seq=1):
+              participant_entry_digest="c" * 64, position=1, seq=1):
     item = {
         "owner_entry_ref": ref, "owner_entry_kind": "ADMISSION", "owner": owner,
         "operation_id": "op/" + ref, "operation_digest": "b" * 64,
@@ -61,7 +61,7 @@ def admission(ref, owner, status="REGISTERED", participant_ref="COC/P1",
     }
     if status == "REGISTERED":
         item.update({"participant_intent_ref": participant_ref,
-                     "participant_entry_digest": participant_digest,
+                     "participant_entry_digest": participant_entry_digest,
                      "participant_position": position})
     return item
 
@@ -174,6 +174,8 @@ def validate_snapshot(s):
 
 
 def validate_manifest(m):
+    if not m.get("signature_valid"):
+        return UNKNOWN
     if not m.get("quorum_read") or not m.get("enumeration_complete") or not m.get("cursor_complete"):
         return UNKNOWN
     entries = m.get("entries")
@@ -199,7 +201,9 @@ def validate_manifest(m):
     authoritative = m.get("authoritative_prefix_entries")
     if authoritative is None:
         return UNKNOWN
-    if {e.get("participant_intent_ref") for e in authoritative} != set(refs):
+    authoritative_by_ref = {e.get("participant_intent_ref"): e.get("entry_digest") for e in authoritative}
+    manifest_by_ref = {e.get("participant_intent_ref"): e.get("entry_digest") for e in entries}
+    if authoritative_by_ref != manifest_by_ref:
         return INVALID
     return VALID
 
@@ -252,7 +256,7 @@ def validate_join(admissions_by_owner, m):
             p = entries.get(a.get("participant_intent_ref"))
             if p is None:
                 return INVALID
-            if (p.get("participant_digest") != a.get("participant_entry_digest") or
+            if (p.get("entry_digest") != a.get("participant_entry_digest") or
                 p.get("index") != a.get("participant_position") or
                 p.get("operation_id") != a.get("operation_id") or
                 p.get("operation_digest") != a.get("operation_digest") or
@@ -408,7 +412,7 @@ class HRCConformance(unittest.TestCase):
     def test_HRC_12(self):
         p = participant()
         m = manifest([p])
-        a = admission("C/admit/1", "C", participant_digest="f" * 64)
+        a = admission("C/admit/1", "C", participant_entry_digest="f" * 64)
         self.assertEqual(validate_join({"C": [a]}, m), INVALID)
 
     # HRC-13: NOT_REGISTERED cannot fabricate a COC participant identity.
