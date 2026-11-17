@@ -83,3 +83,69 @@ H 旧 HEAD `0d363244...` 的 1.2.15 本地 CI 曾通过；之后 `0277a8b...` �
 ## C/H Phase 3.8.24 consumer review snapshot / C/H 3.8.24 消费方审查快照
 
 C Phase 3.8.23 EN/zh-CN decisions (Blobs `4860c627...` / `165d5847...`) accept only C-owned identity semantics against exact G blobs; they explicitly do not accept H wire mapping. H Phase 3.8.24 candidate provides all seven HDeliveryBindingIdentity fields and all seven HObservationRecordIdentity fields, plus a closed evidence_kind enum. However, the candidate schema has only `c_submit_outcome_ref`, `c_outcome_record_ref`, `c_outcome_record_sequence`, and `c_outcome_payload_digest` for C outcome linkage; it does not expose C `issuer_authority_ref` and `sequence_namespace_ref` as first-class C identity members. The H decision does not define whether `c_submit_outcome_ref` resolves an immutable C record carrying those missing fields or how the duplicated C fields are compared. `final_request_boundary_id` must equal C `FinalRequestBoundaryRef` byte-for-byte/opaque-reference equality; H validator only calls an injected `verify_c_final_boundary` callback and current tests stub it to True. C/H mapping is therefore NOT ACCEPTED / NOT VERIFIED pending exact resolution and mismatch vectors.
+
+
+---
+
+## Phase 3.8.22 G / H 1.2.15 field-level reconciliation (2026-11-18)
+
+This addendum records a source-level comparison, not a C/H Owner mapping decision or wire freeze.
+
+### Exact source pins
+
+| Authority | Artifact | Exact Blob | Evidence boundary |
+|---|---|---|---|
+| G | Phase 3.8.22 Applied Persistence / Idempotency / Crash / Restore contract | `bd297873bc1e593280484a43cb44b56058d9c4ff` | G-owned normative design draft; implementation not verified; cross-owner acceptance required |
+| H | Unified COC/JF-10 Schema 1.2.15 | `860fc4cec658db7d2703cd6adf72aa31a2723f6d` | Candidate schema; not interchangeable with Applied ACK bridge schema |
+| H | Gateway Attestation Validator 1.2.15 | `9cc426d4c26deb452f39daff34c1008dd535e969` | Reference integration validator; trust, issuer, transport, key-status and durable replay callbacks are deployment seams |
+| H | Provider Outcome Validator 1.2.15 | `90a2d4b6f5b05590e3e0a7daecb5a01d9bf525c0` | Local schema/semantic validation; not production ingress trust or G Applied authority |
+| H | Applied ACK 1.1.0 JF-10 bridge schema | `a8a945cc3623c2907003b93625e3c79742150944` | Separate schema family; cannot fill gaps in Unified Provider Outcome by implication |
+
+### HDeliveryBindingIdentity field mapping
+
+| G semantic member | H Unified 1.2.15 exact field | Source-level result | Requiredness / authority | Mapping disposition |
+|---|---|---|---|---|
+| `adapter_instance_ref` | None found | Not a first-class property in pinned schema or gateway validator | G requires an adapter-instance identity; H must identify authoritative issuer and immutable evidence carrier | UNAVAILABLE; H decision required |
+| `runtime_session_ref` | None found | Not a first-class property in pinned schema or gateway validator | G requires runtime-session binding; do not borrow a similarly named field from another schema family | UNAVAILABLE; H decision required |
+| `delivery_id` | None found | Not a first-class property in pinned schema or gateway validator | G requires stable delivery identity | UNAVAILABLE; H decision required |
+| `delivery_attempt_id` | None found | Not a first-class property in pinned schema or gateway validator | G requires delivery-attempt identity | UNAVAILABLE; H decision required |
+| `inference_request_id` | `actual_inference_request_id` exists; exact `inference_request_id` does not | Schema and gateway validator contain `actual_inference_request_id`; no automatic alias semantics established | C/H must define whether actual request ID is the authoritative inference request identity, including lifecycle/assignment semantics | UNRESOLVED; no implicit alias |
+| `final_request_boundary_id` | `final_request_boundary_id` | Present in schema and gateway validator | Must bind the same immutable final request boundary used by C final-request evidence | EXACT NAME PRESENT; semantic/issuer binding still requires C/H acceptance |
+| `adapter_capability_epoch` | None found | Not a first-class property in pinned schema or gateway validator | G requires capability epoch binding to prevent stale capability evidence | UNAVAILABLE; H decision required |
+| Additional observed H field | `provider_adapter_ref` | Present in schema/validator | H-owned provider adapter reference | NOT EQUIVALENT by default to `adapter_instance_ref`; explicit H mapping required |
+
+**Important correction:** G Phase 3.8.22 currently describes `final_request_boundary_id` as absent from H Unified 1.2.15. Exact Blob inspection shows it is present in both schema and gateway validator. The absence of the exact field name `inference_request_id` remains true; the present `actual_inference_request_id` must not be silently treated as an alias. Five other proposed HDeliveryBindingIdentity fields remain absent as first-class Unified 1.2.15 fields.
+
+### Identity and evidence separation
+
+- `CProviderAttemptIdentity` is C-owned stable logical provider-attempt identity; it is not the C outcome record identity.
+- `COutcomeRecordIdentity` identifies an immutable C ledger observation; a late receipt is a successor observation, not a mutation of the original record.
+- `HDeliveryBindingIdentity` is a proposed normalized consumer tuple; its exact wire mapping remains unresolved as above.
+- `HEvidenceIdentity` and `HObservationRecordIdentity` remain H-owned evidence/observation identities and require explicit H source fields and authenticated issuer/sequence semantics.
+- `COCParticipantIdentity` is COC/Storage-owned; native database XID is not a substitute for PreparedTransactionGID or participant identity.
+- `GAppliedIdentity` is G-owned and binds the stable identities; payload/evidence digests belong to immutable evidence revisions and must not manufacture a new logical Applied identity.
+- H Unified 1.2.15 and H Applied ACK 1.1.0 JF-10 bridge are distinct schema families. Neither may be silently substituted for the other.
+
+### Required joint closure
+
+1. H publishes or identifies an exact, authenticated, immutable evidence carrier for the five unavailable HDeliveryBindingIdentity fields, or versions explicit fields into a successor schema and validator.
+2. C/H decide the exact mapping and semantics of `actual_inference_request_id` versus G's `inference_request_id`; no alias is inferred by C.
+3. H confirms exact `final_request_boundary_id` semantic binding and issuer/evidence provenance.
+4. G corrects the overbroad missing-field statement in Phase 3.8.22 through a successor revision; this matrix does not edit G-owned normative text.
+5. C/H/G/I/Storage review exact successor Blob SHAs and publish explicit consumer acceptance. Storage v3.3.2's H 1.2.14 pin remains a separate blocking version conflict until a successor manifest is accepted.
+6. Production trust roots, key custody/rotation/revocation, authenticated ingress ordering, durable replay and end-to-end Applied execution remain NOT VERIFIED.
+
+### 中文对账结论
+
+本附录是基于源码的字段级核验，不构成 C/H Owner 映射决议或 Wire Freeze。
+
+- G Phase 3.8.22 精确 Blob：`bd297873bc1e593280484a43cb44b56058d9c4ff`，状态仍为规范设计草案、实现未验证、需要跨 Owner 接受。
+- H Unified 1.2.15 Schema Blob：`860fc4cec658db7d2703cd6adf72aa31a2723f6d`；Gateway Validator Blob：`9cc426d4c26deb452f39daff34c1008dd535e969`；Provider Validator Blob：`90a2d4b6f5b05590e3e0a7daecb5a01d9bf525c0`。它们提供候选结构和有界本地验证，不代表生产信任或 G Applied 权威。
+- H Unified 1.2.15 中确实存在 `actual_inference_request_id` 和 `final_request_boundary_id`。G 将后者也判定为缺失是不准确的，应由 G 后继修订纠正。
+- 精确字段 `inference_request_id` 不存在。不得未经 C/H 决议将其视为 `actual_inference_request_id` 的别名。
+- `adapter_instance_ref`、`runtime_session_ref`、`delivery_id`、`delivery_attempt_id`、`adapter_capability_epoch` 五个字段仍未作为 Unified 1.2.15 一等属性出现。虽然 `provider_adapter_ref` 存在，但不能默认等价于 `adapter_instance_ref`。
+- H Applied ACK 1.1.0 JF-10 Bridge 是独立 Schema Family，不能替代 Unified Provider Outcome。
+- 必须由 H 给出五个缺失字段的精确认证证据载体或发布后继 Schema/Validator；C/H 明确决定 Inference Request ID 映射；G 修订其字段缺失描述；C/H/G/I/Storage 对精确后继 Blob 做消费者接受。
+- Storage v3.3.2 仍绑定 H 1.2.14 的版本冲突未解决。生产 Trust、密钥托管/轮换/撤销、认证入口顺序、持久化重放和端到端 Applied 执行仍未验证。
+
+本附录不关闭 C-CON-002/003/004/014，不批准技术选型，不冻结 Schema，不授权生产部署，也不关闭任何 Gate。
