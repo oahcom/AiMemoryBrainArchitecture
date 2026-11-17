@@ -20,6 +20,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Shared glossary | docs/glossary/architecture-glossary.md | Bilingual | Bilingual | COMPLETE |
 | System overview | 01-system-architecture/system-overview.md | docs/zh-CN/01-system-architecture/system-overview.md | docs/en/01-system-architecture/system-overview.md | COMPLETE |
 | Technology overview | 13-engineering-decisions/technology-architecture-blueprint.md + TAR-AI-001 | docs/zh-CN/13-engineering-decisions/technology-architecture-overview.md | docs/en/13-engineering-decisions/technology-architecture-overview.md | COMPLETE — overview only |
+| TAB-001 full technology blueprint | 13-engineering-decisions/technology-architecture-blueprint.md | Pending | Existing English source | NOT STARTED — full blueprint translation and technical parity review pending |
 | Bilingual documentation policy | 00-governance/bilingual-documentation-policy.md | Embedded bilingual normative policy | Embedded bilingual normative policy | COMPLETE |
 | Architecture invariants | 00-governance/architecture-invariants.md | docs/zh-CN/00-governance/architecture-invariants.md | docs/en/00-governance/architecture-invariants.md | COMPLETE |
 | Canonical terminology | 00-governance/terminology.md | docs/zh-CN/00-governance/terminology.md | docs/en/00-governance/terminology.md | COMPLETE |
