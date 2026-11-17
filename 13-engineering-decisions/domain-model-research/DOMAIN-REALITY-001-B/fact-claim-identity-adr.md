@@ -23,15 +23,15 @@ This ADR separates two questions that must not be collapsed:
 
 ## 2. Exact source evidence / 精确来源证据
 
-| Source | Exact main Blob | Relevant statement |
+| Source / 来源 | Exact main Blob / 精确 main Blob | Relevant statement / 相关陈述 |
 |---|---|---|
-| `02-domain-model/domain-model-overview.md` | `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` | Fact/Claim decision is marked DECIDED; Memory contains multiple Claims; epistemic and temporal qualifications belong to each Claim |
-| `02-domain-model/core-entities.md` | `8cb5a674eec8eac1f3c4d83c400dc08d00166f23` | Claim has required claim_id; MemoryVersion stores immutable ClaimSnapshot[]; identity policy remains referenced but unspecified |
-| `02-domain-model/epistemic-and-temporal-semantics.md` | `8c03a20db1ed54c90db1d5c4c64f5ea7b1324ed7` | Epistemic status is orthogonal to lifecycle, confidence, relevance, trust and evidence strength |
-| `02-domain-model/lifecycle-model.md` | `81c48c928cb5f9c76ca29d493fbd9479079e62f7` | Claim epistemic lifecycle is separate from Memory lifecycle; corrections/retractions preserve history |
-| `02-domain-model/relationships-and-provenance.md` | `e762f84c59f69de7a44baad2123aed46e1ffea16` | Claims participate in typed Relations and evidence/provenance lineage |
-| B research conflict register | `a3cc523b67c2433a8e53bdb0ebfff121705618c6` | B-CONFLICT-001 / 006 remain BLOCKING / HIGH; no closure claimed |
-| A assessment | PR #53 and current B baseline audit | Fact/Claim ADR remains a blocker to B2/B3 and dependent schema freeze |
+| `02-domain-model/domain-model-overview.md` | `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` | Fact/Claim decision is marked DECIDED; Memory contains multiple Claims; epistemic and temporal qualifications belong to each Claim. / Fact/Claim 决策被标记为 DECIDED；Memory 可包含多个 Claim；认知和时间限定属于各 Claim。 |
+| `02-domain-model/core-entities.md` | `8cb5a674eec8eac1f3c4d83c400dc08d00166f23` | Claim has required claim_id; MemoryVersion stores immutable ClaimSnapshot[]; identity policy remains referenced but unspecified. / Claim 要求 claim_id；MemoryVersion 存储不可变 ClaimSnapshot[]；身份策略虽被引用但尚未定义。 |
+| `02-domain-model/epistemic-and-temporal-semantics.md` | `8c03a20db1ed54c90db1d5c4c64f5ea7b1324ed7` | Epistemic status is orthogonal to lifecycle, confidence, relevance, trust and evidence strength. / 认知状态与生命周期、置信度、相关性、信任和证据强度正交。 |
+| `02-domain-model/lifecycle-model.md` | `81c48c928cb5f9c76ca29d493fbd9479079e62f7` | Claim epistemic lifecycle is separate from Memory lifecycle; corrections/retractions preserve history. / Claim 认知生命周期独立于 Memory 生命周期；更正/撤回保留历史。 |
+| `02-domain-model/relationships-and-provenance.md` | `e762f84c59f69de7a44baad2123aed46e1ffea16` | Claims participate in typed Relations and evidence/provenance lineage. / Claim 参与类型化 Relation 以及 Evidence/Provenance 谱系。 |
+| B research conflict register | `a3cc523b67c2433a8e53bdb0ebfff121705618c6` | B-CONFLICT-001 / 006 remain BLOCKING / HIGH; no closure claimed. / B-CONFLICT-001 / 006 仍为 BLOCKING / HIGH，未宣称关闭。 |
+| A assessment | PR #53 and current B baseline audit | Fact/Claim ADR remains a blocker to B2/B3 and dependent schema freeze. / Fact/Claim ADR 仍阻塞 B2/B3 及依赖它的 Schema 冻结。 |
 
 The five main-domain Blob SHAs above were re-fetched from current main during this audit. Their file contents match the recorded pins.
 
@@ -116,27 +116,27 @@ Advantages: preserves one proposition model; supports Reported, Inferred, Disput
 
 ## 6. Decision matrix / 决策矩阵
 
-| Criterion | C1 separate Fact | C2 Fact=qualified Claim | I1 stable identity + snapshots | I2 version-local snapshots | I3 independent Claim store |
+| Criterion / 评估维度 | C1 separate Fact / C1 独立 Fact | C2 Fact=qualified Claim / C2 Fact 为限定 Claim | I1 stable identity + snapshots / I1 稳定身份+快照 | I2 version-local snapshots / I2 版本局部快照 | I3 independent Claim store / I3 独立 Claim 存储 |
 |---|---|---|---|---|---|
-| Single proposition vocabulary | No | Yes | Yes | Yes | Yes |
-| Avoid “Fact means true” hazard | Weak | Strong if qualified | Strong | Strong | Strong |
-| Historical immutability | Possible | Possible | Native | Native | Requires cross-object transaction |
-| Cross-version reference simplicity | N/A | N/A | Strong | Lineage traversal | Strong |
-| Storage/Forget complexity | Higher | Lowest | Medium | Low/medium | Highest |
-| Fit to current core schema | Requires changes | Fits terminology intent | Fits snapshots with added revision semantics | Requires claim_id policy change | Requires major redesign |
-| Current status | Not selected | Recommended candidate | Recommended candidate | Alternative | Deferred |
+| Single proposition vocabulary / 单一命题词汇 | No / 否 | Yes / 是 | Yes / 是 | Yes / 是 | Yes / 是 |
+| Avoid “Fact means true” hazard / 避免 Fact 名称暗示真理 | Weak / 较弱 | Strong if qualified / 限定清晰时较强 | Strong / 较强 | Strong / 较强 | Strong / 较强 |
+| Historical immutability / 历史不可变性 | Possible / 可实现 | Possible / 可实现 | Native / 原生支持 | Native / 原生支持 | Requires cross-object transaction / 需要跨对象事务 |
+| Cross-version reference simplicity / 跨版本引用简洁性 | N/A / 不适用 | N/A / 不适用 | Strong / 较强 | Lineage traversal / 需要遍历谱系 | Strong / 较强 |
+| Storage/Forget complexity / Storage 与 Forget 复杂度 | Higher / 较高 | Lowest / 最低 | Medium / 中等 | Low/medium / 较低至中等 | Highest / 最高 |
+| Fit to current core schema / 与当前核心 Schema 的适配 | Requires changes / 需要修改 | Fits terminology intent / 符合术语意图 | Fits snapshots with added revision semantics / 适配 Snapshot，但需增加 Revision 语义 | Requires claim_id policy change / 需要修改 claim_id 策略 | Requires major redesign / 需要重大重构 |
+| Current status / 当前状态 | Not selected / 未选择 | Recommended candidate / 推荐候选 | Recommended candidate / 推荐候选 | Alternative / 替代方案 | Deferred / 延后 |
 
 ## 7. Required decisions by authority / 各权威必须作出的决定
 
-| Owner | Explicit question | Acceptance evidence required |
+| Owner / 责任方 | Explicit question / 明确问题 | Acceptance evidence required / 所需验收证据 |
 |---|---|---|
-| B | C2 vs C1; I1 vs I2 vs I3; define identity-changing vs non-identity-changing Claim updates | B-authored signed/explicit ADR disposition with exact version and examples |
-| D | Does MemoryVersion own the authoritative immutable ClaimSnapshot set? How do correction, retraction, supersession and Forget affect snapshot identity/lineage? | D exact-version acceptance or enumerated exceptions; lifecycle/Forget race semantics retained |
-| E | Can compiler output preserve stable Claim identity/revision without inferring truth? How are re-extraction, deduplication and provenance bound? | E exact-version producer contract acceptance and fixtures |
-| F | How do retrieval and conflict detection group Claim revisions without collapsing different scope/time/modality? | F exact-version consumer acceptance; ranking cannot alter canonical identity/status |
-| G | Are ContextEntry references to MemoryVersion only, or can they address ClaimSnapshot/revision? What does a ContextVersion freeze? | G exact-version schema/consumer acceptance |
-| Storage | Can immutable snapshots and identity lineage be committed with the owning MemoryVersion/current pointer without a new independent Claim transaction? | Storage exact-version interface and atomicity acceptance; no L4 claim without engine evidence |
-| A | Register accepted ADR and exact consumer pins; maintain gate impact | A registry update after Owner decisions, not before |
+| B | C2 vs C1; I1 vs I2 vs I3; define identity-changing vs non-identity-changing Claim updates. / 选择 C2/C1、I1/I2/I3；定义改变 Claim 身份与不改变身份的更新。 | B-authored explicit ADR disposition with exact version and examples. / 由 B 明确作出 ADR 裁决，包含精确版本和示例。 |
+| D | Does MemoryVersion own the authoritative immutable ClaimSnapshot set? How do correction, retraction, supersession and Forget affect snapshot identity/lineage? / MemoryVersion 是否拥有权威不可变 ClaimSnapshot 集？更正、撤回、替代和 Forget 如何影响 Snapshot 身份/谱系？ | D exact-version acceptance or enumerated exceptions; preserve lifecycle/Forget race semantics. / D 精确版本验收或列明例外；保留生命周期/Forget 竞态语义。 |
+| E | Can compiler output preserve stable Claim identity/revision without inferring truth? How are re-extraction, deduplication and provenance bound? / Compiler 输出能否在不推断真理的前提下保留稳定 Claim 身份/修订？重新抽取、去重和 Provenance 如何绑定？ | E exact-version producer contract acceptance and fixtures. / E 对精确版本生产契约及 Fixtures 的验收。 |
+| F | How do retrieval and conflict detection group Claim revisions without collapsing different scope/time/modality? / 检索和冲突检测如何对 Claim 修订分组，同时不合并不同 Scope/时间/模态？ | F exact-version consumer acceptance; ranking cannot alter canonical identity/status. / F 精确版本消费者验收；Ranking 不得改变规范身份/状态。 |
+| G | Are ContextEntry references to MemoryVersion only, or can they address ClaimSnapshot/revision? What does a ContextVersion freeze? / ContextEntry 只能引用 MemoryVersion，还是也可引用 ClaimSnapshot/Revision？ContextVersion 冻结什么？ | G exact-version schema/consumer acceptance. / G 对精确版本 Schema/消费者契约的验收。 |
+| Storage | Can immutable snapshots and identity lineage be committed with the owning MemoryVersion/current pointer without a new independent Claim transaction? / 能否在不引入独立 Claim 事务的情况下，将不可变 Snapshot 与身份谱系和所属 MemoryVersion/Current Pointer 一并提交？ | Storage exact-version interface and atomicity acceptance; no L4 claim without engine evidence. / Storage 精确版本接口与原子性验收；无引擎证据不得声称 L4 完成。 |
+| A | Register accepted ADR and exact consumer pins; maintain gate impact. / 登记已接受 ADR 和精确消费者 Pin，并维护门禁影响。 | A registry update after Owner decisions, not before. / A 应在 Owner 决策后更新 Registry，不得提前登记。 |
 
 ## 8. Required examples / 必须验证的例子
 
