@@ -104,7 +104,6 @@ The suite proves at bounded local L1/L2 source level:
 | I | 2851d31e4f8caf48348944b885b493c607ca79e1 | Local I COMMIT_WON predicate and fail-closed mismatch behavior | I proof authentication, trust roots, key custody, historical verification, anti-rollback, revocation ordering and final CAS |
 | H | 860c896a388597a4378eda5aa323f276390acf34 | Exact 60-test local reference ingress gate; no production authentication | Outer P0, signer/profile, I trust, replay durability and production callbacks remain OPEN |
 | A | Phase 3.12.1 review | d3d4e6f4b6d7e82f90e3eee3427c8ace3b4160c8 | Accepts bounded reference bundle with amendments; rejects v3.3.1 manifest finality due Option A status contradiction; does not transfer to v3.3.2 |
-| A | Phase 3.12.1 review Blob d3d4e6f4b6d7e82f90e3eee3427c8ace3b4160c8 | Accepts bounded reference bundle with amendments; rejects v3.3.1 manifest finality due Option A status contradiction | Exact review applies to v3.3.1 only; v3.3.2 requires fresh A review |
 
 These are delegated role reviews. They are not independent human Owner signatures or formal governance approvals. Each Owner's authority remains local; the manifest cannot synthesize a global PASS.
 
