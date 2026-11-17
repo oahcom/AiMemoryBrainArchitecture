@@ -4,6 +4,7 @@ These tests cover parsing and deterministic local predicates only. They do not
 claim profile registration, signature/key verification, provider truth, ledger
 membership, COC quorum, cross-language interoperability or production readiness.
 """
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -19,6 +20,7 @@ from provider_outcome_validator import (  # noqa: E402
     _semantic_errors,
     parse_strict_json,
 )
+from jsonschema import Draft202012Validator, FormatChecker
 
 
 class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
@@ -68,6 +70,24 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertIsNone(checks.verify_profile_registration)
         self.assertIsNone(checks.verify_c_signature)
         self.assertIsNone(checks.verify_provider_evidence)
+
+
+    def test_07_exact_c_schema_and_ten_vectors(self):
+        fixture_dir = ROOT.parent / "provider_outcome" / "fixtures"
+        schema = json.loads((fixture_dir / "c-submit-outcome-1.0.0.schema.json").read_text(encoding="utf-8"))
+        vectors = json.loads((fixture_dir / "c_submit_outcome_1_0_0_vectors.json").read_text(encoding="utf-8"))
+        validator = Draft202012Validator(schema, format_checker=FormatChecker())
+        self.assertEqual(schema["$id"], "urn:aimba:schema:c-submit-outcome:1.0.0")
+        self.assertEqual(len(vectors["vectors"]), 10)
+        for vector in vectors["vectors"]:
+            with self.subTest(vector=vector["id"]):
+                schema_errors = list(validator.iter_errors(vector["record"]))
+                semantic = _semantic_errors(vector["record"])
+                if vector["expected"] == "INVALID":
+                    self.assertTrue(schema_errors or semantic)
+                else:
+                    self.assertFalse(schema_errors, [e.message for e in schema_errors])
+                    self.assertFalse(semantic, semantic)
 
 
 if __name__ == "__main__":
