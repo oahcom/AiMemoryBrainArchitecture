@@ -18,6 +18,12 @@ Chinese and English are maintained as equivalent reading versions. Normative arc
 
 **Mandatory rule for every AI developer / 所有 AI 开发者强制规则：** Every AI developer/session—whether doing architecture, implementation, tests, security, storage, protocols, performance, migrations, operations or reviews—MUST read and follow [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md). Any change to architecture meaning or implementation-facing contracts requires synchronized Chinese and English updates in the same change set. Missing or materially divergent counterparts mean NOT DONE unless a formally approved, time-bounded STALE exception exists. See also [AI Development Standard](../14-ai-development/ai-development-standard.md) and the [Prompt & Evidence Template](../14-ai-development/prompt-and-evidence-template.md).
 
+
+
+**Canonical AI prompt library / AI 提示词规范目录：** Every AI session MUST start from the repository [Prompt Library](../prompts/README.md): global prompts live directly under `prompts/`, and Owner-specific prompts live under `prompts/A/` through `prompts/I/`. Each task must preserve the exact executed prompt version in its Work Item evidence bundle.
+
+**AI 提示词规范目录：** 每个 AI 会话 MUST 从仓库的[提示词目录](../prompts/README.md)开始：全局提示词直接放在 `prompts/` 根目录，Owner 专属提示词分别放在 `prompts/A/` 至 `prompts/I/`。每项任务必须将实际执行的准确提示词版本保存在 Work Item 证据包中。
+
 ## Documentation layers / 文档层次
 
 The [Cross-Module Conformance Guide](zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md) explains how architecture contracts are verified and what evidence is required before a PASS can be claimed.
