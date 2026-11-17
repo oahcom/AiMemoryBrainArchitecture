@@ -138,9 +138,7 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "ProviderRequestRef": "Provider/request/55",
-        "ProviderReceiptRef": null,
-        "OutcomeEvidenceType": "authenticated_rejection"
+        "ProviderRequestRef": "Provider/request/55"
       }
     },
     {
@@ -208,11 +206,8 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "ProviderRequestRef": null,
-        "ProviderReceiptRef": null,
         "ProviderNoHandoffProofRef": "C/no-handoff/55",
-        "NotInvokedProofRef": "C/not-invoked/55",
-        "OutcomeEvidenceType": "adapter_serialization_no_handoff_proof"
+        "NotInvokedProofRef": "C/not-invoked/55"
       }
     },
     {
@@ -280,10 +275,7 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "ProviderRequestRef": null,
-        "ProviderReceiptRef": null,
-        "UnknownReasonRef": "C/unknown/55",
-        "OutcomeEvidenceType": "ambiguous_transport_observation"
+        "UnknownReasonRef": "C/unknown/55"
       }
     },
     {
@@ -351,10 +343,7 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "ProviderRequestRef": null,
-        "ProviderReceiptRef": null,
-        "UnknownReasonRef": "C/in-doubt/55",
-        "OutcomeEvidenceType": "provider_lookup_unavailable"
+        "UnknownReasonRef": "C/in-doubt/55"
       }
     },
     {
@@ -422,8 +411,7 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "ProviderRequestRef": "Provider/request/55",
-        "ProviderReceiptRef": null
+        "ProviderRequestRef": "Provider/request/55"
       }
     },
     {
@@ -490,10 +478,7 @@
         "payload_digest": "1111111111111111111111111111111111111111111111111111111111111111",
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
-        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "ProviderRequestRef": null,
-        "ProviderReceiptRef": null,
-        "OutcomeEvidenceType": "timeout"
+        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
       }
     },
     {
@@ -694,9 +679,9 @@
         "payload_digest": "1111111111111111111111111111111111111111111111111111111111111111",
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
-        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "wire_request_digest": "8888888888888888888888888888888888888888888888888888888888888888"
-      }
+        "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "wire_request_digest": "8888888888888888888888888888888888888888888888888888888888888888"
     }
   ]
 }
