@@ -75,7 +75,7 @@ Existing envelope fields retain distinct meanings:
 
 Candidate profile identifier: `AIMBA-H-GATEWAY-ATTEST-1.0` (unregistered candidate only).
 
-Candidate canonicalization: `RFC8785-JCS-1.0`; digest: `SHA-256`; signature: `Ed25519`; digest/signature encoding: unpadded Base64url. These primitives and encodings are proposals only; I must approve the exact profile and H trust root before registration.
+Candidate canonicalization: `RFC8785-JCS-1.0`; digest: `SHA-256`; signature: `Ed25519`; digest encoding: 64-character lowercase hexadecimal to match the BMCP envelope schema convention; signature encoding: unpadded Base64url. These primitives and encodings are proposals only; I must approve the exact profile and H trust root before registration.
 
 The signed P0 projection is a JSON object containing **every present field** from these groups, with no wildcard exclusions:
 
@@ -112,7 +112,7 @@ No other field is excluded. Null, absent, empty string, empty array and empty ob
 
 候选 Profile ID：`AIMBA-H-GATEWAY-ATTEST-1.0`（仅未注册候选）。
 
-候选 Canonicalization：`RFC8785-JCS-1.0`；Digest：`SHA-256`；Signature：`Ed25519`；Digest/Signature Encoding：无 Padding Base64url。以上均只是提案，注册前必须由 I 批准精确 Profile 与 H Trust Root。
+候选 Canonicalization：`RFC8785-JCS-1.0`；Digest：`SHA-256`；Signature：`Ed25519`；Digest Encoding：64 字符小写十六进制，与 BMCP Envelope Schema 约定一致；Signature Encoding：无 Padding Base64url。以上均只是提案，注册前必须由 I 批准精确 Profile 与 H Trust Root。
 
 签名 P0 Projection 是 JSON Object，包含以下全部分组中的**每个实际存在字段**，不得使用 Wildcard Exclusion：
 
@@ -143,7 +143,7 @@ Candidate preimage:
 
 Candidate digest:
 
-`BASE64URL_NOPAD(SHA256(JCS(P0)))`
+`LOWERHEX(SHA256(JCS(P0)))`
 
 Candidate signature:
 
