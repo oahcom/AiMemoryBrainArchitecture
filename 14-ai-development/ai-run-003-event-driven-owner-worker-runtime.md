@@ -175,6 +175,26 @@ The lease authority must be durable and atomic. Process-local mutexes are insuff
 
 租约权威必须持久化且原子化。仅使用进程内 Mutex 不够。Worker 必须在过期前 Heartbeat；心跳丢失后应触发租约过期和恢复，不得静默继续执行。
 
+### 6.1 Fenced publication authority / 带 fencing 的发布权威
+
+A fencing token is effective only if the system that performs the side effect enforces it. A worker holding a shared GitHub write token can bypass a coordinator-side lease check and push after its lease expires. Therefore, in the pilot:
+
+- Owner workers receive no GitHub write credential.
+- All GitHub mutations (branch creation, push, PR/comment/check updates) pass through a single publication broker controlled by the Coordinator.
+- The broker atomically validates the current lease owner, fencing token, work-item state, allowed paths and expected base/head SHA immediately before accepting each mutation.
+- The broker rejects expired, superseded or stale fencing tokens. A check performed earlier by the worker is not sufficient.
+- If the broker cannot provide atomic compare-and-set enforcement, autonomous write-back remains disabled; workers may produce patch artifacts for human application only.
+- Use narrowly scoped short-lived GitHub App installation tokens inside the broker; do not expose them to worker processes or their worktrees.
+
+只有实际执行副作用的系统强制检查 fencing token，fencing 才有效。若 Worker 持有共享 GitHub 写 Token，它可以绕过 Coordinator 的租约检查，在租约过期后仍然 Push。因此试点阶段：
+
+- Owner Worker 不获得 GitHub 写凭据。
+- 所有 GitHub 变更（创建分支、Push、PR/评论/Check 更新）都经过 Coordinator 控制的单一 Publication Broker。
+- Broker 在接受每次变更前，原子校验当前租约所有者、fencing token、Work Item 状态、允许路径和预期 base/head SHA。
+- Broker 拒绝过期、已 superseded 或 fencing token 过期的请求。Worker 之前做过的检查不够。
+- 如果 Broker 无法提供原子 compare-and-set 强制执行，则保持自主写回关闭；Worker 只能生成 Patch Artifact，由人类应用。
+- 使用 Broker 内部的最小权限、短期 GitHub App Installation Token；不得暴露给 Worker 进程或其 Worktree。
+
 ## 7. GitHub authority and credentials / GitHub 权威与凭据
 
 - GitHub Issues/PRs/commits/checks are the durable engineering source of truth.
