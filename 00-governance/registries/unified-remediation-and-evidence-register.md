@@ -238,28 +238,22 @@ Live GitHub compare after the latest P coordination commits: `session-p-project-
 P published `00-governance/role-simulations/issue-20-a-provider-outcome-currentness-integration-review-v0.1.0.md`. Simulated A disposition: **ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS; DO NOT FREEZE**. This is not independent A Owner approval. It confirms the C/H/Storage exact-version bundle mismatch, requires C/H immutable mapping corrections and a Storage-issued successor manifest, and keeps I profile registration, C provider adapter tests, H production authority callbacks and Storage deployment/topology evidence open. P CI run `44064079821` at commit `0806a3bf7746641fce111cd72cd7dcd640cc4275`: SUCCESS, 92 tests.
 
 
-### Current Provider Outcome bundle refresh — 2026-11-17
+### Current H mapping canonicalization and v3.2.8 successor — 2026-11-17
 
-P published the currentness audit and six role-simulation artifacts:
-- `00-governance/role-simulations/issue-20-c-phase-3.8.16-review-current-h-mapping-v0.1.0.md` — simulated C re-review of the one-line RecoveryCutoff pin correction.
-- `00-governance/role-simulations/issue-20-h-phase-3.8.13-current-mapping-closure-addendum-v0.1.0.md` — simulated H closure refresh to current mapping Blob `c196fd...`.
-- `00-governance/role-simulations/issue-20-d-phase-3.8.9-storage-anchor-schema-currentness-addendum-v0.1.0.md` — refreshes D's old H schema pin and records L1 Option A / L4 open distinction.
-- `00-governance/role-simulations/issue-20-storage-v3.2.7-successor-exact-version-bundle-manifest-draft-v0.1.0.md` — Storage successor draft, not Storage Owner-issued.
-- `00-governance/role-simulations/issue-20-a-current-1.2.14-bundle-integration-review-v0.1.0.md` — A-role conditional disposition, not independent A approval.
+The Owner branches advanced after v0.2.0. P refreshed the audit to `00-governance/role-simulations/issue-20-current-bundle-exact-version-audit-v0.3.0.md`.
 
-The actual C/H/Storage/A branches were not modified. UMR-038 remains OPEN until C and H publish exact refreshes, Storage publishes v3.2.7, and A reviews that exact Storage manifest. I/D current structural reviews do not activate production trust or prove complete live owner ledgers. Storage ADR `bb544...` selects Option A only as L1 logical architecture; L4 engine/deployment remains OPEN.
+Current exact state:
+- C Phase 3.8.17 review Blob `1dbbc16...` accepts H mapping Blob `579dd2a...` and H current validator/test Blob `eab961...` / `70a379...`, CI `44068869146` (27/27).
+- H has two parallel 1.2.14 mapping documents: canonical candidate `579dd2a...` and older duplicate `1cbe74e...`. The only substantive document delta is test/CI pin freshness; canonical mapping binds 27 tests, duplicate binds 25.
+- I Phase 3.8.13 Blob `34b29f...` and D Phase 3.8.9 Blob `40fee...` still pin `1cbe74e...`; P has prepared role-simulated refreshes to `579dd2a...`.
+- Storage v3.2.7 current Blob `684908d...` still pins `1cbe74e...`; A Phase 1.F Blob `85cd97...` pins an earlier v3.2.7 manifest Blob `4435fc...`.
+- P prepared a v3.2.8 successor draft and a conditional A-role review draft. Neither is Owner-issued or a real A review.
 
+P role-simulation artifacts:
+- `issue-20-i-phase-3.8.14-review-canonical-h-mapping-v0.1.0.md`
+- `issue-20-d-phase-3.8.10-review-canonical-h-mapping-v0.1.0.md`
+- `issue-20-h-canonical-mapping-identity-addendum-v0.1.0.md`
+- `issue-20-storage-v3.2.8-successor-exact-version-bundle-manifest-draft-v0.1.0.md`
+- `issue-20-a-phase-1g-review-v3.2.8-bundle-draft-v0.1.0.md`
 
-## 11. New remediation — current callback seam and owner-proof source adoption
-
-| ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
-|---|---|---|---|---|---|
-| UMR-039 | P0 | Obtain C/D/I/Storage adoption of H 1.2.14 authority-join callback mapping and publish current H closure | H/C/D/I/Storage | OPEN — callback map is a candidate; base C review does not cover it; H closure is stale | H callback mapping `1cbe74eba69325510d6b1019d971661f965eabf8`; validator `eab961a08d41e871f38543b18ee60cf024977414`; tests `70a3796446553464e71999f916b76bc22e47da11`; run `44068869146` (27 PASS). Require current H closure and exact affected-Owner decisions. |
-| UMR-040 | P0 | Refresh D/I proof reviews against current owner-owned crosswalk/P0 Blobs | D/I/H/Storage/A | OPEN — current D/I reviews pin older proof source Blobs | D current crosswalk `c4adf827dd62d44c43b8e871dec4835581508adf` vs D review pin `bf35b7f...`; I current P0 `44986f5f864bcdc1a79d34978273644d381a68c0` vs I review pin `35e6843...`; H I review pins older `5c0e204...`. Require D/I re-review and refreshed H cross-review. |
-| UMR-041 | P1 | Add full unmocked H envelope + C object positive/negative conformance and production callback evidence | H/C/I/D/Storage | OPEN — 27-test suite proves bounded orchestration only | Add complete unmocked positive fixture; negative mutations for duplicate fields, C P0 digest, sequence namespace, I COMMIT_WON, D fence/currentness, Storage same-GID and pagination; production callbacks must resolve owner-authoritative sources or return UNKNOWN. |
-
-## 12. Latest exact H CI readback — 2026-11-17
-
-- Provider Outcome run `44068869146`, exact commit `e0d89f1b6dac3bdcf1f0ab4e3f062dd7bc53fdf8`: **SUCCESS, 27 tests**.
-- RecoveryCutoff run `44068869090`, same commit: **288 total, 266 passed, 22 skipped, 0 failed**.
-- These are candidate tests only; they do not prove production callback adapters, C provider truth, COC quorum, same-GID production recovery or deployed Storage topology.
+UMR-038 remains OPEN. The actual I/D branches must refresh their exact reviews, H must canonicalize the duplicate mapping path, Storage must issue v3.2.8, and A must review that actual manifest Blob. H callback CI remains bounded/test-double orchestration; production authority, provider adapter, COC quorum and Storage L4 deployment remain open.
