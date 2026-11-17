@@ -161,3 +161,53 @@ Only C's signed CSubmitOutcome, backed by the actual provider egress boundary an
 This is an assistant-authored H role proposal committed at the user's direction. It is not an independent human H Owner signature. Schema 1.0.5 and this addendum require exact H/C/A review, executable semantic validators and cross-implementation canonical-byte fixtures.
 
 No schema freeze, signature-policy approval, interoperability PASS, runtime conformance, deployment, production activation or JF-10 P0 closure is claimed.
+
+
+## 8. Exact-version rebinding for revised Phase 3.6.8 I/D and COC ordering bundle
+
+This section supersedes the historical source pins in §0 for the next exact-version review. The earlier pins remain provenance for the original drafting pass; they are not the current review target.
+
+| Artifact | Exact Blob | H treatment |
+|---|---|---|
+| Storage Design v3.1 | `d5bdc72f193fcdaa654e4f07f865b77c578673ca` | Normative Storage manifest-first/two-record semantic source |
+| COC protocol with §15–16 supersession | `a07a8d352f31d5406786e1cd8ecddd4065ec384a` | Current COC candidate; §15 fixes order, §16 fixes digest projections |
+| Storage ordering amendment | `9704d110a06d0c2ee98be960054e0396d0b68546` | Detailed two-phase content/batch/record digest contract |
+| I Phase 3.6.8 revised source | `cf4b76f151204fa47b156b5d807e7378c28fd268` | Current I owner-local source |
+| D Phase 3.6.8 revised source | `2d95099a2e19a8cbec325925b70da576f73d9899` | Current D owner-local source |
+| C Provider Outcome contract | `f538d921d06c92dfaba13fbe326a80d6550fe1b7` | C-owned provider outcome semantics |
+| C exact-version re-review of revised bundle | `c0f113f2fda52450f1f2aa3bff187cb1279022d0` | C accepts with provider-specific exceptions |
+| H Recovery Cutoff schema 1.0.5 | `3d451778b9867c3b54779c5cd478522993719025` | Structural candidate only |
+
+### 8.1 Normative ordering and digest consistency
+
+H confirms the following pair construction and validator order:
+
+1. Freeze owner snapshots and verify exact committed prefix P.
+2. Enumerate all participant intents through P and stage immutable manifest content; compute ParticipantManifestContentDigest before Batch commit.
+3. Commit RecoveryCutoffBatch binding ManifestId + ParticipantManifestContentDigest and exact owner snapshots.
+4. Commit COC_PARTICIPANT_MANIFEST after the Batch, binding exact RecoveryBatchRef + RecoveryBatchDigest and the same content digest.
+5. Compute/verify ParticipantManifestRecordDigest over the final committed manifest record.
+6. Linearly read back both records and verify their cross-bindings and log order before entering PARTICIPANTS_RECONCILING.
+
+The three digests are non-interchangeable:
+- ParticipantManifestContentDigest is precomputed before Batch and excludes the future Batch back-reference.
+- RecoveryBatchDigest covers the committed Batch payload and its reference to ManifestId/content digest.
+- ParticipantManifestRecordDigest covers the final committed manifest record including the Batch back-reference.
+
+The required dependency is ContentDigest → BatchDigest → ManifestRecordDigest. A Manifest *record* committed before Batch is invalid; precomputing/staging its immutable content before Batch is required. The batch MUST NOT include the future ManifestRecordDigest.
+
+### 8.2 C provider boundary
+
+C's provider gate remains closed after Batch commit but before Manifest Record commit, and after Manifest Record commit but before exact linearizable pair readback. Only after S4 pair readback and independent current C/I/D/Storage predicates may C begin provider-specific lookup/reconciliation. H validates C-owned CSubmitOutcome references and MUST NOT infer provider success from Batch, Manifest membership, Storage resolution, I terminality, D clearance or transport ACK.
+
+### 8.3 Exact-version review result and limits
+
+The current schema 1.0.5 fields and this addendum's digest/order semantics are consistent with revised COC §15–16 and the C Provider Outcome contract. This is a semantic exact-version consistency finding only; it does not claim:
+- H independent human Owner approval or cryptographic signature;
+- executable validator implementation or passing tests;
+- canonical-byte interoperability across independent implementations;
+- approval of I's cryptographic/key lifecycle profile;
+- production provider same-key lookup or exactly-once behavior;
+- joint protocol freeze or production activation.
+
+The existing §6 vectors remain **SPECIFIED / NOT RUN**. H exact-owner decision and A final integration review are still required.
