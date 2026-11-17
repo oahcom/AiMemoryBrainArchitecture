@@ -125,3 +125,18 @@ Current executable candidate inventory: 66 unittest methods (25 HRC + 19 JPF + 1
 
 
 CI evidence boundary: the 66 Python candidate tests passed in run 44039990464. The physical race/crash/failover/restore scenarios in Sections 3–5 remain test plans and have not been executed against a real D/Storage/COC deployment.
+
+
+## 7. Current exact-pin and H candidate-run refresh
+
+The source pins in §1 are historical where they differ from this refresh. Current H candidate bundle:
+- RecoveryJoin schema: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- H semantic contract: `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80`.
+- HRC/JPF: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- Wire: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
+- Schema integrity: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
+- Latest H candidate CI [44040502709](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709): 66/66 PASS, commit `1c6ddd301d538652ceea22ea665d50c5fad8178e`.
+
+Current Storage JoinProof source: `reviews/storage-consistency/phase-3.6.11-storage-bidirectional-coc-owner-admission-join-proof.md`, Blob `364bf7e7833af3d97bc676f7f356e79251ea6cb4`. Current Storage exact review: Blob `0fc74ef747b6e45f8a7d7fcbe8657b88ba67e82d`. Current Storage topology ADR: Blob `080433f8e13a500522bc2754da64057edb0ae9d8`, ADR-BLOCKED.
+
+The 66-test H candidate run is not a run of the 36 physical cases in this matrix. All race, crash/ACK-loss, failover/restore and authoritative read-path cases remain **NOT EXECUTED** until a real COC, I/D/C adapters and selected D/Storage transaction topology are available. Do not count the H candidate PASS toward any physical case.
