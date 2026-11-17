@@ -669,3 +669,17 @@ I accepts `sequence_namespace_ref` as a required signed field and accepts candid
 Still open: production C sequencer and key-status ledger; I governance trust root and key lifecycle; external anti-rollback checkpoint; H production key-status/signature/provider/ledger/COC callback wiring; provider-specific adapter race/fault/idempotency tests; deployment-grade COC/Storage join and readback; final A freeze decision.
 
 **Disposition: C 1.0.1 / BMCP 1.2.12 design and bounded cross-owner candidate tests accepted; no registration, deployment or freeze.**
+
+
+## 20. A Phase 3.12.0 review of C 1.0.1 key-status sequence closure (2026-11-17)
+
+- A review: `01-architecture/phase-3.12.0-a-review-c-submit-outcome-1.0.1-key-status-sequence-closure.md`
+- Exact Blob: `3121bf96bb3a29e5cd195f9dc679cdf2e76d26c9`
+- Commit: `d2815de0b76fd9592c0615cfaaa9ea6150b34fc0`
+- Disposition: **ACCEPT CSubmitOutcome 1.0.1, C key-status lifecycle design, BMCP 1.2.12 mapping and bounded C/H candidate test evidence; DO NOT REGISTER OR FREEZE**.
+
+A confirms the 1.0.1 `sequence_namespace_ref` closes the contract-level ambiguity between C outcome `record_sequence` and CKeyStatusEvent `event_sequence`. C and H CI runs pass at exact pinned commits (19 and 17 tests respectively). I accepts the field and candidate governance construction but does not register either profile or trust root.
+
+Operational blockers remain: production C sequencer, key-status registry, I governance trust root, HSM/KMS custody, external anti-rollback checkpoint, production H authority callbacks, C append-only ledger inclusion, provider-specific adapter race/fault/idempotency evidence and deployment-grade COC/Storage joins.
+
+No production egress, Full Applied, Global Forget Completion, universal exactly-once or final freeze is authorized.
