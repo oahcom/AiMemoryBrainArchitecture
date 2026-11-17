@@ -112,7 +112,7 @@ Branch tips/commit SHAs are NOT VERIFIED for the live owner branches in this mat
 ## 5. Current conflict summary / 当前冲突摘要
 
 1. **XOWN-BLOCK-001 — Fact/Claim:** main overview and guide disagree on decision status; preserve ADR-BLOCKED. Owners B/D/E; A registry; Gate B2/B3.
-2. **XOWN-BLOCK-002 — Applied:** G owns Applied record, C actual submit proof, H wire, I authorization, D fence; issue #3 requests independent owner approvals. Gate B3.
+2. **XOWN-BLOCK-002 — Applied:** G owns Applied record, C actual submit proof, H wire, I authorization, D fence. Exact CGH-APPLIED-1.1 recovery-batch decisions are recorded by C/D/G/H/I/B with enumerated exceptions and Storage confirmed interface with changes; Applied Contract Frozen remains NO and production proof is NOT VERIFIED. Gate B3.
 3. **XOWN-BLOCK-003 — JF-10 publication:** I COMMIT_WON, Storage owner commit and Published receipt are separate; current DE-S protocol is proposal and JF-10 P0 remains open. Gate B3/B4 and A system gate.
 4. **XOWN-BLOCK-004 — Global Forget:** D canonical suppression proof is not I global completion or Storage physical purge. I inventory seal/governance approvals are missing; Gate B3.
 5. **XOWN-HIGH-001 — Scope taxonomy:** Tenant/Workspace/Project/Environment/ownership/applicability scope need I/A registry decision; fail closed for ambiguous cross-scope references.
@@ -124,8 +124,68 @@ Branch tips/commit SHAs are NOT VERIFIED for the live owner branches in this mat
 11. **XOWN-BLOCK-005 — Outer-envelope authenticated ingress:** C origin signer/P0, H extraction/verification, I trust/profile/key lifecycle and Storage durable replay must close as one exact-version boundary; current H reference gate and local test doubles are insufficient. Owner authority C/H/I/Storage; A integration; blocks Gate A/B and production ingress.
 12. **XOWN-HIGH-005 — Per-authority serialization anchor:** B-approved nominal type distinctions are not a physical implementation decision; Storage v3.2.11 is not jointly accepted/frozen, and fresh A review plus L4 proof are required.
 
+## 2A. Chinese semantic matrix mirror / 中文语义矩阵对照
+
+| Concept / 概念 | B 规范立场 / B Canonical Position | Owner 局部权威 / Owner-local Authority | Status and conflict / 状态与冲突 |
+|---|---|---|---|
+| Memory identity/version / Memory 身份与版本 | Memory 身份稳定；MemoryVersion 不可变；内容变化不改变 Memory ID。 | D 拥有规范 Memory/Revision/Cursor 和生命周期；Storage 持久化。 | 原则兼容；精确 Aggregate/Transaction 契约由 D/Storage 决定。 |
+| Claim / Fact / Claim 与 Fact | Claim 是命题，认知状态独立；Fact 是不同概念，但其独立对象身份/类型还是限定 Claim 表示仍 ADR-BLOCKED。 | E 抽取/派生；D 存储规范 Memory；F/G 消费投影/Context。 | **Schema 冻结 BLOCKING**：保留 I-04 概念区分；Fact/Claim 身份与表示未决；A PR #53 已关闭但未合并，结论 DEFERRED。 |
+| Entity / Relation / 实体与关系 | Entity 具有稳定身份；Relation 必须类型化、有方向/Scope/时间/Evidence。 | E 派生候选；F 建立图/索引投影；G 消费选定引用。 | 未发现直接矛盾；类型化 Relation 不得退化为共现边。 |
+| Source / Evidence / Provenance / 来源、证据与溯源 | Source 是来源起点；Evidence 是支持材料；Provenance 是派生轨迹。 | E 生产来源/派生谱系；D 跟踪规范依赖；I 控制访问/保留。 | 核心兼容；图循环、保留和身份粒度仍 OPEN。 |
+| Principal / ActorRef / Domain Entity / Principal、ActorRef 与领域实体 | 身份类型不同；Ref 不等于认证或权限。 | I 解析 Principal/Trust/Delegation；H 认证传输；B 定义类型化引用；C/D/E/G 绑定操作上下文。 | B 类型映射已正式批准；C/F/G 的 BIH 消费者设计 ACCEPT WITH EXCEPTIONS，H 接受精确包（Issue #6 已关闭）；I36 治理仍阻塞。 |
+| Scope / Tenant / Workspace / Environment / 作用域与隔离域 | ScopeRef 是类型化命名空间/所有权/适用边界；Scope 不等于 Permission；EnvironmentRef 独立。 | I 管理隔离/策略；G 绑定 Context Scope；C/H 传输类型化引用；B 定义引用语义。 | **HIGH**：Tenant/Workspace/Project/Environment 精确分类和 Registry 权威未完成。 |
+| Session / Conversation / RuntimeSessionRef / 会话与对话 | RuntimeSessionRef 是认证后的有界 Runtime Session，不必然等于 Conversation 或 Session Scope。 | C/G/H 定义 Runtime/Session/Conversation 用法；H 拥有 Session 绑定。 | **HIGH**：术语不得别名化；规范 Session/Conversation 关系未决。 |
+| Context / ContextVersion / ChangeSet / 上下文与变更集 | Context 是 G 拥有的任务级期望视图；ContextVersion 与 MemoryVersion 分离；ChangeSet 由 G 拥有。 | G 管理 Context 和 Applied；F 管 Working Set；E 的 Compiler Input Bundle 独立。 | 方向兼容；G 精确 Schema/状态转换仍需 Pin；不得复用标量版本号。 |
+| Retrieval / Activation / Working Set / 检索、激活与工作集 | Runtime 派生视图/过程，不是规范 Memory 真值。 | F 管 Ranking、Index/Cache、Working Set 和最终 Gate；G 选择 Context 成员。 | 兼容；F Working Set 必须与 G ContextVersion 分离。 |
+| Operation / Protocol Message / Receipt / 操作、协议消息与回执 | Operation 身份/状态与 Request/Response/Command/ACK 分离。 | H 管 Wire/ACK；C 管 Provider Submit；D/I 管 Fence/Auth；Storage 管 Receipt。 | **HIGH**：操作身份和跨权威参与方引用需精确契约；ACK 永不自动升级为 Applied。 |
+| Applied / 已应用 | G 在完整谓词满足后，对精确 ContextVersion 进入精确提交请求的历史证明；不声称模型注意或理解。 | C 提供真实 Final Request 证据；H 传输；I/D 提供授权/Fence；G 验证并提交。 | **BLOCKING**：CGH-APPLIED-1.1 设计决策已有例外记录，但 Frozen=NO；38/60 项本地测试使用确定性 Authority Double，生产信任、Provider 真值、COC、Storage same-GID、G Applied 持久化和 L3/L4 未验证。 |
+| Recorded / Committed / Visible / Published / 已记录、已提交、可见、已发布 | 四者语义不同，不存在默认全局总序。 | Owner 记录证据；D 规范 Cursor；Storage 拥有 Pointer/Receipt；E 在 Receipt 后终态化。 | **BLOCKING**：I COMMIT_WON 不等于 Storage PUBLISHED；JF-10 物理能力/实现未验证。 |
+| Forget / Forgotten / Deleted / Purged / 遗忘、已遗忘、删除、清除 | Forgotten 是 Memory 生命周期状态；ForgetOperation 独立；逻辑抑制不等于物理 Purge。 | D Operation/Fence/Barrier；I 全局完成/保留；Storage/备份物理擦除；G/F/H 局部清理。 | **BLOCKING**：全局完成/物理擦除无单一 Owner 可宣称成功。 |
+| Event Time / Observed At / Recorded At / Valid Time / 事件、观察、记录、有效时间 | 时间维度必须区分；保留 Valid Time 和 Record Time 历史。 | C/E 捕获来源时间；D 管 Commit Cursor；Storage 管 Transaction Time。 | 概念兼容；Record vs Transaction Time 字段权威及模糊时间编码仍 OPEN。 |
+| Provider Outcome / Final Request Submitted / Provider 结果与最终请求提交 | 执行/Provider 边界证据不等于通用 Event 或 Protocol ACK。 | 只有 C 发出真实 Provider Submit Outcome；H 传输；G 消费。 | 兼容；精确因果顺序仍依赖 C/I/D/Storage。 |
+| Outer Envelope Authentication / C Origin Signature / 外层认证与 C 来源签名 | 认证证明和来源签名语义与 ActorRef/PrincipalRef 载荷引用分离。 | C 拥有 Origin Signer/P0；H 提取/验证 Wire；I 拥有 Profile/Trust/Key 生命周期；Storage 持久化认证入口/Replay。 | **BLOCKING**：H 仅有 Reference Gate；C Signer/P0 候选；I Crypto Suite/Trust 注册未批准；A 要求不得冻结。 |
+| Serialization Anchor / SerializationRevision / 序列化锚点与修订号 | 每 Authority 物理序列化原语，不是规范领域身份或全局时钟。 | B 批准名义类型边界；Storage 拥有物理 Anchor；E/F 有条件接受；D/I/C/COC 计数器保持独立。 | **HIGH**：Storage v3.2.11 候选包未联合接受/冻结；需 A 新审查及 L4 DB/HA/恢复证明。 |
+| Audit / Governance Decision / Consent / Forget Request / 审计、治理决定、同意与遗忘请求 | 是不同记录，不是 Memory 生命周期标志。 | I 拥有策略、批准、审计和全局 Forget。 | B 不得将其吸收到通用 State；I36 外部治理批准仍阻塞。 |
+
+## 3A. Chinese owner boundaries / 中文 Owner 权威边界
+
+- **A：** 负责跨模块集成、契约注册和系统级依赖；不能批准其他 Owner 的语义决定。
+- **B：** 负责规范领域词汇、类型化引用以及领域关系/时间/Evidence 语义。
+- **C：** 负责真实 Final Request/Provider Submit 边界及不可变 CSubmitOutcome。
+- **D：** 负责规范 Memory 生命周期、ForgetOperation/Fence、Producer Registration/Barrier、规范 Commit Cursor 和依赖谱系。
+- **E：** 负责 Compiler Ingress/Work/Derivation/Attempt 和 Output Staging；不能宣称 Artifact Published。
+- **F：** 负责 Retrieval/Index/Cache/Working Set 和 Runtime 最终抑制；不能修改规范 Memory 或 G Applied。
+- **G：** 负责期望 Context、ContextVersion、ChangeSet、Delivery、Applied Record 和当前使用投影；不能宣称 Provider Submit 或全局 Forget。
+- **H：** 负责 BMCP Wire、传输认证集成、ACK、Capability 和 Reconnect；ACK 只证明其声明的有界后置条件。
+- **I：** 负责 Issuer Trust、Principal、Authorization、Delegation、Revocation、PermissionEpoch、Retention 和全局 Forget 策略/完成。
+- **Storage：** 负责持久事务、Visibility Pointer/Receipt 和物理存储能力；当前包仍是提案，不是实现证据。
+- **Testing/QA：** 属于 A 协调的横切一致性/故障注入执行方；B 负责 TC-01 和 TC-10 测试语义。尚未找到独立 Testing/Quality 分支或独立负责 Owner，仍需指定独立执行/审查人员。
+
+## 4A. 中文冲突严重级别
+
+- **BLOCKING：** 阻止跨 Owner 规范契约冻结或架构 Gate。
+- **HIGH：** 影响身份、Scope、安全或正确性；在隔离路径上可 Fail Closed。
+- **MEDIUM：** 在相关实现开始前必须解决的歧义/复杂度。
+- **LOW：** 不立即破坏不变量的局部术语/文档问题。
+- **INFORMATIONAL：** 已记录的兼容差异或边界。
+
+## 5A. 中文当前冲突摘要
+
+1. **XOWN-BLOCK-001 — Fact/Claim：** I-04 要求 Fact 与 Claim 保持概念区分；Fact 是否独立对象或限定 Claim 表示仍 ADR-BLOCKED。Owner：B/D/E；A 维护 Registry；阻塞 B2/B3。
+2. **XOWN-BLOCK-002 — Applied：** G 拥有 Applied Record；C 提供真实 Submit 证明；H 管 Wire；I 管授权；D 管 Fence。精确设计决策已有列明例外，但 Frozen=NO，生产证明未验证。阻塞 B3。
+3. **XOWN-BLOCK-003 — JF-10 Publication：** I COMMIT_WON、Storage Owner Commit 和 Published Receipt 是不同事实；DE-S 仍是提案，JF-10 P0 未关闭。阻塞 B3/B4 和 A 系统 Gate。
+4. **XOWN-BLOCK-004 — Global Forget：** D Canonical Suppression 证明不等于 I Global Completion 或 Storage Physical Purge；I Inventory Seal/治理批准仍缺。阻塞 B3。
+5. **XOWN-HIGH-001 — Scope 分类：** Tenant/Workspace/Project/Environment/Ownership/Applicability Scope 需要 I/A Registry 决策；跨 Scope 歧义时 Fail Closed。
+6. **XOWN-HIGH-002 — Claim 身份：** Claim ID 与版本局部 ClaimSnapshot 的关系未定；不得冻结 Schema。
+7. **XOWN-HIGH-003 — 时间轴：** Record Time 与 Transaction Time 及不确定时间编码需 B/D/Storage 协调。
+8. **XOWN-HIGH-004 — Context 身份/状态：** ContextVersion、F Working Set、E Compiler Input Bundle、MemoryVersion 和 Applied 均不同；G 精确 Schema/谓词仍需消费者验收。
+9. **XOWN-MED-001 — Provenance 身份/循环：** 边记录还是 Provenance 对象、图循环策略仍 OPEN。
+10. **XOWN-MED-002 — Source/Observation/Evidence：** 需确认 Source 是否为一等实体还是类型化来源引用；Evidence 自身具有身份。
+11. **XOWN-BLOCK-005 — 外层认证 Ingress：** C Origin Signer/P0、H 提取/验证、I Trust/Profile/Key 生命周期和 Storage Durable Replay 必须形成一个精确版本边界；当前 H Reference Gate 和本地 Test Double 不足。Owner：C/H/I/Storage；A 集成；阻塞生产入口。
+12. **XOWN-HIGH-005 — Per-authority Serialization Anchor：** B 批准的名义类型差异不代表物理实现批准；Storage v3.2.11 未联合接受/冻结，需要 A 新审查和 L4 证明。
+
 ## 6. B3 gate / B3 门禁
 
-B3 is **NOT PASSED**. The matrix is based on exact fetched source Blobs and explicit issue acceptance requirements, but several owner acceptances are explicitly open, branch tip SHAs are not verified, and cross-owner contracts remain candidate/not frozen. B3 cannot be marked complete by this B session's role simulation or A's synthesis.
+B3 is **NOT PASSED**. The matrix is based on exact fetched source Blobs, current branch HEAD snapshots and explicit issue acceptance requirements, but several owner acceptances remain conditional, branch HEADs may move and must be re-read, and cross-owner contracts remain candidate/not frozen. B3 cannot be marked complete by this B session's role simulation or A's synthesis.
 
 B3 **未通过**。矩阵基于精确读取的源 Blob 和 Issue 中明确的 Owner 验收要求，但多个 Owner 验收仍明确开放、分支 Tip SHA 未核验、跨 Owner 契约仍为候选/未冻结。本 B 会话角色扮演或 A 的综合意见不能代替 B3 完成。
