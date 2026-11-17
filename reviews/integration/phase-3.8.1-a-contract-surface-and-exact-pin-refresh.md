@@ -83,16 +83,18 @@ D terminalization accepts only authoritative Storage COMMITTED_VISIBLE or NO_PUB
 
 `CommitAuthorizationReceipt`:
 - `authorization_receipt_ref`, `receipt_nonce`
-- `policy_domain_ref`, `issuer_key_id`, `issuer_key_version`
+- `policy_domain_ref`, `policy_version_ref`, `issuer_key_id`, `issuer_key_version`, `issuer_key_status_ref`
+- authenticated `subject_ref`, `actor_ref`, `workload_ref` and delegation-chain digest
+- `owner_boundary_ref`, `final_visibility_gate_ref`
 - exact `publication_operation_id`, `publication_tuple_digest`
 - exact `storage_visibility_participant_ref`, `publication_participant_ref`
 - `subject_ref`, `purpose`, `audience`, `scope_ref`, `environment_ref`
 - I-local `permission_epoch`, `sequencer_position`
-- `decision`: COMMIT_WON | REVOCATION_WON | UNKNOWN
-- `issued_at`, `expires_at` (expiry limits receipt acceptance; expiry never terminalizes an already consumed participant)
+- `consumption_result`: COMMIT_WON | REVOCATION_WON | UNKNOWN (sequencer result; not a caller-selected claim)
+- `sequencer_position`, `consumed_at`, `issued_at`, `accept_before`
 - `signature_profile_id`, `signature`
 
-I consumes the receipt exactly once in its PolicyDomain sequencer. Revocation-first yields REVOCATION_WON. COMMIT_WON creates an unresolved I participant and holds subsequent applicable revocation until the same Storage terminal outcome. UNKNOWN holds. A consumed receipt is not a bearer token for an independent Storage write.
+The logical receipt is the signed, single-use sequencer result. If the implementation separates an authorization request/token from the consumption result, those MUST be distinct nominal types; do not put a caller-supplied decision into a signed bearer token. I consumes the authorization exactly once in its PolicyDomain sequencer. Revocation-first yields REVOCATION_WON. COMMIT_WON creates an unresolved I participant and holds subsequent applicable revocation until the same Storage terminal outcome. UNKNOWN holds. `accept_before` constrains first consumption only; it cannot expire or release an already-consumed COMMIT_WON participant. A consumed receipt is not a bearer token for an independent Storage write.
 
 `ITerminalProof` binds the receipt, both participant refs, tuple digest and exact Storage outcome proof. I closes only after validating COMMITTED_VISIBLE or authoritative NO_PUBLICATION. Issuer/key status, policy version, audience, replay and anti-rollback rules remain I/H owner decisions and are not silently decided here.
 
@@ -137,6 +139,8 @@ E retains local ownership of CompileIntent, immutable compiler input bundle, Der
 
 Every mutating operation must define same-key/same-digest replay, same-key/different-digest conflict, response-loss resolution and authority-local monotonicity. Idempotency records must outlive all retry/replay/restore horizons; retention policy cannot permit identity reuse.
 
+**Retry identity rule:** a transport retry, lost-ACK resolution or recovery replay of the *same immutable publication attempt* reuses the same PublicationOperationId, tuple digest and participant identities. A new publication attempt after authoritative NO_PUBLICATION (or a changed artifact/version, dependency set, Scope, source revision or attempt/lease tuple) is a new immutable operation: allocate a new PublicationOperationId, new participant identities, new tuple digest and fresh D/I checks. Never reuse one operation ID with a changed digest, and never rewrite a historical terminal outcome.
+
 ## 5. Error and recovery vocabulary
 
 Minimum distinct outcomes:
@@ -153,7 +157,20 @@ Minimum distinct outcomes:
 
 Do not collapse UNKNOWN into retryable abort. A retry after proven NO_PUBLICATION uses fresh D/I checks and a new attempt as required; it must not mutate the historical outcome.
 
-## 6. Deterministic conformance matrix (required, not yet run)
+## 6. Role-simulated exact-Blob review (not independent Owner signatures)
+
+The following dispositions are this integration session's independent analytical passes over the four current Blob pins in §1. They are not GitHub approvals by the named Owners.
+
+| Role lens | Disposition | Findings / required amendments |
+|---|---|---|
+| D | ACCEPT WITH ENUMERATED AMENDMENTS (semantic composition only) | Current D Blob explicitly requires durable Storage participant before D admission and binds the exact Storage ref. Keep D fence/admission ordering in one D authority domain. Before freeze, D must publish exact request/receipt/terminal schemas, stable operation names, and exact behavior for rejection, replay, stale attempt and UNKNOWN. |
+| E | ACCEPT WITH ENUMERATED AMENDMENTS (orchestration only) | Current E Blob adopts D registration and complete dependencies; §11 corrects the earlier §10 order. Treat §11 as controlling and remove the stale D-before-Storage wording from §10 in the next E cleanup to prevent implementer ambiguity. Distinguish same-operation recovery replay from a new publication attempt after NO_PUBLICATION. |
+| I | ACCEPT WITH ENUMERATED AMENDMENTS (authorization semantics only) | Current I Blob correctly requires exact Storage participant before single-use sequencer consumption and holds revocation after COMMIT_WON. It still leaves token serialization, key-status/rotation/revocation, nonce retention, audience, anti-replay/anti-rollback and proof validity at Storage commit as open I/H decisions. The candidate receipt fields above must remain a proposed mapping until I signs them. |
+| Storage | ACCEPT WITH ENUMERATED AMENDMENTS (logical transaction model only) | Current Storage Blob has illustrative records and clear atomicity/race obligations but does not choose or prove the physical serialization domain. Storage must specify how its final commit atomically validates the exact D participant/current fence and I proof, and how NO_PUBLICATION proves no delayed publisher can later install a pointer. |
+
+Cross-cutting: all four current Blobs are semantically compatible with the Storage-first sequence. No exact callable API or wire schema is yet frozen. The D/E/Storage physical authority boundary, I sequencer-to-Storage proof semantics, H canonicalization/signatures and deterministic test evidence remain blockers.
+
+## 7. Deterministic conformance matrix (required, not yet run)
 
 | Test | Forced ordering/fault | Required result |
 |---|---|---|
@@ -176,13 +193,13 @@ Do not collapse UNKNOWN into retryable abort. A retry after proven NO_PUBLICATIO
 
 Each test must assert durable records, visibility pointer state, D barrier state, I revocation state and retry identity—not merely HTTP status.
 
-## 7. Physical topology decision remains OPEN
+## 8. Physical topology decision remains OPEN
 
 A recommends a single serializable transaction domain per Canonical Memory authority only as a candidate. D and Storage must identify the actual deployment boundary and prove that RegisterProducerWork, InstallForgetFence/high-water, complete dependency registration and final visibility transition share the required ordering. If physically split, a D/Storage-approved durable prepare/commit or linearizable coordinator protocol must demonstrate equivalent crash/failover/restore behavior. No database product is selected by this addendum.
 
 I's PolicyDomain sequencer remains independent. No cross-domain scalar epoch comparison is permitted. The Storage visibility commit must validate an exact I proof whose semantics remain valid through the commit linearization point; a detached stale ALLOW snapshot is insufficient.
 
-## 8. Owner-exact review checklist
+## 9. Owner-exact review checklist
 
 - **D:** accept/reject exact PublicationParticipant fields, fence admission linearization, Storage participant precondition, terminalization proof, operation/error/idempotency semantics.
 - **E:** accept/reject orchestration order, stable work/run/attempt/lease identities, complete dependency set, retry and recovery mappings.
@@ -193,36 +210,36 @@ I's PolicyDomain sequencer remains independent. No cross-domain scalar epoch com
 
 A role simulation by one integration session is not an independent Owner signature. Every owner must record ACCEPT, ACCEPT WITH ENUMERATED AMENDMENTS, REJECT or CANDIDATE / NO APPROVAL against the exact current Blob. Until then this artifact is a candidate contract surface only.
 
-## 9. Explicit non-claims
+## 10. Explicit non-claims
 
 No schema/wire freeze, API existence, database selection/deployment, independent Owner approval, implementation, conformance PASS, branch merge, provider execution, production activation, Global Forget completion or physical-erasure claim is made.
 
-## 10. 中文规范
+## 11. 中文规范
 
-### 10.1 精确基线
+### 11.1 精确基线
 
 本补充文件重新读取 D/E/I/Storage 四个 Owner 分支。D 当前 Blob 为 `4c01713bc8793a8926ef18b625b72d132572173d`，E 为 `4fb9e58511941f59b4d777336f8f85ad88ecccf1`，I 为 `e3b1b5d99eb36ac0b395854d8c19287d2b64b752`，Storage 为 `2ab899ee37a18ae6c8f2f64dbb82ad6499842060`。此前 D `206ead...`、E `bad04d...`、Storage `1ad895...` 均被替代；I 未变化。旧 A 报告保留为历史证据，本文件负责当前 Pin 修正。
 
-### 10.2 保留的语义裁决
+### 11.2 保留的语义裁决
 
 仅含 EventRef 的 ProducerWork 在认证 Producer、启用 ProducerClass/Version、精确 Scope、规范请求摘要及 D 批准的 opaque Lineage Token/Digest 完整时，允许 D 提前注册并纳入 ForgetFence High-water；但不授予受保护 Payload 读取权限。E 必须在 Dependency Registration/Publish 前补齐 Canonical MemoryRef/MemoryVersionRef 及 Revision。D RegistrationReceipt 必须早于 Queue/Lease/Protected Dereference/Execution/Retry/Replay/Publication。Dependency Set 必须完整集合原子登记。UNKNOWN 永远保持 Private 和 Barrier-open。
 
-### 10.3 发布顺序
+### 11.3 发布顺序
 
 强制顺序：Storage 先持久化隐藏 StorageVisibilityParticipantRef；D 再准入绑定该 Participant 的 PublicationParticipantRef；I 在自己的 PolicyDomain Sequencer 单次消费绑定两个精确 Participant 和不可变 Tuple 的 CommitAuthorizationReceipt；Storage 最终提交同时验证 D 当前 Participant/Fence 与 I Terminal Proof；D/I 分别验证同一权威 Storage Outcome 后才关闭 Participant。COMMITTED_VISIBLE 或有权威证据的 NO_PUBLICATION 才能终态化。UNKNOWN/IN_DOUBT 不得释放 Gate。
 
-### 10.4 类型与摘要隔离
+### 11.4 类型与摘要隔离
 
 PublicationOperationId、ProducerWorkItemId、DerivationRunId、AttemptId、LeaseId、D PublicationParticipantRef、I CommitAuthorizationReceipt、StorageVisibilityParticipantRef、C ParticipantIntentRef、Storage PreparedParticipantRef/GID/XID 均为不同名义类型。D RegistrationSequence/FenceGeneration/CanonicalCommitCursor、I PermissionEpoch、Storage Transaction/XID/Visibility Pointer 不得合并或跨域比较。所有参与者绑定相同不可变 Publication Tuple Digest；同身份同摘要幂等，同身份不同摘要冲突。
 
-### 10.5 精确合同仍待 Owner 决定
+### 11.5 精确合同仍待 Owner 决定
 
 本文件的字段集合和操作表只是候选逻辑合同，不是冻结 Schema。D 必须决定 Fence/Admission/Terminal 语义；E 决定 Orchestration/Retry/Recovery；I 决定 Receipt、Sequencer、Key Status、Audience、Replay 和 Anti-rollback；Storage 决定 Prepare/Commit/NO_PUBLICATION 与实际事务拓扑；H 决定 Wire Canonicalization/Signature/Interop。单一集成会话模拟角色不等于独立 Owner 签署。
 
-### 10.6 符合性验证
+### 11.6 符合性验证
 
 必须执行注册与 Fence 竞态、EventRef Admission、Dependency Completeness、Storage Prepare Crash、D Admission ACK Loss、I Revocation Race、Visibility ACK Loss、Stale Lease、Ledger Gap、Restore Disagreement、NO_PUBLICATION 与 Outbox Replay 测试。每项必须检查持久化记录、Visibility Pointer、D Barrier、I Revocation State 和 Retry Identity，不能只检查 HTTP 状态。
 
-### 10.7 未授权事项
+### 11.7 未授权事项
 
 不宣称 Schema/Wire Freeze、API 已存在、数据库已选型或部署、独立 Owner 批准、实现完成、Conformance PASS、分支合并、Provider Execution、Production Activation、Global Forget Completion 或物理擦除完成。
