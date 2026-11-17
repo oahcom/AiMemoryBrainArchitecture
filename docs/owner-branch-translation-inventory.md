@@ -277,3 +277,11 @@ Corrected cross-owner audit: `reviews/integration/2026-11-17-cgh-phase36-cross-o
 H full-path closure Chinese count/scope was corrected to match English: 38 methods = 32 H validator + 6 C crypto interop; H closure Blob `cda025fb157815570b3280fa5ff168d5e62453b1`; run `44070924346` SUCCESS.
 
 PR structural CI current head `8431312367a44b70246912884547a377cf69116c`: run `44072368844` / #114, GOV-DOC-001 SUCCESS. This is structural-only evidence.
+
+
+## Final Issue #3 / PR #28 readback — 2026-11-17
+
+- Issue #3 reconciliation comment: `6946497217`.
+- PR #28 head: `3b5ce54c1687e9c7591f9e6e70e5c24f2afa465d`.
+- Structural workflow runs `44072524932` (#116) and `44072518263` (#115): both SUCCESS; job `GOV-DOC-001 structural checks` SUCCESS.
+- PR remains Draft/Open. Structural CI is not semantic/architecture/implementation approval.
