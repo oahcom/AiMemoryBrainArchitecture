@@ -787,3 +787,62 @@ R-08 remains **High / PARTIALLY SPECIFIED; NOT PROVEN in deployed execution**. T
 
 **Closure status: NOT CLOSED.** No production authorization, publication or provider-egress race-freedom claim is made.
 
+
+
+## 23. R-09 live production deployment, disaster recovery and operational readiness assessment — 2026-11-18
+
+### 23.1 Exact current source pins
+
+| Source | Blob | Observed decision / status |
+|---|---|---|
+| A COC deployment architecture | a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d | A proposal; exact C/I/D/H/Storage acceptance pending; 3-voter/3-failure-domain quorum topology is target, not deployed infrastructure |
+| A JF-10 deployment binding record | c54c21321c8a115f3ea4b6bfed19a96cac8ccffe | All project deployment binding fields NOT DESIGNATED; Gate A actual deployment binding OPEN; Gate B blocked; Gate C blocked; JF-10 P0 open |
+| Storage deployment readiness | ef4eff1708e4bd6072b86cc234340dd848bb5fbc | Logical deployment profile selected; PostgreSQL 18.7 CI candidate qualified; production Canonical Authority deployment NOT DESIGNATED |
+| A physical race/crash/failover/restore matrix | 29125b89ddf47af4c358c0cddbd5c3d6077e1f53 | Required physical test plan NOT EXECUTED; no physical conformance PASS |
+| I retention/backup/physical erasure policy | f14cb2149ca3f817229533005ab89dbdc7f0b3a8 | Candidate global governance contract; D/E/F/G/H implementation and external-recipient proof open |
+| A restore integration acceptance | fa5e066a208a64401c96a6b8790d8b53dc7f1585 | Four-proof restore architecture accepted with owner-local release gates; production proof APIs/orchestration not implemented |
+| A restore owner matrix | 3b488ae3a7cf9aca9a70a659aba09ecba53ce17f | Architecture accepted with conditions; implementation not implemented; Gate A design conditional pass; Gate C deferred |
+
+### 23.2 What is selected at architecture/candidate level
+
+- Storage's logical realization selects one Canonical Authority transaction domain per authority boundary, PostgreSQL SERIALIZABLE as the target isolation level, same-transaction fence/admission/dependency/visibility/outcome writes, prepared-XID recovery, authoritative-primary read path, and private artifact staging.
+- PostgreSQL 18.7 is selected only as the pinned CI capability candidate image (digest recorded in Storage dossier). Physical CI covers prepared-XID, synchronous standby promotion, same-XID commit/rollback, physical backup/restore, PITR, stale-control replay, required-standby-unavailable fail-closed and pg_rewind/rejoin.
+- The COC proposal specifies one logical append-only quorum log, target topology three voters across three independent failure domains, quorum two, and no writes on minority partition. Storage is proposed custodian; Storage must confirm actual placement, durability, backup and SLO before activation.
+- Restore architecture is accepted conditionally as four separate owner proofs (COC prefix, I control high-water, D Forget/lineage high-water, Storage participant/GID ledger) and starts RECONCILED_BUT_FENCED. No proof substitutes for another authority.
+- The project has explicitly corrected its phase: production runtime/DB adapter implementation is deferred to the engineering phase by design. The absence of production code in this architecture repository is not itself a design defect or an architecture-phase Gate A prerequisite.
+
+### 23.3 Unresolved architecture and operations decisions
+
+**R09-1 — No deployment binding or accountable operator.** A's binding table still marks Canonical Authority service name, environment, accountable service owner, production operator/on-call, exact database build/image, configuration, primary/standby topology, failure domains, participant adapter, D/I integration, COC quorum, authoritative read path, fencing, backup/restore procedure, RPO/RTO and runbook as NOT DESIGNATED. This is not an instruction to add production code now; it is evidence that no real deployment or operations ownership is approved.
+
+**R09-2 — COC consensus target is not a real topology.** Three voters/three failure domains/quorum two is a target architecture. No cloud/account/region/AZ/host placement, failure independence, network partition policy, operator, quorum witness, disk durability class or production COC service is designated. Raft is an option, not a pinned implementation.
+
+**R09-3 — PostgreSQL 18.7 is a CI candidate, not production DB selection.** Storage explicitly distinguishes candidate engine capability from production Canonical Authority deployment. No production DB build/config, schema migration, actual DB adapter, live primary/standby routing, authoritative read service, production STONITH/fencing or split-brain arbitration is designated. The two-node CI promotion and pg_rewind probes are not production HA-manager or cloud fencing proof.
+
+**R09-4 — RPO/RTO/SLO/capacity remain unapproved.** A restore acceptance bounds RPO 0 to the specified synchronous durability fault models, not correlated total-cluster/site loss; numeric RTO is TBD. Storage leaves throughput, manifest/transaction size, lock-wait, prepared-XID age/volume, WAL rate, archive bandwidth, restore duration, service SLO and sizing TBD pending representative workload tests. No SLO/SLA or recovery objective has an accountable approver.
+
+**R09-5 — Backup/DR custody and physical-erasure policy are candidates.** I's Forget/Retention/Backup/Physical Erasure policy is a candidate global governance contract. Backup inventory, off-site immutable archive, independent control-ledger custody, retention classes/expiry, jurisdiction/data residency, key custody/KMS/HSM, object-store ACLs, external recipient guarantees and physical-erasure evidence are not approved as an operational service. CI PITR proves a pinned fixture only.
+
+**R09-6 — Operational controls are requirements, not deployed controls.** COC architecture calls for separate operator roles, append-only admin audit, two-person restore/rollback/key-compromise approval, encryption, metrics and non-expiring unresolved participants. No named on-call, separation-of-duties roster, incident escalation, restore runbook, tested human handoff, key ceremony or disaster exercise is identified.
+
+**R09-7 — Physical integrated conformance is still deferred.** A's 36-case matrix explicitly says NOT EXECUTED / NO PHYSICAL CONFORMANCE PASS. H candidate suites and Storage engine capability probes are not D/E/I/COC application-path tests. Gate C is intentionally deferred to engineering after implementation. There is no tested correlated loss of all COC voters plus primary/standby and backup/control-plane dependencies.
+
+### 23.4 Phase-aware disposition
+
+R-09 remains **High / PARTIALLY SPECIFIED; PRODUCTION READINESS NOT PROVEN**. The phase correction matters: production runtime absence is intentionally deferred and should not be treated as a defect in this architecture repository. However, target topology, durability/failure assumptions, RPO/RTO, retention, data residency, operator ownership, backup custody and release gates still require explicit decisions or formally accepted engineering-phase prerequisites. The current evidence supports a candidate logical/CI profile, not a production-ready architecture deployment.
+
+Architecture design may preserve IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE, but must not claim production-ready, production-deployed, operationally accepted, DR-certified or physical-erasure-capable.
+
+### 23.5 Closure criteria
+
+1. A/Storage/I record the final architecture-phase deployment profile: single-authority DB transaction boundary, PostgreSQL candidate rationale, COC topology and failure model, backup/control-ledger independence, restore quarantine and owner-local release conditions.
+2. Storage/Infrastructure explicitly accepts the three-voter placement/failure-domain model or publishes a successor topology with actual quorum/fencing semantics. No vague “three zones” claim without independent failure-domain evidence.
+3. Approve RPO/RTO/SLO and capacity envelopes with named service owner and risk acceptance; distinguish single-node, one-zone, region loss and correlated total-cluster loss.
+4. I/Legal/Privacy approve retention classes, legal-hold rules, data residency, backup expiry, external recipient policy, KMS/key lifecycle and physical-erasure promises. Unapproved promises remain out of scope.
+5. Name accountable engineering/service owner, operator/on-call and two-person privileged-operation roles before production activation; approve incident, restore, key compromise and split-brain runbooks.
+6. Engineering phase binds exact application repository/commit, DB adapter/schema/migration, COC service, I/D services, image/config digests and authoritative read path; then executes A's 36 physical cases plus production-specific DR/failure-domain exercises.
+7. Independently test full-cluster/region loss, COC quorum loss, simultaneous DB/COC restore, stale checkpoint, backup archive gap/corruption, KMS/key loss/rotation, operator error, old-primary rejoin and control-ledger replay before read enablement.
+8. Keep Gate A design and Gate B design acceptance distinct from implementation Gate A, Gate B deployment, Gate C physical conformance and production activation. No CI engine capability result is a substitute.
+
+**Closure status:** Architecture candidate profile only; production deployment/operations NOT DESIGNATED; production activation NOT AUTHORIZED.
+
