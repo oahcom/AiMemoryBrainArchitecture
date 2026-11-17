@@ -60,6 +60,7 @@ All Blob SHAs below were read from the D source branch at the baseline commit. S
 | `phase-3.8.9-d-review-h-forget-clearance-verifier-seam.md` | `53613f383d064d25ac9f34a00e457f86730f16bf` | ACCEPT H verifier seam as fail-closed interface only; D lineage/release proof OPEN. / 仅接受 H Verifier Fail-Closed 接口；D Lineage/Release 证明开放。 | **Consumer interface acceptance only**; no full D clearance. / 仅消费接口接受；非完整 D Clearance。 |
 | `phase-3.8.9-d-exact-review-h-authority-join-mapping-1.2.14.md` | `40fee15d7e42d68da231ea161896f85df2921669` | Accept L1/L2 D-clearance carrier candidate; L3 lineage/currentness/production release OPEN; delegated D-role review. / 接受 L1/L2 D Clearance 载体候选；L3 Lineage/Currentness/Production Release 开放；委派 D 角色审查。 | **L1/L2 candidate only**; not full release proof or independent human D signature. / 仅 L1/L2 候选；非完整 Release Proof 或独立人类 D 签名。 |
 | `phase-3.9-d-forget-terminal-semantics-and-linearization-closure-proposal.md` | `9c02b5680317f0092788ad0da66d621338b1c54c` | New proposal in PR #66; D-001..003 closure proposal. / PR #66 新提案；D-001..003 闭合提案。 | **Proposal only**; becomes successor only after exact D/Storage/I acceptance and independent review. / 仅提案；须 D/Storage/I 精确接受并经独立审查后才能成为后继。 |
+| `tests/test_phase_3_9_forget_reference_model.py` | `b712f15bdb3770a3075070f8f3fce573c70defcf` | 19-case logical reference-model suite; locally executed in ChatGPT Python runtime, 19/19 PASS; no CI run and no production conformance. / 19 项逻辑 Reference Model 测试；在 ChatGPT Python 运行环境本地执行，19/19 PASS；无 CI 运行且非生产符合性。 | **Bounded semantic test evidence only.** / 仅有限语义测试证据。 |
 
 ---
 
@@ -99,6 +100,7 @@ Until the required exact-version approvals are recorded, use the following conse
 | D-NI-06 | Prove D Barrier terminality and final Release CAS with executable tests. / 用可执行测试证明 D Barrier 终态与最终 Release CAS。 | D + H + Storage | OPEN. |
 | D-NI-07 | Execute D R3 and D/I cross-owner test matrix on identified commits. / 在明确 Commit 上执行 D R3 和 D/I 跨 Owner 测试矩阵。 | D + I + Storage + H | NOT RUN / NOT EVIDENCED. |
 | D-NI-08 | Obtain independent non-implementing integration review. / 取得不参与实现的独立集成审查。 | A/governance-appointed reviewer | PENDING. |
+| D-NI-09 | Add D/I/Storage logical reference tests, then separately execute production-boundary and fault-injection tests. / 增加 D/I/Storage 逻辑 Reference 测试，并单独执行生产边界与故障注入测试。 | D + I + Storage | 19 D logical tests PASS in ChatGPT Python runtime; CI/production conformance NOT RUN. / ChatGPT Python 运行环境 19 项 D 逻辑测试 PASS；CI/生产符合性未运行。 |
 
 ---
 
