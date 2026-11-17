@@ -51,3 +51,24 @@ I 拥有 Principal/Delegation Trust、PolicyDomain、PermissionEpoch、Authoriza
 Storage 拥有 Durable Commit/Visibility 和恢复机制。Option A 仅选择 L1 逻辑序列化档案；v3.3.2 尚未联合接受/冻结，并仍绑定 H 1.2.14，而不是 H 1.2.15。
 
 本次未建立 C/H/I/Storage 字段级联合 Wire Freeze。CSubmitOutcome 1.0.1 与 H 1.2.15 是不同 Owner 分支上的候选版本。G Applied、D Forget 和 I Authorization 是互相独立的必要条件。C5 维持 BLOCKED/PARTIAL。
+
+
+
+## Live H / D / I / Storage delta / H、D、I、Storage 当前增量
+
+### H — BMCP / Provider Outcome
+H branch HEAD `0d36324457e39bd50ad56ae902d477c4ea765b61` contains Unified 1.2.15 schema, mapping, local C Provider Outcome validator and Gateway Attestation validator. Exact CI: run 44079842914 = 91/91; run 44079842878 = 288, 22 skipped, 0 failures. A review PR #67 disposition DEFERRED. The bounded tests do not prove production trust, signing issuance, durable replay or live I/D/Storage. C Phase 3.8.27 and I Phase 3.8.23 accept corrected ordering as reference contracts, not production deployment. Storage v3.3.2 still pins H 1.2.14. **Status: local CI PASS; joint wire freeze / production trust OPEN.**
+
+### D/I/Storage — Phase 3.9 Forget proposal
+D PR #66, I PR #68 and Storage PR #71 propose a common terminalization path:
+- D's durable ForgetFence linearization and immediate canonical read suppression are separated from later barrier drain.
+- D alone appends the canonical Forgotten LifecycleEvent after validating current Fence/proof and a single-use I authorization receipt.
+- I receipt returns COMMIT_WON, REVOCATION_WON or UNKNOWN/IN_DOUBT, bound to exact Memory/version/Scope/Fence/proof/Event digest.
+- Storage final transaction checks current D Fence and exact I receipt; UNKNOWN retains private state.
+These are proposals only; D/I/Storage exact-owner concurrence, implementation and physical proof remain open.
+
+### B current branch
+B PR #55 branch head is now `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`; the eight key model/identity/state/temporal/invariant/matrix/conflict files were re-read at this current branch ref and their Blob SHAs match the pins in the baseline. B0/B5 status remains not passed.
+
+### 中文结论
+H 已有真实本地 CI 通过，但生产 Trust 和联合 Wire Freeze 仍开放。D/I/Storage 的 Phase 3.9 提案提出“Fence 立即读抑制—Barrier Drain—D Forgotten LifecycleEvent—I 单次授权收据—Storage 原子终态提交”的分离链路，但所有提案均未成为规范。B 分支 Head 已刷新为 8ba14b99，关键领域文件 Blob 与本研究记录一致。跨 Owner Gate 仍未关闭。

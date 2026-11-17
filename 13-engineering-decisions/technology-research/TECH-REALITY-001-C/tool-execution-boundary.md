@@ -46,3 +46,10 @@ Agent 选择是否调用 Tool 并解释结果；I 决定主体、动作、资源
 只有在工具宿主能证明时，才记录 NOT_STARTED、ADMITTED、EXECUTING、EFFECT_POSSIBLE、EFFECT_CONFIRMED、EFFECT_REJECTED、UNKNOWN、COMPENSATION_REQUESTED 或 COMPENSATED。补偿不等于回滚，除非外部系统确认。只读确定性 Tool 可在有限策略下重试；幂等写入仅在稳定 Operation Key 和接收端语义明确时重试；非幂等写入在超时/响应丢失后必须先对账，禁止盲目重试。取消不撤销已完成副作用。
 
 Tool 可提交候选及来源、执行身份、结果 Digest、Event Time 和观察时间，但不得直接修改 Canonical Storage、推进生命周期、伪造 Evidence/Applied Attestation 或声明 Forget 完成。Brain 必须重新验证当前授权和 Forget/Scope 条件。
+
+
+
+## MCP security-specific requirements / MCP 安全专项要求
+MCP 2025-11-25 defines Host/Client/Server roles over JSON-RPC 2.0 with stateful connections and capability negotiation. It explicitly warns that tool descriptions/annotations from untrusted servers must be treated as untrusted, tools can represent arbitrary code execution, and Hosts must obtain explicit user consent before invoking tools. C treats these as protocol security requirements to map into I authorization and tool-host enforcement; MCP itself does not grant the permission.
+
+MCP 2025-11-25 使用 JSON-RPC 2.0 定义 Host/Client/Server、Stateful Connection 和能力协商。规范明确指出不可信 Server 的 Tool 描述/Annotation 必须视为不可信，Tool 可能代表任意代码执行，Host 在调用 Tool 前必须取得明确用户同意。C 将这些要求映射到 I 授权和 Tool Host 执行控制；MCP 本身不授予权限。

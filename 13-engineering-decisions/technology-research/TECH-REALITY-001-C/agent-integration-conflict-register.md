@@ -44,3 +44,16 @@ BLOCKING 项必须 Fail Closed。C 不得通过重命名字段、添加竞争枚
 The following project issues were directly fetched on 2026-11-18 and remain OPEN: #3 C/G/H Applied freeze, #4 I identity/authorization/Global Forget external decisions, #5 I36 governance approvals, #7 runtime repository/accountable engineering owner, #10 JF-10 physical recovery proof, #25 D/E/I/Storage producer admission and visibility, #29 HRC/RecoveryJoin and physical topology, #43 system-wide consolidation. These are external dependencies, not C-local issues that this PR can close.
 
 **中文：** 本次直接读取的 Issue #3/#4/#5/#7/#10/#25/#29/#43 均为 OPEN，分别涉及 C/G/H Applied 冻结、I 身份/授权/Global Forget 治理、I36 正式批准、Runtime 仓库与工程 Owner、JF-10 物理恢复、D/E/I/Storage Producer Admission、HRC/RecoveryJoin 和全系统收敛。这些是跨 Owner/项目级依赖，不是 C 可通过本 PR 自行关闭的事项。
+
+
+
+## Current-source delta conflicts / 当前性增量冲突
+
+| ID | Level | New evidence | Remaining blocker / closure |
+|---|---|---|---|
+| C-CON-013 | HIGH | H 1.2.15 now has local validators and exact-head CI (91 tests + 288 tests/22 skipped) | Bounded callback tests do not prove production issuer, live gateway order, durable replay or trust registration; PR #67 DEFERRED |
+| C-CON-014 | BLOCKING | Storage v3.3.2 manifest still pins H 1.2.14 while H current candidate is 1.2.15 | Successor exact-version manifest and all C/H/I/Storage owner approvals |
+| C-CON-015 | HIGH | D/I/Storage PR #66/#68/#71 propose Phase 3.9 Forget terminalization/read-suppression changes | Proposals are non-normative; exact D/I/Storage decisions and executable/physical conformance required |
+| C-CON-016 | HIGH | A PR #73 refreshes A against current D/E/I/Storage proposals | PR remains Draft and verdict REVISE/NOT YET PROVEN; no Owner approval is inferred |
+
+These additions do not close C-CON-002/003/004. H CI success is evidence of local conformance only; it cannot close the H/Storage version mismatch, production trust registration or G Applied freeze.

@@ -103,3 +103,18 @@ C Phase 3.8.4 明确规定：C 仅判断不可变最终推理请求是否跨越�
 HANDOFF_ACCEPTED 仅对 Handoff 事实终态，不代表推理完成；HANDOFF_REJECTED 必须有权威拒绝和无副作用证据；NOT_INVOKED 必须有正向证据证明未越过 Egress；UNKNOWN 与 IN_DOUBT 均为非终态、不得自动过期。IN_DOUBT 下禁止创建新 Attempt 或新幂等键，必须用同一 Provider Key 对账。若 Provider 不提供权威幂等/查询能力，C 不能承诺 Exactly-Once，自动重试必须禁用。
 
 CSubmitOutcome 1.0.1 Schema 仅验证结构；Issuer Authentication、Append-only Ledger、Gate Linearization、Provider Evidence 和 COC Join 仍需语义验证。Schema 要求 sequence_namespace_ref；Phase 3.11.1 要求签名记录序列和 Key Status Event 序列位于同一持久单调命名空间。候选签名配置 AIMBA-C-CRYPTO-1.0 仍 NOT REGISTERED，不是生产签名部署。
+
+
+
+## H 1.2.15 validator and exact CI evidence / H 1.2.15 Validator 与精确 CI 证据
+
+H 1.2.15 has progressed beyond schema-only status. The current H branch HEAD `0d36324457e39bd50ad56ae902d477c4ea765b61` contains a local C Provider Outcome validator (Blob `90a2d4b6f5b05590e3e0a7daecb5a01d9bf525c0`) and Gateway Attestation validator (Blob `9cc426d4c26deb452f39daff34c1008dd535e969`). Exact-head GitHub Actions runs were independently fetched:
+- Run `44079842914`, job `134027249681`: 91 tests, 0 failures, SUCCESS.
+- Run `44079842878`, job `134027249428`: 288 tests, 22 skipped, 0 failures, SUCCESS.
+
+These are bounded local L1/L2 reference tests. Test callbacks are injected and do not establish production issuer authentication, H signing authority, production key registration/custody, C-before-H-signing enforcement at a live gateway, durable replay/anti-rollback, or actual I/D/Storage services. A review PR #67 is DEFERRED, not an Owner approval. Storage v3.3.2 still pins H 1.2.14. Therefore H 1.2.15 remains a candidate for joint wire freeze, despite real local CI evidence.
+
+### 中文说明
+H 1.2.15 已超出纯 Schema 阶段。当前 H 分支 HEAD 包含 C Provider Outcome 本地 Validator 和 Gateway Attestation Validator。两个精确 HEAD 的 GitHub Actions 均已直接核验：Provider Outcome 91 项测试、0 失败；Recovery Cutoff 288 项测试、22 项跳过、0 失败。
+
+这些只构成本地 L1/L2 参考测试。测试使用注入回调，不证明生产 Issuer 身份、H 签名权威、生产密钥注册/托管、真实 Gateway 的 C-before-H-signing 强制、Durable Replay/Anti-Rollback 或真实 I/D/Storage 服务集成。PR #67 的 A 审查结论为 DEFERRED，不是 Owner 批准。Storage v3.3.2 仍绑定 H 1.2.14。因此即使本地 CI 通过，H 1.2.15 仍是等待联合 Wire Freeze 的候选版本。

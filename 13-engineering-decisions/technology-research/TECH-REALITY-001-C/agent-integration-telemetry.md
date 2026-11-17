@@ -57,3 +57,10 @@ OTel W3C Trace Context 用于传播 traceparent/tracestate。Baggage 是任意�
 The previously linked OpenTelemetry GenAI semantic-conventions page now explicitly says the conventions moved to the dedicated GenAI semantic-conventions repository and that the old page is no longer maintained. The current OTel documentation shell identifies semantic conventions release 1.45.0. Treat GenAI span/attribute names as versioned conventions to pin, not as a timeless stable schema. C's privacy allowlist and I's audit policy remain project-owned regardless of OTel conventions.
 
 OpenTelemetry GenAI 语义规范原页面现明确说明规范已迁移至独立 GenAI semantic-conventions 仓库，旧页面不再维护；当前文档站标识的 Semantic Conventions 版本为 1.45.0。GenAI Span/Attribute 名称必须按版本固定，不能当作永恒不变的 Schema。无论采用何种 OTel 规范版本，C 的隐私白名单和 I 的 Audit Policy 仍由项目自身决定。
+
+
+
+## H test evidence ceiling / H 测试证据上限
+H's successful exact-head local CI is useful engineering telemetry, but test logs and workflow results are not production audit or runtime proof. Preserve workflow run/job IDs, tested commit SHA and test count as CI evidence. Do not promote the test result into a production Trust registration or a G Applied/Brain operation fact.
+
+H 精确 HEAD 的本地 CI 成功是有效工程遥测，但测试日志和 Workflow 结果不是生产 Audit 或运行时证明。CI 证据应保留 Run/Job ID、被测 Commit SHA 和测试数量。不得将测试通过升级为生产 Trust 注册或 G Applied/Brain Operation 事实。

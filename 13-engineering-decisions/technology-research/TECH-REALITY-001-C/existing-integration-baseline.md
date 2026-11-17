@@ -139,3 +139,48 @@ Issue #7's current body says this repository is intentionally an architecture re
 
 ### 中文结论
 本次已直接读取 A 的 14 项 PR 文件；B 的 21 项研究文件中，已读取 README、规范领域模型、身份、状态、时间/证据、不变量、术语、实体清单、关系、跨 Owner 矩阵、复杂度、决策记录和冲突登记，共 14 项，剩余 7 项 NOT VERIFIED。另直接读取 Issue #3/#4/#5/#7/#10/#25/#29/#43，均为 OPEN。Issue #7 明确指出当前仓库是架构仓库，尚未启动实现，也未指定权威 Runtime 仓库和负责工程 Owner。
+
+
+
+## Live PR/Issue and current-source refresh / 实时 PR、Issue 与当前性刷新
+
+### Open repository work / 仓库开放工作
+A direct GitHub API listing on 2026-11-18 returned **40 OPEN PRs** and **24 OPEN Issues**. This C task reviewed the directly relevant current PRs below; the remaining repository-wide PR/Issue population was not exhaustively reviewed.
+
+| PR | State | Head SHA | C relevance / observed disposition |
+|---|---|---|---|
+| #69 C research | OPEN / DRAFT | `274f5ec59127c582882b5d3ff6d31f31d811f6f5` | This research package |
+| #67 H validator/CI/trust review | OPEN / DRAFT | `abd9156d3e9aa171eeb03693b2be1e722e8d33ff` | A review disposition DEFERRED; local exact-head CI verified, production trust/replay open |
+| #73 A current-source remediation | OPEN / DRAFT | `7b4771b3766c616fa932b30b21c3bc0dc742f564` | A role-simulated remediation; REVISE / NOT YET PROVEN |
+| #66 D Phase 3.9 Forget closure | OPEN / DRAFT | `a085190360a27404ecb24e6f6b2103e72659307c` | D proposal, not normative; requires D/Storage/I concurrence |
+| #68 I/D Phase 3.9 authorization | OPEN / DRAFT | `a71985e360c7ab8aa8ca7e8d63b9460035cc9e02` | I proposal, not normative; no I/D approval |
+| #71 Storage Phase 3.9 review | OPEN / DRAFT | `65c03872cb1ea3407972ec371794f5bab976ace1` | Conditional logical review; not independent Storage Owner signature or physical proof |
+| #55 B research | OPEN / DRAFT | `8ba14b99f1c303d9a368eb65178b0d79d507f2ff` | Current branch head refreshed; B0 partial/B5 blocked |
+| #45 A research | OPEN / DRAFT | `6c7c5919c1b50f38c4d24be679a3885ee3c15b97` | Historical research base; PR #56 review says REVISE |
+
+### A current-source remediation / A 当前性整改
+PR #73 is a current-main remediation branch, not an Owner approval. Directly read:
+- `owner-remediation/OWNER-REMEDIATION-001.md` Blob `52425a5207389ccf806d3f865eb74fb5745cf7ea`.
+- Updated A README Blob `3d0049dcdeddae42eaee41ce33e4a497ae81dad3`.
+- Updated A technology recommendation Blob `b03f8430ed4f76224386b75256eb83a547131cb5`.
+- Updated A evidence register Blob `43c55f4425a97623bd4e7be6e2a7514d57d90a3b`.
+- Updated A open questions Blob `869149a1cfa0851af10160b6a87050162498fd12`.
+The remediation explicitly preserves **REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY** and says role simulations cannot create real Owner approvals.
+
+### H 1.2.15 exact CI evidence / H 1.2.15 精确 CI 证据
+A review PR #67 report (English Blob `582ed576f73d9096dcc77b3a559df8c3b997b895`, Chinese Blob `8b3118f5595dc0a8bbf49b17f7e7ecd5d1015116`) records:
+- H Provider Outcome run `44079842914`, job `134027249681`, commit `0d36324457e39bd50ad56ae902d477c4ea765b61`: SUCCESS, 91 tests, 0 failures. Directly fetched run metadata and decoded Job Logs.
+- H Recovery Cutoff run `44079842878`, job `134027249428`, same commit: SUCCESS, 288 tests, 22 skipped, 0 failures. Directly fetched run metadata and decoded Job Logs.
+- H local C Provider Outcome validator Blob `90a2d4b6f5b05590e3e0a7daecb5a01d9bf525c0`; Gateway Attestation validator Blob `9cc426d4c26deb452f39daff34c1008dd535e969`.
+- The review explicitly limits these to bounded local L1/L2 reference evidence. It does not prove production authentication, production signer registration, issuance ordering, durable replay or live I/D/Storage integration. Overall disposition DEFERRED; no schema freeze or Gate B/C advancement.
+- C Phase 3.8.27 order review Blob `3ca06dbfd7d59483e9604b7a68df924c719f60aa` and I Phase 3.8.23 order review Blob `85cdbad04ae4b688338cdf2b667c21d2f02d8b96` accept corrected order as reference contracts, not production trust deployment.
+- Storage v3.3.2 manifest Blob `5c614375e10698e4931d83deb57d20321445e068` still pins H 1.2.14, not H 1.2.15.
+
+### Phase 3.9 proposal delta / Phase 3.9 提案增量
+- D PR #66 proposal Blob `9c02b5680317f0092788ad0da66d621338b1c54c` proposes immediate read suppression at durable ForgetFence linearization, separate from later barrier drain; Forgotten LifecycleEvent requires D proof and I single-use COMMIT_WON receipt.
+- I PR #68 proposal Blob `362307f6fff84cbe81fb71f37d6319e691db4f89` defines COMMIT_WON / REVOCATION_WON / UNKNOWN-IN_DOUBT for a single-use receipt bound to exact Memory/version/Scope/Fence/proof/Event digest.
+- Storage PR #71 proposal Blob `1cd9f35f1e28fb5f71cd74599d1560fa36043ed8` conditionally accepts the logical direction and requires current D Fence + exact I receipt checks at final visibility transaction.
+All three are DRAFT proposals, not normative contracts, and none claims physical implementation or production evidence.
+
+### 中文当前性结论
+截至本次刷新，仓库有 40 个开放 PR、24 个开放 Issue。A 的 PR #73、H 的 PR #67、D/I/Storage 的 Phase 3.9 PR #66/#68/#71 均为 Draft。H 1.2.15 已有精确 HEAD 的 91 项 Provider Outcome 测试通过，以及 288 项 Recovery Cutoff 测试（22 项跳过）通过，但这些只是本地参考验证，不是生产信任、Durable Replay 或跨 Owner 证明。Storage v3.3.2 仍绑定 H 1.2.14。Phase 3.9 的 Fence 读抑制和 Forgotten 终态授权是提案，必须等待 D/I/Storage 精确版本批准。
