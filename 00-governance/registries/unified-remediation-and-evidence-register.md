@@ -225,7 +225,7 @@ This is a bounded repository-tree observation, not a claim that no tests exist o
 
 | ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
 |---|---|---|---|---|---|
-| UMR-038 | P0 | Complete current CSubmitOutcome 1.0.1 × H Unified 1.2.14 × RecoveryJoin 1.0.2 × I/D proof × Storage successor exact-version bundle; refresh C/H closure pins, issue Storage v3.2.7 and obtain fresh A review | C/H/Storage/I/D/A | OPEN — L1/L2 composition coherent, but no common current manifest or joint acceptance | Current audit: `00-governance/role-simulations/issue-20-current-bundle-exact-version-audit-v0.2.0.md`. H current mapping Blob `c196fdc7a9d88e344d37ba2810a9bce1803f8b96` binds H Unified 1.2.14 `09fcd1fa29fe24255fbd87cae79dafb406594a59`, CSubmitOutcome 1.0.1 `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`, RecoveryJoin 1.0.2 `4b664e3bce465499bcdfd93796349a4ba7074002`, RecoveryCutoff 1.0.5 `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`. C Phase 3.8.15 `28d604...` and H Phase 3.8.12 closure `d9c09...` still pin prior H mapping `8c5c22...`; C/H refresh proposals are in P only. I Phase 3.8.12 `fbd44...` and D Phase 3.8.8 `6aca...` accept current schema/mapping candidates. Storage v3.2.6 `dbfa...` still binds H 1.2.13; no Storage Owner-issued v3.2.7 or fresh A review exists. H CI: 22/22 run `44067666900`, later 25-test run `44068247661`, RecoveryCutoff 266 passed / 22 legacy skipped run `44068545618`; C candidate CI 19 tests run `44059935858`. Candidate CI does not close profile/trust, provider adapter, owner-ledger, COC quorum, Storage L4 or production gates. |
+| UMR-038 | P0 | Complete current CSubmitOutcome 1.0.1 × H Unified 1.2.14 × RecoveryJoin 1.0.2 × I/D proof × Storage successor exact-version bundle | C/H/Storage/I/D/A | PARTIALLY ADVANCED — Storage v3.2.7 exists as candidate; joint exact acceptance remains OPEN | P audit `issue-20-v3.2.7-callback-seam-currentness-audit-v0.3.0.md`. C/H base mapping is coherent; Storage v3.2.7 Blob `4435fc0...` pins superseded H test Blob `53774ac...` / 25-test run `44068247661`. Current H test Blob `70a3796...` / run `44068869146` is 27/27 PASS. C/D/I owner decisions are not all current to the callback mapping and current proof source Blobs. Require v3.2.8 and same-manifest C/D/I/H/Storage/A review. |
 
 
 ### Latest P/main compare — 2026-11-17
@@ -248,3 +248,18 @@ P published the currentness audit and six role-simulation artifacts:
 - `00-governance/role-simulations/issue-20-a-current-1.2.14-bundle-integration-review-v0.1.0.md` — A-role conditional disposition, not independent A approval.
 
 The actual C/H/Storage/A branches were not modified. UMR-038 remains OPEN until C and H publish exact refreshes, Storage publishes v3.2.7, and A reviews that exact Storage manifest. I/D current structural reviews do not activate production trust or prove complete live owner ledgers. Storage ADR `bb544...` selects Option A only as L1 logical architecture; L4 engine/deployment remains OPEN.
+
+
+## 11. New remediation — current callback seam and owner-proof source adoption
+
+| ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
+|---|---|---|---|---|---|
+| UMR-039 | P0 | Obtain C/D/I/Storage adoption of H 1.2.14 authority-join callback mapping and publish current H closure | H/C/D/I/Storage | OPEN — callback map is a candidate; base C review does not cover it; H closure is stale | H callback mapping `1cbe74eba69325510d6b1019d971661f965eabf8`; validator `eab961a08d41e871f38543b18ee60cf024977414`; tests `70a3796446553464e71999f916b76bc22e47da11`; run `44068869146` (27 PASS). Require current H closure and exact affected-Owner decisions. |
+| UMR-040 | P0 | Refresh D/I proof reviews against current owner-owned crosswalk/P0 Blobs | D/I/H/Storage/A | OPEN — current D/I reviews pin older proof source Blobs | D current crosswalk `c4adf827dd62d44c43b8e871dec4835581508adf` vs D review pin `bf35b7f...`; I current P0 `44986f5f864bcdc1a79d34978273644d381a68c0` vs I review pin `35e6843...`; H I review pins older `5c0e204...`. Require D/I re-review and refreshed H cross-review. |
+| UMR-041 | P1 | Add full unmocked H envelope + C object positive/negative conformance and production callback evidence | H/C/I/D/Storage | OPEN — 27-test suite proves bounded orchestration only | Add complete unmocked positive fixture; negative mutations for duplicate fields, C P0 digest, sequence namespace, I COMMIT_WON, D fence/currentness, Storage same-GID and pagination; production callbacks must resolve owner-authoritative sources or return UNKNOWN. |
+
+## 12. Latest exact H CI readback — 2026-11-17
+
+- Provider Outcome run `44068869146`, exact commit `e0d89f1b6dac3bdcf1f0ab4e3f062dd7bc53fdf8`: **SUCCESS, 27 tests**.
+- RecoveryCutoff run `44068869090`, same commit: **288 total, 266 passed, 22 skipped, 0 failed**.
+- These are candidate tests only; they do not prove production callback adapters, C provider truth, COC quorum, same-GID production recovery or deployed Storage topology.
