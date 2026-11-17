@@ -96,3 +96,111 @@ Main branch HEAD at snapshot: b372b62c640a2b656e54b6db62a4ee67d7d8c001. Review b
 | COC Outage Recovery 模型，Run 43897364938 | 11 通过 | 仅内存逻辑模型；不是已部署 Quorum COC 或物理恢复。 |
 | JF-10 PostgreSQL 18.7 Gate A，Issue #10 | 五类能力 CI 报告成功 | Gate A 仍 PARTIAL PASS；Gate B/C 仍 BLOCKED。不能证明项目已选定/部署 Canonical Authority。 |
 
+
+
+## 8. Current 1.2.14 protocol-alignment snapshot / 当前 1.2.14 协议对齐快照
+
+The earlier sections record the Phase 2 initial snapshot. The following exact Owner-branch heads and successor artifacts supersede those earlier version observations for the B review:
+
+| Owner | Branch HEAD | Current relevant artifact |
+|---|---|---|
+| C | 8d7298d7f56b1df48229799ff6462a8db634e7ed | Phase 3.8.16 C final review of H Provider Outcome mapping; commit-level decision is candidate acceptance, not independent Owner signature |
+| H | a0e0944dc742ac89a71e00814f1d296155b622e5 | Unified 1.2.14 schema 09fcd1fa29fe24255fbd87cae79dafb406594a59; Provider Outcome mapping 7739d8159b32702024583669f40974a80801782b; integrated authority mapping 1cbe74eba69325510d6b1019d971661f965eabf8 |
+| D | 188f414fa2c080111325cb52c93f8cd1dc551388 | RecoveryJoin P0 crosswalk c4adf827dd62d44c43b8e871dec4835581508adf, pinned to H 1.2.14 Blob 09fcd... |
+| I | 947553e77375a94671523931518e0d9673c4a766 | Phase 3.8.12 compatibility review accepts H 1.2.14 Blob 09fcd... / RecoveryJoin 1.0.2 |
+| Storage | 19eb636d364c87850afdcd1d87c04c7fe920f115 | Storage v3.2.7 manifest Blob 4435fc0340a4fce10751679a95f3b4c821bdae4d; topology ADR Blob bb544ba2f346bdc130d524bd5c7310d86f367988 |
+
+### 8.1 Exact C/H/D/I/Storage source pins / 精确源 Pin
+
+- H Unified 1.2.14: 09fcd1fa29fe24255fbd87cae79dafb406594a59.
+- H RecoveryJoin 1.0.2: 4b664e3bce465499bcdfd93796349a4ba7074002.
+- H RecoveryCutoff 1.0.5: 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7.
+- H Provider Outcome mapping: 7739d8159b32702024583669f40974a80801782b.
+- H integrated authority-join mapping: 1cbe74eba69325510d6b1019d971661f965eabf8.
+- H validator core / tests in Storage v3.2.7: eab961a08d41e871f38543b18ee60cf024977414 / 53774aca0224fd9a727dfa625ba142825f1754b0.
+- CSubmitOutcome 1.0.1: a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda.
+- C Phase 3.11.1 sequence namespace amendment: 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb.
+- C RecoveryJoin crosswalk: df12af95e6859a389ba71eb1b7dba512b9feb8f6.
+- D RecoveryJoin crosswalk: c4adf827dd62d44c43b8e871dec4835581508adf.
+- I P0 successor allowlist: 35e6843da8becbf3b152512a561b05cf5486819b.
+- I exact compatibility review: commit 947553e77375a94671523931518e0d9673c4a766.
+- Storage v3.2.7 manifest: 4435fc0340a4fce10751679a95f3b4c821bdae4d.
+
+### 8.2 Exact unresolved differences / 精确未决差异
+
+1. C Phase 3.8.16 accepts H Provider Outcome mapping 7739..., but its header pins H schema Blob fee452efb99ab4fe0ceccb347c46eeef1521bd28, while H mapping and current H schema use 09fcd1fa29fe24255fbd87cae79dafb406594a59. Direct comparison shows the only textual difference is the description's artifact revision label (1.2.13 vs 1.2.14). This is an exact-Blob mismatch requiring C readback correction, not a proven semantic incompatibility.
+2. C has reviewed the Provider Outcome mapping 7739..., but Storage v3.2.7 binds the integrated authority-join mapping 1cbe.... C must review the exact integrated mapping; Provider Outcome-only acceptance does not cover I/D/Storage callback joins.
+3. Storage v3.2.7 is explicitly NOT JOINTLY ACCEPTED / NOT FROZEN and still requires fresh Owner reviews and A integration review.
+4. H 25-test callback-seam CI uses test doubles for schema validation, semantic validation and candidate digest/preimage calculation in orchestration cases. It proves separate callback seams and fail-closed UNKNOWN behavior, not real I/D/Storage proof verification or production integration.
+
+### 8.3 L1/L2 candidate CI / 有限候选 CI
+
+- C 1.0.1 candidate CI: run 44059935858, commit b49966361b4b3121a2ebf4105b4e0c57a612e945, 19 tests SUCCESS.
+- H Provider Outcome candidate CI: run 44067402639, commit 2068dd4f89245f9a4913ac069a169a2bed5471be, 22 tests SUCCESS.
+- H authority callback-seam CI: run 44068247661, tested commit 0701b12c3f43e1e6d5706c8eb2747e1c583d60b7, 25 tests SUCCESS; orchestration cases mock schema/semantic/digest primitives.
+- None of these CI runs proves production trust registration, live authority adapters, provider truth, COC quorum durability, Storage JF-10, or production activation.
+
+**B disposition:** L1/L2 candidate alignment substantially exists; exact same-manifest Owner adoption and C review of the integrated H mapping remain OPEN. Do not mark protocol frozen.
+
+**B 阶段结论：** L1/L2 候选对齐已基本形成；同一 Manifest 的 Owner 联合采纳，以及 C 对 H 集成 Mapping 的审查仍 OPEN。不得标记协议冻结。
+
+
+## 9. Superseding exact bundle — Storage v3.2.9 / 后继精确 Bundle
+
+The v3.2.9 manifest supersedes the v3.2.8 B snapshot for H full-path source/test/CI and refreshed C/H/I/D review pins.
+
+- Storage v3.2.9 exact manifest: Blob `bf323a1682f2bfadc3ff41ea4f86883d678a77e3`.
+- H Unified 1.2.14: `09fcd1fa29fe24255fbd87cae79dafb406594a59`.
+- H Authority-Join mapping: `1cbe74eba69325510d6b1019d971661f965eabf8`.
+- H RecoveryJoin 1.0.2 / RecoveryCutoff 1.0.5: `4b664e3bce465499bcdfd93796349a4ba7074002` / `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`.
+- H validator core: `eab961a08d41e871f38543b18ee60cf024977414`.
+- H full-path test source / fixture: `dccf8c099c18807ec072870d32604d0912209f01` / `c80247a6ecfbb4a29ff0993e8e2aea4829d00626`.
+- H full-path source/CI closure: `804bfd3214b015c80340575c1eb467d756ad0699`.
+- H CI run `44069777296`, tested commit `9eb06313e94e762f0fde4a606633a6dbe1bf8262`, job `133992753552`, 32 test methods, success.
+- C Phase 3.8.18 full-path review: `4be9c1cd8f116086bab58340f07e38ddfc223e21`.
+- I Phase 3.8.14 full-path/terminal callback review: `7c65650a37c8c0f270451fb0419e93259fc38151`.
+- D Phase 3.8.10 full-path/clearance callback review: `ccdae9b45affb23c6741b5cceb27004b35a8e03e`.
+- C/I/D role reviews are delegated simulations, not independent human Owner approvals.
+- Storage v3.2.9 status: exact candidate bundle bound; not jointly frozen; A review pending.
+
+**B status:** L1/L2 candidate alignment is conditionally aligned. Full-path tests do not authenticate production I/D/Storage proofs because authority callbacks remain test doubles; production adapters, C/I trust, D lineage/release, COC/Storage joins, JF-10, R1/R2 and Gate B/C remain open.
+
+**B 状态：** L1/L2 候选对齐已条件满足。Full-Path 测试未认证生产 I/D/Storage Proof，因为 Authority Callback 仍为 Test Double；生产 Adapter、C/I Trust、D Lineage/Release、COC/Storage Join、JF-10、R1/R2 和 Gate B/C 仍 OPEN。
+
+
+## 10. Currentness invalidation — v3.2.9 no longer pins latest Owner reviews / 当前性失效
+
+Latest Owner branch corrections after v3.2.9:
+- C HEAD 81f1e81307315a31c3bbeae17eb801e8a4f47e10: corrected exact H schema pin in C Phase 3.8.18.
+- D HEAD 7d01732521a8b9db202f10cde2c2547e50071d58: corrected exact H schema pin in D Phase 3.8.10.
+- I HEAD a68bb3587fe88aa72398e2dc8d136f94cee9a63f: corrected exact H schema pin in I Phase 3.8.14.
+- H HEAD 362cc113cfb5b595a4002a6f6e980d19ae2d2d15: updated CI binding to run 44069941327, commit ba2c9341fee4eb9ca9e665c74bdd37b4675dd251, job 133993324484.
+- Storage HEAD 39a1e0429f6b4b08c6c437c8e3f5ace582a7315f: latest manifest remains v3.2.9.
+
+Storage v3.2.9 Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3 still pins prior C/D/I review Blobs 4be9c1cd8f116086bab58340f07e38ddfc223e21 / ccdae9b45affb23c6741b5cceb27004b35a8e03e / 7c65650a37c8c0f270451fb0419e93259fc38151 and H run 44069777296 / commit 9eb06313e94e762f0fde4a606633a6dbe1bf8262.
+
+**Disposition correction:** B semantic/source alignment remains valid, but the exact manifest is stale. A successor Storage manifest must bind the corrected current C/D/I review Blobs and current H CI run/commit/job; C/H/D/I must review that same successor; A must review the successor. Do not label v3.2.9 the current joint bundle.
+
+This is exact-currentness/provenance drift, not a demonstrated schema/semantic regression.
+
+**中文：** v3.2.9 发布后 C/D/I/H 分支再次更新了精确 Review/CI Pin，而 Storage v3.2.9 未同步。B 的语义/源文件候选对齐仍成立，但 Manifest 当前性失效。后继 Storage Manifest 必须绑定修正后的 C/D/I Review Blob 和当前 H CI Run/Commit/Job；C/H/D/I 对同一后继 Manifest 复审，再由 A 审查。不得继续将 v3.2.9 标记为当前联合 Bundle。这是精确当前性/来源漂移，不是已证明的 Schema/Semantic 回退。
+
+
+## 11. Storage v3.3.0 successor manifest / Storage v3.3.0 后继 Manifest
+
+- Exact path: reviews/storage-consistency/phase-3.6.20-storage-v3.3.0-successor-exact-version-bundle-manifest.md
+- Exact Blob: c8407c9f10049d65426a3598ad20b6aa70f83c32
+- Predecessor: Storage v3.2.9 Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3
+- Additional current 42-test source: Storage v3.2.7 manifest Blob f7a3acc1845f4322b2b38264eb0d4bae92623bac
+- Supersession: v3.3.0 explicitly supersedes v3.2.7/v3.2.8/v3.2.9 for current candidate bundle binding.
+
+Exact current source set:
+- H Unified 1.2.14: 09fcd1fa29fe24255fbd87cae79dafb406594a59.
+- H integrated authority mapping: 1cbe74eba69325510d6b1019d971661f965eabf8.
+- RecoveryJoin 1.0.2 / RecoveryCutoff 1.0.5: 4b664e3bce465499bcdfd93796349a4ba7074002 / 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7.
+- CSubmitOutcome 1.0.1 / C sequence amendment: a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda / 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb.
+- H validator/test/fixture: eab961a08d41e871f38543b18ee60cf024977414 / da1454ed985c84160c4cb6a0462df9d1225fab7f / f911027c848d21dd36fb87ba64a201a1455787a7.
+- H CI: run 44072037563, commit c6faee294e503f32a802ba51f3f3b3eb4bee2cd7, job 134000402978, 42 tests.
+- C/D/I review Blobs: 61ff3716c9c3d3101a0058963c58f089aa1448b0 / 2bf4514fe7972b72f6c1f904e461f86488d04cda / 2851d31e4f8caf48348944b885b493c607ca79e1.
+
+**Disposition:** B L1/L2 candidate alignment is conditionally aligned against v3.3.0. Fresh A exact review is required. Production and L3/L4 gates remain open.

@@ -12,7 +12,7 @@
 
 ## 1. Executive disposition / 总体裁决
 
-**EN — NOT READY FOR ARCHITECTURE FREEZE.** The project has a coherent and unusually explicit set of domain and safety principles. The main logical decomposition is sound: Canonical Memory is separate from retrieval projections and task Context; D owns canonical memory and ForgetFence semantics; I owns authorization and global Forget policy; C owns provider-side-effect truth; H owns wire contracts; Storage owns physical durability and visibility mechanics. However, the system is not yet proven as one composable architecture. The current freeze blockers are the unresolved D/Storage serialization topology, exact-version drift across C/H/D/I, incomplete end-to-end reference-model evidence for publication/Forget/recovery, and unresolved Fact/Claim and Applied/Provider Outcome contract bindings.
+**EN — NOT READY FOR ARCHITECTURE FREEZE.** The domain/authority decomposition remains coherent. B has reached semantic/source L1/L2 candidate alignment on H 1.2.14/C 1.0.1, but Storage v3.2.9 is stale against later C/D/I exact-review and H CI pin corrections; A has selected Option A as the v1 logical D/Storage topology, but its L1/L2 contract still needs clarifications for transaction execution authority, D effect-permit/lifecycle coverage, cross-BrainAuthority scope, I COMMIT_WON crash/revocation semantics and anchor restore continuity. The remaining freeze blockers are those Option A clarifications, incomplete distributed reference-model/COC/JF-10 evidence, Fact/Claim ADR, Full Applied and Global Forget composition.
 
 **中文 — 暂不具备架构冻结条件。** 项目已经形成相当清晰且安全约束深入的领域架构。总体模块划分合理：Canonical Memory 与检索投影、任务 Context 分离；D 管理权威记忆和 ForgetFence 语义；I 管理授权与 Global Forget 策略；C 管理 Provider 副作用事实；H 管理 Wire 合同；Storage 管理物理持久化与可见性机制。但目前仍不能证明这些模块已经组成一套完整、无歧义的系统。主要冻结阻塞是 D/Storage 序列化拓扑未决、C/H/D/I 精确版本绑定漂移、发布/遗忘/恢复端到端参考模型证据不足，以及 Fact/Claim 和 Applied/Provider Outcome 合同仍有未闭环绑定。
 
@@ -119,7 +119,7 @@ Fact/Claim ADR 仍为 ADR-BLOCKED。在 B 正式解决之前，任何共享 Sche
 6. E/D/Storage 候选发布顺序为：Storage 持久化 PREPARED_HIDDEN Participant → D 准入 PublicationParticipant → I 单次消费 CommitAuthorization → Storage 在最终可见性提交点验证 D/I 证明 → D/I 根据同一权威 Storage Outcome 分别关闭。
 7. UNKNOWN/IN_DOUBT 必须保持私有，并保持相关 Barrier 开启。
 
-The sequence is logically coherent in the current proposals, including the correction that post-commit ITerminalProof cannot be required by the commit that creates the Storage outcome. It is not yet a selected physical serialization topology or an end-to-end verified protocol.
+The logical sequence is coherent, including the correction that post-commit ITerminalProof cannot be required by the commit that creates the Storage outcome. Option A is now selected as the v1 logical serialization profile by ADR §8; the database engine/deployment remains unselected (L4), and A-01–A-05 remain architecture clarification gates. The protocol is not end-to-end or production verified.
 
 COC and JF-10 must remain separate in the system model. COC is a quorum-committed causal-order log for recovery cutoffs and participant manifests; it records owner evidence but cannot issue owner decisions. JF-10 is a separately gated I/Storage prepared-participant bridge using the exact same prepared GID/participant identity for resolution. Storage v3.2.3 explicitly says prior COC acceptance does not approve automatic COC↔JF-10 composition, and COC does not become the JF-10 coordinator. Issue #10 currently records Gate A PARTIAL PASS after five PostgreSQL 18.7 capability CI classes; Gate B persistent COC and Gate C deterministic fault-injection remain BLOCKED. The CI results do not identify a project-designated Canonical Authority deployment or close JF-10.
 
@@ -171,9 +171,9 @@ D 管理每个 Canonical Memory 的 Producer 准入、Lineage、ForgetFence 和 
 
 | ID | Severity / Level | Finding / 发现 | Required closure / 必须闭环 |
 |---|---|---|---|
-| ARC-01 | P0 · L1/L3 | Storage/D final visibility serialization topology is ADR-BLOCKED. Option A (one serializable transaction domain per Canonical Memory authority) is preferred conditionally; Option B requires a durable linearizable coordinator; check-then-write is rejected. / Storage/D 最终可见性序列化拓扑仍 ADR-BLOCKED。 | Select a logically feasible topology and state exact transaction domain, owner row boundary, D/I hold semantics, visibility point and crash model. Physical deployment remains L4. / 选定逻辑可行拓扑并明确事务域、Owner 行边界、D/I Hold、可见性点和崩溃模型；物理部署属于 L4。 |
-| ARC-02 | P1 · L2 | H current wire schemas are Unified 1.2.12 / RecoveryJoin 1.0.2, while the H Provider Outcome semantic validator is pinned to 1.2.11; C Provider Outcome and older D/I contracts still reference 1.2.11. D/I 1.2.12 adoption amendments are candidate role artifacts only. / H 当前 Schema 为 1.2.12/RecoveryJoin 1.0.2，但 Provider Outcome 语义验证合同仍绑定 1.2.11；C 及旧 D/I 合同仍引用 1.2.11。 | C/D/I/H publish exact successor mappings and cross-reviews; H validator and negative vectors must target the same exact schema bundle. / C/D/I/H 发布精确后继映射与交叉审查；H Validator 和负向向量必须针对同一精确 Schema 包。 |
-| ARC-03 | P1 · L2 | C branch contains CSubmitOutcome schema 1.0.1, but the C schema/conformance contract still binds schema 1.0.0. / C 分支已有 CSubmitOutcome 1.0.1 Schema，但 C Schema/Conformance 合同仍绑定 1.0.0。 | C decides whether 1.0.1 supersedes 1.0.0; refresh C/H/Storage manifests and all signature projections and fixtures. / C 决定 1.0.1 是否替代 1.0.0，并刷新 C/H/Storage 清单、签名投影和 Fixtures。 |
+| ARC-01 | P1 · L1/L2/L3 | Storage/D Option A is selected as the v1 logical profile, but the cross-owner transaction executor/write-authority boundary, complete D fence-sensitive lifecycle transition set, one-BrainAuthority operation scope, I COMMIT_WON crash/revocation rule and anchor restore checkpoint proof are not fully specified. / Storage/D Option A 已选为 v1 逻辑 Profile，但跨 Owner 事务执行者/写权边界、D Fence 敏感生命周期转换、单 BrainAuthority 操作范围、I COMMIT_WON 崩溃/撤销规则和 Anchor Restore Checkpoint Proof 尚未完整规范。 | Resolve A-01–A-05 in a successor ADR amendment; then execute L3 reference-model/race/fault vectors. DB engine/deployment remains L4. / 在后继 ADR 修订中解决 A-01 至 A-05，再执行 L3 参考模型/竞争/故障向量；DB Engine/部署仍属 L4。 |
+| ARC-02 | P2 · L2 | Storage v3.3.0 now consolidates H 1.2.14/C 1.0.1, the exact 42-test H local path, and current C/H/D/I role reviews; semantic/source candidate alignment is conditionally aligned. / Storage v3.3.0 已整合 H 1.2.14/C 1.0.1、H 精确 42-test 本地路径及当前 C/H/D/I 角色审查；语义/源文件候选对齐已条件满足。 | A performs fresh exact review of v3.3.0 and Option A ADR; production authority adapters and L3/L4 gates remain open. / A 对 v3.3.0 和 Option A ADR 进行新精确审查；生产权威 Adapter 与 L3/L4 Gate 仍 OPEN。 |
+| ARC-03 | P2 · L2 | CSubmitOutcome 1.0.1 is now the proposed immutable source for new records and is pinned by Storage v3.2.9; 1.0.0 remains historical. / CSubmitOutcome 1.0.1 已成为新记录候选不可变来源并由 Storage v3.2.9 精确绑定；1.0.0 保留为历史。 | Keep production C/I crypto profile registration, trust roots, key custody, historical verification and anti-rollback as independent I governance gates; do not infer production trust from local CI. / 生产 C/I Crypto Profile 注册、Trust Root、Key Custody、历史验证和 Anti-Rollback 仍是 I 独立治理 Gate，不得从本地 CI 推断生产信任。 |
 | ARC-04 | P0 · L1/L3 | The D/E/Storage publication sequence is coherent as a proposal, but a complete integrated race/crash reference model is not evidenced by the exact current contract bundle. / D/E/Storage 发布顺序作为提案自洽，但当前精确合同包尚无完整集成竞争/崩溃参考模型证据。 | Model both D fence/admission orders, I revocation/consumption orders, Storage prepare/commit ACK loss, process crash at every durable boundary, stale lease, replay and conflicting terminal outcomes. / 建模 D Fence/Admission 两种顺序、I 撤权/消费顺序、Storage Prepare/Commit ACK 丢失、每个持久边界崩溃、过期 Lease、重放和冲突终态。 |
 | ARC-05 | P1 · L1/L2/L3 | Multi-PolicyDomain atomicity is explicitly blocked; I PermissionEpoch is local to one PolicyDomain. Global Forget and cross-domain operations need an explicit supported scope. / Multi-PolicyDomain 原子性明确阻塞；I PermissionEpoch 仅属于单个 PolicyDomain。 | State single-domain guarantees and cross-domain limitations, or design a separate coordinator/partial-completion protocol with explicit semantics. / 明确单域保证与跨域限制，或设计独立协调/部分完成协议。 |
 | ARC-06 | P1 · L2/L3 | C Provider Outcome, H wire validation and G Applied are not yet one exact frozen end-to-end contract. / C Provider Outcome、H Wire 验证和 G Applied 尚未形成一套精确冻结的端到端合同。 | Bind the final immutable inference request after all transformations; distinguish handoff, provider acceptance, execution, completion, delivery and Applied. / 绑定全部转换后的最终不可变推理请求；区分 Handoff、Provider Acceptance、Execution、Completion、Delivery 与 Applied。 |
@@ -202,9 +202,9 @@ The SQLite prototype must not be represented as satisfying JF-10 prepared-partic
 | Retrieval/runtime F | CANDIDATE | Candidate filtering, exact ref revalidation and derivative gating are specified; full anti-resurrection traces remain open. / 候选过滤、精确引用复核和派生物 Gate 已定义；防复活轨迹未闭环。 |
 | Context/Applied G | NOT PROVEN | Context version boundary is clear; exact Full Applied C/G/H proof is not frozen. / Context 版本边界清晰；Full Applied 的 C/G/H 证明未冻结。 |
 | Agent/provider C | CANDIDATE | Egress gate and immutable outcome semantics exist; schema/contract version alignment and provider conformance remain open. / Egress Gate 与不可变 Outcome 语义已定义；Schema/合同版本及 Provider 符合性未闭环。 |
-| BMCP H | NOT PROVEN | 1.2.12/1.0.2 structural artifacts exist; exact semantic validator and C mapping lag the current schema. / 1.2.12/1.0.2 结构工件存在；语义 Validator 与 C 映射落后。 |
+| BMCP H | NOT PROVEN | 1.2.14/1.0.2/1.0.5 and C 1.0.1 candidate artifacts exist; Provider Outcome and integrated authority mappings are separate, and same-manifest C review remains open. / 1.2.12/1.0.2 结构工件存在；语义 Validator 与 C 映射落后。 |
 | Security/governance I | CANDIDATE | Authority and fail-closed semantics are clear; crypto profile registration and governance approval remain open. / 权威与 Fail-closed 语义清晰；密码学配置注册和治理批准未完成。 |
-| Storage/COC/JF-10 | BLOCKED | No serialization topology selected; JF-10 Gate A is only partial and later gates remain blocked. / 未选定序列化拓扑；JF-10 Gate A 仅部分通过，后续 Gate 仍阻塞。 |
+| Storage/COC/JF-10 | BLOCKED | Option A is selected as L1 logical topology, conditionally accepted pending A-01–A-05; JF-10 P0, Gate A, persistent COC Gate B and fault-campaign Gate C remain open/blocked. / Option A 已选为 L1 逻辑拓扑，但 A-01 至 A-05 仍待澄清；JF-10 P0、Gate A、持久化 COC Gate B 和故障演练 Gate C 仍 OPEN/BLOCKED。 |
 | System composition A | NOT READY | Exact-version joins, integrated reference traces and owner-authority decisions are incomplete. / 精确版本 Join、集成参考轨迹及 Owner 权威决议尚不完整。 |
 
 ## 7. Architecture-freeze gate / 架构冻结门槛
@@ -229,16 +229,16 @@ Freeze requires L1 + L2 + L3:
 
 ## 8. Ordered next actions / 后续推进顺序
 
-1. Storage + D: resolve the abstract serialization topology (Option A vs Option B), define the exact D/Storage transaction and visibility boundary, and explicitly scope the SQLite prototype.
-2. C + H + D + I + Storage: close the 1.2.12 / RecoveryJoin 1.0.2 / CSubmitOutcome 1.0.1 exact-version migration and publish fresh exact cross-reviews.
+1. Storage + D + A: amend Option A with the exact transaction executor/owner-write boundary, D effect-permit and lifecycle transition coverage, per-BrainAuthority scope, I receipt race semantics and anchor restore continuity; keep DB engine selection at L4.
+2. C + H + D + I + Storage: close same-manifest review of H 1.2.14 / RecoveryJoin 1.0.2 / RecoveryCutoff 1.0.5 / CSubmitOutcome 1.0.1, including both H mapping artifacts.
 3. D + E + I + Storage: build the integrated producer/fence/publication reference model with adversarial ordering and crash-window tests.
 4. I + D + E + F + G + Storage: prove Global Forget inventory, restore/replay cutoff and anti-resurrection across all derivative classes.
 5. C + G + H + I + D: close the final-request-bound Applied evidence chain and provider outcome semantics.
 6. B: resolve Fact/Claim ADR and confirm no dependent schema uses unresolved semantics.
 7. A: refresh all exact pins, complete bilingual parity review and issue a final L1/L2/L3 freeze disposition.
 
-1. Storage + D：解决抽象序列化拓扑（Option A 或 Option B），定义精确 D/Storage 事务及可见性边界，并明确 SQLite 原型的适用范围。
-2. C + H + D + I + Storage：闭环 1.2.12 / RecoveryJoin 1.0.2 / CSubmitOutcome 1.0.1 精确版本迁移，并发布新的精确交叉审查。
+1. Storage + D + A：修订 Option A，明确事务执行者/Owner 写权、D EffectPermit/生命周期转换覆盖、per-BrainAuthority 范围、I Receipt 竞争语义及 Anchor 恢复连续性；DB Engine 选择仍属于 L4。
+2. C + H + D + I + Storage：闭环 H 1.2.14 / RecoveryJoin 1.0.2 / RecoveryCutoff 1.0.5 / CSubmitOutcome 1.0.1 的同一 Manifest 审查，必须包含两种 H Mapping。
 3. D + E + I + Storage：建立集成 Producer/Fence/Publication 参考模型，覆盖对抗性顺序和崩溃窗口。
 4. I + D + E + F + G + Storage：证明 Global Forget Inventory、Restore/Replay Cutoff 和所有派生物的防复活。
 5. C + G + H + I + D：闭环最终请求绑定的 Applied 证据链及 Provider Outcome 语义。
@@ -249,7 +249,44 @@ Freeze requires L1 + L2 + L3:
 
 - A Phase 1 reassessment: reviews/architecture-feasibility/phase-1-owner-reassessment.md, Blob 1ffb788c7e193b8777e8d849c1e3cc11ededc545.
 - TAB-001: 13-engineering-decisions/technology-architecture-blueprint.md, Blob 7b6f2d139217dbe13ab3a3af31bfbff525f20e71.
-- Storage topology ADR: Blob 080433f8e13a500522bc2754da64057edb0ae9d8.
+- Storage/D topology ADR: Blob bb544ba2f346bdc130d524bd5c7310d86f367988.
 - Storage v3.2.4 successor exact-version manifest: Blob 6fc0bedaf5421d1be5a9ab5fb4d8cfab2871d7d7.
 - Current exact evidence ledger: phase-2-exact-evidence-ledger.md.
 - Contradiction register: phase-2-contradiction-register.md.
+
+
+## 12. Superseding protocol status — Storage v3.2.9 / 后继协议状态
+
+The latest Owner branches supersede the earlier Phase 2 protocol observations. Current B baseline is Storage v3.2.9 exact manifest Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3.
+
+- H Unified 1.2.14 / wire 1.3.0, RecoveryJoin 1.0.2, RecoveryCutoff 1.0.5 and CSubmitOutcome 1.0.1 are now bound in one candidate source bundle.
+- C/H/D/I role reviews now bind the corrected H schema Blob 09fcd1fa29fe24255fbd87cae79dafb406594a59 and integrated H authority-join mapping 1cbe74eba69325510d6b1019d971661f965eabf8.
+- H now has a full local H envelope + CSubmitOutcome 1.0.1 positive fixture and 32 passing test methods (26 H validator/fixture + 6 Python/Node crypto interoperability) on run 44069777296.
+- The full-path local tests no longer mock H/C schema validation, local semantic predicates or C-P0 digest/preimage computation. The ten I/D/Storage authority callbacks remain test doubles; production trust and owner-authoritative proof adapters remain OPEN.
+- Storage v3.2.9 records C/H/I/D role reviews but explicitly requires fresh A review. The earlier A review of v3.2.8 does not transfer.
+- B is **CONDITIONALLY ALIGNED at L1/L2 candidate level**. This is not protocol freeze, independent human Owner approval, Gate B/C acceptance or production authorization.
+
+中文：最新 Owner 分支已替代此前 Phase 2 协议观察。当前 B 基线为 Storage v3.2.9 精确 Manifest Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3。H 1.2.14、RecoveryJoin 1.0.2、RecoveryCutoff 1.0.5、CSubmitOutcome 1.0.1 已绑定为同一候选源包；C/H/D/I 角色审查已绑定修正后的 H Schema 和集成 Authority-Join Mapping；H 已有完整本地 H Envelope + CSubmitOutcome 正向 Fixture，32 项测试通过。本地 Schema/Semantic/Digest 路径不再 Mock，但十个 I/D/Storage Authority Callback 仍为 Test Double。生产信任和 Owner 权威 Proof Adapter 仍 OPEN。Storage v3.2.9 记录了 C/H/I/D 角色审查，但明确要求 A 新审查；A 对 v3.2.8 的旧审查不能继承。B 可在 L1/L2 候选层标记 CONDITIONALLY ALIGNED，但不代表协议冻结、独立人类 Owner 批准、Gate B/C 验收或生产授权。
+
+
+## 13. Currentness correction after v3.2.9 / v3.2.9 后的当前性修正
+
+The latest Owner branches advanced after Storage v3.2.9:
+- C HEAD 81f1e81307315a31c3bbeae17eb801e8a4f47e10 corrected its H schema pin.
+- D HEAD 7d01732521a8b9db202f10cde2c2547e50071d58 corrected its H schema pin.
+- I HEAD a68bb3587fe88aa72398e2dc8d136f94cee9a63f corrected its H schema pin.
+- H HEAD 362cc113cfb5b595a4002a6f6e980d19ae2d2d15 updated the CI pin to run 44069941327 / commit ba2c9341fee4eb9ca9e665c74bdd37b4675dd251 / job 133993324484.
+- Storage HEAD 39a1e0429f6b4b08c6c437c8e3f5ace582a7315f still has v3.2.9 as latest manifest.
+
+Storage v3.2.9 therefore no longer binds the latest C/D/I review Blobs and H CI run. The semantic/source candidate alignment remains, but B's exact-currentness gate is OPEN until Storage publishes a successor manifest, all Owners review that same exact Blob, and A reviews the successor. This is provenance/currentness drift, not a demonstrated schema regression.
+
+中文：v3.2.9 发布后，C/D/I 修正了精确 Schema Pin，H 更新了 CI Run/Commit/Job，但 Storage 尚未刷新 Manifest。语义/源文件候选对齐仍成立，B 的精确当前性 Gate 重新 OPEN，直至 Storage 发布后继 Manifest、所有 Owner 审查同一 Blob、A 复审后继版本。该问题属于来源/当前性漂移，不是已证明的 Schema 回退。
+
+
+## 14. B successor manifest reconciliation / B 后继 Manifest 谱系收敛
+
+Storage has published v3.3.0, exact Blob c8407c9f10049d65426a3598ad20b6aa70f83c32. It explicitly supersedes v3.2.7, v3.2.8 and v3.2.9 for current candidate bundle binding and reconciles the divergent manifest lineage. It binds the 42-test H exact-head suite (run 44072037563, commit c6faee294e503f32a802ba51f3f3b3eb4bee2cd7, job 134000402978), H 1.2.14, C 1.0.1, RecoveryJoin 1.0.2, RecoveryCutoff 1.0.5, integrated H authority mapping and current C/D/I 42-test review Blobs.
+
+**B disposition:** CONDITIONALLY ALIGNED at L1/L2 candidate level against v3.3.0. A must now review the exact v3.3.0 Blob and Option A topology ADR. Production callbacks remain test doubles; production C/I trust, D lineage/release, COC quorum, JF-10, same-GID recovery, Gate B/C, Global Forget and Full Applied remain open.
+
+中文：Storage 已发布 v3.3.0，精确 Blob c8407c9f...，明确替代 v3.2.7/v3.2.8/v3.2.9 的当前候选 Bundle 绑定，解决 Manifest 谱系分叉。它绑定 H 42-test 精确 HEAD Suite、H 1.2.14、C 1.0.1、RecoveryJoin 1.0.2、RecoveryCutoff 1.0.5、H 集成 Authority Mapping 和当前 C/D/I 42-test Review Blob。**B 裁决：** L1/L2 候选层 CONDITIONALLY ALIGNED，基线为 v3.3.0；A 现在必须精确审查 v3.3.0 和 Option A 拓扑 ADR。生产 Callback 仍为 Test Double；生产 C/I Trust、D Lineage/Release、COC Quorum、JF-10、Same-GID Recovery、Gate B/C、Global Forget 和 Full Applied 仍 OPEN。
