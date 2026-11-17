@@ -11,10 +11,10 @@
 - E Phase 3.8 contract: Blob 475fee41e5eea527af4edefbfe88c58c86967d0a.
 - I Phase 3.8 contract: Blob 54bab0484bd232a5a258e65e34cc7425288b39a6.
 - Storage Phase 3.8 visibility contract: Blob 175ee7b1349cfdb79a19898b311a88391ed88010.
-- Storage Phase 3.6.11 bidirectional JoinProof: Blob 41f80b1aacfebdb1f652b16144afbf83ce950e82.
-- H RecoveryJoin schema 1.0.0: Blob f531c1d4b89a48457188c4988f140952759223a6.
-- H semantic validator/test contract: Blob c93560fcda947aef0a611b3096fb1c1994d41cd0.
-- HRC/JPF executable suite: Blob d14e66a2196303374f31a4285244a0f77a3ad328.
+- Storage Phase 3.6.11 bidirectional JoinProof: Blob 2882fa8eb4d5e7faca035866572cbe48ac5eeae0.
+- H RecoveryJoin schema 1.0.0: Blob dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
+- H semantic validator/test contract: Blob 9a2c3b856d1319e780932d75d2b0165021faf816.
+- HRC/JPF executable suite: Blob f28834d73e055be411060f0c1093bd3dc0d865b9.
 - A race/crash/failover matrix: Blob c0f8ae699a42de46d12d0d311892e5670014e0f1.
 
 ## 2. Storage disposition
@@ -85,3 +85,13 @@ Storage 接受双向 Join Proof 的逻辑方向：COC Prefix Participant 集合�
 物理拓扑 ADR 仍 ADR-BLOCKED：Option A 是有条件优先候选，Option B 是替代方案，Check-then-write 被拒绝；真实 Canonical Authority Runtime 和 D/Storage 事务域尚未指定。
 
 本文件是本集成会话中的 Storage 角色模拟审查，不是独立 Owner 签名。
+
+
+## 8. H/Storage schema follow-up
+
+The latest RecoveryJoin schema now binds every owner request row by both logical request digest and owner-row digest, carries distinct OwnerAdmissionRef and OwnerEntryRef, and requires typed D lineage, I authorization, C provider and Storage prepared/resolution evidence. This addresses the schema-shape portion of STORAGE-RJ-01 and makes the bidirectional contract more precise. It does not replace live authoritative enumeration, signed proof dereference, quorum readback or owner-local release CAS. STORAGE-RJ-02..05 remain open, especially physical topology/HA/restore.
+
+Updated Storage JoinProof contract Blob: 2882fa8eb4d5e7faca035866572cbe48ac5eeae0.
+Updated H RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
+Updated H semantic contract Blob: 9a2c3b856d1319e780932d75d2b0165021faf816.
+Updated HRC suite Blob: f28834d73e055be411060f0c1093bd3dc0d865b9.
