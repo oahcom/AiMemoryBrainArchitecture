@@ -520,3 +520,48 @@ At the live read immediately before this §13 update:
 The current B Owner recommendation is Option A, but the Fact/Claim ADR remains ADR-BLOCKED because formal Architecture Governance approval is absent. Stable ClaimRef/ClaimRevisionRef and ConflictSet remain candidates. A Phase 8 B-02 refers to H ingress and is not B's B2 gate. H 1.2.15 contract reviews are conditional; issuer implementation, production I trust registration, D exact 1.2.15 review, Storage successor bundle and fresh A review remain open. Memory OS/IR research remains incomplete. B2 remains IN PROGRESS / NOT PASSED; B3 NOT PASSED; B4 NOT READY; B5 BLOCKED / NOT PASSED; B6 INDEPENDENT_REVIEW_PENDING.
 
 当前 B Owner 推荐 Option A，但 Fact/Claim ADR 仍 ADR-BLOCKED，因为缺少正式 Architecture Governance 批准。稳定 ClaimRef/ClaimRevisionRef 和 ConflictSet 仍为候选。A Phase 8 B-02 指 H 入口，不是 B 的 B2 Gate。H 1.2.15 契约复审为有条件接受；Issuer 实现、I 生产 Trust 注册、D 对 1.2.15 的精确复审、Storage 后继 Bundle 和 A 新复审仍开放。Memory OS/IR 研究仍未完成。B2 仍 IN PROGRESS / NOT PASSED；B3 NOT PASSED；B4 NOT READY；B5 BLOCKED / NOT PASSED；B6 INDEPENDENT_REVIEW_PENDING。
+
+
+## 14. D/E/F/G consumer-source reconciliation for Fact/Claim and Claim revision / D/E/F/G Fact/Claim 与 Claim Revision 消费者来源协调 — 2026-11-18
+
+All refs below were re-fetched from their named live Owner branches. These sources confirm that the current B recommendation is not yet a cross-owner accepted or frozen canonical model.
+
+以下来源均从指定实时 Owner 分支重新读取。它们确认当前 B 建议尚未成为跨 Owner 验收或冻结的规范模型。
+
+| Owner | Live branch HEAD / 实时分支 HEAD | Exact artifact / 精确工件 | Blob SHA / Blob SHA | Source-backed status / 来源支持的状态 |
+|---|---|---|---|---|
+| B | `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | Summary ADR; detailed canonical ADR; consumer map | `a1024938ff5baba069cf128c69496a44e143330c`; `df77e4a93cb8fef689ae7c828888d960cbf381d6`; `dd45a37199c9b69ab6b68f65e051a484a04691d4` | Option A separate Fact attestation + Claim proposition is preferred candidate; ADR blocked; mapping candidate |
+| D | `session-d-memory-brain-2026-11-16` @ `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | Canonical Store; Memory Versioning; Lifecycle Model | `6b37c91033fda21f072e2a3bde6f274663b1e76e`; `af747f339d03bdd4684b6ed60fca05957dc8e1fb`; `81c48c928cb5f9c76ca29d493fbd9479079e62f7` | Fact/Claim persistence ADR-BLOCKED; neutral PropositionRef only; stable Claim ID + immutable ClaimRevision is a candidate; D does not freeze schema/DDL/API/wire |
+| E | `session-e-memory-compiler-2026-11-16` @ `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | Extraction & Normalization; Evidence & Provenance | `c18780403de2d1dbcf471bdb8abdaa009a4a78e1`; `38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963` | ExtractionIR/CandidateProposition is intentionally pre-canonical and neutral; E does not assign Fact/Claim identity or adjudicate truth; Evidence/Provenance final schema remains D/B/I-dependent |
+| F | `session-f-memory-runtime` @ `1908ce4d233b20f7cafd00cb679affd01bd15174` | Memory Retrieval Engine | `1fbfc0ff07b66c0ff68c3cea5271261c9d7fc0af` | D owns Memory/Version/Claim/Entity/Relation/Evidence identity; F does not resolve disputed claims; Claim revision identity remains OPEN; F deduplicates exact MemoryVersion refs and preserves conflict alternatives |
+| G | `session-g-memory-context` @ `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8` | Context Versioning and Change Sets | `05c0739d0c22576a1fd5affc7d73c078c89049b1` | G Entry pins exact MemoryVersion; ContextVersion/ChangeSet are G-owned and distinct; canonical revision watermark schema remains CANDIDATE/OPEN; no unapproved Claim/Fact identity is minted |
+
+### 14.1 Important option-label disambiguation / 重要方案编号消歧
+
+There are two unrelated “Option A” labels in the source set:
+1. **B Fact/Claim Option A:** separate Claim proposition thread and independently addressable Fact attestation object. This is B's preferred CANDIDATE under INT-P0-01 and remains ADR-BLOCKED.
+2. **D Claim identity Option A:** stable Claim ID + immutable ClaimRevision for corrections, contrasted with Option B (new Claim ID for every correction/successor). D marks this as a CANDIDATE under INT-P1-02, pending the Fact/Claim ADR.
+
+The two labels must never be conflated. The current B Fact/Claim Option A does not itself approve D's Claim identity Option A; both remain candidate decisions, with the first requiring Architecture Governance + B approval and the second requiring B ADR approval plus D's canonical mechanics.
+
+来源中存在两个互不相关的 “Option A”：
+1. **B Fact/Claim Option A：** Claim 命题线程与可独立寻址的 Fact Attestation 对象分离。这是 B 在 INT-P0-01 下优先推荐的 CANDIDATE，仍 ADR-BLOCKED。
+2. **D Claim Identity Option A：** 稳定 Claim ID + 不可变 ClaimRevision，用于更正；其对照方案 Option B 是每次更正/后继都创建新 Claim ID。D 将其标为 INT-P1-02 下的 CANDIDATE，等待 Fact/Claim ADR。
+
+两个编号不得混淆。当前 B Fact/Claim Option A 并不会自动批准 D 的 Claim Identity Option A；两者仍是候选决策。前者需要 Architecture Governance + B 批准，后者需要 B ADR 批准及 D 的规范持久化机制确认。
+
+### 14.2 Consumer boundary / 消费者边界
+
+- **D:** Canonical Store accepts only neutral PropositionRef/opaque proposal envelope while INT-P0-01 is blocked. Stable Claim ID + immutable ClaimRevision is an option sketch; Claim/Fact identity, ClaimRevision schema and ConflictSet schema remain ADR-BLOCKED. D owns canonical identity allocation, persistence and commit mechanics only after the semantic ADR is approved.
+- **E:** ExtractionIR and CandidateProposition are compiler IR, not public Claim/Fact schemas. E may emit candidate proposals, source spans, Evidence and Provenance, but cannot assign canonical ClaimRef/FactRef or convert confidence/model output into Verified/Fact.
+- **F:** D remains canonical identity/status authority. F consumes authorized exact version refs and cannot adjudicate disputed claims or upgrade epistemic status. Claim revision identity is explicitly OPEN.
+- **G:** ContextEntry pins exact MemoryVersion; ContextVersion/ChangeSet are G-owned. Context references do not create canonical Claim identity, and a MemoryVersion pin does not imply an approved ClaimRef/ClaimRevisionRef model.
+
+- **D：** INT-P0-01 阻塞期间，Canonical Store 只接受中立 PropositionRef/不透明提案 Envelope。稳定 Claim ID + 不可变 ClaimRevision 只是方案草图；Claim/Fact 身份、ClaimRevision Schema 和 ConflictSet Schema 仍 ADR-BLOCKED。语义 ADR 批准后，D 才负责规范身份分配、持久化和 Commit 机制。
+- **E：** ExtractionIR 和 CandidateProposition 是 Compiler IR，不是公开 Claim/Fact Schema。E 可提交候选提案、Source Span、Evidence 和 Provenance，但不得分配规范 ClaimRef/FactRef，也不得把 Confidence/模型输出转为 Verified/Fact。
+- **F：** D 仍是规范身份/状态权威。F 消费已授权的精确版本引用，不得裁决争议 Claim 或提升认知状态。Claim Revision 身份明确保持 OPEN。
+- **G：** ContextEntry 固定精确 MemoryVersion；ContextVersion/ChangeSet 由 G 拥有。Context 引用不会创建规范 Claim 身份，MemoryVersion Pin 也不意味着 ClaimRef/ClaimRevisionRef 模型已获批准。
+
+B2 remains **IN PROGRESS / NOT PASSED**. The consumer-source review identifies no downstream acceptance that can substitute for the missing formal Fact/Claim decision. B4 schema freeze remains NOT READY.
+
+B2 仍为 **IN PROGRESS / NOT PASSED**。消费者来源审查未发现任何可替代正式 Fact/Claim 决议缺失的下游验收。B4 Schema 冻结仍 NOT READY。
