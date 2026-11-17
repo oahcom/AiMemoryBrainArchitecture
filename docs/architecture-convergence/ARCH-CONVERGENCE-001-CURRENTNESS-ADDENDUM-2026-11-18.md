@@ -15,13 +15,13 @@
 
 The A–E workstream proposals and their integration synthesis are already merged into `main`. They must not be re-created or described as still-open Draft PRs.
 
-At the inventory snapshot used for this addendum, the original ARCH-CONVERGENCE-001 workstream PRs were no longer open. PR-RECOVERY-002's merged audit (#118) recorded 73 merged and 16 closed-unmerged PRs at its audit snapshot. Subsequent focused publication PRs #121 and #122 were opened after that snapshot; #121 has since merged and #122 is this currentness addendum. The repository is not waiting for the original ARCH-CONVERGENCE-001 documentation PRs to merge.
+At the inventory snapshot used for this addendum, the original ARCH-CONVERGENCE-001 workstream PRs were no longer open. PR-RECOVERY-002's merged audit (#118) recorded 73 merged and 16 closed-unmerged PRs at its audit snapshot. Subsequent focused publication PRs #121 and #124 were opened after that snapshot; #121 has since merged and #124 is this currentness addendum. Draft PR #122 was superseded and closed. The repository is not waiting for the original ARCH-CONVERGENCE-001 documentation PRs to merge.
 
 ARCH-CONVERGENCE-001 remains **architecturally unresolved and not implementation-authorized**. Publication/merge of proposal documents is not Owner approval, ADR approval, Gate passage, or executable correctness evidence.
 
 A–E 五个工作流提案及其整合文件已经合入 `main`，不得重新创建，也不得继续描述为尚未合并的 Draft PR。
 
-本补充文件所用清单快照中，ARCH-CONVERGENCE-001 原工作流 PR 已不再开放。PR-RECOVERY-002 的已合并审计 #118 在其审计快照中记录了 73 个已合并 PR 和 16 个关闭未合并 PR。此后又创建了聚焦发布 PR #121 和 #122；#121 已随后合并，#122 即本当前性补充 PR。当前问题不是等待原 ARCH-CONVERGENCE-001 文档 PR 合并。
+本补充文件所用清单快照中，ARCH-CONVERGENCE-001 原工作流 PR 已不再开放。PR-RECOVERY-002 的已合并审计 #118 在其审计快照中记录了 73 个已合并 PR 和 16 个关闭未合并 PR。此后又创建了聚焦发布 PR #121 和 #124；#121 已随后合并，#124 即本当前性补充 PR。Draft PR #122 已被替代并关闭。当前问题不是等待原 ARCH-CONVERGENCE-001 文档 PR 合并。
 
 ARCH-CONVERGENCE-001 在架构层面仍未解决，也未获实现授权。提案文档发布/合并不等于 Owner 批准、ADR 批准、Gate 通过或可执行正确性证明。
 
