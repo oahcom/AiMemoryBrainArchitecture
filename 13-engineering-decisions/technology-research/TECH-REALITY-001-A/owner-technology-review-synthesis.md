@@ -125,3 +125,39 @@
 - Storage must publish a TAR-style technology review or A must obtain an explicit Storage decision package covering the logical v1 profile, PostgreSQL 18.7 qualification, residual Gate A/B/C and L4 boundary.
 - A must refresh the PR #44 exact evidence ledger because its branch pins are older than the current Owner branch heads listed here.
 - The system-level technology recommendation must preserve PostgreSQL 18.7 as leading JF-10 capability candidate, SQLite as a limited local prototype alternative, and no production DB approval.
+
+## 5. 完整中文版本 / Chinese Version
+
+### 5.1 当前 Owner 分支与报告当前性
+
+2026-11-17 直接读取 B–I 当前分支 Tree 后，发现 TAR 报告中记录的 Reviewed HEAD 均早于本次读取的当前分支 HEAD。因此这些报告可以作为设计输入，但不能视为对后续全部修改的当前批准。Storage 当前分支没有独立 TAR-AI-001 技术报告，必须直接审查其 ADR 和能力档案。
+
+| Owner | 当前分支 HEAD | TAR 报告 Blob | 当前性 |
+|---|---|---|---|
+| B | `8f83e4b172bc6bb41df60de58c1884886b22e617` | `fd3e5723b81de10bed806896e4be71ceb7a1669b` | 报告基线过期，需重审 |
+| C | `667bbf84b89dc1a54ddc02852477a74083d2d89b` | `ee42c7192561261789a0c7b5bd16d32c0eaaf14c` | 报告基线过期，需重审 |
+| D | `97e68fbd225bdf0ac71860c01077481afc162d50` | `97c049050d67dd12e0c64ef49b2b05795651608c` | 报告基线过期，需重审 |
+| E | `fdb4f67a83083d995930b88f93975b5ee36080f3` | `c94f6a8e64ba3138a27e6f316f10411ef33b7ab8` | 报告基线过期，需重审 |
+| F | `8d5ef89ce9b1ff1471ffd1a03fe4f289addb0af3` | `124cc9300442b0e3a1e83603910e1c332b4fae48` | 报告基线过期，需重审 |
+| G | `f9ca0ddc36e17f74041506f17039f0202d13042e` | `8b9ea4b4a63f7bbddbefdb0b14cf99943b3e7613` | 报告基线过期，需重审 |
+| H | `f809be092a6c04db7982cc1bdbdd9c88787a4286` | `cb9d1d97604bdb71bc2f5bf47f6392e03f30ba99` | 报告基线过期，需重审 |
+| I | `28df608b075e619563c6367a8a1c171185c1faaf` | `c24f03aae6ce7bc76eaeb1ed33bb24fb7fcac624` | 报告基线过期，需重审 |
+| Storage | `17be31915b06d98d7f822e6e5270b8cde39eb0bb` | 无独立 TAR 报告 | 直接读取 Storage ADR/Dossier |
+
+### 5.2 各 Owner 技术发现
+
+- **B：** CONDITIONAL PASS。建议 Rust Newtype/Enum、规范化关系表、不可变修订、Schema Version 和有限 JSON 扩展。Fact/Claim 身份仍被 ADR-001 阻塞；ActorRef/ScopeRef/EnvironmentRef 语义批准不代表授权或 Wire Schema 批准。
+- **C：** CONDITIONAL PASS。建议语言无关 BMCP、Rust Reference SDK、Sidecar/IPC；HTTP(S) 用于跨语言，Unix Socket/Windows Named Pipe 用于本地。Tier 1 Full Applied 必须有 Agent 最终请求提交 Hook；真实框架 Adapter 未测试。
+- **D：** CONDITIONAL PASS 语义架构，物理实现阻塞。SQLite WAL 仅是本地原型候选；PostgreSQL 18.7 是 JF-10 Prepared-XID 能力资格的领先候选，但不是生产数据库批准。D/E/Storage 端到端竞争与 JF-10 应用集成仍未完成。
+- **E：** CONDITIONAL PASS。本地 Rust Host、Durable Ingress、DB Outbox/Worker、隔离 Inference Worker 可行；默认不需要 Kafka。Accepted、Registered、Staged、Dependency-Registered、Published、Canonical-Committed、Terminal 必须保持不同证据。
+- **F：** CONDITIONAL PASS。先结构化 SQL + FTS5，Tantivy 仅在实测不足时引入，ANN/Rerank 后置。Cache 必须按当前 Authorization 和 Forget 状态重新验证。
+- **G：** CONDITIONAL PASS。G 独自拥有 Context Membership、ContextVersion、ChangeSet、Delivery Intent；SQLite Tables/Transaction/Outbox 是本地原型候选，PostgreSQL 是扩展候选。Context Transaction、Applied、Forget 重连尚未实测。
+- **H：** CONDITIONAL PASS。JSON + RFC 8785 JCS 是互操作原型候选；HTTP(S) 和本地 IPC 是传输候选。CBOR/gRPC 按负载/流式需求比较；Identity、Applied、Forget ACK 语义仍开放。
+- **I：** CONDITIONAL PASS 架构，部署安全与 Global Forget 阻塞。PermissionEpoch 是 I 权威，JF-10 只接受单 PolicyDomain 档案。密钥托管、加密、审计、撤销、Global Forget Inventory 和 Restore 仍需批准/测试。
+- **Storage：** 当前 ADR 补充条款选择每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain 作为 v1 序列化档案，D/Storage 语义权威分离，I Sequencer 和 COC Log 独立。PostgreSQL 18.7 通过有限 CI Prepared-XID/故障恢复能力子测试，但 Gate A 仍 PARTIAL PASS/OPEN，Gate B 需要聚焦精确 Owner 复审，Gate C 延后，JF-10 Runtime P0 OPEN，生产激活未授权。
+
+### 5.3 综合结论
+
+总体候选组合是 Rust 模块化 Host + 关系型事务权威 + DB Outbox/Worker + 结构化/词法检索 + 可选隔离推理 + 语言无关 Agent Protocol。真正关键不是“选哪种 Queue”，而是 D/Storage 在同一逻辑 Serializable Transaction Domain 中如何实现 Admission/Fence/Dependency/Final Visibility。PostgreSQL 18.7 已有引擎能力证据，但不是 Brain 应用集成或生产部署证明。SQLite 仍可用于符合单写者/同主机条件的本地原型，不能声称满足外部 I Sequencer 的 Prepared-XID 恢复。
+
+所有 Owner TAR 报告都是委派静态设计审查，不是独立人工 Owner 签署；其审查 HEAD 也落后于当前分支。正式冻结前必须刷新所有 Owner TAR，并由 Storage 补齐独立技术审查。
