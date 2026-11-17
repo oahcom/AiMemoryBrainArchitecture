@@ -24,6 +24,8 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Architecture invariants | 00-governance/architecture-invariants.md | docs/zh-CN/00-governance/architecture-invariants.md | docs/en/00-governance/architecture-invariants.md | COMPLETE |
 | Canonical terminology | 00-governance/terminology.md | docs/zh-CN/00-governance/terminology.md | docs/en/00-governance/terminology.md | COMPLETE |
 | System component map | 01-system-architecture/component-map.md | docs/zh-CN/01-system-architecture/component-map.md | docs/en/01-system-architecture/component-map.md | COMPLETE |
+| System design principles/interactions/flows/boundaries/quality reader guide | 00-governance/ and 01-system-architecture/ | docs/zh-CN/01-system-architecture/system-design-guide.md | docs/en/01-system-architecture/system-design-guide.md | COMPLETE — synthesis guide only |
+| Detailed design principles, component interactions, data flows, boundaries, quality attributes | Source specifications under 00-governance/ and 01-system-architecture/ | Pending | Existing English sources | NOT STARTED — full source-level translation pending |
 | Subsystem responsibility matrix | 01-system-architecture/responsibility-matrix.md | docs/zh-CN/01-system-architecture/responsibility-matrix.md | docs/en/01-system-architecture/responsibility-matrix.md | COMPLETE |
 | Domain Model reader guide | 02-domain-model/ | docs/zh-CN/02-domain-model/domain-model-guide.md | docs/en/02-domain-model/domain-model-guide.md | COMPLETE — overview guide only |
 | Domain Model detailed contracts (6 source specifications) | 02-domain-model/ | Pending | Existing English sources | NOT STARTED — field-level translation pending |
@@ -55,7 +57,8 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 - Status: COMPLETE.
 
 ### Batch 2 — Governance and system map / 第二批：治理基线与系统地图
-- Status: COMPLETE.
+- Status: COMPLETE for reader guides and core maps.
+- Detailed component interactions, data flows, boundaries, and quality-attribute source documents: NOT STARTED — full source-level bilingual versions remain pending.
 - GOV-DOC-001 adopted in the proposed governance change set; effective as a repository requirement upon merge into the approved main baseline.
 - Architecture principles, invariants, terminology source reconciliation.
 - Component map, responsibility matrix, system workflows.
