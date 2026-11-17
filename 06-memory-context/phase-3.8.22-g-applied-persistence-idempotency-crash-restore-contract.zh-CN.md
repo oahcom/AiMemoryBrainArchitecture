@@ -52,34 +52,40 @@ H 1.2.15 本地测试/CI 仅是候选级证据，其 Callback 接口使用确定
 
 ### 3.1 CSubmitOutcome Identity（C 所有）
 
-对不可变 C Outcome Object，G 至少必须绑定：
+G 必须区分稳定逻辑 Provider Attempt 与每条不可变 C Outcome Observation：
 
-`COutcomeIdentity = (issuer_authority_ref, sequence_namespace_ref, record_ref, record_sequence, ProviderAttemptRef, ProviderAttemptGeneration)`
+`CProviderAttemptIdentity = (issuer_authority_ref, sequence_namespace_ref, ProviderAttemptRef, ProviderAttemptGeneration, ProviderRef, ProviderAccountRef, IdempotencyNamespaceRef, IdempotencyKeyRef, RequestDigest)`
 
-该对象还必须绑定精确的 `ProviderRef`、认证后的 Provider Account/Tenant、Endpoint/Model/API Operation、`IdempotencyNamespaceRef`、`IdempotencyKeyRef`、`FinalRequestBoundaryRef`、`RequestDigest`、分配后实际的 `ActualInferenceRequestId`、`CausalOrderTransactionRef`、COC Intent/Reservation Ref，以及适用 Outcome/Evidence Ref。
+`COutcomeRecordIdentity = (issuer_authority_ref, sequence_namespace_ref, record_ref, record_sequence)`
 
-- `record_ref` 与不可变 C Sequence/Attempt 元组标识 C Record。
-- `payload_digest`、`OutcomeEvidenceDigest`、`RequestDigest` 是内容/完整性值，不得替代 C Identity。
-- 相同 C Identity + 相同不可变 C Payload Digest 表示同一 Record。
-- 相同 C Identity + 不同 Payload Digest，或不可变元组发生变化，属于硬完整性冲突，必须隔离。
-- 迟到 Receipt 或 Same-Key Lookup 必须由 C 追加为新的不可变 Observation/Successor，并通过 C 的 Prior/Supersedes/Reconciliation Ref 关联；不得改写原 C Record。
+C 对象还必须绑定精确 `AdapterRef`、`EndpointRef`、API Operation、`FinalRequestBoundaryRef`、`RequestDigest`、分配后实际的 `ActualInferenceRequestId`、`CausalOrderTransactionRef`、COC Intent/Reservation Ref，以及适用 Outcome/Evidence Ref。
+
+- `CProviderAttemptIdentity` 在同一个逻辑 Provider Attempt 的追加式 Outcome Observation 之间保持稳定。
+- `COutcomeRecordIdentity` 标识一条不可变 C Ledger Record。`payload_digest`、`OutcomeEvidenceDigest`、`RequestDigest` 是内容/完整性值，不是 Identity 替代物。
+- 相同 COutcomeRecordIdentity + 相同不可变 C Payload Digest 表示同一 Record。相同 Record Identity + 不同 Payload Digest 或不可变 Record 元组变化，属于硬完整性冲突，必须隔离。
+- 迟到 Receipt 或 Same-Key Lookup 必须由 C 追加为新的不可变 Observation/Successor，具有新的 COutcomeRecordIdentity，并通过 C 的 Prior/Supersedes/Reconciliation Ref 明确关联到同一 CProviderAttemptIdentity；不得改写原 C Record 或创建新的 Provider Attempt。
 - `UNKNOWN` 和 `IN_DOUBT` 是非终态，必须保留同一个 ProviderAttempt 和 Provider Idempotency Key；禁止 Retry-as-New。
 
 只有 C 的确定成功 Handoff Outcome（当前为 `HANDOFF_ACCEPTED`，且所有必需 Provider/Participant Proof 齐全）才具备进入 Full Applied 评估的资格。`HANDOFF_REJECTED`、`NOT_INVOKED`、`UNKNOWN` 和 `IN_DOUBT` 均不得产生 Full Applied。
 
 ### 3.2 H Evidence Identity（H 所有的协议证据）
 
-对于 G 的跨 Owner Applied Join，建议采用以下稳定 H Evidence Identity：
+G 必须区分稳定 H Delivery Binding、每一种 Evidence Kind 与每条不可变 H Ingress Observation：
 
-`HEvidenceIdentity = (adapter_instance_ref, runtime_session_ref, delivery_id, delivery_attempt_id, inference_request_id, final_request_boundary_id, evidence_kind, adapter_capability_epoch)`
+`HDeliveryBindingIdentity = (adapter_instance_ref, runtime_session_ref, delivery_id, delivery_attempt_id, inference_request_id, final_request_boundary_id, adapter_capability_epoch)`
 
-这是**建议的标准化消费方元组**。共享冻结前，C 和 H 必须明确确认其精确字段名、Requiredness、Canonicalization，以及它与当前 H 1.2.15 Schema/Validator 的映射。G 不声称现有 H Schema 或 Validator 已经冻结该元组。
+`HEvidenceIdentity = (HDeliveryBindingIdentity, evidence_kind)`
 
-H Identity 元组不得包含 Digest。对应的 Canonical H Payload/P0 Digest 必须单独存储和比较：
+`HObservationRecordIdentity = (issuer_ref, sender_authority_ref, sender_subject_ref, message_id, message_nonce, signing_sequence_namespace_ref, signing_record_sequence)`
 
-- 相同 H Identity + 相同 H P0 Digest + 相同且经过认证的不可变 Receipt/Result Ref：精确重放，返回原始持久化 H 处置结果；
-- 相同 H Identity + 不同 H P0 Digest：`CONFLICT`，隔离两份 Observation，禁止 Last-Write-Wins；
-- H Identity 发生变化（例如新的 DeliveryAttempt、RuntimeSession 或 CapabilityEpoch）即构成不同 Evidence Identity，不得重新绑定到旧 Applied Attempt。
+以上均为**建议的标准化消费方元组**。共享冻结前，C 和 H 必须明确确认精确字段名、Requiredness、Canonicalization，以及它们与当前 H 1.2.15 Schema/Validator 的映射。G 不声称现有 H Schema 或 Validator 已经冻结这些元组。
+
+HDeliveryBindingIdentity 和 HEvidenceIdentity 均不包含 Digest。H P0 Digest 是不可变内容，必须与 HObservationRecordIdentity 分开比较：
+
+- 相同 HObservationRecordIdentity + 相同 H P0 Digest + 相同且经过认证的不可变 Receipt/Result Ref：精确重放，返回原始持久化 H 处置结果；
+- 相同 HObservationRecordIdentity + 不同 H P0 Digest：`CONFLICT`，隔离两份 Observation，禁止 Last-Write-Wins；
+- 只有当 H 的认证 Owner Ledger 明确将新的 HObservationRecordIdentity 关联到同一个 Delivery Binding 时，才允许在相同 HDeliveryBindingIdentity 下追加 Successor Observation；该 Observation 是新的 Evidence Revision，不是新的 G Applied Attempt；
+- HDeliveryBindingIdentity 变化（例如新的 DeliveryAttempt、RuntimeSession 或 CapabilityEpoch）即构成不同逻辑 Delivery，不得重新绑定到旧 Applied Attempt。
 
 H Ingress Replay Protection 是独立层。H 的 Message Identity/Nonce 与 H P0 Digest 用于保护认证 Envelope Ingress/Replay；它们不是 G Applied Identity，也不是 C ProviderAttempt Identity。H 的 `IDEMPOTENT_REPLAY` 只证明同一 H Ingress Result 获得授权重放，不证明产生了新的 G Applied Commit。
 
@@ -101,7 +107,7 @@ H Ingress Replay Protection 是独立层。H 的 Message Identity/Nonce 与 H P0
 
 G 必须为预期 Applied Fact 派生一个稳定逻辑身份：
 
-`GAppliedIdentity = (ContextId, ContextVersion, DeliveryId, DeliveryAttemptId, InferenceRequestId, FinalRequestBoundaryId, COutcomeIdentity, HEvidenceIdentity, COCParticipantIdentity)`
+`GAppliedIdentity = (ContextId, ContextVersion, DeliveryId, DeliveryAttemptId, InferenceRequestId, FinalRequestBoundaryId, CProviderAttemptIdentity, HDeliveryBindingIdentity, COCParticipantIdentity)`
 
 持久化唯一键为：
 
@@ -123,8 +129,8 @@ Identity Key 不包含 Payload Digest、Provider Receipt Digest、H P0 Digest、
 
 Evidence Set 必须按适用情况包含：
 
-- 精确 CSubmitOutcome Record Ref、C Identity 元组、C Payload Digest、C RequestDigest 和 Provider Outcome Evidence Ref；
-- 精确 H Evidence Identity、H Schema Artifact Revision、H P0 Digest、认证 Receipt/Result Ref、Materialization/Managed-Region Inventory 与 Digest；
+- 精确 COutcomeRecordIdentity、其 C Payload Digest、稳定 CProviderAttemptIdentity、C RequestDigest 和 Provider Outcome Evidence Ref；
+- 精确 H HEvidenceIdentity 与 HObservationRecordIdentity、H Schema Artifact Revision、H P0 Digest、认证 Receipt/Result Ref、Materialization/Managed-Region Inventory 与 Digest；
 - 精确 COC Transaction/Participant/Reservation/GID Identity、Terminal Proof Ref/Digest、Recovery-Batch Ref/Digest、Participant Completeness 与 Owner High-Water Vector；
 - I Decision/Receipt/PermissionEpoch Proof Ref 与 Digest；
 - D Fence Generation、Lineage Proof、Request Cutoff 和 Effective Position，分别保存，不得合并；
@@ -137,10 +143,10 @@ Evidence Set 必须按适用情况包含：
 |---|---|
 | 相同 GAppliedIdentityKey + 相同 Revision Number + 相同 EvidenceSetDigest | 返回原始持久化处置和 Receipt；不得创建第二条 Applied Row，不得改写时间戳 |
 | 相同 Key + 相同 Revision Number + 不同 EvidenceSetDigest | 硬冲突；隔离两份 Evidence Set；禁止覆盖 |
-| 相同 H EvidenceIdentity + 不同 H P0 Digest | H Evidence Conflict；G 禁止晋升 |
-| 相同 COutcomeIdentity + 不同 C Payload Digest 或不可变 Request/Attempt 元组 | C Evidence Conflict；G 禁止晋升 |
+| 相同 HObservationRecordIdentity + 不同 H P0 Digest | H Evidence Conflict；G 禁止晋升 |
+| 相同 COutcomeRecordIdentity + 不同 C Payload Digest 或不可变 Record 元组 | C Evidence Conflict；G 禁止晋升 |
 | 相同 COCParticipantIdentity + 不同 Participant/Terminal Digest 或矛盾 Terminal Result | COC/Storage Conflict；G 禁止晋升 |
-| 新的、有效的 C Successor Observation 或 H Evidence Revision，且明确关联同一逻辑 Attempt | 追加新的 Evidence Revision；保留旧 Revision 与处置；重新评估同一个 GAppliedIdentity，绝不创建新 Attempt Identity |
+| 新的、有效的 C Successor Observation 或 H Successor Observation，且明确关联同一 CProviderAttemptIdentity/HDeliveryBindingIdentity | 追加新的 Evidence Revision；保留旧 Revision 与处置；重新评估同一个 GAppliedIdentity，绝不创建新 Attempt Identity |
 | 已提交 Full Applied 后到达迟到 Evidence | 只追加历史 Enrichment；不得改写原 Applied Record 或追溯修改 Predicate Snapshot |
 
 只有来源权威签发了新的不可变 Successor/Observation，并且它关联到同一原始 Attempt 时，才允许创建新的 Evidence Revision。调用方不得把同一 Source Identity 下的篡改字节标记为新 Revision。
@@ -239,8 +245,8 @@ Current Use 是独立 Projection，在每次 Protected Use 前以及每次 Final
 
 - `g_applied_identity_key`、`identity_canonicalization_profile`、`identity_schema_revision`；
 - 精确 ContextId/ContextVersion、DeliveryId/DeliveryAttemptId、InferenceRequestId、FinalRequestBoundaryId；
-- COutcomeIdentity、CSubmitOutcomeRef、CSubmitOutcomeDigest、RequestDigest、ProviderAttemptRef/Generation、Provider Idempotency Namespace/Key Ref；
-- HEvidenceIdentity、H Schema Artifact Revision、H P0 Digest、Authenticated H Receipt/Result Ref、Adapter/Runtime/Session/CapabilityEpoch；
+- CProviderAttemptIdentity、COutcomeRecordIdentity、CSubmitOutcomeRef、CSubmitOutcomeDigest、RequestDigest、ProviderAttemptRef/Generation、Provider Idempotency Namespace/Key Ref；
+- HDeliveryBindingIdentity、HEvidenceIdentity、HObservationRecordIdentity、H Schema Artifact Revision、H P0 Digest、Authenticated H Receipt/Result Ref、Adapter/Runtime/Session/CapabilityEpoch；
 - COCParticipantIdentity、CausalOrderTransactionRef、Participant Intent/Reservation Ref、PreparedParticipantRef、PreparedTransactionGID、DB Incarnation、ParticipantTupleDigest；
 - COC Terminal Proof、Recovery-Batch Proof、Participant Completeness 与 Owner High-Water Ref/Digest；
 - I Authorization/Receipt/PermissionEpoch Ref 与 Digest；
@@ -258,8 +264,8 @@ Current Use 是独立 Projection，在每次 Protected Use 前以及每次 Final
 |---|---|---|
 | G-AP-P01 | 相同 Identity/Revision/Digest 提交两次 | 只有一条 Durable Applied Fact；第二次返回原 Receipt |
 | G-AP-P02 | 相同 Identity/Revision 但 Aggregate Digest 改变 | Conflict/Quarantine；禁止覆盖 |
-| G-AP-P03 | 相同 H EvidenceIdentity 但 H P0 Digest 改变 | Conflict/Quarantine；禁止 Full Applied |
-| G-AP-P04 | 相同 COutcomeIdentity 但 C Payload Digest 改变 | Conflict/Quarantine；禁止 Full Applied |
+| G-AP-P03 | 相同 HObservationRecordIdentity 但 H P0 Digest 改变 | Conflict/Quarantine；禁止 Full Applied |
+| G-AP-P04 | 相同 COutcomeRecordIdentity 但 C Payload Digest 改变 | Conflict/Quarantine；禁止 Full Applied |
 | G-AP-P05 | 相同 COC Participant Identity 但 Terminal Digest/Outcome 矛盾 | Conflict/UNKNOWN；禁止 Full Applied |
 | G-AP-P06 | Provider Side Effect 可能发生后 C 为 UNKNOWN/IN_DOUBT | 同一 ProviderAttempt/Key；禁止 Full Applied；保持 Barrier |
 | G-AP-P07 | Provider Handoff 后、C Outcome 持久化前崩溃 | IN_DOUBT；只允许 Same-Key Recovery |
