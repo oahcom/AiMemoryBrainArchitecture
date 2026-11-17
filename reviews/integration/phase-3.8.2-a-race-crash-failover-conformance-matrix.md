@@ -160,3 +160,12 @@ H run [44043100543](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/
 ### 7.5 中文测试边界
 
 H 的 97 项候选测试包括 HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26 和 XLANG 1，最近运行 44043100543 全部通过。新增 Schema 测试只覆盖结构字段；TPH 是参考模型；XLANG 是固定测试向量。它们都没有执行本矩阵中的 36 项物理 Race、Crash/ACK Loss、Failover/Restore 场景。所有物理场景仍为 NOT EXECUTED，不能将 H 的 97 项 PASS 计入物理符合性。
+
+
+### 7.6 H 101-test boundary / 101 项测试边界
+
+H Run [44044062849](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44044062849) reports 101 candidate methods PASS: HRC 25 + JPF 19 + WIRE 10 + SCHEMA 16 + TPH 26 + XLANG 1 + CRYPTO 4. CRYPTO-01..04 compare Python/Node JCS and Ed25519 on a fixed TEST-ONLY seed/vector. This is not production key/trust approval and does not run any of the 36 physical race/crash/failover/restore cases in this matrix. All physical cases remain NOT EXECUTED.
+
+### 7.7 中文测试边界
+
+H 的 101 项候选测试包括 HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1、CRYPTO 4。CRYPTO 测试比较 Python/Node 的 JCS 与 Ed25519 测试实现，但使用固定测试 Seed，不构成生产密钥或 Trust Profile 批准。它们没有执行本矩阵中的 36 项物理 Race/Crash/Failover/Restore 场景。所有物理场景仍为 NOT EXECUTED。
