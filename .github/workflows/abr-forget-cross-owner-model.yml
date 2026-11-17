@@ -1,0 +1,33 @@
+name: ABR Forget Cross-Owner Model
+
+on:
+  push:
+    branches:
+      - review/architecture-breakthrough-integration-2026-11-18
+    paths:
+      - "reviews/architecture-breakthrough/integration/model/**"
+      - ".github/workflows/abr-forget-cross-owner-model.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  bounded-model:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run bounded explicit-state model
+        working-directory: reviews/architecture-breakthrough/integration/model
+        run: python forget_cross_owner_model.py
+      - name: Run model regression tests
+        working-directory: reviews/architecture-breakthrough/integration/model
+        run: python -m unittest -v test_forget_cross_owner_model.py
+      - name: Run overlapping two-operation Forget model
+        working-directory: reviews/architecture-breakthrough/integration/model
+        run: python overlapping_forget_model.py
+      - name: Run overlapping Forget regression tests
+        working-directory: reviews/architecture-breakthrough/integration/model
+        run: python -m unittest -v test_overlapping_forget_model.py
