@@ -4,7 +4,7 @@
 - Delivery stage: **DOCUMENTARY + LOGICAL-MODEL EVIDENCE DELIVERED**
 - Freeze disposition: **BLOCKED — NOT FROZEN / NOT IMPLEMENTED / NOT DEPLOYMENT-ACCEPTED**
 - Snapshot branch: `session-i-security-governance-2026-11-16`
-- Snapshot HEAD: `9942e41384c5aeebbc272033275358a9bf9e19b1`
+- Snapshot HEAD: `93aca8b61ef9ee80126a5f1bced0a46bb194b02c`
 - Owner technology review Blob: `c24f03aae6ce7bc76eaeb1ed33bb24fb7fcac624`
 - Provenance: assistant-authored delegated I-role delivery at the user's direction; not an independent human Owner signature or cryptographic attestation.
 
@@ -68,3 +68,17 @@ I 已交付身份/授权权威、PermissionEpoch、全局清单与遗忘完成�
 **Not delivered:** production security implementation, cryptographic freeze, complete global inventory, real target deletion, production restore proof or deployment acceptance.
 
 **Decision:** I evidence delivery is complete for this documentary/logical stage. I freeze-readiness remains **BLOCKED** until I-FR-01 through I-FR-07 are satisfied.
+
+## 7. Exact RecoveryJoin cross-owner evidence refresh / RecoveryJoin 精确证据刷新
+
+- I exact RecoveryJoin trust/currentness review Blob: `4a72cecd7769be7017b699ab102b127fab516101`.
+- H RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- H semantic validator contract: `b3218298f58cff9b92cb1c38e453af6fd4d0dd50`.
+- HRC/JPF suite after JPF-08 fixture correction: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- H wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
+- H schema suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
+- Latest H CI: [44040312711](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040312711), job `133893012456`, **66/66 PASS**.
+
+I recognizes the HRC/RecoveryJoin pass as candidate-model/schema/wire evidence only. I-RJ-01/02 typed field-shape requirements are partially addressed. I-RJ-03 owner-signed empty/out-of-scope proofs, I-RJ-04 exact I/Storage terminal pairing against real authority ledgers, I-RJ-05 approved crypto/trust profile, real PolicyDomain sequencer and release CAS remain OPEN.
+
+This update does not approve a production trust profile, revoke/commit ordering implementation, Global Forget completion, production activation or TAB-001 freeze.
