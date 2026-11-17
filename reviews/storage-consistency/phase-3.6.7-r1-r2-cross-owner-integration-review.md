@@ -324,3 +324,36 @@ R1/R2 may be proposed for closure only after:
 6. A publishes a fresh exact-blob integration disposition.
 
 **Disposition remains: R1 OPEN / R2 OPEN / Issue #14 OPEN / JF-10 P0 OPEN.** No implementation/conformance PASS, deployment, protocol freeze, Gate B/C authorization or production activation is claimed.
+
+
+## 9. Phase 3.6.10 — H semantic validator and A exact-version re-review
+
+### Exact new evidence
+
+- H Recovery Cutoff schema 1.0.4: `d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1`
+- H semantic validator contract: `7e6f67518e476fe9798f23a87798c7a3eb352f3c`
+- H delegated exact-version disposition: `1de7d30f3ca81bc579b396acb0f05e2ead5fe9dd`
+- I delegated exact-version re-review: `a0fee9ef41c52ea3948286e6ec9a348cc1b17168`
+- D delegated exact-version re-review: `e03ca0db209fc8ac5b985e114a31c21fbb136859`
+- C delegated exact-version re-review: `694b19dd5c52db1b8206c0f5986464bd64194cbd`
+- A delegated exact-version integration review: `a298e54f69ea04fb81a87a062b32c0d712afdf44`
+
+All role dispositions are explicitly marked as coordinating-session simulations, not independent human Owner signatures.
+
+### Updated technical assessment
+
+H's validator contract now specifies six validator families plus RecoveryJoin, with explicit behavior for:
+- request/admission split ledgers and owner-specific high-waters;
+- canonical empty/non-empty set proof;
+- complete quorum-prefix participant enumeration;
+- batch chaining and exact owner snapshot digests;
+- bidirectional owner admission ↔ COC participant joins;
+- JF-10 cross-schema same-participant/same-XID proof joins;
+- owner-only release currentness CAS and exact I/D/C release cardinality;
+- UNKNOWN/IN_DOUBT fail-closed behavior.
+
+The H schema remains a structural candidate; semantic validators and HRC-01..25 are specified but NOT IMPLEMENTED / NOT RUN. The role simulations are conditional and cannot close the independent Owner decision gate.
+
+A's latest simulated exact-version integration disposition accepts the architecture direction but retains R1/R2 OPEN. This is consistent with the evidence boundary: documentation completeness has improved, but authoritative signatures, real owner ledgers, concrete C egress adapter behavior and executable fault proof do not exist in this review record.
+
+**Current status remains: R1 OPEN / R2 OPEN / Issue #14 OPEN / JF-10 P0 OPEN.**
