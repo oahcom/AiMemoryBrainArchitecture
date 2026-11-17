@@ -200,10 +200,29 @@ class Protocol:
         self.private_unknown.discard(operation_id)
         return receipt
 
+    def _validate_unknown_binding(self, binding):
+        if not isinstance(binding, tuple) or len(binding) != 5:
+            raise Rejected("UNKNOWN operation binding must be an immutable five-tuple")
+        auth_id, publication_id, storage_id, d_proof, i_commit_won_proof = binding
+        if self.authorizations.get(auth_id) != (publication_id, storage_id):
+            raise Rejected("UNKNOWN operation authorization binding mismatch")
+        publication = self.publication_participants.get(publication_id)
+        if publication is None or publication[1] != storage_id:
+            raise Rejected("UNKNOWN operation publication/Storage participant mismatch")
+        storage = self.storage_participants.get(storage_id)
+        if storage is None or storage[0] != publication[0]:
+            raise Rejected("UNKNOWN operation Storage participant belongs to another work")
+        if d_proof != ("D_ADMITTED", publication_id, storage_id):
+            raise Rejected("UNKNOWN operation D admission proof mismatch")
+        if i_commit_won_proof != ("I_COMMIT_WON", auth_id, publication_id, storage_id):
+            raise Rejected("UNKNOWN operation I COMMIT_WON proof mismatch")
+        return auth_id, publication_id, storage_id
+
     def mark_unknown(self, operation_id, binding=None):
         if operation_id in self.outcomes or operation_id in self.receipts:
             raise Rejected("cannot mark a terminal operation UNKNOWN")
         if binding is not None:
+            self._validate_unknown_binding(binding)
             prior = self.operation_bindings.get(operation_id)
             if prior is not None and prior != binding:
                 raise Rejected("UNKNOWN operation identity rebound")
@@ -215,16 +234,21 @@ class Protocol:
             raise Rejected("NO_PUBLICATION reconciliation requires an UNKNOWN operation")
         if operation_id in self.outcomes or operation_id in self.receipts:
             raise Rejected("operation already has a terminal outcome")
+        if not isinstance(proof, StorageNoPublicationProof):
+            raise Rejected("NO_PUBLICATION proof must use the typed test-seam record")
         binding = self.operation_bindings.get(operation_id)
         if binding is None:
             raise Rejected("UNKNOWN operation has no immutable binding to reconcile")
+        auth_id, publication_id, storage_id = self._validate_unknown_binding(binding)
         if proof.operation_id != operation_id or proof.operation_binding != binding:
             raise Rejected("NO_PUBLICATION proof does not bind the exact UNKNOWN operation")
-        if len(binding) != 5 or binding[1] != proof.publication_id or binding[2] != proof.storage_id:
+        if publication_id != proof.publication_id or storage_id != proof.storage_id:
             raise Rejected("NO_PUBLICATION proof participant identity mismatch")
+        if publication_id in self.visibility or operation_id in self.outbox or auth_id in self.consumed:
+            raise Rejected("local state contradicts NO_PUBLICATION absence proof")
         if not proof.complete():
             raise Rejected("Storage NO_PUBLICATION proof is incomplete")
-        outcome = ("NO_PUBLICATION", operation_id, proof.publication_id, proof.storage_id)
+        outcome = ("NO_PUBLICATION", operation_id, publication_id, storage_id)
         self.outcomes[operation_id] = outcome
         self.storage_no_publication_proofs[operation_id] = proof
         self.private_unknown.remove(operation_id)
@@ -510,6 +534,48 @@ class PublicationProtocolTests(unittest.TestCase):
             with self.subTest(proof=proof):
                 with self.assertRaises(Rejected):
                     p.resolve_no_publication("op-1", proof)
+                self.assertIn("op-1", p.private_unknown)
+                self.assertNotIn("op-1", p.outcomes)
+
+    def test_no_publication_unknown_binding_must_match_registered_participants(self):
+        p = self.prepared()
+        args = self.commit_args()
+        binding = (args["auth_id"], args["publication_id"], args["storage_id"],
+                   args["d_proof"], args["i_commit_won_proof"])
+        invalid_bindings = (
+            (args["auth_id"], args["publication_id"], "storage-substituted",
+             args["d_proof"], args["i_commit_won_proof"]),
+            (args["auth_id"], args["publication_id"], args["storage_id"],
+             ("D_ADMITTED", args["publication_id"], "storage-substituted"),
+             args["i_commit_won_proof"]),
+            (args["auth_id"], args["publication_id"], args["storage_id"],
+             args["d_proof"],
+             ("I_COMMIT_WON", "other-auth", args["publication_id"], args["storage_id"])),
+        )
+        for invalid in invalid_bindings:
+            with self.subTest(binding=invalid):
+                with self.assertRaises(Rejected):
+                    p.mark_unknown("op-1", invalid)
+                self.assertNotIn("op-1", p.private_unknown)
+        p.mark_unknown("op-1", binding)
+        self.assertIn("op-1", p.private_unknown)
+
+    def test_no_publication_rejects_local_state_contradicting_absence_proof(self):
+        for state_name in ("visibility", "outbox", "consumed"):
+            with self.subTest(state=state_name):
+                p = self.prepared()
+                args = self.commit_args()
+                binding = (args["auth_id"], args["publication_id"], args["storage_id"],
+                           args["d_proof"], args["i_commit_won_proof"])
+                p.mark_unknown("op-1", binding)
+                if state_name == "visibility":
+                    p.visibility["publication-1"] = "VISIBLE"
+                elif state_name == "outbox":
+                    p.outbox["op-1"] = ("PUBLISH", ("RECEIPT", "op-1"))
+                else:
+                    p.consumed.add("auth-1")
+                with self.assertRaisesRegex(Rejected, "local state contradicts"):
+                    p.resolve_no_publication("op-1", p.no_publication_proof())
                 self.assertIn("op-1", p.private_unknown)
                 self.assertNotIn("op-1", p.outcomes)
 
