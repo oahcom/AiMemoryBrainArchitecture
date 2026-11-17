@@ -50,3 +50,27 @@ OpenAI Responses 官方资料说明 SSE 流式响应和 Structured Outputs 的 J
 Hermes 是具有 Provider Resolver、Tool Registry、SQLite Session、Gateway 等模块的 Python Agent Runtime，可供架构参考，但不是 Brain Core。LangGraph 提供 Checkpoint/Interrupt/HITL，恢复时节点可能从头执行，因此副作用必须具备幂等保护。PydanticAI 提供类型化工具、重试和 Deferred Tool Result；重试预算是框架行为，不代表副作用安全。OpenAI Agents SDK 提供工具、MCP、Session、HITL 和内建 Tracing，但 Tracing 不能替代 Brain Audit。AutoGen 生态正在演进，不应未经版本/支持审查冻结依赖。MCP 是工具/资源集成协议，不是身份授权权威。
 
 候选采用分层 Capability Registry 加 Provider 专属 Adapter。标准化 Request/Attempt/Evidence、错误分类、流事件封套和可用 Usage；保留 Provider 原生 Response ID、Model Version、安全拦截、多模态、缓存计量、Batch、取消和 Tool Call ID。能力缺失必须显式降级或拒绝，不能静默模拟保证。
+
+
+
+## Additional official-source verification — 2026-11-18 / 官方来源补充核验
+
+### Newly verified provider facts / 新核验 Provider 事实
+- **Anthropic Messages API:** current reference identifies API version `2026-10-21` and `POST /v1/messages`; `stream=true` streams server-sent events. The response exposes a message id, model, stop_reason and usage (including cache counters). Client tool definitions may yield `tool_use` blocks; the client executes tools and returns `tool_result`. Batch cancellation can enter `canceling` while in-progress non-interruptible requests may still complete. A stable request-id header and general synchronous cancellation guarantee were not verified.
+- **Ollama Chat API:** `POST /api/chat`; `stream` defaults true; request supports optional `tools` and `format` as JSON or JSON Schema. Response reports `done`, `done_reason`, total/load/eval durations and token counts. The inspected endpoint page does not establish a provider operation ID or cancellation/idempotency guarantee.
+- **Hugging Face Inference Providers:** requests pass through an HF router; for language models OpenRouter selects a serving provider and can retry on another provider if it fails. Routing considers price, speed/TTFT and reliability; provider can change over time. This is a distinct router-level retry/failover layer and must not be confused with a C client Attempt or Brain idempotency. The documentation lists Chat Completion, Responses API (beta), Messages, Tool Calling, Structured Outputs, Prompt Caching and Embeddings; exact support remains model/provider dependent.
+- **MCP Specification 2025-11-25:** JSON-RPC 2.0 host/client/server roles, stateful connections and capability negotiation; resources, prompts and tools; cancellation, progress, error reporting and logging. Security principles explicitly cover user consent, privacy and tool safety; tools can represent arbitrary code execution. MCP is a tool/context protocol, not a Brain identity or canonical Memory authority.
+
+### Revised provider status / 修订状态
+Anthropic, Ollama and Hugging Face are no longer marked wholly NOT VERIFIED: the above endpoint/routing facts are now source-inspected. Their full error taxonomy, stable request identifiers, per-model capability coverage, cancellation semantics, SDK release/license and idempotency behavior remain **NOT VERIFIED** and require per-version conformance tests.
+
+### 中文补充
+Anthropic 当前 Messages API 参考版本为 `2026-10-21`，接口为 `POST /v1/messages`；`stream=true` 使用 SSE。响应包含 Message ID、Model、Stop Reason 和 Usage（含缓存计量）。客户端 Tool 定义可能产生 `tool_use`，实际工具由客户端执行，再以 `tool_result` 返回。Batch 取消进入 canceling 后，已在执行且不可中断的请求仍可能完成。稳定 Request-ID Header 和通用同步取消保证本轮未核实。
+
+Ollama `POST /api/chat` 默认启用 Streaming，支持可选 Tools 和 JSON/JSON Schema Format；响应提供 done、done_reason、总耗时/加载/推理耗时和 Token 数量。当前检查的接口页没有证明 Provider Operation ID、取消或幂等保证。
+
+Hugging Face Inference Providers 通过 Router 处理请求；语言模型由 OpenRouter 选择实际 Provider，失败时可能切换另一个 Provider。路由会考虑价格、速度/首 Token 时间和可靠性。该路由器重试是独立于 C Client Attempt 和 Brain 幂等性的另一层。文档列出 Chat Completion、Responses API beta、Messages、Tool Calling、Structured Outputs、Prompt Caching 和 Embeddings，但具体能力依赖模型和 Provider。
+
+MCP 2025-11-25 规范使用 JSON-RPC 2.0，定义 Host/Client/Server、Stateful Connection、能力协商、Resources/Prompts/Tools，并提供 Cancellation、Progress、Error Reporting 和 Logging。安全原则明确要求用户同意、数据隐私和 Tool 安全；Tool 可能代表任意代码执行。MCP 不是 Brain 身份或 Canonical Memory 权威。
+
+因此 Anthropic、Ollama 和 Hugging Face 不再整体标记为 NOT VERIFIED；上述具体事实已核验。但完整错误分类、稳定请求标识、逐模型能力、取消语义、SDK 版本/许可证和幂等行为仍未核验。

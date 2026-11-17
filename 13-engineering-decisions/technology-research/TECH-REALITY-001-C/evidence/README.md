@@ -50,3 +50,16 @@ OpenTelemetry Context Propagation 说明 Trace Context 跨进程传播，以及�
 项目证据：main HEAD b3c666...；A PR #45 Draft、A Review PR #56 REVISE；B PR #55 Draft；D/G/H/I/Storage 使用精确 Branch/Blob Pin。H 1.2.15 和 Storage v3.3.2 不匹配，G Applied 仍阻塞。
 
 本轮未完整核验 Anthropic Messages、Ollama、Hugging Face Inference、AutoGen 当前包版本、全部 SDK 许可证、Provider Cancellation/Idempotency 语义及完整 MCP 安全配置。没有来源不代表能力不存在。
+
+
+
+## Additional official sources verified / 新增已核验官方来源
+- Anthropic Messages API reference (API version 2026-10-21): https://platform.claude.com/docs/en/api/http/beta/messages/create
+- Ollama Chat endpoint: https://docs.ollama.com/api/chat
+- Hugging Face Inference Providers: https://huggingface.co/docs/inference-providers/index
+- Hugging Face provider routing/failover: https://huggingface.co/docs/inference-providers/routing
+- MCP specification 2025-11-25: https://modelcontextprotocol.io/specification/2025-11-25
+- OpenTelemetry GenAI conventions landing/migration page: https://opentelemetry.io/docs/specs/semconv/gen-ai/ (page says moved; current docs registry shows semantic conventions 1.45.0)
+
+### 中文说明
+上述来源补齐了 Anthropic Messages、Ollama Chat、Hugging Face Router/Failover、MCP 2025-11-25 和 OTel GenAI 规范迁移状态。它们只证明所列官方文档明确记载的能力，不证明完整 API 等价、稳定 Request ID、统一取消、幂等或许可证状态。上述未明确的内容仍需固定版本后逐项验证。

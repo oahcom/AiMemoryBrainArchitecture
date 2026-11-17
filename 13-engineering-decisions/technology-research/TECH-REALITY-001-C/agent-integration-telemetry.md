@@ -50,3 +50,10 @@ TraceId/SpanId/ParentSpanId 表示分布式追踪；CorrelationId 表示业务�
 OTel W3C Trace Context 用于传播 traceparent/tracestate。Baggage 是任意跨服务数据，不得放 PII、Secret、Tenant ID 或敏感 Memory。向不可信 Provider 传播内部 Trace/Baggage 必须受控。保留期限、访问、删除和 Legal Hold 由 I 决定。Trace Dashboard 不是 Audit Proof。
 
 候选使用 OpenTelemetry API/SDK、W3C Trace Context、结构化脱敏日志和 Prometheus 兼容聚合指标。Collector/Grafana 是部署候选，不是强制架构。Rust SDK/Exporter 版本和数据驻留策略仍待验证。
+
+
+
+## OTel semantic convention currentness / OTel 语义规范当前性
+The previously linked OpenTelemetry GenAI semantic-conventions page now explicitly says the conventions moved to the dedicated GenAI semantic-conventions repository and that the old page is no longer maintained. The current OTel documentation shell identifies semantic conventions release 1.45.0. Treat GenAI span/attribute names as versioned conventions to pin, not as a timeless stable schema. C's privacy allowlist and I's audit policy remain project-owned regardless of OTel conventions.
+
+OpenTelemetry GenAI 语义规范原页面现明确说明规范已迁移至独立 GenAI semantic-conventions 仓库，旧页面不再维护；当前文档站标识的 Semantic Conventions 版本为 1.45.0。GenAI Span/Attribute 名称必须按版本固定，不能当作永恒不变的 Schema。无论采用何种 OTel 规范版本，C 的隐私白名单和 I 的 Audit Policy 仍由项目自身决定。
