@@ -212,7 +212,7 @@ def owner_reconciliation_root(manifest, owner):
 
 def validate_release(r,b,m):
     owner=r.get("owner_kind")
-    if owner not in {"I","D","C"} or r.get("release_type")!="OUTAGE_ADMISSION_GATE_ONLY":
+    if owner not in {"I","D","C"} or r.get("release_type")!="OUTAGE_ADMISSION_RELEASE_ONLY":
         return INVALID
     snapshots=b.get("owner_snapshots")
     if not isinstance(snapshots,dict) or owner not in snapshots:
