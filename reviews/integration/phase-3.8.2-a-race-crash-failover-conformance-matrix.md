@@ -18,7 +18,7 @@
 | H | HRC semantic validator contract | session-h-bmcp-protocol | b3218298f58cff9b92cb1c38e453af6fd4d0dd50 |
 | H | Recovery-cutoff schema 1.0.4 | session-h-bmcp-protocol | d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1 |
 | H | RecoveryJoin schema candidate 1.0.0 | session-h-bmcp-protocol | dd3234aa1c74caf6d0e335875cd96e0b2b64082f |
-| H | HRC semantic suite | session-h-bmcp-protocol | ee0f47095df10786da358bed193d6f8491a5eb2c |
+| H | HRC semantic suite | session-h-bmcp-protocol | 60a2f4db4bd12f2131ecd147db9bbe328da6db50 |
 | H | Wire interop suite | session-h-bmcp-protocol | 1a4e754ba9bfa57eb973c6d39731e9f89443b323 |
 | H | Schema integrity suite | session-h-bmcp-protocol | 5292d56661e938c905c61455e9ed53c4ff674c54 |
 
