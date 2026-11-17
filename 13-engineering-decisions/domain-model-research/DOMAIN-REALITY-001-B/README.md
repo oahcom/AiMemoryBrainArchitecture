@@ -95,12 +95,12 @@ Any unresolved identity collision, contradictory state meaning, unowned lifecycl
 
 - Baseline currentness and Owner source audit, including current-main pins and selected Owner source evidence.
 - Owner branch snapshot errata, correcting earlier branch-tip snapshots from later Phase 3.8 matrix data.
-- Fact/Claim and Claim identity ADR decision request; C2 + I1 are candidate recommendations only.
+- Fact/Claim and Claim identity ADR decision request; current B Owner preference is Option A (separate Fact attestation + Claim proposition), still ADR-BLOCKED / NOT APPROVED; stable ClaimRef + ClaimRevisionRef remains candidate.
 - Official reference validation for DDD, Zep/Graphiti, Mem0, Letta, LangGraph, Temporal, PostgreSQL, W3C PROV-O, RDF/OWL and JSON Schema.
 
 - 基线时效性与 Owner 源文件审计，包含 current-main Pin 和部分 Owner 源证据。
 - Owner 分支快照勘误，使用 Phase 3.8 矩阵中的后续数据纠正早期分支 Tip。
-- Fact/Claim 与 Claim 身份 ADR 决策请求；C2 + I1 仅为候选建议。
+- Fact/Claim 与 Claim 身份 ADR 决策请求；当前 B Owner 倾向 Option A（独立 Fact Attestation + Claim 命题），仍 ADR-BLOCKED / NOT APPROVED；稳定 ClaimRef + ClaimRevisionRef 仍为候选。
 - DDD、Zep/Graphiti、Mem0、Letta、LangGraph、Temporal、PostgreSQL、W3C PROV-O、RDF/OWL 和 JSON Schema 官方参考核验。
 
 B0 remains PARTIAL / NOT PASSED; B2 remains IN PROGRESS; B3 remains NOT PASSED; B4 remains NOT READY; B6 remains INDEPENDENT_REVIEW_PENDING. No merge is requested.
@@ -294,14 +294,14 @@ The B decision record now contains an exact-source B2 checkpoint. It confirms th
 
 B 决策记录现已加入精确来源 B2 检查点。该检查点确认部分语义区分已经确定，但 B2 核心闭合条件仍开放：
 
-- **Fact / Claim:** I-04 requires distinct concepts; whether Fact has independent object identity or is represented as a qualified Claim remains ADR-BLOCKED. C2 is a candidate recommendation only.
+- **Fact / Claim:** I-04/P-04 require distinction. The current B Owner ADR prefers Option A (separate Fact attestation object + Claim proposition thread) as a candidate; formal Architecture Governance approval is absent and the ADR remains BLOCKED. The earlier C2/Option B recommendation in this research package is superseded.
 - **Claim identity across MemoryVersions:** I1 (stable Claim identity plus immutable version-local snapshots/revisions) is a candidate, not a decision; I2 remains viable; I3 is deferred.
 - **Typed identity:** B has approved ActorRef / ScopeRef / EnvironmentRef semantic mapping within B's authority; H wire encoding, I trust/policy, registry authority and runtime conformance are not thereby approved.
 - **Scope / Permission:** separation is DECIDED; scope algebra, policy language, inheritance, cached authorization and revocation guarantees remain open.
 - **I36 governance:** Issue #5 remains OPEN; I36-GOV-01..10 remain GOVERNANCE-BLOCKED.
 - **Session / Conversation:** RuntimeSessionRef, Session ScopeRef, Conversation and Agent identity remain distinct; exact canonical relation and consumer mappings remain open.
 
-- **Fact / Claim：** I-04 要求概念区分；Fact 是否具有独立对象身份，还是作为限定 Claim 表示，仍 ADR-BLOCKED。C2 仅为候选建议。
+- **Fact / Claim：** I-04/P-04 要求概念区分。当前 B Owner ADR 优先推荐 Option A（独立 Fact Attestation 对象 + Claim 命题线程），但尚无正式 Architecture Governance 批准，ADR 仍 BLOCKED。本研究包此前倾向 C2/Option B 的建议已被取代。
 - **Claim 跨 MemoryVersion 身份：** I1（稳定 Claim 身份 + 不可变版本局部 Snapshot/Revision）仅为候选，不是决策；I2 仍可选；I3 延后。
 - **类型化身份：** B 已在自身权限范围内批准 ActorRef / ScopeRef / EnvironmentRef 语义映射；这不代表 H Wire 编码、I Trust/Policy、Registry 权威或 Runtime Conformance 获批。
 - **Scope / Permission：** 二者分离已 DECIDED；Scope 代数、Policy 语言、继承、缓存授权和撤销保证仍开放。
