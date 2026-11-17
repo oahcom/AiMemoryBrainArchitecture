@@ -108,6 +108,14 @@ implementation_commits:
   - 01ff08d4c34553bad4f66455fba2308b5a54ea72
   - 54fe95d5d40fb8f42a9e2efa1fce6575902d75e6
   - 282bc7dcec816a1ffbee23f07ad3e06fa44ad5d5
+  - 4e9d58a0a7a8a789cf7c9cd84ebe03083346135b
+  - ccdc697b4f12e3f61d2b3f9a305b1d6496435c20
+  - c8309ab05a3f8bd32f7e8edff75039f91ecb175e
+  - bbd555bc145b31832ec227d10d7c27ffc627792d
+  - 9740b4888c5a875b87d9062100917f8c1f587628
+  - f0f455ec3aa41825074a57c9eb65e1e067e1db77
+  - ddd04f95b6d5f4f5b911344c7e7c6c62157efb3f
+  - 0cfba423f5d6c17f8be23e02e4006873f33437b7
 changed_paths:
   - 14-ai-development/prompt-and-evidence-template.md
   - 14-ai-development/README.md
@@ -130,6 +138,7 @@ changed_paths:
   - 14-ai-development/prompts/owners/I/owner-session-v2.md
   - 14-ai-development/prompts/owners/README.md
   - 14-ai-development/work-items/AID-2026-001/manifest.yaml
+  - 14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md
   - 14-ai-development/work-items/AID-2026-001/execution-record-001.md
   - 14-ai-development/work-items/AID-2026-001/governance-decision-NR-001.md
   - 14-ai-development/work-items/AID-2026-001/prompt-v1.md
@@ -140,12 +149,16 @@ changed_paths:
   - 14-ai-development/work-items/AID-2026-001/integration-review-prompt.md
   - 14-ai-development/work-items/AID-2026-001/self-review-v1.md
   - 14-ai-development/work-items/INDEX.md
+  - docs/en/09-security-governance/security-governance-guide.md
+  - docs/zh-CN/09-security-governance/security-governance-guide.md
 verification:
   status: NOT_RUN
   commit_sha: ""
   commands: []
   evidence_refs: []
 traceability_exclusions:
+  - sha: 3fb10eef38d88b83b48edf5e2818e2ca5ae8ee9e
+    reason: Previous current-head manifest self-update; now superseded by subsequent remediation commits and classified as historical manifest-only bookkeeping.
   - sha: c97e3de7ac37158ef60526d7b8703c4574ed042a
     reason: Manifest-only governance inventory reconciliation; metadata bookkeeping, not implementation.
   - sha: 1e11b787f4bdfd2979642d4633f89fa84049ae62
