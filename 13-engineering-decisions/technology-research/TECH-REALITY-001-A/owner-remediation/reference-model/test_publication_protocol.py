@@ -326,6 +326,14 @@ class PublicationProtocolTests(unittest.TestCase):
             i_commit_won_proof=("I_COMMIT_WON", "auth-1", "publication-1", "storage-1"),
         )
 
+    def consume_i(self, p, args=None):
+        args = dict(args or self.commit_args())
+        args["i_commit_won_proof"] = p.consume_i_commit_won(
+            args["operation_id"], args["auth_id"], args["publication_id"],
+            args["storage_id"], args["d_proof"],
+        )
+        return args
+
     def no_publication_proof(self, *, operation_binding=None, **overrides):
         args = self.commit_args()
         binding = operation_binding or (
@@ -375,8 +383,10 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_publication_already_closed_by_d_before_fence_is_not_pending(self):
         p = self.prepared()
-        p.commit(**self.commit_args())
+        args = self.consume_i(p)
+        p.commit(**args)
         outcome = p.outcomes["op-1"]
+        p.close_i("op-1", outcome)
         p.close_d("op-1", outcome)
         p.install_forget_fence()
         self.assertNotIn("publication-1", p.fence_pending)
@@ -385,7 +395,8 @@ class PublicationProtocolTests(unittest.TestCase):
         p = self.prepared()
         p.install_forget_fence()
         self.assertIn("publication-1", p.fence_pending)
-        receipt = p.commit(**self.commit_args())
+        args = self.consume_i(p)
+        receipt = p.commit(**args)
         outcome = p.outcomes["op-1"]
         p.close_i("op-1", outcome)
         self.assertIn("publication-1", p.fence_pending)
@@ -429,44 +440,49 @@ class PublicationProtocolTests(unittest.TestCase):
     def test_revocation_wins_before_commit(self):
         p = self.prepared()
         p.revoke("auth-1")
-        with self.assertRaises(Rejected):
-            p.commit(**self.commit_args())
+        with self.assertRaisesRegex(Rejected, "revocation won"):
+            self.consume_i(p)
 
     def test_commit_wins_before_later_revocation(self):
         p = self.prepared()
-        receipt = p.commit(**self.commit_args())
-        outcome = p.outcomes["op-1"]
+        args = self.consume_i(p)
         p.revoke("auth-1")
+        self.assertIn("auth-1", p.revocation_pending)
+        receipt = p.commit(**args)
+        outcome = p.outcomes["op-1"]
         self.assertEqual(p.receipts["op-1"], receipt)
         self.assertEqual(p.outcomes["op-1"], outcome)
-        args = self.commit_args()
-        args["operation_id"] = "op-2"
+        args2 = self.commit_args()
+        args2["operation_id"] = "op-2"
         with self.assertRaises(Rejected):
-            p.commit(**args)
+            self.consume_i(p, args2)
+        p.close_i("op-1", outcome)
+        self.assertNotIn("auth-1", p.revocation_pending)
 
     def test_authorization_is_single_use_across_distinct_operations(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         p.commit(**args)
-        args["operation_id"] = "op-2"
-        with self.assertRaises(Rejected):
-            p.commit(**args)
+        args2 = self.commit_args()
+        args2["operation_id"] = "op-2"
+        with self.assertRaisesRegex(Rejected, "single-use"):
+            self.consume_i(p, args2)
 
     def test_final_storage_commit_requires_both_exact_proofs(self):
         p = self.prepared()
         args = self.commit_args()
         args["d_proof"] = ("D_ADMITTED", "publication-1", "wrong-storage")
         with self.assertRaises(Rejected):
-            p.commit(**args)
+            self.consume_i(p, args)
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         args["i_commit_won_proof"] = ("I_TERMINAL", "auth-1")
         with self.assertRaises(Rejected):
             p.commit(**args)
 
     def test_crash_before_commit_leaves_no_partial_visibility_or_receipt(self):
         p = self.prepared()
-        args = self.commit_args()
+        args = self.consume_i(p)
         args["fail_before_commit"] = True
         with self.assertRaises(RuntimeError):
             p.commit(**args)
@@ -474,11 +490,18 @@ class PublicationProtocolTests(unittest.TestCase):
         self.assertEqual(p.outcomes, {})
         self.assertEqual(p.receipts, {})
         self.assertEqual(p.outbox, {})
-        self.assertEqual(p.consumed, set())
+        self.assertEqual(p.consumed, {"auth-1"})
+        self.assertIn("op-1", p.i_pending)
+        args.pop("fail_before_commit")
+        receipt = p.commit(**args)
+        self.assertEqual(p.receipts["op-1"], receipt)
 
-    def test_commit_atomically_records_visibility_outcome_receipt_and_outbox(self):
+    def test_storage_commit_records_visibility_outcome_receipt_and_outbox_after_i_consumption(self):
         p = self.prepared()
-        receipt = p.commit(**self.commit_args())
+        args = self.consume_i(p)
+        receipt = p.commit(**args)
+        self.assertEqual(p.consumed, {"auth-1"})
+        self.assertIn("op-1", p.i_pending)
         self.assertEqual(p.visibility["publication-1"], "VISIBLE")
         self.assertEqual(p.outcomes["op-1"][0], "COMMITTED")
         self.assertEqual(p.receipts["op-1"], receipt)
@@ -486,21 +509,23 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_lost_ack_retry_is_idempotent(self):
         p = self.prepared()
-        first = p.commit(**self.commit_args())
-        second = p.commit(**self.commit_args())
+        args = self.consume_i(p)
+        first = p.commit(**args)
+        second = p.commit(**args)
         self.assertEqual(first, second)
         self.assertEqual(len(p.receipts), 1)
         self.assertEqual(len(p.outbox), 1)
 
     def test_operation_id_reuse_with_changed_participant_binding_conflicts(self):
         p = self.prepared()
-        p.commit(**self.commit_args())
-        args = self.commit_args()
-        args["storage_id"] = "storage-substituted"
-        args["d_proof"] = ("D_ADMITTED", "publication-1", "storage-substituted")
-        args["i_commit_won_proof"] = ("I_COMMIT_WON", "auth-1", "publication-1", "storage-substituted")
+        args = self.consume_i(p)
+        p.commit(**args)
+        changed = dict(args)
+        changed["storage_id"] = "storage-substituted"
+        changed["d_proof"] = ("D_ADMITTED", "publication-1", "storage-substituted")
+        changed["i_commit_won_proof"] = ("I_COMMIT_WON", "auth-1", "publication-1", "storage-substituted")
         with self.assertRaises(Rejected):
-            p.commit(**args)
+            p.commit(**changed)
         self.assertEqual(len(p.receipts), 1)
         self.assertEqual(len(p.outbox), 1)
 
