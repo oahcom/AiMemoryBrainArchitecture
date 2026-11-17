@@ -3,7 +3,8 @@
 
 - Owner: H — BMCP Protocol and Adapter Authentication
 - Exact I proposal: `AIMBA-I-CRYPTO-1.0`, Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`
-- Exact H schema: `bmcp.coc-jf10-unified/1.2.7`, Blob `70b892797d07489936300a26c0dedfafe1d6e746`
+- Exact H schema: `bmcp.coc-jf10-unified/1.2.8`, Blob `70b892797d07489936300a26c0dedfafe1d6e746`
+- Exact H RecoveryJoin schema 1.0.1: Blob `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`
 - On-wire family version: `schema_version = 1.2.0` (unchanged)
 - H decision: **ACCEPT AS WIRE-MAPPING CANDIDATE WITH BLOCKING AMENDMENTS**
 - Status: **NOT FROZEN / NOT INTEROPERABILITY-VERIFIED / NOT IMPLEMENTED**
@@ -25,11 +26,11 @@ H accepts the following exact identifiers for the proposed I mapping only:
 | Signature encoding | Base64url without padding |
 | JSON canonicalization | RFC 8785 JCS constrained by RFC 7493 I-JSON |
 
-H 将 I 提案接受为候选密码学输入，并接受 Schema Artifact 1.2.7 作为可向后兼容的 Envelope 增量修订。H 不批准 I 的算法选择、Trust Root、Key Custody、Key Lifecycle、历史信任或 Anti-rollback 策略；这些仍由 I/治理决策。
+H 将 I 提案接受为候选密码学输入，并接受 Schema Artifact 1.2.8 作为可向后兼容的 Envelope 增量修订。H 不批准 I 的算法选择、Trust Root、Key Custody、Key Lifecycle、历史信任或 Anti-rollback 策略；这些仍由 I/治理决策。
 
-## 2. Schema 1.2.8 exact change / Schema 1.2.7 精确变更
+## 2. Schema 1.2.8 exact change / Schema 1.2.8 精确变更
 
-Artifact 1.2.7 adds optional `signature_profile_id` to `$defs.commonEnvelope`. It deliberately keeps the on-wire family `schema_version=1.2.0` unchanged and leaves the new field optional at structural-schema level for compatibility with older message producers.
+Artifact 1.2.8 adds optional `signature_profile_id` to `$defs.commonEnvelope` and optional `owner_snapshot_attestation_digest` to `$defs.ownerSnapshot`. It deliberately keeps the on-wire family `schema_version=1.2.0` unchanged and leaves the new field optional at structural-schema level for compatibility with older message producers.
 
 For protected I-signed records, the semantic validator MUST require all of:
 - `canonicalization_profile_id = RFC8785-JCS-1.0`;
@@ -40,7 +41,7 @@ For protected I-signed records, the semantic validator MUST require all of:
 
 Missing `signature_profile_id` is a semantic rejection for a protected I-signed record, even though the additive structural schema can parse a legacy envelope. No downgrade or fallback is permitted.
 
-Artifact 1.2.7 also corrects the stale common-envelope description that referred to artifact revision 1.2.5. The `$id` and title now consistently identify artifact revision 1.2.7. Artifact revision and on-wire family version remain distinct.
+Artifact 1.2.7 also corrects the stale common-envelope description that referred to artifact revision 1.2.5. The `$id` and title now consistently identify artifact revision 1.2.8. Artifact revision and on-wire family version remain distinct.
 
 Artifact 1.2.7 在 `$defs.commonEnvelope` 增加可选 `signature_profile_id`。为兼容旧消息生产方，Wire Family `schema_version=1.2.0` 保持不变，结构层暂不强制新字段。
 
@@ -178,9 +179,9 @@ These vectors are **SPECIFIED / NOT RUN**. The existing HRC/JPF/WIRE/SCHEMA 66/6
 
 ## 9. Blocking amendments / 阻断修订
 
-1. I must issue an exact-version decision on Blob `30967b2c58ef0aaf760a22fe61192e70744d5964`, including algorithm/regulatory suitability and the exact P0 trust semantics.
-2. H must publish a separate exact-version decision for schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854` and this mapping revision; this document is the H candidate mapping decision, not a second independent signature.
-3. I/H must resolve the owner snapshot attestation digest binding and confirm the exact P0 allowlists above against the final schema artifact.
+1. I must issue a fresh exact-version decision on the updated mapping and review the exact profile Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`; algorithm/regulatory suitability remains a separate I/governance decision.
+2. H must publish a separate exact-version decision for schema 1.2.8 Blob `70b892797d07489936300a26c0dedfafe1d6e746`, RecoveryJoin 1.0.1 Blob `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c` and this mapping revision.
+3. I/H must confirm the exact snapshot attestation digest binding, empty-set/out-of-scope proof references and P0 allowlists above against the final schema artifacts.
 4. At least two independent canonicalization/signature implementations and byte-for-byte vectors must pass.
 5. I must approve trust-root/key custody/rotation/compromise/anti-rollback operations and the external checkpoint mechanism.
 6. Storage must accept the exact proof-verification contract for its actual visibility linearization point.
@@ -188,7 +189,7 @@ These vectors are **SPECIFIED / NOT RUN**. The existing HRC/JPF/WIRE/SCHEMA 66/6
 
 ## 10. Final H decision / H 最终决议
 
-I exact review of this mapping: Blob `446109f4867268fe7dca3c7e114346f3c1a74b61` — **ACCEPT WITH ENUMERATED AMENDMENTS**.
+I exact review of the prior mapping revision: Blob `446109f4867268fe7dca3c7e114346f3c1a74b61` — **ACCEPT WITH ENUMERATED AMENDMENTS**. This revised mapping requires a fresh I exact-version review.
 
 **ACCEPT AS WIRE-MAPPING CANDIDATE WITH BLOCKING AMENDMENTS.**
 
