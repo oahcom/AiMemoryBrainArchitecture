@@ -252,3 +252,24 @@ Storage/COC 只能存储/报告 JoinProof，不能签发 I/D/C Gate Release。I�
 
 ### 11.6 状态边界
 缺项、未知、分页不完整、陈旧副本、签名不可验证、Owner 不可用均为 UNKNOWN 或 INVALID，绝不能折算为空集合。任何身份/摘要冲突都隔离。JF-10 只接受同一 Participant/GID/DB Incarnation 的 I/Storage 终态配对。未知时保留同一 Participant、GID、锁和 Gate。
+
+
+## 12. H implementation artifact linkage and exact current pins
+
+H has now committed the following candidate artifacts to its owner branch:
+
+- H semantic validator contract 3.6.10 latest: Blob `142425b6280f7e0fe517489bc87bc81db892225a`
+- H recovery-cutoff structural schema 1.0.4: Blob `d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1`
+- H RecoveryJoin structural schema candidate 1.0.0: Blob `9a0aa3f2b5165a12e4326437c95e91d9f1adbe75`
+- H executable HRC semantic suite: Blob `794ac0c34aaad921e5d4a5bcc42b6601f7caf817`
+- H wire interoperability candidate suite: Blob `18e50957848178f3f35593b3e618dfa9b90cdb31`
+
+The semantic suite contains HRC-01..25 plus JPF-01..12. The wire suite contains WIRE-01..10. These are committed test candidates, not CI execution evidence. The test-only digest helper is not a production canonicalization profile.
+
+### 12.1 Storage/H boundary clarification
+
+Storage owns the logical bidirectional join invariants, durable JoinProof persistence, exact digest chain and quorum readback. H owns the wire schema, nominal type encoding, strict parser, canonical serialization and interoperability. I owns signature trust/key status; D/I/C own their admission ledgers and final currentness/release CAS. A owns integration reconciliation.
+
+The H RecoveryJoin schema is a candidate. It does not make Storage the issuer of I/D/C gate releases and does not make a valid structural document proof of owner-ledger completeness. Storage may commit a JoinProof record only after both authoritative sides have been completely read and joined; each owner still independently evaluates its release predicate in its own serialization domain.
+
+**Status:** JoinProof contract and H wire candidate are published. Independent Owner review, actual schema/semantic adapter, CI execution, DB/COC physical realization and failover/restore evidence remain OPEN.
