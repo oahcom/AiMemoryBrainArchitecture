@@ -238,3 +238,26 @@ B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪�
 Gate disposition remains unchanged: B0 PARTIAL / NOT PASSED; B1 IN PROGRESS; B2 IN PROGRESS; B3 NOT PASSED; B4 NOT READY; B5 BLOCKED / NOT PASSED pending independent semantic parity review; B6 INDEPENDENT_REVIEW_PENDING. No schema freeze, implementation authorization, Owner approval, merge or Ready transition is claimed.
 
 门禁结论不变：B0 PARTIAL / NOT PASSED；B1 进行中；B2 进行中；B3 未通过；B4 未就绪；B5 因等待独立语义对等审查而 BLOCKED / NOT PASSED；B6 INDEPENDENT_REVIEW_PENDING。不宣称 Schema 冻结、实现授权、Owner 批准、合并或转为 Ready。
+
+
+## 17. Blocking cross-owner reconciliation / 阻塞性跨 Owner 协调 — 2026-11-18
+
+A's exact Phase 3.12.1 review of Storage v3.3.1 found a substantive Option A status contradiction. The pinned Storage/D ADR selects Option A as the normative v1 logical architecture and leaves only L4 physical engine/deployment open; Storage v3.3.1 calls Option A a conditional L1 candidate and cites A-01–A-05 clarifications absent from the pinned ADR. A explicitly rejects v3.3.1 as a final consistent manifest until Storage publishes a corrected successor and A re-reviews it.
+
+A 对 Storage v3.3.1 的精确 Phase 3.12.1 复审发现 Option A 状态存在实质矛盾。精确绑定的 Storage/D ADR 已选择 Option A 作为 v1 规范逻辑架构，仅保留 L4 物理引擎/部署开放；Storage v3.3.1 却称 Option A 为 conditional L1 candidate，并引用精确 ADR 中不存在的 A-01–A-05 澄清项。A 明确拒绝将 v3.3.1 作为最终一致 Manifest，直到 Storage 发布修正后继版本并由 A 重新复审。
+
+- New conflict: **B-CONFLICT-017 — BLOCKING / OPEN**.
+- Exact evidence: ADR Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`; Storage v3.3.1 Blob `f6e61691ecdcfcbf1fb423cc45242868676ca925`; A Phase 3.12.1 review Blob `d3d4e6f4b6d7e82f90e3eee3427c8ace3b4160c8`.
+- H Unified 1.2.15 mapping Blob `2dc30f193d9c4f4bdc05ca4c137103687db28924` and I review Blob `6ba4ce3a93f2adf6f8961d4927d9b87deb9696bf` are later structural-candidate evidence; they do not retroactively amend Storage v3.3.1 or constitute production trust approval.
+- Storage owns the successor manifest correction. B records the cross-owner incompatibility and must not edit Storage-owned normative artifacts.
+- B3 remains NOT PASSED. G Applied remains FREEZE BLOCKED / NOT VERIFIED; D Forget clearance/lineage/barrier/release remain open; I/H outer-envelope trust/profile/verification remain open; Storage L4 physical realization remains open.
+
+- 新增冲突：**B-CONFLICT-017 — BLOCKING / OPEN**。
+- 精确证据：ADR Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`；Storage v3.3.1 Blob `f6e61691ecdcfcbf1fb423cc45242868676ca925`；A Phase 3.12.1 复审 Blob `d3d4e6f4b6d7e82f90e3eee3427c8ace3b4160c8`。
+- H Unified 1.2.15 Mapping Blob `2dc30f193d9c4f4bdc05ca4c137103687db28924` 和 I 复审 Blob `6ba4ce3a93f2adf6f8961d4927d9b87deb9696bf` 属于较新的结构候选证据；它们不会追溯修改 Storage v3.3.1，也不构成生产 Trust 批准。
+- Storage 负责修正后继 Manifest。B 只记录跨 Owner 不兼容，不得编辑 Storage 所有的规范工件。
+- B3 仍 NOT PASSED。G Applied 仍 FREEZE BLOCKED / NOT VERIFIED；D Forget Clearance/Lineage/Barrier/Release 仍开放；I/H Outer-Envelope Trust/Profile/Verification 仍开放；Storage L4 物理实现仍开放。
+
+No Storage correction, A independent human approval, production authentication, global Forget completion, Applied freeze, L4 deployment or independent QA result is claimed.
+
+不宣称 Storage 已整改、A 独立人类批准、生产认证、Global Forget 完成、Applied 冻结、L4 部署或独立 QA 结果。
