@@ -598,3 +598,46 @@ The 1.2.15 schema declares the §17 requirements at the structural layer:
 - C Provider Outcome 的 `final_request_boundary_id` 必填要求。
 
 **取代规则：** §17.5 中引用的 H Schema Artifact Revision 1.2.5 属于历史前序版本，不再是当前 H 结构候选。当前精确 Pin 为上述 1.2.15 / Wire 1.3.0。H 1.2.15 结构符合性不证明 Semantic Pair Validation、Quorum Proof Authenticity、Owner Snapshot Truth、Cryptographic Key Lifecycle、已部署 COC 或物理 JF-10 行为；这些仍须分别验证。
+
+
+## 19. Normative owner-snapshot completeness correction — H Unified 1.2.16
+
+This section supersedes the H schema pin and owner-snapshot high-water mapping in §18. It does not change the two-record Recovery Cutoff ordering, canonical union membership, digest dependency, or authority ownership defined in §§14–17.
+
+A fresh cross-owner source reconciliation identified four missing explicit values in H Unified 1.2.15 relative to §17.1:
+- generic owner `scope_generation_ref`, distinct from `owner_gate_generation`;
+- I-local `permission_epoch`, distinct from `producer_domain_inventory_epoch_ref`;
+- D `dependency_closure_cursor` and `dependency_closure_root`;
+- C `provider_idempotency_namespace_ref` and `final_request_boundary_generation`.
+
+The exact updated H candidate is:
+- Schema artifact revision **1.2.16**, wire version **1.3.0**;
+- Schema Blob: `3ed43c4d0d067d4db98a2fa94f4d232280b4bbf5`;
+- Dedicated structural test Blob: `70e1169cc05295f18cde95ce8e66a0498bc74902`;
+- Exact H branch Head: `5545f45fb78af385c72269a0cb850980b7570cd7`;
+- H Recovery Cutoff run [#44191375797](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44191375797): **317 tests PASS**, including 11 dedicated 1.2.16 checks.
+
+The I PermissionEpoch is an opaque I-local authority value and MUST NOT be numerically compared with D or Storage positions. ProducerDomainInventoryEpoch remains a separate I inventory-currentness value. D dependency-closure cursor/root bind the exact frozen dependency inventory. C provider idempotency namespace and final-request-boundary generation bind C's provider-attempt and final request boundary state. Scope generation is independently frozen and included in both owner snapshot and snapshot-root bindings.
+
+The 1.2.15 pin in §18 remains historical evidence only. **H Unified 1.2.16 is the current structural candidate.** Structural tests do not prove that live I/D/C owner ledgers emit/sign these values, H semantically validates their membership/root proofs, COC has deployed durable quorum, or physical JF-10 is production-ready.
+
+### 中文：Owner Snapshot 完整性规范修正
+
+本节取代 §18 的 H Schema Pin 和 Owner Snapshot High-water 映射，不改变 §§14–17 规定的双记录 Recovery Cutoff 顺序、Canonical Union Membership、Digest 依赖或权威归属。
+
+最新跨 Owner 源码对照发现，H Unified 1.2.15 相对于 §17.1 缺少四类显式值：
+- 通用 Owner `scope_generation_ref`，独立于 `owner_gate_generation`；
+- I-local `permission_epoch`，独立于 `producer_domain_inventory_epoch_ref`；
+- D 的 `dependency_closure_cursor` 与 `dependency_closure_root`；
+- C 的 `provider_idempotency_namespace_ref` 与 `final_request_boundary_generation`。
+
+更新后的 H 候选精确版本：
+- Schema Artifact Revision **1.2.16**，Wire Version **1.3.0**；
+- Schema Blob：`3ed43c4d0d067d4db98a2fa94f4d232280b4bbf5`；
+- 专用结构测试 Blob：`70e1169cc05295f18cde95ce8e66a0498bc74902`；
+- H 精确分支 Head：`5545f45fb78af385c72269a0cb850980b7570cd7`；
+- H Recovery Cutoff Run [#44191375797](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44191375797)：**317 项测试 PASS**，其中包括 11 项 1.2.16 专用检查。
+
+I PermissionEpoch 是不透明的 I-local Authority Value，绝不得与 D 或 Storage Position 做数值比较。ProducerDomainInventoryEpoch 是独立的 I Inventory Currentness Value。D Dependency-closure Cursor/Root 绑定精确冻结的依赖清单。C Provider Idempotency Namespace 和 Final-request-boundary Generation 绑定 C 的 Provider Attempt 与 Final Request Boundary 状态。Scope Generation 独立冻结，并同时纳入 Owner Snapshot 和 Snapshot Root 绑定。
+
+§18 的 1.2.15 Pin 仅保留为历史证据。**H Unified 1.2.16 是当前结构候选。** 结构测试不证明实时 I/D/C Owner Ledger 已生成/签署这些值，不证明 H 已语义验证 Membership/Root Proof，也不证明 COC 已部署持久 Quorum 或物理 JF-10 已达到生产就绪。
