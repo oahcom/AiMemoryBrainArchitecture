@@ -8,7 +8,7 @@
 
 I alone owns the PolicyDomain permission/revocation Gate, PermissionEpoch, receipt issuance/consumption, I request ledger and I Gate release. COC records ordering/evidence only. D owns its Forget Gate and lineage barrier. Storage owns prepared participant durability and visibility. No COC batch, Storage receipt, D receipt or A integration decision can release I's Gate.
 
-This amendment is scoped to the I authority described by Storage Design v2 Blob `4ed4234ce548a814a9496adf7a14c4459ea9f7ce` and COC companion Blob `8ac17816476f280ab6fb3afca0688aa03e37de1d`.
+This amendment is scoped to the current Storage Design v3.1 Blob `d5bdc72f193fcdaa654e4f07f865b77c578673ca` and COC companion Blob `8ac17816476f280ab6fb3afca0688aa03e37de1d`. Storage Design v2 Blob `4ed4234ce548a814a9496adf7a14c4459ea9f7ce` is retained as historical predecessor only; it lacks the §§15.1–15.7 required by the current COC protocol.
 
 ## 2. Atomic Gate linearization
 
