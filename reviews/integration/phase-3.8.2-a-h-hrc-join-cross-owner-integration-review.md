@@ -28,9 +28,9 @@
 | Wire interop candidate suite | session-h-bmcp-protocol | 1a4e754ba9bfa57eb973c6d39731e9f89443b323 |
 | Schema integrity suite | session-h-bmcp-protocol | 5292d56661e938c905c61455e9ed53c4ff674c54 |
 | H branch test workflow | session-h-bmcp-protocol | ea7a3d9c365b84352d3bac69da94fe0d510e46a4 |
-| Storage bidirectional JoinProof contract | session-storage-consistency-forget-atomicity-2026-11-16 | 5b3f81ada75994cabc6fdab8537d7f185e6c6287 |
+| Storage bidirectional JoinProof contract | session-storage-consistency-forget-atomicity-2026-11-16 | 668faeb20e3e9cb907a8d1061635b12162f3dbe2 |
 | Storage serialization topology ADR | session-storage-consistency-forget-atomicity-2026-11-16 | 080433f8e13a500522bc2754da64057edb0ae9d8 |
-| A deterministic conformance matrix | session-a-integration-2026-11-16 | c556125b279271c1cc57fca0b49584b5b1f302b2 |
+| A deterministic conformance matrix | session-a-integration-2026-11-16 | b53fe265cd5477a99e8b52e181e34d2a90c2dcf9 |
 
 ### Role review artifacts
 
@@ -155,7 +155,7 @@ H has added row-digest and typed owner-evidence requirements to RecoveryJoin 1.0
 - I receipt/terminal evidence requires PolicyDomain, PermissionEpoch, inventory epoch, issuer key and authorization receipt;
 - C provider and Storage prepared/resolution evidence carry their owner-specific tuple fields.
 
-The latest H schema Blob is dd3234aa1c74caf6d0e335875cd96e0b2b64082f. The latest HRC suite Blob is 60a2f4db4bd12f2131ecd147db9bbe328da6db50. The Storage JoinProof contract is now Blob 5b3f81ada75994cabc6fdab8537d7f185e6c6287.
+The latest H schema Blob is dd3234aa1c74caf6d0e335875cd96e0b2b64082f. The latest HRC suite Blob is 60a2f4db4bd12f2131ecd147db9bbe328da6db50. The Storage JoinProof contract is now Blob 668faeb20e3e9cb907a8d1061635b12162f3dbe2.
 
 These are schema and test-candidate refinements only. No CI run, cross-language interop PASS or owner signature is claimed.
 
