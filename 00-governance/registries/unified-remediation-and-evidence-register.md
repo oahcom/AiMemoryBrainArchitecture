@@ -24,15 +24,15 @@ Observed GitHub branch refs at this refresh. These are point-in-time HEADs, not 
 |---|---|---|
 | A | session-a-integration-2026-11-16 | 6d6f08ae7704e0fa0cf0f2eee0512bf5e3eb624f |
 | B | session-b-domain-model-phase3 | 0df144ae25c2039c9934395fc88b2d17080eb119 |
-| C | session-c-agent-integration-2026-11-16 | f2ff6ee552ed63094acbf8f36095431f0e1964b3 |
+| C | session-c-agent-integration-2026-11-16 | 76ac41427b8183d5a1cfe7b3046bdb75564349a7 |
 | D | session-d-memory-brain-2026-11-16 | f0672a4e9ab95b8cd94d28b52153f54a05e17a73 |
 | E | session-e-memory-compiler-2026-11-16 | df3f56cdebbb4bb85999e2e04b666dacf77da810 |
 | F | session-f-memory-runtime | 348b5ec84c44a8a067122ce0aa72a594b9c06b66 |
 | G | session-g-memory-context | 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa |
-| H | session-h-bmcp-protocol | 46a7c534b5068e274c21c460feaf333060cb45a2 |
-| I | session-i-security-governance-2026-11-16 | de29ebcf2bb901c7ce9cca63b7d7d21c9495e491 |
-| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | bd6c1d23ed685db8d4bd13a75821611e04d138ba |
-| main | main | b0ec721d1663f78cd0dbc864a094f72ad1fa3ab7 |
+| H | session-h-bmcp-protocol | 54ab10af211dd92f641d2f30f511dc0a3043b9c5 |
+| I | session-i-security-governance-2026-11-16 | 958565e4395ed5153cf4bafeedfbc57ca13c788f |
+| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | 5220ec33aee63220d50c362e51e76f5e86b1f233 |
+| main | main | b372b62c640a2b656e54b6db62a4ee67d7d8c001 |
 
 P vs main remains **diverged**. Re-query the live compare before any integration because every P coordination commit changes the ahead count. No merge, force-update or main write is authorized or performed.
 
