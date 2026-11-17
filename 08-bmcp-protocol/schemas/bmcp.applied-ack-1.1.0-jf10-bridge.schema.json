@@ -1,0 +1,1803 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.aimemorybrainarchitecture.invalid/bmcp.applied-ack/1.1.0/jf10-bridge",
+  "title": "BMCP Applied ACK 1.1.0 — JF-10 COC bridge candidate",
+  "description": "Documentation-derived schema candidate for the five JF-10 COC bridge message families. Not production-frozen; authority signatures, canonicalization and cross-field semantic checks require runtime validators.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.applied-ack"
+        },
+        "schema_version": {
+          "const": "1.1.0"
+        },
+        "message_type": {
+          "const": "JF10_PREPARE_INTENT_REGISTERED"
+        },
+        "message_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "message_nonce": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "audience": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "runtime_session_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_profile_ref": {
+          "const": "CausalOrderProfile/1.0"
+        },
+        "causal_order_coordinator_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "canonicalization_profile_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "digest_algorithm": {
+          "const": "SHA-256"
+        },
+        "payload_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "integrity_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "channel_binding_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "sender_authority_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "publication_operation_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_boundary": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "participant_intent_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "policy_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_participant_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_xid_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "participant_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_authority_db_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_state": {
+          "const": "REGISTERED"
+        },
+        "preallocated_storage_xid_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_coc_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_coc_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "applicable_d_fence_request_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/opaqueRef"
+          },
+          "uniqueItems": true
+        },
+        "d_fence_completeness_attestation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "registration_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_participant_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_participant_receipt_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_prepare_state": {
+          "const": "PREPARED_DURABLE"
+        },
+        "storage_prepare_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_coc_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_coc_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_private_visibility_state": {
+          "const": "NOT_VISIBLE"
+        },
+        "storage_lock_retention_state": {
+          "const": "RETAINED"
+        },
+        "i_authorization_terminal_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_commit_authorization_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_receipt_consumption_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_decision_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_decision_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "i_terminal_outcome": {
+          "enum": [
+            "COMMIT_WON",
+            "REVOCATION_WON",
+            "INDETERMINATE_ABORTED"
+          ]
+        },
+        "i_revocation_request_state": {
+          "enum": [
+            "PRESENT",
+            "NONE_AT_TERMINALIZATION"
+          ]
+        },
+        "i_revocation_request_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_revocation_cutoff_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "observed_coc_prepare_intent_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "observed_coc_prepared_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_owner_signature_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_outcome": {
+          "enum": [
+            "COMMITTED",
+            "ROLLED_BACK"
+          ]
+        },
+        "storage_resolution_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_owner_outcome_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_owner_signature_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_visibility_state": {
+          "enum": [
+            "VISIBLE",
+            "NOT_VISIBLE"
+          ]
+        },
+        "storage_lock_release_state": {
+          "const": "RELEASED_AFTER_TERMINAL"
+        },
+        "storage_same_xid_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_publication_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "visibility_pointer_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_nonpublication_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "coc_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciliation_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciliation_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reconciliation_state": {
+          "enum": [
+            "RECONCILED_TERMINAL",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "reconciled_coc_prefix_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciled_coc_prefix_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "i_authoritative_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_lookup_state": {
+          "enum": [
+            "COMMIT_WON",
+            "REVOCATION_WON",
+            "INDETERMINATE_ABORTED",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "storage_authoritative_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_lookup_state": {
+          "enum": [
+            "PREPARED",
+            "COMMITTED",
+            "ROLLED_BACK",
+            "UNKNOWN"
+          ]
+        },
+        "d_barrier_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "d_barrier_state": {
+          "enum": [
+            "OPEN",
+            "SATISFIED",
+            "UNKNOWN"
+          ]
+        },
+        "reconciliation_observation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "message_nonce",
+        "audience",
+        "runtime_session_ref",
+        "causal_order_profile_ref",
+        "causal_order_coordinator_ref",
+        "causal_order_domain_ref",
+        "causal_order_transaction_ref",
+        "canonicalization_profile_id",
+        "digest_algorithm",
+        "payload_digest",
+        "integrity_proof_ref",
+        "channel_binding_proof_ref",
+        "sender_authority_ref",
+        "publication_operation_id",
+        "request_digest",
+        "owner_boundary",
+        "participant_intent_ref",
+        "policy_domain_ref",
+        "storage_participant_ref",
+        "storage_xid_ref",
+        "participant_digest",
+        "storage_authority_db_ref",
+        "prepare_intent_state",
+        "preallocated_storage_xid_ref",
+        "prepare_intent_coc_position",
+        "prepare_intent_coc_epoch",
+        "prepare_intent_entry_digest",
+        "applicable_d_fence_request_refs",
+        "registration_commit_proof_ref"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "applicable_d_fence_request_refs": {
+                "maxItems": 0
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "d_fence_completeness_attestation_ref"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.applied-ack"
+        },
+        "schema_version": {
+          "const": "1.1.0"
+        },
+        "message_type": {
+          "const": "JF10_PREPARED_PARTICIPANT_REGISTERED"
+        },
+        "message_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "message_nonce": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "audience": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "runtime_session_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_profile_ref": {
+          "const": "CausalOrderProfile/1.0"
+        },
+        "causal_order_coordinator_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "canonicalization_profile_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "digest_algorithm": {
+          "const": "SHA-256"
+        },
+        "payload_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "integrity_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "channel_binding_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "sender_authority_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "publication_operation_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_boundary": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "participant_intent_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "policy_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_participant_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_xid_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "participant_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_authority_db_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_state": {
+          "const": "REGISTERED"
+        },
+        "preallocated_storage_xid_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_coc_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_coc_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "applicable_d_fence_request_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/opaqueRef"
+          },
+          "uniqueItems": true
+        },
+        "d_fence_completeness_attestation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "registration_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_participant_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_participant_receipt_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_prepare_state": {
+          "const": "PREPARED_DURABLE"
+        },
+        "storage_prepare_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_coc_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_coc_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_private_visibility_state": {
+          "const": "NOT_VISIBLE"
+        },
+        "storage_lock_retention_state": {
+          "const": "RETAINED"
+        },
+        "i_authorization_terminal_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_commit_authorization_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_receipt_consumption_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_decision_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_decision_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "i_terminal_outcome": {
+          "enum": [
+            "COMMIT_WON",
+            "REVOCATION_WON",
+            "INDETERMINATE_ABORTED"
+          ]
+        },
+        "i_revocation_request_state": {
+          "enum": [
+            "PRESENT",
+            "NONE_AT_TERMINALIZATION"
+          ]
+        },
+        "i_revocation_request_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_revocation_cutoff_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "observed_coc_prepare_intent_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "observed_coc_prepared_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_owner_signature_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_outcome": {
+          "enum": [
+            "COMMITTED",
+            "ROLLED_BACK"
+          ]
+        },
+        "storage_resolution_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_owner_outcome_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_owner_signature_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_visibility_state": {
+          "enum": [
+            "VISIBLE",
+            "NOT_VISIBLE"
+          ]
+        },
+        "storage_lock_release_state": {
+          "const": "RELEASED_AFTER_TERMINAL"
+        },
+        "storage_same_xid_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_publication_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "visibility_pointer_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_nonpublication_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "coc_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciliation_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciliation_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reconciliation_state": {
+          "enum": [
+            "RECONCILED_TERMINAL",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "reconciled_coc_prefix_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciled_coc_prefix_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "i_authoritative_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_lookup_state": {
+          "enum": [
+            "COMMIT_WON",
+            "REVOCATION_WON",
+            "INDETERMINATE_ABORTED",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "storage_authoritative_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_lookup_state": {
+          "enum": [
+            "PREPARED",
+            "COMMITTED",
+            "ROLLED_BACK",
+            "UNKNOWN"
+          ]
+        },
+        "d_barrier_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "d_barrier_state": {
+          "enum": [
+            "OPEN",
+            "SATISFIED",
+            "UNKNOWN"
+          ]
+        },
+        "reconciliation_observation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "message_nonce",
+        "audience",
+        "runtime_session_ref",
+        "causal_order_profile_ref",
+        "causal_order_coordinator_ref",
+        "causal_order_domain_ref",
+        "causal_order_transaction_ref",
+        "canonicalization_profile_id",
+        "digest_algorithm",
+        "payload_digest",
+        "integrity_proof_ref",
+        "channel_binding_proof_ref",
+        "sender_authority_ref",
+        "publication_operation_id",
+        "request_digest",
+        "owner_boundary",
+        "participant_intent_ref",
+        "policy_domain_ref",
+        "storage_participant_ref",
+        "storage_xid_ref",
+        "participant_digest",
+        "storage_authority_db_ref",
+        "prepared_participant_receipt_ref",
+        "prepared_participant_receipt_digest",
+        "storage_prepare_state",
+        "storage_prepare_transaction_ref",
+        "prepared_coc_position",
+        "prepared_coc_epoch",
+        "prepared_entry_digest",
+        "prepare_intent_coc_position",
+        "prepare_intent_entry_digest",
+        "storage_private_visibility_state",
+        "storage_lock_retention_state",
+        "registration_commit_proof_ref"
+      ],
+      "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.applied-ack"
+        },
+        "schema_version": {
+          "const": "1.1.0"
+        },
+        "message_type": {
+          "const": "I_JF10_TERMINAL_DECISION_OBSERVED"
+        },
+        "message_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "message_nonce": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "audience": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "runtime_session_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_profile_ref": {
+          "const": "CausalOrderProfile/1.0"
+        },
+        "causal_order_coordinator_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "canonicalization_profile_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "digest_algorithm": {
+          "const": "SHA-256"
+        },
+        "payload_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "integrity_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "channel_binding_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "sender_authority_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "publication_operation_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_boundary": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "participant_intent_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "policy_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_participant_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_xid_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "participant_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_authority_db_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_state": {
+          "const": "REGISTERED"
+        },
+        "preallocated_storage_xid_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_coc_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_coc_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "applicable_d_fence_request_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/opaqueRef"
+          },
+          "uniqueItems": true
+        },
+        "d_fence_completeness_attestation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "registration_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_participant_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_participant_receipt_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_prepare_state": {
+          "const": "PREPARED_DURABLE"
+        },
+        "storage_prepare_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_coc_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_coc_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_private_visibility_state": {
+          "const": "NOT_VISIBLE"
+        },
+        "storage_lock_retention_state": {
+          "const": "RETAINED"
+        },
+        "i_authorization_terminal_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_commit_authorization_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_receipt_consumption_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_decision_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_decision_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "i_terminal_outcome": {
+          "enum": [
+            "COMMIT_WON",
+            "REVOCATION_WON",
+            "INDETERMINATE_ABORTED"
+          ]
+        },
+        "i_revocation_request_state": {
+          "enum": [
+            "PRESENT",
+            "NONE_AT_TERMINALIZATION"
+          ]
+        },
+        "i_revocation_request_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_revocation_cutoff_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "observed_coc_prepare_intent_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "observed_coc_prepared_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_owner_signature_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_outcome": {
+          "enum": [
+            "COMMITTED",
+            "ROLLED_BACK"
+          ]
+        },
+        "storage_resolution_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_owner_outcome_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_owner_signature_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_visibility_state": {
+          "enum": [
+            "VISIBLE",
+            "NOT_VISIBLE"
+          ]
+        },
+        "storage_lock_release_state": {
+          "const": "RELEASED_AFTER_TERMINAL"
+        },
+        "storage_same_xid_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_publication_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "visibility_pointer_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_nonpublication_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "coc_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciliation_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciliation_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reconciliation_state": {
+          "enum": [
+            "RECONCILED_TERMINAL",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "reconciled_coc_prefix_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciled_coc_prefix_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "i_authoritative_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_lookup_state": {
+          "enum": [
+            "COMMIT_WON",
+            "REVOCATION_WON",
+            "INDETERMINATE_ABORTED",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "storage_authoritative_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_lookup_state": {
+          "enum": [
+            "PREPARED",
+            "COMMITTED",
+            "ROLLED_BACK",
+            "UNKNOWN"
+          ]
+        },
+        "d_barrier_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "d_barrier_state": {
+          "enum": [
+            "OPEN",
+            "SATISFIED",
+            "UNKNOWN"
+          ]
+        },
+        "reconciliation_observation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "message_nonce",
+        "audience",
+        "runtime_session_ref",
+        "causal_order_profile_ref",
+        "causal_order_coordinator_ref",
+        "causal_order_domain_ref",
+        "causal_order_transaction_ref",
+        "canonicalization_profile_id",
+        "digest_algorithm",
+        "payload_digest",
+        "integrity_proof_ref",
+        "channel_binding_proof_ref",
+        "sender_authority_ref",
+        "publication_operation_id",
+        "request_digest",
+        "owner_boundary",
+        "participant_intent_ref",
+        "policy_domain_ref",
+        "storage_participant_ref",
+        "storage_xid_ref",
+        "participant_digest",
+        "storage_authority_db_ref",
+        "i_authorization_terminal_ref",
+        "i_commit_authorization_receipt_ref",
+        "i_receipt_consumption_proof_ref",
+        "i_sequencer_ref",
+        "i_sequencer_epoch",
+        "i_sequencer_position",
+        "i_decision_id",
+        "i_decision_digest",
+        "i_terminal_outcome",
+        "i_revocation_request_state",
+        "observed_coc_prepare_intent_position",
+        "observed_coc_prepared_position",
+        "i_owner_signature_ref",
+        "coc_observation_commit_proof_ref"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "i_revocation_request_state": {
+                "const": "PRESENT"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "i_revocation_request_ref",
+              "i_revocation_cutoff_proof_ref"
+            ]
+          },
+          "else": {
+            "properties": {
+              "i_revocation_request_ref": false,
+              "i_revocation_cutoff_proof_ref": false
+            }
+          }
+        }
+      ],
+      "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.applied-ack"
+        },
+        "schema_version": {
+          "const": "1.1.0"
+        },
+        "message_type": {
+          "const": "STORAGE_JF10_PARTICIPANT_RESOLVED"
+        },
+        "message_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "message_nonce": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "audience": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "runtime_session_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_profile_ref": {
+          "const": "CausalOrderProfile/1.0"
+        },
+        "causal_order_coordinator_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "canonicalization_profile_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "digest_algorithm": {
+          "const": "SHA-256"
+        },
+        "payload_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "integrity_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "channel_binding_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "sender_authority_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "publication_operation_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_boundary": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "participant_intent_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "policy_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_participant_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_xid_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "participant_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_authority_db_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_state": {
+          "const": "REGISTERED"
+        },
+        "preallocated_storage_xid_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_coc_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_coc_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "applicable_d_fence_request_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/opaqueRef"
+          },
+          "uniqueItems": true
+        },
+        "d_fence_completeness_attestation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "registration_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_participant_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_participant_receipt_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_prepare_state": {
+          "const": "PREPARED_DURABLE"
+        },
+        "storage_prepare_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_coc_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_coc_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_private_visibility_state": {
+          "const": "NOT_VISIBLE"
+        },
+        "storage_lock_retention_state": {
+          "const": "RETAINED"
+        },
+        "i_authorization_terminal_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_commit_authorization_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_receipt_consumption_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_decision_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_decision_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "i_terminal_outcome": {
+          "enum": [
+            "COMMIT_WON",
+            "REVOCATION_WON",
+            "INDETERMINATE_ABORTED"
+          ]
+        },
+        "i_revocation_request_state": {
+          "enum": [
+            "PRESENT",
+            "NONE_AT_TERMINALIZATION"
+          ]
+        },
+        "i_revocation_request_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_revocation_cutoff_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "observed_coc_prepare_intent_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "observed_coc_prepared_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_owner_signature_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_outcome": {
+          "enum": [
+            "COMMITTED",
+            "ROLLED_BACK"
+          ]
+        },
+        "storage_resolution_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_owner_outcome_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_owner_signature_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_visibility_state": {
+          "enum": [
+            "VISIBLE",
+            "NOT_VISIBLE"
+          ]
+        },
+        "storage_lock_release_state": {
+          "const": "RELEASED_AFTER_TERMINAL"
+        },
+        "storage_same_xid_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_publication_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "visibility_pointer_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_nonpublication_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "coc_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciliation_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciliation_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reconciliation_state": {
+          "enum": [
+            "RECONCILED_TERMINAL",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "reconciled_coc_prefix_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciled_coc_prefix_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "i_authoritative_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_lookup_state": {
+          "enum": [
+            "COMMIT_WON",
+            "REVOCATION_WON",
+            "INDETERMINATE_ABORTED",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "storage_authoritative_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_lookup_state": {
+          "enum": [
+            "PREPARED",
+            "COMMITTED",
+            "ROLLED_BACK",
+            "UNKNOWN"
+          ]
+        },
+        "d_barrier_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "d_barrier_state": {
+          "enum": [
+            "OPEN",
+            "SATISFIED",
+            "UNKNOWN"
+          ]
+        },
+        "reconciliation_observation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "message_nonce",
+        "audience",
+        "runtime_session_ref",
+        "causal_order_profile_ref",
+        "causal_order_coordinator_ref",
+        "causal_order_domain_ref",
+        "causal_order_transaction_ref",
+        "canonicalization_profile_id",
+        "digest_algorithm",
+        "payload_digest",
+        "integrity_proof_ref",
+        "channel_binding_proof_ref",
+        "sender_authority_ref",
+        "publication_operation_id",
+        "request_digest",
+        "owner_boundary",
+        "participant_intent_ref",
+        "policy_domain_ref",
+        "storage_participant_ref",
+        "storage_xid_ref",
+        "participant_digest",
+        "storage_authority_db_ref",
+        "storage_resolution_outcome",
+        "storage_resolution_transaction_ref",
+        "storage_resolution_position",
+        "storage_resolution_digest",
+        "storage_owner_outcome_ref",
+        "storage_owner_signature_ref",
+        "storage_visibility_state",
+        "storage_lock_release_state",
+        "storage_same_xid_proof_ref",
+        "coc_observation_position",
+        "coc_observation_epoch",
+        "coc_observation_entry_digest",
+        "coc_commit_proof_ref"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "storage_resolution_outcome": {
+                "const": "COMMITTED"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "storage_publication_receipt_ref",
+              "visibility_pointer_transaction_ref"
+            ],
+            "properties": {
+              "storage_nonpublication_proof_ref": false
+            }
+          },
+          "else": {
+            "required": [
+              "storage_nonpublication_proof_ref"
+            ],
+            "properties": {
+              "storage_publication_receipt_ref": false,
+              "visibility_pointer_transaction_ref": false
+            }
+          }
+        }
+      ],
+      "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.applied-ack"
+        },
+        "schema_version": {
+          "const": "1.1.0"
+        },
+        "message_type": {
+          "const": "JF10_BRIDGE_RECONCILIATION_RECORDED"
+        },
+        "message_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "message_nonce": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "audience": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "runtime_session_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_profile_ref": {
+          "const": "CausalOrderProfile/1.0"
+        },
+        "causal_order_coordinator_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "causal_order_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "canonicalization_profile_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "digest_algorithm": {
+          "const": "SHA-256"
+        },
+        "payload_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "integrity_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "channel_binding_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "sender_authority_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "publication_operation_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_boundary": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "participant_intent_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "policy_domain_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_participant_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_xid_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "participant_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_authority_db_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_state": {
+          "const": "REGISTERED"
+        },
+        "preallocated_storage_xid_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_coc_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_coc_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepare_intent_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "applicable_d_fence_request_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/opaqueRef"
+          },
+          "uniqueItems": true
+        },
+        "d_fence_completeness_attestation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "registration_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_participant_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_participant_receipt_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_prepare_state": {
+          "const": "PREPARED_DURABLE"
+        },
+        "storage_prepare_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_coc_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_coc_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "prepared_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_private_visibility_state": {
+          "const": "NOT_VISIBLE"
+        },
+        "storage_lock_retention_state": {
+          "const": "RETAINED"
+        },
+        "i_authorization_terminal_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_commit_authorization_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_receipt_consumption_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_sequencer_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_decision_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_decision_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "i_terminal_outcome": {
+          "enum": [
+            "COMMIT_WON",
+            "REVOCATION_WON",
+            "INDETERMINATE_ABORTED"
+          ]
+        },
+        "i_revocation_request_state": {
+          "enum": [
+            "PRESENT",
+            "NONE_AT_TERMINALIZATION"
+          ]
+        },
+        "i_revocation_request_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_revocation_cutoff_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "observed_coc_prepare_intent_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "observed_coc_prepared_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_owner_signature_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_outcome": {
+          "enum": [
+            "COMMITTED",
+            "ROLLED_BACK"
+          ]
+        },
+        "storage_resolution_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_resolution_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "storage_owner_outcome_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_owner_signature_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_visibility_state": {
+          "enum": [
+            "VISIBLE",
+            "NOT_VISIBLE"
+          ]
+        },
+        "storage_lock_release_state": {
+          "const": "RELEASED_AFTER_TERMINAL"
+        },
+        "storage_same_xid_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_publication_receipt_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "visibility_pointer_transaction_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_nonpublication_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_epoch": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_observation_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "coc_commit_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciliation_id": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciliation_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "reconciliation_state": {
+          "enum": [
+            "RECONCILED_TERMINAL",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "reconciled_coc_prefix_position": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "reconciled_coc_prefix_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "i_authoritative_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "i_lookup_state": {
+          "enum": [
+            "COMMIT_WON",
+            "REVOCATION_WON",
+            "INDETERMINATE_ABORTED",
+            "PENDING",
+            "UNKNOWN"
+          ]
+        },
+        "storage_authoritative_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "storage_lookup_state": {
+          "enum": [
+            "PREPARED",
+            "COMMITTED",
+            "ROLLED_BACK",
+            "UNKNOWN"
+          ]
+        },
+        "d_barrier_lookup_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "d_barrier_state": {
+          "enum": [
+            "OPEN",
+            "SATISFIED",
+            "UNKNOWN"
+          ]
+        },
+        "reconciliation_observation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "message_nonce",
+        "audience",
+        "runtime_session_ref",
+        "causal_order_profile_ref",
+        "causal_order_coordinator_ref",
+        "causal_order_domain_ref",
+        "causal_order_transaction_ref",
+        "canonicalization_profile_id",
+        "digest_algorithm",
+        "payload_digest",
+        "integrity_proof_ref",
+        "channel_binding_proof_ref",
+        "sender_authority_ref",
+        "publication_operation_id",
+        "request_digest",
+        "owner_boundary",
+        "participant_intent_ref",
+        "policy_domain_ref",
+        "storage_participant_ref",
+        "storage_xid_ref",
+        "participant_digest",
+        "storage_authority_db_ref",
+        "reconciliation_id",
+        "reconciliation_digest",
+        "reconciliation_state",
+        "reconciled_coc_prefix_position",
+        "reconciled_coc_prefix_digest",
+        "i_authoritative_lookup_ref",
+        "i_lookup_state",
+        "storage_authoritative_lookup_ref",
+        "storage_lookup_state",
+        "d_barrier_lookup_ref",
+        "d_barrier_state",
+        "reconciliation_observation_ref",
+        "coc_commit_proof_ref"
+      ],
+      "additionalProperties": true
+    }
+  ],
+  "$defs": {
+    "opaqueRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Opaque issuer-namespaced UTF-8 reference. Do not parse or compare across authorities."
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "32-byte SHA-256 digest in lowercase hexadecimal."
+    }
+  }
+}

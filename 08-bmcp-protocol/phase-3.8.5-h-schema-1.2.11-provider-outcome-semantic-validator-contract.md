@@ -1,0 +1,273 @@
+# Phase 3.8.5 — H Semantic Validator Contract for Schema Artifact 1.2.11 / C Provider Outcome
+
+- Owner: H — BMCP Protocol and Interoperability
+- Exact schema: `bmcp.coc-jf10-unified-1.2.11.schema.json`, Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`
+- Wire family: `schema_version=1.3.0`; artifact revision: `1.2.11`
+- C source amendment: Phase 3.8.6, Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`
+- Status: PROPOSED exact-revision validator contract; NOT FROZEN / NOT IMPLEMENTED / NOT EXECUTED.
+- Provenance: delegated H-role simulation at user's direction, not independent human Owner approval.
+
+## 1. Validation result model
+
+Every message is evaluated in ordered layers:
+1. Strict transport framing and UTF-8/JSON parsing.
+2. JSON Schema validation against exact artifact revision 1.2.11.
+3. Canonicalization and exact envelope/profile checks.
+4. Owner signature and key-status/trust validation.
+5. Message-family semantic invariants.
+6. Typed-reference dereference and cross-record joins.
+7. COC quorum/record-chain and Storage Batch/Manifest proof validation where applicable.
+8. Currentness, anti-rollback and recovery-cutoff gate decision.
+
+Outcomes:
+- `VALID`: all required evidence is present, authoritative, current and consistent.
+- `INVALID`: cryptographic, digest, schema, identity, enum, projection or cross-record contradiction.
+- `UNKNOWN`: required authoritative evidence or currentness cannot be obtained, including unavailable provider lookup, key status, owner ledger, anti-rollback anchor or proof locator.
+- `NOT_APPLICABLE`: only where the exact schema/contract defines a typed non-applicable branch with proof; never inferred from missing data.
+
+INVALID and UNKNOWN both fail closed. UNKNOWN is not converted to empty, success, NOT_INVOKED or safe retry. Preserve the evidence and affected gate/barrier.
+
+## 2. Exact schema and envelope rules
+
+- Require artifact revision 1.2.11 and wire family 1.3.0 exactly for this profile; reject downgrade and ambiguous mixed-revision payloads.
+- Validate the common envelope against the exact 1.2.11 schema and bind artifact revision in every protected signature.
+- Duplicate JSON keys MUST be rejected before object materialization.
+- Absent, null, empty string, empty array and empty object remain distinct.
+- Reject unknown critical fields, invalid UTF-8, non-I-JSON values, non-finite numbers and unsafe numeric identifiers.
+- Never infer a message authority from a filename, transport peer name or untrusted payload field; resolve authenticated authority and message-family ownership.
+
+## 3. Signature/canonicalization requirements
+
+The H/I candidate profile `AIMBA-I-CRYPTO-1.0` / `RFC8785-JCS-1.0` / `AIMBA-ED25519-SHA256-1.0` is I-only and is not automatically applicable to C. H requires a C-owned or explicitly jointly approved C profile with:
+- exact immutable profile bundle ID and version;
+- canonicalization profile and digest algorithm;
+- exact C message-family projection allowlist;
+- payload digest and domain-separated signature preimage;
+- key ID/version and authenticated C trust/key-status evidence;
+- anti-rollback and historical verification behavior;
+- strict Base64url and Ed25519 verification only if the C/I governance profile explicitly adopts that candidate suite.
+
+Until C/I publish and H pins the C profile, protected C Provider Outcome records cannot reach VALID; return UNKNOWN/UNSUPPORTED_PROFILE and block dependent release.
+
+## 4. C Provider Outcome semantic validation
+
+For `C_PROVIDER_OUTCOME_RECORDED`:
+- enforce exact enum: `HANDOFF_ACCEPTED`, `HANDOFF_REJECTED`, `NOT_INVOKED`, `UNKNOWN`, `IN_DOUBT`;
+- dereference immutable `c_submit_outcome_ref`, recompute its digest and compare every duplicated wire value;
+- validate the complete attempt tuple: C admission ref/digest, C gate ref/generation, ProviderAttemptRef/generation, provider/account/adapter/endpoint/region, idempotency namespace/key, final request boundary and request digest;
+- validate C owner ledger/version/sequence/high-water/root and prove referenced admission is included exactly once in the C owner-local snapshot;
+- validate ParticipantIntent/Reservation pair or explicit null+reason, and join it to exact request digest and causal transaction;
+- validate provider receipt/no-handoff/not-invoked/lookup evidence independently under its issuer's trust profile.
+
+### 4.1 Outcome predicates
+
+| Outcome | Required semantic predicate |
+|---|---|
+| HANDOFF_ACCEPTED | Authenticated provider/transport evidence proves exact request crossed handoff for exact attempt; no claim of inference completion or downstream Applied |
+| HANDOFF_REJECTED | Authenticated rejection for exact attempt; not a no-side-effect proof unless a separate authoritative no-handoff proof exists |
+| NOT_INVOKED | Authoritative Adapter/transport proof that exact attempt never crossed handoff; no receipt/egress commitment contradiction |
+| UNKNOWN | Nonterminal reason and preserved original tuple; authoritative resolution unavailable |
+| IN_DOUBT | Nonterminal ambiguity after possible handoff; same-key lookup/reconciliation only |
+
+- A provider lookup proof must match provider/account/endpoint, namespace/key, ProviderAttemptRef/generation, FinalRequestBoundaryRef and RequestDigest. Same key with different request digest is INVALID.
+- Lookup result absence is NOT_INVOKED only when provider capability contract guarantees authoritative complete absence for the relevant retention/consistency window. Otherwise UNKNOWN.
+- Provider key retention expiry before authoritative reconciliation is UNKNOWN/IN_DOUBT, never permission to retry with a new key.
+- Any provider failover or account/region/endpoint change is a new operation requiring fresh authorization/admission; it cannot inherit the previous attempt.
+
+## 5. C Gate linearization semantic validation
+
+H validates C evidence, it does not operate C's gate. Verify:
+- CommitEgress and CloseEgressGate use the same durable serialization authority and monotonic gate generation.
+- Close-wins implies no transport bytes for any older uncommitted admission.
+- Commit-wins implies the exact attempt is included in close's in-flight set.
+- crash after EGRESS_COMMITTED before durable transport result => UNKNOWN/IN_DOUBT.
+- no process-local mutex/cached OPEN flag is accepted as multi-replica proof.
+- SDK retries, redirects, stream continuations and failover cannot bypass fresh gate admission.
+- C outcome's gate generation/attempt generation and request digest match the immutable C admission/reservation and provider evidence.
+
+## 6. COC / Storage joins
+
+- C owner-local admission is independently enumerated even when COC ParticipantIntentRef is null; null requires explicit reason and never means no C admission.
+- If ParticipantIntentRef exists, validate exact ParticipantIntent -> ParticipantReservation chain and request digest equality.
+- COC Recovery Cutoff Batch must precede Participant Manifest record. Validate exact ManifestId/content digest/count/high-water and Batch position/digest; then validate Manifest record's back-reference and record digest. Do not collapse content digest, Batch digest and Manifest record digest.
+- C owner Gate Release remains blocked until exact S4 Batch/Manifest pair readback and semantic join are VALID.
+- I authorization, D clearance, Storage Prepared/COMMITTED, H ACK, COC quorum or G Applied cannot synthesize provider handoff truth.
+
+## 7. Error precedence and evidence preservation
+
+- INVALID dominates UNKNOWN when an independently provable contradiction exists.
+- Otherwise any missing/unavailable required authoritative proof yields UNKNOWN.
+- Preserve original raw bytes, parsed canonical projection, schema artifact revision, validator version, all dereference refs/digests and decision trace.
+- A later proof does not rewrite an earlier result; append a new validation/reconciliation record linked to the original.
+- Validator MUST NOT mutate C owner records, I receipts, D fences, Storage ledger or provider outcomes.
+
+## 8. Required conformance vectors
+
+H must publish exact 1.2.11 vectors for:
+1. all five outcome values, valid and invalid conditional proof combinations;
+2. gate generation stale/current, close-wins and commit-wins;
+3. provider attempt generation mismatch;
+4. same-key same-digest versus same-key different-digest;
+5. provider/account/endpoint/namespace mismatch;
+6. authoritative no-handoff versus timeout/lost ACK/worker death;
+7. rejection after possible side effect;
+8. UNKNOWN/IN_DOUBT key expiry and unavailable lookup;
+9. contradictory receipts and append-only supersession;
+10. C admission ledger high-water/root and COC intent/reservation joins;
+11. null ParticipantIntentRef with/without absence reason;
+12. schema artifact downgrade, signature profile downgrade, duplicate JSON keys and unknown critical fields;
+13. C signature projection mutation of every signed field;
+14. Batch-before-Manifest and three-digest mismatch.
+
+Execution record must identify exact schema/validator/vector blobs, language/runtime versions, command, CI run, pass/fail counts and retained output. A checked-in test file is not evidence that it ran.
+
+## 9. Freeze gate
+
+This contract is PROPOSED. It does not freeze 1.2.11 because the current schema's structural message does not alone carry every C gate/attempt semantic value and no exact C signature profile/vector bundle is yet pinned. H will only accept a later exact bundle after C's amendment, I candidate profile addendum Blob `1bcddbaaa4a9ca730d492a6554941becac305668`; C candidate review Blob `794d1dc49f034152407e3a42ba5ac937ea3539f8`. H schema/validator updates, independent cross-language execution and Storage/A exact pin review.
+
+No tests, production readiness, provider-specific exactly-once or implementation acceptance are claimed.
+
+
+## 10. Exact 1.2.11 wire mapping and current cross-owner inputs
+
+The exact JSON Pointer/requiredness inventory and inline-versus-dereference matrix are maintained in H Phase 3.8.6, Blob `e4dca3765e1557a4d29866c6e1289cea1db4ab7a`. It confirms that the 1.2.11 C branch does **not** inline CGateRef/CGateGeneration, ProviderAttemptRef/Generation, provider account, endpoint, region or API operation. These values MUST be obtained from the immutable C object referenced by `c_submit_outcome_ref`, then compared to provider evidence and all duplicated wire values. Missing members in an authoritative C object are INVALID; unavailable dereference/currentness is UNKNOWN.
+
+Current C/I dependencies:
+- C exact semantic signature projection proposal: Phase 3.8.8 Blob `a0e38c781d8aa2da5242dfce121e74b5141663d8`.
+- I governance disposition: Phase 3.8.5 Blob `41fc0f508ae75e8c16012966160e9e2a1e368881`, conditional acceptance of the suite in principle only; no profile registration or deployment approval.
+- C review of I candidate: Phase 3.8.7 Blob `794d1dc49f034152407e3a42ba5ac937ea3539f8`.
+- C semantic amendment: Phase 3.8.6 Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`.
+
+The profile remains unregistered. C outcome records cannot be declared VALID merely because the common envelope carries SHA-256 and a signature; exact C profile registration, authenticated C key-status evidence, H projection implementation and independent vector execution remain mandatory.
+
+
+## 11. CSubmitOutcome immutable object schema and test-harness binding
+
+C's immutable object schema is `urn:aimba:schema:c-submit-outcome:1.0.0`, exact Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`. C's schema/conformance contract is Blob `eac5a6b02405aa554bd53095303e364bf25479de`.
+
+The proposed H dereference pipeline MUST:
+1. Validate the BMCP 1.2.11 envelope against exact schema Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`.
+2. Resolve `c_submit_outcome_ref` under authenticated C object-store authority; reject a payload-supplied object as a trust anchor.
+3. Validate the dereferenced object against exact C schema Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`.
+4. Recompute and verify the object digest using the final registered C profile; current profile remains unregistered, so this gate is presently blocked.
+5. Compare every duplicated wire member to the immutable C object, including provider/adapter/idempotency/request/outcome/evidence/COC and owner-ledger fields.
+6. Validate C gate generation, provider attempt generation, provider account, endpoint, region and API operation from the C object and correlate provider evidence to the exact same tuple.
+7. Independently verify C owner ledger membership/currentness, provider evidence issuer trust and COC intent/reservation/quorum joins.
+
+C fixture pack Blob `e14eab2bed41f30af10a073b8e6523512128e78e` contains ten synthetic structural/semantic cases. C harness Blob `92e8e9e607566eafa6ad89110202dbeed0fc43cb` uses JSON Schema Draft 2020-12 plus selected semantic predicates. It does not verify signatures, provider issuer trust, ledger inclusion, gate linearizability or COC quorum. Fixture signatures are placeholders. The harness is NOT EXECUTED.
+
+H must classify an absent required C object member or a proven digest/identity contradiction as INVALID. Unavailable object retrieval, currentness, key status or external authoritative proof is UNKNOWN. Both outcomes fail closed. No cross-language or production acceptance is implied.
+
+
+## 12. H validator implementation interface (not executed)
+
+H has added a fail-closed validator core:
+- `08-bmcp-protocol/validators/provider_outcome_validator.py`, Blob `e8f737326bc4791e8d7acf917b4725dbb7171fad`.
+- It performs strict JSON parsing helpers, separate BMCP/C-object schema validation, C-P0 digest recomputation, duplicated wire/object comparison and selected local semantic predicates.
+- Trust-dependent operations are injected tri-state callbacks: C profile registration, C signature/key status, provider evidence issuer, C owner ledger membership/currentness, COC join and anti-rollback/currentness.
+- Missing callback or unavailable evidence yields UNKNOWN; proven contradiction yields INVALID; INVALID dominates UNKNOWN.
+
+This is an integration seam only. The caller MUST use `parse_strict_json` for raw bytes. The callbacks must be backed by authenticated authorities and must never trust payload-supplied public keys. The module is not yet connected to production key registries, object storage, provider trust, C ledgers or COC. It has not been executed against the full H schema or C fixtures.
+
+
+## 13. Executable H unit/fixture test and currentness
+
+H unit/fixture tests:
+- Test file Blob `1f17bdcef6004eca165644ce96bcf35d3b10c3f8`.
+- Requirements Blob `a90afd258a50582c33f0f7c7f5e979600322ae86`.
+- Exact vendored C schema Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`.
+- Exact vendored C vector fixture Blob `e14eab2bed41f30af10a073b8e6523512128e78e`.
+- Workflow Blob `267f9bce0ee501864d6c83bacf84d747639ceadf`.
+
+The H Provider Outcome workflow run `44055334361` completed SUCCESS at commit `4837831c6c22973aba15be18e5376e56266b697b`, with 7 tests passing. That run predates the latest C schema fields `OwnerSignatureRef` and `ActualInferenceRequestId`, the complete optional wire mapping and the latest H callback changes. It is historical evidence only; it is NOT current validation of the latest code.
+
+A new run is required after the latest H/C fixture synchronization. No signature, provider issuer, C ledger, COC quorum or production integration test is covered by these 7 unit/fixture tests.
+
+
+## 14. I exact C schema review
+
+I Phase 3.8.6 exact review Blob `b2e37b0ba9137f2ef1b9fd65bf815bc136ca28c` accepts the structural C object crypto binding only. It does not register/deploy the profile, trust root or key custody. It requires strict UTF-8/JCS/I-JSON handling, duplicate-key rejection, exact C-P0 coverage, strict Base64url decoding to 64 bytes, message_type domain binding, anti-rollback and independent cross-language signature vectors.
+
+The H implementation core is Blob `e8f737326bc4791e8d7acf917b4725dbb7171fad`; the H unit/fixture test is Blob `1f17bdcef6004eca165644ce96bcf35d3b10c3f8`. The core exposes injected tri-state authority callbacks and must return UNKNOWN when profile registration or trust/currentness callbacks are absent. The COC and owner proof callbacks receive both envelope and immutable C object so they can validate independent COC/Storage/I/D refs without incorrectly folding them into C-P0.
+
+
+## 15. Current executed CI evidence
+
+- C schema/semantic CI: run `44055965702`, commit `a0c197fa94e71c52758fadaa335a686815485dd7`, SUCCESS, 3 tests.
+- H Provider Outcome CI: run `44055791045`, commit `7d5c7324cabde76d99df49c55220219a491e03c0`, SUCCESS, 7 tests.
+- H Provider Outcome run executed strict JSON parser tests, invalid UTF-8/non-finite rejection, candidate digest/preimage domain binding, owner high-water semantic check, fail-closed missing callback check, and all ten C schema/vector cases.
+
+The H run's exact tested source blobs were validator core `e8f737326bc4791e8d7acf917b4725dbb7171fad`, test file `1f17bdcef6004eca165644ce96bcf35d3b10c3f8`, C schema `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`, and C vector fixture `e14eab2bed41f30af10a073b8e6523512128e78e`. The test suite did not execute cryptographic signature verification or any external authority callback. No production readiness is established.
+
+
+## 16. Independent C crypto candidate verification evidence
+
+H's own Python/Node candidate verifier completed successfully:
+- Run `44057944517`, commit `b8a22cecdf6238c81f08338d30776be250fd69a4`, 10 tests passed.
+- Python verifier `a49d588ea6f840927fe21ad8c41cd8089dceac29`.
+- Node oracle `c35ddea3ecaf5e452b14fb57fb20327ad80703cc`.
+- Expected vectors `a4bfe0b431d5e710ac99d604e7b1bce49c044d23`.
+
+This second run independently recomputed the five candidate signatures and fingerprints, verified all present C-P0 field mutations fail, and compared H Python/Node output to the static expected vectors. It is not profile registration or production trust evidence. The test seed is public; C trust root/key lifecycle, H production callback wiring, provider evidence authentication, C ledger inclusion, COC quorum and provider adapter testing remain open.
+
+
+## 17. C key-status event and signing-sequence validation
+
+C has published the proposed append-only key-status event schema Blob `908b293eba337e9fa75864cea3704e28a1a8d82e` and lifecycle contract Blob `de581ea59e724faf5972217e17b983de641ad3f7`. I's candidate governance review is Blob `57d1b1ca616eaec6df1dee82ddaccc66519caca2`.
+
+The H validator core now exposes `verify_key_status(c_object)`, Blob `c8717869d066543b1272780014ab1e42310c6951`. It is mandatory for a VALID result and must establish:
+- a valid I-governed signature over the exact immutable key-status event;
+- a valid append-only predecessor chain and permitted state transition;
+- exact C key ID/version/fingerprint/profile/purpose/audience binding;
+- ACTIVE status at the C outcome signing sequence;
+- shared C authority sequence namespace between outcome record and key-status event;
+- latest trusted key-status checkpoint and anti-rollback evidence.
+
+Missing callback, unavailable trust root, unavailable status ledger or checkpoint outage => UNKNOWN. Proven key substitution, invalid transition, fork, stale root or invalid governance signature => INVALID. Wall-clock timestamps are not a causal substitute.
+
+I accepts the schema/lifecycle and proposed governance signature construction as candidates only. Both C data profile and I governance profile remain unregistered. No production key registry, HSM/KMS, key custody or anti-rollback service is claimed.
+
+
+## 18. Key-status structural CI and I review
+
+C key-status schema/state-machine suite passed in C run `44059137081` (12 total tests) at commit `6b7b9c4a24d81ae45dcb7ddcdbe49c9617e3e4da`. H key-status schema and fail-closed callback suite passed in H run `44058962672` (11 total tests) at commit `f6a632c76efe50d8514a8b94bd1b134f064445c8`.
+
+I review Blob `57d1b1ca616eaec6df1dee82ddaccc66519caca2` accepts the structural lifecycle and governance-signature construction as candidates only. The governance profile and C data profile remain unregistered. No I governance root, C key registry, custody/HSM/KMS, external anti-rollback checkpoint or operational revocation/compromise drill is present.
+
+
+## 19. CSubmitOutcome 1.0.1 required sequence namespace
+
+The current C immutable object schema is `urn:aimba:schema:c-submit-outcome:1.0.1`, exact Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`. C 1.0.1 adds required `sequence_namespace_ref` so H can join C outcome `record_sequence` to CKeyStatusEvent `event_sequence` without inferring an ordering domain.
+
+H implementation core Blob `1a92c0cf7146e2884bd38232005dd9a55d558a85` now requires schema version and artifact revision 1.0.1 and rejects missing sequence namespace. The mandatory `verify_key_status` callback must compare the object namespace to the authenticated key-status ledger namespace and prove both sequence classes share the same durable C sequencer.
+
+C 1.0.1 fixtures Blob `c447f8c2908469c52cb52a448101495a331277c5`, candidate vector manifest Blob `3a5fb8502091636135a298de5891d728b550ba50` and expected crypto fingerprints Blob `34e49a49551390f52198b1fa557e15a32a3f6ee2` are vendored in H byte-identically.
+
+I 1.0.1 review Blob `a93febf867b8da2f23e7ee3cb5334bf491872637` accepts this as a required signed field. It does not register either C data or I governance profile. Production trust, key-status ledger, anti-rollback and callback integration remain open.
+
+
+## 20. Current H schema 1.2.12 / C object 1.0.1 integration evidence
+
+The active validator target is BMCP schema artifact revision `1.2.12`, wire version `1.3.0`, exact schema Blob `a54f66914a819d77f00c6af04e76453ff9f654ee`. The current C dereference object is schema `urn:aimba:schema:c-submit-outcome:1.0.1`, Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`. C object 1.0.0 and BMCP 1.2.11 references in earlier sections are historical only.
+
+The current H validator core Blob `1a92c0cf7146e2884bd38232005dd9a55d558a85` rejects C object versions other than 1.0.1 and requires the explicit `sequence_namespace_ref`. The key-status callback must compare that namespace with CKeyStatusEvent and prove both sequence streams use the same durable C sequencer.
+
+H run `44060704553`, commit `8c377a7218b70621d2348b47341d4cf4755b3733`, passed 17 tests, including the 1.0.1 schema/namespace test and H's independent Python/Node candidate crypto verification against static expected vectors.
+
+I review of the 1.0.1 namespace is Blob `40d223c55473fc7d101b6d16858ad6405d9db5ee`. I accepts the namespace as a required signed design field but does not register the C data profile or I governance profile. No production sequencer, key-status ledger, trust root, anti-rollback service, H authority callback adapter or provider integration is claimed.
+
+
+## 21. Current exact-version disposition / 当前精确版本状态
+
+The historical title and §§1–18 describe the superseded BMCP 1.2.11 / CSubmitOutcome 1.0.0 validation target. They remain immutable historical context and MUST NOT be used as the current wire binding. §§19–20 record the 1.0.1 migration and candidate CI evidence. The current exact consumer mapping is H Phase 3.8.7 Blob `fad28f1b62f6a686669e209ebe30d69df6330d75`, which binds BMCP schema 1.2.12 Blob `a54f66914a819d77f00c6af04e76453ff9f654ee`, CSubmitOutcome 1.0.1 Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`, current C semantic amendment Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`, and current I sequence namespace review Blob `0d78e5b2bfcf66cae6b757314cead84b9c942601`.
+
+The exact C/H candidate CI evidence remains bounded:
+- C run `44059935858`, tested commit `b49966361b4b3121a2ebf4105b4e0c57a612e945`, 19 tests, SUCCESS.
+- H run `44060704553`, tested commit `8c377a7218b70621d2348b47341d4cf4755b3733`, 17 tests, SUCCESS.
+- The runs are verified GitHub Actions jobs. They prove candidate schema/semantic/crypto-vector construction only, not profile registration, production sequencer/key-status service, trust-root/custody, provider truth, COC quorum, Storage durability or deployment.
+
+**Disposition:** current 1.2.12 / 1.0.1 structural and candidate cross-language mapping is ACCEPTED AS A PROPOSAL; protocol freeze, production trust registration and production activation remain NOT APPROVED.
+
+**中文：** 历史标题及 §1–18 描述已被取代的 BMCP 1.2.11 / CSubmitOutcome 1.0.0 验证目标，仅保留为历史上下文，不得继续作为当前 Wire Binding。§19–20 记录 1.0.1 迁移与候选 CI 证据。当前精确消费映射为 H Phase 3.8.7 Blob `fad28f1b62f6a686669e209ebe30d69df6330d75`，绑定 BMCP 1.2.12、CSubmitOutcome 1.0.1、当前 C 语义修订及 I Sequence Namespace Review。C 的 19 项与 H 的 17 项 GitHub Actions 测试均已核验为 SUCCESS，但只证明候选 Schema/语义/跨语言密码学向量构造；不证明 Profile 注册、生产 Sequencer/Key Status、Trust Root/密钥托管、Provider Truth、COC Quorum、Storage 持久化或部署。
+
+**结论：** 1.2.12 / 1.0.1 结构与候选跨语言映射可作为提案接受；协议冻结、生产信任注册与生产激活仍未获批准。

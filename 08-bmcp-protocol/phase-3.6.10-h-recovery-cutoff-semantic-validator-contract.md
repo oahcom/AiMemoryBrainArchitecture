@@ -1,0 +1,457 @@
+# Phase 3.6.10 — H Recovery Cutoff Semantic Validator Contract
+
+- Owner perspective: H — BMCP Protocol Architect
+- Status: **PROPOSED VALIDATION CONTRACT — EXACT-VERSION H / I / D / C / STORAGE / A REVIEW REQUIRED**
+- Scope: A §11 Recovery Cutoff Batch, owner snapshots/admission sets, COC ParticipantManifest, owner-only release and A §12 JF-10 bridge joins
+- This is a specification of validators and vectors, not an implementation or conformance result.
+
+## 0. Exact source bundle
+
+| Source | Blob |
+|---|---|
+| A Phase 3.6 architecture §§11–12 | `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` |
+| Storage Design v3.1 | `d5bdc72f193fcdaa654e4f07f865b77c578673ca` |
+| COC protocol | `8ac17816476f280ab6fb3afca0688aa03e37de1d` |
+| I Phase 3.6.8 amendment | `929b30ba10ac627927d3959e0777b467846b268d` |
+| D Phase 3.6.8 amendment | `0668667daeb936bf223ab049277ea2a4117c3b09` |
+| C Phase 3.6.9 amendment | `9609b252fc38fd5ba7b2f8c0992b7bd33a13c5bb` |
+| H recovery schema 1.0.4 | `d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1` |
+| H JF-10 bridge schema 1.1.0 | `a8a945cc3623c2907003b93625e3c79742150944` |
+
+Schema 1.0.4 is the current structural candidate at the time of this document. The semantic rules below are additional requirements and are not implied by JSON Schema validity.
+
+## 1. Validator architecture
+
+Implement five independently testable validators and one composition validator:
+
+1. `validateOwnerSnapshot`
+2. `validateParticipantManifest`
+3. `validateRecoveryCutoffBatch`
+4. `validateOwnerGateRelease`
+5. `validateRecoveryEpochCompleted`
+6. `validateRecoveryJoin` — composes the first five and the JF-10 bridge validators.
+
+Each validator returns one of `VALID`, `INVALID`, or `UNKNOWN`. Missing authoritative source, incomplete pagination, stale read, unavailable owner, unverifiable signature or unresolved anti-rollback state returns UNKNOWN and MUST NOT be coerced to VALID or EMPTY.
+
+## 2. Owner snapshot validation
+
+For each I/D/C owner snapshot:
+
+1. Validate schema ID/version, strict field set, issuer/subject/owner authority, audience, purpose, signer/key status and signature under I-approved trust policy.
+2. Resolve the exact owner ledger source and completeness method; reject a stale replica or partial cursor.
+3. Verify GateRef, GateGeneration, scope binding, scope generation, snapshot generation and anti-rollback anchor are current and monotonic.
+4. Independently validate request and admission ledgers:
+   - request member entries have `owner_entry_kind=REQUEST`;
+   - admission member entries MUST NOT have REQUEST kind;
+   - request/admission high-waters are from the exact owner ledger namespace;
+   - I requires receipt_issue, receipt_consume and producer_domain_inventory_epoch high-waters;
+   - D requires producer_registration, work_item, attempt and barrier high-waters;
+   - C requires reservation and provider_attempt high-waters.
+5. Require exact array count equality and canonical ordering by the owner's declared immutable sequence/ref ordering. Duplicate owner_entry_ref is INVALID.
+6. Recompute each member digest and each member-set root using the exact H canonicalization/digest profile; compare to declared values.
+7. COMPLETE_EMPTY is VALID only when the array is present and empty, count is zero, root equals the canonical empty-set root, ledger query is complete, and owner attestation signs that exact state.
+8. COMPLETE_NON_EMPTY requires non-empty array, exact count and root. NOT_ENUMERATED/PARTIAL/UNAVAILABLE/UNKNOWN never qualifies as empty.
+9. Validate all owner-specific high-waters and ensure no member exceeds its captured high-water. If the owner ledger advances before release, snapshot becomes STALE and a later recovery round is required.
+
+## 3. COC ParticipantManifest validation
+
+1. Obtain the exact quorum-confirmed prefix position (term/index) and root using a linearizable COC read.
+2. Enumerate every ParticipantIntent in the affected causal-order domain through that exact prefix; pagination must be complete and cursor continuity verified.
+3. Validate each typed participant entry: unique ParticipantIntentRef, owner kind, mandatory owner_admission_ref, operation identity, participant digest, term/index and entry digest. Resolve owner_admission_ref against the exact signed C admission ledger; Storage participants additionally join the exact JF-10 PreparedParticipant tuple.
+4. Verify every entry is actually present in the committed prefix at its declared term/index and the digest matches the committed record.
+5. Recompute participant count and canonical participant-set root.
+6. COMPLETE_EMPTY requires a complete prefix enumeration and canonical empty root. A missing log segment, unavailable quorum, incomplete page or stale follower is UNKNOWN, not empty.
+7. Reject duplicate participant refs, duplicate positions, conflicting operation identities or one identity bound to different digests.
+8. The manifest is immutable and bound to RecoveryEpoch, prefix root and previous-prefix digest. A later prefix is a new manifest/round, never an in-place mutation.
+
+## 4. RecoveryCutoffBatch validation
+
+1. Validate quorum proof and ensure the batch is appended after the exact prefix it closes.
+2. Require exactly one I, one D and one C snapshot reference and digest for this Phase 3.6.9 recovery scope. Missing owner is not empty.
+3. Fetch each snapshot by exact immutable ref and verify its digest, signature and scope binding.
+4. Fetch the ParticipantManifest by exact ref and verify its digest, prefix term/index/root and complete enumeration.
+5. Verify RecoveryEpoch, recovery round, previous batch digest and reconciliation attempt generation form an append-only chain with no gaps or forks.
+6. Ensure the batch's scope binding equals the exact owner scope bindings and causal-order domain scope; partial or widened scope is UNKNOWN/INVALID.
+7. Reject any batch that attempts to sort or compare I/D/C local sequence numbers against one another or against COC term/index.
+8. Recompute batch digest over the canonical protected payload and verify the quorum commit proof.
+
+## 5. Cross-set RecoveryJoin validation
+
+The join is a typed relation, not a global sequence.
+
+For each owner admission member:
+- If `REGISTERED`, its exact ParticipantIntentRef, COC position and entry digest MUST match one unique participant manifest entry. The owner operation identity/digest and scope must match the participant payload.
+- If `NOT_REGISTERED`, the member MUST carry no ParticipantIntentRef/position/digest. It remains an owner-local obligation and must be registered under the same stable identity before any later protected effect, or terminalized by authoritative no-effect evidence.
+- Multiple owner evidence entries may legitimately refer to one participant (for example issue/consume evidence), but the same owner entry cannot map to multiple participants unless an explicit typed cardinality contract allows it.
+- Every affected participant in the COC manifest must have an accountable owner binding (mandatory C owner_admission_ref, plus I receipt/terminal evidence, D barrier membership and Storage participant where applicable). A participant with no accountable owner evidence is UNKNOWN and blocks release.
+- A Storage participant is joined through the exact JF-10 participant tuple; it is not treated as a separate user request merely because it has a Storage owner kind.
+
+The join proof records exact member refs/digests and participant refs/digests. It does not synthesize a cross-owner high-water or fabricate missing entries.
+
+## 6. JF-10 cross-schema join (A §12)
+
+The recovery-cutoff messages supplement `bmcp.applied-ack/1.1.0`; they do not replace its five JF-10 bridge message families.
+
+For every applicable Storage participant, the cross-schema validator MUST compare the same immutable tuple across the RecoveryJoin, JF-10 bridge, I proof and Storage receipt/resolution:
+- ParticipantIntentRef / CausalOrderTransactionRef;
+- PublicationOperationId / RequestDigest / ParticipantTupleDigest;
+- PreparedParticipantRef / PreparedTransactionGID;
+- CanonicalAuthorityDBRef / DatabaseIncarnationRef / PostgreSQLNativeXID where known;
+- PrepareAttemptRef / PrepareAttemptGeneration;
+- ParticipantLedgerRef / ParticipantLedgerVersion;
+- COC prepare-intent position/digest;
+- I receipt ref, single-use consumption identity and terminal proof;
+- Storage PreparedParticipantReceipt and StorageResolutionProof.
+
+Terminal mapping is mandatory:
+- I COMMIT_WON → same participant and same XID Storage COMMITTED; provider invocation additionally requires D clearance and C's final gate.
+- I REVOCATION_WON or INDETERMINATE_ABORTED → same participant and same XID Storage ROLLED_BACK; provider invocation is forbidden.
+- I UNKNOWN/IN_DOUBT or Storage UNKNOWN/IN_DOUBT → unresolved; no release.
+- Contradictory I/Storage terminal pair → INVALID and quarantine; never resolve by COC observation or timeout.
+
+## 7. Owner Gate Release validation
+
+1. Validate owner signature and authority; I/D/C may issue only their own gate release.
+2. Compare release GateRef/Generation, scope/scope generation, request high-water/root, admission high-water/root, snapshot generation/digest and anti-rollback anchor against the latest authoritative owner ledger.
+3. Perform the final compare-and-commit at the owner authority. A precomputed release message without successful currentness CAS is not a release.
+4. Verify exact RecoveryEpoch/round/RecoveryCutoffBatch/ParticipantManifest and all owner obligations are terminal or explicitly safe no-effect.
+5. Any post-high-water request, inventory epoch advance, D projection/lineage advance, C provider-attempt advance, changed root or stale key status invalidates the candidate and requires a subsequent round.
+6. A release is typed OUTAGE_ADMISSION_RELEASE_ONLY. It does not clear effective ForgetFence, prove Global Forget Completion, resolve Storage visibility or manufacture provider success.
+
+## 8. RecoveryEpochCompleted validation
+
+COC may record RECOVERY_EPOCH_COMPLETED only after:
+- every required immutable cutoff round is present and chained;
+- each round's batch, prefix and participant manifest validates;
+- all affected participants are reconciled;
+- exactly one valid current I release, one D release and one C release are present for the applicable scope/generation;
+- no UNKNOWN/IN_DOUBT, missing owner, missing prefix page or stale high-water remains.
+
+The completion record is a COC observation, not an owner gate release or a substitute for I/D/C authority.
+
+## 9. Required positive and negative vectors
+
+| ID | Scenario | Expected |
+|---|---|---|
+| HRC-01 | I/D/C request and admission sets all complete-empty with valid signed canonical empty roots | VALID |
+| HRC-02 | Request set empty, admission set non-empty, independent roots correct | VALID |
+| HRC-03 | COMPLETE_EMPTY with null/missing array or non-empty array | INVALID |
+| HRC-04 | Zero count but ledger unavailable/partial pagination | UNKNOWN / INVALID |
+| HRC-05 | Count differs from array length | INVALID |
+| HRC-06 | Duplicate owner_entry_ref or noncanonical member order | INVALID |
+| HRC-07 | I snapshot omits receipt_consume or inventory epoch high-water | INVALID |
+| HRC-08 | D snapshot omits work/attempt/barrier high-water | INVALID |
+| HRC-09 | C snapshot omits provider_attempt high-water | INVALID |
+| HRC-10 | COC participant prefix has missing page/segment or stale follower read | UNKNOWN |
+| HRC-11 | ParticipantManifest omits one committed pre-batch ParticipantIntent | INVALID |
+| HRC-12 | REGISTERED owner member points to wrong participant digest/position | INVALID |
+| HRC-13 | NOT_REGISTERED member carries a fabricated ParticipantIntentRef | INVALID |
+| HRC-14 | Affected participant has no accountable owner admission/barrier/receipt evidence | UNKNOWN |
+| HRC-15 | Batch omits I, D or C snapshot | INVALID |
+| HRC-16 | Batch references stale snapshot digest or wrong prefix root | INVALID |
+| HRC-17 | High-water/scope generation advances before owner release CAS | STALE; next round required |
+| HRC-18 | COC attempts to issue an I/D/C release | INVALID |
+| HRC-19 | RecoveryEpochCompleted has fewer than one valid I, D and C release | INVALID |
+| HRC-20 | I COMMIT_WON paired with Storage ROLLED_BACK | INVALID |
+| HRC-21 | I REVOCATION_WON paired with Storage COMMITTED | INVALID |
+| HRC-22 | I or Storage UNKNOWN/IN_DOUBT | UNKNOWN; release blocked |
+| HRC-23 | Same message identity/same digest replay | VALID idempotent replay |
+| HRC-24 | Same message identity/changed digest | CONFLICT / INVALID |
+| HRC-25 | Unknown critical field, downgrade, duplicate JSON key or absent/null substitution | INVALID |
+
+## 10. Status and owner acceptance boundary
+
+This contract specifies H's semantic validation obligations. It does not implement the validators or establish canonical-byte/signature interoperability. H exact-version acceptance, I trust-policy approval, C/D/Storage owner review, A integration acceptance and executable tests remain required.
+
+No protocol/schema/cryptographic freeze, runtime conformance, deployment, production activation or JF-10 P0 closure is claimed.
+
+
+## 11. Executable candidate suite and RecoveryJoin wire candidate
+
+The following implementation artifacts have been added on the H branch:
+
+| Artifact | Path | Current Blob | Purpose |
+|---|---|---|---|
+| HRC semantic suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_hrc_semantics.py` | `60a2f4db4bd12f2131ecd147db9bbe328da6db50` | 25 HRC unittest cases plus 19 JPF bidirectional-join cases |
+| Wire interop candidate suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_wire_interop.py` | `1a4e754ba9bfa57eb973c6d39731e9f89443b323` | Strict JSON parsing, duplicate-key rejection, absent/null distinction, canonical test bytes, counter encoding and critical-field behavior |
+| RecoveryJoin schema candidate | `08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.0.schema.json` | `dd3234aa1c74caf6d0e335875cd96e0b2b64082f` | Strict structural candidate for both directional edge sets, owner snapshots, JF-10 sub-join and difference sets |
+
+Run the dependency-free candidate suite from the test directory:
+
+```bash
+python -m unittest -v test_hrc_semantics.py test_wire_interop.py
+```
+
+The HRC suite has 44 unittest methods: HRC-01..25 and JPF-01..19. The wire suite has 10 methods and the schema-integrity suite has 9 methods, for 66 unittest methods total. The branch workflow is `.github/workflows/h-recovery-cutoff-conformance.yml` (Blob `ea7a3d9c365b84352d3bac69da94fe0d510e46a4`). No workflow run is available for this candidate yet; the code is committed as an executable candidate but **has not been run in CI or independently reproduced**. No PASS is claimed.
+
+### 11.1 Semantic model vs wire model
+
+The HRC test harness operates on a normalized semantic projection of the 1.0.4 message family. It is not a replacement for JSON Schema validation or signature verification. A production adapter must map exact wire fields into the normalized model without dropping:
+- request vs admission enumeration status and independent roots/counts;
+- owner-specific high-waters and namespace identity;
+- COC prefix position, participant entry digest and mandatory primary C admission ref;
+- additional I/D evidence edges and JF-10 participant tuple;
+- exact Batch, Manifest record and JoinProof identities/digests.
+
+The candidate helper digest profile named HRC-TEST-v1 is test-only. It MUST NOT be used as a production canonicalization or signature profile. Production canonical bytes and cryptographic trust require H approval and I security approval.
+
+### 11.2 Join Proof schema boundary
+
+The new RecoveryJoin schema is a candidate extension, not a change to recovery-cutoff 1.0.4 or JF-10 bridge 1.1.0. It carries separate OwnerAdmissionToParticipant and ParticipantToOwnerEvidence relations. The current recovery-cutoff 1.0.4 participant entry's owner_admission_ref remains the primary C admission anchor; it does not encode all I/D receipt, work, attempt, barrier or lineage evidence. Those are represented as explicit typed edges in RecoveryJoinProof.
+
+Schema validity alone cannot prove:
+- prefix completeness against the live quorum log;
+- owner-ledger completeness or empty-set truth;
+- signature/key status and anti-rollback;
+- both directional set equality;
+- currentness CAS at owner gate release;
+- same-XID I/Storage terminal coupling.
+
+Those remain runtime semantic validators and owner-authority checks.
+
+### 11.3 Required next implementation increment
+
+1. Add a wire-to-normalized adapter for all six 1.0.4 message families.
+2. Validate each raw message against its exact JSON Schema before semantic evaluation.
+3. Implement the six validators in §1 as production modules, with injected H canonicalization and I trust-verifier interfaces.
+4. Replace test-only digest helper with the exact H/I-approved profile only after formal approval.
+5. Run the current checked-in suite with `python -m unittest discover -s 08-bmcp-protocol/tests/conformance/recovery_cutoff -p "test_*.py" -v`: HRC-01..25 (25), JPF-01..19 (19), WIRE-01..10 (10), and SCHEMA-01..12 (12), total 66 test methods. The older 47-parser / JPF-01..12 count is superseded.
+6. Add differential vectors in at least two independent implementations; compare canonical bytes, digests, signature input bytes, error codes and replay behavior.
+7. Publish raw CI logs, deterministic seeds, source/schema hashes and independent H/I/D/C/Storage review.
+
+Until then, status is **EXECUTABLE CANDIDATE COMMITTED / NOT RUN / NOT CONFORMANCE-VERIFIED**.
+
+
+### 11.4 Schema refinement after Storage Join Proof review
+
+The RecoveryJoin 1.0.0 candidate was revised to preserve request-set and admission-set completeness independently for each of I, D and C. It now requires six separate owner-set statuses rather than one collapsed per-owner status. It also carries both the original participant_position_ref from recovery-cutoff 1.0.4 and the resolved COC term/index/entry-digest tuple in the JoinProof edge. Conditional requirements now bind NO_EFFECT_PROVEN to a no-effect proof, NOT_APPLICABLE_WITH_PROOF to its proof reference, and terminal Storage outcomes to StorageResolutionProof.
+
+The earlier RecoveryJoin schema Blob 044fb07ad53d6778c135ea6918de9c69eb178982 is superseded by the row-level identity and request-disposition amendment below.
+Latest schema integrity test Blob: 5292d56661e938c905c61455e9ed53c4ff674c54.
+
+
+### 11.5 Request-ledger and row-identity completeness
+
+The RecoveryJoin schema now carries an explicit owner_request_dispositions array, so the JoinProof accounts for every I/D/C request-ledger member as well as every admission-ledger member. Each request disposition binds owner request ref, owner ledger row ref, request digest, owner-local sequence namespace/value, scope and owner signature; OUT_OF_SCOPE_WITH_PROOF requires a proof ref. A request is not silently dropped merely because it has no COC ParticipantIntent.
+
+The join edges also distinguish the stable OwnerAdmissionRef (the admission identity referenced by ParticipantManifest.owner_admission_ref) from the OwnerEntryRef (the exact row in the owner snapshot admission_members array). The row digest and owner-local sequence bind the snapshot member. The H adapter must resolve both refs and reject substitution; matching text in unrelated namespaces is not sufficient.
+
+Latest RecoveryJoin schema Blob: f531c1d4b89a48457188c4988f140952759223a6.
+Latest schema integrity test Blob: 5292d56661e938c905c61455e9ed53c4ff674c54.
+
+
+### 11.6 Request-side JoinProof semantic vectors
+
+JPF-13..17 exercise the request-side half of the owner snapshot join: missing request disposition, OUT_OF_SCOPE_WITH_PROOF without proof, changed request digest, OwnerEntryRef substitution, and a valid exact IN_BATCH_REQUEST_SET mapping. The executable request validator requires exact set equality between all I/D/C request ledger rows and the JoinProof request-disposition edges. This prevents an admission-complete proof from silently omitting pending or out-of-scope requests.
+
+Latest HRC suite Blob: d14e66a2196303374f31a4285244a0f77a3ad328.
+
+
+### 11.7 Typed owner evidence and request-row digest binding
+
+RecoveryJoin schema 1.0.0 now requires each request disposition to bind both OwnerRequestDigest and OwnerEntryDigest. NOT_REGISTERED admission dispositions bind OperationIdentityRef, OperationDigest, ScopeRef, GateGeneration and ScopeGeneration in addition to the owner row identity. Typed owner-evidence conditions now require D LINEAGE/BARRIER edges to carry ForgetOperationRef, FenceGeneration, LineageManifestRef/Digest and BarrierMemberRef; I receipt/terminal edges to carry PolicyDomain, PermissionEpoch, ProducerDomainInventoryEpoch, issuer key and authorization receipt; C provider edges to carry reservation/provider-attempt/idempotency identity; and Storage prepared/resolution edges to carry PreparedParticipantRef, GID and DatabaseIncarnationRef.
+
+Latest RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
+Latest HRC/JPF suite Blob: f28834d73e055be411060f0c1093bd3dc0d865b9.
+Latest schema integrity suite Blob: 67aba74c120f2916d768e7b01c45408ee2624f3a.
+
+
+### 11.8 OwnerAdmissionRef / OwnerEntryRef substitution vectors
+
+JPF-18 and JPF-19 explicitly verify that the stable OwnerAdmissionRef and the exact OwnerEntryRef row identity cannot substitute for one another in either direction. The C primary admission anchor must resolve by OwnerAdmissionRef, while the captured owner snapshot row must match the separately bound OwnerEntryRef and row digest.
+
+Latest HRC/JPF suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
+
+
+### 11.9 Current exact executable inventory and run contract
+
+The current H branch source-of-truth inventory is:
+- H semantic + bidirectional JoinProof: `tests/conformance/recovery_cutoff/test_hrc_semantics.py`, Blob `60a2f4db4bd12f2131ecd147db9bbe328da6db50`; HRC-01..25 and JPF-01..19 = 44 methods.
+- Wire candidate: `tests/conformance/recovery_cutoff/test_wire_interop.py`, Blob `1a4e754ba9bfa57eb973c6d39731e9f89443b323`; WIRE-01..10 = 10 methods.
+- Schema integrity: `tests/conformance/recovery_cutoff/test_schema_candidates.py`, Blob `67aba74c120f2916d768e7b01c45408ee2624f3a`; SCHEMA-01..12 = 12 methods.
+- RecoveryJoin schema: `schemas/bmcp.recovery-join-1.0.0.schema.json`, Blob `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- Workflow: `.github/workflows/h-recovery-cutoff-conformance.yml`, Blob `ea7a3d9c365b84352d3bac69da94fe0d510e46a4`.
+
+**Current total: 66 test methods.** The older 61-method inventory (JPF-01..17 + 9 schema checks) and 56-method inventory are historical and superseded by the exact current source pins above. The workflow is configured on push to `session-h-bmcp-protocol`, pull request to that branch, and manual dispatch. This contract update will trigger the push workflow; its run result must be fetched and assessed before any PASS claim.
+
+The executable command is:
+
+```bash
+python -m unittest discover \
+  -s 08-bmcp-protocol/tests/conformance/recovery_cutoff \
+  -p "test_*.py" -v
+```
+
+The 66 methods remain candidate tests until the workflow actually completes. A successful run proves only the committed Python candidate suite on that CI runner. It does not prove production canonicalization, I-approved signatures/key status, real COC quorum completeness, real I/D/C owner-ledger adapters, Storage JF-10 same-XID behavior, independent implementation interoperability or physical topology.
+
+HRC-TEST-v1 remains test-only. Production validators must consume raw versioned wire messages, validate the exact schema, resolve authoritative owner/COC sources, perform cryptographic verification under I policy, and then run semantic validators. A normalized-model unit test alone is not an end-to-end wire/authority test.
+
+
+### 11.10 Verified CI execution
+
+The branch-scoped workflow completed successfully:
+- Workflow run: 44039990464
+- Job: semantic-and-wire-tests (job ID 133891944149)
+- Checked-out H branch commit: da94bcc1796cb350eed12845e49cbc3663faab9c
+- Runner: Ubuntu 26.04, CPython 3.12.16
+- Result: 66 tests run, 66 passed, 0 failed, 0 skipped.
+
+The run checked out these exact source blobs:
+- HRC/JPF suite: 60a2f4db4bd12f2131ecd147db9bbe328da6db50
+- RecoveryJoin schema: dd3234aa1c74caf6d0e335875cd96e0b2b64082f
+- Wire suite: 1a4e754ba9bfa57eb973c6d39731e9f89443b323
+- Schema integrity suite: 67aba74c120f2916d768e7b01c45408ee2624f3a
+- H semantic contract at run commit: b3218298f58cff9b92cb1c38e453af6fd4d0dd50
+
+The raw job log reports HRC-01..25, JPF-01..19, SCHEMA-01..12 and WIRE-01..10 individually as OK, followed by “Ran 66 tests” and “OK”. This is a verified pass of the checked-in Python candidate suite on that runner. It is NOT proof of production cryptographic canonicalization, I key/trust policy, two-language interoperability, live COC quorum enumeration, real I/D/C owner-ledger adapters, Storage JF-10 physical behavior or deployed transaction topology.
+
+The H semantic contract has since received documentation-only exact-pin/run-result updates. The tested schema and test source blobs above remain the exact CI inputs.
+
+
+### 11.10 First executed CI evidence — candidate suite only
+
+- Workflow run: [44040139351](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040139351)
+- Trigger commit: `d36874c2656b08d1d7e10c367f32660241645e6a`
+- Job: `semantic-and-wire-tests` / job ID `133892431245`
+- Result: **SUCCESS — 66 tests ran, OK**
+- Exact suite source pins: HRC/JPF `60a2f4db4bd12f2131ecd147db9bbe328da6db50`; Wire `1a4e754ba9bfa57eb973c6d39731e9f89443b323`; Schema Integrity `67aba74c120f2916d768e7b01c45408ee2624f3a`; RecoveryJoin schema `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+
+This is the first recorded CI execution of the current 66-method candidate inventory. It does not change the overall H freeze disposition: **BLOCKED / NOT INTEROPERABILITY-VERIFIED**. The run does not execute production adapters, validate live quorum prefix enumeration, verify I-approved signatures/key status, prove owner-ledger currentness CAS, exercise PostgreSQL same-GID recovery, or compare two independent language implementations. HRC-TEST-v1 remains test-only.
+
+
+### 11.11 Expanded executable recovery and cross-language suite
+
+The H branch has expanded beyond the original 66-method suite. Current candidate inventory:
+
+| Suite | Cases | Methods |
+|---|---|---:|
+| Recovery Cutoff semantic | HRC-01..25 | 25 |
+| Bidirectional RecoveryJoin | JPF-01..19 | 19 |
+| Strict wire parser | WIRE-01..10 | 10 |
+| Schema candidate integrity | SCHEMA-01..12 | 12 |
+| Two-phase Batch/Manifest recovery | TPH-01..26 | 26 |
+| Python ↔ Node differential wire vectors | XLANG-01 | 1 |
+| **Total** | | **93** |
+
+Exact current source pins:
+- HRC/JPF suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- Two-phase semantic reference: `08-bmcp-protocol/runtime_reference/recovery_cutoff_semantics.py`, Blob `4c8dcafdb49db5279a1d1190b832a9c6c05d6b67`.
+- Two-phase recovery suite: `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_two_phase_recovery.py`, Blob `690ab42b4f8f7e61adf38fd7b6006f20cc71a7f5`.
+- Wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
+- Python/Node differential test: `1b32fdf81530353b8bd4571fe6d4f77119a0458b`.
+- Node reference: `992585d3bc323dc0224d0075ef14abd992980f65`.
+- Shared fixed vectors: `cc7e98c729db8d9f615e17a9542b3cb63f459922`.
+- Schema integrity suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
+- RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+
+The expanded suite passed GitHub Actions run [44041900859](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041900859), commit `3e42b2c535f095acd9e7cc6cf021a2c3f0629dda`, job `133898213531`: **93 tests ran, OK**. This includes the 26 TPH vectors for ContentDigest → BatchDigest → ManifestRecordDigest ordering, exact backlink/prefix/count validation, quorum/readback UNKNOWN handling, owner-release binding/currentness, and restore-fenced state transitions. XLANG-01 independently compares Python and Node.js implementations against fixed UTF-8 and test-domain digest vectors.
+
+The workflow now explicitly pins Node.js 22 using `actions/setup-node@v4` for XLANG-01. A subsequent run on the workflow-updated commit is required before treating the pinned-runtime workflow as verified.
+
+Important limits:
+- HRC-TEST-v1 and all fixed digest vectors remain test-only; they are not a production canonicalization/signature profile.
+- XLANG-01 proves only agreement between the two test implementations for the three fixed vectors, not complete BMCP SDK interoperability.
+- TPH tests exercise the deterministic reference model, not a real COC quorum log, linearizable prefix read, durable Batch/Manifest append, DB failover or restore.
+- The H unified schema 1.2.7 exact review is a separate structural review; this 93-test suite does not validate schema 1.2.7 or its signature_profile_id semantics.
+
+**Status:** 93/93 reference-candidate methods PASS on the recorded run; production semantic adapters, I trust/crypto, live owner/COC authority adapters, actual COC durability and physical JF-10 remain OPEN.
+
+
+### 11.12 Unified schema 1.2.7 structural candidate coverage
+
+The schema-integrity suite has added two methods for the separate unified COC/JF-10 schema 1.2.7:
+- SCHEMA-13 verifies artifact revision 1.2.7 remains distinct from the on-wire family version 1.2.0.
+- SCHEMA-14 verifies signature_profile_id is represented as a distinct field and remains compatibility-optional at structural schema level; protected owner-signed messages must require it through the future semantic/trust adapter, not by trusting the payload.
+
+Current schema integrity test Blob: `fa4fc9f7d3bf64a90bc992453b13fc1fb3c11879`.
+
+The H branch candidate inventory is now **95 methods**:
+- HRC-01..25: 25;
+- JPF-01..19: 19;
+- WIRE-01..10: 10;
+- SCHEMA-01..14: 14;
+- TPH-01..26: 26;
+- XLANG-01: 1.
+
+Latest run [44042401245](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042401245), commit `a39c87a62b5cbe911c096b010146685d779eecae`, job `133899868784`: **95 tests ran, OK**. The run includes the Node.js 22 setup and the two new unified-schema structural checks.
+
+The 1.2.7 tests are structural only. They do not prove that signature_profile_id is semantically mandatory for protected records, that the identifier resolves through an I-controlled trust registry, or that production key status/signature verification works. The 95-test suite remains candidate reference-model/schema/wire evidence; H freeze and production interoperability remain BLOCKED.
+
+
+### 11.13 Recovery Cutoff 1.0.5 / RecoveryJoin 1.0.1 / Unified 1.2.8 refresh
+
+The H branch has advanced the exact schema candidates:
+- Recovery Cutoff 1.0.5: Blob `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`.
+- RecoveryJoin 1.0.1: Blob `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`.
+- Unified COC/JF-10 schema 1.2.8: Blob `70b892797d07489936300a26c0dedfafe1d6e746`.
+- Schema candidate test suite: Blob `ff2b735ccdbf5d45f3c6b2ee9a25d14db2e3c7ad`.
+
+SCHEMA-13/14 now assert unified 1.2.8 artifact revision vs wire-family version and signature_profile_id structural shape. SCHEMA-15 checks owner snapshot attestation content binding. SCHEMA-16 checks RecoveryJoin 1.0.1 complete-empty and out-of-scope proof structures, including query completeness, owner high-water, key-status generation and anti-rollback anchors.
+
+The current inventory is **97 methods**:
+- HRC-01..25: 25;
+- JPF-01..19: 19;
+- WIRE-01..10: 10;
+- SCHEMA-01..16: 16;
+- TPH-01..26: 26;
+- XLANG-01: 1.
+
+Latest verified run [44042997885](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042997885), commit `5592ba9f993e358d826902660b64775b1eb3ee1b`, job `133901859735`: **97 tests ran, OK**. The earlier 1.2.8 fixture drift failure is retained in CI history; the test assertion was corrected to 1.2.8 without weakening it, and the subsequent exact commit passed.
+
+The new SCHEMA-15/16 checks are structural only. They do not prove production owner attestation signatures, I key-status verification, currentness CAS, live pagination/quorum, or production semantic behavior. HRC-TEST-v1 remains test-only; the 97-method suite does not validate a production signature/canonicalization profile or deployed COC/Storage behavior.
+
+
+### 11.14 中文规范：Recovery Cutoff 1.0.5 / RecoveryJoin 1.0.1 / Unified 1.2.8
+
+H 分支当前候选 Schema 精确版本：
+- Recovery Cutoff 1.0.5：`75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`。
+- RecoveryJoin 1.0.1：`f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`。
+- Unified COC/JF-10 1.2.8：`70b892797d07489936300a26c0dedfafe1d6e746`。
+
+当前 97 项候选测试由 HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1 组成。SCHEMA-15 检查 Owner Snapshot Attestation 的内容绑定；SCHEMA-16 检查 RecoveryJoin 1.0.1 的 COMPLETE_EMPTY 与 OUT_OF_SCOPE 证明字段结构。两者均为结构检查，不验证 Owner 签名、I Key Status 或真实 Ledger 完整性。
+
+最近已验证 CI：Run `44043100543`，Job `133902179251`，97 项全部通过。此前 1.2.8 版本升级造成的旧测试断言失败已保留在 CI 历史中；修正断言以匹配精确 1.2.8 后，后续运行通过，没有降低验证要求。
+
+该 97 项测试仍属于 Reference Model / Schema / Test Profile 证据。HRC-TEST-v1 不是生产 Canonicalization 或 Signature Profile；TPH 未运行真实 COC Quorum Log；XLANG-01 只验证固定测试向量。真实 COC/Owner Adapter、生产密码学、I/D/C Currentness CAS、JF-10 物理恢复和部署拓扑仍 OPEN。H 尚未冻结，也未达到生产互操作通过。
+
+
+### 11.15 I candidate RFC 8785 / Ed25519 cross-language profile vectors
+
+The H test directory now includes an additional four-method candidate suite for the proposed I profile `AIMBA-I-CRYPTO-1.0`:
+- `test_i_crypto_profile.py`: Blob `05c36b9d01340e0cc9fe504208b6ebc66fcf95bf`, CRYPTO-01..04.
+- Independent Node.js JCS/Ed25519 oracle: `i_crypto_profile_reference.mjs`, Blob `851484fee665f5a559b61ceae92a07c5082a3986`.
+- Fixed TEST-ONLY vector: `i_crypto_profile_vector.json`, Blob `f1ec9fdca8ca7a124ef63a99d8f50c4dc57fa219`.
+- Exact I profile proposal: Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`.
+- H crypto wire mapping R3: Blob `b132e6a01bcfe13f92020b9778ee3f7ddbf65753`.
+- I exact review R3: Blob `93afe9c9e06d20de5ce1c2a0f676b4785123fbcf`.
+
+The suite checks Python/Node equality for RFC 8785 JCS canonical payload bytes, SHA-256 domain-separated payload digest, signature projection/preimage, Ed25519 public key and deterministic test signature; it also checks object-key order, array order, Unicode non-normalization and non-finite number rejection. The CI workflow pins Python `rfc8785==0.1.4`, `cryptography==44.0.2`, Node.js 22 and Node `canonicalize@2.1.0`.
+
+The current H suite therefore contains **101 methods**:
+- HRC-01..25: 25;
+- JPF-01..19: 19;
+- WIRE-01..10: 10;
+- SCHEMA-01..16: 16;
+- TPH-01..26: 26;
+- XLANG-01: 1;
+- CRYPTO-01..04: 4.
+
+Latest verified run [44043797393](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44043797393), H commit `3e582f45d9a1df3cc98c847ca6071667f3c06dd8`, job `133904440718`: **101 tests ran, OK**.
+
+Security boundary: the deterministic Ed25519 seed is explicitly TEST-ONLY and MUST NEVER be reused. The suite validates independent Python/Node test implementations for one fixed candidate vector and a small set of JCS edge cases. It does not approve I's profile, trust roots, HSM/KMS custody, key lifecycle, historical trust, revocation propagation, production per-message P0 allowlists, real owner-signed snapshots or Storage final-gate verification. I proposal and H mapping remain CANDIDATE / ACCEPT WITH AMENDMENTS, not frozen or deployed.
+
+### 11.16 中文规范：I 候选 RFC 8785 / Ed25519 跨语言向量
+
+H 测试目录新增 I 候选 Profile `AIMBA-I-CRYPTO-1.0` 的四项测试：
+- Python 测试 `test_i_crypto_profile.py`，Blob `05c36b9d01340e0cc9fe504208b6ebc66fcf95bf`，CRYPTO-01..04。
+- Node.js 独立 JCS/Ed25519 实现，Blob `851484fee665f5a559b61ceae92a07c5082a3986`。
+- 固定测试向量，Blob `f1ec9fdca8ca7a124ef63a99d8f50c4dc57fa219`。
+- I Profile 提案 Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`。
+- H Wire Mapping R3 Blob `b132e6a01bcfe13f92020b9778ee3f7ddbf65753`。
+- I Exact Review R3 Blob `93afe9c9e06d20de5ce1c2a0f676b4785123fbcf`。
+
+测试比较 Python 与 Node 的 RFC 8785 JCS Canonical Payload Bytes、SHA-256 Domain-separated Payload Digest、Signature Projection/Preimage、Ed25519 Public Key 和确定性测试签名；同时覆盖对象 Key 顺序、数组顺序、Unicode 不自动归一化及非有限数字拒绝。CI 固定 Python `rfc8785==0.1.4`、`cryptography==44.0.2`、Node.js 22 和 Node `canonicalize@2.1.0`。
+
+当前 H 候选套件共 **101 项**：HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26、XLANG 1、CRYPTO 4。最近已验证运行 44043797393，在 Commit `3e582f45d9a1df3cc98c847ca6071667f3c06dd8` 上 101 项全部通过。
+
+安全边界：Ed25519 私钥 Seed 是测试专用，严禁生产复用。测试仅证明两套测试实现对一个固定候选向量及少量 JCS 边界行为一致，不代表 I Profile、Trust Root、HSM/KMS、Key Lifecycle、历史信任、撤权传播、生产逐消息 P0 Allowlist、真实 Owner Snapshot 签名或 Storage 最终 Gate 验证已批准。I 提案与 H 映射仍是 CANDIDATE / 有条件接受修订，尚未冻结或部署。

@@ -1,0 +1,3227 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.12",
+  "title": "BMCP Unified COC / JF-10 / Provider Outcome Protocol 1.2.12",
+  "description": "Schema artifact revision 1.2.12. Makes owner-specific I/D/C high-water objects structurally complete and disjoint, while retaining signed schema_artifact_revision and wire version 1.3.0, typed union recovery manifest, exact snapshot attestation/membership-proof binding, distinct content/member-set/record digests and OUTAGE_ADMISSION_RELEASE_ONLY. Protected owner-signed records require signature_profile_id semantically. Completeness, digest equality, quorum order, signature projection and owner authority remain semantic-validator responsibilities.",
+  "oneOf": [
+    {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message_type": {
+              "const": "COC_RECOVERY_CUTOFF_BATCH"
+            },
+            "recovery_epoch_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Recovery epoch"
+            },
+            "batch_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Stable batch identity"
+            },
+            "prefix": {
+              "type": "object",
+              "properties": {
+                "coordinator_epoch": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512,
+                  "description": "COC epoch identifier"
+                },
+                "coordinator_index": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "entry_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "committed_configuration_epoch": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512,
+                  "description": "Quorum configuration epoch"
+                }
+              },
+              "required": [
+                "coordinator_epoch",
+                "coordinator_index",
+                "entry_digest",
+                "committed_configuration_epoch"
+              ],
+              "additionalProperties": false
+            },
+            "owner_snapshots": {
+              "type": "object",
+              "properties": {
+                "I": {
+                  "$ref": "#/$defs/ownerSnapshot"
+                },
+                "D": {
+                  "$ref": "#/$defs/ownerSnapshot"
+                },
+                "C": {
+                  "$ref": "#/$defs/ownerSnapshot"
+                }
+              },
+              "required": [
+                "I",
+                "D",
+                "C"
+              ],
+              "additionalProperties": false,
+              "description": "Exactly one signed owner snapshot per authority. Object keys are owner identities; validator requires each nested owner field to equal its key."
+            },
+            "manifest_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Immutable manifest identity"
+            },
+            "enumeration_high_water": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "COC enumeration high-water"
+            },
+            "batch_idempotency_identity": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Stable batch idempotency identity"
+            },
+            "coordinator_quorum_configuration_epoch": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Quorum configuration epoch"
+            },
+            "quorum_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Quorum commit proof"
+            },
+            "coc_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifest_content_digest": {
+              "$ref": "#/$defs/sha256",
+              "description": "ParticipantManifestContentDigest over the canonical union projection, prefix and frozen owner snapshot roots; excludes the later Batch backlink, quorum proof and envelope."
+            },
+            "coc_participant_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Count of COC_PARTICIPANT members only."
+            },
+            "owner_local_admission_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Count of unregistered OWNER_LOCAL_ADMISSION members only."
+            },
+            "manifest_member_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Total union member count; equals coc_participant_count plus owner_local_admission_count."
+            },
+            "member_set_root": {
+              "$ref": "#/$defs/sha256",
+              "description": "Canonical ordered root over every typed union member."
+            }
+          },
+          "required": [
+            "message_type",
+            "recovery_epoch_ref",
+            "batch_id",
+            "prefix",
+            "owner_snapshots",
+            "manifest_id",
+            "enumeration_high_water",
+            "batch_idempotency_identity",
+            "coordinator_quorum_configuration_epoch",
+            "quorum_commit_proof_ref",
+            "coc_commit_proof_ref",
+            "coc_record_position",
+            "coc_entry_digest",
+            "manifest_content_digest",
+            "coc_participant_count",
+            "owner_local_admission_count",
+            "manifest_member_count",
+            "member_set_root"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message_type": {
+              "const": "PARTICIPANT_SET_RECONCILIATION"
+            },
+            "recovery_epoch_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Recovery epoch"
+            },
+            "prefix": {
+              "type": "object",
+              "properties": {
+                "coordinator_epoch": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512,
+                  "description": "COC epoch identifier"
+                },
+                "coordinator_index": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "entry_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "committed_configuration_epoch": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512,
+                  "description": "Quorum configuration epoch"
+                }
+              },
+              "required": [
+                "coordinator_epoch",
+                "coordinator_index",
+                "entry_digest",
+                "committed_configuration_epoch"
+              ],
+              "additionalProperties": false
+            },
+            "batch_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Exact prior Batch record"
+            },
+            "batch_position": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "batch_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifest_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Immutable manifest identity"
+            },
+            "enumeration_high_water": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "COC enumeration high-water"
+            },
+            "manifest_retrieval_locator": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Immutable manifest retrieval locator"
+            },
+            "quorum_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Quorum commit proof"
+            },
+            "coc_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifest_content_digest": {
+              "$ref": "#/$defs/sha256",
+              "description": "ParticipantManifestContentDigest over the canonical union projection, prefix and frozen owner snapshot roots; excludes the later Batch backlink, quorum proof and envelope."
+            },
+            "coc_participant_count": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Count of COC_PARTICIPANT members only."
+            },
+            "owner_local_admission_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "manifest_member_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "member_set_root": {
+              "$ref": "#/$defs/sha256",
+              "description": "Canonical ordered root over every typed union member."
+            },
+            "owner_snapshot_roots": {
+              "$ref": "#/$defs/ownerSnapshotRoots"
+            },
+            "manifest_members": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/cocParticipantMember"
+                  },
+                  {
+                    "$ref": "#/$defs/ownerLocalAdmissionMember"
+                  }
+                ]
+              },
+              "uniqueItems": true,
+              "description": "Canonical union of every COC participant at/before P and every applicable I/D/C owner-local admission at/below its frozen high-water. Joined admissions are bindings on the COC member; unregistered admissions are separate OWNER_LOCAL_ADMISSION members."
+            }
+          },
+          "required": [
+            "message_type",
+            "recovery_epoch_ref",
+            "prefix",
+            "batch_record_ref",
+            "batch_position",
+            "batch_entry_digest",
+            "manifest_id",
+            "enumeration_high_water",
+            "manifest_retrieval_locator",
+            "quorum_commit_proof_ref",
+            "coc_commit_proof_ref",
+            "coc_record_ref",
+            "coc_record_position",
+            "coc_entry_digest",
+            "manifest_content_digest",
+            "coc_participant_count",
+            "owner_local_admission_count",
+            "manifest_member_count",
+            "member_set_root",
+            "owner_snapshot_roots",
+            "manifest_members"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message_type": {
+              "const": "OWNER_LOCAL_PENDING_GATE"
+            },
+            "owner_kind": {
+              "enum": [
+                "I",
+                "D",
+                "C"
+              ]
+            },
+            "owner_gate_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Owner gate"
+            },
+            "owner_gate_generation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Gate generation"
+            },
+            "request_set_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "request_set_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "owner_request_high_water": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Request high-water"
+            },
+            "snapshot_generation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Snapshot generation"
+            },
+            "anti_rollback_anchor_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Anti-rollback anchor"
+            },
+            "owner_signature_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "owner_admission_high_water": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "admission_set_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "admission_set_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "request_ledger_root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "admission_ledger_root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "message_type",
+            "owner_kind",
+            "owner_gate_ref",
+            "owner_gate_generation",
+            "request_set_count",
+            "request_set_digest",
+            "owner_request_high_water",
+            "snapshot_generation",
+            "anti_rollback_anchor_ref",
+            "owner_signature_ref",
+            "coc_commit_proof_ref",
+            "coc_record_ref",
+            "coc_record_position",
+            "coc_entry_digest",
+            "owner_admission_high_water",
+            "admission_set_count",
+            "admission_set_digest",
+            "request_ledger_root",
+            "admission_ledger_root"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message_type": {
+              "const": "OWNER_LOCAL_GATE_RELEASE"
+            },
+            "owner_kind": {
+              "enum": [
+                "I",
+                "D",
+                "C"
+              ]
+            },
+            "release_type": {
+              "const": "OUTAGE_ADMISSION_RELEASE_ONLY",
+              "description": "Owner-local release of the temporary outage admission gate only; it does not clear Forget effectiveness, grant I permission or authorize C egress."
+            },
+            "owner_gate_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Owner gate"
+            },
+            "owner_gate_generation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Gate generation"
+            },
+            "recovery_epoch_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Recovery epoch"
+            },
+            "batch_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Batch record"
+            },
+            "batch_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifest_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Manifest record"
+            },
+            "owner_request_high_water": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Owner high-water"
+            },
+            "reconciliation_root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "owner_signature_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "owner_admission_high_water": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "request_set_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "admission_set_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "request_ledger_root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "admission_ledger_root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "batch_position": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "batch_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifest_record_position": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "manifest_record_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifest_content_digest": {
+              "$ref": "#/$defs/sha256",
+              "description": "ParticipantManifestContentDigest; not the final committed manifest-record entry digest."
+            }
+          },
+          "required": [
+            "message_type",
+            "owner_kind",
+            "release_type",
+            "owner_gate_ref",
+            "owner_gate_generation",
+            "recovery_epoch_ref",
+            "batch_record_ref",
+            "batch_digest",
+            "manifest_record_ref",
+            "owner_request_high_water",
+            "reconciliation_root",
+            "owner_signature_ref",
+            "coc_commit_proof_ref",
+            "coc_record_ref",
+            "coc_record_position",
+            "coc_entry_digest",
+            "owner_admission_high_water",
+            "request_set_digest",
+            "admission_set_digest",
+            "request_ledger_root",
+            "admission_ledger_root",
+            "batch_position",
+            "batch_entry_digest",
+            "manifest_record_position",
+            "manifest_record_entry_digest",
+            "manifest_content_digest"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message_type": {
+              "const": "RECOVERY_EPOCH_COMPLETED"
+            },
+            "recovery_epoch_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Recovery epoch"
+            },
+            "prefix": {
+              "type": "object",
+              "properties": {
+                "coordinator_epoch": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512,
+                  "description": "COC epoch identifier"
+                },
+                "coordinator_index": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "entry_digest": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "committed_configuration_epoch": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 512,
+                  "description": "Quorum configuration epoch"
+                }
+              },
+              "required": [
+                "coordinator_epoch",
+                "coordinator_index",
+                "entry_digest",
+                "committed_configuration_epoch"
+              ],
+              "additionalProperties": false
+            },
+            "batch_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Batch record"
+            },
+            "batch_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifest_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Manifest record"
+            },
+            "reconciliation_root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "owner_release_refs": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512,
+                "description": "Owner-local release receipt"
+              },
+              "minItems": 3
+            },
+            "quorum_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Quorum commit proof"
+            },
+            "coc_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "batch_position": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "batch_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifest_record_position": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "manifest_record_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "manifest_content_digest": {
+              "$ref": "#/$defs/sha256",
+              "description": "ParticipantManifestContentDigest; not the final committed manifest-record entry digest."
+            }
+          },
+          "required": [
+            "message_type",
+            "recovery_epoch_ref",
+            "prefix",
+            "batch_record_ref",
+            "batch_digest",
+            "manifest_record_ref",
+            "reconciliation_root",
+            "owner_release_refs",
+            "quorum_commit_proof_ref",
+            "coc_commit_proof_ref",
+            "coc_record_ref",
+            "coc_record_position",
+            "coc_entry_digest",
+            "batch_position",
+            "batch_entry_digest",
+            "manifest_record_position",
+            "manifest_record_entry_digest",
+            "manifest_content_digest"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message_type": {
+              "const": "JF10_PREPARE_INTENT_REGISTERED"
+            },
+            "transaction_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Transaction"
+            },
+            "participant_intent_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Participant intent"
+            },
+            "publication_operation_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Publication operation"
+            },
+            "request_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "owner_boundary_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Owner boundary"
+            },
+            "policy_domain_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "PolicyDomain"
+            },
+            "prepared_transaction_gid": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Preallocated GID"
+            },
+            "database_incarnation_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Database incarnation"
+            },
+            "prepare_attempt_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepare attempt"
+            },
+            "prepare_attempt_generation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Attempt generation"
+            },
+            "participant_ledger_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Participant ledger"
+            },
+            "participant_ledger_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Ledger version"
+            },
+            "participant_tuple_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "preallocated_xid_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Opaque preallocated XID identity"
+            },
+            "coc_prepare_intent_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "COC prepare intent position"
+            },
+            "owner_signature_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "message_type",
+            "transaction_ref",
+            "participant_intent_ref",
+            "publication_operation_id",
+            "request_digest",
+            "owner_boundary_ref",
+            "policy_domain_ref",
+            "prepared_transaction_gid",
+            "database_incarnation_ref",
+            "prepare_attempt_ref",
+            "prepare_attempt_generation",
+            "participant_ledger_ref",
+            "participant_ledger_version",
+            "participant_tuple_digest",
+            "preallocated_xid_ref",
+            "coc_prepare_intent_position",
+            "owner_signature_ref",
+            "coc_commit_proof_ref",
+            "coc_record_ref",
+            "coc_record_position",
+            "coc_entry_digest"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message_type": {
+              "const": "JF10_PREPARED_PARTICIPANT_REGISTERED"
+            },
+            "storage_prepared_participant_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepared participant"
+            },
+            "prepared_transaction_gid": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepared GID"
+            },
+            "postgresql_native_xid": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Native XID; not GID"
+            },
+            "canonical_authority_db_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Canonical authority DB"
+            },
+            "database_incarnation_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Database incarnation"
+            },
+            "postgresql_system_identifier": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "PostgreSQL system identifier"
+            },
+            "postgresql_database_oid": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "prepare_attempt_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepare attempt"
+            },
+            "prepare_attempt_generation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Attempt generation"
+            },
+            "participant_ledger_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Participant ledger"
+            },
+            "participant_ledger_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Ledger version"
+            },
+            "publication_operation_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Publication operation"
+            },
+            "request_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "participant_tuple_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "owner_boundary_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Owner boundary"
+            },
+            "coc_prepare_intent_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "COC intent position"
+            },
+            "prepared_participant_receipt_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Storage-signed prepared receipt"
+            },
+            "authoritative_prepared_observation_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Authoritative PREPARED readback"
+            },
+            "owner_signature_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "message_type",
+            "storage_prepared_participant_ref",
+            "prepared_transaction_gid",
+            "canonical_authority_db_ref",
+            "database_incarnation_ref",
+            "prepare_attempt_ref",
+            "prepare_attempt_generation",
+            "participant_ledger_ref",
+            "participant_ledger_version",
+            "publication_operation_id",
+            "request_digest",
+            "participant_tuple_digest",
+            "owner_boundary_ref",
+            "coc_prepare_intent_position",
+            "prepared_participant_receipt_ref",
+            "authoritative_prepared_observation_ref",
+            "owner_signature_ref",
+            "coc_commit_proof_ref",
+            "coc_record_ref",
+            "coc_record_position",
+            "coc_entry_digest"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message_type": {
+              "const": "JF10_I_TERMINAL_DECISION_OBSERVED"
+            },
+            "i_terminal_outcome": {
+              "enum": [
+                "COMMIT_WON",
+                "REVOCATION_WON",
+                "INDETERMINATE_ABORTED",
+                "UNKNOWN",
+                "IN_DOUBT"
+              ]
+            },
+            "i_terminal_decision_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "I decision"
+            },
+            "i_sequencer_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "I sequencer position"
+            },
+            "commit_authorization_receipt_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Authorization receipt"
+            },
+            "receipt_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "receipt_consumption_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Single-use consumption proof"
+            },
+            "prepared_participant_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepared participant"
+            },
+            "prepared_transaction_gid": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepared GID"
+            },
+            "database_incarnation_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Database incarnation"
+            },
+            "prepare_attempt_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepare attempt"
+            },
+            "prepare_attempt_generation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Attempt generation"
+            },
+            "participant_ledger_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Participant ledger"
+            },
+            "participant_ledger_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Ledger version"
+            },
+            "participant_tuple_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "owner_signature_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "message_type",
+            "i_terminal_outcome",
+            "i_terminal_decision_ref",
+            "i_sequencer_position",
+            "prepared_participant_ref",
+            "prepared_transaction_gid",
+            "database_incarnation_ref",
+            "prepare_attempt_ref",
+            "prepare_attempt_generation",
+            "participant_ledger_ref",
+            "participant_ledger_version",
+            "participant_tuple_digest",
+            "owner_signature_ref",
+            "coc_commit_proof_ref",
+            "coc_record_ref",
+            "coc_record_position",
+            "coc_entry_digest"
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "i_terminal_outcome": {
+                "enum": [
+                  "COMMIT_WON",
+                  "REVOCATION_WON",
+                  "INDETERMINATE_ABORTED"
+                ]
+              }
+            },
+            "required": [
+              "i_terminal_outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "receipt_consumption_proof_ref"
+            ]
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message_type": {
+              "const": "JF10_STORAGE_PARTICIPANT_RESOLVED"
+            },
+            "storage_resolution_outcome": {
+              "enum": [
+                "COMMITTED",
+                "ROLLED_BACK",
+                "UNKNOWN"
+              ]
+            },
+            "storage_resolution_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Same-XID resolution proof"
+            },
+            "prepared_participant_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepared participant"
+            },
+            "prepared_transaction_gid": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepared GID"
+            },
+            "postgresql_native_xid": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Native XID"
+            },
+            "database_incarnation_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Database incarnation"
+            },
+            "prepare_attempt_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepare attempt"
+            },
+            "prepare_attempt_generation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Attempt generation"
+            },
+            "participant_ledger_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Participant ledger"
+            },
+            "participant_ledger_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Ledger version"
+            },
+            "participant_tuple_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "publication_receipt_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Visibility publication receipt"
+            },
+            "non_publication_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Authoritative no-publication proof"
+            },
+            "owner_signature_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "message_type",
+            "storage_resolution_outcome",
+            "storage_resolution_proof_ref",
+            "prepared_participant_ref",
+            "prepared_transaction_gid",
+            "database_incarnation_ref",
+            "prepare_attempt_ref",
+            "prepare_attempt_generation",
+            "participant_ledger_ref",
+            "participant_ledger_version",
+            "participant_tuple_digest",
+            "owner_signature_ref",
+            "coc_commit_proof_ref",
+            "coc_record_ref",
+            "coc_record_position",
+            "coc_entry_digest"
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "storage_resolution_outcome": {
+                "const": "COMMITTED"
+              }
+            },
+            "required": [
+              "storage_resolution_outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "publication_receipt_ref"
+            ],
+            "not": {
+              "required": [
+                "non_publication_proof_ref"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "storage_resolution_outcome": {
+                "const": "ROLLED_BACK"
+              }
+            },
+            "required": [
+              "storage_resolution_outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "non_publication_proof_ref"
+            ],
+            "not": {
+              "required": [
+                "publication_receipt_ref"
+              ]
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message_type": {
+              "const": "JF10_BRIDGE_RECONCILIATION_RECORDED"
+            },
+            "reconciliation_state": {
+              "enum": [
+                "PENDING",
+                "UNKNOWN",
+                "RECONCILED_TERMINAL"
+              ]
+            },
+            "i_terminal_decision_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "I terminal evidence"
+            },
+            "storage_resolution_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Storage resolution evidence"
+            },
+            "d_barrier_evidence_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "D barrier evidence"
+            },
+            "c_provider_outcome_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "C provider outcome"
+            },
+            "reconciliation_root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "coc_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "message_type",
+            "reconciliation_state",
+            "i_terminal_decision_ref",
+            "storage_resolution_proof_ref",
+            "d_barrier_evidence_ref",
+            "c_provider_outcome_ref",
+            "reconciliation_root",
+            "coc_commit_proof_ref",
+            "coc_record_ref",
+            "coc_record_position",
+            "coc_entry_digest"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    {
+      "allOf": [
+        {
+          "$ref": "#/$defs/commonEnvelope"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "message_type": {
+              "const": "C_PROVIDER_OUTCOME_RECORDED"
+            },
+            "c_submit_outcome_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "C-owned outcome"
+            },
+            "c_submit_outcome_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "provider_outcome": {
+              "enum": [
+                "HANDOFF_ACCEPTED",
+                "HANDOFF_REJECTED",
+                "NOT_INVOKED",
+                "UNKNOWN",
+                "IN_DOUBT"
+              ]
+            },
+            "provider_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Provider identity"
+            },
+            "provider_adapter_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Provider adapter"
+            },
+            "provider_idempotency_key_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Stable provider key reference"
+            },
+            "provider_request_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Provider request identity"
+            },
+            "provider_receipt_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Provider receipt"
+            },
+            "actual_inference_request_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Actual inference request ID"
+            },
+            "final_request_boundary_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Final request boundary"
+            },
+            "request_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "transaction_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Transaction"
+            },
+            "participant_reservation_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Participant reservation"
+            },
+            "participant_intent_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Participant intent"
+            },
+            "prepared_participant_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepared participant"
+            },
+            "prepare_attempt_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Prepare attempt"
+            },
+            "prepare_attempt_generation": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Attempt generation"
+            },
+            "participant_ledger_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Participant ledger"
+            },
+            "participant_ledger_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Ledger version"
+            },
+            "participant_tuple_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "i_terminal_decision_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "I terminal decision"
+            },
+            "d_clearance_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "D clearance"
+            },
+            "storage_resolution_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Storage resolution proof"
+            },
+            "provider_outcome_evidence_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Provider outcome evidence"
+            },
+            "provider_lookup_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "description": "Same-key lookup proof"
+            },
+            "owner_signature_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_commit_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_record_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "provider_no_handoff_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "not_invoked_proof_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "unknown_reason_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_admission_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_admission_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "owner_ledger_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_ledger_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_local_sequence": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_high_water": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_ledger_root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "coc_participant_intent_ref": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_absence_reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
+          },
+          "required": [
+            "message_type",
+            "c_submit_outcome_ref",
+            "c_submit_outcome_digest",
+            "provider_outcome",
+            "provider_ref",
+            "provider_adapter_ref",
+            "provider_idempotency_key_ref",
+            "final_request_boundary_id",
+            "request_digest",
+            "transaction_ref",
+            "provider_outcome_evidence_ref",
+            "owner_signature_ref",
+            "coc_commit_proof_ref",
+            "coc_record_ref",
+            "coc_record_position",
+            "coc_entry_digest",
+            "owner_admission_ref",
+            "owner_admission_digest",
+            "owner_ledger_ref",
+            "owner_ledger_version",
+            "owner_local_sequence",
+            "owner_high_water",
+            "owner_ledger_root",
+            "coc_participant_intent_ref"
+          ],
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "provider_outcome": {
+                    "const": "HANDOFF_ACCEPTED"
+                  }
+                },
+                "required": [
+                  "provider_outcome"
+                ]
+              },
+              "then": {
+                "required": [
+                  "participant_reservation_ref",
+                  "provider_receipt_ref",
+                  "provider_outcome_evidence_ref"
+                ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "provider_outcome": {
+                    "const": "HANDOFF_REJECTED"
+                  }
+                },
+                "required": [
+                  "provider_outcome"
+                ]
+              },
+              "then": {
+                "required": [
+                  "participant_reservation_ref",
+                  "provider_no_handoff_proof_ref",
+                  "provider_outcome_evidence_ref"
+                ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "provider_outcome": {
+                    "const": "NOT_INVOKED"
+                  }
+                },
+                "required": [
+                  "provider_outcome"
+                ]
+              },
+              "then": {
+                "required": [
+                  "not_invoked_proof_ref"
+                ],
+                "not": {
+                  "required": [
+                    "provider_receipt_ref"
+                  ]
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "provider_outcome": {
+                    "enum": [
+                      "UNKNOWN",
+                      "IN_DOUBT"
+                    ]
+                  }
+                },
+                "required": [
+                  "provider_outcome"
+                ]
+              },
+              "then": {
+                "required": [
+                  "unknown_reason_ref"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "if": {
+            "properties": {
+              "provider_outcome": {
+                "const": "HANDOFF_ACCEPTED"
+              }
+            },
+            "required": [
+              "provider_outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "provider_request_ref",
+              "provider_receipt_ref",
+              "provider_outcome_evidence_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "provider_outcome": {
+                "const": "HANDOFF_REJECTED"
+              }
+            },
+            "required": [
+              "provider_outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "provider_no_handoff_proof_ref",
+              "provider_outcome_evidence_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "provider_outcome": {
+                "const": "NOT_INVOKED"
+              }
+            },
+            "required": [
+              "provider_outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "not_invoked_proof_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "provider_outcome": {
+                "enum": [
+                  "UNKNOWN",
+                  "IN_DOUBT"
+                ]
+              }
+            },
+            "required": [
+              "provider_outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "unknown_reason_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "coc_participant_intent_ref": {
+                "type": "null"
+              }
+            },
+            "required": [
+              "coc_participant_intent_ref"
+            ]
+          },
+          "then": {
+            "required": [
+              "coc_absence_reason"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "coc_participant_intent_ref": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "coc_participant_intent_ref"
+            ]
+          },
+          "then": {
+            "not": {
+              "required": [
+                "coc_absence_reason"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "provider_outcome": {
+                "enum": [
+                  "HANDOFF_ACCEPTED",
+                  "HANDOFF_REJECTED"
+                ]
+              }
+            },
+            "required": [
+              "provider_outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "participant_reservation_ref"
+            ]
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  ],
+  "$defs": {
+    "commonEnvelope": {
+      "type": "object",
+      "properties": {
+        "schema_id": {
+          "const": "bmcp.coc-jf10-unified"
+        },
+        "schema_version": {
+          "const": "1.3.0",
+          "description": "Protocol-family wire version 1.3.0. Schema artifact revision 1.2.12 is separately carried in schema_artifact_revision and identified by $id."
+        },
+        "message_type": {
+          "type": "string"
+        },
+        "message_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Stable immutable message identity"
+        },
+        "message_nonce": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Replay-protection nonce"
+        },
+        "audience": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Authenticated receiver audience"
+        },
+        "sender_authority_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Typed authority reference"
+        },
+        "sender_subject_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Authenticated subject reference"
+        },
+        "issuer_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Authenticated issuer reference"
+        },
+        "subject_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Authenticated subject reference"
+        },
+        "owner_authority": {
+          "enum": [
+            "COC",
+            "I",
+            "D",
+            "C",
+            "STORAGE",
+            "H"
+          ]
+        },
+        "owner_record_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Owner-authored record reference"
+        },
+        "policy_domain_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Single PolicyDomain scope reference"
+        },
+        "causal_order_profile_ref": {
+          "const": "CausalOrderProfile/1.0"
+        },
+        "causal_order_coordinator_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "COC authority reference"
+        },
+        "causal_order_domain_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Typed COC causal-order domain"
+        },
+        "canonicalization_profile_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Exact versioned canonicalization profile identifier; candidate until approved by the relevant authority."
+        },
+        "digest_algorithm": {
+          "const": "SHA-256"
+        },
+        "payload_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "integrity_proof_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Integrity evidence reference"
+        },
+        "channel_binding_proof_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Protected channel binding evidence"
+        },
+        "key_id_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Authenticated issuer/owner key reference; never key material and never trusted from payload alone."
+        },
+        "key_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Immutable signing key version reference."
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 1
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "owner_signature_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "coc_commit_proof_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "coc_record_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "coc_record_position": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "coc_entry_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "coc_previous_entry_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "signature_profile_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Exact owner/authority signature profile identifier. Required by semantic validation for signed owner records; not inferred from canonicalization_profile_id."
+        },
+        "schema_artifact_revision": {
+          "const": "1.2.12",
+          "description": "Exact JSON Schema artifact revision 1.2.12; included in protected owner signature projections and distinct from wire schema_version 1.3.0."
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_artifact_revision",
+        "schema_version",
+        "message_type",
+        "message_id",
+        "message_nonce",
+        "audience",
+        "sender_authority_ref",
+        "sender_subject_ref",
+        "issuer_ref",
+        "subject_ref",
+        "owner_authority",
+        "owner_record_ref",
+        "causal_order_profile_ref",
+        "causal_order_coordinator_ref",
+        "causal_order_domain_ref",
+        "canonicalization_profile_id",
+        "digest_algorithm",
+        "payload_digest",
+        "integrity_proof_ref",
+        "channel_binding_proof_ref",
+        "key_id_ref",
+        "key_version",
+        "signature",
+        "created_at"
+      ],
+      "description": "Common authenticated message envelope. Artifact revision 1.2.8; the on-wire protocol-family schema_version remains 1.2.0. Signature profile is explicit when present; semantic validation requires it for protected owner-signed records."
+    },
+    "opaqueRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Opaque typed authority reference"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "prefix": {
+      "type": "object",
+      "properties": {
+        "coordinator_epoch": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "COC epoch identifier"
+        },
+        "coordinator_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "entry_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "committed_configuration_epoch": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Quorum configuration epoch"
+        }
+      },
+      "required": [
+        "coordinator_epoch",
+        "coordinator_index",
+        "entry_digest",
+        "committed_configuration_epoch"
+      ],
+      "additionalProperties": false
+    },
+    "ownerSnapshot": {
+      "type": "object",
+      "properties": {
+        "owner": {
+          "enum": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "owner_gate_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Owner-local gate identity"
+        },
+        "owner_gate_generation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Monotonic owner-local gate generation"
+        },
+        "request_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Owner-local request high-water"
+        },
+        "request_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "request_set_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "owner_snapshot_attestation_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Owner-signed snapshot attestation"
+        },
+        "anti_rollback_anchor_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Owner anti-rollback anchor"
+        },
+        "owner_ledger_root": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "admission_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Owner-local admission ledger high-water, distinct from request_high_water."
+        },
+        "admission_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "admission_set_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "request_ledger_root": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "admission_ledger_root": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "owner_specific_high_waters": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ownerSpecificHighWatersI"
+            },
+            {
+              "$ref": "#/$defs/ownerSpecificHighWatersD"
+            },
+            {
+              "$ref": "#/$defs/ownerSpecificHighWatersC"
+            }
+          ],
+          "description": "Exactly one owner-specific high-water shape. I, D and C namespaces are disjoint; each owner must provide every field in its own shape and no fields belonging to another owner."
+        },
+        "owner_snapshot_attestation_digest": {
+          "$ref": "#/$defs/sha256",
+          "description": "Digest of the immutable owner-signed snapshot attestation resolved by owner_snapshot_attestation_ref."
+        },
+        "owner_specific_high_waters_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Digest of the complete owner-specific high-water object under the approved canonical profile."
+        }
+      },
+      "required": [
+        "owner",
+        "owner_gate_ref",
+        "owner_gate_generation",
+        "request_high_water",
+        "request_count",
+        "request_set_digest",
+        "owner_snapshot_attestation_ref",
+        "anti_rollback_anchor_ref",
+        "owner_ledger_root",
+        "admission_high_water",
+        "admission_count",
+        "admission_set_digest",
+        "request_ledger_root",
+        "admission_ledger_root",
+        "owner_specific_high_waters",
+        "owner_snapshot_attestation_digest",
+        "owner_specific_high_waters_digest"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "owner": {
+                "const": "I"
+              }
+            },
+            "required": [
+              "owner"
+            ]
+          },
+          "then": {
+            "properties": {
+              "owner_specific_high_waters": {
+                "required": [
+                  "receipt_issue_high_water",
+                  "receipt_consume_high_water",
+                  "inventory_epoch_ref",
+                  "registry_snapshot_digest",
+                  "relevant_entry_set_root"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "owner": {
+                "const": "D"
+              }
+            },
+            "required": [
+              "owner"
+            ]
+          },
+          "then": {
+            "properties": {
+              "owner_specific_high_waters": {
+                "required": [
+                  "producer_registration_high_water",
+                  "work_item_high_water",
+                  "attempt_high_water",
+                  "barrier_generation",
+                  "barrier_root"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "owner": {
+                "const": "C"
+              }
+            },
+            "required": [
+              "owner"
+            ]
+          },
+          "then": {
+            "properties": {
+              "owner_specific_high_waters": {
+                "required": [
+                  "reservation_high_water",
+                  "provider_attempt_high_water",
+                  "provider_outcome_high_water"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "participant": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "member_kind": {
+              "const": "COC_PARTICIPANT"
+            },
+            "participant_intent_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_participant_position": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_participant_entry_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "transaction_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "request_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "owner_boundary_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "policy_domain_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "participant_tuple_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "participant_owner": {
+              "enum": [
+                "C",
+                "D",
+                "I",
+                "STORAGE"
+              ]
+            },
+            "owner_admission_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_admission_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "required": [
+            "member_kind",
+            "participant_intent_ref",
+            "coc_participant_position",
+            "coc_participant_entry_digest",
+            "transaction_ref",
+            "request_digest",
+            "owner_boundary_ref",
+            "policy_domain_ref",
+            "participant_tuple_digest",
+            "participant_owner"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "member_kind": {
+              "const": "OWNER_LOCAL_ADMISSION"
+            },
+            "owner_kind": {
+              "enum": [
+                "I",
+                "D",
+                "C"
+              ]
+            },
+            "owner_admission_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_admission_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "owner_ledger_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_ledger_version": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_local_sequence": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_high_water": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_ledger_root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "request_or_operation_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "admission_state": {
+              "enum": [
+                "ADMITTED",
+                "IN_PROGRESS",
+                "ACK_UNKNOWN",
+                "OUTCOME_PENDING",
+                "RETRYING",
+                "QUARANTINED",
+                "SUPPRESSED",
+                "TERMINAL"
+              ]
+            },
+            "policy_domain_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "owner_boundary_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "participant_tuple_digest": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "coc_participant_intent_ref": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "coc_absence_reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            "provider_idempotency_key_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "work_item_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "attempt_ref": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          },
+          "required": [
+            "member_kind",
+            "owner_kind",
+            "owner_admission_ref",
+            "owner_admission_digest",
+            "owner_ledger_ref",
+            "owner_ledger_version",
+            "owner_local_sequence",
+            "owner_high_water",
+            "owner_ledger_root",
+            "request_or_operation_digest",
+            "admission_state",
+            "policy_domain_ref",
+            "owner_boundary_ref",
+            "coc_participant_intent_ref"
+          ],
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "coc_participant_intent_ref": {
+                    "type": "null"
+                  }
+                },
+                "required": [
+                  "coc_participant_intent_ref"
+                ]
+              },
+              "then": {
+                "required": [
+                  "coc_absence_reason"
+                ]
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "coc_participant_intent_ref": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "coc_participant_intent_ref"
+                ]
+              },
+              "then": {
+                "not": {
+                  "required": [
+                    "coc_absence_reason"
+                  ]
+                }
+              }
+            }
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ownerAdmissionBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner_kind": {
+          "enum": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "owner_admission_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_entry_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_ledger_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_ledger_version": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_local_sequence": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_high_water": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_ledger_root": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_snapshot_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_snapshot_attestation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_attestation_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "operation_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "scope_binding_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "coc_participant_intent_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_membership_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_membership_proof_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Digest of the exact owner-ledger membership proof, bound to the frozen snapshot root and entry identity."
+        }
+      },
+      "required": [
+        "owner_kind",
+        "owner_admission_ref",
+        "owner_entry_ref",
+        "owner_ledger_ref",
+        "owner_ledger_version",
+        "owner_local_sequence",
+        "owner_high_water",
+        "owner_entry_digest",
+        "owner_ledger_root",
+        "owner_snapshot_ref",
+        "owner_snapshot_digest",
+        "owner_snapshot_attestation_ref",
+        "owner_snapshot_attestation_digest",
+        "operation_digest",
+        "scope_binding_digest",
+        "coc_participant_intent_ref",
+        "owner_snapshot_membership_proof_ref",
+        "owner_snapshot_membership_proof_digest"
+      ]
+    },
+    "ownerLocalAdmissionMember": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "member_kind": {
+          "const": "OWNER_LOCAL_ADMISSION"
+        },
+        "owner_kind": {
+          "enum": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "owner_admission_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_entry_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_entry_kind": {
+          "enum": [
+            "RECEIPT_ISSUE",
+            "RECEIPT_CONSUME",
+            "PRODUCER_REGISTRATION",
+            "WORK_ITEM",
+            "ATTEMPT",
+            "DERIVATIVE",
+            "RESERVATION",
+            "PROVIDER_ATTEMPT",
+            "OTHER"
+          ]
+        },
+        "owner_ledger_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_ledger_version": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_local_sequence": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_high_water": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_entry_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_ledger_root": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_snapshot_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_snapshot_attestation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_attestation_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "operation_identity_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "operation_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "request_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "scope_binding_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "admission_state": {
+          "enum": [
+            "ADMITTED_NOT_REGISTERED",
+            "PENDING",
+            "TERMINAL_SUCCESS",
+            "TERMINAL_ABORT",
+            "NO_EFFECT_PROVEN",
+            "UNKNOWN",
+            "IN_DOUBT"
+          ]
+        },
+        "effect_boundary": {
+          "enum": [
+            "LOCAL_ACCEPTANCE",
+            "RECEIPT_ISSUE",
+            "RECEIPT_CONSUME",
+            "WORK_ADMISSION",
+            "RESERVATION",
+            "PROVIDER_ATTEMPT",
+            "PUBLICATION",
+            "RESTORE_REPLAY",
+            "OTHER"
+          ]
+        },
+        "terminal_evidence_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "coc_participant_intent_ref": {
+          "type": "null"
+        },
+        "coc_absence_reason": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "owner_snapshot_membership_proof_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_membership_proof_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Digest of the exact owner-ledger membership proof, bound to the frozen snapshot root and entry identity."
+        }
+      },
+      "required": [
+        "member_kind",
+        "owner_kind",
+        "owner_admission_ref",
+        "owner_entry_ref",
+        "owner_entry_kind",
+        "owner_ledger_ref",
+        "owner_ledger_version",
+        "owner_local_sequence",
+        "owner_high_water",
+        "owner_entry_digest",
+        "owner_ledger_root",
+        "owner_snapshot_ref",
+        "owner_snapshot_digest",
+        "owner_snapshot_attestation_ref",
+        "owner_snapshot_attestation_digest",
+        "operation_identity_ref",
+        "operation_digest",
+        "request_digest",
+        "scope_binding_digest",
+        "admission_state",
+        "effect_boundary",
+        "coc_participant_intent_ref",
+        "coc_absence_reason",
+        "owner_snapshot_membership_proof_ref",
+        "owner_snapshot_membership_proof_digest"
+      ]
+    },
+    "ownerSnapshotRoot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner_snapshot_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_snapshot_attestation_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_attestation_digest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_gate_generation": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "request_high_water": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "admission_high_water": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "request_ledger_root": {
+          "$ref": "#/$defs/sha256"
+        },
+        "admission_ledger_root": {
+          "$ref": "#/$defs/sha256"
+        },
+        "owner_ledger_root": {
+          "$ref": "#/$defs/sha256"
+        },
+        "anti_rollback_anchor_ref": {
+          "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_specific_high_waters_digest": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "owner_snapshot_ref",
+        "owner_snapshot_digest",
+        "owner_snapshot_attestation_ref",
+        "owner_snapshot_attestation_digest",
+        "owner_gate_generation",
+        "request_high_water",
+        "admission_high_water",
+        "request_ledger_root",
+        "admission_ledger_root",
+        "owner_ledger_root",
+        "anti_rollback_anchor_ref",
+        "owner_specific_high_waters_digest"
+      ]
+    },
+    "ownerSnapshotRoots": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "I": {
+          "$ref": "#/$defs/ownerSnapshotRoot"
+        },
+        "D": {
+          "$ref": "#/$defs/ownerSnapshotRoot"
+        },
+        "C": {
+          "$ref": "#/$defs/ownerSnapshotRoot"
+        }
+      },
+      "required": [
+        "I",
+        "D",
+        "C"
+      ]
+    },
+    "cocParticipantMember": {
+      "type": "object",
+      "properties": {
+        "participant_intent_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Immutable participant intent"
+        },
+        "transaction_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Transaction identity"
+        },
+        "request_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "owner_boundary_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Typed owner boundary"
+        },
+        "policy_domain_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "PolicyDomain identity"
+        },
+        "participant_tuple_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "participant_owner": {
+          "enum": [
+            "C",
+            "D",
+            "I",
+            "STORAGE"
+          ]
+        },
+        "storage_prepared_participant_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Storage participant identity"
+        },
+        "prepared_transaction_gid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Prepared transaction GID"
+        },
+        "database_incarnation_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Database incarnation"
+        },
+        "prepare_attempt_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Prepare attempt"
+        },
+        "prepare_attempt_generation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Prepare attempt generation"
+        },
+        "participant_ledger_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Participant ledger identity"
+        },
+        "participant_ledger_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Participant ledger version"
+        },
+        "provider_idempotency_key_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Provider idempotency key reference; never the secret value"
+        },
+        "member_kind": {
+          "const": "COC_PARTICIPANT"
+        },
+        "owner_admission_bindings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ownerAdmissionBinding"
+          },
+          "minItems": 0,
+          "uniqueItems": true,
+          "description": "Zero or more exact owner-local admissions already joined to this COC participant. If an applicable frozen owner admission exists, it must appear exactly once; if none exists, the array is explicitly empty."
+        }
+      },
+      "required": [
+        "participant_intent_ref",
+        "transaction_ref",
+        "request_digest",
+        "owner_boundary_ref",
+        "policy_domain_ref",
+        "participant_tuple_digest",
+        "participant_owner",
+        "member_kind",
+        "owner_admission_bindings"
+      ],
+      "additionalProperties": false
+    },
+    "ownerSpecificHighWatersI": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "receipt_issue_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "receipt_consume_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "inventory_epoch_ref": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "registry_snapshot_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "relevant_entry_set_root": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "receipt_issue_high_water",
+        "receipt_consume_high_water",
+        "inventory_epoch_ref",
+        "registry_snapshot_digest",
+        "relevant_entry_set_root"
+      ]
+    },
+    "ownerSpecificHighWatersD": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "producer_registration_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "work_item_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "attempt_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "barrier_generation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "barrier_root": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "required": [
+        "producer_registration_high_water",
+        "work_item_high_water",
+        "attempt_high_water",
+        "barrier_generation",
+        "barrier_root"
+      ]
+    },
+    "ownerSpecificHighWatersC": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reservation_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "provider_attempt_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        },
+        "provider_outcome_high_water": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512
+        }
+      },
+      "required": [
+        "reservation_high_water",
+        "provider_attempt_high_water",
+        "provider_outcome_high_water"
+      ]
+    }
+  }
+}
