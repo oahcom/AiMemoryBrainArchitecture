@@ -168,7 +168,9 @@ class ForgetOperation:
                               Phase.DOMAIN_COMPLETION_EVALUATED}:
             raise ContractError("domain evaluation requires cleanup")
         accepted = {TargetState.CLEANED, TargetState.ERASED}
-        complete = all(
+        # A canonical Forget operation must have at least one D-domain
+        # target; otherwise all([]) would incorrectly report vacuous success.
+        complete = bool(self.domain_targets) and all(
             t.state in accepted and t.has_current_evidence(self.fence_generation)
             for t in self.domain_targets.values()
         )
