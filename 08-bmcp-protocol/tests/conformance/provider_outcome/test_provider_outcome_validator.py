@@ -68,6 +68,7 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
     def test_06_missing_authority_callbacks_are_not_silent_success(self):
         checks = AuthorityChecks()
         self.assertIsNone(checks.verify_profile_registration)
+        self.assertIsNone(checks.verify_key_status)
         self.assertIsNone(checks.verify_c_signature)
         self.assertIsNone(checks.verify_provider_evidence)
 
@@ -88,6 +89,17 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
                 else:
                     self.assertFalse(schema_errors, [e.message for e in schema_errors])
                     self.assertFalse(semantic, semantic)
+
+    def test_08_c_key_status_event_schema_is_closed_and_governance_scoped(self):
+        fixture_dir = ROOT.parent / "fixtures"
+        schema = json.loads((fixture_dir / "c-key-status-event-1.0.0.schema.json").read_text(encoding="utf-8"))
+        Draft202012Validator.check_schema(schema)
+        self.assertEqual(schema["$id"], "urn:aimba:schema:c-key-status-event:1.0.0")
+        self.assertFalse(schema["additionalProperties"])
+        self.assertEqual(schema["properties"]["message_type"]["const"], "C_KEY_STATUS_EVENT")
+        self.assertEqual(schema["properties"]["profile_id"]["const"], "AIMBA-C-CRYPTO-1.0")
+        self.assertEqual(schema["properties"]["governance_signature_profile_id"]["const"], "AIMBA-I-KEY-GOVERNANCE-1.0")
+        self.assertEqual(set(schema["properties"]["state"]["enum"]), {"PENDING","ACTIVE","RETIRED","REVOKED","COMPROMISED","DESTROYED"})
 
 
 if __name__ == "__main__":
