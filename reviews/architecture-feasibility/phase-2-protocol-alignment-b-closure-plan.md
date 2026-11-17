@@ -1,144 +1,133 @@
 # ARCH-CONSOL-002 — B: Cross-Owner Protocol Alignment Review
 # ARCH-CONSOL-002 — B：跨 Owner 协议精确对齐审查
 
-- Repository: \`oahcom/AiMemoryBrainArchitecture\`
-- Scope: C / H / D / I / Storage exact Provider Outcome and owner-proof wire bindings
-- Review mode: exact-Blob inspection and delegated role synthesis; not independent Owner approval
-- Status: **PARTIAL ALIGNMENT EXISTS / EXACT BUNDLE NOT YET CLOSED**
-- Branch: \`review/arch-consol-002-protocol-alignment-2026-11-17\`
+- Repository: oahcom/AiMemoryBrainArchitecture
+- Scope: C / H / D / I / Storage exact Provider Outcome, RecoveryJoin and owner-proof bindings
+- Snapshot: 2026-11-17
+- Status: **L1/L2 CANDIDATE ALIGNMENT SUBSTANTIALLY EXISTS; SAME-BUNDLE REVIEW NOT CLOSED**
+- Provenance: exact-Blob inspection and delegated role synthesis; not independent Owner approval
+- Branch: review/arch-consol-002-protocol-alignment-2026-11-17
 
 ## 1. Executive disposition / 总体裁决
 
-**EN:** The earlier Phase 2 report overstated the C/H version gap. A current candidate alignment already exists: H has a 1.2.12 → CSubmitOutcome 1.0.1 exact consumer mapping; C has a 1.0.1 immutable sequence-namespace amendment; I has reviewed that required signed field; H's validator contract §§19–21 record the current 1.2.12 / 1.0.1 target and a 17-test candidate run. C reports a separate 19-test candidate run. These are meaningful architecture-level progress and must not be discarded.
+**EN:** The project has materially advanced beyond the earlier 1.2.12 snapshot. The current target is H Unified **1.2.14** (wire 1.3.0) + RecoveryJoin **1.0.2** + RecoveryCutoff **1.0.5**, with CSubmitOutcome **1.0.1**. C has accepted a current H 1.2.14 Provider Outcome mapping candidate; D has a corrected RecoveryJoin P0 crosswalk and D FenceGeneration high-water mapping; I has accepted H 1.2.14 / RecoveryJoin 1.0.2 compatibility; H has both a Provider Outcome mapping and an integrated authority-join mapping; Storage has published v3.2.7 and selected Option A at L1 in its separate topology ADR.
 
-However, the cross-owner *exact bundle* is still not closed. The Storage v3.2.4 successor manifest still pins CSubmitOutcome 1.0.0 and omits the new C 3.11.1 / I 3.8.8 / H exact mapping chain. The H mapping pins an older Blob of the 1.2.12 schema (a one-line descriptive revision-label mismatch versus the actual current H branch file). Several historical C semantic/projection artifacts still explicitly bind H 1.2.11, and the old H validator contract retains superseded 1.2.11 normative text in §§1–18. D/I adoption artifacts are candidates, not independent Owner approvals. Therefore B is **not complete**, but the remaining work is now precise and bounded.
+The remaining B problem is no longer "C/H have not migrated from 1.2.11". It is **same-bundle exactness and cross-owner closure**:
 
-**中文：** 上一轮 Phase 2 报告对 C/H 版本缺口的描述过重。当前已经存在一条候选对齐链：H 发布了 1.2.12 → CSubmitOutcome 1.0.1 精确消费映射；C 发布了 1.0.1 不可变 Sequence Namespace 修订；I 已审查该必需签名字段；H Validator 合同 §19–21 记录当前 1.2.12 / 1.0.1 目标及 17 项候选测试；C 另有 19 项候选测试。这些是实际架构进展，不应否定或重复实现。
+1. H has two different mapping artifacts: C Provider Outcome mapping Blob 7739d8159b32702024583669f40974a80801782b and integrated authority-join mapping Blob 1cbe74eba69325510d6b1019d971661f965eabf8. Storage v3.2.7 binds only the latter; C's latest review accepts the former, not the integrated mapping that adds I/D/Storage verifier seams.
+2. C's latest review of the C mapping pins H schema Blob fee452efb99ab4fe0ceccb347c46eeef1521bd28, while the mapping itself and current H schema file pin 09fcd1fa29fe24255fbd87cae79dafb406594a59. The two schema Blobs differ only in descriptive text ("1.2.13" vs "1.2.14"), but exact-Blob governance still requires one identical pin and a fresh C readback.
+3. Storage v3.2.7 is a candidate bundle, not joint acceptance. It predates the latest C/I review records and still routes fresh C/H/D/I reviews and A integration review as required.
+4. H's 25-test callback-seam CI is bounded orchestration evidence: the new orchestration tests mock schema validation, semantic validation and candidate digest/preimage calculation. It is not an unmocked end-to-end proof of real I/D/Storage authority records.
 
-但跨 Owner **精确版本包**尚未闭环。Storage v3.2.4 后继清单仍绑定 CSubmitOutcome 1.0.0，未纳入 C 3.11.1 / I 3.8.8 / H 精确 Mapping 链。H Mapping 仍绑定较早的 1.2.12 Schema Blob；与 H 当前分支文件相比，唯一内容差异是 Schema 描述中的 Artifact Revision 文案仍写 1.2.11。多个历史 C 语义/签名投影工件仍明确绑定 H 1.2.11；旧 H Validator 合同 §1–18 仍保留已被后续章节取代的 1.2.11 规范性文字。D/I 采纳文件仍是候选，不是独立 Owner 批准。因此 B **尚未完成**，但剩余工作已能精确界定。
+**中文：** 项目已明显超越此前 1.2.12 快照。当前协议目标为 H Unified **1.2.14**（Wire 1.3.0）+ RecoveryJoin **1.0.2** + RecoveryCutoff **1.0.5**，CSubmitOutcome **1.0.1**。C 已接受 H 1.2.14 Provider Outcome Mapping 候选；D 已发布修正后的 RecoveryJoin P0 Crosswalk 和 D FenceGeneration High-Water 映射；I 已接受 H 1.2.14 / RecoveryJoin 1.0.2 兼容性；H 已发布 Provider Outcome Mapping 和集成 Authority-Join Mapping；Storage 已发布 v3.2.7，并在独立拓扑 ADR 中完成 Option A 的 L1 逻辑选择。
 
-## 2. Exact current source / consumer chain / 当前精确源—消费链
+B 阶段剩余问题不再是“C/H 尚未从 1.2.11 迁移”，而是**同一 Bundle 的精确一致性和跨 Owner 闭环**：
 
-| Role | Exact artifact | Blob | Current disposition |
-|---|---|---|---|
-| H schema | BMCP Unified 1.2.12 on H branch | \`9aa366d857d0229687df7e44e8e70d2097a99237\` | Current branch file; wire family 1.3.0 |
-| H RecoveryJoin | RecoveryJoin 1.0.2 | \`4b664e3bce465499bcdfd93796349a4ba7074002\` | Candidate structural proof carrier |
-| H R1/R2 crosswalk | Phase 3.8.6 | \`8b5b2c37201f7ae821bb5ca71a5101f19e75cf5c\` | Correctly identifies Unified 1.2.12 / RecoveryJoin 1.0.2 |
-| C immutable object | CSubmitOutcome 1.0.1 schema | \`a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda\` | Current proposed immutable object revision |
-| C semantic amendment | Phase 3.11.1 | \`6fa67af110ebbc5ef57ed908bb4880d99c5e46fb\` | Explicit required signed sequence namespace; supersedes 1.0.0 for new records |
-| I review | Phase 3.8.8 | \`0d78e5b2bfcf66cae6b757314cead84b9c942601\` | Accepts namespace as required/signed; no profile registration |
-| H exact consumer mapping | Phase 3.8.7 | \`fad28f1b62f6a686669e209ebe30d69df6330d75\` | Accepts 1.2.12 / 1.0.1 mapping as proposal; not frozen |
-| H validator core | Current core | \`1a92c0cf7146e2884bd38232005dd9a55d558a85\` | Requires C 1.0.1 and sequence namespace; callbacks not production-connected |
-| H validator contract | Phase 3.8.5 current file | \`62b740696b4a5335f19f82e83fe4d4ce8b4e0f4e\` | §§19–21 current target; §§1–18 historical/superseded |
-| Storage exact bundle | v3.2.4 successor manifest | \`6fc0bedaf5421d1be5a9ab5fb4d8cfab2871d7d7\` | Stale: C 1.0.0 and earlier C/H bindings remain pinned |
+1. H 有两种不同 Mapping：C Provider Outcome Mapping Blob 7739...，以及集成 Authority-Join Mapping Blob 1cbe...。Storage v3.2.7 只绑定后者；C 最新审查接受的是前者，没有审查包含 I/D/Storage Verifier Seam 的集成 Mapping。
+2. C 最新审查绑定 H Schema Blob fee452...，而 Mapping 自身和 H 当前 Schema 文件绑定 09fcd...。两 Blob 仅在 Description 的 1.2.13/1.2.14 文案上不同，但精确 Blob 治理仍要求统一 SHA 并由 C 重新读回。
+3. Storage v3.2.7 是候选 Bundle，不是联合接受；它早于 C/I 最新审查，仍要求 C/H/D/I 新审查及 A 集成审查。
+4. H 的 25 项 Callback-Seam CI 仅是有限编排证据：新增测试对 Schema 校验、语义校验和候选 Digest/Preimage 计算使用 Mock，不能当作真实 I/D/Storage 权威记录的无 Mock 端到端证明。
 
-**Exact schema Blob correction:** H mapping Blob \`fad28f...\` and Storage manifest pin \`a54f669...\` bind an older copy of Unified 1.2.12. The current H branch file is Blob \`9aa366...\`. A line-by-line comparison found exactly one difference: the current file's schema description says artifact revision 1.2.12, while the older pinned Blob's description says 1.2.11. The schema's actual version fields remain 1.2.12 and wire family 1.3.0. This appears non-functional, but exact-Blob governance forbids treating the two blobs as interchangeable. H must re-pin the current Blob and rerun the exact mapping/conformance bundle; D/I/Storage must consume the same new pin.
+## 2. Exact branch snapshot / 精确分支快照
 
-**精确 Schema Blob 修正：** H Mapping Blob \`fad28f...\` 和 Storage 清单中的 \`a54f669...\` 绑定的是较早的 Unified 1.2.12 副本。H 当前分支文件 Blob 是 \`9aa366...\`。逐行比较发现唯一差异是 Schema description：当前文件写 Artifact Revision 1.2.12，旧 Blob 写 1.2.11。Schema 实际版本字段仍为 1.2.12，Wire Family 仍为 1.3.0。该差异看起来不影响运行语义，但精确 Blob 治理不允许将两个 Blob 视为相同。H 必须重新绑定当前 Blob 并重跑精确 Mapping/Conformance，D/I/Storage 随后消费同一新 pin。
+| Owner | Branch HEAD at snapshot | Latest relevant evidence |
+|---|---|---|
+| C | 8d7298d7f56b1df48229799ff6462a8db634e7ed | Phase 3.8.16 accepts H Provider Outcome mapping candidate; its H schema pin is fee452... |
+| H | a0e0944dc742ac89a71e00814f1d296155b622e5 | Provider Outcome mapping 7739...; integrated authority mapping 1cbe...; current H schema 09fcd... |
+| D | 188f414fa2c080111325cb52c93f8cd1dc551388 | RecoveryJoin P0 crosswalk c4ad... pins H schema 09fcd... |
+| I | 947553e77375a94671523931518e0d9673c4a766 | Phase 3.8.12 accepts H schema 09fcd... / RecoveryJoin 1.0.2 |
+| Storage | 19eb636d364c87850afdcd1d87c04c7fe920f115 | v3.2.7 manifest Blob 4435fc0340a4fce10751679a95f3b4c821bdae4d; topology ADR Blob bb544... |
 
-## 3. What is already proven — and what is not / 已有证明与证明上限
+Branch heads are snapshot identifiers, not moving references. Re-read before any freeze or final sign-off.
 
-### 3.1 Candidate structural and cross-language evidence
+## 3. Canonical source pins / 当前规范源 Pin
 
-- C run \`44059935858\`, commit \`b49966361b4b3121a2ebf4105b4e0c57a612e945\`: SUCCESS, 19 tests. Covers CSubmitOutcome 1.0.1 schema, ten structural/semantic vectors, candidate Ed25519 cases, field-mutation rejection and Python/Node agreement.
-- H run \`44060704553\`, commit \`8c377a7218b70621d2348b47341d4cf4755b3733\`: SUCCESS, 17 tests. Covers 1.0.1 namespace validation, five candidate crypto vectors, field-mutation rejection and H Python/Node agreement.
-- I Phase 3.8.8 accepts the sequence namespace as a required signed field and explicitly does not register either profile.
-- H exact mapping distinguishes C-authored Provider Outcome from external COC, I, D and Storage evidence; external proof refs are validated under their own issuers and authority callbacks.
+| Artifact | Exact Blob | Status |
+|---|---|---|
+| H Unified 1.2.14 / wire 1.3.0 | 09fcd1fa29fe24255fbd87cae79dafb406594a59 | Current H branch schema and H mapping pin |
+| H RecoveryJoin 1.0.2 | 4b664e3bce465499bcdfd93796349a4ba7074002 | Current companion schema |
+| H RecoveryCutoff 1.0.5 | 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7 | Current companion schema |
+| H Provider Outcome mapping | 7739d8159b32702024583669f40974a80801782b | Exact C object / wire mapping candidate |
+| H integrated authority-join mapping | 1cbe74eba69325510d6b1019d971661f965eabf8 | Separate I/D/Storage verifier seams; bound by Storage v3.2.7 |
+| H validator core / tests | eab961a08d41e871f38543b18ee60cf024977414 / 53774aca0224fd9a727dfa625ba142825f1754b0 | Current callback-seam implementation/test pair in Storage v3.2.7 |
+| CSubmitOutcome 1.0.1 | a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda | Current immutable C object schema |
+| C Phase 3.11.1 sequence namespace amendment | 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb | New records use 1.0.1; 1.0.0 remains historical |
+| C RecoveryJoin P0 crosswalk | df12af95e6859a389ba71eb1b7dba512b9feb8f6 | C row digest + immutable C object dereference |
+| D RecoveryJoin P0 crosswalk | c4adf827dd62d44c43b8e871dec4835581508adf | D row digest + ForgetFence high-water |
+| I P0 successor allowlist | 35e6843da8becbf3b152512a561b05cf5486819b | Exact I P0 fields; profile registration separate |
+| I exact compatibility review | Commit 947553e77375a94671523931518e0d9673c4a766 | Accepts H 1.2.14 / RecoveryJoin 1.0.2; delegated review |
+| C exact mapping review | Commit 8d7298d7f56b1df48229799ff6462a8db634e7ed | Accepts H mapping 7739...; schema pin mismatch noted above |
+| Storage v3.2.7 manifest | 4435fc0340a4fce10751679a95f3b4c821bdae4d | Not jointly accepted / not frozen |
 
-### 3.2 Explicit evidence ceiling
+## 4. Exact-version contradictions / 精确版本矛盾
 
-These tests and documents do **not** prove:
-- production registration of \`AIMBA-C-CRYPTO-1.0\` or \`AIMBA-I-KEY-GOVERNANCE-1.0\`;
-- production trust roots, HSM/KMS, key custody, revocation or external anti-rollback;
-- a deployed durable C sequencer or authenticated C key-status ledger;
-- provider issuer truth, provider-specific idempotency, real adapter race/fault behavior;
-- production COC quorum, Storage durable joins or end-to-end owner callback wiring;
-- independent human C/H/D/I/Storage Owner approvals.
+### B-01 — C review and H mapping do not use the same H schema Blob
 
-### 3.3 Authority rules that remain normative
+H Provider Outcome mapping 7739... binds H Unified 1.2.14 Blob 09fcd.... C Phase 3.8.16 review binds the same mapping Blob but lists H schema Blob fee452.... Direct comparison shows the only textual difference is the schema description: fee452... says artifact revision 1.2.13, while 09fcd... says 1.2.14. The actual schema ID and required artifact revision are 1.2.14 in both.
 
-1. C alone owns immutable Provider Outcome truth, final transport handoff boundary, C admission/attempt/gate and C signing sequence.
-2. H owns BMCP wire structure, exact field mapping, schema/version checks and tri-state validation orchestration; it cannot manufacture C/I/D/Storage truth.
-3. I owns profile registration, governance trust, key lifecycle and PermissionDomain decisions; accepting a signed field is not profile registration.
-4. D owns Memory/ForgetFence and D lineage/participant semantics; it cannot delegate those semantics to H.
-5. Storage owns durable transaction/visibility/physical recovery and exact version bundle binding; a Storage manifest is not an Owner approval.
-6. COC records causal-order/recovery evidence; it is not the C Provider Outcome authority or the JF-10 coordinator.
+**Required:** C republishes a one-line exact-pin correction against 09fcd... and re-reads H mapping 7739.... This is an exact-Blob provenance mismatch, not a demonstrated semantic incompatibility.
 
-## 4. Contradictions and migration debt / 矛盾与迁移债务
+### B-02 — C has not reviewed the integrated H authority-join mapping
 
-| ID | Severity | Exact issue | Required successor |
-|---|---|---|---|
-| B-01 | P1 | H exact mapping pins old Unified Blob \`a54f...\`; current H branch is \`9aa366...\` (one stale descriptive revision label). | H republishes mapping against exact current Blob; rerun H tests; D/I/Storage re-pin. |
-| B-02 | P1 | Storage v3.2.4 manifest still lists C 1.0.0 schema/vectors and old Phase 3.8.6–3.8.9 C docs as current. | Storage publishes a successor manifest binding C 1.0.1, C Phase 3.11.1, I Phase 3.8.8, H exact mapping/core and current H schema. |
-| B-03 | P1 | C Phase 3.8.6/3.8.7/3.8.8 and Phase 3.8.9 historical docs retain H 1.2.11 and/or C 1.0.0 pins. | C publishes one explicit successor applicability addendum (do not rewrite historical artifacts) binding H 1.2.12 exact current Blob and C 1.0.1, while preserving the 1.0.0 history. |
-| B-04 | P1 | H validator contract title and §§1–18 still state 1.2.11 / C 1.0.0; §§19–21 later supersede them, creating two apparent normative targets. | H publishes a consolidated currentness amendment or clean successor contract making §§1–18 explicitly historical and pointing to exact current 1.2.12 / 1.0.1 mapping. |
-| B-05 | P1 | D/I candidate membership adoption artifacts pin old H schema Blob \`a54f...\`; no fresh exact re-review against current H Blob \`9aa366...\`. | D and I each publish exact successor pin/review on their own branches; delegated simulation must remain labelled as such. |
-| B-06 | P1 | Storage manifest has not yet composed the C/H/I exact source-consumer chain or received fresh C/H/D/I exact reviews against one identical manifest. | Storage publishes manifest first; C/H/D/I review that exact manifest; A integrates only after all exact dispositions. |
-| B-07 | P1 | C/I crypto profiles remain PROPOSED_NOT_REGISTERED; H authority callbacks are not production-connected. | Keep activation blocked; registration and production trust are separate later gates, not papered over by schema alignment. |
+H has two separate mapping artifacts: Provider Outcome mapping 7739..., and integrated authority-join mapping 1cbe..., which includes distinct I terminal, D clearance and Storage resolution verifier seams and is the mapping pinned by Storage v3.2.7. C Phase 3.8.16 accepts 7739..., not 1cbe....
 
-## 5. Ordered closure plan / 按序闭环计划
+**Required:** C reviews exact 1cbe... with H schema 09fcd..., C schema a631..., validator eab961..., tests 53774..., and precise C/COC/I/D/Storage joins. H/Storage cannot infer C acceptance from the Provider Outcome-only review.
 
-### Step B1 — C source successor / C 源合同后继修订
-C must publish a bilingual successor applicability amendment that:
-- declares CSubmitOutcome 1.0.1 the current proposed immutable object revision for new records, with 1.0.0 retained as historical;
-- binds C Phase 3.11.1 Blob \`6fa67af...\`, schema Blob \`a631bc...\`, vectors \`c447f8...\`, crypto manifest \`3a5fb...\`, expected vectors \`34e49a...\`;
-- updates the applicability of the 3.8.6 semantic amendment and 3.8.8 projection to H Unified 1.2.12 exact current Blob \`9aa366...\`, without changing their historical source blobs;
-- binds H mapping Blob \`fad28f...\` only as the current *candidate* mapping until H re-pins its corrected schema Blob;
-- explicitly keeps the C profile NOT REGISTERED and provider/authority integration NOT PROVEN.
+### B-03 — Storage v3.2.7 is a candidate manifest, not joint acceptance
 
-### Step B2 — H consumer successor / H 消费方后继修订
-H must publish a clean current validator/mapping bundle that:
-- pins exact Unified schema Blob \`9aa366...\`, wire version 1.3.0, artifact revision 1.2.12;
-- pins RecoveryJoin 1.0.2 Blob \`4b664e...\` and RecoveryCutoff 1.0.5 exact current Blob after re-read;
-- pins CSubmitOutcome 1.0.1 Blob \`a631bc...\`, C semantic amendment \`6fa67a...\`, I review \`0d78e5...\`;
-- pins the current H validator core \`1a92c0...\` and the H exact mapping, with a new Blob after correction;
-- records the 17-test run as candidate-only historical evidence and reruns tests against the exact successor Blob set;
-- labels the old 1.2.11 sections historical, not a second active target.
+Storage v3.2.7 Blob 4435... binds H schema 1.2.14, RecoveryJoin 1.0.2, RecoveryCutoff 1.0.5, integrated mapping 1cbe..., validator/test pair eab961... / 53774..., and C 1.0.1. It explicitly says fresh H/C/D/I reviews and A integration review are required.
 
-### Step B3 — D/I exact successor reviews / D/I 精确后继复审
-D and I must independently re-pin the corrected H Unified Blob and RecoveryJoin/RecoveryCutoff bundle, preserve their own authority boundaries, and review the same C/H source chain. Their prior Phase 3.8.5 candidate adoption artifacts are not upgraded by implication.
+**Required:** Storage publishes v3.2.8 binding C's review of 1cbe..., H's exact review of I P0 / D crosswalk, D's current crosswalk/review, I's compatibility review, exact H workflow evidence and unchanged Storage v3.2.3/COC source base. Then each Owner reviews the same v3.2.8 Blob and A reviews the joined evidence.
 
-### Step B4 — Storage manifest successor / Storage 精确清单后继
-Storage must publish a new successor manifest that:
-- removes C 1.0.0 as the current binding and records it only as historical;
-- pins C 1.0.1 source + amendment + vectors, I review, H mapping + validator core + corrected schema, D/I successor pins and Storage visibility contract;
-- includes exact HEAD commits and exact Blob SHAs;
-- records every Owner disposition and its provenance;
-- preserves COC and JF-10 as separate protocols;
-- does not declare the bundle frozen merely because all documents exist.
+### B-04 — H 25-test CI is bounded, not end-to-end
 
-### Step B5 — Exact cross-owner review / 精确跨 Owner 复审
-C/H/D/I each review the same Storage manifest SHA; Storage records exact review references; A performs the integration review only after all required Owner responses. No auto-approval, no inherited approval, no schema freeze and no production activation.
+Storage v3.2.7 §3.1 explains callback tests mock schema validation, semantic validation and candidate digest/preimage calculation for orchestration cases. They show separate I/D/Storage callback slots and UNKNOWN on missing callbacks. They do not prove real authority record validation or production adapters.
 
-## 6. Acceptance criteria for B / B 阶段验收标准
+**Required:** Add unmocked end-to-end positive and negative fixtures exercising exact H envelope + CSubmitOutcome 1.0.1 + digest/signature + CKeyStatus namespace + provider evidence + C owner ledger + COC + I COMMIT_WON + D clearance + Storage same-GID proof. Keep production integration as a separate L4 gate.
 
-B can be marked **CONDITIONALLY ALIGNED** only when:
-1. one exact H schema Blob is consumed by H mapping, H validator, D, I and Storage;
-2. one exact C object schema (1.0.1) is consumed by C contract, H mapping/validator, I review and Storage manifest;
-3. C 1.0.0 is explicitly historical and never silently parsed as 1.0.1;
-4. all source/consumer references are acyclic and exact;
-5. C/H candidate CI reruns against the final exact blobs;
-6. D/I/C/H/Storage dispositions are bound to the same successor manifest;
-7. all evidence ceilings and unregistered production trust remain explicit.
+### B-05 — Role simulation is not independent Owner acceptance
 
-B is **not** allowed to approve D/Storage transaction topology. That is Phase A and begins only after this protocol bundle is stable enough to serve as its input.
+C/H/D/I/Storage artifacts label delegated-role provenance. No independent human Owner signature or governance approval is created by this review.
 
-B 只有在同一个 H Schema Blob 被 H Mapping、H Validator、D、I、Storage 同时精确消费；同一个 C 1.0.1 对象 Schema 被 C 合同、H Mapping/Validator、I Review、Storage Manifest 同时绑定；1.0.0 明确降为历史；引用无环且精确；CI 对最终 Blob 重跑；D/I/C/H/Storage 对同一 Manifest 完成各自审查；证据上限和生产信任未注册状态仍明确时，才可标记 **CONDITIONALLY ALIGNED**。
+**Required:** Route the same exact manifest to authorized human Owners; no implicit/inherited approval or automatic merge.
 
-B 不得批准 D/Storage 事务拓扑。该事项属于后续 A 阶段，必须以稳定的协议包作为输入。
+## 5. Authority and semantic constraints / 权威与语义约束
 
-## 7. Sources / 精确来源
+1. C owns immutable Provider Outcome truth, provider handoff evidence, C gate/attempt/admission and C sequence namespace.
+2. H owns wire schema, version identity, exact mapping and tri-state orchestration; H cannot issue C/I/D/Storage decisions.
+3. I owns PolicyDomain, PermissionEpoch, COMMIT_WON/REVOCATION_WON and governance trust/key lifecycle.
+4. D owns Canonical Memory, ForgetFenceGeneration, producer/work/attempt/derivative lineage, barrier and D clearance.
+5. Storage owns physical serialization substrate, durable participants, visibility pointer/outcome, DB incarnation, outbox and physical recovery.
+6. COC owns quorum causal-order prefix, Recovery Cutoff Batch/Manifest and participant log; it is neither C Provider Outcome authority nor JF-10 coordinator.
+7. schema_artifact_revision, wire schema_version, C record_sequence/namespace, D Fence/Gate/Barrier generations, I PermissionEpoch/PolicyDomain position, COC quorum position and Storage serialization revision/GID/XID are distinct nominal types. No cross-domain numeric comparison or implicit ordering.
+8. Missing verifier, stale key status, incomplete pagination, unavailable proof, unknown DB incarnation or anti-rollback uncertainty must remain UNKNOWN and block release/visibility.
 
-- CSubmitOutcome 1.0.1 schema: \`a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda\`
-- C Phase 3.11.1 amendment: \`6fa67af110ebbc5ef57ed908bb4880d99c5e46fb\`
-- I Phase 3.8.8 review: \`0d78e5b2bfcf66cae6b757314cead84b9c942601\`
-- H Unified current branch file: \`9aa366d857d0229687df7e44e8e70d2097a99237\`
-- H Unified previously pinned Blob: \`a54f66914a819d77f00c6af04e76453ff9f654ee\`
-- H Phase 3.8.7 exact mapping: \`fad28f1b62f6a686669e209ebe30d69df6330d75\`
-- H validator contract current file: \`62b740696b4a5335f19f82e83fe4d4ce8b4e0f4e\`
-- H validator core: \`1a92c0cf7146e2884bd38232005dd9a55d558a85\`
-- Storage v3.2.4 successor manifest: \`6fc0bedaf5421d1be5a9ab5fb4d8cfab2871d7d7\`
-- C CI: run \`44059935858\`, commit \`b49966361b4b3121a2ebf4105b4e0c57a612e945\`
-- H CI: run \`44060704553\`, commit \`8c377a7218b70621d2348b47341d4cf4755b3733\`
+## 6. B closure plan / B 阶段闭环计划
 
-All owner-branch files remain unchanged by this review branch.
+- **B1 — C exact integrated mapping review:** C reviews H integrated mapping 1cbe... against exact H/C schemas and current validator/test pair; corrects its schema Blob pin from fee452... to 09fcd....
+- **B2 — H exact review of current I/D proof set:** H binds I P0 successor 35e..., D crosswalk c4ad..., C crosswalk df12..., RecoveryJoin 4b664..., Unified 09fcd..., and current validator mapping. H confirms required fields, digest domains, signature projections, D-only high-water separation and tri-state behavior.
+- **B3 — D/I exact currentness:** D and I re-read the same exact H/C mapping bundle and publish their own current exact pins. Earlier H 1.2.13/1.2.12 decisions do not transfer.
+- **B4 — Storage v3.2.8 manifest:** Storage publishes a successor binding the complete C/H/D/I source/consumer set, exact CI run/job/commit and evidence ceiling. It includes both H mapping artifacts, not one opaque reference.
+- **B5 — Same-manifest review and A handoff:** C/H/D/I/Storage review the identical v3.2.8 Blob. A then reviews the exact joined set. No protocol freeze or production activation follows automatically.
+
+## 7. B acceptance criteria / B 阶段验收条件
+
+B may be marked **CONDITIONALLY ALIGNED (L1/L2)** only when one successor manifest binds H schema 09fcd..., both H mappings 7739... and 1cbe..., validator/test, C schema/amendment, C/D crosswalks, I P0 and all Owner reviews; C reviews the integrated mapping; H reviews current C/D/I sources; the C schema Blob pin is corrected; all Owners review the same manifest and A completes integration review.
+
+B 只有在一个后继 Manifest 精确绑定 H Schema、两类 H Mapping、Validator/Test、C Schema/Amendment、C/D Crosswalk、I P0 和所有 Owner Review；C 审查集成 Mapping；H 审查当前 C/D/I 源集合；C 修正 Schema Blob Pin；所有 Owner 对同一 Manifest 审查且 A 完成集成复审后，才可标记 **CONDITIONALLY ALIGNED (L1/L2)**。
+
+This does not mean protocol freeze, profile registration, provider activation, Global Forget completion, JF-10 closure or implementation PASS.
+
+## 8. A handoff / A 阶段交接
+
+Storage has already selected Option A as the L1 logical topology. Phase A must review, not reselect, that decision:
+- per-BrainAuthority CanonicalAuthoritySerializationAnchor identity and append-only transition record;
+- D Producer Admission, dependency registration, PublicationParticipant, ForgetFence and Storage visibility/NO_PUBLICATION all sharing one serializable transaction domain and anchor;
+- same-transaction ownership and CAS semantics;
+- I PolicyDomain sequencer remains independent;
+- C Provider Outcome sequencer remains independent;
+- COC quorum log remains independent and is not folded into XA;
+- lost ACK, serialization retry, old-primary fencing, database incarnation and restore continuity;
+- L1 logical correctness separated from L4 engine/deployment/operator/fault-campaign acceptance.
+
+A must not treat the existence of the ADR as proof of physical feasibility or deployment readiness.
