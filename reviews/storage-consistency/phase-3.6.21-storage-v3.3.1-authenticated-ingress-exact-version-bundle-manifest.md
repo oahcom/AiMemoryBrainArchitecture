@@ -99,7 +99,7 @@ The suite proves at bounded local L1/L2 source level:
 | D | 2bf4514fe7972b72f6c1f904e461f86488d04cda | Local D callback boundary and exact operation/Fence mismatch behavior | Complete lineage, late discovery, pagination, currentness CAS, barrier terminality and release |
 | I | 2851d31e4f8caf48348944b885b493c607ca79e1 | Local I COMMIT_WON predicate and fail-closed mismatch behavior | I proof authentication, trust roots, key custody, historical verification, anti-rollback, revocation ordering and final CAS |
 | H | 860c896a388597a4378eda5aa323f276390acf34 | Exact 60-test local reference ingress gate; no production authentication | Outer P0, signer/profile, I trust, replay durability and production callbacks remain OPEN |
-| A | PENDING for this exact v3.3.0 Blob | Must review v3.3.0 and Option A topology ADR | No v3.2.8/v3.2.9 A review transfers |
+| A | PENDING for this exact v3.3.1 Blob | Must review v3.3.1 and Option A topology ADR | No predecessor A review transfers |
 
 These are delegated role reviews. They are not independent human Owner signatures or formal governance approvals. Each Owner's authority remains local; the manifest cannot synthesize a global PASS.
 
@@ -107,7 +107,7 @@ These are delegated role reviews. They are not independent human Owner signature
 
 - Storage v3.2.3: normative design body unchanged.
 - H 1.2.14 / C 1.0.1 local conformance: **60 tests PASS; bounded reference-interface L1/L2 only**. Outer envelope production authentication remains OPEN.
-- Storage v3.3.0: **candidate exact bundle consolidated; fresh A review required; not jointly accepted / not frozen**.
+- Storage v3.3.1: **candidate exact bundle consolidated; fresh A review required; not jointly accepted / not frozen**.
 - Option A topology: **conditional L1 candidate; A-01–A-05 clarifications remain open**.
 - JF-10 P0: **OPEN**.
 - Gate A Storage architecture: **PARTIAL PASS / OPEN**.
@@ -123,7 +123,7 @@ These are delegated role reviews. They are not independent human Owner signature
 
 1. A issues a fresh exact integration review against the final read-back Blob of this v3.3.1 manifest and Option A topology ADR.
 2. Storage/D resolve Option A A-01–A-05 and publish a successor topology ADR; affected Owners re-review exact changed Blobs.
-3. H implements/validates outer-envelope payload_digest/signature and authenticated transport-principal checks at the gateway boundary.
+3. C/I decide the outer-envelope signer/attestation and trust policy; H then implements real P0/digest/signature verification, protected transport/channel binding and durable replay/ingress state transitions against that exact approval.
 4. I connects COMMIT_WON verification to I-authoritative terminal proofs, request/admission ledger, key status/history, PermissionEpoch and final currentness CAS.
 5. D connects Fence/lineage/barrier proof to complete D-authoritative pagination, late-discovery successor snapshot and final D-local CAS.
 6. Storage connects same-GID resolution to DB incarnation, GID, PrepareAttempt, participant ledger, terminal outcome and visibility marker.
