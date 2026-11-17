@@ -72,13 +72,13 @@ This corrects the earlier ARCH-CONVERGENCE-001 source inventory and PRODUCT-FIRS
 
 PR #119 was merged as a documentation-only audit. Its disposition is **REQUEST CHANGES / CANDIDATE ONLY / APPLIED FREEZE BLOCKED**. The original #119 audit findings are now at different remediation stages:
 
-- **H-ADE-001 — duplicate JSON object members (P0):** #121 subsequently published a candidate validator using `object_pairs_hook` to reject duplicates at all nesting depths, with top-level and nested negative tests. The exact 16-test suite was **NOT RUN on PR #121's exact Head**; H Owner acceptance and CI evidence remain pending. Treat the code fix as candidate-published, not verified/closed.
-- **H-ADE-003 — replay-time authorization (P0):** #121 subsequently published a tri-state `verify_current_replay_authorization` adapter callback before replay-result disclosure, with denial/UNKNOWN/exception tests. The callback is only an adapter seam; it does not implement I PermissionEpoch/authorization, key registry, audience/scope or D ForgetFence ledgers. Owner wiring and exact CI remain pending.
+- **H-ADE-001 — duplicate JSON object members (P0):** #121 subsequently published a candidate validator using `object_pairs_hook` to reject duplicates at all nesting depths, with top-level and nested negative tests. GitHub Actions run [#44180944513](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44180944513) ran on PR #121's exact Head `0c878b7b5a14dcc5a417f006818920d96254eaab` (`pull_request`, run number 9) and completed **SUCCESS**. The `applied-delivery-evidence` job and the schema/semantic conformance test step both succeeded. This verifies the bounded reference test suite, not H Owner acceptance or production closure.
+- **H-ADE-003 — replay-time authorization (P0):** #121 subsequently published a tri-state `verify_current_replay_authorization` adapter callback before replay-result disclosure, with denial/UNKNOWN/exception tests. The callback is only an adapter seam; it does not implement I PermissionEpoch/authorization, key registry, audience/scope or D ForgetFence ledgers. The exact PR-head CI run #44180944513 passed, but Owner wiring to real I/D authority ledgers and production integration remain pending.
 - **H-ADE-002 — CSubmitOutcome 1.0.1 immutable resolver/equality (P0):** remains open; no real cross-schema fixture/mutation proof or exact C/G acceptance is established.
 - **P1:** G has not published an exact consumer successor decision for the separate H Applied Delivery Evidence 1.0.0 family.
 - **P0:** G durable Applied persistence, crash/restart, multi-replica idempotency and restore conformance remain specified, not implemented/run.
 
-**Consequences:** no Full Applied, shared wire freeze, Gate release or production activation. H's earlier 11-test CI is not cross-owner or production proof. PR #121's newer 16-test candidate suite has no exact-head CI run recorded; its merge is candidate publication only.
+**Consequences:** no Full Applied, shared wire freeze, Gate release or production activation. H's earlier 11-test CI is not cross-owner or production proof. PR #121's 16-test candidate suite did have an exact-head CI run: #44180944513 completed SUCCESS on `0c878b7b5a14dcc5a417f006818920d96254eaab`. This is candidate conformance evidence only, not cross-owner or production proof.
 
 ### 4.2 PR #120 — B domain post-merge reconciliation
 
@@ -139,11 +139,11 @@ This addendum is the status overlay frozen at `main@6c325804027b88de1014ab3364cd
 
 ## 8. Subsequent candidate publication / 后续候选发布
 
-After the frozen baseline above, PR #121 merged at `ab1fa87d74ca4a632155aa19569533ea560109d5`. It publishes the H Applied Delivery Evidence 1.0.0 schema, reference validator, 16-test candidate suite, hardening addendum and PR-triggered workflow. Its exact PR Head had no workflow run/status evidence at merge time; the PR body and merge record explicitly state that the tests were NOT RUN on that exact Head. The merge is candidate publication only.
+After the frozen baseline above, PR #121 merged at `ab1fa87d74ca4a632155aa19569533ea560109d5`. It publishes the H Applied Delivery Evidence 1.0.0 schema, reference validator, 16-test candidate suite, hardening addendum and PR-triggered workflow. The PR body initially stated that tests had not run, but GitHub Actions subsequently recorded run [#44180944513](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44180944513) on the exact PR Head `0c878b7b5a14dcc5a417f006818920d96254eaab`; the run completed successfully, including the conformance test step. This supersedes the stale NOT RUN note in the PR body. The merge remains candidate publication only.
 
 PR #121 advances H-ADE-001 and H-ADE-003 from “no candidate remediation” to “candidate code and negative tests published; exact CI and Owner integration pending.” It does not close the production/Owner findings. H-ADE-002, G consumer acceptance, G durable persistence/restore, production crypto/trust, and C/G/H/I/D/Storage acceptance remain open.
 
-PR #121 合并提交为 `ab1fa87d74ca4a632155aa19569533ea560109d5`，发布了 H Applied Delivery Evidence 1.0.0 Schema、参考 Validator、16 项候选测试、加固补充文件和 PR 触发工作流。合并时该 PR 精确 Head 没有 Workflow Run/Status 证据；PR 正文及合并记录明确说明该精确 Head 的测试 **NOT RUN**。此次合并仅为候选发布。
+PR #121 合并提交为 `ab1fa87d74ca4a632155aa19569533ea560109d5`，发布了 H Applied Delivery Evidence 1.0.0 Schema、参考 Validator、16 项候选测试、加固补充文件和 PR 触发工作流。PR 正文最初记载测试尚未运行，但 GitHub Actions 随后对精确 PR Head `0c878b7b5a14dcc5a417f006818920d96254eaab` 执行了 [Run #44180944513](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44180944513)，并成功完成，包括 Schema/语义符合性测试步骤。本证据修正 PR 正文中过时的 NOT RUN 说明，但此次合并仍仅为候选发布。
 
 PR #121 将 H-ADE-001 和 H-ADE-003 从“没有候选修复”推进到“候选代码与负向测试已发布；精确 CI 与 Owner 集成待完成”。它不关闭生产/Owner 层发现。H-ADE-002、G 消费者验收、G Durable Persistence/Restore、生产密码学/信任，以及 C/G/H/I/D/Storage 接受仍开放。
 
