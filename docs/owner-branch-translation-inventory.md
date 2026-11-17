@@ -94,3 +94,30 @@ Architecture review reports, Owner acceptance reports, ADRs, and integration dec
 架构审查报告、Owner 验收报告、ADR 和集成决议都属于 GOV-DOC-001 管辖的架构交付物。它们将在对应源契约完成双语配对后迁移，以保留准确的决策上下文，并避免把已被取代的提案翻译成当前要求。
 
 Historical reports may be marked SUPERSEDED, but their conclusions and evidence must remain traceable. Translation does not reopen or approve the underlying decision.
+
+
+## 7. Phase 3.6 targeted source refresh — 2026-11-17
+
+The following exact source Blob SHAs were re-read directly from their named Owner branches for the PR #28 high-risk follow-up. These are file Blob SHAs, not branch HEADs or approval signals.
+
+| Owner | Source path | Branch | Current file Blob SHA | Preserved source state |
+|---|---|---|---|---|
+| B | `02-domain-model/typed-reference-and-scope-semantics.md` | `session-b-domain-model-phase3` | `e9a6bd21e06bc02a5208619f5a949217860b1c00` | CANDIDATE; Claim identity conditional on ADR-001 |
+| B | `02-domain-model/principal-actor-binding-mapping.md` | `session-b-domain-model-phase3` | `bbbef919e1e2ffe158cda8d9b2c5e718efaae969` | CANDIDATE; INT-P0-02 / INT-X-03 OPEN |
+| C | `07-agent-integration/phase-3.6-final-request-evidence-contract.md` | `session-c-agent-integration-2026-11-16` | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | C decisions recorded; C/G/H freeze BLOCKED; implementation/execution NOT VERIFIED |
+| G | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `session-g-memory-context` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G decisions recorded; C/G/H freeze BLOCKED; implementation/execution NOT VERIFIED |
+| H | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `session-h-bmcp-protocol` | `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248` | JOINT-DECIDED technical baseline; governance/consumer acceptance OPEN; implementation/conformance NOT VERIFIED |
+| H | `08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md` | `session-h-bmcp-protocol` | `8afb914731a34d8ab44331f54f1f39bfd8ec37ce` | JOINT-DECIDED technical design; governance BLOCKED; H36 NOT RUN |
+| I | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | `session-i-security-governance-2026-11-16` | `0cbf6bb7480db873790c454817593a9b1c5548ba` | JOINT-DECIDED technical baseline; governance BLOCKED; implementation/conformance NOT VERIFIED |
+| Storage | `reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md` | `session-storage-consistency-forget-atomicity-2026-11-16` | `175ee7b1349cfdb79a19898b311a88391ed88010` | Logical proposal; physical topology and implementation proof OPEN |
+| Storage | `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md` | `session-storage-consistency-forget-atomicity-2026-11-16` | `1ef47d4e5711c7db73a24d249adf1992be1f6aa4` | ADR-BLOCKED; candidate options only; no deployed topology selected |
+| Storage | `reviews/storage-consistency/phase-3.6.2-jf10-cross-authority-recovery-protocol.md` | `session-storage-consistency-forget-atomicity-2026-11-16` | `94679897e84a6f58fd8b9467b5249e1a885cb0b0` | CANDIDATE; I acceptance required; NOT IMPLEMENTED; NOT RUN; JF-10 P0 OPEN |
+| Storage | `reviews/storage-consistency/phase-3.6.5-restore-control-highwater-and-quarantine-contract.md` | `session-storage-consistency-forget-atomicity-2026-11-16` | `4f656163aeba532a441eaed1d293a48e2363cb4a` | CANDIDATE; exact I-D-A-Storage review required; restore remains fenced |
+
+### Currentness findings
+
+- **BSR-28-005 — OPEN:** H's identity status report records historical protected-operation Blob `9845c97ac43d7888732afafe12e28850ec02add8`; live branch readback now returns `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248`. Preserve the historic record and request a dated H currentness correction.
+- **BSR-28-006 — OPEN:** the previously cited Storage topology Blob `080433f8e13a500522bc2754da64057edb0ae9d8` is no longer the live path Blob; readback returns `1ef47d4e5711c7db73a24d249adf1992be1f6aa4`. The ADR remains BLOCKED and no topology is selected.
+- **BSR-28-007 — OPEN:** PR #28 contains a bilingual pair for the H identity consumer/conformance status report only. This is not one of the seven H normative core-spec pairs and does not complete B/C/G/H/I/Storage detailed contracts.
+
+Full findings and disposition: [Phase 3.6 identity / Applied / Storage source audit](../reviews/translation/2026-11-17-phase36-identity-applied-storage-source-audit.md).
