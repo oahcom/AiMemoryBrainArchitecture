@@ -6,8 +6,8 @@
 - H exact JSON-Pointer mapping: Blob `4ba7e1699215d02224f805a15484b1da2e40c03f`
 - H schema 1.2.14: Blob `09fcd1fa29fe24255fbd87cae79dafb406594a59`
 - H envelope auth validator current Blob: `571f69d326be51fd80acfe0c5a3f5f2dddce61f4`
-- H envelope auth tests current Blob: `e4639b8c7389aea59e09fce897afa3ea56e6e388`
-- H exact branch HEAD: `7a666e93c08424e21342bea5f6f291a59f93f34e`
+- H envelope auth tests current Blob: `babe51825d6aa13693e9cf844740104c74f598d8`
+- H exact branch HEAD: `39dce3db0375bec6af4804c2403e1248fee2171f`
 - Test methods in the updated envelope-auth test file: 28
 - CI: **NOT YET OBSERVED FOR THIS HEAD / NO PASS CLAIM**
 - Status: **REFERENCE P0/DIGEST IMPLEMENTATION CANDIDATE; CRYPTOGRAPHIC SIGNATURE AND TRUST STILL CALLBACK-BASED; NOT PRODUCTION**
