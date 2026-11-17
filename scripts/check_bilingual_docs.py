@@ -88,6 +88,16 @@ def main() -> int:
             if not (ROOT / counterpart).is_file() and not exception:
                 errors.append(f"English counterpart does not exist: {counterpart}")
 
+    bilingual_doc_changes = any(
+        path.startswith("docs/en/") or path.startswith("docs/zh-CN/")
+        for path in changed
+    )
+    if bilingual_doc_changes and not complete and not exception:
+        errors.append(
+            "Bilingual guide/spec files changed but PR body lacks the explicit "
+            "COMPLETE manifest status or a fully documented approved exception."
+        )
+
     # A normative source-spec change requires paired reader/spec documents
     # or a formally approved, time-bounded exception.
     normative_changes = []
