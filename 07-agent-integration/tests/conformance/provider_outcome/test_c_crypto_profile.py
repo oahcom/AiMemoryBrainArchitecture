@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parent
 FIXTURES = ROOT / "c_submit_outcome_1_0_0_vectors.json"
 SCHEMA = ROOT.parents[2] / "schemas" / "c-submit-outcome-1.0.0.schema.json"
 VECTOR = ROOT / "c_crypto_profile_vector.json"
+EXPECTED = ROOT / "c_crypto_profile_expected_vectors.json"
 NODE_ORACLE = ROOT / "c_crypto_profile_reference.mjs"
 
 
@@ -114,10 +115,20 @@ class CProviderOutcomeCryptoCandidateTests(unittest.TestCase):
                 "public_key_hex": output["public_key_hex"],
                 "signature_base64url": output["signature_base64url"],
             })
-        print("C_CRYPTO_EXPECTED_BEGIN")
-        print(json.dumps(summaries, separators=(",", ":")))
-        print("C_CRYPTO_EXPECTED_END")
+        expected = json.loads(EXPECTED.read_text(encoding="utf-8"))
+        self.assertEqual(expected["profile_id"], "AIMBA-C-CRYPTO-1.0")
+        self.assertEqual(expected["status"], "CANDIDATE_TEST_ONLY_NOT_REGISTERED")
+        self.assertEqual(expected["seed_hex"], self.manifest["seed_hex"])
+        self.assertEqual(summaries, expected["vectors"])
 
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+    def test_CRYPTO_C04_expected_vectors_decode_to_ed25519_lengths(self):
+        expected = json.loads(EXPECTED.read_text(encoding="utf-8"))
+        for vector in expected["vectors"]:
+            signature = base64.urlsafe_b64decode(vector["signature_base64url"] + "==")
+            public_key = bytes.fromhex(vector["public_key_hex"])
+            self.assertEqual(len(signature), 64)
+            self.assertEqual(len(public_key), 32)
