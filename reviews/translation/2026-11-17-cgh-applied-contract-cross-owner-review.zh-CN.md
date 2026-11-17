@@ -98,3 +98,11 @@ H 源文件明确为 CANDIDATE，并注明 final-request proof profile 与 C 的
 本复审识别 H36-AP-01..07 后，H Owner 分支在 `adapter-capability-and-applied-attestation.md` 新增了 §11。当前 live 精确 Blob 为 `db59b63e322d7255b8b400f47859dcac32bb3027`；此前复审的 `ed6b43a29aa368d772c701ffc83309a5aadf3c00` 已不再是当前版本。补充条款提议明确请求/边界身份、目标/attempt 映射、Region inventory/coverage、verifier 身份绑定、I/D 权威引用、证据来源信息、逐请求 bypass 覆盖、重放身份和时间顺序规则。
 
 处理状态：**已起草候选缺口响应，但尚未关闭**。C 和 G 尚未接受该精确 Blob；I/D/B 权威确认、H Wire Schema、生成 SDK/互操作及一致性测试仍 OPEN / NOT RUN。六阶段语义一致结论仍成立；七项字段映射发现已由提案回应，但在 Owner 接受前不得标记 RESOLVED。
+
+## 8. H recovery-batch 修订跟进 — 2026-11-17
+
+H 候选源文件进一步新增 §11.8。当前精确 H 源 Blob：`0dca3dc5463a02be0e19524811afbae87795baf5`（替代 `db59b63e322d7255b8b400f47859dcac32bb3027`）。§11.8 提案回应 G 所要求的 CGH-APPLIED-1.1 recovery-batch 证据：COC terminal proof、recovery-batch 与 participant-set 完整性、owner high-water attestation、participant reconciliation、I terminal/revocation 证据、D lineage/cutoff/effective-position 证据，以及 Storage same-XID terminal 证据。
+
+**新增发现 H36-AP-08 — OPEN：** 候选映射已有文字定义，但 H Wire Schema/SDK 和精确 ACK message-family 绑定尚未更新或生成。H 必须将 COC、I、D 和 Storage 顺序域保持独立；Owner 证据缺失时保持 UNKNOWN/IN_DOUBT。G 的 recovery-batch 接受仅适用于精确版本且带条件；H 不得推断 COC 已部署或 Owner gate 已释放。C/G/I/D/Storage 确认以及 Schema/一致性测试仍待完成。
+
+§11.8 响应仍只是候选提案。在对应 Owner 接受同一个精确公共 package 且生成版本化 H Schema 映射前，H36-AP-01..08 均不得标记 RESOLVED。C/G/H 冻结仍 BLOCKED。
