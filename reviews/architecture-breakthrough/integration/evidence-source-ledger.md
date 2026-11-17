@@ -145,3 +145,19 @@ Current main: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; tree `7096e0bc3fdc9a39
 - ABR-AUDIT-007 / PR #100: exact RM latency correction applied; model/prototype/fixture Blob pins added; bounded-vs-production evidence classes retained.
 - A-H-ADE-006 / PR #98: H-ADE-001..003 integrated; additional `integrity_proof_ref` P0 binding question tracked separately as an integration candidate finding.
 - A-OWNER-SOURCE-REFRESH-004 / PR #102: Storage ADR §8.6 supersession and E commit metadata fetch rechecked; two findings require A/Storage reconciliation rather than silent adoption.
+
+
+## ABR-INTEGRATION-005 — Forget cross-owner model audit
+
+- Reviewed model: `reviews/architecture-breakthrough/integration/model/forget_cross_owner_model.py`, Blob `d45807b0b165e53aa6e92d211c221cc93b46ca60`.
+- Regression test: `reviews/architecture-breakthrough/integration/model/test_forget_cross_owner_model.py`, Blob `64ee823eb1d3d81e020e73ef97817208326f42b5`.
+- README: `reviews/architecture-breakthrough/integration/model/README.md`, Blob `c7dc620b3486e496de1792147cbf441a51cb3af0`.
+- Historical model CI: run `44136327645`, SUCCESS at `89a680bbad7246952d51c61c137b0c3611f52a06`; 27,472 state/depth pairs through depth 14, 11 mutants. Not evidence that later ABR-INTEGRATION-005 documents were tested.
+- D source: `03-memory-brain/forget-fence-operation-and-publication-gate.md`, branch `session-d-memory-brain-2026-11-16`, Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`.
+- I source: `09-security-governance/global-forget-target-inventory-and-completion-evidence.md`, branch `session-i-security-governance-2026-11-16`, Blob `9100061fa986fb6676656169de3fcf9fc1c72664`.
+- Storage source: `reviews/storage-consistency/phase-3.7-storage-atomic-producer-registration-dependency-visibility-realization.md`, branch `session-storage-consistency-forget-atomicity-2026-11-16`, Blob `2ab899ee37a18ae6c8f2f64dbb82ad6499842060`.
+- New bilingual audit:
+  - `reviews/architecture-breakthrough/integration/forget-cross-owner-model-audit-zh-CN.md`, commit `9f3f84b11c51ed6257c098cccffa157db662af9a`.
+  - `reviews/architecture-breakthrough/integration/forget-cross-owner-model-audit-en.md`, commit `c89900275ffacbddac76354bb8cd583e8f944918`.
+- Findings: M-01 global_complete overclaims relative to I Completed; M-02 no normal terminal proof path for registered-but-never-started work; M-03 only one Fence generation modeled; M-04 physical crash cut points remain unmodeled; M-05 liveness/fairness must be separated from safety.
+- Disposition: bounded research model accepted with conditions; global Forget and JF-10 remain NOT PROVEN.
