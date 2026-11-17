@@ -43,8 +43,17 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Scope and Permission model | 02-domain-model/scope-and-permission-model.md | docs/zh-CN/02-domain-model/scope-and-permission-model.md | docs/en/02-domain-model/scope-and-permission-model.md | COMPLETE — source-aligned pair |
 | Domain Model Phase 3 identity/typed-reference extensions and ADR-001 | session-b-domain-model-phase3 branch; ADR-001 remains ADR-BLOCKED | Pending | Owner-branch English source | NOT STARTED — exact branch-source translation and bilingual review pending |
 | Canonical Memory Brain reader guide | D owner branch: 03-memory-brain/ | docs/zh-CN/03-memory-brain/memory-brain-guide.md | docs/en/03-memory-brain/memory-brain-guide.md | COMPLETE — overview guide only |
-| Canonical Memory Brain detailed contracts (8 core specifications; Phase 3.7 addenda separately tracked) | D owner branch; audited head 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3 | Pending | Owner-branch English sources | NOT STARTED — 8 core specs are English-only |
-| Memory Compiler detailed contracts (8 core specifications) | E owner branch; audited head a1b8ba129ef7d5f4463bd4229667f0b2bf6d9886 | Pending | Owner-branch English sources | NOT STARTED — 8 core specs are English-only |
+| D Memory Brain overview | 03-memory-brain/memory-brain-overview.md | docs/zh-CN/03-memory-brain/memory-brain-overview.md | docs/en/03-memory-brain/memory-brain-overview.md | COMPLETE — source-aligned pair |
+| D Canonical Memory Store | 03-memory-brain/canonical-memory-store.md | docs/zh-CN/03-memory-brain/canonical-memory-store.md | docs/en/03-memory-brain/canonical-memory-store.md | COMPLETE — source-aligned pair |
+| D Memory Lifecycle Manager | 03-memory-brain/memory-lifecycle-manager.md | docs/zh-CN/03-memory-brain/memory-lifecycle-manager.md | docs/en/03-memory-brain/memory-lifecycle-manager.md | COMPLETE — source-aligned pair |
+| D Entity and Relationship Manager | 03-memory-brain/entity-and-relationship-manager.md | docs/zh-CN/03-memory-brain/entity-and-relationship-manager.md | docs/en/03-memory-brain/entity-and-relationship-manager.md | COMPLETE — source-aligned pair |
+| D Memory Versioning | 03-memory-brain/memory-versioning.md | docs/zh-CN/03-memory-brain/memory-versioning.md | docs/en/03-memory-brain/memory-versioning.md | COMPLETE — source-aligned pair |
+| D Canonical Commit Cursor Semantics | 03-memory-brain/commit-cursor-semantics.md | docs/zh-CN/03-memory-brain/commit-cursor-semantics.md | docs/en/03-memory-brain/commit-cursor-semantics.md | COMPLETE — source-aligned pair |
+| D Forget Fence and Completion Contract | 03-memory-brain/forget-fence-and-completion-contract.md | docs/zh-CN/03-memory-brain/forget-fence-and-completion-contract.md | docs/en/03-memory-brain/forget-fence-and-completion-contract.md | COMPLETE — source-aligned pair |
+| D Forget Fence Operation and Publication Gate | 03-memory-brain/forget-fence-operation-and-publication-gate.md | Pending | Owner-branch English source | NOT STARTED — large normative operation contract remains to translate |
+| E Memory Compiler Overview | 04-memory-compiler/compiler-overview.md | docs/zh-CN/04-memory-compiler/compiler-overview.md | docs/en/04-memory-compiler/compiler-overview.md | COMPLETE — source-aligned pair |
+| E Accepted Receipt and Idempotency Contract | 04-memory-compiler/accepted-receipt-and-idempotency-contract.md | docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | COMPLETE — source-aligned pair |
+| E remaining detailed contracts | 04-memory-compiler/ | Pending | Owner-branch English sources | NOT STARTED — 6 of 8 core specs remain |
 | Memory Runtime detailed contracts (5 core specifications) | F owner branch; audited head 348b5ec84c44a8a067122ce0aa72a594b9c06b66 | Pending | Owner-branch English sources | NOT STARTED — 5 core specs are English-only |
 | Memory Context detailed contracts (6 core specifications) | G owner branch; audited head 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa | Pending | Owner-branch English sources | NOT STARTED — 6 core specs are English-only |
 | Agent Integration detailed contracts (10 core specifications) | C owner branch; audited head 0f1df3b9c8bdfbb7991cd9e18842c56c521665c4 | Pending | Owner-branch English sources | NOT STARTED — 10 core specs are English-only |
@@ -83,7 +92,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 
 ### Batch 3 — Domain and canonical memory / 第三批：领域模型与权威记忆
 - D Canonical Memory reader guide: COMPLETE — includes D/E/F/G/H/I ownership split, cursor namespaces, and Forget boundary.
-- D detailed source specifications: NOT STARTED — 8 core Markdown specifications are English-only at the audited head; the latest source SHA must be refreshed before translation.
+- D: 7 of 8 core specifications now have bilingual companions; the large Forget Fence Operation/Publication Gate remains pending. Refresh D branch head before translating it.
 - Domain Model reader guide: COMPLETE.
 - B's six main source specifications: COMPLETE — source-aligned bilingual pairs added. Phase 3 typed-reference/identity extensions and ADR-001 decision package remain NOT STARTED; preserve ADR-BLOCKED status.
 - D Canonical Memory detailed bilingual work: pending source-branch reconciliation.
@@ -93,7 +102,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 
 ### Batch 4 — Memory production and runtime / 第四批：记忆生产与运行时
 - E and F reader guides: COMPLETE.
-- E/F detailed owner specifications: NOT STARTED — E has 8 and F has 5 English-only core specifications at audited heads; refresh source SHAs before translation.
+- E: 2 of 8 core specifications have bilingual companions; 6 remain. F: 5 core specifications remain. Refresh source SHAs before each translation.
 - E Compiler, ingestion, extraction, evidence, consolidation.
 - F retrieval, activation, working set, scheduling, anti-resurrection.
 - Acceptance: Accepted/Compiled/Canonical Committed/Indexed remain distinct; cursor and Forget semantics stay aligned.
