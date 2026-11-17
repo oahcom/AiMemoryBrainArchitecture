@@ -380,3 +380,50 @@ Phase 3.8 组合仍为 **契约层面一致的提案 / 未冻结**。
 - 生产工程实施入口；项目负责人仍明确将其延期至工程阶段。
 
 本次不宣称架构冻结、Owner 批准、生产实现、Forget 完成、部署或生产激活。
+
+
+## 15. UNKNOWN outcome replay hardening — PR #159 (2026-11-18)
+
+PR #159 was merged to main at `05fe0f9551ef3149d1c54b6f3a5e2f0ba6672551`.
+
+- Exact PR Head: `3c75b246cbaa2053460408b949a7b83a032a5fd8`.
+- Exact-head publication reference-model workflow [#44191060992](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44191060992): SUCCESS; job log reports 21 tests / OK.
+- Exact-head GOV-DOC-001 structural check #44191060993: SUCCESS.
+- Main readback: reference-model source Blob `321fc511aa3f1b5cc8bfcac47664c432bee89c50`, 21 test methods.
+
+### 15.1 Bounded behavior
+
+The model now rejects a commit attempt when the same `operation_id` is already in `private_unknown`. The regression test asserts that a retry cannot create visibility, outcome, receipt or outbox state, and cannot consume authorization while the authoritative Storage outcome remains unknown.
+
+This closes the modeled fail-open path where an UNKNOWN operation could otherwise be recommitted as though it were a fresh attempt and clear its private-unknown marker without reconciliation.
+
+### 15.2 Remaining evidence limit
+
+This is still an in-memory model. It does not implement or prove the authoritative Storage reconciliation protocol, durable operation-intent binding across process restart, database uniqueness, multi-process races, cryptographic proof authenticity, cross-owner participant ledgers or production crash/failover/restore. The model still has no executable positive `NO_PUBLICATION` proof path; D/I closeout is exercised only for the modeled COMMITTED outcome, while UNKNOWN is proven non-terminal. That missing positive no-publication path remains an explicit coverage gap, not an inferred PASS.
+
+### 15.3 Updated disposition
+
+The publication reference-model sequence now has bounded tests for fence-first rejection, publication-first barrier retention, exclusion of D-closed participants from later fences, exact immutable operation replay binding and UNKNOWN non-recommit. The Phase 3.8 architecture remains **COHERENT PROPOSED CONTRACT / NOT FROZEN**. Independent D/E/I/Storage decisions, H wire/crypto, physical topology, positive NO_PUBLICATION proof, real Storage reconciliation, crash/failover/restore and production conformance remain OPEN.
+
+### 中文规范
+
+PR #159 已合并至 main，合并提交为 `05fe0f9551ef3149d1c54b6f3a5e2f0ba6672551`。
+
+- 精确 PR Head：`3c75b246cbaa2053460408b949a7b83a032a5fd8`。
+- 精确 Head 的 Publication 参考模型工作流 #44191060992 SUCCESS；Job 日志报告 21 项测试通过。
+- 精确 Head 的 GOV-DOC-001 检查 #44191060993 SUCCESS。
+- 主线回读的参考模型源码 Blob：`321fc511aa3f1b5cc8bfcac47664c432bee89c50`，共 21 个测试方法。
+
+#### 15.1 有界行为
+
+当同一 `operation_id` 已处于 `private_unknown` 时，模型现在拒绝再次提交。回归测试确认：在 Storage 权威终态仍未知时，重试不能创建可见性、终态、Receipt 或 Outbox，也不能消费授权。
+
+这关闭了模型中 UNKNOWN 操作被当作新尝试重新提交、并在未完成权威对账前清除 private-unknown 标记的失效开放路径。
+
+#### 15.2 仍然存在的证据边界
+
+这仍是内存模型，并未实现或证明权威 Storage 对账协议、跨进程重启的持久操作意图绑定、数据库唯一性、多进程竞态、密码学证明真实性、跨 Owner Participant Ledger 或生产崩溃/故障切换/恢复。模型仍没有可执行的正向 `NO_PUBLICATION` 证明路径；D/I 关闭目前只对模型 COMMITTED 终态进行测试，UNKNOWN 则被证明不能终态化。该正向 NO_PUBLICATION 路径缺失是明确的测试覆盖缺口，不能推断为 PASS。
+
+#### 15.3 更新后的裁决
+
+当前发布参考模型已覆盖 Fence-first 拒绝、Publication-first Barrier 保留、后续 Fence 排除已由 D 关闭的 Participant、精确不可变操作元组重放，以及 UNKNOWN 禁止重新提交。Phase 3.8 架构仍为 **契约层面一致的提案 / 未冻结**。独立 D/E/I/Storage 决策、H Wire/密码学、物理拓扑、正向 NO_PUBLICATION 证明、真实 Storage 对账、崩溃/故障切换/恢复及生产符合性仍 OPEN。
