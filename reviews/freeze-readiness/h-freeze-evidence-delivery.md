@@ -138,3 +138,19 @@ The branch also contains schema artifact 1.2.6 (Blob `ea8d644df17ea88ed368980b7d
 - Current 66-case CI does not load unified schema 1.2.7. No 1.2.7-specific validator PASS, signature vectors or interoperability PASS is claimed.
 
 Schema artifact 1.2.7 supersedes 1.2.6 as the latest candidate in this branch, but its exact review remains conditional and does not freeze it. Production signature profile, I registry and independent-language conformance remain OPEN.
+
+
+## 12. Expanded H candidate suite and Phase 3.8.3 crypto wire mapping / H 扩展候选套件与 Phase 3.8.3 密码学 Wire 映射
+
+The latest H workflow [44042093922](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042093922), job `133898853312`, checked out H commit `d3baecb560e9b365a591b6afbe794c09f2b891a7` and reported **93 tests, OK**. The expanded suite includes:
+- HRC/JPF: 44 methods, Blob `60a2f4db4bd12f2131ecd147db9bbe328da6db50`;
+- Schema integrity: 12 methods, Blob `67aba74c120f2916d768e7b01c45408ee2624f3a`;
+- Two-phase Batch/Manifest recovery: 26 methods, Blob `690ab42b4f8f7e61adf38fd7b6006f20cc71a7f5`;
+- Python/Node fixed-vector differential: 1 method, Blob `1b32fdf81530353b8bd4571fe6d4f77119a0458b`, Node reference Blob `992585d3bc323dc0224d0075ef14abd992980f65`, vectors Blob `cc7e98c729db8d9f615e17a9542b3cb63f459922`;
+- Wire negative/interoperability candidate: 10 methods, Blob `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
+
+This is 93/93 for the checked-in Python/Node candidate test harness. The differential test proves only the included fixed vectors against a Node reference implementation; it is not yet two independently maintained production protocol implementations, and HRC-TEST-v1 is not the I-approved production profile.
+
+H has also published Phase 3.8.3 wire mapping Blob `c30e8ccbecb75b7e27ddceb0cf088afbbb26f562` for I proposal `AIMBA-I-CRYPTO-1.0` (I proposal Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`) and schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`. H accepts this as a wire-mapping candidate with blocking amendments only. I exact review Blob `446109f4867268fe7dca3c7e114346f3c1a74b61` accepts with enumerated amendments; exact per-message P0 allowlists, key registry/runtime trust, profile lifecycle and independent production implementation vectors remain OPEN.
+
+The 93-case run does not validate unified schema 1.2.7 itself, production Ed25519 signatures, HSM/KMS, live I key-status, real owner/COC adapters or physical JF-10/Storage topology. H freeze remains **BLOCKED**.
