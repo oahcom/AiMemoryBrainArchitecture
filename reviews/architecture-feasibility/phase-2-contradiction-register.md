@@ -17,27 +17,27 @@
 
 **中文：** Storage 拓扑 ADR 明确为 ADR-BLOCKED / NO TOPOLOGY SELECTED，列出 Option A（每个 Canonical Memory Authority 一个 Serializable Transaction Domain）与 Option B（D/Storage 分离并由持久化线性协调器协调），明确拒绝 Check-then-write。Phase 3.8 定义了逻辑最终可见性事务，但尚未选择物理序列化基础。必须选择 A 或 B，明确序列化域、D/I Hold、Storage Pointer/Outcome/Outbox 原子性、读路径、幂等和恢复语义，并在冻结前提供确定性参考模型。实际部署数据库和运维责任人属于 L4。
 
-## ARC-02 — H wire version 1.2.12 is not yet uniformly adopted
-**Severity:** P1 · **Level:** L2 · **Owners:** C, D, H, I, Storage
+## ARC-02 — H 1.2.14 exact mapping and same-manifest adoption remain open
+**Severity:** P1 · **Level:** L2 · **Owners:** C, H, D, I, Storage
 
-**Evidence:** H Unified schema 1.2.12 Blob a54f66914a819d77f00c6af04e76453ff9f654ee; RecoveryJoin 1.0.2 Blob 4b664e3bce465499bcdfd93796349a4ba7074002; H R1/R2 crosswalk Blob 8b5b2c37201f7ae821bb5ca71a5101f19e75cf5c. H Provider Outcome semantic validator contract Blob ac800ddbb1fb13aa7eaef415e2282db971d73ff4 is explicitly bound to 1.2.11. C Phase 3.8.6/3.8.8/3.8.9 artifacts bind 1.2.11. D and I Phase 3.8.5 amendments (Blobs 46b6abd94f3396e5eef7d7456f9b62a3865d4ce2 and b56b0c3690f1826f2fc965ec6af5d66a920004ae) adopt 1.2.12 only as candidate amendments. Storage successor manifest Blob 6fc0bedaf5421d1be5a9ab5fb4d8cfab2871d7d7 explicitly calls out this migration gap.
+**Evidence:** H Unified 1.2.14 Blob 09fcd1fa29fe24255fbd87cae79dafb406594a59; RecoveryJoin 1.0.2 Blob 4b664e3bce465499bcdfd93796349a4ba7074002; RecoveryCutoff 1.0.5 Blob 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7; CSubmitOutcome 1.0.1 Blob a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda. H Provider Outcome mapping Blob 7739d8159b32702024583669f40974a80801782b; H integrated authority-join mapping Blob 1cbe74eba69325510d6b1019d971661f965eabf8. C Phase 3.8.16 review commit 8d7298d7f56b1df48229799ff6462a8db634e7ed accepts the Provider Outcome mapping but pins H schema Blob fee452efb99ab4fe0ceccb347c46eeef1521bd28, whereas current H schema and H mapping pin 09fcd... (the two schema blobs differ only in descriptive revision text). Storage v3.2.7 manifest Blob 4435fc0340a4fce10751679a95f3b4c821bdae4d binds the integrated mapping but still requires fresh Owner reviews and A integration review.
 
-**Finding:** Structural schema revision, semantic validator revision and Owner applicability statements do not yet form one exact bundle. Previous 1.2.11 reviews do not transfer automatically.
+**Finding:** L1/L2 version migration substantially exists. The remaining blocker is that C has not yet reviewed the integrated authority-join mapping used by Storage, and C's exact schema pin differs from H's current Blob. The bundle is not jointly accepted.
 
-**Required closure:** C publishes exact 1.2.12 Provider Outcome mapping; H publishes matching semantic validator and negative vectors; D/I issue fresh exact cross-reviews; Storage refreshes the successor manifest. Keep wire-family version and artifact revision distinct.
+**Required closure:** C reviews exact integrated mapping 1cbe... and corrects the schema pin to 09fcd...; H confirms current C/D/I exact source set; D/I/Storage bind the same successor manifest; H callback tests must not be represented as unmocked end-to-end authority proof.
 
-**中文：** H 当前结构 Schema 已到 1.2.12，但 Provider Outcome Validator 和 C 合同仍绑定 1.2.11；D/I 对 1.2.12 的采纳只是候选修订。必须由 C 更新精确映射、H 更新 Validator/负向向量、D/I 重新审查、Storage 刷新绑定清单。旧版批准不能自动继承。
+**中文：** 当前 L1/L2 版本迁移已基本形成：H 1.2.14、RecoveryJoin 1.0.2、RecoveryCutoff 1.0.5、CSubmitOutcome 1.0.1 均有精确工件；H 也分别有 Provider Outcome Mapping 与集成 Authority-Join Mapping。剩余阻断是 C 尚未审查 Storage 使用的集成 Mapping，且 C 最新审查的 H Schema Blob 与 H 当前精确 Blob 不一致。Storage v3.2.7 仍是候选 Bundle，尚未联合接受。
 
-## ARC-03 — CSubmitOutcome schema 1.0.1 is not adopted by its contract
-**Severity:** P1 · **Level:** L2 · **Owners:** C, H, Storage
+## ARC-03 — CSubmitOutcome 1.0.1 is selected as proposed current revision; joint adoption remains open
+**Severity:** P2 · **Level:** L2 · **Owners:** C, H, I, Storage
 
-**Evidence:** Current C branch schema 1.0.1 Blob a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda; C Phase 3.8.9 schema/conformance contract Blob 2ecdf44cae1bf71e9611dd5367c8f7bcf25dd7ac still binds schema 1.0.0 Blob b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c. Storage v3.2.4 manifest lists the 1.0.0 source as current.
+**Evidence:** C Phase 3.11.1 amendment Blob 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb explicitly supersedes 1.0.0 for new records; schema Blob a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda; I namespace review Blob 0d78e5b2bfcf66cae6b757314cead84b9c942601; H Provider Outcome mapping Blob 7739d8159b32702024583669f40974a80801782b. Storage v3.2.7 binds C 1.0.1.
 
-**Finding:** The branch contains a successor schema that is not reflected in the normative contract and cross-owner binding. A validator could therefore accept one object revision while the owner contract describes another.
+**Finding:** C's proposed immutable version selection is explicit; 1.0.0 is historical, not silently upgraded. The remaining issue is same-manifest review and that C's Phase 3.8.16 review has not reviewed the integrated H authority-join mapping.
 
-**Required closure:** C explicitly chooses 1.0.0 or 1.0.1 as the active candidate; updates the conformance contract, projection, vectors and C/H mapping; Storage pins the same exact object schema. Do not silently infer that 1.0.1 supersedes 1.0.0.
+**Required closure:** Keep 1.0.0 historical; bind C 1.0.1 schema/amendment/vectors in the successor manifest and obtain C/H/D/I exact reviews against that same manifest. Production C/I profiles remain unregistered until I governance gates pass.
 
-**中文：** C 当前分支存在 1.0.1 Schema，但 3.8.9 合同和 Storage 清单仍绑定 1.0.0。必须由 C 明确选择当前候选版本，并同步更新 Conformance、签名投影、Vectors、C/H 映射和 Storage Pin，不得暗中推定新版本自动替代旧版本。
+**中文：** C Phase 3.11.1 已明确 1.0.1 是新记录的候选不可变版本，1.0.0 保留为历史；I 已审查 Sequence Namespace，H 已映射 1.0.1，Storage v3.2.7 也绑定 1.0.1。剩余问题是同一 Manifest 的联合审查，以及 C 尚未审查集成 H Authority-Join Mapping。生产 C/I Profile 仍须等待 I Governance Gate。
 
 ## ARC-04 — Integrated D/E/I/Storage publication race proof is incomplete
 **Severity:** P0 · **Level:** L1 + L3 · **Owners:** D, E, I, Storage, H, A
