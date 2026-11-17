@@ -699,6 +699,19 @@ def reject_duplicates(pairs):
     return out
 
 
+    # JPF-18: the primary OwnerEntryRef must not be substituted with OwnerAdmissionRef.
+    def test_JPF_18(self):
+        p = participant(required=["C"])
+        p["primary_owner_entry_ref"] = "C/admit/1"
+        a = admission("C/admit/1", "C")
+        self.assertEqual(validate_join({"C": [a]}, manifest([p])), INVALID)
+
+    # JPF-19: stable OwnerAdmissionRef is independently checked from the row ref.
+    def test_JPF_19(self):
+        p = participant(required=["C"])
+        a = admission("C/admit/1", "C")
+        a["owner_admission_ref"] = "C/admit/other"
+        self.assertEqual(validate_join({"C": [a]}, manifest([p])), INVALID)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
