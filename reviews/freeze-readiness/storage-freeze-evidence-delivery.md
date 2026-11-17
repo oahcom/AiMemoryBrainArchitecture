@@ -189,3 +189,12 @@ H 当前候选套件为 97 项：HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26�
 该结果只证明候选参考模型、Schema 结构、Wire 负例和固定 Python/Node 测试向量在 CI 中通过。它不证明生产签名、I Key Status、真实 COC Quorum、Owner Ledger 完整性、Storage JoinProof 持久化、Owner Currentness CAS、JF-10 物理同 GID 恢复或实际 D/Storage 事务拓扑。
 
 Storage JoinProof 仍为逻辑提案并附带明确修订项；Storage 不能代替 I/D/C 释放 Gate。物理拓扑 ADR 仍 BLOCKED，T1–T8、STORAGE-RJ-01..05 和集成 JF-10 符合性仍 OPEN。没有声明 Storage Freeze、生产启用或独立 Owner 正式批准。
+
+
+## 16. H 101-test I crypto profile candidate evidence / H 101 项 I 密码学候选证据
+
+The current Storage JoinProof Blob is `eac350ed5cb53094bdd5626f49e6f82ebea1f78c`; current Storage exact review Blob is `a92f56da78bef63ed28128c319eb277b5a7b7aa7`.
+
+H latest run [44044062849](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44044062849), job `133905301392`: **101 tests ran, OK**. The added CRYPTO-01..04 vectors compare Python RFC 8785 / Ed25519 with an independent Node.js JCS / Ed25519 oracle. The deterministic seed is test-only; I's AIMBA-I-CRYPTO-1.0 proposal and H wire mapping remain candidate artifacts with amendments, not approved production cryptography.
+
+This does not prove live I trust/key status, HSM/KMS, historical verification, anti-rollback deployment, real I/D/C owner snapshots, COC quorum enumeration, Storage JoinProof durability, owner currentness CAS, JF-10 physical same-GID or D/Storage topology. Storage freeze remains BLOCKED.
