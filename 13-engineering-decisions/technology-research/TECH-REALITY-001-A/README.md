@@ -76,3 +76,14 @@ All research documents contain English and Chinese sections in the same file/cha
 **NOT YET PROVEN.** The project has a plausible path to a local-first Rust modular monolith, but the physical transaction/Forget protocol, workload envelope, retrieval value, Applied proof, security model and recovery topology must be demonstrated before the architecture can be called engineering-feasible.
 
 **NOT YET PROVEN（尚未证明）。** 项目具备走向本地优先 Rust 模块化单体的合理路径，但在称为工程可行之前，必须证明物理事务/Forget 协议、工作负载边界、检索价值、Applied 证明、安全模型和恢复拓扑。
+
+
+## 7. Owner-branch currentness update / Owner 分支当前性更新
+
+A further direct audit of current Owner branches found that B–I each have an existing TAR-AI-001 report, but each report's recorded reviewed HEAD predates the branch HEAD read on 2026-11-17. The exact branch HEADs, report Blob SHAs and findings are recorded in `owner-technology-review-synthesis.md`. Storage has no separate TAR-style review; its current Storage ADR and PostgreSQL 18.7 capability dossier were read directly.
+
+Storage's latest ADR addendum selects a single logical serializable transaction domain per Canonical Memory authority as the normative v1 **serialization architecture profile**. This is not a production database or deployment choice. PostgreSQL 18.7 has bounded CI engine-capability evidence for prepared-XID/recovery; JF-10 application integration and production deployment remain open. This update supersedes any simplistic reading that no logical serialization profile exists, while preserving the physical L4 blockers.
+
+进一步直接审查 Owner 分支发现：B–I 均已有 TAR-AI-001 报告，但报告记录的审查 HEAD 早于 2026-11-17 读取的分支 HEAD。精确分支 HEAD、报告 Blob SHA 和发现见 `owner-technology-review-synthesis.md`。Storage 没有独立 TAR 报告；本研究直接读取了其当前 Storage ADR 和 PostgreSQL 18.7 能力档案。
+
+Storage 最新 ADR 补充条款选择每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain，作为 v1 规范性**序列化架构档案**。这不是生产数据库或部署选型。PostgreSQL 18.7 已有针对 Prepared-XID/恢复的有限 CI 引擎能力证据；JF-10 应用集成和生产部署仍未关闭。该更新纠正“完全没有逻辑序列化档案”的简单解读，同时保留物理 L4 阻塞。
