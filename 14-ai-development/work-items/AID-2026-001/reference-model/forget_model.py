@@ -7,6 +7,7 @@ production behavior.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import json
 from enum import Enum
 from hashlib import sha256
 from typing import Dict, Iterable, Optional
@@ -102,8 +103,13 @@ class ForgetOperation:
     @staticmethod
     def canonical_request_hash(memory_id: str, principal: str, scope: str,
                                purpose: str, action: str = "forget") -> str:
-        raw = "|".join((memory_id, principal, scope, purpose, action))
-        return sha256(raw.encode("utf-8")).hexdigest()
+        # Encode fields structurally: delimiter-joining permits distinct
+        # authority tuples to collide when a field itself contains "|".
+        raw = json.dumps(
+            [memory_id, principal, scope, purpose, action],
+            ensure_ascii=False, separators=(",", ":"), allow_nan=False,
+        ).encode("utf-8")
+        return sha256(raw).hexdigest()
 
     def authorize(self, allowed: bool) -> None:
         if self.phase != Phase.REQUESTED:
