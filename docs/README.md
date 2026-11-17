@@ -23,6 +23,7 @@ Chinese and English are maintained as equivalent reading versions. Normative arc
 The [Cross-Module Conformance Guide](zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md) explains how architecture contracts are verified and what evidence is required before a PASS can be claimed.
 
 ### L1 — Understand the system / 理解系统
+Read the [Design Principles](zh-CN/00-governance/design-principles.md) and [Architecture Invariants](zh-CN/00-governance/architecture-invariants.md) before relying on subsystem details.
 Mission, scope, non-goals, Brain vs. Agent, system map, main data and control flows.
 
 ### L2 — Understand subsystem architecture / 理解子系统
