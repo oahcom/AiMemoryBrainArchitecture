@@ -102,3 +102,10 @@ The review conditionally accepts the cross-protocol outcome enum and boundary, b
 ## 10. H schema 1.2.7 C boundary / H Schema 1.2.7 的 C 边界
 
 C reviewed H's schema 1.2.7 signature-profile change in the Provider Outcome boundary review (current C review Blob `ce191163deb4fea2acf1ac53ebbe3b4fc90acabf`; H review Blob `8bed0b05cd631014bf5af7cb5a8dafdd932940e9`; schema Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`). C accepts the structural distinction between signature profile and canonicalization profile with amendments. I owns profile trust resolution. The C Provider Outcome semantic validator must require a trusted signature profile for protected owner-signed outcomes. C's own canonical CSubmitOutcome source contract and provider-specific evidence vectors remain OPEN.
+
+
+## 11. Phase 3.8.3 signature-profile mapping / 签名配置映射
+
+C reviewed the H schema 1.2.7 / I crypto-profile mapping as a boundary consumer. H mapping Blob `c30e8ccbecb75b7e27ddceb0cf088afbbb26f562`; I profile proposal Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`; I exact review Blob `446109f4867268fe7dca3c7e114346f3c1a74b61`. C accepts that I alone resolves trust/key profile for I-signed records and that C's own Provider Outcome must use a C-approved profile, not inherit I's. H's 93-case run [44042093922](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042093922) is reference candidate evidence; it does not test real C provider signatures or provider adapters.
+
+C's canonical CSubmitOutcome source contract remains unpinned. The unified schema's Provider Outcome shape and a C boundary review do not replace the missing C-owned normative contract, per-provider proof semantics and same-key recovery vectors. C-RJ-05 and C-FR-03/04 remain OPEN.
