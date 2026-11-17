@@ -7,7 +7,7 @@
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Review branch: `review/session-3-engineering-planning-2026-11-17`
 - Review date: 2026-11-17
-- Baseline: `main`；本次 GitHub 最近提交检索返回 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`。由于连接器未暴露 refs/heads/main 的直接 SHA，本报告将其记为“最近可见仓库提交”，**main HEAD 精确绑定仍 PARTIALLY VERIFIED**。新分支由 GitHub 从 `main` ref 创建。
+- Baseline: `main`；本次 GitHub 最近提交检索返回 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`。PR #46 返回的 base_sha 已确认本次 PR 的 main 基线为 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`；因此本报告的 main 基线 SHA **VERIFIED（PR 创建时）**。该 SHA 不代表后续 main 永远不变。
 - 关键源 Blob：TAB-001 `7b6f2d139217dbe13ab3a3af31bfbff525f20e71`；System Overview `995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256`；Component Map `ddb7a1571463cadce83d89f62b03526c4f9693e8`；Architecture Invariants `33b037318e459ebb73bea33b3186f31a41d5dcfe`；GOV-DOC-001 `b51b054b9f1022133666542680df74dfe19de2fb`；Roadmap `29289361973ec4369f067706132190793cd57a6b`。
 - Method: live GitHub reads of Issue #43, #25, #29, #10, #3, #7, #4, #5, PR search results, source documents and recent commits.
 - Independence note: F/D/P are three separately structured analytical roles simulated in this session. They are not three independent humans or Owner approvals. Their cross-examination is analytical evidence only.
