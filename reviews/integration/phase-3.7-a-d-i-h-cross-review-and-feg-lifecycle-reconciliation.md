@@ -276,3 +276,20 @@ The amendments close the semantic drafting gaps for LIF-01, LIF-02, LIF-03, LIF-
 A must still perform a line-by-line exact-blob re-review of all six amended artifacts and reconcile with Storage/C owner contracts. D's registry/receipt and ParticipantIntentRef callable schemas, pre-canonical ingress implementation, I verifier integration, H canonical wire schema/security vectors, D/E/Storage atomic registration-to-visibility, and C/G/H final-submit/Applied proof integration remain blocking.
 
 No branch merge, schema freeze, conformance PASS, production activation, provider submit authorization or global Forget completion is authorized by these amendments.
+
+
+## 9. A exact-blob re-review of the six amendments
+
+A re-fetched all six owner artifacts from their named branches after publication. The returned Blob SHAs exactly match the pins in §8. All six contain substantive Chinese normative text in addition to English. Exact-blob integrity is VERIFIED.
+
+A's semantic re-review disposition:
+- **F — ACCEPT WITH ENUMERATED AMENDMENTS:** narrow ephemeral Recall exception, D registration before derivative-capable work, partition-local watermark, D-owned terminality, independent I/D checks and conjunctive restore are explicit.
+- **E — ACCEPT WITH ENUMERATED AMENDMENTS:** EventRef-only ingress is quarantined pending D contract; E AcceptedReceipt is separated from D RegistrationReceipt; recompile lineage and D-owned terminality are explicit.
+- **G — ACCEPT WITH ENUMERATED AMENDMENTS:** Context derivatives, transport Delivery and D ParticipantIntentRef are separated; C submit is blocked without the exact D reference; Applied remains G-owned historical evidence.
+- **D — ACCEPT AS SEMANTIC PROPOSAL; IMPLEMENTATION/SCHEMA OPEN:** ProducerClass eligibility, per-work registration, pre-canonical EventRef quarantine, participant-intent binding and terminality authority are explicit.
+- **I — ACCEPT AS SEMANTIC PROPOSAL; VERIFIER/SCHEMA OPEN:** current authorization revalidation, authenticated binding, independent PolicyDomain proof and no cross-authority comparison are explicit.
+- **H — ACCEPT SEMANTIC HANDOFFS ONLY; WIRE NOT FROZEN:** typed envelope dimensions, idempotency conflict, fail-closed behavior, proof transport and type separation are explicit.
+
+This re-review does not convert role-played Owner artifacts into independent Owner approvals. LIF-04 remains blocked at proof-schema and end-to-end restore evidence level. LIF-06 remains deliberately open pending H's separate exact-version wire schema and interoperability/security vectors. D/E/Storage atomic registration-to-visibility and C/G/H final-submit/Applied integration remain blocking. Storage and C exact-owner contracts have not been re-reviewed in this Phase 3.7 pass.
+
+**A disposition:** semantic reconciliation is ready for independent Owner validation, but NOT READY FOR SHARED SCHEMA FREEZE, IMPLEMENTATION CONFORMANCE, MERGE OR PRODUCTION ACTIVATION. Issue #21 remains OPEN.
