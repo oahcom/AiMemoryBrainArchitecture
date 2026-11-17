@@ -3,7 +3,7 @@
 - 权威角色：A — 首席系统架构权威
 - 版本：1.0.0
 - 日期：2026-11-17
-- 精确 Main 基线：`6470f25ca23b8d35c06f60be2326867066418d18`
+- 精确 Main 基线：`6470f25ca23b8d35c06f60be2326867066418d18`（历史评估快照，非当前 Main）
 - 审查分支：`review/session-4-a-final-architecture-authority-2026-11-17`
 - 统一跟踪入口：Issue #43
 - 整体决策结果：**DEFERRED**
@@ -180,4 +180,9 @@ P0-01 实现仓库/责任人 → P0-02 B 领域语义及 P0-03 I 治理/Inventor
 
 ## 证据与交叉引用
 
-R PR #50；X PR #49；F/D/P PR #46；B 协议 PR #51；B→A 审查 PR #52；Option A 拓扑审查 PR #54；当前 Main `6470f25ca23b8d35c06f60be2326867066418d18`；Issues #3、#5、#7、#10、#25、#29、#43；精确来源见 SYS-RISK-002。配套文件：ARCH-CX-002、DEV-FEAS-002、DEP-DAG-002、PRIORITY-002、READINESS-002、CONFLICT-002、GATE-002、DEFERRED-002。本评估不合并 PR、不关闭 Issue #43，也不授权生产。
+R PR #50；X PR #49；F/D/P PR #46；B 协议 PR #51；B→A 审查 PR #52；Option A 拓扑审查 PR #54；当前 Main HEAD `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`（历史评估快照，非当前 Main）；Issues #3、#5、#7、#10、#25、#29、#43；精确来源见 SYS-RISK-002。配套文件：ARCH-CX-002、DEV-FEAS-002、DEP-DAG-002、PRIORITY-002、READINESS-002、CONFLICT-002、GATE-002、DEFERRED-002。本评估不合并 PR、不关闭 Issue #43，也不授权生产。
+
+
+## 当前 Main HEAD
+
+本次发布独立观察到的当前 Main HEAD 为 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。此前的 `6470f25...` / `b372b62...` 均为历史评估快照，不是当前 Main。本套文件尚未完成针对当前 Main 的逐来源完整差异审计；G1 仍为 PARTIAL，所有 Gate/冻结限制继续有效。
