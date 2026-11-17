@@ -106,7 +106,7 @@ Memory、Evidence、摘要和模型生成的提取结果都是不可信数据，
 
 ## 11. Forget 联合契约提案——待 D/I 批准
 
-双语联合契约提案记录于 `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`。相关的 [Owner D/I Forget 权责矩阵](../../14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md) 同样是提案；在 D 与 I 对同一版本/SHA 明确批准前，两份文件都不具有规范效力。
+双语联合契约提案记录于 `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`。相关的 [Owner D/I Forget 权责矩阵](../../../14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md) 同样是提案；在 D 与 I 对同一版本/SHA 明确批准前，两份文件都不具有规范效力。
 
 D 拥有规范 Memory 生命周期、ForgetOperation/Fence 语义及 D 领域完成判定条件。I 拥有认证/授权、隐私/Retention/Legal Hold 策略、跨系统目标清单策略、证据接受标准和跨系统治理评估。I 不得改写 D 的规范状态或判定条件；D 不得豁免 I 的策略或声明跨系统治理合规。每个执行方只报告其能力范围内的动作和证据。
 
