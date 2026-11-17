@@ -242,7 +242,9 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
     def test_19_signature_profile_id_is_required_and_cannot_fall_back_to_canonicalization_profile(self):
         self.envelope.pop("signature_profile_id")
         self.assertTrue(self.envelope["canonicalization_profile_id"])
-        result = authenticate_outer_envelope(self.raw(), self.context, self.checks())
+        # Do not recompute a P0 whose required signature_profile_id is absent;
+        # serialize the malformed envelope so the validator returns INVALID.
+        result = authenticate_outer_envelope(self.raw(refresh_digest=False), self.context, self.checks())
         self.assertEqual(result["status"], "INVALID", result)
         self.assertTrue(any("signature_profile_id" in error for error in result["errors"]))
 
