@@ -197,3 +197,42 @@ This follow-up records narrow claims verified against official documentation on 
 - OpenTelemetry Rust 的 Traces 为 Beta，Metrics/Logs 为 Stable；不得笼统声称所有 Signal 同等成熟。
 
 These official-document checks are desk verification only. No Brain prototype, integration, benchmark, concurrency/fault test, production runbook or security audit was run.
+
+
+## 7. Late Storage / JF-10 evidence refresh — 2026-11-17 / Storage 与 JF-10 最新证据
+
+Directly fetched from Storage branch `session-storage-consistency-forget-atomicity-2026-11-16`:
+
+| Artifact | Path | Blob SHA | Current recorded boundary |
+|---|---|---|---|
+| Storage v3.2.6 successor bundle manifest | `reviews/storage-consistency/phase-3.6.16-storage-v3.2.6-successor-exact-version-bundle-manifest.md` | `dbfa37617d109d5891a067769e858085e2ce547a` | Bundle bound; H 1.2.13 exact CI open; not jointly frozen; delegated Storage-role artifact, not independent human signature |
+| Normative Storage technical body v3.2.3 | `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md` | `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792` | Normative Storage S0a–S4 and same-GID recovery contract |
+| COC companion §§15–17 | `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md` (companion content pinned by manifest) | `5b950a3a29bd7a5276b92a49a9114d700718b987` | Batch-before-Manifest and recovery join ordering |
+| PostgreSQL 18.7 capability dossier | `reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md` | `0aabf66848dc97deee028c571183c0d7204008c0` | Seven bounded CI subtests PASS; Gate A PARTIAL PASS / OPEN; production integration deferred |
+| Storage deployment readiness | `reviews/storage-consistency/phase-3.6-deployment-selection-and-verification-readiness.md` | `ef4eff1708e4bd6072b86cc234340dd848bb5fbc` | Logical deployment profile selected; production Canonical Authority deployment not designated |
+
+The seven dossier subtests cover: single-node prepared-XID/hard restart; synchronous standby replay/promotion; physical pg_basebackup restore with stale-control fail-closed fixture; coordinator crash in participant-success/ACK-checkpoint gap; TCP CommandComplete response loss; synchronous-standby-unavailable fail-closed PREPARE; WAL-archive PITR to explicit LSN. These are pinned CI fixture capabilities, not live Brain D/I/COC application conformance or production deployment proof.
+
+Exact successor bundle members recorded by the manifest include H Unified 1.2.13 / wire 1.3.0 Blob `8e7f6a6c9663388863db88548f9c37d0fdb1bd97`, H RecoveryJoin 1.0.2 Blob `4b664e3bce465499bcdfd93796349a4ba7074002`, H RecoveryCutoff 1.0.5 Blob `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`, H C mapping Blob `32bf9b0fd42abe8b58749b858b1d5c9aef39c5fd`, CSubmitOutcome 1.0.1 Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`, I exact review Blob `367a6002327134840b1d03d426bb4bcd864db4c9`, and D exact review Blob `1f03f3a83dda3fc1cc364ae9d2d18a3f1b96b590`. The manifest itself states C candidate CI run 44059935858 (19 tests) SUCCESS; exact H 1.2.13 15-test source has not run; prior H 1.2.12 run does not transfer.
+
+### 7.1 Source verification corrections / 源码核验补充
+
+- Qdrant source path should be cited as `lib/collection/src/collection_manager/segments_searcher/mod.rs` (not a standalone `segments_searcher.rs`); fetched at the pinned source snapshot `23065a0bf6857c3e5da45f6c8939cc746cc0580e`, file Blob `c2108ce6ff1465e4172401e96369e5d84e65f915`.
+- Mem0 `mem0/memory/main.py`, Graphiti `graphiti_core/graphiti.py`, Letta Code `src/agent/memory-filesystem.ts`, LangGraph PostgreSQL checkpointer, Temporal Rust worker, NATS JetStream and Tantivy IndexWriter paths were fetched at the exact source snapshot commits listed in §1. Hermes source re-fetch hit GitHub API rate limiting in this refresh; the prior pinned source claim remains **NOT RE-READ IN THIS REFRESH**, not newly re-verified.
+- PydanticAI durable-execution official documentation was added to `mature-project-research.md`; its Python engine integrations are comparison evidence, not a Rust dependency.
+
+本次直接从 Storage 分支读取：
+
+| 工件 | 路径 | Blob SHA | 当前记录边界 |
+|---|---|---|---|
+| Storage v3.2.6 后继 Bundle | `reviews/storage-consistency/phase-3.6.16-storage-v3.2.6-successor-exact-version-bundle-manifest.md` | `dbfa37617d109d5891a067769e858085e2ce547a` | Bundle 已绑定；H 1.2.13 精确 CI OPEN；未联合冻结；属于委派 Storage 角色工件，不是独立人工签名 |
+| Storage v3.2.3 规范正文 | `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md` | `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792` | 规范 S0a–S4 与 same-GID recovery |
+| COC companion §§15–17 | 同一协议文档的独立内容 Pin | `5b950a3a29bd7a5276b92a49a9114d700718b987` | Batch-before-Manifest 与 Recovery Join 顺序 |
+| PostgreSQL 18.7 能力档案 | `reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md` | `0aabf66848dc97deee028c571183c0d7204008c0` | 七项限定 CI 子测试 PASS；Gate A PARTIAL PASS / OPEN；生产集成延后 |
+| Storage 部署准备 | `reviews/storage-consistency/phase-3.6-deployment-selection-and-verification-readiness.md` | `ef4eff1708e4bd6072b86cc234340dd848bb5fbc` | 逻辑部署档案已选；生产 Canonical Authority 部署未指定 |
+
+七项档案测试包括：单节点 Prepared-XID/硬重启；同步 Standby 重放/提升；物理 pg_basebackup 恢复与 stale-control fail-closed fixture；参与者成功/ACK 检查点间 Coordinator 崩溃；TCP CommandComplete 响应丢失；同步 Standby 不可用时 PREPARE fail-closed；显式 LSN 的 WAL Archive PITR。这些仅是固定 CI Fixture 能力，不是 Brain 实时 D/I/COC 应用一致性或生产部署证明。
+
+Manifest 记录的后继 Bundle 还包括 H Unified 1.2.13 / wire 1.3.0、H RecoveryJoin 1.0.2、H RecoveryCutoff 1.0.5、H C 映射、CSubmitOutcome 1.0.1、I 精确审查和 D 精确审查等 Blob，详见上方表格。Manifest 记录 C 候选 CI Run 44059935858（19 项测试）SUCCESS；H 1.2.13 的 15 项测试源码尚未运行；此前 H 1.2.12 的结果不能转移。
+
+源码核验更正：Qdrant 的准确源码路径是 `segments_searcher/mod.rs`；Mem0、Graphiti、Letta Code、LangGraph PostgreSQL Checkpointer、Temporal Rust Worker、NATS JetStream 和 Tantivy IndexWriter 已按 §1 所列精确提交读回。此次重新读取 Hermes 源码时触发 GitHub API Rate Limit，因此本轮未重新验证，不将旧 Pin 记为本轮新核验。新增 PydanticAI 持久执行官方文档，但其 Python 集成仅作为比较证据，不是 Rust 依赖。
