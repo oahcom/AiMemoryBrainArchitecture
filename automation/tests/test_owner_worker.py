@@ -9,6 +9,8 @@ class BoundaryTests(unittest.TestCase):
         self.assertTrue(safe_path("automation/owner-output/a.md"))
         self.assertFalse(safe_path(".github/workflows/a.yml"))
         self.assertFalse(safe_path("src/main.rs"))
+        self.assertFalse(safe_path("automation/owner-output/run.py"))
+        self.assertFalse(safe_path("automation/owner-output/%2e%2e/escape.md"))
     def test_traversal(self):
         self.assertFalse(safe_path("automation/owner-output/../x.md"))
         self.assertFalse(safe_path("automation/owner-output/a/../../x"))
