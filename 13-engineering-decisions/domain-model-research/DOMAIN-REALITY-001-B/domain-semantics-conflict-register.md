@@ -81,3 +81,32 @@
 No BLOCKING conflict is closed. B3 is NOT PASSED. The latest Phase 3.8 branch reviews add B-CONFLICT-013 (outer-envelope authenticated ingress) and B-CONFLICT-014 (physical serialization anchor acceptance/implementation boundary). This register is an evidence-backed issue ledger, not a claim of independent review, owner acceptance or project governance approval.
 
 尚无 BLOCKING 冲突关闭。B3 未通过。本登记册是有证据支持的问题台账，不代表独立审查、Owner 验收或项目治理批准。
+
+
+## 1C. New blocking conflict — Storage v3.3.1 Option A status / 新增阻塞冲突 — Storage v3.3.1 Option A 状态
+
+| Field | Record |
+|---|---|
+| Conflict ID | **B-CONFLICT-017** |
+| Severity | **BLOCKING** |
+| Conflicting source A | Storage/D Option A topology ADR, Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`: Status says L1 LOGICAL TOPOLOGY SELECTED — OPTION A; L4 PHYSICAL ENGINE/DEPLOYMENT OPEN; §8 selects Option A as normative v1 logical architecture. |
+| Conflicting source B | Storage v3.3.1 manifest, Blob `f6e61691ecdcfcbf1fb423cc45242868676ca925`: describes Option A as “conditional L1 candidate” and says “A-01–A-05 clarifications remain open”. |
+| Exact integration review | A Phase 3.12.1, Blob `d3d4e6f4b6d7e82f90e3eee3427c8ace3b4160c8`: explicitly rejects v3.3.1 as a final consistent manifest until corrected; requires successor manifest and fresh review. |
+| Authority | Storage owns its manifest and topology artifact; A owns system integration review; B records cross-owner semantic consistency only. B cannot amend Storage's decision. |
+| Impact | Conflicting decision state can mislead downstream consumers about whether logical topology is selected and what remains open. B3 cannot pass; affected Storage bundle cannot be treated as final consistent/frozen. |
+| Closure | Storage publishes a corrected successor manifest; exact pins the selected Option A ADR and L4 OPEN boundary; removes unsupported A-01–A-05 references or pins a real register; binds the exact H/C/I successor artifacts; A performs fresh exact-version review. |
+| Status | **OPEN — BLOCKING — OWNER ACTION REQUIRED** |
+
+**English finding.** The conflict is substantive, not stylistic. The exact ADR selects Option A for the v1 logical architecture while leaving only physical engine/deployment at L4 open. The v3.3.1 manifest weakens that selected decision to a conditional L1 candidate and cites an A-01–A-05 register absent from the pinned ADR. A's Phase 3.12.1 review independently identifies this mismatch and refuses final manifest acceptance. The correct remediation owner is Storage; B must not silently rewrite the Storage-owned artifact.
+
+**中文发现。** 该冲突属于实质性决策状态矛盾，而非文风差异。精确 ADR 已选择 Option A 作为 v1 逻辑架构，仅将物理引擎/部署保留为 L4 OPEN。v3.3.1 Manifest 却将已选决策降格为 conditional L1 candidate，并引用精确 ADR 中不存在的 A-01–A-05 登记表。A Phase 3.12.1 复审独立指出该不一致，并拒绝最终接受该 Manifest。正确整改责任属于 Storage；B 不得静默改写 Storage 所有的工件。
+
+This conflict is separate from B-CONFLICT-013 outer-envelope authentication and B-CONFLICT-014 serialization-anchor authority. It also does not resolve the H 1.2.15 successor gap: Storage v3.3.1 binds H 1.2.14, while H 1.2.15 and I's structural-candidate review require a new exact bundle and fresh A review.
+
+该冲突与 B-CONFLICT-013 外层 Envelope 认证及 B-CONFLICT-014 Serialization Anchor 权威边界分别登记。它也不能解决 H 1.2.15 后继版本缺口：Storage v3.3.1 绑定 H 1.2.14，而 H 1.2.15 与 I 的结构候选复审需要新的精确 Bundle 和 A 新复审。
+
+## 3A. Updated gate / 更新后的门禁
+
+B-CONFLICT-017 is newly recorded as BLOCKING and OPEN. No blocking conflict is closed. B3 remains NOT PASSED. This author-side registration is not a Storage correction, Owner acceptance, independent review or governance approval.
+
+B-CONFLICT-017 新登记为 BLOCKING 且 OPEN。尚无阻塞冲突关闭。B3 仍 NOT PASSED。本次作者侧登记不代表 Storage 已整改、Owner 已验收、独立审查或治理批准。
