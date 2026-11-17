@@ -112,12 +112,16 @@ class AppliedStore:
         evidence_set_digest: str,
         proofs: dict[str, str],
         *,
+        c_outcome: str = "HANDOFF_ACCEPTED",
+        side_effect_status: str = "PROVEN_OCCURRED",
         crash_before_commit: bool = False,
         lose_ack_after_commit: bool = False,
     ) -> str:
         if not identity_key or not evidence_set_digest or evidence_revision < 1:
             raise Rejected("invalid immutable Applied identity/revision/digest")
         self._validate_proofs(proofs)
+        if c_outcome != "HANDOFF_ACCEPTED" or side_effect_status != "PROVEN_OCCURRED":
+            raise Rejected("C outcome is not eligible for G Full Applied")
 
         conn = self._connect()
         try:
@@ -382,6 +386,20 @@ class GAppliedPersistenceReferenceTests(unittest.TestCase):
         )
         self.assertEqual(result, "RECONCILED")
         self.assertTrue(self.store.current_use_allowed("g-applied:context-1:delivery-4:request-9"))
+
+    def test_13_unknown_or_in_doubt_c_outcome_blocks_full_applied(self):
+        for outcome in ("UNKNOWN", "IN_DOUBT"):
+            with self.subTest(outcome=outcome):
+                with self.assertRaises(Rejected):
+                    self.commit(c_outcome=outcome, side_effect_status="POSSIBLE_OR_UNKNOWN")
+        self.assertEqual(self.store.snapshot()["ledger"], [])
+
+    def test_14_rejected_or_not_invoked_c_outcome_blocks_full_applied(self):
+        for outcome, side_effect in (("HANDOFF_REJECTED", "PROVEN_NONE"), ("NOT_INVOKED", "PROVEN_NONE")):
+            with self.subTest(outcome=outcome):
+                with self.assertRaises(Rejected):
+                    self.commit(c_outcome=outcome, side_effect_status=side_effect)
+        self.assertEqual(self.store.snapshot()["ledger"], [])
 
 
 if __name__ == "__main__":
