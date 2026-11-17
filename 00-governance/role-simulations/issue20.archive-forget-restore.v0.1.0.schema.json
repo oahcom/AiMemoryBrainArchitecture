@@ -1,0 +1,767 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.aimemorybrainarchitecture.invalid/issue20/archive-forget-restore/0.1.0",
+  "title": "Issue 20 Archive, Forget and Restore Cross-Owner Contract Candidate",
+  "description": "Session P structural candidate only. Non-normative pending exact D/I/F/E/G/H/Storage Owner adoption. Cryptographic, currentness, completeness and transaction semantics require owner validators.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/DRegistrationReceipt"
+    },
+    {
+      "$ref": "#/$defs/DForgetBarrierProof"
+    },
+    {
+      "$ref": "#/$defs/IInventorySeal"
+    },
+    {
+      "$ref": "#/$defs/ICommitAuthorizationReceipt"
+    },
+    {
+      "$ref": "#/$defs/StorageVisibilityParticipantRef"
+    },
+    {
+      "$ref": "#/$defs/StorageOutcomeProof"
+    },
+    {
+      "$ref": "#/$defs/FRecallCursor"
+    },
+    {
+      "$ref": "#/$defs/EPublicationRequest"
+    },
+    {
+      "$ref": "#/$defs/GContextLineageManifest"
+    },
+    {
+      "$ref": "#/$defs/RestoreProofBundle"
+    }
+  ],
+  "$defs": {
+    "OpaqueRef": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512
+    },
+    "Digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "AuthorityPosition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority",
+        "positionRef"
+      ],
+      "properties": {
+        "authority": {
+          "enum": [
+            "D",
+            "I",
+            "F",
+            "E",
+            "G",
+            "H",
+            "STORAGE",
+            "COC",
+            "ADAPTER"
+          ]
+        },
+        "positionRef": {
+          "$ref": "#/$defs/OpaqueRef"
+        }
+      }
+    },
+    "SignedEnvelope": {
+      "type": "object",
+      "required": [
+        "schemaId",
+        "schemaVersion",
+        "messageId",
+        "issuer",
+        "audience",
+        "issuedAt",
+        "signatureProfileId",
+        "keyId",
+        "signature"
+      ],
+      "properties": {
+        "schemaId": {
+          "type": "string",
+          "const": "issue20.archive-forget-restore"
+        },
+        "schemaVersion": {
+          "type": "string",
+          "const": "0.1.0"
+        },
+        "messageId": {
+          "$ref": "#/$defs/OpaqueRef"
+        },
+        "issuer": {
+          "$ref": "#/$defs/OpaqueRef"
+        },
+        "audience": {
+          "$ref": "#/$defs/OpaqueRef"
+        },
+        "issuedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "signatureProfileId": {
+          "$ref": "#/$defs/OpaqueRef"
+        },
+        "keyId": {
+          "$ref": "#/$defs/OpaqueRef"
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "ProducerInstanceRef": {
+      "type": "object",
+      "required": [
+        "policyDomainRef",
+        "producerDomainRef",
+        "producerId",
+        "producerInstanceId",
+        "identityGeneration"
+      ],
+      "properties": {
+        "policyDomainRef": {
+          "$ref": "#/$defs/OpaqueRef"
+        },
+        "producerDomainRef": {
+          "$ref": "#/$defs/OpaqueRef"
+        },
+        "producerId": {
+          "$ref": "#/$defs/OpaqueRef"
+        },
+        "producerInstanceId": {
+          "$ref": "#/$defs/OpaqueRef"
+        },
+        "identityGeneration": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "DRegistrationReceipt": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "producerInstanceRef",
+            "producerClassRef",
+            "producerWorkItemId",
+            "requestDigest",
+            "scopeRef",
+            "registrationCursor",
+            "forgetFenceGeneration",
+            "sourceLineageDigest"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "D_REGISTRATION_RECEIPT"
+            },
+            "producerInstanceRef": {
+              "$ref": "#/$defs/ProducerInstanceRef"
+            },
+            "producerClassRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "producerWorkItemId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "requestDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "scopeRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "registrationCursor": {
+              "$ref": "#/$defs/AuthorityPosition"
+            },
+            "forgetFenceGeneration": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "sourceLineageDigest": {
+              "$ref": "#/$defs/Digest"
+            }
+          }
+        }
+      ]
+    },
+    "DForgetBarrierProof": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "forgetOperationRef",
+            "requestDigest",
+            "targetSetDigest",
+            "coverageStatus",
+            "forgetFenceGeneration",
+            "producerRegistryVersion",
+            "producerRegistrationHighWater",
+            "barrierMembershipDigest",
+            "dependencyClosureDigest",
+            "dependencyClosureCursor",
+            "reopenGeneration",
+            "terminalMemberCount",
+            "terminalReceiptSetDigest",
+            "suppressionAcknowledgementSetDigest"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "D_FORGET_BARRIER_PROOF"
+            },
+            "forgetOperationRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "requestDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "targetSetDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "coverageStatus": {
+              "enum": [
+                "COVERED",
+                "COVERAGE_BLOCKED"
+              ]
+            },
+            "forgetFenceGeneration": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "producerRegistryVersion": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "producerRegistrationHighWater": {
+              "$ref": "#/$defs/AuthorityPosition"
+            },
+            "barrierMembershipDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "dependencyClosureDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "dependencyClosureCursor": {
+              "$ref": "#/$defs/AuthorityPosition"
+            },
+            "reopenGeneration": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "terminalMemberCount": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "terminalReceiptSetDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "suppressionAcknowledgementSetDigest": {
+              "$ref": "#/$defs/Digest"
+            }
+          }
+        }
+      ]
+    },
+    "IInventorySeal": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "policyDomainRef",
+            "scopeBindingFingerprint",
+            "producerDomainInventoryEpoch",
+            "registrySnapshotDigest",
+            "inventoryEntrySetDigest",
+            "targetInventorySealRef",
+            "targetInventorySealDigest",
+            "completenessProofGeneration",
+            "completenessStatus",
+            "signerKeyStatusGeneration",
+            "permissionEpoch",
+            "iGateGeneration",
+            "iRequestHighWater"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "I_GLOBAL_INVENTORY_SEAL"
+            },
+            "policyDomainRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "scopeBindingFingerprint": {
+              "$ref": "#/$defs/Digest"
+            },
+            "producerDomainInventoryEpoch": {
+              "$ref": "#/$defs/AuthorityPosition"
+            },
+            "registrySnapshotDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "inventoryEntrySetDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "targetInventorySealRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "targetInventorySealDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "completenessProofGeneration": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "completenessStatus": {
+              "enum": [
+                "COMPLETE",
+                "INCOMPLETE",
+                "UNKNOWN"
+              ]
+            },
+            "signerKeyStatusGeneration": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "permissionEpoch": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "iGateGeneration": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "iRequestHighWater": {
+              "$ref": "#/$defs/AuthorityPosition"
+            }
+          }
+        }
+      ]
+    },
+    "ICommitAuthorizationReceipt": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "publicationOperationId",
+            "requestDigest",
+            "participantRef",
+            "participantTupleDigest",
+            "permissionEpoch",
+            "iGateGeneration",
+            "sequencerPosition",
+            "decision"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "I_COMMIT_AUTHORIZATION_RECEIPT"
+            },
+            "publicationOperationId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "requestDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "participantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "participantTupleDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "permissionEpoch": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "iGateGeneration": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "sequencerPosition": {
+              "$ref": "#/$defs/AuthorityPosition"
+            },
+            "decision": {
+              "enum": [
+                "COMMIT_WON",
+                "REVOCATION_WON",
+                "INDETERMINATE_ABORTED",
+                "UNKNOWN_IN_DOUBT"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "StorageVisibilityParticipantRef": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "preparedParticipantRef",
+            "preparedTransactionGid",
+            "databaseIncarnationRef",
+            "prepareAttemptRef",
+            "prepareAttemptGeneration",
+            "participantLedgerVersion",
+            "publicationOperationId",
+            "requestDigest",
+            "participantTupleDigest"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "STORAGE_VISIBILITY_PARTICIPANT_REF"
+            },
+            "preparedParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "preparedTransactionGid": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "databaseIncarnationRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "postgresqlNativeXid": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "prepareAttemptRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "prepareAttemptGeneration": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "participantLedgerVersion": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "publicationOperationId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "requestDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "participantTupleDigest": {
+              "$ref": "#/$defs/Digest"
+            }
+          }
+        }
+      ]
+    },
+    "StorageOutcomeProof": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "participantRef",
+            "publicationOperationId",
+            "requestDigest",
+            "participantTupleDigest",
+            "databaseIncarnationRef",
+            "prepareAttemptGeneration",
+            "outcome",
+            "storageCommitPosition"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "STORAGE_OUTCOME_PROOF"
+            },
+            "participantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "publicationOperationId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "requestDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "participantTupleDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "databaseIncarnationRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "prepareAttemptGeneration": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "outcome": {
+              "enum": [
+                "COMMITTED_VISIBLE",
+                "NO_PUBLICATION"
+              ]
+            },
+            "storageCommitPosition": {
+              "$ref": "#/$defs/AuthorityPosition"
+            }
+          }
+        }
+      ]
+    },
+    "FRecallCursor": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "principalRef",
+            "scopeRef",
+            "objectSetDigest",
+            "policyRef",
+            "dFenceGeneration",
+            "permissionEpoch",
+            "fIndexGeneration",
+            "cursorPosition"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "F_RECALL_CURSOR"
+            },
+            "principalRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "scopeRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "objectSetDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "policyRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "dFenceGeneration": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "permissionEpoch": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "fIndexGeneration": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cursorPosition": {
+              "$ref": "#/$defs/AuthorityPosition"
+            }
+          }
+        }
+      ]
+    },
+    "EPublicationRequest": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "producerWorkItemId",
+            "attemptId",
+            "derivationRunId",
+            "publicationOperationId",
+            "requestDigest",
+            "scopeRef",
+            "sourceLineageDigest",
+            "dependencySetDigest",
+            "artifactDigest",
+            "storageParticipantRef",
+            "dPublicationParticipantRef"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "E_PUBLICATION_REQUEST"
+            },
+            "producerWorkItemId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "attemptId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "derivationRunId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "publicationOperationId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "requestDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "scopeRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "sourceLineageDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "dependencySetDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "artifactDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "storageParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "dPublicationParticipantRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            }
+          }
+        }
+      ]
+    },
+    "GContextLineageManifest": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "contextId",
+            "contextVersion",
+            "sourceFragmentSetDigest",
+            "effectiveDLineageDigest",
+            "scopeRef",
+            "iPermissionEpoch",
+            "dFenceGeneration",
+            "deliveryId"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "G_CONTEXT_LINEAGE_MANIFEST"
+            },
+            "contextId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "contextVersion": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "sourceFragmentSetDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "effectiveDLineageDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "scopeRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "iPermissionEpoch": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "dFenceGeneration": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "deliveryId": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "deliveryAttemptId": {
+              "$ref": "#/$defs/OpaqueRef"
+            }
+          }
+        }
+      ]
+    },
+    "RestoreProofBundle": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/SignedEnvelope"
+        },
+        {
+          "type": "object",
+          "required": [
+            "messageType",
+            "restoreAttemptRef",
+            "checkpointDigest",
+            "databaseIncarnationRef",
+            "cocPrefixDigest",
+            "iProofDigest",
+            "dProofDigest",
+            "fProofDigest",
+            "eProofDigest",
+            "gProofDigest",
+            "adapterProofDigest",
+            "storageProofDigest",
+            "antiRollbackAnchor"
+          ],
+          "properties": {
+            "messageType": {
+              "const": "RESTORE_PROOF_BUNDLE"
+            },
+            "restoreAttemptRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "checkpointDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "databaseIncarnationRef": {
+              "$ref": "#/$defs/OpaqueRef"
+            },
+            "cocPrefixDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "iProofDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "dProofDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "fProofDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "eProofDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "gProofDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "adapterProofDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "storageProofDigest": {
+              "$ref": "#/$defs/Digest"
+            },
+            "antiRollbackAnchor": {
+              "$ref": "#/$defs/OpaqueRef"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
