@@ -122,7 +122,7 @@ Do not copy: automatically adopting a graph database or assuming extracted edges
 - Official “How Mem0 Works”: https://github.com/mem0ai/mem0/blob/main/docs/core-concepts/how-it-works.mdx
 - Official architecture reference: https://github.com/mem0ai/mem0/blob/main/skills/mem0/references/architecture.md
 
-Observed model: memory extraction and retrieval pipeline; user/agent/app/run scope dimensions; SQL facts/metadata, vector embeddings and entity store; platform graph connections link memory nodes through extracted entities and boost retrieval. Current Graph Memory documentation says connections are entity-to-memory/co-occurrence based, not typed semantic relations such as “manages”. Official repository docs describe ADD-only extraction for the current algorithm, with explicit update/delete operations still available at API level; do not overgeneralize “ADD-only” to every API mutation.
+Observed model: memory extraction and retrieval pipeline; user/agent/app/run scope dimensions; SQL facts/metadata, vector embeddings and entity store; platform graph connections link memory nodes through extracted entities and boost retrieval. Current Graph Memory documentation says connections are entity-to-memory/co-occurrence based, not typed semantic relations such as “manages”. The current official source validation supplement records the observed extraction/scope/graph model and its limits; no unsupported claim about all API mutation behavior is made here.
 
 Borrow: separating scope IDs from extracted graph entities; multi-signal retrieval and entity linking as a projection/ranking aid.
 Do not copy: platform-specific hidden extraction pipeline as canonical truth; untyped co-occurrence edges as substitutes for typed Relation; no evidence that this model supplies this project's strict Forget atomicity and provenance guarantees.
@@ -137,8 +137,8 @@ Borrow: explicit separation between persistent Agent identity and conversations;
 Do not copy: agent-owned memory filesystem as the Brain's canonical domain model; Agent identity and conversation semantics are product-specific to Letta.
 
 ### 6.4 LangGraph
-- Official checkpoint reference: https://langchain-ai.github.io/langgraph/reference/checkpoints/
-- Official persistence guide: https://langchain-ai.github.io/langgraph/cloud/concepts/threads/
+- Official checkpoint reference: https://docs.langchain.com/oss/python/langgraph/persistence
+- Official persistence guide: https://docs.langchain.com/oss/python/langgraph/persistence
 
 Observed model: checkpoint is a snapshot of graph state at a point in time, identified by a unique monotonically increasing ID; thread_id groups checkpoints; pending writes enable resumption. Checkpointers support thread-scoped short-term state; Stores support long-term cross-thread data.
 
