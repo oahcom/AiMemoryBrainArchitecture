@@ -185,6 +185,7 @@ def validate_pair(batch, manifest, batch_position, manifest_position, linearizab
         if batch.get(f)!=manifest.get(f):return INVALID
     if manifest.get("batch_record_ref")!=batch.get("coc_record_ref"):return INVALID
     if manifest.get("batch_position")!=batch_position[1] or manifest.get("batch_entry_digest")!=batch.get("coc_entry_digest"):return INVALID
+    if batch.get("coc_record_position")!=str(batch_position[1]) or manifest.get("coc_record_position")!=str(manifest_position[1]):return INVALID
     if manifest.get("manifest_content_digest")!=content_digest(manifest):return INVALID
     owner_snaps=batch.get("owner_snapshots")
     roots=manifest.get("owner_snapshot_roots")
@@ -233,6 +234,37 @@ def validate_release(r,b,m):
     if any(r.get(k)!=v for k,v in expected.items()):
         return INVALID
     return VALID if r.get("final_currentness_cas_valid") is True else UNKNOWN
+
+
+def validate_epoch_completed(completed, batch, manifest, releases):
+    if not isinstance(releases,dict) or set(releases)!={"I","D","C"}:
+        return INVALID
+    for owner,release in releases.items():
+        if release.get("owner_kind")!=owner:
+            return INVALID
+        result=validate_release(release,batch,manifest)
+        if result!=VALID:
+            return result
+    expected={
+      "recovery_epoch_ref":batch.get("recovery_epoch_ref"),
+      "batch_record_ref":batch.get("coc_record_ref"),
+      "batch_digest":batch.get("payload_digest"),
+      "batch_position":batch.get("coc_record_position"),
+      "batch_entry_digest":batch.get("coc_entry_digest"),
+      "manifest_record_ref":manifest.get("coc_record_ref"),
+      "manifest_content_digest":manifest.get("manifest_content_digest"),
+      "manifest_record_position":manifest.get("coc_record_position"),
+      "manifest_record_entry_digest":manifest.get("coc_entry_digest"),
+    }
+    if any(completed.get(k)!=v for k,v in expected.items()):
+        return INVALID
+    refs=completed.get("owner_release_refs")
+    if not isinstance(refs,list) or len(refs)!=3 or len(set(refs))!=3:
+        return INVALID
+    if set(refs)!={r.get("coc_record_ref") for r in releases.values()}:
+        return INVALID
+    return VALID if completed.get("quorum_committed") is True else UNKNOWN
+
 
 def validate_profile(message, protected, registry, owner, audience, purpose):
     if not protected:return VALID
