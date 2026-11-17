@@ -121,3 +121,31 @@ Storage 合同要求 D、I 两个独立 participant 绑定同一个 Storage Visi
 因此 M-02 的准确结论是：**E 已有候选 Cancelled/Rejected 语义，D 已有 durable no-publication terminal 约束；但两者之间的精确 receipt/schema/authority mapping、pre-execution cancel 的触发权限、同 WorkItemId 幂等、late-worker fencing 和 D barrier ledger 线性化仍 OPEN。** 当前模型没有把该候选 E 状态映射为合法 D terminal receipt 的转移。A 不得自行把 E 候选提升为 D 接受。
 
 修复方向：由 E Owner 确认 pre-execution Cancelled/Rejected 可产生何种完整证据；由 D Owner 确认该证据如何成为 D terminal disposition；Storage 确认不存在仍可发布的 participant/outbox；之后 A 才将这条精确合同纳入模型并增加 registered → fenced → cancelled-before-run → durable D terminal receipt → barrier closure 与 stale-worker rejection 测试。
+
+## 当前模型 HEAD 复核更正（2026-11-18；覆盖本报告先前 M-01/M-02 状态）
+
+在提交本报告后，集成分支已有模型修订，必须以当前模型 Blob 为准：
+
+- 当前模型 Blob：`05ed37fe4c673ed938672b0f7ce4f3da85f58472`。
+- 当前测试 Blob：`6192f18a8b94a39be6fcef999f62edcb4542383a`。
+- 当前 README Blob：`1abcc3f92d97cea4f18049d2b0fcd18eca3a2952`。
+- 最新模型 CI：run `44140051181`，SUCCESS，精确测试提交 `c6c6e136f3d1c1b24448e28b754bfe083fe1a0f8`；模型步骤与 unittest 均成功，14 tests passed，28,383 state/depth pairs，13 mutants。
+- 早期修订 CI run `44139591931` 在旧 expected count 上失败；该失败已由更新状态基数及测试修订后的成功 run 覆盖，历史失败仍保留。
+
+### M-01 状态：模型范围内已修复
+
+模型已将 global_complete 改名为 core_barrier_ready，且注释明确它不是 I GlobalForget Completed。相应不变量也检查 core_barrier_ready 的局部条件。故原 M-01 的命名/范围误导在当前模型层面 CLOSED。I 的完整 Global Forget Completed 仍未建模，仍 NOT PROVEN。
+
+### M-02 状态：模型已加入抽象外部证明输入；Owner 组合仍 OPEN
+
+模型已增加 record_no_publication_proof：它仅在 Fence 已安装、WorkItem 已注册、尚未运行、没有 lease/I participant/visible artifact 时接受外部 D/E/Storage durable proof；随后允许 terminalize 并关闭 barrier。模型还增加 stale-worker-after-cancel mutant 和 terminal-without-proof invariant。新增回归测试验证无 proof 时不能 terminalize、提供 proof 后可 terminalize，且旧 Worker 不得继续运行。
+
+因此原 M-02 “模型没有 pre-execution terminal transition”的判断已被当前模型修订关闭。剩余问题是该外部 proof 的真实 Owner contract：E Cancelled/Rejected 仍是 CANDIDATE；E→D terminal acknowledgement schema/reconciliation OPEN；D terminal receipt 和 Storage no-publish participant 的精确绑定仍未完成。故模型闭合不等于 Owner 接受或生产实现。
+
+### 当前仍开放
+
+- M-03：只建模一个 Fence generation；多 Forget/重叠 target set 未建模。
+- M-04：真实 D/I/Storage durable participant、prepared transaction、WAL/MVCC/2PC crash recovery 未建模；JF-10 NOT PROVEN。
+- M-05：liveness/fairness 与 safety 的分离及外部响应进度假设仍需明确。
+
+当前模型结论：**bounded research CI PASS；M-01/M-02 模型层已修复；Owner receipt mapping、multi-Forget、物理 crash atomicity、Global Forget completion 仍 OPEN / NOT PROVEN。**
