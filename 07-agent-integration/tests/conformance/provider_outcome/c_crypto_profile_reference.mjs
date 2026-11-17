@@ -1,6 +1,6 @@
 // Independent Node.js RFC 8785 + Ed25519 candidate oracle for C Provider Outcome.
 import canonicalize from "canonicalize";
-import { createPrivateKey, createPublicKey, sign } from "node:crypto";
+import { createHash, createPrivateKey, createPublicKey, sign } from "node:crypto";
 import { readFileSync } from "node:fs";
 
 const root = new URL("./", import.meta.url);
@@ -46,5 +46,4 @@ const output = manifest.vector_ids.map(id => {
 function createHashDigest(bytes) {
   return createHash("sha256").update(bytes).digest("hex");
 }
-import { createHash } from "node:crypto";
 process.stdout.write(JSON.stringify(output));
