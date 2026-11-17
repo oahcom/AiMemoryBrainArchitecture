@@ -120,3 +120,16 @@ H 候选源文件现已包含 §11.9，当前精确 Blob 为 `74be8374a67da385a5
 G 当前源文件明确要求实际 C Provider receipt 和不可变 CSubmitOutcome，作为 1.1 因果顺序/recovery 谓词的一部分。H §§11.8–11.9 已提议携带 C 签发引用，但 H 提案不能替代 C 自身的 producer 决议或 Provider 证据合同。
 
 必须由 C 发布精确版本决议或源文件补充，固定到同一个 A/COC package 版本，并定义 C 签发的 Provider receipt/CSubmitOutcome、条件性 terminal 引用、UNKNOWN/IN_DOUBT 行为，以及与 InferenceRequestId/FinalRequestBoundaryId/request digest/participant identity 的因果绑定。在此之前，H36-AP-09 和 C36-AP-01 均保持 OPEN；不得推断 1.1 跨 Owner 已接受。
+
+## 11. 更正 — 在独立 Owner 合同中找到 C 精确版本接受
+
+此前 C36-AP-01 发现现已在 **C 源决议层面 RESOLVED**。此前复审只检查了 C 的 Final Request Evidence 合同，没有纳入 C 独立的 cross-authority causal-order 合同。重新读取 `session-c-agent-integration-2026-11-16` 分支上的 `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`，精确 Blob 为 `45a48249717c8cddb07ab96197730ef93d406c22`。
+
+该 C Owner 工件明确记录对精确 CGH-APPLIED-1.1 recovery-batch 修订 **ACCEPT WITH ENUMERATED EXCEPTIONS**，固定 A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` 和 companion COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`。它要求 C 签发 CSubmitOutcome、实际 Provider receipt、实际 InferenceRequestId/FinalRequestBoundaryId、不可变 request digest、UNKNOWN/IN_DOUBT 处理及同 key 恢复。C 的 JF-10 Issue #8 bridge 决议也已记录精确工件 pin 和列明的 C 自有条件。
+
+已新增完整 EN/zh-CN 配对及针对性一致性复审：
+- `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`
+- `docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`
+- [英文复审](2026-11-17-c-submit-causal-order-bilingual-review.md) / [中文复审](2026-11-17-c-submit-causal-order-bilingual-review.zh-CN.md)
+
+该更正不解决 H36-AP-09：H 的版本化 Wire message-family Schema/SDK 映射，以及 C/G/I/D/Storage 消费方互操作仍开放。它也不代表 coordinator 已部署、Provider 实现已验证或 C-CO/JF-10 测试已执行。
