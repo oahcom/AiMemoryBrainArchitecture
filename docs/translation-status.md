@@ -3,7 +3,7 @@
 - Document ID: DOC-STATUS-001
 - Version: 1.0
 - Status: Active documentation work plan
-- Tracking branch: docs/bilingual-architecture
+- Tracking branch: docs/bilingual-coverage-completion
 
 ## 1. Purpose / 目的
 
@@ -22,6 +22,8 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Technology overview | 13-engineering-decisions/technology-architecture-blueprint.md + TAR-AI-001 | docs/zh-CN/13-engineering-decisions/technology-architecture-overview.md | docs/en/13-engineering-decisions/technology-architecture-overview.md | COMPLETE — overview only |
 | TAB-001 full technology blueprint | 13-engineering-decisions/technology-architecture-blueprint.md | Pending | Existing English source | NOT STARTED — full blueprint translation and technical parity review pending |
 | Bilingual documentation policy | 00-governance/bilingual-documentation-policy.md | Embedded bilingual normative policy | Embedded bilingual normative policy | COMPLETE |
+| Design principles source specification | 00-governance/design-principles.md | docs/zh-CN/00-governance/design-principles.md | docs/en/00-governance/design-principles.md | COMPLETE — source-aligned pair |
+| System architecture source specification | 01-system-architecture/system-overview.md | docs/zh-CN/01-system-architecture/system-architecture-specification.md | docs/en/01-system-architecture/system-architecture-specification.md | COMPLETE — source-aligned pair; distinct from reader guide |
 | Architecture invariants | 00-governance/architecture-invariants.md | docs/zh-CN/00-governance/architecture-invariants.md | docs/en/00-governance/architecture-invariants.md | COMPLETE |
 | Canonical terminology | 00-governance/terminology.md | docs/zh-CN/00-governance/terminology.md | docs/en/00-governance/terminology.md | COMPLETE |
 | System component map | 01-system-architecture/component-map.md | docs/zh-CN/01-system-architecture/component-map.md | docs/en/01-system-architecture/component-map.md | COMPLETE |
@@ -62,7 +64,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 ### Batch 2 — Governance and system map / 第二批：治理基线与系统地图
 - Status: COMPLETE for reader guides and core maps.
 - Detailed component interactions, data flows, boundaries, and quality-attribute source documents: NOT STARTED — full source-level bilingual versions remain pending.
-- GOV-DOC-001 adopted in the proposed governance change set; effective as a repository requirement upon merge into the approved main baseline.
+- GOV-DOC-001 is present on main as the normative repository-wide policy and applies to new architecture work.
 - Architecture principles, invariants, terminology source reconciliation.
 - Component map, responsibility matrix, system workflows.
 - Deliverables: paired Chinese/English documents and cross-links.
@@ -135,4 +137,4 @@ A document is not bilingual-complete merely because it has been translated. Each
 
 A integration governance and conformance reader guides are available in both languages. The detailed A registry, complete test catalogue, and Owner-specific review reports remain to be translated as source-level documents.
 
-Batches 1 and 2 provide the orientation, shared language, governance invariants, component map, and responsibility matrix. This is still not a full translation of all subsystem specifications. Root-level Owner documents remain the detailed source specifications until their paired bilingual versions are completed and reviewed. The mandatory bilingual policy is proposed in this change set and becomes effective as an approved governance baseline when merged.
+Batches 1 and 2 provide the orientation, shared language, governance invariants, component map, and responsibility matrix. This is still not a full translation of all subsystem specifications. Root-level Owner documents remain the detailed source specifications until their paired bilingual versions are completed and reviewed. GOV-DOC-001 is already part of the main governance baseline. This batch adds source-aligned pairs for design principles and the detailed system architecture overview.
