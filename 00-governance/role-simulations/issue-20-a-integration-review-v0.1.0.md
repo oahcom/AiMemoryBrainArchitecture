@@ -1,7 +1,7 @@
 # Session P — A-role Integration Review of Issue #20 v0.1.0
 # Session P — A 角色 Issue #20 集成审查 v0.1.0
 
-**Disposition:** BLOCKED — integration freeze NOT APPROVED.  
+**Disposition:** ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS. Joint contract freeze NOT APPROVED; production activation NOT AUTHORIZED.  
 **Authority:** Session P role simulation only. This is not A Owner's signed decision or a PGA decision.  
 **Review baseline:** Exact branch heads and source blobs recorded below; any movement invalidates this review snapshot.
 
@@ -61,7 +61,7 @@ This is a useful executable contract check, but not proof of concurrent database
 
 ## 4. Decision
 
-**Simulated A disposition: BLOCKED — no interface freeze, no architecture baseline freeze, no production readiness, no Global Forget completion, no Restore Serving authorization.**
+**Simulated A disposition: ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS.** No interface freeze, architecture baseline freeze, production readiness, Global Forget completion or Restore Serving authorization is granted.
 
 Required next Owner actions:
 1. D/I: publish exact schemas and owner-local linearization/receipt-consumption tests.
@@ -72,3 +72,47 @@ Required next Owner actions:
 6. A: re-fetch all branches, re-pin all exact blobs, reconcile every Owner decision and issue a new integration disposition.
 
 Issue #20 remains OPEN. This role simulation does not impersonate independent Owner approval.
+
+## 5. Phase 3.8.4 exact-version refresh / Phase 3.8.4 精确版本刷新
+
+This addendum supersedes the earlier A-role verdict wording above where it implied that the candidate composition itself was rejected. The correct current disposition is candidate acceptance with blockers, consistent with the latest A branch artifacts. It does NOT authorize joint contract freeze or production activation.
+
+Latest source branch heads observed:
+- D `e326e6ec11f01776fa8c1655da232e8e0e5c4706`
+- I `ac12267ab5bca6ac462893a053c93965eaa6b3b9`
+- F `348b5ec84c44a8a067122ce0aa72a594b9c06b66`
+- E `df3f56cdebbb4bb85999e2e04b666dacf77da810`
+- G `69ba55c5ffd473ced1ccb569e9bbf7fea48566aa`
+- H `ba99eea9334d77c2a014ed45d9287ef514a4d895`
+- Storage `93c9546bae5e17f6b62e4219e792b947c5fbd816`
+- A `6d6f08ae7704e0fa0cf0f2eee0512bf5e3eb624f`
+
+Additional exact evidence:
+- D Publication Participant and Terminal Contract Blob `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78`.
+- D Owner Snapshot Membership Proof Blob `d80dabe7210e681bc4e2290355a38f8b67be9ddd`.
+- I Commit Authorization Receipt / Revocation Sequencer Blob `54bab0484bd232a5a258e65e34cc7425288b39a6`.
+- I Owner Snapshot Membership Proof Blob `88209bbea0ab600880c5c630cfe83af31ee16dd7`.
+- H RecoveryJoin 1.0.2 Blob `4b664e3bce465499bcdfd93796349a4ba7074002`; H Unified Manifest Union Contract Blob `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175`.
+- Storage Visibility Participant / Atomic Outcome Contract Blob `175ee7b1349cfdb79a19898b311a88391ed88010`; Storage Serialization Topology ADR Blob `080433f8e13a500522bc2754da64057edb0ae9d8`.
+- Current A Phase 3.8.4 Membership Proof Cross-Owner Review Blob `81d8956eedceb0b8842034c4ea1989e765dd6e4e`.
+- A Phase 3.8 D/E/I/Storage Atomic Registration-to-Visibility Decision Blob `6338be6c2a45fdd35f6709beb7978725a3b8fb37`.
+
+### A-COC-I20-10 — Membership is not completeness
+
+RecoveryJoin 1.0.2 gives typed owner-signed row-membership proof payloads. Exact inclusion in an owner snapshot does not prove complete enumeration. Each I/D/C owner must separately prove query identity, pagination completion, count, ordered set root, owner-local high-water vector, snapshot attestation and anti-rollback. Empty sets require a signed COMPLETE_EMPTY proof. H transports/validates structure and joins references; it cannot assert owner ledger completeness or key trust.
+
+### A-COC-I20-11 — Canonical union and digest layers
+
+The Manifest is the disjoint typed union of quorum-committed COC participants at/before prefix P and applicable unjoined I/D/C owner-local admissions at/below each owner's independently frozen high-water. No synthetic participant identity or cross-owner numeric order is allowed. Keep `member_set_root`, `manifest_content_digest`, `manifest_record_entry_digest`, `batch_digest` and `batch_entry_digest` distinct. RecoveryCutoffBatch commits before ParticipantSetReconciliation; crash between them leaves the epoch fenced and recovery must resume the same pair.
+
+### A-COC-I20-12 — I pre-commit and post-commit proofs are different
+
+The consumed I CommitAuthorizationReceipt is the pre-commit ICommitAuthorizationProof validated by Storage at the visibility linearization point. ITerminalProof is issued only after authoritative Storage COMMITTED_VISIBLE or NO_PUBLICATION and is used for closeout. Storage must not require ITerminalProof to create the Storage outcome. I 3.8 receipt outcomes are COMMIT_WON, REVOCATION_WON and UNKNOWN/IN_DOUBT.
+
+### A-COC-I20-13 — Physical Storage topology remains BLOCKED
+
+Storage 3.8 visibility is a logical transaction proposal. Storage 3.8.2 topology ADR is ADR-BLOCKED / NO TOPOLOGY SELECTED. Option A (single serializable transaction domain per Canonical Memory authority) and Option B (durable linearizable coordinator) remain candidates; check-then-write/eventual coordination is rejected. The current branch does not prove actual deployment topology, database/adapter binding, same-XID recovery or physical crash/failover/restore conformance.
+
+### Refreshed simulated A verdict
+
+**ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS.** Gate A remains PARTIAL PASS / OPEN; Gate B BLOCKED; Gate C BLOCKED; R1/R2 OPEN; JF-10 P0 OPEN; multi-PolicyDomain atomicity BLOCKED. The latest A branch review itself is a delegated role review, not an independent human Owner/governance signature. No interface freeze or production activation.
