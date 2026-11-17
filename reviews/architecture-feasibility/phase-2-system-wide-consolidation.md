@@ -86,7 +86,8 @@ The diagram is a logical responsibility view, not a deployment diagram. A–I do
 | G | Desired Context, immutable ContextVersion, delivery and Context-side Applied / 目标 Context、不可变版本、交付与 Context 侧 Applied | Canonical Memory, provider outcome or external erasure / 权威记忆、Provider Outcome 或外部擦除 |
 | H | BMCP schema, wire semantics, capability and authenticated transport evidence / BMCP Schema、Wire 语义、能力与认证传输证据 | Owner authority or business terminal truth / Owner 权威或业务终态事实 |
 | I | Principal/workload trust, authorization, PolicyDomain, PermissionEpoch, revocation and Global Forget policy/completion / 身份信任、授权、PolicyDomain、PermissionEpoch、撤权及 Global Forget | D lineage/fence or Storage visibility / D Lineage/Fence 或 Storage 可见性 |
-| Storage | Durable transaction, serialization, visibility pointer, COC log and recovery / 持久事务、序列化、可见性指针、COC 日志与恢复 | D/I/C semantic decisions or Global Forget completion / D/I/C 语义决议或 Global Forget 完成 |
+| COC | Quorum-committed causal-order prefix, Recovery Cutoff Batch/Manifest and participant registry / Quorum 因果顺序前缀、Recovery Cutoff Batch/Manifest 与 Participant Registry | Owner authorization, D fence, C provider truth or I release / Owner 授权、D Fence、C Provider Truth 或 I Release |
+| Storage | Durable transaction, prepared participant, visibility pointer, outbox and physical recovery / 持久事务、Prepared Participant、可见性指针、Outbox 与物理恢复 | D/I/C semantic decisions or Global Forget completion / D/I/C 语义决议或 Global Forget 完成 |
 
 ### 2.2 Domain model / 领域模型
 
