@@ -37,15 +37,15 @@ This is the canonical repository location for reusable AI prompts. Store prompts
 
 | Owner | Directory | Responsibility |
 |---|---|---|
-| A | [A/](A/) | Principal integration architecture and system-wide contract reconciliation |
-| B | [B/](B/) | Domain model, canonical semantics and ADRs |
-| C | [C/](C/) | Agent integration, telemetry and inference boundary |
-| D | [D/](D/) | Canonical Memory Brain authority and lifecycle |
-| E | [E/](E/) | Event ingestion, compilation and derivative publication |
-| F | [F/](F/) | Retrieval, activation, working set and runtime scheduling |
-| G | [G/](G/) | Memory Context, versioning, delivery and reconciliation |
-| H | [H/](H/) | BMCP protocol, wire contract and conformance |
-| I | [I/](I/) | Security, identity, permission and governance |
+| A | [A/](A/) | Charter, Phase 3 remediation prompt, technology review prompt |
+| B | [B/](B/) | Charter, Phase 3 remediation prompt, technology review prompt |
+| C | [C/](C/) | Charter, Phase 3 remediation prompt, technology review prompt |
+| D | [D/](D/) | Charter, Phase 3 remediation prompt, technology review prompt |
+| E | [E/](E/) | Charter, Phase 3 remediation prompt, technology review prompt |
+| F | [F/](F/) | Charter, Phase 3 remediation prompt, technology review prompt |
+| G | [G/](G/) | Charter, Phase 3 remediation prompt, technology review prompt |
+| H | [H/](H/) | Charter, Phase 3 remediation prompt, technology review prompt |
+| I | [I/](I/) | Charter, Phase 3 remediation prompt, technology review prompt |
 
 ## 4. Mandatory execution sequence / 强制执行顺序
 
