@@ -261,7 +261,7 @@ H has now committed the following candidate artifacts to its owner branch:
 - H semantic validator contract 3.6.10 latest: Blob `142425b6280f7e0fe517489bc87bc81db892225a`
 - H recovery-cutoff structural schema 1.0.4: Blob `d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1`
 - H RecoveryJoin structural schema candidate 1.0.0: Blob `f531c1d4b89a48457188c4988f140952759223a6`
-- H executable HRC semantic suite: Blob `794ac0c34aaad921e5d4a5bcc42b6601f7caf817`
+- H executable HRC semantic suite: Blob `d14e66a2196303374f31a4285244a0f77a3ad328`
 - H wire interoperability candidate suite: Blob `18e50957848178f3f35593b3e618dfa9b90cdb31`
 
 The semantic suite contains HRC-01..25 plus JPF-01..12. The wire suite contains WIRE-01..10. These are committed test candidates, not CI execution evidence. The test-only digest helper is not a production canonicalization profile.
@@ -290,9 +290,9 @@ The H schema keeps the COC ParticipantManifest's owner_admission_ref as the prim
 
 Latest H pins:
 - RecoveryJoin schema candidate: f531c1d4b89a48457188c4988f140952759223a6
-- H semantic validator contract: fe9a9a5b65d34de0366bce6f996da9739eb8ca5f
+- H semantic validator contract: c93560fcda947aef0a611b3096fb1c1994d41cd0
 - HRC semantic suite: 794ac0c34aaad921e5d4a5bcc42b6601f7caf817
 - Wire interop suite: 1a4e754ba9bfa57eb973c6d39731e9f89443b323
 - Schema integrity suite: 5292d56661e938c905c61455e9ed53c4ff674c54
 
-The tests remain unrun; these are executable candidates only.
+The test inventory is 61 unittest methods: 25 HRC, 17 JPF, 10 wire and 9 schema-integrity. The tests remain unrun; these are executable candidates only.
