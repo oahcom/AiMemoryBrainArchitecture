@@ -7,7 +7,7 @@ import jsonschema
 class Issue20SchemaStructureTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        schema_path = Path(__file__).resolve().parents[1] / "issue20.archive-forget-restore.v0.1.0.schema.json"
+        schema_path = Path(__file__).resolve().parents[1] / "issue20.archive-forget-restore.v0.1.1.schema.json"
         cls.schema = json.loads(schema_path.read_text(encoding="utf-8"))
 
     def test_d_i_storage_and_module_contract_types_exist(self):
@@ -50,7 +50,7 @@ class Issue20SchemaStructureTests(unittest.TestCase):
         )
         receipt = {
             "schemaId": "issue20.archive-forget-restore",
-            "schemaVersion": "0.1.0",
+            "schemaVersion": "0.1.1",
             "messageId": "msg-1",
             "issuer": "D",
             "audience": "E",
