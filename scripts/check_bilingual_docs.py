@@ -186,6 +186,12 @@ def main() -> int:
     for path in sorted(changed):
         parts = Path(path).parts
         if len(parts) >= 2 and parts[0] in NORMATIVE_ROOTS:
+            # Root-level Chinese source peers use a .zh-CN.md suffix. They are
+            # already the language counterpart of the English source and must
+            # not be treated as a second independent normative source whose
+            # docs/en/...zh-CN.md and docs/zh-CN/...zh-CN.md peers are required.
+            if path.endswith(".zh-CN.md"):
+                continue
             if Path(path).suffix.lower() in EXEMPT_SUFFIXES:
                 continue
             if Path(path).suffix.lower() in {".md", ".yaml", ".yml", ".json", ".toml", ".proto"}:
