@@ -1,7 +1,7 @@
 # Phase 3.8.2 — A Race, Crash, Failover and Restore Conformance Matrix
 
 - Owner perspective: A — Principal Integration Architect (integration-session role simulation)
-- Status: **REQUIRED TEST PLAN — NOT EXECUTED / NO CONFORMANCE PASS**
+- Status: **REQUIRED PHYSICAL TEST PLAN — NOT EXECUTED / NO PHYSICAL CONFORMANCE PASS**
 - Scope: Phase 3.8 D/E/I/Storage publication gate + COC RecoveryJoin + JF-10 bridge
 - Language: English and Chinese are normative peers.
 
@@ -15,7 +15,7 @@
 | Storage | Phase 3.8 Storage Visibility Participant and Atomic Outcome Contract | session-storage-consistency-forget-atomicity-2026-11-16 | 175ee7b1349cfdb79a19898b311a88391ed88010 |
 | Storage | Phase 3.6.11 Bidirectional COC/Owner Admission Join Proof | session-storage-consistency-forget-atomicity-2026-11-16 | 4520860b28429d35cdb2ca947a56d0ccb64226a3 |
 | Storage | Phase 3.8.2 Serialization Topology ADR | session-storage-consistency-forget-atomicity-2026-11-16 | 080433f8e13a500522bc2754da64057edb0ae9d8 |
-| H | HRC semantic validator contract | session-h-bmcp-protocol | b3218298f58cff9b92cb1c38e453af6fd4d0dd50 |
+| H | HRC semantic validator contract | session-h-bmcp-protocol | 121717c5f303b1a2e864f2b95664f51f51ba4b48 |
 | H | Recovery-cutoff schema 1.0.4 | session-h-bmcp-protocol | d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1 |
 | H | RecoveryJoin schema candidate 1.0.0 | session-h-bmcp-protocol | dd3234aa1c74caf6d0e335875cd96e0b2b64082f |
 | H | HRC semantic suite | session-h-bmcp-protocol | 60a2f4db4bd12f2131ecd147db9bbe328da6db50 |
@@ -100,7 +100,7 @@ Any unknown authority, incomplete enumeration, signature/key uncertainty, stale 
 - WIRE-01..10: deterministic test serialization, duplicate key, absent/null, counter, critical field, GID typing and digest domain separation.
 - SCHEMA-01..09: schema-family inventory, strict definitions, independent request/admission statuses, JF-10 typed tuple and row identity fields.
 
-The current test code uses a TEST-ONLY canonical digest helper. It does not verify production signatures, final H canonicalization, or cross-language canonical bytes.
+The 66-method HRC/JPF/WIRE/SCHEMA candidate suite passed GitHub Actions run 44039990464. The test code uses a TEST-ONLY canonical digest helper. It does not verify production signatures, final H canonicalization, or cross-language canonical bytes. The physical race/crash/failover/restore matrix in this document remains unexecuted.
 
 ## 7. Exit criteria
 
@@ -121,4 +121,4 @@ The current test code uses a TEST-ONLY canonical digest helper. It does not veri
 Exit 条件包括：H 六类消息与 RecoveryJoin 的 Wire Adapter；Schema 结构验证；HRC/JPF/WIRE/SCHEMA 全部 CI 执行；至少两种独立语言实现的 Canonical Bytes/Digest/Signature Input 互操作；I/D/C 独立批准；Storage 实际事务拓扑、HA/Restore 证据；最后 A 对精确 Blob 复审。
 
 
-Current executable candidate inventory: 66 unittest methods (25 HRC + 19 JPF + 10 WIRE + 12 SCHEMA). No CI run or conformance PASS is available.
+Current executable candidate inventory: 66 unittest methods (25 HRC + 19 JPF + 10 WIRE + 12 SCHEMA). The H candidate unit suite passed 66/66 in run 44039990464; no physical race/crash/failover conformance PASS is available.
