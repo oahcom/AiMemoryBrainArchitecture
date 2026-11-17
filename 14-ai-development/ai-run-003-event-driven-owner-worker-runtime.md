@@ -282,29 +282,10 @@ A commit or successful unit test is not system acceptance. A scheduled run is no
 
 ## 11. Storage decision remains open / 存储选型仍开放
 
-Detailed decision record: [ADR-RUN-001 — Durable Store and Transaction Boundaries](adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md). The ADR is PROPOSED: it defines transaction invariants, candidate comparison, benchmark/fault matrix and acceptance gates; it does not select or deploy a database.
+Detailed decision records: [ADR-RUN-001 — Durable Store and Transaction Boundaries](adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md) and [ADR-RUN-002 — GitHub App, Webhook Ingress and Secret Management](adr/ADR-RUN-002-github-app-webhook-security-and-secrets.md) and [ADR-RUN-003 — Owner Worker Isolation and Execution Boundary](adr/ADR-RUN-003-owner-worker-isolation-and-execution-boundary.md). All ADRs are PROPOSED: they define constraints and acceptance gates; none authorizes deployment or selects production credentials.
 
 详细决策记录：[ADR-RUN-001 — 持久化存储与事务边界](adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md)。该 ADR 处于 PROPOSED：定义事务不变量、候选方案比较、基准/故障矩阵和验收 Gate；不代表已选择或部署数据库。
 
-## 11. Storage decision remains open / 存储选型仍开放
-
-The pilot requires a durable transactional store for inbox, deduplication, queue state, leases, run ledger and outbox. The technology is intentionally **not decided here**.
-
-试点需要事务型持久化存储，承载 Inbox、去重、队列状态、租约、Run Ledger 和 Outbox。本文件**不在此决定**具体技术。
-
-Candidate options for an explicit ADR and workload test:
-
-- SQLite with WAL for a single-host pilot, subject to concurrency, backup, corruption recovery and write-amplification tests.
-- PostgreSQL for stronger multi-process concurrency and future multi-node operation, subject to operational complexity and backup/recovery design.
-
-候选方案需通过独立 ADR 和负载测试：
-
-- 单机试点可评估 SQLite + WAL，但必须测试并发、备份、损坏恢复和写放大。
-- PostgreSQL 可评估多进程并发和未来多节点扩展，但需承担运维复杂度及备份恢复设计。
-
-Do not choose based only on familiarity. Define required transaction boundaries and crash-recovery tests first.
-
-不得仅凭熟悉程度选型。先定义事务边界和崩溃恢复测试，再做技术决策。
 
 ## 12. Failure and recovery model / 故障与恢复模型
 
