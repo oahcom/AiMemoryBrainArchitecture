@@ -1,0 +1,298 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.aimba.dev/bmcp.applied-delivery-evidence-1.0.0.schema.json",
+  "title": "BMCP Applied Delivery Evidence 1.0.0",
+  "description": "Versioned H Adapter/Runtime delivery evidence. This schema does not modify Unified 1.2.15 Gateway C Provider Outcome messages.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_artifact_revision": {
+      "const": "1.0.0"
+    },
+    "message_type": {
+      "const": "APPLIED_DELIVERY_EVIDENCE_RECORDED"
+    },
+    "issuer_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sender_authority_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sender_subject_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "audience": {
+      "type": "string",
+      "minLength": 1
+    },
+    "message_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "message_nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "signing_sequence_namespace_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "signing_record_sequence": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "signature_profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "key_id_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "key_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter_instance_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_session_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "delivery_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "delivery_attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inference_request_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "final_request_boundary_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter_capability_epoch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_kind": {
+      "enum": [
+        "FINAL_REQUEST_SUBMITTED",
+        "APPLIED_CONTEXT_OBSERVED",
+        "EXECUTION_STARTED",
+        "RECONCILIATION_OBSERVED"
+      ]
+    },
+    "evidence_tier": {
+      "enum": [
+        "TIER_1",
+        "TIER_2",
+        "TIER_3"
+      ]
+    },
+    "adapter_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_instance_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "context_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "materialized_context_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "final_request_boundary_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "managed_region_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "managed_region_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "managed_region_inventory_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "managed_region_coverage": {
+      "enum": [
+        "COMPLETE",
+        "PARTIAL",
+        "BYPASSED",
+        "UNKNOWN"
+      ]
+    },
+    "managed_region_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "digest_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_issuer_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_schema_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "submission_observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "submission_monotonic_sequence": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "correlation_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "causation_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "audit_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "c_submit_outcome_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "c_outcome_record_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "c_outcome_record_sequence": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "c_outcome_payload_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "payload_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "signature": {
+      "type": "string",
+      "minLength": 1
+    },
+    "integrity_proof_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "schema_artifact_revision",
+    "message_type",
+    "issuer_ref",
+    "sender_authority_ref",
+    "sender_subject_ref",
+    "audience",
+    "message_id",
+    "message_nonce",
+    "signing_sequence_namespace_ref",
+    "signing_record_sequence",
+    "signature_profile_id",
+    "key_id_ref",
+    "key_version",
+    "adapter_instance_ref",
+    "runtime_session_ref",
+    "delivery_id",
+    "delivery_attempt_id",
+    "inference_request_id",
+    "final_request_boundary_id",
+    "adapter_capability_epoch",
+    "evidence_kind",
+    "evidence_tier",
+    "adapter_ref",
+    "runtime_instance_ref",
+    "context_id",
+    "context_version",
+    "materialized_context_version",
+    "final_request_boundary_type",
+    "managed_region_id",
+    "managed_region_revision",
+    "managed_region_inventory_digest",
+    "managed_region_coverage",
+    "managed_region_digest",
+    "digest_profile",
+    "evidence_issuer_ref",
+    "evidence_schema_version",
+    "submission_observed_at",
+    "correlation_ref",
+    "causation_ref",
+    "audit_ref",
+    "c_submit_outcome_ref",
+    "c_outcome_record_ref",
+    "c_outcome_record_sequence",
+    "c_outcome_payload_digest",
+    "payload_digest",
+    "signature",
+    "integrity_proof_ref"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "evidence_tier": {
+            "const": "TIER_1"
+          }
+        },
+        "required": [
+          "evidence_tier"
+        ]
+      },
+      "then": {
+        "properties": {
+          "managed_region_coverage": {
+            "const": "COMPLETE"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "evidence_kind": {
+            "const": "FINAL_REQUEST_SUBMITTED"
+          }
+        },
+        "required": [
+          "evidence_kind"
+        ]
+      },
+      "then": {
+        "required": [
+          "submission_monotonic_sequence"
+        ]
+      }
+    }
+  ]
+}
