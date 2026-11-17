@@ -395,7 +395,7 @@ class CProviderOutcomeTests(unittest.TestCase):
                          {"outcome": "UNKNOWN"})
         self.assertEqual(c.submit("intent-1", "provider-key-1", "perm-7"), first)
         with self.assertRaises(ProtocolError):
-            c.submit("intent-1", "provider-key-2")
+            c.submit("intent-1", "provider-key-2", "perm-7")
 
     def test_exact_terminal_callback_is_idempotent(self):
         c = CProviderOutcome()
