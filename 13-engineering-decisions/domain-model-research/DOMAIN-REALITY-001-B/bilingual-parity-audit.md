@@ -41,6 +41,33 @@ A file is bilingual-complete only when the full normative content is present in 
 | evidence/official-reference-validation.md | Chinese peers added for all Observed/Borrow/Do-not-infer/Project-disposition clauses across DDD, Zep/Graphiti, Mem0, Letta, LangGraph, Temporal, PostgreSQL, PROV-O, RDF/OWL and JSON Schema; Blob `610a4480b483bac668ab26bbb7ef0505029412e2` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently re-open each official URL and verify source scope, version and no overclaim |
 | bilingual-parity-audit.md | Bilingual acceptance rules and selected narrative; file-by-file table and status/action cells are English-only | PARTIAL | Translate every audit row and re-audit after all other files are translated |
 
+## 2A. 中文逐文件双语对等审计
+
+| 文件 | 当前双语覆盖情况 | 对等状态 | 必需动作 |
+|---|---|---|---|
+| README.md | 已补齐 B0–B6 门禁、交付物、治理边界和当前阻塞的中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 刷新实时 PR/HEAD 指标，核验所有 Gate 和分支隔离声明。 |
+| existing-domain-model-baseline.md | 已补齐仓库/分支、领域源 Pin、Owner 指南、PR/Issue、冲突、缺失定义和 B0 结论中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验 SHA、main HEAD Commit 元数据和 Fact/Claim/I-04 语义。 |
+| baseline-currentness-and-owner-source-audit.md | 已补齐 main/领域 Pin、Owner HEAD、PR/Issue、Phase 3.8、治理/测试权威和 BIH 当前性中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 重新读取实时分支和 PR；核验每个 Blob/状态。 |
+| baseline-owner-branch-snapshot-errata.md | 已补齐十个 Owner 分支 HEAD 和精确复审工件 Pin 的中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 最终验收前重读实时 Ref；不得将快照误报为批准。 |
+| bilingual-parity-audit.md | 英文审计表已有中文逐文件对照；本表自身仍需独立检查。 | PARTIAL — SELF-AUDIT | 复核所有文件状态和 Blob Pin，确保审计没有遗漏。 |
+| canonical-domain-entity-inventory.md | 已补齐候选实体分类、理由和存在性问题的中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验实体分类未越权，OPEN/CANDIDATE 未被提升为 DECIDED。 |
+| canonical-identity-semantics.md | 已补齐类型区别、身份稳定性、命名空间、解析顺序、序列化引用和决策记录中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 与 I/H/Storage 精确类型契约逐条核验。 |
+| canonical-state-semantics.md | 已补齐状态词汇、Owner 权威、Applied/Recorded/Committed/Visible/Published 区分和 Gate 说明。 | REMEDIATED — MANUAL REVIEW PENDING | 与 D/G/H/I/Storage 精确状态契约逐条核验。 |
+| canonical-temporal-evidence-semantics.md | 已补齐时间字段、双时态比较、Source/Evidence/Provenance、精度、谱系和 Forget 保留规则。 | REMEDIATED — MANUAL REVIEW PENDING | 核验时间权威、Nullability 和 Forget Retention 规则。 |
+| canonical-domain-relationships.md | 已补齐关系类型、全部关系/基数行、引用完整性和建模问题中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验 Cardinality、Owner 权威、Forget 传播和跨 Tenant 规则。 |
+| domain-model-complexity-assessment.md | 已补齐评估维度、实体/值对象/派生视图分类、复杂度风险和模型建议。 | REMEDIATED — MANUAL REVIEW PENDING | 确保候选仍是候选，未被写成已批准实现。 |
+| mature-domain-model-research.md | 已补齐 DDD、Event Sourcing、PROV-O、双时态、RDF/OWL、成熟项目、建议和局限。 | REMEDIATED — MANUAL REVIEW PENDING | 重新打开官方来源，核验版本、范围和不可推断边界。 |
+| cross-owner-canonical-semantics-matrix.md | 已补齐当前 Owner Source Pin、历史契约、语义矩阵、权威边界、严重级别和冲突摘要。 | REMEDIATED — MANUAL REVIEW PENDING | 重读 Owner 分支；逐项核验 Blob 和批准状态。 |
+| domain-semantics-conflict-register.md | 已补齐 16 项冲突、决策权威、解除条件、Gate 和解决流程中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验每项冲突仍为正确状态，并检查是否有后续裁决。 |
+| canonical-domain-invariants.md | 已补齐 Identity/Relationship/Temporal/Evidence/State/Forget 不变量及测试条件。 | REMEDIATED — MANUAL REVIEW PENDING | 运行 Schema/Test；确认未运行项仍标记 NOT RUN。 |
+| canonical-domain-glossary.md | 已为所有规范术语、定义和禁止混淆项添加中文镜像。 | REMEDIATED — MANUAL REVIEW PENDING | 对照各 Owner 词汇表，确认无一词多义/误译。 |
+| canonical-domain-model.md | 已补齐最小/推荐模型、身份边界、认证入口和阻塞问题的中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 与所有 Owner 精确契约核验；不能将候选误报为冻结模型。 |
+| domain-model-decision-record.md | 已补齐 12 项决策、备选方案、后果、拒绝方案和未决问题中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验 Decision Status、Evidence、Affected Owner 和 Reversal Conditions。 |
+| fact-claim-identity-adr.md | 已补齐证据、决策矩阵、Owner 验收要求和八个验证示例中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 确保 C2+I1 仍是候选，不是已决定/接受/冻结。 |
+| validation/README.md | 已补齐验证计划、Schema/Test 状态和 NOT RUN 限制的中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验测试实际运行结果；不把计划写成通过。 |
+| evidence/README.md | 已补齐来源标题、用途、证据局限和版本注意事项中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验 URL 和版本范围。 |
+| evidence/official-reference-validation.md | 已补齐所有官方参考的观察、借鉴、不可推断和本项目处理条款中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 独立打开每个官方 URL，核验来源范围和不夸大结论。 |
+
 ## 3. Current conclusion / 当前结论
 
 **B5 MUST NOT PASS.** Most normative files are only partially bilingual. The presence of Chinese headings and selected translated paragraphs must not be presented as full bilingual compliance. The branch is a research draft only.
