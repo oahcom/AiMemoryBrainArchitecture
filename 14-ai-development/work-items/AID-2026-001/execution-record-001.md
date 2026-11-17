@@ -103,3 +103,38 @@ Subsequent commits that address IR-001, NR-002 and NR-003 must be appended here 
 - CI, YAML/schema parsing and full Manifest validation: NOT RUN.
 - Acceptance: BLOCKED pending named specialist reports, reproducible R3 test evidence, distinct integration review, fresh independent review and explicit acceptance authority decision.
 - Merge/deployment: NOT AUTHORIZED.
+
+
+## Follow-up remediation appendendum — I-PRE-001 and I-PRE-004 / 后续整改追加记录
+
+- Execution date: 2026-11-18
+- Starting Head for this remediation: `3fb10eef38d88b83b48edf5e2818e2ca5ae8ee9e`
+- I-PRE-001: corrected invalid indentation in `manifest.yaml`; the R3 specialist prompt, Forget specialist prompt and Integration Reviewer prompt paths are now peer mapping keys beside `r3_test_matrix`.
+- I-PRE-004: added bilingual `owner-d-i-forget-authority-matrix.md` and clarified Owner D v2, Owner I v2, and DOC-SEC-001 English/Chinese guides.
+- Authority distinction: D exclusively owns canonical Forget lifecycle semantics and D-domain completion predicates; I owns cross-system governance policy, evidence-acceptance criteria, retention/legal-hold policy and governance evaluation. I cannot rewrite D's canonical state; D cannot declare unverified external targets complete or waive I's governance constraints.
+- Explicit approval status: the matrix is PROPOSED. No claim is made that Owners D and I have separately approved it.
+- Commits:
+  - `4e9d58a0a7a8a789cf7c9cd84ebe03083346135b` — Manifest YAML mapping indentation correction.
+  - `ccdc697b4f12e3f61d2b3f9a305b1d6496435c20` — bilingual D/I authority matrix.
+  - `c8309ab05a3f8bd32f7e8edff75039f91ecb175e` — Owner I authority clarification.
+  - `bbd555bc145b31832ec227d10d7c27ffc627792d` — Owner D authority clarification.
+  - `9740b4888c5a875b87d9062100917f8c1f587628` — Owner I matrix link correction.
+  - `f0f455ec3aa41825074a57c9eb65e1e067e1db77` — Owner D matrix link correction.
+  - `ddd04f95b6d5f4f5b911344c7e7c6c62157efb3f` — English DOC-SEC-001 clarification.
+  - `0cfba423f5d6c17f8be23e02e4006873f33437b7` — Chinese DOC-SEC-001 clarification.
+- GitHub read-back: corrected Manifest and updated normative files were read back from the branch; PR changed-file inventory is now 34 paths.
+- YAML parser/schema validation: NOT RUN. Manifest validation: NOT RUN. CI/workflow runs and status checks: not yet rechecked after this appendendum.
+- R3 executable security tests: NOT RUN. Specialist reports: NOT EVIDENCED. This remediation does not constitute independent verification or R3 PASS.
+- PR remains Open/Draft/Not Merged; acceptance remains BLOCKED; merge NOT AUTHORIZED.
+
+## 后续整改追加记录 — I-PRE-001 与 I-PRE-004
+
+- 执行日期：2026-11-18
+- 本轮整改起始 Head：`3fb10eef38d88b83b48edf5e2818e2ca5ae8ee9e`
+- I-PRE-001：修复 `manifest.yaml` 中不合法的缩进；三个 R3/Forget/Integration Reviewer 提示词路径现与 `r3_test_matrix` 处于同一映射层级。
+- I-PRE-004：新增双语 `owner-d-i-forget-authority-matrix.md`，并澄清 Owner D v2、Owner I v2 及 DOC-SEC-001 中英文规范。
+- 权责区分：D 独占规范 Forget 生命周期语义及 D 领域完成判定条件；I 负责跨系统治理策略、证据接受条件、Retention/Legal Hold 策略及治理评估。I 不得改写 D 的规范状态；D 不得将未经验证的外部目标宣称为完成，也不得豁免 I 的治理约束。
+- 明确批准状态：该矩阵仍为 PROPOSED，不声称 D/I 已分别批准。
+- YAML Parser/Schema 验证：NOT RUN。Manifest 验证：NOT RUN。CI/Workflow 与 Status Check 尚未在本追加记录后重新核验。
+- R3 可执行安全测试：NOT RUN。专业审查报告：NOT EVIDENCED。本轮整改不构成独立验证或 R3 PASS。
+- PR 仍为 Open/Draft/Not Merged；Acceptance 仍 BLOCKED；Merge NOT AUTHORIZED。
