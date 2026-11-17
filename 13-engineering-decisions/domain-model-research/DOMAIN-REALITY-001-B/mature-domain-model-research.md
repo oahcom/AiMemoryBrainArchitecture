@@ -286,3 +286,108 @@ Do not copy: using JSON Schema as the source of domain semantics, state-transiti
 This report completes a first official-source research pass for DDD, Event Sourcing, PROV-O, RDF/OWL, Zep/Graphiti, Mem0, Letta, LangGraph, Temporal, PostgreSQL and JSON Schema. It does not close B2/B3, and it is not an independent review or technology ADR.
 
 本报告完成了 DDD、Event Sourcing、PROV-O、RDF/OWL、Zep/Graphiti、Mem0、Letta、LangGraph、Temporal、PostgreSQL 和 JSON Schema 的第一轮官方来源研究。但不关闭 B2/B3，也不构成独立审查或技术 ADR。
+
+
+## 10. Full Chinese peer for mature-project evidence / 成熟项目证据完整中文对照
+
+### 10.1 Zep / Graphiti
+
+**官方来源：**
+- Zep v4《How Graph Creation Works》：https://help.getzep.com/how-graph-creation-works
+- Zep v2《Understanding the Graph》：https://help.getzep.com/v2/understanding-the-graph
+- Graphiti 官方仓库 README：https://github.com/getzep/graphiti
+
+**观察到的模型：** 原始来源以 Episode 保存；抽取流程据此派生 Entity 节点以及带时间语义的 Relation/Fact Edge；其他派生观察或摘要可作为额外上下文产物。来源 Episode 提供溯源入口。Graphiti 文档描述关系有效时间窗口和时间历史。
+
+**可借鉴：** 显式保留 Source Episode → Derived Entity/Edge 的来源链；保留关系时间历史；让派生关系可以回链到原始来源。
+
+**不得照搬：** 不因 Graphiti 使用图模型就自动选择图数据库；不把抽取出的 Edge 当作已验证真值。B 的模型还必须保留认知状态、明确 Evidence 角色和 Owner 生命周期控制。
+
+**适用边界：** 这些结论受所引用 Zep v2/v4 文档版本约束。不同文档代际不能被合并成“所有版本行为一致”的结论。
+
+### 10.2 Mem0
+
+**官方来源：**
+- 官方仓库：https://github.com/mem0ai/mem0
+- Graph Memory 官方文档源码：https://github.com/mem0ai/mem0/blob/main/docs/platform/features/graph-memory.mdx
+-《How Mem0 Works》官方文档：https://github.com/mem0ai/mem0/blob/main/docs/core-concepts/how-it-works.mdx
+- 官方架构参考：https://github.com/mem0ai/mem0/blob/main/skills/mem0/references/architecture.md
+
+**观察到的模型：** 系统具有 Memory Extraction 和 Retrieval 流水线；Scope 维度包括 user、agent、app、run；存储组件包括 SQL Facts/Metadata、Vector Embeddings 和 Entity Store。平台 Graph Connections 将 Memory Nodes 与抽取出的 Entity 关联，用于辅助检索。当前 Graph Memory 文档描述的是 Entity 与 Memory 的连接/共现关系，不等于“管理”等类型化语义关系。当前官方来源验证补充记录了已观察到的抽取、Scope 和 Graph 模型及其限制；本研究不对所有 API Mutation 行为作无证据推断。
+
+**可借鉴：** 将 Scope ID 与抽取出的 Graph Entity 分离；把多信号 Retrieval 和 Entity Linking 作为派生投影/排序辅助。
+
+**不得照搬：** 不把平台内部、不可见的抽取流水线直接视为规范真值；无类型共现边不能替代类型化 Relation；没有证据证明该模型提供本项目要求的严格 Forget Atomicity 和 Provenance 保证。
+
+**适用边界：** 观察结论来自研究时可访问的官方仓库和文档。实施决策前必须固定具体版本，并重新核验版本行为。
+
+### 10.3 Letta
+
+**官方来源：**
+- Stateful Agents：https://docs.letta.com/concepts/stateful-agents
+- Memory & dreaming：https://docs.letta.com/configuration/memory
+
+**观察到的模型：** Agent 身份具有持久性，并关联 Memory、模型/工具配置及多个 Conversation；同一 Agent 的 Memory 可跨 Conversation 共享。MemFS 是基于 Git 的 Memory 文件系统，文件可检查和编辑；Dreaming 用于巩固近期交互。
+
+**可借鉴：** 明确区分持久 Agent 身份和 Conversation；让 Memory 状态可检查，并能观察版本化变化。
+
+**不得照搬：** 不把 Agent 自有 Memory 文件系统直接当作 Brain 的规范领域模型；Letta 的 Agent 身份与 Conversation 语义属于其产品模型，不能未经映射就成为本项目规范。
+
+### 10.4 LangGraph
+
+**官方来源：**
+- Checkpoint/Persistence：https://docs.langchain.com/oss/python/langgraph/persistence
+
+**观察到的模型：** Checkpoint 是某个时点 Graph State 的快照，具有唯一且单调递增的 ID；Thread ID 用于组织同一 Thread 的 Checkpoints；Pending Writes 支持从中断处恢复。Checkpointer 支持 Thread 范围的短期状态，Store 支持跨 Thread 的长期数据。
+
+**可借鉴：** 区分 Session/Thread 执行状态与长期 Memory Store；Checkpoint 身份/版本不等于规范 Memory 身份。
+
+**不得照搬：** 不把 Graph Execution Checkpoint 当作 Brain MemoryVersion 或 ContextVersion；三者属于不同状态权威和生命周期。
+
+### 10.5 Temporal
+
+**官方来源：**
+- Event History：https://docs.temporal.io/encyclopedia/event-history
+- Understanding Temporal：https://docs.temporal.io/evaluate/understanding-temporal
+
+**观察到的模型：** Workflow Event History 是单个 Workflow Execution 的持久、有序记录。Workflow Code 发出 Command；Temporal Service 持久化执行产生的 Event；发生故障后通过 Replay 重建 Workflow 执行状态。
+
+**可借鉴：** 对长时间运行的 Forget/Commit 工作流，借鉴持久操作历史、Command 与 Event 区分、Replay 证据和确定性恢复纪律。
+
+**不得照搬：** 不把每次 Memory Mutation 都变成 Temporal Workflow；不把 Temporal 设为项目必需 Runtime 依赖。Workflow History 是执行历史，不是规范 Memory 领域模型。
+
+### 10.6 PostgreSQL
+
+**官方来源：**
+- PostgreSQL 18《Concurrency Control》：https://www.postgresql.org/docs/current/mvcc.html
+- PostgreSQL 18《Transaction Isolation》：https://www.postgresql.org/docs/current/transaction-iso.html
+
+**观察到的模型：** MVCC Snapshot 提供事务隔离；Serializable 旨在保证结果等价于某种串行执行，但应用必须处理 Serialization Failure 并按规则重试。根据 PostgreSQL 文档，Repeatable Read 仍可能出现其定义的 Serialization Anomaly。
+
+**可借鉴：** 将 Snapshot Visibility 和 Serializable Transaction 语义作为 Storage 物理实现能力，针对 Storage 契约验证。
+
+**不得照搬：** 不能仅凭数据库隔离级别标签为 SERIALIZABLE，就声称已经证明项目的 JF-10 跨权威崩溃/恢复协议、Same-XID 决议、D Fence 顺序或 I Authorization Sequencing。这些要求必须由端到端故障证据和明确 Owner 契约参与来证明。
+
+### 10.7 JSON Schema
+
+**官方来源：**
+- JSON Schema Specification：https://json-schema.org/specification
+- Draft 2020-12：https://json-schema.org/draft/2020-12
+
+**观察到的模型：** 规范分为 Core 与 Validation 两部分；研究时官方规格页面列出的已发布版本为 Draft 2020-12。
+
+**可借鉴：** 使用 JSON Schema 验证稳定、已获 Owner 批准的序列化契约，并为 Negative Fixture 提供结构验证。
+
+**不得照搬：** 不把 JSON Schema 当作领域语义来源。它不能单独定义状态转换、授权、时间排序或跨文档不变量；这些必须通过 Schema 以外的显式语义验证完成。
+
+### 10.8 跨项目综合结论 / Cross-project synthesis
+
+- 成熟项目普遍区分长期身份、短期执行状态、来源材料和派生投影；本项目应保持相同的类型边界，而不是把 Memory、Context、Checkpoint、Session 和 Graph Node 统一成一个通用对象。
+- 图结构、向量索引、Checkpoint、Event History 和 JSON Schema 分别解决不同问题，不能互相替代，也不能因技术组件存在就推导出规范领域身份。
+- 外部项目可提供模式和实现参考，但其产品文档不能证明本项目的 Forget、授权、Applied、Storage Publication 或生产恢复不变量。
+- 所有借鉴均为候选设计输入；Owner 规范权威、精确版本 Pin、实现测试和独立验收仍然优先。
+
+- 成熟项目普遍区分长期身份、短期执行状态、来源材料和派生投影；本项目必须保留相同类型边界，不能把 Memory、Context、Checkpoint、Session 和 Graph Node 统一为通用对象。
+- Graph、Vector Index、Checkpoint、Event History 与 JSON Schema 解决不同问题，不能互相替代；不能因为存在某个技术组件，就推导出规范领域身份。
+- 外部项目只提供模式和实现参考，其产品文档不能证明本项目的 Forget、授权、Applied、Storage Publication 或生产恢复不变量。
+- 所有借鉴均是候选设计输入；Owner 规范权威、精确版本 Pin、实现测试和独立验收优先。
