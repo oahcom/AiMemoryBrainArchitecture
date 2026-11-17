@@ -15,8 +15,10 @@
 | H 1.2.15 C Validator | H 分支 / `08-bmcp-protocol/validators/provider_outcome_validator_1_2_15.py` | `90a2d4b6f5b05590e3e0a7daecb5a01d9bf525c0` | 本地 C 对象/Schema/语义 Validator；需要 Authority Callback |
 | H 1.2.15 Gateway Validator | H 分支 / `08-bmcp-protocol/validators/gateway_attestation_validator.py` | `9cc426d4c26deb452f39daff34c1008dd535e969` | Gateway-Attested Ingress/Replay Validator；生产接口由 Callback 注入 |
 | H 1.2.15 Gateway Tests | H 分支 / `08-bmcp-protocol/tests/conformance/provider_outcome/test_gateway_attestation_validator.py` | `9a5051b001a6e59d7b71e6dd175e84bb7d01d252` | 21 个确定性 Unit/Fixture 测试 |
-| H Workflow | H 分支 / `.github/workflows/h-provider-outcome-conformance.yml` | `4459d19f5b4eea058377d9819e48e81eed5c8c4b` | 执行 Provider Outcome 测试发现；Path Filter 仍指向 1.2.14 |
-| H 精确 CI | Run `44078755981`，Commit `e3e4cab0aab2c68f9db98bd50bc387b1895c3773` | — | SUCCESS；共 91 个测试，其中包括 21 个 H 1.2.15 Gateway 测试；Callback Fixture 使用确定性 Test Double |
+| H Workflow（修正前） | H 分支 / `.github/workflows/h-provider-outcome-conformance.yml` | `4459d19f5b4eea058377d9819e48e81eed5c8c4b` | 仅有 1.2.14 Path Filter；已被替代 |
+| H Workflow（已修正） | H 分支 / `.github/workflows/h-provider-outcome-conformance.yml` | `2ad679952ce5499a16c8fffa0a1543e26460e6eb` | 纳入 1.2.15 Schema、两个 Validator、Envelope Validator、测试路径和 Workflow |
+| H 精确 CI（修正前） | Run `44078755981`，Commit `e3e4cab0aab2c68f9db98bd50bc387b1895c3773` | — | SUCCESS；共 91 个测试，其中包括 21 个 H 1.2.15 Gateway 测试 |
+| H 精确 CI（修正后） | Run `44079842914`，Commit `0d36324457e39bd50ad56ae902d477c4ea765b61` | — | SUCCESS；共 91 个测试，其中包括 21 个 H 1.2.15 Gateway 测试；Callback Fixture 使用确定性 Test Double |
 | C 1.2.15 Schema 审查 | C 分支 / `07-agent-integration/phase-3.8.26-c-exact-review-h-unified-1.2.15-gateway-attestation-schema.md` | `c5ff68814be49ec5e6e2c081004e7fa058d276fa` | 委托 C 角色接受 Schema Shape，但附带条件 |
 | G Applied 源合同 | G 分支 / `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G 自有语义；持久化实现未验证 |
 | G 精确 Full-Path 消费审查 | G 分支 / `06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md` | `1894860c76336f8739d354b72beed3992cffd17e` | 明确绑定 H 1.2.14 × CSubmitOutcome 1.0.1 |
@@ -32,7 +34,7 @@ H 1.2.15 是 Unified Wire Family 的不可变后继候选（Wire Family 仍为 1
 
 测试 Fixture 对 Protected Transport、H/C Signature/Profile/Key Status、Origin Receipt、Durable Ingress/Replay 和 Owner Authority 接口使用确定性 Callback Test Double。该运行构成有意义的本地候选验证，但不证明生产 Trust Root、真实 I Registry/Delegation、实时 Owner Ledger、已部署的 Durable Replay Storage、Provider Truth 或生产 Ingress。
 
-Workflow 文件仍将 Revision 描述为 Unified 1.2.14，Push Path Filter 只列出 1.2.14 Schema 和旧 Validator，没有列出 1.2.15 Schema、两个 1.2.15 Validator 和 Gateway Test 文件。本次 Workflow 因在分支 HEAD 上运行而实际执行了 1.2.15 测试；但未来若变更仅涉及遗漏的 1.2.15 路径，可能不会触发该 Workflow。这是一个 CI Wiring P1。
+H 分支已修正过时 Workflow：Revision 描述现在区分 1.2.14 Compatibility 与 1.2.15 Gateway-Attested Conformance；Path Filter 已纳入 1.2.15 Schema、两个 1.2.15 Validator、Envelope-Auth Validator、Conformance Tests 和 Workflow 文件。修正后的 Workflow 已读回，Blob 为 `2ad679952ce5499a16c8fffa0a1543e26460e6eb`；修正后精确 Run `44079842914` 在 Commit `0d36324457e39bd50ad56ae902d477c4ea765b61` 上 SUCCESS，共 91 个测试，其中包括 21 个 1.2.15 Gateway 测试。上述路径的 CI Trigger Wiring P1 已关闭。
 
 C 的精确审查仅接受 1.2.15 的 **Schema Shape**，并附带 C 自有语义条件，且该审查早于当前 Validator/CI 证据。C 现在必须复审精确的 1.2.15 Validator/Test/CI Pin。例如，H 必须认证 Origin Receipt，将原始 Adapter 身份绑定到不可变 C 对象，验证 Raw-Byte Digest，独立验证 H 与 C 签名，执行 Wire/Object 重复字段精确相等，并保持 C 的 UNKNOWN/IN_DOUBT 非终态。
 
@@ -76,7 +78,7 @@ G 源合同规定：Applied 按精确 Request/Attempt/Evidence Identity 提交�
 
 | 优先级 | Owner | 下一项必需工件/证明 | Gate |
 |---|---|---|---|
-| P1 | H | 取得 C 对 Validator/Test/CI Pin 的精确复审；修正 Workflow Revision 与 Path Filter，纳入 1.2.15 Schema、Validator 和 Tests；在声明生产能力前以真实生产 Authority 集成证据替换 Callback Double | H 1.2.15 仍为 Candidate；本地测试通过不等于生产符合性 |
+| P1 | H | 取得 C 对 Validator/Test/CI Pin 的精确复审；在声明生产能力前以真实生产 Authority 集成证据替换 Callback Double | Workflow Path Wiring 已修正；H 1.2.15 仍为 Candidate；本地测试通过不等于生产符合性 |
 | P1 | G | 发布 Applied Persistence/Idempotency 补充合同：定义 Durable Key、唯一性范围、C/H/COC 精确 Crosswalk、同 Digest 重放、不同 Digest 冲突、Supersession、Crash Recovery 和 Restore Fencing | 无实现证据前不得声明 G Persistence PASS |
 | P1 | G + C + H | 精确 1.2.15 Consumer Matrix：各 Owner 接受同一不可变 Schema/Mapping/Validator/Fixture/CI 集；不得继承前序版本批准 | 精确决议完成前不得接受 1.2.15 Full-Path |
 | P2 | C/H/G | 为 ProviderIdempotencyKeyRef、H Envelope/Evidence Identity、CSubmitOutcome Identity、G Applied Record Identity 保留不同强类型标识；仅定义必要的相等/关联边 | 禁止跨层身份合并 |
