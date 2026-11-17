@@ -13,7 +13,7 @@
 
 | PR | Branch | Head SHA | Base SHA | Key report path | Report Blob SHA |
 |---|---|---|---|---|---|
-| #84 | `research/architecture-breakthrough-session-0-2026-11-18` | `c6e76b34cbf099d36631b284c9b8a75d778d707f` | `28fb37e21fa4ba2b871f7816fe669128618c063e` | `reviews/architecture-breakthrough/architecture-breakthrough-overview-zh-CN.md` | Read-back performed; exact Blob SHA to be appended after final pin |
+| #84 | `research/architecture-breakthrough-session-0-2026-11-18` | `c6e76b34cbf099d36631b284c9b8a75d778d707f` | `28fb37e21fa4ba2b871f7816fe669128618c063e` | `reviews/architecture-breakthrough/architecture-breakthrough-overview-zh-CN.md` | `c31726f6414eeb87a9447ab7154d26743f75d5f3` |
 | #88 | `review/forget-formal-verification-2026-11-18` | `bf35b32295d0d3f337c80c3dc406db0a41de6830` | `e52594f181d2edb77448adcfed64a0fbdffaf3aa` | `reviews/architecture-breakthrough/forget-formal-verification/forget-formal-verification-zh-CN.md` | `ea05c23da95ce926cd8ae4f645e5d5b5cc1097c4` |
 | #86 | `research/memory-operating-system-architecture-2026-11-18` | `3892916ce2379f807a0ddcd0039816f6e88ecee1` | `b3c666e67982cb3d3374e759cfb6552c7765aacb` | `reviews/architecture-breakthrough/memory-operating-system/memory-operating-system-zh-CN.md` | `2e5b50d6fdf181e7f87749349f450443a703c9eb` |
 | #85 | `research/memory-ir-compiler-session-c-2026-11-18` | `c5013d3585d54457f38bef37984645e2055ff7cf` | `b3c666e67982cb3d3374e759cfb6552c7765aacb` | `reviews/architecture-breakthrough/memory-ir-compiler/memory-ir-compiler-zh-CN.md` | `181652a431fd84429981825dbd63ca1b95468101` |
