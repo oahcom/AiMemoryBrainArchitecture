@@ -94,10 +94,11 @@ The implementing AI must:
 4. make the smallest coherent change;
 5. add or update tests alongside behavior;
 6. update documentation, examples and migrations as needed;
-7. run local checks;
-8. report deviations, unknowns and unrun checks;
-9. commit to its assigned branch;
-10. verify branch HEAD and read back changed files.
+7. for architecture-significant changes, update Chinese and English counterparts in the same change set and verify semantic parity;
+8. run local checks;
+9. report deviations, unknowns and unrun checks;
+10. commit to its assigned branch;
+11. verify branch HEAD and read back changed files.
 
 The AI must stop and request a decision when it discovers a conflict outside its authority, an unsafe invariant, an unanticipated data migration, or an acceptance criterion that cannot be tested.
 
