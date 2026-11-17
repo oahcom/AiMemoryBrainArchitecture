@@ -243,3 +243,24 @@ PublicationOperationId、ProducerWorkItemId、DerivationRunId、AttemptId、Leas
 ### 11.7 未授权事项
 
 不宣称 Schema/Wire Freeze、API 已存在、数据库已选型或部署、独立 Owner 批准、实现完成、Conformance PASS、分支合并、Provider Execution、Production Activation、Global Forget Completion 或物理擦除完成。
+
+
+## 12. Owner-role contract artifacts created in their respective branches
+
+These are role-authored candidate contract artifacts created during this integration session. They are not independent signatures by the named repository Owners.
+
+| Role | Branch | Path | Exact Blob SHA | Disposition |
+|---|---|---|---|---|
+| D | `session-d-memory-brain-2026-11-16` | `03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md` | `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | Candidate D participant/admission/terminal contract |
+| E | `session-e-memory-compiler-2026-11-16` | `04-memory-compiler/phase-3.8-e-publication-orchestration-retry-recovery-contract.md` | `cee88de8614b1739aa6a575ac88cb907463a0312` | Candidate orchestration/retry/recovery contract |
+| I | `session-i-security-governance-2026-11-16` | `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md` | `b0b6997bf518e03e924faee8cdba367807dfeda6` | Candidate authorization receipt/sequencer contract |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md` | `73c6d3d86a51a7163a727994aef247ba97fde083` | Candidate durable prepare/visibility outcome contract |
+
+### 12.1 Integration cross-check
+
+- D requires durable Storage PREPARED_HIDDEN before admitting its PublicationParticipantRef.
+- E orchestrates the full Storage → D → I → Storage sequence and distinguishes same-operation recovery replay from a new publication after NO_PUBLICATION.
+- I separates caller request, single-use sequencer consumption receipt and terminal proof; COMMIT_WON holds revocation but never grants standalone visibility.
+- Storage owns the durable participant, final visibility linearization, immutable outcome and positive NO_PUBLICATION proof; physical topology remains open.
+
+The four artifacts are mutually consistent at the logical contract level. Their exact APIs, canonical wire schemas, cryptographic profiles, physical serialization topology and conformance evidence remain open. A final owner-exact review must be performed by each actual Owner against these exact Blob SHAs.
