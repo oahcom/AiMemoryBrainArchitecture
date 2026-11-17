@@ -11,7 +11,7 @@
 - H RecoveryJoin schema 1.0.2: Blob 4b664e3bce465499bcdfd93796349a4ba7074002
 - H Phase 3.8.10 review of I profile/P0: Blob 0b6eeadb1cfac415e77ec1358b9fdf99fde11d41
 - H Phase 3.8.9 C outcome mapping: Blob a09980b168f14ef41f84567d28267387d9a98377
-- C Phase 3.8.12 exact review of H/C mapping and validator: Blob c1dcc4049205b8b9315e3b284433625e9893a711
+- C Phase 3.8.14 successor review of H/C mapping and validator: Blob dd4fb61536bead57d5c8db0a58abae93b368b72e
 - C Phase 3.8.13 profile identifier decision: Blob 5067dadb9c646a054d78f03c56e635facc36311a
 - I owner snapshot membership proof contract: Blob 88209bbea0ab600880c5c630cfe83af31ee16dd7
 - Provenance: delegated I-role review; **not an independent human I Owner signature or external governance approval**.
