@@ -3,7 +3,7 @@
 - Research ID: ABR-SESSION-0-2026-11-18
 - Status: **CANDIDATE / TO_VALIDATE; not an architecture approval**
 - Research branch: `research/architecture-breakthrough-session-0-2026-11-18`
-- Baseline: `main@b3c666e67982cb3d3374e759cfb6552c7765aacb`
+- Baseline: `main@28fb37e21fa4ba2b871f7816fe669128618c063e`
 - Date: 2026-11-18
 
 ## 1. Executive summary
@@ -28,7 +28,7 @@ This is not a blind organizational review: Session 0 shares the same repository 
 
 | Source | Current branch HEAD | Read artifacts / blob SHA |
 |---|---|---|
-| main | `b3c666e67982cb3d3374e759cfb6552c7765aacb` | `01-system-architecture/system-overview.md` / `995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256` |
+| main | `28fb37e21fa4ba2b871f7816fe669128618c063e` | `01-system-architecture/system-overview.md` / `995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256`; new B-02 Phase 8 / `8a0a428ebf9cd8c8fe00562d2267ff490d5c3205` |
 | A | `session-a-integration-2026-11-16` @ `6e05831d264040e0e3b3359245b1e01ea613b46c` | responsibility matrix / `fbeb6935fe874e6c843c25c3a891d6b3242cbfd3`; governance baseline / `a43a8f2fa3d31681d64b79d584364fdae80f8866` |
 | B | `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | Fact/Claim ADR / `a1024938ff5baba069cf128c69496a44e143330c`; consumer mapping / `dd45a37199c9b69ab6b68f65e051a484a04691d4` |
 | D | `session-d-memory-brain-2026-11-16` @ `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | Forget contract / `1f0391bc49d007c44ec74165bd33d37412cc7990`; publication gate / `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` |
@@ -233,3 +233,10 @@ Fingerprint using `source_digest + parser_version + extraction_policy/model_vers
 - Linux cgroup v2 memory controller: https://www.kernel.org/doc/html/latest/admin-guide/cgroup-v2.html
 - Redis eviction: https://redis.io/docs/latest/develop/reference/eviction/
 - OpenTelemetry context propagation: https://opentelemetry.io/docs/concepts/context-propagation/
+
+
+## 11. Main baseline delta (2026-11-18)
+
+During research, main advanced one commit from `b3c666e...` to `28fb37e21fa4ba2b871f7816fe669128618c063e`, adding only A's B-02 Phase 8 correction report (Blob `8a0a428ebf9cd8c8fe00562d2267ff490d5c3205`). The research branch now includes this main update through merge commit `a1bf0d0b6d4a79d0690941218bcf57461aa8d258`; main itself was not modified by this research.
+
+The new report corrects H 1.2.15 evidence: C/I have conditionally reviewed the schema and corrected issuance order at contract level; I production profile/issuer/trust registration remains OPEN; an H receiver validator exists but a distinct executable issuer path was not found; D's exact review of current H 1.2.15 remains OPEN. Contract review, executable issuer, production trust registration and independent Owner adoption must be tracked separately.
