@@ -220,7 +220,7 @@ class Protocol:
             raise Rejected("UNKNOWN operation has no immutable binding to reconcile")
         if proof.operation_id != operation_id or proof.operation_binding != binding:
             raise Rejected("NO_PUBLICATION proof does not bind the exact UNKNOWN operation")
-        if len(binding) < 3 or binding[1] != proof.publication_id or binding[2] != proof.storage_id:
+        if len(binding) != 5 or binding[1] != proof.publication_id or binding[2] != proof.storage_id:
             raise Rejected("NO_PUBLICATION proof participant identity mismatch")
         if not proof.complete():
             raise Rejected("Storage NO_PUBLICATION proof is incomplete")
@@ -462,21 +462,35 @@ class PublicationProtocolTests(unittest.TestCase):
         with self.assertRaises(Rejected):
             p.close_i("op-unknown", ("UNKNOWN",))
 
-    def test_no_publication_requires_complete_storage_proof(self):
+    def test_no_publication_requires_every_storage_absence_and_fence_fact(self):
         p = self.prepared()
         args = self.commit_args()
         binding = (args["auth_id"], args["publication_id"], args["storage_id"],
                    args["d_proof"], args["i_commit_won_proof"])
         p.mark_unknown("op-1", binding)
-        proof = self.no_publication_proof(outbox_absent=False)
-        with self.assertRaisesRegex(Rejected, "incomplete"):
-            p.resolve_no_publication("op-1", proof)
-        self.assertIn("op-1", p.private_unknown)
-        self.assertNotIn("op-1", p.outcomes)
-        self.assertEqual(p.visibility, {})
-        self.assertEqual(p.receipts, {})
-        self.assertEqual(p.outbox, {})
-        self.assertEqual(p.consumed, set())
+        required_facts = (
+            "visibility_pointer_absent",
+            "outbox_absent",
+            "unresolved_participants_absent",
+            "writers_fenced",
+            "stage_publishers_fenced",
+            "retries_fenced",
+            "delayed_publishers_fenced",
+            "outbox_handlers_fenced",
+            "conflicting_commit_absent",
+            "restore_preserves_terminal",
+        )
+        for fact in required_facts:
+            with self.subTest(missing_fact=fact):
+                proof = self.no_publication_proof(**{fact: False})
+                with self.assertRaisesRegex(Rejected, "incomplete"):
+                    p.resolve_no_publication("op-1", proof)
+                self.assertIn("op-1", p.private_unknown)
+                self.assertNotIn("op-1", p.outcomes)
+                self.assertEqual(p.visibility, {})
+                self.assertEqual(p.receipts, {})
+                self.assertEqual(p.outbox, {})
+                self.assertEqual(p.consumed, set())
 
     def test_no_publication_proof_must_bind_exact_unknown_operation(self):
         p = self.prepared()
@@ -485,11 +499,19 @@ class PublicationProtocolTests(unittest.TestCase):
                    args["d_proof"], args["i_commit_won_proof"])
         p.mark_unknown("op-1", binding)
         wrong_binding = ("other-auth",) + binding[1:]
-        proof = self.no_publication_proof(operation_binding=wrong_binding)
-        with self.assertRaisesRegex(Rejected, "exact UNKNOWN operation"):
-            p.resolve_no_publication("op-1", proof)
-        self.assertIn("op-1", p.private_unknown)
-        self.assertNotIn("op-1", p.outcomes)
+        valid = self.no_publication_proof()
+        invalid_proofs = (
+            replace(valid, operation_id="other-operation"),
+            replace(valid, operation_binding=wrong_binding),
+            replace(valid, publication_id="other-publication"),
+            replace(valid, storage_id="other-storage"),
+        )
+        for proof in invalid_proofs:
+            with self.subTest(proof=proof):
+                with self.assertRaises(Rejected):
+                    p.resolve_no_publication("op-1", proof)
+                self.assertIn("op-1", p.private_unknown)
+                self.assertNotIn("op-1", p.outcomes)
 
     def test_no_publication_reconciles_unknown_and_allows_exact_d_i_closeout(self):
         p = self.prepared()
