@@ -215,7 +215,7 @@ H accepts the additive schema envelope field and the separation between owner si
 ### Exact vector evidence
 
 - H unified schema 1.2.11 Blob: `4f1e103ab4b2ac961d77179dba0b65093532ea40`
-- I crypto vector Blob: `4657f0c81e9c8692d29ac183380f3d7e074a4e4c`
+- I crypto vector Blob: `9210219a85afe1f48da0ea253a073aba8b2e138c`
 - I Python/Node vector test now includes the artifact/wire version fields in the three unified-schema I P0 families.
 - `OWNER_LOCAL_GATE_RELEASE` P0 now signs `manifest_content_digest` separately from `manifest_record_entry_digest`; the ambiguous `manifest_digest` field is removed.
 - The fixed Ed25519 seed remains TEST-ONLY. The vector run proves cross-language deterministic test behavior, not production key custody or trust approval.
@@ -244,3 +244,13 @@ Wire Payload 包含 Owner Kind/Authority、Issuer/Subject/Audience/Purpose、精
 H 只拥有 Typed Schema 与引用映射。I/D/C 分别拥有自己的 Proof P0、Key Trust、Signature 与 Completeness 语义。Schema 有效不代表 Proof 已接受；相关 Owner Authority 必须验证签名与精确 Snapshot Inclusion。缺少 Verifier 结果为 UNKNOWN；Owner/Entry/Root/Snapshot/High-water/Scope 不匹配为 INVALID。
 
 RecoveryJoin 1.0.2 不继承 Unified Schema Artifact Revision 1.2.11 或 Wire 1.3.0，仍是独立绑定的配套工件。
+
+
+## 13. I owner membership proof P0 vector / I Owner Membership Proof P0 向量
+
+The I vector set now includes `I_ADMISSION_SNAPSHOT_MEMBERSHIP_PROOF` with the exact RecoveryJoin 1.0.2 payload projection. The vector P0 binds the I owner authority, exact ledger/version/entry/admission identity, local sequence/high-water, ledger root, snapshot and attestation, gate/scope generation, operation/request digest, anti-rollback anchor, key-status generation, signature profile/key version and canonicalization/digest profile. `proof_digest` is derived and `signature_ref` remains an external signature artifact reference, not part of P0.
+
+- Exact vector Blob: `9210219a85afe1f48da0ea253a073aba8b2e138c`
+- Exact Python/Node test Blob: `01239e06e8f4464f49acd34241dc00899befe424`
+
+The vector uses TEST-ONLY key material and does not establish production I signing or trust.
