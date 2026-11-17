@@ -1,4 +1,4 @@
-<!-- 源文件：session-h-bmcp-protocol / 08-bmcp-protocol/adapter-capability-and-applied-attestation.md / Blob 0dca3dc5463a02be0e19524811afbae87795baf5 -->
+<!-- 源文件：session-h-bmcp-protocol / 08-bmcp-protocol/adapter-capability-and-applied-attestation.md / Blob 74be8374a67da385a5f0f8e34c7aef2b38b72bcf -->
 <!-- 状态镜像：CANDIDATE — final-request 证明配置与 C 的对齐仍 OPEN；授权绑定与 I 的对齐仍 OPEN。 -->
 <!-- English companion: ../../en/08-bmcp-protocol/adapter-capability-and-applied-attestation.md -->
 
@@ -342,3 +342,16 @@ COC position 仅对 COC 记录排序。I position 仅在 I policy-domain sequenc
 对于 recovery-batch 配置，消息 MUST 区分“已证明为空的 pre-batch participant set”和“缺失/不完整的枚举”。若缺少 participant-set completeness attestation、owner high-water proof、participant reconciliation 不完整、I/D/Storage outcome 未知，或 transaction/digest 不匹配，则必须拒绝或保持 UNKNOWN/IN_DOUBT。COC recovery observation 本身不能释放 I/D Owner-local pending gate；只有对应 Owner 签名的 gate disposition 才能释放。
 
 本 §11.8 是针对 G 精确版本 CGH-APPLIED-1.1 决议历史的候选映射保留条款。它不声称当前 H JSON Schema/SDK 已包含这些字段，不声称 COC 或 recovery-batch 基础设施已部署，也不声称 JF-10/COC 一致性测试已执行。H 必须发布精确的增量 Schema 版本，并取得相关 C/G/I/D/Storage 确认后，才能声称该桥接已完成。
+
+
+### 11.9 明确的 C Provider outcome 与 Owner-local gate release 绑定 — 候选
+
+§11.8 的 recovery-batch 映射 MUST 明确保留 C 的 Provider outcome，以及 COC observation 与 Owner-local gate release 之间的区别：
+
+- `c_provider_receipt_ref` 和不可变的 `c_submit_outcome_ref` 由 C 签发。它们将实际 Provider/Runtime Submit 结果绑定到精确 InferenceRequestId、FinalRequestBoundaryId、request digest 和 participant/request identity。COC observation、H transport ACK、本地 Adapter receipt 或 timeout MUST NOT 替代这两个引用。
+- 当 C outcome 为 ACCEPTED 或 REJECTED 时，必须提供对应的 C 签发 terminal outcome 引用。若 C outcome 为 UNKNOWN，该 participant 保持 IN_DOUBT，不能支持 Full Applied。
+- 只有所有必需 Owner outcome 均确定且完成 reconciliation 时，才允许存在 `participant_terminal_proof_ref`；只要任何必需 I/D/C/Storage outcome 仍为 PENDING 或 UNKNOWN，该字段 MUST 缺失。
+- 若存在 I 或 D Owner-local pending gate，只有对应 Owner 才能签发自己的 `owner_gate_release_attestation_ref`。H/COC 可以传输和保留该引用，但 MUST NOT 发出、推断或合成 REOPENED。`REMAINS_CLOSED` disposition 是 fail-closed 状态，不能授权受保护 admission。
+- COC recovery-batch record 或 reconciliation observation 本身不是 Owner gate release、Provider success、D clearance、I authorization 或 Storage terminal outcome。
+
+缺少 C Provider receipt/outcome、伪造 terminal proof、由错误 authority 发出的 Owner gate release，或任何把 UNKNOWN 当作 terminal 的尝试，均应被拒绝或保持 UNKNOWN/IN_DOUBT。该候选映射不改变权威归属，也不声称相关 recovery/conformance suite 已执行。
