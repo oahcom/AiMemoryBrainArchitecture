@@ -331,3 +331,51 @@ B0 仍为 **PARTIAL / NOT PASSED**。main/PR/Owner Ref 及选定的 C/D/G/H/I/St
 No canonical freeze, schema freeze, implementation authorization, Owner approval, independent review or ACCEPTED status is claimed. No main-branch write, rebase, PR retarget, merge or Ready transition was performed.
 
 不宣称规范冻结、Schema 冻结、实现授权、Owner 批准、独立审查或 ACCEPTED 状态。本轮未写入 main、未 Rebase、未修改 PR Base、未合并、未转为 Ready。
+
+
+## 9. A Phase 3.12.1 / Storage v3.3.1 successor reconciliation / A Phase 3.12.1 与 Storage v3.3.1 后继协调
+
+### 9.1 Exact source pins / 精确来源 Pin
+
+- Storage/D Option A topology ADR: Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`; fetched directly by Blob. Its status line states **L1 LOGICAL TOPOLOGY SELECTED — OPTION A; L4 PHYSICAL ENGINE/DEPLOYMENT OPEN**. Section 8 selects Option A as the normative v1 logical architecture; §8.7 describes one durable `CanonicalAuthoritySerializationAnchor` per `BrainAuthorityRef` and an append-only transition record / SERIALIZABLE-CAS protocol.
+- Storage v3.3.1 exact manifest: `reviews/storage-consistency/phase-3.6.21-storage-v3.3.1-authenticated-ingress-exact-version-bundle-manifest.md`, Blob `f6e61691ecdcfcbf1fb423cc45242868676ca925`.
+- A Phase 3.12.1 exact integration review: `01-architecture/phase-3.12.1-a-exact-review-storage-v3.3.1-h-authenticated-ingress.md`, Blob `d3d4e6f4b6d7e82f90e3eee3427c8ace3b4160c8`.
+- H Unified 1.2.15 exact schema mapping: `08-bmcp-protocol/phase-3.8.21-h-exact-schema-mapping-unified-1.2.15-gateway-attestation.md`, Blob `2dc30f193d9c4f4bdc05ca4c137103687db28924`; H schema candidate Blob `860fc4cec658db7d2703cd6adf72aa31a2723f6d`; H P0 candidate Blob `a08bff1145dfeccac3e583e065055ca7dfdcb189`.
+- I Phase 3.8.22 exact review of H Unified 1.2.15: `09-security-governance/phase-3.8.22-i-exact-review-h-unified-1.2.15-gateway-attestation-schema.md`, Blob `6ba4ce3a93f2adf6f8961d4927d9b87deb9696bf`; I exact P0 review Blob `6a8717930f8822033c047bd6384df2aacf630a4b`.
+- G current Applied contract: Blob `aa3afa73d8a76cc6f025839c52bfbff6a983046a`; G explicitly records C/G/H Applied freeze blocked and implementation/execution not verified.
+
+### 9.2 Confirmed contradiction / 已确认矛盾
+
+A's exact Phase 3.12.1 review accepts the bounded H 1.2.14 / CSubmitOutcome 1.0.1 reference-ingress candidate and 60-test evidence only with enumerated amendments, but **rejects Storage v3.3.1 as a final consistent bundle manifest** until its Option A wording is corrected. The exact ADR selects Option A as the normative v1 logical architecture and leaves only L4 physical engine/deployment open. The v3.3.1 manifest instead calls Option A a “conditional L1 candidate” and refers to “A-01–A-05 clarifications” that are not present in the pinned ADR. A requires a successor manifest to correct both statements and retain the L4 gates.
+
+A 的精确 Phase 3.12.1 复审仅在列明修订条件下接受 H 1.2.14 / CSubmitOutcome 1.0.1 Reference-Ingress 候选及 60 项测试证据，但在 Option A 措辞修正前，**拒绝将 Storage v3.3.1 作为最终一致的 Bundle Manifest**。精确 ADR 已选择 Option A 作为 v1 规范逻辑架构，只有 L4 物理引擎/部署仍开放。v3.3.1 Manifest 却将 Option A 称为“conditional L1 candidate”，并引用精确 ADR 中不存在的“A-01–A-05 clarifications”。A 要求通过后继 Manifest 修正两项表述，并保留 L4 门禁。
+
+This is a real semantic/status contradiction, not a wording-only difference: the manifest's decision state and unresolved-work register do not match its pinned authority artifact. Storage owns the manifest and must publish the correction; B must not edit or reinterpret the Storage decision.
+
+这是实际的语义/状态矛盾，不只是措辞差异：Manifest 的决策状态和未决事项登记与其绑定的权威 ADR 不一致。Manifest 由 Storage 负责，必须由 Storage 发布修正；B 不得编辑或重新解释 Storage 决策。
+
+### 9.3 Successor version gap / 后继版本缺口
+
+The current Storage v3.3.1 manifest binds H 1.2.14 and its 60-test reference-gate evidence. H has since published a Unified 1.2.15 structural schema candidate, and I has reviewed its schema shape as a trust-carrier candidate only. I explicitly leaves profile registration, gateway issuer/key approval, key status, custody, anti-rollback and production verification OPEN. The current A Phase 3.12.1 review is explicitly scoped to the exact v3.3.1 / H 1.2.14 bundle and does not approve H 1.2.15. Therefore a future Storage successor must bind the exact H 1.2.15/C/I artifacts and obtain fresh A review; do not infer cross-version acceptance.
+
+当前 Storage v3.3.1 Manifest 绑定 H 1.2.14 及其 60 项 Reference-Gate 测试证据。此后 H 已发布 Unified 1.2.15 结构 Schema 候选，I 也仅将其 Schema 形态作为 Trust-Carrier 候选复审。I 明确保留 Profile 注册、Gateway Issuer/Key 批准、Key Status、Custody、Anti-Rollback 和生产验证为 OPEN。当前 A Phase 3.12.1 复审明确仅针对精确 v3.3.1 / H 1.2.14 Bundle，不批准 H 1.2.15。因此 Storage 后继版本必须绑定精确 H 1.2.15/C/I 工件并取得 A 新复审；不得推断跨版本验收。
+
+### 9.4 Required closure / 解除条件
+
+1. Storage publishes a successor manifest correcting Option A to “normative v1 logical architecture selected; L4 physical engine/deployment OPEN”, removing unsupported A-01–A-05 references unless a separate exact register is pinned, and preserving all L4 constraints.
+2. Storage binds the exact H 1.2.15 schema/P0, C review and I review Blob set (or explicitly records a justified predecessor version), with tested-commit/current-head distinctions.
+3. H closes exact P0 canonicalization, signature verification, protected transport provenance, durable replay and schema/profile binding order; I separately decides profile/issuer/key trust registration.
+4. C retains independent C-object P0 and Provider Outcome semantics; no implicit reuse of C-object signature for the outer envelope.
+5. A performs a fresh exact-version integration review of the successor manifest and changed source pins.
+6. D/G/Storage still separately close ForgetFence/lineage, Applied predicate/persistence, durable recovery and L4 physical gates; this manifest correction does not close them.
+
+1. Storage 发布后继 Manifest，将 Option A 修正为“已选择 v1 规范逻辑架构；L4 物理引擎/部署 OPEN”；除非绑定独立精确登记表，否则删除无依据的 A-01–A-05 引用，并保留全部 L4 约束。
+2. Storage 绑定精确 H 1.2.15 Schema/P0、C 复审和 I 复审 Blob 集（或明确记录有理由的前序版本），并区分 Tested Commit 与 Current HEAD。
+3. H 关闭精确 P0 Canonicalization、Signature Verification、Protected Transport 来源证明、Durable Replay 和 Schema/Profile Binding 顺序；I 独立决定 Profile/Issuer/Key Trust 注册。
+4. C 保持独立 C Object P0 与 Provider Outcome 语义；不得将 C Object Signature 隐式复用于 Outer Envelope。
+5. A 对后继 Manifest 和变更后的来源 Pin 执行精确版本集成复审。
+6. D/G/Storage 仍须分别关闭 ForgetFence/Lineage、Applied Predicate/Persistence、Durable Recovery 和 L4 物理门禁；Manifest 修正不会自动关闭这些事项。
+
+Disposition: add a BLOCKING cross-owner conflict to B's register and matrix. B3 remains NOT PASSED. This is a delegated A-role review and exact source reconciliation, not an independent human A Owner approval or a Storage Owner decision.
+
+处置：将该问题作为 BLOCKING 跨 Owner 冲突加入 B 冲突登记和矩阵。B3 仍 NOT PASSED。本结论基于委派 A 角色复审和精确来源协调，不是独立人类 A Owner 批准，也不是 Storage Owner 决议。
