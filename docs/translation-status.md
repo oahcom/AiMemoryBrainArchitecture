@@ -41,7 +41,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Memory lifecycle model | 02-domain-model/lifecycle-model.md | docs/zh-CN/02-domain-model/lifecycle-model.md | docs/en/02-domain-model/lifecycle-model.md | COMPLETE — source-aligned pair |
 | Relationships and provenance | 02-domain-model/relationships-and-provenance.md | docs/zh-CN/02-domain-model/relationships-and-provenance.md | docs/en/02-domain-model/relationships-and-provenance.md | COMPLETE — source-aligned pair |
 | Scope and Permission model | 02-domain-model/scope-and-permission-model.md | docs/zh-CN/02-domain-model/scope-and-permission-model.md | docs/en/02-domain-model/scope-and-permission-model.md | COMPLETE — source-aligned pair |
-| Domain Model Phase 3 identity/typed-reference extensions and ADR-001 | session-b-domain-model-phase3 branch; ADR-001 remains ADR-BLOCKED | Pending | Owner-branch English source | NOT STARTED — exact branch-source translation and bilingual review pending |
+| Domain Model Phase 3 identity/typed-reference extensions and ADR-001 | B Owner branch exact Blobs: typed-reference `e9a6bd21e06bc02a5208619f5a949217860b1c00`; Principal/Actor `bbbef919e1e2ffe158cda8d9b2c5e718efaae969` | docs/zh-CN/02-domain-model/typed-reference-and-scope-semantics.md; docs/zh-CN/02-domain-model/principal-actor-binding-mapping.md | docs/en/02-domain-model/typed-reference-and-scope-semantics.md; docs/en/02-domain-model/principal-actor-binding-mapping.md | PAIRED — two Phase 3 identity companions; ADR-001 remains ADR-BLOCKED and no identity freeze implied |
 | Canonical Memory Brain reader guide | D owner branch: 03-memory-brain/ | docs/zh-CN/03-memory-brain/memory-brain-guide.md | docs/en/03-memory-brain/memory-brain-guide.md | COMPLETE — overview guide only |
 | D Memory Brain overview | 03-memory-brain/memory-brain-overview.md | docs/zh-CN/03-memory-brain/memory-brain-overview.md | docs/en/03-memory-brain/memory-brain-overview.md | COMPLETE — source-aligned pair |
 | D Canonical Memory Store | 03-memory-brain/canonical-memory-store.md | docs/zh-CN/03-memory-brain/canonical-memory-store.md | docs/en/03-memory-brain/canonical-memory-store.md | COMPLETE — source-aligned pair |
@@ -86,7 +86,7 @@ The following describes the current bilingual companion files on `docs/bilingual
 
 | Owner | Detailed core source set | PR #28 bilingual coverage | Remaining work |
 |---|---:|---|---|
-| B | 6 main specs | 6/6 paired | Phase 3 typed-reference/identity extensions and ADR-001 remain pending |
+| B | 6 main specs + Phase 3 identity extensions | 6/6 main specs; 2 Phase 3 identity companions paired | ADR-001 remains ADR-BLOCKED; INT-P0-02 / INT-X-03 remain OPEN; independent semantic review and cross-owner approval pending |
 | D | 8 core specs | 8/8 paired | Source-branch reconciliation and semantic acceptance |
 | E | 8 core specs | 7/8 paired | Forget Fence and Derived Registration |
 | F | 5 core specs | 5/5 paired | Independent semantic review |
@@ -114,7 +114,7 @@ The following describes the current bilingual companion files on `docs/bilingual
 - D Canonical Memory reader guide: COMPLETE — includes D/E/F/G/H/I ownership split, cursor namespaces, and Forget boundary.
 - D: 8/8 core specifications have bilingual companions in PR #28; the long Forget Fence Operation/Publication Gate is split into four parallel bilingual parts. Source-branch reconciliation and independent semantic review remain separate gates.
 - Domain Model reader guide: COMPLETE.
-- B's six main source specifications: COMPLETE — source-aligned bilingual pairs added. Phase 3 typed-reference/identity extensions and ADR-001 decision package remain NOT STARTED; preserve ADR-BLOCKED status.
+- B's six main source specifications: COMPLETE — source-aligned bilingual pairs added. Phase 3 typed-reference/Scope and Principal/Actor mapping now have exact-Blob bilingual companions (2/2); ADR-001 decision package remains NOT STARTED and ADR-BLOCKED. INT-P0-02 / INT-X-03 remain OPEN.
 - D Canonical Memory bilingual companions: present in PR #28 (8/8); source-branch reconciliation and semantic acceptance remain pending.
 - B Domain Model.
 - D Canonical Memory, lifecycle, versioning, Forget Fence, commit cursor.
@@ -178,3 +178,15 @@ A document is not bilingual-complete merely because it has been translated. Each
 A integration governance and conformance reader guides are available in both languages. The detailed A registry, complete test catalogue, and Owner-specific review reports remain to be translated as source-level documents.
 
 Batches 1 and 2 provide the orientation, shared language, governance invariants, component map, responsibility matrix, and the source-aligned system-level specifications. The six core Domain Model source specifications are also paired. The H Phase 3.6 identity consumer/conformance status report now has a separate bilingual pair, but this does not complete H's normative core contracts or imply H36 execution. This is not yet a full translation of all Owner branch contracts, technology decisions, detailed test plans, or review reports. GOV-DOC-001 is already part of the main governance baseline.\n\nThe 2026-11-17 Phase 3.6 identity/Applied/Storage source audit is recorded in [the source audit report](../reviews/translation/2026-11-17-phase36-identity-applied-storage-source-audit.md). It records currentness findings BSR-28-005 and BSR-28-006 and keeps the high-risk detailed-contract coverage finding BSR-28-007 OPEN.
+
+
+## 8. B Phase 3 identity companion batch — 2026-11-17
+
+Two exact B Owner-branch source artifacts now have reciprocal Chinese/English companions in PR #28:
+
+| Source artifact | Owner branch | Exact source Blob SHA | English companion | Chinese companion | Preserved source status |
+|---|---|---|---|---|---|
+| `02-domain-model/typed-reference-and-scope-semantics.md` | `session-b-domain-model-phase3` | `e9a6bd21e06bc02a5208619f5a949217860b1c00` | `docs/en/02-domain-model/typed-reference-and-scope-semantics.md` | `docs/zh-CN/02-domain-model/typed-reference-and-scope-semantics.md` | CANDIDATE; ClaimRef conditional on ADR-001; I36-GOV-03/04 BLOCKED |
+| `02-domain-model/principal-actor-binding-mapping.md` | `session-b-domain-model-phase3` | `bbbef919e1e2ffe158cda8d9b2c5e718efaae969` | `docs/en/02-domain-model/principal-actor-binding-mapping.md` | `docs/zh-CN/02-domain-model/principal-actor-binding-mapping.md` | CANDIDATE; INT-P0-02 / INT-X-03 OPEN; I36 governance decisions remain blocked |
+
+Pair presence is not semantic acceptance, identity freeze, I policy approval, H wire freeze, or ADR-001 closure. The detailed semantic parity review must separately inspect both pairs. Exact source Blob pins are not Owner branch HEADs.
