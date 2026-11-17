@@ -137,6 +137,31 @@ These findings add a new BLOCKING semantic integration conflict: a typed ActorRe
 
 上述发现增加一个新的 BLOCKING 语义集成冲突：类型化 ActorRef/PrincipalRef 或 Schema 有效的 Envelope 并不构成已认证的 Origin 证明。C Origin Signature/P0、H Protected Transport Authentication、I Trust/Profile/Key 批准，以及 Storage Durable Authenticated Ingress/Replay 是彼此独立的权威要求。
 
+
+
+## 6A. Governance and testing authority / 治理与测试权威
+
+Additional current-main source pins:
+- Architecture invariants: 00-governance/architecture-invariants.md, Blob 33b037318e459ebb73bea33b3186f31a41d5dcfe.
+- Bilingual documentation policy GOV-DOC-001: 00-governance/bilingual-documentation-policy.md, Blob b51b054b9f1022133666542680df74dfe19de2fb.
+- AI Development Standard AI-STD-001: 14-ai-development/ai-development-standard.md, Blob f46867f97fc1860015adbe2a1f7b8262640c16fd.
+- AI Development Iteration Lifecycle: 14-ai-development/iteration-lifecycle.md, Blob 8ecc8e4ddde78be01e2038be4ece8dc8ac282c97.
+- Cross-Module Conformance & Fault-Injection Guide (EN): docs/en/12-testing-and-acceptance/cross-module-conformance-guide.md, Blob 6a32f31f0690b8217ae7c2e7049155814f3f108f.
+- Cross-Module Conformance & Fault-Injection Guide (ZH): docs/zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md, Blob 9a63d38997fd2e7aa8fea5d88470ad7fd83dab6d.
+- System Quality Attributes: 01-system-architecture/system-quality-attributes.md, Blob 4350733173d29451a8ea4aa6a544de46526b4fd7.
+
+The conformance guide explicitly assigns TC-01 Domain Identity and References and TC-10 Provenance/Lifecycle/Temporal to B, with D/E/F/G and D/E/F/I collaborators respectively. Testing/QA is a cross-cutting contributor alongside Storage/Consistency and Engineering, coordinated by A; no dedicated Testing/Quality branch or independent accountable Owner was found in the branch search. Therefore B owns domain invariant definitions and domain test semantics; a named Testing/QA specialist must be assigned for independent execution/review rather than treating B self-tests as independent acceptance.
+
+一致性指南明确将 TC-01 Domain Identity and References 与 TC-10 Provenance/Lifecycle/Temporal 分配给 B，分别要求 D/E/F/G 和 D/E/F/I 协作。Testing/QA 与 Storage/Consistency、Engineering 一样属于横切参与方，由 A 协调；分支搜索未找到独立 Testing/Quality 分支或独立负责 Owner。因此 B 负责领域不变量定义和领域测试语义；必须指定 Testing/QA 专家负责独立执行/审查，不能把 B 自测视为独立验收。
+
+Architecture invariant I-04 says Event, Memory, Fact, Entity, Relation and Evidence are distinct domain concepts. The older B overview describes Fact as a qualified interpretation of Claim rather than a separate object type, while the bilingual guide keeps the Fact/Claim ADR BLOCKED and prohibits downstream schema freeze. These statements can only be reconciled provisionally as: Fact is a distinct concept, but whether it has an independent object identity/type or is represented as a qualified Claim remains undecided. Do not erase I-04 or freeze a Fact/Claim schema before the ADR.
+
+架构不变量 I-04 规定 Event、Memory、Fact、Entity、Relation、Evidence 是不同领域概念。较早 B Overview 将 Fact 描述为 Claim 的限定解释而非独立对象类型；双语指南则将 Fact/Claim ADR 保持 BLOCKED，并禁止冻结下游 Schema。当前只能暂时协调为：Fact 是不同概念，但它是否具有独立对象身份/类型，还是作为带限定的 Claim 表示，仍未裁决。不得删除 I-04，也不得在 ADR 完成前冻结 Fact/Claim Schema。
+
+Architecture invariants I-23/I-24 and GOV-DOC-001 require full Chinese/English semantic parity, stable-ID parity, matching decision status and source traceability in the same change set. This research package has bilingual headings and bilingual sections, but several detailed tables and normative passages are not yet fully mirrored. **Bilingual parity is NOT COMPLETE; B5 cannot pass.**
+
+架构不变量 I-23/I-24 与 GOV-DOC-001 要求同一变更集内提供完整中英文语义对等、稳定 ID 对等、决策状态一致和来源可追溯。本研究包已有双语标题和部分双语章节，但若干详细表格和规范段落尚未完整对照翻译。**双语语义对等尚未完成；B5 不能通过。**
+
 ## 7. B0 disposition / B0 门禁结论
 
 B0 remains **PARTIAL / NOT PASSED**. The current main HEAD, domain-source Blob pins, owner branch snapshots, selected owner source files, relevant PR metadata and controlling issues have been refreshed. Remaining B0 work: complete A and Testing/Quality source authority inventory; fetch full exact PR diffs/commit/Blob pins for all directly relevant records; pin the latest C/G/H/Storage exact contract bundle; re-read the Storage ADR decision section and latest D review/acceptance; reconcile every Owner-local canonical definition against B's matrix.
