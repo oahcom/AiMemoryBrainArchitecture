@@ -132,3 +132,50 @@ Storage ADR 最新补充条款选择一个逻辑 Serializable Transaction Domain
 ### 6.4 关闭所需证据
 
 必须有批准的物理 Storage ADR、D/E/Storage 可执行竞争测试、C/G/H Final Applied Conformance、I 身份/撤销/Forget 清单、B Fact/Claim 决策、目标硬件原型、完整 DB+Blob+Index Backup/Restore、Owner 独立审查和独立技术审查。
+
+
+## 7. Late status correction — 2026-11-17 / 最新状态校正
+
+The earlier sections describe the initial PR #44 / Issue #43 and initial JF-10 evidence snapshot. The following exact current Storage artifacts were fetched after those snapshots and control the technical evidence described here:
+
+- Storage v3.2.6 successor manifest Blob `dbfa37617d109d5891a067769e858085e2ce547a`.
+- Normative Storage v3.2.3 body Blob `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792`.
+- PostgreSQL 18.7 dossier Blob `0aabf66848dc97deee028c571183c0d7204008c0`.
+- Deployment readiness Blob `ef4eff1708e4bd6072b86cc234340dd848bb5fbc`.
+
+### 7.1 Corrected status vector / 校正后的状态向量
+
+| Concern | Current evidence | Status |
+|---|---|---|
+| Logical serialization profile | Storage readiness selects one authority-local serializable transaction/lock domain; does not select production DB topology | Logical profile selected; production binding deferred |
+| PostgreSQL 18.7 engine capability | Seven pinned isolated CI subtests pass, including prepared-XID recovery, standby promotion, restore fixture, ACK-loss and PITR cases | PARTIAL PASS / OPEN |
+| Storage/JF-10 exact successor | v3.2.6 manifest binds H 1.2.13/C 1.0.1 successor sources | Bound; not jointly frozen |
+| C candidate | CSubmitOutcome 1.0.1 candidate CI 19 tests success | Candidate evidence only |
+| H exact version | H 1.2.13 has 15-test source; exact-head CI not run | OPEN |
+| D lineage / release | Exact structural carrier review exists; lineage completeness, late-discovery and release CAS not proven | OPEN |
+| I authorization / trust | I P0 structural candidate accepted; L3 vectors, trust/key lifecycle and anti-rollback remain open | OPEN |
+| JF-10 Gate A | Isolated PostgreSQL capability evidence exists; application/deployment binding deferred | PARTIAL PASS / OPEN |
+| JF-10 Gate B | Design protocol acceptance with enumerated exceptions; v3.2.6 not jointly frozen | Design-level only |
+| JF-10 Gate C | End-to-end distributed fault campaign deferred to engineering | NOT RUN |
+| Runtime P0 / production | No live Brain runtime integration or production activation | OPEN / NOT AUTHORIZED |
+
+### 7.2 Questions that remain blocking / 仍然阻塞的问题
+
+1. Complete exact Owner review and freeze of Storage v3.2.6 successor bundle, including H 1.2.13 exact CI and any amendments; changed Blob requires new review.
+2. Complete I L3 family vectors, production trust/key registration, signer/audience/revocation/anti-rollback and policy-domain controls.
+3. Complete D lineage enumeration, late-discovery handling and final barrier-release CAS evidence.
+4. Complete C provider-specific idempotency, same-key outcome lookup, UNKNOWN/IN_DOUBT recovery and final side-effect boundary.
+5. Implement bidirectional COC participant ↔ I/D/C admission join and same-GID RecoveryJoin in the designated runtime during engineering phase.
+6. Run deterministic end-to-end race/crash/restart/partition/restore/failover tests with exact schema, database, COC and adapter binaries/configuration.
+7. Designate production host/failure domains, durable media, KMS/HSM custody, backup retention, human operator/on-call, runbook, monitoring, RPO/RTO and restore rehearsal before production activation.
+8. Keep multi-PolicyDomain atomicity BLOCKED until a separate approved protocol and proof exist.
+
+### 7.3 What this research does not authorize / 本研究不授权事项
+
+- No production implementation or deployment is authorized by this research PR.
+- No technology recommendation is promoted to DECIDED.
+- No JF-10 P0 closure, Gate B/C implementation PASS, Global Forget completion, production activation or architecture freeze is claimed.
+- The independent technology review must be performed by a different session and must independently re-fetch the exact source bundle.
+
+前文记录了 PR #44 / Issue #43 的初始状态和初始 JF-10 证据快照。以上四个精确 Storage 工件是之后直接读回的当前证据，应用于校正旧快照。当前逻辑序列化档案已选择，但生产 DB 拓扑未选；PostgreSQL 18.7 七项隔离 CI 子测试 PASS，Gate A 仍 PARTIAL PASS / OPEN；v3.2.6 Bundle 已绑定但未联合冻结；C 候选 19 项测试成功，H 1.2.13 精确 CI 未运行；D Lineage/Release 和 I L3/信任仍 OPEN；Gate B 仅设计级接受，Gate C NOT RUN；JF-10 Runtime P0 OPEN，生产激活未授权，多 PolicyDomain BLOCKED。
+
