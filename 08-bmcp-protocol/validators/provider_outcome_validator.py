@@ -129,7 +129,7 @@ def _candidate_digest_and_preimage(record: dict) -> tuple[str, bytes]:
         b"AIMBA-C-SIGNATURE-v1\0"
         + C_PROFILE_ID.encode("ascii")
         + b"\0"
-        + record["message_id"].encode("ascii")
+        + record["message_type"].encode("ascii")
         + b"\0"
         + signed_bytes
     )
@@ -174,6 +174,8 @@ def validate_provider_outcome(
         invalid.append("wrong immutable C object schema identity")
     if c_object.get("signature_profile_id") != C_PROFILE_ID:
         invalid.append("wrong C signature profile identifier")
+    if c_object.get("message_type") != "C_PROVIDER_OUTCOME_RECORDED" or envelope.get("message_type") != c_object.get("message_type"):
+        invalid.append("C object/envelope message_type mismatch")
     if envelope.get("c_submit_outcome_ref") != c_object.get("record_ref"):
         invalid.append("c_submit_outcome_ref does not resolve to this immutable object")
     if envelope.get("c_submit_outcome_digest") != c_object.get("payload_digest"):
@@ -184,10 +186,7 @@ def validate_provider_outcome(
             if envelope[wire_name] != c_object.get(object_name):
                 invalid.append(f"wire/object mismatch: {wire_name} != {object_name}")
         elif object_name in c_object and c_object[object_name] is not None:
-            # Optional wire fields can be omitted only where the exact wire
-            # schema makes them optional and the C object value is absent/null.
-            if object_name not in ("COCParticipantReservationRef", "COCAbsenceReason"):
-                invalid.append(f"required wire duplicate absent: {wire_name}")
+            invalid.append(f"non-null C object value missing from wire: {wire_name}")
 
     invalid.extend(_semantic_errors(c_object))
     if invalid:
