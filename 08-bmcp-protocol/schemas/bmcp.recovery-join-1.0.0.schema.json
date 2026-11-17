@@ -379,12 +379,6 @@
         },
         "owner_entry_ref": {
           "$ref": "#/$defs/ref"
-        },
-        "admission_message_id": {
-          "$ref": "#/$defs/ref"
-        },
-        "admission_message_digest": {
-          "$ref": "#/$defs/digest"
         }
       },
       "required": [
@@ -404,9 +398,7 @@
         "participant_manifest_record_digest",
         "cardinality_rule_ref",
         "participant_position_ref",
-        "owner_entry_ref",
-        "admission_message_id",
-        "admission_message_digest"
+        "owner_entry_ref"
       ]
     },
     "noParticipantDisposition": {
