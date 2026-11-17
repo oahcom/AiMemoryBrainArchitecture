@@ -23,7 +23,7 @@
 | H RecoveryJoin 1.0.2 tests | `6afa788da2a899f03de8207cb700c40e0533aba1` |
 | I P0 vector set | `9210219a85afe1f48da0ea253a073aba8b2e138c` |
 | I Python/Node crypto test | `01239e06e8f4464f49acd34241dc00899befe424` |
-| H CI | Run `44050250038`, commit `34fb4ccf8b1580321d38eda1340cf53f73b83f24`, **281 tests: 259 passed, 22 skipped, 0 failed** |
+| H CI | Run `44051045877`, commit `ccecb8b6b80dff1e8ef7af10caac67c2f3c77929`, **282 tests: 260 passed, 22 skipped, 0 failed** |
 
 ## 2. H findings / H 审查发现
 
@@ -113,3 +113,10 @@ The 22 skipped tests belong to the historical 1.2.10 semantic suite and are supe
 
 
 The I cross-language vector set now also covers the I owner snapshot membership proof P0 as a sixth message family. The exact vector Blob is `9210219a85afe1f48da0ea253a073aba8b2e138c`; the Python/Node test source is `01239e06e8f4464f49acd34241dc00899befe424`. This expands only fixed TEST-ONLY vector coverage.
+
+
+## 7. Sixth I P0 family — owner snapshot membership proof
+
+The Python RFC 8785 / Node JCS + Ed25519 differential vector set now includes `I_ADMISSION_SNAPSHOT_MEMBERSHIP_PROOF`, with the exact RecoveryJoin 1.0.2 owner proof P0 fields. The exact vector Blob is `9210219a85afe1f48da0ea253a073aba8b2e138c`; Python/Node test Blob is `01239e06e8f4464f49acd34241dc00899befe424`.
+
+Run `44051045877` completed successfully: 282 tests total, 260 passed, 22 skipped, 0 failed. The 22 skipped tests remain the superseded historical 1.2.10 semantic fixture class. The new cross-language vector uses TEST-ONLY key material and does not prove production I key custody or trust.
