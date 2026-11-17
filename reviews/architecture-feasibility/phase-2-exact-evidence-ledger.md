@@ -44,6 +44,7 @@ Main branch HEAD at snapshot: b372b62c640a2b656e54b6db62a4ee67d7d8c001. Review b
 | C key-status suite, run 44059137081 | 12 passed | Schema/state-machine only; no production key registry or trust-root approval. |
 | H key-status callback suite, run 44058962672 | 11 passed | Schema and fail-closed callback behavior; no production trust service or external anti-rollback. |
 | COC outage recovery model, run 43897364938 | 11 passed | In-memory logical model only; not deployed quorum COC or physical recovery. |
+| JF-10 PostgreSQL 18.7 Gate A capability classes, Issue #10 | Five CI classes reported successful: single-node restart, synchronous standby promotion/same-GID resolution, physical restore, coordinator crash fixture, TCP response loss/same-XID reconciliation | Gate A remains PARTIAL PASS / OPEN; Gate B persistent COC and Gate C fault campaign remain BLOCKED. Does not prove designated Canonical Authority runtime, PITR, old-primary fencing, real I/D ledger integration or production operator. |
 | PostgreSQL 18.7 capability CI, Issue #10 | Gate A PARTIAL PASS | Pinned capability profile only; not selection/deployment of Canonical Authority topology. |
 
 ## 4. Freshness and supersession rules / 时效与替代规则
