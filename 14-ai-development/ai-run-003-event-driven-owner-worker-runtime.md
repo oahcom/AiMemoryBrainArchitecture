@@ -282,7 +282,7 @@ A commit or successful unit test is not system acceptance. A scheduled run is no
 
 ## 11. Storage decision remains open / 存储选型仍开放
 
-Detailed decision records: [ADR-RUN-001 — Durable Store and Transaction Boundaries](adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md) and [ADR-RUN-002 — GitHub App, Webhook Ingress and Secret Management](adr/ADR-RUN-002-github-app-webhook-security-and-secrets.md) and [ADR-RUN-003 — Owner Worker Isolation and Execution Boundary](adr/ADR-RUN-003-owner-worker-isolation-and-execution-boundary.md). All ADRs are PROPOSED: they define constraints and acceptance gates; none authorizes deployment or selects production credentials.
+Detailed decision records: [ADR-RUN-001 — Durable Store and Transaction Boundaries](adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md) and [ADR-RUN-002 — GitHub App, Webhook Ingress and Secret Management](adr/ADR-RUN-002-github-app-webhook-security-and-secrets.md) and [ADR-RUN-003 — Owner Worker Isolation and Execution Boundary](adr/ADR-RUN-003-owner-worker-isolation-and-execution-boundary.md), [ADR-RUN-004 — Event-to-Work-Item Mapping and Semantic Idempotency](adr/ADR-RUN-004-event-to-work-item-mapping-and-idempotency.md), [ADR-RUN-005 — Prompt Approval and Runtime Authorization](adr/ADR-RUN-005-prompt-approval-and-runtime-authorization.md), and [ADR-RUN-006 — Branch Protection and Review Gates](adr/ADR-RUN-006-branch-protection-and-review-gates.md). All ADRs are PROPOSED: they define constraints and acceptance gates; none authorizes deployment or selects production credentials.
 
 详细决策记录：[ADR-RUN-001 — 持久化存储与事务边界](adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md)。该 ADR 处于 PROPOSED：定义事务不变量、候选方案比较、基准/故障矩阵和验收 Gate；不代表已选择或部署数据库。
 
@@ -368,6 +368,8 @@ Detailed decision records: [ADR-RUN-001 — Durable Store and Transaction Bounda
 - **ADR-RUN-002:** GitHub App permission matrix, webhook ingress/network exposure and secret storage.
 - **ADR-RUN-003:** Worker isolation mechanism (systemd + Unix identities vs per-run containers/VMs).
 - **ADR-RUN-004:** Event-to-work-item mapping and semantic idempotency keys.
+- **ADR-RUN-005:** Owner prompt approval and runtime authorization enforcement.
+- **ADR-RUN-004:** Event-to-work-item mapping and semantic idempotency.
 - **ADR-RUN-005:** Owner prompt approval and runtime authorization enforcement.
 - **ADR-RUN-006:** Branch protection and required review/check rules.
 
