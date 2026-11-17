@@ -135,8 +135,13 @@ The source pins in §1 are historical where they differ from this refresh. Curre
 - HRC/JPF: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
 - Wire: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
 - Schema integrity: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
-- Latest H candidate CI [44041395001](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709): 66/66 PASS, commit `b4d7ed2798fcd6514892ac91d8f3ae6c06f0a338`.
+- Latest H candidate CI [44042074640](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709): 66/66 PASS, commit `fb9a2ab8b528c2b7010d935372f76a14d6676755`.
 
-Current Storage JoinProof source: `reviews/storage-consistency/phase-3.6.11-storage-bidirectional-coc-owner-admission-join-proof.md`, Blob `d5a84aa22e90d7b8689b23cd8af2fc82125368c4`. Current Storage exact review: Blob `9d5aa6cc08cdf9230296c362d1aa44804a92afbe`. Current Storage topology ADR: Blob `080433f8e13a500522bc2754da64057edb0ae9d8`, ADR-BLOCKED.
+Current Storage JoinProof source: `reviews/storage-consistency/phase-3.6.11-storage-bidirectional-coc-owner-admission-join-proof.md`, Blob `155b0d613dc785f9f5904e4509cfce1ed06a2f0d`. Current Storage exact review: Blob `6c0ca46dfdb2d3b142c1796ae44b0cc23f67bf0a`. Current Storage topology ADR: Blob `080433f8e13a500522bc2754da64057edb0ae9d8`, ADR-BLOCKED.
 
 The 66-test H candidate run is not a run of the 36 physical cases in this matrix. All race, crash/ACK-loss, failover/restore and authoritative read-path cases remain **NOT EXECUTED** until a real COC, I/D/C adapters and selected D/Storage transaction topology are available. Do not count the H candidate PASS toward any physical case.
+
+
+### 7.1 H expanded suite boundary
+
+H now reports 93 candidate methods passing in run [44042074640](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042074640): 25 HRC + 19 JPF + 10 WIRE + 12 SCHEMA + 26 TPH + 1 XLANG. The TPH and XLANG cases are reference/test-profile only. This does not execute any of the 36 physical race/crash/failover/restore scenarios in this matrix. All physical cases remain NOT EXECUTED.
