@@ -13,6 +13,12 @@ endpoint:
   transport: "ssh"
   host_key_fingerprint_status: "NOT_VERIFIED"
   host_key_fingerprint: null
+  tailscale:
+    device_name: "vm-0-9-ubuntu"
+    ipv4: "100.108.116.118"
+    daemon_enabled: true
+    daemon_active: true
+    evidence: "User-provided server-console output; not independently queried by deployment controller."
 purpose:
   - "GitHub Actions self-hosted runner"
   - "Future event-driven A-I Owner worker execution substrate"
@@ -36,5 +42,6 @@ governance:
   tracking_issue: 26
   architecture_document: "14-ai-development/continuous-owner-runtime-architecture.md"
   status_claims:
+    tailscale_connected: true
     worker_online: false
     continuous_a_i_operation: false
