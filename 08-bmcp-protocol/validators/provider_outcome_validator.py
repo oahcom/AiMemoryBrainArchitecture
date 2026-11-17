@@ -1,6 +1,12 @@
-"""Fail-closed validator core for BMCP 1.2.14 C Provider Outcome records.
+"""Local H/C schema and C Provider Outcome validator for BMCP 1.2.14.
 
-The module is an integration seam, not a production-ready trust implementation.
+This module does NOT authenticate the outer BMCP envelope, transport principal,
+channel binding or message replay. Direct calls to validate_provider_outcome()
+and validate_raw_provider_outcome() are not secure ingress acceptance APIs.
+Production ingress MUST call validate_authenticated_provider_outcome() from
+envelope_auth_validator.py first, then supply real owner-authority verifiers.
+
+This remains an integration seam, not a production-ready trust implementation.
 All authority-dependent checks are injected callbacks and MUST be supplied by
 the deployment. Missing callbacks produce UNKNOWN, never VALID.
 """
@@ -174,7 +180,11 @@ def validate_provider_outcome(
     c_object_schema: dict,
     checks: AuthorityChecks,
 ) -> dict:
-    """Return VALID, INVALID, or UNKNOWN with fail-closed precedence."""
+    """Validate H/C schema and C semantics only; does not authenticate outer H.
+
+    Production ingress must first pass envelope_auth_validator's protected
+    transport, signature, key-status, channel-binding, identity and replay gate.
+    """
     invalid = []
     unknown = []
 
@@ -269,7 +279,12 @@ def validate_raw_provider_outcome(
     c_object_schema: dict,
     checks: AuthorityChecks,
 ) -> dict:
-    """Strictly parse both raw byte streams before invoking the validator."""
+    """Strictly parse raw JSON for local tests; NOT an authenticated ingress API.
+
+    This function does not verify outer-envelope signature, transport identity,
+    channel binding or replay. Production ingress must use the authenticated
+    wrapper in envelope_auth_validator.py.
+    """
     try:
         envelope = parse_strict_json(envelope_raw)
         c_object = parse_strict_json(c_object_raw)
