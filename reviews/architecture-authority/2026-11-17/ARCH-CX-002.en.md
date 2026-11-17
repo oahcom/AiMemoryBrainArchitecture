@@ -1,6 +1,6 @@
 # Architecture Complexity Assessment — ARCH-CX-002
 
-- Version: 1.0.0; baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- Version: 1.0.0; baseline: `main@8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
 - X source: PR #49, commit `131f91743bd506517ee354d58c277501ca447929`, EN Blob `c509120644d6f7c7223decf3f9f0ee33b0548bb7`, ZH Blob `981a376ddf283ace1e891795c813b17ac4aa3d8b`.
 - A disposition: complexity controllability **NOT PROVEN**.
 
@@ -39,6 +39,12 @@ Before any P0/P1 invariant is called verified: direct negative tests, crash-befo
 **CAN DEFER:** vector/ANN, reranking, graph backend proliferation, multiple providers/backends, multi-PolicyDomain atomicity, distributed service decomposition, advanced autoscaling.
 
 **MUST NOT INTRODUCE:** cross-domain cursor comparison, cache/index as authority, generic Success replacing distinct terminal facts, heuristic JF-10 resolution, process mutex as durable atomicity, microservices without measured need.
+
+## New Option A and protocol-bundle complexity
+
+Option A reduces coordinator proliferation but adds five non-trivial proof/maintenance obligations: shared transaction executor and D/Storage row-write authority; D EffectPermit coverage across admission/lease/attempt/retry/replay/source-read/execution/late-dependency/terminalization; one BrainAuthority per atomic v1 operation; I COMMIT_WON immutable tuple with crash/revocation/replay semantics; independent anchor checkpoint and DB-incarnation restore anti-rollback witness. The PR #54 amendment is a proposal, not an adopted Owner contract.
+
+The H 1.2.14/CSubmitOutcome 1.0.1 protocol candidate also has exact-currentness join complexity. H mapping, C re-review, D crosswalk, I P0 and Storage manifest must bind the same current artifacts; v3.2.9 is stale and a v3.3.0 successor is required.
 
 ## Conclusion
 
