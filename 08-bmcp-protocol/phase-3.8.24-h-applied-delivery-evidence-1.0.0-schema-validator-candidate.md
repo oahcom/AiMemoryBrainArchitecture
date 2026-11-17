@@ -59,3 +59,13 @@ These tests have not yet been executed in this commit environment. A CI run must
 - H must implement durable observation replay storage and deployed validator integration.
 - SDK generation, runtime Adapter integration, cross-language vectors and production crypto are not implemented.
 - No global Applied freeze, production activation or merge authorization is implied.
+
+## 7. CI result / exact verification
+
+- Workflow run: [H Applied Delivery Evidence Conformance](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44130722532)
+- Run ID: `44130722532`; conclusion: **SUCCESS**
+- Exact tested commit: `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`
+- Test suite: 11 tests, all passed (positive Tier 1, strict unknown-member rejection, seven delivery identity members, coverage/version gates, digest mutation, identity-domain separation, tri-state UNKNOWN, signature rejection, same-digest replay, changed-digest conflict).
+- Concurrent H Recovery Cutoff Conformance run: [44130722851](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44130722851), **SUCCESS**.
+
+CI PASS proves only this candidate schema/reference validator/test suite on the exact commit. It does not prove production JCS/signature trust, durable ledger deployment, SDK interoperability, runtime Adapter behavior, C/G/I owner acceptance, crash/restore or production activation.
