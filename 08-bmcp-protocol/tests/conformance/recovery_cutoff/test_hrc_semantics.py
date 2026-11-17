@@ -47,15 +47,17 @@ def owner_snapshot(owner="I", requests=None, admissions=None, highwaters=None,
         "admission_root": test_digest(admissions, "owner-admission-set"),
         "request_highwaters": deepcopy(defaults), "admission_highwaters": deepcopy(defaults),
         "completeness": "COMPLETE" if complete else "PARTIAL",
+        "request_enumeration_status": ("COMPLETE_EMPTY" if not requests else "COMPLETE_NON_EMPTY") if complete else "PARTIAL",
+        "admission_enumeration_status": ("COMPLETE_EMPTY" if not admissions else "COMPLETE_NON_EMPTY") if complete else "PARTIAL",
         "ledger_available": ledger_available, "pagination_complete": pagination_complete,
-        "signature_valid": True, "key_current": True, "schema_version": "1.0.4",
+        "signature_valid": True, "key_current": True, "schema_version": "1.0.0",
     }
 
 
 def admission(ref, owner, status="REGISTERED", participant_ref="COC/P1",
               participant_entry_digest="c" * 64, position=1, seq=1):
     item = {
-        "owner_entry_ref": ref, "owner_entry_kind": "ADMISSION", "owner": owner,
+        "owner_entry_ref": ref, "owner_entry_kind": "RECEIPT_ISSUE", "owner": owner,
         "operation_id": "op/" + ref, "operation_digest": "b" * 64,
         "scope_ref": "scope/test", "sequence": seq, "status": status,
     }
@@ -145,8 +147,17 @@ def validate_snapshot(s):
             return INVALID
         if s.get(root_name) != test_digest(entries, "owner-request-set" if name.startswith("request") else "owner-admission-set"):
             return INVALID
-        expected_kind = "REQUEST" if name.startswith("request") else "ADMISSION"
-        if any(e.get("owner_entry_kind") != expected_kind for e in entries):
+        status_name = "request_enumeration_status" if name.startswith("request") else "admission_enumeration_status"
+        state = s.get(status_name)
+        if state not in {"COMPLETE_EMPTY", "COMPLETE_NON_EMPTY"}:
+            return UNKNOWN
+        if state == "COMPLETE_EMPTY" and entries:
+            return INVALID
+        if state == "COMPLETE_NON_EMPTY" and not entries:
+            return INVALID
+        if name.startswith("request") and any(e.get("owner_entry_kind") != "REQUEST" for e in entries):
+            return INVALID
+        if name.startswith("admission") and any(e.get("owner_entry_kind") == "REQUEST" for e in entries):
             return INVALID
     owner = s.get("owner")
     required = {
@@ -345,7 +356,8 @@ class HRCConformance(unittest.TestCase):
 
     # HRC-01: all request/admission sets explicitly complete-empty.
     def test_HRC_01(self):
-        self.assertEqual(validate_snapshot(owner_snapshot("I")), VALID)
+        for owner in ("I", "D", "C"):
+            self.assertEqual(validate_snapshot(owner_snapshot(owner)), VALID)
 
     # HRC-02: empty request set and non-empty admission set are independent.
     def test_HRC_02(self):
@@ -489,19 +501,19 @@ class HRCConformance(unittest.TestCase):
                 pairs = json.loads(raw, object_pairs_hook=lambda p: reject_duplicates(p))
             except ValueError:
                 return INVALID
-            if version != "1.0.4" or not set(critical_fields).issubset(allowed):
+            if version != "1.0.0" or not set(critical_fields).issubset(allowed):
                 return INVALID
             if pairs.get("request_entries", "MISSING") is None:
                 return INVALID
             return VALID
 
         def duplicate_json():
-            return strict_wire('{"schema_version":"1.0.4","schema_version":"1.0.3"}',
-                               "1.0.4", [], {"schema_version"})
+            return strict_wire('{"schema_version":"1.0.0","schema_version":"0.9.0"}',
+                               "1.0.0", [], {"schema_version"})
         self.assertEqual(duplicate_json(), INVALID)
-        self.assertEqual(strict_wire('{"request_entries":null}', "1.0.4", [], {"request_entries"}), INVALID)
-        self.assertEqual(strict_wire('{"schema_version":"1.0.3"}', "1.0.3", [], {"schema_version"}), INVALID)
-        self.assertEqual(strict_wire('{"schema_version":"1.0.4"}', "1.0.4", ["new_critical"], {"schema_version"}), INVALID)
+        self.assertEqual(strict_wire('{"request_entries":null}', "1.0.0", [], {"request_entries"}), INVALID)
+        self.assertEqual(strict_wire('{"schema_version":"0.9.0"}', "0.9.0", [], {"schema_version"}), INVALID)
+        self.assertEqual(strict_wire('{"schema_version":"1.0.0"}', "1.0.0", ["new_critical"], {"schema_version"}), INVALID)
 
 
     # JPF-01: owner-to-participant and participant-to-primary-C joins both resolve.
