@@ -33,6 +33,14 @@ updated_at: ""
 implementation_branch: ""
 implementation_commits: []
 changed_paths: []
+documentation:
+  architecture_significant: true
+  policy_id: "GOV-DOC-001"
+  chinese_paths: []
+  english_paths: []
+  source_revision: ""
+  parity_review: "NOT_STARTED"
+  coverage_register_updated: false
 verification:
   status: "NOT_RUN"
   commit_sha: ""
@@ -93,7 +101,19 @@ Each criterion MUST be objectively verifiable. Avoid “high quality”, “robu
 ## Verification plan
 List exact commands, tests, fixtures, expected results and required fault/security cases. Mark unavailable checks as NOT RUN with a reason.
 
+## Bilingual documentation requirement (mandatory for architecture-significant work)
+
+Read GOV-DOC-001. Before implementation/design work, list the Chinese and English paths for every architecture-significant artifact. Deliver both versions in the same change set, preserve normative force and decision status, keep stable identifiers unchanged, and update the glossary/translation coverage register when required. A missing counterpart must be marked STALE with owner, source revision, due date, and approved exception; it is not a completed deliverable.
+
+## 双语文档要求（架构类任务强制）
+
+阅读 GOV-DOC-001。在开始设计/实现前，列出每项重要架构交付物的中英文路径，并在同一变更集中交付。两种语言必须保持规范效力和决策状态一致，稳定标识不得改写；必要时同步更新术语表和双语覆盖登记表。缺少对应版本时必须登记 STALE、责任人、源版本、截止日期和获批例外，不能视为完成。
+
 ## Required deliverables
+- Chinese documentation paths:
+- English documentation paths:
+- Bilingual parity checklist/evidence:
+- Coverage register update:
 - Modified/new files:
 - Decision/change log:
 - Tests:
@@ -128,7 +148,8 @@ Stop and report if:
 7. Independent-review handoff notes.
 8. Open questions, risks and dependencies.
 9. Commit SHA and read-back verification.
-10. Honest final status: IMPLEMENTED / VERIFIED / BLOCKED / PARTIAL.
+10. Bilingual parity status and Chinese/English paths (or approved STALE exception).
+11. Honest final status: IMPLEMENTED / VERIFIED / BLOCKED / PARTIAL.
 
 ## 3. Prompt versioning rules / 提示词版本规则
 
