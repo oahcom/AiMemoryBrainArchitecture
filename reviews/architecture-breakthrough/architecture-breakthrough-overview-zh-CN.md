@@ -27,6 +27,8 @@
 | 来源 | 当前分支 HEAD | 本轮读取的文件 / Blob SHA |
 |---|---|---|
 | main | `b3c666e67982cb3d3374e759cfb6552c7765aacb` | `01-system-architecture/system-overview.md` / `995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256` |
+| A | `session-a-integration-2026-11-16` @ `6e05831d264040e0e3b3359245b1e01ea613b46c` | responsibility matrix / `fbeb6935fe874e6c843c25c3a891d6b3242cbfd3`; governance baseline / `a43a8f2fa3d31681d64b79d584364fdae80f8866` |
+| B | `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | Fact/Claim ADR / `a1024938ff5baba069cf128c69496a44e143330c`; consumer mapping / `dd45a37199c9b69ab6b68f65e051a484a04691d4` |
 | D | `session-d-memory-brain-2026-11-16` @ `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | Forget contract / `1f0391bc49d007c44ec74165bd33d37412cc7990`; publication gate / `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` |
 | E | `session-e-memory-compiler-2026-11-16` @ `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | producer admission / `e59f517fff161ab882aa0ddc4a5bda513964ae1a`; derived registration / `00e37ba56596e710513c8d0568acd79141d9101b`; evidence/provenance / `38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963` |
 | F | `session-f-memory-runtime` @ `1908ce4d233b20f7cafd00cb679affd01bd15174` | runtime overview / `b7a948f014c3ad882a35a18bfc8ce025b26ab85a`; scheduling / `ca35d8cddd012c1ff067328ee22177f57c40ae36`; working set / `a934491950c876701e8ac592a0e6aaea983b44e3`; activation / `b7f5d85468f5262e472769a1991b812ac4a64f5b` |
