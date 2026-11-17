@@ -1,0 +1,56 @@
+# B — Exact Type Review of Storage COC Protocol v3 / Prepared Participant Contract
+
+- Owner boundary: B — Domain Model
+- Branch: `session-b-domain-model-phase3`
+- Review target: Storage v3 commit `db226387b0f2dede30a32a19a1478136b368cc1e`, Blob `4a60420d457f359780c568dce42b8bef000026ca`
+- Related Storage source: `phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`
+- B registry before this change: Blob `63ccb4bf687b00dea2b21fc2773f3018648d76e6`
+- H schema 1.1.1 candidate reviewed: Blob `c0bbfc7611a8d88a39cee209831db32b62601fde`
+- A closure authority: `phase-3.6-final-closure-plan.md`, Blob `0adca0f54ff6ee1e344949cb48334ff475fad247`
+- Decision: **ACCEPT WITH ENUMERATED AMENDMENTS — B SEMANTIC TYPE BOUNDARY ONLY**
+
+## 1. Scope and evidence boundary
+
+B reviewed Storage v3 §§15.1–15.7 and the companion §14 mapping against the current B typed-reference registry. This is a domain-type decision only. It does not accept Storage implementation, I security policy, H wire encoding, COC deployment or D/E runtime behavior.
+
+## 2. Adversarial findings
+
+### B-V3-01 — Missing B registrations
+
+The pre-review B registry defined PreparedParticipantRef, PreparedTransactionGID and EngineNativeTransactionXIDRef, but did not define DatabaseIncarnationRef, PrepareAttemptRef, PrepareAttemptGeneration, ParticipantLedgerRef, ParticipantLedgerVersion or the complete ParticipantTupleDigest semantics required by Storage v3. These are not optional metadata: they participate in authoritative lookup, attempt replay and proof binding. The registry is amended in §13 of the current B source.
+
+### B-V3-02 — Native XID nominal type ambiguity
+
+Storage v3 uses PostgreSQLNativeXID as an engine-assigned unsigned numeric value. The existing B registry uses EngineNativeTransactionXIDRef, an engine-neutral opaque reference. They are not silently identical. B now defines PostgreSQLNativeXID as the PostgreSQL-specific native value and retains EngineNativeTransactionXIDRef for engine-neutral references/other adapters. H must carry an explicit engine-specific type discriminator and preserve the distinction.
+
+### B-V3-03 — PostgreSQL metadata spelling drift
+
+Storage v3 uses PostgreSQLSystemIdentifier, PostgreSQLDatabaseOID, PostgreSQLTimeline and PostgreSQLLSN; older B vocabulary used PostgresSystemIdentifier, DatabaseOID, Timeline and LSN. B records the full PostgreSQL-prefixed spellings as canonical for this adapter and the older names as compatibility vocabulary only. No numeric coercion or cross-authority ordering follows from the naming alignment.
+
+### B-V3-04 — I terminal proof must bind the complete Storage attempt
+
+Storage v3 §15.7 lists the core I terminal proof tuple but does not explicitly enumerate PrepareAttemptRef/generation and ParticipantLedgerRef/version. Those fields are required to prevent a valid receipt from one prepare attempt being replayed against another attempt or a newer ledger state. I must bind the exact Storage PreparedParticipantReceipt digest and complete participant tuple digest in its atomic receipt-consumption record. B records this as a cross-owner dependency, not an I decision.
+
+### B-V3-05 — Authority boundaries preserved
+
+DatabaseIncarnationRef issuance and participant-ledger truth remain Storage-owned. I authorization/PermissionEpoch and receipt consumption remain I-owned. COC positions remain COC-owned. H encoding remains H-owned. B does not infer that a typed reference is authentic or authorized merely because it is well-formed.
+
+## 3. Required normative mapping
+
+The B registry §13 now defines the added nominal types and the complete lookup key. H must encode those exact semantic distinctions. I must bind the same participant/attempt/ledger tuple in its terminal proof. Storage must implement the incarnation registry and append-only attempt ledger. No cross-owner position comparison or fallback to GID-only lookup is accepted.
+
+## 4. Test and implementation status
+
+- B semantic review: completed as a candidate type decision.
+- B runtime type validator: **NOT RUN**; no B executable domain-model harness was identified.
+- H schema/validator: the pre-review 1.1.1 schema does not contain DatabaseIncarnationRef, PrepareAttemptRef, PrepareAttemptGeneration or ParticipantLedgerRef/Version; H work is required.
+- Storage implementation: not evidenced by this architecture repository's owner artifacts; no implementation PASS inferred.
+- Fact/Claim ADR-001: **ADR-BLOCKED**, unchanged.
+
+## 5. A G0–G10 reconciliation
+
+This artifact supports G4 only at B's domain semantic boundary. It is not C/D/E/F/G/Storage consumer acceptance and does not close G6. It is not external governance approval (G5), I36/H36 execution (G7), CFG freeze (G8), runtime/security execution (G9) or overall readiness (G10). A remains the final acceptance authority.
+
+## 6. Provenance
+
+This is a B-role review and domain-model amendment prepared by the delegated B/I/H joint developer session at the user's direction. It is not an independently authenticated human signature or evidence that a separate B session executed tests.

@@ -245,3 +245,70 @@ Non-substitution invariants:
 6. Missing, stale, gapped, audience-mismatched or unverifiable proof remains UNKNOWN and keeps restore fenced.
 
 Disposition: **B ACCEPTS THE TYPE/REFERENCE SEPARATION AS CANDIDATE SEMANTICS ONLY.** This does not approve I governance, create a real inventory seal, close Global Forget, or authorize production restore.
+
+## 13. Phase 3.6.6 — Storage v3 prepared-participant identity reconciliation
+
+Exact source reviewed:
+- Storage v3: `reviews/storage-consistency/phase-3.6-coc-durable-log-and-recovery-protocol-storage-design-v3.md`, commit `db226387b0f2dede30a32a19a1478136b368cc1e`, Blob `4a60420d457f359780c568dce42b8bef000026ca`, §§15.1–15.7.
+- Storage companion protocol: `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`, §14.
+- H schema 1.1.1 candidate: `08-bmcp-protocol/schemas/bmcp.applied-ack-1.1.1-jf10-prepared-gid.schema.json`, Blob `c0bbfc7611a8d88a39cee209831db32b62601fde`.
+- A Phase 3.6 final closure plan: `reviews/integration/phase-3.6-final-closure-plan.md`, Blob `0adca0f54ff6ee1e344949cb48334ff475fad247`.
+
+**Disposition: ACCEPT WITH ENUMERATED AMENDMENTS — B DOMAIN-TYPE SEMANTICS ONLY; CANDIDATE MAPPING, NOT A CROSS-OWNER FREEZE.**
+
+### 13.1 Canonical nominal type additions
+
+The following types are now registered as candidate domain semantics. Their wire spelling remains H-owned; issuer, registry and authorization policy remain owned by the named authority.
+
+| Nominal type | Authority | B semantic rule |
+|---|---|---|
+| `DatabaseIncarnationRef` | Storage authority registry | Non-reusable identity for one governed logical database incarnation under a `CanonicalAuthorityDBRef`; survives restart/failover of that same incarnation; clone, independent restore, copy, re-provision or authority migration creates a new value unless a separately authorized migration record preserves identity. |
+| `PrepareAttemptRef` | Storage | Opaque identity for one attempt to prepare one participant; never reused for a later attempt. |
+| `PrepareAttemptGeneration` | Storage | Strictly monotonic positive generation scoped to one `PreparedParticipantRef`; not comparable to any COC/I/D/H/G position or generation. |
+| `ParticipantLedgerRef` | Storage | Opaque identity for the durable Storage participant ledger that records the immutable tuple and append-only attempt history. |
+| `ParticipantLedgerVersion` | Storage | Strictly monotonic positive version within one `ParticipantLedgerRef`; not a global sequence and not an owner-authority cursor. |
+| `ParticipantTupleDigest` | Storage | Algorithm/profile-tagged digest of the complete immutable participant tuple, including the DB incarnation, attempt and ledger binding. It is not a substitute for the tuple or its signed proof. |
+| `PostgreSQLNativeXID` | PostgreSQL engine, observed by Storage | PostgreSQL-specific engine-assigned unsigned native XID observed after PREPARE. It is distinct from the client-chosen GID and from the engine-neutral `EngineNativeTransactionXIDRef`; neither is cast to the other. |
+| `PostgreSQLSystemIdentifier` | PostgreSQL engine, observed by Storage | Cluster identity evidence; not a canonical authority or database-incarnation identity. |
+| `PostgreSQLDatabaseOID` | PostgreSQL engine, observed by Storage | Database-local OID; never globally stable or sufficient to identify a database incarnation. |
+| `PostgreSQLTimeline` | PostgreSQL engine, observed by Storage | Engine timeline metadata; not a causal-order cursor. |
+| `PostgreSQLLSN` | PostgreSQL engine, observed by Storage | Canonical PostgreSQL WAL location; not an integer sequence comparable with COC/I/D positions. |
+
+The existing registry names `PostgresSystemIdentifier`, `DatabaseOID`, `Timeline` and `LSN` are compatibility vocabulary for the corresponding PostgreSQL-specific nominal types above. The full PostgreSQL-prefixed names are canonical for the v3 adapter contract. This is a naming clarification, not permission to coerce these types or treat the underlying values as interchangeable.
+
+### 13.2 Immutable participant tuple and lookup semantics
+
+The Storage v3 tuple is accepted as a candidate semantic contract when it binds, at minimum:
+- `PublicationOperationId` and `RequestDigest`;
+- `PreparedParticipantRef`, `PrepareAttemptRef`, `PrepareAttemptGeneration`;
+- `PreparedTransactionGID` and `PostgreSQLNativeXID` as separate values, with the latter observed only after PREPARE;
+- `CanonicalAuthorityDBRef` and `DatabaseIncarnationRef`;
+- `PostgreSQLSystemIdentifier`, `PostgreSQLDatabaseOID`, original `PostgreSQLTimeline` and `PostgreSQLLSN`;
+- owner boundary, `CausalOrderDomainRef`, `PolicyDomainRef`, COC prepare-intent identity/digest;
+- `ParticipantLedgerRef`, `ParticipantLedgerVersion` and `ParticipantTupleDigest`.
+
+Authoritative participant lookup MUST use the complete key:
+`(CanonicalAuthorityDBRef, DatabaseIncarnationRef, PreparedParticipantRef, PreparedTransactionGID)`.
+GID-only, participant-only, system-identifier-only, OID-only or database-name-only lookup is insufficient. A matching GID found in another incarnation MUST NOT resolve the original participant.
+
+A new prepare attempt is permitted only after the previous attempt has an authoritative append-only terminal attempt record and a new COC prepare-intent binding. A previous receipt cannot authorize a new attempt. Same complete tuple + same attempt is idempotent; any changed tuple field, attempt generation, ledger version, DB incarnation or digest under the same immutable identity is CONFLICT.
+
+Original prepare timeline/LSN are immutable historical facts. Recovery timeline/LSN belong to append-only recovery observations and MUST NOT overwrite the original prepare coordinates.
+
+### 13.3 Cross-owner naming and proof constraints
+
+1. `PostgreSQLNativeXID` is the PostgreSQL-specific refinement; `EngineNativeTransactionXIDRef` remains an engine-neutral opaque reference for other adapters. A wire decoder MUST retain the engine discriminator and MUST NOT infer type from a matching string or number.
+2. `PreparedTransactionGID` is the PostgreSQL client-chosen locator. It is not the PostgreSQL native XID and is not a universal database-engine handle.
+3. `DatabaseIncarnationRef` is distinct from `CanonicalAuthorityDBRef`: the former identifies a governed incarnation; the latter identifies the canonical authority boundary.
+4. `ParticipantLedgerRef` is distinct from `StorageParticipantLedgerProofRef`; the latter is evidence about a ledger, not the ledger identity.
+5. The I terminal proof must bind the exact participant, GID, DB incarnation, attempt/generation, participant-ledger version, operation/request/tuple digests and owner-final-gate participant. B does not define or mint that I proof.
+6. The H schema must encode the nominal types and requiredness without converting authority positions to integers or a synthetic global sequence.
+7. Storage registry authority, signer trust, cryptographic profile, H canonicalization, I receipt consumption and production deployment remain outside B's approval.
+
+### 13.4 Preservation and non-claims
+
+- BIH36-JD-01..17 are unchanged.
+- Fact/Claim ADR-001 remains **ADR-BLOCKED**; this type addition does not decide Fact/Claim semantics.
+- No Storage registry authority is designated by B.
+- No I36 governance approval, inventory seal, authorization permit, H wire freeze, production DB selection, runtime implementation or conformance PASS is claimed.
+- The A G0–G10 plan remains the overall acceptance authority. This B type decision can support G4 technical reconciliation but does not close G5, G6, G7 or G10.
