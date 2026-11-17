@@ -170,3 +170,19 @@ Exact current heads were re-fetched after branch synchronization:
 - PR #94 merged to `session-c-agent-integration-2026-11-16` at `62c3e799b36c56bd82972a4d7d561f246598deaf`. The merge-commit workflow, controlled schema-only trigger run and restore run all passed; details are in the merge log. The only submitted review was still author-account COMMENTED, so independent-review provenance remains a retrospective governance gap.
 - PR #110 exact head `5f42acb1391a06703f9aa1a7b615f4dd62d5cbea`; #111 exact head `c6fc822c64c6afa728e1eff884012384256958cf`; both target current main and report mergeable=true, but no exact-head status contexts/workflow runs or independent APPROVE exist.
 - Authenticated GitHub identity remains `oahcom`; technical re-check comments on #110/#111 are explicitly non-independent. No main-target PR is presently eligible for a safe merge under the independent-review requirement.
+
+## Latest authoritative live refresh — after PR #110 merge
+
+- Current main HEAD: `4a0acc1608f0909bafb64ac90f0a724b8223d546` (PR #110 merged at 2026-11-17T18:56:12Z).
+- Current Open PRs: **61 = 60 Draft + 1 Ready (#111)**.
+- All 61 currently Open PRs target `main`; there are no currently Open non-main-target PRs in the REST collection.
+- Original tracked inventory: **76 PRs = 61 Open + 15 Merged**.
+- The 15 merged rows are #32, #33, #34, #35, #51, #54, #66, #68, #71, #72, #92, #94, #108, #109, #110.
+- Formal PR review evidence across these 15 merges: 11 PRs (#32–#35, #51, #54, #66, #68, #71, #72, #92) have zero submitted review records; four (#94, #108, #109, #110) have only author-account COMMENTED reviews. **None has an independent APPROVE in the review API.**
+- #94 had three successful workflow runs validating its C workflow trigger and restore, but those runs do not replace independent review.
+- #110 merged into main at `4a0acc1608f0909bafb64ac90f0a724b8223d546`; merge SHA has no combined status contexts or PR workflow runs. Only author-account COMMENTED review exists on an earlier head.
+- #111 was rebased onto current main. Current head `9a7ba7ac8cfc6d3de0d732bb7e677ff2288a4ca5`, base `4a0acc1608f0909bafb64ac90f0a724b8223d546`, one report file, 1 commit ahead / 0 behind. It is the only Ready Open PR, but has no current-head status/check evidence and no independent review.
+- #105 recovery PR is based on current main and contains only the eight recovery artifacts. It remains Draft and requires a separate reviewer; it cannot self-approve.
+- Classification across 76 tracked rows: DRAFT_ACTIVE 48; BLOCKED_BY_DEPENDENCY 0? (see exact inventory); STALE_UNCERTAIN 5; ARCHITECTURE_CONFLICT 3; NEEDS_REBASE 2; SECURITY_REVIEW_REQUIRED 2; READY_AFTER_REVIEW 1; MERGED_REVIEW_GAP 15. The CSV is the exact per-row source; the aggregate is refreshed below after inventory validation.
+- Priority totals remain P0 2; P1 55; P2 19.
+- The mainline review bottleneck is now explicit: all currently Open PRs are authored by `oahcom`; no current Open PR has a GitHub `review:approved` result. The authenticated GitHub identity is also `oahcom`, so Recovery Principal Reviewer technical checks cannot be represented as independent GitHub approvals.
