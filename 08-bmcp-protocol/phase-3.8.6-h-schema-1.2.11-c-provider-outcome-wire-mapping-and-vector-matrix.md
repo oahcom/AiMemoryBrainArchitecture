@@ -127,3 +127,27 @@ H accepts the exact structural field inventory above as the 1.2.11 mapping basel
 I Phase 3.8.5 conditionally accepts the cryptographic suite in principle but explicitly does not register the profile. Therefore C Provider Outcome protected records remain blocked from VALID until the exact profile is registered, H's projection implementation exists, C object contract is immutable and dereferenceable, and independent vectors are executed.
 
 No executable validator, test fixtures, cross-language execution, provider adapter test, production readiness or exactly-once property is claimed.
+
+
+## 8. C immutable object schema 1.0.0 binding
+
+C has now published the proposed immutable object schema:
+- C schema `urn:aimba:schema:c-submit-outcome:1.0.0`, Blob `b0e324ffa46d7afb1bf4687ae51202e3e220ae67`.
+- C schema/conformance contract Phase 3.8.9, Blob `054b28bc8fcbf7f29c0755eac941441972581829`.
+- C structural/semantic fixture pack, Blob `d2ce9176e82e0b311e2145fa03d2dede4a50a675`.
+- C Python harness, Blob `92e8e9e607566eafa6ad89110202dbeed0fc43cb`; dependency pin Blob `89099e36f214d8d0e0c7d4aacc19e2b4450f0744`.
+
+The dereference target of `c_submit_outcome_ref` MUST validate against this exact schema revision and object digest. The object contains the complete C gate/attempt/provider/account/endpoint/region/API/idempotency/request tuple absent from the BMCP 1.2.11 inline branch. H must compare all duplicated wire fields to the dereferenced object.
+
+The C fixture pack contains ten synthetic structural/semantic cases. Its signatures are explicit placeholders; the profile is unregistered and these tests are NOT EXECUTED. The C harness is not a cryptographic verifier, provider proof verifier, owner-ledger membership verifier or COC quorum verifier. H must not elevate its existence to cross-language or production evidence.
+
+### 8.1 H decision
+
+H accepts the C schema as a proposed dereference contract for validator implementation planning. H does not yet accept it as a frozen interoperable object because:
+- I has not registered `AIMBA-C-CRYPTO-1.0`;
+- no valid C signed vectors or C key-status evidence exist;
+- no H dereference/duplicate-field validator implementation exists;
+- the C harness has not been executed;
+- provider adapter and Storage deployment evidence remain open.
+
+C schema structural validity and BMCP envelope structural validity are separate gates; both must pass before semantic joins.
