@@ -611,8 +611,10 @@ class HRCConformance(unittest.TestCase):
 
     # JPF-08: one owner admission identity cannot bind two participants.
     def test_JPF_08(self):
-        p1 = participant(ref="COC/P1")
-        p2 = participant(ref="COC/P2", position=2)
+        # Isolate the duplicate-primary-admission invariant: unrelated I/D
+        # evidence is deliberately not required in this vector.
+        p1 = participant(ref="COC/P1", required=["C"])
+        p2 = participant(ref="COC/P2", position=2, required=["C"])
         p2["owner_admission_ref"] = "C/admit/1"
         p2["entry_digest"] = "e" * 64
         a = admission("C/admit/1", "C")
