@@ -225,3 +225,57 @@ All 22 files were re-read at research branch commit `9274e28d7b116c6ce58b9cfeb9d
 - B6：**INDEPENDENT_REVIEW_PENDING**。执行作者不能成为独立审查者。
 - Schema 验证、可执行不变量测试、属性测试和集成/故障注入测试：**NOT RUN**。当前交付仅为研究/契约草稿。
 
+
+
+## 7. Live exact-file refresh / 实时精确文件刷新 — 2026-11-18
+
+This section supersedes the earlier 9274e28 and other historical snapshot tables for the exact Blob/line-count values below. All 22 package files were fetched again from the live research branch after the official-reference and currentness-audit updates. The research branch was at commit `4f230d96409a3d28a4f5d5da17c5322bd208584b` at the end of the currentness-audit write; the PR metadata will be refreshed again after this audit update.
+
+本节对下列精确 Blob/行数值，取代此前 9274e28 及其他历史快照表。官方来源与当前性审计更新后，已从实时研究分支重新读取全部 22 个研究包文件。当前性审计写入结束时，研究分支 Commit 为 `4f230d96409a3d28a4f5d5da17c5322bd208584b`；本审计更新后还会再次刷新 PR 元数据。
+
+| File / 文件 | Exact Blob SHA / 精确 Blob SHA | Lines / 行数 |
+|---|---|---:|
+| README.md | `af10e810aaff96537afc731af07d322f2c050d1e` | 218 |
+| bilingual-parity-audit.md | `710df4a0170c3bb762297a81beacb80845719330` (pre-update self Blob) | 228 |
+| baseline-currentness-and-owner-source-audit.md | `f94836b337b6b59915f3ba55810642da5f44e1d6` | 334 |
+| baseline-owner-branch-snapshot-errata.md | `a96860efd61962633a5ad9e55b3353c151785411` | 65 |
+| canonical-domain-entity-inventory.md | `ca84d9b6fa1c835fdcab08b4a62302b97a2b84a2` | 211 |
+| canonical-domain-glossary.md | `2dbf2e7c402eb551bace71039120975783128f08` | 162 |
+| canonical-domain-invariants.md | `51792426bb71609ceecf8d13491f9ab0b36c91eb` | 132 |
+| canonical-domain-model.md | `ce441336e2fbba7c7a28c0b4c75482d524a4ade7` | 212 |
+| canonical-domain-relationships.md | `277e7955d3c111ef43d5eda94c65647228f6d1a6` | 121 |
+| canonical-identity-semantics.md | `bc8816eadcd14a1dd01ae03ed68de553b2bb1483` | 169 |
+| canonical-state-semantics.md | `2c42b4b9d8311e218d0e6fadd7b1f3a7d9c10017` | 153 |
+| canonical-temporal-evidence-semantics.md | `636c28a4d06e61702665ec4e6d7c5a6f034aba1c` | 250 |
+| cross-owner-canonical-semantics-matrix.md | `0e8b58fa7efacda4321ac8f62db7ca81e70a4960` | 220 |
+| domain-model-complexity-assessment.md | `38bee7501e52798152524665778c69659be6cf33` | 418 |
+| domain-model-decision-record.md | `08383c76658129cebe8ef9e303cf75c27269bfb3` | 218 |
+| domain-semantics-conflict-register.md | `edad7a11e59c975f7af53c44d141891bb5ed3180` | 84 |
+| evidence/README.md | `bda915327a0ee77fb78e9a52bc094986254a1a60` | 47 |
+| evidence/official-reference-validation.md | `ef4a0cf448e474b08bf5ff6b80c32dbae705b002` | 208 |
+| existing-domain-model-baseline.md | `08f2843db1d41027ee6d1bee9af564ce07a3a793` | 383 |
+| fact-claim-identity-adr.md | `0bbea0beec6a5828c2db5ae267fac40f59ad7f1f` | 187 |
+| mature-domain-model-research.md | `1f31eee069f58e9da5b1eeecf7298af8b3c24882` | 394 |
+| validation/README.md | `a2bb3d494fadd5ae411d9b8227d83dd50a16a895` | 46 |
+
+### 7.1 New source evidence status / 新来源证据状态
+
+- `evidence/official-reference-validation.md` now records a 2026-11-18 direct revalidation of DDD, Zep v4, Letta, LangGraph, Temporal, PostgreSQL current docs, W3C PROV-O, RDF 1.1, OWL 2 and JSON Schema 2020-12. Mem0's detailed official page timed out and is explicitly marked NOT REVALIDATED in this pass.
+- `baseline-currentness-and-owner-source-audit.md` now records the refreshed main/PR/Owner refs, selected exact source pins, the newer H 1.2.15 / I review, Storage v3.3.1 and A Phase 3.12.1 successor evidence, and the live OPEN state of Issue #7.
+- These are author-side evidence refreshes. They do not constitute independent clause-by-clause translation review or Owner approval.
+
+- `evidence/official-reference-validation.md` 已记录 2026-11-18 对 DDD、Zep v4、Letta、LangGraph、Temporal、PostgreSQL 当前文档、W3C PROV-O、RDF 1.1、OWL 2 和 JSON Schema 2020-12 的直接复核。Mem0 详细官方页面读取超时，并明确标记为本轮未重新验证。
+- `baseline-currentness-and-owner-source-audit.md` 已记录刷新的 main/PR/Owner Ref、选定精确来源 Pin、更新的 H 1.2.15 / I 复审、Storage v3.3.1 和 A Phase 3.12.1 后继证据，以及 Issue #7 实时 OPEN 状态。
+- 这些属于作者侧证据刷新，不构成独立逐条翻译审查或 Owner 批准。
+
+### 7.2 Gate / 门禁
+
+- B5 remains **BLOCKED / NOT PASSED**. Exact-file readback is refreshed, but independent clause-by-clause semantic parity review has not been performed.
+- B6 remains **INDEPENDENT_REVIEW_PENDING**.
+- The 22-file Blob table proves file identity/readback only; it does not prove translation completeness or semantic equivalence.
+- Schema validation and executable unit/integration/property/fault-injection tests remain **NOT RUN**.
+
+- B5 仍为 **BLOCKED / NOT PASSED**。精确文件读回已刷新，但尚未执行独立逐条语义对等审查。
+- B6 仍为 **INDEPENDENT_REVIEW_PENDING**。
+- 22 文件 Blob 表仅证明文件身份/读回，不证明翻译完整性或语义等价。
+- Schema 验证及可执行 Unit/Integration/Property/Fault-injection 测试仍为 **NOT RUN**。
