@@ -15,7 +15,7 @@
 | Storage | Phase 3.8 Storage Visibility Participant and Atomic Outcome Contract | session-storage-consistency-forget-atomicity-2026-11-16 | 175ee7b1349cfdb79a19898b311a88391ed88010 |
 | Storage | Phase 3.6.11 Bidirectional COC/Owner Admission Join Proof | session-storage-consistency-forget-atomicity-2026-11-16 | 5b3f81ada75994cabc6fdab8537d7f185e6c6287 |
 | Storage | Phase 3.8.2 Serialization Topology ADR | session-storage-consistency-forget-atomicity-2026-11-16 | 080433f8e13a500522bc2754da64057edb0ae9d8 |
-| H | HRC semantic validator contract | session-h-bmcp-protocol | 121717c5f303b1a2e864f2b95664f51f51ba4b48 |
+| H | HRC semantic validator contract | session-h-bmcp-protocol | 6f66a72a2d0aa43af338ff9e22d650d47aa2bd80 |
 | H | Recovery-cutoff schema 1.0.4 | session-h-bmcp-protocol | d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1 |
 | H | RecoveryJoin schema candidate 1.0.0 | session-h-bmcp-protocol | dd3234aa1c74caf6d0e335875cd96e0b2b64082f |
 | H | HRC semantic suite | session-h-bmcp-protocol | 60a2f4db4bd12f2131ecd147db9bbe328da6db50 |
