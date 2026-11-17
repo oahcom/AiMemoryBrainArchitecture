@@ -71,3 +71,33 @@ PermissionEpoch 是 PolicyDomain 内不透明值，禁止与 D/COC/Storage/F/G �
 本审查不注册 H Profile/Issuer/Trust Root/Key，不实现 I PolicyDomain Sequencer/Authorization Service，也不证明生产 Key Custody、Revocation Propagation、Durable Replay 或 Anti-rollback。H Callback 仍是注入适配器接缝，测试 Double 不是真实 I 服务。
 
 最终状态：I Replay Callback **参考候选有条件接受**；生产 I Authorization Adapter/Trust Registry **OPEN / NOT VERIFIED**；H Profile Registration 和 Durable Replay **OPEN**；不代表 I Trust Gate 或生产激活通过。
+
+## 6. Current H code-head delta — 2026-11-18
+
+The original 29-test snapshot above is historical. H's current Owner branch is `session-h-bmcp-protocol@4386f67a61f7968da4c3603f28cc8a5100714f9f`. The final H successor commit adds a Unified 1.2.15 structural-conformance document; the replay code and tests are unchanged at the Blob level.
+
+Current exact H pins:
+- Applied Delivery Evidence schema Blob: `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608`.
+- Validator Blob: `43f402e4a09034da197ac24856cddbd496c9c75f`.
+- Conformance test Blob: `98242cc193a77b27d58b39353ccc031201992614`.
+- Hardening addendum Blob: `4c220e998fc6ba700157598b0384dc3134cf8575`.
+
+The exact 30-test code Head reviewed in the later H/C pass is `4c16410f8b20b8fc2bc8c7609eb7bf07d83f317e`; run [#44187702465](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44187702465) is SUCCESS, 30/30. Its validator/test Blobs match the current H Owner branch pins above. This is code-blob equivalence, not a claim that CI ran on the later documentation-only branch HEAD `4386f67...`.
+
+The 30-test suite retains the I replay callback boundary:
+- `verify_current_i_replay_authorization(envelope, original_result_ref)` is independently evaluated for SAME_DIGEST_REPLAY before the original result reference is returned.
+- False => INVALID and no result reference; None/exception => UNKNOWN and no result reference.
+- Current key-status verification remains a separate earlier check; I replay authorization must additionally revalidate principal/workload/delegation, action/resource/purpose/audience/scope/environment, PolicyDomainRef, current PermissionEpoch, revocation/registry state and exact request/result binding.
+- D's current ForgetFence callback remains a separate conjunctive authority and is not accepted by I's result.
+
+**Updated disposition:** the I callback shape remains ACCEPTED AS REFERENCE CANDIDATE WITH CONDITIONS on the current code Blob. The callback is still injected; there is no live I authorization/PermissionEpoch/key-status adapter, production trust registration, revocation propagation, or durable replay implementation. This delegated I-role review is not an independent human I Owner signature and does not pass I36 governance or production activation.
+
+### 中文：当前 H 代码 Head 差异
+
+上方 29 项测试快照已是历史记录。H 当前 Owner 分支为 `session-h-bmcp-protocol@4386f67a61f7968da4c3603f28cc8a5100714f9f`。最后的 H 后继提交只增加 Unified 1.2.15 结构符合性文档，Replay 代码和测试 Blob 未改变。
+
+当前 H 精确来源：Schema `2ce8776...`、Validator `43f402e...`、Tests `98242cc...`、Hardening Addendum `4c220e9...`。后续 30 项精确代码 Head `4c16410...` 的 Run #44187702465 SUCCESS，30/30；其 Validator/Tests Blob 与当前 H Owner 分支一致。这是代码 Blob 等价，不表示 CI 运行在仅增加文档的后续分支 Head 上。
+
+当前 30 项测试仍保留独立的 I Replay Callback：SAME_DIGEST_REPLAY 时，在返回 Original Result Ref 前执行 `verify_current_i_replay_authorization`；False 为 INVALID 且不返回引用，None/异常为 UNKNOWN 且不返回引用。Key Status 仍是独立的前置检查；I Replay Authorization 还必须在重放时重新验证主体/Delegation、Action/Resource/Purpose/Audience/Scope/Environment、PolicyDomainRef、当前 PermissionEpoch、Revocation/Registry 和精确 Request/Result 绑定。D ForgetFence 是另一个独立合取权威，不归 I 代替。
+
+更新结论：I Callback 结构在当前代码 Blob 上仍**有条件接受为参考候选**；它仍是注入接缝，没有真实 I Authorization/PermissionEpoch/Key Status Adapter、生产 Trust Registration、Revocation Propagation 或 Durable Replay。此委派 I 角色审查不是独立人类 I Owner 签名，也不代表 I36 Governance 或生产激活通过。
