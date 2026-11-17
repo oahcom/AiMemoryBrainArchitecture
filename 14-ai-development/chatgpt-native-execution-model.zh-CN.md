@@ -110,7 +110,7 @@ A 负责协调，但**不得替代领域 Owner 做决策**。每个 Owner 只能
       chatgpt-session-contract-v1.md
     owners/
       A/owner-session-v1.md
-      B/owner-session-v1.md
+      B/owner-session-v2.md
       C/owner-session-v1.md
       D/owner-session-v1.md
       E/owner-session-v1.md
