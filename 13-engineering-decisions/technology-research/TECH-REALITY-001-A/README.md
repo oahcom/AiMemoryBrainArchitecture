@@ -170,3 +170,9 @@ A direct readback of the current Storage branch supersedes the earlier Storage s
 
 This refresh does not approve a technology, close JF-10 P0, authorize implementation, or claim independent review. The separate reviewer handoff remains mandatory.
 本次刷新不批准任何技术、不关闭 JF-10 P0、不授权实现，也不声称独立审查通过。仍必须执行独立审查交接。
+
+## 7. Current-source remediation addendum / 当前源整改补充
+
+The original 2026-11-17 research snapshot remains historical. Current-main remediation is based on `b3c666e67982cb3d3374e759cfb6552c7765aacb`. The multi-owner Phase 3.8/3.8.3 contract, bounded evidence, license correction, and explicit closure conditions are recorded in [OWNER-REMEDIATION-001](owner-remediation/OWNER-REMEDIATION-001.md). The exact D/E/I/Storage proposal pins are listed there. This addendum does not represent real Owner approval, physical deployment selection, implementation or conformance. Verdict remains **REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY**.
+
+**中文：** 原 2026-11-17 研究快照保留为历史记录。当前 Main 整改基于 `b3c666e67982cb3d3374e759cfb6552c7765aacb`。Phase 3.8/3.8.3 跨 Owner 契约、有限范围证据、许可证更正和关闭条件见 [OWNER-REMEDIATION-001](owner-remediation/OWNER-REMEDIATION-001.md)。此补充不代表真实 Owner 批准、物理部署选择、实现或符合性。裁决仍为 **REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY**。
