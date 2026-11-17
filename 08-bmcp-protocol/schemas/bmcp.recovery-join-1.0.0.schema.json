@@ -447,6 +447,21 @@
         },
         "owner_entry_ref": {
           "$ref": "#/$defs/ref"
+        },
+        "operation_identity_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "operation_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "gate_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "scope_generation": {
+          "$ref": "#/$defs/counter"
         }
       },
       "required": [
@@ -459,7 +474,12 @@
         "reason",
         "terminal_state",
         "owner_signature_ref",
-        "owner_entry_ref"
+        "owner_entry_ref",
+        "operation_identity_ref",
+        "operation_digest",
+        "scope_ref",
+        "gate_generation",
+        "scope_generation"
       ],
       "allOf": [
         {
@@ -580,6 +600,75 @@
         },
         "not_applicable_proof_ref": {
           "$ref": "#/$defs/ref"
+        },
+        "forget_operation_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "fence_generation": {
+          "$ref": "#/$defs/counter"
+        },
+        "lineage_manifest_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "lineage_manifest_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "barrier_member_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "producer_work_item_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "attempt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "terminal_proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "policy_domain_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "permission_epoch": {
+          "$ref": "#/$defs/counter"
+        },
+        "producer_domain_inventory_epoch": {
+          "$ref": "#/$defs/counter"
+        },
+        "receipt_nonce": {
+          "$ref": "#/$defs/ref"
+        },
+        "issuer_key_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "authorization_receipt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "provider_attempt_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "reservation_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "provider_outcome_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "idempotency_key_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "provider_effect_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "prepared_participant_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "prepared_transaction_gid": {
+          "$ref": "#/$defs/ref"
+        },
+        "database_incarnation_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "storage_resolution_proof_ref": {
+          "$ref": "#/$defs/ref"
         }
       },
       "required": [
@@ -590,6 +679,115 @@
         "disposition"
       ],
       "allOf": [
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "D"
+              },
+              "evidence_kind": {
+                "enum": [
+                  "LINEAGE",
+                  "BARRIER_MEMBERSHIP"
+                ]
+              }
+            },
+            "required": [
+              "owner_kind",
+              "evidence_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "forget_operation_ref",
+              "fence_generation",
+              "lineage_manifest_ref",
+              "lineage_manifest_digest",
+              "barrier_member_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "I"
+              },
+              "evidence_kind": {
+                "enum": [
+                  "RECEIPT_ISSUE",
+                  "RECEIPT_CONSUME",
+                  "TERMINAL_PROOF"
+                ]
+              }
+            },
+            "required": [
+              "owner_kind",
+              "evidence_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "policy_domain_ref",
+              "permission_epoch",
+              "producer_domain_inventory_epoch",
+              "issuer_key_ref",
+              "authorization_receipt_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "C"
+              },
+              "evidence_kind": {
+                "enum": [
+                  "PROVIDER_ATTEMPT",
+                  "PROVIDER_OUTCOME"
+                ]
+              }
+            },
+            "required": [
+              "owner_kind",
+              "evidence_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "reservation_ref",
+              "provider_attempt_ref",
+              "idempotency_key_ref"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "owner_kind": {
+                "const": "STORAGE"
+              },
+              "evidence_kind": {
+                "enum": [
+                  "PREPARED_PARTICIPANT",
+                  "STORAGE_RESOLUTION"
+                ]
+              }
+            },
+            "required": [
+              "owner_kind",
+              "evidence_kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "prepared_participant_ref",
+              "prepared_transaction_gid",
+              "database_incarnation_ref"
+            ]
+          }
+        },
         {
           "if": {
             "properties": {
@@ -941,6 +1139,9 @@
         },
         "owner_signature_ref": {
           "$ref": "#/$defs/ref"
+        },
+        "owner_entry_digest": {
+          "$ref": "#/$defs/digest"
         }
       },
       "required": [
@@ -952,7 +1153,8 @@
         "owner_sequence",
         "scope_ref",
         "disposition",
-        "owner_signature_ref"
+        "owner_signature_ref",
+        "owner_entry_digest"
       ],
       "allOf": [
         {
