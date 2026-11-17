@@ -169,3 +169,11 @@ Current main: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; tree `7096e0bc3fdc9a39
 - E source status: CANDIDATE E enforcement contract; D/E/Storage atomic registration and final publication gate OPEN/BLOCKING.
 - E §3.2 has Cancelled/Rejected durable terminal disposition and no-publication semantics; E §7 Producer terminal acknowledgement remains OPEN (D response schema + reconciliation semantics).
 - Refined M-02: the semantic candidate exists, but exact E→D terminal receipt mapping, pre-execution cancellation authority, idempotency, late-worker fencing and D barrier-ledger linearization remain OPEN; integration model has no corresponding transition.
+
+
+### M-02 regression test added (CI not yet observed)
+
+- Updated test: `reviews/architecture-breakthrough/integration/model/test_forget_cross_owner_model.py`, Blob `434cd370350f2091151a93b6440651f61d8a03e7`, commit `8d7d5a50b45d2137cb3816a21c15bd5760ffc5fd`.
+- New test: `test_registered_fenced_never_started_has_no_pre_execution_terminal_transition`.
+- It records the exact bounded-model gap: after register + install_fence, the current action set has no cancel_before_execution transition; terminalize, resolve_no_publication and close_barrier are not legal from that state.
+- The historical CI list currently shows only runs `44136327645` and `44136537336`, neither tests commit `8d7d5a5...`. The new regression test is committed but **CI execution is not yet observed**; do not report it as passing.
