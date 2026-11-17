@@ -5,7 +5,7 @@
 - 审查日期：2026-11-17
 - 仓库：`oahcom/AiMemoryBrainArchitecture`
 - 用户指定基线：`8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
-- 最终观察到的 main HEAD：`901e38ba7b45ed1822eaefddc2da8d765cf8985c`
+- 最终观察到的 main HEAD：`b3c666e67982cb3d3374e759cfb6552c7765aacb`
 - 两个提交的 main Tree SHA：`7096e0bc3fdc9a390fccff388f9261522fa424f2`
 - 审查分支：`review/session-4-a-rx-fdp-currentness-refresh-2026-11-17`
 - 状态：**以下精确绑定工件的当前源对账已完成；系统级批准与 G1 完成尚未成立**
@@ -27,7 +27,7 @@
 
 ## 1. Main 基线与差异
 
-用户指定 SHA `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` 与最终观察到的 main HEAD `901e38ba7b45ed1822eaefddc2da8d765cf8985c` 具有相同的 Git Tree SHA：`7096e0bc3fdc9a390fccff388f9261522fa424f2`。两者之间有两个提交：`ca69d50...` 曾短暂新增一份仅供研究使用的 B 双语对等审计，随后 `901e38b...` 将其撤回。本次 G1 审计读取了该中间文件，但它不在当前 main 中。因此，用户指定基线到当前 main 的最终净文件差异为零。
+用户指定 SHA `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` 与最终观察到的 main HEAD `b3c666e67982cb3d3374e759cfb6552c7765aacb` 具有相同的 Git Tree SHA：`7096e0bc3fdc9a390fccff388f9261522fa424f2`。在 `901e38b...` 之后，main 又推进了四个提交；最新提交 `b3c666e...` 撤回了一份误加入的 R/X/F/D/P 说明。更早的 `ca69d50...` / `901e38b...` 也曾新增并撤回一份仅供研究使用的 B 双语对等审计。这些中间新增均已检查，但最终都不在当前 main 中。因此，用户指定基线到当前 main 的最终净文件差异仍为零。
 
 这不意味着 Owner 分支已经当前化或获批。Main 文件树相同只是源基线事实，不是 Owner 采纳证明。
 
