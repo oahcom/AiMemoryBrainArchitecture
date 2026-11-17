@@ -2,7 +2,7 @@
 # Phase 3.8.18 — C 精确复审：H Full-Path CSubmitOutcome 1.0.1 Fixture 与 CI
 
 - Owner: C — Provider Outcome Semantic Authority
-- H Unified 1.2.14 schema Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a4a`
+- H Unified 1.2.14 schema Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a59`
 - H authority-join mapping Blob: `1cbe74eba69325510d6b1019d971661f965eabf8`
 - CSubmitOutcome 1.0.1 schema Blob: `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`
 - H validator core Blob: `eab961a08d41e871f38543b18ee60cf024977414`
