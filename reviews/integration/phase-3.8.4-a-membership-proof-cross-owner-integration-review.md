@@ -15,7 +15,7 @@
 | H | RecoveryJoin 1.0.2 | `4b664e3bce465499bcdfd93796349a4ba7074002` |
 | H | I crypto wire mapping 3.8.4 | `1a64a7be3ec4190643809897519afdf73ed69c1d` |
 | H | Unified Manifest union contract 3.8.4 | `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175` |
-| H | H exact review | `f5ab9a9232b04720faf552a70d5d2962343f843f` |
+| H | H exact review | `6f091840f5106bb0bb37118ae4b77c6c6b58625d` |
 | H | Semantic reference validator | `e26379d38825ee13d15f652d3bd019c4091da37d` |
 | H | RecoveryJoin 1.0.2 tests | `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a` |
 | H | Unified 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
@@ -34,7 +34,7 @@
 | C | Provider Egress Gate Adapter | `a8d1cfc4d2171c9b0a0ced10e53fc6b110479aca` |
 | Storage | COC protocol v3.2.3 | `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792` |
 | Storage | Batch/Manifest order amendment | `1c8c0bc11798293293bcf47fa560f1699a5bcfe0` |
-| Storage | Updated exact binding manifest | `e5f283a0aa88f2f78bbdd3ab85fac011178887f5` |
+| Storage | Updated exact binding manifest | `74c3db219ec5badbf86c033d1aa3b2d0ab65f05a` |
 
 ## 2. Integration findings
 
