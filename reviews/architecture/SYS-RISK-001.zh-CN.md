@@ -361,3 +361,53 @@ R-01 继续保持 **Critical / OPEN**，仍阻塞架构冻结和 Visibility/Forg
 5. 在实际引擎/配置、权威读路径、HA/PITR、Operator 和物理故障/恢复证据被明确并验证前，L4 必须保持 OPEN。
 
 **本 R 审查不推定任何 Owner 已批准。** 本补充仅修正独立风险状态。
+
+
+## 15. R-02 实时来源增量 — Fact / Claim Canonical 语义 / 2026-11-17
+
+### 15.1 B 当前精确来源锚点
+
+| 来源 | B 分支当前 HEAD | 精确路径 | Blob SHA | 直接观察到的状态 |
+|---|---|---|---|---|
+| B ADR-001 | `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | `02-domain-model/ADR-001-fact-claim-semantics.md` | `a1024938ff5baba069cf128c69496a44e143330c` | ADR-BLOCKED；没有正式决策权威、批准人、时间戳、批准选项或批准记录 |
+| Domain Model Overview | 同一 HEAD | `02-domain-model/domain-model-overview.md` | `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` | DECIDED 基线文字规定 Claim 是规范命题对象，Fact 是 Claim 的限定解释，当前不是独立对象类型 |
+| Architecture Invariants | 同一 HEAD | `00-governance/architecture-invariants.md` | `66266667bdbb1cf15a2644fa98db5ecaaf3bb23b` | I-04 将 Event、Memory、Fact、Entity、Relation、Evidence 列为不同领域概念 |
+| Design Principles | 同一 HEAD | `00-governance/design-principles.md` | `192e6ba6e9287792a02b679dda0d391844270228` | P-04 将 Event、Memory、Fact、Entity、Relation、Evidence 定义为不同对象 |
+| Consumer Mapping | 同一 HEAD | `02-domain-model/fact-claim-consumer-mapping.md` | `dd45a37199c9b69ab6b68f65e051a484a04691d4` | CANDIDATE；规范 Fact/Claim 部分明确 ADR-BLOCKED |
+
+ADR 自身的 “Last reviewed baseline” 为 `ab19afbf92f67fe0a7679e9aa3a35b015fed89f4`，并非当前 B HEAD。此次评估以当前分支实时读回为准；该内嵌基线标签已过期，不得作为当前来源锚点。
+
+### 15.2 规范冲突与当前决策状态
+
+该冲突是实质性的：
+
+- 治理不变量 I-04 和设计原则 P-04 将 Fact 与 Claim 列为不同领域概念/对象。
+- 当前 Domain Model Overview 却规定 Claim 是规范命题对象，而 Fact 是 Claim 的限定解释，当前不作为独立对象类型。
+- ADR-001 明确将其记录为规范基线冲突，而非命名差异，并明确 B 无权单方面解决。
+- B 推荐 Option A（独立 Fact Attestation 对象）作为候选，但前提是存在真实独立 Attestation 用例且 D/I 同意；这不是决策。
+- Consumer Mapping 将两个分支都保留为条件映射，并明确禁止在 ADR 批准前冻结规范 Fact/Claim Identity 字段。
+
+因此 R-02 在**治理决策层面处于 BLOCKED**，不只是字段定义不足。Option A 和 Option B 都尚未成为规范决策。当前 Overview 的文字不能默默修改 I-04/P-04；B 对 Option A 的推荐也不能默默批准新的 Canonical Fact Identity。
+
+### 15.3 跨 Owner 影响
+
+正式决策记录完成之前：
+- E 必须保持 CandidateProposition / ExtractionIR 中立，不得分配 Canonical ClaimRef 或 FactRef。
+- D 不得冻结 Canonical Fact/Claim Schema、ID、Storage 或 API 形态。
+- F/G 不得假定 FactRef 存在，也不得将 Fact-qualified View 折叠为稳定 Canonical 字段。
+- H 不得冻结 Fact/Claim Wire 字段。
+- C Telemetry 仍是 Source/Producer Observation，不是 Fact Attestation。
+- Consumer Mapping 仍是候选；任何 Consumer 分支工件或实现都不能证明治理批准。
+
+候选 Mapping 已包含有价值的保护措施（精确指向 ClaimRevision、Evidence/Provenance 关联、禁止仅凭 Confidence 晋升 Fact、不可变 Correction/Retraction 历史及 Conflict 保留）。这些是设计约束，不能替代 Canonical Object Model 的正式选择。
+
+### 15.4 R-02 关闭条件
+
+1. 在规范治理工件中明确正式 Architecture Governance 权威及其决策权。
+2. 由有权批准者签署带时间戳的 Option A 或 Option B 决策，记录理由和已接受的真实用例。
+3. 若选 Option A：定义 Fact/FactRevision Identity、精确 ClaimRevisionRefs、Attestor ActorRef、Method/Version、Evidence、Scope、Validity、Revocation/Supersession 和 I Authorization；Canonical Commit 由 D 拥有。
+4. 若选 Option B：通过授权变更控制正式修改 I-04/P-04 及所有受影响的基线/术语引用；定义精确 ClaimRevision Qualification Object 与历史语义。
+5. B/D/E/F/G/H/I 针对精确 Blob 完成明确 Consumer Mapping 采纳；保留 C Telemetry 与 Extraction Confidence 不得被推定为 Attestation 的边界。
+6. 发布 Creation、Correction、Retraction、Conflict、Expiry/Revocation、Temporal Validity 和 As-of Read 的迁移/兼容计划及符合性向量。
+
+R-02 继续为 **Critical / BLOCKED**，阻塞 Canonical Schema/Identity Freeze。本 R 审查不选择任何方案，也不模拟或替代治理权威。
