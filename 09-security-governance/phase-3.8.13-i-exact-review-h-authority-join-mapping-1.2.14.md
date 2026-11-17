@@ -9,8 +9,8 @@
 - I P0 allowlist successor Blob: `44986f5f864bcdc1a79d34978273644d381a68c0`
 - I owner snapshot membership proof contract Blob: `88209bbea0ab600880c5c630cfe83af31ee16dd7`
 - H validator Blob: `eab961a08d41e871f38543b18ee60cf024977414`
-- H test Blob: `53774aca0224fd9a727dfa625ba142825f1754b0`
-- H callback-seam CI: run `44068247661`, tested commit `0701b12c3f43e1e6d5706c8eb2747e1c583d60b7`, SUCCESS, 25 tests.
+- H test Blob: `70a3796446553464e71999f916b76bc22e47da11`
+- H callback-seam CI: run `44068869146`, tested commit `e0d89f1b6dac3bdcf1f0ab4e3f062dd7bc53fdf8`, SUCCESS, 27 tests.
 - Provenance: delegated I-role review; **not an independent human I Owner or governance approval**.
 - English and Chinese are normative peers.
 
@@ -32,9 +32,9 @@ I 仍是 I Ledger Completeness、Authorization、PermissionEpoch、Key Status、
 
 ## 3. Test ceiling / 测试证据上限
 
-H run `44068247661` passed 25 tests on exact commit `0701b12c3f43e1e6d5706c8eb2747e1c583d60b7`. It demonstrates independent I/D/Storage callback slots and fail-closed UNKNOWN when missing. The orchestration tests mock schema validation, semantic validation and candidate digest/preimage calculation. They do not authenticate real I proofs, prove I ledger completeness, exercise production key status or demonstrate final I currentness CAS.
+H run `44068869146` passed 27 tests on exact commit `e0d89f1b6dac3bdcf1f0ab4e3f062dd7bc53fdf8`. It demonstrates independent I/D/Storage callback slots and fail-closed UNKNOWN when missing. The orchestration tests mock schema validation, semantic validation and candidate digest/preimage calculation. They do not authenticate real I proofs, prove I ledger completeness, exercise production key status or demonstrate final I currentness CAS.
 
-H Run `44068247661` 精确 Commit 上 25 项通过，证明 I/D/Storage 回调槽独立以及缺失回调时 fail-closed UNKNOWN。编排测试 Mock 了 Schema、语义及 Digest/Preimage 计算；未认证真实 I Proof、未证明 I Ledger 完整性、未执行生产 Key Status 或最终 I Currentness CAS。
+H Run `44068869146` 精确 Commit 上 27 项通过，证明 I/D/Storage 回调槽独立以及缺失回调时 fail-closed UNKNOWN。编排测试 Mock 了 Schema、语义及 Digest/Preimage 计算；未认证真实 I Proof、未证明 I Ledger 完整性、未执行生产 Key Status 或最终 I Currentness CAS。
 
 ## 4. Conditions retained / 保留条件
 
@@ -52,3 +52,10 @@ H Run `44068247661` 精确 Commit 上 25 项通过，证明 I/D/Storage 回调�
 This is not an independent human I Owner signature or formal governance approval.
 
 **角色模拟 I 侧决议：接受 H Mapping Blob `1cbe74...`、H 1.2.14 与 RecoveryJoin 1.0.2 作为 I Proof 传输的 L1/L2 结构候选，但 I Terminal 回调必须执行上述谓词。Trust/L3/Production 继续 OPEN。** 本结论不是独立人类 I Owner 签名或正式治理批准。
+
+
+## H current-source CI addendum / H 当前源 CI 补充
+
+H Phase 3.8.13 current-head closure Blob `9083ad54581352c83be21ac981aea845cd307382` supersedes the prior H test-source pin. The current exact test Blob is `70a3796446553464e71999f916b76bc22e47da11`; validator Blob remains `eab961a08d41e871f38543b18ee60cf024977414`. H run `44068869146` completed SUCCESS on exact commit `e0d89f1b6dac3bdcf1f0ab4e3f062dd7bc53fdf8`. The run is bounded unit/schema/fixture/reference-model evidence; callback orchestration cases mock schema, semantic and digest/preimage primitives and do not prove production authority integration or a full unmocked envelope/object path.
+
+H Phase 3.8.13 当前 HEAD 闭环 Blob `9083ad...` 替代此前 H Test Source 绑定。当前 Test Blob 为 `70a379...`，Validator Blob 仍为 `eab961...`。H Run `44068869146` 在精确 Commit `e0d89f...` 上 SUCCESS。该 Run 仅为有限 Unit/Schema/Fixture/Reference-Model 证据；回调编排用例 Mock Schema、语义与 Digest/Preimage 基础函数，不证明生产权威集成或完整未 Mock Envelope/Object 路径。
