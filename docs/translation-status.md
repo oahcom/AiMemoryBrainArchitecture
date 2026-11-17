@@ -270,3 +270,11 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 - Result: six-stage lifecycle and core authority split aligned; **CGH-APPLIED-1.1 recovery-batch evidence chain BLOCKED**. C source does not yet define the required CSubmitOutcome/provider receipt contract or record exact-version acceptance of the 1.1 recovery-batch package. H §11.8 is a candidate mapping, not frozen schema/SDK. Exact-version C/G/H joint acceptance is not established.
 - Findings XCH-36-001..005; P1 blockers and P2 ordering-language ambiguity detailed in the cross-owner report. All conformance remains NOT RUN / implementation NOT VERIFIED.
 - H current companion pin is `0dca3dc5463a02be0e19524811afbae87795baf5`; earlier H parity report against `db59b63e322d7255b8b400f47859dcac32bb3027` is superseded for current-source evidence.
+
+
+
+## C exact-version recovery-batch acceptance gap — 2026-11-17
+
+- New finding **C36-AP-01 — OPEN**: current C source Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` accepts the pinned CGH-APPLIED-1.0 package and BIH consumer package, but contains no explicit C Owner acceptance of G's later CGH-APPLIED-1.1 recovery-batch amendment or complete CSubmitOutcome/provider-receipt mapping for that profile.
+- G 1.1 requires actual C provider receipt and immutable CSubmitOutcome. H §§11.8–11.9 only propose carrying C-issued references; H cannot substitute for C's producer decision.
+- C must publish exact-version acceptance/mapping for C provider receipt, CSubmitOutcome, terminal reference, UNKNOWN/IN_DOUBT and causal binding. Until then C/G/H 1.1 acceptance remains BLOCKED.
