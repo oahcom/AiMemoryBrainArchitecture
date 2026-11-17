@@ -131,3 +131,8 @@ Storage has re-read the latest H run [44041110983](https://github.com/oahcom/AiM
 ## 10. C Provider Outcome cross-review / C Provider Outcome 交叉审查
 
 C has published a protocol-boundary review of H unified schema 1.2.5 (C review Blob `fd34218202259daa1a66f5ca1746de4e1141bf2f`; H exact schema Blob `164ec3c436558d5d93032edc51e127d15e03db4d`). The wire enum is `HANDOFF_ACCEPTED | HANDOFF_REJECTED | NOT_INVOKED | UNKNOWN | IN_DOUBT`; C alone creates CSubmitOutcome. Storage may persist/validate references but cannot synthesize provider truth. C's own canonical outcome contract was not located/pinned in that review, so Storage does not treat the schema fields as proof that a valid C outcome exists. Provider outcome runtime, same-key recovery and exact C source pin remain OPEN.
+
+
+## 11. H schema 1.2.7 signature-profile persistence / H Schema 1.2.7 签名配置持久化
+
+Storage exact review now includes the signature-profile boundary (current Storage review Blob `b12d73f0c48aff0b1a339902c29beabcf6aec530`). H schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`; H review Blob `8bed0b05cd631014bf5af7cb5a8dafdd932940e9`. Storage may persist and digest-bind the exact profile reference, but I alone resolves trust/key status; Storage cannot authenticate or choose a profile. Current H 66-case CI does not cover schema 1.2.7. Physical D/Storage topology remains ADR-BLOCKED.
