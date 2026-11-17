@@ -60,7 +60,7 @@ ACTIONS = (
     "i_commit", "i_unknown", "revoke", "publish", "resolve_no_publication",
     "expire_lease", "retry", "park_dlq", "suppress", "terminalize",
     "close_barrier", "inventory_gap", "seal_inventory", "cache_fill", "read",
-    "restore_backup", "reconcile_restore", "release_restore",
+    "restore_backup", "replay_fence_highwater", "reconcile_restore", "release_restore",
     "persist_receipt", "lose_ack", "retry_forget", "complete_global",
 )
 
@@ -230,6 +230,11 @@ def step(s: State, action: str, mutant: str | None = None):
             return None
         d.update(restore_started=True, restore_released=False, restored_fence_gen=0)
 
+    elif action == "replay_fence_highwater":
+        if not s.restore_started or s.restore_released:
+            return None
+        d.update(restored_fence_gen=s.durable_fence_gen)
+
     elif action == "reconcile_restore":
         if not s.restore_started or s.restore_released:
             return None
@@ -398,6 +403,10 @@ def run_checks():
     assert step(p, "terminalize") is None
     p = apply_actions(p, "suppress", "terminalize", "close_barrier")
     assert p.barrier_closed
+
+    # Restore can release only after replaying the current D-local high-water.
+    restore = apply_actions(State(), "install_fence", "restore_backup", "replay_fence_highwater", "reconcile_restore")
+    assert restore.restore_released and restore.restored_at_release == restore.durable_at_release
 
     # UNKNOWN is nonterminal and holds the barrier until authoritative resolution.
     u = apply_actions(State(), "register", "run", "stage",
