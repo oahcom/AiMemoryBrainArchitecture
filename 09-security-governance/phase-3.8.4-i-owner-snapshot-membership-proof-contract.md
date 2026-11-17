@@ -49,3 +49,13 @@ Proofs are immutable and append-only. Late evidence creates a successor proof or
 ## 7. Decision boundary
 
 This contract is an I-role proposal in the coordinating session, not independent human I Owner approval. Production algorithm/regulatory suitability, trust-root ceremony, HSM/KMS, key rotation, compromise response, external anti-rollback and durable PolicyDomain sequencer conformance remain open. I exact review of H 1.2.11 is limited to the wire fields and semantic obligations above; it does not freeze production cryptography.
+
+
+## 8. Concrete I P0 projection / I P0 具体投影
+
+The I membership proof P0 is the exact RecoveryJoin 1.0.2 `ownerSnapshotMembershipProof` payload identity excluding only the derived `proof_digest` and external `signature_ref`. The digest field is `proof_digest`; the signed projection is P0 plus that derived digest. The signature preimage is governed by the I crypto profile and domain-separated by message type `I_ADMISSION_SNAPSHOT_MEMBERSHIP_PROOF`.
+
+The P0 includes all of:
+`proof_ref`, `owner_kind`, `owner_authority_ref`, `issuer_ref`, `subject_ref`, `audience_ref`, `purpose`, `owner_ledger_ref`, `owner_ledger_version`, `owner_entry_ref`, `owner_entry_digest`, `owner_admission_ref`, `owner_sequence_namespace`, `owner_local_sequence`, `owner_high_water`, `owner_ledger_root`, `owner_snapshot_ref`, `owner_snapshot_digest`, `owner_snapshot_attestation_ref`, `owner_snapshot_attestation_digest`, `owner_gate_ref`, `owner_gate_generation`, `scope_ref`, `scope_generation`, `scope_binding_digest`, `operation_identity_ref`, `operation_digest`, `request_digest`, `anti_rollback_anchor_ref`, `key_status_generation`, `signature_profile_ref`, `key_id`, `key_version`, `canonicalization_profile_ref`, and `digest_profile_ref`.
+
+The TEST-ONLY cross-language vector is in H vector Blob `9210219a85afe1f48da0ea253a073aba8b2e138c`; the Python/Node test source is Blob `01239e06e8f4464f49acd34241dc00899befe424`. This vector proves only Python/Node agreement for this fixed test proof. Production I signing, key trust, ledger membership and completeness remain unimplemented.
