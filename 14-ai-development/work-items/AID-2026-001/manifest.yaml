@@ -116,6 +116,7 @@ implementation_commits:
   - f0f455ec3aa41825074a57c9eb65e1e067e1db77
   - ddd04f95b6d5f4f5b911344c7e7c6c62157efb3f
   - 0cfba423f5d6c17f8be23e02e4006873f33437b7
+  - 6ed56b8fcb8bac6c59eac7ba824be4387e22e944
 changed_paths:
   - 14-ai-development/prompt-and-evidence-template.md
   - 14-ai-development/README.md
@@ -157,6 +158,8 @@ verification:
   commands: []
   evidence_refs: []
 traceability_exclusions:
+  - sha: 13410d37958b3bf5b3c1e5bd9d604fab61fbe4c3
+    reason: Previous manifest self-update for the I-PRE-001/I-PRE-004 remediation inventory; superseded by the current manifest self-update.
   - sha: 3fb10eef38d88b83b48edf5e2818e2ca5ae8ee9e
     reason: Previous current-head manifest self-update; now superseded by subsequent remediation commits and classified as historical manifest-only bookkeeping.
   - sha: c97e3de7ac37158ef60526d7b8703c4574ed042a
