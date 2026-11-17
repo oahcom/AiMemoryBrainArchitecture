@@ -4,7 +4,7 @@
 - Delivery stage: **STRUCTURAL SCHEMA + REFERENCE PARSER EVIDENCE DELIVERED**
 - Freeze disposition: **BLOCKED — NOT FROZEN / NOT INTEROPERABILITY-VERIFIED**
 - Snapshot branch: `session-h-bmcp-protocol`
-- Snapshot HEAD: `78777e62d5243415f364726f5d73f5d95b8092ee`
+- Snapshot HEAD: `b8bdc0a57da1abb90ad38f8261dbdb60a668ee5c`
 - Owner technology review Blob: `cb9d1d97604bdb71bc2f5bf47f6392e03f30ba99`
 - Provenance: assistant-authored delegated H-role delivery at the user's direction; not an independent human Owner signature.
 
@@ -49,20 +49,22 @@ H 已交付结构化 Schema 与参考解析器证据，包括 JF-10 Bridge Schem
 - Canonical byte profile, Unicode/number/time normalization, absent/null semantics, cryptographic signature profile, key lifecycle, generated SDK and cross-language interoperability remain OPEN.
 - Unified schema v1.2.6 has no exact-version H decision in this delivery snapshot. It is not approved by v1.2.4 review.
 
-## 5. Latest executable semantic-validator candidate / 最新语义验证器候选
+## 5. Latest HRC / RecoveryJoin executable candidate — exact current pins
 
-The current H branch also contains a Recovery Cutoff / RecoveryJoin executable candidate, with the following exact pins in the current semantic-validator contract (Blob `c93560fcda947aef0a611b3096fb1c1994d41cd0`):
+The latest H branch and A cross-owner review identify the following exact candidate bundle:
 
-- HRC semantic suite: Blob `d14e66a2196303374f31a4285244a0f77a3ad328`; 42 test methods (HRC-01..25 and JPF-01..17).
-- Wire interoperability candidate suite: Blob `1a4e754ba9bfa57eb973c6d39731e9f89443b323`; 10 methods.
-- Schema-integrity suite: Blob `5292d56661e938c905c61455e9ed53c4ff674c54`; 9 methods.
-- RecoveryJoin schema candidate: Blob `f531c1d4b89a48457188c4988f140952759223a6`.
-- Total: **61 test methods specified in executable candidate code; NOT RUN**.
-- Workflow: `.github/workflows/h-recovery-cutoff-conformance.yml`, workflow Blob `ea7a3d9c365b84352d3bac69da94fe0d510e46a4`; the current contract explicitly records no workflow run and no PASS.
+| Artifact | Blob SHA | Scope |
+|---|---|---|
+| RecoveryJoin schema 1.0.0 | `dd3234aa1c74caf6d0e335875cd96e0b2b64082f` | Typed bidirectional owner/participant edges and row identity |
+| H semantic validator contract | `b3218298f58cff9b92cb1c38e453af6fd4d0dd50` | HRC/JPF/WIRE/SCHEMA execution contract |
+| HRC semantic suite | `ee0f47095df10786da358bed193d6f8491a5eb2c` | 25 HRC + 19 JPF = 44 methods |
+| Wire interop candidate suite | `1a4e754ba9bfa57eb973c6d39731e9f89443b323` | 10 methods |
+| Schema integrity candidate suite | `67aba74c120f2916d768e7b01c45408ee2624f3a` | 12 methods |
+| CI workflow | `.github/workflows/h-recovery-cutoff-conformance.yml`, Blob `ea7a3d9c365b84352d3bac69da94fe0d510e46a4` | Runs all `test_*.py` under `08-bmcp-protocol/tests/conformance/recovery_cutoff` |
 
-This candidate adds request-ledger dispositions and exact row identity to the bidirectional owner join. It is a materially stronger test design, but it must not be reported as a 61/61 pass. Its HRC-TEST-v1 digest helper is test-only and is not an approved production canonicalization/signature profile.
+**Total: 66 unittest methods specified in the current candidate code (25 HRC + 19 JPF + 10 WIRE + 12 SCHEMA).** This is a count of test methods, not a test result. At the time this evidence document was prepared, no run for the exact current H candidate bundle had been verified. The subsequent push-triggered workflow result must be appended only after reading its run, jobs, and logs.
 
-当前 H 分支还包含 Recovery Cutoff / RecoveryJoin 可执行候选套件。上述 61 个测试方法目前仅表示测试代码已提交，**尚未运行**，不能写成 61/61 PASS。HRC-TEST-v1 摘要算法仅用于测试，不是生产 Canonicalization/Signature Profile。
+The HRC/WIRE candidate uses TEST-ONLY canonical digest helpers. It is not an approved production canonicalization, signature, key-trust or cross-language byte profile. Passing this candidate suite cannot by itself close H-FR-04/H-FR-06 or I-RJ-05.
 
 ## 6. Freeze exit criteria / 冻结退出条件
 
