@@ -102,3 +102,14 @@ This is a CANDIDATE governance contract, not a production security certification
 Validation must include identity spoofing, delegation expiry/revocation, cross-Scope denial, stale permission epoch, Forget race/fault injection, backup restore, external recipient exceptions, and zero unauthorized disclosure.
 
 See the [I owner branch](https://github.com/oahcom/AiMemoryBrainArchitecture/tree/session-i-security-governance-2026-11-16/09-security-governance) for detailed candidate governance contracts.
+
+
+## 11. Joined Forget contract proposal — pending D/I approval
+
+The bilingual joined contract proposal is recorded at `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`. The related [Owner D/I authority matrix](../../../14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md) is also a proposal; neither artifact is normative until D and I approve the exact same version/SHA.
+
+D owns canonical Memory lifecycle, ForgetOperation/Fence semantics and the D-domain completion predicate. I owns authentication/authorization, privacy/retention/legal-hold policy, cross-system inventory policy, evidence-acceptance criteria and the cross-system governance assessment. I must not rewrite D's canonical state or predicate; D must not waive I policy or declare cross-system governance compliance. Each executor reports only its own capability-bounded action and evidence.
+
+The cross-system governance assessment is separate from D-domain completion. `CompletedWithPolicyException` is a derived public projection only when D has independently recorded `Completed` and I has recorded `CompliantWithException`. Unknown, failed, unsupported or unaccounted-for mandatory targets block I's `Compliant` assessment. Neither a tombstone nor an ACK proves physical erasure.
+
+**Status:** PROPOSED / D-I APPROVAL PENDING / R3 TESTS NOT RUN.
