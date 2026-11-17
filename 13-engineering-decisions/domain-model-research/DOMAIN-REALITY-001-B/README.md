@@ -195,3 +195,13 @@ B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪�
 - 双语审计将其标记为 `REMEDIATED — MANUAL PARITY REVIEW PENDING`。这属于作者侧整改，不是独立语义验收。
 - B1 remains IN PROGRESS; B5 remains BLOCKED / NOT PASSED; B6 remains INDEPENDENT_REVIEW_PENDING.
 - B1 仍进行中；B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。
+
+
+## 14. Mature reference research bilingual remediation / 成熟参考研究双语整改
+
+- `mature-domain-model-research.md` now has detailed Chinese peer text for Zep/Graphiti, Mem0, Letta, LangGraph, Temporal, PostgreSQL and JSON Schema, including observed behavior, borrow/do-not-copy boundaries, version caveats and cross-project synthesis. Exact Blob: `1f31eee069f58e9da5b1eeecf7298af8b3c24882`.
+- The parity audit records `REMEDIATED — MANUAL PARITY REVIEW PENDING`; this is not independent validation of external-source claims.
+- `mature-domain-model-research.md` 已为 Zep/Graphiti、Mem0、Letta、LangGraph、Temporal、PostgreSQL 和 JSON Schema 补齐详细中文对照，包括实际行为、可借鉴/不得照搬边界、版本限制及跨项目综合结论。精确 Blob：`1f31eee069f58e9da5b1eeecf7298af8b3c24882`。
+- 双语审计将其标记为 `REMEDIATED — MANUAL PARITY REVIEW PENDING`；这不代表外部来源主张已通过独立验证。
+- B1 remains IN PROGRESS; B2/B3 remain open; B5 remains BLOCKED / NOT PASSED; B6 remains INDEPENDENT_REVIEW_PENDING.
+- B1 仍进行中；B2/B3 仍未关闭；B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。
