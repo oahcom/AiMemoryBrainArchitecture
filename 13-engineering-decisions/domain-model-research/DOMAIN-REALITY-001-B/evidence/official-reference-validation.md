@@ -166,3 +166,42 @@
 These references were searched/read as official documentation or standards on 2026-11-17. The summary records only claims supported by those sources. It is not a benchmark, production compatibility test, endorsement, or evidence that any product should be adopted. Product versions and mutable documentation pages must be re-pinned at any later decision date.
 
 以上资料于 2026-11-17 从官方文档或标准页面检索/读取。本文件只记录来源能够支持的结论，不构成性能基准、生产兼容性测试、产品背书或采用建议。产品版本和可变文档页面必须在后续决策时重新 Pin。
+
+
+## 12. Live official-source revalidation / 官方来源实时复核 — 2026-11-18
+
+- Revalidation date: 2026-11-18 (UTC date at review time).
+- Method: opened the linked official documentation/specification pages directly. This is a documentation-content check, not a package benchmark, code execution, compatibility test or endorsement.
+- The following observations were confirmed in the currently served pages:
+
+### 12.1 Confirmed source observations / 已确认的来源观察
+
+| Source / 来源 | Directly observed in current page / 当前页面直接观察 | Boundary / 边界 |
+|---|---|---|
+| Martin Fowler, Bounded Context | DDD strategic design divides large models into bounded contexts and makes their relationships explicit. | This supports semantic ownership boundaries; it does not prescribe this project's exact Owner map. |
+| Martin Fowler, DDD Aggregate | An aggregate is a cluster treated as one unit; outside references target the root; transactions should not cross aggregate boundaries in this model. | It does not justify making every domain object an aggregate or prescribing a service topology. |
+| Zep v4, How Graph Creation Works | The page identifies itself as v4; raw source Episodes remain searchable/retrievable; LLM extraction produces entities, relationships and facts tied to Episodes; it infers valid_at/invalid_at and uses under-merge when identity is unclear. | This current page does not establish epistemic correctness, authorization, deletion completion or suitability as this project's canonical store. Do not generalize v4 behavior to v3 without separate evidence. |
+| Letta, Stateful agents | A stateful agent is a persistent identity with memory, model/tool configuration and message history; it can have one or more conversations and share memory across them. | This supports distinguishing agent identity from conversation identity, not replacing B canonical Memory identity or I Principal. |
+| LangGraph, Persistence | Current docs distinguish thread-scoped graph-state checkpoints (checkpointers) from application-defined cross-thread stores. | This is a useful state-scope distinction, not a canonical domain contract for this project. |
+| Temporal, Event History | Event History is described as a complete durable log of Workflow Execution lifecycle; Commands are mapped to persisted Events and replay reconstructs workflow state after worker failure. | This does not establish Memory truth, domain provenance, Forget completion or exactly-once external side effects. |
+| PostgreSQL current MVCC chapter | The served current documentation identifies PostgreSQL 18 and describes concurrency control, transaction isolation, serializable transactions, explicit locking and serialization failure handling. | The page is a database concurrency reference, not evidence that this project has deployed or validated PostgreSQL, serializable isolation, HA or physical Forget. |
+| W3C PROV-O | The Recommendation lists starting-point classes Entity, Activity and Agent, with relations including used, wasGeneratedBy, wasDerivedFrom, wasAttributedTo and wasAssociatedWith. | PROV-O vocabulary is a provenance reference; its broad prov:Entity must not be collapsed into this project's domain Entity. |
+| W3C RDF 1.1 Concepts | RDF graphs are sets of subject-predicate-object triples; RDF datasets contain a default graph and zero or more named graphs. | RDF's graph data model does not itself supply this project's domain-specific temporal, truth, authorization or Forget semantics. |
+| W3C OWL 2 overview | OWL 2 is an ontology language with formally defined meaning, classes, properties, individuals and data values; ontologies can be exchanged as RDF documents. | This supports deferring OWL until formal ontology/interoperability requirements exist; it does not require adoption. |
+| JSON Schema Draft 2020-12 | The specification index identifies Core and Validation documents and describes prefixItems/items, dynamic references and separate format annotation/assertion vocabularies. | Schema validation cannot prove semantic truth, authorization, currentness, lineage completeness or physical deletion. |
+
+### 12.2 Incomplete source check / 未完成来源核验
+
+- Mem0's official GitHub documentation URL was opened, but the detailed page fetch timed out in this pass. Its prior summary remains a prior-source observation, **not revalidated on 2026-11-18**. Before any adoption decision, re-open the current official docs and pin the relevant commit or release version.
+- The current PostgreSQL documentation is a moving `current` URL. The page served PostgreSQL 18 documentation and listed supported major versions 18, 17, 16, 15 and 14 at review time; pin a major-version-specific page and exact deployed version before any implementation decision.
+- The Zep page is explicitly v4. The separate v3 Context Graph page remains a distinct historical/versioned reference and must not be merged into v4 behavior without clause-level comparison.
+
+- Mem0 官方 GitHub 文档 URL 已打开，但详细页面在本轮读取超时。因此，既有 Mem0 摘要仅属于先前来源观察，**未在 2026-11-18 重新验证**。任何采用决策前，必须重新打开当前官方文档并固定相关 Commit 或 Release 版本。
+- PostgreSQL 的当前文档使用可变的 `current` URL。本轮页面提供 PostgreSQL 18 文档，并列出当时支持的 18、17、16、15、14 主版本；任何实现决策前，必须固定主版本专属页面和实际部署版本。
+- Zep 页面明确为 v4。独立的 v3 Context Graph 页面是不同版本的参考资料，未经逐条比较不得将 v3 行为与 v4 合并。
+
+### 12.3 Updated evidence ceiling / 更新后的证据上限
+
+The direct page checks above increase confidence that the cited descriptions match the pages served on 2026-11-18. They do not prove product behavior in a deployed environment, establish comparative performance, validate APIs/SDKs, or authorize adoption. Mutable documentation, repository `main` pages and product versions must be pinned again at the time of any engineering decision.
+
+上述直接页面核验提高了对相关描述与 2026-11-18 页面内容一致性的置信度，但不能证明产品在部署环境中的行为、建立性能比较、验证 API/SDK 或授权采用。任何工程决策时，都必须重新 Pin 可变文档、仓库 `main` 页面及产品版本。
