@@ -307,9 +307,9 @@ H RecoveryJoin 1.0.2 requires `owner_snapshot_membership_proofs` as a distinct p
 - `anti_rollback_anchor_ref`, `key_status_generation`;
 - `signature_profile_ref`, `key_id`, `key_version`;
 - `canonicalization_profile_ref`, `digest_profile_ref`;
-- stable `signature_ref`.
+- external `signature_ref` locator (not part of the signed P0).
 
-Exclude only `proof_digest` from P0. Compute it as SHA-256 over the I domain-separated JCS(P0); the final signature projection is P0 plus `proof_digest`. The schema's `owner_kind`, `owner_authority_ref`, `purpose`, and all operation/snapshot/gate/scope/ledger bindings are signed. Unknown fields, a non-I owner, a wrong purpose, or any field mismatch against the exact RecoveryJoin admission row is INVALID. Missing authoritative ledger, snapshot, key-status or anti-rollback evidence is UNKNOWN, never VALID.
+Exclude `proof_digest` and external `signature_ref` from P0. Compute `proof_digest` as SHA-256 over the I domain-separated JCS(P0); the final signature projection is P0 plus `proof_digest`. The external `signature_ref` resolves the signature bytes but is not signed into its own P0. The schema's `owner_kind`, `owner_authority_ref`, `purpose`, and all operation/snapshot/gate/scope/ledger bindings are signed. Unknown fields, a non-I owner, a wrong purpose, or any field mismatch against the exact RecoveryJoin admission row is INVALID. Missing authoritative ledger, snapshot, key-status or anti-rollback evidence is UNKNOWN, never VALID.
 
 `owner_sequence_namespace` is the I owner-ledger namespace. It is nominally distinct from C `sequence_namespace_ref`, COC quorum prefix, D local sequence, Storage prepare attempt, and any database serialization sequence. No cross-domain counter comparison is permitted.
 
@@ -323,7 +323,7 @@ The H 1.2.13 `ownerSnapshot` summary adds required `owner_snapshot_attestation_d
 - H `owner_specific_high_waters_digest` is recomputed over the exact I high-water object under the approved canonical profile and must equal the summary field. It is a derived summary digest, not a second I attestation field.
 - The H summary is COC-carried evidence, not itself the I signature object. H must dereference and verify the I attestation and every I membership proof independently.
 
-**中文：** RecoveryJoin 1.0.2 新增必需的 `owner_snapshot_membership_proofs` 数组。对于 `owner_kind=I`，其签名 P0 精确包含 Proof Ref、Owner 身份、Issuer/Subject/Audience/Purpose、I Ledger/Entry/Admission、I Sequence Namespace/Local Sequence/High Water、Snapshot/Attestation、Gate/Scope、Operation/Request、Anti-Rollback/Key Status、Signature/Key/Canonicalization/Digest Profile 和稳定 Signature Ref；仅排除计算得到的 `proof_digest`。该对象不是 I Snapshot Attestation、ICompleteEmptyProof 或 IOutOfScopeProof。缺失权威证据必须 UNKNOWN；未知字段、错误 Owner/Purpose 或与 Admission Row 不匹配为 INVALID。
+**中文：** RecoveryJoin 1.0.2 新增必需的 `owner_snapshot_membership_proofs` 数组。对于 `owner_kind=I`，其签名 P0 精确包含 Proof Ref、Owner 身份、Issuer/Subject/Audience/Purpose、I Ledger/Entry/Admission、I Sequence Namespace/Local Sequence/High Water、Snapshot/Attestation、Gate/Scope、Operation/Request、Anti-Rollback/Key Status、Signature/Key/Canonicalization/Digest Profile；`signature_ref` 仅是外部签名定位符，不进入 P0；P0 排除 `proof_digest` 与外部 `signature_ref`。该对象不是 I Snapshot Attestation、ICompleteEmptyProof 或 IOutOfScopeProof。缺失权威证据必须 UNKNOWN；未知字段、错误 Owner/Purpose 或与 Admission Row 不匹配为 INVALID。
 
 `owner_sequence_namespace` 属于 I 自己的 Owner Ledger，不得与 C `sequence_namespace_ref`、COC Quorum Prefix、D Local Sequence、Storage Prepare Attempt 或数据库 Serialization Sequence 混用或跨域比较。
 
