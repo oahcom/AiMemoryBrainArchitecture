@@ -112,3 +112,11 @@ The §11.8 response is a candidate proposal only. H36-AP-01..08 are not marked R
 H's candidate source now includes §11.9 and has current exact Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`. It explicitly binds C-issued provider receipt and immutable CSubmitOutcome, preserves UNKNOWN/IN_DOUBT, requires participant terminal proof only after all owner outcomes are determinate, and reserves owner-local gate release attestations to the respective I or D authority.
 
 **New finding H36-AP-09 — OPEN:** the candidate text now reserves the correct evidence/authority boundaries, but the exact H wire message-family schema/SDK mapping and consumer acceptance remain absent. C/G/I/D/Storage must confirm the exact common version; no H ACK or COC observation may substitute for C provider outcome or I/D owner-signed gate release. H36-AP-01..09 remain OPEN pending exact-version owner decisions and schema/conformance evidence.
+
+## 10. C exact-version recovery-batch acceptance gap — 2026-11-17
+
+**New finding C36-AP-01 — OPEN:** C's live Phase 3.6 source remains Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`. It contains C's Issue #3 acceptance for the exact CGH-APPLIED-1.0 package and C's Issue #6 BIH consumer acceptance, but it does not contain an explicit C Owner acceptance of G's later CGH-APPLIED-1.1 recovery-batch amendment, nor a complete exact-version CSubmitOutcome/provider-receipt mapping against that recovery profile.
+
+G's current source explicitly requires actual C provider receipt and immutable CSubmitOutcome as part of the 1.1 causal-order/recovery predicate. H §§11.8–11.9 now propose carrying C-issued references, but an H proposal cannot substitute for C's own producer decision or provider evidence contract.
+
+Required: C must publish an exact-version decision or source addendum pinning the same A/COC package version and defining the C-issued provider receipt/CSubmitOutcome, conditional terminal reference, UNKNOWN/IN_DOUBT behavior and causal binding to InferenceRequestId/FinalRequestBoundaryId/request digest/participant identity. Until then, H36-AP-09 and C36-AP-01 remain OPEN; no 1.1 cross-owner acceptance is inferred.
