@@ -201,12 +201,12 @@ These official-document checks are desk verification only. No Brain prototype, i
 
 ## 7. Late Storage / JF-10 evidence refresh — 2026-11-17 / Storage 与 JF-10 最新证据
 
-Directly fetched from Storage branch `session-storage-consistency-forget-atomicity-2026-11-16`:
+Directly fetched from Storage branch `session-storage-consistency-forget-atomicity-2026-11-16`; the v3.2.3 body Blob is recorded as a manifest pin, not claimed as an independently fetched file:
 
 | Artifact | Path | Blob SHA | Current recorded boundary |
 |---|---|---|---|
 | Storage v3.2.6 successor bundle manifest | `reviews/storage-consistency/phase-3.6.16-storage-v3.2.6-successor-exact-version-bundle-manifest.md` | `dbfa37617d109d5891a067769e858085e2ce547a` | Bundle bound; H 1.2.13 exact CI open; not jointly frozen; delegated Storage-role artifact, not independent human signature |
-| Normative Storage technical body v3.2.3 | `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md` | `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792` | Normative Storage S0a–S4 and same-GID recovery contract |
+| Normative Storage technical body v3.2.3 | Path not separately surfaced in the v3.2.6 manifest readback | `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792` | Exact Blob is pinned by the manifest; body itself was not independently fetched in this refresh |
 | COC companion §§15–17 | `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md` (companion content pinned by manifest) | `5b950a3a29bd7a5276b92a49a9114d700718b987` | Batch-before-Manifest and recovery join ordering |
 | PostgreSQL 18.7 capability dossier | `reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md` | `0aabf66848dc97deee028c571183c0d7204008c0` | Seven bounded CI subtests PASS; Gate A PARTIAL PASS / OPEN; production integration deferred |
 | Storage deployment readiness | `reviews/storage-consistency/phase-3.6-deployment-selection-and-verification-readiness.md` | `ef4eff1708e4bd6072b86cc234340dd848bb5fbc` | Logical deployment profile selected; production Canonical Authority deployment not designated |
