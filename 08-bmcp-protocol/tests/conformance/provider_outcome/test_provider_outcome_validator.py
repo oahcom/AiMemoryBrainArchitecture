@@ -448,5 +448,96 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
                 )
                 self.assertEqual(result["status"], "INVALID", result)
 
+
+    def test_26_full_path_rejects_every_present_duplicated_wire_field_mutation(self):
+        from provider_outcome_validator import WIRE_TO_C
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        present = [
+            (wire_name, object_name)
+            for wire_name, object_name in WIRE_TO_C.items()
+            if wire_name in envelope and object_name in c_object and c_object[object_name] is not None
+        ]
+        self.assertGreaterEqual(len(present), 18)
+        for wire_name, object_name in present:
+            with self.subTest(wire_field=wire_name, object_field=object_name):
+                mutated_envelope, mutated_object, h_schema, c_schema, callbacks = self._full_validator_fixture()
+                original = mutated_envelope[wire_name]
+                if wire_name == "provider_outcome":
+                    mutated = "HANDOFF_REJECTED"
+                elif isinstance(original, str) and len(original) == 64:
+                    mutated = "0" * 64 if original != "0" * 64 else "1" * 64
+                else:
+                    mutated = str(original) + "/tampered"
+                mutated_envelope[wire_name] = mutated
+                result = validate_provider_outcome(
+                    mutated_envelope, mutated_object, h_schema, c_schema, callbacks
+                )
+                self.assertEqual(result["status"], "INVALID", result)
+
+    def test_27_full_path_recomputes_digest_after_p0_member_and_wire_are_mutated_together(self):
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        c_object["ProviderRef"] = "Provider/attacker"
+        envelope["provider_ref"] = "Provider/attacker"
+        result = validate_provider_outcome(
+            envelope, c_object, envelope_schema, c_object_schema, checks
+        )
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertIn("C payload_digest mismatch", result["errors"])
+
+    def test_28_full_path_rejects_c_sequence_namespace_mismatch(self):
+        from provider_outcome_validator import _candidate_digest_and_preimage
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        c_object["sequence_namespace_ref"] = "C/sequencer/attacker"
+        digest, _ = _candidate_digest_and_preimage(c_object)
+        c_object["payload_digest"] = digest
+        envelope["c_submit_outcome_digest"] = digest
+        checks.verify_key_status = lambda record: (
+            record["sequence_namespace_ref"] == "C/sequencer/provider-outcome"
+        )
+        result = validate_provider_outcome(
+            envelope, c_object, envelope_schema, c_object_schema, checks
+        )
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertIn("C key status at signing sequence verification contradiction", result["errors"])
+
+    def test_29_full_path_i_terminal_requires_commit_won(self):
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        envelope["i_terminal_decision_ref"] = "I/terminal/REVOCATION_WON/operation-41"
+        checks.verify_i_terminal_decision = lambda wire, record: (
+            wire.get("i_terminal_decision_ref") == "I/terminal/COMMIT_WON/operation-41"
+        )
+        result = validate_provider_outcome(
+            envelope, c_object, envelope_schema, c_object_schema, checks
+        )
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertIn("I terminal decision / COMMIT_WON authority verification contradiction", result["errors"])
+
+    def test_30_full_path_d_clearance_is_bound_to_exact_fence(self):
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        envelope["d_clearance_ref"] = "D/clearance/other-operation/fence-20"
+        checks.verify_d_clearance = lambda wire, record: (
+            wire.get("d_clearance_ref") == "D/clearance/forget-op-41/fence-19"
+        )
+        result = validate_provider_outcome(
+            envelope, c_object, envelope_schema, c_object_schema, checks
+        )
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertIn("D Forget clearance / fence authority verification contradiction", result["errors"])
+
+    def test_31_full_path_storage_resolution_binds_same_gid_and_prepare_attempt(self):
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        envelope["storage_resolution_proof_ref"] = "Storage/resolution/gid/other-incarnation/gid-99"
+        checks.verify_storage_resolution_proof = lambda wire, record: (
+            wire.get("storage_resolution_proof_ref") == "Storage/resolution/gid/pg-inc-7/gid-41"
+            and wire.get("prepare_attempt_ref") == "Storage/prepare-attempt/41"
+            and wire.get("prepared_participant_ref") == "Storage/prepared-participant/41"
+            and wire.get("participant_ledger_ref") == "Storage/participant-ledger/1"
+        )
+        result = validate_provider_outcome(
+            envelope, c_object, envelope_schema, c_object_schema, checks
+        )
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertIn("Storage resolution proof / same-GID authority verification contradiction", result["errors"])
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
