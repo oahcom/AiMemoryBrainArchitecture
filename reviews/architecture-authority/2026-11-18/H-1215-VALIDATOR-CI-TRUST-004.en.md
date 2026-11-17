@@ -110,3 +110,8 @@ Do not:
 - advance Gate B/C, merge PRs, close Issues, or authorize production.
 
 The next execution should be H exact-bundle publication and issuer-side closure, followed by C exact executable/CI review, I exact trust/registration review, Storage successor manifest, and A exact-bundle rereview.
+
+
+## Publication boundary clarification — 2026-11-18
+
+This PR publishes the review record itself. Any statement above that says not to merge PRs refers to merging the H 1.2.15 implementation/candidate as an approved or production-ready change. It does not prohibit publication of this non-normative audit artifact. Merging this documentation PR does not close any finding, authorize a protected operation, freeze a schema, advance a Gate, or approve production use.
