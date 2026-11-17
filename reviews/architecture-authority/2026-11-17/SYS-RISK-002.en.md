@@ -4,7 +4,7 @@
 - Version: 1.0.0 (candidate integration baseline)
 - Date: 2026-11-17
 - Main baseline: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
-- A review branch: `review/session-4-a-final-architecture-authority-2026-11-17`
+- A review branch: `review/session-4-a-final-architecture-authority-current-2026-11-17`
 - Source assessments: R PR #50; X PR #49; F/D/P PR #46
 - Decision status: DEFERRED for architecture freeze; bounded preparation only.
 
@@ -36,6 +36,8 @@
 | AR-09 | Production DR, key custody, operator and RPO/RTO unspecified | High | Yes for production | Storage + I + project operations authority | Deployment ADR, named operator, key lifecycle, backup/PITR/restore drill, RPO/RTO | production acceptance |
 | AR-10 | Governance/contract burden may exceed maintainable budget | High | No for bounded preparation; yes for scale commitment | A + all Owners + engineering lead | Measured review cost, automated conformance yield, duplicate state-machine reduction without invariant loss | G5/G7 follow-up |
 
+| AR-11 | B/H/C/D/I/Storage exact protocol bundle is stale/incompletely joined | High | Yes for protocol freeze | H + C + D + I + Storage; A integrates | H mapping current D crosswalk + C re-review; H current I P0 review + I anchor refresh; H mapping status/CI currentness; Storage v3.3.0 successor reviewed by C/H/D/I and A | G1/G2/G6 |
+
 ## Five root risks
 
 1. L1 logical serialization is selected (Storage Option A); actual L4 engine/deployment, authoritative adapter, HA/fencing and restore conformance remain unproven.
@@ -49,6 +51,16 @@
 No Critical risk is accepted or waived. High risks AR-04, AR-07, AR-08 and AR-10 remain blocking where they touch mandatory correctness or freeze criteria. Only capability deferrals explicitly listed in the Deferred Capabilities Register may proceed as bounded non-blocking work.
 
 A may accept system-wide scope and sequencing risks; A cannot accept B, D, I, C, G, H or Storage domain risks on their behalf. Each risk remains open until its authority supplies the evidence above and the relevant Gate Owner separately records disposition.
+
+## Current source refresh against main@8c0c5b (2026-11-17)
+
+- Current main HEAD `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` reverts the three interim B research artifacts introduced by commits `6470f25...`, `67f1122...` and `e723222...`. Those artifacts are not part of the current main baseline and are not canonical evidence. B Fact/Claim ADR remains ADR-BLOCKED.
+- B→A review PR #52: branch HEAD `2727bd8544f812d796186769f86cf92aba244dee`, report Blob `b59b2ef745330f901027f59b69c68b99097c604b`.
+- Option A review PR #54: branch HEAD `208c5e84f64ec68338045b963407bcb6d2463faf`, report Blob `ff782d7ab32bdbe66f01a2057c516c5a855abdd3`; proposed amendment Blob `f5ad30c8570d480f60bc9b02ee53c06317b41525` is NOT ADOPTED.
+- B protocol PR #51: branch HEAD `042f60217903215b75251bc36a650d7a4c994704`, evidence ledger Blob `247b6644a3f1c61078e19befc7428be78d789d5c`. H 1.2.14 / wire 1.3.0 + CSubmitOutcome 1.0.1 are L1/L2 candidates; Storage v3.2.9 manifest Blob `bf323a1682f2bfadc3ff41ea4f86883d678a77e3` is stale.
+- Exact candidate Blobs: H schema `09fcd1fa29fe24255fbd87cae79dafb406594a59`; C schema `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`; H mapping `c196fdc7a9d88e344d37ba2810a9bce1803f8b96`; C re-review `f2d33a8998f8a6906c9bef8be6f9e880c61a0c8c`; D review `55ae7bc33b37f0e729949fdd2a694eb6211bbc55`; I P0 `44986f5f864bcdc1a79d34978273644d381a68c0`; I anchor review `f22d31dec3a95f094c2942ab816c830f007e830e`; Storage topology ADR `bb544ba2f346bdc130d524bd5c7310d86f367988`.
+- H CI current pin: run `44069941327`, commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251`, job `133993324484`; H HEAD `362cc113cfb5b595a4002a6f6e980d19ae2d2d15`; Storage HEAD `39a1e0429f6b4b08c6c437c8e3f5ace582a7315f` (per PR #51 ledger).
+- Storage v3.2.9 is stale against corrected C/D/I review pins and H CI. Storage must publish v3.3.0 or equivalent; C/H/D/I review the identical manifest and A re-reads it. Exact path/commit must be published by Storage.
 
 ## Cross-references
 
