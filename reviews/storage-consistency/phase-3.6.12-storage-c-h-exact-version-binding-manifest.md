@@ -433,3 +433,16 @@ The crosswalk maps the current schema record families: OWNER_LOCAL_PENDING_GATE,
 The Storage addendum fixes the immutable RecoveryRound identity, same-key retry after lost ACK, strict Batch-before-Manifest quorum order, exact linearizable readback, successor-round handling for post-snapshot high-water changes and separate owner-signed release CAS. It does not claim implementation or executed fault tests.
 
 Both are coordinator-authored candidates, not independent Owner acceptances. The current A review is not refreshed by this binding. R1/R2 remain OPEN; Gate A PARTIAL PASS/OPEN; Gate B/C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
+
+
+### 10.11 A exact-version integration simulation (2026-11-17)
+
+A-role integration artifact:
+- Path: `reviews/integration/phase-3.8.6-a-r1-r2-gate-linearization-exact-integration-review.md`
+- Branch: `session-a-integration-2026-11-16`
+- Blob: `bfbff1e697a7ef2092b4438ccddddf7336e66b15`
+- Decision: `ACCEPT AS A COHERENT CANDIDATE DESIGN WITH BLOCKING CONDITIONS`.
+
+The review finds the I/D/C owner-local serialization boundaries, H schema crosswalk and Storage immutable RecoveryRound/Batch-before-Manifest/release ordering mutually composable. It retains blockers for actual independent Owner adoption, durable owner-local sequencers/ledgers, trusted owner verifiers, C transport adapter integration, Storage quorum/readback/restore/operator evidence and executable race/fault-injection.
+
+**Provenance limitation:** this A artifact is a coordinator-authored A-role simulation, not independent A Owner acceptance. It does not refresh or supersede the controlling A review for Issue #14, does not close R1/R2, and does not change Gate A/B/C or production status.
