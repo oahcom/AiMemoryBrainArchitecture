@@ -142,3 +142,13 @@ B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪�
 - 双语审计将其标记为 `REMEDIATED — MANUAL PARITY REVIEW PENDING`；这不构成独立验收。
 - B1 remains IN PROGRESS; B5 remains BLOCKED / NOT PASSED; B6 remains INDEPENDENT_REVIEW_PENDING.
 - B1 仍进行中；B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。
+
+
+## 13. Complexity assessment bilingual remediation / 复杂度评估双语整改
+
+- `domain-model-complexity-assessment.md` now has a full Chinese semantic mirror for qualitative assessment dimensions, entity/value-object/derived-view classifications, merge/defer/reject decisions, aggregate analysis, complexity risks, Storage serialization-anchor classification, model tiers and gate status. Exact Blob: `38bee7501e52798152524665778c69659be6cf33`.
+- The parity audit records `REMEDIATED — MANUAL PARITY REVIEW PENDING`. This is author-side remediation, not independent semantic acceptance.
+- `domain-model-complexity-assessment.md` 已为定性评估维度、实体/值对象/派生视图分类、合并/延后/拒绝决策、聚合分析、复杂度风险、Storage 序列化锚点分类、模型层级及门禁状态补齐完整中文语义对照。精确 Blob：`38bee7501e52798152524665778c69659be6cf33`。
+- 双语审计将其标记为 `REMEDIATED — MANUAL PARITY REVIEW PENDING`。这属于作者侧整改，不是独立语义验收。
+- B1 remains IN PROGRESS; B5 remains BLOCKED / NOT PASSED; B6 remains INDEPENDENT_REVIEW_PENDING.
+- B1 仍进行中；B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。
