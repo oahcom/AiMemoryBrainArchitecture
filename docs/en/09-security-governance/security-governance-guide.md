@@ -106,7 +106,7 @@ See the [I owner branch](https://github.com/oahcom/AiMemoryBrainArchitecture/tre
 
 ## 11. Joined Forget contract proposal — pending D/I approval
 
-The bilingual joined contract proposal is recorded at `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`. The related [Owner D/I authority matrix](../../14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md) is also a proposal; neither artifact is normative until D and I approve the exact same version/SHA.
+The bilingual joined contract proposal is recorded at `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`. The related [Owner D/I authority matrix](../../../14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md) is also a proposal; neither artifact is normative until D and I approve the exact same version/SHA.
 
 D owns canonical Memory lifecycle, ForgetOperation/Fence semantics and the D-domain completion predicate. I owns authentication/authorization, privacy/retention/legal-hold policy, cross-system inventory policy, evidence-acceptance criteria and the cross-system governance assessment. I must not rewrite D's canonical state or predicate; D must not waive I policy or declare cross-system governance compliance. Each executor reports only its own capability-bounded action and evidence.
 
