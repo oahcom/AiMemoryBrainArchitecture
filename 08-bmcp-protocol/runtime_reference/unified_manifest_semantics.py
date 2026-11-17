@@ -79,6 +79,16 @@ def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=
             return INVALID
         if proof.get("owner_snapshot_digest") != a.get("owner_snapshot_digest"):
             return INVALID
+        if proof.get("proof_ref") != a.get("owner_snapshot_membership_proof_ref"):
+            return INVALID
+        if proof.get("proof_digest") != a.get("owner_snapshot_membership_proof_digest"):
+            return INVALID
+        if proof.get("owner_snapshot_attestation_digest") != a.get("owner_snapshot_attestation_digest"):
+            return INVALID
+        if proof.get("owner_local_sequence") != a.get("owner_local_sequence") or proof.get("owner_high_water") != a.get("owner_high_water"):
+            return INVALID
+        if proof.get("operation_digest") != a.get("operation_digest") or proof.get("scope_binding_digest") != a.get("scope_binding_digest"):
+            return INVALID
         if proof.get("within_frozen_high_water") is not True:
             return INVALID
         for field in ("owner_snapshot_ref","owner_snapshot_digest","owner_snapshot_attestation_ref",
