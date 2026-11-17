@@ -95,9 +95,17 @@ class ForgetReferenceModelTests(unittest.TestCase):
         old_revision = op.inventory_revision
         op.expand_inventory(Target("late-cache", "F", "invalidate"))
         self.assertEqual(op.inventory_revision, old_revision + 1)
-        self.assertEqual(op.phase, Phase.CLEANUP_IN_PROGRESS)
+        self.assertEqual(op.phase, Phase.COMPLETED)
         self.assertEqual(op.governance, Governance.PENDING)
         self.assertEqual(op.public_result(), "Incomplete")
+
+    def test_unsupported_capability_cannot_claim_erasure(self):
+        op = self.operation()
+        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+        op.evaluate_domain()
+        op.record_target("index", TargetState.ERASED, "ev-f", "erase-proof", capability="unsupported")
+        op.record_target("adapter", TargetState.ERASED, "ev-h", "erase-proof")
+        self.assertEqual(op.evaluate_governance(), Governance.NON_COMPLIANT)
 
     def test_stale_lease_cannot_commit_checkpoint(self):
         op = self.operation()
