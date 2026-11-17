@@ -590,3 +590,26 @@ This section supersedes prior live-status claims in this file wherever they desc
 - 未发现正式 Architecture Governance 对 B Fact/Claim Option A 的批准。D Claim Identity Option A 是独立候选。未冻结 Claim/Fact/ClaimRevision/ConflictSet Schema。
 
 See `post-merge-currentness-and-governance-reconciliation.md` for evidence and limitations.
+
+
+## Latest Owner source refresh — 2026-11-18 / 最新 Owner 来源刷新
+
+Exact current branch tips and selected B/D/E/F/G plus A/C/H/I/Storage source Blobs have been re-read. The detailed source matrix and evidence ceilings are in `latest-cross-owner-source-reconciliation.md`. Important deltas from earlier pins: D HEAD is now `7e6d0b133dae88f442665e7b05a54060e047647e`; G HEAD is now `ed6ad0b316b721e49d2fe560ae9f7e6c647ca661`; H HEAD is `eaee480d35ee5c2778cd1150a137558a2635de2d`; I HEAD is `ea949896f891f0a08ef5fe9358edadc8a49e546f`; Storage HEAD is `f6887cc9ea5bfa5293c1bc47e9f10e582830cba3`. These changes do not alter B2/B3 dispositions. B Fact/Claim Option A remains ADR-BLOCKED; D Claim Identity Option A remains a separate candidate; H 1.2.15 issuer/trust/replay and Storage successor evidence remain open; D/I/Storage Phase 3.9 Forget artifacts remain proposals/conditional review, not normative acceptance.
+
+已重新读取精确当前分支 Tip 及 B/D/E/F/G、A/C/H/I/Storage 的选定来源 Blob。详细来源矩阵与证据上限见 `latest-cross-owner-source-reconciliation.md`。相较此前 Pin 的重要变化：D HEAD 现为 `7e6d0b133dae88f442665e7b05a54060e047647e`；G HEAD 为 `ed6ad0b316b721e49d2fe560ae9f7e6c647ca661`；H HEAD 为 `eaee480d35ee5c2778cd1150a137558a2635de2d`；I HEAD 为 `ea949896f891f0a08ef5fe9358edadc8a49e546f`；Storage HEAD 为 `f6887cc9ea5bfa5293c1bc47e9f10e582830cba3`。这些变化不改变 B2/B3 结论。B Fact/Claim Option A 仍 ADR-BLOCKED；D Claim Identity Option A 仍是独立候选；H 1.2.15 Issuer/Trust/Replay 和 Storage 后继证据仍开放；D/I/Storage Phase 3.9 Forget 工件仍是提案/有条件审查，不是规范验收。
+
+
+## PR #120 merge and subsequent source refresh / PR #120 合并及后续来源刷新
+
+PR #120 was merged at `2026-11-17T21:29:04Z` by `oahcom`, merge commit `6c325804027b88de1014ab3364cdda7e0c023ba6`, merged head `069984b5c3915334d6fa2d3ec409d4c7e36fe549`. Main was later observed at `ab1fa87d74ca4a632155aa19569533ea560109d5`. The merge incorporated the post-PR-55 currentness correction. The latest Owner source refresh recorded in `latest-cross-owner-source-reconciliation.md` was committed after PR #120's merged head and therefore requires its own review path; it must not be described as already present on main.
+
+PR #120 于 `2026-11-17T21:29:04Z` 由 `oahcom` 合并，Merge Commit 为 `6c325804027b88de1014ab3364cdda7e0c023ba6`，合并时 Head 为 `069984b5c3915334d6fa2d3ec409d4c7e36fe549`。此后 main 被观察为 `ab1fa87d74ca4a632155aa19569533ea560109d5`。该合并纳入了 PR #55 后的当前性纠偏。`latest-cross-owner-source-reconciliation.md` 中记录的最新 Owner 来源刷新提交晚于 PR #120 的合并 Head，因此需要独立审查路径；不得称其已存在于 main。
+
+
+## Latest cross-owner source refresh after C/G/H updates — 2026-11-18
+
+Current branch tips: C `461dd616209657c3bf485871bdbc2a1b6a652d40`; G `07a84a5ef5b331180bee47f8a60ef16c2918a700`; H `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`. Current source Blobs: C delegated review `c97355b27c2ee8647a03a6e5ef3f8bdac0b34ef7`; G delegated consumer decision `03a86eec0f4d81e6fc1c83274b75080932fdc16b`; H Applied validator `8febb915ec321cc37cf159b2f5b917a3f945726c`; H tests `77cb66b895c5293a2f4883b1d5cb69775e71d00c`; H hardening addendum `4c220e998fc6ba700157598b0384dc3134cf8575`; H C join addendum `9ff4ac5b64b354f63add21a5d16d37da46835c07`.
+
+The C/G delegated role review artifacts were refreshed against H current HEAD `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`. They are not independent human Owner signatures. The current H Applied suite contains 29 test methods; the only cited 26/26 CI run is on earlier H head `9fb2097905ef653b3a2048ac5f6804fc94178d8d`, not the current H head. Exact current-head CI remains unverified.
+
+H-ADE-001/002/003 have reference-candidate code and test coverage. Production C resolver/Owner Ledger, I/D authority wiring, H durable replay, G durable Applied persistence/restore, production trust, and C/G/H Full Applied remain open.
