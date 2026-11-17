@@ -16,7 +16,7 @@ Chinese and English are maintained as equivalent reading versions. Normative arc
 
 **Coverage and migration plan / 覆盖与迁移计划：** [Bilingual Documentation Status](translation-status.md) · [Owner Branch Migration Inventory](owner-branch-translation-inventory.md)
 
-**Mandatory project rule / 项目强制规范：** Every architecture design and semantic change must be documented in Chinese and English in the same change set. See [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md).
+**Mandatory rule for every AI developer / 所有 AI 开发者强制规则：** Every AI developer/session—whether doing architecture, implementation, tests, security, storage, protocols, performance, migrations, operations or reviews—MUST read and follow [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md). Any change to architecture meaning or implementation-facing contracts requires synchronized Chinese and English updates in the same change set. Missing or materially divergent counterparts mean NOT DONE unless a formally approved, time-bounded STALE exception exists. See also [AI Development Standard](../14-ai-development/ai-development-standard.md) and the [Prompt & Evidence Template](../14-ai-development/prompt-and-evidence-template.md).
 
 ## Documentation layers / 文档层次
 
@@ -45,7 +45,7 @@ Bilingual guides explain and navigate these specifications; they do not silently
 3. Translation must never turn CANDIDATE, OPEN, or TO_VALIDATE into DECIDED or APPROVED.
 4. Normative decisions are governed by source specifications and the owner/ADR process—not by whichever language page was edited last.
 5. Each paired document records its ID, version, source revision, status, and counterpart path.
-6. A contract change requires both language versions to be updated in the same change set, or the untranslated counterpart must be marked STALE.
+6. Every AI developer/session must check both language counterparts before work and include bilingual parity in its task plan, prompt, review and completion evidence.\n7. A contract change requires both language versions to be updated in the same change set, or the untranslated counterpart must be marked STALE under a formally approved, time-bounded exception.
 
 ## Status vocabulary / 状态词汇
 
