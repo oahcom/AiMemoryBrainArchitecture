@@ -517,3 +517,245 @@ This research session is complete for Draft submission only when all of the foll
 | LangMem behavior | PARTIALLY VERIFIED | Official README inspected; release/source and transitive dependency review incomplete |
 | Any product's Brain-grade Forget/Applied/security authority | UNVERIFIED | No candidate-specific end-to-end proof; cannot infer from marketing/API documentation |
 | Performance, cost, production suitability | UNVERIFIED | No comparable workload benchmark run |
+
+
+---
+
+# 完整中文对应版本 / Full Chinese Companion
+
+> 本节与前述英文研究正文具有相同的研究结论、能力决策、权威边界和未决事项。英文版本中的产品能力细节、证据状态和限制同样适用于本节；本节不是独立的技术批准。
+
+## 1. 执行摘要
+
+### 1.1 结论
+
+**建议采用“产品辅助、Brain 保持权威”的架构，不建议使用任何单一 Memory 产品替代 Brain。**
+
+最值得研究的产品具有互补性，而不是互相替代：
+
+1. **Graphiti（Apache-2.0）**：最贴近时态实体/关系抽取、Episode 来源关联、事实随时间演化和图混合检索。适合作为派生投影，不是 Canonical Memory Truth。
+2. **Mem0（Apache-2.0）**：适合对话事实抽取、记忆更新/去重、向量与元数据检索以及 SDK 集成。其抽象不能替代 Brain 的 Event、Fact、Claim、Evidence 和 Lifecycle 类型契约。
+3. **Hindsight（MIT）**：适合完整 Memory Pipeline 对比实验，涵盖 retain/recall/reflect、证据关联 Observation、时态/图/语义检索和 PostgreSQL 部署。其观察和综合结论仍然不是权威事实。
+4. **Letta / MemFS**：适合 Agent 自己管理可编辑记忆文件、Git 历史、程序性记忆和自我改进流程，不是通用多 Agent Canonical Memory 权威。
+5. **LangMem（MIT）**：可组合的抽取与整合工具包，可与 LangGraph Store 集成；它是算法和工具参考，不是 Brain 治理系统。
+6. **Zep Cloud**：提供托管 Context Graph 能力，但服务及其数据库属于专有托管边界，会引入供应商、数据驻留和权威依赖；必须与 Apache-2.0 的 Graphiti 开源库分开评估。
+
+目前没有证据证明任何候选产品同时满足 Canonical Truth、独立 Evidence/Provenance 权威、Authorization/Revocation、Forget Fence、跨系统 Lifecycle 和最终推理请求 Applied Evidence。上述能力仍需 Brain 自己组合并保持权威。
+
+**不建议任何产品直接成为初始 System of Record。** 风险最低的下一步，是在生产架构之外建立一次性、非权威 Adapter 实验，用相同标注语料比较 Graphiti、Mem0 和 Hindsight，同时保留 Brain 自有记录和生命周期权威。
+
+### 1.2 明确不声称
+
+- 本研究没有运行 Brain 原型、性能基准、负载测试、迁移演练、安全审计或端到端符合性测试。
+- 不把厂商宣传和厂商基准测试当作独立验证结果。
+- 版本信息是研究快照，不是依赖锁定；正式采用前必须重新核验精确 Release/Commit、传递许可证、CVE 和 SBOM。
+- 本报告不批准 ADR、不选择数据库或部署拓扑，也不冻结任何 Owner 契约。
+
+## 2. 当前架构基线
+
+### 2.1 精确基线与既有研究
+
+本次从 GitHub 读取的 main HEAD 为 `b3c666e67982cb3d3374e759cfb6552c7765aacb`。README 表明仓库当前是架构定义仓库，Runtime Implementation 尚未开始，这是有意状态。
+
+- PR #45：历史技术研究，仍为 Open/Draft，基线和 Head 属于历史快照。
+- PR #56：对 #45 的独立审查，仍为 Open/Draft，结论为 REVISE / NOT YET PROVEN；发现包括源当前性、Restate Server 许可证披露和双语语义一致性问题。
+- PR #73：当前源整改包，仍为 Open/Draft；其自身明确说明这是角色模拟的整合/整改，不是真实 Owner 签名或批准。
+
+本报告不重复这些 PR 的整体技术选型工作，而是新增 Mem0、Graphiti/Zep、Letta/MemFS、Hindsight、LangMem 对 14 项 Memory 能力的产品级比较。
+
+### 2.2 产品不得越权的架构不变量
+
+1. Canonical Memory Truth 归 Brain/D 与 Storage，不归产品的 Memory 表、Graph 或 Vector Store。
+2. Evidence/Provenance 的语义权威属于 Brain。产品 Source Pointer、Episode ID、Quote 或 Confidence 只是输入材料，不构成来源权威或真实性证明。
+3. Principal、PolicyDomain、PermissionEpoch、Authorization 和 Revocation 属于 Owner I。产品的 user_id、tenant_id、bank_id 或 graph_id 不是授权凭证。
+4. Forget 权威与 Fence 顺序属于 Owner D/I/Storage。供应商 DELETE API 不是 Forget 协议。
+5. Producer Admission、Dependency Inventory、Publication Participation、Lifecycle Terminality 属于 Brain。
+6. Context Applied Evidence 权威位于 C/G/H 推理边界。产品返回搜索结果、提交 Agent Memory 文件或声称 Prompt Enriched，都不能证明最终推理请求实际应用了指定上下文。
+7. 检索到的 Memory 是不可信数据，不能提升为 System/Developer 指令。
+8. Graph、Embedding、Index、Cache、Summary 和产品 Memory Object 应作为可替换派生数据，除非 Brain 的正式契约另有规定。
+
+### 2.3 当前 Owner 契约增量
+
+当前整改分支中读取到的提案证据表明：
+
+- **D** 拥有 ProducerClass 准入、ProducerWork 注册、RegistrationReceipt/Sequence、ForgetFence 顺序、依赖/血缘清单、PublicationParticipant 和终态；精确 Owner 批准、可调用 API 和符合性仍 OPEN。
+- **E** 拥有 CompileIntent、Ingress Receipt、不可变输入包、DerivationRun/Attempt/Lease、私有 Stage 和编译恢复编排。Queue ACK 或本地 Published/Completed 标签不是跨 Owner 证明。
+- **I** 拥有 Principal/Workload/Delegation 信任、PolicyDomain、Authorization、PermissionEpoch、Revocation 顺序、Issuer/Key 状态和授权终态证明。授权是必要条件，不是可见性的充分条件。
+- **Storage** 的 L1 逻辑序列化提案选择一个 Canonical Memory Authority 对应一个逻辑 Serializable Transaction Domain；L4 物理引擎/部署仍 OPEN。不能从中推断采用任何 Memory 产品后端。
+- **C/G/H Applied**：Issue #3 仍为 Applied Contract Frozen = NO、Test Executed/Passed = NO/NO、Implementation Verified = NO。
+- **B Fact/Claim** 仍为 ADR-BLOCKED。
+
+因此，产品集成只能从派生数据边界开始，不能用产品能力来宣称关闭 D/E/I/Storage 或 Applied 阻塞项。
+
+## 3. 产品能力矩阵结论
+
+状态说明：VERIFIED 表示官方文档/源码支持所述产品行为；PARTIALLY VERIFIED 表示存在相应功能，但完整性或生产保证尚未证明；UNVERIFIED 表示尚未证明满足 Brain 的特定要求。产品功能不等于 Brain 契约证明。
+
+| 产品 | 已观察到的优势 | 关键缺口 | 研究定位 |
+|---|---|---|---|
+| Mem0 OSS | LLM 事实抽取、更新/去重、SQL 元数据/历史、向量和实体检索、删除 API | 多存储一致性、完整 Evidence 血缘、跨索引/备份 Forget Fence 未证明 | 高价值 Adapter 候选 |
+| Graphiti | Episode 增量摄取、实体/关系抽取、时态边、自定义 Ontology、图/语义/BM25 混合检索 | 来源关联不等于来源正确；没有 Brain 授权、Forget 和 Applied 权威 | 语义匹配度最高 |
+| Zep Cloud | 托管 Context Graph、Episode/Edge 来源关联、时态检索 | 专有托管服务，数据驻留、导出、删除 SLA 和锁定风险需审查 | 暂缓托管采用 |
+| Letta / MemFS | Agent 级记忆文件、Memory Blocks、Git 历史、Dreaming/整合 | 不提供完整事实/证据模型、跨 Agent 授权和全局 Forget | Agent 工作区候选 |
+| Hindsight | retain/recall/reflect、Observation 整合、语义/BM25/图/时态检索、重排 | Bank 隔离不等于 I 授权；产品删除不等于跨系统 Forget | 第一波基准候选 |
+| LangMem | 热路径工具、后台 Memory Manager、抽取与整合 | 依赖外部 Store；无 Brain Evidence、Forget、Lifecycle 或 Applied 权威 | 算法工具候选 |
+
+### 3.1 Mem0
+
+Mem0 是通用 Agent Memory Layer。官方文档和源码显示其 Memory.add 流程会进行抽取/更新，并提供 Search、History、Update、Delete 和按 Scope 删除能力。其架构组合 SQL Facts/Metadata、Vector Store 和 Entity Store。
+
+此前 PR #45 记录了 Mem0 v2.2.1、Apache-2.0 和源码 Tree SHA `f1791daa86d469249c9b002f62644d58a1eb96a0`，涉及 `mem0/memory/main.py`、`mem0/memory/storage.py` 和 Vector Store Adapter。本 Session 重新读取了官方 API 和架构资料，但没有重新锁定当前最新 Release。
+
+采用建议：**WRAP / EXTEND**。只用于提取或检索派生服务；不能成为 Canonical Store。多存储架构会增加跨存储一致性和删除协调成本。
+
+### 3.2 Graphiti 与 Zep
+
+Graphiti 是开源时态 Context Graph 框架；Zep 是基于 Graphiti 派生图能力的托管 Context 平台。
+
+Graphiti 支持 Text/Message/JSON Episode、实体和关系抽取、时态边、自定义实体/关系类型，以及 Semantic、BM25 和 Graph Traversal 混合检索。Zep 文档说明图由 Entity Nodes、Entity Edges 和 Episodic Nodes 构成；Edge 保存来源 Episode 和有效时间。文档同时明确：Provenance 只识别来源数据，不保证来源或派生事实正确。
+
+此前 PR #45 记录 Graphiti v0.31.2、Apache-2.0、Tree SHA `869c1b279e01a2767a464581e1cb657ce0e39271`，并检查 `graphiti_core/graphiti.py`、`nodes.py`、`edges.py`、Search 和 Driver 实现。本 Session 重新读取了官方 README、文档和 pyproject。当前 pyproject 显示 Python >=3.10、Neo4j 核心依赖，以及 FalkorDB/Neptune/模型供应商可选依赖；Kuzu Extra 因上游项目不再维护而被标记为弃用。
+
+采用建议：Graphiti **EXTEND / WRAP**，只做可替换的时态图投影。Zep Cloud **DEFER**，待托管服务合同、数据驻留、删除和导出条件通过审查后再评估。
+
+### 3.3 Letta / MemFS
+
+Letta Code 使用 Git-backed Memory Filesystem，提供 Agent 级 Memory Blocks 和外部 Memory Files。Agent 可用常规文件工具编辑记忆，并用 Git 查看历史。官方文档描述了 Dreaming 后台整合；Memory 修改提交并重新编译后才会影响后续上下文，不会改变已经开始的当前推理请求。
+
+此前 PR #45 记录 Letta Code v0.34.63、Apache-2.0、Tree SHA `b622fb1bc0941981e08da5ec2b2736d897e9bde1`，检查 `memory-filesystem.ts`、`memory-git.ts` 等源码。当前 Letta 项目说明活跃代码已转至 `letta-ai/letta-code`，旧 Letta V1 API Server 已归档。必须区分 Letta Code、Server、SDK 和 Cloud 的许可证及服务条款。
+
+采用建议：**WRAP** 为 Agent 自有工作区记忆，不作为 Brain Canonical Memory。
+
+### 3.4 Hindsight
+
+Hindsight 提供 retain、recall、reflect 三个核心操作。Retain 摄取对话/文档并抽取事实、实体和关系；Recall 组合 Semantic、BM25、Graph、Temporal 搜索与重排；Reflect 使用 LLM 在记忆上进行综合推理。Observation 文档描述了去重、证据关联和基于新证据的修订。Memory Bank 用于隔离不同 Agent/User/上下文。
+
+本 Session 检查了官方 README、API 方法、异步 Operation、安装、Storage 和 Docker Compose 文档。仓库声明 MIT。生产存储主要使用 PostgreSQL + pgvector，也提供 Oracle AI Database 企业方案；pg0 嵌入式 PostgreSQL 用于开发，不建议生产。支持 REST、Python、Node、Go 和 MCP。精确最新 Release/Commit 和传递依赖许可证仍需锁定。
+
+采用建议：**EXTEND / WRAP**，作为整合与检索的强基准候选或可选派生服务；Observation 不得成为 Canonical Truth，Bank 隔离不能替代 I 的授权，删除不能替代 D/I/Storage 的 Forget Fence。
+
+### 3.5 LangMem 与其他候选
+
+LangMem 提供 Hot-path Memory Tools 和后台 Memory Manager，支持抽取、整合、更新，并集成 LangGraph Store。它是工具包而非独立权威服务。采用建议 **EXTEND** 算法参考，生产集成 **DEFER**，除非 Python/LangGraph Sidecar 的成本得到证明。
+
+Hermes Agent 的 Provider/Memory Adapter 模式可供参考，但它是 Agent Runtime，不是 Brain。LangGraph Store/Checkpointer 可借鉴 Thread State 与跨 Thread Memory 的区分。GraphRAG 更偏静态文档语料，不作为第一波时态 Agent Memory 候选。Qdrant、pgvector、Tantivy 属于检索基础设施，不是 Memory Authority。
+
+## 4. 14 项能力采用决策
+
+| 能力 | 决策 | 中文理由 |
+|---|---|---|
+| 1. Memory Ingestion | **WRAP** | 用 Adapter 接入对话、消息、JSON 和文档；Brain 自己校验 Principal、Scope、幂等、Admission 和 Accepted Receipt。产品 ACK 不是 Brain 接受证明。 |
+| 2. Memory Extraction | **EXTEND** | 使用 Mem0/Graphiti/Hindsight 生成候选；Brain 校验类型、证据、权限和血缘后才允许 Canonical Commit。 |
+| 3. Entity Resolution | **EXTEND** | 借用 Graphiti/Mem0/Hindsight 的实体链接；Canonical Entity ID、Merge/Split、Alias 和冲突裁决归 Brain。 |
+| 4. Fact / Claim Modeling | **BUILD** | 产品结构不能替代 B 的领域模型；Fact/Claim ADR 仍阻塞。 |
+| 5. Temporal Memory | **EXTEND** | 借用 Graphiti 时态边/Hindsight 时间检索；有效时间、记录时间、事件顺序和 Supersession 由 Brain 定义。 |
+| 6. Provenance | **BUILD** | Episode、Quote、History 是来源线索；Evidence Identity、完整派生血缘、完整性、授权和保留策略由 Brain 拥有。 |
+| 7. Contradiction Detection | **EXTEND** | 产品提出矛盾候选；Brain 保留竞争 Claim、来源、时间和裁决状态，不得静默覆盖。 |
+| 8. Memory Consolidation | **EXTEND** | 使用 Observation、Dreaming、Dedup 等生成派生结果；必须保留完整血缘和幂等 Derivation ID，不得删除原始证据或完成 Forget。 |
+| 9. Memory Retrieval | **WRAP** | Graphiti/Hindsight/Mem0 可生成候选；Brain 在排序/激活前复查授权、Canonical 状态、时效和 Forget 抑制。 |
+| 10. Memory Ranking | **EXTEND** | 可使用产品 Reranker；Brain 决定策略排序和激活，排名不能覆盖授权、Forget 或认知状态。 |
+| 11. Forget / Deletion | **BUILD** | 产品 DELETE 仅是下游清理；D/I/Storage 拥有操作身份、授权、目标清单、Fence、Barrier、终态证明、恢复和 Restore Fencing。 |
+| 12. Multi-Agent Sharing | **WRAP** | 可利用 Agent Repo、Shared Graph、Bank 或 Scope；Brain/I 决定 Principal、Delegation、Policy 和共享授权。 |
+| 13. Memory Lifecycle | **BUILD** | Brain 拥有 ProducerWork、Lease/Fencing、Dependency Registration、Publication Participation、Terminality 和恢复。 |
+| 14. Memory Quality Evaluation | **EXTEND** | 借用 LongMemEval 和产品基准工具，但增加 Truth、Provenance、Forget、Authorization、Temporal Leakage 和 Applied 专项指标。 |
+
+本报告没有对 14 项中的任何一项建议将外部产品整体 ADOPT 为系统记录权威。未来若要改变，必须先通过固定版本的独立端到端符合性验证，并取得相关 Owner 明确批准。
+
+## 5. 架构影响与推荐集成方式
+
+建议增加的是**非权威 Product Adapter 边界**，而不是新增产品权威：
+
+1. Brain 按自己的契约接受并持久化标识 Source Event。
+2. Adapter 仅发送经过最小化/脱敏的派生数据，并携带稳定 Brain Source/Evidence 引用和 Scope 元数据。
+3. 产品执行抽取、图构建、Embedding、整合或检索。
+4. Adapter 将产品输出映射为 Brain 的 Typed Proposal；产品原始对象只作为外部引用。
+5. Brain 校验 Scope、Authorization、Schema、Source Lineage、Temporal Semantics、Conflict 及当前 Forget/Lifecycle Fence。
+6. 只有 Brain 的 Canonical Transaction 可以发布已接受的 Canonical Asset。
+7. 检索 Adapter 返回候选 ID/Score/Source Pointer；Brain 在 Context Planning 前重新校验。
+8. Forget 向产品传播为下游目标，但 Brain 是否完成取决于权威目标清单和所需确认/协调结果。
+
+第一阶段只比较 Brain SQL+Lexical Baseline、Mem0 OSS、Graphiti、Hindsight。使用固定匿名数据集和相同模型/Token 预算。Letta 与 LangMem 放到第二波，分别评估 Agent Workspace 和 Toolkit 场景。不得把真实敏感数据或 Canonical Write Credential 交给产品。
+
+## 6. 安全、Forget 与 Provenance
+
+### 6.1 安全边界
+
+- Brain Principal/Workload/Delegation 映射为不透明产品 Scope；产品调用者传入的 user_id/bank_id/agent_id/graph_id 不能作为身份凭证。
+- 任何受保护读写必须由 I 授权；产品 RBAC 仅作为纵深防御。
+- 只发送必要数据；审查模型供应商出站、保留、日志、备份、区域和分包商。
+- 所有 Memory、Graph Fact、Summary、Observation 和 Memory File 都是不可信数据，不得进入特权指令通道。
+- 在 Ingestion、Extraction、Graph Traversal、Vector Search、Rerank、Reflect 和 Export 的每个阶段测试跨租户泄漏。
+- 产品只能使用受限、短期 Adapter Credential，不能获得 Storage/I 签名密钥或 Canonical DB 的无限制权限。
+
+### 6.2 Forget
+
+产品 DELETE 最多只能证明产品在自身语义下接受或完成了本地删除，不能证明：
+
+- 抽取事实、关联实体、图边、Summary、Embedding 和 Cache 全部删除；
+- 异步 Job/Retry 已被 Fence，无法重新创建被遗忘数据；
+- Replica、Export、Audit Log、Object Store、Snapshot 和 Backup 满足擦除语义；
+- 旧索引/副本不会再次返回已 Forget 项；
+- Restore 不会从旧 Snapshot 复活数据；
+- 下游 Agent Context/Applied 已完成协调。
+
+Adapter 必须绑定 Brain Forget Operation ID 和不可变 Digest，幂等执行，Digest 冲突失败关闭，关闭或隔离相关写入，枚举派生对象和异步 Job，对超时/丢 ACK/部分删除/UNKNOWN 保持未解决状态，并在恢复和重建前重放 Forget/Revocation 状态。
+
+**当前没有候选产品被验证满足这一跨系统协议。Forget 必须 BUILD。**
+
+### 6.3 Provenance 与 Applied
+
+Graphiti Episode 能关联派生 Node/Edge，Hindsight Observation 能关联支持 Memory/Quote，Mem0 History 能追踪记忆变化，Letta Git History 能追踪文件修订。但这些都不等于 Brain Evidence Authority 或完整 Fact-Level Lineage。
+
+Brain 应保存来源 Event/Evidence ID、内容 Digest、允许保留的 Source Span/Quote、Extractor/Model/Prompt Version、Derivation Run ID、产品版本/配置、时间断言、验证结果及 Supersession/Contradiction 链路。此处是研究映射建议，不是擅自新增 B/D 契约。
+
+所有产品都不能证明 Brain Adapter 组装的最终推理请求确实应用了指定上下文。产品的“Memory Returned”“Context Updated”“Prompt Enriched”均不是 C/G/H Final-request Applied Attestation。
+
+## 7. 许可证、部署和成本风险
+
+- **Mem0 OSS：** Apache-2.0；Python；SQL、Vector、Entity Provider；可自托管 REST/Docker。主要风险是多存储一致性、Provider 出站、Python Sidecar 和托管 API 条款。
+- **Graphiti：** Apache-2.0；Python >=3.10；Neo4j 核心依赖，FalkorDB/Neptune 等可选；需要图数据库和模型供应商。需注意 Kuzu Extra 已弃用。
+- **Zep Cloud：** 专有托管服务；需审查数据驻留、保留、定价、导出、删除 SLA 和供应商锁定。
+- **Letta Code：** 既有源码快照记录 Apache-2.0；Node/TypeScript；本地 App Server 或 Cloud；必须分别核查 Code、Server、SDK 和 Cloud 条款。
+- **Hindsight：** MIT；Python API；生产 PostgreSQL + pgvector（另有 Oracle 企业方案）；需要模型 Provider、Docker/Helm 和数据库运维。
+- **LangMem：** MIT；Python；可集成 LangGraph Store；需要外部存储和模型 Provider。
+
+仓库许可证不等于完整法律意见。必须逐包核查依赖、模型权重、托管服务条款、数据集、SBOM 和 CVE。成本必须通过实验测量 CPU/RAM/磁盘、Token/事件、重试放大、服务数量、P95/P99、删除收敛时间、Backup/Restore 和运维工时。
+
+## 8. 基准测试提案
+
+第一波候选：Brain SQL+Lexical Baseline、Mem0 OSS、Graphiti、Hindsight。数据集覆盖稳定偏好、纠正和事实变化、矛盾来源、实体别名/同名、长对话延迟召回、JSON/自然语言混合、跨 Agent 共享/私有、Forget 后延迟任务和 Restore、Prompt Injection、多语言。
+
+指标包括：
+
+- Extraction Precision/Recall/F1、Unsupported Claim Rate；
+- Entity Pairwise Precision/Recall、False Merge/Split；
+- Valid-time Accuracy、Point-in-time Query Accuracy；
+- Evidence Link Coverage、Source Span Accuracy、Orphan Derivative Rate；
+- Contradiction Detection、Silent Overwrite Rate；
+- Recall@k、nDCG@k、MRR、Forgotten/Stale Leakage；
+- Forget Suppression Time、Late-write Resurrection、Restore Leakage；
+- Cross-scope Leakage、Prompt Injection Success；
+- P50/P95/P99、吞吐、Token 和每千条事件成本；
+- Duplicate/Lost Work、UNKNOWN Recovery、Retry Idempotency。
+
+任何跨 Scope 泄漏、Fence 后发布、权威抑制后仍检索出已 Forget 项或伪造 Applied Proof 都是硬失败。没有项目 SLO 和标注集之前不虚构数值门槛。
+
+## 9. 未决问题与 ADR 建议
+
+未决问题包括：B Fact/Claim Schema；D ProducerWork/ForgetFence API；E 外部抽取任务幂等和恢复；I 产品 Scope 与 Principal 映射；Storage L4 物理拓扑；Evidence 血缘/保留；F 索引/Cache 抑制；C/G/H 最终 Applied 边界；Python Sidecar 可接受性；实际 Workload/SLO/预算；Zep/Hindsight 托管服务数据治理；精确 Release/Commit/SBOM/CVE。
+
+建议提出但不批准：
+
+**ADR-PROPOSAL-001：非权威外部 Memory Projection 与 Adapter 边界。**
+
+建议原则：Brain 是 Canonical Truth、Evidence/Provenance、Authorization、Forget、Lifecycle 和 Context Applied Evidence 的唯一权威；外部产品仅作为可替换抽取、图、整合、排序或检索投影；产品输出是非可信 Proposal/Candidate；所有读写由 Brain 复查 Scope/Authorization/Lifecycle/Forget；产品删除确认不是 Forget 终态证明；产品数据必须可导出和重建，否则显式接受锁定风险。
+
+此 ADR 仍是提案，需 A/B/C/D/E/F/G/H/I/Storage 按影响范围审查，不改变任何 Owner 契约。
+
+## 10. 验收状态
+
+已完成：精确 main HEAD/README、PR #45/#56/#73 核验、扩展产品名单、官方文档与选定源码/元数据检查、14 项能力决策、安全/Forget/Provenance/Applied 分析、基准提案和未决问题。
+
+尚未完成：所有候选精确最新 Release/Commit 锁定；完整源码路径审查和 SBOM/许可证/CVE；Brain Adapter 原型及故障注入；人工标注数据集和 SLO；独立审查本 Draft PR；相关 Owner 对契约接触点的明确接受。
+
+**当前结论：PARTIAL。可进入研究审查和实验规划，不构成生产采用批准。**
