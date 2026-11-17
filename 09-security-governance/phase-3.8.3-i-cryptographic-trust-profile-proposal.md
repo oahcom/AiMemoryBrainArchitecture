@@ -22,7 +22,9 @@ This proposal establishes one explicit candidate cryptographic profile so H can 
 | Digest | SHA-256 | Lowercase hexadecimal 64-character representation on wire |
 | Signature | Ed25519, RFC 8032 | 64-byte signature; public key 32 bytes; no algorithm negotiation or downgrade within this profile |
 | Signature encoding | Base64url without padding | Decode strictly; reject non-canonical encodings |
-| Profile identity | `AIMBA-I-CRYPTO-1.0` | Exact, case-sensitive, immutable profile identifier |
+| Profile bundle ID | `AIMBA-I-CRYPTO-1.0` | Exact, case-sensitive, immutable I trust/signature profile bundle |
+| Canonicalization profile ID | `RFC8785-JCS-1.0` | Exact JCS/I-JSON serialization rules |
+| Signature profile ID | `AIMBA-ED25519-SHA256-1.0` | Ed25519 with SHA-256 domain-separated payload/signature construction |
 | Domain separation | Profile- and message-type-specific ASCII domain tag | A signature for one message family cannot be replayed as another family |
 
 This is a candidate profile, not a claim that Ed25519 satisfies every deployment's regulatory/FIPS requirements. A deployment requiring a different approved cryptographic module or algorithm suite MUST define a separately versioned profile and obtain I/H/Storage approval; silent fallback is forbidden.
@@ -64,7 +66,7 @@ H MUST publish an exact per-message-type field projection. The owner signature c
 - message type, stable message ID and replay nonce;
 - owner authority, owner record reference and owner subject/issuer identity;
 - audience, purpose, PolicyDomain and OwnerBoundary where applicable;
-- canonicalization/signature profile IDs;
+- canonicalization profile ID `RFC8785-JCS-1.0`, signature profile ID `AIMBA-ED25519-SHA256-1.0` and profile bundle ID `AIMBA-I-CRYPTO-1.0`;
 - all message-specific semantic payload fields, typed refs, generations, high-waters, roots, counts, digests and terminal enums;
 - key ID/version and owner-authored creation/validity fields.
 
@@ -85,7 +87,7 @@ Let `P` be the exact H-defined owner-signed projection and `JCS(P)` its RFC 8785
 - Signature:
   `signature = Ed25519.Sign(private_key, signature_preimage)`
 
-The signature field itself, signature verification result, transport channel-binding proof and post-append COC commit attestation are not members of P. The exact projection MUST include `payload_digest` only if H defines it as a field inside P; if included, the digest is recomputed over the projection with the digest field omitted, and this omission rule must be explicit in the H mapping. No circular digest is permitted.
+The signature field itself, signature verification result, transport channel-binding proof and post-append COC commit attestation are not members of P. The exact projection MUST include `canonicalization_profile_id=RFC8785-JCS-1.0`, `signature_profile_id=AIMBA-ED25519-SHA256-1.0` and `digest_algorithm=SHA-256`. The profile bundle ID `AIMBA-I-CRYPTO-1.0` is the immutable trust-policy bundle resolved by I and is included in the signature domain tag. The exact projection MUST include `payload_digest` only if H defines it as a field inside P; if included, the digest is recomputed over the projection with the digest field omitted, and this omission rule must be explicit in the H mapping. No circular digest is permitted.
 
 `P` 是 H 定义的精确 Owner-signed Projection，`JCS(P)` 是 RFC 8785 规范 UTF-8 字节。
 
