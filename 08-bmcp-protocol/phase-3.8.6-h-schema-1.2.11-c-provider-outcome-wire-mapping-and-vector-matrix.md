@@ -205,7 +205,7 @@ H independently recomputed and verified all five candidate signatures, checked a
 
 - C key-status event schema: Blob `908b293eba337e9fa75864cea3704e28a1a8d82e`.
 - C key lifecycle/anti-rollback contract: Phase 3.11.0 Blob `de581ea59e724faf5972217e17b983de641ad3f7`.
-- I review of C key-status/governance signature candidate: Blob `9765b36bce72fc8a1aa347af40b85727ff5a59ed`.
+- I review of C key-status/governance signature candidate: Blob `57d1b1ca616eaec6df1dee82ddaccc66519caca2`.
 - H validator core with explicit key-status callback: Blob `c8717869d066543b1272780014ab1e42310c6951`.
 - H unit test with key-status fail-closed/schema assertion: Blob `46267648309823e1c20f1b07acb4b3dd66d9f60b`.
 
@@ -214,3 +214,16 @@ The H `verify_key_status` callback must validate the C key event chain, governan
 Missing key-status callback, unavailable governance trust chain or unavailable external checkpoint yields UNKNOWN. A proven invalid transition, fork, stale checkpoint, key identity mismatch or signature failure yields INVALID. H must not infer ACTIVE from missing status.
 
 I has accepted the lifecycle/governance-signature design as a candidate only. Neither `AIMBA-C-CRYPTO-1.0` nor `AIMBA-I-KEY-GOVERNANCE-1.0` is registered; no C trust root or key custody is activated.
+
+
+## 14. Current key-status CI evidence and I governance disposition
+
+- C key-status schema: `908b293eba337e9fa75864cea3704e28a1a8d82e`.
+- C key-status lifecycle contract: `9339b168165a7a3dd34def5236ad61cfd3163418`.
+- I review: `57d1b1ca616eaec6df1dee82ddaccc66519caca2`.
+- H validator core with mandatory `verify_key_status` callback: `c8717869d066543b1272780014ab1e42310c6951`.
+- H test file: `46267648309823e1c20f1b07acb4b3dd66d9f60b`.
+- H CI run `44058962672`, commit `f6a632c76efe50d8514a8b94bd1b134f064445c8`: SUCCESS, 11 tests.
+- C CI run `44059137081`, commit `6b7b9c4a24d81ae45dcb7ddcdbe49c9617e3e4da`: SUCCESS, 12 tests.
+
+These runs cover schema closure, state-transition unit predicates, sequence-scoped status evaluation and fail-closed missing key-status callback. They do not authenticate the governance signature, trust root, registry durability, HSM/KMS custody or external anti-rollback service. No key activation is implied.
