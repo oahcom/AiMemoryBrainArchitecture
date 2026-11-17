@@ -27,14 +27,14 @@ The central rule is: use mature, simple and verifiable technology to satisfy exi
 | `baseline/architecture-baseline.md` | Exact main baseline, architecture and decision states | Readback verified; baseline pinned |
 | `mature-project-research.md` | Mem0, Graphiti, Letta, Hermes, LangGraph, Temporal, Restate, NATS, storage, retrieval, auth and observability source research | Source-inspected; independent review pending |
 | `technology-capability-matrix.md` | Map Brain capabilities to real mechanisms and gaps | Readback verified |
-| `deployment-topology-comparison.md` | Option A/B/C comparison | Drafted |
-| `architecture-complexity-audit.md` | Over-design and duplicate-authority audit | Drafted |
-| `rust-ecosystem-assessment.md` | Rust crate/SDK/runtime maturity and integration types | Drafted |
+| `deployment-topology-comparison.md` | Option A/B/C comparison | Readback verified |
+| `architecture-complexity-audit.md` | Over-design and duplicate-authority audit | Readback verified |
+| `rust-ecosystem-assessment.md` | Rust crate/SDK/runtime maturity and integration types | Readback verified |
 | `workload-model.md` | S/M/L assumed envelopes and benchmark plan | Readback verified; assumptions need owner confirmation |
 | `technology-recommendation.md` | Minimum/balanced/high-scale candidate stacks | Readback verified; no selection approved |
-| `owner-dependency-register.md` | Required B–I/Storage/Testing/Operations inputs | Drafted; responses pending |
+| `owner-dependency-register.md` | Required B–I/Storage/Testing/Operations inputs | Readback verified; Owner decisions pending |
 | `research-evidence-register.md` | Exact source snapshots, releases, licenses, paths and docs | Readback verified; external evidence review pending |
-| `open-questions.md` | Blockers and evidence needed to close | Drafted |
+| `open-questions.md` | Blockers and evidence needed to close | Readback verified |
 | `owner-technology-review-synthesis.md` | Current B–I TAR findings, branch-head drift and Storage/PostgreSQL evidence | Readback verified; owner-branch freshness caveat remains |
 | `independent-review-handoff.md` | Separate-session reviewer mandate and exact checks | Readback verified; independent review not started |
 
