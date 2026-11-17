@@ -70,6 +70,41 @@ PR #74 Memory Products, #75 Durable Execution, #76 Security/Governance, #77 Agen
 - PR #92 says H identity tuple shape is a candidate, but exact COutcomeRecord and final-boundary mapping is NOT ACCEPTED / NOT VERIFIED. It also records a G source discrepancy concerning `final_request_boundary_id`; G must correct/resolve its own contract rather than having the integration layer silently reinterpret it.
 - PR #94's C workflow path-filter correction remains Draft; schema-only trigger execution is pending. Do not claim that trigger path is proven.
 
+## 2.4 Exact G/H schema re-read / G/H Schema 精确复核
+
+A targeted read of the exact current branch blobs narrows the reported mapping discrepancy:
+
+| Artifact | Blob | Exact observation |
+|---|---|---|
+| H Unified COC/JF-10 1.2.15 schema | `860fc4cec658db7d2703cd6adf72aa31a2723f6d` | Of the seven HDeliveryBindingIdentity fields listed in G, only `final_request_boundary_id` is present in this schema; the other six are absent |
+| H Applied Delivery Evidence 1.0.0 schema | `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608` | All seven fields are present as schema properties and required fields |
+| H Applied Delivery Evidence 1.0.0 candidate contract | `f193113f142506b0d0848c7131f780db93a83aef` | Explicitly defines HDeliveryBindingIdentity, HEvidenceIdentity and HObservationRecordIdentity as three distinct tuples and a separate message family |
+| G Applied persistence contract | `bd297873bc1e593280484a43cb44b56058d9c4ff` | Correctly treats the tuples as proposed pending C/H acceptance, but its sentence saying all seven fields are absent from H 1.2.15 is inaccurate for `final_request_boundary_id` |
+
+Therefore the precise correction is: **H 1.2.15 contains `final_request_boundary_id`, but does not contain the other six HDeliveryBindingIdentity fields; H Applied Delivery Evidence 1.0.0 contains all seven as a separate candidate message family.** Do not merge the two schema families or infer that the newer candidate is globally frozen.
+
+Required follow-up:
+1. G corrects the 1.2.15 field-presence statement and records the exact H 1.0.0 schema/validator mapping as a candidate source, not as an approved contract.
+2. H confirms the validator enforces all seven required fields and the three identity projections exactly.
+3. C accepts or rejects the C ProviderAttempt/Outcome ↔ H Applied Delivery Evidence join, including `final_request_boundary_id`, request digest and actual request ID.
+4. G accepts the exact evidence identity and durable Applied join; I confirms signer/key/trust and current PermissionEpoch evidence; D confirms ForgetFence currentness.
+5. The cross-owner bundle is pinned by exact schema, validator, vector, CI and Owner decision refs before Full Applied is eligible.
+
+H Applied Delivery Evidence CI 11/11 is recorded on exact code commit `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`. Live H branch tip `6608cde89d959257db612d8ff8080f631333f3f3` is one documentation-only commit beyond that tested code snapshot. This supports bounded candidate code continuity; it does not prove production crypto, durable replay, cross-owner integration or current-head CI.
+
+这次针对精确 Blob 的复核进一步缩小了映射差异：
+
+| 工件 | Blob | 精确观察 |
+|---|---|---|
+| H Unified COC/JF-10 1.2.15 Schema | `860fc4cec658db7d2703cd6adf72aa31a2723f6d` | G 所列七个 HDeliveryBindingIdentity 字段中，只有 `final_request_boundary_id` 存在；另外六个不存在 |
+| H Applied Delivery Evidence 1.0.0 Schema | `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608` | 七个字段全部作为 Schema 属性存在，并全部列为必填 |
+| H Applied Delivery Evidence 1.0.0 候选合同 | `f193113f142506b0d0848c7131f780db93a83aef` | 明确将 HDeliveryBindingIdentity、HEvidenceIdentity 和 HObservationRecordIdentity 定义为三个不同 Tuple，并作为独立消息族 |
+| G Applied Persistence 合同 | `bd297873bc1e593280484a43cb44b56058d9c4ff` | 正确将这些 Tuple 视为等待 C/H 接受的提案，但其“七个字段在 H 1.2.15 全部缺失”的表述对 `final_request_boundary_id` 不准确 |
+
+因此，精确修正应为：**H 1.2.15 已包含 `final_request_boundary_id`，但不包含 HDeliveryBindingIdentity 的另外六个字段；H Applied Delivery Evidence 1.0.0 则在独立候选消息族中包含全部七个字段。** 不得混合两个 Schema 消息族，也不得推断新候选已全局冻结。
+
+后续必须由 G 修正文案，H 确认 Validator，C 接受 Provider Outcome 与 Applied Evidence 的精确关联，G 接受持久化 Applied 映射，I 确认签名/密钥/信任与 PermissionEpoch，D 确认 ForgetFence 当前性。所有 Owner 决议和精确 Schema/Validator/Vector/CI 引用必须共同固定后，Full Applied 才可被考虑。
+
 ## 3. Cross-workstream architecture that is mutually supportable / 可共同支持的架构
 
 ### 3.1 Authority map
