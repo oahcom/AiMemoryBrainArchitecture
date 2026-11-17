@@ -539,5 +539,15 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertEqual(result["status"], "INVALID", result)
         self.assertIn("Storage resolution proof / same-GID authority verification contradiction", result["errors"])
 
+    def test_32_c_p0_projection_covers_every_member_except_derived_digest_and_signature(self):
+        from provider_outcome_validator import _p0, _candidate_digest_and_preimage
+
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        p0 = _p0(c_object)
+        self.assertEqual(set(p0), set(c_object) - {"payload_digest", "signature"})
+        digest, _ = _candidate_digest_and_preimage(c_object)
+        self.assertEqual(digest, c_object["payload_digest"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
