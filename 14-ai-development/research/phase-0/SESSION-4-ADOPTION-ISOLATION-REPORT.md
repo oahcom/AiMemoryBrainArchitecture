@@ -127,8 +127,8 @@ The PRs above have diverged histories relative to the refreshed main. Their exis
 | ChatGPT Work | Supports longer multi-step work, connected apps/files and deliverables. | Plan, workspace and rollout dependent; not a universal baseline. |
 | ChatGPT GitHub connection | Retrieves permitted repository content on demand. | OpenAI documents this connection as read-only; do not assume push, issue mutation or PR creation. |
 | Codex local | Coding agent for local repository work, edits and tests. | Requires local setup and user-controlled environment; plan usage limits apply. |
-| Codex Cloud | Isolated cloud coding environments and managed tasks. | Not included with Free/Go according to the plan documentation; not a baseline dependency here. |
-| Scheduled Tasks | One-time and recurring tasks exist. | Free plan limits include up to three active tasks and recurrence no more than daily; flexible execution windows. |
+| Codex Cloud | Isolated cloud coding environments and managed tasks. | Plan/workspace eligibility varies and must be verified live; not a baseline dependency here. |
+| Scheduled Tasks | One-time and recurring tasks exist. | Active-task limits, recurrence and execution windows vary by plan/product rollout; verify current eligibility before relying on them. |
 | Work GitHub event triggers | Eligible Work surfaces can react to supported GitHub PR activity. | Paid-plan/workspace eligibility applies; not available as a Free/Go assumption and not a general arbitrary webhook service. |
 | GitHub Issues / PRs | Durable task discussion, source changes, commit history and review records. | Repository permissions and policy apply; PR approval is not automatically business acceptance. |
 | GitHub Actions | Event-driven deterministic workflows and checks. | Requires reviewed workflow files, permissions and runner configuration; untrusted PR content is a security boundary. |
