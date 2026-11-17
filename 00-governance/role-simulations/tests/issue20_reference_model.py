@@ -27,6 +27,7 @@ class DAuthority:
     admissions: dict = field(default_factory=dict)
     unresolved: set = field(default_factory=set)
     terminal: dict = field(default_factory=dict)
+    dependencies: dict = field(default_factory=dict)
 
     def admit(self, work_id: str, digest: str):
         old = self.admissions.get(work_id)
@@ -41,6 +42,26 @@ class DAuthority:
                    "sequence": self.registration_high_water,
                    "generation": self.generation}
         self.admissions[work_id] = receipt
+        self.dependencies.setdefault(work_id, None)
+        self.unresolved.add(work_id)
+        return receipt
+
+    def admit_late_derivative(self, parent_work_id: str, work_id: str, digest: str):
+        """Admit a newly discovered derivative and reopen the fenced D barrier."""
+        if parent_work_id not in self.admissions:
+            raise ProtocolError("late derivative requires an exact admitted parent")
+        old = self.admissions.get(work_id)
+        if old:
+            if old["digest"] != digest or self.dependencies.get(work_id) != parent_work_id:
+                raise ProtocolError("late derivative identity/parent conflict")
+            return old
+        self.registration_high_water += 1
+        receipt = {"work_id": work_id, "digest": digest,
+                   "sequence": self.registration_high_water,
+                   "generation": self.generation,
+                   "late_derivative_of": parent_work_id}
+        self.admissions[work_id] = receipt
+        self.dependencies[work_id] = parent_work_id
         self.unresolved.add(work_id)
         return receipt
 
@@ -368,10 +389,32 @@ class EDerivation:
             raise ProtocolError("stable WorkItem identity changed request digest")
         if self.state in {"PUBLISHED", "NO_PUBLICATION"}:
             return self.attempt
+        if self.state in {"PRIVATE_STAGED", "STORAGE_PREPARED_HIDDEN",
+                          "D_ADMITTED", "UNKNOWN_IN_DOUBT"}:
+            raise ProtocolError("in-flight publication must be reconciled, not retried")
         self.attempt += 1
         self.lease_id = f"{self.work_item_id}:lease:{self.attempt}"
         self.state = "LEASED"
         return self.attempt
+
+    def expire_lease(self, lease_id):
+        if self.state != "LEASED" or lease_id != self.lease_id:
+            raise ProtocolError("lease expiry must bind the exact current attempt")
+        self.state = "LEASE_EXPIRED"
+        return {"work_item_id": self.work_item_id, "attempt": self.attempt,
+                "lease_id": lease_id, "state": self.state}
+
+    def move_to_dlq(self):
+        if self.state != "LEASE_EXPIRED":
+            raise ProtocolError("only an expired, pre-publication attempt may enter DLQ")
+        self.state = "DLQ"
+        return self.state
+
+    def replay_dlq(self, request_digest):
+        if self.state != "DLQ":
+            raise ProtocolError("DLQ replay requires a DLQ WorkItem")
+        self.state = "REGISTERED"
+        return self.retry(request_digest)
 
     def stage_private(self, digest):
         if self.state != "LEASED":
@@ -443,9 +486,20 @@ class GContextVersion:
             "version": context_version, "d_generation": d_generation}
         return delivery_id
 
+    def validate_reconnect(self, snapshot_version, current_d_refs, current_d_generation):
+        """Reconnect is a fresh authorization check, not replay of an old ACK."""
+        if self.stale or snapshot_version != self.version:
+            raise ProtocolError("reconnect snapshot is stale")
+        for fragment in self.fragments.values():
+            if (fragment["d_generation"] != current_d_generation
+                    or not set(fragment["source_refs"]).issubset(set(current_d_refs))):
+                raise ProtocolError("reconnect fragment lineage is not currently authorized")
+        return True
+
     def replay_delivery(self, delivery_id, current_d_generation):
         item = self.deliveries.get(delivery_id)
-        if not item or self.stale or item["d_generation"] != current_d_generation:
+        if (not item or self.stale or item["version"] != self.version
+                or item["d_generation"] != current_d_generation):
             raise ProtocolError("old delivery/ACK is not replay authority")
         return True
 

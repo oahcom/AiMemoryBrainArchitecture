@@ -183,3 +183,14 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 - 2026-11-17: Re-ran P Issue #20 suite after the exact-source/branch-head documentation refresh. Run `44055688440` at commit `409822a802a135a33379957dae0fd88b5444aaeb` again passed 78 tests. Main advanced independently; P compare is now 164 ahead / 23 behind (diverged), so no merge was attempted.
 
 - 2026-11-17: Latest branch compare after concurrent main updates: P is 166 commits ahead / 23 behind main (diverged). No merge/rebase or main write was performed.
+
+
+## 7. Issue #20 D/E/G coordinator test expansion — 2026-11-17
+
+| Evidence | Exact artifact | Result / boundary |
+|---|---|---|
+| D/E/G focused obligation tests | `00-governance/role-simulations/tests/test_issue20_deg_owner_obligations.py` | Added deterministic tests for late derivative barrier reopening and refreshed release CAS; exact lease expiry, DLQ/replay identity and no-retry-before-reconciliation; G lineage-aware reconnect and stale delivery rejection. Pending CI until the commit workflow completes. |
+| D/E/G model additions | `00-governance/role-simulations/tests/issue20_reference_model.py` | Adds explicit reference transitions for late D derivatives, E lease expiry/DLQ/replay and G reconnect authorization. Coordinator-only; not Owner-local implementation evidence. |
+| Bilingual semantics note | `00-governance/role-simulations/issue-20-d-e-g-conformance-expansion-v0.1.0.md` | PROPOSED; exact semantic scope and non-claims recorded in Chinese and English. |
+
+UMR-037 remains OPEN until D/E/G publish independently attributable Owner-local conformance tests and exact source decisions. P model results cannot close that gap.
