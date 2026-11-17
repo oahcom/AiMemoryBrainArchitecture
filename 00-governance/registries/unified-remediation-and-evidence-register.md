@@ -225,7 +225,7 @@ This is a bounded repository-tree observation, not a claim that no tests exist o
 
 | ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
 |---|---|---|---|---|---|
-| UMR-038 | P0 | Reconcile Storage v3.2.7 current manifest Owner matrix and obtain same-manifest C/H/I/D/Storage/A review; issue corrected v3.2.8 successor before freeze | C/H/Storage/I/D/A | OPEN — L1/L2 local full-path evidence advanced; current Storage manifest remains documentary-stale and A review is predecessor-bound | P audit: `00-governance/role-simulations/issue-20-v3.2.7-owner-review-matrix-and-currentness-audit-v0.4.0.md`. Current Storage manifest Blob `c4ce39e25bf57d97c28db4e2133087d4eca1fbb8` binds H mapping `1cbe74...`, validator `eab961...`, test `dccf8...`, fixture `c80247...`, and H full-path closure `5f4873...`; canonical H CI run `44069941327` on `ba2c934...` passed 32 tests (26 H validator + 6 crypto interop). C Phase 3.8.18 `4be9c1...`, I Phase 3.8.14 `7c6565...`, D Phase 3.8.10 `ccdae9...` review the integrated mapping/full-path sources. Storage §4 still lists older C/I/D reviews and H callback-seam run, duplicates the fixture row, and omits current review pins. A Phase 1.F `85cd97...` reviews predecessor manifest `4435fc...`, not current `c4ce39...`. Require Storage v3.2.8 corrected matrix + duplicate removal + canonical run pin, followed by fresh A exact review. Production trust/adapters, owner ledger completeness, provider adapter, COC quorum, Storage L4, JF-10 P0 and Gate B/C remain OPEN. |
+| UMR-038 | P0 | Complete current CSubmitOutcome 1.0.1 × H Unified 1.2.14 × RecoveryJoin 1.0.2 × I/D proof × Storage successor exact-version bundle | C/H/Storage/I/D/A | PARTIALLY ADVANCED — Storage v3.2.8 and A Phase 1.G review exist; v3.2.8 pins pre-full-path H tests/run | P audit `issue-20-v3.2.8-full-path-currentness-audit-v0.4.0.md`. H full local H-envelope + C-object schema/semantic/digest path now passes on test Blob `dccf8c...` / fixture `c80247...` / closure Blob `5f4873...` / run `44069941327` (32 tests). Storage v3.2.8 Blob `b8a736...` still pins the prior 27-test source/run `70a379...` / `44068869146`; A Phase 1.G Blob `cb2cb0...` reviews v3.2.8 only. Require Storage v3.2.9 and fresh exact C/D/I/A review pins. |
 
 
 ### Latest P/main compare — 2026-11-17
@@ -262,3 +262,19 @@ UMR-038 remains OPEN. The actual I/D branches must refresh their exact reviews, 
 ### Storage v3.2.7 currentness and owner-matrix audit — 2026-11-17
 
 P re-read current Owner branch heads and exact review Blobs. C Phase 3.8.18 (`4be9c1...`), I Phase 3.8.14 (`7c6565...`) and D Phase 3.8.10 (`ccdae9...`) now review H integrated authority-join mapping `1cbe74...` and the full-path test/fixture source set. H Phase 3.8.14 closure `5f4873...` binds the 32-test exact CI run `44069941327`. Storage v3.2.7 manifest `c4ce39...` contains stale Owner matrix entries and a duplicate fixture row. A Phase 1.F review `85cd97...` binds an earlier manifest `4435fc...` and 25-test suite; it does not review `c4ce39...`. P published a currentness audit and simulated A Phase 1.G review. Require Storage Owner publication of corrected v3.2.8 and a fresh A review; no Owner branch or main was modified.
+
+
+## 13. New remediation — full-path closure and successor exactness
+
+| ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
+|---|---|---|---|---|---|
+| UMR-039 | P0 | Bind C/D/I callback reviews to the current H full-path closure and exact CI run | C/D/I/H | PARTIALLY ADVANCED — callback boundary reviews exist; their closure references need exact refresh | H closure file Blob `5f487321b273ede41a7c23c3f94b6c0625968439`; current run `44069941327`, commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251`, 32 tests. C/D/I review docs cite commit `f9c8d797...` as “Blob” and earlier run `44069777296`; require corrected owner addenda. |
+| UMR-040 | P0 | Refresh Storage successor manifest and A integration review to the full-path H source set | Storage/A | OPEN — v3.2.8 and Phase 1.G review predate the full-path evidence | Storage v3.2.8 Blob `b8a736e885a42d09f4776c34e8b6a93e6402b900` pins 27-test source/run; H current full-path source/test/fixture/closure are `dccf8c...` / `c80247...` / `5f4873...`, run `44069941327`. Require Storage v3.2.9 and new A review of its exact Blob. |
+| UMR-041 | P1 | Close local H envelope + C object schema/semantic/digest path conformance | H/C | PARTIALLY CLOSED — local full path PASS; production owner callbacks remain test doubles | H Phase 3.8.14 closure Blob `5f487321...` and run `44069941327` prove real local schema/semantic/digest path and negative mutations. Ten authority callbacks remain test doubles; no production I/D/Storage proof authentication. |
+| UMR-042 | P0 | Correct Blob-versus-commit references in C/D/I full-path review evidence | C/D/I/H | OPEN — review docs mislabel H commit SHA as a Blob | C Phase 3.8.18 Blob `4be9c1...`, D Phase 3.8.10 Blob `ccdae9...`, I Phase 3.8.14 Blob `7c6565...` each cite H commit `f9c8d797...` as closure Blob. Actual H closure file Blob is `5f487321...`. Publish exact addenda; do not treat commit SHA as file Blob. |
+
+## 14. Latest H full-path and recovery CI — 2026-11-17
+
+- Provider Outcome run `44069941327`, exact tested commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251`: **32 tests, SUCCESS**.
+- RecoveryCutoff run `44070707497`, exact tested commit `362cc113cfb5b595a4002a6f6e980d19ae2d2d15`: **288 tests, 266 passed / 22 skipped / 0 failed**.
+- The full-path fixture uses test-double authority callbacks; production trust, provider truth, owner-ledger completeness, COC quorum and Storage deployment remain unverified.
