@@ -116,6 +116,12 @@ Use **REJECTED** when the proposed approach is invalid or unacceptable. Preserve
 
 A task prompt is a versioned engineering artifact, not disposable chat text.
 
+**Canonical storage location:** all reusable prompts MUST be stored in the repository-root `prompts/` directory before execution. Global prompts MUST be placed directly under `prompts/`; Owner-specific prompts MUST be placed only under `prompts/A/` through `prompts/I/`. Do not place Owner prompts at the root or duplicate global rules in Owner files. Cross-owner tasks combine the global prompts with the relevant Owner prompts. The exact prompt actually executed MUST be copied into its Work Item evidence bundle with Prompt ID, version and SHA-256. Executed prompt versions are immutable.
+
+**规范存储位置：** 所有可复用提示词 MUST 在执行前存入仓库根目录的 `prompts/`。全局提示词 MUST 直接放在 `prompts/` 根目录；Owner 专属提示词 MUST 仅放在 `prompts/A/` 至 `prompts/I/` 对应目录中。不得将 Owner 提示词放在根目录，也不得在 Owner 文件中重复复制全局规则。跨 Owner 任务组合全局提示词和相关 Owner 提示词。实际执行的准确提示词 MUST 连同 Prompt ID、版本和 SHA-256 复制到 Work Item 证据包。已执行提示词版本不可修改。
+
+Start from the [canonical Prompt Library](../prompts/README.md). Every AI session MUST read `prompts/global-project-developer.md` and `prompts/global-bilingual-documentation.md`, plus its assigned Owner prompt. Review sessions MUST also read `prompts/global-architecture-reviewer.md`.
+
 Every prompt MUST include:
 
 1. Work Item ID, prompt ID, version, status and task class/risk.
