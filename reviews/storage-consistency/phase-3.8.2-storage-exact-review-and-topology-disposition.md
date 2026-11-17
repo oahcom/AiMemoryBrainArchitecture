@@ -11,10 +11,10 @@
 - E Phase 3.8 contract: Blob 475fee41e5eea527af4edefbfe88c58c86967d0a.
 - I Phase 3.8 contract: Blob 54bab0484bd232a5a258e65e34cc7425288b39a6.
 - Storage Phase 3.8 visibility contract: Blob 175ee7b1349cfdb79a19898b311a88391ed88010.
-- Storage Phase 3.6.11 bidirectional JoinProof: Blob 2882fa8eb4d5e7faca035866572cbe48ac5eeae0.
+- Storage Phase 3.6.11 bidirectional JoinProof: Blob 4520860b28429d35cdb2ca947a56d0ccb64226a3.
 - H RecoveryJoin schema 1.0.0: Blob dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
-- H semantic validator/test contract: Blob 9a2c3b856d1319e780932d75d2b0165021faf816.
-- HRC/JPF executable suite: Blob f28834d73e055be411060f0c1093bd3dc0d865b9.
+- H semantic validator/test contract: Blob b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
+- HRC/JPF executable suite: Blob ee0f47095df10786da358bed193d6f8491a5eb2c.
 - A race/crash/failover matrix: Blob c0f8ae699a42de46d12d0d311892e5670014e0f1.
 
 ## 2. Storage disposition
@@ -91,7 +91,7 @@ Storage 接受双向 Join Proof 的逻辑方向：COC Prefix Participant 集合�
 
 The latest RecoveryJoin schema now binds every owner request row by both logical request digest and owner-row digest, carries distinct OwnerAdmissionRef and OwnerEntryRef, and requires typed D lineage, I authorization, C provider and Storage prepared/resolution evidence. This addresses the schema-shape portion of STORAGE-RJ-01 and makes the bidirectional contract more precise. It does not replace live authoritative enumeration, signed proof dereference, quorum readback or owner-local release CAS. STORAGE-RJ-02..05 remain open, especially physical topology/HA/restore.
 
-Updated Storage JoinProof contract Blob: 2882fa8eb4d5e7faca035866572cbe48ac5eeae0.
+Updated Storage JoinProof contract Blob: 4520860b28429d35cdb2ca947a56d0ccb64226a3.
 Updated H RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
-Updated H semantic contract Blob: 9a2c3b856d1319e780932d75d2b0165021faf816.
-Updated HRC suite Blob: f28834d73e055be411060f0c1093bd3dc0d865b9.
+Updated H semantic contract Blob: b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
+Updated HRC suite Blob: ee0f47095df10786da358bed193d6f8491a5eb2c.
