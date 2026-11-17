@@ -54,6 +54,7 @@ A 可以接受全局范围和顺序风险，但不能代替 B、D、I、C、G、
 
 ## 基于 main@8c0c5b 的当前源刷新（2026-11-17）
 
+- R PR #50、X PR #49 和 F/D/P PR #46 报告绑定的是较早 Main 基线 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`；它们仍是分析输入，并非对当前 Main 的刷新评估。A 已集成 PR #51/#52/#54 后续证据，但在精确当前源/消费者 Pin 和必要角色刷新完成独立回读前，G1/G7 仍为部分完成。
 - 当前 Main HEAD `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` 撤销了 Commit `6470f25...`、`67f1122...` 和 `e723222...` 短暂引入的三份 B 研究工件。这些工件不属于当前 Main 基线，也不是规范证据。B Fact/Claim ADR 仍 ADR-BLOCKED。
 - B→A 审查 PR #52：分支 HEAD `2727bd8544f812d796186769f86cf92aba244dee`，报告 Blob `b59b2ef745330f901027f59b69c68b99097c604b`。
 - Option A 审查 PR #54：分支 HEAD `208c5e84f64ec68338045b963407bcb6d2463faf`，报告 Blob `ff782d7ab32bdbe66f01a2057c516c5a855abdd3`；提案修订 Blob `f5ad30c8570d480f60bc9b02ee53c06317b41525` 尚 NOT ADOPTED。
