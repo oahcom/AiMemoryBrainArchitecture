@@ -9,7 +9,7 @@
 - C Phase 3.11.1 sequence namespace amendment: Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`
 - I Phase 3.8.8 sequence namespace review: Blob `0d78e5b2bfcf66cae6b757314cead84b9c942601`
 - C key-status event schema 1.0.0: Blob `908b293eba337e9fa75864cea3704e28a1a8d82e`
-- H validator core: Blob `1533d0aed222042dd0525c60532170b04803c0ed`
+- H validator core: Blob `0449090a0367576b8b4ac20b1b46897facf9233d`
 - H validator tests: Blob `78d3c58ec0d56a95ef78c41ffbad9b21eb797556`
 - C review of H 1.2.13 × C 1.0.1: Blob `761f204ac0ad3a433c336d71217e7c3147ebc09e`
 - H predecessor mapping 1.2.12 × C 1.0.1: Blob `fad28f1b62f6a686669e209ebe30d69df6330d75`
@@ -120,7 +120,7 @@ The H validator core now pins:
 - `C_OBJECT_SCHEMA_ID=urn:aimba:schema:c-submit-outcome:1.0.1`;
 - C profile candidate `AIMBA-C-CRYPTO-1.0`.
 
-Exact validator core Blob: `1533d0aed222042dd0525c60532170b04803c0ed`.
+Exact validator core Blob: `0449090a0367576b8b4ac20b1b46897facf9233d`.
 Exact test source Blob: `78d3c58ec0d56a95ef78c41ffbad9b21eb797556`.
 
 The test source now includes 1.2.13 schema pinning, 1.0.1 C object namespace checks, removal of the legacy intent alias and the HANDOFF_REJECTED/SideEffectStatus conditional cases. It also verifies that HANDOFF_REJECTED + PROVEN_NONE requires ProviderNoHandoffProofRef only, while NOT_INVOKED requires both ProviderNoHandoffProofRef and NotInvokedProofRef, and rejects wrong loaded schema URIs. **These latest tests have not yet been tied to a completed exact-head GitHub Actions run in this review.** The earlier H run 44060704553 (17 tests) tested H 1.2.12/C 1.0.1 and is not evidence for H 1.2.13.
