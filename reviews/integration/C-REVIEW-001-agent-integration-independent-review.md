@@ -129,7 +129,7 @@ The 22 scenarios are a design plan. C Agent/Provider/Tool/Brain end-to-end tests
 
 ## 4. C-owned remediation applied in this branch / 本分支已执行的 C 自有整改
 
-The following edits were applied on `review/c-review-001-remediation-2026-11-18`, based on PR #69 HEAD `1a1d6f2...`:
+The following edits were applied on `review/c-review-001-remediation-2026-11-18`, based on PR #69 HEAD `a69007a...` after merging its latest field-mapping addendum:
 
 1. `TECH-REALITY-001-C/README.md` — corrected baseline and current-source status; distinguished historical H CI from current H branch contents.
 2. `existing-integration-baseline.md` — corrected current main, PR #69 head, G/H branch heads, and historical H artifact status.
