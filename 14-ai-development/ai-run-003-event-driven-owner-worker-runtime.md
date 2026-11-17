@@ -26,7 +26,7 @@ GitHub Actions Self-hosted Runner 只是显式触发 Workflow 的执行底座，
 | GitHub `ai-worker` runner | Operator-confirmed Online and service started; not independently queried / 操作方确认在线且服务已启动；未独立查询 |
 | Read-only diagnostics | Workflow file exists on PR #27 branch; no matching run observed / Workflow 文件存在于 PR #27 分支；未观察到匹配运行 |
 | PR #27 | Ready for Review, open, not merged; formal review list empty at last query / 已可审查、开放、未合并；最近查询正式审查列表为空 |
-| Main branch protection | GitHub API reports protection disabled / GitHub API 报告未启用分支保护 |
+| Main branch protection | Earlier check reported disabled; current integration cannot read this admin endpoint, so re-verification by a repository administrator is required / 早期检查报告未启用；当前集成无权读取该管理接口，必须由仓库管理员重新核验 |
 | A–I worker runtime | Not deployed / 尚未部署 |
 
 These facts do not establish reboot recovery, least-privilege isolation, durable event processing, 24/7 availability, or autonomous A–I operation.
@@ -202,14 +202,14 @@ A fencing token is effective only if the system that performs the side effect en
 - Use a GitHub App installation identity with the minimum repository permissions required for the pilot.
 - Prefer short-lived installation access tokens; keep the App private key and webhook secret in a host secret store with restricted file permissions.
 - Never store PATs, private keys, registration tokens, webhook secrets or model credentials in Git, Issues, PR comments, workflow artifacts or ordinary logs.
-- Read current branch protection/ruleset state before any write operation. The current main branch protection API result is disabled; autonomous write mode is blocked until required review/check rules are established and verified.
+- Read current branch protection/ruleset state before any write operation. An earlier check reported main branch protection disabled, but the current integration receives HTTP 403 for this administrative endpoint and cannot independently re-verify it. A repository administrator must confirm the active ruleset/branch protection and required review/check rules; autonomous write mode remains blocked until this evidence is recorded.
 
 - GitHub Issue/PR/Commit/Check 是持久化工程事实源。
 - Runtime 是对账器和执行器，不是新的项目授权来源。
 - 使用 GitHub App Installation 身份，并将仓库权限限制为试点所需最小集合。
 - 优先使用短期 Installation Access Token；App 私钥和 Webhook Secret 放在权限受限的主机 Secret Store。
 - PAT、私钥、注册 Token、Webhook Secret、模型凭据不得进入 Git、Issue、PR 评论、Workflow Artifact 或普通日志。
-- 写操作前读取当前分支保护/Ruleset。当前 main 分支保护 API 结果为 disabled；在建立并验证必要审查/检查规则前，禁止自主写入模式。
+- 写操作前读取当前分支保护/Ruleset。早期检查报告 main 分支保护未启用，但当前集成访问该管理接口返回 HTTP 403，无法独立重新核验。仓库管理员必须确认生效的 Ruleset/分支保护及必要审查/检查规则；在记录该证据前，禁止自主写入模式。
 
 ## 8. Worker isolation / Worker 隔离
 
