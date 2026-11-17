@@ -97,3 +97,8 @@ A new protocol-boundary review is available:
 - Reviewed Storage COC protocol Blob: `5b950a3a29bd7a5276b92a49a9114d700718b987`.
 
 The review conditionally accepts the cross-protocol outcome enum and boundary, but explicitly records that C's own canonical Provider Outcome source contract was not located/pinned in that pass. The current C branch search shows exact review artifacts and adapter contracts, but no separate canonical CSubmitOutcome source artifact. Therefore the exact owner contract pin, provider-specific proof semantics, same-key lookup behavior and race vectors remain OPEN. Do not present this review as a final C Owner decision or provider implementation acceptance.
+
+
+## 10. H schema 1.2.7 C boundary / H Schema 1.2.7 的 C 边界
+
+C reviewed H's schema 1.2.7 signature-profile change in the Provider Outcome boundary review (current C review Blob `ce191163deb4fea2acf1ac53ebbe3b4fc90acabf`; H review Blob `8bed0b05cd631014bf5af7cb5a8dafdd932940e9`; schema Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`). C accepts the structural distinction between signature profile and canonicalization profile with amendments. I owns profile trust resolution. The C Provider Outcome semantic validator must require a trusted signature profile for protected owner-signed outcomes. C's own canonical CSubmitOutcome source contract and provider-specific evidence vectors remain OPEN.
