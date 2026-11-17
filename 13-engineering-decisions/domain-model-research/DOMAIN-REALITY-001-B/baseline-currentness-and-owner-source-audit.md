@@ -379,3 +379,46 @@ The current Storage v3.3.1 manifest binds H 1.2.14 and its 60-test reference-gat
 Disposition: registered as **B-CONFLICT-017 — BLOCKING / OPEN** in B's conflict register and cross-owner matrix. B3 remains NOT PASSED. This is a delegated A-role review and exact source reconciliation, not an independent human A Owner approval or a Storage Owner decision.
 
 处置：已在 B 冲突登记和跨 Owner 矩阵中登记为 **B-CONFLICT-017 — BLOCKING / OPEN**。B3 仍 NOT PASSED。本结论基于委派 A 角色复审和精确来源协调，不是独立人类 A Owner 批准，也不是 Storage Owner 决议。
+
+
+## 10. Storage v3.3.2 and A Phase 3.12.2 exact re-review / Storage v3.3.2 与 A Phase 3.12.2 精确复审
+
+This section supersedes §9's temporary status that B-CONFLICT-017 remained open. A Storage successor and exact A re-review were found on the live Owner branches.
+
+本节取代 §9 中 B-CONFLICT-017 仍开放的临时状态。已在实时 Owner 分支发现 Storage 后继版本及 A 精确复审。
+
+- Storage current branch HEAD: `830a559bd2f4ec72608f5a51e1a0b43779f2b989`.
+- Storage v3.3.2 manifest path: `reviews/storage-consistency/phase-3.6.22-storage-v3.3.2-option-a-status-corrected-exact-version-manifest.md`.
+- Storage v3.3.2 exact Blob: `5c614375e10698e4931d83deb57d20321445e068`.
+- A Phase 3.12.2 exact review path: `01-architecture/phase-3.12.2-a-exact-rereview-storage-v3.3.2-option-a-status-correction.md`.
+- A Phase 3.12.2 exact review Blob: `eb3c946065aff4fbc6d76f384402fb9f75fa32dc`.
+- A review status: **ACCEPT AS A CONSISTENT EXACT-VERSION CANDIDATE MANIFEST WITH ENUMERATED RELEASE BLOCKERS; NOT FROZEN / NOT PRODUCTION-APPROVED**.
+- A explicitly marks the prior Option A status inconsistency **CLOSED AT MANIFEST CONSISTENCY LEVEL**: v3.3.2 now says Option A is selected as normative v1 logical architecture, retains L4 physical engine/deployment OPEN, removes unsupported A-01–A-05 references and preserves the exact ADR §8.7 per-BrainAuthority anchor obligation.
+
+- Storage 当前分支 HEAD：`830a559bd2f4ec72608f5a51e1a0b43779f2b989`。
+- Storage v3.3.2 Manifest 路径：`reviews/storage-consistency/phase-3.6.22-storage-v3.3.2-option-a-status-corrected-exact-version-manifest.md`。
+- Storage v3.3.2 精确 Blob：`5c614375e10698e4931d83deb57d20321445e068`。
+- A Phase 3.12.2 精确复审路径：`01-architecture/phase-3.12.2-a-exact-rereview-storage-v3.3.2-option-a-status-correction.md`。
+- A Phase 3.12.2 精确复审 Blob：`eb3c946065aff4fbc6d76f384402fb9f75fa32dc`。
+- A 复审状态：**接受为带列明 Release Blocker 的一致精确版本候选 Manifest；不冻结 / 不批准生产**。
+- A 明确将此前 Option A 状态不一致判为 **Manifest 一致性层面 CLOSED**：v3.3.2 现已表述 Option A 已选为 v1 规范逻辑架构，保留 L4 物理引擎/部署 OPEN，删除无依据的 A-01–A-05 引用，并保留精确 ADR §8.7 的 Per-BrainAuthority Anchor 义务。
+
+### 10.1 Exact scope and remaining gaps / 精确范围与剩余缺口
+
+A Phase 3.12.2 review is scoped to the exact Storage v3.3.2 Blob and its pinned H 1.2.14 / C 1.0.1 / C Phase 3.8.22 / I Phase 3.8.18 evidence. It does not approve or bind H Unified 1.2.15, I Phase 3.8.22's 1.2.15 structural review, or a future Storage bundle containing those successor pins. The v3.3.2 manifest itself says a fresh A review is required for its exact version and remains NOT JOINTLY ACCEPTED / NOT FROZEN.
+
+A Phase 3.12.2 复审仅针对精确 Storage v3.3.2 Blob 及其绑定的 H 1.2.14 / C 1.0.1 / C Phase 3.8.22 / I Phase 3.8.18 证据。它不批准或绑定 H Unified 1.2.15、I Phase 3.8.22 对 1.2.15 的结构复审，或包含这些后继 Pin 的未来 Storage Bundle。v3.3.2 Manifest 自身也要求对其精确版本取得 A 新复审，并保持 NOT JOINTLY ACCEPTED / NOT FROZEN。
+
+Remaining blockers explicitly retained by A include outer-envelope P0/canonical bytes/signature profile; signer-role decision; I trust root/issuer/key registration and lifecycle; non-forgeable protected transport context; durable replay/ingress atomicity and replay authorization; C provider truth; D lineage/fence/barrier/release; I terminality/currentness; Storage/COC quorum, RecoveryJoin and same-GID; and Option A L4 deployment evidence.
+
+A 明确保留的阻塞项包括 Outer-Envelope P0/Canonical Bytes/Signature Profile、Signer Role 决议、I Trust Root/Issuer/Key 注册及生命周期、不可伪造的 Protected Transport Context、Durable Replay/Ingress 原子性及重放授权、C Provider Truth、D Lineage/Fence/Barrier/Release、I Terminality/Currentness、Storage/COC Quorum/RecoveryJoin/Same-GID，以及 Option A L4 部署证据。
+
+### 10.2 Updated disposition / 更新后的处置
+
+B-CONFLICT-017 is now **CLOSED — MANIFEST CONSISTENCY REMEDIATED**, based on Storage v3.3.2 exact Blob `5c614375e10698e4931d83deb57d20321445e068` and A Phase 3.12.2 exact re-review Blob `eb3c946065aff4fbc6d76f384402fb9f75fa32dc`. Qualification: both the Storage manifest and A review identify delegated-role provenance, not independent human Owner signatures. The closure is limited to the Option A status inconsistency and unsupported A-01–A-05 reference. It does not close B3, Storage L4, authenticated ingress, production trust, Applied, Forget or runtime conformance.
+
+B-CONFLICT-017 现更新为 **CLOSED — MANIFEST CONSISTENCY REMEDIATED**，依据 Storage v3.3.2 精确 Blob `5c614375e10698e4931d83deb57d20321445e068` 与 A Phase 3.12.2 精确复审 Blob `eb3c946065aff4fbc6d76f384402fb9f75fa32dc`。限定条件：Storage Manifest 与 A 复审均注明委派角色来源，不是独立人类 Owner 签名。关闭范围仅限 Option A 状态不一致及无依据的 A-01–A-05 引用，不关闭 B3、Storage L4、Authenticated Ingress、Production Trust、Applied、Forget 或 Runtime Conformance。
+
+B3 remains **NOT PASSED**. H 1.2.15 successor integration and a fresh exact Storage/A bundle review remain open. This author-side currentness refresh does not claim independent review or global Owner acceptance.
+
+B3 仍为 **NOT PASSED**。H 1.2.15 后继集成以及 Storage/A 对精确后继 Bundle 的新复审仍开放。本次作者侧时效性刷新不代表独立审查或全局 Owner 验收。
