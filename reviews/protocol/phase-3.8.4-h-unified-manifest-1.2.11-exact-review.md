@@ -21,8 +21,8 @@
 | H Unified Schema 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
 | H Unified Schema 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
 | H RecoveryJoin 1.0.2 tests | `6afa788da2a899f03de8207cb700c40e0533aba1` |
-| I P0 vector set | `4657f0c81e9c8692d29ac183380f3d7e074a4e4c` |
-| I Python/Node crypto test | `7658edc6f51dac203742ecc1ecf00d41bd676908` |
+| I P0 vector set | `9210219a85afe1f48da0ea253a073aba8b2e138c` |
+| I Python/Node crypto test | `01239e06e8f4464f49acd34241dc00899befe424` |
 | H CI | Run `44050250038`, commit `34fb4ccf8b1580321d38eda1340cf53f73b83f24`, **281 tests: 259 passed, 22 skipped, 0 failed** |
 
 ## 2. H findings / H 审查发现
@@ -110,3 +110,6 @@ RecoveryJoin 1.0.2 and the new verifier seam remain candidate-level. Actual I/D/
 - Exact CI: [Run 44050250038](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44050250038), H HEAD `34fb4ccf8b1580321d38eda1340cf53f73b83f24`, 281 tests, 259 passed, 22 skipped, 0 failed.
 
 The 22 skipped tests belong to the historical 1.2.10 semantic suite and are superseded by active 1.2.11/1.2.12 suites. No production owner signer/verifier is connected. Candidate CI PASS is not production cryptographic conformance.
+
+
+The I cross-language vector set now also covers the I owner snapshot membership proof P0 as a sixth message family. The exact vector Blob is `9210219a85afe1f48da0ea253a073aba8b2e138c`; the Python/Node test source is `01239e06e8f4464f49acd34241dc00899befe424`. This expands only fixed TEST-ONLY vector coverage.
