@@ -68,9 +68,9 @@ The package README and baseline described `b3c666...` as current main and contai
 
 The cross-owner matrix pinned G at `3367438...` and H at `0d363244...`. Live branch reads show:
 - G current HEAD: `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8`; the G Applied Persistence EN contract Blob is `bd297873...`, and the latest Chinese companion Blob is `82553a47...`.
-- H current HEAD: `0277a8b9ee63be850acc0b8b1b08625524aaa33b`.
+- H incident snapshot: `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; restored current H Owner HEAD: `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6`.
 
-H's latest commit has parent `0d363244...` and removes the prior Unified 1.2.15 schema, Gateway/Provider validators, conformance tests and most of the previous H branch tree. The current H branch tree contains only the two Phase 3.8.23 decision documents and three workflow files. The old schema/validator/CI artifacts remain addressable by immutable historical commit, but are not files at current H HEAD.
+At the incident snapshot H's latest commit had parent `0d363244...` and removed the prior Unified 1.2.15 schema, Gateway/Provider validators, conformance tests and most of the previous H branch tree. The H Owner branch was subsequently restored at `4e65a2...` with 215 blobs, including those artifacts and the new Applied Delivery Evidence 1.0.0 candidate.
 
 **Risk:** the C matrix and validation index could be read as asserting that old H schema/validator artifacts are current branch contents. Historical CI is not current branch conformance and is not production trust proof.
 
@@ -161,7 +161,7 @@ No H/D/G/I/Storage authoritative contract was modified. No C executable tests or
 - Current main: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/e52594f181d2edb77448adcfed64a0fbdffaf3aa
 - C reviewed HEAD: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/1a1d6f26a793fc285a1806edf21b696f748a8fed
 - G current HEAD: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/763b3d31e910db8fd29c6e4dbaff9273b7fb66b8
-- H current HEAD: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/0277a8b9ee63be850acc0b8b1b08625524aaa33b
+- H current HEAD: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6
 - H historical 1.2.15 evidence commit: https://github.com/oahcom/AiMemoryBrainArchitecture/commit/0d36324457e39bd50ad56ae902d477c4ea765b61
 - H Phase 3.8.23 mapping decision: https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-h-bmcp-protocol/08-bmcp-protocol/phase-3.8.23-h-exact-review-g-applied-delivery-evidence-mapping.md
 - G Phase 3.8.22 Applied Persistence contract: https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-g-memory-context/06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md
