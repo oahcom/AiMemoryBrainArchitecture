@@ -1,0 +1,89 @@
+name: ChatGPT Codex channel proof of concept
+
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: "install-only checks the CLI; chatgpt-device-auth performs a temporary ChatGPT OAuth login and read-only smoke test"
+        required: true
+        type: choice
+        options:
+          - install-only
+          - chatgpt-device-auth
+        default: install-only
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chatgpt-codex-channel-poc
+  cancel-in-progress: false
+
+jobs:
+  codex-chatgpt-auth-probe:
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 15
+    env:
+      CODEX_HOME: \${{ runner.temp }}/codex-home
+    steps:
+      - name: Checkout trusted main revision
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Install official Codex CLI
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://chatgpt.com/codex/install.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/.local/bin:$PATH"
+          codex --version
+
+      - name: Prepare temporary credential home
+        if: inputs.phase == 'chatgpt-device-auth'
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d -m 0700 "$CODEX_HOME"
+          chmod 0700 "$CODEX_HOME"
+          echo "Temporary CODEX_HOME prepared; no persistent account credential will be retained."
+
+      - name: Authenticate with ChatGPT device code
+        if: inputs.phase == 'chatgpt-device-auth'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          echo "Complete the one-time device authorization in your own ChatGPT browser."
+          echo "The short-lived device code is printed by Codex in this private-repository workflow log."
+          timeout --signal=TERM 10m codex login --device-auth
+          codex login status
+
+      - name: Run read-only Codex proof
+        if: inputs.phase == 'chatgpt-device-auth'
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          output="$RUNNER_TEMP/codex-channel-proof.txt"
+          codex exec --ephemeral --sandbox read-only --ask-for-approval never \
+            --cd "$GITHUB_WORKSPACE" \
+            --output-last-message "$output" \
+            "Inspect this checked-out private repository. Read its README.md and obtain the current Git HEAD using git. Return exactly these items: the marker CHATGPT_CODEX_CHANNEL_PROOF_OK, the repository name, the current HEAD SHA, and the first Markdown H1 from README.md. Do not modify any file, do not access secrets, and do not make network requests."
+          test -s "$output"
+          cat "$output"
+          grep -q "CHATGPT_CODEX_CHANNEL_PROOF_OK" "$output"
+
+      - name: Remove temporary ChatGPT credentials
+        if: always() && inputs.phase == 'chatgpt-device-auth'
+        shell: bash
+        run: |
+          set +e
+          export PATH="$HOME/.local/bin:$PATH"
+          codex logout
+          rm -rf -- "$CODEX_HOME"
+          rm -f -- "$RUNNER_TEMP/codex-channel-proof.txt"
+          echo "Temporary Codex authentication home removed."
