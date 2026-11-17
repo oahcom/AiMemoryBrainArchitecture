@@ -481,3 +481,42 @@ These are current live `main` Blob pins at the refresh. The conflict is not reso
 At this refresh: main HEAD `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; B Owner branch HEAD `2faf8ec38f14dba49e7263d7a60804dae1a74ee2`; research branch HEAD before this refresh's author-side writes `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`. PR #55 remains Open / Draft, base `main`, recorded base SHA `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`; compare is DIVERGED, 166 ahead / 34 behind, merge base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; 22 files, 4,864 additions, 0 deletions. GitHub reports `mergeable=true` at the read. These are metadata only; no rebase, retarget, merge or Ready transition is authorized. The main tree contains zero B research package paths.
 
 本次刷新时：main HEAD `e52594f181d2edb77448adcfed64a0fbdffaf3aa`；B Owner 分支 HEAD `2faf8ec38f14dba49e7263d7a60804dae1a74ee2`；本轮作者侧写入前研究分支 HEAD `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`。PR #55 仍 Open / Draft，Base 为 `main`，记录的 Base SHA 为 `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`；Compare 为 DIVERGED，领先 166 / 落后 34，Merge Base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`；22 个文件，新增 4,864 行，删除 0 行。GitHub 本次返回 `mergeable=true`。以上仅为元数据；不授权 Rebase、改 Base、合并或转 Ready。Main Tree 中 B 研究包路径为零。
+
+
+## 13. Final live PR snapshot after B2/B3 source reconciliation / B2/B3 来源协调后的最终实时 PR 快照 — 2026-11-18
+
+At the live read immediately before this §13 update:
+- Main HEAD: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`.
+- B Owner branch HEAD: `2faf8ec38f14dba49e7263d7a60804dae1a74ee2`.
+- Research branch / PR head: `df4dcbe58eb711364fe0d7b1f49ec78b151810e6`.
+- PR #55: Open / Draft, base `main`, recorded base SHA `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`; 22 changed files, 5,128 additions, 0 deletions.
+- Compare: DIVERGED; 177 commits ahead / 34 behind; merge base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; GitHub reports `mergeable=true` (metadata only).
+- The current main recursive tree is not truncated and contains zero paths under the B research package directory.
+- No rebase, retarget, merge, Ready transition or main write occurred.
+
+本节更新前的实时读取：
+- Main HEAD：`e52594f181d2edb77448adcfed64a0fbdffaf3aa`。
+- B Owner 分支 HEAD：`2faf8ec38f14dba49e7263d7a60804dae1a74ee2`。
+- 研究分支 / PR Head：`df4dcbe58eb711364fe0d7b1f49ec78b151810e6`。
+- PR #55：Open / Draft，Base 为 `main`，记录的 Base SHA 为 `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`；22 个变更文件，新增 5,128 行，删除 0 行。
+- Compare：DIVERGED；领先 177 个 Commit / 落后 34 个 Commit；Merge Base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`；GitHub 返回 `mergeable=true`（仅为元数据）。
+- 当前 main 递归 Tree 未截断，B 研究包目录下路径数量为零。
+- 未发生 Rebase、改 Base、合并、转 Ready 或 main 写入。
+
+### 13.1 Exact B package readback before this refresh / 本次刷新前 B 研究包精确读回
+
+| File / 文件 | Blob SHA / Blob SHA | Lines / 行数 |
+|---|---|---:|
+| README.md | `480efa28b281e21a2358c1bddc5b4788a37bd160` | 337 |
+| fact-claim-identity-adr.md | `958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593` | 223 |
+| domain-model-decision-record.md | `b83d99d3c66b30c5834f08ce61c5acfd27004e6a` | 271 |
+| baseline-currentness-and-owner-source-audit.md | `646d3e3308ba0a8c2a40ede6655b37b4e4391303` (pre-update self Blob) | 484 |
+| cross-owner-canonical-semantics-matrix.md | `d9ec7f9cb6f72e2756d12da73c48a784ea9c7a83` | 291 |
+| domain-semantics-conflict-register.md | `980f8563ec772939826b338a9b048efebd5bf2f6` | 166 |
+| bilingual-parity-audit.md | `231760102377a8866cf9c8b221bd6e0ff3aeb72c` (pre-update self Blob) | 407 |
+
+### 13.2 Gate disposition / 门禁处置
+
+The current B Owner recommendation is Option A, but the Fact/Claim ADR remains ADR-BLOCKED because formal Architecture Governance approval is absent. Stable ClaimRef/ClaimRevisionRef and ConflictSet remain candidates. A Phase 8 B-02 refers to H ingress and is not B's B2 gate. H 1.2.15 contract reviews are conditional; issuer implementation, production I trust registration, D exact 1.2.15 review, Storage successor bundle and fresh A review remain open. Memory OS/IR research remains incomplete. B2 remains IN PROGRESS / NOT PASSED; B3 NOT PASSED; B4 NOT READY; B5 BLOCKED / NOT PASSED; B6 INDEPENDENT_REVIEW_PENDING.
+
+当前 B Owner 推荐 Option A，但 Fact/Claim ADR 仍 ADR-BLOCKED，因为缺少正式 Architecture Governance 批准。稳定 ClaimRef/ClaimRevisionRef 和 ConflictSet 仍为候选。A Phase 8 B-02 指 H 入口，不是 B 的 B2 Gate。H 1.2.15 契约复审为有条件接受；Issuer 实现、I 生产 Trust 注册、D 对 1.2.15 的精确复审、Storage 后继 Bundle 和 A 新复审仍开放。Memory OS/IR 研究仍未完成。B2 仍 IN PROGRESS / NOT PASSED；B3 NOT PASSED；B4 NOT READY；B5 BLOCKED / NOT PASSED；B6 INDEPENDENT_REVIEW_PENDING。
