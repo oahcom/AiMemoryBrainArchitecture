@@ -143,18 +143,18 @@ The profile remains unregistered. C outcome records cannot be declared VALID mer
 
 ## 11. CSubmitOutcome immutable object schema and test-harness binding
 
-C's immutable object schema is `urn:aimba:schema:c-submit-outcome:1.0.0`, exact Blob `09725d3a90e4c130b38400e8e2d613f755f3806a`. C's schema/conformance contract is Blob `eac5a6b02405aa554bd53095303e364bf25479de`.
+C's immutable object schema is `urn:aimba:schema:c-submit-outcome:1.0.0`, exact Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`. C's schema/conformance contract is Blob `eac5a6b02405aa554bd53095303e364bf25479de`.
 
 The proposed H dereference pipeline MUST:
 1. Validate the BMCP 1.2.11 envelope against exact schema Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`.
 2. Resolve `c_submit_outcome_ref` under authenticated C object-store authority; reject a payload-supplied object as a trust anchor.
-3. Validate the dereferenced object against exact C schema Blob `09725d3a90e4c130b38400e8e2d613f755f3806a`.
+3. Validate the dereferenced object against exact C schema Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`.
 4. Recompute and verify the object digest using the final registered C profile; current profile remains unregistered, so this gate is presently blocked.
 5. Compare every duplicated wire member to the immutable C object, including provider/adapter/idempotency/request/outcome/evidence/COC and owner-ledger fields.
 6. Validate C gate generation, provider attempt generation, provider account, endpoint, region and API operation from the C object and correlate provider evidence to the exact same tuple.
 7. Independently verify C owner ledger membership/currentness, provider evidence issuer trust and COC intent/reservation/quorum joins.
 
-C fixture pack Blob `88bef7ddddff3b9f07c453e0af999f2c23af01bc` contains ten synthetic structural/semantic cases. C harness Blob `92e8e9e607566eafa6ad89110202dbeed0fc43cb` uses JSON Schema Draft 2020-12 plus selected semantic predicates. It does not verify signatures, provider issuer trust, ledger inclusion, gate linearizability or COC quorum. Fixture signatures are placeholders. The harness is NOT EXECUTED.
+C fixture pack Blob `e14eab2bed41f30af10a073b8e6523512128e78e` contains ten synthetic structural/semantic cases. C harness Blob `92e8e9e607566eafa6ad89110202dbeed0fc43cb` uses JSON Schema Draft 2020-12 plus selected semantic predicates. It does not verify signatures, provider issuer trust, ledger inclusion, gate linearizability or COC quorum. Fixture signatures are placeholders. The harness is NOT EXECUTED.
 
 H must classify an absent required C object member or a proven digest/identity contradiction as INVALID. Unavailable object retrieval, currentness, key status or external authoritative proof is UNKNOWN. Both outcomes fail closed. No cross-language or production acceptance is implied.
 
@@ -162,9 +162,23 @@ H must classify an absent required C object member or a proven digest/identity c
 ## 12. H validator implementation interface (not executed)
 
 H has added a fail-closed validator core:
-- `08-bmcp-protocol/validators/provider_outcome_validator.py`, Blob `a38d3474ae15de823463da51382d821f47da6ef9`.
+- `08-bmcp-protocol/validators/provider_outcome_validator.py`, Blob `e8f737326bc4791e8d7acf917b4725dbb7171fad`.
 - It performs strict JSON parsing helpers, separate BMCP/C-object schema validation, C-P0 digest recomputation, duplicated wire/object comparison and selected local semantic predicates.
 - Trust-dependent operations are injected tri-state callbacks: C profile registration, C signature/key status, provider evidence issuer, C owner ledger membership/currentness, COC join and anti-rollback/currentness.
 - Missing callback or unavailable evidence yields UNKNOWN; proven contradiction yields INVALID; INVALID dominates UNKNOWN.
 
 This is an integration seam only. The caller MUST use `parse_strict_json` for raw bytes. The callbacks must be backed by authenticated authorities and must never trust payload-supplied public keys. The module is not yet connected to production key registries, object storage, provider trust, C ledgers or COC. It has not been executed against the full H schema or C fixtures.
+
+
+## 13. Executable H unit/fixture test and currentness
+
+H unit/fixture tests:
+- Test file Blob `1f17bdcef6004eca165644ce96bcf35d3b10c3f8`.
+- Requirements Blob `a90afd258a50582c33f0f7c7f5e979600322ae86`.
+- Exact vendored C schema Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`.
+- Exact vendored C vector fixture Blob `e14eab2bed41f30af10a073b8e6523512128e78e`.
+- Workflow Blob `5f3a483c96594e3fd215fd6295e8937b9523cce0`.
+
+The H Provider Outcome workflow run `44055334361` completed SUCCESS at commit `4837831c6c22973aba15be18e5376e56266b697b`, with 7 tests passing. That run predates the latest C schema fields `OwnerSignatureRef` and `ActualInferenceRequestId`, the complete optional wire mapping and the latest H callback changes. It is historical evidence only; it is NOT current validation of the latest code.
+
+A new run is required after the latest H/C fixture synchronization. No signature, provider issuer, C ledger, COC quorum or production integration test is covered by these 7 unit/fixture tests.
