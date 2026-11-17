@@ -36,7 +36,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | canonical-domain-glossary.md | Chinese term column exists; definitions, non-definitions, owners and status columns are English-only | PARTIAL | Translate every definition, non-definition, related concept and status |
 | canonical-domain-model.md | Bilingual headings and selected narrative; entity lists, ownership tables and blocking issues are English-only | PARTIAL | Full Chinese equivalent for model, diagrams, owner boundaries and gate constraints |
 | domain-model-decision-record.md | Bilingual headings and selected decisions; detailed ADR context/alternatives/consequences are English-only | PARTIAL | Translate every decision record field and rejected alternative |
-| validation/README.md | English-only content with bilingual folder naming only | NOT COMPLETE | Translate entire validation plan and all test/schema status |
+| validation/README.md | Full Chinese peer text added for test scope, schema prerequisites, future validation and current result; Blob `a2bb3d494fadd5ae411d9b8227d83dd50a16a895` | REMEDIATED — MANUAL REVIEW PENDING | Verify test-section reference and clause equivalence against invariants/owner contracts |
 | evidence/README.md | English-only content with bilingual folder naming only | NOT COMPLETE | Translate every external source title, evidence limitation and adoption disposition |
 | evidence/official-reference-validation.md | English headings and Chinese peer explanations are present for each major section; source links and some “do not infer” clauses require line-by-line comparison | PROVISIONAL — RECHECK | Perform clause-by-clause parity check and align source/version notes |
 | bilingual-parity-audit.md | Bilingual acceptance rules and selected narrative; file-by-file table and status/action cells are English-only | PARTIAL | Translate every audit row and re-audit after all other files are translated |
@@ -79,3 +79,7 @@ A file is bilingual-complete only when the full normative content is present in 
 
 - `canonical-domain-invariants.md` 已为每条不变量、正/负条件、候选测试前置条件/预期结果以及验证/门禁说明补齐中文对应内容。当前 Blob：`51792426bb71609ceecf8d13491f9ab0b36c91eb`。
 - 这仅是作者侧整改，不构成独立语义一致性验收。剩余 P0/P1/P2 文件完成翻译并由独立审查者逐条核对后，B5 才能解除阻塞。
+
+
+- `canonical-state-semantics.md` has also been rewritten with Chinese peer text for all state matrices, critical execution terms, ordering constraints, state-machine requirements, cross-owner evidence and blockers. Current Blob: `2c42b4b9d8311e218d0e6fadd7b1f3a7d9c10017`.
+- `canonical-state-semantics.md` 也已为所有状态矩阵、关键执行术语、顺序约束、状态机要求、跨 Owner 证据和阻塞项补齐中文对应内容。当前 Blob：`2c42b4b9d8311e218d0e6fadd7b1f3a7d9c10017`。
