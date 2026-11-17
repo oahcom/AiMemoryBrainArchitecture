@@ -1,6 +1,6 @@
 # 架构复杂度评估 — ARCH-CX-002
 
-- 版本：1.0.0；基线：`main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- 版本：1.0.0；基线：`main@8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
 - X 来源：PR #49，Commit `131f91743bd506517ee354d58c277501ca447929`，英文 Blob `c509120644d6f7c7223decf3f9f0ee33b0548bb7`，中文 Blob `981a376ddf283ace1e891795c813b17ac4aa3d8b`。
 - A 裁决：复杂度可控性 **NOT PROVEN**。
 
@@ -39,6 +39,12 @@ X 使用八个序数维度：内部、依赖、状态、并发、恢复、验证
 **CAN DEFER：** Vector/ANN、Reranking、图数据库后端扩张、多 Provider/Backend、Multi-PolicyDomain 原子性、分布式服务拆分和高级自动扩缩容。
 
 **MUST NOT INTRODUCE：** 跨域 Cursor 比较、Cache/Index 充当权威、用通用 Success 替代不同终态、JF-10 启发式裁决、用进程 Mutex 代替持久原子性、无量化依据的微服务。
+
+## Option A 与协议 Bundle 新增复杂度
+
+Option A 减少了协调器扩张，但新增五项重要证明/维护义务：（1）共享 Transaction Executor 与 D/Storage 行写权威边界；（2）D EffectPermit 必须覆盖 Admission/Lease/Attempt/Retry/Replay/Source Read/Execution/Late Dependency/Terminalization；（3）v1 每个原子操作仅限一个 BrainAuthority；（4）I COMMIT_WON 不可变 Tuple 及 Crash/Revocation/Replay 语义；（5）独立 Anchor Checkpoint 和 DB-Incarnation Restore Anti-rollback Witness。PR #54 修订仍是提案，不是已采纳 Owner 合同。
+
+H 1.2.14/CSubmitOutcome 1.0.1 协议候选也增加精确当前性联结复杂度。H Mapping、C Re-review、D Crosswalk、I P0 和 Storage Manifest 必须绑定同一组当前工件；v3.2.9 已过期，需要 v3.3.0 后继版本。
 
 ## 结论
 
