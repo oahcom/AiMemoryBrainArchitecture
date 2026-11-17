@@ -70,7 +70,7 @@ A will not override this I boundary. The following remain mandatory:
 
 | Gate | Status |
 |---|---|
-| Candidate JCS/SHA-256/Ed25519 construction | <badge>Verified by C and H candidate CI</badge> |
+| Candidate JCS/SHA-256/Ed25519 construction | Verified by C and H candidate CI |
 | I profile registration | OPEN / NOT APPROVED |
 | C production trust root and key lifecycle | OPEN |
 | H production signature/key-status callbacks | NOT CONNECTED |
