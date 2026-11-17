@@ -79,7 +79,24 @@ These are explanatory guides on main, not substitutes for Owner branch normative
 | H | `fb25bbd1c1c90871c9d9682992ca6bcd8098c661` | `228d28671955c977f653bef5b537554e431f9137` |
 | I | `57423eaab9053f7b59869a493fedec583601f7fb` | `3d3fa33c016c1c601374bab1e621cfec8b2b403d` |
 
-## 5. Relevant PRs and issues / 相关 PR 与 Issue
+## 5. Current Owner branch heads / 当前 Owner 分支 HEAD
+
+The following exact branch refs were read from GitHub on 2026-11-17. These are live branch HEAD commits, not claims that every file in each branch has been exhaustively reviewed.
+
+| Owner | Branch | HEAD Commit SHA | Latest commit message |
+|---|---|---|---|
+| B | `session-b-domain-model-phase3` | `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | B: approve serialization anchor nominal type boundary |
+| C | `session-c-agent-integration-2026-11-16` | `2e8414f361b0b5d7de959be8a971aadc9e62d6a9` | C: review H authenticated ingress reference gate and exact 60-test evidence |
+| D | `session-d-memory-brain-2026-11-16` | `76fcc92225666a11893b7241825261319edb621e` | D: review H outer envelope auth boundary and preserve D authority |
+| E | `session-e-memory-compiler-2026-11-16` | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | E: review per-authority Storage serialization anchor |
+| F | `session-f-memory-runtime` | `1908ce4d233b20f7cafd00cb679affd01bd15174` | F: review per-authority Storage serialization anchor |
+| G | `session-g-memory-context` | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | review(g): refresh exact C/H pins to 38-test full-path closure |
+| H | `session-h-bmcp-protocol` | `8e24342048d29ef29195b153b8b9ec53ba7c75d9` | docs(h): correct C envelope P0 and publish exact JSON pointer mapping |
+| I | `session-i-security-governance-2026-11-16` | `2afe0e17f8c0929d9e642ccbe2cad112b5fd43a9` | docs(owner-review): review C outer envelope signer and trust/wire boundary |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `431138e7c7af8bee716f3d8dcbc20114c046bd36` | Storage: bind H outer-auth reference gate, 60-test CI and C/I/D reviews |
+| A | `session-a-integration-2026-11-16` | `9bdf938b980413f592a4db9fe94f4bf2c299fb01` | docs(architecture): assess outer envelope authentication as blocking integration gap |
+
+## 6. Relevant PRs and issues / 相关 PR 与 Issue
 
 | Record | Observed state | Relevance |
 |---|---|---|
@@ -96,7 +113,7 @@ This is a relevant-record sample, not a claim that every related PR/Issue has be
 
 这是相关记录样本，不代表已经穷尽所有相关 PR/Issue。B0 通过前仍需完成搜索与精确源文件审查。
 
-## 6. Existing B branch comparison / 既有 B 分支比较
+## 7. Existing B branch comparison / 既有 B 分支比较
 
 The existing `session-b-domain-model-phase3` branch was inspected. Its `domain-model-overview.md`, `core-entities.md`, `epistemic-and-temporal-semantics.md`, `lifecycle-model.md`, and `relationships-and-provenance.md` returned the same Blob SHAs as current main. Its `scope-and-permission-model.md` returned Blob `6a9c47031ca3ecfd47b2f7d7419b2df8d808329b`, whereas main has `b5215ae27bd65a6c89c185b496f730b6cd52efa9`.
 
@@ -106,7 +123,7 @@ The old branch head SHA and complete branch diff were not returned by the branch
 
 旧分支 HEAD SHA 和完整分支 Diff 未由分支搜索接口返回，因此此处标记 NOT VERIFIED。不得假定旧分支是最新版本或覆盖它。新研究分支保持隔离。
 
-## 7. Material semantic conflicts / 重大语义冲突
+## 8. Material semantic conflicts / 重大语义冲突
 
 ### B-BASE-001 — Fact / Claim authority mismatch
 - Root overview Blob `4d1debc...` says Claim is canonical and Fact is a qualified interpretation, marked DECIDED.
@@ -138,7 +155,7 @@ The old branch head SHA and complete branch diff were not returned by the branch
 - A PR #53 lists Forget anti-resurrection and physical publication/Forget proof as blockers.
 - Severity: BLOCKING for claims of global completion or physical purge; domain vocabulary can be clarified without usurping D/I/Storage.
 
-## 8. Missing definitions / 缺失定义
+## 9. Missing definitions / 缺失定义
 
 - Canonical typed reference grammar and namespace scope across modules: OPEN / NOT YET PINNED.
 - Claim identity policy across Memory versions: OPEN in domain overview.
@@ -152,15 +169,15 @@ The old branch head SHA and complete branch diff were not returned by the branch
 - Exhaustive related PR/Issue inventory and full diffs: NOT VERIFIED.
 - Runtime implementation repository and executable conformance evidence: NOT VERIFIED; Issue #7 remains open.
 
-## 9. Baseline confidence / 基线置信度
+## 10. Baseline confidence / 基线置信度
 
 **MEDIUM** for the identified main-branch domain source set and listed Blob pins. **LOW / NOT VERIFIED** for exhaustive cross-owner normative contracts, all relevant PR/Issue history, branch HEADs not exposed by the current listing, and runtime implementation.
 
 对已识别的 main 分支领域源文件及其 Blob Pin，置信度为 **MEDIUM**；对穷尽跨 Owner 规范契约、所有相关 PR/Issue 历史、当前分支列表未提供的分支 HEAD，以及运行时实现，置信度为 **LOW / NOT VERIFIED**。
 
-## 10. Gate B0 disposition / B0 门禁结论
+## 11. Gate B0 disposition / B0 门禁结论
 
-**B0 = PARTIAL / NOT PASSED.** Repository identity, main HEAD, major domain source files, bilingual guide pins, shared invariants, responsibility matrix, glossary, and selected relevant PR/issues are verified. Full Owner normative contract inventory, exhaustive related PR/Issue audit, exact PR diffs/commits/blob pins and source-level semantic reconciliation are still required.
+**B0 = PARTIAL / NOT PASSED.** Repository identity, main HEAD, major domain source files, bilingual guide pins, shared invariants, responsibility matrix, glossary, and selected relevant PR/issues are verified. Full Owner normative contract inventory, exhaustive related PR/Issue audit, exact PR diffs/commits/blob pins and source-level semantic reconciliation are still required. New Phase 3.8 current branch-head evidence adds a material blocking identity/trust issue: H 1.2.14 outer-envelope authentication is reference-only, C signer/P0 is candidate, I cryptographic suite/trust registration is not approved, Storage v3.2.11 is not jointly accepted/frozen, and A explicitly records a blocking gap.
 
 **B0 = PARTIAL / NOT PASSED。** 已核验仓库身份、main HEAD、主要领域源文件、双语指南 Pin、共享不变量、责任矩阵、术语表及部分相关 PR/Issue。完整 Owner 规范契约清单、穷尽相关 PR/Issue 审计、PR 精确 Diff/Commit/Blob Pin 和源级语义协调仍未完成。
 
