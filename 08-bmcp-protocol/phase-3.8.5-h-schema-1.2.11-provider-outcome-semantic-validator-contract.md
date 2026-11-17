@@ -213,7 +213,7 @@ This second run independently recomputed the five candidate signatures and finge
 
 ## 17. C key-status event and signing-sequence validation
 
-C has published the proposed append-only key-status event schema Blob `908b293eba337e9fa75864cea3704e28a1a8d82e` and lifecycle contract Blob `de581ea59e724faf5972217e17b983de641ad3f7`. I's candidate governance review is Blob `9765b36bce72fc8a1aa347af40b85727ff5a59ed`.
+C has published the proposed append-only key-status event schema Blob `908b293eba337e9fa75864cea3704e28a1a8d82e` and lifecycle contract Blob `de581ea59e724faf5972217e17b983de641ad3f7`. I's candidate governance review is Blob `57d1b1ca616eaec6df1dee82ddaccc66519caca2`.
 
 The H validator core now exposes `verify_key_status(c_object)`, Blob `c8717869d066543b1272780014ab1e42310c6951`. It is mandatory for a VALID result and must establish:
 - a valid I-governed signature over the exact immutable key-status event;
@@ -226,3 +226,10 @@ The H validator core now exposes `verify_key_status(c_object)`, Blob `c8717869d0
 Missing callback, unavailable trust root, unavailable status ledger or checkpoint outage => UNKNOWN. Proven key substitution, invalid transition, fork, stale root or invalid governance signature => INVALID. Wall-clock timestamps are not a causal substitute.
 
 I accepts the schema/lifecycle and proposed governance signature construction as candidates only. Both C data profile and I governance profile remain unregistered. No production key registry, HSM/KMS, key custody or anti-rollback service is claimed.
+
+
+## 18. Key-status structural CI and I review
+
+C key-status schema/state-machine suite passed in C run `44059137081` (12 total tests) at commit `6b7b9c4a24d81ae45dcb7ddcdbe49c9617e3e4da`. H key-status schema and fail-closed callback suite passed in H run `44058962672` (11 total tests) at commit `f6a632c76efe50d8514a8b94bd1b134f064445c8`.
+
+I review Blob `57d1b1ca616eaec6df1dee82ddaccc66519caca2` accepts the structural lifecycle and governance-signature construction as candidates only. The governance profile and C data profile remain unregistered. No I governance root, C key registry, custody/HSM/KMS, external anti-rollback checkpoint or operational revocation/compromise drill is present.
