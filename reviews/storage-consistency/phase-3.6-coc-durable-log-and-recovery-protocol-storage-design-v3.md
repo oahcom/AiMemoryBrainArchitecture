@@ -1,8 +1,8 @@
-# Phase 3.6 — Storage Design v3: COC Durable Log, Recovery Cutoff, Owner Gates & JF-10 Bridge
+# Phase 3.6 — Storage Design v3.1: COC Durable Log, Recovery Cutoff, Owner Gates & JF-10 Bridge
 
 - Owner: Storage/Consistency
 - Date: 2026-11-17
-- Status: **REVISED STORAGE TECHNICAL DESIGN PROPOSAL v3 — FRESH EXACT-VERSION OWNER REVIEW REQUIRED**
+- Status: **REVISED STORAGE TECHNICAL DESIGN PROPOSAL v3.1 — FRESH EXACT-VERSION OWNER REVIEW REQUIRED**
 - Project phase: **ARCHITECTURE DESIGN**
 - Supersedes the earlier Storage design draft at commit `9a975f665ee60f4551effe0104ea8f867716d9dd`, blob `cd5566b3d99b5204401ac713a5bb2dcf89a02726`.
 - Exact five-Owner review baseline (pinned by A/I/D/C/H acceptance artifacts): `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, Blob `4ac63ac79491e79ec0c9114ef73941c73d7bbf25`.
@@ -11,7 +11,7 @@
 - Related Storage boundary: `phase-3.6-coc-storage-boundary-acceptance.md`
 - Implementation / deployment / conformance: **NOT IMPLEMENTED / NOT DEPLOYED / NOT RUN**
 - This proposal does not freeze cryptographic algorithms, wire schemas, a consensus product, production topology, or authorize activation.
-- This v3 is a new immutable review target. The v1 artifact remains preserved as historical review evidence.
+- This v3.1 is a new immutable review target. v3 and earlier review decisions remain historical evidence only.
 
 ## 1. Purpose, scope and non-goals
 
@@ -199,9 +199,9 @@ No owner may release its gate while an unrepresented request exists. Same reques
 
 ### 6.1 I gate
 
-I alone closes and releases its local gate. Before acknowledging a pending cutoff, I durably suspends affected receipt issuance and consumption. Its pending attestation binds I authority, stable request IDs/digests, PolicyDomainRef, I cursor/high-water, gate generation, RecoveryEpoch (when known), and anti-rollback anchor.
+I alone closes and releases its local gate. CloseIRecoveryGate MUST be one serializable I PolicyDomain sequencer transaction: append the idempotent IRevocationRequestRef/RequestDigest, set the affected gate to PENDING_COC_CUTOFF, increment GateGeneration and capture request-set count/digest/high-water before acknowledging. Every affected receipt issuance and consumption transaction serializes through that same sequencer and checks gate state/generation in-transaction. If gate-close commits first, issuance/consumption is denied; if it commits later, the exact admitted operation remains in the durable I ledger and recovery inventory. No admitted operation may exist outside both records. Its pending attestation binds I authority, stable request IDs/digests, PolicyDomainRef, I cursor/high-water, gate generation, RecoveryEpoch (when known), and anti-rollback anchor.
 
-I release is an I-signed, idempotent, monotonic record bound to the exact batch and manifest digests, complete I request set, I high-water and participant reconciliation evidence. COC cannot issue I release. Release clears only the outage gate; it does not issue authorization, advance PermissionEpoch or decide revocation victory.
+I release is an I-signed, idempotent, monotonic CAS bound to the exact batch and manifest digests, complete I request set/count/digest, I high-water, GateGeneration, independent anti-rollback anchor and complete applicable participant reconciliation root. Immediately before release, I rechecks the current request-set high-water and scope generation. Any advance, new in-scope request or omission keeps the gate closed and requires a subsequent batch/manifest. COC cannot issue I release. Release clears only the outage gate; it does not issue authorization, advance PermissionEpoch or decide revocation victory.
 
 ### 6.2 D gate
 
@@ -271,7 +271,7 @@ Storage MUST verify the I proof against the exact prepared participant tuple bef
 ### 7.3 Same-XID Storage resolution
 
 - I durable COMMIT_WON for the exact owner-final-gate participant: Storage forward-commits the same DBIdentity/XID and emits the authoritative PublicationReceipt/VisibilityPointer evidence.
-- I durable ABORT_WON / REVOCATION_WON / INDETERMINATE_ABORTED as defined by the accepted I state machine: Storage rolls back the same DBIdentity/XID and emits authoritative non-publication proof.
+- I durable REVOCATION_WON / INDETERMINATE_ABORTED as defined by I's accepted terminal vocabulary: Storage rolls back the same participant/GID and emits authoritative non-publication proof. ABORT_WON is not an I terminal outcome and MUST NOT be emitted or inferred.
 - I UNKNOWN/IN_DOUBT, missing terminal proof, lost ACK or mismatched tuple: retain the same prepared XID/private bytes/locks and remain blocking. Do not infer from timeout, process death, missing row, stale replica or absent ACK.
 - No alternate XID, new operation identity, heuristic resolution or timeout-based terminality is permitted.
 - Storage's PublicationReceipt proves Storage visibility publication only. It does not prove C provider handoff, D fence clearance or G Applied.
@@ -282,7 +282,7 @@ COC records I and Storage proofs as observations and performs later idempotent r
 ### 7.4 COC bridge state names are observations, not authority decisions
 
 Use explicit observed states:
-`I_TERMINAL_DECISION_OBSERVED(COMMIT_WON | ABORT_WON | INDETERMINATE_ABORTED)`,
+`I_TERMINAL_DECISION_OBSERVED(COMMIT_WON | REVOCATION_WON | INDETERMINATE_ABORTED)`,
 `STORAGE_RESOLUTION_OBSERVED(COMMITTED | ROLLED_BACK)`,
 `C_PROVIDER_OUTCOME_OBSERVED(...)`,
 and `D_LINEAGE_CLEARANCE_OBSERVED(...)`.
@@ -618,7 +618,11 @@ Before Storage commits a prepared participant, it MUST validate an I-authoritati
 - PublicationOperationId, RequestDigest and ParticipantTupleDigest;
 - owner boundary, PolicyDomainRef and PermissionEpoch;
 - I sequencer position and terminal decision;
-- exact Storage final-gate participant identity.
+- exact Storage final-gate participant identity;
+- PrepareAttemptRef and PrepareAttemptGeneration;
+- ParticipantLedgerRef and ParticipantLedgerVersion;
+- PreparedParticipantReceiptRef and the exact signed receipt payload digest;
+- the complete ParticipantTupleDigest.
 
 The I proof must demonstrate that authorization validation, current PermissionEpoch/key-status check, one-time receipt consumption, exact participant binding and terminal decision were atomically persisted in I's own authoritative transaction. A detached token, COC projection, Storage receipt or transport ACK is insufficient.
 
@@ -717,3 +721,29 @@ Exact review target for the next round is the immutable v3 commit/blob only. Req
 - Storage: verify exact PostgreSQL adapter mapping and participant-ledger invariants.
 
 **Status:** Storage v3 technical proposal — fresh exact-version review required. No joint contract freeze, cryptographic profile freeze, wire-schema freeze, implementation/conformance PASS, deployment, production readiness or production activation is claimed. JF-10 P0 remains OPEN until the accountable Owner decisions and required evidence close.
+
+
+## 19. v3.1 exact-owner findings and normative reconciliation (2026-11-17)
+
+This v3.1 amendment responds to the exact-Blob v3 reviews by I, H and B. It also reconciles the companion PostgreSQL §14 source contract to this document's §§15.1–15.7. It does not treat prior v3 or §14 acceptance as acceptance of v3.1.
+
+### 19.1 Closed Storage drafting conflicts
+
+1. The I terminal vocabulary is exactly `COMMIT_WON`, `REVOCATION_WON`, `INDETERMINATE_ABORTED`, plus nonterminal `UNKNOWN/IN_DOUBT`. `ABORT_WON` is prohibited. Storage outcome remains a separate enum: `COMMITTED`, `ROLLED_BACK`, `UNKNOWN`.
+2. I terminal proof now binds the exact prepare attempt/generation, participant-ledger ref/version, PreparedParticipantReceipt ref/digest and complete ParticipantTupleDigest in addition to the exact final-gate participant and one-time authorization receipt consumption.
+3. I recovery-gate close is specified as one I-sequencer serialization transaction; receipt issue/consume races must resolve in that same transaction order. Gate release requires a second current high-water/scope-generation check and a new batch/manifest if either advances.
+4. The companion §14 source now contains the same DatabaseIncarnationRef, PrepareAttemptRef/Generation, ParticipantLedgerRef/Version, ParticipantTupleDigest and authoritative PREPARED readback requirements as §§15.1–15.7. The earlier abbreviated §14 tuple is superseded.
+
+### 19.2 Remaining cross-owner blockers (not silently waived)
+
+- **I:** must confirm the exact v3.1 I-gate serialization/release clauses and publish its final security policy for issuer/subject/audience/purpose, key lifecycle, historical verification, compromise/revocation and independent anti-rollback. The proposed domain-separated signature input remains a candidate, not a selected profile.
+- **H:** must reconcile the exact schema with the full §15 tuple and publish schemas for Recovery Cutoff Batch, Participant Manifest, owner pending/release attestations and RecoveryEpoch completion; cross-message validators must bind envelope subject, receipt digest, attempt/ledger, DB incarnation and tuple digest. H must explicitly map the current A §11/§12 package and all required C/G/H Applied evidence families.
+- **B:** must confirm the v3.1 type names and PostgreSQLNativeXID versus EngineNativeTransactionXIDRef mapping against its amended registry.
+- **A:** must verify end-to-end ordering, exact I terminal participant binding, batch/manifest crash ordering and all cross-owner exact-blob dependencies.
+- **D/C/E/G:** earlier acceptance of the §14 source Blob does not automatically accept v3.1. Each must confirm whether these clarified fields alter its owner boundary and pin this exact v3.1 Blob.
+
+### 19.3 Evidence and status boundary
+
+The H schema/parser CI result of 47/47 on its cited candidate commit is structural schema/reference-test evidence only. It is not canonical-byte interoperability, cryptographic verification, complete BMCP family coverage, production transport or runtime conformance. I's security review is an owner-scope technical disposition, not approval of I36-GOV-01..10 or a selected cryptographic suite.
+
+**v3.1 status:** Storage proposal amended; exact-version A/B/C/D/E/G/H/I review required. No joint contract freeze, no cryptographic or full-wire freeze, no implementation/conformance PASS, no deployment and no production activation. JF-10 runtime P0 remains OPEN; Multi-PolicyDomain remains BLOCKED.
