@@ -46,25 +46,31 @@ The v3.2.3 S0a–S4 order remains unchanged:
 | H | RecoveryCutoff schema 1.0.5 | 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7 | Exact recovery cutoff structural family |
 | H | Phase 3.8.10 Unified 1.2.14 / C 1.0.1 authority-join mapping | 1cbe74eba69325510d6b1019d971661f965eabf8 | Exact mapping candidate and separate I/D/Storage verifier seam contract |
 | H | Provider Outcome validator core | eab961a08d41e871f38543b18ee60cf024977414 | Exact schema identity, C 1.0.1 dereference/equality and tri-state orchestration; authority adapters remain unconnected |
-| H | Provider Outcome validator tests | 70a3796446553464e71999f916b76bc22e47da11 | 27 tests; callback seam orchestration tests use test doubles for schema/semantic/digest primitives |
-| H | Provider Outcome workflow | 4459d19f5b4eea058377d9819e48e81eed5c8c4b | CI workflow path filters include H 1.2.14 schema, validator and tests |
-| H | Exact callback-seam CI | Run 44068869146; tested commit e0d89f1b6dac3bdcf1f0ab4e3f062dd7bc53fdf8 | SUCCESS, 27 tests, 0 failed; tested validator/test Blobs equal the exact rows above; later H commit only added mapping evidence |
+| H | Full positive H envelope + C object fixture | `08-bmcp-protocol/tests/conformance/provider_outcome/fixtures/h-full-provider-outcome-positive-1.0.1.json`, Blob `c80247a6ecfbb4a29ff0993e8e2aea4829d00626` | Synthetic CPO-01 fixture with exact C candidate payload digest/signature vector; TEST-ONLY authority facts |
+| H | Provider Outcome validator tests | `08-bmcp-protocol/tests/conformance/provider_outcome/test_provider_outcome_validator.py`, Blob `dccf8c099c18807ec072870d32604d0912209f01` | 32 tests; includes full unmocked local schema/semantic/C-P0 digest path and negative/tri-state cases |
+| H | Provider Outcome workflow | `.github/workflows/h-provider-outcome-conformance.yml`, Blob `4459d19f5b4eea058377d9819e48e81eed5c8c4b` | CI workflow path filters include H 1.2.14 schema, validator and tests |
+| H | Exact full-validator CI | Run `44069941327`; tested commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251` | SUCCESS, 32 tests, 0 failed; 6 Python/Node crypto interop + 26 H validator tests; current H head adds documentation only; schema/validator/test/fixture Blobs unchanged |
 | C | CSubmitOutcome immutable schema 1.0.1 | a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda | C-owned object; required signed sequence_namespace_ref |
 | C | Phase 3.11.1 sequence namespace amendment | 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb | C record_sequence and CKeyStatusEvent event_sequence share the durable C namespace |
 | I | Phase 3.8.8 review of C 1.0.1 namespace | 0d78e5b2bfcf66cae6b757314cead84b9c942601 | Accepts required signed namespace field; does not register C/I profiles |
 
 ### 3.1 Meaning of H callback CI / H 回调 CI 的含义
 
-The exact H run `44068869146` is a real GitHub Actions success on the exact validator and test Blobs pinned above. Its 27 tests include 6 Python/Node crypto interop test methods and 21 H validator unit-test methods. New tests call the actual `validate_provider_outcome` orchestration function and prove:
-- I terminal decision, D Forget clearance and Storage resolution each have distinct callback slots;
-- all three callbacks can participate in a VALID orchestration result when test doubles return True;
-- missing all three callbacks yields UNKNOWN, never VALID.
+The exact H run `44069941327` is a real GitHub Actions success on the exact schema, validator, test and fixture Blobs pinned above. It ran 32 tests: 6 Python/Node crypto interop test methods and 26 H validator test methods.
 
-**The tests mock schema validation, semantic validation and candidate digest/preimage calculation for the orchestration cases. They are not an end-to-end positive H envelope + C object validation test, do not authenticate real I/D/Storage proof payloads, and do not connect production authority stores.** Therefore the CI result is bounded orchestration evidence only.
+The new positive test passes a complete synthetic H envelope and CSubmitOutcome 1.0.1 object through `validate_provider_outcome` with the actual H/C JSON Schemas, actual local semantic predicates and actual C-P0 digest recomputation; no schema, semantic or digest primitive is patched. Negative tests prove:
+- a duplicated wire/object field mismatch returns INVALID;
+- a mutated C payload digest returns INVALID after recomputation;
+- missing I, D or Storage verifier callbacks return UNKNOWN;
+- an I, D or Storage verifier contradiction returns INVALID.
 
-H run `44068869146` 是真实 GitHub Actions 成功，且测试的 Validator/Test Blob 与本清单精确绑定一致。27 项测试包括6 个 Python/Node 密码学互操作测试方法和 21 个 H Validator 单元测试方法。新增测试调用真实 `validate_provider_outcome` 编排函数，证明 I Terminal、D Forget Clearance、Storage Resolution 各有独立回调；Test Double 全部返回 True 时可得到 VALID 编排结果；缺少三者时只能得到 UNKNOWN。
+**Evidence ceiling:** signature, profile-registration, key-status, provider-evidence, owner-ledger, COC, currentness and I/D/Storage authority callbacks in the full-path fixture are deterministic test doubles. The C crypto interoperability suite separately verifies candidate JCS/Ed25519 vectors, but this fixture does not authenticate real owner proofs, connect production trust stores, or prove provider/Storage runtime truth. This is a full local schema/semantic/digest validation path, not production authority conformance.
 
-**编排测试对 Schema 校验、语义校验和候选摘要/Preimage 计算使用了 Mock。它们不是完整 H Envelope + C Object 端到端正向验证，不认证真实 I/D/Storage 证明载荷，也未连接生产权威存储。** 因此 CI 仅是有限的编排证据。
+H Run `44069941327` 是真实 GitHub Actions 成功，精确绑定本清单中的 Schema、Validator、Test 与 Fixture Blob，共运行 32 项：6 个 Python/Node Crypto 互操作测试方法和 26 个 H Validator 测试方法。
+
+新增正向测试将完整合成 H Envelope 与 CSubmitOutcome 1.0.1 对象送入 `validate_provider_outcome`，使用真实 H/C JSON Schema、真实本地语义谓词和真实 C-P0 Digest 重算；不再 Mock Schema、Semantic 或 Digest 基础函数。负向测试证明：Wire/Object 重复字段不一致为 INVALID；C Payload Digest 变异并重算后为 INVALID；缺失 I/D/Storage Verifier 为 UNKNOWN；I/D/Storage Verifier 明确矛盾为 INVALID。
+
+**证据边界：** 完整路径测试中的 Signature、Profile Registration、Key Status、Provider Evidence、Owner Ledger、COC、Currentness 和 I/D/Storage 权威回调仍使用确定性 Test Double。C Crypto Interop 套件另行验证候选 JCS/Ed25519 向量，但本 Fixture 不认证真实 Owner Proof、不连接生产 Trust Store，也不证明 Provider/Storage Runtime Truth。这是完整的本地 Schema/Semantic/Digest 验证路径，不是生产 Authority Conformance。
 
 ## 4. Owner review/adoption matrix / Owner 精确审查与采纳矩阵
 
@@ -101,8 +107,8 @@ All these review artifacts are delegated role reviews in this coordinating workf
 
 - Storage technical architecture v3.2.3: normative candidate body unchanged.
 - Storage v3.2.7: **CANDIDATE EXACT BUNDLE BOUND; NOT JOINTLY ACCEPTED / NOT FROZEN**.
-- H 1.2.14 / C 1.0.1 callback CI: **SUCCESS, 27 tests; bounded orchestration only**.
-- Complete unmocked H envelope + C object positive/negative matrix: **OPEN**.
+- H 1.2.14 / C 1.0.1 full local validator CI: **SUCCESS, 32 tests; actual schema/semantic/C-P0 digest path covered with TEST-ONLY authority callbacks**.
+- Complete unmocked H envelope + C object positive schema/semantic/digest path: **PASS in bounded local tests**; full per-field mutation matrix and production authority verification: **OPEN**.
 - Production I/D/Storage authority callback adapters: **NOT IMPLEMENTED / NOT VERIFIED**.
 - JF-10 P0: **OPEN**.
 - R1 Recovery Cutoff Batch completeness: **OPEN**.
@@ -121,7 +127,7 @@ All these review artifacts are delegated role reviews in this coordinating workf
 1. H Owner independently reviews exact schema/validator/test/mapping Blobs and CI 44068869146.
 2. C and I independently review H 1.2.14 mapping and their own proof/authority obligations; no C/I profile registration is implied.
 3. D independently reviews the exact 1.2.14 D fence/barrier carrier and D verifier boundary.
-4. Add a complete unmocked positive H envelope + CSubmitOutcome 1.0.1 fixture and full-path negative mutations for wire duplicates, C-P0 digest, sequence namespace, I terminal result, D fence and Storage same-GID proof.
+4. Expand full-path negative vectors to every duplicated wire field, sequence namespace, I terminal result, D fence generation, Storage same-GID proof and stale/currentness cases; retain TEST-ONLY authority callbacks as UNKNOWN unless production adapters are separately approved.
 5. Bind production adapters to owner-authoritative I/D/Storage ledgers and trust/currentness sources; until then missing adapters remain UNKNOWN.
 6. Storage proves bidirectional COC participant ↔ I/D/C owner admission joins, same-GID RecoveryJoin, quorum persistence and linearizable readback.
 7. A performs fresh exact-version integration review of this manifest. No Gate or activation upgrade follows from CI alone.
