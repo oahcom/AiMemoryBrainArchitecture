@@ -77,12 +77,12 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertIsNone(checks.verify_provider_evidence)
 
 
-    def test_07_exact_c_schema_and_ten_vectors(self):
+    def test_07_current_c_schema_and_ten_vectors(self):
         fixture_dir = ROOT.parent / "fixtures"
-        schema = json.loads((fixture_dir / "c-submit-outcome-1.0.0.schema.json").read_text(encoding="utf-8"))
-        vectors = json.loads((fixture_dir / "c_submit_outcome_1_0_0_vectors.json").read_text(encoding="utf-8"))
+        schema = json.loads((fixture_dir / "c-submit-outcome-1.0.1.schema.json").read_text(encoding="utf-8"))
+        vectors = json.loads((fixture_dir / "c_submit_outcome_1_0_1_vectors.json").read_text(encoding="utf-8"))
         validator = Draft202012Validator(schema, format_checker=FormatChecker())
-        self.assertEqual(schema["$id"], "urn:aimba:schema:c-submit-outcome:1.0.0")
+        self.assertEqual(schema["$id"], "urn:aimba:schema:c-submit-outcome:1.0.1")
         self.assertEqual(len(vectors["vectors"]), 10)
         for vector in vectors["vectors"]:
             with self.subTest(vector=vector["id"]):
@@ -144,11 +144,11 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
                 self.assertFalse(list(validator.iter_errors(vector["record"])))
 
 
-    def test_12_unified_1_2_13_removes_ambiguous_intent_alias_and_corrects_rejected_branch(self):
-        schema_path = H_ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.13.schema.json"
+    def test_12_current_unified_1_2_14_removes_ambiguous_intent_alias_and_corrects_rejected_branch(self):
+        schema_path = H_ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.14.schema.json"
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
-        self.assertEqual(schema["$defs"]["commonEnvelope"]["properties"]["schema_artifact_revision"]["const"], "1.2.13")
-        self.assertIn("1.2.13", schema["$defs"]["commonEnvelope"]["properties"]["schema_artifact_revision"]["description"])
+        self.assertEqual(schema["$defs"]["commonEnvelope"]["properties"]["schema_artifact_revision"]["const"], "1.2.14")
+        self.assertIn("1.2.14", schema["$defs"]["commonEnvelope"]["properties"]["schema_artifact_revision"]["description"])
 
         provider_branch = next(
             branch for branch in schema["oneOf"]
@@ -342,6 +342,31 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertTrue(any("D Forget clearance" in item for item in result["unknown"]))
         self.assertTrue(any("Storage resolution proof" in item for item in result["unknown"]))
 
+
+
+    def test_19_exact_current_bundle_and_owner_authority_seams(self):
+        fixture_dir = ROOT.parent / "fixtures"
+        c_schema = json.loads((fixture_dir / "c-submit-outcome-1.0.1.schema.json").read_text(encoding="utf-8"))
+        h_schema = json.loads((H_ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.14.schema.json").read_text(encoding="utf-8"))
+        self.assertEqual(c_schema["$id"], "urn:aimba:schema:c-submit-outcome:1.0.1")
+        self.assertEqual(h_schema["$defs"]["commonEnvelope"]["properties"]["schema_artifact_revision"]["const"], "1.2.14")
+        self.assertEqual(SCHEMA_ARTIFACT_REVISION, "1.2.14")
+        self.assertEqual(WIRE_SCHEMA_VERSION, "1.3.0")
+        from provider_outcome_validator import C_OBJECT_SCHEMA_URI, C_PROFILE_ID, BMCP_SCHEMA_URI, AuthorityChecks
+        self.assertEqual(C_OBJECT_SCHEMA_URI, "urn:aimba:schema:c-submit-outcome:1.0.1")
+        self.assertEqual(BMCP_SCHEMA_URI, h_schema["$id"])
+        self.assertEqual(C_PROFILE_ID, "AIMBA-C-CRYPTO-1.0")
+        checks = AuthorityChecks()
+        self.assertIsNone(checks.verify_i_terminal_decision)
+        self.assertIsNone(checks.verify_d_clearance)
+        self.assertIsNone(checks.verify_storage_resolution_proof)
+
+    def test_20_current_c_sequence_namespace_is_required_and_schema_is_closed(self):
+        fixture_dir = ROOT.parent / "fixtures"
+        schema = json.loads((fixture_dir / "c-submit-outcome-1.0.1.schema.json").read_text(encoding="utf-8"))
+        self.assertIn("sequence_namespace_ref", schema["required"])
+        self.assertIn("sequence_namespace_ref", schema["properties"])
+        self.assertFalse(schema["additionalProperties"])
 
 
 if __name__ == "__main__":
