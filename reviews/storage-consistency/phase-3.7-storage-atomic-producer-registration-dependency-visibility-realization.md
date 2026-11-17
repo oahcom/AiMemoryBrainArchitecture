@@ -223,3 +223,26 @@ The authority barriers are conjunctive, not numerically merged. D fence-first or
 D/Storage 序列化域本身不能解决独立 I Revocation 竞态，因此强制采用上述组合：D 将精确 PublicationParticipantRef 纳入自身 Fence/Barrier；Storage 创建隐藏 Visibility Participant；I 在自己的 PolicyDomain Sequencer 单次消费绑定 D/Storage Participant 的 CommitAuthorizationReceipt；Storage 最终 Visibility Transaction 同时验证 D 当前参与状态/Fence 和精确 I Terminal Proof。Storage 提交后产生不可变 COMMITTED_VISIBLE 证明；安全中止产生 NO_PUBLICATION 证明；D/I 只有验证同一 Storage Outcome 后才能分别关闭自己的 Participant。UNKNOWN 时两个 Gate 均保持开放且 Artifact Private。
 
 两个权威 Barrier 必须合取满足，不得合并成数值序列。D Fence-first 或 I Revocation-first 均不得 Visibility。D Publication Participant 或 I COMMIT_WON 单独存在都不是 Visibility Permission。本协议仍须 D/I/Storage 精确 Owner 接受和确定性 Crash/Race 测试；尚未实现或验证。
+
+
+## 11. Exact source pins and nominal identity separation
+
+The following Phase 3.7 owner-role amendments are the exact current proposal bundle consumed by this Storage design:
+- D Phase 3.7 Blob: `62d8eaf3501e20ecaceba5cd6f3298d5f6b03ac4`.
+- E Phase 3.7 Blob: `2e80b66b2c6612bc67a5dec69c74e3c6cb2ba734`.
+- I Phase 3.7 Blob: `a09a2ecc37601c25bfa7a6a235350730cac2855b`.
+- D controlling operation contract Blob: `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5`.
+- E producer admission Blob: `e59f517fff161ab882aa0ddc4a5bda513964ae1a`.
+- E staging/derived registration Blob: `00e37ba56596e710513c8d0568acd79141d9101b`.
+- I PermissionEpoch/final-boundary contract Blob: `bae6a24fe3a374bc816993979a8fa9af52517dea`.
+- I CommitAuthorizationReceipt/sequencer contract Blob: `5a5304d48aa912dcf6f817099bd5659371d8cdc8`.
+- C final-submit contract Blob: `45a48249717c8cddb07ab96197730ef93d406c22`.
+- G Applied/Context contract Blob: `aa3afa73d8a76cc6f025839c52bfbff6a983046a`.
+
+Nominal identity separation is mandatory:
+- D PublicationParticipantRef is the in-flight barrier identity for one derivative visibility attempt; it is not C's ParticipantIntentRef.
+- C ParticipantIntentRef is the pre-provider-side-effect participant; it is not D PublicationParticipantRef.
+- StorageVisibilityParticipantRef is the hidden Storage visibility transaction participant; it is not PreparedParticipantRef or PreparedTransactionGID from the separate JF-10 prepared-transaction protocol.
+- PublicationOperationId, CausalOrderTransactionRef, PreparedParticipantRef, ProducerWorkItemId, DerivationRunId, AttemptId and LeaseId remain distinct types and idempotency scopes.
+
+The D/I/Storage composition in §§9–10 is a candidate joint protocol. It does not inherit C/G Applied acceptance or JF-10 prepared-participant acceptance by analogy. Each exact interface and wire mapping requires its own review.
