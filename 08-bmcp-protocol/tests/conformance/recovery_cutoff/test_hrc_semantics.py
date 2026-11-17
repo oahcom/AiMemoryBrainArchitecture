@@ -57,7 +57,7 @@ def owner_snapshot(owner="I", requests=None, admissions=None, highwaters=None,
 def admission(ref, owner, status="REGISTERED", participant_ref="COC/P1",
               participant_entry_digest="c" * 64, position=1, seq=1):
     item = {
-        "owner_entry_ref": ref, "owner_entry_kind": "RECEIPT_ISSUE", "owner": owner,
+        "owner_entry_ref": ref + "/row", "owner_admission_ref": ref, "owner_entry_kind": "RECEIPT_ISSUE", "owner": owner,
         "operation_id": "op/" + ref, "operation_digest": "b" * 64,
         "scope_ref": "scope/test", "sequence": seq, "status": status,
     }
@@ -72,11 +72,11 @@ def participant(ref="COC/P1", owner="C", admission_ref="C/admit/1",
                 digest="a" * 64, position=1, required=("C", "I", "D")):
     return {
         "participant_intent_ref": ref, "owner_kind": owner,
-        "owner_admission_ref": admission_ref, "operation_id": "op/C/admit/1",
+        "owner_admission_ref": admission_ref, "primary_owner_entry_ref": admission_ref + "/row", "operation_id": "op/C/admit/1",
         "operation_digest": "b" * 64, "participant_digest": digest, "scope_ref": "scope/test",
         "term": 1, "index": position, "entry_digest": "c" * 64,
         "required_owner_evidence": list(required),
-        "owner_evidence": {"C": ["C/admit/1"], "I": ["I/receipt/1"], "D": ["D/barrier/1"]},
+        "owner_evidence": {"C": ["C/admit/1/row"], "I": ["I/receipt/1/row"], "D": ["D/barrier/1/row"]},
     }
 
 
@@ -313,7 +313,7 @@ def validate_join(admissions_by_owner, m):
                 p.get("participant_intent_ref") != a.get("participant_intent_ref")):
                 return INVALID
             # C admission is the primary manifest anchor; I/D evidence may be many-to-one.
-            if owner == "C" and p.get("owner_admission_ref") != ref:
+            if owner == "C" and p.get("owner_admission_ref") != a.get("owner_admission_ref"):
                 return INVALID
             refs = p.get("owner_evidence", {}).get(owner, [])
             if ref not in refs:
@@ -324,9 +324,11 @@ def validate_join(admissions_by_owner, m):
         if c_entries is None:
             return UNKNOWN
         owner_entry = next((a for a in c_entries
-                            if a.get("owner_entry_ref") == p.get("owner_admission_ref")), None)
+                            if a.get("owner_admission_ref") == p.get("owner_admission_ref")), None)
         if owner_entry is None or owner_entry.get("status") != "REGISTERED":
             return UNKNOWN
+        if owner_entry.get("owner_entry_ref") != p.get("primary_owner_entry_ref"):
+            return INVALID
         if owner_entry.get("participant_intent_ref") != p.get("participant_intent_ref"):
             return INVALID
         for required in p.get("required_owner_evidence", []):
@@ -475,7 +477,7 @@ class HRCConformance(unittest.TestCase):
     # HRC-14: a manifest participant without accountable owner evidence blocks as UNKNOWN.
     def test_HRC_14(self):
         p = participant(required=["C", "I", "D"])
-        p["owner_evidence"] = {"C": ["C/admit/1"]}
+        p["owner_evidence"] = {"C": ["C/admit/1/row"]}
         m = manifest([p])
         a = admission("C/admit/1", "C")
         self.assertEqual(validate_join({"C": [a]}, m), UNKNOWN)
@@ -563,7 +565,7 @@ class HRCConformance(unittest.TestCase):
     # JPF-02: two distinct I evidence entries may join one participant.
     def test_JPF_02(self):
         p = participant(required=["C", "I", "D"])
-        p["owner_evidence"]["I"] = ["I/issue/1", "I/consume/1"]
+        p["owner_evidence"]["I"] = ["I/issue/1/row", "I/consume/1/row"]
         a = admission("C/admit/1", "C")
         i1 = admission("I/issue/1", "I")
         i2 = admission("I/consume/1", "I", seq=2)
@@ -577,7 +579,7 @@ class HRCConformance(unittest.TestCase):
     # JPF-03: D evidence must be in the exact owner ledger.
     def test_JPF_03(self):
         p = participant(required=["C", "D"])
-        p["owner_evidence"]["D"] = ["D/barrier/1"]
+        p["owner_evidence"]["D"] = ["D/barrier/1/row"]
         a = admission("C/admit/1", "C")
         d1 = admission("D/barrier/1", "D")
         d1["operation_id"] = p["operation_id"]
