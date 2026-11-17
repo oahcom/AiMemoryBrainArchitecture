@@ -43,11 +43,11 @@ All above PR metadata was re-read from GitHub. At this addendum's frozen baselin
 
 上述 PR 状态均按本补充文件冻结基线从 GitHub 元数据读取。该基线时 PR #120 的合并提交是 `main` HEAD，PR #119 的合并提交是其直接父提交；PR #121 随后合并并推进了 main。
 
-## 3. Current main source-tree correction / 当前 Main 来源树修正
+## 3. Frozen-baseline source-tree correction / 冻结基线来源树修正
 
-The frozen recursive tree has 665 entries and is not truncated. The following README-mapped roots are present or absent as follows:
+At the frozen baseline `main@6c325804027b88de1014ab3364cdda7e0c023ba6`, the recursive tree had 665 entries and was not truncated. The following README-mapped roots were present or absent at that baseline:
 
-| Path | Current main observation |
+| Path | Frozen-baseline observation |
 |---|---|
 | `02-domain-model/` | PRESENT |
 | `06-memory-context/` | PRESENT |
@@ -62,9 +62,9 @@ The frozen recursive tree has 665 entries and is not truncated. The following RE
 | `11-consistency-and-recovery/` | ABSENT |
 | `12-testing-and-acceptance/` | ABSENT |
 
-This corrects the earlier ARCH-CONVERGENCE-001 source inventory and PRODUCT-FIRST integration snapshot where they claimed `02-domain-model/` was absent. It is present in current main. The remaining absent roots continue to be a discoverability/publication issue, but absence of a README-mapped root does not prove that the corresponding Owner branch contract does not exist.
+This corrects the earlier ARCH-CONVERGENCE-001 source inventory and PRODUCT-FIRST integration snapshot where they claimed `02-domain-model/` was absent. `08-bmcp-protocol/` was absent at this frozen baseline but was published later by PR #121. Remaining absent roots continue to be a discoverability/publication issue, but absence of a README-mapped root does not prove that the corresponding Owner branch contract does not exist.
 
-当前 main 的 665 项递归树中，`02-domain-model/` 与 `06-memory-context/` 存在；`03/04/05/08/09/10/11/12` 所列规范根目录仍缺失。这修正了早期文档错误地声称 `02-domain-model/` 不存在的记录。其他缺失目录属于规范可发现性/发布问题，但不能据此推断对应 Owner 分支不存在相关契约。
+在冻结基线 `main@6c325804027b88de1014ab3364cdda7e0c023ba6` 的 665 项递归树中，`02-domain-model/` 与 `06-memory-context/` 存在；当时 `08-bmcp-protocol/` 尚不存在，后由 PR #121 发布。其余所列规范根目录在该冻结基线中缺失。这修正了早期文档错误地声称 `02-domain-model/` 不存在的记录。目录缺失属于规范可发现性/发布问题，但不能据此推断对应 Owner 分支不存在相关契约。
 
 ## 4. Newer blocking evidence / 后续新增阻塞证据
 
@@ -146,3 +146,18 @@ PR #121 advances H-ADE-001 and H-ADE-003 from “no candidate remediation” to 
 PR #121 合并提交为 `ab1fa87d74ca4a632155aa19569533ea560109d5`，发布了 H Applied Delivery Evidence 1.0.0 Schema、参考 Validator、16 项候选测试、加固补充文件和 PR 触发工作流。合并时该 PR 精确 Head 没有 Workflow Run/Status 证据；PR 正文及合并记录明确说明该精确 Head 的测试 **NOT RUN**。此次合并仅为候选发布。
 
 PR #121 将 H-ADE-001 和 H-ADE-003 从“没有候选修复”推进到“候选代码与负向测试已发布；精确 CI 与 Owner 集成待完成”。它不关闭生产/Owner 层发现。H-ADE-002、G 消费者验收、G Durable Persistence/Restore、生产密码学/信任，以及 C/G/H/I/D/Storage 接受仍开放。
+
+
+## 9. Latest mainline currentness / 最新主线当前性 — 2026-11-18
+
+This section supersedes any interpretation of §3 as describing today's main tree. After PR #124 merged, the current main HEAD is `e8d5e5e374627ac0c472d2bb179e8e940cc6a6de`. The H Applied Delivery Evidence candidate directory `08-bmcp-protocol/` is present on main following PR #121; §3 records only the earlier frozen baseline and must not be read as the current tree state.
+
+PR #124 merged the corrected currentness overlay at `e8d5e5e374627ac0c472d2bb179e8e940cc6a6de`. Draft PR #125 attempted another copy of this addendum from the pre-#124 baseline and contained stale/currentness inconsistencies; it is superseded by this mainline refresh and must not be merged.
+
+No new Owner or governance acceptance is recorded by this refresh. B0-B6 remain as recorded in §4.3. H-ADE-001/H-ADE-003 candidate code remains NOT VERIFIED pending exact-head CI and Owner integration; H-ADE-002, G consumer acceptance, durable G Applied persistence/restore and production trust remain open. No Full Applied, wire freeze, Gate release or production activation is authorized.
+
+PR #124 合并后的当前 main HEAD 为 `e8d5e5e374627ac0c472d2bb179e8e940cc6a6de`。PR #121 发布的 `08-bmcp-protocol/` 现已存在于 main；§3 仅记录较早冻结基线，不应再被理解为当前目录树状态。
+
+PR #124 已合并修正后的当前性补充记录，合并提交为 `e8d5e5e374627ac0c472d2bb179e8e940cc6a6de`。Draft PR #125 从 #124 合并前的旧基线再次复制该补充文件，存在当前性陈述不一致，现由本主线刷新取代，不应合并。
+
+本次刷新没有新增 Owner 或治理验收。B0-B6 维持 §4.3 所记录状态。H-ADE-001/H-ADE-003 候选代码仍待精确 Head CI 与 Owner 集成验证；H-ADE-002、G 消费者验收、G Applied 持久化/恢复和生产信任仍开放。不得据此批准 Full Applied、Wire Freeze、Gate Release 或生产启用。
