@@ -66,3 +66,15 @@ A may accept system-wide scope and sequencing risks; A cannot accept B, D, I, C,
 ## Cross-references
 
 See ARCH-CX-002, DEV-FEAS-002, DEP-DAG-002, PRIORITY-002, READINESS-002, CONFLICT-002, GATE-002, DEFERRED-002 and FINAL-A-002. All are bound to the same main baseline SHA.
+
+
+
+### AR-12 — Bilingual research evidence mistaken for independently verified domain closure
+- Level: **High**. Blocking: B5 and any normative decision relying on affected B research artifacts; not independently a runtime failure mode.
+- Root cause: author-side translation and paired files may be mistaken for independent semantic parity despite untranslated tables/clauses, pending manual review, stale source pins or status drift.
+- Trigger/consequence: a downstream Owner freezes a domain contract or schema using research evidence whose full normative content and decision status have not been independently checked.
+- Owner: B for source remediation; independent reviewer for clause/row parity; each downstream Owner for exact-version adoption; A for G1/G6 integration tracking.
+- Closure evidence: remediate all PARTIAL/PROVISIONAL rows; independently compare every normative clause, table row, stable ID, field, enum, status, example and source pin; re-read exact current Blobs; record B Owner decision and consumer adoption. The source audit Blob `a877ceff906da01e70e277a81b95978982af3ede` is evidence of the audit, not proof that the translations pass.
+- Risk acceptance: **not accepted**. No deadline is invented; closure is due before any dependent normative decision/schema freeze. B5 remains BLOCKED; Issue #43 G6 remains PARTIAL / NOT PASSED pending full system-wide review.
+- Residual risk: all affected B research artifacts remain research-only until independently accepted.
+- Gate: B5/B6; Issue #43 G1/G2/G6.
