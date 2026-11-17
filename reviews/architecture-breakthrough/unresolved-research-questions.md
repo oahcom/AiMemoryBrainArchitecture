@@ -5,8 +5,8 @@
 
 ## A. Forget / Model Checking
 
-1. What is the exact physical linearization authority for RegisterProducerWork vs InstallForgetFence?
-2. Can dependency registration, canonical target commit, outbox and final visibility be committed in one PostgreSQL/SQLite transaction, or is a recoverable prepare/commit protocol unavoidable?
+1. Storage L1 Option A defines one per-BrainAuthorityRef serialization anchor; have D/E/I accepted the exact row ownership, operation semantics and transition tuple at current source versions?
+2. Which actual DB product/version/adapter can satisfy SERIALIZABLE (or formally equivalent) behavior, durable transition records, authoritative read-after-commit, old-primary fencing and restore continuity? If none can, what successor ADR and proof are required for Option B?
 3. What does “terminal” mean for a worker whose lease expired but whose process may still publish?
 4. Is the producer inventory closed-world at a stable inventory epoch, and how are unknown/offline external recipients represented?
 5. Which ACKs are authoritative evidence, which are transport observations, and how are lost ACKs reconciled by stable operation identity?
