@@ -1,7 +1,7 @@
 # Phase 3.8.9 — CSubmitOutcome 1.0.0 Schema and Conformance Contract
 
 - Owner: C — Provider Outcome / immutable submit evidence
-- Status: PROPOSED structural schema and local conformance harness; NOT EXECUTED.
+- Status: PROPOSED schema; structural/semantic CI executed successfully; cryptographic/provider tests NOT EXECUTED.
 - Schema: `schemas/c-submit-outcome-1.0.0.schema.json`, Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`
 - Semantic amendment: Phase 3.8.6 Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`
 - Signature projection: Phase 3.8.8 Blob `39ff523c41f10e3a82442d4746dd7ca7763d271c`
@@ -66,7 +66,7 @@ COC linkage is either a complete non-null intent/reservation pair with null abse
 
 The 10 fixture cases cover accepted, rejected-with-ambiguous-side-effect, not-invoked, unknown, in-doubt, missing accepted receipt, not-invoked without proof, broken COC pair, high-water violation and request-digest mismatch.
 
-Run command (not yet executed):
+Run command (executed successfully in GitHub Actions):
 ```sh
 python -m pip install -r 07-agent-integration/tests/conformance/provider_outcome/requirements.txt
 python -m unittest discover -s 07-agent-integration/tests/conformance/provider_outcome -p 'test_*.py' -v
@@ -99,3 +99,16 @@ The schema requires `OwnerSignatureRef` in addition to inline `key_id_ref`, `key
 C's conditional provider proof members are `ProviderRequestRef`, `ProviderReceiptRef`, `ProviderLookupProofRef`, `ProviderNoHandoffProofRef`, `NotInvokedProofRef` and `UnknownReasonRef`. Each matching BMCP optional field, when present, must equal the immutable C object; if the immutable C object contains a non-null value, its wire duplicate cannot be silently omitted.
 
 The BMCP `coc_commit_proof_ref`, `coc_record_ref`, `coc_record_position`, `coc_entry_digest`, `prepared_participant_ref`, `prepare_attempt_ref/generation`, participant ledger fields, I terminal decision, D clearance and Storage resolution proof are independent owner/COC evidence, not C-authored truth. H verifies them through the appropriate authenticated COC/owner-ledger callback; they are not copied into C-P0 merely because they appear in the envelope.
+
+
+## 8. C schema/semantic CI evidence
+
+- Workflow: `.github/workflows/c-provider-outcome-conformance.yml`, Blob `bc47b8c4ba83b3703064df6818d12ee2849c26f0`.
+- Workflow run: `44055965702`.
+- Exact tested commit: `a0c197fa94e71c52758fadaa335a686815485dd7`.
+- Result: SUCCESS.
+- Python runtime: 3.12.
+- Test count: 3 passed.
+- Covered: Draft 2020-12 schema self-validation; all 10 synthetic expected-result vectors against schema plus selected local semantic predicates; explicit confirmation that fixture signatures are placeholders and the profile remains unregistered.
+
+This is executed structural/semantic unit evidence only. It does not execute C cryptographic signatures, Ed25519 verification, C key-status/trust, provider issuer proofs, C gate races, provider adapters, owner ledger membership, COC quorum or Storage durability. It does not establish production readiness or exactly-once behavior.
