@@ -393,12 +393,12 @@ Author-side bilingual parity refresh was performed for the latest additions to R
 
 | File / 文件 | Exact Blob SHA / 精确 Blob SHA | Lines / 行数 |
 |---|---|---:|
-| README.md | `480efa28b281e21a2358c1bddc5b4788a37bd160` | 337 |
+| README.md | `104cd99f635fe76c34e5a89bb076a742c88148a7` | 360 |
 | fact-claim-identity-adr.md | `958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593` | 223 |
-| domain-model-decision-record.md | `b83d99d3c66b30c5834f08ce61c5acfd27004e6a` | 271 |
-| baseline-currentness-and-owner-source-audit.md | `5fc5ea42ba6420da6b2eefeb427a6c550e54b839` | 523 |
-| cross-owner-canonical-semantics-matrix.md | `d9ec7f9cb6f72e2756d12da73c48a784ea9c7a83` | 291 |
-| domain-semantics-conflict-register.md | `980f8563ec772939826b338a9b048efebd5bf2f6` | 166 |
+| domain-model-decision-record.md | `051aad3fdcac589b26fabd08adc70f9d7d6afe1d` | 290 |
+| baseline-currentness-and-owner-source-audit.md | `2bbfbddd47739c18226e3b57b17baa85afd41211` | 568 |
+| cross-owner-canonical-semantics-matrix.md | `95531d2ef029a0a7cf65f8ee68de6f396fdfddcb` | 319 |
+| domain-semantics-conflict-register.md | `3063d0620dafd23dff30f91181d9c329552ee11e` | 189 |
 | bilingual-parity-audit.md | self Blob intentionally not hard-coded | — |
 
 Independent clause-by-clause bilingual semantic review remains **PENDING**. This table records exact readback and author-side parity work only; it does not close B5 or B6.
@@ -425,3 +425,34 @@ After the §13 currentness update, exact readback confirmed currentness audit Bl
 The B2 source update has been reflected in all affected bilingual artifacts. Independent clause-by-clause bilingual review remains pending; B5 remains BLOCKED / NOT PASSED and B6 INDEPENDENT_REVIEW_PENDING.
 
 B2 来源更新已反映到所有受影响的双语工件。独立逐条双语审查仍待完成；B5 仍 BLOCKED / NOT PASSED，B6 仍 INDEPENDENT_REVIEW_PENDING。
+
+
+### 8.9 D/E/F/G consumer source parity / D/E/F/G 消费者来源双语对等 — 2026-11-18
+
+The new D/E/F/G source reconciliation was added in English and Chinese to the currentness audit, cross-owner matrix, conflict register, B decision record and README. The bilingual statements preserve:
+- D Canonical Store's neutral PropositionRef-only boundary while INT-P0-01 is blocked; stable Claim ID + immutable ClaimRevision remains a D candidate.
+- E's pre-canonical CandidateProposition/ExtractionIR and prohibition on assigning Fact/Claim identity.
+- F's D-owned canonical identity/status boundary and prohibition on resolving disputed Claims.
+- G's exact MemoryVersion pin in ContextEntry and independent ContextVersion/ChangeSet authority.
+- The distinct meanings of B Fact/Claim Option A and D Claim Identity Option A.
+
+D/E/F/G 来源协调已以中英文写入当前性审计、跨 Owner 矩阵、冲突登记、B 决策记录和 README。双语表述保留：
+- D Canonical Store 在 INT-P0-01 阻塞期间仅允许中立 PropositionRef；稳定 Claim ID + 不可变 ClaimRevision 仍是 D 的候选。
+- E 的规范化前 CandidateProposition/ExtractionIR，以及不得分配 Fact/Claim 身份的边界。
+- F 的 D 规范身份/状态权威边界，以及不得解决争议 Claim 的限制。
+- G 在 ContextEntry 中固定精确 MemoryVersion，并独立拥有 ContextVersion/ChangeSet。
+- B Fact/Claim Option A 与 D Claim Identity Option A 的不同含义。
+
+| File / 文件 | Exact Blob SHA / 精确 Blob SHA | Lines / 行数 |
+|---|---|---:|
+| README.md | `104cd99f635fe76c34e5a89bb076a742c88148a7` | 360 |
+| fact-claim-identity-adr.md | `958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593` | 223 |
+| domain-model-decision-record.md | `051aad3fdcac589b26fabd08adc70f9d7d6afe1d` | 290 |
+| baseline-currentness-and-owner-source-audit.md | `2bbfbddd47739c18226e3b57b17baa85afd41211` | 568 |
+| cross-owner-canonical-semantics-matrix.md | `95531d2ef029a0a7cf65f8ee68de6f396fdfddcb` | 319 |
+| domain-semantics-conflict-register.md | `3063d0620dafd23dff30f91181d9c329552ee11e` | 189 |
+| bilingual-parity-audit.md | self Blob intentionally not hard-coded | — |
+
+Independent clause-by-clause bilingual semantic review remains pending. This author-side parity refresh does not close B5 or B6.
+
+独立逐条双语语义审查仍待完成。本次作者侧双语对等刷新不关闭 B5 或 B6。
