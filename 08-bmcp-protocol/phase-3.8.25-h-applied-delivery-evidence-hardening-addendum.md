@@ -14,12 +14,12 @@ The candidate test suite adds top-level and nested duplicate-member negative vec
 
 ## 2. Replay disclosure authorization
 
-The validator contract now requires \`verify_current_replay_authorization(envelope, original_result_ref)\` for \`SAME_DIGEST_REPLAY\`. The callback is tri-state:
-- True: the original result reference may be returned.
-- False: INVALID; do not disclose the result reference.
-- None or exception: UNKNOWN; do not disclose the result reference.
+The validator contract now requires two separate callbacks for SAME_DIGEST_REPLAY: verify_current_i_replay_authorization(envelope, original_result_ref) and verify_current_d_forget_fence(envelope, original_result_ref). Each runs in its own authority domain and is tri-state:
+- Both True: the original result reference may be returned.
+- Either False: INVALID; do not disclose the result reference.
+- Either None or exception: UNKNOWN; do not disclose the result reference.
 
-The callback contract must recheck current I authorization/PermissionEpoch, current key status, audience/scope and applicable D ForgetFence at the owner-defined decision boundary. A historical signature and same digest do not confer perpetual disclosure authorization.
+The I callback rechecks current I authorization/PermissionEpoch, issuer/key status, principal/delegation, audience and scope. The D callback independently rechecks the applicable ForgetOperation/Fence/lineage currentness. Neither authority may substitute for the other. A historical signature and same digest do not confer perpetual disclosure authorization.
 
 Candidate tests cover denial, UNKNOWN and callback exception; all assert that \`original_result_ref\` is absent.
 

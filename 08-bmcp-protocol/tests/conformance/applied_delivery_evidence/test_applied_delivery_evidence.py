@@ -47,7 +47,7 @@ def fixture():
     return value
 
 
-def checks(disposition="NEW", replay_authorization=True, c_record=None, c_verification=True, resolver_available=True):
+def checks(disposition="NEW", replay_i_authorization=True, replay_d_fence=True, c_record=None, c_verification=True, resolver_available=True):
     resolved_record = copy.deepcopy(C_ACCEPTED_RECORD if c_record is None else c_record)
     return AppliedDeliveryChecks(
         verify_profile_registration=lambda e: True, verify_key_status=lambda e: True,
@@ -55,7 +55,8 @@ def checks(disposition="NEW", replay_authorization=True, c_record=None, c_verifi
         verify_c_final_boundary=lambda e: True, verify_g_delivery_binding=lambda e: True,
         verify_capability_epoch=lambda e: True,
         commit_observation=lambda e,d: DurableObservationDecision(disposition, "H/result/1" if disposition=="SAME_DIGEST_REPLAY" else None),
-        verify_current_replay_authorization=lambda e,r: replay_authorization,
+        verify_current_i_replay_authorization=lambda e,r: replay_i_authorization,
+        verify_current_d_forget_fence=lambda e,r: replay_d_fence,
         resolve_c_submit_outcome=lambda ref: resolved_record if resolver_available else None,
         verify_c_submit_outcome_record=lambda record: c_verification,
     )
@@ -132,18 +133,18 @@ class AppliedDeliveryEvidenceTests(unittest.TestCase):
         self.assertEqual(result["errors"], ["invalid JSON: ValueError"])
 
     def test_14_replay_result_not_disclosed_after_authorization_denial(self):
-        result=self.validate(fixture(),checks("SAME_DIGEST_REPLAY",False))
+        result=self.validate(fixture(),checks("SAME_DIGEST_REPLAY",replay_i_authorization=False))
         self.assertEqual(result["status"],"INVALID")
         self.assertNotIn("original_result_ref",result)
 
     def test_15_replay_result_not_disclosed_when_current_authority_unknown(self):
-        result=self.validate(fixture(),checks("SAME_DIGEST_REPLAY",None))
+        result=self.validate(fixture(),checks("SAME_DIGEST_REPLAY",replay_i_authorization=None))
         self.assertEqual(result["status"],"UNKNOWN")
         self.assertNotIn("original_result_ref",result)
 
     def test_16_replay_result_not_disclosed_when_authority_callback_raises(self):
         c=checks("SAME_DIGEST_REPLAY")
-        c.verify_current_replay_authorization=lambda e,r: (_ for _ in ()).throw(RuntimeError("I/D unavailable"))
+        c.verify_current_i_replay_authorization=lambda e,r: (_ for _ in ()).throw(RuntimeError("I unavailable"))
         result=self.validate(fixture(),c)
         self.assertEqual(result["status"],"UNKNOWN")
         self.assertNotIn("original_result_ref",result)
@@ -184,6 +185,23 @@ class AppliedDeliveryEvidenceTests(unittest.TestCase):
     def test_26_c_record_missing_issuer_identity_rejected(self):
         record=copy.deepcopy(C_ACCEPTED_RECORD); record.pop("issuer_authority_ref")
         self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"INVALID")
+
+    def test_27_replay_result_not_disclosed_after_d_fence_denial(self):
+        result=self.validate(fixture(),checks("SAME_DIGEST_REPLAY",replay_d_fence=False))
+        self.assertEqual(result["status"],"INVALID")
+        self.assertNotIn("original_result_ref",result)
+
+    def test_28_replay_result_not_disclosed_when_d_fence_unknown(self):
+        result=self.validate(fixture(),checks("SAME_DIGEST_REPLAY",replay_d_fence=None))
+        self.assertEqual(result["status"],"UNKNOWN")
+        self.assertNotIn("original_result_ref",result)
+
+    def test_29_replay_result_not_disclosed_when_d_fence_callback_raises(self):
+        c=checks("SAME_DIGEST_REPLAY")
+        c.verify_current_d_forget_fence=lambda e,r: (_ for _ in ()).throw(RuntimeError("D unavailable"))
+        result=self.validate(fixture(),c)
+        self.assertEqual(result["status"],"UNKNOWN")
+        self.assertNotIn("original_result_ref",result)
 
 
 if __name__ == "__main__":

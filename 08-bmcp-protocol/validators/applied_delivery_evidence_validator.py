@@ -45,7 +45,8 @@ class AppliedDeliveryChecks:
     verify_g_delivery_binding: Callable[[dict[str, Any]], bool | None]
     verify_capability_epoch: Callable[[dict[str, Any]], bool | None]
     commit_observation: Callable[[dict[str, Any], str], DurableObservationDecision]
-    verify_current_replay_authorization: Callable[[dict[str, Any], str], bool | None]
+    verify_current_i_replay_authorization: Callable[[dict[str, Any], str], bool | None]
+    verify_current_d_forget_fence: Callable[[dict[str, Any], str], bool | None]
     resolve_c_submit_outcome: Callable[[str], dict[str, Any] | None]
     verify_c_submit_outcome_record: Callable[[dict[str, Any]], bool | None]
 
@@ -203,16 +204,19 @@ def validate_applied_delivery_evidence(
         # A historical replay result is not perpetual authorization to disclose it.
         # Recheck current I authorization/epoch, key status, audience/scope and the
         # applicable D fence through the owner-authority adapter before disclosure.
-        status, detail = _tri_state(
-            "current replay authorization",
-            checks.verify_current_replay_authorization,
-            envelope,
-            decision.original_result_ref,
+        currentness_results = (
+            ("current I replay authorization", checks.verify_current_i_replay_authorization),
+            ("current D ForgetFence", checks.verify_current_d_forget_fence),
         )
-        if status == "INVALID":
-            return {"status": "INVALID", "errors": [detail], "unknown": []}
-        if status == "UNKNOWN":
-            return {"status": "UNKNOWN", "errors": [], "unknown": [detail], "h_p0_digest": digest}
+        replay_unknown = []
+        for name, callback in currentness_results:
+            status, detail = _tri_state(name, callback, envelope, decision.original_result_ref)
+            if status == "INVALID":
+                return {"status": "INVALID", "errors": [detail], "unknown": []}
+            if status == "UNKNOWN":
+                replay_unknown.append(detail)
+        if replay_unknown:
+            return {"status": "UNKNOWN", "errors": [], "unknown": replay_unknown, "h_p0_digest": digest}
         return {"status": "VALID_REPLAY", "errors": [], "unknown": [], "original_result_ref": decision.original_result_ref, "h_p0_digest": digest}
     if decision.disposition != "NEW":
         return {"status": "UNKNOWN", "errors": [], "unknown": [f"unsupported durable disposition: {decision.disposition}"]}
