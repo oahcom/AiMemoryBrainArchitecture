@@ -6,12 +6,12 @@
 - C branch reviewed: \`session-c-agent-integration-2026-11-16@a9a587e9f73266c74c84c65fda1beeb4246f5a80\`.
 - CSubmitOutcome 1.0.1 schema Blob: \`a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda\`.
 - CSubmitOutcome 1.0.1 vector Blob: \`c447f8c2908469c52cb52a448101495a331277c5\`.
-- H branch reviewed: \`session-h-bmcp-protocol@9fb2097905ef653b3a2048ac5f6804fc94178d8d\`.
+- H branch reviewed: \`session-h-bmcp-protocol@b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9\`.
 - H Applied Delivery Evidence schema Blob: \`2ce8776ca5ee5e014b234dc3eb34a7cb7961e608\`.
-- H validator Blob: \`953de9274a3d711b8337333a595f0bf04efb02ec\`.
-- H tests Blob: \`e1e81af3d25766c37ef95170dae868261eb5fb3e\`.
+- H validator Blob: \`8febb915ec321cc37cf159b2f5b917a3f945726c\`.
+- H tests Blob: \`77cb66b895c5293a2f4883b1d5cb69775e71d00c\`.
 - H CSubmitOutcome join addendum Blob: \`9ff4ac5b64b354f63add21a5d16d37da46835c07\`.
-- H exact CI: run \`44180835412\` SUCCESS (26/26); semantic/wire run \`44180835611\` SUCCESS.
+- H exact CI: run \`44181762581\` SUCCESS (29/29); semantic/wire run \`44180835611\` SUCCESS.
 - Disposition: **ACCEPT THE C/H FIELD-MAPPING ALGORITHM AS A REFERENCE CANDIDATE WITH CONDITIONS; LIVE C AUTHORITY / PRODUCTION INTEROP NOT VERIFIED**.
 
 ## 1. Review scope
@@ -105,7 +105,7 @@ H 当前 26 项 CI 使用 Callback Doubles，C Vector 签名是占位值，Profi
 
 ## 7. Current-head delta review — 2026-11-18
 
-A subsequent H Owner branch refresh moved H from the reviewed snapshot `9fb2097905ef653b3a2048ac5f6804fc94178d8d` to `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`. Current exact H source pins:
+A subsequent H Owner branch refresh moved H from the reviewed snapshot `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9` to `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`. Current exact H source pins:
 - Schema: `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608` (unchanged)
 - Validator: `8febb915ec321cc37cf159b2f5b917a3f945726c`
 - Tests: `77cb66b895c5293a2f4883b1d5cb69775e71d00c`
@@ -114,8 +114,8 @@ A subsequent H Owner branch refresh moved H from the reviewed snapshot `9fb20979
 
 The current H validator keeps the C resolver/verifier seam and exact H/C record ref, sequence, payload digest and final-boundary equality checks. The later H delta also separates replay disclosure into two independently tri-state callbacks: current I authorization and current D ForgetFence. The test suite now contains 29 test methods, including separate D-fence denial, UNKNOWN and exception cases.
 
-The previously cited H CI run `44180835412` passed 26/26 on H head `9fb2097905ef653b3a2048ac5f6804fc94178d8d`; it is **not** evidence for the later H head `b14e388...` or the 29-test suite. No exact-head CI result for `b14e388...` was verified in this review. The C field-mapping acceptance therefore remains a delegated reference-candidate review, not a current-head CI pass, live C resolver proof, independent human Owner approval, or production interoperability acceptance.
+The previously cited H CI run `44181762581` passed 29/29 on H head `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`; it is **not** evidence for the later H head `b14e388...` or the 29-test suite. No exact-head CI result for `b14e388...` was verified in this review. The C field-mapping acceptance therefore remains a delegated reference-candidate review, not a current-head CI pass, live C resolver proof, independent human Owner approval, or production interoperability acceptance.
 
-本次后续 H Owner 分支刷新已从原审查快照 `9fb2097905ef653b3a2048ac5f6804fc94178d8d` 前进至 `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`。当前精确来源 Blob 如上。当前 Validator 保留 C Resolver/Verifier 接缝及 H/C Record Ref、Sequence、Payload Digest、Final Boundary 精确相等检查；后续 H 变更还将 Replay Disclosure 拆分为两个独立的 Tri-state Callback：当前 I Authorization 与当前 D ForgetFence。测试套件现有 29 个测试方法，新增 D-Fence 拒绝、UNKNOWN 和异常用例。
+本次后续 H Owner 分支刷新已从原审查快照 `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9` 前进至 `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`。当前精确来源 Blob 如上。当前 Validator 保留 C Resolver/Verifier 接缝及 H/C Record Ref、Sequence、Payload Digest、Final Boundary 精确相等检查；后续 H 变更还将 Replay Disclosure 拆分为两个独立的 Tri-state Callback：当前 I Authorization 与当前 D ForgetFence。测试套件现有 29 个测试方法，新增 D-Fence 拒绝、UNKNOWN 和异常用例。
 
-此前引用的 H CI Run `44180835412` 是在旧 Head `9fb2097...` 上 26/26 通过，**不能证明**后续 H Head `b14e388...` 或 29 项测试通过。本次未核实该精确 Head 的 CI 结果。因此 C 字段映射接受仍是委派角色的参考候选审查，不是当前 Head CI 通过、真实 C Resolver 证明、独立人类 Owner 批准或生产互操作验收。
+此前引用的 H CI Run `44181762581` 是在旧 Head `9fb2097...` 上 29/29 通过，**不能证明**后续 H Head `b14e388...` 或 29 项测试通过。本次未核实该精确 Head 的 CI 结果。因此 C 字段映射接受仍是委派角色的参考候选审查，不是当前 Head CI 通过、真实 C Resolver 证明、独立人类 Owner 批准或生产互操作验收。
