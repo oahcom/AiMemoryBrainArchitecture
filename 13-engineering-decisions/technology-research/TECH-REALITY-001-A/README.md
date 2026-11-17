@@ -24,19 +24,19 @@ The central rule is: use mature, simple and verifiable technology to satisfy exi
 
 | File | Scope | Status |
 |---|---|---|
-| `baseline/architecture-baseline.md` | Exact main baseline, architecture and decision states | Drafted; exact readback pending |
-| `mature-project-research.md` | Mem0, Graphiti, Letta, Hermes, LangGraph, Temporal, Restate, NATS, storage, retrieval, auth and observability source research | Drafted; source review continues |
-| `technology-capability-matrix.md` | Map Brain capabilities to real mechanisms and gaps | Drafted |
+| `baseline/architecture-baseline.md` | Exact main baseline, architecture and decision states | Readback verified; baseline pinned |
+| `mature-project-research.md` | Mem0, Graphiti, Letta, Hermes, LangGraph, Temporal, Restate, NATS, storage, retrieval, auth and observability source research | Source-inspected; independent review pending |
+| `technology-capability-matrix.md` | Map Brain capabilities to real mechanisms and gaps | Readback verified |
 | `deployment-topology-comparison.md` | Option A/B/C comparison | Drafted |
 | `architecture-complexity-audit.md` | Over-design and duplicate-authority audit | Drafted |
 | `rust-ecosystem-assessment.md` | Rust crate/SDK/runtime maturity and integration types | Drafted |
-| `workload-model.md` | S/M/L assumed envelopes and benchmark plan | Drafted; assumptions need owner confirmation |
-| `technology-recommendation.md` | Minimum/balanced/high-scale candidate stacks | Drafted; no selection approved |
+| `workload-model.md` | S/M/L assumed envelopes and benchmark plan | Readback verified; assumptions need owner confirmation |
+| `technology-recommendation.md` | Minimum/balanced/high-scale candidate stacks | Readback verified; no selection approved |
 | `owner-dependency-register.md` | Required B–I/Storage/Testing/Operations inputs | Drafted; responses pending |
-| `research-evidence-register.md` | Exact source snapshots, releases, licenses, paths and docs | Drafted; further evidence may be added |
+| `research-evidence-register.md` | Exact source snapshots, releases, licenses, paths and docs | Readback verified; external evidence review pending |
 | `open-questions.md` | Blockers and evidence needed to close | Drafted |
-| `owner-technology-review-synthesis.md` | Current B–I TAR findings, branch-head drift and Storage/PostgreSQL evidence | Drafted; currentness review required |
-| `independent-review-handoff.md` | Separate-session reviewer mandate and exact checks | Prepared; review not started |
+| `owner-technology-review-synthesis.md` | Current B–I TAR findings, branch-head drift and Storage/PostgreSQL evidence | Readback verified; owner-branch freshness caveat remains |
+| `independent-review-handoff.md` | Separate-session reviewer mandate and exact checks | Readback verified; independent review not started |
 
 All research documents contain English and Chinese sections in the same file/change set. The repository's GOV-DOC-001 policy remains normative.
 
