@@ -242,3 +242,9 @@ Cross-owner review current H pin: `reviews/integration/2026-11-17-cgh-phase36-cr
 | C | `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `session-c-agent-integration-2026-11-16` | `45a48249717c8cddb07ab96197730ef93d406c22` | `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | `docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` | 14/14 headings; 0 tables; targeted parity PASS; exact CGH-APPLIED-1.1 recovery-batch acceptance recorded; C-CO/JF-10 NOT RUN; implementation NOT VERIFIED |
 
 C detailed core companion coverage: 2/10. C36-AP-01 resolved at source-decision level. H36-AP-09 remains OPEN for H wire Schema/SDK and cross-owner consumer interoperability.
+
+
+
+## C36-AP-01 disposition correction — 2026-11-17
+
+The earlier OPEN disposition is superseded by C's separate exact source decision in Blob `45a48249717c8cddb07ab96197730ef93d406c22`. C explicitly accepts the exact CGH-APPLIED-1.1 recovery-batch amendment with enumerated exceptions and defines CSubmitOutcome/provider evidence. **C36-AP-01: RESOLVED at source-decision level.** H36-AP-09 remains OPEN; H Schema/SDK, C/G/I/D/Storage interoperability, deployment and conformance are not closed.
