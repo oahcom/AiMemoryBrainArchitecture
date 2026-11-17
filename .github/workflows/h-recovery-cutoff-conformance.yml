@@ -22,6 +22,10 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Set up Node.js 22 for independent wire differential tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - name: Run HRC, Join Proof, wire and schema candidate tests
         run: |
           python -m unittest discover \
