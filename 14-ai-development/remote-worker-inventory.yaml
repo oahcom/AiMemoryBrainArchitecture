@@ -7,15 +7,15 @@ worker_id: "ubuntu-primary-01"
 display_name: "Primary Ubuntu AI development worker"
 provider: "user-managed-remote-host"
 endpoint:
-  host: "43.138.133.238"
-  port: 22
-  username: "ubuntu"
+  host: null # Redacted from public repository; keep endpoint in an access-controlled operations record.
+  port: null
+  username: null
   transport: "ssh"
   host_key_fingerprint_status: "NOT_VERIFIED"
   host_key_fingerprint: null
   tailscale:
-    device_name: "vm-0-9-ubuntu"
-    ipv4: "100.108.116.118"
+    device_name: null # Redacted from public repository.
+    ipv4: null # Redacted from public repository.
     daemon_enabled: true
     daemon_active: true
     evidence: "User-provided server-console output; not independently queried by deployment controller."
@@ -23,18 +23,18 @@ purpose:
   - "GitHub Actions self-hosted runner"
   - "Future event-driven A-I Owner worker execution substrate"
 runner:
-  name: "zesu-x64"
+  name: "REDACTED — see access-controlled operations record"
   version: "2.338.2"
   architecture: "linux-x64"
   labels: ["self-hosted", "linux", "x64"]
   custom_label_status: "DEFERRED — adding ai-worker requires re-registration with a one-time token; see AI-RUN-002-RUNBOOK 4.2"
-  install_path: "/home/ubuntu/actions-runner"
+  install_path: "REDACTED — see access-controlled operations record"
   work_folder: "_work"
-  service_unit: "actions.runner.oahcom-AiMemoryBrainArchitecture.zesu-x64.service"
+  service_unit: "REDACTED — see access-controlled operations record"
   drop_ins:
     - "proxy.conf (HTTP(S)_PROXY + After/Wants=sing-box.service)"
     - "guard.conf (ACTIONS_RUNNER_HOOK_JOB_STARTED)"
-  egress_chain: "runner -> sing-box 127.0.0.1:17891 -> warp-usque 127.0.0.1:2085 (Cloudflare WARP); api.github.com, domestic mirrors, .cn and private ranges route direct"
+  egress_chain: "REDACTED — operational network topology is maintained in an access-controlled operations record"
 runtime:
   deployment_status: "DEPLOYED"
   runner_status: "ONLINE_AND_EXECUTING"
@@ -62,9 +62,9 @@ security:
     policy: "Only refs/heads/main is admitted, and only for push, workflow_dispatch, or schedule."
     service_layer:
       status: "ENFORCED"
-      mechanism: "ACTIONS_RUNNER_HOOK_JOB_STARTED -> /home/ubuntu/actions-runner/hooks/job-started-guard.sh"
-      log: "/home/ubuntu/actions-runner/hooks/guard.log"
-      rollback_switch: "/home/ubuntu/actions-runner/hooks/observe.flag (present = log only, never block)"
+      mechanism: "ACTIONS_RUNNER_HOOK_JOB_STARTED -> host-local admission hook (path withheld from public inventory)"
+      log: "host-local guard log (path withheld from public inventory)"
+      rollback_switch: "host-local emergency observe flag (path withheld from public inventory)"
     repository_layer:
       status: "AVAILABLE_NOT_BINDING"
       mechanism: ".github/workflows/runner-admission-policy.yml + scripts/ci/audit_runner_admission.py"
