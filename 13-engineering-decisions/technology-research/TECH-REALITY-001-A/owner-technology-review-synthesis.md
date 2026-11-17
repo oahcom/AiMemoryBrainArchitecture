@@ -161,3 +161,46 @@
 总体候选组合是 Rust 模块化 Host + 关系型事务权威 + DB Outbox/Worker + 结构化/词法检索 + 可选隔离推理 + 语言无关 Agent Protocol。真正关键不是“选哪种 Queue”，而是 D/Storage 在同一逻辑 Serializable Transaction Domain 中如何实现 Admission/Fence/Dependency/Final Visibility。PostgreSQL 18.7 已有引擎能力证据，但不是 Brain 应用集成或生产部署证明。SQLite 仍可用于符合单写者/同主机条件的本地原型，不能声称满足外部 I Sequencer 的 Prepared-XID 恢复。
 
 所有 Owner TAR 报告都是委派静态设计审查，不是独立人工 Owner 签署；其审查 HEAD 也落后于当前分支。正式冻结前必须刷新所有 Owner TAR，并由 Storage 补齐独立技术审查。
+
+
+## 7. Late exact-version refresh — Storage v3.2.6 / JF-10 / 2026-11-17
+
+A fetched the following current Storage-branch artifacts directly from `session-storage-consistency-forget-atomicity-2026-11-16`:
+
+| Artifact | Blob SHA | Result / authority boundary |
+|---|---|---|
+| Storage v3.2.6 successor exact-version manifest | `dbfa37617d109d5891a067769e858085e2ce547a` | **SUCCESSOR BUNDLE BOUND / OWNER REVIEWS RECORDED / H 1.2.13 EXACT CI OPEN / NOT JOINTLY FROZEN**; provenance explicitly says delegated Storage-role artifact, not independent human Storage Owner signature |
+| Normative Storage v3.2.3 technical body | `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792` | Current normative S0a–S4 body pinned by manifest |
+| COC companion §§15–17 | `5b950a3a29bd7a5276b92a49a9114d700718b987` | Batch-before-Manifest, immutable recovery round and recovery-join ordering |
+| PostgreSQL 18.7 prepared-XID dossier | `0aabf66848dc97deee028c571183c0d7204008c0` | Seven isolated CI capability subtests PASS; Gate A remains PARTIAL PASS / OPEN |
+| Deployment readiness | `ef4eff1708e4bd6072b86cc234340dd848bb5fbc` | Logical deployment profile selected; production Canonical Authority deployment not designated |
+
+The seven PostgreSQL CI evidence classes are: single-node prepared-XID/hard restart; synchronous standby WAL replay/promotion; physical pg_basebackup restore with stale-control fail-closed fixture; coordinator crash in participant-success/ACK-checkpoint gap; TCP CommandComplete response loss; synchronous-standby-unavailable fail-closed PREPARE; and WAL-archive PITR to an explicit LSN. These results qualify only the pinned isolated CI profiles. They do **not** prove live Brain D/I/COC integration, signed PreparedParticipantReceipt interoperability, production authoritative reads, external high-water restore quarantine, deployed host/failure-domain durability or production operations.
+
+### 7.1 Current successor bundle / 当前后继 Bundle
+
+The v3.2.6 manifest pins the following successor candidates:
+- H Unified 1.2.13 / wire 1.3.0: `8e7f6a6c9663388863db88548f9c37d0fdb1bd97`.
+- H RecoveryJoin 1.0.2: `4b664e3bce465499bcdfd93796349a4ba7074002`.
+- H RecoveryCutoff 1.0.5: `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`.
+- H C 1.0.1 mapping: `32bf9b0fd42abe8b58749b858b1d5c9aef39c5fd`.
+- CSubmitOutcome 1.0.1 schema: `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`.
+- C exact review: `dd4fb61536bead57d5c8db0a58abae93b368b72e`.
+- I exact review: `367a6002327134840b1d03d426bb4bcd864db4c9`.
+- D exact review: `1f03f3a83dda3fc1cc364ae9d2d18a3f1b96b590`.
+
+Evidence boundary from the manifest:
+- CSubmitOutcome 1.0.1 candidate CI run 44059935858: SUCCESS, 19 tests.
+- H 1.2.13 current source: 15 tests, exact-head CI NOT RUN / OPEN.
+- Prior H 1.2.12 17-test run is a predecessor and does not transfer to H 1.2.13.
+- I accepts structural carriers and I P0 candidate only; L3 family vectors, production trust/key status and anti-rollback remain OPEN.
+- D accepts structural carrier candidate; lineage completeness, late-discovery and final release CAS remain OPEN.
+- C accepts exact C/H mapping candidate with enumerated blockers; provider idempotency, UNKNOWN recovery and runtime evidence remain OPEN.
+
+**Gate interpretation:** Gate A = PARTIAL PASS / OPEN. Gate B = design-level owner acceptance with enumerated exceptions for the earlier pinned revision; the v3.2.6 successor bundle is bound but **not jointly frozen** and H exact CI is open. Gate B implementation/conformance is NOT PASS and deferred to engineering. Gate C end-to-end distributed fault injection is deferred to engineering and remains NOT RUN. JF-10 runtime P0 remains OPEN; production activation is NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
+
+本次直接读取 Storage 当前分支，核实 Storage v3.2.6 后继 Bundle、规范技术正文、COC companion、PostgreSQL 18.7 能力档案和部署准备文件。Manifest 明确说明它由协调会话模拟 Storage 角色编写，不是独立人工 Storage Owner 签名。
+
+PostgreSQL 七类 CI 结果只限定于固定隔离测试档案，不能证明 Brain 的实时 D/I/COC 集成、签名 Receipt 互操作、生产权威读取、外部 High-water 恢复隔离、真实主机/故障域耐久性或生产运维。C 1.0.1 的 19 项候选测试 PASS；H 1.2.13 的 15 项源码尚未在精确 HEAD 执行 CI，旧 H 1.2.12 的 17 项结果不得转移。I 的 L3 向量、生产信任/密钥状态/防回滚仍 OPEN；D 的 Lineage 完整性、迟到发现和最终 Release CAS 仍 OPEN；C 的 Provider 幂等、UNKNOWN 恢复与运行时证据仍 OPEN。
+
+**Gate 解释：** Gate A = PARTIAL PASS / OPEN；Gate B 仅为带枚举例外的设计级 Owner 接受，v3.2.6 后继 Bundle 已绑定但**尚未联合冻结**且 H 精确 CI OPEN；Gate B 实现/一致性验证不是 PASS，延后到工程阶段；Gate C 分布式端到端故障注入延后到工程阶段且 NOT RUN；JF-10 Runtime P0 仍 OPEN；禁止生产激活；多 PolicyDomain 仍 BLOCKED。
