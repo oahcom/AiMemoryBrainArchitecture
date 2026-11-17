@@ -2,7 +2,7 @@
 
 - Owner: I — Security, Identity and Governance
 - C key-status event schema: Blob `908b293eba337e9fa75864cea3704e28a1a8d82e`
-- C lifecycle/anti-rollback contract: Phase 3.11.0 Blob `de581ea59e724faf5972217e17b983de641ad3f7`
+- C lifecycle/anti-rollback contract: Phase 3.11.0 Blob `9339b168165a7a3dd34def5236ad61cfd3163418`
 - C crypto candidate review baseline: Phase 3.8.6 Blob `b2e37b0ba9137f2ef1b9fd65bf815bc136ca28c8`
 - Disposition: **STRUCTURAL LIFECYCLE MODEL ACCEPTED; GOVERNANCE SIGNATURE PROFILE ACCEPTED AS CANDIDATE; NO TRUST ROOT OR PROFILE REGISTRATION**
 - Provenance: delegated I-role simulation at user's direction; not independent human I Owner approval.
@@ -78,3 +78,12 @@ Public deterministic test seeds and checked-in signatures are not operational ke
 **ACCEPT THE STRUCTURAL LIFECYCLE MODEL AND GOVERNANCE SIGNATURE CONSTRUCTION AS CANDIDATES. DO NOT REGISTER OR DEPLOY.**
 
 I has not approved or activated a governance trust root, C key registry, key custody, HSM/KMS, anti-rollback service or production profile. This review is a delegated role simulation, not an independent human I Owner signature.
+
+
+## 7. Review of executed C/H key-status structural tests
+
+C CI run `44059137081` at commit `6b7b9c4a24d81ae45dcb7ddcdbe49c9617e3e4da` passed 12 tests, including five key-status schema/state-machine tests. H CI run `44058962672` at commit `f6a632c76efe50d8514a8b94bd1b134f064445c8` passed 11 tests, including key-status schema closure and fail-closed missing callback checks.
+
+I accepts these as bounded evidence that the proposed schema is structurally valid, the state transition matrix is encoded in unit tests, and H's validator cannot silently treat a missing key-status callback as success.
+
+Neither run validates an actual governance signature, I trust root, C registry persistence, HSM/KMS custody, anti-rollback checkpoint, revocation/compromise operations or production key activation. The candidate governance profile and C data profile remain unregistered.
