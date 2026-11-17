@@ -159,6 +159,18 @@ class Protocol:
 
     def consume_i_commit_won(self, operation_id, auth_id, publication_id,
                              storage_id, d_proof):
+        i_proof = ("I_COMMIT_WON", auth_id, publication_id, storage_id)
+        binding = (auth_id, publication_id, storage_id, d_proof, i_proof)
+        # Once COMMIT_WON is consumed, a retry retrieves the same proof even if
+        # revocation subsequently arrived; COMMIT_WON already won the sequencer.
+        if operation_id in self.i_pending:
+            if self.i_pending[operation_id] != binding:
+                raise Rejected("I participant identity rebound")
+            return i_proof
+        if operation_id in self.i_closed:
+            if self.operation_bindings.get(operation_id) != binding:
+                raise Rejected("closed I participant identity rebound")
+            return i_proof
         if operation_id in self.private_unknown or operation_id in self.outcomes:
             raise Rejected("operation is already UNKNOWN or terminal")
         if auth_id not in self.authorizations or auth_id in self.revoked:
@@ -171,15 +183,9 @@ class Protocol:
             raise Rejected("D proof does not bind exact Storage participant")
         if d_proof != ("D_ADMITTED", publication_id, storage_id):
             raise Rejected("invalid D publication proof")
-        i_proof = ("I_COMMIT_WON", auth_id, publication_id, storage_id)
-        binding = (auth_id, publication_id, storage_id, d_proof, i_proof)
         prior = self.operation_bindings.get(operation_id)
         if prior is not None and prior != binding:
             raise Rejected("operation identity rebound before Storage commit")
-        if operation_id in self.i_pending:
-            if self.i_pending[operation_id] != binding:
-                raise Rejected("I participant identity rebound")
-            return i_proof
         if auth_id in self.consumed:
             raise Rejected("single-use authorization already consumed")
         self.consumed.add(auth_id)
@@ -448,6 +454,10 @@ class PublicationProtocolTests(unittest.TestCase):
         args = self.consume_i(p)
         p.revoke("auth-1")
         self.assertIn("auth-1", p.revocation_pending)
+        self.assertEqual(
+            self.consume_i(p, args)["i_commit_won_proof"],
+            args["i_commit_won_proof"],
+        )
         receipt = p.commit(**args)
         outcome = p.outcomes["op-1"]
         self.assertEqual(p.receipts["op-1"], receipt)
