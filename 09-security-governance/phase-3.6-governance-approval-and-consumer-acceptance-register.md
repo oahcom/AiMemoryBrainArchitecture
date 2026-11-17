@@ -120,7 +120,7 @@ H36-SR-02/SR-03/SR-04/SR-05/SR-07 additional cases remain mandatory and NOT RUN:
 - I governance confirmation: I policy technical baseline preserved; external approvals remain GOVERNANCE-BLOCKED.
 - H protocol binding confirmation: joint technical baseline preserved; no separate H-session signature claimed.
 - Cross-module technical agreement: B/I/H only, under delegated joint technical decision.
-- Consumer acceptance: OPEN for C/D/E/F/G/H/Storage; A is registrar only.
+- Consumer acceptance: **DESIGN-ACCEPTED for C/D/E/F/G/Storage** against A BIH package Blob `a45ae90b318a79bf009d14f4d917611881e9e214`; H's own BIH boundary acceptance is also recorded. Current branch readbacks and exact acceptance artifacts are reconciled in §11. A remains registrar only.
 - Test evidence: I36 and H36 NOT RUN.
 - Fact/Claim ADR-001: independently ADR-BLOCKED. No status change is made by this register.
 
@@ -230,3 +230,38 @@ G6 BIH Consumer Acceptance is now **PARTIAL / BLOCKED**:
 - A remains registrar only, not a consumer approver.
 
 I36-GOV-01..10 remain GOVERNANCE-BLOCKED. JF-10 remains P0 OPEN under the separate I36-SR-02 owner-gate ordering correction. This register update does not close G6, G5, G7 or G10.
+
+
+## 11. C/F/G BIH consumer acceptance — current Owner-branch reconciliation (2026-11-17)
+
+This section supersedes the historical OPEN/PARTIAL consumer status in §§5.3 and 7 for the **design-acceptance subrequirement only**. It does not change I36-GOV-01..10, H36/I36 execution, implementation or overall Phase 3.6 acceptance.
+
+Exact A BIH package: `reviews/integration/phase-3.6-identity-trust-joint-architecture.md`, Blob `a45ae90b318a79bf009d14f4d917611881e9e214`.
+
+| Consumer | Current branch HEAD | Owner acceptance artifact | Current readback Blob | Decision |
+|---|---|---|---|---|
+| C | `c408d2c138d1975eff1167bd5889ba45a13b126b` | `07-agent-integration/phase-3.6-final-request-evidence-contract.md` | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | ACCEPT WITH ENUMERATED EXCEPTIONS |
+| D | `f5cbe59561b73c75708a52f28b0bf12707d75c71` | `03-memory-brain/phase-3.6-bih-identity-consumer-acceptance.md` | `184423d2d8191a12f2d4a869bc63f5e7fafaf96a` | DESIGN-LEVEL ACCEPTANCE RECORDED |
+| E | `fb063e15ee31569e501f5fa0a3198b3cf0b67a9c` | `04-memory-compiler/phase-3.6-bih-identity-consumer-acceptance.md` | `6f4100618695fcf971560fb784f7887a72798c96` | DESIGN-LEVEL ACCEPTANCE RECORDED |
+| F | `86c013814fbbfff1829729eb18fdc3a5de265969` | `05-memory-runtime/phase-3.6-runtime-forget-suppression-and-invalidation.md` | `ce59252dbbdc5d10d016704797e9ba12d5a941bd` | ACCEPT WITH ENUMERATED EXCEPTIONS |
+| G | `466e2bf5992ea5944ef6ecebd79a39eeb21cdc97` | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | ACCEPT WITH ENUMERATED EXCEPTIONS |
+| Storage | `f0f9d9fefd31251fc1ee27e543d4351f398627e8` | `reviews/storage-consistency/phase-3.6-bih-identity-consumer-acceptance.md` | `ec8e49d0d11c72d37ad0c291611a96a1122ba6f5` | DESIGN-LEVEL ACCEPTANCE RECORDED |
+
+Additional H owner-side BIH boundary evidence:
+- H branch HEAD: `7924f68bd55c1ab8020713d496c30bc9bed41a2c`.
+- H artifact: `08-bmcp-protocol/phase-3.6-bih-identity-trust-consumer-acceptance.md`.
+- Current readback Blob: `ccbac2d30234df9b910565a7326d100d11a6494e`.
+- Disposition: DESIGN-LEVEL ACCEPTANCE RECORDED; H36 NOT RUN.
+
+The earlier A Issue #6 reconciliation comment `6919649724` reported G's acceptance Blob as `5406b3f2558daa3f5915f6bb46e808be8d90d3ca`. The current G branch readback is Blob `aa3afa73d8a76cc6f025839c52bfbff6a983046a`; the current file still contains the exact A BIH package pin and G's ACCEPT WITH ENUMERATED EXCEPTIONS disposition. This register uses the current readback Blob and retains the earlier A comment as historical evidence.
+
+### 11.1 G6 consequence
+
+The explicit BIH design-consumer acceptance subrequirement for C/D/E/F/G/Storage is now **COMPLETE / ACCEPTED WITH ENUMERATED EXCEPTIONS** on current branch readbacks. H's own owner-side design acceptance is also recorded. This is the acceptance state only; it does not imply:
+- I36-GOV-01..10 approval (still GOVERNANCE-BLOCKED);
+- I36/H36/D36/E36/Storage/consumer runtime execution (NOT RUN or NOT VERIFIED);
+- JF-10 P0 implementation closure or production coordinator deployment;
+- CGH-APPLIED-1.1 production wire freeze or C/G/H contract freeze;
+- Global Forget completion, Runtime Forget E2E closure or physical erasure.
+
+A is the final G0–G10 registrar/acceptance authority and must update its own closure plan/ledger before treating G6 as closed. This I register does not rewrite A's gate state or approve on behalf of any consumer.
