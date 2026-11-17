@@ -10,6 +10,7 @@ import os
 from datetime import date
 import subprocess
 import sys
+import re
 from pathlib import Path
 
 NORMATIVE_ROOTS = {
@@ -68,6 +69,79 @@ def approved_exception(body: str) -> bool:
     return True
 
 
+
+def check_prompt_library() -> list[str]:
+    """Validate the canonical global/Owner prompt library structure and metadata."""
+    errors: list[str] = []
+    prompt_root = ROOT / "prompts"
+    required = [
+        prompt_root / "README.md",
+        prompt_root / "global-project-developer.md",
+        prompt_root / "global-architecture-reviewer.md",
+        prompt_root / "global-bilingual-documentation.md",
+    ]
+    for owner in "ABCDEFGHI":
+        owner_dir = prompt_root / owner
+        required.extend(
+            owner_dir / name
+            for name in (
+                "owner-charter.md",
+                "phase-3-remediation.md",
+                "technology-review.md",
+            )
+        )
+
+    seen_ids: dict[str, str] = {}
+    for path in required:
+        rel = path.relative_to(ROOT).as_posix()
+        if not path.is_file():
+            errors.append(f"Required prompt library file is missing: {rel}")
+            continue
+        content = path.read_text(encoding="utf-8").strip()
+        if len(content) < 250:
+            errors.append(f"Required prompt library file is empty or incomplete: {rel}")
+            continue
+
+        prompt_id_match = re.search(
+            r"^(?:- )?(?:Prompt ID|Library ID):\s*([A-Za-z0-9._-]+)\s*$",
+            content,
+            re.MULTILINE,
+        )
+        version_match = re.search(
+            r"^(?:- )?Version:\s*([^\r\n]+)$", content, re.MULTILINE
+        )
+        status_match = re.search(
+            r"^(?:- )?Status:\s*(.+)$", content, re.MULTILINE
+        )
+        if not prompt_id_match:
+            errors.append(f"Prompt ID / Library ID metadata missing: {rel}")
+        else:
+            prompt_id = prompt_id_match.group(1)
+            if prompt_id in seen_ids:
+                errors.append(
+                    f"Duplicate prompt identifier {prompt_id}: "
+                    f"{seen_ids[prompt_id]} and {rel}"
+                )
+            seen_ids[prompt_id] = rel
+        if not version_match:
+            errors.append(f"Version metadata missing: {rel}")
+        if not status_match:
+            errors.append(f"Status metadata missing: {rel}")
+
+    # Owner-specific prompts must remain inside their matching Owner directory.
+    for owner in "ABCDEFGHI":
+        charter = prompt_root / owner / "owner-charter.md"
+        if charter.is_file():
+            content = charter.read_text(encoding="utf-8")
+            if not re.search(rf"Owner:\s*{owner}\b", content):
+                errors.append(
+                    f"Owner charter does not declare its directory Owner {owner}: "
+                    f"prompts/{owner}/owner-charter.md"
+                )
+
+    return errors
+
+
 def main() -> int:
     try:
         changed = changed_paths()
@@ -76,7 +150,7 @@ def main() -> int:
         return 2
 
     body = os.environ.get("PR_BODY", "")
-    errors: list[str] = []
+    errors: list[str] = check_prompt_library()
     exception = approved_exception(body)
     complete = "BILINGUAL-MANIFEST: COMPLETE" in body
 
@@ -147,7 +221,7 @@ def main() -> int:
         print("Bilingual documentation gate: FAIL")
         return 1
 
-    print(f"Bilingual documentation gate: PASS ({len(changed)} changed paths inspected).")
+    print(f"Bilingual documentation and prompt-library gate: PASS ({len(changed)} changed paths inspected).")
     print("This is a structural gate only; semantic parity requires independent review.")
     return 0
 
