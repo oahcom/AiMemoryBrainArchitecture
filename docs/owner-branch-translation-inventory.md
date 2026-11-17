@@ -221,3 +221,14 @@ Cross-owner report: `reviews/integration/2026-11-17-cgh-phase36-cross-owner-cont
 | H | `74be8374a67da385a5f0f8e34c7aef2b38b72bcf` | §§11.8–11.9 candidate mapping only; H36-AP-08/09 OPEN pending exact H schema and C/G/I/D/Storage acceptance |
 
 No common CGH-APPLIED-1.1 cross-owner acceptance is established.
+
+
+## H §11.9 current-source correction and C outcome closure proposal — 2026-11-17
+
+| Artifact | Exact source Blob | Current finding / status |
+|---|---|---|
+| H Adapter Capability / Applied Attestation | `74be8374a67da385a5f0f8e34c7aef2b38b72bcf` | Current source includes §§11.8–11.9; EN/zh-CN pair pins exact Blob; 24/24 headings, 33/33 table rows; §11.9 is candidate C provider outcome / I-D gate-release mapping; no schema freeze |
+| C Final Request Evidence | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | No CSubmitOutcome/provider receipt object or exact 1.1 recovery-batch acceptance in current C source |
+| G Applied / Forget / Reconciliation | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G 1.1 recovery-batch acceptance remains with enumerated exceptions; implementation NOT VERIFIED; conformance NOT RUN |
+
+Cross-owner review current H pin: `reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md` and Chinese companion. C closure proposal (non-normative; NOT an Owner decision): `reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal.md` and Chinese companion. The prior H pin `0dca3dc5463a02be0e19524811afbae87795baf5` is superseded by `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`.
