@@ -13,12 +13,12 @@
 | E | Phase 3.8 E Publication Orchestration, Retry and Recovery Contract | session-e-memory-compiler-2026-11-16 | 475fee41e5eea527af4edefbfe88c58c86967d0a |
 | I | Phase 3.8 I Commit Authorization Receipt and Revocation Sequencer Contract | session-i-security-governance-2026-11-16 | 54bab0484bd232a5a258e65e34cc7425288b39a6 |
 | Storage | Phase 3.8 Storage Visibility Participant and Atomic Outcome Contract | session-storage-consistency-forget-atomicity-2026-11-16 | 175ee7b1349cfdb79a19898b311a88391ed88010 |
-| Storage | Phase 3.6.11 Bidirectional COC/Owner Admission Join Proof | session-storage-consistency-forget-atomicity-2026-11-16 | 2882fa8eb4d5e7faca035866572cbe48ac5eeae0 |
+| Storage | Phase 3.6.11 Bidirectional COC/Owner Admission Join Proof | session-storage-consistency-forget-atomicity-2026-11-16 | 4520860b28429d35cdb2ca947a56d0ccb64226a3 |
 | Storage | Phase 3.8.2 Serialization Topology ADR | session-storage-consistency-forget-atomicity-2026-11-16 | 080433f8e13a500522bc2754da64057edb0ae9d8 |
-| H | HRC semantic validator contract | session-h-bmcp-protocol | 9a2c3b856d1319e780932d75d2b0165021faf816 |
+| H | HRC semantic validator contract | session-h-bmcp-protocol | b3218298f58cff9b92cb1c38e453af6fd4d0dd50 |
 | H | Recovery-cutoff schema 1.0.4 | session-h-bmcp-protocol | d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1 |
 | H | RecoveryJoin schema candidate 1.0.0 | session-h-bmcp-protocol | dd3234aa1c74caf6d0e335875cd96e0b2b64082f |
-| H | HRC semantic suite | session-h-bmcp-protocol | f28834d73e055be411060f0c1093bd3dc0d865b9 |
+| H | HRC semantic suite | session-h-bmcp-protocol | ee0f47095df10786da358bed193d6f8491a5eb2c |
 | H | Wire interop suite | session-h-bmcp-protocol | 1a4e754ba9bfa57eb973c6d39731e9f89443b323 |
 | H | Schema integrity suite | session-h-bmcp-protocol | 5292d56661e938c905c61455e9ed53c4ff674c54 |
 
