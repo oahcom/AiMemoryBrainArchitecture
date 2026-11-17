@@ -324,6 +324,140 @@
     "storageResolutionPayload": {
       "allOf": [
         {
+          "$ref": "#/$defs/commonPayload"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "storage_resolution_outcome": {
+              "type": "string",
+              "enum": [
+                "COMMITTED",
+                "ROLLED_BACK",
+                "UNKNOWN"
+              ]
+            },
+            "participant_outcome_ledger_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "participant_outcome_ledger_version": {
+              "$ref": "#/$defs/positiveVersion"
+            },
+            "authoritative_source_role": {
+              "type": "string",
+              "enum": [
+                "CANONICAL_WRITABLE_PRIMARY",
+                "RECOVERY_AUTHORITY",
+                "DURABLE_PARTICIPANT_LEDGER"
+              ]
+            },
+            "owner_final_gate_participant_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "commit_authorization_receipt_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "commit_authorization_receipt_digest": {
+              "$ref": "#/$defs/sha256"
+            },
+            "i_receipt_consumption_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_receipt_consumption_digest": {
+              "$ref": "#/$defs/sha256"
+            },
+            "i_terminal_proof_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_terminal_proof_digest": {
+              "$ref": "#/$defs/sha256"
+            },
+            "i_sequencer_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_sequencer_epoch": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_sequencer_position": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_permission_epoch": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "i_terminal_outcome": {
+              "type": "string",
+              "enum": [
+                "COMMIT_WON",
+                "REVOCATION_WON",
+                "INDETERMINATE_ABORTED",
+                "UNKNOWN",
+                "PENDING"
+              ]
+            },
+            "storage_same_gid_resolution_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "storage_private_visibility_state": {
+              "type": "string",
+              "enum": [
+                "VISIBLE",
+                "NOT_VISIBLE"
+              ]
+            },
+            "storage_lock_retention_state": {
+              "type": "string",
+              "enum": [
+                "RETAINED",
+                "RELEASED_AFTER_TERMINAL"
+              ]
+            },
+            "visibility_pointer_transaction_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "publication_receipt_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "publication_receipt_digest": {
+              "$ref": "#/$defs/sha256"
+            },
+            "atomic_publication_transaction_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "nonpublication_proof_ref": {
+              "$ref": "#/$defs/opaqueRef"
+            },
+            "unknown_reason_class": {
+              "type": "string",
+              "enum": [
+                "I_PROOF_MISSING",
+                "I_OUTCOME_UNKNOWN",
+                "STORAGE_LOOKUP_AMBIGUOUS",
+                "DB_INCARNATION_UNVERIFIED",
+                "AUTHORITATIVE_SOURCE_UNAVAILABLE",
+                "CONFLICTING_EVIDENCE"
+              ]
+            },
+            "recovery_observations": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/recoveryObservation"
+              },
+              "minItems": 0
+            }
+          },
+          "required": [
+            "storage_resolution_outcome",
+            "participant_outcome_ledger_ref",
+            "participant_outcome_ledger_version",
+            "authoritative_source_role",
+            "storage_same_gid_resolution_ref",
+            "storage_private_visibility_state",
+            "storage_lock_retention_state",
+            "recovery_observations",
+            "i_terminal_outcome"
+          ]
+        },
+        {
           "if": {
             "properties": {
               "storage_resolution_outcome": {

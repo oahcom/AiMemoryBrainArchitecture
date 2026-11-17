@@ -13,7 +13,7 @@
 
 | Artifact | Blob | Purpose |
 |---|---|---|
-| 08-bmcp-protocol/schemas/bmcp.storage-prepared-participant-proof-1.0.0.schema.json | 4fe21354b7f4ea778a7c82c2dc4b6fbbc1601444 | Candidate strict schema for Storage.PreparedParticipantReceipt and Storage.StorageResolutionProof |
+| 08-bmcp-protocol/schemas/bmcp.storage-prepared-participant-proof-1.0.0.schema.json | 6327d9d387bdc0d6610aba08ff3e51ca9da17f5d | Candidate strict schema for Storage.PreparedParticipantReceipt and Storage.StorageResolutionProof |
 | tests/schema/test_storage_prepared_participant_proof_schema.py | f8de63379d4d411ff9c9831f25294e4c8b09f158 | Structural positive/negative JSON Schema tests |
 | .github/workflows/jf10-bridge-schema.yml | f9a8a403b4fd523a065c0aee6c51f3575c4270a2 | Adds the candidate schema suite to the existing pinned jsonschema CI harness |
 
