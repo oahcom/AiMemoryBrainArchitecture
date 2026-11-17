@@ -152,3 +152,17 @@ The latest H workflow [44042093922](https://github.com/oahcom/AiMemoryBrainArchi
 I candidate crypto profile Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`; H wire mapping Blob `c30e8ccbecb75b7e27ddceb0cf088afbbb26f562`; H schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`; I exact review Blob `446109f4867268fe7dca3c7e114346f3c1a74b61`. Storage accepts profile identifiers as immutable references only; it cannot resolve trust or select algorithms. I remains the trust authority. H's two-language fixed-vector test is not proof of two independent production implementations.
 
 The new crypto profile does not resolve the physical D/Storage serialization topology. Storage T1–T8 and JF-10 integrated conformance remain OPEN; topology ADR remains BLOCKED.
+
+
+## 13. H 95-test latest refresh and Storage JoinProof current pins
+
+- Current Storage JoinProof: Blob `0deffc2dcead5f88264417c2ae0ae231a38cfb6f`.
+- Current Storage exact review: Blob `2c9327e89d37e8955d9774a18d2575273000d2a2`.
+- H semantic contract: Blob `99ccf2b637b6a87be045ed8342c88b15b8816604`.
+- H schema integrity suite: Blob `fa4fc9f7d3bf64a90bc992453b13fc1fb3c11879`.
+- H unified schema 1.2.7: Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`.
+- Latest H CI [44042568297](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042568297), commit `b832679d1143e2806cba30e77dd8d0b240334fdc`: **95 tests ran, OK**.
+
+The 95 methods include 25 HRC, 19 JPF, 10 WIRE, 14 SCHEMA, 26 TPH and 1 XLANG. The two added schema checks cover only unified 1.2.7 artifact/wire version separation and signature_profile_id field shape. They do not implement production semantic signature_profile_id requiredness or I trust-registry resolution.
+
+Storage's JoinProof remains a logical proposal accepted with amendments. The 95-test CI result does not prove live COC prefix/quorum completeness, signed I/D/C ledger enumeration, Storage JoinProof durability, owner currentness CAS, JF-10 physical same-GID resolution, or selected D/Storage topology. Storage freeze remains BLOCKED; T1–T8, STORAGE-RJ-01..05 and integrated JF-10 conformance remain OPEN.
