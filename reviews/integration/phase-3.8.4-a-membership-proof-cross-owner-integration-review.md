@@ -20,7 +20,7 @@
 | H | RecoveryJoin 1.0.2 tests | `6afa788da2a899f03de8207cb700c40e0533aba1` |
 | H | Unified 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
 | H | Unified 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
-| H | Candidate CI | Run `44051045877`, commit `ccecb8b6b80dff1e8ef7af10caac67c2f3c77929`, 282 total / 260 passed / 22 skipped / 0 failed |
+| H | Candidate CI | Run `44051257901`, commit `07cacfbc208a566a784389f4eef60bc8e5d1281f`, 282 total / 260 passed / 22 skipped / 0 failed |
 | I | Crypto profile proposal | `5eeb011032c53c2f7897d699d6f512b26f07d0a2` |
 | I | Artifact revision / manifest digest amendment | `35c47cc56c9d5e7ab72fdddb7ef9032aa3661ff9` |
 | I | Owner membership proof contract | `88209bbea0ab600880c5c630cfe83af31ee16dd7` |
