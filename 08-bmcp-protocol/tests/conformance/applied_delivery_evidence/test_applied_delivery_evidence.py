@@ -186,17 +186,24 @@ class AppliedDeliveryEvidenceTests(unittest.TestCase):
         record=copy.deepcopy(C_ACCEPTED_RECORD); record.pop("issuer_authority_ref")
         self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"INVALID")
 
-    def test_27_replay_result_not_disclosed_after_d_fence_denial(self):
+    def test_27_resolver_record_ref_must_equal_h_c_submit_outcome_ref(self):
+        record=copy.deepcopy(C_ACCEPTED_RECORD)
+        record["record_ref"]="C/outcome/other-valid-record"
+        result=self.validate(fixture(),checks(c_record=record))
+        self.assertEqual(result["status"],"INVALID")
+        self.assertIn("does not equal H c_submit_outcome_ref", result["errors"][0])
+
+    def test_28_replay_result_not_disclosed_after_d_fence_denial(self):
         result=self.validate(fixture(),checks("SAME_DIGEST_REPLAY",replay_d_fence=False))
         self.assertEqual(result["status"],"INVALID")
         self.assertNotIn("original_result_ref",result)
 
-    def test_28_replay_result_not_disclosed_when_d_fence_unknown(self):
+    def test_29_replay_result_not_disclosed_when_d_fence_unknown(self):
         result=self.validate(fixture(),checks("SAME_DIGEST_REPLAY",replay_d_fence=None))
         self.assertEqual(result["status"],"UNKNOWN")
         self.assertNotIn("original_result_ref",result)
 
-    def test_29_replay_result_not_disclosed_when_d_fence_callback_raises(self):
+    def test_30_replay_result_not_disclosed_when_d_fence_callback_raises(self):
         c=checks("SAME_DIGEST_REPLAY")
         c.verify_current_d_forget_fence=lambda e,r: (_ for _ in ()).throw(RuntimeError("D unavailable"))
         result=self.validate(fixture(),c)
