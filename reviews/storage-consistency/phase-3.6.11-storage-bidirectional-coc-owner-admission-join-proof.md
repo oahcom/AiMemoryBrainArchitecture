@@ -353,3 +353,33 @@ Storage recognizes H's current 66/66 result as evidence that the reference seman
 After the H contract and freeze-evidence documentation updates, the H branch workflow ran again on its latest branch commit `b4d7ed2798fcd6514892ac91d8f3ae6c06f0a338`. GitHub Actions run [44041395001](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041395001), job `133896572160`, completed successfully; raw log reports **66 tests ran, OK**.
 
 The exact test sources remained unchanged: HRC/JPF `60a2f4db4bd12f2131ecd147db9bbe328da6db50`, Wire `1a4e754ba9bfa57eb973c6d39731e9f89443b323`, Schema Integrity `67aba74c120f2916d768e7b01c45408ee2624f3a`, RecoveryJoin schema `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`. This is a repeat CI pass of the same 66 candidate methods, not additional coverage and not production conformance.
+
+
+## 18. Expanded H 93-test semantic / two-phase / differential suite
+
+The H branch has expanded its executable candidate inventory to **93 methods**:
+- HRC-01..25: 25;
+- JPF-01..19: 19;
+- WIRE-01..10: 10;
+- SCHEMA-01..12: 12;
+- TPH-01..26: 26 two-phase Recovery Cutoff Batch/Manifest recovery;
+- XLANG-01: 1 Python ↔ Node.js differential wire vector.
+
+Current exact H pins:
+- H semantic contract: `e38ab74d29ded66987d3295503b6f717b6cd83e6`.
+- HRC/JPF suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- Two-phase semantic reference: `4c8dcafdb49db5279a1d1190b832a9c6c05d6b67`.
+- Two-phase test suite: `690ab42b4f8f7e61adf38fd7b6006f20cc71a7f5`.
+- Wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
+- Cross-language test: `1b32fdf81530353b8bd4571fe6d4f77119a0458b`.
+- Node reference: `992585d3bc323dc0224d0075ef14abd992980f65`.
+- Fixed vectors: `cc7e98c729db8d9f615e17a9542b3cb63f459922`.
+- Schema integrity suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
+- RecoveryJoin schema: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- Workflow with explicit Node.js 22: `55d877499010f6a776ae432c1fb2a3a31bae5f11`.
+
+GitHub Actions run [44042074640](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042074640), commit `fb9a2ab8b528c2b7010d935372f76a14d6676755`, completed **93 tests, OK**. This run includes the explicitly pinned Node.js 22 setup step. It proves the candidate Python/Node reference suite executes in CI; it does not prove the production wire/crypto profile, live owner/COC adapters, real quorum durability, actual PostgreSQL JF-10 recovery or physical topology.
+
+The TPH vectors cover the two-record ContentDigest → BatchDigest → ManifestRecordDigest relationship, exact Batch/Manifest backlinks and prefix, ordering, counts, quorum/readback UNKNOWN behavior, owner release digest/currentness, and fenced restore states. XLANG-01 compares fixed canonical UTF-8 and test-domain digest outputs from independent Python and Node.js implementations. Both remain TEST-PROFILE evidence only.
+
+Storage's bidirectional JoinProof disposition is unchanged: logical contract accepted with enumerated amendments; live source enumeration, durable JoinProof append/readback, owner-local currentness CAS, physical JF-10 and topology remain OPEN.
