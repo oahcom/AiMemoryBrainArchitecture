@@ -1,6 +1,6 @@
 import json, unittest
 from pathlib import Path
-from jsonschema import Draft202012Validator, ValidationError
+from jsonschema import Draft202012Validator, ValidationError, RefResolver
 
 ROOT=Path(__file__).resolve().parents[3]
 SCHEMA=ROOT/"schemas"/"bmcp.recovery-join-1.0.2.schema.json"
@@ -28,7 +28,7 @@ class RecoveryJoin102Tests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.schema=json.loads(SCHEMA.read_text(encoding="utf-8"))
-        cls.validator=Draft202012Validator(cls.schema["$defs"]["ownerSnapshotMembershipProof"])
+        cls.validator=Draft202012Validator(cls.schema["$defs"]["ownerSnapshotMembershipProof"],resolver=RefResolver.from_schema(cls.schema))
 
     def test_RJ102_01_schema_meta_validates(self):
         Draft202012Validator.check_schema(self.schema)
