@@ -23,9 +23,13 @@ purpose:
   - "GitHub Actions self-hosted runner"
   - "Future event-driven A-I Owner worker execution substrate"
 runtime:
-  deployment_status: "NOT_DEPLOYED"
-  runner_status: "NOT_REGISTERED"
-  persistent_service_status: "NOT_VERIFIED"
+  deployment_status: "PARTIALLY_DEPLOYED"
+  runner_status: "OPERATOR_CONFIRMED_ONLINE"
+  persistent_service_status: "OPERATOR_CONFIRMED_RUNNING"
+  runner_evidence: "User confirmation in ChatGPT conversation on 2026-11-17; not independently queried by deployment controller."
+  diagnostic_workflow_status: "NOT_RUN"
+  reboot_recovery_status: "NOT_VERIFIED"
+  untrusted_pr_isolation_status: "NOT_VERIFIED"
   owner_workers_status: "NOT_DEPLOYED"
 credentials:
   password: "DO_NOT_STORE"
@@ -43,5 +47,6 @@ governance:
   architecture_document: "14-ai-development/continuous-owner-runtime-architecture.md"
   status_claims:
     tailscale_connected: true
-    worker_online: false
+    runner_online: true
+    worker_runtime_online: false
     continuous_a_i_operation: false
