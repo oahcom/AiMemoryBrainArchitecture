@@ -11,7 +11,7 @@
 
 ## 1. Purpose / 目的
 
-This work establishes a minimal, complete, explicit, and verifiable canonical domain model for AI Memory Brain. It audits actual repository contracts before proposing semantic changes. It does not replace Owner-local authority or decide physical implementation.
+This work establishes a minimal, complete, explicit, and verifiable canonical domain model for AI Memory Brain. A currentness/source-audit supplement and official-reference validation supplement were added after the first baseline pass; see those files for newer Owner heads and exact external source review. It audits actual repository contracts before proposing semantic changes. It does not replace Owner-local authority or decide physical implementation.
 
 本研究为 AI Memory Brain 建立最小、完整、明确且可验证的规范领域模型。必须先审计仓库真实契约，再提出语义变更；不得取代各 Owner 的局部权威，也不决定物理实现。
 
@@ -65,6 +65,7 @@ Every normative deliverable must contain full Chinese and English semantics in t
 
 Published on this branch so far / 本分支已发布：
 - existing-domain-model-baseline.md
+- baseline-currentness-and-owner-source-audit.md
 - canonical-domain-entity-inventory.md
 - canonical-identity-semantics.md
 - canonical-state-semantics.md
@@ -80,6 +81,7 @@ Published on this branch so far / 本分支已发布：
 - domain-model-decision-record.md
 - validation/README.md
 - evidence/README.md
+- evidence/official-reference-validation.md
 - evidence/official-reference-validation.md
 - baseline-currentness-and-owner-source-audit.md
 
