@@ -1,6 +1,6 @@
 # Gate Entry and Exit Criteria — GATE-002
 
-- Version: 1.0.0; baseline `b372b62c640a2b656e54b6db62a4ee67d7d8c001`.
+- Version: 1.0.0; baseline `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`.
 - This document preserves two separate layers: Issue #43 integration gates G1–G8 and JF-10 physical gates A/B/C. They are not interchangeable.
 
 ## Issue #43 integration gates
@@ -17,6 +17,10 @@
 | G8 Freeze recommendation | Explicit READY / READY WITH ENUMERATED BLOCKERS / NOT READY backed by G1–G7 | NOT READY |
 
 No G1–G8 gate passes by document existence, role simulation, schema-only tests or candidate reference-model runs.
+
+**Option A sub-gates:** L1 direction conditionally accepted only; L1 closure waits A-01/A-02/A-03 and exact D acceptance. L2 OPEN pending shared transaction/UoW and I COMMIT_WON/COC/JF-10 composition (A-04/A-05). L3 OPEN pending executed concurrency/reference-model/fault evidence. L4 OPEN pending real DB/adapter/deployment/operator/HA/PITR/read-path and physical drills.
+
+**B protocol sub-gate:** H 1.2.14/C 1.0.1 is a candidate, not a current joint bundle. Storage v3.2.9 is stale; successor manifest and exact C/H/D/I adoption are required before G1/G2 closure.
 
 ## JF-10 physical gates (preserved exactly as separate gates)
 
