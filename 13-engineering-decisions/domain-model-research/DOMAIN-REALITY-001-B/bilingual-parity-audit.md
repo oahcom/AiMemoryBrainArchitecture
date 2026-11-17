@@ -38,7 +38,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | domain-model-decision-record.md | Chinese mirror added for all 12 decision records, alternatives, consequences, rejected options and open decisions; Blob `08383c76658129cebe8ef9e303cf75c27269bfb3` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently verify status labels, exact evidence pins, affected Owners and reversal conditions |
 | validation/README.md | Full Chinese peer text added for test scope, schema prerequisites, future validation and current result; Blob `a2bb3d494fadd5ae411d9b8227d83dd50a16a895` | REMEDIATED — MANUAL REVIEW PENDING | Verify test-section reference and clause equivalence against invariants/owner contracts |
 | evidence/README.md | Chinese peers added for all source titles, section descriptions, evidence limitations and version caveats; Blob `bda915327a0ee77fb78e9a52bc094986254a1a60` | REMEDIATED — MANUAL REVIEW PENDING | Verify official URLs, product-version scope and no stronger claims than source evidence |
-| evidence/official-reference-validation.md | English headings and Chinese peer explanations are present for each major section; source links and some “do not infer” clauses require line-by-line comparison | PROVISIONAL — RECHECK | Perform clause-by-clause parity check and align source/version notes |
+| evidence/official-reference-validation.md | Chinese peers added for all Observed/Borrow/Do-not-infer/Project-disposition clauses across DDD, Zep/Graphiti, Mem0, Letta, LangGraph, Temporal, PostgreSQL, PROV-O, RDF/OWL and JSON Schema; Blob `610a4480b483bac668ab26bbb7ef0505029412e2` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently re-open each official URL and verify source scope, version and no overclaim |
 | bilingual-parity-audit.md | Bilingual acceptance rules and selected narrative; file-by-file table and status/action cells are English-only | PARTIAL | Translate every audit row and re-audit after all other files are translated |
 
 ## 3. Current conclusion / 当前结论
@@ -104,6 +104,7 @@ A file is bilingual-complete only when the full normative content is present in 
 - `existing-domain-model-baseline.md` now has a full Chinese mirror for repository/branch facts, source pins, Owner guides, PR/Issue status, conflicts, missing definitions and B0 disposition. Current Blob: `2b3739c62e039f8c8824aa464ccabb52216c2c8f`.
 - `mature-domain-model-research.md` now has Chinese mirrors for DDD, Event Sourcing, PROV-O, bitemporal, RDF/OWL, mature projects, recommendations and limitations. Current Blob: `5091ce19a4a71648cb769676a8ae09a63c83b60e`.
 - `README.md` now has Chinese mirrors for B0–B6 exit conditions, core deliverable descriptions, governance boundaries and current blockers. Current Blob: `a77061e0032d771e704e04f1a3ea081c0368ab87`.
+- `evidence/official-reference-validation.md` now has Chinese peers for observed, borrow, do-not-infer and project-disposition clauses across all listed official references. Current Blob: `610a4480b483bac668ab26bbb7ef0505029412e2`.
 - `canonical-identity-semantics.md` 已为全部表格、规则、解析步骤、未决问题和决策记录补齐中文对应内容。当前 Blob：`bc8816eadcd14a1dd01ae03ed68de553b2bb1483`。
 - `fact-claim-identity-adr.md` 已为证据表、决策矩阵、Owner 验收要求和全部八个验证示例补齐中文对应内容。当前 Blob：`0bbea0beec6a5828c2db5ae267fac40f59ad7f1f`。
 - `evidence/README.md` 已为所有来源标题、来源用途说明、证据局限和版本注意事项补齐中文对应内容。当前 Blob：`bda915327a0ee77fb78e9a52bc094986254a1a60`。
@@ -119,6 +120,7 @@ A file is bilingual-complete only when the full normative content is present in 
 - `existing-domain-model-baseline.md` 已为仓库/分支事实、源文件 Pin、Owner 指南、PR/Issue 状态、冲突、缺失定义和 B0 结论补齐完整中文对照。当前 Blob：`2b3739c62e039f8c8824aa464ccabb52216c2c8f`。
 - `mature-domain-model-research.md` 已为 DDD、Event Sourcing、PROV-O、双时态、RDF/OWL、成熟项目、建议和局限补齐中文对照。当前 Blob：`5091ce19a4a71648cb769676a8ae09a63c83b60e`。
 - `README.md` 已为 B0–B6 退出条件、核心交付物描述、治理边界和当前阻塞补齐中文对照。当前 Blob：`a77061e0032d771e704e04f1a3ea081c0368ab87`。
+- `evidence/official-reference-validation.md` 已为全部官方参考的观察、借鉴、不可推断和本项目处理条款补齐中文对照。当前 Blob：`610a4480b483bac668ab26bbb7ef0505029412e2`。
 
 
 - `canonical-domain-model.md` has received a full Chinese peer for its normative prose, object inventories, ownership matrix, minimum/recommended/deferred/rejected model tiers, architecture fit, authenticated-ingress boundaries and blockers. Exact readback Blob: `ce441336e2fbba7c7a28c0b4c75482d524a4ade7`.
