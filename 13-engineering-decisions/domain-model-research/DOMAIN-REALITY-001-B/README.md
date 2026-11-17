@@ -144,7 +144,7 @@ B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪�
 - B1 仍进行中；B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。
 
 
-## 14. Chinese gate and deliverable mirror / 中文门禁与交付物对照
+## 13A. Chinese gate and deliverable mirror / 中文门禁与交付物对照
 
 | Gate | 中文退出条件 | 当前状态的中文含义 |
 |---|---|---|
