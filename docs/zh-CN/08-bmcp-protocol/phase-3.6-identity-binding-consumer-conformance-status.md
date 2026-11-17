@@ -7,6 +7,7 @@
 - 精确源 Blob SHA：`8afb914731a34d8ab44331f54f1f39bfd8ec37ce`
 - 源状态：**协议绑定技术设计 JOINT-DECIDED；消费者 Owner 验收 OPEN；治理批准 GOVERNANCE-BLOCKED；H36 NOT RUN**
 - 对应文件状态：**双语阅读对应文件；不改变源决策状态**
+- English companion: [English](../../en/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md)
 - 范围：仅覆盖 H 所有的协议绑定与一致性证据。本记录不是外部治理批准，也不构成下游消费者签署验收。
 
 > 源快照说明：源文件 §1 记录的是历史发现时的基线。重新读取当前 H 分支后，受保护操作绑定文件的当前 Blob 为 `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248`，而非下表历史记录中的 `9845c97ac43d7888732afafe12e28850ec02add8`。本译文保留源记录的历史事实；该差异登记为当前性问题，不静默改写历史记录。
