@@ -29,7 +29,7 @@
 
 **建议：Phase 1 采用“人工启动普通 ChatGPT 对话 + GitHub 持久化任务与证据 + 由人类开发者控制的手动文件修改”。当前 Issue #41 排除 Codex/本地 AI 编码 Agent 及本地电脑中继，未经正式治理修订不得将其作为 Phase 1 执行渠道。当前没有足够的业务需求证明必须部署自建 Durable AI Worker Runtime。**
 
-The product and repository evidence supports a low-infrastructure workflow. Ordinary ChatGPT is a user-triggered reasoning and coordination surface, not an always-on daemon. GitHub provides durable task/change/review history. Human developers may manually edit files in their normal workflow, but that is distinct from authorizing a local AI coding agent. Issue #41 currently excludes Codex and local-computer relay. Deterministic CI may be added separately after workflow and security review; no AI system should receive business architecture approval authority merely because it can edit files or publish evidence.
+The product and repository evidence supports a low-infrastructure workflow. Ordinary ChatGPT is a user-triggered reasoning and coordination surface, not an always-on daemon. GitHub provides durable task/change/review history. Human developers may manually edit files in their normal workflow, but that is distinct from authorizing a local AI coding agent. Issue #41 currently excludes Codex and local-computer relay; they remain research alternatives only unless the authorized governance body explicitly amends that boundary. Deterministic CI may be added separately after workflow and security review; no AI system should receive business architecture approval authority merely because it can edit files or publish evidence.
 
 产品和仓库证据支持低基础设施成本的工作方式。普通 ChatGPT 是用户触发的推理与协调界面，不是持续运行的守护进程；GitHub 提供持久化任务、变更和审查历史；代码执行可以留在开发者控制的本地环境。确定性 CI 可在工作流和安全审查后单独引入。任何 AI 系统都不能因为具备文件修改或证据发布能力而获得业务架构批准权。
 
