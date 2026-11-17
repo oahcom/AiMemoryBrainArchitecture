@@ -75,6 +75,22 @@ class SchemaCandidateIntegrity(unittest.TestCase):
         participant = self.join["$defs"]["participantEvidenceJoin"]
         self.assertIn("primary_owner_entry_ref", participant["required"])
 
+    def test_SCHEMA_10_request_disposition_binds_snapshot_row_digest(self):
+        req = self.join["$defs"]["requestDisposition"]
+        self.assertIn("owner_entry_digest", req["required"])
+        self.assertIn("owner_request_digest", req["required"])
+
+    def test_SCHEMA_11_typed_d_lineage_edge_requires_fence_and_manifest(self):
+        oe = self.join["$defs"]["ownerEvidence"]
+        self.assertIn("forget_operation_ref", oe["properties"])
+        self.assertIn("fence_generation", oe["properties"])
+        self.assertIn("lineage_manifest_ref", oe["properties"])
+        self.assertIn("barrier_member_ref", oe["properties"])
+
+    def test_SCHEMA_12_not_registered_disposition_binds_operation_and_scope(self):
+        no = self.join["$defs"]["noParticipantDisposition"]
+        self.assertTrue({"operation_identity_ref", "operation_digest", "scope_ref", "gate_generation", "scope_generation"}.issubset(set(no["required"])))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
