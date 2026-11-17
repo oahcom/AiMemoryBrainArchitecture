@@ -1,7 +1,7 @@
 # Phase 3.8.9 — CSubmitOutcome 1.0.0 Schema and Conformance Contract
 
 - Owner: C — Provider Outcome / immutable submit evidence
-- Status: PROPOSED schema; structural/semantic CI executed successfully; cryptographic/provider tests NOT EXECUTED.
+- Status: PROPOSED schema; structural/semantic and candidate crypto CI executed successfully; provider/authority tests NOT EXECUTED.
 - Schema: `schemas/c-submit-outcome-1.0.0.schema.json`, Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`
 - Semantic amendment: Phase 3.8.6 Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`
 - Signature projection: Phase 3.8.8 Blob `39ff523c41f10e3a82442d4746dd7ca7763d271c`
@@ -112,3 +112,27 @@ The BMCP `coc_commit_proof_ref`, `coc_record_ref`, `coc_record_position`, `coc_e
 - Covered: Draft 2020-12 schema self-validation; all 10 synthetic expected-result vectors against schema plus selected local semantic predicates; explicit confirmation that fixture signatures are placeholders and the profile remains unregistered.
 
 This is executed structural/semantic unit evidence only. It does not execute C cryptographic signatures, Ed25519 verification, C key-status/trust, provider issuer proofs, C gate races, provider adapters, owner ledger membership, COC quorum or Storage durability. It does not establish production readiness or exactly-once behavior.
+
+
+## 9. Candidate cryptographic vector execution
+
+C has added deterministic TEST-ONLY candidate vectors:
+- Vector manifest: `c_crypto_profile_vector.json`, Blob `88a16f0d9aaa8a5e46af857c2cd34c2bcedd07ae`.
+- Expected vector fingerprints/signatures: `c_crypto_profile_expected_vectors.json`, Blob `a4bfe0b431d5e710ac99d604e7b1bce49c044d23`.
+- Python RFC 8785 / Ed25519 implementation and tests: Blob `2e1f572facc644c378ee1880a553c27a72ed2cc4`.
+- Independent Node.js JCS / Ed25519 oracle: Blob `31c8ac889766f9574725357ae6134a901bfb5f33`.
+- Requirements: Blob `305d9bf5ae883a16e22dde83d97005f2b0be902e`.
+- CI workflow: Blob `a1f0b8f884f0f294fb3ec96da7c4f11e294e5142`.
+
+The test-only deterministic seed is public and must never be reused. Five outcome families are signed under the candidate construction: ACCEPTED, REJECTED-with-ambiguous-side-effect, NOT_INVOKED, UNKNOWN and IN_DOUBT. Tests verify Ed25519 signatures, ensure every present C-P0 member is signature-covered, compare Python and Node canonical bytes/digests/preimages/signatures, and pin expected fingerprints/signatures.
+
+### 9.1 Executed CI result
+
+- Workflow run: `44057463855`.
+- Exact tested commit: `08ae2649c3be812ef425fb7a958d41a62f933850`.
+- Result: SUCCESS.
+- Runtime: Python 3.12 + Node.js 22.
+- Test count: 7 passed (3 schema/semantic tests + 4 candidate crypto tests).
+- Crypto candidate tests: five test-only signatures verified; every present P0 field mutation rejected by Ed25519 verification; Python and Node outputs matched; 64-byte signatures/32-byte public keys checked.
+
+This is executed candidate cryptographic construction/interoperability evidence only. It does NOT register `AIMBA-C-CRYPTO-1.0`, approve C trust roots/key custody, validate deployed key status/anti-rollback, authenticate provider evidence, prove owner-ledger/COC inclusion or certify production use. The public test seed is not a production secret and the candidate suite remains unregistered.
