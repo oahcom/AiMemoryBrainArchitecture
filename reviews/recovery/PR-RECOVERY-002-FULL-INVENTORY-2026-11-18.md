@@ -351,3 +351,38 @@ This overlay supersedes §10's count for this later snapshot only. It preserves 
 - Issue #130 仍 OPEN，尽管 PR-GOVERNANCE-001 已作为仓库流程规范 ADOPTED。Issue #134 仍 OPEN / P0；Main 分支元数据报告 `protected=false`；由于保护端点 HTTP 403，Rulesets 仍未核实。
 - 本追加中的任何合并都不构成独立审查、Owner 验收、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
 - 129 条记录是元数据完整的状态盘点，不是对全部 129 条历史 PR Diff 重新逐行进行语义/代码审查。
+
+
+---
+
+## 12. Latest live inventory and Worker / Publication follow-up / 最新实时盘点与 Worker / Publication 后续（2026-11-18）
+
+This overlay supersedes §11's count for this later snapshot only. It preserves the 107-, 116-, 125- and 129-record inventories as historical snapshots.
+
+- Main HEAD at this snapshot: `f262cd17c4a8ee039f99a79d4fb2b25b54128e67`.
+- Refreshed GitHub `state=all` inventory: **133 PR records = 109 merged + 24 closed-unmerged + 0 open** (API pages 1–3, `per_page=100`). The documentation PR that appends this overlay is not included in this base snapshot; after its merge the count is expected to be 134 = 110 merged + 24 closed-unmerged + 0 open, absent concurrent PR creation.
+- Four PRs followed the §11 snapshot:
+  - PR #160 — current integration-session traceability row; exact Head `52d3efa98b20c42ddd7034626b4ad4d68c90253e`; GOV-DOC-001 run #44191497068 SUCCESS; merged at `b9952f7fcf47db054e5699fecbb607b4cddf073f`.
+  - PR #161 — this recovery report's 129-record live inventory overlay; exact Head `256fe82cee431a34bc15803c56043d4e130d6974`; GOV-DOC-001 run #44191502982 SUCCESS; merged at `eb95fbf0ca563c950c3308a15c3e3b76eb2a0060`.
+  - PR #162 — corrected Worker evidence classification: runner admission self-tests are no longer misreported as the manual read-only diagnostics workflow; exact Head `99a02ea72f64c4e48357b0e76a035042965300ef`; GOV-DOC-001 run #44191809812 SUCCESS; merged at `9c4da591fc70b95ad769b33471825ccb96cdc4c7`. Manual diagnostics remain NOT RUN / NOT EVIDENCED; Issue #26 remains SECURITY_ACCEPTANCE_BLOCKED.
+  - PR #163 — positive model-level `NO_PUBLICATION` reconciliation for UNKNOWN operations; exact Head `d2936205df59f089445e37d2bc3c60b34d6cce9d`; Publication Protocol run #44191938983 SUCCESS (25 tests), GOV-DOC-001 #44191938447 SUCCESS; merged at `f262cd17c4a8ee039f99a79d4fb2b25b54128e67`.
+- Issue #25 remains OPEN. PR #151/#153/#159/#163 are deterministic in-memory reference-model corrections; the NO_PUBLICATION proof is caller-supplied test data, not authenticated production Storage evidence. No production database durability, distributed transaction ordering, multi-process concurrency, cryptographic proof, crash/failover/restore or deployed D/E/I/Storage integration is proven.
+- Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED. PR #162 corrected the public evidence classification only; no new host reboot, emergency stop, least-privilege service identity, full untrusted-PR isolation, sudo containment or independent credential-rotation evidence was supplied.
+- Issue #130 remains OPEN for operational session-coverage audit although PR-GOVERNANCE-001 is ADOPTED. Issue #134 remains OPEN / P0; classic Main branch protection is disabled and Rulesets remain unverified under the current private-repository plan.
+- No merge in this overlay establishes independent review, Owner acceptance, production R3/DFI conformance, Worker security acceptance or production authorization.
+- The 133-record inventory is metadata-complete for the API snapshot, not a fresh line-by-line semantic/code review of all 133 historical PR diffs.
+
+本追加仅更新第 11 节之后的实时状态，不改写原始 107、116、125、129 条历史快照。
+
+- 本次快照 Main HEAD：`f262cd17c4a8ee039f99a79d4fb2b25b54128e67`。
+- GitHub `state=all` 盘点：**133 条 PR = 109 条已合并 + 24 条关闭未合并 + 0 条开放**（API 第 1–3 页，`per_page=100`）。追加本节的文档 PR 不包含在本次 Base 快照内；其合并后预计为 134 = 110 已合并 + 24 关闭未合并 + 0 开放，前提是没有并发创建新 PR。
+- 第 11 节快照之后新增四条 PR：
+  - PR #160：当前集成会话追踪行；精确 Head `52d3efa98b20c42ddd7034626b4ad4d68c90253e`；GOV-DOC-001 Run #44191497068 SUCCESS；合并提交 `b9952f7fcf47db054e5699fecbb607b4cddf073f`。
+  - PR #161：本恢复报告的 129 条实时盘点追加；精确 Head `256fe82cee431a34bc15803c56043d4e130d6974`；GOV-DOC-001 Run #44191502982 SUCCESS；合并提交 `eb95fbf0ca563c950c3308a15c3e3b76eb2a0060`。
+  - PR #162：更正 Worker 证据分类，不再把 Runner Admission Self-Test 错报为手动只读 Diagnostics Workflow；精确 Head `99a02ea72f64c4e48357b0e76a035042965300ef`；GOV-DOC-001 Run #44191809812 SUCCESS；合并提交 `9c4da591fc70b95ad769b33471825ccb96cdc4c7`。手动 Diagnostics 仍 NOT RUN / NOT EVIDENCED；Issue #26 仍 SECURITY_ACCEPTANCE_BLOCKED。
+  - PR #163：为 UNKNOWN 操作增加模型级正向 `NO_PUBLICATION` 对账；精确 Head `d2936205df59f089445e37d2bc3c60b34d6cce9d`；Publication Protocol Run #44191938983 SUCCESS（25 项测试），GOV-DOC-001 #44191938447 SUCCESS；合并提交 `f262cd17c4a8ee039f99a79d4fb2b25b54128e67`。
+- Issue #25 仍 OPEN。PR #151/#153/#159/#163 均为确定性内存参考模型修正；NO_PUBLICATION 证明是调用方提供的测试数据，不是经认证的生产 Storage 证据。未证明生产数据库持久性、分布式事务顺序、多进程并发、密码学证明、崩溃/故障切换/恢复或已部署 D/E/I/Storage 集成。
+- Issue #26 仍 OPEN / SECURITY_ACCEPTANCE_BLOCKED。PR #162 只更正公开证据分类；没有新的 Host 重启、Emergency Stop、最小权限身份、完整不可信 PR 隔离、sudo 能力隔离或独立凭据轮换证据。
+- Issue #130 仍 OPEN，等待会话覆盖审计，尽管 PR-GOVERNANCE-001 已 ADOPTED。Issue #134 仍 OPEN / P0；Main 经典分支保护关闭，当前私有仓库计划下 Rulesets 仍未核实。
+- 本追加中的任何合并都不构成独立审查、Owner 验收、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
+- 133 条记录是该 API 快照的元数据完整盘点，不是对全部 133 条历史 PR Diff 重新逐行进行语义/代码审查。
