@@ -296,3 +296,9 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 - Structural readback: 14/14 headings; no tables in source/EN/zh-CN; EN exact source content. Targeted parity: [EN report](../reviews/translation/2026-11-17-c-submit-causal-order-bilingual-review.md) / [中文报告](../reviews/translation/2026-11-17-c-submit-causal-order-bilingual-review.zh-CN.md) — PASS for this exact Blob.
 - C explicitly ACCEPTS WITH ENUMERATED EXCEPTIONS the exact CGH-APPLIED-1.1 recovery-batch amendment, A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` and COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`. C36-AP-01 is RESOLVED at source-decision level; this does not resolve H wire/schema mapping or deployment/test gates.
 - C detailed core companion coverage is now 2/10 (Final Request Evidence + C-submit causal-order).
+
+
+
+## C36-AP-01 disposition correction — 2026-11-17
+
+The earlier OPEN entry is superseded. C's separate cross-authority causal-order source Blob `45a48249717c8cddb07ab96197730ef93d406c22` explicitly accepts the exact CGH-APPLIED-1.1 recovery-batch amendment with enumerated exceptions and defines CSubmitOutcome/provider evidence. **C36-AP-01: RESOLVED at C source-decision level.** This does not close H36-AP-09, H wire Schema/SDK mapping, coordinator/provider implementation, or conformance.
