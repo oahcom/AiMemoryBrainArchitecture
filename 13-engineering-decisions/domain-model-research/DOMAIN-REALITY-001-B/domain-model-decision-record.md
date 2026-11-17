@@ -46,7 +46,7 @@
 - Problem: downstream consumers could freeze incompatible Claim/Fact schemas.
 - Alternatives: adopt overview; adopt guide blocker; silently treat Fact as Claim subtype.
 - Evidence: overview Blob 4d1debc0ec19b3917f9e76d04bb66da4df4cd346; guide Blobs a9f53a453aec25c47c58c4aea75adc43c83028d3 and 8a19cebacf5aefb0aded5fdbfeaff406291a5cf1; A PR #53.
-- Decision: preserve ADR-BLOCKED; do not use old overview wording to freeze dependent schema. Supplemental decision request B-ADR-FACT-CLAIM-001 (fact-claim-identity-adr.md, Blob 96a2ee7d595fcd4a214201a7c7b6b2a9c3deb961) recommends C2 (Fact as qualified Claim concept) + I1 (stable Claim lineage with immutable version-local snapshots), but explicitly remains CANDIDATE / NOT DECIDED / NOT ACCEPTED / NOT SCHEMA-FROZEN.
+- Decision: preserve ADR-BLOCKED; do not use old overview wording to freeze dependent schema. Supplemental decision request B-ADR-FACT-CLAIM-001 (fact-claim-identity-adr.md, Blob 0bbea0beec6a5828c2db5ae267fac40f59ad7f1f) recommends C2 (Fact as qualified Claim concept) + I1 (stable Claim lineage with immutable version-local snapshots), but explicitly remains CANDIDATE / NOT DECIDED / NOT ACCEPTED / NOT SCHEMA-FROZEN.
 - Consequences: Claim/Fact identity and version representation remain open.
 - Complexity: delays schema but avoids false certainty.
 - Affected owners: B/D/E/A.
@@ -215,3 +215,41 @@
 This register does not close any blocking ADR, owner acceptance or implementation gate. All recommendations remain subject to exact-version owner review and independent review.
 
 本登记册不关闭任何阻塞 ADR、Owner 验收或实现门禁。所有建议仍需精确版本 Owner 审查和独立审查。
+
+
+## 7. B2 semantic closure checkpoint / B2 语义闭合检查点 — 2026-11-18
+
+This checkpoint records the current exact source state. It does not promote candidate recommendations into decisions and does not close B2.
+
+本检查点记录当前精确来源状态，不将候选建议提升为决策，也不关闭 B2。
+
+| B2 topic / B2 主题 | Exact source / 精确来源 | Current disposition / 当前处置 | Closure authority / 关闭权威 |
+|---|---|---|---|
+| Fact vs Claim concept / Fact 与 Claim 概念 | Architecture invariant I-04, main Blob `33b037318e459ebb73bea33b3186f31a41d5dcfe`; B ADR `fact-claim-identity-adr.md`, Blob `0bbea0beec6a5828c2db5ae267fac40f59ad7f1f` | Fact and Claim remain distinct concepts under I-04. Whether Fact is an independent identity-bearing object or a qualified Claim remains **ADR-BLOCKED**. C2 is recommendation only. | B explicit ADR decision; D/E consumer impact acceptance; A exact contract registration. |
+| Claim identity across MemoryVersions / Claim 跨 MemoryVersion 身份 | Core entity source Blob `8cb5a674eec8eac1f3c4d83c400dc08d00166f23`; immutable MemoryVersion ClaimSnapshot model; B ADR above | I1 (stable Claim identity + immutable version-local revisions/snapshots) is the least-complex candidate; I2 remains viable; I3 deferred. Identity-changing vs non-identity-changing update policy is not decided. | B ADR; D MemoryVersion lifecycle/Forget acceptance; E derivation/deduplication acceptance; F/G consumer acceptance; Storage atomicity acceptance. |
+| Typed domain identity / 类型化领域身份 | B formal type confirmation Blob `3a1e77889cd9a90cd5822d9f0cb3437880868706` | B has approved ActorRef, ScopeRef and EnvironmentRef semantic mapping within exact B authority. This does not freeze H wire paths, approve I trust/policy, designate Environment Registry Authority or prove runtime conformance. | B for domain semantics; H for wire; I for trust/authorization; A for registry/integration. |
+| Scope vs Permission / Scope 与 Permission | Current main `02-domain-model/scope-and-permission-model.md`, Blob `b5215ae27bd65a6c89c185b496f730b6cd52efa9` | Separation and isolation are DECIDED; scope algebra, policy language, inheritance edge cases, cached authorization and revocation guarantees remain OPEN/CANDIDATE. ScopeRef does not grant Permission. | B for domain scope semantics; I for policy, grants, revocation and PermissionEpoch; A for registry authority. |
+| I identity governance / I 身份治理 | Issue #5, fetched 2026-11-18, state OPEN; I identity-trust closure Blob `0cbf6bb7480db873790c454817593a9b1c5548ba` | I36-GOV-01..10 remain GOVERNANCE-BLOCKED; technical design baseline is not external governance approval; implementation/conformance NOT VERIFIED. | Named Security/Identity/Data/Environment governance approvers per Issue #5 evidence requirements. |
+| Session vs Conversation / Session 与 Conversation | B identity semantics Blob `bc8816eadcd14a1dd01ae03ed68de553b2bb1483`; G Context contract and C/H consumer sources | RuntimeSessionRef, Session ScopeRef, Conversation and Agent identity remain distinct; exact canonical Session/Conversation relation and consumer field mappings remain OPEN. | C/G/H for operation/runtime semantics; B for shared typed vocabulary; I/H for authenticated session binding. |
+
+### 7.1 Explicit non-decisions / 明确未决事项
+
+1. Do not select C1 or C2 as final Fact/Claim representation. I-04's conceptual distinction remains; independent object identity vs qualified-Claim representation remains open.
+2. Do not select I1/I2/I3 as final Claim identity/version policy. I1 remains candidate only.
+3. Do not create/freeze Fact, Claim, ClaimSnapshot or cross-MemoryVersion identity schemas.
+4. Do not collapse Scope into Permission, Tenant into Scope, EnvironmentRef into ScopeRef, PrincipalRef into ActorRef, or Conversation into RuntimeSessionRef.
+5. Do not infer I36 governance approval from the technical BIH baseline or any delegated review.
+6. Do not treat an absent Owner objection, a candidate matrix, or a role-simulated review as acceptance.
+
+1. 不得将 C1 或 C2 选为最终 Fact/Claim 表示。I-04 的概念区分继续有效；Fact 是独立对象身份还是限定 Claim 表示仍开放。
+2. 不得将 I1/I2/I3 选为最终 Claim 身份/版本策略。I1 仍仅为候选。
+3. 不得创建/冻结 Fact、Claim、ClaimSnapshot 或跨 MemoryVersion 身份 Schema。
+4. 不得合并 Scope 与 Permission、Tenant 与 Scope、EnvironmentRef 与 ScopeRef、PrincipalRef 与 ActorRef，或 Conversation 与 RuntimeSessionRef。
+5. 不得从技术 BIH 基线或任何委派复审推断 I36 治理批准。
+6. 不得将 Owner 未反对、候选矩阵或角色模拟复审视为验收。
+
+### 7.2 B2 disposition / B2 结论
+
+B2 remains **IN PROGRESS / NOT PASSED**. Some distinctions are decided (for example Scope vs Permission, and the semantic type mapping within B's authority), but Fact/Claim representation, Claim identity across MemoryVersions, exact Session/Conversation semantics, Scope algebra and I36 governance approval remain unresolved. B4 schema freeze remains NOT READY.
+
+B2 仍为 **IN PROGRESS / NOT PASSED**。部分区分已决（例如 Scope 与 Permission 的分离，以及 B 权限范围内的语义类型映射），但 Fact/Claim 表示、Claim 跨 MemoryVersion 身份、精确 Session/Conversation 语义、Scope 代数及 I36 治理批准仍未解决。B4 Schema 冻结仍 NOT READY。
