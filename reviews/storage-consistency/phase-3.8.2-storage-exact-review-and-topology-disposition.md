@@ -171,3 +171,10 @@ The Storage JoinProof source has advanced to Blob `364bf7e7833af3d97bc676f7f356e
 Storage's logical JoinProof disposition remains **ACCEPT WITH ENUMERATED AMENDMENTS**. The latest CI result improves candidate-suite evidence only; it does not close STORAGE-RJ-02 live prefix enumeration, STORAGE-RJ-04 owner currentness CAS, STORAGE-RJ-05 topology, or the real JF-10 physical sub-join. No independent Owner approval or physical conformance is claimed.
 
 This review remains a delegated Storage-role simulation. The latest JoinProof Blob must be re-reviewed by actual H/I/D/C/Storage Owners; previous exact-Blob decisions do not automatically transfer.
+
+
+## 11. Latest H workflow rerun / current JoinProof pin
+
+The controlling Storage JoinProof artifact is now Blob `d5a84aa22e90d7b8689b23cd8af2fc82125368c4`. It records H's latest rerun [44041395001](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041395001), job `133896572160`, on H branch commit `b4d7ed2798fcd6514892ac91d8f3ae6c06f0a338`; 66 tests ran and the job ended OK. Test source/schema blobs are unchanged from §10.
+
+The rerun does not add new test vectors. Storage's ACCEPT WITH ENUMERATED AMENDMENTS remains a logical contract disposition only. Actual COC prefix/quorum reads, six live owner-ledger enumerations, signed proof verification, durable JoinProof commit/readback, I/D/C currentness CAS, same-GID JF-10 physical resolution, and topology T1–T8 remain open. This remains a role simulation, not an independent Storage Owner signature.
