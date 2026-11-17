@@ -24,7 +24,7 @@
 | H RecoveryCutoff schema 1.0.4 | session-h-bmcp-protocol | d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1 |
 | H RecoveryJoin schema 1.0.0 candidate | session-h-bmcp-protocol | dd3234aa1c74caf6d0e335875cd96e0b2b64082f |
 | H semantic validator contract | session-h-bmcp-protocol | b3218298f58cff9b92cb1c38e453af6fd4d0dd50 |
-| HRC/JPF executable semantic suite | session-h-bmcp-protocol | ee0f47095df10786da358bed193d6f8491a5eb2c |
+| HRC/JPF executable semantic suite | session-h-bmcp-protocol | 60a2f4db4bd12f2131ecd147db9bbe328da6db50 |
 | Wire interop candidate suite | session-h-bmcp-protocol | 1a4e754ba9bfa57eb973c6d39731e9f89443b323 |
 | Schema integrity suite | session-h-bmcp-protocol | 5292d56661e938c905c61455e9ed53c4ff674c54 |
 | H branch test workflow | session-h-bmcp-protocol | ea7a3d9c365b84352d3bac69da94fe0d510e46a4 |
@@ -155,7 +155,7 @@ H has added row-digest and typed owner-evidence requirements to RecoveryJoin 1.0
 - I receipt/terminal evidence requires PolicyDomain, PermissionEpoch, inventory epoch, issuer key and authorization receipt;
 - C provider and Storage prepared/resolution evidence carry their owner-specific tuple fields.
 
-The latest H schema Blob is dd3234aa1c74caf6d0e335875cd96e0b2b64082f. The latest HRC suite Blob is ee0f47095df10786da358bed193d6f8491a5eb2c. The Storage JoinProof contract is now Blob 4520860b28429d35cdb2ca947a56d0ccb64226a3.
+The latest H schema Blob is dd3234aa1c74caf6d0e335875cd96e0b2b64082f. The latest HRC suite Blob is 60a2f4db4bd12f2131ecd147db9bbe328da6db50. The Storage JoinProof contract is now Blob 4520860b28429d35cdb2ca947a56d0ccb64226a3.
 
 These are schema and test-candidate refinements only. No CI run, cross-language interop PASS or owner signature is claimed.
 
