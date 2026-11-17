@@ -102,3 +102,19 @@ This is a CANDIDATE governance contract, not a production security certification
 Validation must include identity spoofing, delegation expiry/revocation, cross-Scope denial, stale permission epoch, Forget race/fault injection, backup restore, external recipient exceptions, and zero unauthorized disclosure.
 
 See the [I owner branch](https://github.com/oahcom/AiMemoryBrainArchitecture/tree/session-i-security-governance-2026-11-16/09-security-governance) for detailed candidate governance contracts.
+
+
+## 11. Joined Forget contract alignment proposal — pending D/I approval
+
+The bilingual joined contract proposal is recorded at `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`. This is a proposal and does not supersede this CANDIDATE governance guide until D and I approve the exact same version/SHA.
+
+Proposed I-owned decisions:
+- current authorization, delegation/revocation, subject and Scope eligibility, purpose, consent, retention and legal-hold policy;
+- global target-inventory policy, mandatory target classes, inventory sealing and re-evaluation triggers;
+- global completion aggregation, approved residual exceptions, audit integrity and truthful public status.
+
+D retains canonical Memory lifecycle, ForgetOperation and ForgetFence semantics. I does not redefine `Forgotten` or the canonical linearization event. D does not grant authorization, waive retention/legal hold, or unilaterally declare global completion. E/F/G/H/C/Storage/external recipients provide only their own capability-bounded execution evidence.
+
+The operation phase is separate from Memory lifecycle. A durable `SuppressionCommitted` event may place the Memory in terminal `Forgotten` while cleanup remains asynchronous. `Completed` requires all mandatory targets to have verified terminal evidence. Unknown, failed, unsupported or unaccounted-for mandatory targets block `Completed`. `CompletedWithPolicyException` requires explicit I approval, bounded residuals, compensating controls, an accountable owner and expiry/review; it is not physical-erasure proof.
+
+**Status:** PROPOSED / D-I APPROVAL PENDING / R3 TESTS NOT RUN.
