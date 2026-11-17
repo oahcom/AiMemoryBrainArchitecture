@@ -27,7 +27,8 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Subsystem responsibility matrix | 01-system-architecture/responsibility-matrix.md | docs/zh-CN/01-system-architecture/responsibility-matrix.md | docs/en/01-system-architecture/responsibility-matrix.md | COMPLETE |
 | Domain Model reader guide | 02-domain-model/ | docs/zh-CN/02-domain-model/domain-model-guide.md | docs/en/02-domain-model/domain-model-guide.md | COMPLETE — overview guide only |
 | Domain Model detailed contracts (6 source specifications) | 02-domain-model/ | Pending | Existing English sources | NOT STARTED — field-level translation pending |
-| Canonical Memory Brain (D) | 03-memory-brain/ | Pending | Existing English sources | NOT STARTED |
+| Canonical Memory Brain reader guide | D owner branch: 03-memory-brain/ | docs/zh-CN/03-memory-brain/memory-brain-guide.md | docs/en/03-memory-brain/memory-brain-guide.md | COMPLETE — overview guide only |
+| Canonical Memory Brain detailed contracts (7 source specifications) | D owner branch: 03-memory-brain/ | Pending | Owner-branch English sources | NOT STARTED — detailed translation pending |
 | Memory Compiler (E) | 04-memory-compiler/ | Pending | Existing English sources | NOT STARTED |
 | Memory Runtime (F) | 05-memory-runtime/ | Pending | Existing English sources | NOT STARTED |
 | Memory Context (G) | 06-memory-context/ | Pending | Existing English sources | NOT STARTED |
@@ -56,6 +57,8 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 - Acceptance: no owner or authority boundary changes; glossary parity checked.
 
 ### Batch 3 — Domain and canonical memory / 第三批：领域模型与权威记忆
+- D Canonical Memory reader guide: COMPLETE — includes D/E/F/G/H/I ownership split, cursor namespaces, and Forget boundary.
+- D detailed source specifications: NOT STARTED — source branch is linked; field/transaction-level translation pending.
 - Domain Model reader guide: COMPLETE.
 - Detailed B source specifications: NOT STARTED; retain exact field/state semantics during translation.
 - D Canonical Memory detailed bilingual work: pending source-branch reconciliation.
