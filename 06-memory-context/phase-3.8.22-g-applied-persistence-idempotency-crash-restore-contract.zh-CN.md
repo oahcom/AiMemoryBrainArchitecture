@@ -80,6 +80,8 @@ G 必须区分稳定 H Delivery Binding、每一种 Evidence Kind 与每条不�
 
 以上均为**建议的标准化消费方元组**。共享冻结前，C 和 H 必须明确确认精确字段名、Requiredness、Canonicalization，以及它们与当前 H 1.2.15 Schema/Validator 的映射。G 不声称现有 H Schema 或 Validator 已经冻结这些元组。
 
+**已观察到的映射缺口：**本次读取的 H 1.2.15 JSON Schema 并未将完整 HDeliveryBindingIdentity 暴露为一等 Schema Property：`adapter_instance_ref`、`runtime_session_ref`、`delivery_id`、`delivery_attempt_id`、`inference_request_id`、`final_request_boundary_id` 和 `adapter_capability_epoch` 均未出现在本次审查读取的 Schema Property 集合中。Gateway Validator 的 Signed P0 Allowlist 虽包含 `provider_adapter_ref`、`actual_inference_request_id` 和 `final_request_boundary_id`，但它本身尚未建立上述完整元组。H 必须选择：(a) 在版本化 Signed P0 Mapping 中新增并验证缺失字段；或 (b) 绑定一份承载完整元组、经过认证且不可变的 H Owner Evidence Record，并提供精确 Schema/Validator 映射。在 C/H 接受该精确映射之前，HEvidenceIdentity 只是 G 消费方要求/提案，不是已冻结的 H Wire Contract。
+
 HDeliveryBindingIdentity 和 HEvidenceIdentity 均不包含 Digest。H P0 Digest 是不可变内容，必须与 HObservationRecordIdentity 分开比较：
 
 - 相同 HObservationRecordIdentity + 相同 H P0 Digest + 相同且经过认证的不可变 Receipt/Result Ref：精确重放，返回原始持久化 H 处置结果；
@@ -115,7 +117,7 @@ G 必须为预期 Applied Fact 派生一个稳定逻辑身份：
 
 Canonicalization 必须使用明确版本化、确定性的 Profile，拒绝重复 JSON Key 和未知 Critical Field，并保留类型差异。每条 Record 都必须保存 Canonicalization Profile ID 与实现 Revision。
 
-Identity Key 不包含 Payload Digest、Provider Receipt Digest、H P0 Digest、C Payload Digest、Participant Digest 或 G Aggregate Digest。这些值是绑定到 Identity 的不可变**证据内容**，必须独立比较。这样可避免通过更改 Digest 伪造新的逻辑 Applied Identity。
+Identity Key 不包含 C Outcome Payload Digest、Provider Receipt Digest、H P0 Digest、C Outcome Evidence Digest、Participant Digest 或 G Aggregate Digest。这些值是绑定到 Identity 的不可变**证据内容**，必须独立比较。C 的 `RequestDigest` 是 CProviderAttemptIdentity 中唯一以 Digest 形式出现的组成部分，因为 C 将精确 Request 变化定义为不同 Provider Attempt/Key Scope；它不是 C Outcome Payload Digest，也不是 H/COC Evidence Digest。这样可避免通过更改 Evidence Digest 伪造新的逻辑 Applied Identity。
 
 不同 ContextVersion、DeliveryAttempt、InferenceRequestId、Final Boundary、C Outcome Identity、H Evidence Identity 或 COC Participant Identity，构成不同逻辑 Applied Attempt。不得覆盖或回滚较早 Record。
 
@@ -297,7 +299,7 @@ Current Use 是独立 Projection，在每次 Protected Use 前以及每次 Final
 本补充合同称为 Shared/Frozen 前，必须取得以下精确版本接受：
 
 1. C 接受 G Identity/Evidence-Revision 与 CSubmitOutcome 1.0.1 及 C Causal-Order Source Pin 的精确 Join。
-2. H 接受精确 HEvidenceIdentity 元组及其与 Unified 1.2.15 Gateway Evidence 的映射，并确认 H Ingress Replay 与 G Applied Idempotency 的区别。
+2. H 接受精确 HEvidenceIdentity/HDeliveryBindingIdentity 元组，并提供其到 Unified 1.2.15 Gateway Evidence 的缺失 Signed-Schema/Owner-Record 字段映射，同时确认 H Ingress Replay 与 G Applied Idempotency 的区别。
 3. COC/Storage 接受精确 Participant/GID/Terminal/Restore 绑定与 Recovery 语义。
 4. I 与 D 在各自权威范围内确认 Owner Evidence/Cutoff/High-Water 字段。
 5. G 实现提供 Generated Machine-Readable Schema/SDK、Durable Unique Index、Crash/Restart/Restore Test，并由独立审查针对精确 Commit 读回。
@@ -308,7 +310,7 @@ H 1.2.14、此前 G Consumer Review、CGH-APPLIED-1.1 Semantic Package、Schema-
 
 - G Applied Persistence / Idempotency 合同：**本 G 草案已规定；尚未实现/验证**。
 - CSubmitOutcome 1.0.1 精确源绑定：**已 Pin；需要 C 对本补充合同精确接受**。
-- H EvidenceIdentity 元组：**提案；需要 H/C 字段级精确接受**。
+- H EvidenceIdentity 元组：**提案；当前 1.2.15 Schema 未暴露全部 Binding 字段；需要 H/C 精确字段映射及 Schema/Owner-Record 扩展**。
 - COC Participant/GID Join：**G 已有设计接受；仍需 COC/Storage 实现与本补充合同精确接受**。
 - Crash/Restart/Restore-Fencing 符合性：**已规定 / 未运行**。
 - G Applied Persistence 生产证明：**未验证**。
