@@ -79,6 +79,14 @@ def validate_c_submit_outcome_join(
     append-only ledger inclusion. C outcome semantics remain C-owned and are not
     reinterpreted here as a G Applied decision.
     """
+    # Bind the resolver result to the exact opaque reference carried by H.
+    # A resolver adapter must not be able to return a different valid C record.
+    requested_ref = envelope.get("c_submit_outcome_ref")
+    if not isinstance(requested_ref, str) or not requested_ref:
+        return "INVALID", "H c_submit_outcome_ref must be a non-empty immutable C record reference"
+    if c_record.get("record_ref") != requested_ref:
+        return "INVALID", "resolved CSubmitOutcome record_ref does not equal H c_submit_outcome_ref"
+
     required = (
         "issuer_authority_ref", "sequence_namespace_ref", "record_ref",
         "record_sequence", "payload_digest", "FinalRequestBoundaryRef",
