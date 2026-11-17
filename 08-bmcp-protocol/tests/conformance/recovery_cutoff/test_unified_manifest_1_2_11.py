@@ -20,6 +20,15 @@ def fixtures():
           "request_ledger_root":hexchar*64,"admission_ledger_root":hexchar*64,
           "owner_ledger_root":hexchar*64,"anti_rollback_anchor_ref":o+"/anchor/7",
           "owner_specific_high_waters_digest":hexchar*64,"ledger_available":True,"pagination_complete":True}
+    for owner,snapshot in snaps.items():
+        if owner=="I":
+            values={"receipt_issue_high_water":"11","receipt_consume_high_water":"12","inventory_epoch_ref":"I/inventory/3","registry_snapshot_digest":"1"*64,"relevant_entry_set_root":"2"*64}
+        elif owner=="D":
+            values={"producer_registration_high_water":"21","work_item_high_water":"22","attempt_high_water":"23","barrier_generation":"24","barrier_root":"3"*64}
+        else:
+            values={"reservation_high_water":"31","provider_attempt_high_water":"32","provider_outcome_high_water":"33"}
+        snapshot["owner_specific_high_waters"]=values
+        snapshot["owner_specific_high_waters_digest"]=td("OWNER-SPECIFIC-HIGH-WATERS",values)
     def admission(owner,ref,pref):
         s=snaps[owner]
         return {"owner_kind":owner,"owner_admission_ref":owner+"/"+ref,"owner_entry_ref":owner+"/"+ref+"/row",
@@ -191,7 +200,7 @@ class UnionSemanticsTests(unittest.TestCase):
         proofs=deepcopy(self.proofs);proofs.pop(("D","D/work-9"))
         self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),UNKNOWN)
     def test_UNION_17_invalid_membership_proof_is_invalid(self):
-        proofs=deepcopy(self.proofs);proofs[("C","C/admit-1")]["valid"]=False
+        proofs=deepcopy(self.proofs);proofs[("C","C/admit-1")]["test_signature_verified"]=False
         self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),INVALID)
     def test_UNION_18_non_numeric_owner_sequences_are_not_arithmetically_compared(self):
         snaps=deepcopy(self.snaps);rows=deepcopy(self.admissions);proofs=deepcopy(self.proofs)
