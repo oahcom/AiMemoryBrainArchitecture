@@ -1,4 +1,4 @@
-name: BMCP JF-10 Bridge JSON Schema Validation
+name: BMCP JF-10 and Storage Prepared Participant Schema Validation
 
 on:
   push:
@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   validate-schema:
-    name: Validate BMCP JF-10 1.1.0 schema and five message families
+    name: Validate BMCP JF-10 and Storage proof schema candidates
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
@@ -32,6 +32,6 @@ jobs:
       - name: Install pinned schema validator
         run: python -m pip install jsonschema==4.23.0
       - name: Compile schema tests
-        run: python -m py_compile 08-bmcp-protocol/runtime_reference/strict_json_parser.py tests/schema/test_jf10_bridge_schema.py tests/schema/test_jf10_bridge_schema_1_1_1.py tests/schema/test_strict_json_parser.py
+        run: python -m py_compile 08-bmcp-protocol/runtime_reference/strict_json_parser.py tests/schema/test_jf10_bridge_schema.py tests/schema/test_jf10_bridge_schema_1_1_1.py tests/schema/test_strict_json_parser.py tests/schema/test_storage_prepared_participant_proof_schema.py
       - name: Validate schema and message fixtures
         run: python -m unittest discover -s tests/schema -v
