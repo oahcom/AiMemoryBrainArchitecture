@@ -191,6 +191,48 @@
         "signature_ref": "I/signature/out-of-scope/1",
         "issued_at": "2026-11-17T08:00:00Z"
       }
+    },
+    {
+      "id": "I_ADMISSION_SNAPSHOT_MEMBERSHIP_PROOF",
+      "message_type": "I_ADMISSION_SNAPSHOT_MEMBERSHIP_PROOF",
+      "digest_field": "proof_digest",
+      "p0": {
+        "proof_ref": "I/proof/admission-membership/7",
+        "owner_kind": "I",
+        "owner_authority_ref": "I/PolicyDomain/pd-1",
+        "issuer_ref": "I/issuer/root",
+        "subject_ref": "I/entry/admission-7",
+        "audience_ref": "COC/recovery-validator",
+        "purpose": "COC_RECOVERY_CUTOFF_MANIFEST_MEMBERSHIP",
+        "owner_ledger_ref": "I/ledger/admissions/pd-1",
+        "owner_ledger_version": "ledger-v9",
+        "owner_entry_ref": "I/entry/admission-7",
+        "owner_entry_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "owner_admission_ref": "I/admission/7",
+        "owner_sequence_namespace": "I/PolicyDomain/pd-1/admission",
+        "owner_local_sequence": "7",
+        "owner_high_water": "12",
+        "owner_ledger_root": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "owner_snapshot_ref": "I/snapshot/9",
+        "owner_snapshot_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "owner_snapshot_attestation_ref": "I/snapshot-attestation/9",
+        "owner_snapshot_attestation_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "owner_gate_ref": "I/gate/recovery/1",
+        "owner_gate_generation": "11",
+        "scope_ref": "Scope/tenant-1",
+        "scope_generation": "7",
+        "scope_binding_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "operation_identity_ref": "ForgetOperation/9",
+        "operation_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "request_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+        "anti_rollback_anchor_ref": "I/anchor/22",
+        "key_status_generation": "IKeyStatus/22",
+        "signature_profile_ref": "AIMBA-I-CRYPTO-1.0",
+        "key_id": "I/key/test-only",
+        "key_version": "test-v1",
+        "canonicalization_profile_ref": "RFC8785-JCS-1.0",
+        "digest_profile_ref": "SHA256/AIMBA-I-PAYLOAD-v1"
+      }
     }
   ],
   "seed_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
