@@ -44,13 +44,13 @@ Does a shared resource allocator improve fairness under contention, and what qua
 |---|---:|---:|---:|
 | Recall | 0.5333 | **0.5417** | 0.5083 |
 | Precision | **0.4741** | 0.2863 | 0.2699 |
-| Token efficiency | **0.4817** | 0.3244 | 0.2984 |
+| Token efficiency | **0.4817** | 0.3064 | 0.2984 |
 | Redundancy rate | **0.2815** | 0.4097 | 0.4071 |
 | Mean task coverage | 0.5333 | **0.5417** | 0.5083 |
 | Starved tasks | 1 | 0 | **0** |
 | Jain fairness | 0.8325 | 0.8141 | **0.8554** |
 | Budget utilization | 0.9997 | 0.9996 | 0.9973 |
-| Median selection latency (ms) | **0.099** | 0.127 | 0.324 |
+| Median selection latency (ms) | **0.095** | 0.119 | 0.306 |
 
 ## Interpretation
 
