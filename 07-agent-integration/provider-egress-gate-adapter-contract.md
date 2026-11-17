@@ -191,3 +191,12 @@ These states must map to C's existing CSubmitOutcome and CausalOrderTerminalProo
 ### 中文规范摘要
 
 C Provider Egress Gate 必须嵌入既有因果链：C 本地 Admission → COC ParticipantIntent → I 单次 COMMIT_WON 与 D 精确 Fence/Lineage Clearance → COC ParticipantReservation → C 本地最终 Egress CAS → Provider Transport → CSubmitOutcome → COC Terminal Proof。COC Reservation 不能代替 C Gate 的最终发送 CAS。C Gate Close 与 CommitEgress 在同一 C 持久化序列化域竞争：关闭先赢则零字节发送；发送提交先赢则进入 Close Snapshot 并以同一 Provider Idempotency Key 恢复。发送结果不明必须 UNKNOWN/IN_DOUBT，禁止新 Key 重发。多 Adapter 实例必须共享可证明的持久化线性化权威，不能依赖进程锁。
+
+
+### 13.6 Currentness after I/D participant ordering
+
+The final egress check MUST validate the authoritative outcome of the exact I authorization consumption, not perform a numeric comparison between PermissionEpoch and any C/D/COC generation. If I's sequencer records REVOCATION_WON before consumption, the send is rejected. If it records COMMIT_WON first, the exact participant remains in-flight and later revocation is ordered behind it until C terminal outcome. A later PermissionEpoch value alone does not rewrite that historical operation ordering; the Adapter must verify the exact receipt, digest, participant binding, issuer/key validity and that the I sequencer has not invalidated the receipt under its own policy.
+
+The same rule applies to D: final egress validates the exact D participant/clearance and D fence relation. Fence-first blocks; participant-first holds the fence behind the unresolved participant. The Adapter MUST NOT infer ordering from timestamps or compare D and I counters.
+
+This rule is not a reusable permission lease. The COMMIT_WON receipt is one-use, operation-bound, digest-bound and terminalized only through the C outcome/recovery path. It authorizes no other request, retry identity, redirect, stream continuation, provider account or model.
