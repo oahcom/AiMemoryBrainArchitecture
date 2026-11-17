@@ -57,7 +57,7 @@ None of the five independent assessments is rejected as a whole. Any proposal to
 
 | ID | Owner | Closure deadline | Risk acceptance |
 |---|---|---|---|
-| AR-01 physical topology | Storage + D + I | Before final visibility implementation / JF-10 Gate A completion | Not accepted; blocking |
+| AR-01 L4 physical realization of selected Option A | Storage + D + I | Before final visibility implementation / JF-10 Gate A completion | Not accepted; blocking |
 | AR-02 domain semantics | B | Before dependent schema freeze | Not accepted; blocking |
 | AR-03 Forget/inventory | I + D + Storage; all consumers | Before Forget/restore security Gate | Not accepted; blocking |
 | AR-04 Applied/provider | C/G/H + I/D | Before Applied implementation/acceptance | Not accepted; blocking |
