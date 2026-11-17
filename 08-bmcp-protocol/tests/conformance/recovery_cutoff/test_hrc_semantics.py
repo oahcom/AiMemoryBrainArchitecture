@@ -245,7 +245,7 @@ def validate_batch(b):
 
 def request_entry(row_ref, owner, request_ref=None, digest="d" * 64, seq=1):
     return {"owner_entry_ref": row_ref, "owner_entry_kind": "REQUEST", "owner": owner,
-            "request_ref": request_ref or ("request/" + row_ref), "request_digest": digest,
+            "request_ref": request_ref or ("request/" + row_ref), "request_digest": digest, "entry_digest": "e" * 64,
             "sequence": seq, "scope_ref": "scope/test"}
 
 
@@ -267,6 +267,7 @@ def validate_request_dispositions(requests_by_owner, dispositions_by_owner):
             if (edge.get("owner_kind") != owner or
                 edge.get("owner_request_ref") != row.get("request_ref") or
                 edge.get("owner_request_digest") != row.get("request_digest") or
+                edge.get("owner_entry_digest") != row.get("entry_digest") or
                 edge.get("owner_sequence") != row.get("sequence") or
                 edge.get("scope_ref") != row.get("scope_ref")):
                 return INVALID
@@ -655,7 +656,7 @@ class HRCConformance(unittest.TestCase):
     def test_JPF_14(self):
         req = request_entry("C/request-row/1", "C")
         edge = {"owner_kind":"C","owner_entry_ref":"C/request-row/1","owner_request_ref":req["request_ref"],
-                "owner_request_digest":req["request_digest"],"owner_sequence":1,"scope_ref":"scope/test",
+                "owner_request_digest":req["request_digest"],"owner_entry_digest":req["entry_digest"],"owner_sequence":1,"scope_ref":"scope/test",
                 "disposition":"OUT_OF_SCOPE_WITH_PROOF","owner_signature_valid":True}
         reqs = {"I":[],"D":[],"C":[req]}; edges = {"I":[],"D":[],"C":[edge]}
         self.assertEqual(validate_request_dispositions(reqs, edges), INVALID)
