@@ -123,15 +123,15 @@ Owner 分支 HEAD 是本次评估期间读取的实时引用；Blob 用于标识
 
 ### 各跨模块机制的评分依据与控制
 
-| 机制 | 评分依据（I；D；S；C；R；V；O；K） | 放大因素 | 可简化部分 | 必须保留 |
+| 机制 | 评分依据（I；D；S；C；R；V；O；K） | 放大因素 | 可简化部分 | 必须保留 | 置信度 |
 |---|---|---|---|---|
-| E/D/Storage Publication | 5 个操作阶段；5 三个权威依赖；5 Work/Fence/Participant/Outcome 状态；5 竞争线性化；5 崩溃/Lost ACK；5 Race Proof；4 单 DB 拓扑；5 跨 Owner 语义 | Admission 与 Visibility 是两个独立持久化权威 | 在 Owner 批准时将物理串行化收敛到一个事务域 | 最终 Gate 复核当前 Fence 和 I Proof；不得暴露暂存内容 |
-| Global Forget | 5 Inventory/Proof 算法；5 六个以上 Owner；5 独立 Epoch 和局部 ACK；5 新 Producer/Recipient 竞争；5 离线/Restore；5 Global Evidence；5 外部 Backup/Operator；5 全局推理 | 每条 Copy/Consumer/Restore 路径都会扩大 Inventory | 限定首发 Inventory 和 PolicyDomain | Unknown 不等于成功；Suppression/Cleanup/Erasure 必须区分 |
-| C/G/H Applied | 4 Adapter Assembly；5 三个 Owner 加 I；5 按 Delivery/Session/Request 的状态；4 Late ACK/Revocation；4 Offline/Reconnect；5 实际最终请求证明；3 单 Adapter 运维；5 证明语义 | Capability Tier 可能夸大 Adapter 的可观测能力 | 一个 Adapter Profile 和狭窄 Managed Region | Full Applied 必须有精确最终提交证据 |
-| JF-10/COC | 5 分布式 Participant 协议；5 C/D/I/H/Storage/COC；5 Participant/XID/Prefix/Gate；5 串行顺序和 Quorum；5 Same-XID Recovery；5 确定性故障活动；5 生产运维；5 精确 Bundle 治理 | Prepared DB Transaction + 独立 Coordinator + Owner Ledger | 延期 COC 部署，或限制在一个已证明拓扑内 | 不允许启发式决议；Same-XID；UNKNOWN 保持 Barrier |
-| Typed Positions | 4 类型 Registry；5 Consumers；5 不同位置语义；4 排序错误；5 Replay/Gap Recovery；5 类型误用测试；3 运行时运维；5 认知命名空间负担 | 相似整数/Version 字段容易被意外强制转换 | 集中 Registry 和代码生成 | 名义类型区分及由权威方负责比较 |
-| Restore | 5 Reconciliation 协议；5 DB/COC/I/D/Storage/Owner；5 Epoch/Prefix/Participant/Seal；5 Stale Primary/Rollback 竞争；5 Partial Restore；5 Negative Evidence；5 Operator/DR；5 证据解释 | 数据平面可能在控制平面之前被恢复 | 一种 Restore 拓扑和自动 Manifest 验证 | 从 Fenced 开始；独立 Ledger 和 Owner Release 前不服务 |
-| 双语治理 | 3 文档流程；5 Owner/Branch；4 Source/Translation 状态；2 运行时竞争；3 Supersession/Re-review；5 语义一致性；3 CI/Review 运维；5 人工认知负担 | 阅读指南被误当作规范源文件、Blob Pin 过期 | 一份双语报告/Manifest；结构检查自动化 | 语义一致性、稳定 ID、精确源版本和权威状态 |
+| E/D/Storage Publication | 5 个操作阶段；5 三个权威依赖；5 Work/Fence/Participant/Outcome 状态；5 竞争线性化；5 崩溃/Lost ACK；5 Race Proof；4 单 DB 拓扑；5 跨 Owner 语义 | Admission 与 Visibility 是两个独立持久化权威 | 在 Owner 批准时将物理串行化收敛到一个事务域 | 最终 Gate 复核当前 Fence 和 I Proof；不得暴露暂存内容 | 中高 |
+| Global Forget | 5 Inventory/Proof 算法；5 六个以上 Owner；5 独立 Epoch 和局部 ACK；5 新 Producer/Recipient 竞争；5 离线/Restore；5 Global Evidence；5 外部 Backup/Operator；5 全局推理 | 每条 Copy/Consumer/Restore 路径都会扩大 Inventory | 限定首发 Inventory 和 PolicyDomain | Unknown 不等于成功；Suppression/Cleanup/Erasure 必须区分 | 中高 |
+| C/G/H Applied | 4 Adapter Assembly；5 三个 Owner 加 I；5 按 Delivery/Session/Request 的状态；4 Late ACK/Revocation；4 Offline/Reconnect；5 实际最终请求证明；3 单 Adapter 运维；5 证明语义 | Capability Tier 可能夸大 Adapter 的可观测能力 | 一个 Adapter Profile 和狭窄 Managed Region | Full Applied 必须有精确最终提交证据 | 中 |
+| JF-10/COC | 5 分布式 Participant 协议；5 C/D/I/H/Storage/COC；5 Participant/XID/Prefix/Gate；5 串行顺序和 Quorum；5 Same-XID Recovery；5 确定性故障活动；5 生产运维；5 精确 Bundle 治理 | Prepared DB Transaction + 独立 Coordinator + Owner Ledger | 延期 COC 部署，或限制在一个已证明拓扑内 | 不允许启发式决议；Same-XID；UNKNOWN 保持 Barrier | 中高 |
+| Typed Positions | 4 类型 Registry；5 Consumers；5 不同位置语义；4 排序错误；5 Replay/Gap Recovery；5 类型误用测试；3 运行时运维；5 认知命名空间负担 | 相似整数/Version 字段容易被意外强制转换 | 集中 Registry 和代码生成 | 名义类型区分及由权威方负责比较 | 中高 |
+| Restore | 5 Reconciliation 协议；5 DB/COC/I/D/Storage/Owner；5 Epoch/Prefix/Participant/Seal；5 Stale Primary/Rollback 竞争；5 Partial Restore；5 Negative Evidence；5 Operator/DR；5 证据解释 | 数据平面可能在控制平面之前被恢复 | 一种 Restore 拓扑和自动 Manifest 验证 | 从 Fenced 开始；独立 Ledger 和 Owner Release 前不服务 | 中高 |
+| 双语治理 | 3 文档流程；5 Owner/Branch；4 Source/Translation 状态；2 运行时竞争；3 Supersession/Re-review；5 语义一致性；3 CI/Review 运维；5 人工认知负担 | 阅读指南被误当作规范源文件、Blob Pin 过期 | 一份双语报告/Manifest；结构检查自动化 | 语义一致性、稳定 ID、精确源版本和权威状态 | 高 |
 
 置信度表示基于所引用源样本对评分的置信度，不表示模块正确或已达到可实现状态。
 
