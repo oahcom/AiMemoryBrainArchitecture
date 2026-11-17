@@ -5,7 +5,7 @@
 - Review mode: independent I-role semantic review at the user's direction
 - Decision: **ACCEPT WITH CONDITIONS**
 - Status: semantic contract accepted within I authority; implementation, inventory closure and conformance OPEN
-- Controlling contract: gate-release-currentness-cas-and-admission-proof.md, including §11
+- Controlling contract: gate-release-currentness-cas-and-admission-proof.md, Blob a3313d6a1e1e149491adfb145b5c906b541b0dc4, including §11
 
 ## 1. I decision
 
