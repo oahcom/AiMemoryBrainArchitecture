@@ -27,8 +27,8 @@ jobs:
         run: |
           set -euo pipefail
           echo "=== Runner identity ==="
-          printf 'runner=%s\n' "${RUNNER_NAME:-unknown}"
-          printf 'hostname=%s\n' "$(hostname)"
+          printf "runner identity: registered (name withheld)\n"
+          printf "host identity: withheld\n"
           printf 'kernel='; uname -sr
           printf 'architecture='; uname -m
           echo "=== Operating system ==="
@@ -46,8 +46,8 @@ jobs:
           systemctl is-enabled tailscaled 2>/dev/null || true
           systemctl is-active tailscaled 2>/dev/null || true
           echo "=== Egress chain state (units only, no config) ==="
-          systemctl is-active warp-usque 2>/dev/null || true
-          systemctl is-active sing-box 2>/dev/null || true
+          echo "Host-specific egress service state withheld."
+          systemctl is-active [HOST EGRESS SERVICE] 2>/dev/null || true
           echo "=== Admission control state ==="
           hooks="$HOME/actions-runner/hooks"
           if [ -r "${hooks}/guard.log" ]; then
