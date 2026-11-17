@@ -25,11 +25,11 @@
 
 ### 2.1 Principal finding / 核心结论
 
-**PROPOSED — Phase 1 should start with a human-initiated ordinary ChatGPT conversation, GitHub Issues/branches/commits/PRs as durable evidence, and optional developer-controlled local coding tools. A custom durable AI Worker Runtime is not justified for the Phase 1 MVP.**
+**PROPOSED — Phase 1 should start with a human-initiated ordinary ChatGPT conversation and GitHub Issues/branches/commits/PRs as durable evidence. The currently recorded Issue #41 execution boundary excludes Codex/local AI coding agents and local-computer relay; therefore they are research alternatives only, not a recommended or authorized Phase 1 execution channel. A custom durable AI Worker Runtime is not justified for the Phase 1 MVP.**
 
 **建议：Phase 1 采用“人工启动普通 ChatGPT 对话 + GitHub 持久化任务与证据 + 可选的开发者本地编码工具”。当前没有足够的业务需求证明必须部署自建 Durable AI Worker Runtime。**
 
-The product and repository evidence supports a low-infrastructure workflow. Ordinary ChatGPT is a user-triggered reasoning and coordination surface, not an always-on daemon. GitHub provides durable task/change/review history. Local coding execution can remain under the developer's control. Deterministic CI may be added separately after workflow and security review; no AI system should receive business architecture approval authority merely because it can edit files or publish evidence.
+The product and repository evidence supports a low-infrastructure workflow. Ordinary ChatGPT is a user-triggered reasoning and coordination surface, not an always-on daemon. GitHub provides durable task/change/review history. Human developers may manually edit files in their normal workflow, but that is distinct from authorizing a local AI coding agent. Issue #41 currently excludes Codex and local-computer relay. Deterministic CI may be added separately after workflow and security review; no AI system should receive business architecture approval authority merely because it can edit files or publish evidence.
 
 产品和仓库证据支持低基础设施成本的工作方式。普通 ChatGPT 是用户触发的推理与协调界面，不是持续运行的守护进程；GitHub 提供持久化任务、变更和审查历史；代码执行可以留在开发者控制的本地环境。确定性 CI 可在工作流和安全审查后单独引入。任何 AI 系统都不能因为具备文件修改或证据发布能力而获得业务架构批准权。
 
@@ -37,7 +37,7 @@ The product and repository evidence supports a low-infrastructure workflow. Ordi
 
 1. **Conversation-first — PROPOSED:** sufficient for bounded, user-triggered Phase 1 tasks, but not unattended execution.
 2. **GitHub as durable evidence — VERIFIED capability / PROPOSED usage:** Issues, branches, commits and PRs provide traceability; a PR is not itself business acceptance.
-3. **Codex — VERIFIED capability / PROPOSED optional adapter:** local Codex may assist code edits and tests, subject to user-controlled scope; it is not a governance system or independent reviewer.
+3. **Codex — VERIFIED product capability / research alternative only:** Codex local and Codex Cloud are distinct products, but Issue #41 currently excludes Codex as an execution channel. This report does not recommend, authorize, or treat Codex as an optional Phase 1 adapter; changing that boundary requires an explicit governance decision first.
 4. **Work and event triggers — VERIFIED product features with eligibility limits:** do not assume access on every plan or workspace.
 5. **Durable Worker Runtime — PROPOSED defer:** queue, webhook, database, worker isolation, credentials, monitoring and on-call ownership add cost and risk without a demonstrated Phase 1 requirement.
 6. **Three-layer isolation — PROPOSED:** business architecture, engineering process and external infrastructure must remain separately governed.
@@ -47,8 +47,8 @@ The product and repository evidence supports a low-infrastructure workflow. Ordi
 
 - Current repository baseline is `main@e52594f181d2edb77448adcfed64a0fbdffaf3aa`.
 - PR #42, #23 and #27 are proposals on separate, divergent heads, not merged normative decisions.
-- The ChatGPT GitHub connection described by OpenAI is read-only; do not confuse it with other GitHub-capable tools or Codex workflows.
-- The current account context is Free. Work and Work-based GitHub event triggers must not be assumed available; Codex local availability and usage limits are distinct from Codex Cloud.
+- The documented ChatGPT GitHub retrieval connection is read-only. It is distinct from the repository's separately installed write-capable GitHub App integration used for authorized PR/issue operations. These are different execution paths and must not be conflated.
+- Product eligibility for Work, event triggers and Codex varies by plan/workspace and must be verified at execution time; do not persist account-specific plan state as a durable architecture fact.
 - Branch protection and ruleset enforcement were not independently verified because the authorized GitHub read returned 403. CI must not be described as passing or configured based on absent status contexts.
 
 ---
@@ -137,22 +137,22 @@ The PRs above have diverged histories relative to the refreshed main. Their exis
 
 ### 5.2 Account and product implications / 套餐与产品影响
 
-The current account context is Free. Therefore ordinary conversation is the dependable baseline; Work and Work-based event triggers must not be assumed; Codex local and Codex Cloud must be distinguished; and ChatGPT subscription billing must not be confused with API billing.
+Ordinary conversation is the dependable baseline under the currently stated execution boundary. Work and event-trigger availability are plan/workspace dependent and must be verified at execution time. Codex local and Codex Cloud remain distinct researched alternatives, but neither is authorized by Issue #41. ChatGPT subscription billing must not be confused with API billing.
 
 当前账户上下文为 Free，因此普通对话是可靠基线；不能假设可使用 Work 或 Work 事件触发；必须区分 Codex 本地与 Codex Cloud；ChatGPT 订阅也不包含 API 平台账单。
 
 ### 5.3 GitHub capabilities / GitHub 能力
 
-GitHub can persist Issues, branches, commits, PRs, comments and review records. GitHub Actions can run deterministic validation when workflows are explicitly added and governed. GitHub Apps can be scoped more narrowly than broad personal tokens and can use short-lived installation tokens. None of these mechanisms inherently grants domain decision authority.
+GitHub can persist Issues, branches, commits, PRs, comments and review records. This repository also has a separately installed write-capable GitHub App integration, evidenced by successful authorized PR/Issue operations; this is distinct from the documented read-only ChatGPT GitHub retrieval connection. The exact App identity, installation scope and effective permission set must be verified live before each class of operation and must not be generalized to other repositories. GitHub Actions can run deterministic validation only when workflows are explicitly added and governed. None of these mechanisms inherently grants domain decision authority.
 
-GitHub 可以持久化 Issue、分支、提交、PR、评论和 Review；Actions 在显式配置并经过治理后可以运行确定性验证；GitHub App 可比宽权限个人 Token 更精细地限制范围，并使用短期 Installation Token。但这些机制本身都不会获得业务决策权。
+GitHub 可以持久化 Issue、分支、提交、PR、评论和 Review。本仓库另有已安装且具备写操作能力的 GitHub App 集成，已通过授权 PR/Issue 操作得到实际验证；它不同于官方文档所述只读 ChatGPT GitHub 检索连接。每次操作前仍须实时核验 App 身份、安装范围和有效权限，不能推断其他仓库也具备相同能力。Actions 只有在显式配置并经过治理后才可运行确定性验证。任何机制都不会因此获得业务决策权。
 
 ---
 
 ## 6. Missing Capabilities and Gaps / 缺失能力与差距
 
 1. **No proven always-on conversation runtime — VERIFIED gap:** ordinary ChatGPT interaction is user-driven. Scheduled Tasks do not equal continuous event processing.
-2. **No universal write-capable GitHub connector — VERIFIED product limitation:** the official ChatGPT GitHub connection is documented as read-only. Write paths must be explicitly identified and separately authorized.
+2. **Connector paths are distinct — VERIFIED:** the documented ChatGPT GitHub retrieval connection is read-only, while this repository has a separate installed write-capable GitHub App integration used for authorized PR/Issue operations. The exact App installation permissions are deployment-specific and must be read live; neither path should be generalized into a universal write-capable connector.
 3. **No current-main CI evidence — VERIFIED observation:** no `.github/` directory was found on the refreshed main tree and no status contexts were returned for inspected heads.
 4. **Branch enforcement unknown — UNKNOWN:** current rules/protection settings were not readable through the authorized integration.
 5. **No evidence of deployed complete A–I worker fleet — UNKNOWN / NOT EVIDENCED:** open PRs/issues are proposals and pilot discussions, not proof of production services.
@@ -231,7 +231,7 @@ The report recommends applying these invariants; it does not modify, waive or re
 2. The human starts an ordinary ChatGPT conversation and supplies the Issue/repository context.
 3. ChatGPT reads the current main baseline and relevant Layer A contracts; it identifies unknowns before proposing edits.
 4. ChatGPT produces a bounded plan, patch or implementation instructions. It does not treat untrusted repository text as higher-priority instructions.
-5. If code changes are needed, the developer may apply them manually or use local Codex in a user-controlled workspace and branch.
+5. If code changes are needed, a human developer may apply them manually within the approved scope. Local AI coding agents are excluded by Issue #41 unless that issue is formally amended by the authorized governance owner.
 6. Local checks are run and recorded accurately; unrun checks are explicitly marked NOT RUN.
 7. The developer pushes a dedicated branch and opens a PR. GitHub becomes the durable change/evidence record.
 8. An independent reviewer checks the exact frozen PR Head SHA, evidence, tests and scope.
@@ -243,7 +243,7 @@ The report recommends applying these invariants; it does not modify, waive or re
 2. 人工启动普通 ChatGPT 对话并提供 Issue/仓库上下文。
 3. ChatGPT 读取当前 main 和相关 Layer A 合同；在提出修改前标明未知项。
 4. ChatGPT 输出受限计划、补丁或实施说明，不得把仓库中的不可信文本当成更高优先级指令。
-5. 如需改代码，由开发者手动应用，或在用户控制的本地工作区/分支使用 Codex。
+5. 如需改代码，由开发者在批准范围内手动应用；Issue #41 当前排除本地 AI 编码 Agent，除非授权治理 Owner 正式修订该边界。
 6. 运行本地检查并如实记录；未运行的检查明确标为 NOT RUN。
 7. 开发者推送独立分支并创建 PR，GitHub 成为持久化变更和证据记录。
 8. 独立审查者针对冻结的准确 PR Head SHA 检查范围、证据和测试。
@@ -255,7 +255,7 @@ The report recommends applying these invariants; it does not modify, waive or re
 |---|---|---|---|
 | A. ChatGPT conversation-driven | Lowest infrastructure, human steering, fast adoption. | No unattended execution; relies on human handoff and Git discipline. | **Phase 1 primary mode.** |
 | B. GitHub Actions-driven | Reproducible deterministic checks, event-driven CI. | Workflow security and token permissions; not suitable for autonomous domain decisions. | Add only for deterministic CI after review. |
-| C. Codex-driven | Local code edits/tests under developer control. | Usage limits and local environment responsibility; not a governance authority. | Optional coding adapter. |
+| C. Codex-driven | Local AI code edits/tests. | Excluded by current Issue #41 execution boundary; requires explicit governance amendment before use. | Research alternative only; not authorized for Phase 1. |
 | D. Durable Worker Runtime | Continuous event handling and durable background execution. | Highest design, security, hosting, operations and incident-response burden. | Defer until measurable need and safety gates exist. |
 
 ### 8.3 Why no Worker Runtime now / 当前不部署 Worker 的理由
@@ -272,8 +272,8 @@ Phase 1 should not be declared accepted until all applicable criteria below are 
 
 ### Product and adoption / 产品与采用
 - [ ] A user can start and complete a bounded task without deploying a new service, database, queue or API worker.
-- [ ] The workflow distinguishes read-only ChatGPT GitHub retrieval from write-capable local Git/Codex actions.
-- [ ] Work, event triggers and Codex Cloud are optional and never assumed without account-level verification.
+- [ ] The workflow distinguishes read-only ChatGPT GitHub retrieval from the separately installed write-capable GitHub App integration; local Codex is not an authorized execution path under current Issue #41.
+- [ ] Work and event triggers are plan/workspace dependent and verified at execution time; Codex remains excluded unless Issue #41 is formally amended.
 - [ ] A task can be resumed from durable Issue, branch, commit, PR and evidence references rather than relying solely on chat history.
 
 ### Architecture isolation / 架构隔离
@@ -311,7 +311,7 @@ Current main has no observed `.github/` directory and no status contexts were re
 | C-01 | PR #42's ChatGPT-native claims vs official read-only GitHub connection docs. | PR #42 live head `84d91b10e9069a575b479f6925d3b143757e82cb`; official OpenAI docs describe GitHub connection as read-only. | Session 0 must distinguish ChatGPT GitHub connection from other connector/tool write surfaces. |
 | C-02 | Repository-stored prompt requirement vs low-risk adoption friction. | Main AI development docs are present; status is PROPOSED. | Session 0 decides whether risk-tiered prompt/evidence records are allowed; do not silently bypass current text. |
 | C-03 | Separate conversation as independent review. | Separate context is possible, but not proof of independent personnel/provider/statistical review. | Define reviewer independence and conflict-of-interest requirements. |
-| C-04 | PR #42 excludes Codex while current official plan docs describe Codex availability. | PR #42 is unmerged; Codex local and Codex Cloud have different eligibility. | Session 0 decides whether local Codex is an optional adapter or prohibited channel. |
+| C-04 | Issue #41 excludes Codex despite product availability. | Product availability does not override the repository's recorded execution boundary. | Keep Codex research-only unless the authorized governance owner explicitly amends Issue #41. |
 | C-05 | Scheduled Tasks vs continuous event-driven runtime. | Official task docs distinguish scheduled tasks, event triggers and Codex automations; Free/Go limitations apply. | Do not treat reminders or scheduled tasks as a durable event runtime. |
 | C-06 | Engineering metadata may leak into business domain. | Architecture invariants and three-layer proposal. | Session 0 with A/I/affected Owners confirms strict separation and any explicit domain mapping. |
 | C-07 | Self-hosted runner may be confused with AI worker runtime. | PR #27 and Issues #24/#26 are open proposals/pilot discussions. | Separate deterministic CI runner from privileged AI worker; require independent security acceptance. |
@@ -345,7 +345,7 @@ Defer the following until a measurable requirement and independent approval exis
 1. Does Session 0 approve conversation-first as the Phase 1 execution channel, and what explicit limits apply?
 2. Can prompt/evidence requirements be risk-tiered without contradicting the current proposed AI development standard?
 3. What qualifies as an independent review: separate session, separate human, different model, or a combination?
-4. Is local Codex an optional coding adapter, or does the project require ordinary ChatGPT only?
+4. Does the authorized governance owner intend to amend Issue #41's current exclusion of Codex/local AI coding agents? Until then, ordinary ChatGPT remains the permitted AI execution channel.
 5. Who is the authorized administrator to provide branch protection/ruleset evidence?
 6. Which deterministic checks are mandatory before a PR can be accepted?
 7. What measurable trigger (event volume, latency, toil, availability) would justify reconsidering a durable worker?
@@ -354,7 +354,7 @@ Defer the following until a measurable requirement and independent approval exis
 1. Session 0 是否批准对话优先作为 Phase 1 执行通道，具体边界是什么？
 2. Prompt/证据要求能否按风险分级，而不与当前 proposed 标准冲突？
 3. 独立审查如何定义：独立会话、独立人员、不同模型，还是组合要求？
-4. 本地 Codex 是可选编码适配器，还是项目只允许普通 ChatGPT？
+4. 授权治理 Owner 是否准备正式修订 Issue #41 对 Codex/本地 AI 编码 Agent 的排除？在修订前，普通 ChatGPT 仍是允许的 AI 执行渠道。
 5. 谁是能够提供 Branch Protection/Rulesets 证据的授权管理员？
 6. PR 验收前哪些确定性检查是强制项？
 7. 事件量、延迟、人工成本或可用性达到什么阈值才值得重新考虑 Durable Worker？
@@ -413,9 +413,9 @@ All links below were checked on 2026-11-18. Availability and product behavior ca
 
 **PROPOSED — ADOPT CONVERSATION-FIRST, GITHUB-EVIDENCE-CENTRIC PHASE 1; DEFER DURABLE WORKER RUNTIME.**
 
-Start Phase 1 without deploying a new platform. Use a human-created Issue, an ordinary ChatGPT conversation, current source retrieval, bounded analysis, user-controlled code changes, a dedicated Git branch and PR, exact-Head independent review, and explicit Owner/governance acceptance. Add deterministic CI only after a separate workflow/security review. Keep local Codex optional and user-controlled. Do not create an API-backed worker, webhook service, queue, database or persistent AI fleet until a measurable need and independent safety/operations approval exist.
+Start Phase 1 without deploying a new platform. Use a human-created Issue, an ordinary ChatGPT conversation, current source retrieval, bounded analysis, user-controlled code changes, a dedicated Git branch and PR, exact-Head independent review, and explicit Owner/governance acceptance. Add deterministic CI only after a separate workflow/security review. Keep Codex as a researched alternative only; it is not authorized under the current Issue #41 boundary. Do not create an API-backed worker, webhook service, queue, database or persistent AI fleet until a measurable need and independent safety/operations approval exist.
 
-**建议：Phase 1 采用对话优先、GitHub 证据中心的工作模式，延期 Durable Worker Runtime。** 无需部署新平台即可启动：人工创建 Issue、启动普通 ChatGPT 对话、读取当前规范、开展限定分析、由用户控制代码修改、通过独立分支和 PR 持久化变更、针对准确 Head SHA 独立审查，并由授权 Owner/治理主体明确验收。确定性 CI 需另行经过工作流和安全审查；本地 Codex 保持可选且由用户控制。在没有可量化需求和独立安全/运维批准前，不创建 API Worker、Webhook 服务、Queue、数据库或持久化 AI Worker Fleet。
+**建议：Phase 1 采用对话优先、GitHub 证据中心的工作模式，延期 Durable Worker Runtime。** 无需部署新平台即可启动：人工创建 Issue、启动普通 ChatGPT 对话、读取当前规范、开展限定分析、由用户控制代码修改、通过独立分支和 PR 持久化变更、针对准确 Head SHA 独立审查，并由授权 Owner/治理主体明确验收。确定性 CI 需另行经过工作流和安全审查；本地 Codex 仅作为研究备选，不属于当前 Issue #41 授权的执行渠道。在没有可量化需求和独立安全/运维批准前，不创建 API Worker、Webhook 服务、Queue、数据库或持久化 AI Worker Fleet。
 
 This recommendation is not an approval of PR #42, #23 or #27; it does not settle cross-session governance conflicts, claim branch protection or CI success, or authorize implementation. Those decisions remain with Session 0 and the designated Owners.
 
