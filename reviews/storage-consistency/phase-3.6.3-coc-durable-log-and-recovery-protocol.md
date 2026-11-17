@@ -551,3 +551,50 @@ This §17 supersedes any narrower owner-snapshot/participant-membership interpre
 Required vectors: omitted pre-COC owner admission; duplicate union member; wrong owner-ledger root/high-water; request set complete but admission set incomplete; owner Gate close racing prefix P; exact C Provider Outcome missing for a crossed side effect; Batch/Manifest mismatch; crash between S2/S3; and attempted release without both request and admission roots. These are **SPECIFIED / NOT RUN**.
 
 No schema freeze, crypto approval, COC quorum deployment, provider exactly-once behavior, runtime conformance, production activation or Global Forget Completion is claimed.
+
+
+## 18. Normative H schema pin supersession — Unified COC/JF-10 1.2.15
+
+This section supersedes only the H schema artifact pin and structural mapping paragraph in §17.5. It does not alter the Storage-owned participant semantics, owner snapshot requirements, two-record Recovery Cutoff order, digest dependency, authority boundaries or production gates in §§14–17.
+
+The exact current H structural candidate is:
+- Schema artifact revision: **1.2.15**
+- Protocol-family wire version: **1.3.0**
+- Exact schema Blob: `860fc4cec658db7d2703cd6adf72aa31a2723f6d`
+- Dedicated structural test Blob: `d8d09ec54a2cc95761c3670fb2a69e325caed5e9`
+- H exact tested code Head: `5c1e492825910370c5fe6afd7e239d94a01559ec`
+- H Recovery Cutoff workflow [#44190526491](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44190526491): **306 tests PASS**, including 18 dedicated 1.2.15 structural checks.
+
+The 1.2.15 schema declares the §17 requirements at the structural layer:
+- distinct `COC_PARTICIPANT` and `OWNER_LOCAL_ADMISSION` member variants;
+- separate request and admission high-waters/counts/digests/ledger roots;
+- owner-specific I/D/C high-water shapes;
+- owner snapshot membership proof refs/digests;
+- Batch, Participant Manifest and RecoveryEpochCompleted exact references/positions/digests;
+- JF-10 PreparedParticipant/GID/database-incarnation fields;
+- C Provider Outcome `final_request_boundary_id` requirement.
+
+**Supersession rule:** the H schema artifact revision 1.2.5 named in §17.5 is a historical predecessor and is no longer the current H structural candidate. The current exact pin is 1.2.15 / wire 1.3.0 above. H 1.2.15 structural conformance does not prove semantic pair validation, quorum proof authenticity, owner snapshot truth, cryptographic key lifecycle, deployed COC or physical JF-10 behavior. Those remain separately required.
+
+### 中文：H Schema 精确 Pin 的规范性更新
+
+本节仅取代 §17.5 中的 H Schema Artifact Pin 和结构映射段落，不改变 §§14–17 中 Storage 所有的 Participant Semantics、Owner Snapshot 要求、双记录 Recovery Cutoff 顺序、Digest 依赖、权威边界或生产 Gate。
+
+当前 H 结构候选的精确版本为：
+- Schema Artifact Revision：**1.2.15**
+- Protocol-family Wire Version：**1.3.0**
+- 精确 Schema Blob：`860fc4cec658db7d2703cd6adf72aa31a2723f6d`
+- 专用结构测试 Blob：`d8d09ec54a2cc95761c3670fb2a69e325caed5e9`
+- H 精确测试代码 Head：`5c1e492825910370c5fe6afd7e239d94a01559ec`
+- H Recovery Cutoff Workflow [#44190526491](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44190526491)：**306 项测试 PASS**，其中包括 18 项针对 1.2.15 的专用结构检查。
+
+1.2.15 Schema 在结构层声明了 §17 的要求：
+- 独立的 `COC_PARTICIPANT` 与 `OWNER_LOCAL_ADMISSION` Member Variant；
+- 独立的 Request 与 Admission High-water/Count/Digest/Ledger Root；
+- I/D/C Owner-specific High-water 结构；
+- Owner Snapshot Membership Proof Ref/Digest；
+- Batch、Participant Manifest 和 RecoveryEpochCompleted 的精确引用/位置/Digest；
+- JF-10 PreparedParticipant/GID/Database Incarnation 字段；
+- C Provider Outcome 的 `final_request_boundary_id` 必填要求。
+
+**取代规则：** §17.5 中引用的 H Schema Artifact Revision 1.2.5 属于历史前序版本，不再是当前 H 结构候选。当前精确 Pin 为上述 1.2.15 / Wire 1.3.0。H 1.2.15 结构符合性不证明 Semantic Pair Validation、Quorum Proof Authenticity、Owner Snapshot Truth、Cryptographic Key Lifecycle、已部署 COC 或物理 JF-10 行为；这些仍须分别验证。
