@@ -161,3 +161,69 @@ Only D releases D outage Gate. The effective Forget Fence remains. Any failed cu
 ## 10. Provenance
 
 This document is an assistant-authored role-based proposal committed at the user's direction. It is not a cryptographic signature and does not prove independent human D Owner authorship or approval.
+
+
+## 11. D36.8-R1..R4 — Mandatory owner-local revision (append-only)
+
+This section is a normative append-only refinement of §§3–8. Where an earlier sentence is less specific or inconsistent with this section, this section controls for the revised Phase 3.6.8 proposal. The previously reviewed source Blob remains immutable historical evidence.
+
+### 11.1 D36.8-R1 — Exact shared reconciliation tuple alignment
+
+DReconciliationTuple MUST bind the same join identity as the corresponding IReconciliationTuple:
+- ReconciliationAttemptRef and monotonically increasing AttemptGeneration;
+- TupleSchemaId, TupleSchemaVersion and CanonicalizationProfileRef;
+- canonical digest over the versioned canonical representation;
+- exact I-signed subrecord reference/digest and exact D-signed subrecord reference/digest;
+- I PermissionEpoch and I sequencer position where relevant to the decision;
+- exact TargetInventorySealRef/digest and GlobalInventoryCompletenessProof generation/status;
+- signer/key-status generation and relevant ScopeBindingFingerprint / policy-scope mapping fingerprint;
+- ProducerDomainInventoryEpoch, registry snapshot digest and relevant InventoryEntryRef/InventoryEntryGeneration set;
+- IGateGeneration and IRequestHighWater where applicable;
+- D ForgetOperationRef, D FenceGeneration, exact FenceInstallationCursor, producer/work high-waters, barrier root/count/generation and dependency-closure cursor;
+- exact COC RecoveryEpoch, committed-prefix/position, RecoveryCutoffBatchRef/digest and ParticipantManifestRef/digest;
+- Storage participant and RestoreAttempt references where applicable.
+
+For a given reconciliation attempt, I and D MUST use byte-compatible schema/version and canonicalization profile, the same ReconciliationAttemptRef and AttemptGeneration, and cross-reference each other's signed subrecord digests. The envelope is a join over independently signed owner records, not a fictional atomic snapshot. D MUST NOT author or attest I-owned fields; it validates I's signed evidence against I authority.
+
+Any relevant change to I epoch, PermissionEpoch, sequencer position, registry digest, entry generation, target seal, completeness-proof generation/status, signer/key status, scope mapping, D FenceGeneration/FenceInstallationCursor, barrier root, COC prefix/batch/manifest or either signed subrecord digest invalidates the affected attempt. D MUST append a new attempt generation and re-evaluate membership/currentness; it MUST NOT patch a signed tuple in place or retain a closure based solely on unchanged D-local counters.
+
+### 11.2 D36.8-R2 — Mechanically decidable publication-before-fence witness
+
+Every barrier member classified PUBLISHED_BEFORE_FENCE MUST carry an authoritative publication-order witness binding:
+- the exact D FenceGeneration and FenceInstallationCursor / fence linearization reference;
+- ValidatedFenceGeneration: the generation actually checked by the final publication/visibility transaction;
+- authoritative publication transaction and commit reference;
+- VisibilityReceiptRef and VisibilityPointerRef/digest, or the exact authoritative visibility record applicable to the publication system;
+- WorkItemRef, AttemptRef, LeaseGeneration, scope binding and lineage digest;
+- evidence that the final publication transaction's current-generation comparison and visibility mutation occurred within the same atomic/linearizable boundary, with a transactionally meaningful order relative to the D fence installation point.
+
+The classification is valid only if the authoritative publication system can prove that its final effect transaction validated the current D generation and that the publication commit linearized before the D fence installation. A worker's earlier fence read, cached generation, lease acquisition time, wall-clock timestamp, queue timestamp or transport ACK is not such a witness.
+
+If any field or ordering proof is absent, ambiguous or unverifiable, the member MUST be UNKNOWN; the output remains private/quarantined and the affected barrier remains open. A publication that linearized after the fence is a post-fence safety violation: preserve immutable evidence, quarantine/withdraw through the publication authority, invalidate the affected closure and block D release/completion until remediation and a new complete proof. Later high-water advancement cannot reclassify it as pre-fence success.
+
+### 11.3 D36.8-R3 — C-owned provider outcome for crossed side-effect members
+
+For every D barrier member whose execution crossed, or may have crossed, the C Provider/Runtime side-effect boundary, D terminalization MUST include a C-owned CSubmitOutcomeRef and digest, provider idempotency-key namespace, exact provider request digest and authoritative provider receipt or provider lookup/reconciliation evidence where available. The C evidence MUST identify the exact submission attempt and provider operation so retries cannot conflate distinct effects.
+
+C alone owns and attests provider outcome. Storage COMMITTED/ROLLED_BACK, I terminality, COC batch membership/participant status, local queue state and transport ACK MUST NOT be substituted for provider success, rejection or non-invocation. If the protocol says provider invocation was not permitted, the barrier member still requires authoritative C-owned proof that no invocation occurred; absence of a COC row or worker is not proof.
+
+If provider outcome is unknown, conflicting, not queryable or not bound to the exact request/idempotency namespace, the member remains UNKNOWN and blocks D barrier terminalization, D outage-Gate release where applicable, and Forget completion. D records the reference and validates it; D does not mint C's outcome.
+
+### 11.4 D36.8-R4 — I inventory currentness at release and Forget terminalization
+
+D MUST perform an authoritative I-currentness validation immediately before each D outage-Gate release and immediately before each D Forget terminalization/completion transition. The validation MUST bind the exact current ProducerDomainInventoryEpoch, registry snapshot digest, relevant InventoryEntryRef/Generation set, TargetInventorySealRef/digest, GlobalInventoryCompletenessProof generation/status, PermissionEpoch where relevant, signer/key-status generation and scope/policy mapping fingerprint.
+
+The D decision record MUST identify the I authority response/reference, its generation and digest, the ReconciliationAttemptRef to which it belongs, and the point at which D validated it. A previously valid I proof is not current merely because D FenceGeneration and D's local work high-waters did not change.
+
+If any relevant I epoch, registry digest, entry generation, target seal, completeness proof, signer/key status or scope mapping changes, D MUST determine whether the change exposes an omitted producer, work item, derivative, attempt, backup/export/restore lineage or other affected descendant. Unless D has positive, source-backed proof that the relevant inventory projection and all dependent work remain complete, D MUST reopen the affected barrier, invalidate the prior closure/reconciliation attempt and keep the Gate closed. No D release or Forget terminalization may proceed on stale, incomplete or unavailable I evidence.
+
+### 11.5 Added conformance obligations — specified, not executed
+
+- compare I and D tuple schemas, canonicalization profile, attempt identity and signed-subrecord digests for exact compatibility;
+- verify D rejects a tuple missing PermissionEpoch, I sequencer position, target seal, completeness-proof generation/status, key-status generation or scope mapping fingerprint;
+- verify publication-before-fence is accepted only with a final-transaction ValidatedFenceGeneration and same-transaction linearization witness;
+- inject publication/fence races and ensure unknown order remains private/quarantined and blocks release;
+- cross the C provider boundary with success, rejection, timeout/lost ACK and lookup-unavailable outcomes; ensure only C-owned evidence terminalizes the provider subrecord;
+- test authoritative proof of non-invocation when provider invocation was prohibited;
+- advance each relevant I inventory/currentness generation immediately before D release and Forget terminalization; ensure stale evidence reopens the barrier;
+- verify absent or incomplete I proof, unknown provider outcome or changed signed subrecord keeps D closed.
