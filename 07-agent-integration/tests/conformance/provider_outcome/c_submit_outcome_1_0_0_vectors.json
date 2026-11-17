@@ -1,5 +1,5 @@
 {
-  "schema_blob": "09725d3a90e4c130b38400e8e2d613f755f3806a",
+  "schema_blob": "b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c",
   "schema_version": "1.0.0",
   "profile_status": "PROPOSED_NOT_REGISTERED",
   "signature_values": "TEST_FIXTURE_PLACEHOLDERS_NOT_CRYPTOGRAPHICALLY_VALID",
@@ -71,7 +71,8 @@
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "ProviderRequestRef": "Provider/request/55",
         "ProviderReceiptRef": "Provider/receipt/55",
-        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+        "OwnerSignatureRef": "C/signature/fixture-1"
       }
     },
     {
@@ -140,7 +141,8 @@
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "ProviderRequestRef": "Provider/request/55",
-        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+        "OwnerSignatureRef": "C/signature/fixture-1"
       }
     },
     {
@@ -210,7 +212,8 @@
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "ProviderNoHandoffProofRef": "C/no-handoff/55",
         "NotInvokedProofRef": "C/not-invoked/55",
-        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+        "OwnerSignatureRef": "C/signature/fixture-1"
       }
     },
     {
@@ -279,7 +282,8 @@
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "UnknownReasonRef": "C/unknown/55",
-        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+        "OwnerSignatureRef": "C/signature/fixture-1"
       }
     },
     {
@@ -348,7 +352,8 @@
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "UnknownReasonRef": "C/in-doubt/55",
-        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+        "OwnerSignatureRef": "C/signature/fixture-1"
       }
     },
     {
@@ -417,7 +422,8 @@
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "ProviderRequestRef": "Provider/request/55",
-        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+        "OwnerSignatureRef": "C/signature/fixture-1"
       }
     },
     {
@@ -485,7 +491,8 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+        "OwnerSignatureRef": "C/signature/fixture-1"
       }
     },
     {
@@ -553,7 +560,8 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+        "OwnerSignatureRef": "C/signature/fixture-1"
       }
     },
     {
@@ -621,7 +629,8 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+        "OwnerSignatureRef": "C/signature/fixture-1"
       }
     },
     {
@@ -689,7 +698,8 @@
         "key_id_ref": "C/key/test-only",
         "key_version": "test-v1",
         "signature": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-        "message_type": "C_PROVIDER_OUTCOME_RECORDED"
+        "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+        "OwnerSignatureRef": "C/signature/fixture-1"
       },
       "wire_request_digest": "8888888888888888888888888888888888888888888888888888888888888888"
     }
