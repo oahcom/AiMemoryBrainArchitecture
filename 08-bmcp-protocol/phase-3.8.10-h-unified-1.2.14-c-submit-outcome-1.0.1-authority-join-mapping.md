@@ -13,6 +13,7 @@
 - H validator test Blob: `53774aca0224fd9a727dfa625ba142825f1754b0`
 - H conformance workflow Blob: `4459d19f5b4eea058377d9819e48e81eed5c8c4b`
 - C candidate CI: `44059935858`, SUCCESS, 19 tests (C source construction only; not production trust).
+- H exact callback-seam CI: `44068247661`, SUCCESS, 25 tests, tested commit `0701b12c3f43e1e6d5706c8eb2747e1c583d60b7`.
 - Provenance: delegated H-role work performed at the user's direction; **not an independent human H Owner signature**.
 
 ## 1. Version authority and supersession
@@ -55,7 +56,7 @@ Validator 新增三个独立权威回调，彼此独立，也不能由 COC Join 
 
 The new tests exercise the actual `validate_provider_outcome` orchestration function with schema, semantic and digest primitives patched to deterministic test doubles. They prove that the I, D and Storage callbacks are distinct required seams, that all three can participate in a VALID orchestration result when test doubles return True, and that omitting all three produces UNKNOWN rather than VALID.
 
-**They do not constitute an end-to-end valid H envelope + C object fixture test.** Schema validation, semantic predicates, canonicalization/digest recomputation, signature verification and the owner evidence contents are not jointly exercised by these orchestration tests. The test doubles are not production trust authorities. Exact-head CI must run before this mapping can claim even bounded CI evidence for the new callbacks.
+**They do not constitute an end-to-end valid H envelope + C object fixture test.** Schema validation, semantic predicates, canonicalization/digest recomputation, signature verification and the owner evidence contents are not jointly exercised by these orchestration tests. The test doubles are not production trust authorities. Exact H Provider Outcome CI run `44068247661` completed successfully on commit `0701b12c3f43e1e6d5706c8eb2747e1c583d60b7`: 25 tests passed, 0 failed. The tested validator and test Blobs are exactly `eab961a08d41e871f38543b18ee60cf024977414` and `53774aca0224fd9a727dfa625ba142825f1754b0`; the later branch commit only added this mapping document. This is bounded CI evidence for the new callback orchestration, not end-to-end proof validation.
 
 新增测试通过确定性 Test Double 调用真实的 `validate_provider_outcome` 编排函数，但对 Schema、语义与摘要基础函数进行了 Mock。它们证明 I、D、Storage 是三个独立必需接口；当三个 Test Double 均返回 True 时可以参与 VALID 编排；缺少三者时结果为 UNKNOWN，而不是 VALID。
 
