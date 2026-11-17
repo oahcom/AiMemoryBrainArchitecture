@@ -2,7 +2,7 @@
 
 - Owner: C — Provider Outcome / immutable submit evidence
 - Status: PROPOSED structural schema and local conformance harness; NOT EXECUTED.
-- Schema: `schemas/c-submit-outcome-1.0.0.schema.json`, Blob `09725d3a90e4c130b38400e8e2d613f755f3806a`
+- Schema: `schemas/c-submit-outcome-1.0.0.schema.json`, Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`
 - Semantic amendment: Phase 3.8.6 Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`
 - Signature projection: Phase 3.8.8 Blob `39ff523c41f10e3a82442d4746dd7ca7763d271c`
 - H wire schema: 1.2.11 Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`
@@ -59,8 +59,8 @@ COC linkage is either a complete non-null intent/reservation pair with null abse
 
 ## 5. Conformance source files
 
-- Schema: `schemas/c-submit-outcome-1.0.0.schema.json`, Blob `09725d3a90e4c130b38400e8e2d613f755f3806a`
-- Fixture pack: `tests/conformance/provider_outcome/c_submit_outcome_1_0_0_vectors.json`, Blob `88bef7ddddff3b9f07c453e0af999f2c23af01bc`
+- Schema: `schemas/c-submit-outcome-1.0.0.schema.json`, Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`
+- Fixture pack: `tests/conformance/provider_outcome/c_submit_outcome_1_0_0_vectors.json`, Blob `e14eab2bed41f30af10a073b8e6523512128e78e`
 - Python harness: `tests/conformance/provider_outcome/test_c_submit_outcome_1_0_0.py`, Blob `92e8e9e607566eafa6ad89110202dbeed0fc43cb`
 - Dependency pin: `tests/conformance/provider_outcome/requirements.txt`, Blob `89099e36f214d8d0e0c7d4aacc19e2b4450f0744`
 
@@ -90,3 +90,12 @@ The harness checks Draft 2020-12 schema validity and selected semantic invariant
 **C ACCEPTS THIS AS THE PROPOSED IMMUTABLE OBJECT SCHEMA AND STRUCTURAL/SEMANTIC TEST CONTRACT. NOT FROZEN.**
 
 No tests have been executed by this artifact. No profile is registered. No provider adapter is certified. No production activation, universal exactly-once behavior, Full Applied or Global Forget Completion is claimed.
+
+
+### 3.1 Additional exact wire bindings
+
+The schema requires `OwnerSignatureRef` in addition to inline `key_id_ref`, `key_version` and `signature`. It also permits `ActualInferenceRequestId` when the runtime/provider assigns one. The H wire validator must compare `owner_signature_ref` and `actual_inference_request_id` when present.
+
+C's conditional provider proof members are `ProviderRequestRef`, `ProviderReceiptRef`, `ProviderLookupProofRef`, `ProviderNoHandoffProofRef`, `NotInvokedProofRef` and `UnknownReasonRef`. Each matching BMCP optional field, when present, must equal the immutable C object; if the immutable C object contains a non-null value, its wire duplicate cannot be silently omitted.
+
+The BMCP `coc_commit_proof_ref`, `coc_record_ref`, `coc_record_position`, `coc_entry_digest`, `prepared_participant_ref`, `prepare_attempt_ref/generation`, participant ledger fields, I terminal decision, D clearance and Storage resolution proof are independent owner/COC evidence, not C-authored truth. H verifies them through the appropriate authenticated COC/owner-ledger callback; they are not copied into C-P0 merely because they appear in the envelope.
