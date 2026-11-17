@@ -27,7 +27,7 @@ Preserve the existing logical authority model and prefer a modular Rust monolith
 
 **PostgreSQL candidate profile:** plausible fit for the Storage L1-selected per-authority SERIALIZABLE transaction domain, concurrent workers and physical HA/failover. SSI can reject non-serializable schedules. It increases deployment/backup/monitoring complexity and still cannot atomically include systems outside its transaction. Storage's L1 Option A is DECIDED; PostgreSQL itself is not selected, and actual engine/deployment conformance remains L4 OPEN.
 
-**Selection gate:** choose SQLite if the product target is single-host/single-writer and the entire D visibility boundary can be implemented in one SQLite transaction with acceptable concurrency and durability. Choose PostgreSQL if multiple concurrent workers and HA are required and the D/I/Storage authority can share its physical transaction boundary. Do not select based on feature lists alone.
+**Selection gate:** choose an engine only if it can implement the already-selected Storage L1 per-authority serialization anchor, durable transition records, authoritative read-after-commit, old-primary fencing and restore continuity. SQLite remains a possible local prototype candidate only if the complete required transaction and recovery semantics are demonstrated; PostgreSQL is a candidate, not an approved product choice. Do not reopen Option A/Option B without the required successor ADR.
 
 ## 3. Search and index selection
 
