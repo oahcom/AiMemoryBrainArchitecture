@@ -2,7 +2,7 @@
 
 | ID | Level | Conflict / gap | Authority | Evidence | Closure condition | Gate |
 |---|---|---|---|---|---|---|
-| C-CON-001 | BLOCKING | Current main does not contain full Owner D/E/F/G/H/I contracts; branches are separate and exact currentness must be reconciled | A + each Owner | Main HEAD b3c666...; Owner branch pins in baseline | A-approved source pin manifest and each Owner exact-version adoption | C0/C5 |
+| C-CON-001 | BLOCKING | Current main does not contain full Owner D/E/F/G/H/I contracts; branches are separate and exact currentness must be reconciled | A + each Owner | Main HEAD `e52594f...`; original C merge base `b3c666...`; refreshed G/H branch pins in baseline | A-approved source pin manifest and each Owner exact-version adoption | C0/C5 |
 | C-CON-002 | BLOCKING | H 1.2.15 candidate vs Storage v3.3.2 bundle pinned to H 1.2.14 | H/Storage/C/I/A | H schema Blob 860fc4...; Storage manifest 5c6143... | Successor manifest pins 1.2.15 exact schema, validator, CI and trust artifacts; all consumers review same bundle | C3/C5 |
 | C-CON-003 | BLOCKING | C crypto profile and I governance signature profile not registered/deployed | I (trust policy), C (data signer), H (verification) | C Phase 3.11.0 Blob 9339b1... | I approval, key custody/rotation/revocation, anti-rollback checkpoints, H validator tests, operational evidence | C3/C5 |
 | C-CON-004 | BLOCKING | G Applied freeze remains blocked and execution not verified | G; C/H/I/D supporting | G contract Blob aa3afa... | G-owned exact predicate, C final-request evidence, H wire/ACK, I authorization, D fence currentness and end-to-end tests | C5/C6 |
@@ -57,3 +57,10 @@ The following project issues were directly fetched on 2026-11-18 and remain OPEN
 | C-CON-016 | HIGH | A PR #73 refreshes A against current D/E/I/Storage proposals | PR remains Draft and verdict REVISE/NOT YET PROVEN; no Owner approval is inferred |
 
 These additions do not close C-CON-002/003/004. H CI success is evidence of local conformance only; it cannot close the H/Storage version mismatch, production trust registration or G Applied freeze.
+
+
+## C-REVIEW-001 disposition / C 独立审查增量处置
+
+C-CON-017 is a cross-owner blocker, not a C-owned schema fix. C may correct its consumer contract and evidence pins only after H publishes the successor artifact. The current H branch HEAD `0277a8b...` has removed the prior 1.2.15 schema/validator/test files from its tree; the old `0d363244...` artifacts and CI remain historical immutable evidence. Do not describe them as current H branch contents. C-CON-018 is a C-owned baseline/reconciliation task and must be closed before PR #69 can be considered merge-ready.
+
+C-CON-017 属于跨 Owner 阻塞，不是 C 可自行修复的 Schema 问题。C 只能在 H 发布后继工件后更新消费方合同和证据 Pin。当前 H 分支 HEAD `0277a8b...` 已从分支树中删除旧 1.2.15 Schema/Validator/Test；旧 `0d363244...` 工件和 CI 仅是历史不可变证据，不得描述为当前 H 分支内容。C-CON-018 属于 C 自有基线对账任务，PR #69 在其关闭前不能视为可合并。
