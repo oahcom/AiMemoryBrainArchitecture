@@ -143,6 +143,9 @@ class Schema1211Tests(unittest.TestCase):
 
 class UnionSemanticsTests(unittest.TestCase):
     def setUp(self):self.m,self.prefix,self.admissions,self.snaps,self.proofs=fixtures()
+    def validate_union(self,*args,**kwargs):
+        kwargs["verify_membership_proof"]=lambda proof,owner,snapshot: proof.get("test_signature_verified") is True
+        return _validate_union(*args,**kwargs)
     def test_UNION_00_missing_owner_signature_verifier_is_unknown(self):
         self.assertEqual(_validate_union(self.m,self.prefix,self.admissions,self.snaps,self.proofs),UNKNOWN)
     def test_UNION_00b_owner_signature_verifier_rejection_is_invalid(self):
