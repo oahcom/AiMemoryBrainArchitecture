@@ -166,3 +166,21 @@ The v3.2.9 manifest supersedes the v3.2.8 B snapshot for H full-path source/test
 **B status:** L1/L2 candidate alignment is conditionally aligned. Full-path tests do not authenticate production I/D/Storage proofs because authority callbacks remain test doubles; production adapters, C/I trust, D lineage/release, COC/Storage joins, JF-10, R1/R2 and Gate B/C remain open.
 
 **B 状态：** L1/L2 候选对齐已条件满足。Full-Path 测试未认证生产 I/D/Storage Proof，因为 Authority Callback 仍为 Test Double；生产 Adapter、C/I Trust、D Lineage/Release、COC/Storage Join、JF-10、R1/R2 和 Gate B/C 仍 OPEN。
+
+
+## 10. Currentness invalidation — v3.2.9 no longer pins latest Owner reviews / 当前性失效
+
+Latest Owner branch corrections after v3.2.9:
+- C HEAD 81f1e81307315a31c3bbeae17eb801e8a4f47e10: corrected exact H schema pin in C Phase 3.8.18.
+- D HEAD 7d01732521a8b9db202f10cde2c2547e50071d58: corrected exact H schema pin in D Phase 3.8.10.
+- I HEAD a68bb3587fe88aa72398e2dc8d136f94cee9a63f: corrected exact H schema pin in I Phase 3.8.14.
+- H HEAD 362cc113cfb5b595a4002a6f6e980d19ae2d2d15: updated CI binding to run 44069941327, commit ba2c9341fee4eb9ca9e665c74bdd37b4675dd251, job 133993324484.
+- Storage HEAD 39a1e0429f6b4b08c6c437c8e3f5ace582a7315f: latest manifest remains v3.2.9.
+
+Storage v3.2.9 Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3 still pins prior C/D/I review Blobs 4be9c1cd8f116086bab58340f07e38ddfc223e21 / ccdae9b45affb23c6741b5cceb27004b35a8e03e / 7c65650a37c8c0f270451fb0419e93259fc38151 and H run 44069777296 / commit 9eb06313e94e762f0fde4a606633a6dbe1bf8262.
+
+**Disposition correction:** B semantic/source alignment remains valid, but the exact manifest is stale. A successor Storage manifest must bind the corrected current C/D/I review Blobs and current H CI run/commit/job; C/H/D/I must review that same successor; A must review the successor. Do not label v3.2.9 the current joint bundle.
+
+This is exact-currentness/provenance drift, not a demonstrated schema/semantic regression.
+
+**中文：** v3.2.9 发布后 C/D/I/H 分支再次更新了精确 Review/CI Pin，而 Storage v3.2.9 未同步。B 的语义/源文件候选对齐仍成立，但 Manifest 当前性失效。后继 Storage Manifest 必须绑定修正后的 C/D/I Review Blob 和当前 H CI Run/Commit/Job；C/H/D/I 对同一后继 Manifest 复审，再由 A 审查。不得继续将 v3.2.9 标记为当前联合 Bundle。这是精确当前性/来源漂移，不是已证明的 Schema/Semantic 回退。
