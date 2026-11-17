@@ -20,6 +20,8 @@ class OwnerSnapshot:
     high_water: int
     snapshot_ref: str
     snapshot_digest: str
+    snapshot_count: int
+    snapshot_root: str
     query_id: str
     pagination_complete: bool
     anti_rollback_current: bool
@@ -35,6 +37,10 @@ class OwnerSnapshot:
             raise JoinError("owner anti-rollback state unknown")
         if len(set(self.rows)) != len(self.rows):
             raise JoinError("duplicate owner snapshot row")
+        if self.snapshot_count != len(self.rows):
+            raise JoinError("owner snapshot count mismatch")
+        if self.snapshot_root != self.expected_root():
+            raise JoinError("owner snapshot root mismatch")
         if not self.rows and not self.complete_empty_signed:
             raise JoinError("empty set requires signed COMPLETE_EMPTY proof")
 
