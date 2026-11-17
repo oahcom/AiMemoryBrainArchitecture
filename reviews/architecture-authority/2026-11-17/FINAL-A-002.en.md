@@ -3,7 +3,7 @@
 - Authority: A — Principal System Architecture Authority
 - Version: 1.0.0
 - Date: 2026-11-17
-- Exact main baseline: `6470f25ca23b8d35c06f60be2326867066418d18`
+- Historical assessment snapshot (not current main): `6470f25ca23b8d35c06f60be2326867066418d18`
 - Review branch: `review/session-4-a-final-architecture-authority-2026-11-17`
 - Controlling tracker: Issue #43
 - Overall decision outcome: **DEFERRED**
@@ -180,4 +180,9 @@ All Critical risks remain open. Any accepted condition is automatically suspende
 
 ## Evidence and cross-references
 
-R PR #50; X PR #49; F/D/P PR #46; B protocol PR #51; B→A review PR #52; Option A topology review PR #54; current main `6470f25ca23b8d35c06f60be2326867066418d18`; Issues #3, #5, #7, #10, #25, #29 and #43; exact source pins in SYS-RISK-002. Companion documents: ARCH-CX-002, DEV-FEAS-002, DEP-DAG-002, PRIORITY-002, READINESS-002, CONFLICT-002, GATE-002, DEFERRED-002. This assessment does not merge PRs, close Issue #43 or authorize production.
+R PR #50; X PR #49; F/D/P PR #46; B protocol PR #51; B→A review PR #52; Option A topology review PR #54; current main HEAD `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`; Issues #3, #5, #7, #10, #25, #29 and #43; exact source pins in SYS-RISK-002. Companion documents: ARCH-CX-002, DEV-FEAS-002, DEP-DAG-002, PRIORITY-002, READINESS-002, CONFLICT-002, GATE-002, DEFERRED-002. This assessment does not merge PRs, close Issue #43 or authorize production.
+
+
+## Current main HEAD / 当前 Main HEAD
+
+The current main HEAD independently observed for this publication is `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The earlier `6470f25...` / `b372b62...` values are historical assessment snapshots, not current main. This package has not completed a full source-by-source delta audit against current main; G1 remains PARTIAL and all Gate/freeze restrictions remain in force.
