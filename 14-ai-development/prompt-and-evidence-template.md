@@ -175,7 +175,19 @@ Each completed implementation task should contain, as applicable:
 - `integration-report.md` — cross-owner acceptance;
 - links to PR, commits and CI runs.
 
-## 5. Suggested repository layout / 建议目录
+## 5. Canonical prompt library and evidence layout / 规范提示词库与证据目录
+
+Reusable prompts MUST first be stored in the repository-root `prompts/` library:
+- Global prompts: directly under `prompts/`.
+- Owner prompts: `prompts/A/` through `prompts/I/`.
+- Every task prompt MUST reference the global prompts and applicable Owner prompt IDs.
+- Before execution, copy the exact prompt text into the work-item evidence bundle, compute SHA-256, and never overwrite an executed version.
+
+See [Prompt Library](../prompts/README.md).
+
+可复用提示词必须先存入仓库根目录的 `prompts/`：全局提示词直接放在根目录，Owner 专属提示词放入各自目录。每项任务提示词必须引用全局提示词和适用的 Owner 提示词 ID。执行前将准确提示词复制到 Work Item 证据包并计算 SHA-256；已执行版本不得覆盖。
+
+## 6. Suggested repository layout / 建议目录
 
 ```text
 14-ai-development/
