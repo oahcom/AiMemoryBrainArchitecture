@@ -21,6 +21,7 @@ class State:
 
     # E-owned work/attempt lifecycle and dependency registration
     work: str = "ABSENT"
+    no_publication_proof: bool = False  # abstract external D/E/Storage durable proof input
     attempt: int = 0
     lease_active: bool = False
     deps_complete: bool = False
@@ -52,16 +53,16 @@ class State:
     receipt_durable: bool = False
     receipt_ever_durable: bool = False
     ack_observed: bool = False
-    global_complete: bool = False
+    core_barrier_ready: bool = False  # scoped D/I-core predicate; NOT I GlobalForget Completed
 
 
 ACTIONS = (
-    "register", "install_fence", "run", "stage", "register_dependencies",
+    "register", "install_fence", "record_no_publication_proof", "run", "stage", "register_dependencies",
     "i_commit", "i_unknown", "revoke", "publish", "resolve_no_publication",
     "expire_lease", "retry", "park_dlq", "suppress", "terminalize",
     "close_barrier", "inventory_gap", "seal_inventory", "cache_fill", "read",
     "restore_backup", "replay_fence_highwater", "reconcile_restore", "release_restore",
-    "persist_receipt", "lose_ack", "retry_forget", "complete_global",
+    "persist_receipt", "lose_ack", "retry_forget", "mark_core_barrier_ready",
 )
 
 
@@ -81,9 +82,18 @@ def step(s: State, action: str, mutant: str | None = None):
                  durable_fence_gen=max(s.durable_fence_gen, s.fence_gen + 1),
                  fence_hwm=s.reg_seq, barrier_closed=False)
 
+    elif action == "record_no_publication_proof":
+        # External authority input: D/E/Storage must define the durable proof contract.
+        # Never infer cancellation merely from the absence of a Worker run.
+        if (not s.fence or not s.registered or s.work != "REGISTERED" or
+                s.lease_active or s.i_participant_open or s.visible):
+            return None
+        d.update(work="NO_PUBLICATION_PROVEN", no_publication_proof=True)
+
     elif action == "run":
         if not s.registered or s.work not in ("REGISTERED", "RETRY"):
-            return None
+            if not (mutant == "stale_worker_after_cancel" and s.work == "NO_PUBLICATION_PROVEN"):
+                return None
         d.update(work="RUNNING", lease_active=True)
 
     elif action == "stage":
@@ -169,7 +179,12 @@ def step(s: State, action: str, mutant: str | None = None):
         d.update(suppressed=True, cached=False)
 
     elif action == "terminalize":
-        if mutant == "unknown_terminalization":
+        if mutant == "cancel_without_proof":
+            if (not s.fence or not s.registered or s.work != "REGISTERED" or
+                    s.lease_active or s.i_participant_open or s.visible):
+                return None
+            d.update(work="TERMINAL")
+        elif mutant == "unknown_terminalization":
             if (not s.registered or s.work == "TERMINAL" or s.lease_active or
                     not s.i_participant_open or s.i_decision != "UNKNOWN"):
                 return None
@@ -182,7 +197,8 @@ def step(s: State, action: str, mutant: str | None = None):
                 return None
             if s.visible and not s.suppressed:
                 return None
-            if not s.visible and s.i_decision not in ("NO_PUBLICATION", "REVOCATION_WON"):
+            if (not s.visible and s.i_decision not in ("NO_PUBLICATION", "REVOCATION_WON")
+                    and not s.no_publication_proof):
                 return None
             d.update(work="TERMINAL")
 
@@ -204,7 +220,7 @@ def step(s: State, action: str, mutant: str | None = None):
         if not s.inventory_complete:
             return None
         # A newly discovered inventory gap invalidates and reopens a prior barrier proof.
-        d.update(inventory_complete=False, global_complete=False, barrier_closed=False)
+        d.update(inventory_complete=False, core_barrier_ready=False, barrier_closed=False)
 
     elif action == "seal_inventory":
         if s.inventory_complete:
@@ -268,11 +284,11 @@ def step(s: State, action: str, mutant: str | None = None):
         # Same operation key + normalized digest; return the original durable receipt.
         d.update(receipt_durable=True, ack_observed=True)
 
-    elif action == "complete_global":
+    elif action == "mark_core_barrier_ready":
         if (not s.fence or not s.barrier_closed or not s.inventory_complete or
                 s.i_participant_open):
             return None
-        d.update(global_complete=True)
+        d.update(core_barrier_ready=True)
 
     else:
         raise ValueError(action)
@@ -300,10 +316,15 @@ def invariant_violations(s: State):
         (s.registered and s.work != "TERMINAL")
     ):
         bad.append("premature-barrier-close")
-    if s.global_complete and (
+    if s.core_barrier_ready and (
         not s.inventory_complete or not s.barrier_closed or s.i_participant_open
     ):
-        bad.append("false-global-completion")
+        bad.append("false-core-barrier-ready")
+    if (s.registered and s.work == "TERMINAL" and not s.visible and
+            s.i_decision == "NONE" and not s.no_publication_proof):
+        bad.append("terminal-without-authoritative-no-publication-proof")
+    if s.no_publication_proof and s.work in ("RUNNING", "STAGED", "PUBLISHED"):
+        bad.append("stale-worker-after-cancel-proof")
     if s.restore_started and s.restore_released and s.restored_at_release < s.durable_at_release:
         bad.append("stale-restore-release")
     if s.receipt_ever_durable and not s.receipt_durable:
@@ -349,6 +370,8 @@ EXPECTED_COUNTEREXAMPLES = {
                                 "i_unknown", "expire_lease", "terminalize", "close_barrier"],
     "inventory_barrier": ["install_fence", "inventory_gap", "close_barrier"],
     "ack_loss_rollback": ["install_fence", "close_barrier", "persist_receipt", "lose_ack"],
+    "cancel_without_proof": ["register", "install_fence", "terminalize"],
+    "stale_worker_after_cancel": ["register", "install_fence", "record_no_publication_proof", "run"],
 }
 
 
@@ -408,6 +431,16 @@ def run_checks():
     restore = apply_actions(State(), "install_fence", "restore_backup", "replay_fence_highwater", "reconcile_restore")
     assert restore.restore_released and restore.restored_at_release == restore.durable_at_release
 
+    # A registered-but-never-started item needs an explicit external durable proof.
+    never_started = apply_actions(State(), "register", "install_fence")
+    assert step(never_started, "terminalize") is None
+    never_started = apply_actions(never_started, "record_no_publication_proof", "terminalize", "close_barrier")
+    assert never_started.barrier_closed
+
+    # The model predicate is intentionally scoped and is not I GlobalForget Completed.
+    core = apply_actions(State(), "install_fence", "close_barrier", "mark_core_barrier_ready")
+    assert core.core_barrier_ready
+
     # UNKNOWN is nonterminal and holds the barrier until authoritative resolution.
     u = apply_actions(State(), "register", "run", "stage",
                       "register_dependencies", "i_unknown", "install_fence")
@@ -420,7 +453,7 @@ def run_checks():
     for mutant, expected in EXPECTED_COUNTEREXAMPLES.items():
         print(f"COUNTEREXAMPLE {mutant}: {' -> '.join(expected)}")
     print("CACHE NEGATIVE CONTROL: stale cache fill alone is not disclosure; final read gate blocks")
-    print("SERIAL ORDER / UNKNOWN / ACK-LOSS CHECKS: PASS")
+    print("SERIAL ORDER / UNKNOWN / PRE-EXECUTION PROOF / ACK-LOSS CHECKS: PASS")
     print("MODEL CHECK COMPLETE (bounded abstraction only)")
 
 
