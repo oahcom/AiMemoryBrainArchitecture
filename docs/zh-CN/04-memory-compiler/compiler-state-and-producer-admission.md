@@ -237,3 +237,68 @@ E 必须原样消费 D 的语义字段。特别是 ProducerRegistrationSequence 
 正常路径：`REGISTERED → QUEUED → LEASED → RUNNING → STAGED → DEPENDENCY_REGISTERED → PUBLISH_PENDING → PUBLISHED`。Retry 在相同 WorkItemId 下以新 AttemptId 返回 QUEUED。DLQ/Lease Expiry 都不是终态。Suppression/Quarantine Terminal Path 必须具有持久化证据，证明未来不可能再发布。
 
 **D 已 DECIDED：** ProducerClass/WorkItem 区分；RegisterProducerWork/InstallForgetFence 共享排序；不可变 ProducerRegistryVersion + ProducerRegistrationHighWater；Dependency 在 Visibility 前持久化；最终 Publish Linearization；Terminal/Reconciliation Receipt。**OPEN：** 可调用 Transport/API 和 Wire Error；H/B/I Identity Serialization；I PermissionEpoch 当前决策绑定；I 全局 Inventory Reconciliation；准确 Recompile Child Identity；指定 Storage Owner 和已验证原子实现；可执行一致性测试。本文不声称任何 Endpoint/Implementation 已存在或通过。
+
+## Phase 3.6 — 由 Fence 强制执行的 Producer Work 协议
+
+**状态：** E Producer Execution 契约已定义；消费 D 语义操作；Storage 串行化/可见性实现和 D/Storage Owner 确认仍为 OPEN。**实现 NOT VERIFIED。**
+
+### 1. 稳定 Work Identity 与 Attempt 模型
+
+逻辑 Producer Work Identity 在整个恢复/重新处理生命周期中不可变：
+
+- **ProducerClass：** 由 D 登记、带版本且启用的 Producer Capability Class。E 的 Compiler Ingress、Extraction/Normalization、Consolidation、Retry Scheduler、DLQ Replay、Worker Recovery、Outbox Dispatcher、Rebuild/Recompile Initiator，按 D/I Inventory Policy 声明为独立能力。本地 E Allow-list 不是 Admission Authority。
+- **WorkItemId / ProducerWorkItemId：** 一个逻辑 Source-to-Derived Work 义务的稳定身份。在 Dispatch 前创建并持久化。Retry、DLQ、Replay、Recompile、Outbox Replay、Lease Expiry、Worker Recovery 和进程重启期间保持不变。同一 ID 搭配不同语义请求必须 Conflict；新的 AttemptId/DerivationRunId 绝不创建新的 WorkItemId。
+- **AttemptId：** 单次执行尝试的不可变身份；每次 Retry/Replay/Recovery 都创建新的 AttemptId。
+- **DerivationRunId：** 一次 Extraction/Normalization/Consolidation Run 的不可变身份。Recompile 创建新的 Run，并链接原 WorkItemId、已接收来源和 Lineage；它不创建替代 WorkItemId。D 要求的任何 Child/Re-admission Operation 都必须保留 Root WorkItemId 作为 Barrier Identity，并在 Dispatch 前由 D 明确确认。
+- **RegistrationReceipt：** E 分别保存 D 签发的 ProducerClassRegistrationReceipt 和 ProducerRegistrationReceipt。后者绑定 WorkItemId、Canonical Request Digest、ProducerClass/Registry Version、Source Lineage、ScopeRefs、Admission Disposition 和 ProducerRegistrationSequence。它不是 AcceptedReceipt、Lease 或 Publish Permit。
+- **Lease：** 有时限的 Worker Claim，绑定 WorkItemId、AttemptId、Worker Identity、LeaseId、Lease Epoch/Expiry、Observed ForgetFenceCursor 和 PermissionEpoch。Lease Acquire/Renew 必须是条件式且持久化。Lease 永远不是 Admission Authority；Expiry 只使该 Attempt 失效。
+- **Source MemoryVersion：** 若存在 Canonical Memory，使用准确不可变 Source MemoryRef + MemoryVersionRef/Revision；Event-only Ingress 则保留 EventRef + 不可变 Payload Digest。每次 Recompile/Derivative-of-Derivative 都保留完整 Source Ancestry 和 Lineage Digest。
+- **ScopeRef：** 类型化、已验证的 Scope Binding 和 Security Domain Ref。ScopeRef 不等于 Permission，Payload 声明不等于 Credential。
+- **FenceGeneration / ForgetFenceCursor：** D 签发的类型化 Fence Generation/Cursor Tuple。E 原样保存，绝不与 PermissionEpoch 或其他 Cursor 做数值比较。
+- **PermissionEpoch：** I 签发的不透明授权新鲜度值，带 Authorization Decision Ref。E 必须通过 I 重新验证；它本身不是 Grant。
+- **Dependency Registration：** 稳定 DependencyRegistrationId + Canonical Digest，以及 D 签发的 DependencyRegistrationReceipt；该 Receipt 覆盖完整 Artifact/Version 和全部直接/传递 Source/Parent Edge。相同 ID/Digest 解析为原 Receipt；Digest 变化产生 Conflict。
+- **Terminal Disposition：** 持久化、追加式的最终 Work 结果，通过 D CompleteProducerWork 提交，并且只有 D 返回 ProducerWorkTerminalReceipt 才被接受。E 本地完成不等于 D Barrier 关闭。
+
+### 2. Admission 与 Execution 顺序
+
+必需顺序如下：
+
+1. 在 E 的 Durable Acceptance/Outbox 边界持久化不可变 Ingress/CompileIntent 和稳定 WorkItemId。
+2. 解析已启用的 D ProducerClass Registration，以及当前已认证 Producer/Scope Binding。
+3. 使用 WorkItemId + Canonical Request Digest 和准确 Source Lineage 调用 D RegisterProducerWork；任何 Timeout 都使用相同 Key 解析。
+4. 只有确认收到持久化 ACCEPTED RegistrationReceipt 后才能 Dispatch/Queue。REJECTED、QUARANTINED、CLEANUP_ONLY、UNKNOWN、缺少 Receipt 或 Registry Gap 都不能进入普通 Compile Execution。
+5. 在当前 I Authorization 和 D Fence 状态下获取新的 LeaseId/AttemptId。只有此后才允许解引用受保护 Source/Evidence/Provenance。
+6. 在 Private Staging 中执行 Extraction、Normalization 和 Consolidation。记录 Source MemoryVersion、ScopeRef、FenceGeneration Observation、PermissionEpoch Observation 和 Provenance Digest。
+7. 向 D 登记完整 Derived Dependency Set。部分/未知 Dependency Registration 必须保持 Private。
+8. 调用最终 PublishDerivedIfFenceCurrent Operation；决定 Publication 的是最终 Visibility Commit，而不是之前的预检查。
+9. 解析权威 PublicationReceipt，再向 D 提交 Terminal Evidence。只有所有 Output/Attempt/Replay Path 都协调完成后，Work 才算 Terminal。
+
+任何 E Queue Insert、Lease、Source Dereference、Execution、Retry、DLQ Replay、Recompile、Rebuild 触发的 Compiler Work 或 Publication 都不得绕过 D Registration 和当前 Authorization/Fence 检查。
+
+### 3. Lease、Retry 与 Terminal 规则
+
+- Lease Renewal 保留 WorkItemId、AttemptId 和 LeaseId；只有在当前 Authorization/Fence 检查通过后才推进 Lease Epoch/Expiry。
+- Lease Expiry 撤销旧 Lease/Attempt 的 Publication 能力。Recovery 保留 WorkItemId 和 Lineage，创建新的 AttemptId/LeaseId，并在访问 Source 前重新解析 D Work State、当前 I PermissionEpoch 和 D ForgetFence。
+- Retry 和 DLQ Parking 不关闭 D Barrier Membership。只要仍可能 Replay/Publication，DLQ 就不是 Terminal。
+- DLQ Replay/Outbox Replay 使用相同 WorkItemId、CompileIntentId、Source EventRef/MemoryVersion 和 Request Digest；创建新的 AttemptId/Lease，再重新检查全部当前控制。
+- Recompile 使用相同 WorkItemId 和原始 Source Lineage、新 DerivationRunId，以及不可变的新 Output Artifact/Version ID。不得创建新的 AcceptedReceipt，也不得使用新的 WorkItemId 逃避旧 Fence。D 必须明确确认任何 Child Registration 表示法，并保留 Root Barrier Identity。
+- 只有在所有 Attempt 均已撤销/过期、所有 Output 均已带 Receipt 发布或被抑制/隔离、没有 Dependency/Publication UNKNOWN、没有 Outbox/DLQ/Replay Dispatch 路径，且 D 接受 CompleteProducerWork 后，才允许 Terminal Disposition。FAILED_PARKED 不是 Terminal。
+- 旧 Worker 不得在新 Attempt/Lease 接管后发布或终结 Work。D Final Gate 必须校验活动 Attempt/Lease；Storage 必须将该校验与 Visibility 串行化。
+
+### 4. 类型化状态转换
+
+`RECEIVED -> DURABLE_INGESTION -> ACCEPTED -> D_REGISTRATION_PENDING -> REGISTERED -> QUEUED -> LEASED -> RUNNING -> CANDIDATE_PRIVATE -> STAGED_PRIVATE -> DEPENDENCY_REGISTRATION_PENDING -> DEPENDENCY_REGISTERED -> PUBLISH_PENDING -> PUBLISHED -> TERMINAL`
+
+替代转换：
+- 任一 D Operation 结果不明确：`*_PENDING -> UNKNOWN_RECONCILIATION`；在相同 Operation Identity 解析前，不得推进、Dispatch 或暴露。
+- Retry/Worker Recovery：`RUNNING/STAGED/UNKNOWN -> RETRY_QUEUED`；同一 WorkItemId、新 AttemptId/LeaseId，并重新授权/检查 Fence。
+- DLQ：`RETRY_QUEUED -> DLQ_PARKED`；仍已登记且 Barrier-open。
+- Recompile：在相同 WorkItemId 下使用新 DerivationRunId；旧 Run/Output Evidence 保持不可变并关联。
+- Fence/Permission Denial：`*_PRIVATE -> SUPPRESSED_QUARANTINED`；禁用 Publication；只有持久化“不可能再发布”证明且 D 接受后才可 Terminal。
+- 任一部分 Dependency Registration 或不明确 Publication：保持 Private 和未解决状态。
+
+### 5. E/D 证据分离
+
+E 的本地状态（Queued、Leased、Running、Candidate、Staged、Retry、DLQ）是 Execution Telemetry。D 的 RegistrationReceipt、DependencyRegistrationReceipt、PublicationReceipt 和 ProducerWorkTerminalReceipt 才是权威 Ledger Evidence。本地 Row、Queue ACK、Object Store 存在、Lease Heartbeat 或 Worker Success Log 都不能替代 D Receipt。
+
+D Producer Registration Sequence/High-water、D ForgetFenceGeneration、D CanonicalCommitCursor 和 I PermissionEpoch 属于不同类型化 Namespace。E 必须分别存入各自类型字段，并将 Currentness/Coverage 评估交给签发方。
