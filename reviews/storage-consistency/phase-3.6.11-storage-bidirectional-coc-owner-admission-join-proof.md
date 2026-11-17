@@ -290,7 +290,7 @@ The H schema keeps the COC ParticipantManifest's owner_admission_ref as the prim
 
 Latest H pins:
 - RecoveryJoin schema candidate: f531c1d4b89a48457188c4988f140952759223a6
-- H semantic validator contract: 121717c5f303b1a2e864f2b95664f51f51ba4b48
+- H semantic validator contract: 6f66a72a2d0aa43af338ff9e22d650d47aa2bd80
 - HRC semantic suite: 794ac0c34aaad921e5d4a5bcc42b6601f7caf817
 - Wire interop suite: 1a4e754ba9bfa57eb973c6d39731e9f89443b323
 - Schema integrity suite: 67aba74c120f2916d768e7b01c45408ee2624f3a
