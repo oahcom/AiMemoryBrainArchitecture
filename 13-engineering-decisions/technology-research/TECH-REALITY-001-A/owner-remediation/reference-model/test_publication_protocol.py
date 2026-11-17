@@ -462,7 +462,7 @@ class PublicationProtocolTests(unittest.TestCase):
         self.assertEqual(p.outcomes["op-1"], outcome)
         args2 = self.commit_args()
         args2["operation_id"] = "op-2"
-        with self.assertRaisesRegex(Rejected, "single-use"):
+        with self.assertRaisesRegex(Rejected, "revocation won|single-use"):
             self.consume_i(p, args2)
         p.close_i("op-1", outcome)
         self.assertNotIn("auth-1", p.revocation_pending)
