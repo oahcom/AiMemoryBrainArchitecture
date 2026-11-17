@@ -36,7 +36,13 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Detailed design principles, component interactions, data flows, quality attributes | Source specifications under 00-governance/ and 01-system-architecture/ | Pending | Existing English sources | NOT STARTED — full source-level translation pending |
 | Subsystem responsibility matrix | 01-system-architecture/responsibility-matrix.md | docs/zh-CN/01-system-architecture/responsibility-matrix.md | docs/en/01-system-architecture/responsibility-matrix.md | COMPLETE |
 | Domain Model reader guide | 02-domain-model/ | docs/zh-CN/02-domain-model/domain-model-guide.md | docs/en/02-domain-model/domain-model-guide.md | COMPLETE — overview guide only |
-| Domain Model detailed contracts (6 source specifications) | 02-domain-model/ | Pending | Existing English sources | NOT STARTED — field-level translation pending |
+| Domain Model overview | 02-domain-model/domain-model-overview.md | docs/zh-CN/02-domain-model/domain-model-overview.md | docs/en/02-domain-model/domain-model-overview.md | COMPLETE — source-aligned pair |
+| Core domain entities | 02-domain-model/core-entities.md | docs/zh-CN/02-domain-model/core-entities.md | docs/en/02-domain-model/core-entities.md | COMPLETE — source-aligned pair |
+| Epistemic and temporal semantics | 02-domain-model/epistemic-and-temporal-semantics.md | docs/zh-CN/02-domain-model/epistemic-and-temporal-semantics.md | docs/en/02-domain-model/epistemic-and-temporal-semantics.md | COMPLETE — source-aligned pair |
+| Memory lifecycle model | 02-domain-model/lifecycle-model.md | docs/zh-CN/02-domain-model/lifecycle-model.md | docs/en/02-domain-model/lifecycle-model.md | COMPLETE — source-aligned pair |
+| Relationships and provenance | 02-domain-model/relationships-and-provenance.md | docs/zh-CN/02-domain-model/relationships-and-provenance.md | docs/en/02-domain-model/relationships-and-provenance.md | COMPLETE — source-aligned pair |
+| Scope and Permission model | 02-domain-model/scope-and-permission-model.md | docs/zh-CN/02-domain-model/scope-and-permission-model.md | docs/en/02-domain-model/scope-and-permission-model.md | COMPLETE — source-aligned pair |
+| Domain Model Phase 3 identity/typed-reference extensions and ADR-001 | session-b-domain-model-phase3 branch; ADR-001 remains ADR-BLOCKED | Pending | Owner-branch English source | NOT STARTED — exact branch-source translation and bilingual review pending |
 | Canonical Memory Brain reader guide | D owner branch: 03-memory-brain/ | docs/zh-CN/03-memory-brain/memory-brain-guide.md | docs/en/03-memory-brain/memory-brain-guide.md | COMPLETE — overview guide only |
 | Canonical Memory Brain detailed contracts (7 source specifications) | D owner branch: 03-memory-brain/ | Pending | Owner-branch English sources | NOT STARTED — detailed translation pending |
 | Memory Compiler reader guide | E owner branch: 04-memory-compiler/ | docs/zh-CN/04-memory-compiler/memory-compiler-guide.md | docs/en/04-memory-compiler/memory-compiler-guide.md | COMPLETE — overview guide only |
@@ -78,7 +84,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 - D Canonical Memory reader guide: COMPLETE — includes D/E/F/G/H/I ownership split, cursor namespaces, and Forget boundary.
 - D detailed source specifications: NOT STARTED — source branch is linked; field/transaction-level translation pending.
 - Domain Model reader guide: COMPLETE.
-- Detailed B source specifications: NOT STARTED; retain exact field/state semantics during translation.
+- B's six main source specifications: COMPLETE — source-aligned bilingual pairs added. Phase 3 typed-reference/identity extensions and ADR-001 decision package remain NOT STARTED; preserve ADR-BLOCKED status.
 - D Canonical Memory detailed bilingual work: pending source-branch reconciliation.
 - B Domain Model.
 - D Canonical Memory, lifecycle, versioning, Forget Fence, commit cursor.
