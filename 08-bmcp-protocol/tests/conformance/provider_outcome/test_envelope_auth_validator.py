@@ -290,13 +290,13 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
 
     def test_22_unknown_outer_envelope_member_is_rejected(self):
         self.envelope["unclassified_extension"] = "must-not-be-ignored"
-        result = authenticate_outer_envelope(self.raw(), self.context, self.checks())
+        result = authenticate_outer_envelope(self.raw(refresh_digest=False), self.context, self.checks())
         self.assertEqual(result["status"], "INVALID", result)
         self.assertTrue(any("unclassified outer-envelope members" in e for e in result["errors"]))
 
     def test_23_wrong_outer_signature_profile_is_rejected_before_crypto_callback(self):
         self.envelope["signature_profile_id"] = "AIMBA-C-CRYPTO-1.0"
-        result = authenticate_outer_envelope(self.raw(), self.context, self.checks())
+        result = authenticate_outer_envelope(self.raw(refresh_digest=False), self.context, self.checks())
         self.assertEqual(result["status"], "INVALID", result)
         self.assertTrue(any("wrong C outer-envelope signature_profile_id" in e for e in result["errors"]))
 
