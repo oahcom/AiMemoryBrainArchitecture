@@ -126,3 +126,26 @@ No new Owner authority is exercised by this follow-up. No merge, schema freeze, 
 **中文：** 主报告裁决不变：REVISE；NOT YET PROVEN；NOT READY。当前源差异进一步强化 P1-01/P1-02：研究不只是漏了一个 Phase 3.7 补充，而是落后于更完整的 Phase 3.8/3.8.3 提案与证据族。整改应保留历史基线，新增当前 Main/Owner 差异；区分 Storage L1 Option A 已选与 L4 物理部署未决；区分逻辑提案、Owner 批准、Schema Freeze、运行时实现、JF-10 物理证明和端到端符合性；准确限定 H CI/I Crypto 候选证据；在 Issue #3 权威和证据改变前继续保持 Applied 未冻结/未测试/未实现。修订后必须针对新精确 HEAD 再次独立复审。
 
 本补充不行使任何 Owner 权威，不授权合并、Schema Freeze、实现、Gate 释放、部署或生产激活。
+
+## 6. Revalidation against the live PR #45 HEAD and research-file contents / 对 PR #45 实时 HEAD 与研究文件内容的再次核验
+
+A further live read of PR #45 metadata, its complete changed-file list, its patch, and the exact research files at HEAD 6c7c5919c1b50f38c4d24be679a3885ee3c15b97 confirms:
+
+- PR #45 is still OPEN/Draft, mergeable=true, with the same base b372b62c640a2b656e54b6db62a4ee67d7d8c001, the same head SHA, and 14 changed files. No new research commit has appeared since the prior review.
+- The PR description now summarizes a Storage v3.2.6 successor bundle, PostgreSQL 18.7 bounded CI, CSubmitOutcome 1.0.1 candidate CI, and H 1.2.13 exact CI still OPEN.
+- Importantly, this late Storage/JF-10 refresh is not only PR-description text: it is present in the exact-HEAD README, research-evidence-register, and owner-technology-review-synthesis. The evidence register pins Storage v3.2.6 manifest Blob dbfa37617d109d5891a067769e858085e2ce547a, Storage v3.2.3 body Blob 5cee0d58575adc0fb3dd20a5c7ab68c2a2711792, PostgreSQL dossier Blob 0aabf66848dc97deee028c571183c0d7204008c0, CSubmitOutcome 1.0.1 Blob a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda, and the exact H 1.2.13 CI-open boundary. These are real existing package contents and must not be described as wholly absent.
+- However, this refresh does not close the Phase 3.8/3.8.3 current-source gap recorded above. The current research files still do not integrate the exact D/E/I/Storage Phase 3.8 publication lifecycle and current H/I mapping/crypto candidate evidence into the capability matrix and system recommendation. A Storage successor bundle pin is not a substitute for the D/E/I/Storage cross-owner protocol delta.
+- The research files continue to cite the older Storage ADR Blob 1ef47d4e5711c7db73a24d249adf1992be1f6aa4 in the Owner synthesis, capability matrix, recommendation, and handoff. The independently re-fetched current Storage ADR is bb544ba2f346bdc130d524bd5c7310d86f367988. The handoff also still contains the malformed item 13/14 paths with trailing right parentheses. This is a concrete exact-pin/currentness defect, not merely a PR-description issue.
+- The evidence register's Restate Server row still reports repository API license metadata as NOASSERTION and does not disclose the canonical server LICENSE's BSL 1.1 Additional Use Grant. The separate Restate Rust SDK MIT entry does not resolve the Server license obligation.
+
+### Revalidated disposition / 再核验裁决
+
+The review must distinguish present but incomplete Storage/JF-10 refresh from missing cross-owner Phase 3.8/3.8.3 integration. P1 currentness and license findings remain open; P2 ADR pin/handoff defects remain open. The unchanged exact research HEAD means no remediation commit has been published for independent closure. The verdict remains REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY.
+
+**中文：** 再次读取 PR #45 元数据、完整变更文件清单、Patch，以及精确 HEAD 下的研究文件后确认：PR 仍为 OPEN/Draft，mergeable=true，Base/Head SHA 未变，仍为 14 个文件，没有新的研究提交。PR 描述中的 Storage v3.2.6、PostgreSQL 18.7、CSubmitOutcome 1.0.1 和 H 1.2.13 信息并非纯粹描述性文字；这些 Storage/JF-10 刷新确实已经存在于精确 HEAD 的 README、Evidence Register 和 Owner Synthesis 中。审查不得错误地说这些内容完全缺失。
+
+但这些内容仍不能关闭 Phase 3.8/3.8.3 当前源差异：研究文件尚未把 D/E/I/Storage Phase 3.8 完整发布生命周期及当前 H/I Mapping/Crypto 候选证据整合进能力矩阵和系统推荐。Storage 后继 Bundle Pin 不能替代跨 Owner 协议差异审查。
+
+此外，Owner Synthesis、Capability Matrix、Recommendation 和 Handoff 仍引用旧 Storage ADR Blob 1ef47d4e5711c7db73a24d249adf1992be1f6aa4，而独立重新读取的当前 ADR Blob 为 bb544ba2f346bdc130d524bd5c7310d86f367988；Handoff 的第 13/14 项路径仍带多余右括号。Evidence Register 的 Restate Server 行仍只记 API 元数据 NOASSERTION，没有披露规范 Server LICENSE 的 BSL 1.1 Additional Use Grant；Rust SDK 的 MIT 许可证不能替代 Server 许可证审查。
+
+因此应明确区分“已存在但不完整的 Storage/JF-10 刷新”和“缺失的跨 Owner Phase 3.8/3.8.3 集成”。P1 当前性与许可证问题仍开放；P2 ADR Pin/Handoff 问题仍开放。精确研究 HEAD 未变化，尚无新修订提交可供独立关闭。裁决维持 REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY。
