@@ -334,3 +334,26 @@ The current B Owner branch `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e
 Stable ClaimRef + immutable ClaimRevisionRef and ConflictSet over exact ClaimRevisionRefs remain candidates, not frozen schemas. D owns canonical identity allocation/commit and ConflictSet persistence after approval; E keeps neutral CandidateProposition/ExtractionIR; F/G do not assume unapproved Fact/Claim identities; H wire fields remain unfrozen. B2 remains IN PROGRESS / NOT PASSED and B4 NOT READY.
 
 稳定 ClaimRef + 不可变 ClaimRevisionRef，以及按精确 ClaimRevisionRef 构建 ConflictSet，仍是候选，不是冻结 Schema。批准后 D 负责规范身份分配/Commit 和 ConflictSet 持久化；E 保持中立 CandidateProposition/ExtractionIR；F/G 不得假定未批准的 Fact/Claim 身份；H Wire 字段仍未冻结。B2 仍 IN PROGRESS / NOT PASSED，B4 仍 NOT READY。
+
+
+## 21. D/E/F/G exact consumer alignment / D/E/F/G 精确消费者对齐 — 2026-11-18
+
+The live consumer contracts preserve the ADR-blocked boundary:
+- **D:** Canonical Store permits only neutral PropositionRef before INT-P0-01 approval; stable Claim ID + immutable ClaimRevision is a D candidate.
+- **E:** CandidateProposition/ExtractionIR is pre-canonical; E does not assign Fact/Claim identity or adjudicate truth.
+- **F:** D owns canonical Claim identity/status; F cannot resolve disputed Claims or promote epistemic status.
+- **G:** ContextEntry pins exact MemoryVersion; G owns ContextVersion/ChangeSet, not Claim/Fact identity.
+
+实时消费者契约保留 ADR 阻塞边界：
+- **D：** INT-P0-01 批准前，Canonical Store 只允许中立 PropositionRef；稳定 Claim ID + 不可变 ClaimRevision 是 D 的候选方案。
+- **E：** CandidateProposition/ExtractionIR 属于规范化前表示；E 不分配 Fact/Claim 身份，也不裁决真实性。
+- **F：** D 拥有规范 Claim 身份/状态；F 不得解决争议 Claim 或提升认知状态。
+- **G：** ContextEntry 固定精确 MemoryVersion；G 拥有 ContextVersion/ChangeSet，不拥有 Claim/Fact 身份。
+
+**Do not conflate Option A labels:** B Fact/Claim Option A means separate Fact attestation object + Claim proposition thread. D Claim identity Option A means stable Claim ID + immutable ClaimRevision. They are different decisions; both remain candidates. No Claim/Fact/ClaimRevision/ConflictSet schema is frozen.
+
+**不得混淆 Option A 编号：** B Fact/Claim Option A 指独立 Fact Attestation 对象 + Claim 命题线程；D Claim Identity Option A 指稳定 Claim ID + 不可变 ClaimRevision。两者是不同决策，均仍为候选。不得冻结 Claim/Fact/ClaimRevision/ConflictSet Schema。
+
+This consumer alignment is source-backed but is not D/E/F/G approval of B's preferred Fact/Claim Option A. B2 remains IN PROGRESS / NOT PASSED; B4 remains NOT READY.
+
+该消费者对齐有来源支持，但不代表 D/E/F/G 已批准 B 优先推荐的 Fact/Claim Option A。B2 仍 IN PROGRESS / NOT PASSED；B4 仍 NOT READY。
