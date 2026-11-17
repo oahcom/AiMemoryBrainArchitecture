@@ -58,6 +58,9 @@ jobs:
           echo "title=$(python3 -c 'import json;print(json.load(open(".ai-worker/task.json"))["title"].replace("%","%25").replace("\n","%0A"))')" >> "$GITHUB_OUTPUT"
           echo "base_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
+      - name: Test task admission validator
+        run: python3 -m unittest discover -s scripts/ai_worker -p "test_*.py" -v
+
       - name: Require model API credential
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
