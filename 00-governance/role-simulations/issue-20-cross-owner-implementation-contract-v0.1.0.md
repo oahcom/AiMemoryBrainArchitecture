@@ -224,3 +224,25 @@ Storage Phase 3.8 visibility contract remains a logical transaction proposal. It
 - Storage Gate A: PARTIAL PASS / OPEN; Gate B blocked; Gate C blocked.
 - R1/R2 and JF-10 P0 remain OPEN; multi-PolicyDomain atomicity remains BLOCKED.
 - Interface freeze and production activation remain NOT AUTHORIZED.
+
+## 11.6 Phase 3.8.4 current branch-head refresh / 最新 Owner 分支 HEAD 刷新
+
+Observed at this refresh (2026-11-17; currentness must be rechecked before any future adoption):
+
+| Owner | Branch HEAD |
+|---|---|
+| A | `6d6f08ae7704e0fa0cf0f2eee0512bf5e3eb624f` |
+| B | `0df144ae25c2039c9934395fc88b2d17080eb119` |
+| C | `812eb84ba9d2d078670d348d70e6626d59df7643` |
+| D | `f0672a4e9ab95b8cd94d28b52153f54a05e17a73` |
+| E | `df3f56cdebbb4bb85999e2e04b666dacf77da810` |
+| F | `348b5ec84c44a8a067122ce0aa72a594b9c06b66` |
+| G | `69ba55c5ffd473ced1ccb569e9bbf7fea48566aa` |
+| H | `cc1d18b58f9a9c064347ee5e7c275f29ee80b495` |
+| I | `ff28e9b50821c704a886d2fa393a929c1528f92f` |
+| Storage | `bd6c1d23ed685db8d4bd13a75821611e04d138ba` |
+| main | `b0ec721d1663f78cd0dbc864a094f72ad1fa3ab7` |
+
+The relevant D/I/H/Storage/A contract blobs listed in §§11.1–11.5 remained byte-identical at this refresh. C's exact Phase 3.8.4 membership contract is Blob `5e37185610869951c3b392c9ad143a72b4c702ac`; its exact H review is Blob `ea2e11519646225679eadc8b33af0d755998d92e`. C's disposition is ACCEPT WITH ENUMERATED C-OWNED CONDITIONS in a delegated role review; not an independent human Owner signature. The P conformance gap matrix now includes C provider outcome membership/idempotency tests as a separate required suite.
+
+P reference-model CI run `44054221711` passed 69 tests on P commit `fcafce4c316c49dd4f2f78740d1a19d0ef7aa13d`. The current contract/gap-matrix/registry commits are later documentation-only updates and do not change the test-run source commit. They do not elevate P tests to Owner-local conformance.
