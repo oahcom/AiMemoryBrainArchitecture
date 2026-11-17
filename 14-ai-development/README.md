@@ -10,6 +10,8 @@ This directory defines how all AI developers work on AiMemoryBrainArchitecture. 
 1. [AI Development Standard](ai-development-standard.md) — roles, authority, task gates, DoR/DoD, verification and acceptance.
 2. [AI Development Iteration Lifecycle](iteration-lifecycle.md) — the end-to-end development loop and multi-Owner collaboration patterns.
 3. [AI Work Item and Prompt Record Template](prompt-and-evidence-template.md) — immutable prompt versions, task manifest and evidence bundle.
+4. [Owner Automation Operating Model](owner-automation-operating-model.md) — GitHub Issue/PR collaboration and per-Owner scheduled execution.
+5. [AI Prompt Authoring Standard](prompt-authoring-standard.md) — A's prompt-authoring process, Owner approvals, quality gates and hashing.
 
 ## Required usage
 
