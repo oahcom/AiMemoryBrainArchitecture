@@ -184,3 +184,23 @@ Storage v3.2.9 Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3 still pins prior C/
 This is exact-currentness/provenance drift, not a demonstrated schema/semantic regression.
 
 **中文：** v3.2.9 发布后 C/D/I/H 分支再次更新了精确 Review/CI Pin，而 Storage v3.2.9 未同步。B 的语义/源文件候选对齐仍成立，但 Manifest 当前性失效。后继 Storage Manifest 必须绑定修正后的 C/D/I Review Blob 和当前 H CI Run/Commit/Job；C/H/D/I 对同一后继 Manifest 复审，再由 A 审查。不得继续将 v3.2.9 标记为当前联合 Bundle。这是精确当前性/来源漂移，不是已证明的 Schema/Semantic 回退。
+
+
+## 11. Storage v3.3.0 successor manifest / Storage v3.3.0 后继 Manifest
+
+- Exact path: reviews/storage-consistency/phase-3.6.20-storage-v3.3.0-successor-exact-version-bundle-manifest.md
+- Exact Blob: c8407c9f10049d65426a3598ad20b6aa70f83c32
+- Predecessor: Storage v3.2.9 Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3
+- Additional current 42-test source: Storage v3.2.7 manifest Blob f7a3acc1845f4322b2b38264eb0d4bae92623bac
+- Supersession: v3.3.0 explicitly supersedes v3.2.7/v3.2.8/v3.2.9 for current candidate bundle binding.
+
+Exact current source set:
+- H Unified 1.2.14: 09fcd1fa29fe24255fbd87cae79dafb406594a59.
+- H integrated authority mapping: 1cbe74eba69325510d6b1019d971661f965eabf8.
+- RecoveryJoin 1.0.2 / RecoveryCutoff 1.0.5: 4b664e3bce465499bcdfd93796349a4ba7074002 / 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7.
+- CSubmitOutcome 1.0.1 / C sequence amendment: a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda / 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb.
+- H validator/test/fixture: eab961a08d41e871f38543b18ee60cf024977414 / da1454ed985c84160c4cb6a0462df9d1225fab7f / f911027c848d21dd36fb87ba64a201a1455787a7.
+- H CI: run 44072037563, commit c6faee294e503f32a802ba51f3f3b3eb4bee2cd7, job 134000402978, 42 tests.
+- C/D/I review Blobs: 61ff3716c9c3d3101a0058963c58f089aa1448b0 / 2bf4514fe7972b72f6c1f904e461f86488d04cda / 2851d31e4f8caf48348944b885b493c607ca79e1.
+
+**Disposition:** B L1/L2 candidate alignment is conditionally aligned against v3.3.0. Fresh A exact review is required. Production and L3/L4 gates remain open.
