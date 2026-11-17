@@ -702,6 +702,7 @@ class PublicationProtocolTests(unittest.TestCase):
                 p.install_forget_fence()
                 args = self.consume_i(p)
                 binding = (args["auth_id"], args["publication_id"], args["storage_id"],
+                           args["request_digest"], args["owner_boundary"],
                            args["d_proof"], args["i_commit_won_proof"])
                 p.mark_unknown("op-1", binding)
                 p.install_forget_fence()
