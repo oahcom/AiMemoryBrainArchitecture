@@ -6,7 +6,7 @@
 - D owner membership proof contract: Blob `d80dabe7210e681bc4e2290355a38f8b67be9ddd`
 - D Forget Fence contract: Blob `1f0391bc49d007c44ec74165bd33d37412cc7990`
 - D Gate Release currentness contract: Blob `7f2861d9441b9be6c8e69f41fd0276636be483a8`
-- H Unified schema 1.2.14: Blob `fee452efb99ab4fe0ceccb347c46eeef1521bd28`
+- H Unified schema 1.2.14: Blob `09fcd1fa29fe24255fbd87cae79dafb406594a59`
 - H RecoveryJoin schema 1.0.2: Blob `4b664e3bce465499bcdfd93796349a4ba7074002`
 - Provenance: delegated D-role technical decision; **not an independent human D Owner signature**.
 
@@ -68,3 +68,10 @@ The final field is distinct from both `owner_gate_generation` and `barrier_gener
 **D 接受 RecoveryJoin 1.0.2 通用 P0、上述 D Row Digest 解引用映射及 H 1.2.14 Fence High-Water 作为 L1/L2 候选。** 该方案保留封闭通用 Proof Schema，同时确保 D 语义被完整承诺并由 D 独立验证。H 不得认证 D Ledger 完整性或签发 D Release。
 
 Remaining L3: exact D canonical-row schema/vectors, full producer/dependency pagination, late-discovery and stale-fence fault campaigns, D key lifecycle, I trust integration, independent human D Owner approval and physical Storage realization remain OPEN.
+
+
+## 6. Exact H 1.2.14 pin correction / H 1.2.14 精确 Pin 修正
+
+The H 1.2.14 schema description was corrected to state artifact revision 1.2.14 (the schema ID, required `schema_artifact_revision` and wire version were already 1.2.14). The corrected exact schema Blob is now `09fcd1fa29fe24255fbd87cae79dafb406594a59`. This is a metadata-only correction; the D-specific `forget_fence_generation_high_water` field and its semantics are unchanged. This crosswalk now pins the corrected exact Blob.
+
+H 1.2.14 Schema Description 已修正为 Artifact Revision 1.2.14（此前 Schema ID、必需的 `schema_artifact_revision` 和 Wire Version 已是 1.2.14）。修正后的精确 Schema Blob 为 `09fcd1fa29fe24255fbd87cae79dafb406594a59`。该修正仅涉及元数据；D 专属 `forget_fence_generation_high_water` 字段及语义不变。本 Crosswalk 现绑定修正后的精确 Blob。
