@@ -4,7 +4,7 @@
 - Delivery stage: **DATABASE CAPABILITY + LOGICAL-RESTORE EVIDENCE DELIVERED; CROSS-OWNER JF-10 CONFORMANCE OPEN**
 - Freeze disposition: **BLOCKED — GATE A PARTIAL PASS / GATE B NOT ACCEPTED FOR CURRENT REVISION / GATE C DEFERRED**
 - Snapshot branch: `session-storage-consistency-forget-atomicity-2026-11-16`
-- Snapshot HEAD: `e7ce0442e15a55478a21bb612580699ebc3ff330`
+- Snapshot HEAD: `59dcf9529ec67abbc4ca87567e8876a55ea92771`
 - Provenance: assistant-authored delegated Storage-role delivery at the user's direction; not an independent human Storage Owner signature.
 
 ## 1. Executive disposition / 执行结论
@@ -92,3 +92,18 @@ This is a material blocker clarification: PostgreSQL CI capability evidence does
 **Not delivered:** integrated JF-10 conformance, production Canonical Authority deployment, complete cross-owner COC acceptance, operational restore proof or Multi-PolicyDomain atomicity.
 
 **Decision:** Storage evidence delivery is complete for the database-capability/documentary stage. Storage freeze-readiness remains **BLOCKED** until ST-FR-01 through ST-FR-08 are satisfied.
+
+## 7. Exact RecoveryJoin and C provider boundary evidence refresh / RecoveryJoin 与 C Provider 证据刷新
+
+- Storage bidirectional JoinProof contract: `4520860b28429d35cdb2ca947a56d0ccb64226a3`.
+- Storage exact review after H/C refresh: `4cb3a6c71497cc68ffbb947cd47c4e67c6590bc2`.
+- Storage topology ADR: `080433f8e13a500522bc2754da64057edb0ae9d8` — **ADR-BLOCKED / NO TOPOLOGY SELECTED**.
+- H RecoveryJoin schema: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- HRC/JPF suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- H CI run [44040312711](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040312711): **66/66 PASS**, reference candidate only.
+- C exact RecoveryJoin/provider-side-effect review: `d5be3be10f7144476ddc61a94f29faff67424292`.
+- I exact RecoveryJoin trust/currentness review: `4a72cecd7769be7017b699ab102b127fab516101`.
+
+The H CI pass does not execute Storage's live COC prefix read, quorum-committed Batch/Manifest ordering, durable JoinProof commit, D/Storage shared transaction boundary, VisibilityPointer/PublicationReceipt/outcome/outbox atomicity, or physical HA/restore. C ProviderIdempotencyKey remains a C-owned namespace and cannot be replaced by PreparedTransactionGID/native XID.
+
+Storage accepts the logical digest chain and two-direction join as a proposed contract with STORAGE-RJ-01..05 amendments. The physical topology is still unselected: Option A is conditional on proof of one actual Serializable transaction domain; Option B requires a named durable linearizable coordinator and its own failover proof; Option C remains rejected. No topology, deployment, production activation or freeze is approved.
