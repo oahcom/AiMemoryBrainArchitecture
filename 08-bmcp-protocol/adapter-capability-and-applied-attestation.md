@@ -194,3 +194,119 @@ CapabilityEpoch changes whenever Adapter identity/build, runtime hook, Managed R
 Forget ACK and Applied Attestation are separate evidence families. Applied binds G ContextVersion + Delivery + inference request at the declared final submission boundary. Forget ACK binds ForgetOperation + D fence + I Permission Epoch + local action/Managed Region. Applied does not prove model attention or use; Forget ACK does not prove global Forget completion or provider deletion.
 
 The full status semantics, target mapping and evidence fields are defined in adapter-forget-ack-and-target-binding.md.
+
+
+## 11. Phase 3.6 exact final-request field mapping — H candidate addendum
+
+- Status: **CANDIDATE — proposed field mapping for C/G review; NOT FROZEN**
+- Related exact C source: `07-agent-integration/phase-3.6-final-request-evidence-contract.md`, Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`.
+- Related G source: `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md`, Blob `aa3afa73d8a76cc6f025839c52bfbff6a983046a`.
+- H remains owner of wire/evidence encoding and capability negotiation. C remains sole producer of final-request submission evidence. G remains sole authority for Applied acceptance. I and D remain sole authorities for authorization and ForgetFence respectively.
+
+This addendum proposes a field-level mapping to close the candidate gaps identified in the 2026-11-17 C/G/H cross-owner review. It is not an acceptance by C, G, I, D or B, and it does not freeze a schema, signature profile or implementation.
+
+### 11.1 Canonical request and delivery binding
+
+For a Tier 1 final-request attestation, the H candidate field set is:
+
+| H candidate field | Requiredness | Semantic source / rule |
+|---|---|---|
+| `inference_request_id` | REQUIRED | Actual Runtime/Provider-assigned request ID; never synthesized from DeliveryId |
+| `final_request_boundary_id` | REQUIRED | Exact C-observed successful submit boundary identity |
+| `final_request_boundary_type` | REQUIRED | Declared hook/submit boundary profile; must identify the observation point |
+| `context_id` | REQUIRED | Exact G Context identity |
+| `context_version` | REQUIRED | Exact immutable G target version |
+| `delivery_id` | REQUIRED | Exact G Delivery identity |
+| `delivery_attempt_id` | REQUIRED | Exact non-superseded attempt |
+| `materialized_context_version` | REQUIRED | Version actually present in the Adapter managed region; must equal `context_version` for Full |
+| `adapter_instance_ref` | REQUIRED | Exact Adapter instance that materialized and observed the request |
+| `runtime_instance_ref` | REQUIRED | Runtime instance in which the request was submitted |
+| `runtime_session_ref` | REQUIRED | Authenticated Runtime Session binding |
+
+The legacy candidate field `applied_context_version` is ambiguous because H cannot decide G's Applied state. For this profile it is deprecated as a wire name and MUST NOT be interpreted as a G Applied decision. Implementations should use `materialized_context_version`; a compatibility decoder may accept the legacy name only when it is unambiguously mapped to the materialized version and never to an Applied state.
+
+### 11.2 Managed Region completeness and digest
+
+Tier 1 evidence MUST bind all of the following:
+
+- `managed_region_id`: exact managed-region identity;
+- `managed_region_revision`: immutable revision observed in the submitted request;
+- `managed_region_inventory_digest`: digest of the complete inventory of managed-region segments/entries included by the negotiated profile;
+- `managed_region_coverage`: per-request coverage enum `COMPLETE`, `PARTIAL`, `BYPASSED` or `UNKNOWN`;
+- `managed_region_digest`: digest of the exact complete region content as embedded in the final submitted request;
+- `digest_profile_id`: canonicalization profile identifier and digest algorithm/version;
+- `omitted_region_refs` and `unobservable_path_refs`: explicit sets when coverage is not complete, including an explicit empty set for complete coverage where required by the canonical profile.
+
+A digest without region identity, revision, inventory and coverage is insufficient to prove completeness. Full candidate evidence requires `managed_region_coverage=COMPLETE`, exact target/version match, no bypass or unknown path, and equality between the delivered/materialized target and the region observed in the submitted request. Partial, bypassed, unknown or truncated coverage MUST NOT be upgraded to Full by H or G.
+
+### 11.3 Protected identity and authority bindings
+
+The candidate attestation MUST carry verifier-resolved opaque references, not payload-asserted identity values:
+
+- `agent_principal_ref`, `agent_actor_ref`, `agent_instance_ref`;
+- `adapter_principal_ref`, `adapter_ref`, `adapter_instance_ref`;
+- `runtime_instance_ref`, `runtime_session_ref`;
+- `scope_ref` and applicable `environment_ref`.
+
+The authenticated transport principal remains useful transport evidence but MUST NOT substitute for the protected Agent/Adapter/Runtime/Session binding. H preserves exact issuer-namespaced references and verifies the configured authenticated envelope/binding profile; it does not mint Principal, Actor, Scope, Environment or delegation authority.
+
+The following owner-issued authority fields are opaque and must be current at the final submit boundary:
+
+- `permission_epoch_ref` and `permission_decision_ref` — I-issued; H does not define or infer authorization;
+- `forget_fence_generation`, `forget_fence_cursor` and `forget_fence_validation_ref` — D-issued; H does not define or infer canonical Forget ordering;
+- `adapter_capability_epoch` and negotiated `capability_profile_ref` — H-issued and bound to the exact Adapter instance/session.
+
+An attestation with missing, stale, incomparable, unverifiable or mismatched authority bindings is not eligible for Full. The receiver must not substitute a newer epoch, infer a clear fence, or use payload identity claims as fallback.
+
+### 11.4 Evidence provenance, integrity and correlation
+
+The Tier 1 candidate evidence profile requires:
+
+- `evidence_issuer_ref`;
+- `submission_observed_at` and, where the runtime provides it, `submission_monotonic_sequence`;
+- `evidence_schema_version`;
+- `correlation_ref` and `causation_ref`;
+- `audit_ref` or a policy-controlled reference to the immutable evidence record;
+- `integrity_proof_ref` under the H/I-approved integrity profile;
+- the exact `inference_request_id`, `final_request_boundary_id`, request digest/profile and region digest/profile covered by that proof.
+
+Wall-clock timestamps are descriptive and MUST NOT alone establish ordering between C submission, I revocation and D ForgetFence advancement. Where a common causal order cannot be proven from owner-authoritative evidence, disposition is UNKNOWN and the managed region remains suppressed for future use.
+
+Raw prompt or full memory text MUST NOT be copied into ACK/evidence by default. A digest is not anonymization; evidence retention and disclosure remain subject to I policy.
+
+### 11.5 Per-request coverage and capability ceiling
+
+The negotiated Adapter capability declaration describes maximum supported behavior; the attestation MUST additionally describe actual per-request coverage. The following rules apply:
+
+1. Tier 1 is eligible for candidate Full evidence only when final request observation, successful submit, exact request identity, complete region digest, protected identity binding and current authority bindings are all proven.
+2. Tier 2 cannot prove the final transformed request/submit boundary and MUST remain Partial or Unknown.
+3. Tier 3 proves transport only and MUST NOT claim Applied=Full.
+4. Any per-request bypass, omitted path, truncation, unknown middleware transformation, unsupported region or incomplete inventory prevents Full.
+5. CapabilityEpoch is bound to the exact Adapter instance/session and proof profile. A capability downgrade or relevant build/hook/region/integrity change requires a new epoch and renegotiation; old evidence remains bound to its original epoch.
+
+### 11.6 Idempotency, replay and temporal rules
+
+For this candidate profile, evidence identity is scoped to:
+
+`(adapter_instance_ref, runtime_session_ref, delivery_id, delivery_attempt_id, inference_request_id, final_request_boundary_id, evidence_kind, adapter_capability_epoch)`
+
+- Same evidence identity and same canonical payload digest is an idempotent replay and returns the original durable disposition.
+- Same evidence identity with a different digest is CONFLICT and quarantined; last-write-wins is forbidden.
+- Evidence from a superseded attempt, old Adapter instance or old Runtime Session may be retained as historical evidence only; it cannot roll back G's current Context/Delivery head or be rebound to a replacement session/epoch.
+- C alone emits Final Request Submitted evidence. H validates/encodes/transports it; H does not create a substitute submit proof.
+- G alone accepts Applied after checking C evidence, H protocol/capability proof, I authorization and D ForgetFence evidence.
+- A later Forget/revocation invalidates current-use eligibility without rewriting a historically valid submission/Applied fact. If Forget/revocation precedes submit, Full is rejected. If ordering is unknown, disposition is UNKNOWN and content remains suppressed.
+- Execution Started remains a separate Runtime/Provider receipt correlated to the same InferenceRequestId.
+
+### 11.7 Required owner decisions and non-claims
+
+Before this candidate can be frozen:
+
+- C MUST confirm the exact FinalRequestBoundaryId, request/delivery/context mapping, Managed Region completeness profile and evidence provenance.
+- G MUST confirm that the H candidate evidence is sufficient for its Applied predicate and that H does not usurp G's Applied authority.
+- I MUST confirm Principal/Actor verifier binding, PermissionEpoch/decision references, integrity profile and retention rules.
+- D MUST confirm ForgetFence generation/cursor/lineage references and the authoritative ordering evidence.
+- B MUST confirm ActorRef/ScopeRef/EnvironmentRef typed semantics.
+- H MUST publish the corresponding versioned wire schema/SDK mapping only after the above field semantics are accepted.
+
+All related conformance cases remain **SPECIFIED / NOT RUN** until executable fixtures, deterministic ordering, expected/actual outputs and durable owner evidence are attached. This addendum does not establish H schema freeze, cryptographic approval, interoperability, implementation correctness, C/G/H global freeze, or production readiness.
