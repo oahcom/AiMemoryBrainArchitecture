@@ -33,7 +33,8 @@ flowchart TB
   G["G — Memory Context / Delivery / Applied"]
   B["B — Domain Model / Typed Semantics"]
   I["I — Identity / Authorization / Revocation / Global Forget"]
-  S["Storage — Durable Records / COC / Visibility / Recovery"]
+  S["Storage — Durable Transactions / Visibility / Recovery"]
+  Q["COC — Quorum Log / Recovery Cutoff / Participant Registry"]
   A["A — Principal Integration / Architecture Governance"]
   AG <--> C
   C <--> H
