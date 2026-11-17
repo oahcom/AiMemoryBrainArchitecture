@@ -33,3 +33,8 @@ C Provider Outcome remains one of HANDOFF_ACCEPTED, HANDOFF_REJECTED, NOT_INVOKE
 ## 4. C disposition
 
 **ACCEPT WITH ENUMERATED C-OWNED CONDITIONS** for the exact candidate wire shape. No production provider conformance, universal exactly-once, C egress activation, JF-10 P0 closure or production activation is claimed.
+
+
+## 5. H semantic payload validator follow-up
+
+H now validates the actual proof payload against the exact C row and frozen snapshot and requires a C-authoritative signature verifier callback. Exact module Blob: `e26379d38825ee13d15f652d3bd019c4091da37d`; RecoveryJoin tests Blob: `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a`. H CI Run `44051676055` passed 288 tests (266 passed, 22 skipped, 0 failed). The callback remains TEST-ONLY; C's real signer, provider-account ledger and same-key lookup remain unimplemented. C's ACCEPT WITH ENUMERATED CONDITIONS is unchanged.
