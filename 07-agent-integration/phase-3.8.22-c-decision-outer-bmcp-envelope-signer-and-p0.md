@@ -97,6 +97,8 @@ Include every present member in this exact set:
 - `key_version`
 - `created_at`
 - `owner_signature_ref`
+- `integrity_proof_ref`
+- `channel_binding_proof_ref`
 
 ### 4.2 C message-family members included
 
