@@ -209,3 +209,20 @@ H's own Python/Node candidate verifier completed successfully:
 - Expected vectors `a4bfe0b431d5e710ac99d604e7b1bce49c044d23`.
 
 This second run independently recomputed the five candidate signatures and fingerprints, verified all present C-P0 field mutations fail, and compared H Python/Node output to the static expected vectors. It is not profile registration or production trust evidence. The test seed is public; C trust root/key lifecycle, H production callback wiring, provider evidence authentication, C ledger inclusion, COC quorum and provider adapter testing remain open.
+
+
+## 17. C key-status event and signing-sequence validation
+
+C has published the proposed append-only key-status event schema Blob `908b293eba337e9fa75864cea3704e28a1a8d82e` and lifecycle contract Blob `de581ea59e724faf5972217e17b983de641ad3f7`. I's candidate governance review is Blob `9765b36bce72fc8a1aa347af40b85727ff5a59ed`.
+
+The H validator core now exposes `verify_key_status(c_object)`, Blob `c8717869d066543b1272780014ab1e42310c6951`. It is mandatory for a VALID result and must establish:
+- a valid I-governed signature over the exact immutable key-status event;
+- a valid append-only predecessor chain and permitted state transition;
+- exact C key ID/version/fingerprint/profile/purpose/audience binding;
+- ACTIVE status at the C outcome signing sequence;
+- shared C authority sequence namespace between outcome record and key-status event;
+- latest trusted key-status checkpoint and anti-rollback evidence.
+
+Missing callback, unavailable trust root, unavailable status ledger or checkpoint outage => UNKNOWN. Proven key substitution, invalid transition, fork, stale root or invalid governance signature => INVALID. Wall-clock timestamps are not a causal substitute.
+
+I accepts the schema/lifecycle and proposed governance signature construction as candidates only. Both C data profile and I governance profile remain unregistered. No production key registry, HSM/KMS, key custody or anti-rollback service is claimed.
