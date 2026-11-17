@@ -113,7 +113,11 @@ Only entities with genuine independent lifecycle require a state machine. A stat
 
 No new state machine is introduced for every metadata field. State names without a subject type and owner are invalid as normative contracts.
 
-## 7. Blocking issues / 阻塞问题
+## 7. Cross-owner decision evidence / 跨 Owner 决策证据
+
+The exact CGH-APPLIED-1.1 recovery-batch package and companion COC architecture have owner decisions recorded: C, D, G, H, I and B accepted their respective semantic portions with enumerated exceptions; Storage confirmed its architecture interface with changes. H/C local L1/L2 validation passed 38 methods, but all ten authority callbacks were deterministic test doubles. This is bounded design/local validation evidence only. Applied Contract Frozen remains NO; production trust, provider-specific idempotency/live provider truth, COC quorum durability, Storage same-GID recovery, G Applied persistence and L3/L4 end-to-end conformance remain NOT VERIFIED / NOT RUN. Issue #3 remains OPEN.
+
+## 8. Blocking issues / 阻塞问题
 
 - **B-STATE-001:** Fact/Claim ADR remains BLOCKED; epistemic status cannot settle object identity.
 - **B-STATE-002:** Memory lifecycle and D ForgetOperation phase are distinct; all owner docs and schemas must preserve that split.
@@ -122,7 +126,7 @@ No new state machine is introduced for every metadata field. State names without
 - **B-STATE-005:** Forgotten vs Deleted vs Purged/global completion remains D/I/Storage split; do not claim physical erasure from logical state.
 - **B-STATE-006:** Context/ChangeSet/ContextVersion state transitions need G's exact current Owner contract pin; not yet reconciled here.
 
-## 8. Gate status / 门禁状态
+## 9. Gate status / 门禁状态
 
 B2 is **IN PROGRESS**. This document establishes a typed vocabulary proposal and records exact Owner boundaries; it does not close Owner-specific state machines or approve the cross-owner Applied/Forget/Storage contract. No universal status enum or production schema is authorized.
 
