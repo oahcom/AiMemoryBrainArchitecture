@@ -112,3 +112,48 @@ Storage release does not release I Gate, D Gate, D Forget barrier, C provider si
 ## 7. Status
 
 The canonical pair proposed here is `4ed4234...` + `8ac1781...`. The earlier `86ff3...` companion is superseded for current prepared-participant semantics. Architecture only; no protocol freeze, implementation, production conformance or production activation is claimed.
+
+
+## 8. Critical exact-version correction — v2 is not the current companion target
+
+A further exact-file check found that the COC protocol Blob `8ac17816476f280ab6fb3afca0688aa03e37de1d` §14 explicitly requires the Storage design's §§15.1–15.7. Storage Design v2 Blob `4ed4234ce548a814a9496adf7a14c4459ea9f7ce` does not contain §§15.1–15.7; it contains only the earlier abbreviated PostgreSQL mapping in §7.5 and ends at §14. Therefore, **the pair `4ed423...` + `8ac178...` is not a coherent normative pair**.
+
+The Storage branch contains the successor artifact:
+
+- Path: `reviews/storage-consistency/phase-3.6-coc-durable-log-and-recovery-protocol-storage-design-v3.md`
+- Displayed version: **Storage Design v3.1**
+- Exact current blob returned by branch readback: `d5bdc72f193fcdaa654e4f07f865b77c578673ca`
+- It contains §§15.1–15.7 and those sections provide the nominal identity types, DatabaseIncarnationRef registry, immutable prepare-attempt/ledger, receipt preconditions and fields, resolution proof, and exact I terminal proof join required by COC protocol §14.
+
+Accordingly, the corrected version lineage is:
+
+`Storage Design v2 (4ed423...)` → `Storage Design v3.1 (d5bdc72...)`
+
+and the proposed current companion bundle is:
+
+`Storage Design v3.1 (d5bdc72...)` + `COC persistence protocol (8ac178...)`.
+
+The v3.1 header still cites `86ff3...` as its companion clarification source. That reference is historical and is superseded for this exact review bundle by the later COC protocol Blob `8ac178...`, whose §14.1–14.5 both preserves and extends the same-participant identity contract and explicitly points to Storage §§15.1–15.7. This amendment is the explicit cross-file binding; the v3.1 source itself remains immutable.
+
+### 8.1 Cross-file identity completeness check
+
+The v3.1 §§15.1–15.7 and COC protocol §14.1–14.5 MUST be interpreted as one typed semantic contract. The combined tuple includes:
+- PreparedParticipantRef; PreparedTransactionGID; PostgreSQLNativeXID;
+- CanonicalAuthorityDBRef; DatabaseIncarnationRef; PostgreSQLSystemIdentifier; PostgreSQLDatabaseOID;
+- PrepareAttemptRef; PrepareAttemptGeneration; ParticipantLedgerRef; ParticipantLedgerVersion;
+- PublicationOperationId; RequestDigest; ParticipantTupleDigest; owner boundary;
+- CausalOrderDomainRef; PolicyDomainRef;
+- COC prepare-intent identity, position and digest;
+- original prepare timeline and LSN; authoritative writable-primary PREPARED observation;
+- protected envelope identity: message/schema version, issuer, subject, owner authority, audience, purpose, key ID/version, algorithm/canonicalization/digest profile, payload digest and signature;
+- StorageResolutionProof with same-tuple binding, exact VisibilityPointer + PublicationReceipt for COMMITTED, authoritative non-publication proof for ROLLED_BACK, and append-only RecoveryObservation[].
+
+The following are not interchangeable: GID/native XID; authority DB ref/incarnation/system identifier/database OID; original prepare timeline/LSN versus recovery observations; I sequencer position versus COC position versus D FenceGeneration; participant identity versus attempt identity versus ledger identity.
+
+### 8.2 Disposition
+
+- `4ed423...`: preserved historical v2 proposal; not the current companion target for `8ac178...`.
+- `d5bdc72...`: current Storage Design v3.1 candidate; exact owner review still required.
+- `8ac178...`: current COC persistence protocol candidate; exact owner review still required.
+- `86ff3...`: superseded companion clarification for the current pair; retain only as immutable history.
+- No acceptance is inherited from the v2 artifact. A/I/D/C/H must review the exact v3.1 + 8ac178 bundle where their authority is affected.
