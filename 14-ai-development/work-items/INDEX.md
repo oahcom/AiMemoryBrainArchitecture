@@ -6,6 +6,8 @@ This index is the entry point for all governed AI development tasks.
 |---|---|---|---|---|---|---|---|---|
 | AID-2026-001 | A–I review and approval of AI Development Governance v1.0 | A (integration parent; A–I reviewers) | ARCH/R2 | IN_REVIEW | [Owner review prompts](AID-2026-001/owner-review-prompts.md) | N/A | [Preliminary assessment](AID-2026-001/preliminary-cross-owner-assessment.md) | [A decision](AID-2026-001/A-integration-decision.md) |
 
+Related GitHub tracking: [Issue #24 — GitHub-mediated Owner workflow and scheduled automation](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/24); [PR #23](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/23).
+
 ## Registration rules
 
 - Create a unique `AID-YYYY-NNN` before substantive work begins.
