@@ -122,3 +122,12 @@ Translations must not create architecture decisions. Semantic changes must follo
 Every A–I Owner MUST deliver architecture work in Chinese and English. This includes proposals, review reports, module specifications, interfaces, schemas, state machines, ADRs, technology decisions, tests/acceptance requirements, and material revisions. Bilingual parity is an acceptance gate, not optional polish. See [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md).
 
 A–I 所有 Owner 必须以中英文双语交付架构工作，包括设计提案、审查报告、模块规范、接口、Schema、状态机、ADR、技术决策、测试/验收要求和重要修订。双语一致性是验收门禁，不是可选的文字润色。详见 [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md)。
+
+
+## Mandatory bilingual architecture delivery / 强制双语架构交付
+
+All new architecture designs and architecture changes MUST include Chinese and English counterparts in the same change set. This applies to Owner proposals, ADRs, protocols, schemas, reviews, integration decisions, tests, and acceptance reports—not only overview documents.
+
+每次新架构设计和架构变更，都必须在同一变更集中提交中英文对应文档。此要求适用于 Owner 提案、ADR、协议、Schema、审查报告、集成决议、测试和验收报告，不仅限于总览文档。
+
+The normative policy is [GOV-DOC-BILINGUAL-001](../../00-governance/bilingual-architecture-documentation-policy.md). A missing or stale counterpart blocks documentation acceptance unless an explicitly approved, time-bounded exception exists. Update docs/translation-status.md in the same change set.
