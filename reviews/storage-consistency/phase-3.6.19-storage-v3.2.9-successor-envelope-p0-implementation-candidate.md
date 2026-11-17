@@ -33,8 +33,8 @@ v3.2.9 仅作为精确候选 Bundle Manifest 替代 v3.2.8。它绑定 H 新增�
 | H | Unified schema 1.2.14 / wire 1.3.0 | `09fcd1fa29fe24255fbd87cae79dafb406594a59` | exact structural schema |
 | H | Corrected C outer P0 JSON-Pointer mapping | `4ba7e1699215d02224f805a15484b1da2e40c03f` | exact schema-derived candidate mapping |
 | H | Outer envelope auth reference validator | `571f69d326be51fd80acfe0c5a3f5f2dddce61f4` | computes P0 digest/preimage; signature/trust callbacks remain injected |
-| H | Outer envelope auth test source | `e4639b8c7389aea59e09fce897afa3ea56e6e388` | 28 test methods; execution not yet observed |
-| H | H P0 implementation closure note | `cbca0d3496285c672d0b27b388da850db5a9f8c3` | records exact source and CI pending |
+| H | Outer envelope auth test source | `babe51825d6aa13693e9cf844740104c74f598d8` | 28 test methods; execution not yet observed |
+| H | H P0 implementation closure note | `9b0e9fb5ad2ca49c121052763bd189d82547b413` | records exact source and CI pending |
 | H | C object Provider Outcome validator | `b8cd692d261df7a31a0f65c3e003693e305f73a2` | local C object validation, separate from envelope |
 | H | Previous 60-test CI | Run `44073888935`, commit `0e212731073b36e4fa9ffda8467e60806da1b380` | valid for older exact source only; NOT evidence for current P0 code |
 | I | C trust-boundary review | `b6d1ea45825a1c2090abfba42474814f02f073a3` | candidate separation accepted; no crypto approval |
