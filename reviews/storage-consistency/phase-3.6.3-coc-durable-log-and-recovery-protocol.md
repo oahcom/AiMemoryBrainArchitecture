@@ -279,16 +279,56 @@ The initial three-voter/two-quorum profile tolerates one crash/unavailable voter
 
 Any missing, invalid, stale or contradictory proof keeps the operation UNKNOWN/IN_DOUBT. No authority may infer another authority's decision from a COC index, common transaction ID or elapsed time.
 
-## 14. PostgreSQL prepared-participant identity mapping — Storage clarification
+## 14. PostgreSQL prepared-participant identity mapping — Storage normative clarification
 
-The protocol term `preallocated XID` MUST be represented explicitly in engine-neutral APIs so it is not confused with an engine-assigned transaction number. For the PostgreSQL 18.7 candidate profile:
+This section defines the PostgreSQL 18.x adapter mapping and MUST be read together with Storage design §§15.1–15.7. The complete immutable tuple below is normative for this profile; abbreviated field lists in prior revisions are superseded.
 
-1. `PreparedParticipantRef` is the stable cross-service participant identity.
-2. `PreparedTransactionGID` is the client-chosen PostgreSQL prepared-transaction GID. Storage allocates and durably binds this unique GID to the immutable `PublicationOperationId` / `RequestDigest` before `JF10_PREPARE_INTENT_REGISTERED`. This is the preallocated identifier carried in the COC prepare-intent record and reused for every lookup/retry/COMMIT PREPARED/ROLLBACK PREPARED.
-3. PostgreSQL's numeric `pg_prepared_xacts.transaction` value is an engine-assigned native XID allocated by PostgreSQL; the client cannot preallocate it. It MUST NOT be described as the preallocated cross-service XID or used as the sole participant identity. Storage records it as observed engine evidence after PREPARE.
-4. `PreparedParticipantReceipt` MUST bind at least: PreparedParticipantRef; PreparedTransactionGID; native XID as observed; CanonicalAuthorityDBRef; PostgreSQL cluster `system_identifier`; target database identity/OID; original prepare timeline and observed prepare LSN; participant digest; PublicationOperationId and RequestDigest; exact owner_boundary; CausalOrderDomainRef and PolicyDomainRef; COC prepare-intent position/digest; prepared state; Storage signer/key version and audience.
-5. The GID MUST be unique within the bound PostgreSQL cluster/database authority and MUST NOT be reassigned to a different operation after resolution. A same-GID/same-digest retry is lookup/replay; a same-GID/different-tuple request is CONFLICT.
-6. After a durable I terminal decision, `StorageResolutionProof` MUST bind the same GID and original participant tuple to the final COMMITTED or ROLLED_BACK state. On commit it includes the exact VisibilityPointer/PublicationReceipt transaction identity and receipt digest; on rollback it includes authoritative non-publication evidence. It also records the recovery timeline/LSN context without replacing the original prepare identity.
-7. Absence of a GID from `pg_prepared_xacts` is not, by itself, proof of commit or rollback. Storage MUST resolve through the durable participant outcome/idempotency ledger and authoritative DB readback. If those disagree or are unavailable, the result remains UNKNOWN/IN_DOUBT and protected reads stay closed.
+### 14.1 Distinct identity and evidence types
 
-This clarification preserves the protocol's engine-neutral intent while making the PostgreSQL mapping implementable. Other database engines MUST define an equivalent stable prepared-participant identifier and separately typed engine-native transaction identifier. The exact field names and wire encoding require H review; the security tuple and same-participant recovery invariant are normative.
+1. `PreparedParticipantRef` is the stable, engine-neutral cross-service identity for one prepared-participant lifecycle. It is opaque, globally unique and never reused.
+2. `PreparedTransactionGID` is the client-chosen PostgreSQL prepared-transaction locator. Storage allocates it once, preserves its exact bytes/case, and binds it to the immutable participant tuple. It is a PostgreSQL locator, not a native transaction number.
+3. `PostgreSQLNativeXID` is the engine-assigned numeric XID observed from authoritative `pg_prepared_xacts` readback after PREPARE. It is evidence only, never client-preallocated, never a cross-service participant identity and never interchangeable with GID.
+4. `CanonicalAuthorityDBRef` and governed non-reusable `DatabaseIncarnationRef` identify the exact canonical authority/database incarnation. `PostgreSQLSystemIdentifier`, `PostgreSQLDatabaseOID`, timeline and LSN are separate typed engine evidence; system identifier/OID/name alone do not establish incarnation identity.
+5. `PrepareAttemptRef` + monotonic `PrepareAttemptGeneration` identify one immutable prepare attempt. `ParticipantLedgerRef` + `ParticipantLedgerVersion` identify the durable append-only Storage participant record/version. `ParticipantTupleDigest` covers the complete canonical immutable tuple.
+
+A generic field named `xid` is prohibited. Other database engines MUST define separately tagged locator and native-transaction-ID types.
+
+### 14.2 Required pre-PREPARE binding and sequence
+
+Storage MUST durably allocate and bind, before COC prepare-intent registration: PreparedParticipantRef, PreparedTransactionGID, PrepareAttemptRef/Generation, ParticipantLedgerRef/Version, PublicationOperationId, RequestDigest, ParticipantTupleDigest, owner boundary, CausalOrderDomainRef, the single PolicyDomainRef, CanonicalAuthorityDBRef, DatabaseIncarnationRef and the exact database/engine metadata available before PREPARE.
+
+The exact sequence is:
+1. Storage commits the immutable reservation and GID mapping as `ALLOCATED_NOT_PREPARED`; this is not a prepared side effect and does not create visibility.
+2. COC quorum-commits `JF10_PREPARE_INTENT_REGISTERED` containing the exact participant/GID/attempt/ledger/DB-incarnation tuple and digest, then Storage linearly reads back that exact identity/digest.
+3. Only after that authoritative COC readback may Storage issue PostgreSQL PREPARE.
+4. Storage reads the authoritative writable primary's `pg_prepared_xacts`, matches exact GID/database and records the observed PostgreSQLNativeXID, original prepare timeline and LSN.
+5. Storage persists the signed PreparedParticipantReceipt and receipt digest in the same durable participant ledger before returning it or registering the prepared participant with COC.
+
+A D/I cutoff before step 2 forbids PREPARE. A preallocated reservation in that window may be cancelled only with an append-only Storage terminal-attempt record plus authoritative engine evidence that PREPARE never occurred; absence from `pg_prepared_xacts` alone is insufficient.
+
+### 14.3 PreparedParticipantReceipt required binding
+
+The Storage-signed receipt MUST bind the complete immutable tuple, including:
+- PreparedParticipantRef, PreparedTransactionGID, PostgreSQLNativeXID;
+- CanonicalAuthorityDBRef, DatabaseIncarnationRef, PostgreSQLSystemIdentifier and PostgreSQLDatabaseOID;
+- PrepareAttemptRef, PrepareAttemptGeneration, ParticipantLedgerRef and ParticipantLedgerVersion;
+- PublicationOperationId, RequestDigest, ParticipantTupleDigest and exact owner boundary;
+- CausalOrderDomainRef, PolicyDomainRef, COC prepare-intent identity/position/digest;
+- original prepare timeline/LSN, authoritative PREPARED observation source and time;
+- payload/message type and schema version, issuer, subject, owner authority, audience, purpose, key ID/version, algorithm/canonicalization/digest profile identifiers, payload digest and signature.
+
+The receipt proves only that this exact Storage participant was authoritatively PREPARED and remains private. It does not imply I authorization, COC commit beyond the referenced intent, D clearance, C provider outcome, VisibilityPointer/PublicationReceipt publication or G Applied.
+
+### 14.4 Replay, resolution and recovery
+
+- Same participant + same GID + same attempt generation + same complete tuple/digest is lookup/replay and returns the original evidence.
+- Any changed tuple field under the same participant/attempt/GID is immutable CONFLICT.
+- A new attempt generation is allowed only after an append-only authoritative terminal attempt record and a new COC prepare-intent binding; receipts cannot be carried across attempts.
+- GID cannot be reassigned within the DatabaseIncarnationRef and configured retention/archive horizon. Same GID in another authority or incarnation MUST NOT resolve.
+- StorageResolutionProof binds the same participant, GID, native XID, DB incarnation, attempt, ledger version, operation/request/tuple digests and owner boundary. COMMITTED includes exact VisibilityPointer and PublicationReceipt transaction identities/digests; ROLLED_BACK includes authoritative non-publication proof; UNKNOWN retains the participant and locks.
+- Original prepare timeline/LSN are immutable. Failover/PITR/recovery timeline and LSN are appended as separate RecoveryObservation entries.
+- Absence from `pg_prepared_xacts` is never terminal evidence by itself. Storage reconciles the durable outcome ledger with authoritative database readback. Missing, stale, contradictory or unavailable evidence remains UNKNOWN/IN_DOUBT.
+
+### 14.5 Trust and wire ownership
+
+H owns exact wire spelling, nominal encoding, requiredness, nullability, canonical serialization, schema evolution and interoperability vectors. I owns the signature algorithm/profile, issuer/subject authorization, key lifecycle, revocation, historical verification and anti-rollback policy. Until both approve the same versioned envelope and profile, the fields above are a semantic contract candidate, not a cryptographic or wire freeze.
