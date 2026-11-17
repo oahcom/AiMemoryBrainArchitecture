@@ -1,0 +1,43 @@
+work_item_id: AID-2026-001
+title: Define the ChatGPT-native AI development execution model
+class: ARCH
+risk: R2
+status: PROPOSED
+sponsor: project user
+accountable_owner: A
+implementing_ai_session: current ChatGPT conversation
+independent_reviewer: PENDING — separate ChatGPT conversation required
+integration_reviewer: A
+acceptance_authority: project governance authority
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: b372b62c640a2b656e54b6db62a4ee67d7d8c001
+dependency_refs:
+  - 14-ai-development/ai-development-standard.md
+  - 14-ai-development/iteration-lifecycle.md
+  - 14-ai-development/prompt-and-evidence-template.md
+  - 00-governance/bilingual-documentation-policy.md
+prompt_id: AID-2026-001-PROMPT
+prompt_version: v1
+prompt_sha256: PENDING — calculate after prompt file is finalized
+created_at: 2026-11-17
+updated_at: 2026-11-17
+implementation_branch: design/chatgpt-native-execution-model
+implementation_commits: []
+changed_paths: []
+verification:
+  status: NOT_RUN
+  commit_sha: ""
+  commands: []
+  evidence_refs: []
+review:
+  status: NOT_STARTED
+  report_ref: ""
+  findings: []
+acceptance:
+  status: PENDING
+  record_ref: ""
+merge:
+  target_branch: main
+  merge_commit_sha: ""
+  status: NOT_MERGED
