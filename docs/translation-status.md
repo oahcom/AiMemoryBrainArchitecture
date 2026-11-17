@@ -234,3 +234,12 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 - Targeted semantic parity review: [EN report](../reviews/translation/2026-11-17-h-adapter-capability-applied-bilingual-review.md) / [中文报告](../reviews/translation/2026-11-17-h-adapter-capability-applied-bilingual-review.zh-CN.md) — PASS for this exact Blob only.
 - H source status remains CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I. H conformance NOT RUN; implementation/interoperability NOT VERIFIED; C/G/H freeze BLOCKED.
 - Coverage: 1/7 H detailed core specifications paired. This does not complete H's detailed contract set or the C/G/H freeze.
+
+
+## 12. G Phase 3.6 Applied / Forget / Reconciliation bilingual companion — 2026-11-17
+
+- Exact G source Blob: `aa3afa73d8a76cc6f025839c52bfbff6a983046a` on `session-g-memory-context`.
+- Pair: `docs/en/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` and `docs/zh-CN/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md`.
+- Structural readback: 21/21 headings and 37/37 table rows across source, EN and zh-CN; EN companion contains exact source content.
+- Targeted semantic parity: [EN report](../reviews/translation/2026-11-17-g-phase36-applied-forget-bilingual-review.md) / [中文报告](../reviews/translation/2026-11-17-g-phase36-applied-forget-bilingual-review.zh-CN.md) — PASS for this exact Blob.
+- G source status remains semantic decisions recorded; C/G/H Applied freeze BLOCKED; implementation/execution NOT VERIFIED; G-36-01..15 SPECIFIED / NOT RUN.
