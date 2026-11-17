@@ -15,8 +15,10 @@
 | H 1.2.15 C validator | H branch / `08-bmcp-protocol/validators/provider_outcome_validator_1_2_15.py` | `90a2d4b6f5b05590e3e0a7daecb5a01d9bf525c0` | Local C-object/schema/semantic validator; authority callbacks required |
 | H 1.2.15 gateway validator | H branch / `08-bmcp-protocol/validators/gateway_attestation_validator.py` | `9cc426d4c26deb452f39daff34c1008dd535e969` | Gateway-attested ingress/replay validator; production seams callback-injected |
 | H 1.2.15 gateway tests | H branch / `08-bmcp-protocol/tests/conformance/provider_outcome/test_gateway_attestation_validator.py` | `9a5051b001a6e59d7b71e6dd175e84bb7d01d252` | 21 deterministic unit/fixture tests |
-| H workflow | H branch / `.github/workflows/h-provider-outcome-conformance.yml` | `4459d19f5b4eea058377d9819e48e81eed5c8c4b` | Executes provider-outcome test discovery; path filters still target 1.2.14 |
-| H exact CI | Run `44078755981`, commit `e3e4cab0aab2c68f9db98bd50bc387b1895c3773` | — | SUCCESS; 91 tests total, including 21 H 1.2.15 gateway tests; callback fixtures are deterministic test doubles |
+| H workflow (before fix) | H branch / `.github/workflows/h-provider-outcome-conformance.yml` | `4459d19f5b4eea058377d9819e48e81eed5c8c4b` | Stale 1.2.14-only path filters; superseded |
+| H workflow (corrected) | H branch / `.github/workflows/h-provider-outcome-conformance.yml` | `2ad679952ce5499a16c8fffa0a1543e26460e6eb` | Includes 1.2.15 schema, both validators, envelope validator, test paths and workflow |
+| H exact CI (pre-fix) | Run `44078755981`, commit `e3e4cab0aab2c68f9db98bd50bc387b1895c3773` | — | SUCCESS; 91 tests total, including 21 H 1.2.15 gateway tests |
+| H exact CI (post-fix) | Run `44079842914`, commit `0d36324457e39bd50ad56ae902d477c4ea765b61` | — | SUCCESS; 91 tests total, including 21 H 1.2.15 gateway tests; callback fixtures are deterministic test doubles |
 | C 1.2.15 schema review | `session-c-agent-integration-2026-11-16` / `07-agent-integration/phase-3.8.26-c-exact-review-h-unified-1.2.15-gateway-attestation-schema.md` | `c5ff68814be49ec5e6e2c081004e7fa058d276fa` | Delegated C-role accepts schema shape with conditions |
 | G Applied source | `session-g-memory-context` / `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G-owned semantics; persistence implementation not verified |
 | G exact full-path consumer review | `session-g-memory-context` / `06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md` | `1894860c76336f8739d354b72beed3992cffd17e` | Explicitly pins H 1.2.14 × CSubmitOutcome 1.0.1 |
@@ -32,7 +34,7 @@ H 1.2.15 is an immutable successor candidate for the Unified wire family (wire f
 
 The test fixtures use deterministic callback doubles for protected transport, H/C signature/profile/key status, origin receipt, durable ingress/replay and owner-authority seams. The run is meaningful local candidate validation, but it does not establish production trust roots, real I registry/delegation, live owner ledgers, durable deployed replay storage, provider truth or production ingress.
 
-The workflow file still describes its revision as Unified 1.2.14 and its push path filters name the 1.2.14 schema and old validator, but omit the 1.2.15 schema, both 1.2.15 validators and the gateway test file. The current run did execute the 1.2.15 tests because the workflow ran on the branch head; future changes limited to the omitted 1.2.15 paths may not trigger this workflow. This is a CI wiring P1.
+The stale workflow was corrected on the H branch: its revision description now distinguishes 1.2.14 compatibility from 1.2.15 gateway-attested conformance, and its path filters include the 1.2.15 schema, both 1.2.15 validators, envelope-auth validator, conformance tests and workflow file. The corrected workflow was read back at Blob `2ad679952ce5499a16c8fffa0a1543e26460e6eb`; exact post-fix run `44079842914` on commit `0d36324457e39bd50ad56ae902d477c4ea765b61` completed SUCCESS with 91 tests, including 21 1.2.15 gateway tests. The CI trigger-wiring P1 is closed for these paths.
 
 C's exact review accepts the 1.2.15 **schema shape only**, subject to C-owned semantic conditions, and predates the current validator/CI evidence. C must now review the exact 1.2.15 validator/test/CI pins. Among other conditions, H must authenticate the origin receipt, bind the original Adapter identity to the immutable C object, verify raw-byte digest, verify H and C signatures independently, enforce exact duplicated-field equality, and preserve C UNKNOWN/IN_DOUBT as nonterminal.
 
@@ -76,7 +78,7 @@ This is a **G-owned persistence-contract gap**, not a reason to change C provide
 
 | Priority | Owner | Required next artifact / proof | Gate |
 |---|---|---|---|
-| P1 | H | Obtain C's exact review of validator/test/CI pins; correct workflow revision and path filters to include 1.2.15 schema, validators and tests; replace callback doubles with production-authority integration evidence before production claims | H 1.2.15 remains candidate; local test pass is not production conformance |
+| P1 | H | Obtain C's exact review of validator/test/CI pins; replace callback doubles with production-authority integration evidence before production claims | Workflow path wiring is corrected; H 1.2.15 remains candidate; local test pass is not production conformance |
 | P1 | G | G Applied persistence/idempotency addendum defining durable key, uniqueness scope, exact C/H/COC crosswalk, same-digest replay, changed-digest conflict, supersession, crash recovery and restore fencing | No G persistence PASS before implementation/evidence |
 | P1 | G + C + H | Exact 1.2.15 consumer matrix: each owner accepts the same immutable schema/mapping/validator/fixture/CI set; no predecessor-pin inheritance | No 1.2.15 full-path acceptance until exact decisions |
 | P2 | C/H/G | Preserve distinct typed identifiers for ProviderIdempotencyKeyRef, H envelope/evidence identity, CSubmitOutcome identity and G Applied record identity; specify only the necessary equality/correlation edges | No cross-layer identity collapse |
