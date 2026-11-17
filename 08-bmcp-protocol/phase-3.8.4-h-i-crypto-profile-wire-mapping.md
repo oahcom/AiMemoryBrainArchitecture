@@ -3,9 +3,9 @@
 
 - Owner: H — BMCP Protocol and Adapter Authentication
 - Exact I proposal: `AIMBA-I-CRYPTO-1.0`, Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`
-- Exact H schema: `bmcp.coc-jf10-unified/1.2.8`, Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`
+- Exact H schema: `bmcp.coc-jf10-unified/1.2.11`, Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`
 - Exact H RecoveryJoin schema 1.0.1: Blob `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`
-- On-wire family version: `schema_artifact_revision = 1.2.11` and `schema_version = 1.3.0` (unchanged)
+- Exact signed schema artifact revision: `schema_artifact_revision = 1.2.11`; on-wire family version: `schema_version = 1.3.0`
 - H decision: **ACCEPT AS WIRE-MAPPING CANDIDATE WITH BLOCKING AMENDMENTS**
 - Status: **NOT FROZEN / NOT INTEROPERABILITY-VERIFIED / NOT IMPLEMENTED**
 - Provenance: delegated H-role simulation at the user's direction; not an independent human H Owner signature.
@@ -13,7 +13,7 @@
 
 ## 1. H disposition / H 决议
 
-H accepts the I proposal as a candidate cryptographic input and accepts schema artifact 1.2.11 as an additive envelope revision. H does not approve I's algorithm choice, trust roots, key custody, key lifecycle, historical trust or anti-rollback policy. Those remain I/governance decisions.
+H accepts the I proposal as a candidate cryptographic input and accepts schema artifact 1.2.11 as a breaking wire-family revision: the exact artifact revision is now a required signed common-envelope field and the wire version advances to 1.3.0. H does not approve I's algorithm choice, trust roots, key custody, key lifecycle, historical trust or anti-rollback policy. Those remain I/governance decisions.
 
 H accepts the following exact identifiers for the proposed I mapping only:
 
@@ -26,11 +26,11 @@ H accepts the following exact identifiers for the proposed I mapping only:
 | Signature encoding | Base64url without padding |
 | JSON canonicalization | RFC 8785 JCS constrained by RFC 7493 I-JSON |
 
-H 将 I 提案接受为候选密码学输入，并接受 Schema Artifact 1.2.11 作为可向后兼容的 Envelope 增量修订。H 不批准 I 的算法选择、Trust Root、Key Custody、Key Lifecycle、历史信任或 Anti-rollback 策略；这些仍由 I/治理决策。
+H 将 I 提案接受为候选密码学输入，并接受 Schema Artifact 1.2.11 作为破坏性 Wire Family 修订：精确 Artifact Revision 成为必填且参与签名的 Common Envelope 字段，Wire Version 升级至 1.3.0。H 不批准 I 的算法选择、Trust Root、Key Custody、Key Lifecycle、历史信任或 Anti-rollback 策略；这些仍由 I/治理决策。
 
 ## 2. Schema 1.2.11 exact change / Schema 1.2.11 精确变更
 
-Artifact 1.2.8 adds optional `signature_profile_id` to `$defs.commonEnvelope` and optional `owner_snapshot_attestation_digest` to `$defs.ownerSnapshot`. It deliberately keeps the on-wire family `schema_artifact_revision=1.2.11` and `schema_version=1.3.0` unchanged and leaves the new field optional at structural-schema level for compatibility with older message producers.
+Artifact 1.2.8 introduced optional `signature_profile_id` in `$defs.commonEnvelope` and the owner snapshot attestation digest. Artifact 1.2.11 retains those fields, makes the snapshot attestation digest mandatory, adds required `schema_artifact_revision=1.2.11`, and advances the wire family to `schema_version=1.3.0`. The new artifact-revision field is structurally required and is included in the I P0 projection for unified-schema messages.
 
 For protected I-signed records, the semantic validator MUST require all of:
 - `canonicalization_profile_id = RFC8785-JCS-1.0`;
@@ -41,11 +41,11 @@ For protected I-signed records, the semantic validator MUST require all of:
 
 Missing `signature_profile_id` is a semantic rejection for a protected I-signed record, even though the additive structural schema can parse a legacy envelope. No downgrade or fallback is permitted.
 
-Artifact 1.2.8 also corrects the stale common-envelope description that referred to artifact revision 1.2.5. The `$id` and title now consistently identify artifact revision 1.2.8. Artifact revision and on-wire family version remain distinct.
+Artifact 1.2.11 makes artifact and wire versions independently explicit and signed. The `$id`, `schema_artifact_revision` and `schema_version` must agree with the exact resolved artifact and protocol family; mismatch or downgrade is rejected.
 
-Artifact 1.2.8 在 `$defs.commonEnvelope` 增加可选 `signature_profile_id`。为兼容旧消息生产方，Wire Family `schema_artifact_revision=1.2.11` and `schema_version=1.3.0` 保持不变，结构层暂不强制新字段。
+Artifact 1.2.8 曾在 `$defs.commonEnvelope` 增加可选 `signature_profile_id` 与 Owner Snapshot Attestation Digest。Artifact 1.2.11 保留这些字段，将 Snapshot Attestation Digest 设为必填，新增必填 `schema_artifact_revision=1.2.11`，并将 Wire Family 升级为 `schema_version=1.3.0`。新 Artifact Revision 字段在结构层强制要求，并纳入 Unified Schema 消息的 I P0 Projection。
 
-但所有受保护的 I 签名记录，Semantic Validator 必须强制要求上述四个精确配置值、Key ID/Version、消息专属 Projection 以及 I Owner Authority。结构 Schema 能解析旧 Envelope，不代表 I 安全语义接受旧 Envelope；缺失 Profile ID 必须拒绝，不得降级。Artifact 1.2.8 同时修正 commonEnvelope 描述中错误引用 1.2.5 的问题。Artifact Revision 与 Wire Family Version 仍是不同概念。
+但所有受保护的 I 签名记录，Semantic Validator 必须强制要求上述四个精确配置值、Key ID/Version、消息专属 Projection 以及 I Owner Authority。结构 Schema 能解析旧 Envelope，不代表 I 安全语义接受旧 Envelope；缺失 Profile ID 必须拒绝，不得降级。Artifact 1.2.11 将 Artifact Version 与 Wire Version 分别显式化并纳入签名。`$id`、`schema_artifact_revision` 与 `schema_version` 必须与解析到的精确工件及协议族一致；不一致或降级必须拒绝。
 
 ## 2.1 Exact artifact and wire version binding / Artifact 与 Wire Version 精确绑定
 
@@ -115,7 +115,7 @@ For the snapshot reference, H must not treat the nested `ownerSnapshot` JSON obj
 
 ### 4.1 Owner snapshot attestation binding / Owner Snapshot Attestation 绑定
 
-Schema 1.2.11 adds `owner_snapshot_attestation_digest`. H semantic validation must dereference `owner_snapshot_attestation_ref`, verify the I signature, recompute the referenced immutable object's SHA-256 digest and compare it to this field, then compare owner, gate/scope generation, request/admission high-waters, counts, roots, inventory epoch and anti-rollback anchor to the COC-embedded `ownerSnapshot`. Missing digest, mutable locator, mismatch or unavailable object returns UNKNOWN/INVALID and keeps the recovery gate closed.
+Schema 1.2.8 introduced `owner_snapshot_attestation_digest`; schema 1.2.11 makes it required. H semantic validation must dereference `owner_snapshot_attestation_ref`, verify the I signature, recompute the referenced immutable object's SHA-256 digest and compare it to this field, then compare owner, gate/scope generation, request/admission high-waters, counts, roots, inventory epoch and anti-rollback anchor to the COC-embedded `ownerSnapshot`. Missing digest, mutable locator, mismatch or unavailable object returns UNKNOWN/INVALID and keeps the recovery gate closed.
 
 ### 4.2 COMPLETE_EMPTY and OUT_OF_SCOPE proof schemas / 空集合与范围外证明 Schema
 
