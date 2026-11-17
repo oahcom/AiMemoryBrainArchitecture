@@ -11,7 +11,7 @@
 | P0-02 | Close domain identity, Fact/Claim, evidence and temporal semantics | B; consumers accept | Approved B ADR; exact Blob; typed cases; consumer adoption | G2/G3 |
 | P0-03 | Close I security governance, trust, revocation and closed-world inventory | I + external authorities | Signed I36-GOV-01..10 decisions; InventorySealReceipt; target/backup/recipient enumeration | G2/G4 |
 | P0-04 | Close D/E/I/Storage admission, lineage, Forget fence and visibility composition | D/E/I/Storage | Exact Owner decisions; both race orders; crash/ACK-loss/stale lease; hidden-on-UNKNOWN | G3/G4 |
-| P0-05 | Complete L4 physical DB/COC/JF-10 proof for the selected L1 Option A logical profile | Storage + A/COC + I/D | Gate A complete; Gate B persistent COC; Gate C fault campaign; same-XID proof | JF-10 A/B/C |
+| P0-05 | Close Option A A-01..A-05 L1/L2 clarifications and exact D adoption, then complete L3/L4 physical proof | Storage + A/COC + I/D | Gate A complete; Gate B persistent COC; Gate C fault campaign; same-XID proof | JF-10 A/B/C |
 | P0-06 | Close C/G/H final-request, provider outcome and Applied contract | C/G/H + I/D consumers | Exact contract approvals; provider close-vs-send; same idempotency key; negative conformance | G2/G4 |
 | P0-07 | Bounded durable ingress → canonical commit/cursor vertical slice | E/D/Storage; engineering lead | Durable ACK, outbox, idempotent replay, canonical cursor atomicity, recovery proof; only after P0-02..05 | implementation entry |
 | P0-08 | Safe structured/lexical retrieval and Forget-safe index/cache rebuild | F + D/I/Storage | Permission/fence before ranking; stale projection suppression; rebuild/restore proof | implementation verification |
