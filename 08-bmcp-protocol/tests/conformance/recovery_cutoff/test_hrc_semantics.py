@@ -74,7 +74,7 @@ def participant(ref="COC/P1", owner="C", admission_ref="C/admit/1",
         "operation_digest": "b" * 64, "participant_digest": digest,
         "term": 1, "index": position, "entry_digest": "c" * 64,
         "required_owner_evidence": list(required),
-        "owner_evidence": {"C": "C/admit/1", "I": "I/receipt/1", "D": "D/barrier/1"},
+        "owner_evidence": {"C": ["C/admit/1"], "I": ["I/receipt/1"], "D": ["D/barrier/1"]},
     }
 
 
@@ -84,6 +84,7 @@ def manifest(entries=None, complete=True, quorum=True, prefix=(1, 10, "d" * 64))
         "manifest_id": "manifest/1", "recovery_epoch": "epoch/1",
         "prefix": {"term": prefix[0], "index": prefix[1], "root": prefix[2]},
         "entries": deepcopy(entries), "count": len(entries),
+        "authoritative_prefix_entries": deepcopy(entries),
         "root": test_digest(entries, "participant-set"),
         "enumeration_complete": complete, "quorum_read": quorum,
         "cursor_complete": complete, "signature_valid": True,
@@ -192,6 +193,11 @@ def validate_manifest(m):
             return INVALID
     if m.get("root") != test_digest(entries, "participant-set"):
         return INVALID
+    authoritative = m.get("authoritative_prefix_entries")
+    if authoritative is None:
+        return UNKNOWN
+    if {e.get("participant_intent_ref") for e in authoritative} != set(refs):
+        return INVALID
     return VALID
 
 
@@ -233,7 +239,7 @@ def validate_join(admissions_by_owner, m):
                 return INVALID
             seen_admissions.add(ref)
             if a.get("status") == "NOT_REGISTERED":
-                if any(k in a for k in ("participant_intent_ref", "participant_digest", "participant_position")):
+                if any(k in a for k in ("participant_intent_ref", "participant_entry_digest", "participant_position")):
                     return INVALID
                 if a.get("protected_effect_occurred") or not a.get("no_effect_or_pending_proof"):
                     return UNKNOWN
@@ -243,12 +249,16 @@ def validate_join(admissions_by_owner, m):
             p = entries.get(a.get("participant_intent_ref"))
             if p is None:
                 return INVALID
-            if (p.get("owner_admission_ref") != ref or
-                p.get("participant_digest") != a.get("participant_digest") or
+            if (p.get("participant_digest") != a.get("participant_entry_digest") or
                 p.get("index") != a.get("participant_position") or
                 p.get("operation_id") != a.get("operation_id") or
-                p.get("operation_digest") != a.get("operation_digest") or
-                p.get("owner_kind") != owner):
+                p.get("operation_digest") != a.get("operation_digest")):
+                return INVALID
+            # C admission is the primary manifest anchor; I/D evidence may be many-to-one.
+            if owner == "C" and p.get("owner_admission_ref") != ref:
+                return INVALID
+            refs = p.get("owner_evidence", {}).get(owner, [])
+            if ref not in refs:
                 return INVALID
     # COC ParticipantManifest -> accountable owner evidence direction.
     for p in m["entries"]:
@@ -259,8 +269,13 @@ def validate_join(admissions_by_owner, m):
         if owner_entry is None or owner_entry.get("status") != "REGISTERED":
             return UNKNOWN
         for required in p.get("required_owner_evidence", []):
-            if required not in p.get("owner_evidence", {}):
+            refs = p.get("owner_evidence", {}).get(required, [])
+            if not refs:
                 return UNKNOWN
+            if required in admissions_by_owner:
+                known = {a.get("owner_entry_ref") for a in admissions_by_owner[required]}
+                if any(ref not in known for ref in refs):
+                    return UNKNOWN
     return VALID
 
 
@@ -397,7 +412,7 @@ class HRCConformance(unittest.TestCase):
     # HRC-14: a manifest participant without accountable owner evidence blocks as UNKNOWN.
     def test_HRC_14(self):
         p = participant(required=["C", "I", "D"])
-        p["owner_evidence"] = {"C": "C/admit/1"}
+        p["owner_evidence"] = {"C": ["C/admit/1"]}
         m = manifest([p])
         a = admission("C/admit/1", "C")
         self.assertEqual(validate_join({"C": [a]}, m), UNKNOWN)
