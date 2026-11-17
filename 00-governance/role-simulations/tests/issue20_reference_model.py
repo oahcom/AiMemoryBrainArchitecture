@@ -221,3 +221,101 @@ class RestoreGate:
             raise ProtocolError("restore proof conjunction incomplete/stale")
         self.state = "SERVING"
         return self.state
+
+
+@dataclass
+class OwnerSnapshot:
+    """Membership and complete-enumeration are deliberately separate proofs."""
+    owner: str
+    generation: int
+    high_water: str
+    rows: list
+    pagination_complete: bool = False
+    attested: bool = False
+    anti_rollback: bool = False
+    complete_empty_proof: bool = False
+    sealed: bool = False
+
+    @staticmethod
+    def ordered_root(rows):
+        import hashlib
+        payload = "\\n".join(rows).encode("utf-8")
+        return "sha256:" + hashlib.sha256(payload).hexdigest()
+
+    def proves_membership(self, row, generation):
+        return generation == self.generation and row in self.rows
+
+    def seal_complete(self, declared_count, declared_root):
+        if not self.pagination_complete or not self.attested or not self.anti_rollback:
+            raise ProtocolError("snapshot completeness evidence missing")
+        if declared_count != len(self.rows):
+            raise ProtocolError("snapshot count mismatch")
+        if declared_root != self.ordered_root(self.rows):
+            raise ProtocolError("snapshot ordered root mismatch")
+        if not self.rows and not self.complete_empty_proof:
+            raise ProtocolError("empty set requires signed COMPLETE_EMPTY proof")
+        self.sealed = True
+        return {"owner": self.owner, "generation": self.generation,
+                "high_water": self.high_water, "count": declared_count,
+                "root": declared_root}
+
+    def discover_late_row(self, row):
+        if row not in self.rows:
+            self.rows.append(row)
+            self.sealed = False
+
+
+@dataclass
+class RecoveryManifest:
+    """Two disjoint evidence domains; never invent a cross-owner scalar order."""
+    cutoff: dict | None = None
+    reconciliation: dict | None = None
+
+    def commit_cutoff(self, batch_ref, batch_digest, coc_prefix, owner_high_waters):
+        candidate = {"batch_ref": batch_ref, "batch_digest": batch_digest,
+                     "coc_prefix": coc_prefix,
+                     "owner_high_waters": dict(owner_high_waters)}
+        if self.cutoff and self.cutoff != candidate:
+            raise ProtocolError("recovery cutoff pair is immutable")
+        self.cutoff = candidate
+        return self.cutoff
+
+    def reconcile(self, coc_participants, owner_admissions):
+        if not self.cutoff:
+            raise ProtocolError("cutoff batch must commit before reconciliation")
+        if self.reconciliation:
+            candidate_digest = (tuple(coc_participants), tuple(owner_admissions))
+            if self.reconciliation["inputs"] != candidate_digest:
+                raise ProtocolError("recovery must resume the same manifest pair")
+            return self.reconciliation
+        prefix = self.cutoff["coc_prefix"]
+        for item in coc_participants:
+            if item["coc_position"] > prefix:
+                raise ProtocolError("COC participant beyond frozen prefix")
+        hwm = self.cutoff["owner_high_waters"]
+        for item in owner_admissions:
+            if item["owner"] not in hwm:
+                raise ProtocolError("owner admission without owner-local cutoff")
+            if item["owner_position"] > hwm[item["owner"]]:
+                raise ProtocolError("owner admission beyond owner-local HWM")
+        identities = [("COC", x["participant_ref"]) for x in coc_participants]
+        identities += [(x["owner"], x["admission_ref"]) for x in owner_admissions]
+        if len(identities) != len(set(identities)):
+            raise ProtocolError("duplicate typed manifest member")
+        import hashlib, json
+        inputs = (tuple(coc_participants), tuple(owner_admissions))
+        member_root = hashlib.sha256(
+            json.dumps(identities, sort_keys=True).encode()).hexdigest()
+        content_digest = hashlib.sha256(
+            json.dumps(inputs, sort_keys=True).encode()).hexdigest()
+        self.reconciliation = {
+            "inputs": inputs,
+            "member_set_root": member_root,
+            "manifest_content_digest": content_digest,
+            "manifest_record_entry_digest": hashlib.sha256(
+                (content_digest + ":record").encode()).hexdigest(),
+            "batch_digest": self.cutoff["batch_digest"],
+            "batch_entry_digest": hashlib.sha256(
+                (self.cutoff["batch_digest"] + ":entry").encode()).hexdigest()
+        }
+        return self.reconciliation
