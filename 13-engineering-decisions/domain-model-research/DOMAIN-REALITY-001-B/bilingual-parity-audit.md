@@ -327,3 +327,30 @@ After §8 was written, the currentness audit was amended to name B-CONFLICT-017 
 README was updated after §8.3 to point at the final currentness-audit Blob and to avoid hard-coding this audit's own self Blob. The resulting README exact Blob is `ad412b941fc7d3e656cdc1262686f64f0c428964` (264 lines). The final currentness-audit Blob remains `8641268f6cb93e8154ae1693ace37cc72498a4b8` (382 lines). This section supersedes the earlier README Blob `932a1affb2d4dee9181e8f7b3688eddff3cb4d2d`.
 
 README 在 §8.3 后再次更新，改为引用最终当前性审计 Blob，并避免在 README 中硬编码本审计文件自身的 Blob。最终 README 精确 Blob 为 `ad412b941fc7d3e656cdc1262686f64f0c428964`（264 行）。最终当前性审计 Blob 仍为 `8641268f6cb93e8154ae1693ace37cc72498a4b8`（382 行）。本节取代此前 README Blob `932a1affb2d4dee9181e8f7b3688eddff3cb4d2d`。
+
+
+### 8.5 Storage v3.3.2 closure refresh / Storage v3.3.2 关闭状态刷新
+
+Following the exact Storage v3.3.2 manifest and A Phase 3.12.2 re-review, three B package files were refreshed and re-read. The updated exact pins are:
+
+在读取精确 Storage v3.3.2 Manifest 与 A Phase 3.12.2 复审后，B 研究包中三份文件已刷新并重新读回。更新后的精确 Pin：
+
+| File / 文件 | Exact Blob SHA / 精确 Blob SHA | Lines / 行数 |
+|---|---|---:|
+| README.md | `00170eb8c3477e02e3844c568bb8bb2613b25ced` | 289 |
+| baseline-currentness-and-owner-source-audit.md | `92b3f6d1b0c6236f245195337129f1d69a5bd499` | 425 |
+| cross-owner-canonical-semantics-matrix.md | `ebb59e57259cd9bae5522004e3b493a70285915b` | 246 |
+| domain-semantics-conflict-register.md | `01cf84cf81ca009024e29b5355cd993342f0fd78` | 113 |
+| bilingual-parity-audit.md | `c2af6c6e1b7bb7623d3017638df545f4624bf124` (pre-update self Blob) | 330 |
+
+New external Owner-source pins recorded in the B currentness audit:
+- Storage v3.3.2 manifest: `5c614375e10698e4931d83deb57d20321445e068`.
+- A Phase 3.12.2 exact re-review: `eb3c946065aff4fbc6d76f384402fb9f75fa32dc`.
+
+B 当前性审计中新增记录的外部 Owner 来源 Pin：
+- Storage v3.3.2 Manifest：`5c614375e10698e4931d83deb57d20321445e068`。
+- A Phase 3.12.2 精确复审：`eb3c946065aff4fbc6d76f384402fb9f75fa32dc`。
+
+B-CONFLICT-017 is now CLOSED at manifest-consistency level only. The author-side English/Chinese status mirror has been updated; independent clause-by-clause bilingual semantic review remains pending. B5 remains BLOCKED / NOT PASSED and B6 remains INDEPENDENT_REVIEW_PENDING.
+
+B-CONFLICT-017 现仅在 Manifest 一致性层面 CLOSED。作者侧中英文状态对照已更新；独立逐条双语语义审查仍待完成。B5 仍 BLOCKED / NOT PASSED，B6 仍 INDEPENDENT_REVIEW_PENDING。
