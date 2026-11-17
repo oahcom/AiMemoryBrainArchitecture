@@ -174,6 +174,28 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         self.assertEqual(result["status"], "VALID")
         self.assertTrue(result["outer_envelope_authenticated"])
 
+    def test_15_replay_reservation_is_not_attempted_before_authentication(self):
+        from unittest.mock import Mock
+
+        checks = self.checks()
+        replay = Mock(return_value=ReplayCheck(ReplayDecision.NEW))
+        checks.verify_envelope_integrity = lambda raw, env, ctx: False
+        checks.check_and_reserve_replay = replay
+        result = authenticate_outer_envelope(self.raw(), self.context, checks)
+        self.assertEqual(result["status"], "INVALID", result)
+        replay.assert_not_called()
+
+    def test_16_replay_reservation_is_not_attempted_when_key_status_is_unknown(self):
+        from unittest.mock import Mock
+
+        checks = self.checks()
+        replay = Mock(return_value=ReplayCheck(ReplayDecision.NEW))
+        checks.verify_key_status = lambda env, ctx: None
+        checks.check_and_reserve_replay = replay
+        result = authenticate_outer_envelope(self.raw(), self.context, checks)
+        self.assertEqual(result["status"], "UNKNOWN", result)
+        replay.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
