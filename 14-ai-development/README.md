@@ -12,7 +12,8 @@ This directory defines how all AI developers work on AiMemoryBrainArchitecture. 
 3. [AI Work Item and Prompt Record Template](prompt-and-evidence-template.md) — immutable prompt versions, task manifest and evidence bundle.
 4. [ChatGPT-Native Execution Model — English](chatgpt-native-execution-model.en.md) / [中文](chatgpt-native-execution-model.zh-CN.md) — proposed execution boundary using ordinary ChatGPT conversations.
 5. [Global ChatGPT Session Contract](prompts/global/chatgpt-session-contract-v1.md) — shared constraints inherited by all Owner conversations.
-6. [Owner Prompt Directory](prompts/owners/README.md) — A–I role-specific session prompts.
+6. [Independent Reviewer Session Prompt](prompts/global/independent-reviewer-session-v1.md) — reusable fresh-context review instructions.
+7. [Owner Prompt Directory](prompts/owners/README.md) — A–I role-specific session prompts.
 
 ## Required usage
 
