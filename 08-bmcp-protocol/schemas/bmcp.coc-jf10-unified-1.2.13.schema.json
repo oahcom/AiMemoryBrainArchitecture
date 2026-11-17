@@ -2186,7 +2186,7 @@
         },
         "schema_artifact_revision": {
           "const": "1.2.13",
-          "description": "Exact JSON Schema artifact revision 1.2.12; included in protected owner signature projections and distinct from wire schema_version 1.3.0."
+          "description": "Exact JSON Schema artifact revision 1.2.13; included in protected owner signature projections and distinct from wire schema_version 1.3.0."
         }
       },
       "required": [
