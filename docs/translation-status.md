@@ -20,8 +20,11 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Shared glossary | docs/glossary/architecture-glossary.md | Bilingual | Bilingual | COMPLETE |
 | System overview | 01-system-architecture/system-overview.md | docs/zh-CN/01-system-architecture/system-overview.md | docs/en/01-system-architecture/system-overview.md | COMPLETE |
 | Technology overview | 13-engineering-decisions/technology-architecture-blueprint.md + TAR-AI-001 | docs/zh-CN/13-engineering-decisions/technology-architecture-overview.md | docs/en/13-engineering-decisions/technology-architecture-overview.md | COMPLETE — overview only |
-| Governance principles and invariants | 00-governance/ | Pending | Existing English sources | NOT STARTED |
-| System component map and responsibility matrix | 01-system-architecture/ | Pending | Existing English sources | NOT STARTED |
+| Bilingual documentation policy | 00-governance/bilingual-documentation-policy.md | Embedded bilingual normative policy | Embedded bilingual normative policy | COMPLETE |
+| Architecture invariants | 00-governance/architecture-invariants.md | docs/zh-CN/00-governance/architecture-invariants.md | docs/en/00-governance/architecture-invariants.md | COMPLETE |
+| Canonical terminology | 00-governance/terminology.md | docs/zh-CN/00-governance/terminology.md | docs/en/00-governance/terminology.md | COMPLETE |
+| System component map | 01-system-architecture/component-map.md | docs/zh-CN/01-system-architecture/component-map.md | docs/en/01-system-architecture/component-map.md | COMPLETE |
+| Subsystem responsibility matrix | 01-system-architecture/responsibility-matrix.md | docs/zh-CN/01-system-architecture/responsibility-matrix.md | docs/en/01-system-architecture/responsibility-matrix.md | COMPLETE |
 | Domain Model (B) | 02-domain-model/ | Pending | Existing English sources | NOT STARTED |
 | Canonical Memory Brain (D) | 03-memory-brain/ | Pending | Existing English sources | NOT STARTED |
 | Memory Compiler (E) | 04-memory-compiler/ | Pending | Existing English sources | NOT STARTED |
@@ -44,6 +47,8 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 - Status: COMPLETE.
 
 ### Batch 2 — Governance and system map / 第二批：治理基线与系统地图
+- Status: COMPLETE.
+- GOV-DOC-001 adopted in the proposed governance change set; effective as a repository requirement upon merge into the approved main baseline.
 - Architecture principles, invariants, terminology source reconciliation.
 - Component map, responsibility matrix, system workflows.
 - Deliverables: paired Chinese/English documents and cross-links.
@@ -101,4 +106,4 @@ A document is not bilingual-complete merely because it has been translated. Each
 
 ## 6. Current limitation / 当前限制
 
-The first batch is an orientation layer, not a full translation of all subsystem specifications. The root-level owner documents remain the detailed source specifications until their paired bilingual versions are completed and reviewed.
+Batches 1 and 2 provide the orientation, shared language, governance invariants, component map, and responsibility matrix. This is still not a full translation of all subsystem specifications. Root-level Owner documents remain the detailed source specifications until their paired bilingual versions are completed and reviewed. The mandatory bilingual policy is proposed in this change set and becomes effective as an approved governance baseline when merged.
