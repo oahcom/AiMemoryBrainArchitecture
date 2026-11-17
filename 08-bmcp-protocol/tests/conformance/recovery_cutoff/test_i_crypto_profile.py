@@ -1,7 +1,8 @@
-"""Independent Python RFC 8785 + Ed25519 candidate verifier.
+"""Independent Python RFC 8785 + Ed25519 candidate verifier for all I P0 families.
 
 The deterministic private seed in the vector is TEST-ONLY. Never reuse it outside tests.
 """
+import base64
 import hashlib
 import json
 import shutil
@@ -18,55 +19,57 @@ VECTOR = ROOT / "i_crypto_profile_vector.json"
 NODE_ORACLE = ROOT / "i_crypto_profile_reference.mjs"
 
 
-def payload_and_signature(p0, seed):
+def payload_and_signature(vector, seed):
+    p0 = vector["p0"]
+    message_type = vector["message_type"]
+    digest_field = vector["digest_field"]
     p0_bytes = rfc8785.dumps(p0)
-    payload_digest = hashlib.sha256(
-        b"AIMBA-I-PAYLOAD-v1\0" + p0_bytes
-    ).hexdigest()
+    digest = hashlib.sha256(b"AIMBA-I-PAYLOAD-v1\0" + p0_bytes).hexdigest()
     signed_projection = dict(p0)
-    signed_projection["payload_digest"] = payload_digest
+    signed_projection[digest_field] = digest
     signed_bytes = rfc8785.dumps(signed_projection)
     preimage = (
         b"AIMBA-I-SIGNATURE-v1\0"
         + b"AIMBA-I-CRYPTO-1.0\0"
-        + p0["message_type"].encode("ascii")
+        + message_type.encode("ascii")
         + b"\0"
         + signed_bytes
     )
     private_key = Ed25519PrivateKey.from_private_bytes(seed)
     signature = private_key.sign(preimage)
-    public_key = private_key.public_key()
-    public_raw = public_key.public_bytes(
+    public_raw = private_key.public_key().public_bytes(
         serialization.Encoding.Raw, serialization.PublicFormat.Raw
     )
-    public_key.verify(signature, preimage)
+    private_key.public_key().verify(signature, preimage)
     return {
+        "id": vector["id"],
         "p0_canonical_utf8": p0_bytes.decode("utf-8"),
-        "payload_digest": payload_digest,
+        "digest": digest,
         "signed_projection_canonical_utf8": signed_bytes.decode("utf-8"),
         "signature_preimage_hex": preimage.hex(),
         "public_key_hex": public_raw.hex(),
-        "signature_base64url": __import__("base64").urlsafe_b64encode(signature).decode("ascii").rstrip("="),
+        "signature_base64url": base64.urlsafe_b64encode(signature).decode("ascii").rstrip("="),
     }
 
 
 class IProfileCrossLanguageVectors(unittest.TestCase):
-    def test_CRYPTO_01_python_rfc8785_and_ed25519_match_node_independent_oracle(self):
+    def test_CRYPTO_01_all_i_p0_families_match_node_rfc8785_and_ed25519(self):
         node = shutil.which("node")
         self.assertIsNotNone(node, "Node.js 22 is required")
         vector = json.loads(VECTOR.read_text(encoding="utf-8"))
         seed = bytes.fromhex(vector["seed_hex"])
-        python_result = payload_and_signature(vector["p0"], seed)
+        python_results = [payload_and_signature(v, seed) for v in vector["vectors"]]
         proc = subprocess.run(
-            [node, str(NODE_ORACLE)],
-            cwd=ROOT,
-            check=True,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
+            [node, str(NODE_ORACLE)], cwd=ROOT, check=True,
+            capture_output=True, text=True, encoding="utf-8"
         )
-        node_result = json.loads(proc.stdout)
-        self.assertEqual(python_result, node_result)
+        self.assertEqual(python_results, json.loads(proc.stdout))
+        self.assertEqual(
+            {v["message_type"] for v in vector["vectors"]},
+            {"OWNER_LOCAL_PENDING_GATE", "OWNER_LOCAL_GATE_RELEASE",
+             "JF10_I_TERMINAL_DECISION_OBSERVED", "I_COMPLETE_EMPTY_PROOF",
+             "I_OUT_OF_SCOPE_PROOF"}
+        )
 
     def test_CRYPTO_02_jcs_object_order_is_irrelevant_but_array_order_is_not(self):
         left = {"z": 1, "a": [1, 2], "é": "café"}
@@ -76,9 +79,10 @@ class IProfileCrossLanguageVectors(unittest.TestCase):
         self.assertNotEqual(rfc8785.dumps(left), rfc8785.dumps(changed_array))
 
     def test_CRYPTO_03_unicode_is_not_implicitly_normalized(self):
-        composed = {"value": "\u00e9"}
-        decomposed = {"value": "e\u0301"}
-        self.assertNotEqual(rfc8785.dumps(composed), rfc8785.dumps(decomposed))
+        self.assertNotEqual(
+            rfc8785.dumps({"value": "\u00e9"}),
+            rfc8785.dumps({"value": "e\u0301"})
+        )
 
     def test_CRYPTO_04_non_finite_number_is_rejected(self):
         with self.assertRaises(Exception):
