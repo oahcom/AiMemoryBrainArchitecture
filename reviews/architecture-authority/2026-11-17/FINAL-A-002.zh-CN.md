@@ -57,7 +57,7 @@ P0-01 实现仓库/责任人 → P0-02 B 领域语义及 P0-03 I 治理/Inventor
 
 | ID | Owner | 关闭期限 | 风险接受 |
 |---|---|---|---|
-| AR-01 物理拓扑 | Storage + D + I | 最终 Visibility 实现/JF-10 Gate A 完成前 | 不接受；阻塞 |
+| AR-01 已选 Option A 的 L4 物理实现 | Storage + D + I | 最终 Visibility 实现/JF-10 Gate A 完成前 | 不接受；阻塞 |
 | AR-02 领域语义 | B | 依赖 Schema Freeze 前 | 不接受；阻塞 |
 | AR-03 Forget/Inventory | I + D + Storage；所有消费者 | Forget/Restore 安全 Gate 前 | 不接受；阻塞 |
 | AR-04 Applied/Provider | C/G/H + I/D | Applied 实现/验收前 | 不接受；阻塞 |
