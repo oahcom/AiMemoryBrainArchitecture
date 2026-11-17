@@ -3,7 +3,7 @@
 - Owner perspective: H — BMCP Protocol Architect
 - Status: **PROPOSED H WIRE CONTRACT — EXACT-VERSION H / I / A REVIEW REQUIRED**
 - Project phase: ARCHITECTURE DESIGN; NOT IMPLEMENTED / NOT INTEROPERABILITY-VERIFIED
-- Schema companion: `schemas/bmcp.recovery-cutoff-1.0.1.schema.json`
+- Schema companion: `schemas/bmcp.recovery-cutoff-1.0.2.schema.json`
 
 ## 0. Exact normative source bundle
 
@@ -20,7 +20,7 @@ The H schema is a candidate mapping of the exact A §§11–12 recovery semantic
 
 ## 1. Message families
 
-The current schema candidate is **1.0.1**. It supersedes the first 1.0.0 draft because the first draft combined owner request and admission sets under one root and represented the COC participant manifest as a bare ref list. Version 1.0.1 separates request and admission enumerations and gives every COC participant a typed entry with operation identity, digest and prefix coordinates. The 1.0.0 file is retained as historical drafting evidence, not the current review target.\n\nThe schema defines six strict message families:
+The current schema candidate is **1.0.2**. It supersedes 1.0.0 and 1.0.1 drafts. Version 1.0.1 separated request and admission enumerations and typed the COC participant manifest; self-review then found that the generic owner member still used the misleading field name `admission_ref` for request-ledger entries. Version 1.0.2 replaces it with `owner_entry_ref`, requires `owner_entry_kind=REQUEST` for request members, prohibits REQUEST-kind entries in admission members, and includes STORAGE as an explicit participant owner kind. Earlier files remain immutable drafting history, not current review targets.\n\nThe schema defines six strict message families:
 
 1. `OWNER_ADMISSION_SNAPSHOT_ATTESTATION` — I/D/C owner-local request/admission snapshot, including explicit complete-empty state.
 2. `COC_PARTICIPANT_MANIFEST` — exact enumeration of ParticipantIntentRefs in a quorum-confirmed COC prefix.
@@ -119,4 +119,21 @@ The 1.0.1 candidate corrects this by:
 
 The JSON Schema remains structural. Count-to-array equality, canonical ordering, root calculation, cryptographic signature verification, prefix completeness, cross-owner joins and final owner-local CAS currentness require executable semantic validators and positive/negative interoperability fixtures.
 
-**Current H review target:** `schemas/bmcp.recovery-cutoff-1.0.1.schema.json`. Schema 1.0.0 is superseded for new review.
+**Current H review target:** `schemas/bmcp.recovery-cutoff-1.0.2.schema.json`. Schemas 1.0.0 and 1.0.1 are superseded for new review.
+
+
+## 9. Exact mapping to A §§11–12 and existing JF-10 bridge schema
+
+The two A sections are related but distinct protocol surfaces; they MUST NOT be collapsed into one schema:
+
+- **A §11 — COC-outage owner-local cutoff and recovery reconciliation:** mapped by `bmcp.recovery-cutoff/1.0.2` message families `OWNER_ADMISSION_SNAPSHOT_ATTESTATION`, `COC_PARTICIPANT_MANIFEST`, `RECOVERY_CUTOFF_BATCH`, `OWNER_ADMISSION_ENTRY`, `OWNER_GATE_RELEASE_ATTESTATION` and `RECOVERY_EPOCH_COMPLETED`.
+- **A §12 — JF-10 prepared participant bridge:** remains mapped by the existing candidate `bmcp.applied-ack/1.1.0` five message families in `schemas/bmcp.applied-ack-1.1.0-jf10-bridge.schema.json` (reviewed source Blob `a8a945cc3623c2907003b93625e3c79742150944`). The recovery-cutoff schema supplements this bridge; it does not replace or redefine its prepare-intent, prepared receipt, I terminal, Storage resolution or reconciliation messages.
+
+Cross-schema semantic validators MUST join the recovery participant manifest entry to the exact JF-10 bridge identity where applicable, including ParticipantIntentRef, CausalOrderTransactionRef, PublicationOperationId, RequestDigest, PreparedParticipantRef, PreparedTransactionGID, DatabaseIncarnationRef, PrepareAttemptRef/Generation, ParticipantLedgerRef/Version and ParticipantTupleDigest. Recovery messages carry immutable references/digests to owner evidence; they do not copy or override I, D, C or Storage authority.
+
+The validator MUST also enforce the terminal cross-authority mapping:
+- I `COMMIT_WON` permits only same-participant/same-XID Storage `COMMITTED`, subject to C's actual provider outcome and all D predicates.
+- I `REVOCATION_WON` or `INDETERMINATE_ABORTED` permits only same-participant/same-XID Storage `ROLLED_BACK`; provider invocation is forbidden.
+- I or Storage `UNKNOWN/IN_DOUBT`, mismatched participant tuple, or contradictory terminal outcome blocks release and recovery completion.
+
+This mapping is a structural/semantic contract only. It does not assert that H has implemented the validator or passed canonical-byte, cryptographic, or runtime interoperability tests.
