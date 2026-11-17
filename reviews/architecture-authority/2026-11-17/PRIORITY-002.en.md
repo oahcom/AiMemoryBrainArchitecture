@@ -1,6 +1,6 @@
 # Root-first Development Priority Roadmap — PRIORITY-002
 
-- Version: 1.0.0; baseline `b372b62c640a2b656e54b6db62a4ee67d7d8c001`.
+- Version: 1.0.0; baseline `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`.
 - Status: planning recommendation only; not implementation or Gate authorization.
 
 ## Unified priority
@@ -20,6 +20,11 @@
 | P3 | High concurrency, distributed scale-out, advanced autoscaling and multi-region operations | Engineering/Storage/I | measured workload and proven need; deployment/DR ADR and fault evidence | production scale gate |
 
 P0 is not one monolithic phase. P0-01..06 are authority and proof prerequisites; P0-07..08 are bounded implementation work only after their named dependencies are satisfied.
+
+## Additional root-first blockers
+
+- B protocol bundle currentness is a P0/P1 freeze prerequisite: v3.2.9 is stale; Storage v3.3.0 or equivalent must bind current exact Owner/CI artifacts and be reviewed by C/H/D/I and A.
+- Do not call Option A L1 closed until A-01..A-05 are adopted and D gives an exact Storage ADR decision. L3/L4 remain separate proofs.
 
 ## First-release shape
 
