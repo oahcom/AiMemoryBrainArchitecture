@@ -25,7 +25,7 @@
 | I Python/Node crypto tests | `7658edc6f51dac203742ecc1ecf00d41bd676908` |
 | D owner proof contract candidate | `d80dabe7210e681bc4e2290355a38f8b67be9ddd` |
 | C owner proof contract candidate | `5e37185610869951c3b392c9ad143a72b4c702ac` |
-| H CI candidate run | `44049931110` (exact run against H HEAD `9fe480da1e610392bd277e8f8692f7ed6922d45d`; status recorded after final check) |
+| H CI candidate run | `44050250038` (H test commit `34fb4ccf8b1580321d38eda1340cf53f73b83f24`; 281 tests total, 259 passed, 22 skipped, 0 failed) |
 
 ## 2. I findings
 
@@ -80,7 +80,7 @@ I accepts the direction of H Unified Schema 1.2.11 and RecoveryJoin 1.0.2 as the
 ## 5. Exact H bundle refresh
 
 The exact H review and wire mapping were refreshed after adding RecoveryJoin 1.0.2 and the owner-verifier callback:
-- H exact review Blob: `cb82758dcf01f95a43d6ecb37a8f82cce41c7396`.
+- H exact review Blob: `f5ab9a9232b04720faf552a70d5d2962343f843f`.
 - H wire mapping Blob: `a692a790a4c7abef94dba6da9c22b5e06417879a`.
 - H union contract Blob: `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175`.
 - RecoveryJoin 1.0.2 test Blob: `83435af0f75d9e0bea64e2a331571356c3c1c26b`.
@@ -89,3 +89,10 @@ The exact H review and wire mapping were refreshed after adding RecoveryJoin 1.0
 - H semantic reference module Blob: `6710bd7876be5f2c60640f21090729b8859a7a3e`.
 
 The reference validator now requires an explicit owner-proof verifier callback for any non-empty admission set. The test adapter is marked TEST-ONLY. It is not a production I/D/C signature verification implementation.
+
+
+## 6. Final exact CI result
+
+H candidate CI run `44050250038` completed successfully against commit `34fb4ccf8b1580321d38eda1340cf53f73b83f24`: 281 tests total, 259 passed, 22 skipped, 0 failed. The 22 skipped tests are the superseded historical Unified Schema 1.2.10 semantic fixture class. Current 1.2.11, 1.2.12 and RecoveryJoin 1.0.2 suites ran.
+
+This result supports candidate schema/reference-validator behavior only. The proof verifier used by tests is TEST-ONLY; no production I/D/C signer, key registry or ledger adapter is connected.
