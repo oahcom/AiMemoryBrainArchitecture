@@ -23,8 +23,45 @@ prompt_sha256: c32448736986cc9902c796af11cec5562191a4daeec390835e39dcc4d26dae12
 created_at: 2026-11-17
 updated_at: 2026-11-17
 implementation_branch: design/chatgpt-native-execution-model
-implementation_commits: []
-changed_paths: []
+implementation_commits:
+  - b3a6bd612cb310d0b116db6d8cbd7bdff37c7ccf
+  - adefecb47c81511bfc0f8c2f3f4210eba50fe419
+  - 7b94ab7431eb0a65af9380fa3ab40686c5a633e5
+  - e455450cbc719991bcd5146a7595efd9666a1718
+  - d86799af23dfdd4d783dff06bc05a6bd11e201ef
+  - 884972fe6adde0ec511d94162613bf48b76fab53
+  - 49824dbe44c689ba45c8051b490441ae459039f0
+  - 7da7d9735de7bcbde636493f10a84480dd5c292f
+  - a64646a2ded7dca9f0e40b231f14ecf333b67e13
+  - dc9d3efc352dd6788f29692345e427bb3c1a0a54
+  - a2bfcc6feeae063159d8aa65bfd0b9e5442bf507
+  - ae4ca4405a2d79b0984dd5517601f4a3e95aea56
+  - 4a6f2092ddec25d199f55f1f0c56a79d271bd7dc
+  - 859abf7dafd8d6d8863ed07c9003ba97d77c44ca
+  - 9a4fd94ba533f3f491f540056694a616ef024194
+  - 13a308f832cbb953e185e5cf6825c6aed571e95a
+  - b8de91cdd5ed84e826da3b4ff6673c2e43ffc869
+  - 74a524f0d56326c403f6a2f7c8f943269c5c49f9
+  - f7322826361cd5ef37ef85c5fa966f0f5e65d51a
+  - d9df1c71b23cef669ef8dfb156b618ca0caaab05
+changed_paths:
+  - 14-ai-development/README.md
+  - 14-ai-development/chatgpt-native-execution-model.en.md
+  - 14-ai-development/chatgpt-native-execution-model.zh-CN.md
+  - 14-ai-development/prompts/global/chatgpt-session-contract-v1.md
+  - 14-ai-development/prompts/owners/A/owner-session-v1.md
+  - 14-ai-development/prompts/owners/B/owner-session-v1.md
+  - 14-ai-development/prompts/owners/C/owner-session-v1.md
+  - 14-ai-development/prompts/owners/D/owner-session-v1.md
+  - 14-ai-development/prompts/owners/E/owner-session-v1.md
+  - 14-ai-development/prompts/owners/F/owner-session-v1.md
+  - 14-ai-development/prompts/owners/G/owner-session-v1.md
+  - 14-ai-development/prompts/owners/H/owner-session-v1.md
+  - 14-ai-development/prompts/owners/I/owner-session-v1.md
+  - 14-ai-development/prompts/owners/README.md
+  - 14-ai-development/work-items/AID-2026-001/manifest.yaml
+  - 14-ai-development/work-items/AID-2026-001/prompt-v1.md
+  - 14-ai-development/work-items/INDEX.md
 verification:
   status: NOT_RUN
   commit_sha: ""
@@ -40,4 +77,6 @@ acceptance:
 merge:
   target_branch: main
   merge_commit_sha: ""
+pull_request: 42
+pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42
   status: NOT_MERGED
