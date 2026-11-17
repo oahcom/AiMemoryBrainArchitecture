@@ -278,3 +278,45 @@ All references are branch-qualified. Re-read the exact artifact and Blob before 
 
 ---
 **Final status: NOT READY FOR ARCHITECTURE FREEZE.** This is a risk assessment disposition, not a gate closure decision.
+
+
+## 13. Live source refresh and risk-status correction — 2026-11-17
+
+This section adds the exact Owner artifact readback performed in the current R session. It does not replace the risk IDs above or promote a candidate proposal into an approval decision. Owner HEADs and Blobs:
+
+| Owner | Current branch HEAD | Exact artifact path | Blob SHA | Status directly confirmed in this read |
+|---|---|---|---|---|
+| B | 0df144ae25c2039c9934395fc88b2d17080eb119 | 02-domain-model/ADR-001-fact-claim-semantics.md | a1024938ff5baba069cf128c69496a44e143330c | ADR-BLOCKED; no formal governance authority, approver, date or decision; B recommendation remains Candidate |
+| C | f3251081c49e697fe4739a252e27f59e2ecd0a8f | 07-agent-integration/phase-3.8.12-c-final-review-h-unified-1.2.13-csubmitoutcome-1.0.1-mapping.md | 92ed89a308ad97f6846960bb7182e0916949978e | Current C review artifact for H 1.2.13 / CSubmitOutcome 1.0.1 exists; this does not imply all consumers approved it or current CI passed |
+| C | same HEAD | 07-agent-integration/phase-3.8.12-c-exact-review-h-1.2.13-c-submit-outcome-1.0.1-validator.md | c1dcc4049205b8b9315e3b284433625e9893a711 | Exact Validator review artifact exists; current branch CI and formal Owner decision remain separate evidence |
+| D | 97e68fbd225bdf0ac71860c01077481afc162d50 | 03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md | 17e53890dd6cce9bea9eacc1be2e64b0ef55ac78 | D-role proposal; independent D Owner approval, callable API and conformance OPEN; UNKNOWN/IN_DOUBT keeps barriers open |
+| E | fdb4f67a83083d995930b88f93975b5ee36080f3 | 04-memory-compiler/phase-3.8-e-publication-orchestration-retry-recovery-contract.md | 475fee41e5eea527af4edefbfe88c58c86967d0a | E-role proposal; D/I/Storage APIs and independent Owner approval OPEN; local state does not establish D ProducerWork terminality |
+| F | 8d5ef89ce9b1ff1471ffd1a03fe4f289addb0af3 | 05-memory-runtime/phase-3.7-f-local-lifecycle-producer-derivative-queue-recall-context-restore.md | 29e9504c75d737c2dd200ebc3306eda555f0b0ac | F-local proposal; cross-Owner interfaces/implementation OPEN; IndexWatermark is partition-local contiguous coverage, not Forget completion proof |
+| G | f9ca0ddc36e17f74041506f17039f0202d13042e | 06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md | c1de241ec69834377d9b0e24aa4770a809796d4b | G-local proposal; C/G/H delivery and cross-Owner interfaces OPEN; Transport ACK is not Applied |
+| H | f809be092a6c04db7982cc1bdbdd9c88787a4286 | 08-bmcp-protocol/phase-3.8.9-h-exact-mapping-unified-1.2.13-c-submit-outcome-1.0.1.md | 32bf9b0fd42abe8b58749b858b1d5c9aef39c5fd | CURRENT SUCCESSOR MAPPING CANDIDATE; exact CI rerun required; not frozen; latest tests are not tied to a run on the exact HEAD read here |
+| I | 28df608b075e619563c6367a8a1c171185c1faaf | 09-security-governance/phase-3.8.9-i-p0-allowlists-unified-1.2.13-recoveryjoin-1.0.2.md | 5c0e2049513d391dfc118f4f629a5ec95de456d6 | I-owned P0 projection candidate; production profile, trust roots, key custody, anti-rollback and complete P0 vectors remain open |
+| Storage | 17be31915b06d98d7f822e6e5270b8cde39eb0bb | reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md | 1ef47d4e5711c7db73a24d249adf1992be1f6aa4 | ADR-BLOCKED; candidate options only, no topology selected; T1–T8 all OPEN |
+| Storage | same HEAD | reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md | 175ee7b1349cfdb79a19898b311a88391ed88010 | Logical transaction proposal; physical topology, cross-Owner APIs, read-path enforcement and implementation proof OPEN |
+| Storage | same HEAD | reviews/storage-consistency/phase-3.6.15-storage-v3.2.5-protocol-bundle-exact-version-manifest.md | bea90697e7a61d43bed00543d636a5cdf40cf5ca | Successor bundle published; NOT JOINTLY ACCEPTED / NOT FROZEN |
+| A | 4f3181fdf9d5b7785887381fde83e33026308c31 | reviews/architecture-feasibility/phase-2-system-wide-consolidation.md | 6f5fbe13a5c12ab6cad833b2326ae595f8d047d0 | A Phase 2 historical consolidation snapshot; does not replace current Owner HEAD revalidation |
+| A | same HEAD | reviews/architecture-feasibility/phase-2-exact-evidence-ledger.md | 8be676b28d32efd1f214f8644010f187eb6b3c17 | Exact evidence and historical version ledger; must be refreshed when Blobs change |
+| A | same HEAD | reviews/architecture-feasibility/phase-2-contradiction-register.md | 0fb013e7148acfc3d042dd6be310c61c9632ad3d | ARC-01 through ARC-10 are integration contradiction leads, not substitutes for R's root-risk model |
+
+### 13.1 Evidence boundaries and CI interpretation
+
+- The current H Mapping file explicitly states **CANDIDATE / EXACT CI RE-RUN REQUIRED / NOT FROZEN**. H Recovery Cutoff CI run 44042074640 was on head `fb9a2ab8b528c2b7010d935372f76a14d6676755`, not the H HEAD read here (`f809be092a6c04db7982cc1bdbdd9c88787a4286`); it therefore does not prove the current H 1.2.13/C 1.0.1 bundle.
+- H Provider Outcome CI run 44063916718 was on head `c326e561145e9558f48f199128814643d8720e45`, also not the current C branch HEAD (`f3251081c49e697fe4739a252e27f59e2ecd0a8f)); it is not exact-head end-to-end proof for the current mapping.
+- Storage PostgreSQL 18.7 Prepared-XID/PITR capability run 43958775001 is bounded engine-capability evidence. It does not prove the real Canonical Authority topology, COC/JF-10/I/D integration, production read path or production deployment.
+- Current D/E/F/G files explicitly distinguish local proposals from cross-Owner acceptance and implementation conformance. Role simulation is not an independent Owner signature.
+- Issue #43 remains Open. This R report does not replace A's G1–G8 integration disposition or close any Owner Gate.
+
+### 13.2 Status correction to the original risk register
+
+The original ten risk IDs remain unchanged: R-01 physical serialization; R-02 canonical semantics; R-03 Forget/anti-resurrection; R-04 Applied/Publication/Provider Outcome; R-05 exact-version drift; R-06 Identity/Scope; R-07 Recovery/Cursor; R-08 authorization TOCTOU; R-09 production DR; R-10 governance complexity.
+
+After this refresh:
+- R-01, R-02 and R-03 remain **Critical / BLOCKED or NOT PROVEN**.
+- R-04 through R-10 remain **High / NOT PROVEN or BLOCKED**; R-04's semantic boundaries are clearer, but exact-bundle adoption, cross-Owner approvals and end-to-end proof remain open.
+- More candidate artifacts do not, by themselves, reduce risk. Risk can be downgraded only after exact-version adoption, authority approval and reproducible verification.
+- No new evidence found in this pass is sufficient to mark any Critical/High risk CLOSED.
+
