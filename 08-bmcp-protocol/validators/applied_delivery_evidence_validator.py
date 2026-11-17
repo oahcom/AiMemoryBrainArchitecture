@@ -45,7 +45,10 @@ class AppliedDeliveryChecks:
     verify_g_delivery_binding: Callable[[dict[str, Any]], bool | None]
     verify_capability_epoch: Callable[[dict[str, Any]], bool | None]
     commit_observation: Callable[[dict[str, Any], str], DurableObservationDecision]
-    verify_current_replay_authorization: Callable[[dict[str, Any], str], bool | None]
+    verify_current_i_replay_authorization: Callable[[dict[str, Any], str], bool | None]
+    verify_current_d_forget_fence: Callable[[dict[str, Any], str], bool | None]
+    resolve_c_submit_outcome: Callable[[str], dict[str, Any] | None]
+    verify_c_submit_outcome_record: Callable[[dict[str, Any]], bool | None]
 
 
 def _reject_duplicate_object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -63,6 +66,39 @@ def build_h_p0(envelope: dict[str, Any]) -> dict[str, Any]:
     if unknown:
         raise ValueError("unrecognized Applied Delivery Evidence members: " + ", ".join(sorted(unknown)))
     return {key: envelope[key] for key in P0_FIELDS if key in envelope}
+
+
+def validate_c_submit_outcome_join(
+    envelope: dict[str, Any],
+    c_record: dict[str, Any],
+) -> tuple[str | None, str | None]:
+    """Check H's duplicated C identity fields against one resolved immutable C record.
+
+    The resolver must resolve envelope.c_submit_outcome_ref to this exact record;
+    the separate verifier authenticates C issuer/namespace, schema, signature and
+    append-only ledger inclusion. C outcome semantics remain C-owned and are not
+    reinterpreted here as a G Applied decision.
+    """
+    required = (
+        "issuer_authority_ref", "sequence_namespace_ref", "record_ref",
+        "record_sequence", "payload_digest", "FinalRequestBoundaryRef",
+    )
+    missing = [name for name in required if not isinstance(c_record.get(name), str) or not c_record[name]]
+    if missing:
+        return "INVALID", "resolved CSubmitOutcome missing immutable identity fields: " + ", ".join(missing)
+    equalities = (
+        ("c_outcome_record_ref", "record_ref"),
+        ("c_outcome_record_sequence", "record_sequence"),
+        ("c_outcome_payload_digest", "payload_digest"),
+        ("final_request_boundary_id", "FinalRequestBoundaryRef"),
+    )
+    for h_field, c_field in equalities:
+        if envelope[h_field] != c_record[c_field]:
+            return "INVALID", f"H/C exact field mismatch: {h_field} != C.{c_field}"
+    actual_request_id = c_record.get("ActualInferenceRequestId")
+    if actual_request_id is not None and actual_request_id != envelope["inference_request_id"]:
+        return "INVALID", "H/C exact field mismatch: inference_request_id != C.ActualInferenceRequestId"
+    return None, None
 
 
 def canonical_p0_bytes(envelope: dict[str, Any]) -> bytes:
@@ -137,6 +173,25 @@ def validate_applied_delivery_evidence(
     if unknown:
         return {"status": "UNKNOWN", "errors": [], "unknown": unknown, "h_p0_digest": digest}
 
+    # Resolve and authenticate the immutable C-owned outcome before H observation
+    # acceptance. H verifies the join; it never mints or reinterprets C provider truth.
+    try:
+        c_record = checks.resolve_c_submit_outcome(envelope["c_submit_outcome_ref"])
+    except Exception as exc:
+        return {"status": "UNKNOWN", "errors": [], "unknown": [f"CSubmitOutcome resolver exception: {type(exc).__name__}"]}
+    if c_record is None:
+        return {"status": "UNKNOWN", "errors": [], "unknown": ["CSubmitOutcome resolver unavailable or record not yet visible"]}
+    if not isinstance(c_record, dict):
+        return {"status": "INVALID", "errors": ["CSubmitOutcome resolver returned a non-object record"], "unknown": []}
+    status, detail = _tri_state("CSubmitOutcome authentication", checks.verify_c_submit_outcome_record, c_record)
+    if status == "INVALID":
+        return {"status": "INVALID", "errors": [detail], "unknown": []}
+    if status == "UNKNOWN":
+        return {"status": "UNKNOWN", "errors": [], "unknown": [detail], "h_p0_digest": digest}
+    status, detail = validate_c_submit_outcome_join(envelope, c_record)
+    if status == "INVALID":
+        return {"status": "INVALID", "errors": [detail], "unknown": []}
+
     try:
         decision = checks.commit_observation(envelope, digest)
     except Exception as exc:
@@ -149,16 +204,19 @@ def validate_applied_delivery_evidence(
         # A historical replay result is not perpetual authorization to disclose it.
         # Recheck current I authorization/epoch, key status, audience/scope and the
         # applicable D fence through the owner-authority adapter before disclosure.
-        status, detail = _tri_state(
-            "current replay authorization",
-            checks.verify_current_replay_authorization,
-            envelope,
-            decision.original_result_ref,
+        currentness_results = (
+            ("current I replay authorization", checks.verify_current_i_replay_authorization),
+            ("current D ForgetFence", checks.verify_current_d_forget_fence),
         )
-        if status == "INVALID":
-            return {"status": "INVALID", "errors": [detail], "unknown": []}
-        if status == "UNKNOWN":
-            return {"status": "UNKNOWN", "errors": [], "unknown": [detail], "h_p0_digest": digest}
+        replay_unknown = []
+        for name, callback in currentness_results:
+            status, detail = _tri_state(name, callback, envelope, decision.original_result_ref)
+            if status == "INVALID":
+                return {"status": "INVALID", "errors": [detail], "unknown": []}
+            if status == "UNKNOWN":
+                replay_unknown.append(detail)
+        if replay_unknown:
+            return {"status": "UNKNOWN", "errors": [], "unknown": replay_unknown, "h_p0_digest": digest}
         return {"status": "VALID_REPLAY", "errors": [], "unknown": [], "original_result_ref": decision.original_result_ref, "h_p0_digest": digest}
     if decision.disposition != "NEW":
         return {"status": "UNKNOWN", "errors": [], "unknown": [f"unsupported durable disposition: {decision.disposition}"]}
