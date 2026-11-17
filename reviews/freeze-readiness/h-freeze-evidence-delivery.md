@@ -126,3 +126,15 @@ H has added an exact structural review for unified COC/JF-10 schema artifact 1.2
 - Decision: **ACCEPT WITH ENUMERATED AMENDMENTS** for structural mapping only; semantic and interoperability gates remain OPEN.
 
 The branch also contains schema artifact 1.2.6 (Blob `ea8d644df17ea88ed368980b7d5930cd33934fd2`). The 1.2.5 decision does not transfer to 1.2.6. The current 1.2.6 artifact still lacks an exact H review in this evidence set. Provider Outcome wire shape is present in 1.2.5, but C's canonical owner contract and provider-specific evidence vectors are still required. No schema freeze or CSubmitOutcome implementation acceptance is implied.
+
+
+## 11. Unified schema 1.2.7 exact review / 统一 Schema 1.2.7 精确审查
+
+- Schema 1.2.7 Blob: `e9748a5b904d2b975e47a32a0cbb31de31636854`.
+- H exact review Blob: `8bed0b05cd631014bf5af7cb5a8dafdd932940e9`.
+- Decision: **ACCEPT WITH ENUMERATED AMENDMENTS — STRUCTURAL ENVELOPE ONLY**.
+- Main change: explicit `signature_profile_id`, separate from `canonicalization_profile_id`; key reference/version descriptions are tightened.
+- Critical limitation: the schema field is structurally optional. Semantic validation MUST require it for protected owner-signed records and reject missing/unknown/wrong-owner/wrong-audience/downgraded profiles. I owns trusted profile/key resolution.
+- Current 66-case CI does not load unified schema 1.2.7. No 1.2.7-specific validator PASS, signature vectors or interoperability PASS is claimed.
+
+Schema artifact 1.2.7 supersedes 1.2.6 as the latest candidate in this branch, but its exact review remains conditional and does not freeze it. Production signature profile, I registry and independent-language conformance remain OPEN.
