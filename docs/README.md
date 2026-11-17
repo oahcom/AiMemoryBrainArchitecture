@@ -14,6 +14,8 @@ Chinese and English are maintained as equivalent reading versions. Normative arc
 | Evaluate technology / 技术选型 | [中文技术架构总览](zh-CN/13-engineering-decisions/technology-architecture-overview.md) · [English Technology Overview](en/13-engineering-decisions/technology-architecture-overview.md) |
 | Look up terms / 查术语 | [Bilingual Glossary / 中英术语表](glossary/architecture-glossary.md) |
 
+**Coverage and migration plan / 覆盖与迁移计划：** [Bilingual Documentation Status](translation-status.md)
+
 ## Documentation layers / 文档层次
 
 ### L1 — Understand the system / 理解系统
