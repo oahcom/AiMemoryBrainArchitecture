@@ -1,4 +1,3 @@
-import importlib.util
 import json
 import pathlib
 import tempfile
@@ -30,18 +29,12 @@ class PrepareTaskTests(unittest.TestCase):
         src = self.root / "issue.json"
         dst = self.root / "out" / "task.json"
         src.write_text(json.dumps(issue), encoding="utf-8")
-        old_argv = MODULE.sys.argv
-        MODULE.sys.argv = [str(SCRIPT), str(src), str(dst)]
-        try:
-            MODULE.__dict__.get("__name__")
-            # Call main logic through a subprocess to exercise exit behavior.
-            import subprocess, sys
-            return subprocess.run(
-                [sys.executable, str(SCRIPT), str(src), str(dst)],
-                capture_output=True, text=True
-            ), dst
-        finally:
-            MODULE.sys.argv = old_argv
+        # Run as a subprocess to exercise the command-line contract.
+        import subprocess, sys
+        return subprocess.run(
+            [sys.executable, str(SCRIPT), str(src), str(dst)],
+            capture_output=True, text=True
+        ), dst
 
     def test_accepts_exactly_one_owner_risk_and_work_class(self):
         result, dst = self.invoke(self.issue)
