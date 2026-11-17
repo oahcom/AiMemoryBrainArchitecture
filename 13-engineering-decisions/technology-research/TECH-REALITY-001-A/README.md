@@ -1,0 +1,78 @@
+# TECH-REALITY-001-A — Principal Technology Reality Research
+# 首席技术架构师：独立技术现实性研究
+
+- Task ID: `TECH-REALITY-001-A`
+- Owner: `A — Principal System Architect & Integration Architect`
+- Repository: `oahcom/AiMemoryBrainArchitecture`
+- Baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- Research branch: `ai/TECH-REALITY-001-A/principal-technology-research`
+- Date: 2026-11-17
+- Status: **PARTIAL — RESEARCH DOCUMENTS IN PROGRESS; INDEPENDENT REVIEW NOT STARTED**
+- Conclusion: **NOT YET PROVEN**
+
+## 1. Purpose / 目的
+
+This directory studies whether the current AI Memory Brain logical architecture can be implemented, deployed, tested, operated and evolved using real mature technologies. It is not a new architecture expansion exercise, implementation task, technology freeze or approval of ADRs.
+
+本目录研究当前 AI Memory Brain 逻辑架构能否由真实成熟技术实现、部署、测试、运维和演进。它不是继续扩充架构的工作，不是生产实现任务，也不构成技术冻结或 ADR 批准。
+
+The central rule is: use mature, simple and verifiable technology to satisfy existing invariants. Do not weaken Canonical Truth, Evidence, Security, Context Applied or Forget safety to make a preferred tool fit.
+
+核心原则：用成熟、简单、可验证的技术兑现现有不变量。不得为了适配某个偏好的工具而削弱 Canonical Truth、Evidence、Security、Context Applied 或 Forget 安全性。
+
+## 2. Deliverables / 交付物
+
+| File | Scope | Status |
+|---|---|---|
+| `baseline/architecture-baseline.md` | Exact main baseline, architecture and decision states | Drafted; exact readback pending |
+| `mature-project-research.md` | Mem0, Graphiti, Letta, Hermes, LangGraph, Temporal, Restate, NATS, storage, retrieval, auth and observability source research | Drafted; source review continues |
+| `technology-capability-matrix.md` | Map Brain capabilities to real mechanisms and gaps | Drafted |
+| `deployment-topology-comparison.md` | Option A/B/C comparison | Drafted |
+| `architecture-complexity-audit.md` | Over-design and duplicate-authority audit | Drafted |
+| `rust-ecosystem-assessment.md` | Rust crate/SDK/runtime maturity and integration types | Drafted |
+| `workload-model.md` | S/M/L assumed envelopes and benchmark plan | Drafted; assumptions need owner confirmation |
+| `technology-recommendation.md` | Minimum/balanced/high-scale candidate stacks | Drafted; no selection approved |
+| `owner-dependency-register.md` | Required B–I/Storage/Testing/Operations inputs | Drafted; responses pending |
+| `research-evidence-register.md` | Exact source snapshots, releases, licenses, paths and docs | Drafted; further evidence may be added |
+| `open-questions.md` | Blockers and evidence needed to close | Drafted |
+| Independent review handoff | Separate reviewer task package | Not started |
+
+All research documents contain English and Chinese sections in the same file/change set. The repository's GOV-DOC-001 policy remains normative.
+
+全部研究文档在同一文件/变更集中包含英文和中文内容。仓库 GOV-DOC-001 规范继续有效。
+
+## 3. Preliminary findings / 初步发现
+
+1. The logical architecture is detailed enough to study but does not establish a working Brain implementation. README marks implementation not started by design; no Brain Rust workspace was observed at the captured main tree.
+2. TAB-001 v0.1 is a candidate blueprint, not a technology freeze. Most database, index, inference, protocol, security and deployment choices remain CANDIDATE/OPEN/TO_VALIDATE.
+3. SQLite WAL is a plausible local prototype substrate but is one-writer and same-host only. It cannot be described as distributed transaction capability.
+4. The D/E/Storage producer admission, Forget fence, dependency registration and publication gate are the critical physical feasibility proof.
+5. Search should begin with structured/lexical baseline; vector infrastructure is conditional on measured retrieval value.
+6. Durable workflow engines and message brokers solve valuable execution problems but do not replace canonical SQL transactions or Forget barriers.
+7. The largest avoidable complexity risk is premature distribution and duplicated orchestration/state ownership; the core semantic distinctions must remain.
+8. Current architecture consolidation PR #44 / Issue #43 remains NOT READY FOR ARCHITECTURE FREEZE; its blockers are preserved in `open-questions.md`.
+
+## 4. Execution sequence / 执行顺序
+
+1. Finish exact source readback and currentness checks for all research artifacts.
+2. Review the live PR #44 consolidation package and owner source pins for any new changes that affect this report.
+3. Complete source inspection for selected candidates and update evidence register.
+4. Obtain owner inputs through the dependency register; preserve all OPEN/ADR-BLOCKED states.
+5. Close technology matrix, complexity audit and three topology comparisons.
+6. Define prototype and benchmark plans; mark NOT RUN until actually executed.
+7. Create the final research PR with exact diff, commit, Blob SHAs and limitations.
+8. Prepare a separate independent reviewer handoff; do not self-approve.
+
+## 5. Non-claims / 非声明
+
+- No technology has been approved by this research.
+- No Brain production implementation has been created.
+- No prototype, benchmark, fault-injection campaign, security audit or cross-platform build was run.
+- No PR has been merged and no architecture freeze is requested.
+- This author cannot declare independent review passed.
+
+## 6. Research conclusion / 研究结论
+
+**NOT YET PROVEN.** The project has a plausible path to a local-first Rust modular monolith, but the physical transaction/Forget protocol, workload envelope, retrieval value, Applied proof, security model and recovery topology must be demonstrated before the architecture can be called engineering-feasible.
+
+**NOT YET PROVEN（尚未证明）。** 项目具备走向本地优先 Rust 模块化单体的合理路径，但在称为工程可行之前，必须证明物理事务/Forget 协议、工作负载边界、检索价值、Applied 证明、安全模型和恢复拓扑。
