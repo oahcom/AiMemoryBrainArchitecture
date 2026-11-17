@@ -44,9 +44,12 @@ implementation_commits:
   - 74a524f0d56326c403f6a2f7c8f943269c5c49f9
   - f7322826361cd5ef37ef85c5fa966f0f5e65d51a
   - d9df1c71b23cef669ef8dfb156b618ca0caaab05
+  - 66a0ddf9a1440817ff5d128fd5648bb450aa9b4e
+  - 635a6d0dacd3440e7508cde7a755a4ad0231fc69
   - 1791e8ea60c5df34f95378754b226a6ec208b5c8
   - 5013e71154529ad31cefe25071ee1657872eac0a
 changed_paths:
+  - 14-ai-development/prompt-and-evidence-template.md
   - 14-ai-development/README.md
   - 14-ai-development/chatgpt-native-execution-model.en.md
   - 14-ai-development/chatgpt-native-execution-model.zh-CN.md
