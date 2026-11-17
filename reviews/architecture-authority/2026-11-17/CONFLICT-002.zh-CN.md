@@ -1,11 +1,11 @@
 # 架构决策冲突登记册 — CONFLICT-002
 
-- 版本：1.0.0；基线 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`。
+- 版本：1.0.0；基线 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。
 - 状态：A 集成裁决；不替代 Owner 领域规范决策。
 
 | ID | 表面冲突/歧义 | A 裁决 | 权威/所需行动 | Gate |
 |---|---|---|---|---|
-| AC-01 | Modular Monolith 建议与 Storage 已选 L1 逻辑配置及 L4 部署开放 | 不构成矛盾。Modular Monolith 是部署形态；Storage §8 已选择 L1 Option A（每个 Canonical Memory Authority 一个 Serializable Transaction Domain）。L4 Engine/Deployment 符合性仍由 Storage/D/I 负责且开放 | Storage + D + I 证明 Option A 的 L4 实现；A 集成 | G3/G5；JF-10 |
+| AC-01 | Modular Monolith 建议与有条件接受的 Option A 逻辑方向及仍开放的 L1/L2/L3/L4 义务 | 不构成矛盾。Modular Monolith 是部署形态；Option A 仅有条件接受为 v1 逻辑方向。A-01..A-05 和 D 精确采纳仍开放；L2/L3/L4 分别处理 | Storage + D + I 证明 Option A 的 L4 实现；A 集成 | G3/G5；JF-10 |
 | AC-02 | P0 Durable Vertical Slice 与 P0 语义/原子性前置条件未解决 | P0-07 必须位于 P0-02..05 之后；此前仅能开展 Harness/Fixture 工作 | A 修正 F/D/P 路线；D/E/Storage 负责前置条件 | 实现准入 |
 | AC-03 | Delivery/Transport ACK 与 Applied | 必须保留为不同事实；ACK 不能证明跨越 Final Request 或 Provider Outcome | C/G/H 负责 Final Request/Applied 合同；I/D 提供授权/Fence 输入 | G2/G4；Issue #3 |
 | AC-04 | COC 顺序、I Commit 决策和 Storage Visibility | 保留不同权威：COC 排序/记录；I PolicyDomain Sequencer 决定 JF-10 COMMIT/ABORT；Storage 解决同 XID 并拥有 Visibility；D 拥有 ForgetFence | A 只协调，不合成权威 | JF-10 A/B/C |
@@ -17,6 +17,10 @@
 | AC-10 | Candidate Schema/Technology 工件与 Freeze 声明 | Candidate 和有限 CI 状态不等于规范冻结或生产符合性 | 对应 Owner/ADR 权威决定；A 要求精确 HEAD 证据 | G1/G2/G5 |
 
 | AC-11 | Storage 拓扑 ADR 保留了“尚未选择方案”的前置补充文字，而 §8 已明确在 L1 层覆盖该文字 | 以 §8 为准：L1 已选择 Option A；§3 历史文字不是当前阻塞，但应明确标记/精简以免产生歧义 | Storage | G1/G5 冻结复审前 | G1/G5 |
+
+| AC-12 | Storage v3.2.9 Manifest 相对后续 C/D/I Review 和 H CI Run 44069941327 已过期 | Storage 必须发布 v3.3.0/等效版本；C/H/D/I 复审同一 Manifest；A 回读 | Storage + C/H/D/I；A 集成 | G1/G2/G6 |
+| AC-13 | 中间 B Identity/Entity 研究工件已从当前 Main 撤销 | 它们不是当前基线证据；Fact/Claim 仍 ADR-BLOCKED；不得 Schema Freeze | B；I/C/H 消费者 | G2/G3 |
+| AC-14 | Option A L1 选择可能被误认为 L1/L2 已完成 | 仅有条件接受方向；A-01..A-05 和 D 精确接受仍开放；L2/L3/L4 分离 | Storage/D/I + A | G2/G3/G4/G5 |
 
 ## A 的明确边界
 
