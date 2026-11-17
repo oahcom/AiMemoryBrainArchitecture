@@ -16,7 +16,7 @@
 | H I crypto wire mapping 3.8.4 | `bf160288d7529b37ad1b56924c1583748922aa25` |
 | I crypto profile proposal | `5eeb011032c53c2f7897d699d6f512b26f07d0a2` |
 | I crypto artifact-revision amendment | `9db3976ed9a891e9395d0e7edf949e75cb4422aa` |
-| H RecoveryJoin schema 1.0.1 | `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c` |
+| H RecoveryJoin schema 1.0.2 | `4b664e3bce465499bcdfd93796349a4ba7074002` |
 | H semantic reference module | `4a7c22ed15dff0a688559f79e4facbffca6527cd` |
 | H schema/semantic tests | `c95bea3d7a7bee5f419bfabe914ea56be79fc8ad` |
 | I P0 vector set | `4657f0c81e9c8692d29ac183380f3d7e074a4e4c` |
@@ -86,3 +86,12 @@ The semantic digest module uses `BMCP-*-TEST-v1` normalized test digests. It is 
 - Production Cryptographic Freeze：NOT APPROVED。
 - Runtime Conformance/Deployment：NOT ESTABLISHED。
 - Production Activation：NOT AUTHORIZED。
+
+
+## 6. RecoveryJoin 1.0.2 and owner-verifier seam
+
+H now provides RecoveryJoin 1.0.2 structural proof payloads and requires each join edge to carry exact membership-proof ref/digest. The reference union validator no longer treats a caller-supplied `valid=true` as sufficient: it requires an injected owner-authoritative proof-verifier callback. Missing verifier result returns UNKNOWN; a rejecting verifier returns INVALID. Current unit fixtures use an explicitly TEST-ONLY verifier adapter and do not implement production owner key verification.
+
+The old 1.2.10 semantic fixture is retained as a historical skipped suite because the shared current reference validator now enforces later owner-snapshot/high-water requirements. Current 1.2.11 and 1.2.12 suites exercise the callback seam.
+
+RecoveryJoin 1.0.2 and the new verifier seam remain candidate-level. Actual I/D/C key registries, proof signers, ledger queries, pagination and anti-rollback adapters are not connected.
