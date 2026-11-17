@@ -80,3 +80,54 @@ This is an architecture-level logical profile, not a physical database selection
 Storage 当前分支的序列化 ADR 补充条款（Blob `1ef47d4e5711c7db73a24d249adf1992be1f6aa4`）选择**每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain**作为 v1 规范性序列化架构，覆盖 D Admission/Fence/Dependency/PublicationParticipant 与 Storage Hidden Participant/最终 VisibilityPointer/PublicationReceipt/Outcome/Outbox，同时保持 D 和 Storage 的语义权威分离。I 的 PolicyDomain Sequencer 与 COC Quorum Log 仍独立。
 
 这是逻辑架构档案，不是物理数据库选型。PostgreSQL 18.7 能力档案（Blob `0aabf66848dc97deee028c571183c0d7204008c0`）记录了 Prepared-XID 持久化与同 XID 恢复、同步故障切换、备份恢复、ACK 丢失和 PITR 的有限 CI 引擎能力 PASS。它不能证明 Brain 的 D/I/COC Adapter、集成 Publication 竞争、生产部署或 JF-10 端到端行为。Gate A PARTIAL PASS / OPEN；JF-10 runtime P0 OPEN。
+
+## 7. 完整中文版本 / Chinese Version
+
+### 7.1 分类方法
+
+- **M1 成熟直接支持：** 成熟组件直接提供核心原语，但仍需正确配置。
+- **M2 成熟组件组合：** 组件成熟，但需要 Brain 自己编排和适配。
+- **M3 项目自有逻辑：** 没有成熟产品能替代 Brain 特有语义不变量。
+- **M4 可行但未证明：** 技术上合理，但需要原型、竞争和故障证据。
+- **M5 根本风险：** 候选物理拓扑可能无法满足承诺的保证。
+
+### 7.2 能力映射
+
+| 能力 | 候选成熟机制 | 真实支持能力 | Brain 自有缺口 | 分类/风险 |
+|---|---|---|---|---|
+| Canonical Memory 持久化 | SQLite 事务、PostgreSQL MVCC/锁、SQL Migration | 单数据库事务内的原子行更新、约束与恢复工具 | Schema、权威 API、不可变修订、Cursor CAS、Blob 协调与备份 | M2/M4，高 |
+| Event 接受 | SQL Transaction + Outbox + DB Worker | Event 与 Outbox 意图可同事务提交 | 幂等域、Blob 阶段写入、Receipt、Replay、Admission | M2/M4，高 |
+| Durable Workflow | DB Lease/Outbox、Temporal、Restate | 重试、Timer、Durable History/Step | 与 Canonical DB 和 Forget Fence 集成 | M2/M4，高 |
+| Forget/防复活 | SQL Lock/CAS、Append-only Audit、索引重建 | 数据库内行更新可序列化 | Producer 清单、Fence、依赖注册、索引/缓存/备份/外部目标 | M3/M4，严重 |
+| Evidence/Provenance | FK、不可变修订、Blob Hash、Graph Edge | 关系完整性与内容身份 | 来源语义、Evidence 授权、保留与派生链 | M2/M3，高 |
+| Retrieval | SQL、FTS5、Tantivy、pgvector/Qdrant/LanceDB | 过滤、BM25、ANN、Hybrid Candidate | 排序、授权、新鲜度、Forget 抑制和重建 | M2/M4，中高 |
+| Entity Resolution | Graphiti 模式、关系表、LLM Proposal | 实体抽取/去重建议 | Canonical Identity、可逆 Merge/Split、确定性校验 | M2/M3，高 |
+| Context Versioning | SQL CAS、Optimistic Concurrency | 原子版本递增和冲突检测 | Final Request Applied 证据、重连与 Forget 语义 | M2/M4，严重 |
+| Protocol | Serde JSON/CBOR、HTTP/IPC/gRPC | 序列化、传输、Schema 校验 | H Wire Schema、身份绑定、跨语言 Conformance | M2/M4，高 |
+| Authorization | Cedar、OpenFGA、SpiceDB、OPA | Policy Evaluation 或关系授权 | I 身份、撤销、Epoch、在途操作和审计 | M2/M4，严重 |
+| Cache | Moka | 本地缓存、淘汰和过期 | Typed Cache Key、Epoch/Fence 失效、权威复查 | M1/M2，中 |
+| Observability | tracing、OTel、Prometheus/Grafana | Trace、Metrics、Logs | 语义 Trace ID、脱敏、SLO | M1/M2，中 |
+| Backup/Recovery | SQLite Backup API、PostgreSQL Backup/PITR | 数据库快照与恢复 | DB/Blob 协同、版本清单、恢复隔离和防复活 | M2/M4，严重 |
+| Deployment | Rust Binary、systemd、OCI | 打包、重启、资源限制 | Migration、升级、密钥、OS 矩阵和运维流程 | M2/M4，中高 |
+
+### 7.3 关键能力边界
+
+1. Storage Repository 接口不是事务证明。每个关键迁移必须明确具体事务、锁/CAS、隔离级别、唯一约束、提交点和恢复读取。跨 DB 或文件系统的操作需要阶段状态、补偿和对账。
+2. 数据库本身不提供完整 Forget。它不知道所有 Producer、Worker、Provider、Index、Cache、Adapter、副本、备份和恢复目标。Brain 必须管理目标清单和跨 Owner 协议。
+3. FTS5、Tantivy、Qdrant、LanceDB 只生成检索候选，不能决定其是否 Canonical、获授权、最新、未被 Forget 或认知状态合格。必须先执行权威过滤。
+4. Temporal/Restate 可以持久执行步骤，但 Workflow History 不与 Canonical SQL 自动共享事务。Workflow 完成不能代替 CanonicalCommitCursor、Applied 或 Forget 证明。
+5. 当前 Storage 分支新增的 v1 逻辑档案要求每个 Canonical Memory Authority 一个 Serializable Transaction Domain，覆盖 D Admission/Fence/Dependency/PublicationParticipant 和 Storage Visibility/Outcome/Outbox；I Sequencer 与 COC Log 仍独立。
+6. PostgreSQL 18.7 的 Prepared-XID/故障恢复 CI 能力测试是有限引擎证据，不等于 Brain 的 D/I/COC 应用集成或生产部署证明。
+
+### 7.4 当前关键缺口
+
+- D/E/Storage 的 Admission/Fence/Dependency/Publication 物理语义仍需真实 Adapter 和竞争测试。
+- B Fact/Claim ADR 仍阻塞 Schema、索引和协议冻结。
+- C/G/H Applied 证据尚未冻结，需验证最终 Inference Request 边界。
+- I 身份、撤销、Forget 目标清单和加密擦除仍由 I 决定。
+- 没有真实工作负载和检索评估集，无法做定量技术选择。
+- Brain 原型尚未证明上述能力组合。
+
+### 7.5 决策规则
+
+矩阵不会自动把任何技术改成 DECIDED。每个选型必须进入对应 Owner ADR，并完成精确契约 Pin、竞争方案比较、最小原型、崩溃/竞争/故障测试、迁移恢复计划和独立审查。
