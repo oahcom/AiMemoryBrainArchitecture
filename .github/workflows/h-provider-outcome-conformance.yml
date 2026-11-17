@@ -1,5 +1,5 @@
 name: H Provider Outcome Conformance
-# revision: BMCP Unified 1.2.14 + CSubmitOutcome 1.0.1 conditional outcome conformance
+# revision: BMCP Unified 1.2.14 compatibility + 1.2.15 gateway-attested C Provider Outcome / CSubmitOutcome 1.0.1 conformance
 
 on:
   push:
@@ -7,7 +7,11 @@ on:
       - session-h-bmcp-protocol
     paths:
       - "08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.14.schema.json"
+      - "08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.15.schema.json"
       - "08-bmcp-protocol/validators/provider_outcome_validator.py"
+      - "08-bmcp-protocol/validators/provider_outcome_validator_1_2_15.py"
+      - "08-bmcp-protocol/validators/gateway_attestation_validator.py"
+      - "08-bmcp-protocol/validators/envelope_auth_validator.py"
       - "08-bmcp-protocol/tests/conformance/provider_outcome/**"
       - ".github/workflows/h-provider-outcome-conformance.yml"
   workflow_dispatch:
