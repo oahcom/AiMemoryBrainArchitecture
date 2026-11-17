@@ -549,5 +549,82 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertEqual(digest, c_object["payload_digest"])
 
 
+
+    def test_32_every_present_c_p0_member_is_bound_by_schema_semantics_or_digest(self):
+        from provider_outcome_validator import _p0, WIRE_TO_C
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        p0_fields = list(_p0(c_object))
+        self.assertGreaterEqual(len(p0_fields), 60)
+        inverse_wire = {object_name: wire_name for wire_name, object_name in WIRE_TO_C.items()}
+        for field in p0_fields:
+            with self.subTest(c_p0_field=field):
+                wire, obj, h_schema, c_schema, callbacks = self._full_validator_fixture()
+                original = obj[field]
+                if field == "Outcome":
+                    mutated = "HANDOFF_REJECTED"
+                elif field == "SideEffectStatus":
+                    mutated = "POSSIBLE_OR_UNKNOWN"
+                elif original is None:
+                    mutated = "C/tampered/" + field
+                elif isinstance(original, str) and len(original) == 64 and all(ch in "0123456789abcdef" for ch in original):
+                    mutated = "0" * 64 if original != "0" * 64 else "1" * 64
+                elif field in ("COwnerLocalSequence", "COwnerHighWater", "record_sequence"):
+                    mutated = str(int(original) + 1)
+                elif isinstance(original, str):
+                    mutated = original + "-tampered"
+                else:
+                    continue
+                obj[field] = mutated
+                wire_name = inverse_wire.get(field)
+                if wire_name is not None and wire_name in wire:
+                    wire[wire_name] = mutated
+                if field == "record_ref":
+                    wire["c_submit_outcome_ref"] = mutated
+                if field == "Outcome":
+                    wire["provider_outcome"] = mutated
+                if field == "COCAbsenceReason":
+                    wire["coc_absence_reason"] = mutated
+                result = validate_provider_outcome(wire, obj, h_schema, c_schema, callbacks)
+                self.assertEqual(result["status"], "INVALID", result)
+
+    def test_33_not_invoked_without_coc_intent_is_valid_only_with_explicit_absence_reason(self):
+        from provider_outcome_validator import _candidate_digest_and_preimage
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        c_object["Outcome"] = "NOT_INVOKED"
+        c_object["SideEffectStatus"] = "PROVEN_NONE"
+        c_object.pop("ProviderReceiptRef")
+        c_object["ProviderNoHandoffProofRef"] = "C/no-handoff/CPO-01"
+        c_object["NotInvokedProofRef"] = "C/not-invoked/CPO-01"
+        c_object["COCParticipantIntentRef"] = None
+        c_object["COCParticipantReservationRef"] = None
+        c_object["COCAbsenceReason"] = "not-a-COC-participant"
+        digest, _ = _candidate_digest_and_preimage(c_object)
+        c_object["payload_digest"] = digest
+
+        envelope["c_submit_outcome_digest"] = digest
+        envelope["provider_outcome"] = "NOT_INVOKED"
+        envelope.pop("provider_receipt_ref")
+        envelope["provider_no_handoff_proof_ref"] = c_object["ProviderNoHandoffProofRef"]
+        envelope["not_invoked_proof_ref"] = c_object["NotInvokedProofRef"]
+        envelope["coc_participant_intent_ref"] = None
+        envelope.pop("participant_reservation_ref")
+        envelope["coc_absence_reason"] = c_object["COCAbsenceReason"]
+
+        result = validate_provider_outcome(
+            envelope, c_object, envelope_schema, c_object_schema, checks
+        )
+        self.assertEqual(result["status"], "VALID", result)
+        self.assertEqual(result["errors"], [])
+        self.assertEqual(result["unknown"], [])
+
+    def test_34_coc_absence_reason_null_and_absent_are_not_interchangeable(self):
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        c_object.pop("COCAbsenceReason")
+        result = validate_provider_outcome(
+            envelope, c_object, envelope_schema, c_object_schema, checks
+        )
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertTrue(any("COCAbsenceReason" in item for item in result["errors"]))
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
