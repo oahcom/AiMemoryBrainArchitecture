@@ -42,3 +42,11 @@
 **双语语义一致性：针对该精确源 Blob，PASS。**
 
 **源状态不变：** CANDIDATE；final-request proof profile 与 C 的对齐仍 OPEN；authorization binding 与 I 的对齐仍 OPEN。C/G/H 冻结仍 BLOCKED。本复审不构成 H Owner 接受、C/G 接受、I/D/B 批准、Wire/Schema 冻结、实现验证或测试执行。
+
+## 5. H recovery-batch 映射跟进
+
+H 已新增 §11.8，覆盖 CGH-APPLIED-1.1 因果顺序与 recovery-batch 证据桥接。当前精确 H 源 Blob 已更新为 `0dca3dc5463a02be0e19524811afbae87795baf5`，替代 `db59b63e322d7255b8b400f47859dcac32bb3027`。EN/zh-CN companion 已同步到该精确源版本。
+
+更新后的结构读回：源文件、英文和中文均为 23/23 个标题、33/33 行表格；英文内容仍与源文件完全一致。§11.8 候选映射保留 COC terminal proof、recovery-batch identity/digest、pre-batch participant 完整性、owner high-water attestation、participant reconciliation、I terminal/revocation 证据、D lineage/cutoff/effective-position 证据，以及 Storage same-XID terminal 证据。
+
+该跟进仍为 **CANDIDATE / NOT FROZEN**。本报告原先 22 个标题的统计已由本次 23 个标题读回取代。不代表 H Schema/SDK 已生成、Owner 已批准或一致性测试已执行。
