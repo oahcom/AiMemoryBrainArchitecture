@@ -75,7 +75,7 @@ Each Owner has a distinct ChatGPT conversation context and a versioned Owner pro
 | F | Memory Runtime, retrieval, activation, working sets, runtime cache |
 | G | Memory Context, ContextVersion, ChangeSet, reconciliation |
 | H | BMCP and Adapter protocol behavior |
-| I | Security, identity, authorization, and governance |
+| I | Security identity, authentication/authorization, privacy/retention governance, and security controls for Forget (not canonical Forget lifecycle semantics) |
 
 A coordinates work but MUST NOT replace a domain Owner's decisions. Each Owner may decide only within its approved authority and must escalate cross-owner conflicts.
 
@@ -117,7 +117,7 @@ Global instructions live directly under the global prompt directory. Each Owner'
       F/owner-session-v1.md
       G/owner-session-v1.md
       H/owner-session-v1.md
-      I/owner-session-v1.md
+      I/owner-session-v2.md
 ```
 
 Every Owner prompt MUST reference the global session contract, its authority boundary, the exact source-of-truth documents, the task's acceptance criteria, and stop conditions. Executed prompt versions are immutable.
