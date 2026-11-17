@@ -4,11 +4,15 @@ on:
   pull_request:
     paths:
       - "14-ai-development/work-items/AID-2026-001/manifest.yaml"
+      - "scripts/validate_aid_2026_001_manifest.py"
+      - "scripts/tests/test_aid_2026_001_manifest_validation.py"
       - ".github/workflows/aid-2026-001-manifest-validation.yml"
   push:
     branches: [main]
     paths:
       - "14-ai-development/work-items/AID-2026-001/manifest.yaml"
+      - "scripts/validate_aid_2026_001_manifest.py"
+      - "scripts/tests/test_aid_2026_001_manifest_validation.py"
       - ".github/workflows/aid-2026-001-manifest-validation.yml"
 
 permissions:
@@ -16,7 +20,7 @@ permissions:
 
 jobs:
   manifest-yaml:
-    name: Full Manifest YAML parse and required-field checks
+    name: Unique-key YAML parse, required-field and path checks
     runs-on: ubuntu-latest
     steps:
       - name: Check out exact commit
@@ -29,35 +33,7 @@ jobs:
           python-version: "3.13"
       - name: Install pinned YAML parser
         run: python -m pip install PyYAML==6.0.2
-      - name: Parse full Manifest and validate required fields
+      - name: Run duplicate-key negative tests and full Manifest validation
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          import yaml
-
-          path = Path("14-ai-development/work-items/AID-2026-001/manifest.yaml")
-          data = yaml.safe_load(path.read_text(encoding="utf-8"))
-          assert isinstance(data, dict), "Manifest root must be a YAML mapping"
-          required = (
-              "work_item_id", "title", "class", "risk", "status",
-              "repository", "base_branch", "r3_test_matrix",
-              "r3_security_specialist_prompt",
-              "r3_forget_specialist_prompt",
-              "integration_reviewer_prompt",
-          )
-          missing = [key for key in required if key not in data]
-          assert not missing, f"Missing required top-level keys: {missing}"
-          assert data["work_item_id"] == "AID-2026-001"
-          assert data["class"] == "ARCH"
-          assert data["risk"] == "R3"
-          for key in (
-              "r3_test_matrix",
-              "r3_security_specialist_prompt",
-              "r3_forget_specialist_prompt",
-              "integration_reviewer_prompt",
-          ):
-              target = Path(data[key])
-              assert target.is_file(), f"Manifest path does not exist: {key}={target}"
-          print("AID-2026-001 Manifest: full YAML parse and required-field/path checks PASS")
-          print("This is a repository-local structural check, not a formal JSON Schema validation.")
-          PY
+          python -m unittest scripts.tests.test_aid_2026_001_manifest_validation -v
+          python scripts/validate_aid_2026_001_manifest.py
