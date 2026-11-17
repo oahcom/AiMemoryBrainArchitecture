@@ -8,7 +8,7 @@
 - H predecessor schema 1.2.12: Blob `9aa366d857d0229687df7e44e8e70d2097a99237` (historical; C outcome branch requires revision)
 - CSubmitOutcome schema 1.0.1: Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`
 - C Phase 3.8.9 contract (1.0.0 historical semantic source): Blob `2ecdf44cae1bf71e9611dd5367c8f7bcf25dd7ac`\n- C Phase 3.11.1 sequence namespace amendment: Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`\n- I Phase 3.8.8 sequence namespace review: Blob `0d78e5b2bfcf66cae6b757314cead84b9c942601`
-- C Phase 3.8.10 exact compatibility review: Blob `3ca46be90c98e47b24dd7914573b9068d0e15abd`
+- C Phase 3.8.11 exact compatibility review of H 1.2.13 × C 1.0.1: Blob `3ca46be90c98e47b24dd7914573b9068d0e15abd`
 - C Phase 3.8.6 semantic amendment: Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`
 - C Phase 3.8.8 signature projection: Blob `06d9264124d85896ccd44ef7789d9af245d8255b`
 - I C-crypto candidate addendum: Blob `1bcddbaaa4a9ca730d492a6554941becac305668`\n- H validator core: Blob `241657140375c93acd90d107724b54c612d99597`\n- H validator tests: Blob `418f0a78ea363286f143ae414af4b92e9a3e89bf`
@@ -119,7 +119,7 @@ These are specified vectors. The H validator core and test source have now been 
 
 Remaining blockers:
 1. C must review and accept/revise this exact 1.2.13 mapping.
-2. H semantic validator implementation and H13-C01..C23 execution are NOT RUN.
+2. H semantic validator and exact test source are updated to 1.2.13 / C 1.0.1; execution of the exact workflow against this source bundle remains pending verification.
 3. I crypto profile registration, trust roots, key lifecycle, historical verification and anti-rollback remain OPEN.
 4. Independent Python/JavaScript canonical-byte and signature interoperability against the registered profile remains OPEN.
 5. Provider-specific same-key lookup/idempotency and actual adapter fault/race tests remain OPEN.
