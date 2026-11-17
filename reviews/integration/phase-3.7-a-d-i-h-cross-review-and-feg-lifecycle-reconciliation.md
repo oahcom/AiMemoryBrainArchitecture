@@ -243,3 +243,36 @@ The following are the unified normative clauses to be incorporated by each owner
 6. Storage/C must independently verify crash-safe visibility and provider-submit boundaries; prose acceptance is not implementation proof.
 
 **Final A integration disposition:** the three local lifecycle designs are semantically compatible after the resolutions in this document, but they are not yet freeze-ready. LIF-01 through LIF-06 remain blocking. Do not merge branches, freeze shared schemas, enable production work or declare Forget completion on the strength of this review.
+
+
+## 8. Phase 3.7 owner-role amendment execution — 2026-11-17
+
+**Status:** Owner-role amendment artifacts have been published on the respective owner branches and read back by exact content. This is an integration-session role execution, not evidence of independent human/agent approval by those Owners. Exact-blob A re-review and implementation remain open.
+
+### 8.1 F/E/G local lifecycle amendments
+
+| Owner | Branch | Commit | Blob | Artifact |
+|---|---|---|---|---|
+| F | session-f-memory-runtime | 348b5ec84c44a8a067122ce0aa72a594b9c06b66 | 29e9504c75d737c2dd200ebc3306eda555f0b0ac | 05-memory-runtime/phase-3.7-f-local-lifecycle-producer-derivative-queue-recall-context-restore.md |
+| E | session-e-memory-compiler-2026-11-16 | 1b5dc2ea6a444fb2556121d6294bc82678e52cde | 4128e867cdcbc40275c0cf527759567408f1058e | 04-memory-compiler/phase-3.7-e-local-lifecycle-producer-derivative-queue-recall-context-restore.md |
+| G | session-g-memory-context | 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa | c1de241ec69834377d9b0e24aa4770a809796d4b | 06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md |
+
+Each artifact contains appended English and Chinese normative amendments. F narrows read-only Recall and formalizes partition evidence/restore proof; E blocks derivative execution from EventRef-only ingress pending D's explicit path; G separates Context derivatives, Delivery and D ParticipantIntentRef before C submit.
+
+### 8.2 D/I/H authority proposals
+
+| Owner | Branch | Commit | Blob | Artifact |
+|---|---|---|---|---|
+| D | session-d-memory-brain-2026-11-16 | 30d4997f6a367ddada52e7171ff970b557bb0062 | e2d096e788eab164dc153905ab68350ad26d2ed0 | 03-memory-brain/phase-3.7-d-producer-class-registry-eventref-ingress-and-participant-intent.md |
+| I | session-i-security-governance-2026-11-16 | 011323a7a1efd1013f3b84112bd5a6db867eaf9e | 0c0c6f96d2037faf5062eafebfcee02b98a11ed2 | 09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md |
+| H | session-h-bmcp-protocol | 1f6a2d3aeedc5a0eefc0d33cca62fc2eaca3f258 | b2a2648d5576511f68fdb9d87ce4388a1fedd5e9 | 08-bmcp-protocol/phase-3.7-h-lifecycle-handoff-envelope-semantics-not-frozen.md |
+
+D now has an explicit semantic disposition: EventRef-only ingress remains quarantined until a separately versioned pre-canonical ingress contract is approved; ProducerClass eligibility and per-work registration are separate; C submit requires exact D ParticipantIntentRef. I specifies current authorization revalidation at every protected boundary and independent PolicyDomain proofs. H defines semantic envelope requirements while explicitly withholding wire freeze.
+
+### 8.3 A integration assessment and remaining blockers
+
+The amendments close the semantic drafting gaps for LIF-01, LIF-02, LIF-03, LIF-05, LIF-07, LIF-08, LIF-09, LIF-10, LIF-11 and LIF-12 at proposal level. LIF-04's conjunctive restore proof model is now repeated in the owner amendments, but exact proof schemas and end-to-end restore evidence remain open. LIF-06 remains open by design: H wire schema is explicitly NOT FROZEN.
+
+A must still perform a line-by-line exact-blob re-review of all six amended artifacts and reconcile with Storage/C owner contracts. D's registry/receipt and ParticipantIntentRef callable schemas, pre-canonical ingress implementation, I verifier integration, H canonical wire schema/security vectors, D/E/Storage atomic registration-to-visibility, and C/G/H final-submit/Applied proof integration remain blocking.
+
+No branch merge, schema freeze, conformance PASS, production activation, provider submit authorization or global Forget completion is authorized by these amendments.
