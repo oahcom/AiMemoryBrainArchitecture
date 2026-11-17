@@ -253,3 +253,17 @@ Freeze requires L1 + L2 + L3:
 - Storage v3.2.4 successor exact-version manifest: Blob 6fc0bedaf5421d1be5a9ab5fb4d8cfab2871d7d7.
 - Current exact evidence ledger: phase-2-exact-evidence-ledger.md.
 - Contradiction register: phase-2-contradiction-register.md.
+
+
+## 12. Superseding protocol status — Storage v3.2.9 / 后继协议状态
+
+The latest Owner branches supersede the earlier Phase 2 protocol observations. Current B baseline is Storage v3.2.9 exact manifest Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3.
+
+- H Unified 1.2.14 / wire 1.3.0, RecoveryJoin 1.0.2, RecoveryCutoff 1.0.5 and CSubmitOutcome 1.0.1 are now bound in one candidate source bundle.
+- C/H/D/I role reviews now bind the corrected H schema Blob 09fcd1fa29fe24255fbd87cae79dafb406594a59 and integrated H authority-join mapping 1cbe74eba69325510d6b1019d971661f965eabf8.
+- H now has a full local H envelope + CSubmitOutcome 1.0.1 positive fixture and 32 passing test methods (26 H validator/fixture + 6 Python/Node crypto interoperability) on run 44069777296.
+- The full-path local tests no longer mock H/C schema validation, local semantic predicates or C-P0 digest/preimage computation. The ten I/D/Storage authority callbacks remain test doubles; production trust and owner-authoritative proof adapters remain OPEN.
+- Storage v3.2.9 records C/H/I/D role reviews but explicitly requires fresh A review. The earlier A review of v3.2.8 does not transfer.
+- B is **CONDITIONALLY ALIGNED at L1/L2 candidate level**. This is not protocol freeze, independent human Owner approval, Gate B/C acceptance or production authorization.
+
+中文：最新 Owner 分支已替代此前 Phase 2 协议观察。当前 B 基线为 Storage v3.2.9 精确 Manifest Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3。H 1.2.14、RecoveryJoin 1.0.2、RecoveryCutoff 1.0.5、CSubmitOutcome 1.0.1 已绑定为同一候选源包；C/H/D/I 角色审查已绑定修正后的 H Schema 和集成 Authority-Join Mapping；H 已有完整本地 H Envelope + CSubmitOutcome 正向 Fixture，32 项测试通过。本地 Schema/Semantic/Digest 路径不再 Mock，但十个 I/D/Storage Authority Callback 仍为 Test Double。生产信任和 Owner 权威 Proof Adapter 仍 OPEN。Storage v3.2.9 记录了 C/H/I/D 角色审查，但明确要求 A 新审查；A 对 v3.2.8 的旧审查不能继承。B 可在 L1/L2 候选层标记 CONDITIONALLY ALIGNED，但不代表协议冻结、独立人类 Owner 批准、Gate B/C 验收或生产授权。
