@@ -28,6 +28,23 @@ These are observed snapshot values, not permanent branch tips. Re-fetch live ref
 
 以上是观察快照，不是永久分支 Tip。最终验收或合并决策前必须重新获取实时 Ref 和当前 Blob。
 
+## 1A. 中文 Owner 分支快照对照
+
+| Owner | 分支 | 后续观察到的 HEAD | 精确工件 Pin / 观察结果 |
+|---|---|---|---|
+| B | session-b-domain-model-phase3 | 2faf8ec38f14dba49e7263d7a60804dae1a74ee2 | Phase 3.8.6 复审 Blob e2bc4c8dde9706bfbe443269b702f1b5aa6965f6：仅批准每 Authority 名义类型边界。 |
+| C | session-c-agent-integration-2026-11-16 | 2e8414f361b0b5d7de959be8a971aadc9e62d6a9 | Phase 3.8.22 复审 Blob 8fd6052cabf58a78962cc2e776398b2a40604bcd：接受 H Reference Gate/60 项测试边界，Signer/Attestation 仍开放。 |
+| D | session-d-memory-brain-2026-11-16 | 76fcc92225666a11893b7241825261319edb621e | Phase 3.8.13 复审 Blob 152627e00b96355e2ff370acd643a51168c4c78c：H 仅为上游接口，不改变 D 权威。 |
+| E | session-e-memory-compiler-2026-11-16 | ee098e14747d9915de5b3efb63b3a8dd77f670ed | Phase 3.8.6 复审 Blob 19d708bc29b6115d7bccb7d320781f452ee28b78：在 E 生命周期条件下接受。 |
+| F | session-f-memory-runtime | 1908ce4d233b20f7cafd00cb679affd01bd15174 | Phase 3.8.6 复审 Blob 122238146830db6188f00a9788e018a82bfb3f90：在读路径/Cache 条件下接受。 |
+| G | session-g-memory-context | 3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe | Phase 3.8.18 复审 Blob 1894860c76336f8739d354b72beed3992cffd17e：接受有限 L1/L2 映射，Applied Contract 仍未冻结。 |
+| H | session-h-bmcp-protocol | 8e24342048d29ef29195b153b8b9ec53ba7c75d9 | Phase 3.8.20 复审 Blob 4ba7e1699215d02224f805a15484b1da2e40c03f：修正 P0 Proof Locator，认证实现仍开放。 |
+| I | session-i-security-governance-2026-11-16 | 2afe0e17f8c0929d9e642ccbe2cad112b5fd43a9 | Phase 3.8.18 复审 Blob b6d1ea45825a1c2090abfba42474814f02f073a3：接受 Signer 分离候选，Crypto/Trust 注册未批准。 |
+| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | 431138e7c7af8bee716f3d8dcbc20114c046bd36 | v3.2.11 Manifest Blob 54a4f0dab7ab24f1f6fb01f8cc5c7da292f02c57：精确候选包，尚未联合接受/冻结。 |
+| A | session-a-integration-2026-11-16 | 9bdf938b980413f592a4db9fe94f4bf2c299fb01 | Phase 3.8.19 复审 Blob e12cd7b5c79e2234178014243fd51f2e7d51272e：外层认证为阻塞性架构缺口。 |
+
+以上 HEAD 是分支快照，不是 Owner 批准或独立审查。最终决策前必须重新读取实时 Ref 和精确 Blob。
+
 ## 2. Scope and interpretation / 范围与解释
 
 - The older C/D/E/G/H/I/Storage branch-tip rows in B-BASELINE-ADD-001 are superseded by this table.
