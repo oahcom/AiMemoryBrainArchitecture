@@ -266,7 +266,7 @@ Latest HRC/JPF suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
 ### 11.9 Current exact executable inventory and run contract
 
 The current H branch source-of-truth inventory is:
-- H semantic + bidirectional JoinProof: `tests/conformance/recovery_cutoff/test_hrc_semantics.py`, Blob `ee0f47095df10786da358bed193d6f8491a5eb2c`; HRC-01..25 and JPF-01..19 = 44 methods.
+- H semantic + bidirectional JoinProof: `tests/conformance/recovery_cutoff/test_hrc_semantics.py`, Blob `60a2f4db4bd12f2131ecd147db9bbe328da6db50`; HRC-01..25 and JPF-01..19 = 44 methods.
 - Wire candidate: `tests/conformance/recovery_cutoff/test_wire_interop.py`, Blob `1a4e754ba9bfa57eb973c6d39731e9f89443b323`; WIRE-01..10 = 10 methods.
 - Schema integrity: `tests/conformance/recovery_cutoff/test_schema_candidates.py`, Blob `67aba74c120f2916d768e7b01c45408ee2624f3a`; SCHEMA-01..12 = 12 methods.
 - RecoveryJoin schema: `schemas/bmcp.recovery-join-1.0.0.schema.json`, Blob `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
@@ -285,3 +285,24 @@ python -m unittest discover \
 The 66 methods remain candidate tests until the workflow actually completes. A successful run proves only the committed Python candidate suite on that CI runner. It does not prove production canonicalization, I-approved signatures/key status, real COC quorum completeness, real I/D/C owner-ledger adapters, Storage JF-10 same-XID behavior, independent implementation interoperability or physical topology.
 
 HRC-TEST-v1 remains test-only. Production validators must consume raw versioned wire messages, validate the exact schema, resolve authoritative owner/COC sources, perform cryptographic verification under I policy, and then run semantic validators. A normalized-model unit test alone is not an end-to-end wire/authority test.
+
+
+### 11.10 Verified CI execution
+
+The branch-scoped workflow completed successfully:
+- Workflow run: 44039990464
+- Job: semantic-and-wire-tests (job ID 133891944149)
+- Checked-out H branch commit: da94bcc1796cb350eed12845e49cbc3663faab9c
+- Runner: Ubuntu 26.04, CPython 3.12.16
+- Result: 66 tests run, 66 passed, 0 failed, 0 skipped.
+
+The run checked out these exact source blobs:
+- HRC/JPF suite: 60a2f4db4bd12f2131ecd147db9bbe328da6db50
+- RecoveryJoin schema: dd3234aa1c74caf6d0e335875cd96e0b2b64082f
+- Wire suite: 1a4e754ba9bfa57eb973c6d39731e9f89443b323
+- Schema integrity suite: 67aba74c120f2916d768e7b01c45408ee2624f3a
+- H semantic contract at run commit: b3218298f58cff9b92cb1c38e453af6fd4d0dd50
+
+The raw job log reports HRC-01..25, JPF-01..19, SCHEMA-01..12 and WIRE-01..10 individually as OK, followed by “Ran 66 tests” and “OK”. This is a verified pass of the checked-in Python candidate suite on that runner. It is NOT proof of production cryptographic canonicalization, I key/trust policy, two-language interoperability, live COC quorum enumeration, real I/D/C owner-ledger adapters, Storage JF-10 physical behavior or deployed transaction topology.
+
+The H semantic contract has since received documentation-only exact-pin/run-result updates. The tested schema and test source blobs above remain the exact CI inputs.
