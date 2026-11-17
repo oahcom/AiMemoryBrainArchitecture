@@ -61,7 +61,11 @@ def fixtures():
         key=(row["owner_kind"],row["owner_admission_ref"])
         proofs[key]={"available":True,"valid":True,"owner_ledger_root":row["owner_ledger_root"],
           "owner_entry_digest":row["owner_entry_digest"],"owner_snapshot_digest":row["owner_snapshot_digest"],
-          "within_frozen_high_water":True}
+          "owner_snapshot_attestation_digest":row["owner_snapshot_attestation_digest"],
+          "owner_local_sequence":row["owner_local_sequence"],"owner_high_water":row["owner_high_water"],
+          "operation_digest":row["operation_digest"],"scope_binding_digest":row["scope_binding_digest"],
+          "proof_ref":row["owner_snapshot_membership_proof_ref"],
+          "proof_digest":row["owner_snapshot_membership_proof_digest"],"within_frozen_high_water":True}
     return m,[p],[a,z],snaps,proofs
 
 class Schema129Tests(unittest.TestCase):
