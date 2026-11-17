@@ -150,3 +150,8 @@ H now reports 93 candidate methods passing in run [44042074640](https://github.c
 ### 7.3 H 95-test boundary
 
 H's latest run [44042568297](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042568297) reports 95 candidate methods PASS: 25 HRC + 19 JPF + 10 WIRE + 14 SCHEMA + 26 TPH + 1 XLANG. The additional schema cases are structural-only for unified 1.2.7. None of these runs the 36 physical race/crash/failover/restore scenarios in this matrix. All physical cases remain NOT EXECUTED.
+
+
+### 7.4 H 97-test scope
+
+H run [44043100543](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44043100543) reports 97 candidate methods PASS: HRC 25 + JPF 19 + WIRE 10 + SCHEMA 16 + TPH 26 + XLANG 1. SCHEMA-15/16 add structural checks for owner-snapshot attestation and RecoveryJoin 1.0.1 proof shape. None of the 97 tests executes the 36 physical race/crash/failover/restore cases. All physical cases remain NOT EXECUTED.
