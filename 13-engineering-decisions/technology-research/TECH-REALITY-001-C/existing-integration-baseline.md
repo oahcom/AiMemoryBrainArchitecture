@@ -56,3 +56,20 @@
 
 ## 中文核验结论
 以上 HEAD、Blob 和 PR 状态均为本次直接读取的 GitHub 证据。A/B 的研究提交均处于 Draft/未完成独立审查状态；C 历史分支与 main 分叉；D/E/F/G/H/I/Storage 的独立分支快照不能被当作 main 已采纳合同。未读取的文件明确保持 NOT VERIFIED。C0 因此为 PARTIAL，而非 PASS。
+
+
+## 完整中文版本
+
+### 仓库基线
+2026-11-18 直接观察到仓库默认分支为 main，HEAD 为 `b3c666e67982cb3d3374e759cfb6552c7765aacb`。本研究分支从该 SHA 创建。历史 C 分支 HEAD 为 `71047cdb51139ca4080ac67f451e38a48698859d`，与 main 比较为分叉状态，领先 167 个提交、落后 56 个提交、104 个文件有差异，故不作为本次研究基线。
+
+### A/B 研究状态
+A 的 PR #45 仍为 Open/Draft，基于历史 main SHA，研究 HEAD 为 `6c7c5919c1b50f38c4d24be679a3885ee3c15b97`。PR #56 的独立技术审查结论为 REVISE，工程可行性仍 NOT YET PROVEN。A 的候选技术栈不能视为批准选型。
+
+B 的 PR #55 仍为 Open/Draft，HEAD 为 `f95b479b223ebb63c8aebcfca13a4cd9b28d5331`。B0 为 PARTIAL/NOT PASSED，B5 为 BLOCKED/NOT PASSED，Fact/Claim ADR 仍阻塞。本次读取并固定了 main 上 B 的领域模型文件，但未穷尽 B 研究分支全部文件，故未读部分保持 NOT VERIFIED。
+
+### Owner 分支
+D、E、F、G、H、I、Storage 均有独立 Owner 分支。本次记录了精确 HEAD 和直接读取的关键 Blob。分支快照不等于 main 已合并，也不等于 Owner 已批准所有内容。H 1.2.15 是候选 Schema，而 Storage v3.3.2 Manifest 仍绑定 H 1.2.14。C 密钥配置与 I 治理签名配置尚未注册。G Applied 冻结仍阻塞。
+
+### 基线结论
+C0 只能评为 PARTIAL。完整生产实现未由本次文档核验得到证明。所有未读取文件、未核验 Issue/PR Diff 和未完成的联合审查均应明确标记 NOT VERIFIED。

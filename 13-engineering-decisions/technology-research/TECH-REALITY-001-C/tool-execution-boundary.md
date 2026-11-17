@@ -33,3 +33,16 @@ Track NOT_STARTED, ADMITTED, EXECUTING, EFFECT_POSSIBLE, EFFECT_CONFIRMED, EFFEC
 A tool may submit a candidate with source refs, execution identity, result digest, event time and observed_at/recorded_at. It MUST NOT modify Canonical Memory rows, advance lifecycle state, fabricate Evidence/Applied attestations or claim Forget completion. Brain revalidates authorization and current Forget/scope predicates at submission and commit time.
 
 Tool 可以提交包含来源引用、执行身份、结果 Digest、Event Time 和观察/记录时间的候选，但不得修改 Canonical Memory 行、推进生命周期、伪造 Evidence/Applied Attestation 或声明 Forget 完成。Brain 必须在提交与 Commit 时重新验证授权和当前 Forget/Scope 条件。
+
+
+## 完整中文版本
+
+Tool 是由 Agent 调用、具有独立身份的能力，可为进程内函数、沙箱进程、远程服务、MCP Server Tool 或 Provider 托管工具。定义、调用提议、授权、执行、副作用和结果观察必须区分。
+
+Agent 选择是否调用 Tool 并解释结果；I 决定主体、动作、资源、Scope、委派和撤权；C 记录调用与推理 Attempt 的关联和交付证据，但不负责授权；Tool Host 执行沙箱、凭据、网络和文件系统限制并捕获结果；D 拥有 Canonical Memory 变更和生命周期；H 拥有 BMCP Wire/Adapter Protocol。
+
+版本化能力清单应声明 Tool 身份/版本、输入输出 Schema、读写资源、外部副作用、网络目的地、文件系统根、Memory/Context 访问请求、执行环境、超时、取消行为、幂等性、证据能力和 Secret 需求。能力声明不等于授权，授权由 I 决定。版本升级不会自动继承权限。
+
+只有在工具宿主能证明时，才记录 NOT_STARTED、ADMITTED、EXECUTING、EFFECT_POSSIBLE、EFFECT_CONFIRMED、EFFECT_REJECTED、UNKNOWN、COMPENSATION_REQUESTED 或 COMPENSATED。补偿不等于回滚，除非外部系统确认。只读确定性 Tool 可在有限策略下重试；幂等写入仅在稳定 Operation Key 和接收端语义明确时重试；非幂等写入在超时/响应丢失后必须先对账，禁止盲目重试。取消不撤销已完成副作用。
+
+Tool 可提交候选及来源、执行身份、结果 Digest、Event Time 和观察时间，但不得直接修改 Canonical Storage、推进生命周期、伪造 Evidence/Applied Attestation 或声明 Forget 完成。Brain 必须重新验证当前授权和 Forget/Scope 条件。

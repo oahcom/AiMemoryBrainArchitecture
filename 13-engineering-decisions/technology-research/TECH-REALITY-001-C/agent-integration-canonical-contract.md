@@ -30,3 +30,28 @@ C owns Agent/Provider integration requirements, inference request/attempt semant
 
 ## Compatibility / 兼容
 C's historical CSubmitOutcome 1.0.1 and H Unified 1.2.15 are candidate artifacts only. This document does not change their schema, fields, signature profile, wire version or acceptance status. Any normative field-level change requires exact owner review and a successor immutable version.
+
+
+## 完整中文版本
+
+### 必须要求
+1. Agent、Runtime、Model、Provider、Tool、Session 和 Principal 必须是不同概念。
+2. 每个 Inference Request/Attempt 必须有稳定身份和明确幂等作用域。
+3. Provider Handoff、执行生命周期、响应接收、解析、验证、Tool 执行、Brain Commit/Visibility 和 G Applied 必须分开记录。
+4. 不能仅因模型或 Provider 返回内容就将其升级为 Verified Claim 或 Canonical Memory。
+5. 必须保留 Provider 原生响应元数据；缺失字段使用明确的 Unavailable/Not Reported/Unknown/Not Applicable。
+6. Handoff 状态不明确时，必须先对账同一 Attempt 和 Provider Key，再考虑创建新 Attempt。
+7. 迟到/重复结果必须作为不可变观察追加；冲突必须进入 Reconciliation。
+8. Tool 副作用必须独立授权、标识和留证；取消不等于回滚。
+9. Brain 候选和写操作必须通过 I 授权和 D 生命周期/Forget 检查。Agent/Tool 不得直接访问规范存储。
+10. C 最终请求证据必须绑定实际不可变请求及真实提交边界；G 独自决定 Applied。
+11. Trace、Correlation、Request、Attempt、Operation、Session 和 Principal 标识不得互换。
+12. 遥测必须最小化敏感内容，不能替代不可篡改审计证明。
+
+### 禁止要求
+不得将 HTTP 200、Provider 接受、Tool 成功或输出解析等同于规范操作成功；不得仅凭超时/ACK 丢失认定 NOT_INVOKED；不得盲目重试非幂等副作用；不得将 Agent 载荷身份当认证主体；不得允许外部 Agent 修改 Canonical Memory 或生命周期；不得在未注册信任密钥上签名或把 Schema 存在误认为 I/H 已批准；Forget/撤权后不得复用失效 Context/Memory Reference。
+
+### 权威边界
+C 负责 Agent/Provider 集成要求、推理 Request/Attempt、Provider Handoff 证据、Tool 集成证据要求和遥测关联。B 负责领域类型；D 负责生命周期/Forget；E 负责派生记忆；F 负责检索激活；G 负责 ContextVersion/Applied；H 负责 BMCP Wire/ACK；I 负责身份/授权/信任/隐私；Storage 负责持久化 Commit/Visibility；A 负责系统集成和部署决策。
+
+历史 CSubmitOutcome 1.0.1 与 H Unified 1.2.15 仅为候选。本文不修改其 Schema、字段、签名配置、Wire Version 或接受状态。任何字段级规范变化都必须由权威 Owner 审查并发布不可变后继版本。

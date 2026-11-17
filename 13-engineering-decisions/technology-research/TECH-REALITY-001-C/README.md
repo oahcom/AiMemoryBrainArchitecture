@@ -46,3 +46,14 @@ Establish an evidence-backed boundary between Agents, model inference, Providers
 No Provider or Agent framework is approved. No Brain runtime implementation, benchmark, production security review, production cryptographic key registry, production Provider egress or end-to-end Forget/Applied proof is claimed. Test plans are not test results. Provider response is not canonical business success.
 
 本研究不批准任何 Provider 或 Agent Framework；不声称 Brain Runtime 已实现，不声称已完成基准测试、生产安全审查、生产密码密钥注册、生产 Provider Egress 或端到端 Forget/Applied 证明。测试计划不是测试结果，Provider 响应不是规范业务成功。
+
+
+## 完整中文版本
+
+本任务由 C 负责，评审级别 R2。目标是基于可核验的 GitHub 源文件和成熟技术官方资料，明确 Agent、模型推理、Provider、Tool 与 Memory Brain 的责任边界、执行证据、失败恢复和遥测要求。本包属于研究及规范提案，不是生产实现、技术冻结或跨 Owner 批准。
+
+本目录包含现有基线、Agent/Brain 边界、推理信任模型、Provider 研究、Provider Outcome/执行证据、Tool 边界、遥测、失败语义、跨 Owner 矩阵、冲突登记、技术评估、验证计划、决策记录、C 规范集成合同，以及 Evidence 和 Validation 索引。
+
+Gate 状态：C0 PARTIAL（尚未穷尽所有 PR/Issue 和源文件）；C1/C2 已形成候选定义；C3 已发现历史 C Outcome 合同但当前联合版本绑定未完成；C4 已研究但隐私策略和实现未批准；C5 BLOCKED/PARTIAL；C6 验证计划已定义但全部 NOT RUN；C7 PR 已创建；C8 INDEPENDENT_REVIEW_PENDING。
+
+本研究没有批准任何 Provider 或 Agent Framework，没有实现 Brain Runtime，没有运行端到端原型、生产安全审查或性能基准，也没有证明生产密钥、Provider Egress、Forget 或 Applied 闭环。测试计划不等于测试通过；Provider 响应不等于规范业务成功。

@@ -39,3 +39,14 @@ Normalize only stable concepts: request identity, attempt identity, provider/mod
 
 ## 6. License and version / 许可证与版本
 Official docs pages reviewed do not establish a pinned SDK release/license for every framework/provider. **NOT VERIFIED** for Anthropic SDK, Gemini SDK, Ollama, Hugging Face Inference, AutoGen package and MCP SDK versions/licenses in this pass. No package is approved by this report.
+
+
+## 完整中文版本
+
+本研究于 2026-11-18 检查官方文档和公开源码。滚动文档不等于固定 Release。实现前必须固定 API/SDK 版本和许可证。没有检查到官方当前证据的能力标记 NOT VERIFIED，不能推断 Provider 之间完全兼容。
+
+OpenAI Responses 官方资料说明 SSE 流式响应和 Structured Outputs 的 JSON Schema 子集；不能据此推断所有 Schema 均支持，也不能推断所有请求都有取消或幂等保证。Anthropic Messages 本轮未完成官方当前 API 文档核验，标记 NOT VERIFIED。Gemini streamGenerateContent 文档展示 responseId、modelVersion、usageMetadata 和 functionCall；functionCall 是模型提出的调用，不是系统已经执行工具。vLLM 官方文档列出部分 OpenAI-compatible Chat、Responses、Embeddings API，并提供 /metrics；其文档明确警告 --api-key 并不保护所有端点。llama.cpp Server 文档列出 OpenAI-compatible 和 Anthropic-compatible 路由、流式、多模态和工具调用，但不承诺完全符合 OpenAI 规范；工具调用可能依赖 Jinja/Chat Template。Ollama、Hugging Face Inference 本轮未完成官方能力矩阵核验，标记 NOT VERIFIED。
+
+Hermes 是具有 Provider Resolver、Tool Registry、SQLite Session、Gateway 等模块的 Python Agent Runtime，可供架构参考，但不是 Brain Core。LangGraph 提供 Checkpoint/Interrupt/HITL，恢复时节点可能从头执行，因此副作用必须具备幂等保护。PydanticAI 提供类型化工具、重试和 Deferred Tool Result；重试预算是框架行为，不代表副作用安全。OpenAI Agents SDK 提供工具、MCP、Session、HITL 和内建 Tracing，但 Tracing 不能替代 Brain Audit。AutoGen 生态正在演进，不应未经版本/支持审查冻结依赖。MCP 是工具/资源集成协议，不是身份授权权威。
+
+候选采用分层 Capability Registry 加 Provider 专属 Adapter。标准化 Request/Attempt/Evidence、错误分类、流事件封套和可用 Usage；保留 Provider 原生 Response ID、Model Version、安全拦截、多模态、缓存计量、Batch、取消和 Tool Call ID。能力缺失必须显式降级或拒绝，不能静默模拟保证。

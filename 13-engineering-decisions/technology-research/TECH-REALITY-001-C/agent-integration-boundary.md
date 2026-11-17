@@ -46,3 +46,16 @@ All state-changing Brain calls MUST resolve authenticated principal, scope, auth
 
 ## 6. Open owner decisions / Owner 未决项
 B must confirm Agent/Principal/Session typed references and scope cardinalities. I must approve principal/delegation and tenant policy. H must confirm wire envelope/capability semantics. D/E/F/G must confirm write, derived-memory, retrieval and Context boundaries. These are not inferred from C's proposal.
+
+
+## 完整中文版本
+
+Agent 是负责规划、推理、选择行动和协调工具的执行主体/运行时组合，不等同于 Model、Provider、Process、Session 或 Principal。一个 Agent 可以调用多个 Model/Provider；一个 Agent 可以拥有多个并发 Session。Principal 身份及授权必须由 I 根据认证上下文解析，不能由 Agent 载荷自报。
+
+External、Embedded、Autonomous、Workflow、Coding、Conversational 和 Multi-agent 是部署或行为类别，不必全部成为领域实体。Agent Host 管理交互环境，Agent Client 是协议客户端，Gateway 是可选入口/路由层，Runtime 执行推理和工具循环。
+
+Agent/Runtime 负责推理、规划、任务拆分、行动选择、工具调用和 Agent 原生状态。Memory Brain 负责受控请求入口、规范领域规则、Canonical Memory 生命周期、受控 Retrieval/Context、Evidence/Provenance 和可验证操作结果。Provider 负责模型推理服务及其原生执行/响应元数据，不决定 Brain 业务状态。Tool Runtime 负责工具执行环境、副作用隔离和执行结果证据。I 负责身份、授权、委派和撤权；H 负责 BMCP Wire、Adapter Protocol 和 ACK；D/E/F/G 分别负责规范生命周期/Forget、派生记忆、检索激活、ContextVersion/Applied。
+
+禁止 Agent 直接写 Canonical Storage、绕过 D 修改生命周期、将 LLM 输出声明为已验证事实、绕过 I 授权、伪造 Applied Attestation、将 Tool Success 当 Provider Outcome、将 HTTP 200 当业务成功、使用无 Scope 的全局 Namespace、跨用户共享未授权 Context，以及 Forget 后继续使用失效 Memory Reference。
+
+所有状态变更请求必须在权威边界解析认证主体、Scope、授权和幂等性。载荷中的 ID 只是引用，不是认证凭据。Agent Framework 是可替换 Adapter，不是 Memory Brain 的领域权威。

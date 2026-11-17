@@ -49,3 +49,19 @@ Standardize request/attempt/evidence lifecycle, error categories, stream envelop
 - TO_VALIDATE: Rust SDK ecosystem, streaming, cancellation, local inference, telemetry overhead, multi-provider failover.
 - DEFERRED: distributed Agent gateway/services, mandatory broker, vector retrieval and multi-agent orchestration in Brain.
 - REJECTED: single success enum; framework-owned canonical memory; blind retry; treating OpenAI-compatible as full semantic compatibility.
+
+
+## 完整中文版本
+
+### 架构方案
+A Direct Provider：Agent Runtime 直接使用 Provider SDK 和 Brain API，部署简单、原生能力完整，但 Adapter/证据/隐私逻辑重复，仅适合极小型单 Agent Spike。B Central Gateway：统一身份路由和遥测，但 Gateway 可能成为单点和重复状态权威，且不能替代 I，当前阶段暂缓。C Modular Integration Layer：在单一可部署模块化结构内分离 Agent Interface、Provider Adapter、Tool Boundary、Execution Evidence、Telemetry 和 Brain Client，复杂度适中，最适合当前候选阶段。D Distributed Services：隔离和独立扩展能力强，但带来运维、一致性、Trace 和恢复复杂度，当前阶段延期。
+
+候选在本地优先 Rust 模块化单体内建设模块化 Integration Layer，Agent 专属 Adapter 独立适配，Inference Worker 可选隔离。不把 Agent Planner 或 Tool Catalog 放入 Brain Core，不强制 Kubernetes、Broker 或中央 Gateway。此为候选，不是 A 的部署拓扑批准。
+
+逐 Provider 独立 Adapter 保留原生能力但有重复；单一统一接口易丢失能力；Capability Registry 加专属 Adapter 可明确支持矩阵和扩展字段；统一请求加能力协商可与 Registry 结合，但不能保证运行语义等价。建议采用后两者组合。
+
+Hermes 适合作为真实 Python Agent Runtime 参考，不是 Brain Core。LangGraph 的 Checkpoint/HITL 能力有用，但恢复时节点可能重跑。PydanticAI 提供类型化验证和 Deferred Tool。OpenAI Agents SDK 提供内建 Trace，但不能作为 Brain Audit。AutoGen 生态仍在演进。MCP 是工具协议，不是身份授权或规范 Memory 协议。
+
+技术层候选包括 Rust/Tokio、Provider 原生 SDK、vLLM/llama.cpp/Ollama 本地推理、H 所有的 BMCP、按需使用 MCP、JSON Schema/Serde、显式 Attempt State Machine、Provider 原生 Streaming、OpenTelemetry 和脱敏日志。除既有项目语言方向外，不应仅凭本报告将任何技术升级为正式决策。
+
+DECIDED：Agent/Model/Provider 是不同角色。CANDIDATE：模块化 Integration Layer、Capability Registry 和 Provider 专属 Adapter。TO_VALIDATE：Rust SDK、Streaming、Cancellation、本地推理、遥测开销。DEFERRED：分布式 Gateway、Broker、多 Agent Brain Orchestration。REJECTED：单一 Success 枚举、Framework 拥有 Canonical Memory、超时盲目重试、将 OpenAI-Compatible 当成完全等价。

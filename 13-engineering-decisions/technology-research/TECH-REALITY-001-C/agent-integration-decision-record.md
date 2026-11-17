@@ -49,3 +49,20 @@
 - I tool permission/capability policy.
 - Provider API version and SDK/license pins.
 - Runtime repository/accountable engineering owner (A identifies Issue #7 open).
+
+
+## 完整中文版本
+
+C-DEC-001：Agent Runtime 位于 Brain 领域之外。状态 DECIDED（边界原则，依据当前 C Overview 和责任矩阵）。Agent 负责规划和工具循环，Brain 保留规范 Memory 权威。Agent Framework 可替换，需 Adapter 和身份检查。除非治理正式修改责任矩阵，否则不得反转此边界。
+
+C-DEC-002：模型输出是未受信候选数据。状态 DECIDED（依据 B 认识论区分和 C 边界，具体流水线仍 OPEN）。模型生成不建立事实、验证或 Canonical 状态。必须保留来源并服从验证、D/E 规则。
+
+C-DEC-003：保留 C Provider Handoff 五态代数。状态 CANDIDATE，精确联合采纳 OPEN。历史 C Phase 3.8.4 定义 HANDOFF_ACCEPTED、HANDOFF_REJECTED、NOT_INVOKED、UNKNOWN、IN_DOUBT。等待 C/H/I/A 精确版本决策。
+
+C-DEC-004：分层 Provider Capability Registry。状态 CANDIDATE。采用窄统一接口加 Provider 专属 Adapter 和明确能力登记。需要更多符合性测试，以换取避免虚假兼容。
+
+C-DEC-005：模块化集成层而非分布式服务。状态 CANDIDATE，A 拓扑仍未批准。候选在本地优先模块化单体内组织模块，Inference Worker 可选隔离。
+
+C-DEC-006：OTel Trace Context 不拥有 Audit 权威。状态 CANDIDATE。W3C Trace Context 用于因果可观测；安全审计和授权证据由 I 负责。
+
+未决事项包括 C/I 密码配置注册、H 1.2.15 Validator/CI、Storage 后继 Manifest、G Applied Predicate、I Tool 权限策略、Provider API/SDK 版本和许可证，以及正式 Runtime 仓库/工程 Owner。

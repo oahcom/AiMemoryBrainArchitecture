@@ -17,3 +17,23 @@
 
 ## Conflict handling / 冲突处理
 BLOCKING items fail closed. C cannot resolve B/D/E/F/G/H/I/Storage authority conflicts by renaming fields, adding a parallel enum, or treating an author-side acceptance as Owner approval. Any change to exact Blob SHA invalidates reviews that pin the predecessor.
+
+
+## 完整中文版本
+
+| ID | 等级 | 冲突/缺口 | 权威 Owner | 关闭条件 |
+|---|---|---|---|---|
+| C-CON-001 | BLOCKING | main 未包含完整 D/E/F/G/H/I 合同，Owner 分支尚未联合对账 | A 与各 Owner | A 批准精确源 Pin Manifest，各 Owner 对同版本采纳 |
+| C-CON-002 | BLOCKING | H 1.2.15 候选与 Storage v3.3.2 的 H 1.2.14 Pin 不一致 | H/Storage/C/I | 后继 Manifest 精确绑定 1.2.15 Schema、Validator、CI、Trust，并由消费者复审 |
+| C-CON-003 | BLOCKING | C/I 密钥信任配置尚未注册或部署 | I/C/H | I 批准、密钥托管/轮换/撤销、Anti-Rollback、H 验证器和运维证据 |
+| C-CON-004 | BLOCKING | G Applied 冻结阻塞，端到端执行未验证 | G/C/H/I/D | G Predicate、C 最终请求证据、H Wire/ACK、I 授权、D Fence 和端到端测试 |
+| C-CON-005 | HIGH | B Fact/Claim ADR 阻塞，B PR #55 Draft | B/治理 | 正式 ADR 和下游类型映射 |
+| C-CON-006 | HIGH | 历史 C 分支与 main 分叉 167 ahead/56 behind | C/A | 精确源对账和独立审查，禁止盲目合并 |
+| C-CON-007 | HIGH | A PR #45 旧基线 Draft，PR #56 判定 REVISE | A | 修复发现、刷新当前源 Pin 并独立复审 |
+| C-CON-008 | HIGH | Provider 能力等价性未跨 OpenAI/Anthropic/Gemini/本地服务证明 | C | 每 Provider/Model 的版本化 Stream/Tool/Error/Cancel/Usage/Idempotency 符合性矩阵 |
+| C-CON-009 | HIGH | 任意 Tool 的副作用证据和安全重试语义未标准化 | I/Tool Runtime/C | I 批准能力授权模型及每类 Tool 的幂等/副作用证据 |
+| C-CON-010 | MEDIUM | Telemetry 保留期限、属性白名单、数据分类未批准 | I/Observability | I 批准分类/保留/导出策略和脱敏测试 |
+| C-CON-011 | MEDIUM | Runtime/Framework 版本、许可证和 Rust Exporter 未固定 | A/C | 精确 Release、许可证和依赖审查 |
+| C-CON-012 | MEDIUM | Brain 端到端原型和基准未执行 | C/Testing/Runtime | 可复现 Harness 和测量结果 |
+
+BLOCKING 项必须 Fail Closed。C 不得通过重命名字段、添加竞争枚举或将作者自检接受视为 Owner 批准来消除冲突。任何 Blob SHA 变化都会使绑定旧 Blob 的审查失效。

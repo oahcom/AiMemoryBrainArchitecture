@@ -49,3 +49,18 @@ Require independent validation for high-impact, disputed, external-world, financ
 Conflicting model outputs create competing Claims/Evidence, not majority-vote truth. Preserve model/provider/version, prompt/request digest where retention permits, independent sources, event_time and recorded_at. B owns Claim semantics and conflict interpretation; E owns derived-memory pipeline; D owns lifecycle. C only preserves invocation and output provenance.
 
 相互冲突的模型输出形成相互竞争的 Claim/Evidence，而不是多数投票事实。保留模型/Provider/版本、允许保留时的 Prompt/Request Digest、独立来源、event_time 和 recorded_at。B 负责 Claim 语义和冲突解释；E 负责派生记忆流水线；D 负责生命周期。C 只保存调用与输出来源证据。
+
+
+## 完整中文版本
+
+模型生成内容不是已验证事实。Provider 接受请求不等于推理完成；推理完成不等于输出有效；Tool 执行不等于 Canonical Commit。B 拥有认识论语义，C 负责集成证据，D/E 负责规范生命周期和派生记忆生产。
+
+输入接收、InferenceRequest 冻结、Provider Handoff、Provider 执行开始/完成、响应接收、流完整性、解析、结构验证、领域验证、Tool Call Proposal、Tool 授权、Tool Execution、结果观察、候选 Memory 提交、D 接受/提交，以及 G Applied 必须分别记录。不得压缩为一个 success 状态。
+
+信任不是事实、认识论状态、置信度、证据强度或授权。必须分别记录来源认证、完整性、Provenance、验证结果、B 的 Epistemic Status 和 I 的授权决定。Provider 签名只能在已注册的信任配置范围内证明来源/完整性，不能证明现实世界真伪。模型自我评价不是独立验证。
+
+信任提升必须产生新的验证事件，记录方法、验证者、来源、时间和 Scope，不得抹除历史。I 批准的信任权威才能建立 Issuer/Key 信任。多个相同模型输出的副本不构成独立佐证。密钥撤销、来源更正或证据失效必须触发新的状态/对账事件。
+
+带来源的用户明确陈述、认证外部记录、可验证工具观察结果、关联源证据的结构化提取，可以成为候选输入，但不等于 Canonical Memory Applied。高影响、争议、外部世界、财务、安全、身份和破坏性操作主张必须独立验证。模型推断摘要应保留来源链并保持 Inferred，除非经过声明的验证程序。
+
+模型输出冲突应保留为竞争 Claim/Evidence，不采用简单多数投票决定事实。记录模型/Provider/版本、请求摘要、独立来源、Event Time 和 Recorded At。B 解释 Claim 冲突，E 管理派生流程，D 管理生命周期；C 不得越权裁决事实。

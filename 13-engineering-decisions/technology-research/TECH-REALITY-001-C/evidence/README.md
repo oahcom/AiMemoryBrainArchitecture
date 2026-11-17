@@ -37,3 +37,16 @@ Research capture date: 2026-11-18. Prefer official, versioned documentation; mov
 
 ## Limitations / 限制
 Anthropic Messages, Ollama, Hugging Face Inference, current AutoGen package versions, exact SDK releases/licenses, provider cancellation/idempotency semantics and complete current MCP security profiles were not fully verified in this pass. Do not treat absent sources as negative capability evidence.
+
+
+## 中文证据索引
+
+官方 Provider/Runtime 资料包括 OpenAI Responses 流式文档、OpenAI Structured Outputs、OpenAI Agents SDK、Gemini GenerateContent、vLLM OpenAI-Compatible Server 和 llama.cpp Server。它们用于核验具体 API/能力，不证明跨 Provider 完全等价。
+
+Agent 框架资料包括 Hermes Architecture/Tools、LangGraph Interrupts、PydanticAI Retries/Deferred Tools、Microsoft AutoGen Migration 和 MCP Specification Changelog。滚动文档在正式实现前需重新固定版本。
+
+OpenTelemetry Context Propagation 说明 Trace Context 跨进程传播，以及对不可信外部 Trace Header 和 Baggage 的安全注意事项。GenAI Semantic Conventions 页面已迁移，需检查新规范仓库。
+
+项目证据：main HEAD b3c666...；A PR #45 Draft、A Review PR #56 REVISE；B PR #55 Draft；D/G/H/I/Storage 使用精确 Branch/Blob Pin。H 1.2.15 和 Storage v3.3.2 不匹配，G Applied 仍阻塞。
+
+本轮未完整核验 Anthropic Messages、Ollama、Hugging Face Inference、AutoGen 当前包版本、全部 SDK 许可证、Provider Cancellation/Idempotency 语义及完整 MCP 安全配置。没有来源不代表能力不存在。

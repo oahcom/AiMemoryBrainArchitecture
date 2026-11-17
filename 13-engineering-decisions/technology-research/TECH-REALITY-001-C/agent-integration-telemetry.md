@@ -35,3 +35,18 @@ OTel W3C Trace Context propagates traceparent/tracestate; Baggage is arbitrary c
 
 ## 7. Implementation candidate / 实现候选
 CANDIDATE: OpenTelemetry API/SDK with W3C Trace Context, structured redacted logs and Prometheus-compatible aggregate metrics. OTel Collector and Grafana are deployment options, not mandatory architecture. Exact Rust SDK/exporter versions and data residency policy remain TO_VALIDATE.
+
+
+## 完整中文版本
+
+Trace 记录 Agent、Inference、Tool 和 Brain 之间的因果执行路径；Metrics 记录低基数聚合速率、延迟、Usage、队列深度、重试/失败/超时/取消数量；Logs 是经过脱敏和访问控制的结构化诊断事件；Audit 由 I 治理，普通日志/Trace 不能作为不可篡改审计证据。
+
+TraceId/SpanId/ParentSpanId 表示分布式追踪；CorrelationId 表示业务关联；RequestId 是逻辑请求；AttemptId 是一次尝试；OperationId 是 Brain 领域操作；ProviderOperationId 由 Provider 提供；ToolInvocationId 表示工具调用；SessionId 表示运行时会话；Principal/Tenant/Scope 由 I/B 管理。禁止互相替代。外部 Trace Header 是不可信输入。
+
+调用链可以从 User Request 到 Agent Run、Inference Attempt、Tool Invocation、Brain API、Domain Operation，再到异步 Evidence/Ack。真实父子关系使用 Parent Span；异步或汇聚关系可用 Span Link。Trace 不完整不代表业务事务未完成。
+
+建议使用低基数标签记录请求数、延迟、Provider/Model Family、TTFT、Token 总量、Tool 时长、超时/重试/取消/失败、Outcome 分布、队列积压和 Brain API 延迟。禁止将用户、Tenant、SessionId、Prompt、Request/Operation ID 或任意 Tool 参数放入 Metric Label。默认不记录完整 Prompt、模型输出、Memory、源文件、Secret、API Key、Bearer Token 或原始工具参数。
+
+OTel W3C Trace Context 用于传播 traceparent/tracestate。Baggage 是任意跨服务数据，不得放 PII、Secret、Tenant ID 或敏感 Memory。向不可信 Provider 传播内部 Trace/Baggage 必须受控。保留期限、访问、删除和 Legal Hold 由 I 决定。Trace Dashboard 不是 Audit Proof。
+
+候选使用 OpenTelemetry API/SDK、W3C Trace Context、结构化脱敏日志和 Prometheus 兼容聚合指标。Collector/Grafana 是部署候选，不是强制架构。Rust SDK/Exporter 版本和数据驻留策略仍待验证。
