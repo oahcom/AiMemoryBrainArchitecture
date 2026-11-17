@@ -2,7 +2,7 @@
 
 - Owner: C — Provider Outcome signing authority
 - Governance owner: I — trust policy, governance root and key lifecycle approval
-- Key-status event schema: `schemas/c-key-status-event-1.0.0.schema.json`, Blob `6159004500bd188438e4bf898bf1a2a77ba6dd59`
+- Key-status event schema: `schemas/c-key-status-event-1.0.0.schema.json`, Blob `908b293eba337e9fa75864cea3704e28a1a8d82e`
 - C data profile candidate: `AIMBA-C-CRYPTO-1.0` (NOT REGISTERED)
 - Governance signature profile candidate: `AIMBA-I-KEY-GOVERNANCE-1.0` (NOT REGISTERED)
 - Status: PROPOSED lifecycle and anti-rollback contract; no production key registry or custody is deployed.
