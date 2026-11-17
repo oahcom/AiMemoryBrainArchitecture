@@ -422,3 +422,62 @@ B-CONFLICT-017 现更新为 **CLOSED — MANIFEST CONSISTENCY REMEDIATED**，依
 B3 remains **NOT PASSED**. H 1.2.15 successor integration and a fresh exact Storage/A bundle review remain open. This author-side currentness refresh does not claim independent review or global Owner acceptance.
 
 B3 仍为 **NOT PASSED**。H 1.2.15 后继集成以及 Storage/A 对精确后继 Bundle 的新复审仍开放。本次作者侧时效性刷新不代表独立审查或全局 Owner 验收。
+
+
+## 11. Current B Owner Fact/Claim ADR and governance baseline / 当前 B Owner Fact/Claim ADR 与治理基线 — 2026-11-18
+
+### 11.1 Live refs and exact B artifacts / 实时 Ref 与 B 精确工件
+
+- Current `main` ref observed: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; recursive tree SHA equals that commit; tree is not truncated. No paths exist under `13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/`.
+- Current B Owner branch observed: `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e7263d7a60804dae1a74ee2`.
+- B summary ADR `02-domain-model/ADR-001-fact-claim-semantics.md`: Blob `a1024938ff5baba069cf128c69496a44e143330c`.
+- B detailed canonical ADR `02-domain-model/adr/ADR-001-fact-claim-canonical-model.md`: Blob `df77e4a93cb8fef689ae7c828888d960cbf381d6`.
+- B consumer mapping `02-domain-model/fact-claim-consumer-mapping.md`: Blob `dd45a37199c9b69ab6b68f65e051a484a04691d4`.
+- B typed-reference approval `02-domain-model/phase-3.6-b-owner-formal-actor-scope-environment-type-mapping-confirmation.md`: Blob `3a1e77889cd9a90cd5822d9f0cb3437880868706`; this is a separate approved scope and does not decide Fact/Claim.
+
+### 11.2 Corrected B recommendation / B 建议纠偏
+
+The current B Owner artifacts recommend **Option A — a separate Fact attestation object and Claim proposition thread** as the preferred candidate. This supersedes the older C2/Option B recommendation in the B research package's earlier `fact-claim-identity-adr.md`. Neither option is approved: both B ADRs explicitly remain ADR-BLOCKED; the named formal Architecture Governance authority, approver, decision timestamp and approval record are absent. Option B would require an explicit Governance amendment/reinterpretation of I-04/P-04 and terminology before it could become normative.
+
+当前 B Owner 工件优先推荐 **Option A——Fact Attestation 独立对象与 Claim 命题线程分离**。这取代 B 研究包旧版 `fact-claim-identity-adr.md` 中此前倾向 C2/Option B 的建议。两个方案均未获批准：B 的两份 ADR 都明确保持 ADR-BLOCKED；具名正式 Architecture Governance 权威、批准人、决策时间和批准记录均缺失。Option B 若要成为规范方案，必须先由 Governance 明确修订/重新解释 I-04/P-04 和术语基线。
+
+The B Owner consumer map remains CANDIDATE / ADR-BLOCKED. It keeps E's CandidateProposition/ExtractionIR neutral; proposes stable ClaimRef + immutable ClaimRevisionRef and ConflictSet over exact ClaimRevisionRefs; assigns canonical ID allocation, persistence, revision commit and ConflictSet lifecycle/commit shape to D after approval; and keeps F/G exact-version-bound and H wire fields unfrozen. These are proposals, not downstream Owner acceptance.
+
+B Owner 消费者映射仍为 CANDIDATE / ADR-BLOCKED。它要求 E 的 CandidateProposition/ExtractionIR 保持中立；提出稳定 ClaimRef + 不可变 ClaimRevisionRef 及按精确 ClaimRevisionRef 构建 ConflictSet；批准后由 D 负责规范 ID 分配、持久化、Revision Commit 和 ConflictSet 生命周期/Commit 形态；F/G 保持精确版本绑定，H Wire 字段不冻结。这些均为提案，不是下游 Owner 验收。
+
+### 11.3 Exact current main contradiction / 当前 main 精确矛盾
+
+| Source / 来源 | Exact Blob / 精确 Blob | Current statement / 当前表述 |
+|---|---|---|
+| `00-governance/architecture-invariants.md` I-04 | `33b037318e459ebb73bea33b3186f31a41d5dcfe` | Fact is distinct from Claim as a domain concept |
+| `00-governance/design-principles.md` P-04 | `192e6ba6e9287792a02b679dda0d391844270228` | Fact and Claim are different objects |
+| `02-domain-model/domain-model-overview.md` | `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` | Fact is a qualified interpretation of Claim, not a separate object type; labels this DECIDED |
+| `00-governance/terminology.md` | `9b287ebe027ae01128baf164952ce15aad050638` | Defines “Fact / Claim” together |
+| EN domain guide | `8a19cebacf5aefb0aded5fdbfeaff406291a5cf1` | Explicitly ADR-BLOCKED; prohibits downstream schema freeze |
+| ZH domain guide | `a9f53a453aec25c47c58c4aea75adc43c83028d3` | Same ADR-BLOCKED status and freeze prohibition |
+
+These are current live `main` Blob pins at the refresh. The conflict is not resolved by the B recommendation: B recommends Option A but cannot amend governance invariants. Issue #43 remains OPEN and preserves the blocker. Issue #5 remains OPEN for I36 governance approvals, a separate authority track; it is not the missing Architecture Governance decision record for this ADR.
+
+以上均为本次刷新时实时 `main` 的 Blob Pin。B 的建议不能解除该冲突：B 推荐 Option A，但无权修改治理不变量。Issue #43 仍 OPEN 并保留阻塞。Issue #5 仍 OPEN，负责 I36 治理批准，是独立权威轨道；它不是本 ADR 缺失的 Architecture Governance 决议记录。
+
+## 12. B3 ingress and research-maturity refresh / B3 入口与研究成熟度刷新 — 2026-11-18
+
+- A Phase 8 B-02 issuer state-machine reconciliation: `reviews/architecture-feasibility/phase-8-b02-issuer-state-machine-and-cross-owner-reconciliation.md`, Blob `8a0a428ebf9cd8c8fe00562d2267ff490d5c3205`. It corrects the earlier A summary: I schema/P0/order review and C order review exist as **ACCEPT WITH CONDITIONS** reference-contract reviews; neither is production trust registration or H executable issuer approval. D's exact 1.2.15 review remains OPEN. H issuer pre-sign chain and integrated authority-join successor remain OPEN / NOT FOUND. B-02 here means the H gateway-ingress workstream; it is not B's B2 gate.
+- A H 1.2.15 Validator/CI/Trust exact review: Blob `582ed576f73d9096dcc77b3a559df8c3b997b895`; H tested commit `0d36324457e39bd50ad56ae902d477c4ea765b61`. It reports 91 Provider Outcome tests and 288 Recovery Cutoff tests (22 skipped), both successful. Evidence is bounded local/reference CI with deterministic callback seams; production cryptographic trust, issuer signing, I registration and durable replay remain OPEN. A disposition: DEFERRED.
+- Storage v3.3.2 remains pinned to H 1.2.14 / C 1.0.1; it is not the H 1.2.15 successor bundle. New exact H/C/I/D pins, Storage successor manifest and fresh A review are required.
+- PRODUCT-FIRST-001 integration review Blob `3e7f0fc604761533ddd521924ff69d2039a63282` is NON-NORMATIVE / DRAFT and confirms Fact/Claim ADR remains blocked; no ADR, technology freeze or implementation authorization is issued.
+- Memory Operating System research Blob `00e09d91ad3e7f08a9b7f7a26e30ebc98160d9c5` and Memory IR research Blob `084fc03bc5f09393bdd1ea6e8af3d8a6b703d3fc` both say baseline pinned, but design/prototype work not completed. They are not evidence for changing B canonical semantics.
+- Issues #5, #7 and #43 are all OPEN. #5 tracks I36 external governance approvals; #7 tracks authoritative runtime repository/accountable engineering owner; #43 tracks system-wide consolidation and explicitly preserves Fact/Claim ADR-BLOCKED.
+
+- A Phase 8 B-02 Issuer 状态机协调：`reviews/architecture-feasibility/phase-8-b02-issuer-state-machine-and-cross-owner-reconciliation.md`，Blob `8a0a428ebf9cd8c8fe00562d2267ff490d5c3205`。它修正此前 A 摘要：I 的 Schema/P0/顺序复审和 C 的顺序复审已作为 Reference 契约获得 **ACCEPT WITH CONDITIONS**；但都不是生产 Trust 注册，也不是 H 可执行 Issuer 批准。D 对 1.2.15 的精确复审仍 OPEN。H Issuer Pre-sign 链和 Integrated Authority-Join 后继版本仍 OPEN / NOT FOUND。此处 B-02 指 H Gateway Ingress 工作流，不是 B 的 B2 Gate。
+- A H 1.2.15 Validator/CI/Trust 精确复审：Blob `582ed576f73d9096dcc77b3a559df8c3b997b895`；H 测试 Commit `0d36324457e39bd50ad56ae902d477c4ea765b61`。报告 91 项 Provider Outcome 测试和 288 项 Recovery Cutoff 测试（22 项跳过），均成功。证据仅限使用确定性 Callback Seam 的本地/Reference CI；生产密码学 Trust、Issuer 签名、I 注册和 Durable Replay 仍 OPEN。A 处置为 DEFERRED。
+- Storage v3.3.2 仍绑定 H 1.2.14 / C 1.0.1，不是 H 1.2.15 后继 Bundle。需要新的精确 H/C/I/D Pin、Storage 后继 Manifest 和 A 新复审。
+- PRODUCT-FIRST-001 集成审查 Blob `3e7f0fc604761533ddd521924ff69d2039a63282` 为 NON-NORMATIVE / DRAFT，并确认 Fact/Claim ADR 仍阻塞；未签发 ADR、技术冻结或实现授权。
+- Memory Operating System 研究 Blob `00e09d91ad3e7f08a9b7f7a26e30ebc98160d9c5` 与 Memory IR 研究 Blob `084fc03bc5f09393bdd1ea6e8af3d8a6b703d3fc` 均表示基线已 Pin，但设计/原型尚未完成。它们不是改变 B 规范语义的证据。
+- Issue #5、#7 和 #43 均为 OPEN。#5 跟踪 I36 外部治理批准；#7 跟踪规范 Runtime 仓库/负责工程 Owner；#43 跟踪全系统整合，并明确保留 Fact/Claim ADR-BLOCKED。
+
+### 12.1 Main/PR currentness snapshot / Main/PR 当前性快照
+
+At this refresh: main HEAD `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; B Owner branch HEAD `2faf8ec38f14dba49e7263d7a60804dae1a74ee2`; research branch HEAD before this refresh's author-side writes `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`. PR #55 remains Open / Draft, base `main`, recorded base SHA `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`; compare is DIVERGED, 166 ahead / 34 behind, merge base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; 22 files, 4,864 additions, 0 deletions. GitHub reports `mergeable=true` at the read. These are metadata only; no rebase, retarget, merge or Ready transition is authorized. The main tree contains zero B research package paths.
+
+本次刷新时：main HEAD `e52594f181d2edb77448adcfed64a0fbdffaf3aa`；B Owner 分支 HEAD `2faf8ec38f14dba49e7263d7a60804dae1a74ee2`；本轮作者侧写入前研究分支 HEAD `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`。PR #55 仍 Open / Draft，Base 为 `main`，记录的 Base SHA 为 `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`；Compare 为 DIVERGED，领先 166 / 落后 34，Merge Base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`；22 个文件，新增 4,864 行，删除 0 行。GitHub 本次返回 `mergeable=true`。以上仅为元数据；不授权 Rebase、改 Base、合并或转 Ready。Main Tree 中 B 研究包路径为零。
