@@ -17,7 +17,7 @@
 | H I crypto wire mapping 3.8.4 | `bf160288d7529b37ad1b56924c1583748922aa25` |
 | I crypto profile proposal | `5eeb011032c53c2f7897d699d6f512b26f07d0a2` |
 | I crypto artifact-revision amendment | `9db3976ed9a891e9395d0e7edf949e75cb4422aa` |
-| H RecoveryJoin schema 1.0.1 | `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c` |
+| H RecoveryJoin schema 1.0.2 | `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c` |
 | H semantic validator reference | `4a7c22ed15dff0a688559f79e4facbffca6527cd` |
 | H unified manifest conformance tests | `c95bea3d7a7bee5f419bfabe914ea56be79fc8ad` |
 | I Python/Node P0 vector set | `4657f0c81e9c8692d29ac183380f3d7e074a4e4c` |
@@ -207,3 +207,10 @@ No schema/protocol/cryptographic freeze, deployment, implementation conformance 
 **作为协议/Schema 候选有条件接受。** 本决议是协调会话中的 H 角色模拟，不是独立人工 H Owner 签署。I/D/C/Storage 必须审查各自 Authority 与 Evidence；A 必须进行新的精确版本集成审查。
 
 不宣称 Schema/Protocol/Cryptographic Freeze、部署、实现 Conformance PASS、JF-10 P0 关闭或生产激活。
+
+
+## 10. Companion owner membership proof schema / 配套 Owner Membership Proof Schema
+
+RecoveryJoin 1.0.2, Blob `4b664e3bce465499bcdfd93796349a4ba7074002`, now defines the full structural payload for owner-signed snapshot membership proofs. Each directional admission join and no-participant disposition binds the exact proof ref/digest. I, D and C each own their respective proof semantics and signatures; H performs structural validation and exact reference joins only. This companion schema is separately versioned and does not inherit Unified Schema 1.2.11 / wire 1.3.0.
+
+RecoveryJoin 1.0.2，Blob `4b664e3bce465499bcdfd93796349a4ba7074002`，现定义 Owner-signed Snapshot Membership Proof 的完整结构 Payload。每个双向 Admission Join 与 No-participant Disposition 都绑定精确 Proof Ref/Digest。I、D、C 分别拥有各自 Proof 语义与签名；H 只做结构验证和精确引用 Join。该配套 Schema 独立版本化，不继承 Unified Schema 1.2.11 / Wire 1.3.0。
