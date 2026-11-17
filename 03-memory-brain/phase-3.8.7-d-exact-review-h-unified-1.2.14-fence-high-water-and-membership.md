@@ -4,7 +4,7 @@
 - Owner perspective: D — Memory Brain / ForgetFence Authority
 - H Unified schema 1.2.14 Blob: `fee452efb99ab4fe0ceccb347c46eeef1521bd28`
 - H RecoveryJoin schema 1.0.2 Blob: `4b664e3bce465499bcdfd93796349a4ba7074002`
-- D membership P0 crosswalk Blob: `bf35b7f047a374268920b99199c06fc2a78dabb7`
+- D membership P0 crosswalk Blob: `c4adf827dd62d44c43b8e871dec4835581508adf`
 - D original membership proof contract Blob: `d80dabe7210e681bc4e2290355a38f8b67be9ddd`
 - D Forget Fence contract Blob: `1f0391bc49d007c44ec74165bd33d37412cc7990`
 - D Gate Release currentness contract Blob: `7f2861d9441b9be6c8e69f41fd0276636be483a8`
