@@ -42,3 +42,11 @@ No material semantic divergence was found in this targeted translation review.
 **Bilingual parity: PASS for this exact source Blob only.**
 
 **Source status remains unchanged:** CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I. C/G/H freeze remains BLOCKED. This review does not count as H Owner acceptance, C/G acceptance, I/D/B approval, wire/schema freeze, implementation verification or test execution.
+
+## 5. H recovery-batch mapping follow-up
+
+H added §11.8 for the CGH-APPLIED-1.1 causal-order and recovery-batch evidence bridge. The current exact H source Blob is now `0dca3dc5463a02be0e19524811afbae87795baf5`, superseding `db59b63e322d7255b8b400f47859dcac32bb3027`. EN/zh-CN companions were refreshed to this exact source.
+
+Updated structural readback: 23/23 headings and 33/33 table rows across source, EN and zh-CN; EN content remains exact source text. The §11.8 candidate mapping preserves COC terminal proof, recovery-batch identity/digest, pre-batch participant completeness, owner high-water attestations, participant reconciliation, I terminal/revocation evidence, D lineage/cutoff/effective-position evidence and Storage same-XID terminal evidence.
+
+This follow-up is still **CANDIDATE / NOT FROZEN**. The report's original 22-heading count is superseded by this 23-heading readback. No H schema/SDK generation, owner approval or conformance execution is implied.
