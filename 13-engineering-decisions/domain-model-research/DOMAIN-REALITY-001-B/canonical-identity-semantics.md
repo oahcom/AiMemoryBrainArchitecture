@@ -22,31 +22,31 @@ B 负责领域引用类型和身份不变量。I 负责 Issuer 信任、Principa
 
 ## 2. Canonical distinctions / 规范区分
 
-| Term | Canonical meaning | Must not be confused with |
+| Term / 术语 | Canonical meaning / 规范含义 | Must not be confused with / 不得混淆 |
 |---|---|---|
-| Domain Identity | Stable identity of a domain object within its declared identity namespace | Content digest, display label, external identifier |
-| Typed Reference | Typed, namespaced pointer to a registered identity/object | Authentication credential, grant, permission |
-| Identity Claim | Untrusted caller/payload assertion about an identity | Authenticated identity |
-| Authentication Credential | Protected proof material validated by a verifier under I policy | Domain Ref or ActorRef |
-| Authenticated Principal | I-resolved security subject after trust/credential/issuer/audience/revocation checks | Domain Entity or AgentRef |
-| ActorRef | Immutable per-operation attribution binding to a verified Principal and acting/delegation context | PrincipalRef, bearer token, reusable user ID |
-| Permission | I policy decision for a specific Principal/action/resource/purpose/scope/audience/current epoch | ScopeRef or any identifier |
-| ScopeRef | Typed namespace/ownership/applicability boundary | Permission grant |
-| EnvironmentRef | Stable identity of a world/save/simulation/device-fleet/external state domain | Display name, coordinates, environment revision |
-| RuntimeSessionRef | Bounded runtime/session identity for correlation and binding | Conversation history, long-lived Agent identity |
+| Domain Identity / 领域身份 | Stable identity of a domain object within its declared identity namespace. / 领域对象在声明的身份命名空间内保持稳定的身份。 | Content digest, display label, external identifier. / 内容摘要、显示标签、外部标识符。 |
+| Typed Reference / 类型化引用 | Typed, namespaced pointer to a registered identity/object. / 指向已注册身份/对象的类型化、带命名空间引用。 | Authentication credential, grant, permission. / 认证凭证、授权授予或权限。 |
+| Identity Claim / 身份声明 | Untrusted caller/payload assertion about an identity. / 调用方或载荷对某个身份提出的未受信声明。 | Authenticated identity. / 已认证身份。 |
+| Authentication Credential / 身份认证凭证 | Protected proof material validated by a verifier under I policy. / 在 I 策略下由验证器校验的受保护证明材料。 | Domain Ref or ActorRef. / 领域引用或 ActorRef。 |
+| Authenticated Principal / 已认证 Principal | I-resolved security subject after trust/credential/issuer/audience/revocation checks. / 通过信任、凭证、Issuer、Audience 和撤销检查后由 I 解析的安全主体。 | Domain Entity or AgentRef. / 领域 Entity 或 AgentRef。 |
+| ActorRef / 行为主体引用 | Immutable per-operation attribution binding to a verified Principal and acting/delegation context. / 每次操作不可变的归因引用，绑定已验证 Principal 及行为/委托上下文。 | PrincipalRef, bearer token, reusable user ID. / PrincipalRef、Bearer Token 或可复用 User ID。 |
+| Permission / 权限 | I policy decision for a specific Principal/action/resource/purpose/scope/audience/current epoch. / I 针对特定 Principal、Action、Resource、Purpose、Scope、Audience 和当前 Epoch 作出的策略决定。 | ScopeRef or any identifier. / ScopeRef 或任意标识符。 |
+| ScopeRef / 作用域引用 | Typed namespace/ownership/applicability boundary. / 表示命名空间、所有权或适用边界的类型化引用。 | Permission grant. / 权限授予。 |
+| EnvironmentRef / 环境引用 | Stable identity of a world/save/simulation/device-fleet/external state domain. / 世界、存档、仿真、设备群或外部状态域的稳定身份。 | Display name, coordinates, environment revision. / 显示名称、坐标或环境修订号。 |
+| RuntimeSessionRef / 运行时会话引用 | Bounded runtime/session identity for correlation and binding. / 用于关联和绑定的有界运行时/会话身份。 | Conversation history, long-lived Agent identity. / Conversation 历史或长期 Agent 身份。 |
 
 ## 3. Identity stability rules / 身份稳定性规则
 
 ### 3.1 Domain object identity
 
-1. Identity is opaque and non-semantic; content edits do not change object identity.
-2. A new immutable version/revision receives its own version identity while the parent aggregate identity remains stable.
-3. An identity, once assigned, is never silently recycled or reused.
-4. A display label, alias, normalized text, embedding, or content digest is not a canonical identity.
-5. The same content may legitimately exist as multiple domain objects in different ownership, purpose, time, or source contexts.
-6. Merge/split is an explicit identity-governance operation with retained lineage and reference migration; no silent ID reassignment.
-7. Supersession creates an explicit predecessor/successor relation; it does not make IDs aliases.
-8. Forget does not authorize identity reuse. Reappearance of equivalent content must pass D/I lifecycle, suppression, provenance and admission rules; content equality cannot resurrect a forgotten object.
+1. Identity is opaque and non-semantic; content edits do not change object identity. / 身份是不透明且无语义的；内容编辑不得改变对象身份。
+2. A new immutable version/revision receives its own version identity while the parent aggregate identity remains stable. / 新的不可变 Version/Revision 获得独立版本身份，同时父聚合身份保持稳定。
+3. An identity, once assigned, is never silently recycled or reused. / 身份一经分配，不得静默回收或复用。
+4. A display label, alias, normalized text, embedding, or content digest is not a canonical identity. / 显示标签、别名、规范化文本、Embedding 或内容摘要都不是规范身份。
+5. The same content may legitimately exist as multiple domain objects in different ownership, purpose, time, or source contexts. / 相同内容在不同所有权、用途、时间或来源上下文中可以合法地对应多个领域对象。
+6. Merge/split is an explicit identity-governance operation with retained lineage and reference migration; no silent ID reassignment. / 合并/拆分必须是显式身份治理操作，保留谱系并迁移引用；不得静默重新分配 ID。
+7. Supersession creates an explicit predecessor/successor relation; it does not make IDs aliases. / Supersession 建立明确的前驱/后继关系，不会使两个 ID 成为别名。
+8. Forget does not authorize identity reuse. Reappearance of equivalent content must pass D/I lifecycle, suppression, provenance and admission rules; content equality cannot resurrect a forgotten object. / Forget 不授权复用身份。等价内容重新出现时，必须经过 D/I 生命周期、抑制、Provenance 和准入规则；内容相等不能使已遗忘对象复活。
 
 ### 3.2 Version identity
 
@@ -60,17 +60,17 @@ The existing B Phase 3.6 proposal defines the following distinct reference types
 
 现有 B Phase 3.6 提案定义以下不同引用类型。本清单记录 B 的类型语义提案，不表示所有消费者契约或治理批准均已完成。
 
-| Type | Namespace / identity boundary | Authority |
+| Type / 类型 | Namespace / identity boundary / 命名空间与身份边界 | Authority / 权威 |
 |---|---|---|
-| PrincipalRef | Issuer + tenant/security domain + Principal kind + opaque subject ID | I registry; B type semantics |
-| IssuerRef | Trust domain / issuer registry + opaque issuer ID | I |
-| ActorRef | Per-operation attribution namespace; immutable ID | B type; I validates; H binds |
-| AgentRef | Agent registry + tenant/security domain | Agent/deployment registry; I binding |
-| AdapterRef | Adapter application registry + tenant/security domain; instance separate | H registry; I Principal trust |
-| ProducerRef | Issuer + tenant/security domain + producer namespace | I registration; E/D enforce |
-| ScopeRef | Scope authority + tenant/security domain + scope kind + opaque Scope ID | B type; I/G registry/policy |
-| EnvironmentRef | Environment authority + tenant/project + environment kind + opaque ID | Environment registry; I bridge policy |
-| RuntimeSessionRef | Issuer + runtime/Agent/Adapter instance + session namespace | H/platform session authority; I trust policy |
+| PrincipalRef / Principal 引用 | Issuer + tenant/security domain + Principal kind + opaque subject ID. / Issuer + Tenant/安全域 + Principal 类型 + 不透明 Subject ID。 | I registry; B type semantics. / I 注册表；B 负责类型语义。 |
+| IssuerRef / Issuer 引用 | Trust domain / issuer registry + opaque issuer ID. / 信任域或 Issuer 注册表 + 不透明 Issuer ID。 | I. / I。 |
+| ActorRef / 行为主体引用 | Per-operation attribution namespace; immutable ID. / 每次操作独立的归因命名空间；ID 不可变。 | B type; I validates; H binds. / B 定义类型；I 验证；H 绑定。 |
+| AgentRef / Agent 引用 | Agent registry + tenant/security domain. / Agent 注册表 + Tenant/安全域。 | Agent/deployment registry; I binding. / Agent/部署注册表；I 负责绑定。 |
+| AdapterRef / Adapter 引用 | Adapter application registry + tenant/security domain; instance separate. / Adapter 应用注册表 + Tenant/安全域；实例身份另行区分。 | H registry; I Principal trust. / H 注册表；I 负责 Principal 信任。 |
+| ProducerRef / Producer 引用 | Issuer + tenant/security domain + producer namespace. / Issuer + Tenant/安全域 + Producer 命名空间。 | I registration; E/D enforce. / I 注册；E/D 强制执行。 |
+| ScopeRef / Scope 引用 | Scope authority + tenant/security domain + scope kind + opaque Scope ID. / Scope 权威 + Tenant/安全域 + Scope 类型 + 不透明 Scope ID。 | B type; I/G registry/policy. / B 定义类型；I/G 负责注册表/策略。 |
+| EnvironmentRef / Environment 引用 | Environment authority + tenant/project + environment kind + opaque ID. / Environment 权威 + Tenant/Project + Environment 类型 + 不透明 ID。 | Environment registry; I bridge policy. / Environment 注册表；I 负责跨域桥接策略。 |
+| RuntimeSessionRef / 运行时会话引用 | Issuer + runtime/Agent/Adapter instance + session namespace. / Issuer + Runtime/Agent/Adapter 实例 + Session 命名空间。 | H/platform session authority; I trust policy. / H/平台会话权威；I 信任策略。 |
 
 A consumer must preserve type discriminator, issuer/authority namespace and security-domain dimensions. Weakening a typed reference into an untyped string loses essential semantics and is prohibited where it creates ambiguity.
 
@@ -82,25 +82,25 @@ The following is the B/I/H semantic dependency order; it is not a wire schema or
 
 以下是 B/I/H 的语义依赖顺序，不是 Wire Schema，也不替代 Owner 专属的可执行流程：
 
-1. H/platform authenticates protected transport/session/workload context.
-2. I validates issuer, credential/key, audience, validity and revocation; resolves PrincipalRef.
-3. Resolve AgentRef, AdapterRef, ProducerRef and RuntimeSessionRef through authoritative registries and bind them to the authenticated Principal.
-4. Compare payload identity claims with verifier-produced bindings; mismatch/unknown required binding fails closed.
-5. Resolve ActorRef from verifier-produced operation context; validate Principal, Issuer and delegation attribution.
-6. Resolve ScopeRef and EnvironmentRef against authoritative registries; validate type, namespace, status, parent and compatibility.
-7. I authorizes the exact Principal + Actor + action + resource + purpose + audience + Scope/Environment + delegation tuple.
-8. Revalidate current PermissionEpoch and the independent D ForgetFence at the owner-defined final commit/disclosure boundary.
+1. H/platform authenticates protected transport/session/workload context. / H/平台认证受保护的 Transport、Session 和 Workload 上下文。
+2. I validates issuer, credential/key, audience, validity and revocation; resolves PrincipalRef. / I 验证 Issuer、Credential/Key、Audience、有效期和撤销状态，并解析 PrincipalRef。
+3. Resolve AgentRef, AdapterRef, ProducerRef and RuntimeSessionRef through authoritative registries and bind them to the authenticated Principal. / 通过权威注册表解析 AgentRef、AdapterRef、ProducerRef 和 RuntimeSessionRef，并将其绑定到已认证 Principal。
+4. Compare payload identity claims with verifier-produced bindings; mismatch/unknown required binding fails closed. / 将载荷身份声明与验证器生成的绑定进行比较；不匹配或必需绑定未知时必须 Fail Closed。
+5. Resolve ActorRef from verifier-produced operation context; validate Principal, Issuer and delegation attribution. / 从验证器生成的操作上下文解析 ActorRef，并验证 Principal、Issuer 和委托归因。
+6. Resolve ScopeRef and EnvironmentRef against authoritative registries; validate type, namespace, status, parent and compatibility. / 通过权威注册表解析 ScopeRef 和 EnvironmentRef，并验证类型、命名空间、状态、父级和兼容性。
+7. I authorizes the exact Principal + Actor + action + resource + purpose + audience + Scope/Environment + delegation tuple. / I 对精确的 Principal + Actor + Action + Resource + Purpose + Audience + Scope/Environment + Delegation 元组进行授权。
+8. Revalidate current PermissionEpoch and the independent D ForgetFence at the owner-defined final commit/disclosure boundary. / 在 Owner 定义的最终提交/披露边界重新验证当前 PermissionEpoch 和独立的 D ForgetFence。
 
 ## 6. Non-equivalence invariants / 不等价不变量
 
-- PrincipalRef ≠ AgentRef ≠ AdapterRef ≠ ProducerRef.
-- ActorRef ≠ PrincipalRef and is not reusable across materially different operations/session/delegation context.
-- ScopeRef does not grant Permission.
-- EnvironmentRef ≠ Environment ScopeRef ≠ Environment revision.
-- RuntimeSessionRef ≠ Session ScopeRef ≠ Conversation.
-- Ref resolution ≠ authentication; authentication ≠ authorization.
-- PermissionEpoch ≠ D ForgetFenceGeneration; neither may be compared, converted or substituted.
-- Domain Entity identity ≠ Security Principal identity, even when a person/Agent is represented in both domains.
+- PrincipalRef ≠ AgentRef ≠ AdapterRef ≠ ProducerRef. / PrincipalRef、AgentRef、AdapterRef、ProducerRef 彼此不同。
+- ActorRef ≠ PrincipalRef and is not reusable across materially different operations/session/delegation context. / ActorRef 不等于 PrincipalRef；在实质不同的操作、Session 或 Delegation 上下文中不得复用。
+- ScopeRef does not grant Permission. / ScopeRef 不授予 Permission。
+- EnvironmentRef ≠ Environment ScopeRef ≠ Environment revision. / EnvironmentRef、Environment ScopeRef 和 Environment Revision 彼此不同。
+- RuntimeSessionRef ≠ Session ScopeRef ≠ Conversation. / RuntimeSessionRef、Session ScopeRef 和 Conversation 彼此不同。
+- Ref resolution ≠ authentication; authentication ≠ authorization. / Ref 解析不等于认证；认证不等于授权。
+- PermissionEpoch ≠ D ForgetFenceGeneration; neither may be compared, converted or substituted. / PermissionEpoch 不等于 D ForgetFenceGeneration；二者不得比较、转换或替代。
+- Domain Entity identity ≠ Security Principal identity, even when a person/Agent is represented in both domains. / 即使同一 Person/Agent 同时出现在两个领域中，Domain Entity 身份仍不等于 Security Principal 身份。
 
 ## 7. Physical serialization identity is not domain identity / 物理序列化身份不等于领域身份
 
@@ -132,33 +132,33 @@ The anchor is an IMPLEMENTATION_DETAIL / physical serialization primitive, not a
 
 ## 8. Unresolved namespace questions / 未决命名空间问题
 
-1. Canonical Tenant vs Workspace vs Project vs User Scope taxonomy and parent/child algebra: OPEN; I/A confirmation required.
-2. Whether one Principal may be federated across multiple tenant/security domains and under which issuer mapping: I GOVERNANCE-BLOCKED.
-3. Environment Registry Authority designation and closed-world registry completeness: NOT VERIFIED; cross-environment access remains fail closed.
-4. Exact typed Ref wire names/encoding and authenticated context fields: H-owned; no B unilateral freeze.
-5. Canonical Agent logical identity vs runtime instance/session relationships: C/I/H confirmation required.
-6. ExternalId uniqueness and issuer-scoped collision behavior: I policy OPEN.
-7. Claim identity across Memory Versions: B ADR OPEN.
-8. Whether Session and Conversation are separate domain entities: C/G OPEN; do not conflate with RuntimeSessionRef or Session ScopeRef.
+1. Canonical Tenant vs Workspace vs Project vs User Scope taxonomy and parent/child algebra: OPEN; I/A confirmation required. / Tenant、Workspace、Project 与 User Scope 的规范分类及父子代数仍 OPEN，需 I/A 确认。
+2. Whether one Principal may be federated across multiple tenant/security domains and under which issuer mapping: I GOVERNANCE-BLOCKED. / 一个 Principal 是否可跨多个 Tenant/安全域联邦，以及采用何种 Issuer 映射，仍被 I GOVERNANCE-BLOCKED。
+3. Environment Registry Authority designation and closed-world registry completeness: NOT VERIFIED; cross-environment access remains fail closed. / Environment Registry Authority 的指定及封闭世界注册表完整性尚 NOT VERIFIED；跨 Environment 访问继续 Fail Closed。
+4. Exact typed Ref wire names/encoding and authenticated context fields: H-owned; no B unilateral freeze. / 类型化 Ref 的精确 Wire 名称/编码及认证上下文字段由 H 负责；B 不得单方面冻结。
+5. Canonical Agent logical identity vs runtime instance/session relationships: C/I/H confirmation required. / 规范 Agent 逻辑身份与 Runtime Instance/Session 关系需 C/I/H 确认。
+6. ExternalId uniqueness and issuer-scoped collision behavior: I policy OPEN. / ExternalId 唯一性和 Issuer 作用域内冲突处理仍为 I 策略 OPEN。
+7. Claim identity across Memory Versions: B ADR OPEN. / Claim 跨 Memory Version 的身份策略仍为 B ADR OPEN。
+8. Whether Session and Conversation are separate domain entities: C/G OPEN; do not conflate with RuntimeSessionRef or Session ScopeRef. / Session 与 Conversation 是否为独立领域实体仍由 C/G OPEN；不得与 RuntimeSessionRef 或 Session ScopeRef 混淆。
 
 ## 9. Conflict and decision status / 冲突与决策状态
 
-- B Phase 3.6 typed identity proposal Blob `0a6b78...` labels itself JOINT-DECIDED technical baseline, but explicitly says no separate B-session signature is claimed and implementation tests were not run.
-- I's current identity-trust closure Blob `0cbf6bb...` says technical baseline JOINT-DECIDED but external governance approvals remain GOVERNANCE-BLOCKED and implementation/conformance NOT VERIFIED.
-- H current protected-operation binding Blob `e7ca5c...` says governance and consumer acceptance OPEN; implementation/conformance NOT VERIFIED.
-- B formally APPROVED ActorRef/ScopeRef/EnvironmentRef semantic type mapping for the exact BIH package (A Blob `a45ae90b318a79bf009d14f4d917611881e9e214`) and exact CGH-APPLIED-1.1 recovery-batch pair above. C/F/G BIH consumer design decisions were recorded ACCEPT WITH ENUMERATED EXCEPTIONS; H ACCEPTED the BIH package. The separate CGH-APPLIED-1.1 C/D/G/H/I/B decisions are also recorded with enumerated exceptions, while Storage confirmed its architecture interface with changes.
-- These are exact-version semantic/design acceptances only. They do not freeze H wire encoding, close I36-GOV-01..10, prove runtime conformance or production readiness. Applied Contract Frozen remains NO; COC/Storage physical implementation and fault tests remain open.
+- B Phase 3.6 typed identity proposal Blob `0a6b78...` labels itself JOINT-DECIDED technical baseline, but explicitly says no separate B-session signature is claimed and implementation tests were not run. / B Phase 3.6 类型化身份提案 Blob `0a6b78...` 将自身标记为 JOINT-DECIDED 技术基线，但明确未声称存在单独 B Session 签字，且实现测试未运行。
+- I's current identity-trust closure Blob `0cbf6bb...` says technical baseline JOINT-DECIDED but external governance approvals remain GOVERNANCE-BLOCKED and implementation/conformance NOT VERIFIED. / I 当前身份信任闭合 Blob `0cbf6bb...` 表明技术基线 JOINT-DECIDED，但外部治理批准仍 GOVERNANCE-BLOCKED，实现/一致性仍 NOT VERIFIED。
+- H current protected-operation binding Blob `e7ca5c...` says governance and consumer acceptance OPEN; implementation/conformance NOT VERIFIED. / H 当前受保护操作绑定 Blob `e7ca5c...` 表明治理和消费者验收 OPEN；实现/一致性 NOT VERIFIED。
+- B formally APPROVED ActorRef/ScopeRef/EnvironmentRef semantic type mapping for the exact BIH package (A Blob `a45ae90b318a79bf009d14f4d917611881e9e214`) and exact CGH-APPLIED-1.1 recovery-batch pair above. C/F/G BIH consumer design decisions were recorded ACCEPT WITH ENUMERATED EXCEPTIONS; H ACCEPTED the BIH package. The separate CGH-APPLIED-1.1 C/D/G/H/I/B decisions are also recorded with enumerated exceptions, while Storage confirmed its architecture interface with changes. / B 已针对精确 BIH Package（A Blob `a45ae90b318a79bf009d14f4d917611881e9e214`）及上述精确 CGH-APPLIED-1.1 Recovery-batch 配对正式 APPROVED ActorRef/ScopeRef/EnvironmentRef 语义类型映射。C/F/G 的 BIH 消费者设计决策记录为 ACCEPT WITH ENUMERATED EXCEPTIONS；H 接受该 BIH Package。独立的 CGH-APPLIED-1.1 C/D/G/H/I/B 决策也均记录了列明例外，Storage 则在变更条件下确认架构接口。
+- These are exact-version semantic/design acceptances only. They do not freeze H wire encoding, close I36-GOV-01..10, prove runtime conformance or production readiness. Applied Contract Frozen remains NO; COC/Storage physical implementation and fault tests remain open. / 以上仅为精确版本的语义/设计验收，不冻结 H Wire 编码，不关闭 I36-GOV-01..10，不证明运行时一致性或生产就绪。Applied Contract Frozen 仍为 NO；COC/Storage 物理实现和故障测试仍开放。
 
 ## 10. Decision record / 决策记录
 
-**B-ID-DEC-001 — Preserve distinct typed references and separate reference from trust**
-- Context: payload identity, authenticated principal, domain scope and authorization had been at risk of being conflated.
-- Alternatives: untyped string IDs; one universal Actor/User ID; distinct typed references with verifier/registry binding.
-- Candidate decision: preserve distinct typed references; no implicit casts; reference never proves authentication or permission.
-- Consequences: safer cross-module validation, but requires registries, explicit mappings and schema compatibility.
-- Affected owners: B, I, H, C, D, E, G.
-- Reversal condition: only a documented domain case proving two concepts are semantically identical without loss of namespace, lifecycle, authority or trust semantics.
-- Status: CANDIDATE FOR B CANONICAL MODEL; existing delegated technical decision retained as evidence, no new cross-owner approval inferred.
+**B-ID-DEC-001 — Preserve distinct typed references and separate reference from trust / 保留不同类型化引用，并区分引用与信任**
+- Context: payload identity, authenticated principal, domain scope and authorization had been at risk of being conflated. / 背景：载荷身份、已认证 Principal、领域 Scope 和授权曾面临被混为一谈的风险。
+- Alternatives: untyped string IDs; one universal Actor/User ID; distinct typed references with verifier/registry binding. / 备选方案：无类型字符串 ID；统一 Actor/User ID；通过验证器/注册表绑定的不同类型化引用。
+- Candidate decision: preserve distinct typed references; no implicit casts; reference never proves authentication or permission. / 候选决定：保留不同类型化引用；禁止隐式转换；引用本身永远不能证明认证或权限。
+- Consequences: safer cross-module validation, but requires registries, explicit mappings and schema compatibility. / 后果：跨模块验证更安全，但需要注册表、显式映射和 Schema 兼容性。
+- Affected owners: B, I, H, C, D, E, G. / 受影响 Owner：B、I、H、C、D、E、G。
+- Reversal condition: only a documented domain case proving two concepts are semantically identical without loss of namespace, lifecycle, authority or trust semantics. / 撤销条件：仅当有文档证明两个概念在不损失命名空间、生命周期、权威或信任语义的前提下完全相同时，才可撤销。
+- Status: CANDIDATE FOR B CANONICAL MODEL; existing delegated technical decision retained as evidence, no new cross-owner approval inferred. / 状态：B 规范模型候选；保留既有委托技术决策作为证据，不推断存在新的跨 Owner 批准。
 
 ## 11. Gate status / 门禁状态
 
