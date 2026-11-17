@@ -318,3 +318,26 @@ H 1.2.14、此前 G Consumer Review、CGH-APPLIED-1.1 Semantic Package、Schema-
 - 生产 Egress/Activation：**NOT AUTHORIZED**。
 
 本合同不声称 Provider Side Effect Exactly-Once、模型执行、全局 Forget 完成、物理擦除或生产就绪。
+
+
+## 13. 可执行参考模型证据 — 2026-11-18
+
+已在合并 PR [#139](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/139) 中加入有明确边界的单节点 SQLite 参考模型：
+
+- `06-memory-context/reference-model/g_applied_ledger.py`
+- `06-memory-context/reference-model/test_g_applied_ledger.py`
+- `.github/workflows/g-applied-reference-model.yml`
+
+精确 PR Head 的运行 [#44187485388](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44187485388) 与合并后 main 的运行 [#44187595305](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44187595305) 均已 SUCCESS。合并后运行绑定 main Commit `af3b0380e35a5834f8b5cdca92dfa0f8fcd8e1bf`；Job Log 报告 **8 项测试通过**。
+
+可执行用例覆盖：
+1. 完整正向 Gate 且 C 为 `HANDOFF_ACCEPTED` 时创建唯一记录；
+2. 相同逻辑身份与相同 Evidence Digest 返回原记录；
+3. 相同身份但 Evidence Digest 变化时产生持久化冲突，且不覆盖原记录；
+4. `HANDOFF_REJECTED`、`NOT_INVOKED`、`UNKNOWN`、`IN_DOUBT` 均不能创建 Full Applied；
+5. 缺失或失败的 Authority/Evidence Gate Fail-Closed；
+6. 关闭并重新打开数据库后的读回与同记录重放；
+7. 不同逻辑身份创建不同记录；
+8. 拒绝未声明的 Identity 字段。
+
+**证据上限：** 该成果是符合性/参考原型，不是生产 G Runtime，也不是 G Owner 的实现验收。它仅使用单个本地 SQLite 数据库，并由调用方提供 Gate 布尔值。它不证明多副本线性化、分布式 Restore-Fencing、后续 I/D 变化后的 Current-Use Revalidation、真实 C/H/COC/I/D/Storage 权威解析、密码学认证或生产持久化拓扑。因此第 12 节状态不变：生产 G Applied Persistence 与跨 Owner Full Applied 仍为 **NOT VERIFIED / NOT FROZEN**。
