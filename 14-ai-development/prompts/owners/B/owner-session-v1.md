@@ -3,7 +3,7 @@
 
 **Prompt ID:** CHATGPT-OWNER-B-001  
 **Version:** 1.0  
-**Status:** PROPOSED  
+**Status:** SUPERSEDED / HISTORICAL — NOT A CURRENT EXECUTION ENTRY POINT  
 **Global contract:** [Global ChatGPT Session Contract](../../global/chatgpt-session-contract-v1.md)  
 **Authority source:** [AI Development Standard](../../../ai-development-standard.md)
 
