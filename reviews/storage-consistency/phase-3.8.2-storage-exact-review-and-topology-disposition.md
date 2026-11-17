@@ -130,7 +130,7 @@ This addendum supersedes the earlier target pins in §§1 and 8 only for the art
 | E Phase 3.8 orchestration contract | `session-e-memory-compiler-2026-11-16` | `475fee41e5eea527af4edefbfe88c58c86967d0a` |
 | I Phase 3.8 authorization proof contract | `session-i-security-governance-2026-11-16` | `54bab0484bd232a5a258e65e34cc7425288b39a6` |
 | Storage Phase 3.8 visibility contract | `session-storage-consistency-forget-atomicity-2026-11-16` | `175ee7b1349cfdb79a19898b311a88391ed88010` |
-| Storage Phase 3.6.11 bidirectional JoinProof contract | same Storage branch | `2daea020808b174460d69ba1c0c4a0a3f6b3e8e2` |
+| Storage Phase 3.6.11 bidirectional JoinProof contract | same Storage branch | `364bf7e7833af3d97bc676f7f356e79251ea6cb4` |
 | Storage COC protocol v3.2.2 companion | same Storage branch | `ce3c41adf826a622a3717eca481b5d53e6549196` |
 | H RecoveryJoin schema 1.0.0 | `session-h-bmcp-protocol` | `dd3234aa1c74caf6d0e335875cd96e0b2b64082f` |
 | H semantic validator contract | same H branch | `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80` |
@@ -162,3 +162,12 @@ C's exact RecoveryJoin/provider-side-effect review remains a delegated role simu
 **ACCEPT WITH ENUMERATED AMENDMENTS** remains the Storage-role disposition for the logical bidirectional JoinProof and Phase 3.8 composition. This exact-pin refresh does not upgrade the status to independent Owner acceptance, wire/schema freeze, physical topology approval, implementation/conformance PASS or production activation.
 
 STORAGE-RJ-01..05, C-RJ-01..08, I authority/currentness proof, H production wire/crypto interoperability, and Storage topology T1–T8 remain OPEN unless separately closed by exact current Owner evidence.
+
+
+## 10. Current JoinProof artifact exact re-review after H 66/66 run
+
+The Storage JoinProof source has advanced to Blob `364bf7e7833af3d97bc676f7f356e79251ea6cb4` with §16 recording H's current 66/66 candidate CI run. The H source bundle is now H semantic contract `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80`, HRC/JPF `60a2f4db4bd12f2131ecd147db9bbe328da6db50`, Wire `1a4e754ba9bfa57eb973c6d39731e9f89443b323`, Schema Integrity `67aba74c120f2916d768e7b01c45408ee2624f3a`, RecoveryJoin schema `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`; CI run [44040502709](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709) succeeded with 66 tests.
+
+Storage's logical JoinProof disposition remains **ACCEPT WITH ENUMERATED AMENDMENTS**. The latest CI result improves candidate-suite evidence only; it does not close STORAGE-RJ-02 live prefix enumeration, STORAGE-RJ-04 owner currentness CAS, STORAGE-RJ-05 topology, or the real JF-10 physical sub-join. No independent Owner approval or physical conformance is claimed.
+
+This review remains a delegated Storage-role simulation. The latest JoinProof Blob must be re-reviewed by actual H/I/D/C/Storage Owners; previous exact-Blob decisions do not automatically transfer.
