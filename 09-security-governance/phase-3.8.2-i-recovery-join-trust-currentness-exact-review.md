@@ -10,7 +10,7 @@
 - D Phase 3.8 contract: Blob 17e53890dd6cce9bea9eacc1be2e64b0ef55ac78.
 - E Phase 3.8 contract: Blob 475fee41e5eea527af4edefbfe88c58c86967d0a.
 - I Phase 3.8 contract: Blob 54bab0484bd232a5a258e65e34cc7425288b39a6.
-- Storage Phase 3.8 contract: Blob 175ee7b1349cfdb2e450d0fab49e0f61f20a5a5.
+- Storage Phase 3.8 contract: Blob 175ee7b1349cfdb79a19898b311a88391ed88010.
 - Storage RecoveryJoin contract: Blob 41f80b1aacfebdb1f652b16144afbf83ce950e82.
 - H RecoveryJoin schema: Blob f531c1d4b89a48457188c4988f140952759223a6.
 - H semantic contract: Blob c93560fcda947aef0a611b3096fb1c1994d41cd0.
