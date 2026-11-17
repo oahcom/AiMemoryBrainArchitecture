@@ -122,9 +122,6 @@ class CProviderOutcomeCryptoCandidateTests(unittest.TestCase):
         self.assertEqual(summaries, expected["vectors"])
 
 
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
-
     def test_CRYPTO_C04_expected_vectors_decode_to_ed25519_lengths(self):
         expected = json.loads(EXPECTED.read_text(encoding="utf-8"))
         for vector in expected["vectors"]:
@@ -132,3 +129,7 @@ if __name__ == "__main__":
             public_key = bytes.fromhex(vector["public_key_hex"])
             self.assertEqual(len(signature), 64)
             self.assertEqual(len(public_key), 32)
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
