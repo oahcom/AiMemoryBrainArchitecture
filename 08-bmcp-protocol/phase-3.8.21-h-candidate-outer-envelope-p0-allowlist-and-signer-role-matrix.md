@@ -83,13 +83,10 @@ signature_projection = P0 plus:
   "payload_digest": payload_digest
 
 signature_preimage =
-  UTF8("AIMBA-BMCP-ENVELOPE-SIGNATURE-v1\0")
-  || UTF8(signature_profile_id)
-  || 0x00
-  || UTF8(message_type)
-  || 0x00
+  UTF8("AIMBA-BMCP-ENVELOPE-SIGNATURE-v1\\0")
   || RFC8785_JCS(signature_projection)
 
+# signature_profile_id and message_type are already members of P0
 signature = Sign(registered_profile_key, signature_preimage)
 ```
 
