@@ -597,3 +597,68 @@ No manifest found here is a current jointly accepted cross-owner freeze. Storage
 | D/E/G/Storage share accepted executable Publication/Applied bundle | NOT PROVEN | D/E proposals, G freeze blocked, no joint bundle/test |
 | Predecessor reviews transfer to current heads | FALSE | Manifest states no transfer; A review is v3.3.1-only |
 
+
+
+## 20. R-06 live identity, principal, actor, scope and environment trust assessment — 2026-11-18
+
+### 20.1 Exact current source pins
+
+| Owner | Branch HEAD | Artifact / Blob | Current evidence status |
+|---|---|---|---|
+| B | `0df144ae25c2039c9934395fc88b2d17080eb119` | Formal ActorRef/ScopeRef/EnvironmentRef mapping `3a1e77889cd9a90cd5822d9f0cb3437880868706` | B approves semantic type distinctions and non-substitution; exact consumer paths/wire encodings remain owner-bound/candidate |
+| B | same | Typed Reference and Scope Semantics `e9a6bd21e06bc02a5208619f5a949217860b1c00` | Candidate domain contract; Scope registry ownership and Environment registry authority open; cross-Scope/Environment governance blocked |
+| I | `0d071bf1ee7cc71912398c6ae57e4496e08f44ab` | Principal/Actor/Authorization Contract `03765efac4bb1153f303ce0030f9e277d602e81d` | Candidate semantic contract; earlier baseline says joint approval required and INT-P0-02 open |
+| I | same | PermissionEpoch formal confirmation `bae6a24fe3a374bc816993979a8fa9af52517dea` | I confirms normative technical baseline; external governance profile approval blocked; implementation/conformance not verified |
+| I | same | Current authorization/restore proposal `e3b1b5d99eb36ac0b395854d8c19287d2b64b752` | Semantic enforcement proposal; token schema and conformance open |
+| I | same | Governance and consumer register `f8cfab7100e161ec4b8d0d9791a66337ab7a69de` | I36-GOV-01..10 all GOVERNANCE-BLOCKED; I36 execution NOT RUN; later appendices record design consumer acceptance |
+| H | `0d36324457e39bd50ad56ae902d477c4ea765b61` | Authenticated Identity / Protected Operation Binding `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248` | BIH36-JD-01..17 delegated technical baseline; governance and consumer acceptance/execution boundaries remain |
+| H | same | H BIH Consumer Acceptance `ccbac2d30234df9b910565a7326d100d11a6494e` | Delegated design-level acceptance; H36 tests NOT RUN; not independent human signature |
+| C | `71047cdb51139ca4080ac67f451e38a48698859d` | C Final Request Evidence Contract `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | Accepts BIH36 semantics with exceptions; C/G/H freeze blocked; implementation/execution not verified |
+| D | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | D BIH Consumer Acceptance `184423d2d8191a12f2d4a869bc63f5e7fafaf96a` | Design-level acceptance; runtime conformance not verified; conditional on I governance |
+| E | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | E BIH Consumer Acceptance `6f4100618695fcf971560fb784f7887a72798c96` | Design-level acceptance; runtime conformance not verified; conditional on I governance |
+| F | `1908ce4d233b20f7cafd00cb679affd01bd15174` | F Runtime Forget Suppression/Invalidation `ce59252dbbdc5d10d016704797e9ba12d5a941bd` | BIH36 accepted with exceptions; F runtime semantics decided; implementation/execution not verified |
+| G | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | G Applied/Forget/Reconciliation `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | BIH36 accepted with exceptions; Applied freeze blocked; implementation/execution not verified |
+| Storage | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | Storage BIH Consumer Acceptance `ec8e49d0d11c72d37ad0c291611a96a1122ba6f5` | Design-level acceptance; runtime conformance not verified; I governance and JF-10 open |
+
+### 20.2 What is actually decided
+
+The evidence does establish a coherent *technical semantic baseline* for BIH36-JD-01..17:
+- PrincipalRef, IssuerRef, ActorRef, AgentRef, AdapterRef and ProducerRef are distinct identities; a payload reference is a claim, not authentication.
+- ActorRef is verifier-produced, immutable and operation-specific; it is not a Principal alias, credential, grant or reusable capability.
+- ScopeRef identifies ownership/applicability boundaries, not permission. Ownership and applicability roles must remain distinct; containment never implies permission inheritance.
+- EnvironmentRef identifies an authoritative external execution/state domain and is orthogonal to ScopeRef; cross-Environment access is deny-by-default.
+- I owns issuer trust, Principal resolution, delegation, authorization, revocation and PermissionEpoch. H owns protected transport/session binding and wire representation. B owns typed-reference meaning. Each consumer retains its own final enforcement boundary.
+- PermissionEpoch is opaque and I-owned within one PolicyDomain; it is not comparable with D ForgetFenceGeneration, COC positions, Storage cursors, or H capability epochs.
+- Missing, forged, stale, gapped, unknown or unverifiable security context must deny/pause; cached ALLOW or payload-supplied identity cannot create trust.
+
+B's formal mapping decision is owner-confirmed within B's semantic authority. I's PermissionEpoch technical semantics are formally confirmed by I. D/E/F/G/C/Storage and H have design-level consumer acceptance evidence, with enumerated exceptions. The I register's later §11 / §6.3 appendices explicitly reconcile C/F/G acceptance and state the design-acceptance subrequirement is complete; its top-level header still says consumer acceptance OPEN. This is an internal status-label freshness inconsistency: the later appendices control the scoped design-acceptance update, but A must refresh its own G6 ledger. Neither status means runtime conformance.
+
+### 20.3 Material blockers and limitations
+
+**R06-1 — Governance approval is still blocked.** I register Blob `f8cf...` states I36-GOV-01..10 are GOVERNANCE-BLOCKED, with no authorized external approver/effective policy version located. Topics include issuer admission/federation, Principal collision/alias migration, delegation policy, ActorRef/Principal attribution, cross-Scope grants, cross-Environment bridge and Environment registry authority, PermissionEpoch/revocation policy, unsupported Adapter/Producer handling, and Global Forget exceptions. User delegation to a technical role or an architect-authored decision is not the required governance approval.
+
+**R06-2 — Registry authority is incomplete.** B confirms semantic types but explicitly leaves authoritative Scope registry ownership/lifecycle and Environment Registry Authority designation open. I governance register records that Environment registry authority is not assigned. Until authoritative registries and issuer/key lifecycle are designated, a well-formed typed ref does not prove a trusted identity or permitted relationship.
+
+**R06-3 — Current authorization enforcement remains a proposal.** I Phase 3.7 says semantic enforcement proposal; token schema and conformance OPEN. It requires current I authorization at each protected boundary, including source dereference, publication, retrieval, Context dispatch, Adapter apply, C provider submit and restore/reconnect. No deployed authoritative epoch sequencer, revocation stream continuity, final-boundary verifier or restore proof was demonstrated.
+
+**R06-4 — Design acceptance is not executable consumer enforcement.** H36-01..18 and I36-01..20 are specified but NOT RUN. C final-request cases, F retrieval/cache/rebuild cases and G Applied/COC cases are also specified but NOT RUN. D/E/Storage acceptances explicitly disclaim runtime conformance. No executable end-to-end proof was found that every consumer rejects forged identity, checks exact Scope/Environment roles, validates current PermissionEpoch and preserves independent D Fence checks at its irreversible boundary.
+
+**R06-5 — The I register header is stale against its own appendices.** The current I register top line still reports “consumer acceptance OPEN”, while later reconciliation sections state C/D/E/F/G/H/Storage design acceptance is recorded and the design-acceptance subrequirement is complete with exceptions. This is not evidence that runtime/G6 is fully PASS: the same appendices explicitly keep I governance blocked, all identity tests NOT RUN and A's overall G6 closure decision outstanding. The register should be normalized by a new append-only status correction, not by rewriting historical discovery records.
+
+**R06-6 — Exact consumer-field mapping is not fully frozen.** B's type decision explicitly does not approve concrete consumer field names, requiredness, cardinality, serialization or DB columns. H identity binding says its logical field names are candidates, not frozen schema. Consumer acceptance is against the pinned BIH design package and is not automatic approval of later schema/validator revisions or every changed protected boundary.
+
+### 20.4 R-06 disposition and closure criteria
+
+R-06 remains **High / NOT PROVEN**. The technical semantics and design-consumer acceptance are materially more mature than an unowned design gap; do not report “no identity design exists” or “all consumer acceptance is OPEN”. The remaining blockers are governance activation, registry ownership/lifecycle, exact executable field enforcement, current PermissionEpoch/revocation service behavior and adversarial runtime proof.
+
+Closure requires:
+1. I obtains authorized, durable, exact-text/hash approvals for I36-GOV-01..10, including explicit Environment/Scope registry authority, effective policy version/jurisdiction, expiry/review and revocation/supersession.
+2. B/I/H publish one refreshed exact source/field mapping bundle; B approves semantic types, I approves policy/trust, H approves wire/authentication, each consumer signs its exact enforcement boundary. No owner approves another owner's authority.
+3. I finalizes PermissionEpoch token/profile schema, authoritative sequencer/currentness API, contiguous invalidation/revocation stream, key/issuer lifecycle and failover/restore semantics.
+4. C/D/E/F/G/H/Storage implement and execute their exact protected-boundary checks; preserve the separation between PermissionEpoch, D ForgetFenceGeneration, AdapterCapabilityEpoch and Storage/COC cursors.
+5. Execute forged Principal/Actor/Producer/Adapter tests; issuer/key unknown/revoked/rotated tests; delegation expiry/cycle/amplification tests; Scope/Environment mismatch and cross-boundary deny tests; stale/gapped epoch and offline partition tests; both revocation-vs-commit orderings; reconnect/old-session ACK replay; restore rollback; and no-side-channel retrieval tests.
+6. Publish raw reproducible logs, exact source/test/fixture/dependency Blobs, tested commit and independent Owner result for each consumer.
+7. A refreshes the G6 register from I's append-only corrected status and exact consumer artifacts; A may register evidence but cannot manufacture governance approval.
+
+**Closure status: NOT CLOSED.** No external governance activation, production authorization or security certification is claimed.
+
