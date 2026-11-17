@@ -15,10 +15,10 @@
 | I Phase 3.6.8 amendment | `929b30ba10ac627927d3959e0777b467846b268d` |
 | D Phase 3.6.8 amendment | `0668667daeb936bf223ab049277ea2a4117c3b09` |
 | C Phase 3.6.9 amendment | `9609b252fc38fd5ba7b2f8c0992b7bd33a13c5bb` |
-| H recovery schema 1.0.3 | `9c3b98abab0c04a241a93c5e6f02e9424059b07b` |
+| H recovery schema 1.0.4 | `d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1` |
 | H JF-10 bridge schema 1.1.0 | `a8a945cc3623c2907003b93625e3c79742150944` |
 
-Schema 1.0.3 is the current structural candidate at the time of this document. The semantic rules below are additional requirements and are not implied by JSON Schema validity.
+Schema 1.0.4 is the current structural candidate at the time of this document. The semantic rules below are additional requirements and are not implied by JSON Schema validity.
 
 ## 1. Validator architecture
 
@@ -57,7 +57,7 @@ For each I/D/C owner snapshot:
 
 1. Obtain the exact quorum-confirmed prefix position (term/index) and root using a linearizable COC read.
 2. Enumerate every ParticipantIntent in the affected causal-order domain through that exact prefix; pagination must be complete and cursor continuity verified.
-3. Validate each typed participant entry: unique ParticipantIntentRef, owner kind, operation identity, participant digest, term/index and entry digest.
+3. Validate each typed participant entry: unique ParticipantIntentRef, owner kind, mandatory owner_admission_ref, operation identity, participant digest, term/index and entry digest. Resolve owner_admission_ref against the exact signed C admission ledger; Storage participants additionally join the exact JF-10 PreparedParticipant tuple.
 4. Verify every entry is actually present in the committed prefix at its declared term/index and the digest matches the committed record.
 5. Recompute participant count and canonical participant-set root.
 6. COMPLETE_EMPTY requires a complete prefix enumeration and canonical empty root. A missing log segment, unavailable quorum, incomplete page or stale follower is UNKNOWN, not empty.
@@ -83,7 +83,7 @@ For each owner admission member:
 - If `REGISTERED`, its exact ParticipantIntentRef, COC position and entry digest MUST match one unique participant manifest entry. The owner operation identity/digest and scope must match the participant payload.
 - If `NOT_REGISTERED`, the member MUST carry no ParticipantIntentRef/position/digest. It remains an owner-local obligation and must be registered under the same stable identity before any later protected effect, or terminalized by authoritative no-effect evidence.
 - Multiple owner evidence entries may legitimately refer to one participant (for example issue/consume evidence), but the same owner entry cannot map to multiple participants unless an explicit typed cardinality contract allows it.
-- Every affected participant in the COC manifest must have an accountable owner binding (C admission, I receipt/terminal evidence, D barrier membership and Storage participant where applicable). A participant with no accountable owner evidence is UNKNOWN and blocks release.
+- Every affected participant in the COC manifest must have an accountable owner binding (mandatory C owner_admission_ref, plus I receipt/terminal evidence, D barrier membership and Storage participant where applicable). A participant with no accountable owner evidence is UNKNOWN and blocks release.
 - A Storage participant is joined through the exact JF-10 participant tuple; it is not treated as a separate user request merely because it has a Storage owner kind.
 
 The join proof records exact member refs/digests and participant refs/digests. It does not synthesize a cross-owner high-water or fabricate missing entries.
