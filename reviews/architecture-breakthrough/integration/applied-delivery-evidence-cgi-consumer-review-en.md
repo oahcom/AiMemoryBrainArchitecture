@@ -155,3 +155,38 @@ H Applied 1.0.0 has no explicit PermissionEpoch / CommitAuthorizationReceipt fie
 - Global Applied / Production activation: **NOT FROZEN / NOT AUTHORIZED**.
 
 This is an integration technical finding, not a C/G/I Owner decision. It does not modify H/C/G/I Owner branches or authorize schema freeze, merge or production activation.
+
+
+## 9. A-H-ADE-006 exact-review supplement: three P0 blockers
+
+A's exact review in PR #98 (Blob `44f79fc037a3aa15d171781fecf5a924e10a0388`) dispositions H Applied Delivery Evidence 1.0.0 as **DEFERRED — CANDIDATE IMPLEMENTATION WITH OPEN P0 CONDITIONS** and records:
+
+### H-ADE-001 — Duplicate JSON object keys
+
+The current Validator directly calls `json.loads(raw_envelope.decode("utf-8"))`. Python's standard decoder collapses duplicate object keys before JSON Schema/P0 processing. Reject duplicate top-level and nested keys before object materialization, with negative vectors covering identity, digest, signature and authority fields. This blocks authenticated production use.
+
+### H-ADE-002 — CSubmitOutcome semantic join
+
+H currently has opaque C refs/sequence/digest and a `verify_c_final_boundary` seam, but does not define how to resolve and validate the immutable CSubmitOutcome 1.0.1 record's:
+- issuer / sequence namespace / COutcomeRecordIdentity;
+- CProviderAttemptIdentity and successor lineage;
+- `Outcome` / `SideEffectStatus`;
+- `RequestDigest` / `ActualInferenceRequestId` / `FinalRequestBoundaryRef`;
+- immutable record payload digest and Owner-ledger inclusion.
+
+A tri-state resolver/verifier and exact C/G review are required. H must not mint C provider truth, and G must not create Full Applied from H evidence alone.
+
+### H-ADE-003 — Current authorization recheck before replay-result disclosure
+
+I Phase 3.8.23 requires SAME_DIGEST_REPLAY to recheck current I Authorization/PermissionEpoch, key status, audience/scope and applicable D Forget fence before returning the original durable result. The H Validator has no explicit current-authorization callback; the `commit_observation` seam does not specify this recheck. Until closed, do not return `original_result_ref` to a revoked or stale caller.
+
+### Additional integration question: H-ADE-004 candidate — Integrity Proof Reference binding
+
+This review separately notes that `integrity_proof_ref` is required but excluded from the P0 projection, with no separate verifier callback. This is an additional H Owner question, not one of A's registered H-ADE-001..003. Decide whether it is a non-authoritative hint or must be bound by signature/immutable ledger proof, and add a substitution mutation test.
+
+## 10. Applicability of C/I Gateway order reviews
+
+- C Phase 3.8.27 Blob `3ca06dbfd7d59483e9604b7a68df924c719f60aa` accepts C object schema/digest/signature/sequence namespace/provider evidence/semantics before H Unified Gateway Attestation signing, followed by replay reservation and durable ingress acceptance.
+- I Phase 3.8.23 Blob `85cdbad04ae4b688338cdf2b667c21d2f02d8b96` accepts the same gateway replay/durable-ingress order and explicitly requires SAME_DIGEST_REPLAY to recheck current authorization, PermissionEpoch, key status, audience/scope and D Forget fence.
+- Both are delegated role reviews and apply to the H Unified 1.2.15 Gateway Attestation path. **They are not exact C/G/I consumer acceptance of H Applied Delivery Evidence 1.0.0**, although their replay-disclosure constraints are directly relevant to any implementation returning a prior result reference.
+
