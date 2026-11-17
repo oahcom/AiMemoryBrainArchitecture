@@ -188,3 +188,26 @@ remediation:
     - 206c14c2d9b8785e5cd0e6704c4900ce3daaed25
     - 201a6f5784bae2f75b20a05303bb1a703883f86f
   note: IR-001 and NR-002/NR-003 changes are author-side remediation only; they do not supersede the independent reviewer disposition. A fresh review of the new Head is required. NR-001 remains blocked pending explicit governance authority decision.
+
+
+governance_decisions:
+  - decision_id: AID-2026-001-GOV-NR-001
+    finding_id: NR-001
+    decision: OPTION_A_ACCEPTED
+    status: RESOLVED_BY_GOVERNANCE_DECISION
+    decision_record: 14-ai-development/work-items/AID-2026-001/governance-decision-NR-001.md
+    decision_request: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945859120
+    decision_date: 2026-11-17
+    scope: AI-STD-001 section 3.2 interpretation for ChatGPT-native independent review
+    independence_claim: conversation_context_isolation_only
+    explicitly_not_claimed:
+      - model_independence
+      - provider_independence
+      - runtime_environment_independence
+      - statistical_independence
+      - multi_model_consensus
+    r3_requirements: UNCHANGED_MANDATORY
+    acceptance_authority: UNCHANGED
+    implementation_review_acceptance_merge: DISTINCT_GATES
+    rationale: A genuinely new ChatGPT conversation, not involved in implementation and independently reading exact GitHub artifacts, meets the separate-session requirement while disclosing its limited independence.
+    recorded_by: project_governance_decision_supplied_in_chat_and_linked_pr_discussion
