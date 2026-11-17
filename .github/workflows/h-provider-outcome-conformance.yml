@@ -6,8 +6,8 @@ on:
     branches:
       - session-h-bmcp-protocol
     paths:
-      - "08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.14.schema.json
-      - 08-bmcp-protocol/validators/provider_outcome_validator.py"
+      - "08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.14.schema.json"
+      - "08-bmcp-protocol/validators/provider_outcome_validator.py"
       - "08-bmcp-protocol/tests/conformance/provider_outcome/**"
       - ".github/workflows/h-provider-outcome-conformance.yml"
   workflow_dispatch:
