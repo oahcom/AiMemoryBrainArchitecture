@@ -2,7 +2,7 @@
 
 - Owner: C — Provider Outcome / immutable submit evidence
 - Status: PROPOSED structural schema and local conformance harness; NOT EXECUTED.
-- Schema: `schemas/c-submit-outcome-1.0.0.schema.json`, Blob `b0e324ffa46d7afb1bf4687ae51202e3e220ae67`
+- Schema: `schemas/c-submit-outcome-1.0.0.schema.json`, Blob `09725d3a90e4c130b38400e8e2d613f755f3806a`
 - Semantic amendment: Phase 3.8.6 Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`
 - Signature projection: Phase 3.8.8 Blob `39ff523c41f10e3a82442d4746dd7ca7763d271c`
 - H wire schema: 1.2.11 Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`
@@ -59,8 +59,8 @@ COC linkage is either a complete non-null intent/reservation pair with null abse
 
 ## 5. Conformance source files
 
-- Schema: `schemas/c-submit-outcome-1.0.0.schema.json`, Blob `b0e324ffa46d7afb1bf4687ae51202e3e220ae67`
-- Fixture pack: `tests/conformance/provider_outcome/c_submit_outcome_1_0_0_vectors.json`, Blob `d2ce9176e82e0b311e2145fa03d2dede4a50a675`
+- Schema: `schemas/c-submit-outcome-1.0.0.schema.json`, Blob `09725d3a90e4c130b38400e8e2d613f755f3806a`
+- Fixture pack: `tests/conformance/provider_outcome/c_submit_outcome_1_0_0_vectors.json`, Blob `88bef7ddddff3b9f07c453e0af999f2c23af01bc`
 - Python harness: `tests/conformance/provider_outcome/test_c_submit_outcome_1_0_0.py`, Blob `92e8e9e607566eafa6ad89110202dbeed0fc43cb`
 - Dependency pin: `tests/conformance/provider_outcome/requirements.txt`, Blob `89099e36f214d8d0e0c7d4aacc19e2b4450f0744`
 
