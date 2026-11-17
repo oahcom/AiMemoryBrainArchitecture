@@ -104,3 +104,53 @@ D cannot claim a single atomic CAS over an I-owned PermissionEpoch when D and I 
 The implementation MUST use either a shared linearizable sequencer, a proven distributed transaction/consensus protocol, or an I-owned revocation barrier/fencing protocol. Under the barrier profile, I revocation is PENDING until every D/E/F/G/H/C enforcement point required by the closed-world inventory has durably installed the newer PermissionEpoch/fence and acknowledged that older permits are rejected. Only then may I mark the revocation EFFECTIVE. D's producer admission and final visibility commit must reject any fencing epoch below the latest installed epoch at that same local linearization point.
 
 A bounded authorization lease is permitted only as a separately named weaker policy profile with explicit maximum stale window and clock/partition assumptions; it is not immediate revocation. If D cannot establish current permission/fencing epoch, producer admission and publication fail closed.
+
+
+## 11. Controlling alignment with D Phase 3.6.7–3.8
+
+**This section is a controlling alignment note.** The detailed D Forget Gate and publication semantics remain in the existing owner contracts phase-3.6.7-d-owner-local-gate-admission-release-amendment.md, phase-3.6.8-d-cross-boundary-fencing-terminalization-amendment.md, phase-3.7-d-producer-class-registry-eventref-ingress-and-participant-intent.md, and phase-3.8-d-publication-participant-and-terminal-contract.md. This document MUST NOT create a second D gate, second D receipt family or alternate admission order.
+
+### 11.1 D-local currentness CAS only
+
+D's final DGateRelease CAS is linearizable only over D-owned state: D Gate ref/revision, ForgetOperationRef, ForgetFenceGeneration, D request/work/producer/publication high-waters, D barrier snapshot generation/root, D producer-registry projection and D anti-rollback anchor. It atomically revalidates those values and writes the D-signed DGateReleaseReceipt only after all D-local release predicates are satisfied.
+
+I ProducerDomainInventoryEpoch, I IGateGeneration and PermissionEpoch are not D counters and are never compared numerically or claimed to be atomically mutated by D. D binds exact I-signed current inventory/authorization proof refs, digests, relevant entry mappings and policy decision identity in a DReconciliationTuple. Missing, stale, contradictory or unverifiable I evidence blocks D release. If a newer I inventory epoch reveals a previously omitted producer/work mapping, D reopens the affected barrier and invalidates the prior snapshot/closure proof.
+
+D outage-gate release is typed OUTAGE_ADMISSION_RELEASE_ONLY. It does not clear the effective Forget Fence, authorize protected source dereference, grant I permission or authorize provider egress. Every protected read, admission and final publication boundary still enforces current D Fence and applicable I authorization. The I COMMIT_WON/REVOCATION_WON decision is consumed only for the exact operation and cannot be inferred from a D receipt.
+
+### 11.2 Canonical derivative publication order
+
+For canonical derivative visibility, the controlling Phase 3.8 order is:
+1. E/producer prepares immutable private stage and complete dependency evidence.
+2. Storage persists exact StorageVisibilityParticipantRef as PREPARED_HIDDEN; no read path can expose it.
+3. D admits exact PublicationParticipantRef in the D Fence/Barrier domain, bound to the exact Storage participant, request/tuple digest, WorkItem, lineage, scope, attempt/lease and complete dependencies.
+4. I consumes a single-use CommitAuthorizationReceipt in its own PolicyDomain Sequencer, bound to the same immutable operation and both exact participant refs.
+5. Storage final visibility transaction verifies current D participant/fence and the consumed I proof and atomically commits visibility pointer, immutable outcome/receipt and outbox.
+6. D and I terminalize their own participants only after authoritative Storage outcome readback.
+
+D admission is an ordering hold, not visibility permission. UNKNOWN/IN_DOUBT remains private and keeps the relevant barriers open. The physical D/Storage serialization topology remains ADR-BLOCKED until Storage T1–T8 are evidenced; this semantic contract does not select a database or claim runtime atomicity.
+
+### 11.3 D admission race and release proof
+
+RegisterProducerWork and InstallForgetFence remain one D-authoritative ordering domain. Fence-first rejects/quarantines affected later work; registration-first includes the durable registration in the captured barrier. The D snapshot must include registered work even if COC registration/ACK is absent, plus exact producer/work high-waters and complete member root. Late-discovered pre-fence work reopens the barrier; unknown ordering is UNKNOWN, never resolved by wall-clock timestamps.
+
+A D terminal disposition is accepted only with authoritative proof: PUBLISHED_BEFORE_FENCE, CANCELLED_NO_OUTPUT, SUPPRESSED_QUARANTINED or FAILED_PARKED_NO_PUBLISH under the existing D contract. Lease expiry, queue deletion, worker loss, timeout, DLQ or missing COC row is not terminal. D release is invalidated by any high-water/root/registry/lineage/anti-rollback change before commit.
+
+### 11.4 Required cross-owner conformance
+
+1. Fence CAS wins before RegisterProducerWork: no protected admission/execute/publish.
+2. RegisterProducerWork wins: exact receipt and sequence are in the immutable fence barrier despite lost caller/COC ACK.
+3. New I inventory epoch reveals a pre-fence producer: D reopens the barrier.
+4. Storage hidden participant exists but D admission fails: participant remains private and resolvable by same ID/digest.
+5. D admission succeeds but Storage participant cannot be read back: UNKNOWN/integrity incident; never abort by assumption.
+6. I REVOCATION_WON: Storage cannot publish; prove NO_PUBLICATION.
+7. I COMMIT_WON: exact participant remains in-flight until Storage terminal outcome.
+8. D fence advances after expensive work but before visibility: final Storage visibility CAS rejects stale D participant/fence.
+9. Restore replays stale work: D Gate remains closed until current Fence/high-waters and Storage/I evidence reconcile.
+10. D release candidate becomes stale before final local CAS: reject and rebuild snapshot.
+
+**Disposition:** D semantic alignment is specified against the controlling Phase 3.6.7–3.8 contracts. Storage topology, I proof interoperability, callable API, executable race tests and independent D acceptance remain OPEN. No physical linearizability or Forget completion is claimed.
+
+### 中文规范摘要
+
+D 的 Gate Release 仅对 D 自己的 Gate/Fence/High-water/Barrier/Registry/Anti-rollback 状态执行最终 CAS；I 的 Epoch 不属于 D 的计数器，只能通过 I 签名的精确证明和 DReconciliationTuple 关联。D 的 outage release 不清除 Forget Fence，也不授权 I、C 或 Storage 的操作。Canonical derivative 发布严格遵循 Storage 隐藏 Prepare → D PublicationParticipant Admission → I 单次 CommitAuthorizationReceipt 消费 → Storage 最终 Visibility Commit → D/I 各自终态化。D/Storage 物理事务域仍受 Storage ADR 阻塞。
