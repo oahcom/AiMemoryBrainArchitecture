@@ -14,7 +14,7 @@
 | Hermes Agent | https://github.com/NousResearch/hermes-agent — v0.23.2+canary.20261117T064624Z | `7c9b019ab5620d4c64e7b0de4aa45cbc24dea963` | MIT / Python | `agent/memory_manager.py`, `agent/memory_provider.py`, `agent/memory_context.py`, `hermes_cli/backup_sqlite.py` | Provider isolation/profile binding/background drain; SQLite session backup; Agent-owned runtime, not Brain |
 | LangGraph | https://github.com/langchain-ai/langgraph — 1.2.22 | `02f2c2e6c992ffccce9e9129781fdd04f015c6fa` | MIT / Python | `libs/checkpoint-postgres/langgraph/checkpoint/postgres/base.py`, checkpoint conformance tests | Checkpointer vs Store separation, versioned SQL migrations, pending writes; not Rust core or canonical memory |
 | Temporal Rust SDK | https://github.com/temporalio/sdk-rust — v1.2.0 | `a5d7742e8c5b925351fff314c2662a316309583b` | MIT / Rust | `crates/client/src/worker.rs`, `workflow_handle.rs`, `crates/sdk-core/src/worker/workflow/managed_run.rs`, replay/state machines | Real Rust workflow replay/worker SDK; requires Temporal service; workflow history is not canonical DB transaction |
-| Restate Server | https://github.com/restatedev/restate — v1.8.1-hotfix.2 | `f0cfcae2b935cfe6f80de9a72a180f976da1c66c` | Repo license NOASSERTION in API / Rust | server Bifrost/loglet/workflow modules | Durable service infrastructure; adds another state authority |
+| Restate Server | https://github.com/restatedev/restate — v1.8.1-hotfix.2 | `f0cfcae2b935cfe6f80de9a72a180f976da1c66c`; canonical LICENSE: https://github.com/restatedev/restate/blob/main/LICENSE | BSL 1.1 + Additional Use Grant / Rust | server Bifrost/loglet/workflow modules | Durable service infrastructure; adds another state authority; review public managed-platform restriction separately |
 | Restate Rust SDK | https://github.com/restatedev/sdk-rust — v0.12.1 | `9a08091654f1e6da905f71ffe09bdd4742ecc995` | MIT / Rust | `src/lib.rs`, `src/service.rs`, `Cargo.toml` | First-party Rust SDK; HEAD manifest 0.13.0, MSRV 1.90, ahead of latest tag |
 | NATS Server | https://github.com/nats-io/nats-server — v2.15.3 | `99cd69546eedb8450157ff0d104ffcfb23c69ec3` | Apache-2.0 / Go | `server/jetstream.go` family and server stream/consumer code | JetStream durable streams/consumer ACK/replay; broker exactly-once boundary only |
 | Qdrant | https://github.com/qdrant/qdrant — v1.20.2 | `23065a0bf6857c3e5da45f6c8939cc746cc0580e` | Apache-2.0 / Rust | `lib/collection/src/collection_manager/segments_searcher/*`, `lib/collection/src/shards/*`, `lib/segment/src/index/hnsw_index/*` | HNSW + payload filtering + segments/shards; external service not canonical truth |
@@ -127,7 +127,7 @@ PostgreSQL 18.7 档案记录了有限 CI 子测试 PASS：Prepared-XID 持久化
 | Hermes Agent | NousResearch/hermes-agent，v0.23.2 Canary | `7c9b019ab5620d4c64e7b0de4aa45cbc24dea963` | MIT/Python | `memory_manager.py`、`memory_provider.py`、`memory_context.py`、`backup_sqlite.py` | Provider 隔离、Profile 绑定、有界后台 Drain、SQLite 备份 |
 | LangGraph | langchain-ai/langgraph，1.2.22 | `02f2c2e6c992ffccce9e9129781fdd04f015c6fa` | MIT/Python | Postgres Checkpointer、Conformance Test | Checkpoint 与长期 Store 分离；不是 Rust Canonical Memory |
 | Temporal Rust SDK | temporalio/sdk-rust，v1.2.0 | `a5d7742e8c5b925351fff314c2662a316309583b` | MIT/Rust | Client Worker、Workflow Replay、State Machine | 真正 Rust Durable Workflow SDK；需外部 Temporal Service |
-| Restate Server | restatedev/restate，v1.8.1-hotfix.2 | `f0cfcae2b935cfe6f80de9a72a180f976da1c66c` | API 元数据 NOASSERTION/Rust | Server Bifrost/Loglet/Workflow | Durable Service 基础设施，增加持久化权威 |
+| Restate Server | restatedev/restate，v1.8.1-hotfix.2 | `f0cfcae2b935cfe6f80de9a72a180f976da1c66c`；规范 LICENSE：https://github.com/restatedev/restate/blob/main/LICENSE | BSL 1.1 + Additional Use Grant/Rust | Server Bifrost/Loglet/Workflow | Durable Service 基础设施，增加持久化权威；公共托管平台限制需单独审查 |
 | Restate Rust SDK | restatedev/sdk-rust，v0.12.1 | `9a08091654f1e6da905f71ffe09bdd4742ecc995` | MIT/Rust | `src/lib.rs`、`src/service.rs`、`Cargo.toml` | 一方 Rust SDK；HEAD Manifest 0.13.0，MSRV 1.90 |
 | NATS Server | nats-io/nats-server，v2.15.3 | `99cd69546eedb8450157ff0d104ffcfb23c69ec3` | Apache-2.0/Go | JetStream Stream/Consumer 实现 | Durable Stream、ACK/Redelivery/Replay；Exactly Once 仅 Broker 边界 |
 | Qdrant | qdrant/qdrant，v1.20.2 | `23065a0bf6857c3e5da45f6c8939cc746cc0580e` | Apache-2.0/Rust | Collection/Segment/HNSW/Shard | HNSW、Payload Filter、Segment/Shard；不是 Canonical Truth |
@@ -236,3 +236,23 @@ Exact successor bundle members recorded by the manifest include H Unified 1.2.13
 Manifest 记录的后继 Bundle 还包括 H Unified 1.2.13 / wire 1.3.0、H RecoveryJoin 1.0.2、H RecoveryCutoff 1.0.5、H C 映射、CSubmitOutcome 1.0.1、I 精确审查和 D 精确审查等 Blob，详见上方表格。Manifest 记录 C 候选 CI Run 44059935858（19 项测试）SUCCESS；H 1.2.13 的 15 项测试源码尚未运行；此前 H 1.2.12 的结果不能转移。
 
 源码核验更正：Qdrant 的准确源码路径是 `segments_searcher/mod.rs`；Mem0、Graphiti、Letta Code、LangGraph PostgreSQL Checkpointer、Temporal Rust Worker、NATS JetStream 和 Tantivy IndexWriter 已按 §1 所列精确提交读回。此次重新读取 Hermes 源码时触发 GitHub API Rate Limit，因此本轮未重新验证，不将旧 Pin 记为本轮新核验。新增 PydanticAI 持久执行官方文档，但其 Python 集成仅作为比较证据，不是 Rust 依赖。
+
+## 6. Phase 3.8 / 3.8.3 current owner evidence pins / 当前 Owner 证据 Pin
+
+| Owner | Artifact | Branch / Blob | Status and scope |
+|---|---|---|---|
+| D | Phase 3.8 publication participant and terminal contract | `session-d-memory-brain-2026-11-16` / `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | Role proposal; approval/API/conformance OPEN |
+| E | Phase 3.8 publication orchestration/retry/recovery | `session-e-memory-compiler-2026-11-16` / `475fee41e5eea527af4edefbfe88c58c86967d0a` | Role proposal; D/I/Storage APIs and approval OPEN |
+| I | Phase 3.8 commit authorization/revocation sequencer | `session-i-security-governance-2026-11-16` / `54bab0484bd232a5a258e65e34cc7425288b39a6` | Role proposal; approval/crypto/conformance OPEN |
+| Storage | Phase 3.8 visibility participant and atomic outcome | `session-storage-consistency-forget-atomicity-2026-11-16` / `175ee7b1349cfdb79a19898b311a88391ed88010` | Logical transaction proposal; physical topology OPEN |
+| Storage ADR | Phase 3.8.2 serialization topology ADR | same Storage branch / `bb544ba2f346bdc130d524bd5c7310d86f367988` | L1 Option A selected; L4 physical engine/deployment OPEN |
+| A | Phase 3.8.1 contract surface and exact-pin refresh | `session-a-integration-2026-11-16` / `89f81b16e398653ece127709346baa64baf078ab` | Proposed; not Owner-approved/frozen |
+| I crypto | `AIMBA-I-CRYPTO-1.0` | Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2` | Candidate only; no production key custody proof |
+| H wire/schema | wire mapping `b132e6a01bcfe13f92020b9778ee3f7ddbf65753`; Unified 1.2.8 `70b892797d07489936300a26c0dedfafe1d6e746`; RecoveryJoin 1.0.1 `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c` | Issue #25 evidence | Candidate schemas only; exact H 1.2.13 CI OPEN |
+| C | provider-side-effect review `a7b57bd5531222559666f0f1d9df59a259cde61a` | Issue #25 evidence | Review only; live Owner Ledger adapter/fault/race proof OPEN |
+
+H CI run `44043259259` (97/97) is structural/reference-model scope; run `44044062849` (101 tests) is candidate differential/structural scope. Neither proves production wire/crypto or Brain end-to-end conformance. Issue #3 Applied status remains Frozen NO / Test NO-NO / Implementation Verified NO.
+
+Restate Server canonical LICENSE is BSL 1.1 with Additional Use Grant; API metadata `NOASSERTION` is not a sufficient license conclusion. Record Server and Rust SDK MIT as separate components. See [OWNER-REMEDIATION-001](owner-remediation/OWNER-REMEDIATION-001.md).
+
+**中文：** 上表记录当前 Phase 3.8/3.8.3 Owner 工件的精确 Blob 与证据范围。D/E/I/Storage 均为角色提案，A 为未批准提案；H CI 仅候选结构/参考模型或差分测试，不是生产 Wire/Crypto 或 Brain 端到端证明。Issue #3 Applied 仍为未冻结、未测试、未验证实现。Restate Server 规范许可证为 BSL 1.1 + Additional Use Grant；不能只记 API 元数据 NOASSERTION，且必须与 Rust SDK MIT 分开登记。
