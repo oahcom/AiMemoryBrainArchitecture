@@ -182,3 +182,22 @@ Still open: independent human Owner/governance signatures; production C/I trust/
 **B 现可在 L1/L2 候选层标记为 CONDITIONALLY ALIGNED，基线为 Storage v3.2.9。** 早期精确 Pin 与 C 集成 Mapping 审查缺口，已由最新 C/H/D/I 源文件和 v3.2.9 Manifest 修正。现交由 A 对 (a) Storage v3.2.9 和 (b) 独立的 Option A per-BrainAuthority Serialization Topology ADR 做精确审查。A 对 v3.2.8 的旧审查不自动转移到 v3.2.9，也不等于拓扑 ADR 审查。
 
 仍未关闭：独立人类 Owner/治理签署；生产 C/I Trust/Key Status 与 D/Storage Proof Adapter；完整 D Lineage/Release CAS；双向 COC↔I/D/C Join；Same-GID Recovery；R1/R2；JF-10；Gate B/C；生产激活。
+
+
+## 10. Exact-currentness invalidation after Owner pin corrections / Owner Pin 修正后的精确当前性失效
+
+The latest live Owner branches advanced after Storage v3.2.9 was published:
+
+- C HEAD 81f1e81307315a31c3bbeae17eb801e8a4f47e10 corrected the H schema Blob pin in its Phase 3.8.18 full-path review.
+- D HEAD 7d01732521a8b9db202f10cde2c2547e50071d58 corrected the same pin in its full-path/clearance review.
+- I HEAD a68bb3587fe88aa72398e2dc8d136f94cee9a63f corrected the same pin in its full-path/terminal review.
+- H HEAD 362cc113cfb5b595a4002a6f6e980d19ae2d2d15 updated exact CI binding to run 44069941327, tested commit ba2c9341fee4eb9ca9e665c74bdd37b4675dd251, job 133993324484.
+- Storage HEAD remains 39a1e0429f6b4b08c6c437c8e3f5ace582a7315f, with v3.2.9 as its latest manifest.
+
+Storage v3.2.9 Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3 still binds the earlier C/D/I review Blobs 4be9c1cd8f116086bab58340f07e38ddfc223e21 / ccdae9b45affb23c6741b5cceb27004b35a8e03e / 7c65650a37c8c0f270451fb0419e93259fc38151 and H CI run 44069777296 / commit 9eb06313e94e762f0fde4a606633a6dbe1bf8262. The latest Owner branches have changed those exact review/CI pins.
+
+**Correction to Section 9:** B is aligned at the semantic/source candidate level, but the v3.2.9 manifest is no longer the current exact review bundle. B cannot be called fully conditionally aligned against a current same-manifest baseline until Storage publishes a successor (v3.3.0 or equivalent) binding the corrected C/D/I review Blobs and current H CI run/commit/job; C/H/D/I review that identical successor; and A reviews the successor.
+
+This is exact-currentness/provenance drift, not a demonstrated schema or semantic regression. The H 1.2.14 / C 1.0.1 source target remains unchanged.
+
+**中文修正：** 最新 C/D/I 分支分别修正了 Full-Path Review 中的 H Schema Pin；H 将 CI 绑定更新到 Run 44069941327 / Commit ba2c934... / Job 133993324484。Storage v3.2.9 仍绑定旧 C/D/I Review Blob 和旧 H CI Run。因此 B 在语义/源文件候选层已对齐，但 v3.2.9 不再是当前精确 Review Bundle。必须由 Storage 发布后继 v3.3.0（或等效版本），绑定修正后的 C/D/I Review Blob 和当前 H CI Run/Commit/Job；C/H/D/I 对同一 Manifest 复审，再由 A 精确复审。该问题属于精确当前性/来源漂移，不是已证明的 Schema/Semantic 回退。
