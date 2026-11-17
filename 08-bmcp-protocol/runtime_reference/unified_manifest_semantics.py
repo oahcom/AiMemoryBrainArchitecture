@@ -63,10 +63,12 @@ def validate_owner_snapshot(snapshot, owner):
     return VALID
 
 
-def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=None, complete=True):
+def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=None, complete=True, verify_membership_proof=None):
     if not complete:
         return UNKNOWN
     if membership_proofs is None:
+        return UNKNOWN
+    if admission_rows and not callable(verify_membership_proof):
         return UNKNOWN
     if not isinstance(snapshots,dict) or set(snapshots)!={"I","D","C"}:
         return UNKNOWN
@@ -100,7 +102,10 @@ def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=
         proof=membership_proofs.get(key)
         if proof is None or proof.get("available") is not True:
             return UNKNOWN
-        if proof.get("valid") is not True:
+        verification=verify_membership_proof(proof,key[0],s)
+        if verification is None or verification == UNKNOWN:
+            return UNKNOWN
+        if verification is not True:
             return INVALID
         if proof.get("owner_ledger_root") != a.get("owner_ledger_root"):
             return INVALID
