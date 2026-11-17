@@ -155,7 +155,7 @@ C schema structural validity and BMCP envelope structural validity are separate 
 
 ## 9. I exact C object crypto review
 
-I Phase 3.8.6 review Blob `0a3bca042f8922f589028ce57a6b8bec91e637d8` accepts the C object structure and candidate digest/signature construction only. It explicitly does not register/deploy the profile or approve trust roots/custody. The H implementation must enforce strict UTF-8, duplicate-key rejection, JCS, exact C-P0 field coverage, 86-character Base64url structural screening plus strict decoding to 64 bytes, and the exact message_type domain component. The C test signatures remain placeholders and no cryptographic vector execution is claimed.
+I Phase 3.8.6 review Blob `cdfaa1c112210d65f9fd24fc1f5eb3caf8514fec` accepts the C object structure and candidate digest/signature construction only. It explicitly does not register/deploy the profile or approve trust roots/custody. The H implementation must enforce strict UTF-8, duplicate-key rejection, JCS, exact C-P0 field coverage, 86-character Base64url structural screening plus strict decoding to 64 bytes, and the exact message_type domain component. The C test signatures remain placeholders and no cryptographic vector execution is claimed.
 
 
 ## 10. Complete optional proof-reference disposition
