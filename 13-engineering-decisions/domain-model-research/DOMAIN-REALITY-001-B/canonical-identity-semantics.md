@@ -4,7 +4,9 @@
 - ID: B-ID-001
 - Status: CANDIDATE DOMAIN SEMANTICS; cross-owner binding OPEN
 - Baseline: main `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- Related B artifact: `session-b-domain-model-phase3:02-domain-model/phase-3.6-typed-identity-trust-closure.md`, Blob `0a6b78a842e550b58533b797cdfcd2d954ed6826`
+- Related B technical baseline: `session-b-domain-model-phase3:02-domain-model/phase-3.6-typed-identity-trust-closure.md`, Blob `0a6b78a842e550b58533b797cdfcd2d954ed6826`
+- Current B formal type confirmation: `02-domain-model/phase-3.6-b-owner-formal-actor-scope-environment-type-mapping-confirmation.md`, Blob `3a1e77889cd9a90cd5822d9f0cb3437880868706` (supersedes earlier readback Blob 729a706860b1259115816265e847a29683c3c233)
+- B exact CGH-APPLIED-1.1 recovery-batch type confirmation: included in current B formal artifact Blob `3a1e77889cd9a90cd5822d9f0cb3437880868706`; exact A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819`; companion COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`
 - Related I artifact: `session-i-security-governance-2026-11-16:09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md`, Blob `0cbf6bb7480db873790c454817593a9b1c5548ba`
 - Related H artifact: `session-h-bmcp-protocol:08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md`, current readback Blob `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248`
 
@@ -116,7 +118,8 @@ The following is the B/I/H semantic dependency order; it is not a wire schema or
 - B Phase 3.6 typed identity proposal Blob `0a6b78...` labels itself JOINT-DECIDED technical baseline, but explicitly says no separate B-session signature is claimed and implementation tests were not run.
 - I's current identity-trust closure Blob `0cbf6bb...` says technical baseline JOINT-DECIDED but external governance approvals remain GOVERNANCE-BLOCKED and implementation/conformance NOT VERIFIED.
 - H current protected-operation binding Blob `e7ca5c...` says governance and consumer acceptance OPEN; implementation/conformance NOT VERIFIED.
-- Therefore: typed identity distinctions are a strong existing cross-owner technical baseline; exact production schemas, external governance, runtime enforcement and consumer acceptance are not approved or verified by this B research.
+- B formally APPROVED ActorRef/ScopeRef/EnvironmentRef semantic type mapping for the exact BIH package (A Blob `a45ae90b318a79bf009d14f4d917611881e9e214`) and exact CGH-APPLIED-1.1 recovery-batch pair above. C/F/G BIH consumer design decisions were recorded ACCEPT WITH ENUMERATED EXCEPTIONS; H ACCEPTED the BIH package. The separate CGH-APPLIED-1.1 C/D/G/H/I/B decisions are also recorded with enumerated exceptions, while Storage confirmed its architecture interface with changes.
+- These are exact-version semantic/design acceptances only. They do not freeze H wire encoding, close I36-GOV-01..10, prove runtime conformance or production readiness. Applied Contract Frozen remains NO; COC/Storage physical implementation and fault tests remain open.
 
 ## 9. Decision record / 决策记录
 
