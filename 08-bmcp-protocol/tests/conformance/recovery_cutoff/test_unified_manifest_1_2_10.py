@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[3]
 SCHEMA_PATH=ROOT/"schemas"/"bmcp.coc-jf10-unified-1.2.10.schema.json"
 sys.path.insert(0,str(ROOT/"runtime_reference"))
 from unified_manifest_semantics import (VALID,INVALID,UNKNOWN,td,snapshot_root,content_digest,
-    validate_union,validate_pair,validate_release,validate_epoch_completed,validate_profile,validate_provider_outcome)
+    validate_union as _validate_union,validate_pair,validate_release,validate_epoch_completed,validate_profile,validate_provider_outcome)
 
 
 def fixtures():
@@ -59,7 +59,7 @@ def fixtures():
     proofs={}
     for row in (a,z):
         key=(row["owner_kind"],row["owner_admission_ref"])
-        proofs[key]={"available":True,"valid":True,"owner_ledger_root":row["owner_ledger_root"],
+        proofs[key]={"available":True,"valid":True,"test_signature_verified":True,"owner_ledger_root":row["owner_ledger_root"],
           "owner_entry_digest":row["owner_entry_digest"],"owner_snapshot_digest":row["owner_snapshot_digest"],
           "owner_snapshot_attestation_digest":row["owner_snapshot_attestation_digest"],
           "owner_local_sequence":row["owner_local_sequence"],"owner_high_water":row["owner_high_water"],
@@ -116,48 +116,51 @@ class Schema1210Tests(unittest.TestCase):
 
 class UnionSemanticsTests(unittest.TestCase):
     def setUp(self):self.m,self.prefix,self.admissions,self.snaps,self.proofs=fixtures()
-    def test_UNION_01_exact_union_passes(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,self.proofs),VALID)
-    def test_UNION_02_omitted_prefix_participant_fails(self):self.assertEqual(validate_union(self.m,[],self.admissions,self.snaps,self.proofs),INVALID)
-    def test_UNION_03_omitted_unregistered_admission_fails(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions[:1],self.snaps,self.proofs),INVALID)
-    def test_UNION_04_duplicate_admission_fails(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions+[deepcopy(self.admissions[0])],self.snaps,self.proofs),INVALID)
+    def validate_union(self,*args,**kwargs):
+        kwargs["verify_membership_proof"]=lambda proof,owner,snapshot: proof.get("test_signature_verified") is True
+        return _validate_union(*args,**kwargs)
+    def test_UNION_01_exact_union_passes(self):self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,self.snaps,self.proofs),VALID)
+    def test_UNION_02_omitted_prefix_participant_fails(self):self.assertEqual(self.validate_union(self.m,[],self.admissions,self.snaps,self.proofs),INVALID)
+    def test_UNION_03_omitted_unregistered_admission_fails(self):self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions[:1],self.snaps,self.proofs),INVALID)
+    def test_UNION_04_duplicate_admission_fails(self):self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions+[deepcopy(self.admissions[0])],self.snaps,self.proofs),INVALID)
     def test_UNION_05_fabricated_coc_ref_on_local_member_fails(self):
         m=deepcopy(self.m);m["manifest_members"][1]["coc_participant_intent_ref"]="fake"
-        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
+        self.assertEqual(self.validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
     def test_UNION_06_missing_absence_reason_fails(self):
         m=deepcopy(self.m);m["manifest_members"][1]["coc_absence_reason"]=""
-        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
+        self.assertEqual(self.validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
     def test_UNION_07_wrong_owner_row_binding_fails(self):
         m=deepcopy(self.m);m["manifest_members"][0]["owner_admission_bindings"][0]["owner_entry_ref"]="wrong"
-        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
+        self.assertEqual(self.validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
     def test_UNION_08_missing_owner_snapshot_is_unknown(self):
-        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,{"I":self.snaps["I"],"D":self.snaps["D"]},self.proofs),UNKNOWN)
+        self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,{"I":self.snaps["I"],"D":self.snaps["D"]},self.proofs),UNKNOWN)
     def test_UNION_09_partial_owner_pagination_is_unknown(self):
         s=deepcopy(self.snaps);s["D"]["pagination_complete"]=False
-        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,s,self.proofs),UNKNOWN)
+        self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,s,self.proofs),UNKNOWN)
     def test_UNION_10_owner_highwater_advance_is_unknown(self):
         a=deepcopy(self.admissions);a[1]["owner_high_water"]="19"
-        self.assertEqual(validate_union(self.m,self.prefix,a,self.snaps,self.proofs),UNKNOWN)
+        self.assertEqual(self.validate_union(self.m,self.prefix,a,self.snaps,self.proofs),UNKNOWN)
     def test_UNION_11_owner_snapshot_root_mismatch_fails(self):
         m=deepcopy(self.m);m["owner_snapshot_roots"]["I"]["request_ledger_root"]="0"*64
-        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
+        self.assertEqual(self.validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
     def test_UNION_12_member_count_mismatch_fails(self):
         m=deepcopy(self.m);m["manifest_member_count"]=9
-        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
+        self.assertEqual(self.validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
     def test_UNION_13_member_root_mismatch_fails(self):
         m=deepcopy(self.m);m["member_set_root"]="0"*64
-        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
+        self.assertEqual(self.validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
     def test_UNION_14_content_digest_mismatch_fails(self):
         m=deepcopy(self.m);m["manifest_content_digest"]="0"*64
-        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
+        self.assertEqual(self.validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
     def test_UNION_15_incomplete_prefix_is_unknown(self):
-        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,self.proofs,False),UNKNOWN)
+        self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,self.snaps,self.proofs,False),UNKNOWN)
 
     def test_UNION_16_missing_membership_proof_is_unknown(self):
         proofs=deepcopy(self.proofs);proofs.pop(("D","D/work-9"))
-        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),UNKNOWN)
+        self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),UNKNOWN)
     def test_UNION_17_invalid_membership_proof_is_invalid(self):
         proofs=deepcopy(self.proofs);proofs[("C","C/admit-1")]["valid"]=False
-        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),INVALID)
+        self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),INVALID)
     def test_UNION_18_non_numeric_owner_sequences_are_not_arithmetically_compared(self):
         snaps=deepcopy(self.snaps);rows=deepcopy(self.admissions);proofs=deepcopy(self.proofs)
         snaps["D"]["admission_high_water"]="opaque/cursor/18";rows[1]["owner_high_water"]="opaque/cursor/18"
@@ -166,25 +169,25 @@ class UnionSemanticsTests(unittest.TestCase):
         m["manifest_members"][1]["owner_high_water"]="opaque/cursor/18"
         m["member_set_root"]=td("MANIFEST-MEMBER-SET",m["manifest_members"])
         m["manifest_content_digest"]=content_digest(m)
-        self.assertEqual(validate_union(m,self.prefix,rows,snaps,proofs),VALID)
+        self.assertEqual(self.validate_union(m,self.prefix,rows,snaps,proofs),VALID)
     def test_UNION_19_empty_owner_binding_is_valid_when_no_owner_admission_applies(self):
         m=deepcopy(self.m);m["manifest_members"]=[m["manifest_members"][0]]
         m["manifest_members"][0]["owner_admission_bindings"]=[]
         m["owner_local_admission_count"]=0;m["manifest_member_count"]=1
         m["member_set_root"]=td("MANIFEST-MEMBER-SET",m["manifest_members"])
         m["manifest_content_digest"]=content_digest(m)
-        self.assertEqual(validate_union(m,self.prefix,[],self.snaps,{}),VALID)
+        self.assertEqual(self.validate_union(m,self.prefix,[],self.snaps,{}),VALID)
     def test_UNION_20_applicable_owner_admission_cannot_be_omitted_from_binding(self):
         m=deepcopy(self.m);m["manifest_members"][0]["owner_admission_bindings"]=[]
-        self.assertEqual(validate_union(m,self.prefix,self.admissions[:1],self.snaps,self.proofs),INVALID)
+        self.assertEqual(self.validate_union(m,self.prefix,self.admissions[:1],self.snaps,self.proofs),INVALID)
 
 
     def test_UNION_21_membership_proof_ref_mismatch_fails(self):
         proofs=deepcopy(self.proofs);proofs[("C","C/admit-1")]["proof_ref"]="wrong/ref"
-        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),INVALID)
+        self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),INVALID)
     def test_UNION_22_membership_proof_outside_highwater_fails(self):
         proofs=deepcopy(self.proofs);proofs[("D","D/work-9")]["within_frozen_high_water"]=False
-        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),INVALID)
+        self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),INVALID)
 
 
 class PairAndReleaseTests(unittest.TestCase):
