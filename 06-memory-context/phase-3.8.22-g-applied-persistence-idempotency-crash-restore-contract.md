@@ -319,3 +319,26 @@ No approval transfers from H 1.2.14, a prior G consumer review, the CGH-APPLIED-
 - Production egress/activation: **NOT AUTHORIZED**.
 
 This contract does not claim exactly-once provider side effects, model execution, global Forget completion, physical erasure or production readiness.
+
+
+## 13. Executable reference-model evidence — 2026-11-18
+
+A bounded, single-node SQLite reference model was added in merged PR [#139](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/139):
+
+- `06-memory-context/reference-model/g_applied_ledger.py`
+- `06-memory-context/reference-model/test_g_applied_ledger.py`
+- `.github/workflows/g-applied-reference-model.yml`
+
+Exact PR-head run [#44187485388](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44187485388) and post-merge main run [#44187595305](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44187595305) both completed SUCCESS. The post-merge run is pinned to main commit `af3b0380e35a5834f8b5cdca92dfa0f8fcd8e1bf`; its job log reports **8 tests OK**.
+
+The executable cases cover:
+1. a complete positive gate set with C `HANDOFF_ACCEPTED` creating one record;
+2. same logical identity + same evidence digest returning the original record;
+3. same identity + changed evidence digest producing a durable conflict without overwriting the original;
+4. `HANDOFF_REJECTED`, `NOT_INVOKED`, `UNKNOWN` and `IN_DOUBT` never creating Full Applied;
+5. missing or failed authority/evidence gates failing closed;
+6. close/reopen readback and same-record replay;
+7. distinct logical identity producing a distinct record; and
+8. rejection of undeclared identity fields.
+
+**Evidence ceiling:** this is a conformance/reference prototype, not the production G runtime or a G Owner implementation acceptance. It uses one local SQLite database and caller-supplied gate booleans. It does not prove multi-replica linearization, distributed restore fencing, current-use revalidation after later I/D changes, real C/H/COC/I/D/Storage authority resolution, cryptographic authentication, or production durability topology. The status in §12 therefore remains unchanged: production G Applied persistence and cross-owner Full Applied are NOT VERIFIED / NOT FROZEN.
