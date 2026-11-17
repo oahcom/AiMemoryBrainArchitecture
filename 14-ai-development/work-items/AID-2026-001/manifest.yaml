@@ -80,9 +80,15 @@ implementation_commits:
   - fc2dfc072d7ad23be4a942c995579e3e3ae5c4fb
   - 206c14c2d9b8785e5cd0e6704c4900ce3daaed25
   - 201a6f5784bae2f75b20a05303bb1a703883f86f
+  - 83bfd4f53af5f0e19e0b6772d18f2158e67a7a19
+  - 1228f84e64845e4ca5d467ca3e70058b18077085
+  - dca13b927c99679e0e3b5aa4b522f7c7aeade780
+  - 633c1b9c37b95e135b7b609d8662b8f8edd768a4
+  - ecef5ca8adcb3d5bd7088853bdd2c1a3d9bc9bfa
 changed_paths:
   - 14-ai-development/prompt-and-evidence-template.md
   - 14-ai-development/README.md
+  - 14-ai-development/ai-development-standard.md
   - 14-ai-development/chatgpt-native-execution-model.en.md
   - 14-ai-development/chatgpt-native-execution-model.zh-CN.md
   - 14-ai-development/prompts/global/chatgpt-session-contract-v1.md
@@ -102,6 +108,7 @@ changed_paths:
   - 14-ai-development/prompts/owners/README.md
   - 14-ai-development/work-items/AID-2026-001/manifest.yaml
   - 14-ai-development/work-items/AID-2026-001/execution-record-001.md
+  - 14-ai-development/work-items/AID-2026-001/governance-decision-NR-001.md
   - 14-ai-development/work-items/AID-2026-001/prompt-v1.md
   - 14-ai-development/work-items/AID-2026-001/self-review-v1.md
   - 14-ai-development/work-items/INDEX.md
@@ -181,13 +188,13 @@ remediation:
     IR-001: FIXED_PENDING_INDEPENDENT_REVIEW
     IR-002: VERIFIED_FIXED_BY_INDEPENDENT_REVIEW
     IR-003: VERIFIED_FIXED_BY_INDEPENDENT_REVIEW
-    NR-001: BLOCKED_GOVERNANCE_AUTHORITY_DECISION
+    NR-001: RESOLVED_BY_GOVERNANCE_DECISION_OPTION_A
     NR-002: FIXED_PR_DESCRIPTION_UPDATED
     NR-003: FIXED_REVIEW_HISTORY_APPENDED
   remediation_commits:
     - 206c14c2d9b8785e5cd0e6704c4900ce3daaed25
     - 201a6f5784bae2f75b20a05303bb1a703883f86f
-  note: IR-001 and NR-002/NR-003 changes are author-side remediation only; they do not supersede the independent reviewer disposition. A fresh review of the new Head is required. NR-001 remains blocked pending explicit governance authority decision.
+  note: IR-001 and NR-002/NR-003 changes are author-side remediation only; they do not supersede the independent reviewer disposition. A fresh review of the new Head is required. NR-001 is resolved by the explicit OPTION A governance decision recorded in governance-decision-NR-001.md; this does not approve the architecture or waive R3 specialist review.
 
 
 governance_decisions:
