@@ -11,6 +11,14 @@ on:
       - "08-bmcp-protocol/tests/conformance/applied_delivery_evidence/**"
       - ".github/workflows/h-applied-delivery-evidence-conformance.yml"
   workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json"
+      - "08-bmcp-protocol/validators/applied_delivery_evidence_validator.py"
+      - "08-bmcp-protocol/tests/conformance/applied_delivery_evidence/**"
+      - ".github/workflows/h-applied-delivery-evidence-conformance.yml"
 
 permissions:
   contents: read
@@ -29,12 +37,3 @@ jobs:
         run: python -m pip install -r 08-bmcp-protocol/tests/conformance/provider_outcome/requirements.txt
       - name: Run Applied Delivery Evidence schema and semantic conformance tests
         run: python -m unittest discover -s 08-bmcp-protocol/tests/conformance/applied_delivery_evidence -p 'test_*.py' -v
-
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "08-bmcp-protocol/schemas/bmcp.applied-delivery-evidence-1.0.0.schema.json"
-      - "08-bmcp-protocol/validators/applied_delivery_evidence_validator.py"
-      - "08-bmcp-protocol/tests/conformance/applied_delivery_evidence/**"
-      - ".github/workflows/h-applied-delivery-evidence-conformance.yml"
