@@ -6,7 +6,7 @@
 - Decision: **ACCEPT WITH CONDITIONS**
 - Status: provider egress semantics composed; Adapter implementation and runtime conformance OPEN
 - Exact reviewed file: provider-egress-gate-adapter-contract.md
-- Exact reviewed Blob: 6cee9eeaf826feb4f27895aeeebcfe32d42306e7
+- Exact reviewed Blob after §13.6 currentness refinement: a8d1cfc4d2171c9b0a0ced10e53fc6b110479aca
 
 ## 1. C decision
 
