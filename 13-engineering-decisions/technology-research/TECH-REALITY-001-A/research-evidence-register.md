@@ -236,3 +236,23 @@ Exact successor bundle members recorded by the manifest include H Unified 1.2.13
 Manifest 记录的后继 Bundle 还包括 H Unified 1.2.13 / wire 1.3.0、H RecoveryJoin 1.0.2、H RecoveryCutoff 1.0.5、H C 映射、CSubmitOutcome 1.0.1、I 精确审查和 D 精确审查等 Blob，详见上方表格。Manifest 记录 C 候选 CI Run 44059935858（19 项测试）SUCCESS；H 1.2.13 的 15 项测试源码尚未运行；此前 H 1.2.12 的结果不能转移。
 
 源码核验更正：Qdrant 的准确源码路径是 `segments_searcher/mod.rs`；Mem0、Graphiti、Letta Code、LangGraph PostgreSQL Checkpointer、Temporal Rust Worker、NATS JetStream 和 Tantivy IndexWriter 已按 §1 所列精确提交读回。此次重新读取 Hermes 源码时触发 GitHub API Rate Limit，因此本轮未重新验证，不将旧 Pin 记为本轮新核验。新增 PydanticAI 持久执行官方文档，但其 Python 集成仅作为比较证据，不是 Rust 依赖。
+
+## 6. Phase 3.8 / 3.8.3 current owner evidence pins / 当前 Owner 证据 Pin
+
+| Owner | Artifact | Branch / Blob | Status and scope |
+|---|---|---|---|
+| D | Phase 3.8 publication participant and terminal contract | `session-d-memory-brain-2026-11-16` / `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | Role proposal; approval/API/conformance OPEN |
+| E | Phase 3.8 publication orchestration/retry/recovery | `session-e-memory-compiler-2026-11-16` / `475fee41e5eea527af4edefbfe88c58c86967d0a` | Role proposal; D/I/Storage APIs and approval OPEN |
+| I | Phase 3.8 commit authorization/revocation sequencer | `session-i-security-governance-2026-11-16` / `54bab0484bd232a5a258e65e34cc7425288b39a6` | Role proposal; approval/crypto/conformance OPEN |
+| Storage | Phase 3.8 visibility participant and atomic outcome | `session-storage-consistency-forget-atomicity-2026-11-16` / `175ee7b1349cfdb79a19898b311a88391ed88010` | Logical transaction proposal; physical topology OPEN |
+| Storage ADR | Phase 3.8.2 serialization topology ADR | same Storage branch / `bb544ba2f346bdc130d524bd5c7310d86f367988` | L1 Option A selected; L4 physical engine/deployment OPEN |
+| A | Phase 3.8.1 contract surface and exact-pin refresh | `session-a-integration-2026-11-16` / `89f81b16e398653ece127709346baa64baf078ab` | Proposed; not Owner-approved/frozen |
+| I crypto | `AIMBA-I-CRYPTO-1.0` | Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2` | Candidate only; no production key custody proof |
+| H wire/schema | wire mapping `b132e6a01bcfe13f92020b9778ee3f7ddbf65753`; Unified 1.2.8 `70b892797d07489936300a26c0dedfafe1d6e746`; RecoveryJoin 1.0.1 `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c` | Issue #25 evidence | Candidate schemas only; exact H 1.2.13 CI OPEN |
+| C | provider-side-effect review `a7b57bd5531222559666f0f1d9df59a259cde61a` | Issue #25 evidence | Review only; live Owner Ledger adapter/fault/race proof OPEN |
+
+H CI run `44043259259` (97/97) is structural/reference-model scope; run `44044062849` (101 tests) is candidate differential/structural scope. Neither proves production wire/crypto or Brain end-to-end conformance. Issue #3 Applied status remains Frozen NO / Test NO-NO / Implementation Verified NO.
+
+Restate Server canonical LICENSE is BSL 1.1 with Additional Use Grant; API metadata `NOASSERTION` is not a sufficient license conclusion. Record Server and Rust SDK MIT as separate components. See [OWNER-REMEDIATION-001](owner-remediation/OWNER-REMEDIATION-001.md).
+
+**中文：** 上表记录当前 Phase 3.8/3.8.3 Owner 工件的精确 Blob 与证据范围。D/E/I/Storage 均为角色提案，A 为未批准提案；H CI 仅候选结构/参考模型或差分测试，不是生产 Wire/Crypto 或 Brain 端到端证明。Issue #3 Applied 仍为未冻结、未测试、未验证实现。Restate Server 规范许可证为 BSL 1.1 + Additional Use Grant；不能只记 API 元数据 NOASSERTION，且必须与 Rust SDK MIT 分开登记。

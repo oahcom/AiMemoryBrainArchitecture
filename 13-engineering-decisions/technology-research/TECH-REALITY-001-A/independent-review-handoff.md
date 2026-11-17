@@ -156,3 +156,13 @@ H. Owner 权限：Owner TAR 是委派静态审查，不是人工批准；核验�
 ### 7.6 停止条件
 
 若源码 Pin 过期、无法读取精确代码、Owner 契约冲突、安全/一致性保证缺少物理证据，或把厂商宣传当项目基准，应停止相关结论并标记 UNKNOWN/BLOCKED，不得猜测。
+
+## 9. Current remediation baseline and corrected source pins / 当前整改基线与更正 Pin
+
+The new remediation branch is based on current main `b3c666e67982cb3d3374e759cfb6552c7765aacb`; the prior PR #45 snapshot remains historical at head `6c7c5919c1b50f38c4d24be679a3885ee3c15b97`. Re-review the entire copied 14-file package plus [OWNER-REMEDIATION-001](owner-remediation/OWNER-REMEDIATION-001.md).
+
+Correct current Storage ADR Blob: `bb544ba2f346bdc130d524bd5c7310d86f367988` (not the superseded `1ef47d4e5711c7db73a24d249adf1992be1f6aa4`). Handoff item 13/14 paths are corrected to remove trailing right parentheses.
+
+The D/E/I/Storage Phase 3.8 pins and H/I/C bounded evidence are in the remediation addendum. Verify exact branches, Blob SHAs, approval status and CI scope independently. The addendum is role simulation, not Owner approval. Verdict remains REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY until a new independent review closes findings.
+
+**中文：** 新整改分支基于当前 Main `b3c666e67982cb3d3374e759cfb6552c7765aacb`；PR #45 旧快照仍保留为历史 Head `6c7c5919c1b50f38c4d24be679a3885ee3c15b97`。复审必须覆盖复制的 14 个文件及整改补充。当前 Storage ADR Blob 更正为 `bb544ba2f346bdc130d524bd5c7310d86f367988`，不再使用旧 Blob `1ef47d4e5711c7db73a24d249adf1992be1f6aa4`。Handoff 第 13/14 项路径移除多余右括号。独立审查者必须重新核验分支、Blob、批准状态和 CI 范围；角色模拟不是 Owner 批准。发现关闭前裁决保持 REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY。

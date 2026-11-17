@@ -204,3 +204,11 @@ Evidence boundary from the manifest:
 PostgreSQL 七类 CI 结果只限定于固定隔离测试档案，不能证明 Brain 的实时 D/I/COC 集成、签名 Receipt 互操作、生产权威读取、外部 High-water 恢复隔离、真实主机/故障域耐久性或生产运维。C 1.0.1 的 19 项候选测试 PASS；H 1.2.13 的 15 项源码尚未在精确 HEAD 执行 CI，旧 H 1.2.12 的 17 项结果不得转移。I 的 L3 向量、生产信任/密钥状态/防回滚仍 OPEN；D 的 Lineage 完整性、迟到发现和最终 Release CAS 仍 OPEN；C 的 Provider 幂等、UNKNOWN 恢复与运行时证据仍 OPEN。
 
 **Gate 解释：** Gate A = PARTIAL PASS / OPEN；Gate B 仅为带枚举例外的设计级 Owner 接受，v3.2.6 后继 Bundle 已绑定但**尚未联合冻结**且 H 精确 CI OPEN；Gate B 实现/一致性验证不是 PASS，延后到工程阶段；Gate C 分布式端到端故障注入延后到工程阶段且 NOT RUN；JF-10 Runtime P0 仍 OPEN；禁止生产激活；多 PolicyDomain 仍 BLOCKED。
+
+## 4. Phase 3.8 cross-owner synthesis / Phase 3.8 跨 Owner 综合
+
+Current D/E/I/Storage proposal pins and authority boundaries have been refreshed in [OWNER-REMEDIATION-001](owner-remediation/OWNER-REMEDIATION-001.md). Key result: D controls producer admission/fence/dependency/publication participant; E controls compiler ingress/run/lease/private staging/recovery; I controls PolicyDomain authorization/PermissionEpoch/revocation; Storage controls durable hidden participant and final visibility/outcome transaction. None can substitute for another Owner's proof. The eight-step logical publication sequence is still a proposal, not frozen APIs or implementation.
+
+Storage ADR Blob `bb544ba2f346bdc130d524bd5c7310d86f367988` selects L1 Option A only; L4 physical engine/deployment remains OPEN. H/I candidate evidence and C review evidence remain bounded; Issue #3 Applied remains NO/NO/NO. Restate Server BSL 1.1 Additional Use Grant must be disclosed separately from Rust SDK MIT.
+
+**中文：** 当前 D/E/I/Storage Phase 3.8 精确 Pin 与权限边界已在整改补充中刷新。核心结论是各 Owner 证明不可互相替代；八步发布顺序仍为提案，不是冻结 API 或实现。Storage 仅 L1 Option A 已选，L4 物理引擎/部署 OPEN。H/I 候选证据和 C 复审证据范围有限；Issue #3 Applied 仍为 NO/NO/NO。Restate Server BSL 1.1 Additional Use Grant 必须与 Rust SDK MIT 分开披露。

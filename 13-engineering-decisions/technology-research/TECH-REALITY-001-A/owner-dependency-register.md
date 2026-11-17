@@ -101,3 +101,15 @@ Storage v3.2.6 Manifest 绑定当前候选接口，但明确记录 **NOT JOINTLY
 - **Storage：** PostgreSQL 18.7 七项隔离 CI 能力子测试 PASS；Gate A 仍 PARTIAL PASS / OPEN。实时 COC/I/D 应用集成和生产部署未证明。
 
 这些状态用于细化此前 TAR 当前性快照，不替代 Owner 权威，也不授权技术选型。
+
+## 6. Current Phase 3.8 owner dependency state / 当前 Phase 3.8 Owner 依赖状态
+
+| Owner | Current exact artifact | Authority preserved | Remaining dependency / gate |
+|---|---|---|---|
+| D | Phase 3.8 Blob `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | Admission, ForgetFence, dependency lineage, PublicationParticipant | Exact Owner approval/API and race conformance OPEN |
+| E | Phase 3.8 Blob `475fee41e5eea527af4edefbfe88c58c86967d0a` | Compiler ingress, run/attempt/lease, private stage, recovery | D/I/Storage API approval and fault/retry conformance OPEN |
+| I | Phase 3.8 Blob `54bab0484bd232a5a258e65e34cc7425288b39a6` | PolicyDomain, authorization, PermissionEpoch, revocation | Crypto profile approval, key custody, anti-rollback/restore OPEN |
+| Storage | Phase 3.8 Blob `175ee7b1349cfdb79a19898b311a88391ed88010`; ADR `bb544ba2f346bdc130d524bd5c7310d86f367988` | Durable participant, serialization and visibility outcome | L1 Option A selected; L4 engine/deployment/JF-10 OPEN |
+| C/G/H | Issue #3 and Issue #25 candidate evidence | Final-request Applied and protocol evidence | Applied Frozen NO; tests NO/NO; implementation verified NO |
+
+**中文：** 当前依赖状态如上。各 Owner 只对自己的语义权威负责，跨 Owner 提案不等于相互批准。Applied、L4 物理拓扑、生产密钥和真实 Adapter 仍为阻塞项。
