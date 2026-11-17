@@ -7,6 +7,7 @@
 - Exact source blob SHA: `8afb914731a34d8ab44331f54f1f39bfd8ec37ce`
 - Source status: **Protocol-binding technical design JOINT-DECIDED; consumer-owner acceptance OPEN; governance approval GOVERNANCE-BLOCKED; H36 NOT RUN**
 - Companion status: **BILINGUAL READING COMPANION; source decision state unchanged**
+- Chinese companion: [简体中文](../../zh-CN/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md)
 - Scope: H-owned protocol binding and conformance evidence only. This record is not external governance approval or downstream consumer sign-off.
 
 > Source-snapshot note: the source's §1 records the historical discovery baseline. A fresh read of the live H branch found the protected-operation binding at blob `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248`, not the historical `9845c97ac43d7888732afafe12e28850ec02add8` recorded below. This companion preserves the source record verbatim in substance; the discrepancy is a currentness finding, not silently rewritten history.
