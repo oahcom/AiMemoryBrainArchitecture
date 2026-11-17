@@ -9,9 +9,9 @@
 - A current CGH-APPLIED-1.1 owner matrix: Blob `ee35d3b39cb1fddd1feee0e0504b77e73e376893`
 - This ledger is a B/I/H-owned coordination record, not an A gate decision and not an approval on behalf of another Owner.
 
-## 1. Current branch-head snapshot
+## 1. Owner branch-head snapshot at the start of this run (before this ledger commit)
 
-All discoverable repository branches were refreshed from the live branch listing. Owner branches remain independent; `main` is not authoritative for Owner decisions.
+All discoverable repository branches were refreshed from the live branch listing. Owner branches remain independent; `main` is not authoritative for Owner decisions. The B row is the pre-ledger HEAD; writing this evidence ledger subsequently advanced the B branch. The table is an intentionally time-bounded snapshot, not a self-referential post-commit HEAD.
 
 | Owner / branch | Current HEAD |
 |---|---|
