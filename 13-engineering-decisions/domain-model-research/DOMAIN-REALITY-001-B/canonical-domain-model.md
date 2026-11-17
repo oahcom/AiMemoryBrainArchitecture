@@ -119,7 +119,23 @@ The model does not require microservices or globally ordered IDs/cursors. Any cr
 
 本模型原则上适配 Local-first Modular Monolith：Bounded Context 是语义/代码权威边界，不是强制进程边界；规范写入权威明确；Owner 局部投影和队列通过契约隔离；类型化引用不要求分布式身份服务；Storage 事务边界由真实不变量和实现证据决定。本模型不要求微服务或全局有序 ID/Cursor。任何跨权威因果排序（如 C/I/D/Storage JF-10）仍是独立的操作协议，必须单独提供证据。
 
-## 7. Blocking semantic issues / 阻塞语义问题
+## 7. Authenticated ingress and physical ordering boundaries / 认证入口与物理排序边界
+
+The domain model preserves three separate layers:
+1. Domain identity and ActorRef/PrincipalRef/ScopeRef/EnvironmentRef typed attribution (B types; I trust/authorization; H protected transport binding).
+2. C origin-signed message semantics and exact C object P0, distinct from H outer-envelope P0 and protected transport authentication.
+3. Storage per-authority physical serialization anchor, a physical implementation primitive whose SerializationRevision is not comparable with D fences, I PermissionEpoch, C sequence, COC position or XID.
+
+当前领域模型保留三个不同层次：
+1. 领域身份与 ActorRef/PrincipalRef/ScopeRef/EnvironmentRef 类型化归因（B 定义类型；I 负责 Trust/Authorization；H 负责 Protected Transport Binding）。
+2. C Origin-signed Message 语义和精确 C Object P0，与 H Outer Envelope P0 及 Protected Transport Authentication 分离。
+3. Storage per-authority 物理序列化锚点；它是物理实现原语，其 SerializationRevision 不得与 D Fence、I PermissionEpoch、C Sequence、COC Position 或 XID 比较。
+
+C owns origin P0, H owns wire extraction/verification, I owns cryptographic trust/profile/key governance, and Storage owns durable authenticated ingress/replay. Current reviews accept portions only as bounded candidates; A marks outer authentication as a blocking gap and no production ingress is authorized.
+
+C 负责 Origin P0，H 负责 Wire 提取/验证，I 负责密码学 Trust/Profile/Key 治理，Storage 负责认证后的持久 Ingress/Replay。当前复审仅接受有限候选部分；A 将外层认证列为阻塞缺口，未授权生产 Ingress。
+
+## 8. Blocking semantic issues / 阻塞语义问题
 
 - Fact/Claim ADR and Claim identity across Memory Versions.
 - Scope taxonomy and Tenant/Workspace/Project/Environment namespace mapping.
@@ -130,7 +146,7 @@ The model does not require microservices or globally ordered IDs/cursors. Any cr
 - Record Time vs Storage Transaction Time and fuzzy-time representation.
 - Provenance identity granularity/cycle/retention policy.
 
-## 8. Gate status / 门禁状态
+## 9. Gate status / 门禁状态
 
 This is the recommended candidate model for further owner reconciliation. It is not a frozen canonical contract. B2/B3/B4/B6 remain open or pending; independent review is not complete.
 
