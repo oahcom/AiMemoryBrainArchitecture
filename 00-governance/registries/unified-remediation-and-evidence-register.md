@@ -226,3 +226,8 @@ This is a bounded repository-tree observation, not a claim that no tests exist o
 | ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
 |---|---|---|---|---|---|
 | UMR-038 | P0 | Reconcile CSubmitOutcome 1.0.1 / BMCP Unified 1.2.12 / RecoveryJoin 1.0.2 exact-version bundle and publish Storage successor manifest | C/H/Storage/I/D/A | OPEN — exact-version currentness mismatch; no common bundle acceptance | Session P cross-review: `00-governance/role-simulations/issue-20-c-h-storage-provider-outcome-wire-currentness-review-v0.1.0.md`. Storage v3.2.4 manifest Blob `6fc0bedaf5421d1be5a9ab5fb4d8cfab2871d7d7` pins C 1.0.0 Blob `b5e87...` and H Unified 1.2.12 Blob `a54f...`; current C 1.0.1 schema is `a631bc7...` and current H 1.2.12 schema is `9aa366d...`. C 3.8.10 Blob `b112444...` still describes 1.0.0; C 3.11.1 Blob `6fa67af...` introduces 1.0.1. H mapping Blob `fad28f1...` maps 1.0.1 but still pins old H schema Blob. Require C/H immutable amendments, Storage successor manifest and exact I/D/C/H/Storage/A re-review. Candidate CI PASS does not close this issue. |
+
+
+### Latest P/main compare — 2026-11-17
+
+Live GitHub compare after the latest P coordination commits: `session-p-project-governance-baseline` is **175 commits ahead / 23 behind** `main` (**DIVERGED**). This is a point-in-time compare. No merge, rebase, force update or main-branch write was performed or authorized.
