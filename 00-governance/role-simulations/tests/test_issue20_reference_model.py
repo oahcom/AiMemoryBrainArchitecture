@@ -1,7 +1,8 @@
 import unittest
 from issue20_reference_model import (
     DAuthority, IAuthority, StorageAuthority, Publication, Protocol,
-    RestoreGate, ProtocolError, UnknownOutcome
+    RestoreGate, ProtocolError, UnknownOutcome, FRecallProjection,
+    EDerivation, GContextVersion
 )
 
 
@@ -251,6 +252,99 @@ class RecoveryManifestTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             manifest.reconcile(
                 [{"participant_ref": "late", "coc_position": 9}], [])
+
+
+class FRecallGateTests(unittest.TestCase):
+    def test_candidate_is_not_returned_without_current_d_and_i_proofs(self):
+        f = FRecallProjection()
+        f.index("memory-1", "source-digest")
+        self.assertEqual(f.return_page(["memory-1"], {"memory-1"}, set()), [])
+        self.assertEqual(f.return_page(["memory-1"], set(), {"memory-1"}), [])
+
+    def test_every_page_revalidates_and_forget_invalidates_projection(self):
+        f = FRecallProjection()
+        f.index("memory-1", "source-digest")
+        self.assertEqual(f.return_page(["memory-1"], {"memory-1"}, {"memory-1"}),
+                         ["memory-1"])
+        f.invalidate("memory-1")
+        self.assertEqual(f.return_page(["memory-1"], {"memory-1"}, {"memory-1"}), [])
+
+    def test_integrity_unknown_fails_closed(self):
+        f = FRecallProjection()
+        f.index("memory-1", "source-digest")
+        self.assertEqual(f.return_page(["memory-1"], {"memory-1"}, {"memory-1"},
+                                       integrity_ok=False), [])
+
+
+class EDerivationLifecycleTests(unittest.TestCase):
+    def test_retry_keeps_work_identity_and_increments_attempt(self):
+        e = EDerivation("work-1", "request-digest")
+        self.assertEqual(e.retry("request-digest"), 1)
+        first_lease = e.lease_id
+        self.assertEqual(e.retry("request-digest"), 2)
+        self.assertEqual(e.work_item_id, "work-1")
+        self.assertNotEqual(first_lease, e.lease_id)
+
+    def test_same_work_identity_with_changed_digest_conflicts(self):
+        e = EDerivation("work-1", "request-digest")
+        with self.assertRaises(ProtocolError):
+            e.retry("changed-digest")
+
+    def test_d_admission_cannot_precede_storage_prepare(self):
+        e = EDerivation("work-1", "request-digest")
+        e.retry("request-digest")
+        e.stage_private("artifact-digest")
+        with self.assertRaises(ProtocolError):
+            e.admit_d("d-admission-1")
+
+    def test_unknown_and_lease_retry_are_not_no_publication(self):
+        e = EDerivation("work-1", "request-digest")
+        e.retry("request-digest")
+        e.stage_private("artifact-digest")
+        e.prepare_storage("storage-participant-1")
+        e.admit_d("d-admission-1")
+        with self.assertRaises(UnknownOutcome):
+            e.resolve("UNKNOWN")
+        self.assertEqual(e.state, "UNKNOWN_IN_DOUBT")
+        self.assertIsNone(e.terminal_outcome)
+
+    def test_terminal_publication_requires_storage_and_d_join(self):
+        e = EDerivation("work-1", "request-digest")
+        e.retry("request-digest")
+        e.stage_private("artifact-digest")
+        e.prepare_storage("storage-participant-1")
+        e.admit_d("d-admission-1")
+        self.assertEqual(e.resolve("COMMITTED_VISIBLE"), "PUBLISHED")
+
+
+class GContextLineageTests(unittest.TestCase):
+    def test_context_derivative_requires_source_lineage(self):
+        g = GContextVersion()
+        with self.assertRaises(ProtocolError):
+            g.materialize("fragment-1", [], 3)
+
+    def test_delta_rejects_stale_base_version(self):
+        g = GContextVersion()
+        g.materialize("fragment-1", ["memory-1"], 3)
+        g.version += 1
+        with self.assertRaises(ProtocolError):
+            g.apply_delta(1, "fragment-2", ["memory-2"], 3)
+
+    def test_forget_of_transitive_source_invalidates_context_and_delivery(self):
+        g = GContextVersion()
+        g.materialize("fragment-1", ["memory-1", "memory-parent"], 3)
+        g.create_delivery("delivery-1", 1, 3)
+        result = g.forget({"memory-parent"}, current_d_generation=4)
+        self.assertTrue(result["stale"])
+        with self.assertRaises(ProtocolError):
+            g.replay_delivery("delivery-1", 4)
+
+    def test_old_delivery_cannot_cross_d_generation_change(self):
+        g = GContextVersion()
+        g.materialize("fragment-1", ["memory-1"], 3)
+        g.create_delivery("delivery-1", 1, 3)
+        with self.assertRaises(ProtocolError):
+            g.replay_delivery("delivery-1", 4)
 
 
 if __name__ == "__main__":
