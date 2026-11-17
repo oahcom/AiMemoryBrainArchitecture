@@ -2,7 +2,7 @@
 # Phase 3.8.14 — I 复审：H Full-Path Fixture 与 I Terminal Callback 边界
 
 - Owner: I — Security, Identity and Governance
-- H Unified 1.2.14 schema Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a4a`
+- H Unified 1.2.14 schema Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a59`
 - H authority-join mapping Blob: `1cbe74eba69325510d6b1019d971661f965eabf8`
 - I P0 allowlist current Blob: `44986f5f864bcdc1a79d34978273644d381a68c0`
 - I exact H authority-join review Blob: `34b29f405d4e8ceb1a039666bfe84518f62355f8`
