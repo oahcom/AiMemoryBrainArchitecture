@@ -175,3 +175,14 @@ A prompt version change returns the affected task to PROMPT_READY/READY as appro
 ## 10. Initial adoption / 初始采用
 
 This model is PROPOSED. Existing tasks may be linked retrospectively, with missing automation IDs, prompt hashes and run evidence marked NOT_RECORDED. Do not create scheduled tasks until the Owner prompt, cadence, timezone, access model, notification behavior and duplicate-task check are defined.
+
+## 11. 中文规范要点 / Chinese normative summary
+
+- GitHub Issue 是需求、Work Item 状态、依赖、阻塞、决议和讨论的持久事实源；所有实质性任务必须关联 Issue。
+- GitHub PR 是变更与审查桥梁；实现者提交实际 diff，审查者针对具体提交提出意见，修改后必须复审新提交。PR Approve 不自动等于领域决议、集成接受或项目批准。
+- 每个活跃 Owner 可配置一个专属定时任务。定时任务是执行入口，不是新的授权主体，也不能取代 GitHub。
+- A 负责组合任务、编写提示词、跟踪依赖与 PR、集成裁决；但每个领域 Owner 必须批准自己领域的提示词边界和验收标准。A 不能独自编写并批准自己的实现任务提示词。
+- 定时任务每次运行都必须重新读取 Issue、PR、分支 SHA、依赖和权限；一次只做有界、幂等的工作，并把提交、审查、测试和阻塞结果回写 GitHub。
+- 定时任务不得默认合并、发布、执行破坏性迁移或绕过 CI。构建、测试和合并门禁应由 GitHub Actions/CI 等确定性机制执行。
+- 如果没有可用 GitHub 权限、代码执行环境或可信基线，必须停止并报告 BLOCKED/NOT RUN，不能假设自动化具有这些能力。
+- 定时任务频率、时区、通知策略和执行权限必须显式配置；未创建成功前 automation ID 必须为 NOT_CREATED。
