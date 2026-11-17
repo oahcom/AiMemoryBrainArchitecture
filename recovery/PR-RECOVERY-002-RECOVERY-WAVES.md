@@ -173,3 +173,17 @@ This closes the non-main-target backlog wave. Next work moves to the main-target
 - #110 exact head `5f42acb1391a06703f9aa1a7b615f4dd62d5cbea` and #111 exact head `c6fc822c64c6afa728e1eff884012384256958cf` are mergeable=true but lack independent exact-head approval and current-head status/check evidence. Both remain blocked at the formal review/verification gates.
 - #105 recovery package is Draft and self-authored; it cannot review or approve itself. Its branch is 98 commits ahead / 0 behind main by ancestry and changes only the eight recovery artifact files in the PR diff; independent review remains required.
 - No current main-target PR has a GitHub `review:approved` result. Do not merge by substituting the current Recovery Principal Reviewer technical re-check for the required separate AI session/agent.
+
+
+## Latest live wave re-sequencing after mainline and Owner-branch merges — 2026-11-18
+
+- Current REST portfolio: **61 Open = 60 Draft + 1 Ready (#111)**; all 61 target main.
+- Main HEAD: `4a0acc1608f0909bafb64ac90f0a724b8223d546`.
+- Original 76 tracked PRs now comprise 61 Open and 15 Merged.
+- Merged Owner/runtime/research branches: #32–#35, #51, #54, #66, #68, #71, #72, #92; each has zero formal submitted PR review records. #94 has successful workflow validation but only author-account COMMENTED review. #108/#109/#110 are mainline research publications with only author-account COMMENTED reviews. All 15 are recorded as MERGED_REVIEW_GAP until retrospective independent review and Owner disposition are complete.
+- #110's main merge is now part of current main. #111 has been rebased onto that exact main and is 1 commit ahead / 0 behind; it remains the only Ready PR, but no independent exact-head approval or check evidence exists.
+- #105 recovery PR is based on current main and contains eight recovery evidence files only. It remains Draft and requires an independent reviewer.
+- The former dependency-blocked non-main PRs have been merged into their target branches, so the current open portfolio has no non-main targets. This does **not** mean the proposals were accepted as normative mainline architecture.
+- Current inventory classifications across 76 tracked rows: DRAFT_ACTIVE 48; BLOCKED_BY_DEPENDENCY 0; STALE_UNCERTAIN 5; ARCHITECTURE_CONFLICT 3; NEEDS_REBASE 2; SECURITY_REVIEW_REQUIRED 2; READY_AFTER_REVIEW 1; MERGED_REVIEW_GAP 15.
+- Priority totals: P0 2; P1 55; P2 19.
+- No further merge is authorized by this wave until a separate reviewer identity/session satisfies the required review gate. Do not treat author-account comments or Recovery Principal Reviewer re-checks as independent approval.
