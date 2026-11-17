@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-c-agent-integration-2026-11-16/07-agent-integration/schemas/c-submit-outcome-1.0.0.schema.json",
+  "$id": "urn:aimba:schema:c-submit-outcome:1.0.0",
   "title": "CSubmitOutcome",
   "description": "Immutable C-owned provider handoff outcome record. Schema validates structure only; issuer authentication, append-only ledger inclusion, gate linearization, provider evidence and COC joins require semantic validation.",
   "type": "object",
@@ -60,7 +60,13 @@
     "COCAbsenceReason",
     "PriorObservationRef",
     "SupersedesObservationRef",
-    "ReconciliationParentRef"
+    "ReconciliationParentRef",
+    "payload_digest",
+    "key_id_ref",
+    "key_version",
+    "signature",
+    "ProviderEvidenceIssuerRef",
+    "ProviderEvidenceType"
   ],
   "properties": {
     "schema_id": {
@@ -301,6 +307,29 @@
         "null"
       ],
       "maxLength": 512
+    },
+    "payload_digest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "key_id_ref": {
+      "$ref": "#/$defs/ref"
+    },
+    "key_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{86}$"
+    },
+    "ProviderEvidenceIssuerRef": {
+      "$ref": "#/$defs/ref"
+    },
+    "ProviderEvidenceType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
     }
   },
   "$defs": {
