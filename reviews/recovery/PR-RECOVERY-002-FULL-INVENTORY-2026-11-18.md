@@ -205,9 +205,9 @@ Important rule: PRs targeting Owner/research/recovery branches are not candidate
 
 **PROJECT ACCEPTANCE: NOT COMPLETE. / 项目验收：未完成。**
 
-This recovery closes the stale open-PR queue by reconciling the remaining duplicate PR #135. It does not convert merges into approvals, close Issue #26, pass architecture gates, or authorize production activation.
+The 107-record inventory is a point-in-time snapshot. PR #135 was refreshed and merged after PR #137; it was not closed by this recovery. PR #138 subsequently published the inventory report. These repository-integration events do not convert merges into approvals, close Issue #26, pass architecture gates, or authorize production activation.
 
-本次恢复通过关闭已被 PR #137 取代的重复 PR #135 清空开放 PR 队列；不把合并事实转换为 Owner 批准，不关闭 Issue #26，不宣称架构 Gate 通过，也不授权生产激活。
+上述 107 条 PR 盘点是一个时间点快照。PR #135 在 PR #137 之后经过刷新并实际合并；本次恢复并未关闭 PR #135。随后 PR #138 发布了盘点报告。这些仓库集成事实不代表 Owner 批准，不会关闭 Issue #26，不代表架构 Gate 通过，也不授权生产激活。
 
 
 ---
