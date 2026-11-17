@@ -104,3 +104,12 @@ I accepts the schema shape only as a proposed typed evidence envelope. The CI pa
 This exact-version re-review does not approve I cryptographic profile, does not issue an I gate-release decision and is not an independent human Owner signature.
 
 H 分支当前 RecoveryJoin Schema 及候选验证套件已精确绑定，66/66 逻辑/结构候选测试通过。I 仅接受其类型化证据字段形状作为提案；不接受其 TEST-only 摘要作为生产签名规范。真实签名、Key Status、历史信任、PermissionEpoch 与 Inventory Epoch 连续性、空集合签名及 I PolicyDomain Sequencer 的 Currentness CAS 仍未闭环。
+
+
+## 9. Signature profile registry boundary / Signature Profile 注册表边界
+
+H exact schema 1.2.7 review Blob: `8bed0b05cd631014bf5af7cb5a8dafdd932940e9`; schema Blob: `e9748a5b904d2b975e47a32a0cbb31de31636854`.
+
+I disposition: `signature_profile_id` is a typed reference only. I owns the trusted issuer/key/profile registry and must resolve the identifier from an authenticated current registry; no profile definition, algorithm or key material supplied in the message payload is authoritative. For protected owner-signed records I requires semantic validation to enforce presence, owner/issuer binding, audience/purpose/scope, key version/status, canonicalization profile separation, anti-rollback and historical verification. Missing/unknown/downgraded/wrong-audience/wrong-owner profiles yield UNKNOWN/REJECT and keep the gate closed according to the relevant verification state. I does not approve a production signature suite or registry implementation in this review.
+
+The H schema field is structurally optional; H's own review states semantic validation must require it for protected owner-signed records. I accepts that layering only if the executable semantic validator and negative vectors are added. I cryptographic profile and runtime trust remain OPEN.
