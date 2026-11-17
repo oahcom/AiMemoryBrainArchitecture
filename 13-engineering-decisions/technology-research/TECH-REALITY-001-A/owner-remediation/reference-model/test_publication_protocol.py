@@ -815,6 +815,54 @@ class PublicationProtocolTests(unittest.TestCase):
         with self.assertRaises(Rejected):
             self.consume_i(p, changed)
 
+    def test_unknown_binding_rejects_request_digest_substitution(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        wrong = (
+            args["auth_id"], args["publication_id"], args["storage_id"],
+            "request-digest-substituted", args["owner_boundary"],
+            args["d_proof"], args["i_commit_won_proof"],
+        )
+        with self.assertRaises(Rejected):
+            p.mark_unknown("op-1", wrong)
+        self.assertNotIn("op-1", p.private_unknown)
+
+    def test_no_publication_proof_rejects_request_digest_substitution(self):
+        p = self.prepared()
+        p.install_forget_fence()
+        args = self.consume_i(p)
+        binding = (
+            args["auth_id"], args["publication_id"], args["storage_id"],
+            args["request_digest"], args["owner_boundary"],
+            args["d_proof"], args["i_commit_won_proof"],
+        )
+        p.mark_unknown("op-1", binding)
+        p.install_forget_fence()
+        wrong = list(binding)
+        wrong[3] = "request-digest-substituted"
+        proof = self.no_publication_proof(operation_binding=tuple(wrong))
+        with self.assertRaises(Rejected):
+            p.resolve_no_publication("op-1", proof)
+        self.assertIn("op-1", p.private_unknown)
+
+    def test_no_publication_proof_rejects_owner_boundary_substitution(self):
+        p = self.prepared()
+        p.install_forget_fence()
+        args = self.consume_i(p)
+        binding = (
+            args["auth_id"], args["publication_id"], args["storage_id"],
+            args["request_digest"], args["owner_boundary"],
+            args["d_proof"], args["i_commit_won_proof"],
+        )
+        p.mark_unknown("op-1", binding)
+        p.install_forget_fence()
+        wrong = list(binding)
+        wrong[4] = "visibility-gate-substituted"
+        proof = self.no_publication_proof(operation_binding=tuple(wrong))
+        with self.assertRaises(Rejected):
+            p.resolve_no_publication("op-1", proof)
+        self.assertIn("op-1", p.private_unknown)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
