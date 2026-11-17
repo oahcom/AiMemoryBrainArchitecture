@@ -11,7 +11,8 @@
 - C key-status event schema 1.0.0: Blob `908b293eba337e9fa75864cea3704e28a1a8d82e`
 - H validator core: Blob `0449090a0367576b8b4ac20b1b46897facf9233d`
 - H validator tests: Blob `78d3c58ec0d56a95ef78c41ffbad9b21eb797556`
-- C review of H 1.2.13 × C 1.0.1: Blob `761f204ac0ad3a433c336d71217e7c3147ebc09e`
+- C successor review Phase 3.8.14: Blob `dd4fb61536bead57d5c8db0a58abae93b368b72e`
+- C predecessor review Phase 3.8.11: Blob `761f204ac0ad3a433c336d71217e7c3147ebc09e`
 - C profile identifier ownership decision: Blob `5067dadb9c646a054d78f03c56e635facc36311a`
 - I scope clarification of C profile identifier: Blob `1e86a1349d371a1cdb4a56d69f783e0f316c7203`
 - H predecessor mapping 1.2.12 × C 1.0.1: Blob `fad28f1b62f6a686669e209ebe30d69df6330d75`
