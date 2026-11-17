@@ -264,3 +264,14 @@ A crash between steps 1 and 2 leaves an orphan private Storage participant, whic
 The D PublicationParticipantRef must include the exact StorageVisibilityParticipantRef. The Storage ledger row is the recovery anchor that prevents an admitted D barrier participant from existing without a recoverable Storage operation identity.
 
 This order does not weaken D fence-first or I revocation-first behavior. It only closes the prepare/admission crash window.
+
+
+## 13. Exact pin refresh after crash-window correction
+
+The final proposal pins after the Storage-prepare-before-D-admission correction are:
+- D Phase 3.7: 206ead86103302d147c5e08a5c2ce93ec8c1d0c2.
+- E Phase 3.7: bad04d2d8caa654ee4c0ffd65f32fd962a19f10f.
+- I Phase 3.7: e3b1b5d99eb36ac0b395854d8c19287d2b64b752.
+- Storage Phase 3.7: this file's current Blob after this append.
+
+The required order is Storage durable hidden participant first → D PublicationParticipantRef bound to that participant → I single-use receipt consumption → Storage final visibility commit → D/I independently close after the same authoritative Storage outcome. The earlier D-first ordering is superseded. Exact-owner re-review must use these final pins, not earlier intermediate blobs.
