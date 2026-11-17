@@ -32,6 +32,7 @@ class Protocol:
     outcomes: dict = field(default_factory=dict)
     visibility: dict = field(default_factory=dict)
     receipts: dict = field(default_factory=dict)
+    operation_bindings: dict = field(default_factory=dict)
     outbox: dict = field(default_factory=dict)
     private_unknown: set = field(default_factory=set)
     d_closed: dict = field(default_factory=dict)
@@ -57,7 +58,12 @@ class Protocol:
         self.fence_installed = True
         # Publications admitted before the fence remain barrier-counted until
         # D observes the exact authoritative Storage terminal outcome.
-        self.fence_pending = set(self.publication_participants)
+        already_d_closed = {
+            outcome[2]
+            for outcome in self.d_closed.values()
+            if isinstance(outcome, tuple) and len(outcome) >= 3
+        }
+        self.fence_pending = set(self.publication_participants) - already_d_closed
         return self.fence_generation
 
     def register_dependencies(self, work_id, dependencies):
@@ -114,8 +120,12 @@ class Protocol:
 
     def commit(self, operation_id, auth_id, publication_id, storage_id,
                d_proof, i_commit_won_proof, *, fail_before_commit=False):
-        # Idempotent retry after a committed result returns the same receipt.
+        # Idempotent retry is valid only for the exact immutable operation tuple.
+        # Reusing an operation ID with different participants/proofs is a conflict.
+        binding = (auth_id, publication_id, storage_id, d_proof, i_commit_won_proof)
         if operation_id in self.receipts:
+            if self.operation_bindings.get(operation_id) != binding:
+                raise Rejected("operation identity reused with different immutable binding")
             return self.receipts[operation_id]
         if auth_id not in self.authorizations or auth_id in self.revoked:
             raise Rejected("authorization absent or revoked")
@@ -141,6 +151,7 @@ class Protocol:
         self.visibility[publication_id] = "VISIBLE"
         self.outcomes[operation_id] = outcome
         self.receipts[operation_id] = receipt
+        self.operation_bindings[operation_id] = binding
         self.outbox[operation_id] = ("PUBLISH", receipt)
         self.private_unknown.discard(operation_id)
         return receipt
@@ -201,6 +212,14 @@ class PublicationProtocolTests(unittest.TestCase):
         p.install_forget_fence()
         with self.assertRaises(Rejected):
             p.admit_publication("publication-1", "work-1", "storage-1")
+
+    def test_publication_already_closed_by_d_before_fence_is_not_pending(self):
+        p = self.prepared()
+        p.commit(**self.commit_args())
+        outcome = p.outcomes["op-1"]
+        p.close_d("op-1", outcome)
+        p.install_forget_fence()
+        self.assertNotIn("publication-1", p.fence_pending)
 
     def test_publication_first_remains_fence_barrier_until_d_closeout(self):
         p = self.prepared()
@@ -310,6 +329,18 @@ class PublicationProtocolTests(unittest.TestCase):
         first = p.commit(**self.commit_args())
         second = p.commit(**self.commit_args())
         self.assertEqual(first, second)
+        self.assertEqual(len(p.receipts), 1)
+        self.assertEqual(len(p.outbox), 1)
+
+    def test_operation_id_reuse_with_changed_participant_binding_conflicts(self):
+        p = self.prepared()
+        p.commit(**self.commit_args())
+        args = self.commit_args()
+        args["storage_id"] = "storage-substituted"
+        args["d_proof"] = ("D_ADMITTED", "publication-1", "storage-substituted")
+        args["i_commit_won_proof"] = ("I_COMMIT_WON", "auth-1", "publication-1", "storage-substituted")
+        with self.assertRaises(Rejected):
+            p.commit(**args)
         self.assertEqual(len(p.receipts), 1)
         self.assertEqual(len(p.outbox), 1)
 
