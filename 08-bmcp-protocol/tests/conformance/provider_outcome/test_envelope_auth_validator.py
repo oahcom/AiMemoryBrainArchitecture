@@ -225,7 +225,8 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         self.envelope["subject_ref"] = "C/authority/agent-runtime"
         self.envelope["owner_authority"] = "C"
         result = authenticate_outer_envelope(self.raw(), gateway_context, self.checks())
-        self.assertEqual(result["status"], "AUTHENTICATED_NEW", result)
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertIn("authenticated C origin principal", result["errors"][0])
 
     def test_18_subject_and_owner_authority_are_checked_by_registry_not_sender_string_equality(self):
         self.envelope["subject_ref"] = "C/subject/unauthorized"
@@ -309,6 +310,24 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         result = authenticate_outer_envelope(self.raw(), self.context, checks)
         self.assertEqual(result["status"], "AUTHENTICATED_NEW", result)
         self.assertEqual(seen["preimage"], expected_preimage)
+
+    def test_25_non_c_transport_principal_cannot_sign_c_origin_message(self):
+        gateway_context = ProtectedTransportContext(
+            issuer_ref="H/gateway/issuer",
+            authority_ref="H/gateway/authority",
+            authority_kind="H",
+            subject_ref="H/gateway/instance-7",
+            audience=self.context.audience,
+            runtime_session_ref="H/session/gateway-7",
+            authentication_context_ref="I/auth-context/gateway-7",
+            channel_binding_proof_ref=self.context.channel_binding_proof_ref,
+        )
+        self.envelope["issuer_ref"] = gateway_context.issuer_ref
+        self.envelope["sender_authority_ref"] = gateway_context.authority_ref
+        self.envelope["sender_subject_ref"] = gateway_context.subject_ref
+        result = authenticate_outer_envelope(self.raw(), gateway_context, self.checks())
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertIn("authenticated C origin principal", result["errors"][0])
 
 
 if __name__ == "__main__":
