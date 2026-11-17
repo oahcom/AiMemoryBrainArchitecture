@@ -76,6 +76,7 @@ _REQUIRED_AUTH_FIELDS = (
     "subject_ref",
     "owner_authority",
     "canonicalization_profile_id",
+    "signature_profile_id",
     "digest_algorithm",
     "payload_digest",
     "integrity_proof_ref",
