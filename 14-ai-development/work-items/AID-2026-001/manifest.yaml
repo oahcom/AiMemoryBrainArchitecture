@@ -15,9 +15,9 @@ r3_specialist_reviews:
   security_specialist: PENDING — Owner I role in a genuinely new non-implementing ChatGPT conversation
   forget_domain_specialist: PENDING — Owner D role in a genuinely new non-implementing ChatGPT conversation
 r3_test_matrix: 14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md
-  r3_security_specialist_prompt: 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-i-prompt.md
-  r3_forget_specialist_prompt: 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-d-prompt.md
-  integration_reviewer_prompt: 14-ai-development/work-items/AID-2026-001/integration-review-prompt.md
+r3_security_specialist_prompt: 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-i-prompt.md
+r3_forget_specialist_prompt: 14-ai-development/work-items/AID-2026-001/r3-specialist-review-owner-d-prompt.md
+integration_reviewer_prompt: 14-ai-development/work-items/AID-2026-001/integration-review-prompt.md
 r3_test_evidence_status: NOT_RUN_NOT_EVIDENCED
 acceptance_blocker: R3 specialist reports and reproducible R3 contract-test evidence are mandatory before acceptance
 acceptance_authority: project governance authority
