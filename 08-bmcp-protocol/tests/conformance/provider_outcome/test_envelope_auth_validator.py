@@ -15,6 +15,7 @@ from envelope_auth_validator import (  # noqa: E402
     ReplayDecision,
     authenticate_outer_envelope,
     validate_authenticated_provider_outcome,
+    outer_envelope_digest_and_preimage,
 )
 from provider_outcome_validator import AuthorityChecks  # noqa: E402
 
@@ -32,6 +33,16 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
             channel_binding_proof_ref="C/channel-binding/test",
         )
         self.envelope = {
+            "schema_id": "bmcp.coc-jf10-unified",
+            "schema_artifact_revision": "1.2.14",
+            "schema_version": "1.3.0",
+            "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+            "owner_record_ref": "C/outcome/record-7",
+            "causal_order_profile_ref": "CausalOrderProfile/1.0",
+            "causal_order_coordinator_ref": "COC/coordinator/1",
+            "causal_order_domain_ref": "COC/domain/provider-outcome",
+            "created_at": "2026-11-17T12:00:00Z",
+            "owner_signature_ref": "C/signature/envelope-7",
             "message_id": "msg/h-envelope/CPO-01-accepted",
             "message_nonce": "nonce/h-envelope/CPO-01-accepted-0123456789",
             "audience": "COC/provider-outcome-validator",
@@ -41,9 +52,9 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
             "subject_ref": "C/adapter/adapter-7",
             "owner_authority": "C",
             "canonicalization_profile_id": "RFC8785-JCS-1.0",
-            "signature_profile_id": "TEST-ONLY-ENVELOPE-SIGNATURE-PROFILE",
+            "signature_profile_id": "AIMBA-C-BMCP-ENVELOPE-CRYPTO-1.0",
             "digest_algorithm": "SHA-256",
-            "payload_digest": "a" * 64,
+            "payload_digest": "0" * 64,
             "integrity_proof_ref": "C/integrity-proof/test",
             "channel_binding_proof_ref": "C/channel-binding/test",
             "key_id_ref": "C/key/test-only",
@@ -60,7 +71,9 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
             check_and_reserve_replay=lambda env, ctx: ReplayCheck(ReplayDecision.NEW),
         )
 
-    def raw(self):
+    def raw(self, refresh_digest=True):
+        if refresh_digest:
+            self.envelope["payload_digest"] = outer_envelope_digest_and_preimage(self.envelope)[0]
         return json.dumps(self.envelope, separators=(",", ":"), sort_keys=True).encode("utf-8")
 
     def test_01_new_envelope_authenticates_only_with_protected_context_and_all_verifiers(self):
@@ -245,6 +258,57 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         checks.verify_envelope_integrity = lambda raw, env, ctx: None
         result = authenticate_outer_envelope(self.raw(), self.context, checks)
         self.assertEqual(result["status"], "UNKNOWN", result)
+
+    def test_19_outer_p0_digest_is_recomputed_before_signature_callback(self):
+        self.envelope["message_id"] = "msg/tampered"
+        called = []
+        checks = self.checks()
+        checks.verify_envelope_integrity = lambda raw, env, ctx: called.append(True) or True
+        result = authenticate_outer_envelope(self.raw(refresh_digest=False), self.context, checks)
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertIn("outer-envelope payload_digest mismatch", result["errors"])
+        self.assertEqual(called, [])
+
+    def test_20_outer_p0_binds_integrity_and_channel_binding_references(self):
+        digest, _ = outer_envelope_digest_and_preimage(self.envelope)
+        self.envelope["integrity_proof_ref"] = "C/integrity-proof/attacker"
+        changed_integrity, _ = outer_envelope_digest_and_preimage(self.envelope)
+        self.assertNotEqual(digest, changed_integrity)
+        self.envelope["integrity_proof_ref"] = "C/integrity-proof/test"
+        self.envelope["channel_binding_proof_ref"] = "C/channel-binding/attacker"
+        changed_channel, _ = outer_envelope_digest_and_preimage(self.envelope)
+        self.assertNotEqual(digest, changed_channel)
+
+    def test_21_coordinator_appended_coc_fields_are_excluded_from_c_origin_p0(self):
+        digest, _ = outer_envelope_digest_and_preimage(self.envelope)
+        self.envelope["coc_commit_proof_ref"] = "COC/commit/1"
+        self.envelope["coc_record_ref"] = "COC/record/1"
+        self.envelope["coc_record_position"] = "COC/position/1"
+        self.envelope["coc_entry_digest"] = "b" * 64
+        after_append, _ = outer_envelope_digest_and_preimage(self.envelope)
+        self.assertEqual(digest, after_append)
+
+    def test_22_unknown_outer_envelope_member_is_rejected(self):
+        self.envelope["unclassified_extension"] = "must-not-be-ignored"
+        result = authenticate_outer_envelope(self.raw(), self.context, self.checks())
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertTrue(any("unclassified outer-envelope members" in e for e in result["errors"]))
+
+    def test_23_wrong_outer_signature_profile_is_rejected_before_crypto_callback(self):
+        self.envelope["signature_profile_id"] = "AIMBA-C-CRYPTO-1.0"
+        result = authenticate_outer_envelope(self.raw(), self.context, self.checks())
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertTrue(any("wrong C outer-envelope signature_profile_id" in e for e in result["errors"]))
+
+    def test_24_signature_callback_receives_exact_candidate_preimage(self):
+        expected_digest, expected_preimage = outer_envelope_digest_and_preimage(self.envelope)
+        self.envelope["payload_digest"] = expected_digest
+        seen = {}
+        checks = self.checks()
+        checks.verify_envelope_signature = lambda env, preimage, ctx: seen.update({"preimage": preimage}) or True
+        result = authenticate_outer_envelope(self.raw(), self.context, checks)
+        self.assertEqual(result["status"], "AUTHENTICATED_NEW", result)
+        self.assertEqual(seen["preimage"], expected_preimage)
 
 
 if __name__ == "__main__":
