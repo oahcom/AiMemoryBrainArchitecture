@@ -164,3 +164,56 @@ Subsequent commits that address IR-001, NR-002 and NR-003 must be appended here 
 - 本轮仅完成作者侧文档核对，不声称取得 B/H/I 联合批准、Owner I 独立审查、生产实现或 R3 PASS。
 - YAML/Schema/Manifest 验证、CI 和 R3 可执行测试：NOT RUN。
 - Acceptance 仍 BLOCKED；Merge NOT AUTHORIZED。
+
+
+## Current GitHub state reconciliation — 2026-11-18
+## 当前 GitHub 状态对账 — 2026-11-18
+
+This appendendum supersedes only stale present-tense status statements in earlier entries; it does not rewrite their historical review-time observations.
+
+- Observed current `main` Head: `ac4558ce7a78fc8fb27a18d0c06033e3a48f6fff`.
+- PR #42: CLOSED / MERGED. Final PR Head: `890fba6185c655d9e6e99ca2a7e9cf1e9b6e62e7`; merge commit: `43b76350a7d654b3d0a3602c51ae7ddce7c81af1`.
+- PR #72: CLOSED / MERGED into `design/chatgpt-native-execution-model`; final PR Head: `3bd943ad6ef2acf55a48e23e6b4cba92fdd3ada0`; merge commit on that branch: `890fba6185c655d9e6e99ca2a7e9cf1e9b6e62e7`. Its content is included in PR #42's subsequent merge to main.
+- The earlier statements “PR remains Open/Draft/Not Merged” and “Merge NOT AUTHORIZED” describe historical review/remediation points only. They are not current PR status.
+- The PR merges are integration facts only. They do not imply Owner D/I approval, executor acknowledgements, independent review of current main, acceptance, or production authorization.
+- The D/I authority matrix remains PROPOSED. Owner D and Owner I approvals remain PENDING; E/F/G/H/C/Storage acknowledgements remain PENDING.
+- The 14/14 result is a NON-PRODUCTION in-memory reference-model unit-test result only. The R3/DFI contract matrix (including DFI-001…DFI-022) remains NOT RUN / NOT EVIDENCED against production components.
+- Fresh distinct integration review and fresh independent review of current main remain PENDING. Acceptance remains BLOCKED/PENDING; production activation is NOT AUTHORIZED.
+- Manifest YAML parser, schema validation, full manifest verification and current-main full R3 CI evidence have not been established by this reconciliation.
+
+本追加记录仅修正旧条目中的过时当前状态，不改写当时的历史审查观察。
+
+- 当前 `main` Head：`ac4558ce7a78fc8fb27a18d0c06033e3a48f6fff`。
+- PR #42：已关闭并合并。最终 PR Head：`890fba6185c655d9e6e99ca2a7e9cf1e9b6e62e7`；合并提交：`43b76350a7d654b3d0a3602c51ae7ddce7c81af1`。
+- PR #72：已合并至 `design/chatgpt-native-execution-model`。最终 PR Head：`3bd943ad6ef2acf55a48e23e6b4cba92fdd3ada0`；该分支上的合并提交：`890fba6185c655d9e6e99ca2a7e9cf1e9b6e62e7`。其内容随后随 PR #42 合并进入 main。
+- 早期“PR 仍 Open/Draft/Not Merged”及“Merge NOT AUTHORIZED”仅描述当时历史审查/整改状态，不代表当前 PR 状态。
+- PR 合并仅证明集成事实，不代表 D/I Owner 批准、执行方确认、当前 main 的独立审查、Acceptance 或生产授权。
+- D/I 权责矩阵仍为 PROPOSED；Owner D、Owner I 批准仍 PENDING；E/F/G/H/C/Storage 确认仍 PENDING。
+- 14/14 仅为非生产内存参考模型单元测试结果。R3/DFI 测试矩阵（包括 DFI-001…DFI-022）仍未在生产组件上执行，状态为 NOT RUN / NOT EVIDENCED。
+- 当前 main 的新独立审查、独立集成审查仍 PENDING。Acceptance 仍 BLOCKED/PENDING；生产激活 NOT AUTHORIZED。
+- 本次对账未提供 Manifest YAML Parser、Schema 验证、完整 Manifest 验证或当前 main 全量 R3 CI 证据。
+
+
+## Subsequent current-state reconciliation — 2026-11-18 / 后续当前状态对账
+
+This append-only update supersedes the earlier observed-main snapshot above; it does not rewrite historical review or execution observations.
+
+- Current main Head at this reconciliation: `5bdb88f234eacae98aaa57f987cc7f71e3391768`.
+- Subsequent mainline merges after the earlier `ac4558ce7a78fc8fb27a18d0c06033e3a48f6fff` snapshot:
+  - PR #132 — session-to-GitHub delivery traceability governance; merge `6b7c864e65453f8e8c9f5edc02c6fd937f13813f`.
+  - PR #136 — H Applied resolver-to-CSubmitOutcome reference binding; merge `1cdd5a5b23fe942e35b890657546c429de8826be`.
+  - PR #133 — exact-Head 29-test CI evidence correction; merge `5bdb88f234eacae98aaa57f987cc7f71e3391768`.
+- PR #42 and PR #72 remain CLOSED / MERGED as recorded above.
+- These integration events do not change the AID-2026-001 acceptance gates: fresh independent review, distinct integration review, Owner D/I approval, other executor acknowledgements, R3 contract tests, YAML/schema validation and acceptance remain PENDING / NOT RUN / NOT EVIDENCED as applicable.
+- The 14/14 result remains a non-production in-memory reference-model result only. Production activation remains NOT AUTHORIZED.
+
+本追加记录仅更新当前 main 快照，不改写上述历史审查与执行观察。
+
+- 本次对账时 main Head：`5bdb88f234eacae98aaa57f987cc7f71e3391768`。
+- 相较此前 `ac4558ce7a78fc8fb27a18d0c06033e3a48f6fff` 快照，后续进入 main 的合并：
+  - PR #132 — 会话到 GitHub 交付追溯治理；Merge `6b7c864e65453f8e8c9f5edc02c6fd937f13813f`。
+  - PR #136 — H Applied Resolver 与 CSubmitOutcome 引用绑定；Merge `1cdd5a5b23fe942e35b890657546c429de8826be`。
+  - PR #133 — 精确 Head 的 29 项测试 CI 证据修正；Merge `5bdb88f234eacae98aaa57f987cc7f71e3391768`。
+- PR #42 与 PR #72 仍按上文记录为 CLOSED / MERGED。
+- 上述集成事实不改变 AID-2026-001 的 Acceptance 门禁：新独立审查、独立集成审查、Owner D/I 批准、其他执行方确认、R3 合约测试、YAML/Schema 验证及 Acceptance 仍按实际情况保持 PENDING / NOT RUN / NOT EVIDENCED。
+- 14/14 仍仅为非生产内存参考模型结果；生产激活仍 NOT AUTHORIZED。

@@ -224,8 +224,8 @@ acceptance:
   record_ref: ""
 merge:
   target_branch: main
-  merge_commit_sha: ""
-  status: NOT_MERGED
+  merge_commit_sha: 43b76350a7d654b3d0a3602c51ae7ddce7c81af1
+  status: MERGED
 pull_request: 42
 pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42
 
@@ -348,8 +348,9 @@ follow_up_remediation:
   yaml_schema_validation: NOT_RUN
   integration_review: PENDING_DISTINCT_NON_IMPLEMENTING_REVIEWER
   acceptance: PENDING
-  merge: NOT_MERGED
-  note: Proposal and author-side remediation only. This manifest update records pre-update branch Head 13e9c03976d3728bdfedf02e72e1875fbb937933; the resulting manifest self-update commit is excluded from self-reference. Verify exact branch Head from GitHub before review.
+  merge: MERGED_WITH_PR_42_INTO_MAIN
+  merge_commit_sha: 43b76350a7d654b3d0a3602c51ae7ddce7c81af1
+  note: PR #72 was merged into the implementation branch and then included in PR #42's merge to main. This records integration only, not Owner approval, runtime conformance, acceptance or R3 passage. This manifest update records pre-update branch Head 13e9c03976d3728bdfedf02e72e1875fbb937933; the resulting manifest self-update commit is excluded from self-reference. Verify exact branch Head from GitHub before review.
 
 
 execution_boundary_extension:
@@ -416,3 +417,43 @@ reference_model_validation:
     - no_production_E_F_G_H_C_Storage_components
     - DFI_001_to_DFI_022_runtime_tests_not_run
     - no_CI_or_acceptance_claim
+
+
+# Current-state overlay / 当前状态覆盖记录
+current_status_snapshot:
+  observed_main_head: 5bdb88f234eacae98aaa57f987cc7f71e3391768
+  observed_at: 2026-11-18
+  subsequent_mainline_merges:
+    - pr: 132
+      merge_commit_sha: 6b7c864e65453f8e8c9f5edc02c6fd937f13813f
+      scope: session_delivery_traceability_governance
+    - pr: 136
+      merge_commit_sha: 1cdd5a5b23fe942e35b890657546c429de8826be
+      scope: H_Applied_CSubmitOutcome_reference_binding
+    - pr: 133
+      merge_commit_sha: 5bdb88f234eacae98aaa57f987cc7f71e3391768
+      scope: H_Applied_29_test_CI_evidence_correction
+  pr_42:
+    state: CLOSED_MERGED
+    head_sha: 890fba6185c655d9e6e99ca2a7e9cf1e9b6e62e7
+    merge_commit_sha: 43b76350a7d654b3d0a3602c51ae7ddce7c81af1
+  pr_72:
+    state: CLOSED_MERGED
+    head_sha: 3bd943ad6ef2acf55a48e23e6b4cba92fdd3ada0
+    merge_commit_sha: 890fba6185c655d9e6e99ca2a7e9cf1e9b6e62e7
+    integration_path: merged_into_design_chatgpt_native_execution_model_then_included_in_pr_42_merge_to_main
+  current_gate_state:
+    r3_contract_tests: NOT_RUN_NOT_EVIDENCED
+    non_production_reference_model: PASS_MODEL_ONLY_14_OF_14
+    owner_d_approval: PENDING
+    owner_i_approval: PENDING
+    other_executor_acknowledgements: PENDING
+    integration_review: PENDING_DISTINCT_NON_IMPLEMENTING_REVIEWER
+    fresh_independent_review_of_current_head: PENDING
+    acceptance: PENDING_BLOCKED
+    production_activation: NOT_AUTHORIZED
+  validation:
+    manifest_yaml_parser: NOT_RUN
+    manifest_schema_validation: NOT_RUN
+    current_main_full_r3_ci: NOT_EVIDENCED
+  note: Historical review and execution entries above are preserved as historical records. The merge facts above do not convert any review, approval, test, acceptance or production gate to PASS.
