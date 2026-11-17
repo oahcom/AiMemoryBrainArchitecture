@@ -104,7 +104,7 @@ Restore starts RESTORE_FENCED/non-serving. Replay/verify Storage/COC control rec
 
 ## 8. H wire contract / H 协议合同
 
-The accompanying `issue20.archive-forget-restore.v0.1.0.schema.json` is structural candidate only. It defines nominally separate ProducerInstanceRef, DRegistrationReceipt, DForgetBarrierProof, IInventorySeal, ICommitAuthorizationReceipt, StorageVisibilityParticipantRef, StorageOutcomeProof, FRecallCursor, EPublicationRequest, GContextLineageManifest and RestoreProofBundle.
+The accompanying `issue20.archive-forget-restore.v0.1.1.schema.json` is structural candidate v0.1.1 only. It defines nominally separate ProducerInstanceRef, DRegistrationReceipt, DForgetBarrierProof, IInventorySeal, ICommitAuthorizationReceipt, StorageVisibilityParticipantRef, StorageOutcomeProof, FRecallCursor, EPublicationRequest, GContextLineageManifest and RestoreProofBundle.
 
 It does not merge D ForgetFenceGeneration, I PermissionEpoch/InventoryEpoch, F IndexGeneration, G ContextVersion, COC CoordinatorIndex or Storage XID/commit cursor into one scalar. Cryptographic projection, canonicalization, key status, authorization, completeness, same-XID recovery and CAS semantics remain validator/Owner responsibilities. It does not supersede H unified COC/JF-10 schema 1.2.12.
 
