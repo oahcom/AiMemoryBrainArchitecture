@@ -259,15 +259,15 @@ No production readiness, universal exactly-once, Full Applied or Global Forget C
 | H RecoveryJoin 1.0.2 tests | `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a` |
 | H Unified 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
 | H Unified 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
-| H candidate CI | Run `44051676055`, commit `16c0e63458a3e3773cd38ef86bfb4f7fe44dd0b4`, 288 total / 266 passed / 22 skipped / 0 failed |
+| H candidate CI | Run `44051851164`, commit `ba99eea9334d77c2a014ed45d9287ef514a4d895`, 288 total / 266 passed / 22 skipped / 0 failed |
 
 ### 10.2 Owner-owned proof contracts and reviews
 
 | Owner | Proof contract Blob | Exact review Blob | Decision boundary |
 |---|---|---|---|
 | I | `88209bbea0ab600880c5c630cfe83af31ee16dd7` | `658ed437ecd05d226a6658a3f159ce28449b0b36` | Candidate security/wire acceptance with blocking conditions |
-| D | `d80dabe7210e681bc4e2290355a38f8b67be9ddd` | `fe4ba71dd3a07d0775e17dbb90e8aeccc3bc71c0` | Accept with conditions; D signer/ledger implementation open |
-| C | `5e37185610869951c3b392c9ad143a72b4c702ac` | `c6b317f5050bca745bb6308ad6f77ba7d8284f77` | Accept with enumerated C-owned conditions; provider adapter open |
+| D | `d80dabe7210e681bc4e2290355a38f8b67be9ddd` | `0edd96d07960292d938656d5d8a20095750f4cf1` | Accept with conditions; D signer/ledger implementation open |
+| C | `5e37185610869951c3b392c9ad143a72b4c702ac` | `ea2e11519646225679eadc8b33af0d755998d92e` | Accept with enumerated C-owned conditions; provider adapter open |
 
 These are coordinator-authored role-simulated review artifacts, not independent human Owner signatures. Each Owner remains the sole authority for its proof semantics, signature, key status, ledger completeness and anti-rollback.
 
