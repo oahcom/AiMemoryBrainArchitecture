@@ -22,7 +22,7 @@ python3 forget_cross_owner_model.py
 python3 -m unittest -v test_forget_cross_owner_model.py
 ```
 
-The model uses only the Python standard library.
+The model uses only the Python standard library.\n\nRepository CI: [run 44136327645](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44136327645) — **SUCCESS** at integration-branch commit `89a680bbad7246952d51c61c137b0c3611f52a06`; both the model command and unittest regression suite completed successfully.
 
 ## Bounded result / 有界结果
 
