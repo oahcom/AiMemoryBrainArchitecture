@@ -237,6 +237,8 @@ If authorization or policy cannot be established, fail closed and pause the stag
 
 Every owner must publish its own capability and evidence contract. This proposal does not claim that any of these execution obligations are implemented or tested.
 
+The owner-specific normative questions, local preconditions, visibility gates, evidence envelopes, failure behavior and cross-owner handshakes are expanded in [Forget Execution Boundary Contracts v1](owner-execution-boundary-contracts-v1.md). The R3 matrix adds DFI-013…DFI-022 for E/F/G/H/C/Storage race, replay, stale-cache, offline-reconciliation, ACK-capability and restore cases. Both documents remain proposals pending each accountable Owner's acknowledgement of the exact blob SHA.
+
 ## 8. Minimum conformance tests to add to R3 matrix
 
 | Test ID | Scenario | Required assertion |
@@ -509,6 +511,8 @@ API/UI 必须分别呈现 D 领域结果、I 治理评估和各阶段状态。�
 | External Recipients | 仅执行已授权、限定 Scope 的动作并返回可验证响应 | authenticated receipt、覆盖范围、时间戳、Provenance；不暗示隐藏副本已擦除 |
 
 每个 Owner 必须发布自己的能力和证据契约。本提案不声称上述任何执行义务已实现或测试。
+
+各 Owner 的规范问题、本地前置条件、可见性 Gate、证据封装、故障行为和跨 Owner 握手已在[Forget 执行边界契约 v1](owner-execution-boundary-contracts-v1.md)中展开。R3 矩阵新增 DFI-013…DFI-022，覆盖 E/F/G/H/C/Storage 的竞态、Replay、陈旧 Cache、离线对账、ACK 能力和 Restore 场景。两份文件仍为提案，须由每个责任 Owner 针对准确 Blob SHA 确认。
 
 ## 8. 应加入 R3 矩阵的最低一致性测试
 
