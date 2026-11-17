@@ -151,3 +151,12 @@ This is 1 of 10 C detailed core specifications, not completion of the C set. C's
 | H | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `session-h-bmcp-protocol` | `ed6b43a29aa368d772c701ffc83309a5aadf3c00` | Pair BLOCKED pending H/C exact field mapping; H36-AP-01..07 OPEN | CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I |
 
 Cross-owner report: `reviews/translation/2026-11-17-cgh-applied-contract-cross-owner-review.md` and Chinese companion. The six-stage lifecycle and historical/current-use semantics align; H's exact wire field mapping is not yet sufficient for a faithful normative translation. This report is not Owner approval, wire freeze, implementation verification or conformance execution.
+
+
+## H candidate field-mapping revision — 2026-11-17
+
+| Owner | Source path | Branch | Current exact Blob SHA | Revision / status |
+|---|---|---|---|---|
+| H | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `session-h-bmcp-protocol` | `db59b63e322d7255b8b400f47859dcac32bb3027` | §11 candidate field-mapping proposal added; C/G acceptance and I/D/B authority confirmations pending; wire/schema freeze NO; implementation/conformance NOT VERIFIED / NOT RUN |
+
+The prior reviewed Blob `ed6b43a29aa368d772c701ffc83309a5aadf3c00` is superseded for currentness by the exact live Blob above. This is a candidate revision, not an Owner approval or C/G/H freeze. H bilingual companions remain pending until exact-version review and acceptance.
