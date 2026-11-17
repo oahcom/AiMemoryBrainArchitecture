@@ -409,3 +409,62 @@ OpenTelemetry Rust 0.33.1 的 Signals 成熟度不同；当前官方状态需分
 ### 10.8 未验证项
 
 本任务没有运行 Brain 原型，也没有对上述系统进行集成测试、性能基准、跨平台构建或安全审计。所有性能、模型兼容、GPU 和部署结论均需目标硬件验证。
+
+
+## 11. Focused implementation-boundary verification / 实现边界重点核验
+
+The following official-document checks sharpen the integration boundaries. They are not Brain integration evidence.
+
+### 11.1 PostgreSQL prepared transactions are a powerful but operationally sharp primitive
+
+PostgreSQL documents `PREPARE TRANSACTION` as a mechanism for external transaction managers. A prepared transaction is durable and can later be committed or rolled back from another session, but PostgreSQL warns that leaving prepared transactions open for long periods retains locks and interferes with VACUUM. Therefore a Brain JF-10 implementation would need bounded prepare-to-decision time, durable coordinator ownership, orphan detection, operator recovery and a tested UNKNOWN/private behavior. Merely enabling `max_prepared_transactions` is not a protocol.
+
+Sources: https://www.postgresql.org/docs/18/sql-prepare-transaction.html ; https://www.postgresql.org/docs/18/two-phase.html ; https://www.postgresql.org/docs/18/sql-commit-prepared.html
+
+### 11.2 SQLite WAL is appropriate only inside a narrow physical envelope
+
+SQLite WAL allows readers and a writer to overlap but still serializes writers. Its wal-index uses shared memory, requiring all participating processes to be on the same host; WAL is not supported when clients on different machines access a network filesystem. SQLite remains a reasonable local prototype candidate only if Brain's selected Storage topology is single-host and the serialized writer/fence protocol is proven under crash and concurrency tests.
+
+Source: https://www.sqlite.org/wal.html
+
+### 11.3 Durable workflow replay requires deterministic workflow code
+
+Temporal's Event History is the ordered record used to replay Workflow code and reconstruct state. Decisions must be replay-deterministic; time, randomness and external effects must be mediated by replay-safe APIs or Activities. This is valuable for long-running compilation/maintenance work, but the workflow engine's history does not become Brain's Canonical Memory ledger and does not atomically close the Forget/publication race.
+
+Source: https://docs.temporal.io/workflows
+
+### 11.4 Broker delivery semantics do not eliminate domain idempotency
+
+JetStream adds persistence, replay and at-least-once delivery to NATS. Publish acknowledgements and consumer acknowledgements still have failure windows in which a sender may retry or a consumer may receive a message again. The application must keep idempotent operation identity and durable deduplication in the owning transaction domain; a broker's "exactly once" feature label must be scoped to its documented broker boundary.
+
+Source: https://docs.nats.io/concepts/jetstream
+
+### 11.5 Filtered ANN is a workload-specific retrieval capability, not an access-control boundary
+
+Qdrant uses HNSW for dense vector search and supports filter-aware indexing through payload indexes and filterable HNSW edges. The docs emphasize indexing fields used in filters and note that strict or combined filters affect query strategy/recall. Brain must test recall under actual Scope/tenant/time/Forget filters and still enforce authorization and visibility in the authoritative read path. A vector store must remain a derived projection.
+
+Sources: https://qdrant.tech/documentation/manage-data/indexing/ ; https://qdrant.tech/documentation/search-design/vector-search-filtering/
+
+### 11.6 Embedded policy evaluation still depends on host-owned identity and entity data
+
+Cedar evaluates authorization using Principal, Action, Resource and Context; default behavior is deny unless a Permit policy grants access. Evaluation errors are diagnostically visible. This makes Cedar a plausible embedded policy engine candidate, not a complete identity or revocation system: Brain still owns trusted identity binding, entity freshness, Scope mapping, revocation and audit evidence.
+
+Source: https://docs.cedarpolicy.com/auth/authorization.html
+
+### 11.7 Rust observability signals have different maturity levels
+
+The official OpenTelemetry Rust status page lists Traces as Beta and Metrics/Logs as Stable. Integrations should therefore be selected per signal and exporter, with a stable instrumentation facade and explicit privacy filtering. No protected Memory payload should be emitted by default.
+
+Source: https://opentelemetry.io/docs/languages/rust/
+
+### 11.8 中文综合判断
+
+1. PostgreSQL 2PC 是强能力，但同时引入 Prepared-XID 的协调器、超时、孤儿事务、人工恢复和运维责任；不能只把数据库参数打开就宣称 JF-10 完成。
+2. SQLite WAL 适用于同主机、单写者约束可接受的原型；跨主机共享数据库文件不符合 WAL 物理前提。
+3. Temporal 能提供可重放的 Durable Workflow，但 Workflow 代码必须确定性；它不拥有 Canonical Memory 或 Forget 线性化点。
+4. NATS JetStream 的 At-least-once 意味着重复仍需业务幂等处理，Outbox/Consumer 的去重必须落在正确的事务权威中。
+5. Qdrant 能做过滤向量检索，但 Scope/Forget 过滤下的 Recall 和权限仍须在 Brain 真实读取路径证明。
+6. Cedar 可评估 Permit/Forbid 策略，但身份、撤销、Scope 绑定和实体数据可信度仍归 Brain/Owner。
+7. OTel Rust Traces 与 Metrics/Logs 成熟度不同，Observability 不能作为统一“已成熟”依赖处理。
+
+No benchmark, integration or fault test was run. All recommendations remain conditional candidates, not ADR decisions.
