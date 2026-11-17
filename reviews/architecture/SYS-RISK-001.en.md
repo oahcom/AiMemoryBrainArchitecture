@@ -907,3 +907,58 @@ The demonstrated risk is process and integration overhead: duplicate reports, ma
 
 **Closure status:** NOT CLOSED. No evidence yet demonstrates that the design is economically unviable; the governance/integration control system needs consolidation before the project expands the protocol surface further.
 
+
+
+## 25. Current Owner-branch refresh and new proposal deltas — 2026-11-18
+
+This section supersedes earlier B/G branch-head pins where they differ. Main content remains unchanged from b372 (tree SHA 7096e0...), but Owner branches have advanced.
+
+### 25.1 Current B serialization-type decision
+
+- Current B branch HEAD: 2faf8ec38f14dba49e7263d7a60804dae1a74ee2 (two commits after prior R snapshot).
+- B Phase 3.8.5 logical serialization type review Blob: ad1cc3c3f934b88e8fc3d0200612269198345e2f; reviewed Storage ADR Blob 1ef47d4e5711c7db73a24d249adf1992be1f6aa4.
+- B Phase 3.8.6 per-authority anchor nominal-type review Blob: e2bc4c8dde9706bfbe443269b702f1b5aa6965f6; exact Storage ADR Blob bb544ba2f346bdc130d524bd5c7310d86f367988.
+- Current Storage branch Phase 3.8.2 ADR is Blob bb544ba2f346bdc130d524bd5c7310d86f367988, status L1 LOGICAL TOPOLOGY SELECTED — OPTION A; L4 PHYSICAL ENGINE/DEPLOYMENT OPEN.
+
+B approves the nominal type boundary and concrete CanonicalAuthoritySerializationAnchor with clarifications. This is delegated B-role technical review, explicitly not an independent human B Owner signature. It approves L1/L2 type separation only, not DB schema, serializable runtime, HA/restore or L4 performance. It improves R-01/R-06 semantic clarity but does not close physical linearization or implementation proof.
+
+A PR #54 remains Draft and conditionally accepts Option A as the V1 logical topology while saying L1 is not fully closed and “do not freeze”; it lists A-01..A-05 clarifications. It is a review branch, not merged authority. Its body refers to a v3.2.9 predecessor bundle; current Storage manifest is v3.3.2, so exact bundle references require reconciliation before it can be used as current acceptance.
+
+### 25.2 Current G Applied persistence / identity contract
+
+- Current G branch HEAD: 763b3d31e910db8fd29c6e4dbaff9273b7fb66b8 (six commits after prior R snapshot).
+- New G Phase 3.8.22 contract Blob: bd297873bc1e593280484a43cb44b56058d9c4ff.
+- Status: G-owned normative design draft; delegated G-role drafting/self-review, not independent human G Owner signature; implementation NOT VERIFIED; cross-owner acceptance REQUIRED.
+- It defines separate C ProviderAttempt/Outcome identities, H delivery/evidence/observation identities, COC participant identity and G Applied identity; immutable evidence revisions; digest-conflict quarantine; same-identity crash/retry; restore fencing; and separate historical Applied vs current-use projection.
+- It pins CSubmitOutcome 1.0.1, H Unified 1.2.15 and the separate H Applied ACK 1.1.0 JF-10 bridge schema. It explicitly says no approval transfers from H 1.2.14, earlier G consumer reviews or schema-only acceptance.
+
+This is a useful design advance for R-04/R-07, but not executable persistence proof. It requires exact C/H/COC/Storage acceptance, I/D field confirmation, generated schema/SDK, durable unique indexes, crash/restart/restore tests and independent readback.
+
+### 25.3 Independent correction to G's H field-gap statement
+
+G's draft says all seven HDeliveryBindingIdentity fields are absent from H Unified 1.2.15. I independently read exact H schema Blob 860fc4cec658db7d2703cd6adf72aa31a2723f6d and gateway validator Blob 9cc426d4c26deb452f39daff34c1008dd535e969.
+
+The provider-outcome branch in H 1.2.15 and signed P0 allowlist do contain actual_inference_request_id and final_request_boundary_id. Therefore G's blanket statement that those two exact properties are absent is overbroad. The exact field name inference_request_id is not present; whether it is semantically represented by actual_inference_request_id needs explicit mapping, not assumption.
+
+The following HDeliveryBindingIdentity fields are genuinely absent as first-class fields in the inspected H 1.2.15 schema: adapter_instance_ref, runtime_session_ref, delivery_id, delivery_attempt_id and adapter_capability_epoch. The separate H Applied ACK 1.1.0 JF-10 schema Blob a8a945cc3623c2907003b93625e3c79742150944 contains runtime_session_ref, but does not contain adapter_instance_ref, delivery_id, delivery_attempt_id, inference_request_id, actual_inference_request_id, final_request_boundary_id or adapter_capability_epoch; it is a separate JF-10 bridge candidate, not a substitute for Unified 1.2.15 provider-outcome schema.
+
+**Corrected R-04/R-06 conclusion:** a complete H delivery-binding tuple is still not established in one accepted, authenticated, versioned contract. But the exact missing-field list must distinguish truly absent fields, differently named fields with a candidate semantic mapping, and fields present in a different schema family. G should correct its field inventory before C/H exact review. This does not invalidate the broader identity-binding gap.
+
+### 25.4 New Phase 3.9 Forget terminalization proposals — not closure evidence
+
+Current Draft PRs:
+- PR #66 D Forget terminal/linearization closure proposal: 19-case logical model reported 19/19 in ChatGPT Python runtime; no GitHub CI or production D/Storage/I conformance.
+- PR #68 I D/I Forget terminalization authorization proposal: exact I/D approval, Storage commit-boundary acceptance and reproducible tests still required; no implementation claim.
+- PR #71 Storage role review of PR #66/#68: conditional logical acceptance, explicitly role-simulated rather than independent Storage Owner signature; physical implementation unverified.
+- PR #72 joined Forget lifecycle/governance proposal: D/I approvals and E/F/G/H/C/Storage boundary acknowledgements pending; tests and schema/manifest validation not run.
+
+These proposals clarify D canonical suppression/lifecycle terminalization, I global governance completion and physical-erasure evidence. They do not close R-03: none is merged, none supplies production implementation, and cross-owner acceptance/fault proof remains pending.
+
+### 25.5 Current-source disposition update
+
+- R-01: B now has delegated nominal-type approval for exact current Storage ADR Blob bb544...; Option A remains L1 selected, L4 open, A PR #54 draft/conditional. Keep Critical until D/Storage transaction authority and executable L1/L2/L4 proof close.
+- R-03: Phase 3.9 D/I/Storage proposals exist but remain Draft/proposal-only. Keep Critical / NOT PROVEN.
+- R-04: G Applied persistence/idempotency/restore contract is more explicit but remains G draft; H identity tuple has a precise field-mapping gap and one overbroad absence claim. Keep High / NOT PROVEN.
+- R-05: G introduces a separate H Applied ACK 1.1.0 JF-10 bridge schema alongside Unified 1.2.15 and CSubmitOutcome 1.0.1. Add it to the version/consumer graph; no shared freeze.
+- R-06: B's latest nominal-type decision strengthens Actor/Scope/Environment/Serialization type separation, but is delegated and not governance/runtime authorization. Keep High / NOT PROVEN.
+
