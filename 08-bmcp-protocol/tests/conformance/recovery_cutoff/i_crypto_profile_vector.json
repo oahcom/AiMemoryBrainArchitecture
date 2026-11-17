@@ -6,7 +6,7 @@
       "digest_field": "payload_digest",
       "p0": {
         "schema_id": "bmcp.coc-jf10-unified",
-        "schema_version": "1.2.0",
+        "schema_version": "1.3.0",
         "message_id": "msg/crypto-vector/1",
         "message_nonce": "nonce/crypto-vector/1",
         "audience": "storage.visibility.commit",
@@ -40,7 +40,8 @@
         "admission_set_count": 1,
         "admission_set_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
         "request_ledger_root": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-        "admission_ledger_root": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+        "admission_ledger_root": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+        "schema_artifact_revision": "1.2.11"
       }
     },
     {
@@ -49,7 +50,7 @@
       "digest_field": "payload_digest",
       "p0": {
         "schema_id": "bmcp.coc-jf10-unified",
-        "schema_version": "1.2.0",
+        "schema_version": "1.3.0",
         "message_id": "msg/crypto-vector/1",
         "message_nonce": "nonce/crypto-vector/1",
         "audience": "storage.visibility.commit",
@@ -78,7 +79,6 @@
         "batch_record_ref": "COC/batch/4",
         "batch_digest": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
         "manifest_record_ref": "COC/manifest/4",
-        "manifest_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
         "owner_request_high_water": "IReq/5",
         "reconciliation_root": "1111111111111111111111111111111111111111111111111111111111111111",
         "owner_signature_ref": "I/signature/release/12",
@@ -90,7 +90,9 @@
         "batch_position": "COC/term-4/index-80",
         "batch_entry_digest": "2222222222222222222222222222222222222222222222222222222222222222",
         "manifest_record_position": "COC/term-4/index-81",
-        "manifest_record_entry_digest": "3333333333333333333333333333333333333333333333333333333333333333"
+        "manifest_record_entry_digest": "3333333333333333333333333333333333333333333333333333333333333333",
+        "schema_artifact_revision": "1.2.11",
+        "manifest_content_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
       }
     },
     {
@@ -99,7 +101,7 @@
       "digest_field": "payload_digest",
       "p0": {
         "schema_id": "bmcp.coc-jf10-unified",
-        "schema_version": "1.2.0",
+        "schema_version": "1.3.0",
         "message_id": "msg/crypto-vector/1",
         "message_nonce": "nonce/crypto-vector/1",
         "audience": "storage.visibility.commit",
@@ -134,7 +136,8 @@
         "participant_ledger_ref": "ledger-1",
         "participant_ledger_version": "3",
         "participant_tuple_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-        "owner_signature_ref": "I/signature/terminal/1"
+        "owner_signature_ref": "I/signature/terminal/1",
+        "schema_artifact_revision": "1.2.11"
       }
     },
     {
