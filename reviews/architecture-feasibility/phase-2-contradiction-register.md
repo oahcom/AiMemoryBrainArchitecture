@@ -114,3 +114,43 @@
 
 **中文：** A/C/D/I 工件明确标记为委托角色模拟。它们可以作为技术分析证据，但不能描述为独立人类签署或外部治理批准。必须分开登记模拟技术意见和真实 Owner/治理决议，禁止将模拟 ACCEPT 自动转换为正式批准。
 
+
+## ARC-11 — RecoveryJoin generic membership proof does not yet express C/D owner-specific P0
+**Severity:** P0 · **Level:** L1 + L2 · **Owners:** C, D, H, I
+
+**Exact evidence:**
+- H RecoveryJoin 1.0.2 `ownerSnapshotMembershipProof` Blob `4b664e3bce465499bcdfd93796349a4ba7074002` is a closed generic object with common owner/ledger/snapshot/gate/scope/operation/key fields.
+- I owner membership proof contract Blob `88209bbea0ab600880c5c630cfe83af31ee16dd7` defines a P0 that matches the generic shape (excluding derived `proof_digest` and external `signature_ref`).
+- C owner membership proof contract Blob `5e37185610869951c3b392c9ad143a72b4c702ac` additionally says its P0 binds adapter/provider-account/egress-gate identity, idempotency namespace/key, reservation/attempt/outcome and receipt/lookup evidence.
+- D owner membership proof contract Blob `d80dabe7210e681bc4e2290355a38f8b67be9ddd` additionally says its P0 binds ForgetOperationRef, target/source/ancestor lineage, ForgetFenceGeneration, affected-lineage membership, barrier generation/root and dependency closure.
+- The generic H schema has `additionalProperties=false` and no explicit C/D typed payload union or canonical dereference rule that proves those extra fields are committed by the owner entry/operation/scope digests.
+
+**Finding:** I's generic P0 can be expressed in RecoveryJoin 1.0.2, but the C/D owner contracts enumerate more signed semantics than the H generic schema serializes. The architecture has not decided whether C/D details are (a) explicit typed C/D proof variants in a successor RecoveryJoin schema, or (b) committed through exact owner-entry/operation/scope digests with a normative no-loss dereference map. Do not silently drop C/D fields or claim current RecoveryJoin 1.0.2 proves them.
+
+**Required closure:** C, D, H and I must select one representation; publish exact field-to-digest mapping or typed owner-discriminated schemas; prove each owner P0's exact canonical preimage and signature projection; add negative vectors for missing/extra/mismatched owner-specific fields; then re-run all owner reviews against exact successor Blobs.
+
+**中文：** RecoveryJoin 1.0.2 的 `ownerSnapshotMembershipProof` 是封闭的通用对象，I 的 P0 与之匹配；但 C/D 自有合同还要求签名绑定 Adapter/Provider/Idempotency/Reservation/Outcome/Receipt，以及 ForgetOperation/Lineage/FenceGeneration/Barrier/Dependency Closure 等字段。H Schema 设置 `additionalProperties=false)，却没有 C/D 类型化 Payload Union，也没有规范的 Digest 解引用映射证明这些字段都被无损承诺。必须由 C/D/H/I 决定采用 Owner 类型化 Proof Variant，或明确将专属字段承诺到 Owner Entry/Operation/Scope Digest，并完成精确 P0 与负向向量验证。不得静默丢弃 C/D 字段。
+
+## ARC-12 — D ForgetFenceGeneration is absent from the current H D high-water projection
+**Severity:** P0 · **Level:** L1 + L2 · **Owners:** D, H, COC, Storage, A
+
+**Exact evidence:**
+- D Forget Fence contract `03-memory-brain/forget-fence-and-completion-contract.md` Blob `1f0391bc49d007c44ec74165bd33d37412cc7990` defines a canonical `fence_generation` / `ForgetFenceCursor`.
+- D Gate Release contract Blob `7f2861d9441b9be6c8e69f41fd0276636be483a8` requires final CAS over both D Gate revision and `ForgetFenceGeneration`, separately from barrier snapshot generation/root.
+- H Unified 1.2.13 Blob `8e7f6a6c9663388863db88548f9c37d0fdb1bd97` `ownerSpecificHighWatersD` exposes producer-registration, WorkItem, Attempt, `barrier_generation` and `barrier_root`, but no explicit `forget_fence_generation`.
+- D review Blob `84196906cad92367a60c79a74dd241fd80abb96c` confirms the D-owned FenceGeneration and Barrier fields are distinct, but its H schema pin predates the metadata-only schema correction and does not resolve this missing field.
+
+**Finding:** D GateGeneration, ForgetFenceGeneration and BarrierGeneration are separate D-owned values. H must not alias them or infer equivalence. The current H RecoveryCutoff/ownerSnapshot shape does not expose an explicit D ForgetFenceGeneration field in the owner-specific high-water union.
+
+**Required closure:** D and H must define an explicit typed `forget_fence_generation` field (or provide a formally proven exact mapping to an existing field, with D Owner approval), bind it into the D snapshot attestation and membership proof, and add stale-fence / barrier-generation substitution vectors. Any schema change requires a successor exact H artifact and fresh D/H/COC/Storage review.
+
+**中文：** D 的 GateGeneration、ForgetFenceGeneration 与 BarrierGeneration 是不同的 D 自有状态。H 1.2.13 的 D High-Water Union 只有 Producer/WorkItem/Attempt High-Water、BarrierGeneration 和 BarrierRoot，没有明确 ForgetFenceGeneration。不得将三者别名化。D/H 必须增加精确类型字段，或由 D Owner 正式证明现有字段等价，并将其绑定到 Snapshot Attestation、Membership Proof 和 Stale-Fence/Barrier 替换测试。
+
+## ARC-13 — I common-envelope P0 omitted schema_artifact_revision (CLOSED AT L1 CONTRACT)
+**Severity:** P1 · **Level:** L1 · **Owners:** I, H
+
+**Resolution evidence:** I successor P0 addendum Blob `5c0e2049513d391dfc118f4f629a5ec95de456d6` adds required `schema_artifact_revision` to the common I-signed P0; H review Blob `c16063197766a495feb98776c7516ebcbe4b7441` confirms exact H Unified 1.2.13 common-envelope coverage and aligns the owner-membership `signature_ref` exclusion with I's original proof contract.
+
+**Residual:** L3 differential P0 vectors, I profile registration, production trust/key custody and anti-rollback remain OPEN; this closure is only the L1 field-contract omission.
+
+**中文：** I 后继 P0 Blob `5c0e2049513d391dfc118f4f629a5ec95de456d6` 已将必需 `schema_artifact_revision` 纳入 I Common Envelope P0；H 复审 Blob `c16063197766a495feb98776c7516ebcbe4b7441` 确认与 H Unified 1.2.13 对齐，并修正 Membership Proof 的 `signature_ref` 排除规则。L1 字段合同关闭，但 L3 差分向量、Profile 注册、生产信任/密钥托管及 Anti-Rollback 仍 OPEN。
