@@ -56,3 +56,8 @@ After a possible handoff, recovery uses same-key authoritative provider lookup/i
 ## 6. Review boundary
 
 The Storage COC and H schema artifacts were fetched and inspected. The C-specific canonical artifact was not recovered; the above is a protocol-boundary assessment only. This role-simulated report is not an independent human Owner signature. No provider sandbox, executable adapter test, exactly-once guarantee, implementation conformance or production activation is claimed.
+
+
+## 7. H unified schema 1.2.7 signature-profile amendment / H Schema 1.2.7 签名配置修订
+
+H's exact review of schema 1.2.7 is Blob `8bed0b05cd631014bf5af7cb5a8dafdd932940e9`; reviewed schema Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`. C accepts the structural distinction between `signature_profile_id` and `canonicalization_profile_id` with amendments. C does not own the trust registry or key profile; I must resolve and authenticate the profile reference. The semantic validator must require the field for protected owner-signed Provider Outcome records and reject missing/unknown/wrong-owner/wrong-audience/downgraded profiles. C still requires its own canonical CSubmitOutcome source contract and provider-specific vectors; this schema change does not close that gap.
