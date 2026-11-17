@@ -174,7 +174,7 @@ The following implementation artifacts have been added on the H branch:
 |---|---|---|---|
 | HRC semantic suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_hrc_semantics.py` | `794ac0c34aaad921e5d4a5bcc42b6601f7caf817` | 25 HRC unittest cases plus 12 JPF bidirectional-join cases |
 | Wire interop candidate suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_wire_interop.py` | `18e50957848178f3f35593b3e618dfa9b90cdb31` | Strict JSON parsing, duplicate-key rejection, absent/null distinction, canonical test bytes, counter encoding and critical-field behavior |
-| RecoveryJoin schema candidate | `08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.0.schema.json` | `044fb07ad53d6778c135ea6918de9c69eb178982` | Strict structural candidate for both directional edge sets, owner snapshots, JF-10 sub-join and difference sets |
+| RecoveryJoin schema candidate | `08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.0.schema.json` | `f531c1d4b89a48457188c4988f140952759223a6` | Strict structural candidate for both directional edge sets, owner snapshots, JF-10 sub-join and difference sets |
 
 Run the dependency-free candidate suite from the test directory:
 
@@ -227,4 +227,14 @@ Until then, status is **EXECUTABLE CANDIDATE COMMITTED / NOT RUN / NOT CONFORMAN
 The RecoveryJoin 1.0.0 candidate was revised to preserve request-set and admission-set completeness independently for each of I, D and C. It now requires six separate owner-set statuses rather than one collapsed per-owner status. It also carries both the original participant_position_ref from recovery-cutoff 1.0.4 and the resolved COC term/index/entry-digest tuple in the JoinProof edge. Conditional requirements now bind NO_EFFECT_PROVEN to a no-effect proof, NOT_APPLICABLE_WITH_PROOF to its proof reference, and terminal Storage outcomes to StorageResolutionProof.
 
 Latest RecoveryJoin schema Blob: 044fb07ad53d6778c135ea6918de9c69eb178982.
-Latest schema integrity test Blob: dffea10aa16533ad8915e5c6ab434e24cbd7b38f.
+Latest schema integrity test Blob: 5292d56661e938c905c61455e9ed53c4ff674c54.
+
+
+### 11.5 Request-ledger and row-identity completeness
+
+The RecoveryJoin schema now carries an explicit owner_request_dispositions array, so the JoinProof accounts for every I/D/C request-ledger member as well as every admission-ledger member. Each request disposition binds owner request ref, owner ledger row ref, request digest, owner-local sequence namespace/value, scope and owner signature; OUT_OF_SCOPE_WITH_PROOF requires a proof ref. A request is not silently dropped merely because it has no COC ParticipantIntent.
+
+The join edges also distinguish the stable OwnerAdmissionRef (the admission identity referenced by ParticipantManifest.owner_admission_ref) from the OwnerEntryRef (the exact row in the owner snapshot admission_members array). The row digest and owner-local sequence bind the snapshot member. The H adapter must resolve both refs and reject substitution; matching text in unrelated namespaces is not sufficient.
+
+Latest RecoveryJoin schema Blob: f531c1d4b89a48457188c4988f140952759223a6.
+Latest schema integrity test Blob: 5292d56661e938c905c61455e9ed53c4ff674c54.
