@@ -132,3 +132,13 @@ B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪�
 - 对应逐文件审计已在 `bilingual-parity-audit.md` 中登记为 `REMEDIATED — MANUAL PARITY REVIEW PENDING`。这仅是作者侧工作，不代表独立双语验收。
 - B5 remains BLOCKED / NOT PASSED; B6 remains INDEPENDENT_REVIEW_PENDING. No merge or canonical freeze is authorized.
 - B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。未授权合并或规范冻结。
+
+
+## 12. Entity inventory bilingual remediation / 实体清单双语整改
+
+- `canonical-domain-entity-inventory.md` now has Chinese peer text for all classification rules, entity/value-object/association/security/protocol inventory rows, non-collapse distinctions, open questions and gate disposition. Exact Blob: `1bebb0f5ef85a395afce00db8d74c76bdbd3c721`.
+- The parity audit records `REMEDIATED — MANUAL PARITY REVIEW PENDING`; this is not independent acceptance.
+- `canonical-domain-entity-inventory.md` 已为全部分类规则、实体/值对象/关联/安全/协议清单行、不可合并语义、未决问题和门禁结论补齐中文对照。精确 Blob：`1bebb0f5ef85a395afce00db8d74c76bdbd3c721`。
+- 双语审计将其标记为 `REMEDIATED — MANUAL PARITY REVIEW PENDING`；这不构成独立验收。
+- B1 remains IN PROGRESS; B5 remains BLOCKED / NOT PASSED; B6 remains INDEPENDENT_REVIEW_PENDING.
+- B1 仍进行中；B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。
