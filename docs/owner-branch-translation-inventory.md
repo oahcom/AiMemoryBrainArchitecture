@@ -265,3 +265,15 @@ The earlier OPEN disposition is superseded by C's separate exact source decision
 Bilingual companions: `docs/{en,zh-CN}/06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md` and `docs/{en,zh-CN}/07-agent-integration/phase-3.8.19-c-exact-review-h-fullpath-38-test-current-head.md`.
 
 Corrected cross-owner audit: `reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md` and Chinese companion. Prior proposal `reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal*.md` is marked SUPERSEDED. These review artifacts do not change core normative coverage totals.
+
+
+## Final C/G review companion structural readback — 2026-11-17
+
+| Pair | Source structure | EN companion | zh-CN companion | Exact source Blob |
+|---|---|---|---|---|
+| G Phase 3.8.18 current H 1.2.14 / C 1.0.1 consumer review | 9 headings / 16 table rows (two language title headings) | 8 headings / 8 table rows | 8 headings / 8 table rows | `1894860c76336f8739d354b72beed3992cffd17e` |
+| C Phase 3.8.19 H full-path 38-test review | 6 headings (two language title headings) | 5 headings | 5 headings | `24337b79cfea6264a8a6f11fa414578fc559716c` |
+
+H full-path closure Chinese count/scope was corrected to match English: 38 methods = 32 H validator + 6 C crypto interop; H closure Blob `cda025fb157815570b3280fa5ff168d5e62453b1`; run `44070924346` SUCCESS.
+
+PR structural CI current head `8431312367a44b70246912884547a377cf69116c`: run `44072368844` / #114, GOV-DOC-001 SUCCESS. This is structural-only evidence.
