@@ -58,7 +58,7 @@ Thus: **D Work Registration precedes execution; Storage Prepare precedes D Publi
 4. **Storage Prepare.** Persist PreparedParticipantRef, GID, DB identity/incarnation, prepare attempt/generation, ledger version, PublicationOperationId, RequestDigest and ParticipantTupleDigest. Bytes/locks remain private.
 5. **D PublicationParticipant admission.** Check current ForgetFence/lineage and durably bind exact D PublicationParticipantRef to the existing StorageVisibilityParticipantRef.
 6. **I consumes single-use CommitAuthorizationReceipt** in its PolicyDomain sequencer, binding PreparedParticipantRef/GID, DatabaseIncarnationRef, PrepareAttemptRef/Generation, PublicationOperationId, RequestDigest, ParticipantTupleDigest and applicable COC PrepareIntent position/digest.
-7. **Storage final visibility gate.** Verify exact D current clearance and I terminal proof independently, plus exact participant tuple and current attempt. Only I COMMIT_WON permits forward visibility. REVOCATION_WON / INDETERMINATE_ABORTED require same-XID rollback and authoritative NO_PUBLICATION. UNKNOWN/IN_DOUBT retains same XID/private bytes/locks.
+7. **Storage final visibility gate.** Verify exact D current participant/fence proof and the consumed I CommitAuthorizationReceipt / ICommitAuthorizationProof (COMMIT_WON) at the actual visibility linearization point, plus exact participant tuple and current attempt. Do NOT require post-outcome ITerminalProof before this commit. Only I COMMIT_WON permits forward visibility. REVOCATION_WON requires same-participant rollback and authoritative NO_PUBLICATION. UNKNOWN/IN_DOUBT retains the same XID/private bytes/locks. After Storage emits its terminal outcome, I issues ITerminalProof for closeout.
 8. **D and I independently close their participants** only after authoritative Storage COMMITTED_VISIBLE or NO_PUBLICATION. UNKNOWN leaves both unresolved. D barrier terminalization and I revocation release are separate decisions.
 9. **Downstream F/G/H.** F revalidates current D/I evidence at protected read/materialization/cache/return. G revalidates before dispatch, Adapter Apply, final request submission and materialization. Delivery/ACK is not Applied. H transports evidence; it cannot upgrade outcomes.
 
@@ -146,3 +146,80 @@ Adjacent reference-model tests cover a deterministic subset. They are not Postgr
 7. CI runs schema validation, model tests, Owner suites and DB/adapter fault tests with immutable run artifacts.
 
 **Verdict:** IMPLEMENTATION CONTRACT PROPOSAL. Interface freeze NOT AUTHORIZED. Production readiness NOT ESTABLISHED. Issue #20 remains OPEN. No Owner signature is simulated as real.
+
+## 11. Phase 3.8.4 live Owner refresh / Phase 3.8.4 Owner 实时刷新补充
+
+This addendum supersedes the earlier branch-head snapshot in §0 for currentness checks. The original source table remains the historical basis used to draft v0.1.0. Latest branch heads observed in the refresh:
+
+| Owner | Latest observed branch HEAD |
+|---|---|
+| D | `e326e6ec11f01776fa8c1655da232e8e0e5c4706` |
+| I | `ac12267ab5bca6ac462893a053c93965eaa6b3b9` |
+| F | `348b5ec84c44a8a067122ce0aa72a594b9c06b66` |
+| E | `df3f56cdebbb4bb85999e2e04b666dacf77da810` |
+| G | `69ba55c5ffd473ced1ccb569e9bbf7fea48566aa` |
+| H | `ba99eea9334d77c2a014ed45d9287ef514a4d895` |
+| Storage | `93c9546bae5e17f6b62e4219e792b947c5fbd816` |
+| A | `6d6f08ae7704e0fa0cf0f2eee0512bf5e3eb624f` |
+
+Exact additional source pins:
+- D Phase 3.8 Publication Participant and Terminal Contract: Blob `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78`.
+- D Phase 3.8.4 Owner Snapshot Membership Proof: Blob `d80dabe7210e681bc4e2290355a38f8b67be9ddd`.
+- I Phase 3.8 Commit Authorization Receipt and Revocation Sequencer: Blob `54bab0484bd232a5a258e65e34cc7425288b39a6`.
+- I Phase 3.8.4 Owner Snapshot Membership Proof: Blob `88209bbea0ab600880c5c630cfe83af31ee16dd7`.
+- H RecoveryJoin 1.0.2 schema: Blob `4b664e3bce465499bcdfd93796349a4ba7074002`.
+- H Phase 3.8.4 Unified Manifest Union Contract: Blob `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175`.
+- Storage Phase 3.8 Visibility Participant and Atomic Outcome Contract: Blob `175ee7b1349cfdb79a19898b311a88391ed88010`.
+- Storage Phase 3.8.2 Serialization Topology ADR: Blob `080433f8e13a500522bc2754da64057edb0ae9d8`.
+- A Phase 3.8.4 Membership Proof Cross-Owner Review: Blob `81d8956eedceb0b8842034c4ea1989e765dd6e4e`.
+- A Phase 3.8 D/E/I/Storage Atomic Registration-to-Visibility Decision: Blob `6338be6c2a45fdd35f6709beb7978725a3b8fb37`.
+
+### 11.1 Correct pre-commit vs post-commit I proofs / I 提交前后证明边界
+
+The current I Phase 3.8 contract makes three distinct objects:
+1. CommitAuthorizationRequest — caller input, not authority evidence.
+2. CommitAuthorizationReceipt — single-use I sequencer result for one exact publication.
+3. ITerminalProof — I-signed closeout proof after authoritative Storage outcome.
+
+The consumed CommitAuthorizationReceipt is the pre-commit ICommitAuthorizationProof verified by Storage at the actual visibility linearization point. ITerminalProof binds the exact receipt, PolicyDomain, publication tuple, D/Storage participant refs and Storage outcome digest; it is issued only after COMMITTED_VISIBLE or NO_PUBLICATION. Storage MUST NOT require ITerminalProof to perform the commit that creates the outcome. This avoids a circular dependency.
+
+The current I 3.8 receipt result vocabulary is COMMIT_WON, REVOCATION_WON and UNKNOWN/IN_DOUBT. COMMIT_WON is not a bearer token or standalone write permit. REVOCATION_WON blocks visibility. UNKNOWN keeps I participant and applicable revocation held.
+
+The accompanying schema candidate has been amended accordingly:
+- `ICommitAuthorizationReceipt` represents the consumed pre-commit receipt/proof.
+- `ITerminalProof` is a distinct post-outcome closeout object.
+- `StorageOutcomeProof` represents only authoritative terminal outcomes.
+- `DPublicationParticipantAdmissionReceipt` and `DPublicationTerminalReceipt` are distinct.
+- D/I/F/Storage positions use nominal owner-local position definitions; a D position cannot validate as an I/F/Storage position.
+
+### 11.2 Owner snapshot membership is not set completeness / Membership 不等于全集完整性
+
+D and I Phase 3.8.4 now define their own signed row-membership proof contracts. H RecoveryJoin 1.0.2 supplies the structural `ownerSnapshotMembershipProof` payload. The proof establishes exact row inclusion in a frozen owner snapshot and its owner-local high-water. It does NOT by itself establish complete enumeration.
+
+Full-set completeness separately requires authoritative query/projection identity, pagination completion, count, ordered set root, owner high-water vector, snapshot attestation and anti-rollback checkpoint. Empty sets require a signed COMPLETE_EMPTY proof; count=0 or an empty array alone is insufficient. Late-discovered pre-fence rows invalidate the prior snapshot and require a successor snapshot/barrier reconciliation. D/I/C each own their own proof semantics and signatures; H only validates structure and exact reference joins.
+
+H's Unified Manifest is a disjoint typed union of (a) every quorum-committed COC ParticipantIntent at/before frozen prefix P and (b) every applicable unjoined I/D/C owner-local admission at/below its own frozen high-water. It preserves five distinct digest values: member_set_root, manifest_content_digest, manifest_record_entry_digest, batch_digest and batch_entry_digest. RecoveryCutoffBatch commits before ParticipantSetReconciliation/Manifest; crash between them leaves recovery fenced and must resume the same pair. No synthetic empty manifest or cross-owner sequence is permitted.
+
+### 11.3 Updated A integration disposition / 更新后的 A 集成裁决
+
+The latest A Phase 3.8 D/E/I/Storage decision accepts the composition as a coherent proposed design with enumerated conditions. The latest A Phase 3.8.4 membership review accepts the membership-proof composition as a candidate with blocking conditions. This Session P A-role review therefore uses:
+
+**ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS. Joint contract freeze NOT APPROVED. Production activation NOT AUTHORIZED.**
+
+This is consistent with the latest A role-review artifacts, but is still a Session P role simulation and not an independent human Owner/governance signature.
+
+### 11.4 Physical topology remains unselected / 物理拓扑仍未选择
+
+Storage Phase 3.8.2 ADR remains ADR-BLOCKED / NO TOPOLOGY SELECTED. Option A (one serializable transaction domain per Canonical Memory authority) is a conditional preferred candidate; Option B (durable linearizable coordinator across D/Storage services) is a candidate; check-then-write/asynchronous eventual coordination is rejected. The project has not proved which topology the actual Canonical Authority runtime uses. PostgreSQL 18.7 capability probes do not establish production deployment or D/Storage shared transaction-domain realization.
+
+Storage Phase 3.8 visibility contract remains a logical transaction proposal. Its required final visibility transaction atomically validates PREPARED_HIDDEN, exact D current participant/fence, consumed ICommitAuthorizationProof, artifact/version/digest, dependencies, Scope and current attempt/lease, then commits pointer + PublicationReceipt/outcome + outbox. NO_PUBLICATION requires positive proof that no pointer or delayed publisher can later appear; timeout/missing row is not proof. UNKNOWN stays private and blocks both D/I closeout.
+
+### 11.5 Current gate verdict / 当前 Gate 裁决
+
+- D/I membership-proof contracts: PROPOSED / CANDIDATE ONLY; independent Owner approval and production ledger/signature verification open.
+- H RecoveryJoin 1.0.2 and Manifest union: candidate structural/semantic validation only; owner trust adapters and complete authoritative ledgers not connected.
+- A: ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS.
+- Storage topology: ADR-BLOCKED / no physical topology selected.
+- Storage Gate A: PARTIAL PASS / OPEN; Gate B blocked; Gate C blocked.
+- R1/R2 and JF-10 P0 remain OPEN; multi-PolicyDomain atomicity remains BLOCKED.
+- Interface freeze and production activation remain NOT AUTHORIZED.
