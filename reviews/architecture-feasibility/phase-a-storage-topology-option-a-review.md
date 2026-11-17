@@ -189,3 +189,32 @@ Option A 应继续作为 v1 方向。Option B 不是自动后备方案，必须�
 - H local full-path CI: run 44069777296, 32 tests, with deterministic I/D/Storage callback doubles.
 
 All Owner reviews in the cited branches are delegated role simulations in this coordinating workflow. No independent human Owner or governance approval is claimed.
+
+
+## 9. Post-review exact-currentness correction — Storage v3.2.9 is superseded by later Owner updates
+## 9. 审查后精确当前性修正 — Storage v3.2.9 已被后续 Owner 更新超越
+
+After this review snapshot, the live Owner branches advanced again:
+
+| Owner | Latest branch HEAD | Exact change after v3.2.9 manifest |
+|---|---|---|
+| C | 81f1e81307315a31c3bbeae17eb801e8a4f47e10 | Corrected H Unified schema pin in the Phase 3.8.18 full-path review |
+| H | 362cc113cfb5b595a4002a6f6e980d19ae2d2d15 | Updated exact CI binding to run 44069941327, tested commit ba2c9341fee4eb9ca9e665c74bdd37b4675dd251, job 133993324484 |
+| D | 7d01732521a8b9db202f10cde2c2547e50071d58 | Corrected H Unified schema pin in the D full-path/clearance review |
+| I | a68bb3587fe88aa72398e2dc8d136f94cee9a63f | Corrected H Unified schema pin in the I full-path/terminal review |
+| Storage | 39a1e0429f6b4b08c6c437c8e3f5ace582a7315f | v3.2.9 manifest remains the current Storage branch manifest; it has not yet rebound the post-v3.2.9 review/CI updates |
+
+Storage v3.2.9 Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3 still pins the earlier C/D/I full-path review Blobs 4be9c1cd8f116086bab58340f07e38ddfc223e21 / ccdae9b45affb23c6741b5cceb27004b35a8e03e / 7c65650a37c8c0f270451fb0419e93259fc38151 and the earlier H run 44069777296 / commit 9eb06313e94e762f0fde4a606633a6dbe1bf8262. The latest Owner branches have corrected those exact review pins and H CI binding. Therefore v3.2.9 is no longer the current exact review bundle, even though its source schema/mapping design remains the same.
+
+**A-09 — Storage exact manifest is stale against current Owner review/CI Blobs**
+- Severity: P1 · Level: L2
+- Required: Storage publishes a successor manifest (v3.3.0 or equivalent) binding the corrected current C/D/I review Blobs, current H CI run/commit/job and current H source/CI closure Blob. C/H/D/I re-review that same exact successor manifest; A then performs final integration review on the successor.
+- Do not call v3.2.9 jointly current or frozen. This is an exact-currentness/provenance gap, not a demonstrated semantic regression.
+
+**A disposition update:** Option A topology review remains valid against ADR Blob bb544..., but the Storage bundle integration portion must be refreshed against the successor manifest before the overall B→A review can be considered current. The topology A-01–A-05 clarifications remain unchanged.
+
+中文：本次审查快照之后，Owner 分支再次推进。C/D/I 分别修正 Full-Path Review 中的 H Schema 精确 Pin；H 将 CI 绑定更新到 Run 44069941327 / Commit ba2c934... / Job 133993324484。Storage v3.2.9 仍绑定旧 C/D/I Review Blob 和旧 H CI Run，因此虽然 Schema/Mapping 语义没有显示回退，v3.2.9 已不再是当前精确 Review Bundle。
+
+**A-09：Storage 精确 Manifest 相对当前 Owner Review/CI Blob 已过期。** Storage 必须发布后继 Manifest（v3.3.0 或等效版本），绑定修正后的 C/D/I Review Blob、当前 H CI Run/Commit/Job 和 H Source/CI Closure Blob；C/H/D/I 对同一后继 Manifest 复审，随后 A 再做最终集成复审。这是精确当前性/来源证明缺口，不是已证明的语义回退。
+
+**A 裁决更新：** Option A 拓扑审查对 ADR Blob bb544... 仍有效；但 Storage Bundle 集成部分必须基于后继 Manifest 重新审查。A-01 至 A-05 的拓扑澄清仍不变。
