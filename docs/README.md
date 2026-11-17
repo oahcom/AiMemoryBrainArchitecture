@@ -32,6 +32,8 @@ Domain Model, Canonical Memory Brain, Compiler, Runtime, Memory Context, BMCP, A
 ### L3 — Build and verify / 工程实现与验证
 Exact schemas, protocol fields, state machines, transaction boundaries, failure recovery, ADRs, prototypes, benchmarks, conformance tests, and acceptance gates.
 
+CI execution environment and runner operations / CI 执行环境与 Runner 运维：[中文](zh-CN/14-ai-development/ci-runner-operations.md) · [English](en/14-ai-development/ci-runner-operations.md)
+
 ## Source specifications / 原始规范
 
 The existing root-level directories remain the detailed specification source: 00-governance, 01-system-architecture, 02-domain-model, 03-memory-brain, 04-memory-compiler, 05-memory-runtime, 06-memory-context, 07-agent-integration, 08-protocols, 09-storage-and-index, 10-security-and-governance, 11-consistency-and-recovery, 12-testing-and-acceptance, and 13-engineering-decisions.
