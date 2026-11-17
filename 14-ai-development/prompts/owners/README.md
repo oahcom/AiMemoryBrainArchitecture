@@ -7,7 +7,7 @@ Each Owner has a separate ChatGPT conversation prompt. The prompt defines only t
 | Owner | Prompt |
 |---|---|
 | A — Principal Integration Architect | [owner-session-v1.md](A/owner-session-v1.md) |
-| B — Domain Model Architect | [owner-session-v1.md](B/owner-session-v1.md) |
+| B — Domain Model Architect | [owner-session-v2.md](B/owner-session-v2.md) — domain identity is distinct from security identity |
 | C — Agent Integration Architect | [owner-session-v1.md](C/owner-session-v1.md) |
 | D — Memory Brain Architect | [owner-session-v1.md](D/owner-session-v1.md) |
 | E — Memory Compiler Architect | [owner-session-v1.md](E/owner-session-v1.md) |
