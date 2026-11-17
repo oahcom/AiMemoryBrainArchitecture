@@ -177,3 +177,23 @@ Current main: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; tree `7096e0bc3fdc9a39
 - New test: `test_registered_fenced_never_started_has_no_pre_execution_terminal_transition`.
 - It records the exact bounded-model gap: after register + install_fence, the current action set has no cancel_before_execution transition; terminalize, resolve_no_publication and close_barrier are not legal from that state.
 - The historical CI list currently shows only runs `44136327645` and `44136537336`, neither tests commit `8d7d5a5...`. The new regression test is committed but **CI execution is not yet observed**; do not report it as passing.
+
+
+## ABR-INTEGRATION-005 current-model correction and verified CI
+
+The current cross-owner model revision supersedes earlier M-01/M-02 statements in the initial audit text:
+
+- Model current Blob: `05ed37fe4c673ed938672b0f7ce4f3da85f58472` (commit `27da6a7686896f884750faf2ae9289200578782e`).
+- Test current Blob: `6192f18a8b94a39be6fcef999f62edcb4542383a` (commit `2a936b38e62facad69813d94968d1e70568ee248`).
+- README current Blob: `1abcc3f92d97cea4f18049d2b0fcd18eca3a2952` (commit `b5adbba92c6d447e4cbdcddbebb42deeafc02914`).
+- M-01: model now uses `core_barrier_ready`, explicitly not I GlobalForget Completed. CLOSED at model naming/scope level only; I full completion vector remains unmodeled.
+- M-02: model now has `record_no_publication_proof`, proof-required terminal invariant, stale-worker mutant and regression path. CLOSED as a missing model transition; E→D terminal receipt schema/authority mapping and Storage no-publication proof remain OPEN.
+- M-03 remains open: one Fence generation only; overlapping Forget not modeled.
+- M-04 remains open: real D/I/Storage crash cut points, prepared transaction and WAL/MVCC/2PC recovery absent.
+- M-05 remains open: liveness/fairness and external progress assumptions require explicit treatment.
+
+Verified successful runs:
+- Run `44140051181`, SUCCESS, exact tested commit `c6c6e136f3d1c1b24448e28b754bfe083fe1a0f8`; model and unittest steps both SUCCESS; 14 tests; 28,383 state/depth pairs; 13 mutants.
+- Run `44140042792`, SUCCESS, exact tested commit `6b762b8cbcb5ca235ee230e0111322628661b7e0`; model and unittest steps both SUCCESS.
+- Earlier run `44139591931` failed because the model state count had expanded to 28,383 while the old assertion expected 27,472. Subsequent baseline/test fixes are covered by the later successful runs; failure history retained.
+- Run `44140003348` and `44139992597` also failed during intermediate sequential commits (stale count / stale test references). They are superseded by the successful later runs and are not hidden.
