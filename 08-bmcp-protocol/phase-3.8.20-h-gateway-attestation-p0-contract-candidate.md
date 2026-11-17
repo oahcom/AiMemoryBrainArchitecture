@@ -162,13 +162,14 @@ The H gateway signature authenticates the H P0 only. The C object signature rema
 5. Reconstruct exact P0, recompute `payload_digest`, verify H signature and integrity evidence.
 6. Verify the origin transport receipt against H gateway's protected ingress-verifier result; bind raw received bytes digest, C adapter identity, authentication context and channel-binding proof.
 7. Verify H gateway signer/issuer/subject/audience/message-family delegation in the I registry.
-8. Atomically reserve replay state and persist the accepted H receipt/message under a crash-safe ingress state machine. A mere callback return is not durable acceptance.
-9. Dereference and independently verify CSubmitOutcome 1.0.1, C-P0 digest/signature, sequence namespace, provider evidence and C semantics.
-10. Verify separate I/D/Storage/COC joins and currentness. Return VALID only when every required verifier and durable join succeeds; missing authority state is UNKNOWN.
+8. Dereference and independently verify CSubmitOutcome 1.0.1, C-P0 digest/signature, sequence namespace, provider evidence and C semantics. The H gateway issuer MUST complete this C verification before it creates/signs the H attestation; the receiver independently repeats C verification after authenticating the H envelope.
+9. Verify separate I/D/Storage/COC joins and currentness. No H receipt may be durably accepted as a semantically VALID Provider Outcome while any required owner verifier is UNKNOWN.
+10. Only after H envelope authentication, origin receipt verification, independent C object verification and required owner/currentness checks, atomically reserve replay state and persist the accepted H receipt/message under a crash-safe ingress state machine. A mere callback return is not durable acceptance.
+11. Return VALID only when every required verifier and durable join succeeds; missing authority state is UNKNOWN.
 
 ## 6. Replay and durable acceptance state machine / Replay 与 Durable Acceptance 状态机
 
-The current H reference callback `check_and_reserve_replay` is insufficient as a production contract. The production state machine must bind `message_id`, `message_nonce`, H P0 digest, C object ref/digest, signer key/version, audience, origin context digest and replay expiry.
+The current H reference callback `check_and_reserve_replay` is insufficient as a production contract. The production state machine must bind `message_id`, `message_nonce`, H P0 digest, C object ref/digest, signer key/version, audience, origin context digest and replay expiry. The gateway MUST verify the immutable C object schema, C-P0 digest/signature and C semantic record before it signs the H gateway attestation. The receiver MUST independently verify both H attestation and C object before durable ingress acceptance. Replay reservation/commit occurs only after both authentication domains and required owner/currentness checks succeed.
 
 Required states:
 - `AUTHENTICATED_UNRESERVED`;
