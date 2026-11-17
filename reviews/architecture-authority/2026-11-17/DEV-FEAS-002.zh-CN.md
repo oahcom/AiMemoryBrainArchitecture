@@ -16,7 +16,7 @@
 | C Agent Integration | FEASIBLE_WITH_CONDITIONS | L–XL | C | Final Request 边界、Provider Side-effect 幂等与 UNKNOWN 恢复 |
 | H BMCP | FEASIBLE_WITH_CONDITIONS | L | H | 精确 Schema、Canonicalization、Signature、Crypto、互操作决策 |
 | I Security/Governance | 策略闭环 BLOCKED；机制有条件可行 | XL | I + 外部治理权威 | I36-GOV-01..10、InventorySeal、Revocation、Trust 批准 |
-| Storage/Consistency | 生产拓扑 BLOCKED；原型可行 | XL | Storage | L1 Option A 逻辑拓扑已选定；实际 DB Engine/Adapter、持久 COC、同 XID 恢复、故障切换/还原证明仍开放 |
+| Storage/Consistency | 生产拓扑 BLOCKED；原型可行 | XL | Storage | Option A 仅有条件接受为 L1 逻辑方向；A-01..A-05 和 D 精确采纳仍开放；实际 DB Engine/Adapter、持久 COC、同 XID 恢复、故障切换/还原证明仍开放 |
 | Index/Cache | FEASIBLE_WITH_CONDITIONS | M–L | F + D + Storage | Derived-only Authority、Rebuild、Stale Suppression、Forget 安全 |
 | 端到端系统 | NOT PROVEN | XL | 全体 Owner；A 集成 | 精确 Owner 合同 + 物理 P0 证明 + 符合性 |
 
