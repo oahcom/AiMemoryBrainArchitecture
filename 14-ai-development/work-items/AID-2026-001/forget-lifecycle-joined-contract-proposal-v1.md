@@ -5,6 +5,7 @@
 - Classification: ARCH / R3
 - Status: PROPOSED — NOT NORMATIVE UNTIL D/I APPROVAL
 - Prepared roles: Owner D (canonical lifecycle semantics), Owner I (security/governance policy), with execution-boundary input from E/F/G/H/C/Storage
+- Related authority baseline: `14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md` (PROPOSED; not Owner approval)
 - Baseline: PR #42 Base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`, reviewed Head `3fb10eef38d88b83b48edf5e2818e2ca5ae8ee9e`
 - This proposal is a remediation artifact. It does not assert that the named Owners or acceptance authority have approved it.
 
@@ -32,7 +33,8 @@ This document proposes one joined contract to close D-F01 through D-F04. It sepa
 | Subject/Scope eligibility, purpose, consent, retention and legal-hold decision | I | D supplies typed target references; domain owners supply ownership/applicability |
 | Global target-inventory policy, required target classes and inventory sealing criteria | I | D defines dependency-inventory contract; E/F/G/H/C/Storage register owned targets |
 | Per-target action semantics and local capability result | Owning execution domain | E/F/G/H/C/Storage; each emits signed/traceable evidence within its trust boundary |
-| Global completion/exception evaluation and audit retention | I | D supplies operation state and evidence envelope; all target owners supply evidence |
+| D-domain completion predicate | D | I reviews security implications but cannot redefine the predicate; D-owned transition/conformance evidence |
+| Cross-system evidence evaluation, governance compliance and policy exceptions | I | D supplies canonical D-domain state/predicate; target owners supply capability-bounded evidence |
 | Agent telemetry or model inference | C | May propose/observe; cannot authenticate, authorize, mutate lifecycle or declare Forget complete |
 | Queue, lease, retry, replay and publication-gate execution | E | Must consume D fence and I current authorization |
 | Retrieval/index/cache/working-set suppression | F | Must enforce current D fence and report per-target result |
@@ -41,7 +43,7 @@ This document proposes one joined contract to close D-F01 through D-F04. It sepa
 | Controlled storage, replicas, backup expiry and restore fencing | Storage/backup operator | Must prove durability, erasure or bounded retention state |
 | External recipient action | External recipient; tracked by I | Brain records only verifiable response/contractual evidence |
 
-**Authority rule:** D may define what a canonical Forget transition means, but cannot grant permission, waive legal hold, define an exception to retention policy, or declare global completion unilaterally. I may authorize/deny/defer, define inventory and completion policy, and approve bounded exceptions, but cannot redefine canonical Memory states, ForgetFence semantics, or silently mutate D-owned operation transitions. An executor may report only its own target action and evidence.
+**Authority rule:** D may define what a canonical Forget transition means, but cannot grant permission, waive legal hold, define an exception to retention policy, or declare global completion unilaterally. I may authorize/deny/defer, define cross-system inventory/evidence acceptance policy, and approve bounded governance exceptions, but cannot redefine D's canonical Memory states, ForgetFence semantics, D-domain completion predicate, or silently mutate D-owned operation transitions. D defines domain completion; I separately assesses cross-system governance compliance. An executor may report only its own target action and evidence.
 
 ### 2.1 Required bilateral change control
 
@@ -54,10 +56,13 @@ Any change to (a) the mapping in §3, (b) the global result rules in §5, or (c)
 Memory lifecycle:
 `Candidate | Consolidated | Active | Superseded | Archived | Forgotten`
 
-Forget operation phase:
-`Requested → Authorized → SuppressionCommitted → InventorySealed → CleanupInProgress → CompletionEvaluated → Completed | CompletedWithPolicyException | Failed | Cancelled`
+**D-owned canonical Forget operation phase:**
+`Requested → Authorized → SuppressionCommitted → InventorySealed → CleanupInProgress → DomainCompletionEvaluated → Completed | Failed | Cancelled`
 
-These are different aggregates with different identities and authorities. A Memory may be `Forgotten` while its Forget operation is still `InventorySealed` or `CleanupInProgress`.
+**Separate I-owned cross-system governance assessment:**
+`Pending | Compliant | CompliantWithException | NonCompliant | Deferred`
+
+These are different aggregates with different identities and authorities. A Memory may be `Forgotten` while its Forget operation is still `InventorySealed` or `CleanupInProgress`. The user-facing label `CompletedWithPolicyException` is a derived combined projection only when D's domain result is `Completed` and I's governance assessment is `CompliantWithException`; it is not a D-owned canonical lifecycle state.
 
 ### 3.2 Linearization and transition mapping
 
@@ -68,9 +73,9 @@ These are different aggregates with different identities and authorities. A Memo
 | SuppressionCommitted | Target Memory transitions atomically to `Forgotten`; durable ForgetFence generation and tombstone are committed with operation/outbox record | This durable commit is the canonical linearization point. From it onward, all reads, derivations, activations, deliveries and restore paths must reject or quarantine the forgotten identity |
 | InventorySealed | No additional lifecycle change | Versioned target inventory is sealed for a specific inventory revision; late targets create a new revision and invalidate completion evaluation |
 | CleanupInProgress | No lifecycle change | Derivatives and physical copies are cleaned according to policy; `Forgotten` remains terminal |
-| CompletionEvaluated | No lifecycle change | I evaluates every required target against the sealed inventory and evidence rules |
-| Completed | No lifecycle change | All required targets satisfy verified completion criteria; this is an operation result, not a Memory state |
-| CompletedWithPolicyException | No lifecycle change | Every residual target is explicitly approved, bounded, non-accessible, non-resurrectable and auditable under §5.3 |
+| CompletionEvaluated | No lifecycle change | D evaluates its canonical domain-level completion predicate. I separately evaluates cross-system evidence and policy compliance; I does not rewrite D's result |
+| Completed | No lifecycle change | D's canonical domain-level completion predicate is satisfied. Cross-system governance compliance remains a separate I assessment |
+| CompletedWithPolicyException | No lifecycle change | Not a D-owned phase. It is a derived public projection only when D result is Completed and I assessment is CompliantWithException under §5.3 |
 | Failed | No lifecycle rollback | Failure means the operation cannot currently advance; suppression remains in force. Retry/reconciliation may resume unless I policy explicitly closes further attempts |
 | Cancelled | No lifecycle change permitted after suppression | Cancellation is allowed only before SuppressionCommitted. After the linearization point, cancellation is rejected; an operator may stop an attempt but cannot remove the fence or mark the operation Cancelled |
 
@@ -128,11 +133,13 @@ No target may be omitted because it is unsupported, offline, inaccessible, or in
 - Missing evidence, unverifiable provenance, stale fence generation, unsupported capability or unknown state is not success.
 - Evidence must not contain the forgotten content itself. Use opaque references, digests where permitted, minimal metadata and integrity protection.
 
-## 5. Global completion and exception aggregation (I authority)
+## 5. Cross-system governance assessment and exception policy (I authority; separate from D-domain completion)
 
-### 5.1 Completed
+D alone defines the canonical D-domain completion predicate and the D-owned `Completed` operation result. I MUST NOT set, rewrite or redefine that result. I evaluates whether cross-system evidence and policy obligations are satisfied and records a separate governance assessment.
 
-I may set `Completed` only when all of the following hold:
+### 5.1 GovernanceCompliant
+
+I may record `Compliant` only when all of the following hold:
 
 1. Authorization and applicable policy decisions are valid and current.
 2. The target inventory is sealed at the evaluated revision; no required target is unknown or unaccounted for.
@@ -145,13 +152,13 @@ I may set `Completed` only when all of the following hold:
 9. Audit evidence is complete, integrity-protected and contains no forbidden content.
 10. No legal hold, retention conflict, unsupported mandatory target, failed action or unknown state remains unresolved.
 
-### 5.2 Not complete
+### 5.2 GovernanceNonCompliant / Deferred
 
-Any required target in `pending`, `in_progress`, `failed`, `unknown`, or `unsupported` blocks `Completed`. A successful subset does not make the global operation complete. Re-evaluation is mandatory after inventory expansion, policy change, authorization revocation, evidence expiry or restore event.
+Any required target in `pending`, `in_progress`, `failed`, `unknown`, or `unsupported` blocks `Compliant`. A successful subset does not make the cross-system governance result compliant. I records `NonCompliant` or `Deferred` with reasons. Re-evaluation is mandatory after inventory expansion, policy change, authorization revocation, evidence expiry or restore event.
 
-### 5.3 CompletedWithPolicyException
+### 5.3 GovernanceCompliantWithException
 
-This result is permitted only when I explicitly approves each residual target and records:
+This assessment is permitted only when I explicitly approves each residual target and records:
 - target and data class;
 - precise reason and legal/policy basis;
 - why full erasure is currently prohibited or infeasible;
@@ -162,11 +169,13 @@ This result is permitted only when I explicitly approves each residual target an
 - expiry/review time and required re-evaluation trigger;
 - evidence reference and audit-integrity metadata.
 
-It is not equivalent to physical erasure or unconditional completion. A legal hold or mandatory retention may require the operation to remain deferred/incomplete instead; I must state the governing policy outcome. Exceptions cannot authorize resurrection or ordinary access.
+It is not equivalent to physical erasure or unconditional completion. A legal hold or mandatory retention may require I to record `Deferred` rather than approve an exception; I must state the governing policy outcome. Exceptions cannot authorize resurrection or ordinary access.
+
+The public projection `CompletedWithPolicyException` is permitted only when D has independently recorded domain result `Completed` and I has recorded `CompliantWithException`. If D is not `Completed`, the combined outcome remains incomplete regardless of I's exception assessment.
 
 ### 5.4 Truthful public status
 
-The API/UI must expose operation result and per-stage status distinctly. It must never translate `SuppressionCommitted`, `CleanupInProgress`, `Acknowledged`, or a partial target success into “deleted everywhere” or “Forget complete”.
+The API/UI must expose D-domain result, I governance assessment and per-stage status distinctly. It must never translate `SuppressionCommitted`, `CleanupInProgress`, `Acknowledged`, or a partial target success into “deleted everywhere” or “Forget complete”.
 
 ## 6. Idempotency, retries, concurrency and crash recovery (D-F04)
 
@@ -297,7 +306,8 @@ These are test specifications only. They are NOT RUN until a reproducible harnes
 | Subject/Scope 资格、Purpose、Consent、Retention 和 Legal Hold 决策 | I | D 提供类型化目标引用；领域 Owner 提供归属/适用性 |
 | 全局目标清单策略、必需目标类别及清单封存标准 | I | D 定义依赖清单契约；E/F/G/H/C/Storage 登记各自目标 |
 | 逐目标动作语义及本地能力结果 | 对应执行域 Owner | E/F/G/H/C/Storage；各自在信任边界内输出可追踪证据 |
-| 全局完成/例外评估及审计保留 | I | D 提供操作状态和证据封装；所有目标 Owner 提供证据 |
+| D 领域完成判定条件 | D | I 审查安全影响，但不得重定义判定条件；提供 D 所有的转换/一致性证据 |
+| 跨系统证据评估、治理合规和策略例外 | I | D 提供规范 D 领域状态/判定条件；目标 Owner 提供能力范围内的证据 |
 | Agent Telemetry 或模型推理 | C | 可以提出/观察；不能认证、授权、修改生命周期或声明 Forget 完成 |
 | Queue、Lease、Retry、Replay 和 Publication Gate 执行 | E | 必须消费 D Fence 并检查 I 当前授权 |
 | Retrieval/Index/Cache/Working Set 抑制 | F | 必须执行当前 D Fence 并报告逐目标结果 |
@@ -306,7 +316,7 @@ These are test specifications only. They are NOT RUN until a reproducible harnes
 | 受控存储、Replica、Backup 到期及 Restore Fence | Storage/Backup Operator | 必须证明持久化、擦除或有边界的保留状态 |
 | 外部接收方动作 | 外部接收方；由 I 跟踪 | Brain 只记录可验证响应 |
 
-**权限规则：** D 可以定义规范 Forget 转换的含义，但不能授予权限、豁免 Legal Hold、定义 Retention 策略例外，也不能单方面声明全局完成。I 可以授权/拒绝/延期，定义清单和完成策略并批准有边界的例外，但不能重新定义规范 Memory 状态、ForgetFence 语义，也不能静默修改 D 所有的 Operation 转换。执行方只能报告自己的目标动作和证据。
+**权限规则：** D 可以定义规范 Forget 转换的含义，但不能授予权限、豁免 Legal Hold、定义 Retention 策略例外，也不能单方面声明全局完成。I 可以授权/拒绝/延期，定义跨系统清单/证据接受策略并批准有边界的治理例外，但不能重新定义 D 的规范 Memory 状态、ForgetFence 语义、D 领域完成判定条件，也不能静默修改 D 所有的 Operation 转换。D 定义领域完成；I 单独评估跨系统治理合规性。执行方只能报告自己的目标动作和证据。
 
 ### 2.1 必须的双边变更控制
 
@@ -319,10 +329,13 @@ These are test specifications only. They are NOT RUN until a reproducible harnes
 Memory 生命周期：
 `Candidate | Consolidated | Active | Superseded | Archived | Forgotten`
 
-Forget Operation 阶段：
-`Requested → Authorized → SuppressionCommitted → InventorySealed → CleanupInProgress → CompletionEvaluated → Completed | CompletedWithPolicyException | Failed | Cancelled`
+**D 所有的规范 Forget Operation 阶段：**
+`Requested → Authorized → SuppressionCommitted → InventorySealed → CleanupInProgress → DomainCompletionEvaluated → Completed | Failed | Cancelled`
 
-两者是不同身份、不同权限的聚合对象。Memory 可以已经处于 `Forgotten`，而 Forget Operation 仍处于 `InventorySealed` 或 `CleanupInProgress`。
+**独立的 I 所有跨系统治理评估：**
+`Pending | Compliant | CompliantWithException | NonCompliant | Deferred`
+
+两者是不同身份、不同权限的聚合对象。Memory 可以已经处于 `Forgotten`，而 Forget Operation 仍处于 `InventorySealed` 或 `CleanupInProgress`。面向用户的 `CompletedWithPolicyException` 仅是派生展示结果：只有 D 的领域结果为 `Completed` 且 I 的治理评估为 `CompliantWithException` 时才允许出现；它不是 D 所有的规范生命周期状态。
 
 ### 3.2 线性化点与状态映射
 
@@ -333,9 +346,9 @@ Forget Operation 阶段：
 | SuppressionCommitted | 目标 Memory 原子转换为 `Forgotten`；持久化 ForgetFence generation 与 Tombstone，并与 Operation/Outbox 记录一起提交 | 此持久化提交是规范线性化点。从此之后，所有读取、派生、激活、交付和 Restore 路径必须拒绝或隔离该 Forgotten 身份 |
 | InventorySealed | 不再改变生命周期 | 目标清单针对特定 revision 封存；迟到目标产生新 revision，并使此前完成评估失效 |
 | CleanupInProgress | 不改变生命周期 | 按策略清理派生项和物理副本；`Forgotten` 始终保持终态 |
-| CompletionEvaluated | 不改变生命周期 | I 根据封存清单和证据规则评估每个必需目标 |
-| Completed | 不改变生命周期 | 所有必需目标满足已验证完成条件；这是 Operation 结果，不是 Memory 状态 |
-| CompletedWithPolicyException | 不改变生命周期 | 每个残留目标均经明确批准、有边界、不可访问、不可复活且可审计，符合 §5.3 |
+| CompletionEvaluated | 不改变生命周期 | D 评估其规范领域完成判定条件；I 独立评估跨系统证据和策略合规性，不得改写 D 的结果 |
+| Completed | 不改变生命周期 | D 的规范领域完成判定条件已满足。跨系统治理合规性仍由 I 单独评估 |
+| CompletedWithPolicyException | 不改变生命周期 | 不是 D 所有阶段；仅当 D 结果为 Completed 且 I 评估为 CompliantWithException 时，才可作为 §5.3 的派生公开展示结果 |
 | Failed | 不回滚生命周期 | 表示 Operation 当前无法继续；抑制持续有效。除非 I 策略明确关闭后续尝试，否则可重试/对账 |
 | Cancelled | SuppressionCommitted 后不允许生命周期变化 | 仅在 SuppressionCommitted 之前允许取消。线性化之后必须拒绝取消；操作员可以停止一次尝试，但不能移除 Fence 或将 Operation 标记为 Cancelled |
 
@@ -393,11 +406,13 @@ I 管理的目标清单中，每个目标对每个必需动作阶段都必须有
 - 缺失证据、不可验证 Provenance、陈旧 Fence Generation、不支持的能力或未知状态都不算成功。
 - 证据不得包含已 Forgotten 内容本身。应使用不透明引用、在允许时使用 Digest、最少元数据和完整性保护。
 
-## 5. 全局完成与例外聚合（I 权限）
+## 5. 跨系统治理评估与例外策略（I 权限；独立于 D 领域完成）
 
-### 5.1 Completed
+只有 D 可以定义规范 D 领域完成判定条件及 D 所有的 `Completed` Operation 结果。I 不得设置、改写或重定义该结果。I 评估跨系统证据及策略义务是否满足，并记录独立的治理评估。
 
-仅当以下条件全部满足，I 才可设置 `Completed`：
+### 5.1 GovernanceCompliant
+
+仅当以下条件全部满足，I 才可记录 `Compliant`：
 
 1. 授权及适用策略决策仍有效且为当前版本。
 2. 目标清单已针对被评估 revision 封存；没有未知或未解释的必需目标。
@@ -410,13 +425,13 @@ I 管理的目标清单中，每个目标对每个必需动作阶段都必须有
 9. 审计证据完整、完整性受保护，且不含禁止保留的内容。
 10. 不存在未解决的 Legal Hold、Retention 冲突、不支持的必需目标、失败动作或未知状态。
 
-### 5.2 未完成
+### 5.2 GovernanceNonCompliant / Deferred
 
-任何必需目标处于 `pending`、`in_progress`、`failed`、`unknown` 或 `unsupported`，都阻止 `Completed`。部分目标成功不代表全局 Operation 完成。发生清单扩展、策略变更、授权撤销、证据过期或 Restore 事件后，必须重新评估。
+任何必需目标处于 `pending`、`in_progress`、`failed`、`unknown` 或 `unsupported`，都阻止 `Compliant`。部分目标成功不代表跨系统治理结果合规。I 应记录带有原因的 `NonCompliant` 或 `Deferred`。发生清单扩展、策略变更、授权撤销、证据过期或 Restore 事件后，必须重新评估。
 
-### 5.3 CompletedWithPolicyException
+### 5.3 GovernanceCompliantWithException
 
-只有 I 对每个残留目标明确批准并记录以下信息时，才允许此结果：
+仅当 I 对每个残留目标明确批准并记录以下信息时，才允许此评估：
 - 目标及数据类别；
 - 精确原因和法律/策略依据；
 - 当前禁止或无法完全擦除的原因；
@@ -427,11 +442,13 @@ I 管理的目标清单中，每个目标对每个必需动作阶段都必须有
 - 到期/复核时间及必须重新评估的触发条件；
 - 证据引用和审计完整性元数据。
 
-它不等于物理擦除，也不等于无条件完成。法律保留或强制 Retention 也可能要求 Operation 继续延期/未完成；I 必须说明适用策略结果。例外不能授权复活或普通访问。
+它不等于物理擦除，也不等于无条件完成。法律保留或强制 Retention 也可能要求 I 记录 `Deferred` 而不是批准例外；I 必须说明适用策略结果。例外不能授权复活或普通访问。
+
+公开展示的 `CompletedWithPolicyException` 仅在 D 已独立记录领域结果 `Completed` 且 I 已记录 `CompliantWithException` 时允许。如果 D 尚未 `Completed`，无论 I 的例外评估如何，联合结果都仍为未完成。
 
 ### 5.4 真实状态对外呈现
 
-API/UI 必须分别呈现 Operation Result 和各阶段状态。不得把 `SuppressionCommitted`、`CleanupInProgress`、`Acknowledged` 或部分目标成功翻译成“已全域删除”或“Forget 已完成”。
+API/UI 必须分别呈现 D 领域结果、I 治理评估和各阶段状态。不得把 `SuppressionCommitted`、`CleanupInProgress`、`Acknowledged` 或部分目标成功翻译成“已全域删除”或“Forget 已完成”。
 
 ## 6. 幂等、重试、并发与崩溃恢复（D-F04）
 
