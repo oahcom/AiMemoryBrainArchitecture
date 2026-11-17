@@ -155,3 +155,38 @@ H Applied 1.0.0 没有显式 PermissionEpoch / CommitAuthorizationReceipt field�
 - Global Applied / Production activation：**NOT FROZEN / NOT AUTHORIZED**。
 
 本审查是集成技术发现，不是 C/G/I Owner 决议，不修改 H/C/G/I Owner 分支，不授权 schema freeze、merge 或生产激活。
+
+
+## 9. A-H-ADE-006 精确审查补充：三个 P0 阻断条件
+
+A 的 PR #98 精确审查（Blob `44f79fc037a3aa15d171781fecf5a924e10a0388`）将 H Applied Delivery Evidence 1.0.0 判为 **DEFERRED — CANDIDATE IMPLEMENTATION WITH OPEN P0 CONDITIONS**，并登记：
+
+### H-ADE-001 — Duplicate JSON object keys
+
+当前 Validator 直接调用 `json.loads(raw_envelope.decode("utf-8"))`。Python 标准 decoder 会在 JSON Schema/P0 计算前折叠重复 object keys。必须在对象物化前拒绝顶层和嵌套重复 key，覆盖 identity、digest、signature、authority 字段，并增加负向向量。该项阻断认证生产使用。
+
+### H-ADE-002 — CSubmitOutcome semantic join
+
+H 当前只有 opaque C refs/sequence/digest 和 `verify_c_final_boundary` seam；没有明确规定如何解析并验证不可变 CSubmitOutcome 1.0.1 record 的：
+- issuer / sequence namespace / COutcomeRecordIdentity；
+- CProviderAttemptIdentity 与 successor lineage；
+- `Outcome` / `SideEffectStatus`；
+- `RequestDigest` / `ActualInferenceRequestId` / `FinalRequestBoundaryRef`；
+- immutable record payload digest 与 Owner-ledger inclusion。
+
+必须有 tri-state resolver/verifier，且由 C/G exact review。H 不得 mint C provider truth，G 不得仅凭 H evidence 产生 Full Applied。
+
+### H-ADE-003 — Replay result disclosure 的 current authorization recheck
+
+I Phase 3.8.23 要求 SAME_DIGEST_REPLAY 在返回原始 durable result 前重新检查当前 I Authorization/PermissionEpoch、key status、audience/scope 和适用 D Forget fence。H Validator 当前没有显式 current-authorization callback；`commit_observation` seam 未规定该回查。未完成前不得向已撤权或 stale caller 返回 `original_result_ref`。
+
+### 额外集成问题：H-ADE-004 candidate — Integrity Proof Reference binding
+
+本审查另发现 `integrity_proof_ref` 是 required field，却被排除在 P0 projection 外，且没有独立 verifier callback。该项是待 H Owner 决定的额外安全问题，不应冒充 A 已登记的 H-ADE-001..003。必须明确它是非权威 hint，还是需要签名/不可变 ledger proof 绑定；增加替换 mutation test。
+
+## 10. C/I Gateway order reviews 的适用范围
+
+- C Phase 3.8.27 Blob `3ca06dbfd7d59483e9604b7a68df924c719f60aa` 接受 C object schema/digest/signature/sequence namespace/provider evidence/semantics 先于 H Unified Gateway Attestation 签名，再进行 replay reservation 和 durable ingress acceptance 的顺序。
+- I Phase 3.8.23 Blob `85cdbad04ae4b688338cdf2b667c21d2f02d8b96` 接受同一 gateway replay/durable ingress 顺序，并明确 SAME_DIGEST_REPLAY 必须重新检查当前授权、PermissionEpoch、key status、audience/scope 和 D Forget fence。
+- 两项均是 delegated role review，且针对 H Unified 1.2.15 Gateway Attestation path。**它们不是 H Applied Delivery Evidence 1.0.0 的 C/G/I exact consumer acceptance**，但其 replay disclosure 约束对任何返回 prior result reference 的实现具有直接安全相关性。
+
