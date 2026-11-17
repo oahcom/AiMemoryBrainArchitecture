@@ -10,6 +10,10 @@
 
 > 本文件保存 Phase 3 对应 Owner 的原始任务提示词。源版本中的分支和 SHA 可能已经过期；复用前必须刷新分支、契约和 SHA，不得把历史引用当作当前权威基线。
 
+## Mandatory global preflight
+
+Before using this preserved task prompt, read `prompts/README.md`, `prompts/global-project-developer.md`, `prompts/global-bilingual-documentation.md`, `prompts/D/owner-charter.md`, and GOV-DOC-001. Review sessions must also read `prompts/global-architecture-reviewer.md`. Refresh all current source refs and SHAs; historical prompt baselines below are not authoritative.
+
 ## Session D — Memory Brain Corrections and Canonical Authority
 
 ```text
