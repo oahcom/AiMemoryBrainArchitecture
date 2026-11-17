@@ -86,3 +86,14 @@ C's decision is limited to logical composition and nominal identity boundaries. 
 ## 8. Current C exact review pin / C 当前精确审查版本
 
 The latest readback of `07-agent-integration/phase-3.8.2-c-recovery-join-provider-side-effect-exact-review.md` is Blob `a7b57bd5531222559666f0f1d9df59a259cde61a`. The decision remains ACCEPT WITH C-OWNED PROVIDER-SIDE-EFFECT AMENDMENTS for logical composition only. The H 66/66 candidate CI is not a provider adapter or final-submit runtime test. C-FR-01..08 and C-RJ-01..08 remain OPEN.
+
+
+## 9. Provider Outcome wire-boundary review / Provider Outcome Wire 边界复核
+
+A new protocol-boundary review is available:
+- `reviews/agent-integration/phase-3.6.12-c-provider-outcome-boundary-review.md`
+- Blob: `fd34218202259daa1a66f5ca1746de4e1141bf2f`.
+- Reviewed H schema 1.2.5 Blob: `164ec3c436558d5d93032edc51e127d15e03db4d`.
+- Reviewed Storage COC protocol Blob: `5b950a3a29bd7a5276b92a49a9114d700718b987`.
+
+The review conditionally accepts the cross-protocol outcome enum and boundary, but explicitly records that C's own canonical Provider Outcome source contract was not located/pinned in that pass. The current C branch search shows exact review artifacts and adapter contracts, but no separate canonical CSubmitOutcome source artifact. Therefore the exact owner contract pin, provider-specific proof semantics, same-key lookup behavior and race vectors remain OPEN. Do not present this review as a final C Owner decision or provider implementation acceptance.
