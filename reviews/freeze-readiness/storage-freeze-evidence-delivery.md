@@ -96,16 +96,16 @@ This is a material blocker clarification: PostgreSQL CI capability evidence does
 
 ## 7. Exact RecoveryJoin, bidirectional Owner Admission join and H CI evidence refresh
 
-- Storage controlling bidirectional JoinProof contract: `reviews/storage-consistency/phase-3.6.11-storage-bidirectional-coc-owner-admission-join-proof.md`, Blob `364bf7e7833af3d97bc676f7f356e79251ea6cb4`.
+- Storage controlling bidirectional JoinProof contract: `reviews/storage-consistency/phase-3.6.11-storage-bidirectional-coc-owner-admission-join-proof.md`, Blob `d5a84aa22e90d7b8689b23cd8af2fc82125368c4`.
 - Storage COC protocol v3.2.2 companion: `reviews/storage-consistency/phase-3.6-coc-durable-log-and-recovery-protocol-storage-design-v3.2.2.md`, Blob `ce3c41adf826a622a3717eca481b5d53e6549196`.
-- Storage exact review / topology disposition: `reviews/storage-consistency/phase-3.8.2-storage-exact-review-and-topology-disposition.md`, Blob `0fc74ef747b6e45f8a7d7fcbe8657b88ba67e82d`.
+- Storage exact review / topology disposition: `reviews/storage-consistency/phase-3.8.2-storage-exact-review-and-topology-disposition.md`, Blob `9d5aa6cc08cdf9230296c362d1aa44804a92afbe`.
 - Storage topology ADR: Blob `080433f8e13a500522bc2754da64057edb0ae9d8` — **ADR-BLOCKED / NO TOPOLOGY SELECTED**.
 - H RecoveryJoin schema 1.0.0: Blob `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
 - H semantic validator contract: Blob `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80`.
 - HRC/JPF suite: Blob `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
 - H Wire suite: Blob `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
 - H Schema integrity suite: Blob `67aba74c120f2916d768e7b01c45408ee2624f3a`.
-- H CI run [44040502709](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709), commit `1c6ddd301d538652ceea22ea665d50c5fad8178e`: **66/66 PASS**, candidate reference suite only.
+- H CI run [44041395001](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041395001), commit `b4d7ed2798fcd6514892ac91d8f3ae6c06f0a338`: **66/66 PASS**, candidate reference suite only.
 - C delegated exact RecoveryJoin/provider-side-effect review: Blob `a7b57bd5531222559666f0f1d9df59a259cde61a`; provider implementation remains unverified.
 - I recovery-cutoff wire-authority review: Blob `5a95e1764c3fb812046c8f725a3dd325d9385b17`; that review is **CANDIDATE / NO I WIRE APPROVAL** for its exact 1.0.1 target and does not approve RecoveryJoin 1.0.0.
 
