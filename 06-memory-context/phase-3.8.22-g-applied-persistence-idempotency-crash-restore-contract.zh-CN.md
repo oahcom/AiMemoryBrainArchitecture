@@ -80,7 +80,7 @@ G 必须区分稳定 H Delivery Binding、每一种 Evidence Kind 与每条不�
 
 以上均为**建议的标准化消费方元组**。共享冻结前，C 和 H 必须明确确认精确字段名、Requiredness、Canonicalization，以及它们与当前 H 1.2.15 Schema/Validator 的映射。G 不声称现有 H Schema 或 Validator 已经冻结这些元组。
 
-**已观察到的映射缺口（根据 H 精确源码 Pin 修正）：** H Unified 1.2.15 的 `C_PROVIDER_OUTCOME_RECORDED` oneOf 分支确实要求 `final_request_boundary_id`，Gateway Validator 的签名 P0 Allowlist 也包含该字段。此前将该字段与 Schema 中完全不存在的字段并列描述，范围过宽。**但这并不证明完整的 `HDeliveryBindingIdentity` 元组已被定义。** 已检查的 Schema/Allowlist 暴露的是 `provider_adapter_ref` 和 `actual_inference_request_id`；二者不能自动等同于 G 所需的 `adapter_instance_ref` 和 `inference_request_id`。完整元组仍需要精确、版本化、经认证的 H 映射，覆盖 `adapter_instance_ref`、`runtime_session_ref`、`delivery_id`、`delivery_attempt_id`、Inference Request 标识映射、`final_request_boundary_id` 和 `adapter_capability_epoch`。H 必须：(a) 在版本化签名 P0 映射中增加并验证缺失字段；或 (b) 绑定携带完整元组且具有精确 Schema/Validator 映射的不可变、经认证 H Owner Evidence Record。在 C/H 接受该精确映射前，HEvidenceIdentity 仍是 G Consumer 要求/提案，不是已冻结的 H Wire Contract。
+**映射缺口及后续 H 候选映射（2026-11-18 精确源码刷新）：** H Unified 1.2.15 仍是独立的 C Provider Outcome Gateway 消息族。其 `C_PROVIDER_OUTCOME_RECORDED` oneOf 分支要求 `final_request_boundary_id`，Gateway Validator 的签名 P0 Allowlist 也包含该字段；此前将该字段与 Schema 中完全不存在的字段并列描述，范围过宽。Unified 1.2.15 仍未定义完整的标准化 `HDeliveryBindingIdentity` 元组。H 随后发布了独立的 `BMCP Applied Delivery Evidence 1.0.0` Schema/Validator 消息族，且明确不修改 Unified 1.2.15。当前 main 的精确候选 Pin 为：Schema Blob `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608`、Validator Blob `43f402e4a09034da197ac24856cddbd496c9c75f`、符合性测试 Blob `98242cc193a77b27d58b39353ccc031201992614`。该 Schema 声明了 `HDeliveryBindingIdentity` 的全部七个字段；Validator 的 `DELIVERY_BINDING_FIELDS` 强制校验这七字段元组；测试要求每个字段存在并拒绝缺失字段。PR #136 精确 Head `fe69b105a44ebe8b0b6f4f603a0dbddd21c28fa8` 的工作流 #44184689270 中，该套件 30 项测试全部通过。这关闭了 H Applied Delivery Evidence 1.0.0 的**候选 Schema/Validator 字段映射缺口**。但这不代表候选协议已成为跨 Owner 冻结契约或生产服务：仍需 H/C 精确版本接受、生产 Canonicalization/Signature Profile、Key Registry/Lifecycle、Durable Replay Storage 和已部署 Adapter 集成。Unified 1.2.15 中的 `provider_adapter_ref` / `actual_inference_request_id` 不得被默认为 `adapter_instance_ref` / `inference_request_id` 的同义字段。
 
 HDeliveryBindingIdentity 和 HEvidenceIdentity 均不包含 Digest。H P0 Digest 是不可变内容，必须与 HObservationRecordIdentity 分开比较：
 
@@ -310,7 +310,7 @@ H 1.2.14、此前 G Consumer Review、CGH-APPLIED-1.1 Semantic Package、Schema-
 
 - G Applied Persistence / Idempotency 合同：**本 G 草案已规定；尚未实现/验证**。
 - CSubmitOutcome 1.0.1 精确源绑定：**已 Pin；需要 C 对本补充合同精确接受**。
-- H EvidenceIdentity 元组：**提案；当前 1.2.15 Schema 未暴露全部 Binding 字段；需要 H/C 精确字段映射及 Schema/Owner-Record 扩展**。
+- H EvidenceIdentity 元组：**已在独立 BMCP Applied Delivery Evidence 1.0.0 中完成候选映射**（Schema Blob `2ce8776...`、Validator Blob `43f402e...`、PR #136 精确 Head 上候选符合性测试 30/30）；**H/C 精确接受及生产 Trust/Replay/Adapter 集成仍未完成**。
 - COC Participant/GID Join：**G 已有设计接受；仍需 COC/Storage 实现与本补充合同精确接受**。
 - Crash/Restart/Restore-Fencing 符合性：**已规定 / 未运行**。
 - G Applied Persistence 生产证明：**未验证**。
