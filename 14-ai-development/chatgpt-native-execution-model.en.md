@@ -68,7 +68,7 @@ Each Owner has a distinct ChatGPT conversation context and a versioned Owner pro
 | Owner | Conversation responsibility |
 |---|---|
 | A | Intake, prompt authoring, dependency sequencing, cross-owner integration, decision/evidence registry |
-| B | Domain model and canonical domain semantics |
+| B | Domain model and domain identity semantics (excluding security identity) |
 | C | Agent integration, telemetry, inference-boundary requirements |
 | D | Canonical Memory Brain, memory lifecycle, Forget semantics |
 | E | Memory Compiler and derived-memory production |
