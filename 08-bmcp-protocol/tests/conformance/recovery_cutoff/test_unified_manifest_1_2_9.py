@@ -12,23 +12,23 @@ from unified_manifest_semantics import (VALID,INVALID,UNKNOWN,td,snapshot_root,c
 def fixtures():
     snaps={}
     for o in ("I","D","C"):
-        x={"owner":o,"owner_snapshot_ref":o+"/snap/1","owner_snapshot_digest":o.lower()*64,
-           "owner_snapshot_attestation_ref":o+"/att/1","owner_snapshot_attestation_digest":o.lower()*64,
-           "owner_gate_generation":"7","request_high_water":"12","admission_high_water":"18",
-           "request_ledger_root":o.lower()*64,"admission_ledger_root":o.lower()*64,
-           "owner_ledger_root":o.lower()*64,"anti_rollback_anchor_ref":o+"/anchor/7",
-           "owner_specific_high_waters_digest":o.lower()*64,"ledger_available":True,"pagination_complete":True}
-        snaps[o]=x
+        snaps[o]={"owner":o,"owner_snapshot_ref":o+"/snap/1","owner_snapshot_digest":o.lower()*64,
+          "owner_snapshot_attestation_ref":o+"/att/1","owner_snapshot_attestation_digest":o.lower()*64,
+          "owner_gate_generation":"7","request_high_water":"12","admission_high_water":"18",
+          "request_ledger_root":o.lower()*64,"admission_ledger_root":o.lower()*64,
+          "owner_ledger_root":o.lower()*64,"anti_rollback_anchor_ref":o+"/anchor/7",
+          "owner_specific_high_waters_digest":o.lower()*64,"ledger_available":True,"pagination_complete":True}
     def admission(owner,ref,pref):
         s=snaps[owner]
         return {"owner_kind":owner,"owner_admission_ref":owner+"/"+ref,"owner_entry_ref":owner+"/"+ref+"/row",
           "owner_entry_kind":"RESERVATION" if owner=="C" else "WORK_ITEM","owner_ledger_ref":owner+"/ledger/1",
-          "owner_ledger_version":"1","owner_local_sequence":"5","owner_high_water":"18","owner_entry_digest":"a"*64,
+          "owner_ledger_version":"1","owner_local_sequence":"sequence/5","owner_high_water":"18","owner_entry_digest":"a"*64,
           "owner_ledger_root":s["owner_ledger_root"],"owner_snapshot_ref":s["owner_snapshot_ref"],
           "owner_snapshot_digest":s["owner_snapshot_digest"],"owner_snapshot_attestation_ref":s["owner_snapshot_attestation_ref"],
-          "owner_snapshot_attestation_digest":s["owner_snapshot_attestation_digest"],"operation_identity_ref":"operation/"+ref,
-          "operation_digest":"b"*64,"request_digest":"c"*64,"scope_binding_digest":"d"*64,
-          "admission_state":"PENDING" if pref else "ADMITTED_NOT_REGISTERED",
+          "owner_snapshot_attestation_digest":s["owner_snapshot_attestation_digest"],
+          "owner_snapshot_membership_proof_ref":owner+"/membership-proof/"+ref,
+          "operation_identity_ref":"operation/"+ref,"operation_digest":"b"*64,"request_digest":"c"*64,
+          "scope_binding_digest":"d"*64,"admission_state":"PENDING" if pref else "ADMITTED_NOT_REGISTERED",
           "effect_boundary":"RESERVATION" if owner=="C" else "WORK_ADMISSION",
           "coc_participant_intent_ref":pref,"coc_absence_reason":"not_registered_at_frozen_prefix" if pref is None else None}
     a=admission("C","admit-1","participant/1");z=admission("D","work-9",None)
@@ -42,6 +42,7 @@ def fixtures():
         "owner_snapshot_ref":a["owner_snapshot_ref"],"owner_snapshot_digest":a["owner_snapshot_digest"],
         "owner_snapshot_attestation_ref":a["owner_snapshot_attestation_ref"],
         "owner_snapshot_attestation_digest":a["owner_snapshot_attestation_digest"],
+        "owner_snapshot_membership_proof_ref":a["owner_snapshot_membership_proof_ref"],
         "operation_digest":a["operation_digest"],"scope_binding_digest":a["scope_binding_digest"],
         "coc_participant_intent_ref":"participant/1"}]}
     local={"member_kind":"OWNER_LOCAL_ADMISSION",**{k:v for k,v in z.items() if k!="coc_absence_reason"},
@@ -55,8 +56,13 @@ def fixtures():
        "member_set_root":td("MANIFEST-MEMBER-SET",members),"owner_snapshot_roots":{k:snapshot_root(v) for k,v in snaps.items()},
        "manifest_members":members}
     m["manifest_content_digest"]=content_digest(m)
-    return m,[p],[a,z],snaps
-
+    proofs={}
+    for row in (a,z):
+        key=(row["owner_kind"],row["owner_admission_ref"])
+        proofs[key]={"available":True,"valid":True,"owner_ledger_root":row["owner_ledger_root"],
+          "owner_entry_digest":row["owner_entry_digest"],"owner_snapshot_digest":row["owner_snapshot_digest"],
+          "within_frozen_high_water":True}
+    return m,[p],[a,z],snaps,proofs
 
 class Schema129Tests(unittest.TestCase):
     @classmethod
@@ -99,14 +105,14 @@ class Schema129Tests(unittest.TestCase):
 
 
 class UnionSemanticsTests(unittest.TestCase):
-    def setUp(self):self.m,self.prefix,self.admissions,self.snaps=fixtures()
-    def test_UNION_01_exact_union_passes(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps),VALID)
-    def test_UNION_02_omitted_prefix_participant_fails(self):self.assertEqual(validate_union(self.m,[],self.admissions,self.snaps),INVALID)
-    def test_UNION_03_omitted_unregistered_admission_fails(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions[:1],self.snaps),INVALID)
-    def test_UNION_04_duplicate_admission_fails(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions+[deepcopy(self.admissions[0])],self.snaps),INVALID)
+    def setUp(self):self.m,self.prefix,self.admissions,self.snaps,self.proofs=fixtures()
+    def test_UNION_01_exact_union_passes(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,self.proofs),VALID)
+    def test_UNION_02_omitted_prefix_participant_fails(self):self.assertEqual(validate_union(self.m,[],self.admissions,self.snaps,self.proofs),INVALID)
+    def test_UNION_03_omitted_unregistered_admission_fails(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions[:1],self.snaps,self.proofs),INVALID)
+    def test_UNION_04_duplicate_admission_fails(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions+[deepcopy(self.admissions[0])],self.snaps,self.proofs),INVALID)
     def test_UNION_05_fabricated_coc_ref_on_local_member_fails(self):
         m=deepcopy(self.m);m["manifest_members"][1]["coc_participant_intent_ref"]="fake"
-        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
+        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps,self.proofs),INVALID)
     def test_UNION_06_missing_absence_reason_fails(self):
         m=deepcopy(self.m);m["manifest_members"][1]["coc_absence_reason"]=""
         self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
@@ -114,13 +120,13 @@ class UnionSemanticsTests(unittest.TestCase):
         m=deepcopy(self.m);m["manifest_members"][0]["owner_admission_bindings"][0]["owner_entry_ref"]="wrong"
         self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
     def test_UNION_08_missing_owner_snapshot_is_unknown(self):
-        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,{"I":self.snaps["I"],"D":self.snaps["D"]}),UNKNOWN)
+        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,{"I":self.snaps["I"],"D":self.snaps["D"]},self.proofs),UNKNOWN)
     def test_UNION_09_partial_owner_pagination_is_unknown(self):
         s=deepcopy(self.snaps);s["D"]["pagination_complete"]=False
-        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,s),UNKNOWN)
+        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,s,self.proofs),UNKNOWN)
     def test_UNION_10_owner_highwater_advance_is_unknown(self):
         a=deepcopy(self.admissions);a[1]["owner_high_water"]="19"
-        self.assertEqual(validate_union(self.m,self.prefix,a,self.snaps),UNKNOWN)
+        self.assertEqual(validate_union(self.m,self.prefix,a,self.snaps,self.proofs),UNKNOWN)
     def test_UNION_11_owner_snapshot_root_mismatch_fails(self):
         m=deepcopy(self.m);m["owner_snapshot_roots"]["I"]["request_ledger_root"]="0"*64
         self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
@@ -134,7 +140,81 @@ class UnionSemanticsTests(unittest.TestCase):
         m=deepcopy(self.m);m["manifest_content_digest"]="0"*64
         self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
     def test_UNION_15_incomplete_prefix_is_unknown(self):
-        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,False),UNKNOWN)
+        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,self.proofs,False),UNKNOWN)
+
+    def test_UNION_16_missing_membership_proof_is_unknown(self):
+        proofs=deepcopy(self.proofs);proofs.pop(("D","D/work-9"))
+        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),UNKNOWN)
+    def test_UNION_17_invalid_membership_proof_is_invalid(self):
+        proofs=deepcopy(self.proofs);proofs[("C","C/admit-1")]["valid"]=False
+        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),INVALID)
+    def test_UNION_18_non_numeric_owner_sequences_are_not_arithmetically_compared(self):
+        snaps=deepcopy(self.snaps);rows=deepcopy(self.admissions)
+        snaps["D"]["admission_high_water"]="opaque/cursor/18";rows[1]["owner_high_water"]="opaque/cursor/18"
+        self.assertEqual(validate_union(self.m,self.prefix,rows,snaps,self.proofs),VALID)
+    def test_UNION_19_empty_owner_binding_is_valid_when_no_owner_admission_applies(self):
+        m=deepcopy(self.m);m["manifest_members"]=[m["manifest_members"][0]]
+        m["manifest_members"][0]["owner_admission_bindings"]=[]
+        m["owner_local_admission_count"]=0;m["manifest_member_count"]=1
+        m["member_set_root"]=td("MANIFEST-MEMBER-SET",m["manifest_members"])
+        m["manifest_content_digest"]=content_digest(m)
+        self.assertEqual(validate_union(m,self.prefix,[],self.snaps,{}),VALID)
+    def test_UNION_20_applicable_owner_admission_cannot_be_omitted_from_binding(self):
+        m=deepcopy(self.m);m["manifest_members"][0]["owner_admission_bindings"]=[]
+        self.assertEqual(validate_union(m,self.prefix,self.admissions[:1],self.snaps,self.proofs),INVALID)
+
+
+
+class PairAndReleaseTests(unittest.TestCase):
+    def setUp(self):
+        self.m,self.prefix,self.admissions,self.snaps,self.proofs=fixtures()
+        self.batch={"schema_version":"1.3.0","message_type":"COC_RECOVERY_CUTOFF_BATCH",
+          "recovery_epoch_ref":self.m["recovery_epoch_ref"],"manifest_id":self.m["manifest_id"],
+          "manifest_content_digest":self.m["manifest_content_digest"],
+          "coc_participant_count":self.m["coc_participant_count"],
+          "owner_local_admission_count":self.m["owner_local_admission_count"],
+          "manifest_member_count":self.m["manifest_member_count"],"member_set_root":self.m["member_set_root"],
+          "prefix":self.m["prefix"],"owner_snapshots":self.snaps,"coc_record_ref":"coc/batch/1",
+          "coc_entry_digest":"f"*64,"quorum_committed":True}
+        self.manifest=deepcopy(self.m)
+        self.manifest.update({"batch_record_ref":"coc/batch/1","batch_position":100,
+          "batch_entry_digest":"f"*64,"coc_record_ref":"coc/manifest/1",
+          "coc_entry_digest":"e"*64,"envelope_payload_digest":"e"*64,"quorum_committed":True})
+    def test_PAIR_01_exact_batch_manifest_pair_passes(self):
+        from unified_manifest_semantics import validate_pair
+        self.assertEqual(validate_pair(self.batch,self.manifest,(4,100),(4,101)),VALID)
+    def test_PAIR_02_manifest_must_follow_batch(self):
+        from unified_manifest_semantics import validate_pair
+        self.assertEqual(validate_pair(self.batch,self.manifest,(4,101),(4,100)),INVALID)
+    def test_PAIR_03_wrong_batch_backlink_fails(self):
+        from unified_manifest_semantics import validate_pair
+        m=deepcopy(self.manifest);m["batch_record_ref"]="wrong"
+        self.assertEqual(validate_pair(self.batch,m,(4,100),(4,101)),INVALID)
+    def test_PAIR_04_wrong_owner_snapshot_roots_fail(self):
+        from unified_manifest_semantics import validate_pair
+        m=deepcopy(self.manifest);m["owner_snapshot_roots"]["I"]["request_ledger_root"]="0"*64
+        self.assertEqual(validate_pair(self.batch,m,(4,100),(4,101)),INVALID)
+    def test_PAIR_05_non_linearizable_readback_is_unknown(self):
+        from unified_manifest_semantics import validate_pair
+        self.assertEqual(validate_pair(self.batch,self.manifest,(4,100),(4,101),False),UNKNOWN)
+    def test_RELEASE_01_exact_content_and_record_digest_binding_passes(self):
+        r={"owner_kind":"I","release_type":"OUTAGE_ADMISSION_GATE_ONLY",
+           "batch_record_ref":"coc/batch/1","batch_entry_digest":"f"*64,
+           "manifest_record_ref":"coc/manifest/1","manifest_content_digest":self.manifest["manifest_content_digest"],
+           "manifest_record_entry_digest":"e"*64,"final_currentness_cas_valid":True}
+        self.assertEqual(validate_release(r,self.batch,self.manifest),VALID)
+    def test_RELEASE_02_missing_record_digest_fails(self):
+        r={"owner_kind":"D","release_type":"OUTAGE_ADMISSION_GATE_ONLY",
+           "batch_record_ref":"coc/batch/1","batch_entry_digest":"f"*64,
+           "manifest_record_ref":"coc/manifest/1","manifest_content_digest":self.manifest["manifest_content_digest"],
+           "final_currentness_cas_valid":True}
+        self.assertEqual(validate_release(r,self.batch,self.manifest),INVALID)
+    def test_RELEASE_03_currentness_cas_not_proven_is_unknown(self):
+        r={"owner_kind":"C","release_type":"OUTAGE_ADMISSION_GATE_ONLY",
+           "batch_record_ref":"coc/batch/1","batch_entry_digest":"f"*64,
+           "manifest_record_ref":"coc/manifest/1","manifest_content_digest":self.manifest["manifest_content_digest"],
+           "manifest_record_entry_digest":"e"*64,"final_currentness_cas_valid":False}
+        self.assertEqual(validate_release(r,self.batch,self.manifest),UNKNOWN)
 
 
 class ProfileAndProviderTests(unittest.TestCase):
