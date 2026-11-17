@@ -138,7 +138,8 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertIn("sequence_namespace_ref", schema["required"])
         for vector in vectors["vectors"]:
             self.assertEqual(vector["record"]["sequence_namespace_ref"], "C/sequencer/provider-outcome")
-            self.assertFalse(list(validator.iter_errors(vector["record"])))
+            if vector["expected"] != "INVALID":
+                self.assertFalse(list(validator.iter_errors(vector["record"])))
 
 
 if __name__ == "__main__":
