@@ -62,7 +62,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | canonical-domain-glossary.md | 已为所有规范术语、定义和禁止混淆项添加中文镜像。 | REMEDIATED — MANUAL REVIEW PENDING | 对照各 Owner 词汇表，确认无一词多义/误译。 |
 | canonical-domain-model.md | 已补齐最小/推荐模型、身份边界、认证入口和阻塞问题的中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 与所有 Owner 精确契约核验；不能将候选误报为冻结模型。 |
 | domain-model-decision-record.md | 已补齐 12 项决策、备选方案、后果、拒绝方案和未决问题中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验 Decision Status、Evidence、Affected Owner 和 Reversal Conditions。 |
-| fact-claim-identity-adr.md | 已补齐证据、决策矩阵、Owner 验收要求和八个验证示例中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 确保 C2+I1 仍是候选，不是已决定/接受/冻结。 |
+| fact-claim-identity-adr.md | 已补齐证据、决策矩阵、Owner 验收要求和八个验证示例中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 记录当前 B Owner Option A 首选候选，并明确 ADR-BLOCKED；稳定 ClaimRef/ClaimRevisionRef 仍为候选，未冻结。 |
 | validation/README.md | 已补齐验证计划、Schema/Test 状态和 NOT RUN 限制的中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验测试实际运行结果；不把计划写成通过。 |
 | evidence/README.md | 已补齐来源标题、用途、证据局限和版本注意事项中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验 URL 和版本范围。 |
 | evidence/official-reference-validation.md | 已补齐所有官方参考的观察、借鉴、不可推断和本项目处理条款中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 独立打开每个官方 URL，核验来源范围和不夸大结论。 |
@@ -371,3 +371,36 @@ B2 语义检查点已加入 `domain-model-decision-record.md`，README 也同步
 The B2 checkpoint preserves Fact/Claim and Claim identity as undecided; confirms Scope/Permission separation and B's typed-reference mapping only within their stated authority; and records Issue #5 / I36-GOV-01..10 as still OPEN / GOVERNANCE-BLOCKED. B2 remains IN PROGRESS / NOT PASSED.
 
 B2 检查点保留 Fact/Claim 与 Claim 身份未决；确认 Scope/Permission 分离及 B 类型化引用映射仅在其既定权威范围内成立；并记录 Issue #5 / I36-GOV-01..10 仍为 OPEN / GOVERNANCE-BLOCKED。B2 仍 IN PROGRESS / NOT PASSED。
+
+
+### 8.7 Current B Owner ADR and H ingress reconciliation / 当前 B Owner ADR 与 H 入口协调 — 2026-11-18
+
+Author-side bilingual parity refresh was performed for the latest additions to README, the Fact/Claim ADR reconciliation, B decision record, currentness audit, cross-owner matrix and conflict register. English and Chinese status statements now agree on the controlling distinctions:
+- B's current preferred Fact/Claim candidate is Option A (separate Fact attestation object + Claim proposition thread); it remains ADR-BLOCKED / NOT APPROVED pending formal Architecture Governance decision.
+- The earlier C2/Option B preference is explicitly superseded, not silently deleted or promoted.
+- Stable ClaimRef + immutable ClaimRevisionRef and ConflictSet remain candidates; no canonical schema freeze.
+- A Phase 8 B-02 means H gateway ingress, not B's B2 gate. C/I contract-level reviews are ACCEPT WITH CONDITIONS; production I trust registration and H executable issuer remain OPEN.
+- H 1.2.15 local CI results are bounded callback/reference evidence, not production crypto, durable replay or end-to-end conformance.
+- Memory OS and Memory IR research are baseline-pinned only; prototypes/design work are not complete and cannot alter B domain authority.
+
+本次对 README、Fact/Claim ADR 对账、B 决策记录、当前性审计、跨 Owner 矩阵和冲突登记的最新增量执行了作者侧双语对等刷新。中英文状态现在一致表达以下边界：
+- B 当前优先 Fact/Claim 候选为 Option A（独立 Fact Attestation 对象 + Claim 命题线程）；等待正式 Architecture Governance 决议，仍 ADR-BLOCKED / NOT APPROVED。
+- 此前 C2/Option B 倾向已明确标记为被取代，不是静默删除，也未提升为正式决策。
+- 稳定 ClaimRef + 不可变 ClaimRevisionRef 和 ConflictSet 仍为候选；没有规范 Schema 冻结。
+- A Phase 8 的 B-02 指 H Gateway Ingress，不是 B 的 B2 Gate。C/I 契约级复审为 ACCEPT WITH CONDITIONS；I 生产 Trust 注册和 H 可执行 Issuer 仍 OPEN。
+- H 1.2.15 本地 CI 结果仅是有限 Callback/Reference 证据，不是生产 Crypto、Durable Replay 或端到端 Conformance 证明。
+- Memory OS 和 Memory IR 研究仅完成基线 Pin；原型/设计工作尚未完成，不能改变 B 领域权威。
+
+| File / 文件 | Exact Blob SHA / 精确 Blob SHA | Lines / 行数 |
+|---|---|---:|
+| README.md | `480efa28b281e21a2358c1bddc5b4788a37bd160` | 337 |
+| fact-claim-identity-adr.md | `958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593` | 223 |
+| domain-model-decision-record.md | `b83d99d3c66b30c5834f08ce61c5acfd27004e6a` | 271 |
+| baseline-currentness-and-owner-source-audit.md | `646d3e3308ba0a8c2a40ede6655b37b4e4391303` | 484 |
+| cross-owner-canonical-semantics-matrix.md | `d9ec7f9cb6f72e2756d12da73c48a784ea9c7a83` | 291 |
+| domain-semantics-conflict-register.md | `980f8563ec772939826b338a9b048efebd5bf2f6` | 166 |
+| bilingual-parity-audit.md | self Blob intentionally not hard-coded | — |
+
+Independent clause-by-clause bilingual semantic review remains **PENDING**. This table records exact readback and author-side parity work only; it does not close B5 or B6.
+
+独立逐条双语语义审查仍 **PENDING**。本表仅记录精确读回和作者侧对等工作；不关闭 B5 或 B6。
