@@ -187,3 +187,15 @@ A prompt may be REJECTED or BLOCKED at any stage. Prompt approval is scoped to a
 ## 9. Initial status / 初始状态
 
 This document is PROPOSED and becomes normative only after the project's governance approval process. It does not retroactively validate earlier prompts or scheduled runs.
+
+## 10. 中文规范要点 / Chinese normative summary
+
+- 提示词是受控工程指令，不是临时聊天内容。每份提示词必须关联 Work Item、Issue、Owner、版本、哈希、基线 SHA 和验收标准。
+- A 默认负责跨模块任务提示词的起草和维护，但不因此获得其他 Owner 的领域决策权。领域 Owner 必须在任务进入 READY 前批准本领域语义、范围和验收条件。
+- A 自己负责实现的任务，提示词必须由 Sponsor 或独立受托者起草，并由独立审查者审核；A 不能自编自批。
+- 每个提示词必须明确目标、输入源、授权边界、允许/禁止修改路径、依赖状态、可验证验收条件、测试要求、停止条件、Git/PR 流程和证据格式。
+- 跨 Owner 任务必须拆分责任边界；每个 Owner 只批准自己的领域。I 和 Testing/Quality 按安全风险和验证风险参与审查。
+- 定时任务提示词还必须写明 Owner key、automation ID、频率、时区、Issue/PR 查询规则、每次运行的工作上限、幂等行为、无任务时的行为、权限预检和升级路径。
+- SHA-256 对仓库中实际提交的提示词文件字节计算；UTF-8，不做换行、空白或 Unicode 归一化。记录文件路径、字节数、摘要、Blob SHA 和 Commit SHA。
+- 任何影响目标、范围、授权、基线、验收、测试或定时行为的修改都必须产生新版本；已执行版本不可覆盖。
+- 缺少来源、审批、权限、可验证条件或安全保障时，提示词不得进入 READY；AI 必须停止并报告阻塞，不能自行补造决议。
