@@ -186,7 +186,7 @@ A new run is required after the latest H/C fixture synchronization. No signature
 
 ## 14. I exact C schema review
 
-I Phase 3.8.6 exact review Blob `a4d0be0e5bbf6122e2d86e59a48e62586869fd23` accepts the structural C object crypto binding only. It does not register/deploy the profile, trust root or key custody. It requires strict UTF-8/JCS/I-JSON handling, duplicate-key rejection, exact C-P0 coverage, strict Base64url decoding to 64 bytes, message_type domain binding, anti-rollback and independent cross-language signature vectors.
+I Phase 3.8.6 exact review Blob `b2e37b0ba9137f2ef1b9fd65bf815bc136ca28c` accepts the structural C object crypto binding only. It does not register/deploy the profile, trust root or key custody. It requires strict UTF-8/JCS/I-JSON handling, duplicate-key rejection, exact C-P0 coverage, strict Base64url decoding to 64 bytes, message_type domain binding, anti-rollback and independent cross-language signature vectors.
 
 The H implementation core is Blob `e8f737326bc4791e8d7acf917b4725dbb7171fad`; the H unit/fixture test is Blob `1f17bdcef6004eca165644ce96bcf35d3b10c3f8`. The core exposes injected tri-state authority callbacks and must return UNKNOWN when profile registration or trust/currentness callbacks are absent. The COC and owner proof callbacks receive both envelope and immutable C object so they can validate independent COC/Storage/I/D refs without incorrectly folding them into C-P0.
 
@@ -198,3 +198,14 @@ The H implementation core is Blob `e8f737326bc4791e8d7acf917b4725dbb7171fad`; th
 - H Provider Outcome run executed strict JSON parser tests, invalid UTF-8/non-finite rejection, candidate digest/preimage domain binding, owner high-water semantic check, fail-closed missing callback check, and all ten C schema/vector cases.
 
 The H run's exact tested source blobs were validator core `e8f737326bc4791e8d7acf917b4725dbb7171fad`, test file `1f17bdcef6004eca165644ce96bcf35d3b10c3f8`, C schema `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`, and C vector fixture `e14eab2bed41f30af10a073b8e6523512128e78e`. The test suite did not execute cryptographic signature verification or any external authority callback. No production readiness is established.
+
+
+## 16. Independent C crypto candidate verification evidence
+
+H's own Python/Node candidate verifier completed successfully:
+- Run `44057944517`, commit `b8a22cecdf6238c81f08338d30776be250fd69a4`, 10 tests passed.
+- Python verifier `a49d588ea6f840927fe21ad8c41cd8089dceac29`.
+- Node oracle `c35ddea3ecaf5e452b14fb57fb20327ad80703cc`.
+- Expected vectors `a4bfe0b431d5e710ac99d604e7b1bce49c044d23`.
+
+This second run independently recomputed the five candidate signatures and fingerprints, verified all present C-P0 field mutations fail, and compared H Python/Node output to the static expected vectors. It is not profile registration or production trust evidence. The test seed is public; C trust root/key lifecycle, H production callback wiring, provider evidence authentication, C ledger inclusion, COC quorum and provider adapter testing remain open.
