@@ -10,6 +10,9 @@ This directory defines how all AI developers work on AiMemoryBrainArchitecture. 
 1. [AI Development Standard](ai-development-standard.md) — roles, authority, task gates, DoR/DoD, verification and acceptance.
 2. [AI Development Iteration Lifecycle](iteration-lifecycle.md) — the end-to-end development loop and multi-Owner collaboration patterns.
 3. [AI Work Item and Prompt Record Template](prompt-and-evidence-template.md) — immutable prompt versions, task manifest and evidence bundle.
+4. [ChatGPT-Native Execution Model — English](chatgpt-native-execution-model.en.md) / [中文](chatgpt-native-execution-model.zh-CN.md) — proposed execution boundary using ordinary ChatGPT conversations.
+5. [Global ChatGPT Session Contract](prompts/global/chatgpt-session-contract-v1.md) — shared constraints inherited by all Owner conversations.
+6. [Owner Prompt Directory](prompts/owners/README.md) — A–I role-specific session prompts.
 
 ## Required usage
 
