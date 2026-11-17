@@ -283,3 +283,19 @@ P re-read current Owner branch heads and exact review Blobs. C Phase 3.8.18 (`4b
 ### H expanded full-path 38-test bundle and outer-envelope security boundary — 2026-11-17
 
 P re-read the current C/H/I/D/Storage/A branch snapshots. H Phase 3.8.15 Blob `60e5eb98...` binds validator `eab961...`, test `540056...`, fixture `f911027...`, mapping `1cbe74...` and exact CI run `44070924346` (38 tests, SUCCESS). C Phase 3.8.19 expanded mutation review `5edff7...`, I Phase 3.8.15 `df869e...`, and D Phase 3.8.11 `1ce8f2...` review the same 38-test source set. Storage v3.2.9 manifest `bf323a...` and A Phase 1.H review `df79f9...` remain pinned to the 32-test predecessor source set; P prepared a v3.2.10 successor draft and simulated A review only. I also identified that outer H envelope authentication and transport-principal binding are not covered by Provider Outcome full-path tests; UMR-039 is opened as a P0 security gate. No Owner branch or main was modified.
+
+
+## 15. New remediation — H 39-test source currentness and v3.2.11 successor
+
+| ID | Priority | Work item | Accountable authority | Current state | Closure evidence |
+|---|---|---|---|---|---|
+| UMR-039 | P0 | Refresh C/D/I exact reviews to H 39-test closure | C/D/I/H | OPEN — current C/D/I reviews pin 38-test source and closure | H test `c37c5e2621ebd7bae138f135c5066aa8be7f9926`, fixture `f911027c848d21dd36fb87ba64a201a1455787a7`, closure `927fe9e8dafd5def6a5cb825e5968f5835d3c6bf`, run `44071354162` (39 PASS). Actual C/D/I branches must publish exact re-review addenda. |
+| UMR-040 | P0 | Publish Storage v3.2.11 and obtain fresh A exact integration review | Storage/A | OPEN — v3.2.10 and Phase 1.K review are 38-test predecessor | Storage v3.2.10 Blob `4e2261dfceee5606fa73c08caadf0829acaa5fa0`; A review `c97b1801a24c1e0a1a0167595b1b464cee22cf6e`; require v3.2.11 with 39-test H closure and new A review of exact manifest. |
+| UMR-041 | P1 | Close local H envelope + C object schema/semantic/digest and expanded mutation conformance | H/C | PARTIALLY CLOSED — 39-test local L1/L2 path PASS; production callbacks remain test doubles | H closure `927fe9e8dafd5def6a5cb825e5968f5835d3c6bf`; run `44071354162`, 39 tests. Includes 22 duplicate-field mutations, C-P0 digest, sequence namespace, I COMMIT_WON, D fence, Storage GID/PrepareAttempt and C-P0 projection. |
+| UMR-042 | P0 | Implement and verify outer H envelope authentication independently of C object validation | H/I | OPEN — Provider Outcome validator does not authenticate outer envelope signature/integrity or transport principal | H current review explicitly states outer H `payload_digest`, signature, channel binding, issuer key status, audience and authenticated transport-principal binding are outside this path. Require H Gateway/Auth positive/negative vectors before durable acceptance. |
+
+## 16. Latest H expanded CI evidence — 2026-11-17
+
+- Provider Outcome run `44071354162`, exact commit `6dda3c8f82c2f25118d5bdcfe24015cec678895a`: **39 tests, SUCCESS**.
+- RecoveryCutoff run `44071641086`, exact commit `45db689afe548345491c9987daea109f2816d3e6`: **completed / SUCCESS**; this is a separate H recovery suite and does not upgrade Provider Outcome evidence.
+- Full-path authority callbacks remain test doubles; production owner proof, outer envelope authentication, C provider truth, COC quorum and Storage deployment remain open.
