@@ -470,7 +470,7 @@ Source: https://opentelemetry.io/docs/languages/rust/
 No benchmark, integration or fault test was run. All recommendations remain conditional candidates, not ADR decisions.
 
 
-### 3.5 PydanticAI durable execution / PydanticAI 持久执行
+## 11. PydanticAI durable execution addendum / PydanticAI 持久执行补充
 
 - Official documentation: https://pydantic.dev/docs/ai/capabilities/durable_execution/overview/
 - Source documentation snapshot consulted: https://github.com/pydantic/pydantic-ai/blob/main/docs/durable_execution/overview.md
@@ -489,7 +489,7 @@ No benchmark, integration or fault test was run. All recommendations remain cond
 - Do not assume engine journaling proves provider side effects exactly once or makes them atomic with Brain canonical publication.
 - Do not let Agent workflow history replace Brain Evidence, CanonicalCommitCursor, ContextVersion or Applied proof.
 
-### 3.5 中文补充：PydanticAI 持久执行
+### 11.1 中文补充：PydanticAI 持久执行
 
 - 官方文档：https://pydantic.dev/docs/ai/capabilities/durable_execution/overview/
 - PydanticAI 是 Python Agent 框架，不是 Rust Brain Runtime。其当前持久执行集成支持 Temporal、DBOS、Prefect、Restate，以及 AWS Lambda、Absurd、pgtask、Azure Durable Task、Airflow 等引擎。
