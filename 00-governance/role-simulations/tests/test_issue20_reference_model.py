@@ -282,6 +282,7 @@ class FRecallGateTests(unittest.TestCase):
 class EDerivationLifecycleTests(unittest.TestCase):
     def test_retry_keeps_work_identity_and_increments_attempt(self):
         e = EDerivation("work-1", "request-digest")
+        e.register_producer("d-registration:" + e.work_item_id)
         self.assertEqual(e.retry("request-digest"), 1)
         first_lease = e.lease_id
         self.assertEqual(e.retry("request-digest"), 2)
@@ -290,11 +291,13 @@ class EDerivationLifecycleTests(unittest.TestCase):
 
     def test_same_work_identity_with_changed_digest_conflicts(self):
         e = EDerivation("work-1", "request-digest")
+        e.register_producer("d-registration:" + e.work_item_id)
         with self.assertRaises(ProtocolError):
             e.retry("changed-digest")
 
     def test_d_admission_cannot_precede_storage_prepare(self):
         e = EDerivation("work-1", "request-digest")
+        e.register_producer("d-registration:" + e.work_item_id)
         e.retry("request-digest")
         e.stage_private("artifact-digest")
         with self.assertRaises(ProtocolError):
@@ -302,6 +305,7 @@ class EDerivationLifecycleTests(unittest.TestCase):
 
     def test_unknown_and_lease_retry_are_not_no_publication(self):
         e = EDerivation("work-1", "request-digest")
+        e.register_producer("d-registration:" + e.work_item_id)
         e.retry("request-digest")
         e.stage_private("artifact-digest")
         e.prepare_storage("storage-participant-1")
@@ -313,6 +317,7 @@ class EDerivationLifecycleTests(unittest.TestCase):
 
     def test_terminal_publication_requires_storage_and_d_join(self):
         e = EDerivation("work-1", "request-digest")
+        e.register_producer("d-registration:" + e.work_item_id)
         e.retry("request-digest")
         e.stage_private("artifact-digest")
         e.prepare_storage("storage-participant-1")

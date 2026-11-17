@@ -57,6 +57,7 @@ class EAttemptLeaseAndReplayObligationTests(unittest.TestCase):
 
     def test_expiry_is_exact_attempt_bound_and_preserves_work_identity(self):
         e = EDerivation("work-1", "request-digest")
+        e.register_producer("d-registration:" + e.work_item_id)
         e.retry("request-digest")
         lease1 = e.lease_id
         expired = e.expire_lease(lease1)
@@ -68,6 +69,7 @@ class EAttemptLeaseAndReplayObligationTests(unittest.TestCase):
 
     def test_expired_attempt_can_enter_dlq_and_replay_with_same_work_identity(self):
         e = EDerivation("work-2", "request-digest")
+        e.register_producer("d-registration:" + e.work_item_id)
         e.retry("request-digest")
         e.expire_lease(e.lease_id)
         self.assertEqual(e.move_to_dlq(), "DLQ")
@@ -76,6 +78,7 @@ class EAttemptLeaseAndReplayObligationTests(unittest.TestCase):
 
     def test_dlq_is_not_a_terminal_no_publication_proof(self):
         e = EDerivation("work-3", "request-digest")
+        e.register_producer("d-registration:" + e.work_item_id)
         e.retry("request-digest")
         e.expire_lease(e.lease_id)
         e.move_to_dlq()
@@ -86,6 +89,7 @@ class EAttemptLeaseAndReplayObligationTests(unittest.TestCase):
     def test_inflight_or_unknown_publication_cannot_spawn_new_attempt(self):
         for state in ("PRIVATE_STAGED", "STORAGE_PREPARED_HIDDEN", "D_ADMITTED", "UNKNOWN_IN_DOUBT"):
             e = EDerivation("work-4", "request-digest")
+        e.register_producer("d-registration:" + e.work_item_id)
             e.retry("request-digest")
             e.state = state
             with self.assertRaises(ProtocolError, msg=state):
@@ -93,6 +97,7 @@ class EAttemptLeaseAndReplayObligationTests(unittest.TestCase):
 
     def test_dlq_replay_with_changed_request_digest_is_rejected(self):
         e = EDerivation("work-5", "request-digest")
+        e.register_producer("d-registration:" + e.work_item_id)
         e.retry("request-digest")
         e.expire_lease(e.lease_id)
         e.move_to_dlq()
