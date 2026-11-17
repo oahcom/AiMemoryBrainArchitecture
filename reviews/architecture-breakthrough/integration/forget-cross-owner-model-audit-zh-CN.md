@@ -106,3 +106,18 @@ Storage 合同要求 D、I 两个独立 participant 绑定同一个 Storage Visi
 保留现有模型及其 CI 历史，不删除或改写历史证据。Gate 使用模型前，必须处理 M-01、由 D/E/Storage 定义 M-02、补充 M-03；M-04 仍归 Storage/D/I 的物理验证，M-05 单独审查。
 
 本报告是同一集成会话对模型的复核，不是 D/E/I/Storage Owner 独立批准；不修改 Owner authority contract，不授权实现、合并、部署或生产激活。
+
+
+## M-02 精确 Owner 合同补充（后续核验）
+
+进一步读取 E 当前原始合同后，M-02 需要精确收窄，不能表述为“Owner 文档完全没有 no-publication terminal 语义”：
+
+- E 当前文件 Blob：`00e37ba56596e710513c8d0568acd79141d9101b`，状态明确为 **CANDIDATE E enforcement contract**；D/E/Storage atomic registration and final publication gate 为 OPEN/BLOCKING。
+- E §3.2 已定义 `Cancelled / Rejected`：durable terminal disposition、no publication possible、记录 cancellation/suppression reason；D 收到 terminal evidence。
+- E §7 的 Producer terminal acknowledgement 明确为 **OPEN — D response schema + reconciliation semantics**。
+- D 当前文件 Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` §3.5/状态机要求 suppression/quarantine 只有在 durable no-publication evidence 且无未来发布路径后才能 terminalize。
+- D §3.5 的 terminal disposition 必须在 D barrier ledger 持久提交；lease expiry、queue deletion、worker shutdown、DLQ parking 都不是 terminal。
+
+因此 M-02 的准确结论是：**E 已有候选 Cancelled/Rejected 语义，D 已有 durable no-publication terminal 约束；但两者之间的精确 receipt/schema/authority mapping、pre-execution cancel 的触发权限、同 WorkItemId 幂等、late-worker fencing 和 D barrier ledger 线性化仍 OPEN。** 当前模型没有把该候选 E 状态映射为合法 D terminal receipt 的转移。A 不得自行把 E 候选提升为 D 接受。
+
+修复方向：由 E Owner 确认 pre-execution Cancelled/Rejected 可产生何种完整证据；由 D Owner 确认该证据如何成为 D terminal disposition；Storage 确认不存在仍可发布的 participant/outbox；之后 A 才将这条精确合同纳入模型并增加 registered → fenced → cancelled-before-run → durable D terminal receipt → barrier closure 与 stale-worker rejection 测试。
