@@ -260,7 +260,7 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         result = authenticate_outer_envelope(self.raw(), self.context, checks)
         self.assertEqual(result["status"], "UNKNOWN", result)
 
-    def test_19_outer_p0_digest_is_recomputed_before_signature_callback(self):
+    def test_22_outer_p0_digest_is_recomputed_before_signature_callback(self):
         self.envelope["message_id"] = "msg/tampered"
         called = []
         checks = self.checks()
@@ -270,7 +270,7 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         self.assertIn("outer-envelope payload_digest mismatch", result["errors"])
         self.assertEqual(called, [])
 
-    def test_20_outer_p0_binds_integrity_and_channel_binding_references(self):
+    def test_23_outer_p0_binds_integrity_and_channel_binding_references(self):
         digest, _ = outer_envelope_digest_and_preimage(self.envelope)
         self.envelope["integrity_proof_ref"] = "C/integrity-proof/attacker"
         changed_integrity, _ = outer_envelope_digest_and_preimage(self.envelope)
@@ -280,7 +280,7 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         changed_channel, _ = outer_envelope_digest_and_preimage(self.envelope)
         self.assertNotEqual(digest, changed_channel)
 
-    def test_21_coordinator_appended_coc_fields_are_excluded_from_c_origin_p0(self):
+    def test_24_coordinator_appended_coc_fields_are_excluded_from_c_origin_p0(self):
         digest, _ = outer_envelope_digest_and_preimage(self.envelope)
         self.envelope["coc_commit_proof_ref"] = "COC/commit/1"
         self.envelope["coc_record_ref"] = "COC/record/1"
@@ -289,19 +289,19 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         after_append, _ = outer_envelope_digest_and_preimage(self.envelope)
         self.assertEqual(digest, after_append)
 
-    def test_22_unknown_outer_envelope_member_is_rejected(self):
+    def test_25_unknown_outer_envelope_member_is_rejected(self):
         self.envelope["unclassified_extension"] = "must-not-be-ignored"
         result = authenticate_outer_envelope(self.raw(refresh_digest=False), self.context, self.checks())
         self.assertEqual(result["status"], "INVALID", result)
         self.assertTrue(any("unclassified outer-envelope members" in e for e in result["errors"]))
 
-    def test_23_wrong_outer_signature_profile_is_rejected_before_crypto_callback(self):
+    def test_26_wrong_outer_signature_profile_is_rejected_before_crypto_callback(self):
         self.envelope["signature_profile_id"] = "AIMBA-C-CRYPTO-1.0"
         result = authenticate_outer_envelope(self.raw(refresh_digest=False), self.context, self.checks())
         self.assertEqual(result["status"], "INVALID", result)
         self.assertTrue(any("wrong C outer-envelope signature_profile_id" in e for e in result["errors"]))
 
-    def test_24_signature_callback_receives_exact_candidate_preimage(self):
+    def test_27_signature_callback_receives_exact_candidate_preimage(self):
         expected_digest, expected_preimage = outer_envelope_digest_and_preimage(self.envelope)
         self.envelope["payload_digest"] = expected_digest
         seen = {}
@@ -311,7 +311,7 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         self.assertEqual(result["status"], "AUTHENTICATED_NEW", result)
         self.assertEqual(seen["preimage"], expected_preimage)
 
-    def test_25_non_c_transport_principal_cannot_sign_c_origin_message(self):
+    def test_28_non_c_transport_principal_cannot_sign_c_origin_message(self):
         gateway_context = ProtectedTransportContext(
             issuer_ref="H/gateway/issuer",
             authority_ref="H/gateway/authority",
