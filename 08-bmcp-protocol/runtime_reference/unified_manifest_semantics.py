@@ -63,6 +63,63 @@ def validate_owner_snapshot(snapshot, owner):
     return VALID
 
 
+
+def validate_owner_snapshot_membership_proof_payload(proof, row, snapshot, verify_owner_signature=None):
+    """Validate one exact owner proof payload; signature verification is delegated to that owner."""
+    if not isinstance(proof,dict) or not isinstance(row,dict) or not isinstance(snapshot,dict):
+        return UNKNOWN
+    if not callable(verify_owner_signature):
+        return UNKNOWN
+    required=("proof_ref","owner_kind","owner_authority_ref","issuer_ref","subject_ref","audience_ref","purpose",
+      "owner_ledger_ref","owner_ledger_version","owner_entry_ref","owner_entry_digest","owner_admission_ref",
+      "owner_sequence_namespace","owner_local_sequence","owner_high_water","owner_ledger_root",
+      "owner_snapshot_ref","owner_snapshot_digest","owner_snapshot_attestation_ref",
+      "owner_snapshot_attestation_digest","owner_gate_ref","owner_gate_generation","scope_ref",
+      "scope_generation","scope_binding_digest","operation_identity_ref","operation_digest","request_digest",
+      "anti_rollback_anchor_ref","key_status_generation","signature_profile_ref","key_id","key_version",
+      "canonicalization_profile_ref","digest_profile_ref","proof_digest","signature_ref")
+    if any(not proof.get(k) for k in required):
+        return UNKNOWN
+    if proof.get("purpose")!="COC_RECOVERY_CUTOFF_MANIFEST_MEMBERSHIP":
+        return INVALID
+    if proof.get("owner_kind") not in {"I","D","C"} or proof.get("owner_kind")!=row.get("owner_kind"):
+        return INVALID
+    row_fields=("owner_ledger_ref","owner_ledger_version","owner_entry_ref","owner_entry_digest",
+      "owner_admission_ref","owner_sequence_namespace","owner_local_sequence","owner_high_water",
+      "owner_ledger_root","owner_snapshot_ref","owner_snapshot_digest","owner_snapshot_attestation_ref",
+      "owner_snapshot_attestation_digest","operation_identity_ref","operation_digest","request_digest",
+      "scope_binding_digest")
+    for field in row_fields:
+        if proof.get(field)!=row.get(field):
+            return INVALID
+    if proof.get("proof_ref")!=row.get("owner_snapshot_membership_proof_ref"):
+        return INVALID
+    if proof.get("proof_digest")!=row.get("owner_snapshot_membership_proof_digest"):
+        return INVALID
+    snapshot_fields=("owner_snapshot_ref","owner_snapshot_digest","owner_snapshot_attestation_ref",
+      "owner_snapshot_attestation_digest","owner_ledger_root","owner_gate_ref","owner_gate_generation",
+      "anti_rollback_anchor_ref")
+    for field in snapshot_fields:
+        target="owner_gate_generation" if field=="owner_gate_generation" else field
+        if field not in snapshot:
+            return UNKNOWN
+        if proof.get(field)!=snapshot.get(target):
+            return INVALID
+    seq=proof.get("owner_local_sequence")
+    high=proof.get("owner_high_water")
+    if not isinstance(seq,str) or not re.fullmatch(r"(0|[1-9][0-9]*)",seq):
+        return INVALID
+    if not isinstance(high,str) or not re.fullmatch(r"(0|[1-9][0-9]*)",high):
+        return INVALID
+    if int(seq)>int(high):
+        return INVALID
+    verified=verify_owner_signature(proof,proof["owner_kind"],snapshot)
+    if verified is None or verified==UNKNOWN:
+        return UNKNOWN
+    if verified is not True:
+        return INVALID
+    return VALID
+
 def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=None, complete=True, verify_membership_proof=None):
     if not complete:
         return UNKNOWN
