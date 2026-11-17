@@ -255,11 +255,11 @@ No production readiness, universal exactly-once, Full Applied or Global Forget C
 | H wire mapping 3.8.4 | `1a64a7be3ec4190643809897519afdf73ed69c1d` |
 | H union Manifest contract 3.8.4 | `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175` |
 | H exact review | `b91c645d54ddbcc16aba84fbd83436bcb106bd98` |
-| H semantic reference module | `6710bd7876be5f2c60640f21090729b8859a7a3e` |
-| H RecoveryJoin 1.0.2 tests | `6afa788da2a899f03de8207cb700c40e0533aba1` |
+| H semantic reference module | `e26379d38825ee13d15f652d3bd019c4091da37d` |
+| H RecoveryJoin 1.0.2 tests | `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a` |
 | H Unified 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
 | H Unified 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
-| H candidate CI | Run `44051257901`, commit `07cacfbc208a566a784389f4eef60bc8e5d1281f`, 282 total / 260 passed / 22 skipped / 0 failed |
+| H candidate CI | Run `44051676055`, commit `16c0e63458a3e3773cd38ef86bfb4f7fe44dd0b4`, 288 total / 266 passed / 22 skipped / 0 failed |
 
 ### 10.2 Owner-owned proof contracts and reviews
 
@@ -367,3 +367,12 @@ I added `I_ADMISSION_SNAPSHOT_MEMBERSHIP_PROOF` as a sixth Python/Node RFC 8785 
 - I exact review current Blob: `27b355ff4174fed20033b78d2e77f5c1e8d3177a`
 
 The vector binds the full I owner proof P0 identity. It remains TEST-ONLY. H run 44051045877 completed 282 tests: 260 passed, 22 skipped, 0 failed. Production I proof signing/key trust and real owner ledger inclusion remain unimplemented.
+
+
+### 10.7 H exact proof-payload verifier evidence
+
+H's reference module now validates the actual RecoveryJoin membership proof payload against exact row and frozen-snapshot fields and requires an injected owner-authoritative signature verifier. New negative cases cover missing verifier, unknown verifier result, signature rejection, entry mismatch and high-water overflow.
+- Module Blob: `e26379d38825ee13d15f652d3bd019c4091da37d`.
+- RecoveryJoin test Blob: `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a`.
+- CI Run `44051676055`: 288 total / 266 passed / 22 skipped / 0 failed.
+This remains candidate reference validation; the verifier callback is TEST-ONLY and is not connected to real owner signers or ledgers.
