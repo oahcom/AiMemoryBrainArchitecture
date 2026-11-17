@@ -167,12 +167,19 @@ Issue #6 的关闭仅表示精确 BIH 设计级消费者验收，不代表 I36 �
 
 The current owner branch tips were refreshed after the earlier source snapshot. Exact current artifacts show:
 - B Phase 3.8.6 approves per-authority nominal serialization types only; the anchor is physical implementation detail, not a canonical domain entity or global counter (Blob e2bc4c8dde9706bfbe443269b702f1b5aa6965f6).
+  - B Phase 3.8.6 仅批准 Per-authority 名义序列化类型；Anchor 是物理实现细节，不是规范领域实体或全局计数器。
 - E accepts the anchor with E lifecycle conditions (Blob 19d708bc29b6115d7bccb7d320781f452ee28b78); F accepts with read-path/cache conditions (Blob 122238146830db6188f00a9788e018a82bfb3f90). Storage v3.2.11 is still not jointly accepted/frozen and needs fresh A review (Blob 54a4f0dab7ab24f1f6fb01f8cc5c7da292f02c57).
+  - E 在自身生命周期条件下接受 Anchor；F 在读路径/Cache 条件下接受。Storage v3.2.11 尚未联合接受/冻结，需要 A 新一轮复审。
 - C Phase 3.8.22 accepts H's reference ingress gate and 60-test boundary only; signer/attestation remains open and crypto is not frozen (Blob 8fd6052cabf58a78962cc2e776398b2a40604bcd).
+  - C Phase 3.8.22 仅接受 H 的 Reference Ingress Gate 和 60 项测试边界；Signer/Attestation 仍开放，密码学 Profile 未冻结。
 - G Phase 3.8.18 accepts C/H full-path mapping as bounded L1/L2 candidate with G-owned Applied conditions, not frozen; its 38 methods use ten deterministic authority test doubles (Blob 1894860c76336f8739d354b72beed3992cffd17e).
+  - G Phase 3.8.18 将 C/H Full-path 映射作为有限 L1/L2 候选接受，并保留 G 自身 Applied 条件；尚未冻结；38 个方法使用 10 个确定性 Authority Test Double。
 - H Phase 3.8.20 corrects the C outer-envelope P0 proof-locator omission and documents JSON pointers, but executable authentication, I profile registration and durable replay remain open (Blob 4ba7e1699215d02224f805a15484b1da2e40c03f).
+  - H Phase 3.8.20 修正 C Outer Envelope P0 的 Proof Locator 遗漏并记录 JSON Pointer，但可执行认证、I Profile 注册和 Durable Replay 仍开放。
 - I accepts C origin-signer/P0 separation as candidate, but does not approve the proposed crypto suite, register the profile/keys, approve custody or authorize deployment (Blob b6d1ea45825a1c2090abfba42474814f02f073a3).
+  - I 将 C Origin Signer/P0 分离作为候选接受，但未批准拟议 Crypto Suite、未注册 Profile/Keys、未批准密钥托管，也未授权部署。
 - A Phase 3.8.19 marks outer-envelope authentication as a blocking architecture gap and says do not freeze (Blob e12cd7b5c79e2234178014243fd51f2e7d51272e).
+  - A Phase 3.8.19 将 Outer Envelope Authentication 标记为阻塞性架构缺口，并明确要求不得冻结。
 
 These findings add a new BLOCKING semantic integration conflict: a typed ActorRef/PrincipalRef or a schema-valid envelope is not authenticated origin proof. C origin signature/P0, H protected transport authentication, I trust/profile/key approval and Storage durable authenticated ingress/replay are separate authority requirements.
 
@@ -182,14 +189,14 @@ These findings add a new BLOCKING semantic integration conflict: a typed ActorRe
 
 ## 6A. Governance and testing authority / 治理与测试权威
 
-Additional current-main source pins:
-- Architecture invariants: 00-governance/architecture-invariants.md, Blob 33b037318e459ebb73bea33b3186f31a41d5dcfe.
-- Bilingual documentation policy GOV-DOC-001: 00-governance/bilingual-documentation-policy.md, Blob b51b054b9f1022133666542680df74dfe19de2fb.
-- AI Development Standard AI-STD-001: 14-ai-development/ai-development-standard.md, Blob f46867f97fc1860015adbe2a1f7b8262640c16fd.
-- AI Development Iteration Lifecycle: 14-ai-development/iteration-lifecycle.md, Blob 8ecc8e4ddde78be01e2038be4ece8dc8ac282c97.
-- Cross-Module Conformance & Fault-Injection Guide (EN): docs/en/12-testing-and-acceptance/cross-module-conformance-guide.md, Blob 6a32f31f0690b8217ae7c2e7049155814f3f108f.
-- Cross-Module Conformance & Fault-Injection Guide (ZH): docs/zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md, Blob 9a63d38997fd2e7aa8fea5d88470ad7fd83dab6d.
-- System Quality Attributes: 01-system-architecture/system-quality-attributes.md, Blob 4350733173d29451a8ea4aa6a544de46526b4fd7.
+Additional current-main source pins / 当前 main 补充来源 Pin：
+- Architecture invariants: 00-governance/architecture-invariants.md, Blob 33b037318e459ebb73bea33b3186f31a41d5dcfe. / 架构不变量文件及精确 Blob。
+- Bilingual documentation policy GOV-DOC-001: 00-governance/bilingual-documentation-policy.md, Blob b51b054b9f1022133666542680df74dfe19de2fb. / 双语文档政策 GOV-DOC-001 及精确 Blob。
+- AI Development Standard AI-STD-001: 14-ai-development/ai-development-standard.md, Blob f46867f97fc1860015adbe2a1f7b8262640c16fd. / AI 开发标准 AI-STD-001 及精确 Blob。
+- AI Development Iteration Lifecycle: 14-ai-development/iteration-lifecycle.md, Blob 8ecc8e4ddde78be01e2038be4ece8dc8ac282c97. / AI 开发迭代生命周期文件及精确 Blob。
+- Cross-Module Conformance & Fault-Injection Guide (EN): docs/en/12-testing-and-acceptance/cross-module-conformance-guide.md, Blob 6a32f31f0690b8217ae7c2e7049155814f3f108f. / 跨模块一致性与故障注入指南英文版及精确 Blob。
+- Cross-Module Conformance & Fault-Injection Guide (ZH): docs/zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md, Blob 9a63d38997fd2e7aa8fea5d88470ad7fd83dab6d. / 跨模块一致性与故障注入指南中文版及精确 Blob。
+- System Quality Attributes: 01-system-architecture/system-quality-attributes.md, Blob 4350733173d29451a8ea4aa6a544de46526b4fd7. / 系统质量属性文件及精确 Blob。
 
 The conformance guide explicitly assigns TC-01 Domain Identity and References and TC-10 Provenance/Lifecycle/Temporal to B, with D/E/F/G and D/E/F/I collaborators respectively. Testing/QA is a cross-cutting contributor alongside Storage/Consistency and Engineering, coordinated by A; no dedicated Testing/Quality branch or independent accountable Owner was found in the branch search. Therefore B owns domain invariant definitions and domain test semantics; a named Testing/QA specialist must be assigned for independent execution/review rather than treating B self-tests as independent acceptance.
 
