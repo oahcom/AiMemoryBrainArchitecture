@@ -20,7 +20,7 @@ A file is bilingual-complete only when the full normative content is present in 
 |---|---|---|---|
 | README.md | Bilingual purpose and governance sections; work-plan tables and some status details are English-only | PARTIAL | Translate all table cells, gate explanations and remaining-work statements |
 | existing-domain-model-baseline.md | Bilingual executive summaries and selected sections; most evidence tables and issue/PR rows are English-only | PARTIAL | Full Chinese peer for every evidence table, branch row, conflict, missing definition and gate conclusion |
-| baseline-currentness-and-owner-source-audit.md | Many bilingual sections; several owner/source tables and detailed Phase 3.8 findings are English-only | PARTIAL | Translate all tables, currentness corrections, issue state and test authority evidence |
+| baseline-currentness-and-owner-source-audit.md | Chinese mirrors added for main/domain Blob pins, current Owner heads, PR/Issue state, Phase 3.8 evidence, governance/testing authority and BIH acceptance correction; Blob `6183923c6d90b3eaf0b471e6707b2e3e21659e36` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Re-read live branch/PR refs; verify every status and exact Blob pin against current GitHub state |
 | baseline-owner-branch-snapshot-errata.md | Chinese mirror added for all ten Owner branch heads, exact artifact pins and acceptance limits; Blob `a96860efd61962633a5ad9e55b3353c151785411` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Re-read live refs before final acceptance; ensure no snapshot is misrepresented as approval |
 | fact-claim-identity-adr.md | Chinese peers added for source evidence, conceptual/identity alternatives, decision matrix, authority acceptance table and all eight required examples; Blob `0bbea0beec6a5828c2db5ae267fac40f59ad7f1f` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently compare each alternative, matrix cell, example and ADR status; ensure no recommendation was promoted to decision |
 | canonical-domain-entity-inventory.md | Full Chinese peer added for classification rules, all canonical/value/association/security/protocol inventory rows, distinctions, open questions and gate disposition; Blob `ca84d9b6fa1c835fdcab08b4a62302b97a2b84a2` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently verify each classification, identity rationale, owner boundary and status; confirm OPEN/CANDIDATE/DEFERRED distinctions remain unchanged |
@@ -100,6 +100,7 @@ A file is bilingual-complete only when the full normative content is present in 
 - `domain-semantics-conflict-register.md` now has a Chinese mirror for all 16 conflict records and the resolution protocol. Current Blob: `edad7a11e59c975f7af53c44d141891bb5ed3180`.
 - `domain-model-decision-record.md` now has a Chinese mirror for all 12 decision records, rejected options and open decisions. Current Blob: `08383c76658129cebe8ef9e303cf75c27269bfb3`.
 - `baseline-owner-branch-snapshot-errata.md` now has a Chinese mirror for all Owner branch heads and exact artifact pins. Current Blob: `a96860efd61962633a5ad9e55b3353c151785411`.
+- `baseline-currentness-and-owner-source-audit.md` now has Chinese mirrors for main/domain pins, Owner heads, PR/Issue states, Phase 3.8 evidence, governance/testing authority and BIH acceptance currentness. Current Blob: `6183923c6d90b3eaf0b471e6707b2e3e21659e36`.
 - `canonical-identity-semantics.md` 已为全部表格、规则、解析步骤、未决问题和决策记录补齐中文对应内容。当前 Blob：`bc8816eadcd14a1dd01ae03ed68de553b2bb1483`。
 - `fact-claim-identity-adr.md` 已为证据表、决策矩阵、Owner 验收要求和全部八个验证示例补齐中文对应内容。当前 Blob：`0bbea0beec6a5828c2db5ae267fac40f59ad7f1f`。
 - `evidence/README.md` 已为所有来源标题、来源用途说明、证据局限和版本注意事项补齐中文对应内容。当前 Blob：`bda915327a0ee77fb78e9a52bc094986254a1a60`。
@@ -111,6 +112,7 @@ A file is bilingual-complete only when the full normative content is present in 
 - `domain-semantics-conflict-register.md` 已为全部 16 项冲突记录及解决流程补齐中文对照。当前 Blob：`edad7a11e59c975f7af53c44d141891bb5ed3180`。
 - `domain-model-decision-record.md` 已为全部 12 项决策、拒绝方案和未决决策补齐中文对照。当前 Blob：`08383c76658129cebe8ef9e303cf75c27269bfb3`。
 - `baseline-owner-branch-snapshot-errata.md` 已为全部 Owner 分支 HEAD 和精确工件 Pin 补齐中文对照。当前 Blob：`a96860efd61962633a5ad9e55b3353c151785411`。
+- `baseline-currentness-and-owner-source-audit.md` 已为 main/领域 Pin、Owner HEAD、PR/Issue 状态、Phase 3.8 证据、治理/测试权威和 BIH 验收时效性补齐中文对照。当前 Blob：`6183923c6d90b3eaf0b471e6707b2e3e21659e36`。
 
 
 - `canonical-domain-model.md` has received a full Chinese peer for its normative prose, object inventories, ownership matrix, minimum/recommended/deferred/rejected model tiers, architecture fit, authenticated-ingress boundaries and blockers. Exact readback Blob: `ce441336e2fbba7c7a28c0b4c75482d524a4ade7`.
