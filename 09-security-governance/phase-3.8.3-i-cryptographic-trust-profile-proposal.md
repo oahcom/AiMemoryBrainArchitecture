@@ -60,42 +60,44 @@ JCS 数字序列化规则具有规范性。禁止签署语言运行时自行生�
 
 ### 3.1 Projection ownership / 投影归属
 
-H MUST publish an exact per-message-type field projection. The owner signature covers the complete immutable owner-authored semantic record, including:
+H MUST publish an exact per-message-type field projection. For each I-signed record, define `P0` as every immutable owner-authored semantic field in the exact H message-family schema, including common envelope identity/trust fields, message-specific payload, typed refs, scope, purpose, audience, PolicyDomain, owner generations/high-waters/roots/counts/digests, terminal enums, key ID/version and owner-authored creation/validity fields.
 
-- schema ID and on-wire schema-family version;
-- message type, stable message ID and replay nonce;
-- owner authority, owner record reference and owner subject/issuer identity;
-- audience, purpose, PolicyDomain and OwnerBoundary where applicable;
-- canonicalization profile ID `RFC8785-JCS-1.0`, signature profile ID `AIMBA-ED25519-SHA256-1.0` and profile bundle ID `AIMBA-I-CRYPTO-1.0`;
-- all message-specific semantic payload fields, typed refs, generations, high-waters, roots, counts, digests and terminal enums;
-- key ID/version and owner-authored creation/validity fields.
+`P0` excludes only:
+- `payload_digest` (computed from P0);
+- `signature` (signature output);
+- `integrity_proof_ref` (external proof locator);
+- `channel_binding_proof_ref` (transport/session evidence, verified separately);
+- coordinator-added fields: `quorum_commit_proof_ref`, `coc_commit_proof_ref`, `coc_record_ref`, `coc_record_position`, `coc_entry_digest`, `coc_previous_entry_digest`.
 
-The projection MUST exclude only fields that are not owner-authored and are added by another authority after signing, such as COC quorum position/commit proof and transport-session channel-binding evidence. Exclusions MUST be an explicit H field allowlist per message family; wildcard exclusions and implementation-defined omission are forbidden.
+All other owner-authored fields are included. H must explicitly enumerate any message-specific exception; wildcard exclusions and implementation-defined omission are forbidden. The owner projection must include `canonicalization_profile_id=RFC8785-JCS-1.0`, `signature_profile_id=AIMBA-ED25519-SHA256-1.0` and `digest_algorithm=SHA-256`. The profile bundle ID `AIMBA-I-CRYPTO-1.0` is resolved by I and included in the signature domain tag.
 
-H 必须按消息类型发布精确字段投影。Owner 签名覆盖完整、不可变且由 Owner 撰写的语义记录，包括 Schema 标识与 Wire 版本、消息类型/稳定 ID/Replay Nonce、Owner Authority/Record Ref/Issuer/Subject、Audience/Purpose/PolicyDomain/OwnerBoundary、Profile ID、所有消息专属字段、Typed Ref、Generation、High-water、Root、Count、Digest、Terminal Enum、Key ID/Version 及 Owner 创建/有效期字段。
+H 必须按消息类型发布精确字段投影。对每个 I 签名记录，`P0` 包含精确 H Message Family Schema 中所有不可变 Owner-authored 语义字段，包括 Common Envelope 身份/Trust 字段、消息专属 Payload、Typed Ref、Scope、Purpose、Audience、PolicyDomain、Owner Generation/High-water/Root/Count/Digest、Terminal Enum、Key ID/Version 及 Owner 创建/有效期字段。
 
-仅可排除签名后由其他 Authority 添加、且并非 Owner 撰写的字段，例如 COC Quorum Position/Commit Proof 和 Transport Session Channel-binding Evidence。每类消息的排除项必须由 H 明确列出；禁止通配符排除或实现自行省略。
+`P0` 仅排除 Payload Digest（由 P0 计算）、Signature 输出、外部 Integrity Proof Locator、Transport Channel-binding Evidence，以及签名后由 Coordinator 添加的 Quorum/COC Commit Proof/Position/Record/Digest 字段。其他 Owner-authored 字段全部必须纳入。任何消息专属例外必须由 H 明确枚举，禁止通配符排除或实现自行省略。Projection 必须包含精确的 Canonicalization Profile、Signature Profile 与 SHA-256 Digest Algorithm。Profile Bundle ID 由 I 解析，并纳入签名域分离标签。
 
 ### 3.2 Signature construction / 签名构造
 
-Let `P` be the exact H-defined owner-signed projection and `JCS(P)` its RFC 8785 canonical UTF-8 bytes.
+Let `P0` be the exact H-defined owner-authored projection.
 
-- Payload digest:
-  `payload_digest = SHA-256(ASCII("AIMBA-I-PAYLOAD-v1") || 0x00 || JCS(P))`
-- Signature preimage:
-  `signature_preimage = ASCII("AIMBA-I-SIGNATURE-v1") || 0x00 || ASCII("AIMBA-I-CRYPTO-1.0") || 0x00 || ASCII(message_type) || 0x00 || JCS(P)`
-- Signature:
-  `signature = Ed25519.Sign(private_key, signature_preimage)`
+- `P0Bytes = JCS(P0)`
+- `payload_digest = SHA-256(ASCII("AIMBA-I-PAYLOAD-v1") || 0x00 || P0Bytes)`, lowercase hexadecimal.
+- `P = P0 + { payload_digest }`
+- `PBytes = JCS(P)`
+- `signature_preimage = ASCII("AIMBA-I-SIGNATURE-v1") || 0x00 || ASCII("AIMBA-I-CRYPTO-1.0") || 0x00 || ASCII(message_type) || 0x00 || PBytes`
+- `signature = Ed25519.Sign(private_key, signature_preimage)`, Base64url without padding.
 
-The signature field itself, signature verification result, transport channel-binding proof and post-append COC commit attestation are not members of P. The exact projection MUST include `canonicalization_profile_id=RFC8785-JCS-1.0`, `signature_profile_id=AIMBA-ED25519-SHA256-1.0` and `digest_algorithm=SHA-256`. The profile bundle ID `AIMBA-I-CRYPTO-1.0` is the immutable trust-policy bundle resolved by I and is included in the signature domain tag. The exact projection MUST include `payload_digest` only if H defines it as a field inside P; if included, the digest is recomputed over the projection with the digest field omitted, and this omission rule must be explicit in the H mapping. No circular digest is permitted.
+The signature field, verification result, transport channel-binding proof and post-append COC commit attestation are not members of P. Digest and signature MUST be computed from this exact two-stage construction; no circular digest or alternative projection is permitted.
 
-`P` 是 H 定义的精确 Owner-signed Projection，`JCS(P)` 是 RFC 8785 规范 UTF-8 字节。
+`P0` 是 H 精确定义的 Owner-authored Projection。
 
-- Payload Digest：`SHA-256("AIMBA-I-PAYLOAD-v1" || 0x00 || JCS(P))`
-- Signature Preimage：`"AIMBA-I-SIGNATURE-v1" || 0x00 || "AIMBA-I-CRYPTO-1.0" || 0x00 || message_type || 0x00 || JCS(P)`
-- Signature：`Ed25519.Sign(private_key, signature_preimage)`
+- `P0Bytes = JCS(P0)`
+- `payload_digest = SHA-256("AIMBA-I-PAYLOAD-v1" || 0x00 || P0Bytes)`，使用小写十六进制。
+- `P = P0 + { payload_digest }`
+- `PBytes = JCS(P)`
+- `signature_preimage = "AIMBA-I-SIGNATURE-v1" || 0x00 || "AIMBA-I-CRYPTO-1.0" || 0x00 || message_type || 0x00 || PBytes`
+- `signature = Ed25519.Sign(private_key, signature_preimage)`，使用无 Padding 的 Base64url。
 
-Signature 字段本身、验签结果、Transport Channel-binding Proof 及签名后追加的 COC Commit Attestation 不属于 P。若 H 将 `payload_digest` 纳入 P，必须明确其计算时排除该字段并防止循环摘要；否则不得自行推断。
+Signature 字段、验签结果、Transport Channel-binding Proof 和签名后追加的 COC Commit Attestation 不属于 P。Digest 与 Signature 必须严格采用上述两阶段构造；禁止循环摘要或替代 Projection。
 
 ### 3.3 Separate authority attestations / Authority Attestation 分离
 
