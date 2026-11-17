@@ -343,3 +343,16 @@ All Owner decisions above are delegated role simulations authored at the user's 
 - Decision: **ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS**.
 - R1/R2 remain OPEN; Storage Gate A remains PARTIAL PASS / OPEN; Gate B and Gate C remain BLOCKED; JF-10 P0 remains OPEN; Multi-PolicyDomain atomicity remains BLOCKED; production activation remains NOT AUTHORIZED.
 - Provenance is delegated A-role simulation in the coordinating session, not independent human A Owner/governance sign-off.
+
+
+## 13. A Phase 3.8.9 integration disposition (2026-11-17)
+
+- A final integration review: `01-architecture/phase-3.8.9-a-final-integration-review-c-provider-outcome.md`
+- Exact Blob: `0e4581c7b0731577131f13c24b1994bca9d4917e`
+- Commit: `893ea9cb7eb595e2004ec7c95edda54ad506201e`
+- Disposition: **ACCEPT AS COHERENT DESIGN CANDIDATE WITH ENUMERATED BLOCKERS; DO NOT FREEZE**.
+- A confirms owner boundaries and exact schema dereference rule are coherent at design level.
+- Blocking gates: immutable C object schema/record and digest semantics; I profile registration and C key trust/custody lifecycle; H validator implementation; executable canonical/signature vectors and independent cross-language CI; provider-specific adapter race/idempotency tests; deployment-grade Storage/COC join evidence.
+- No production activation, provider egress authorization, Full Applied, Global Forget Completion or exactly-once guarantee is granted.
+
+The current design-level bundle is now pinned through A review. Any subsequent freeze request MUST replace the relevant PROPOSED/NOT EXECUTED evidence with exact implementation, registration and execution artifacts, then obtain a new A review.
