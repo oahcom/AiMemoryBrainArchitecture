@@ -184,3 +184,39 @@ Until explicit decisions and consumer acceptances are recorded:
 **ADR status:** CANDIDATE / DECISION REQUEST. B2/B3 remain OPEN until B's explicit decision and required D/E/F/G/Storage consumer acceptance are exact-version pinned. B4 remains NOT READY. No Owner approval is inferred from silence or role simulation.
 
 **ADR 状态：**CANDIDATE / DECISION REQUEST。B 作出明确决定并完成 D/E/F/G/Storage 消费者精确版本验收前，B2/B3 保持 OPEN。B4 仍 NOT READY。不得从沉默或角色模拟推断 Owner 批准。
+
+
+## 11. Current B Owner ADR reconciliation — 2026-11-18 / 当前 B Owner ADR 对账 — 2026-11-18
+
+**Supersession notice / 替代说明.** The earlier recommendation in §4 for C2 (Fact as a qualified Claim) is superseded as the *current B-preferred candidate* by the newer B Owner branch artifacts below. It was never approved and must not be treated as a decision. The current B Owner recommendation is Option A (separate Fact attestation object and Claim proposition thread), still **ADR-BLOCKED / NOT APPROVED** pending formal Architecture Governance decision. This update changes the recommendation record only; it does not create an approved canonical model.
+
+**替代说明。** §4 中此前倾向 C2（Fact 是限定 Claim）的建议，现已被下列较新的 B Owner 分支工件取代，作为“当前 B 优先候选”。此前建议从未获批，不得视为决策。当前 B Owner 推荐 Option A（Fact 独立 Attestation 对象，Claim 为命题线程），但仍 **ADR-BLOCKED / NOT APPROVED**，等待正式 Architecture Governance 决议。本次仅更新建议记录，不创建已批准的规范模型。
+
+### 11.1 Exact current B Owner evidence / 当前 B Owner 精确证据
+
+| Artifact / 工件 | Branch / 分支 | Exact Blob SHA / 精确 Blob SHA | Status / 状态 |
+|---|---|---|---|
+| `02-domain-model/ADR-001-fact-claim-semantics.md` | `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | `a1024938ff5baba069cf128c69496a44e143330c` | ADR-BLOCKED; B recommends Option A; Architecture Governance authority/approval not recorded |
+| `02-domain-model/adr/ADR-001-fact-claim-canonical-model.md` | same | `df77e4a93cb8fef689ae7c828888d960cbf381d6` | ADR-BLOCKED; Option A preferred candidate; Option B requires explicit I-04/P-04 amendment |
+| `02-domain-model/fact-claim-consumer-mapping.md` | same | `dd45a37199c9b69ab6b68f65e051a484a04691d4` | CANDIDATE; canonical Fact/Claim identity portions blocked |
+| `02-domain-model/phase-3.6-b-owner-formal-actor-scope-environment-type-mapping-confirmation.md` | same | `3a1e77889cd9a90cd5822d9f0cb3437880868706` | B-approved typed-reference semantics only; explicitly does not approve Fact/Claim ADR |
+
+### 11.2 Current option mapping and boundaries / 当前方案映射与边界
+
+The current B Owner ADR's Option A corresponds to this research ADR's earlier C1: Claim is an attributable proposition thread with immutable ClaimRevision; Fact is a separately addressable, evidence-backed attestation/adjudication object with FactRevision, exact ClaimRevisionRef(s), authorized attestor, method/version, evidence, Scope, validity and decision history. Option B corresponds to earlier C2: Fact is a qualification/view of an exact ClaimRevision without separate identity. The current B Owner recommendation prefers Option A because it preserves I-04/P-04 and provides a distinct auditable attestation boundary; it remains conditional on a concrete product attestation use case and D/I/governance boundary agreement.
+
+当前 B Owner ADR 的 Option A 对应本研究 ADR 早先的 C1：Claim 是带不可变 ClaimRevision 的可归属命题线程；Fact 是独立可寻址、由 Evidence 支持的 Attestation/Adjudication 对象，拥有 FactRevision、精确 ClaimRevisionRef、授权 Attestor、Method/Version、Evidence、Scope、Validity 和决策历史。Option B 对应早先的 C2：Fact 是精确 ClaimRevision 的限定/视图，不具有独立身份。当前 B Owner 推荐 Option A，因为它保留 I-04/P-04 并提供独立可审计的 Attestation 边界；但仍以存在真实产品 Attestation 用例，以及 D/I/Governance 边界达成一致为条件。
+
+The current B Owner ADR also proposes (not freezes) stable ClaimRef + immutable ClaimRevisionRef, exact revision-pinned Evidence/Provenance, and ConflictSet over exact ClaimRevisionRefs. D owns canonical identity allocation, persistence, revision commit and ConflictSet lifecycle/commit shape after approval. E remains neutral CandidateProposition/ExtractionIR and may not mint canonical ClaimRef/FactRef. F/G may consume only candidate-neutral or exact version-pinned references while blocked. H wire fields remain H-owned and unfrozen. No Fact/Claim schema, DDL, API or wire contract may be frozen.
+
+当前 B Owner ADR 还提出（但未冻结）稳定 ClaimRef + 不可变 ClaimRevisionRef、精确版本绑定的 Evidence/Provenance，以及基于精确 ClaimRevisionRef 的 ConflictSet。批准后，D 负责规范身份分配、持久化、Revision Commit 和 ConflictSet 生命周期/Commit 形态。E 必须继续使用中立 CandidateProposition/ExtractionIR，不得创建规范 ClaimRef/FactRef。阻塞期间 F/G 只能消费中立候选或精确版本绑定引用。H Wire 字段仍由 H 负责且未冻结。不得冻结 Fact/Claim Schema、DDL、API 或 Wire 契约。
+
+### 11.3 Governance blocker / 治理阻塞
+
+Main I-04 (Blob `33b037318e459ebb73bea33b3186f31a41d5dcfe`) and P-04 (Blob `192e6ba6e9287792a02b679dda0d391844270228`) normatively distinguish Fact from Claim as distinct domain concepts/objects. Main domain overview Blob `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` still describes Fact as a qualified interpretation of Claim, while both current bilingual guides (EN Blob `8a19cebacf5aefb0aded5fdbfeaff406291a5cf1`; ZH Blob `a9f53a453aec25c47c58c4aea75adc43c83028d3`) explicitly retain ADR-BLOCKED and prohibit downstream schema freeze. Main terminology Blob `9b287ebe027ae01128baf164952ce15aad050638` still defines “Fact / Claim” jointly. These source-level inconsistencies remain unresolved.
+
+Main I-04（Blob `33b037318e459ebb73bea33b3186f31a41d5dcfe`）和 P-04（Blob `192e6ba6e9287792a02b679dda0d391844270228`）规范性地区分 Fact 与 Claim，视为不同领域概念/对象。Main Domain Overview Blob `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` 仍将 Fact 描述为 Claim 的限定解释；而当前中英文指南（EN Blob `8a19cebacf5aefb0aded5fdbfeaff406291a5cf1`；ZH Blob `a9f53a453aec25c47c58c4aea75adc43c83028d3`）明确保留 ADR-BLOCKED，并禁止下游 Schema 冻结。Main Terminology Blob `9b287ebe027ae01128baf164952ce15aad050638` 仍将 “Fact / Claim” 合并定义。这些来源层面的不一致仍未解决。
+
+Issue #43 remains OPEN and preserves the Fact/Claim ADR blocker. Issue #5 remains OPEN for I36 governance approvals; it is a separate I identity-trust governance dependency and must not be misrepresented as the missing Architecture Governance decision authority for this ADR. No named Architecture Governance decision-maker, approval timestamp or approved option is recorded in the current B ADR artifacts. Therefore the recommendation remains Option A / CANDIDATE and the ADR remains BLOCKED.
+
+Issue #43 仍 OPEN，并保留 Fact/Claim ADR 阻塞。Issue #5 仍 OPEN，负责 I36 治理批准；它是独立的 I 身份信任治理依赖，不得误称为本 ADR 缺失的 Architecture Governance 决策权威。当前 B ADR 工件中没有记录具名 Architecture Governance 决策人、批准时间或获批方案。因此当前建议为 Option A / CANDIDATE，ADR 仍 BLOCKED。
