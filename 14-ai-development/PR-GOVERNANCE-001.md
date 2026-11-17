@@ -3,10 +3,11 @@
 
 - Document ID: PR-GOVERNANCE-001
 - Version: 1.0
-- Status: PROPOSED — becomes repository policy only after merge and explicit Issue #130 adoption record
+- Status: ADOPTED — owner-directed adoption recorded in Issue #130 comment #6962523529 after PR #144 merged on 2026-11-18
 - Owner: Integration Owner; repository configuration remains the repository administrator's responsibility
 - Tracking: Issue #130
 - Related P0: Issue #134
+- Adoption record: Issue #130 comment #6962523529; PR #144 merge commit `3754d049db840b049728afd814faac968bf10749`
 
 ## 1. Purpose and governing rule / 目的与治理原则
 
