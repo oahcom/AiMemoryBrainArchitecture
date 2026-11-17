@@ -121,3 +121,31 @@ After reading the current E source, M-02 must be narrowed. It would be inaccurat
 The precise M-02 finding is therefore: **E has candidate Cancelled/Rejected semantics and D has a durable no-publication terminality requirement; however, the exact receipt/schema/authority mapping, authority to trigger pre-execution cancellation, same-WorkItemId idempotency, late-worker fencing and D barrier-ledger linearization remain OPEN.** The current model has no transition mapping this candidate E state into an accepted D terminal receipt. A must not promote E's candidate semantics into D acceptance.
 
 Remediation: E Owner confirms the complete evidence emitted by pre-execution Cancelled/Rejected; D Owner confirms how it becomes a D terminal disposition; Storage confirms no publish-capable participant/outbox remains. Only then should A add the exact contract to the model and test registered → fenced → cancelled-before-run → durable D terminal receipt → barrier closure, including stale-worker rejection.
+
+## Current model HEAD re-review correction (2026-11-18; supersedes earlier M-01/M-02 status)
+
+A later model revision exists on the integration branch; the current model Blobs control:
+
+- Current model Blob: `05ed37fe4c673ed938672b0f7ce4f3da85f58472`.
+- Current test Blob: `6192f18a8b94a39be6fcef999f62edcb4542383a`.
+- Current README Blob: `1abcc3f92d97cea4f18049d2b0fcd18eca3a2952`.
+- Latest model CI: run `44140051181`, SUCCESS at exact tested commit `c6c6e136f3d1c1b24448e28b754bfe083fe1a0f8`; model step and unittest succeeded, 14 tests passed, 28,383 state/depth pairs and 13 mutants.
+- Earlier run `44139591931` failed against the stale expected state count. That failure is superseded by the updated baseline/tests and later successful run; the historical failure remains visible.
+
+### M-01 status: fixed within model scope
+
+The model renamed global_complete to core_barrier_ready and explicitly documents that it is not I GlobalForget Completed. Its invariant checks only the scoped core predicate. The original M-01 naming/scope issue is therefore CLOSED at the current model level. I's full Global Forget Completed state remains unmodeled and NOT PROVEN.
+
+### M-02 status: abstract external proof input is now modeled; Owner composition remains OPEN
+
+The model now includes record_no_publication_proof. It accepts this external D/E/Storage durable-proof input only when the Fence is installed, the WorkItem is registered but not running, no lease/I participant exists and no artifact is visible. The model then permits terminalization and barrier closure. It also adds a stale-worker-after-cancel mutant and a terminal-without-proof invariant. The new regression test verifies that terminalization is blocked without proof, succeeds after proof, and a stale Worker cannot resume.
+
+Thus the original finding that the model had no pre-execution terminal transition is CLOSED by the current model revision. The remaining gap is the real Owner contract for that external proof: E Cancelled/Rejected remains CANDIDATE; E→D terminal acknowledgement schema/reconciliation remains OPEN; exact binding among D terminal receipt and Storage no-publication participant is not closed. Model closure is not Owner acceptance or production implementation.
+
+### Still open
+
+- M-03: only one Fence generation is modeled; overlapping/multiple Forget target sets are not modeled.
+- M-04: real D/I/Storage durable participants, prepared transactions and WAL/MVCC/2PC crash recovery are not modeled; JF-10 remains NOT PROVEN.
+- M-05: liveness/fairness must be separated from safety and external progress assumptions must be explicit.
+
+Current model disposition: **bounded research CI PASS; M-01/M-02 fixed at model level; Owner receipt mapping, multi-Forget, physical crash atomicity and Global Forget completion remain OPEN / NOT PROVEN.**
