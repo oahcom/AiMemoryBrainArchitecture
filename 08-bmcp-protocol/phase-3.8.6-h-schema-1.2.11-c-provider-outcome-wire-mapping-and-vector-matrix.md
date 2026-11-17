@@ -155,7 +155,7 @@ C schema structural validity and BMCP envelope structural validity are separate 
 
 ## 9. I exact C object crypto review
 
-I Phase 3.8.6 review Blob `cdfaa1c112210d65f9fd24fc1f5eb3caf8514fec` accepts the C object structure and candidate digest/signature construction only. It explicitly does not register/deploy the profile or approve trust roots/custody. The H implementation must enforce strict UTF-8, duplicate-key rejection, JCS, exact C-P0 field coverage, 86-character Base64url structural screening plus strict decoding to 64 bytes, and the exact message_type domain component. The C test signatures remain placeholders and no cryptographic vector execution is claimed.
+I Phase 3.8.6 review Blob `a4d0be0e5bbf6122e2d86e59a48e62586869fd23` accepts the C object structure and candidate digest/signature construction only. It explicitly does not register/deploy the profile or approve trust roots/custody. The H implementation must enforce strict UTF-8, duplicate-key rejection, JCS, exact C-P0 field coverage, 86-character Base64url structural screening plus strict decoding to 64 bytes, and the exact message_type domain component. The C test signatures remain placeholders and no cryptographic vector execution is claimed.
 
 
 ## 10. Complete optional proof-reference disposition
@@ -177,3 +177,12 @@ If a mapped C object member is non-null, the wire duplicate cannot be omitted. I
 The following envelope values are not C-authored fields and MUST be verified independently by H's COC/owner-ledger authority callbacks: `coc_commit_proof_ref`, `coc_record_ref`, `coc_record_position`, `coc_entry_digest`, `prepared_participant_ref`, `prepare_attempt_ref/generation`, participant ledger/version/tuple digest, `i_terminal_decision_ref`, `d_clearance_ref`, and `storage_resolution_proof_ref`. They must not be silently ignored or promoted into C-P0; they are external owner evidence with independent issuer and join semantics.
 
 Current H validator core: Blob `e8f737326bc4791e8d7acf917b4725dbb7171fad`. H unit/fixture test file current Blob `1f17bdcef6004eca165644ce96bcf35d3b10c3f8`. Exact vendored C schema and fixture Blobs are `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c` and `e14eab2bed41f30af10a073b8e6523512128e78e`.
+
+
+## 11. C and H executed structural/semantic CI evidence
+
+- C schema/semantic workflow run `44055965702`, tested commit `a0c197fa94e71c52758fadaa335a686815485dd7`: SUCCESS, 3 tests.
+- H Provider Outcome workflow run `44055791045`, tested commit `7d5c7324cabde76d99df49c55220219a491e03c0`: SUCCESS, 7 tests.
+- H run validates the exact vendored C schema/vector blobs `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c` and `e14eab2bed41f30af10a073b8e6523512128e78e`, identical to current C branch blobs at the time of the run.
+
+These runs prove only the checked structural/semantic/unit assertions. They do not validate C Ed25519 signatures, registered profile/trust, provider issuer proofs, owner ledger membership, COC quorum, real adapter races or production deployment.
