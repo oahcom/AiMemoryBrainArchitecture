@@ -207,3 +207,28 @@ Important rule: PRs targeting Owner/research/recovery branches are not candidate
 This recovery closes the stale open-PR queue by reconciling the remaining duplicate PR #135. It does not convert merges into approvals, close Issue #26, pass architecture gates, or authorize production activation.
 
 本次恢复通过关闭已被 PR #137 取代的重复 PR #135 清空开放 PR 队列；不把合并事实转换为 Owner 批准，不关闭 Issue #26，不宣称架构 Gate 通过，也不授权生产激活。
+
+
+---
+
+## 8. Live currentness overlay / 实时状态追加（2026-11-18）
+
+This append-only overlay supersedes the earlier Main snapshot and queue statement only. It does not rewrite the inventory snapshot taken before PR #138 was created.
+
+- Updated current `main` HEAD: `5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`.
+- Updated Main tree: `0aad576605be44f4eb595070c2c3d8effd836f1e`.
+- The 107-record inventory above was captured immediately before creating PR #138; it therefore correctly reports zero open PRs at that inventory instant.
+- Recovery report PR #138 is now the sole open PR: `docs(recovery): publish PR-RECOVERY-002 full inventory and closeout`, Head `7aa4a4c32fcc0cd768bd3eb08e7a1e2d645ef264`, Base `5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`.
+- PR #138 is mergeable at the latest read, but its `GOV-DOC-001 structural checks` are still IN_PROGRESS and combined commit status is PENDING. Do not merge until the exact-head check completes successfully and the diff/readback remains unchanged.
+- Legacy branch protection remains disabled. Rulesets remain unverified because the protection endpoint returns 403.
+- Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED.
+
+本追加记录仅更新实时基线，不改写创建 PR #138 之前的 107 项盘点快照。
+
+- 当前 `main` HEAD 更新为：`5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`。
+- 当前 Main Tree：`0aad576605be44f4eb595070c2c3d8effd836f1e`。
+- 上述 107 项盘点是在创建 PR #138 之前完成，因此“0 个 Open PR”只代表当时的盘点瞬间。
+- 恢复报告 PR #138 已成为唯一开放 PR：Head `7aa4a4c32fcc0cd768bd3eb08e7a1e2d645ef264`，Base `5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`。
+- 最新读取时 PR #138 的 mergeable 为 true，但精确 Head 的 `GOV-DOC-001 structural checks` 仍为 IN_PROGRESS，综合 Commit Status 为 PENDING。必须等待检查成功并重新核对 Diff 后才能考虑合并。
+- 传统 Main Branch Protection 仍未启用；Rulesets 因 API 403 无法核实。
+- Issue #26 仍为 OPEN / SECURITY_ACCEPTANCE_BLOCKED。
