@@ -1,6 +1,6 @@
 # 开发可行性矩阵 — DEV-FEAS-002
 
-- 版本：1.0.0；基线：`main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- 版本：1.0.0；基线：`main@8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
 - 来源：F/D/P PR #46，分支 `review/session-3-engineering-planning-2026-11-17`，Commit `8b9ff8efa92a88dacc8f97b5faba5918fe5d2edc`，英文 Blob `081610b1734ec08dc7c35c75fae1cae3ca713be4`，中文 Blob `834dc39998342dc2f292fe1dfed411768b3ed156`。
 - A 裁决：原则上 **FEASIBLE_WITH_CONDITIONS**；当前实现准入 **BLOCKED**。
 
@@ -31,6 +31,10 @@ F/D/P 使用相对规模 S/M/L/XL，而非人日。由于工程人数、可用�
 - PostgreSQL 18.7 证据只是受限引擎能力探测，不证明已选生产拓扑或 D/I/COC 集成。
 - Durable Ingress/Outbox、Canonical Cursor、Forget/Publication、JF-10 Recovery 和 Applied 必须分别提供证据。
 - Vector/ANN、Reranking、Graph Backend 扩张不是安全首期纵向切片的前置条件。
+
+## 当前 B→A 可行性更新
+
+B Fact/Claim 仍 ADR-BLOCKED。中间 B Identity/Entity 研究工件已从 Main 撤销，不属于当前基线证据。H Unified 1.2.14 / wire 1.3.0 + CSubmitOutcome 1.0.1 是 L1/L2 候选；C 接受精确 H Mapping，D 接受 H Carrier/Crosswalk，I 有 Option A Anchor Review。但 H Mapping 状态过期，H/I/D 精确 Review Pin 未在同一当前 Bundle 中收敛，Storage v3.2.9 已过期。Storage v3.3.0 或等效版本由 C/H/D/I 和 A 共同复审前不得协议冻结。Option A 仅有条件接受为逻辑方向；A-01..A-05、D 精确采纳及 L2/L3/L4 仍开放。
 
 ## 五项工程前置条件
 
