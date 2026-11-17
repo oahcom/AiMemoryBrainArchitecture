@@ -180,4 +180,47 @@ Author-side remediation has now added Chinese peer text to all 22 files, includi
 - `existing-domain-model-baseline.md` now includes a full Chinese peer for the Owner branch snapshot, relevant PR/Issue impact, legacy B branch comparison, all five material conflicts, missing definitions, confidence and B0 disposition. Exact Blob: `08f2843db1d41027ee6d1bee9af564ce07a3a793`.
 - `existing-domain-model-baseline.md` 已为 Owner 分支快照、相关 PR/Issue 影响、旧 B 分支比较、五项重大语义冲突、缺失定义、基线置信度及 B0 结论补齐完整中文对照。精确 Blob：`08f2843db1d41027ee6d1bee9af564ce07a3a793`。
 - Author-side remediation only; independent semantic parity and live-source reconciliation remain pending. B0 remains PARTIAL / NOT PASSED; B5 remains BLOCKED.
-- 仅属于作者侧整改；独立语义对等复审和实时来源协调仍待完成。B0 仍为 PARTIAL / NOT PASSED；B5 仍 BLOCKED。
+- 仅属于作者侧整改；独立语义对等复审和实时来源协调仍待完成。B0 仍为 PARTIAL / NOT PASSED；B5 仍 BLOCKED。## 5. Exact readback inventory / 精确读回清单
+
+The following 21 non-self files were re-read at research branch commit `bdd03f3731f1460bfceeff5cc3ffecda15f83dc5`. The audit file itself was read at Blob `a868e5cc2a8fb09fd6f02fd28b295719dac9c50d` at the same snapshot; its Blob changes whenever this audit is updated and must be re-read from the live PR head.
+
+以下 21 个非本审计文件均在研究分支 Commit `bdd03f3731f1460bfceeff5cc3ffecda15f83dc5` 精确读回。本审计文件自身在同一快照下的 Blob 为 `a868e5cc2a8fb09fd6f02fd28b295719dac9c50d`；每次更新本审计都会改变其 Blob，必须从实时 PR HEAD 重新读取。
+
+| File / 文件 | Exact Blob SHA / 精确 Blob SHA | Lines / 行数 |
+|---|---|---:|
+| README.md | af10e810aaff96537afc731af07d322f2c050d1e | 218 |
+| existing-domain-model-baseline.md | 08f2843db1d41027ee6d1bee9af564ce07a3a793 | 383 |
+| baseline-currentness-and-owner-source-audit.md | 4bc2d7339bdb7431393c449036fd374d2403f992 | 263 |
+| baseline-owner-branch-snapshot-errata.md | a96860efd61962633a5ad9e55b3353c151785411 | 65 |
+| canonical-domain-entity-inventory.md | ca84d9b6fa1c835fdcab08b4a62302b97a2b84a2 | 211 |
+| canonical-identity-semantics.md | bc8816eadcd14a1dd01ae03ed68de553b2bb1483 | 169 |
+| canonical-state-semantics.md | 2c42b4b9d8311e218d0e6fadd7b1f3a7d9c10017 | 153 |
+| canonical-temporal-evidence-semantics.md | 636c28a4d06e61702665ec4e6d7c5a6f034aba1c | 250 |
+| canonical-domain-relationships.md | 277e7955d3c111ef43d5eda94c65647228f6d1a6 | 121 |
+| domain-model-complexity-assessment.md | 38bee7501e52798152524665778c69659be6cf33 | 418 |
+| mature-domain-model-research.md | 1f31eee069f58e9da5b1eeecf7298af8b3c24882 | 394 |
+| cross-owner-canonical-semantics-matrix.md | 0e8b58fa7efacda4321ac8f62db7ca81e70a4960 | 220 |
+| domain-semantics-conflict-register.md | edad7a11e59c975f7af53c44d141891bb5ed3180 | 84 |
+| canonical-domain-invariants.md | 51792426bb71609ceecf8d13491f9ab0b36c91eb | 132 |
+| canonical-domain-glossary.md | 2dbf2e7c402eb551bace71039120975783128f08 | 162 |
+| canonical-domain-model.md | ce441336e2fbba7c7a28c0b4c75482d524a4ade7 | 212 |
+| domain-model-decision-record.md | 08383c76658129cebe8ef9e303cf75c27269bfb3 | 218 |
+| fact-claim-identity-adr.md | 0bbea0beec6a5828c2db5ae267fac40f59ad7f1f | 187 |
+| validation/README.md | a2bb3d494fadd5ae411d9b8227d83dd50a16a895 | 46 |
+| evidence/README.md | bda915327a0ee77fb78e9a52bc094986254a1a60 | 47 |
+| evidence/official-reference-validation.md | 610a4480b483bac668ab26bbb7ef0505029412e2 | 169 |
+
+## 6. Gate / 门禁
+
+- Author-side Chinese peer text is present in all 22 files at the recorded snapshot. This is **not** independent bilingual acceptance.
+- Clause-by-clause semantic comparison against each English normative source remains **INDEPENDENT_REVIEW_PENDING**.
+- B5: **BLOCKED / NOT PASSED** until independent bilingual review, live Blob readback, and final PR diff verification are recorded.
+- B6: **INDEPENDENT_REVIEW_PENDING**. The execution author cannot be the independent reviewer.
+- Schema validation, executable invariant tests, property-based tests and integration/fault-injection tests: **NOT RUN**. The current package is a research/contract draft only.
+
+- 在记录的快照中，全部 22 个文件均已有作者侧中文对照文本。这**不构成**独立双语验收。
+- 对照每个英文规范源逐条进行语义比较仍为 **INDEPENDENT_REVIEW_PENDING**。
+- B5：在独立双语复审、实时 Blob 读回和最终 PR Diff 核验登记前，保持 **BLOCKED / NOT PASSED**。
+- B6：**INDEPENDENT_REVIEW_PENDING**。执行作者不能成为独立审查者。
+- Schema 验证、可执行不变量测试、属性测试和集成/故障注入测试：**NOT RUN**。当前交付仅为研究/契约草稿。
+
