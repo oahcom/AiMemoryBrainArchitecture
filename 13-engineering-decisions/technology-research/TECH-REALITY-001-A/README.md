@@ -147,3 +147,25 @@ On 2026-11-17, the evidence register and mature-project research were extended w
 本次在 2026-11-17 对研究证据登记表和成熟项目研究补充了 PostgreSQL Prepared Transaction、SQLite WAL、Temporal Replay、NATS JetStream 投递语义、Qdrant 过滤 HNSW、Cedar 授权语义及 OpenTelemetry Rust Signal 成熟度的官方文档核验。精确来源与能力边界见 `research-evidence-register.md` §8 和 `mature-project-research.md` §11。
 
 This is desk-source verification only. It does not change the **NOT YET PROVEN** feasibility conclusion, does not approve any ADR, and does not claim a Brain prototype, benchmark, fault campaign or independent review.
+
+
+## 9. Late evidence refresh — 2026-11-17 / 最新证据刷新
+
+A direct readback of the current Storage branch supersedes the earlier Storage snapshot in this package:
+
+- Storage v3.2.6 successor exact-version manifest: Blob `dbfa37617d109d5891a067769e858085e2ce547a`; status is **SUCCESSOR BUNDLE BOUND / OWNER REVIEWS RECORDED / H 1.2.13 EXACT CI OPEN / NOT JOINTLY FROZEN**. The manifest is delegated Storage-role work, not an independent human Storage Owner signature.
+- Normative Storage technical body remains v3.2.3, Blob `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792`; COC companion §§15–17 Blob `5b950a3a29bd7a5276b92a49a9114d700718b987`.
+- PostgreSQL 18.7 dossier Blob `0aabf66848dc97deee028c571183c0d7204008c0` records seven bounded CI capability subtests PASS for the pinned isolated profiles. Gate A remains PARTIAL PASS / OPEN; production Canonical Authority deployment, live I/D/COC integration and operator readiness remain deferred / not proven.
+- CSubmitOutcome 1.0.1 candidate CI is 19 tests SUCCESS; exact H 1.2.13 CI remains OPEN (15-test source only). The earlier H 1.2.12 17-test result does not transfer.
+- Gate B has design-level owner acceptance with enumerated exceptions only; implementation/conformance is not PASS. Gate C is deferred to engineering-phase integration/fault injection. JF-10 runtime P0 remains OPEN; production activation is NOT AUTHORIZED; multi-PolicyDomain remains BLOCKED.
+
+本次直接读回 Storage 当前分支，更新此前记录的 Storage 快照：
+
+- Storage v3.2.6 后继精确版本清单 Blob：`dbfa37617d109d5891a067769e858085e2ce547a`；状态为 **SUCCESSOR BUNDLE BOUND / OWNER REVIEWS RECORDED / H 1.2.13 EXACT CI OPEN / NOT JOINTLY FROZEN**。该清单来自协调会话的 Storage 角色委派工作，不是独立人工 Storage Owner 签名。
+- 规范 Storage 技术正文仍为 v3.2.3，Blob：`5cee0d58575adc0fb3dd20a5c7ab68c2a2711792`；COC companion §§15–17 Blob：`5b950a3a29bd7a5276b92a49a9114d700718b987`。
+- PostgreSQL 18.7 能力档案 Blob：`0aabf66848dc97deee028c571183c0d7204008c0`，记录七项限定 CI 能力子测试在固定隔离档案中 PASS。Gate A 仍为 PARTIAL PASS / OPEN；生产 Canonical Authority 部署、实时 I/D/COC 集成和操作人员准备情况仍未证明/延后。
+- CSubmitOutcome 1.0.1 候选 CI 为 19 项测试 SUCCESS；H 1.2.13 精确 CI 仍 OPEN（目前只有 15 项测试源码）。此前 H 1.2.12 的 17 项测试结果不能转移。
+- Gate B 仅达到带枚举例外的设计级 Owner 接受；实现/一致性验证不是 PASS。Gate C 延后到工程阶段集成/故障注入。JF-10 Runtime P0 仍 OPEN；禁止生产激活；多 PolicyDomain 仍 BLOCKED。
+
+This refresh does not approve a technology, close JF-10 P0, authorize implementation, or claim independent review. The separate reviewer handoff remains mandatory.
+本次刷新不批准任何技术、不关闭 JF-10 P0、不授权实现，也不声称独立审查通过。仍必须执行独立审查交接。
