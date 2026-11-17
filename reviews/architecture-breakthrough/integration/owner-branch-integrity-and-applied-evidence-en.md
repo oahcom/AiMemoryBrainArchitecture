@@ -116,7 +116,7 @@ The current C recursive tree contains 136 Blob files. The C Phase 3.8.23 bilingu
 | C | Phase 3.8.23 C/G identity review Blob `4860c627...` | Accepts only C-owned identity semantics in G 3.8.22; explicitly does not accept H wire mapping |
 | I | PermissionEpoch formal confirmation Blob `bae6a24...`; I 3.8 Commit Authorization proposal Blob `54bab048...` | PermissionEpoch technical baseline confirmed; complete production issuer/key/profile registration, crypto profile, canonicalization and trust acceptance remain open |
 | D | Forget Fence / Publication Gate Blob `4da0b61...` | D operation semantics DECIDED; D/E interface schema, Storage realization and cross-owner conformance OPEN |
-| Storage | Option A topology ADR Blob `bb544ba...`; atomic producer/dependency/visibility review Blob `2ab899...` | L1 logical topology selected; D adoption, L3 adversarial proof and L4 physical realization/conformance remain OPEN |
+| Storage | Option A topology ADR Blob `bb544ba...`; atomic producer/dependency/visibility review Blob `2ab899...` | L1 Option A logical topology DECIDED by ADR §8.6 supersession; D adoption, L3 adversarial proof and L4 physical realization/conformance remain OPEN |
 
 ### 5.2 Non-negotiable boundaries
 
@@ -145,7 +145,7 @@ The Owner files read in this pass support the following boundaries:
 - E `forget-fence-and-derived-registration.md`: E enforcement contract remains CANDIDATE; every derivative must remain private/non-queryable until durable D dependency registration, current PermissionEpoch/Fence and final Publication Gate succeed.
 - I `global-forget-target-inventory-and-completion-evidence.md`: global inventory/completion remains CANDIDATE; D/E/F/G/H/Storage conformance is OPEN. I PermissionEpoch technical confirmation is normative, but external governance profile approval remains BLOCKED.
 - I `phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md`: still an I-role proposal; exact Owner approval, crypto profile and conformance remain OPEN.
-- Storage `phase-3.7-storage-atomic-producer-registration-dependency-visibility-realization.md`: provides a candidate atomic realization design; it is not proof of physical topology deployment. Storage L1 Option A ADR is selected, not L3/L4.
+- Storage `phase-3.7-storage-atomic-producer-registration-dependency-visibility-realization.md`: provides a candidate atomic realization design; it is not proof of physical topology deployment. Storage L1 Option A is selected by ADR §8.6, which explicitly supersedes the historical §3 wording; v3.3.2 manifest confirms the correction. L3/L4 remain open. A PR #102's conflict finding must be reconciled against this explicit supersession text.
 - Storage Restore high-water contract and reference model still need physical evidence from real database backup, PITR, failover, rejoin and restore behavior.
 
 Therefore the P0 / NOT READY Forget disposition in ABR-INTEGRATION-001 remains correct, but the precise wording is: **some logical Owner semantics already exist; cross-owner atomic composition, exact interface adoption, physical realization and failure proof remain open.** It would be inaccurate to say that no logical ordering contract exists at all.
@@ -158,7 +158,7 @@ Therefore the P0 / NOT READY Forget disposition in ABR-INTEGRATION-001 remains c
 | G2 Owner authority/consumer acceptance | H/C recovery is not acceptance of Applied 1.0.0 by C/G/I; B ADR blocked | BLOCKED |
 | G3 end-to-end state/causal model | Forget logical contracts read; full serial-order and cross-owner race/crash proof not completed | BLOCKED |
 | G4 P0/P1 proof | H/C trees restored; JF-10/Forget/Applied/Restore P0/P1 remain open | BLOCKED |
-| G5 technology feasibility | Storage L1 Option A selected; L3/L4 and JF-10 physical evidence insufficient | BLOCKED |
+| G5 technology feasibility | Storage L1 Option A is decided by the §8.6 addendum; L3/L4 and JF-10 physical evidence remain insufficient | BLOCKED |
 | G6 bilingual parity | No complete line-by-line semantic parity review of all Owner bilingual documents in this pass | PARTIAL |
 | G7 A integration disposition | Two integration reports submitted in a research Draft PR; Owner decisions still require confirmation by their own authorities | PARTIAL |
 | G8 freeze recommendation | Architecture freeze remains unsupported | NOT READY |
@@ -206,4 +206,38 @@ Important refinements:
 - **Model refinement:** a stale cache fill alone is not sufficient to constitute external disclosure if the final read gate still enforces current Fence/Permission. Stale cache contents may still violate cache freshness/fill contracts, but the security invariant should directly test whether disclosure occurred. The earlier A model treated cache refill itself as a counterexample; this model distinguishes retained bytes from actual disclosure.
 
 This remains a bounded single-Producer/single-lineage/single-Fence abstraction. It does not cover complete producer/recipient/backup inventory, arbitrary dependency DAGs, real MVCC/WAL/2PC, COC/G Applied implementation, multi-replica I/Storage recovery or a physical topology. **It is not TLC, an unbounded proof or production safety certification.**
+
+
+
+## 10. Independent A review reconciliation
+
+### ABR-AUDIT-007 / PR #100
+
+A's independent source audit rated the original PR #93 research integration **APPROVED_WITH_CONDITIONS** for accuracy only, not architecture approval. Two conditions have been applied:
+- RM latency is corrected to the exact PR #86 report Blob `2053e4de179c80878fbdeee4f4874de5ad04057c`: Direct Top-K 0.095 ms, Rerank + Budget 0.119 ms, Unified RM 0.306 ms.
+- The evidence ledger now adds exact Blob pins for underlying executable sources and fixtures (see the ABR-AUDIT-007 section in the ledger).
+
+A's original-model limitation is partly addressed by the new model in this report, but it remains a bounded single-Producer/single-lineage/single-Fence abstraction. It does not cover multiple Producers, overlapping Forget operations, arbitrary DAGs, split brain, real DB/HA/PITR or physical implementation.
+
+### A-H-ADE-006 / PR #98
+
+A's exact H review disposition is **DEFERRED — CANDIDATE IMPLEMENTATION WITH OPEN P0 CONDITIONS**, with H-ADE-001..003:
+- H-ADE-001: reject duplicate top-level and nested JSON object keys;
+- H-ADE-002: define a versioned tri-state verifier for CSubmitOutcome 1.0.1 outcome/side-effect/final-boundary/request-digest/identity/lineage semantic joins;
+- H-ADE-003: before returning an original result reference for SAME_DIGEST_REPLAY, recheck current I Authorization/PermissionEpoch, key status, audience/scope and applicable D Forget fence.
+
+The `integrity_proof_ref` P0-exclusion question raised in this integration review is an additional issue, not a substitute for those three A blockers.
+
+C Phase 3.8.27 Blob `3ca06db...` and I Phase 3.8.23 Blob `85cdbad...` accept the C-before-H-signing / durable replay acceptance order for **H Unified 1.2.15 Gateway Attestation**. They do not accept the new H Applied Delivery Evidence 1.0.0 wire family.
+
+### A-OWNER-SOURCE-REFRESH-004 / PR #102 — Storage ADR finding reconciliation
+
+A PR #102 labels the Storage Option A ADR as an L1 conflict. This integration review re-read the same ADR Blob `bb544ba...` and found:
+- §3 is pre-addendum “no option selected” text;
+- subsequent §8.6 explicitly marks that historical disposition superseded and states “L1 CLOSED BY THIS ADR” / Option A selected as the normative v1 logical topology;
+- v3.3.2 manifest Blob `5c614375...` explicitly says it corrects the Option A status to match the exact ADR.
+
+Therefore this report does not adopt the conclusion that the current ADR has no decision. L1 logical Option A is DECIDED. L4 physical engine/deployment, HA/PITR, old-primary fencing, read-after-commit and restore continuity remain OPEN. A/Storage should confirm in the PR #102 thread whether they accept the §8.6 supersession interpretation.
+
+A PR #102 also reports an E commit-object lookup anomaly. This pass directly fetched `GET /commits/ee098e14747d9915de5b3efb63b3a8dd77f670ed` successfully and received commit metadata and tree SHA; that lookup anomaly did not reproduce in this pass.
 
