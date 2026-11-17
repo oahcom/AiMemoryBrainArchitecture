@@ -148,3 +148,34 @@ Storage Owner appended §19 (Storage protocol Blob `1f8fac86886dc28f2d7727de430e
 H 已发布 Schema Artifact Revision **1.2.16**（Wire Version 1.3.0），Blob `3ed43c4d0d067d4db98a2fa94f4d232280b4bbf5`，专用测试 Blob `70e1169cc05295f18cde95ce8e66a0498bc74902`。H 精确 Head `5545f45fb78af385c72269a0cb850980b7570cd7` 在 Run [#44191375797](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44191375797) 中 **317 项通过**，其中包括 11 项 1.2.16 专用检查。
 
 Storage Owner 已追加 §19（Storage Protocol Blob `1f8fac86886dc28f2d7727de430ee8a24473e1d0`），取代 §18 的 1.2.15 Pin。上文关于 1.2.15 的发现现为历史记录；当前 A 审查应使用 1.2.16。这只提高结构完整性，不关闭实时 I/D/C Ledger 签发/签名、H Semantic Validation、COC Quorum 或物理 JF-10。
+
+
+## 6. Append-only currentness correction — H Unified 1.2.17 / Owner Gate Release semantics
+
+Storage §17.4 was not fully represented by H Unified 1.2.16: the OWNER_LOCAL_GATE_RELEASE message did not structurally require exact owner snapshot/attestation, scope generation, anti-rollback anchor, owner ledger root or the complete typed owner-specific high-water object/digest.
+
+H Unified 1.2.17 now requires those release bindings:
+- Schema Blob `1b8f44675f30919764481d33755c566ef5cf1ea8`;
+- exact tested H code Head `156717b24d6283d410c9a0e8de99fa6aed8e583f`;
+- TEST-profile semantic reference module Blob `b8baddcc74b9247870555d8500ba9c41f65e75dd`;
+- semantic test Blob `e03c6ba7f0679d9cc189b515a0a3d63e681fba5c`;
+- workflow [#44192498589](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44192498589): **351 tests PASS**, including 22 semantic release vectors.
+
+Storage Owner appended §20 for 1.2.17 structure and §21 for the H semantic reference candidate (Storage protocol Blob `dbc1dfd4c488c5d5e5a328388487d190984e8adc`). The semantic reference preserves VALID/INVALID/UNKNOWN and separately injects owner signature, COC quorum proof and currentness CAS checks.
+
+This is a currentness update to the A review. It remains TEST-profile only: no real I key, owner ledger, COC quorum or live CAS was contacted; five other H semantic validators remain outstanding. Gate B/C and physical JF-10 remain blocked.
+
+### 中文补充
+
+Storage §17.4 在 H Unified 1.2.16 中尚未完整表达：OWNER_LOCAL_GATE_RELEASE 未结构性强制精确 Owner Snapshot/Attestation、Scope Generation、Anti-rollback Anchor、Owner Ledger Root 或完整类型化 Owner-specific High-water Object/Digest。
+
+H Unified 1.2.17 现已强制这些 Release 绑定：
+- Schema Blob `1b8f44675f30919764481d33755c566ef5cf1ea8`；
+- H 精确测试代码 Head `156717b24d6283d410c9a0e8de99fa6aed8e583f`；
+- TEST-profile 语义参考模块 Blob `b8baddcc74b9247870555d8500ba9c41f65e75dd`；
+- 语义测试 Blob `e03c6ba7f0679d9cc189b515a0a3d63e681fba5c`；
+- Workflow [#44192498589](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44192498589)：**351 项 PASS**，其中包括 22 项语义 Release 向量。
+
+Storage Owner 已追加 §20 记录 1.2.17 结构，并追加 §21 记录 H 语义参考候选（Storage Protocol Blob `dbc1dfd4c488c5d5e5a328388487d190984e8adc`）。语义参考保留 VALID/INVALID/UNKNOWN，并独立注入 Owner Signature、COC Quorum Proof 和 Currentness CAS 检查。
+
+这是 A 审查的当前性更新。仍仅为 TEST-profile：没有访问真实 I Key、Owner Ledger、COC Quorum 或实时 CAS；H 其他五个语义验证器仍未完成。Gate B/C 和物理 JF-10 仍为 BLOCKED。
