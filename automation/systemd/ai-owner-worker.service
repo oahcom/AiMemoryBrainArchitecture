@@ -1,0 +1,38 @@
+[Unit]
+Description=Bounded GitHub Owner AI development worker
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ai-owner-worker
+Group=ai-owner-worker
+WorkingDirectory=/opt/ai-owner-worker
+EnvironmentFile=/etc/ai-owner-worker/worker.env
+Environment=WORKER_DB=/var/lib/ai-owner-worker/worker.sqlite3
+Environment=POLL_SECONDS=60
+ExecStart=/usr/bin/python3 /opt/ai-owner-worker/owner_worker.py
+Restart=always
+RestartSec=10
+TimeoutStopSec=30
+UMask=0077
+StateDirectory=ai-owner-worker
+StateDirectoryMode=0750
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/ai-owner-worker
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+SystemCallArchitectures=native
+
+[Install]
+WantedBy=multi-user.target
