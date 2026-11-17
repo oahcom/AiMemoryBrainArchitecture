@@ -575,7 +575,7 @@ class PublicationProtocolTests(unittest.TestCase):
                 else:
                     p.consumed.add("auth-1")
                 with self.assertRaisesRegex(Rejected, "local state contradicts"):
-                    p.resolve_no_publication("op-1", p.no_publication_proof())
+                    p.resolve_no_publication("op-1", self.no_publication_proof())
                 self.assertIn("op-1", p.private_unknown)
                 self.assertNotIn("op-1", p.outcomes)
 
