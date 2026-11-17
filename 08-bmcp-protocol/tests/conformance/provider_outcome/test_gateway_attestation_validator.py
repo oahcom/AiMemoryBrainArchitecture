@@ -71,7 +71,7 @@ class GatewayAttestationSchemaTests(unittest.TestCase):
             "origin_received_at": "2026-11-17T08:00:00Z",
             "signing_sequence_namespace_ref": "H/gateway/signing-sequence/1",
             "signing_record_sequence": "17",
-            "signature": "TEST-ONLY-H-GATEWAY-SIGNATURE",
+            "signature": "A" * 86,
             "integrity_proof_ref": "H/integrity-proof/1",
         })
         digest, _ = h_p0_digest_and_preimage(self.envelope)
@@ -86,7 +86,7 @@ class GatewayAttestationSchemaTests(unittest.TestCase):
                 and env.get("key_version") == "h-gateway-v1"
             ),
             verify_h_signature=lambda env, preimage, ctx: (
-                env.get("signature") == "TEST-ONLY-H-GATEWAY-SIGNATURE"
+                env.get("signature") == "A" * 86
                 and preimage.startswith(b"AIMBA-H-GATEWAY-ATTEST-P0\x00v1\x00")
             ),
             verify_integrity_evidence=lambda env, digest, ctx: (
@@ -289,12 +289,23 @@ class GatewayAttestationSchemaTests(unittest.TestCase):
                 self.envelope[field] = old
 
     def test_19_signature_and_integrity_reference_are_independently_verified(self):
-        self.envelope["signature"] = "MUTATED-SIGNATURE"
+        self.envelope["signature"] = "B" * 86
         result = self.invoke()
         self.assertEqual(result["status"], "INVALID", result)
 
         self.setUp()
         self.envelope["integrity_proof_ref"] = "H/integrity-proof/attacker"
+        result = self.invoke()
+        self.assertEqual(result["status"], "INVALID", result)
+
+
+    def test_20_wrong_canonicalization_profile_is_invalid(self):
+        self.envelope["canonicalization_profile_id"] = "some-other-profile"
+        result = self.invoke()
+        self.assertEqual(result["status"], "INVALID", result)
+
+    def test_21_signature_must_use_unpadded_base64url_ed25519_shape(self):
+        self.envelope["signature"] = "not-base64url"
         result = self.invoke()
         self.assertEqual(result["status"], "INVALID", result)
 
