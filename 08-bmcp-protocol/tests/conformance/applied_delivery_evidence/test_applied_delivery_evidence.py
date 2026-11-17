@@ -44,20 +44,24 @@ def fixture():
     return value
 
 
-def checks(disposition="NEW"):
+def checks(disposition="NEW", replay_authorization=True):
     return AppliedDeliveryChecks(
         verify_profile_registration=lambda e: True, verify_key_status=lambda e: True,
         verify_signature=lambda e,p: True, verify_protected_identity_binding=lambda e: True,
         verify_c_final_boundary=lambda e: True, verify_g_delivery_binding=lambda e: True,
         verify_capability_epoch=lambda e: True,
-        commit_observation=lambda e,d: DurableObservationDecision(disposition, "H/result/1" if disposition=="SAME_DIGEST_REPLAY" else None)
+        commit_observation=lambda e,d: DurableObservationDecision(disposition, "H/result/1" if disposition=="SAME_DIGEST_REPLAY" else None),
+        verify_current_replay_authorization=lambda e,r: replay_authorization,
     )
 
 
 class AppliedDeliveryEvidenceTests(unittest.TestCase):
+    def validate_raw(self, raw, callbacks=None):
+        return validate_applied_delivery_evidence(raw, SCHEMA, callbacks or checks())
+
     def validate(self, value, callbacks=None):
         raw=json.dumps(value,separators=(",",":"),sort_keys=True).encode()
-        return validate_applied_delivery_evidence(raw, SCHEMA, callbacks or checks())
+        return self.validate_raw(raw, callbacks)
 
     def test_01_schema_and_positive_tier1(self):
         value=fixture()
@@ -108,6 +112,35 @@ class AppliedDeliveryEvidenceTests(unittest.TestCase):
     def test_11_changed_digest_same_identity_conflicts(self):
         c=checks("CONFLICT")
         self.assertEqual(self.validate(fixture(),c)["status"],"INVALID")
+
+    def test_12_duplicate_top_level_json_member_rejected(self):
+        raw=b'{"message_type":"APPLIED_DELIVERY_EVIDENCE_RECORDED","message_type":"ATTACKER"}'
+        result=self.validate_raw(raw)
+        self.assertEqual(result["status"],"INVALID")
+        self.assertIn("duplicate JSON object member", result["errors"][0])
+
+    def test_13_duplicate_nested_json_member_rejected(self):
+        raw=b'{"outer":{"identity":"trusted","identity":"attacker"}}'
+        result=self.validate_raw(raw)
+        self.assertEqual(result["status"],"INVALID")
+        self.assertIn("duplicate JSON object member", result["errors"][0])
+
+    def test_14_replay_result_not_disclosed_after_authorization_denial(self):
+        result=self.validate(fixture(),checks("SAME_DIGEST_REPLAY",False))
+        self.assertEqual(result["status"],"INVALID")
+        self.assertNotIn("original_result_ref",result)
+
+    def test_15_replay_result_not_disclosed_when_current_authority_unknown(self):
+        result=self.validate(fixture(),checks("SAME_DIGEST_REPLAY",None))
+        self.assertEqual(result["status"],"UNKNOWN")
+        self.assertNotIn("original_result_ref",result)
+
+    def test_16_replay_result_not_disclosed_when_authority_callback_raises(self):
+        c=checks("SAME_DIGEST_REPLAY")
+        c.verify_current_replay_authorization=lambda e,r: (_ for _ in ()).throw(RuntimeError("I/D unavailable"))
+        result=self.validate(fixture(),c)
+        self.assertEqual(result["status"],"UNKNOWN")
+        self.assertNotIn("original_result_ref",result)
 
 
 if __name__ == "__main__":

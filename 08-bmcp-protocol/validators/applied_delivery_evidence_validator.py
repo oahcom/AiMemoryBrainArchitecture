@@ -45,6 +45,17 @@ class AppliedDeliveryChecks:
     verify_g_delivery_binding: Callable[[dict[str, Any]], bool | None]
     verify_capability_epoch: Callable[[dict[str, Any]], bool | None]
     commit_observation: Callable[[dict[str, Any], str], DurableObservationDecision]
+    verify_current_replay_authorization: Callable[[dict[str, Any], str], bool | None]
+
+
+def _reject_duplicate_object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    """Build every JSON object while rejecting duplicate member names."""
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON object member: {key}")
+        result[key] = value
+    return result
 
 
 def build_h_p0(envelope: dict[str, Any]) -> dict[str, Any]:
@@ -77,7 +88,10 @@ def validate_applied_delivery_evidence(
     checks: AppliedDeliveryChecks,
 ) -> dict[str, Any]:
     try:
-        envelope = json.loads(raw_envelope.decode("utf-8"))
+        envelope = json.loads(
+            raw_envelope.decode("utf-8"),
+            object_pairs_hook=_reject_duplicate_object_pairs,
+        )
     except Exception as exc:
         return {"status": "INVALID", "errors": [f"invalid JSON: {type(exc).__name__}"], "unknown": []}
     if not isinstance(envelope, dict):
@@ -132,6 +146,19 @@ def validate_applied_delivery_evidence(
     if decision.disposition == "SAME_DIGEST_REPLAY":
         if not decision.original_result_ref:
             return {"status": "UNKNOWN", "errors": [], "unknown": ["same-digest replay lacks original durable result reference"]}
+        # A historical replay result is not perpetual authorization to disclose it.
+        # Recheck current I authorization/epoch, key status, audience/scope and the
+        # applicable D fence through the owner-authority adapter before disclosure.
+        status, detail = _tri_state(
+            "current replay authorization",
+            checks.verify_current_replay_authorization,
+            envelope,
+            decision.original_result_ref,
+        )
+        if status == "INVALID":
+            return {"status": "INVALID", "errors": [detail], "unknown": []}
+        if status == "UNKNOWN":
+            return {"status": "UNKNOWN", "errors": [], "unknown": [detail], "h_p0_digest": digest}
         return {"status": "VALID_REPLAY", "errors": [], "unknown": [], "original_result_ref": decision.original_result_ref, "h_p0_digest": digest}
     if decision.disposition != "NEW":
         return {"status": "UNKNOWN", "errors": [], "unknown": [f"unsupported durable disposition: {decision.disposition}"]}
