@@ -17,7 +17,7 @@ A grants bounded preparatory work only. This is not a Gate pass, implementation 
 
 ## Five fundamental risks
 
-1. No selected physical serialization and visibility authority (Storage/D/I).
+1. L1 logical serialization profile is selected by Storage Option A; actual L4 physical engine/deployment and visibility proof remain open (Storage/D/I).
 2. B Fact/Claim/identity/temporal semantics remain ADR-BLOCKED.
 3. Forget/revocation/restore lacks end-to-end no-resurrection proof and complete inventory.
 4. I36 governance, trust and authorization approvals remain open.
