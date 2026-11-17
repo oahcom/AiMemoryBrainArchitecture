@@ -61,7 +61,7 @@ Gate 状态：C0 PARTIAL（尚未穷尽所有 PR/Issue 和源文件）；C1/C2 �
 
 
 ## Current-source refresh / 当前性刷新
-- Latest branch commit (2026-11-18 refresh): `274f5ec59127c582882b5d3ff6d31f31d811f6f5`.
+- Latest branch commit (2026-11-18 refresh): `274f5ec59127c582882b5d3ff6d31f31d811f6f5` was the pre-refresh snapshot; consult live PR #69 metadata for current head.
 - Open PR/Issue scan: 40 open PRs and 24 open Issues. Directly relevant PRs #67/#73/#66/#68/#71 are included in baseline and conflict register.
 - H 1.2.15 local exact-head CI has been independently verified (91 Provider Outcome tests; 288 Recovery Cutoff tests, 22 skipped); production trust and cross-owner freeze remain open.
 - B PR #55 current head refreshed to `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`.

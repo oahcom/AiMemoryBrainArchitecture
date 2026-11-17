@@ -30,7 +30,7 @@
 - A candidate stacks are not approved technology decisions. Its source/currentness findings remain relevant and are not silently accepted.
 
 ## B research / B 研究
-- PR #55: Open / Draft; branch `research/domain-reality-001-b`; head `f95b479b223ebb63c8aebcfca13a4cd9b28d5331`; PR base SHA `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`.
+- PR #55: Open / Draft; branch `research/domain-reality-001-b`; head `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`; PR base SHA `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`.
 - PR metadata reports B0 PARTIAL / NOT PASSED, B5 BLOCKED / NOT PASSED, B6 INDEPENDENT_REVIEW_PENDING. Fact/Claim remains ADR-BLOCKED.
 - B's main-branch domain files above were read and their Blob SHAs verified. The complete B branch package and all changed files were not independently re-read in this C pass: **NOT VERIFIED**.
 
@@ -66,7 +66,7 @@
 ### A/B 研究状态
 A 的 PR #45 仍为 Open/Draft，基于历史 main SHA，研究 HEAD 为 `6c7c5919c1b50f38c4d24be679a3885ee3c15b97`。PR #56 的独立技术审查结论为 REVISE，工程可行性仍 NOT YET PROVEN。A 的候选技术栈不能视为批准选型。
 
-B 的 PR #55 仍为 Open/Draft，HEAD 为 `f95b479b223ebb63c8aebcfca13a4cd9b28d5331`。B0 为 PARTIAL/NOT PASSED，B5 为 BLOCKED/NOT PASSED，Fact/Claim ADR 仍阻塞。本次读取并固定了 main 上 B 的领域模型文件，但未穷尽 B 研究分支全部文件，故未读部分保持 NOT VERIFIED。
+B 的 PR #55 仍为 Open/Draft，HEAD 为 `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`。B0 为 PARTIAL/NOT PASSED，B5 为 BLOCKED/NOT PASSED，Fact/Claim ADR 仍阻塞。本次读取并固定了 main 上 B 的领域模型文件，但未穷尽 B 研究分支全部文件，故未读部分保持 NOT VERIFIED。
 
 ### Owner 分支
 D、E、F、G、H、I、Storage 均有独立 Owner 分支。本次记录了精确 HEAD 和直接读取的关键 Blob。分支快照不等于 main 已合并，也不等于 Owner 已批准所有内容。H 1.2.15 是候选 Schema，而 Storage v3.3.2 Manifest 仍绑定 H 1.2.14。C 密钥配置与 I 治理签名配置尚未注册。G Applied 冻结仍阻塞。
@@ -96,7 +96,7 @@ All 14 PR #45 changed files were fetched from the exact A branch and their Blob 
 Together with the four core pins above (README `e69498...`, recommendation `cc2269...`, mature research `115f47...`, topology `b526996...`), this accounts for all 14 changed files in PR #45. PR #56's independent review still requires remediation.
 
 ### B research package source pins / B 研究包来源 Pin
-The following key B artifacts were fetched from branch `research/domain-reality-001-b` at head `f95b479b223ebb63c8aebcfca13a4cd9b28d5331`:
+The following key B artifacts were fetched from branch `research/domain-reality-001-b` at head `8ba14b99f1c303d9a368eb65178b0d79d507f2ff`:
 | Path | Blob SHA |
 |---|---|
 | `README.md` | `4c78c656c9c8a80e4bf2c9d440381d6eb2191019` |
@@ -149,7 +149,7 @@ A direct GitHub API listing on 2026-11-18 returned **40 OPEN PRs** and **24 OPEN
 
 | PR | State | Head SHA | C relevance / observed disposition |
 |---|---|---|---|
-| #69 C research | OPEN / DRAFT | `274f5ec59127c582882b5d3ff6d31f31d811f6f5` | This research package |
+| #69 C research | OPEN / DRAFT | `274f5ec59127c582882b5d3ff6d31f31d811f6f5` (superseded by subsequent readback commits; consult live PR #69 metadata for current head) | This research package |
 | #67 H validator/CI/trust review | OPEN / DRAFT | `abd9156d3e9aa171eeb03693b2be1e722e8d33ff` | A review disposition DEFERRED; local exact-head CI verified, production trust/replay open |
 | #73 A current-source remediation | OPEN / DRAFT | `7b4771b3766c616fa932b30b21c3bc0dc742f564` | A role-simulated remediation; REVISE / NOT YET PROVEN |
 | #66 D Phase 3.9 Forget closure | OPEN / DRAFT | `a085190360a27404ecb24e6f6b2103e72659307c` | D proposal, not normative; requires D/Storage/I concurrence |

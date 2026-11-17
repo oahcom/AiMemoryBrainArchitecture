@@ -44,3 +44,13 @@ No production secrets, live user memory or real personal data may be used in syn
 10. 由 I 拥有/批准的跨 Tenant 授权负面 Fixture。
 
 不得在合成符合性 Fixture 中使用生产 Secret、真实用户 Memory 或真实个人数据。
+
+
+## H 1.2.15 external CI evidence / H 1.2.15 外部 CI 证据
+H exact-head local tests have been verified directly from GitHub Actions, not executed by this C research branch:
+- Commit `0d36324457e39bd50ad56ae902d477c4ea765b61`: Provider Outcome run 44079842914, 91 tests, 0 failures, SUCCESS.
+- Same commit: Recovery Cutoff run 44079842878, 288 tests, 22 skipped, 0 failures, SUCCESS.
+These are H local reference tests only. C Agent/Provider/Tool/Brain end-to-end tests, C/H/I trust production tests, Forget-vs-late-result integration and C benchmarks remain NOT RUN.
+
+### 中文
+H 精确 HEAD 的本地测试已通过 GitHub Actions 实际日志核验，但不是由 C 本研究分支执行：Provider Outcome 91 项、0 失败；Recovery Cutoff 288 项、22 项跳过、0 失败。它们仅是 H 本地参考测试。C 的 Agent/Provider/Tool/Brain 端到端测试、C/H/I 生产 Trust 测试、Forget 与迟到结果集成测试以及 C 基准测试仍全部 NOT RUN。
