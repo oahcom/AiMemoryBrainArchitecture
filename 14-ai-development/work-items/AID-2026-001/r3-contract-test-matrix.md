@@ -80,3 +80,38 @@ These cases supplement R3-002…R3-009 and are required by the joined contract p
 | DFI-012 | Restore 前必须执行 Fence | Restore 在对外服务前应用最新 Forget Generation/High-water Mark | Backup Restore 使 Forgotten 身份重新进入读取或交付 | Restore Trace、Fence 比较和负向 Query Test |
 
 **Execution status remains NOT RUN / NOT EVIDENCED.** The DFI cases are not test results and do not close any R3 gate.
+
+
+## Owner execution-boundary extension — DFI-013…DFI-022
+
+These tests operationalize the E/F/G/H/C/Storage obligations in `owner-execution-boundary-contracts-v1.md`. They are specifications only.
+
+| ID | Owner | Contract invariant | Positive case | Negative / failure case | Required observable evidence |
+|---|---|---|---|---|---|
+| DFI-013 | E | Producer admission, dependency registration and Forget fence race are closed | Producer registration/publication wins before fence under a serialized protocol, or fence wins and suppresses staged output | Fence commits while late derivative is published or omitted from inventory | Deterministic race schedule, transaction/linearization receipts, dependency registration revision, publication-gate decision |
+| DFI-014 | E | Lease/DLQ/recompile cannot resurrect forgotten source | Current lease and current fence permit only eligible work | Stale lease, DLQ replay, duplicate event or recompile publishes after fence | Attempt IDs, lease fence, source lineage, replay trace, publication rejection |
+| DFI-015 | F | In-flight Recall and delayed cache fill obey latest fence | Request revalidates fence before response and serves only eligible candidate | Fence advances after enumeration; stale response/cache fill still returns content | Query trace, fence generations at enumeration/return, cache namespace generation, negative assertion |
+| DFI-016 | F | Index rebuild cannot reintroduce forgotten identity | Rebuild consumes canonical state and latest fence high-water mark | Old snapshot/stale worker publishes forgotten identity | Snapshot watermark, fence high-water mark, rebuild worker epoch, post-rebuild negative query |
+| DFI-017 | G | Offline Snapshot/Delta cannot be replayed without reconciliation | Reconnect obtains current ContextVersion/PermissionEpoch/Fence and applies only current state | Old queued Delta is applied after Forget or revocation | Delivery IDs, old/new ContextVersion, reconnect reconciliation receipt, rejected stale-delta trace |
+| DFI-018 | G | Context Remove remains distinct from canonical Forget | Remove changes only Context membership; Forget invalidates all mapped projections and pending deliveries | Remove is treated as canonical deletion, or Forget leaves stale Context/Delivery visible | ContextVersion diff, canonical Memory state, dependency map, invalidation and delivery-cancel receipts |
+| DFI-019 | H | ACK class and capability epoch bound all claims | Adapter reports only the managed region/action supported by its current capability profile | Generic transport ACK or old capability epoch is promoted to erase/Full Applied | Authenticated ACK, coverage, capability epoch, downgrade event, verifier rejection |
+| DFI-020 | C | Telemetry/inference cannot authorize or re-emit forgotten source | Agent report remains untrusted and source lineage/fence is checked before candidate/context emission | Model/Agent claims success or rewraps stale forgotten content as a new candidate | Source-kind/lineage, fence decision, candidate rejection trace, no authority-bearing telemetry |
+| DFI-021 | Storage | Suppression commit is atomic and durable across crash/failover | Tombstone, fence generation, operation state and durable publication intent recover consistently | Crash/failover exposes content, loses fence, or advances operation without durable fence | Transaction/WAL receipt, crash schedule, replica high-water observations, recovery state and negative read |
+| DFI-022 | Storage | Backup restore is fenced before serving | Restore applies latest fence and reconciles all later Forget operations before opening reads | Restored stale backup becomes queryable/deliverable before reconciliation | Backup manifest, restore preflight trace, fence comparison, quarantine release receipt, negative query/delivery |
+
+### 中文补充测试
+
+| ID | Owner | 契约不变量 | 正向场景 | 负向/故障场景 | 必需可观察证据 |
+|---|---|---|---|---|---|
+| DFI-013 | E | Producer Admission、依赖登记与 Forget Fence 竞态已关闭 | 在串行协议下，Producer 登记/发布先于 Fence 完成；或 Fence 获胜并抑制暂存输出 | Fence 已提交，但迟到派生项仍发布或未进入清单 | 确定性竞态调度、事务/线性化 Receipt、依赖登记 Revision、Publication Gate 决策 |
+| DFI-014 | E | Lease/DLQ/Recompile 不得复活已遗忘来源 | 当前 Lease 和当前 Fence 只允许符合条件的工作 | 陈旧 Lease、DLQ Replay、重复 Event 或 Recompile 在 Fence 后发布 | Attempt ID、Lease Fence、来源 Lineage、Replay Trace、发布拒绝 |
+| DFI-015 | F | 在途 Recall 和延迟 Cache Fill 遵守最新 Fence | 响应前重新验证 Fence，只提供符合条件的 Candidate | 枚举后 Fence 前进，但陈旧响应/Cache Fill 仍返回内容 | Query Trace、枚举/返回时 Fence Generation、Cache Namespace Generation、负向断言 |
+| DFI-016 | F | Index Rebuild 不得重新引入 Forgotten Identity | Rebuild 消费 Canonical 状态和最新 Fence High-water Mark | 旧 Snapshot/陈旧 Worker 发布已遗忘身份 | Snapshot Watermark、Fence High-water Mark、Rebuild Worker Epoch、重建后负向 Query |
+| DFI-017 | G | 离线 Snapshot/Delta 未经对账不得 Replay | 重连先获取当前 ContextVersion/PermissionEpoch/Fence，再应用当前状态 | Forget 或撤销后应用旧队列 Delta | Delivery ID、旧/新 ContextVersion、重连对账 Receipt、陈旧 Delta 拒绝 Trace |
+| DFI-018 | G | Context Remove 与 Canonical Forget 保持区分 | Remove 仅改变 Context 成员；Forget 使所有映射投影和待处理 Delivery 失效 | Remove 被当作 Canonical 删除，或 Forget 后仍有陈旧 Context/Delivery 可见 | ContextVersion Diff、Canonical Memory 状态、依赖映射、失效及 Delivery 取消 Receipt |
+| DFI-019 | H | ACK 类别和 Capability Epoch 限定所有声明 | Adapter 仅报告当前 Capability Profile 支持的 Managed Region/Action | 通用 Transport ACK 或旧 Capability Epoch 被升级为擦除/Full Applied 证明 | 认证 ACK、覆盖范围、Capability Epoch、降级 Event、验证拒绝 |
+| DFI-020 | C | Telemetry/Inference 不得授权或重新输出已遗忘来源 | Agent Report 保持不可信，Candidate/Context 输出前检查来源 Lineage/Fence | 模型/Agent 声称完成，或将陈旧已遗忘内容重新包装为新 Candidate | Source Kind/Lineage、Fence 决策、Candidate 拒绝 Trace、无权威 Telemetry |
+| DFI-021 | Storage | 抑制提交在 Crash/Failover 后仍原子且持久 | Tombstone、Fence Generation、Operation 状态和 Durable Publication Intent 恢复一致 | Crash/Failover 暴露内容、丢失 Fence，或在 Fence 未持久化时推进 Operation | Transaction/WAL Receipt、Crash 调度、Replica High-water Observation、恢复状态和负向 Read |
+| DFI-022 | Storage | Backup Restore 在对外服务前执行 Fence | Restore 在开放读取前应用最新 Fence 并对账所有后续 Forget Operation | 陈旧 Backup 在对账前变为可查询/可交付 | Backup Manifest、Restore Preflight Trace、Fence 比较、解除 Quarantine Receipt、负向 Query/Delivery |
+
+**Execution status remains NOT RUN / NOT EVIDENCED.** No test pass is implied by adding these cases.
