@@ -5,7 +5,7 @@
 - Date: 2026-11-17
 - Status: **H 1.2.14 / C 1.0.1 60-TEST REFERENCE-INGRESS CANDIDATE BUNDLE CONSOLIDATED; C/I CROSS-REVIEWS ADDED; FRESH A REVIEW REQUIRED; NOT JOINTLY ACCEPTED / NOT FROZEN**
 - Project phase: **ARCHITECTURE DESIGN**
-- Predecessor exact manifest: Storage v3.2.9, Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3
+- Predecessor exact manifest: Storage v3.3.0, Blob `c8407c9f10049d65426a3598ad20b6aa70f83c32`
 - Additional evidence source: Storage v3.2.7 manifest, Blob f7a3acc1845f4322b2b38264eb0d4bae92623bac (latest 42-test source/review set; its own predecessor is v3.2.6)
 - Intermediate manifest: Storage v3.2.8, Blob b8a736e885a42d09f4776c34e8b6a93e6402b900
 - Normative Storage technical body: Storage v3.2.3, Blob 5cee0d58575adc0fb3dd20a5c7ab68c2a2711792
@@ -58,17 +58,21 @@ The normative S0a–S4 order remains unchanged:
 | H | Positive full-path fixture | f911027c848d21dd36fb87ba64a201a1455787a7 | Synthetic H envelope + immutable C object; authority callbacks are test-only |
 | H | C crypto interop tests | 5559fb7a612c8dd92345ceae3a6aa62f4faae41a; a49d588ea6f840927fe21ad8c41cd8089dceac29 | Six Python/Node candidate JCS/Ed25519 interoperability methods |
 | H | Provider Outcome workflow | 4459d19f5b4eea058377d9819e48e81eed5c8c4b | Exact workflow path filters include schema, validator and test/fixture directories |
-| H | Envelope auth validator | 5c5079765f468eaf40690c0c7cbd6b03275a1ff8 | Reference gate; protected transport context, fail-closed auth callbacks, post-auth replay gate; production callbacks not connected |\n| H | Envelope auth test source | ddf34e9c30edfc378a9482a30837ce04c4abcf97 | 18 deterministic reference-interface tests; callbacks are test doubles |\n| H | Exact Provider Outcome CI | Run 44073888935; tested commit 0e212731073b36e4fa9ffda8467e60806da1b380; job 134006790527 | SUCCESS; 60 tests, 0 failures (36 H/C validator + 18 envelope auth + 6 Python/Node crypto interop) |
+| H | Envelope auth validator | 5c5079765f468eaf40690c0c7cbd6b03275a1ff8 | Reference gate; protected transport context, fail-closed auth callbacks, post-auth replay gate; production callbacks not connected |
+| H | Envelope auth test source | ddf34e9c30edfc378a9482a30837ce04c4abcf97 | 18 deterministic reference-interface tests; callbacks are test doubles |
+| H | Exact Provider Outcome CI | Run 44073888935; tested commit 0e212731073b36e4fa9ffda8467e60806da1b380; job 134006790527 | SUCCESS; 60 tests, 0 failures (36 H/C validator + 18 envelope auth + 6 Python/Node crypto interop) |
 | H | Phase 3.8.19 authenticated-ingress closure | 860c896a388597a4378eda5aa323f276390acf34 | 60-test reference-gate closure; outer P0/profile/production trust remain OPEN |
 | H | Current H branch HEAD | 10434b4df4b7c999206cbc296ffdbca4755fe3d2 | Documentation-only successor after tested commit; validator/test source Blobs unchanged from exact 60-test run |
 | C | CSubmitOutcome immutable schema 1.0.1 | a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda | C-owned immutable provider outcome; signed sequence_namespace_ref |
 | C | Sequence namespace amendment | 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb | C record_sequence and CKeyStatusEvent event_sequence share C-owned namespace |
 | C | RecoveryJoin P0 crosswalk | df12af95e6859a389ba71eb1b7dba512b9feb8f6 | C owner row/digest indirection |
-| C | Exact 42-test review | 61ff3716c9c3d3101a0058963c58f089aa1448b0 | C-P0 projection/full mutation and nullable COC semantics; production C authority OPEN |\n| C | Outer-envelope exact review | 8fd6052cabf58a78962cc2e776398b2a40604bcd | Accepts H reference gate; recommends separate H gateway attestation; signer approval remains OPEN |
+| C | Exact 42-test review | 61ff3716c9c3d3101a0058963c58f089aa1448b0 | C-P0 projection/full mutation and nullable COC semantics; production C authority OPEN |
+| C | Outer-envelope exact review | 8fd6052cabf58a78962cc2e776398b2a40604bcd | Accepts H reference gate; recommends separate H gateway attestation; signer approval remains OPEN |
 | D | RecoveryJoin P0 crosswalk | c4adf827dd62d44c43b8e871dec4835581508adf | D row/operation/scope/fence/barrier/lineage digest indirection |
 | D | Exact 42-test review | 2bf4514fe7972b72f6c1f904e461f86488d04cda | Delegated D acceptance of local callback boundary only; lineage/currentness/release OPEN |
 | I | P0 allowlist successor | 44986f5f864bcdc1a79d34978273644d381a68c0 | Exact I common-envelope/proof-family P0 candidate |
-| I | Exact 42-test review | 2851d31e4f8caf48348944b885b493c607ca79e1 | Local I COMMIT_WON predicate only; trust/L3/currentness OPEN |\n| I | Outer-envelope trust-boundary review | 73145f83df234ebb9e55cc07f0a82b0db9416b68 | Accepts reference interface only; no envelope profile/trust root/signer delegation registered or approved |
+| I | Exact 42-test review | 2851d31e4f8caf48348944b885b493c607ca79e1 | Local I COMMIT_WON predicate only; trust/L3/currentness OPEN |
+| I | Outer-envelope trust-boundary review | 73145f83df234ebb9e55cc07f0a82b0db9416b68 | Accepts reference interface only; no envelope profile/trust root/signer delegation registered or approved |
 
 ## 4. Exact CI and evidence ceiling / 精确 CI 与证据上限
 
