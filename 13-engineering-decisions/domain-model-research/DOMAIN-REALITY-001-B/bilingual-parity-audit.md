@@ -49,7 +49,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | existing-domain-model-baseline.md | 已补齐仓库/分支、领域源 Pin、Owner 指南、PR/Issue、冲突、缺失定义和 B0 结论中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验 SHA、main HEAD Commit 元数据和 Fact/Claim/I-04 语义。 |
 | baseline-currentness-and-owner-source-audit.md | 已补齐 main/领域 Pin、Owner HEAD、PR/Issue、Phase 3.8、治理/测试权威和 BIH 当前性中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 重新读取实时分支和 PR；核验每个 Blob/状态。 |
 | baseline-owner-branch-snapshot-errata.md | 已补齐十个 Owner 分支 HEAD 和精确复审工件 Pin 的中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 最终验收前重读实时 Ref；不得将快照误报为批准。 |
-| bilingual-parity-audit.md | 英文审计表及逐文件审计表均已提供中文对照；当前 Blob `46eecfc752ffe84b65a682ce372ea8b20888e788`。 | REMEDIATED — INDEPENDENT REVIEW PENDING | 由独立审查者复核所有文件状态、Blob Pin 和遗漏风险。 |
+| bilingual-parity-audit.md | 英文审计表及逐文件审计表均已提供中文对照；本文件 Blob 随每次更新变化，见第 5 节快照记录。 | REMEDIATED — INDEPENDENT REVIEW PENDING | 由独立审查者复核所有文件状态、Blob Pin 和遗漏风险。 |
 | canonical-domain-entity-inventory.md | 已补齐候选实体分类、理由和存在性问题的中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验实体分类未越权，OPEN/CANDIDATE 未被提升为 DECIDED。 |
 | canonical-identity-semantics.md | 已补齐类型区别、身份稳定性、命名空间、解析顺序、序列化引用和决策记录中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 与 I/H/Storage 精确类型契约逐条核验。 |
 | canonical-state-semantics.md | 已补齐状态词汇、Owner 权威、Applied/Recorded/Committed/Visible/Published 区分和 Gate 说明。 | REMEDIATED — MANUAL REVIEW PENDING | 与 D/G/H/I/Storage 精确状态契约逐条核验。 |
@@ -97,7 +97,7 @@ Author-side remediation has now added Chinese peer text to all 22 files, includi
 
 ## 5. Gate / 门禁
 
-- B5: BLOCKED — bilingual parity incomplete.
+- B5: BLOCKED — author-side Chinese peer coverage is present across all files; independent clause-by-clause bilingual verification remains pending.
 - B6: INDEPENDENT_REVIEW_PENDING.
 - No review/acceptance/merge status may be inferred from this audit.
 
