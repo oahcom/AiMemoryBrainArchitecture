@@ -1,0 +1,168 @@
+"""H semantic/structural tests for unified manifest schema artifact 1.2.9."""
+import json, sys, unittest
+from copy import deepcopy
+from pathlib import Path
+ROOT=Path(__file__).resolve().parents[3]
+SCHEMA_PATH=ROOT/"schemas"/"bmcp.coc-jf10-unified-1.2.9.schema.json"
+sys.path.insert(0,str(ROOT/"runtime_reference"))
+from unified_manifest_semantics import (VALID,INVALID,UNKNOWN,td,snapshot_root,content_digest,
+    validate_union,validate_pair,validate_release,validate_profile,validate_provider_outcome)
+
+
+def fixtures():
+    snaps={}
+    for o in ("I","D","C"):
+        x={"owner":o,"owner_snapshot_ref":o+"/snap/1","owner_snapshot_digest":o.lower()*64,
+           "owner_snapshot_attestation_ref":o+"/att/1","owner_snapshot_attestation_digest":o.lower()*64,
+           "owner_gate_generation":"7","request_high_water":"12","admission_high_water":"18",
+           "request_ledger_root":o.lower()*64,"admission_ledger_root":o.lower()*64,
+           "owner_ledger_root":o.lower()*64,"anti_rollback_anchor_ref":o+"/anchor/7",
+           "owner_specific_high_waters_digest":o.lower()*64,"ledger_available":True,"pagination_complete":True}
+        snaps[o]=x
+    def admission(owner,ref,pref):
+        s=snaps[owner]
+        return {"owner_kind":owner,"owner_admission_ref":owner+"/"+ref,"owner_entry_ref":owner+"/"+ref+"/row",
+          "owner_entry_kind":"RESERVATION" if owner=="C" else "WORK_ITEM","owner_ledger_ref":owner+"/ledger/1",
+          "owner_ledger_version":"1","owner_local_sequence":"5","owner_high_water":"18","owner_entry_digest":"a"*64,
+          "owner_ledger_root":s["owner_ledger_root"],"owner_snapshot_ref":s["owner_snapshot_ref"],
+          "owner_snapshot_digest":s["owner_snapshot_digest"],"owner_snapshot_attestation_ref":s["owner_snapshot_attestation_ref"],
+          "owner_snapshot_attestation_digest":s["owner_snapshot_attestation_digest"],"operation_identity_ref":"operation/"+ref,
+          "operation_digest":"b"*64,"request_digest":"c"*64,"scope_binding_digest":"d"*64,
+          "admission_state":"PENDING" if pref else "ADMITTED_NOT_REGISTERED",
+          "effect_boundary":"RESERVATION" if owner=="C" else "WORK_ADMISSION",
+          "coc_participant_intent_ref":pref,"coc_absence_reason":"not_registered_at_frozen_prefix" if pref is None else None}
+    a=admission("C","admit-1","participant/1");z=admission("D","work-9",None)
+    p={"member_kind":"COC_PARTICIPANT","participant_intent_ref":"participant/1","transaction_ref":"transaction/1",
+       "request_digest":"c"*64,"owner_boundary_ref":"boundary/C/1","policy_domain_ref":"policy/1",
+       "participant_tuple_digest":"e"*64,"participant_owner":"C","owner_admission_bindings":[{
+        "owner_kind":"C","owner_admission_ref":a["owner_admission_ref"],"owner_entry_ref":a["owner_entry_ref"],
+        "owner_ledger_ref":a["owner_ledger_ref"],"owner_ledger_version":a["owner_ledger_version"],
+        "owner_local_sequence":a["owner_local_sequence"],"owner_high_water":a["owner_high_water"],
+        "owner_entry_digest":a["owner_entry_digest"],"owner_ledger_root":a["owner_ledger_root"],
+        "owner_snapshot_ref":a["owner_snapshot_ref"],"owner_snapshot_digest":a["owner_snapshot_digest"],
+        "owner_snapshot_attestation_ref":a["owner_snapshot_attestation_ref"],
+        "owner_snapshot_attestation_digest":a["owner_snapshot_attestation_digest"],
+        "operation_digest":a["operation_digest"],"scope_binding_digest":a["scope_binding_digest"],
+        "coc_participant_intent_ref":"participant/1"}]}
+    local={"member_kind":"OWNER_LOCAL_ADMISSION",**{k:v for k,v in z.items() if k!="coc_absence_reason"},
+           "coc_participant_intent_ref":None,"coc_absence_reason":z["coc_absence_reason"]}
+    members=sorted([p,local],key=lambda x:("0" if x["member_kind"]=="COC_PARTICIPANT" else "1",
+        x.get("participant_intent_ref",x.get("owner_kind","")+":"+x.get("owner_admission_ref",""))))
+    m={"schema_version":"1.3.0","message_type":"PARTICIPANT_SET_RECONCILIATION","manifest_id":"manifest/1",
+       "recovery_epoch_ref":"epoch/1","prefix":{"coordinator_epoch":"term/4","coordinator_index":88,
+       "entry_digest":"f"*64,"committed_configuration_epoch":"config/2"},"enumeration_high_water":"prefix/88",
+       "coc_participant_count":1,"owner_local_admission_count":1,"manifest_member_count":2,
+       "member_set_root":td("MANIFEST-MEMBER-SET",members),"owner_snapshot_roots":{k:snapshot_root(v) for k,v in snaps.items()},
+       "manifest_members":members}
+    m["manifest_content_digest"]=content_digest(m)
+    return m,[p],[a,z],snaps
+
+
+class Schema129Tests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):cls.schema=json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    def msg(self,t):
+        return next(x["allOf"][1] for x in self.schema["oneOf"] if x["allOf"][1]["properties"]["message_type"]["const"]==t)
+    def test_SCHEMA129_01_artifact_vs_wire_version(self):
+        self.assertTrue(self.schema["$id"].endswith("/1.2.9"))
+        self.assertEqual(self.schema["$defs"]["commonEnvelope"]["properties"]["schema_version"]["const"],"1.3.0")
+    def test_SCHEMA129_02_typed_union_members(self):
+        refs={x["$ref"] for x in self.msg("PARTICIPANT_SET_RECONCILIATION")["properties"]["manifest_members"]["items"]["oneOf"]}
+        self.assertEqual(refs,{"#/$defs/cocParticipantMember","#/$defs/ownerLocalAdmissionMember"})
+    def test_SCHEMA129_03_local_admission_requires_null_and_reason(self):
+        d=self.schema["$defs"]["ownerLocalAdmissionMember"]
+        self.assertEqual(d["properties"]["coc_participant_intent_ref"]["type"],"null")
+        self.assertTrue({"coc_participant_intent_ref","coc_absence_reason","owner_snapshot_attestation_digest"}.issubset(d["required"]))
+    def test_SCHEMA129_04_coc_member_binds_owner_rows(self):
+        self.assertIn("owner_admission_bindings",self.schema["$defs"]["cocParticipantMember"]["required"])
+    def test_SCHEMA129_05_batch_has_distinct_counts_and_root(self):
+        p=self.msg("COC_RECOVERY_CUTOFF_BATCH")["properties"]
+        self.assertTrue({"manifest_content_digest","coc_participant_count","owner_local_admission_count","manifest_member_count","member_set_root"}.issubset(p))
+    def test_SCHEMA129_06_manifest_binds_owner_snapshot_roots(self):
+        p=self.msg("PARTICIPANT_SET_RECONCILIATION")["properties"]
+        self.assertIn("owner_snapshot_roots",p)
+        self.assertEqual(self.schema["$defs"]["ownerSnapshotRoots"]["required"],["I","D","C"])
+    def test_SCHEMA129_07_snapshot_requires_both_attestation_and_highwater_digests(self):
+        r=set(self.schema["$defs"]["ownerSnapshot"]["required"])
+        self.assertTrue({"owner_snapshot_attestation_digest","owner_specific_high_waters_digest"}.issubset(r))
+    def test_SCHEMA129_08_release_completion_bind_content_and_record(self):
+        for t in ("OWNER_LOCAL_GATE_RELEASE","RECOVERY_EPOCH_COMPLETED"):
+            r=set(self.msg(t)["required"])
+            self.assertTrue({"manifest_content_digest","manifest_record_entry_digest"}.issubset(r))
+    def test_SCHEMA129_09_signature_profile_structural_optional(self):
+        d=self.schema["$defs"]["commonEnvelope"]
+        self.assertIn("signature_profile_id",d["properties"])
+        self.assertNotIn("signature_profile_id",d["required"])
+    def test_SCHEMA129_10_ambiguous_manifest_digest_removed(self):
+        for t in ("COC_RECOVERY_CUTOFF_BATCH","PARTICIPANT_SET_RECONCILIATION","OWNER_LOCAL_GATE_RELEASE","RECOVERY_EPOCH_COMPLETED"):
+            self.assertNotIn("manifest_digest",self.msg(t)["properties"])
+
+
+class UnionSemanticsTests(unittest.TestCase):
+    def setUp(self):self.m,self.prefix,self.admissions,self.snaps=fixtures()
+    def test_UNION_01_exact_union_passes(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps),VALID)
+    def test_UNION_02_omitted_prefix_participant_fails(self):self.assertEqual(validate_union(self.m,[],self.admissions,self.snaps),INVALID)
+    def test_UNION_03_omitted_unregistered_admission_fails(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions[:1],self.snaps),INVALID)
+    def test_UNION_04_duplicate_admission_fails(self):self.assertEqual(validate_union(self.m,self.prefix,self.admissions+[deepcopy(self.admissions[0])],self.snaps),INVALID)
+    def test_UNION_05_fabricated_coc_ref_on_local_member_fails(self):
+        m=deepcopy(self.m);m["manifest_members"][1]["coc_participant_intent_ref"]="fake"
+        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
+    def test_UNION_06_missing_absence_reason_fails(self):
+        m=deepcopy(self.m);m["manifest_members"][1]["coc_absence_reason"]=""
+        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
+    def test_UNION_07_wrong_owner_row_binding_fails(self):
+        m=deepcopy(self.m);m["manifest_members"][0]["owner_admission_bindings"][0]["owner_entry_ref"]="wrong"
+        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
+    def test_UNION_08_missing_owner_snapshot_is_unknown(self):
+        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,{"I":self.snaps["I"],"D":self.snaps["D"]}),UNKNOWN)
+    def test_UNION_09_partial_owner_pagination_is_unknown(self):
+        s=deepcopy(self.snaps);s["D"]["pagination_complete"]=False
+        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,s),UNKNOWN)
+    def test_UNION_10_owner_highwater_advance_is_unknown(self):
+        a=deepcopy(self.admissions);a[1]["owner_high_water"]="19"
+        self.assertEqual(validate_union(self.m,self.prefix,a,self.snaps),UNKNOWN)
+    def test_UNION_11_owner_snapshot_root_mismatch_fails(self):
+        m=deepcopy(self.m);m["owner_snapshot_roots"]["I"]["request_ledger_root"]="0"*64
+        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
+    def test_UNION_12_member_count_mismatch_fails(self):
+        m=deepcopy(self.m);m["manifest_member_count"]=9
+        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
+    def test_UNION_13_member_root_mismatch_fails(self):
+        m=deepcopy(self.m);m["member_set_root"]="0"*64
+        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
+    def test_UNION_14_content_digest_mismatch_fails(self):
+        m=deepcopy(self.m);m["manifest_content_digest"]="0"*64
+        self.assertEqual(validate_union(m,self.prefix,self.admissions,self.snaps),INVALID)
+    def test_UNION_15_incomplete_prefix_is_unknown(self):
+        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,False),UNKNOWN)
+
+
+class ProfileAndProviderTests(unittest.TestCase):
+    def setUp(self):self.registry={"I/profile/1":{"status":"ACTIVE","owner_authority":"I","audience":"coc/validator","purpose":"OWNER_LOCAL_GATE_RELEASE","wire_schema_version":"1.3.0"}}
+    def test_PROFILE_01_missing_protected_profile_fails(self):
+        self.assertEqual(validate_profile({"owner_authority":"I","audience":"coc/validator"},True,self.registry,"I","coc/validator","OWNER_LOCAL_GATE_RELEASE"),INVALID)
+    def test_PROFILE_02_unavailable_trust_registry_unknown(self):
+        self.assertEqual(validate_profile({"signature_profile_id":"I/profile/1"},True,None,"I","coc/validator","OWNER_LOCAL_GATE_RELEASE"),UNKNOWN)
+    def test_PROFILE_03_exact_profile_passes(self):
+        m={"signature_profile_id":"I/profile/1","owner_authority":"I","audience":"coc/validator"}
+        self.assertEqual(validate_profile(m,True,self.registry,"I","coc/validator","OWNER_LOCAL_GATE_RELEASE"),VALID)
+    def test_PROFILE_04_wrong_owner_audience_profile_fails(self):
+        m={"signature_profile_id":"I/profile/1","owner_authority":"C","audience":"other"}
+        self.assertEqual(validate_profile(m,True,self.registry,"I","coc/validator","OWNER_LOCAL_GATE_RELEASE"),INVALID)
+    def test_PROVIDER_01_handoff_accepted_requires_receipt(self):
+        m={"message_type":"C_PROVIDER_OUTCOME_RECORDED","owner_authority":"C","c_submit_outcome_ref":"out/1","c_submit_outcome_digest":"a"*64,
+           "owner_admission_ref":"C/admit/1","owner_ledger_ref":"C/ledger","owner_ledger_version":"1","owner_local_sequence":"2","owner_high_water":"3",
+           "owner_ledger_root":"b"*64,"provider_ref":"p/1","provider_adapter_ref":"a/1","provider_idempotency_key_ref":"key/1",
+           "request_digest":"c"*64,"final_request_boundary_id":"boundary/1","provider_outcome_evidence_ref":"e/1",
+           "provider_outcome":"HANDOFF_ACCEPTED","provider_request_ref":"req/1","provider_receipt_ref":"receipt/1","participant_reservation_ref":"reservation/1"}
+        self.assertEqual(validate_provider_outcome(m),VALID)
+    def test_PROVIDER_02_in_doubt_stays_unknown(self):
+        m={"message_type":"C_PROVIDER_OUTCOME_RECORDED","owner_authority":"C","c_submit_outcome_ref":"out/1","c_submit_outcome_digest":"a"*64,
+           "owner_admission_ref":"C/admit/1","owner_ledger_ref":"C/ledger","owner_ledger_version":"1","owner_local_sequence":"2","owner_high_water":"3",
+           "owner_ledger_root":"b"*64,"provider_ref":"p/1","provider_adapter_ref":"a/1","provider_idempotency_key_ref":"key/1",
+           "request_digest":"c"*64,"final_request_boundary_id":"boundary/1","provider_outcome_evidence_ref":"e/1",
+           "provider_outcome":"IN_DOUBT","unknown_reason_ref":"lookup_unavailable"}
+        self.assertEqual(validate_provider_outcome(m),UNKNOWN)
+
+
+if __name__=="__main__":unittest.main(verbosity=2)
