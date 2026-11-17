@@ -200,3 +200,12 @@ Updated H exact pins:
 The H suite still uses HRC-TEST-v1, not an I-approved production signature/canonicalization profile. TPH uses a deterministic reference model, not a real quorum log or durable COC service. XLANG-01 compares only fixed test vectors; it does not establish full SDK interoperability.
 
 Storage's exact disposition remains **ACCEPT WITH ENUMERATED AMENDMENTS** for the logical JoinProof only. Live COC/owner-ledger enumeration, signatures/key status, durable JoinProof commit/readback, owner-local CAS, JF-10 physical same-GID resolution, and topology T1–T8 remain OPEN. No independent Owner signature or physical conformance PASS is claimed.
+
+
+## 13. Latest H 95-test exact evidence and Storage JoinProof pin
+
+The controlling Storage JoinProof artifact is now Blob `0deffc2dcead5f88264417c2ae0ae231a38cfb6f`. It records H's latest candidate run [44042568297](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042568297), commit `b832679d1143e2806cba30e77dd8d0b240334fdc`, job `133900417567`: **95 tests ran, OK**.
+
+The 95 methods are HRC 25, JPF 19, WIRE 10, SCHEMA 14, TPH 26 and XLANG 1. SCHEMA-13/14 add structural checks for unified schema 1.2.7 artifact/wire version distinction and signature_profile_id field shape. They do not prove production semantic requiredness, I trust-registry resolution or cryptographic signature verification.
+
+Storage's logical JoinProof acceptance remains conditional. The run does not execute live COC quorum enumeration, owner-ledger adapters/signatures, Storage durable JoinProof append/readback, I/D/C release CAS, same-GID JF-10 physical resolution, or the D/Storage topology. T1–T8 and STORAGE-RJ-01..05 remain OPEN. No independent Owner signature or physical conformance PASS is claimed.
