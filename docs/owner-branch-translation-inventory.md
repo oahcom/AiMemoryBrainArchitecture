@@ -41,7 +41,7 @@ The audit below checked the core Markdown specifications in each module director
 ## 3. PR #28 companion status / PR #28 双语对应文件状态
 
 - System-level specifications: paired for the current source set.
-- B main Domain Model specifications: 6/6 paired; Phase 3 typed-reference/identity addenda and ADR-001 remain pending.
+- B main Domain Model specifications: 6/6 paired; two Phase 3 identity/Scope and Principal/Actor companions now paired against exact Owner Blob SHAs; ADR-001 remains ADR-BLOCKED and INT-P0-02 / INT-X-03 remain OPEN.
 - D Memory Brain core specifications: 8/8 bilingual companions present in PR #28, including the four-part operation/publication gate. Source-branch reconciliation and semantic acceptance remain pending.
 - E Memory Compiler core specifications: 7/8 paired; Compiler Overview, Event Ingestion, Extraction/Normalization, Consolidation/Conflict Resolution, Evidence/Provenance, Accepted Receipt and Producer Admission are paired. Only Forget Fence/Derived Registration remains.
 - F Memory Runtime: 5/5 detailed core specifications paired in PR #28; independent semantic review pending.
@@ -121,3 +121,13 @@ The following exact source Blob SHAs were re-read directly from their named Owne
 - **BSR-28-007 — OPEN:** PR #28 contains a bilingual pair for the H identity consumer/conformance status report only. This is not one of the seven H normative core-spec pairs and does not complete B/C/G/H/I/Storage detailed contracts.
 
 Full findings and disposition: [Phase 3.6 identity / Applied / Storage source audit](../reviews/translation/2026-11-17-phase36-identity-applied-storage-source-audit.md).
+
+
+## 8. B Phase 3 bilingual companion batch — 2026-11-17
+
+| Source | Owner branch | Exact source Blob SHA | PR #28 pair | Source state |
+|---|---|---|---|---|
+| `02-domain-model/typed-reference-and-scope-semantics.md` | `session-b-domain-model-phase3` | `e9a6bd21e06bc02a5208619f5a949217860b1c00` | EN + zh-CN companions | CANDIDATE; Claim identity conditional on ADR-001; I36-GOV-03/04 GOVERNANCE-BLOCKED |
+| `02-domain-model/principal-actor-binding-mapping.md` | `session-b-domain-model-phase3` | `bbbef919e1e2ffe158cda8d9b2c5e718efaae969` | EN + zh-CN companions | CANDIDATE; INT-P0-02 / INT-X-03 OPEN; no identity freeze |
+
+These source Blob SHAs were re-read from the named B Owner branch in this turn. They are file Blob SHAs, not branch HEADs or approval evidence. Translation pairing does not approve I policy, H wire fields, D/E schema migrations, or ADR-001.
