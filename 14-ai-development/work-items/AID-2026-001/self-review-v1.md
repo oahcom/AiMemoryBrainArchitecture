@@ -53,7 +53,7 @@
 - Current PR file inventory: **22**; manifest `changed_paths`: **22**; exact set equality verified.
 - Current PR commit inventory: **45**; manifest `implementation_commits`: **41**; exact set equality verified after excluding three manifest-only bookkeeping commits and the current manifest self-update.
 - B v2 and I v2 are both present, indexed, and referenced by the matching English/Chinese architecture documents.
-- The PR is still Draft and unmerged. GitHub currently reports `mergeable=false`; this is not interpreted as a successful mergeability check and must be rechecked after GitHub recalculates.
+- The PR is still Draft and unmerged. The first post-update metadata read returned `mergeable_state=unknown` / `mergeable=false`; a subsequent fresh GitHub read returned `mergeable_state=clean` / `mergeable=true`. This is only GitHub's mergeability calculation, not independent review or acceptance.
 - CI workflow runs for the current PR head: **none returned**.
 
 ## Verification
@@ -110,7 +110,7 @@
 - 当前 PR 文件清单：**22**；Manifest 的 `changed_paths`：**22**；已核实两者集合完全一致。
 - 当前 PR 提交数：**45**；Manifest 的 `implementation_commits`：**41**；排除三个仅用于 Manifest 清单维护的提交及当前 Manifest 自更新提交后，两者集合完全一致。
 - B v2 和 I v2 均已创建、加入索引，并由中英文架构文档引用。
-- PR 仍为 Draft 且未合并。GitHub 当前返回 `mergeable=false`；这不视为合并检查通过，必须等待 GitHub 重新计算后复核。
+- PR 仍为 Draft 且未合并。首次更新后的元数据读取返回 `mergeable_state=unknown` / `mergeable=false`；随后重新读取 GitHub 返回 `mergeable_state=clean` / `mergeable=true`。这仅代表 GitHub 的合并可行性计算，不代表独立审查或验收。
 - 当前 PR Head 对应的 CI Workflow Runs：**未返回任何记录**。
 
 ## 验证状态
