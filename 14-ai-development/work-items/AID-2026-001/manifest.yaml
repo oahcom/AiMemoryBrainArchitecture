@@ -457,3 +457,38 @@ current_status_snapshot:
     manifest_schema_validation: NOT_RUN
     current_main_full_r3_ci: NOT_EVIDENCED
   note: Historical review and execution entries above are preserved as historical records. The merge facts above do not convert any review, approval, test, acceptance or production gate to PASS.
+
+
+post_merge_reference_model_update:
+  observed_at: "2026-11-18"
+  observed_main_head: 41367e8230cd906ce0548df37bbb77027b26124d
+  pr_141:
+    state: CLOSED_MERGED
+    head_sha: d5702426147456f0bf00e0aec9ad5916200cebef
+    merge_commit_sha: 9edc746c001f1f82950edad7ce130342db53ff67
+    reference_model_workflow_run: 44188134319
+    reference_model_workflow_conclusion: SUCCESS
+    tests_discovered: 24
+    tests_passed: 24
+    tests_failed: 0
+    tests_errors: 0
+    bilingual_documentation_runs:
+      - 44188134357
+      - 44188136170
+    bilingual_documentation_conclusion: SUCCESS
+  current_main_blobs:
+    forget_model_py: cd623d67400c8870a729f79f88a4413f37bb335a
+    test_forget_model_py: 633e12db094b703b5f4a431950c3df369dababb0
+    readme_md: 7aa163719978f253685931b2eb001bb6a7228c6f
+    workflow_yml: 9f261aa8c00b1a144cee50c049bae8d437fd0eea
+  classification: NON_PRODUCTION_REFERENCE_MODEL_ONLY
+  r3_contract_tests: NOT_RUN_NOT_EVIDENCED
+  owner_d_approval: PENDING
+  owner_i_approval: PENDING
+  other_executor_acknowledgements: PENDING
+  fresh_independent_review: PENDING
+  distinct_integration_review: PENDING
+  manifest_yaml_parser_and_schema_validation: NOT_RUN
+  acceptance: PENDING_BLOCKED
+  production_activation: NOT_AUTHORIZED
+  note: 24/24 model tests do not constitute production R3 conformance or cross-owner acceptance. Historical 14/14 reference-model evidence above is preserved unchanged.
