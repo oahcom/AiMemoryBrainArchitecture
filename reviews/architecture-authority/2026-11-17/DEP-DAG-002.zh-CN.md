@@ -1,6 +1,6 @@
 # 架构与实现依赖 DAG — DEP-DAG-002
 
-- 版本：1.0.0；基线 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`。
+- 版本：1.0.0；基线 `6470f25ca23b8d35c06f60be2326867066418d18`。
 - 权威：A 负责集成；领域语义仍由表中 Owner 自己决定。
 
 ## 架构决策 DAG
@@ -57,6 +57,12 @@ P0-08 集成 Race/Crash/Replay/Failover/Restore 符合性
   → 对应 Gate 验收
   → 生产运维授权
 ```
+
+## 更新后的 B→A 关闭顺序
+
+**Wave B — 精确协议 Bundle：** H 将 1.2.14 Mapping 更新为当前 D Crosswalk；C 复审该后继 Mapping；H 复审当前 I P0；I 刷新 Anchor Review；H 记录 C 接受和当前 CI；Storage 发布 v3.3.0 或等效版本，绑定当前 C/H/D/I/Storage 精确 Blob 与 Run/Commit/Job；C/H/D/I 复审同一 Manifest；A 回读后继 Manifest 和源分支。该链未关闭前不得协议冻结。
+
+**Wave A — Option A L1/L2：** Storage 提交解决 A-01/A-06 文档清晰度的 ADR 后继版本；D 对 Storage ADR 和共享 Anchor 合同作精确决议；D/Storage 定义共享 Transaction Executor/UoW 和行写授权边界；D 将 EffectPermit 映射到所有 Fence-sensitive 生命周期转换；v1 每个原子操作限制为一个 BrainAuthorityRef；I/Storage 定义 COMMIT_WON 重放/撤销/崩溃语义；Storage/I 定义独立 Restore Anti-rollback Witness；D/I/Storage/H 澄清 COC/JF-10 证明顺序且不宣称跨 Log 原子性。A 对精确后继 Blob 复审。只有 A-01/A-03 规范化且 D 接受后 L1 才能关闭；L2 要求 A-04/A-05 组合；L3 要求实际执行确定性并发/参考模型/故障证据；L4 仍是物理部署。
 
 ## 关键路径与并行工作
 
