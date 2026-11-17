@@ -83,3 +83,46 @@ Required tests: fence-vs-build race; revocation-vs-final-return race; duplicate/
 - No ownership of G ContextVersion/Applied, H ACK, C execution, I policy, or D barrier.
 - D/E/Storage atomic register-before-visible interface remains a blocking dependency where a derivative can become externally visible.
 - **No runtime implementation, conformance PASS, physical erasure proof or production activation is claimed.**
+
+
+## 10. Phase 3.7 cross-owner reconciliation amendments (EN)
+
+**Disposition:** F-local amendment proposal for LIF-01/04/05/07/08/09/10/11. It does not assert independent approval by another Owner, freeze a shared schema, or claim implementation conformance.
+
+### 10.1 Producer admission and derivative boundary
+- A local F ProducerClass declaration is descriptive only. Before derivative-capable work, F MUST resolve a D-issued, versioned, enabled ProducerClass registration whose owner, source-reference classes, output/derivative classes and capability (normal, replay, rebuild, cleanup-only) cover the operation.
+- F MUST retain a D RegistrationReceipt bound to stable ProducerWorkItemId and canonical request digest before queue insertion, lease, protected source dereference, execution, retry/replay or publication.
+- The no-registration Recall exception is limited to bounded, non-persistent, non-derivative reads. It MUST NOT retain excerpts, populate reusable caches, prefetch, embed, summarize, expand graphs, persist Working Set items, enqueue replayable work or create reusable output. Any such effect requires registration first.
+- Unknown registration blocks execution and is resolved using the same identity/digest; no replacement identity may evade a fence.
+
+### 10.2 Partition evidence and terminality
+- IndexWatermark is an F partition-local contiguous coverage statement, not a D producer high-water, D barrier disposition, global cursor, proof of source absence or Forget completion.
+- Gaps, truncation, stale replicas and unknown coverage mean INCOMPLETE/UNKNOWN. Zero hits are not deletion evidence.
+- ACK, DLQ, lease expiry, retry exhaustion, worker death, cancel request, missing queue row and F-local Completed do not close D's barrier. F supplies durable no-later-publication evidence; D alone accepts terminal disposition.
+
+### 10.3 Current authorization and restore
+- I authorization and D fence/lineage are independent authority decisions. F MUST revalidate current I authorization and D eligibility at each protected source read, materialization, cache/Working Set access, derivative registration and final visibility/return boundary. Historical receipts or cached ALLOW are not perpetual authority.
+- Restore requires a conjunctive gate over independent Storage/DB-incarnation, COC-prefix, I-policy/revocation/registry, D-fence/lineage/producer-ledger and F partition/invalidation proofs. Preserve each issuer, audience, signature, schema and opaque authority-local position. No scalar aggregate high-water or cross-authority numeric comparison is permitted.
+- Restored bytes, queues, caches, indexes and Working Sets remain quarantined until required proofs are current and complete, tombstones replayed, dependencies reconciled and the F final gate succeeds. Unknown coverage remains non-serving.
+- F Working Set, E frozen compiler input bundle and G ContextVersion are distinct nominal types.
+
+## 10. Phase 3.7 跨 Owner 对齐修订（中文）
+
+**处置：** 本节将 LIF-01/04/05/07/08/09/10/11 纳入 F 本地合同。它不代表其他 Owner 已独立批准，不冻结共享 Schema，也不声称实现符合性。
+
+### 10.1 Producer 准入与 Derivative 边界
+- F 本地 ProducerClass 声明仅用于描述，不能授予生产权限。Derivative-capable 工作开始前，必须取得 D 签发、具备版本且启用的 ProducerClass 注册；其 Owner、SourceRef 类型、输出/Derivative 类型及能力（normal、replay、rebuild、cleanup-only）必须覆盖该操作。
+- F 必须在入队、租约分配、受保护源读取、执行、重试/重放或发布前，取得并保存绑定稳定 ProducerWorkItemId 与规范请求摘要的 D RegistrationReceipt。
+- 免注册 Recall 例外仅限有界、非持久、非 Derivative 的只读操作。不得保留摘录、填充可复用缓存、预取、生成 Embedding/Summary、扩展图、持久化 Working Set、入队可重放任务或产生可复用输出。存在任一此类效果即必须先注册。
+- 注册结果未知必须阻断执行，并使用相同身份/摘要解析；不得更换身份绕过 Fence。
+
+### 10.2 分区证据与终态
+- IndexWatermark 仅表示 F 单个分区的连续覆盖情况，不是 D Producer High-water、D Barrier 处置、全局游标、源不存在证明或 Forget 完成证明。
+- Gap、截断、陈旧副本及未知覆盖均表示 INCOMPLETE/UNKNOWN。零命中不能作为删除证据。
+- ACK、DLQ、租约过期、重试耗尽、Worker 死亡、取消请求、队列行缺失及 F 本地 Completed 均不能关闭 D Barrier。F 只能提供持久化的“不会再发布”证据；仅 D 有权接受终态处置。
+
+### 10.3 当前授权与 Restore
+- I 授权与 D Fence/Lineage 是两个独立权威决策。F 必须在每次受保护源读取、物化、缓存/Working Set 访问、Derivative 注册及最终可见/返回边界重新验证 I 当前授权和 D 当前资格。历史 Receipt 或缓存 ALLOW 不是永久授权。
+- Restore 必须采用独立证明的合取门：Storage/DB incarnation、COC prefix、I policy/revocation/registry、D fence/lineage/producer ledger，以及 F 分区/失效覆盖证明。每份证明保留自己的签发者、受众、签名、Schema 和权威域内不透明位置；禁止合成单一 High-water 或跨权威数值比较。
+- 恢复字节、队列、缓存、索引和 Working Set 在必要证明完整且当前、Tombstone 已重放、依赖已核对、F 最终门通过前必须保持隔离。覆盖未知时不得 Serving。
+- F Working Set、E 冻结编译输入包和 G ContextVersion 是不同名义类型。
