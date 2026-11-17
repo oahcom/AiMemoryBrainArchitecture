@@ -86,3 +86,21 @@ The latest H RecoveryJoin schema separates OwnerAdmissionRef and OwnerEntryRef, 
 Updated H RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
 Updated H semantic contract Blob: b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
 Updated HRC suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
+
+
+## 8. Exact H RecoveryJoin candidate re-review / H RecoveryJoin 精确版本复核补充
+
+The H branch now pins this exact candidate set:
+
+- RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`
+- H semantic validator contract: `b3218298f58cff9b92cb1c38e453af6fd4d0dd50`
+- HRC/JPF suite after JPF-08 fixture correction: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`
+- Wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`
+- Schema integrity suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`
+- H CI run: [44039990464](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44039990464), 66/66 candidate tests PASS.
+
+I accepts the schema shape only as a proposed typed evidence envelope. The CI pass does not validate production signatures, issuer/key status, historical trust, PermissionEpoch/ProducerDomainInventoryEpoch continuity, owner-signed empty/out-of-scope proofs, or I's actual PolicyDomain sequencer. HRC TEST-only digest remains non-normative. I-RJ-01/02 schema-shape coverage improves; I-RJ-03/04/05 and all runtime currentness/crypto obligations remain OPEN.
+
+This exact-version re-review does not approve I cryptographic profile, does not issue an I gate-release decision and is not an independent human Owner signature.
+
+H 分支当前 RecoveryJoin Schema 及候选验证套件已精确绑定，66/66 逻辑/结构候选测试通过。I 仅接受其类型化证据字段形状作为提案；不接受其 TEST-only 摘要作为生产签名规范。真实签名、Key Status、历史信任、PermissionEpoch 与 Inventory Epoch 连续性、空集合签名及 I PolicyDomain Sequencer 的 Currentness CAS 仍未闭环。
