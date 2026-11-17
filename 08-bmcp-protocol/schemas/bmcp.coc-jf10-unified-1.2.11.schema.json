@@ -2025,7 +2025,7 @@
         },
         "schema_version": {
           "const": "1.3.0",
-          "description": "Protocol-family wire version 1.3.0. Schema artifact revision 1.2.9 is identified by $id. The wire version is incremented because the manifest union and digest fields are breaking changes."
+          "description": "Protocol-family wire version 1.3.0. Schema artifact revision 1.2.11 is separately carried in schema_artifact_revision and identified by $id."
         },
         "message_type": {
           "type": "string"
