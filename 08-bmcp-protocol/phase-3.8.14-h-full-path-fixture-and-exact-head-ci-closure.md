@@ -12,9 +12,9 @@
 - Full positive H envelope + C object fixture Blob: `c80247a6ecfbb4a29ff0993e8e2aea4829d00626`
 - C crypto interop test Blobs: `5559fb7a612c8dd92345ceae3a6aa62f4faae41a` and `a49d588ea6f840927fe21ad8c41cd8089dceac29`
 - H workflow Blob: `4459d19f5b4eea058377d9819e48e81eed5c8c4b`
-- Exact H Provider Outcome CI run: `44069777296`
-- Exact tested commit: `9eb06313e94e762f0fde4a606633a6dbe1bf8262`
-- Exact job: `133992753552` (`provider-outcome`) — **completed / success**
+- Exact H Provider Outcome CI run: `44069941327`
+- Exact tested commit: `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251`
+- Exact job: `133993324484` (`provider-outcome`) — **completed / success**
 - Provenance: delegated H-role source review and CI readback; **not an independent human H Owner signature**.
 - English and Chinese are normative peers.
 
@@ -42,7 +42,7 @@ Tests 21–25 in the exact validator test source load the fixture and the real H
 
 ## 3. Exact CI readback / 精确 CI 读回
 
-GitHub Actions run `44069777296` completed with status/conclusion `completed/success` on exact commit `9eb06313e94e762f0fde4a606633a6dbe1bf8262`. Job `133992753552` (`provider-outcome`) completed successfully. The workflow runs Python unittest discovery across all `test_*.py` files in the provider_outcome directory and installs the pinned Python and Node/JCS test dependencies.
+GitHub Actions run `44069941327` completed with status/conclusion `completed/success` on exact commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251`. Job `133993324484` (`provider-outcome`) completed successfully. The workflow runs Python unittest discovery across all `test_*.py` files in the provider_outcome directory and installs the pinned Python and Node/JCS test dependencies.
 
 The current suite has 32 test methods across three Python test files: 26 H validator unit/fixture methods and six C crypto interoperability methods. The full-path fixture is loaded by the H validator test source pinned above.
 
