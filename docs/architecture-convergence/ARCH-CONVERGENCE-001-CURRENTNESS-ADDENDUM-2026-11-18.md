@@ -37,7 +37,7 @@ ARCH-CONVERGENCE-001 在架构层面仍未解决，也未获实现授权。提�
 | E — Minimum Runnable Architecture | #106 | `e571a0f69b22ff5f565286981de839cd8eab515a` | MERGED — implementation plan, not authorization |
 | Integration synthesis + adversarial matrix | #107 | `e6adb447911403bd319ee8a9f7bc9014180e1d81` | MERGED — interim integration only |
 | C/G/H Applied consumer audit | #119 | `431468a9066f6fe68d9c514f3603ab1a603146ff` | MERGED — audit publication; findings remain open |
-| H Applied Delivery Evidence hardening candidate | #121 | `ab1fa87d74ca4a632155aa19569533ea560109d5` | MERGED — bounded candidate code publication; exact 16-test suite NOT RUN on PR head |
+| H Applied Delivery Evidence hardening candidate | #121 | `ab1fa87d74ca4a632155aa19569533ea560109d5` | MERGED — bounded candidate code publication; exact 16-test PR-head workflow PASSED |
 | B domain post-merge reconciliation | #120 | `6c325804027b88de1014ab3364cdda7e0c023ba6` | MERGED — status reconciliation; B gates remain open |
 
 All above PR metadata was re-read from GitHub. PR #120's merge commit is the current `main` HEAD. PR #119's merge commit is its direct parent.
@@ -73,8 +73,8 @@ This corrects earlier source inventory claims: `02-domain-model/` is present, an
 
 PR #119 was merged as a documentation-only audit. Its disposition is **REQUEST CHANGES / CANDIDATE ONLY / APPLIED FREEZE BLOCKED**. The following findings remain open; publication did not remediate them:
 
-- **P0 remediation candidate merged by #121:** duplicate JSON object members are now rejected by the reference validator before schema validation; however, the exact 16-test suite was **NOT RUN on the PR head**, so this is not verified closure.
-- **P0 remediation candidate merged by #121:** `SAME_DIGEST_REPLAY` now requires a tri-state current-authorization callback before returning the original result reference; the callback remains an adapter seam, not deployed I/D authority-ledger integration, and exact tests were not run on the PR head.
+- **P0 remediation candidate merged by #121:** duplicate JSON object members are now rejected by the reference validator before schema validation; the exact 16-test PR-head workflow subsequently completed **SUCCESS** (run #44180944513, head `0c878b7b5a14dcc5a417f006818920d96254eaab`); this verifies the bounded reference suite, not production or Owner closure.
+- **P0 remediation candidate merged by #121:** `SAME_DIGEST_REPLAY` now requires a tri-state current-authorization callback before returning the original result reference; the callback remains an adapter seam, not deployed I/D authority-ledger integration, and the exact PR-head workflow passed; the callback remains only an adapter seam, not deployed I/D authority-ledger integration.
 - **P0 / H-ADE-002 OPEN:** CSubmitOutcome 1.0.1 immutable resolver/equality remains callback-only and lacks real cross-schema fixture/mutation proof.
 - **P1:** G has not published an exact consumer successor decision for the separate H Applied Delivery Evidence 1.0.0 family.
 - **P0:** G durable Applied persistence, crash/restart, multi-replica idempotency and restore conformance remain specified, not implemented/run.
@@ -83,7 +83,7 @@ PR #119 was merged as a documentation-only audit. Its disposition is **REQUEST C
 
 ### 4.2 PR #121 — H Applied Delivery Evidence hardening candidate
 
-PR #121 merged a bounded six-file H candidate package: schema, reference validator, 16 deterministic tests, pinned test dependencies and workflow/addendum. It adds duplicate-key rejection at every JSON object depth and a tri-state replay authorization callback. The PR explicitly states the 16-test suite was **NOT RUN on that PR head**. H-ADE-002 (CSubmitOutcome immutable resolver/equality), G consumer acceptance, production trust/canonicalization, durable replay ledger, crash/restore and multi-replica conformance remain open. This publication is not Owner acceptance or Full Applied readiness.
+PR #121 merged a bounded six-file H candidate package: schema, reference validator, 16 deterministic tests, pinned test dependencies and workflow/addendum. It adds duplicate-key rejection at every JSON object depth and a tri-state replay authorization callback. Although the PR body initially recorded that the suite had not run, GitHub Actions subsequently recorded run #44180944513 (`pull_request`, exact head `0c878b7b5a14dcc5a417f006818920d96254eaab`) as **completed / success**. The `applied-delivery-evidence` job and the step `Run Applied Delivery Evidence schema and semantic conformance tests` both completed successfully. The test file contains 16 deterministic test methods. This is bounded candidate conformance evidence; it does not prove production trust, deployed I/D callbacks, C mapping, durable replay, crash/restore, multi-replica behavior or Owner acceptance. H-ADE-002 (CSubmitOutcome immutable resolver/equality), G consumer acceptance, production trust/canonicalization, durable replay ledger, crash/restore and multi-replica conformance remain open. This publication is not Owner acceptance or Full Applied readiness.
 
 ### 4.3 PR #120 — B domain post-merge reconciliation
 
