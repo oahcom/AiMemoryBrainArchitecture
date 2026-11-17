@@ -112,7 +112,7 @@ Global instructions live directly under the global prompt directory. Each Owner'
       A/owner-session-v1.md
       B/owner-session-v2.md
       C/owner-session-v1.md
-      D/owner-session-v1.md
+      D/owner-session-v2.md
       E/owner-session-v1.md
       F/owner-session-v1.md
       G/owner-session-v1.md
