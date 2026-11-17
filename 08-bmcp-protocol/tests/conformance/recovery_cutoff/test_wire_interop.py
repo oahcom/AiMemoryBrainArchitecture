@@ -40,8 +40,8 @@ def reject_unknown_critical(obj, allowed):
 
 class WireInteropVectors(unittest.TestCase):
     def test_WIRE_01_object_member_order_is_canonicalized(self):
-        left = strict_parse('{"schema_version":"1.0.4","message_type":"COC_PARTICIPANT_MANIFEST"}')
-        right = strict_parse('{"message_type":"COC_PARTICIPANT_MANIFEST","schema_version":"1.0.4"}')
+        left = strict_parse('{"schema_version":"1.0.0","message_type":"COC_PARTICIPANT_MANIFEST"}')
+        right = strict_parse('{"message_type":"COC_PARTICIPANT_MANIFEST","schema_version":"1.0.0"}')
         self.assertEqual(canonical_test_bytes(left), canonical_test_bytes(right))
 
     def test_WIRE_02_absent_and_null_are_not_equivalent(self):
@@ -64,7 +64,7 @@ class WireInteropVectors(unittest.TestCase):
         self.assertEqual(canonical_test_bytes(value), '{"label":"恢复批次"}'.encode("utf-8"))
 
     def test_WIRE_06_unknown_critical_field_fails_closed(self):
-        obj = {"schema_version": "1.0.4", "critical_new_gate_field": "x"}
+        obj = {"schema_version": "1.0.0", "critical_new_gate_field": "x"}
         self.assertFalse(reject_unknown_critical(obj, {"schema_version"}))
         self.assertTrue(reject_unknown_critical(obj, {"schema_version", "critical_new_gate_field"}))
 
