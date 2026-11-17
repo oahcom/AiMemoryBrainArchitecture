@@ -289,3 +289,94 @@ The old branch head SHA and complete branch diff were not returned by the branch
 No final domain freeze, schema freeze, downstream implementation authorization, or ACCEPTED status is claimed. PR #53 is CLOSED / NOT MERGED; its A decision is DEFERRED / ARCHITECTURE_NOT_READY. PR #52 remains OPEN / DRAFT.
 
 不宣称领域最终冻结、Schema 冻结、下游实现授权或 ACCEPTED 状态。
+
+
+## 13. Full Chinese peer for Owner branch and semantic conflict evidence / Owner 分支与语义冲突证据完整中文对照
+
+### 13.1 当前 Owner 分支 HEAD 与最近提交
+
+以下 HEAD 是 2026-11-17 读取时的分支快照，不代表所有分支文件均已穷尽审查，也不构成 Owner 对本 B 研究包的批准。
+
+| Owner | 分支 | HEAD Commit SHA | 最近提交说明（中文） |
+|---|---|---|---|
+| B | `session-b-domain-model-phase3` | `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | B：批准 Storage Serialization Anchor 的名义类型边界。 |
+| C | `session-c-agent-integration-2026-11-16` | `2e8414f361b0b5d7de959be8a971aadc9e62d6a9` | C：复审 H 认证入口 Reference Gate 及精确 60 项测试证据。 |
+| D | `session-d-memory-brain-2026-11-16` | `76fcc92225666a11893b7241825261319edb621e` | D：复审 H 外层 Envelope 认证边界并保持 D 权威。 |
+| E | `session-e-memory-compiler-2026-11-16` | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | E：复审每 Authority Storage Serialization Anchor。 |
+| F | `session-f-memory-runtime` | `1908ce4d233b20f7cafd00cb679affd01bd15174` | F：复审每 Authority Storage Serialization Anchor。 |
+| G | `session-g-memory-context` | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | G：刷新 C/H 精确 Pin，以支持 38 项 Full-path Closure。 |
+| H | `session-h-bmcp-protocol` | `8e24342048d29ef29195b153b8b9ec53ba7c75d9` | H：修正 C Envelope P0，并发布精确 JSON Pointer 映射。 |
+| I | `session-i-security-governance-2026-11-16` | `2afe0e17f8c0929d9e642ccbe2cad112b5fd43a9` | I：复审 C 外层 Envelope Signer 与 Trust/Wire 边界。 |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `431138e7c7af8bee716f3d8dcbc20114c046bd36` | Storage：绑定 H 外层认证 Reference Gate、60 项 CI 和 C/I/D 复审。 |
+| A | `session-a-integration-2026-11-16` | `9bdf938b980413f592a4db9fe94f4bf2c299fb01` | A：将外层 Envelope 认证评估为阻塞性集成缺口。 |
+
+这些是历史观察值；最终决策前必须重新读取实时 Ref 和精确 Blob。不能把 HEAD 快照等同于 Owner 批准或独立复审。
+
+### 13.2 相关 PR 与 Issue 的完整影响说明
+
+| 记录 | 读取时状态 | 对 B 的具体影响 |
+|---|---|---|
+| PR #53 — 最终架构工程评估 | CLOSED / NOT MERGED | A 的结论为 DEFERRED / ARCHITECTURE_NOT_READY；Fact/Claim ADR、I36 治理、JF-10 以及 C/G/H Applied/Provider 证据仍是阻塞项。 |
+| PR #52 — B→A 协议收敛与 Storage 拓扑审查 | OPEN / DRAFT | B 协议收敛只是候选，未冻结；H Unified 1.2.14 / Wire 1.3.0 与 CSubmitOutcome 1.0.1 为候选配对；仍存在精确 Pin 缺口；A 对 L1 拓扑是有条件接受，L4 物理实现仍 OPEN。 |
+| PR #42 — ChatGPT-native 执行模型 | Open | 包含 B v2 责任区分：领域身份与安全身份不同；治理决定及新审查要求仍适用。 |
+| Issue #3 | OPEN | C/G/H Applied 证据与 BMCP Wire 契约；明确要求 B 提供 ActorRef/ScopeRef/EnvironmentRef 类型化映射。 |
+| Issue #5 | OPEN | I36 治理批准未完成；Principal 分类、跨 Issuer 身份和 ActorRef 绑定影响 B/I 边界。 |
+| Issue #7 | OPEN | 规范 Runtime 实现仓库和负责 Owner 未确定；本架构仓库没有 Runtime 实现证据。 |
+| Issue #10 | OPEN | JF-10 P0 的 Prepared-XID、COC 物理能力及故障证明未建立。 |
+| Issue #11 | OPEN | A–I 基线与 Redline 推进尚未完成。 |
+| Issue #21 | OPEN | F/E/G 局部生命周期协调仍开放。 |
+| Issue #43 | OPEN | 系统级整合控制 Issue 仍开放；架构冻结尚未获准。 |
+
+Issue #3 虽已有 C/D/G/H/I/B 的精确 CGH-APPLIED-1.1 Recovery-batch 决策，并列出例外，Storage 也确认了经过修改的架构接口，但 Applied Contract Frozen 仍为 NO；生产实现/符合性未验证，JF-10 P0 仍开放。Issue #6 的关闭仅表示 C/F/G 对精确 BIH Package 的设计级消费者验收（带列明例外），以及 H 的精确验收；不代表 I36 治理批准或 Runtime 认证。Issue #7 仍开放，负责 Runtime 仓库/Owner 未确定。Issue #10 仍开放，物理 Prepared-XID/COC/故障证明未完成。Issue #11、#21、#43 仍开放。Issue #2 与 #13 仍与 D/E/Storage Publication 和 COC/Storage Recovery 证据有关。以上状态是 2026-11-17 的读取快照，不得当作永久状态。
+
+### 13.3 既有 B Owner 分支比较
+
+已检查既有 `session-b-domain-model-phase3` 分支。其 `domain-model-overview.md`、`core-entities.md`、`epistemic-and-temporal-semantics.md`、`lifecycle-model.md` 和 `relationships-and-provenance.md` 与当时 main 对应文件具有相同 Blob SHA。其 `scope-and-permission-model.md` Blob 为 `6a9c47031ca3ecfd47b2f7d7419b2df8d808329b`，而 main 对应 Blob 为 `b5215ae27bd65a6c89c185b496f730b6cd52efa9`。
+
+分支搜索未返回旧分支 HEAD SHA 和完整 Branch Diff，因此这两项必须标记 NOT VERIFIED。不得假定旧分支当前或覆盖它。本研究分支 `research/domain-reality-001-b` 与旧 B Owner 分支隔离。
+
+### 13.4 五项重大语义冲突完整中文说明
+
+**B-BASE-001 — Fact / Claim 权威不一致（BLOCKING）**
+
+- 根 Overview Blob `4d1debc...` 将 Claim 定义为规范对象，并把 Fact 视为带限定的 Claim 解释，状态标记 DECIDED。
+- 双语 Guide Blobs `a9f53a...` / `8a19ce...` 明确声明 Fact/Claim ADR 仍为 ADR-BLOCKED，并禁止下游 Schema 冻结。
+- A PR #53 也将 B Fact/Claim ADR 列为未解决项。
+- 严重性：阻塞所有依赖 Fact/Claim 的 Schema 和跨 Owner 契约冻结。
+- 权威：B 提出领域语义；必须确认最终 ADR/治理路径及 A Registry 要求。本基线不得单方面解决。
+
+**B-BASE-002 — 领域身份与安全身份（HIGH）**
+
+- Domain Entity 身份与 I Principal/ActorRef/ProducerIdentity 属于不同语义问题。
+- Main 领域源将 Entity 定义为具有身份的指称对象；I 指南将 Principal 定义为经过认证的安全主体，将 ActorRef 定义为操作行为者绑定。
+- B 必须定义类型化引用/命名空间映射；I 保留认证、信任和授权权威。
+- 严重性：HIGH；只有缺少安全类型映射的具体契约被阻塞，不能泛化为所有领域模型均无效。
+
+**B-BASE-003 — Scope / Tenant / Workspace / Environment 边界（HIGH）**
+
+- 现有领域源定义 Agent Scope 和 Environment Scope；I 指南使用 Tenant/User/Project/Agent/Session 等维度；系统概览区分 Session、Environment 和 Agent。
+- 规范 Scope 分类、Ownership 与 Applicability、Tenant 与 Workspace 的关系，以及跨 Tenant 引用规则仍需 I 与 A 协调。
+- 未解决前必须 Fail Closed；不得通过隐式继承或字符串别名扩大访问范围。
+
+**B-BASE-004 — Applied / Recorded / Committed / Visible / Published（BLOCKING）**
+
+- 架构不变量 I-10 要求 Context Delivery 具有明确 Adapter Acknowledgement 后才可称 Applied；I-18 限制 ACK 只代表协议层应用，不代表模型理解。
+- H/C 集成资料进一步区分 Delivery ACK 与 Final-request Applied 证明；A PR #53 仍将 C/G/H Applied/Provider Proof 列为阻塞。
+- B 负责词汇边界；C/G/H 负责精确 Final Request/Provider Proof；Storage 负责持久可见性/提交。
+- I-10 必须澄清 ACK 是必要条件但不充分；不得仅凭 ACK 推导 Applied。
+- 严重性：跨模块 Applied 契约冻结 BLOCKING；B 无权替代执行证明。
+
+**B-BASE-005 — Forget / Deleted / Forgotten / Purged（BLOCKING）**
+
+- 领域 Guide 将 Forgotten 描述为受治理 Forget 已提交、访问被拒绝，且清理/去标识过程有跟踪记录。
+- I Guide 区分 Suppression、派生清理和物理擦除；D 拥有规范 ForgetOperation/Fence；I 拥有全局完成策略；Storage/备份操作方拥有物理擦除。
+- A PR #53 将 Forget Anti-resurrection 和物理 Publication/Forget Proof 列为阻塞项。
+- 严重性：声称 Global Completion 或 Physical Purge 前必须满足 BLOCKING 证据；领域词汇可以澄清，但不得取代 D/I/Storage 权威。
+
+### 13.5 缺失定义与基线置信度补充
+
+以下定义仍缺失或未固定：跨模块类型化引用语法与 Namespace Scope；Claim 跨 Memory Version 身份策略；时间不确定性模型与双时态适用范围；Tenant/Workspace/Project/Environment Scope 关系；Fact/Claim 精确决策及 Schema 后果；B Domain Actor/Scope/Environment 到 I Authenticated Principal 与 H Wire Identity 的稳定映射；C/G/H/Storage Applied 词汇与证明权威拆分；Forget、Superseded、Invalidated、Purged 的终态性及重新出现语义；所有 A/C/D/E/F/G/H/I/Storage Owner-local 契约和精确版本 Pin；穷尽 PR/Issue 清单及完整 Diff；Runtime 实现仓库和可执行符合性证据。
+
+对已识别 main 领域源文件及 Blob Pin 的置信度为 MEDIUM；对穷尽跨 Owner 规范契约、全部 PR/Issue 历史、未暴露 HEAD 的分支以及 Runtime 实现的置信度为 LOW / NOT VERIFIED。B0 仍为 PARTIAL / NOT PASSED。
+
+本补充不授予领域冻结、Schema 冻结、下游实现授权或 ACCEPTED 状态。
