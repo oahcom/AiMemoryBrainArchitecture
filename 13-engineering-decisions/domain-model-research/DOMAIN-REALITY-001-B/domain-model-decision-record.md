@@ -149,6 +149,45 @@
 - Reversal conditions: only an explicit jointly approved profile proving equivalent signer, trust, transport and authorization semantics.
 - Status: semantic boundary CANDIDATE/RECOMMENDED; production crypto/trust/ingress BLOCKED; A says do not freeze.
 
+## 2A. Chinese decision record mirror / 中文决策记录对照
+
+| Decision ID / 决策 ID | Context and problem / 背景与问题 | Alternatives / 备选方案 | Decision and consequences / 决定与后果 | Status / 状态 |
+|---|---|---|---|---|
+| B-DEC-001 | Memory 内容、标签、Embedding 和来源文本可能变化/重复；内容 Hash 会造成身份漂移或误合并。 | 内容 Hash 身份；可变数据库主键；不透明稳定领域 ID + 独立内容摘要。 | 推荐领域身份独立于内容/版本；ID 算法尚未选择。稳定引用和版本谱系需要 Registry 及禁止复用规则。 | 语义原则 DECIDED；实现 ID 算法 CANDIDATE。 |
+| B-DEC-002 | 多模块传递 Principal/Actor/Agent/Scope/Environment ID，载荷引用可能被误认为认证身份或访问权。 | 无类型 ID；统一 Actor ID；由 Owner Registry 解析的类型化命名空间引用。 | 保留不同类型引用；Ref 不证明认证、注册或权限。需要显式映射和逐边界验证，提升 Tenant/Scope 隔离。 | B 规范采纳 CANDIDATE；既有委托技术基线仅作证据，不推断新的 Owner 批准。 |
+| B-DEC-003 | Memory 生命周期与 Claim 认知地位回答不同问题。 | 一个合并状态 Enum；独立类型化状态维度。 | 保持两套独立维度，避免 Active 被误读为 Verified、Archived 被误读为 False。 | 源规范 DECIDED。 |
+| B-DEC-004 | Overview 的 DECIDED 与双语 Guide 的 ADR-BLOCKED 不一致；下游可能冻结不兼容的 Fact/Claim Schema。 | 采用 Overview；采用 Guide 阻塞；静默把 Fact 当作 Claim 子类型。 | 保留 ADR-BLOCKED。补充 ADR 请求 B-ADR-FACT-CLAIM-001 提议 C2+I1，但仅为候选，不是决定/接受/Schema 冻结。 | BLOCKING / OPEN。 |
+| B-DEC-005 | 系统必须解释信息来源、证据支持和派生过程；单一 Source 字段无法回答三者。 | 单一 Source 对象；分离 SourceRef、Evidence 对象和 Provenance Trace。 | 保持语义区分；Source/Provenance Edge 是否每条都独立成实体仍 OPEN。 | 区分 DECIDED；身份粒度 OPEN。 |
+| B-DEC-006 | Event、Observation、Claim 和系统记录发生于不同时间；单一 Timestamp 会丢失历史真值和历史知识。 | 单一时间；仅 Valid Time；仅 Record Time；全局双时态；选择性双时态。 | 保留 Event/Observed/Recorded/Valid/Transaction 时间差异；推荐仅对时间敏感 Claim/Relation/Revision 使用双时态。 | 推荐 CANDIDATE；Schema/权威 OPEN。 |
+| B-DEC-007 | 不可变版本、审计和恢复是必要的，但外部副作用与 Forget 会增加 Replay 复杂度。 | 全系统 Event Sourcing；纯可变状态；状态 + 不可变版本 + 目标操作账本。 | 推荐规范 Memory 使用状态 + 不可变版本 + 追加式生命周期/审计记录；只在需要顺序/恢复时使用持久操作账本。 | RECOMMENDED。 |
+| B-DEC-008 | 类型化 Relation 和实体检索可能受益于图遍历；过早采用 RDF/OWL 或 Graph DB 会增加治理和双存储一致性成本。 | 关系型类型化 Relation；Property Graph 作为规范存储；RDF/OWL；关系型规范模型 + 图投影。 | 推荐关系型规范表示 + 显式类型化 Relation/Provenance；只有查询价值得到证明才使用图投影；RDF/OWL 延后。 | RECOMMENDED；未选技术。 |
+| B-DEC-009 | 多 Owner 在不同边界产生证据；通用 Completed 会导致 ACK/授权被错误提升为 Published/Applied。 | 通用 Completed；按 Owner 签发的分阶段证据状态。 | 保留 Recorded/Applied/Committed/Visible/Published 各自语义和签发权威；不建立通用全序。 | 语义区分 DECIDED；精确 Applied/JF-10 契约 BLOCKED。 |
+| B-DEC-010 | Memory 生命周期、治理操作、逻辑抑制和物理清理范围不同。 | 单一 Deleted/Forgotten 状态；D 操作、Memory 生命周期、I 全局策略、Storage 物理目标证明分离。 | D CanonicalSuppressionComplete 不等于 I GlobalForgetComplete 或物理 Purge；需要目标级 Receipt 和清单完整性。 | 语义分离 DECIDED；全局完成/物理证明 OPEN。 |
+| B-DEC-011 | Storage Option A 的 Per-authority Anchor 可能被误认为领域身份、ForgetFence、PermissionEpoch 或全局顺序。 | 通用计数器；复用 D/I/C/COC Epoch；独立物理 Anchor 和名义引用。 | B 仅批准 L1/L2 名义类型边界；Anchor 属于 IMPLEMENTATION_DETAIL，不是规范领域实体/全局计数器。Storage 仍须证明物理 DB、same-GID、HA/Restore 和读路径。 | B 委托技术批准带例外；Storage v3.2.11 未联合接受/冻结；需 A 新审查和 L4 证据。 |
+| B-DEC-012 | 载荷 Sender Claim、传输认证、C Origin Signature 和 Authorization 可能被混为一谈。 | 复用 C Object P0；把 H Transport Sender 当作 C Signer；分离 C Origin P0、H Protected Context、I Trust Registry 和 Storage Durable Ingress。 | B 保留类型化身份区分；C 拥有 Origin-signed Message/P0；H 负责 Wire 解析/验证编排；I 负责 Trust/Profile/Issuer/Key Policy；Storage 负责认证后持久 Ingress/Replay。各层不可互相替代。 | 语义边界 CANDIDATE/RECOMMENDED；生产 Crypto/Trust/Ingress BLOCKED；A 要求不得冻结。 |
+
+## 3A. 中文被拒绝方案
+
+- **通用 Status Enum：** 丢失对象/Owner 专属权威和状态转换语义。
+- **全系统 Event Sourcing：** 所有 Bounded Context 都没有被证明需要；增加 Replay、Forget 和外部副作用成本。
+- **Content Hash 作为身份：** 相同内容可能代表不同对象，身份还必须在内容变化后保持稳定。
+- **通用 Actor/User ID：** 混淆安全身份、操作归因和逻辑 Agent 身份。
+- **默认完整 RDF/OWL Ontology：** 当前没有正式推理/互操作需求证据。
+- **Graph DB 作为规范真值：** 在用例未证明前增加双写、一致性和 Forget 复杂度。
+- **所有对象使用双时态字段：** 对非时间身份和 Runtime 状态过度建模。
+- **在 Fact/Claim 和跨 Owner 验收前冻结 Schema：** 与未决 ADR 和 Owner 权威冲突。
+
+## 4A. 中文未决决策
+
+- Fact/Claim 及 Claim 跨版本身份。
+- Tenant/Workspace/Project/Scope/Environment 分类和 Registry 权威。
+- 精确 ContextVersion/ChangeSet/Entry Schema 和跨 Owner 验收。
+- Applied 谓词及 CGH-APPLIED-1.1 精确版本验收。
+- JF-10 same-XID/COC/Storage 物理能力和故障注入。
+- Provenance 图循环策略和 Source/Provenance 记录身份。
+- 模糊时间编码及 Record Time 与 Transaction Time 映射。
+- Runtime 实现仓库和负责 Engineering Owner（Issue #7）。
+
 ## 3. Rejected alternatives / 被拒绝方案
 
 - Universal status enum — loses subject-specific authority and state transitions.
