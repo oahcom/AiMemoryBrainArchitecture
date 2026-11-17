@@ -253,3 +253,51 @@ No schema freeze, implementation authorization, merge, deployment, provider acti
 
 **系统：** **尚不具备架构冻结条件。** 严格按 B→A 推进：先关闭协议精确 Join，再关闭逻辑拓扑 Owner/证明义务，最后独立验证物理可行性。
 
+
+
+---
+
+## 7. Owner execution packet and dependency order / Owner 执行包与依赖顺序
+
+This section converts the findings into exact Owner-scoped work. It is a coordination specification, not permission for this review role to write to Owner branches. Each Owner must make its own changes on its own branch, publish a successor artifact, and provide exact branch HEAD, commit SHA, Blob SHA, and CI evidence. No approval is inferred from task assignment.
+
+本节将审查发现转化为精确的 Owner 任务。它是协调规范，不授权本审查角色写入 Owner 分支。每个 Owner 必须在自己的分支上完成修改、发布后继工件，并提供精确 branch HEAD、commit SHA、Blob SHA 与 CI 证据。不得因任务分配而推定批准。
+
+### Wave 1 — B exact protocol pins / 第一波 — B 协议精确绑定
+
+| Order | Owner | Required action | Required evidence / exit condition |
+|---|---|---|---|
+| 1 | H | Publish successor to mapping Blob `c196fd...`; replace predecessor D crosswalk `bf35b7...` with current D crosswalk `c4adf827dd62d44c43b8e871dec4835581508adf`; pin H schema `09fcd1fa29fe24255fbd87cae79dafb406594a59`; update C review status truthfully. | New mapping path + Blob; exact source pin table; mapping status no longer says C review required for a predecessor mapping; H CI run/commit readback. |
+| 2 | C | Re-review the exact successor H mapping Blob from step 1; do not reuse acceptance of predecessor Blob `c196fd...`. | New C review naming exact H mapping Blob, disposition and any conditions; candidate CI run and tested commit. |
+| 3 | H | Publish a fresh H review of current I P0 Blob `44986f5f864bcdc1a79d34978273644d381a68c0` against H schema Blob `09fcd1fa29fe24255fbd87cae79dafb406594a59`; supersede stale review `daf3ea...`. | New H review with exact I P0 + H schema Blob pins and explicit scope/limitations. |
+| 4 | I | Refresh Storage-anchor review after step 3; replace stale I P0 pin `35e684...` with `44986f...` and bind the new H review Blob. | New I review Blob; explicit PolicyDomain separation; no cross-domain atomicity implied. |
+
+### Wave 2 — A topology closure / 第二波 — A 拓扑收敛
+
+| Order | Owner | Required action | Required evidence / exit condition |
+|---|---|---|---|
+| 5 | Storage | Amend ADR `bb544ba2f346bdc130d524bd5c7310d86f367988`: label §3 no-selection text as historical; preserve §8 Option A as current normative v1 logical decision; specify scoped transaction/UoW capability, row-write ownership, retry identity and independent restore anti-rollback witness. | Successor ADR Blob; explicit API/ownership contract; restore witness failure behavior (unavailable/mismatch => RESTORE_FENCED/UNKNOWN); no DB engine or L4 claim unless separately evidenced. |
+| 6 | D | Review the exact successor Storage ADR Blob and transaction/UoW contract; explicitly decide D-owned row writes, anchor operation scope, D Fence/admission/publication race ordering and any objections. | D exact-Blob decision (ACCEPT / CONDITIONAL / REJECT), assumptions, unresolved items and evidence; do not substitute H carrier review for this decision. |
+| 7 | H, D, I, Storage | Jointly reconcile COC/JF-10 ordering with Option A while retaining separate authority/logs. | Exact sequence showing pre-commit proofs, post-outcome records, participant identities and fail-closed UNKNOWN behavior; no XA or cross-log atomicity claim. |
+| 8 | Storage | Publish a successor exact-version binding manifest only after steps 1–7 settle. Bind current C/H/D/I/Storage source, consumer-review and CI artifacts, including the exact successor H mapping, C re-review, D crosswalk/review, current I P0/H review/I anchor review and Storage ADR. | Manifest Blob with no stale predecessor pins; explicit supersession ledger; CI and branch-head readback. |
+| 9 | A (integration) | Re-read all named Owner branch HEADs and exact successor Blobs; re-run B→A integration and contradiction review. | Updated integration report and gate matrix; no inferred Owner acceptance; retain NOT READY if any required proof is absent. |
+
+### Required execution semantics / 执行语义
+
+1. **Strict sequence:** H mapping successor → C exact re-review; H review of current I P0 → I anchor-review refresh; Storage ADR successor ↔ D exact review; Storage manifest only after all upstream pins settle.
+2. **No cross-Owner writes:** A/integration may coordinate and review but must not commit to H/C/D/I/Storage Owner branches or rewrite their artifacts.
+3. **Exact-version invalidation:** any changed source Blob invalidates downstream reviews that cite the predecessor Blob. Re-run only the affected downstream review chain, but never silently transfer approval.
+4. **No gate laundering:** schema CI, reference-model tests, document existence, delegated role simulation or draft PR status cannot close physical, production, owner-approval or architecture-freeze gates.
+5. **No merge or freeze:** PR #52 remains Draft. This report and its execution packet do not authorize merge, Owner branch merge, implementation, deployment or production activation.
+
+1. **严格顺序：** H mapping 后继版本 → C 精确复审；H 对当前 I P0 的复审 → I 更新 anchor review；Storage ADR 后继版本 ↔ D 精确审查；所有上游 pin 稳定后 Storage 才能发布 manifest。
+2. **禁止跨 Owner 写入：** A/集成角色可以协调和审查，但不得向 H/C/D/I/Storage Owner 分支提交或改写其工件。
+3. **精确版本失效：** 任一源 Blob 变化，引用旧 Blob 的下游审查即失效。只重跑受影响的下游链，但不得静默继承批准。
+4. **禁止 Gate 洗白：** Schema CI、参考模型测试、文档存在、委托角色模拟或 Draft PR 状态，均不能关闭物理、生产、Owner 批准或架构冻结门禁。
+5. **禁止合并或冻结：** PR #52 保持 Draft。本报告及执行包不授权合并、Owner 分支合并、实现、部署或生产启用。
+
+### Stop conditions / 停止条件
+
+Stop the chain and retain the affected item as BLOCKED if: (a) a named exact source Blob cannot be read; (b) a successor review omits its exact predecessor Blob; (c) an Owner rejects or materially conditions the contract; (d) a required witness/authority is unavailable; (e) any workflow resolves UNKNOWN as success/abort/terminality; or (f) the physical transaction/restore proof is asserted without reproducible evidence.
+
+如出现以下任一情况，停止依赖链并将相关事项保持为 BLOCKED：(a) 无法读取指定精确源 Blob；(b) 后继审查未列明其精确前序 Blob；(c) Owner 拒绝或对契约提出实质条件；(d) 所需 witness/authority 不可用；(e) 任一工作流将 UNKNOWN 解释为成功/中止/终态；(f) 未提供可复现证据却宣称物理事务/恢复证明成立。
