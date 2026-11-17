@@ -7,6 +7,7 @@ claim semantic translation parity; that remains a reviewer responsibility.
 from __future__ import annotations
 
 import os
+from datetime import date
 import subprocess
 import sys
 from pathlib import Path
@@ -57,8 +58,12 @@ def approved_exception(body: str) -> bool:
         values[label] = value
     if not all(values.values()):
         return False
-    due = values["Due date (YYYY-MM-DD"]
-    if len(due) < 10 or not due[:10].count("-") == 2:
+    if any(value.upper() in {"TBD", "TODO", "N/A", "PENDING"} for value in values.values()):
+        return False
+    due = values["Due date (YYYY-MM-DD"][:10]
+    try:
+        date.fromisoformat(due)
+    except ValueError:
         return False
     return True
 
