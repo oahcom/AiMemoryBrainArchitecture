@@ -20,16 +20,16 @@
 | H | RecoveryJoin 1.0.2 tests | `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a` |
 | H | Unified 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
 | H | Unified 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
-| H | Candidate CI | Run `44051676055`, commit `16c0e63458a3e3773cd38ef86bfb4f7fe44dd0b4`, 288 total / 266 passed / 22 skipped / 0 failed |
+| H | Candidate CI | Run `44051851164`, commit `ba99eea9334d77c2a014ed45d9287ef514a4d895`, 288 total / 266 passed / 22 skipped / 0 failed |
 | I | Crypto profile proposal | `5eeb011032c53c2f7897d699d6f512b26f07d0a2` |
 | I | Artifact revision / manifest digest amendment | `35c47cc56c9d5e7ab72fdddb7ef9032aa3661ff9` |
 | I | Owner membership proof contract | `88209bbea0ab600880c5c630cfe83af31ee16dd7` |
 | I | Exact H membership proof review | `27b355ff4174fed20033b78d2e77f5c1e8d3177a` |
 | D | Owner membership proof contract | `d80dabe7210e681bc4e2290355a38f8b67be9ddd` |
-| D | Exact H membership proof review | `fe4ba71dd3a07d0775e17dbb90e8aeccc3bc71c0` |
+| D | Exact H membership proof review | `0edd96d07960292d938656d5d8a20095750f4cf1` |
 | D | Gate/currentness/producer contract | `7f2861d9441b9be6c8e69f41fd0276636be483a8` |
 | C | Owner membership proof contract | `5e37185610869951c3b392c9ad143a72b4c702ac` |
-| C | Exact H membership proof review | `c6b317f5050bca745bb6308ad6f77ba7d8284f77` |
+| C | Exact H membership proof review | `ea2e11519646225679eadc8b33af0d755998d92e` |
 | C | Provider Outcome binding decision | `1353572f7d5655e3007b2fb5b3f10066f483e6bb` |
 | C | Provider Egress Gate Adapter | `a8d1cfc4d2171c9b0a0ced10e53fc6b110479aca` |
 | Storage | COC protocol v3.2.3 | `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792` |
