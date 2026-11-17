@@ -529,3 +529,70 @@ R-04 继续为 **High / NOT PROVEN**。合同已更清晰地区分 Provider Hand
 7. 执行 Duplicate Callback、Delayed/Late Evidence、Lost ACK、Provider Side Effect 后 Timeout、Stale Authorization/Fence、Replay Reservation Crash、Gateway Restart 和 Storage Outcome Ambiguity 的端到端故障测试。
 
 任何角色模拟 Owner 决议、Schema 存在或本地 Validator 测试都不能关闭 R-04。
+
+
+## 18. R-05 实时精确版本漂移审计 — 2026-11-18
+
+### 18.1 精确来源锚点
+
+| Owner | 分支 HEAD | 工件 / Blob | 观察到的状态 |
+|---|---|---|---|
+| Storage | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | v3.3.2 Manifest `5c614375e10698e4931d83deb57d20321445e068` | 明确绑定 H 1.2.14 + C 1.0.1；60 项 Reference-ingress 证据；未联合采纳/冻结；要求新的 A Review |
+| C | `71047cdb51139ca4080ac67f451e38a48698859d` | Phase 3.8.26 Review `c5ff68814be49ec5e6e2c081004e7fa058d276fa` | 有条件接受 H 1.2.15 Schema Shape；Validator/CI 未审查 |
+| C | 同一 HEAD | Phase 3.8.27 Ordering Review `3ca06dbfd7d59483e9604b7a68df924c719f60aa` | 委托 C 角色决议接受修正顺序，不是独立人工 Owner 签名 |
+| C | 同一 HEAD | CSubmitOutcome 1.0.1 Schema `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` | 精确 C Object Schema |
+| C | 同一 HEAD | Phase 3.8.4 Exact-owner Binding `1353572f7d5655e3007b2fb5b3f10066f483e6bb` | C 语义源集合在列明例外下接受；文内 Reviewed HEAD `afacd82...` 和 H 1.2.11 Addendum 属历史记录 |
+| D | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | Phase 3.8.5 Adoption `46b6abd94f3396e5eef7d7456f9b62a3865d4ce2` | Unified 1.2.12 + RecoveryJoin 1.0.2 候选；要求 H 精确交叉审查；未冻结 |
+| D | 同一 HEAD | Publication Terminal Contract `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | D 提案；精确 Owner 批准、Callable API 和符合性 OPEN |
+| E | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | Publication Orchestration `475fee41e5eea527af4edefbfe88c58c86967d0a` | E 提案；D/I/Storage 精确 API 和独立批准 OPEN |
+| G | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | Applied/Forget Contract `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G 语义在列明例外下批准；C/G/H Applied Freeze 阻塞；实现/执行未验证 |
+| H | `0d36324457e39bd50ad56ae902d477c4ea765b61` | Unified 1.2.15 Schema `860fc4cec658db7d2703cd6adf72aa31a2723f6d` | 不可变 1.2.15 Schema 候选；Wire Family 1.3.0 |
+| H | 同一 HEAD | Phase 3.8.21 Mapping `2dc30f193d9c4f4bdc05ca4c137103687db28924` | 仅候选；明确未声称 Validator/CI；未冻结 |
+| I | `0d071bf1ee7cc71912398c6ae57e4496e08f44ab` | Phase 3.8.22 Review `6ba4ce3a93f2adf6f8961d4927d9b87deb9696bf` | 接受 1.2.15 结构 Carrier 候选；Profile 注册、Key Status 和 Trust Root OPEN |
+| I | 同一 HEAD | Phase 3.8.5 Adoption `b56b0c3690f1826f2fc965ec6af5d66a920004ae` | 仍绑定 Unified 1.2.12 + RecoveryJoin 1.0.2 候选；未冻结 |
+
+### 18.2 发现
+
+**R05-1 — Storage v3.3.2 对 H 1.2.14 精确，不是当前 H 1.2.15。** Manifest 绑定 H Unified 1.2.14 Blob `09fcd1fa29fe24255fbd87cae79dafb406594a59` 与 CSubmitOutcome 1.0.1。其 60 项测试绑定测试 Commit `0e212731073b36e4fa9ffda8467e60806da1b380`。当前 H 已有 1.2.15 Blob `860fc4...`。Manifest 正确地没有声称 1.2.15；消费者不得将 v3.3.2 误标为 1.2.15 Bundle。需要后继 Manifest 和新的 A Review。
+
+**R05-2 — D/I RecoveryJoin 采纳仍绑定 H 1.2.12。** D Phase 3.8.5 与 I Phase 3.8.5 均绑定 Unified 1.2.12 Blob `a54f66914a819d77f00c6af04e76453ff9f654ee` + RecoveryJoin 1.0.2 Blob `4b664e3bce465499bcdfd93796349a4ba7074002`；均为 Candidate、要求 H 精确交叉审查且未冻结。H 1.2.14/1.2.15 不会自动修改 D/I 适用版本声明。RecoveryJoin Carrier 与 Provider Outcome/Gateway-attestation Schema 是不同消费者；各自需要显式逐字段映射。
+
+**R05-3 — C 决议记录存在版本新鲜度混杂。** C Phase 3.8.4 Binding Decision 记录历史 Reviewed HEAD `afacd82...` 和 H 1.2.11 Addendum。该记录仍可证明 C 自有语义权威，但不是当前 1.2.15 批准。后续 C Phase 3.8.26 精确绑定 H 1.2.15 与 CSubmitOutcome 1.0.1，但仅接受 Schema Shape，明确尚未审查 Validator/CI。Phase 3.8.27 是委托角色决议，不是独立 Owner 批准。
+
+**R05-4 — I 接受 1.2.15 Carrier，不代表生产 Trust Profile 已注册。** I Phase 3.8.22 仅接受结构 Shape，Profile 注册、Issuer/Key 批准、Key Status History、Trust Root、Custody、Anti-rollback 和生产验证均 OPEN。
+
+**R05-5 — D/E/G 缺少统一可执行 Publication/Applied Bundle。** D Publication Terminal Contract 与 E Orchestration 仍为提案；Callable API 和独立批准 OPEN。G Applied 语义在列明例外下批准，但 C/G/H Applied Freeze 阻塞，实现/执行未验证。未发现精确 D/E/G/H/I/Storage Tuple Bundle 或联合符合性运行。
+
+**R05-6 — Storage v3.3.2 Review 表属于前序版本范围。** 其 C/D/I/H 行引用 42-Test 阶段 Review 和 H 1.2.14 Reference-ingress 证据。A Review 是仅针对 v3.3.1 的 Phase 3.12.1，明确不转移至 v3.3.2。后续 C/I 1.2.15 Review 未纳入。Manifest 自身正确要求重新审查 v3.3.2。
+
+### 18.3 R-05 结论
+
+R-05 继续为 **High / NOT PROVEN**。证据证明存在版本族分歧，不证明 1.2.12/1.2.14/1.2.15 天然不兼容。它们服务不同消费者，需要显式逐字段兼容/采纳边。实际缺口是 RecoveryJoin、Provider Outcome、Publication 与 Applied 之间缺少当前联合审查的兼容图，以及机械化的后继版本失效和 Review 转移规则。
+
+本轮未发现可称为当前联合采纳跨 Owner Freeze 的 Manifest。Storage v3.3.2 是委托协调 Manifest；D/I 1.2.12 Adoption 是候选；C/H 1.2.15 Schema Review 是委托角色决议；I Registration OPEN；D/E Publication 仍为提案；G Applied Freeze 阻塞。
+
+### 18.4 关闭条件
+
+1. 发布 Storage 后继 Manifest，区分 RecoveryJoin Carrier Version 与 Provider Outcome/Gateway-attestation Schema Version；分别绑定 Schema、Validator、P0 Profile、Fixtures、Workflow、Raw Run/Job、测试 Commit、源 Blob 和 Consumer Mapping。
+2. C 针对 H 1.2.15 与 CSubmitOutcome 1.0.1 发布新的精确 HEAD Semantic/Validator Review。
+3. H 发布精确 1.2.15 Validator/Gateway 符合性并在精确 Commit 运行 Workflow；测试双向 Revision 替换、每个条件字段、C/H Signature 组合、Origin-to-Adapter Binding、重复字段、Replay 和 UNKNOWN/INVALID。
+4. I 独立注册精确 H Profile、Issuer、Key Lifecycle、Trust Root、Custody、Sequence/Anti-rollback 和 Transport Receipt Verifier；此前生产 Trust 保持 OPEN。
+5. D/I 发布 RecoveryJoin 后继采纳修订映射 1.2.15（若该 Carrier 使用 1.2.15），或保留 1.2.12 并说明理由；不得推断 Provider Outcome Schema 会自动改变 RecoveryJoin Carrier。
+6. D/E/Storage 发布精确 Publication Participant/API/Tuple Compatibility Bundle；G/C/H 发布独立精确 Applied Proof Bundle；每个 Owner 审查自己的 Blob。
+7. A 审查精确后继 Manifest 与全部 Consumer Edge。变更 Blob 只使受影响范围的前序 Review 失效，不得跨变更范围转移批准。
+8. CI 绑定测试 Commit、Workflow Blob、Test/Fixture Blob、Dependency Lock 和 Raw Log；前序 Commit 的绿色运行不能关闭后继版本 Gate。
+
+**关闭状态：NOT CLOSED。** R-05 仍是 High 架构冻结阻塞项。
+
+## 19. R-05 证据分类
+
+| 声明 | 分类 | 依据 |
+|---|---|---|
+| Storage v3.3.2 精确 Pin 可识别 | VERIFIED | 直接读取当前 Manifest 和源 Blob Pin |
+| H 1.2.15 Schema Shape 有 C/I 委托结构 Review | VERIFIED | 直接读取 C Phase 3.8.26 与 I Phase 3.8.22 Blob |
+| C 已接受 H 1.2.15 Validator/CI | NOT PROVEN | C Review 明确尚未审查 |
+| I 生产 H Gateway Profile 已注册 | NOT PROVEN | I Review 保留 Registration/Key/Trust OPEN |
+| D/I RecoveryJoin 采纳已更新到 1.2.15 | NOT PROVEN | 当前 D/I 修订仍绑定 1.2.12 |
+| D/E/G/Storage 共用已接受可执行 Publication/Applied Bundle | NOT PROVEN | D/E 提案、G Freeze 阻塞、无联合 Bundle/测试 |
+| 前序 Review 自动转移到当前 HEAD | FALSE | Manifest 明确不转移；A Review 仅针对 v3.3.1 |
+
