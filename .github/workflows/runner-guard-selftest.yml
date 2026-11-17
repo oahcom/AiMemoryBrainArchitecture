@@ -4,8 +4,8 @@ name: Runner Guard Self-Test
 # that the L1 admission hook admitted it. Read-only; prints no secrets.
 #
 # Documented in DOC-OPS-001 section 13 and AI-RUN-002-RUNBOOK section 4.1.
-# Triggered by changes to this file and by manual dispatch. The temporary cron
-# entry is removed once the admission hook is verified against live job context.
+# The push trigger is scoped to this file so the workflow runs when it is added
+# or revised and stays dormant otherwise.
 
 on:
   push:
@@ -13,8 +13,6 @@ on:
     paths:
       - '.github/workflows/runner-guard-selftest.yml'
   workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
 
 permissions:
   contents: read
@@ -57,9 +55,9 @@ jobs:
             echo "::error::no ALLOW decision for refs/heads/main in the guard log"
             exit 1
           fi
-          dump="${HOME}/actions-runner/hooks/context-dump.txt"
-          if [ -r "$dump" ]; then
-            echo "Hook context source (first lines of the diagnostic capture):"
-            head -n 12 "$dump"
+          decision="${HOME}/actions-runner/hooks/last-decision.txt"
+          if [ -r "$decision" ]; then
+            echo "Guard decision record:"
+            cat "$decision"
           fi
           echo "Admission guard admitted this job."

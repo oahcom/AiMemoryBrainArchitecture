@@ -1,10 +1,10 @@
 # AI Memory Brain — CI Self-Hosted Runner Operations
 
 - Document ID: DOC-OPS-001
-- Version: 1.0
+- Version: 1.1 (revised 2026-11-17: run-identity deviation accepted, service-layer admission added)
 - Chinese counterpart: [CI 自托管 Runner 运维设计](../../zh-CN/14-ai-development/ci-runner-operations.md)
 - Basis: Actual deployment and measurements on cloud host zesu on 2026-11-17 (the host address is not recorded in this repository); source revision recorded at the end of this document
-- Status: **Operations design note** describing one **deployed and running** instance. Measured numbers are single measurements from that day and are not performance commitments. Evidence of a first real CI execution remains OPEN (see section 14)
+- Status: **Operations design note** describing one **deployed and running** instance. Measured numbers are single measurements from that day and are not performance commitments. Admission control is enforced at the service layer by the L1 hook (section 4); first-execution evidence is in section 14
 
 ## 1. Purpose
 
@@ -34,7 +34,7 @@ Because this repository's CI cannot rely on GitHub-hosted runners for network re
 
 ## 4. Relationship to the existing bootstrap runbook
 
-The repository already contains a runner bootstrap runbook, `AI-RUN-002-RUNBOOK` (`14-ai-development/ubuntu-self-hosted-runner-bootstrap.md`, on branch `infra/remote-worker-bootstrap-2026-11-17`, tracked by Issue #26), with status **PROPOSED / operator-executed**.
+The repository already contains a runner bootstrap runbook, `AI-RUN-002-RUNBOOK` (`14-ai-development/ubuntu-self-hosted-runner-bootstrap.md`, on branch `infra/remote-worker-bootstrap-2026-11-17`, tracked by Issue #26), with status **ACTIVE / operator-executed (v1.1, revised 2026-11-17)**.
 
 This document records the **actual result of executing that runbook**. The two **diverge** on deployment shape, and the divergence must be recorded explicitly rather than glossed over with "deployed as specified":
 
@@ -47,9 +47,31 @@ This document records the **actual result of executing that runbook**. The two *
 | Target host | `ubuntu-primary-01` | The same host (`vm-0-9-ubuntu`) |
 | Status | PROPOSED | Deployed and online |
 
-**Practical consequence of the divergence**: workflows execute as `ubuntu`, and that account can escalate to root without a password, so **any workflow triggered from an allowed branch is equivalent to root on this host**. The only current mitigation is admission control: run only trusted-branch or manually dispatched workflows, and never fork-PR or untrusted-PR code. This matches section 0 of the runbook, but there is **no automated enforcement** — it depends on human discipline.
+**Practical consequence of the divergence**: workflows execute as `ubuntu`, and that account can escalate to root without a password, so **any workflow that executes on this host is equivalent to root on it**.
 
-**Open**: either roll back to the runbook shape (create an `actions-runner` account, relocate to `/opt`, re-register), or revise the runbook to accept the current shape and add enforced trusted-trigger-only checks at the service layer. Until that decision, this divergence is **visible technical debt** and MUST NOT be described as "compliant with the bootstrap runbook".
+**Decision (DECIDED, 2026-11-17, Owner)**: do **not** roll back the account shape. Revise `AI-RUN-002-RUNBOOK` to v1.1 accepting the deployed shape, and move admission control from human discipline to **service-layer enforcement**. Rationale: rolling back would only turn "root-equivalent" into "an unprivileged account on the same host", while whether that account can escalate is not the main risk surface — **the main risk surface is whether a workflow starts executing on this host at all**. The effective control point is the admission verdict, not the account name.
+
+**Three admission layers**:
+
+| Layer | Mechanism | Location | Enforceability |
+|---|---|---|---|
+| L1 service | An `ACTIONS_RUNNER_HOOK_JOB_STARTED` hook reads `GITHUB_REF` and `GITHUB_EVENT_NAME` and admits only `push`, `workflow_dispatch`, and `schedule` on `refs/heads/main`; everything else fails **before any step runs** | Host `~/actions-runner/hooks/job-started-guard.sh`, injected via a systemd drop-in | **Enforced**: decided inside the runner; editing a workflow cannot change the verdict |
+| L2 repository | Workflow audit: a `self-hosted` job combined with `pull_request`, `pull_request_target`, `issue_comment`, `workflow_run`, or similar events, an unfiltered `push`, or a statically unevaluable `runs-on` expression fails the check | `.github/workflows/runner-admission-policy.yml` + `scripts/ci/audit_runner_admission.py` | Preventive: binding only once configured as a required status check |
+| L3 organization | Branch protection, Environments with required approval, repository-scoped runner groups | GitHub repository settings | Requires the Owner to enable it in the UI; this document does not claim it is enabled |
+
+**L1 evidence** (2026-11-17, same host):
+
+| Scenario | Result |
+|---|---|
+| `push` to `refs/heads/main` (run 44049832708) | ALLOW, job `Succeeded` |
+| `push` to `refs/heads/ci/admission-negative-test` (run 44050069421) | DENY `ref_not_default_branch`, job `Failed`, **zero steps executed** |
+| Where the hook gets its context | This runner version invokes `bash -e <hook>` with no argv and no stdin; the verdict uses the `GITHUB_*` environment exported by the worker |
+
+**Residual risk (accepted; no longer an open item)**:
+
+1. The hook governs only whether a job may start, not what it does; steps can still `sudo`. Tightening that requires `NoNewPrivileges=yes` or a separate account, both of which change existing job capabilities and were **not** implemented in this round.
+2. `main` currently has **no branch protection** (the hook observed `GITHUB_REF_PROTECTED=false`), so "trusted branch" is a factual convention rather than a platform guarantee. Until branch protection is enabled, anyone who can push to `main` can change the workflow that will run; L1 only checks the ref and will not stop it.
+3. The hook is fail-closed: if the hook script or `python3` is unavailable, every job fails. The rollback switch is `hooks/observe.flag` (present = log only, never block).
 
 ## 5. Components and responsibilities
 
@@ -206,8 +228,9 @@ A runner is considered usable only when **all** of the following hold:
 3. `api.github.com` through the proxy returns 200 (routing rule still effective).
 4. `codeload` can download one action package completely (bulk-transfer path).
 5. One real `git clone` completes (multiplexed and redirected path).
+6. The admission hook is installed and `guard.log` contains an `ALLOW ref=refs/heads/main` decision (proves L1 was not bypassed).
 
-Items 1–4 are necessary conditions; **item 5 is the sufficient one** — only it covers all three failure points at once: TLS, the redirect to `release-assets` / `objects.githubusercontent.com`, and stream multiplexing.
+Items 1–4 and 6 are necessary conditions; **item 5 alone is sufficient** — only it covers all three failure points at once: TLS, the redirect to `release-assets` / `objects.githubusercontent.com`, and stream multiplexing.
 
 ## 14. Decisions, open items, and references
 
@@ -216,12 +239,12 @@ Items 1–4 are necessary conditions; **item 5 is the sufficient one** — only 
 - Egress defaults to WARP; the subscription node pool is demoted to fallback. Rationale: WARP is free and consumes no subscription quota, while the subscription egress is a shared IP that consumes quota.
 - Routing: `api.github.com` and domestic mirrors go direct, everything else goes through the proxy. Rationale in 8.3.
 - Labels are fixed at `self-hosted,linux,x64`; workflows **MUST NOT** use `arm64` (the host is x86_64).
+- The run-identity deviation is **accepted and locked in** (section 4): the account shape is not rolled back, and the L1 hook enforces “only `refs/heads/main` may execute” at the service layer. Decided 2026-11-17; runbook v1.1.
 - No tuning for jitter; the default MTU is kept.
 
 **Open**
 
-- **Run identity conflicts with the runbook** (section 4). Workflows execute as an account holding passwordless sudo, which conflicts with the privilege boundary required by `AI-RUN-002-RUNBOOK`; an Owner decision is needed to either roll back or revise the runbook.
-- **Complete evidence of a first real workflow execution has not been collected.** Current evidence covers only "the runner is online and five endpoints are reachable"; it **MUST NOT** be read as "the CI pipeline has been verified".
+- **No business pipeline has executed on this runner yet.** The first real execution is `Runner Guard Self-Test` (2026-11-17, run 44049832708, `Succeeded`), which validates the fetch-execute-report chain and is **not** evidence that this repository's CI pipeline passes.
 - Disk growth rate is unknown; no cleanup threshold or alerting is configured. Until then, capacity risk is carried by manual inspection.
 - The fallback pool's validity depends on subscription availability; there is no automatic switching policy (switching is currently a manual decision). This is deliberate: automatic switching would cause pointless flapping whenever WARP jitters.
 

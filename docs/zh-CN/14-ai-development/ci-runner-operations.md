@@ -1,10 +1,10 @@
 # AI Memory Brain — CI 自托管 Runner 运维设计
 
 - 文档 ID：DOC-OPS-001
-- 版本：1.0
+- 版本：1.1（2026-11-17 修订：接受运行身份偏差，新增服务层准入校验）
 - 对应英文：[CI Self-Hosted Runner Operations](../../en/14-ai-development/ci-runner-operations.md)
 - 依据：2026-11-17 在云端主机 zesu 上的实际部署与实测数据（主机地址不在本仓库记录），源修订见本文末
-- 状态：**运维设计说明**，描述一个**已部署并运行**的实例；实测数字为该日的单次测量，不构成性能承诺；首次真实 CI 执行证据仍为 OPEN（见第 14 节）
+- 状态：**运维设计说明**，描述一个**已部署并运行**的实例；实测数字为该日的单次测量，不构成性能承诺；准入控制已由 L1 钩子在服务层强制执行（第 4 节），首次真实执行证据见第 14 节
 
 ## 1. 目的
 
@@ -34,7 +34,7 @@
 
 ## 4. 与本仓库既有引导规程的关系
 
-本仓库已有一份 Runner 引导规程 `AI-RUN-002-RUNBOOK`（`14-ai-development/ubuntu-self-hosted-runner-bootstrap.md`，位于 `infra/remote-worker-bootstrap-2026-11-17` 分支，跟踪 Issue #26），状态为 **PROPOSED / operator-executed**。
+本仓库已有一份 Runner 引导规程 `AI-RUN-002-RUNBOOK`（`14-ai-development/ubuntu-self-hosted-runner-bootstrap.md`，位于 `infra/remote-worker-bootstrap-2026-11-17` 分支，跟踪 Issue #26），状态为 **ACTIVE / operator-executed（v1.1，2026-11-17 修订）**。
 
 本文档记录的是该规程的**实际执行结果**。两者的部署形态**存在偏差**，必须显式记录，不能用"已按规程执行"含混过去：
 
@@ -47,9 +47,31 @@
 | 目标主机 | `ubuntu-primary-01` | 同一主机（`vm-0-9-ubuntu`） |
 | 状态 | PROPOSED | 已部署并在线 |
 
-**偏差的实际后果**：workflow 以 `ubuntu` 身份执行，而该账号可无密码提权到 root，因此**任何在被允许分支上触发的 workflow 都等价于该主机的 root 权限**。当前唯一的缓解措施是准入限制：只对受信分支或手动触发的 workflow 执行，禁止 fork PR 与不可信 PR 的代码——这一点与规程第 0 节一致，但**没有任何自动校验**，依赖人工遵守。
+**偏差的实际后果**：workflow 以 `ubuntu` 身份执行，而该账号可无密码提权到 root，因此**任何在这台主机上执行的 workflow 都等价于该主机的 root 权限**。
 
-**未决（OPEN）**：是回退到规程形态（新建 `actions-runner` 账号、迁到 `/opt`、重新注册），还是修订规程接受现状并在服务层加"仅受信触发"的强制校验。在决策之前，本偏差属于**可见技术债**，不得表述为"符合引导规程"。
+**决策（DECIDED，2026-11-17，Owner）**：**不回退**账号形态。把 `AI-RUN-002-RUNBOOK` 修订为 v1.1 接受现状，并把准入限制从"靠人遵守"改为**服务层强制**。理由：回退只能把"root 等价"换成"同一主机上的普通用户"，而账号能否提权并非主要风险面——**主要风险面是"workflow 能不能在这台主机上开始执行"**。有效的控制点是准入判定，不是账号名。
+
+**三层准入校验**：
+
+| 层 | 机制 | 落点 | 强制力 |
+|---|---|---|---|
+| L1 服务层 | `ACTIONS_RUNNER_HOOK_JOB_STARTED` 钩子读 `GITHUB_REF` 与 `GITHUB_EVENT_NAME`，仅放行 `refs/heads/main` 上的 `push`、`workflow_dispatch`、`schedule`，其余在**任何步骤执行前**失败 | 主机 `~/actions-runner/hooks/job-started-guard.sh`，经 systemd drop-in 注入 | **强制**：在 runner 内部判定，改 workflow 改变不了判定 |
+| L2 仓库层 | 工作流审计：`self-hosted` 与 `pull_request` / `pull_request_target` / `issue_comment` / `workflow_run` 等事件的组合、无分支约束的 `push`、无法静态判定的 `runs-on` 表达式，一律判失败 | `.github/workflows/runner-admission-policy.yml` + `scripts/ci/audit_runner_admission.py` | 预防性：需设为必需状态检查才具约束力 |
+| L3 组织层 | 分支保护、Environment 必须审批、Runner group 限仓 | GitHub 仓库设置 | 需 Owner 在设置界面启用；本文不代为声明已启用 |
+
+**L1 的实测依据**（2026-11-17，同一台主机）：
+
+| 场景 | 结果 |
+|---|---|
+| `push` → `refs/heads/main`（run 44049832708） | ALLOW，job `Succeeded` |
+| `push` → `refs/heads/ci/admission-negative-test`（run 44050069421） | DENY `ref_not_default_branch`，job `Failed`，**零个步骤执行** |
+| 钩子的上下文来源 | 该版 runner 以 `bash -e <hook>` 调用，无参数、无 stdin；判定依据来自 worker 导出的 `GITHUB_*` 环境变量 |
+
+**残余风险（已接受，不再是未决事项）**：
+
+1. 钩子只管"job 能否开始"，不管"job 里做什么"，步骤内仍可 `sudo`。收敛需 `NoNewPrivileges=yes` 或独立账号，两者都会改变现有 job 能力，本轮**未实施**。
+2. `main` 目前**未启用分支保护**（钩子实测 `GITHUB_REF_PROTECTED=false`），"受信分支"因此是事实约定而非平台强制。启用分支保护前，能推送 `main` 的人可直接改变待执行的 workflow，L1 只认 ref、不会拦。
+3. 钩子 fail-closed：钩子脚本或 `python3` 不可用时所有 job 失败。回滚开关为 `hooks/observe.flag`（存在时仅记录、不拦截）。
 
 ## 5. 组件与职责
 
@@ -206,8 +228,9 @@ GitHub
 3. 经代理访问 `api.github.com` 返回 200（验证分流未失效）。
 4. `codeload` 能完整下载一个 action 包（验证大文件链路）。
 5. 一次真实 `git clone` 能完成（验证多流与重定向链路）。
+6. 准入钩子已启用，且 `guard.log` 中存在 `ALLOW ref=refs/heads/main` 记录（验证 L1 未被绕过）。
 
-前四项是必要条件，**第 5 项才是充分条件**——只有它能同时覆盖 TLS、重定向到 `release-assets` / `objects.githubusercontent.com`、多流复用三个失败点。
+前四项与第 6 项是必要条件，**第 5 项才是充分条件**——只有它能同时覆盖 TLS、重定向到 `release-assets` / `objects.githubusercontent.com`、多流复用三个失败点。
 
 ## 14. 决策、未决事项与引用
 
@@ -216,12 +239,12 @@ GitHub
 - 出口默认 WARP，订阅节点池降为备用。理由：WARP 免费且不计订阅流量，订阅出口为共享 IP 且消耗配额。
 - 分流：`api.github.com` 与国内镜像站直连，其余走代理。理由见 8.3。
 - 标签固定为 `self-hosted,linux,x64`，workflow 中**禁止**写 `arm64`（该主机为 x86_64）。
+- 运行身份偏差**接受并固化**（第 4 节）：不回退账号形态，由 L1 钩子在服务层强制“仅 `refs/heads/main` 可执行”；决策日 2026-11-17，对应规程 v1.1。
 - 不为抖动调参，保持 MTU 默认值。
 
 **未决（OPEN）**
 
-- **运行身份与规程不一致**（第 4 节）。workflow 以具备免密 sudo 的账号执行，与 `AI-RUN-002-RUNBOOK` 的权限边界要求相冲突，需 Owner 决定回退或修订规程。
-- **首次真实 workflow 执行的完整证据尚未采集。** 当前证据只能覆盖"Runner 在线、五个端点可达"，**不能**声称 CI 流水线已验证通过。
+- **业务流水线尚未在本 Runner 上执行。** 已完成的首次真实执行是 `Runner Guard Self-Test`（2026-11-17，run 44049832708，结论 `Succeeded`），它验证的是“取值—执行—回传”链路，**不等于**本仓库 CI 流水线通过。
 - 磁盘增长速率未知，未设定清理阈值与告警。在设定之前，容量风险由人工巡检承担。
 - 备用节点池的有效期取决于订阅可用性，未做自动切换（当前需人工判断后切换）。此为有意为之：自动切换会在 WARP 抖动时造成无意义的反复切换。
 
