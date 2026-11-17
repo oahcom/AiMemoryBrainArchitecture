@@ -409,3 +409,27 @@ These are coordinator-authored role-specific candidates, not independent Owner d
 - H: an explicit owner-authority verifier adapter contract maps owner verification to VALID/INVALID/UNKNOWN without taking over I/D/C cryptographic or ledger authority.
 
 No executable owner-local sequencer, durable in-flight ledger, owner signer/verifier, production adapter, or race/fault-injection test is established by these documents. R1/R2 remain OPEN until each actual Owner independently adopts/amends/rejects the exact candidate, Storage/H map the sealed record families to the current wire contract, and A performs a new exact-version integration review. Gate A remains PARTIAL PASS / OPEN; Gate B/C remain blocked; JF-10 P0 remains OPEN; production activation remains NOT AUTHORIZED.
+
+
+### 10.10 H R1/R2 exact wire crosswalk and Storage round/release addendum (2026-11-17)
+
+The current H branch exact schema versions were re-read before binding:
+- Unified COC/JF-10/Provider schema 1.2.12 — Blob `a54f66914a819d77f00c6af04e76453ff9f654ee`.
+- RecoveryJoin 1.0.2 — Blob `4b664e3bce465499bcdfd93796349a4ba7074002`.
+- RecoveryCutoff 1.0.5 — Blob `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`.
+
+The H exact wire crosswalk candidate:
+- Path: `08-bmcp-protocol/phase-3.8.6-h-r1-r2-owner-gate-wire-crosswalk.md`
+- Branch: `session-h-bmcp-protocol`
+- Blob: `8b5b2c37201f7ae821bb5ca71a5101f19e75cf5c`
+
+The Storage R1/R2 round and release ordering addendum:
+- Path: `reviews/storage-consistency/phase-3.6.13-storage-r1-r2-batch-round-and-owner-release-ordering-addendum.md`
+- Branch: `session-storage-consistency-forget-atomicity-2026-11-16`
+- Blob: `0477f0329997e42a1cbf6ecb8127c5c01fa47051`
+
+The crosswalk maps the current schema record families: OWNER_LOCAL_PENDING_GATE, COC_RECOVERY_CUTOFF_BATCH, PARTICIPANT_SET_RECONCILIATION, OWNER_LOCAL_ADMISSION, COC_PARTICIPANT, OWNER_LOCAL_GATE_RELEASE and RECOVERY_EPOCH_COMPLETED. It explicitly distinguishes structural schema validity from authoritative owner ledger completeness, close-vs-admission serialization, fresh release CAS and provider send-vs-close execution.
+
+The Storage addendum fixes the immutable RecoveryRound identity, same-key retry after lost ACK, strict Batch-before-Manifest quorum order, exact linearizable readback, successor-round handling for post-snapshot high-water changes and separate owner-signed release CAS. It does not claim implementation or executed fault tests.
+
+Both are coordinator-authored candidates, not independent Owner acceptances. The current A review is not refreshed by this binding. R1/R2 remain OPEN; Gate A PARTIAL PASS/OPEN; Gate B/C BLOCKED; JF-10 P0 OPEN; production activation NOT AUTHORIZED.
