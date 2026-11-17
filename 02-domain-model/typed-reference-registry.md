@@ -312,3 +312,14 @@ Original prepare timeline/LSN are immutable historical facts. Recovery timeline/
 - No Storage registry authority is designated by B.
 - No I36 governance approval, inventory seal, authorization permit, H wire freeze, production DB selection, runtime implementation or conformance PASS is claimed.
 - The A G0–G10 plan remains the overall acceptance authority. This B type decision can support G4 technical reconciliation but does not close G5, G6, G7 or G10.
+
+
+### 13.5 Companion protocol §14 reconciliation requirement
+
+The exact Storage companion protocol §14, Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`, is older/narrower than Storage v3 §§15.1–15.7, Blob `4a60420d457f359780c568dce42b8bef000026ca`. §14 currently binds PreparedParticipantRef, PreparedTransactionGID, engine-native XID, CanonicalAuthorityDBRef, system identifier, target database/OID, original prepare timeline/LSN, participant digest, operation/request digest, owner boundary, CausalOrderDomainRef, PolicyDomainRef and COC prepare-intent position/digest. It does **not** enumerate DatabaseIncarnationRef, PrepareAttemptRef/Generation, ParticipantLedgerRef/Version or ParticipantTupleDigest as separate required tuple fields.
+
+B requires Storage to either:
+1. amend §14 so its receipt, lookup and same-GID resolution rules use the complete v3 tuple and the exact lookup key in §13.2; or
+2. explicitly mark §14 as superseded for PostgreSQL v3 and publish one unambiguous normative mapping.
+
+Until then, the repository contains two non-identical prepared-participant field contracts. H's new schema candidate implements the v3 fields; it does not silently amend Storage's §14. No approval of the older incomplete §14 mapping is inferred.

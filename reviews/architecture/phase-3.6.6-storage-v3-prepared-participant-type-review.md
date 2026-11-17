@@ -54,3 +54,10 @@ This artifact supports G4 only at B's domain semantic boundary. It is not C/D/E/
 ## 6. Provenance
 
 This is a B-role review and domain-model amendment prepared by the delegated B/I/H joint developer session at the user's direction. It is not an independently authenticated human signature or evidence that a separate B session executed tests.
+
+
+## 7. Addendum — companion §14 is not yet reconciled with v3
+
+The live companion protocol §14 Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` was re-read. It omits DatabaseIncarnationRef, PrepareAttemptRef/Generation, ParticipantLedgerRef/Version and the v3 ParticipantTupleDigest as separate required fields. Storage v3 §§15.1–15.7 Blob `4a60420d457f359780c568dce42b8bef000026ca` requires them. This is a cross-document contract gap, not a cosmetic naming issue.
+
+**B-V3-06:** Storage must amend §14 to the v3 tuple or explicitly supersede §14 for this profile. The B registry §13.5 now records the required action. Until Storage publishes one consistent normative tuple, B's v3 type semantics are accepted only as a candidate mapping; no cross-owner contract freeze is claimed.
