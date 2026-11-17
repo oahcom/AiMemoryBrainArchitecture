@@ -38,11 +38,11 @@ Minimum immutable fields:
 - publication_operation_id and publication_tuple_digest
 - exact StorageVisibilityParticipantRef
 - exact D PublicationParticipantRef
-- exact I CommitAuthorizationReceiptRef / ITerminalProofRef
+- exact ICommitAuthorizationProofRef (the consumed CommitAuthorizationReceipt)
 - outcome COMMITTED_VISIBLE | NO_PUBLICATION | UNKNOWN
 - visibility_transaction_ref and visibility_pointer_ref (pointer required only for COMMITTED_VISIBLE)
 - D current participant/fence proof reference
-- I terminal authorization proof reference
+- ICommitAuthorizationProof reference (consumed CommitAuthorizationReceipt)
 - outbox_event_ref and outcome_digest
 - commit timestamp and storage authority/incarnation identity
 
@@ -68,7 +68,7 @@ D admission is prohibited until Storage can authoritatively read back this exact
 After PrepareVisibility:
 - D admits PublicationParticipantRef bound to the exact StorageVisibilityParticipantRef and same publication tuple.
 - I consumes CommitAuthorizationReceipt in its own PolicyDomain sequencer, bound to the exact D and Storage refs.
-- Storage must persist the returned exact D/I proof references into the publication ledger before final visibility commit.
+- Storage must persist the exact D participant/fence proof reference and consumed I CommitAuthorizationReceipt / ICommitAuthorizationProof reference into the publication ledger before final visibility commit. ITerminalProof is post-outcome closeout evidence and is not part of this pre-commit proof set.
 
 Storage must reject participant substitution, cross-operation refs, changed digest, stale attempt/lease, incomplete dependency receipt or Scope mismatch.
 
@@ -80,7 +80,7 @@ The final visibility transaction is the only visibility linearization point. It 
 1. Resolve PublicationOperationId + tuple digest; exact replay returns the immutable original outcome.
 2. Verify Storage participant is PREPARED_HIDDEN and exact.
 3. Verify exact active D PublicationParticipantRef and current D fence/participant proof.
-4. Verify exact I terminal authorization proof, including PolicyDomain, tuple, both participant refs, COMMIT_WON and current proof/key status at the final gate.
+4. Verify exact consumed I CommitAuthorizationReceipt / ICommitAuthorizationProof, including PolicyDomain, tuple, both participant refs, COMMIT_WON and current proof/key status at the final gate. Do not require post-outcome ITerminalProof here.
 5. Verify artifact/version/content digest, complete dependency set, Scope and current attempt/lease fencing.
 6. Atomically install authoritative visibility pointer, immutable PublicationReceipt/outcome and outbox event.
 7. Persist COMMITTED_VISIBLE outcome and commit identity in the same transaction.
@@ -160,10 +160,10 @@ Storage 拥有持久化记录、事务隔离/序列化、幂等约束、Private 
 Storage 必须先验证不可变 Private Stage，再按 PublicationOperationId + Tuple Digest 幂等创建持久化 PREPARED_HIDDEN StorageVisibilityParticipantRef。相同 ID/摘要返回原 Participant；相同 ID 不同摘要返回 IMMUTABLE_IDENTITY_CONFLICT。Prepare 成功只证明 Storage 持久化，不是 D Admission、I Authorization 或 Visibility Permission。ACK 丢失时使用同 ID/摘要解析。D 只能在 Storage 权威回读确认 Participant 已持久化后准入。
 
 ### 11.3 D/I 绑定
-Storage Prepare 后，D 准入绑定精确 Storage Participant 的 PublicationParticipantRef；I 在 PolicyDomain Sequencer 消费绑定精确 D/Storage Participant 的 CommitAuthorizationReceipt。Storage 最终提交前必须持久化精确 D/I Proof Ref。任何 Participant 替换、跨 Operation 引用、Digest 变化、Stale Attempt/Lease、Dependency 不完整或 Scope 不一致均拒绝。
+Storage Prepare 后，D 准入绑定精确 Storage Participant 的 PublicationParticipantRef；I 在 PolicyDomain Sequencer 消费绑定精确 D/Storage Participant 的 CommitAuthorizationReceipt。Storage 最终提交前必须持久化精确 D Participant/Fence Proof Ref 和已消费的 I CommitAuthorizationReceipt / ICommitAuthorizationProof Ref。ITerminalProof 属于 Storage Outcome 后的 Closeout 证据，不在提交前证明集合中。任何 Participant 替换、跨 Operation 引用、Digest 变化、Stale Attempt/Lease、Dependency 不完整或 Scope 不一致均拒绝。
 
 ### 11.4 CommitVisibility
-最终 Visibility Transaction 是唯一 Visibility Linearization Point，必须原子验证 Storage PREPARED_HIDDEN、D 当前 PublicationParticipant/Fence、I Terminal Authorization Proof、Artifact/Version/Digest、完整 Dependency、Scope 和当前 Attempt/Lease，并提交 Visibility Pointer、PublicationReceipt/Outcome、Outbox。提交前所有 Read Path 必须 Private。对象存在、Signed URL、Cache、Index Event、Queue 或 Outbox Delivery 都不是 Visibility。无法证明提交结果时为 UNKNOWN，Artifact 保持 Private。
+最终 Visibility Transaction 是唯一 Visibility Linearization Point，必须原子验证 Storage PREPARED_HIDDEN、D 当前 PublicationParticipant/Fence、I 已消费的 CommitAuthorizationReceipt / ICommitAuthorizationProof、Artifact/Version/Digest、完整 Dependency、Scope 和当前 Attempt/Lease，并提交 Visibility Pointer、PublicationReceipt/Outcome、Outbox。提交前所有 Read Path 必须 Private。对象存在、Signed URL、Cache、Index Event、Queue 或 Outbox Delivery 都不是 Visibility。无法证明提交结果时为 UNKNOWN，Artifact 保持 Private。
 
 ### 11.5 NO_PUBLICATION
 NO_PUBLICATION 必须正向证明没有 Pointer、没有 Prepared/Unresolved Publication、所有 Writer/Stage Publisher/Retry/Delayed Worker/Outbox Handler 已被 Fence 或永久不能发布、没有冲突 COMMITTED_VISIBLE，且 Restore 保留该终态。超时、RPC 失败、行缺失、Lease 过期、进程死亡或对象年龄都不是 NO_PUBLICATION。
