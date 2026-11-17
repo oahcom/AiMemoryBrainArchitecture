@@ -14,7 +14,7 @@
 - Storage RecoveryJoin contract: Blob 41f80b1aacfebdb1f652b16144afbf83ce950e82.
 - H RecoveryJoin schema: Blob dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
 - H semantic contract: Blob b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
-- HRC semantic suite: Blob ee0f47095df10786da358bed193d6f8491a5eb2c.
+- HRC semantic suite: Blob 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
 
 ## 2. I disposition
 
@@ -85,4 +85,4 @@ The latest H RecoveryJoin schema separates OwnerAdmissionRef and OwnerEntryRef, 
 
 Updated H RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
 Updated H semantic contract Blob: b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
-Updated HRC suite Blob: ee0f47095df10786da358bed193d6f8491a5eb2c.
+Updated HRC suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
