@@ -1,7 +1,7 @@
 # Phase 3.8.2 — Storage/D Serialization Topology ADR
 
 - Owner perspective: Storage / Consistency
-- Status: **ADR-BLOCKED — CANDIDATE OPTIONS ONLY; NO DEPLOYED TOPOLOGY SELECTED**
+- Status: **L1 LOGICAL TOPOLOGY SELECTED — OPTION A; L4 PHYSICAL ENGINE/DEPLOYMENT OPEN**
 - Related: Issue #10 (JF-10 physical realization), Issue #25 (Phase 3.8 visibility gate)
 - Language: English and Chinese are normative peers.
 
@@ -114,7 +114,7 @@ Issue #10 的 PostgreSQL 18.7 CI 仅证明指定测试 Profile 的能力，不�
 
 ## 7. Disposition
 
-**ADR-BLOCKED / NO TOPOLOGY SELECTED.** Storage may not claim the Phase 3.8 final visibility boundary is physically realized until T1–T8 are evidenced and independently reviewed.
+**Historical pre-addendum disposition — superseded for L1 only.** Before §8, no topology was selected. Section 8 selects Option A as the normative v1 logical architecture; physical engine/deployment remains L4 OPEN.
 
 
 ## 8. Architecture-level decision addendum / 架构层决策补充（2026-11-17）
@@ -195,3 +195,79 @@ Crash before final commit => PREPARED_HIDDEN remains private; same PublicationOp
 **L4 仍 OPEN：** 实际数据库产品/版本/配置、部署清单、Operator/On-call、集群故障域、HA/PITR、真实读路径、生产密钥托管、物理崩溃/故障切换/恢复演练。这些是实现符合性义务，不否定架构决策本身。
 
 ---
+
+
+### 8.7 Concrete per-authority serialization anchor / 每 Authority 具体序列化锚点
+
+The shared serializable transaction domain MUST expose one durable `CanonicalAuthoritySerializationAnchor` per `BrainAuthorityRef`. This is the concrete common serialization point; a general claim that D and Storage happen to use the same database is insufficient.
+
+**Anchor identity and physical record / 锚点身份与物理记录**
+
+- Primary key: exact `BrainAuthorityRef`; one anchor per Canonical Memory authority and its `SerializationDomainRef`.
+- Physical record: `AuthoritySerializationAnchorRef`, `BrainAuthorityRef`, `SerializationDomainRef`, `DatabaseIncarnationRef`, monotonic `serialization_revision`, `last_transition_ref`, `last_transition_kind`, `last_transition_digest`.
+- Append-only transition record: `SerializationTransitionRef`, `AuthoritySerializationAnchorRef`, committed `serialization_revision`, transition kind, issuing owner ref, immutable operation/participant ref and digest.
+- The anchor and transition record are Storage-owned physical serialization metadata. They do not grant Storage D-policy authority or mint a D/I/C/COC owner receipt. D signs and validates D semantics; Storage controls only the physical transaction substrate.
+
+**Required protected transitions / 必须使用锚点的受保护状态变更**
+
+Every following transition MUST update the same per-authority anchor row and append its transition record in the same database transaction as its owner-authoritative record:
+
+1. D ProducerWork admission/registration before E queue, lease, protected-source dereference or execution.
+2. D complete direct/transitive dependency-set registration.
+3. D PublicationParticipant admission.
+4. D InstallForgetFence / advance of D ForgetFenceGeneration.
+5. Storage final VisibilityPointer + COMMITTED_VISIBLE outcome + PublicationReceipt + outbox commit.
+6. Storage authoritative NO_PUBLICATION terminal outcome when it closes the same publication operation.
+
+Storage PREPARED_HIDDEN is durable and private. It may be written before D admission without advancing the serialization anchor because it cannot create a serving pointer; D admission still must win the anchor order before any final visibility commit. Any later transition that can affect D fence/participant/publication order MUST use the anchor.
+
+**Transaction protocol / 事务协议**
+
+For each protected transition:
+
+1. Begin a transaction in the selected per-authority serialization domain at SERIALIZABLE isolation (or a formally proven equivalent).
+2. Resolve the exact `BrainAuthorityRef`, `SerializationDomainRef` and `DatabaseIncarnationRef`; lock the unique anchor row for update.
+3. Read the current `serialization_revision` and all relevant D/Storage owner state from the authoritative primary.
+4. Validate the owner-specific preconditions and immutable operation/participant tuple. A physical anchor lock is not an owner authorization.
+5. CAS-update the anchor from expected revision `r` to `r+1`; append a unique `SerializationTransitionRef` with the exact transition digest; write the D or Storage owner-authoritative record(s) in the same transaction.
+6. Commit. The transaction commit is the linearization point for this transition. A serialization failure aborts the entire transaction; retry only with the same immutable transition ref and digest.
+7. On lost ACK, resolve by the stable `SerializationTransitionRef` and exact digest from the durable transition table. Same ref/same digest returns the same committed result; same ref/different digest is an integrity incident. Never mint a new owner identity to escape an ambiguous commit.
+
+**Linearization outcomes / 线性化结果**
+
+- D Fence transaction commits first: later D admission or Storage final-visibility transaction observes the committed fence and is denied/quarantined; no VisibilityPointer is created.
+- D participant/dependency admission commits first: its exact row is in D's barrier/snapshot; a later Fence must include and reconcile it. Fence cannot become effective past unresolved admitted work.
+- Storage final-visibility transaction commits first: the artifact is a pre-fence visible participant; the later Fence snapshot must include it and D/I closeout must use the same immutable Storage outcome.
+- Dependency registration commits first: the complete dependency set is included in the fence/barrier snapshot. Fence commits first: later dependency expansion is rejected or quarantined; no partial set is published.
+- UNKNOWN serialization history, stale anchor incarnation, uncertain failover or missing transition record => RESTORE_FENCED / UNKNOWN; never infer order from timestamps, queue order, XID, or owner counters.
+
+**Nominal type boundary / 名义类型边界**
+
+`serialization_revision` is a physical monotonic revision local to one `SerializationDomainRef` / `BrainAuthorityRef`. It is NOT equal or comparable to:
+- D `ForgetFenceGeneration`, D `owner_gate_generation` or D `barrier_generation`;
+- I `PermissionEpoch`, InventoryEpoch or PolicyDomain position;
+- C `sequence_namespace_ref` / record sequence;
+- COC quorum position or RecoveryCutoff position;
+- Storage prepared participant attempt, `PreparedTransactionGID` or `EngineNativeXIDRef`.
+
+`AuthoritySerializationAnchorRef`, `SerializationTransitionRef` and `SerializationRevision` are nominally distinct from `SerializationDomainRef`, `BrainAuthorityRef`, `StorageAuthorityRef`, owner receipts and all semantic epochs/generations. A string representation does not erase the type.
+
+**Availability and performance boundary / 可用性与性能边界**
+
+There is one anchor per Canonical Memory authority, not one global anchor for the whole installation. The single row may be a contention point; this is an explicit v1 correctness-first tradeoff. Partitioning/sharding the anchor is forbidden until a successor proof demonstrates non-overlapping fence/participant/publication domains and preserves cross-scope ordering. Throughput/latency benchmarks and DB-engine selection are L4, not assumed.
+
+The deployment MUST provide one authoritative writer/primary for this anchor, durable commit acknowledgement, old-primary fencing, authoritative read-after-commit and restore/failover continuity of the anchor plus append-only transition records. If a future engine cannot provide these properties, Option A is non-conforming; Option B requires a successor ADR and proof. No process mutex, queue ordering, stale replica, or check-then-write may substitute.
+
+**中文规范：**
+
+每个 `BrainAuthorityRef` 必须有一个持久化 `CanonicalAuthoritySerializationAnchor`，作为 D 与 Storage 的共同物理序列化点。仅仅声称“使用同一个数据库”不够。
+
+锚点以 BrainAuthorityRef 为主键，绑定 SerializationDomainRef、DatabaseIncarnationRef、单调 serialization_revision、最后 Transition Ref/Kind/Digest；每次受保护变更还必须在同一事务内追加不可变 SerializationTransition 记录。锚点与 Transition 是 Storage 拥有的物理序列化元数据，不授予 Storage D Policy 权威，也不签发 D/I/C/COC Owner Receipt。
+
+D Producer Admission/Registration、完整 Dependency Registration、D PublicationParticipant Admission、D InstallForgetFence/ForgetFenceGeneration 推进、Storage 最终 VisibilityPointer/Outcome/Receipt/Outbox Commit、Storage NO_PUBLICATION 终态，均必须在同一个 per-authority Transaction Domain 中更新同一锚点并写入对应 Owner 记录。PREPARED_HIDDEN 是私有持久状态，不产生服务指针，可以先于 D Admission 写入；但它不能绕过锚点顺序进入可见状态。
+
+每个受保护事务必须：使用 SERIALIZABLE（或已证明等价机制）；锁定唯一锚点；读取权威主库中的 D/Storage 状态；验证 Owner 自己的语义前置条件；通过 CAS 将 revision 从 r 推进到 r+1；同事务写入 Transition 与 Owner Record；最后提交。事务提交是线性化点。序列化失败必须整体回滚，并使用同一个不可变 Transition Ref/Digest 幂等重试。Lost ACK 必须按 Transition Ref/Digest 查回，不能创建新 Owner Identity。
+
+Fence 先提交，则后续 Admission/Visibility 被拒绝；Admission/Dependency 先提交，则必须进入后续 Fence Snapshot/Barrier；Storage Visibility 先提交，则属于 Fence 前可见工作集；Dependency 先提交，则完整依赖集进入 Barrier。顺序 UNKNOWN、旧主未隔离、锚点 Incarnation 不确定或 Transition Record 缺失时必须 RESTORE_FENCED/UNKNOWN，不得用时间戳、Queue 顺序、XID 或 Owner Counter 推断。
+
+SerializationRevision 只属于一个 SerializationDomain/BrainAuthority，是物理单调 Revision；不得与 D Fence/Gate/Barrier Generation、I Permission/Inventory/PolicyDomain Position、C Sequence Namespace、COC Quorum Position、PreparedTransactionGID 或 EngineNativeXID 比较。每个 Canonical Memory Authority 独立一个锚点。单行热点是 v1 正确性优先取舍；没有 successor proof 不得分片。单主、旧主隔离、持久 ACK、读后写和恢复连续性均属于 Option A 必须满足的部署条件；无法满足时 Option A 不符合规范，Option B 必须提交后继 ADR。
