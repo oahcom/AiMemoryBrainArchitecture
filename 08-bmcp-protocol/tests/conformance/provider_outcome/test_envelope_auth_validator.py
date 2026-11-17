@@ -41,6 +41,7 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
             "subject_ref": "C/adapter/adapter-7",
             "owner_authority": "C",
             "canonicalization_profile_id": "RFC8785-JCS-1.0",
+            "signature_profile_id": "TEST-ONLY-ENVELOPE-SIGNATURE-PROFILE",
             "digest_algorithm": "SHA-256",
             "payload_digest": "a" * 64,
             "integrity_proof_ref": "C/integrity-proof/test",
@@ -223,6 +224,27 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         )
         result = authenticate_outer_envelope(self.raw(), self.context, checks)
         self.assertEqual(result["status"], "INVALID", result)
+
+    def test_19_signature_profile_id_is_required_and_cannot_fall_back_to_canonicalization_profile(self):
+        self.envelope.pop("signature_profile_id")
+        self.assertTrue(self.envelope["canonicalization_profile_id"])
+        result = authenticate_outer_envelope(self.raw(), self.context, self.checks())
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertTrue(any("signature_profile_id" in error for error in result["errors"]))
+
+    def test_20_unregistered_signature_profile_is_not_accepted(self):
+        checks = self.checks()
+        checks.verify_envelope_integrity = lambda raw, env, ctx: (
+            env.get("signature_profile_id") == "I-APPROVED-TEST-PROFILE"
+        )
+        result = authenticate_outer_envelope(self.raw(), self.context, checks)
+        self.assertEqual(result["status"], "INVALID", result)
+
+    def test_21_unavailable_signature_profile_registry_is_unknown(self):
+        checks = self.checks()
+        checks.verify_envelope_integrity = lambda raw, env, ctx: None
+        result = authenticate_outer_envelope(self.raw(), self.context, checks)
+        self.assertEqual(result["status"], "UNKNOWN", result)
 
 
 if __name__ == "__main__":
