@@ -119,6 +119,10 @@ traceability_exclusions:
     reason: Manifest-only Owner I v2 inventory update; metadata bookkeeping, not implementation.
   - sha: af2eae80a560b875f05ef4b9f0798a1976f2e250
     reason: Manifest-only final inventory refresh; metadata bookkeeping, not implementation.
+  - sha: d0540edbebd7b4c518ecb03d23fe1b40fa04d70e
+    reason: Historical manifest-only self-update commit after the first inventory snapshot; metadata bookkeeping, not implementation.
+  - sha: e148ed7f2c479e142ecbbcbaf5a78ede503f80f0
+    reason: Manifest-only review-disposition and execution-traceability update; metadata bookkeeping, not implementation.
   - current_manifest_self_update: Excluded by definition to avoid self-reference.
 self_review:
   status: RECORDED_NOT_INDEPENDENT
