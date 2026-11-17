@@ -221,6 +221,18 @@ class PublicationProtocolTests(unittest.TestCase):
         with self.assertRaises(Rejected):
             p.commit(**self.commit_args())
 
+    def test_commit_wins_before_later_revocation(self):
+        p = self.prepared()
+        receipt = p.commit(**self.commit_args())
+        outcome = p.outcomes["op-1"]
+        p.revoke("auth-1")
+        self.assertEqual(p.receipts["op-1"], receipt)
+        self.assertEqual(p.outcomes["op-1"], outcome)
+        args = self.commit_args()
+        args["operation_id"] = "op-2"
+        with self.assertRaises(Rejected):
+            p.commit(**args)
+
     def test_authorization_is_single_use_across_distinct_operations(self):
         p = self.prepared()
         args = self.commit_args()
