@@ -342,3 +342,35 @@ follow_up_remediation:
   acceptance: PENDING
   merge: NOT_MERGED
   note: Proposal and author-side remediation only. This manifest update records pre-update branch Head 13e9c03976d3728bdfedf02e72e1875fbb937933; the resulting manifest self-update commit is excluded from self-reference. Verify exact branch Head from GitHub before review.
+
+
+execution_boundary_extension:
+  proposal_status: PROPOSED_PENDING_ACCOUNTABLE_OWNER_ACKNOWLEDGEMENTS
+  source_baseline: 4f8c5218c8d33f5fdb690a7c4bdb671639ebb807
+  owner_contracts:
+    path: 14-ai-development/work-items/AID-2026-001/owner-execution-boundary-contracts-v1.md
+    commit_before_manifest_update: 5d1364a579e38c57b952c347f04acf118f03e420
+    sha256_or_blob_sha: PENDING_READBACK
+    owner_acknowledgements:
+      E: PENDING
+      F: PENDING
+      G: PENDING
+      H: PENDING
+      C: PENDING
+      storage_backup_operator: PENDING_OPERATOR_ASSIGNMENT_AND_ACK
+  added_conformance_cases:
+    test_matrix_path: 14-ai-development/work-items/AID-2026-001/r3-contract-test-matrix.md
+    test_matrix_commit_before_manifest_update: 5394f94d670fd1ffbf0ac10d5e7e8c8201cff48a
+    cases: DFI-013..DFI-022
+    execution_status: NOT_RUN_NOT_EVIDENCED
+  joined_contract_updated:
+    path: 14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md
+    commit_before_manifest_update: 7e5a8c7bb015114633f7df39a7fe45aa5cfa2720
+    status: PROPOSAL_LINKS_DETAILED_OWNER_CONTRACTS
+  implementation_status: NOT_CHANGED_NOT_CLAIMED
+  ci_status: NOT_RUN_OR_NO_STATUS_RETURNED
+  bilingual_semantic_parity: PENDING_INDEPENDENT_REVIEW
+  integration_review: PENDING_DISTINCT_NON_IMPLEMENTING_REVIEWER
+  acceptance: PENDING
+  merge: NOT_MERGED
+  note: These are author-side contract and test-specification changes only. They do not constitute E/F/G/H/C/Storage approvals or executed conformance evidence.
