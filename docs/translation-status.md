@@ -210,3 +210,17 @@ Pair presence is not semantic acceptance, identity freeze, I policy approval, H 
 - H Adapter candidate remains CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I. Findings H36-AP-01..07 identify unresolved exact boundary identity, target/attempt mapping, managed-region inventory/coverage, I/D authority vector, verifier-bound identity, evidence provenance, and per-request bypass coverage.
 - H Adapter pair is intentionally NOT marked complete: source-to-source field alignment must be resolved before translation can safely represent a normative protocol contract.
 - C/G/H freeze remains BLOCKED. C-FR-01..12 and G-36-01..15 remain SPECIFIED / NOT RUN; H Adapter conformance NOT RUN; implementation NOT VERIFIED.
+
+
+## H Owner candidate field-mapping revision — 2026-11-17
+
+H's `session-h-bmcp-protocol` source `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` was revised with §11, an exact final-request field-mapping proposal. Current exact source Blob SHA: `db59b63e322d7255b8b400f47859dcac32bb3027` (replaces prior reviewed Blob `ed6b43a29aa368d772c701ffc83309a5aadf3c00`). The addendum proposes explicit FinalRequestBoundaryId/type, Context/Delivery/attempt bindings, managed-region identity/revision/inventory/coverage/digest, verifier-bound identities, I/D authority references, provenance, per-request bypass coverage, replay identity and temporal rules.
+
+This remains H CANDIDATE only: C confirmation, G Applied-consumer acceptance, I/D/B authority confirmation, versioned wire schema and conformance remain pending. Do not mark the H bilingual pair complete until this exact source version is independently accepted/aligned and translated.
+
+
+## H Owner 候选字段映射修订 — 2026-11-17
+
+H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` 已新增 §11 精确 final-request 字段映射提案。当前精确源 Blob SHA：`db59b63e322d7255b8b400f47859dcac32bb3027`（替代此前复审的 Blob `ed6b43a29aa368d772c701ffc83309a5aadf3c00`）。补充条款提议明确 FinalRequestBoundaryId/type、Context/Delivery/attempt 绑定、Managed Region 身份/修订/inventory/coverage/digest、verifier 身份绑定、I/D 权威引用、证据来源信息、逐请求 bypass 覆盖、重放身份和时间顺序规则。
+
+此版本仍仅为 H CANDIDATE：C 确认、G Applied 消费方接受、I/D/B 权威确认、版本化 Wire Schema 和一致性测试均待完成。在该精确源版本经过独立接受/对齐并翻译前，不得把 H 双语配对标记为完成。
