@@ -126,3 +126,48 @@ Required tests: register-before-enqueue crash; enqueue-before-ACK; duplicate del
 - Restore 的 Serving/Publication 必须由独立证明共同满足：Storage participant/visibility 与 DB incarnation、COC committed prefix、I 当前 policy/revocation/registry、D fence/lineage/producer/dependency，以及 E compiler ledger/run/dependency。保留各签发者签名和不透明位置，禁止合成单一 Restore High-water。
 - Prefix、prepared publication tuple、GID、participant receipt、registration 或 dependency 连续性任何一项未知，相关 Run/Artifact/Outbox 必须隔离。不得根据队列行缺失或陈旧副本推断完成。
 - E 冻结编译输入包是绑定单一 DerivationRun 和摘要的独立名义类型，不是 F Working Set，也不是 G ContextVersion/Delivery/Applied。
+
+
+## 8. Normative correction — EventRef-only work and D admission
+
+This section supersedes the earlier §3.7 wording that EventRef-only ingress must remain outside D admission. D's controlling §3.2 permits registration before Canonical MemoryRef creation.
+
+1. E creates stable CompileIntentId/ProducerWorkItemId and E AcceptedReceipt as local ingress evidence.
+2. Before enqueue, lease, protected source dereference or derivative-capable execution, E invokes D RegisterProducerWork. D may accept an EventRef-only source when authenticated ProducerClass, Scope, request digest and D-approved opaque lineage token/digest are complete.
+3. D acceptance yields durable RegistrationReceipt and ProducerRegistrationSequence. ACK-unknown is resolved by the same WorkItemId+digest; E does not dispatch while unresolved.
+4. EventRef-only registration is included in D ForgetFence high-water and obeys D's two-outcome admission/fence linearization.
+5. Before RegisterDerivedDependency or publication, E appends/links exact Canonical MemoryRef/MemoryVersionRef revisions to the original EventRef lineage. Incomplete/conflicting lineage remains private/quarantined and cannot publish.
+6. D registration is not protected-payload authorization. E checks current I permission before each protected dereference and at final publication.
+7. Missing identity, Scope, lineage token, registry or current authority means no queue/lease/execute capability.
+
+### 中文规范
+
+本节替代此前“EventRef-only 入口必须始终留在 D Admission 之外”的表述。D 既有权威 §3.2 允许 Canonical MemoryRef 形成前完成注册。
+
+1. E 创建稳定 CompileIntentId/ProducerWorkItemId，并产生 E AcceptedReceipt 作为本地入口证据。
+2. E 必须在入队、租约、受保护源读取或 Derivative-capable 执行前调用 D RegisterProducerWork。经认证 ProducerClass、Scope、请求摘要和 D 批准的不透明 Lineage Token/Digest 完整时，D 可以接受 EventRef-only Source。
+3. D 接受后返回持久化 RegistrationReceipt 和 ProducerRegistrationSequence。ACK 未知时，E 必须用同一 WorkItemId+Digest 查询；未解决前不得 Dispatch。
+4. EventRef-only Registration 同样纳入 D ForgetFence High-water，并遵循 D 的 Admission/Fence 两结果线性化规则。
+5. RegisterDerivedDependency 或 Publish 前，E 必须把精确 Canonical MemoryRef/MemoryVersionRef Revision 追加关联到原 EventRef Lineage。Lineage 不完整或冲突时保持 Private/Quarantined，不得发布。
+6. D Registration 不等于受保护 Payload 授权。E 必须在每次受保护源读取及最终 Publish Boundary 单独检查 I 当前授权。
+7. 身份、Scope、Lineage Token、Registry 或当前权威状态缺失时，不得授予 Queue/Lease/Execute 能力。
+
+## 9. D/E/Storage atomic registration-to-visibility consumption
+
+E adopts D's nine-operation semantic contract and Storage's per-Canonical-Memory-authority shared serialization recommendation, subject to Storage proof. Required order:
+
+E AcceptedReceipt → durable D RegistrationReceipt → Queue/Lease/Run → private immutable Stage → complete D DependencyRegistrationReceipt → D PublishDerivedIfFenceCurrent + Storage authoritative Visibility Commit → D CompleteProducerWork.
+
+No queue/lease/execution before durable D registration. Retry preserves ProducerWorkItemId and request digest while AttemptId/LeaseId rotate. Recompile uses a new DerivationRunId and explicit D-linked child/re-admission decision, never resets lineage. Staged bytes remain private. Dependency set and lineage digest commit as one complete immutable unit. Visibility changes only at the authoritative atomic commit checking current D fence, I authorization, D registration, complete dependencies, active attempt/lease, Scope and exact artifact digest. ACK loss resolves by the same stable operation ID+digest; UNKNOWN keeps the artifact private and barrier open. Terminal closure requires D terminal receipt after all output/attempt/replay paths are accounted.
+
+E rejects a D-approved message followed by unconstrained object-store write. If no shared ACID domain exists, E requires D+Storage-approved durable prepare/commit, one-time final visibility CAS, current-fence validation at commit, crash recovery and hidden-on-UNKNOWN behavior.
+
+### 中文规范
+
+E 采用 D 九项语义操作合同及 Storage 提出的每个 Canonical Memory Authority 一个共享序列化域作为目标实现，但以 Storage 物理证明为前提。强制顺序：
+
+E AcceptedReceipt → 持久化 D RegistrationReceipt → Queue/Lease/Run → Private Immutable Stage → 完整 D DependencyRegistrationReceipt → D PublishDerivedIfFenceCurrent + Storage 权威 Visibility Commit → D CompleteProducerWork。
+
+D Registration 持久化前不得 Queue/Lease/Execution。Retry 保持 ProducerWorkItemId 和请求摘要不变，AttemptId/LeaseId 轮换。Recompile 使用新 DerivationRunId 和明确的 D-linked Child/Re-admission 决策，不得重置 Lineage。Staged Bytes 必须保持 Private。Dependency Set 与 Lineage Digest 必须作为完整不可变单元提交。只有在权威原子提交中检查当前 D Fence、I 授权、D Registration、完整依赖、活动 Attempt/Lease、Scope 和精确 Artifact Digest 后，Visibility 才能改变。ACK 丢失必须用同一稳定 Operation ID+Digest 查询；UNKNOWN 时 Artifact 保持 Private、Barrier 保持开放。所有 Output/Attempt/Replay Path 核清并取得 D Terminal Receipt 后才能关闭终态。
+
+E 不接受 D Approved 消息后接无约束 Object Store 写入。若无共享 ACID 域，E 要求 D+Storage 批准持久化 Prepare/Commit、一次性 Final Visibility CAS、提交时当前 Fence 验证、崩溃恢复和 UNKNOWN 时隐藏。
