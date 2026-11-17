@@ -111,3 +111,26 @@ This document offers system-level options. It does not approve an ADR, freeze a 
 ## 7. Conditional system recommendation / 条件性总体建议
 
 For Profile S, Option A is the first experiment to run because it minimizes independent failure and transaction domains. This is not a formal selection. If the D/E/Storage fence/publication proof cannot be implemented safely in SQLite, the correct response is to evaluate PostgreSQL or revise the physical transaction boundary—not to weaken Forget semantics. Option B is the natural candidate if measured concurrency/remote access requires it. Option C remains unsupported absent Profile L evidence.
+
+
+## 8. Current Storage architecture and PostgreSQL qualification update / Storage 当前架构与 PostgreSQL 资格更新
+
+The Storage branch now contains a 2026-11-17 ADR addendum (Blob `1ef47d4e5711c7db73a24d249adf1992be1f6aa4`) selecting one logical serializable transaction domain per Canonical Memory authority as the normative v1 **serialization architecture profile**. This decision preserves D, Storage, I and COC as separate semantic/consistency authorities. It does not select the deployment topology in this document and does not select a production DB.
+
+The PostgreSQL 18.7 prepared-XID dossier (Blob `0aabf66848dc97deee028c571183c0d7204008c0`) reports PASS for bounded engine-level CI subtests: prepared-XID/lock persistence through hard restart and same-XID commit/rollback; two-node synchronous WAL replay and promotion; physical backup/restore; coordinator ACK-gap crash; TCP ACK loss; standby-unavailable UNKNOWN/private behavior; and WAL PITR. Gate A remains PARTIAL PASS / OPEN. Gate B's amended COC protocol requires focused exact-owner re-review. Gate C is deferred to engineering-phase distributed integration/fault injection. JF-10 runtime P0 remains OPEN; production activation is NOT AUTHORIZED; multi-PolicyDomain atomicity remains BLOCKED.
+
+**Updated conditional recommendation:**
+- Keep Storage-ADR Option A (one logical serializable transaction domain per Canonical Memory authority) as the current normative v1 architecture profile, subject to exact current Owner reviews.
+- Treat PostgreSQL 18.7 as the leading qualified engine-capability candidate for the JF-10 prepared-XID bridge, not an approved production Canonical Authority database.
+- Retain SQLite WAL only as a limited local prototype candidate for transaction groups that fit its single-writer, same-host model; do not claim it meets JF-10 prepared-XID recovery across an external I sequencer.
+- Do not approve any DB product or production topology until the actual adapter, D/I/COC integration, authoritative read path, failover/fencing, backup/restore and operator/runbook evidence pass.
+
+Storage 分支现有 2026-11-17 ADR 补充条款（Blob `1ef47d4e5711c7db73a24d249adf1992be1f6aa4`）选择每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain，作为 v1 规范性**序列化架构档案**。该决策保持 D、Storage、I、COC 的语义/一致性权威独立，不选择本文件中的部署拓扑，也不选择生产数据库。
+
+PostgreSQL 18.7 Prepared-XID 档案（Blob `0aabf66848dc97deee028c571183c0d7204008c0`）报告了有限的引擎级 CI 子测试 PASS：Prepared-XID/锁跨硬重启持久化及同 XID Commit/Rollback；双节点同步 WAL Replay 与 Promotion；物理备份恢复；协调器 ACK 间隙崩溃；TCP ACK 丢失；同步备机不可用时 UNKNOWN/Private；WAL PITR。Gate A 仍 PARTIAL PASS / OPEN。Gate B 修订 COC 协议需要聚焦精确 Owner 复审。Gate C 延后到工程阶段进行分布式集成/故障注入。JF-10 runtime P0 仍 OPEN；禁止生产激活；多 PolicyDomain 原子性仍 BLOCKED。
+
+**更新后的条件性建议：**
+- 将 Storage-ADR Option A（每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain）保留为当前 v1 规范性架构档案，但需当前 Owner 精确复审。
+- 将 PostgreSQL 18.7 视为 JF-10 Prepared-XID 桥接的领先引擎能力候选，不是已批准的生产 Canonical Authority 数据库。
+- SQLite WAL 仅保留为适用于单写者、同主机事务组的有限本地原型候选；不得声称其满足跨外部 I Sequencer 的 JF-10 Prepared-XID 恢复。
+- 在真实 Adapter、D/I/COC 集成、权威读路径、故障切换/隔离、备份恢复和 Operator/Runbook 证据通过前，不批准数据库产品或生产拓扑。
