@@ -12,9 +12,9 @@ from unified_manifest_semantics import (VALID,INVALID,UNKNOWN,td,snapshot_root,c
 def fixtures():
     snaps={}
     for o in ("I","D","C"):
-        snaps[o]={"owner":o,"owner_snapshot_ref":o+"/snap/1","owner_snapshot_digest":o.lower()*64,
+        snaps[o]={"owner":o,"owner_gate_ref":o+"/gate/1","request_set_digest":o.lower()*64,"admission_set_digest":o.lower()*64,"owner_snapshot_ref":o+"/snap/1","owner_snapshot_digest":o.lower()*64,
           "owner_snapshot_attestation_ref":o+"/att/1","owner_snapshot_attestation_digest":o.lower()*64,
-          "owner_gate_generation":"7","request_high_water":"12","admission_high_water":"18",
+          "owner_gate_generation":"7","request_high_water":"12","admission_high_water":"18","request_count":1,"admission_count":1,
           "request_ledger_root":o.lower()*64,"admission_ledger_root":o.lower()*64,
           "owner_ledger_root":o.lower()*64,"anti_rollback_anchor_ref":o+"/anchor/7",
           "owner_specific_high_waters_digest":o.lower()*64,"ledger_available":True,"pagination_complete":True}
@@ -198,22 +198,41 @@ class PairAndReleaseTests(unittest.TestCase):
         from unified_manifest_semantics import validate_pair
         self.assertEqual(validate_pair(self.batch,self.manifest,(4,100),(4,101),False),UNKNOWN)
     def test_RELEASE_01_exact_content_and_record_digest_binding_passes(self):
+        from unified_manifest_semantics import owner_reconciliation_root
+        s=self.snaps["I"]
         r={"owner_kind":"I","release_type":"OUTAGE_ADMISSION_GATE_ONLY",
-           "batch_record_ref":"coc/batch/1","batch_entry_digest":"f"*64,
-           "manifest_record_ref":"coc/manifest/1","manifest_content_digest":self.manifest["manifest_content_digest"],
-           "manifest_record_entry_digest":"e"*64,"final_currentness_cas_valid":True}
+           "batch_record_ref":"coc/batch/1","batch_digest":"a"*64,"batch_position":"100","batch_entry_digest":"f"*64,
+           "manifest_record_ref":"coc/manifest/1","manifest_record_position":"101",
+           "manifest_content_digest":self.manifest["manifest_content_digest"],"manifest_record_entry_digest":"e"*64,
+           "owner_gate_ref":s["owner_gate_ref"],"owner_gate_generation":s["owner_gate_generation"],
+           "owner_request_high_water":s["request_high_water"],"owner_admission_high_water":s["admission_high_water"],
+           "request_set_digest":s["request_set_digest"],"admission_set_digest":s["admission_set_digest"],
+           "request_ledger_root":s["request_ledger_root"],"admission_ledger_root":s["admission_ledger_root"],
+           "reconciliation_root":owner_reconciliation_root(self.manifest,"I"),"final_currentness_cas_valid":True}
         self.assertEqual(validate_release(r,self.batch,self.manifest),VALID)
     def test_RELEASE_02_missing_record_digest_fails(self):
         r={"owner_kind":"D","release_type":"OUTAGE_ADMISSION_GATE_ONLY",
-           "batch_record_ref":"coc/batch/1","batch_entry_digest":"f"*64,
-           "manifest_record_ref":"coc/manifest/1","manifest_content_digest":self.manifest["manifest_content_digest"],
-           "final_currentness_cas_valid":True}
+           "batch_record_ref":"coc/batch/1","batch_digest":"a"*64,"batch_position":"100","batch_entry_digest":"f"*64,
+           "manifest_record_ref":"coc/manifest/1","manifest_record_position":"101",
+           "manifest_content_digest":self.manifest["manifest_content_digest"],
+           "owner_gate_ref":self.snaps["D"]["owner_gate_ref"],"owner_gate_generation":"7",
+           "owner_request_high_water":"12","owner_admission_high_water":"18",
+           "request_set_digest":"d"*64,"admission_set_digest":"d"*64,
+           "request_ledger_root":"d"*64,"admission_ledger_root":"d"*64,
+           "reconciliation_root":"d"*64,"final_currentness_cas_valid":True}
         self.assertEqual(validate_release(r,self.batch,self.manifest),INVALID)
     def test_RELEASE_03_currentness_cas_not_proven_is_unknown(self):
+        from unified_manifest_semantics import owner_reconciliation_root
+        s=self.snaps["C"]
         r={"owner_kind":"C","release_type":"OUTAGE_ADMISSION_GATE_ONLY",
-           "batch_record_ref":"coc/batch/1","batch_entry_digest":"f"*64,
-           "manifest_record_ref":"coc/manifest/1","manifest_content_digest":self.manifest["manifest_content_digest"],
-           "manifest_record_entry_digest":"e"*64,"final_currentness_cas_valid":False}
+           "batch_record_ref":"coc/batch/1","batch_digest":"a"*64,"batch_position":"100","batch_entry_digest":"f"*64,
+           "manifest_record_ref":"coc/manifest/1","manifest_record_position":"101",
+           "manifest_content_digest":self.manifest["manifest_content_digest"],"manifest_record_entry_digest":"e"*64,
+           "owner_gate_ref":s["owner_gate_ref"],"owner_gate_generation":s["owner_gate_generation"],
+           "owner_request_high_water":s["request_high_water"],"owner_admission_high_water":s["admission_high_water"],
+           "request_set_digest":s["request_set_digest"],"admission_set_digest":s["admission_set_digest"],
+           "request_ledger_root":s["request_ledger_root"],"admission_ledger_root":s["admission_ledger_root"],
+           "reconciliation_root":owner_reconciliation_root(self.manifest,"C"),"final_currentness_cas_valid":False}
         self.assertEqual(validate_release(r,self.batch,self.manifest),UNKNOWN)
 
 
