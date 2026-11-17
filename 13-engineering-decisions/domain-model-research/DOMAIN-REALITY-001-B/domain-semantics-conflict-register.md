@@ -163,3 +163,26 @@ B-CONFLICT-013 仍 **BLOCKING / OPEN**。不得将 A 工作流标签 “B-02”�
 B-CONFLICT-017 remains closed only at manifest-consistency level. B2 remains IN PROGRESS / NOT PASSED; B3 remains NOT PASSED; B4 NOT READY; B5 BLOCKED / NOT PASSED; B6 INDEPENDENT_REVIEW_PENDING. No independent Owner acceptance, governance approval, production ingress, Applied freeze, Forget completion or L4 implementation is claimed.
 
 B-CONFLICT-017 仍仅在 Manifest 一致性层面关闭。B2 仍 IN PROGRESS / NOT PASSED；B3 仍 NOT PASSED；B4 NOT READY；B5 BLOCKED / NOT PASSED；B6 INDEPENDENT_REVIEW_PENDING。不宣称独立 Owner 验收、治理批准、生产 Ingress、Applied 冻结、Forget 完成或 L4 实现。
+
+
+### 4.5 B-CONFLICT-006 — D/E/F/G exact consumer status / B-CONFLICT-006 — D/E/F/G 精确消费者状态
+
+The live Owner sources confirm alignment with the blocked boundary, not downstream acceptance:
+- D Canonical Store Blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` explicitly keeps Fact/Claim persistence ADR-BLOCKED and allows only neutral PropositionRef until INT-P0-01 approval. D Memory Versioning Blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb` calls stable Claim ID + immutable ClaimRevision **D Option A**, a candidate under INT-P1-02.
+- E Extraction Blob `c18780403de2d1dbcf471bdb8abdaa009a4a78e1` says CandidateProposition/ExtractionIR is pre-canonical and E excludes canonical Fact/Claim identity. E Evidence/Provenance Blob `38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963` keeps final Evidence/Provenance contracts dependent on D/B/I.
+- F Retrieval Blob `1fbfc0ff07b66c0ff68c3cea5271261c9d7fc0af` assigns Claim identity/status to D, prohibits F from resolving disputed claims and leaves Claim revision identity OPEN.
+- G Context Versioning Blob `05c0739d0c22576a1fd5affc7d73c078c89049b1` pins exact MemoryVersion in ContextEntry; ContextVersion/ChangeSet are G-owned and do not mint Claim/Fact identity.
+
+实时 Owner 来源确认的是与阻塞边界一致，而不是下游验收：
+- D Canonical Store Blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` 明确保留 Fact/Claim 持久化 ADR-BLOCKED，INT-P0-01 批准前只允许中立 PropositionRef。D Memory Versioning Blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb` 将稳定 Claim ID + 不可变 ClaimRevision 称为 **D Option A**，属于 INT-P1-02 下的候选。
+- E Extraction Blob `c18780403de2d1dbcf471bdb8abdaa009a4a78e1` 明确 CandidateProposition/ExtractionIR 属于规范化前表示，E 不负责规范 Fact/Claim 身份。E Evidence/Provenance Blob `38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963` 将最终 Evidence/Provenance 契约保留为依赖 D/B/I 的事项。
+- F Retrieval Blob `1fbfc0ff07b66c0ff68c3cea5271261c9d7fc0af` 将 Claim 身份/状态权威分配给 D，禁止 F 裁决争议 Claim，并将 Claim Revision 身份保留为 OPEN。
+- G Context Versioning Blob `05c0739d0c22576a1fd5affc7d73c078c89049b1` 在 ContextEntry 中固定精确 MemoryVersion；ContextVersion/ChangeSet 由 G 拥有，不创建 Claim/Fact 身份。
+
+**Option-label warning / 方案编号警告:** D's “Option A” (stable Claim ID + immutable ClaimRevision) is a different decision from B's “Option A” (separate Fact attestation object + Claim proposition thread). Do not treat D's candidate as approval of B's Fact/Claim recommendation. Both remain CANDIDATE and schema freeze remains blocked.
+
+**方案编号警告：** D 的 “Option A”（稳定 Claim ID + 不可变 ClaimRevision）与 B 的 “Option A”（独立 Fact Attestation 对象 + Claim 命题线程）是两个不同决策。不得将 D 的候选视为对 B Fact/Claim 建议的批准。两者均仍为 CANDIDATE，Schema 冻结仍受阻。
+
+B-CONFLICT-006 remains **HIGH / OPEN**. D's candidate is not an accepted revision identity contract; B's Fact/Claim ADR is still blocked; E/F/G provide no substitute approval. No ClaimRef, ClaimRevisionRef, FactRevisionRef or ConflictSet schema may be frozen.
+
+B-CONFLICT-006 仍为 **HIGH / OPEN**。D 的候选不是已验收的 Revision 身份契约；B 的 Fact/Claim ADR 仍阻塞；E/F/G 不提供替代批准。不得冻结 ClaimRef、ClaimRevisionRef、FactRevisionRef 或 ConflictSet Schema。
