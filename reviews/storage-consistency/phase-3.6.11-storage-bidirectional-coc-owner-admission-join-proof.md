@@ -319,3 +319,30 @@ HRC/JPF now explicitly tests both sides of the OwnerAdmissionRef vs OwnerEntryRe
 ## Verified H candidate CI result
 
 GitHub Actions run 44039990464, job 133891944149, checked out H commit da94bcc1796cb350eed12845e49cbc3663faab9c and completed 66/66 candidate tests successfully (Ubuntu 26.04 / CPython 3.12.16). This is a PASS for the committed Python HRC/JPF/WIRE/SCHEMA candidate suite only. It does not prove production signatures, cross-language canonical bytes, live owner/COC adapters, physical JF-10 behavior or deployed Storage topology/HA/restore.
+
+
+## 16. H exact executable suite refresh / H 精确可执行测试刷新
+
+The current H branch exact bundle is:
+- RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- H semantic validator contract: `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80`.
+- HRC/JPF semantic suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50` (25 HRC + 19 JPF).
+- Wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323` (10).
+- Schema integrity suite: `67aba74c120f2916d768e7b01c45408ee2624f3a` (12).
+- Workflow: `.github/workflows/h-recovery-cutoff-conformance.yml`, Blob `ea7a3d9c365b84352d3bac69da94fe0d510e46a4`.
+
+GitHub Actions run [44040502709](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709), commit `1c6ddd301d538652ceea22ea665d50c5fad8178e`, completed **66/66 PASS**. The job executed HRC-01..25, JPF-01..19, WIRE-01..10 and SCHEMA-01..12. The test command and raw result are recorded in the H branch contract/evidence.
+
+This is a repeatable candidate-suite CI pass only. It does not prove real COC prefix enumeration, live I/D/C owner-ledger snapshots, owner signature/key-status verification, Storage durable JoinProof commit, owner-local release CAS, production JF-10 same-GID resolution, cross-language canonical bytes or deployed topology. HRC-TEST-v1 remains test-only.
+
+The H test fixture correction for JPF-08 isolates the duplicate primary C admission invariant; it does not weaken the semantic validator. H's latest 66-test run supersedes earlier 61/56-test inventory counts.
+
+### 16.1 Storage interpretation
+
+Storage recognizes H's current 66/66 result as evidence that the reference semantic vectors and schema-shape checks execute successfully. Storage does not promote this result to integrated Storage conformance. The ST-JOIN-01..20 physical/authority tests and topology T1–T8 remain required; mocks cannot substitute for live quorum, owner ledger or DB evidence.
+
+### 16.2 中文结论
+
+当前 H 分支包含 RecoveryJoin 1.0.0 Schema、HRC-01..25、JPF-01..19、WIRE-01..10 和 SCHEMA-01..12，共 66 个测试方法。GitHub Actions Run 44040502709 在 Commit 1c6ddd3 上完成 66/66 PASS。
+
+该结果只证明 Python 参考语义/Schema/Wire 候选套件在 CI 上通过，不证明真实 COC Prefix、I/D/C Owner Ledger、签名与 Key Status、Storage JoinProof 持久化、Owner Currentness CAS、JF-10 物理同 GID 恢复或跨语言互操作。Storage 集成测试和物理拓扑仍 OPEN。
