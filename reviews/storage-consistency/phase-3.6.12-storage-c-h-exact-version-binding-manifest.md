@@ -292,3 +292,45 @@ Storage accepts the separation of proof authorities and the typed RecoveryJoin 1
 - JF-10 P0 remains OPEN; Multi-PolicyDomain atomicity remains BLOCKED; production activation remains NOT AUTHORIZED.
 
 **Storage disposition: ACCEPT AS ARCHITECTURE/WIRE CANDIDATE WITH BLOCKING IMPLEMENTATION AND OWNER-AUTHORITY CONDITIONS.** No Storage Gate A acceptance, COC deployment, JF-10 closure or production activation is inferred.
+
+
+## 12. C/H/I exact Provider Outcome projection, wire mapping and governance review (2026-11-17)
+
+This section is the current superseding exact pin set for the C Provider Outcome semantic/crypto/wire bundle. Earlier Section 11 pins remain historical provenance and MUST NOT be treated as the latest current artifacts.
+
+### 12.1 Exact artifact pins
+
+| Owner | Artifact | Exact Blob | Current disposition |
+|---|---|---|---|
+| C | Phase 3.8.6 Gate/Attempt/Idempotency semantic amendment | `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4` | PROPOSED; tests not run |
+| C | Phase 3.8.7 review of I crypto candidate | `794d1dc49f034152407e3a42ba5ac937ea3539f8` | Candidate construction accepted only |
+| C | Phase 3.8.8 exact C Provider Outcome signature projection | `39ff523c41f10e3a82442d4746dd7ca7763d271c` | C semantic field inventory proposed; no crypto freeze |
+| I | Phase 3.8.4 C-scoped crypto profile proposal | `1bcddbaaa4a9ca730d492a6554941becac305668` | Candidate only |
+| I | Phase 3.8.5 governance review/disposition | `41fc0f508ae75e8c16012966160e9e2a1e368881` | Conditional suite acceptance in principle; profile registration NOT APPROVED |
+| H | Schema 1.2.11 / wire 1.3.0 | `4f1e103ab4b2ac961d77179dba0b65093532ea40` | Structural candidate |
+| H | Phase 3.8.5 semantic validator contract, corrected and extended | `d0496f32e6a7c0c46b41a9fc21867c354787b32a` | Proposed; not implemented/executed |
+| H | Phase 3.8.6 exact 1.2.11 C outcome wire mapping/vector matrix | `de3db907b4077e0e4d37df19d289cf1bf51afbad` | Mapping/vector specification; vectors not executed |
+
+Commit pins:
+- C Phase 3.8.8: `36dd8e79ab4400f3824cb97c489780a89844da4b`.
+- I Phase 3.8.5: `da8ea75c9ae3d6fffb0594633e478a3d665ab23b`.
+- H Phase 3.8.5 correction/extension: `337b98a0ecbaf85768294575c9743844057f40b8`.
+- H Phase 3.8.6 mapping/vector matrix: `91001740d461a64877e8ee10a4ce7332678b22e8`.
+
+### 12.2 Exact schema finding
+
+The exact 1.2.11 schema requires inline C outcome ref/digest, five-value outcome enum, provider and adapter refs, idempotency-key ref, final request boundary ID/digest, transaction ref, provider outcome evidence, C owner admission and ledger/high-water/root fields, COC record/quorum refs and nullable ParticipantIntentRef. It does NOT inline CGateRef/CGateGeneration, ProviderAttemptRef/Generation, provider account, endpoint, region or API operation. These are required in the immutable CSubmitOutcome object referenced by `c_submit_outcome_ref`; H must dereference and validate them. This is an explicit schema semantic dependency, not a claim of inline schema coverage.
+
+### 12.3 Governance and release disposition
+
+- I conditionally accepts the primitive suite in principle (JCS/RFC 8785, SHA-256, Ed25519, unpadded Base64url) for a separately scoped C profile, but does not register/approve the profile, C trust root, custody or production use.
+- C owns the immutable semantic projection and provider outcome truth.
+- H owns exact wire projection/mapping, validator and cross-language conformance.
+- I owns cryptographic governance, trust and key lifecycle approval.
+- C gate/attempt/provider idempotency tests remain unexecuted.
+- H vector matrix is a specification only; no test fixture execution or independent Python/JavaScript agreement is claimed.
+- Storage exact pinning is complete for this design bundle only. It does not imply implementation, CI success, production readiness, exactly-once semantics or final A acceptance.
+
+**Current disposition: PROPOSED / DESIGN-LEVEL ONLY.** Protected C Provider Outcome cannot be declared VALID for release until profile registration, immutable C object dereference, H validator implementation, independent vector execution, provider adapter evidence and A final integration acceptance are all complete.
+
+All Owner decisions above are delegated role simulations authored at the user's direction, not independent human Owner signatures.
