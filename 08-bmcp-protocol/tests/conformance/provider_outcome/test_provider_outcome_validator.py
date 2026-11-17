@@ -104,12 +104,12 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertEqual(set(schema["properties"]["state"]["enum"]), {"PENDING","ACTIVE","RETIRED","REVOKED","COMPROMISED","DESTROYED"})
 
 
-    def test_09_validator_is_pinned_to_unified_1_2_12(self):
-        self.assertEqual(SCHEMA_ARTIFACT_REVISION, "1.2.12")
+    def test_10_validator_is_pinned_to_unified_1_2_13(self):
+        self.assertEqual(SCHEMA_ARTIFACT_REVISION, "1.2.13")
         self.assertEqual(WIRE_SCHEMA_VERSION, "1.3.0")
-        schema_path = H_ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.12.schema.json"
+        schema_path = H_ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.13.schema.json"
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
-        self.assertTrue(schema["$id"].endswith("/1.2.12"))
+        self.assertTrue(schema["$id"].endswith("/1.2.13"))
         provider_branch = next(
             branch for branch in schema["oneOf"]
             if any(part.get("properties", {}).get("message_type", {}).get("const") == "C_PROVIDER_OUTCOME_RECORDED"
@@ -140,6 +140,75 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
             self.assertEqual(vector["record"]["sequence_namespace_ref"], "C/sequencer/provider-outcome")
             if vector["expected"] != "INVALID":
                 self.assertFalse(list(validator.iter_errors(vector["record"])))
+
+
+    def test_12_unified_1_2_13_removes_ambiguous_intent_alias_and_corrects_rejected_branch(self):
+        schema_path = H_ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.13.schema.json"
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
+        self.assertEqual(schema["$defs"]["commonEnvelope"]["properties"]["schema_artifact_revision"]["const"], "1.2.13")
+        self.assertIn("1.2.13", schema["$defs"]["commonEnvelope"]["properties"]["schema_artifact_revision"]["description"])
+
+        provider_branch = next(
+            branch for branch in schema["oneOf"]
+            if any(part.get("properties", {}).get("message_type", {}).get("const") == "C_PROVIDER_OUTCOME_RECORDED"
+                   for part in branch.get("allOf", []))
+        )
+        properties = {}
+        for part in provider_branch.get("allOf", []):
+            properties.update(part.get("properties", {}))
+        self.assertIn("coc_participant_intent_ref", properties)
+        self.assertNotIn("participant_intent_ref", properties)
+
+        def walk(value):
+            if isinstance(value, dict):
+                yield value
+                for child in value.values():
+                    yield from walk(child)
+            elif isinstance(value, list):
+                for child in value:
+                    yield from walk(child)
+
+        rejected_rules = [
+            node for node in walk(provider_branch)
+            if node.get("if", {}).get("properties", {}).get("provider_outcome", {}).get("const") == "HANDOFF_REJECTED"
+        ]
+        self.assertTrue(rejected_rules)
+        required_sets = [set(node.get("then", {}).get("required", [])) for node in rejected_rules]
+        self.assertTrue(any({"provider_request_ref", "provider_outcome_evidence_ref"}.issubset(req)
+                            and "provider_no_handoff_proof_ref" not in req for req in required_sets))
+
+    def test_13_rejected_outcome_proof_is_conditional_on_side_effect_status(self):
+        base = {
+            "sequence_namespace_ref": "C/sequencer/provider-outcome",
+            "COwnerLocalSequence": "41",
+            "COwnerHighWater": "41",
+            "COCParticipantIntentRef": "COC/intent/41",
+            "COCParticipantReservationRef": "COC/reservation/41",
+            "COCAbsenceReason": None,
+            "Outcome": "HANDOFF_REJECTED",
+            "SideEffectStatus": "POSSIBLE_OR_UNKNOWN",
+        }
+        self.assertEqual(_semantic_errors(base), [])
+
+        occurred = dict(base, SideEffectStatus="PROVEN_OCCURRED")
+        self.assertEqual(_semantic_errors(occurred), [])
+
+        no_side_effect = dict(base, SideEffectStatus="PROVEN_NONE")
+        errors = _semantic_errors(no_side_effect)
+        self.assertTrue(any("rejected-as-no-side-effect" in error for error in errors))
+
+        proven_none = dict(
+            no_side_effect,
+            ProviderNoHandoffProofRef="C/no-handoff/41",
+            NotInvokedProofRef="C/not-invoked/41",
+        )
+        self.assertEqual(_semantic_errors(proven_none), [])
+
+    def test_14_wire_mapping_does_not_accept_legacy_participant_intent_alias(self):
+        from provider_outcome_validator import WIRE_TO_C
+        self.assertNotIn("participant_intent_ref", WIRE_TO_C)
+        self.assertEqual(WIRE_TO_C["coc_participant_intent_ref"], "COCParticipantIntentRef")
+        self.assertEqual(WIRE_TO_C["c_submit_outcome_digest"], "payload_digest")
 
 
 if __name__ == "__main__":
