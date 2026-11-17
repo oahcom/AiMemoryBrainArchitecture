@@ -121,3 +121,8 @@ C ProviderIdempotencyKey remains a C-owned namespace and cannot be replaced by S
 ## 8. Current Storage exact review pin / Storage 当前精确审查版本
 
 The latest readback of the Storage Phase 3.8.2 exact review is Blob `2726f0a2a5168f126d25eb48b857d8921a09031e`; the latest bidirectional JoinProof contract is Blob `668faeb20e3e9cb907a8d1061635b12162f3dbe2`. The topology ADR remains `080433f8e13a500522bc2754da64057edb0ae9d8`, ADR-BLOCKED / NO TOPOLOGY SELECTED. H CI [44040312711](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040312711) is 66/66 candidate PASS, not live Storage/COC integration. T1–T8 and STORAGE-RJ-01..05 remain OPEN.
+
+
+## 9. Latest H CI and current Storage snapshot / 最新 H CI 与 Storage 快照
+
+Storage has re-read the latest H run [44041110983](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041110983): 66/66 candidate tests PASS. This is not live Storage/COC/JF-10 conformance. Current Storage branch snapshot for this update: `8540568a469afaf8a7425ace0e8103a407cfd713`. Current Storage exact review Blob: `2726f0a2a5168f126d25eb48b857d8921a09031e`; current JoinProof Blob: `668faeb20e3e9cb907a8d1061635b12162f3dbe2`. Physical topology remains ADR-BLOCKED.
