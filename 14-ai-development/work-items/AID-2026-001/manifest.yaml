@@ -78,6 +78,8 @@ implementation_commits:
   - d77f019e4078fd37d5c919c88ebb97891723a323
   - 176df68068dfb60ceed10581c4467c15c1ed0e74
   - fc2dfc072d7ad23be4a942c995579e3e3ae5c4fb
+  - 206c14c2d9b8785e5cd0e6704c4900ce3daaed25
+  - 201a6f5784bae2f75b20a05303bb1a703883f86f
 changed_paths:
   - 14-ai-development/prompt-and-evidence-template.md
   - 14-ai-development/README.md
@@ -131,6 +133,10 @@ traceability_exclusions:
     reason: Manifest-only bookkeeping reconciliation; metadata bookkeeping, not implementation.
   - sha: bdc92b7f1442df495881edd119cee7b363de632f
     reason: Manifest-only final bookkeeping reconciliation; metadata bookkeeping, not implementation.
+  - sha: 0708e25d8e008b1044679ff29ba7ae34977bc08c
+    reason: Prior manifest-only inventory finalization; superseded by subsequent review/remediation records.
+  - sha: 1e31308e079a2f82925c9a3930e269edf266e09e
+    reason: Manifest-only append of the independent re-review history; superseded by this manifest self-update.
   - current_manifest_self_update: Excluded by definition to avoid self-reference.
 self_review:
   status: RECORDED_NOT_INDEPENDENT
@@ -167,3 +173,18 @@ review_history:
     yaml_parse_schema_validation: NOT_RUN
     manifest_verification: NOT_RUN
     disposition: Historical review retained; follow-up remediation tracked in subsequent commits.
+
+remediation:
+  source_review: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945250593
+  source_reviewed_head: 0708e25d8e008b1044679ff29ba7ae34977bc08c
+  status:
+    IR-001: FIXED_PENDING_INDEPENDENT_REVIEW
+    IR-002: VERIFIED_FIXED_BY_INDEPENDENT_REVIEW
+    IR-003: VERIFIED_FIXED_BY_INDEPENDENT_REVIEW
+    NR-001: BLOCKED_GOVERNANCE_AUTHORITY_DECISION
+    NR-002: FIXED_PR_DESCRIPTION_UPDATED
+    NR-003: FIXED_REVIEW_HISTORY_APPENDED
+  remediation_commits:
+    - 206c14c2d9b8785e5cd0e6704c4900ce3daaed25
+    - 201a6f5784bae2f75b20a05303bb1a703883f86f
+  note: IR-001 and NR-002/NR-003 changes are author-side remediation only; they do not supersede the independent reviewer disposition. A fresh review of the new Head is required. NR-001 remains blocked pending explicit governance authority decision.
