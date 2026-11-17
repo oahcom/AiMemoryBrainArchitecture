@@ -662,3 +662,65 @@ Closure requires:
 
 **Closure status: NOT CLOSED.** No external governance activation, production authorization or security certification is claimed.
 
+
+
+## 21. R-07 live recovery, replay, cursor, restore and anti-rollback assessment — 2026-11-18
+
+### 21.1 Exact source and execution evidence
+
+| Owner | Source | Blob / run | Evidence ceiling |
+|---|---|---|---|
+| Storage | COC durable log / recovery protocol v3.2.3 | 5cee0d58575adc0fb3dd20a5c7ab68c2a2711792 | Revised technical proposal; fresh exact-version Owner review required; implementation/deployment/conformance not run |
+| Storage | Restore control-high-water contract | 4f656163aeba532a441eaed1d293a48e2363cb4a | Architecture candidate; I/D/A exact review required; no real proof APIs or orchestration |
+| Storage | Restore reference model / tests / workflow | Model be0aef6232c8ee2ed6179df7b0a74473c3e25b3b; tests a9e1a96b449c6bf0e2b52c5fea394a8c32961a24; workflow 57ac98e333abfc325bfb9f3d3606fa0801adec4b | Run 43965501810 / job 133643756066 / commit 19798634fb0d55cb0c901c8f4194506fab96b75b: 25/25 PASS; in-memory logical model only |
+| Storage | PostgreSQL 18.7 restore probe | Script 81072ea2411af12f29c7a7a4d984df3f870321ca; workflow 38369ed197665c4ed99a9ba30602cb5e3b04ba75 | Run 43959079703 / job 133621314624 / commit 83bdacbafa840808dca9be7a8c76c4df83c63504: physical pg_basebackup restore, prepared XID survives, stale restore gate closed, current control replay before reads, same-XID commit and pointer+receipt fixture PASS |
+| Storage | Prepared-XID / sync failover / sync unavailable / old-primary rewind / PITR probes | Scripts: 184e0507fd225ee18f321f3f1ce6a63f869b13f3; cbe1f317479145dbf1467e426b0c0737a6ec054c; 78d40d0d4e46dc9f286ca3f59bb159843c1dcf26; 10461a2de093ad0c4944536ba686c217aa0aa835; 6e7721ee8f8708357610e0bc564e015872b8263c | Runs 43959079736, 43959079669, 43959079760, 43959079930, 43959079745 all successful; details below |
+| H | Recovery Cutoff schema 1.0.5 / two-phase amendment | Schema 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7; addendum c216853412f654d92e2890ddcc2dffc12406cbe6 | 1.0.5 remains structural candidate; exact H/C/A review required; no freeze |
+| H | Recovery Cutoff runtime / test / workflow | Runtime 4c8dcafdb49db5279a1d1190b832a9c6c05d6b67; test 690ab42b4f8f7e61adf38fd7b6006f20cc71a7f5; workflow 65f25ef5d069be3ca9560784906b88c0d3854828 | Run 44079842878 / job 134027249428 on current H HEAD 0d36324457e39bd50ad56ae902d477c4ea765b61: 288 tests PASS |
+| C / I | Recovery Cutoff exact reviews | C 694b19dd5c52db1b8206c0f5986464bd64194cbd; I a0fee9ef41c52ea3948286e6ec9a348cc1b17168 | Both accept H schema 1.0.4 with amendments; delegated role simulations, not independent human Owner approvals; architecture only |
+| D / I / A | Restore proof acceptances | D 211e54acfb4573b1c51d96f07af297671dfc4c4b; I 85d62b8858fc86addacd3b83f49476e42f49b785; A fa5e066a208a64401c96a6b8790d8b53dc7f1585 | D/I accept their proof semantics; A accepts four-proof architecture with owner-local release gates; all delegated/architecture-only, no implementation |
+| A | Exact owner restore matrix | 3b488ae3a7cf9aca9a70a659aba09ecba53ce17f | All owner perspectives accept architecture with conditions; Gate A design conditional pass, implementation not passed, Gate C deferred, JF-10 runtime P0 open |
+| F / G | Restore consumer acceptances | F d630933a2aa70b9bc182fdeab47856dd8bbec386; G 0910fea807b96a896e361cd2722e4c94df55187b | F accepts anti-resurrection gates; G accepts Context/Applied/Delivery restore gates; production integration not implemented/verified |
+
+### 21.2 Verified component capability — do not understate it
+
+Storage PostgreSQL CI is materially stronger than a mock: it starts pinned PostgreSQL 18.7 Docker containers with ephemeral volumes and executes actual PostgreSQL physical backup/restore, prepared transactions, WAL/PITR and synchronous standby/failover probes.
+
+Run 43959079703 logs show physical pg_basebackup PASS, prepared-XID survives physical restore PASS, stale restore read gate closed PASS, current Forget-control replay before reads PASS, forgotten artifact suppressed PASS, unrelated artifact remains readable PASS, same-XID commit after restore PASS, and pointer+receipt fixture PASS.
+
+Other successful runs:
+- 43959079736: prepared lock retention, post-restart same-XID commit/rollback, atomic visibility pointer+receipt.
+- 43959079669: synchronous standby promotion, prepared XID replay, same-XID commit/rollback after primary loss.
+- 43959079760: synchronous standby unavailable; PREPARE blocked, client outcome UNKNOWN, prepared lock retained, no protected visibility.
+- 43959079930: old primary fenced, stale epoch rejected, pg_rewind, old primary rejoins as standby, no dual writer.
+- 43959079745: WAL archive PITR to explicit target LSN; post-target data absent.
+
+The tested Storage commit 83bdacbafa840808dca9be7a8c76c4df83c63504 predates current Storage HEAD 830a559bd2f4ec72608f5a51e1a0b43779f2b989. Direct Git tree comparison confirms the six probe scripts and the directly checked restore/sync-unavailable/rewind workflows have identical Blobs at both commits. This evidence remains applicable to those exact files, not to the entire current architecture.
+
+H Recovery Cutoff run 44079842878 is on current H HEAD and passes 288 tests, including two-phase batch/manifest ordering, digest binding, incomplete prefix, quorum proof, duplicate participant, same-identity/different-digest conflict, owner release and currentness CAS.
+
+### 21.3 What remains unproven
+
+1. The PostgreSQL probe explicitly limits itself to CI volumes and a test-fixture control ledger, not a production backup service. It does not invoke real COC, I or D proof APIs, production KMS/key custody, cloud fencing, object-store ACLs or deployed restore orchestration.
+2. The 25/25 restore model is in-memory; it does not restore PostgreSQL, verify real signatures, enumerate production participant ledgers, reconcile real owner high-waters or exercise a production old-primary/cloud control plane.
+3. A's accepted four-proof architecture (COC prefix, I control high-water, D Forget/lineage high-water, Storage participant/GID ledger) remains architecture-only. A explicitly says production proof APIs, signature/key verification, orchestration and cross-owner release gate are not implemented. Receipt is RECONCILED_BUT_FENCED, not serving permission.
+4. D/I accept proof boundaries but their durable proof APIs and restore integration remain NOT IMPLEMENTED/NOT RUN. G/F accept consumer gates but production index/cache/Context/Adapter restore integration is not shown.
+5. H schema 1.0.5 and two-phase amendment remain proposed and require exact H/C/A review. C/I reviews found here accept schema 1.0.4, not 1.0.5. The current-head 288-test pass cannot be promoted into C/I owner acceptance or wire freeze.
+6. Storage COC v3.2.3 proposal requires fresh exact-version Owner review and says implementation/deployment/conformance are not run. Exact cross-authority JF-10/COC composition remains P0.
+
+### 21.4 R-07 disposition
+
+R-07 is **PARTIALLY VERIFIED at component-capability level; NOT PROVEN end-to-end**. It is inaccurate to say there is no physical PostgreSQL restore/failover evidence. It is equally inaccurate to call these tests production Global Forget/restore proof: real I/D/COC proof services, exact current 1.0.5 C/I adoption, real signature/registry integration, complete participant enumeration and end-to-end restore release are absent.
+
+### 21.5 Closure criteria
+
+1. I/D implement authenticated monotonic high-water proof APIs with external anti-rollback anchors, per-domain/per-operation coverage and currentness CAS; unknown/stale/forked states remain fenced.
+2. C publishes exact 1.0.5 Recovery Cutoff acceptance for provider admission/side-effect ledger and same-key outcome reconciliation; H/C/I/A review the same schema/runtime/fixture/workflow Blob bundle.
+3. Storage integrates actual COC quorum prefix, I sequencer/registry/revocation, D Forget/lineage and same-GID/native-XID participant ledgers; fixture ledgers cannot stand in for owner authority.
+4. Run distributed fault injection across owner crash, quorum loss, leader election, delayed/lost ACK, partial batch/manifest, missing staged payload, duplicate/changed digest, owner high-water advance during restore, stale checkpoint, restore rollback, unknown prepared GID and old-primary rejoin.
+5. Demonstrate production target quarantine, independent old-primary/cloud fencing, WAL/archive custody, KMS/signature verification, object-store/backup ACLs, real inventory completeness, operator identity, measured RPO/RTO and runbook.
+6. Every recovery run binds exact commit, workflow Blob, script/test Blobs, image digest, fixture, raw logs and owner acceptance. Predecessor CI and delegated review do not transfer to changed protocol versions.
+7. A closes Gate A design only within its conditional scope; implementation Gate A and Gate C remain blocked until production integration and fault-injection evidence are independently reviewed.
+
+**Closure status: NOT CLOSED.** JF-10 runtime P0 and production restore remain open.
+
