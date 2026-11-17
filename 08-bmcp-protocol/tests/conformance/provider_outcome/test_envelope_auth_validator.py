@@ -214,8 +214,13 @@ class OuterEnvelopeAuthenticationTests(unittest.TestCase):
         self.assertEqual(result["status"], "AUTHENTICATED_NEW", result)
 
     def test_18_subject_and_owner_authority_are_checked_by_registry_not_sender_string_equality(self):
+        self.envelope["subject_ref"] = "C/subject/unauthorized"
+        self.envelope["owner_authority"] = "D"
         checks = self.checks()
-        checks.verify_identity_binding = lambda env, ctx: False
+        checks.verify_identity_binding = lambda env, ctx: (
+            env.get("subject_ref") == "C/subject/authorized"
+            and env.get("owner_authority") == "C"
+        )
         result = authenticate_outer_envelope(self.raw(), self.context, checks)
         self.assertEqual(result["status"], "INVALID", result)
 
