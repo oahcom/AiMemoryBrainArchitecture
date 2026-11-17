@@ -145,3 +145,8 @@ The 66-test H candidate run is not a run of the 36 physical cases in this matrix
 ### 7.1 H expanded suite boundary
 
 H now reports 93 candidate methods passing in run [44042074640](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042074640): 25 HRC + 19 JPF + 10 WIRE + 12 SCHEMA + 26 TPH + 1 XLANG. The TPH and XLANG cases are reference/test-profile only. This does not execute any of the 36 physical race/crash/failover/restore scenarios in this matrix. All physical cases remain NOT EXECUTED.
+
+
+### 7.3 H 95-test boundary
+
+H's latest run [44042568297](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042568297) reports 95 candidate methods PASS: 25 HRC + 19 JPF + 10 WIRE + 14 SCHEMA + 26 TPH + 1 XLANG. The additional schema cases are structural-only for unified 1.2.7. None of these runs the 36 physical race/crash/failover/restore scenarios in this matrix. All physical cases remain NOT EXECUTED.
