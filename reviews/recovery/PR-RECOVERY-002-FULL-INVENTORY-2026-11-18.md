@@ -44,9 +44,10 @@ The repository currently has no open PRs. This does not mean all project work is
 - Outstanding: dedicated least-privilege service account, branch protection/rulesets and required checks, runner-group/environment restrictions, reboot recovery, emergency stop, independent credential-rotation verification, untrusted-PR isolation and accountable Security/Infrastructure Owner acceptance.
 - Do not claim secure worker acceptance or continuous A–I operation.
 
-### PR #135 — stale AID reconciliation duplicate
-- Superseded by merged PR #137; PR #137 merge commit is current main HEAD.
-- Recovery action: PR #135 closed unmerged, with supersession evidence in comment #6962346475.
+### PR #135 — AID reconciliation follow-up
+- PR #137 merged first at `43203675389b7cb351587e465ab3acbb6e165efd`; PR #135 then also merged to `main` at `2026-11-17T22:07:22Z`.
+- PR #135 exact Head: `1ca57512cdc093a11c5aa7294c873edebbec9c4b`; merge commit: `fb9269661225a26416d11528e9a94d845345b2af`.
+- PR #135 was not closed unmerged and must not be classified as superseded/closed. Its additional AID-2026-001 reconciliation is part of mainline history.
 
 ## 3. Dependency / base-branch topology
 
@@ -179,7 +180,7 @@ Important rule: PRs targeting Owner/research/recovery branches are not candidate
 | [#131](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/131) | MERGED | `main` | `40c52edb97f1` | Merged; integration fact only, does not imply domain acceptance. |
 | [#132](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/132) | MERGED | `main` | `c5e16e224f7e` | Merged; integration fact only, does not imply domain acceptance. |
 | [#133](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/133) | MERGED | `main` | `a79443858674` | Merged; integration fact only, does not imply domain acceptance. |
-| [#135](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/135) | MERGED | `main` | `1ca57512cdc0` | Superseded by merged #137; closed during this recovery. |
+| [#135](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/135) | MERGED | `main` | `1ca57512cdc0` | Merged after #137; merge commit `fb9269661225a26416d11528e9a94d845345b2af`. |
 | [#136](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/136) | MERGED | `main` | `fe69b105a44e` | Merged; integration fact only, does not imply domain acceptance. |
 | [#137](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/137) | MERGED | `main` | `a0dd00168899` | Merged; integration fact only, does not imply domain acceptance. |
 
@@ -195,7 +196,7 @@ Important rule: PRs targeting Owner/research/recovery branches are not candidate
 1. Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED. It must not be closed until each applicable security gate has evidence and accountable Owner acceptance.
 2. PR #121's candidate package remains non-production. PR #136 and #133 improve bounded reference evidence only.
 3. PR #23, #27, #121 and #135 now have recovery comments documenting actual status and evidence boundaries.
-4. The 21 closed-unmerged PRs remain in GitHub history. Their disposition is recorded above; do not reopen a PR solely because it is not merged.
+4. The 20 closed-unmerged PRs in the 107-record snapshot remain in GitHub history. Their disposition is recorded above; do not reopen a PR solely because it is not merged.
 5. The inventory does not assert a fresh file-by-file semantic review of all 107 PR diffs. Historical merged changes require targeted audit only when current-main defects or traceability gaps identify a reason.
 
 ## 7. Recovery verdict / 恢复结论
@@ -204,7 +205,7 @@ Important rule: PRs targeting Owner/research/recovery branches are not candidate
 
 **PROJECT ACCEPTANCE: NOT COMPLETE. / 项目验收：未完成。**
 
-This recovery closes the stale open-PR queue by reconciling the remaining duplicate PR #135. It does not convert merges into approvals, close Issue #26, pass architecture gates, or authorize production activation.
+The 107-record inventory snapshot had zero open PRs; PR #135 was merged after #137 and was not closed by this recovery. PR #138 was created after that snapshot and subsequently merged. These integration facts do not convert merges into approvals, close Issue #26, pass architecture gates, or authorize production activation.
 
 本次恢复通过关闭已被 PR #137 取代的重复 PR #135 清空开放 PR 队列；不把合并事实转换为 Owner 批准，不关闭 Issue #26，不宣称架构 Gate 通过，也不授权生产激活。
 
@@ -232,3 +233,24 @@ This append-only overlay supersedes the earlier Main snapshot and queue statemen
 - 最新读取时 PR #138 的 mergeable 为 true，但精确 Head 的 `GOV-DOC-001 structural checks` 仍为 IN_PROGRESS，综合 Commit Status 为 PENDING。必须等待检查成功并重新核对 Diff 后才能考虑合并。
 - 传统 Main Branch Protection 仍未启用；Rulesets 因 API 403 无法核实。
 - Issue #26 仍为 OPEN / SECURITY_ACCEPTANCE_BLOCKED。
+
+
+---
+
+## 9. Post-merge factual correction / 合并后事实更正（2026-11-18）
+
+This append-only correction reconciles the recovery narrative with the live GitHub PR records and the subsequent merge events.
+
+- PR #135 is **CLOSED / MERGED**, not closed-unmerged. Exact Head: `1ca57512cdc093a11c5aa7294c873edebbec9c4b`; merge commit: `fb9269661225a26416d11528e9a94d845345b2af`; merged at `2026-11-17T22:07:22Z`. It merged after PR #137 and is retained as an additional AID-2026-001 reconciliation.
+- PR #138 is **CLOSED / MERGED**. Exact Head: `ecc39eba505aaa867cb3820fbbd3bc38acc0099b`; base: `5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`; merge commit: `8b9d896d714e6037a7856a77a9d2d3ec0179f117`; merged at `2026-11-17T22:09:24Z`.
+- PR #138 exact-Head GOV-DOC-001 workflow run `44187098367` completed SUCCESS; the structural-check job and paired-documentation/PR-manifest step succeeded.
+- The original 107-record snapshot predates PR #138 and remains a point-in-time record. The current all-state API subsequently returns 108 PR records; the current open-PR search returns zero.
+- Current `main` HEAD at this correction: `8b9d896d714e6037a7856a77a9d2d3ec0179f117`. Classic branch protection remains disabled (`protected=false`, required-check enforcement off); repository Rulesets remain unverified because the available API returns 403.
+
+本追加更正将恢复报告与 GitHub 实际 PR 状态及后续合并事件对齐。
+
+- PR #135 实际为 **CLOSED / MERGED**，并非关闭未合并。精确 Head：`1ca57512cdc093a11c5aa7294c873edebbec9c4b`；合并提交：`fb9269661225a26416d11528e9a94d845345b2af`；合并时间：`2026-11-17T22:07:22Z`。它在 PR #137 之后合入，是额外的 AID-2026-001 对账更新。
+- PR #138 实际为 **CLOSED / MERGED**。精确 Head：`ecc39eba505aaa867cb3820fbbd3bc38acc0099b`；Base：`5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`；合并提交：`8b9d896d714e6037a7856a77a9d2d3ec0179f117`；合并时间：`2026-11-17T22:09:24Z`。
+- PR #138 精确 Head 的 GOV-DOC-001 工作流 run `44187098367` 已 SUCCESS；结构检查 Job 与双语文档/PR Manifest 步骤均成功。
+- 原始 107 条盘点早于 PR #138 创建，仍是有效的时间点快照。后续全量 API 返回 108 条 PR；当前开放 PR 查询为 0。
+- 本次更正时的 `main` HEAD：`8b9d896d714e6037a7856a77a9d2d3ec0179f117`。传统分支保护仍关闭（`protected=false`，必需检查未强制）；可用 API 返回 403，Rulesets 仍无法核验。
