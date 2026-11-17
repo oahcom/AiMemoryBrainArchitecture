@@ -36,6 +36,19 @@ def owner_reconciliation_root(manifest: Mapping, owner: str) -> str:
     return _td("OWNER-RECONCILIATION", projected)
 
 
+
+def owner_snapshot_root_projection(snapshot: Mapping) -> dict:
+    fields = (
+        "owner_snapshot_ref", "owner_snapshot_digest",
+        "owner_snapshot_attestation_ref", "owner_snapshot_attestation_digest",
+        "owner_gate_generation", "scope_generation_ref",
+        "request_high_water", "admission_high_water",
+        "request_ledger_root", "admission_ledger_root", "owner_ledger_root",
+        "anti_rollback_anchor_ref", "owner_specific_high_waters_digest",
+    )
+    return {field: snapshot.get(field) for field in fields}
+
+
 def validate_owner_gate_release(
     release: Mapping,
     batch: Mapping,
@@ -103,10 +116,60 @@ def validate_owner_gate_release(
     if not isinstance(release.get("owner_specific_high_waters"), Mapping):
         return INVALID
 
+    # The Batch and Manifest must carry this exact same frozen owner snapshot.
+    batch_snapshots = batch.get("owner_snapshots")
+    if not isinstance(batch_snapshots, Mapping) or owner not in batch_snapshots:
+        return UNKNOWN
+    if not isinstance(batch_snapshots[owner], Mapping):
+        return INVALID
+    if dict(batch_snapshots[owner]) != dict(owner_snapshot):
+        return INVALID
+
+    manifest_roots = manifest.get("owner_snapshot_roots")
+    if not isinstance(manifest_roots, Mapping) or owner not in manifest_roots:
+        return UNKNOWN
+    if not isinstance(manifest_roots[owner], Mapping):
+        return INVALID
+    if dict(manifest_roots[owner]) != owner_snapshot_root_projection(owner_snapshot):
+        return INVALID
+
     # Exact Recovery Cutoff Batch / Manifest pair binding.
     if release.get("recovery_epoch_ref") != batch.get("recovery_epoch_ref"):
         return INVALID
     if release.get("recovery_epoch_ref") != manifest.get("recovery_epoch_ref"):
+        return INVALID
+    pair_fields = (
+        "batch_record_ref", "batch_position", "batch_entry_digest",
+        "manifest_id", "manifest_content_digest", "enumeration_high_water",
+        "coc_participant_count", "owner_local_admission_count",
+        "manifest_member_count", "member_set_root", "prefix",
+    )
+    batch_to_manifest = {
+        "batch_record_ref": batch.get("coc_record_ref"),
+        "batch_position": batch.get("coc_record_position"),
+        "batch_entry_digest": batch.get("coc_entry_digest"),
+        "manifest_id": batch.get("manifest_id"),
+        "manifest_content_digest": batch.get("manifest_content_digest"),
+        "enumeration_high_water": batch.get("enumeration_high_water"),
+        "coc_participant_count": batch.get("coc_participant_count"),
+        "owner_local_admission_count": batch.get("owner_local_admission_count"),
+        "manifest_member_count": batch.get("manifest_member_count"),
+        "member_set_root": batch.get("member_set_root"),
+        "prefix": batch.get("prefix"),
+    }
+    if any(field not in manifest or manifest.get(field) is None for field in pair_fields):
+        return UNKNOWN
+    for field, expected in batch_to_manifest.items():
+        if expected is None:
+            return UNKNOWN
+        if str(manifest.get(field)) != str(expected):
+            return INVALID
+    try:
+        batch_position = int(batch.get("coc_record_position"))
+        manifest_position = int(manifest.get("coc_record_position"))
+    except (TypeError, ValueError):
+        return UNKNOWN
+    if batch_position >= manifest_position:
         return INVALID
     if release.get("batch_record_ref") != batch.get("coc_record_ref"):
         return INVALID
@@ -132,17 +195,28 @@ def validate_owner_gate_release(
     # All authority checks are independent; absence/uncertainty is UNKNOWN.
     if not callable(verify_owner_signature) or not callable(verify_coc_commit_proof) or not callable(currentness_cas):
         return UNKNOWN
-    owner_sig = verify_owner_signature(release, owner_snapshot)
+    try:
+        owner_sig = verify_owner_signature(release, owner_snapshot)
+    except Exception:
+        return UNKNOWN
     if owner_sig is None or owner_sig == UNKNOWN:
         return UNKNOWN
     if owner_sig is not True:
         return INVALID
-    coc_proof = verify_coc_commit_proof(release, batch, manifest)
+    try:
+        coc_proof = verify_coc_commit_proof(release, batch, manifest)
+    except Exception:
+        return UNKNOWN
     if coc_proof is None or coc_proof == UNKNOWN:
         return UNKNOWN
     if coc_proof is not True:
         return INVALID
-    current = currentness_cas(owner, owner_snapshot)
-    if current is None or current == UNKNOWN or current is not True:
+    try:
+        current = currentness_cas(owner, owner_snapshot)
+    except Exception:
         return UNKNOWN
+    if current is None or current == UNKNOWN:
+        return UNKNOWN
+    if current is not True:
+        return INVALID
     return VALID
