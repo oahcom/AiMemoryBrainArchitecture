@@ -64,6 +64,34 @@ Branch tips/commit SHAs are NOT VERIFIED for the live owner branches in this mat
 - H 1.2.14 / CSubmitOutcome 1.0.1 Reference Ingress 路径不是生产认证。H 60 项 CI 使用确定性 Callback Double；G 的 38 项 Full-path Fixture 也使用确定性 Authority Double。H P0 提取/签名验证、生产 Trust Registry、持久 Replay、C Envelope Signer Profile 和 Storage Durable Ingress 仍未完成。
 - A 当前 Phase 3.8.19 复审明确将其列为阻塞性架构缺口。这一问题更新了旧摘要：42 项本地 Validator 测试仅在其原始 C-object/本地校验范围内有效。
 
+## 1C. Chinese current-owner source-pin ledger / 中文当前 Owner 来源 Pin 台账
+
+| Owner | Branch HEAD | Exact review artifact and Blob / 精确复审工件与 Blob | 中文发现 / Chinese finding |
+|---|---|---|---|
+| B | 2faf8ec38f14dba49e7263d7a60804dae1a74ee2 | phase-3.8.6 B serialization anchor; e2bc4c8dde9706bfbe443269b702f1b5aa6965f6 | B 仅批准 Per-authority 名义类型边界；Anchor 是物理实现细节，不是规范实体/全局计数器。 |
+| C | 2e8414f361b0b5d7de959be8a971aadc9e62d6a9 | phase-3.8.22 C H authenticated ingress review; 8fd6052cabf58a78962cc2e776398b2a40604bcd | C 接受 H Reference Gate/测试边界；Signer/Attestation 和 Crypto Profile 仍未关闭；60 项测试使用确定性 Callback Double。 |
+| D | 76fcc92225666a11893b7241825261319edb621e | phase-3.8.13 D outer-envelope review; 152627e00b96355e2ff370acd643a51168c4c78c | D 只接受 H 作为上游接口；D Forget/RecoveryJoin 权威不变。 |
+| E | ee098e14747d9915de5b3efb63b3a8dd77f670ed | phase-3.8.6 E serialization review; 19d708bc29b6115d7bccb7d320781f452ee28b78 | E 在自身生命周期条件下接受 Anchor；L4 实现仍开放。 |
+| F | 1908ce4d233b20f7cafd00cb679affd01bd15174 | phase-3.8.6 F serialization review; 122238146830db6188f00a9788e018a82bfb3f90 | F 在读路径/Cache 条件下接受 Anchor；L4 实现仍开放。 |
+| G | 3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe | phase-3.8.18 G H/CSubmitOutcome full-path review; 1894860c76336f8739d354b72beed3992cffd17e | G 接受有限 L1/L2 C/H 消费者映射并保留 G Applied 谓词；NOT FROZEN；38 项测试使用 10 个确定性 Authority Double。 |
+| H | 8e24342048d29ef29195b153b8b9ec53ba7c75d9 | phase-3.8.20 H C-envelope P0 correction; 4ba7e1699215d02224f805a15484b1da2e40c03f | H 修正 C P0 Proof Locator 缺失并记录 JSON Pointer；可执行认证仍开放。 |
+| I | 2afe0e17f8c0929d9e642ccbe2cad112b5fd43a9 | phase-3.8.18 I C origin-signer review; b6d1ea45825a1c2090abfba42474814f02f073a3 | I 接受 Signer Ownership 分离为候选；Crypto Suite/Trust 注册未批准。 |
+| Storage | 431138e7c7af8bee716f3d8dcbc20114c046bd36 | Storage v3.2.11 exact manifest; 54a4f0dab7ab24f1f6fb01f8cc5c7da292f02c57 | 精确候选包已绑定 C/H/I/D 复审；仍未联合接受/冻结，需 A 新审查。 |
+| A | 9bdf938b980413f592a4db9fe94f4bf2c299fb01 | phase-3.8.19 A outer-envelope auth review; e12cd7b5c79e2234178014243fd51f2e7d51272e | A 将外层 Envelope Authentication 明确标记为阻塞架构缺口，要求不得冻结。 |
+
+## 1D. Chinese historical contract evidence summary / 中文历史契约证据摘要
+
+- **B：** Phase 3.6 Typed Identity Trust Closure（Blob 0a6b78...）建立类型化身份技术基线；当前 Formal Actor/Scope/Environment Type Mapping Blob 3a1e77889cd9a90cd5822d9f0cb3437880868706 已正式批准对应类型语义。Fact/Claim ADR（Blob 96a2ee...）仅提出 C2+I1 候选，不构成最终决策。
+- **C：** Final Request Evidence Contract（Blob fd2f47...）区分真实 Final Request 与传输 ACK；CSubmit Cross-authority Causal Order Contract（Blob 45a482...）仍需跨 Owner 因果顺序和 Storage 接受。
+- **D：** Forget Fence/Completion Contract（Blob 1f0391...）规定 D 规范抑制和完成证明；Commit Cursor Semantics（Blob 4688a0...）由 D 拥有，不能与其他 Owner Epoch/Cursor 混用。
+- **E：** Compiler State/Producer Admission（Blob e59f51...）和 Forget Fence/Derived Registration（Blob 00e37b...）定义 Compiler 侧准入/派生登记；Storage Publication Gate 仍阻塞。
+- **F：** Phase 3.7 Local Lifecycle/Queue/Recall/Context Restore（Blob 29e950...）是 F 局部提案，不能替代 G ContextVersion 或规范 Memory。
+- **G：** Applied Forget Reconciliation Contract（Blob aa3afa...）由 G 拥有 Applied 记录；ContextVersion/ChangeSet 与 MemoryVersion 不同。
+- **H：** Protected Operation Binding（Blob e7ca5c...）和 Adapter Capability/Applied Attestation（Blob 74be83...）是候选协议边界；ACK 仅证明其声明的有限后置条件。
+- **I：** Identity Trust Policy Joint Closure（Blob 0cbf6b...）技术基线已共同决定，但 I36 外部治理仍阻塞；Global Forget Target Inventory（Blob 910006...）仍候选。
+- **Storage：** Forget Atomicity Realization Review（Blob 107d21...）和 JF-10 DE-S Proposal（Blob 946798...）仍是提案/未实现证据，不能宣称物理擦除或跨权威原子性已证明。
+- **A：** CGH Applied Decision Package（Blob 122b16...）和 CGH-APPLIED-1.1 Causal Order Package（Blob 4961ff...）记录集成裁决/候选包；必须以各 Owner 精确版本批准为准。
+
 ## 2. Semantic matrix / 语义矩阵
 
 | Concept | B canonical position | Owner-local position | Status / conflict |
