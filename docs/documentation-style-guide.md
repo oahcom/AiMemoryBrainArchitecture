@@ -73,12 +73,14 @@ Never use “supports”, “secure”, “atomic”, “durable”, “real-tim
 
 ## 6. Bilingual parity / 双语一致性
 
-- Maintain Chinese and English counterparts for each published major guide/specification.
+- **MUST:** Maintain Chinese and English counterparts for every architecture design, specification, review finding, ADR, and semantic architecture change—not only major guides.
+- **MUST:** Add and update both counterparts in the same change set. A one-language-only architecture change cannot pass documentation acceptance except under GOV-DOC-001.
 - Keep the same document ID, semantic version, decision status, section numbering, diagrams, tables, examples, and normative force.
 - Translate explanations, not stable identifiers: API fields, enum values, type names, crate names, paths, and ADR IDs remain unchanged.
-- A change to one language triggers a parity check of the other language in the same change set.
+- Any change to either language triggers a semantic parity check of the other language in the same change set.
+- Record source revision, document ID/version, accountable Owner, and parity evidence.
 - Do not omit caveats, failure cases, or open issues in either language.
-- If a translation is not updated, mark it **STALE / 翻译待同步** and link the authoritative revision.
+- If a translation is not updated, mark it **STALE / 翻译待同步** and link the authoritative revision; GOV-DOC-001 requires an approved, time-bounded exception with an Owner and due date.
 
 ## 7. Diagram and table rules / 图表规范
 
@@ -114,3 +116,9 @@ Translations must not create architecture decisions. Semantic changes must follo
 - Are failure cases and non-guarantees visible?
 - Do Chinese and English say the same thing?
 - Are links and diagrams valid?
+
+## 10. Mandatory project rule / 项目强制规范
+
+Every A–I Owner MUST deliver architecture work in Chinese and English. This includes proposals, review reports, module specifications, interfaces, schemas, state machines, ADRs, technology decisions, tests/acceptance requirements, and material revisions. Bilingual parity is an acceptance gate, not optional polish. See [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md).
+
+A–I 所有 Owner 必须以中英文双语交付架构工作，包括设计提案、审查报告、模块规范、接口、Schema、状态机、ADR、技术决策、测试/验收要求和重要修订。双语一致性是验收门禁，不是可选的文字润色。详见 [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md)。
