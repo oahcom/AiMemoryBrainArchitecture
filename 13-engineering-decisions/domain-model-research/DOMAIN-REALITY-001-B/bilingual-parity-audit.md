@@ -396,7 +396,7 @@ Author-side bilingual parity refresh was performed for the latest additions to R
 | README.md | `480efa28b281e21a2358c1bddc5b4788a37bd160` | 337 |
 | fact-claim-identity-adr.md | `958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593` | 223 |
 | domain-model-decision-record.md | `b83d99d3c66b30c5834f08ce61c5acfd27004e6a` | 271 |
-| baseline-currentness-and-owner-source-audit.md | `646d3e3308ba0a8c2a40ede6655b37b4e4391303` | 484 |
+| baseline-currentness-and-owner-source-audit.md | `5fc5ea42ba6420da6b2eefeb427a6c550e54b839` | 523 |
 | cross-owner-canonical-semantics-matrix.md | `d9ec7f9cb6f72e2756d12da73c48a784ea9c7a83` | 291 |
 | domain-semantics-conflict-register.md | `980f8563ec772939826b338a9b048efebd5bf2f6` | 166 |
 | bilingual-parity-audit.md | self Blob intentionally not hard-coded | — |
@@ -404,3 +404,24 @@ Author-side bilingual parity refresh was performed for the latest additions to R
 Independent clause-by-clause bilingual semantic review remains **PENDING**. This table records exact readback and author-side parity work only; it does not close B5 or B6.
 
 独立逐条双语语义审查仍 **PENDING**。本表仅记录精确读回和作者侧对等工作；不关闭 B5 或 B6。
+
+
+### 8.8 Final PR snapshot and currentness pin / PR 最终快照与当前性审计 Pin — 2026-11-18
+
+After the §13 currentness update, exact readback confirmed currentness audit Blob `5fc5ea42ba6420da6b2eefeb427a6c550e54b839` (523 lines). At the live read immediately before this parity-audit update:
+- Research branch / PR head: `bb304b2d6559abca4ddd73b10c9e1635543830e9`.
+- Main HEAD: `e52594f181d2edb77448adcfed64a0fbdffaf3aa`.
+- PR #55: Open / Draft, 22 files, 5,167 additions, 0 deletions.
+- Compare: DIVERGED, 178 ahead / 34 behind, merge base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`.
+- GitHub reports `mergeable=false` at this read; cause is not verified. This metadata is not evidence of a semantic conflict or approval. No rebase, retarget, merge or Ready transition occurred.
+
+§13 当前性更新后，精确读回确认当前性审计 Blob 为 `5fc5ea42ba6420da6b2eefeb427a6c550e54b839`（523 行）。本次双语审计更新前的实时读取：
+- 研究分支 / PR Head：`bb304b2d6559abca4ddd73b10c9e1635543830e9`。
+- Main HEAD：`e52594f181d2edb77448adcfed64a0fbdffaf3aa`。
+- PR #55：Open / Draft，22 个文件，新增 5,167 行，删除 0 行。
+- Compare：DIVERGED，领先 178 / 落后 34，Merge Base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`。
+- GitHub 本次返回 `mergeable=false`，原因未核实。该元数据不代表语义冲突或批准。未发生 Rebase、改 Base、合并或转 Ready。
+
+The B2 source update has been reflected in all affected bilingual artifacts. Independent clause-by-clause bilingual review remains pending; B5 remains BLOCKED / NOT PASSED and B6 INDEPENDENT_REVIEW_PENDING.
+
+B2 来源更新已反映到所有受影响的双语工件。独立逐条双语审查仍待完成；B5 仍 BLOCKED / NOT PASSED，B6 仍 INDEPENDENT_REVIEW_PENDING。
