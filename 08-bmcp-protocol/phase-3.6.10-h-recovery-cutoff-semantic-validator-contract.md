@@ -355,3 +355,24 @@ Important limits:
 - The H unified schema 1.2.7 exact review is a separate structural review; this 93-test suite does not validate schema 1.2.7 or its signature_profile_id semantics.
 
 **Status:** 93/93 reference-candidate methods PASS on the recorded run; production semantic adapters, I trust/crypto, live owner/COC authority adapters, actual COC durability and physical JF-10 remain OPEN.
+
+
+### 11.12 Unified schema 1.2.7 structural candidate coverage
+
+The schema-integrity suite has added two methods for the separate unified COC/JF-10 schema 1.2.7:
+- SCHEMA-13 verifies artifact revision 1.2.7 remains distinct from the on-wire family version 1.2.0.
+- SCHEMA-14 verifies signature_profile_id is represented as a distinct field and remains compatibility-optional at structural schema level; protected owner-signed messages must require it through the future semantic/trust adapter, not by trusting the payload.
+
+Current schema integrity test Blob: `fa4fc9f7d3bf64a90bc992453b13fc1fb3c11879`.
+
+The H branch candidate inventory is now **95 methods**:
+- HRC-01..25: 25;
+- JPF-01..19: 19;
+- WIRE-01..10: 10;
+- SCHEMA-01..14: 14;
+- TPH-01..26: 26;
+- XLANG-01: 1.
+
+Latest run [44042401245](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042401245), commit `a39c87a62b5cbe911c096b010146685d779eecae`, job `133899868784`: **95 tests ran, OK**. The run includes the Node.js 22 setup and the two new unified-schema structural checks.
+
+The 1.2.7 tests are structural only. They do not prove that signature_profile_id is semantically mandatory for protected records, that the identifier resolves through an I-controlled trust registry, or that production key status/signature verification works. The 95-test suite remains candidate reference-model/schema/wire evidence; H freeze and production interoperability remain BLOCKED.
