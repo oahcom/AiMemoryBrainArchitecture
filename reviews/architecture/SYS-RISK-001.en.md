@@ -530,3 +530,70 @@ Closure requires:
 7. Execute end-to-end fault tests for duplicate callbacks, delayed/late evidence, lost ACK, provider timeout after possible side effect, stale authorization/fence, replay reservation crash, gateway restart and Storage outcome ambiguity.
 
 No role-simulated Owner decision, schema existence or local validator test closes R-04.
+
+
+## 18. R-05 live exact-version drift audit — 2026-11-18
+
+### 18.1 Exact source pins
+
+| Owner | Branch HEAD | Artifact / Blob | Observed disposition |
+|---|---|---|---|
+| Storage | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | v3.3.2 manifest `5c614375e10698e4931d83deb57d20321445e068` | Explicitly binds H 1.2.14 + C 1.0.1; 60-test reference-ingress evidence; not jointly accepted/frozen; fresh A review required |
+| C | `71047cdb51139ca4080ac67f451e38a48698859d` | Phase 3.8.26 review `c5ff68814be49ec5e6e2c081004e7fa058d276fa` | Accepts H 1.2.15 schema shape with C conditions; Validator/CI not reviewed |
+| C | same | Phase 3.8.27 ordering review `3ca06dbfd7d59483e9604b7a68df924c719f60aa` | Corrected order accepted as delegated C-role decision, not independent human Owner signature |
+| C | same | CSubmitOutcome 1.0.1 schema `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` | Exact C object schema |
+| C | same | Phase 3.8.4 exact-owner binding `1353572f7d5655e3007b2fb5b3f10066f483e6bb` | Semantic source set accepted with exceptions; embeds historical reviewed HEAD `afacd82...` and H 1.2.11 addendum |
+| D | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | Phase 3.8.5 adoption `46b6abd94f3396e5eef7d7456f9b62a3865d4ce2` | Unified 1.2.12 + RecoveryJoin 1.0.2 candidate; H exact cross-review required; not frozen |
+| D | same | Publication terminal contract `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | D proposal; exact Owner approval, callable API and conformance open |
+| E | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | Publication orchestration `475fee41e5eea527af4edefbfe88c58c86967d0a` | E proposal; D/I/Storage exact APIs and independent approval open |
+| G | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | Applied/Forget contract `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G semantics approved with exceptions; C/G/H Applied freeze blocked; implementation/execution not verified |
+| H | `0d36324457e39bd50ad56ae902d477c4ea765b61` | Unified 1.2.15 schema `860fc4cec658db7d2703cd6adf72aa31a2723f6d` | Immutable 1.2.15 schema candidate; wire family 1.3.0 |
+| H | same | Phase 3.8.21 mapping `2dc30f193d9c4f4bdc05ca4c137103687db28924` | Candidate only; explicitly no Validator/CI claim; not frozen |
+| I | `0d071bf1ee7cc71912398c6ae57e4496e08f44ab` | Phase 3.8.22 review `6ba4ce3a93f2adf6f8961d4927d9b87deb9696bf` | Accepts 1.2.15 structural carrier candidate; profile registration, key status and trust root open |
+| I | same | Phase 3.8.5 adoption `b56b0c3690f1826f2fc965ec6af5d66a920004ae` | Still pins Unified 1.2.12 + RecoveryJoin 1.0.2 as candidate; not frozen |
+
+### 18.2 Findings
+
+**R05-1 — Storage v3.3.2 is exact for H 1.2.14, not current H 1.2.15.** The manifest binds H Unified 1.2.14 Blob `09fcd1fa29fe24255fbd87cae79dafb406594a59` and CSubmitOutcome 1.0.1. Its 60-test run is tied to tested commit `0e212731073b36e4fa9ffda8467e60806da1b380`. Current H contains 1.2.15 Blob `860fc4...`. The manifest correctly makes no 1.2.15 claim; consumers must not mislabel v3.3.2 as the 1.2.15 bundle. A successor manifest and fresh A review are required.
+
+**R05-2 — D/I RecoveryJoin adoption remains pinned to H 1.2.12.** D Phase 3.8.5 and I Phase 3.8.5 both bind Unified 1.2.12 Blob `a54f66914a819d77f00c6af04e76453ff9f654ee` + RecoveryJoin 1.0.2 Blob `4b664e3bce465499bcdfd93796349a4ba7074002`; both remain candidate, require exact H cross-review and are not frozen. H 1.2.14/1.2.15 revisions do not automatically amend D/I applicability statements. RecoveryJoin carrier and Provider Outcome/Gateway-attestation schema are different consumers; each needs explicit field-level mapping.
+
+**R05-3 — C decision records have mixed freshness.** C Phase 3.8.4 binding decision records historical reviewed HEAD `afacd82...` and H 1.2.11 addendum. It remains useful for C semantic authority but is not current 1.2.15 approval. Later C Phase 3.8.26 pins H 1.2.15 and CSubmitOutcome 1.0.1, but accepts schema shape only and explicitly has not reviewed Validator/CI. Phase 3.8.27 is a delegated role decision, not independent Owner approval.
+
+**R05-4 — I accepts the 1.2.15 carrier, not a production trust profile.** I Phase 3.8.22 accepts structural shape only. It leaves profile registration, issuer/key approval, key-status history, trust root, custody, anti-rollback and production verification open.
+
+**R05-5 — D/E/G lack one executable Publication/Applied bundle.** D publication terminal contract and E orchestration remain proposals; callable APIs and independent approvals are open. G Applied semantics are approved with exceptions, but C/G/H Applied freeze is blocked and implementation/execution is not verified. No exact D/E/G/H/I/Storage tuple bundle or joint conformance run was found.
+
+**R05-6 — Storage v3.3.2 review table is predecessor-scoped.** It cites 42-test-era C/D/I/H reviews and H 1.2.14 reference-ingress evidence. Its A review is Phase 3.12.1 for v3.3.1 only and expressly does not transfer to v3.3.2. Later C/I 1.2.15 reviews are not incorporated. The manifest correctly requires fresh A review of v3.3.2.
+
+### 18.3 R-05 disposition
+
+R-05 remains **High / NOT PROVEN**. The evidence establishes version-family divergence, not that 1.2.12/1.2.14/1.2.15 are inherently incompatible. They serve different consumers and require explicit field-level compatibility/adoption edges. The actual gap is the absence of a current, jointly reviewed graph spanning RecoveryJoin, Provider Outcome, publication and Applied, with mechanical successor invalidation and review-transfer rules.
+
+No manifest found here is a current jointly accepted cross-owner freeze. Storage v3.3.2 is a delegated coordination manifest; D/I 1.2.12 adoption is candidate; C/H 1.2.15 schema reviews are delegated role decisions; I registration remains open; D/E publication remains proposed; G Applied freeze remains blocked.
+
+### 18.4 Closure criteria
+
+1. Publish a successor Storage manifest distinguishing RecoveryJoin carrier version from Provider Outcome/Gateway-attestation schema version; independently bind schemas, validators, P0 profiles, fixtures, workflow, raw run/job, tested commit, source Blobs and consumer mappings.
+2. C publishes fresh exact-head semantic/validator review against H 1.2.15 and CSubmitOutcome 1.0.1.
+3. H publishes exact 1.2.15 validator/gateway conformance and runs workflow on exact commit; test bidirectional revision substitution, each conditional field, C/H signature combinations, origin-to-Adapter binding, duplicate fields, replay and UNKNOWN/INVALID behavior.
+4. I separately registers exact H profile, issuer, key lifecycle, trust root, custody, sequence/anti-rollback and transport-receipt verifier; until then production trust remains OPEN.
+5. D/I either publish successor RecoveryJoin adoption mapping 1.2.15 (if used for that carrier) or retain 1.2.12 with explicit rationale. Do not infer Provider Outcome schema changes RecoveryJoin carrier.
+6. D/E/Storage publish exact publication participant/API/tuple compatibility bundle; G/C/H publish separately pinned Applied proof bundle. Each Owner reviews its own exact Blobs.
+7. A reviews exact successor manifest and all consumer edges. Changed Blobs invalidate predecessor review only for changed scope; no approval transfer across changed scope.
+8. CI evidence binds tested commit, workflow Blob, test and fixture Blobs, dependency lock and raw logs. A green predecessor run cannot close a successor gate.
+
+**Closure status: NOT CLOSED.** R-05 remains a High architecture-freeze blocker.
+
+## 19. R-05 evidence classification
+
+| Claim | Classification | Basis |
+|---|---|---|
+| Storage v3.3.2 exact pins identifiable | VERIFIED | Live manifest and source Blob pins read |
+| H 1.2.15 schema shape has C/I delegated structural reviews | VERIFIED | Exact C Phase 3.8.26 and I Phase 3.8.22 Blobs read |
+| C accepts H 1.2.15 Validator/CI | NOT PROVEN | C review explicitly says not reviewed |
+| I production H gateway profile registered | NOT PROVEN | I review leaves registration/key/trust open |
+| D/I RecoveryJoin adoption updated to 1.2.15 | NOT PROVEN | Current D/I amendments still pin 1.2.12 |
+| D/E/G/Storage share accepted executable Publication/Applied bundle | NOT PROVEN | D/E proposals, G freeze blocked, no joint bundle/test |
+| Predecessor reviews transfer to current heads | FALSE | Manifest states no transfer; A review is v3.3.1-only |
+
