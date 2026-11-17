@@ -62,13 +62,13 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Memory Runtime detailed contracts (5 core specifications) | F owner branch; audited head 348b5ec84c44a8a067122ce0aa72a594b9c06b66 | docs/zh-CN/05-memory-runtime/ | docs/en/05-memory-runtime/ | PAIRED IN PR #28 — 5/5 detailed pairs present; independent semantic review pending |
 | Memory Context detailed contracts (6 core specifications) | G owner branch; audited head 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa | Pending | Owner-branch English sources | NOT STARTED — 6 core specs are English-only |
 | Agent Integration detailed contracts (10 core specifications) | C owner branch; audited head 0f1df3b9c8bdfbb7991cd9e18842c56c521665c4 | Pending | Owner-branch English sources | NOT STARTED — 10 core specs are English-only |
-| BMCP Protocol detailed contracts (7 core specifications) | H owner branch; audited head 8150a450c73d59eba9b81f6aae30e28ab0d7a0e0 | Pending | Owner-branch English sources | NOT STARTED — 7 core specs are English-only |
+| BMCP Protocol detailed contracts (7 core specifications) | H owner branch; refresh exact source blobs per Phase 3.6 audit | Pending for normative core contracts | Owner-branch English sources | NOT STARTED — 7 normative core specs remain unpaired; separate H identity consumer/conformance status report is paired below |
 | Security & Governance detailed contracts (8 core specifications) | I owner branch; audited head a00173f3cf6c266f638fe89c0d2af0445e0ae30b | Pending | Owner-branch English sources | NOT STARTED — 8 core specs are English-only |
 | Memory Compiler reader guide | E owner branch: 04-memory-compiler/ | docs/zh-CN/04-memory-compiler/memory-compiler-guide.md | docs/en/04-memory-compiler/memory-compiler-guide.md | COMPLETE — overview guide only |
 | Memory Runtime reader guide | F owner branch: 05-memory-runtime/ | docs/zh-CN/05-memory-runtime/memory-runtime-guide.md | docs/en/05-memory-runtime/memory-runtime-guide.md | COMPLETE — overview guide only |
 | Memory Context reader guide | G owner branch: 06-memory-context/ | docs/zh-CN/06-memory-context/memory-context-guide.md | docs/en/06-memory-context/memory-context-guide.md | COMPLETE — overview guide only |
 | Agent Integration reader guide | C owner branch: 07-agent-integration/ | docs/zh-CN/07-agent-integration/agent-integration-guide.md | docs/en/07-agent-integration/agent-integration-guide.md | COMPLETE — overview guide only |
-| BMCP Protocol reader guide | H owner branch: 08-bmcp-protocol/ | docs/zh-CN/08-bmcp-protocol/bmcp-guide.md | docs/en/08-bmcp-protocol/bmcp-guide.md | COMPLETE — overview guide only |
+| BMCP Protocol reader guide | H owner branch: 08-bmcp-protocol/ | docs/zh-CN/08-bmcp-protocol/bmcp-guide.md | docs/en/08-bmcp-protocol/bmcp-guide.md | COMPLETE — overview guide only |\n| H Phase 3.6 identity consumer/conformance status report | 08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md; source Blob 8afb914731a34d8ab44331f54f1f39bfd8ec37ce | docs/zh-CN/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md | docs/en/08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md | PAIRED — status report only; H36/H36-SR NOT RUN; does not count as a normative core-spec pair |
 | Storage and Index | 09-storage-and-index/ | Pending | Existing English sources | NOT STARTED |
 | Security & Governance reader guide | I owner branch: 09-security-governance/ | docs/zh-CN/09-security-governance/security-governance-guide.md | docs/en/09-security-governance/security-governance-guide.md | COMPLETE — overview guide only |
 | Consistency and Recovery | 11-consistency-and-recovery/ | Pending | Existing English sources | NOT STARTED |
@@ -90,7 +90,7 @@ The following describes the current bilingual companion files on `docs/bilingual
 | D | 8 core specs | 8/8 paired | Source-branch reconciliation and semantic acceptance |
 | E | 8 core specs | 7/8 paired | Forget Fence and Derived Registration |
 | F | 5 core specs | 5/5 paired | Independent semantic review |
-| G/C/H/I | 6/10/7/8 core specs | Reader guides only; detailed pairs not started | Full detailed contracts and reviews |
+| G/C/H/I | 6/10/7/8 core specs | Reader guides only; detailed pairs not started; H identity status report is a separate paired report | Full detailed contracts and reviews |
 | Storage/Consistency | Per-source inventory pending | No detailed paired set | COC/JF-10/identity/restore/high-water/acceptance evidence inventory and translation |
 
 ## 4. Translation and readability sequence / 翻译与易读性推进顺序
@@ -129,7 +129,7 @@ The following describes the current bilingual companion files on `docs/bilingual
 
 ### Batch 5 — Context and Agent boundary / 第五批：上下文与 Agent 边界
 - G Context, C Agent Integration, and H BMCP reader guides: COMPLETE.
-- G/C/H detailed contracts: NOT STARTED — G has 6, C has 10 and H has 7 English-only core specifications at audited heads; refresh source SHAs before translation.
+- G/C/H normative detailed contracts: NOT STARTED — G has 6, C has 10 and H has 7 core specifications; refresh exact source Blob SHAs before translation. H Phase 3.6 identity consumer/conformance status report is separately PAIRED; H36/H36-SR remain NOT RUN.
 - G Context Manager, versioning, edit operations, reconciliation, budget.
 - H BMCP schemas and state machines.
 - C Adapter integration and inference-boundary Applied proof.
@@ -177,4 +177,4 @@ A document is not bilingual-complete merely because it has been translated. Each
 
 A integration governance and conformance reader guides are available in both languages. The detailed A registry, complete test catalogue, and Owner-specific review reports remain to be translated as source-level documents.
 
-Batches 1 and 2 provide the orientation, shared language, governance invariants, component map, responsibility matrix, and the source-aligned system-level specifications. The six core Domain Model source specifications are also paired. This is not yet a full translation of all Owner branch contracts, technology decisions, detailed test plans, or review reports. GOV-DOC-001 is already part of the main governance baseline.
+Batches 1 and 2 provide the orientation, shared language, governance invariants, component map, responsibility matrix, and the source-aligned system-level specifications. The six core Domain Model source specifications are also paired. The H Phase 3.6 identity consumer/conformance status report now has a separate bilingual pair, but this does not complete H's normative core contracts or imply H36 execution. This is not yet a full translation of all Owner branch contracts, technology decisions, detailed test plans, or review reports. GOV-DOC-001 is already part of the main governance baseline.\n\nThe 2026-11-17 Phase 3.6 identity/Applied/Storage source audit is recorded in [the source audit report](../reviews/translation/2026-11-17-phase36-identity-applied-storage-source-audit.md). It records currentness findings BSR-28-005 and BSR-28-006 and keeps the high-risk detailed-contract coverage finding BSR-28-007 OPEN.
