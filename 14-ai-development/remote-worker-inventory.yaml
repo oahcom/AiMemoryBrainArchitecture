@@ -2,7 +2,7 @@
 # Never add passwords, private keys, PATs, runner registration tokens,
 # webhook secrets, or model-provider credentials to this file.
 
-schema_version: "1.0"
+schema_version: "1.1"
 worker_id: "ubuntu-primary-01"
 display_name: "Primary Ubuntu AI development worker"
 provider: "user-managed-remote-host"
@@ -22,14 +22,29 @@ endpoint:
 purpose:
   - "GitHub Actions self-hosted runner"
   - "Future event-driven A-I Owner worker execution substrate"
+runner:
+  name: "zesu-x64"
+  version: "2.338.2"
+  architecture: "linux-x64"
+  labels: ["self-hosted", "linux", "x64"]
+  custom_label_status: "DEFERRED — adding ai-worker requires re-registration with a one-time token; see AI-RUN-002-RUNBOOK 4.2"
+  install_path: "/home/ubuntu/actions-runner"
+  work_folder: "_work"
+  service_unit: "actions.runner.oahcom-AiMemoryBrainArchitecture.zesu-x64.service"
+  drop_ins:
+    - "proxy.conf (HTTP(S)_PROXY + After/Wants=sing-box.service)"
+    - "guard.conf (ACTIONS_RUNNER_HOOK_JOB_STARTED)"
+  egress_chain: "runner -> sing-box 127.0.0.1:17891 -> warp-usque 127.0.0.1:2085 (Cloudflare WARP); api.github.com, domestic mirrors, .cn and private ranges route direct"
 runtime:
-  deployment_status: "PARTIALLY_DEPLOYED"
-  runner_status: "OPERATOR_CONFIRMED_ONLINE"
-  persistent_service_status: "OPERATOR_CONFIRMED_RUNNING"
-  runner_evidence: "User confirmation in ChatGPT conversation on 2026-11-17; not independently queried by deployment controller."
-  diagnostic_workflow_status: "NOT_RUN"
+  deployment_status: "DEPLOYED"
+  runner_status: "ONLINE_AND_EXECUTING"
+  persistent_service_status: "VERIFIED_RUNNING"
+  runner_evidence: "Guard log and job results on 2026-11-17: run 44049832708 ALLOW + Succeeded (first real execution), run 44050467500 ALLOW + Succeeded."
+  diagnostic_workflow_status: "SUCCEEDED"
   reboot_recovery_status: "NOT_VERIFIED"
-  untrusted_pr_isolation_status: "NOT_VERIFIED"
+  reboot_recovery_note: "Service is enabled at boot with warp-usque -> sing-box -> runner ordering; no reboot cycle has been performed."
+  untrusted_pr_isolation_status: "ENFORCED_AT_SERVICE_LAYER"
+  untrusted_pr_isolation_evidence: "Run 44050069421 (push to a feature branch) denied by the job-started hook with zero steps executed."
   owner_workers_status: "NOT_DEPLOYED"
 credentials:
   password: "DO_NOT_STORE"
@@ -40,13 +55,39 @@ security:
   require_password_rotation_before_bootstrap: true
   require_out_of_band_host_fingerprint_verification: true
   require_least_privilege_service_account: true
+  least_privilege_service_account_status: "ACCEPTED_DEVIATION"
   require_untrusted_pr_isolation: true
   prohibit_secrets_in_git: true
+  admission_control:
+    policy: "Only refs/heads/main is admitted, and only for push, workflow_dispatch, or schedule."
+    service_layer:
+      status: "ENFORCED"
+      mechanism: "ACTIONS_RUNNER_HOOK_JOB_STARTED -> /home/ubuntu/actions-runner/hooks/job-started-guard.sh"
+      log: "/home/ubuntu/actions-runner/hooks/guard.log"
+      rollback_switch: "/home/ubuntu/actions-runner/hooks/observe.flag (present = log only, never block)"
+    repository_layer:
+      status: "AVAILABLE_NOT_BINDING"
+      mechanism: ".github/workflows/runner-admission-policy.yml + scripts/ci/audit_runner_admission.py"
+      note: "Preventive only; binding once the check is required on main."
+    organization_layer:
+      status: "NOT_ENABLED"
+      controls: ["branch protection on main", "environments with required approval", "repository-scoped runner group"]
+      note: "The hook observed GITHUB_REF_PROTECTED=false on 2026-11-17."
+deviations:
+  - id: "run-identity"
+    accepted_on: "2026-11-17"
+    planned: "Dedicated actions-runner account under /opt/actions-runner without sudo."
+    actual: "ubuntu account (passwordless sudo) with the runner under ~/actions-runner."
+    decision_source: "DOC-OPS-001 section 4; AI-RUN-002-RUNBOOK 0.1"
+    residual_risk: "An admitted workflow can sudo. Containment needs NoNewPrivileges or a separate account."
 governance:
   tracking_issue: 26
   architecture_document: "14-ai-development/continuous-owner-runtime-architecture.md"
+  runner_runbook: "14-ai-development/ubuntu-self-hosted-runner-bootstrap.md (AI-RUN-002-RUNBOOK v1.1)"
+  operations_design: "docs/zh-CN/14-ai-development/ci-runner-operations.md and docs/en/14-ai-development/ci-runner-operations.md (DOC-OPS-001)"
   status_claims:
     tailscale_connected: true
     runner_online: true
+    runner_executed_real_job: true
     worker_runtime_online: false
     continuous_a_i_operation: false

@@ -1,11 +1,24 @@
 # Ubuntu Self-Hosted Runner Bootstrap Runbook
 
 **Document:** AI-RUN-002-RUNBOOK  
-**Status:** PROPOSED / operator-executed bootstrap  
-**Target:** `ubuntu-primary-01` (`vm-0-9-ubuntu`, Tailscale `100.108.116.118`)  
-**Tracking:** [Issue #26](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/26)
+**Version:** 1.1 (revised 2026-11-17)  
+**Status:** ACTIVE / operator-executed. v1.0 was PROPOSED; v1.1 records what was actually deployed and the Owner decision to accept it.  
+**Target:** `ubuntu-primary-01` (`vm-0-9-ubuntu`), runner name `zesu-x64`  
+**Tracking:** [Issue #26](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/26)  
+**Normative architecture statement:** DOC-OPS-001, `docs/zh-CN/14-ai-development/ci-runner-operations.md` and `docs/en/14-ai-development/ci-runner-operations.md`. That pair states the deployed shape, the security boundary, and the admission policy bilingually. This file is the execution procedure.  
+**Translation:** TRANSLATION_PENDING / 翻译待同步. This procedure is English-only; the normative decision and the security boundary live in the bilingual DOC-OPS-001 pair and must be read there.
 
-This runbook establishes a persistent GitHub Actions execution substrate on the Ubuntu host. It does **not** deploy the complete A–I event-driven worker fleet.
+## Revision summary (v1.0 → v1.1)
+
+| Item | v1.0 (planned) | v1.1 (executed and accepted) |
+|---|---|---|
+| Service account | dedicated `actions-runner` | **`ubuntu`** (also the login account, passwordless sudo) |
+| Install path | `/opt/actions-runner` (0750) | **`~/actions-runner`** |
+| Labels | `ai-worker` | **`self-hosted,linux,x64`** (custom label deferred, see §4.2) |
+| Untrusted-trigger isolation | "restrict to trusted dispatches" — human discipline | **enforced in the runner** by a job-started hook (§4.1) |
+| Status | PROPOSED | ACTIVE; acceptance evidence in §6 |
+
+The account and path deviations are **accepted, not pending**. Rationale and residual risk are stated in DOC-OPS-001 §4 and repeated in §0.1 below. Do not paraphrase this as "deployed as specified".
 
 ## 0. Safety preconditions
 
@@ -14,8 +27,18 @@ This runbook establishes a persistent GitHub Actions execution substrate on the 
 - Verify the host identity and OS before installing anything.
 - Do not paste passwords, private keys, PATs, runner registration tokens, webhook secrets, or model-provider keys into chat, Git, Issues, PRs, logs, or artifacts.
 - Generate the GitHub runner registration token immediately before configuration. It is short-lived; never save it in a file or shell history.
-- Initially restrict the runner to trusted workflow dispatches / protected branches. Do not execute fork PR code or untrusted PR workflows on this persistent host.
-- Use a dedicated non-root account. Never run the runner service as root.
+- Keep the runner off untrusted code. As of v1.1 this is **enforced mechanically** by the admission hook in §4.1, not by discipline alone.
+- Run the service as a non-root user. Never run the runner service as root. The executed deployment satisfies "non-root" but not "dedicated"; see §0.1.
+
+## 0.1 Accepted deviations
+
+| Deviation | Accepted on | Compensating control | Residual risk |
+|---|---|---|---|
+| Runner service runs as `ubuntu`, which holds passwordless sudo | 2026-11-17 | L1 admission hook denies every job whose ref is not `refs/heads/main` or whose event is not `push` / `workflow_dispatch` / `schedule` | A workflow that *is* admitted can `sudo`. Containment would need `NoNewPrivileges=yes` or a separate account; neither was implemented |
+| Installed under `~/actions-runner` instead of `/opt/actions-runner` | 2026-11-17 | `.credentials`, `.credentials_rsaparams`, `.runner` are mode 600; the runner directory is 755 and owned by `ubuntu` | A local user with access to the `ubuntu` account can read the runner credentials. There are no other interactive accounts on the host today |
+| Labels are the platform defaults, not `ai-worker` | 2026-11-17 | The repository has exactly one self-hosted runner; a job cannot land elsewhere | If a second self-hosted runner is registered, restore the custom label first (see §4.2) |
+
+**Review trigger:** re-open this deviation if any of the following happens — a second self-hosted runner is registered; a second interactive account is created on the host; the repository becomes public; branch protection on `main` is enabled and someone asks to relax the hook.
 
 ## 1. Host preflight
 
@@ -37,89 +60,148 @@ tailscale status
 tailscale ip -4
 ```
 
-Record non-secret output in the deployment evidence. Confirm architecture before choosing the runner package. Confirm adequate disk and memory before proceeding.
+Record non-secret output in the deployment evidence. Confirm architecture before choosing the runner package: **this host is `x86_64`**. A package chosen from an `arch=arm64` page is the wrong artifact; a partially downloaded package additionally fails `tar tzf` and leaves no `config.sh`. Verify both the architecture and the archive hash before extracting.
 
-## 2. Create a dedicated service identity
+## 2. Service identity
 
-Review the target directory and account policy before running:
+**As executed:** the runner uses the existing `ubuntu` account and `~/actions-runner`. No new account was created. Tighten credential permissions immediately after registration:
 
 ```bash
-sudo useradd --create-home --shell /bin/bash actions-runner
-sudo install -d -o actions-runner -g actions-runner -m 0750 /opt/actions-runner
+chmod 600 ~/actions-runner/.credentials ~/actions-runner/.credentials_rsaparams ~/actions-runner/.runner
 ```
 
-Do not add this account to `sudo`, `docker`, or other privileged groups for the initial pilot.
+**Planned shape, not executed:** `useradd --create-home --shell /bin/bash actions-runner` plus `install -d -o actions-runner -g actions-runner -m 0750 /opt/actions-runner`, with the account kept out of `sudo` and `docker`. Adopting it is a deliberate migration, not a cleanup: it requires re-registration and a short runner outage.
 
 ## 3. Obtain the runner package and one-time registration token
 
 1. Open repository **Settings → Actions → Runners → New self-hosted runner**.
-2. Select Linux and the architecture confirmed in Step 1.
-3. Follow GitHub's current package download and checksum-verification instructions.
-4. Generate the registration token just-in-time. Treat it as a secret and do not store it.
-5. Download and verify the package as an administrator, then transfer ownership to `actions-runner`.
+2. Select Linux and the architecture confirmed in §1 (`x64` on this host).
+3. Download the package and **verify the published SHA256** before extracting.
+4. Generate the registration token just-in-time. Treat it as a secret; do not store it.
+5. Transfer ownership to the account that runs the service.
 
-Use GitHub's displayed commands for the current runner release rather than pinning an unverified version in this document.
+Use GitHub's displayed commands for the current runner release rather than pinning an unverified version here.
 
-## 4. Configure as a non-root service
+## 4. Configure the service (as executed)
 
-As `actions-runner`, configure the runner for this repository with a distinctive label such as `ai-worker`. GitHub's runner configuration interface requires the short-lived token to be supplied to `config.sh`; when passed with `--token`, it is a command-line argument and may be visible to sufficiently privileged/local process inspection during the brief configuration window. Do **not** claim that this method hides the token from process listings.
-
-Bound that exposure as follows:
-
-- Use a trusted administrative console on the host; do not perform registration while untrusted local users or jobs can inspect processes.
-- Issue the registration token immediately before configuration and use it once.
-- Disable shell history for the registration shell before entering the command; never paste the token into chat, tickets, logs, or Git.
-- Keep the configuration window as short as practical. Do not run unrelated jobs concurrently.
-- Do not enable shell tracing (`set -x`) or capture terminal transcripts during token entry.
-- After successful registration, unset any shell variables holding the token and close the temporary shell.
-- If exposure is suspected, remove/re-register the runner with a newly issued token and follow GitHub's credential revocation guidance.
-
-Example shape only; replace the placeholder locally and never commit or share the real token:
+Tokens are visible to privileged local process inspection while `config.sh` runs; do not claim otherwise. Issue the token immediately before use, disable shell history for that shell, and close it afterwards.
 
 ```bash
-./config.sh --url https://github.com/oahcom/AiMemoryBrainArchitecture --token <ONE_TIME_TOKEN> --name ubuntu-primary-01 --labels ai-worker --work _work
+./config.sh \
+  --url https://github.com/oahcom/AiMemoryBrainArchitecture \
+  --token <ONE_TIME_TOKEN> \
+  --name zesu-x64 \
+  --labels self-hosted,linux,x64 \
+  --work _work \
+  --unattended --replace
+sudo ./svc.sh install ubuntu
+sudo ./svc.sh start
 ```
 
-Install and start the service using the runner's generated service integration, following the current GitHub instructions. Verify the service runs as `actions-runner`, is enabled at boot, and is visible as **Online** in repository Settings → Actions → Runners.
+The generated unit is `actions.runner.oahcom-AiMemoryBrainArchitecture.zesu-x64.service`. Two drop-ins are required; both are load-bearing.
 
-Do not enable broad SSH access from ChatGPT or grant the runner broad administrative credentials as part of this step.
+`/etc/systemd/system/actions.runner.oahcom-AiMemoryBrainArchitecture.zesu-x64.service.d/proxy.conf`:
 
-## 5. Initial diagnostic workflow
+```ini
+[Unit]
+After=sing-box.service
+Wants=sing-box.service
 
-The first workflow must be harmless and read-only. It may report hostname, OS, architecture, runner labels, disk, memory, and Tailscale service state. It must not:
-- print environment variables wholesale;
-- inspect credential stores or secret files;
-- upload home directories or runner workspaces;
-- run arbitrary issue/PR-supplied scripts;
-- access production systems or modify repository branches.
+[Service]
+Environment="HTTP_PROXY=http://127.0.0.1:17891"
+Environment="HTTPS_PROXY=http://127.0.0.1:17891"
+Environment="http_proxy=http://127.0.0.1:17891"
+Environment="https_proxy=http://127.0.0.1:17891"
+Environment="NO_PROXY=localhost,127.0.0.1,::1,169.254.169.254,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+Environment="no_proxy=localhost,127.0.0.1,::1,169.254.169.254,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16"
+```
 
-Use an explicit `workflow_dispatch` trigger and the `self-hosted` + `ai-worker` labels. Protect workflow changes with review and branch protection.
+`...service.d/guard.conf`:
+
+```ini
+[Service]
+Environment="ACTIONS_RUNNER_HOOK_JOB_STARTED=/home/ubuntu/actions-runner/hooks/job-started-guard.sh"
+```
+
+**`runsvc.sh` in this runner version does not read `.env`.** Proxy settings must come from the unit (drop-in), not from `.runner`'s sibling `.env`. Verify by reading the process environment, not by looking at the file:
+
+```bash
+PID=$(pgrep -f "Runner.Listener run" | head -1)
+sudo tr '\0' '\n' < /proc/$PID/environ | grep -E 'PROXY|HOOK'
+```
+
+Egress is a two-stage chain: `warp-usque.service` exposes a SOCKS listener on `127.0.0.1:2085`, `sing-box.service` exposes a mixed proxy on `127.0.0.1:17891` that defaults to the WARP outbound, with `api.github.com`, domestic mirrors, `.cn` domains, and private address space routed direct. The runner unit starts after `sing-box`, which starts after `warp-usque`.
+
+## 4.1 Admission control (REQUIRED)
+
+This is the control that makes §0.1 acceptable. It is enforced by the runner itself, so it cannot be bypassed by editing a workflow.
+
+**L1 — service layer (binding).** `ACTIONS_RUNNER_HOOK_JOB_STARTED` points at `~/actions-runner/hooks/job-started-guard.sh`. The hook runs before any workflow step and fails the job unless:
+
+- `GITHUB_REF` is exactly `refs/heads/main`, **and**
+- `GITHUB_EVENT_NAME` is one of `push`, `workflow_dispatch`, `schedule`.
+
+If the ref cannot be resolved, the job is denied (fail-closed).
+
+Do not assume the hook receives a context file. On runner 2.338.2 the hook is executed as `bash -e <hook>` with no argv and no stdin; the verdict must read the environment the worker exports. An implementation that expects `$1` denies every job — observed on 2026-11-17 as a failed run before the fix.
+
+Artifacts and operators' handles:
+
+| Path | Purpose |
+|---|---|
+| `~/actions-runner/hooks/guard.log` | One line per decision: verdict, ref, event, source |
+| `~/actions-runner/hooks/last-decision.txt` | Full record of the last decision (ref, event, `GITHUB_REF_PROTECTED`, run id, actors) |
+| `~/actions-runner/hooks/observe.flag` | Emergency rollback: present ⇒ log only, never block. Create it, investigate, remove it |
+
+**L1 evidence (2026-11-17, this host):**
+
+| Run | Trigger | Verdict | Job |
+|---|---|---|---|
+| 44049832708 | `push` → `refs/heads/main` | ALLOW | `Succeeded` — first real execution on this runner |
+| 44050069421 | `push` → `refs/heads/ci/admission-negative-test` | DENY `ref_not_default_branch` | `Failed` with **zero steps executed** |
+| 44050467500 | `push` → `refs/heads/main` | ALLOW | `Succeeded` |
+
+**L2 — repository layer (preventive).** `scripts/ci/audit_runner_admission.py` rejects, for any workflow with a `self-hosted` job: untrusted triggers (`pull_request`, `pull_request_target`, `issue_comment`, `workflow_run`, …), a `push` without a `branches:` filter, `push.branches` naming anything other than `main`, and a `runs-on` that cannot be statically evaluated. `.github/workflows/runner-admission-policy.yml` runs it on a GitHub-hosted runner. Bind it by making that check required on `main`.
+
+**L3 — organization layer (Owner action, not enabled).** Branch protection on `main`, Environments with required approval for self-hosted jobs, and a repository-scoped runner group. Until branch protection exists, `main` itself is unprotected — the hook observed `GITHUB_REF_PROTECTED=false`, so the "trusted branch" is a convention: anyone who can push to `main` can change what will run there.
+
+## 4.2 Custom label (deferred)
+
+`--labels self-hosted,linux,x64` are platform labels. The distinctive `ai-worker` label from v1.0 is not set, because adding or renaming labels requires re-registration with a fresh one-time token. Do this before a second self-hosted runner is registered; until then, prefer `runs-on: [self-hosted, linux, x64]` so workflows match reality.
+
+## 5. Diagnostic workflows
+
+The first workflow MUST be harmless and read-only. Two exist:
+
+- `.github/workflows/runner-guard-selftest.yml` — `push` on its own path plus `workflow_dispatch`; prints execution context and the guard's decision record, and fails if `guard.log` has no `ALLOW ref=refs/heads/main`.
+- `14-ai-development/…` diagnostics workflow — `workflow_dispatch` only; reports hostname, OS, architecture, disk, memory, Tailscale service state.
+
+Neither may print environment variables wholesale, read credential stores, upload home directories or workspaces, run issue/PR-supplied scripts, or touch production systems.
 
 ## 6. Acceptance evidence
 
-Do not mark the host WORKER_ONLINE until all are evidenced:
+- [x] OS, architecture, resources, time sync and network preflight recorded.
+- [x] Host identity verified out-of-band.
+- [ ] Disclosed password rotated — operator statement only.
+- [ ] Dedicated non-root runner account — **not adopted**; superseded by the accepted deviation in §0.1.
+- [x] Runner visible Online with expected labels (`self-hosted,linux,x64`).
+- [x] Harmless diagnostic workflow succeeds — run 44050467500, and the first admitted run 44049832708.
+- [ ] Runner service survives reboot and reconnects — `enabled` at boot with the documented start ordering, but **no reboot cycle has been performed**.
+- [x] Untrusted triggers cannot reach this runner — enforced by L1 and demonstrated by run 44050069421 with zero steps executed.
+- [x] No secrets in Git, logs, artifacts, Issues or PR comments — reviewed for the files added on 2026-11-17.
+- [ ] Emergency stop / runner removal procedure tested — documented only; the guard's `observe.flag` rollback was not exercised in production.
 
-- [ ] OS, architecture, resources, time sync and network preflight recorded.
-- [ ] Host identity verified out-of-band.
-- [ ] Disclosed password rotated.
-- [ ] Dedicated non-root runner account and directory ownership verified.
-- [x] Runner visible Online with expected labels — operator-confirmed; not independently queried by deployment controller.
-- [ ] Harmless diagnostic workflow succeeds.
-- [ ] Runner service survives reboot and reconnects.
-- [ ] No secrets in Git, logs, artifacts, Issues or PR comments.
-- [ ] Untrusted PR workflows cannot reach this runner or its secrets.
-- [ ] Emergency stop / runner removal procedure tested.
-
-Even after these pass, the status is only **RUNNER_ONLINE**. It is not proof of 24/7 A–I autonomous operation, durable event processing, independent Owner identity, lease fencing, crash recovery, or end-to-end governance.
+Even when every box is ticked, the status is only **RUNNER_ONLINE**. It is not proof of 24/7 A–I autonomous operation, durable event processing, independent Owner identity, lease fencing, crash recovery, or end-to-end governance.
 
 ## 7. Rollback / emergency stop
 
-- Disable the runner in GitHub repository Settings → Actions → Runners.
-- Stop and disable its system service on Ubuntu.
-- Remove the runner registration using the documented GitHub procedure.
-- Revoke any credentials exposed during the incident.
-- Preserve sanitized logs and record the incident in Issue #26.
+1. **Stop execution now:** cancel the run in GitHub, then stop the service: `sudo systemctl stop actions.runner.oahcom-AiMemoryBrainArchitecture.zesu-x64.service`.
+2. **Suspend the runner:** disable it in repository Settings → Actions → Runners.
+3. **Remove the registration:** follow GitHub's documented removal procedure, then delete `~/actions-runner/.credentials*`.
+4. **Loosen the guard (only for diagnosis):** `touch ~/actions-runner/hooks/observe.flag`; remove it as soon as the incident is understood. Leaving it in place silently disables admission control.
+5. **Revoke credentials exposed during the incident** (registration token, PAT, SSH password).
+6. Preserve sanitized logs (`journalctl -u <unit>`, `~/actions-runner/_diag/`, `hooks/guard.log`) and record the incident in Issue #26.
 
-## Current status
+## 8. Current status
 
-The operator confirmed that Tailscale is enabled and active at `100.108.116.118`, and that the GitHub self-hosted runner is **Online** with its Ubuntu service started. These are operator-confirmed statements, not independent host/API observations by this deployment controller. The read-only diagnostic workflow, reboot recovery, untrusted-PR isolation, and emergency-stop acceptance checks remain **NOT VERIFIED**. The ChatGPT execution environment is not a Tailnet member and has not remotely accessed the host. A–I Owner workers remain **NOT DEPLOYED**.
+Deployed and verified on 2026-11-17: runner 2.338.2 `linux-x64` named `zesu-x64`, service enabled at boot with the `warp-usque → sing-box → runner` ordering, egress through Cloudflare WARP, admission enforced at L1 with three recorded decisions (§4.1), and one workflow executing end-to-end. Operator-confirmed but not independently re-verified: password rotation. **Not verified:** a reboot cycle, the emergency-stop procedure, and the L3 settings (branch protection, required check, environment approval). Business pipelines have not run on this runner; the A–I Owner workers remain **NOT DEPLOYED**.
