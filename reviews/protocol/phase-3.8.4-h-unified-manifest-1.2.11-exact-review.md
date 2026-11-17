@@ -17,13 +17,13 @@
 | I crypto profile proposal | `5eeb011032c53c2f7897d699d6f512b26f07d0a2` |
 | I crypto artifact-revision amendment | `9db3976ed9a891e9395d0e7edf949e75cb4422aa` |
 | H RecoveryJoin schema 1.0.2 | `4b664e3bce465499bcdfd93796349a4ba7074002` |
-| H semantic reference module | `6710bd7876be5f2c60640f21090729b8859a7a3e` |
+| H semantic reference module | `e26379d38825ee13d15f652d3bd019c4091da37d` |
 | H Unified Schema 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
 | H Unified Schema 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
-| H RecoveryJoin 1.0.2 tests | `6afa788da2a899f03de8207cb700c40e0533aba1` |
+| H RecoveryJoin 1.0.2 tests | `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a` |
 | I P0 vector set | `9210219a85afe1f48da0ea253a073aba8b2e138c` |
 | I Python/Node crypto test | `01239e06e8f4464f49acd34241dc00899befe424` |
-| H CI | Run `44051045877`, commit `ccecb8b6b80dff1e8ef7af10caac67c2f3c77929`, **282 tests: 260 passed, 22 skipped, 0 failed** |
+| H CI | Run `44051676055`, commit `16c0e63458a3e3773cd38ef86bfb4f7fe44dd0b4`, **288 tests: 266 passed, 22 skipped, 0 failed** |
 
 ## 2. H findings / H 审查发现
 
@@ -103,10 +103,10 @@ RecoveryJoin 1.0.2 and the new verifier seam remain candidate-level. Actual I/D/
 ## 6. Final membership-proof exact bundle addendum
 
 - RecoveryJoin 1.0.2 schema: `4b664e3bce465499bcdfd93796349a4ba7074002`.
-- RecoveryJoin 1.0.2 tests: `6afa788da2a899f03de8207cb700c40e0533aba1`.
+- RecoveryJoin 1.0.2 tests: `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a`.
 - Unified Schema 1.2.11 tests: `7582091c22ad7f75ed51dba7fbbd02d43af06933`.
 - Unified Schema 1.2.12 tests: `5b444aa11ffb86c145ec745752204e623c1c2b41`.
-- Semantic reference module requiring an injected owner proof verifier: `6710bd7876be5f2c60640f21090729b8859a7a3e`.
+- Semantic reference module requiring an injected owner proof verifier: `e26379d38825ee13d15f652d3bd019c4091da37d`.
 - Exact CI: [Run 44050250038](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44050250038), H HEAD `34fb4ccf8b1580321d38eda1340cf53f73b83f24`, 281 tests, 259 passed, 22 skipped, 0 failed.
 
 The 22 skipped tests belong to the historical 1.2.10 semantic suite and are superseded by active 1.2.11/1.2.12 suites. No production owner signer/verifier is connected. Candidate CI PASS is not production cryptographic conformance.
@@ -120,3 +120,14 @@ The I cross-language vector set now also covers the I owner snapshot membership 
 The Python RFC 8785 / Node JCS + Ed25519 differential vector set now includes `I_ADMISSION_SNAPSHOT_MEMBERSHIP_PROOF`, with the exact RecoveryJoin 1.0.2 owner proof P0 fields. The exact vector Blob is `9210219a85afe1f48da0ea253a073aba8b2e138c`; Python/Node test Blob is `01239e06e8f4464f49acd34241dc00899befe424`.
 
 Run `44051045877` completed successfully: 282 tests total, 260 passed, 22 skipped, 0 failed. The 22 skipped tests remain the superseded historical 1.2.10 semantic fixture class. The new cross-language vector uses TEST-ONLY key material and does not prove production I key custody or trust.
+
+
+## 8. Exact owner-proof payload validation addendum
+
+The H semantic reference module now exposes `validate_owner_snapshot_membership_proof_payload`. It checks exact row/ledger/version/entry/admission identity, local sequence/high-water, ledger root, snapshot/attestation, gate generation, scope/operation/request binding, anti-rollback and key-status fields, and requires an injected owner-authoritative signature verifier. Missing verifier or unverifiable state returns UNKNOWN; mismatches or a rejected signature return INVALID.
+
+- Updated module Blob: `e26379d38825ee13d15f652d3bd019c4091da37d`.
+- Updated RecoveryJoin 1.0.2 tests Blob: `3c61cc8c9d973a27f890e1452305e3fb0ad09f1a`.
+- CI Run `44051676055`, commit `16c0e63458a3e3773cd38ef86bfb4f7fe44dd0b4`: 288 total, 266 passed, 22 skipped, 0 failed.
+
+The injected verifier is still a TEST-ONLY seam; no production owner key registry or ledger source is connected.
