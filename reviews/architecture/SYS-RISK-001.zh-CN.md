@@ -661,3 +661,65 @@ R-06 继续为 **High / NOT PROVEN**。技术语义和设计 Consumer Acceptance
 
 **关闭状态：NOT CLOSED。** 不声称外部 Governance Activation、生产授权或 Security Certification。
 
+
+
+## 21. R-07 实时 Recovery、Replay、Cursor、Restore 与 Anti-rollback 审查 — 2026-11-18
+
+### 21.1 精确来源与执行证据
+
+| Owner | 来源 | Blob / Run | 证据上限 |
+|---|---|---|---|
+| Storage | COC Durable Log / Recovery Protocol v3.2.3 | 5cee0d58575adc0fb3dd20a5c7ab68c2a2711792 | 修订技术提案；要求新的精确版本 Owner Review；实现/部署/符合性未运行 |
+| Storage | Restore Control-high-water Contract | 4f656163aeba532a441eaed1d293a48e2363cb4a | 架构候选；要求 I/D/A 精确 Review；无真实 Proof API 或 Orchestration |
+| Storage | Restore Reference Model / Tests / Workflow | Model be0aef6232c8ee2ed6179df7b0a74473c3e25b3b；Tests a9e1a96b449c6bf0e2b52c5fea394a8c32961a24；Workflow 57ac98e333abfc325bfb9f3d3606fa0801adec4b | Run 43965501810 / Job 133643756066 / Commit 19798634fb0d55cb0c901c8f4194506fab96b75b：25/25 PASS；仅内存逻辑模型 |
+| Storage | PostgreSQL 18.7 Restore Probe | Script 81072ea2411af12f29c7a7a4d984df3f870321ca；Workflow 38369ed197665c4ed99a9ba30602cb5e3b04ba75 | Run 43959079703 / Job 133621314624 / Commit 83bdacbafa840808dca9be7a8c76c4df83c63504：物理 pg_basebackup Restore、Prepared XID 保留、Stale Restore Gate 关闭、Read 前回放 Current Control、Same-XID Commit 与 Pointer+Receipt Fixture PASS |
+| Storage | Prepared-XID / Sync Failover / Sync Unavailable / Old-primary Rewind / PITR Probes | Scripts：184e0507fd225ee18f321f3f1ce6a63f869b13f3；cbe1f317479145dbf1467e426b0c0737a6ec054c；78d40d0d4e46dc9f286ca3f59bb159843c1dcf26；10461a2de093ad0c4944536ba686c217aa0aa835；6e7721ee8f8708357610e0bc564e015872b8263c | Runs 43959079736、43959079669、43959079760、43959079930、43959079745 均成功；详情见下文 |
+| H | Recovery Cutoff Schema 1.0.5 / Two-phase Addendum | Schema 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7；Addendum c216853412f654d92e2890ddcc2dffc12406cbe6 | 1.0.5 仍是结构候选；要求 H/C/A 精确 Review；未冻结 |
+| H | Recovery Cutoff Runtime / Test / Workflow | Runtime 4c8dcafdb49db5279a1d1190b832a9c6c05d6b67；Test 690ab42b4f8f7e61adf38fd7b6006f20cc71a7f5；Workflow 65f25ef5d069be3ca9560784906b88c0d3854828 | Run 44079842878 / Job 134027249428，在当前 H HEAD 0d36324457e39bd50ad56ae902d477c4ea765b61：288 项测试 PASS |
+| C / I | Recovery Cutoff Exact Reviews | C 694b19dd5c52db1b8206c0f5986464bd64194cbd；I a0fee9ef41c52ea3948286e6ec9a348cc1b17168 | 两者接受 H Schema 1.0.4 并附修订；为委托角色模拟，不是独立人工 Owner 批准；仅架构 |
+| D / I / A | Restore Proof Acceptances | D 211e54acfb4573b1c51d96f07af297671dfc4c4b；I 85d62b8858fc86addacd3b83f49476e42f49b785；A fa5e066a208a64401c96a6b8790d8b53dc7f1585 | D/I 接受各自 Proof 语义；A 接受四 Proof 架构和 Owner-local Release Gate；均为委托/架构级，无实现 |
+| A | Exact Owner Restore Matrix | 3b488ae3a7cf9aca9a70a659aba09ecba53ce17f | 所有 Owner Perspective 有条件接受架构；Gate A Design Conditional Pass、Implementation Not Passed、Gate C Deferred、JF-10 Runtime P0 Open |
+| F / G | Restore Consumer Acceptances | F d630933a2aa70b9bc182fdeab47856dd8bbec386；G 0910fea807b96a896e361cd2722e4c94df55187b | F 接受 Anti-resurrection Gate；G 接受 Context/Applied/Delivery Restore Gate；生产 Integration 未实现/验证 |
+
+### 21.2 已验证组件能力 — 不应低估
+
+Storage PostgreSQL CI 明显强于 Mock：它启动固定版本 PostgreSQL 18.7 Docker 容器和 Ephemeral Volume，执行真实 PostgreSQL 物理 Backup/Restore、Prepared Transaction、WAL/PITR 与 Synchronous Standby/Failover Probe。
+
+Run 43959079703 日志显示物理 pg_basebackup PASS、Prepared-XID 在物理 Restore 后保留 PASS、Stale Restore Read Gate Closed PASS、Read 前回放 Current Forget Control PASS、Forgotten Artifact Suppressed PASS、Unrelated Artifact Readable PASS、Restore 后 Same-XID Commit PASS，以及 Pointer+Receipt Fixture PASS。
+
+其他成功 Run：
+- 43959079736：Prepared Lock Retention、Restart 后 Same-XID Commit/Rollback、Atomic Visibility Pointer+Receipt。
+- 43959079669：Synchronous Standby Promotion、Prepared XID Replay、Primary Loss 后 Same-XID Commit/Rollback。
+- 43959079760：Synchronous Standby Unavailable；PREPARE 阻塞、Client Outcome UNKNOWN、Prepared Lock 保留、无 Protected Visibility。
+- 43959079930：Old Primary Fenced、Stale Epoch Rejected、pg_rewind、Old Primary 作为 Standby 重新加入、No Dual Writer。
+- 43959079745：WAL Archive PITR 到明确 Target LSN；Target 之后的数据不存在。
+
+测试 Storage Commit 83bdacbafa840808dca9be7a8c76c4df83c63504 早于当前 Storage HEAD 830a559bd2f4ec72608f5a51e1a0b43779f2b989。直接 Git Tree 比较确认六个 Probe Script 和直接核对的 Restore/Sync-unavailable/Rewind Workflow 在两个 Commit 上 Blob 相同。因此证据仍适用于这些精确文件，但不是整个当前架构的全面证明。
+
+H Recovery Cutoff Run 44079842878 运行于当前 H HEAD，288 项测试通过，包含 Two-phase Batch/Manifest Order、Digest Binding、Incomplete Prefix、Quorum Proof、Duplicate Participant、Same-identity/Different-digest Conflict、Owner Release 和 Currentness CAS。
+
+### 21.3 尚未证明的部分
+
+1. PostgreSQL Probe 明确限定为 CI Volume 和 Test-fixture Control Ledger，不是生产 Backup Service。它没有调用真实 COC/I/D Proof API、生产 KMS/Key Custody、Cloud Fencing、Object-store ACL 或已部署 Restore Orchestration。
+2. 25/25 Restore Model 是内存模型；没有恢复 PostgreSQL、验证真实签名、枚举生产 Participant Ledger、协调真实 Owner High-water 或执行生产 Old-primary/Cloud Control Plane。
+3. A 接受的四 Proof 架构（COC Prefix、I Control High-water、D Forget/Lineage High-water、Storage Participant/GID Ledger）仍仅架构级。A 明确表示生产 Proof API、Signature/Key Verification、Orchestration 和 Cross-owner Release Gate 未实现。Receipt 是 RECONCILED_BUT_FENCED，不是 Serving Permission。
+4. D/I 接受 Proof Boundary，但 Durable Proof API 与 Restore Integration 仍 NOT IMPLEMENTED/NOT RUN。G/F 接受 Consumer Gate，但未证明生产 Index/Cache/Context/Adapter Restore Integration。
+5. H Schema 1.0.5 和 Two-phase Addendum 仍为提案，要求 H/C/A 精确 Review。本轮 C/I Review 接受的是 Schema 1.0.4，不是 1.0.5。当前 HEAD 的 288 项测试不能升级为 C/I Owner Acceptance 或 Wire Freeze。
+6. Storage COC v3.2.3 Proposal 要求新的精确版本 Owner Review，并明确实现/部署/符合性未运行。精确跨权威 JF-10/COC 组合仍是 P0。
+
+### 21.4 R-07 结论
+
+R-07 为 **组件能力层面 PARTIALLY VERIFIED；端到端 NOT PROVEN**。说“没有物理 PostgreSQL Restore/Failover 证据”不准确；但将这些测试称为生产 Global Forget/Restore Proof 同样不准确：真实 I/D/COC Proof Service、精确当前 1.0.5 C/I 采纳、真实 Signature/Registry Integration、完整 Participant Enumeration 和端到端 Restore Release 仍然缺失。
+
+### 21.5 关闭条件
+
+1. I/D 实现经过认证的单调 High-water Proof API，含外部 Anti-rollback Anchor、按 Domain/Operation 覆盖和 Currentness CAS；Unknown/Stale/Forked 状态持续 Fenced。
+2. C 针对 Provider Admission/Side-effect Ledger 和 Same-key Outcome Reconciliation 发布精确 1.0.5 Recovery Cutoff Acceptance；H/C/I/A 对同一 Schema/Runtime/Fixture/Workflow Blob Bundle 复审。
+3. Storage 集成真实 COC Quorum Prefix、I Sequencer/Registry/Revocation、D Forget/Lineage 和 Same-GID/Native-XID Participant Ledger；Fixture Ledger 不得替代 Owner 权威。
+4. 执行跨 Owner 故障注入：Owner Crash、Quorum Loss、Leader Election、Delayed/Lost ACK、Partial Batch/Manifest、Missing Staged Payload、Duplicate/Changed Digest、Restore 期间 Owner High-water Advance、Stale Checkpoint、Restore Rollback、Unknown Prepared GID 和 Old-primary Rejoin。
+5. 证明生产 Target Quarantine、独立 Old-primary/Cloud Fencing、WAL/Archive Custody、KMS/Signature Verification、Object-store/Backup ACL、真实 Inventory Completeness、Operator Identity、实测 RPO/RTO 和 Runbook。
+6. 每个 Recovery Run 绑定精确 Commit、Workflow Blob、Script/Test Blob、Image Digest、Fixture、Raw Log 和 Owner Acceptance。前序 CI 与委托 Review 不得转移到变更后的 Protocol Version。
+7. A 仅能在既有条件范围内关闭 Gate A Design；生产集成和 Fault-injection 证据经独立审查前，Implementation Gate A 与 Gate C 继续阻塞。
+
+**关闭状态：NOT CLOSED。** JF-10 Runtime P0 与生产 Restore 仍 OPEN。
+
