@@ -4,10 +4,6 @@ import tempfile
 import unittest
 
 SCRIPT = pathlib.Path(__file__).with_name("prepare_task.py")
-SPEC = importlib.util.spec_from_file_location("prepare_task", SCRIPT)
-MODULE = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(MODULE)
-
 class PrepareTaskTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
