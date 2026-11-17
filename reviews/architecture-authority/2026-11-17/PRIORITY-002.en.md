@@ -1,6 +1,6 @@
 # Root-first Development Priority Roadmap — PRIORITY-002
 
-- Version: 1.0.0; baseline `b372b62c640a2b656e54b6db62a4ee67d7d8c001`.
+- Version: 1.0.0; baseline `6470f25ca23b8d35c06f60be2326867066418d18`.
 - Status: planning recommendation only; not implementation or Gate authorization.
 
 ## Unified priority
@@ -11,7 +11,7 @@
 | P0-02 | Close domain identity, Fact/Claim, evidence and temporal semantics | B; consumers accept | Approved B ADR; exact Blob; typed cases; consumer adoption | G2/G3 |
 | P0-03 | Close I security governance, trust, revocation and closed-world inventory | I + external authorities | Signed I36-GOV-01..10 decisions; InventorySealReceipt; target/backup/recipient enumeration | G2/G4 |
 | P0-04 | Close D/E/I/Storage admission, lineage, Forget fence and visibility composition | D/E/I/Storage | Exact Owner decisions; both race orders; crash/ACK-loss/stale lease; hidden-on-UNKNOWN | G3/G4 |
-| P0-05 | Complete L4 physical DB/COC/JF-10 proof for the selected L1 Option A logical profile | Storage + A/COC + I/D | Gate A complete; Gate B persistent COC; Gate C fault campaign; same-XID proof | JF-10 A/B/C |
+| P0-05 | Complete Option A A-01..A-05 L1/L2 clarifications, exact D acceptance, independent restore anti-rollback, then L3 and L4 proofs | Storage + A/COC + I/D | Gate A complete; Gate B persistent COC; Gate C fault campaign; same-XID proof | JF-10 A/B/C |
 | P0-06 | Close C/G/H final-request, provider outcome and Applied contract | C/G/H + I/D consumers | Exact contract approvals; provider close-vs-send; same idempotency key; negative conformance | G2/G4 |
 | P0-07 | Bounded durable ingress → canonical commit/cursor vertical slice | E/D/Storage; engineering lead | Durable ACK, outbox, idempotent replay, canonical cursor atomicity, recovery proof; only after P0-02..05 | implementation entry |
 | P0-08 | Safe structured/lexical retrieval and Forget-safe index/cache rebuild | F + D/I/Storage | Permission/fence before ranking; stale projection suppression; rebuild/restore proof | implementation verification |
@@ -20,6 +20,11 @@
 | P3 | High concurrency, distributed scale-out, advanced autoscaling and multi-region operations | Engineering/Storage/I | measured workload and proven need; deployment/DR ADR and fault evidence | production scale gate |
 
 P0 is not one monolithic phase. P0-01..06 are authority and proof prerequisites; P0-07..08 are bounded implementation work only after their named dependencies are satisfied.
+
+## Additional root-first blockers
+
+- B protocol bundle currentness (H/D/C/I/Storage) is a P0/P1 freeze prerequisite: v3.2.9 is stale; Storage v3.3.0 or equivalent must bind the current exact Owner/CI set and be accepted by all relevant Owners and A.
+- Option A must not be called L1 closed until A-01..A-05 are adopted and D's exact Storage ADR decision is recorded. L3 and L4 remain separate proofs.
 
 ## First-release shape
 
