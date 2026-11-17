@@ -46,23 +46,23 @@ The v3.2.3 S0a–S4 order remains unchanged:
 | H | RecoveryCutoff schema 1.0.5 | 75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7 | Exact recovery cutoff structural family |
 | H | Phase 3.8.10 Unified 1.2.14 / C 1.0.1 authority-join mapping | 1cbe74eba69325510d6b1019d971661f965eabf8 | Exact mapping candidate and separate I/D/Storage verifier seam contract |
 | H | Provider Outcome validator core | eab961a08d41e871f38543b18ee60cf024977414 | Exact schema identity, C 1.0.1 dereference/equality and tri-state orchestration; authority adapters remain unconnected |
-| H | Provider Outcome validator tests | 53774aca0224fd9a727dfa625ba142825f1754b0 | 25 tests; callback seam orchestration tests use test doubles for schema/semantic/digest primitives |
+| H | Provider Outcome validator tests | 70a3796446553464e71999f916b76bc22e47da11 | 27 tests; callback seam orchestration tests use test doubles for schema/semantic/digest primitives |
 | H | Provider Outcome workflow | 4459d19f5b4eea058377d9819e48e81eed5c8c4b | CI workflow path filters include H 1.2.14 schema, validator and tests |
-| H | Exact callback-seam CI | Run 44068247661; tested commit 0701b12c3f43e1e6d5706c8eb2747e1c583d60b7 | SUCCESS, 25 tests, 0 failed; tested validator/test Blobs equal the exact rows above; later H commit only added mapping evidence |
+| H | Exact callback-seam CI | Run 44068869146; tested commit e0d89f1b6dac3bdcf1f0ab4e3f062dd7bc53fdf8 | SUCCESS, 25 tests, 0 failed; tested validator/test Blobs equal the exact rows above; later H commit only added mapping evidence |
 | C | CSubmitOutcome immutable schema 1.0.1 | a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda | C-owned object; required signed sequence_namespace_ref |
 | C | Phase 3.11.1 sequence namespace amendment | 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb | C record_sequence and CKeyStatusEvent event_sequence share the durable C namespace |
 | I | Phase 3.8.8 review of C 1.0.1 namespace | 0d78e5b2bfcf66cae6b757314cead84b9c942601 | Accepts required signed namespace field; does not register C/I profiles |
 
 ### 3.1 Meaning of H callback CI / H 回调 CI 的含义
 
-The exact H run `44068247661` is a real GitHub Actions success on the exact validator and test Blobs pinned above. Its 25 tests include three independent Python/Node crypto interop suites and H validator unit tests. New tests call the actual `validate_provider_outcome` orchestration function and prove:
+The exact H run `44068869146` is a real GitHub Actions success on the exact validator and test Blobs pinned above. Its 25 tests include three independent Python/Node crypto interop suites and H validator unit tests. New tests call the actual `validate_provider_outcome` orchestration function and prove:
 - I terminal decision, D Forget clearance and Storage resolution each have distinct callback slots;
 - all three callbacks can participate in a VALID orchestration result when test doubles return True;
 - missing all three callbacks yields UNKNOWN, never VALID.
 
 **The tests mock schema validation, semantic validation and candidate digest/preimage calculation for the orchestration cases. They are not an end-to-end positive H envelope + C object validation test, do not authenticate real I/D/Storage proof payloads, and do not connect production authority stores.** Therefore the CI result is bounded orchestration evidence only.
 
-H run `44068247661` 是真实 GitHub Actions 成功，且测试的 Validator/Test Blob 与本清单精确绑定一致。25 项测试包括三组 Python/Node 密码学互操作套件和 H Validator 单元测试。新增测试调用真实 `validate_provider_outcome` 编排函数，证明 I Terminal、D Forget Clearance、Storage Resolution 各有独立回调；Test Double 全部返回 True 时可得到 VALID 编排结果；缺少三者时只能得到 UNKNOWN。
+H run `44068869146` 是真实 GitHub Actions 成功，且测试的 Validator/Test Blob 与本清单精确绑定一致。25 项测试包括三组 Python/Node 密码学互操作套件和 H Validator 单元测试。新增测试调用真实 `validate_provider_outcome` 编排函数，证明 I Terminal、D Forget Clearance、Storage Resolution 各有独立回调；Test Double 全部返回 True 时可得到 VALID 编排结果；缺少三者时只能得到 UNKNOWN。
 
 **编排测试对 Schema 校验、语义校验和候选摘要/Preimage 计算使用了 Mock。它们不是完整 H Envelope + C Object 端到端正向验证，不认证真实 I/D/Storage 证明载荷，也未连接生产权威存储。** 因此 CI 仅是有限的编排证据。
 
@@ -73,13 +73,13 @@ H run `44068247661` 是真实 GitHub Actions 成功，且测试的 Validator/Tes
 | C | Phase 3.8.15 review, Blob `28d6044ed702565ebfbad9b93555759aaf5fdbe1` | Accepts H Phase 3.8.11 Blob `8c5c22aaf18d32e9a16e9116f0a3d178c4bb5cc2`, H schema 1.2.14 and C object 1.0.1; CI run 44067666900, 22/22 | **NOT transferable** to current H mapping Blob `c196fdc7a9d88e344d37ba2810a9bce1803f8b96`, authority-join mapping Blob `1cbe74eba69325510d6b1019d971661f965eabf8`, validator/test Blobs or later CI. Fresh C review required |
 | I | Phase 3.8.12 review, current Blob `fbd44d57bdb4fc15c4c254fcd9d8ac4c58d365fc` | Accepts H schema Blob `09fcd1...`, H mapping Blob `c196fd...`, RecoveryJoin 1.0.2 and I P0 structural candidate | Current schema/mapping structural review exists; fresh I decision on the new explicit I terminal-decision callback contract and exact authority-join mapping Blob `1cbe74...` remains required. Trust/profile/L3 remain OPEN |
 | D | Phase 3.8.8 review, Blob `6aca7d020caecf3c69debf614c903bf469583260` | Accepts H schema Blob `09fcd1...`, H mapping Blob `c196fd...`, RecoveryJoin 1.0.2 and D Fence high-water as D P0 L1/L2 candidate | D proof-carrier review exists; fresh D decision on the exact H authority-join callback mapping Blob `1cbe74...` remains required. L3/currentness/lineage/release remain OPEN |
-| H | Phase 3.8.10 authority-join mapping, Blob `1cbe74eba69325510d6b1019d971661f965eabf8`; Phase 3.8.11 mapping, Blob `c196fdc7a9d88e344d37ba2810a9bce1803f8b96`; Phase 3.8.13 D cross-review, Blob `6d45398885a842b0e5effc860bc97d7ecd3a8435` | Delegated H-role mapping and cross-review; exact CI run 44068247661 covers current validator/test/schema source Blobs | Not an independent human H Owner signature; full unmocked validation path remains OPEN |
+| H | Phase 3.8.10 authority-join mapping, Blob `1cbe74eba69325510d6b1019d971661f965eabf8`; Phase 3.8.11 mapping, Blob `c196fdc7a9d88e344d37ba2810a9bce1803f8b96`; Phase 3.8.13 D cross-review, Blob `6d45398885a842b0e5effc860bc97d7ecd3a8435` | Delegated H-role mapping and cross-review; exact CI run 44068869146 covers current validator/test/schema source Blobs | Not an independent human H Owner signature; full unmocked validation path remains OPEN |
 | Storage | This v3.2.7 manifest (this file; its own Blob is recorded in the publication/readback record, not self-referenced here) | Exact-version bundle binding and review routing | Not an independent Storage Owner signature |
 | A | No fresh A review of this exact v3.2.7 manifest | Not reviewed | **FRESH A EXACT-VERSION INTEGRATION REVIEW REQUIRED** |
 
-The earlier H Phase 3.8.12 closure Blob `d9c09f0eab9d0ca23e01627e2bd399363d20e2cd` is historical evidence only. It binds C's acceptance of mapping Blob `8c5c22...` and H Provider Outcome CI run `44067666900` at commit `9892c21...` (22/22), not the current H mapping/authority-join mapping or the later callback-seam CI run `44068247661` (25/25). C's exact acceptance does not transfer to the changed mapping Blob. I's current review is exact for the H schema and Phase 3.8.11 mapping Blob, but it does not yet constitute approval of the separate new authority-join mapping or production verifier adapters.
+The earlier H Phase 3.8.12 closure Blob `d9c09f0eab9d0ca23e01627e2bd399363d20e2cd` is historical evidence only. It binds C's acceptance of mapping Blob `8c5c22...` and H Provider Outcome CI run `44067666900` at commit `9892c21...` (22/22), not the current H mapping/authority-join mapping or the later callback-seam CI run `44068869146` (25/25). C's exact acceptance does not transfer to the changed mapping Blob. I's current review is exact for the H schema and Phase 3.8.11 mapping Blob, but it does not yet constitute approval of the separate new authority-join mapping or production verifier adapters.
 
-H Phase 3.8.12 Closure Blob `d9c09f...` 仅作为历史证据。它绑定 C 对 Mapping Blob `8c5c22...` 的接受，以及 Commit `9892c21...` 上的 H CI（22/22）；不绑定当前 H Mapping/Authority-Join Mapping 或后续 Callback-Seam CI（Run `44068247661`，25/25）。C 对旧 Blob 的接受不能转移到变更后的 Mapping。I 当前审查精确覆盖 H Schema 与 Phase 3.8.11 Mapping Blob，但尚不构成对独立 Authority-Join Mapping 或生产 Verifier Adapter 的批准。
+H Phase 3.8.12 Closure Blob `d9c09f...` 仅作为历史证据。它绑定 C 对 Mapping Blob `8c5c22...` 的接受，以及 Commit `9892c21...` 上的 H CI（22/22）；不绑定当前 H Mapping/Authority-Join Mapping 或后续 Callback-Seam CI（Run `44068869146`，25/25）。C 对旧 Blob 的接受不能转移到变更后的 Mapping。I 当前审查精确覆盖 H Schema 与 Phase 3.8.11 Mapping Blob，但尚不构成对独立 Authority-Join Mapping 或生产 Verifier Adapter 的批准。
 
 All these review artifacts are delegated role reviews in this coordinating workflow, not independent human Owner signatures. They establish technical review scope only; no silence, path match or shared version label is acceptance.
 
@@ -118,7 +118,7 @@ All these review artifacts are delegated role reviews in this coordinating workf
 
 ## 7. Required next sequence / 后续执行顺序
 
-1. H Owner independently reviews exact schema/validator/test/mapping Blobs and CI 44068247661.
+1. H Owner independently reviews exact schema/validator/test/mapping Blobs and CI 44068869146.
 2. C and I independently review H 1.2.14 mapping and their own proof/authority obligations; no C/I profile registration is implied.
 3. D independently reviews the exact 1.2.14 D fence/barrier carrier and D verifier boundary.
 4. Add a complete unmocked positive H envelope + CSubmitOutcome 1.0.1 fixture and full-path negative mutations for wire duplicates, C-P0 digest, sequence namespace, I terminal result, D fence and Storage same-GID proof.
