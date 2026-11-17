@@ -110,7 +110,7 @@ Global instructions live directly under the global prompt directory. Each Owner'
       chatgpt-session-contract-v1.md
     owners/
       A/owner-session-v1.md
-      B/owner-session-v1.md
+      B/owner-session-v2.md
       C/owner-session-v1.md
       D/owner-session-v1.md
       E/owner-session-v1.md
