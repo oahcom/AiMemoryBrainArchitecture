@@ -106,6 +106,12 @@ class Schema1210Tests(unittest.TestCase):
     def test_SCHEMA1210_10_ambiguous_manifest_digest_removed(self):
         for t in ("COC_RECOVERY_CUTOFF_BATCH","PARTICIPANT_SET_RECONCILIATION","OWNER_LOCAL_GATE_RELEASE","RECOVERY_EPOCH_COMPLETED"):
             self.assertNotIn("manifest_digest",self.msg(t)["properties"])
+    def test_SCHEMA1210_11_membership_proof_ref_and_digest_are_required(self):
+        for name in ("ownerAdmissionBinding","ownerLocalAdmissionMember"):
+            required=set(self.schema["$defs"][name]["required"])
+            self.assertTrue({"owner_snapshot_membership_proof_ref","owner_snapshot_membership_proof_digest"}.issubset(required))
+    def test_SCHEMA1210_12_owner_release_enum_matches_I_D_contract(self):
+        self.assertEqual(self.msg("OWNER_LOCAL_GATE_RELEASE")["properties"]["release_type"]["const"],"OUTAGE_ADMISSION_RELEASE_ONLY")
 
 
 class UnionSemanticsTests(unittest.TestCase):
