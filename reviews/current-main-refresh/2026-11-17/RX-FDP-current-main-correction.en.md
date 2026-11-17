@@ -1,7 +1,8 @@
 # R/X/F/D/P — Current-main correction addendum (2026-11-17)
 
-- Controlling main HEAD: `901e38ba7b45ed1822eaefddc2da8d765cf8985c`
-- Parent: `ca69d50d1fc6c19a930128de700b0f2328bf32fb`
+- Controlling main HEAD: `b3c666e67982cb3d3374e759cfb6552c7765aacb`
+- Content tree: `7096e0bc3fdc9a390fccff388f9261522fa424f2` (identical to the tree at `901e38...`; subsequent add/delete cleanup commits restored the same tree).
+- Previous baseline parent: `ca69d50d1fc6c19a930128de700b0f2328bf32fb`
 - Change: `revert(domain): remove research-only bilingual audit from main`
 - Historical refresh PR: #62, originally based on `ca69d50d1fc6c19a930128de700b0f2328bf32fb`
 - Status: current-main delta correction; not a replacement for full Owner source refresh.
