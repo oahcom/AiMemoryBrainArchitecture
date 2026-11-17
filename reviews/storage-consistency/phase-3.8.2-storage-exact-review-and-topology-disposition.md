@@ -95,3 +95,24 @@ Updated Storage JoinProof contract Blob: 4520860b28429d35cdb2ca947a56d0ccb64226a
 Updated H RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
 Updated H semantic contract Blob: b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
 Updated HRC suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
+
+
+## 6. Exact H candidate and C provider-boundary cross-review / H 候选与 C Provider 边界交叉复核
+
+Current exact references reviewed:
+- H RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- H semantic contract: `b3218298f58cff9b92cb1c38e453af6fd4d0dd50`.
+- HRC/JPF suite after fixture correction: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- H wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
+- H schema suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
+- H CI run [44039990464](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44039990464): 66/66 candidate tests PASS.
+- C Phase 3.8.2 RecoveryJoin/provider-side-effect exact review: commit `d5be3be10f7144476ddc61a94f29faff67424292`.
+- Storage bidirectional JoinProof contract: `4520860b28429d35cdb2ca947a56d0ccb64226a3`.
+
+Storage recognizes the H pass as reference-model/schema/wire-candidate evidence only. It does not exercise authoritative COC prefix enumeration, actual owner request/admission ledgers, live quorum readback, Storage durable JoinProof commit, or any owner-local currentness CAS. It does not prove Storage final VisibilityPointer + PublicationReceipt + outcome + outbox atomicity.
+
+C's exact review correctly preserves the C ProviderIdempotencyKey as a C-owned namespace, distinct from Storage PreparedTransactionGID and engine-native XID. Storage must persist/recover the exact provider attempt references supplied by C but must not mint provider keys or infer CSubmitOutcome from Storage commit.
+
+The H test correction addressed a test-fixture issue only. The original JPF-08 fixture returned UNKNOWN because it required unrelated I/D evidence that the test did not supply; the corrected fixture isolates the duplicate C primary-admission invariant. This did not weaken production validator behavior. The CI result remains a test-harness pass, not an implementation proof.
+
+**Storage disposition unchanged:** logical bidirectional JoinProof accepted with enumerated amendments; physical serialization topology remains ADR-BLOCKED. T1–T8 and STORAGE-RJ-01..05 remain OPEN. No production DB/topology, visibility gate, deployment, or TAB-001 freeze is approved.
