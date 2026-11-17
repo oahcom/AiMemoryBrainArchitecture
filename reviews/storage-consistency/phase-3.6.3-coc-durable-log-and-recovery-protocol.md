@@ -674,3 +674,34 @@ H Unified Schema Artifact Revision **1.2.17** / Wire Version **1.3.0** 已修正
 OWNER_LOCAL_GATE_RELEASE Message 现在强制要求精确 Owner Snapshot Ref/Digest、Owner Snapshot Attestation Ref/Digest、Owner Ledger Root、Scope Generation、Anti-rollback Anchor、完整类型化 I/D/C Owner-specific High-water Object 及其 Digest；同时保留原有 Gate Generation、Request/Admission High-water/Count/Digest/Root、精确 Batch/Manifest Ref/Position/Digest、Reconciliation Root、Owner Signature 和 COC Commit Proof。
 
 §19 的 1.2.16 Pin 仅保留为历史证据。**H Unified 1.2.17 是当前结构候选。** 结构检查不证明真实 Owner Signature、当前 Key Status、实时 Owner Ledger 完整性、H Semantic Verification、COC Quorum 部署或物理 JF-10 行为。
+
+
+## 21. Owner Gate Release semantic reference candidate — H 1.2.17
+
+This section records the first executable H TEST-profile semantic reference for the expanded OWNER_LOCAL_GATE_RELEASE binding in §20. It does not change the required owner authority, quorum, currentness or physical Storage semantics.
+
+Exact H artifacts:
+- Schema 1.2.17 Blob: `1b8f44675f30919764481d33755c566ef5cf1ea8`
+- Semantic reference module Blob: `b8baddcc74b9247870555d8500ba9c41f65e75dd`
+- Semantic test Blob: `e03c6ba7f0679d9cc189b515a0a3d63e681fba5c`
+- Exact H code Head: `156717b24d6283d410c9a0e8de99fa6aed8e583f`
+- H Recovery Cutoff run [#44192498589](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44192498589): **351 tests PASS**, including 22 Owner Gate Release semantic vectors.
+
+The reference validator checks exact owner snapshot and attestation, scope generation, anti-rollback anchor, owner ledger root, owner-specific high-waters/digest, request/admission roots, Batch/Manifest references/positions/digests, reconciliation root, and three separately injected callbacks: owner signature, COC quorum commit proof and currentness CAS. Explicit mismatch/denial is INVALID; missing verifier/source or uncertain currentness is UNKNOWN; VALID requires all exact bindings and all callbacks to succeed.
+
+This is TEST-profile only. Its digest helper is not the production I-approved canonicalization profile; callbacks do not contact real owner ledgers, keys, quorum logs or CAS services. It implements only the Owner Gate Release validator, not the other five semantic validators in H Phase 3.6.10. Production semantic validation and real owner/COC/Storage adapters remain open.
+
+### 中文：Owner Gate Release 语义参考候选
+
+本节记录 H 首个针对 §20 扩展 OWNER_LOCAL_GATE_RELEASE 绑定的可执行 TEST-profile 语义参考实现，不改变 Owner Authority、Quorum、Currentness 或物理 Storage 语义要求。
+
+H 精确 Artifact：
+- Schema 1.2.17 Blob：`1b8f44675f30919764481d33755c566ef5cf1ea8`
+- Semantic Reference Module Blob：`b8baddcc74b9247870555d8500ba9c41f65e75dd`
+- Semantic Test Blob：`e03c6ba7f0679d9cc189b515a0a3d63e681fba5c`
+- H 精确代码 Head：`156717b24d6283d410c9a0e8de99fa6aed8e583f`
+- H Recovery Cutoff Run [#44192498589](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44192498589)：**351 项测试 PASS**，其中包括 22 项 Owner Gate Release 语义向量。
+
+参考验证器检查精确 Owner Snapshot/Attestation、Scope Generation、Anti-rollback Anchor、Owner Ledger Root、Owner-specific High-water/Digest、Request/Admission Root、Batch/Manifest Ref/Position/Digest、Reconciliation Root，以及三个独立注入的 Callback：Owner Signature、COC Quorum Commit Proof 和 Currentness CAS。明确不匹配/拒绝为 INVALID；缺少验证器/来源或 Currentness 不确定为 UNKNOWN；只有全部精确绑定和全部 Callback 成功才返回 VALID。
+
+该实现仅为 TEST-profile。Digest Helper 不是生产 I-approved Canonicalization Profile；Callback 不访问真实 Owner Ledger、Key、Quorum Log 或 CAS Service。它仅实现 Owner Gate Release Validator，并未实现 H Phase 3.6.10 的其他五个语义验证器。生产语义验证和真实 Owner/COC/Storage Adapter 仍未完成。
