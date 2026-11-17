@@ -60,7 +60,7 @@ jobs:
           print(f"owner={task['owner']}")
           title = task["title"].replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
           print(f"title={title}")
-          print(f"base_sha={subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()}")
+          print("base_sha=" + subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip())
           PY
 
       - name: Test task admission validator
@@ -94,6 +94,10 @@ jobs:
           git add -A
           git reset -q -- .ai-worker/task.json .ai-worker/final-message.txt
           git diff --cached --check
+          if git diff --cached --summary | grep -q "create mode 120000"; then
+            echo "::error::symlink changes are not allowed in the pilot"
+            exit 3
+          fi
           changed="$(git diff --cached --name-only)"
           if [ -z "$changed" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -117,6 +121,7 @@ jobs:
           mkdir -p /tmp/ai-owner-worker-artifact
           cp /tmp/ai-owner-worker.patch /tmp/ai-owner-worker-artifact/ai-owner-worker.patch
           cp /tmp/changed-files.txt /tmp/ai-owner-worker-artifact/changed-files.txt
+          test -f .ai-worker/final-message.txt
           cp .ai-worker/final-message.txt /tmp/ai-owner-worker-artifact/final-message.txt
 
       - name: Upload proposed patch and evidence
