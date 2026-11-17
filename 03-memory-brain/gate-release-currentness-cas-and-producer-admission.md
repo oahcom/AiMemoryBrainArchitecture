@@ -95,3 +95,12 @@ CanonicalProducerAdmissionProof binds release receipt/vector digest, registry ve
 D owns canonical gate, producer registration ordering, fence snapshot/high-water, dependency barrier and canonical proof semantics. I owns authorization, PermissionEpoch, policy, exception and global Forget criteria. E/F/G/H own their producer-specific admission and terminal evidence. Storage/Consistency must prove the linearizable/crash-recovery realization. C Provider Egress Gate is a separate boundary; D producer admission never authorizes network egress.
 
 **PROPOSED.** No Storage realization, executable tests or end-to-end Forget completion is claimed.
+
+
+## 10. Cross-authority PermissionEpoch validation / 跨权威 PermissionEpoch 校验
+
+D cannot claim a single atomic CAS over an I-owned PermissionEpoch when D and I use independent authorities. A D-local transaction that merely reads an I decision and later commits is a TOCTOU race.
+
+The implementation MUST use either a shared linearizable sequencer, a proven distributed transaction/consensus protocol, or an I-owned revocation barrier/fencing protocol. Under the barrier profile, I revocation is PENDING until every D/E/F/G/H/C enforcement point required by the closed-world inventory has durably installed the newer PermissionEpoch/fence and acknowledged that older permits are rejected. Only then may I mark the revocation EFFECTIVE. D's producer admission and final visibility commit must reject any fencing epoch below the latest installed epoch at that same local linearization point.
+
+A bounded authorization lease is permitted only as a separately named weaker policy profile with explicit maximum stale window and clock/partition assumptions; it is not immediate revocation. If D cannot establish current permission/fencing epoch, producer admission and publication fail closed.
