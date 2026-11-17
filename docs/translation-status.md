@@ -43,24 +43,26 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Scope and Permission model | 02-domain-model/scope-and-permission-model.md | docs/zh-CN/02-domain-model/scope-and-permission-model.md | docs/en/02-domain-model/scope-and-permission-model.md | COMPLETE — source-aligned pair |
 | Domain Model Phase 3 identity/typed-reference extensions and ADR-001 | session-b-domain-model-phase3 branch; ADR-001 remains ADR-BLOCKED | Pending | Owner-branch English source | NOT STARTED — exact branch-source translation and bilingual review pending |
 | Canonical Memory Brain reader guide | D owner branch: 03-memory-brain/ | docs/zh-CN/03-memory-brain/memory-brain-guide.md | docs/en/03-memory-brain/memory-brain-guide.md | COMPLETE — overview guide only |
-| Canonical Memory Brain detailed contracts (7 source specifications) | D owner branch: 03-memory-brain/ | Pending | Owner-branch English sources | NOT STARTED — detailed translation pending |
+| Canonical Memory Brain detailed contracts (8 core specifications; Phase 3.7 addenda separately tracked) | D owner branch; audited head 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3 | Pending | Owner-branch English sources | NOT STARTED — 8 core specs are English-only |
+| Memory Compiler detailed contracts (8 core specifications) | E owner branch; audited head a1b8ba129ef7d5f4463bd4229667f0b2bf6d9886 | Pending | Owner-branch English sources | NOT STARTED — 8 core specs are English-only |
+| Memory Runtime detailed contracts (5 core specifications) | F owner branch; audited head 348b5ec84c44a8a067122ce0aa72a594b9c06b66 | Pending | Owner-branch English sources | NOT STARTED — 5 core specs are English-only |
+| Memory Context detailed contracts (6 core specifications) | G owner branch; audited head 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa | Pending | Owner-branch English sources | NOT STARTED — 6 core specs are English-only |
+| Agent Integration detailed contracts (10 core specifications) | C owner branch; audited head 0f1df3b9c8bdfbb7991cd9e18842c56c521665c4 | Pending | Owner-branch English sources | NOT STARTED — 10 core specs are English-only |
+| BMCP Protocol detailed contracts (7 core specifications) | H owner branch; audited head 8150a450c73d59eba9b81f6aae30e28ab0d7a0e0 | Pending | Owner-branch English sources | NOT STARTED — 7 core specs are English-only |
+| Security & Governance detailed contracts (8 core specifications) | I owner branch; audited head a00173f3cf6c266f638fe89c0d2af0445e0ae30b | Pending | Owner-branch English sources | NOT STARTED — 8 core specs are English-only |
 | Memory Compiler reader guide | E owner branch: 04-memory-compiler/ | docs/zh-CN/04-memory-compiler/memory-compiler-guide.md | docs/en/04-memory-compiler/memory-compiler-guide.md | COMPLETE — overview guide only |
-| Memory Compiler detailed contracts | E owner branch: 04-memory-compiler/ | Pending | Owner-branch English sources | NOT STARTED — field/stage-level translation pending |
 | Memory Runtime reader guide | F owner branch: 05-memory-runtime/ | docs/zh-CN/05-memory-runtime/memory-runtime-guide.md | docs/en/05-memory-runtime/memory-runtime-guide.md | COMPLETE — overview guide only |
-| Memory Runtime detailed contracts | F owner branch: 05-memory-runtime/ | Pending | Owner-branch English sources | NOT STARTED — field/policy-level translation pending |
 | Memory Context reader guide | G owner branch: 06-memory-context/ | docs/zh-CN/06-memory-context/memory-context-guide.md | docs/en/06-memory-context/memory-context-guide.md | COMPLETE — overview guide only |
-| Memory Context detailed contracts | G owner branch: 06-memory-context/ | Pending | Owner-branch English sources | NOT STARTED — detailed state/field translation pending |
 | Agent Integration reader guide | C owner branch: 07-agent-integration/ | docs/zh-CN/07-agent-integration/agent-integration-guide.md | docs/en/07-agent-integration/agent-integration-guide.md | COMPLETE — overview guide only |
-| Agent Integration detailed contracts | C owner branch: 07-agent-integration/ | Pending | Owner-branch English sources | NOT STARTED — detailed capability/telemetry translation pending |
 | BMCP Protocol reader guide | H owner branch: 08-bmcp-protocol/ | docs/zh-CN/08-bmcp-protocol/bmcp-guide.md | docs/en/08-bmcp-protocol/bmcp-guide.md | COMPLETE — overview guide only |
-| BMCP Protocol detailed contracts | H owner branch: 08-bmcp-protocol/ | Pending | Owner-branch English sources | NOT STARTED — wire/schema translation pending |
 | Storage and Index | 09-storage-and-index/ | Pending | Existing English sources | NOT STARTED |
 | Security & Governance reader guide | I owner branch: 09-security-governance/ | docs/zh-CN/09-security-governance/security-governance-guide.md | docs/en/09-security-governance/security-governance-guide.md | COMPLETE — overview guide only |
-| Security & Governance detailed contracts | I owner branch: 09-security-governance/ | Pending | Owner-branch English sources | NOT STARTED — policy/identity/Forget detail translation pending |
 | Consistency and Recovery | 11-consistency-and-recovery/ | Pending | Existing English sources | NOT STARTED |
 | Cross-module conformance and fault-injection reader guide | A owner branch: reviews/integration/cross-module-conformance-plan.md | docs/zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md | docs/en/12-testing-and-acceptance/cross-module-conformance-guide.md | COMPLETE — test guide only; execution NOT_RUN/BLOCKED |
 | Detailed Testing and Acceptance specifications/reports | 12-testing-and-acceptance/ and reviews/ | Pending | Existing English sources | NOT STARTED — detailed test cases and review reports pending |
 | Detailed technology and Rust engineering | 13-engineering-decisions/ | Pending | Existing English sources | NOT STARTED |
+
+**Exact Owner branch source snapshots and migration batches:** [Owner Branch Bilingual Migration Inventory](owner-branch-translation-inventory.md). The audited branch SHAs are source references only; refresh each branch HEAD before translating or accepting a companion.
 
 ## 3. Translation and readability sequence / 翻译与易读性推进顺序
 
@@ -81,7 +83,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 
 ### Batch 3 — Domain and canonical memory / 第三批：领域模型与权威记忆
 - D Canonical Memory reader guide: COMPLETE — includes D/E/F/G/H/I ownership split, cursor namespaces, and Forget boundary.
-- D detailed source specifications: NOT STARTED — source branch is linked; field/transaction-level translation pending.
+- D detailed source specifications: NOT STARTED — 8 core Markdown specifications are English-only at the audited head; the latest source SHA must be refreshed before translation.
 - Domain Model reader guide: COMPLETE.
 - B's six main source specifications: COMPLETE — source-aligned bilingual pairs added. Phase 3 typed-reference/identity extensions and ADR-001 decision package remain NOT STARTED; preserve ADR-BLOCKED status.
 - D Canonical Memory detailed bilingual work: pending source-branch reconciliation.
@@ -91,14 +93,14 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 
 ### Batch 4 — Memory production and runtime / 第四批：记忆生产与运行时
 - E and F reader guides: COMPLETE.
-- Detailed E/F owner specifications: NOT STARTED — field-level translation and owner parity review remain pending.
+- E/F detailed owner specifications: NOT STARTED — E has 8 and F has 5 English-only core specifications at audited heads; refresh source SHAs before translation.
 - E Compiler, ingestion, extraction, evidence, consolidation.
 - F retrieval, activation, working set, scheduling, anti-resurrection.
 - Acceptance: Accepted/Compiled/Canonical Committed/Indexed remain distinct; cursor and Forget semantics stay aligned.
 
 ### Batch 5 — Context and Agent boundary / 第五批：上下文与 Agent 边界
 - G Context, C Agent Integration, and H BMCP reader guides: COMPLETE.
-- Detailed G/C/H contracts: NOT STARTED — schemas, state machines, capability tiers, and proof fields remain to be translated.
+- G/C/H detailed contracts: NOT STARTED — G has 6, C has 10 and H has 7 English-only core specifications at audited heads; refresh source SHAs before translation.
 - G Context Manager, versioning, edit operations, reconciliation, budget.
 - H BMCP schemas and state machines.
 - C Adapter integration and inference-boundary Applied proof.
@@ -106,7 +108,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 
 ### Batch 6 — Governance, storage, and recovery / 第六批：治理、存储与恢复
 - I Security & Governance reader guide: COMPLETE.
-- Detailed I policies and contracts: NOT STARTED — principal, authorization, Forget target inventory, backup/erasure and threat model remain to be translated.
+- I detailed policies/contracts: NOT STARTED — 8 English-only core specifications at audited head; refresh source SHA before translation.
 - I identity, authorization, Forget, retention, audit.
 - Storage/index/cache.
 - Consistency/Recovery and COC.
