@@ -26,8 +26,8 @@ The model uses only the Python standard library.\n\nRepository CI: [run 44136327
 
 ## Bounded result / 有界结果
 
-- Safe transition graph: **27,472 state/depth pairs**, maximum depth 14; no modeled invariant violation.
-- 11 weakened-guard mutants produce shortest counterexamples (see script output).
+- Safe transition graph: **28,383 state/depth pairs**, maximum depth 14; no modeled invariant violation.
+- 13 weakened-guard mutants produce shortest counterexamples (see script output).
 - Manual serial-order assertions cover I COMMIT_WON-before-revocation, revocation-before-commit, Fence-before-visibility, visibility-before-Fence, UNKNOWN participant handling and lost-ACK receipt replay.
 - Cache negative control: a stale cache fill by itself is not an external disclosure if the final read gate still checks current Fence/Permission. A stale read after Fence/revocation is a violation. Cache-fill freshness remains a separate F contract requirement.
 
