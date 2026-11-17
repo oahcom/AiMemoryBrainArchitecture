@@ -13,7 +13,7 @@
 
 架构**原则上合理，但尚未证明完整系统在语义、物理实现、验证和维护层面成立**。本项目并未被判定为不可行。由于不可豁免的语义、权威、原子性、安全和恢复前置条件仍未关闭，架构冻结和全面实现准入暂缓。
 
-A 仅允许有界准备工作。这不构成 Gate 通过、受保护路径实现授权、Schema/Technology Freeze、部署批准或生产授权。
+A 仅允许有界准备工作。范围限定的 `APPROVED_WITH_CONDITIONS` 仅适用于：（1）有条件接受 Option A 作为 v1 逻辑方向，仍须关闭 A-01..A-05 并取得 D 精确采纳；（2）有条件接受 H 1.2.14/CSubmitOutcome 1.0.1 作为 L1/L2 协议候选，仍须关闭 B-01..B-04。两项均不代表 L1/L2 关闭、Gate 通过、受保护路径实现授权、Schema/Technology Freeze、部署批准或生产授权。
 
 ## 五项根本风险
 
@@ -27,13 +27,13 @@ A 仅允许有界准备工作。这不构成 Gate 通过、受保护路径实现
 
 1. Forget Fence × Producer Admission × Dependency Registration × Publication。
 2. Global Forget 跨 Canonical、衍生物、索引、缓存、Context、Adapter、副本和备份。
-3. Storage/COC/JF-10 事务、同 XID 恢复、Quorum、Failover 和 Restore。
+3. Storage/COC/JF-10 事务、同 XID 恢复、Quorum、Failover 和 Restore，并叠加共享 Transaction Executor、EffectPermit 生命周期覆盖和 Anchor Anti-rollback 义务。
 4. D/E Durable Ingress、Outbox、Lease、Retry、Replay 和 Cursor 组合。
 5. C/G/H Final Request、Provider Side-effect、Applied 与 I/D 权威耦合。
 
 ## 工程前置条件与关键路径
 
-P0-01 实现仓库/责任人 → P0-02 B 领域语义及 P0-03 I 治理/Inventory → P0-04 D/E/I/Storage 原子 Publication/Forget 合同 → P0-05 Storage/COC/JF-10 物理证明 → P0-06 C/G/H Applied 合同 → P0-07 有界 Durable Canonical 切片 → P0-08 安全 Retrieval/Rebuild → P1 Context/Adapter/Applied → 集成 Recovery 和 Conformance。该顺序并非完全串行：Synthetic Benchmark、Harness 脚手架、源刷新、双语自动化和候选 DB 实验可以并行。
+P0-01 实现仓库/责任人 → P0-02 B 领域语义及 P0-03 I 治理/Inventory → B-01..B-04 H/C/D/I/Storage 精确 Manifest 关闭 → A-01..A-05 Option A L1/L2 澄清及 D 精确采纳 → P0-04 D/E/I/Storage 原子 Publication/Forget 合同 → P0-05 Storage/COC/JF-10 L3/L4 物理证明 → P0-06 C/G/H Applied 合同 → P0-07 有界 Durable Canonical 切片 → P0-08 安全 Retrieval/Rebuild → P1 Context/Adapter/Applied → 集成 Recovery 和 Conformance。该顺序并非完全串行：Synthetic Benchmark、Harness 脚手架、源刷新、双语自动化和候选 DB 实验可以并行。
 
 ## 决策记录
 
@@ -66,7 +66,7 @@ P0-01 实现仓库/责任人 → P0-02 B 领域语义及 P0-03 I 治理/Inventor
 | AR-07 源版本时效 | 各 Owner；A 跟踪 | G1/G2 和每次冻结复审前 | 不接受；阻塞 |
 | AR-08 Cursor/Replay | D/E/Storage | Canonical 端到端符合性前 | 不接受；阻塞 |
 | AR-09 生产 DR | Storage + I + 运维权威 | 生产授权前 | 不接受；阻塞 |
-| AR-10 治理经济性 | A + 全体 Owner + 工程负责人 | 规模化/运维模式承诺前 | 残余风险开放；不得豁免核心语义 |
+| AR-10 治理经济性 | A + 全体 Owner + 工程负责人 | 规模化/运维模式承诺前 | 残余风险开放；不得豁免核心语义 |\n| AR-11 B 协议精确当前性 | H + C + D + I + Storage；A 集成 | G1/G2 和协议关闭前 | 不接受；阻塞 |
 
 ## 强制未决条件记录——不得作为残余风险接受
 
@@ -180,4 +180,4 @@ P0-01 实现仓库/责任人 → P0-02 B 领域语义及 P0-03 I 治理/Inventor
 
 ## 证据与交叉引用
 
-R PR #50；X PR #49；F/D/P PR #46；Issues #3、#5、#7、#10、#25、#29、#43；精确来源见 SYS-RISK-002。配套文件：ARCH-CX-002、DEV-FEAS-002、DEP-DAG-002、PRIORITY-002、READINESS-002、CONFLICT-002、GATE-002、DEFERRED-002。本评估不合并 PR、不关闭 Issue #43，也不授权生产。
+R PR #50；X PR #49；F/D/P PR #46；B 协议 PR #51；B→A 审查 PR #52；Option A 拓扑审查 PR #54；当前 Main `6470f25ca23b8d35c06f60be2326867066418d18`；Issues #3、#5、#7、#10、#25、#29、#43；精确来源见 SYS-RISK-002。配套文件：ARCH-CX-002、DEV-FEAS-002、DEP-DAG-002、PRIORITY-002、READINESS-002、CONFLICT-002、GATE-002、DEFERRED-002。本评估不合并 PR、不关闭 Issue #43，也不授权生产。
