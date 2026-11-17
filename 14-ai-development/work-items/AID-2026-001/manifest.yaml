@@ -350,7 +350,7 @@ follow_up_remediation:
   acceptance: PENDING
   merge: MERGED_WITH_PR_42_INTO_MAIN
   merge_commit_sha: 43b76350a7d654b3d0a3602c51ae7ddce7c81af1
-  note: PR #72 was merged into the implementation branch and then included in PR #42's merge to main. This records integration only, not Owner approval, runtime conformance, acceptance or R3 passage. This manifest update records pre-update branch Head 13e9c03976d3728bdfedf02e72e1875fbb937933; the resulting manifest self-update commit is excluded from self-reference. Verify exact branch Head from GitHub before review.
+  note: Proposal and author-side remediation only. This manifest update records pre-update branch Head 13e9c03976d3728bdfedf02e72e1875fbb937933; the resulting manifest self-update commit is excluded from self-reference. Verify exact branch Head from GitHub before review.
 
 
 execution_boundary_extension:
@@ -421,7 +421,7 @@ reference_model_validation:
 
 # Current-state overlay / 当前状态覆盖记录
 current_status_snapshot:
-  observed_main_head: ac4558ce7a78fc8fb27a18d0c06033e3a48f6fff
+  observed_main_head: 5bdb88f234eacae98aaa57f987cc7f71e3391768
   observed_at: 2026-11-18
   pr_42:
     state: CLOSED_MERGED
