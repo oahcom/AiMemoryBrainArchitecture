@@ -143,7 +143,67 @@
 10. Which derived views require durable audit retention without becoming canonical domain entities?
     哪些派生视图需要持久审计保留，但不因此成为规范领域实体？
 
-## 8. Gate disposition / 门禁结论
+## 8A. Chinese candidate inventory mirror / 中文候选领域对象清单
+
+| Candidate term / 候选概念 | Classification / 分类 | 中文存在性判断 / 中文理由 |
+|---|---|---|
+| User | DEFERRED_CONCEPT | 人类用户可能由 I Principal 和 C/G Conversation Actor 表示；在 Owner 分类前不得作为通用身份根。 |
+| Agent | CANONICAL_ENTITY or IMPLEMENTATION_DETAIL by context | 逻辑 Agent 可具有稳定身份；Runtime Agent Instance 属于执行细节；必须区分 AgentRef 和 PrincipalRef。 |
+| Principal | CANONICAL_ENTITY (I-owned security context) | I 解析的安全主体；不是 Memory 领域实体或 Agent 的同义词。 |
+| Subject | VALUE_OBJECT / SECURITY TERM | 必须由 I/具体上下文定义；不得用作 Principal/User/Entity 的通用别名。 |
+| Tenant | CANONICAL_SCOPE_CONCEPT, exact type OPEN | 安全隔离边界，必须由 I/A 明确其命名空间和层级。 |
+| Workspace | DEFERRED_CONCEPT | 可能是协作空间，但不能假定等于 Tenant 或 Project。 |
+| Session | DEFERRED_CONCEPT | 由 C/G/H 明确生命周期和作用域；不得与 Conversation/RuntimeSessionRef 混同。 |
+| Conversation | CANONICAL_ENTITY candidate | 交互历史/对话对象，可能具有独立引用和生命周期；需 C/G 确认。 |
+| Identity / External Identity | VALUE_OBJECT + mapping association | 外部身份映射必须有 Issuer/Namespace；External ID 不能直接作为 Canonical ID。 |
+| ActorRef | VALUE_OBJECT / typed attribution reference | 每次操作不可变的归因引用；不具备认证或授权能力。 |
+| Execution | OWNER-LOCAL OPERATION | C/Runtime 执行记录；不是通用 Memory 领域实体。 |
+| Memory | CANONICAL_ENTITY | 具有稳定身份、生命周期和可引用内容；由 D 拥有。 |
+| Memory Record / Memory Item / Memory Fragment | REJECTED_ABSTRACTION as separate canonical entities | 默认是 Memory/ContentRef 的旧称或表示形式；不创建三套身份/生命周期。 |
+| MemoryVersion | CANONICAL_ENTITY | Memory 的不可变版本身份；与 ContextVersion/Checkpoint 分离。 |
+| Memory Revision | DEFERRED / VALUE OBJECT | 若仅表示版本则统一为 MemoryVersion；若表示变更操作才考虑独立记录。 |
+| Memory Snapshot | DERIVED_VIEW / VERSIONED REPRESENTATION | 需按 Owner 区分 MemoryVersion、ContextVersion、Storage Snapshot 和 Runtime Checkpoint。 |
+| Memory Collection / Namespace | DEFERRED_CONCEPT / VALUE_OBJECT | 仅在需要独立访问、生命周期或治理时提升为实体；不能仅因数据库分区而创建。 |
+| Claim | CANONICAL_DOMAIN CONCEPT; identity OPEN | 命题对象，认知状态与 Memory Lifecycle 分离；Claim 跨版本身份由 ADR 决定。 |
+| Fact | DISTINCT DOMAIN CONCEPT; representation ADR-BLOCKED | I-04 要求概念区分；是否独立对象/类型或限定 Claim 仍未决。 |
+| Observation | CANONICAL_DOMAIN CONCEPT / VALUE OBJECT | 带观察者、Observed At 和来源的观察内容；不自动成为已验证 Claim。 |
+| Event | CANONICAL_ENTITY | 已捕获的发生/观察/报告/状态变化；不得与 Protocol Event Envelope 混同。 |
+| Evidence | CANONICAL_ENTITY | 可独立寻址、支持/反驳/限定 Claim/Relation 的材料；拥有自身可用性和保留语义。 |
+| Source / Memory Source | VALUE OBJECT or ASSOCIATION by context | 表示信息来源；MemorySource 默认是类型化关联，不默认是独立 Source Entity。 |
+| Provenance | VALUE OBJECT / DERIVATION GRAPH | 记录精确输入、方法、版本和派生关系；是否单独实体取决于生命周期/审计需求。 |
+| Derived Memory | CANONICAL_ENTITY candidate | 具有稳定身份的派生知识资产；必须保留来源谱系并受 Forget 传播规则约束。 |
+| Derivation | ASSOCIATION / OWNER-LOCAL OPERATION | Source→Target 的有向派生关系；DerivationRun/Attempt 属于 E 工作流，不是通用 B 实体。 |
+| Inference / Synthesis / Summary | DERIVED_VIEW unless promoted | 默认是算法/表示结果；只有显式纳入 Memory 并获得生命周期时才成为 Memory 类型。 |
+| Entity | CANONICAL_ENTITY | 具有稳定指称身份，不等于任意名词或标签。 |
+| Relationship / Relation | CANONICAL_ENTITY | 类型化端点、方向、限定条件、Scope、时间和 Evidence；不是简单共现边。 |
+| Assertion / Hypothesis | DEFERRED_CONCEPT / CLAIM SUBTYPE candidate | 若需要区分命题类型，可作为 Claim 的受控分类；不得先建通用实体。 |
+| Confidence | VALUE_OBJECT | 带量规/方法/校准条件的估计，不等于 Truth 或 Evidence。 |
+| Evidence Link | ASSOCIATION / VALUE OBJECT | Claim–Evidence 关系；若需独立版本/审计再提升为实体。 |
+| Context | G-OWNED CANONICAL_ENTITY | 任务范围的期望状态/成员视图，不是第二套规范 Memory。 |
+| ContextVersion | G-OWNED CANONICAL_ENTITY | Context 的不可变版本身份；不得与 MemoryVersion 混用。 |
+| Context Snapshot | DERIVED_VIEW / G-owned version representation | ContextVersion 的快照语义由 G 拥有；不是 Memory Snapshot。 |
+| Context Item / Context Entry | G-OWNED ENTITY or VALUE OBJECT, G decides | ContextVersion 的成员/引用；身份分类由 G Schema 决定。 |
+| ChangeSet | G-OWNED OPERATION / CANONICAL CONTEXT OBJECT | 绑定精确 Base/Target Version 和 Digest；不是 BMCP Command。 |
+| Working Set | DERIVED_VIEW | F Runtime 局部集合；不是规范 Memory 或 G ContextVersion。 |
+| Activation | DERIVED_VIEW / F-OWNED EVENT | 运行时选择/过程，不是 Memory 生命周期状态。 |
+| Retrieval Result / Candidate / Ranking | DERIVED_VIEW | 查询相关、可重算，由 F 拥有；不得改变规范身份/状态。 |
+| Runtime State | IMPLEMENTATION_DETAIL | F/C/H Runtime 执行状态，不是跨模块规范领域实体。 |
+| Protocol Message / Request / Response / Command | PROTOCOL_OBJECT | H Wire 对象；不得因为引用领域对象而成为领域实体。 |
+| Event Envelope | PROTOCOL_OBJECT | 传输封装，不等于领域 Event。 |
+| Provider Outcome | C-OWNED OPERATION EVIDENCE | 真实 Provider/Runtime Submit 边界证据；不是通用 Event 或 ACK。 |
+| Operation | OWNER-OWNED CANONICAL OPERATION | 具有身份/幂等/恢复语义的操作；Owner 定义状态，不使用通用 Status。 |
+| Correlation / Idempotency | VALUE OBJECT / PROTOCOL METADATA | 关联/幂等键；不是领域实体，必须绑定命名空间和操作身份。 |
+| Receipt / Acknowledgement | OWNER-ISSUED EVIDENCE / PROTOCOL OBJECT | 证明声明的特定后置条件；不得自动证明更下游状态。 |
+| Principal Policy / Permission | I-OWNED GOVERNANCE OBJECT or VALUE | 策略/权限属于 I；不能合并到 Domain Entity 的 status。 |
+| Authorization Decision | I-OWNED DECISION RECORD | 对精确主体/动作/资源/Scope/Audience 的授权结果。 |
+| Consent | I-OWNED GOVERNANCE RECORD | 同意状态独立于授权和 Forget。 |
+| Forget Request | GOVERNANCE REQUEST OBJECT | 请求对象，不等于 Forget 决定/操作/结果。 |
+| ForgetOperation | D-OWNED OPERATION ENTITY | 持久操作身份、阶段、Fence、Barrier；不等于 Memory 状态。 |
+| Audit Record | OWNER-OWNED EVIDENCE | 记录某个可验证行为/决定；不等于业务实体。 |
+| Legal Hold / Retention Policy | I-OWNED GOVERNANCE OBJECT | 法律保留和保留策略独立于 Delete/Forget/Purge 状态。 |
+| Serialization Anchor / SerializationRevision | IMPLEMENTATION_DETAIL | Storage 物理序列化原语；不是领域实体、Memory Version 或全局时钟。 |
+
+## 9. Gate disposition / 门禁结论
 
 B1 is **IN PROGRESS**. This inventory is a classification proposal grounded in the current main domain source and owner guides. It is not a final entity approval. All Owner-owned classifications remain subject to exact normative contract readback and owner confirmation. No schema is frozen by this inventory.
 
