@@ -36,7 +36,7 @@ This is not a blind organizational review: Session 0 shares the same repository 
 | F | `session-f-memory-runtime` @ `1908ce4d233b20f7cafd00cb679affd01bd15174` | runtime overview / `b7a948f014c3ad882a35a18bfc8ce025b26ab85a`; scheduling / `ca35d8cddd012c1ff067328ee22177f57c40ae36`; working set / `a934491950c876701e8ac592a0e6aaea983b44e3`; activation / `b7f5d85468f5262e472769a1991b812ac4a64f5b` |
 | G | `session-g-memory-context` @ `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8` | context reconciliation / `87063aceebed1c30b7840045ada8e3f348732688`; context architecture/budget also read at this HEAD |
 | I | `session-i-security-governance-2026-11-16` @ `0d071bf1ee7cc71912398c6ae57e4496e08f44ab` | global inventory / `9100061fa986fb6676656169de3fcf9fc1c72664`; retention/erasure / `f14cb2149ca3f817229533005ab89dbdc7f0b3a8` |
-| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` @ `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | COC design v3.2.3 / `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` @ `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | COC design v3.2.3 / `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792`; topology ADR / `bb544ba2f346bdc130d524bd5c7310d86f367988` |
 | C / H | C @ `71047cdb51139ca4080ac67f451e38a48698859d`; H @ `0d36324457e39bd50ad56ae902d477c4ea765b61` | live branch heads checked; Applied/recovery limitations require further exact-source review |
 
 Issue #43 records G's prior HEAD as `3367438...`; the live GitHub branch listing now returns `763b3d...`. This report uses the live branch head, not the stale issue value.
