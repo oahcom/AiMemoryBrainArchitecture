@@ -1,6 +1,6 @@
 # 开发可行性矩阵 — DEV-FEAS-002
 
-- 版本：1.0.0；基线：`main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- 版本：1.0.0；基线：`main@6470f25ca23b8d35c06f60be2326867066418d18`
 - 来源：F/D/P PR #46，分支 `review/session-3-engineering-planning-2026-11-17`，Commit `8b9ff8efa92a88dacc8f97b5faba5918fe5d2edc`，英文 Blob `081610b1734ec08dc7c35c75fae1cae3ca713be4`，中文 Blob `834dc39998342dc2f292fe1dfed411768b3ed156`。
 - A 裁决：原则上 **FEASIBLE_WITH_CONDITIONS**；当前实现准入 **BLOCKED**。
 
@@ -31,6 +31,12 @@ F/D/P 使用相对规模 S/M/L/XL，而非人日。由于工程人数、可用�
 - PostgreSQL 18.7 证据只是受限引擎能力探测，不证明已选生产拓扑或 D/I/COC 集成。
 - Durable Ingress/Outbox、Canonical Cursor、Forget/Publication、JF-10 Recovery 和 Applied 必须分别提供证据。
 - Vector/ANN、Reranking、Graph Backend 扩张不是安全首期纵向切片的前置条件。
+
+## 当前 B→A 可行性更新
+
+- B 的 Canonical Identity 和 Entity Inventory 工件已进入 main，但仍为 CANDIDATE；B1 进行中，Fact/Claim 仍 ADR-BLOCKED。它们改善了研究基础，但没有关闭领域语义，也不允许 Schema Freeze。
+- H Unified 1.2.14 / wire 1.3.0 + CSubmitOutcome 1.0.1 是一致的 L1/L2 候选。C 接受精确 H Mapping；D 接受 H High-water/RecoveryJoin Carrier；I 有 Anchor Review。但 H Mapping 状态仍写着需要 C Review，H/I/D 精确 Pin 未在一个 Bundle 中全部当前化，Storage v3.2.9 已过期。协议冻结仍被阻塞，直到 Storage v3.3.0 或等效版本由 C/H/D/I 和 A 复审。
+- Storage Option A 是首选 v1 逻辑方向，但仅有条件接受；A-01..A-05 和 D 精确接受仍开放。L2/L3/L4 均未关闭。
 
 ## 五项工程前置条件
 
