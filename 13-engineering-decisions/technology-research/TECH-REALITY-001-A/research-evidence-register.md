@@ -113,3 +113,60 @@ Current Owner branch heads were read from recursive Git Trees on 2026-11-17. Pub
 The PostgreSQL 18.7 dossier's pinned CI profile records bounded PASS subtests for prepared-XID persistence/lock retention/hard restart/same-XID commit/rollback, two-node synchronous WAL replay/promotion, physical backup/restore, coordinator crash in participant-success/ACK gap, TCP ACK loss, standby-unavailable UNKNOWN/private and WAL PITR. It explicitly does not prove production Canonical Authority deployment, live D/I/COC integration, signed participant receipt trust, real read-path enforcement, production operator/runbook or RPO/RTO. Gate A remains PARTIAL PASS / OPEN; Gate B current amended protocol requires focused exact-owner re-review; Gate C is deferred to engineering; JF-10 runtime P0 remains OPEN.
 
 PostgreSQL 18.7 档案记录了有限 CI 子测试 PASS：Prepared-XID 持久化/锁保留/硬重启/同 XID Commit/Rollback、双节点同步 WAL Replay/Promotion、物理备份恢复、参与者成功与 ACK 间隙协调器崩溃、TCP ACK 丢失、备机不可用时 UNKNOWN/Private、WAL PITR。它明确不能证明生产 Canonical Authority 部署、D/I/COC 实时集成、签名参与者 Receipt 信任、真实读路径、生产 Operator/Runbook 或 RPO/RTO。Gate A 仍 PARTIAL PASS / OPEN；Gate B 当前修订协议需要聚焦精确 Owner 复审；Gate C 延后到工程阶段；JF-10 runtime P0 仍 OPEN。
+
+
+## 7. 完整中文版本 / Chinese Version
+
+### 7.1 外部项目源码证据
+
+| 项目 | 仓库/观察到的版本 | 源码 Tree SHA | 许可证/语言 | 检查的核心路径 | 主要发现 |
+|---|---|---|---|---|---|
+| Mem0 | mem0ai/mem0，v2.2.1 | `f1791daa86d469249c9b002f62644d58a1eb96a0` | Apache-2.0/Python | `mem0/memory/main.py`、`storage.py`、`vector_stores/*` | LLM 抽取/更新/删除，Vector Adapter，SQLite History；未证明跨存储 Forget 原子性 |
+| Graphiti | getzep/graphiti，v0.31.2 | `869c1b279e01a2767a464581e1cb657ce0e39271` | Apache-2.0/Python | `graphiti.py`、`nodes.py`、`edges.py`、`search/*`、`driver/*` | Episode Provenance、Temporal Edge、Graph Driver、Hybrid Search |
+| Letta Code | letta-ai/letta-code，v0.34.63 | `b622fb1bc0941981e08da5ec2b2736d897e9bde1` | Apache-2.0/TypeScript | `memory-filesystem.ts`、`memory-git.ts` | Agent 隔离文件系统、Git 历史/同步；不是 Brain Canonical Store |
+| Hermes Agent | NousResearch/hermes-agent，v0.23.2 Canary | `7c9b019ab5620d4c64e7b0de4aa45cbc24dea963` | MIT/Python | `memory_manager.py`、`memory_provider.py`、`memory_context.py`、`backup_sqlite.py` | Provider 隔离、Profile 绑定、有界后台 Drain、SQLite 备份 |
+| LangGraph | langchain-ai/langgraph，1.2.22 | `02f2c2e6c992ffccce9e9129781fdd04f015c6fa` | MIT/Python | Postgres Checkpointer、Conformance Test | Checkpoint 与长期 Store 分离；不是 Rust Canonical Memory |
+| Temporal Rust SDK | temporalio/sdk-rust，v1.2.0 | `a5d7742e8c5b925351fff314c2662a316309583b` | MIT/Rust | Client Worker、Workflow Replay、State Machine | 真正 Rust Durable Workflow SDK；需外部 Temporal Service |
+| Restate Server | restatedev/restate，v1.8.1-hotfix.2 | `f0cfcae2b935cfe6f80de9a72a180f976da1c66c` | API 元数据 NOASSERTION/Rust | Server Bifrost/Loglet/Workflow | Durable Service 基础设施，增加持久化权威 |
+| Restate Rust SDK | restatedev/sdk-rust，v0.12.1 | `9a08091654f1e6da905f71ffe09bdd4742ecc995` | MIT/Rust | `src/lib.rs`、`src/service.rs`、`Cargo.toml` | 一方 Rust SDK；HEAD Manifest 0.13.0，MSRV 1.90 |
+| NATS Server | nats-io/nats-server，v2.15.3 | `99cd69546eedb8450157ff0d104ffcfb23c69ec3` | Apache-2.0/Go | JetStream Stream/Consumer 实现 | Durable Stream、ACK/Redelivery/Replay；Exactly Once 仅 Broker 边界 |
+| Qdrant | qdrant/qdrant，v1.20.2 | `23065a0bf6857c3e5da45f6c8939cc746cc0580e` | Apache-2.0/Rust | Collection/Segment/HNSW/Shard | HNSW、Payload Filter、Segment/Shard；不是 Canonical Truth |
+| Tantivy | quickwit-oss/tantivy，0.26.1 | `2ad36b4fd0c00ded047b12295423250d8d4d713b` | MIT/Rust | `src/index`、`indexer`、`query`、`directory` | Rust 原生分段词法检索；HEAD Cargo 版本 0.27.0 |
+| LanceDB | lancedb/lancedb，v0.42.0-beta.18 | `57b20fb11d907fd8948827370e7c4032d396c205` | Apache-2.0/Rust+其他 SDK | `rust/lancedb/src` | 嵌入/分布式检索 DB、Hybrid Search；当前版本 Beta |
+| OpenFGA | openfga/openfga，v1.22.1 | `798149843737e264e64b8660baadb946528c02f0` | Apache-2.0/Go | `internal/graph`、`pkg/server/check.go` | Zanzibar 风格关系授权服务 |
+| OPA | open-policy-agent/opa，v1.22.4 | `cb47e88514b31765d12fa774830cd6a8caa35440` | Apache-2.0/Go | Policy Evaluator、Server、Wasm | Rego 服务或 Wasm；Host 仍需提供数据和运行时 |
+| Cedar | cedar-policy/cedar，CLI v4.15.0 | `6387cb449bbff5e7c7c9617c56e02b36310be733` | Apache-2.0/Rust | Cedar SDK/Core/Validator | 嵌入式 Rust Policy Evaluator；身份和撤销仍由项目实现 |
+| Rig | 0xPlaygrounds/rig，v0.46.0 | `6428714f6be50fdc8c05eece015c6adebbcb7233` | MIT/Rust | `rig-core` Provider/Tool | Agent/LLM 库，不是 Durable Workflow 或 Brain Store |
+| OpenTelemetry Rust | opentelemetry-rust，0.33.1 | `1e29b1fe1d03bde8e48eb564a3dee8ec9efed6a7` | Apache-2.0/Rust | API、SDK、Exporter | Metrics/Logs 与 Tracing 的成熟度需分信号核验 |
+
+### 7.2 官方技术文档
+
+- SQLite Isolation：确认 SQLite 写入串行化，同一时间只有一个 Writer。
+- SQLite WAL：Reader/Writer 可并行，但仍只有一个 Writer；依赖同主机共享内存，不支持网络文件系统。
+- PostgreSQL MVCC：使用 MVCC、事务隔离和显式锁；Serializable 冲突需要应用 Retry。
+- SQLite FTS5：Tokenizer 与 BM25 排序机制。
+- Tantivy：Segment、Schema、IndexWriter、Searcher 和 Directory。
+- Qdrant：Client/Server、HNSW、Payload Filtering、Segment。
+- LanceDB：嵌入式/分布式检索库与 Lance Table。
+- NATS JetStream：Durable Stream、Consumer、ACK/Redelivery/Replay。
+- Temporal：持久 Event History 和 Workflow Replay。
+- Restate：Service、Virtual Object、Workflow。
+- LangGraph：Thread Checkpointer 与跨 Thread Store 分离。
+- Graphiti：Episode、Entity Node、Temporal Fact Edge。
+- Cedar：Policy Language、Validator 和嵌入式授权。
+- OPA Wasm：Rego 编译为 Wasm，Host 提供数据/Imports。
+- OpenTelemetry Rust：各 Signal 独立成熟度状态。
+
+### 7.3 Rust Crate 证据
+
+Tokio 1.54.1、SQLx 0.9.0、rusqlite 0.43.0、Tantivy Release 0.26.1（HEAD 0.27.0）、Moka 0.12.16、Temporalio SDK 1.2.0、Restate SDK Release 0.12.1（HEAD 0.13.0）、Cedar Crate docs.rs 4.14.1（CLI Tag v4.15.0）、ort 2.0.0-rc.15、Candle Core 0.11.1、OpenTelemetry 0.33.1。具体 Crate 版本必须与 Server/CLI/Exporter 版本分别核对。
+
+### 7.4 证据标签和限制
+
+- **SOURCE INSPECTED：** 已检查精确公开仓库 Tree SHA 和实现路径。
+- **OFFICIAL DOC INSPECTED：** 已读取官方文档。
+- **RELEASE OBSERVED：** 2026-11-17 观察到 GitHub Release 或 docs.rs 版本。
+- **NOT RUN：** 本任务没有运行 Brain Build、集成、基准、竞争/故障测试或安全审计。
+- **NOT PROVEN：** 外部项目功能本身不能证明 Brain 特有契约满足。
+
+Tree SHA 不一定等于最新 Release Commit；许可证信息不是完整传递依赖法律审查；本任务没有执行 SBOM、cargo-audit、cargo-deny、CVE 审查或 Windows/Linux/macOS 构建矩阵。
