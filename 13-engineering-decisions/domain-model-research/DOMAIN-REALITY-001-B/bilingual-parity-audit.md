@@ -49,7 +49,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | existing-domain-model-baseline.md | 已补齐仓库/分支、领域源 Pin、Owner 指南、PR/Issue、冲突、缺失定义和 B0 结论中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验 SHA、main HEAD Commit 元数据和 Fact/Claim/I-04 语义。 |
 | baseline-currentness-and-owner-source-audit.md | 已补齐 main/领域 Pin、Owner HEAD、PR/Issue、Phase 3.8、治理/测试权威和 BIH 当前性中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 重新读取实时分支和 PR；核验每个 Blob/状态。 |
 | baseline-owner-branch-snapshot-errata.md | 已补齐十个 Owner 分支 HEAD 和精确复审工件 Pin 的中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 最终验收前重读实时 Ref；不得将快照误报为批准。 |
-| bilingual-parity-audit.md | 英文审计表已有中文逐文件对照；本表自身仍需独立检查。 | PARTIAL — SELF-AUDIT | 复核所有文件状态和 Blob Pin，确保审计没有遗漏。 |
+| bilingual-parity-audit.md | 英文审计表及逐文件审计表均已提供中文对照；当前 Blob `46eecfc752ffe84b65a682ce372ea8b20888e788`。 | REMEDIATED — INDEPENDENT REVIEW PENDING | 由独立审查者复核所有文件状态、Blob Pin 和遗漏风险。 |
 | canonical-domain-entity-inventory.md | 已补齐候选实体分类、理由和存在性问题的中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验实体分类未越权，OPEN/CANDIDATE 未被提升为 DECIDED。 |
 | canonical-identity-semantics.md | 已补齐类型区别、身份稳定性、命名空间、解析顺序、序列化引用和决策记录中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 与 I/H/Storage 精确类型契约逐条核验。 |
 | canonical-state-semantics.md | 已补齐状态词汇、Owner 权威、Applied/Recorded/Committed/Visible/Published 区分和 Gate 说明。 | REMEDIATED — MANUAL REVIEW PENDING | 与 D/G/H/I/Storage 精确状态契约逐条核验。 |
@@ -69,6 +69,10 @@ A file is bilingual-complete only when the full normative content is present in 
 | evidence/official-reference-validation.md | 已补齐所有官方参考的观察、借鉴、不可推断和本项目处理条款中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 独立打开每个官方 URL，核验来源范围和不夸大结论。 |
 
 ## 3. Current conclusion / 当前结论
+
+Author-side remediation has now added Chinese peer text to all 22 files, including this audit table. This is not independent parity acceptance. Every file remains subject to clause-by-clause review against its English normative source, and B5 remains BLOCKED until that independent review and final readback are recorded.
+
+作者侧整改现已为全部 22 个文件补充中文对照，包括本审计表本身。但这不构成独立双语验收。每个文件仍须逐条对照英文规范源进行复审；在独立复审和最终读回登记之前，B5 继续 BLOCKED。
 
 **B5 MUST NOT PASS.** Most normative files are only partially bilingual. The presence of Chinese headings and selected translated paragraphs must not be presented as full bilingual compliance. The branch is a research draft only.
 
