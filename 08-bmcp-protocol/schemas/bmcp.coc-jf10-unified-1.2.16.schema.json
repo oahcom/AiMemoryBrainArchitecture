@@ -2496,7 +2496,7 @@
                 "required": [
                   "receipt_issue_high_water",
                   "receipt_consume_high_water",
-                  "inventory_epoch_ref",
+                  "producer_domain_inventory_epoch_ref",
                   "registry_snapshot_digest",
                   "relevant_entry_set_root"
                 ]
