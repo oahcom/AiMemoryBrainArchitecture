@@ -193,15 +193,15 @@ This section supersedes earlier H/Storage pins in §§1–3 where they differ. I
 | Artifact | Branch | Current exact Blob / Run |
 |---|---|---|
 | H RecoveryJoin schema 1.0.0 | `session-h-bmcp-protocol` | `dd3234aa1c74caf6d0e335875cd96e0b2b64082f` |
-| H semantic validator contract | same H branch | `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80` |
+| H semantic validator contract | same H branch | `e38ab74d29ded66987d3295503b6f717b6cd83e6` |
 | HRC/JPF suite | same H branch | `60a2f4db4bd12f2131ecd147db9bbe328da6db50` |
 | Wire suite | same H branch | `1a4e754ba9bfa57eb973c6d39731e9f89443b323` |
 | Schema integrity suite | same H branch | `67aba74c120f2916d768e7b01c45408ee2624f3a` |
 | H freeze evidence delivery | same H branch | `483fd974cfdd756f19505bad4d0e003facef0082` |
-| H CI run | GitHub Actions | [44041395001 — 66/66 PASS](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709), commit `b4d7ed2798fcd6514892ac91d8f3ae6c06f0a338`, job `133893645184` |
-| Storage bidirectional JoinProof | `session-storage-consistency-forget-atomicity-2026-11-16` | `d5a84aa22e90d7b8689b23cd8af2fc82125368c4` |
+| H CI run | GitHub Actions | [44042074640 — 66/66 PASS](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709), commit `fb9a2ab8b528c2b7010d935372f76a14d6676755`, job `133893645184` |
+| Storage bidirectional JoinProof | `session-storage-consistency-forget-atomicity-2026-11-16` | `155b0d613dc785f9f5904e4509cfce1ed06a2f0d` |
 | Storage COC v3.2.2 companion | same Storage branch | `ce3c41adf826a622a3717eca481b5d53e6549196` |
-| Storage exact review / topology disposition | same Storage branch | `9d5aa6cc08cdf9230296c362d1aa44804a92afbe` |
+| Storage exact review / topology disposition | same Storage branch | `6c0ca46dfdb2d3b142c1796ae44b0cc23f67bf0a` |
 | Storage topology ADR | same Storage branch | `080433f8e13a500522bc2754da64057edb0ae9d8` — ADR-BLOCKED |
 | I RecoveryJoin trust/currentness role review | `session-i-security-governance-2026-11-16` | `01d4514c1c0979ea878a89f36213a7db3c3c1003` |
 | C RecoveryJoin/provider-side-effect role review | `session-c-agent-integration-2026-11-16` | `a7b57bd5531222559666f0f1d9df59a259cde61a` |
@@ -224,3 +224,19 @@ This section supersedes earlier H/Storage pins in §§1–3 where they differ. I
 6. Selected physical topology, D/Storage linearization, read-path enforcement, failover/restore and deterministic race/crash campaign.
 
 **A disposition remains:** ACCEPT AS A COHERENT PROPOSED COMPOSITION WITH BLOCKING AMENDMENTS. No schema freeze, physical conformance PASS, merge, production activation, Global Forget completion or physical-erasure claim.
+
+
+### 9.3 H expanded executable evidence
+
+The latest H workflow [44042074640](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042074640), commit `fb9a2ab8b528c2b7010d935372f76a14d6676755`, completed **93 tests / OK** with Node.js 22 explicitly configured. Current test inventory: HRC 25 + JPF 19 + WIRE 10 + SCHEMA 12 + TPH 26 + XLANG 1.
+
+The 26 TPH tests exercise the test-profile two-record Batch/Manifest digest dependency, ordering, exact backlink/prefix/count, quorum/readback UNKNOWN and fenced restore states. XLANG-01 compares Python and Node implementations on three fixed HRC-TEST-v1 vectors. These are candidate reference tests only; HRC-TEST-v1 is not a production signature/canonicalization profile. The 93 tests do not execute live COC quorum or I/D/C owner adapters, real JF-10, or the physical race/crash/failover matrix.
+
+Updated exact pins:
+- H semantic contract: `e38ab74d29ded66987d3295503b6f717b6cd83e6`.
+- H workflow: `55d877499010f6a776ae432c1fb2a3a31bae5f11`.
+- Storage JoinProof: `155b0d613dc785f9f5904e4509cfce1ed06a2f0d`.
+- Storage exact review: `6c0ca46dfdb2d3b142c1796ae44b0cc23f67bf0a`.
+- Storage freeze evidence: `cddbb2f9a09b16f4f6e022fcee4477e139c89ac3`.
+
+The H unified schema 1.2.7 review is a separate structural review and is not covered by this 93-test RecoveryJoin suite. Production signature_profile_id enforcement and I trust-registry resolution remain open.
