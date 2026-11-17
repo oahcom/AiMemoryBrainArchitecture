@@ -15,7 +15,7 @@
 | D | session-d-memory-brain-2026-11-16 | 03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md | 17e53890dd6cce9bea9eacc1be2e64b0ef55ac78 |
 | E | session-e-memory-compiler-2026-11-16 | 04-memory-compiler/phase-3.8-e-publication-orchestration-retry-recovery-contract.md | 475fee41e5eea527af4edefbfe88c58c86967d0a |
 | I | session-i-security-governance-2026-11-16 | 09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md | 54bab0484bd232a5a258e65e34cc7425288b39a6 |
-| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md | 175ee7b1349cfdb2e450d0fab49e0f61f20a5a5 |
+| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md | 175ee7b1349cfdb79a19898b311a88391ed88010 |
 
 ### H / Storage RecoveryJoin and tests
 
