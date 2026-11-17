@@ -1,5 +1,4 @@
-<!-- Source: session-h-bmcp-protocol / 08-bmcp-protocol/adapter-capability-and-applied-attestation.md / Blob db59b63e322d7255b8b400f47859dcac32bb3027 -->
-<!-- Status mirror: CANDIDATE — final-request proof profile OPEN with C; authorization binding OPEN with I. -->
+<!-- Source: session-h-bmcp-protocol / 08-bmcp-protocol/adapter-capability-and-applied-attestation.md / Blob 0dca3dc5463a02be0e19524811afbae87795baf5 -->
 <!-- Chinese companion: ../../zh-CN/08-bmcp-protocol/adapter-capability-and-applied-attestation.md -->
 
 # Adapter Capability and Applied Attestation
@@ -314,3 +313,32 @@ Before this candidate can be frozen:
 - H MUST publish the corresponding versioned wire schema/SDK mapping only after the above field semantics are accepted.
 
 All related conformance cases remain **SPECIFIED / NOT RUN** until executable fixtures, deterministic ordering, expected/actual outputs and durable owner evidence are attached. This addendum does not establish H schema freeze, cryptographic approval, interoperability, implementation correctness, C/G/H global freeze, or production readiness.
+
+
+### 11.8 CGH-APPLIED-1.1 causal-order and recovery-batch evidence bridge — candidate
+
+G's current exact-version decision history includes the CGH-APPLIED-1.1 causal-order profile and a recovery-batch amendment. The Tier 1 evidence mapping above is necessary but not sufficient for that profile. Before H can claim the 1.1 Applied ACK mapping is complete, the H message/evidence profile MUST carry or immutably reference the following owner-issued evidence set:
+
+- `causal_order_profile_ref`, `causal_order_coordinator_ref`, `causal_order_domain_ref`, and `causal_order_transaction_ref`;
+- `causal_order_terminal_proof_ref` and its digest, binding the exact transaction, immutable request/participant digest, reservation and determinate terminal outcome;
+- `recovery_batch_ref` and `recovery_batch_digest`;
+- `pre_batch_participant_set_digest`, `participant_set_completeness_attestation_ref`, and the complete `owner_high_water_attestations` set;
+- the complete `participant_reconciliation_entries` set, or an explicitly attested empty set; each entry retains its exact ParticipantIntentRef, causal-order transaction, request digest, and separate I/D/C reconciliation states;
+- I-issued `i_authorization_terminal_ref`, `i_sequencer_ref`, `i_sequencer_epoch`, `i_sequencer_position`, `i_decision_digest`, and revocation cutoff evidence or an explicit I-attested absence at terminalization;
+- D-issued `d_lineage_coverage_ref`, `d_fence_request_cutoff_ref`, and `d_fence_effective_position`, preserving complete lineage and the distinction between request cutoff and effective fence position;
+- where the recovery participant set includes Storage, Storage-issued same-XID resolution and terminal visibility/non-publication proof references required by the applicable Storage contract.
+
+H may authenticate the H envelope, validate message-family/schema integrity and preserve these owner-issued opaque references. H MUST NOT mint or infer COC terminal proof, I authorization outcome, D clearance/fence, C provider outcome, or Storage commit/rollback/visibility. Missing or unknown critical owner evidence remains UNKNOWN/IN_DOUBT and cannot promote Full Applied or release an owner-local gate.
+
+The following ordering domains MUST remain distinct and MUST NOT be compared, coerced or substituted by H:
+
+1. COC causal-order epoch/position/entry digest;
+2. I sequencer reference/epoch/position/decision digest;
+3. D request cutoff and effective fence position;
+4. Storage transaction/resolution position.
+
+COC position orders COC records only. I position is authoritative only within the I policy-domain sequencer. D positions remain D-issued. Storage positions remain Storage-local. Wall-clock timestamps, H receiver sequence, message arrival order, timeout, missing ACK or reconnect cannot establish cross-authority order.
+
+For a recovery-batch profile, the message MUST distinguish a proven empty pre-batch participant set from an absent/incomplete enumeration. A missing participant-set completeness attestation, missing owner high-water proof, incomplete participant reconciliation, unknown I/D/Storage outcome, or mismatched transaction/digest is rejected or held UNKNOWN/IN_DOUBT. COC recovery observation does not itself release I/D owner-local pending gates; only the corresponding owner-signed gate disposition can do so.
+
+This §11.8 is a candidate mapping reservation against G's exact-version CGH-APPLIED-1.1 decision history. It does not claim that the current H JSON Schema/SDK already contains these fields, that COC or recovery-batch infrastructure is deployed, or that JF-10/COC conformance has run. H must publish an exact additive schema version and obtain the relevant C/G/I/D/Storage confirmations before claiming this bridge complete.
