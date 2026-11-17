@@ -110,8 +110,9 @@ The review is **not** a blanket approval of all 124 changed files. It is a targe
 - Risk: reviewers and AI developers may rely on contradictory coverage statements and either duplicate work or incorrectly assume untranslated material is complete.
 - Required correction: reconcile the exact source-spec count and split inventory; mark F as “paired in PR #28; semantic review pending” rather than NOT STARTED; align D's 8/8 state across both registers; correct the PR E summary after confirming the remaining Forget/Derived Registration scope.
 
-### BSR-28-003 — PR validation summary is stale
+### BSR-28-003 — PR validation summary was stale; corrected
 - Severity: **P3 — review metadata**
+- Status: **RESOLVED** in the PR description after this finding was recorded.
 - File: PR #28 description
 - Evidence: PR body says the current-head CI result is “pending after the prompt-library gate update”; the recorded workflow run `44050762889` completed successfully for the structural bilingual/prompt-library gate.
 - Risk: PR readers see an obsolete validation status.
