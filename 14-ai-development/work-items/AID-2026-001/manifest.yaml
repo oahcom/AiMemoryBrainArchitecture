@@ -30,6 +30,20 @@ repository: "oahcom/AiMemoryBrainArchitecture"
 base_branch: "main"
 base_commit_sha: "55d44b9276456f88bd2193de8b06aff146c228a4"
 review_branch: "ai/AID-2026-001/governance-owner-review"
+github_issue: 24
+github_pr: 23
+related_issues:
+  - 24
+automations:
+  A: "NOT_CREATED"
+  B: "NOT_CREATED"
+  C: "NOT_CREATED"
+  D: "NOT_CREATED"
+  E: "NOT_CREATED"
+  F: "NOT_CREATED"
+  G: "NOT_CREATED"
+  H: "NOT_CREATED"
+  I: "NOT_CREATED"
 review_prompt: "owner-review-prompts.md"
 review_prompt_version: "v1"
 review_prompt_sha256: "NOT_RECORDED — prompt pack prepared for independent execution; no run hash claimed"
@@ -42,6 +56,8 @@ source_documents:
   - "README.md"
   - "reviews/integration/phase-3-defghi-cross-module-contract-review.md"
   - "14-ai-development/work-items/AID-2026-001/preliminary-cross-owner-assessment.md"
+  - "14-ai-development/owner-automation-operating-model.md"
+  - "14-ai-development/prompt-authoring-standard.md"
 verification:
   status: "NOT_RUN"
   reason: "This is a governance document review; no code or CI changes are in scope."
@@ -58,3 +74,5 @@ merge:
 notes:
   - "The initial AI governance documents were committed before this Work Item existed. This record is a retrospective bootstrap record and does not fabricate an original prompt, prompt hash, or review evidence."
   - "A role-played review in one coordinating session is not counted as nine independent approvals."
+  - "GitHub Issue #24 tracks the GitHub/automation/prompt-authoring extension; PR #23 is the current change proposal."
+  - "No A–I scheduled automation has been created; cadence, timezone and execution capability must be configured and verified first."
