@@ -54,6 +54,7 @@ A may accept system-wide scope and sequencing risks; A cannot accept B, D, I, C,
 
 ## Current source refresh against main@8c0c5b (2026-11-17)
 
+- R PR #50, X PR #49 and F/D/P PR #46 reports are pinned to the earlier main baseline `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; they remain analytical inputs, not refreshed assessments of current main. A has integrated the later PR #51/#52/#54 evidence, but G1/G7 remain partial until exact current source/consumer pins and any required role refresh are independently read back.
 - Current main HEAD `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` reverts the three interim B research artifacts introduced by commits `6470f25...`, `67f1122...` and `e723222...`. Those artifacts are not part of the current main baseline and are not canonical evidence. B Fact/Claim ADR remains ADR-BLOCKED.
 - B→A review PR #52: branch HEAD `2727bd8544f812d796186769f86cf92aba244dee`, report Blob `b59b2ef745330f901027f59b69c68b99097c604b`.
 - Option A review PR #54: branch HEAD `208c5e84f64ec68338045b963407bcb6d2463faf`, report Blob `ff782d7ab32bdbe66f01a2057c516c5a855abdd3`; proposed amendment Blob `f5ad30c8570d480f60bc9b02ee53c06317b41525` is NOT ADOPTED.
