@@ -188,3 +188,13 @@ Review reports: `reviews/translation/2026-11-17-g-phase36-applied-forget-bilingu
 | H | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `session-h-bmcp-protocol` | `0dca3dc5463a02be0e19524811afbae87795baf5` | EN + zh-CN refreshed; 23/23 headings; 33/33 table rows; candidate mapping §11.8; H36-AP-08 OPEN; C/G/I/D/Storage acceptance pending; no schema freeze |
 
 Supersedes the previous H source Blob `db59b63e322d7255b8b400f47859dcac32bb3027`. The H companion remains 1/7 detailed core specifications.
+
+
+
+## H provider outcome / owner gate source refresh — 2026-11-17
+
+| Owner | Source path | Branch | Current exact Blob SHA | Companion parity / disposition |
+|---|---|---|---|---|
+| H | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `session-h-bmcp-protocol` | `74be8374a67da385a5f0f8e34c7aef2b38b72bcf` | EN + zh-CN refreshed; 24/24 headings; 33/33 table rows; §11.9 C provider outcome/owner gate mapping; H36-AP-09 OPEN; no wire schema/SDK mapping or consumer acceptance |
+
+Supersedes H Blob `0dca3dc5463a02be0e19524811afbae87795baf5`. H companion remains 1/7 detailed core specifications.
