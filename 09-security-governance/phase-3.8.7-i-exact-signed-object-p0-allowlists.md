@@ -130,8 +130,10 @@ The I-signed attestation P0 contains exactly:
 - `owner_authority_ref` (must be I);
 - `snapshot_ref`;
 - `snapshot_digest` (digest of the underlying I ledger snapshot, not this attestation);
-- `request_count`, `request_root`, `request_highwaters`;
-- `admission_count`, `admission_root`, `admission_highwaters`;
+- `request_high_water`, `request_count`, `request_set_digest`, `request_ledger_root`;
+- `admission_high_water`, `admission_count`, `admission_set_digest`, `admission_ledger_root`;
+- `owner_ledger_root`;
+- `owner_specific_high_waters` containing exactly `receipt_issue_high_water`, `receipt_consume_high_water`, `inventory_epoch_ref`, `registry_snapshot_digest`, `relevant_entry_set_root`;
 - `gate_ref`, `gate_generation`, `scope_generation`;
 - `anti_rollback_anchor_ref`;
 - `request_enumeration_status`, `admission_enumeration_status`;
