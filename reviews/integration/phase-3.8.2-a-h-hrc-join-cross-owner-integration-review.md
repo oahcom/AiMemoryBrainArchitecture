@@ -22,13 +22,13 @@
 | Artifact | Branch | Blob |
 |---|---|---|
 | H RecoveryCutoff schema 1.0.4 | session-h-bmcp-protocol | d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1 |
-| H RecoveryJoin schema 1.0.0 candidate | session-h-bmcp-protocol | f531c1d4b89a48457188c4988f140952759223a6 |
-| H semantic validator contract | session-h-bmcp-protocol | c93560fcda947aef0a611b3096fb1c1994d41cd0 |
-| HRC/JPF executable semantic suite | session-h-bmcp-protocol | d14e66a2196303374f31a4285244a0f77a3ad328 |
+| H RecoveryJoin schema 1.0.0 candidate | session-h-bmcp-protocol | dd3234aa1c74caf6d0e335875cd96e0b2b64082f |
+| H semantic validator contract | session-h-bmcp-protocol | 9a2c3b856d1319e780932d75d2b0165021faf816 |
+| HRC/JPF executable semantic suite | session-h-bmcp-protocol | f28834d73e055be411060f0c1093bd3dc0d865b9 |
 | Wire interop candidate suite | session-h-bmcp-protocol | 1a4e754ba9bfa57eb973c6d39731e9f89443b323 |
 | Schema integrity suite | session-h-bmcp-protocol | 5292d56661e938c905c61455e9ed53c4ff674c54 |
 | H branch test workflow | session-h-bmcp-protocol | ea7a3d9c365b84352d3bac69da94fe0d510e46a4 |
-| Storage bidirectional JoinProof contract | session-storage-consistency-forget-atomicity-2026-11-16 | 41f80b1aacfebdb1f652b16144afbf83ce950e82 |
+| Storage bidirectional JoinProof contract | session-storage-consistency-forget-atomicity-2026-11-16 | 2882fa8eb4d5e7faca035866572cbe48ac5eeae0 |
 | Storage serialization topology ADR | session-storage-consistency-forget-atomicity-2026-11-16 | 080433f8e13a500522bc2754da64057edb0ae9d8 |
 | A deterministic conformance matrix | session-a-integration-2026-11-16 | c556125b279271c1cc57fca0b49584b5b1f302b2 |
 
@@ -36,10 +36,10 @@
 
 | Role | Artifact | Branch | Exact Blob | Simulated disposition |
 |---|---|---|---|---|
-| D | phase-3.8.2-d-recovery-join-and-visibility-exact-review.md | D branch | df3e3fef5f86cf466abba272d98a3678340ef2cb | ACCEPT WITH AMENDMENTS |
-| E | phase-3.8.2-e-recovery-join-orchestration-exact-review.md | E branch | d8a72b6874fb7af83df459dd84830f80cda2fd8b | ACCEPT WITH AMENDMENTS |
-| I | phase-3.8.2-i-recovery-join-trust-currentness-exact-review.md | I branch | 3342562c7f795989ce5df6caa989f4c57d105a08 | ACCEPT WITH AMENDMENTS |
-| Storage | phase-3.8.2-storage-exact-review-and-topology-disposition.md | Storage branch | 557417b6fbbef03f7b5740f825850d4017144af0 | ACCEPT WITH AMENDMENTS; ADR BLOCKED |
+| D | phase-3.8.2-d-recovery-join-and-visibility-exact-review.md | D branch | 1ef3a736cdbf59b27a017d6dd4aee9fe7be0b940 | ACCEPT WITH AMENDMENTS |
+| E | phase-3.8.2-e-recovery-join-orchestration-exact-review.md | E branch | c2beb133de40e7c8281933dfa175ac7fa289bd5f | ACCEPT WITH AMENDMENTS |
+| I | phase-3.8.2-i-recovery-join-trust-currentness-exact-review.md | I branch | 83cacf7575c2800593104ddb9a6e72f521a9576b | ACCEPT WITH AMENDMENTS |
+| Storage | phase-3.8.2-storage-exact-review-and-topology-disposition.md | Storage branch | 7c09cfad1ca77ed51cf282dc0826c62d91eea4dd | ACCEPT WITH AMENDMENTS; ADR BLOCKED |
 
 These are assistant-authored role simulations at the user's direction. They are not independently attributable repository Owner signatures or cryptographic attestations.
 
@@ -50,7 +50,7 @@ H has converted the existing 25 semantic scenarios into named unittest methods a
 - WIRE-01..10: strict duplicate-key parsing, absent/null distinction, deterministic test bytes, counter representation, unknown critical field, GID typing and domain separation;
 - SCHEMA-01..09: six recovery message families, strict object boundaries, RecoveryJoin required edge sets, JF-10 tuple and owner request/admission completeness.
 
-Total committed candidate suite: **61 unittest methods** (25 HRC + 17 JPF + 10 WIRE + 9 SCHEMA).
+Total committed candidate suite: **64 unittest methods** (25 HRC + 17 JPF + 10 WIRE + 9 SCHEMA).
 
 The RecoveryJoin schema now has:
 - six separate owner request/admission completeness states (I/D/C request and I/D/C admission);
@@ -144,3 +144,17 @@ A 认为 HRC-01..25 与 RecoveryJoin 的逻辑组合方向成立。当前 JoinPr
 四方精确版本角色审查均为 ACCEPT WITH AMENDMENTS 的模拟结论，不是独立 Owner 签名。D 的 per-Fence Lineage Proof、E 的 Restore/Dispatch Gate、I 的 Cryptographic Trust/Currentness、Storage 的真实事务拓扑和 HA/Restore、H 的 Wire Adapter/Canonicalization/跨语言互操作仍为阻塞项。
 
 最终裁决：**接受为逻辑一致的提案组合，但保留阻塞项；不冻结、不合并、不启用生产。**
+
+
+## 9. Follow-up schema refinement
+
+H has added row-digest and typed owner-evidence requirements to RecoveryJoin 1.0.0:
+- request disposition now binds both OwnerRequestDigest and OwnerEntryDigest;
+- NOT_REGISTERED admission disposition binds operation identity/digest, scope and gate/scope generations;
+- D lineage/barrier evidence requires ForgetOperationRef, FenceGeneration, LineageManifestRef/Digest and BarrierMemberRef;
+- I receipt/terminal evidence requires PolicyDomain, PermissionEpoch, inventory epoch, issuer key and authorization receipt;
+- C provider and Storage prepared/resolution evidence carry their owner-specific tuple fields.
+
+The latest H schema Blob is dd3234aa1c74caf6d0e335875cd96e0b2b64082f. The latest HRC suite Blob is f28834d73e055be411060f0c1093bd3dc0d865b9. The Storage JoinProof contract is now Blob 2882fa8eb4d5e7faca035866572cbe48ac5eeae0.
+
+These are schema and test-candidate refinements only. No CI run, cross-language interop PASS or owner signature is claimed.
