@@ -70,3 +70,14 @@ C 已交付明确的 Provider Egress Gate Adapter 合同、Owner-local Admission
 **Not delivered:** actual provider egress adapter, runtime final-submit hook, provider same-key recovery, conformance PASS or Full Applied implementation evidence.
 
 **Decision:** C documentary contract delivery is complete for this stage. C freeze-readiness remains **BLOCKED** until C-FR-01 through C-FR-08 are satisfied.
+
+## 7. Exact RecoveryJoin / provider boundary re-review / RecoveryJoin 与 Provider 边界复核
+
+C has now published an exact-version role review:
+- `07-agent-integration/phase-3.8.2-c-recovery-join-provider-side-effect-exact-review.md`
+- Commit: `d5be3be10f7144476ddc61a94f29faff67424292`
+- Decision: **ACCEPT WITH C-OWNED PROVIDER-SIDE-EFFECT AMENDMENTS**.
+
+The review pins H RecoveryJoin schema `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`, HRC/JPF suite `60a2f4db4bd12f2131ecd147db9bbe328da6db50`, Storage bidirectional JoinProof `4520860b28429d35cdb2ca947a56d0ccb64226a3`, and H CI run [44040312711](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040312711) (66/66 candidate tests PASS).
+
+C's decision is limited to logical composition and nominal identity boundaries. Real egress adapter, gate/send linearization, same-key provider lookup, durable CSubmitOutcome, final immutable Agent submit hook and C/G/H Full Applied remain OPEN. Provider outcome cannot be inferred from COC, Storage, I, D or H evidence.
