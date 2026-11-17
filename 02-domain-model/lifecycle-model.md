@@ -156,7 +156,7 @@ Proposed clarification:
 - `Forgotten` does not assert physical erasure, backup expiry, external-recipient compliance, or global Forget completion.
 - The Forget Operation phase is a separate state machine. In particular, a Memory may be `Forgotten` while its operation remains `InventorySealed` or `CleanupInProgress`.
 - `SuppressionCommitted` is the canonical linearization event: the tombstone, ForgetFence generation and operation/outbox record must be durably committed together. After that point, cancellation/rollback cannot remove the fence or restore ordinary access.
-- D owns canonical Memory/Forget semantics and fence ordering. I owns authorization, retention/legal-hold policy, inventory policy and global completion/exception evaluation. Executors own only their local action and evidence.
+- D owns canonical Memory/Forget semantics, fence ordering and the D-domain completion predicate. I owns authorization, retention/legal-hold policy, cross-system inventory/evidence acceptance policy and the cross-system governance assessment; I must not rewrite D's state or predicate. Executors own only their local action and evidence.
 - Failed or incomplete cleanup leaves suppression active and resumable; it never reopens the Memory identity.
 
 **Status:** PROPOSED / D-I APPROVAL PENDING / R3 TESTS NOT RUN.
