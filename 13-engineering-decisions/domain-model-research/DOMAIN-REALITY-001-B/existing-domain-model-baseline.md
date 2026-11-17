@@ -27,7 +27,8 @@ However, the source set is not internally ready for a new freeze. The Fact/Claim
 | Repository | `oahcom/AiMemoryBrainArchitecture` |
 | Visibility | Private |
 | Default branch | `main` |
-| Main HEAD | `b372b62c640a2b656e54b6db62a4ee67d7d8c001` |
+| Original main HEAD at research start | `b372b62c640a2b656e54b6db62a4ee67d7d8c001` |
+| Current main HEAD after branch-isolation correction | `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f` |
 | HEAD commit message | `docs: remove superseded runner operations tracking row` |
 | HEAD commit date | 2026-11-17T09:25:41Z |
 | Repository README Blob | `429e873bd5bf081e10a449b27e3495428e1046f1` |
@@ -35,7 +36,7 @@ However, the source set is not internally ready for a new freeze. The Fact/Claim
 | Existing B branch | `session-b-domain-model-phase3` |
 | New research branch | `research/domain-reality-001-b`, created from exact main HEAD |
 
-The HEAD was independently read through the repository's recent commit listing and exact commit fetch. The commit diff only removes a superseded CI runner operations row from `docs/translation-status.md`; it does not change domain contracts.
+The original HEAD was independently read through the repository's recent commit listing and exact commit fetch. After the branch-isolation correction, current main HEAD is `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`; it consists of explicit cleanup commits deleting the 13 research paths that had been mistakenly written there. All 13 current-main path readbacks returned NOT_FOUND. The research branch merge-base remains the original `b372b62...`; the cleanup history was not rewritten.
 
 HEAD 已通过仓库最近提交列表和精确 Commit 读取核验。该提交 Diff 仅从 `docs/translation-status.md` 移除一条已废止的 CI Runner 运维登记，不涉及领域契约修改。
 
@@ -163,6 +164,6 @@ The old branch head SHA and complete branch diff were not returned by the branch
 
 **B0 = PARTIAL / NOT PASSED。** 已核验仓库身份、main HEAD、主要领域源文件、双语指南 Pin、共享不变量、责任矩阵、术语表及部分相关 PR/Issue。完整 Owner 规范契约清单、穷尽相关 PR/Issue 审计、PR 精确 Diff/Commit/Blob Pin 和源级语义协调仍未完成。
 
-No final domain freeze, schema freeze, downstream implementation authorization, or ACCEPTED status is claimed.
+No final domain freeze, schema freeze, downstream implementation authorization, or ACCEPTED status is claimed. PR #53 is CLOSED / NOT MERGED; its A decision is DEFERRED / ARCHITECTURE_NOT_READY. PR #52 remains OPEN / DRAFT.
 
 不宣称领域最终冻结、Schema 冻结、下游实现授权或 ACCEPTED 状态。
