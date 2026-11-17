@@ -1,6 +1,6 @@
 # 架构与实现依赖 DAG — DEP-DAG-002
 
-- 版本：1.0.0；基线 `6470f25ca23b8d35c06f60be2326867066418d18`。
+- 版本：1.0.0；基线 `6470f25ca23b8d35c06f60be2326867066418d18`（历史评估快照，非当前 Main）。
 - 权威：A 负责集成；领域语义仍由表中 Owner 自己决定。
 
 ## 架构决策 DAG
@@ -80,3 +80,8 @@ P0-08 集成 Race/Crash/Replay/Failover/Restore 符合性
 - 技术 ADR 必须跟随 Owner 合同和可复现实验，不能反过来。
 
 参见 SYS-RISK-002、DEV-FEAS-002、PRIORITY-002 和 GATE-002。
+
+
+## 当前 Main HEAD
+
+本次发布独立观察到的当前 Main HEAD 为 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。此前的 `6470f25...` / `b372b62...` 均为历史评估快照，不是当前 Main。本套文件尚未完成针对当前 Main 的逐来源完整差异审计；G1 仍为 PARTIAL，所有 Gate/冻结限制继续有效。
