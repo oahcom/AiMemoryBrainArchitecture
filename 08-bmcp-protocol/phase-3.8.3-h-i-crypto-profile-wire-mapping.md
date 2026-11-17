@@ -86,7 +86,27 @@ P0 仅排除 Payload Digest（由 P0 计算）、Signature 输出、外部 Integ
 
 COC Recovery Cutoff Batch 即使包含 I Snapshot，也不因此变成 I 签名记录。Validator 必须独立解引用并验证 I Snapshot Attestation，再独立验证 COC Quorum Commit。JF10 Bridge Reconciliation 中引用的 I Proof 也必须作为独立不可变 I 对象验证；外层 COC Record 不能替换或合成 I Proof。
 
-## 4. Message-family authority mapping / 消息族 Authority 映射
+## 4. Exact I-signed field allowlists / I 签名字段精确 Allowlist
+
+The common I-signed projection fields are exactly:
+`schema_id`, `schema_version`, `message_type`, `message_id`, `message_nonce`, `audience`, `sender_authority_ref`, `sender_subject_ref`, `issuer_ref`, `subject_ref`, `owner_authority`, `owner_record_ref`, `policy_domain_ref` when present/applicable, `causal_order_profile_ref`, `causal_order_coordinator_ref`, `causal_order_domain_ref`, `canonicalization_profile_id`, `signature_profile_id`, `digest_algorithm`, `key_id_ref`, `key_version`, and `created_at`.
+
+The common exclusions are exactly `payload_digest`, `signature`, `integrity_proof_ref`, `channel_binding_proof_ref`, `quorum_commit_proof_ref`, `coc_commit_proof_ref`, `coc_record_ref`, `coc_record_position`, `coc_entry_digest`, and `coc_previous_entry_digest`. No other field is excluded.
+
+| I-signed object | Additional fields included in P0 | Required semantic discriminator |
+|---|---|---|
+| `OWNER_LOCAL_PENDING_GATE` | `owner_kind`, `owner_gate_ref`, `owner_gate_generation`, `request_set_count`, `request_set_digest`, `owner_request_high_water`, `snapshot_generation`, `anti_rollback_anchor_ref`, `owner_signature_ref`, `owner_admission_high_water`, `admission_set_count`, `admission_set_digest`, `request_ledger_root`, `admission_ledger_root` | `owner_kind=I` and `owner_authority=I` |
+| `OWNER_LOCAL_GATE_RELEASE` | `owner_kind`, `release_type`, `owner_gate_ref`, `owner_gate_generation`, `recovery_epoch_ref`, `batch_record_ref`, `batch_digest`, `manifest_record_ref`, `manifest_digest`, `owner_request_high_water`, `reconciliation_root`, `owner_signature_ref`, `owner_admission_high_water`, `request_set_digest`, `admission_set_digest`, `request_ledger_root`, `admission_ledger_root`, `batch_position`, `batch_entry_digest`, `manifest_record_position`, `manifest_record_entry_digest` | `owner_kind=I`, `owner_authority=I`, release type is the exact I outage-admission release enum |
+| `JF10_I_TERMINAL_DECISION_OBSERVED` | `i_terminal_outcome`, `i_terminal_decision_ref`, `i_sequencer_position`, `commit_authorization_receipt_ref`, `receipt_digest`, `receipt_consumption_proof_ref`, `prepared_participant_ref`, `prepared_transaction_gid`, `database_incarnation_ref`, `prepare_attempt_ref`, `prepare_attempt_generation`, `participant_ledger_ref`, `participant_ledger_version`, `participant_tuple_digest`, `owner_signature_ref` | `owner_authority=I`; terminal enum and same-XID tuple are checked by I semantics |
+| I owner snapshot attestation referenced by `owner_snapshot_attestation_ref` | Resolve to the exact immutable I `OWNER_LOCAL_PENDING_GATE`/snapshot attestation record and compare all owner, gate, scope, generation, high-water, count, root, digest and anti-rollback fields | The referenced record must be I-signed and its digest/ref must match the nested COC snapshot |
+
+For the snapshot reference, H must not treat the nested `ownerSnapshot` JSON object as an I signature. The I-signed source object is dereferenced and verified separately. Empty-set and out-of-scope assertions are accepted only when carried by an exact I-signed evidence object whose schema and projection are explicitly pinned; absent or partial evidence remains UNKNOWN.
+
+### 4.1 Owner snapshot attestation binding / Owner Snapshot Attestation 绑定
+
+The current schema's `owner_snapshot_attestation_ref` is a locator. H semantic validation must dereference it, verify the I signature and compare the returned immutable snapshot's owner, gate/scope generation, request/admission high-waters, counts, roots, digests, inventory epoch and anti-rollback anchor to the COC-embedded `ownerSnapshot`. A locator alone is not proof. If the immutable referenced snapshot digest is not available from the resolved object/registry, the validator returns UNKNOWN; H must add an explicit digest field in a later schema revision if the reference resolver cannot guarantee immutable digest addressing.
+
+## 5. Message-family authority mapping / 消息族 Authority 映射
 
 | Message family | Record authority | I profile application |
 |---|---|---|
@@ -106,7 +126,7 @@ The profile MUST NOT be applied to C/D/Storage/COC signatures merely because tho
 
 该配置只应用于 I 撰写的记录。C/D/Storage/COC 记录即使共用 Common Envelope，也不得自动套用 I Profile。各 Authority 必须发布自己的批准配置，或明确引用经联合批准的配置，同时保留自己的 Key Status Authority。
 
-## 5. Required H validator behavior / H Validator 强制行为
+## 6. Required H validator behavior / H Validator 强制行为
 
 H semantic validation MUST:
 
@@ -123,7 +143,7 @@ H semantic validation MUST:
 
 H Semantic Validator 必须按认证 Owner Authority 与精确 Profile ID 选择配置；在构造 JSON Object 前拒绝重复 Key；按消息类型精确 Allowlist 重建 P0；重新计算 Digest/Signature Preimage；验证 Base64url 与 Ed25519；独立验证嵌套 I Proof、Transport Channel Binding 和 COC Quorum；Key Status/历史 Checkpoint/Anti-rollback/Proof 不可用时返回 UNKNOWN 并阻断 Gate；拒绝 Profile 降级、Key Version 替换、跨 Audience Replay 和 Message Family 替换。JSON Schema 通过不等于签名、Trust、Currentness 或 Owner Authority 通过。
 
-## 6. Required exact vectors / 精确测试向量
+## 7. Required exact vectors / 精确测试向量
 
 H must extend the candidate suite with:
 - exact P0 extraction for all I-signed message families;
@@ -141,17 +161,19 @@ These vectors are **SPECIFIED / NOT RUN**. The existing HRC/JPF/WIRE/SCHEMA 66/6
 
 上述向量目前均为**已定义、未执行**。现有 HRC/JPF/WIRE/SCHEMA 66/66 仍是独立的 Test-only Candidate 结果，不覆盖本 Profile Mapping。
 
-## 7. Blocking amendments / 阻断修订
+## 8. Blocking amendments / 阻断修订
 
 1. I must issue an exact-version decision on Blob `30967b2c58ef0aaf760a22fe61192e70744d5964`, including algorithm/regulatory suitability and the exact P0 trust semantics.
-2. H must review schema 1.2.7 exact Blob `e9748a5b904d2b975e47a32a0cbb31de31636854` and approve the profile-field mapping only within H's wire authority.
-3. I/H must jointly settle the exact per-message projection, including any schema field added after this review.
+2. H must publish a separate exact-version decision for schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854` and this mapping revision; this document is the H candidate mapping decision, not a second independent signature.
+3. I/H must resolve the owner snapshot attestation digest binding and confirm the exact P0 allowlists above against the final schema artifact.
 4. At least two independent canonicalization/signature implementations and byte-for-byte vectors must pass.
 5. I must approve trust-root/key custody/rotation/compromise/anti-rollback operations and the external checkpoint mechanism.
 6. Storage must accept the exact proof-verification contract for its actual visibility linearization point.
 7. No profile is production-active until independent human Owner/governance approval and runtime conformance are recorded.
 
-## 8. Final H decision / H 最终决议
+## 9. Final H decision / H 最终决议
+
+I exact review of this mapping: Blob `446109f4867268fe7dca3c7e114346f3c1a74b61` — **ACCEPT WITH ENUMERATED AMENDMENTS**.
 
 **ACCEPT AS WIRE-MAPPING CANDIDATE WITH BLOCKING AMENDMENTS.**
 
