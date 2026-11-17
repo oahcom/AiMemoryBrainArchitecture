@@ -198,3 +198,14 @@ Supersedes the previous H source Blob `db59b63e322d7255b8b400f47859dcac32bb3027`
 | H | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `session-h-bmcp-protocol` | `74be8374a67da385a5f0f8e34c7aef2b38b72bcf` | EN + zh-CN refreshed; 24/24 headings; 33/33 table rows; §11.9 C provider outcome/owner gate mapping; H36-AP-09 OPEN; no wire schema/SDK mapping or consumer acceptance |
 
 Supersedes H Blob `0dca3dc5463a02be0e19524811afbae87795baf5`. H companion remains 1/7 detailed core specifications.
+
+
+## C/G/H Phase 3.6 cross-owner audit — 2026-11-17
+
+| Owner | Exact current source Blob | Cross-owner result |
+|---|---|---|
+| C | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | C producer contract lacks explicit CGH-APPLIED-1.1 CSubmitOutcome/provider receipt/recovery-batch evidence mapping and exact 1.1 acceptance |
+| G | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G accepts its own 1.1 recovery-batch prerequisites with exceptions; implementation NOT VERIFIED; conformance NOT RUN |
+| H | `0dca3dc5463a02be0e19524811afbae87795baf5` | §11.8 maps 1.1 evidence bridge as candidate; schema/SDK freeze not established |
+
+Cross-owner report: `reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md` and Chinese companion. Result: lifecycle/authority split aligned; joint 1.1 contract BLOCKED; exact C/G/H acceptance chain NOT ESTABLISHED. This audit does not change Owner statuses.
