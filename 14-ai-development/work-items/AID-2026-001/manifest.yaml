@@ -59,6 +59,7 @@ implementation_commits:
   - 46e678cd9580d7fa0dfc8e806cf384f04c294f85
   - 75bb7fa19a1a4b1dd37564272a88790d9f82ca26
   - 2efd289e8baad6d16213febd1b54c326e3dfc77c
+  - d3a7a603066ee6f1d9ef140a7215f060297a5f90
 changed_paths:
   - 14-ai-development/prompt-and-evidence-template.md
   - 14-ai-development/README.md
@@ -86,6 +87,12 @@ verification:
   commit_sha: ""
   commands: []
   evidence_refs: []
+traceability_exclusions:
+  - sha: 2ce0bfad35fcd7a3e0b6a150b6a141e25aa67218
+    reason: Manifest-only commit-inventory reconciliation; metadata bookkeeping, not implementation.
+  - sha: 08ed26cf3496ccc52382583f2e05a7fef0017547
+    reason: Manifest-only commit-order maintenance; metadata bookkeeping, not implementation.
+  - current_manifest_self_update: Excluded by definition to avoid self-reference.
 self_review:
   status: RECORDED_NOT_INDEPENDENT
   report_ref: 14-ai-development/work-items/AID-2026-001/self-review-v1.md
