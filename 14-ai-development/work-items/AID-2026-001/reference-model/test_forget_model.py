@@ -218,6 +218,16 @@ class ForgetReferenceModelTests(unittest.TestCase):
         self.assertEqual(op.evaluate_governance(now=1), Governance.NON_COMPLIANT)
         self.assertEqual(op.public_result(), "Incomplete")
 
+    def test_empty_domain_inventory_cannot_claim_completion(self):
+        op = ForgetOperation("op-empty", "mem", "p", "s", "forget")
+        op.authorize(True)
+        op.suppress()
+        op.seal_inventory([], [])
+        op.start_cleanup()
+        self.assertFalse(op.evaluate_domain())
+        self.assertEqual(op.phase, Phase.DOMAIN_COMPLETION_EVALUATED)
+        self.assertEqual(op.public_result(), "Incomplete")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
