@@ -102,3 +102,19 @@ Memory、Evidence、摘要和模型生成的提取结果都是不可信数据，
 验证必须覆盖身份伪造、Delegation 过期/撤销、跨 Scope 拒绝、Permission Epoch 过期、Forget 竞态/故障注入、备份恢复、外部接收方例外以及零未授权泄露。
 
 详细候选治理契约见 [I Owner 分支](https://github.com/oahcom/AiMemoryBrainArchitecture/tree/session-i-security-governance-2026-11-16/09-security-governance)。
+
+
+## 11. Forget 联合契约对齐提案——待 D/I 批准
+
+双语联合契约提案记录于 `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`。在 D 与 I 对同一版本/SHA 明确批准前，本节仅为提案，不取代本 CANDIDATE 治理指南。
+
+拟由 I 决定的事项：
+- 当前授权、Delegation/Revocation、数据主体及 Scope 资格、Purpose、Consent、Retention 和 Legal Hold 策略；
+- 全局目标清单策略、强制目标类别、清单封存和重新评估触发条件；
+- 全局完成聚合、批准的残留例外、审计完整性和真实状态对外呈现。
+
+D 继续拥有规范 Memory 生命周期、ForgetOperation 和 ForgetFence 语义。I 不重新定义 `Forgotten` 或规范线性化事件。D 不授予授权、不豁免 Retention/Legal Hold，也不得单方面声明全局完成。E/F/G/H/C/Storage/外部接收方只提供各自能力范围内的执行证据。
+
+Operation Phase 与 Memory Lifecycle 相互独立。持久化的 `SuppressionCommitted` 事件可以使 Memory 进入终态 `Forgotten`，而清理仍异步进行。`Completed` 要求所有强制目标均有已验证的终态证据。未知、失败、不支持或未纳入清单的强制目标均阻止 `Completed`。`CompletedWithPolicyException` 必须有 I 的明确批准、有边界的残留、补偿控制、责任人及到期/复核时间；它不是物理擦除证明。
+
+**状态：** PROPOSED / 待 D-I 批准 / R3 测试未执行。
