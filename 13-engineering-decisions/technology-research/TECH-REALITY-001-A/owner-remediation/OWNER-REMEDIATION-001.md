@@ -121,3 +121,18 @@ No Brain prototype, benchmark, production deployment, production security audit,
 
 
 Canonical license source for independent re-fetch: https://github.com/restatedev/restate/blob/main/LICENSE . The Server license must be read from the Server repository root LICENSE at the reviewed commit; do not substitute repository API license metadata or the separate Rust SDK LICENSE. Legal interpretation for a proposed commercial distribution model remains outside this technical role simulation.
+
+
+## 11. C/G/H Applied exact consumer review — 2026-11-18 / C/G/H Applied 精确消费者审查
+
+A current-main review has been recorded in \`CGH-APPLIED-REVIEW-001.md\`. It pins C/G/H/I artifacts and identifies five closure items: H duplicate-key rejection (P0), H current-authorization recheck before replay result disclosure (P0), exact CSubmitOutcome 1.0.1 resolver/equality (P0), G's exact consumer decision for the separate H Applied Delivery Evidence 1.0.0 family (P1), and G durable Applied persistence/restore implementation (P0).
+
+The H Applied Delivery Evidence 1.0.0 family is distinct from Unified 1.2.15 C Provider Outcome Gateway Attestation and JF-10 Applied ACK. C's Phase 3.8.27 corrected gateway ordering review does not approve this separate H family. C's Applied Delivery Evidence review accepts identity shape only as a candidate and leaves C outcome mapping NOT ACCEPTED / NOT VERIFIED. A-H-ADE-006 remains DEFERRED with H-ADE-001..003 open. G Phase 3.8.22 remains a normative design draft with conformance SPECIFIED / NOT RUN.
+
+No source-owner contract was modified by this audit. Role simulation is not an Owner signature. Full Applied remains blocked and the overall verdict remains **REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY**.
+
+**中文：** 本次 current-main 审查记录于 \`CGH-APPLIED-REVIEW-001.md\`，锁定 C/G/H/I 精确证据，并确定五项关闭条件：H 重复 JSON 键拒绝（P0）、Replay 结果披露前当前授权复核（P0）、CSubmitOutcome 1.0.1 精确 Resolver/Equality（P0）、G 对独立 H Applied Delivery Evidence 1.0.0 消息族的精确消费者决议（P1）、G Applied Durable Persistence/Restore 实现（P0）。
+
+H Applied Delivery Evidence 1.0.0 与 Unified 1.2.15 C Provider Outcome Gateway Attestation、JF-10 Applied ACK 是不同消息族。C Phase 3.8.27 的 Gateway 顺序接受不等于批准该独立 H 消息族。C 对 Applied Delivery Evidence 仅接受身份结构作为候选，C Outcome Mapping 仍 NOT ACCEPTED / NOT VERIFIED。A-H-ADE-006 仍为 DEFERRED，H-ADE-001..003 未关闭。G Phase 3.8.22 仍是规范设计草案，一致性义务 SPECIFIED / NOT RUN。
+
+本次审查没有修改任何 Owner 源契约。角色模拟不是 Owner 签名。Full Applied 仍阻塞，总体结论仍为 **REVISE / NOT YET PROVEN / ARCHITECTURE FREEZE NOT READY**。
