@@ -348,3 +348,64 @@ Storage's current branch adds an important update: its serialization ADR Blob `1
 这些 Owner 报告均为 **CONDITIONAL PASS** 设计审查，不是独立人工 Owner 签署；其记录的审查 HEAD 早于本任务读取的当前分支 HEAD。精确对比见 `owner-technology-review-synthesis.md`。
 
 Storage 当前分支有重要更新：序列化 ADR Blob `1ef47d4e5711c7db73a24d249adf1992be1f6aa4` 的 2026-11-17 补充条款选择每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain 作为 v1 规范档案，但范围仅限逻辑序列化，不选择数据库产品或实际部署。相同分支的 PostgreSQL 18.7 档案 Blob `0aabf66848dc97deee028c571183c0d7204008c0` 记录了 Prepared-XID 持久化/锁保留/重启、同步故障切换、物理恢复、ACK 丢失和 WAL PITR 的有限 CI PASS 子测试。Gate A 仍 PARTIAL PASS / OPEN；Gate B 修订协议需要聚焦精确 Owner 复审；Gate C 延后；JF-10 runtime P0 仍 OPEN，禁止生产激活。
+
+## 10. 完整中文版本 / Chinese Version
+
+### 10.1 研究方法
+
+本研究直接检查外部项目 GitHub 仓库元数据、默认分支 Tree、关键实现文件、Release 元数据和官方文档。Tree SHA 标识实际检查的源码快照；Release Tag 用于可复现版本参考。滚动 main 不等于发布版本，正式选型必须固定 Tag/Commit。
+
+### 10.2 记忆架构项目
+
+**Mem0**（v2.2.1，Apache-2.0，Python，Tree `f1791daa86d469249c9b002f62644d58a1eb96a0`）：`Memory.add()` 支持 user/agent/run Scope；开启 inference 时先取近期对话、检索旧 Memory，再由 LLM 抽取候选事实并决定 Add/Update/Delete。Embedding 和 Vector Store 通过 Adapter Factory 接入；SQLiteManager 用 SQLite 存历史和消息，核心 Memory Retrieval 由独立 Vector Store 提供。可借鉴分阶段 Extract→Retrieve→Compare→Propose、显式 Scope、向量后端适配；不能把向量行当 Canonical Truth，也不能把 LLM Add/Update/Delete 当生命周期权威。跨 SQL/Vector/Blob/Forget 的原子性未证明。
+
+**Zep/Graphiti**（v0.31.2，Apache-2.0，Python，Tree `869c1b279e01a2767a464581e1cb657ce0e39271`）：以 Episode 为摄入单位，抽取实体和关系，写入 Graph Node/Edge；Edge 保存 `valid_at`、`invalid_at`、`expired_at`、`reference_time` 等时间字段，并保留 Episode 来源。使用 LLM 抽取/去重，支持多个图数据库 Driver 和 Hybrid Search。可借鉴原始 Episode Provenance、Valid Time 与记录时间分离、显式 Entity Resolution；不能把 Graph Store/LLM Pipeline 当成 Brain 完整 Canonical Revision、Forget Fence、ContextVersion 或 Permission 实现。实体关系不自动意味着首版必须部署图数据库。
+
+**Letta Code**（v0.34.63，Apache-2.0，TypeScript，Tree `b622fb1bc0941981e08da5ec2b2736d897e9bde1`）：记忆与有状态 Agent Runtime 紧密结合，采用 Agent-scoped Memory Filesystem、系统/用户目录和 Git 历史/同步，并通过 Backend Capability 处理本地/远程差异。可借鉴 Agent 记忆隔离、可读文件、版本历史和能力协商；Git 历史不能替代多记录事务、Forget 目标清单、权限和 Applied 证明。
+
+**Hermes Agent**（v0.23.2+canary，MIT，Python，Tree `7c9b019ab5620d4c64e7b0de4aa45cbc24dea963`）：MemoryManager 管内建 Provider 和至多一个外部 Provider；Provider 按 Profile/Home 绑定，失败隔离；后台写入使用单 Worker Executor 和有界 Shutdown Drain。SQLite Session 持久化、Checkpoint、Backup/Restore 有独立代码和测试，Backup 使用 SQLite Backup API，避免只复制主 DB 而遗漏 WAL。可借鉴 Profile 隔离、有界后台任务、故障降级和真实备份测试；不能把 best-effort Provider Hook 当成 Brain Accepted Event 的持久性保证。
+
+### 10.3 Agent Runtime 与 Durable Workflow
+
+**LangGraph**（1.2.22，MIT，Python，Tree `02f2c2e6c992ffccce9e9129781fdd04f015c6fa`）：明确区分短期 Thread Checkpoint 与跨 Thread Store；PostgreSQL Checkpointer 有 Checkpoint、Blob、Pending Writes 表、复合键、版本迁移和 Conformance Tests。可借鉴执行状态与长期领域记忆分离、持久化行为契约；不能把 Agent Graph Checkpoint 当 Canonical Memory。
+
+**Temporal Rust SDK**（1.2.0，MIT，Tree `a5d7742e8c5b925351fff314c2662a316309583b`）：有 Rust Client/Worker 和 Replay/Workflow State Machine；Workflow 通过持久 Event History 重放恢复，Activity 有 Retry/Heartbeat。需要独立 Temporal Service。适用于长时间 Timer、重试、取消、独立 Worker 和恢复；不替代 Canonical SQL、Forget Barrier 或 Applied。
+
+**Restate**（Server v1.8.1-hotfix.2，Rust；Rust SDK Release v0.12.1，HEAD Manifest 0.13.0，MIT）：提供 Service、Virtual Object、Workflow；Virtual Object 按 Key 串行处理。可借鉴 Durable Handler 和按 Aggregate 串行化；但 SDK 版本较新，增加独立持久化服务，不与 Brain SQL 自动事务化。
+
+**PydanticAI/Rig**：PydanticAI 是 Python typed Agent/Tool 框架；Rig v0.46.0 是 Rust Agent/LLM 库。两者可用于 Agent 侧集成参考，不是 Brain Durable Workflow 或 Canonical Memory Store。Brain 应拥有自己的 Provider Port 和 Conformance。
+
+### 10.4 Event 与 Message
+
+**NATS JetStream**（v2.15.3，Apache-2.0，Go，Tree `99cd69546eedb8450157ff0d104ffcfb23c69ec3`）：Stream 持久化消息，Consumer 保存 ACK/Delivery 状态，未确认消息可重投，支持 Replay。所谓 Exactly Once 由 Publisher Message-ID 去重窗口和 Consumer Double ACK 组成，是 Broker 交互范围内的保证，不代表任意 SQL/外部副作用 Exactly Once。首版优先 SQL Transactional Outbox + DB Worker；只有独立 Consumer、Replay、复制或实测吞吐需求成立时才引入 JetStream。
+
+Kafka/Redpanda 提供分区日志、Offset、Replay，但不自动解决跨 Brain SQL、Blob、Forget Barrier 的事务。Broker 内事务不能原子提交任意外部数据库业务副作用。
+
+### 10.5 Storage 与 Retrieval
+
+SQLite WAL 允许 Reader 与 Writer 并行，但仍只有一个 Writer；WAL Index 依赖同主机共享内存，不能放在网络文件系统；长 Reader 可能阻塞 Checkpoint。PostgreSQL 使用 MVCC，并提供显式锁和 Serializable Isolation，但序列化冲突仍需 Retry。两者都不会自动把文件系统 Blob 与 SQL 提交变成同一原子事务。
+
+FTS5 内置于 SQLite，支持 Tokenizer 和 BM25，部署最简单；中文、混合语言和领域词必须用项目语料测试。Tantivy 是 Rust 原生 Segment Index/Searcher/IndexWriter，控制力更强，但引入 Index Writer/Reader Refresh、Delete/Merge 和 Rebuild 生命周期。建议 FTS5 起步，测量不足时再引入 Tantivy。
+
+Qdrant v1.20.2 是 Rust Server，支持 Dense/Sparse/Named Vector、Payload Filter、HNSW、Segment、Shard 和分布式部署；适合专用向量检索，不是 Canonical Store。LanceDB v0.42.0-beta.18 支持 Lance Columnar、向量/全文/Hybrid Retrieval，但当前版本 Beta；可作为派生检索库候选，不能替代事务领域数据库。
+
+### 10.6 Security 与 Observability
+
+Cedar 是 Rust 原生 Policy Language/Evaluator，支持 Schema Validation；适合作为嵌入式策略评估候选，但不负责身份签发、撤销传播、Inventory 或审计。OpenFGA/SpiceDB 是服务化 Zanzibar 风格关系授权，增加 API/DB/网络一致性边界。OPA/Rego/Wasm 可做通用策略分发，但 Host 仍要提供数据和执行环境。首版不应强制部署独立授权服务，I 决定语义。
+
+OpenTelemetry Rust 0.33.1 的 Signals 成熟度不同；当前官方状态需分别看 Metrics、Logs、Tracing。建议先用 Rust `tracing` API，Exporter 作为 Adapter，禁止默认将受保护 Memory 内容写入 Trace/Log。
+
+### 10.7 跨项目结论
+
+1. 成熟记忆系统以不同方式分离原始对话/Episode、抽取事实、索引和 Agent Context，没有一个项目直接提供 Brain 的完整 Canonical Authority + Temporal/Provenance + Forget + Applied 语义。
+2. LLM 适合抽取、实体解析和摘要建议；身份、Scope、权限、生命周期、提交顺序和 Forget 必须由确定性代码掌控。
+3. Temporal Graph 是能力，不是必须部署 Graph DB 的理由。
+4. Durable Workflow 不替代 Canonical SQL Transaction。
+5. At-least-once Broker 仍要求业务幂等；Exactly Once 必须明确作用边界。
+6. SQL + Outbox/Worker 可能是最简单首版，但前提是事务和 Forget 竞争得到证明。
+7. Search/Vector 是派生投影，必须可重建、可授权过滤、可 Forget 抑制。
+8. 应借鉴机制和 Conformance，而不是整体照搬单个产品架构。
+
+### 10.8 未验证项
+
+本任务没有运行 Brain 原型，也没有对上述系统进行集成测试、性能基准、跨平台构建或安全审计。所有性能、模型兼容、GPU 和部署结论均需目标硬件验证。
