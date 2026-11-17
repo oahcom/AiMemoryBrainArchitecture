@@ -129,7 +129,7 @@ All statuses below were read from live PR metadata. None was merged at audit tim
 | #57 | A final assessment v3 | `8c0c5b1...` | `d354ec4...` | OPEN / DRAFT |
 | #58 | A clean-base assessment v2 | `8c0c5b1...` | `dbec207...` | OPEN / DRAFT |
 | #59 | A Phase 4 currentness re-review | `8c0c5b1...` | `26fd171...` | OPEN / DRAFT |
-| #60 | A current-main final assessment | `8c0c5b1...` | `d476db8...` | OPEN / DRAFT |
+| #60 | A current-main final assessment | `ca69d50...` | `292b84c...` | OPEN / DRAFT |
 | #61 | A B-02 / H 1.2.15 delta review | `8c0c5b1...` | `4726d93...` | OPEN / DRAFT |
 
 PR #57–#61 all target main at `8c0c5b1...`; final main is now `901e38b...`, two commits ahead in history but with an identical tree. Their base commit is therefore historically behind, even though the current tree has no net content delta from their base. PR #63 was created with base SHA `901e38b...` and contains only the two G1 audit documents. PR #51/#54 are stacked on review branches, not direct current-main baselines. No existing PR was retargeted, merged or closed in this audit.
