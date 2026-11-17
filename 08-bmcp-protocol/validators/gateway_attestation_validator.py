@@ -92,7 +92,7 @@ class GatewayAttestationChecks:
         Callable[[dict[str, Any], ProtectedTransportContext], Optional[bool]]
     ] = None
     verify_origin_transport_receipt: Optional[
-        Callable[[dict[str, Any], bytes, dict[str, Any]], Optional[bool]]
+        Callable[[dict[str, Any], bytes, dict[str, Any], ProtectedTransportContext], Optional[bool]]
     ] = None
     # Atomically reserve replay identity and durably commit the accepted ingress.
     # This callback must be crash-safe; an in-memory dedupe cache is not sufficient.
@@ -230,7 +230,7 @@ def validate_gateway_attested_provider_outcome(
         _collect_check(
             "original C ingress transport receipt/AdapterRef binding",
             gateway_checks.verify_origin_transport_receipt,
-            (envelope, raw_origin_bytes, c_object),
+            (envelope, raw_origin_bytes, c_object, protected_context),
             invalid,
             unknown,
         )
