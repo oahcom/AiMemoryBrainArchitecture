@@ -60,3 +60,34 @@ I 在自己的权威 PolicyDomain Sequencer 中单次消费 Receipt，并返回 
 I 不决定 D ForgetFence。D 独立保持 PublicationParticipantRef，阻止后续 Fence 越过未解决发布。Storage Visibility 必须同时验证 D 当前 Clearance 和 I Terminal Authorization，且分别在各自权威命名空间内验证。COMMIT_WON 是顺序证据，不是 Participant 绑定改变后独立写入 Visibility 的许可。
 
 本修订将 I 既有合同扩展至 Derivative Publication；密码算法、Token 序列化和 Storage 技术仍属于 I/H/Storage 冻结门槛。
+
+
+## 9. Storage prepare ordering — exact participant existence before I receipt consumption
+
+I requires the durable StorageVisibilityParticipantRef to exist before I consumes the single-use CommitAuthorizationReceipt for a derivative publication. The receipt and terminal proof bind that exact participant plus D PublicationParticipantRef and the immutable publication tuple.
+
+Required order:
+1. Storage durably persists a hidden StorageVisibilityParticipantRef.
+2. D admits PublicationParticipantRef bound to that exact durable Storage participant.
+3. I issues/consumes the single-use receipt in the PolicyDomain sequencer.
+4. Storage final gate validates exact D and I proofs and commits visibility or a durable no-publication outcome.
+5. I closes the in-flight authorization participant only after authoritative Storage COMMITTED_VISIBLE or NO_PUBLICATION proof.
+
+If Storage participant preparation exists but D admission does not, there is no D barrier admission and no visibility permission; the Storage object remains private. If D admission is confirmed but the referenced Storage participant is missing, I treats the state as UNKNOWN/IN_DOUBT and does not release revocation. No missing-row, timeout or age-based inference is allowed.
+
+This order is a crash-safety precondition, not a new authorization grant. I does not own the D barrier or Storage persistence and does not authorize publication from its receipt alone.
+
+### 中文规范
+
+I 要求 Derivative Publication 的单次 CommitAuthorizationReceipt 被消费前，StorageVisibilityParticipantRef 必须已经持久化存在。Receipt 和 Terminal Proof 绑定该精确 Storage Participant、D PublicationParticipantRef 及不可变 Publication Tuple。
+
+强制顺序：
+1. Storage 持久化隐藏的 StorageVisibilityParticipantRef。
+2. D 接受并绑定该精确且已持久化的 Storage Participant 的 PublicationParticipantRef。
+3. I 在 PolicyDomain Sequencer 中签发/消费单次 Receipt。
+4. Storage Final Gate 验证精确 D/I 证明，并提交 Visibility 或持久化 No-Publication Outcome。
+5. I 只有在取得权威 Storage COMMITTED_VISIBLE 或 NO_PUBLICATION 证明后，才关闭进行中的 Authorization Participant。
+
+若 Storage Participant 已 Prepare 但 D Admission 尚未发生，则没有 D Barrier Admission，也没有 Visibility Permission；Storage 对象保持 Private。若 D Admission 已确认但其引用的 Storage Participant 缺失，I 必须视为 UNKNOWN/IN_DOUBT，不得释放 Revocation。禁止根据行缺失、超时或对象年龄推断结果。
+
+该顺序是崩溃安全前置条件，不是新的授权授予。I 不拥有 D Barrier 或 Storage 持久化，也不能仅凭自己的 Receipt 授权发布。
