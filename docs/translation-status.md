@@ -29,8 +29,10 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Domain Model detailed contracts (6 source specifications) | 02-domain-model/ | Pending | Existing English sources | NOT STARTED — field-level translation pending |
 | Canonical Memory Brain reader guide | D owner branch: 03-memory-brain/ | docs/zh-CN/03-memory-brain/memory-brain-guide.md | docs/en/03-memory-brain/memory-brain-guide.md | COMPLETE — overview guide only |
 | Canonical Memory Brain detailed contracts (7 source specifications) | D owner branch: 03-memory-brain/ | Pending | Owner-branch English sources | NOT STARTED — detailed translation pending |
-| Memory Compiler (E) | 04-memory-compiler/ | Pending | Existing English sources | NOT STARTED |
-| Memory Runtime (F) | 05-memory-runtime/ | Pending | Existing English sources | NOT STARTED |
+| Memory Compiler reader guide | E owner branch: 04-memory-compiler/ | docs/zh-CN/04-memory-compiler/memory-compiler-guide.md | docs/en/04-memory-compiler/memory-compiler-guide.md | COMPLETE — overview guide only |
+| Memory Compiler detailed contracts | E owner branch: 04-memory-compiler/ | Pending | Owner-branch English sources | NOT STARTED — field/stage-level translation pending |
+| Memory Runtime reader guide | F owner branch: 05-memory-runtime/ | docs/zh-CN/05-memory-runtime/memory-runtime-guide.md | docs/en/05-memory-runtime/memory-runtime-guide.md | COMPLETE — overview guide only |
+| Memory Runtime detailed contracts | F owner branch: 05-memory-runtime/ | Pending | Owner-branch English sources | NOT STARTED — field/policy-level translation pending |
 | Memory Context (G) | 06-memory-context/ | Pending | Existing English sources | NOT STARTED |
 | Agent Integration (C) | 07-agent-integration/ | Pending | Existing English sources | NOT STARTED |
 | BMCP Protocol (H) | 08-protocols/ | Pending | Existing English sources | NOT STARTED |
@@ -67,6 +69,8 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 - Acceptance: Fact/Claim OPEN state preserved; exact identifiers and state names unchanged.
 
 ### Batch 4 — Memory production and runtime / 第四批：记忆生产与运行时
+- E and F reader guides: COMPLETE.
+- Detailed E/F owner specifications: NOT STARTED — field-level translation and owner parity review remain pending.
 - E Compiler, ingestion, extraction, evidence, consolidation.
 - F retrieval, activation, working set, scheduling, anti-resurrection.
 - Acceptance: Accepted/Compiled/Canonical Committed/Indexed remain distinct; cursor and Forget semantics stay aligned.
