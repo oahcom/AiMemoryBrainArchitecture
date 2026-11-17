@@ -58,7 +58,12 @@ class Protocol:
         self.fence_installed = True
         # Publications admitted before the fence remain barrier-counted until
         # D observes the exact authoritative Storage terminal outcome.
-        self.fence_pending = set(self.publication_participants)
+        already_d_closed = {
+            outcome[2]
+            for outcome in self.d_closed.values()
+            if isinstance(outcome, tuple) and len(outcome) >= 3
+        }
+        self.fence_pending = set(self.publication_participants) - already_d_closed
         return self.fence_generation
 
     def register_dependencies(self, work_id, dependencies):
@@ -207,6 +212,14 @@ class PublicationProtocolTests(unittest.TestCase):
         p.install_forget_fence()
         with self.assertRaises(Rejected):
             p.admit_publication("publication-1", "work-1", "storage-1")
+
+    def test_publication_already_closed_by_d_before_fence_is_not_pending(self):
+        p = self.prepared()
+        p.commit(**self.commit_args())
+        outcome = p.outcomes["op-1"]
+        p.close_d("op-1", outcome)
+        p.install_forget_fence()
+        self.assertNotIn("publication-1", p.fence_pending)
 
     def test_publication_first_remains_fence_barrier_until_d_closeout(self):
         p = self.prepared()
