@@ -96,3 +96,18 @@ The HRC/WIRE candidate uses TEST-ONLY canonical digest helpers. It is not an app
 ## 8. Latest CI confirmation / 最新 CI 再确认
 
 The current H branch snapshot was re-executed by [run 44040312711](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040312711), job `133893012456`, checking out H branch commit `e53d9b8a5fc9f4a77fb3ece8b3c3540b20698d1c`. The raw job log reports **66 tests, OK**. The test source remains HRC/JPF Blob `60a2f4db4bd12f2131ecd147db9bbe328da6db50`, WIRE Blob `1a4e754ba9bfa57eb973c6d39731e9f89443b323`, SCHEMA Blob `67aba74c120f2916d768e7b01c45408ee2624f3a`. This is a repeatable candidate-suite PASS only; production wire/crypto, independent language interoperability, live owner/COC adapters and physical JF-10 remain OPEN.
+
+
+## 8. Current 66-test CI execution refresh / 当前 66 项 CI 执行刷新
+
+The current exact H candidate bundle remains:
+- RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- H semantic validator contract: `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80`.
+- HRC/JPF suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50` — 25 HRC + 19 JPF.
+- Wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323` — 10.
+- Schema integrity suite: `67aba74c120f2916d768e7b01c45408ee2624f3a` — 12.
+- Workflow: `.github/workflows/h-recovery-cutoff-conformance.yml`, Blob `ea7a3d9c365b84352d3bac69da94fe0d510e46a4`.
+
+Latest run [44040502709](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040502709), commit `1c6ddd301d538652ceea22ea665d50c5fad8178e`, job `semantic-and-wire-tests`: **66 tests ran, OK**. This supersedes earlier 61/56-method inventories and the previous successful run 44039990464 as the latest recorded H candidate CI evidence.
+
+This result is limited to the checked-in Python reference semantic, wire-negative and schema-integrity candidate tests. It does not close H-FR-01/02/04/06/07: exact schema 1.2.6 approval, CSubmitOutcome schema acceptance, two independent production canonical-byte/signature implementations, I-approved cryptographic trust, SDK/transport interoperability and one immutable integrated H/I/C/D/Storage/A bundle remain OPEN. H freeze remains **BLOCKED — NOT FROZEN / NOT INTEROPERABILITY-VERIFIED**.
