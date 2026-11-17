@@ -138,3 +138,12 @@ Storage 最新 ADR 补充条款选择每个 Canonical Memory Authority 一个逻
 ### 8.6 研究结论
 
 **NOT YET PROVEN（尚未证明）**。项目存在合理的本地优先 Rust 模块化单体路径，但在物理事务/Forget 协议、工作负载、检索价值、Applied 证明、安全模型和恢复拓扑得到证明前，不能称为工程可行。
+
+
+## 9. Follow-up official-source verification / 官方来源补充核验
+
+On 2026-11-17, the evidence register and mature-project research were extended with focused official-document checks for PostgreSQL prepared transactions, SQLite WAL, Temporal replay, NATS JetStream delivery, Qdrant filtered HNSW, Cedar authorization semantics and OpenTelemetry Rust signal maturity. Exact official URLs and the limits of each claim are recorded in `research-evidence-register.md` §8 and `mature-project-research.md` §11.
+
+本次在 2026-11-17 对研究证据登记表和成熟项目研究补充了 PostgreSQL Prepared Transaction、SQLite WAL、Temporal Replay、NATS JetStream 投递语义、Qdrant 过滤 HNSW、Cedar 授权语义及 OpenTelemetry Rust Signal 成熟度的官方文档核验。精确来源与能力边界见 `research-evidence-register.md` §8 和 `mature-project-research.md` §11。
+
+This is desk-source verification only. It does not change the **NOT YET PROVEN** feasibility conclusion, does not approve any ADR, and does not claim a Brain prototype, benchmark, fault campaign or independent review.
