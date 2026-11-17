@@ -59,6 +59,8 @@ Ubuntu MUST NOT:
 
 GitHub Actions may start deterministic CI in response to repository events. A CI result is evidence for ChatGPT to inspect; it is not an AI invocation mechanism.
 
+**Current repository status:** the cleaned `main` branch currently contains no `.github/workflows/` files. The self-hosted runner may remain registered on the host, but this proposal does not claim that a repository CI workflow is currently configured or running. CI is **NOT CONFIGURED / NOT RUN** until a deterministic workflow is added, reviewed, and executed with evidence.
+
 ## 4. A–I conversation model
 
 Each Owner has a distinct ChatGPT conversation context and a versioned Owner prompt:
