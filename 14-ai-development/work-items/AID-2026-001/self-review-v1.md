@@ -35,12 +35,18 @@
 - Required control: The global session contract and task prompt template already require exact source refs and stop on ambiguity. Owner sessions must enforce this gate before editing.
 - Status: **CONTROL CONFIRMED**; no unsupported source paths were invented.
 
+### SR-005 — Forget security governance overlaps canonical lifecycle semantics (P1 / CONTROL)
+- Evidence: D owns canonical Memory Brain lifecycle and Forget semantics; I v1 listed “Forget governance” without defining whether that included lifecycle decisions.
+- Impact: An I session could unintentionally redefine D-owned deletion lifecycle semantics, or D could overlook I-owned authorization, privacy, retention and audit constraints.
+- Correction: Preserve I v1 and add I v2 with a strict split: D owns canonical Forget meaning/completeness and lifecycle/deletion guarantees; I owns who may request/authorize Forget, permission/scope checks, privacy/retention obligations, audit evidence and required exceptions. Joint boundary contracts require D/I agreement. Update the Owner index and both architecture counterparts.
+- Status: **CORRECTED IN THIS PR** by `owner-session-v2.md`; independent confirmation pending.
+
 ## Bilingual parity check
 
 - AI-ARCH-002 English and Chinese documents both contain sections 1–10 in the same order.
 - The role table maps A–I to the same authority categories as AI-STD-001 §3.1.
 - CI status, non-goals, interactive-only execution, reviewer limitations, and proposal status are represented in both language versions.
-- Owner B v2 is bilingual and makes the domain/security identity boundary explicit.
+- Owner B v2 and Owner I v2 are bilingual and make the domain/security identity and Forget lifecycle/security-governance boundaries explicit.
 - Full independent bilingual semantic review remains **PENDING**.
 
 ## Verification
@@ -79,12 +85,18 @@
 - 所需控制：全局会话契约和任务提示词模板已经要求准确源引用，并要求遇到歧义时停止。Owner 在修改前必须执行该门禁。
 - 状态：**控制要求已确认**；没有臆造任何源文件路径。
 
+### SR-005 — Forget 安全治理与规范生命周期语义边界重叠（P1 / 控制项）
+- 证据：D 负责 Canonical Memory Brain 生命周期与 Forget 语义；I v1 使用“Forget governance”表述，但没有说明是否包含生命周期决策。
+- 影响：I 对话可能无意中重定义 D 负责的删除生命周期语义；或 D 忽略 I 负责的授权、隐私、保留和审计约束。
+- 修正：保留 I v1，新增 I v2，严格拆分职责：D 负责规范 Forget 含义/完整性及生命周期/删除保证；I 负责谁可以请求/批准 Forget、权限/范围检查、隐私/保留义务、审计证据和必要例外。跨边界契约必须取得 D/I 一致意见。同步更新 Owner 索引和中英文架构文档。
+- 状态：**已在本 PR 修正**，由 `owner-session-v2.md` 实现；仍待独立确认。
+
 ## 双语一致性检查
 
 - AI-ARCH-002 中英文文档均包含 1–10 节，顺序一致。
 - A–I 职责表与 AI-STD-001 §3.1 的职责类别一致。
 - CI 状态、非目标、交互式执行限制、审查独立性限制和提案状态均在两种语言中表达。
-- B v2 为双语版本，并明确领域身份/安全身份边界。
+- B v2 和 I v2 均为双语版本，明确领域身份/安全身份边界及 Forget 生命周期/安全治理边界。
 - 完整的独立双语语义审查仍为 **PENDING**。
 
 ## 验证状态
