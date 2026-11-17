@@ -169,3 +169,12 @@ The prior reviewed Blob `ed6b43a29aa368d772c701ffc83309a5aadf3c00` is superseded
 | H | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `session-h-bmcp-protocol` | `db59b63e322d7255b8b400f47859dcac32bb3027` | `docs/en/08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `docs/zh-CN/08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | 22/22 headings; 33/33 table rows; targeted parity PASS; source CANDIDATE; C proof profile OPEN; I authorization binding OPEN; NOT FROZEN |
 
 Review reports: `reviews/translation/2026-11-17-h-adapter-capability-applied-bilingual-review.md` and Chinese companion. This is 1 of H's 7 detailed core specifications, not H-set completion. C/G/I/D/B approvals and implementation/conformance evidence remain separate.
+
+
+## G Phase 3.6 Applied / Forget / Reconciliation bilingual pair — 2026-11-17
+
+| Owner | Source path | Branch | Exact source Blob SHA | EN companion | zh-CN companion | Review / source state |
+|---|---|---|---|---|---|---|
+| G | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `session-g-memory-context` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | `docs/en/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `docs/zh-CN/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | 21/21 headings; 37/37 table rows; targeted parity PASS; G decisions recorded; C/G/H freeze BLOCKED; implementation NOT VERIFIED; G-36-01..15 NOT RUN |
+
+Review reports: `reviews/translation/2026-11-17-g-phase36-applied-forget-bilingual-review.md` and Chinese companion. The pair includes the full G Owner decision history through the exact CGH-APPLIED-1.1 recovery-batch amendment. Translation does not extend or globalize any pinned Owner decision.
