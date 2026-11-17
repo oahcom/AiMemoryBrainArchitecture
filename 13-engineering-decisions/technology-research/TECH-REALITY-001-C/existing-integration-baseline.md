@@ -41,14 +41,14 @@
 | E | `session-e-memory-compiler-2026-11-16` | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | Local lifecycle producer `4fb9e58511941f59b4d777336f8f85ad88ecccf1` |
 | F | `session-f-memory-runtime` | `1908ce4d233b20f7cafd00cb679affd01bd15174` | Local lifecycle/runtime `29e9504c75d737c2dd200ebc3306eda555f0b0ac` |
 | G | `session-g-memory-context` | `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8` | Applied/Forget baseline `aa3afa73d8a76cc6f025839c52bfbff6a983046a`; Applied persistence EN `bd297873bc1e593280484a43cb44b56058d9c4ff`; zh-CN `82553a47fae2d5e796e0742b46231afe465e75b2` |
-| H | `session-h-bmcp-protocol` | `0277a8b9ee63be850acc0b8b1b08625524aaa33b` | Latest H Applied Delivery Evidence decision EN `be308261c3e000e712a3cdbd3dbf60507156127b`; zh-CN `641abd9b5a4ed271c3c4b561747c99d7cde79463`. Unified 1.2.15 schema `860fc4...`, gateway validator `9cc426...` and mapping `2dc30f...` are historical artifacts at ancestor `0d363244...`, not present in current H branch tree. |
+| H | `session-h-bmcp-protocol` | `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6` | Restored H Owner tree (215 blobs); Unified 1.2.15 schema/validators/tests restored; Applied Delivery Evidence 1.0.0 candidate decision `36dff0b...`, schema `2ce8776...`, validator `2f6de24...`, tests `bb2bb6c...`; CI 11/11 PASS. Earlier truncated snapshot `0277a8b...` is historical incident evidence. |
 | I | `session-i-security-governance-2026-11-16` | `0d071bf1ee7cc71912398c6ae57e4496e08f44ab` | Governance register `f5fd2558c657f4ef49396a7a00cdbcd0f226f853`; commit authorization `5a5304d48aa912dcf6f817099bd5659371d8cdc8` |
 | Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | Option A ADR `bb544ba2f346bdc130d524bd5c7310d86f367988`; v3.3.2 manifest `5c614375e10698e4931d83deb57d20321445e068` |
 
 ## Verified gaps / 已确认缺口
 - Current main is a consolidated baseline and does not contain the full historical D/E/F/G/H/I owner trees. Those owner snapshots are separate branches, not main-merged contracts.
 - C historical branch diverges materially and is not current main.
-- H 1.2.15 schema/validator/CI artifacts are historical evidence at H ancestor `0d363244...`; current H branch HEAD `0277a8b...` removed the prior protocol/schema/validator/test tree. H Phase 3.8.23 now states a separate Applied Delivery Evidence successor schema/validator is NOT YET IMPLEMENTED and wire mapping is NOT FROZEN.
+- H 1.2.15 schema/validator/CI artifacts were temporarily absent at the branch-integrity incident snapshot `0277a8b...` but are restored in current H Owner HEAD `4e65a2...`. H Phase 3.8.24 adds a separate Applied Delivery Evidence 1.0.0 schema/validator/test candidate with exact-head CI 11/11 PASS; wire mapping and production trust remain NOT FROZEN.
 - Storage v3.3.2 explicitly binds H 1.2.14 and CSubmitOutcome 1.0.1, not H 1.2.15 or the proposed Applied Delivery Evidence successor.
 - C crypto profile `AIMBA-C-CRYPTO-1.0` and I governance signature profile remain NOT REGISTERED in C Phase 3.11.0.
 - G states Applied contract freeze BLOCKED and implementation/execution NOT VERIFIED.
@@ -192,8 +192,8 @@ All three are DRAFT proposals, not normative contracts, and none claims physical
 - Current `main` HEAD is `e52594f181d2edb77448adcfed64a0fbdffaf3aa`; original C merge base is `b3c666e67982cb3d3374e759cfb6552c7765aacb`.
 - GitHub compare `main@e52594f...research/tech-reality-001-c@1a1d6f2` reports **6 commits ahead / 2 behind**. All 17 C research paths are additions relative to main; this does not waive the need to validate the updated base before merge.
 - G branch HEAD is `763b3d31e910db8fd29c6e4dbaff9273b7fb66b8`; the English Applied Persistence contract Blob is unchanged at `bd297873...`, and the latest Chinese companion is `82553a47...`.
-- H branch HEAD is `0277a8b9ee63be850acc0b8b1b08625524aaa33b`. Its latest commit removes the prior Unified 1.2.15 schema, gateway/provider validators, tests, and most prior H branch files; the current tree contains only the two Phase 3.8.23 decision documents and three workflow files. The previous 1.2.15 artifacts remain addressable by immutable historical commit `0d363244...`, but are not current branch files.
-- H Phase 3.8.23 EN/zh-CN Blobs `be308261...` / `641abd9b...` accept the G identity semantics with enumerated exceptions, but explicitly leave Applied Delivery Evidence wire mapping NOT FROZEN and the separate successor schema/validator NOT IMPLEMENTED.
+- At the incident snapshot H HEAD was `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; the tree was truncated. It was subsequently restored at current Owner HEAD `4e65a2ee0c6ac1c52a36f5d830ec7685dc4967e6` (215 blobs), including the Unified 1.2.15 artifacts and the new Applied Delivery Evidence 1.0.0 candidate.
+- H Phase 3.8.23 EN/zh-CN Blobs `be308261...` / `641abd9b...` accept the G identity semantics with enumerated exceptions and leave wire mapping NOT FROZEN. H Phase 3.8.24 now implements the separate 1.0.0 schema/validator/test candidate; exact-head CI passed 11/11, but production trust and durable replay remain open.
 - These are cross-owner blockers. C may refresh its source pins and consume the exact H mapping requirement; C must not recreate or edit H-owned schema/validator artifacts.
 
 
