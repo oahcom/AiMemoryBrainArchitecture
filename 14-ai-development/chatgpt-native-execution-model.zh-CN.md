@@ -75,7 +75,7 @@ GitHub Actions 可以响应仓库事件启动确定性 CI。CI 结果是 ChatGPT
 | F | Memory Runtime、检索、激活、工作集和运行时缓存 |
 | G | Memory Context、ContextVersion、ChangeSet 与协调 |
 | H | BMCP 与 Adapter 协议行为 |
-| I | 安全、身份、授权与治理 |
+| I | 安全身份、认证/授权、隐私/保留治理及 Forget 安全控制（不拥有规范 Forget 生命周期语义） |
 
 A 负责协调，但**不得替代领域 Owner 做决策**。每个 Owner 只能在已批准的职责范围内决策；跨 Owner 冲突必须升级处理。
 
@@ -117,7 +117,7 @@ A 负责协调，但**不得替代领域 Owner 做决策**。每个 Owner 只能
       F/owner-session-v1.md
       G/owner-session-v1.md
       H/owner-session-v1.md
-      I/owner-session-v1.md
+      I/owner-session-v2.md
 ```
 
 每份 Owner 提示词必须引用全局会话契约、自己的权限边界、准确的权威源文档、任务验收条件和停止条件。已经执行的提示词版本不得覆盖。
