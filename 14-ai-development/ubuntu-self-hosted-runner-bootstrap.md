@@ -185,9 +185,10 @@ Neither may print environment variables wholesale, read credential stores, uploa
 - [ ] Disclosed password rotated — operator statement only.
 - [ ] Dedicated non-root runner account — **not adopted**; superseded by the accepted deviation in §0.1.
 - [x] Runner visible Online with expected labels (`self-hosted,linux,x64`).
-- [x] Harmless diagnostic workflow succeeds — run 44050467500, and the first admitted run 44049832708.
+- [x] Runner execution/admission self-test succeeded on main push — runs 44049832708 and 44050467500. These runs are not the manual read-only Worker diagnostics workflow.
+- [ ] Manual read-only Worker diagnostics workflow (`.github/workflows/ubuntu-worker-diagnostics.yml`) — NOT RUN / NOT EVIDENCED; no matching workflow-dispatch run ID is recorded.
 - [ ] Runner service survives reboot and reconnects — `enabled` at boot with the documented start ordering, but **no reboot cycle has been performed**.
-- [x] Untrusted triggers cannot reach this runner — enforced by L1 and demonstrated by run 44050069421 with zero steps executed.
+- [x] L1 Admission Hook denied the tested feature-branch push before workflow steps (run 44050069421); full untrusted-PR isolation and sudo-capability containment remain pending independent review.
 - [x] No secrets in Git, logs, artifacts, Issues or PR comments — reviewed for the files added on 2026-11-17.
 - [ ] Emergency stop / runner removal procedure tested — documented only; the guard's `observe.flag` rollback was not exercised in production.
 
@@ -204,7 +205,7 @@ Current security acceptance is **BLOCKED**. Even when every operational box is t
 
 ## 8. Current status
 
-Deployment is reported active on 2026-11-17, with a successful diagnostic execution and three recorded admission decisions (§4.1). These are operational observations, not an independent security assessment. Operator-confirmed but not independently re-verified: password rotation. **Not verified:** a reboot cycle, the emergency-stop procedure, and the L3 settings (branch protection, required check, environment approval). The runner's sudo-capable service identity remains a material residual risk. Business pipelines have not run on this runner; the A–I Owner workers remain **NOT DEPLOYED**. **Security acceptance remains BLOCKED pending an explicit infrastructure/security Owner decision and independent evidence.**
+Deployment is reported active on 2026-11-17, with successful runner execution/admission self-tests and three recorded admission decisions (§4.1). The manual read-only Worker diagnostics workflow has no evidenced run and remains NOT RUN. These are operational observations, not an independent security assessment. Operator-confirmed but not independently re-verified: password rotation. **Not verified:** a reboot cycle, the emergency-stop procedure, and the L3 settings (branch protection, required check, environment approval). The runner's sudo-capable service identity remains a material residual risk. Business pipelines have not run on this runner; the A–I Owner workers remain **NOT DEPLOYED**. **Security acceptance remains BLOCKED pending an explicit infrastructure/security Owner decision and independent evidence.**
 
 ```
 
