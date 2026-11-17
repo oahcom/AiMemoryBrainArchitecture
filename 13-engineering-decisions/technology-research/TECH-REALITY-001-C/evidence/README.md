@@ -1,0 +1,39 @@
+# Evidence Index / 证据索引
+
+Research capture date: 2026-11-18. Prefer official, versioned documentation; moving docs require re-check before implementation.
+
+## Official provider/runtime sources
+- OpenAI Responses streaming: https://developers.openai.com/api/docs/guides/streaming-responses
+- OpenAI Structured Outputs: https://developers.openai.com/api/docs/guides/structured-outputs
+- OpenAI Agents SDK capabilities: https://openai.github.io/openai-agents-python/
+- OpenAI Agents tracing: https://openai.github.io/openai-agents-python/docs/tracing/
+- Gemini GenerateContent / streamGenerateContent: https://ai.google.dev/api/generate-content
+- vLLM OpenAI-compatible server: https://docs.vllm.ai/en/latest/serving/online_serving/openai_compatible_server/
+- llama.cpp server source/docs: https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
+
+## Agent framework source inspections
+- Hermes Agent architecture: https://github.com/NousResearch/hermes-agent/blob/main/website/docs/developer-guide/architecture.md
+- Hermes Agent tools reference: https://github.com/NousResearch/hermes-agent/blob/main/website/docs/reference/tools-reference.md
+- LangGraph interrupts/checkpointing: https://langchain-ai.github.io/langgraph/how-tos/human_in_the_loop/breakpoints/
+- PydanticAI retries: https://pydantic.dev/docs/ai/core-concepts/retries/
+- PydanticAI deferred tool results: https://github.com/pydantic/pydantic-ai/blob/main/docs/toolsets.md
+- AutoGen migration context: https://learn.microsoft.com/en-us/agent-framework/migration-guide/from-autogen/
+- MCP specification changelog: https://modelcontextprotocol.io/specification/draft/changelog
+
+## Observability/security
+- OpenTelemetry context propagation: https://opentelemetry.io/docs/concepts/context-propagation/
+- OTel GenAI conventions (moved): https://opentelemetry.io/docs/specs/semconv/gen-ai/
+
+## Project evidence
+- Main baseline HEAD: b3c666e67982cb3d3374e759cfb6552c7765aacb
+- A PR #45 research HEAD: 6c7c5919c1b50f38c4d24be679a3885ee3c15b97; A independent review PR #56 verdict REVISE.
+- B PR #55 research HEAD: f95b479b223ebb63c8aebcfca13a4cd9b28d5331; Draft; B0 partial and B5 blocked.
+- C old branch HEAD: 71047cdb51139ca4080ac67f451e38a48698859d; diverged from current main.
+- D Forget contract Blob: 1f0391bc49d007c44ec74165bd33d37412cc7990.
+- G Applied contract Blob: aa3afa73d8a76cc6f025839c52bfbff6a983046a.
+- H Unified 1.2.15 schema Blob: 860fc4cec658db7d2703cd6adf72aa31a2723f6d.
+- I governance register Blob: f5fd2558c657f4ef49396a7a00cdbcd0f226f853.
+- Storage v3.3.2 manifest Blob: 5c614375e10698e4931d83deb57d20321445e068.
+
+## Limitations / 限制
+Anthropic Messages, Ollama, Hugging Face Inference, current AutoGen package versions, exact SDK releases/licenses, provider cancellation/idempotency semantics and complete current MCP security profiles were not fully verified in this pass. Do not treat absent sources as negative capability evidence.
