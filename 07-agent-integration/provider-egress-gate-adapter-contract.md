@@ -112,3 +112,12 @@ No ungated transport handle. No cached OPEN flag or old release receipt authoriz
 C owns Provider Egress Gate semantics, Adapter API and race outcomes. I owns authorization, PermissionEpoch, revocation, classification, provider/recipient inventory, retention and provider-side deletion policy. H owns BMCP wire and capability/ack encoding. G supplies exact ContextVersion/AppliedContext evidence; delivery is not egress. D/E/F supply canonical identity/lineage/Forget references; their internal gates never authorize network sends. Agent/provider runtime owns inference beyond transport handoff.
 
 Acceptance requires executable conformance against the actual Adapter/transport, including SDK retries, redirects, streaming and multi-replica behavior. **PROPOSED:** no implementation, test pass, interface freeze or implementation sign-off is claimed.
+
+
+## 12. Cross-authority revocation and availability / 跨权威撤销与可用性
+
+The Adapter's local send CAS cannot magically make an independently stored I PermissionEpoch atomic. The implementation MUST NOT claim immediate revocation based only on a previously fetched signed decision.
+
+Strict revocation requires either a shared linearizable sequencer for I epoch changes and Adapter final egress commitment, a proven distributed transaction/consensus equivalent, or an I-owned revocation barrier. Under the barrier profile, I marks revocation PENDING, sends the newer fencing epoch to every Adapter/provider-account gate in the closed-world inventory, and waits for durable acknowledgements that each gate rejects old epochs. I may declare revocation EFFECTIVE only after the required acknowledgements or an explicit policy-approved residual exception. Each Adapter validates the highest installed epoch at CommitEgress.
+
+A time-bounded authorization lease is a weaker profile with an explicit maximum stale-send window and clock/partition assumptions; it must not be represented as immediate revocation. If the Adapter cannot establish current policy/fencing epoch, governed egress fails closed. Offline Adapter means revocation remains pending for that target unless I approves and records a residual exception.
