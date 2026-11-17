@@ -25,6 +25,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Canonical terminology | 00-governance/terminology.md | docs/zh-CN/00-governance/terminology.md | docs/en/00-governance/terminology.md | COMPLETE |
 | System component map | 01-system-architecture/component-map.md | docs/zh-CN/01-system-architecture/component-map.md | docs/en/01-system-architecture/component-map.md | COMPLETE |
 | System design principles/interactions/flows/boundaries/quality reader guide | 00-governance/ and 01-system-architecture/ | docs/zh-CN/01-system-architecture/system-design-guide.md | docs/en/01-system-architecture/system-design-guide.md | COMPLETE — synthesis guide only |
+| Principal Integration / contract governance guide (A) | A owner branch: reviews/integration/ | docs/zh-CN/01-system-architecture/integration-governance-guide.md | docs/en/01-system-architecture/integration-governance-guide.md | COMPLETE — reader guide only |
 | Detailed design principles, component interactions, data flows, boundaries, quality attributes | Source specifications under 00-governance/ and 01-system-architecture/ | Pending | Existing English sources | NOT STARTED — full source-level translation pending |
 | Subsystem responsibility matrix | 01-system-architecture/responsibility-matrix.md | docs/zh-CN/01-system-architecture/responsibility-matrix.md | docs/en/01-system-architecture/responsibility-matrix.md | COMPLETE |
 | Domain Model reader guide | 02-domain-model/ | docs/zh-CN/02-domain-model/domain-model-guide.md | docs/en/02-domain-model/domain-model-guide.md | COMPLETE — overview guide only |
@@ -45,7 +46,8 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Security & Governance reader guide | I owner branch: 09-security-governance/ | docs/zh-CN/09-security-governance/security-governance-guide.md | docs/en/09-security-governance/security-governance-guide.md | COMPLETE — overview guide only |
 | Security & Governance detailed contracts | I owner branch: 09-security-governance/ | Pending | Owner-branch English sources | NOT STARTED — policy/identity/Forget detail translation pending |
 | Consistency and Recovery | 11-consistency-and-recovery/ | Pending | Existing English sources | NOT STARTED |
-| Testing and Acceptance | 12-testing-and-acceptance/ | Pending | Existing English sources | NOT STARTED |
+| Cross-module conformance and fault-injection reader guide | A owner branch: reviews/integration/cross-module-conformance-plan.md | docs/zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md | docs/en/12-testing-and-acceptance/cross-module-conformance-guide.md | COMPLETE — test guide only; execution NOT_RUN/BLOCKED |
+| Detailed Testing and Acceptance specifications/reports | 12-testing-and-acceptance/ and reviews/ | Pending | Existing English sources | NOT STARTED — detailed test cases and review reports pending |
 | Detailed technology and Rust engineering | 13-engineering-decisions/ | Pending | Existing English sources | NOT STARTED |
 
 ## 3. Translation and readability sequence / 翻译与易读性推进顺序
@@ -99,6 +101,8 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 - Acceptance: no logical design is described as implemented or physically verified without evidence.
 
 ### Batch 7 — Engineering, tests, and acceptance / 第七批：工程、测试与验收
+- Cross-module conformance reader guide: COMPLETE.
+- Test execution remains NOT_RUN/BLOCKED until implementations and dependencies exist; no PASS is claimed.
 - Rust crate architecture, technology ADRs, deployment, resource budgets.
 - Test plans, conformance vectors, fault injection, benchmarks.
 - Acceptance: candidate technologies remain candidates until ADR and evidence gates are met.
@@ -127,5 +131,7 @@ A document is not bilingual-complete merely because it has been translated. Each
 - Keep a distinction between explanatory guides and normative owner specifications.
 
 ## 6. Current limitation / 当前限制
+
+A integration governance and conformance reader guides are available in both languages. The detailed A registry, complete test catalogue, and Owner-specific review reports remain to be translated as source-level documents.
 
 Batches 1 and 2 provide the orientation, shared language, governance invariants, component map, and responsibility matrix. This is still not a full translation of all subsystem specifications. Root-level Owner documents remain the detailed source specifications until their paired bilingual versions are completed and reviewed. The mandatory bilingual policy is proposed in this change set and becomes effective as an approved governance baseline when merged.
