@@ -84,7 +84,71 @@ The review is **not** a blanket approval of all 124 changed files. It is a targe
 - Ranking 不得静默裁决冲突 Claim；必须保留 Support/Refute Evidence 和 Conflict Marker。
 - Partial/Degraded/Unavailable 与 Complete 状态不同；Scheduling/Cancellation 不得把部分结果变成完整结果。
 
-## 3. Findings / 发现项
+## 5. Focused cross-module identity, Applied and Storage/Consistency review / 跨模块身份、Applied 与 Storage/Consistency 专项复审
+
+### 5.1 Reviewed bilingual pairs / 已复审双语配对
+
+The following PR #28 pairs were checked against each other at the current branch snapshot:
+
+- `docs/en/01-system-architecture/component-interactions.md` ↔ `docs/zh-CN/01-system-architecture/component-interactions.md`
+- `docs/en/01-system-architecture/data-flows.md` ↔ `docs/zh-CN/01-system-architecture/data-flows.md`
+- `docs/en/01-system-architecture/integration-governance-guide.md` ↔ `docs/zh-CN/01-system-architecture/integration-governance-guide.md`
+- `docs/en/12-testing-and-acceptance/cross-module-conformance-guide.md` ↔ `docs/zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md`
+- `docs/en/02-domain-model/scope-and-permission-model.md` ↔ `docs/zh-CN/02-domain-model/scope-and-permission-model.md`
+
+No material semantic divergence was found in the checked identity and Applied summaries:
+- Principal/ActorRef/ScopeRef/ProducerIdentity remain distinct; identity authentication, domain reference semantics, wire binding, telemetry assertion and owner-side enforcement remain assigned to their respective authorities.
+- Scope is not Permission; payload-supplied identity is not authenticated transport identity; async work rechecks current authorization.
+- Applied is tied to the exact ContextVersion and Adapter boundary receipt; it is not model comprehension. The conformance guide preserves final-request attestation, offline reconnect against ContextVersion/PermissionEpoch/ForgetFenceGeneration, and fail-closed behavior for unknown Forget targets.
+- Typed cursor/epoch namespaces remain distinct in the integration guide, including ForgetFenceGeneration/Cursor, PermissionEpoch, ContextVersion, IndexWatermark and AdapterCapabilityEpoch.
+- Component interaction tables preserve Context version commit, asynchronous delivery, Applied acknowledgement and Sync/Adapter failure containment.
+
+本轮核对了上述五组 PR #28 中英文配对。身份和 Applied 摘要未发现实质语义偏差：
+- Principal/ActorRef/ScopeRef/ProducerIdentity 保持不同类型；身份认证、领域引用语义、Wire 绑定、遥测声明和 Owner 边界执行仍由各自权威负责。
+- Scope 不等于 Permission；Payload 自报身份不等于已认证 Transport Identity；异步任务必须重新检查当前授权。
+- Applied 绑定准确 ContextVersion 和 Adapter 边界 Receipt，不代表模型理解。Conformance 指南保留了最终请求 Attestation、离线重连时对 ContextVersion/PermissionEpoch/ForgetFenceGeneration 的协调，以及未知 Forget 目标 Fail-closed 要求。
+- Integration Guide 保留不同 Cursor/Epoch Namespace，包括 ForgetFenceGeneration/Cursor、PermissionEpoch、ContextVersion、IndexWatermark 和 AdapterCapabilityEpoch。
+- Component Interaction 双语表均保留 Context Version 提交、异步 Delivery、Applied 确认以及 Sync/Adapter 故障隔离。
+
+### 5.2 Authoritative source status checked / 权威源规范状态核验
+
+The paired guides are not the detailed contracts. The current Owner source snapshots show:
+
+| Source artifact | Exact source revision | Current status / limitation |
+|---|---|---|
+| B `principal-actor-binding-mapping.md` | `bbbef919e1e2ffe158cda8d9b2c5e718efaae969` | CANDIDATE; identity freeze INT-P0-02 / INT-X-03 remains OPEN |
+| B `typed-reference-and-scope-semantics.md` | `e9a6bd21e06bc02a5208619f5a949217860b1c00` | CANDIDATE; Claim identity remains ADR-BLOCKED; typed identity/Scope/Environment semantics require dependent approvals |
+| C `phase-3.6-final-request-evidence-contract.md` | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | C-owned semantic decisions recorded; C/G/H cross-owner freeze BLOCKED; implementation/execution NOT VERIFIED |
+| H `adapter-capability-and-applied-attestation.md` | `ed6b43a29aa368d772c701ffc83309a5aadf3c00` | CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I |
+| H `phase-3.6-authenticated-identity-protected-operation-binding.md` | `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248` | JOINT-DECIDED technical baseline; governance and consumer acceptance OPEN; implementation/conformance NOT VERIFIED |
+| Storage `phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md` | `175ee7b1349cfdb79a19898b311a88391ed88010` | Logical transaction proposal; physical topology and implementation proof OPEN |
+| Storage `phase-3.8.2-storage-serialization-topology-adr.md` | `080433f8e13a500522bc2754da64057edb0ae9d8` | ADR-BLOCKED; candidate options only; no deployed topology selected; T1–T8 OPEN |
+| Storage/JF-10 `phase-3.6.2-jf10-cross-authority-recovery-protocol.md` | `94679897e84a6f58fd8b9467b5249e1a885cb0b0` | CANDIDATE; I acceptance required; NOT IMPLEMENTED; conformance NOT RUN; JF-10 P0 OPEN |
+| Storage restore `phase-3.6.5-restore-control-highwater-and-quarantine-contract.md` | `4f656163aeba532a441eaed1d293a48e2363cb4a` | CANDIDATE; exact I-D-A-Storage review required; restore remains fenced absent current control high-water proof |
+
+The C contract requires the actual post-transformation final request to cross the observed successful submit boundary, with runtime-assigned InferenceRequestId, exact Context/Delivery identifiers, complete managed-region digest, current PermissionEpoch, D ForgetFence and H CapabilityEpoch. G alone accepts Applied. Tier 2/3 cannot claim Full Applied. Historical Applied remains an audit fact but cannot be reused after revocation/Forget invalidation. Unknown ordering fails closed.
+
+The Storage contracts require durable hidden participant preparation, exact D participant/fence binding, consumed I authorization proof, and a single final visibility linearization transaction that atomically commits VisibilityPointer, PublicationReceipt/outcome and outbox. UNKNOWN remains private. Restore starts quarantined and requires independent COC/I/D/Storage high-water and participant reconciliation; no single cursor proves global safety.
+
+C 契约要求实际经过全部转换的最终请求越过可观测的成功 Submit 边界，并绑定 Runtime 分配的 InferenceRequestId、准确 Context/Delivery 标识、完整 Managed Region Digest、当前 PermissionEpoch、D ForgetFence 和 H CapabilityEpoch。只有 G 可以接受 Applied。Tier 2/3 不得声称 Full Applied。历史 Applied 可以保留为审计事实，但在撤销/Forget 失效后不得再次用于后续请求。无法证明顺序时必须 Fail-closed。
+
+Storage 契约要求先持久化隐藏 Participant，绑定准确 D Participant/Fence、已消费的 I Authorization Proof，并通过唯一最终 Visibility Linearization Transaction 原子提交 VisibilityPointer、PublicationReceipt/Outcome 和 Outbox。UNKNOWN 必须保持 Private。Restore 必须从隔离状态开始，并独立协调 COC/I/D/Storage High-water 与 Participant；任何单一 Cursor 都不能证明全局安全。
+
+### 5.3 BSR-28-004 — High-risk detailed contracts are not part of PR #28 / 高风险详细契约未纳入 PR #28
+
+- Severity: **P1 — high-risk coverage / acceptance gate**
+- Status: **OPEN — explicitly tracked scope gap, not a translation mismatch in the reviewed guide pairs**
+- Evidence: PR #28 changes bilingual reader/overview guides through F, but it does not include paired detailed specifications for B Phase 3 typed identity/Principal binding, C/G/H final-request Applied contracts, or Storage/Consistency COC/JF-10/visibility/restore contracts. The current `docs/translation-status.md` branch overlay records these detailed sets as pending.
+- Risk: a reader could over-read the system guides as if they were frozen, complete cross-owner contracts. The authoritative sources are still CANDIDATE/BLOCKED/OPEN/NOT VERIFIED as listed above.
+- Required action: keep PR #28's scope statement explicit; do not mark identity, Applied, Storage topology, JF-10 or restore as bilingual-complete or accepted. Create exact-source-SHA bilingual pairs in subsequent tracked batches, and preserve each source's candidate/blocking/not-run status.
+
+- 严重级别：**P1 — 高风险覆盖/验收门禁**
+- 状态：**OPEN — 已明确登记的范围缺口，不是本轮已复审指南配对中的翻译偏差**
+- 证据：PR #28 包含截至 F 的双语阅读/总览指南，但未包含 B Phase 3 Typed Identity/Principal Binding、C/G/H Final-request Applied 契约或 Storage/Consistency COC/JF-10/Visibility/Restore 契约的成对详细规范。当前 `docs/translation-status.md` 分支覆盖表已将这些详细文档登记为待处理。
+- 风险：读者可能误将系统指南理解为已冻结、完整的跨 Owner 契约；但上述权威源文件仍处于 CANDIDATE/BLOCKED/OPEN/NOT VERIFIED 状态。
+- 要求：PR #28 必须继续明确其范围；不得将 Identity、Applied、Storage Topology、JF-10 或 Restore 标记为双语完成或已验收。后续批次必须按准确源 SHA 创建双语配对，并保留每份源文件的 Candidate/Blocking/Not-run 状态。
+
+## 6. Findings / 发现项
 
 ### BSR-28-001 — Recorded At wording weakens the durability qualifier
 - Severity: **P2 — terminology precision**
@@ -119,7 +183,7 @@ The review is **not** a blanket approval of all 124 changed files. It is a targe
 - Risk: PR readers see an obsolete validation status.
 - Required correction: update the PR body with the actual run result and retain the qualification that structural CI does not prove semantic parity.
 
-## 4. Review boundaries and non-findings / 复审边界与未发现事项
+## 7. Review boundaries and non-findings / 复审边界与未发现事项
 
 - No Critical/P0 semantic reversal was found in the targeted high-risk pairs reviewed above.
 - The source/environment identity digest requirement is present in both languages; no finding is raised for it.
@@ -133,7 +197,7 @@ The review is **not** a blanket approval of all 124 changed files. It is a targe
 - 本复审没有执行 Rust 测试、故障注入测试、Storage 崩溃/恢复测试或跨 Owner Conformance Suite。源文档标记为 NOT RUN 的测试仍然是 NOT RUN。
 - 本复审不批准架构冻结、实现签收、分支保护或合并。
 
-## 5. Recommended disposition / 建议处置
+## 8. Recommended disposition / 建议处置
 
 1. BSR-28-001 and BSR-28-002 are resolved in the current PR branch; keep their resolution evidence traceable.
 2. BSR-28-003 is resolved in the PR description and current-head CI record.
