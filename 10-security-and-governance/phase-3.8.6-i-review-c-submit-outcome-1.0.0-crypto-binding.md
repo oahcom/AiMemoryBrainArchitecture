@@ -3,7 +3,7 @@
 - Owner: I — Security, Identity and Governance
 - C schema: `urn:aimba:schema:c-submit-outcome:1.0.0`, Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`
 - C projection proposal: Phase 3.8.8 current Blob `06d9264124d85896ccd44ef7789d9af245d8255b`
-- C schema/conformance contract: Phase 3.8.9 Blob `3a3f4e6be9537faa919dd54650c81cb8a08345c0`
+- C schema/conformance contract: Phase 3.8.9 Blob `7939c84e950b50f3ec44e4e2fbe5e7f93e544c2e`
 - Prior I governance disposition: Phase 3.8.5 Blob `41fc0f508ae75e8c16012966160e9e2a1e368881`
 - Status: **STRUCTURAL CRYPTO BINDING ACCEPTED WITH CONDITIONS; PROFILE REGISTRATION NOT APPROVED**
 - Provenance: delegated I-role simulation at user's direction; not independent human I Owner approval.
@@ -87,3 +87,10 @@ I has not approved the C profile, C trust root, key custody or production use. N
 ### 4.1 Additional schema fields
 
 The reviewed schema revision also requires `OwnerSignatureRef`, binding the owner-signature evidence reference separately from the inline `key_id_ref`, `key_version` and `signature`. It permits `ActualInferenceRequestId` where the provider/runtime assigns a real request identifier. H must compare both fields when the corresponding wire member is present and must not infer an actual request ID from a local attempt identifier.
+
+
+## 8. Review of executed structural CI
+
+C's schema/semantic CI run `44055965702` at commit `a0c197fa94e71c52758fadaa335a686815485dd7` passed 3 tests. I accepts this as evidence that the Draft 2020-12 schema is internally valid and that the ten synthetic structural/semantic vectors match their expected local outcomes under the checked harness.
+
+This does not alter the crypto decision: all fixture signatures are placeholders, the C profile remains unregistered, and there is no executed Ed25519 signature vector, C key-status/trust verification, provider proof authentication or cross-language C-profile conformance. No registration or deployment approval is granted.
