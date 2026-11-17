@@ -3,7 +3,7 @@
 - Owner: I — Security, Identity and Governance
 - C schema: `urn:aimba:schema:c-submit-outcome:1.0.0`, Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`
 - C projection proposal: Phase 3.8.8 current Blob `06d9264124d85896ccd44ef7789d9af245d8255b`
-- C schema/conformance contract: Phase 3.8.9 Blob `7939c84e950b50f3ec44e4e2fbe5e7f93e544c2e`
+- C schema/conformance contract: Phase 3.8.9 Blob `f8a1cf608b937c77595df797fd1875332caf5c10`
 - Prior I governance disposition: Phase 3.8.5 Blob `41fc0f508ae75e8c16012966160e9e2a1e368881`
 - Status: **STRUCTURAL CRYPTO BINDING ACCEPTED WITH CONDITIONS; PROFILE REGISTRATION NOT APPROVED**
 - Provenance: delegated I-role simulation at user's direction; not independent human I Owner approval.
@@ -66,9 +66,9 @@ Unavailable current key status or anti-rollback proof yields UNKNOWN. Compromise
 
 ## 6. Test evidence required
 
-The current C fixture signatures are placeholders and are explicitly not cryptographically valid. The current Python harness is structural/semantic only and has not been executed. Neither is crypto registration evidence.
+The ten structural/semantic fixture records still carry placeholder signatures. Separately, C has now executed candidate-only Ed25519/JCS vectors with a public test-only seed in Python and Node. These runs are construction/interoperability evidence only, not crypto profile registration or trust/key lifecycle evidence.
 
-Required next vectors:
+Remaining registration vectors/evidence:
 - at least one known-good C test-only Ed25519 keypair and exact RFC 8785 bytes;
 - expected C-P0 bytes, digest, signed projection bytes, preimage bytes and signature;
 - each field mutation, absent/null/empty mutation, duplicate key, malformed UTF-8 and invalid number;
@@ -94,3 +94,19 @@ The reviewed schema revision also requires `OwnerSignatureRef`, binding the owne
 C's schema/semantic CI run `44055965702` at commit `a0c197fa94e71c52758fadaa335a686815485dd7` passed 3 tests. I accepts this as evidence that the Draft 2020-12 schema is internally valid and that the ten synthetic structural/semantic vectors match their expected local outcomes under the checked harness.
 
 This does not alter the crypto decision: all fixture signatures are placeholders, the C profile remains unregistered, and there is no executed Ed25519 signature vector, C key-status/trust verification, provider proof authentication or cross-language C-profile conformance. No registration or deployment approval is granted.
+
+
+## 9. I review of executed candidate crypto vectors
+
+I reviewed the C candidate vector and CI record:
+- Test-only vector manifest Blob `88a16f0d9aaa8a5e46af857c2cd34c2bcedd07ae`.
+- Expected vector fingerprints/signatures Blob `a4bfe0b431d5e710ac99d604e7b1bce49c044d23`.
+- Python implementation/test Blob `2e1f572facc644c378ee1880a553c27a72ed2cc4`.
+- Node oracle Blob `31c8ac889766f9574725357ae6134a901bfb5f33`.
+- C CI run `44057463855`, commit `08ae2649c3be812ef425fb7a958d41a62f933850`: SUCCESS, 7 tests.
+
+The five outcome-family candidate signatures verify, all present C-P0 member mutations fail verification, and Python/Node canonical bytes, digest, preimage and signature outputs agree. I accepts this as meaningful candidate construction/interoperability evidence.
+
+This does NOT satisfy profile registration conditions. The deterministic seed is public test-only material; there is no deployed C trust root, authenticated key-status ledger, custody/HSM/KMS evidence, revocation/compromise drill, anti-rollback anchor or independent operational key lifecycle proof. The C profile remains **NOT REGISTERED / NOT APPROVED FOR PRODUCTION**.
+
+**Updated I disposition: candidate crypto construction ACCEPTED FOR FURTHER IMPLEMENTATION; registration and deployment remain NOT APPROVED.**
