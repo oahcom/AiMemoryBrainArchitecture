@@ -103,6 +103,13 @@
     },
     "envelope": {
       "$ref": "#/$defs/envelope"
+    },
+    "owner_request_dispositions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requestDisposition"
+      },
+      "uniqueItems": true
     }
   },
   "required": [
@@ -132,7 +139,8 @@
     "join_root",
     "canonicalization_profile_ref",
     "digest_profile_ref",
-    "envelope"
+    "envelope",
+    "owner_request_dispositions"
   ],
   "$defs": {
     "ref": {
@@ -368,6 +376,15 @@
         },
         "participant_position_ref": {
           "$ref": "#/$defs/ref"
+        },
+        "owner_entry_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "admission_message_id": {
+          "$ref": "#/$defs/ref"
+        },
+        "admission_message_digest": {
+          "$ref": "#/$defs/digest"
         }
       },
       "required": [
@@ -386,7 +403,10 @@
         "participant_manifest_ref",
         "participant_manifest_record_digest",
         "cardinality_rule_ref",
-        "participant_position_ref"
+        "participant_position_ref",
+        "owner_entry_ref",
+        "admission_message_id",
+        "admission_message_digest"
       ]
     },
     "noParticipantDisposition": {
@@ -432,6 +452,9 @@
         },
         "owner_signature_ref": {
           "$ref": "#/$defs/ref"
+        },
+        "owner_entry_ref": {
+          "$ref": "#/$defs/ref"
         }
       },
       "required": [
@@ -443,7 +466,8 @@
         "registration_state",
         "reason",
         "terminal_state",
-        "owner_signature_ref"
+        "owner_signature_ref",
+        "owner_entry_ref"
       ],
       "allOf": [
         {
@@ -502,6 +526,9 @@
             "$ref": "#/$defs/ownerEvidence"
           },
           "uniqueItems": true
+        },
+        "primary_owner_entry_ref": {
+          "$ref": "#/$defs/ref"
         }
       },
       "required": [
@@ -511,7 +538,8 @@
         "primary_owner_kind",
         "primary_owner_admission_ref",
         "required_owner_set",
-        "owner_evidence"
+        "owner_evidence",
+        "primary_owner_entry_ref"
       ]
     },
     "ownerEvidence": {
@@ -823,6 +851,13 @@
             "$ref": "#/$defs/ref"
           },
           "uniqueItems": true
+        },
+        "owner_request_without_disposition": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ref"
+          },
+          "uniqueItems": true
         }
       },
       "required": [
@@ -830,7 +865,8 @@
         "participant_without_primary_owner_admission",
         "participant_without_required_owner_evidence",
         "duplicate_or_conflicting_join_edges",
-        "unproved_not_registered_effects"
+        "unproved_not_registered_effects",
+        "owner_request_without_disposition"
       ]
     },
     "envelope": {
@@ -871,6 +907,79 @@
         "key_version",
         "signature_profile_ref",
         "signature_ref"
+      ]
+    },
+    "requestDisposition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "owner_kind": {
+          "enum": [
+            "I",
+            "D",
+            "C"
+          ]
+        },
+        "owner_request_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_entry_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_request_digest": {
+          "$ref": "#/$defs/digest"
+        },
+        "owner_sequence_namespace": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_sequence": {
+          "$ref": "#/$defs/counter"
+        },
+        "scope_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "disposition": {
+          "enum": [
+            "IN_BATCH_REQUEST_SET",
+            "OUT_OF_SCOPE_WITH_PROOF"
+          ]
+        },
+        "proof_ref": {
+          "$ref": "#/$defs/ref"
+        },
+        "owner_signature_ref": {
+          "$ref": "#/$defs/ref"
+        }
+      },
+      "required": [
+        "owner_kind",
+        "owner_request_ref",
+        "owner_entry_ref",
+        "owner_request_digest",
+        "owner_sequence_namespace",
+        "owner_sequence",
+        "scope_ref",
+        "disposition",
+        "owner_signature_ref"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "disposition": {
+                "const": "OUT_OF_SCOPE_WITH_PROOF"
+              }
+            },
+            "required": [
+              "disposition"
+            ]
+          },
+          "then": {
+            "required": [
+              "proof_ref"
+            ]
+          }
+        }
       ]
     }
   }
