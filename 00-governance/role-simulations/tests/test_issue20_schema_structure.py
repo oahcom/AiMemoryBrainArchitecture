@@ -103,5 +103,106 @@ class Issue20SchemaStructureTests(unittest.TestCase):
         self.assertFalse(validator.is_valid(ipos, self.schema["$defs"]["DPosition"]))
 
 
+    def test_i_commit_authorization_and_terminal_proofs_validate_as_separate_messages(self):
+        validator = jsonschema.Draft202012Validator(
+            self.schema, format_checker=jsonschema.FormatChecker()
+        )
+        envelope = {
+            "schemaId": "issue20.archive-forget-restore",
+            "schemaVersion": "0.1.0",
+            "messageId": "msg-i-1",
+            "issuer": "I",
+            "audience": "STORAGE",
+            "issuedAt": "2026-11-17T00:00:00Z",
+            "signatureProfileId": "i-profile",
+            "keyId": "i-key-v1",
+            "signature": "signed"
+        }
+        receipt = dict(envelope)
+        receipt.update({
+            "messageType": "I_COMMIT_AUTHORIZATION_RECEIPT",
+            "publicationOperationId": "pub-1",
+            "requestDigest": "sha256:" + "a" * 64,
+            "participantRef": "storage-participant-1",
+            "participantTupleDigest": "sha256:" + "b" * 64,
+            "permissionEpoch": "permission-7",
+            "iGateGeneration": 7,
+            "sequencerPosition": {"authority": "I", "positionRef": "i:100"},
+            "decision": "COMMIT_WON",
+            "nonce": "nonce-1",
+            "policyVersion": "policy-v3",
+            "issuerKeyVersion": "key-v1",
+            "issuerKeyStatusRef": "key-status-1",
+            "subjectRef": "subject-1",
+            "actorRef": "actor-1",
+            "workloadRef": "workload-1",
+            "delegationChainDigest": "sha256:" + "c" * 64,
+            "action": "publish",
+            "artifactRef": "artifact-1",
+            "artifactVersion": "v1",
+            "artifactContentDigest": "sha256:" + "d" * 64,
+            "purpose": "memory-derivative",
+            "environmentRef": "prod-candidate",
+            "ownerBoundary": "canonical-memory",
+            "finalVisibilityGateRef": "gate-1",
+            "publicationTupleDigest": "sha256:" + "e" * 64,
+            "dPublicationParticipantRef": "d-participant-1",
+            "storageVisibilityParticipantRef": "storage-participant-1",
+            "consumedAt": "2026-11-17T00:00:01Z",
+            "canonicalizationProfileRef": "jcs-profile",
+            "signatureProfileRef": "ed25519-profile"
+        })
+        validator.validate(receipt)
+        terminal = dict(envelope)
+        terminal.update({
+            "messageType": "I_TERMINAL_PROOF",
+            "authorizationReceiptRef": "receipt-1",
+            "policyDomainRef": "pd-1",
+            "publicationOperationId": "pub-1",
+            "publicationTupleDigest": "sha256:" + "e" * 64,
+            "dPublicationParticipantRef": "d-participant-1",
+            "storageVisibilityParticipantRef": "storage-participant-1",
+            "storageOutcomeDigest": "sha256:" + "f" * 64,
+            "storageOutcome": "COMMITTED_VISIBLE",
+            "iSequencerPosition": {"authority": "I", "positionRef": "i:101"}
+        })
+        validator.validate(terminal)
+
+    def test_d_terminal_receipt_requires_outcome_specific_evidence(self):
+        validator = jsonschema.Draft202012Validator(
+            self.schema, format_checker=jsonschema.FormatChecker()
+        )
+        base = {
+            "schemaId": "issue20.archive-forget-restore",
+            "schemaVersion": "0.1.0",
+            "messageId": "msg-d-terminal",
+            "issuer": "D",
+            "audience": "AUDIT",
+            "issuedAt": "2026-11-17T00:00:00Z",
+            "signatureProfileId": "d-profile",
+            "keyId": "d-key-v1",
+            "signature": "signed",
+            "messageType": "D_PUBLICATION_TERMINAL_RECEIPT",
+            "publicationParticipantRef": "d-participant-1",
+            "publicationOperationId": "pub-1",
+            "publicationTupleDigest": "sha256:" + "a" * 64,
+            "storageVisibilityParticipantRef": "storage-participant-1",
+            "artifactRef": "artifact-1",
+            "artifactVersion": "v1",
+            "artifactContentDigest": "sha256:" + "b" * 64,
+            "storageOutcomeDigest": "sha256:" + "c" * 64,
+            "forgetFenceGeneration": 4,
+            "dTerminalPosition": {"authority": "D", "positionRef": "d:44"}
+        }
+        committed = dict(base, outcome="COMMITTED_VISIBLE",
+                         visibilityPointerRef="pointer-1")
+        validator.validate(committed)
+        self.assertFalse(validator.is_valid(dict(base, outcome="COMMITTED_VISIBLE")))
+        no_publication = dict(base, outcome="NO_PUBLICATION",
+                              nonPublicationEvidenceDigest="sha256:" + "d" * 64)
+        validator.validate(no_publication)
+        self.assertFalse(validator.is_valid(dict(base, outcome="NO_PUBLICATION")))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
