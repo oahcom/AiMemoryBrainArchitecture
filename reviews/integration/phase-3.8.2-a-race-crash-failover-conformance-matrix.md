@@ -155,3 +155,8 @@ H's latest run [44042568297](https://github.com/oahcom/AiMemoryBrainArchitecture
 ### 7.4 H 97-test scope
 
 H run [44043100543](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44043100543) reports 97 candidate methods PASS: HRC 25 + JPF 19 + WIRE 10 + SCHEMA 16 + TPH 26 + XLANG 1. SCHEMA-15/16 add structural checks for owner-snapshot attestation and RecoveryJoin 1.0.1 proof shape. None of the 97 tests executes the 36 physical race/crash/failover/restore cases. All physical cases remain NOT EXECUTED.
+
+
+### 7.5 中文测试边界
+
+H 的 97 项候选测试包括 HRC 25、JPF 19、WIRE 10、SCHEMA 16、TPH 26 和 XLANG 1，最近运行 44043100543 全部通过。新增 Schema 测试只覆盖结构字段；TPH 是参考模型；XLANG 是固定测试向量。它们都没有执行本矩阵中的 36 项物理 Race、Crash/ACK Loss、Failover/Restore 场景。所有物理场景仍为 NOT EXECUTED，不能将 H 的 97 项 PASS 计入物理符合性。
