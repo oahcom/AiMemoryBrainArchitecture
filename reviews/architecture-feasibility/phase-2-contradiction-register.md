@@ -17,16 +17,16 @@
 
 **中文：** Storage 拓扑 ADR 明确为 ADR-BLOCKED / NO TOPOLOGY SELECTED，列出 Option A（每个 Canonical Memory Authority 一个 Serializable Transaction Domain）与 Option B（D/Storage 分离并由持久化线性协调器协调），明确拒绝 Check-then-write。Phase 3.8 定义了逻辑最终可见性事务，但尚未选择物理序列化基础。必须选择 A 或 B，明确序列化域、D/I Hold、Storage Pointer/Outcome/Outbox 原子性、读路径、幂等和恢复语义，并在冻结前提供确定性参考模型。实际部署数据库和运维责任人属于 L4。
 
-## ARC-02 — C/H/D/I protocol bundle is conditionally aligned; A review and independent approval remain
-**Severity:** P2 · **Level:** L2 · **Owners:** A, C, H, D, I, Storage
+## ARC-02 — Storage v3.2.9 exact manifest is stale against later Owner review/CI pins
+**Severity:** P1 · **Level:** L2 · **Owners:** C, H, D, I, Storage, A
 
-**Evidence:** Storage v3.2.9 manifest Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3 binds H Unified 1.2.14 Blob 09fcd1fa29fe24255fbd87cae79dafb406594a59, CSubmitOutcome 1.0.1, H integrated authority-join mapping 1cbe74eba69325510d6b1019d971661f965eabf8, RecoveryJoin 1.0.2, RecoveryCutoff 1.0.5, and refreshed C/H/I/D role reviews. H full local path CI run 44069777296 passed 32 test methods. The manifest explicitly requires a fresh A review and is NOT JOINTLY FROZEN.
+**Evidence:** Storage v3.2.9 manifest Blob bf323a1682f2bfadc3ff41ea4f86883d678a77e3 pins earlier C/D/I review Blobs 4be9c1cd8f116086bab58340f07e38ddfc223e21 / ccdae9b45affb23c6741b5cceb27004b35a8e03e / 7c65650a37c8c0f270451fb0419e93259fc38151 and H run 44069777296 / commit 9eb06313e94e762f0fde4a606633a6dbe1bf8262. Later Owner branch HEADs corrected C/D/I H-schema pins (C 81f1e813..., D 7d017325..., I a68bb358...) and H updated CI binding to run 44069941327 / commit ba2c9341... / job 133993324484 (H HEAD 362cc113...).
 
-**Finding:** The earlier C schema pin mismatch and missing C review of the integrated mapping have been corrected by the latest Owner artifacts. B is CONDITIONALLY ALIGNED at L1/L2 candidate level. The remaining B governance gap is A's exact review of v3.2.9 and independent human Owner/governance acceptance; production proof adapters remain later gates.
+**Finding:** H 1.2.14/C 1.0.1 semantic/source alignment remains valid, but v3.2.9 no longer represents the latest exact Owner review/CI set. This is exact-currentness/provenance drift, not a demonstrated schema regression. The manifest must not be called the current joint bundle.
 
-**Required closure:** A reviews exact v3.2.9 and the Option A topology ADR; authorized human Owners separately approve where required. Do not transfer the A v3.2.8 review to v3.2.9.
+**Required closure:** Storage publishes a successor manifest (v3.3.0 or equivalent) binding the corrected C/D/I review Blobs, current H source/CI closure and run/commit/job. C/H/D/I review the identical successor Blob; A reviews that successor. Only then may B same-manifest alignment be restored.
 
-**中文：** Storage v3.2.9 已绑定 H 1.2.14、CSubmitOutcome 1.0.1、集成 Authority-Join Mapping、RecoveryJoin/RecoveryCutoff 和更新后的 C/H/I/D 角色审查；H 本地完整路径 CI 32 项通过。早期 C Schema Pin 不一致和 C 未审查集成 Mapping 的问题已由最新 Owner 工件修正。B 可在 L1/L2 候选层标记 CONDITIONALLY ALIGNED，但 v3.2.9 仍需 A 精确审查和独立人类 Owner/治理批准，且不继承 A 对 v3.2.8 的旧审查。
+**中文：** H 1.2.14/C 1.0.1 语义/源文件候选对齐仍成立，但 Storage v3.2.9 绑定的 C/D/I Review Blob 和 H CI Run 已被后续 Owner 分支修正/更新，当前性失效。这是精确来源漂移，不是已证明的 Schema 回退。Storage 必须发布 v3.3.0 或等效后继 Manifest，绑定最新 C/D/I Review Blob 与 H CI Source/Run/Commit/Job；C/H/D/I 对同一 Blob 复审，A 再审查后继版本。
 ## ARC-03 — CSubmitOutcome 1.0.1 is the current proposed immutable revision
 **Severity:** P2 · **Level:** L2 · **Owners:** C, H, I, Storage
 
