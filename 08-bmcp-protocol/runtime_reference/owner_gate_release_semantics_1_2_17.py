@@ -162,7 +162,11 @@ def validate_owner_gate_release(
     for field, expected in batch_to_manifest.items():
         if expected is None:
             return UNKNOWN
-        if str(manifest.get(field)) != str(expected):
+        actual = manifest.get(field)
+        if field == "batch_position":
+            if str(actual) != str(expected):
+                return INVALID
+        elif actual != expected:
             return INVALID
     try:
         batch_position = int(batch.get("coc_record_position"))
@@ -188,7 +192,10 @@ def validate_owner_gate_release(
     if release.get("manifest_content_digest") != manifest.get("manifest_content_digest"):
         return INVALID
 
-    expected_root = owner_reconciliation_root(manifest, owner)
+    try:
+        expected_root = owner_reconciliation_root(manifest, owner)
+    except Exception:
+        return UNKNOWN
     if release.get("reconciliation_root") != expected_root:
         return INVALID
 
