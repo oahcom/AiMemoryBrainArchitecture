@@ -17,7 +17,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 SCHEMA_ARTIFACT_REVISION = "1.2.12"
 WIRE_SCHEMA_VERSION = "1.3.0"
-C_OBJECT_SCHEMA_ID = "urn:aimba:schema:c-submit-outcome:1.0.0"
+C_OBJECT_SCHEMA_ID = "urn:aimba:schema:c-submit-outcome:1.0.1"
 C_PROFILE_ID = "AIMBA-C-CRYPTO-1.0"
 
 # Wire field -> immutable C object field. The exact H schema remains the
@@ -94,6 +94,8 @@ def _schema_errors(instance: dict, schema: dict) -> list[str]:
 
 def _semantic_errors(record: dict) -> list[str]:
     errors = []
+    if not record.get("sequence_namespace_ref"):
+        errors.append("C outcome sequence namespace is required")
     if int(record["COwnerLocalSequence"]) > int(record["COwnerHighWater"]):
         errors.append("C owner local sequence exceeds high-water")
     intent = record["COCParticipantIntentRef"]
@@ -181,8 +183,10 @@ def validate_provider_outcome(
     if invalid:
         return {"status": "INVALID", "errors": invalid, "unknown": []}
 
-    if c_object.get("schema_id") != "CSubmitOutcome" or c_object.get("schema_version") != "1.0.0":
-        invalid.append("wrong immutable C object schema identity")
+    if (c_object.get("schema_id") != "CSubmitOutcome"
+            or c_object.get("schema_version") != "1.0.1"
+            or c_object.get("schema_artifact_revision") != "1.0.1"):
+        invalid.append("wrong immutable C object schema identity/revision; require 1.0.1")
     if c_object.get("signature_profile_id") != C_PROFILE_ID:
         invalid.append("wrong C signature profile identifier")
     if c_object.get("message_type") != "C_PROVIDER_OUTCOME_RECORDED" or envelope.get("message_type") != c_object.get("message_type"):
@@ -256,3 +260,10 @@ def validate_raw_provider_outcome(
     except (UnicodeDecodeError, DuplicateJSONKey, json.JSONDecodeError, ValueError, TypeError) as exc:
         return {"status": "INVALID", "errors": [f"strict JSON parse failed: {type(exc).__name__}"], "unknown": []}
     return validate_provider_outcome(envelope, c_object, envelope_schema, c_object_schema, checks)
+
+
+# CSubmitOutcome 1.0.1 requires sequence_namespace_ref. The verify_key_status
+# authority callback must compare it with the authenticated CKeyStatusEvent
+# sequence_namespace_ref and prove event_sequence and record_sequence share the
+# same durable C authority sequencer. Missing callback remains UNKNOWN; this
+# local core never infers namespace equivalence.
