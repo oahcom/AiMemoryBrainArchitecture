@@ -224,3 +224,13 @@ This remains H CANDIDATE only: C confirmation, G Applied-consumer acceptance, I/
 H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` 已新增 §11 精确 final-request 字段映射提案。当前精确源 Blob SHA：`db59b63e322d7255b8b400f47859dcac32bb3027`（替代此前复审的 Blob `ed6b43a29aa368d772c701ffc83309a5aadf3c00`）。补充条款提议明确 FinalRequestBoundaryId/type、Context/Delivery/attempt 绑定、Managed Region 身份/修订/inventory/coverage/digest、verifier 身份绑定、I/D 权威引用、证据来源信息、逐请求 bypass 覆盖、重放身份和时间顺序规则。
 
 此版本仍仅为 H CANDIDATE：C 确认、G Applied 消费方接受、I/D/B 权威确认、版本化 Wire Schema 和一致性测试均待完成。在该精确源版本经过独立接受/对齐并翻译前，不得把 H 双语配对标记为完成。
+
+
+## 11. H Adapter Capability / Applied Attestation bilingual companion — 2026-11-17
+
+- Exact H source Blob: `db59b63e322d7255b8b400f47859dcac32bb3027` on `session-h-bmcp-protocol`.
+- Pair: `docs/en/08-bmcp-protocol/adapter-capability-and-applied-attestation.md` and `docs/zh-CN/08-bmcp-protocol/adapter-capability-and-applied-attestation.md`.
+- Structural readback: 22/22 headings and 33/33 table rows in source, EN and zh-CN; EN content is exact source text plus source/language metadata.
+- Targeted semantic parity review: [EN report](../reviews/translation/2026-11-17-h-adapter-capability-applied-bilingual-review.md) / [中文报告](../reviews/translation/2026-11-17-h-adapter-capability-applied-bilingual-review.zh-CN.md) — PASS for this exact Blob only.
+- H source status remains CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I. H conformance NOT RUN; implementation/interoperability NOT VERIFIED; C/G/H freeze BLOCKED.
+- Coverage: 1/7 H detailed core specifications paired. This does not complete H's detailed contract set or the C/G/H freeze.
