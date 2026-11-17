@@ -276,3 +276,28 @@ The engineering-phase entry plan still needs to identify the canonical implement
 中文：Issue #7 评论 #6962269783 已记录项目 Owner 的明确决定 `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`。当前阶段仓库按架构定义仓库运行；本仓库没有生产运行时代码并非当前架构阶段的实现阻塞，也不得在此仓库添加占位运行时实现。
 
 进入工程阶段前仍需确定规范实现仓库/分支、负责代码 Owner、构建/测试/部署权威和物理拓扑。该延期不代表任何生产 R3/DFI 测试通过；生产 R3 测试仍 NOT RUN / NOT EVIDENCED，Owner D/I 批准及独立专业审查仍待完成，生产激活仍未授权。
+
+
+## Manifest YAML integrity correction — PR #147 and PR #152 / Manifest YAML 完整性修正 — PR #147 与 PR #152（2026-11-18）
+
+### Evidence / 证据
+
+- PR #147 merged at `56336bd16b4dcab1b600eb7ab12e171fda0553a1`; exact Head `d3dbc5321ccf97429b3003b19a28d8100330fda9`; workflow run [#44189279179](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44189279179) SUCCESS. PyYAML `safe_load` parsed the file and required-field/path checks passed. This historical run did **not** reject duplicate mapping keys.
+- Strict-parser first run [#44189624240](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44189624240) FAILED on a real data-integrity defect: two `status` keys existed in the `remediation` mapping. The permissive loader silently retained the later mapping, masking the earlier IR-004..I-PRE-005 status block.
+- PR #152 merged at `bc6ab890aea68ea33f4de42e442d7ac22fcbf26b`; exact Head `08c017af689eb98ffc8e114e54ed46314cfbf757`; strict unique-key validation run [#44189789286](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44189789286) SUCCESS; GOV-DOC-001 run [#44189789166](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44189789166) SUCCESS.
+- The two remediation maps were preserved and disambiguated as `latest_review_status` and `source_review_status`. Negative fixtures reject duplicate top-level and nested keys; the actual manifest passes strict parsing and required-field/path checks.
+- Formal JSON Schema validation remains NOT RUN. Production R3/DFI-001…DFI-022 remains NOT RUN / NOT EVIDENCED. Owner D/I approvals and independent specialist reviews remain pending.
+
+### Evidence boundary / 证据边界
+
+PR #147's successful permissive parse remains a historical fact, but it is not proof of unique keys or lossless manifest interpretation. PR #152 closes the specific duplicate-key defect at the strict structural-validation layer only. Neither PR proves formal schema validity, R3 conformance, independent Owner acceptance, or production readiness.
+
+### 中文记录
+
+- PR #147 已合并至 `56336bd16b4dcab1b600eb7ab12e171fda0553a1`，精确 Head 为 `d3dbc5321ccf97429b3003b19a28d8100330fda9`，运行 #44189279179 SUCCESS。PyYAML `safe_load` 完成了解析及必需字段/路径检查，但该历史运行**没有检测重复映射键**。
+- 严格解析器首次运行 #44189624240 FAILED，发现真实数据完整性缺陷：`remediation` 映射中存在两个 `status` 键。宽松解析器静默保留后一个映射，导致前一个 IR-004..I-PRE-005 状态块被覆盖。
+- PR #152 已合并至 `bc6ab890aea68ea33f4de42e442d7ac22fcbf26b`，精确 Head 为 `08c017af689eb98ffc8e114e54ed46314cfbf757`。严格唯一键验证运行 #44189789286 SUCCESS；GOV-DOC-001 运行 #44189789166 SUCCESS。
+- 两组状态分别更名为 `latest_review_status` 与 `source_review_status`，完整保留原有信息。顶层和嵌套重复键负例测试通过；真实 Manifest 的严格解析及必需字段/路径检查通过。
+- 正式 JSON Schema 验证仍 NOT RUN；生产 R3/DFI-001…DFI-022 仍 NOT RUN / NOT EVIDENCED；Owner D/I 批准和独立专业审查仍待完成。
+
+PR #147 的宽松解析成功是历史事实，但不代表键唯一或清单解释无损。PR #152 只关闭了严格结构验证层面的重复键缺陷，不代表正式 Schema、R3 符合性、独立 Owner 验收或生产就绪。
