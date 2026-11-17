@@ -1,0 +1,168 @@
+name: AI Owner Worker (bounded pilot)
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Open GitHub issue number carrying ai:ready, owner, risk and work labels
+        required: true
+        type: number
+
+permissions:
+  contents: read
+  issues: read
+
+concurrency:
+  group: ai-owner-worker-${{ github.event.issue.number || inputs.issue_number }}
+  cancel-in-progress: false
+
+jobs:
+  codex:
+    name: Execute one bounded Owner task
+    if: >-
+      ${{ (github.event_name == 'workflow_dispatch') ||
+          (github.event_name == 'issues' && github.event.label.name == 'ai:ready') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    outputs:
+      issue_number: ${{ steps.task.outputs.issue_number }}
+      owner: ${{ steps.task.outputs.owner }}
+      task_title: ${{ steps.task.outputs.title }}
+      base_sha: ${{ steps.task.outputs.base_sha }}
+      changed: ${{ steps.patch.outputs.changed }}
+    steps:
+      - name: Check out trusted default branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve and validate issue
+        id: task
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_ISSUE_NUMBER: ${{ github.event.issue.number }}
+          INPUT_ISSUE_NUMBER: ${{ inputs.issue_number }}
+        run: |
+          set -euo pipefail
+          issue_number="${EVENT_ISSUE_NUMBER:-${INPUT_ISSUE_NUMBER}}"
+          [[ "$issue_number" =~ ^[0-9]+$ ]] || { echo "::error::invalid issue number"; exit 2; }
+          gh api "repos/${GITHUB_REPOSITORY}/issues/${issue_number}" > /tmp/issue.json
+          python3 scripts/ai_worker/prepare_task.py /tmp/issue.json .ai-worker/task.json
+          echo "issue_number=$issue_number" >> "$GITHUB_OUTPUT"
+          echo "owner=$(python3 -c 'import json;print(json.load(open(".ai-worker/task.json"))["owner"])')" >> "$GITHUB_OUTPUT"
+          echo "title=$(python3 -c 'import json;print(json.load(open(".ai-worker/task.json"))["title"].replace("%","%25").replace("\n","%0A"))')" >> "$GITHUB_OUTPUT"
+          echo "base_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Require model API credential
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$OPENAI_API_KEY" || {
+            echo "::error::Repository Actions secret OPENAI_API_KEY is not configured."
+            exit 2
+          }
+
+      - name: Run Codex in workspace-only sandbox
+        id: run_codex
+        uses: openai/codex-action@306c6a196a99dcc6582530c396a19d2672d5e9ec # v1.14
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .github/codex/prompts/owner-worker.md
+          permission-profile: ":workspace"
+          safety-strategy: drop-sudo
+          output-file: .ai-worker/final-message.txt
+          effort: high
+
+      - name: Validate and export proposed patch
+        id: patch
+        run: |
+          set -euo pipefail
+          git add -A
+          git reset -q -- .ai-worker/task.json .ai-worker/final-message.txt
+          git diff --cached --check
+          changed="$(git diff --cached --name-only)"
+          if [ -z "$changed" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Codex made no eligible changes."
+            exit 0
+          fi
+          while IFS= read -r path; do
+            case "$path" in
+              *.md) ;;
+              *) echo "::error::non-Markdown change blocked: $path"; exit 3 ;;
+            esac
+            case "$path" in
+              .github/*|14-ai-development/*|scripts/ai_worker/*|reviews/ai-run-003/*)
+                echo "::error::protected path change blocked: $path"; exit 3 ;;
+            esac
+          done <<< "$changed"
+          git diff --cached --binary > /tmp/ai-owner-worker.patch
+          test -s /tmp/ai-owner-worker.patch
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$changed" > /tmp/changed-files.txt
+
+      - name: Upload proposed patch and evidence
+        if: steps.patch.outputs.changed == 'true'
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
+        with:
+          name: ai-owner-worker-${{ steps.task.outputs.issue_number }}-${{ github.run_id }}
+          path: |
+            /tmp/ai-owner-worker.patch
+            /tmp/changed-files.txt
+            .ai-worker/final-message.txt
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish proposed branch and pull request
+    needs: codex
+    if: needs.codex.result == 'success' && needs.codex.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Check out exact base revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          ref: ${{ needs.codex.outputs.base_sha }}
+          fetch-depth: 0
+
+      - name: Download proposed patch
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ai-owner-worker-${{ needs.codex.outputs.issue_number }}-${{ github.run_id }}
+          path: /tmp/ai-owner-worker
+
+      - name: Apply patch and publish branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ needs.codex.outputs.issue_number }}
+          OWNER: ${{ needs.codex.outputs.owner }}
+          TASK_TITLE: ${{ needs.codex.outputs.task_title }}
+          BASE_SHA: ${{ needs.codex.outputs.base_sha }}
+        run: |
+          set -euo pipefail
+          git apply --index /tmp/ai-owner-worker/ai-owner-worker.patch
+          git diff --cached --check
+          test -n "$(git diff --cached --name-only)"
+          branch="ai/owner-${OWNER,,}/issue-${ISSUE_NUMBER}/run-${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "ai(owner-${OWNER,,}): address issue #${ISSUE_NUMBER}"
+          git push origin "HEAD:refs/heads/$branch"
+          pr_url="$(gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base "${{ github.event.repository.default_branch }}" \
+            --head "$branch" \
+            --title "AI proposal (Owner ${OWNER}) for #${ISSUE_NUMBER}: ${TASK_TITLE}" \
+            --body "Automated bounded Owner proposal for #${ISSUE_NUMBER}.\n\n- Owner: ${OWNER}\n- Base SHA: ${BASE_SHA}\n- Workflow run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\n- This PR is a proposal only. No automated merge or acceptance.\n- Review the complete diff and verify all evidence before approval.")"
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "AI Owner Worker produced a proposed PR: $pr_url. This is not an approval or merge."
