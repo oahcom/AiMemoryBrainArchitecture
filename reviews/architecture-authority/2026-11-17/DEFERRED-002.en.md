@@ -1,6 +1,6 @@
 # Deferred Capabilities Register — DEFERRED-002
 
-- Version: 1.0.0; baseline `b372b62c640a2b656e54b6db62a4ee67d7d8c001`.
+- Version: 1.0.0; baseline `6470f25ca23b8d35c06f60be2326867066418d18`.
 - Deferral is not a waiver of core correctness, authorization, consistency, Forget or mandatory Gate requirements.
 
 | ID | Capability deferred | Owner | Risk | Blocking | Permitted scope | Prohibited scope | Closure criteria / evidence | Deadline / Gate |
