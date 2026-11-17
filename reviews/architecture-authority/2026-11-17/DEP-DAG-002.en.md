@@ -1,6 +1,6 @@
 # Architecture and Implementation Dependency DAG — DEP-DAG-002
 
-- Version: 1.0.0; baseline `6470f25ca23b8d35c06f60be2326867066418d18`.
+- Version: 1.0.0; historical assessment snapshot `6470f25ca23b8d35c06f60be2326867066418d18` (not current main).
 - Authority: A integration; Owner-specific semantics remain with named Owners.
 
 ## Architecture decision DAG
@@ -80,3 +80,8 @@ Parallel bounded work: synthetic-data retrieval benchmarks; DB/COC candidate com
 - Technology ADRs follow Owner contracts and reproducible experiments, not the reverse.
 
 See SYS-RISK-002, DEV-FEAS-002, PRIORITY-002 and GATE-002.
+
+
+## Current main HEAD / 当前 Main HEAD
+
+The current main HEAD independently observed for this publication is `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The earlier `6470f25...` / `b372b62...` values are historical assessment snapshots, not current main. This package has not completed a full source-by-source delta audit against current main; G1 remains PARTIAL and all Gate/freeze restrictions remain in force.
