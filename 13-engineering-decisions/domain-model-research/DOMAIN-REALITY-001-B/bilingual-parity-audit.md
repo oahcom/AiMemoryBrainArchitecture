@@ -354,3 +354,20 @@ B 当前性审计中新增记录的外部 Owner 来源 Pin：
 B-CONFLICT-017 is now CLOSED at manifest-consistency level only. The author-side English/Chinese status mirror has been updated; independent clause-by-clause bilingual semantic review remains pending. B5 remains BLOCKED / NOT PASSED and B6 remains INDEPENDENT_REVIEW_PENDING.
 
 B-CONFLICT-017 现仅在 Manifest 一致性层面 CLOSED。作者侧中英文状态对照已更新；独立逐条双语语义审查仍待完成。B5 仍 BLOCKED / NOT PASSED，B6 仍 INDEPENDENT_REVIEW_PENDING。
+
+
+### 8.6 B2 decision checkpoint refresh / B2 决策检查点刷新
+
+The B2 semantic checkpoint was added to `domain-model-decision-record.md`, and the README now mirrors its unresolved topics. Exact readback:
+
+B2 语义检查点已加入 `domain-model-decision-record.md`，README 也同步记录未决主题。精确读回：
+
+| File / 文件 | Exact Blob SHA / 精确 Blob SHA | Lines / 行数 |
+|---|---|---:|
+| README.md | `4c78c656c9c8a80e4bf2c9d440381d6eb2191019` | 314 |
+| domain-model-decision-record.md | `b8a7ceb25a4c28ea4d261a9383b5b16f7c4c2037` | 256 |
+| bilingual-parity-audit.md | `f82f1232f420848a4599ed0f10ed4611f618ec7a` (pre-update self Blob) | 357 |
+
+The B2 checkpoint preserves Fact/Claim and Claim identity as undecided; confirms Scope/Permission separation and B's typed-reference mapping only within their stated authority; and records Issue #5 / I36-GOV-01..10 as still OPEN / GOVERNANCE-BLOCKED. B2 remains IN PROGRESS / NOT PASSED.
+
+B2 检查点保留 Fact/Claim 与 Claim 身份未决；确认 Scope/Permission 分离及 B 类型化引用映射仅在其既定权威范围内成立；并记录 Issue #5 / I36-GOV-01..10 仍为 OPEN / GOVERNANCE-BLOCKED。B2 仍 IN PROGRESS / NOT PASSED。
