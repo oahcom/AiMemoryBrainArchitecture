@@ -81,7 +81,19 @@
 | OPR-004 | Owner-local cursors/epochs are typed | D cursor, I PermissionEpoch, F watermark, G version, Storage XID kept separate | Compare unrelated counters as global order |
 | OPR-005 | Publication requires Storage authority | VisibilityPointer and PublicationReceipt read back | I COMMIT_WON or E local Published state exposes bytes |
 
-## 8. Candidate executable test catalogue / 候选可执行测试目录
+## 8. Authentication and physical-order invariants / 认证与物理顺序不变量
+
+| ID | Invariant | Positive condition | Negative condition |
+|---|---|---|---|
+| AUTH-001 | C origin signature, H transport authentication and I authorization are separate | Each is verified by its authority and bound to exact message/context | Treat payload sender claim or H gateway receipt as C origin proof |
+| AUTH-002 | C object P0 and outer-envelope P0 are distinct | Both are independently computed/verified under exact profile and object | Reuse C object P0 as outer-envelope P0 without explicit approval |
+| AUTH-003 | Missing trust evidence is UNKNOWN, never VALID | Missing profile/key history/anti-rollback/principal fails closed | Treat absent trust data as permissive |
+| AUTH-004 | Protected transport context is verifier-produced | Context is constructed only by authenticated adapter and bound to channel/session | Caller constructs context from payload claims |
+| AUTH-005 | Replay reservation is durable and ordered | Reservation/acceptance/prior-result publication have explicit crash-safe semantics | In-memory replay set or reserve before required auth checks |
+| SER-001 | SerializationRevision is local to one physical anchor | Revision compares only within one AuthoritySerializationAnchorRef | Compare to D FenceGeneration, I PermissionEpoch, C sequence, COC position or XID |
+| SER-002 | SerializationTransitionRef idempotency includes immutable digest | Same ref/same digest replays same result | Same ref/different digest silently accepted |
+
+## 9. Candidate executable test catalogue / 候选可执行测试目录
 
 | Test ID | Setup | Expected result | Owner |
 |---|---|---|---|
@@ -103,7 +115,7 @@
 | T-OPR-01 | Same operation key with changed digest | Conflict | Owner operation |
 | T-OPR-02 | Compare PermissionEpoch with ForgetFenceGeneration | Type error/reject | I/D/B |
 
-## 9. Validation status / 验证状态
+## 10. Validation status / 验证状态
 
 - Test specifications: recorded above.
 - JSON Schema: NOT CREATED; core identity/Fact-Claim/Applied schemas are not stable enough to freeze.
@@ -111,7 +123,7 @@
 - Property-based tests: TO_VALIDATE after nominal type/identity and state machine decisions stabilize.
 - Fault injection: NOT RUN; JF-10 P0 remains open (Issue #10).
 
-## 10. Gate status / 门禁状态
+## 11. Gate status / 门禁状态
 
 B4 is NOT READY. Invariants are candidate and owner-scoped; test specifications are not executable proof. No schema or runtime conformance is claimed.
 
