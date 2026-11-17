@@ -186,3 +186,104 @@ The exact CI evidence in this decision (29/29, run `44181762581`) is for the ear
 H 分支已从本委派 G 角色决议审查的精确快照 `9fb2097...` 前进至当前 Head `b14e388...`。当前 H Validator 已将 Replay Disclosure 检查拆分为两个独立 Callback：I 当前授权/PermissionEpoch/Key/Principal/Audience/Scope，以及 D 当前 ForgetOperation/Fence/Lineage。二者均为 Tri-state，必须同时通过后才能返回 `original_result_ref`。H Validator 也包含 C Resolver 和精确字段映射参考实现。
 
 本决议引用的 29/29 CI Run `44181762581` 属于旧 H Head `9fb2097...`，不是当前 `b14e388...`。当前 29 项测试尚无本审查可核实的精确 Head Run。因此本 G 角色决议仍仅为委派候选消费者接受，不是真实 G Owner 签名、生产集成验收或 G 持久化证明。
+
+
+## 10. Current H/C source refresh — 2026-11-18
+
+This append-only refresh replaces stale source pins for the candidate consumer review. It does not broaden the decision or turn delegated G-role work into a real Owner signature.
+
+### Exact current source pins
+
+- G Owner branch HEAD observed: `2c53a9d872ad4d57d99bd24a860ca695b9e3a661`.
+- H Owner branch HEAD observed: `4386f67a61f7968da4c3603f28cc8a5100714f9f`.
+- C Owner branch HEAD observed: `9e18e9065377f291b01536c383fcf4a7aecb9971`.
+- H Applied Delivery Evidence 1.0.0 schema Blob: `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608`.
+- H validator Blob: `43f402e4a09034da197ac24856cddbd496c9c75f`.
+- H conformance tests Blob: `98242cc193a77b27d58b39353ccc031201992614`.
+- H hardening addendum Blob: `4c220e998fc6ba700157598b0384dc3134cf8575`.
+- H CSubmitOutcome join addendum Blob: `9ff4ac5b64b354f63add21a5d16d37da46835c07`.
+- CSubmitOutcome 1.0.1 schema Blob: `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`.
+- CSubmitOutcome 1.0.1 vector Blob: `c447f8c2908469c52cb52a448101495a331277c5`.
+- C delegated exact review of H resolver binding / 30-test head: C Phase 3.8.29 Blob `ef90613b19b857c9436bab86b8b42c26a54bdda8`.
+- Earlier C delegated join review: C Phase 3.8.28 Blob `7ae8f2609a8786c4a5a715a270faa706156ed462`.
+
+The H schema/validator/test/addendum Blobs on current H Owner branch `4386f67...` are byte-identical to the current-main Blobs read in the same refresh. H's code files did not change in the final H branch successor commit; that commit adds the Chinese Unified 1.2.15 structural-conformance document.
+
+### Exact CI scope
+
+- H exact code Head reviewed by C Phase 3.8.29: `4c16410f8b20b8fc2bc8c7609eb7bf07d83f317e`.
+- H exact CI run [#44187702465](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44187702465): SUCCESS, 30/30.
+- The exact schema, validator and test Blobs from that 30-test Head match the current H Owner branch Blobs listed above.
+- This is code-blob equivalence plus exact-Head CI on `4c16410...`; it is not a claim that CI ran on the later documentation-only H branch HEAD `4386f67...`.
+- C Phase 3.8.29 is a delegated C-role review, not an independent human C Owner signature. It accepts the immutable C record field-mapping algorithm as a reference candidate with conditions only.
+
+### C 1.0.1 semantics that G must preserve
+
+The current C 1.0.1 schema requires `sequence_namespace_ref` and carries `ActualInferenceRequestId` as an optional property (it is not in the schema's required array). The C Phase 3.11.1 sequence-namespace amendment is PROPOSED, not a production trust/ledger registration.
+
+For G Full Applied:
+1. The H resolver result must be the exact C record named by H `c_submit_outcome_ref`; H exact reference, sequence, payload digest and FinalRequestBoundary equality checks are reference-code candidate behavior only.
+2. C's `Outcome` and `SideEffectStatus` remain C-owned. G may consider Full Applied only for determinate `HANDOFF_ACCEPTED` + `PROVEN_OCCURRED` with all required ProviderRequest/Receipt and participant evidence.
+3. Because C schema 1.0.1 does not require `ActualInferenceRequestId`, absence cannot be silently treated as an exact C/H request join. Under this G candidate predicate, absent ActualInferenceRequestId means H observation may be retained but Full Applied remains UNKNOWN / INELIGIBLE until an authorized C/G profile decision provides an independently proven exact request binding.
+4. G must join C `RequestDigest`, ProviderAttempt identity/generation and C causal/COC participant lineage to the exact G request and Applied evidence revision. H's 1.0.0 message does not replace those joins.
+
+### Updated disposition
+
+- H/C field-mapping algorithm: ACCEPTED AS REFERENCE CANDIDATE WITH CONDITIONS (delegated C/G role reviews only).
+- H 30/30 exact-code-head reference conformance: PASS on run #44187702465; current H code Blobs match.
+- Live C resolver, C Owner Ledger inclusion/high-water, real C signer/profile trust and production sequence namespace: NOT IMPLEMENTED / NOT VERIFIED.
+- I PermissionEpoch/key/audience/scope and D ForgetFence callbacks: not live authority integrations.
+- G durable Applied schema/SDK/unique index/atomic commit/crash-restore/multi-replica behavior: NOT IMPLEMENTED / NOT VERIFIED; G-AP-P01..P18 remain SPECIFIED / NOT RUN.
+- Full Applied: NOT ACCEPTED / NOT PROVEN.
+- Global C/G/H freeze and production activation: NO / NOT AUTHORIZED.
+
+---
+
+## 11. 中文：H/C 当前来源刷新 — 2026-11-18
+
+本追加记录刷新候选消费者审查的过期来源 Pin，不扩大原决议范围，也不把委派 G 角色工作转化为真实 Owner 签名。
+
+### 精确当前来源
+
+- G Owner 分支 HEAD：`2c53a9d872ad4d57d99bd24a860ca695b9e3a661`。
+- H Owner 分支 HEAD：`4386f67a61f7968da4c3603f28cc8a5100714f9f`。
+- C Owner 分支 HEAD：`9e18e9065377f291b01536c383fcf4a7aecb9971`。
+- H Applied Delivery Evidence 1.0.0 Schema Blob：`2ce8776ca5ee5e014b234dc3eb34a7cb7961e608`。
+- H Validator Blob：`43f402e4a09034da197ac24856cddbd496c9c75f`。
+- H Conformance Tests Blob：`98242cc193a77b27d58b39353ccc031201992614`。
+- H Hardening Addendum Blob：`4c220e998fc6ba700157598b0384dc3134cf8575`。
+- H CSubmitOutcome Join Addendum Blob：`9ff4ac5b64b354f63add21a5d16d37da46835c07`。
+- CSubmitOutcome 1.0.1 Schema Blob：`a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`。
+- CSubmitOutcome 1.0.1 Vector Blob：`c447f8c2908469c52cb52a448101495a331277c5`。
+- C 对 H Resolver Binding / 30 项测试 Head 的委派精确审查：C Phase 3.8.29 Blob `ef90613b19b857c9436bab86b8b42c26a54bdda8`。
+- C 较早的 Join 委派审查：C Phase 3.8.28 Blob `7ae8f2609a8786c4a5a715a270faa706156ed462`。
+
+同一轮读取确认，当前 H Owner 分支 `4386f67...` 上的 Schema/Validator/Tests/Addendum Blob 与当前 main 的对应 Blob 完全相同。H 分支最后的后继提交仅增加 Unified 1.2.15 结构符合性中文文档，未改变上述代码文件。
+
+### 精确 CI 范围
+
+- C Phase 3.8.29 审查的 H 精确代码 Head：`4c16410f8b20b8fc2bc8c7609eb7bf07d83f317e`。
+- H 精确 CI Run [#44187702465](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44187702465)：SUCCESS，30/30。
+- 该 30 项测试 Head 的 Schema、Validator、Tests Blob 与当前 H Owner 分支列出的 Blob 一致。
+- 这证明代码 Blob 等价且该精确代码 Head 的 CI 通过；不能声称 CI 直接运行在后续仅修改文档的 H 分支 HEAD `4386f67...` 上。
+- C Phase 3.8.29 是委派 C 角色审查，不是独立人类 C Owner 签名。它仅有条件地接受不可变 C Record 字段映射算法作为参考候选。
+
+### G 必须保留的 C 1.0.1 语义
+
+当前 C 1.0.1 Schema 将 `sequence_namespace_ref` 设为必需字段；`ActualInferenceRequestId` 虽有属性定义，但不在 Schema 的 required 数组中。C Phase 3.11.1 Sequence Namespace 修订仍为 PROPOSED，不等于生产 Trust/Ledger 注册。
+
+对于 G Full Applied：
+1. H Resolver 返回的必须是 H `c_submit_outcome_ref` 所指向的同一 C Record；H 的精确引用、Sequence、Payload Digest 和 FinalRequestBoundary 相等检查目前仅是参考代码候选行为。
+2. C 的 `Outcome` 和 `SideEffectStatus` 仍归 C 所有。G 只有在确定的 `HANDOFF_ACCEPTED` + `PROVEN_OCCURRED`，并具备全部必要 ProviderRequest/Receipt 和 Participant Evidence 时才可评估 Full Applied。
+3. 因 C 1.0.1 Schema 并未要求 `ActualInferenceRequestId`，缺失时不得静默视为 C/H Request 精确关联。按当前 G 候选 Predicate，缺失时可保留 H Observation，但 Full Applied 必须保持 UNKNOWN / INELIGIBLE，直至经授权的 C/G Profile 决议提供独立证明的精确 Request 绑定。
+4. G 必须把 C `RequestDigest`、ProviderAttempt Identity/Generation 和 C Causal/COC Participant Lineage 关联到精确 G Request 与 Applied Evidence Revision。H 1.0.0 消息不能替代这些 Join。
+
+### 更新后的结论
+
+- H/C 字段映射算法：有条件接受为参考候选（仅委派 C/G 角色审查）。
+- H 30/30 精确代码 Head 参考符合性：Run #44187702465 PASS；当前 H 代码 Blob 一致。
+- 真实 C Resolver、C Owner Ledger Inclusion/High-water、真实 C Signer/Profile Trust 和生产 Sequence Namespace：NOT IMPLEMENTED / NOT VERIFIED。
+- I PermissionEpoch/Key/Audience/Scope 与 D ForgetFence Callback：尚未接入真实权威服务。
+- G Durable Applied Schema/SDK/Unique Index/Atomic Commit/Crash-Restore/Multi-replica：NOT IMPLEMENTED / NOT VERIFIED；G-AP-P01..P18 仍 SPECIFIED / NOT RUN。
+- Full Applied：NOT ACCEPTED / NOT PROVEN。
+- 全局 C/G/H Freeze 和生产激活：NO / NOT AUTHORIZED。
