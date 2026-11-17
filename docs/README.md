@@ -16,6 +16,8 @@ Chinese and English are maintained as equivalent reading versions. Normative arc
 
 **Coverage and migration plan / 覆盖与迁移计划：** [Bilingual Documentation Status](translation-status.md)
 
+**Mandatory project rule / 项目强制规范：** Every architecture design and semantic change must be documented in Chinese and English in the same change set. See [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md).
+
 ## Documentation layers / 文档层次
 
 ### L1 — Understand the system / 理解系统
