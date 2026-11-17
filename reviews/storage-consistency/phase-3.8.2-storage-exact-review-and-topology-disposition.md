@@ -183,3 +183,20 @@ The rerun does not add new test vectors. Storage's ACCEPT WITH ENUMERATED AMENDM
 ## 7. Schema 1.2.7 signature profile persistence boundary / Schema 1.2.7 签名配置持久化边界
 
 H schema 1.2.7 exact review Blob `8bed0b05cd631014bf5af7cb5a8dafdd932940e9`; schema Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`. Storage accepts `signature_profile_id` as a signed-envelope reference field only, not as a trust decision. Storage may persist the exact bytes/reference and include it in the immutable proof digest, but must not resolve issuer trust, select algorithms or treat the payload's profile as authenticated. I remains authoritative for trust/key/profile resolution; H owns wire shape; C owns Provider Outcome truth. Because the 66-case candidate suite does not cover schema 1.2.7, no validator or cryptographic conformance PASS is claimed. Storage topology remains ADR-BLOCKED.
+
+
+## 12. Expanded H 93-test suite and current JoinProof exact pin
+
+The controlling Storage JoinProof contract is now Blob `155b0d613dc785f9f5904e4509cfce1ed06a2f0d`. It records the H 93-method candidate suite and latest CI run [44042074640](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042074640), commit `fb9a2ab8b528c2b7010d935372f76a14d6676755`, with Node.js 22 explicitly configured; 93 tests completed successfully.
+
+The added TPH-01..26 reference tests improve executable coverage of the two-record Batch/Manifest digest chain and restore-fenced state machine. XLANG-01 compares Python and Node implementations over fixed HRC-TEST-v1 vectors. These are meaningful candidate improvements, but not production conformance.
+
+Updated H exact pins:
+- Semantic contract: `e38ab74d29ded66987d3295503b6f717b6cd83e6`.
+- Two-phase reference/tests: `4c8dcafdb49db5279a1d1190b832a9c6c05d6b67` / `690ab42b4f8f7e61adf38fd7b6006f20cc71a7f5`.
+- Python/Node differential test/reference/vectors: `1b32fdf81530353b8bd4571fe6d4f77119a0458b` / `992585d3bc323dc0224d0075ef14abd992980f65` / `cc7e98c729db8d9f615e17a9542b3cb63f459922`.
+- Workflow: `55d877499010f6a776ae432c1fb2a3a31bae5f11`.
+
+The H suite still uses HRC-TEST-v1, not an I-approved production signature/canonicalization profile. TPH uses a deterministic reference model, not a real quorum log or durable COC service. XLANG-01 compares only fixed test vectors; it does not establish full SDK interoperability.
+
+Storage's exact disposition remains **ACCEPT WITH ENUMERATED AMENDMENTS** for the logical JoinProof only. Live COC/owner-ledger enumeration, signatures/key status, durable JoinProof commit/readback, owner-local CAS, JF-10 physical same-GID resolution, and topology T1–T8 remain OPEN. No independent Owner signature or physical conformance PASS is claimed.
