@@ -6,6 +6,7 @@ on:
       - session-c-agent-integration-2026-11-16
     paths:
       - "07-agent-integration/schemas/c-submit-outcome-1.0.0.schema.json"
+      - "07-agent-integration/schemas/c-submit-outcome-1.0.1.schema.json"
       - "07-agent-integration/tests/conformance/provider_outcome/**"
       - ".github/workflows/c-provider-outcome-conformance.yml"
   workflow_dispatch:
