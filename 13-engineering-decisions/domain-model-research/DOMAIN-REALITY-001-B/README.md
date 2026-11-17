@@ -205,3 +205,13 @@ B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪�
 - 双语审计将其标记为 `REMEDIATED — MANUAL PARITY REVIEW PENDING`；这不代表外部来源主张已通过独立验证。
 - B1 remains IN PROGRESS; B2/B3 remain open; B5 remains BLOCKED / NOT PASSED; B6 remains INDEPENDENT_REVIEW_PENDING.
 - B1 仍进行中；B2/B3 仍未关闭；B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。
+
+
+## 15. Existing baseline evidence bilingual remediation / 现有基线证据双语整改
+
+- `existing-domain-model-baseline.md` now includes a full Chinese peer for the Owner branch snapshot, relevant PR/Issue impact, legacy B branch comparison, all five material conflicts, missing definitions, confidence and B0 disposition. Exact Blob: `08f2843db1d41027ee6d1bee9af564ce07a3a793`.
+- The file-by-file audit records `REMEDIATED — MANUAL PARITY REVIEW PENDING`; its historical branch/issue snapshots still require live-source refresh before acceptance.
+- `existing-domain-model-baseline.md` 已为 Owner 分支快照、相关 PR/Issue 影响、旧 B 分支比较、五项重大语义冲突、缺失定义、基线置信度及 B0 结论补齐完整中文对照。精确 Blob：`08f2843db1d41027ee6d1bee9af564ce07a3a793`。
+- 逐文件审计将其标记为 `REMEDIATED — MANUAL PARITY REVIEW PENDING`；其中历史分支/Issue 快照在验收前仍须实时刷新。
+- B0 remains PARTIAL / NOT PASSED; B5 remains BLOCKED / NOT PASSED; B6 remains INDEPENDENT_REVIEW_PENDING.
+- B0 仍为 PARTIAL / NOT PASSED；B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。
