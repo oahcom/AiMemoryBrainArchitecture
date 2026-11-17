@@ -1,5 +1,7 @@
 # C Owner 闭合提案 — 面向 CGH-APPLIED-1.1 的 Provider Receipt 与不可变 CSubmitOutcome
 
+> **已被后续 Owner 工件取代（仅作为审计轨迹保留）。** C 已针对精确 recovery-batch package 发布 ACCEPT WITH ENUMERATED EXCEPTIONS 决议，并发布 CSubmitOutcome 1.0.1 规范合同/Schema。当前权威工件为：C Phase 3.6 addendum Blob 45a48249717c8cddb07ab96197730ef93d406c22；C Provider Outcome 规范合同 Blob 819705037da89834e10b6dd2ec6e66c1b8c70886；CSubmitOutcome 1.0.1 Schema Blob a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda。本提案不再代表当前 Producer 合同缺口。
+
 - 日期：2026-11-17
 - 状态：**提交 C Owner 审阅的提案 — 不是 Owner 决议**
 - C 源基线：`07-agent-integration/phase-3.6-final-request-evidence-contract.md`，Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`。
