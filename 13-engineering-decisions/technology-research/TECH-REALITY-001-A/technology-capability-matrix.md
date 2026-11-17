@@ -69,3 +69,14 @@ Temporal/Restate 能够持久执行步骤并恢复编排，但不会自动把 Wo
 ## 5. Decision rule / 决策规则
 
 No row becomes DECIDED by this matrix. Each choice must be moved into the owning ADR only after: (a) exact owner contract pin, (b) competing candidate comparison, (c) minimal prototype, (d) crash/race/fault tests, (e) migration and recovery plan, and (f) independent review.
+
+
+## 6. Updated Storage evidence / Storage 最新证据补充
+
+The current Storage branch's serialization ADR addendum (Blob `1ef47d4e5711c7db73a24d249adf1992be1f6aa4`) selects **one logical serializable transaction domain per Canonical Memory authority** as the normative v1 serialization architecture. It covers D admission/fence/dependency/publication-participant records and Storage hidden participant/final VisibilityPointer/PublicationReceipt/outcome/outbox records while keeping D and Storage semantic authorities separate. I's PolicyDomain sequencer and COC quorum log remain independent.
+
+This is an architecture-level logical profile, not a physical database selection. The PostgreSQL 18.7 capability dossier (Blob `0aabf66848dc97deee028c571183c0d7204008c0`) records bounded CI engine capability PASS for prepared-XID persistence and same-XID recovery, synchronous failover, backup/restore, ACK-loss and PITR subtests. It does not prove the Brain's D/I/COC adapters, integrated publication races, production deployment or JF-10 end-to-end behavior. Gate A PARTIAL PASS / OPEN; JF-10 runtime P0 OPEN.
+
+Storage 当前分支的序列化 ADR 补充条款（Blob `1ef47d4e5711c7db73a24d249adf1992be1f6aa4`）选择**每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain**作为 v1 规范性序列化架构，覆盖 D Admission/Fence/Dependency/PublicationParticipant 与 Storage Hidden Participant/最终 VisibilityPointer/PublicationReceipt/Outcome/Outbox，同时保持 D 和 Storage 的语义权威分离。I 的 PolicyDomain Sequencer 与 COC Quorum Log 仍独立。
+
+这是逻辑架构档案，不是物理数据库选型。PostgreSQL 18.7 能力档案（Blob `0aabf66848dc97deee028c571183c0d7204008c0`）记录了 Prepared-XID 持久化与同 XID 恢复、同步故障切换、备份恢复、ACK 丢失和 PITR 的有限 CI 引擎能力 PASS。它不能证明 Brain 的 D/I/COC Adapter、集成 Publication 竞争、生产部署或 JF-10 端到端行为。Gate A PARTIAL PASS / OPEN；JF-10 runtime P0 OPEN。
