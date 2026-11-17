@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[3]
 SCHEMA_PATH=ROOT/"schemas"/"bmcp.coc-jf10-unified-1.2.9.schema.json"
 sys.path.insert(0,str(ROOT/"runtime_reference"))
 from unified_manifest_semantics import (VALID,INVALID,UNKNOWN,td,snapshot_root,content_digest,
-    validate_union,validate_pair,validate_release,validate_profile,validate_provider_outcome)
+    validate_union,validate_pair,validate_release,validate_epoch_completed,validate_profile,validate_provider_outcome)
 
 
 def fixtures():
@@ -168,6 +168,13 @@ class UnionSemanticsTests(unittest.TestCase):
         self.assertEqual(validate_union(m,self.prefix,self.admissions[:1],self.snaps,self.proofs),INVALID)
 
 
+    def test_UNION_21_membership_proof_ref_mismatch_fails(self):
+        proofs=deepcopy(self.proofs);proofs[("C","C/admit-1")]["proof_ref"]="wrong/ref"
+        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),INVALID)
+    def test_UNION_22_membership_proof_outside_highwater_fails(self):
+        proofs=deepcopy(self.proofs);proofs[("D","D/work-9")]["within_frozen_high_water"]=False
+        self.assertEqual(validate_union(self.m,self.prefix,self.admissions,self.snaps,proofs),INVALID)
+
 
 class PairAndReleaseTests(unittest.TestCase):
     def setUp(self):
@@ -237,6 +244,44 @@ class PairAndReleaseTests(unittest.TestCase):
            "request_set_digest":s["request_set_digest"],"admission_set_digest":s["admission_set_digest"],
            "request_ledger_root":s["request_ledger_root"],"admission_ledger_root":s["admission_ledger_root"],
            "reconciliation_root":owner_reconciliation_root(self.manifest,"C"),"final_currentness_cas_valid":False}
+        self.assertEqual(validate_release(r,self.batch,self.manifest),UNKNOWN)
+
+
+    def test_EPOCH_01_exact_three_owner_releases_pass(self):
+        from unified_manifest_semantics import owner_reconciliation_root
+        releases={}
+        for owner in ("I","D","C"):
+            s=self.snaps[owner]
+            releases[owner]={"owner_kind":owner,"release_type":"OUTAGE_ADMISSION_GATE_ONLY",
+              "batch_record_ref":"coc/batch/1","batch_digest":"a"*64,"batch_position":"100","batch_entry_digest":"f"*64,
+              "manifest_record_ref":"coc/manifest/1","manifest_record_position":"101",
+              "manifest_content_digest":self.manifest["manifest_content_digest"],"manifest_record_entry_digest":"e"*64,
+              "owner_gate_ref":s["owner_gate_ref"],"owner_gate_generation":s["owner_gate_generation"],
+              "owner_request_high_water":s["request_high_water"],"owner_admission_high_water":s["admission_high_water"],
+              "request_set_digest":s["request_set_digest"],"admission_set_digest":s["admission_set_digest"],
+              "request_ledger_root":s["request_ledger_root"],"admission_ledger_root":s["admission_ledger_root"],
+              "reconciliation_root":owner_reconciliation_root(self.manifest,owner),"final_currentness_cas_valid":True,
+              "coc_record_ref":"release/"+owner}
+        completed={"recovery_epoch_ref":"epoch/1","batch_record_ref":"coc/batch/1","batch_digest":"a"*64,
+          "batch_position":"100","batch_entry_digest":"f"*64,"manifest_record_ref":"coc/manifest/1",
+          "manifest_content_digest":self.manifest["manifest_content_digest"],"manifest_record_position":"101",
+          "manifest_record_entry_digest":"e"*64,"owner_release_refs":["release/I","release/D","release/C"],
+          "quorum_committed":True}
+        self.assertEqual(validate_epoch_completed(completed,self.batch,self.manifest,releases),VALID)
+    def test_EPOCH_02_missing_owner_release_fails(self):
+        self.assertEqual(validate_epoch_completed({},self.batch,self.manifest,{"I":{},"D":{}}),INVALID)
+    def test_EPOCH_03_owner_release_without_currentness_is_unknown(self):
+        from unified_manifest_semantics import owner_reconciliation_root
+        s=self.snaps["I"]
+        r={"owner_kind":"I","release_type":"OUTAGE_ADMISSION_GATE_ONLY",
+           "batch_record_ref":"coc/batch/1","batch_digest":"a"*64,"batch_position":"100","batch_entry_digest":"f"*64,
+           "manifest_record_ref":"coc/manifest/1","manifest_record_position":"101",
+           "manifest_content_digest":self.manifest["manifest_content_digest"],"manifest_record_entry_digest":"e"*64,
+           "owner_gate_ref":s["owner_gate_ref"],"owner_gate_generation":s["owner_gate_generation"],
+           "owner_request_high_water":s["request_high_water"],"owner_admission_high_water":s["admission_high_water"],
+           "request_set_digest":s["request_set_digest"],"admission_set_digest":s["admission_set_digest"],
+           "request_ledger_root":s["request_ledger_root"],"admission_ledger_root":s["admission_ledger_root"],
+           "reconciliation_root":owner_reconciliation_root(self.manifest,"I"),"final_currentness_cas_valid":False}
         self.assertEqual(validate_release(r,self.batch,self.manifest),UNKNOWN)
 
 
