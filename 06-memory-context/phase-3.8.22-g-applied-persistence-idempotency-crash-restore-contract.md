@@ -218,6 +218,8 @@ A restored snapshot that predates an I revocation, D ForgetFence, COC participan
 
 The restore fence may be cleared only after a durable, authenticated RestoreReconciliationReceipt proves all required ledgers/prefixes and owner high-water vectors are complete and current, all prepared participants have determinate same-GID terminal resolution, and fresh I/D/current Context/Capability checks pass. G cannot mint I or D proof and cannot clear an owner-local barrier.
 
+A snapshot whose restore epoch or any owner/G/COC/Storage high-water is ahead of the trusted external anchor is also UNKNOWN/UNANCHORED and MUST remain fenced; a numerically greater snapshot value is not proof of a newer committed prefix. Advancement is permitted only after an independently authenticated contiguous-prefix/checkpoint proof updates the trusted anchor, after which exact epoch/high-water reconciliation is repeated.
+
 No restored Snapshot, Delta, ACK, cache, queue item or historical Applied record may resurrect content covered by a current Forget tombstone. Historical Applied remains historical; current-use remains denied until independently re-authorized and reconciled.
 
 ## 8. Forget/revocation race and current-use projection
