@@ -316,3 +316,40 @@ These labels are from different decision records and are not interchangeable. B'
 The live D/E/F/G consumer artifacts consistently preserve the blocked boundary: D does not accept final Claim/Fact identity; E remains neutral pre-canonical; F does not adjudicate claims; G pins MemoryVersion only. No downstream Owner acceptance substitutes for the missing formal Architecture Governance decision. B2 remains **IN PROGRESS / NOT PASSED** and B4 **NOT READY**.
 
 实时 D/E/F/G 消费者工件一致保留阻塞边界：D 不接受最终 Claim/Fact 身份；E 保持规范化前中立状态；F 不裁决 Claim；G 仅固定 MemoryVersion。没有任何下游 Owner 验收能够替代缺失的正式 Architecture Governance 决议。B2 仍 **IN PROGRESS / NOT PASSED**，B4 **NOT READY**。
+
+
+## 10. Latest exact Owner-source refresh — 2026-11-18 / 最新精确 Owner 来源刷新
+
+This section supersedes earlier Owner branch-tip rows where they conflict with the exact current heads below. Full file-level Blob pins and status analysis are in `latest-cross-owner-source-reconciliation.md`.
+
+| Owner | Current branch HEAD | Current source disposition |
+|---|---|---|
+| A | `6e05831d264040e0e3b3359245b1e01ea613b46c` | Phase 3.12.2 accepts Storage v3.3.2 only as a consistent exact-version candidate; L4 and production blockers remain open |
+| B | `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | Fact/Claim Option A preferred candidate; ADR-BLOCKED / NOT APPROVED |
+| C | `a9a587e9f73266c74c84c65fda1beeb4246f5a80` | H 1.2.15 schema shape accepted with C-owned conditions; current validator/CI exact review remains incomplete |
+| D | `7e6d0b133dae88f442665e7b05a54060e047647e` | Neutral PropositionRef only while INT-P0-01 blocked; Claim identity Option A candidate; Phase 3.9 Forget proposal not normative |
+| E | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | CandidateProposition/ExtractionIR neutral; no canonical Fact/Claim identity |
+| F | `1908ce4d233b20f7cafd00cb679affd01bd15174` | D owns canonical Claim identity/status; F does not adjudicate disputed Claims |
+| G | `ed6ad0b316b721e49d2fe560ae9f7e6c647ca661` | ContextEntry pins exact MemoryVersion; G owns ContextVersion/ChangeSet only |
+| H | `eaee480d35ee5c2778cd1150a137558a2635de2d` | 1.2.15 receiver/reference validators and bounded CI exist; issuer executable, production trust and durable replay remain open |
+| I | `ea949896f891f0a08ef5fe9358edadc8a49e546f` | H profile/trust registration not approved; Phase 3.9 authorization is proposal only |
+| Storage | `f6887cc9ea5bfa5293c1bc47e9f10e582830cba3` | v3.3.2 is historical H1.2.14/C1.0.1 bundle; Phase 3.9 review conditional; L4 remains open |
+
+本节在 Owner 分支 Tip 与下表精确当前 Head 冲突时，取代此前的 Owner Tip 行。逐文件 Blob Pin 与状态分析见 `latest-cross-owner-source-reconciliation.md`。
+
+| Owner | 当前分支 HEAD | 当前来源结论 |
+|---|---|---|
+| A | `6e05831d264040e0e3b3359245b1e01ea613b46c` | Phase 3.12.2 仅将 Storage v3.3.2 接受为一致精确版本候选；L4 和生产阻塞仍开放 |
+| B | `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | Fact/Claim Option A 首选候选；ADR-BLOCKED / NOT APPROVED |
+| C | `a9a587e9f73266c74c84c65fda1beeb4246f5a80` | 接受 H 1.2.15 Schema 结构并附 C 自有条件；当前 Validator/CI 精确审查仍不完整 |
+| D | `7e6d0b133dae88f442665e7b05a54060e047647e` | INT-P0-01 阻塞期间仅允许中立 PropositionRef；Claim Identity Option A 是候选；Phase 3.9 Forget 提案非规范 |
+| E | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | CandidateProposition/ExtractionIR 保持中立；不分配规范 Fact/Claim 身份 |
+| F | `1908ce4d233b20f7cafd00cb679affd01bd15174` | D 拥有规范 Claim 身份/状态；F 不裁决争议 Claim |
+| G | `ed6ad0b316b721e49d2fe560ae9f7e6c647ca661` | ContextEntry 固定精确 MemoryVersion；G 仅拥有 ContextVersion/ChangeSet |
+| H | `eaee480d35ee5c2778cd1150a137558a2635de2d` | 存在 1.2.15 Receiver/Reference Validator 与有限 CI；Issuer Executable、生产 Trust 和 Durable Replay 仍开放 |
+| I | `ea949896f891f0a08ef5fe9358edadc8a49e546f` | H Profile/Trust 注册未获批准；Phase 3.9 Authorization 仅为提案 |
+| Storage | `f6887cc9ea5bfa5293c1bc47e9f10e582830cba3` | v3.3.2 是历史 H1.2.14/C1.0.1 Bundle；Phase 3.9 Review 有条件；L4 仍开放 |
+
+B2 remains IN PROGRESS / NOT PASSED and B3 remains NOT PASSED. No source alignment or branch movement is an Owner approval.
+
+B2 仍为 IN PROGRESS / NOT PASSED，B3 仍 NOT PASSED。来源对齐或分支推进均不构成 Owner 批准。
