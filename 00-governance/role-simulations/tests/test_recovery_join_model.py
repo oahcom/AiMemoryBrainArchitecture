@@ -10,6 +10,7 @@ def snapshot(owner, rows=("row-1",), high_water=10, complete=True,
     return OwnerSnapshot(
         owner=owner, rows=tuple(rows), high_water=high_water,
         snapshot_ref=f"{owner}-snapshot", snapshot_digest=f"{owner}-snapshot-digest",
+        snapshot_count=len(rows), snapshot_root=digest(sorted(rows)),
         query_id=f"{owner}-query", pagination_complete=complete,
         anti_rollback_current=anti_rollback, complete_empty_signed=empty_signed
     )
@@ -51,6 +52,28 @@ class MembershipCompletenessTests(unittest.TestCase):
             unsigned.assert_complete()
         signed = snapshot("I", rows=(), empty_signed=True)
         self.assertTrue(signed.assert_complete() is None)
+
+    def test_snapshot_count_mismatch_blocks_completeness(self):
+        s = snapshot("D")
+        altered = OwnerSnapshot(
+            owner=s.owner, rows=s.rows, high_water=s.high_water,
+            snapshot_ref=s.snapshot_ref, snapshot_digest=s.snapshot_digest,
+            snapshot_count=2, snapshot_root=s.snapshot_root, query_id=s.query_id,
+            pagination_complete=True, anti_rollback_current=True
+        )
+        with self.assertRaises(JoinError):
+            altered.assert_complete()
+
+    def test_snapshot_root_mismatch_blocks_completeness(self):
+        s = snapshot("D")
+        altered = OwnerSnapshot(
+            owner=s.owner, rows=s.rows, high_water=s.high_water,
+            snapshot_ref=s.snapshot_ref, snapshot_digest=s.snapshot_digest,
+            snapshot_count=1, snapshot_root="sha256:wrong", query_id=s.query_id,
+            pagination_complete=True, anti_rollback_current=True
+        )
+        with self.assertRaises(JoinError):
+            altered.assert_complete()
 
     def test_stale_key_or_bad_signature_fails_membership(self):
         s = snapshot("D")
