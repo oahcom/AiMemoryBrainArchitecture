@@ -61,7 +61,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | E remaining detailed contracts | 04-memory-compiler/ | Pending | Owner-branch English sources | IN PROGRESS — 7 of 8 core specs paired; 1 remains (Forget Fence and Derived Registration) |
 | Memory Runtime detailed contracts (5 core specifications) | F owner branch; audited head 348b5ec84c44a8a067122ce0aa72a594b9c06b66 | docs/zh-CN/05-memory-runtime/ | docs/en/05-memory-runtime/ | PAIRED IN PR #28 — 5/5 detailed pairs present; independent semantic review pending |
 | Memory Context detailed contracts (6 core specifications) | G owner branch; audited head 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa | Pending | Owner-branch English sources | NOT STARTED — 6 core specs are English-only |
-| Agent Integration detailed contracts (10 core specifications) | C owner branch; audited head 0f1df3b9c8bdfbb7991cd9e18842c56c521665c4 | Pending | Owner-branch English sources | NOT STARTED — 10 core specs are English-only |
+| Agent Integration detailed contracts (10 core specifications) | C Owner branch; Phase 3.6 final-request evidence Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | docs/zh-CN/07-agent-integration/phase-3.6-final-request-evidence-contract.md | docs/en/07-agent-integration/phase-3.6-final-request-evidence-contract.md | 1/10 core specs paired; C decisions recorded; C/G/H cross-owner freeze BLOCKED; implementation/execution NOT VERIFIED |
 | BMCP Protocol detailed contracts (7 core specifications) | H owner branch; refresh exact source blobs per Phase 3.6 audit | Pending for normative core contracts | Owner-branch English sources | NOT STARTED — 7 normative core specs remain unpaired; separate H identity consumer/conformance status report is paired below |
 | Security & Governance detailed contracts (8 core specifications) | I owner branch; audited head a00173f3cf6c266f638fe89c0d2af0445e0ae30b | Pending | Owner-branch English sources | NOT STARTED — 8 core specs are English-only |
 | Memory Compiler reader guide | E owner branch: 04-memory-compiler/ | docs/zh-CN/04-memory-compiler/memory-compiler-guide.md | docs/en/04-memory-compiler/memory-compiler-guide.md | COMPLETE — overview guide only |
@@ -90,7 +90,7 @@ The following describes the current bilingual companion files on `docs/bilingual
 | D | 8 core specs | 8/8 paired | Source-branch reconciliation and semantic acceptance |
 | E | 8 core specs | 7/8 paired | Forget Fence and Derived Registration |
 | F | 5 core specs | 5/5 paired | Independent semantic review |
-| G/C/H/I | 6/10/7/8 core specs | Reader guides only; detailed pairs not started; H identity status report is a separate paired report | Full detailed contracts and reviews |
+| G/C/H/I | 6/10/7/8 core specs | C: 1/10 detailed core specs paired (Phase 3.6 final-request evidence); G/H normative detailed pairs not started; H identity status report is separate paired report | Remaining detailed contracts and cross-owner semantic reviews |
 | Storage/Consistency | Per-source inventory pending | No detailed paired set | COC/JF-10/identity/restore/high-water/acceptance evidence inventory and translation |
 
 ## 4. Translation and readability sequence / 翻译与易读性推进顺序
@@ -190,3 +190,13 @@ Two exact B Owner-branch source artifacts now have reciprocal Chinese/English co
 | `02-domain-model/principal-actor-binding-mapping.md` | `session-b-domain-model-phase3` | `bbbef919e1e2ffe158cda8d9b2c5e718efaae969` | `docs/en/02-domain-model/principal-actor-binding-mapping.md` | `docs/zh-CN/02-domain-model/principal-actor-binding-mapping.md` | CANDIDATE; INT-P0-02 / INT-X-03 OPEN; I36 governance decisions remain blocked |
 
 Pair presence is not semantic acceptance, identity freeze, I policy approval, H wire freeze, or ADR-001 closure. The targeted review [BSR-28-B-IDENTITY-001](../reviews/translation/2026-11-17-b-phase3-identity-bilingual-semantic-review.md) has now inspected both pairs and found no material Chinese/English semantic divergence. This is translation parity only; exact source Blob pins are not Owner branch HEADs and all source CANDIDATE/OPEN/BLOCKED statuses remain unchanged.
+
+
+## 9. C Phase 3.6 final-request evidence companion — 2026-11-17
+
+- Source: `07-agent-integration/phase-3.6-final-request-evidence-contract.md`
+- Owner branch: `session-c-agent-integration-2026-11-16`
+- Exact source Blob SHA: `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`
+- Pair: `docs/en/07-agent-integration/phase-3.6-final-request-evidence-contract.md` and `docs/zh-CN/07-agent-integration/phase-3.6-final-request-evidence-contract.md`
+- Source state preserved: C semantic decisions recorded; C/G/H cross-owner freeze BLOCKED; implementation/execution NOT VERIFIED; C-FR-01..12 SPECIFIED / NOT RUN.
+- Scope: one of C's ten detailed core specifications only. The companion does not freeze H wire fields, G Applied authority, I authorization policy, D Forget fence, or any implementation.
