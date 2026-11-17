@@ -216,6 +216,8 @@ Restore 必须从不可变 Identity Key 与 Evidence Revision 重建并验证 Un
 
 只有 Durable、Authenticated 的 RestoreReconciliationReceipt 证明所有必要 Ledger/Prefix 与 Owner High-Water Vector 完整且当前有效、所有 Prepared Participant 均有确定 Same-GID Terminal Resolution，并且新鲜 I/D/Current Context/Capability 检查通过后，才可清除 Restore Fence。G 无权签发 I 或 D Proof，也无权清除 Owner Local Barrier。
 
+如果 Restore Epoch 或任何 Owner/G/COC/Storage High-Water 数值高于可信外部 Anchor，该 Snapshot 同样属于 UNKNOWN/UNANCHORED，必须继续保持 Fence；数值更大不等于证明存在更新的已提交 Prefix。只有独立认证的 Contiguous-Prefix/Checkpoint Proof 更新可信 Anchor 后，才允许推进 Anchor，并重新执行精确 Epoch/High-Water Reconciliation。
+
 任何恢复的 Snapshot、Delta、ACK、Cache、Queue Item 或历史 Applied Record，都不得复活当前 Forget Tombstone 覆盖的内容。历史 Applied 保留为历史；在独立重新授权并完成 Reconciliation 前，Current Use 仍然禁止。
 
 ## 8. Forget/Revocation 竞争与 Current-Use Projection
