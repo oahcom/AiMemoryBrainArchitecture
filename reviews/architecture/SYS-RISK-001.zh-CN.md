@@ -906,3 +906,58 @@ R-10 继续为 **High / PARTIALLY VERIFIED（治理/集成风险）；是否已�
 
 **关闭状态：NOT CLOSED。** 尚无证据证明该设计在经济上不可行；在继续扩大协议面之前，需要先整合治理/集成控制系统。
 
+
+
+## 25. 当前 Owner 分支刷新与新增提案增量 — 2026-11-18
+
+本节在早先 B/G 分支 HEAD 不同时予以替代。Main 内容仍与 b372 相同（Tree SHA 7096e0...），但 Owner Branch 已前进。
+
+### 25.1 B 当前 Serialization Type 决议
+
+- 当前 B Branch HEAD：2faf8ec38f14dba49e7263d7a60804dae1a74ee2（比之前 R 快照多两个 Commit）。
+- B Phase 3.8.5 Exact Logical Serialization Type Review Blob：ad1cc3c3f934b88e8fc3d0200612269198345e2f；审查的 Storage ADR Blob：1ef47d4e5711c7db73a24d249adf1992be1f6aa4。
+- B Phase 3.8.6 Per-authority Anchor Nominal-type Review Blob：e2bc4c8dde9706bfbe443269b702f1b5aa6965f6；精确 Storage ADR Blob：bb544ba2f346bdc130d524bd5c7310d86f367988。
+- 当前 Storage Branch 的 Phase 3.8.2 ADR 正是 Blob bb544ba2f346bdc130d524bd5c7310d86f367988，状态为 L1 LOGICAL TOPOLOGY SELECTED — OPTION A；L4 PHYSICAL ENGINE/DEPLOYMENT OPEN。
+
+B 批准名义类型边界与具体 CanonicalAuthoritySerializationAnchor，并附明确澄清。但这是委托 B 角色技术 Review，明确不是独立人工 B Owner 签名。它仅批准 L1/L2 类型区分，不批准 DB Schema、Serializable Runtime、HA/Restore 或 L4 Performance。它加强 R-01/R-06 语义清晰度，但没有关闭物理线性化或实现证明。
+
+A PR #54 仍为 Draft，有条件接受 Option A 作为 V1 逻辑拓扑，同时写明 L1 尚未完全关闭且“do not freeze”，并列出 A-01..A-05 澄清。它是 Review Branch，不是已合并权威。其 PR Body 引用 v3.2.9 前序 Bundle；当前 Storage Manifest 已是 v3.3.2，因此精确 Bundle 引用必须协调后才能作为当前 Acceptance。
+
+### 25.2 G 当前 Applied Persistence / Identity 合同
+
+- 当前 G Branch HEAD：763b3d31e910db8fd29c6e4dbaff9273b7fb66b8（比之前 R 快照多六个 Commit）。
+- 新 G Phase 3.8.22 Contract Blob：bd297873bc1e593280484a43cb44b56058d9c4ff。
+- 状态：G 自有规范性设计草案；委托 G 角色起草/自审，不是独立人工 G Owner 签名；实现 NOT VERIFIED；跨 Owner Acceptance REQUIRED。
+- 它分别定义 C ProviderAttempt/Outcome Identity、H Delivery/Evidence/Observation Identity、COC Participant Identity 和 G Applied Identity；定义不可变 Evidence Revision、Digest Conflict Quarantine、同 Identity Crash/Retry、Restore Fencing，以及 Historical Applied 与 Current-use Projection 的分离。
+- 它绑定 CSubmitOutcome 1.0.1、H Unified 1.2.15 和独立 H Applied ACK 1.1.0 JF-10 Bridge Schema。明确指出 H 1.2.14、此前 G Consumer Review 或仅 Schema Acceptance 均不会自动转移批准。
+
+这是 R-04/R-07 的有价值设计进展，但不是可执行持久化证明。它要求精确 C/H/COC/Storage Acceptance、I/D 字段确认、生成式 Schema/SDK、Durable Unique Index、Crash/Restart/Restore Test 和独立 Readback。
+
+### 25.3 对 G 的 H 字段缺口声明作独立更正
+
+G 草案声称 H Unified 1.2.15 缺少全部七个 HDeliveryBindingIdentity 字段。我独立读取了精确 H Schema Blob 860fc4cec658db7d2703cd6adf72aa31a2723f6d 和 Gateway Validator Blob 9cc426d4c26deb452f39daff34c1008dd535e969。
+
+H 1.2.15 的 Provider Outcome 分支和 Signed P0 Allowlist 确实包含 actual_inference_request_id 与 final_request_boundary_id。因此 G 声称这两个精确属性也不存在，是过度概括。字段名 inference_request_id 本身不存在；它是否由 actual_inference_request_id 语义表示，需要显式映射，不能假定等价。
+
+以下 HDeliveryBindingIdentity 字段确实没有作为一等字段出现在本次检查的 H 1.2.15 Schema 中：adapter_instance_ref、runtime_session_ref、delivery_id、delivery_attempt_id、adapter_capability_epoch。独立 H Applied ACK 1.1.0 JF-10 Schema Blob a8a945cc3623c2907003b93625e3c79742150944 包含 runtime_session_ref，但不包含 adapter_instance_ref、delivery_id、delivery_attempt_id、inference_request_id、actual_inference_request_id、final_request_boundary_id 或 adapter_capability_epoch；它是独立 JF-10 Bridge Candidate，不能替代 Unified 1.2.15 Provider-outcome Schema。
+
+**R-04/R-06 更正结论：** 完整 H Delivery Binding Tuple 仍未在一份已采纳、经过认证、版本化的合同中建立。但精确缺失字段清单必须区分真正缺失字段、名称不同且存在候选语义映射的字段，以及只存在于另一 Schema Family 的字段。G 在 C/H 精确 Review 前应更正字段清单。这不推翻更广泛的 Identity Binding Gap。
+
+### 25.4 新 Phase 3.9 Forget Terminalization 提案 — 不是关闭证据
+
+当前 Draft PR：
+- PR #66 D Forget Terminal/Linearization Closure Proposal：19 项逻辑模型在 ChatGPT Python Runtime 报告 19/19；没有 GitHub CI 或生产 D/Storage/I 符合性。
+- PR #68 I D/I Forget Terminalization Authorization Proposal：仍需精确 I/D 批准、Storage Commit-boundary Acceptance 和可复现测试；未声称实现。
+- PR #71 Storage 对 PR #66/#68 的角色审查：Conditional Logical Acceptance，明确是角色模拟而非独立 Storage Owner 签名；物理实现未验证。
+- PR #72 Joined Forget Lifecycle/Governance Proposal：D/I 批准及 E/F/G/H/C/Storage Boundary Acknowledgement 待定；测试和 Schema/Manifest Validation 未运行。
+
+这些提案有助于明确 D Canonical Suppression/Lifecycle Terminalization、I Global Governance Completion 和 Physical-erasure Evidence 的分离。但它们不能关闭 R-03：均未合并，均没有生产实现，跨 Owner Acceptance/Fault Proof 仍待完成。
+
+### 25.5 当前来源结论更新
+
+- R-01：B 已对当前精确 Storage ADR Blob bb544... 作出委托 Nominal-type Approval；Option A 仍是 L1 Selected、L4 Open，A PR #54 为 Draft/Conditional。D/Storage Transaction Authority 与可执行 L1/L2/L4 证明完成前，保持 Critical。
+- R-03：Phase 3.9 D/I/Storage 提案已出现，但仍为 Draft/Proposal-only。保持 Critical / NOT PROVEN。
+- R-04：G Applied Persistence/Idempotency/Restore Contract 更明确，但仍是 G 草案；H Identity Tuple 存在精确字段映射缺口，且 G 有一项过度声称字段不存在。保持 High / NOT PROVEN。
+- R-05：G 新增独立 H Applied ACK 1.1.0 JF-10 Bridge Schema，与 Unified 1.2.15 和 CSubmitOutcome 1.0.1 并存。必须纳入版本/Consumer Graph；仍无共享 Freeze。
+- R-06：B 最新 Nominal-type Decision 加强 Actor/Scope/Environment/Serialization 类型区分，但属于委托决议，不等于 Governance/Runtime Authorization。保持 High / NOT PROVEN。
+
