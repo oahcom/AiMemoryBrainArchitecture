@@ -21,3 +21,5 @@ G Phase 3.8.22 规范定义逻辑 Applied Identity、Evidence-Revision 规则、
 ## 证据上限
 
 该参考模型不是生产 G Runtime 代码，也不是 G Owner 验收。它使用单个本地 SQLite 数据库和调用方提供的 Gate 布尔值，不能证明多副本线性化、分布式 Restore-Fencing、后续 I/D 变化后的 Current-Use Revalidation、真实 C/H/COC/I/D/Storage 权威解析、密码学认证或生产持久化拓扑。生产 G Applied 与跨 Owner Full Applied 仍为 **NOT VERIFIED / NOT FROZEN**。
+
+本阅读摘要与 G Phase 3.8.22 双语规范源文件配对，不替代规范源文件。
