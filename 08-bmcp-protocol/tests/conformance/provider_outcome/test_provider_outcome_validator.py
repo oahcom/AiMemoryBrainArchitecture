@@ -24,6 +24,7 @@ from provider_outcome_validator import (  # noqa: E402
     validate_provider_outcome,
 )
 from jsonschema import Draft202012Validator, FormatChecker
+from unittest.mock import patch
 
 
 class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
@@ -254,6 +255,93 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertIn("owner_gate_generation", schema["$defs"]["ownerSnapshot"]["properties"])
         self.assertNotIn("forget_fence_generation_high_water", schema["$defs"]["ownerSnapshot"]["properties"])
         self.assertEqual(d_highwaters["properties"]["forget_fence_generation_high_water"]["type"], "string")
+
+
+    def test_16_owner_authority_proofs_have_independent_verifier_seams(self):
+        checks = AuthorityChecks()
+        self.assertIsNone(checks.verify_i_terminal_decision)
+        self.assertIsNone(checks.verify_d_clearance)
+        self.assertIsNone(checks.verify_storage_resolution_proof)
+
+    def test_17_full_validator_accepts_only_after_separate_i_d_storage_checks(self):
+        digest = "a" * 64
+        envelope_schema = {"$id": "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.14"}
+        c_schema = {"$id": "urn:aimba:schema:c-submit-outcome:1.0.1"}
+        envelope = {
+            "schema_id": "bmcp.coc-jf10-unified",
+            "schema_artifact_revision": "1.2.14",
+            "schema_version": "1.3.0",
+            "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+            "c_submit_outcome_ref": "C/outcome/1",
+            "c_submit_outcome_digest": digest,
+        }
+        c_object = {
+            "schema_id": "CSubmitOutcome",
+            "schema_version": "1.0.1",
+            "schema_artifact_revision": "1.0.1",
+            "signature_profile_id": "AIMBA-C-CRYPTO-1.0",
+            "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+            "record_ref": "C/outcome/1",
+            "payload_digest": digest,
+        }
+        callbacks = {
+            "verify_profile_registration": lambda record: True,
+            "verify_key_status": lambda record: True,
+            "verify_c_signature": lambda record, preimage: True,
+            "verify_provider_evidence": lambda wire, record: True,
+            "verify_owner_ledger": lambda wire, record: True,
+            "verify_coc_join": lambda wire, record: True,
+            "verify_currentness": lambda wire, record: True,
+            "verify_i_terminal_decision": lambda wire, record: True,
+            "verify_d_clearance": lambda wire, record: True,
+            "verify_storage_resolution_proof": lambda wire, record: True,
+        }
+        checks = AuthorityChecks(**callbacks)
+        with patch("provider_outcome_validator._schema_errors", return_value=[]), patch("provider_outcome_validator._semantic_errors", return_value=[]), patch("provider_outcome_validator._candidate_digest_and_preimage", return_value=(digest, b"test-preimage")):
+            result = validate_provider_outcome(envelope, c_object, envelope_schema, c_schema, checks)
+        self.assertEqual(result["status"], "VALID", result)
+        self.assertEqual(result["errors"], [])
+        self.assertEqual(result["unknown"], [])
+
+    def test_18_missing_i_d_or_storage_authority_is_unknown_not_valid(self):
+        digest = "a" * 64
+        envelope_schema = {"$id": "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.14"}
+        c_schema = {"$id": "urn:aimba:schema:c-submit-outcome:1.0.1"}
+        envelope = {
+            "schema_id": "bmcp.coc-jf10-unified",
+            "schema_artifact_revision": "1.2.14",
+            "schema_version": "1.3.0",
+            "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+            "c_submit_outcome_ref": "C/outcome/1",
+            "c_submit_outcome_digest": digest,
+        }
+        c_object = {
+            "schema_id": "CSubmitOutcome",
+            "schema_version": "1.0.1",
+            "schema_artifact_revision": "1.0.1",
+            "signature_profile_id": "AIMBA-C-CRYPTO-1.0",
+            "message_type": "C_PROVIDER_OUTCOME_RECORDED",
+            "record_ref": "C/outcome/1",
+            "payload_digest": digest,
+        }
+        callbacks = {
+            "verify_profile_registration": lambda record: True,
+            "verify_key_status": lambda record: True,
+            "verify_c_signature": lambda record, preimage: True,
+            "verify_provider_evidence": lambda wire, record: True,
+            "verify_owner_ledger": lambda wire, record: True,
+            "verify_coc_join": lambda wire, record: True,
+            "verify_currentness": lambda wire, record: True,
+        }
+        checks = AuthorityChecks(**callbacks)
+        with patch("provider_outcome_validator._schema_errors", return_value=[]), patch("provider_outcome_validator._semantic_errors", return_value=[]), patch("provider_outcome_validator._candidate_digest_and_preimage", return_value=(digest, b"test-preimage")):
+            result = validate_provider_outcome(envelope, c_object, envelope_schema, c_schema, checks)
+        self.assertEqual(result["status"], "UNKNOWN")
+        self.assertEqual(len(result["unknown"]), 3)
+        self.assertTrue(any("I terminal decision" in item for item in result["unknown"]))
+        self.assertTrue(any("D Forget clearance" in item for item in result["unknown"]))
+        self.assertTrue(any("Storage resolution proof" in item for item in result["unknown"]))
+
 
 
 if __name__ == "__main__":
