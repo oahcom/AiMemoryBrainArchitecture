@@ -11,9 +11,9 @@
 - H Unified schema 1.2.14 Blob: 09fcd1fa29fe24255fbd87cae79dafb406594a59 (wire family 1.3.0).
 - H authority-join mapping Blob: 1cbe74eba69325510d6b1019d971661f965eabf8.
 - H validator Blob: eab961a08d41e871f38543b18ee60cf024977414.
-- H validator test Blob: dccf8c099c18807ec072870d32604d0912209f01.
+- H validator test Blob: 540056d7c4f290c31290b17c264c69cfd76b1cb2.
 - H full positive fixture Blob: c80247a6ecfbb4a29ff0993e8e2aea4829d00626.
-- H full-path closure Blob: 804bfd3214b015c80340575c1eb467d756ad0699.
+- H full-path closure Blob (bilingual count correction): cda025fb157815570b3280fa5ff168d5e62453b1.
 - C full-path review Blob: 4be9c1cd8f116086bab58340f07e38ddfc223e21.
 - Exact CI: run 44069777296, tested commit 9eb06313e94e762f0fde4a606633a6dbe1bf8262, provider-outcome job 133992753552, SUCCESS; closure artifacts report 32 test methods.
 - Decision: **ACCEPT WITH ENUMERATED G-OWNED APPLIED CONDITIONS — L1/L2 C/H CONSUMER MAPPING CANDIDATE; NOT FROZEN**.
@@ -90,13 +90,13 @@ G 接受 H 对 C、COC、I、D、Storage 验证接口的分离，但每个 Callb
 
 ## 5. Evidence ceiling / 证据上限
 
-The exact H full-path fixture/CI materially improves on callback-orchestration-only tests:
+The exact H full-path fixture/CI (38 methods) materially improves on callback-orchestration-only tests:
 
 - Real H Unified 1.2.14 and CSubmitOutcome 1.0.1 schemas are loaded.
 - The actual H validator executes schema validation, C object dereference/equality, C semantic predicates and C-P0 digest recomputation without patching those functions in tests 21–25.
 - Negative mutations prove wire/object mismatch and digest mismatch become INVALID.
 - Missing I/D/Storage callbacks become UNKNOWN; independently false callbacks become INVALID.
-- Run 44069777296 completed SUCCESS on the exact tested commit; the exact closure reports 32 test methods across the H validator/fixture and C crypto-interoperability suite.
+- Run 44070924346 completed SUCCESS on the exact tested commit; the current H closure reports 38 test methods across the H validator/fixture and C crypto-interoperability suite.
 
 But all ten authority callbacks in the full-path fixture are deterministic test doubles. The signature-shaped fixture bytes are not authenticated by production trust roots; real I/D/Storage issuer-signed proof payloads, live C key-status/owner-ledger/sequencer, provider issuer truth, same-key provider lookup, COC quorum deployment, Storage same-GID recovery and multi-replica egress linearization are not established.
 
