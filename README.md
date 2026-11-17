@@ -51,8 +51,9 @@ The Brain is not an Agent framework. It does not own planning, tool execution, o
 | `11-consistency-and-recovery/` | Versioning, idempotency, replay, recovery |
 | `12-testing-and-acceptance/` | System-level verification and acceptance criteria |
 | `13-engineering-decisions/` | Technology evaluation and Rust engineering architecture |
+| `14-ai-development/` | AI development governance, iteration lifecycle, versioned prompts and evidence records |
 
-## How decisions are documented
+## AI development governance\n\nThis repository is developed through named AI Module Owners under a controlled, evidence-based workflow. Every substantive task must have a versioned prompt, an accountable Owner, an isolated change, reproducible verification and independent review. See [AI Development Standard](14-ai-development/ai-development-standard.md), [Iteration Lifecycle](14-ai-development/iteration-lifecycle.md), and [Prompt & Evidence Template](14-ai-development/prompt-and-evidence-template.md).\n\n## How decisions are documented
 
 Every significant design statement must be classified as one of:
 
