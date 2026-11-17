@@ -27,7 +27,7 @@ P0-01 implementation repository, accountable lead, reproducible build
   ↓
 P0-02 B identity/domain semantics + I policy/inventory prerequisites
   ↓
-P0-03 selected/proved Storage transaction and COC topology
+P0-03 L1 Option A logical profile selected; prove L4 physical DB/adapter and COC topology
   ↓
 P0-04 D/E/I/Storage admission + lineage + fence + visibility contract
   ↓
@@ -60,7 +60,7 @@ Exact source pins and Owner authority evidence
 
 ## Critical path and parallelism
 
-Critical path: designate implementation authority → close B/I and other Owner-owned semantics → select/prove Storage/COC physical topology → prove D/E/I/Storage publication/Forget boundary → prove durable canonical vertical slice → safe retrieval/context → Applied → recovery/restore conformance.
+Critical path: designate implementation authority → close B/I and other Owner-owned semantics → complete L4 physical realization of selected Storage Option A and COC topology → prove D/E/I/Storage publication/Forget boundary → prove durable canonical vertical slice → safe retrieval/context → Applied → recovery/restore conformance.
 
 Parallel bounded work: synthetic-data retrieval benchmarks; DB/COC candidate comparison; fault-harness scaffolding; schema validators that do not freeze candidate schemas; bilingual parity and exact-pin automation; hardware/workload inventory; observability/runbook drafts. These do not release dependent gates.
 
