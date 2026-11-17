@@ -104,7 +104,7 @@ Terminalize(p) ==
   /\ p \in registered
   /\ p \notin terminal
   /\ terminal' = terminal \cup {p}
-  /\ UNCHANGED <<registered, preFenceRegistered, artifactOwner,
+  /\ UNCHANGED <<registered, preFenceRegistered,
       dependencyRegistered, visible, fenceInstalled, fenceHighWater,
       registrationSeq, suppressed, inventorySealed, barrierClosed,
       restoreControlGeneration, currentControlGeneration>>
