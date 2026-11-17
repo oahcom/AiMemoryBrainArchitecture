@@ -112,8 +112,8 @@ def _semantic_errors(record: dict) -> list[str]:
         if not record.get("ProviderReceiptRef") or side_effect != "PROVEN_OCCURRED":
             errors.append("HANDOFF_ACCEPTED requires provider receipt and PROVEN_OCCURRED")
     elif outcome == "HANDOFF_REJECTED" and side_effect == "PROVEN_NONE":
-        if not record.get("ProviderNoHandoffProofRef") or not record.get("NotInvokedProofRef"):
-            errors.append("rejected-as-no-side-effect requires authoritative no-handoff proofs")
+        if not record.get("ProviderNoHandoffProofRef"):
+            errors.append("rejected-as-no-side-effect requires authoritative no-handoff proof")
     elif outcome == "NOT_INVOKED":
         if side_effect != "PROVEN_NONE" or not record.get("ProviderNoHandoffProofRef") or not record.get("NotInvokedProofRef"):
             errors.append("NOT_INVOKED requires durable no-handoff proofs and PROVEN_NONE")
