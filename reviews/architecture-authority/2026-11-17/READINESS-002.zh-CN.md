@@ -1,7 +1,7 @@
 # 架构就绪度评估 — READINESS-002
 
 - 版本：1.0.0
-- 基线：`main@6470f25ca23b8d35c06f60be2326867066418d18`
+- 基线：历史评估快照 `6470f25ca23b8d35c06f60be2326867066418d18`（历史评估快照，非当前 Main）（非当前 Main）
 - 整体架构状态：**ARCHITECTURE_NOT_READY**
 - 决策结果：架构冻结及全面实现准入 **DEFERRED**。
 
@@ -40,3 +40,8 @@
 只有在指定架构范围所需的所有不可豁免语义、权威、原子性和安全前置条件均已满足，且仅剩具有完整记录的非阻塞残余条件时，ARCHITECTURE_NOT_READY 才可进入 ARCHITECTURE_READY_WITH_CONDITIONS。任何 Gate 阻塞 P0/P1 事项不得重新标记为已接受条件。ARCHITECTURE_READY_FOR_IMPLEMENTATION 还要求实现权威、精确 Owner 合同和实现准入证明。ARCHITECTURE_READY_FOR_FREEZE 要求 G1–G8 及所有相关 Owner 决策/证据齐备。以上任何状态均不等于生产授权。
 
 参见 FINAL-A-002 和 GATE-002。
+
+
+## 当前 Main HEAD
+
+本次发布独立观察到的当前 Main HEAD 为 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。此前的 `6470f25...` / `b372b62...` 均为历史评估快照，不是当前 Main。本套文件尚未完成针对当前 Main 的逐来源完整差异审计；G1 仍为 PARTIAL，所有 Gate/冻结限制继续有效。
