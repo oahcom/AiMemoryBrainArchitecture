@@ -65,3 +65,8 @@ A may accept system-wide scope and sequencing risks; A cannot accept B, D, I, C,
 ## Cross-references
 
 See ARCH-CX-002, DEV-FEAS-002, DEP-DAG-002, PRIORITY-002, READINESS-002, CONFLICT-002, GATE-002, DEFERRED-002 and FINAL-A-002. All are bound to the same main baseline SHA.
+
+
+## Current main HEAD / 当前 Main HEAD
+
+The current main HEAD independently observed for this publication is `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The earlier `6470f25...` / `b372b62...` values are historical assessment snapshots, not current main. This package has not completed a full source-by-source delta audit against current main; G1 remains PARTIAL and all Gate/freeze restrictions remain in force.
