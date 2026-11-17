@@ -122,3 +122,13 @@ B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪�
 - These rewrites are not independent parity acceptance. B5 remains BLOCKED / NOT PASSED until remaining P0/P1/P2 files are completed and a separate reviewer verifies semantic equivalence.
 - 已完成 `canonical-domain-invariants.md`、`canonical-state-semantics.md` 和 `validation/README.md` 的作者侧双语改写；精确 Blob Pin 及人工复审状态记录在 `bilingual-parity-audit.md`。
 - 这些改写不构成独立双语验收。剩余 P0/P1/P2 文件完成并由独立审查者验证语义等价前，B5 仍 BLOCKED / NOT PASSED。
+
+
+## 11. Additional bilingual remediation / 双语整改补充
+
+- `canonical-domain-model.md` has received a full Chinese peer for design principles, object inventories, owner boundaries, model tiers, architecture fit, authenticated-ingress/physical-ordering boundaries and blockers. Exact Blob: `ce441336e2fbba7c7a28c0b4c75482d524a4ade7`.
+- The corresponding file-by-file audit entry is recorded in `bilingual-parity-audit.md` as `REMEDIATED — MANUAL PARITY REVIEW PENDING`. This is author-side work only; no independent parity acceptance is claimed.
+- `canonical-domain-model.md` 已为设计原则、对象清单、Owner 边界、模型层级、架构适配、认证入口/物理排序边界及阻塞项补齐中文对照。精确 Blob：`ce441336e2fbba7c7a28c0b4c75482d524a4ade7`。
+- 对应逐文件审计已在 `bilingual-parity-audit.md` 中登记为 `REMEDIATED — MANUAL PARITY REVIEW PENDING`。这仅是作者侧工作，不代表独立双语验收。
+- B5 remains BLOCKED / NOT PASSED; B6 remains INDEPENDENT_REVIEW_PENDING. No merge or canonical freeze is authorized.
+- B5 仍为 BLOCKED / NOT PASSED；B6 仍为 INDEPENDENT_REVIEW_PENDING。未授权合并或规范冻结。
