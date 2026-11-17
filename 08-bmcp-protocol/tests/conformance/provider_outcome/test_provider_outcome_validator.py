@@ -369,5 +369,84 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         self.assertFalse(schema["additionalProperties"])
 
 
+
+    def _full_validator_fixture(self):
+        fixture_dir = ROOT.parent / "fixtures"
+        fixture = json.loads(
+            (fixture_dir / "h-full-provider-outcome-positive-1.0.1.json").read_text(encoding="utf-8")
+        )
+        envelope_schema = json.loads(
+            (H_ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.14.schema.json").read_text(encoding="utf-8")
+        )
+        c_object_schema = json.loads(
+            (fixture_dir / "c-submit-outcome-1.0.1.schema.json").read_text(encoding="utf-8")
+        )
+        checks = AuthorityChecks(
+            verify_profile_registration=lambda record: True,
+            verify_key_status=lambda record: True,
+            verify_c_signature=lambda record, preimage: True,
+            verify_provider_evidence=lambda envelope, record: True,
+            verify_owner_ledger=lambda envelope, record: True,
+            verify_coc_join=lambda envelope, record: True,
+            verify_currentness=lambda envelope, record: True,
+            verify_i_terminal_decision=lambda envelope, record: True,
+            verify_d_clearance=lambda envelope, record: True,
+            verify_storage_resolution_proof=lambda envelope, record: True,
+        )
+        return fixture["envelope"], fixture["c_submit_outcome"], envelope_schema, c_object_schema, checks
+
+    def test_21_full_unmocked_schema_semantics_and_digest_path_is_valid(self):
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        result = validate_provider_outcome(
+            envelope, c_object, envelope_schema, c_object_schema, checks
+        )
+        self.assertEqual(result["status"], "VALID", result)
+        self.assertEqual(result["errors"], [])
+        self.assertEqual(result["unknown"], [])
+
+    def test_22_full_path_rejects_wire_object_duplicate_mismatch(self):
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        envelope["provider_ref"] = "Provider/attacker"
+        result = validate_provider_outcome(
+            envelope, c_object, envelope_schema, c_object_schema, checks
+        )
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertTrue(any("wire/object mismatch: provider_ref" in item for item in result["errors"]))
+
+    def test_23_full_path_recomputes_c_payload_digest(self):
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        c_object["payload_digest"] = "0" * 64
+        envelope["c_submit_outcome_digest"] = "0" * 64
+        result = validate_provider_outcome(
+            envelope, c_object, envelope_schema, c_object_schema, checks
+        )
+        self.assertEqual(result["status"], "INVALID", result)
+        self.assertIn("C payload_digest mismatch", result["errors"])
+
+    def test_24_full_path_missing_i_d_storage_verifiers_is_unknown(self):
+        envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+        checks.verify_i_terminal_decision = None
+        checks.verify_d_clearance = None
+        checks.verify_storage_resolution_proof = None
+        result = validate_provider_outcome(
+            envelope, c_object, envelope_schema, c_object_schema, checks
+        )
+        self.assertEqual(result["status"], "UNKNOWN", result)
+        self.assertEqual(len(result["unknown"]), 3)
+
+    def test_25_full_path_i_d_storage_contradictions_are_invalid(self):
+        for callback_name in (
+            "verify_i_terminal_decision",
+            "verify_d_clearance",
+            "verify_storage_resolution_proof",
+        ):
+            with self.subTest(callback=callback_name):
+                envelope, c_object, envelope_schema, c_object_schema, checks = self._full_validator_fixture()
+                setattr(checks, callback_name, lambda *args: False)
+                result = validate_provider_outcome(
+                    envelope, c_object, envelope_schema, c_object_schema, checks
+                )
+                self.assertEqual(result["status"], "INVALID", result)
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
