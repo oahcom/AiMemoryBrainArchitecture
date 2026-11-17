@@ -89,3 +89,17 @@ B 当前优先候选仍为 **B Fact/Claim Option A**：独立 Claim 命题线程
 This addendum records the already-observed merge and corrects stale status claims. It does not reverse the merge or write to main. Subsequent author-side corrections remain on a new branch based on current main and require a separate review path. No schema, implementation or production activation work is authorized.
 
 本补充文件记录已发生的合并并纠正过期状态，不回滚合并，也不直接写入 main。后续作者侧修订在基于当前 main 的新分支中进行，并需单独审查。本补充文件不授权 Schema、实现或生产启用工作。
+
+
+## 7. Subsequent PR #120 merge / 后续 PR #120 合并
+
+A later documentation-only follow-up, PR #120, was merged at `2026-11-17T21:29:04Z` by `oahcom`. Merge commit: `6c325804027b88de1014ab3364cdda7e0c023ba6`; merged head: `069984b5c3915334d6fa2d3ec409d4c7e36fe549`. Main was subsequently observed at `ab1fa87d74ca4a632155aa19569533ea560109d5`. PR #120 incorporated the post-PR-55 status corrections. The later latest cross-owner source refresh is a separate, unmerged follow-up and is not included in PR #120.
+
+后续仅文档类 PR #120 于 `2026-11-17T21:29:04Z` 由 `oahcom` 合并。Merge Commit：`6c325804027b88de1014ab3364cdda7e0c023ba6`；合并时 Head：`069984b5c3915334d6fa2d3ec409d4c7e36fe549`。此后观察到的 main 为 `ab1fa87d74ca4a632155aa19569533ea560109d5`。PR #120 纳入 PR #55 后的状态纠偏。后续最新跨 Owner 来源刷新是独立、尚未合并的后续工作，不包含在 PR #120 中。
+
+
+## 8. Latest cross-owner source refresh — 2026-11-18
+
+The subsequent DOMAIN-REALITY-001-B source refresh now records C `461dd616209657c3bf485871bdbc2a1b6a652d40`, G `07a84a5ef5b331180bee47f8a60ef16c2918a700`, and H `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9` as current branch heads. The C and G review artifacts are delegated role reviews, not independent human Owner approvals. H's current Applied Delivery Evidence suite has 29 test methods; the cited 26/26 CI result is for earlier H head `9fb2097905ef653b3a2048ac5f6804fc94178d8d`, not the current H head. H-ADE-001/002/003 have candidate reference-code coverage; production C/I/D authority, H durable replay, G persistence/restore and Full Applied remain open.
+
+后续 DOMAIN-REALITY-001-B 来源刷新记录 C `461dd616209657c3bf485871bdbc2a1b6a652d40`、G `07a84a5ef5b331180bee47f8a60ef16c2918a700`、H `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9` 为当前分支 Head。C/G 复审属于委派角色审查，不是独立人类 Owner 批准。H 当前 Applied Delivery Evidence 套件包含 29 个测试方法；引用的 26/26 CI 结果针对旧 H Head `9fb2097905ef653b3a2048ac5f6804fc94178d8d`，不是当前 Head。H-ADE-001/002/003 已有候选参考代码覆盖；生产 C/I/D 权威、H Durable Replay、G Persistence/Restore 和 Full Applied 仍开放。
