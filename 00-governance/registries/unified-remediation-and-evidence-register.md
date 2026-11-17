@@ -65,7 +65,7 @@ P vs main remains **diverged**. Re-query the live compare before any integration
 | A COC/JF-10 bridge architecture | Blob a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d | Owner boundary decisions recorded with exceptions; A's separate R1–R6 review remains open. |
 | Common JF-10 v2 protocol | Blob 94679897e84a6f58fd8b9467b5249e1a885cb0b0 | Existing decisions apply only to this exact protocol; generic XID wording needs alignment with the newer GID/native-XID distinction. |
 | Phase 3.6.3 COC protocol prior revision | Blob 4ac63ac79491e79ec0c9114ef73941c73d7bbf25 | A/B/C/D/E/G/H/I/Storage exact role-based design decisions with enumerated exceptions. |
-| Phase 3.6.3 COC protocol amended revision | Blob 86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7 | Storage accepts with conditions. A/H/I role-simulated reviews exist; A has amendments, H/I no approval. Independent exact-version review pending. |
+| Phase 3.6.3 COC protocol amended revision | Blob 8ac17816476f280ab6fb3afca0688aa03e37de1d (live file re-fetch) | Current live companion includes expanded §14 identity tuple; v2 header still pins 86ff3..., creating version drift. Exact cross-version reconciliation and independent Owner review pending. |
 | Storage Design v2 | Blob 4ed4234ce548a814a9496adf7a14c4459ea9f7ce | Fresh proposal. Includes R1–R6 disposition, recovery manifest/batches, owner gate release, GID/native-XID distinction. Issue #16 open. |
 | H JF-10 schema candidate | Blob a8a945cc3623c2907003b93625e3c79742150944 | Candidate only; opaque XID reference fields are not yet explicitly mapped to PreparedTransactionGID vs native XID or DatabaseIncarnationRef. |
 | A exact COC acceptance matrix | Blob 9a39e48a394fedbab16d15589056d59ef33f390f | Covers prior protocol Blob 4ac63..., not amended Blob 86ff... or Storage Design v2 4ed.... |
@@ -96,7 +96,7 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 | UMR-008 | P1 | Update B typed model and E producer contract for GID tuple | B and E; H/I/D/C/Storage consume | OPEN | Distinct PreparedParticipantRef, PreparedTransactionGID, NativeXidObserved, DatabaseIncarnationRef, DBIdentity and PrepareAttempt types; exact immutable producer/participant tuple and replay rules. |
 | UMR-009 | P1 | Update H schema and strict wire envelope for new identity tuple | H; B/I/A review | OPEN | Explicit field mapping or new fields for GID vs native XID, DatabaseIncarnationRef, PrepareAttemptRef/generation, DB incarnation, receipt/proof payload, signer/audience/purpose; positive/negative tests. Current 23/23 tests do not cover these semantics. |
 | UMR-010 | P1 | Update Storage readiness §26.2, self-review and COC design pins | Storage | OPEN | Readiness currently says “preallocate exact XID” without GID/native-XID distinction; self-review still pins old 4ac63...; update to current 86ff3... + 4ed423... and one canonical version vector. |
-| UMR-011 | P0 | Obtain independent A/I/D/C/H decisions for A R1–R6 | A integrates; I/D/C/H decide their own authority | OPEN — Issue #14 | Each Owner pins exact A bundle and current Storage v2, addresses every finding, and posts append-only decision; Storage's v2 disposition alone is not Owner acceptance. |
+| UMR-011 | P0 | Obtain independent A/I/D/C/H decisions for A R1–R6 | A integrates; I/D/C/H decide their own authority | OPEN — Issue #14 | Each Owner pins exact A bundle and current Storage v2, addresses every finding, and posts append-only decision; Storage's v2 disposition alone is not Owner acceptance; P exact-version audit is non-normative. |
 | UMR-012 | P1 | Reconcile A context-optimization decision register and closure tracker | A | STALE / OPEN | Record D/F/G conditional acceptances, new A final matrix, current COC versions and live branch heads; distinguish F/G design acceptance from joint Recall contract acceptance. |
 | UMR-013 | P1 | Consolidate A final TAB-001 system review | A | STALE / OPEN | Front matter still says NOT REVIEWABLE while §19.4 says CONDITIONAL PASS; §2.2 still says B/D/E/I reports missing; §19.2 source manifest has stale H/I heads. Refresh current evidence and exact version status. |
 | UMR-014 | P1 | Update F/G module baseline proposals | F and G | OPEN | F baseline must include Observation Archive/RecallSession/ReadCursor/ReadReceipt/completeness; G baseline must include TSS/ObservationRef/compaction/fidelity/lineage-loss/Forget invalidation. Current branch changes add acceptance/evidence docs, not baseline adoption. |
@@ -115,14 +115,14 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 | UMR-027 | P1 | Maintain no-merge integration boundary | P + A; governance authority when appointed | OPEN / SAFETY CONTROL | P/main diverged; live compare and reviewed non-destructive reconciliation required before any integration; no merge/force update without explicit authorization. |
 | UMR-028 | P1 | Complete module baseline adoption and governance ratification | A–I + Project Governance Authority | OPEN | Each Owner adopts/rejects exact proposal version; formal PGA appointment and G0 approval required before project-wide freeze. |
 
-## 7. Current issue trackers
+| UMR-029 | P0 | Reconcile Storage v2 R1–R6 against current companion protocol and close exact-version gaps | Storage; I/D/C/H/A for their own authority | OPEN — Issues #14/#16 | Session P exact-version audit Blob pending/now published at `00-governance/reviews/storage-v2-r1-r6-coordinator-exact-version-audit.md`; R1/R4 substantially addressed in proposal, R2/R3/R5/R6 remain blocked/conditional. Require exact owner-local linearization, joined C in-flight admission manifest, D per-fence canonical lineage proof, full §14 identity tuple reconciliation, current companion pin 8ac178..., H schema binding to A §§11–12 and independent A/I/D/C/H decisions. No role-simulated review counts as acceptance. |\n\n## 7. Current issue trackers
 
 | Issue | Scope | Current state |
 |---|---|---|
 | #11 | A–I module baseline rollout | Open; proposals remain PROPOSED; owner decisions and baseline adoption tracked separately. |
-| #14 | A COC persistence review R1–R6 | Open; Storage v2 includes a proposal disposition, but independent I/D/C/H decisions are still required. |
+| #14 | A COC persistence review R1–R6 | Open; P exact-version audit finds R1/R4 substantially addressed in proposal; R2/R3/R5/R6 remain conditional/blocked; independent I/D/C/H decisions still required. |
 | #15 | Current COC protocol 86ff3... focused review | Open; A/H/I role reviews are coordinator-simulated; no independent exact acceptance. |
-| #16 | Storage Design v2 4ed423... exact review | Open; A/I/H role reviews are coordinator-simulated; D/C and targeted B/E/G reviews remain required. |
+| #16 | Storage Design v2 4ed423... exact review | Open; A/I/H role reviews are coordinator-simulated; D/C exact-v2 decisions absent; P audit identifies R2/R3/R5/R6 and companion pin/schema gaps. |
 | #17 | Prepared GID / JF-10 / signed wire envelope | Open; A conditional with amendments; H/I no approval in role-simulated reviews; independent decisions required. |
 
 ## 8. Required operating sequence
@@ -146,4 +146,4 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 
 ## 10. Change log
 
-- 2026-11-17: Reconciled live A–I/Storage branches, exact COC/Applied/context decisions, TAB-001 report coverage, F/H/I model/schema tests and current issue #14–#17 status. Closed UMR-024 at design-decision level; all other active blockers remain tracked above.
+- 2026-11-17: Reconciled live A–I/Storage branches, exact COC/Applied/context decisions, TAB-001 report coverage, F/H/I model/schema tests and current issue #14–#17 status. Closed UMR-024 at design-decision level; all other active blockers remain tracked above.\n- 2026-11-17: Added UMR-029 and pinned Session P exact-version audit of Storage v2 R1–R6. Re-fetched current companion protocol Blob 8ac178... and identified mismatch with v2 header's 86ff3... pin; no Owner acceptance inferred.
