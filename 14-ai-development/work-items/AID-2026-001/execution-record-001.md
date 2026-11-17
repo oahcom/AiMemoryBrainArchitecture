@@ -276,3 +276,13 @@ The engineering-phase entry plan still needs to identify the canonical implement
 中文：Issue #7 评论 #6962269783 已记录项目 Owner 的明确决定 `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`。当前阶段仓库按架构定义仓库运行；本仓库没有生产运行时代码并非当前架构阶段的实现阻塞，也不得在此仓库添加占位运行时实现。
 
 进入工程阶段前仍需确定规范实现仓库/分支、负责代码 Owner、构建/测试/部署权威和物理拓扑。该延期不代表任何生产 R3/DFI 测试通过；生产 R3 测试仍 NOT RUN / NOT EVIDENCED，Owner D/I 批准及独立专业审查仍待完成，生产激活仍未授权。
+
+
+## PR #147 and PR #152 — Manifest YAML integrity evidence / Manifest YAML 完整性证据（2026-11-18）
+
+- PR #147 exact Head `d3dbc5321ccf97429b3003b19a28d8100330fda9`; merge `56336bd16b4dcab1b600eb7ab12e171fda0553a1`; run [#44189279179](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44189279179) SUCCESS. This performed full YAML parsing, required-field checks and referenced-path checks, but used PyYAML `safe_load`, which accepts duplicate mapping keys.
+- PR #152 corrected two actual duplicate `status` keys in the Manifest (renamed to `latest_review_status` and `source_review_status`) and added strict duplicate-key rejection with top-level and nested negative fixtures.
+- PR #152 exact Head `08c017af689eb98ffc8e114e54ed46314cfbf757`; merge `bc6ab890aea68ea33f4de42e442d7ac22fcbf26b`; strict validation run [#44189789286](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44189789286) SUCCESS. The actual Manifest, required fields and referenced paths passed the strict loader.
+- Formal JSON Schema validation remains NOT RUN. Production R3/DFI-001…DFI-022 remains NOT RUN / NOT EVIDENCED. Owner D/I approval and independent review remain pending.
+
+中文：PR #147 完成了全量 YAML 解析、必需字段和引用路径检查，但 PyYAML `safe_load` 会接受重复键。PR #152 修复了 Manifest 中两处真实重复的 `status` 键（改为 `latest_review_status` 和 `source_review_status`），并增加顶层与嵌套重复键拒绝测试。PR #152 精确 Head 的严格验证 Run #44189789286 SUCCESS，实际 Manifest、必需字段及引用路径检查均通过。正式 JSON Schema 验证仍 NOT RUN；生产 R3/DFI 测试仍 NOT RUN / NOT EVIDENCED。

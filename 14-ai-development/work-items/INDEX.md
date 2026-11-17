@@ -4,7 +4,7 @@ This index is the entry point for all governed AI development tasks.
 
 | Work Item ID | Title | Owner | Class/Risk | Status | Prompt | Implementation | Review | Acceptance |
 |---|---|---|---|---|---|---|---|---|
-| [AID-2026-001](AID-2026-001/manifest.yaml) | Define ChatGPT-native execution model | A | ARCH/R3 | REMEDIATION_IN_PROGRESS | [prompt-v2](AID-2026-001/prompt-v2.md) | PR #42 merged (includes #72); [PR #141](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/141) adds 24/24 reference-model tests | Historical FAIL at 1d6ab393; fresh independent review pending | BLOCKED_PENDING_R3_EVIDENCE |
+| [AID-2026-001](AID-2026-001/manifest.yaml) | Define ChatGPT-native execution model | A | ARCH/R3 | REMEDIATION_IN_PROGRESS | [prompt-v2](AID-2026-001/prompt-v2.md) | PR #42 merged (includes #72); PR #141 adds 24/24 reference-model tests; PR #147/#152 add strict unique-key Manifest validation | Historical FAIL at 1d6ab393; fresh independent review pending | BLOCKED_PENDING_R3_EVIDENCE |
 | [PR-GOVERNANCE-001](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/130) | Mandatory session delivery traceability and PR integration governance | Integration Owner | DOC/R1 | ADOPTED | Chat instruction (immutable prompt hash: NOT RECORDED) | [PR #132](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/132) traceability implementation; [PR #144](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/144) governance standard + synchronized templates — both merged to `main` | Same-author COMMENT; owner-directed adoption recorded in Issue #130 comment #6962523529; no independent review claimed | ADOPTED as repository process policy; platform enforcement remains blocked by Issue #134 |
 
 ## Session-level delivery records / 会话级交付记录
