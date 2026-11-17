@@ -47,51 +47,51 @@ The v3.2.3 S0a–S4 order remains unchanged:
 | H | Authority-join mapping | `1cbe74eba69325510d6b1019d971661f965eabf8` | Separate I terminal, D Forget clearance and Storage resolution verifier seams |
 | H | Exact C object-wire mapping | `c196fdc7a9d88e344d37ba2810a9bce1803f8b96` | Unified 1.2.14 ↔ CSubmitOutcome 1.0.1 mapping |
 | H | Validator core | `eab961a08d41e871f38543b18ee60cf024977414` | Actual schema, object identity/equality, local semantic and C-P0 digest validation; injected authority callbacks |
-| H | Full positive envelope + C object fixture | `c80247a6ecfbb4a29ff0993e8e2aea4829d00626` | Synthetic TEST-ONLY full envelope/object fixture |
-| H | Validator tests | `dccf8c099c18807ec072870d32604d0912209f01` | 26 H validator methods, including unmocked local full-path tests 21–25 |
-| H | Provider Outcome workflow | `4459d19f5b4eea058377d9819e48e81eed5c8c4b` | Path filters include current H schema, validator and fixture/test directory |
-| H | Exact full-path CI | Run `44069941327`; commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251`; job `133993324484` | SUCCESS; 32 tests total: 26 H validator + 6 Python/Node C crypto interop |
-| H | Full-path closure record | Blob `5f487321b273ede41a7c23c3f94b6c0625968439` | Delegated H-role closure; local schema/semantic/digest path PASS; production callbacks TEST-ONLY |
+| H | Expanded full-path fixture | `f911027c848d21dd36fb87ba64a201a1455787a7` | Complete synthetic H envelope + immutable C object, with test-only I/D/Storage proof refs |
+| H | Expanded validator tests | `c37c5e2621ebd7bae138f135c5066aa8be7f9926` | 33 H validator methods; Tests 21–32 include full path, 22-field duplicate mutation and owner callback predicates |
+| H | C crypto interop tests | `5559fb7a612c8dd92345ceae3a6aa62f4faae41a`; `a49d588ea6f840927fe21ad8c41cd8089dceac29` | Six Python/Node candidate JCS/Ed25519 interoperability methods |
+| H | Provider Outcome workflow | `4459d19f5b4eea058377d9819e48e81eed5c8c4b` | Exact workflow path filters include current schema, validator and test/fixture directory |
+| H | Exact current-head Provider Outcome CI | Run `44071354162`; commit `6dda3c8f82c2f25118d5bdcfe24015cec678895a`; job `133998097779` | SUCCESS; raw log: 39 tests, 0 failures (33 H validator + 6 C crypto interop) |
+| H | Expanded full-path closure | Phase 3.8.16 Blob `927fe9e8dafd5def6a5cb825e5968f5835d3c6bf` | Delegated H-role exact source/CI closure; authority callbacks TEST-ONLY |
+| H | Exact-head C-P0 projection regression closure | Phase 3.8.16 Blob `f8aeae206b71f6a6bccd1c41300d40959a5221a8` | Confirms Test 32 C-P0 projection completeness; exact 39/39 CI |
 | C | CSubmitOutcome immutable schema 1.0.1 | `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` | C-owned immutable provider outcome; signed sequence_namespace_ref required |
 | C | Sequence namespace amendment | `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb` | C outcome record and CKeyStatusEvent share C-owned namespace |
-| C | Full-path exact review | Blob `4be9c1cd8f116086bab58340f07e38ddfc223e21` | Delegated C-role acceptance of local H/C schema/semantic/digest path; production C trust/egress OPEN |
-| D | Full-path exact review | Blob `ccdae9b45affb23c6741b5cceb27004b35a8e03e` | Delegated D-role acceptance of D callback boundary; lineage, pagination and release CAS OPEN |
-| I | Full-path exact review | Blob `7c65650a37c8c0f270451fb0419e93259fc38151` | Delegated I-role acceptance of I terminal callback boundary; trust/L3/currentness OPEN |
+| C | Expanded 22-field full-path exact review | Phase 3.8.19 Blob `da5dd66ef6514f4b66c27e7d8549d17004e8fcac` | Delegated C-role acceptance of local C object/wire matrix; production C trust/egress OPEN |
+| D | Expanded D Fence/Storage callback exact review | Phase 3.8.11 Blob `7a9ed2bcf7fd34edc576a4a1be7f4388ee551b43` | Delegated D-role acceptance of local D callback boundary; lineage/release OPEN |
+| I | Expanded COMMIT_WON callback exact review | Phase 3.8.15 Blob `44898fa686efc00d4b05aa0454755907d25fa3de` | Delegated I-role acceptance of local COMMIT_WON predicate; trust/L3/currentness OPEN |
 
-### 3.1 Meaning of H full-path CI / H Full-Path CI 的含义
+### 3.1 Exact CI and evidence ceiling / 精确 CI 与证据上限
 
-H Provider Outcome CI run `44069941327` completed SUCCESS on exact commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251`, job `133993324484`. The job log explicitly records tests 21–25 executing and `Ran 32 tests ... OK`: 26 H validator test methods and six Python/Node C crypto interoperability methods.
+H Provider Outcome CI run `44071354162` executed on exact commit `6dda3c8f82c2f25118d5bdcfe24015cec678895a`, job `133998097779`, and completed SUCCESS. The raw job log explicitly records Tests 21–32 and `Ran 39 tests in 9.319s; OK`. The 39 methods comprise 33 H validator methods and six Python/Node C crypto interoperability methods.
 
-The positive full-path test loads actual H Unified 1.2.14 and CSubmitOutcome 1.0.1 schemas plus the synthetic envelope/object fixture, then calls `validate_provider_outcome` without patching schema validation, semantic validation or C-P0 digest/preimage computation. Negative tests prove a duplicated `provider_ref` mismatch returns INVALID, a changed C payload digest fails recomputation, missing I/D/Storage callbacks return UNKNOWN, and a False I/D/Storage callback returns INVALID.
+Tests 21–32 use actual H Unified 1.2.14 and CSubmitOutcome 1.0.1 schemas, actual local C semantic predicates and actual C-P0 digest/preimage calculation. They cover a full positive envelope/object path; 22 present duplicated wire fields individually mutated; synchronized C-P0/wire mutation; C sequence namespace mismatch; I COMMIT_WON predicate; D exact operation/Fence binding; Storage DB-incarnation/GID/PrepareAttempt/participant-ledger binding; and complete C-P0 projection membership. The test suite does not patch the local schema, semantic or digest functions.
 
-Current H branch HEAD `c22e8f2c00f289666eb77c2c37e0a791233f50ef` is three commits ahead of the tested commit; comparison shows documentation-only changes. The current schema, validator, full-path test and fixture Blobs are byte-identical to the exact CI inputs.
+The current H branch HEAD after the two Phase 3.8.16 evidence documents is `1ad9391cfcb94c2434da919b78804217a3a609ef`. Comparing tested commit `6dda3c8...` to current HEAD shows only two added documentation files; schema, validator, test, fixture and workflow Blobs remain byte-identical to the exact CI inputs.
 
-**Evidence ceiling:** all authority-dependent callbacks in the positive fixture are deterministic test doubles. The C crypto interop suite separately tests candidate JCS/Ed25519 vectors, but this full-path fixture does not authenticate production C signature/key status, provider issuer truth, I/D/Storage proofs, live owner ledgers, COC quorum or Storage same-GID resolution. This is a full local schema/semantic/C-P0 digest validation path, not production authority conformance.
+**Evidence ceiling:** all I/D/Storage authority callbacks in the full-path fixture are deterministic test doubles. The C crypto interop methods verify candidate JCS/Ed25519 vectors but do not register production trust profiles. This is strong bounded local L1/L2 source evidence, not production authority authentication, production outer H envelope authentication, provider exactly-once, COC quorum durability or Storage same-GID deployment.
 
-H Provider Outcome CI Run `44069941327` 在精确 Commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251`、Job `133993324484` 上 SUCCESS。Job Log 明确记录 Test 21–25 执行，并显示 `Ran 32 tests ... OK`：26 个 H Validator 测试方法和 6 个 Python/Node C Crypto Interoperability 测试方法。
+H Provider Outcome CI Run `44071354162` 在精确 Commit `6dda3c8...`、Job `133998097779` 上 SUCCESS。Raw Job Log 明确记录 Test 21–32 执行，并显示 `Ran 39 tests in 9.319s; OK`。39 项由 33 个 H Validator 方法和 6 个 Python/Node C Crypto Interoperability 方法组成。
 
-正向 Full-Path Test 加载真实 H Unified 1.2.14、CSubmitOutcome 1.0.1 Schema 与合成 Envelope/Object Fixture，调用真实 `validate_provider_outcome`，没有 Patch Schema、Semantic 或 C-P0 Digest/Preimage 计算。负向测试证明 Wire `provider_ref` 不一致为 INVALID、C Payload Digest 变异重算失败、缺少 I/D/Storage Callback 为 UNKNOWN、False Callback 为 INVALID。
+Test 21–32 使用真实 H Unified 1.2.14 与 CSubmitOutcome 1.0.1 Schema、真实本地 C Semantic Predicate 和 C-P0 Digest/Preimage 计算，覆盖完整正向 Envelope/Object 路径、22 个现存重复 Wire 字段逐项变异、同步 C-P0/Wire 变异、C Sequence Namespace 不一致、I COMMIT_WON Predicate、D 精确 Operation/Fence 绑定、Storage DB Incarnation/GID/PrepareAttempt/Participant Ledger 绑定，以及 C-P0 Projection 成员完整性。测试没有 Patch 本地 Schema/Semantic/Digest 函数。
 
-当前 H HEAD `c22e8f2c00f289666eb77c2c37e0a791233f50ef` 相对测试 Commit 仅有三项文档变更；当前 Schema、Validator、Full-Path Test 与 Fixture Blob 均与 CI 输入字节一致。
+H 分支加入两份 Phase 3.8.16 证据文档后的当前 HEAD 为 `1ad9391...`。与测试 Commit `6dda3c8...` 比较，仅新增两份文档；Schema、Validator、Test、Fixture 与 Workflow Blob 均与 CI 输入字节一致。
 
-**证据上限：** 正向 Fixture 中所有 Authority-dependent Callback 均为确定性 Test Double。C Crypto Interop 套件另行测试候选 JCS/Ed25519 向量，但 Full-Path Fixture 不认证生产 C Signature/Key Status、Provider Issuer Truth、I/D/Storage Proof、实时 Owner Ledger、COC Quorum 或 Storage Same-GID Resolution。这是完整本地 Schema/Semantic/C-P0 Digest 验证路径，不是生产 Authority Conformance。
+**证据上限：** Full-Path Fixture 中所有 I/D/Storage Authority Callback 均为确定性 Test Double。C Crypto Interop 方法验证候选 JCS/Ed25519 向量，但不注册生产 Trust Profile。这是强有力的有限本地 L1/L2 源级证据，不是生产 Authority Authentication、生产外层 H Envelope Authentication、Provider Exactly-once、COC Quorum Durability 或 Storage Same-GID 部署证明。
 
 ## 4. Owner review/adoption matrix / Owner 精确审查与采纳矩阵
 
 | Owner | Exact review artifact / Blob | Exact scope actually reviewed | Current bundle disposition |
 |---|---|---|---|
-| C | Phase 3.8.18 full-path review, Blob `4be9c1cd8f116086bab58340f07e38ddfc223e21` | Exact H schema `09fcd1...`, C schema `a631bc...`, mapping `1cbe74...`, validator `eab961...`, test `dccf8...`, fixture `c80247...` | Delegated C-role acceptance of local schema/semantic/digest path as L1/L2 candidate; production C trust, provider evidence and egress OPEN |
-| D | Phase 3.8.10 full-path review, Blob `ccdae9b45affb23c6741b5cceb27004b35a8e03e` | Exact H schema, mapping, validator, test and fixture Blobs above; D clearance callback boundary | Delegated D-role acceptance of local callback boundary only; lineage completeness, late discovery, pagination, currentness CAS and production release OPEN |
-| D | Phase 3.8.9 mapping review, Blob `40fee15d7e42d68da231ea161896f85df2921669` | Exact authority-join mapping `1cbe74...` and D P0/crosswalk | D proof-carrier/mapping candidate; no production verifier or release proof |
-| I | Phase 3.8.14 full-path review, Blob `7c65650a37c8c0f270451fb0419e93259fc38151` | Exact H schema, mapping, I P0 `44986f...`, validator, test and fixture Blobs above | Delegated I-role acceptance of local callback boundary only; production trust roots, key custody, historical verification, anti-rollback, L3 and final I CAS OPEN |
-| I | Phase 3.8.13 mapping review, Blob `34b29f405d4e8ceb1a039666bfe84518f62355f8` | Exact authority-join mapping `1cbe74...`, RecoveryJoin 1.0.2 and I P0 | I terminal-proof carrier/P0 compatibility accepted as L1/L2 candidate; trust/L3/production OPEN |
-| H | Phase 3.8.14 full-path closure, Blob `5f487321b273ede41a7c23c3f94b6c0625968439` | Exact H/C schemas, mapping, validator, test, fixture and CI 44069941327 | Delegated H-role local full-path closure; authority callbacks TEST-ONLY |
-| A | Prior Phase 1.F review, Blob `85cd97bb66461440c7c08c4397e6cd496217b6fd` | Pins obsolete manifest Blob `4435fc...`, earlier H test Blob `53774...`, CI 44068247661 | **SUPERSEDED / NOT CURRENT**. Fresh A review required against final current manifest Blob |
+| C | Phase 3.8.19 expanded full-path review, Blob `da5dd66ef6514f4b66c27e7d8549d17004e8fcac` | Exact H schema, C schema, mapping, validator, 22-field test source and full fixture; H CI 44071354162 | Delegated C-role acceptance of local C object/wire and digest/namespace checks as L1/L2 candidate; production C trust, provider evidence and egress OPEN |
+| D | Phase 3.8.11 expanded D review, Blob `7a9ed2bcf7fd34edc576a4a1be7f4388ee551b43` | Exact H test/fixture, Test 30 D operation/Fence callback boundary and Test 31 Storage callback distinction | Delegated D-role acceptance of local D callback boundary only; D lineage completeness, late discovery, pagination, currentness CAS and release OPEN |
+| I | Phase 3.8.15 expanded I review, Blob `44898fa686efc00d4b05aa0454755907d25fa3de` | Exact H test/fixture, Test 29 COMMIT_WON callback predicate | Delegated I-role acceptance of local predicate only; production I proof, trust roots, key custody, historical verification, anti-rollback and final CAS OPEN |
+| H | Phase 3.8.16 expanded full-path closure, Blob `927fe9e8dafd5def6a5cb825e5968f5835d3c6bf`; C-P0 regression closure Blob `f8aeae206b71f6a6bccd1c41300d40959a5221a8` | Exact H HEAD 6dda3c8..., current test/fixture Blobs and CI 44071354162 | Delegated H-role local L1/L2 closure; callbacks TEST-ONLY; outer envelope authentication OPEN |
+| A | Prior Phase 1.G review Blob `86b3d4e7d6615b9a5cd915616d7c12f4ecd0a1b3` | Pins previous manifest Blob `fe1dcf...`, old test `dccf8...`, fixture `c80247...`, CI 44069941327 | **SUPERSEDED / NOT CURRENT** by H 39-test/22-field expansion; fresh A exact re-review required |
 | Storage | This v3.2.7 manifest | Exact-version bundle binding and review routing | Delegated Storage-role artifact, not independent Storage Owner signature |
 
-C/D/I/H reviews above are exact delegated role artifacts and evidence of domain-boundary review, not independent human Owner signatures. C Phase 3.8.18, D Phase 3.8.10 and I Phase 3.8.14 specifically pin the current full-path test and fixture Blobs. A's previous Phase 1.F review is stale because it pins an earlier manifest Blob and earlier H test/CI evidence.
+C/D/I/H review documents are exact delegated role artifacts, not independent human Owner signatures. They confirm bounded domain review of the current H 39-test set; they do not certify production authority adapters or transfer earlier approvals. A's Phase 1.G review is stale because H's test source and fixture have changed after its pinned manifest and CI set.
 
-上述 C/D/I/H 审查是精确的角色审查工件，可证明领域边界审查范围，但不是独立人类 Owner 签署。C Phase 3.8.18、D Phase 3.8.10、I Phase 3.8.14 均精确绑定当前 Full-Path Test 与 Fixture Blob。A 先前 Phase 1.F Review 因绑定旧 Manifest Blob 与旧 H Test/CI 证据而过期。
+C/D/I/H 审查文档是精确的角色审查工件，不是真正独立人类 Owner 签署。它们确认了当前 H 39 项测试集的有限领域审查，但不认证生产 Authority Adapter，也不转移此前批准。A 的 Phase 1.G Review 因 H Test Source 与 Fixture 在其绑定的 Manifest/CI 集之后发生变化而过期。
 
 ## 5. Required semantic and operational joins / 必需语义与运行 Join
 
@@ -109,9 +109,9 @@ C/D/I/H reviews above are exact delegated role artifacts and evidence of domain-
 
 - Storage technical architecture v3.2.3: normative candidate body unchanged.
 - Storage v3.2.7: **CURRENT EXACT CANDIDATE BUNDLE BOUND; NOT JOINTLY ACCEPTED / NOT FROZEN**.
-- H Unified 1.2.14 / CSubmitOutcome 1.0.1 full local validator CI: **SUCCESS, 32 tests; complete local schema/semantic/C-P0 digest path PASS with TEST-ONLY authority callbacks**.
-- Full unmocked H envelope + C object positive path and bounded negative/tri-state tests: **PASS**.
-- Full mutation matrix for every duplicated wire field, exact identity/digest joins, stale/currentness branches and production authority verification: **OPEN**.
+- H Unified 1.2.14 / CSubmitOutcome 1.0.1 full local validator CI: **SUCCESS, 39 tests; 22-field duplicate mutation, local semantic/C-P0 digest and bounded I/D/Storage callback predicates PASS with TEST-ONLY authority callbacks**.
+- Full local H envelope + C object schema/semantic/digest path: **PASS**.
+- Full mutation coverage of all present duplicated fields in the fixture: **PASS (22 fields)**; complete schema-wide optional/conditional mutation and outer H envelope authentication: **OPEN**.
 - Production I/D/Storage authority callback adapters: **NOT IMPLEMENTED / NOT VERIFIED**.
 - JF-10 P0: **OPEN**.
 - R1 Recovery Cutoff Batch completeness: **OPEN**.
@@ -127,21 +127,23 @@ C/D/I/H reviews above are exact delegated role artifacts and evidence of domain-
 
 ## 7. Required next sequence / 后续执行顺序
 
-1. A must issue a fresh exact integration review against the final read-back Blob of this v3.2.7 manifest; the old Phase 1.F review is stale.
-2. H must expand negative vectors to every duplicated wire field, exact C identity/digest, C sequence namespace/key-status mismatch, rollback/fork and malformed raw JSON cases.
-3. I must bind the terminal verifier to I-authoritative proof, request/admission ledger, PermissionEpoch, currentness and COMMIT_WON semantics; missing evidence remains UNKNOWN.
-4. D must bind the clearance verifier to complete lineage membership, FenceGeneration, barrier root/terminality, late-discovery successor snapshot and final D-local CAS.
-5. Storage must bind same-GID resolution to DB incarnation, GID, PrepareAttempt, participant ledger, authoritative terminal resolution and visibility marker.
-6. C must separately close provider issuer truth, same-key lookup, adapter send-vs-close, lost ACK, retry/replay and multi-replica egress fault cases.
-7. Storage must prove COC quorum persistence, bidirectional RecoveryJoin, exact prefix/readback and owner-local release ordering. A fresh A review does not close R1/R2 or any production Gate.
+1. A must issue a fresh exact integration review against the final read-back Blob of this v3.2.7 manifest; Phase 1.G is stale.
+2. H must add outer H envelope payload_digest/signature and authenticated transport-principal verification through the H gateway boundary; the C object validator must not be treated as outer-envelope authentication.
+3. H/C must expand schema-wide conditional/optional field mutation, raw JSON strict parsing through validate_raw_provider_outcome, signature/preimage mismatch and C key-status/currentness/rollback vectors.
+4. I must connect COMMIT_WON verification to I-authoritative terminal proofs, request/admission ledger, key status/history, PermissionEpoch and final currentness CAS.
+5. D must connect Fence/lineage/Barrier proof to complete D-authoritative pagination, late-discovery successor snapshot and final D-local CAS.
+6. Storage must connect same-GID resolution to DB incarnation, GID, PrepareAttempt, participant ledger, terminal outcome and visibility marker.
+7. C must close production provider issuer truth, same-key lookup, adapter send-vs-close, lost ACK/retry/failover and egress linearization.
+8. Storage must prove COC quorum persistence, bidirectional RecoveryJoin, exact prefix/readback and owner-local release ordering. No Gate status changes from CI alone.
 
-1. A 必须针对本 v3.2.7 Manifest 最终读回 Blob 发布全新精确集成审查；旧 Phase 1.F 已过期。
-2. H 必须扩展负向向量，覆盖每个重复 Wire 字段、C Identity/Digest、C Sequence Namespace/Key Status 不一致、Rollback/Fork 与 Raw JSON 错误。
-3. I 必须将 Terminal Verifier 绑定 I 权威 Proof、Request/Admission Ledger、PermissionEpoch、Currentness 与 COMMIT_WON 语义；缺失证据仍为 UNKNOWN。
-4. D 必须将 Clearance Verifier 绑定完整 Lineage Membership、FenceGeneration、Barrier Root/Terminality、Late-Discovery 后继 Snapshot 与最终 D-local CAS。
-5. Storage 必须将 Same-GID Resolution 绑定 DB Incarnation、GID、PrepareAttempt、Participant Ledger、权威终态 Resolution 与 Visibility Marker。
-6. C 必须独立关闭 Provider Issuer Truth、Same-Key Lookup、Adapter Send-vs-Close、Lost ACK、Retry/Replay 与多副本 Egress Fault。
-7. Storage 必须证明 COC Quorum Persistence、双向 RecoveryJoin、Exact Prefix/Readback 与 Owner-local Release Ordering。A 新审查不关闭 R1/R2 或任何生产 Gate。
+1. A 必须针对本 v3.2.7 Manifest 最终读回 Blob 发布全新精确集成审查；Phase 1.G 已过期。
+2. H 必须在 H Gateway 边界增加外层 H Envelope payload_digest/signature 与认证 Transport Principal 验证；不得将 C Object Validator 误当成外层 Envelope Authentication。
+3. H/C 必须扩展 Schema-wide 条件/可选字段变异、经 validate_raw_provider_outcome 的 Raw JSON 严格解析、Signature/Preimage 不匹配及 C Key Status/Currentness/Rollback 向量。
+4. I 必须将 COMMIT_WON 验证连接 I 权威 Terminal Proof、Request/Admission Ledger、Key Status/History、PermissionEpoch 与最终 Currentness CAS。
+5. D 必须将 Fence/Lineage/Barrier Proof 连接 D 权威完整分页、Late-Discovery Successor Snapshot 与最终 D-local CAS。
+6. Storage 必须将 Same-GID Resolution 连接 DB Incarnation、GID、PrepareAttempt、Participant Ledger、Terminal Outcome 与 Visibility Marker。
+7. C 必须关闭生产 Provider Issuer Truth、Same-Key Lookup、Adapter Send-vs-Close、Lost ACK/Retry/Failover 与 Egress Linearization。
+8. Storage 必须证明 COC Quorum Persistence、双向 RecoveryJoin、Exact Prefix/Readback 与 Owner-local Release Ordering。CI 本身不改变任何 Gate 状态。
 
 ## 8. Provenance / 来源说明
 
