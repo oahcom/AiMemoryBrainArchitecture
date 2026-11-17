@@ -238,9 +238,9 @@ def validate_join(admissions_by_owner, m):
     for owner, admissions in admissions_by_owner.items():
         for a in admissions:
             ref = a.get("owner_entry_ref")
-            if ref in seen_admissions:
+            if (owner, ref) in seen_admissions:
                 return INVALID
-            seen_admissions.add(ref)
+            seen_admissions.add((owner, ref))
             if a.get("status") == "NOT_REGISTERED":
                 if any(k in a for k in ("participant_intent_ref", "participant_entry_digest", "participant_position")):
                     return INVALID
@@ -267,12 +267,15 @@ def validate_join(admissions_by_owner, m):
                 return INVALID
     # COC ParticipantManifest -> accountable owner evidence direction.
     for p in m["entries"]:
-        if p.get("owner_kind") not in admissions_by_owner:
+        c_entries = admissions_by_owner.get("C")
+        if c_entries is None:
             return UNKNOWN
-        owner_entry = next((a for a in admissions_by_owner[p["owner_kind"]]
+        owner_entry = next((a for a in c_entries
                             if a.get("owner_entry_ref") == p.get("owner_admission_ref")), None)
         if owner_entry is None or owner_entry.get("status") != "REGISTERED":
             return UNKNOWN
+        if owner_entry.get("participant_intent_ref") != p.get("participant_intent_ref"):
+            return INVALID
         for required in p.get("required_owner_evidence", []):
             refs = p.get("owner_evidence", {}).get(required, [])
             if not refs:
