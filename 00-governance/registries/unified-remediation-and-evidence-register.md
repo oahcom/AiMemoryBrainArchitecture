@@ -22,17 +22,17 @@ Observed GitHub branch refs at this refresh. These are point-in-time HEADs, not 
 
 | Role | Branch | Observed HEAD |
 |---|---|---|
-| A | session-a-integration-2026-11-16 | bccd8769e981310b85da4974fb4af98e41f9f374 |
-| B | session-b-domain-model-phase3 | 310f305575d6f406e80d5d6ebf951bcd9e79e35f |
-| C | session-c-agent-integration-2026-11-16 | 018de5044810e755d4e21cb21e982526c27eb9a8 |
-| D | session-d-memory-brain-2026-11-16 | a3ea0de75ca7b2297589293ec142f2cb07757282 |
-| E | session-e-memory-compiler-2026-11-16 | 5fb76b666fac49ceeb51ddb7c320fe5975313d99 |
-| F | session-f-memory-runtime | e4c26214b8f78169c0e20f1faae23f945c3afeb9 |
-| G | session-g-memory-context | b0c515399c6a336dcbf17a1ced6925413c804d5c |
-| H | session-h-bmcp-protocol | 26378ea59675f31ac0455d745e9cbedab898db8c |
-| I | session-i-security-governance-2026-11-16 | ba0d1dfcca9392f3a20c405169c83b41da3f12b7 |
-| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | 337fe8bffa178e64ad8e4750f1ede1d561424edc |
-| main | main | 3799616bea65bf5ffd1cd0bdb321cd4c6f591b7f |
+| A | session-a-integration-2026-11-16 | 6d6f08ae7704e0fa0cf0f2eee0512bf5e3eb624f |
+| B | session-b-domain-model-phase3 | 0df144ae25c2039c9934395fc88b2d17080eb119 |
+| C | session-c-agent-integration-2026-11-16 | 972920c818f837e6b57696f369240512488e572a |
+| D | session-d-memory-brain-2026-11-16 | e326e6ec11f01776fa8c1655da232e8e0e5c4706 |
+| E | session-e-memory-compiler-2026-11-16 | df3f56cdebbb4bb85999e2e04b666dacf77da810 |
+| F | session-f-memory-runtime | 348b5ec84c44a8a067122ce0aa72a594b9c06b66 |
+| G | session-g-memory-context | 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa |
+| H | session-h-bmcp-protocol | ba99eea9334d77c2a014ed45d9287ef514a4d895 |
+| I | session-i-security-governance-2026-11-16 | ac12267ab5bca6ac462893a053c93965eaa6b3b9 |
+| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | 93c9546bae5e17f6b62e4219e792b947c5fbd816 |
+| main | main | b0ec721d1663f78cd0dbc864a094f72ad1fa3ab7 |
 
 P vs main remains **diverged**. Re-query the live compare before any integration because every P coordination commit changes the ahead count. No merge, force-update or main write is authorized or performed.
 
@@ -164,9 +164,11 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 
 | UMR-032 | P0 | Convert Issue #20 role designs into executable state machines and conformance vectors | D/I/F/E/G/H/Storage/A | OPEN — Issue #20 | Session P authored `00-governance/role-simulations/issue-20-executable-state-machines-and-conformance-vectors.md` (commit `91b23f681f934474d3486f2ce1a53b9f5f86154a`, Blob `af3edf669bb119e7076a77c6a782a3f730091328`). Includes D Fence/Admission, I Inventory Seal, F/E/G lifecycles, Storage restore/Serving CAS, H schema constraints and 28 race/fault vectors. Proposal only; tests are specified, not run. Require Owner adoption, executable tests on selected persistence profile and exact-version evidence. |
 
-| UMR-033 | P0 | Obtain exact Owner adoption of Issue #20 cross-owner implementation contract and schema candidate | D/I/F/E/G/H/Storage/A | OPEN — Issue #20 | Session P proposal: `00-governance/role-simulations/issue-20-cross-owner-implementation-contract-v0.1.0.md`; schema candidate `issue20.archive-forget-restore.v0.1.0.schema.json`. Exact source branch heads/blobs are pinned in the contract. Distinguishes D Work Registration from post-Storage-Prepare D PublicationParticipant admission; binds I single-use receipt and Storage terminal outcome. No Owner has adopted this exact package yet. |
-| UMR-034 | P0 | Execute Issue #20 reference-model/schema tests and then persistence/adapter fault conformance | D/I/F/E/G/H/Storage/A | OPEN — reference-model/schema CI PASS; production conformance NOT VERIFIED | Deterministic reference model and Draft 2020-12 schema checks under `00-governance/role-simulations/tests/`; workflow `.github/workflows/issue20-contract-tests.yml`. GitHub Actions run `44052599184` on commit `b1fd86edbf93cf6c66106539c9c81628de33a278` completed SUCCESS: 27 tests, OK. Covers model race/recovery invariants and structural/semantic schema checks only; PostgreSQL/SQLite, quorum COC, crash/failover, same-XID and production adapter tests remain required. |
+| UMR-033 | P0 | Obtain exact Owner adoption of Issue #20 cross-owner implementation contract and schema candidate | D/I/F/E/G/H/Storage/A | OPEN — candidate only | Session P contract: `00-governance/role-simulations/issue-20-cross-owner-implementation-contract-v0.1.0.md` (Phase 3.8.4 refresh addendum); current schema candidate `issue20.archive-forget-restore.v0.1.1.schema.json`. It distinguishes D Work Registration from post-Storage-Prepare D PublicationParticipant admission, and consumed I pre-commit proof from post-outcome ITerminalProof. Exact Owner adoption is absent. |
+| UMR-034 | P0 | Execute Issue #20 reference-model/schema tests and then persistence/adapter fault conformance | D/I/F/E/G/H/Storage/A | OPEN — reference-model/schema CI PASS; production conformance NOT VERIFIED | Deterministic reference model and Draft 2020-12 schema checks under `00-governance/role-simulations/tests/`; workflow `.github/workflows/issue20-contract-tests.yml`. GitHub Actions run `44053248809` on commit `37e3910f87c3c16c7c181e53cb0ab7bcbc46b4cc` completed SUCCESS: 29 tests, OK. Covers model race/recovery invariants and schema validation/positive-negative payloads only; PostgreSQL/SQLite, quorum COC, crash/failover, same-XID and production adapter tests remain required. |
 
-| UMR-035 | P0 | Obtain formal A exact-version integration decision for Issue #20 cross-owner contract v0.1.0 | A/D/I/F/E/G/H/Storage | OPEN — simulated A disposition BLOCKED | Session P published `00-governance/role-simulations/issue-20-a-integration-review-v0.1.0.md` (P role simulation only). Findings A-I20-01..09 block freeze pending exact Owner adoption, DB/restore evidence, H schema review and refreshed exact-version pins. This is not A Owner's signed decision. |
+| UMR-035 | P0 | Obtain formal A exact-version integration decision for Issue #20 cross-owner contract | A/D/I/F/E/G/H/Storage | OPEN — candidate composition accepted with blockers; freeze NOT APPROVED | Session P A-role review `00-governance/role-simulations/issue-20-a-integration-review-v0.1.0.md` was refreshed against A Phase 3.8.4 review Blob `81d8956eedceb0b8842034c4ea1989e765dd6e4e` and A Phase 3.8 D/E/I/Storage decision Blob `6338be6c2a45fdd35f6709beb7978725a3b8fb37`. Simulated disposition: ACCEPT AS CANDIDATE COMPOSITION WITH BLOCKING CONDITIONS; no interface freeze/production activation and not an independent A Owner signature. |
 
 | UMR-036 | P0 | Align Issue #20 I pre-commit authorization and post-commit terminal proof semantics; consume D/I snapshot membership proofs in RecoveryJoin 1.0.2 | D/I/H/Storage/A | OPEN — candidate composition only | Phase 3.8.4 refresh identified exact D/I Owner Snapshot Membership Proof proposals, H RecoveryJoin 1.0.2 and H Unified Manifest union. Corrected contract/schema to distinguish consumed I CommitAuthorizationReceipt / ICommitAuthorizationProof (pre-commit) from ITerminalProof (post-Storage outcome closeout); added D PublicationParticipant admission vs D terminal receipt. Owner approval, full set completeness, trust adapters and production verification remain open. |
+
+- 2026-11-17: Phase 3.8.4 refresh re-pinned D/I/H/Storage/A current branches; integrated D/I Owner Snapshot Membership Proof contracts, H RecoveryJoin 1.0.2/Manifest union, Storage visibility participant and topology ADR, and A candidate-composition ruling. Corrected I pre-commit CommitAuthorizationReceipt vs post-commit ITerminalProof. Schema v0.1.1 and 29-test CI pass recorded; physical topology remains unselected and production conformance open.
