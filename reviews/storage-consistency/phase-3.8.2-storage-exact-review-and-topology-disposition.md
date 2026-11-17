@@ -13,7 +13,7 @@
 - Storage Phase 3.8 visibility contract: Blob 175ee7b1349cfdb79a19898b311a88391ed88010.
 - Storage Phase 3.6.11 bidirectional JoinProof: Blob 4520860b28429d35cdb2ca947a56d0ccb64226a3.
 - H RecoveryJoin schema 1.0.0: Blob dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
-- H semantic validator/test contract: Blob 121717c5f303b1a2e864f2b95664f51f51ba4b48.
+- H semantic validator/test contract: Blob 6f66a72a2d0aa43af338ff9e22d650d47aa2bd80.
 - HRC/JPF executable suite: Blob 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
 - A race/crash/failover matrix: Blob c0f8ae699a42de46d12d0d311892e5670014e0f1.
 
@@ -93,7 +93,7 @@ The latest RecoveryJoin schema now binds every owner request row by both logical
 
 Updated Storage JoinProof contract Blob: 4520860b28429d35cdb2ca947a56d0ccb64226a3.
 Updated H RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
-Updated H semantic contract Blob: 121717c5f303b1a2e864f2b95664f51f51ba4b48.
+Updated H semantic contract Blob: 6f66a72a2d0aa43af338ff9e22d650d47aa2bd80.
 Updated HRC suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
 
 
@@ -101,7 +101,7 @@ Updated HRC suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
 
 Current exact references reviewed:
 - H RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
-- H semantic contract: `121717c5f303b1a2e864f2b95664f51f51ba4b48`.
+- H semantic contract: `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80`.
 - HRC/JPF suite after fixture correction: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
 - H wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
 - H schema suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
