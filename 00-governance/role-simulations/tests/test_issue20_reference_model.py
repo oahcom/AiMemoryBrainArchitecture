@@ -367,7 +367,7 @@ class CProviderOutcomeTests(unittest.TestCase):
     def test_submit_requires_prior_exact_intent_admission(self):
         c = CProviderOutcome()
         with self.assertRaises(ProtocolError):
-            c.submit("intent-1", "provider-key-1")
+            c.submit("intent-1", "provider-key-1", "perm-7")
 
     def test_same_intent_and_same_request_are_idempotent(self):
         c = CProviderOutcome()
@@ -389,11 +389,11 @@ class CProviderOutcomeTests(unittest.TestCase):
         c = CProviderOutcome()
         c.admit_intent("intent-1", "request-digest", "d-participant-1",
                        self.authorized_i_receipt(), "perm-7")
-        first = c.submit("intent-1", "provider-key-1")
+        first = c.submit("intent-1", "provider-key-1", "perm-7")
         self.assertEqual(first["state"], "SUBMITTED_UNKNOWN")
         self.assertEqual(c.lookup_after_timeout("intent-1", "provider-key-1"),
                          {"outcome": "UNKNOWN"})
-        self.assertEqual(c.submit("intent-1", "provider-key-1"), first)
+        self.assertEqual(c.submit("intent-1", "provider-key-1", "perm-7"), first)
         with self.assertRaises(ProtocolError):
             c.submit("intent-1", "provider-key-2")
 
@@ -401,7 +401,7 @@ class CProviderOutcomeTests(unittest.TestCase):
         c = CProviderOutcome()
         c.admit_intent("intent-1", "request-digest", "d-participant-1",
                        self.authorized_i_receipt(), "perm-7")
-        c.submit("intent-1", "provider-key-1")
+        c.submit("intent-1", "provider-key-1", "perm-7")
         first = c.record_outcome("intent-1", "provider-key-1",
                                  "SUCCEEDED", "provider-outcome-digest")
         self.assertEqual(first, c.record_outcome(
@@ -411,13 +411,29 @@ class CProviderOutcomeTests(unittest.TestCase):
         c = CProviderOutcome()
         c.admit_intent("intent-1", "request-digest", "d-participant-1",
                        self.authorized_i_receipt(), "perm-7")
-        c.submit("intent-1", "provider-key-1")
+        c.submit("intent-1", "provider-key-1", "perm-7")
         c.record_outcome("intent-1", "provider-key-1",
                          "SUCCEEDED", "outcome-a")
         with self.assertRaises(ProtocolError):
             c.record_outcome("intent-1", "provider-key-1",
                              "FAILED_NO_SIDE_EFFECT", "outcome-b")
         self.assertIn("intent-1", c.quarantined)
+
+    def test_same_intent_replay_rejects_changed_authority_refs(self):
+        c = CProviderOutcome()
+        c.admit_intent("intent-1", "request-digest", "d-participant-1",
+                       self.authorized_i_receipt(), "perm-7")
+        with self.assertRaises(ProtocolError):
+            c.admit_intent("intent-1", "request-digest", "d-participant-2",
+                           self.authorized_i_receipt(), "perm-7")
+
+    def test_permission_epoch_change_blocks_first_provider_submit(self):
+        c = CProviderOutcome()
+        c.admit_intent("intent-1", "request-digest", "d-participant-1",
+                       self.authorized_i_receipt(), "perm-7")
+        with self.assertRaises(ProtocolError):
+            c.submit("intent-1", "provider-key-1", "perm-8")
+        self.assertNotIn("intent-1", c.provider_calls)
 
 
 if __name__ == "__main__":
