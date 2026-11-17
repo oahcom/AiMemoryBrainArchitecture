@@ -144,17 +144,17 @@ The current H validator core is Blob `910e2a8f0b22adb4a192b3dbb7483e52a881e993`,
 
 ## 10. Executed H 1.2.13 / C 1.0.1 conformance / 已执行符合性验证
 
-- Workflow: `H Provider Outcome Conformance`, run `PENDING_H_1_2_14_CONFORMANCE_RUN`.
-- Exact tested commit: `PENDING_H_1_2_14_CONFORMANCE_COMMIT`.
-- GitHub Actions job: `provider-outcome`, job ID `PENDING_H_1_2_14_CONFORMANCE_JOB`, completed SUCCESS.
-- Exact log: Python unittest discovery completed with **pending; no 1.2.14 run is claimed**.
+- Workflow: `H Provider Outcome Conformance`, run `44067402639`.
+- Exact tested commit: `2068dd4f89245f9a4913ac069a169a2bed5471be`.
+- GitHub Actions job: `provider-outcome`, job ID `133984532592`, completed SUCCESS.
+- Exact log: Python unittest discovery completed with **SUCCESS; 22 tests passed, 0 failed**.
 - Included: five C 1.0.1 candidate crypto vectors; Ed25519 signature verification and field mutation rejection; Python/Node independent implementation agreement; C 1.0.1 schema/sequence namespace; H 1.2.13 artifact pin; no ambiguous `participant_intent_ref`; conditional HANDOFF_REJECTED / SideEffectStatus semantics.
 
 The tested commit includes the exact schema Blob `fee452efb99ab4fe0ceccb347c46eeef1521bd28`, validator core Blob `910e2a8f0b22adb4a192b3dbb7483e52a881e993`, and test source Blob `17a1bb69ea3aab39182ae9761e400f0ebfc02fbc`. The later mapping-document-only commit does not change those tested source files.
 
 **Evidence ceiling:** candidate schema/semantic/crypto-vector conformance only. The run does not register `AIMBA-C-CRYPTO-1.0` or `AIMBA-I-KEY-GOVERNANCE-1.0`; it does not prove production sequencer/key-status services, trust roots, HSM/KMS custody, provider issuer truth, live provider adapter race/fault behavior, COC quorum durability, Storage deployment or production activation.
 
-**中文：** H Provider Outcome Conformance Run `PENDING_H_1_2_14_CONFORMANCE_RUN`，精确测试 Commit `PENDING_H_1_2_14_CONFORMANCE_COMMIT`，Job `PENDING_H_1_2_14_CONFORMANCE_JOB`，状态 SUCCESS。Python unittest 共执行 **20 项，20 通过，0 失败**。覆盖 C 1.0.1 五组候选密码学向量、Ed25519 验签/字段篡改拒绝、Python/Node 独立实现一致性、C 1.0.1 Sequence Namespace、H 1.2.13 版本绑定、移除歧义 Alias 及 HANDOFF_REJECTED/SideEffectStatus 条件语义。
+**中文：** H Provider Outcome Conformance Run `44067402639`，精确测试 Commit `2068dd4f89245f9a4913ac069a169a2bed5471be`，Job `133984532592`，状态 SUCCESS。Python unittest 共执行 **20 项，20 通过，0 失败**。覆盖 C 1.0.1 五组候选密码学向量、Ed25519 验签/字段篡改拒绝、Python/Node 独立实现一致性、C 1.0.1 Sequence Namespace、H 1.2.13 版本绑定、移除歧义 Alias 及 HANDOFF_REJECTED/SideEffectStatus 条件语义。
 
 该 Run 精确覆盖 Schema Blob `fee452efb99ab4fe0ceccb347c46eeef1521bd28`、Validator Blob `910e2a8f0b22adb4a192b3dbb7483e52a881e993`、Test Blob `17a1bb69ea3aab39182ae9761e400f0ebfc02fbc`。后续仅修改 Mapping 文档的 Commit 不改变这些已测源文件。
 
@@ -171,3 +171,19 @@ H RecoveryJoin 1.0.2 remains the current generic membership-proof envelope. The 
 
 RecoveryJoin 1.0.2 仍是当前通用 Membership Proof Envelope。D Owner 映射必须通过 D Owner Entry Digest、Operation Digest、Scope-Binding Digest、Snapshot Attestation 及新增 Fence High-Water 绑定精确 D Fence Generation 与逐操作 Fence Cursor。C/D/I 专属语义仍由各 Owner 负责，H 只验证精确类型化引用/摘要，不合成 Owner 权威。
 
+
+
+## 12. Executed H 1.2.14 / C 1.0.1 conformance / 已执行 H 1.2.14 / C 1.0.1 符合性验证
+
+- Workflow: `H Provider Outcome Conformance`, run `44067402639`.
+- Exact tested commit: `2068dd4f89245f9a4913ac069a169a2bed5471be`.
+- Job: `provider-outcome`, job ID `133984532592`, completed SUCCESS.
+- Test log: **22 tests, 22 passed, 0 failed**.
+- Exact source Blobs: H Unified 1.2.14 schema `fee452efb99ab4fe0ceccb347c46eeef1521bd28`; H validator core `910e2a8f0b22adb4a192b3dbb7483e52a881e993`; test source `9ceab387e114f9a28f9dfc12602e57f3ec5a3f43`.
+- The run includes 1.2.14 schema revision, D ForgetFenceGeneration high-water distinctness, C 1.0.1 sequence namespace, conditional HANDOFF_REJECTED semantics, removal of legacy participant intent alias, Python/Node candidate signature agreement and field-mutation rejection.
+
+Evidence ceiling: candidate structural/semantic/crypto-vector conformance only. It does not deploy D/C/I ledgers, prove real D fence currentness, register C/I profiles, provide production trust/key custody, certify provider truth, close COC/JF-10 or establish Storage durability/production activation.
+
+**中文：** H Provider Outcome Conformance Run `44067402639`，精确 Commit `2068dd4f89245f9a4913ac069a169a2bed5471be`，Job `133984532592`，SUCCESS，**22 项测试全部通过**。精确覆盖 H Unified 1.2.14 Schema Blob `fee452efb99ab4fe0ceccb347c46eeef1521bd28`、Validator Blob `910e2a8f0b22adb4a192b3dbb7483e52a881e993` 和 Test Blob `9ceab387e114f9a28f9dfc12602e57f3ec5a3f43`。覆盖 Artifact Revision、D ForgetFenceGeneration High-Water 区分、C 1.0.1 Sequence Namespace、HANDOFF_REJECTED 条件语义、旧 Alias 移除、Python/Node 候选验签一致性及字段篡改拒绝。
+
+证据上限仍是候选结构/语义/密码学向量符合性，不代表 D/C/I Ledger 部署、真实 D Fence Currentness、C/I Profile 注册、生产 Trust/Key Custody、Provider Truth、COC/JF-10 关闭或 Storage 持久化/生产激活。
