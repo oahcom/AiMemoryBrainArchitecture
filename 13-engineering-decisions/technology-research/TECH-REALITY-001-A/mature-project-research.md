@@ -333,3 +333,18 @@ OpenTelemetry Rust supports metrics, logs and traces, but the official status pa
 - Windows/macOS/Linux packaging and runtime compatibility have not been exhaustively tested for every Rust dependency.
 - Security advisories, transitive dependency audit and full license compatibility review remain required before pinning dependencies.
 - Release tag and HEAD may differ; the evidence register records which was inspected. Exact dependency pinning is deferred to ADRs.
+
+
+## 9. Project Owner technology-review cross-check / 项目 Owner 技术审查交叉核对
+
+The current B–I Owner branches contain TAR-AI-001 technology review reports. Their recommendations are consistent with the external project research at a high level: typed relational domain core (B), capability-tiered Agent integration and HTTP/local IPC (C), local transactional prototype with strict fence/publication ordering (D), DB outbox/workers rather than Kafka by default (E), structured + FTS5 first and ANN later (F), SQL tables/outbox for Context prototype (G), JSON/JCS + HTTP/IPC as interoperability candidates (H), and I-owned authorization/revocation/key/Forget governance (I).
+
+These Owner reports are **CONDITIONAL PASS** design reviews, not independent human Owner signatures. Their recorded reviewed HEADs are older than the current branch HEADs read in this task. See `owner-technology-review-synthesis.md` for exact current branch heads, report Blobs and stale-baseline comparisons.
+
+Storage's current branch adds an important update: its serialization ADR Blob `1ef47d4e5711c7db73a24d249adf1992be1f6aa4` contains a 2026-11-17 addendum selecting one logical serializable transaction domain per Canonical Memory authority as the normative v1 profile. Its scope is logical serialization only; it does not choose a database product or deployed topology. The same branch's PostgreSQL 18.7 dossier Blob `0aabf66848dc97deee028c571183c0d7204008c0` records bounded CI PASS subtests for prepared-XID persistence/lock retention/restart, synchronous failover, physical restore, ACK-loss and WAL PITR. Gate A remains PARTIAL PASS / OPEN; Gate B's amended protocol requires focused exact-owner re-review; Gate C is deferred; JF-10 runtime P0 remains OPEN and production activation is NOT AUTHORIZED.
+
+本项目 B–I 当前分支包含 TAR-AI-001 技术审查报告。其建议与外部成熟项目研究总体一致：B 的强类型关系型领域核心；C 的分层 Agent 集成与 HTTP/本地 IPC；D 的本地事务原型和严格 Fence/Publication 顺序；E 默认采用 DB Outbox/Worker 而不是 Kafka；F 先结构化 + FTS5，再按需引入 ANN；G 的 Context SQL/Outbox 原型；H 的 JSON/JCS + HTTP/IPC 候选；I 保留授权、撤销、密钥和 Forget 治理权。
+
+这些 Owner 报告均为 **CONDITIONAL PASS** 设计审查，不是独立人工 Owner 签署；其记录的审查 HEAD 早于本任务读取的当前分支 HEAD。精确对比见 `owner-technology-review-synthesis.md`。
+
+Storage 当前分支有重要更新：序列化 ADR Blob `1ef47d4e5711c7db73a24d249adf1992be1f6aa4` 的 2026-11-17 补充条款选择每个 Canonical Memory Authority 一个逻辑 Serializable Transaction Domain 作为 v1 规范档案，但范围仅限逻辑序列化，不选择数据库产品或实际部署。相同分支的 PostgreSQL 18.7 档案 Blob `0aabf66848dc97deee028c571183c0d7204008c0` 记录了 Prepared-XID 持久化/锁保留/重启、同步故障切换、物理恢复、ACK 丢失和 WAL PITR 的有限 CI PASS 子测试。Gate A 仍 PARTIAL PASS / OPEN；Gate B 修订协议需要聚焦精确 Owner 复审；Gate C 延后；JF-10 runtime P0 仍 OPEN，禁止生产激活。
