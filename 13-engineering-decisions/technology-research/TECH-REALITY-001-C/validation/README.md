@@ -1,12 +1,12 @@
 # Validation Assets / 验证资产
 
 ## Status
-- Design scenarios: 20 defined in `agent-integration-validation-plan.md`.
+- Design scenarios: 22 defined (V01–V22) in `agent-integration-validation-plan.md`.
 - Executable provider adapter tests: NOT RUN.
 - Real provider tests: NOT RUN.
 - Real tool side-effect/recovery tests: NOT RUN.
 - C/H cryptographic profile registration: NOT RUN / NOT REGISTERED.
-- H Unified 1.2.15 exact validator CI: NOT VERIFIED in this C pass.
+- H Unified 1.2.15 exact validator CI: VERIFIED as historical bounded evidence at H ancestor `0d363244...` (91 Provider Outcome tests; 288 Recovery Cutoff tests, 22 skipped); artifacts are not present in current H HEAD `0277a8b...`, and this is not C integration CI.
 - G Applied end-to-end tests: NOT RUN / NOT VERIFIED.
 - Forget-vs-late-result fault injection: NOT RUN.
 - Performance benchmarks: NOT RUN.
@@ -17,7 +17,7 @@
 3. Request/Attempt idempotency and timeout race fixtures.
 4. Tool side-effect lost-ACK fixtures with external reconciliation.
 5. CSubmitOutcome 1.0.1 schema and cryptographic vectors from exact C owner branch.
-6. H exact-version 1.2.15 schema/validator/CI bundle from H.
+6. H exact-version 1.2.15 historical schema/validator/CI evidence from H, plus the separately versioned Applied Delivery Evidence successor schema/validator/P0 vectors/CI required by H Phase 3.8.23.
 7. G Applied predicate fixtures and D Forget fence/lineage race fixtures.
 8. Redaction tests with synthetic secrets and sensitive content.
 9. Trace propagation tests across process boundaries and untrusted ingress.
@@ -29,7 +29,7 @@ No production secrets, live user memory or real personal data may be used in syn
 ## 中文验证资产说明
 
 ### 当前状态
-验证设计已定义 20 个场景。Provider Adapter 可执行测试、真实 Provider 测试、真实 Tool 副作用/恢复测试均 NOT RUN。C/H 密码配置 NOT REGISTERED。H Unified 1.2.15 精确 Validator CI 本次 NOT VERIFIED。G Applied 端到端测试 NOT RUN/NOT VERIFIED。Forget 与迟到结果故障注入 NOT RUN。性能基准 NOT RUN。
+验证设计已定义 22 个场景（V01–V22）。Provider Adapter 可执行测试、真实 Provider 测试、真实 Tool 副作用/恢复测试均 NOT RUN。C/H 密码配置 NOT REGISTERED。H Unified 1.2.15 精确 Validator CI 已在历史 H Commit `0d363244...` 作为有限证据核验（Provider Outcome 91 项；Recovery Cutoff 288 项、22 项跳过）；这些工件不在当前 H HEAD `0277a8b...` 中，也不是 C 集成 CI。G Applied 端到端测试 NOT RUN/NOT VERIFIED。Forget 与迟到结果故障注入 NOT RUN。性能基准 NOT RUN。
 
 ### 后续必须准备的资产
 1. 每个 Provider/Model 的固定版本能力 Fixture。
