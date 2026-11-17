@@ -244,3 +244,83 @@ A may close these findings only after I/D/C/H have each published their exact-ve
 6. A performs a fresh exact-bundle integration review after the owner decisions.
 
 Until then: R1/R2 remain OPEN; Issue #14 remains OPEN; JF-10 P0 remains OPEN; Gate B/C remain subject to their existing dependencies; no implementation, conformance, deployment or production activation is authorized.
+
+
+## 8. Phase 3.6.9 follow-up — C egress boundary and H schema exact mapping
+
+Date: 2026-11-17. This section supersedes no prior finding; it records the follow-up review of the newer append-only C/H proposals against the same A §§11–12 and Storage/COC bundle.
+
+### 8.1 Exact follow-up source pins
+
+| Role | Artifact | Exact Blob |
+|---|---|---|
+| A | COC deployment architecture §§11–12 | `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` |
+| Storage | Storage Design v3.1 | `d5bdc72f193fcdaa654e4f07f865b77c578673ca` |
+| COC companion | Phase 3.6.3 COC protocol | `8ac17816476f280ab6fb3afca0688aa03e37de1d` |
+| I | Phase 3.6.8 global inventory / receipt / restore amendment | `929b30ba10ac627927d3959e0777b467846b268d` |
+| D | Phase 3.6.8 cross-boundary fencing / terminalization amendment | `0668667daeb936bf223ab049277ea2a4117c3b09` |
+| C | Phase 3.6.9 C owner-local gate / admission / egress amendment | `9609b252fc38fd5ba7b2f8c0992b7bd33a13c5bb` |
+| H | Phase 3.6.9 recovery cutoff wire contract | `707ed85642ba4b0275c4ec851d599fde28ec6cae` |
+| H | Recovery Cutoff schema candidate 1.0.3 | `9c3b98abab0c04a241a93c5e6f02e9424059b07b` |
+| H | Existing JF-10 bridge schema candidate 1.1.0 | `a8a945cc3623c2907003b93625e3c79742150944` |
+
+The C/H files are proposals and schema candidates. I/D Phase 3.6.8 files are proposed amendments; their exact-version re-review decisions are not inferred from their earlier 3.6.7 conditional decisions.
+
+### 8.2 Updated R1 disposition
+
+**R1 — SUBSTANTIALLY SPECIFIED; STILL OPEN.**
+
+The proposal set now has the correct conceptual split:
+
+1. I, D and C each provide owner-local request and admission inventories.
+2. COC independently enumerates the exact quorum-committed ParticipantIntent prefix.
+3. H 1.0.3 represents request and admission arrays/roots separately, requires owner-specific secondary high-waters, and models each COC participant as a typed manifest entry.
+4. RecoveryCutoffBatch binds I/D/C snapshots plus the COC ParticipantManifest; no synthetic global counter is introduced.
+5. Post-high-water requests require a subsequent immutable recovery round; owner release remains owner-only.
+
+Remaining R1 blockers:
+- H schema is structural only. It does not itself prove member-count equality, canonical ordering, root correctness, complete pagination, unique participant identity, exact prefix membership, or that each required owner release is present exactly once. Those require semantic validators and signed owner/COC evidence.
+- The COC participant manifest and owner-local admission inventories still need a normative cross-message join proof showing that every REGISTERED owner entry maps to exactly one manifest participant and every pre-batch manifest participant maps to the accountable owner entry or an explicitly justified owner class. No missing item may be interpreted as empty.
+- I's global ProducerDomainInventoryEpoch/registry/TargetInventorySeal and D's relevant projection/lineage generations must be bound into the owner snapshot roots and revalidated at release; generic high-water fields alone do not prove global inventory completeness.
+- A fresh exact-version I/D/C/H decision set and A integration acceptance are still absent.
+
+### 8.3 Updated R2 disposition
+
+**R2 — OWNER-LOCAL LINEARIZATION SPECIFIED IN CANDIDATES; STILL OPEN.**
+
+- **I:** Phase 3.6.8 defines the I-sequencer close transaction, monotonic IGateGeneration, request/high-water capture, receipt issue/consume generation fencing and currentness CAS. Every I issue/consume effect must serialize in that same sequencer domain.
+- **D:** Phase 3.6.8 defines atomic Fence/Gate close and requires current FenceGeneration enforcement at producer/work admission, queue/lease/retry/replay, derivative, recall/context, restore and final publication boundaries. The final visibility transaction must compare generation and scope/lineage atomically.
+- **C:** Phase 3.6.9 now distinguishes reservation from provider invocation and defines the final egress send boundary. The egress adapter must serialize current CGateGeneration, exact reservation, I COMMIT_WON, D clearance and one-use attempt identity before releasing provider request bytes. A reserved/not-dispatched attempt cannot be sent after gate close; a sent/ambiguous pre-close attempt is reconciled with the same key.
+- **Storage/COC:** COC prefix append/manifest and Storage participant ledger remain separate durable authorities; neither releases I/D/C gates.
+
+Remaining R2 blockers:
+- C's final egress serialization must be demonstrated by a concrete adapter boundary. A process-local check followed by an unrelated network call is not sufficient. If no gateway can serialize gate close against outbound send, C must fail closed and R2 remains blocked.
+- I/D/C exact owner decisions must confirm their 3.6.8/3.6.9 proposals, not merely their earlier 3.6.7 decisions.
+- Cross-owner release must perform a final currentness compare-and-commit against the exact sealed scope/high-waters/roots; no release may race a newly appended request or inventory generation.
+- H must publish semantic validators and canonical-byte fixtures; schema parse/shape checks are not protocol conformance.
+
+### 8.4 Role-based simulated dispositions
+
+| Role | Current simulated disposition | Remaining condition |
+|---|---|---|
+| I | ACCEPT WITH ENUMERATED AMENDMENTS | Exact 3.6.8 re-review; prove global inventory currentness and receipt issue/consume gate join |
+| D | ACCEPT WITH ENUMERATED AMENDMENTS | Exact 3.6.8 re-review; prove every final publication boundary and late-discovery reopening |
+| C | ACCEPT WITH ENUMERATED AMENDMENTS | Exact 3.6.9 re-review; concrete egress gateway/send-boundary proof and provider same-key evidence |
+| H | ACCEPT WITH ENUMERATED AMENDMENTS | Exact 1.0.3 schema decision; semantic validators, canonical bytes, A §11/§12 cross-schema joins |
+| Storage | ACCEPT WITH ENUMERATED AMENDMENTS | Exact batch/manifest join proof; no owner authority substitution |
+| A | NOT READY TO CLOSE | Re-review one immutable complete bundle after I/D/C/H decisions |
+
+These are coordinator-session role simulations only. They are not independent Owner signatures, do not change Issue #14's acceptance predicate and do not authorize freeze or production.
+
+### 8.5 Required next gate
+
+R1/R2 may be proposed for closure only after:
+
+1. I, D, C and H publish append-only exact-version decisions against the same A/Storage/COC bundle and the exact peer amendments.
+2. H semantic validator fixtures prove complete-empty/non-empty, request/admission roots, count/root equality, unique participant identity, exact prefix coverage, batch digest joins, owner release cardinality and post-high-water subsequent rounds.
+3. C demonstrates egress send/gate-close linearization, including the gate-close-wins and send-wins race vectors.
+4. I/D demonstrate their local transaction/fencing behavior at every receipt/publication boundary, including stale cache, partition, lost ACK and restore.
+5. Storage proves the COC prefix manifest and owner-local admission sets reconcile without omission or fabricated identities.
+6. A publishes a fresh exact-blob integration disposition.
+
+**Disposition remains: R1 OPEN / R2 OPEN / Issue #14 OPEN / JF-10 P0 OPEN.** No implementation/conformance PASS, deployment, protocol freeze, Gate B/C authorization or production activation is claimed.
