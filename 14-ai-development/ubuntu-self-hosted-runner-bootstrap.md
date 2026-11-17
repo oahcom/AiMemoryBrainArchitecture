@@ -109,11 +109,11 @@ Wants=network-online.target
 
 [Service]
 Environment="HTTP_PROXY=http://<LOCAL_PROXY_HOST>:<LOCAL_PROXY_PORT>"
-Environment="HTTPS_PROXY=http://[NETWORK ADDRESS WITHHELD]:<LOCAL_PORT>"
+Environment="HTTPS_PROXY=http://<LOCAL_PROXY_HOST>:<LOCAL_PROXY_PORT>"
 Environment="http_proxy=http://<LOCAL_PROXY_HOST>:<LOCAL_PROXY_PORT>"
-Environment="https_proxy=http://[NETWORK ADDRESS WITHHELD]:<LOCAL_PORT>"
-Environment="NO_PROXY=localhost,[NETWORK ADDRESS WITHHELD],::1"
-Environment="no_proxy=localhost,[NETWORK ADDRESS WITHHELD],::1"
+Environment="https_proxy=http://<LOCAL_PROXY_HOST>:<LOCAL_PROXY_PORT>"
+Environment="NO_PROXY=localhost,127.0.0.1,::1"
+Environment="no_proxy=localhost,127.0.0.1,::1"
 ```
 
 `...service.d/guard.conf`:
