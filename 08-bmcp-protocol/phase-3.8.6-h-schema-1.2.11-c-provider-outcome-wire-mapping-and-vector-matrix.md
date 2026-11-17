@@ -199,3 +199,18 @@ H executed a second owner-side implementation of the C candidate crypto vectors:
 - Exact C candidate expected vectors: `88a16f0d9aaa8a5e46af857c2cd34c2bcedd07ae` and `a4bfe0b431d5e710ac99d604e7b1bce49c044d23`.
 
 H independently recomputed and verified all five candidate signatures, checked all present C-P0 field mutations, and matched Python/Node outputs to the static expected fingerprints. This is candidate-only JCS/SHA-256/Ed25519 construction evidence. It does not register the C profile or authenticate production keys/provider evidence.
+
+
+## 13. C key-status lifecycle and H validation binding
+
+- C key-status event schema: Blob `908b293eba337e9fa75864cea3704e28a1a8d82e`.
+- C key lifecycle/anti-rollback contract: Phase 3.11.0 Blob `de581ea59e724faf5972217e17b983de641ad3f7`.
+- I review of C key-status/governance signature candidate: Blob `9765b36bce72fc8a1aa347af40b85727ff5a59ed`.
+- H validator core with explicit key-status callback: Blob `c8717869d066543b1272780014ab1e42310c6951`.
+- H unit test with key-status fail-closed/schema assertion: Blob `46267648309823e1c20f1b07acb4b3dd66d9f60b`.
+
+The H `verify_key_status` callback must validate the C key event chain, governance signature, state transition, exact key ID/version/fingerprint/profile/purpose/audience, signing-sequence applicability and external anti-rollback checkpoint. C `record_sequence` and key-status `event_sequence` must share the same C authority sequence namespace; cross-service wall-clock comparison is forbidden.
+
+Missing key-status callback, unavailable governance trust chain or unavailable external checkpoint yields UNKNOWN. A proven invalid transition, fork, stale checkpoint, key identity mismatch or signature failure yields INVALID. H must not infer ACTIVE from missing status.
+
+I has accepted the lifecycle/governance-signature design as a candidate only. Neither `AIMBA-C-CRYPTO-1.0` nor `AIMBA-I-KEY-GOVERNANCE-1.0` is registered; no C trust root or key custody is activated.
