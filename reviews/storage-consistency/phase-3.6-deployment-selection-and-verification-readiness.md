@@ -734,3 +734,23 @@ The complete A–I plus Storage acceptance matrix is `reviews/integration/phase-
 The matrix also records the Storage restore reference-model CI result: 25/25 tests PASS, run `43965501810`, job `133643756066`, commit `19798634fb0d55cb0c901c8f4194506fab96b75b`.
 
 **Gate A architecture design remains CONDITIONAL PASS.** All owner semantic proof shapes, authority boundaries, fail-closed rules and restore high-water recheck order are accepted. Production/implementation/deployment readiness remains NOT PASSED / DEFERRED; no real restore, signature verification, proof API or measured RTO is claimed. Gate B amended §14 remains design-accepted with conditions; Gate C and JF-10 runtime remain deferred/open.
+
+## 32. Storage COC prepared-participant contract v3.1 — exact review reopened (2026-11-17)
+
+Storage amended the PostgreSQL source §14 and COC Storage design v3 after exact-version v3 findings from I, H and B.
+
+- Companion source: `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md` — amended to carry DatabaseIncarnationRef, PrepareAttemptRef/Generation, ParticipantLedgerRef/Version, ParticipantTupleDigest, authoritative PREPARED readback and append-only recovery observations.
+- COC Storage design: `reviews/storage-consistency/phase-3.6-coc-durable-log-and-recovery-protocol-storage-design-v3.md` — v3.1 adds the exact I terminal proof attempt/ledger/receipt bindings, removes the non-I `ABORT_WON` outcome, defines I sequencer gate-close serialization and second high-water check, and reconciles the companion §14 tuple.
+- v3 predecessor: commit `db226387b0f2dede30a32a19a1478136b368cc1e`, Blob `4a60420d457f359780c568dce42b8bef000026ca`. The v3.1 blob/commit is the new review target after publication; v3 decisions do not carry forward.
+
+The v3 review surfaced real cross-document and authority-contract gaps. In particular, companion §14 did not enumerate the v3 incarnation/attempt/ledger/tuple-digest fields; I proof binding omitted attempt/ledger identity; Storage used `ABORT_WON` outside I's accepted vocabulary; and H's prepared-proof schema did not cover Recovery Cutoff Batch/Manifest and the complete Applied evidence families. The first three Storage-owned drafting conflicts are corrected in v3.1; H/I/A and affected owner decisions remain required.
+
+**Gate vector unchanged pending exact v3.1 review:**
+- Storage Gate A architecture design: CONDITIONAL PASS (existing accepted contract scope only); v3.1 amendments require exact owner confirmation.
+- Gate B COC design: prior §14 Blob `86ff3b...` exact owner acceptance with conditions remains historical and scoped to that Blob; v3.1 is fresh review required.
+- Gate B implementation/conformance: NOT RUN / deferred to engineering.
+- Gate C distributed fault injection: deferred to engineering.
+- JF-10 runtime P0: OPEN.
+- TAB-001: CANDIDATE / NOT FROZEN.
+- Production activation: NOT AUTHORIZED.
+- Multi-PolicyDomain: BLOCKED.
