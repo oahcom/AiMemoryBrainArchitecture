@@ -1,4 +1,4 @@
-<!-- Source: session-h-bmcp-protocol / 08-bmcp-protocol/adapter-capability-and-applied-attestation.md / Blob 0dca3dc5463a02be0e19524811afbae87795baf5 -->
+<!-- Source: session-h-bmcp-protocol / 08-bmcp-protocol/adapter-capability-and-applied-attestation.md / Blob 74be8374a67da385a5f0f8e34c7aef2b38b72bcf -->
 <!-- Chinese companion: ../../zh-CN/08-bmcp-protocol/adapter-capability-and-applied-attestation.md -->
 
 # Adapter Capability and Applied Attestation
@@ -342,3 +342,16 @@ COC position orders COC records only. I position is authoritative only within th
 For a recovery-batch profile, the message MUST distinguish a proven empty pre-batch participant set from an absent/incomplete enumeration. A missing participant-set completeness attestation, missing owner high-water proof, incomplete participant reconciliation, unknown I/D/Storage outcome, or mismatched transaction/digest is rejected or held UNKNOWN/IN_DOUBT. COC recovery observation does not itself release I/D owner-local pending gates; only the corresponding owner-signed gate disposition can do so.
 
 This §11.8 is a candidate mapping reservation against G's exact-version CGH-APPLIED-1.1 decision history. It does not claim that the current H JSON Schema/SDK already contains these fields, that COC or recovery-batch infrastructure is deployed, or that JF-10/COC conformance has run. H must publish an exact additive schema version and obtain the relevant C/G/I/D/Storage confirmations before claiming this bridge complete.
+
+
+### 11.9 Explicit C provider outcome and owner-local gate release bindings — candidate
+
+The recovery-batch mapping in §11.8 MUST explicitly preserve C's provider outcome and the distinction between COC observation and owner-local gate release:
+
+- `c_provider_receipt_ref` and immutable `c_submit_outcome_ref` are C-issued. They bind the actual provider/runtime submit result to the exact InferenceRequestId, FinalRequestBoundaryId, request digest and participant/request identity. A COC observation, H transport ACK, local Adapter receipt or timeout MUST NOT substitute for either reference.
+- Where C outcome is ACCEPTED or REJECTED, the corresponding C-issued terminal outcome reference is REQUIRED. Where C outcome is UNKNOWN, the participant remains IN_DOUBT and cannot support Full Applied.
+- `participant_terminal_proof_ref` is present only when every required owner outcome is determinate and reconciled; it MUST be absent while any required I/D/C/Storage outcome is PENDING or UNKNOWN.
+- If an I or D owner-local pending gate exists, only that owner may emit its own `owner_gate_release_attestation_ref`. H/COC may transport and preserve the reference but MUST NOT emit, infer or synthesize REOPENED. A `REMAINS_CLOSED` disposition is fail-closed and cannot authorize protected admission.
+- A COC recovery-batch record or reconciliation observation is not itself an owner gate release, provider success, D clearance, I authorization, or Storage terminal outcome.
+
+Missing C provider receipt/outcome, fabricated terminal proof, owner gate release from the wrong authority, or any attempt to treat UNKNOWN as terminal is rejected or remains UNKNOWN/IN_DOUBT. This candidate mapping does not change the authority ownership or claim that the related recovery/conformance suite has run.
