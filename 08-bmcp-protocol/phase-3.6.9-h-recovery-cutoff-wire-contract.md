@@ -13,7 +13,7 @@
 | Storage Design v3.1 | `d5bdc72f193fcdaa654e4f07f865b77c578673ca` |
 | COC durable log / recovery protocol | `8ac17816476f280ab6fb3afca0688aa03e37de1d` |
 | I Phase 3.6.8 amendment | `929b30ba10ac627927d3959e0777b467846b268d` |
-| D Phase 3.6.8 amendment | `0668667daeb936bf223ab04921ea2a4117c3b09` |
+| D Phase 3.6.8 amendment | `0668667daeb936bf223ab049277ea2a4117c3b09` |
 | C Phase 3.6.9 proposal | `104434dc5682ce84ef9f26f3141540a897e4436d` |
 
 The H schema is a candidate mapping of the exact A §§11–12 recovery semantics. It does not select I's signature algorithm, trust-root, key lifecycle or historical-verification policy. It does not claim cross-language canonical-byte interoperability.
