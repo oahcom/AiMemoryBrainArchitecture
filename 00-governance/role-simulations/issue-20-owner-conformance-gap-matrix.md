@@ -100,6 +100,7 @@ The following inventory is based on the currently inspected Owner branch trees a
 
 P tests are deliberately supplemental and non-normative. Current test modules cover:
 - D admission/fence and release CAS;
+- C provider intent requires exact D participant + current I COMMIT_WON; stable intent binding, provider idempotency, same-key timeout lookup, terminal callback conflict quarantine and submit-time PermissionEpoch revalidation;
 - I receipt/revocation and Storage visibility handshake;
 - Restore conjunctive proof gate;
 - owner snapshot membership vs completeness, COMPLETE_EMPTY, late-row invalidation;
@@ -141,3 +142,5 @@ The following successful runs were read back from GitHub Actions logs and are pi
 - P supplemental Issue #20 reference-model/schema: run `44054221711`, commit `fcafce4c316c49dd4f2f78740d1a19d0ef7aa13d`, 69 tests, SUCCESS.
 
 Current branch heads at the time of this matrix refresh: C `f2ff6ee552ed63094acbf8f36095431f0e1964b3`; D `f0672a4e9ab95b8cd94d28b52153f54a05e17a73`; E `df3f56cdebbb4bb85999e2e04b666dacf77da810`; F `348b5ec84c44a8a067122ce0aa72a594b9c06b66`; G `69ba55c5ffd473ced1ccb569e9bbf7fea48566aa`; H `46a7c534b5068e274c21c460feaf333060cb45a2`; I `de29ebcf2bb901c7ce9cca63b7d7d21c9495e491`; Storage `bd6c1d23ed685db8d4bd13a75821611e04d138ba`; P `8698ebd35809c92c0508fd6829abcc157f6ee134`. Re-fetch before future exact-version acceptance.
+
+C's new P reference-model tests are supplemental only. The C Owner branch still has no dedicated provider-outcome membership integration suite found in the inspected tree; exact Owner-local provider side-effect/idempotency tests remain required.
