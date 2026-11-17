@@ -5,7 +5,7 @@
 - Status: **NOT PASSED — B5 BLOCKED**
 - Governing policy: GOV-DOC-001 Blob b51b054b9f1022133666542680df74dfe19de2fb
 - Governing invariants: I-23/I-24, architecture invariants Blob 33b037318e459ebb73bea33b3186f31a41d5dcfe
-- Audit scope: all research files currently present on branch research/domain-reality-001-b.
+- Audit scope: all research files currently present on branch research/domain-reality-001-b, including the supplemental Fact/Claim ADR and owner-branch snapshot errata.
 - Audit date: 2026-11-17
 
 ## 1. Acceptance rule / 验收规则
@@ -21,6 +21,8 @@ A file is bilingual-complete only when the full normative content is present in 
 | README.md | Bilingual purpose and governance sections; work-plan tables and some status details are English-only | PARTIAL | Translate all table cells, gate explanations and remaining-work statements |
 | existing-domain-model-baseline.md | Bilingual executive summaries and selected sections; most evidence tables and issue/PR rows are English-only | PARTIAL | Full Chinese peer for every evidence table, branch row, conflict, missing definition and gate conclusion |
 | baseline-currentness-and-owner-source-audit.md | Many bilingual sections; several owner/source tables and detailed Phase 3.8 findings are English-only | PARTIAL | Translate all tables, currentness corrections, issue state and test authority evidence |
+| baseline-owner-branch-snapshot-errata.md | Bilingual headings and paragraphs; snapshot table and gate effects are English-only | PARTIAL | Translate the owner/branch/commit/artifact table and all scope/gate conditions |
+| fact-claim-identity-adr.md | Most main sections have Chinese peers; alternatives/decision matrix and several evidence rows are English-only | PARTIAL | Translate every matrix cell, ADR status, authority and consequence; perform clause-by-clause semantic parity |
 | canonical-domain-entity-inventory.md | Bilingual headings and narrative; most entity/classification tables are English-only | PARTIAL | Translate each concept row, rationale, status and open question |
 | canonical-identity-semantics.md | Bilingual headings and selected explanatory sections; identity and serialization type tables are English-only | PARTIAL | Translate all typed-ref definitions, namespace rules, constraints and decisions |
 | canonical-state-semantics.md | Bilingual headings and selected paragraphs; state and authority matrices are English-only | PARTIAL | Translate every state definition, authority, proof boundary and transition rule |
@@ -37,7 +39,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | validation/README.md | English-only content with bilingual folder naming only | NOT COMPLETE | Translate entire validation plan and all test/schema status |
 | evidence/README.md | English-only content with bilingual folder naming only | NOT COMPLETE | Translate every external source title, evidence limitation and adoption disposition |
 | evidence/official-reference-validation.md | English headings and Chinese peer explanations are present for each major section; source links and some “do not infer” clauses require line-by-line comparison | PROVISIONAL — RECHECK | Perform clause-by-clause parity check and align source/version notes |
-| bilingual-parity-audit.md | Bilingual acceptance rules and audit explanations; file table has both English and Chinese explanation | PROVISIONAL — RECHECK | Re-audit after all other files are translated |
+| bilingual-parity-audit.md | Bilingual acceptance rules and selected narrative; file-by-file table and status/action cells are English-only | PARTIAL | Translate every audit row and re-audit after all other files are translated |
 
 ## 3. Current conclusion / 当前结论
 
