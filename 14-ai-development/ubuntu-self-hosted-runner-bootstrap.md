@@ -2,7 +2,7 @@
 
 **Document:** AI-RUN-002-RUNBOOK  
 **Version:** 1.1 (revised 2026-11-17)  
-**Status:** ACTIVE / operator-executed. v1.0 was PROPOSED; v1.1 records what was actually deployed and the Owner decision to accept it.  
+**Deployment status:** ACTIVE / operator-executed. **Security acceptance:** BLOCKED / pending independent infrastructure-security Owner decision. v1.1 records the deployed state; it does not establish security acceptance.  
 **Target:** `ubuntu-primary-01` (`vm-0-9-ubuntu`), runner name `zesu-x64`  
 **Tracking:** [Issue #26](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/26)  
 **Normative architecture statement:** DOC-OPS-001, `docs/zh-CN/14-ai-development/ci-runner-operations.md` and `docs/en/14-ai-development/ci-runner-operations.md`. That pair states the deployed shape, the security boundary, and the admission policy bilingually. This file is the execution procedure.  
@@ -18,7 +18,7 @@
 | Untrusted-trigger isolation | "restrict to trusted dispatches" — human discipline | **enforced in the runner** by a job-started hook (§4.1) |
 | Status | PROPOSED | ACTIVE; acceptance evidence in §6 |
 
-The account and path deviations are **accepted, not pending**. Rationale and residual risk are stated in DOC-OPS-001 §4 and repeated in §0.1 below. Do not paraphrase this as "deployed as specified".
+The account and path deviations are **recorded but not security-accepted**. Rationale and residual risk are stated below. Do not paraphrase this as "deployed as specified" or as approved risk acceptance.
 
 ## 0. Safety preconditions
 
@@ -32,13 +32,13 @@ The account and path deviations are **accepted, not pending**. Rationale and res
 
 ## 0.1 Accepted deviations
 
-| Deviation | Accepted on | Compensating control | Residual risk |
+| Deviation | Recorded on (not approval) | Compensating control | Residual risk |
 |---|---|---|---|
 | Runner service runs as `ubuntu`, which holds passwordless sudo | 2026-11-17 | L1 admission hook denies every job whose ref is not `refs/heads/main` or whose event is not `push` / `workflow_dispatch` / `schedule` | A workflow that *is* admitted can `sudo`. Containment would need `NoNewPrivileges=yes` or a separate account; neither was implemented |
 | Installed under `~/actions-runner` instead of `/opt/actions-runner` | 2026-11-17 | `.credentials`, `.credentials_rsaparams`, `.runner` are mode 600; the runner directory is 755 and owned by `ubuntu` | A local user with access to the `ubuntu` account can read the runner credentials. There are no other interactive accounts on the host today |
 | Labels are the platform defaults, not `ai-worker` | 2026-11-17 | The repository has exactly one self-hosted runner; a job cannot land elsewhere | If a second self-hosted runner is registered, restore the custom label first (see §4.2) |
 
-**Review trigger:** re-open this deviation if any of the following happens — a second self-hosted runner is registered; a second interactive account is created on the host; the repository becomes public; branch protection on `main` is enabled and someone asks to relax the hook.
+**Security acceptance:** this deviation remains unapproved for security acceptance until the infrastructure/security Owner records an explicit decision. Reassess if any of the following happens — a second self-hosted runner is registered; a second interactive account is created on the host; the repository becomes public; branch protection on `main` is enabled and someone asks to relax the hook.
 
 ## 1. Host preflight
 
@@ -134,7 +134,7 @@ Egress is a two-stage chain: `warp-usque.service` exposes a SOCKS listener on `1
 
 ## 4.1 Admission control (REQUIRED)
 
-This is the control that makes §0.1 acceptable. It is enforced by the runner itself, so it cannot be bypassed by editing a workflow.
+This is a service-layer admission control. It reduces untrusted-trigger exposure but does not make a sudo-capable runner isolated or security-accepted. It can be bypassed by changes to the trusted host or runner service configuration.
 
 **L1 — service layer (binding).** `ACTIONS_RUNNER_HOOK_JOB_STARTED` points at `~/actions-runner/hooks/job-started-guard.sh`. The hook runs before any workflow step and fails the job unless:
 
@@ -191,7 +191,7 @@ Neither may print environment variables wholesale, read credential stores, uploa
 - [x] No secrets in Git, logs, artifacts, Issues or PR comments — reviewed for the files added on 2026-11-17.
 - [ ] Emergency stop / runner removal procedure tested — documented only; the guard's `observe.flag` rollback was not exercised in production.
 
-Even when every box is ticked, the status is only **RUNNER_ONLINE**. It is not proof of 24/7 A–I autonomous operation, durable event processing, independent Owner identity, lease fencing, crash recovery, or end-to-end governance.
+Current security acceptance is **BLOCKED**. Even when every operational box is ticked, the status is only **RUNNER_ONLINE**; it is not proof of security acceptance. It is not proof of 24/7 A–I autonomous operation, durable event processing, independent Owner identity, lease fencing, crash recovery, or end-to-end governance.
 
 ## 7. Rollback / emergency stop
 
@@ -204,4 +204,4 @@ Even when every box is ticked, the status is only **RUNNER_ONLINE**. It is not p
 
 ## 8. Current status
 
-Deployed and verified on 2026-11-17: runner 2.338.2 `linux-x64` named `zesu-x64`, service enabled at boot with the `warp-usque → sing-box → runner` ordering, egress through Cloudflare WARP, admission enforced at L1 with three recorded decisions (§4.1), and one workflow executing end-to-end. Operator-confirmed but not independently re-verified: password rotation. **Not verified:** a reboot cycle, the emergency-stop procedure, and the L3 settings (branch protection, required check, environment approval). Business pipelines have not run on this runner; the A–I Owner workers remain **NOT DEPLOYED**.
+Deployment is reported active on 2026-11-17, with a successful diagnostic execution and three recorded admission decisions (§4.1). These are operational observations, not an independent security assessment. Operator-confirmed but not independently re-verified: password rotation. **Not verified:** a reboot cycle, the emergency-stop procedure, and the L3 settings (branch protection, required check, environment approval). The runner's sudo-capable service identity remains a material residual risk. Business pipelines have not run on this runner; the A–I Owner workers remain **NOT DEPLOYED**. **Security acceptance remains BLOCKED pending an explicit infrastructure/security Owner decision and independent evidence.**
