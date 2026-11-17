@@ -172,7 +172,7 @@ The following implementation artifacts have been added on the H branch:
 
 | Artifact | Path | Current Blob | Purpose |
 |---|---|---|---|
-| HRC semantic suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_hrc_semantics.py` | `794ac0c34aaad921e5d4a5bcc42b6601f7caf817` | 25 HRC unittest cases plus 12 JPF bidirectional-join cases |
+| HRC semantic suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_hrc_semantics.py` | `d14e66a2196303374f31a4285244a0f77a3ad328` | 25 HRC unittest cases plus 12 JPF bidirectional-join cases |
 | Wire interop candidate suite | `08-bmcp-protocol/tests/conformance/recovery_cutoff/test_wire_interop.py` | `1a4e754ba9bfa57eb973c6d39731e9f89443b323` | Strict JSON parsing, duplicate-key rejection, absent/null distinction, canonical test bytes, counter encoding and critical-field behavior |
 | RecoveryJoin schema candidate | `08-bmcp-protocol/schemas/bmcp.recovery-join-1.0.0.schema.json` | `f531c1d4b89a48457188c4988f140952759223a6` | Strict structural candidate for both directional edge sets, owner snapshots, JF-10 sub-join and difference sets |
 
@@ -182,7 +182,7 @@ Run the dependency-free candidate suite from the test directory:
 python -m unittest -v test_hrc_semantics.py test_wire_interop.py
 ```
 
-The HRC suite has 37 unittest methods: HRC-01..25 and JPF-01..12. The wire suite has 10 methods and the schema-integrity suite has 9 methods, for 56 unittest methods total. The branch workflow is `.github/workflows/h-recovery-cutoff-conformance.yml` (Blob `ea7a3d9c365b84352d3bac69da94fe0d510e46a4`). No workflow run is available for this candidate yet; the code is committed as an executable candidate but **has not been run in CI or independently reproduced**. No PASS is claimed.
+The HRC suite has 42 unittest methods: HRC-01..25 and JPF-01..17. The wire suite has 10 methods and the schema-integrity suite has 9 methods, for 61 unittest methods total. The branch workflow is `.github/workflows/h-recovery-cutoff-conformance.yml` (Blob `ea7a3d9c365b84352d3bac69da94fe0d510e46a4`). No workflow run is available for this candidate yet; the code is committed as an executable candidate but **has not been run in CI or independently reproduced**. No PASS is claimed.
 
 ### 11.1 Semantic model vs wire model
 
@@ -238,3 +238,10 @@ The join edges also distinguish the stable OwnerAdmissionRef (the admission iden
 
 Latest RecoveryJoin schema Blob: f531c1d4b89a48457188c4988f140952759223a6.
 Latest schema integrity test Blob: 5292d56661e938c905c61455e9ed53c4ff674c54.
+
+
+### 11.6 Request-side JoinProof semantic vectors
+
+JPF-13..17 now exercise the request-side half of the owner snapshot join: missing request disposition, OUT_OF_SCOPE_WITH_PROOF without proof, changed request digest, OwnerEntryRef substitution, and a valid exact IN_BATCH_REQUEST_SET mapping. The executable request validator requires exact set equality between all I/D/C request ledger rows and the JoinProof request-disposition edges. This prevents an admission-complete proof from silently omitting pending or out-of-scope requests.
+
+Latest HRC suite Blob: d14e66a2196303374f31a4285244a0f77a3ad328.
