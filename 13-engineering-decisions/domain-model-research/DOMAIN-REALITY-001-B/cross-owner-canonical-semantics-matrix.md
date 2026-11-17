@@ -217,3 +217,29 @@ Branch tips/commit SHAs are NOT VERIFIED for the live owner branches in this mat
 B3 is **NOT PASSED**. The matrix is based on exact fetched source Blobs, current branch HEAD snapshots and explicit issue acceptance requirements, but several owner acceptances remain conditional, branch HEADs may move and must be re-read, and cross-owner contracts remain candidate/not frozen. B3 cannot be marked complete by this B session's role simulation or A's synthesis.
 
 B3 **未通过**。矩阵基于精确读取的源 Blob 和 Issue 中明确的 Owner 验收要求，但多个 Owner 验收仍明确开放、分支 Tip SHA 未核验、跨 Owner 契约仍为候选/未冻结。本 B 会话角色扮演或 A 的综合意见不能代替 B3 完成。
+
+
+## 7. Live successor reconciliation — Storage topology / 实时后继协调 — Storage 拓扑
+
+| Semantic area / 语义领域 | Exact source evidence / 精确来源证据 | Owner authority / Owner 权威 | Current cross-owner disposition / 当前跨 Owner 结论 |
+|---|---|---|---|
+| Option A logical topology vs L4 physical realization / Option A 逻辑拓扑与 L4 物理实现 | Storage/D ADR Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`; Storage v3.3.1 manifest Blob `f6e61691ecdcfcbf1fb423cc45242868676ca925`; A Phase 3.12.1 review Blob `d3d4e6f4b6d7e82f90e3eee3427c8ace3b4160c8` | Storage owns the topology ADR and manifest; A owns integration review; B owns only shared semantic consistency. | **BLOCKING / B-CONFLICT-017:** ADR selects Option A as normative v1 logical architecture and leaves L4 physical engine/deployment OPEN. v3.3.1 incorrectly calls Option A a conditional L1 candidate and cites unpinned A-01–A-05 clarifications. A refuses final manifest acceptance until Storage corrects it. |
+| H authenticated-ingress schema successor / H 认证入口 Schema 后继版本 | H Unified 1.2.15 mapping Blob `2dc30f193d9c4f4bdc05ca4c137103687db28924`; H schema Blob `860fc4cec658db7d2703cd6adf72aa31a2723f6d`; I review Blob `6ba4ce3a93f2adf6f8961d4927d9b87deb9696bf` | H owns wire/schema; I owns trust registration; C owns provider outcome and C-object P0; Storage owns durable ingress bundle; A integrates. | 1.2.15 is a structural trust-carrier candidate only. I accepts shape, not profile registration, gateway issuer/key, custody, anti-rollback or production verification. Storage v3.3.1 still binds H 1.2.14; successor exact bundle and fresh A review are required. |
+| Applied / Forget / current-use / Applied、Forget 与当前使用资格 | G current contract Blob `aa3afa73d8a76cc6f025839c52bfbff6a983046a`; D Phase 3.8.13 review Blob `152627e00b96355e2ff370acd643a51168c4c78c` | G owns Applied predicate/record; D owns ForgetFence/lineage/barrier; I owns authorization/PermissionEpoch; C owns final provider submit evidence; H owns transport. | **BLOCKING remains:** G Applied freeze and execution remain blocked/not verified; D clearance/lineage/barrier/release remain open; H ACK is insufficient; no Global Forget or physical purge claim. |
+| C origin and outer-envelope signer separation / C 来源与外层 Envelope Signer 分离 | C Phase 3.8.22 review Blob `8fd6052cabf58a78962cc2e776398b2a40604bcd`; I Phase 3.8.22 review Blob `6ba4ce3a93f2adf6f8961d4927d9b87deb9696bf` | C owns CSubmitOutcome object P0/provider truth; H owns outer wire/P0; I owns signer trust/profile/key registration. | C recommends but does not approve a distinct H gateway attestation. I accepts 1.2.15 schema shape only; exact P0, trust registry, signer approval and executable verifier remain OPEN. No implicit reuse of C-object signature. |
+
+### 7.1 Owner-authority boundary / Owner 权威边界
+
+The A Phase 3.12.1 review is a delegated A-role review of the exact Storage v3.3.1 Blob, not an independent human A Owner signature. Its explicit rejection of v3.3.1 as a final consistent manifest is nevertheless direct source evidence that the bundle cannot be treated as final accepted. Storage must make the correction in its own branch; B records the incompatibility and does not edit Storage-owned normative documents.
+
+A Phase 3.12.1 复审是针对精确 Storage v3.3.1 Blob 的委派 A 角色复审，不是独立人类 A Owner 签名。但其明确拒绝将 v3.3.1 作为最终一致 Manifest，是该 Bundle 不能被视为最终验收的直接来源证据。Storage 必须在自己的分支整改；B 只记录不兼容，不编辑 Storage 所有的规范文件。
+
+The H 1.2.15 / I review does not retroactively amend the v3.3.1 manifest or A's exact-version review. A successor Storage bundle must bind exact H/C/I pins and receive fresh A review. All authority decisions remain local; no cross-owner global PASS is inferred.
+
+H 1.2.15 / I 复审不会追溯修改 v3.3.1 Manifest 或 A 对精确版本的复审。Storage 后继 Bundle 必须绑定精确 H/C/I Pin 并取得 A 新复审。所有权威决定仍局限于各 Owner；不得推断跨 Owner 全局 PASS。
+
+### 7.2 Gate / 门禁
+
+B3 remains **NOT PASSED**. B-CONFLICT-017 is BLOCKING / OPEN. The cross-owner matrix is updated with successor evidence, but no Owner acceptance, Storage correction, production authentication, Applied freeze, Forget completion, L4 implementation or independent QA result is claimed.
+
+B3 仍为 **NOT PASSED**。B-CONFLICT-017 为 BLOCKING / OPEN。跨 Owner 矩阵已补充后继证据，但不宣称 Owner 验收、Storage 整改、生产认证、Applied 冻结、Forget 完成、L4 实现或独立 QA 结果。
