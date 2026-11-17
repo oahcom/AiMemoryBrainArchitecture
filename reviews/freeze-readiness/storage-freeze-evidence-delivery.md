@@ -4,7 +4,7 @@
 - Delivery stage: **DATABASE CAPABILITY + LOGICAL-RESTORE EVIDENCE DELIVERED; CROSS-OWNER JF-10 CONFORMANCE OPEN**
 - Freeze disposition: **BLOCKED — GATE A PARTIAL PASS / GATE B NOT ACCEPTED FOR CURRENT REVISION / GATE C DEFERRED**
 - Snapshot branch: `session-storage-consistency-forget-atomicity-2026-11-16`
-- Snapshot HEAD: `5141d93e97acf8bcd6b2abc136574ec78716e964`
+- Snapshot HEAD: `e7ce0442e15a55478a21bb612580699ebc3ff330`
 - Provenance: assistant-authored delegated Storage-role delivery at the user's direction; not an independent human Storage Owner signature.
 
 ## 1. Executive disposition / 执行结论
@@ -59,7 +59,20 @@ Storage 已交付 PostgreSQL 18.7 的真实 CI 能力证据，覆盖 Prepared-XI
 - Storage's acceptance of the §14 PreparedParticipantGID mapping with conditions does not imply acceptance of the entire amended COC protocol.
 - Production deployment/operations, named operator, runbook, measured RPO/RTO and multi-PolicyDomain atomicity are not approved.
 
-## 5. Freeze exit criteria / 冻结退出条件
+## 5. Phase 3.8.2 serialization topology ADR / 序列化拓扑 ADR
+
+The latest Storage branch adds an explicit topology ADR (Blob `080433f8e13a500522bc2754da64057edb0ae9d8`), status **ADR-BLOCKED — CANDIDATE OPTIONS ONLY; NO DEPLOYED TOPOLOGY SELECTED**.
+
+- Option A: one Serializable transaction domain per Canonical Memory authority, with D retaining semantic authority and Storage owning the physical visibility transaction. Preferred only if the real deployment proves the shared transaction boundary and all protected read paths use it.
+- Option B: separate D and Storage services with a durable linearizable coordinator and independently proven prepare/commit, failover and restore.
+- Option C (check-then-write / asynchronous event coordination) is explicitly **REJECTED**.
+- T1–T8 remain OPEN: runtime/DB identity, D/Storage row ownership, final linearization, I proof verification, atomic outcome, HA/restore, read-path enforcement and D/I/Storage/A owner decisions.
+
+This is a material blocker clarification: PostgreSQL CI capability evidence does not select Option A or prove the actual project Canonical Authority uses PostgreSQL 18.7. Option A remains conditional; Option B needs its own approved ADR and proof bundle.
+
+最新 Storage 分支新增 Phase 3.8.2 拓扑 ADR，明确当前没有选择实际部署拓扑。Option A（单 Serializable 事务域）只是有条件优先候选；Option B（独立服务 + 持久化线性协调器）需要单独决策与证明；Option C（check-then-write/异步事件协调）明确拒绝。T1–T8 全部仍 OPEN。
+
+## 6. Freeze exit criteria / 冻结退出条件
 
 | ID | Required evidence | Current status |
 |---|---|---|
@@ -72,7 +85,7 @@ Storage 已交付 PostgreSQL 18.7 的真实 CI 能力证据，覆盖 Prepared-XI
 | ST-FR-07 | Production topology, operator, runbook, monitoring, RPO/RTO and restore drill | DEFERRED TO ENGINEERING / OPEN |
 | ST-FR-08 | Multi-PolicyDomain transaction or explicit rejection profile | BLOCKED |
 
-## 6. Storage final delivery statement / Storage 最终交付声明
+## 7. Storage final delivery statement / Storage 最终交付声明
 
 **Delivered:** pinned PostgreSQL 18.7 capability evidence, logical restore model evidence, exact-version design artifacts and owner-boundary contracts.
 
