@@ -37,7 +37,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | canonical-domain-model.md | Bilingual headings and selected narrative; entity lists, ownership tables and blocking issues are English-only | PARTIAL | Full Chinese equivalent for model, diagrams, owner boundaries and gate constraints |
 | domain-model-decision-record.md | Bilingual headings and selected decisions; detailed ADR context/alternatives/consequences are English-only | PARTIAL | Translate every decision record field and rejected alternative |
 | validation/README.md | Full Chinese peer text added for test scope, schema prerequisites, future validation and current result; Blob `a2bb3d494fadd5ae411d9b8227d83dd50a16a895` | REMEDIATED — MANUAL REVIEW PENDING | Verify test-section reference and clause equivalence against invariants/owner contracts |
-| evidence/README.md | English-only content with bilingual folder naming only | NOT COMPLETE | Translate every external source title, evidence limitation and adoption disposition |
+| evidence/README.md | Chinese peers added for all source titles, section descriptions, evidence limitations and version caveats; Blob `bda915327a0ee77fb78e9a52bc094986254a1a60` | REMEDIATED — MANUAL REVIEW PENDING | Verify official URLs, product-version scope and no stronger claims than source evidence |
 | evidence/official-reference-validation.md | English headings and Chinese peer explanations are present for each major section; source links and some “do not infer” clauses require line-by-line comparison | PROVISIONAL — RECHECK | Perform clause-by-clause parity check and align source/version notes |
 | bilingual-parity-audit.md | Bilingual acceptance rules and selected narrative; file-by-file table and status/action cells are English-only | PARTIAL | Translate every audit row and re-audit after all other files are translated |
 
@@ -91,5 +91,7 @@ A file is bilingual-complete only when the full normative content is present in 
 
 - `canonical-identity-semantics.md` has received a full Chinese peer for all tables, rules, resolution steps, unresolved questions and decision record. Current Blob: `bc8816eadcd14a1dd01ae03ed68de553b2bb1483`.
 - `fact-claim-identity-adr.md` now has Chinese peers for its evidence, decision matrices, authority requirements and all eight validation examples. Current Blob: `0bbea0beec6a5828c2db5ae267fac40f59ad7f1f`.
+- `evidence/README.md` now has Chinese peers for all source titles, source-purpose labels, evidence limitations and version caveats. Current Blob: `bda915327a0ee77fb78e9a52bc094986254a1a60`.
 - `canonical-identity-semantics.md` 已为全部表格、规则、解析步骤、未决问题和决策记录补齐中文对应内容。当前 Blob：`bc8816eadcd14a1dd01ae03ed68de553b2bb1483`。
 - `fact-claim-identity-adr.md` 已为证据表、决策矩阵、Owner 验收要求和全部八个验证示例补齐中文对应内容。当前 Blob：`0bbea0beec6a5828c2db5ae267fac40f59ad7f1f`。
+- `evidence/README.md` 已为所有来源标题、来源用途说明、证据局限和版本注意事项补齐中文对应内容。当前 Blob：`bda915327a0ee77fb78e9a52bc094986254a1a60`。
