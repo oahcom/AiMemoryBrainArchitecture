@@ -11,7 +11,10 @@
       "maxLength": 512
     },
     "owner_authority_ref": {
-      "const": "I"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "description": "Typed I owner authority reference; semantic validator resolves it to the unique I authority"
     },
     "snapshot_ref": {
       "type": "string",
