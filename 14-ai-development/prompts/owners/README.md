@@ -19,3 +19,9 @@ Each Owner has a separate ChatGPT conversation prompt. The prompt defines only t
 Prompts are PROPOSED until reviewed and accepted. Executed versions must never be overwritten; create v2 for material changes.
 
 提示词在审查和批准前均为 PROPOSED。已经执行的版本不得覆盖；重大变更必须创建 v2。
+
+
+## Historical prompt versions / 历史提示词版本
+
+- **Owner B v1 — SUPERSEDED / HISTORICAL.** Retained unchanged for audit and historical replay only. It is not a current execution entry point. All new Owner B work MUST use [owner-session-v2.md](B/owner-session-v2.md).
+- **Owner B v1 — 已被取代 / 历史版本。** 原文件保持不变，仅用于审计和历史回放，不得作为当前执行入口。所有新的 Owner B 工作必须使用 [owner-session-v2.md](B/owner-session-v2.md)。
