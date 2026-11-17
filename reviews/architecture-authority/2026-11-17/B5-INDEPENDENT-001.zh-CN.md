@@ -87,6 +87,33 @@ B 研究分支仍然存在，并包含 22 个文件的 DOMAIN-REALITY-001-B 研�
 3. 将作者侧翻译、人工对等审查、独立语义验收和最终读回区分为不同状态。
 4. 修正后重新读取完整审计文件。
 
+### A-B5-004 — B 当前性台账中的 Owner 分支快照已过时
+
+严重级别：HIGH  
+阻塞范围：B0 跨 Owner 当前性与 B3 Owner 源协调  
+责任方：B（来源台账）；各受影响 Owner（各自决策）；A（集成回读）
+
+实时分支列表与 `baseline-currentness-and-owner-source-audit.md` 记录的 Owner HEAD 不一致：
+- C：审计记录 `2e8414f361b0b5d7de959be8a971aadc9e62d6a9`；实时分支为 `71047cdb51139ca4080ac67f451e38a48698859d`。
+- D：审计记录 `76fcc92225666a11893b7241825261319edb621e`；实时分支为 `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f`。
+- H：审计记录 `8e24342048d29ef29195b153b8b9ec53ba7c75d9`；实时分支为 `0d36324457e39bd50ad56ae902d477c4ea765b61`。
+- I：审计记录 `2afe0e17f8c0929d9e642ccbe2cad112b5fd43a9`；实时分支为 `0d071bf1ee7cc71912398c6ae57e4496e08f44ab`。
+- Storage：审计记录 `431138e7c7af8bee716f3d8dcbc20114c046bd36`；实时分支为 `830a559bd2f4ec72608f5a51e1a0b43779f2b989`。
+
+当前性审计只是历史快照，不是当前 Owner 源台账。这些分支 Tip 变化本身并不自动证明 Owner 决策发生变化，但所有依赖旧 Tip 的 B 跨 Owner 证据都必须根据精确当前工件重新评估。
+
+关闭条件：B 刷新 Owner 分支快照和相关工件 Pin；每项 Owner 决策仍只能归属于对应 Owner；A 重新读取精确工件及消费者接受证据。
+
+### A-B5-005 — 决策登记册中的 Fact/Claim ADR 精确 Blob Pin 已过时
+
+严重级别：HIGH  
+阻塞范围：B2/B3 来源可追溯性，以及任何依赖 Fact/Claim 的 Schema 决策  
+责任方：B（决策登记册）；A（消费者登记）
+
+在 `domain-model-decision-record.md` Blob `08383c76658129cebe8ef9e303cf75c27269bfb3` 中，B-DEC-004 将补充文件 `fact-claim-identity-adr.md` 引用为历史 Blob `96a2ee7d595fcd4a214201a7c7b6b2a9c3deb961`。B 分支上的实时 ADR Blob 为 `0bbea0beec6a5828c2db5ae267fac40f59ad7f1f`。实时 ADR 仍是 CANDIDATE / DECISION REQUEST，并明确标记 NOT DECIDED / NOT ACCEPTED / NOT SCHEMA-FROZEN；旧 Pin 不改变这一裁决。
+
+关闭条件：将决策登记册引用更新为实时精确 Blob（或将旧 Blob 明确标记为历史并补充当前 Blob），随后重新读取两个文件，确认状态仍为候选/阻塞。
+
 ## 3. 当前 B 门禁解释
 
 实时 README 和源审计支持以下保守解释：
