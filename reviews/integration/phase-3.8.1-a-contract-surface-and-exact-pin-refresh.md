@@ -252,9 +252,9 @@ These are role-authored candidate contract artifacts created during this integra
 | Role | Branch | Path | Exact Blob SHA | Disposition |
 |---|---|---|---|---|
 | D | `session-d-memory-brain-2026-11-16` | `03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md` | `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | Candidate D participant/admission/terminal contract |
-| E | `session-e-memory-compiler-2026-11-16` | `04-memory-compiler/phase-3.8-e-publication-orchestration-retry-recovery-contract.md` | `cee88de8614b1739aa6a575ac88cb907463a0312` | Candidate orchestration/retry/recovery contract |
-| I | `session-i-security-governance-2026-11-16` | `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md` | `b0b6997bf518e03e924faee8cdba367807dfeda6` | Candidate authorization receipt/sequencer contract |
-| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md` | `73c6d3d86a51a7163a727994aef247ba97fde083` | Candidate durable prepare/visibility outcome contract |
+| E | `session-e-memory-compiler-2026-11-16` | `04-memory-compiler/phase-3.8-e-publication-orchestration-retry-recovery-contract.md` | `475fee41e5eea527af4edefbfe88c58c86967d0a` | Candidate orchestration/retry/recovery contract |
+| I | `session-i-security-governance-2026-11-16` | `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md` | `54bab0484bd232a5a258e65e34cc7425288b39a6` | Candidate authorization receipt/sequencer contract |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md` | `175ee7b1349cfdb79a19898b311a88391ed88010` | Candidate durable prepare/visibility outcome contract |
 
 ### 12.1 Integration cross-check
 
@@ -264,3 +264,22 @@ These are role-authored candidate contract artifacts created during this integra
 - Storage owns the durable participant, final visibility linearization, immutable outcome and positive NO_PUBLICATION proof; physical topology remains open.
 
 The four artifacts are mutually consistent at the logical contract level. Their exact APIs, canonical wire schemas, cryptographic profiles, physical serialization topology and conformance evidence remain open. A final owner-exact review must be performed by each actual Owner against these exact Blob SHAs.
+
+## 13. Circular-proof dependency correction
+
+The final pre-commit proof set is:
+- D current PublicationParticipantRef + current D fence proof;
+- Storage durable PREPARED_HIDDEN StorageVisibilityParticipantRef;
+- I consumed CommitAuthorizationReceipt, which is the pre-commit `ICommitAuthorizationProof` and proves COMMIT_WON in the I PolicyDomain sequencer.
+
+Storage validates this ICommitAuthorizationProof at the visibility linearization point. Only after Storage emits COMMITTED_VISIBLE or authoritative NO_PUBLICATION may I issue `ITerminalProof` to close its in-flight authorization participant and release held revocation as appropriate.
+
+`ITerminalProof` MUST NOT be required by the Storage commit that creates the outcome it attests. That would be a circular dependency. The consumed CommitAuthorizationReceipt and post-commit ITerminalProof are distinct proof stages and MUST remain distinct in every API and wire schema.
+
+### 中文规范
+
+最终提交前证明集合为：D 当前 PublicationParticipantRef 与当前 D Fence Proof；Storage 已持久化的 PREPARED_HIDDEN StorageVisibilityParticipantRef；以及 I 已消费的 CommitAuthorizationReceipt（即提交前 ICommitAuthorizationProof），证明该精确发布在 I PolicyDomain Sequencer 中取得 COMMIT_WON。
+
+Storage 在 Visibility Linearization Point 验证 ICommitAuthorizationProof。只有 Storage 产生 COMMITTED_VISIBLE 或权威 NO_PUBLICATION 后，I 才能签发 ITerminalProof，用于关闭自己的进行中 Authorization Participant，并按规则释放等待中的 Revocation。
+
+Storage 不得要求 ITerminalProof 来执行产生该证明所依赖 Storage Outcome 的提交，否则形成循环依赖。已消费 CommitAuthorizationReceipt 与提交后 ITerminalProof 是两个不同证明阶段，所有 API/Wire Schema 必须保持类型隔离。
