@@ -13,7 +13,7 @@
 - Storage Phase 3.8 Visibility Participant and Atomic Outcome contract: Blob 175ee7b1349cfdb79a19898b311a88391ed88010.
 - Storage Phase 3.6.11 Bidirectional COC/Owner Admission Join Proof: Blob 41f80b1aacfebdb1f652b16144afbf83ce950e82.
 - H RecoveryJoin schema 1.0.0 candidate: Blob dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
-- H semantic validator contract: Blob b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
+- H semantic validator contract: Blob 121717c5f303b1a2e864f2b95664f51f51ba4b48.
 - HRC semantic suite: Blob 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
 - A race/crash/failover matrix: Blob c0f8ae699a42de46d12d0d311892e5670014e0f1.
 
@@ -83,5 +83,5 @@ D 接受逻辑组合方向，但要求 RecoveryJoin 明确绑定每个 ForgetOpe
 The latest H RecoveryJoin schema now has typed D evidence requirements for LINEAGE/BARRIER_MEMBERSHIP: ForgetOperationRef, FenceGeneration, LineageManifestRef/Digest and BarrierMemberRef. This addresses the schema-shape part of D-RJ-01. It does not yet prove that the referenced D records are signed, current, complete for the exact Fence, or read from the authoritative D ledger. H/D runtime adapter and D owner proof verification remain OPEN. The D disposition therefore remains ACCEPT WITH AMENDMENTS, not acceptance for freeze.
 
 Updated H RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
-Updated H semantic contract Blob: b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
+Updated H semantic contract Blob: 121717c5f303b1a2e864f2b95664f51f51ba4b48.
 Updated HRC suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
