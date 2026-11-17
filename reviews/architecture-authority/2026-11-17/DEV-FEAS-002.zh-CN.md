@@ -38,7 +38,7 @@ F/D/P 使用相对规模 S/M/L/XL，而非人日。由于工程人数、可用�
 2. B 关闭规范性 Identity/Fact-Claim/Temporal 语义；消费者绑定精确版本。
 3. I 与外部权威关闭安全治理决策及签署的闭世界 Producer/Recipient/Backup Inventory。
 4. D/E/I/Storage 对 Admission → Dependency Registration → Fence → Final Visibility 达成精确一致，并证明两种竞态顺序和崩溃窗口。
-5. Storage 选定并证明真实 DB/COC 拓扑；C/G/H 关闭 Final Request 和 Applied/Provider Outcome 合同。
+5. Storage 完成 L4 物理实现并证明已选定的 L1 Option A 配置（实际 DB/Adapter、COC、同 XID 恢复、故障切换/还原）；C/G/H 关闭 Final Request 和 Applied/Provider Outcome 合同。
 
 ## 有界工程工作
 
