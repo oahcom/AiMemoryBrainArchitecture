@@ -103,3 +103,21 @@ Any unresolved identity collision, contradictory state meaning, unowned lifecycl
 A subset of initial create-file operations landed on main because the branch parameter was omitted. The exact affected research files were copied to this isolated branch, then removed from main through explicit delete commits. All 13 affected main paths were subsequently checked and returned NOT_FOUND; the branch contains the 19-file research package. Main was not rewritten and historical commits remain auditable. This correction is recorded transparently; it is not treated as a clean initial write.
 
 部分初始 create-file 操作因遗漏 branch 参数而写入 main。受影响的研究文件已复制到本隔离分支，再通过明确的删除提交从 main 移除。随后对 13 个受影响的 main 路径逐一核验，均返回 NOT_FOUND；研究分支包含完整 17 个文件。main 未被重写，历史提交仍可审计。本纠正过程如实记录，不将其描述为从一开始就正确隔离。
+
+## 7. Continued work — 2026-11-17 / 继续工作 — 2026-11-17
+
+- Added `baseline-currentness-and-owner-source-audit.md`: refreshed current-main and selected Owner source snapshots; B0 remains PARTIAL.
+- Added `baseline-owner-branch-snapshot-errata.md`: corrects older Owner branch-tip rows using the later Phase 3.8 snapshot in the cross-owner matrix.
+- Added `fact-claim-identity-adr.md`: explicit alternatives and a candidate recommendation; no Fact/Claim or Claim identity decision is claimed.
+- Added `evidence/official-reference-validation.md`: official domain-modeling reference survey; research patterns are not project contracts.
+- PR #55 remains Open / Draft. The branch is not merged and no architecture/schema freeze is requested.
+
+Bilingual coverage and exact readback are still required after each subsequent write. B0 is PARTIAL / NOT PASSED; B2/B3 remain OPEN; B4 is NOT READY; B6 is pending truly independent review.
+
+- 新增 `baseline-currentness-and-owner-source-audit.md`：刷新 current-main 和部分 Owner 源快照；B0 仍 PARTIAL。
+- 新增 `baseline-owner-branch-snapshot-errata.md`：使用跨 Owner 矩阵中较新的 Phase 3.8 快照更正旧 Owner 分支 Tip。
+- 新增 `fact-claim-identity-adr.md`：列出明确备选方案及候选建议；不宣称已决定 Fact/Claim 或 Claim 身份。
+- 新增 `evidence/official-reference-validation.md`：官方领域建模参考研究；外部产品模式不是项目契约。
+- PR #55 仍为 Open / Draft。研究分支未合并，也未请求架构/Schema 冻结。
+
+每次后续写入后仍须完成双语覆盖和精确读回。B0 为 PARTIAL / NOT PASSED；B2/B3 仍 OPEN；B4 为 NOT READY；B6 等待真正独立审查。
