@@ -1,6 +1,6 @@
 # 根本性优先级与开发路线图 — PRIORITY-002
 
-- 版本：1.0.0；基线 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`。
+- 版本：1.0.0；基线 `6470f25ca23b8d35c06f60be2326867066418d18`。
 - 状态：仅为规划建议；不构成实现或 Gate 授权。
 
 ## 统一优先级
@@ -11,7 +11,7 @@
 | P0-02 | 关闭 Domain Identity、Fact/Claim、Evidence 和 Temporal 语义 | B；消费者采用 | 已批准 B ADR、精确 Blob、类型案例、消费者采用 | G2/G3 |
 | P0-03 | 关闭 I 安全治理、Trust、Revocation 和闭世界 Inventory | I + 外部权威 | 签署 I36-GOV-01..10 决策、InventorySealReceipt、Target/Backup/Recipient 枚举 | G2/G4 |
 | P0-04 | 关闭 D/E/I/Storage Admission、Lineage、Forget Fence 和 Visibility 组合 | D/E/I/Storage | 精确 Owner 决策、两种竞态顺序、Crash/ACK-loss/Stale Lease、UNKNOWN 时保持隐藏 | G3/G4 |
-| P0-05 | 完成已选定 L1 Option A 的 L4 物理 DB/COC/JF-10 证明 | Storage + A/COC + I/D | Gate A 完整；Gate B 持久 COC；Gate C 故障活动；同 XID 证明 | JF-10 A/B/C |
+| P0-05 | 完成 Option A 的 A-01..A-05 L1/L2 澄清、D 精确接受、独立 Restore Anti-rollback，然后完成 L3/L4 证明 | Storage + A/COC + I/D | Gate A 完整；Gate B 持久 COC；Gate C 故障活动；同 XID 证明 | JF-10 A/B/C |
 | P0-06 | 关闭 C/G/H Final Request、Provider Outcome 和 Applied 合同 | C/G/H + I/D 消费者 | 精确合同批准、Provider Close-vs-Send、相同 Idempotency Key、负向符合性 | G2/G4 |
 | P0-07 | 有界 Durable Ingress → Canonical Commit/Cursor 纵向切片 | E/D/Storage；工程负责人 | Durable ACK、Outbox、幂等 Replay、Canonical Cursor 原子性、恢复证明；仅在 P0-02..05 后 | 实现准入 |
 | P0-08 | 安全 Structured/Lexical Retrieval 与 Forget-safe Index/Cache Rebuild | F + D/I/Storage | Ranking 前 Permission/Fence、陈旧投影抑制、Rebuild/Restore 证明 | 实现验证 |
@@ -20,6 +20,11 @@
 | P3 | 高并发、分布式扩展、高级自动扩缩容、多地域运维 | Engineering/Storage/I | 实测负载和已证明需求；部署/DR ADR 与故障证据 | 生产规模化 Gate |
 
 P0 并非一个不可拆分的大阶段。P0-01..06 是权威与证明前置条件；P0-07..08 只有在指定依赖满足后才可开展有界实现。
+
+## 新增根本性阻塞
+
+- B 协议 Bundle 当前性（H/D/C/I/Storage）是 P0/P1 冻结前置条件：v3.2.9 已过期；Storage v3.3.0 或等效版本必须绑定当前精确 Owner/CI 工件，并获得相关 Owner 与 A 接受。
+- 在 A-01..A-05 被采纳且 D 对 Storage ADR 作出精确决议前，不得称 Option A 的 L1 已关闭。L3/L4 仍是独立证明。
 
 ## 首期形态
 
