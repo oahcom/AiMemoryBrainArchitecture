@@ -12,8 +12,8 @@
 | Artifact | Exact Blob / Evidence |
 |---|---|
 | H Unified Schema 1.2.11, wire 1.3.0 | `4f1e103ab4b2ac961d77179dba0b65093532ea40` |
-| H Unified Manifest contract 3.8.4 | `0b7251d63ba5a585e55e74a10c4c3113d17188bc` |
-| H I crypto wire mapping 3.8.4 | `bf160288d7529b37ad1b56924c1583748922aa25` |
+| H Unified Manifest contract 3.8.4 | `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175` |
+| H I crypto wire mapping 3.8.4 | `a692a790a4c7abef94dba6da9c22b5e06417879a` |
 | I crypto profile proposal | `5eeb011032c53c2f7897d699d6f512b26f07d0a2` |
 | I crypto artifact-revision amendment | `9db3976ed9a891e9395d0e7edf949e75cb4422aa` |
 | H RecoveryJoin schema 1.0.2 | `4b664e3bce465499bcdfd93796349a4ba7074002` |
