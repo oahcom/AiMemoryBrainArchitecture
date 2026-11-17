@@ -17,7 +17,7 @@
 | G exact full-path consumer review | `session-g-memory-context` / `06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md` | `1894860c76336f8739d354b72beed3992cffd17e` | Explicitly pins H 1.2.14 × CSubmitOutcome 1.0.1 |
 | C normative Provider Submit Outcome | `session-c-agent-integration-2026-11-16` / `07-agent-integration/phase-3.8.4-c-normative-provider-submit-outcome-contract.md` | `819705037da89834e10b6dd2ec6e66c1b8c70886` | C semantic authority |
 | CSubmitOutcome 1.0.1 schema | C branch / `07-agent-integration/schemas/c-submit-outcome-1.0.1.schema.json` | `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` | Immutable C object schema |
-| H JF-10 Applied ACK schema | H branch / `08-bmcp-protocol/schemas/bmcp.applied-ack-1.1.0-jf10-bridge.schema.json` | See H schema directory artifact; distinct schema family | JF-10 bridge Applied ACK, not Provider Outcome |
+| H JF-10 Applied ACK schema | H branch / `08-bmcp-protocol/schemas/bmcp.applied-ack-1.1.0-jf10-bridge.schema.json` | `a8a945cc3623c2907003b93625e3c79742150944`; distinct schema family | JF-10 bridge Applied ACK, not Provider Outcome |
 
 The exact branch heads observed during this read were C `71047cdb51139ca4080ac67f451e38a48698859d`, G `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe`, and H `e3e4cab0aab2c68f9db98bd50bc387b1895c3773`.
 
