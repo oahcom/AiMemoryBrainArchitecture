@@ -9,7 +9,7 @@ Chinese and English are maintained as equivalent reading versions. Normative arc
 | Reader | Recommended path |
 |---|---|
 | New to the project / 初次了解 | [中文系统总览](zh-CN/01-system-architecture/system-overview.md) · [English System Overview](en/01-system-architecture/system-overview.md) |
-| Understand architecture / 理解架构 | System overview → [System Design Guide](zh-CN/01-system-architecture/system-design-guide.md) → component map → responsibility matrix → [Domain Model Guide](zh-CN/02-domain-model/domain-model-guide.md) |
+| Understand architecture / 理解架构 | System overview → [System Design Guide](zh-CN/01-system-architecture/system-design-guide.md) → [Integration Governance Guide](zh-CN/01-system-architecture/integration-governance-guide.md) → component map → responsibility matrix → [Domain Model Guide](zh-CN/02-domain-model/domain-model-guide.md) |
 | Implement a subsystem / 开发模块 | Owner specification → domain/protocol contracts → acceptance criteria |
 | Evaluate technology / 技术选型 | [中文技术架构总览](zh-CN/13-engineering-decisions/technology-architecture-overview.md) · [English Technology Overview](en/13-engineering-decisions/technology-architecture-overview.md) |
 | Look up terms / 查术语 | [Bilingual Glossary / 中英术语表](glossary/architecture-glossary.md) |
@@ -19,6 +19,8 @@ Chinese and English are maintained as equivalent reading versions. Normative arc
 **Mandatory project rule / 项目强制规范：** Every architecture design and semantic change must be documented in Chinese and English in the same change set. See [GOV-DOC-001](../00-governance/bilingual-documentation-policy.md).
 
 ## Documentation layers / 文档层次
+
+The [Cross-Module Conformance Guide](zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md) explains how architecture contracts are verified and what evidence is required before a PASS can be claimed.
 
 ### L1 — Understand the system / 理解系统
 Mission, scope, non-goals, Brain vs. Agent, system map, main data and control flows.
