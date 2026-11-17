@@ -2,8 +2,8 @@
 # ARCH-CONVERGENCE-001 — 当前性补充记录（2026-11-18）
 
 - Repository: `oahcom/AiMemoryBrainArchitecture`
-- Review baseline: `main@431468a9066f6fe68d9c514f3603ab1a603146ff`
-- Main commit date: 2026-11-17T21:28:16Z
+- Review baseline: `main@6c325804027b88de1014ab3364cdda7e0c023ba6`
+- Main commit date: 2026-11-17T21:29:04Z
 - Main tree: `b46c7059f195ef121d843faa5a0e5141dad2fd1e` (664 entries; recursive tree not truncated)
 - Status: **DRAFT / CURRENTNESS CORRECTION / NON-NORMATIVE**
 - Purpose: supersede stale live-status and source-tree observations in earlier ARCH-CONVERGENCE-001 documents.
@@ -39,13 +39,13 @@ ARCH-CONVERGENCE-001 在架构层面仍未解决，也未获实现授权。提�
 | C/G/H Applied consumer audit | #119 | `431468a9066f6fe68d9c514f3603ab1a603146ff` | MERGED — audit publication; findings remain open |
 | B domain post-merge reconciliation | #120 | `6c325804027b88de1014ab3364cdda7e0c023ba6` | MERGED — status reconciliation; B gates remain open |
 
-All above PR metadata was re-read from GitHub. The merge commit of PR #119 is the current `main` HEAD. PR #120's merge commit is an ancestor of the subsequent main history.
+All above PR metadata was re-read from GitHub. PR #120's merge commit is the current `main` HEAD. PR #119's merge commit is its direct parent.
 
 上述 PR 状态均已重新从 GitHub 元数据读取。PR #119 的合并提交就是当前 `main` HEAD；PR #120 的合并提交是后续 main 历史的祖先。
 
 ## 3. Current main source-tree correction / 当前 Main 来源树修正
 
-The current recursive tree has 664 entries and is not truncated. The following README-mapped roots are present or absent as follows:
+The current recursive tree has ${tree.tree.length} entries and is not truncated. The following README-mapped roots are present or absent as follows:
 
 | Path | Current main observation |
 |---|---|
@@ -110,7 +110,7 @@ These are not resolved by the merge of #89 or #99–#107.
 
 The ten files under `docs/architecture-convergence/` are already present on main. They are **DRAFT / NON-NORMATIVE proposals** anchored to the historical baseline `e52594f...`. Their historical baseline and PR-state statements must be interpreted as audit-time observations, not current status.
 
-This addendum is the current status overlay as of `main@431468a9066f6fe68d9c514f3603ab1a603146ff`. It does not silently rewrite the historical record or promote the ten documents to normative contracts.
+This addendum is the current status overlay as of `main@6c325804027b88de1014ab3364cdda7e0c023ba6`. It does not silently rewrite the historical record or promote the ten documents to normative contracts.
 
 `docs/architecture-convergence/` 下十份文件已经存在于 main，但仍为 **DRAFT / NON-NORMATIVE** 提案，且锚定历史基线 `e52594f...`。其中关于历史基线和 PR 状态的陈述只能理解为当时的审计快照，不能当作当前状态。
 
