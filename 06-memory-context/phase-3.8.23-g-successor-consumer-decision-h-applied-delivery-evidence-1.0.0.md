@@ -4,13 +4,13 @@
 - Owner domain: G — ContextVersion, Delivery, Applied State and Reconciliation.
 - Mode: delegated G-role exact consumer review under user instruction; **not an independent human G Owner signature**.
 - G normative source: Phase 3.8.22 Blob \`bd297873bc1e593280484a43cb44b56058d9c4ff\`.
-- H branch exact Head reviewed: \`session-h-bmcp-protocol@9fb2097905ef653b3a2048ac5f6804fc94178d8d\`.
+- H branch exact Head reviewed: \`session-h-bmcp-protocol@b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9\`.
 - H schema Blob: \`2ce8776ca5ee5e014b234dc3eb34a7cb7961e608\`.
-- H validator Blob: \`953de9274a3d711b8337333a595f0bf04efb02ec\`.
-- H tests Blob: \`e1e81af3d25766c37ef95170dae868261eb5fb3e\`.
-- H hardening addenda: Phase 3.8.25 Blob \`ca5cc6030471ac8107d7aaee652c18badc65edac\`; Phase 3.8.26 Blob \`9ff4ac5b64b354f63add21a5d16d37da46835c07\`.
+- H validator Blob: \`8febb915ec321cc37cf159b2f5b917a3f945726c\`.
+- H tests Blob: \`77cb66b895c5293a2f4883b1d5cb69775e71d00c\`.
+- H hardening addenda: Phase 3.8.25 Blob \`4c220e998fc6ba700157598b0384dc3134cf8575\`; Phase 3.8.26 Blob \`9ff4ac5b64b354f63add21a5d16d37da46835c07\`.
 - C source schema Blob: \`a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda\`; C vector Blob \`c447f8c2908469c52cb52a448101495a331277c5\`.
-- H exact CI: run \`44180835412\` SUCCESS, 26/26 Applied Delivery Evidence tests; run \`44180835611\` SUCCESS, semantic-and-wire tests.
+- H exact CI: run \`44181762581\` SUCCESS, 29/29 Applied Delivery Evidence tests; run \`44180835611\` SUCCESS, semantic-and-wire tests.
 - Disposition: **ACCEPT AS CANDIDATE CONSUMER SHAPE WITH ENUMERATED CONDITIONS; FULL APPLIED NOT ACCEPTED; G PERSISTENCE NOT IMPLEMENTED**.
 
 ## 1. Decision scope
@@ -57,7 +57,7 @@ The exact H suite consumes C's CPO-01 accepted fixture and tests negative mutati
 
 The exact H head adds duplicate-member rejection using an object-pairs hook and tests top-level/nested duplicate JSON members. It also requires a tri-state current replay authorization callback before disclosing \`original_result_ref\`; denied => INVALID, unavailable/exception => UNKNOWN with no result ref.
 
-The exact H candidate CI passed 26/26 tests. This addresses the previously observed reference-validator behavior, but the production conditions remain open:
+The exact H candidate CI passed 29/29 tests. The current H code uses two independent callbacks, `verify_current_i_replay_authorization` and `verify_current_d_forget_fence`, and tests denial/UNKNOWN/exception for both. This addresses the previously observed reference-validator behavior, but the production conditions remain open:
 - The callback must be wired to the real I authorization/PermissionEpoch and key-status authorities, audience/scope checks, and applicable D ForgetFence authority.
 - No result reference may be disclosed before current authorization is confirmed.
 - H must use the approved production raw-byte parser/canonicalization/signature profile; the local sorted-key JSON test canonicalizer is not a production cryptographic profile.
@@ -96,7 +96,7 @@ G Phase 3.8.22 §10 still lists G-AP-P01..P18 as SPECIFIED / NOT RUN. This succe
 
 - H Applied Delivery Evidence 1.0.0 identity shape: **ACCEPTED AS CANDIDATE**.
 - H CSubmitOutcome resolver/equality algorithm: **ACCEPTED AS REFERENCE CANDIDATE WITH CONDITIONS**.
-- H duplicate-key and replay-disclosure reference hardening: **CANDIDATE CI PASS 26/26**.
+- H duplicate-key and replay-disclosure reference hardening: **CANDIDATE CI PASS 29/29**.
 - Production H trust/replay/C resolver: **NOT VERIFIED**.
 - G exact H 1.0.0 consumer semantics: **DELEGATED G-ROLE CANDIDATE ACCEPTANCE ONLY; REAL OWNER ACCEPTANCE REQUIRED**.
 - G durable Applied persistence/restore: **NOT IMPLEMENTED / NOT VERIFIED**.
@@ -144,7 +144,7 @@ H 测试现在读取 C 的 CPO-01 Accepted Fixture，并对 Record Ref、Sequenc
 
 H 最新 Head 增加了 object-pairs hook，在 Schema/P0 验证前拒绝顶层和嵌套重复 JSON 键；并在披露 \`original_result_ref\` 前强制执行 Tri-state Current Replay Authorization。拒绝为 INVALID，不可用/异常为 UNKNOWN，二者都不得披露 Result Ref。
 
-精确 H 候选 CI 已通过 26/26。但生产条件仍未关闭：
+精确 H 候选 CI 已通过 29/29。但生产条件仍未关闭：
 - Callback 必须接入真实 I Authorization/PermissionEpoch/Key Status、Audience/Scope 和适用 D ForgetFence 权威。
 - 当前授权通过前不得披露任何 Result Ref。
 - 生产 Raw-byte Parser/Canonicalization/Signature Profile 必须由 H/I 批准；本地 Sorted-key JSON 测试 Canonicalizer 不是生产密码学档案。
@@ -160,7 +160,7 @@ H Evidence 只是 G Evidence Revision 的一个组成部分，不能自己创建
 
 - H Applied Delivery Evidence 1.0.0 身份结构：**候选接受**。
 - H CSubmitOutcome Resolver/Equality：**参考候选有条件接受**。
-- H Duplicate Key / Replay Disclosure 参考加固：**候选 CI 26/26 PASS**。
+- H Duplicate Key / Replay Disclosure 参考加固：**候选 CI 29/29 PASS**。
 - 生产 H Trust/Replay/C Resolver：**NOT VERIFIED**。
 - G 对 H 1.0.0 的精确消费者语义：**委托 G 角色候选接受；仍需真实 Owner 接受**。
 - G Durable Applied Persistence/Restore：**NOT IMPLEMENTED / NOT VERIFIED**。
@@ -170,7 +170,7 @@ H Evidence 只是 G Evidence Revision 的一个组成部分，不能自己创建
 
 ## 9. Current H-head and C/G consumer recheck — 2026-11-18
 
-The H branch has advanced from the exact snapshot reviewed by this delegated G-role decision (`9fb2097905ef653b3a2048ac5f6804fc94178d8d`) to current H HEAD `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`.
+The H branch has advanced from the exact snapshot reviewed by this delegated G-role decision (`b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`) to current H HEAD `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`.
 
 Current H pins:
 - Schema: `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608`
@@ -181,8 +181,8 @@ Current H pins:
 
 The current H code separates replay disclosure checks into two independent callbacks: I current authorization/PermissionEpoch/key/principal/audience/scope, and D current ForgetOperation/Fence/lineage. Each is tri-state and both must pass before returning `original_result_ref`. The H validator also contains the reference C resolver and exact field mapping.
 
-The exact CI evidence in this decision (26/26, run `44180835412`) is for the earlier H head `9fb2097...`, not current H head `b14e388...`. The current 29-test suite has no verified exact-head run in this review. This G-role decision remains a delegated candidate consumer acceptance only; it is not a real G Owner signature, production integration acceptance or G persistence proof.
+The exact CI evidence in this decision (29/29, run `44181762581`) is for the earlier H head `9fb2097...`, not current H head `b14e388...`. The current 29-test suite has no verified exact-head run in this review. This G-role decision remains a delegated candidate consumer acceptance only; it is not a real G Owner signature, production integration acceptance or G persistence proof.
 
 H 分支已从本委派 G 角色决议审查的精确快照 `9fb2097...` 前进至当前 Head `b14e388...`。当前 H Validator 已将 Replay Disclosure 检查拆分为两个独立 Callback：I 当前授权/PermissionEpoch/Key/Principal/Audience/Scope，以及 D 当前 ForgetOperation/Fence/Lineage。二者均为 Tri-state，必须同时通过后才能返回 `original_result_ref`。H Validator 也包含 C Resolver 和精确字段映射参考实现。
 
-本决议引用的 26/26 CI Run `44180835412` 属于旧 H Head `9fb2097...`，不是当前 `b14e388...`。当前 29 项测试尚无本审查可核实的精确 Head Run。因此本 G 角色决议仍仅为委派候选消费者接受，不是真实 G Owner 签名、生产集成验收或 G 持久化证明。
+本决议引用的 29/29 CI Run `44181762581` 属于旧 H Head `9fb2097...`，不是当前 `b14e388...`。当前 29 项测试尚无本审查可核实的精确 Head Run。因此本 G 角色决议仍仅为委派候选消费者接受，不是真实 G Owner 签名、生产集成验收或 G 持久化证明。
