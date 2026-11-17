@@ -282,3 +282,28 @@ I 基线分支：`session-i-security-governance-2026-11-16` @ `0d071bf1ee7cc7191
 - `09-security-governance/tests/global_forget_model.py` — blob `5233da028e409ec3f41848582dad73a923e7155b`.
 - `09-security-governance/tests/test_global_forget_model.py` — blob `428e15c6263b5b2d730b93ce5412d55e782a449b`.
 
+
+
+---
+
+## 10. Baseline I reference-model test coverage audit / I 基线 Reference Model 测试覆盖审计
+
+At the I baseline branch head `0d071bf1ee7cc71912398c6ae57e4496e08f44ab`, the repository contains:
+
+在 I 基线分支 Head `0d071bf1ee7cc71912398c6ae57e4496e08f44ab`，仓库包含：
+
+- `09-security-governance/tests/global_forget_model.py` — Blob `5233da028e409ec3f41848582dad73a923e7155b`.
+- `09-security-governance/tests/test_global_forget_model.py` — Blob `428e15c6263b5b2d730b93ce5412d55e782a449b`, containing 30 `unittest` test methods.
+- `.github/workflows/i-global-forget-reference-model.yml` — Blob `2c16ef5381dd271789912e9b1c1e5c12941d2826`, which defines Python 3.12 compile + unittest execution on push to the I branch and relevant pull requests.
+
+The 30 tests cover I global inventory sealing, registry gaps, target evidence binding, epoch changes, Unknown/offline behavior, D barrier dependency, backup restore quarantine, physical-erasure action distinctions, exception approval/expiry, NotApplicable evidence, owner-local non-claim, failure/late-ACK reconciliation and global completion components.
+
+这 30 项测试覆盖 I 全局 Inventory Seal、Registry 缺口、目标证据绑定、Epoch 变化、Unknown/Offline 行为、D Barrier 依赖、Backup Restore 隔离、物理擦除动作区分、例外批准/过期、NotApplicable 证据、Owner 本地非声明、失败/迟到 ACK 核对及全局完成组件。
+
+**Specific gap / 明确缺口：** the current 30-test suite contains no test for D `Memory.lifecycle = Forgotten`, D `LifecycleEvent` CAS, I `PermissionEpoch` currentness at that CAS, a single-use Forget terminalization authorization receipt, or the authorization/revocation race for that exact event. The suite is an I global-inventory logical reference model; it is not the D/I lifecycle-terminalization contract suite.
+
+**明确缺口：** 当前 30 项测试没有覆盖 D `Memory.lifecycle = Forgotten`、D `LifecycleEvent` CAS、该 CAS 时 I `PermissionEpoch` 当前性、Forget 终态化单次授权 Receipt，或该精确事件的授权/撤权竞争。该测试集是 I Global Inventory 逻辑 Reference Model，不是 D/I 生命周期终态化契约测试集。
+
+The workflow definition exists, but a read of workflow runs and commit statuses for the exact I branch head returned no run and no status. Therefore this audit records **30 test methods present / execution NOT EVIDENCED at the inspected head**. It does not infer a PASS from the presence of test source or workflow YAML.
+
+Workflow 定义确实存在，但针对精确 I 分支 Head 读取 Workflow Runs 和 Commit Statuses 均未返回运行记录或状态。因此本审计记录为：**存在 30 项测试方法 / 检查 Head 上的执行 NOT EVIDENCED**。不得从测试源码或 Workflow YAML 的存在推断 PASS。
