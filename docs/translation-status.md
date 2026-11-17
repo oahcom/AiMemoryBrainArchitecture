@@ -55,7 +55,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | E Accepted Receipt and Idempotency Contract | 04-memory-compiler/accepted-receipt-and-idempotency-contract.md | docs/zh-CN/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | docs/en/04-memory-compiler/accepted-receipt-and-idempotency-contract.md | COMPLETE — source-aligned pair |
 | E Compiler State and D Producer Admission | 04-memory-compiler/compiler-state-and-producer-admission.md | docs/zh-CN/04-memory-compiler/compiler-state-and-producer-admission.md | docs/en/04-memory-compiler/compiler-state-and-producer-admission.md | COMPLETE — source-aligned pair |
 | E Event Ingestion Engine | 04-memory-compiler/event-ingestion-engine.md | docs/zh-CN/04-memory-compiler/event-ingestion-engine.md | docs/en/04-memory-compiler/event-ingestion-engine.md | COMPLETE — source-aligned pair; source blob 9fa3db53175452bf9e6f0fce8b1540765e46905f |\n| E Extraction and Normalization | 04-memory-compiler/extraction-and-normalization.md | docs/zh-CN/04-memory-compiler/extraction-and-normalization.md | docs/en/04-memory-compiler/extraction-and-normalization.md | COMPLETE — source-aligned pair; source blob c18780403de2d1dbcf471bdb8abdaa009a4a78e1 |\n| E Consolidation and Conflict Resolution | 04-memory-compiler/consolidation-and-conflict-resolution.md | docs/zh-CN/04-memory-compiler/consolidation-and-conflict-resolution.md | docs/en/04-memory-compiler/consolidation-and-conflict-resolution.md | COMPLETE — source-aligned pair; source blob d16f8e2e41a6cca81ad285e5f79f075d87e64edb |\n| E Evidence and Provenance | 04-memory-compiler/evidence-and-provenance.md | docs/zh-CN/04-memory-compiler/evidence-and-provenance.md | docs/en/04-memory-compiler/evidence-and-provenance.md | COMPLETE — source-aligned pair; source blob 38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963 |\n| E remaining detailed contracts | 04-memory-compiler/ | Pending | Owner-branch English sources | IN PROGRESS — 7 of 8 core specs paired; 1 remains (Forget Fence and Derived Registration) |
-| Memory Runtime detailed contracts (5 core specifications) | F owner branch; audited head 348b5ec84c44a8a067122ce0aa72a594b9c06b66 | Pending | Owner-branch English sources | NOT STARTED — 5 core specs are English-only |
+| Memory Runtime detailed contracts (5 core specifications) | F owner branch; audited head 348b5ec84c44a8a067122ce0aa72a594b9c06b66 | docs/zh-CN/05-memory-runtime/ | docs/en/05-memory-runtime/ | PAIRED IN PR #28 — 5/5 detailed pairs present; independent semantic review pending |
 | Memory Context detailed contracts (6 core specifications) | G owner branch; audited head 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa | Pending | Owner-branch English sources | NOT STARTED — 6 core specs are English-only |
 | Agent Integration detailed contracts (10 core specifications) | C owner branch; audited head 0f1df3b9c8bdfbb7991cd9e18842c56c521665c4 | Pending | Owner-branch English sources | NOT STARTED — 10 core specs are English-only |
 | BMCP Protocol detailed contracts (7 core specifications) | H owner branch; audited head 8150a450c73d59eba9b81f6aae30e28ab0d7a0e0 | Pending | Owner-branch English sources | NOT STARTED — 7 core specs are English-only |
@@ -74,7 +74,7 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 
 **Exact Owner branch source snapshots and migration batches:** [Owner Branch Bilingual Migration Inventory](owner-branch-translation-inventory.md). The audited branch SHAs are source references only; refresh each branch HEAD before translating or accepting a companion.
 
-## 3. Translation and readability sequence / 翻译与易读性推进顺序
+## 3. PR #28 branch overlay / PR #28 分支覆盖状态\n\nThe following describes the current bilingual companion files on `docs/bilingual-coverage-completion`, not the historical Owner source-branch audit snapshots. `PAIRED` means both language files exist in the PR branch; it does not mean semantic review, source-branch reconciliation, or governance acceptance is complete.\n\n以下状态描述 `docs/bilingual-coverage-completion` 分支中的双语对应文件，不覆盖历史 Owner 源分支审计快照。`PAIRED` 仅表示 PR 分支中中英文文件均存在，不表示语义复审、源分支基线核对或治理验收已经完成。\n\n| Owner | Detailed core source set | PR #28 bilingual coverage | Remaining work |\n|---|---:|---|---|\n| B | 6 main specs | 6/6 paired | Phase 3 typed-reference/identity extensions and ADR-001 remain pending |\n| D | 8 core specs | 8/8 paired | Source-branch reconciliation and semantic acceptance |\n| E | 8 core specs | 7/8 paired | Forget Fence and Derived Registration |\n| F | 5 core specs | 5/5 paired | Independent semantic review |\n| G/C/H/I | 6/10/7/8 core specs | Reader guides only; detailed pairs not started | Full detailed contracts and reviews |\n| Storage/Consistency | Per-source inventory pending | No detailed paired set | COC/JF-10/identity/restore/high-water/acceptance evidence inventory and translation |\n\n## 3. Translation and readability sequence / 翻译与易读性推进顺序
 
 ### Batch 1 — Orientation and shared language / 第一批：系统认知与共同语言
 - Portal, style guide, glossary.
@@ -93,19 +93,19 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 
 ### Batch 3 — Domain and canonical memory / 第三批：领域模型与权威记忆
 - D Canonical Memory reader guide: COMPLETE — includes D/E/F/G/H/I ownership split, cursor namespaces, and Forget boundary.
-- D: 8 of 8 core specifications now have bilingual companions; the long Forget Fence Operation/Publication Gate is split into four parallel bilingual parts. Refresh D branch head before translating it.
+- D: 8/8 core specifications have bilingual companions in PR #28; the long Forget Fence Operation/Publication Gate is split into four parallel bilingual parts. Source-branch reconciliation and independent semantic review remain separate gates.
 - Domain Model reader guide: COMPLETE.
 - B's six main source specifications: COMPLETE — source-aligned bilingual pairs added. Phase 3 typed-reference/identity extensions and ADR-001 decision package remain NOT STARTED; preserve ADR-BLOCKED status.
-- D Canonical Memory detailed bilingual work: pending source-branch reconciliation.
+- D Canonical Memory bilingual companions: present in PR #28 (8/8); source-branch reconciliation and semantic acceptance remain pending.
 - B Domain Model.
 - D Canonical Memory, lifecycle, versioning, Forget Fence, commit cursor.
 - Acceptance: Fact/Claim OPEN state preserved; exact identifiers and state names unchanged.
 
 ### Batch 4 — Memory production and runtime / 第四批：记忆生产与运行时
 - E and F reader guides: COMPLETE.
-- E: 7 of 8 core specifications have bilingual companions; 1 remains (Forget Fence and Derived Registration). F: 5 core specifications remain. Refresh source SHAs before each translation.
+- E: 7/8 core specifications have bilingual companions; the remaining source scope is Forget Fence and Derived Registration. F: all 5/5 detailed core specifications are paired in PR #28; independent semantic review remains pending.
 - E Compiler, ingestion, extraction, evidence, consolidation.
-- F retrieval, activation, working set, scheduling, anti-resurrection.
+- F retrieval, activation, working set, scheduling, anti-resurrection: 5/5 detailed bilingual pairs present in PR #28; semantic review pending.
 - Acceptance: Accepted/Compiled/Canonical Committed/Indexed remain distinct; cursor and Forget semantics stay aligned.
 
 ### Batch 5 — Context and Agent boundary / 第五批：上下文与 Agent 边界
