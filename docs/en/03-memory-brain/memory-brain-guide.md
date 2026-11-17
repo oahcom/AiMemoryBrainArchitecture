@@ -110,12 +110,12 @@ Cross-module execution is divided by owner:
 
 ## 10. Detailed D source specifications
 
-- [Memory Brain Overview](../../../03-memory-brain/memory-brain-overview.md)
-- [Canonical Memory Store](../../../03-memory-brain/canonical-memory-store.md)
-- [Memory Lifecycle Manager](../../../03-memory-brain/memory-lifecycle-manager.md)
-- [Entity and Relationship Manager](../../../03-memory-brain/entity-and-relationship-manager.md)
-- [Memory Versioning](../../../03-memory-brain/memory-versioning.md)
-- [Forget Fence and Completion Contract](../../../03-memory-brain/forget-fence-and-completion-contract.md)
-- [Canonical Commit Cursor Semantics](../../../03-memory-brain/commit-cursor-semantics.md)
+- [Memory Brain Overview](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/memory-brain-overview.md)
+- [Canonical Memory Store](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/canonical-memory-store.md)
+- [Memory Lifecycle Manager](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/memory-lifecycle-manager.md)
+- [Entity and Relationship Manager](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/entity-and-relationship-manager.md)
+- [Memory Versioning](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/memory-versioning.md)
+- [Forget Fence and Completion Contract](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/forget-fence-and-completion-contract.md)
+- [Canonical Commit Cursor Semantics](https://github.com/oahcom/AiMemoryBrainArchitecture/blob/session-d-memory-brain-2026-11-16/03-memory-brain/commit-cursor-semantics.md)
 
 This guide makes the responsibility boundaries and critical invariants readable; it does not claim the atomic storage operation or end-to-end Forget behavior has been implemented or verified.
