@@ -103,3 +103,37 @@ PR #113 merged the two already-published Session 1/2 report files from current m
 - Across the original 76-row tracked inventory, #94/#108/#109 are now merged; #112/#113 were recovery/branch synchronization PRs outside that original inventory and did not alter main application architecture.
 - Current tracked classification: DRAFT_ACTIVE 48; BLOCKED_BY_DEPENDENCY 10; STALE_UNCERTAIN 5; ARCHITECTURE_CONFLICT 4; NEEDS_REBASE 2; SECURITY_REVIEW_REQUIRED 2; READY_AFTER_REVIEW 2; MERGED_REVIEW_GAP 3.
 - No new merge into main occurred in this checkpoint; #94 targets the C Owner branch only.
+
+## Additional Owner-branch merges discovered in live closed-PR census — 2026-11-18
+
+These 11 PRs were already closed/merged in the current GitHub state. They target non-main Owner/runtime/research branches and do not advance main directly. The formal PR review API returned zero submitted review records for every one of them.
+
+| PR | Target branch | Merge SHA | Merged UTC | Review evidence |
+|---|---|---|---|---|
+| #32 | `infra/ai-run-003-runtime-plan` | `4d2145b778d12a474a73313e722ec07ded83c467` | 2026-11-17T18:51:51Z | No submitted review records |
+| #33 | `infra/ai-run-003-adr-run-002` | `362e3a55959aa4c3ce4e751cae0bbeaba0db811e` | 2026-11-17T18:50:57Z | No submitted review records |
+| #34 | `infra/ai-run-003-adr-run-003` | `b2b4fe1a20750d5cad66b5485f920edd63b57f6e` | 2026-11-17T18:51:47Z | No submitted review records |
+| #35 | `infra/ai-run-003-adr-run-004-005` | `44626eade4862ea2c903c77064745da8021eb82f` | 2026-11-17T18:50:50Z | No submitted review records |
+| #51 | `review/arch-consol-001-system-wide-2026-11-17` | `f117bbdcdd3d25937e78abb4c619f654584e8492` | 2026-11-17T18:51:55Z | No submitted review records |
+| #54 | `review/arch-consol-002-protocol-alignment-2026-11-17` | `044f84f204463ac5a974b0d40129e76fe5ce0dc9` | 2026-11-17T18:51:03Z | No submitted review records |
+| #66 | `session-d-memory-brain-2026-11-16` | `7e6d0b133dae88f442665e7b05a54060e047647e` | 2026-11-17T18:51:18Z | No submitted review records |
+| #68 | `session-i-security-governance-2026-11-16` | `ea949896f891f0a08ef5fe9358edadc8a49e546f` | 2026-11-17T18:51:22Z | No submitted review records |
+| #71 | `session-storage-consistency-forget-atomicity-2026-11-16` | `f6887cc9ea5bfa5293c1bc47e9f10e582830cba3` | 2026-11-17T18:51:26Z | No submitted review records |
+| #72 | `design/chatgpt-native-execution-model` | `890fba6185c655d9e6e99ca2a7e9cf1e9b6e62e7` | 2026-11-17T18:51:10Z | No submitted review records |
+| #92 | `research/tech-reality-001-c` | `69783fea3507ac9913ab4eae75441e4232fa017d` | 2026-11-17T18:51:14Z | No submitted review records |
+
+These are recorded as `MERGED_REVIEW_GAP`, not as approved architecture decisions. Retrospective Owner/independent review is required to establish whether the merged branch content is acceptable, still proposal-only, or needs corrective follow-up.
+
+## Main merge — PR #110 Session 4 research publication
+
+| PR | Target | PR head | Merge SHA | Merged UTC | Review/check evidence |
+|---|---|---|---|---|---|
+| #110 | `main` | `5f42acb1391a06703f9aa1a7b615f4dd62d5cbea` | `4a0acc1608f0909bafb64ac90f0a724b8223d546` | 2026-11-17T18:56:12Z | Only author-account COMMENTED review on earlier head `ab6b5c2...`; no combined status contexts or PR workflow runs on merge SHA |
+
+PR #110 is merged into main. Its report contains the corrected Issue #41 boundary and connector distinction, but the merge did not satisfy the independent-review evidence requirement. The merge is irreversible; retrospective independent review and governance disposition are required before relying on its recommendations. Current main HEAD is now `4a0acc1608f0909bafb64ac90f0a724b8223d546`.
+
+## Rebase and recovery package normalization
+
+- PR #111 was replayed onto current main `4a0acc1608f0909bafb64ac90f0a724b8223d546` without changing its report blob. New head: `9a7ba7ac8cfc6d3de0d732bb7e677ff2288a4ca5`; compare: 1 commit ahead / 0 behind; one report file only. No status/check evidence or independent approval.
+- PR #105 recovery package was compacted/rebased onto the same main commit. The eight artifact files were preserved and the branch history was reduced to a single new commit at the time of rebase; later evidence updates may advance its self-referential head. No application or architecture files are changed by #105.
+- Current live portfolio after #110 merge: **61 Open = 60 Draft + 1 Ready (#111)**; all 61 open PRs target main. The 76-row inventory consists of 61 Open and 15 Merged.
