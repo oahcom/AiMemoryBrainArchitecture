@@ -1,9 +1,9 @@
 # Phase 3.8.6 — I Review of CSubmitOutcome 1.0.0 Crypto Binding
 
 - Owner: I — Security, Identity and Governance
-- C schema: `urn:aimba:schema:c-submit-outcome:1.0.0`, Blob `09725d3a90e4c130b38400e8e2d613f755f3806a`
-- C projection proposal: Phase 3.8.8 current Blob `a0e38c781d8aa2da5242dfce121e74b5141663d8`
-- C schema/conformance contract: Phase 3.8.9 Blob `eac5a6b02405aa554bd53095303e364bf25479de`
+- C schema: `urn:aimba:schema:c-submit-outcome:1.0.0`, Blob `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c`
+- C projection proposal: Phase 3.8.8 current Blob `06d9264124d85896ccd44ef7789d9af245d8255b`
+- C schema/conformance contract: Phase 3.8.9 Blob `3a3f4e6be9537faa919dd54650c81cb8a08345c0`
 - Prior I governance disposition: Phase 3.8.5 Blob `41fc0f508ae75e8c16012966160e9e2a1e368881`
 - Status: **STRUCTURAL CRYPTO BINDING ACCEPTED WITH CONDITIONS; PROFILE REGISTRATION NOT APPROVED**
 - Provenance: delegated I-role simulation at user's direction; not independent human I Owner approval.
@@ -82,3 +82,8 @@ Required next vectors:
 **ACCEPT STRUCTURAL CRYPTO BINDING AS A CANDIDATE; DO NOT REGISTER OR DEPLOY.**
 
 I has not approved the C profile, C trust root, key custody or production use. No signature verification, cross-language execution, key lifecycle drill or production readiness is claimed.
+
+
+### 4.1 Additional schema fields
+
+The reviewed schema revision also requires `OwnerSignatureRef`, binding the owner-signature evidence reference separately from the inline `key_id_ref`, `key_version` and `signature`. It permits `ActualInferenceRequestId` where the provider/runtime assigns a real request identifier. H must compare both fields when the corresponding wire member is present and must not infer an actual request ID from a local attempt identifier.
