@@ -1,6 +1,7 @@
 """TEST-profile reference validators for unified BMCP manifest 1.2.9."""
 import hashlib
 import json
+import re
 
 VALID, INVALID, UNKNOWN = "VALID", "INVALID", "UNKNOWN"
 
@@ -37,6 +38,31 @@ def member_key(m):
     return ("9","")
 
 
+def validate_owner_snapshot(snapshot, owner):
+    fields={
+      "I":{"receipt_issue_high_water","receipt_consume_high_water","inventory_epoch_ref",
+           "registry_snapshot_digest","relevant_entry_set_root"},
+      "D":{"producer_registration_high_water","work_item_high_water","attempt_high_water",
+           "barrier_generation","barrier_root"},
+      "C":{"reservation_high_water","provider_attempt_high_water","provider_outcome_high_water"},
+    }
+    if owner not in fields or snapshot.get("owner")!=owner:
+        return INVALID
+    values=snapshot.get("owner_specific_high_waters")
+    if not isinstance(values,dict) or set(values)!=fields[owner]:
+        return INVALID
+    if any(not isinstance(v,str) or not v for v in values.values()):
+        return INVALID
+    for name,value in values.items():
+        if name.endswith("digest") or name.endswith("_root"):
+            if not re.fullmatch(r"[0-9a-f]{64}",value):
+                return INVALID
+    expected=td("OWNER-SPECIFIC-HIGH-WATERS",values)
+    if snapshot.get("owner_specific_high_waters_digest")!=expected:
+        return INVALID
+    return VALID
+
+
 def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=None, complete=True):
     if not complete:
         return UNKNOWN
@@ -49,6 +75,9 @@ def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=
             return INVALID
         if not s.get("ledger_available") or not s.get("pagination_complete"):
             return UNKNOWN
+        snapshot_result=validate_owner_snapshot(s,owner)
+        if snapshot_result!=VALID:
+            return snapshot_result
     members=m.get("manifest_members")
     if not isinstance(members,list) or members != sorted(members,key=member_key):
         return INVALID
