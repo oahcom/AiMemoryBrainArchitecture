@@ -18,16 +18,16 @@ A branch SHA is a source snapshot identifier, not an approval signal. A translat
 
 ## 2. Audited Owner branches / 已审查 Owner 分支
 
-The audit below checked the core Markdown specifications in each module directory for Chinese content. The listed core files were English-only at the inspected branch heads. Phase-specific reports/addenda may contain bilingual sections and must be assessed individually; they are not counted as completed merely because one addendum is bilingual.
+The audit below checked the core Markdown specifications in each module directory for Chinese content at the exact historical Owner branch heads listed in the table. Those source-branch snapshots are intentionally preserved as audit evidence; the separate PR #28 companion status is recorded in Section 3 below. Phase-specific reports/addenda are not counted as completed merely because one addendum is bilingual.
 
-以下审计检查各模块目录中的核心 Markdown 规范是否包含中文。所列核心文件在检查时的分支 HEAD 上均为英文版本。阶段性报告/补充文件可能含有双语章节，必须逐份评估；不能因为其中一份补充文件是双语，就将整个模块标记为完成。
+以下审计是在表中列明的历史 Owner 分支精确 HEAD 上检查各模块核心 Markdown 规范是否包含中文。为保留审计证据，表中源分支快照状态不被改写；PR #28 中双语对应文件的当前状态另见下文第 3 节。阶段性报告/补充文件必须逐份评估，不能因为其中一份补充文件是双语，就将整个模块标记为完成。
 
 | Owner | Branch | Inspected head SHA | Core English-only specs | Bilingual status |
 |---|---|---|---:|---|
 | B — Domain Model | session-b-domain-model-phase3 | 0df144ae25c2039c9934395fc88b2d17080eb119 | 10 Phase 3 identity/typed-reference/ADR artifacts | Core six main source specs paired; Phase 3 extensions pending |
-| D — Memory Brain | session-d-memory-brain-2026-11-16 | 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3 | 8 | 7/8 core specs paired; large operation/publication gate pending |
+| D — Memory Brain | session-d-memory-brain-2026-11-16 | 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3 | 8 | Historical source-branch audit only; PR #28 now contains 8/8 bilingual companions |
 | E — Memory Compiler | session-e-memory-compiler-2026-11-16 | a1b8ba129ef7d5f4463bd4229667f0b2bf6d9886 | 8 | 2/8 core specs paired; 6 remain |
-| F — Memory Runtime | session-f-memory-runtime | 348b5ec84c44a8a067122ce0aa72a594b9c06b66 | 5 | NOT STARTED — core contracts |
+| F — Memory Runtime | session-f-memory-runtime | 348b5ec84c44a8a067122ce0aa72a594b9c06b66 | 5 | Historical source-branch audit only; PR #28 now contains 5/5 bilingual companions; semantic review pending |
 | G — Memory Context | session-g-memory-context | 69ba55c5ffd473ced1ccb569e9bbf7fea48566aa | 6 | NOT STARTED — core contracts |
 | C — Agent Integration | session-c-agent-integration-2026-11-16 | 0f1df3b9c8bdfbb7991cd9e18842c56c521665c4 | 10 | NOT STARTED — core contracts |
 | H — BMCP Protocol | session-h-bmcp-protocol | 8150a450c73d59eba9b81f6aae30e28ab0d7a0e0 | 7 | NOT STARTED — core protocol contracts |
@@ -38,15 +38,15 @@ The audit below checked the core Markdown specifications in each module director
 
 **审计限制：** 上述数量仅统计按模块目录筛选的核心 Markdown 规范，不包括阶段报告、变更日志、基线提案、Python 参考模型和 Schema。它们不是仓库全部架构文件的总数。
 
-## 3. Translation progress / 当前翻译进度
+## 3. PR #28 companion status / PR #28 双语对应文件状态
 
 - System-level specifications: paired for the current source set.
 - B main Domain Model specifications: 6/6 paired; Phase 3 typed-reference/identity addenda and ADR-001 remain pending.
-- D Memory Brain core specifications: 7/8 paired; the large operation-level Forget Fence/publication-gate contract remains pending.
+- D Memory Brain core specifications: 8/8 bilingual companions present in PR #28, including the four-part operation/publication gate. Source-branch reconciliation and semantic acceptance remain pending.
 - E Memory Compiler core specifications: 7/8 paired; Compiler Overview, Event Ingestion, Extraction/Normalization, Consolidation/Conflict Resolution, Evidence/Provenance, Accepted Receipt and Producer Admission are paired. Only Forget Fence/Derived Registration remains.
-- F/G/C/H/I detailed core specifications: not yet paired.
+- F Memory Runtime: 5/5 detailed core specifications paired in PR #28; independent semantic review pending.\n- G/C/H/I detailed core specifications: not yet paired; reader guides only.
 
-All translated Owner documents retain their exact source blob SHA. Refresh branch HEAD and re-read source files before translating remaining artifacts.
+All translated Owner documents retain their exact source blob SHA. Refresh branch HEAD and re-read source files before translating remaining artifacts. Pair presence is not semantic approval or source-branch integration.
 
 ## 4. Migration order / 迁移顺序
 
