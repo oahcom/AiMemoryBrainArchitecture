@@ -96,16 +96,16 @@ This is a material blocker clarification: PostgreSQL CI capability evidence does
 
 ## 7. Exact RecoveryJoin, bidirectional Owner Admission join and H CI evidence refresh
 
-- Storage controlling bidirectional JoinProof contract: `reviews/storage-consistency/phase-3.6.11-storage-bidirectional-coc-owner-admission-join-proof.md`, Blob `d5a84aa22e90d7b8689b23cd8af2fc82125368c4`.
+- Storage controlling bidirectional JoinProof contract: `reviews/storage-consistency/phase-3.6.11-storage-bidirectional-coc-owner-admission-join-proof.md`, Blob `155b0d613dc785f9f5904e4509cfce1ed06a2f0d`.
 - Storage COC protocol v3.2.2 companion: `reviews/storage-consistency/phase-3.6-coc-durable-log-and-recovery-protocol-storage-design-v3.2.2.md`, Blob `ce3c41adf826a622a3717eca481b5d53e6549196`.
-- Storage exact review / topology disposition: `reviews/storage-consistency/phase-3.8.2-storage-exact-review-and-topology-disposition.md`, Blob `9d5aa6cc08cdf9230296c362d1aa44804a92afbe`.
+- Storage exact review / topology disposition: `reviews/storage-consistency/phase-3.8.2-storage-exact-review-and-topology-disposition.md`, Blob `6c0ca46dfdb2d3b142c1796ae44b0cc23f67bf0a`.
 - Storage topology ADR: Blob `080433f8e13a500522bc2754da64057edb0ae9d8` — **ADR-BLOCKED / NO TOPOLOGY SELECTED**.
 - H RecoveryJoin schema 1.0.0: Blob `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
-- H semantic validator contract: Blob `6f66a72a2d0aa43af338ff9e22d650d47aa2bd80`.
+- H semantic validator contract: Blob `e38ab74d29ded66987d3295503b6f717b6cd83e6`.
 - HRC/JPF suite: Blob `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
 - H Wire suite: Blob `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
 - H Schema integrity suite: Blob `67aba74c120f2916d768e7b01c45408ee2624f3a`.
-- H CI run [44041395001](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041395001), commit `b4d7ed2798fcd6514892ac91d8f3ae6c06f0a338`: **66/66 PASS**, candidate reference suite only.
+- H CI run [44042074640](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041395001), commit `fb9a2ab8b528c2b7010d935372f76a14d6676755`: **66/66 PASS**, candidate reference suite only.
 - C delegated exact RecoveryJoin/provider-side-effect review: Blob `a7b57bd5531222559666f0f1d9df59a259cde61a`; provider implementation remains unverified.
 - I recovery-cutoff wire-authority review: Blob `5a95e1764c3fb812046c8f725a3dd325d9385b17`; that review is **CANDIDATE / NO I WIRE APPROVAL** for its exact 1.0.1 target and does not approve RecoveryJoin 1.0.0.
 
@@ -136,3 +136,10 @@ C has published a protocol-boundary review of H unified schema 1.2.5 (C review B
 ## 11. H schema 1.2.7 signature-profile persistence / H Schema 1.2.7 签名配置持久化
 
 Storage exact review now includes the signature-profile boundary (current Storage review Blob `b12d73f0c48aff0b1a339902c29beabcf6aec530`). H schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`; H review Blob `8bed0b05cd631014bf5af7cb5a8dafdd932940e9`. Storage may persist and digest-bind the exact profile reference, but I alone resolves trust/key status; Storage cannot authenticate or choose a profile. Current H 66-case CI does not cover schema 1.2.7. Physical D/Storage topology remains ADR-BLOCKED.
+
+
+### 7.1 H expanded suite scope refresh
+
+The latest H candidate inventory is 93 methods: HRC-01..25, JPF-01..19, WIRE-01..10, SCHEMA-01..12, TPH-01..26 and XLANG-01. The 26 TPH vectors exercise the reference-model Batch/Manifest two-record digest/order/readback/fenced-restore contract. XLANG-01 compares Python and Node.js outputs over three fixed HRC-TEST-v1 canonical UTF-8/digest vectors. GitHub Actions run 44042074640 reports 93 tests, OK, with Node.js 22 configured.
+
+This is a candidate reference-model/differential test pass only. It does not execute a production COC quorum, authoritative owner ledgers, I signatures/key registry, Storage JoinProof persistence, owner currentness CAS, physical JF-10 or actual D/Storage topology. HRC-TEST-v1 remains non-production. Storage freeze remains BLOCKED.
