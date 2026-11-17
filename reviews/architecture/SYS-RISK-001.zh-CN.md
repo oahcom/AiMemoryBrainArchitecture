@@ -786,3 +786,62 @@ R-08 继续为 **High / PARTIALLY SPECIFIED；部署执行 NOT PROVEN**。已有
 
 **关闭状态：NOT CLOSED。** 不声称生产 Authorization、Publication 或 Provider-egress Race-freedom。
 
+
+
+## 23. R-09 实时生产部署、灾难恢复与运维就绪审查 — 2026-11-18
+
+### 23.1 当前精确来源锚点
+
+| 来源 | Blob | 观察到的决议/状态 |
+|---|---|---|
+| A COC Deployment Architecture | a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d | A 提案；C/I/D/H/Storage 精确采纳待定；3 Voter/3 Failure Domain Quorum 是目标，不是已部署基础设施 |
+| A JF-10 Deployment Binding Record | c54c21321c8a115f3ea4b6bfed19a96cac8ccffe | 所有项目部署绑定字段 NOT DESIGNATED；Gate A 实际部署绑定 OPEN；Gate B/C 阻塞；JF-10 P0 OPEN |
+| Storage Deployment Readiness | ef4eff1708e4bd6072b86cc234340dd848bb5fbc | 逻辑部署 Profile 已选；PostgreSQL 18.7 CI Candidate 已验证；生产 Canonical Authority Deployment NOT DESIGNATED |
+| A Physical Race/Crash/Failover/Restore Matrix | 29125b89ddf47af4c358c0cddbd5c3d6077e1f53 | 必需物理测试计划 NOT EXECUTED；无 Physical Conformance PASS |
+| I Retention/Backup/Physical Erasure Policy | f14cb2149ca3f817229533005ab89dbdc7f0b3a8 | Global Governance Contract Candidate；D/E/F/G/H 实现与 External Recipient Proof OPEN |
+| A Restore Integration Acceptance | fa5e066a208a64401c96a6b8790d8b53dc7f1585 | 有条件接受四 Proof Restore 架构与 Owner-local Release Gate；生产 Proof API/Orchestration 未实现 |
+| A Restore Owner Matrix | 3b488ae3a7cf9aca9a70a659aba09ecba53ce17f | 架构有条件接受；实现未实现；Gate A Design Conditional Pass；Gate C 延后 |
+
+### 23.2 架构/候选层面已经选择的内容
+
+- Storage 逻辑实现选择每个 Canonical Authority Boundary 一个 Transaction Domain，以 PostgreSQL SERIALIZABLE 为目标隔离级别；Fence/Admission/Dependency/Visibility/Outcome 在同一事务中写入；使用 Prepared-XID Recovery、Authoritative-primary Read Path 和 Private Artifact Staging。
+- PostgreSQL 18.7 仅被选为固定 CI Capability Candidate Image（Digest 已记录）。物理 CI 覆盖 Prepared-XID、Synchronous Standby Promotion、Same-XID Commit/Rollback、Physical Backup/Restore、PITR、Stale-control Replay、Required-standby-unavailable Fail-closed 和 pg_rewind/Rejoin。
+- COC 提案规定单一逻辑 Append-only Quorum Log，目标拓扑为三个独立 Failure Domain 的三个 Voter、Quorum 为二，Minority Partition 不允许写入。Storage 是拟议 Custodian；激活前必须确认真实部署位置、持久性、备份和 SLO。
+- Restore 架构有条件接受四种独立 Owner Proof（COC Prefix、I Control High-water、D Forget/Lineage High-water、Storage Participant/GID Ledger），并以 RECONCILED_BUT_FENCED 开始。任何 Proof 不能替代其他权威。
+- 项目已明确修正阶段：生产 Runtime/DB Adapter 实现按设计延后到 Engineering Phase。架构仓库没有生产代码本身不是设计缺陷，也不是架构阶段 Gate A 前置条件。
+
+### 23.3 未解决的架构与运维决策
+
+**R09-1 — 尚无部署绑定或责任 Operator。** A Binding Table 仍将 Canonical Authority Service Name、Environment、Accountable Service Owner、Production Operator/On-call、精确 Database Build/Image、Configuration、Primary/Standby Topology、Failure Domain、Participant Adapter、D/I Integration、COC Quorum、Authoritative Read Path、Fencing、Backup/Restore Procedure、RPO/RTO 和 Runbook 标记为 NOT DESIGNATED。这不是要求现在加入生产代码，而是说明尚无真实部署或运维责任批准。
+
+**R09-2 — COC Consensus Target 不是实际拓扑。** 三 Voter/三 Failure Domain/Quorum 二是目标架构。尚未指定 Cloud/Account/Region/AZ/Host Placement、Failure Independence、Network Partition Policy、Operator、Quorum Witness、Disk Durability Class 或生产 COC Service。Raft 仍是选项，不是已 Pin 的实现。
+
+**R09-3 — PostgreSQL 18.7 是 CI Candidate，不是生产 DB 选型。** Storage 明确区分 Candidate Engine Capability 与 Production Canonical Authority Deployment。尚未指定生产 DB Build/Config、Schema Migration、实际 DB Adapter、Live Primary/Standby Routing、Authoritative Read Service、Production STONITH/Fencing 或 Split-brain Arbitration。双节点 CI Promotion/pg_rewind Probe 不是生产 HA Manager 或 Cloud Fencing 证明。
+
+**R09-4 — RPO/RTO/SLO/Capacity 未获批准。** A Restore Acceptance 将 RPO 0 限定在指定同步持久性故障模型，不覆盖相关的全 Cluster/Site Loss；数值 RTO TBD。Storage 将 Throughput、Manifest/Transaction Size、Lock Wait、Prepared-XID Age/Volume、WAL Rate、Archive Bandwidth、Restore Duration、Service SLO 和 Sizing 保留为 TBD，等待代表性负载测试。没有具备责任批准人的 SLO/SLA 或恢复目标。
+
+**R09-5 — Backup/DR Custody 和 Physical-erasure Policy 仍是候选。** I 的 Forget/Retention/Backup/Physical Erasure Policy 仍为 Global Governance Contract Candidate。Backup Inventory、Off-site Immutable Archive、独立 Control-ledger Custody、Retention Class/Expiry、Jurisdiction/Data Residency、Key Custody/KMS/HSM、Object-store ACL、External Recipient Guarantee 和 Physical-erasure Evidence 尚未批准为运维服务。CI PITR 仅证明固定 Fixture。
+
+**R09-6 — Operational Control 是要求，不是已部署控制。** COC Architecture 要求独立 Operator Role、Append-only Admin Audit、Restore/Rollback/Key-compromise 双人批准、Encryption、Metrics 和永不自动过期的 Unresolved Participant。尚未指定 Named On-call、职责分离名单、Incident Escalation、Restore Runbook、人工交接演练、Key Ceremony 或 Disaster Exercise。
+
+**R09-7 — 物理集成符合性仍延后。** A 的 36 项 Matrix 明确 NOT EXECUTED / NO PHYSICAL CONFORMANCE PASS。H Candidate Suite 和 Storage Engine Capability Probe 不是 D/E/I/COC Application-path Test。Gate C 按计划延后到实现阶段。没有测试 COC 三 Voter 与 Primary/Standby/Backup/Control-plane 依赖同时丢失的相关灾难。
+
+### 23.4 阶段感知结论
+
+R-09 为 **High / PARTIALLY SPECIFIED；PRODUCTION READINESS NOT PROVEN**。阶段修正确实重要：生产 Runtime 缺失是有意延后，不应当作架构仓库的缺陷。但目标拓扑、持久性/故障假设、RPO/RTO、Retention、Data Residency、Operator Ownership、Backup Custody 和 Release Gate 仍需明确决议，或正式接受为 Engineering-phase 前置条件。当前证据支持逻辑/CI 候选 Profile，不支持生产部署就绪结论。
+
+架构设计可保留 IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE，但不得声称 Production-ready、Production-deployed、Operationally Accepted、DR-certified 或具备 Physical-erasure 能力。
+
+### 23.5 关闭条件
+
+1. A/Storage/I 记录最终架构阶段 Deployment Profile：单 Authority DB Transaction Boundary、PostgreSQL Candidate 理由、COC Topology/Failure Model、Backup/Control-ledger Independence、Restore Quarantine 和 Owner-local Release Condition。
+2. Storage/Infrastructure 明确接受三 Voter Placement/Failure-domain Model，或发布带实际 Quorum/Fencing 语义的后继拓扑。没有独立 Failure-domain 证据，不得笼统声称“三个 Zone”。
+3. 由 Named Service Owner 和 Risk Approver 批准 RPO/RTO/SLO/Capacity Envelope；区分 Single-node、One-zone、Region Loss 和 Correlated Total-cluster Loss。
+4. I/Legal/Privacy 批准 Retention Class、Legal Hold、Data Residency、Backup Expiry、External Recipient Policy、KMS/Key Lifecycle 和 Physical-erasure Promise。未批准的承诺不得纳入范围。
+5. 生产激活前指定 Accountable Engineering/Service Owner、Operator/On-call 和 Privileged Operation 双人职责；批准 Incident、Restore、Key Compromise 和 Split-brain Runbook。
+6. Engineering Phase 绑定精确 Application Repo/Commit、DB Adapter/Schema/Migration、COC Service、I/D Service、Image/Config Digest 和 Authoritative Read Path；随后执行 A 的 36 项物理测试及生产 DR/Failure-domain 演练。
+7. 独立测试 Full-cluster/Region Loss、COC Quorum Loss、DB/COC 同时恢复、Stale Checkpoint、Backup Archive Gap/Corruption、KMS/Key Loss/Rotation、Operator Error、Old-primary Rejoin 和 Read Enablement 前 Control-ledger Replay。
+8. Gate A Design、Gate B Design Acceptance 必须与 Implementation Gate A、Gate B Deployment、Gate C Physical Conformance 和 Production Activation 分开。CI Engine Capability 结果不能替代。
+
+**关闭状态：** 仅架构候选 Profile；生产部署/运维 NOT DESIGNATED；Production Activation NOT AUTHORIZED。
+
