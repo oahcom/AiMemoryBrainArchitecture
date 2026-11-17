@@ -100,6 +100,23 @@ class CProviderOutcomeCryptoCandidateTests(unittest.TestCase):
             capture_output=True, text=True, encoding="utf-8"
         )
         self.assertEqual(self.outputs, json.loads(proc.stdout))
+        summaries = []
+        for output in self.outputs:
+            p0_bytes = output["p0_canonical_utf8"].encode("utf-8")
+            signed_bytes = output["signed_projection_canonical_utf8"].encode("utf-8")
+            preimage = bytes.fromhex(output["signature_preimage_hex"])
+            summaries.append({
+                "id": output["id"],
+                "p0_sha256": hashlib.sha256(p0_bytes).hexdigest(),
+                "payload_digest": output["digest"],
+                "signed_projection_sha256": hashlib.sha256(signed_bytes).hexdigest(),
+                "signature_preimage_sha256": hashlib.sha256(preimage).hexdigest(),
+                "public_key_hex": output["public_key_hex"],
+                "signature_base64url": output["signature_base64url"],
+            })
+        print("C_CRYPTO_EXPECTED_BEGIN")
+        print(json.dumps(summaries, separators=(",", ":")))
+        print("C_CRYPTO_EXPECTED_END")
 
 
 if __name__ == "__main__":
