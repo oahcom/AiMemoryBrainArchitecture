@@ -383,3 +383,28 @@ GitHub Actions run [44042074640](https://github.com/oahcom/AiMemoryBrainArchitec
 The TPH vectors cover the two-record ContentDigest → BatchDigest → ManifestRecordDigest relationship, exact Batch/Manifest backlinks and prefix, ordering, counts, quorum/readback UNKNOWN behavior, owner release digest/currentness, and fenced restore states. XLANG-01 compares fixed canonical UTF-8 and test-domain digest outputs from independent Python and Node.js implementations. Both remain TEST-PROFILE evidence only.
 
 Storage's bidirectional JoinProof disposition is unchanged: logical contract accepted with enumerated amendments; live source enumeration, durable JoinProof append/readback, owner-local currentness CAS, physical JF-10 and topology remain OPEN.
+
+
+## 19. H 95-test run including unified schema 1.2.7 structural vectors
+
+The latest H Recovery Cutoff candidate suite now has **95 methods**:
+- HRC-01..25: 25;
+- JPF-01..19: 19;
+- WIRE-01..10: 10;
+- SCHEMA-01..14: 14 (the last two inspect unified COC/JF-10 schema 1.2.7 structure/version distinction and signature_profile_id field shape);
+- TPH-01..26: 26;
+- XLANG-01: 1 Python ↔ Node.js fixed-vector differential.
+
+Current exact H pins:
+- H semantic contract: `99ccf2b637b6a87be045ed8342c88b15b8816604`.
+- HRC/JPF suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
+- Two-phase semantic reference / tests: `4c8dcafdb49db5279a1d1190b832a9c6c05d6b67` / `690ab42b4f8f7e61adf38fd7b6006f20cc71a7f5`.
+- Wire / Python-Node differential / Node reference / vectors: `1a4e754ba9bfa57eb973c6d39731e9f89443b323` / `1b32fdf81530353b8bd4571fe6d4f77119a0458b` / `992585d3bc323dc0224d0075ef14abd992980f65` / `cc7e98c729db8d9f615e17a9542b3cb63f459922`.
+- Schema integrity suite: `fa4fc9f7d3bf64a90bc992453b13fc1fb3c11879`.
+- RecoveryJoin schema 1.0.0: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
+- Unified schema 1.2.7 structural target: `e9748a5b904d2b975e47a32a0cbb31de31636854`.
+- Workflow with Node.js 22: `55d877499010f6a776ae432c1fb2a3a31bae5f11`.
+
+Latest run [44042568297](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042568297), H commit `b832679d1143e2806cba30e77dd8d0b240334fdc`, job `133900417567`: **95 tests ran, OK**. The two new schema tests are structural only; they do not enforce signature_profile_id in protected semantic contexts or resolve it through I's trust registry.
+
+This 95-test result is candidate reference-model/schema/wire evidence. It does not prove live COC quorum prefix completeness, owner signature/key status, production semantic adapters, Storage durable JoinProof append/readback, owner-local currentness CAS, physical JF-10, D/Storage topology or production multi-language interoperability. HRC-TEST-v1 remains test-only.
