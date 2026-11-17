@@ -12,7 +12,7 @@ OWNER=os.getenv("OWNER_LABEL","owner-a")
 class WorkerError(RuntimeError): pass
 
 def safe_path(path):
-    if not isinstance(path,str) or not path.startswith(PREFIX) or path.startswith("/") or "\\" in path or "\x00" in path:
+    if not isinstance(path,str) or not path.startswith(PREFIX) or path.startswith("/") or "\\" in path or "\x00" in path or "%" in path or not path.endswith(".md"):
         return False
     parts=path.split("/")
     return all(p not in ("",".","..") for p in parts) and not any(p in (".github",".git","secrets","credentials") for p in parts)
@@ -102,10 +102,13 @@ def run_once():
     ledger=Ledger(os.getenv("WORKER_DB","var/owner-worker.sqlite3"))
     for item in gh.issues():
         n=int(item["number"])
+        candidate_labels={x["name"] for x in item.get("labels",[])}
+        if item.get("pull_request") or OWNER not in candidate_labels or ACTIVE in candidate_labels: continue
         if not ledger.claim(n): continue
         try:
             issue=gh.issue(n)
-            if issue["state"]!="open" or READY not in {x["name"] for x in issue.get("labels",[])}:
+            issue_labels={x["name"] for x in issue.get("labels",[])}
+            if issue.get("pull_request") or issue["state"]!="open" or READY not in issue_labels or OWNER not in issue_labels:
                 ledger.finish(n,"superseded"); continue
             gh.label(n,ACTIVE)
             files=generate(os.environ["OPENAI_API_KEY"],os.getenv("OPENAI_MODEL","gpt-5"),issue)
