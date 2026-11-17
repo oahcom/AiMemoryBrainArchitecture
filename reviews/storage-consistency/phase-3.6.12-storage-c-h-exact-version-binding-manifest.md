@@ -113,8 +113,8 @@ Corroborating C reviews:
 
 C's delegated exact-owner binding decision:
 - Path: `07-agent-integration/phase-3.8.4-c-provider-outcome-exact-owner-binding-decision.md`
-- Commit: `fd245b83865bbf7192e8b24366b89590ade3f3fc`
-- Blob: `1ac84f2b2991e414e2447d16a746ac19328978ed`
+- Commits: `fd245b83865bbf7192e8b24366b89590ade3f3fc` (initial decision), `f756a5beeaa596d1fa6f791a0adbca402206ccbc` (H current-head qualification)
+- Current Blob: `1353572f7d5655e3007b2fb5b3f10066f483e6bb`
 - Decision: **ACCEPT WITH ENUMERATED C-OWNED EXCEPTIONS**.
 - Provenance: assistant-authored role simulation at the user's direction; not an independent human C Owner signature.
 
@@ -140,3 +140,20 @@ Storage's independent cross-check of the C source set confirms the following int
 - No implementation, provider sandbox test, production activation, universal exactly-once, Full Applied or Global Forget Completion is claimed.
 
 This update closes the document-discovery blocker only. It does not close implementation, provider-specific, H-currentness, conformance or final A acceptance gates.
+
+
+## 9. Follow-up — current H branch head and C re-review boundary
+
+H branch `session-h-bmcp-protocol` was resolved to HEAD `80ba6748f4c7442f162102a30cfefacefdec0db9`. Its recursive tree confirms the current schema artifact:
+- Path: `08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.11.schema.json`
+- Blob: `4f1e103ab4b2ac961d77179dba0b65093532ea40`
+- Artifact revision: 1.2.11
+- On-wire protocol-family version declared by the schema: 1.3.0
+
+The exact schema blob was fetched and inspected. It retains the typed union of COC participants and I/D/C owner-local admissions and Provider Outcome enum support. This does not prove semantic validator completeness or provider truth. C's exact-owner decision was amended at Blob `1353572f7d5655e3007b2fb5b3f10066f483e6bb` to state explicitly that C has NOT yet accepted H 1.2.11 as a complete cross-owner bundle. C/H must review the current schema together with the matching semantic validator, signature/canonicalization profile, canonical-byte fixtures and interoperability vectors before wire freeze.
+
+Storage's binding therefore records:
+- C source-discovery blocker: **CLOSED** (exact C source set found and pinned).
+- C delegated semantic decision: **ACCEPT WITH ENUMERATED C-OWNED EXCEPTIONS**, scoped to its exact source set and previously reviewed mapping.
+- Current H 1.2.11 cross-owner acceptance: **OPEN**.
+- Provider-specific implementation/conformance and A final integration acceptance: **OPEN**.
