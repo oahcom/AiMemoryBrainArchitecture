@@ -63,7 +63,7 @@ Storage 拥有 Durable Commit/Visibility 和恢复机制。Option A 仅选择 L1
 ## Live H / D / I / Storage delta / H、D、I、Storage 当前增量
 
 ### H — BMCP / Provider Outcome
-H branch HEAD `0d36324457e39bd50ad56ae902d477c4ea765b61` contains Unified 1.2.15 schema, mapping, local C Provider Outcome validator and Gateway Attestation validator. Exact CI: run 44079842914 = 91/91; run 44079842878 = 288, 22 skipped, 0 failures. A review PR #67 disposition DEFERRED. The bounded tests do not prove production trust, signing issuance, durable replay or live I/D/Storage. C Phase 3.8.27 and I Phase 3.8.23 accept corrected ordering as reference contracts, not production deployment. Storage v3.3.2 still pins H 1.2.14. **Status: local CI PASS; joint wire freeze / production trust OPEN.**
+Historical H ancestor `0d36324457e39bd50ad56ae902d477c4ea765b61` contained Unified 1.2.15 schema, mapping, local C Provider Outcome validator and Gateway Attestation validator. Exact historical CI: run 44079842914 = 91/91; run 44079842878 = 288, 22 skipped, 0 failures. Current H branch HEAD is `0277a8b9ee63be850acc0b8b1b08625524aaa33b`; its latest commit removed these prior schema/validator/test files. A review PR #67 disposition DEFERRED. The bounded tests do not prove production trust, signing issuance, durable replay or live I/D/Storage. C Phase 3.8.27 and I Phase 3.8.23 accept corrected ordering as reference contracts, not production deployment. Storage v3.3.2 still pins H 1.2.14. **Status: local CI PASS; joint wire freeze / production trust OPEN.**
 
 ### D/I/Storage — Phase 3.9 Forget proposal
 D PR #66, I PR #68 and Storage PR #71 propose a common terminalization path:
