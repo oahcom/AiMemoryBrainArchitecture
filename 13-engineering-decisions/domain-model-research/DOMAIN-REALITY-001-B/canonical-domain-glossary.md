@@ -59,6 +59,14 @@
 | Command | 命令 | Protocol or workflow request to perform an operation | Not evidence that operation occurred | H / workflow owner | DECIDED distinction |
 | Receipt | 回执 | Issuer-bound evidence of one declared operation boundary/outcome | Not generic success or stronger downstream proof | Issuing owner | DECIDED distinction |
 | Provider Outcome | Provider 执行结果 | C-owned observed outcome at actual provider/runtime submit boundary | Not request intent, transport ACK or G Applied | C | C-owned |
+| C Origin Signature | C 来源签名 | C-owned signature over exact C message-family P0; proves origin attribution under an approved profile | Not H transport authentication, I authorization or provider truth by itself | C / I trust registry | Candidate; crypto profile not approved |
+| Outer Envelope P0 | 外层 Envelope P0 | Exact canonical projection of serialized H envelope members for digest/signature verification | Not C object P0 or arbitrary JSON serialization | C defines signed semantics; H maps wire; I approves profile | Mapping candidate; executable verification open |
+| Protected Transport Context | 受保护传输上下文 | Verifier-produced context binding authenticated transport sender/session/channel/audience | Not payload sender claim or caller-created struct | H transport; I trust | Reference gate only; production open |
+| BrainAuthorityRef | Brain 语义权威引用 | Reference to canonical Memory semantic authority | Not StorageAuthorityRef or PolicyDomainRef | B / D | Candidate typed reference |
+| SerializationDomainRef | 序列化域引用 | Physical/logical transaction domain for one serialization anchor | Not BrainAuthorityRef or COC domain | Storage / B type boundary | Implementation detail |
+| AuthoritySerializationAnchorRef | Authority 序列化锚点引用 | Physical anchor row identity for one BrainAuthority within a SerializationDomain | Not D Fence, VisibilityPointer or global sequence | Storage / B type boundary | Implementation detail |
+| SerializationTransitionRef | 序列化转换引用 | Stable idempotent identity of one physical serialization transition | Not PublicationOperationId, WorkItemId or XID | Storage / B type boundary | Implementation detail |
+| SerializationRevision | 序列化修订号 | Monotonic physical revision local to one anchor/domain | Not D FenceGeneration, I PermissionEpoch, C sequence, COC position or XID | Storage | Implementation detail |
 | Memory Source | 记忆来源关联 | Typed source association attached to Memory with role/locator/scope | Not necessarily first-class Source entity | B/E | OPEN granularity |
 | Summary | 摘要 | Derived representation or a Memory kind when explicitly canonicalized | Not automatically an independent entity | E/F/G | DEFERRED |
 | Hypothesis | 假设 | Unverified proposed explanation, if the Fact/Claim model adopts it | Not Verified Claim | B/E | DEFERRED pending ADR |
