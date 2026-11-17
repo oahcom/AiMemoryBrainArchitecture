@@ -155,7 +155,7 @@ C schema structural validity and BMCP envelope structural validity are separate 
 
 ## 9. I exact C object crypto review
 
-I Phase 3.8.6 review Blob `a4d0be0e5bbf6122e2d86e59a48e62586869fd23` accepts the C object structure and candidate digest/signature construction only. It explicitly does not register/deploy the profile or approve trust roots/custody. The H implementation must enforce strict UTF-8, duplicate-key rejection, JCS, exact C-P0 field coverage, 86-character Base64url structural screening plus strict decoding to 64 bytes, and the exact message_type domain component. The C test signatures remain placeholders and no cryptographic vector execution is claimed.
+I Phase 3.8.6 review Blob `b2e37b0ba9137f2ef1b9fd65bf815bc136ca28c8` accepts the C object structure and candidate digest/signature construction only. It explicitly does not register/deploy the profile or approve trust roots/custody. The H implementation must enforce strict UTF-8, duplicate-key rejection, JCS, exact C-P0 field coverage, 86-character Base64url structural screening plus strict decoding to 64 bytes, and the exact message_type domain component. The C test signatures remain placeholders and no cryptographic vector execution is claimed.
 
 
 ## 10. Complete optional proof-reference disposition
@@ -186,3 +186,16 @@ Current H validator core: Blob `e8f737326bc4791e8d7acf917b4725dbb7171fad`. H uni
 - H run validates the exact vendored C schema/vector blobs `b5e87fa8df8463cf4cdc1ebc6867e643dcf5924c` and `e14eab2bed41f30af10a073b8e6523512128e78e`, identical to current C branch blobs at the time of the run.
 
 These runs prove only the checked structural/semantic/unit assertions. They do not validate C Ed25519 signatures, registered profile/trust, provider issuer proofs, owner ledger membership, COC quorum, real adapter races or production deployment.
+
+
+## 12. H independent C crypto candidate verification
+
+H executed a second owner-side implementation of the C candidate crypto vectors:
+- Workflow run `44057944517`, exact commit `b8a22cecdf6238c81f08338d30776be250fd69a4`: SUCCESS, 10 tests.
+- H Python verifier Blob `a49d588ea6f840927fe21ad8c41cd8089dceac29`.
+- H Node oracle Blob `c35ddea3ecaf5e452b14fb57fb20327ad80703cc`.
+- H requirements Blob `305d9bf5ae883a16e22dde83d97005f2b0be902e`.
+- H workflow Blob `4050dabce5b02df14b84b500cc6e7236c65457f0`.
+- Exact C candidate expected vectors: `88a16f0d9aaa8a5e46af857c2cd34c2bcedd07ae` and `a4bfe0b431d5e710ac99d604e7b1bce49c044d23`.
+
+H independently recomputed and verified all five candidate signatures, checked all present C-P0 field mutations, and matched Python/Node outputs to the static expected fingerprints. This is candidate-only JCS/SHA-256/Ed25519 construction evidence. It does not register the C profile or authenticate production keys/provider evidence.
