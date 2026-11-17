@@ -70,7 +70,7 @@
 ### SR-003 — Manifest 漏记四个真实 PR 提交（P1）
 - 证据：GitHub PR commits 接口返回 30 个提交，Manifest 仅记录 26 个。缺失 SHA 已在英文部分逐一列出。
 - 影响：Manifest 未完整追溯 PR 实施历史。
-- 修正：将四个缺失 SHA 补入 `implementation_commits`；Manifest 自身最后一次自更新提交无法在自身内容中自引用。
+- 修正：将四个缺失 SHA 补入 `implementation_commits`；Manifest 专属的清单维护提交为避免自引用记账，不纳入 implementation_commits；当前最终 Manifest 自更新提交也按定义排除。其准确 SHA 记录在 Manifest 的 traceability_exclusions 字段中。
 - 状态：**已在本 PR 修正**；验收前仍须对照最新 PR 提交列表复核。
 
 ### SR-004 — Owner 提示词是可复用角色契约，不是完整任务提示词（P2 / 控制项）
