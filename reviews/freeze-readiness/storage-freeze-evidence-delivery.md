@@ -1,0 +1,81 @@
+# Storage — Freeze-Readiness Evidence Delivery / 冻结前证据交付
+
+- Role / Owner: Storage & Consistency
+- Delivery stage: **DATABASE CAPABILITY + LOGICAL-RESTORE EVIDENCE DELIVERED; CROSS-OWNER JF-10 CONFORMANCE OPEN**
+- Freeze disposition: **BLOCKED — GATE A PARTIAL PASS / GATE B NOT ACCEPTED FOR CURRENT REVISION / GATE C DEFERRED**
+- Snapshot branch: `session-storage-consistency-forget-atomicity-2026-11-16`
+- Snapshot HEAD: `5141d93e97acf8bcd6b2abc136574ec78716e964`
+- Provenance: assistant-authored delegated Storage-role delivery at the user's direction; not an independent human Storage Owner signature.
+
+## 1. Executive disposition / 执行结论
+
+Storage has delivered meaningful physical PostgreSQL 18.7 capability evidence for prepared-XID persistence, synchronous failover, ACK loss, unavailable-standby fail-closed behavior, backup/restore, WAL PITR and old-primary fencing/rejoin. The restore high-water logical reference model also has a recorded 25/25 CI pass.
+
+These results qualify a pinned PostgreSQL 18.7 CI capability profile. They do not prove the application-level I/D/COC/C adapters, the integrated JF-10 state machine, a production Canonical Authority deployment, production routing/fencing/monitoring, or an operational restore drill. The current Storage Phase 3.8 visibility contract remains a logical proposal with physical topology and implementation proof open. JF-10 P0 remains open; production activation is not authorized; Multi-PolicyDomain atomicity remains blocked.
+
+Storage 已交付 PostgreSQL 18.7 的真实 CI 能力证据，覆盖 Prepared-XID 持久性、同步故障切换、ACK 丢失、Standby 不可用时 Fail-closed、备份恢复、WAL PITR，以及旧主隔离/回归。Restore High-water 逻辑参考模型也有 25/25 CI 通过记录。
+
+这些结果只证明固定 PostgreSQL 18.7 CI 能力配置，不证明应用层 I/D/COC/C Adapter、集成 JF-10 状态机、生产 Canonical Authority 部署、生产路由/隔离/监控或运维恢复演练。当前 Storage Phase 3.8 Visibility 合同仍是逻辑提案，物理拓扑与实现证明未闭环。JF-10 P0 仍 OPEN；不授权生产激活；Multi-PolicyDomain 原子性仍 BLOCKED。
+
+## 2. Exact evidence register / 精确证据清单
+
+| Evidence | Exact Blob / Run | Result and scope |
+|---|---|---|
+| PostgreSQL 18.7 prepared-XID capability dossier | `0aabf66848dc97deee028c571183c0d7204008c0` | Pinned CI capability profile; not production deployment acceptance |
+| Prepared-XID capability run | [43959079736](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43959079736) | SUCCESS; durable prepared-XID probe |
+| Synchronous failover/promotion | [43908746695](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43908746695) | SUCCESS; prepared-XID standby promotion/recovery |
+| Standby unavailable fail-closed | [43927416496](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43927416496) | SUCCESS; UNKNOWN/private/lock-retention boundary |
+| Old-primary fencing/rewind/rejoin | [43930047054](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43930047054) | SUCCESS; old primary stays fenced and rejoins as standby |
+| Coordinator ACK-gap recovery | [43912857694](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43912857694) | SUCCESS; same-XID coordinator ACK-gap recovery |
+| TCP CommandComplete ACK loss | [43913477785](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43913477785) | SUCCESS; same-XID recovery after real TCP response loss |
+| Physical backup/restore | [43955195219](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43955195219) | SUCCESS; physical restore and stale-control gate fixture |
+| WAL archive PITR | [43955195388](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43955195388) | SUCCESS; point-in-time recovery to explicit LSN |
+| PITR atomicity / archive negative cases | [43958775001](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/43958775001) | SUCCESS; prepared-XID/VisibilityPointer/PublicationReceipt atomicity and negative cases |
+| Restore high-water reference model evidence | `bf991a8a098bfdacc24bace53d452b8ccf2078e6` | 25/25 logical tests PASS; run 43965501810 |
+| Restore high-water test implementation | `a9e1a96b449c6bf0e2b52c5fea394a8c32961a24` | Logical reference tests, not production restore |
+| Storage Batch/Manifest ordering amendment | `1c8c0bc11798293293bcf47fa560f1699a5bcfe0` | Proposed; exact C/H/A review required |
+| Storage exact-version binding manifest v2 | `8688a03c69227284cd00b4110d87019cd346bfb2` | Pins owner-local decisions; A final integration required |
+| Storage Phase 3.8 visibility participant/atomic outcome contract | `175ee7b1349cfdb79a19898b311a88391ed88010` | Logical proposal; physical topology and implementation proof OPEN |
+| JF-10 executable conformance plan | `49056cd46fd30445c0e564c99e0e234f60f065c4` | TEST DESIGN / NOT EXECUTED |
+
+## 3. Storage invariants / Storage 不变量
+
+1. Storage owns durable participant records, isolation/serialization, idempotency, private staging, authoritative VisibilityPointer, visibility outcome proof, outbox commit and crash/failover/restore mechanics.
+2. Storage does not mint D Admission/ForgetFence/PublicationParticipantRef, I authorization/PermissionEpoch/CommitAuthorizationReceipt, C ParticipantIntent/CSubmitOutcome or Global Forget completion.
+3. PrepareVisibility creates an immutable PREPARED_HIDDEN participant bound to PublicationOperationId + tuple digest. D admission must bind the exact persisted Storage participant; I consumes a single-use CommitAuthorizationReceipt bound to the exact D and Storage participant refs.
+4. The final Visibility transaction is the sole visibility linearization point. It atomically verifies Storage PREPARED_HIDDEN, current D participant/fence proof, consumed I CommitAuthorizationReceipt, exact artifact/version/digest, complete dependencies, Scope and current attempt/lease; then commits VisibilityPointer, PublicationReceipt/Outcome and Outbox.
+5. Until that transaction commits, all read paths remain private. Object-store existence, signed URL, cache, index event, queue or outbox delivery is not visibility.
+6. UNKNOWN remains private. NO_PUBLICATION requires positive proof that no pointer exists and no delayed writer/retry/outbox can still publish.
+7. PostgreSQL engine-native numeric XID is not the cross-service identity. A stable client-chosen PreparedTransactionGID binds the exact operation; native XID is observed evidence only. Same-GID recovery and authoritative outcome readback are mandatory.
+8. Restore remains quarantined until database incarnation, prepared participant ledger, I current policy/receipt state, D fence/lineage and COC committed prefix are reconciled.
+
+## 4. What the evidence does not prove / 证据边界
+
+- PostgreSQL 18.7 CI capability success does not prove live I sequencer integration, D fence serialization, C provider egress, COC quorum integration, application VisibilityPointer implementation or independent read-path enforcement.
+- The restore high-water 25/25 suite is a logical model, not a production backup restore or real I/D control-ledger replay.
+- The JF-10 conformance plan explicitly remains NOT EXECUTED; mocks that return expected values are not acceptable conformance evidence.
+- Storage Phase 3.8 is a role-level logical proposal. Actual DB/coordinator topology, isolation profile, read-path enforcement, outbox guarantees, failover/restore topology and cross-service durable prepare/commit remain open.
+- Gate B's older revision `4ac63ac79491e79ec0c9114ef73941c73d7bbf25` was design-level accepted with exceptions; the amended revision `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` remains published and focused exact-owner re-review required, not yet accepted overall.
+- Storage's acceptance of the §14 PreparedParticipantGID mapping with conditions does not imply acceptance of the entire amended COC protocol.
+- Production deployment/operations, named operator, runbook, measured RPO/RTO and multi-PolicyDomain atomicity are not approved.
+
+## 5. Freeze exit criteria / 冻结退出条件
+
+| ID | Required evidence | Current status |
+|---|---|---|
+| ST-FR-01 | Exact COC amended Blob and bidirectional Batch/Manifest + participant joins accepted by A/I/D/C/H/Storage | OPEN |
+| ST-FR-02 | Selected production-equivalent DB/coordinator profile and D/Storage serialization authority | OPEN |
+| ST-FR-03 | Real JF-10 H01–H13 / JF10-01…X-17 cases on the integrated coordinator and DB | NOT EXECUTED |
+| ST-FR-04 | Exact I receipt and D fence verified at actual Visibility linearization point | OPEN |
+| ST-FR-05 | Same-GID recovery, ACK loss, failover, restore and anti-rollback with authoritative reader/bypass probes | PARTIAL — engine capability only |
+| ST-FR-06 | Private staging, object-store ACL and every read/cache/index/outbox path proven hidden on UNKNOWN | OPEN |
+| ST-FR-07 | Production topology, operator, runbook, monitoring, RPO/RTO and restore drill | DEFERRED TO ENGINEERING / OPEN |
+| ST-FR-08 | Multi-PolicyDomain transaction or explicit rejection profile | BLOCKED |
+
+## 6. Storage final delivery statement / Storage 最终交付声明
+
+**Delivered:** pinned PostgreSQL 18.7 capability evidence, logical restore model evidence, exact-version design artifacts and owner-boundary contracts.
+
+**Not delivered:** integrated JF-10 conformance, production Canonical Authority deployment, complete cross-owner COC acceptance, operational restore proof or Multi-PolicyDomain atomicity.
+
+**Decision:** Storage evidence delivery is complete for the database-capability/documentary stage. Storage freeze-readiness remains **BLOCKED** until ST-FR-01 through ST-FR-08 are satisfied.
