@@ -286,3 +286,28 @@ Storage 已发布 v3.3.2，A 已发布 Phase 3.12.2 精确复审：
 This closes one document-consistency conflict only. It does not close any production, governance, runtime or physical-storage gate.
 
 这只关闭一项文档一致性冲突，不关闭任何生产、治理、运行时或物理存储门禁。
+
+
+## 19. B2 semantic closure checkpoint / B2 语义闭合检查点 — 2026-11-18
+
+The B decision record now contains an exact-source B2 checkpoint. It confirms that some semantic distinctions are decided, but the core B2 closure conditions remain open:
+
+B 决策记录现已加入精确来源 B2 检查点。该检查点确认部分语义区分已经确定，但 B2 核心闭合条件仍开放：
+
+- **Fact / Claim:** I-04 requires distinct concepts; whether Fact has independent object identity or is represented as a qualified Claim remains ADR-BLOCKED. C2 is a candidate recommendation only.
+- **Claim identity across MemoryVersions:** I1 (stable Claim identity plus immutable version-local snapshots/revisions) is a candidate, not a decision; I2 remains viable; I3 is deferred.
+- **Typed identity:** B has approved ActorRef / ScopeRef / EnvironmentRef semantic mapping within B's authority; H wire encoding, I trust/policy, registry authority and runtime conformance are not thereby approved.
+- **Scope / Permission:** separation is DECIDED; scope algebra, policy language, inheritance, cached authorization and revocation guarantees remain open.
+- **I36 governance:** Issue #5 remains OPEN; I36-GOV-01..10 remain GOVERNANCE-BLOCKED.
+- **Session / Conversation:** RuntimeSessionRef, Session ScopeRef, Conversation and Agent identity remain distinct; exact canonical relation and consumer mappings remain open.
+
+- **Fact / Claim：** I-04 要求概念区分；Fact 是否具有独立对象身份，还是作为限定 Claim 表示，仍 ADR-BLOCKED。C2 仅为候选建议。
+- **Claim 跨 MemoryVersion 身份：** I1（稳定 Claim 身份 + 不可变版本局部 Snapshot/Revision）仅为候选，不是决策；I2 仍可选；I3 延后。
+- **类型化身份：** B 已在自身权限范围内批准 ActorRef / ScopeRef / EnvironmentRef 语义映射；这不代表 H Wire 编码、I Trust/Policy、Registry 权威或 Runtime Conformance 获批。
+- **Scope / Permission：** 二者分离已 DECIDED；Scope 代数、Policy 语言、继承、缓存授权和撤销保证仍开放。
+- **I36 治理：** Issue #5 仍 OPEN；I36-GOV-01..10 仍 GOVERNANCE-BLOCKED。
+- **Session / Conversation：** RuntimeSessionRef、Session ScopeRef、Conversation 和 Agent Identity 保持区分；规范关系和消费者映射仍开放。
+
+B2 remains IN PROGRESS / NOT PASSED; B4 remains NOT READY. No schema freeze or cross-owner acceptance is inferred.
+
+B2 仍 IN PROGRESS / NOT PASSED；B4 仍 NOT READY。不推断 Schema 冻结或跨 Owner 验收。
