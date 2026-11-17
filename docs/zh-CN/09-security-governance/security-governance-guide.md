@@ -102,3 +102,14 @@ Memory、Evidence、摘要和模型生成的提取结果都是不可信数据，
 验证必须覆盖身份伪造、Delegation 过期/撤销、跨 Scope 拒绝、Permission Epoch 过期、Forget 竞态/故障注入、备份恢复、外部接收方例外以及零未授权泄露。
 
 详细候选治理契约见 [I Owner 分支](https://github.com/oahcom/AiMemoryBrainArchitecture/tree/session-i-security-governance-2026-11-16/09-security-governance)。
+
+
+## 11. Forget 联合契约提案——待 D/I 批准
+
+双语联合契约提案记录于 `14-ai-development/work-items/AID-2026-001/forget-lifecycle-joined-contract-proposal-v1.md`。相关的 [Owner D/I Forget 权责矩阵](../../../14-ai-development/work-items/AID-2026-001/owner-d-i-forget-authority-matrix.md) 同样是提案；在 D 与 I 对同一版本/SHA 明确批准前，两份文件都不具有规范效力。
+
+D 拥有规范 Memory 生命周期、ForgetOperation/Fence 语义及 D 领域完成判定条件。I 拥有认证/授权、隐私/Retention/Legal Hold 策略、跨系统目标清单策略、证据接受标准和跨系统治理评估。I 不得改写 D 的规范状态或判定条件；D 不得豁免 I 的策略或声明跨系统治理合规。每个执行方只报告其能力范围内的动作和证据。
+
+跨系统治理评估独立于 D 领域完成。只有 D 已独立记录 `Completed` 且 I 已记录 `CompliantWithException` 时，才可派生公开展示 `CompletedWithPolicyException`。未知、失败、不支持或未纳入清单的强制目标都会阻止 I 评估为 `Compliant`。Tombstone 或 ACK 均不能证明物理擦除。
+
+**状态：** PROPOSED / 待 D-I 批准 / R3 测试未执行。
