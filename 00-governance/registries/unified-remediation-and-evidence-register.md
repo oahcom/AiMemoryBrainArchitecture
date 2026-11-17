@@ -117,6 +117,8 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 
 | UMR-029 | P0 | Reconcile Storage v2 R1–R6 against current companion protocol and close exact-version gaps | Storage; I/D/C/H/A for their own authority | OPEN — Issues #14/#16 | Session P exact-version audit Blob pending/now published at `00-governance/reviews/storage-v2-r1-r6-coordinator-exact-version-audit.md`; R1/R4 substantially addressed in proposal, R2/R3/R5/R6 remain blocked/conditional. Require exact owner-local linearization, joined C in-flight admission manifest, D per-fence canonical lineage proof, full §14 identity tuple reconciliation, current companion pin 8ac178..., H schema binding to A §§11–12 and independent A/I/D/C/H decisions. No role-simulated review counts as acceptance. |
 
+| UMR-030 | P0 | Close Issue #20 Archive × Forget × Inventory × Restore exact-version owner reviews | D/I/F/E/G/H independently; A integrates; Storage owns realization | OPEN — Issue #20 | Target Storage Blob 6f4b003b0a398c15b1f22a03c612f2c58afa3e7d. Session P created six role-separated review-input artifacts and an A-style integration readiness assessment on P branch only; these are coordinator simulations, NOT independent Owner decisions. D/I/G/H simulated NEEDS REVISION; F/E simulated ACCEPT WITH ENUMERATED CONDITIONS. Require exact Owner artifacts on their own branches, D/I semantic closure, F/E/G local lifecycle/release, H schemas + I security profile, Storage revised bundle and A formal integration. Issue #4 governance and JF-10 P0 remain separate. |
+
 ## 7. Current issue trackers
 
 | Issue | Scope | Current state |
@@ -126,6 +128,7 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 | #15 | Current COC protocol 86ff3... focused review | Open; A/H/I role reviews are coordinator-simulated; no independent exact acceptance. |
 | #16 | Storage Design v2 4ed423... exact review | Open; A/I/H role reviews are coordinator-simulated; D/C exact-v2 decisions absent; P audit identifies R2/R3/R5/R6 and companion pin/schema gaps. |
 | #17 | Prepared GID / JF-10 / signed wire envelope | Open; A conditional with amendments; H/I no approval in role-simulated reviews; independent decisions required. |
+| #20 | Archive × Forget × Inventory × Restore exact-version owner review | Open; six P role-review inputs and provisional A integration assessment published, but independent D/I/F/E/G/H decisions remain NONE; A formal integration decision NOT ISSUED.
 
 ## 8. Required operating sequence
 
@@ -150,3 +153,4 @@ The old 4ac63... acceptance must not be carried forward to 86ff3... or 4ed423...
 
 - 2026-11-17: Reconciled live A–I/Storage branches, exact COC/Applied/context decisions, TAB-001 report coverage, F/H/I model/schema tests and current issue #14–#17 status. Closed UMR-024 at design-decision level; all other active blockers remain tracked above.
 - 2026-11-17: Added UMR-029 and pinned Session P exact-version audit of Storage v2 R1–R6. Re-fetched current companion protocol Blob 8ac178... and identified mismatch with v2 header's 86ff3... pin; no Owner acceptance inferred.
+- 2026-11-17: Added UMR-030 and six role-separated coordinator review inputs plus provisional A integration assessment for Issue #20 exact Blob 6f4b003b...; all are explicitly non-Owner decisions.
