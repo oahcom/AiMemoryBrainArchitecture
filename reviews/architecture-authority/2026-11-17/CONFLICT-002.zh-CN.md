@@ -1,6 +1,6 @@
 # 架构决策冲突登记册 — CONFLICT-002
 
-- 版本：1.0.0；基线 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`。
+- 版本：1.0.0；基线 `6470f25ca23b8d35c06f60be2326867066418d18`。
 - 状态：A 集成裁决；不替代 Owner 领域规范决策。
 
 | ID | 表面冲突/歧义 | A 裁决 | 权威/所需行动 | Gate |
@@ -17,6 +17,10 @@
 | AC-10 | Candidate Schema/Technology 工件与 Freeze 声明 | Candidate 和有限 CI 状态不等于规范冻结或生产符合性 | 对应 Owner/ADR 权威决定；A 要求精确 HEAD 证据 | G1/G2/G5 |
 
 | AC-11 | Storage 拓扑 ADR 保留了“尚未选择方案”的前置补充文字，而 §8 已明确在 L1 层覆盖该文字 | 以 §8 为准：L1 已选择 Option A；§3 历史文字不是当前阻塞，但应明确标记/精简以免产生歧义 | Storage | G1/G5 冻结复审前 | G1/G5 |
+
+| AC-12 | Storage v3.2.9 Manifest 被当作当前版本，但后续 C/D/I Review Pin 和 H CI 已更新 | 候选语义仍一致，但 Manifest 已过期；Storage 发布 v3.3.0/等效版本，C/H/D/I 复审同一 Blob，A 再复审 | Storage + C/H/D/I；A 集成 | G1/G2/G6 |
+| AC-13 | 新 B Identity/Entity 工件可能被误认为领域语义已关闭 | 这些仍为 CANDIDATE/B1 IN PROGRESS；Fact/Claim 仍 ADR-BLOCKED；不得依此冻结下游 Schema | B；I/C/H 消费者 | G2/G3 |
+| AC-14 | Option A 逻辑选择可能被误认为 L1/L2 已完成 | 仅有条件接受 L1 方向；A-01..A-05 和 D 精确采纳仍开放；L2/L3/L4 分离 | Storage/D/I + A | G2/G3/G4/G5 |
 
 ## A 的明确边界
 
