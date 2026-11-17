@@ -134,8 +134,8 @@ class Protocol:
             raise Rejected("exact hidden storage participant missing")
         if self.storage_participants[storage_id][0] != work_id:
             raise Rejected("storage participant belongs to another work")
-        if not request_digest or not owner_boundary:
-            raise Rejected("canonical request digest and owner boundary are required")
+        if not request_digest or not owner_boundary or not final_visibility_gate_id:
+            raise Rejected("canonical request digest, owner boundary and final visibility gate identity are required")
         binding = (
             work_id, storage_id, self.storage_participants[storage_id][1],
             request_digest, owner_boundary, final_visibility_gate_id,
@@ -478,6 +478,14 @@ class PublicationProtocolTests(unittest.TestCase):
         p.register_producer("w", 0)
         with self.assertRaises(Rejected):
             p.create_hidden_storage_participant("s", "w")
+
+    def test_admission_requires_nonempty_final_visibility_gate(self):
+        p = self.prepared()
+        with self.assertRaisesRegex(Rejected, "final visibility gate identity"):
+            p.admit_publication(
+                "publication-without-gate", "work-1", "storage-1",
+                "request-digest-1", "owner-boundary-1", "",
+            )
 
     def test_publication_must_bind_exact_storage_participant(self):
         p = self.prepared()
@@ -835,7 +843,19 @@ class PublicationProtocolTests(unittest.TestCase):
         args = self.consume_i(p)
         wrong = (
             args["auth_id"], args["publication_id"], args["storage_id"],
-            "request-digest-substituted", args["owner_boundary"],
+            "request-digest-substituted", args["owner_boundary"], args["final_visibility_gate_id"],
+            args["d_proof"], args["i_commit_won_proof"],
+        )
+        with self.assertRaises(Rejected):
+            p.mark_unknown("op-1", wrong)
+        self.assertNotIn("op-1", p.private_unknown)
+
+    def test_unknown_binding_rejects_final_visibility_gate_substitution(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        wrong = (
+            args["auth_id"], args["publication_id"], args["storage_id"],
+            args["request_digest"], args["owner_boundary"], "visibility-gate-substituted",
             args["d_proof"], args["i_commit_won_proof"],
         )
         with self.assertRaises(Rejected):
