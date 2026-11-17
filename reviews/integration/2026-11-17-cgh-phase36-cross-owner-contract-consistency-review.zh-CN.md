@@ -58,7 +58,7 @@ G 最新 recovery-batch 修订至少要求：
 
 **严重级别：P1 — 冻结阻塞**
 
-当前 H 源 Blob `0dca3d...` 包含 §11.8，枚举 causal-order、recovery-batch、participant completeness、Owner high-water、I terminal、D lineage/cutoff/effective-position，以及有条件的 Storage same-XID 证据引用。它正确禁止 H 签发或推断 COC、I、D、C Provider 或 Storage outcome，并要求不同顺序域保持独立。
+当前 H 源 Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf` 包含 §§11.8–11.9，枚举 causal-order、recovery-batch、participant completeness、Owner high-water、I terminal、D lineage/cutoff/effective-position、有条件的 Storage same-XID 证据引用、C 签发的 Provider receipt/outcome 引用、participant terminal proof 条件，以及 I/D 独占的 Owner gate release。它正确禁止 H 签发或推断 COC、I、D、C Provider 或 Storage outcome，并要求不同顺序域保持独立。
 
 §11.8 和 §11.9 均明确仍是候选保留条款。§11.9 进一步要求由 C 签发的 `c_provider_receipt_ref` 和不可变 `c_submit_outcome_ref`，将 `participant_terminal_proof_ref` 限定为所有确定性 outcome 完成 reconciliation 后才可出现，并将 `owner_gate_release_attestation_ref` 独占保留给 I 或 D。这部分缩小了字段映射歧义，但并未修订 C 的 Owner 合同，也不构成 C 接受。它说明不能据此证明当前 JSON Schema/SDK 已包含这些字段，并要求 H 在相关 C/G/I/D/Storage 确认后发布精确增量 Schema 版本。G 将 `bmcp.applied-ack/1.1.0` 列为目标，但本次审查没有在 H 源文件中发现该目标已经作为已发布、冻结的 Schema/SDK 实现的证据。
 
