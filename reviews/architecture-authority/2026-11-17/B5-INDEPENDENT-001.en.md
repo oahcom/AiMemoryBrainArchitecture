@@ -87,6 +87,33 @@ Closure:
 3. Distinguish author-side translation, manual parity review, independent semantic acceptance and final readback as separate states.
 4. Re-read the full audit after correction.
 
+### A-B5-004 — Owner branch snapshots in B's currentness ledger are stale
+
+Severity: HIGH  
+Blocking: B0 cross-owner currentness and B3 owner-source reconciliation  
+Owner: B (source ledger); each affected Owner for its own decisions; A for integration readback
+
+The live branch listing differs from the Owner HEADs recorded in `baseline-currentness-and-owner-source-audit.md`:
+- C: audit records `2e8414f361b0b5d7de959be8a971aadc9e62d6a9`; live branch is `71047cdb51139ca4080ac67f451e38a48698859d`.
+- D: audit records `76fcc92225666a11893b7241825261319edb621e`; live branch is `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f`.
+- H: audit records `8e24342048d29ef29195b153b8b9ec53ba7c75d9`; live branch is `0d36324457e39bd50ad56ae902d477c4ea765b61`.
+- I: audit records `2afe0e17f8c0929d9e642ccbe2cad112b5fd43a9`; live branch is `0d071bf1ee7cc71912398c6ae57e4496e08f44ab`.
+- Storage: audit records `431138e7c7af8bee716f3d8dcbc20114c046bd36`; live branch is `830a559bd2f4ec72608f5a51e1a0b43779f2b989`.
+
+The currentness audit is a historical snapshot, not a current Owner-source register. These branch-tip changes do not automatically establish changed Owner decisions, but all B cross-owner evidence relying on the old tips must be re-evaluated against the exact current artifacts.
+
+Closure: B refreshes its Owner branch snapshot and relevant artifact pins; each Owner decision remains attributed only to that Owner; A re-reads the exact artifacts and consumer acceptance.
+
+### A-B5-005 — Fact/Claim ADR exact Blob pin is stale in the decision register
+
+Severity: HIGH  
+Blocking: B2/B3 source traceability and any Fact/Claim dependent schema decision  
+Owner: B (decision register); A (consumer registry)
+
+In `domain-model-decision-record.md` Blob `08383c76658129cebe8ef9e303cf75c27269bfb3`, B-DEC-004 cites the supplemental `fact-claim-identity-adr.md` at historical Blob `96a2ee7d595fcd4a214201a7c7b6b2a9c3deb961`. The live ADR on the B branch is Blob `0bbea0beec6a5828c2db5ae267fac40f59ad7f1f`. The live ADR remains a CANDIDATE / DECISION REQUEST and explicitly NOT DECIDED / NOT ACCEPTED / NOT SCHEMA-FROZEN; the stale pin does not change that disposition.
+
+Closure: update the decision-register reference to the live exact Blob (or label the cited Blob historical and add the current Blob), then re-read both files and ensure the status remains candidate/blocked.
+
 ## 3. Current B gate interpretation
 
 The live README and source audit support the following conservative interpretation:
