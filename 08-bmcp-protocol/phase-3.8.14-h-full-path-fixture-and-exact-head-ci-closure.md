@@ -48,7 +48,7 @@ The current suite has 38 test methods across three Python test files: 32 H valid
 
 GitHub Actions Run `44070924346` 在精确 Commit `77a9d5e2e716ba33387f0beb1195f864ed8ac54f` 上完成成功，Job `133996627914` 成功。Workflow 对 provider_outcome 目录全部 `test_*.py` 执行 Python unittest discovery，并安装固定版本 Python/Node/JCS 测试依赖。
 
-当前套件共 32 个测试方法，分布于三个 Python 测试文件：26 个 H Validator Unit/Fixture 方法和 6 个 C Crypto Interop 方法。完整路径 Fixture 由本文件绑定的 H Validator Test Source 加载。
+当前套件共 38 个测试方法，分布于三个 Python 测试文件：32 个 H Validator Unit/Fixture 方法和 6 个 C Crypto Interop 方法。完整路径 Fixture 由本文件绑定的 H Validator Test Source 加载。
 
 ## 4. Evidence ceiling / 证据上限
 
