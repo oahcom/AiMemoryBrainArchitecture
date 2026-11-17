@@ -44,9 +44,10 @@ The repository currently has no open PRs. This does not mean all project work is
 - Outstanding: dedicated least-privilege service account, branch protection/rulesets and required checks, runner-group/environment restrictions, reboot recovery, emergency stop, independent credential-rotation verification, untrusted-PR isolation and accountable Security/Infrastructure Owner acceptance.
 - Do not claim secure worker acceptance or continuous A–I operation.
 
-### PR #135 — stale AID reconciliation duplicate
-- Superseded by merged PR #137; PR #137 merge commit is current main HEAD.
-- Recovery action: PR #135 closed unmerged, with supersession evidence in comment #6962346475.
+### PR #135 — AID-2026-001 current-state reconciliation
+- PR #137 merged the initial reconciliation baseline at `43203675389b7cb351587e465ab3acbb6e165efd`.
+- PR #135 was subsequently refreshed on that current main base and merged at `fb9269661225a26416d11528e9a94d845345b2af`, adding the later mainline snapshot and session traceability closeout.
+- PR #135 final state is MERGED, not closed-unmerged. Its merge preserves all R3, Owner, independent-review, schema-validation and acceptance blockers.
 
 ## 3. Dependency / base-branch topology
 
@@ -179,7 +180,7 @@ Important rule: PRs targeting Owner/research/recovery branches are not candidate
 | [#131](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/131) | MERGED | `main` | `40c52edb97f1` | Merged; integration fact only, does not imply domain acceptance. |
 | [#132](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/132) | MERGED | `main` | `c5e16e224f7e` | Merged; integration fact only, does not imply domain acceptance. |
 | [#133](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/133) | MERGED | `main` | `a79443858674` | Merged; integration fact only, does not imply domain acceptance. |
-| [#135](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/135) | MERGED | `main` | `1ca57512cdc0` | Superseded by merged #137; closed during this recovery. |
+| [#135](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/135) | MERGED | `main` | `1ca57512cdc0` | Refreshed after #137 baseline reconciliation; merged at `fb9269661225a26416d11528e9a94d845345b2af`; no R3 acceptance implied. |
 | [#136](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/136) | MERGED | `main` | `fe69b105a44e` | Merged; integration fact only, does not imply domain acceptance. |
 | [#137](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/137) | MERGED | `main` | `a0dd00168899` | Merged; integration fact only, does not imply domain acceptance. |
 
@@ -195,7 +196,7 @@ Important rule: PRs targeting Owner/research/recovery branches are not candidate
 1. Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED. It must not be closed until each applicable security gate has evidence and accountable Owner acceptance.
 2. PR #121's candidate package remains non-production. PR #136 and #133 improve bounded reference evidence only.
 3. PR #23, #27, #121 and #135 now have recovery comments documenting actual status and evidence boundaries.
-4. The 21 closed-unmerged PRs remain in GitHub history. Their disposition is recorded above; do not reopen a PR solely because it is not merged.
+4. The 20 closed-unmerged PRs remain in GitHub history. Their disposition is recorded above; do not reopen a PR solely because it is not merged.
 5. The inventory does not assert a fresh file-by-file semantic review of all 107 PR diffs. Historical merged changes require targeted audit only when current-main defects or traceability gaps identify a reason.
 
 ## 7. Recovery verdict / 恢复结论
@@ -218,8 +219,8 @@ This append-only overlay supersedes the earlier Main snapshot and queue statemen
 - Updated current `main` HEAD: `5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`.
 - Updated Main tree: `0aad576605be44f4eb595070c2c3d8effd836f1e`.
 - The 107-record inventory above was captured immediately before creating PR #138; it therefore correctly reports zero open PRs at that inventory instant.
-- Recovery report PR #138 is now the sole open PR: `docs(recovery): publish PR-RECOVERY-002 full inventory and closeout`, Head `7aa4a4c32fcc0cd768bd3eb08e7a1e2d645ef264`, Base `5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`.
-- PR #138 is mergeable at the latest read, but its `GOV-DOC-001 structural checks` are still IN_PROGRESS and combined commit status is PENDING. Do not merge until the exact-head check completes successfully and the diff/readback remains unchanged.
+- Recovery report PR #138 was the sole open PR at this snapshot: `docs(recovery): publish PR-RECOVERY-002 full inventory and closeout`, pre-correction Head `ecc39eba505aaa867cb3820fbbd3bc38acc0099b`, Base `5ad451d1d2164c3e72d56c9bb5eeeeb388f8ecbc`. The final corrective Head is recorded in the PR closeout.
+- At the time of this overlay, PR #138's `GOV-DOC-001 structural checks` were IN_PROGRESS; the exact-Head run #194 subsequently completed SUCCESS, and PR #138 merged at `8b9d896d714e6037a7856a77a9d2d3ec0179f117`. This status line is a historical snapshot, not a claim that PR #138 remains open.
 - Legacy branch protection remains disabled. Rulesets remain unverified because the protection endpoint returns 403.
 - Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED.
 
