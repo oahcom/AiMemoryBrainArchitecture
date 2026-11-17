@@ -82,3 +82,34 @@
 4. No SBOM, cargo-audit, cargo-deny, SLSA/provenance verification or CVE review was run.
 5. No Windows/Linux/macOS build matrix was run.
 6. No Brain-specific prototype or performance measurement was run.
+
+
+## 6. Project Owner technology review evidence / 项目 Owner 技术审查证据
+
+Current Owner branch heads were read from recursive Git Trees on 2026-11-17. Published TAR report blobs were fetched directly from those branches. The reports themselves record older reviewed HEADs; exact differences and interpretation are in `owner-technology-review-synthesis.md`.
+
+| Owner | Current branch HEAD | TAR report Blob | Report disposition |
+|---|---|---|---|
+| B | `8f83e4b172bc6bb41df60de58c1884886b22e617` | `fd3e5723b81de10bed806896e4be71ceb7a1669b` | Conditional Pass; Fact/Claim ADR blocked |
+| C | `667bbf84b89dc1a54ddc02852477a74083d2d89b` | `ee42c7192561261789a0c7b5bd16d32c0eaaf14c` | Conditional Pass; final-submit/adapter/Applied unverified |
+| D | `97e68fbd225bdf0ac71860c01077481afc162d50` | `97c049050d67dd12e0c64ef49b2b05795651608c` | Conditional Pass semantic architecture; Storage/JF-10 implementation blocked |
+| E | `fdb4f67a83083d995930b88f93975b5ee36080f3` | `c94f6a8e64ba3138a27e6f316f10411ef33b7ab8` | Conditional Pass local durable compiler; publication/recovery blocked |
+| F | `8d5ef89ce9b1ff1471ffd1a03fe4f289addb0af3` | `124cc9300442b0e3a1e83603910e1c332b4fae48` | Conditional Pass structured + FTS5 first; ANN conditional |
+| G | `f9ca0ddc36e17f74041506f17039f0202d13042e` | `8b9ea4b4a63f7bbddbefdb0b14cf99943b3e7613` | Conditional Pass; Context transaction and Applied remain open |
+| H | `f809be092a6c04db7982cc1bdbdd9c88787a4286` | `cb9d1d97604bdb71bc2f5bf47f6392e03f30ba99` | Conditional Pass; encoding/transport/security schema open |
+| I | `28df608b075e619563c6367a8a1c171185c1faaf` | `c24f03aae6ce7bc76eaeb1ed33bb24fb7fcac624` | Conditional Pass architecture; deployable security and Global Forget blocked |
+| Storage | `17be31915b06d98d7f822e6e5270b8cde39eb0bb` | No separate TAR-AI-001 review found | Direct current Storage artifacts below |
+
+### Storage current exact artifacts / Storage 当前精确工件
+
+| Artifact | Current branch path | Blob SHA | Evidence class |
+|---|---|---|---|
+| Serialization topology ADR (includes 2026-11-17 logical Option A addendum) | `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md` | `1ef47d4e5711c7db73a24d249adf1992be1f6aa4` | Storage architecture decision: logical v1 serialization profile; physical topology/DB still open |
+| PostgreSQL 18.7 Prepared-XID capability dossier | `reviews/storage-consistency/phase-3.6.2-postgres-18.7-prepared-xid-capability-dossier.md` | `0aabf66848dc97deee028c571183c0d7204008c0` | Bounded engine-level CI evidence; Gate A PARTIAL PASS / OPEN |
+| Atomic producer/dependency/visibility realization | `reviews/storage-consistency/phase-3.7-storage-atomic-producer-registration-dependency-visibility-realization.md` | `2ab899ee37a18ae6c8f2f64dbb82ad6499842060` | Proposed physical realization; not selected/implemented/conformance verified |
+| Visibility participant and atomic outcome contract | `reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md` | `175ee7b1349cfdb79a19898b311a88391ed88010` | Contract semantics; no implementation proof |
+| Restore high-water reference model evidence | `reviews/storage-consistency/phase-3.6.5-restore-highwater-reference-model-evidence.md` | `bf991a8a098bfdacc24bace53d452b8ccf2078e6` | 25/25 in-memory tests; no real service/DB restore |
+
+The PostgreSQL 18.7 dossier's pinned CI profile records bounded PASS subtests for prepared-XID persistence/lock retention/hard restart/same-XID commit/rollback, two-node synchronous WAL replay/promotion, physical backup/restore, coordinator crash in participant-success/ACK gap, TCP ACK loss, standby-unavailable UNKNOWN/private and WAL PITR. It explicitly does not prove production Canonical Authority deployment, live D/I/COC integration, signed participant receipt trust, real read-path enforcement, production operator/runbook or RPO/RTO. Gate A remains PARTIAL PASS / OPEN; Gate B current amended protocol requires focused exact-owner re-review; Gate C is deferred to engineering; JF-10 runtime P0 remains OPEN.
+
+PostgreSQL 18.7 档案记录了有限 CI 子测试 PASS：Prepared-XID 持久化/锁保留/硬重启/同 XID Commit/Rollback、双节点同步 WAL Replay/Promotion、物理备份恢复、参与者成功与 ACK 间隙协调器崩溃、TCP ACK 丢失、备机不可用时 UNKNOWN/Private、WAL PITR。它明确不能证明生产 Canonical Authority 部署、D/I/COC 实时集成、签名参与者 Receipt 信任、真实读路径、生产 Operator/Runbook 或 RPO/RTO。Gate A 仍 PARTIAL PASS / OPEN；Gate B 当前修订协议需要聚焦精确 Owner 复审；Gate C 延后到工程阶段；JF-10 runtime P0 仍 OPEN。
