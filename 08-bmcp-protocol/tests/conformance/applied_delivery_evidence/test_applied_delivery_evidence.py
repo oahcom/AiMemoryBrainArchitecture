@@ -2,11 +2,13 @@ import copy
 import hashlib
 import json
 import unittest
+import sys
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(ROOT / "validators"))
 SCHEMA = json.loads((ROOT / "schemas" / "bmcp.applied-delivery-evidence-1.0.0.schema.json").read_text())
 from applied_delivery_evidence_validator import (  # noqa: E402
     AppliedDeliveryChecks, DurableObservationDecision, P0_EXCLUDED,
