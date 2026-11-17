@@ -12,6 +12,8 @@
 - I owner snapshot membership proof source: Blob 88209bbea0ab600880c5c630cfe83af31ee16dd7
 - I 1.0.1 C sequence namespace review: Blob 0d78e5b2bfcf66cae6b757314cead84b9c942601
 - H predecessor I profile review Phase 3.8.8: Blob fe435d5a4cc39df76f2cbfd00e270962218cc051
+- C profile identifier ownership decision: Blob 5067dadb9c646a054d78f03c56e635facc36311a
+- I scope clarification of C profile identifier: Blob 1e86a1349d371a1cdb4a56d69f783e0f316c7203
 - Provenance: delegated H-role review; **not an independent human H Owner signature**.
 
 ## 1. Exact I v1 profile decision / I v1 Profile 精确决议
@@ -83,13 +85,9 @@ H 可以解析、校验 Schema Closure、重建精确 I P0 并编排 Typed Join�
 
 ## 5. Cross-owner profile isolation finding / 跨 Owner Profile 隔离发现
 
-The I profile decision's §6 mentions a separate C candidate name, AIMBA-C-OUTCOME-CRYPTO-1.0. The exact C-owned CSubmitOutcome 1.0.1 schema and C signature projection currently declare AIMBA-C-CRYPTO-1.0. H does not treat the I decision's C-name mention as a C-owned profile registration or override.
+Resolved by exact C/I owner decisions: C Phase 3.8.13 selects AIMBA-C-CRYPTO-1.0 as the sole C-owned candidate for CSubmitOutcome 1.0.1; I Phase 3.8.10 clarifies that AIMBA-C-OUTCOME-CRYPTO-1.0 was a non-normative example only. H follows the exact C schema/profile identifier and never inherits AIMBA-I-CRYPTO-1.0.
 
-**Required clarification:** C must confirm whether AIMBA-C-CRYPTO-1.0 remains the C-owned profile ID for schema 1.0.1 or publish an immutable C successor changing it. I's profile decision must not rename or select a C profile. Until C publishes a different exact source and I registers the applicable trust policy, H follows the exact C schema's declared profile ID and returns UNKNOWN for unregistered profile/trust checks.
-
-I Profile 决议 §6 提及另一个 C 候选名称 AIMBA-C-OUTCOME-CRYPTO-1.0；但当前精确 CSubmitOutcome 1.0.1 Schema 与 C Signature Projection 声明的是 AIMBA-C-CRYPTO-1.0。H 不将 I 文件中的 C 名称视为 C Owner 注册，也不允许其覆盖 C 自有 Schema。
-
-**必须澄清：** C 应确认 1.0.1 是否继续使用 AIMBA-C-CRYPTO-1.0，或发布新的不可变 C 后继版本。I 决议不得重命名或选择 C Profile。未注册时 H 对依赖 Profile/Trust 的判定仍为 UNKNOWN。
+已由 C/I 精确权属决议解决：C Phase 3.8.13 选择 AIMBA-C-CRYPTO-1.0 作为 CSubmitOutcome 1.0.1 唯一 C 自有候选；I Phase 3.8.10 澄清 AIMBA-C-OUTCOME-CRYPTO-1.0 仅为非规范示例。H 必须遵循 C Schema/Profile 的精确标识，绝不继承 AIMBA-I-CRYPTO-1.0。
 
 ## 6. L3 and operational evidence boundary / L3 与运维证据边界
 
@@ -109,6 +107,6 @@ No new full per-family P0 vector execution is claimed here. I profile architectu
 
 **Delegated H-role decision: ACCEPT AS NORMATIVE I V1 ARCHITECTURE INPUT AND CURRENT P0 MAPPING CANDIDATE; L3 / TRUST / PRODUCTION GATES REMAIN OPEN.**
 
-The I profile and exact P0 allowlist are accepted as I-owned architecture inputs for H mapping. The cross-owner C profile naming discrepancy in §5 is referred to C/I for explicit disposition. No H production validator, I trust root, key registry, owner ledger verifier, COC quorum or deployment-grade RecoveryJoin is claimed.
+The I profile and exact P0 allowlist are accepted as I-owned architecture inputs for H mapping. C/I profile identifier ownership is closed by the exact decisions pinned above. No H production validator, I trust root, key registry, owner ledger verifier, COC quorum or deployment-grade RecoveryJoin is claimed.
 
 **角色模拟 H 侧决议：接受为 I v1 架构输入及当前 P0 映射候选；L3/Trust/Production 门禁仍 OPEN。** 第 5 节 C Profile 名称差异交由 C/I 明确裁决。未声称 H 生产 Validator、I Trust Root/Key Registry、Owner Ledger Verifier、COC Quorum 或部署级 RecoveryJoin 已完成。
