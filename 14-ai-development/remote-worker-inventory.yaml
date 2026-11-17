@@ -1,0 +1,40 @@
+# Remote worker inventory — non-secret metadata only.
+# Never add passwords, private keys, PATs, runner registration tokens,
+# webhook secrets, or model-provider credentials to this file.
+
+schema_version: "1.0"
+worker_id: "ubuntu-primary-01"
+display_name: "Primary Ubuntu AI development worker"
+provider: "user-managed-remote-host"
+endpoint:
+  host: "43.138.133.238"
+  port: 22
+  username: "ubuntu"
+  transport: "ssh"
+  host_key_fingerprint_status: "NOT_VERIFIED"
+  host_key_fingerprint: null
+purpose:
+  - "GitHub Actions self-hosted runner"
+  - "Future event-driven A-I Owner worker execution substrate"
+runtime:
+  deployment_status: "NOT_DEPLOYED"
+  runner_status: "NOT_REGISTERED"
+  persistent_service_status: "NOT_VERIFIED"
+  owner_workers_status: "NOT_DEPLOYED"
+credentials:
+  password: "DO_NOT_STORE"
+  ssh_private_key: "EXTERNAL_SECRET_STORE_ONLY"
+  github_runner_registration_token: "GENERATE_JUST_IN_TIME"
+  llm_provider_credentials: "EXTERNAL_SECRET_STORE_ONLY"
+security:
+  require_password_rotation_before_bootstrap: true
+  require_out_of_band_host_fingerprint_verification: true
+  require_least_privilege_service_account: true
+  require_untrusted_pr_isolation: true
+  prohibit_secrets_in_git: true
+governance:
+  tracking_issue: 26
+  architecture_document: "14-ai-development/continuous-owner-runtime-architecture.md"
+  status_claims:
+    worker_online: false
+    continuous_a_i_operation: false
