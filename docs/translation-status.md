@@ -323,3 +323,11 @@ The earlier OPEN entry is superseded. C's separate cross-authority causal-order 
 - H Phase 3.8.14 full-path closure Chinese test count/scope corrected to match English: 38 total methods = 32 H validator unit/fixture + 6 C crypto interop. Current closure Blob `cda025fb157815570b3280fa5ff168d5e62453b1`; exact CI run `44070924346` SUCCESS.
 - PR #28 current head `8431312367a44b70246912884547a377cf69116c`; workflow run `44072368844` / Run #114, job GOV-DOC-001 structural checks: **SUCCESS**. This proves paired-document/manifest structure only, not semantic review, architecture approval, implementation or conformance.
 - PR remains Draft/Open, 158 files changed; no merge authorized.
+
+
+## 17. Final current-head structural CI and Issue #3 reconciliation — 2026-11-17
+
+- Issue #3 received current C/G/H exact-version reconciliation comment ID `6946497217`, including exact C/H/G pins, L1/L2 CI evidence ceiling and remaining production gates.
+- PR #28 current head: `3b5ce54c1687e9c7591f9e6e70e5c24f2afa465d`; workflow runs `44072524932` (#116) and `44072518263` (#115) both completed SUCCESS; job `GOV-DOC-001 structural checks` succeeded.
+- Structural gate remains limited to paired-document/manifest structure. It does not establish translation semantic approval, Owner signature, schema freeze, implementation, L3/L4 conformance or production readiness.
+- PR #28 remains Draft/Open; 158 files changed; no merge or production activation authorized.
