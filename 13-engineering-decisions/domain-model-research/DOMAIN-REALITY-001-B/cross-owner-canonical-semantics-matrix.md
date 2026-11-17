@@ -11,6 +11,8 @@
 | Owner | Artifact | Branch | Blob SHA | Observed status |
 |---|---|---|---|---|
 | B | 02-domain-model/phase-3.6-typed-identity-trust-closure.md | session-b-domain-model-phase3 | 0a6b78a842e550b58533b797cdfcd2d954ed6826 | Joint technical baseline; consumer/governance/implementation gates open |
+| B | 02-domain-model/phase-3.8.6-b-storage-serialization-anchor-nominal-types.md | session-b-domain-model-phase3 | e2bc4c8dde9706bfbe443269b702f1b5aa6965f6 | B delegated technical approval of per-authority nominal type boundary only |
+| B | 13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/fact-claim-identity-adr.md | research/domain-reality-001-b | 96a2ee7d595fcd4a214201a7c7b6b2a9c3deb961 | C2 + I1 recommended candidate; NOT DECIDED / NOT ACCEPTED / NOT SCHEMA-FROZEN |
 | C | 07-agent-integration/phase-3.6-final-request-evidence-contract.md | session-c-agent-integration-2026-11-16 | fd2f47ba6c89bb270e9f2bec956873cb7ae3592b | C semantic decisions; C/G/H freeze blocked |
 | C | 07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md | session-c-agent-integration-2026-11-16 | 45a48249717c8cddb07ab96197730ef93d406c22 | C amendment specified; coordinator and cross-owner acceptance open |
 | D | 03-memory-brain/forget-fence-operation-and-publication-gate.md | session-d-memory-brain-2026-11-16 | 4da0b61ba3656a768ea56b4a2a24e09da4e21cd5 | D operation semantics decided; interface/Storage realization open |
@@ -97,7 +99,7 @@ Branch tips/commit SHAs are NOT VERIFIED for the live owner branches in this mat
 - H: BMCP wire, transport authentication integration, ACK, capability and reconnect; ACK only proves declared bounded postcondition.
 - I: issuer trust, Principal, authorization, delegation, revocation, PermissionEpoch, retention and global Forget policy/completion.
 - Storage: durable transaction/visibility pointer/receipt and physical storage capability; current package is proposal, not implementation evidence.
-- Testing: executable invariant/conformance/fault-injection evidence; not found as an owner-authoritative acceptance for all above.
+- Testing/QA: cross-cutting conformance and fault-injection execution coordinated by A; B owns TC-01 Domain Identity and References and TC-10 Provenance/Lifecycle/Temporal test semantics. No dedicated Testing/Quality branch or independent accountable Owner was found. Independent test executor/reviewer still must be appointed.
 
 ## 4. Conflict severity / 冲突等级
 
