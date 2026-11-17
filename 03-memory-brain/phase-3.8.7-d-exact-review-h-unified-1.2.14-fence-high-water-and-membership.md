@@ -2,7 +2,7 @@
 # Phase 3.8.7 — D 精确复审：H Unified 1.2.14 Fence High-Water 与 RecoveryJoin Membership
 
 - Owner perspective: D — Memory Brain / ForgetFence Authority
-- H Unified schema 1.2.14 Blob: `fee452efb99ab4fe0ceccb347c46eeef1521bd28`
+- H Unified schema 1.2.14 Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a59`
 - H RecoveryJoin schema 1.0.2 Blob: `4b664e3bce465499bcdfd93796349a4ba7074002`
 - D membership P0 crosswalk Blob: `c4adf827dd62d44c43b8e871dec4835581508adf`
 - D original membership proof contract Blob: `d80dabe7210e681bc4e2290355a38f8b67be9ddd`
