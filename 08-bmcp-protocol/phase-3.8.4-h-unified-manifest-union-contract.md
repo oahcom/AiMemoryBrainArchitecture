@@ -19,7 +19,7 @@
 | I crypto artifact-revision amendment | `9db3976ed9a891e9395d0e7edf949e75cb4422aa` |
 | H RecoveryJoin schema 1.0.1 | `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c` |
 | H semantic validator reference | `4a7c22ed15dff0a688559f79e4facbffca6527cd` |
-| H unified manifest conformance tests | `cb4a619ac580f50c75bc6c9f7a8a6853a381ddb5` |
+| H unified manifest conformance tests | `c95bea3d7a7bee5f419bfabe914ea56be79fc8ad` |
 | I Python/Node P0 vector set | `4657f0c81e9c8692d29ac183380f3d7e074a4e4c` |
 | I Python/Node crypto test | `7658edc6f51dac203742ecc1ecf00d41bd676908` |
 
@@ -181,9 +181,11 @@ Source 缺失、分页不完整、Owner 不可用、Replica 过期、签名无�
 
 ## 8. Executable evidence boundary / 可执行证据边界
 
-The H candidate reference validator uses a deterministic TEST-only digest profile and normalized evidence fixtures. It is not the production JCS/signature/quorum/ledger implementation. The Python/Node I crypto vectors use a deterministic TEST-only private seed. They prove independent test-stack agreement only.
+The exact H CI run `44048157932` at commit `05812faf5cfd4360803d660ebf5ffb8d48cba6b1` passed **209 tests**. The run includes Draft 2020-12 meta-schema validation for the complete 1.2.11 schema, structural validation of COC and owner-local union-member fixtures, normalized union/join semantic vectors, Batch/Manifest/release/completion tests and independent Python/Node I crypto vectors.
 
-The H CI run is recorded separately against its exact commit. Even a passing candidate suite does not establish:
+The H candidate reference validator still uses a deterministic TEST-only digest profile and normalized evidence fixtures. It is not the production JCS/signature/quorum/ledger implementation. The Python/Node I crypto vectors use a deterministic TEST-only private seed. They prove independent test-stack agreement only.
+
+The 209-test H CI run is recorded against the exact commit above. Even a passing candidate suite does not establish:
 - real COC quorum persistence or linearizable prefix reads;
 - real I/D/C owner-ledger completeness and signed membership proofs;
 - production JCS/Ed25519 trust/key registry and anti-rollback;
@@ -194,7 +196,7 @@ The H CI run is recorded separately against its exact commit. Even a passing can
 
 H 候选参考验证器使用确定性的 TEST-only Digest Profile 与归一化 Evidence Fixture，不是生产 JCS/Signature/Quorum/Ledger 实现。Python/Node I Crypto Vector 使用确定性的 TEST-only 私钥 Seed，只证明独立测试栈结果一致。
 
-H CI 的精确 Run 与 Commit 必须单独记录。即使候选测试全部通过，也不能证明真实 COC Quorum 持久化/线性化 Prefix Read、I/D/C Owner Ledger 完整性与签名 Membership Proof、生产 JCS/Ed25519 Trust/Key Registry/Anti-rollback、C Provider Egress Adapter、Storage Database Incarnation/XID/WAL/PITR、多 PolicyDomain 原子性或生产激活。
+H CI 的精确 Run 与 Commit 必须单独记录。209 项 H 候选 CI 已绑定到上方精确 Commit。即使候选测试全部通过，也不能证明真实 COC Quorum 持久化/线性化 Prefix Read、I/D/C Owner Ledger 完整性与签名 Membership Proof、生产 JCS/Ed25519 Trust/Key Registry/Anti-rollback、C Provider Egress Adapter、Storage Database Incarnation/XID/WAL/PITR、多 PolicyDomain 原子性或生产激活。
 
 ## 9. H decision / H 决议
 
