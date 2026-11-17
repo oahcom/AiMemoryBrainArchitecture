@@ -178,3 +178,8 @@ This review remains a delegated Storage-role simulation. The latest JoinProof Bl
 The controlling Storage JoinProof artifact is now Blob `d5a84aa22e90d7b8689b23cd8af2fc82125368c4`. It records H's latest rerun [44041395001](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44041395001), job `133896572160`, on H branch commit `b4d7ed2798fcd6514892ac91d8f3ae6c06f0a338`; 66 tests ran and the job ended OK. Test source/schema blobs are unchanged from §10.
 
 The rerun does not add new test vectors. Storage's ACCEPT WITH ENUMERATED AMENDMENTS remains a logical contract disposition only. Actual COC prefix/quorum reads, six live owner-ledger enumerations, signed proof verification, durable JoinProof commit/readback, I/D/C currentness CAS, same-GID JF-10 physical resolution, and topology T1–T8 remain open. This remains a role simulation, not an independent Storage Owner signature.
+
+
+## 7. Schema 1.2.7 signature profile persistence boundary / Schema 1.2.7 签名配置持久化边界
+
+H schema 1.2.7 exact review Blob `8bed0b05cd631014bf5af7cb5a8dafdd932940e9`; schema Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`. Storage accepts `signature_profile_id` as a signed-envelope reference field only, not as a trust decision. Storage may persist the exact bytes/reference and include it in the immutable proof digest, but must not resolve issuer trust, select algorithms or treat the payload's profile as authenticated. I remains authoritative for trust/key/profile resolution; H owns wire shape; C owns Provider Outcome truth. Because the 66-case candidate suite does not cover schema 1.2.7, no validator or cryptographic conformance PASS is claimed. Storage topology remains ADR-BLOCKED.
