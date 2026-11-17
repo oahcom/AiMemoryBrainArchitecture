@@ -106,3 +106,18 @@ The Storage contract requires distinct D and I participants bound to the same St
 Keep the existing model and historical CI record. Before a Gate relies on it, address M-01, obtain D/E/Storage authority for M-02, add M-03 multi-operation tests, keep M-04 assigned to Storage/D/I physical validation, and review M-05 separately.
 
 This report is a same-session audit of the integration model, not independent D/E/I/Storage Owner approval. It changes no Owner authority contract and authorizes no implementation, merge, deployment or production activation.
+
+
+## M-02 exact Owner-contract refinement (subsequent source read)
+
+After reading the current E source, M-02 must be narrowed. It would be inaccurate to say that Owner documents contain no no-publication terminal semantics:
+
+- Current E source Blob: `00e37ba56596e710513c8d0568acd79141d9101b`. Its status is explicitly **CANDIDATE E enforcement contract**; D/E/Storage atomic registration and final publication gate are OPEN/BLOCKING.
+- E §3.2 defines `Cancelled / Rejected` as a durable terminal disposition with no publication possible and a recorded cancellation/suppression reason; D receives terminal evidence.
+- E §7's Producer terminal acknowledgement remains **OPEN — D response schema + reconciliation semantics**.
+- Current D source Blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` §3.5/state machine requires suppression/quarantine to terminalize only with durable no-publication evidence and proof that no attempt can later publish.
+- D §3.5 requires terminal disposition to commit durably in the D barrier ledger; lease expiry, queue deletion, worker shutdown and DLQ parking are not terminal.
+
+The precise M-02 finding is therefore: **E has candidate Cancelled/Rejected semantics and D has a durable no-publication terminality requirement; however, the exact receipt/schema/authority mapping, authority to trigger pre-execution cancellation, same-WorkItemId idempotency, late-worker fencing and D barrier-ledger linearization remain OPEN.** The current model has no transition mapping this candidate E state into an accepted D terminal receipt. A must not promote E's candidate semantics into D acceptance.
+
+Remediation: E Owner confirms the complete evidence emitted by pre-execution Cancelled/Rejected; D Owner confirms how it becomes a D terminal disposition; Storage confirms no publish-capable participant/outbox remains. Only then should A add the exact contract to the model and test registered → fenced → cancelled-before-run → durable D terminal receipt → barrier closure, including stale-worker rejection.
