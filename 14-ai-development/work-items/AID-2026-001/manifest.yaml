@@ -267,7 +267,7 @@ review_history:
 remediation:
   latest_review: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#pullrequestreview-5937629228
   latest_reviewed_head: 1d6ab39375136d8649235feebeb6232609001222
-  status:
+  latest_review_status:
     IR-004: FIXED_CLASSIFICATION_AND_PROMPT_V2; SPECIALIST_EVIDENCE_PENDING
     IR-005: FIXED_MISSING_SHA_706F582_CLASSIFIED_AS_MANIFEST_ONLY
     IR-006: FIXED_PRIMARY_REVIEW_POINTER_UPDATED; NEXT_HEAD_REVIEW_PENDING
@@ -277,7 +277,7 @@ remediation:
     I-PRE-005: FIXED_CHINESE_FORGETFENCE_TERMINOLOGY_PENDING_INDEPENDENT_REVIEW
   source_review: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945250593
   source_reviewed_head: 0708e25d8e008b1044679ff29ba7ae34977bc08c
-  status:
+  source_review_status:
     IR-001: FIXED_PENDING_INDEPENDENT_REVIEW
     IR-002: VERIFIED_FIXED_BY_INDEPENDENT_REVIEW
     IR-003: VERIFIED_FIXED_BY_INDEPENDENT_REVIEW
