@@ -56,7 +56,6 @@ A file is bilingual-complete only when the full normative content is present in 
 | canonical-temporal-evidence-semantics.md | 已补齐时间字段、双时态比较、Source/Evidence/Provenance、精度、谱系和 Forget 保留规则。 | REMEDIATED — MANUAL REVIEW PENDING | 核验时间权威、Nullability 和 Forget Retention 规则。 |
 | canonical-domain-relationships.md | 已补齐关系类型、全部关系/基数行、引用完整性和建模问题中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验 Cardinality、Owner 权威、Forget 传播和跨 Tenant 规则。 |
 | domain-model-complexity-assessment.md | 已补齐评估维度、实体/值对象/派生视图分类、复杂度风险和模型建议。 | REMEDIATED — MANUAL REVIEW PENDING | 确保候选仍是候选，未被写成已批准实现。 |
-| mature-domain-model-research.md | 已补齐 DDD、Event Sourcing、PROV-O、双时态、RDF/OWL、成熟项目、建议和局限。 | REMEDIATED — MANUAL REVIEW PENDING | 重新打开官方来源，核验版本、范围和不可推断边界。 |
 | cross-owner-canonical-semantics-matrix.md | 已补齐当前 Owner Source Pin、历史契约、语义矩阵、权威边界、严重级别和冲突摘要。 | REMEDIATED — MANUAL REVIEW PENDING | 重读 Owner 分支；逐项核验 Blob 和批准状态。 |
 | domain-semantics-conflict-register.md | 已补齐 16 项冲突、决策权威、解除条件、Gate 和解决流程中文对照。 | REMEDIATED — MANUAL REVIEW PENDING | 核验每项冲突仍为正确状态，并检查是否有后续裁决。 |
 | canonical-domain-invariants.md | 已补齐 Identity/Relationship/Temporal/Evidence/State/Forget 不变量及测试条件。 | REMEDIATED — MANUAL REVIEW PENDING | 运行 Schema/Test；确认未运行项仍标记 NOT RUN。 |
