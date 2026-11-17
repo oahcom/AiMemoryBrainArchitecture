@@ -91,7 +91,7 @@
 
 ### 3.4 初步结论
 
-**CANDIDATE：TLA+ 作为主模型，Alloy 作为关系约束补充。** 暂不建议先引入通用分布式事务框架或新的全局协调服务。先回答：D 的 Producer Registration、Fence Install、Dependency Registration、Visibility Commit 能否落入一个物理事务/单一线性化锚点？若不能，才比较可恢复 Prepare/Commit 与 COC 的复杂性。
+**CANDIDATE：TLA+ 作为主模型，Alloy 作为关系约束补充。** Storage 当前 topology ADR 的 §§8.2–8.7 已将 L1 逻辑拓扑 DECIDED 为每个 BrainAuthorityRef 一个 Serializable Transaction Domain，并要求 D/Storage 共用 CanonicalAuthoritySerializationAnchor；Option B 不是 v1 自动备选，必须有后继 ADR。研究不重新打开 L1 选择，而是验证 D/E/I 对精确契约的采纳、实际 DB/Adapter 是否满足 L4，以及 Fence/Admission/Dependency/Visibility 的物理测试是否与模型一致。
 
 ## 4. Workstream B — Memory Operating System
 
