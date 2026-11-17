@@ -6,7 +6,7 @@
 - Audit date: 2026-11-17
 - Repository: `oahcom/AiMemoryBrainArchitecture`
 - Current main HEAD readback: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
-- Research branch HEAD observed from PR metadata: `dc05436aaa75a90c70aa3137dcdfadc49cf7e6dd`
+- Research branch HEAD observed from PR metadata: `5797ff44db7e3fdbc0820a08e91ff78f76c4faac`
 - PR: #55, Open / Draft
 - PR base SHA in current metadata: `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`
 - Original research ancestor: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
@@ -53,14 +53,14 @@ The following branch HEADs were read from the repository branch listing and thei
 | Owner | Branch | Observed HEAD | Exact source Blob(s) read |
 |---|---|---|---|
 | B | `session-b-domain-model-phase3` | `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` | Existing baseline records old Scope/Permission Blob `6a9c47031ca3ecfd47b2f7d7419b2df8d808329b`; current-main counterpart is `b5215ae...` |
-| C | `session-c-agent-integration-2026-11-16` | `b8eff8f8b2a3e290c0527ec555885a534ef047a1` | `phase-3.8.21-c-review-h-outer-envelope-authentication-and-c-signing-boundary.md` Blob `d9da97c25cab7d22041dd6e25acab164cde1f9c4` |
-| D | `session-d-memory-brain-2026-11-16` | `79f94f779dcccebacde158fdf0f90b7fda5c6b28` | `phase-3.8.12-d-review-h-nullable-coc-not-invoked-and-p0-matrix.md` Blob `8f064d29f4868ad5ad598aa49f12bf7709b9a993` |
-| E | `session-e-memory-compiler-2026-11-16` | `ee098e14747d9915de5b3efb63a3b8dd77f670ed` | `evidence-and-provenance.md` Blob `38bcacafa89ebe7b3eedb6f38d174e0c6a1f3963`; BIH consumer acceptance Blob `6f4100618695fcf971560fb784f7887a72798c96` |
+| C | `session-c-agent-integration-2026-11-16` | `2e8414f361b0b5d7de959be8a971aadc9e62d6a9` | `phase-3.8.22-c-exact-review-h-authenticated-ingress-1.2.14-60-tests.md` Blob `8fd6052cabf58a78962cc2e776398b2a40604bcd` |
+| D | `session-d-memory-brain-2026-11-16` | `76fcc92225666a11893b7241825261319edb621e` | `phase-3.8.13-d-review-h-outer-envelope-authenticated-ingress-gate.md` Blob `152627e00b96355e2ff370acd643a51168c4c78c` |
+| E | `session-e-memory-compiler-2026-11-16` | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | `phase-3.8.6-e-review-storage-serialization-anchor.md` Blob `19d708bc29b6115d7bccb7d320781f452ee28b78` |
 | F | `session-f-memory-runtime` | `1908ce4d233b20f7cafd00cb679affd01bd15174` | `phase-3.6-runtime-forget-suppression-and-invalidation.md` Blob `ce59252dbbdc5d10d016704797e9ba12d5a941bd` |
 | G | `session-g-memory-context` | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | `context-versioning.md` Blob `05c0739d0c22576a1fd5affc7d73c078c89049b1`; Phase 3.7 Blob `c1de241ec69834377d9b0e24aa4770a809796d4b` |
-| H | `session-h-bmcp-protocol` | `0e212731073b36e4fa9ffda8467e60806da1b380` | Provider Outcome 1.0.1 fixture Blob `f911027c848d21dd36fb87ba64a201a1455787a7`; schema references must be pinned separately |
-| I | `session-i-security-governance-2026-11-16` | `a531cdc971e3d959afbabd7a2cbc5461609965fe` | `security-and-identity-overview.md` Blob `26a990e44709d8604ae515a2a63b510400fd8471`; Crypto ADR Blob `56e956dca909af857469427378777705a5d1082a` |
-| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `601e272619f230de0a9cc009852acacf732b71d9` | `phase-3.8.2-storage-serialization-topology-adr.md` Blob `bb544ba2f346bdc130d524bd5c7310d86f367988` |
+| H | `session-h-bmcp-protocol` | `8e24342048d29ef29195b153b8b9ec53ba7c75d9` | `phase-3.8.20-h-exact-c-envelope-p0-correction-and-json-pointer-mapping.md` Blob `4ba7e1699215d02224f805a15484b1da2e40c03f`; H Unified 1.2.14 schema Blob `09fcd1fa29fe24255fbd87cae79dafb406594a59` |
+| I | `session-i-security-governance-2026-11-16` | `2afe0e17f8c0929d9e642ccbe2cad112b5fd43a9` | `phase-3.8.18-i-review-c-outer-envelope-signer-p0-trust-registration.md` Blob `b6d1ea45825a1c2090abfba42474814f02f073a3` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `431138e7c7af8bee716f3d8dcbc20114c046bd36` | `phase-3.6.21-storage-v3.2.11-exact-version-bundle-manifest.md` Blob `54a4f0dab7ab24f1f6fb01f8cc5c7da292f02c57`; ADR Blob `bb544ba2f346bdc130d524bd5c7310d86f367988` |
 | A | `session-a-integration-2026-11-16` | `9bdf938b980413f592a4db9fe94f4bf2c299fb01` | Owner-local source inventory not fully fetched in this pass |
 | Testing/Quality | NOT VERIFIED | NOT VERIFIED | No accountable branch/source pin established in this pass |
 
@@ -120,7 +120,24 @@ The full repository listing also contains other open PRs/issues. This register i
 7. **I：** Principal 是经过认证的安全主体；ActorRef 是单次操作归因；ScopeRef 不等于 Permission。I 负责 Issuer Trust、Authorization、Revocation、PermissionEpoch 和 Global Forget Policy。I 的密码配置批准是架构配置选择，不代表生产启用。
 8. **Storage：** 当前 Storage ADR 包含 Option A / Serializable Transaction Domain 讨论，而 A PR #52 报告的是有条件 L1 接受，L4 物理引擎/部署仍 OPEN。声称 Option A 已完全选定或验收前，必须重新读取 ADR 决策章节及 D/Storage 批准。Storage Transaction/Visibility 状态不是领域生命周期状态。
 
-## 6. B0 disposition / B0 门禁结论
+
+
+## 6. Latest Phase 3.8 owner boundary update / 最新 Phase 3.8 Owner 边界更新
+
+The current owner branch tips were refreshed after the earlier source snapshot. Exact current artifacts show:
+- B Phase 3.8.6 approves per-authority nominal serialization types only; the anchor is physical implementation detail, not a canonical domain entity or global counter (Blob e2bc4c8dde9706bfbe443269b702f1b5aa6965f6).
+- E accepts the anchor with E lifecycle conditions (Blob 19d708bc29b6115d7bccb7d320781f452ee28b78); F accepts with read-path/cache conditions (Blob 122238146830db6188f00a9788e018a82bfb3f90). Storage v3.2.11 is still not jointly accepted/frozen and needs fresh A review (Blob 54a4f0dab7ab24f1f6fb01f8cc5c7da292f02c57).
+- C Phase 3.8.22 accepts H's reference ingress gate and 60-test boundary only; signer/attestation remains open and crypto is not frozen (Blob 8fd6052cabf58a78962cc2e776398b2a40604bcd).
+- G Phase 3.8.18 accepts C/H full-path mapping as bounded L1/L2 candidate with G-owned Applied conditions, not frozen; its 38 methods use ten deterministic authority test doubles (Blob 1894860c76336f8739d354b72beed3992cffd17e).
+- H Phase 3.8.20 corrects the C outer-envelope P0 proof-locator omission and documents JSON pointers, but executable authentication, I profile registration and durable replay remain open (Blob 4ba7e1699215d02224f805a15484b1da2e40c03f).
+- I accepts C origin-signer/P0 separation as candidate, but does not approve the proposed crypto suite, register the profile/keys, approve custody or authorize deployment (Blob b6d1ea45825a1c2090abfba42474814f02f073a3).
+- A Phase 3.8.19 marks outer-envelope authentication as a blocking architecture gap and says do not freeze (Blob e12cd7b5c79e2234178014243fd51f2e7d51272e).
+
+These findings add a new BLOCKING semantic integration conflict: a typed ActorRef/PrincipalRef or a schema-valid envelope is not authenticated origin proof. C origin signature/P0, H protected transport authentication, I trust/profile/key approval and Storage durable authenticated ingress/replay are separate authority requirements.
+
+上述发现增加一个新的 BLOCKING 语义集成冲突：类型化 ActorRef/PrincipalRef 或 Schema 有效的 Envelope 并不构成已认证的 Origin 证明。C Origin Signature/P0、H Protected Transport Authentication、I Trust/Profile/Key 批准，以及 Storage Durable Authenticated Ingress/Replay 是彼此独立的权威要求。
+
+## 7. B0 disposition / B0 门禁结论
 
 B0 remains **PARTIAL / NOT PASSED**. The current main HEAD, domain-source Blob pins, owner branch snapshots, selected owner source files, relevant PR metadata and controlling issues have been refreshed. Remaining B0 work: complete A and Testing/Quality source authority inventory; fetch full exact PR diffs/commit/Blob pins for all directly relevant records; pin the latest C/G/H/Storage exact contract bundle; re-read the Storage ADR decision section and latest D review/acceptance; reconcile every Owner-local canonical definition against B's matrix.
 
