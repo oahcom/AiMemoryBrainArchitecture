@@ -7,8 +7,8 @@
 - CSubmitOutcome 1.0.1 schema Blob: `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`
 - H validator core Blob: `eab961a08d41e871f38543b18ee60cf024977414`
 - H validator test Blob: `540056d7c4f290c31290b17c264c69cfd76b1cb2`
-- H full positive fixture Blob: `c80247a6ecfbb4a29ff0993e8e2aea4829d00626`
-- H full-path closure Blob: `3fe848b315ba6c069785ef9c47d329a054ca9392`
+- H full positive fixture Blob: `f911027c848d21dd36fb87ba64a201a1455787a7`
+- H full-path closure Blob: `60e5eb98a07efcf87bc3f2be6fcf7fedb2196504`
 - H exact CI run: `44070924346`, tested commit `77a9d5e2e716ba33387f0beb1195f864ed8ac54f`, job `133996627914`: **SUCCESS**.
 - Provenance: delegated C-role review; **not an independent human C Owner signature**.
 - English and Chinese are normative peers.
@@ -55,3 +55,10 @@ This review supersedes the previous C callback-seam-only evidence scope for the 
 The exact H test Blob `540056d7c4f290c31290b17c264c69cfd76b1cb2` adds tests 26–31: every present duplicated wire field mutation, joint C-P0 + wire mutation followed by digest recomputation, C sequence namespace mismatch, I COMMIT_WON predicate, exact D ForgetOperation/Fence binding, and Storage DB incarnation/GID/PrepareAttempt/participant-ledger binding. H run `44070924346` passed on exact commit `77a9d5e2e716ba33387f0beb1195f864ed8ac54f` (job `133996627914`). The suite contains 38 methods total: 32 H validator unit/fixture methods plus six Python/Node crypto interoperability methods.
 
 The authority callbacks remain deterministic test doubles. This extends local negative-path coverage; it does not authenticate real I/D/Storage proofs or prove production authority integration.
+
+
+## H expanded exact-head closure / H 扩展精确 HEAD 闭环
+
+H Phase 3.8.15 closure Blob `60e5eb98a07efcf87bc3f2be6fcf7fedb2196504` supersedes the earlier full-path closure. Current fixture Blob is `f911027c848d21dd36fb87ba64a201a1455787a7`. H run `44070924346` passed on exact commit `77a9d5e2e716ba33387f0beb1195f864ed8ac54f`, job `133996627914`. The suite has 38 methods: 32 H validator methods and six Python/Node C crypto interop methods. It includes a 22-field present-duplicate mutation matrix, C-P0 member + wire joint mutation/digest recomputation, C sequence namespace mismatch, I COMMIT_WON predicate, D exact fence binding, and Storage DB incarnation/GID/PrepareAttempt/participant-ledger binding.
+
+The test fixture's ten authority callbacks remain deterministic test doubles. The H validator verifies the C object digest and H/C wire mapping but does not authenticate the outer H envelope's own payload_digest/signature or transport identity. This remains an H gateway/authentication integration obligation.
