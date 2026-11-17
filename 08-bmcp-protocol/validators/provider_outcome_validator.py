@@ -1,0 +1,229 @@
+"""Fail-closed validator core for BMCP 1.2.11 C Provider Outcome records.
+
+The module is an integration seam, not a production-ready trust implementation.
+All authority-dependent checks are injected callbacks and MUST be supplied by
+the deployment. Missing callbacks produce UNKNOWN, never VALID.
+"""
+from __future__ import annotations
+
+import hashlib
+import json
+from dataclasses import dataclass
+from typing import Any, Callable, Optional
+
+import rfc8785
+from jsonschema import Draft202012Validator, FormatChecker
+
+
+SCHEMA_ARTIFACT_REVISION = "1.2.11"
+WIRE_SCHEMA_VERSION = "1.3.0"
+C_OBJECT_SCHEMA_ID = "urn:aimba:schema:c-submit-outcome:1.0.0"
+C_PROFILE_ID = "AIMBA-C-CRYPTO-1.0"
+
+# Wire field -> immutable C object field. The exact H schema remains the
+# structural authority; this table only defines duplicated-value equality.
+WIRE_TO_C = {
+    "c_submit_outcome_ref": "record_ref",
+    "c_submit_outcome_digest": "payload_digest",
+    "provider_outcome": "Outcome",
+    "provider_ref": "ProviderRef",
+    "provider_adapter_ref": "AdapterRef",
+    "provider_idempotency_key_ref": "IdempotencyKeyRef",
+    "final_request_boundary_id": "FinalRequestBoundaryRef",
+    "request_digest": "RequestDigest",
+    "transaction_ref": "CausalOrderTransactionRef",
+    "provider_outcome_evidence_ref": "OutcomeEvidenceRef",
+    "owner_admission_ref": "CAdmissionRef",
+    "owner_admission_digest": "CAdmissionDigest",
+    "owner_ledger_ref": "COwnerLedgerRef",
+    "owner_ledger_version": "COwnerLedgerVersion",
+    "owner_local_sequence": "COwnerLocalSequence",
+    "owner_high_water": "COwnerHighWater",
+    "owner_ledger_root": "COwnerLedgerRoot",
+    "coc_participant_intent_ref": "COCParticipantIntentRef",
+    "participant_reservation_ref": "COCParticipantReservationRef",
+    "coc_absence_reason": "COCAbsenceReason",
+}
+
+
+class DuplicateJSONKey(ValueError):
+    pass
+
+
+def _reject_duplicate_pairs(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise DuplicateJSONKey(f"duplicate JSON member: {key}")
+        result[key] = value
+    return result
+
+
+def _reject_non_json_constant(value):
+    raise ValueError(f"non-JSON numeric constant: {value}")
+
+
+def parse_strict_json(raw: bytes) -> dict[str, Any]:
+    if not isinstance(raw, bytes):
+        raise TypeError("raw JSON must be bytes")
+    text = raw.decode("utf-8", errors="strict")
+    value = json.loads(
+        text,
+        object_pairs_hook=_reject_duplicate_pairs,
+        parse_constant=_reject_non_json_constant,
+    )
+    if not isinstance(value, dict):
+        raise ValueError("top-level JSON value must be an object")
+    return value
+
+
+def _schema_errors(instance: dict, schema: dict) -> list[str]:
+    Draft202012Validator.check_schema(schema)
+    validator = Draft202012Validator(schema, format_checker=FormatChecker())
+    return [e.message for e in validator.iter_errors(instance)]
+
+
+def _semantic_errors(record: dict) -> list[str]:
+    errors = []
+    if int(record["COwnerLocalSequence"]) > int(record["COwnerHighWater"]):
+        errors.append("C owner local sequence exceeds high-water")
+    intent = record["COCParticipantIntentRef"]
+    reservation = record["COCParticipantReservationRef"]
+    absence_reason = record["COCAbsenceReason"]
+    if intent is None:
+        if reservation is not None or not absence_reason:
+            errors.append("null COC intent requires null reservation and explicit reason")
+    elif not isinstance(reservation, str) or not reservation or absence_reason is not None:
+        errors.append("non-null COC intent requires reservation and null absence reason")
+
+    outcome = record["Outcome"]
+    side_effect = record["SideEffectStatus"]
+    if outcome == "HANDOFF_ACCEPTED":
+        if not record.get("ProviderReceiptRef") or side_effect != "PROVEN_OCCURRED":
+            errors.append("HANDOFF_ACCEPTED requires provider receipt and PROVEN_OCCURRED")
+    elif outcome == "HANDOFF_REJECTED" and side_effect == "PROVEN_NONE":
+        if not record.get("ProviderNoHandoffProofRef") or not record.get("NotInvokedProofRef"):
+            errors.append("rejected-as-no-side-effect requires authoritative no-handoff proofs")
+    elif outcome == "NOT_INVOKED":
+        if side_effect != "PROVEN_NONE" or not record.get("ProviderNoHandoffProofRef") or not record.get("NotInvokedProofRef"):
+            errors.append("NOT_INVOKED requires durable no-handoff proofs and PROVEN_NONE")
+    elif outcome in ("UNKNOWN", "IN_DOUBT"):
+        if side_effect != "POSSIBLE_OR_UNKNOWN" or not record.get("UnknownReasonRef"):
+            errors.append("UNKNOWN/IN_DOUBT must remain nonterminal with a reason")
+    return errors
+
+
+def _p0(record: dict) -> dict:
+    # C-P0 is every present schema-allowed member except the derived digest
+    # and signature. additionalProperties=false prevents wildcard omissions.
+    return {k: v for k, v in record.items() if k not in ("payload_digest", "signature")}
+
+
+def _candidate_digest_and_preimage(record: dict) -> tuple[str, bytes]:
+    p0_bytes = rfc8785.dumps(_p0(record))
+    digest = hashlib.sha256(b"AIMBA-C-PAYLOAD-v1\0" + p0_bytes).hexdigest()
+    signed_projection = dict(_p0(record))
+    signed_projection["payload_digest"] = digest
+    signed_bytes = rfc8785.dumps(signed_projection)
+    preimage = (
+        b"AIMBA-C-SIGNATURE-v1\0"
+        + C_PROFILE_ID.encode("ascii")
+        + b"\0"
+        + record["message_id"].encode("ascii")
+        + b"\0"
+        + signed_bytes
+    )
+    return digest, preimage
+
+
+@dataclass
+class AuthorityChecks:
+    # Each callback returns True (verified), False (contradiction), or None
+    # (unavailable/unknown). No callback may trust a payload-supplied key.
+    verify_c_signature: Optional[Callable[[dict, bytes], Optional[bool]]] = None
+    verify_provider_evidence: Optional[Callable[[dict], Optional[bool]]] = None
+    verify_owner_ledger: Optional[Callable[[dict], Optional[bool]]] = None
+    verify_coc_join: Optional[Callable[[dict], Optional[bool]]] = None
+    verify_currentness: Optional[Callable[[dict], Optional[bool]]] = None
+
+
+def validate_provider_outcome(
+    envelope: dict,
+    c_object: dict,
+    envelope_schema: dict,
+    c_object_schema: dict,
+    checks: AuthorityChecks,
+) -> dict:
+    """Return VALID, INVALID, or UNKNOWN with fail-closed precedence."""
+    invalid = []
+    unknown = []
+
+    if envelope.get("schema_artifact_revision") != SCHEMA_ARTIFACT_REVISION:
+        invalid.append("wrong BMCP schema_artifact_revision")
+    if envelope.get("schema_version") != WIRE_SCHEMA_VERSION:
+        invalid.append("wrong BMCP schema_version")
+    if envelope.get("message_type") != "C_PROVIDER_OUTCOME_RECORDED":
+        invalid.append("wrong BMCP message_type")
+
+    invalid.extend("BMCP schema: " + e for e in _schema_errors(envelope, envelope_schema))
+    invalid.extend("C object schema: " + e for e in _schema_errors(c_object, c_object_schema))
+    if invalid:
+        return {"status": "INVALID", "errors": invalid, "unknown": []}
+
+    if c_object.get("schema_id") != "CSubmitOutcome" or c_object.get("schema_version") != "1.0.0":
+        invalid.append("wrong immutable C object schema identity")
+    if c_object.get("signature_profile_id") != C_PROFILE_ID:
+        invalid.append("wrong C signature profile identifier")
+    if envelope.get("c_submit_outcome_ref") != c_object.get("record_ref"):
+        invalid.append("c_submit_outcome_ref does not resolve to this immutable object")
+    if envelope.get("c_submit_outcome_digest") != c_object.get("payload_digest"):
+        invalid.append("c_submit_outcome_digest differs from C payload_digest")
+
+    for wire_name, object_name in WIRE_TO_C.items():
+        if wire_name in envelope:
+            if envelope[wire_name] != c_object.get(object_name):
+                invalid.append(f"wire/object mismatch: {wire_name} != {object_name}")
+        elif object_name in c_object and c_object[object_name] is not None:
+            # Optional wire fields can be omitted only where the exact wire
+            # schema makes them optional and the C object value is absent/null.
+            if object_name not in ("COCParticipantReservationRef", "COCAbsenceReason"):
+                invalid.append(f"required wire duplicate absent: {wire_name}")
+
+    invalid.extend(_semantic_errors(c_object))
+    if invalid:
+        return {"status": "INVALID", "errors": invalid, "unknown": []}
+
+    try:
+        computed_digest, preimage = _candidate_digest_and_preimage(c_object)
+    except Exception as exc:
+        return {"status": "INVALID", "errors": [f"C canonicalization failed: {type(exc).__name__}"], "unknown": []}
+    if computed_digest != c_object["payload_digest"]:
+        invalid.append("C payload_digest mismatch")
+    if invalid:
+        return {"status": "INVALID", "errors": invalid, "unknown": []}
+
+    callbacks = (
+        ("C signature/key status", checks.verify_c_signature, (c_object, preimage)),
+        ("provider evidence issuer", checks.verify_provider_evidence, (c_object,)),
+        ("C owner ledger inclusion/currentness", checks.verify_owner_ledger, (c_object,)),
+        ("COC intent/reservation join", checks.verify_coc_join, (c_object,)),
+        ("anti-rollback/currentness", checks.verify_currentness, (c_object,)),
+    )
+    for label, callback, args in callbacks:
+        if callback is None:
+            unknown.append(label + " verifier not configured")
+            continue
+        try:
+            result = callback(*args)
+        except Exception:
+            result = None
+        if result is False:
+            invalid.append(label + " verification contradiction")
+        elif result is None:
+            unknown.append(label + " evidence unavailable")
+
+    if invalid:
+        return {"status": "INVALID", "errors": invalid, "unknown": unknown}
+    if unknown:
+        return {"status": "UNKNOWN", "errors": [], "unknown": unknown}
+    return {"status": "VALID", "errors": [], "unknown": []}
