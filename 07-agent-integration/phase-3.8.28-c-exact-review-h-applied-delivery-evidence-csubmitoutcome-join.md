@@ -101,3 +101,21 @@ H 当前 26 项 CI 使用 Callback Doubles，C Vector 签名是占位值，Profi
 - H 生产互操作：**未接受/未验证**。
 - G Full Applied：**未证明**。
 - 全局 C/G/H Freeze/生产激活：**NO / NOT AUTHORIZED**。
+
+
+## 7. Current-head delta review — 2026-11-18
+
+A subsequent H Owner branch refresh moved H from the reviewed snapshot `9fb2097905ef653b3a2048ac5f6804fc94178d8d` to `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`. Current exact H source pins:
+- Schema: `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608` (unchanged)
+- Validator: `8febb915ec321cc37cf159b2f5b917a3f945726c`
+- Tests: `77cb66b895c5293a2f4883b1d5cb69775e71d00c`
+- C join addendum: `9ff4ac5b64b354f63add21a5d16d37da46835c07`
+- Hardening addendum: `4c220e998fc6ba700157598b0384dc3134cf8575`
+
+The current H validator keeps the C resolver/verifier seam and exact H/C record ref, sequence, payload digest and final-boundary equality checks. The later H delta also separates replay disclosure into two independently tri-state callbacks: current I authorization and current D ForgetFence. The test suite now contains 29 test methods, including separate D-fence denial, UNKNOWN and exception cases.
+
+The previously cited H CI run `44180835412` passed 26/26 on H head `9fb2097905ef653b3a2048ac5f6804fc94178d8d`; it is **not** evidence for the later H head `b14e388...` or the 29-test suite. No exact-head CI result for `b14e388...` was verified in this review. The C field-mapping acceptance therefore remains a delegated reference-candidate review, not a current-head CI pass, live C resolver proof, independent human Owner approval, or production interoperability acceptance.
+
+本次后续 H Owner 分支刷新已从原审查快照 `9fb2097905ef653b3a2048ac5f6804fc94178d8d` 前进至 `b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9`。当前精确来源 Blob 如上。当前 Validator 保留 C Resolver/Verifier 接缝及 H/C Record Ref、Sequence、Payload Digest、Final Boundary 精确相等检查；后续 H 变更还将 Replay Disclosure 拆分为两个独立的 Tri-state Callback：当前 I Authorization 与当前 D ForgetFence。测试套件现有 29 个测试方法，新增 D-Fence 拒绝、UNKNOWN 和异常用例。
+
+此前引用的 H CI Run `44180835412` 是在旧 Head `9fb2097...` 上 26/26 通过，**不能证明**后续 H Head `b14e388...` 或 29 项测试通过。本次未核实该精确 Head 的 CI 结果。因此 C 字段映射接受仍是委派角色的参考候选审查，不是当前 Head CI 通过、真实 C Resolver 证明、独立人类 Owner 批准或生产互操作验收。
