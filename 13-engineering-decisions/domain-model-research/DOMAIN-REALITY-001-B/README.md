@@ -4,16 +4,17 @@
 - Owner / 负责人: B — Principal Domain Model & Canonical Semantics Authority
 - Status / 状态: IN_PROGRESS — B0 PARTIAL / NOT PASSED; no canonical freeze
 - Branch / 分支: `research/domain-reality-001-b`
-- Historical research ancestor / 历史研究祖先: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
-- Current main HEAD at 2026-11-17 audit / 本次审计时 main HEAD: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
-- Latest currentness addendum / 最新时效性补充: `baseline-currentness-and-owner-source-audit.md`
+- Historical merge base / 历史合并基点: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- Current main HEAD observed / 当前 main HEAD 观察值: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
+- Current research branch HEAD at last read / 最近读取的研究分支 HEAD: `f289d3aa7997067a312101088a65017b6697d854`
+- PR: #55 — Open / Draft; no merge requested
 - Research date / 研究日期: 2026-11-17
 
 ## 1. Purpose / 目的
 
-This work establishes a minimal, complete, explicit, and verifiable canonical domain model for AI Memory Brain. A currentness/source-audit supplement and official-reference validation supplement were added after the first baseline pass; see those files for newer Owner heads and exact external source review. It audits actual repository contracts before proposing semantic changes. It does not replace Owner-local authority or decide physical implementation.
+This work establishes a minimal, explicit and verifiable candidate canonical domain model for AI Memory Brain. It audits actual repository contracts and mature external domain-modeling references before proposing semantic changes. It does not replace Owner-local authority or decide physical implementation.
 
-本研究为 AI Memory Brain 建立最小、完整、明确且可验证的规范领域模型。必须先审计仓库真实契约，再提出语义变更；不得取代各 Owner 的局部权威，也不决定物理实现。
+本研究为 AI Memory Brain 建立最小、明确、可验证的规范领域模型候选。提出语义变更前，必须审计仓库真实契约和成熟外部领域建模参考。不得取代各 Owner 的局部权威，也不决定物理实现。
 
 ## 2. Governance boundary / 治理边界
 
@@ -29,33 +30,39 @@ B 文档不得静默取代其他 Owner 的权威契约。冲突必须登记并�
 
 | Gate | Exit condition / 退出条件 | Status |
 |---|---|---|
-| B0 | Actual repository baseline, exact source pins, relevant PRs/issues and authority documents verified / 真实仓库基线、精确来源 Pin、相关 PR/Issue 与权威文档已核验 | PARTIAL |
-| B1 | Entity inventory classified; duplication and omissions assessed / 实体清单分类，重复与遗漏完成评估 | IN PROGRESS — candidate inventory + complexity assessment published |
-| B2 | Identity, state, temporal, evidence, provenance and relationships reconciled / 身份、状态、时间、证据、溯源与关系完成协调 | IN PROGRESS — candidate identity/state/temporal/relationship semantics published; owner reconciliation open |
-| B3 | A/C/D/E/F/G/H/I/Storage/Testing cross-owner matrix and conflict register / 跨 Owner 矩阵及冲突登记完成 | NOT PASSED — first-pass matrix and conflict register published; owner acceptances open |
-| B4 | Invariants, schemas, fixtures and validation specifications consistent / 不变量、Schema、Fixtures 与验证规范一致 | NOT READY — invariant/test specs published; schemas/tests intentionally not frozen or run |
-| B5 | GitHub commits, PR, exact readback and Blob verification / GitHub 提交、PR、精确读回与 Blob 核验完成 | IN PROGRESS — draft PR #55 created; final inventory/readback pending |
+| B0 | Actual repository baseline, exact source pins, relevant PRs/issues and authority documents verified / 真实仓库基线、精确来源 Pin、相关 PR/Issue 与权威文档已核验 | PARTIAL / NOT PASSED |
+| B1 | Entity inventory classified; duplication and omissions assessed / 实体清单分类，重复与遗漏完成评估 | IN PROGRESS — candidate inventory and complexity assessment published |
+| B2 | Identity, state, temporal, evidence, provenance and relationships reconciled / 身份、状态、时间、证据、溯源与关系完成协调 | IN PROGRESS — Fact/Claim and Claim identity ADR remains a decision request |
+| B3 | A/C/D/E/F/G/H/I/Storage/Testing cross-owner matrix and conflict register / 跨 Owner 矩阵及冲突登记完成 | NOT PASSED — owner acceptance and successor-pin reconciliation open |
+| B4 | Invariants, schemas, fixtures and validation specifications consistent / 不变量、Schema、Fixtures 与验证规范一致 | NOT READY — specification only; schemas and executable tests not authorized/run |
+| B5 | GitHub commits, PR, exact readback and Blob verification / GitHub 提交、PR、精确读回与 Blob 核验完成 | IN PROGRESS — branch and selected files read back; full 21-file final semantic parity audit pending |
 | B6 | Truly separate independent review and governance disposition / 真正独立审查与治理裁决完成 | INDEPENDENT_REVIEW_PENDING |
 
-## 4. Required deliverables / 必需交付物
+## 4. Required and supplemental deliverables / 必需与补充交付物
 
-1. README.md
-2. existing-domain-model-baseline.md
-3. canonical-domain-entity-inventory.md
-4. canonical-identity-semantics.md
-5. canonical-state-semantics.md
-6. canonical-temporal-evidence-semantics.md
-7. canonical-domain-relationships.md
-8. domain-model-complexity-assessment.md
-9. mature-domain-model-research.md
-10. cross-owner-canonical-semantics-matrix.md
-11. domain-semantics-conflict-register.md
-12. canonical-domain-invariants.md
-13. canonical-domain-glossary.md
-14. canonical-domain-model.md
-15. domain-model-decision-record.md
-16. validation/ (schemas, fixtures, tests and validation notes)
-17. evidence/ (source index and external research evidence)
+Core deliverables / 核心交付物：
+1. `existing-domain-model-baseline.md`
+2. `canonical-domain-entity-inventory.md`
+3. `canonical-identity-semantics.md`
+4. `canonical-state-semantics.md`
+5. `canonical-temporal-evidence-semantics.md`
+6. `canonical-domain-relationships.md`
+7. `domain-model-complexity-assessment.md`
+8. `mature-domain-model-research.md`
+9. `cross-owner-canonical-semantics-matrix.md`
+10. `domain-semantics-conflict-register.md`
+11. `canonical-domain-invariants.md`
+12. `canonical-domain-glossary.md`
+13. `canonical-domain-model.md`
+14. `domain-model-decision-record.md`
+15. `validation/README.md`
+16. `evidence/README.md`
+
+Supplemental audit/decision deliverables / 补充审计与决策交付物：
+- `baseline-currentness-and-owner-source-audit.md`
+- `baseline-owner-branch-snapshot-errata.md`
+- `fact-claim-identity-adr.md`
+- `evidence/official-reference-validation.md`
 
 Every normative deliverable must contain full Chinese and English semantics in the same file/change set. Unresolved statements remain OPEN, CANDIDATE, TO_VALIDATE or DEFERRED.
 
@@ -63,61 +70,38 @@ Every normative deliverable must contain full Chinese and English semantics in t
 
 ## 5. Current execution status / 当前执行状态
 
-Published on this branch so far / 本分支已发布：
-- existing-domain-model-baseline.md
-- baseline-currentness-and-owner-source-audit.md
-- canonical-domain-entity-inventory.md
-- canonical-identity-semantics.md
-- canonical-state-semantics.md
-- canonical-temporal-evidence-semantics.md
-- canonical-domain-relationships.md
-- domain-model-complexity-assessment.md
-- mature-domain-model-research.md
-- cross-owner-canonical-semantics-matrix.md
-- domain-semantics-conflict-register.md
-- canonical-domain-invariants.md
-- canonical-domain-glossary.md
-- canonical-domain-model.md
-- domain-model-decision-record.md
-- validation/README.md
-- evidence/README.md
-- evidence/official-reference-validation.md
-- evidence/official-reference-validation.md
-- baseline-currentness-and-owner-source-audit.md
+The current PR diff reports 21 changed files, 2,668 additions and 0 deletions. This count is PR metadata and must be refreshed after further commits. The research branch is historically based on merge base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; current main has advanced to `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The current compare reported 46 commits ahead and 26 behind, with status DIVERGED. GitHub's PR metadata returned mergeable=true / clean at the latest PR read, but that is only a mergeability signal and not approval. PR base metadata still reports a distinct older base SHA; no rebase or base retarget is requested here.
 
-Remaining work includes completion of A and Testing/Quality source inventory, full exact-version PR/Issue diff audit, explicit relationship and state owner acceptance, schema/fixture design after semantic closure, final readback, and independent review. / 剩余工作包括补齐 A 与 Testing/Quality 源清单、完整精确版本 PR/Issue Diff 审计、关系与状态的 Owner 明确验收、语义闭合后的 Schema/Fixture 设计、最终读回及独立审查。
+当前 PR Diff 元数据显示 21 个变更文件、2,668 行新增、0 行删除。该数量来自 PR 元数据，后续提交后必须刷新。研究分支历史上基于 Merge Base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`；当前 main 已推进至 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。最近 Compare 返回 46 commits ahead、26 behind，状态为 DIVERGED。最近 PR 元数据返回 mergeable=true / clean，但这仅是可合并性信号，不代表批准。PR base 元数据仍报告另一个较旧 SHA；本次不请求 Rebase 或修改 Base。
 
-The actual `main` baseline is pinned in the baseline report. The repository is an architecture-definition repository; README explicitly says implementation has not started by design. The existing B branch is `session-b-domain-model-phase3`; it is not the requested research branch and its Scope/Permission source Blob differs from current main. The research branch's historical merge-base is `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; current main later advanced to `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The branch is therefore historically based on the former, not the latter. Current main and this research branch are divergent; PR #55 remains Draft and no merge/rebase is requested.
+The repository is an architecture-definition repository; README states implementation has not started by design. Issue #7 still requires identification of the canonical runtime implementation repository and accountable engineering owner. No runtime conformance, production readiness, or implementation completion is claimed.
 
-真实 `main` 基线已在基线报告中 Pin。仓库是架构定义仓库；README 明确说明按设计尚未开始实现。已有 B 分支为 `session-b-domain-model-phase3`，它不是本次研究分支，且其 Scope/Permission 源 Blob 与当前 main 不同。研究分支的历史 Merge Base 为 `b372b62c640a2b656e54b6db62a4ee67d7d8c001`；当前 main 后续推进至 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。因此该分支基于前者，而非后者。当前 main 与研究分支存在分叉；PR #55 保持 Draft，不请求合并或 Rebase。
+该仓库是架构定义仓库；README 说明按设计尚未开始实现。Issue #7 仍要求确定规范运行时实现仓库及负责工程 Owner。不宣称运行时一致性、生产就绪或实现完成。
 
-## 6. Stop conditions / 停止条件
+## 6. Branch isolation and provenance / 分支隔离与溯源
 
-Any unresolved identity collision, contradictory state meaning, unowned lifecycle transition, cross-tenant reference ambiguity, Forget/Deletion/Visibility contradiction, or incompatible temporal definition blocks the affected normative contract. Owner decisions are never inferred from silence, summaries, or another Owner's synthesis.
+A subset of initial create-file operations landed on main because the branch parameter was omitted. The affected research artifacts were copied to this isolated branch, then removed from main through explicit delete commits. The audit records the affected paths and verification; main was not rewritten and historical commits remain auditable. This is a delivery-process correction, not a clean initial write.
 
-任何未解决的身份冲突、互斥状态含义、无权威归属的生命周期转换、跨 Tenant 引用歧义、Forget/Deletion/Visibility 矛盾或不兼容时间定义，均阻塞受影响的规范契约。不得从沉默、摘要或其他 Owner 的综合意见推断 Owner 决策。
+部分初始 create-file 操作因遗漏 branch 参数而写入 main。受影响研究工件已复制到本隔离分支，再通过明确删除提交从 main 移除。审计记录了受影响路径及核验结果；main 未被重写，历史提交仍可审计。这是交付流程纠正，不是从一开始就正确隔离。
 
+## 7. Stop conditions / 停止条件
 
-## 7. Branch isolation correction / 分支隔离纠正记录
+Any unresolved identity collision, contradictory state meaning, unowned lifecycle transition, cross-tenant reference ambiguity, Forget/Deletion/Visibility contradiction, incompatible temporal definition, or missing owner acceptance blocks the affected normative contract. Owner decisions are never inferred from silence, summaries, or another Owner's synthesis.
 
-A subset of initial create-file operations landed on main because the branch parameter was omitted. The exact affected research files were copied to this isolated branch, then removed from main through explicit delete commits. All 13 affected main paths were subsequently checked and returned NOT_FOUND; the branch contains the 19-file research package. Main was not rewritten and historical commits remain auditable. This correction is recorded transparently; it is not treated as a clean initial write.
+任何未解决的身份冲突、互斥状态含义、无权威归属的生命周期转换、跨 Tenant 引用歧义、Forget/Deletion/Visibility 矛盾、不兼容时间定义或缺少 Owner 验收，均阻塞受影响的规范契约。不得从沉默、摘要或其他 Owner 的综合意见推断 Owner 决策。
 
-部分初始 create-file 操作因遗漏 branch 参数而写入 main。受影响的研究文件已复制到本隔离分支，再通过明确的删除提交从 main 移除。随后对 13 个受影响的 main 路径逐一核验，均返回 NOT_FOUND；研究分支包含完整 17 个文件。main 未被重写，历史提交仍可审计。本纠正过程如实记录，不将其描述为从一开始就正确隔离。
+## 8. Latest additions / 最新增补
 
-## 7. Continued work — 2026-11-17 / 继续工作 — 2026-11-17
+- Baseline currentness and Owner source audit, including current-main pins and selected Owner source evidence.
+- Owner branch snapshot errata, correcting earlier branch-tip snapshots from later Phase 3.8 matrix data.
+- Fact/Claim and Claim identity ADR decision request; C2 + I1 are candidate recommendations only.
+- Official reference validation for DDD, Zep/Graphiti, Mem0, Letta, LangGraph, Temporal, PostgreSQL, W3C PROV-O, RDF/OWL and JSON Schema.
 
-- Added `baseline-currentness-and-owner-source-audit.md`: refreshed current-main and selected Owner source snapshots; B0 remains PARTIAL.
-- Added `baseline-owner-branch-snapshot-errata.md`: corrects older Owner branch-tip rows using the later Phase 3.8 snapshot in the cross-owner matrix.
-- Added `fact-claim-identity-adr.md`: explicit alternatives and a candidate recommendation; no Fact/Claim or Claim identity decision is claimed.
-- Added `evidence/official-reference-validation.md`: official domain-modeling reference survey; research patterns are not project contracts.
-- PR #55 remains Open / Draft. The branch is not merged and no architecture/schema freeze is requested.
+- 基线时效性与 Owner 源文件审计，包含 current-main Pin 和部分 Owner 源证据。
+- Owner 分支快照勘误，使用 Phase 3.8 矩阵中的后续数据纠正早期分支 Tip。
+- Fact/Claim 与 Claim 身份 ADR 决策请求；C2 + I1 仅为候选建议。
+- DDD、Zep/Graphiti、Mem0、Letta、LangGraph、Temporal、PostgreSQL、W3C PROV-O、RDF/OWL 和 JSON Schema 官方参考核验。
 
-Bilingual coverage and exact readback are still required after each subsequent write. B0 is PARTIAL / NOT PASSED; B2/B3 remain OPEN; B4 is NOT READY; B6 is pending truly independent review.
+B0 remains PARTIAL / NOT PASSED; B2 remains IN PROGRESS; B3 remains NOT PASSED; B4 remains NOT READY; B6 remains INDEPENDENT_REVIEW_PENDING. No merge is requested.
 
-- 新增 `baseline-currentness-and-owner-source-audit.md`：刷新 current-main 和部分 Owner 源快照；B0 仍 PARTIAL。
-- 新增 `baseline-owner-branch-snapshot-errata.md`：使用跨 Owner 矩阵中较新的 Phase 3.8 快照更正旧 Owner 分支 Tip。
-- 新增 `fact-claim-identity-adr.md`：列出明确备选方案及候选建议；不宣称已决定 Fact/Claim 或 Claim 身份。
-- 新增 `evidence/official-reference-validation.md`：官方领域建模参考研究；外部产品模式不是项目契约。
-- PR #55 仍为 Open / Draft。研究分支未合并，也未请求架构/Schema 冻结。
-
-每次后续写入后仍须完成双语覆盖和精确读回。B0 为 PARTIAL / NOT PASSED；B2/B3 仍 OPEN；B4 为 NOT READY；B6 等待真正独立审查。
+B0 仍为 PARTIAL / NOT PASSED；B2 仍进行中；B3 未通过；B4 未就绪；B6 等待独立审查。本次不请求合并。
