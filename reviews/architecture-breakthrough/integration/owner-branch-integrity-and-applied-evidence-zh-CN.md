@@ -182,3 +182,28 @@ H Phase 3.8.24 将 Applied Delivery Evidence 1.0.0 明确标为 **TEST/CONFORMAN
 - Issue #43: **G1 PARTIAL; G2–G5 BLOCKED; G6 PARTIAL; G7 PARTIAL; G8 NOT READY.**
 
 本报告只记录集成复核，不替代 H/C/G/I/D/E/Storage Owner 决议，不授权实现、合并、Gate release、部署或生产激活。
+
+
+## 10. ABR-INTEGRATION-003 — 跨 Owner Forget 有界模型扩展
+
+本轮新增可复现 Python explicit-state 模型，路径：
+- `reviews/architecture-breakthrough/integration/model/forget_cross_owner_model.py`
+- `reviews/architecture-breakthrough/integration/model/test_forget_cross_owner_model.py`
+- `reviews/architecture-breakthrough/integration/model/README.md`
+- 分支专用 CI：`.github/workflows/abr-forget-cross-owner-model.yml`
+
+**结果：**安全转换图在深度 14 内探索 27,472 个 state/depth pairs，未发现模型不变量违反；11 个削弱关键 guard 的变体均产生预期最短反例。模型回归测试和脚本均在 GitHub Actions run [44136327645](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44136327645) 成功，测试 HEAD 为 `89a680bbad7246952d51c61c137b0c3611f52a06`。
+
+新增覆盖：D ProducerWork/Fence high-water、E attempt/lease/DLQ/retry/Derived Registration、I COMMIT_WON/REVOCATION_WON/UNKNOWN 与 revocation hold、Storage visibility、F cache/read disclosure、inventory gap reopen、restore high-water replay、durable receipt/lost ACK retry。
+
+关键补充：
+- I COMMIT_WON 先于 revocation：只允许该精确 participant 完成；revocation 暂挂，Storage terminal 后才生效。
+- revocation 先赢：不得再 publication。
+- Fence 先赢：最终 visibility 不得提交；UNKNOWN/NO_PUBLICATION 必须解决，lease 终止证据后才关闭 barrier。
+- publication 先赢：后续 Fence 必须把它纳入 barrier，先 suppress 再 terminalize。
+- stale backup 的 D high-water 未 replay 前不能 release；replay 当前 D high-water 后才可 release。
+- ACK 丢失不回滚 durable receipt；同一 operation key + normalized digest 返回原 receipt。
+- **模型精化：**单独的 stale cache fill 不是外部 disclosure 的充分条件，只要最终 read gate 仍强制检查 Fence/Permission；stale cache 内容仍违反 cache freshness/fill 合同，但安全不变量应直接检查是否发生披露。原 A 模型把缓存回填本身作为反例，本模型把“残留字节”和“实际披露”区分开。
+
+此模型仍然是单 Producer/单 lineage/单 Fence 的有限抽象；不覆盖完整 producer/recipient/backup inventory、任意依赖 DAG、真实 MVCC/WAL/2PC、COC/G Applied 实现、I/Storage 多副本恢复和真实物理拓扑。**不是 TLC、无界证明或生产安全认证。**
+
