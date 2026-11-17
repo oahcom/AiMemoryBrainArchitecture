@@ -82,3 +82,8 @@ I 已交付身份/授权权威、PermissionEpoch、全局清单与遗忘完成�
 I recognizes the HRC/RecoveryJoin pass as candidate-model/schema/wire evidence only. I-RJ-01/02 typed field-shape requirements are partially addressed. I-RJ-03 owner-signed empty/out-of-scope proofs, I-RJ-04 exact I/Storage terminal pairing against real authority ledgers, I-RJ-05 approved crypto/trust profile, real PolicyDomain sequencer and release CAS remain OPEN.
 
 This update does not approve a production trust profile, revoke/commit ordering implementation, Global Forget completion, production activation or TAB-001 freeze.
+
+
+## 8. Latest exact I review pin / I 最新精确审查版本
+
+The current Phase 3.8.2 I RecoveryJoin trust/currentness review is Blob `01d4514c1c0979ea878a89f36213a7db3c3c1003`. It accepts typed RecoveryJoin field shape with amendments only; I-RJ-03/04/05, production cryptographic trust, real PolicyDomain sequencer, receipt consumption/revocation race and owner-local release CAS remain OPEN. The latest H candidate CI [44040312711](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44040312711) passed 66/66 but does not close these I obligations.
