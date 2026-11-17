@@ -182,3 +182,28 @@ Therefore the P0 / NOT READY Forget disposition in ABR-INTEGRATION-001 remains c
 - Issue #43: **G1 PARTIAL; G2–G5 BLOCKED; G6 PARTIAL; G7 PARTIAL; G8 NOT READY.**
 
 This report is an integration review only. It does not replace H/C/G/I/D/E/Storage Owner decisions or authorize implementation, merge, Gate release, deployment or production activation.
+
+
+## 10. ABR-INTEGRATION-003 — Bounded cross-owner Forget model extension
+
+A reproducible Python explicit-state model has been added:
+- `reviews/architecture-breakthrough/integration/model/forget_cross_owner_model.py`
+- `reviews/architecture-breakthrough/integration/model/test_forget_cross_owner_model.py`
+- `reviews/architecture-breakthrough/integration/model/README.md`
+- Branch-scoped CI: `.github/workflows/abr-forget-cross-owner-model.yml`
+
+**Result:** the safe transition graph explored 27,472 state/depth pairs through depth 14 with no modeled invariant violation; 11 weakened-guard mutants each produced the expected shortest counterexample. The model command and unittest regression suite both passed GitHub Actions run [44136327645](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44136327645), tested at `89a680bbad7246952d51c61c137b0c3611f52a06`.
+
+New coverage includes D ProducerWork/Fence high-water, E attempt/lease/DLQ/retry/Derived Registration, I COMMIT_WON/REVOCATION_WON/UNKNOWN and held revocation, Storage visibility, F cache/read disclosure, inventory-gap reopening, restore high-water replay, and durable receipt/lost-ACK retry.
+
+Important refinements:
+- I COMMIT_WON before revocation permits only that exact participant to complete; revocation is held until the Storage terminal outcome.
+- If revocation wins first, publication is forbidden.
+- If Fence wins first, final visibility cannot commit; UNKNOWN/NO_PUBLICATION must be resolved and lease terminal evidence established before barrier closure.
+- If publication wins first, a later Fence must include it in the barrier; suppress before terminalization.
+- A stale backup cannot be released until the current D high-water is replayed.
+- ACK loss does not roll back a durable receipt; the same operation key + normalized digest returns the original receipt.
+- **Model refinement:** a stale cache fill alone is not sufficient to constitute external disclosure if the final read gate still enforces current Fence/Permission. Stale cache contents may still violate cache freshness/fill contracts, but the security invariant should directly test whether disclosure occurred. The earlier A model treated cache refill itself as a counterexample; this model distinguishes retained bytes from actual disclosure.
+
+This remains a bounded single-Producer/single-lineage/single-Fence abstraction. It does not cover complete producer/recipient/backup inventory, arbitrary dependency DAGs, real MVCC/WAL/2PC, COC/G Applied implementation, multi-replica I/Storage recovery or a physical topology. **It is not TLC, an unbounded proof or production safety certification.**
+
