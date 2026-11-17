@@ -140,6 +140,7 @@ def _candidate_digest_and_preimage(record: dict) -> tuple[str, bytes]:
 class AuthorityChecks:
     # Each callback returns True (verified), False (contradiction), or None
     # (unavailable/unknown). No callback may trust a payload-supplied key.
+    verify_profile_registration: Optional[Callable[[dict], Optional[bool]]] = None
     verify_c_signature: Optional[Callable[[dict, bytes], Optional[bool]]] = None
     verify_provider_evidence: Optional[Callable[[dict], Optional[bool]]] = None
     verify_owner_ledger: Optional[Callable[[dict], Optional[bool]]] = None
@@ -202,6 +203,7 @@ def validate_provider_outcome(
         return {"status": "INVALID", "errors": invalid, "unknown": []}
 
     callbacks = (
+        ("C profile registration", checks.verify_profile_registration, (c_object,)),
         ("C signature/key status", checks.verify_c_signature, (c_object, preimage)),
         ("provider evidence issuer", checks.verify_provider_evidence, (c_object,)),
         ("C owner ledger inclusion/currentness", checks.verify_owner_ledger, (c_object,)),
@@ -226,3 +228,20 @@ def validate_provider_outcome(
     if unknown:
         return {"status": "UNKNOWN", "errors": [], "unknown": unknown}
     return {"status": "VALID", "errors": [], "unknown": []}
+
+
+
+def validate_raw_provider_outcome(
+    envelope_raw: bytes,
+    c_object_raw: bytes,
+    envelope_schema: dict,
+    c_object_schema: dict,
+    checks: AuthorityChecks,
+) -> dict:
+    """Strictly parse both raw byte streams before invoking the validator."""
+    try:
+        envelope = parse_strict_json(envelope_raw)
+        c_object = parse_strict_json(c_object_raw)
+    except (UnicodeDecodeError, DuplicateJSONKey, json.JSONDecodeError, ValueError, TypeError) as exc:
+        return {"status": "INVALID", "errors": [f"strict JSON parse failed: {type(exc).__name__}"], "unknown": []}
+    return validate_provider_outcome(envelope, c_object, envelope_schema, c_object_schema, checks)
