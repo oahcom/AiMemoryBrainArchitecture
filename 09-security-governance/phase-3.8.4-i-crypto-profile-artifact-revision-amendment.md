@@ -93,3 +93,10 @@ Python RFC 8785 + Ed25519 实现与 Node JCS + Ed25519 Oracle 是独立测试实
 This amendment is proposed. I will issue a separate exact-version review after the H schema, H mapping, vector set and CI run are all pinned to one immutable bundle. It does not approve production cryptographic activation, owner ledger deployment, COC quorum persistence, Storage visibility acceptance, JF-10 P0 closure or production activation.
 
 本修订仍为提案。待 H Schema、H Mapping、Vector Set 与 CI Run 全部绑定到同一不可变版本后，I 将另行出具精确版本审查。本修订不批准生产密码学启用、Owner Ledger 部署、COC Quorum 持久化、Storage Visibility 接受、JF-10 P0 关闭或生产激活。
+
+
+## 8. Membership proof follow-up / Membership Proof 后续
+
+I's owner membership proof contract is now separately pinned at Blob `b1e39c92252eadf8ca592f9a8dc6879cf44fd593`. The H companion RecoveryJoin schema 1.0.2 is Blob `4b664e3bce465499bcdfd93796349a4ba7074002`. D and C have supplied owner-specific candidate contracts at Blobs `d80dabe7210e681bc4e2290355a38f8b67be9ddd` and `5e37185610869951c3b392c9ad143a72b4c702ac`.
+
+I's exact H review is Blob `658ed437ecd05d226a6658a3f159ce28449b0b36`, with candidate-only disposition. D/C must still review their exact proof contracts and H RecoveryJoin 1.0.2. A must then perform the final exact-version integration review. This does not change I's production cryptographic approval boundary.
