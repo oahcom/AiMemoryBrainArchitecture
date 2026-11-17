@@ -26,7 +26,7 @@ def fixtures():
           "owner_ledger_root":s["owner_ledger_root"],"owner_snapshot_ref":s["owner_snapshot_ref"],
           "owner_snapshot_digest":s["owner_snapshot_digest"],"owner_snapshot_attestation_ref":s["owner_snapshot_attestation_ref"],
           "owner_snapshot_attestation_digest":s["owner_snapshot_attestation_digest"],
-          "owner_snapshot_membership_proof_ref":owner+"/membership-proof/"+ref,
+          "owner_snapshot_membership_proof_ref":owner+"/membership-proof/"+ref,"owner_snapshot_membership_proof_digest":"e"*64,
           "operation_identity_ref":"operation/"+ref,"operation_digest":"b"*64,"request_digest":"c"*64,
           "scope_binding_digest":"d"*64,"admission_state":"PENDING" if pref else "ADMITTED_NOT_REGISTERED",
           "effect_boundary":"RESERVATION" if owner=="C" else "WORK_ADMISSION",
@@ -42,7 +42,7 @@ def fixtures():
         "owner_snapshot_ref":a["owner_snapshot_ref"],"owner_snapshot_digest":a["owner_snapshot_digest"],
         "owner_snapshot_attestation_ref":a["owner_snapshot_attestation_ref"],
         "owner_snapshot_attestation_digest":a["owner_snapshot_attestation_digest"],
-        "owner_snapshot_membership_proof_ref":a["owner_snapshot_membership_proof_ref"],
+        "owner_snapshot_membership_proof_ref":a["owner_snapshot_membership_proof_ref"],"owner_snapshot_membership_proof_digest":a["owner_snapshot_membership_proof_digest"],
         "operation_digest":a["operation_digest"],"scope_binding_digest":a["scope_binding_digest"],
         "coc_participant_intent_ref":"participant/1"}]}
     local={"member_kind":"OWNER_LOCAL_ADMISSION",**{k:v for k,v in z.items() if k!="coc_absence_reason"},
