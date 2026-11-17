@@ -115,9 +115,20 @@ class CProviderOutcomeCrypto101Tests(unittest.TestCase):
                 "public_key_hex": output["public_key_hex"],
                 "signature_base64url": output["signature_base64url"],
             })
-        print("C_CRYPTO_101_EXPECTED_BEGIN")
-        print(json.dumps(summaries, separators=(",", ":")))
-        print("C_CRYPTO_101_EXPECTED_END")
+        expected = json.loads(EXPECTED.read_text(encoding="utf-8"))
+        self.assertEqual(expected["profile_id"], "AIMBA-C-CRYPTO-1.0")
+        self.assertEqual(expected["schema_version"], "1.0.1")
+        self.assertEqual(expected["status"], "CANDIDATE_TEST_ONLY_NOT_REGISTERED")
+        self.assertEqual(expected["seed_hex"], self.manifest["seed_hex"])
+        self.assertEqual(summaries, expected["vectors"])
+
+    def test_CRYPTO_101_C04_expected_vectors_decode_to_ed25519_lengths(self):
+        expected = json.loads(EXPECTED.read_text(encoding="utf-8"))
+        for vector in expected["vectors"]:
+            signature = base64.urlsafe_b64decode(vector["signature_base64url"] + "==")
+            public_key = bytes.fromhex(vector["public_key_hex"])
+            self.assertEqual(len(signature), 64)
+            self.assertEqual(len(public_key), 32)
 
 
 if __name__ == "__main__":
