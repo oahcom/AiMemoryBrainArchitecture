@@ -179,9 +179,9 @@ Storage 契约要求先持久化隐藏 Participant，绑定准确 D Participant/
 - Severity: **P3 — review metadata**
 - Status: **RESOLVED** in the PR description after this finding was recorded.
 - File: PR #28 description
-- Evidence: PR body says the current-head CI result is “pending after the prompt-library gate update”; the recorded workflow run `44050762889` completed successfully for the structural bilingual/prompt-library gate.
-- Risk: PR readers see an obsolete validation status.
-- Required correction: update the PR body with the actual run result and retain the qualification that structural CI does not prove semantic parity.
+- Evidence: the stale PR statement was replaced. On current PR head `d1196a1fa6bbab5d1b978c1344061a2c749e8b1b`, workflow runs `44058512458` and `44058466437` both completed successfully; job `GOV-DOC-001 structural checks` passed in both runs.
+- Risk: PR readers could otherwise see an obsolete validation status.
+- Resolution: PR body now records the current-head structural gate result and explicitly states that structural CI does not prove semantic parity.
 
 ## 7. Review boundaries and non-findings / 复审边界与未发现事项
 
