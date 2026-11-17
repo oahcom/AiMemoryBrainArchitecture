@@ -19,7 +19,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | File | Current language coverage | Parity status | Required action |
 |---|---|---|---|
 | README.md | Chinese mirrors added for B0–B6 exit conditions, all core deliverable descriptions, governance boundaries and current blockers; Blob `a77061e0032d771e704e04f1a3ea081c0368ab87` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Refresh live PR/head metrics; verify all gate statuses and branch-isolation claims against current records |
-| existing-domain-model-baseline.md | Full Chinese mirror added for repository/branch facts, all six domain source pins, bilingual guide pins, Owner branch heads, PR/Issue state, five major conflicts, missing definitions, confidence and B0 disposition; Blob `2b3739c62e039f8c8824aa464ccabb52216c2c8f` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Verify exact SHA values and reconcile the current-main HEAD/date with live commit metadata; verify Fact/Claim/I-04 nuance |
+| existing-domain-model-baseline.md | Full Chinese peer added for Owner branch heads, relevant PR/Issue impact, legacy B branch comparison, all five material semantic conflicts, missing definitions, confidence and B0 gate; Blob `08f2843db1d41027ee6d1bee9af564ce07a3a793` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently verify every branch/issue snapshot, exact source pin, conflict severity and authority attribution; refresh live states before acceptance |
 | baseline-currentness-and-owner-source-audit.md | Chinese mirrors added for main/domain Blob pins, current Owner heads, PR/Issue state, Phase 3.8 evidence, governance/testing authority and BIH acceptance correction; Blob `6183923c6d90b3eaf0b471e6707b2e3e21659e36` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Re-read live branch/PR refs; verify every status and exact Blob pin against current GitHub state |
 | baseline-owner-branch-snapshot-errata.md | Chinese mirror added for all ten Owner branch heads, exact artifact pins and acceptance limits; Blob `a96860efd61962633a5ad9e55b3353c151785411` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Re-read live refs before final acceptance; ensure no snapshot is misrepresented as approval |
 | fact-claim-identity-adr.md | Chinese peers added for source evidence, conceptual/identity alternatives, decision matrix, authority acceptance table and all eight required examples; Blob `0bbea0beec6a5828c2db5ae267fac40f59ad7f1f` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently compare each alternative, matrix cell, example and ADR status; ensure no recommendation was promoted to decision |
@@ -175,3 +175,9 @@ Author-side remediation has now added Chinese peer text to all 22 files, includi
 - `mature-domain-model-research.md` 已为七项成熟项目/技术研究章节及跨项目综合结论补齐详细中文对应内容，不再仅依赖摘要矩阵。精确 Blob：`1f31eee069f58e9da5b1eeecf7298af8b3c24882`。
 - This is author-side remediation only; independent source-claim and semantic parity review remains pending. B5 remains BLOCKED.
 - 这仅属于作者侧整改；外部来源主张与语义对等的独立复审仍待完成。B5 继续 BLOCKED。
+
+
+- `existing-domain-model-baseline.md` now includes a full Chinese peer for the Owner branch snapshot, relevant PR/Issue impact, legacy B branch comparison, all five material conflicts, missing definitions, confidence and B0 disposition. Exact Blob: `08f2843db1d41027ee6d1bee9af564ce07a3a793`.
+- `existing-domain-model-baseline.md` 已为 Owner 分支快照、相关 PR/Issue 影响、旧 B 分支比较、五项重大语义冲突、缺失定义、基线置信度及 B0 结论补齐完整中文对照。精确 Blob：`08f2843db1d41027ee6d1bee9af564ce07a3a793`。
+- Author-side remediation only; independent semantic parity and live-source reconciliation remain pending. B0 remains PARTIAL / NOT PASSED; B5 remains BLOCKED.
+- 仅属于作者侧整改；独立语义对等复审和实时来源协调仍待完成。B0 仍为 PARTIAL / NOT PASSED；B5 仍 BLOCKED。
