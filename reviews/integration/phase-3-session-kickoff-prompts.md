@@ -442,3 +442,10 @@ Explicit non-claims (what was not implemented or proven):
 ## Coordinator instruction
 
 Do not ask all sessions to independently produce a global architecture rewrite. The task is bounded remediation of identified gaps. When two sessions disagree, record the conflict and route it to the authoritative owner/ADR; do not resolve it by silently editing the other session's document. Main integration and final contract freeze happen only after the cross-module review.
+
+
+## Mandatory bilingual architecture deliverables / 强制中英双语架构交付
+
+This task MUST comply with [GOV-DOC-001 — Bilingual Architecture Documentation Policy](../../00-governance/bilingual-documentation-policy.md). Every architecture proposal, Owner review, interface/schema/state-machine change, ADR, integration decision, and acceptance report produced by this task MUST have Chinese and English counterparts updated in the same change set. Both versions must preserve identical scope, authority, normative force, decision status, findings, severity, evidence, caveats, and open issues. Stable identifiers and machine-readable values must remain unchanged. Update the repository-wide docs/translation-status.md register. Missing or stale counterparts block documentation acceptance unless a documented, time-bounded exception is approved under GOV-DOC-001.
+
+本任务必须遵循 [GOV-DOC-001《架构双语文档规范》](../../00-governance/bilingual-documentation-policy.md)。本任务产生的每项架构提案、Owner 审查、接口/Schema/状态机变更、ADR、集成决议和验收报告，都必须在同一变更集中提供或更新中英文版本。两种语言必须保持相同的范围、权威性、规范效力、决策状态、发现、严重级别、证据、限制和未决事项。稳定标识和机器可读值不得改变。必须更新全仓库 docs/translation-status.md 登记表。除非依据 GOV-DOC-001 获得有记录、有期限的正式例外，否则缺失或过期的语言版本会阻止文档验收。
