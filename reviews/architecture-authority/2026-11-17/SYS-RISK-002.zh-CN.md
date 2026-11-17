@@ -21,9 +21,11 @@
 
 ## 风险登记册
 
+**Storage 实时源修正（2026-11-17）：** `session-storage-consistency-forget-atomicity-2026-11-16`，`reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md`，Blob `bb544ba2f346bdc130d524bd5c7310d86f367988`。§8 已为 L1 逻辑架构选择 Option A；L4 物理引擎/部署仍 OPEN。文件读取接口未返回该分支 Commit SHA，仍属于 G1 证据项。
+
 | ID | 风险 | 等级 | 是否阻塞 | 责任权威 | 最低关闭证据 | Gate |
 |---|---|---:|---|---|---|---|
-| AR-01 | 物理序列化/可见性拓扑尚未选定 | Critical | 是 | Storage + D + I；A 集成 | 已批准拓扑 ADR、线性化点、事务/锁边界、权威读路径及崩溃/并发/故障切换证明 | G3/G4；JF-10 A/B/C |
+| AR-01 | L1 逻辑序列化配置已选定；L4 物理引擎/部署证明不完整 | Critical | 是 | Storage + D + I；A 集成 | Storage §8 已选择 Option A：每个 Canonical Memory Authority 一个 Serializable Transaction Domain；还须证明实际 DB Adapter/产品/配置、Anchor/Transition 持久性、HA/旧主 Fencing、权威读取、PITR/Restore 和物理 Race/Failover | G3/G4；JF-10 A/B/C |
 | AR-02 | Fact/Claim/Evidence/时间语义未规范性闭环 | Critical | 是 | B | B 权威 ADR、类型定义、修正/冲突案例、下游精确版本采用 | G2/G3 |
 | AR-03 | Forget/撤销/Restore 缺少端到端防复活证明 | Critical | 是 | I + D + Storage；E/F/G/C/H 消费者 | 闭世界 Inventory、Owner 证明、两种竞态顺序、Replay/索引/缓存/备份/还原测试 | G4；Forget Gate |
 | AR-04 | Publication、Provider Outcome 与 Applied 尚无完整证明链 | High | Applied 工作流阻塞 | C/G/H，依赖 I/D/Storage | 精确 Owner 合同、最终请求边界、同 Key 的 UNKNOWN 恢复、符合性测试 | G2/G4 |
@@ -36,7 +38,7 @@
 
 ## 五项根本风险
 
-1. 最终可见性和物理序列化没有落到已选定的权威拓扑。
+1. L1 逻辑序列化已选择（Storage Option A）；实际 L4 Engine/Deployment、权威 Adapter、HA/Fencing 和 Restore 符合性仍未证明。
 2. Canonical 领域真值（尤其 Fact/Claim、时间和证据语义）尚未由 B 关闭。
 3. Forget/撤销尚未以证明覆盖所有衍生物、缓存、重放、备份及还原路径。
 4. Identity/Security Governance 和全局 Inventory 缺少必要外部批准。
