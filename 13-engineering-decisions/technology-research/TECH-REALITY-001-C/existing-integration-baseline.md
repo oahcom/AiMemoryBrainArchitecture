@@ -73,3 +73,69 @@ D、E、F、G、H、I、Storage 均有独立 Owner 分支。本次记录了精�
 
 ### 基线结论
 C0 只能评为 PARTIAL。完整生产实现未由本次文档核验得到证明。所有未读取文件、未核验 Issue/PR Diff 和未完成的联合审查均应明确标记 NOT VERIFIED。
+
+
+
+## Additional exact research pins and open issues / 补充精确研究 Pin 与开放 Issue
+
+### A complete 14-file research package / A 的 14 项完整研究文件
+All 14 PR #45 changed files were fetched from the exact A branch and their Blob SHAs verified. Key additional files:
+| Path | Blob SHA |
+|---|---|
+| `architecture-complexity-audit.md` | `ab49c7003b00279999d8a986bb54be7433c689ac` |
+| `baseline/architecture-baseline.md` | `ad62c4568bf641b02872c805dca1aeb9bd5a8202` |
+| `independent-review-handoff.md` | `9a65b3648f349453b0abbd81fba6f67b2dfeccb6` |
+| `open-questions.md` | `b83dbee047c84f0c80b19fc3ec5350ec4fbc3f90` |
+| `owner-dependency-register.md` | `58fd1ecb1ef318de92a2ad9fa3ab9147ec2999a5` |
+| `owner-technology-review-synthesis.md` | `1a683a265d8fba0cbfbdf0bb3bdd3e25a12a767a` |
+| `research-evidence-register.md` | `f314ccbe88a294aeebdfc43ee57942ec623b84ee` |
+| `rust-ecosystem-assessment.md` | `4e1601975d9bf3a30fc779f00a6130294bd9ef61` |
+| `technology-capability-matrix.md` | `a03981d6dc5e01cd4f5830292f4270403b9cc6fd` |
+| `workload-model.md` | `726ed06a80d52bcb0a1e12bff82d6f20e73469ca` |
+
+Together with the four core pins above (README `e69498...`, recommendation `cc2269...`, mature research `115f47...`, topology `b526996...`), this accounts for all 14 changed files in PR #45. PR #56's independent review still requires remediation.
+
+### B research package source pins / B 研究包来源 Pin
+The following key B artifacts were fetched from branch `research/domain-reality-001-b` at head `f95b479b223ebb63c8aebcfca13a4cd9b28d5331`:
+| Path | Blob SHA |
+|---|---|
+| `README.md` | `4c78c656c9c8a80e4bf2c9d440381d6eb2191019` |
+| `canonical-domain-model.md` | `ce441336e2fbba7c7a28c0b4c75482d524a4ade7` |
+| `canonical-identity-semantics.md` | `bc8816eadcd14a1dd01ae03ed68de553b2bb1483` |
+| `canonical-state-semantics.md` | `2c42b4b9d8311e218d0e6fadd7b1f3a7d9c10017` |
+| `canonical-temporal-evidence-semantics.md` | `636c28a4d06e61702665ec4e6d7c5a6f034aba1c` |
+| `canonical-domain-invariants.md` | `51792426bb71609ceecf8d13491f9ab0b36c91eb` |
+| `canonical-domain-glossary.md` | `2dbf2e7c402eb551bace71039120975783128f08` |
+| `canonical-domain-entity-inventory.md` | `ca84d9b6fa1c835fdcab08b4a62302b97a2b84a2` |
+| `canonical-domain-relationships.md` | `277e7955d3c111ef43d5eda94c65647228f6d1a6` |
+| `canonical-domain-invariants.md` | `51792426bb71609ceecf8d13491f9ab0b36c91eb` |
+| `cross-owner-canonical-semantics-matrix.md` | `ebb59e57259cd9bae5522004e3b493a70285915b` |
+| `domain-model-complexity-assessment.md` | `38bee7501e52798152524665778c69659be6cf33` |
+| `domain-model-decision-record.md` | `b8a7ceb25a4c28ea4d261a9383b5b16f7c4c2037` |
+| `domain-semantics-conflict-register.md` | `01cf84cf81ca009024e29b5355cd993342f0fd78` |
+
+The complete B PR #55 package contains 21 files; 14 core model/research files listed here were read in this pass. Remaining seven files were not exhaustively read and remain NOT VERIFIED. PR #55 metadata records B0 PARTIAL/NOT PASSED, B5 BLOCKED/NOT PASSED, B6 INDEPENDENT_REVIEW_PENDING. The package is a research proposal, not approved domain authority.
+
+### C exact handoff contract / C 精确 Handoff 合同
+Historical C branch:
+- `07-agent-integration/phase-3.8.4-c-normative-provider-submit-outcome-contract.md` Blob `819705037da89834e10b6dd2ec6e66c1b8c70886`.
+- `07-agent-integration/schemas/c-submit-outcome-1.0.1.schema.json` Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`.
+- `phase-3.11.1-c-submit-outcome-1.0.1-sequence-namespace-amendment.md` Blob `6fa67af110ebbc5ef57ed908bb4880d99c5e46fb`.
+C Phase 3.8.4 explicitly states C is authoritative only for whether the immutable final request crossed the Provider handoff boundary; it does not own model completion, answer correctness, H wire, G Applied, I authorization, D Forget or Storage outcome. The five-state enum and exact semantics are documented in the C Outcome file; it remains not shared-wire-frozen.
+
+### Directly fetched open Issues / 本次直接读取的开放 Issue
+| Issue | State | Current title / relevance |
+|---|---|---|
+| #3 | OPEN | C/G/H Applied evidence and BMCP wire explicit owner freeze decision |
+| #4 | OPEN | I external dependencies: identity, authorization and Global Forget governance |
+| #5 | OPEN | Formal I36-GOV-01..10 governance approvals |
+| #7 | OPEN | Authoritative runtime implementation repository and accountable engineering owner not identified |
+| #10 | OPEN | JF-10 physical prepared-XID, persistent COC and fault recovery proof |
+| #25 | OPEN | D/E/I/Storage atomic producer admission and derivative visibility gate |
+| #29 | OPEN | HRC executable validation, bidirectional RecoveryJoin and physical topology proof |
+| #43 | OPEN | System-wide architecture consolidation and feasibility review |
+
+Issue #7's current body says this repository is intentionally an architecture repository and implementation is not started by design; no common root build entry point was found. This is a direct implementation-readiness blocker, not proof that no separate runtime repository exists.
+
+### 中文结论
+本次已直接读取 A 的 14 项 PR 文件；B 的 21 项研究文件中，已读取 README、规范领域模型、身份、状态、时间/证据、不变量、术语、实体清单、关系、跨 Owner 矩阵、复杂度、决策记录和冲突登记，共 14 项，剩余 7 项 NOT VERIFIED。另直接读取 Issue #3/#4/#5/#7/#10/#25/#29/#43，均为 OPEN。Issue #7 明确指出当前仓库是架构仓库，尚未启动实现，也未指定权威 Runtime 仓库和负责工程 Owner。

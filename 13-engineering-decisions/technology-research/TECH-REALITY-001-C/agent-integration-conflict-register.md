@@ -37,3 +37,10 @@ BLOCKING items fail closed. C cannot resolve B/D/E/F/G/H/I/Storage authority con
 | C-CON-012 | MEDIUM | Brain 端到端原型和基准未执行 | C/Testing/Runtime | 可复现 Harness 和测量结果 |
 
 BLOCKING 项必须 Fail Closed。C 不得通过重命名字段、添加竞争枚举或将作者自检接受视为 Owner 批准来消除冲突。任何 Blob SHA 变化都会使绑定旧 Blob 的审查失效。
+
+
+
+## Direct open-issue cross-reference / 开放 Issue 交叉引用
+The following project issues were directly fetched on 2026-11-18 and remain OPEN: #3 C/G/H Applied freeze, #4 I identity/authorization/Global Forget external decisions, #5 I36 governance approvals, #7 runtime repository/accountable engineering owner, #10 JF-10 physical recovery proof, #25 D/E/I/Storage producer admission and visibility, #29 HRC/RecoveryJoin and physical topology, #43 system-wide consolidation. These are external dependencies, not C-local issues that this PR can close.
+
+**中文：** 本次直接读取的 Issue #3/#4/#5/#7/#10/#25/#29/#43 均为 OPEN，分别涉及 C/G/H Applied 冻结、I 身份/授权/Global Forget 治理、I36 正式批准、Runtime 仓库与工程 Owner、JF-10 物理恢复、D/E/I/Storage Producer Admission、HRC/RecoveryJoin 和全系统收敛。这些是跨 Owner/项目级依赖，不是 C 可通过本 PR 自行关闭的事项。

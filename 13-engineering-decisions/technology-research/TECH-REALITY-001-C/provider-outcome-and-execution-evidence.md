@@ -78,3 +78,28 @@ C Phase 3.11.0 提议 C 数据面 Ed25519 密钥和 I 治理信任根，但 C/I 
 只有在权威 Attempt 状态、Provider 幂等语义、副作用风险、授权和 D/I Gate 都允许时才可重试。超时后先对账同一 Attempt 和 Provider Key。迟到结果作为原 Attempt 的新不可变观察记录；重复结果按 Digest 关联，冲突结果保留双方并进入 Reconciliation。取消请求不证明 Provider 已停止，也不证明外部副作用回滚。
 
 C Phase 3.11.0 提议 Ed25519 数据密钥和 I 治理信任根，但 C/I 配置尚未注册。CSubmitOutcome 1.0.1 增加 sequence_namespace_ref，以绑定签名序列与密钥状态事件的单调序列命名空间；仍是提案而非生产信任部署。H 1.2.15 也仍为候选。
+
+
+
+## Exact C handoff semantics readback / C Handoff 精确语义读回
+
+C Phase 3.8.4 Blob `819705037da89834e10b6dd2ec6e66c1b8c70886` is the exact C-owned semantic contract read in this pass. It explicitly says C alone classifies whether the exact immutable final inference request was handed to the named Provider and whether the handoff was accepted/rejected/not invoked/uncertain. It expressly does **not** own model execution completion, answer correctness, H wire, G Applied, I authorization, D ForgetFence or Storage/COC/JF-10 outcome.
+
+| C outcome | Exact semantic boundary | Retry/recovery rule |
+|---|---|---|
+| `HANDOFF_ACCEPTED` | Provider accepted the exact handed-off attempt; terminal for the handoff fact only | No second send for this Attempt; execution start/completion is separate evidence |
+| `HANDOFF_REJECTED` | Authoritative provider rejection proves no accepted execution/side effect for this attempt | New Attempt only with new identity and fresh I/D/C gates |
+| `NOT_INVOKED` | Positive C evidence proves no handoff crossed the egress boundary | New Attempt only after authoritative no-handoff proof and gate recheck |
+| `UNKNOWN` | C cannot establish whether boundary was crossed | Nonterminal/non-expiring; reconcile; do not infer absence |
+| `IN_DOUBT` | Handoff or provider side effect may have occurred, but authoritative outcome is unavailable | Nonterminal/non-expiring; no new Attempt/key; query same Provider key |
+
+A transport timeout, local exception, missing receipt/ACK, process crash, missing request row, empty queue, absent COC intent or provider lookup outage is never proof of NOT_INVOKED or HANDOFF_REJECTED. A same-attempt recovery reuses the exact provider idempotency key and immutable request digest. If the Provider offers no authoritative same-key idempotency/lookup, C cannot promise exactly-once effects; ambiguous handoff remains IN_DOUBT and automatic retry is disabled.
+
+CSubmitOutcome 1.0.1 schema Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` validates structure only. Its description explicitly leaves issuer authentication, append-only ledger inclusion, gate linearization, provider evidence and COC joins to semantic validation. The schema requires `sequence_namespace_ref`; Phase 3.11.1 binds record_sequence and key-status event sequence to the same durable monotonic namespace. The candidate signature profile `AIMBA-C-CRYPTO-1.0` remains NOT REGISTERED. This is not a production signing deployment.
+
+### 中文精确语义
+C Phase 3.8.4 明确规定：C 仅判断不可变最终推理请求是否跨越指定 Provider 的 Handoff 边界，以及该 Handoff 是否被接受、拒绝、证明未发生或仍不确定。C 不拥有模型执行完成、回答正确性、H Wire、G Applied、I 授权、D ForgetFence 或 Storage/COC/JF-10 结果。
+
+HANDOFF_ACCEPTED 仅对 Handoff 事实终态，不代表推理完成；HANDOFF_REJECTED 必须有权威拒绝和无副作用证据；NOT_INVOKED 必须有正向证据证明未越过 Egress；UNKNOWN 与 IN_DOUBT 均为非终态、不得自动过期。IN_DOUBT 下禁止创建新 Attempt 或新幂等键，必须用同一 Provider Key 对账。若 Provider 不提供权威幂等/查询能力，C 不能承诺 Exactly-Once，自动重试必须禁用。
+
+CSubmitOutcome 1.0.1 Schema 仅验证结构；Issuer Authentication、Append-only Ledger、Gate Linearization、Provider Evidence 和 COC Join 仍需语义验证。Schema 要求 sequence_namespace_ref；Phase 3.11.1 要求签名记录序列和 Key Status Event 序列位于同一持久单调命名空间。候选签名配置 AIMBA-C-CRYPTO-1.0 仍 NOT REGISTERED，不是生产签名部署。

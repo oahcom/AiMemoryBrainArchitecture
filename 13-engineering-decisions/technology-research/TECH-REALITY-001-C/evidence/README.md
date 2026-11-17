@@ -63,3 +63,15 @@ OpenTelemetry Context Propagation 说明 Trace Context 跨进程传播，以及�
 
 ### 中文说明
 上述来源补齐了 Anthropic Messages、Ollama Chat、Hugging Face Router/Failover、MCP 2025-11-25 和 OTel GenAI 规范迁移状态。它们只证明所列官方文档明确记载的能力，不证明完整 API 等价、稳定 Request ID、统一取消、幂等或许可证状态。上述未明确的内容仍需固定版本后逐项验证。
+
+
+
+## Additional project evidence pins / 补充项目证据 Pin
+- C Phase 3.8.4 Provider Handoff contract: `07-agent-integration/phase-3.8.4-c-normative-provider-submit-outcome-contract.md`, Blob `819705037da89834e10b6dd2ec6e66c1b8c70886`.
+- CSubmitOutcome 1.0.1 schema: `07-agent-integration/schemas/c-submit-outcome-1.0.1.schema.json`, Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`.
+- A PR #45 complete 14-file package: exact file pins are in `existing-integration-baseline.md`; all 14 were fetched in this pass.
+- B PR #55 selected 14 core domain research files: exact pins are in `existing-integration-baseline.md`; remaining 7 PR files are NOT VERIFIED.
+- Open issues directly fetched: #3, #4, #5, #7, #10, #25, #29, #43 — all OPEN.
+
+## 中文补充
+本目录新增 C Handoff 合同和 CSubmitOutcome 1.0.1 精确 Blob Pin；A 的 14 项 PR 文件均已读回；B 的 21 项研究文件中 14 项核心文件已读回；并直接核验八项关键开放 Issue 均处于 OPEN。
