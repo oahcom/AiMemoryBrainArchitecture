@@ -209,3 +209,19 @@ The controlling Storage JoinProof artifact is now Blob `0deffc2dcead5f88264417c2
 The 95 methods are HRC 25, JPF 19, WIRE 10, SCHEMA 14, TPH 26 and XLANG 1. SCHEMA-13/14 add structural checks for unified schema 1.2.7 artifact/wire version distinction and signature_profile_id field shape. They do not prove production semantic requiredness, I trust-registry resolution or cryptographic signature verification.
 
 Storage's logical JoinProof acceptance remains conditional. The run does not execute live COC quorum enumeration, owner-ledger adapters/signatures, Storage durable JoinProof append/readback, I/D/C release CAS, same-GID JF-10 physical resolution, or the D/Storage topology. T1–T8 and STORAGE-RJ-01..05 remain OPEN. No independent Owner signature or physical conformance PASS is claimed.
+
+
+## 14. H 97-test Recovery Cutoff 1.0.5 / RecoveryJoin 1.0.1 exact refresh
+
+Current controlling Storage JoinProof Blob: `eaa117aff6635597109c10745f2d70e63e6e0308`.
+
+H's current candidate schema/test pins:
+- Recovery Cutoff 1.0.5: `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`.
+- RecoveryJoin 1.0.1: `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`.
+- Unified COC/JF-10 1.2.8: `70b892797d07489936300a26c0dedfafe1d6e746`.
+- H semantic contract: `b32f4a0fe665feefa6eadd3f10c70deb28fe0ba5`.
+- Schema tests: `ff2b735ccdbf5d45f3c6b2ee9a25d14db2e3c7ad`.
+
+Latest run [44043100543](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44043100543), job `133902179251`, reports **97 tests ran, OK**. SCHEMA-15/16 add owner-snapshot attestation and typed empty/out-of-scope proof shape checks; they do not verify signatures, complete live pagination, I key status or actual currentness CAS.
+
+Storage accepts the expanded schema candidate shape as a logical proposal only. It does not change the bidirectional JoinProof authority split or close live COC/owner enumeration, signed proof dereference, durable JoinProof append/readback, I/D/C release CAS, JF-10 same-GID physical resolution or topology. No physical conformance PASS or independent Storage Owner signature is claimed.
