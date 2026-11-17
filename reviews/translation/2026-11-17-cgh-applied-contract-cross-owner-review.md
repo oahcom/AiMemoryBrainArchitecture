@@ -91,3 +91,10 @@ No cross-owner acceptance is inferred from another Owner's decision.
 5. Keep C/G/H freeze BLOCKED and all implementation/conformance statuses NOT VERIFIED / NOT RUN until their own evidence gates pass.
 
 **Conclusion:** The six-stage architecture is semantically aligned, but H's current Adapter Capability/Applied Attestation candidate is not yet a complete field-level contract for C's final-request proof and G's Applied acceptance. Translation must not conceal this gap.
+
+
+## 7. H candidate revision follow-up — 2026-11-17
+
+After this review identified H36-AP-01..07, H's Owner branch added §11 to `adapter-capability-and-applied-attestation.md`. The live exact Blob is now `db59b63e322d7255b8b400f47859dcac32bb3027`; the previously reviewed `ed6b43a29aa368d772c701ffc83309a5aadf3c00` is superseded for currentness. The addendum proposes explicit request/boundary identity, target/attempt mapping, region inventory/coverage, verifier-bound identity, I/D authority references, provenance, per-request bypass coverage, replay identity and temporal rules.
+
+Disposition: **candidate gap response drafted, not closed**. C and G have not accepted this exact Blob; I/D/B authority confirmations, H wire schema, generated SDK/interoperability, and conformance remain OPEN / NOT RUN. The six-stage semantic alignment finding remains valid; the seven field-mapping findings are now addressed by a proposal but are not marked RESOLVED until owner acceptance.
