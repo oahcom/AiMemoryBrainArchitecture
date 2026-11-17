@@ -127,6 +127,10 @@ traceability_exclusions:
     reason: Manifest-only reconciliation of the expanded commit inventory and historical exclusions; metadata bookkeeping, not implementation.
   - sha: 48ae0d421704b2682fa5be2a747572a86c6243fb
     reason: Manifest-only commit-inventory reconciliation; metadata bookkeeping, not implementation.
+  - sha: c38914dec04aeb8956a5a8c9fe052b94e0ed4daa
+    reason: Manifest-only bookkeeping reconciliation; metadata bookkeeping, not implementation.
+  - sha: bdc92b7f1442df495881edd119cee7b363de632f
+    reason: Manifest-only final bookkeeping reconciliation; metadata bookkeeping, not implementation.
   - current_manifest_self_update: Excluded by definition to avoid self-reference.
 self_review:
   status: RECORDED_NOT_INDEPENDENT
