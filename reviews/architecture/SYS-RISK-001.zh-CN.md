@@ -411,3 +411,58 @@ ADR 自身的 “Last reviewed baseline” 为 `ab19afbf92f67fe0a7679e9aa3a35b01
 6. 发布 Creation、Correction、Retraction、Conflict、Expiry/Revocation、Temporal Validity 和 As-of Read 的迁移/兼容计划及符合性向量。
 
 R-02 继续为 **Critical / BLOCKED**，阻塞 Canonical Schema/Identity Freeze。本 R 审查不选择任何方案，也不模拟或替代治理权威。
+
+
+## 16. R-03 实时来源增量 — Forget / Revocation / Restore 防复活 / 2026-11-17
+
+### 16.1 当前实时来源精确锚点
+
+| Owner | 当前分支 HEAD | 精确工件 | Blob SHA | 直接观察到的状态 |
+|---|---|---|---|---|
+| D | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | `03-memory-brain/forget-fence-and-completion-contract.md` | `1f0391bc49d007c44ec74165bd33d37412cc7990` | D Canonical Forget 语义 DECIDED；跨模块执行和全局完成政策 OPEN / 由 I 拥有 |
+| D | 同一 HEAD | `03-memory-brain/forget-fence-operation-and-publication-gate.md` | `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` | D 操作语义 DECIDED；D/E 接口 Schema、Storage 实现和跨 Owner 符合性 OPEN |
+| I | `0d071bf1ee7cc71912398c6ae57e4496e08f44ab` | `09-security-governance/forget-retention-backup-and-erasure-policy.md` | `f14cb2149ca3f817229533005ab89dbdc7f0b3a8` | 全局治理合同 CANDIDATE；D/E/F/G/H 实现及外部接收方证明 OPEN |
+| I | 同一 HEAD | `09-security-governance/global-forget-target-inventory-and-completion-evidence.md` | `9100061fa986fb6676656169de3fcf9fc1c72664` | CANDIDATE Inventory/Completion 合同；各 Owner 符合性 OPEN |
+| I | 同一 HEAD | `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md` | `e3b1b5d99eb36ac0b395854d8c19287d2b64b752` | I 语义执行提案；Token Schema 和符合性 OPEN |
+| Storage | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | `reviews/storage-consistency/phase-3.6.5-restore-control-highwater-and-quarantine-contract.md` | `4f656163aeba532a441eaed1d293a48e2363cb4a` | 架构合同候选；需要 I/D/A 精确审查 |
+| Storage | 同一 HEAD | `reviews/storage-consistency/phase-3.6.5-storage-restore-highwater-owner-acceptance.md` | `d3923fe42bec04d9f5233c7a810303da80b73bc2` | 仅 Storage 技术接受；I/D/A 接受和物理恢复演练仍 OPEN |
+| Storage | 同一 HEAD | `reviews/integration/phase-3.6-forget-atomicity-verification-report.md` | `9f224722a40844686d275e44a8ab6ba72fa1ddb8` | 历史验证报告明确标记 I 治理阻塞、测试阻塞/未运行、实现未验证且未声称 Global Forget；其内嵌分支快照早于当前 HEAD |
+| F | `1908ce4d233b20f7cafd00cb679affd01bd15174` | `05-memory-runtime/phase-3.6-runtime-forget-suppression-and-invalidation.md` | `ce59252dbbdc5d10d016704797e9ba12d5a941bd` | F Runtime 语义 DECIDED；跨 Owner 接口 OPEN；实现/执行 NOT VERIFIED |
+| F | 同一 HEAD | `05-memory-runtime/phase-3.6-anti-resurrection-reference-model-evidence.md` | `15049d448ace5ad24a6c02eba3fc906fcac149f6` | 证据文件报告旧 F Commit `f1ba5c478e395da6b126423e32e20d0990e61920` 上逻辑测试 19/19 通过；明确列出非生产限制 |
+| G | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G 语义决策已记录；C/G/H Applied 合同 FREEZE BLOCKED；实现/执行 NOT VERIFIED |
+
+### 16.2 已规定的内容与未被证明的内容
+
+**D Canonical Fence/Barrier 语义已有较完整规定。** 当前 D 合同区分即时逻辑抑制、异步衍生清理和物理擦除；定义持久化单调 Fence、Closed-world Producer Registration、Barrier High-Water 捕获、Dependency Inventory、Register-before-visible、迟到衍生物导致证明失效，以及 UNKNOWN 时 Fail-closed。D 操作合同要求 ProducerWork Registration 与 Fence Installation 处于同一个线性化顺序域，并要求在 Artifact 从 Private 变为 Visible 的同一边界再次检查最新 Fence。
+
+**I 全局完成仍是候选治理政策，而非已批准的运行权威。** I 政策要求 Closed-world Producer Domain Inventory、不可变 Target Inventory Seal、逐目标认证证据、显式例外，以及覆盖 D/E/F/G/H、外部接收方、Backup/Replica 和 Audit 的类型化完成向量。它区分 Suppression、Cleanup 与 Physical Erasure；Offline/Unsupported/Timeout 必须保持 Unknown。但全局政策和 Inventory 合同都标记 CANDIDATE，当前 I Restore Enforcement 文档也将 Token Schema/Conformance 保留为 OPEN。这是任何 Global Forget Completion 声明的直接治理阻塞。
+
+**F 本地 Anti-resurrection 有价值但范围有限的逻辑证据。** 当前 F Model/Test/Workflow Blob 分别为 `33fa2ca2dc29771aca241e194f13e078a4f8d774`、`c2575327a75577923440ef770d42122218a1e091` 和 `c0fac9eff93ca46e466cda5fe04613bd4565e9b3`。证据文件报告在旧 Commit `f1ba5c478e395da6b126423e32e20d0990e61920` 上 19/19 测试通过，而非当前 F 分支 HEAD `1908ce4d233b20f7cafd00cb679affd01bd15174`。Model/Test 源 Blob 与当前分支相同，但 CI 并非当前 HEAD 的精确运行。更重要的是，该模型是内存模型，不执行真实 Index、Cache、并发进程、Storage Transaction、网络分区、Adapter Reconnect、外部目标或 Backup Restore。其自身明确不认证 Global Forget。
+
+**I 与 Storage 逻辑模型同样是有限测试证据，不是生产证明。** I 当前 Model/Test Blob 为 `5233da028e409ec3f41848582dad73a923e7155b` 和 `428e15c6263b5b2d730b93ce5412d55e782a449b`；证据记录旧 Commit `8a6a6e67696c496e265b3d87f1a550fe5e8bb2a0` 上 30/30 测试通过。当前 Model/Test Blob 与该证据一致，但运行 Commit 不是当前 I HEAD `0d071bf1ee7cc71912398c6ae57e4496e08f44ab`。Storage 当前 Restore Model/Test Blob `be0aef6232c8ee2ed6179df7b0a74473c3e25b3b` / `a9e1a96b449c6bf0e2b52c5fea394a8c32961a24` 与其报告的旧 Commit `19798634fb0d55cb0c901c8f4194506fab96b75b` 上 25/25 测试通过相匹配。两者均为内存逻辑模型；均未执行真实 Proof API 验证、数据库恢复、旧主隔离、外部密钥验证或生产恢复。
+
+**G 合同不是 Purge 证明。** 它要求 Context Tombstone、Snapshot/Delta 失效、Delivery 取消、Applied 历史事实/当前可用性分离及 Reconciliation。它明确不声称 F Index/Cache 清理、H Adapter 本地清除或 I Global Completion。自身状态仍为实现/执行 NOT VERIFIED。
+
+### 16.3 仍未关闭的 R-03 失败路径缺口
+
+1. **跨 Owner 原子顺序：** D Fence/Producer Barrier、Storage Final Visibility、I Revocation/PolicyDomain Sequencer 和 COC Recovery Log 仍是不同权威。必须用当前精确部署/API/崩溃协议证明所有相关顺序；不得推定跨日志原子提交。
+2. **Closed-world 完整性：** I Inventory 仍为候选。迟到 Producer、外部接收方、Backup 路径、新 Replica 或未登记衍生物都可能使先前 Seal/Completion 失效。
+3. **进行中工作和延迟发布：** D/E 语义规定稳定 WorkItem Identity、Attempt/Lease、Retry/DLQ/Replay 和 Delayed Publisher 处理，但尚未证明真实 E Queue/Worker 与 Storage Outbox Handler 在并发和进程崩溃下遵守同一 Fence。
+4. **Runtime 与 Context 本地清理：** F/G 模型和合同不能证明所有生产 Partition、Cache Shard、Working Set、Snapshot、Delta、Offline Adapter 和 Pending Delivery 均已抑制或物理清除。
+5. **Restore Anti-rollback：** Storage Restore 合同要求 Quarantine 并重新核验 COC/I/D/Storage High-Water，但仍是需要 I/D/A 审查的候选。模型产生的成功 Receipt 状态为 RECONCILED_BUT_FENCED，不会放行 Serving。
+6. **物理擦除与外部副本：** I 政策区分逻辑抑制和物理擦除；Provider、人工导出、外部接收方、Backup 到期及 Legal Hold 证据仍是治理/运维义务。本轮没有执行或验证任何外部删除或物理介质擦除。
+
+### 16.4 R-03 结论与关闭条件
+
+R-03 继续为 **Critical / NOT PROVEN**。逻辑 Owner 合同和内存回归模型减少了语义歧义，但没有端到端证据证明 Forgotten Target 不会通过 Producer Retry、Dependency Expansion、Index Rebuild、Cache Fill、Context Replay、Adapter Reconnect、External Provider Copy、Backup Restore 或 Delayed Outbox Delivery 重新出现。
+
+关闭条件：
+1. I 正式批准 Global Inventory、Completion Vector、Exception、Retention 和 External-copy Policy；每类 Target 及实例均在有责任人的权威注册表中登记。
+2. D/E/Storage 联合采纳当前精确版本的 Producer Registration、Barrier Snapshot、Complete Dependency Inventory、Visibility Linearization 和 NO_PUBLICATION Proof；R-01 的 D/Storage Anchor 采纳必须明确。
+3. F/G/H 发布逐目标 Suppression/Cleanup/Clear 证据，并绑定类型化 Scope、Authority、Attempt、Watermark 和 Capability；UNKNOWN/Offline 保持未解决。
+4. Restore 使用当前签名 COC/I/D/Storage High-Water Proof，先 Quarantine 再服务，隔离旧主，核对所有 Participant，并在释放前重新读取控制状态。
+5. 确定性对抗测试覆盖 Publish-vs-Forget 两个串行顺序，以及 Retry/DLQ/Replay、迟到衍生物、Cache Fill、Index Rebuild、Context Delta、Adapter Reconnect、Outbox Replay、Backup Restore、Stale Primary 和 Registry Expansion 的崩溃点。
+6. 所有测试绑定精确当前 Source/Schema/Adapter/Database Revision；随后执行实现级并发/崩溃/故障测试及有见证的 Restore Drill。
+7. 获取外部接收方和 Backup/Physical Erasure 证据，或取得明确、限定范围、独立批准且未过期的政策例外。
+
+任何本地 Owner 模型、角色模拟、候选政策或历史 CI 都不能关闭 R-03。本报告不声称 Global Forget 已完成。
