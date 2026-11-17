@@ -167,6 +167,7 @@ Exact additional source pins:
 - D Phase 3.8.4 Owner Snapshot Membership Proof: Blob `d80dabe7210e681bc4e2290355a38f8b67be9ddd`.
 - I Phase 3.8 Commit Authorization Receipt and Revocation Sequencer: Blob `54bab0484bd232a5a258e65e34cc7425288b39a6`.
 - I Phase 3.8.4 Owner Snapshot Membership Proof: Blob `88209bbea0ab600880c5c630cfe83af31ee16dd7`.
+- C Phase 3.8.4 Owner Snapshot Membership Proof: Blob `5e37185610869951c3b392c9ad143a72b4c702ac`; C exact H review Blob `ea2e11519646225679eadc8b33af0d755998d92e` (delegated C-role review, not independent human Owner signature).
 - H RecoveryJoin 1.0.2 schema: Blob `4b664e3bce465499bcdfd93796349a4ba7074002`.
 - H Phase 3.8.4 Unified Manifest Union Contract: Blob `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175`.
 - Storage Phase 3.8 Visibility Participant and Atomic Outcome Contract: Blob `175ee7b1349cfdb79a19898b311a88391ed88010`.
