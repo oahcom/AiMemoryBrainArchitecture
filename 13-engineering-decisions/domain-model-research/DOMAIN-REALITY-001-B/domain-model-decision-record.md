@@ -46,7 +46,7 @@
 - Problem: downstream consumers could freeze incompatible Claim/Fact schemas.
 - Alternatives: adopt overview; adopt guide blocker; silently treat Fact as Claim subtype.
 - Evidence: overview Blob 4d1debc0ec19b3917f9e76d04bb66da4df4cd346; guide Blobs a9f53a453aec25c47c58c4aea75adc43c83028d3 and 8a19cebacf5aefb0aded5fdbfeaff406291a5cf1; A PR #53.
-- Decision: preserve ADR-BLOCKED; do not use old overview wording to freeze dependent schema. Supplemental decision request B-ADR-FACT-CLAIM-001 (fact-claim-identity-adr.md, Blob 0bbea0beec6a5828c2db5ae267fac40f59ad7f1f) recommends C2 (Fact as qualified Claim concept) + I1 (stable Claim lineage with immutable version-local snapshots), but explicitly remains CANDIDATE / NOT DECIDED / NOT ACCEPTED / NOT SCHEMA-FROZEN.
+- Decision: preserve ADR-BLOCKED; do not use old overview wording to freeze dependent schema. The earlier research ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 once preferred C2/Option B, but that recommendation is superseded. Current B Owner ADRs (summary Blob a1024938ff5baba069cf128c69496a44e143330c; detailed Blob df77e4a93cb8fef689ae7c828888d960cbf381d6) prefer Option A as CANDIDATE only. Formal Architecture Governance approval remains absent; no option is decided, accepted or schema-frozen.
 - Consequences: Claim/Fact identity and version representation remain open.
 - Complexity: delays schema but avoids false certainty.
 - Affected owners: B/D/E/A.
@@ -156,7 +156,7 @@
 | B-DEC-001 | Memory 内容、标签、Embedding 和来源文本可能变化/重复；内容 Hash 会造成身份漂移或误合并。 | 内容 Hash 身份；可变数据库主键；不透明稳定领域 ID + 独立内容摘要。 | 推荐领域身份独立于内容/版本；ID 算法尚未选择。稳定引用和版本谱系需要 Registry 及禁止复用规则。 | 语义原则 DECIDED；实现 ID 算法 CANDIDATE。 |
 | B-DEC-002 | 多模块传递 Principal/Actor/Agent/Scope/Environment ID，载荷引用可能被误认为认证身份或访问权。 | 无类型 ID；统一 Actor ID；由 Owner Registry 解析的类型化命名空间引用。 | 保留不同类型引用；Ref 不证明认证、注册或权限。需要显式映射和逐边界验证，提升 Tenant/Scope 隔离。 | B 规范采纳 CANDIDATE；既有委托技术基线仅作证据，不推断新的 Owner 批准。 |
 | B-DEC-003 | Memory 生命周期与 Claim 认知地位回答不同问题。 | 一个合并状态 Enum；独立类型化状态维度。 | 保持两套独立维度，避免 Active 被误读为 Verified、Archived 被误读为 False。 | 源规范 DECIDED。 |
-| B-DEC-004 | Overview 的 DECIDED 与双语 Guide 的 ADR-BLOCKED 不一致；下游可能冻结不兼容的 Fact/Claim Schema。 | 采用 Overview；采用 Guide 阻塞；静默把 Fact 当作 Claim 子类型。 | 保留 ADR-BLOCKED。补充 ADR 请求 B-ADR-FACT-CLAIM-001 提议 C2+I1，但仅为候选，不是决定/接受/Schema 冻结。 | BLOCKING / OPEN。 |
+| B-DEC-004 | Overview 的 DECIDED 与双语 Guide 的 ADR-BLOCKED 不一致；下游可能冻结不兼容的 Fact/Claim Schema。 | 采用 Overview；采用 Guide 阻塞；静默把 Fact 当作 Claim 子类型。 | 保留 ADR-BLOCKED。研究 ADR Blob 958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593 此前曾倾向 C2/Option B，但该建议已被取代。当前 B Owner ADR（摘要 Blob a1024938ff5baba069cf128c69496a44e143330c；详细 Blob df77e4a93cb8fef689ae7c828888d960cbf381d6）仅将 Option A 作为 CANDIDATE。正式 Architecture Governance 批准仍缺失；没有任何方案已决定、接受或冻结 Schema。 | BLOCKING / OPEN。 |
 | B-DEC-005 | 系统必须解释信息来源、证据支持和派生过程；单一 Source 字段无法回答三者。 | 单一 Source 对象；分离 SourceRef、Evidence 对象和 Provenance Trace。 | 保持语义区分；Source/Provenance Edge 是否每条都独立成实体仍 OPEN。 | 区分 DECIDED；身份粒度 OPEN。 |
 | B-DEC-006 | Event、Observation、Claim 和系统记录发生于不同时间；单一 Timestamp 会丢失历史真值和历史知识。 | 单一时间；仅 Valid Time；仅 Record Time；全局双时态；选择性双时态。 | 保留 Event/Observed/Recorded/Valid/Transaction 时间差异；推荐仅对时间敏感 Claim/Relation/Revision 使用双时态。 | 推荐 CANDIDATE；Schema/权威 OPEN。 |
 | B-DEC-007 | 不可变版本、审计和恢复是必要的，但外部副作用与 Forget 会增加 Replay 复杂度。 | 全系统 Event Sourcing；纯可变状态；状态 + 不可变版本 + 目标操作账本。 | 推荐规范 Memory 使用状态 + 不可变版本 + 追加式生命周期/审计记录；只在需要顺序/恢复时使用持久操作账本。 | RECOMMENDED。 |
@@ -225,7 +225,7 @@ This checkpoint records the current exact source state. It does not promote cand
 
 | B2 topic / B2 主题 | Exact source / 精确来源 | Current disposition / 当前处置 | Closure authority / 关闭权威 |
 |---|---|---|---|
-| Fact vs Claim concept / Fact 与 Claim 概念 | Architecture invariant I-04, main Blob `33b037318e459ebb73bea33b3186f31a41d5dcfe`; B ADR `fact-claim-identity-adr.md`, Blob `0bbea0beec6a5828c2db5ae267fac40f59ad7f1f` | Fact and Claim remain distinct concepts under I-04/P-04. The current B Owner ADR prefers Option A (separate Fact attestation object + Claim proposition thread) as a **CANDIDATE**; no option is approved and the formal Architecture Governance decision remains **ADR-BLOCKED**. The earlier C2/Option B recommendation in the research ADR is superseded. | B explicit ADR decision; D/E consumer impact acceptance; A exact contract registration. |
+| Fact vs Claim concept / Fact 与 Claim 概念 | Architecture invariant I-04, main Blob `33b037318e459ebb73bea33b3186f31a41d5dcfe`; B Owner ADR summary Blob `a1024938ff5baba069cf128c69496a44e143330c` + detailed Blob `df77e4a93cb8fef689ae7c828888d960cbf381d6`; research reconciliation ADR Blob `958e7f3a3a909ee5b6d9fb38ebf3a72b3a9bd593` | Fact and Claim remain distinct concepts under I-04/P-04. The current B Owner ADR prefers Option A (separate Fact attestation object + Claim proposition thread) as a **CANDIDATE**; no option is approved and the formal Architecture Governance decision remains **ADR-BLOCKED**. The earlier C2/Option B recommendation in the research ADR is superseded. | B explicit ADR decision; D/E consumer impact acceptance; A exact contract registration. |
 | Claim identity across MemoryVersions / Claim 跨 MemoryVersion 身份 | Core entity source Blob `8cb5a674eec8eac1f3c4d83c400dc08d00166f23`; immutable MemoryVersion ClaimSnapshot model; B ADR above | I1 (stable Claim identity + immutable version-local revisions/snapshots) is the least-complex candidate; I2 remains viable; I3 deferred. Identity-changing vs non-identity-changing update policy is not decided. | B ADR; D MemoryVersion lifecycle/Forget acceptance; E derivation/deduplication acceptance; F/G consumer acceptance; Storage atomicity acceptance. |
 | Typed domain identity / 类型化领域身份 | B formal type confirmation Blob `3a1e77889cd9a90cd5822d9f0cb3437880868706` | B has approved ActorRef, ScopeRef and EnvironmentRef semantic mapping within exact B authority. This does not freeze H wire paths, approve I trust/policy, designate Environment Registry Authority or prove runtime conformance. | B for domain semantics; H for wire; I for trust/authorization; A for registry/integration. |
 | Scope vs Permission / Scope 与 Permission | Current main `02-domain-model/scope-and-permission-model.md`, Blob `b5215ae27bd65a6c89c185b496f730b6cd52efa9` | Separation and isolation are DECIDED; scope algebra, policy language, inheritance edge cases, cached authorization and revocation guarantees remain OPEN/CANDIDATE. ScopeRef does not grant Permission. | B for domain scope semantics; I for policy, grants, revocation and PermissionEpoch; A for registry authority. |
@@ -234,14 +234,14 @@ This checkpoint records the current exact source state. It does not promote cand
 
 ### 7.1 Explicit non-decisions / 明确未决事项
 
-1. Do not select C1 or C2 as final Fact/Claim representation. I-04's conceptual distinction remains; independent object identity vs qualified-Claim representation remains open.
+1. Do not select Option A or Option B as final Fact/Claim representation. B prefers Option A only as a candidate; Architecture Governance approval is absent. I-04/P-04 and the main overview/terminology conflict remain open.
 2. Do not select I1/I2/I3 as final Claim identity/version policy. I1 remains candidate only.
 3. Do not create/freeze Fact, Claim, ClaimSnapshot or cross-MemoryVersion identity schemas.
 4. Do not collapse Scope into Permission, Tenant into Scope, EnvironmentRef into ScopeRef, PrincipalRef into ActorRef, or Conversation into RuntimeSessionRef.
 5. Do not infer I36 governance approval from the technical BIH baseline or any delegated review.
 6. Do not treat an absent Owner objection, a candidate matrix, or a role-simulated review as acceptance.
 
-1. 不得将 C1 或 C2 选为最终 Fact/Claim 表示。I-04 的概念区分继续有效；Fact 是独立对象身份还是限定 Claim 表示仍开放。
+1. 不得将 Option A 或 Option B 选为最终 Fact/Claim 表示。B 仅将 Option A 作为候选偏好；Architecture Governance 批准仍缺失。I-04/P-04 与 Main Overview/术语冲突仍开放。
 2. 不得将 I1/I2/I3 选为最终 Claim 身份/版本策略。I1 仍仅为候选。
 3. 不得创建/冻结 Fact、Claim、ClaimSnapshot 或跨 MemoryVersion 身份 Schema。
 4. 不得合并 Scope 与 Permission、Tenant 与 Scope、EnvironmentRef 与 ScopeRef、PrincipalRef 与 ActorRef，或 Conversation 与 RuntimeSessionRef。
