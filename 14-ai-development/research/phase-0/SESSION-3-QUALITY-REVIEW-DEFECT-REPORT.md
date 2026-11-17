@@ -50,6 +50,36 @@ The main gap is operational traceability, not the absence of more principles. Fo
 
 The minimum quality-control model may use seven Gate check dimensions: Scope, Prompt Integrity, Implementation, Test, Review, Defect, and Acceptance. Preserve the existing AI-STD-001 Finding Severity vocabulary: BLOCKER, P0, P1, P2, and P3 are Finding Severity levels. Gate Disposition is a separate proposed dimension using NOT_EVALUATED, PASS, BLOCKED, CONDITIONAL, or NOT_APPLICABLE. BLOCKER must not be redefined as a Gate state.
 
+### Seven Gate dimensions mapped to the existing lifecycle / 七个 Gate 维度与既有生命周期映射
+
+The seven proposed Gate dimensions are evidence/checklist views over the existing AI-STD-001 work-item lifecycle and AI-PROC-001 iteration stages. They are **not** a second lifecycle, independent state machine, or replacement for DoR/DoD. Existing lifecycle states and authorized transitions remain authoritative.
+
+| Gate dimension | Existing lifecycle / process stage | DoR / DoD relationship | Accountable role | Minimum evidence |
+|---|---|---|---|---|
+| Scope | AI-STD-001 PROPOSED → ANALYZED; AI-PROC Stage 0–1 | DoR: outcome, non-goals, Owner, dependencies, acceptance criteria | Sponsor + accountable Owner | Work Item, impact/dependency map, scope and acceptance criteria |
+| Prompt Integrity | PROMPT_READY; AI-PROC Stage 2 | DoR: versioned/reviewed prompt and exact source/base refs | Prompt author + prompt reviewer; Owner accountable | Prompt ID/version/hash, review record, source pins |
+| Implementation | IN_PROGRESS → IMPLEMENTED; AI-PROC Stage 4 | DoD: scoped change, commit and changed paths | Accountable Owner | Branch, commit SHA, diff, self-check |
+| Test | VERIFIED; AI-PROC Stage 5 | DoD: applicable checks executed; NOT RUN remains explicit | Testing/Quality + accountable Owner | Commands, environment, logs, exact tested SHA |
+| Review | REVIEWED; AI-PROC Stage 6 | DoD: independent review and finding disposition | Independent Reviewer | Exact-Head review, independence disclosure, findings |
+| Defect | Cross-cutting over VERIFIED/REVIEWED/INTEGRATION_READY/ACCEPTED; AI-PROC Stages 5–8 | DoD: findings resolved or explicitly accepted under authority; no silent closure | Finding Owner; Acceptance Authority for risk acceptance | Stable finding ID, severity, state history, closure proof or risk record |
+| Acceptance | INTEGRATION_READY → ACCEPTED → MERGED → CLOSED; AI-PROC Stages 7–8 | DoD: integration, acceptance and traceability closeout | A/Integration Architect + designated Acceptance Authority | Owner boundary approvals, acceptance record, merge SHA, closeout |
+
+Gate disposition is recorded independently from Finding Severity and lifecycle state. For example, a P1 Finding may exist while the Review Gate is FAIL and the work item lifecycle remains REVIEWED or BLOCKED; the finding must not be recoded as a Gate state. No Gate dimension may independently advance the lifecycle or bypass the existing transition/authority rules.
+
+**七个 Gate 维度只是既有 AI-STD-001 工作项生命周期和 AI-PROC-001 迭代阶段上的证据/检查视图，**不是第二套生命周期、独立状态机，也不替代 DoR/DoD。现有生命周期状态和授权转换规则继续保持权威。
+
+| Gate 维度 | 既有生命周期 / 流程阶段 | DoR / DoD 对应关系 | 责任角色 | 最低证据 |
+|---|---|---|---|---|
+| Scope 范围 | PROPOSED → ANALYZED；AI-PROC Stage 0–1 | DoR：目标、非目标、Owner、依赖、验收标准 | Sponsor + Accountable Owner | Work Item、影响/依赖图、范围与验收标准 |
+| Prompt Integrity 提示词完整性 | PROMPT_READY；AI-PROC Stage 2 | DoR：提示词版本化、审查及准确来源/Base 引用 | Prompt 作者 + Prompt Reviewer；Owner 负责 | Prompt ID/版本/Hash、审查记录、来源固定点 |
+| Implementation 实现 | IN_PROGRESS → IMPLEMENTED；AI-PROC Stage 4 | DoD：范围内变更、提交和变更路径 | Accountable Owner | 分支、Commit SHA、Diff、自检 |
+| Test 测试 | VERIFIED；AI-PROC Stage 5 | DoD：执行适用检查；NOT RUN 必须如实记录 | Testing/Quality + Accountable Owner | 命令、环境、日志、准确测试 SHA |
+| Review 审查 | REVIEWED；AI-PROC Stage 6 | DoD：独立审查和 Finding 处置 | Independent Reviewer | 精确 Head 审查、独立性披露、发现项 |
+| Defect 缺陷 | 横跨 VERIFIED/REVIEWED/INTEGRATION_READY/ACCEPTED；AI-PROC Stage 5–8 | DoD：Finding 已解决或经授权明确接受；禁止静默关闭 | Finding Owner；风险接受由 Acceptance Authority 负责 | 稳定 Finding ID、严重度、状态历史、关闭证明或风险记录 |
+| Acceptance 验收 | INTEGRATION_READY → ACCEPTED → MERGED → CLOSED；AI-PROC Stage 7–8 | DoD：集成、验收和可追溯关闭 | A/Integration Architect + 指定 Acceptance Authority | Owner 边界批准、验收记录、Merge SHA、收尾对账 |
+
+Gate Disposition 必须与 Finding Severity 和生命周期状态分别记录。例如，某个 P1 Finding 存在时，Review Gate 可以为 FAIL，而 Work Item 生命周期仍处于 REVIEWED 或 BLOCKED；不得将 Finding 严重度改写为 Gate 状态。任何 Gate 维度都不能自行推进生命周期或绕过既有状态转换/授权规则。
+
 The repository is primarily an architecture and governance definition repository, not a complete production runtime implementation repository. Architecture/documentation acceptance, contract acceptance, reference-model verification, production implementation verification, production conformance, and deployment acceptance must be reported separately. A passing reference-model test is not evidence that a production runtime has passed.
 
 This is a Phase 0 research artifact. It is not an approved normative standard and does not authorize Phase 1 implementation, changes to existing standards, PR merges, or production deployment.
