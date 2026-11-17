@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 RECOVERY_SCHEMA = ROOT / "schemas" / "bmcp.recovery-cutoff-1.0.4.schema.json"
 JOIN_SCHEMA = ROOT / "schemas" / "bmcp.recovery-join-1.0.0.schema.json"
+UNIFIED_SCHEMA = ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.7.schema.json"
 
 
 class SchemaCandidateIntegrity(unittest.TestCase):
@@ -14,6 +15,7 @@ class SchemaCandidateIntegrity(unittest.TestCase):
     def setUpClass(cls):
         cls.recovery = json.loads(RECOVERY_SCHEMA.read_text(encoding="utf-8"))
         cls.join = json.loads(JOIN_SCHEMA.read_text(encoding="utf-8"))
+        cls.unified = json.loads(UNIFIED_SCHEMA.read_text(encoding="utf-8"))
 
     def test_SCHEMA_01_recovery_schema_is_draft_2020_12_and_closed_root(self):
         self.assertEqual(self.recovery["$schema"], "https://json-schema.org/draft/2020-12/schema")
@@ -90,6 +92,19 @@ class SchemaCandidateIntegrity(unittest.TestCase):
     def test_SCHEMA_12_not_registered_disposition_binds_operation_and_scope(self):
         no = self.join["$defs"]["noParticipantDisposition"]
         self.assertTrue({"operation_identity_ref", "operation_digest", "scope_ref", "gate_generation", "scope_generation"}.issubset(set(no["required"])))
+
+    def test_SCHEMA_13_unified_1_2_7_artifact_and_wire_versions_are_distinct(self):
+        self.assertEqual(self.unified["$id"], "https://schemas.aimemorybrainarchitecture.invalid/bmcp.coc-jf10-unified/1.2.7")
+        self.assertIn("1.2.7", self.unified["title"])
+        common = self.unified["$defs"]["commonEnvelope"]
+        self.assertIn("1.2.7", common["description"])
+        self.assertEqual(common["properties"]["schema_version"]["const"], "1.2.0")
+
+    def test_SCHEMA_14_signature_profile_id_is_explicit_but_compatibility_optional(self):
+        common = self.unified["$defs"]["commonEnvelope"]
+        self.assertIn("signature_profile_id", common["properties"])
+        self.assertNotIn("signature_profile_id", common["required"])
+        self.assertEqual(common["properties"]["digest_algorithm"]["const"], "SHA-256")
 
 
 if __name__ == "__main__":
