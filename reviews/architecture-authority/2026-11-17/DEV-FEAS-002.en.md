@@ -1,6 +1,6 @@
 # Development Feasibility Matrix — DEV-FEAS-002
 
-- Version: 1.0.0; baseline: `main@6470f25ca23b8d35c06f60be2326867066418d18`
+- Version: 1.0.0; baseline: `historical assessment snapshot `6470f25ca23b8d35c06f60be2326867066418d18` (not current main)`
 - Source: F/D/P PR #46, branch `review/session-3-engineering-planning-2026-11-17`, commit `8b9ff8efa92a88dacc8f97b5faba5918fe5d2edc`, EN Blob `081610b1734ec08dc7c35c75fae1cae3ca713be4`, ZH Blob `834dc39998342dc2f292fe1dfed411768b3ed156`.
 - A verdict: **FEASIBLE_WITH_CONDITIONS in principle; current implementation entry BLOCKED**.
 
@@ -53,3 +53,8 @@ May proceed only in an isolated, non-production spike scope: synthetic fixtures,
 No production data, canonical visibility, security policy implementation, provider side effect, schema freeze or production deployment is authorized by this assessment.
 
 See DEP-DAG-002, PRIORITY-002, READINESS-002 and GATE-002.
+
+
+## Current main HEAD / 当前 Main HEAD
+
+The current main HEAD independently observed for this publication is `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The earlier `6470f25...` / `b372b62...` values are historical assessment snapshots, not current main. This package has not completed a full source-by-source delta audit against current main; G1 remains PARTIAL and all Gate/freeze restrictions remain in force.
