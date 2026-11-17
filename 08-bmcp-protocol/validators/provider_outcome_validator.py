@@ -1,4 +1,4 @@
-"""Fail-closed validator core for BMCP 1.2.11 C Provider Outcome records.
+"""Fail-closed validator core for BMCP 1.2.12 C Provider Outcome records.
 
 The module is an integration seam, not a production-ready trust implementation.
 All authority-dependent checks are injected callbacks and MUST be supplied by
@@ -15,7 +15,7 @@ import rfc8785
 from jsonschema import Draft202012Validator, FormatChecker
 
 
-SCHEMA_ARTIFACT_REVISION = "1.2.11"
+SCHEMA_ARTIFACT_REVISION = "1.2.12"
 WIRE_SCHEMA_VERSION = "1.3.0"
 C_OBJECT_SCHEMA_ID = "urn:aimba:schema:c-submit-outcome:1.0.0"
 C_PROFILE_ID = "AIMBA-C-CRYPTO-1.0"
