@@ -28,7 +28,7 @@
 | Wire interop candidate suite | session-h-bmcp-protocol | 1a4e754ba9bfa57eb973c6d39731e9f89443b323 |
 | Schema integrity suite | session-h-bmcp-protocol | 5292d56661e938c905c61455e9ed53c4ff674c54 |
 | H branch test workflow | session-h-bmcp-protocol | ea7a3d9c365b84352d3bac69da94fe0d510e46a4 |
-| Storage bidirectional JoinProof contract | session-storage-consistency-forget-atomicity-2026-11-16 | 4520860b28429d35cdb2ca947a56d0ccb64226a3 |
+| Storage bidirectional JoinProof contract | session-storage-consistency-forget-atomicity-2026-11-16 | 5b3f81ada75994cabc6fdab8537d7f185e6c6287 |
 | Storage serialization topology ADR | session-storage-consistency-forget-atomicity-2026-11-16 | 080433f8e13a500522bc2754da64057edb0ae9d8 |
 | A deterministic conformance matrix | session-a-integration-2026-11-16 | c556125b279271c1cc57fca0b49584b5b1f302b2 |
 
@@ -155,7 +155,7 @@ H has added row-digest and typed owner-evidence requirements to RecoveryJoin 1.0
 - I receipt/terminal evidence requires PolicyDomain, PermissionEpoch, inventory epoch, issuer key and authorization receipt;
 - C provider and Storage prepared/resolution evidence carry their owner-specific tuple fields.
 
-The latest H schema Blob is dd3234aa1c74caf6d0e335875cd96e0b2b64082f. The latest HRC suite Blob is 60a2f4db4bd12f2131ecd147db9bbe328da6db50. The Storage JoinProof contract is now Blob 4520860b28429d35cdb2ca947a56d0ccb64226a3.
+The latest H schema Blob is dd3234aa1c74caf6d0e335875cd96e0b2b64082f. The latest HRC suite Blob is 60a2f4db4bd12f2131ecd147db9bbe328da6db50. The Storage JoinProof contract is now Blob 5b3f81ada75994cabc6fdab8537d7f185e6c6287.
 
 These are schema and test-candidate refinements only. No CI run, cross-language interop PASS or owner signature is claimed.
 
@@ -189,3 +189,8 @@ The first run [44039825581](https://github.com/oahcom/AiMemoryBrainArchitecture/
 ## 10. CI evidence update
 
 GitHub Actions run 44039990464, job 133891944149, checked out H commit da94bcc1796cb350eed12845e49cbc3663faab9c and completed 66/66 candidate tests successfully. The raw log enumerates all HRC/JPF/SCHEMA/WIRE cases as OK. This does not close the production wire, cryptographic, owner-adapter, physical DB, COC quorum, or failover/restore blockers.
+
+
+### 10.1 H candidate CI evidence
+
+GitHub Actions run 44039990464 completed 66/66 HRC/JPF/WIRE/SCHEMA candidate tests successfully on H commit da94bcc1796cb350eed12845e49cbc3663faab9c. This upgrades the test inventory from committed/unrun to candidate-suite PASS. It does not close production wire/crypto, independent implementation interoperability, live owner-ledger/COC adapters, JF-10 physical behavior or Storage topology/HA/restore blockers.
