@@ -37,6 +37,6 @@
 
 ## 状态转换
 
-只有在所有不可豁免的语义/权威前置条件关闭，或在批准的有界范围内明确保留为 Gate 阻塞项后，ARCHITECTURE_NOT_READY 才可进入 ARCHITECTURE_READY_WITH_CONDITIONS。ARCHITECTURE_READY_FOR_IMPLEMENTATION 还要求实现权威、Owner 合同和实现准入证明。ARCHITECTURE_READY_FOR_FREEZE 要求 G1–G8 及所有相关 Owner 决策/证据齐备。以上任何状态均不等于生产授权。
+只有在指定架构范围所需的所有不可豁免语义、权威、原子性和安全前置条件均已满足，且仅剩具有完整记录的非阻塞残余条件时，ARCHITECTURE_NOT_READY 才可进入 ARCHITECTURE_READY_WITH_CONDITIONS。任何 Gate 阻塞 P0/P1 事项不得重新标记为已接受条件。ARCHITECTURE_READY_FOR_IMPLEMENTATION 还要求实现权威、精确 Owner 合同和实现准入证明。ARCHITECTURE_READY_FOR_FREEZE 要求 G1–G8 及所有相关 Owner 决策/证据齐备。以上任何状态均不等于生产授权。
 
 参见 FINAL-A-002 和 GATE-002。
