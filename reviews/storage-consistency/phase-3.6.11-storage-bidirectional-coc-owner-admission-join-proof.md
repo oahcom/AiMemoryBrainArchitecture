@@ -260,7 +260,7 @@ H has now committed the following candidate artifacts to its owner branch:
 
 - H semantic validator contract 3.6.10 latest: Blob `142425b6280f7e0fe517489bc87bc81db892225a`
 - H recovery-cutoff structural schema 1.0.4: Blob `d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1`
-- H RecoveryJoin structural schema candidate 1.0.0: Blob `9a0aa3f2b5165a12e4326437c95e91d9f1adbe75`
+- H RecoveryJoin structural schema candidate 1.0.0: Blob `f531c1d4b89a48457188c4988f140952759223a6`
 - H executable HRC semantic suite: Blob `794ac0c34aaad921e5d4a5bcc42b6601f7caf817`
 - H wire interoperability candidate suite: Blob `18e50957848178f3f35593b3e618dfa9b90cdb31`
 
@@ -273,3 +273,26 @@ Storage owns the logical bidirectional join invariants, durable JoinProof persis
 The H RecoveryJoin schema is a candidate. It does not make Storage the issuer of I/D/C gate releases and does not make a valid structural document proof of owner-ledger completeness. Storage may commit a JoinProof record only after both authoritative sides have been completely read and joined; each owner still independently evaluates its release predicate in its own serialization domain.
 
 **Status:** JoinProof contract and H wire candidate are published. Independent Owner review, actual schema/semantic adapter, CI execution, DB/COC physical realization and failover/restore evidence remain OPEN.
+
+## 13. Exact owner request and admission row mapping (H 1.0.4 → RecoveryJoin 1.0.0)
+
+The join must not collapse three different owner-side concepts:
+
+- OwnerAdmissionRef: stable admission identity carried by the signed OWNER_ADMISSION_ENTRY message and referenced by the COC participant's owner_admission_ref.
+- OwnerEntryRef: exact ledger-row identity carried by an owner snapshot member's owner_entry_ref.
+- OwnerAdmissionEntryDigest: digest of the exact owner snapshot admission member row.
+
+The JoinProof edge carries OwnerAdmissionRef + OwnerEntryRef + OwnerAdmissionEntryDigest + owner-local sequence namespace/value. It must resolve both the signed admission identity and the exact row in the captured owner snapshot. A matching string in one namespace does not replace the other binding.
+
+The RecoveryJoinProof also carries owner_request_dispositions for every request member in each I/D/C snapshot. This is necessary because a request can be pending, out-of-scope with proof, or later admitted; it is not equivalent to an admission and need not yet have a COC ParticipantIntent. Every request row is bound by OwnerRequestRef, OwnerEntryRef, OwnerRequestDigest, owner-local sequence namespace/value, Scope and owner signature. OUT_OF_SCOPE_WITH_PROOF requires an explicit proof reference. A missing request disposition blocks the JoinProof even if all admission and participant edges match.
+
+The H schema keeps the COC ParticipantManifest's owner_admission_ref as the primary C admission anchor. I and D evidence are separate typed edges; the COC participant owner_kind is not overloaded to represent all three owner authorities.
+
+Latest H pins:
+- RecoveryJoin schema candidate: f531c1d4b89a48457188c4988f140952759223a6
+- H semantic validator contract: fe9a9a5b65d34de0366bce6f996da9739eb8ca5f
+- HRC semantic suite: 794ac0c34aaad921e5d4a5bcc42b6601f7caf817
+- Wire interop suite: 1a4e754ba9bfa57eb973c6d39731e9f89443b323
+- Schema integrity suite: 5292d56661e938c905c61455e9ed53c4ff674c54
+
+The tests remain unrun; these are executable candidates only.
