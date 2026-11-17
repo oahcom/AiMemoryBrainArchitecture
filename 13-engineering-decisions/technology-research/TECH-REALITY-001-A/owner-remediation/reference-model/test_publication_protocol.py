@@ -74,6 +74,7 @@ class Protocol:
     private_unknown: set = field(default_factory=set)
     d_closed: dict = field(default_factory=dict)
     i_closed: dict = field(default_factory=dict)
+    publication_commit_winners: dict = field(default_factory=dict)
     fence_pending: set = field(default_factory=set)
 
     @staticmethod
@@ -157,8 +158,12 @@ class Protocol:
             raise Rejected("authorization request digest or owner boundary mismatch")
         binding = (publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id)
         prior = self.authorizations.get(auth_id)
-        if prior is not None and prior != binding:
-            raise Rejected("authorization identity rebound")
+        if prior is not None:
+            if prior != binding:
+                raise Rejected("authorization identity rebound")
+            return
+        if publication_id in self.publication_commit_winners:
+            raise Rejected("publication participant already has a COMMIT_WON operation")
         self.authorizations[auth_id] = binding
 
     def revoke(self, auth_id):
@@ -188,6 +193,9 @@ class Protocol:
             return i_proof
         if operation_id in self.private_unknown or operation_id in self.outcomes:
             raise Rejected("operation is already UNKNOWN or terminal")
+        prior_winner = self.publication_commit_winners.get(publication_id)
+        if prior_winner is not None and prior_winner != operation_id:
+            raise Rejected("publication participant already has a COMMIT_WON operation")
         if auth_id not in self.authorizations or auth_id in self.revoked:
             raise Rejected("authorization absent or revocation won before I consumption")
         if self.authorizations[auth_id] != (
@@ -211,6 +219,7 @@ class Protocol:
         if auth_id in self.consumed:
             raise Rejected("single-use authorization already consumed")
         self.consumed.add(auth_id)
+        self.publication_commit_winners[publication_id] = operation_id
         self.i_pending[operation_id] = binding
         self.operation_bindings[operation_id] = binding
         return i_proof
@@ -499,6 +508,74 @@ class PublicationProtocolTests(unittest.TestCase):
         with self.assertRaises(Rejected):
             p.authorize_commit("wrong-auth", "publication-1", "other-storage", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
 
+    def test_authorization_replay_remains_idempotent_after_commit_won(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        p.authorize_commit(
+            args["auth_id"], args["publication_id"], args["storage_id"],
+            args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"],
+        )
+        self.assertEqual(p.publication_commit_winners["publication-1"], "op-1")
+
+    def test_new_authorization_is_rejected_after_commit_won(self):
+        p = self.prepared()
+        self.consume_i(p)
+        with self.assertRaisesRegex(Rejected, "already has a COMMIT_WON operation"):
+            p.authorize_commit(
+                "auth-2", "publication-1", "storage-1",
+                "request-digest-1", "owner-boundary-1", "visibility-gate-1",
+            )
+
+    def test_publication_participant_has_one_i_commit_winner_across_operation_ids(self):
+        p = self.prepared()
+        p.authorize_commit(
+            "auth-2", "publication-1", "storage-1",
+            "request-digest-1", "owner-boundary-1", "visibility-gate-1",
+        )
+        d_proof = (
+            "D_ADMITTED", "publication-1", "storage-1",
+            "request-digest-1", "owner-boundary-1", "visibility-gate-1",
+        )
+        p.consume_i_commit_won(
+            "op-1", "auth-1", "publication-1", "storage-1",
+            "request-digest-1", "owner-boundary-1", "visibility-gate-1", d_proof,
+        )
+        with self.assertRaisesRegex(Rejected, "already has a COMMIT_WON operation"):
+            p.consume_i_commit_won(
+                "op-2", "auth-2", "publication-1", "storage-1",
+                "request-digest-1", "owner-boundary-1", "visibility-gate-1", d_proof,
+            )
+        self.assertEqual(set(p.i_pending), {"op-1"})
+        self.assertIn("auth-1", p.consumed)
+        self.assertNotIn("auth-2", p.consumed)
+
+    def test_pre_winner_revocation_allows_new_authorization_for_same_participant(self):
+        p = self.prepared()
+        p.authorize_commit(
+            "auth-2", "publication-1", "storage-1",
+            "request-digest-1", "owner-boundary-1", "visibility-gate-1",
+        )
+        p.revoke("auth-1")
+        d_proof = (
+            "D_ADMITTED", "publication-1", "storage-1",
+            "request-digest-1", "owner-boundary-1", "visibility-gate-1",
+        )
+        with self.assertRaises(Rejected):
+            p.consume_i_commit_won(
+                "op-1", "auth-1", "publication-1", "storage-1",
+                "request-digest-1", "owner-boundary-1", "visibility-gate-1", d_proof,
+            )
+        proof = p.consume_i_commit_won(
+            "op-2", "auth-2", "publication-1", "storage-1",
+            "request-digest-1", "owner-boundary-1", "visibility-gate-1", d_proof,
+        )
+        self.assertEqual(
+            proof,
+            ("I_COMMIT_WON", "auth-2", "publication-1", "storage-1",
+             "request-digest-1", "owner-boundary-1", "visibility-gate-1"),
+        )
+        self.assertEqual(p.publication_commit_winners["publication-1"], "op-2")
+
     def test_revocation_wins_before_commit(self):
         p = self.prepared()
         p.revoke("auth-1")
@@ -517,7 +594,7 @@ class PublicationProtocolTests(unittest.TestCase):
         self.assertEqual(p.outcomes["op-1"], outcome)
         args2 = self.commit_args()
         args2["operation_id"] = "op-2"
-        with self.assertRaisesRegex(Rejected, "revocation won|single-use"):
+        with self.assertRaisesRegex(Rejected, "revocation won|single-use|publication participant already has a COMMIT_WON operation"):
             self.consume_i(p, args2)
         p.close_i("op-1", outcome)
         self.assertNotIn("auth-1", p.revocation_pending)
@@ -528,7 +605,7 @@ class PublicationProtocolTests(unittest.TestCase):
         p.commit(**args)
         args2 = self.commit_args()
         args2["operation_id"] = "op-2"
-        with self.assertRaisesRegex(Rejected, "single-use"):
+        with self.assertRaisesRegex(Rejected, "single-use|publication participant already has a COMMIT_WON operation"):
             self.consume_i(p, args2)
 
     def test_final_storage_commit_requires_both_exact_proofs(self):
