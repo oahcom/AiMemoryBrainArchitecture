@@ -596,3 +596,68 @@ R-05 继续为 **High / NOT PROVEN**。证据证明存在版本族分歧，不�
 | D/E/G/Storage 共用已接受可执行 Publication/Applied Bundle | NOT PROVEN | D/E 提案、G Freeze 阻塞、无联合 Bundle/测试 |
 | 前序 Review 自动转移到当前 HEAD | FALSE | Manifest 明确不转移；A Review 仅针对 v3.3.1 |
 
+
+
+## 20. R-06 实时身份、主体、Actor、Scope 与 Environment 信任审查 — 2026-11-18
+
+### 20.1 当前精确来源锚点
+
+| Owner | 分支 HEAD | 工件 / Blob | 当前证据状态 |
+|---|---|---|---|
+| B | `0df144ae25c2039c9934395fc88b2d17080eb119` | ActorRef/ScopeRef/EnvironmentRef 正式映射 `3a1e77889cd9a90cd5822d9f0cb3437880868706` | B 批准语义类型区分和不可替代关系；具体 Consumer Field/Wire 仍由 Owner 负责或为候选 |
+| B | 同一 HEAD | Typed Reference and Scope Semantics `e9a6bd21e06bc02a5208619f5a949217860b1c00` | 候选领域合同；Scope Registry 所有权和 Environment Registry Authority 未解决；跨 Scope/Environment 治理阻塞 |
+| I | `0d071bf1ee7cc71912398c6ae57e4496e08f44ab` | Principal/Actor/Authorization Contract `03765efac4bb1153f303ce0030f9e277d602e81d` | 候选语义合同；较早基线仍称需联合批准且 INT-P0-02 OPEN |
+| I | 同一 HEAD | PermissionEpoch 正式确认 `bae6a24fe3a374bc816993979a8fa9af52517dea` | I 确认规范技术基线；外部治理 Profile 批准阻塞；实现/符合性未验证 |
+| I | 同一 HEAD | Current Authorization/Restore 提案 `e3b1b5d99eb36ac0b395854d8c19287d2b64b752` | 语义执行提案；Token Schema 与 Conformance OPEN |
+| I | 同一 HEAD | Governance/Consumer Register `f8cfab7100e161ec4b8d0d9791a66337ab7a69de` | I36-GOV-01..10 全部 GOVERNANCE-BLOCKED；I36 未执行；后续附录记录设计 Consumer Acceptance |
+| H | `0d36324457e39bd50ad56ae902d477c4ea765b61` | Authenticated Identity/Protected Operation Binding `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248` | BIH36-JD-01..17 委托技术基线；治理、Consumer Acceptance 和执行边界仍在 |
+| H | 同一 HEAD | H BIH Consumer Acceptance `ccbac2d30234df9b910565a7326d100d11a6494e` | 委托设计级接受；H36 未运行；不是独立人工签名 |
+| C | `71047cdb51139ca4080ac67f451e38a48698859d` | C Final Request Evidence Contract `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | 有例外地接受 BIH36 语义；C/G/H Freeze 阻塞；实现/执行未验证 |
+| D | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | D BIH Consumer Acceptance `184423d2d8191a12f2d4a869bc63f5e7fafaf96a` | 设计级接受；Runtime Conformance 未验证；以 I Governance 为条件 |
+| E | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | E BIH Consumer Acceptance `6f4100618695fcf971560fb784f7887a72798c96` | 设计级接受；Runtime Conformance 未验证；以 I Governance 为条件 |
+| F | `1908ce4d233b20f7cafd00cb679affd01bd15174` | F Runtime Forget Suppression/Invalidation `ce59252dbbdc5d10d016704797e9ba12d5a941bd` | 有例外地接受 BIH36；F Runtime 语义已决；实现/执行未验证 |
+| G | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | G Applied/Forget/Reconciliation `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | 有例外地接受 BIH36；Applied Freeze 阻塞；实现/执行未验证 |
+| Storage | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` | Storage BIH Consumer Acceptance `ec8e49d0d11c72d37ad0c291611a96a1122ba6f5` | 设计级接受；Runtime Conformance 未验证；I Governance 与 JF-10 OPEN |
+
+### 20.2 已经真正决议的部分
+
+现有证据确实建立了 BIH36-JD-01..17 的一致*技术语义基线*：
+- PrincipalRef、IssuerRef、ActorRef、AgentRef、AdapterRef 和 ProducerRef 是不同身份；Payload Ref 是 Claim，不是 Authentication。
+- ActorRef 是 Verifier 产生的、不可变、按 Operation 区分的 Attribution；它不是 Principal Alias、Credential、Grant 或可复用 Capability。
+- ScopeRef 标识 Ownership/Applicability Boundary，不是 Permission。Ownership 与 Applicability 必须保持不同角色；Containment 不隐含 Permission Inheritance。
+- EnvironmentRef 标识权威外部执行/状态域，与 ScopeRef 正交；跨 Environment 默认拒绝。
+- I 管理 Issuer Trust、Principal Resolution、Delegation、Authorization、Revocation 和 PermissionEpoch。H 管理 Protected Transport/Session Binding 与 Wire Representation。B 管理 Typed-reference Meaning。每个 Consumer 保留自己的最终执行边界。
+- PermissionEpoch 在一个 PolicyDomain 内由 I 管理且为不透明值；不得与 D ForgetFenceGeneration、COC Position、Storage Cursor 或 H Capability Epoch 比较。
+- 缺失、伪造、陈旧、有 Gap、未知或无法验证的安全上下文必须 Deny/Pause；缓存 ALLOW 或 Payload Identity 不能创建 Trust。
+
+B 的正式映射决议在其语义权威范围内已获 Owner 确认。I 的 PermissionEpoch 技术语义已由 I 正式确认。D/E/F/G/C/Storage 与 H 均有带例外的设计级 Consumer Acceptance 证据。I Register 后续 §11 / §6.3 明确协调了 C/F/G Acceptance，并称设计 Acceptance 子要求已完成；但 Register 顶部状态仍写 Consumer Acceptance OPEN。这是内部状态标签新鲜度不一致：后续附录控制其限定范围内的设计 Acceptance 更新，但 A 仍需刷新自己的 G6 Ledger。两种状态均不代表 Runtime Conformance。
+
+### 20.3 实质性阻塞与限制
+
+**R06-1 — Governance Approval 仍然阻塞。** I Register Blob `f8cf...` 表明 I36-GOV-01..10 全部 GOVERNANCE-BLOCKED，尚未找到授权外部批准人/生效 Policy Version。事项包括 Issuer Admission/Federation、Principal Collision/Alias Migration、Delegation Policy、ActorRef/Principal Attribution、Cross-Scope Grants、Cross-Environment Bridge 与 Environment Registry Authority、PermissionEpoch/Revocation Policy、Unsupported Adapter/Producer Handling，以及 Global Forget Exceptions。用户授权技术角色工作或架构师撰写决议都不是所需的 Governance Approval。
+
+**R06-2 — Registry Authority 不完整。** B 确认语义类型，但明确保留 Authoritative Scope Registry 的所有权/生命周期与 Environment Registry Authority 指定为 OPEN。I Governance Register 也记录 Environment Registry Authority 尚未指定。在权威 Registry 和 Issuer/Key Lifecycle 未确定前，格式正确的 Typed Ref 不证明身份可信或关系获准。
+
+**R06-3 — Current Authorization Enforcement 仍是提案。** I Phase 3.7 明确标记为 Semantic Enforcement Proposal；Token Schema 和 Conformance OPEN。它要求在每个受保护边界重新验证 I 当前授权，包括 Source Dereference、Publication、Retrieval、Context Dispatch、Adapter Apply、C Provider Submit 和 Restore/Reconnect。本轮没有证明已部署权威 Epoch Sequencer、Revocation Stream Continuity、Final-boundary Verifier 或 Restore Proof。
+
+**R06-4 — 设计接受不是可执行 Consumer Enforcement。** H36-01..18 与 I36-01..20 已定义但 NOT RUN。C Final-request、F Retrieval/Cache/Rebuild 和 G Applied/COC 测试也均 NOT RUN。D/E/Storage Acceptance 明确不声称 Runtime Conformance。未发现端到端可执行证明，能证明每个 Consumer 在不可逆边界拒绝伪造身份、检查精确 Scope/Environment 角色、验证当前 PermissionEpoch，并保持独立 D Fence 检查。
+
+**R06-5 — I Register 顶部状态与后续附录不一致。** 当前 I Register 顶部仍报告“consumer acceptance OPEN”，而后续 Reconciliation Sections 记录 C/D/E/F/G/H/Storage 的设计 Acceptance 已完成，设计 Acceptance 子要求带例外完成。这不证明 Runtime/G6 完全 PASS：相同附录仍明确 I Governance 阻塞、全部身份测试 NOT RUN，且 A 的整体 G6 关闭决议尚待完成。应通过新的 Append-only 状态修正确认，不应改写历史发现记录。
+
+**R06-6 — 精确 Consumer Field Mapping 尚未全部冻结。** B 的类型决议明确不批准具体 Consumer Field Name、Requiredness、Cardinality、Serialization 或 DB Column。H Identity Binding 说明逻辑 Field Name 是候选而非冻结 Schema。Consumer Acceptance 针对固定的 BIH Design Package，不自动批准后续 Schema/Validator Revision 或所有变更后的 Protected Boundary。
+
+### 20.4 R-06 结论与关闭条件
+
+R-06 继续为 **High / NOT PROVEN**。技术语义和设计 Consumer Acceptance 已比“没有责任主体的设计空白”成熟得多；不能再报告“没有身份设计”或“所有 Consumer Acceptance 都 OPEN”。剩余阻塞是 Governance Activation、Registry Ownership/Lifecycle、精确可执行 Field Enforcement、当前 PermissionEpoch/Revocation Service 行为和对抗性 Runtime Proof。
+
+关闭条件：
+1. I 获取 I36-GOV-01..10 的授权、持久化、精确文本/Hash 批准，包括明确 Environment/Scope Registry Authority、生效 Policy Version/Jurisdiction、Expiry/Review 和 Revocation/Supersession。
+2. B/I/H 发布更新后的精确 Source/Field Mapping Bundle；B 批准语义类型，I 批准 Policy/Trust，H 批准 Wire/Authentication，每个 Consumer 签署自己的精确 Enforcement Boundary。任何 Owner 不得批准其他 Owner 的权威。
+3. I 定稿 PermissionEpoch Token/Profile Schema、权威 Sequencer/Currentness API、连续 Invalidation/Revocation Stream、Key/Issuer Lifecycle 和 Failover/Restore 语义。
+4. C/D/E/F/G/H/Storage 实现并执行各自精确 Protected-boundary Check；保持 PermissionEpoch、D ForgetFenceGeneration、AdapterCapabilityEpoch 与 Storage/COC Cursor 的独立性。
+5. 执行 Forged Principal/Actor/Producer/Adapter、Issuer/Key Unknown/Revoked/Rotated、Delegation Expiry/Cycle/Amplification、Scope/Environment Mismatch 与跨边界拒绝、Stale/Gap Epoch 和 Offline Partition、Revocation-vs-Commit 双顺序、Reconnect/旧 Session ACK Replay、Restore Rollback，以及无 Side-channel Retrieval 测试。
+6. 每个 Consumer 发布 Raw Reproducible Log、精确 Source/Test/Fixture/Dependency Blob、测试 Commit 和独立 Owner 结果。
+7. A 根据 I Append-only 修正状态和精确 Consumer 工件刷新 G6 Register；A 可以登记证据，但不能制造 Governance Approval。
+
+**关闭状态：NOT CLOSED。** 不声称外部 Governance Activation、生产授权或 Security Certification。
+
