@@ -6,7 +6,7 @@
 - Branch / 分支: `research/domain-reality-001-b`
 - Historical merge base / 历史合并基点: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
 - Current main HEAD observed / 当前 main HEAD 观察值: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
-- Current research branch HEAD at last read / 最近读取的研究分支 HEAD: `f289d3aa7997067a312101088a65017b6697d854`
+- Current research branch HEAD at this document revision / 本文档修订时研究分支 HEAD: `2e45ed0aa0197d41d41310c37601cee65eacf763` (this commit advances the branch; refresh PR metadata for the live tip)
 - PR: #55 — Open / Draft; no merge requested
 - Research date / 研究日期: 2026-11-17
 
@@ -63,6 +63,7 @@ Supplemental audit/decision deliverables / 补充审计与决策交付物：
 - `baseline-owner-branch-snapshot-errata.md`
 - `bilingual-parity-audit.md`
 - `fact-claim-identity-adr.md`
+- `bilingual-parity-audit.md`
 - `evidence/official-reference-validation.md`
 
 Every normative deliverable must contain full Chinese and English semantics in the same file/change set. Unresolved statements remain OPEN, CANDIDATE, TO_VALIDATE or DEFERRED.
@@ -71,7 +72,7 @@ Every normative deliverable must contain full Chinese and English semantics in t
 
 ## 5. Current execution status / 当前执行状态
 
-The current PR diff reports 21 changed files, 2,668 additions and 0 deletions. This count is PR metadata and must be refreshed after further commits. The research branch is historically based on merge base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; current main has advanced to `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The current compare reported 46 commits ahead and 26 behind, with status DIVERGED. GitHub's PR metadata returned mergeable=true / clean at the latest PR read, but that is only a mergeability signal and not approval. PR base metadata still reports a distinct older base SHA; no rebase or base retarget is requested here.
+The current PR diff reports 21 changed files, 2,668 additions and 0 deletions. This count is PR metadata and must be refreshed after further commits. The research branch is historically based on merge base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; current main has advanced to `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`. The current compare reported 46 commits ahead and 26 behind, with status DIVERGED. GitHub's latest PR metadata returned mergeable=false; the cause is NOT VERIFIED. This is not treated as a semantic review result. No rebase, retarget or merge is requested. PR base metadata still reports a distinct older base SHA; no rebase or base retarget is requested here.
 
 当前 PR Diff 元数据显示 21 个变更文件、2,668 行新增、0 行删除。该数量来自 PR 元数据，后续提交后必须刷新。研究分支历史上基于 Merge Base `b372b62c640a2b656e54b6db62a4ee67d7d8c001`；当前 main 已推进至 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。最近 Compare 返回 46 commits ahead、26 behind，状态为 DIVERGED。最近 PR 元数据返回 mergeable=true / clean，但这仅是可合并性信号，不代表批准。PR base 元数据仍报告另一个较旧 SHA；本次不请求 Rebase 或修改 Base。
 
