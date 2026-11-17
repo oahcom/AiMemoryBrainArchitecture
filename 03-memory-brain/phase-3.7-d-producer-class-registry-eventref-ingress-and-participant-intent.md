@@ -74,3 +74,31 @@ Registration and fence have exactly two legal outcomes. Dependency registration 
 D 重申既有权威合同定义的九项语义操作。D 管理其语义和决策；Storage 管理持久化事务/序列化及权威可见性机制；E 管理 Compiler Work/Attempt/Lease/Private Stage/Output Accounting。共享序列化域必须覆盖 RegisterProducerWork、带不可变 Registry/Work High-water 的 InstallForgetFence、完整 RegisterDerivedDependency、与 Visibility Flip 绑定的 PublishDerivedIfFenceCurrent，以及 CompleteProducerWork。
 
 注册与 Fence 只有两种合法结果；Dependency Registration 必须完整集合原子提交。只有在同一权威提交中验证最新 D Fence、I 当前授权、D Registration、完整依赖、当前 Attempt/Lease、Scope 和精确 Artifact Digest 后，Derivative 才可见。若 D Ledger 与 Visibility Authority 无法加入同一 ACID 事务，必须由 D 批准持久化 Prepare/Commit 或等效线性一致协议。禁止可重复使用的 D Token 后接独立 Storage 写入。最终 Visibility Commit 必须针对当前 Fence 验证/消费精确 D 决策；崩溃、Failover 和 Restore 后，歧义/Prepared 状态仍须保持隐藏。
+
+## 10. D publication participant — order the ForgetFence race before physical visibility
+
+D adds a durable, D-owned PublicationParticipantRef as a pre-visibility barrier participant for each protected derivative publication. It is not a PublicationReceipt and does not make an artifact visible.
+
+The D admission binds PublicationOperationId + canonical request digest, ProducerWorkItemId/RegistrationReceipt, DerivedArtifactRef/version, complete dependency/lineage digest, Scope, active AttemptId/LeaseId, ProducerClass/version and exact target/source ancestry. D admits it only after complete dependency registration and a current D fence check in the same serialization domain used by InstallForgetFence.
+
+- If D ForgetFence wins before this participant is admitted, D rejects/quarantines the publication; no Storage visibility commit is permitted.
+- If the publication participant is admitted first, D records it as unresolved in the D barrier. A later fence request may be recorded, but cannot become effective past this participant until Storage proves COMMITTED_VISIBLE or authoritative NO_PUBLICATION. This is an in-flight ordering hold, not publication permission.
+- Storage final visibility commit must validate the exact active PublicationParticipantRef and current D barrier state.
+- Storage COMMITTED_VISIBLE proof lets D terminalize the participant and account the derivative in fence inventory. Authoritative NO_PUBLICATION closes it without a derivative. UNKNOWN/IN_DOUBT keeps the D barrier open and artifact private.
+- D signs terminal/clearance evidence only after authoritative Storage outcome readback. Queue/worker/transport ACK is not terminal evidence.
+
+The I gate is independent and conjunctive: I's single-use authorization receipt/terminal decision must bind the same PublicationOperationId/digest and exact Storage visibility participant. D PublicationParticipantRef grants no I authorization; I COMMIT_WON does not bypass D Fence.
+
+### 中文规范
+
+D 为每次受保护 Derivative 发布增加持久化、由 D 管理的 PublicationParticipantRef，作为可见前 Barrier Participant。它不是 PublicationReceipt，也不会让 Artifact 可见。
+
+D 准入时绑定 PublicationOperationId/规范请求摘要、ProducerWorkItemId/RegistrationReceipt、DerivedArtifactRef/Version、完整 Dependency/Lineage Digest、Scope、活动 AttemptId/LeaseId、ProducerClass/Version 及精确 Target/Source Ancestors。只有完整依赖登记完成，并在与 InstallForgetFence 相同的序列化域内验证当前 D Fence 后，D 才准入。
+
+- 若 D ForgetFence 先于该 Participant 准入，D 必须拒绝/隔离发布，不允许 Storage Visibility Commit。
+- 若 Publication Participant 先准入，D 将其记录为未解决 Barrier Participant。之后的 Fence 请求可以记录，但在 Storage 证明 COMMITTED_VISIBLE 或权威 NO_PUBLICATION 前，不得越过该 Participant 生效。这只是进行中操作的顺序保持，不是发布许可。
+- Storage 最终 Visibility Commit 必须验证精确且仍活动的 PublicationParticipantRef 与当前 D Barrier 状态。
+- Storage COMMITTED_VISIBLE 证明使 D 终态化该 Participant 并将 Derivative 纳入 Fence Inventory；权威 NO_PUBLICATION 使 D 在无 Derivative 情况下关闭 Participant；UNKNOWN/IN_DOUBT 保持 D Barrier 开放且 Artifact Private。
+- D 只有在权威 Storage Outcome 回读后才签发终态/清除证明。Queue/Worker/Transport ACK 均不是终态证据。
+
+I Gate 独立且必须合取满足：I 的单次授权 Receipt/Terminal Decision 必须绑定相同 PublicationOperationId/Digest 和精确 Storage Visibility Participant。D PublicationParticipantRef 不授予 I Authorization；I COMMIT_WON 也不能绕过 D Fence。
