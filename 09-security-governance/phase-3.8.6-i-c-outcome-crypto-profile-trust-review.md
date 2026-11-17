@@ -4,7 +4,7 @@
 - Reviewer: I — Security, Identity and Governance
 - Branch: `session-i-security-governance-2026-11-16`
 - Exact C profile/P0 artifact: `07-agent-integration/phase-3.8.6-c-provider-outcome-signature-profile-and-p0.md`
-- C profile/P0 Blob: `a9b891a109c47422b2387919a42d25172b6c09e0`
+- C profile/P0 Blob: `44641b4b01d721c47e08ae9380ffe645bb3ccda0`
 - Exact H schema: unified 1.2.8, Blob `70b892797d07489936300a26c0dedfafe1d6e746`
 - I trust authority/profile boundary: I owns issuer identity/key status and historical trust; C owns its outcome semantics/profile projection.
 - Decision: **ACCEPT WITH ENUMERATED AMENDMENTS — TRUST REGISTRY / PROFILE SEPARATION**
