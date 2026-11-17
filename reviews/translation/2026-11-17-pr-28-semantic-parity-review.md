@@ -88,16 +88,17 @@ The review is **not** a blanket approval of all 124 changed files. It is a targe
 
 ### BSR-28-001 — Recorded At wording weakens the durability qualifier
 - Severity: **P2 — terminology precision**
+- Status: **RESOLVED** in PR #28 commit `b8295214517c2a6dbaf87a4c75dc91b53721a1b4`.
 - Files:
   - `docs/en/02-domain-model/epistemic-and-temporal-semantics.md`
   - `docs/zh-CN/02-domain-model/epistemic-and-temporal-semantics.md`
-- Evidence: English defines Recorded At as assigned by Brain “at durable acceptance”; Chinese currently says “在可靠接收时赋值” and repeats “在可靠接收时赋值 Recorded At” in the workflow.
-- Risk: “可靠接收” can be read as reliable receipt/transport acceptance rather than the durable acceptance linearization point. That ambiguity could move the meaning of Recorded At earlier than the committed durable receipt.
-- Required correction: use an explicit equivalent such as “在持久化接受提交时赋值” or “在持久化接收成功提交时赋值”, and keep the same wording in §8.
-- This is a wording-precision finding, not evidence that the underlying English/Chinese temporal model is otherwise inconsistent.
+- Evidence at review snapshot: English defines Recorded At as assigned by Brain “at durable acceptance”; the original Chinese used “在可靠接收时赋值”.
+- Risk: the original Chinese could be read as reliable receipt/transport acceptance rather than the durable acceptance linearization point.
+- Resolution: both occurrences in the Chinese document now say “在持久化接受成功提交时赋值”, matching the durable acceptance boundary without changing the source specification.
 
-### BSR-28-002 — Coverage registers and PR summary are stale/inconsistent with the branch tree
+### BSR-28-002 — Coverage registers and PR summary were stale/inconsistent with the branch tree
 - Severity: **P2 — governance/status accuracy**
+- Status: **RESOLVED** in PR #28 commits `2e3e7a4d303cb218b485c46d8093da80ec117795` and `1ffedc673f0b50f27b31430246dd71c522adde04` (with subsequent formatting correction).
 - Files:
   - `docs/translation-status.md`
   - `docs/owner-branch-translation-inventory.md`
@@ -107,8 +108,8 @@ The review is **not** a blanket approval of all 124 changed files. It is a targe
   - The PR description says E Evidence/Provenance is pending, but both `docs/en/04-memory-compiler/evidence-and-provenance.md` and `docs/zh-CN/04-memory-compiler/evidence-and-provenance.md` exist and carry the same source Blob reference.
   - The PR description reports E as 6/8 paired, while `docs/translation-status.md` reports 7/8. The remaining Forget/Derived Registration scope needs an exact split/source inventory before the count is changed.
   - `docs/translation-status.md` and the PR description report D as 8/8 paired, while `docs/owner-branch-translation-inventory.md` still reports 7/8 and says the operation/publication gate is pending, despite the bilingual wrapper and Parts 1–4 being present.
-- Risk: reviewers and AI developers may rely on contradictory coverage statements and either duplicate work or incorrectly assume untranslated material is complete.
-- Required correction: reconcile the exact source-spec count and split inventory; mark F as “paired in PR #28; semantic review pending” rather than NOT STARTED; align D's 8/8 state across both registers; correct the PR E summary after confirming the remaining Forget/Derived Registration scope.
+- Risk: reviewers and AI developers could rely on contradictory coverage statements.
+- Resolution: `docs/translation-status.md` now has an explicit PR #28 branch overlay distinguishing file-pair presence from semantic review/source reconciliation; it records B 6/6, D 8/8, E 7/8 and F 5/5, with G/C/H/I detailed pairs and Storage/Consistency correctly pending. `docs/owner-branch-translation-inventory.md` now preserves historical source-branch audit SHAs while separately recording D 8/8 and F 5/5 companion presence in PR #28. The PR description will be aligned to this same scope.
 
 ### BSR-28-003 — PR validation summary was stale; corrected
 - Severity: **P3 — review metadata**
@@ -134,14 +135,14 @@ The review is **not** a blanket approval of all 124 changed files. It is a targe
 
 ## 5. Recommended disposition / 建议处置
 
-1. Fix BSR-28-001 in the Chinese temporal-semantics document.
-2. Reconcile BSR-28-002 across the bilingual coverage register, Owner inventory and PR description without prematurely marking semantic review complete.
-3. Update BSR-28-003's PR validation statement.
-4. Keep PR #28 Draft until the findings are corrected and the remaining changed architecture pairs receive the planned semantic review.
-5. After fixes, rerun structural CI and perform a final diff review; do not treat CI success as semantic approval.
+1. BSR-28-001 and BSR-28-002 are resolved in the current PR branch; keep their resolution evidence traceable.
+2. BSR-28-003 is resolved in the PR description and current-head CI record.
+3. Continue the targeted review of identity binding, Applied proof and Storage/Consistency contracts.
+4. Keep PR #28 Draft until remaining semantic review, source-branch reconciliation and required governance checks are complete.
+5. Rerun structural CI after the remaining review changes; do not treat CI success as semantic approval.
 
-1. 修正 BSR-28-001 的中文时间语义措辞。
-2. 对齐 BSR-28-002 涉及的双语覆盖清单、Owner Inventory 和 PR 描述，但不得提前将语义复审标记为完成。
-3. 更新 BSR-28-003 的 PR 验证状态。
-4. 在缺陷修复、剩余架构双语文件完成计划中的语义复审之前，PR #28 保持 Draft。
-5. 修复后重跑结构性 CI 并复核最终 Diff；不得把 CI 成功等同于语义批准。
+1. BSR-28-001 和 BSR-28-002 已在当前 PR 分支修复，并保留对应证据。
+2. BSR-28-003 已在 PR 描述和当前 HEAD 的 CI 记录中修复。
+3. 继续针对身份绑定、Applied 证明和 Storage/Consistency 契约开展专项审查。
+4. 在剩余语义复审、源分支基线核对和必要治理检查完成前，PR #28 保持 Draft。
+5. 后续审查变更完成后重跑结构性 CI；不得把 CI 成功等同于语义批准。
