@@ -31,6 +31,7 @@ jobs:
       owner: ${{ steps.task.outputs.owner }}
       task_title: ${{ steps.task.outputs.title }}
       base_sha: ${{ steps.task.outputs.base_sha }}
+      prompt_sha256: ${{ steps.prompt.outputs.sha256 }}
       changed: ${{ steps.patch.outputs.changed }}
     steps:
       - name: Check out trusted default branch
@@ -62,6 +63,13 @@ jobs:
           print(f"title={title}")
           print("base_sha=" + subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip())
           PY
+
+      - name: Pin prompt digest
+        id: prompt
+        run: |
+          set -euo pipefail
+          digest="$(sha256sum .github/codex/prompts/owner-worker.md | awk '{print $1}')"
+          echo "sha256=$digest" >> "$GITHUB_OUTPUT"
 
       - name: Test task admission validator
         run: python3 -m unittest discover -s scripts/ai_worker -p "test_*.py" -v
@@ -163,6 +171,7 @@ jobs:
           OWNER: ${{ needs.codex.outputs.owner }}
           TASK_TITLE: ${{ needs.codex.outputs.task_title }}
           BASE_SHA: ${{ needs.codex.outputs.base_sha }}
+          PROMPT_SHA256: ${{ needs.codex.outputs.prompt_sha256 }}
         run: |
           set -euo pipefail
           git apply --index /tmp/ai-owner-worker/ai-owner-worker.patch
