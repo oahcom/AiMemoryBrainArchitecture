@@ -66,6 +66,7 @@ implementation_commits:
   - 6abfd3ffc6eee9beeae8566183425379eef1d81b
   - 96fc85d5f14946626e4c5b1547bbaca4cb76d9f4
   - 4a6df12eb61c28a5b7c34d9773a6a65b5f148077
+  - d9cae5ce9468dd7b60fd777f9baf84c13e682e2d
 changed_paths:
   - 14-ai-development/prompt-and-evidence-template.md
   - 14-ai-development/README.md
@@ -103,6 +104,8 @@ traceability_exclusions:
     reason: Manifest-only traceability-exclusion update; metadata bookkeeping, not implementation.
   - sha: 76e4765a13a7a6d69bd355c036702b1bea7bc9aa
     reason: Manifest-only Owner I v2 inventory update; metadata bookkeeping, not implementation.
+  - sha: af2eae80a560b875f05ef4b9f0798a1976f2e250
+    reason: Manifest-only final inventory refresh; metadata bookkeeping, not implementation.
   - current_manifest_self_update: Excluded by definition to avoid self-reference.
 self_review:
   status: RECORDED_NOT_INDEPENDENT
