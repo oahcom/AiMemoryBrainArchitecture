@@ -3,7 +3,7 @@
 
 - Owner: H — BMCP Protocol / Interoperability
 - Exact Storage ADR Blob: `bb544ba2f346bdc130d524bd5c7310d86f367988`
-- H Unified 1.2.14 Blob: `fee452efb99ab4fe0ceccb347c46eeef1521bd28`
+- H Unified 1.2.14 Blob: `09fcd1fa29fe24255fbd87cae79dafb406594a59`
 - H RecoveryJoin 1.0.2 Blob: `4b664e3bce465499bcdfd93796349a4ba7074002`
 - B serialization-anchor nominal-type review: `e2bc4c8dde9706bfbe443269b702f1b5aa6965f6`
 - Decision: **ACCEPT TYPE BOUNDARY; NO WIRE-AUTHORITY MERGE**
