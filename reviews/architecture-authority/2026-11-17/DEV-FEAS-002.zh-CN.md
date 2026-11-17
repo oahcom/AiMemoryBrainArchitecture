@@ -1,6 +1,6 @@
 # 开发可行性矩阵 — DEV-FEAS-002
 
-- 版本：1.0.0；基线：`main@6470f25ca23b8d35c06f60be2326867066418d18`
+- 版本：1.0.0；基线：历史评估快照 `6470f25ca23b8d35c06f60be2326867066418d18`（历史评估快照，非当前 Main）（非当前 Main）
 - 来源：F/D/P PR #46，分支 `review/session-3-engineering-planning-2026-11-17`，Commit `8b9ff8efa92a88dacc8f97b5faba5918fe5d2edc`，英文 Blob `081610b1734ec08dc7c35c75fae1cae3ca713be4`，中文 Blob `834dc39998342dc2f292fe1dfed411768b3ed156`。
 - A 裁决：原则上 **FEASIBLE_WITH_CONDITIONS**；当前实现准入 **BLOCKED**。
 
@@ -53,3 +53,8 @@ F/D/P 使用相对规模 S/M/L/XL，而非人日。由于工程人数、可用�
 本评估不授权使用生产数据、Canonical Visibility、安全策略实现、Provider Side-effect、Schema Freeze 或生产部署。
 
 参见 DEP-DAG-002、PRIORITY-002、READINESS-002 和 GATE-002。
+
+
+## 当前 Main HEAD
+
+本次发布独立观察到的当前 Main HEAD 为 `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`。此前的 `6470f25...` / `b372b62...` 均为历史评估快照，不是当前 Main。本套文件尚未完成针对当前 Main 的逐来源完整差异审计；G1 仍为 PARTIAL，所有 Gate/冻结限制继续有效。
