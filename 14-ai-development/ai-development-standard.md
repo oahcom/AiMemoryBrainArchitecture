@@ -288,3 +288,8 @@ The default automation topology MAY use one scheduled task per active Owner. Eac
 Scheduled tasks MUST read current GitHub state before acting and publish durable progress/evidence back to Issues/PRs. They MUST NOT bypass independent review, CI, acceptance or merge protection. Deterministic builds/tests and merge gates SHOULD be enforced by GitHub Actions/CI; scheduled tasks coordinate and perform bounded work only within available capabilities.
 
 See [AI-AUTO-001](owner-automation-operating-model.md) and [AI-PROMPT-STD-001](prompt-authoring-standard.md). Both remain PROPOSED until explicit governance approval.
+
+
+## 14. Continuous Owner operation
+
+The target operating model is continuous progress, not merely daily scheduled reminders. A–I are logical Owner workers that wake on GitHub state changes, process bounded eligible work and resume after interruption. A daily ChatGPT scheduled task is not an always-on worker and MUST NOT be described as uninterrupted operation. True continuous operation requires an event bridge, durable queue, isolated worker runtime, least-privilege GitHub App, leases/idempotency, watchdog recovery, budgets and operational evidence as specified by AI-RUN-001. Until deployed and soak-tested, status remains NOT DEPLOYED.
