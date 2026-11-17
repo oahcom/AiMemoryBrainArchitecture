@@ -3,7 +3,7 @@
 
 - Owner: C — Agent Integration / Provider Outcome
 - Exact Storage ADR Blob: `bb544ba2f346bdc130d524bd5c7310d86f367988`
-- H 1.2.14 / C 1.0.1 mapping: `aee5d374a67eb8de6f8d298a3459580982fecf4f`
+- H 1.2.14 / C 1.0.1 mapping: `579dd2a91edf47b86e744e897ba6668b839944bd`
 - C RecoveryJoin P0 crosswalk: `df12af95e6859a389ba71eb1b7dba512b9feb8f6`
 - Decision: **ACCEPT WITH C-OWNED SEQUENCER/OUTCOME SEPARATION**
 - Provenance: delegated C-role review, not independent human C Owner approval.
