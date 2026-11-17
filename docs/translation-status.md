@@ -200,3 +200,13 @@ Pair presence is not semantic acceptance, identity freeze, I policy approval, H 
 - Pair: `docs/en/07-agent-integration/phase-3.6-final-request-evidence-contract.md` and `docs/zh-CN/07-agent-integration/phase-3.6-final-request-evidence-contract.md`
 - Source state preserved: C semantic decisions recorded; C/G/H cross-owner freeze BLOCKED; implementation/execution NOT VERIFIED; C-FR-01..12 SPECIFIED / NOT RUN.
 - Scope: one of C's ten detailed core specifications only. The companion does not freeze H wire fields, G Applied authority, I authorization policy, D Forget fence, or any implementation.
+
+
+## 10. C/G/H Phase 3.6 Applied cross-owner review — 2026-11-17
+
+- Independent review: [English report](../reviews/translation/2026-11-17-cgh-applied-contract-cross-owner-review.md) / [中文报告](../reviews/translation/2026-11-17-cgh-applied-contract-cross-owner-review.zh-CN.md).
+- Exact sources re-read: C `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`; G `aa3afa73d8a76cc6f025839c52bfbff6a983046a`; H Adapter Capability/Applied `ed6b43a29aa368d772c701ffc83309a5aadf3c00`.
+- Six-stage lifecycle, historical/current-use distinction, and C/G duplicate/late-evidence semantics are aligned.
+- H Adapter candidate remains CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I. Findings H36-AP-01..07 identify unresolved exact boundary identity, target/attempt mapping, managed-region inventory/coverage, I/D authority vector, verifier-bound identity, evidence provenance, and per-request bypass coverage.
+- H Adapter pair is intentionally NOT marked complete: source-to-source field alignment must be resolved before translation can safely represent a normative protocol contract.
+- C/G/H freeze remains BLOCKED. C-FR-01..12 and G-36-01..15 remain SPECIFIED / NOT RUN; H Adapter conformance NOT RUN; implementation NOT VERIFIED.
