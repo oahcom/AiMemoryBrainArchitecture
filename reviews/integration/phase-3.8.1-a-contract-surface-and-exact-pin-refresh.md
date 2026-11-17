@@ -26,7 +26,7 @@ The previous D `206ead...`, E `bad04d...`, and Storage `1ad895...` pins are supe
 2. Register-before-work remains mandatory: D durable RegistrationReceipt precedes queue insertion, lease, protected source dereference, execution, retry/replay or publication.
 3. Complete dependency registration is an immutable complete-set operation. Partial sets never produce a dependency-complete receipt and cannot publish.
 4. Retry preserves ProducerWorkItemId and request digest; AttemptId/LeaseId are attempt-scoped and fenced. Changed logical input or compiler configuration requires a new DerivationRun/input identity and fresh gates.
-5. The final visibility boundary is conjunctive: current D publication participant/fence AND I terminal authorization proof AND exact Storage participant/outcome. No detached reusable token authorizes a later write.
+5. The final visibility boundary is conjunctive: current D publication participant/fence AND I sequencer consumption proof (`CommitAuthorizationReceipt` / `ICommitAuthorizationProof`), not post-commit `ITerminalProof` AND exact Storage participant/outcome. No detached reusable token authorizes a later write.
 6. Crash-safe ordering is **Storage hidden durable participant → D PublicationParticipant admission → I single-use receipt consumption → Storage final visibility commit → D/I independent closeout**.
 7. UNKNOWN/IN_DOUBT remains private and barrier-open. Missing rows, timeout, lease expiry, process death, age, stale replicas, queue deletion and lost ACK never imply abort or success.
 8. D PublicationParticipantRef, I CommitAuthorizationReceipt, StorageVisibilityParticipantRef, C ParticipantIntentRef and Storage PreparedParticipantRef/GID/XID are distinct nominal types and idempotency scopes.
@@ -106,10 +106,10 @@ The logical receipt is the signed, single-use sequencer result. If the implement
 - `outcome`: COMMITTED_VISIBLE | NO_PUBLICATION | UNKNOWN
 - `visibility_transaction_ref`, `visibility_pointer_ref` (required only for COMMITTED_VISIBLE)
 - exact D current-participant/fence proof reference
-- exact I terminal authorization proof reference
+- exact I sequencer consumption proof (`CommitAuthorizationReceipt` / `ICommitAuthorizationProof`), not post-commit `ITerminalProof` reference
 - `outbox_event_ref`, `committed_at`, `outcome_digest`
 
-The visibility linearization point is the durable transaction that validates the exact D and I proofs and changes the authoritative visibility pointer/outcome atomically. NO_PUBLICATION requires positive authoritative proof that no visibility pointer was installed and no delayed publisher/outbox/retry can later install it. UNKNOWN has no terminal semantics and leaves the artifact private.
+The visibility linearization point is the durable transaction that validates the exact D participant/fence proof and ICommitAuthorizationProof, then changes the authoritative visibility pointer/outcome atomically. NO_PUBLICATION requires positive authoritative proof that no visibility pointer was installed and no delayed publisher/outbox/retry can later install it. UNKNOWN has no terminal semantics and leaves the artifact private.
 
 ### 3.6 E orchestration state
 
@@ -197,7 +197,7 @@ Each test must assert durable records, visibility pointer state, D barrier state
 
 A recommends a single serializable transaction domain per Canonical Memory authority only as a candidate. D and Storage must identify the actual deployment boundary and prove that RegisterProducerWork, InstallForgetFence/high-water, complete dependency registration and final visibility transition share the required ordering. If physically split, a D/Storage-approved durable prepare/commit or linearizable coordinator protocol must demonstrate equivalent crash/failover/restore behavior. No database product is selected by this addendum.
 
-I's PolicyDomain sequencer remains independent. No cross-domain scalar epoch comparison is permitted. The Storage visibility commit must validate an exact I proof whose semantics remain valid through the commit linearization point; a detached stale ALLOW snapshot is insufficient.
+I's PolicyDomain sequencer remains independent. No cross-domain scalar epoch comparison is permitted. The Storage visibility commit must validate the exact consumed CommitAuthorizationReceipt / ICommitAuthorizationProof whose COMMIT_WON semantics remain valid through the commit linearization point. ITerminalProof is post-Storage-outcome closeout evidence and MUST NOT be a precondition to that same commit; a detached stale ALLOW snapshot is insufficient.
 
 ## 9. Owner-exact review checklist
 
@@ -226,7 +226,7 @@ No schema/wire freeze, API existence, database selection/deployment, independent
 
 ### 11.3 发布顺序
 
-强制顺序：Storage 先持久化隐藏 StorageVisibilityParticipantRef；D 再准入绑定该 Participant 的 PublicationParticipantRef；I 在自己的 PolicyDomain Sequencer 单次消费绑定两个精确 Participant 和不可变 Tuple 的 CommitAuthorizationReceipt；Storage 最终提交同时验证 D 当前 Participant/Fence 与 I Terminal Proof；D/I 分别验证同一权威 Storage Outcome 后才关闭 Participant。COMMITTED_VISIBLE 或有权威证据的 NO_PUBLICATION 才能终态化。UNKNOWN/IN_DOUBT 不得释放 Gate。
+强制顺序：Storage 先持久化隐藏 StorageVisibilityParticipantRef；D 再准入绑定该 Participant 的 PublicationParticipantRef；I 在自己的 PolicyDomain Sequencer 单次消费绑定两个精确 Participant 和不可变 Tuple 的 CommitAuthorizationReceipt；Storage 最终提交同时验证 D 当前 Participant/Fence 与 I CommitAuthorizationReceipt/COMMIT_WON Sequencer Proof（不是 Storage Outcome 后才签发的 ITerminalProof）；D/I 分别验证同一权威 Storage Outcome 后才关闭 Participant。COMMITTED_VISIBLE 或有权威证据的 NO_PUBLICATION 才能终态化。UNKNOWN/IN_DOUBT 不得释放 Gate。
 
 ### 11.4 类型与摘要隔离
 
