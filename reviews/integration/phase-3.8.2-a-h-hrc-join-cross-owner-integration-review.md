@@ -23,7 +23,7 @@
 |---|---|---|
 | H RecoveryCutoff schema 1.0.4 | session-h-bmcp-protocol | d18b9ae1e2ed5e43ee5a78ac43b873b7d42230f1 |
 | H RecoveryJoin schema 1.0.0 candidate | session-h-bmcp-protocol | dd3234aa1c74caf6d0e335875cd96e0b2b64082f |
-| H semantic validator contract | session-h-bmcp-protocol | b3218298f58cff9b92cb1c38e453af6fd4d0dd50 |
+| H semantic validator contract | session-h-bmcp-protocol | 121717c5f303b1a2e864f2b95664f51f51ba4b48 |
 | HRC/JPF executable semantic suite | session-h-bmcp-protocol | 60a2f4db4bd12f2131ecd147db9bbe328da6db50 |
 | Wire interop candidate suite | session-h-bmcp-protocol | 1a4e754ba9bfa57eb973c6d39731e9f89443b323 |
 | Schema integrity suite | session-h-bmcp-protocol | 5292d56661e938c905c61455e9ed53c4ff674c54 |
@@ -118,7 +118,7 @@ A's matrix includes:
 
 Tests must assert actual authoritative ledgers, owner-local high-waters, participant identity, DB incarnation/GID, visibility pointer, private staging, outbox/provider side effects and exact proof digests. Unknown remains UNKNOWN; timeout/missing row/lease expiry/process death never infers terminality.
 
-No test campaign has been run. H's current candidate workflow has no reported run.
+H's 66-test candidate unit suite has passed run 44039990464. The broader deterministic race/crash/failover/restore physical test campaign has not been run.
 
 ## 7. A integration decision
 
@@ -170,7 +170,7 @@ JPF-18/JPF-19 explicitly reject substitution between stable OwnerAdmissionRef an
 The H candidate test bundle was executed by its push-triggered workflow after the JPF-08 fixture was corrected:
 
 - H RecoveryJoin schema: `dd3234aa1c74caf6d0e335875cd96e0b2b64082f`.
-- H semantic contract: `b3218298f58cff9b92cb1c38e453af6fd4d0dd50`.
+- H semantic contract: `121717c5f303b1a2e864f2b95664f51f51ba4b48`.
 - HRC/JPF suite: `60a2f4db4bd12f2131ecd147db9bbe328da6db50`.
 - Wire suite: `1a4e754ba9bfa57eb973c6d39731e9f89443b323`.
 - Schema suite: `67aba74c120f2916d768e7b01c45408ee2624f3a`.
@@ -184,3 +184,8 @@ The first run [44039825581](https://github.com/oahcom/AiMemoryBrainArchitecture/
 **Updated A decision:** ACCEPT the logical HRC/RecoveryJoin/JoinProof composition as a coherent proposed contract and accept the 66/66 reference-candidate CI result. Do NOT accept implementation/conformance, production canonicalization/signatures, live owner ledger completeness/currentness CAS, provider adapter behavior, or physical D/Storage linearization. Storage topology ADR remains BLOCKED; no freeze or activation.
 
 中文：HRC/RecoveryJoin 逻辑组合及 66/66 候选 CI 通过可接受为设计与参考模型证据。JPF-08 首次失败是测试夹具同时要求缺失 I/D 证据，修正后仅隔离 C 主 Admission 唯一性断言，没有放宽 Validator。该通过不代表真实 Owner Ledger、密码学、Provider Adapter、Storage 物理线性化或跨语言互操作通过。Storage 拓扑 ADR 仍 BLOCKED，禁止冻结和生产激活。
+
+
+## 10. CI evidence update
+
+GitHub Actions run 44039990464, job 133891944149, checked out H commit da94bcc1796cb350eed12845e49cbc3663faab9c and completed 66/66 candidate tests successfully. The raw log enumerates all HRC/JPF/SCHEMA/WIRE cases as OK. This does not close the production wire, cryptographic, owner-adapter, physical DB, COC quorum, or failover/restore blockers.
