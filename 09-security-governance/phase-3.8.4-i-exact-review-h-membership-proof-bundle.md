@@ -21,11 +21,11 @@
 | H semantic reference validator | `6710bd7876be5f2c60640f21090729b8859a7a3e` |
 | H Unified Schema 1.2.11 tests | `3e993400cba7a0e744e865434fb1bb90c48fd525` |
 | H RecoveryJoin 1.0.2 schema tests | `83435af0f75d9e0bea64e2a331571356c3c1c26b` |
-| I Python/Node P0 vectors | `4657f0c81e9c8692d29ac183380f3d7e074a4e4c` |
-| I Python/Node crypto tests | `7658edc6f51dac203742ecc1ecf00d41bd676908` |
+| I Python/Node P0 vectors | `9210219a85afe1f48da0ea253a073aba8b2e138c` |
+| I Python/Node crypto tests | `01239e06e8f4464f49acd34241dc00899befe424` |
 | D owner proof contract candidate | `d80dabe7210e681bc4e2290355a38f8b67be9ddd` |
 | C owner proof contract candidate | `5e37185610869951c3b392c9ad143a72b4c702ac` |
-| H CI candidate run | `44050250038` (H test commit `34fb4ccf8b1580321d38eda1340cf53f73b83f24`; 281 tests total, 259 passed, 22 skipped, 0 failed) |
+| H CI candidate run | `44051045877` (H test commit `ccecb8b6b80dff1e8ef7af10caac67c2f3c77929`; 282 tests total, 260 passed, 22 skipped, 0 failed) |
 
 ## 2. I findings
 
@@ -80,7 +80,7 @@ I accepts the direction of H Unified Schema 1.2.11 and RecoveryJoin 1.0.2 as the
 ## 5. Exact H bundle refresh
 
 The exact H review and wire mapping were refreshed after adding RecoveryJoin 1.0.2 and the owner-verifier callback:
-- H exact review Blob: `f5ab9a9232b04720faf552a70d5d2962343f843f`.
+- H exact review Blob: `b91c645d54ddbcc16aba84fbd83436bcb106bd98`.
 - H wire mapping Blob: `a692a790a4c7abef94dba6da9c22b5e06417879a`.
 - H union contract Blob: `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175`.
 - RecoveryJoin 1.0.2 test Blob: `83435af0f75d9e0bea64e2a331571356c3c1c26b`.
@@ -96,3 +96,15 @@ The reference validator now requires an explicit owner-proof verifier callback f
 H candidate CI run `44050250038` completed successfully against commit `34fb4ccf8b1580321d38eda1340cf53f73b83f24`: 281 tests total, 259 passed, 22 skipped, 0 failed. The 22 skipped tests are the superseded historical Unified Schema 1.2.10 semantic fixture class. Current 1.2.11, 1.2.12 and RecoveryJoin 1.0.2 suites ran.
 
 This result supports candidate schema/reference-validator behavior only. The proof verifier used by tests is TEST-ONLY; no production I/D/C signer, key registry or ledger adapter is connected.
+
+
+## 7. Sixth I P0 vector — membership proof
+
+The exact I membership-proof P0 projection is now represented as the sixth cross-language vector family. It binds the exact owner ledger/version/entry/admission, owner-local namespace/sequence/high-water, ledger root, immutable snapshot/attestation, gate/scope, operation/request, anti-rollback and key-status fields. `proof_digest` is derived; `signature_ref` is external to P0.
+
+- I proof contract exact blob: `88209bbea0ab600880c5c630cfe83af31ee16dd7`.
+- H vector exact blob: `9210219a85afe1f48da0ea253a073aba8b2e138c`.
+- Python/Node test exact blob: `01239e06e8f4464f49acd34241dc00899befe424`.
+- H CI run `44051045877`: 282 tests total, 260 passed, 22 skipped, 0 failed.
+
+The vector is TEST-ONLY and does not approve production I signing, key trust, ledger completeness or anti-rollback. D/C continue to own their own proof profiles and signatures.
