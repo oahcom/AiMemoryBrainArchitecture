@@ -82,6 +82,8 @@ G MUST distinguish the stable H delivery binding from each evidence kind and imm
 
 These are **proposed normalized consumer tuples**. C and H MUST explicitly confirm exact field names, requiredness, canonicalization and mapping against the current H 1.2.15 schema/validator before shared freeze. G does not claim that the existing H schema or validator has already frozen these tuples.
 
+**Observed mapping gap:** the pinned H 1.2.15 JSON Schema does not expose the complete HDeliveryBindingIdentity as first-class schema properties: `adapter_instance_ref`, `runtime_session_ref`, `delivery_id`, `delivery_attempt_id`, `inference_request_id`, `final_request_boundary_id` and `adapter_capability_epoch` are not present in the schema property set read for this review. The gateway validator's signed P0 allowlist includes `provider_adapter_ref`, `actual_inference_request_id` and `final_request_boundary_id`, but does not itself establish the complete tuple above. H MUST either (a) add and validate the missing fields in a versioned signed P0 mapping, or (b) bind an immutable, authenticated H owner evidence record that carries the complete tuple and has an exact schema/validator mapping. Until C/H accepts that exact mapping, HEvidenceIdentity is a G consumer requirement/proposal, not a frozen H wire contract.
+
 Neither HDeliveryBindingIdentity nor HEvidenceIdentity contains a digest. H P0 digest is immutable content and is compared against HObservationRecordIdentity separately:
 
 - same HObservationRecordIdentity + same H P0 digest + same authenticated immutable receipt/result ref → exact replay; return the original durable H disposition;
@@ -117,7 +119,7 @@ The durable unique key is:
 
 Canonicalization MUST use one explicitly versioned deterministic profile, reject duplicate JSON keys and unknown critical fields, and preserve type distinctions. The canonicalization profile identifier and implementation revision MUST be stored with every record.
 
-The identity key contains no payload digest, provider receipt digest, H P0 digest, C payload digest, participant digest or G aggregate digest. Those values are immutable **identity-bound evidence content** and are compared separately. This prevents a changed digest from manufacturing a new logical Applied identity.
+The identity key contains no C outcome payload digest, provider receipt digest, H P0 digest, C outcome evidence digest, participant digest or G aggregate digest. Those values are immutable **identity-bound evidence content** and are compared separately. The C `RequestDigest` is the sole digest-valued component of CProviderAttemptIdentity because C defines a changed exact request as a different provider attempt/key scope; it is not the C outcome payload digest or an H/COC evidence digest. This prevents a changed evidence digest from manufacturing a new logical Applied identity.
 
 A different ContextVersion, DeliveryAttempt, InferenceRequestId, final boundary, C outcome identity, H evidence identity or COC participant identity is a different logical Applied attempt. It MUST NOT overwrite or roll back an earlier record.
 
@@ -298,7 +300,7 @@ Required tests include durable database crash injection, process restart, multi-
 
 Before this addendum can be called shared/frozen, the following exact-version acceptances are required:
 1. C accepts the exact G identity/evidence-revision join to CSubmitOutcome 1.0.1 and the C causal-order source pins.
-2. H accepts the exact HEvidenceIdentity tuple and its mapping to Unified 1.2.15 gateway evidence, including the distinction between H ingress replay and G Applied idempotency.
+2. H accepts the exact HEvidenceIdentity/HDeliveryBindingIdentity tuple and supplies the missing signed-schema/owner-record field mapping to Unified 1.2.15 gateway evidence, including the distinction between H ingress replay and G Applied idempotency.
 3. COC/Storage accept the exact participant/GID/terminal/restore bindings and recovery semantics.
 4. I and D confirm the owner evidence/cutoff/high-water fields within their authority.
 5. G implementation provides generated machine-readable schema/SDK, durable unique indexes, crash/restart/restore tests and independent readback against exact commits.
@@ -309,7 +311,7 @@ No approval transfers from H 1.2.14, a prior G consumer review, the CGH-APPLIED-
 
 - G Applied Persistence / Idempotency contract: **SPECIFIED BY THIS G DRAFT; NOT IMPLEMENTED / NOT VERIFIED**.
 - Exact CSubmitOutcome 1.0.1 source binding: **PINNED; C exact acceptance of this addendum REQUIRED**.
-- H EvidenceIdentity tuple: **PROPOSED; H/C exact field-level acceptance REQUIRED**.
+- H EvidenceIdentity tuple: **PROPOSED; current 1.2.15 schema does not expose all binding fields; H/C exact field-level mapping and schema/owner-record extension REQUIRED**.
 - COC Participant/GID join: **G design acceptance exists; COC/Storage implementation and exact addendum acceptance REQUIRED**.
 - Crash/restart/restore fencing conformance: **SPECIFIED / NOT RUN**.
 - G Applied persistence production proof: **NOT VERIFIED**.
