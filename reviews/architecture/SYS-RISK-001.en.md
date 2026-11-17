@@ -467,3 +467,66 @@ Closure requires:
 7. Obtain external recipient and backup/physical-erasure evidence or explicit, scoped, independently approved and unexpired policy exceptions.
 
 No local Owner model, role simulation, candidate policy or historical CI run closes R-03. No Global Forget completion is claimed.
+
+
+## 17. R-04 live source delta — Provider Outcome / Publication / Applied authority chain / 2026-11-17
+
+### 17.1 Exact current source pins
+
+| Owner | Current branch HEAD | Artifact | Blob SHA | Directly observed status |
+|---|---|---|---|---|
+| C | `71047cdb51139ca4080ac67f451e38a48698859d` | `07-agent-integration/phase-3.8.27-c-rereview-h-gateway-attestation-ordering.md` | `3ca06dbfd7d59483e9604b7a68df924c719f60aa` | Delegated C-role review accepts corrected C-verify → H-sign → receiver-validate → durable-ingress order; explicitly not independent human C Owner signature |
+| C | same | `07-agent-integration/phase-3.8.26-c-exact-review-h-unified-1.2.15-gateway-attestation-schema.md` | `c5ff68814be49ec5e6e2c081004e7fa058d276fa` | Accepts 1.2.15 structural shape conditionally; validator/CI not yet reviewed in this C review |
+| C | same | `07-agent-integration/phase-3.8.4-c-normative-provider-submit-outcome-contract.md` | `819705037da89834e10b6dd2ec6e66c1b8c70886` | C-owned semantic contract proposed for exact Owner review; not shared-wire-frozen |
+| C | same | `07-agent-integration/schemas/c-submit-outcome-1.0.1.schema.json` | `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` | Exact immutable CSubmitOutcome 1.0.1 structural schema |
+| E | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` | `04-memory-compiler/phase-3.8-e-publication-orchestration-retry-recovery-contract.md` | `475fee41e5eea527af4edefbfe88c58c86967d0a` | E-role proposal; exact D/I/Storage APIs and independent Owner approval OPEN |
+| D | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` | `03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md` | `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` | D-role proposal; exact Owner approval, callable API and conformance OPEN |
+| G | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G semantic decisions recorded; C/G/H Applied contract FREEZE BLOCKED; implementation/execution NOT VERIFIED |
+| H | `0d36324457e39bd50ad56ae902d477c4ea765b61` | `08-bmcp-protocol/phase-3.8.21-h-exact-schema-mapping-unified-1.2.15-gateway-attestation.md` | `2dc30f193d9c4f4bdc05ca4c137103687db28924` | H 1.2.15 schema candidate; exact C/I review required; mapping says no validator/CI claim; not frozen |
+| H | same | `08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.15.schema.json` | `860fc4cec658db7d2703cd6adf72aa31a2723f6d` | Structural schema only; semantic validator and trust dependencies remain separate |
+| H | same | `08-bmcp-protocol/validators/provider_outcome_validator_1_2_15.py` | `90a2d4b6f5b05590e3e0a7daecb5a01d9bf525c0` | Local validator implementation; source doc says it is not secure ingress acceptance and requires deployment callbacks |
+| H | same | `08-bmcp-protocol/validators/gateway_attestation_validator.py` | `9cc426d4c26deb452f39daff34c1008dd535e969` | Reference gateway validator; trust/origin/key/replay callbacks are deployment seams, not production trust implementation |
+| H | same | `08-bmcp-protocol/tests/conformance/provider_outcome/test_gateway_attestation_validator.py` | `9a5051b001a6e59d7b71e6dd175e84bb7d01d252` | 21 local gateway-attestation tests; authority callbacks are deterministic test doubles |
+| H | same | `08-bmcp-protocol/validators/provider_outcome_validator.py` and `tests/.../test_provider_outcome_validator.py` | validator Blob not used as 1.2.15 proof; test Blob `da1454ed985c84160c4cb6a0462df9d1225fab7f` | 36 tests import the legacy 1.2.14 validator; not 1.2.15 validator conformance |
+| H | same | `08-bmcp-protocol/adapter-capability-and-applied-attestation.md` | `74be8374a67da385a5f0f8e34c7aef2b38b72bcf` | CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I |
+| H | same | `.github/workflows/h-provider-outcome-conformance.yml` | `2ad679952ce5499a16c8fffa0a1543e26460e6eb` | Workflow includes 1.2.15 files/tests, but current H mapping makes no exact 1.2.15 CI claim |
+
+### 17.2 Semantic separation is clearer, but terminal authority is not yet integrated
+
+C's provider outcome algebra correctly distinguishes:
+- HANDOFF_ACCEPTED — provider handoff accepted, terminal only for the handoff fact;
+- HANDOFF_REJECTED / NOT_INVOKED — only terminal with the required positive evidence;
+- UNKNOWN — whether handoff crossed the boundary is not established;
+- IN_DOUBT — a side effect may exist; nonterminal and non-expiring.
+
+C explicitly prohibits converting timeout, missing ACK, process crash, empty queue or provider lookup outage into NOT_INVOKED. UNKNOWN/IN_DOUBT suppress new attempts and preserve the same attempt/provider idempotency key.
+
+D's PublicationParticipantRef is an in-flight Forget barrier participant, not visibility permission. D terminalizes only from authoritative Storage COMMITTED_VISIBLE or positive NO_PUBLICATION; UNKNOWN keeps the participant and Fence held. E's lifecycle sequences hidden Storage prepare → D admission → I consumption → Storage final visibility → D/I closeout, and E local status is not cross-owner proof. G Applied requires C final-request evidence, H authenticated delivery/capability, I current authorization and D current fence at the exact submission boundary; historical Applied is separate from current-use validity.
+
+These are good authority boundaries, but their source statuses remain proposed/blocked across C/D/E/G/H. No single exact current accepted bundle was established across C outcome, H gateway envelope, D publication participant, Storage outcome, I proof, G Applied record and E orchestration.
+
+### 17.3 H 1.2.15 evidence ceiling
+
+The current H branch contains 1.2.15 schema, provider validator, gateway-attestation validator, tests and a workflow. This is stronger than “no code exists”, but it is not a conformance pass:
+
+- H's 1.2.15 mapping explicitly says the schema is a candidate and makes no validator/CI claim.
+- The new 1.2.15 provider validator states that direct validation functions do not authenticate outer BMCP envelope, transport principal, channel binding or replay; secure ingress must call the gateway validator and supply real owner-authority verifiers.
+- The gateway validator labels itself a reference integration implementation. Profile registration, key status, H signature, integrity, identity binding, origin transport receipt, durable replay commit and replay-disclosure authorization are injected callbacks. Missing callbacks return UNKNOWN.
+- The 21 gateway tests use deterministic callbacks/test doubles. They prove local orchestration and fail-closed predicates under those doubles, not real cryptographic identity, I registry, C adapter registry, durable replay or deployed transport.
+- The separate 36-test provider suite imports the legacy `provider_outcome_validator.py` (1.2.14), not the 1.2.15 validator. The documented 63/63 exact-head CI is explicitly for schema 1.2.14 on commit `a36c34897545316942c7cda8da5d8bea7dacec5b`; it cannot be relabelled as 1.2.15 conformance.
+- C's Phase 3.8.27 review accepts the order only as a delegated C-role decision; it expressly is not an independent human C Owner signature. C's 1.2.15 schema review says validator/CI had not yet been reviewed.
+
+### 17.4 R-04 disposition and closure criteria
+
+R-04 remains **High / NOT PROVEN**. The contracts now distinguish provider handoff, canonical publication, Storage visibility, transport delivery, final-request submission and Applied more carefully. But exact cross-owner adoption, current 1.2.15 validation, trust callbacks, durable replay, Storage outcome, and G Applied conformance are not proven together.
+
+Closure requires:
+1. C formally accepts its immutable CSubmitOutcome 1.0.1 semantic contract and signs off exact H 1.2.15 mapping, including the corrected C-verification-before-H-signing order.
+2. I approves H signer/profile registry, gateway-to-C delegation, key status/history, anti-rollback and durable replay/disclosure policy; real verifiers replace all test doubles.
+3. H binds 1.2.15 schema, 1.2.15 validator, gateway P0 and exact C 1.0.1 object to one exact bundle; run the workflow on that exact HEAD and publish raw logs and mutation coverage.
+4. D and Storage approve the exact publication/visibility participant tuple, final linearization proof and immutable COMMITTED_VISIBLE/NO_PUBLICATION/UNKNOWN resolution; D terminal receipt must consume the same Storage outcome digest.
+5. E's retry/recovery implementation preserves the same operation/attempt/idempotency tuple through crashes and lost ACK; local E status cannot terminalize D/C/G.
+6. G/C/H jointly prove Prepared→Delivered→Materialized→FinalRequestSubmitted→Applied with request/region digest, session, capability epoch, PermissionEpoch and ForgetFence currentness; Tier 2/3 never claim Full Applied.
+7. Execute end-to-end fault tests for duplicate callbacks, delayed/late evidence, lost ACK, provider timeout after possible side effect, stale authorization/fence, replay reservation crash, gateway restart and Storage outcome ambiguity.
+
+No role-simulated Owner decision, schema existence or local validator test closes R-04.
