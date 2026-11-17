@@ -1,5 +1,6 @@
 """H semantic/structural tests for unified manifest schema artifact 1.2.9."""
 import json, sys, unittest
+from jsonschema import Draft202012Validator, RefResolver
 from copy import deepcopy
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[3]
@@ -12,10 +13,11 @@ from unified_manifest_semantics import (VALID,INVALID,UNKNOWN,td,snapshot_root,c
 def fixtures():
     snaps={}
     for o in ("I","D","C"):
-        snaps[o]={"owner":o,"owner_gate_ref":o+"/gate/1","request_set_digest":o.lower()*64,"admission_set_digest":o.lower()*64,"owner_snapshot_ref":o+"/snap/1","owner_snapshot_digest":o.lower()*64,
-          "owner_snapshot_attestation_ref":o+"/att/1","owner_snapshot_attestation_digest":o.lower()*64,
+        hexchar={"I":"1","D":"2","C":"3"}[o]
+        snaps[o]={"owner":o,"owner_gate_ref":o+"/gate/1","request_set_digest":hexchar*64,"admission_set_digest":hexchar*64,"owner_snapshot_ref":o+"/snap/1","owner_snapshot_digest":hexchar*64,
+          "owner_snapshot_attestation_ref":o+"/att/1","owner_snapshot_attestation_digest":hexchar*64,
           "owner_gate_generation":"7","request_high_water":"12","admission_high_water":"18","request_count":1,"admission_count":1,
-          "request_ledger_root":o.lower()*64,"admission_ledger_root":o.lower()*64,
+          "request_ledger_root":hexchar*64,"admission_ledger_root":hexchar*64,
           "owner_ledger_root":o.lower()*64,"anti_rollback_anchor_ref":o+"/anchor/7",
           "owner_specific_high_waters_digest":o.lower()*64,"ledger_available":True,"pagination_complete":True}
     def admission(owner,ref,pref):
@@ -115,6 +117,24 @@ class Schema1211Tests(unittest.TestCase):
             self.assertTrue({"owner_snapshot_membership_proof_ref","owner_snapshot_membership_proof_digest"}.issubset(required))
     def test_SCHEMA1211_12_owner_release_enum_matches_I_D_contract(self):
         self.assertEqual(self.msg("OWNER_LOCAL_GATE_RELEASE")["properties"]["release_type"]["const"],"OUTAGE_ADMISSION_RELEASE_ONLY")
+
+    def test_SCHEMA1211_13_json_schema_draft_2020_12_meta_validation(self):
+        Draft202012Validator.check_schema(self.schema)
+
+    def test_SCHEMA1211_14_owner_local_admission_member_validates_against_schema(self):
+        resolver=RefResolver.from_schema(self.schema)
+        member=next(x for x in self.m["manifest_members"] if x["member_kind"]=="OWNER_LOCAL_ADMISSION")
+        Draft202012Validator(self.schema["$defs"]["ownerLocalAdmissionMember"],resolver=resolver).validate(member)
+
+    def test_SCHEMA1211_15_coc_participant_and_owner_binding_validate_against_schema(self):
+        resolver=RefResolver.from_schema(self.schema)
+        member=next(x for x in self.m["manifest_members"] if x["member_kind"]=="COC_PARTICIPANT")
+        Draft202012Validator(self.schema["$defs"]["cocParticipantMember"],resolver=resolver).validate(member)
+        Draft202012Validator(self.schema["$defs"]["ownerAdmissionBinding"],resolver=resolver).validate(member["owner_admission_bindings"][0])
+
+    def test_SCHEMA1211_16_owner_snapshot_roots_validate_against_schema(self):
+        resolver=RefResolver.from_schema(self.schema)
+        Draft202012Validator(self.schema["$defs"]["ownerSnapshotRoots"],resolver=resolver).validate(self.m["owner_snapshot_roots"])
 
 
 class UnionSemanticsTests(unittest.TestCase):
