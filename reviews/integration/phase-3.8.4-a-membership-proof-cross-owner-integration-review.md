@@ -13,18 +13,18 @@
 |---|---|---|
 | H | Unified Schema 1.2.11 / wire 1.3.0 | `4f1e103ab4b2ac961d77179dba0b65093532ea40` |
 | H | RecoveryJoin 1.0.2 | `4b664e3bce465499bcdfd93796349a4ba7074002` |
-| H | I crypto wire mapping 3.8.4 | `a692a790a4c7abef94dba6da9c22b5e06417879a` |
+| H | I crypto wire mapping 3.8.4 | `1a64a7be3ec4190643809897519afdf73ed69c1d` |
 | H | Unified Manifest union contract 3.8.4 | `e0f561df814c1539ee3b1e72ce7cfc2fd15dd175` |
 | H | H exact review | `f5ab9a9232b04720faf552a70d5d2962343f843f` |
 | H | Semantic reference validator | `6710bd7876be5f2c60640f21090729b8859a7a3e` |
 | H | RecoveryJoin 1.0.2 tests | `6afa788da2a899f03de8207cb700c40e0533aba1` |
 | H | Unified 1.2.11 tests | `7582091c22ad7f75ed51dba7fbbd02d43af06933` |
 | H | Unified 1.2.12 tests | `5b444aa11ffb86c145ec745752204e623c1c2b41` |
-| H | Candidate CI | Run `44050250038`, commit `34fb4ccf8b1580321d38eda1340cf53f73b83f24`, 281 total / 259 passed / 22 skipped / 0 failed |
+| H | Candidate CI | Run `44051045877`, commit `ccecb8b6b80dff1e8ef7af10caac67c2f3c77929`, 282 total / 260 passed / 22 skipped / 0 failed |
 | I | Crypto profile proposal | `5eeb011032c53c2f7897d699d6f512b26f07d0a2` |
 | I | Artifact revision / manifest digest amendment | `35c47cc56c9d5e7ab72fdddb7ef9032aa3661ff9` |
-| I | Owner membership proof contract | `b1e39c92252eadf8ca592f9a8dc6879cf44fd593` |
-| I | Exact H membership proof review | `909165ca0866bb231470a6efc51c9e811e578816` |
+| I | Owner membership proof contract | `88209bbea0ab600880c5c630cfe83af31ee16dd7` |
+| I | Exact H membership proof review | `27b355ff4174fed20033b78d2e77f5c1e8d3177a` |
 | D | Owner membership proof contract | `d80dabe7210e681bc4e2290355a38f8b67be9ddd` |
 | D | Exact H membership proof review | `fe4ba71dd3a07d0775e17dbb90e8aeccc3bc71c0` |
 | D | Gate/currentness/producer contract | `7f2861d9441b9be6c8e69f41fd0276636be483a8` |
@@ -114,3 +114,8 @@ The new membership-proof contract closes an important protocol ambiguity: a row 
 It does not close R1/R2, Storage Gate A/B/C, JF-10 P0, multi-domain atomicity or production activation. No schema/protocol freeze or production conformance PASS is declared.
 
 **候选组合有条件接受；R1/R2、Storage Gate、JF-10 P0 与生产激活仍保持开放/阻断。**
+
+
+### A addendum — sixth I membership proof P0 vector
+
+The I proof P0 now has a sixth Python/Node RFC 8785 + Ed25519 test vector, exact Blob `9210219a85afe1f48da0ea253a073aba8b2e138c`, test Blob `01239e06e8f4464f49acd34241dc00899befe424`. CI Run `44051045877` passed 282 tests (260 passed, 22 skipped, 0 failed). This is TEST-ONLY cryptographic fixture evidence and does not change the production trust/key/ledger boundary.
