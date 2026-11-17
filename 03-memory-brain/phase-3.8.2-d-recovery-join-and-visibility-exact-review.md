@@ -14,7 +14,7 @@
 - Storage Phase 3.6.11 Bidirectional COC/Owner Admission Join Proof: Blob 41f80b1aacfebdb1f652b16144afbf83ce950e82.
 - H RecoveryJoin schema 1.0.0 candidate: Blob dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
 - H semantic validator contract: Blob b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
-- HRC semantic suite: Blob ee0f47095df10786da358bed193d6f8491a5eb2c.
+- HRC semantic suite: Blob 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
 - A race/crash/failover matrix: Blob c0f8ae699a42de46d12d0d311892e5670014e0f1.
 
 ## 2. D disposition
@@ -84,4 +84,4 @@ The latest H RecoveryJoin schema now has typed D evidence requirements for LINEA
 
 Updated H RecoveryJoin schema Blob: dd3234aa1c74caf6d0e335875cd96e0b2b64082f.
 Updated H semantic contract Blob: b3218298f58cff9b92cb1c38e453af6fd4d0dd50.
-Updated HRC suite Blob: ee0f47095df10786da358bed193d6f8491a5eb2c.
+Updated HRC suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
