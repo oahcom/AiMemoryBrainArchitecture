@@ -202,3 +202,43 @@ The available H interop test artifacts are explicitly a recovery-cutoff 1.0.4 / 
 This section supersedes any earlier implication that the historical H 1.2.5 or 1.2.8 pins constitute the current H wire bundle. Historical sections remain retained as provenance. The current exact H schema pin is 1.2.11 Blob `4f1e103...`; it is not a cross-owner wire freeze.
 
 No provider implementation, executed conformance, production activation, universal exactly-once, Full Applied or Global Forget Completion is claimed. C/H decisions are delegated role simulations authored at the user's direction, not independent human Owner signatures.
+
+
+## 11. C/H/I Provider Outcome semantic and crypto amendments (2026-11-17)
+
+### 11.1 Exact owner artifacts
+
+| Owner | Artifact | Exact Blob | Disposition |
+|---|---|---|---|
+| C | Phase 3.8.6 Provider Outcome Gate/Attempt/Idempotency Amendment | `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4` | PROPOSED C semantic amendment; NOT TESTED |
+| C | Phase 3.8.7 review of I C-scoped crypto proposal | `[C review file blob pending pin]` | Candidate construction accepted only; I approval and H wire mapping open |
+| I | Phase 3.8.4 C Provider Outcome crypto profile addendum | `1bcddbaaa4a9ca730d492a6554941becac305668` | PROPOSED AIMBA-C-CRYPTO-1.0; not registered/approved/frozen |
+| H | Phase 3.8.5 exact 1.2.11 Provider Outcome semantic validator contract | `26e529327ae15f57b8169cdec48d9c18fef12097` | PROPOSED; not implemented or executed |
+| H | Schema artifact 1.2.11 | `4f1e103ab4b2ac961d77179dba0b65093532ea40` | Structural candidate only |
+
+C amendment commit: `b30d3b779adec2b7c64dc3267c21c5f281ad47eb`.
+I addendum commit: `fa4bd5e190f0fdb4ace658969433bdb4ef8f6838`.
+H validator latest commit: `ce8ccd5fb319d07911cf68a4c385b2a99eaf4e8e`.
+
+### 11.2 Normative cross-owner alignment
+
+C now specifies the immutable attempt tuple: C outcome, C admission/digest, C gate/generation, provider attempt/generation, provider/account/adapter/endpoint/region, idempotency namespace/key, final request boundary/digest and optional COC intent/reservation. Gate close and final egress commitment must share one durable linearizable authority. Close-wins prevents any older uncommitted send; egress-wins requires the exact attempt to appear in the close in-flight set. A crash after egress commitment without transport result remains UNKNOWN/IN_DOUBT.
+
+Provider same-key lookup must prove the exact same provider/account/endpoint, namespace/key, attempt/generation, request boundary and digest. Provider-specific retention, lookup consistency and receipt authenticity are mandatory capability facts. Generic exactly-once is not assumed; expired/unavailable lookup leaves the attempt IN_DOUBT and bars retry-as-new-operation.
+
+H's proposed semantic validator requires exact schema revision 1.2.11 / wire family 1.3.0, layered structural/crypto/semantic/join/currentness validation, INVALID versus UNKNOWN distinction, C owner ledger joins, COC ParticipantIntent/Reservation joins, and exact Batch-before-Manifest three-digest checks. H does not treat JSON Schema success as semantic acceptance.
+
+I proposes a separate C-scoped cryptographic bundle `AIMBA-C-CRYPTO-1.0`, with distinct C domain separation and independent C key namespace. This is a candidate based on the I cryptographic primitive proposal, not an approved C profile. C accepts only the construction shape; C projection remains C-owned, I trust/key governance remains I-owned, and H must publish the exact projection and validator mapping. No I key, trust root or I P0 projection is reused for C.
+
+### 11.3 Current binding status
+
+- C Gate/Attempt/Same-key semantic amendment: **PROPOSED / NOT TESTED**.
+- I C-scoped crypto profile: **CANDIDATE ONLY / NOT APPROVED / NOT REGISTERED**.
+- H 1.2.11 semantic validator contract: **PROPOSED / NOT EXECUTED**.
+- H schema 1.2.11: **STRUCTURAL CANDIDATE ONLY**.
+- C/H exact cross-review: **STRUCTURAL ACCEPTANCE ONLY; SEMANTIC/WIRE FREEZE BLOCKED**.
+- Real provider adapter race/idempotency tests: **OPEN**.
+- Cross-language canonical-byte/signature/provider-outcome execution: **OPEN**.
+- A final integration acceptance: **OPEN**.
+
+No production readiness, universal exactly-once, Full Applied or Global Forget Completion is claimed. These role artifacts are delegated simulations, not independent human Owner signatures.
