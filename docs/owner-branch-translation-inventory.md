@@ -248,3 +248,20 @@ C detailed core companion coverage: 2/10. C36-AP-01 resolved at source-decision 
 ## C36-AP-01 disposition correction — 2026-11-17
 
 The earlier OPEN disposition is superseded by C's separate exact source decision in Blob `45a48249717c8cddb07ab96197730ef93d406c22`. C explicitly accepts the exact CGH-APPLIED-1.1 recovery-batch amendment with enumerated exceptions and defines CSubmitOutcome/provider evidence. **C36-AP-01: RESOLVED at source-decision level.** H36-AP-09 remains OPEN; H Schema/SDK, C/G/I/D/Storage interoperability, deployment and conformance are not closed.
+
+
+## C/G/H current exact-version full-path review — 2026-11-17
+
+| Owner | Current exact artifact | Blob / evidence | Disposition |
+|---|---|---|---|
+| C | Phase 3.6 recovery-batch acceptance | `45a48249717c8cddb07ab96197730ef93d406c22` | ACCEPT WITH ENUMERATED EXCEPTIONS; provider-specific same-key recovery unverified |
+| C | CSubmitOutcome normative contract / schema | `819705037da89834e10b6dd2ec6e66c1b8c70886` / `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` | C-owned immutable outcome semantics, schema 1.0.1 |
+| C | Phase 3.8.19 current full-path review | `24337b79cfea6264a8a6f11fa414578fc559716c` | ACCEPT exact 38-method local path as L1/L2 candidate; NOT FROZEN |
+| H | Unified schema / mapping | `09fcd1fa29fe24255fbd87cae79dafb406594a59` / `1cbe74eba69325510d6b1019d971661f965eabf8` | H 1.2.14 / wire 1.3.0; candidate mapping |
+| H | Full-path validator/test/fixture | `eab961a08d41e871f38543b18ee60cf024977414` / `540056d7c4f290c31290b17c264c69cfd76b1cb2` / `c80247a6ecfbb4a29ff0993e8e2aea4829d00626` | Exact local validation path; authority callbacks are test doubles |
+| H | Phase 3.8.14 full-path closure | `cda025fb157815570b3280fa5ff168d5e62453b1` | Run 44070924346 SUCCESS; 38 methods; not production proof |
+| G | Phase 3.8.18 current consumer review | `1894860c76336f8739d354b72beed3992cffd17e` | ACCEPT WITH ENUMERATED G-OWNED APPLIED CONDITIONS; delegated role review only |
+
+Bilingual companions: `docs/{en,zh-CN}/06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md` and `docs/{en,zh-CN}/07-agent-integration/phase-3.8.19-c-exact-review-h-fullpath-38-test-current-head.md`.
+
+Corrected cross-owner audit: `reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md` and Chinese companion. Prior proposal `reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal*.md` is marked SUPERSEDED. These review artifacts do not change core normative coverage totals.
