@@ -50,3 +50,9 @@ H 已新增 §11.8，覆盖 CGH-APPLIED-1.1 因果顺序与 recovery-batch 证�
 更新后的结构读回：源文件、英文和中文均为 23/23 个标题、33/33 行表格；英文内容仍与源文件完全一致。§11.8 候选映射保留 COC terminal proof、recovery-batch identity/digest、pre-batch participant 完整性、owner high-water attestation、participant reconciliation、I terminal/revocation 证据、D lineage/cutoff/effective-position 证据，以及 Storage same-XID terminal 证据。
 
 该跟进仍为 **CANDIDATE / NOT FROZEN**。本报告原先 22 个标题的统计已由本次 23 个标题读回取代。不代表 H Schema/SDK 已生成、Owner 已批准或一致性测试已执行。
+
+## 6. C Provider outcome / Owner gate release 映射跟进
+
+H 新增 §11.9，明确要求由 C 签发的 `c_provider_receipt_ref` 和不可变 `c_submit_outcome_ref`，保留 UNKNOWN/IN_DOUBT，仅在所有 Owner outcome 确定后才允许 `participant_terminal_proof_ref`，并将 `owner_gate_release_attestation_ref` 独占保留给 I 或 D。当前精确源 Blob：`74be8374a67da385a5f0f8e34c7aef2b38b72bcf`。
+
+更新后的结构读回为源文件、英文、中文均 24/24 个标题和 33/33 行表格。这仍只是候选映射；没有更新/生成 Wire Schema/SDK，也不代表 C/G/I/D/Storage 批准或一致性测试执行。此前 23 个标题的统计已被本次结果取代。
