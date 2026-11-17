@@ -2804,6 +2804,11 @@
         },
         "owner_snapshot_membership_proof_ref": {
           "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_membership_proof_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Digest of the exact owner-ledger membership proof, bound to the frozen snapshot root and entry identity."
         }
       },
       "required": [
@@ -2823,7 +2828,8 @@
         "operation_digest",
         "scope_binding_digest",
         "coc_participant_intent_ref",
-        "owner_snapshot_membership_proof_ref"
+        "owner_snapshot_membership_proof_ref",
+        "owner_snapshot_membership_proof_digest"
       ]
     },
     "ownerLocalAdmissionMember": {
@@ -2938,6 +2944,11 @@
         },
         "owner_snapshot_membership_proof_ref": {
           "$ref": "#/$defs/opaqueRef"
+        },
+        "owner_snapshot_membership_proof_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "Digest of the exact owner-ledger membership proof, bound to the frozen snapshot root and entry identity."
         }
       },
       "required": [
@@ -2964,7 +2975,8 @@
         "effect_boundary",
         "coc_participant_intent_ref",
         "coc_absence_reason",
-        "owner_snapshot_membership_proof_ref"
+        "owner_snapshot_membership_proof_ref",
+        "owner_snapshot_membership_proof_digest"
       ]
     },
     "ownerSnapshotRoot": {
