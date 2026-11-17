@@ -246,3 +246,7 @@ Observed at this refresh (2026-11-17; currentness must be rechecked before any f
 The relevant D/I/H/Storage/A contract blobs listed in §§11.1–11.5 remained byte-identical at this refresh. C's exact Phase 3.8.4 membership contract is Blob `5e37185610869951c3b392c9ad143a72b4c702ac`; its exact H review is Blob `ea2e11519646225679eadc8b33af0d755998d92e`. C's disposition is ACCEPT WITH ENUMERATED C-OWNED CONDITIONS in a delegated role review; not an independent human Owner signature. The P conformance gap matrix now includes C provider outcome membership/idempotency tests as a separate required suite.
 
 P reference-model CI run `44054221711` passed 69 tests on P commit `fcafce4c316c49dd4f2f78740d1a19d0ef7aa13d`. The current contract/gap-matrix/registry commits are later documentation-only updates and do not change the test-run source commit. They do not elevate P tests to Owner-local conformance.
+
+### 11.7 Subsequent branch-head refresh / 后续分支 HEAD 刷新
+
+After the §11.6 snapshot, C, H, I, Storage and main advanced. Latest observed heads: C `76ac41427b8183d5a1cfe7b3046bdb75564349a7`; H `54ab10af211dd92f641d2f30f511dc0a3043b9c5`; I `958565e4395ed5153cf4bafeedfbc57ca13c788f`; Storage `5220ec33aee63220d50c362e51e76f5e86b1f233`; main `b372b62c640a2b656e54b6db62a4ee67d7d8c001`; P at time of refresh `02d61f6066347c6b48b5fdcd08a5dfadf9a110ba`. Re-read of the exact C/D/I/H/Storage/A source paths found their referenced blobs unchanged. This is a branch-head currentness refresh only, not a new Owner decision.
