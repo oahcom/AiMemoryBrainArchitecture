@@ -3,7 +3,7 @@
 - Owner: H — BMCP Protocol and Interoperability
 - Exact schema: `bmcp.coc-jf10-unified-1.2.11.schema.json`, Blob `4f1e103ab4b2ac961d77179dba0b65093532ea40`
 - Wire family: `schema_version=1.3.0`; artifact revision: `1.2.11`
-- C source amendment: proposed Phase 3.8.6 (exact pin to be added after commit)
+- C source amendment: Phase 3.8.6, Blob `392a3fd43790db59cb8aa5b3c919ca98e4bcddb4`
 - Status: PROPOSED exact-revision validator contract; NOT FROZEN / NOT IMPLEMENTED / NOT EXECUTED.
 - Provenance: delegated H-role simulation at user's direction, not independent human Owner approval.
 
@@ -123,6 +123,6 @@ Execution record must identify exact schema/validator/vector blobs, language/run
 
 ## 9. Freeze gate
 
-This contract is PROPOSED. It does not freeze 1.2.11 because the current schema's structural message does not alone carry every C gate/attempt semantic value and no exact C signature profile/vector bundle is yet pinned. H will only accept a later exact bundle after C's amendment, I/C profile decision, H schema/validator updates, independent cross-language execution and Storage/A exact pin review.
+This contract is PROPOSED. It does not freeze 1.2.11 because the current schema's structural message does not alone carry every C gate/attempt semantic value and no exact C signature profile/vector bundle is yet pinned. H will only accept a later exact bundle after C's amendment, I candidate profile addendum Blob `1bcddbaaa4a9ca730d492a6554941becac305668` plus C candidate review Blob `, H schema/validator updates, independent cross-language execution and Storage/A exact pin review.
 
 No tests, production readiness, provider-specific exactly-once or implementation acceptance are claimed.
