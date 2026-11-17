@@ -7,13 +7,13 @@
 
 ## 1. Relationship kinds / 关系类型
 
-- **Composition:** child is a constituent of parent and its lifecycle is constrained by parent; does not automatically imply shared physical row.
-- **Association:** typed semantic link between independent objects; both identities remain independent.
-- **Reference:** typed pointer; does not imply ownership, permission, or composition.
-- **Derivation:** target produced from source(s) through a declared process; source/target direction is immutable and traceable.
-- **Ownership:** authority/custody relationship defining who may govern lifecycle; distinct from applicability and authorization.
-- **Causal:** establishes an evidenced before/after or cause/outcome relation; timestamps alone may be insufficient for concurrency order.
-- **Temporal:** states when a relation/assertion holds; separate from record lifecycle and transaction time.
+- **Composition:** child is a constituent of parent and its lifecycle is constrained by parent; does not automatically imply shared physical row. / **组合：** 子对象是父对象的组成部分，其生命周期受父对象约束；但不自动意味着共享同一物理行。
+- **Association:** typed semantic link between independent objects; both identities remain independent. / **关联：** 独立对象之间的类型化语义链接；双方身份仍保持独立。
+- **Reference:** typed pointer; does not imply ownership, permission, or composition. / **引用：** 类型化指针；不意味着所有权、权限或组合关系。
+- **Derivation:** target produced from source(s) through a declared process; source/target direction is immutable and traceable. / **派生：** 目标通过声明的过程由一个或多个来源生成；Source/Target 方向不可变且可追溯。
+- **Ownership:** authority/custody relationship defining who may govern lifecycle; distinct from applicability and authorization. / **所有权：** 定义谁有权管理生命周期的权威/保管关系；不同于适用性和授权。
+- **Causal:** establishes an evidenced before/after or cause/outcome relation; timestamps alone may be insufficient for concurrency order. / **因果：** 建立有证据支持的先后或原因/结果关系；仅凭时间戳可能不足以确定并发顺序。
+- **Temporal:** states when a relation/assertion holds; separate from record lifecycle and transaction time. / **时间关系：** 说明某个关系/断言在何时成立；与记录生命周期和事务时间分离。
 
 ## 2. Core relationship matrix / 核心关系矩阵
 
