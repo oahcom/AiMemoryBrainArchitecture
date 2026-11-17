@@ -51,3 +51,22 @@ These are documentation and traceability changes only. They do not constitute ar
 ## Change log
 
 This record is append-only in intent. Subsequent commits and verification outcomes must be added with exact SHAs and timestamps; do not replace the original baseline or rewrite historical entries.
+
+
+## Independent re-review appendendum / 独立复审追加记录
+
+- Review report: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/42#issuecomment-6945250593
+- Reviewed Head: `0708e25d8e008b1044679ff29ba7ae34977bc08c`
+- Result: `CHANGES_REQUIRED`
+- IR-001: `PARTIALLY_FIXED` — B v2 current pointers are correct; v1 historical/superseded labeling required.
+- IR-002: `VERIFIED_FIXED`.
+- IR-003: `VERIFIED_FIXED`.
+- NR-001: `OPEN — GOVERNANCE AUTHORITY DECISION REQUIRED`; no implementation-session self-approval.
+- NR-002: `OPEN at reviewed Head`; PR description statistics require refresh.
+- NR-003: `OPEN at reviewed Head`; append review history to manifest.
+- CI, manifest verification, YAML parse/schema validation: `NOT RUN`.
+- This appendendum records the review result; it does not approve AI-ARCH-002 or authorize merge.
+
+### Follow-up correction tracking / 后续修正跟踪
+
+Subsequent commits that address IR-001, NR-002 and NR-003 must be appended here with exact SHAs after read-back. NR-001 remains blocked until an explicit governance-authority decision is recorded.
