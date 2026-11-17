@@ -408,3 +408,19 @@ Current exact H pins:
 Latest run [44042568297](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44042568297), H commit `b832679d1143e2806cba30e77dd8d0b240334fdc`, job `133900417567`: **95 tests ran, OK**. The two new schema tests are structural only; they do not enforce signature_profile_id in protected semantic contexts or resolve it through I's trust registry.
 
 This 95-test result is candidate reference-model/schema/wire evidence. It does not prove live COC quorum prefix completeness, owner signature/key status, production semantic adapters, Storage durable JoinProof append/readback, owner-local currentness CAS, physical JF-10, D/Storage topology or production multi-language interoperability. HRC-TEST-v1 remains test-only.
+
+
+## 20. H 97-test schema-family refresh / H 97 项 Schema 家族刷新
+
+H has advanced the candidate wire/schema family and added structural checks:
+- Recovery Cutoff 1.0.5: `75cd1fedefd50a6ed570b5afaa2d1f9cc4c6a4c7`.
+- RecoveryJoin 1.0.1: `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`.
+- Unified COC/JF-10 1.2.8: `70b892797d07489936300a26c0dedfafe1d6e746`.
+- H semantic contract: `b32f4a0fe665feefa6eadd3f10c70deb28fe0ba5`.
+- Schema test suite: `ff2b735ccdbf5d45f3c6b2ee9a25d14db2e3c7ad`.
+
+The 97 candidate methods are HRC 25 + JPF 19 + WIRE 10 + SCHEMA 16 + TPH 26 + XLANG 1. SCHEMA-15 checks owner-snapshot attestation content binding; SCHEMA-16 checks RecoveryJoin 1.0.1 typed complete-empty/out-of-scope proof structure. The 1.2.8 test fixture was corrected from stale 1.2.7 literals; the failure was retained and the corrected exact commit passed.
+
+Latest verified H run [44043100543](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44043100543), job `133902179251`: **97 tests ran, OK**. This run includes the current 97-test candidate suite. It is not production owner-signature verification, live I/D/C ledger enumeration, COC quorum durability, Storage JoinProof persistence, currentness CAS or physical JF-10 conformance.
+
+The Storage bidirectional JoinProof semantics do not change: exact two-way membership and six independent owner sets remain required. The newer schema versions improve the typed envelope but do not close live source completeness, signatures, owner release CAS or topology T1–T8.
