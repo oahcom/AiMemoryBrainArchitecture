@@ -456,3 +456,14 @@ D/E/F/G 来源协调已以中英文写入当前性审计、跨 Owner 矩阵、�
 Independent clause-by-clause bilingual semantic review remains pending. This author-side parity refresh does not close B5 or B6.
 
 独立逐条双语语义审查仍待完成。本次作者侧双语对等刷新不关闭 B5 或 B6。
+
+
+## 9. Post-merge status correction / 合并后状态纠正 — 2026-11-18
+
+PR #55 is CLOSED / MERGED, but this status change is not bilingual semantic acceptance. The PR review listing contains 10 COMMENTED records and no APPROVED record. The package is present on main after the merge; the historical author-side parity inventory and its exact Blob pins must not be represented as current without a fresh file-by-file readback. B5 remains BLOCKED / NOT PASSED until a separate reviewer completes clause-by-clause English/Chinese semantic comparison against exact current main blobs. B6 remains INDEPENDENT_REVIEW_PENDING.
+
+PR #55 现为 CLOSED / MERGED，但状态变化不构成双语语义验收。PR Review 列表包含 10 条 COMMENTED 记录，没有 APPROVED 记录。合并后研究包已存在于 main；不得在未逐文件重新读回的情况下，将历史作者侧对等清单及其 Blob Pin 表述为当前有效。B5 仍 BLOCKED / NOT PASSED，直至独立审查者针对 main 上精确 Blob 完成逐条中英文语义对照。B6 仍为 INDEPENDENT_REVIEW_PENDING。
+
+This is an author-side status correction only. It does not close B5/B6, approve Fact/Claim Option A, or authorize schema freeze.
+
+本条仅为作者侧状态纠正，不关闭 B5/B6，不批准 Fact/Claim Option A，也不授权 Schema 冻结。
