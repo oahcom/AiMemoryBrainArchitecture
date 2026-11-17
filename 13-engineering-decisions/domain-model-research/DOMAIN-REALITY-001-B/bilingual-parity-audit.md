@@ -23,7 +23,7 @@ A file is bilingual-complete only when the full normative content is present in 
 | baseline-currentness-and-owner-source-audit.md | Many bilingual sections; several owner/source tables and detailed Phase 3.8 findings are English-only | PARTIAL | Translate all tables, currentness corrections, issue state and test authority evidence |
 | baseline-owner-branch-snapshot-errata.md | Bilingual headings and paragraphs; snapshot table and gate effects are English-only | PARTIAL | Translate the owner/branch/commit/artifact table and all scope/gate conditions |
 | fact-claim-identity-adr.md | Chinese peers added for source evidence, conceptual/identity alternatives, decision matrix, authority acceptance table and all eight required examples; Blob `0bbea0beec6a5828c2db5ae267fac40f59ad7f1f` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently compare each alternative, matrix cell, example and ADR status; ensure no recommendation was promoted to decision |
-| canonical-domain-entity-inventory.md | Bilingual headings and narrative; most entity/classification tables are English-only | PARTIAL | Translate each concept row, rationale, status and open question |
+| canonical-domain-entity-inventory.md | Full Chinese peer added for classification rules, all canonical/value/association/security/protocol inventory rows, distinctions, open questions and gate disposition; Blob `1bebb0f5ef85a395afce00db8d74c76bdbd3c721` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Independently verify each classification, identity rationale, owner boundary and status; confirm OPEN/CANDIDATE/DEFERRED distinctions remain unchanged |
 | canonical-identity-semantics.md | Full Chinese peer text added for canonical distinctions, stability rules, typed namespaces, trust-resolution order, serialization types, open questions and decision record; Blob `bc8816eadcd14a1dd01ae03ed68de553b2bb1483` | REMEDIATED — MANUAL REVIEW PENDING | Independently verify type distinctions, authority boundaries, exact pins and no semantic drift |
 | canonical-state-semantics.md | Full Chinese peer text added for state matrices, critical terms, ordering, state-machine requirements, owner evidence and blockers; Blob `2c42b4b9d8311e218d0e6fadd7b1f3a7d9c10017` | REMEDIATED — MANUAL REVIEW PENDING | Independently verify every state/authority/proof boundary and the new B-STATE-007 alignment |
 | canonical-temporal-evidence-semantics.md | Chinese mirrors added for all 12 time fields, bitemporal options, Source/Evidence/Provenance table, precision/uncertainty, evidence attributes, lineage constraints, owner impacts, invariants and open decisions; Blob `636c28a4d06e61702665ec4e6d7c5a6f034aba1c` | REMEDIATED — MANUAL PARITY REVIEW PENDING | Verify every temporal authority, nullability and Forget-retention rule against B/D/Storage source contracts |
@@ -113,3 +113,9 @@ A file is bilingual-complete only when the full normative content is present in 
 - `canonical-domain-model.md` 已为规范原则、对象清单、权威矩阵、最小/推荐/延后/拒绝模型层级、架构适配、认证入口边界和阻塞项补齐中文对应内容。精确读回 Blob：`ce441336e2fbba7c7a28c0b4c75482d524a4ade7`。
 - This remains author-side remediation. Independent clause-by-clause semantic parity review is pending; B5 remains BLOCKED.
 - 本次仍属于作者侧整改。逐条独立语义对等复审尚未完成；B5 继续保持 BLOCKED。
+
+
+- `canonical-domain-entity-inventory.md` has received a full Chinese peer for classification rules, all inventory matrices, semantic distinctions, open questions and gate disposition. Exact Blob: `1bebb0f5ef85a395afce00db8d74c76bdbd3c721`.
+- `canonical-domain-entity-inventory.md` 已为分类规则、全部实体/值对象/关联/安全协议清单、语义区分、未决问题和门禁结论补齐中文对应内容。精确 Blob：`1bebb0f5ef85a395afce00db8d74c76bdbd3c721`。
+- Author-side remediation only; independent semantic parity review remains pending and B5 remains BLOCKED.
+- 仅为作者侧整改；独立语义对等复审仍待完成，B5 继续 BLOCKED。
