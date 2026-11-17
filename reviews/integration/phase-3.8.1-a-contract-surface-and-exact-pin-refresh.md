@@ -427,3 +427,72 @@ PR #159 已合并至 main，合并提交为 `05fe0f9551ef3149d1c54b6f3a5e2f0ba66
 #### 15.3 更新后的裁决
 
 当前发布参考模型已覆盖 Fence-first 拒绝、Publication-first Barrier 保留、后续 Fence 排除已由 D 关闭的 Participant、精确不可变操作元组重放，以及 UNKNOWN 禁止重新提交。Phase 3.8 架构仍为 **契约层面一致的提案 / 未冻结**。独立 D/E/I/Storage 决策、H Wire/密码学、物理拓扑、正向 NO_PUBLICATION 证明、真实 Storage 对账、崩溃/故障切换/恢复及生产符合性仍 OPEN。
+
+
+## 16. I sequencer / Storage terminal separation — PR #168 (2026-11-18)
+
+PR #168 merged to main at `2fabe07640e2f3cee69b213275c9f5a7b17edd5d`.
+
+- Exact PR Head: `206909f5af9834b993cfc198b2f171c54bc7cd3f`.
+- Exact-head Publication Protocol workflow [#44194106522](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44194106522): SUCCESS, 28 tests / OK.
+- Exact-head GOV-DOC-001 structural check #44194106534: SUCCESS.
+- Main readback source Blob: `3417e0d5a6ec21ff36fa1bba7c9994352bc70849`; 28 test methods.
+
+### 16.1 Corrected authority boundary
+
+The earlier PR #163/#164 NO_PUBLICATION path was too compressed: it treated I authorization consumption as part of Storage commit and rejected a consumed authorization as inconsistent with NO_PUBLICATION. That contradicted the Phase 3.8 Owner sequence.
+
+PR #168 now models two separate authority transitions:
+
+1. I sequencer `COMMIT_WON`: consumes the single-use authorization, persists the exact immutable operation tuple and creates a pending I participant.
+2. Storage final transaction: validates the exact I proof and D participant, then writes visibility, Storage outcome, receipt and outbox. It does not consume I authorization.
+
+Consequences now exercised:
+
+- Revocation before I COMMIT_WON rejects.
+- Revocation after COMMIT_WON remains pending and cannot cancel the winner; the exact I proof is replayable, and I closeout releases the pending revocation only after the exact Storage outcome.
+- A known crash before Storage commit leaves I authorization consumed and I participant pending, but creates no Storage visibility, outcome, receipt or outbox. The same immutable operation can retry.
+- UNKNOWN blocks recommit until authoritative Storage reconciliation.
+- Positive NO_PUBLICATION preserves consumed I authorization and the pending I participant; it creates no visibility/receipt/outbox. D and I close only against the same exact Storage terminal outcome, with D's active ForgetFence participant barrier retained until D closeout.
+
+### 16.2 Historical correction and evidence ceiling
+
+Section 15's statement that the model lacked a positive NO_PUBLICATION path is superseded by PR #163/#164; this section further corrects the I/Storage sequencing mismatch found during review of those merged changes. The typed `StorageNoPublicationProof` remains only an in-memory test seam. Its booleans are not authenticated Storage evidence, a wire schema, a signature or Owner acceptance.
+
+The current model still does not prove real I sequencer durability, Storage transaction durability, DB serializability, multi-process concurrency, cross-service atomicity, proof authenticity, process restart, failover, restore or anti-rollback. No production implementation or conformance is claimed.
+
+The Phase 3.8 disposition remains **COHERENT PROPOSED CONTRACT / NOT FROZEN**. Independent D/E/I/Storage Owner decisions, H wire/crypto, physical topology and production conformance remain OPEN.
+
+### 中文规范
+
+PR #168 已合并至 main，合并提交为 `2fabe07640e2f3cee69b213275c9f5a7b17edd5d`。
+
+- 精确 PR Head：`206909f5af9834b993cfc198b2f171c54bc7cd3f`。
+- 精确 Head 的 Publication Protocol 工作流 #44194106522 SUCCESS，共 28 项测试。
+- 精确 Head 的 GOV-DOC-001 检查 #44194106534 SUCCESS。
+- 主线回读源码 Blob：`3417e0d5a6ec21ff36fa1bba7c9994352bc70849`，共 28 个测试方法。
+
+#### 16.1 修正后的权威边界
+
+此前 PR #163/#164 的 NO_PUBLICATION 路径过度压缩了状态机：它把 I 授权消费视为 Storage 提交的一部分，并将已消费授权视为与 NO_PUBLICATION 冲突。这与 Phase 3.8 Owner 规定的先后顺序矛盾。
+
+PR #168 现在分别建模两个权威转换：
+
+1. I Sequencer `COMMIT_WON`：消费单次授权，持久化精确不可变操作元组，并创建待关闭的 I Participant。
+2. Storage 最终事务：验证精确 I 证明和 D Participant，然后写入可见性、Storage 终态、Receipt 和 Outbox；它不负责消费 I 授权。
+
+现在测试覆盖：
+
+- I COMMIT_WON 之前发生撤权，准入失败。
+- COMMIT_WON 之后发生撤权，撤权保持待处理，不能取消已经胜出的决策；精确 I 证明可以重放，只有 I 在精确 Storage 终态后关闭时才释放待处理撤权。
+- Storage 提交前已知崩溃会保留已消费的 I 授权和待关闭的 I Participant，但不会创建 Storage 可见性、终态、Receipt 或 Outbox；相同不可变操作可以重试。
+- UNKNOWN 在权威 Storage 对账前禁止重新提交。
+- 正向 NO_PUBLICATION 保留已消费的 I 授权和待关闭 I Participant，不创建可见性/Receipt/Outbox。D/I 只能针对同一个精确 Storage 终态关闭；D 的 ForgetFence Participant Barrier 必须一直保留到 D 关闭。
+
+#### 16.2 历史纠正与证据边界
+
+§15 关于模型缺少正向 NO_PUBLICATION 路径的陈述已被 PR #163/#164 的合并所 supersede；本节进一步纠正了审查这些合并变更时发现的 I/Storage 先后顺序问题。类型化 `StorageNoPublicationProof` 仍然只是内存测试夹具，其布尔值不是经过认证的 Storage 证据、Wire Schema、签名或 Owner 批准。
+
+当前模型仍不能证明真实 I Sequencer 持久性、Storage 事务持久性、数据库可串行化、多进程并发、跨服务原子性、证明真实性、进程重启、故障切换、恢复或防回滚。不宣称生产实现或生产符合性。
+
+Phase 3.8 裁决仍为 **契约层面一致的提案 / 未冻结**。独立 D/E/I/Storage Owner 决策、H Wire/密码学、物理拓扑及生产符合性仍 OPEN。
