@@ -110,3 +110,56 @@ B-CONFLICT-013 仍单独 OPEN，涵盖 Authenticated Ingress、H 1.2.15 后继�
 B-CONFLICT-017 is **CLOSED at manifest-consistency level**. No claim is made that all blocking conflicts are closed. B3 remains NOT PASSED. This is a source-backed author-side status reconciliation based on Storage v3.3.2 and delegated A Phase 3.12.2 review, not independent human Owner acceptance or governance approval.
 
 B-CONFLICT-017 已在 **Manifest 一致性层面 CLOSED**。不声称所有阻塞冲突均已关闭。B3 仍 NOT PASSED。本次是基于 Storage v3.3.2 和委派 A Phase 3.12.2 复审的有来源作者侧状态协调，不代表独立人类 Owner 验收或治理批准。
+
+
+## 4. Current B Owner ADR and H ingress source correction / 当前 B Owner ADR 与 H 入口来源纠偏 — 2026-11-18
+
+This section supersedes earlier recommendation wording where it conflicts with the live B Owner branch. It does not close any ADR or cross-owner blocker.
+
+本节在与实时 B Owner 分支不一致时，取代此前的建议表述；不关闭任何 ADR 或跨 Owner 阻塞项。
+
+### 4.1 B-CONFLICT-001 — Fact / Claim / B-CONFLICT-001 — Fact / Claim
+
+- **Current B recommendation:** Option A — distinct Claim proposition thread and independently addressable Fact attestation object — is the preferred **CANDIDATE** in B's current Owner branch.
+- **Exact B evidence:** summary ADR Blob `a1024938ff5baba069cf128c69496a44e143330c`; detailed canonical ADR Blob `df77e4a93cb8fef689ae7c828888d960cbf381d6`; consumer map Blob `dd45a37199c9b69ab6b68f65e051a484a04691d4`; branch `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e7263d7a60804dae1a74ee2`.
+- This supersedes the earlier C2/Option B recommendation in the B research ADR. Neither Option A nor B is approved. Both current B ADRs remain ADR-BLOCKED because no formal Architecture Governance authority/approver/timestamp/approval record is recorded.
+- I-04/P-04 require distinction; main Domain Overview and terminology still conflict with that baseline; bilingual guides retain ADR-BLOCKED. Option B would require an explicit Governance amendment to I-04/P-04/terminology before it could become normative.
+- **Status remains BLOCKING / OPEN.** B2 NOT PASSED; no schema freeze.
+
+- **当前 B 建议：** Option A——独立 Claim 命题线程与可独立寻址 Fact Attestation 对象——是 B 当前 Owner 分支优先推荐的 **CANDIDATE**。
+- **B 精确证据：** 摘要 ADR Blob `a1024938ff5baba069cf128c69496a44e143330c`；详细规范 ADR Blob `df77e4a93cb8fef689ae7c828888d960cbf381d6`；消费者映射 Blob `dd45a37199c9b69ab6b68f65e051a484a04691d4`；分支 `session-b-domain-model-phase3` @ `2faf8ec38f14dba49e7263d7a60804dae1a74ee2`。
+- 这取代 B 研究 ADR 此前倾向 C2/Option B 的建议。Option A 或 B 均未获批准。当前两份 B ADR 仍 ADR-BLOCKED，因为没有记录正式 Architecture Governance 权威/批准人/时间戳/批准记录。
+- I-04/P-04 要求概念区分；Main Domain Overview 和术语仍与该基线冲突；中英文指南保留 ADR-BLOCKED。Option B 若要成为规范方案，必须先由 Governance 明确修订 I-04/P-04/术语。
+- **状态仍为 BLOCKING / OPEN。** B2 未通过；不得冻结 Schema。
+
+### 4.2 B-CONFLICT-006 — Claim identity / B-CONFLICT-006 — Claim 身份
+
+B's current detailed ADR proposes stable ClaimRef + immutable ClaimRevisionRef and exact-revision-targeted Evidence/Provenance; ConflictSet groups incompatible exact ClaimRevisionRefs. These remain CANDIDATE. D owns canonical ID allocation, persistence, revision commit and ConflictSet lifecycle/commit shape after approval. E's CandidateProposition/ExtractionIR remains neutral. No ClaimRef, ClaimRevisionRef, FactRevision or ConflictSet schema is frozen.
+
+B 当前详细 ADR 提出稳定 ClaimRef + 不可变 ClaimRevisionRef、针对精确 Revision 的 Evidence/Provenance，以及按不兼容精确 ClaimRevisionRef 分组的 ConflictSet。这些仍为 CANDIDATE。批准后 D 负责规范 ID 分配、持久化、Revision Commit 和 ConflictSet 生命周期/Commit 形态。E 的 CandidateProposition/ExtractionIR 保持中立。ClaimRef、ClaimRevisionRef、FactRevision 或 ConflictSet Schema 均未冻结。
+
+### 4.3 B-CONFLICT-013 — H 1.2.15 authenticated ingress / B-CONFLICT-013 — H 1.2.15 认证入口
+
+A Phase 8 B-02 reconciliation Blob `8a0a428ebf9cd8c8fe00562d2267ff490d5c3205` and A H 1.2.15 exact review Blob `582ed576f73d9096dcc77b3a559df8c3b997b895` refine the earlier status:
+- C and I have accepted corrected 1.2.15 schema/P0/order reference contracts **WITH CONDITIONS**; this is not production trust registration or exact current-validator/issuer acceptance.
+- H has a local receiver validator and tests; A found no separate executable issuer pre-sign pipeline.
+- H exact-head CI reported 91 Provider Outcome tests and 288 Recovery Cutoff tests (22 skipped), but deterministic callbacks do not prove production crypto, I registration, durable replay or end-to-end integration.
+- D's exact 1.2.15 currentness/Forget/lineage review, I production trust registration, H issuer execution, Storage successor bundle and fresh A review remain OPEN.
+- Storage v3.3.2 remains H 1.2.14 / C 1.0.1 historical bundle.
+
+A Phase 8 B-02 协调 Blob `8a0a428ebf9cd8c8fe00562d2267ff490d5c3205` 和 A H 1.2.15 精确复审 Blob `582ed576f73d9096dcc77b3a559df8c3b997b895` 细化了此前状态：
+- C 和 I 已对修正后的 1.2.15 Schema/P0/顺序 Reference 契约作出 **WITH CONDITIONS** 验收；这不是生产 Trust 注册，也不是对当前 Validator/Issuer 的精确验收。
+- H 已有本地 Receiver Validator 和测试；A 未发现独立可执行 Issuer Pre-sign Pipeline。
+- H 精确 Head CI 报告 91 项 Provider Outcome 测试和 288 项 Recovery Cutoff 测试（22 项跳过），但确定性 Callback 不能证明生产 Crypto、I 注册、Durable Replay 或端到端集成。
+- D 对 1.2.15 的 Currentness/Forget/Lineage 精确复审、I 生产 Trust 注册、H Issuer 执行、Storage 后继 Bundle 和 A 新复审仍 OPEN。
+- Storage v3.3.2 仍是 H 1.2.14 / C 1.0.1 历史 Bundle。
+
+B-CONFLICT-013 remains **BLOCKING / OPEN**. Do not confuse A's workstream label “B-02” (H gateway ingress) with B's B2 semantic gate.
+
+B-CONFLICT-013 仍 **BLOCKING / OPEN**。不得将 A 工作流标签 “B-02”（H Gateway Ingress）与 B 的 B2 语义 Gate 混淆。
+
+### 4.4 Overall gate / 总体门禁
+
+B-CONFLICT-017 remains closed only at manifest-consistency level. B2 remains IN PROGRESS / NOT PASSED; B3 remains NOT PASSED; B4 NOT READY; B5 BLOCKED / NOT PASSED; B6 INDEPENDENT_REVIEW_PENDING. No independent Owner acceptance, governance approval, production ingress, Applied freeze, Forget completion or L4 implementation is claimed.
+
+B-CONFLICT-017 仍仅在 Manifest 一致性层面关闭。B2 仍 IN PROGRESS / NOT PASSED；B3 仍 NOT PASSED；B4 NOT READY；B5 BLOCKED / NOT PASSED；B6 INDEPENDENT_REVIEW_PENDING。不宣称独立 Owner 验收、治理批准、生产 Ingress、Applied 冻结、Forget 完成或 L4 实现。
