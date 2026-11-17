@@ -73,7 +73,7 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
 
 
     def test_07_exact_c_schema_and_ten_vectors(self):
-        fixture_dir = ROOT.parent / "provider_outcome" / "fixtures"
+        fixture_dir = ROOT.parent / "fixtures"
         schema = json.loads((fixture_dir / "c-submit-outcome-1.0.0.schema.json").read_text(encoding="utf-8"))
         vectors = json.loads((fixture_dir / "c_submit_outcome_1_0_0_vectors.json").read_text(encoding="utf-8"))
         validator = Draft202012Validator(schema, format_checker=FormatChecker())
