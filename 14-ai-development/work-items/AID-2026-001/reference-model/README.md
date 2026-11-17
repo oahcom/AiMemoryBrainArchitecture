@@ -10,7 +10,7 @@ It is intentionally isolated from production architecture and runtime code. The 
 python -m unittest discover -s 14-ai-development/work-items/AID-2026-001/reference-model -v
 ```
 
-The model uses only the Python standard library. The expected result is 13 passing model-level tests.
+The model uses only the Python standard library. The observed local result: 14/14 model-level tests passed under Python 3.13.5 (2026-11-18). This does not imply production conformance..
 
 ## Covered invariants
 
