@@ -150,6 +150,7 @@ class AuthorityChecks:
     # Each callback returns True (verified), False (contradiction), or None
     # (unavailable/unknown). No callback may trust a payload-supplied key.
     verify_profile_registration: Optional[Callable[[dict], Optional[bool]]] = None
+    verify_key_status: Optional[Callable[[dict], Optional[bool]]] = None
     verify_c_signature: Optional[Callable[[dict, bytes], Optional[bool]]] = None
     verify_provider_evidence: Optional[Callable[[dict, dict], Optional[bool]]] = None
     verify_owner_ledger: Optional[Callable[[dict, dict], Optional[bool]]] = None
@@ -213,6 +214,7 @@ def validate_provider_outcome(
 
     callbacks = (
         ("C profile registration", checks.verify_profile_registration, (c_object,)),
+        ("C key status at signing sequence", checks.verify_key_status, (c_object,)),
         ("C signature/key status", checks.verify_c_signature, (c_object, preimage)),
         ("provider evidence issuer", checks.verify_provider_evidence, (envelope, c_object)),
         ("C owner ledger inclusion/currentness", checks.verify_owner_ledger, (envelope, c_object)),
