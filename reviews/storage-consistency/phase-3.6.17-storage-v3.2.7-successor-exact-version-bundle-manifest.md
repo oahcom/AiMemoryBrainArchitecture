@@ -47,16 +47,19 @@ The v3.2.3 S0a–S4 order remains unchanged:
 | H | Phase 3.8.10 Unified 1.2.14 / C 1.0.1 authority-join mapping | 1cbe74eba69325510d6b1019d971661f965eabf8 | Exact mapping candidate and separate I/D/Storage verifier seam contract |
 | H | Provider Outcome validator core | eab961a08d41e871f38543b18ee60cf024977414 | Exact schema identity, C 1.0.1 dereference/equality and tri-state orchestration; authority adapters remain unconnected |
 | H | Full positive H envelope + C object fixture | `08-bmcp-protocol/tests/conformance/provider_outcome/fixtures/h-full-provider-outcome-positive-1.0.1.json`, Blob `c80247a6ecfbb4a29ff0993e8e2aea4829d00626` | Synthetic CPO-01 fixture with exact C candidate payload digest/signature vector; TEST-ONLY authority facts |
-| H | Provider Outcome validator tests | `08-bmcp-protocol/tests/conformance/provider_outcome/test_provider_outcome_validator.py`, Blob `dccf8c099c18807ec072870d32604d0912209f01` | 32 tests; includes full unmocked local schema/semantic/C-P0 digest path and negative/tri-state cases |
+| H | Full positive H envelope + C object fixture | `08-bmcp-protocol/tests/conformance/provider_outcome/fixtures/h-full-provider-outcome-positive-1.0.1.json`, Blob `c80247a6ecfbb4a29ff0993e8e2aea4829d00626` | Synthetic CPO-01 fixture with exact C candidate payload digest/signature vector; TEST-ONLY authority facts |
+| H | Provider Outcome validator tests | `08-bmcp-protocol/tests/conformance/provider_outcome/test_provider_outcome_validator.py`, Blob `dccf8c099c18807ec072870d32604d0912209f01` | 32 tests; includes full local schema/semantic/C-P0 digest path and negative/tri-state cases |
+| H | Full-path exact CI closure | `08-bmcp-protocol/phase-3.8.14-h-full-path-fixture-and-exact-head-ci-closure.md`, Blob `5f487321b273ede41a7c23c3f94b6c0625968439` | Corrected exact binding to run 44069941327 / commit ba2c934; supersedes its erroneous earlier run reference |
+| H | Full local validation evidence note | `08-bmcp-protocol/phase-3.8.14-h-full-provider-outcome-local-validation-ci-evidence.md`, Blob `b8bbac49ac99573911fe89f30f12325bbaa67b08` | Explicit full local path coverage and TEST-ONLY authority callback ceiling |
 | H | Provider Outcome workflow | `.github/workflows/h-provider-outcome-conformance.yml`, Blob `4459d19f5b4eea058377d9819e48e81eed5c8c4b` | CI workflow path filters include H 1.2.14 schema, validator and tests |
-| H | Exact full-validator CI | Run `44069941327`; tested commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251` | SUCCESS, 32 tests, 0 failed; 6 Python/Node crypto interop + 26 H validator tests; current H head adds documentation only; schema/validator/test/fixture Blobs unchanged |
+| H | Exact full-validator CI | Run `44069941327`; tested commit `ba2c9341fee4eb9ca9e665c74bdd37b4675dd251` | SUCCESS, 32 tests, 0 failed; 6 Python/Node crypto interop + 26 H validator tests; later H commits changed documentation only; schema/validator/test/fixture Blobs unchanged |
 | C | CSubmitOutcome immutable schema 1.0.1 | a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda | C-owned object; required signed sequence_namespace_ref |
 | C | Phase 3.11.1 sequence namespace amendment | 6fa67af110ebbc5ef57ed908bb4880d99c5e46fb | C record_sequence and CKeyStatusEvent event_sequence share the durable C namespace |
 | I | Phase 3.8.8 review of C 1.0.1 namespace | 0d78e5b2bfcf66cae6b757314cead84b9c942601 | Accepts required signed namespace field; does not register C/I profiles |
 
 ### 3.1 Meaning of H callback CI / H 回调 CI 的含义
 
-The exact H run `44069941327` is a real GitHub Actions success on the exact schema, validator, test and fixture Blobs pinned above. It ran 32 tests: 6 Python/Node crypto interop test methods and 26 H validator test methods.
+The exact H run `44069941327` is a real GitHub Actions success on the exact schema, validator, test and fixture Blobs pinned above; H Phase 3.8.14 closure and evidence notes are also pinned in this manifest. It ran 32 tests: 6 Python/Node crypto interop test methods and 26 H validator test methods.
 
 The new positive test passes a complete synthetic H envelope and CSubmitOutcome 1.0.1 object through `validate_provider_outcome` with the actual H/C JSON Schemas, actual local semantic predicates and actual C-P0 digest recomputation; no schema, semantic or digest primitive is patched. Negative tests prove:
 - a duplicated wire/object field mismatch returns INVALID;
