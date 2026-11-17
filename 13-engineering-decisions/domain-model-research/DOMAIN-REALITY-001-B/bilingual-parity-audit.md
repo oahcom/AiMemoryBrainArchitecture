@@ -182,13 +182,14 @@ Author-side remediation has now added Chinese peer text to all 22 files, includi
 - Author-side remediation only; independent semantic parity and live-source reconciliation remain pending. B0 remains PARTIAL / NOT PASSED; B5 remains BLOCKED.
 - 仅属于作者侧整改；独立语义对等复审和实时来源协调仍待完成。B0 仍为 PARTIAL / NOT PASSED；B5 仍 BLOCKED。## 5. Exact readback inventory / 精确读回清单
 
-The following 21 non-self files were re-read at research branch commit `bdd03f3731f1460bfceeff5cc3ffecda15f83dc5`. The audit file itself was read at Blob `a868e5cc2a8fb09fd6f02fd28b295719dac9c50d` at the same snapshot; its Blob changes whenever this audit is updated and must be re-read from the live PR head.
+All 22 files were re-read at research branch commit `9274e28d7b116c6ce58b9cfeb9d646063c947e8b`. The PR diff was also re-read at this head: 22 changed files, 4,327 additions, 0 deletions. The audit file itself was read at Blob `22fced959c38041a53ad047d0562dd92179e55bf` before this update; its Blob changes whenever this audit is updated and must be re-read from the live PR head.
 
-以下 21 个非本审计文件均在研究分支 Commit `bdd03f3731f1460bfceeff5cc3ffecda15f83dc5` 精确读回。本审计文件自身在同一快照下的 Blob 为 `a868e5cc2a8fb09fd6f02fd28b295719dac9c50d`；每次更新本审计都会改变其 Blob，必须从实时 PR HEAD 重新读取。
+全部 22 个文件均已在研究分支 Commit `9274e28d7b116c6ce58b9cfeb9d646063c947e8b` 精确读回。该 HEAD 的 PR Diff 也已重新读取：22 个变更文件，新增 4,327 行，删除 0 行。本审计文件自身在本次更新前的 Blob 为 `22fced959c38041a53ad047d0562dd92179e55bf`；每次更新本审计都会改变其 Blob，必须从实时 PR HEAD 重新读取。
 
 | File / 文件 | Exact Blob SHA / 精确 Blob SHA | Lines / 行数 |
 |---|---|---:|
 | README.md | af10e810aaff96537afc731af07d322f2c050d1e | 218 |
+| bilingual-parity-audit.md | 22fced959c38041a53ad047d0562dd92179e55bf (pre-update self Blob) | 227 |
 | existing-domain-model-baseline.md | 08f2843db1d41027ee6d1bee9af564ce07a3a793 | 383 |
 | baseline-currentness-and-owner-source-audit.md | 4bc2d7339bdb7431393c449036fd374d2403f992 | 263 |
 | baseline-owner-branch-snapshot-errata.md | a96860efd61962633a5ad9e55b3353c151785411 | 65 |
@@ -214,13 +215,13 @@ The following 21 non-self files were re-read at research branch commit `bdd03f37
 
 - Author-side Chinese peer text is present in all 22 files at the recorded snapshot. This is **not** independent bilingual acceptance.
 - Clause-by-clause semantic comparison against each English normative source remains **INDEPENDENT_REVIEW_PENDING**.
-- B5: **BLOCKED / NOT PASSED** until independent bilingual review, live Blob readback, and final PR diff verification are recorded.
+- B5: **BLOCKED / NOT PASSED** solely because independent clause-by-clause bilingual semantic review is still pending. Exact full-file Blob readback and PR diff verification were completed at the recorded 9274e28 snapshot.
 - B6: **INDEPENDENT_REVIEW_PENDING**. The execution author cannot be the independent reviewer.
 - Schema validation, executable invariant tests, property-based tests and integration/fault-injection tests: **NOT RUN**. The current package is a research/contract draft only.
 
 - 在记录的快照中，全部 22 个文件均已有作者侧中文对照文本。这**不构成**独立双语验收。
 - 对照每个英文规范源逐条进行语义比较仍为 **INDEPENDENT_REVIEW_PENDING**。
-- B5：在独立双语复审、实时 Blob 读回和最终 PR Diff 核验登记前，保持 **BLOCKED / NOT PASSED**。
+- B5：**BLOCKED / NOT PASSED** 的唯一未完成条件是独立逐条双语语义复审。记录的 9274e28 快照已完成全部文件 Blob 读回和 PR Diff 核验。
 - B6：**INDEPENDENT_REVIEW_PENDING**。执行作者不能成为独立审查者。
 - Schema 验证、可执行不变量测试、属性测试和集成/故障注入测试：**NOT RUN**。当前交付仅为研究/契约草稿。
 
