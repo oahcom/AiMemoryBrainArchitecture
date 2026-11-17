@@ -260,3 +260,74 @@ Disposition / 处置：
 - G BIH 验收标记为历史 Pin 已验证；后继版本需要重新确认。
 - 不因后续治理/运行时门禁而重开 Issue #6；这些事项应单独跟踪。
 - 在后继 Pin、剩余跨 Owner 冲突及所有必要 Owner 验收协调完成前，B3 保持 NOT PASSED。
+
+
+## 8. Live repository and Owner-ref refresh / 实时仓库与 Owner Ref 刷新 — 2026-11-18
+
+This section supersedes conflicting branch/PR/main snapshots above wherever the same field is concerned. Snapshot time: 2026-11-17/18 review session; refs and PR metadata were fetched directly from GitHub immediately before this update.
+
+本节在相同字段存在冲突时，优先于上文旧分支/PR/main 快照。快照时间：2026-11-17/18 审查会话；本节 Ref 和 PR 元数据均在更新前直接从 GitHub 读取。
+
+### 8.1 Repository and PR pointers / 仓库与 PR 指针
+
+| Item / 项目 | Live value / 实时值 | Meaning / 含义 |
+|---|---|---|
+| `main` HEAD | `b3c666e67982cb3d3374e759cfb6552c7765aacb` | Current main ref at refresh time; supersedes historical `901e38b...` snapshot. |
+| Research branch HEAD | `138be006ae6874ef44be47f2c8a1aebe96af4314` | Exact current ref; matches PR #55 head. |
+| PR #55 | Open / Draft; base branch `main`; base SHA `052715487bd5e95aab8b9bb386c162cf2d6bf6d3`; head SHA `138be006ae6874ef44be47f2c8a1aebe96af4314` | Not merged and not accepted. GitHub reports `mergeable=false`; cause not investigated/verified in this refresh. |
+| Current compare | `main` → research branch: DIVERGED; 145 commits ahead, 32 behind; merge base `b372b62c640a2b656e54b6db62a4ee67d7d8c001` | The compare endpoint returned 22 research-package files, 4,328 additions and 0 deletions. This is metadata/diff inventory, not semantic acceptance. |
+
+The PR base SHA is not the current main HEAD. Do not collapse the PR's recorded base SHA and live main ref into one value. No rebase, retarget, merge or Ready transition is authorized by this audit.
+
+PR 的 Base SHA 并非当前 main HEAD。不得将 PR 记录的 Base SHA 与实时 main Ref 混为一谈。本审计不授权 Rebase、改目标分支、合并或转为 Ready。
+
+### 8.2 Owner branch HEAD refresh / Owner 分支 HEAD 刷新
+
+| Owner | Branch | Live HEAD at refresh / 本轮实时 HEAD |
+|---|---|---|
+| B | `session-b-domain-model-phase3` | `2faf8ec38f14dba49e7263d7a60804dae1a74ee2` |
+| C | `session-c-agent-integration-2026-11-16` | `71047cdb51139ca4080ac67f451e38a48698859d` |
+| D | `session-d-memory-brain-2026-11-16` | `194c4c8d64972547cdbcf3fe64bd806c4d1d6a2f` |
+| E | `session-e-memory-compiler-2026-11-16` | `ee098e14747d9915de5b3efb63b3a8dd77f670ed` |
+| F | `session-f-memory-runtime` | `1908ce4d233b20f7cafd00cb679affd01bd15174` |
+| G | `session-g-memory-context` | `3367438f7b6ba5fa1b7d7540a0fd03a72bbebdbe` |
+| H | `session-h-bmcp-protocol` | `0d36324457e39bd50ad56ae902d477c4ea765b61` |
+| I | `session-i-security-governance-2026-11-16` | `0d071bf1ee7cc71912398c6ae57e4496e08f44ab` |
+| Storage | `session-storage-consistency-forget-atomicity-2026-11-16` | `830a559bd2f4ec72608f5a51e1a0b43779f2b989` |
+| A | `session-a-integration-2026-11-16` | `6e05831d264040e0e3b3359245b1e01ea613b46c` |
+
+These are branch refs, not Owner approval. No dedicated Testing/Quality branch or accountable independent QA owner was established in this ref refresh.
+
+以上是分支 Ref，不是 Owner 批准。本轮 Ref 刷新仍未建立专门的 Testing/Quality 分支或独立负责的 QA Owner。
+
+### 8.3 Exact selected source pins and successor evidence / 精确选定来源 Pin 与后继证据
+
+The following selected artifacts were fetched by exact path from the refreshed Owner branches. The Blob values confirm the selected artifacts still exist at those exact contents; they do **not** prove that each is the latest or controlling successor.
+
+以下选定工件均从刷新后的 Owner 分支按精确路径读取。Blob 值证明这些选定工件仍存在且内容精确；但**不**证明每份都是最新或控制性后继版本。
+
+| Owner | Exact path | Blob SHA | Currentness qualification |
+|---|---|---|---|
+| C | `07-agent-integration/phase-3.8.22-c-exact-review-h-authenticated-ingress-1.2.14-60-tests.md` | `8fd6052cabf58a78962cc2e776398b2a40604bcd` | Selected C review re-read; later branch tip exists, so inspect successor C decisions before treating it as current approval. |
+| D | `03-memory-brain/phase-3.8.13-d-review-h-outer-envelope-authenticated-ingress-gate.md` | `152627e00b96355e2ff370acd643a51168c4c78c` | Selected D gate review re-read at current branch tip. |
+| G | `06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | Current G Applied contract still differs from Issue #6 historical accepted Blob `5406b3f...`; successor BIH clause re-confirmation remains required. |
+| H | `08-bmcp-protocol/phase-3.8.21-h-exact-schema-mapping-unified-1.2.15-gateway-attestation.md` | `2dc30f193d9c4f4bdc05ca4c137103687db28924` | Current selected H mapping is Unified 1.2.15; earlier H 1.2.14/Phase 3.8.20 evidence is not the newest selected mapping. |
+| I | `09-security-governance/phase-3.8.22-i-exact-review-h-unified-1.2.15-gateway-attestation-schema.md` | `6ba4ce3a93f2adf6f8961d4927d9b87deb9696bf` | Newer I review is pinned; inspect its decision clauses before interpreting as crypto/profile approval. |
+| Storage | `reviews/storage-consistency/phase-3.6.21-storage-v3.3.1-authenticated-ingress-exact-version-bundle-manifest.md` | `f6e61691ecdcfcbf1fb423cc45242868676ca925` | Successor v3.3.1 bundle exists; older v3.2.11 pin is historical and must not be described as latest. |
+| A | `01-architecture/phase-3.12.1-a-exact-review-storage-v3.3.1-h-authenticated-ingress.md` | `d3d4e6f4b6d7e82f90e3eee3427c8ace3b4160c8` | Newer A integration review exists and references Storage v3.3.1. Earlier Phase 3.8.19 evidence is historical. |
+
+### 8.4 Issue #7 current state / Issue #7 当前状态
+
+Issue #7 was fetched directly on 2026-11-18 and remains **OPEN**. It requests the canonical runtime implementation repository, accountable engineering owner, reproducible build/CI/test entry points, deployment topology and contract-to-code traceability. It explicitly says this architecture repository is not itself runtime implementation evidence and prohibits claiming production readiness without reproducible build/run evidence.
+
+Issue #7 已于 2026-11-18 直接读取，仍为 **OPEN**。它要求确定规范运行时实现仓库、负责工程 Owner、可复现 Build/CI/Test 入口、部署拓扑及契约到代码的追溯机制。Issue 明确说明本架构仓库本身不是运行时实现证据，并禁止在没有可复现 Build/Run 证据时宣称生产就绪。
+
+### 8.5 B0 disposition after refresh / 刷新后的 B0 结论
+
+B0 remains **PARTIAL / NOT PASSED**. The main/PR/Owner refs and selected C/D/G/H/I/Storage/A artifacts have been refreshed. Remaining work includes: inspect the exact successor decision clauses for C/G/H/I/Storage/A; read the full relevant PR diffs and commits rather than relying on PR metadata; refresh the current-main domain source pins; complete A's and Testing/QA's accountable source/authority inventory; and reconcile the full Owner-local contract set. The current compare is DIVERGED (145 ahead / 32 behind), and mergeability is false with cause unverified.
+
+B0 仍为 **PARTIAL / NOT PASSED**。main/PR/Owner Ref 及选定的 C/D/G/H/I/Storage/A 工件已刷新。剩余工作包括：检查 C/G/H/I/Storage/A 的精确后继决策条款；读取相关 PR 的完整 Diff 和 Commit，不能只依赖 PR 元数据；刷新 current-main 领域来源 Pin；补齐 A 与 Testing/QA 的负责来源/权威清单；协调全部 Owner 局部契约。当前 Compare 为 DIVERGED（领先 145 / 落后 32），Mergeability 为 false，原因尚未核实。
+
+No canonical freeze, schema freeze, implementation authorization, Owner approval, independent review or ACCEPTED status is claimed. No main-branch write, rebase, PR retarget, merge or Ready transition was performed.
+
+不宣称规范冻结、Schema 冻结、实现授权、Owner 批准、独立审查或 ACCEPTED 状态。本轮未写入 main、未 Rebase、未修改 PR Base、未合并、未转为 Ready。
