@@ -92,3 +92,12 @@ The current Phase 3.8.2 I RecoveryJoin trust/currentness review is Blob `01d4514
 ## 9. H schema 1.2.7 trust-profile review / H Schema 1.2.7 信任配置审查
 
 I's latest exact review of the RecoveryJoin trust/currentness contract including the signature-profile authority boundary is Blob `a6682c3d5ff6653f066aab17950950615e60ac10`. H schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854` and H exact review Blob `8bed0b05cd631014bf5af7cb5a8dafdd932940e9` add `signature_profile_id` separately from canonicalization. I owns the trusted registry and must reject payload-defined profile/key trust. The field is optional in JSON Schema but must be semantically required for protected signed records. No production signature suite or registry implementation is approved; I-FR-01 remains OPEN.
+
+
+## 10. Phase 3.8.3 cryptographic profile candidate / 密码学配置候选
+
+I has published candidate profile proposal `AIMBA-I-CRYPTO-1.0`, Blob `5eeb011032c53c2f7897d699d6f512b26f07d0a2`, proposing RFC 8785 JCS constrained by RFC 7493 I-JSON, SHA-256, Ed25519, Base64url without padding and domain-separated two-stage payload/signature projections. Status is **PROPOSED / CANDIDATE ONLY — NOT APPROVED / NOT FROZEN / NOT IMPLEMENTED**.
+
+I's exact review of H Phase 3.8.3 wire mapping is Blob `446109f4867268fe7dca3c7e114346f3c1a74b61`, decision **ACCEPT WITH ENUMERATED AMENDMENTS**. H mapping Blob `c30e8ccbecb75b7e27ddceb0cf088afbbb26f562`; schema 1.2.7 Blob `e9748a5b904d2b975e47a32a0cbb31de31636854`.
+
+The proposal and mapping establish a candidate format only. I-H-CRYPTO-01..06 remain blocking: exact per-message P0 allowlists, stable owner_signature_ref semantics, executable semantic validation, live key-status/historical trust source, independent production implementation vectors, and no cross-owner profile inheritance. No production HSM/KMS, trust-root, key lifecycle, external anti-rollback anchor or PolicyDomain sequencer is approved. I-FR-01 remains OPEN.
