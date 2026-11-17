@@ -233,3 +233,14 @@ I accepts the schema/lifecycle and proposed governance signature construction as
 C key-status schema/state-machine suite passed in C run `44059137081` (12 total tests) at commit `6b7b9c4a24d81ae45dcb7ddcdbe49c9617e3e4da`. H key-status schema and fail-closed callback suite passed in H run `44058962672` (11 total tests) at commit `f6a632c76efe50d8514a8b94bd1b134f064445c8`.
 
 I review Blob `57d1b1ca616eaec6df1dee82ddaccc66519caca2` accepts the structural lifecycle and governance-signature construction as candidates only. The governance profile and C data profile remain unregistered. No I governance root, C key registry, custody/HSM/KMS, external anti-rollback checkpoint or operational revocation/compromise drill is present.
+
+
+## 19. CSubmitOutcome 1.0.1 required sequence namespace
+
+The current C immutable object schema is `urn:aimba:schema:c-submit-outcome:1.0.1`, exact Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`. C 1.0.1 adds required `sequence_namespace_ref` so H can join C outcome `record_sequence` to CKeyStatusEvent `event_sequence` without inferring an ordering domain.
+
+H implementation core Blob `1a92c0cf7146e2884bd38232005dd9a55d558a85` now requires schema version and artifact revision 1.0.1 and rejects missing sequence namespace. The mandatory `verify_key_status` callback must compare the object namespace to the authenticated key-status ledger namespace and prove both sequence classes share the same durable C sequencer.
+
+C 1.0.1 fixtures Blob `c447f8c2908469c52cb52a448101495a331277c5`, candidate vector manifest Blob `3a5fb8502091636135a298de5891d728b550ba50` and expected crypto fingerprints Blob `34e49a49551390f52198b1fa557e15a32a3f6ee2` are vendored in H byte-identically.
+
+I 1.0.1 review Blob `a93febf867b8da2f23e7ee3cb5334bf491872637` accepts this as a required signed field. It does not register either C data or I governance profile. Production trust, key-status ledger, anti-rollback and callback integration remain open.
