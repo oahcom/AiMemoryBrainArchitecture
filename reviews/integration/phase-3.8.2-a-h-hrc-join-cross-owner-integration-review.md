@@ -36,10 +36,10 @@
 
 | Role | Artifact | Branch | Exact Blob | Simulated disposition |
 |---|---|---|---|---|
-| D | phase-3.8.2-d-recovery-join-and-visibility-exact-review.md | D branch | 06efe05778a8906928d725372b940cc7481c55a9 | ACCEPT WITH AMENDMENTS |
-| E | phase-3.8.2-e-recovery-join-orchestration-exact-review.md | E branch | 29e14511e5b4af9fff908722088142861e828854 | ACCEPT WITH AMENDMENTS |
-| I | phase-3.8.2-i-recovery-join-trust-currentness-exact-review.md | I branch | 19a0caa18f616e7e196965d193a024654764403d | ACCEPT WITH AMENDMENTS |
-| Storage | phase-3.8.2-storage-exact-review-and-topology-disposition.md | Storage branch | abe4443ec07a0188501a0bb53306406fce365a0e | ACCEPT WITH AMENDMENTS; ADR BLOCKED |
+| D | phase-3.8.2-d-recovery-join-and-visibility-exact-review.md | D branch | df3e3fef5f86cf466abba272d98a3678340ef2cb | ACCEPT WITH AMENDMENTS |
+| E | phase-3.8.2-e-recovery-join-orchestration-exact-review.md | E branch | d8a72b6874fb7af83df459dd84830f80cda2fd8b | ACCEPT WITH AMENDMENTS |
+| I | phase-3.8.2-i-recovery-join-trust-currentness-exact-review.md | I branch | 3342562c7f795989ce5df6caa989f4c57d105a08 | ACCEPT WITH AMENDMENTS |
+| Storage | phase-3.8.2-storage-exact-review-and-topology-disposition.md | Storage branch | 557417b6fbbef03f7b5740f825850d4017144af0 | ACCEPT WITH AMENDMENTS; ADR BLOCKED |
 
 These are assistant-authored role simulations at the user's direction. They are not independently attributable repository Owner signatures or cryptographic attestations.
 
