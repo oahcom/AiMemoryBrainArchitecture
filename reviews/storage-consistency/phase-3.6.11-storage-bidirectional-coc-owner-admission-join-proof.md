@@ -295,7 +295,7 @@ Latest H pins:
 - Wire interop suite: 1a4e754ba9bfa57eb973c6d39731e9f89443b323
 - Schema integrity suite: 67aba74c120f2916d768e7b01c45408ee2624f3a
 
-The test inventory is 66 unittest methods: 25 HRC, 19 JPF, 10 wire and 12 schema-integrity. The tests remain unrun; these are executable candidates only.
+The test inventory is 66 unittest methods: 25 HRC, 19 JPF, 10 wire and 12 schema-integrity. The 66-method Python candidate suite passed GitHub Actions run 44039990464. This is not production conformance or physical Storage/COC proof.
 
 
 ## 14. Typed owner-evidence refinements
@@ -314,3 +314,8 @@ These structural conditions reduce ambiguous joins but do not prove that referen
 ## 15. Owner admission identity separation tests
 
 HRC/JPF now explicitly tests both sides of the OwnerAdmissionRef vs OwnerEntryRef distinction. OwnerAdmissionRef is the stable admission identity referenced by the COC participant's primary owner_admission_ref. OwnerEntryRef is the exact member row in the signed owner snapshot. The JoinProof binds both plus the snapshot row digest and owner-local sequence. JPF-18/JPF-19 reject substituting one for the other. Latest HRC/JPF suite Blob: 60a2f4db4bd12f2131ecd147db9bbe328da6db50.
+
+
+## Verified H candidate CI result
+
+GitHub Actions run 44039990464, job 133891944149, checked out H commit da94bcc1796cb350eed12845e49cbc3663faab9c and completed 66/66 candidate tests successfully (Ubuntu 26.04 / CPython 3.12.16). This is a PASS for the committed Python HRC/JPF/WIRE/SCHEMA candidate suite only. It does not prove production signatures, cross-language canonical bytes, live owner/COC adapters, physical JF-10 behavior or deployed Storage topology/HA/restore.
