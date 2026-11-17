@@ -6,7 +6,7 @@
 - Exact I P0 addendum: `09-security-governance/phase-3.8.7-i-exact-signed-object-p0-allowlists.md`
 - I P0 Blob: `739dc15e3cca33aef3f012f713b988e5528d4ad9`
 - Exact H owner-snapshot attestation schema: `08-bmcp-protocol/schemas/bmcp.i-owner-snapshot-attestation-1.0.0.schema.json`
-- H schema Blob: ``d0ce72f59511c115e53974a23c3e3c5e83101871``
+- H schema Blob: ``ecf9971b089ca5fab9a92915663dc913c8ab1ba6``
 - H unified schema 1.2.8: Blob `70b892797d07489936300a26c0dedfafe1d6e746`
 - H RecoveryJoin 1.0.1: Blob `f94e01cf30b4c59fca24cb4ccd8b76a0db8ca95c`
 - Decision: **ACCEPT WITH ENUMERATED AMENDMENTS — P0 FIELD CONTRACT; SNAPSHOT SCHEMA CANDIDATE**
@@ -72,3 +72,6 @@ Existing H 101/101 candidate CI does not prove all these per-family vectors. The
 H accepts the I P0 addendum and the new owner-snapshot attestation schema as exact candidates. H does not claim production semantic validator, full per-family differential vectors, live I trust/key registry, historical checkpoint, anti-rollback deployment, schema freeze or production conformance.
 
 **有条件接受 — P0 字段合同；Snapshot Schema 候选。** H 接受精确 P0 与新 Attestation Schema 候选；不声明生产 Semantic Validator、逐消息族差分向量、实时 I Trust/Key Registry、历史 Checkpoint、Anti-rollback 部署、Schema 冻结或生产符合性。
+
+
+Schema correction: `owner_authority_ref` is a typed opaque reference, not the literal string `I`. The H semantic validator must resolve it to the unique I authority; a payload label cannot self-assert I ownership.
