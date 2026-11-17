@@ -11,7 +11,7 @@
 
 Security is not established by one query filter, cache key, tombstone, or Adapter acknowledgement. It depends on authenticated identity, explicit Scope, policy decisions, reauthorization at trust boundaries, revocation propagation, Forget barriers, and verifiable evidence.
 
-I owns global identity/authorization policy, delegation and revocation, retention, audit governance, backup/external-copy policy, global Forget completion policy, and physical-erasure requirements. D/E/F/G/H/C retain their local enforcement mechanisms and boundary-specific evidence.
+I owns global identity/authorization policy, delegation and revocation, retention, audit governance, backup/external-copy policy, cross-system Forget governance evaluation policy, evidence-acceptance criteria, and physical-erasure requirements. D alone owns canonical Forget lifecycle semantics and the D-domain completion predicate. I's cross-system governance evaluation MUST NOT redefine D's canonical states or declare D-domain completion. D/E/F/G/H/C retain their local enforcement mechanisms and boundary-specific evidence.
 
 ## 2. Three governance planes
 
@@ -60,7 +60,7 @@ Suppressed does not mean Cleaned. Cleaned does not necessarily mean all backups 
 | Owner | Responsibility |
 |---|---|
 | D | Canonical ForgetOperation, target references, Forget Fence/generation, dependency inventory contract |
-| I | Initiation/approval authority, target inventory policy, completion criteria, exceptions, legal hold, retention, backup/external-copy rules, audit and erasure evidence |
+| I | Initiation/approval authority, cross-system target inventory policy, governance evidence-acceptance criteria, policy exceptions, legal hold, retention, backup/external-copy rules, audit and erasure evidence; does not define D-domain completion |
 | E | Compiler work/derivative registration, queue/lease/retry/DLQ/replay suppression and publication gate |
 | F | Retrieval candidates, in-flight reads, cache/Working Set, index/rebuild suppression |
 | G | Context entries, snapshots/deltas, delivery invalidation and reconciliation |
@@ -76,7 +76,7 @@ Recommended phases are Requested → Authorized → SuppressionCommitted → Inv
 
 The operation phase is not the Memory lifecycle. A tombstone or canonical state change alone does not prove global completion.
 
-The global result is a per-target evidence vector, not a single boolean. It must distinguish suppression, derivative cleanup, controlled-storage erasure, backup expiry, external-recipient acknowledgement, and approved residual exceptions. UNKNOWN, FAILED, or UNSUPPORTED targets cannot silently become success.
+The global governance result is a per-target evidence vector, not a single boolean. D supplies the canonical D-domain operation state and predicate; I evaluates cross-system evidence and policy compliance without rewriting D's state. The vector must distinguish suppression, derivative cleanup, controlled-storage erasure, backup expiry, external-recipient acknowledgement, and approved residual exceptions. UNKNOWN, FAILED, or UNSUPPORTED targets cannot silently become success.
 
 ## 8. Security threats and untrusted memory
 
