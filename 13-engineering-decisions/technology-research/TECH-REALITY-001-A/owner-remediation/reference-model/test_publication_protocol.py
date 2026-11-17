@@ -10,11 +10,45 @@ from __future__ import annotations
 import hashlib
 import json
 import unittest
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 
 class Rejected(Exception):
     pass
+
+
+@dataclass(frozen=True)
+class StorageNoPublicationProof:
+    """Test-seam representation of the Storage positive NO_PUBLICATION proof."""
+
+    operation_id: str
+    operation_binding: tuple
+    publication_id: str
+    storage_id: str
+    visibility_pointer_absent: bool
+    outbox_absent: bool
+    unresolved_participants_absent: bool
+    writers_fenced: bool
+    stage_publishers_fenced: bool
+    retries_fenced: bool
+    delayed_publishers_fenced: bool
+    outbox_handlers_fenced: bool
+    conflicting_commit_absent: bool
+    restore_preserves_terminal: bool
+
+    def complete(self):
+        return all((
+            self.visibility_pointer_absent is True,
+            self.outbox_absent is True,
+            self.unresolved_participants_absent is True,
+            self.writers_fenced is True,
+            self.stage_publishers_fenced is True,
+            self.retries_fenced is True,
+            self.delayed_publishers_fenced is True,
+            self.outbox_handlers_fenced is True,
+            self.conflicting_commit_absent is True,
+            self.restore_preserves_terminal is True,
+        ))
 
 
 @dataclass
@@ -33,6 +67,7 @@ class Protocol:
     visibility: dict = field(default_factory=dict)
     receipts: dict = field(default_factory=dict)
     operation_bindings: dict = field(default_factory=dict)
+    storage_no_publication_proofs: dict = field(default_factory=dict)
     outbox: dict = field(default_factory=dict)
     private_unknown: set = field(default_factory=set)
     d_closed: dict = field(default_factory=dict)
@@ -120,17 +155,22 @@ class Protocol:
 
     def commit(self, operation_id, auth_id, publication_id, storage_id,
                d_proof, i_commit_won_proof, *, fail_before_commit=False):
-        # An UNKNOWN operation must be reconciled against authoritative Storage
-        # before any retry can attempt a new commit; keep it private and fail closed.
-        if operation_id in self.private_unknown:
-            raise Rejected("operation outcome UNKNOWN; authoritative reconciliation required")
         # Idempotent retry is valid only for the exact immutable operation tuple.
         # Reusing an operation ID with different participants/proofs is a conflict.
         binding = (auth_id, publication_id, storage_id, d_proof, i_commit_won_proof)
+        # An UNKNOWN operation must be reconciled against authoritative Storage
+        # before any retry can attempt a new commit; keep it private and fail closed.
+        if operation_id in self.private_unknown:
+            prior = self.operation_bindings.get(operation_id)
+            if prior is not None and prior != binding:
+                raise Rejected("UNKNOWN operation binding mismatch; reconciliation required")
+            raise Rejected("operation outcome UNKNOWN; authoritative reconciliation required")
         if operation_id in self.receipts:
             if self.operation_bindings.get(operation_id) != binding:
                 raise Rejected("operation identity reused with different immutable binding")
             return self.receipts[operation_id]
+        if operation_id in self.outcomes:
+            raise Rejected("operation already terminal as NO_PUBLICATION; use a new operation ID")
         if auth_id not in self.authorizations or auth_id in self.revoked:
             raise Rejected("authorization absent or revoked")
         if auth_id in self.consumed:
@@ -160,9 +200,35 @@ class Protocol:
         self.private_unknown.discard(operation_id)
         return receipt
 
-    def mark_unknown(self, operation_id):
-        if operation_id not in self.outcomes:
-            self.private_unknown.add(operation_id)
+    def mark_unknown(self, operation_id, binding=None):
+        if operation_id in self.outcomes or operation_id in self.receipts:
+            raise Rejected("cannot mark a terminal operation UNKNOWN")
+        if binding is not None:
+            prior = self.operation_bindings.get(operation_id)
+            if prior is not None and prior != binding:
+                raise Rejected("UNKNOWN operation identity rebound")
+            self.operation_bindings[operation_id] = binding
+        self.private_unknown.add(operation_id)
+
+    def resolve_no_publication(self, operation_id, proof):
+        if operation_id not in self.private_unknown:
+            raise Rejected("NO_PUBLICATION reconciliation requires an UNKNOWN operation")
+        if operation_id in self.outcomes or operation_id in self.receipts:
+            raise Rejected("operation already has a terminal outcome")
+        binding = self.operation_bindings.get(operation_id)
+        if binding is None:
+            raise Rejected("UNKNOWN operation has no immutable binding to reconcile")
+        if proof.operation_id != operation_id or proof.operation_binding != binding:
+            raise Rejected("NO_PUBLICATION proof does not bind the exact UNKNOWN operation")
+        if len(binding) != 5 or binding[1] != proof.publication_id or binding[2] != proof.storage_id:
+            raise Rejected("NO_PUBLICATION proof participant identity mismatch")
+        if not proof.complete():
+            raise Rejected("Storage NO_PUBLICATION proof is incomplete")
+        outcome = ("NO_PUBLICATION", operation_id, proof.publication_id, proof.storage_id)
+        self.outcomes[operation_id] = outcome
+        self.storage_no_publication_proofs[operation_id] = proof
+        self.private_unknown.remove(operation_id)
+        return outcome
 
     def close_d(self, operation_id, authoritative_outcome):
         if self.outcomes.get(operation_id) != authoritative_outcome:
@@ -194,6 +260,31 @@ class PublicationProtocolTests(unittest.TestCase):
             d_proof=("D_ADMITTED", "publication-1", "storage-1"),
             i_commit_won_proof=("I_COMMIT_WON", "auth-1", "publication-1", "storage-1"),
         )
+
+    def no_publication_proof(self, *, operation_binding=None, **overrides):
+        args = self.commit_args()
+        binding = operation_binding or (
+            args["auth_id"], args["publication_id"], args["storage_id"],
+            args["d_proof"], args["i_commit_won_proof"],
+        )
+        values = dict(
+            operation_id="op-1",
+            operation_binding=binding,
+            publication_id="publication-1",
+            storage_id="storage-1",
+            visibility_pointer_absent=True,
+            outbox_absent=True,
+            unresolved_participants_absent=True,
+            writers_fenced=True,
+            stage_publishers_fenced=True,
+            retries_fenced=True,
+            delayed_publishers_fenced=True,
+            outbox_handlers_fenced=True,
+            conflicting_commit_absent=True,
+            restore_preserves_terminal=True,
+        )
+        values.update(overrides)
+        return StorageNoPublicationProof(**values)
 
     def test_admission_then_fence_blocks_new_work(self):
         p = Protocol()
@@ -370,6 +461,92 @@ class PublicationProtocolTests(unittest.TestCase):
             p.close_d("op-unknown", ("UNKNOWN",))
         with self.assertRaises(Rejected):
             p.close_i("op-unknown", ("UNKNOWN",))
+
+    def test_no_publication_requires_every_storage_absence_and_fence_fact(self):
+        p = self.prepared()
+        args = self.commit_args()
+        binding = (args["auth_id"], args["publication_id"], args["storage_id"],
+                   args["d_proof"], args["i_commit_won_proof"])
+        p.mark_unknown("op-1", binding)
+        required_facts = (
+            "visibility_pointer_absent",
+            "outbox_absent",
+            "unresolved_participants_absent",
+            "writers_fenced",
+            "stage_publishers_fenced",
+            "retries_fenced",
+            "delayed_publishers_fenced",
+            "outbox_handlers_fenced",
+            "conflicting_commit_absent",
+            "restore_preserves_terminal",
+        )
+        for fact in required_facts:
+            with self.subTest(missing_fact=fact):
+                proof = self.no_publication_proof(**{fact: False})
+                with self.assertRaisesRegex(Rejected, "incomplete"):
+                    p.resolve_no_publication("op-1", proof)
+                self.assertIn("op-1", p.private_unknown)
+                self.assertNotIn("op-1", p.outcomes)
+                self.assertEqual(p.visibility, {})
+                self.assertEqual(p.receipts, {})
+                self.assertEqual(p.outbox, {})
+                self.assertEqual(p.consumed, set())
+
+    def test_no_publication_proof_must_bind_exact_unknown_operation(self):
+        p = self.prepared()
+        args = self.commit_args()
+        binding = (args["auth_id"], args["publication_id"], args["storage_id"],
+                   args["d_proof"], args["i_commit_won_proof"])
+        p.mark_unknown("op-1", binding)
+        wrong_binding = ("other-auth",) + binding[1:]
+        valid = self.no_publication_proof()
+        invalid_proofs = (
+            replace(valid, operation_id="other-operation"),
+            replace(valid, operation_binding=wrong_binding),
+            replace(valid, publication_id="other-publication"),
+            replace(valid, storage_id="other-storage"),
+        )
+        for proof in invalid_proofs:
+            with self.subTest(proof=proof):
+                with self.assertRaises(Rejected):
+                    p.resolve_no_publication("op-1", proof)
+                self.assertIn("op-1", p.private_unknown)
+                self.assertNotIn("op-1", p.outcomes)
+
+    def test_no_publication_reconciles_unknown_and_allows_exact_d_i_closeout(self):
+        p = self.prepared()
+        args = self.commit_args()
+        binding = (args["auth_id"], args["publication_id"], args["storage_id"],
+                   args["d_proof"], args["i_commit_won_proof"])
+        p.install_forget_fence()
+        p.mark_unknown("op-1", binding)
+        proof = self.no_publication_proof()
+        outcome = p.resolve_no_publication("op-1", proof)
+        self.assertEqual(outcome, ("NO_PUBLICATION", "op-1", "publication-1", "storage-1"))
+        self.assertNotIn("op-1", p.private_unknown)
+        self.assertEqual(p.storage_no_publication_proofs["op-1"], proof)
+        self.assertEqual(p.visibility, {})
+        self.assertEqual(p.receipts, {})
+        self.assertEqual(p.outbox, {})
+        self.assertEqual(p.consumed, set())
+        self.assertIn("publication-1", p.fence_pending)
+        p.close_i("op-1", outcome)
+        self.assertIn("publication-1", p.fence_pending)
+        p.close_d("op-1", outcome)
+        self.assertNotIn("publication-1", p.fence_pending)
+
+    def test_no_publication_is_terminal_and_requires_new_operation_id(self):
+        p = self.prepared()
+        args = self.commit_args()
+        binding = (args["auth_id"], args["publication_id"], args["storage_id"],
+                   args["d_proof"], args["i_commit_won_proof"])
+        p.mark_unknown("op-1", binding)
+        p.resolve_no_publication("op-1", self.no_publication_proof())
+        with self.assertRaisesRegex(Rejected, "already terminal"):
+            p.commit(**args)
+        self.assertEqual(p.visibility, {})
+        self.assertEqual(p.receipts, {})
+        self.assertEqual(p.outbox, {})
 
     def test_d_and_i_close_only_on_same_authoritative_storage_outcome(self):
         p = self.prepared()
