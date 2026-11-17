@@ -1,7 +1,7 @@
 # Architecture Readiness Assessment — READINESS-002
 
 - Version: 1.0.0
-- Baseline: `main@b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- Baseline: `main@8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
 - Overall architecture state: **ARCHITECTURE_NOT_READY**
 - Decision outcome: **DEFERRED** for architecture freeze and full implementation entry.
 
@@ -13,7 +13,7 @@
 | Domain semantic readiness | NOT READY | B Fact/Claim ADR remains ADR-BLOCKED |
 | Authority/ownership readiness | NOT READY | Issue #7 has no designated canonical runtime repo and accountable engineering lead |
 | Security/governance readiness | NOT READY | I36-GOV-01..10 and closed-world inventory remain governance-blocked |
-| Physical consistency readiness | NOT READY | Storage §8 has selected L1 Option A (one serializable transaction domain per Canonical Memory authority); L4 physical engine/deployment, adapter, HA/fencing and restore proof remain open; JF-10 Gate A partial/open, B/C blocked |
+| Physical consistency readiness | NOT READY | Option A is conditionally accepted as the v1 L1 direction only; A-01..A-05 clarifications, exact D acceptance, L2 composition, L3 proof and L4 engine/deployment remain open; JF-10 Gate A partial/open, B/C blocked |
 | Cross-module correctness | NOT PROVEN | Forget/publication/recovery and Applied proof chains lack full integrated physical evidence |
 | Complexity controllability | NOT PROVEN | X rates complexity High; eight-dimension ordinal scores are not a delivery estimate |
 | Implementation readiness | BLOCKED | No full P0 authority/proof prerequisites; runtime repo/owner absent |
