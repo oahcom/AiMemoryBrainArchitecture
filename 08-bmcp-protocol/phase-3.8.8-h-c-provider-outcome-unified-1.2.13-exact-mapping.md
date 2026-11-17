@@ -119,7 +119,7 @@ These are specified vectors. The H validator core and test source have now been 
 
 Remaining blockers:
 1. C must review and accept/revise this exact 1.2.13 mapping.
-2. H semantic validator and exact test source are updated to 1.2.13 / C 1.0.1; execution of the exact workflow against this source bundle remains pending verification.
+2. H semantic validator and exact test source are updated to 1.2.13 / C 1.0.1; the exact workflow is now verified in §10.
 3. I crypto profile registration, trust roots, key lifecycle, historical verification and anti-rollback remain OPEN.
 4. Independent Python/JavaScript canonical-byte and signature interoperability against the registered profile remains OPEN.
 5. Provider-specific same-key lookup/idempotency and actual adapter fault/race tests remain OPEN.
@@ -140,3 +140,22 @@ The current H validator core is Blob `241657140375c93acd90d107724b54c612d99597`,
 **中文：** 本 Mapping 现消费 CSubmitOutcome 1.0.1 Schema、C Phase 3.11.1、I Phase 3.8.8 及 C Phase 3.8.11 精确 Blob。C 1.0.1 新增必需签名字段 sequence_namespace_ref；H 必须与认证 CKeyStatusEvent Namespace 精确相等，并证明 record_sequence 与 event_sequence 属于同一个持久化 C Sequencer。C 对象 schema version/artifact revision 必须均为 1.0.1；1.0.0 仅作历史版本，不得静默升级。
 
 当前 H Validator Core 已绑定 BMCP 1.2.13 与 C 对象 1.0.1，并移除旧 participant_intent_ref Alias。测试源包含 H 1.2.13 修正分支和 SideEffectStatus 条件证明语义的结构检查，但其执行仍是独立 CI 证据门禁。
+
+
+## 10. Executed H 1.2.13 / C 1.0.1 conformance / 已执行符合性验证
+
+- Workflow: `H Provider Outcome Conformance`, run `44063916718`.
+- Exact tested commit: `c326e561145e9558f48f199128814643d8720e45`.
+- GitHub Actions job: `provider-outcome`, job ID `133972556865`, completed SUCCESS.
+- Exact log: Python unittest discovery completed with **20 tests, 20 passed, 0 failed**.
+- Included: five C 1.0.1 candidate crypto vectors; Ed25519 signature verification and field mutation rejection; Python/Node independent implementation agreement; C 1.0.1 schema/sequence namespace; H 1.2.13 artifact pin; no ambiguous `participant_intent_ref`; conditional HANDOFF_REJECTED / SideEffectStatus semantics.
+
+The tested commit includes the exact schema Blob `8e7f6a6c9663388863db88548f9c37d0fdb1bd97`, validator core Blob `241657140375c93acd90d107724b54c612d99597`, and test source Blob `418f0a78ea363286f143ae414af4b92e9a3e89bf`. The later mapping-document-only commit does not change those tested source files.
+
+**Evidence ceiling:** candidate schema/semantic/crypto-vector conformance only. The run does not register `AIMBA-C-CRYPTO-1.0` or `AIMBA-I-KEY-GOVERNANCE-1.0`; it does not prove production sequencer/key-status services, trust roots, HSM/KMS custody, provider issuer truth, live provider adapter race/fault behavior, COC quorum durability, Storage deployment or production activation.
+
+**中文：** H Provider Outcome Conformance Run `44063916718`，精确测试 Commit `c326e561145e9558f48f199128814643d8720e45`，Job `133972556865`，状态 SUCCESS。Python unittest 共执行 **20 项，20 通过，0 失败**。覆盖 C 1.0.1 五组候选密码学向量、Ed25519 验签/字段篡改拒绝、Python/Node 独立实现一致性、C 1.0.1 Sequence Namespace、H 1.2.13 版本绑定、移除歧义 Alias 及 HANDOFF_REJECTED/SideEffectStatus 条件语义。
+
+该 Run 精确覆盖 Schema Blob `8e7f6a6c9663388863db88548f9c37d0fdb1bd97`、Validator Blob `241657140375c93acd90d107724b54c612d99597`、Test Blob `418f0a78ea363286f143ae414af4b92e9a3e89bf`。后续仅修改 Mapping 文档的 Commit 不改变这些已测源文件。
+
+证据上限仍是候选 Schema/语义/密码学向量符合性；不代表 C/I Profile 注册、生产 Sequencer/Key Status、Trust Root、HSM/KMS、Provider Truth、真实 Adapter Race/Fault、COC Quorum、Storage 部署或生产激活。
