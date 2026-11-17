@@ -1,0 +1,42 @@
+# 架构不变量
+
+- 文档 ID：GOV-INV-001
+- 版本：1.1
+- 源规范：[项目规范性原文](../../../00-governance/architecture-invariants.md)
+- 对应英文：[Architecture Invariants](../../en/00-governance/architecture-invariants.md)
+- 状态：DECIDED（已决议基线）
+
+以下不变量是所有子系统规范和未来实现必须遵守的规范约束。
+
+| ID | 架构不变量 |
+|---|---|
+| I-01 | Brain 是 Canonical Memory 资产及其所管理 Memory Context 的逻辑权威。 |
+| I-02 | Agent 不得定义或覆盖 Brain 内部的记忆组织规则。 |
+| I-03 | Brain 独立于任何特定 Agent 框架、LLM 或推理供应商。 |
+| I-04 | Event、Memory、Fact、Entity、Relation 和 Evidence 是不同的领域概念。 |
+| I-05 | 每条派生记忆都必须保留到源 Evidence 的 Provenance；若无法提供，必须明确记录原因。 |
+| I-06 | Intent、Plan、Prediction 和 Pending Action 不得自动视为已完成结果或已验证事实。 |
+| I-07 | 编辑 Memory Context 不得直接修改 Canonical Memory。 |
+| I-08 | 移除 Context Entry 不等于遗忘或删除其 Canonical Memory。 |
+| I-09 | Context 变更必须版本化，并关联 base version，或明确执行 full-snapshot 转换。 |
+| I-10 | 只有在 Adapter 明确 ACK 后，Context Delivery 才能标记为 Applied。 |
+| I-11 | Context 变更必须在定义明确的 inference-context assembly boundary 生效。 |
+| I-12 | Memory 内容是不可信数据，不得获得 system/developer instruction authority。 |
+| I-13 | Scope 和 Permission 必须显式、独立执行；必须保持 Agent、task、session 和 environment 隔离。 |
+| I-14 | 冲突 Claim 不得被静默覆盖；Provenance 和解决历史必须可审计。 |
+| I-15 | Event time、recording time 和 validity time 不得混为一谈。 |
+| I-16 | 状态变更协议操作的重试，必须在其定义的幂等范围内满足幂等性。 |
+| I-17 | 每个 Context Version 必须具有唯一权威序列；并发变更必须串行化，或通过明确的并发控制解决。 |
+| I-18 | Adapter ACK 证明协议层面的应用，不证明模型已经理解或遵循记忆。 |
+| I-19 | Context Compact 必须保留来源引用；只要保留数据允许，还必须能够展开查看细节。 |
+| I-20 | Forget 和 Retention 治理必须按声明的策略覆盖派生记录及二级表示。 |
+| I-21 | 子系统边界不意味着必须部署为独立进程、服务或 Crate。 |
+| I-22 | 性能声明必须基于明确声明的硬件、数据和负载进行可复现测量。 |
+| I-23 | 每一项架构设计或改变架构语义的修改，都必须在同一个变更集中提供中文和英文文档；只有符合 GOV-DOC-001 的受治理临时例外才可暂缓。 |
+| I-24 | 架构文档验收必须检查双语语义一致性、稳定标识一致性、决策状态一致性以及源版本可追溯性。 |
+
+## 执行要求
+
+每份子系统规范都必须说明自己负责执行哪些不变量、依赖哪些不变量，以及如何发现和处理违反不变量的情况。实现审查不得隐式豁免任何不变量；如需变更，必须提供明确的 ADR 和影响分析。
+
+所有架构 Owner 必须遵守[ GOV-DOC-001 架构双语文档规范 ](../../../00-governance/bilingual-documentation-policy.md)。任何临时 STALE 例外都必须明确登记、设置期限并持续跟踪。
