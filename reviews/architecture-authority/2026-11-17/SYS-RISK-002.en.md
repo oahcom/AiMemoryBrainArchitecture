@@ -3,7 +3,7 @@
 - Authority: A — Principal System Architecture Authority
 - Version: 1.0.0 (candidate integration baseline)
 - Date: 2026-11-17
-- Main baseline: `b372b62c640a2b656e54b6db62a4ee67d7d8c001`
+- Main baseline: `8c0c5b11abf56a6f580fcf2a99c8043d3057da4f`
 - A review branch: `review/session-4-a-final-architecture-authority-2026-11-17`
 - Source assessments: R PR #50; X PR #49; F/D/P PR #46
 - Decision status: DEFERRED for architecture freeze; bounded preparation only.
