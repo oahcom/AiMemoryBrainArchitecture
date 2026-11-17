@@ -197,12 +197,29 @@ class ProviderOutcomeValidatorUnitTests(unittest.TestCase):
         errors = _semantic_errors(no_side_effect)
         self.assertTrue(any("rejected-as-no-side-effect" in error for error in errors))
 
+        # HANDOFF_REJECTED + PROVEN_NONE needs an authoritative no-handoff
+        # proof, but it is not the same outcome as NOT_INVOKED and therefore
+        # does not require NotInvokedProofRef.
         proven_none = dict(
             no_side_effect,
             ProviderNoHandoffProofRef="C/no-handoff/41",
-            NotInvokedProofRef="C/not-invoked/41",
         )
         self.assertEqual(_semantic_errors(proven_none), [])
+
+        # NOT_INVOKED remains stricter and requires both proofs.
+        not_invoked = dict(
+            no_side_effect,
+            Outcome="NOT_INVOKED",
+            ProviderNoHandoffProofRef="C/no-handoff/41",
+            NotInvokedProofRef="C/not-invoked/41",
+        )
+        self.assertEqual(_semantic_errors(not_invoked), [])
+        missing_not_invoked_proof = dict(
+            no_side_effect,
+            Outcome="NOT_INVOKED",
+            ProviderNoHandoffProofRef="C/no-handoff/41",
+        )
+        self.assertTrue(_semantic_errors(missing_not_invoked_proof))
 
     def test_14_wire_mapping_does_not_accept_legacy_participant_intent_alias(self):
         from provider_outcome_validator import WIRE_TO_C
