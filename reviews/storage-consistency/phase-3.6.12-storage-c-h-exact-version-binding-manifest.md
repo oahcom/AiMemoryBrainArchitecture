@@ -15,7 +15,7 @@
 | C | Provider Outcome / CSubmitOutcome owner artifact | NOT PINNED | C owner artifact path/blob not recovered in this pass; no exact-owner acceptance claimed |
 | Historical COC source | `8ac17816476f280ab6fb3afca0688aa03e37de1d` | historical source blob | Superseded by Storage protocol §§15–17 for ordering and digest semantics |
 
-The Storage COC file fetched from the Storage branch is blob `5b950a3a29bd7a5276b92a49a9114d700718b987`. Its §17 supersedes narrower membership/snapshot interpretations in §§15–16 and binds the Storage v3.2.2 amendment blob `9704d110a06d0c2ee98be960054e0396d0b68546`. Do not substitute historical COC blob `8ac178...` or Storage v3.1 `d5bdc72...` as the current complete bundle. The H schema artifact revision is 1.2.5 while its protocol-family `schema_version` remains 1.2.0; these are distinct version concepts.
+The Storage v3.2.2 amendment blob `9704d110a06d0c2ee98be960054e0396d0b68546` was fetched directly via GitHub blob retrieval and its complete 13,682-character content inspected. It is titled “Phase 3.6.4 — COC Recovery Cutoff Batch / Participant Manifest Ordering Amendment”; it explicitly binds base COC `8ac178...`, Storage Design v3.1 `d5bdc72...`, and H schema 1.0.5 candidate. It defines the three-digest model and two-phase commit order. The later COC protocol blob `5b950a3...` extends this with §17 dual-ledger union membership and supersedes narrower §§15–16 interpretations. Do not treat `9704d...` as a standalone current complete bundle: it is the ordering amendment source, while `5b950a...` is the later integrated COC protocol. The H schema artifact revision 1.2.5 while protocol-family `schema_version` remains 1.2.0; distinct concepts.
 
 ## 2. Normative Batch / Manifest sequence
 
@@ -84,3 +84,10 @@ The schema field-presence check is not proof that outcome-dependent evidence con
 4. Any schema or protocol change creates a new exact bundle and requires affected-owner re-review.
 
 No implementation, conformance test execution, provider sandbox verification, production activation, physical erasure, or Global Forget Completion is claimed. This document records an architecture-level exact-version binding candidate only.
+
+
+## 7. Follow-up exact-blob verification (2026-11-17)
+
+Storage amendment blob `9704d110a06d0c2ee98be960054e0396d0b68546` was fetched directly by SHA using GitHub's blob retrieval and inspected in full (13,682 characters). Its content confirms the exact title, three-digest projection, non-circular dependency, and two-phase Batch-before-Manifest-record sequence. It explicitly names Storage Design v3.1 blob `d5bdc72f193fcdaa654e4f07f865b77c578673ca` and base COC blob `8ac17816476f280ab6fb3afca0688aa03e37de1d`. The later integrated COC blob `5b950a3a29bd7a5276b92a49a9114d700718b987` adds §17 dual-ledger union-manifest requirements.
+
+C owner artifact discovery remains unresolved: the C branch's prior review report is present, but the canonical C Provider Outcome contract/schema source could not be located or pinned by exact path/blob in this pass. Consequently C's conditional boundary review must not be promoted to an exact-version Owner acceptance. This is an explicit freeze blocker, not an inferred approval.
