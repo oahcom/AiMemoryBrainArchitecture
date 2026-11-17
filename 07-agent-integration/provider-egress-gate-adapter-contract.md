@@ -121,3 +121,73 @@ The Adapter's local send CAS cannot magically make an independently stored I Per
 Strict revocation requires either a shared linearizable sequencer for I epoch changes and Adapter final egress commitment, a proven distributed transaction/consensus equivalent, or an I-owned revocation barrier. Under the barrier profile, I marks revocation PENDING, sends the newer fencing epoch to every Adapter/provider-account gate in the closed-world inventory, and waits for durable acknowledgements that each gate rejects old epochs. I may declare revocation EFFECTIVE only after the required acknowledgements or an explicit policy-approved residual exception. Each Adapter validates the highest installed epoch at CommitEgress.
 
 A time-bounded authorization lease is a weaker profile with an explicit maximum stale-send window and clock/partition assumptions; it must not be represented as immediate revocation. If the Adapter cannot establish current policy/fencing epoch, governed egress fails closed. Offline Adapter means revocation remains pending for that target unless I approves and records a residual exception.
+
+
+## 13. Controlling composition with C Phase 3.6 and Phase 3.8.2
+
+**This section controls over any reading of §§3–5 that would make a local Adapter token sufficient for provider invocation or omit the common causal participant protocol.** The C Provider Egress Gate is the final C-owned side-effect boundary; it composes with, and does not replace, C's existing causal-order contract phase-3.6-c-submit-cross-authority-causal-order-contract.md, C's local admission/recovery amendment phase-3.6.9-c-owner-local-admission-gate-recovery-release-amendment.md, and the exact review phase-3.8.2-c-recovery-join-provider-side-effect-exact-review.md.
+
+### 13.1 Distinct authorities and identities
+
+C owns CGateGeneration, CAdmissionRef/ledger, provider reservation/attempt, actual egress dispatch and immutable CSubmitOutcome. COC owns the durable causal participant order and recovery prefix. I owns IGateGeneration, PermissionEpoch, policy decision and single-use authorization terminality. D owns ForgetFence/lineage and the exact D participant/clearance required for this operation. H transports typed evidence and ACKs but does not mint any of these decisions. Storage PreparedParticipant/GID/XID is not a provider idempotency key or C attempt identity.
+
+CGateGeneration, ForgetFenceGeneration, PermissionEpoch, COC RecoveryEpoch/position and H CapabilityEpoch are separate opaque namespaces. They are bound by exact typed refs/digests in the operation tuple; they are never numerically compared or collapsed into a synthetic global counter.
+
+### 13.2 Mandatory provider-submit causal chain
+
+For a protected provider submit, the Adapter MUST establish and preserve this order:
+1. **C local admission:** persist exact CAdmissionRef/request digest and bind authenticated principal, Agent/runtime/session, Scope/Environment, ContextId/ContextVersion, DeliveryId/attempt, ManagedRegion identity/revision/digest and final-request boundary. C Gate must be OPEN at this C-local admission linearization point.
+2. **COC intent:** obtain the durable common ParticipantIntentRef from the coordinator, bound to the same CAdmissionRef, exact immutable post-transformation request digest, boundary, identity/session and context/delivery tuple. Intent is not provider permission.
+3. **Owner evidence:** bind the exact D ParticipantIntent/lineage clearance and current D ForgetFence; obtain I's exact single-use authorization terminal receipt. REVOCATION_WON or unknown I terminality means zero provider invocation. COMMIT_WON is valid only for this exact operation/digest and holds later I revocation behind the in-flight participant.
+4. **COC reservation:** coordinator finalizes the exact ParticipantReservationRef after verifying the COC intent and I/D owner evidence. Reservation is not proof of sending and is not permission to bypass C's local gate.
+5. **C final egress CAS:** immediately before any request bytes are released to the provider transport, the concrete transport-owning Adapter atomically validates current CGateGeneration, exact CAdmissionRef, reservation, I COMMIT_WON receipt, D clearance/current fence, exact request digest and one-use ProviderAttemptRef; it durably transitions the attempt to EGRESS_COMMITTED in the same C serialization domain used by CloseEgressGate.
+6. **Transport invocation:** only the winner of the C final egress CAS may invoke the bound transport, exactly once for that attempt. The immutable approved bytes must be the bytes sent. No caller-visible SDK handle, retry middleware, redirect, stream continuation or failover may bypass a fresh C gate/causal authorization check.
+7. **C outcome and closeout:** C records immutable CSubmitOutcome from actual provider/runtime observation, including actual provider receipt and InferenceRequestId when available. COC terminal proof and I/D closeout follow; a transport ACK alone is not C provider truth.
+
+The coordinator intent/reservation and C egress commit are separate durable facts. A coordinator reservation cannot linearize against C Gate closure by itself. The final C CAS is the C egress ordering point; COC/I/D proofs are mandatory conjunctive preconditions, not replacements for that CAS.
+
+### 13.3 Close/send race and crash windows
+
+CommitEgress and CloseEgressGate MUST serialize on the same durable C authority and CGateGeneration:
+- CommitEgress first: the exact provider attempt is pre-close in-flight, included in C close high-water/member root and must be reconciled using the same provider idempotency key.
+- Close first: CommitEgress rejects; no provider request bytes are released.
+- C admission first but COC intent/reservation or egress commit not reached: the request is captured in C's local ledger, but it is NOT a provider invocation. Close blocks it; after recovery it may proceed only under a fresh release/currentness check and the same stable operation identity.
+- Crash after EGRESS_COMMITTED but before transport result: UNKNOWN/IN_DOUBT; never infer no-send and never retry as a new operation. Use provider-authoritative same-key lookup. If no authoritative lookup exists, retain IN_DOUBT and hold C/I/D barriers.
+- Close must not report drained while any committed or ambiguous attempt lacks terminal evidence. If the API promises no bytes handed to transport after Close returns, Close waits for all earlier committed dispatch calls to cross a recorded transport-return boundary; bytes already accepted by transport cannot be recalled.
+
+A process-local mutex is insufficient across Adapter replicas. All replicas for one provider-account/gate must share the same durable C serialization authority or an approved linearizable single-writer/consensus mechanism with split-brain fencing and crash recovery. If the authority is unreachable, no new provider bytes are sent.
+
+### 13.4 Exact provider outcome states
+
+The canonical C evidence must distinguish at least:
+- NOT_DISPATCHED: no final egress commitment exists and authoritative C ledger proves transport was not invoked;
+- EGRESS_COMMITTED: C committed the one-use send boundary; this alone does not prove provider acceptance;
+- HANDOFF_CONFIRMED: transport/provider accepted the exact request under documented semantics;
+- OUTCOME_UNKNOWN: send may or may not have crossed transport; blocks drain/release;
+- OUTCOME_RECONCILED_SENT / OUTCOME_RECONCILED_NOT_SENT: only from authoritative same-key provider/transport evidence.
+
+These states must map to C's existing CSubmitOutcome and CausalOrderTerminalProof schema under H's wire authority. Do not introduce a competing terminal enum without H schema review. Final Request Submitted and Full Applied evidence require C's existing final immutable request + actual successful submit boundary; reservation, intent, COMMIT_WON or EGRESS_COMMITTED alone is insufficient.
+
+### 13.5 Required C conformance vectors
+
+1. C Gate close wins against C admission: reject; no COC intent, reservation or provider call.
+2. C admission wins but close precedes C egress CAS: admission is in close snapshot; zero provider bytes.
+3. COC intent exists but I REVOCATION_WON: zero provider bytes.
+4. COC intent exists but D fence/lineage clearance stale: zero provider bytes.
+5. I COMMIT_WON + D clearance + reservation, then C close wins: zero provider bytes.
+6. C egress CAS wins then close: attempt is included in close snapshot and same-key reconciled.
+7. Payload changes after C admission/COC intent: digest conflict; zero provider bytes.
+8. Crash after C egress CAS before transport invocation/result: UNKNOWN; no new attempt/key.
+9. Lost provider response: same provider idempotency key lookup only.
+10. Adapter SDK retry/redirect/failover attempts to send outside C gate: conformance failure.
+11. Two Adapter replicas race Close/CommitEgress: one durable order, no split-brain send.
+12. COC outage: no new protected intent/reservation/provider invocation; pre-existing ambiguous sends remain in-flight.
+13. H wire ACK delayed or replayed after close: historical evidence only; cannot reopen C gate.
+14. Provider outcome known but CSubmitOutcome persistence ACK lost: same C attempt lookup resolves immutable result.
+15. Close returns while an earlier EGRESS_COMMITTED dispatch is still pending: reject if API promised transport-return drain; otherwise close receipt explicitly reports outstanding committed dispatch.
+
+**Disposition:** C semantic composition is now explicit and aligned to Phase 3.6/3.6.9/3.8.2. Actual provider Adapter implementation, multi-replica serialization, H schema mapping, I/D exact receipt validation and all race/fault execution remain OPEN. No provider conformance, Full Applied, implementation sign-off or interface freeze is claimed.
+
+### 中文规范摘要
+
+C Provider Egress Gate 必须嵌入既有因果链：C 本地 Admission → COC ParticipantIntent → I 单次 COMMIT_WON 与 D 精确 Fence/Lineage Clearance → COC ParticipantReservation → C 本地最终 Egress CAS → Provider Transport → CSubmitOutcome → COC Terminal Proof。COC Reservation 不能代替 C Gate 的最终发送 CAS。C Gate Close 与 CommitEgress 在同一 C 持久化序列化域竞争：关闭先赢则零字节发送；发送提交先赢则进入 Close Snapshot 并以同一 Provider Idempotency Key 恢复。发送结果不明必须 UNKNOWN/IN_DOUBT，禁止新 Key 重发。多 Adapter 实例必须共享可证明的持久化线性化权威，不能依赖进程锁。
