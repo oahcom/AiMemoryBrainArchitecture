@@ -170,3 +170,30 @@ Tokio 1.54.1、SQLx 0.9.0、rusqlite 0.43.0、Tantivy Release 0.26.1（HEAD 0.27
 - **NOT PROVEN：** 外部项目功能本身不能证明 Brain 特有契约满足。
 
 Tree SHA 不一定等于最新 Release Commit；许可证信息不是完整传递依赖法律审查；本任务没有执行 SBOM、cargo-audit、cargo-deny、CVE 审查或 Windows/Linux/macOS 构建矩阵。
+
+
+## 8. Focused official-document verification / 官方文档重点核验补充
+
+This follow-up records narrow claims verified against official documentation on 2026-11-17. It supplements, but does not replace, the source-tree inspection and does not upgrade any Brain capability to PROVEN.
+
+| Topic | Official evidence | Verified boundary / engineering implication |
+|---|---|---|
+| PostgreSQL prepared transactions | PostgreSQL 18 `PREPARE TRANSACTION`, two-phase transactions, and `COMMIT PREPARED`: https://www.postgresql.org/docs/18/sql-prepare-transaction.html ; https://www.postgresql.org/docs/18/two-phase.html ; https://www.postgresql.org/docs/18/sql-commit-prepared.html | Prepared state is durable and can be resolved from another session; PostgreSQL explicitly intends this for external transaction managers, warns against long-lived prepared transactions because locks remain and VACUUM is impeded. Engine support does not supply Brain's coordinator, GID mapping, receipt trust, or recovery proof. |
+| SQLite WAL | https://www.sqlite.org/wal.html | Readers and one writer can overlap, but there is only one writer; WAL requires same-host shared memory and is not supported for clients on different hosts over a network filesystem. This narrows the local prototype envelope. |
+| Temporal replay | https://docs.temporal.io/workflows | Workflow state is reconstructed by replaying ordered Event History; workflow code must be deterministic and external effects belong in Activities. This is durable workflow execution, not a replacement for Canonical SQL commit or Forget fencing. |
+| NATS JetStream | https://docs.nats.io/concepts/jetstream | JetStream provides at-least-once delivery and replay. Duplicate publication/consumption scenarios remain possible; business idempotency is still required. |
+| Qdrant filtered vector search | https://qdrant.tech/documentation/manage-data/indexing/ ; https://qdrant.tech/documentation/search-design/vector-search-filtering/ | Qdrant uses HNSW for dense vector indexing and adds payload-index-aware filtering mechanisms. Filter fields/indexes and strict-filter recall need explicit evaluation; vector ranking does not establish authorization or canonical visibility. |
+| Cedar authorization | https://docs.cedarpolicy.com/auth/authorization.html | Cedar evaluates principal/action/resource/context and defaults to deny when no permit applies; policy evaluation errors are surfaced in diagnostics. Identity issuance, entity freshness, revocation and Brain-specific scope semantics remain host responsibilities. |
+| OpenTelemetry Rust | https://opentelemetry.io/docs/languages/rust/ | Official Rust status currently lists Traces as Beta, Metrics and Logs as Stable. Signal maturity must not be represented as uniform; exporter and privacy policy remain deployment choices. |
+
+### 8.1 中文核验结论
+
+- PostgreSQL Prepared Transaction 是外部事务管理器可用的引擎原语，但长时间停留在 Prepared 状态会持续持锁并妨碍 VACUUM；必须有可靠协调器及时 Commit/Rollback。它不自动证明 Brain 的 GID、Receipt、COC/JF-10 桥接和恢复协议。
+- SQLite WAL 允许 Reader 与单个 Writer 并行，但仍然只有一个 Writer，且所有连接必须位于同一主机；不能将 WAL 放在跨主机网络文件系统上。
+- Temporal 通过重放有序 Event History 恢复 Workflow 状态，因此 Workflow 代码必须确定性；外部副作用应由 Activity 执行。它不是 Canonical SQL Transaction 或 Forget Fence 的替代品。
+- NATS JetStream 提供 At-least-once 和 Replay，不意味着业务端天然 Exactly-once；仍需幂等键和重复处理测试。
+- Qdrant 的 HNSW 与 Payload Index 能支持过滤向量检索，但严格过滤下的 Recall、索引创建时序和租户隔离必须实测；它不承担 Canonical Truth 或授权权威。
+- Cedar 默认拒绝未被 Permit 明确允许的请求，但身份签发、实体数据新鲜度、撤销传播和 Brain Scope 语义仍由 Host/Owner 实现。
+- OpenTelemetry Rust 的 Traces 为 Beta，Metrics/Logs 为 Stable；不得笼统声称所有 Signal 同等成熟。
+
+These official-document checks are desk verification only. No Brain prototype, integration, benchmark, concurrency/fault test, production runbook or security audit was run.
