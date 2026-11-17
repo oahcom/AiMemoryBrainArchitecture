@@ -141,8 +141,6 @@ def authenticate_outer_envelope(
         ("issuer_ref", protected_context.issuer_ref),
         ("sender_authority_ref", protected_context.authority_ref),
         ("sender_subject_ref", protected_context.subject_ref),
-        ("subject_ref", protected_context.subject_ref),
-        ("owner_authority", protected_context.authority_kind),
         ("audience", protected_context.audience),
         ("channel_binding_proof_ref", protected_context.channel_binding_proof_ref),
     )
