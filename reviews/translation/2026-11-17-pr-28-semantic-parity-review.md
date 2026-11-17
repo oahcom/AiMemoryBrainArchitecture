@@ -121,8 +121,11 @@ The paired guides are not the detailed contracts. The current Owner source snaps
 | C `phase-3.6-final-request-evidence-contract.md` | `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` | C-owned semantic decisions recorded; C/G/H cross-owner freeze BLOCKED; implementation/execution NOT VERIFIED |
 | H `adapter-capability-and-applied-attestation.md` | `ed6b43a29aa368d772c701ffc83309a5aadf3c00` | CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I |
 | H `phase-3.6-authenticated-identity-protected-operation-binding.md` | `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248` | JOINT-DECIDED technical baseline; governance and consumer acceptance OPEN; implementation/conformance NOT VERIFIED |
+| H `phase-3.6-identity-binding-consumer-conformance-status.md` | `8afb914731a34d8ab44331f54f1f39bfd8ec37ce` | Protocol design JOINT-DECIDED; consumer acceptance OPEN; governance GOVERNANCE-BLOCKED; H36 NOT RUN |
+| G `phase-3.6-applied-forget-reconciliation-contract.md` | `aa3afa73d8a76cc6f025839c52bfbff6a983046a` | G semantic decisions recorded; C/G/H Applied freeze BLOCKED; implementation/execution NOT VERIFIED |
 | Storage `phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md` | `175ee7b1349cfdb79a19898b311a88391ed88010` | Logical transaction proposal; physical topology and implementation proof OPEN |
 | Storage `phase-3.8.2-storage-serialization-topology-adr.md` | `080433f8e13a500522bc2754da64057edb0ae9d8` | ADR-BLOCKED; candidate options only; no deployed topology selected; T1–T8 OPEN |
+| Storage exact-version review of COC/I/D bundle | `d2e804da153ae30e9c2862bf524bc89c42a5dad3` | ACCEPT on recovery batch/manifest ordering only; joint freeze remains BLOCKED |
 | Storage/JF-10 `phase-3.6.2-jf10-cross-authority-recovery-protocol.md` | `94679897e84a6f58fd8b9467b5249e1a885cb0b0` | CANDIDATE; I acceptance required; NOT IMPLEMENTED; conformance NOT RUN; JF-10 P0 OPEN |
 | Storage restore `phase-3.6.5-restore-control-highwater-and-quarantine-contract.md` | `4f656163aeba532a441eaed1d293a48e2363cb4a` | CANDIDATE; exact I-D-A-Storage review required; restore remains fenced absent current control high-water proof |
 
