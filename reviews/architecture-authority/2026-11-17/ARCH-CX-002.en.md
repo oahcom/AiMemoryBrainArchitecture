@@ -8,7 +8,7 @@
 
 1. Forget → producer admission → dependency/derivative registration → final publication gate. X scores this cross-module chain at 5/5 across its eight dimensions.
 2. Global Forget completion across canonical data, derivatives, indexes, caches, contexts, adapters, replicas and backups; these have different proof/terminal semantics.
-3. Storage/Consistency transaction, visibility, COC/JF-10 recovery and failover. Storage's module profile is 5/5/5/5/5/5/5/5 with low confidence because topology remains unresolved.
+3. Storage/Consistency transaction, visibility, COC/JF-10 recovery and failover. Storage's module profile is 5/5/5/5/5/5/5/5 with low confidence because L1 Option A is selected but L4 physical engine/deployment remains open.
 4. Durable ingress, outbox, lease, retry, replay and canonical cursor coordination across D/E/Storage.
 5. Applied/provider outcome composition across C/G/H and I/D authorization/fence evidence.
 
@@ -20,7 +20,7 @@ X uses eight ordinal dimensions (internal, dependency, state, concurrency, recov
 
 - Preserve distinct proof objects: Accepted, Compiler Completion, Canonical Commit, Index Applied, Context Applied, Applied, Forget Completion, PublicationReceipt and provider outcome.
 - Do not create a service, database, queue, protocol or version boundary for each logical concept without quantified need.
-- A local-first Rust modular monolith is the preferred *candidate deployment shape* for first engineering slices, not a topology approval and not a reason to merge Owner authority.
+- A local-first Rust modular monolith is the preferred *candidate deployment shape* for first engineering slices. Storage has separately selected L1 Option A (one serializable transaction domain per Canonical Memory authority); actual L4 engine/deployment conformance remains open. This does not merge Owner authority.
 - Require each cross-module operation to name one operation ID, authority for each state, finite participant set, linearization point, retry stages, terminal states and recovery action.
 - Require every Receipt/Manifest/Applied/Watermark to name issuer, subject, scope, generation/version, durability, freshness and explicit non-claims.
 - Derived indexes/caches are never second authorities; stale state must be detectable and rebuildable.
