@@ -39,6 +39,12 @@ flowchart TD
 
 ## 2. Iteration stages / 迭代阶段
 
+### GitHub and scheduled execution layer
+
+The Work Item is anchored by a GitHub Issue. A drafts the controlled prompt; the accountable Owner and required specialists approve it; the approved prompt is stored immutably. An Owner-specific scheduled task may then poll the Issue/PR portfolio and execute one bounded eligible action. The task re-reads current state, verifies dependencies and permissions, and records results to GitHub. Implementation is proposed through a PR; review findings and replies remain in the PR conversation. A performs integration reconciliation, while authorized acceptance and merge remain separate gates.
+
+A scheduled run is not allowed to bypass any lifecycle stage. A material Issue clarification creates a prompt revision; a changed base contract invalidates dependent READY approvals until rechecked. No scheduled task may merge or release by default. See AI-AUTO-001 and AI-PROMPT-STD-001.
+
 ### Stage 0 — Intake and registration
 
 Create a Work Item before assigning implementation. Record the user/system need, expected outcome, why now, constraints, priority, sponsor and candidate Owner.
