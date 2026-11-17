@@ -82,12 +82,14 @@ These are explanatory guides on main, not substitutes for Owner branch normative
 
 | Record | Observed state | Relevance |
 |---|---|---|
-| PR #53 — Final architecture engineering assessment | Open PR result; full metadata/diff not yet independently re-read in this B pass | A marks Fact/Claim ADR and other cross-owner semantics as blockers; overall architecture deferred |
-| PR #52 — B→A protocol convergence and Storage topology review | Open PR result; A integration review | Reports B protocol convergence candidate; exact-pin gaps remain; not a B Owner approval of the full domain model |
+| PR #53 — Final architecture engineering assessment | CLOSED, NOT MERGED (closed 2026-11-17T11:17:07Z) | A outcome DEFERRED / ARCHITECTURE_NOT_READY; Fact/Claim ADR, I36 governance, JF-10 and C/G/H Applied/provider evidence remain blockers |
+| PR #52 — B→A protocol convergence and Storage topology review | OPEN / DRAFT | B protocol convergence is candidate, not frozen; H Unified 1.2.14 / wire 1.3.0 + CSubmitOutcome 1.0.1 candidate pair; exact-pin gaps remain; A L1 topology conditional, L4 physical realization OPEN |
 | PR #42 — ChatGPT-native execution model | Open PR result | Contains Owner B v2 responsibility distinction: domain identity vs security identity; governance decision and fresh review requirements |
 | Issue #3 | Open | C/G/H Applied evidence & BMCP wire contract; explicitly requests B typed ActorRef/ScopeRef/EnvironmentRef mapping |
 | Issue #5 | Open | I36 governance approvals; Principal taxonomy, cross-issuer identity and ActorRef binding affect B/I boundary |
 | Issue #7 | Open | Canonical runtime implementation repository and accountable owner remain unresolved; no runtime implementation evidence in this architecture repo |
+
+Additional live issue evidence: #3 OPEN; exact CGH-APPLIED-1.1 recovery-batch owner decisions C/D/G/H/I/B are recorded with enumerated exceptions and Storage has confirmed the architecture interface with changes, but Applied Contract Frozen remains NO, production implementation/conformance NOT VERIFIED, and JF-10 P0 remains OPEN. #5 OPEN (I36-GOV-01..10 governance approvals); #6 CLOSED after C/F/G BIH consumer ACCEPT WITH ENUMERATED EXCEPTIONS and H ACCEPTED on exact BIH package Blob a45ae90b318a79bf009d14f4d917611881e9e214; #7 OPEN (runtime implementation repository/owner unresolved); #10 OPEN (JF-10 P0 physical prepared-XID/COC/fault proof); #11 OPEN (A–I baseline/redlines rollout); #21 OPEN (F/E/G local lifecycle reconciliation); #43 OPEN (system-wide consolidation). Issues #2 and #13 remain relevant to D/E/Storage publication and COC/Storage recovery evidence. These issue states were read from live GitHub on 2026-11-17.
 
 This is a relevant-record sample, not a claim that every related PR/Issue has been exhaustively enumerated. Search and exact source review remain outstanding before B0 can pass.
 
