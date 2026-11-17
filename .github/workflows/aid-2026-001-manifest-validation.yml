@@ -69,8 +69,8 @@ jobs:
 
           # Regression guards: duplicate keys must fail at top level and when nested.
           for label, fixture in (
-              ("top-level", "work_item_id: AID-2026-001\\nwork_item_id: OTHER\\n"),
-              ("nested", "review:\\n  status: PASS\\n  status: FAIL\\n"),
+              ("top-level", "work_item_id: AID-2026-001\nwork_item_id: OTHER\n"),
+              ("nested", "review:\n  status: PASS\n  status: FAIL\n"),
           ):
               try:
                   strict_load(fixture)
