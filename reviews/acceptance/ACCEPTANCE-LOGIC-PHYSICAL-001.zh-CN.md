@@ -28,7 +28,7 @@
 | L0 — 源基线 | 精确当前源文件与依赖版本 | A 协调；每个工件 Owner 确认自己的源 | Branch、Commit、路径、Blob SHA、回读时间、替代/时效状态 | 语义正确或已批准 |
 | L1 — 逻辑契约 | Producer 身份、Scope、Key 命名空间、Digest/重放、Receipt 语义；领域类型与不变量 | Producer/领域身份权威（若治理分配则由 B 负责规范领域身份）；I 负责安全/Scope 授权；Event Store Owner 负责事件语义；A 仅做协调 | 按章节明确决策；中英一致；精确版本；列明未决候选 | 物理唯一性、授权强制执行、事务原子性 |
 | L1 幂等入口 | RFC-IDE-001 v1.0.0 | Domain/Producer Identity 权威 + I/Scope Security 权威；Event Store Owner 确认消费义务 | 评审 PR #251；各权威记录 ACCEPT / ACCEPT_WITH_CONDITIONS / NEEDS_REVISION / REJECT；TTL 与清理仍为 CANDIDATE，直到策略决议 | SQLite Adapter 已经符合契约 |
-| L2 — 逻辑组合 | 端到端状态机、线性化顺序、竞争结果、UNKNOWN 行为 | A 负责集成结论；D、E、I、Storage 分别决定自己负责的状态/操作语义 | 确定性参考模型测试：双向竞争顺序、崩溃切点、ACK 丢失、重复/重放、租约过期、撤权与依赖替换 | 真实 DB 隔离、持久性、崩溃恢复 |
+| L2 — 逻辑组合 | 端到端状态机、线性化顺序、竞争结果、UNKNOWN 行为 | A 负责集成结论；D/E/Storage 决定各自状态/操作语义；I 负责提交前单次授权消费与结果后的终态 Closeout | 确定性参考模型测试：双向竞争顺序、崩溃切点、ACK 丢失、重复/重放、租约过期、撤权与依赖替换；断言 Storage Commit 前消费 `ICommitAuthorizationProof`，且权威 Storage Outcome 后才使用 `ITerminalProof` 完成 D/I Closeout | 真实 DB 隔离、持久性、崩溃恢复 |
 | L3 — 协议契约 | 名义类型、Wire 字段、规范化、签名、版本与错误映射 | H 负责协议/Wire 决策；I 负责信任/安全策略；生产者/消费者 Owner 确认边界 | 精确 Schema/版本、正反向向量、签名与降级测试、独立 Owner 评审 | 运行时强制执行或持久提交 |
 | P0 — 物理拓扑 | Producer Admission、Fence、授权、依赖注册及可见性的真实串行化/事务 Owner 与一致性域 | Storage/Consistency Owner 决定存储拓扑；D/I/E 负责各自权威侧 Participant 行为；A 不得代替选择 | 已选拓扑、权威边界、事务/Participant 协议、部署假设及 Owner 批准 | 仅凭拓扑图证明正确性 |
 | P1 — 物理原子性 | Event/Receipt 与隐藏 Participant/可见性提交边界 | Storage 实现 Owner 负责 DB 原子性；Event Store Owner 负责 Event+Receipt 事务；D/I 负责 Participant 接受与终态证明 | 真实文件 DB/真实 Adapter 测试；事务回滚；唯一性/CAS；持久化配置；独立连接并发；无部分可见状态 | 故障切换/恢复正确性 |
@@ -60,7 +60,7 @@ Owner 边界不得根据职称或分支名称推断。如果项目治理尚未�
 验收链必须拆成独立证明：
 
 1. **L1 契约：** D 的 Admission/Fence/Lineage 语义；E 的 register-before-queue/lease/run 与完整依赖语义；I 的当前授权和终态证明；Storage 的可见性 Participant 语义。RFC-IDE-001 v1.0.0 是 ProducerIdentity/Scope/Key 幂等入口契约。PR #251 是评审入口；PR #252 消费它，不能替代对它的批准。
-2. **L2 组合：** 保持当前提出的崩溃安全顺序：Storage 先持久化隐藏 Participant → D 的 PublicationParticipantRef 绑定该 Participant → I 消费单次 CommitAuthorizationReceipt → Storage 最终可见性提交校验当前 D Fence/Participant 与精确 I 终态证明 → 仅在 COMMITTED_VISIBLE 或已证明 NO_PUBLICATION 后 D/I 才关闭。UNKNOWN 必须保持工件私有且 Barrier 开启。
+2. **L2 组合：** 保持当前提出的崩溃安全顺序：Storage 先持久化隐藏 Participant → D 的 `DPublicationParticipantRef` 绑定该 Participant → I 在提交前消费单次 `ICommitAuthorizationProof` → Storage 最终可见性提交校验当前 D Fence/Participant 并消费该精确提交前 I 证明 → 只有取得权威 Storage Outcome 后，D/I 才使用提交后 `ITerminalProof` 及各自精确终态证据执行 Closeout；Closeout 仅在 `COMMITTED_VISIBLE` 或已证明 `NO_PUBLICATION` 后进行。UNKNOWN 必须保持工件私有且 Barrier 开启。
 3. **P0/P1：** Storage Owner 必须选择并批准物理串行化/事务拓扑。证明可见性不会越过 D Fence 安装或 I 撤权，并且 Participant、授权证明和可见性 Receipt 不可被替换。
 4. **P2/P3：** 使用真实 Adapter 测试每个持久边界前后崩溃、ACK 丢失、相同/不同 Digest 重试、Scope 隔离、独立连接竞争、重启、故障切换/恢复及完整依赖集。
 5. **退出条件：** 在精确 Owner 决策与物理/集成证据入账前，Issue #25 保持 OPEN。PR #252 的文档门禁成功仅是文档证据，不是实现一致性。
