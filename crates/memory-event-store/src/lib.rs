@@ -87,7 +87,7 @@ mod tests {
     use memory_domain::{OpaqueId, ScopeKind};
 
     fn id(v: &str) -> OpaqueId { OpaqueId::new(v).unwrap() }
-    fn scope() -> ScopeRef { ScopeRef { scope_id: id("s1"), scope_kind: ScopeKind::User } }
+    fn scope() -> ScopeRef { ScopeRef { scope_id: id("s1"), scope_kind: ScopeKind::User, namespace_key: "test".into() } }
 
     #[test]
     fn accepted_receipt_is_not_a_compilation_receipt() {
