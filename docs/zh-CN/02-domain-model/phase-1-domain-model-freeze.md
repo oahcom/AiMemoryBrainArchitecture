@@ -119,3 +119,5 @@ Phase 1 DECIDED：对象边界、Memory 跨版本稳定 identity、MemoryVersion
 ## 8. 下一实现单元
 
 **Rust Workspace**：建立 Cargo workspace 与 `crates/memory-domain`；实现冻结的核心类型和领域不变量测试；不得引入 Storage、SQLite、Vector DB 或模型依赖。
+
+> 双语同步说明：本文件是 Phase 1 领域模型冻结的中文规范对应版本。其决策状态和章节结构必须与英文对应版本保持同步。
