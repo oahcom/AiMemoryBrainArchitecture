@@ -123,6 +123,10 @@ Every merged PR MUST leave a closeout record in its PR/Issue carrier and update 
 
 ## 9. Adoption and change control / 采用与变更控制
 
-This standard remains PROPOSED until merged and Issue #130 explicitly records adoption. Platform enforcement remains separately tracked by Issue #134. Changes to this standard require a bilingual semantic-parity update and an exact-Head governance review.
+This standard is **ADOPTED** as a process policy, as recorded by Issue #130 comment #6962523529 after PR #144 merged. This adoption does not claim platform enforcement. Platform enforcement remains separately tracked by Issue #134.
 
-本规范在合并且 Issue #130 明确记录采用之前保持 PROPOSED。平台强制执行由 Issue #134 单独跟踪。本规范的修改必须同步更新双语语义版本，并进行精确 Head 治理审查。
+Changes to this standard require a bilingual semantic-parity update and an exact-Head governance review. If the repository platform cannot enforce a required control, the limitation remains BLOCKED until an administrator establishes a genuinely enforceable configuration.
+
+本规范已被采用为**流程治理规范**；Issue #130 comment #6962523529 在 PR #144 合并后记录了采用决定。该采用不代表 GitHub 平台已经强制执行。平台强制执行仍由 Issue #134 单独跟踪。
+
+本规范的修改必须同步更新双语语义版本，并进行精确 Head 治理审查。如果仓库平台无法强制执行某项必需控制，则该控制继续保持 BLOCKED，直到管理员建立真正可强制执行的配置。
