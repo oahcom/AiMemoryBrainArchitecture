@@ -192,3 +192,31 @@ H's later Phase 3.8 schemas `bmcp.coc-jf10-unified/1.2.17` Blob `1b8f44675f30919
 - GitHub Actions run `44000078669`, job `133761649293`, tested commit `d26a40e2483e32a6afb1e8f9ccd456e8ae3c815c`: Python 3.12, jsonschema 4.23.0, compile succeeded, `python -m unittest discover -s tests/schema -v`: 47 tests, all PASS. The current H branch retains the same schema/test/workflow Blobs.
 
 This is structural schema/parser evidence only. H36, CFG-01..20 and PI-01..08 remain NOT RUN. Signature verification, canonical-byte interoperability, live I/D/Storage authority callbacks, transport/channel binding and production replay durability remain unproven. H-V3-07/08 remain blockers to G8; no schema freeze is claimed.
+
+
+## 10. Successor-schema reconnaissance — H Unified 1.2.17 is partial coverage, not Phase 3.6.1 adoption
+
+A fresh read of the current H Owner branch finds `bmcp.coc-jf10-unified/1.2.17`, Blob `1b8f44675f30919764481d33755c566ef5cf1ea8`. Its exact message types are:
+
+- `COC_RECOVERY_CUTOFF_BATCH`
+- `PARTICIPANT_SET_RECONCILIATION`
+- `OWNER_LOCAL_PENDING_GATE`
+- `OWNER_LOCAL_GATE_RELEASE`
+- `RECOVERY_EPOCH_COMPLETED`
+- `JF10_PREPARE_INTENT_REGISTERED`
+- `JF10_PREPARED_PARTICIPANT_REGISTERED`
+- `JF10_I_TERMINAL_DECISION_OBSERVED`
+- `JF10_STORAGE_PARTICIPANT_RESOLVED`
+- `JF10_BRIDGE_RECONCILIATION_RECORDED`
+- `C_PROVIDER_OUTCOME_RECORDED`
+
+This successor contains useful candidate coverage absent from 1.1.0:
+- `C_PROVIDER_OUTCOME_RECORDED` binds CSubmitOutcomeRef/digest, provider outcome/receipt, actual inference/final-boundary identity, request digest, transaction, participant reservation ref, I terminal, D clearance and Storage resolution proof refs.
+- `OWNER_LOCAL_PENDING_GATE` / `OWNER_LOCAL_GATE_RELEASE` carry generic owner-kind gate evidence and owner-specific high-waters. They could support an I or D owner-local gate mapping only after the respective Owner confirms the exact `owner_kind`, generation, request/admission high-water and proof semantics.
+- `JF10_PREPARE_INTENT_REGISTERED` carries the intent and COC commit-proof reference; `JF10_BRIDGE_RECONCILIATION_RECORDED` carries D barrier and C provider outcome references.
+
+The successor still does not provide a distinct `CAUSAL_ORDER_INTENT_RECEIPT`, `CAUSAL_ORDER_RESERVATION`, explicit D fence terminal family, explicit `CAUSAL_ORDER_TERMINAL_PROOF` ref/family, or distinct `CAUSAL_ORDER_ACK` family. A field such as `participant_reservation_ref`, `d_barrier_evidence_ref`, `reconciliation_root` or `coc_commit_proof_ref` is not silently equivalent to a separately required message family.
+
+H also has `bmcp.applied-delivery-evidence/1.0.0`, Blob `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608`, with one `APPLIED_DELIVERY_EVIDENCE_RECORDED` message. It is a separate Phase 3.8 evidence schema, not a replacement for the eight Phase 3.6 causal-order families.
+
+**Disposition:** H 1.2.17 is a promising successor mapping source, but it is not pinned by A's CGH-APPLIED-1.1 package (which names H 1.1.0). A must publish a successor package/version decision before this schema can be considered for G8. C/G/H must accept the same successor digest; D/I/B must confirm their predicates; H must add explicit missing families or a signed/typed exact mapping. No prior acceptance transfers, and no contract freeze is claimed.
