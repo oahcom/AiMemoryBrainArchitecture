@@ -9,6 +9,7 @@
 - Baseline: remediation/aid-2026-001-forget-contract-closure-2026-11-18 @ `eb6aa17c9cefb51434234cdb0f5503197416b9bf` (dispatch-supplied and Issue #41 U-010 comment corroborated; recheck before any later write)
 - Class/Risk: ARCH / SEC / DOC; R3
 - Status: I-SIDE CONTRACT CANDIDATE; formal Owner-I approval NOT CLAIMED; D/I same-SHA approval NOT GRANTED
+- Language status: English working master; complete Chinese translation PENDING; bilingual semantic parity NOT SATISFIED
 - Reflow: existing Issue #41; no new Issue/PR
 
 ## 1. Authority and invariants / 权责与不变量
@@ -231,7 +232,7 @@ These are author-side candidate resolutions, not closure claims. Each finding re
 
 ## 11. Bilingual semantic parity / 双语语义对等
 
-This file is a bilingual normative-candidate artifact. The English and Chinese sections are intended to be semantically equivalent. Independent bilingual review has NOT RUN; do not mark parity PASS. The final joined contract must incorporate the same rules in both language versions in one frozen change set and be reviewed against GOV-DOC-001.
+This file is an English working master with bilingual headings and limited Chinese labels only; it is NOT a complete bilingual artifact. Complete Chinese translation and independent semantic-parity review are PENDING. Do not mark bilingual parity PASS or use this file alone as the bilingual joined contract. The final joined contract must incorporate the same rules in both language versions in one frozen change set and be reviewed against GOV-DOC-001.
 
 ## 12. Explicit non-claims / 明确不作出的声明
 
