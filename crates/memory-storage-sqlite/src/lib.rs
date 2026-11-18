@@ -1093,14 +1093,16 @@ mod tests {
             1,
             "only one payload may claim an idempotency key"
         );
-        let loser = if first_result.is_err() { first_result.unwrap_err() } else { second_result.unwrap_err() };
+        let first_won = first_result.is_ok();
+        let winner_digest = if first_won { "payload-a" } else { "payload-b" };
+        let loser = if first_won { second_result.unwrap_err() } else { first_result.unwrap_err() };
         assert_eq!(loser, StorageError::IdempotencyConflict);
 
         let reopened = SqliteMemoryStorage::open(&path).unwrap();
         assert_eq!(reopened.list_changes(None, &[scope()], 10).unwrap().records.len(), 1);
         let receipt = reopened.resolve_idempotency(
             "same-conflict-key",
-            if first_result.is_ok() { "payload-a" } else { "payload-b" },
+            winner_digest,
             &[scope()],
         ).unwrap();
         assert!(receipt.is_some());
