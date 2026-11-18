@@ -133,6 +133,16 @@ The follow-up PermissionEpoch currentness candidate adds an explicit unavailable
 - D/I/Storage 必须明确决定一个 `PublicationParticipantRef` 是否只有一个终态授权 Winner，还是需要按 Operation 进行核算。
 - 任何后继规范契约都必须由责任 Owner 针对同一个精确 Blob SHA 明确接受。
 
+## 6.1 Dependency digest consistency / Dependency Digest 一致性
+
+PR #183 restores equality checks between the dependency-set digest persisted by the Storage hidden participant and the digest carried by the D publication participant at three boundaries: first I COMMIT_WON consumption, final Storage commit, and UNKNOWN/NO_PUBLICATION reconciliation. PR #186 adds negative tests for both Storage-side and D-side substitutions at the final-commit and UNKNOWN-reconciliation boundaries.
+
+PR #183 恢复了三个边界上的一致性检查：首次 I COMMIT_WON 消费、Storage 最终 Commit、UNKNOWN/NO_PUBLICATION 核对时，Storage Hidden Participant 持久化的 Dependency Set Digest 必须与 D Publication Participant 携带的摘要一致。PR #186 增加了在最终 Commit 和 UNKNOWN 核对阶段分别替换 Storage 侧与 D 侧摘要的负向测试。
+
+The test seam verifies tuple equality only. It does not prove canonical dependency-set digest derivation, authenticated dependency receipts, durable Storage atomicity, or production isolation.
+
+测试接口仅验证元组相等，不证明规范 Dependency Set Digest 派生、Dependency Receipt 认证、Storage 持久化原子性或生产隔离。
+
 ## 6. Evidence ceiling / 证据上限
 
 PR #179 is a deterministic in-memory reference model. Passing tests prove only the tested abstract transitions and substitution guards. They do not prove production authorization, signed/authenticated evidence, database durability or isolation, distributed races, multi-process fencing, crash/failover/restore, live D/I/Storage adapters, end-to-end conformance, or production readiness.
