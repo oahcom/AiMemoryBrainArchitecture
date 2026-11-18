@@ -121,6 +121,11 @@ impl SqliteMemoryStorage {
 
 impl MemoryStorage for SqliteMemoryStorage {
     fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError> {
+        memory.validate().map_err(|_| StorageError::InvalidSchema)?;
+        if memory.current_version_id.is_some() {
+            // Creation cannot point at a version that this operation does not persist.
+            return Err(StorageError::InvalidReference);
+        }
         Self::scope_allowed(&Self::encode(&memory.scope_refs)?, scope)?;
         let scope_json = Self::encode(&memory.scope_refs)?;
         let memory_json = Self::encode(&memory)?;
@@ -176,6 +181,10 @@ impl MemoryStorage for SqliteMemoryStorage {
     ) -> Result<CommitReceipt, StorageError> {
         if request.memory_id != request.new_version.memory_id {
             return Err(StorageError::InvalidReference);
+        }
+        request.new_version.validate().map_err(|_| StorageError::InvalidSchema)?;
+        if request.idempotency_key.is_empty() || request.request_digest.is_empty() {
+            return Err(StorageError::InvalidSchema);
         }
 
         let tx = self
@@ -886,6 +895,95 @@ mod tests {
         assert!(reopened.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
         drop(reopened);
         remove_db_files(&path);
+    }
+
+    #[test]
+    fn sqlite_rejects_invalid_memory_and_orphan_initial_version_pointer() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+
+        let mut invalid_memory = memory();
+        invalid_memory.memory_kind.clear();
+        assert_eq!(
+            store.create_memory(invalid_memory, &[scope()]),
+            Err(StorageError::InvalidSchema)
+        );
+        assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+
+        let mut orphan_pointer = memory();
+        orphan_pointer.current_version_id = Some(id("v-orphan"));
+        assert_eq!(
+            store.create_memory(orphan_pointer, &[scope()]),
+            Err(StorageError::InvalidReference)
+        );
+        assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+    }
+
+    #[test]
+    fn sqlite_rejects_invalid_version_fields_before_writing_any_commit_state() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        let mut missing_digest = version("v-invalid-digest", 1, None);
+        missing_digest.content_digest.clear();
+        assert_eq!(
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: missing_digest,
+                idempotency_key: "invalid-digest-op".into(),
+                request_digest: "invalid-digest".into(),
+            }, &[scope()]),
+            Err(StorageError::InvalidSchema)
+        );
+
+        let mut missing_created_at = version("v-invalid-time", 1, None);
+        missing_created_at.created_at.clear();
+        assert_eq!(
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: missing_created_at,
+                idempotency_key: "invalid-time-op".into(),
+                request_digest: "invalid-time".into(),
+            }, &[scope()]),
+            Err(StorageError::InvalidSchema)
+        );
+
+        assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+        assert_eq!(store.read_version(&id("m1"), &id("v-invalid-digest"), &[scope()]).unwrap(), None);
+        assert_eq!(store.resolve_idempotency("invalid-digest-op", "invalid-digest", &[scope()]).unwrap(), None);
+        assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+    }
+
+    #[test]
+    fn sqlite_rejects_empty_idempotency_key_or_request_digest() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        assert_eq!(
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v-empty-key", 1, None),
+                idempotency_key: String::new(),
+                request_digest: "digest".into(),
+            }, &[scope()]),
+            Err(StorageError::InvalidSchema)
+        );
+
+        assert_eq!(
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v-empty-digest", 1, None),
+                idempotency_key: "empty-digest-op".into(),
+                request_digest: String::new(),
+            }, &[scope()]),
+            Err(StorageError::InvalidSchema)
+        );
+
+        assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+        assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
     }
 
 }
