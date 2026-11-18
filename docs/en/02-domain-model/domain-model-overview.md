@@ -1,145 +1,238 @@
-# Canonical Domain Model Overview
+# Canonical Domain Model Specification
 
 - Document ID: DOMAIN-MODEL-001
-- Version: 1.0
-- Source: [Normative source specification](../../../02-domain-model/domain-model-overview.md)
-- Source revision: 4d1debc0ec19b3917f9e76d04bb66da4df4cd346
-- Chinese counterpart: [规范领域模型总览](../../zh-CN/02-domain-model/domain-model-overview.md)
-- Status: DECIDED baseline; proposals explicitly marked
+- Version: 2.0
+- Status: DECIDED for the Phase 1 implementation contract
 - Owner: Memory Domain Model (MB-01)
+- Scope: logical domain semantics; not storage DDL, wire encoding, deployment topology, indexing, extraction algorithms, or LLM behavior
 
-**Scope:** Logical semantics, not storage DDL, wire encoding, deployment topology, or extraction algorithms.
+## 1. Decision
 
-## 1. Position and goals
+Phase 1 uses these canonical domain objects:
 
-The Domain Model defines meanings, identities, invariants, and relationships of assets managed by AI Memory Brain. It is the shared semantic contract for Compiler, Canonical Store, Lifecycle Manager, Entity/Relationship Manager, Runtime, Context Manager, Governance, and Adapters.
+Event, Memory, MemoryVersion, Claim, Entity, Relation, Evidence, Provenance, MemorySource, MemoryContext, ContextEntry, ScopeRef, ActorRef, and TemporalRef.
 
-**DECIDED**
-- Event, Memory, Claim, Entity, Relation, Evidence, Provenance, Memory Version, Memory Source, Memory Context, Context Entry, Agent Scope, and Environment Scope are distinct concepts.
-- Memory is an addressable retained knowledge asset, not a truth guarantee.
-- A Memory may contain multiple Claims; each Claim has its own epistemic and temporal qualification.
-- Derived assets retain source and derivation lineage, subject to retention and privacy governance.
-- Epistemic status, lifecycle state, temporal qualification, confidence, relevance, trust, and evidence strength are orthogonal.
-- Canonical Memory and Memory Context have separate ownership and mutation rules.
+Fact is not a separate object in Phase 1. A verified fact is represented as a Claim whose epistemic status is Verified.
 
-## 2. Responsibilities and non-responsibilities
+The model is intentionally richer than text plus embedding. Embeddings, lexical indexes, graph indexes, ranking features, and rendered text are derived representations, not canonical domain objects.
 
-The Domain Model owns canonical object definitions, identifier semantics, field constraints, cardinalities, epistemic/temporal interpretation, typed relationship semantics, scope binding rules, and cross-object invariants.
+## 2. Identity and version rules
 
-It does not own ingestion durability, LLM extraction, embeddings, ranking algorithms, canonical persistence mechanics, lifecycle policy execution, physical erasure, runtime activation decisions, context budget allocation, Agent planning, or tool execution.
+1. Every canonical object has a stable typed opaque identifier.
+2. MemoryId identifies the logical Memory for its entire lifetime.
+3. MemoryVersionId identifies one immutable Memory version.
+4. ClaimId is stable across Memory versions when the proposition remains the same logical claim; a semantic change creates a new ClaimId.
+5. A Memory update creates a new immutable MemoryVersion. Previous versions remain readable subject to governance.
+6. A ContextEntry references a specific MemoryVersion or governed rendering; it is never a second canonical Memory.
+7. IDs are not timestamps, mutable-content hashes, database row numbers, or authorization credentials.
 
-## 3. Canonical object graph
+## 3. Canonical object contracts
 
-```mermaid
-erDiagram
-  EVENT ||--o{ EVIDENCE : supplies
-  MEMORY ||--|{ MEMORY_VERSION : versions
-  MEMORY_VERSION ||--o{ CLAIM : contains
-  CLAIM }o--o{ ENTITY : concerns
-  CLAIM }o--o{ EVIDENCE : supported_by
-  CLAIM }o--o{ RELATION : qualified_by
-  EVIDENCE }o--|| PROVENANCE : traces
-  MEMORY_VERSION }o--o{ MEMORY_SOURCE : derived_from
-  MEMORY_CONTEXT ||--o{ CONTEXT_ENTRY : contains
-  CONTEXT_ENTRY }o--|| MEMORY_VERSION : references
-  AGENT_SCOPE ||--o{ MEMORY : bounds
-  ENVIRONMENT_SCOPE ||--o{ EVENT : qualifies
-```
+### 3.1 Event
+An Event records an observed, reported, submitted, or captured occurrence. It is not proof that the represented occurrence is objectively true.
 
-The diagram is conceptual. Many-to-many edges require explicit association records when the edge has its own role, time, scope, or evidence. Context Entry references a canonical version or governed rendering; it is not a second canonical Memory.
+Required semantics: event_id, scope, recorded_at, event_kind, source, payload; optional occurred_at, actor/environment references, and idempotency key for retryable ingestion.
 
-## 4. Object semantics and ownership
+Recorded_at is system capture time. Occurred_at describes when the represented event occurred and may be unknown.
 
-| Object | Meaning | Primary authority |
-|---|---|---|
-| Event | Time-bounded occurrence, observation, report, or transition captured by Brain | Event Ingestion |
-| Memory | Retained, addressable knowledge asset derived from sources | Canonical Memory authority |
-| Claim | Proposition about an entity, event, or state, with epistemic/time qualifications | Domain semantics; canonical version stores it |
-| Entity | Identity-bearing referent, not a mention string | Entity & Relationship Manager |
-| Relation | Typed association with endpoint, scope, and optional valid interval | Entity & Relationship Manager |
-| Evidence | Source material/observation supporting, refuting, or qualifying a Claim | Evidence & Provenance Manager |
-| Provenance | Origin and derivation lineage | Evidence & Provenance Manager |
-| Memory Version | Immutable historical snapshot of a Memory | Canonical Store/versioning authority |
-| Memory Source | Typed link from derived asset to input source | Evidence & Provenance Manager |
-| Memory Context | Scoped, versioned, task-oriented selection of memory assets | Memory Context Manager |
-| Context Entry | One reference/presentation inside a Context | Memory Context Manager |
-| Agent Scope | Namespace identifying Agent-owned partition | Governance |
-| Environment Scope | Namespace for world, tenant, project environment, save, or simulation | Governance |
+### 3.2 Memory
+Memory is the stable logical identity of a retained knowledge asset.
 
-## 5. Event, Memory, and Claim boundaries
+Required semantics: memory_id, scope, created_at, lifecycle_state, current_version_id.
 
-Event records what was captured or submitted, not necessarily what objectively happened. Memory is created when the system retains an addressable interpretation or knowledge asset. Claim is the proposition contained by or associated with a Memory.
+Memory identity does not change when content is revised, consolidated, superseded, or rendered differently.
 
-**DECIDED:** One Event may generate zero, one, or many candidate Memories. Multiple Events may contribute to one Memory. A Memory may contain one or many Claims. Event and Memory are never aliases.
+### 3.3 MemoryVersion
+MemoryVersion is an immutable semantic snapshot.
 
-**DECIDED:** Claim is the canonical proposition object. “Fact” is a qualified interpretation of a Claim, not a separate object type at this stage. A Verified Claim may be described as a verified fact, but must retain epistemic, temporal, scope, and evidence metadata.
+Required semantics: memory_version_id, memory_id, monotonic version_number, created_at, claims, entity_refs, relation_refs, source_refs, provenance_refs.
 
-**OPEN:** Whether an attestation domain later needs a distinct immutable Fact object. Do not add it without a concrete use case and ownership semantics.
+A candidate Memory may temporarily have no Claim; canonical commit must satisfy its owning subsystem's acceptance rules.
 
-## 6. Input and output contracts
+### 3.4 Claim
+Claim is the canonical proposition object.
 
-Inputs include captured Event envelopes, source references, candidate Memory/Claim proposals, Entity/Relation proposals, Evidence/Provenance records, Scope descriptors, authorization decisions, and lifecycle/governance commands. Every state-changing input carries actor, resolved scope, schema version, stable IDs, and idempotency key where retryable.
+Required semantics: claim_id, proposition subject/reference, predicate, object/value/reference, epistemic_status, temporal_ref, scope, evidence_refs, optional confidence metadata.
 
-Outputs include validated typed objects, identifiers, relationship references, versioned semantic snapshots, structured validation errors, and explicit conflict/unavailability records. Schema validity is not proof of truth.
+The proposition is distinct from Evidence that supports or refutes it. Verified means the claim passed the declaring verification process; it does not mean metaphysical certainty.
 
-## 7. Domain invariants
+Phase 1 epistemic statuses: Observed, Reported, Inferred, Verified, Disputed, Retracted.
 
-1. Event is not Memory; Evidence is not Claim.
-2. Claim is a proposition, not its source.
-3. Memory identity remains stable across immutable versions.
-4. Claims have explicit epistemic status and temporal interpretation; unknown is not “always”.
-5. Derived assets link to Evidence/Memory Sources or state why provenance is unavailable.
-6. Intent, plan, prediction, and pending action are not completed outcomes without outcome evidence.
-7. Relations are typed; co-occurrence is not a Relation.
-8. Scope is not permission.
-9. Context Entry does not own or mutate Canonical Memory.
-10. Context Remove is not Forget.
-11. Conflicting claims retain evidence and resolution history.
-12. Confidence, Trust, Relevance, and Evidence Strength are not interchangeable.
+### 3.5 Entity
+Entity is an identity-bearing referent.
 
-## 8. Main workflow
+Required semantics: entity_id, scope, entity_type, stable identity metadata, optional canonical label and aliases.
 
-```mermaid
-flowchart TD
- A[Occurrence, report, document, observation] --> B[Event / source registration]
- B --> C[Evidence and provenance]
- C --> D[Candidate Memory and Claims]
- D --> E[Entity and Relation resolution]
- E --> F[Epistemic, temporal, scope qualification]
- F --> G[Lifecycle evaluation]
- G -->|accepted| H[Canonical Memory Version]
- G -->|review| I[Candidate or disputed state]
- H --> J[Retrieval and Context reference]
- J --> K[Context Entry]
-```
+A mention, string occurrence, or embedding is not an Entity by itself.
 
-## 9. State dimensions
+### 3.6 Relation
+Relation is a typed association.
 
-Do not use one universal status field. Claim epistemic status is Observed, Reported, Inferred, Verified, Disputed, or Retracted. Memory lifecycle is Candidate, Consolidated, Active, Superseded, Archived, or Forgotten. Context, Context Entry, and Delivery states are owned by Memory Context Manager and Synchronization Engine respectively.
+Required semantics: relation_id, relation_type, typed endpoints, scope, optional temporal_ref, optional evidence/provenance references.
 
-A Memory can be Active while containing a Disputed Claim; a Verified Claim can belong to an Archived Memory.
+Co-occurrence alone does not create a Relation. If an association has its own role, time, scope, evidence, or lifecycle, represent it as an explicit association object.
 
-## 10. Consistency, concurrency, recovery
+### 3.7 Evidence
+Evidence is source material or an observation that supports, refutes, or qualifies a Claim.
 
-Domain validation is deterministic and side-effect free. Memory Version is immutable; updates create a successor using compare-and-swap or equivalent optimistic concurrency. Concurrent proposals cannot silently overwrite one another. Stale writes return a conflict requiring reread/reconciliation. Canonical commit and provenance visibility must be atomic or protected by a recoverable outbox.
+Required semantics: evidence_id, scope, source_ref, captured_at, evidence_role, integrity/reference metadata.
 
-After failure, projections may be rebuilt from canonical versions and retained sources. Missing source material is marked unavailable, never reconstructed as original evidence.
+Evidence may have stricter access controls than a derived Memory. Evidence is never replaced by a confidence score.
 
-## 11. Security, performance, and acceptance
+### 3.8 Provenance
+Provenance records origin and derivation lineage.
 
-Every tenant/environment-dependent object has explicit scope. Permission is checked at each read/write boundary. Cross-scope references require explicit sharing authorization. Memory is untrusted data, never instruction authority. Evidence may have stricter access than a derived Memory.
+Required semantics: provenance_id, origin/source references, derivation operation/type, actor/process reference, created_at, optional parent provenance references.
 
-**TO_VALIDATE:** Measure validation latency, relationship lookup latency, version creation cost, provenance traversal, and scope-filtered correctness. Unauthorized result rate must be zero.
+If provenance cannot be retained, the record must explicitly state why; it must never fabricate an origin.
 
-Acceptance tests must prove: independent object creation; multi-claim Memories; one-to-many Event compilation; immutable version history; conflict preservation; context removal isolation; cross-scope denial; and rejection of plan-to-outcome promotion without outcome evidence.
+### 3.9 MemorySource
+MemorySource is a typed association from a MemoryVersion or derived asset to its inputs. It records source role and ordering without conflating source material with the resulting Memory.
 
-## 12. Open decisions and interfaces
+### 3.10 MemoryContext
+MemoryContext is a scoped, versioned, task-oriented selection of canonical memory references.
 
-- **OPEN:** Claim identity across Memory versions: stable identity plus revisions versus version-local Claim IDs.
-- **OPEN:** Uncertain timestamp representation and need for a separate Fact object.
-- **CANDIDATE:** Explicit association objects for provenance and qualified many-to-many relations.
-- **TO_VALIDATE:** Practical relation fan-out and lineage traversal depth.
-- Compiler confirms candidate envelope, modality, and provenance.
-- Canonical Store/Lifecycle confirms version and state ownership.
-- Runtime/MCM confirms stable Context Entry reference/rendering.
-- Governance confirms scope inheritance, sharing, and Forget propagation.
+Required semantics: context_id, scope, context_version, task/session/environment binding, ordered ContextEntries.
+
+Context versioning is separate from canonical Memory versioning.
+
+### 3.11 ContextEntry
+ContextEntry is one reference/presentation inside a MemoryContext.
+
+Required semantics: entry_id, context_id, referenced memory_version_id, ordering/placement metadata, optional governed rendering metadata.
+
+Removing or replacing an entry does not mutate or delete its referenced canonical Memory.
+
+### 3.12 ScopeRef
+ScopeRef identifies the namespace in which an object or operation is valid.
+
+Scope is distinct from Permission. Phase 1 does not infer permission from object ownership. Cross-scope access requires an authorization decision.
+
+### 3.13 ActorRef
+ActorRef identifies the principal responsible for an operation or source. It is audit/provenance metadata, not a domain permission grant.
+
+### 3.14 TemporalRef
+TemporalRef preserves the distinction between event time, recording time, and validity time.
+
+Phase 1 supports a point in time, an interval, unknown/unavailable time, and declared precision/certainty metadata.
+
+Unknown time must not become always valid. Validity interval and storage retention interval are different concepts.
+
+## 4. Orthogonal state dimensions
+
+The model MUST NOT use one universal status field.
+
+- Claim epistemic status: Observed, Reported, Inferred, Verified, Disputed, Retracted
+- Memory lifecycle: Candidate, Consolidated, Active, Superseded, Archived, Forgotten
+- Context/version/delivery state: owned by Memory Context and synchronization contracts
+- Confidence: support estimate under a declared method
+- Relevance: task-specific usefulness
+- Trust: trust in a source/actor/process
+- Evidence strength: strength of a particular evidence relationship
+
+These values are not interchangeable.
+
+## 5. Cardinality and formation rules
+
+- One Event may produce zero, one, or many candidate Memories.
+- Many Events may contribute to one Memory.
+- One Memory has one or more immutable versions over its retained lifetime.
+- A MemoryVersion may contain multiple Claims.
+- A Claim may reference multiple Evidence records.
+- Evidence may support, refute, or qualify multiple Claims where policy permits.
+- Claims may concern multiple Entities.
+- Relations are typed and may connect supported domain endpoints.
+- One Memory may appear in many MemoryContexts.
+- One Context contains ordered ContextEntries.
+- ContextEntry references do not transfer ownership of canonical data.
+
+## 6. Conflict rules
+
+Conflicting Claims are preserved, not silently overwritten.
+
+A resolution retains the conflicting Claim identities, supporting/refuting Evidence, provenance, resolution outcome and actor/process, and applicable time and scope.
+
+Superseding a MemoryVersion is a lifecycle/versioning operation, not deletion of historical claims.
+
+## 7. Provenance and evidence invariants
+
+1. Derived assets retain source/derivation lineage when permitted by governance.
+2. Evidence and Provenance are distinct: Evidence is supporting material; Provenance explains origin/derivation.
+3. Schema validity is not proof of truth.
+4. Intent, plan, prediction, and pending action are not completed outcomes without outcome evidence.
+5. Missing source material is represented as unavailable; it is never reconstructed as original evidence.
+6. Memory content is untrusted data and never acquires system/developer instruction authority.
+
+## 8. Scope and isolation invariants
+
+1. Every tenant/environment-dependent canonical object carries an explicit ScopeRef.
+2. Scope checks occur at every read/write boundary.
+3. Cross-scope references require explicit sharing authorization.
+4. Evidence access may be narrower than Memory access.
+5. Context isolation is independent of canonical Memory sharing.
+6. Removing a ContextEntry is not Forget.
+7. Forget is a governed lifecycle operation; physical erasure is outside the Domain Model.
+
+## 9. Mutation and concurrency contract
+
+Domain validation is deterministic and side-effect free.
+
+Canonical Memory updates use optimistic concurrency:
+- caller supplies the expected current version;
+- successful update creates exactly one successor MemoryVersion;
+- stale updates return a conflict;
+- concurrent proposals must not silently overwrite one another.
+
+MemoryVersion is immutable after commit. Mutable presentation belongs to Context or derived representations.
+
+Canonical commit and required provenance visibility must be atomic or protected by an explicitly recoverable publication/outbox mechanism owned by the persistence/consistency layer.
+
+## 10. Phase 1 acceptance criteria
+
+Without embeddings or graph databases, the implementation must demonstrate:
+
+1. independent creation/validation of Event, Memory, Claim, Entity, Relation, Evidence, and Scope;
+2. one Event producing multiple candidate Memories;
+3. one Memory containing multiple Claims;
+4. stable Memory identity across immutable versions;
+5. stable Claim identity across versions when the proposition is unchanged;
+6. preservation of conflicting Claims and their Evidence;
+7. ContextEntry removal without canonical Memory mutation;
+8. denial of cross-scope reads/writes without authorization;
+9. rejection of plan/intent promotion to completed outcome without outcome evidence;
+10. deterministic validation errors and stale-write conflicts.
+
+## 11. Explicitly not decided by this specification
+
+The following remain outside the Phase 1 semantic freeze:
+- a separate immutable Fact object;
+- physical storage schema and SQL layout;
+- exact serialization/wire format;
+- embedding/vector/graph indexes;
+- ranking and retrieval algorithms;
+- relationship fan-out performance limits;
+- physical Forget/erasure mechanics;
+- model-assisted extraction behavior.
+
+These must not be introduced into the canonical domain model merely to simplify implementation.
+
+## 12. Decision closure
+
+| Decision | Status |
+|---|---|
+| Event / Memory / Claim are distinct | DECIDED |
+| Claim is the canonical proposition; no separate Fact in Phase 1 | DECIDED |
+| Memory identity is stable across versions | DECIDED |
+| Claim identity is stable across versions when proposition identity is preserved | DECIDED |
+| MemoryVersion is immutable | DECIDED |
+| Event / Recorded / Valid Time are distinct | DECIDED |
+| Unknown time is explicit, never always valid | DECIDED |
+| Canonical Memory and Context are separate | DECIDED |
+| Scope and Permission are separate | DECIDED |
+| Conflicts preserve competing Claims and evidence | DECIDED |
+| Qualified many-to-many associations use explicit association objects when needed | DECIDED semantic rule |
+| Separate immutable Fact object | OPEN / deferred |
+| Exact temporal uncertainty encoding | TO_VALIDATE |
+| Physical storage representation | OUT OF SCOPE |
+
+This specification is the Phase 1 semantic source of truth. Rust types, database tables, and protocol messages may map these concepts but may not redefine their meaning.
