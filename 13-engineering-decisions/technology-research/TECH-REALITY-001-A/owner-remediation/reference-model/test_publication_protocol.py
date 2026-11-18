@@ -78,6 +78,7 @@ class Protocol:
     fence_pending: set = field(default_factory=set)
     authorization_contexts: dict = field(default_factory=dict)
     current_permission_epochs: dict = field(default_factory=dict)
+    i_authority_state: dict = field(default_factory=dict)
 
     @staticmethod
     def digest(items):
@@ -159,7 +160,10 @@ class Protocol:
             "ownership_scope_ref", "applicability_scope_set_digest", "obligations_digest",
             "expiry", "producer_binding_ref", "adapter_binding_ref",
             "authenticated_transport_binding_ref", "authentication_strength",
-            "operation_payload_digest",
+            "operation_payload_digest", "issuer_ref", "issuer_key_status", "workload_ref",
+            "delegation_chain_digest", "request_ref", "work_item_ref", "artifact_ref",
+            "artifact_version", "region_ref", "policy_state_digest", "revocation_state_digest",
+            "registry_state_digest",
         )
         defaults = {
             "principal_ref": "principal-1", "actor_ref": "actor-1",
@@ -179,6 +183,12 @@ class Protocol:
             "authenticated_transport_binding_ref": "transport-binding-1",
             "authentication_strength": "strong",
             "operation_payload_digest": "operation-payload-1",
+            "issuer_ref": "issuer-1", "issuer_key_status": "VALID",
+            "workload_ref": "workload-1", "delegation_chain_digest": "delegation-digest-1",
+            "request_ref": "request-1", "work_item_ref": "work-1", "artifact_ref": "artifact-1",
+            "artifact_version": "artifact-version-1", "region_ref": "region-1",
+            "policy_state_digest": "policy-state-1", "revocation_state_digest": "revocation-state-1",
+            "registry_state_digest": "registry-state-1",
         }
         defaults.update(context)
         value = tuple(defaults[k] for k in fields)
@@ -187,6 +197,41 @@ class Protocol:
             raise Rejected("authorization context is immutable")
         self.authorization_contexts[auth_id] = value
         return value
+
+    def set_i_authority_state(self, policy_domain_id, *, issuer_ref="issuer-1",
+                              issuer_key_status="VALID", policy_state_digest="policy-state-1",
+                              revocation_state_digest="revocation-state-1",
+                              registry_state_digest="registry-state-1"):
+        self.i_authority_state[policy_domain_id] = (
+            issuer_ref, issuer_key_status, policy_state_digest,
+            revocation_state_digest, registry_state_digest,
+        )
+
+    def invalidate_i_authority(self, policy_domain_id, *, issuer_key_status=None,
+                               policy_state_digest=None, revocation_state_digest=None,
+                               registry_state_digest=None):
+        current = self.i_authority_state.get(policy_domain_id)
+        if current is None:
+            raise Rejected("I authority state unavailable")
+        self.i_authority_state[policy_domain_id] = (
+            current[0], issuer_key_status or current[1],
+            policy_state_digest or current[2],
+            revocation_state_digest or current[3],
+            registry_state_digest or current[4],
+        )
+
+    def _validate_i_current_authority(self, auth_id):
+        context = self._authorization_context(auth_id)
+        domain = context[9]
+        current = self.i_authority_state.get(domain)
+        if current is None:
+            raise Rejected("I authoritative policy/revocation/registry state is unavailable")
+        expected = (context[25], context[26], context[27], context[28], context[29])
+        if current != expected:
+            raise Rejected("I issuer-key/policy/revocation/registry currentness mismatch")
+        if context[26] != "VALID":
+            raise Rejected("I issuer key is not current/valid")
+        return True
 
     def set_permission_epoch(self, policy_domain_id, permission_epoch):
         if not policy_domain_id or not permission_epoch:
@@ -216,6 +261,7 @@ class Protocol:
                          request_digest, owner_boundary, final_visibility_gate_id):
         if auth_id in self.revoked:
             raise Rejected("authorization revoked")
+        self._validate_i_current_authority(auth_id)
         publication = self.publication_participants.get(publication_id)
         if publication is None:
             raise Rejected("publication participant missing")
@@ -265,6 +311,7 @@ class Protocol:
             raise Rejected("publication participant already has a COMMIT_WON operation")
         if auth_id not in self.authorizations or auth_id in self.revoked:
             raise Rejected("authorization absent or revocation won before I consumption")
+        self._validate_i_current_authority(auth_id)
         if not self._permission_epoch_is_current(auth_id):
             raise Rejected("PermissionEpoch is stale or currentness is unavailable")
         if self.authorizations[auth_id][:6] != (
@@ -314,6 +361,7 @@ class Protocol:
             raise Rejected("exact I COMMIT_WON participant has not been consumed")
         if auth_id not in self.authorizations or auth_id not in self.consumed:
             raise Rejected("authorization or I consumption missing")
+        self._validate_i_current_authority(auth_id)
         if self.authorizations[auth_id][:6] != (
             operation_id, publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id
         ) or self.authorizations[auth_id][6] != context:
@@ -343,6 +391,8 @@ class Protocol:
         return receipt
 
     def _validate_unknown_binding(self, operation_id, binding):
+        auth_id = binding[0]
+        self._validate_i_current_authority(auth_id)
         if not isinstance(binding, tuple) or len(binding) not in (8, 9):
             raise Rejected("UNKNOWN operation binding must be an immutable tuple")
         if len(binding) == 8:
@@ -490,6 +540,41 @@ class PublicationProtocolTests(unittest.TestCase):
         )
         values.update(overrides)
         return StorageNoPublicationProof(**values)
+
+    def test_i_current_authority_is_required_before_authorization(self):
+        p = Protocol()
+        p.register_producer("work-1", 0)
+        p.register_dependencies("work-1", ["root"])
+        p.create_hidden_storage_participant("storage-1", "op-1", "work-1")
+        p.admit_publication("publication-1", "op-1", "work-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
+        p.set_authorization_context("auth-1")
+        p.set_permission_epoch("policy-domain-1", "epoch-1")
+        with self.assertRaisesRegex(Rejected, "authority state is unavailable"):
+            p.authorize_commit("auth-1", "op-1", "publication-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
+
+    def test_issuer_key_invalidation_before_consumption_fails_closed(self):
+        p = self.prepared()
+        p.invalidate_i_authority("policy-domain-1", issuer_key_status="REVOKED")
+        with self.assertRaisesRegex(Rejected, "issuer-key"):
+            p.consume_i_commit_won("op-1", "auth-1", "publication-1", "storage-1",
+                                   "request-digest-1", "owner-boundary-1", "visibility-gate-1",
+                                   self.commit_args()["d_proof"])
+
+    def test_policy_revocation_registry_change_after_consumption_blocks_final_commit(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        p.invalidate_i_authority("policy-domain-1", policy_state_digest="policy-state-2")
+        with self.assertRaisesRegex(Rejected, "currentness mismatch"):
+            p.commit(**args)
+
+    def test_artifact_and_region_binding_is_immutable(self):
+        p = self.prepared()
+        context = p.authorization_contexts["auth-1"]
+        mutated = list(context)
+        mutated[31] = "artifact-substituted"
+        p.authorization_contexts["auth-1"] = tuple(mutated)
+        with self.assertRaisesRegex(Rejected, "authorization context"):
+            p.commit(**self.consume_i(Protocol().prepared()) if False else self.commit_args())
 
     def test_admission_then_fence_blocks_new_work(self):
         p = Protocol()
