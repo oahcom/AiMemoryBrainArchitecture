@@ -130,3 +130,10 @@ Changes to this standard require a bilingual semantic-parity update and an exact
 本规范已被采用为**流程治理规范**；Issue #130 comment #6962523529 在 PR #144 合并后记录了采用决定。该采用不代表 GitHub 平台已经强制执行。平台强制执行仍由 Issue #134 单独跟踪。
 
 本规范的修改必须同步更新双语语义版本，并进行精确 Head 治理审查。如果仓库平台无法强制执行某项必需控制，则该控制继续保持 BLOCKED，直到管理员建立真正可强制执行的配置。
+
+
+## 10. Enforcement and evidence addendum / 强制执行与证据补充
+
+Version 1.1 implementation details are maintained in the paired [English enforcement and evidence addendum](../docs/en/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md) and [Chinese enforcement and evidence addendum](../docs/zh-CN/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md). The addendum specifies exact-Head CI and bilingual gates, independent approval, prompt-hash/session audit evidence, CANDIDATE-to-DECIDED evidence, administrator-only branch protection actions for Issue #134, Issue #130 operational coverage audit, and rollback/emergency correction. The addendum remains PROPOSED until its PR is reviewed and merged; this link does not imply platform enforcement.
+
+Version 1.1 的执行细节见[英文强制执行与证据补充规范](../docs/en/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md)和[中文强制执行与证据补充规范](../docs/zh-CN/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md)。补充规范定义精确 Head CI 与双语门禁、独立审批、提示词哈希/会话审计证据、CANDIDATE 升级 DECIDED 的证据标准、Issue #134 仅管理员可执行的平台分支保护操作、Issue #130 运营覆盖审计以及回退/紧急纠正策略。补充规范在其 PR 经审查并合并前保持 PROPOSED；该链接不代表平台强制控制已经启用。
