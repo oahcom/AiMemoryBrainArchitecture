@@ -356,3 +356,15 @@ Required owner actions (no acceptance is created by this request):
 3. A re-reads every exact Owner Blob and updates the G6 ledger only after each required Owner record exists. A's CGH-APPLIED-1.1 matrix must remain a separate acceptance dimension.
 
 I36-GOV-01..10 remain GOVERNANCE-BLOCKED; I36/H36 remain NOT RUN. This correction does not change BIH36-JD-01..17 or authorize G5/G7/G10.
+
+
+## 15. Phase 3.6.7 follow-up — component exception path now fails closed — 2026-11-18
+
+A second adversarial pass found that the first hardening revision still allowed a component `PolicyException` state when a caller supplied arbitrary proof/reviewer strings. That is insufficient to represent an authorized, scoped, expiring governance exception. The reference model has no component-exception authorization workflow, so it must not allow that state to complete.
+
+- Model Blob: `207b797fc77358f31bb4d42a541d0b28a0713c5c`, commit `4b8a73c9e529a52e44bf6050f287fe32e1767586`.
+- Test Blob: `ea4102ecbb4fa0b7120a4658f0c931afab341950`, commit `e87bcffe4876d7f7cf8dce687c8543f26247b9e6`.
+- Change: component `PolicyException` is rejected by `set_component`; `evaluate()` returns Pending if that state is injected directly. Only Confirmed/NotApplicable component states can satisfy the component loop, and both require retained proof + verifier. Target-level exception logic remains separate and is not a substitute for component exception authority.
+- Added regression test proves that even a populated proof/reviewer object cannot promote an unimplemented component exception path.
+
+The I reference-model workflow remains the available executable harness (Python 3.12, standard-library compile/unittest), but no GitHub Actions run or combined status was observed for the earlier trigger commit; this follow-up commit also has no verified execution result at this readback. **All I reference-model tests remain NOT RUN / NOT PASS until the exact latest test commit is executed and its raw log is retained.** This is reference-model hardening only; I36-GOV-01..10 remain GOVERNANCE-BLOCKED and I36 remains NOT RUN.
