@@ -43,7 +43,7 @@ Digest 是幂等契约覆盖的规范化请求 Payload 的密码学摘要。它�
 
 **CANDIDATE / TO_VALIDATE——等待权威 Scope 身份决议：** Scope 被提议作为幂等命名空间的一部分。同一 Producer Identity 和 Idempotency Key 是否能在两个 Scope 引用中形成独立操作/Receipt，取决于 §3 所述尚未解决的 Scope 身份/相等域。在 B/domain 与 I/security Owner 决定该规则前，不得将跨 Scope 重放隔离当作规范性比较规则。
 
-这是命名空间隔离，不是跨 Scope 授权。调用方必须在目标 Scope 中独立完成认证和授权。无权访问的调用方收到常规授权拒绝；实现不得泄露另一个 Scope 中是否存在匹配 Key。
+该提议描述的是命名空间隔离，而非跨 Scope 授权；其具体适用仍取决于上述尚未解决的 Scope 身份/相等决议。调用方必须在目标 Scope 中独立完成认证和授权。无权访问的调用方收到常规授权拒绝；实现不得泄露另一个 Scope 中是否存在匹配 Key。
 
 如果项目策略要求 Key 在 Producer 的所有 Scope 之间共享一个全局命名空间，则这是需要明确提出并经评审的替代方案，必须通过显式的后续决议取代本提案；不得由数据库唯一索引是否包含 Scope 而意外决定。
 
@@ -56,7 +56,7 @@ Digest 是幂等契约覆盖的规范化请求 Payload 的密码学摘要。它�
 | Producer Identity + Scope + Key + Digest 全部相同 | 返回原 Receipt 并标记为重放；不得再次追加 |
 | Producer Identity + Scope + Key 相同，但 Digest 不同 | 返回 IDEMPOTENCY_KEY_CONFLICT；不得追加；不得替换 Receipt |
 | Producer Identity 不同，Scope + Key 相同 | 属于独立命名空间；不存在重放关系 |
-| Producer Identity + Key 相同，但 Scope 不同 | 属于独立命名空间；不得跨 Scope 披露 Receipt |
+| Producer Identity + Key 相同，但 Scope 不同 | CANDIDATE / TO_VALIDATE——只有 B/domain 与 I/security 决定 Scope 身份/相等域后，才能判定为独立命名空间及禁止跨 Scope 披露 Receipt |
 | Producer Identity 类型仅部分匹配 | 属于不同命名空间；不得部分匹配去重 |
 | 原操作结果仍未决/UNKNOWN 时命中相同命名空间 | 返回/恢复同一未决 Receipt 状态；不得启动第二次追加 |
 
@@ -80,7 +80,7 @@ Receipt 是将一个命名空间绑定到已接受 Digest 及追加结果的持�
 
 ## 7. 边界用例
 
-1. **跨 Scope 重放：** Producer P 在 Scope A 使用 Key K、Digest D1 提交；同一个 P 在 Scope B 使用 K、D1。这是新的命名空间和新的追加，不是重放。Scope B 不得读取 Scope A 的 Receipt。
+1. **跨 Scope 重放——CANDIDATE / TO_VALIDATE：** Producer P 在 Scope A 使用 Key K、Digest D1 提交；同一个 P 在 Scope B 使用 K、D1 提交。这些引用是否标识不同命名空间、因而是否属于新的追加而非重放，仍待 B/domain 与 I/security 对 Scope 身份/相等域作出决议。未经所需授权，Scope B 不得获得 Scope A 的 Receipt。
 2. **Producer Identity 部分相同：** 若归属身份契约声明 instance 是身份类型的一部分，则 ProducerIdentity=(tenant=T, principal=P, instance=I1) 与 (tenant=T, principal=P, instance=I2) 是不同身份。即使 Scope、Key、Digest 相同也不去重。如果 instance 不属于规范 ProducerIdentity 类型，实现必须一致采用该规范类型；Adapter 不得各自决定。
 3. **同一命名空间下 Digest 不同：** P + Scope A + Key K 首次提交 Digest D1。后续相同命名空间但 Digest D2 的请求必须返回 IDEMPOTENCY_KEY_CONFLICT；不得追加第二个事件，原 Receipt 保持不变。
 4. **相同 Digest 并发重试：** 两个请求以相同命名空间及 D1 竞争。一个提交，另一个返回同一 Receipt。最终只能存在一个事件。
