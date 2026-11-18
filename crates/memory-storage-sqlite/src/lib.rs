@@ -181,16 +181,22 @@ impl MemoryStorage for SqliteMemoryStorage {
 
         Self::scope_allowed(&memory_row.0, scope)?;
 
-        if let Some((stored_digest, receipt_json)) = tx
+        if let Some((stored_memory_id, stored_digest, receipt_json)) = tx
             .query_row(
-                "SELECT request_digest, receipt_json FROM idempotency WHERE idempotency_key = ?1",
+                "SELECT memory_id, request_digest, receipt_json FROM idempotency WHERE idempotency_key = ?1",
                 params![request.idempotency_key.as_str()],
-                |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
+                |row| Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                )),
             )
             .optional()
             .map_err(|_| StorageError::TransactionUnavailable)?
         {
-            if stored_digest == request.request_digest {
+            if stored_memory_id == request.memory_id.as_str()
+                && stored_digest == request.request_digest
+            {
                 return Self::decode(&receipt_json);
             }
             return Err(StorageError::IdempotencyConflict);
@@ -429,6 +435,31 @@ mod tests {
                 idempotency_key: "op1".into(), request_digest: "d1".into(),
             }, &[other]),
             Err(StorageError::ScopeMismatch)
+        );
+    }
+
+    #[test]
+    fn sqlite_does_not_replay_idempotency_key_across_memories() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        let mut second_memory = memory();
+        second_memory.memory_id = id("m2");
+        store.create_memory(second_memory, &[scope()]).unwrap();
+
+        store.commit_version(CommitRequest {
+            memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
+            idempotency_key: "shared-op".into(), request_digest: "same-digest".into(),
+        }, &[scope()]).unwrap();
+
+        let mut second_version = version("v2", 1, None);
+        second_version.memory_id = id("m2");
+        assert_eq!(
+            store.commit_version(CommitRequest {
+                memory_id: id("m2"), expected_current_version: None, new_version: second_version,
+                idempotency_key: "shared-op".into(), request_digest: "same-digest".into(),
+            }, &[scope()]),
+            Err(StorageError::IdempotencyConflict)
         );
     }
 
