@@ -319,7 +319,7 @@ class Protocol:
         binding = self.operation_bindings.get(operation_id)
         if binding is None:
             raise Rejected("UNKNOWN operation has no immutable binding to reconcile")
-        auth_id, publication_id, storage_id = self._validate_unknown_binding(binding)
+        auth_id, publication_id, storage_id = self._validate_unknown_binding(operation_id, binding)
         if proof.operation_id != operation_id or proof.operation_binding != binding:
             raise Rejected("NO_PUBLICATION proof does not bind the exact UNKNOWN operation")
         if publication_id != proof.publication_id or storage_id != proof.storage_id:
