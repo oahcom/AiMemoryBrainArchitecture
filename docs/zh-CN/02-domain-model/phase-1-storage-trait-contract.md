@@ -8,12 +8,12 @@
 
 ## 操作
 
-- create_memory
+- create_memory (with resolved scope)
 - read_current
 - read_version
 - commit_version
 - list_changes
-- resolve_idempotency
+- resolve_idempotency (with resolved scope)
 
 ## 提交边界
 
@@ -21,7 +21,7 @@
 
 ## 安全
 
-每次读写都接收已解析 Scope。后端 MUST NOT 将陈旧 Projection 当作 Canonical State。expected_current_version 是乐观并发保护。
+每次读写都接收已解析 Scope，包括 create_memory 与幂等查询。后端 MUST 拒绝 memory_id 与 new_version.memory_id 不一致的 CommitRequest。后端 MUST NOT 将陈旧 Projection 当作 Canonical State。expected_current_version 是乐观并发保护。
 
 ## 幂等
 
