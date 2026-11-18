@@ -4,8 +4,8 @@
 **仓库：** `oahcom/AiMemoryBrainArchitecture`  
 **审查角色：** A — 系统集成 / 架构收敛  
 **审查分支：** `review/arch-consol-001-live-delta-2026-11-18`  
-**基线 main SHA：** `282a82e58d8d9d1aa876621481df3184fbe5d284`  
-**基线父提交：** `ee76e054ccf71bfc3b5d50af6113c699c455852a`  
+**基线 main SHA：** `9f2dc27d767fbd335906fe0e276cd123329974f8`  
+**基线父提交：** `282a82e58d8d9d1aa876621481df3184fbe5d284`  
 **状态：** 部分实时源增量审查 — 非完整 G1–G8 验收报告  
 **独立性：** 本文由协调 A 审查会话编写，不是独立 D、I、Storage 或 Integration Reviewer 签署。
 
@@ -150,7 +150,7 @@ Issue #7 中 Project Owner 决策仍为 `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGI
 
 ## 6. 治理与集成状态
 
-- 当前 `main`：`282a82e58d8d9d1aa876621481df3184fbe5d284`。
+- 当前 `main`：`9f2dc27d767fbd335906fe0e276cd123329974f8`。
 - 本次刷新时开放 PR：0。
 - Main Branch Protection：`protected=false`；Required Checks 未由平台强制。Issue #134 仍 OPEN/P0。
 - Issue #7 的 Runtime Binding 决策仍延期至 Engineering Phase。
