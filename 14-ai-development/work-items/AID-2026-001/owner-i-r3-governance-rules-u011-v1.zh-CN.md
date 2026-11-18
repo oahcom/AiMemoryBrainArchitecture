@@ -83,7 +83,7 @@
 
 签名/签发者无效、audience 错误、request hash 不匹配、范围扩大、回执过期/尚未生效、委托已撤销、epoch 过期、策略修订版本不匹配、nonce 重放、权威 epoch 不可用或排序结果 UNKNOWN，均必须在提交前 fail closed。重试必须具备幂等性，并绑定同一 operation/request 身份；请求发生变化时必须取得新决策。事务结果不明确时，必须在重试破坏性操作之前，根据持久化提交证据完成核对。
 
-## 4. SuppressionCommitted 时 I 侧治理授权前置条件
+## 4. I authorization precondition for SuppressionCommitted / SuppressionCommitted 时 I 侧治理授权前置条件
 
 只有在提交序列化点验证以下全部条件后，I 对 D 所有提交的授权前置条件才算满足：
 

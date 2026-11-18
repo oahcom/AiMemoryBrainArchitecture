@@ -84,7 +84,7 @@ A preflight authorization check is advisory only. The authoritative check MUST b
 
 Invalid signature/issuer, wrong audience, request-hash mismatch, scope expansion, expired/not-yet-valid receipt, revoked delegation, stale epoch, policy revision mismatch, nonce replay, unavailable authoritative epoch, or UNKNOWN ordering MUST fail closed before commit. Retries MUST be idempotent and bound to the same operation/request identity; a changed request requires a new decision. An ambiguous transaction result MUST be reconciled against durable commit evidence before retrying a destructive action.
 
-## 4. I governance completion precondition at SuppressionCommitted / SuppressionCommitted 的 I 治理前置条件
+## 4. I authorization precondition for SuppressionCommitted / SuppressionCommitted 时 I 侧治理授权前置条件
 
 I's authorization precondition for the D-owned commit is satisfied only when all of the following are verified at the commit serialization point:
 
