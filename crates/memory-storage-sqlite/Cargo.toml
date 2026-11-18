@@ -9,4 +9,5 @@ publish = false
 memory-domain = { path = "../memory-domain" }
 memory-storage = { path = "../memory-storage" }
 rusqlite = { version = "0.43.0", features = ["bundled"] }
+serde = "1"
 serde_json = "1"
