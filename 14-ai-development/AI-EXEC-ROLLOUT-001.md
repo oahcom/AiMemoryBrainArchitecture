@@ -7,7 +7,7 @@
 - **Owner:** Integration Owner
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml)
 - **落地文本**：[AI-EXEC-001](AI-EXEC-001.md)（流程执行细则）、[AI-EXEC-002](AI-EXEC-002.md)（提示词执行细则）
-- **Translation status:** 中文版为本批权威版本；English counterpart = **STALE**（GOV-DOC-001 §5 time-bounded exception，登记见 `docs/translation-status.md`，截止 2026-12-02，Owner: Integration Owner，跟踪 Issue #218）
+- **Translation status:** COMPLETE — source-aligned English counterpart: `docs/en/14-ai-development/AI-EXEC-ROLLOUT-001.md` (translation commit `e683ea275dfaf85fff0f9d18bb706d3bdb5d60a1`; source commit `778b4d3b4b6c846faa6a02247d31d14a33d8b626`); bilingual closeout AID-2026-004 / Issue #218.
 
 > 本文重排 AI 开发流程痛点分析（前期研究，15 项措施）：**阶段一只做"让循环转起来"的最小闭环，阶段二再做加强**。v4 起**以项目现行流程为底座**——不另立平行制度，全部落在 AI-STD-001 / AI-PROC-001 / PR-GOVERNANCE-001 / AI-PROMPT-STD-001 既有机制上；Work Item（`AID-YYYY-NNN` + `manifest.yaml` + `INDEX.md`）按 AI-STD-001 §13 保留并跑起来。
 
