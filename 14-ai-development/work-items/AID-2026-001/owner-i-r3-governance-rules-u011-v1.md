@@ -232,10 +232,19 @@ These are author-side candidate resolutions, not closure claims. Each finding re
 
 ## 11. Bilingual semantic parity / 双语语义对等
 
-This file is an English working master with bilingual headings and limited Chinese labels only; it is NOT a complete bilingual artifact. Complete Chinese translation and independent semantic-parity review are PENDING. Do not mark bilingual parity PASS or use this file alone as the bilingual joined contract. The final joined contract must incorporate the same rules in both language versions in one frozen change set and be reviewed against GOV-DOC-001.
+This English working master has a separately maintained complete Chinese counterpart at `14-ai-development/work-items/AID-2026-001/owner-i-r3-governance-rules-u011-v1.zh-CN.md`. Author-side translation is complete. The independent bilingual semantic review of the prior exact pair (EN Blob `241f1ac4c63758bb791eb9b7d94bdfaf70eda66d`; ZH Blob `ba8f2b0569c834cc384dce0c01b5d918c10a3d0b`; review baseline `5a24134200f55d6f559a452d509b8dbcd9753719`) completed with **FAIL**, identifying `I-U012-001` and `I-U012-002` (both P2; reflowed to Issue #41). Those findings are being remediated in this bilingual change set and remain open pending a fresh independent review of the corrected exact Head. Do not mark bilingual parity PASS or use these files alone as an approved joined contract. The final joined contract must incorporate the same rules in both language versions in one frozen change set and be reviewed against GOV-DOC-001.
 
 ## 12. Explicit non-claims / 明确不作出的声明
 
 No production authorization service, epoch store, transaction protocol, exception workflow, inventory discovery, target execution, Storage atomicity or audit pipeline is claimed implemented. No R3 test was run. No formal Owner-I or D/I same-SHA approval is claimed. No finding is closed by this document alone.
 
-<!-- U-011 artifact content frozen; subsequent registration records point to this exact artifact blob. -->
+
+## Bilingual correspondence and maintenance constraints
+
+- English working master: `owner-i-r3-governance-rules-u011-v1.md`
+- Chinese counterpart: `owner-i-r3-governance-rules-u011-v1.zh-CN.md`
+- Both files belong to the same AID-2026-001 / U-011 rule version.
+- When either language version receives a normative change, the other language version MUST be updated in the same change set.
+- All state values, field names, Finding IDs, test IDs, authority boundaries, negative constraints and mandatory requirements MUST remain aligned; code identifiers MUST NOT be translated or renamed.
+- Translation completion does not mean independent semantic review has passed; bilingual PASS may be recorded only by an independent reviewer bound to the exact Head.
+- Both files remain candidate contracts; translation does not automatically make either file an ADOPTED production policy.
