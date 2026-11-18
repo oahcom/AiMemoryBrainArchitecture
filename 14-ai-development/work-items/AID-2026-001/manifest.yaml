@@ -491,10 +491,11 @@ owner_i_u011:
     sha256: NOT_VERIFIED
   artifact:
     path: 14-ai-development/work-items/AID-2026-001/owner-i-r3-governance-rules-u011-v1.md
-    commit_sha: 1efec2c7d132c8f2fc89ee50087a77a55b36a03c
-    git_blob_sha: aa90c0643199ca817ce385c80b274800346a0d02
-    utf8_bytes: 24157
+    commit_sha: 443fbd08ee7275c22ab61e8b354888759b7d53c0
+    git_blob_sha: 241f1ac4c63758bb791eb9b7d94bdfaf70eda66d
+    utf8_bytes: 24388
     sha256: NOT_VERIFIED
+    language_status: ENGLISH_WORKING_MASTER_CHINESE_TRANSLATION_PENDING_PARITY_NOT_SATISFIED
     status: I_SIDE_CONTRACT_CANDIDATE_NOT_NORMATIVE
   findings:
     I-U009-001:
@@ -532,7 +533,7 @@ owner_i_u011:
     storage_atomic_commit: PENDING
     h_transport_principal_binding: PENDING
     executor_acknowledgements: PENDING
-    bilingual_semantic_parity_review: NOT_RUN
+    bilingual_semantic_parity_review: NOT_RUN_TRANSLATION_INCOMPLETE
     independent_integration_review: PENDING
     r3_runtime_and_race_tests: NOT_RUN_NOT_EVIDENCED
   overall_status: BLOCKED_PENDING_FORMAL_APPROVAL_AND_R3_EVIDENCE
