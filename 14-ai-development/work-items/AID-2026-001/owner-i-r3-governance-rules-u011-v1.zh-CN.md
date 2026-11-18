@@ -8,7 +8,7 @@
 - 基线：`remediation/aid-2026-001-forget-contract-closure-2026-11-18` @ `eb6aa17c9cefb51434234cdb0f5503197416b9bf`（派工事实包提供，且与 Issue #41 的 U-010 评论交叉印证；任何后续写入前必须重新核验）
 - 任务类/风险级：ARCH / SEC / DOC；R3
 - 状态：I 侧契约候选；不声称 Owner I 正式批准；D/I 同 SHA 批准尚未取得
-- 语言状态：本文件为完整中文对应稿；英文工作稿路径为 `owner-i-r3-governance-rules-u011-v1.md`；双语语义一致性仍须独立审查
+- 语言状态：本文件为完整中文对应稿（作者侧翻译 COMPLETE）；英文工作稿路径为 `owner-i-r3-governance-rules-u011-v1.md`；双语语义一致性 NOT SATISFIED（仍须独立审查）
 - 回流：既有 Issue #41；未新建 Issue/PR
 
 ## 1. 权责与不变量
