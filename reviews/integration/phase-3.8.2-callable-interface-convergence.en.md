@@ -56,10 +56,10 @@ The following names are stable logical operation proposals, not frozen Rust trai
 - `D.register_derived_dependency_set(CompleteDependencySet) -> DependencyResult`
   - E supplies the full direct/transitive set and exact source revisions/Scope; D validates lineage and current fence.
   - Success only after the complete immutable set commits; partial sets have no complete receipt.
-- `D.admit_publication(PublicationTuple, StorageVisibilityParticipantRef) -> DPublicationAdmission`
+- `D.admit_publication(PublicationTuple, StorageVisibilityParticipantRef) -> DPublicationParticipantRef`
   - Requires Storage's already durable PREPARED_HIDDEN participant, complete dependencies, current attempt/lease and D fence admission.
-  - Success: D-owned `PublicationParticipantRef`; this is a barrier hold, not visibility permission.
-- `D.close_publication_participant(PublicationParticipantRef, StorageOutcomeProof) -> DTerminalReceipt`
+  - Success: D-owned `DPublicationParticipantRef`; this is a barrier hold, not visibility permission.
+- `D.close_publication_participant(DPublicationParticipantRef, StorageOutcomeProof) -> DTerminalReceipt`
   - Accepts only exact `COMMITTED_VISIBLE` or authoritative `NO_PUBLICATION` for the same tuple.
 - `D.complete_producer_work(WorkItemId, FinalOutputInventory) -> ProducerTerminalReceipt`
   - D closes the barrier only after all outputs, retries, delayed publishers and unknown outcomes are accounted.
@@ -81,7 +81,7 @@ The following names are stable logical operation proposals, not frozen Rust trai
   - Atomically persists the immutable tuple and hidden private participant before D admission.
   - Same operation + same tuple digest returns the same participant; changed digest conflicts.
 - `Storage.commit_visibility(StorageVisibilityParticipantRef, DPublicationParticipantRef, ICommitAuthorizationProof) -> StorageVisibilityOutcome`
-  - The pre-commit I proof is the consumed single-use `CommitAuthorizationReceipt` / `ICommitAuthorizationProof`, not the post-commit `ITerminalProof`.
+  - The pre-commit I proof is the consumed single-use `ICommitAuthorizationProof` / `ICommitAuthorizationProof`, not the post-commit `ITerminalProof`.
   - The authoritative commit validates exact D participant/current fence and exact I proof while atomically installing the visibility pointer and immutable outcome.
 - `Storage.resolve_visibility(PublicationOperationId, TupleDigest) -> StorageVisibilityOutcome`
   - Lost ACK, crash, failover and restore resolve the same operation. UNKNOWN stays private; no age/missing-row inference.
@@ -90,10 +90,10 @@ The following names are stable logical operation proposals, not frozen Rust trai
 
 ### I-owned operations
 
-- `I.consume_commit_authorization(AuthorizationRequest) -> CommitAuthorizationReceipt`
+- `I.consume_commit_authorization(AuthorizationRequest) -> ICommitAuthorizationProof`
   - Single-use consumption in the authoritative PolicyDomain sequencer; binds authenticated subject/delegation, action, purpose, audience, Scope, Environment, PolicyDomain/current PermissionEpoch, artifact/version, PublicationOperationId/tuple digest and exact D + Storage participant refs.
   - Returns authority-derived `COMMIT_WON`, `REVOCATION_WON` or `UNKNOWN/IN_DOUBT`; caller cannot supply the result.
-- `I.close_publication_authorization(CommitAuthorizationReceipt, StorageOutcomeProof) -> ITerminalProof`
+- `I.close_publication_authorization(ICommitAuthorizationProof, StorageOutcomeProof) -> ITerminalProof`
   - Post-Storage-outcome closeout only. COMMIT_WON holds later applicable revocation until exact Storage terminal outcome; UNKNOWN holds.
 - I must expose an authoritative resolution query for a consumed receipt after response loss. Re-consuming a nonce is not a substitute for resolving its original sequencer result.
 
@@ -103,8 +103,8 @@ The following names are stable logical operation proposals, not frozen Rust trai
 2. E obtains durable D RegistrationReceipt before queue, lease, protected read or execution.
 3. E executes under a current AttemptId/LeaseId, stages outputs privately and completes the exact dependency set with D.
 4. Storage durably prepares a hidden `StorageVisibilityParticipantRef` bound to the immutable publication tuple.
-5. D admits a `PublicationParticipantRef` bound to that exact durable Storage participant.
-6. I consumes a single-use `CommitAuthorizationReceipt` in its own PolicyDomain sequencer, bound to both participant refs and the same tuple.
+5. D admits a `DPublicationParticipantRef` bound to that exact durable Storage participant.
+6. I consumes a single-use `ICommitAuthorizationProof` in its own PolicyDomain sequencer, bound to both participant refs and the same tuple.
 7. Storage commits visibility using the exact D current-participant/fence proof and the pre-commit I `ICommitAuthorizationProof`; it atomically writes the authoritative visibility pointer and outcome.
 8. D and I independently close their participants only after reading the same authoritative Storage outcome: `COMMITTED_VISIBLE` or proven `NO_PUBLICATION`.
 9. E/D close producer work only after all output and retry/replay paths are terminally accounted.
@@ -126,7 +126,7 @@ Do not duplicate or reinterpret that contract here. In particular:
 
 Publication uses a separate immutable operation identity: `PublicationOperationId + PublicationTupleDigest`. It is not the producer's IdempotencyKey. Same operation + same tuple resolves the same participant/outcome; same operation + changed tuple is `IMMUTABLE_IDENTITY_CONFLICT`. A new publication attempt after authoritative `NO_PUBLICATION`, or after changing artifact/version, dependency set, Scope, source revision or attempt/lease tuple, receives a new PublicationOperationId and fresh participant identities and D/I checks. AttemptId/LeaseId may rotate for retries of the same logical work; they may not be substituted into an already committed publication tuple.
 
-Nominally distinct: ProducerIdentity, ScopeRef, IdempotencyKey, ProducerWorkItemId, DerivationRunId, AttemptId, LeaseId, PublicationOperationId, PublicationParticipantRef, CommitAuthorizationReceipt, StorageVisibilityParticipantRef, Storage PreparedParticipantRef/GID, C ParticipantIntentRef and ITerminalProof.
+Nominally distinct: ProducerIdentity, ScopeRef, IdempotencyKey, ProducerWorkItemId, DerivationRunId, AttemptId, LeaseId, PublicationOperationId, DPublicationParticipantRef, ICommitAuthorizationProof, StorageVisibilityParticipantRef, Storage PreparedParticipantRef/GID, C ParticipantIntentRef and ITerminalProof.
 
 ## 7. Resolution and failure contract
 
@@ -174,7 +174,7 @@ Required deterministic tests: register-vs-fence both orders; EventRef-only admis
 ## 10. Explicit contradictions / blockers
 
 1. **E stale ordering:** E §10 still states D admission before Storage prepare and describes I terminal proof as a precondition to the Storage commit. E §11 explicitly supersedes that sequence with Storage prepare before D admission. E must remove or prominently mark the stale §10 wording so implementers cannot select the wrong order.
-2. **Storage proof-stage ambiguity:** Storage §12 still says final commit validates an I “terminal proof”. A's current candidate mapping and the required causal order distinguish the consumed pre-commit `CommitAuthorizationReceipt/ICommitAuthorizationProof` from post-commit `ITerminalProof`. Storage and I must explicitly accept the pre-commit proof type for visibility commit; ITerminalProof is closeout only.
+2. **Storage proof-stage ambiguity:** Storage §12 still says final commit validates an I “terminal proof”. A's current candidate mapping and the required causal order distinguish the consumed pre-commit `ICommitAuthorizationProof/ICommitAuthorizationProof` from post-commit `ITerminalProof`. Storage and I must explicitly accept the pre-commit proof type for visibility commit; ITerminalProof is closeout only.
 3. **Callable API not frozen:** D/E/I/Storage source artifacts specify semantic obligations but do not yet publish a jointly accepted, exact typed method/DTO/query surface. The signatures in this proposal remain CANDIDATE.
 4. **No physical topology proof:** Storage's shared serializable domain is a proposal; no selected/deployed topology or crash/failover/restore conformance PASS is claimed.
 5. **No independent Owner approvals:** A role-simulated review is not a D/E/I/Storage signature. Each owner must decide against the exact Blob above.
