@@ -373,13 +373,13 @@ mod tests {
     fn id(value: &str) -> OpaqueId { OpaqueId::new(value).unwrap() }
     fn scope() -> ScopeRef { ScopeRef { scope_id: id("s1"), scope_kind: ScopeKind::User, namespace_key: "test".into() } }
     fn memory() -> Memory {
-        Memory { memory_id: id("m1"), scope_refs: vec![scope()], current_version_id: None, lifecycle_state: MemoryLifecycle::Candidate }
+        Memory { memory_id: id("m1"), memory_kind: "test".into(), scope_refs: vec![scope()], current_version_id: None, lifecycle_state: MemoryLifecycle::Candidate, retention_class: "default".into(), sensitivity: "normal".into(), created_at: "now".into(), updated_at: "now".into() }
     }
     fn version(idv: &str, n: u64, parent: Option<&str>) -> MemoryVersion {
         MemoryVersion {
             memory_version_id: id(idv), memory_id: id("m1"), version_number: n,
-            parent_version_id: parent.map(id), created_at: "now".into(), claims: vec![],
-            entity_refs: vec![], relation_refs: vec![], source_refs: vec![], provenance_refs: vec![],
+            parent_version_id: parent.map(id), created_at: "now".into(), author_kind: "test".into(), change_reason: "test".into(), claims: vec![],
+            entity_refs: vec![], relation_refs: vec![], source_refs: vec![], provenance_refs: vec![], content_digest: format!("digest-{idv}"), schema_version: "1.0".into(),
         }
     }
 
