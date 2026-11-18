@@ -371,15 +371,22 @@ mod tests {
     use memory_domain::{MemoryLifecycle, ScopeKind};
 
     fn id(value: &str) -> OpaqueId { OpaqueId::new(value).unwrap() }
-    fn scope() -> ScopeRef { ScopeRef { scope_id: id("s1"), scope_kind: ScopeKind::User } }
+    fn scope() -> ScopeRef { ScopeRef { scope_id: id("s1"), scope_kind: ScopeKind::User, namespace_key: "user:s1".into() } }
     fn memory() -> Memory {
-        Memory { memory_id: id("m1"), scope_refs: vec![scope()], current_version_id: None, lifecycle_state: MemoryLifecycle::Candidate }
+        Memory {
+            memory_id: id("m1"), memory_kind: "knowledge".into(), scope_refs: vec![scope()],
+            current_version_id: None, lifecycle_state: MemoryLifecycle::Candidate,
+            retention_class: "default".into(), sensitivity: "normal".into(),
+            created_at: "now".into(), updated_at: "now".into(),
+        }
     }
     fn version(idv: &str, n: u64, parent: Option<&str>) -> MemoryVersion {
         MemoryVersion {
             memory_version_id: id(idv), memory_id: id("m1"), version_number: n,
-            parent_version_id: parent.map(id), created_at: "now".into(), claims: vec![],
-            entity_refs: vec![], relation_refs: vec![], source_refs: vec![], provenance_refs: vec![],
+            parent_version_id: parent.map(id), created_at: "now".into(),
+            author_kind: "test".into(), change_reason: "test".into(),
+            claims: vec![], entity_refs: vec![], relation_refs: vec![], source_refs: vec![],
+            provenance_refs: vec![], content_digest: format!("digest-{idv}"), schema_version: "1".into(),
         }
     }
 
@@ -403,7 +410,7 @@ mod tests {
     #[test]
     fn sqlite_rejects_create_outside_requested_scope() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
-        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User };
+        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User, namespace_key: "user:s2".into() };
         assert_eq!(store.create_memory(memory(), &[other]), Err(StorageError::ScopeMismatch));
     }
 
@@ -428,7 +435,7 @@ mod tests {
     #[test]
     fn sqlite_rejects_stale_expected_version() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
-        store.create_memory(memory()).unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
         store.commit_version(CommitRequest {
             memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
             idempotency_key: "op1".into(), request_digest: "d1".into(),
