@@ -10,4 +10,4 @@ Event Store 是 Source Event 的持久化 custody 边界。Accepted 表示 Event
 
 Replay 重用原 Event Identity 和原 Acceptance Time。Forget/Retention 检查仍由独立策略权威负责。
 
-本单元不包含 SQLite 实现、Queue 拓扑、分布式事务、吞吐目标或生产持久化证明。
+候选文件 SQLite Adapter 使用 WAL、synchronous=FULL、foreign_keys=ON 和 5 秒 Busy Timeout；内存模式保留 SQLite 内存 Journal 行为。本单元不包含 Queue 拓扑、Worker 投递、分布式事务、吞吐目标、Schema Migration 或生产持久化证明。
