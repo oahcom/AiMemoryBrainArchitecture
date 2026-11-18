@@ -33,7 +33,8 @@ The Rust workspace CI workflow `.github/workflows/rust-phase1.yml` runs `cargo t
 SQLite adapter tests cover:
 - in-memory round-trip, idempotency, stale-version and scope boundaries;
 - committed state surviving connection close and database reopen, including current pointer, idempotency receipt and change sequence;
-- abrupt process termination while a transaction has written the version row, current pointer, commit-log row and idempotency receipt but has not committed; reopening must recover with none of those partial effects visible.
+- abrupt process termination while a transaction has written the version row, current pointer, commit-log row and idempotency receipt but has not committed; reopening must recover with none of those partial effects visible;
+- two independently opened SQLite connections racing to create the first version from the same expected-current state; exactly one commit succeeds, the loser observes `StaleVersion`, and the durable change log contains exactly one row.
 
 The abrupt-exit test validates process-termination recovery of an uncommitted SQLite transaction under the tested local filesystem/runtime. It is not a power-loss, kernel-crash, storage-controller-cache, media-corruption, backup/restore, or multi-process linearizability proof.
 
