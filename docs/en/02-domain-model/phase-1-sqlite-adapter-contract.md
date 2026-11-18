@@ -33,7 +33,11 @@ The Rust workspace CI workflow `.github/workflows/rust-phase1.yml` runs `cargo t
 SQLite adapter tests cover:
 - in-memory round-trip, idempotency, stale-version and scope boundaries;
 - committed state surviving connection close and database reopen, including current pointer, idempotency receipt and change sequence;
+- two independent SQLite connections racing to commit against the same expected current version: exactly one CAS succeeds and the other receives StaleVersion;
+- two independent SQLite connections concurrently submitting the same idempotency key, digest and request: both receive the same durable receipt and only one change record is created;
 - abrupt process termination while a transaction has written the version row, current pointer, commit-log row and idempotency receipt but has not committed; reopening must recover with none of those partial effects visible.
+
+The two-connection race tests validate write serialization and idempotency replay across independent SQLite Connection instances in one process; they are not a cross-process or multi-host linearizability proof.
 
 The abrupt-exit test validates process-termination recovery of an uncommitted SQLite transaction under the tested local filesystem/runtime. It is not a power-loss, kernel-crash, storage-controller-cache, media-corruption, backup/restore, or multi-process linearizability proof.
 
