@@ -234,7 +234,7 @@ I 可以定义必需覆盖范围，并依据策略接受或拒绝证据；I **�
 
 ## 11. 双语语义一致性
 
-本英文工作稿具有单独维护的完整中文对应稿：`14-ai-development/work-items/AID-2026-001/owner-i-r3-governance-rules-u011-v1.zh-CN.md`。作者侧翻译已完成。针对上一版精确双语文件对的独立语义审查（EN Blob `241f1ac4c63758bb791eb9b7d94bdfaf70eda66d`；ZH Blob `ba8f2b0569c834cc384dce0c01b5d918c10a3d0b`；审查基线 `5a24134200f55d6f559a452d509b8dbcd9753719`）已完成，结论为 **FAIL**，发现 `I-U012-001` 和 `I-U012-002`（均为 P2，已回流至 Issue #41）。这两项发现正在本次双语变更集中整改；在针对整改后精确 Head 的新一轮独立审查完成前，均保持 OPEN。不得将双语对等标记为 PASS，也不得将这两份文件单独视为已批准的 joined contract。最终 joined contract 必须在同一个冻结变更集中纳入两种语言的相同规则，并依据 GOV-DOC-001 进行审查。
+本英文工作稿具有单独维护的完整中文对应稿：`14-ai-development/work-items/AID-2026-001/owner-i-r3-governance-rules-u011-v1.zh-CN.md`。作者侧翻译已完成。针对上一版精确双语文件对的独立语义审查（EN Blob `241f1ac4c63758bb791eb9b7d94bdfaf70eda66d`；ZH Blob `ba8f2b0569c834cc384dce0c01b5d918c10a3d0b`；审查基线 `5a24134200f55d6f559a452d509b8dbcd9753719`）已完成，结论为 **FAIL**，发现 `I-U012-001` 和 `I-U012-002`（均为 P2，已回流至 Issue #41）。在该次审查发生时，`I-U012-001` 和 `I-U012-002` 均记录为 OPEN，等待整改及针对整改后精确 Head 的新一轮独立审查。两项发现的当前处置分别为：`I-U012-001` — CLOSE（U-017）；`I-U012-002` — CLOSE（U-015）。这些后续处置不改变上文记录的历史 FAIL 结论、历史 Blob SHA 或历史审查基线。不得将双语对等标记为 PASS，也不得将这两份文件单独视为已批准的 joined contract。最终 joined contract 必须在同一个冻结变更集中纳入两种语言的相同规则，并依据 GOV-DOC-001 进行审查。
 
 ## 12. 明确不作出的声明
 
