@@ -191,3 +191,18 @@ This report does not amend I-10 or any other invariant. It identifies a potentia
 This is an additive integration review artifact. It does not modify A/B/C source contracts, architecture invariants, Issue #43, implementation code, PR #244/#249, Event Store work, RFC-IDE-001, PR governance or merge-evidence work. Any normative correction must be made by the accountable Owner in a separate bilingual change with its own review and exact-head evidence.
 
 **Disposition: CANDIDATE — partial integration review complete; architecture freeze NOT READY.**
+
+
+## 12. Commit-bound CI evidence for bounded DECIDED statements
+
+The DECIDED labels above refer to bounded semantic/source-owner decisions, not a new cross-owner freeze. The following exact-head runs are the only CI evidence relied on for related executable behavior:
+
+| Bounded claim | Exact commit / tested source | CI Run ID | Result | Evidence ceiling |
+|---|---|---:|---|---|
+| Phase 1 domain + SQLite adapter regression surface | PR #249 Head `7411ec57ef87f995cd7be14cc3ccd44620a8e0f8` | `44276433236` | SUCCESS; workspace 55 passed, 0 failed; domain target 12 passed; SQLite adapter 26 passed | Supports the tested Phase 1 domain/adapter behavior only; PR remains a candidate pending independent review and does not prove global Fact/Claim, production, multi-process or power-loss semantics |
+| C Provider Outcome reference behavior | C restored Owner source `88992da30331121b81cf2773acab11d921daf281` | `44129914790` | SUCCESS; 19 tests, 0 failures | C reference/provider-outcome suite only; not C end-to-end Brain integration, live provider truth, production trust or cross-owner acceptance |
+| H Applied Delivery Evidence 1.0.0 candidate validator | H tested code commit `4e65a2` (review record abbreviates this SHA) | `44130722532` | SUCCESS; 11 tests, 0 failures | H candidate schema/validator only; not exact COutcomeRecord integration, G durable Applied, production crypto or wire freeze |
+
+The two C/H run IDs above are reproduced from the C-REVIEW-001 addendum Blob `3300d95b3074a7bf6690718e0ab7f6cbd9afb9ae`; they are not this report's CI and do not transfer to a changed commit. The exact full H commit SHA is not present in the inspected review artifact; the abbreviated `4e65a2...` is deliberately not expanded or guessed.
+
+**This report's own exact Head:** PR #257 Head `fd688c1328aede0c61bf03d4e4507509b7c32ef8`. GitHub Actions lookup for that exact commit returned no PR-triggered workflow runs; combined status returned no status contexts. Therefore this report's documentation CI is **NOT RUN / NO RUN ID OBSERVED**. Do not treat the PR as CI-passing. The exact report blobs were fetched back: EN `eb4759845367c7a03973be6aecdf718f618f481b`; ZH-CN `59eecf6678a7c993814bf68347da612c83101e66`.
