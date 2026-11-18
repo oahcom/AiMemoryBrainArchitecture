@@ -28,6 +28,22 @@
 - Rust Workspace CI：Run ID `44259233587`（Run #25），Job `rust-workspace-test`，执行 `cargo test --workspace --all-targets`——SUCCESS。
 - GOV-DOC-001：Run ID `44259233358`（Run #405），Job `GOV-DOC-001 structural checks`——SUCCESS。
 
+## 决策：同一进程内独立连接的 CAS 并发正确性
+
+针对已验证的 SQLite 配置，作出 DECIDED 决策；范围严格限定为同一进程内两个独立打开的 SQLite Connection 实例，以相同 Expected-Current Version 状态竞争写入：
+- 竞争写入中恰好一个 CAS 提交成功。
+- 失败的写入方返回 `StaleVersion`。
+- 重新打开数据库后，只有一个 Current Version 和恰好一条 Change Log 记录。
+- 完全相同的幂等请求并发提交时，重放同一个持久化 Receipt，且只产生一条 Change Log 记录。
+
+证据：
+- 实现已通过 PR #243 合入；合并提交 `4a3e06fd263e9dbd1056179dceb3cb21b17e330f`（PR Head `179059a5be1973e2e188fd648ee57d1db7b004fe`）。
+- PR #243 精确 Head 的 Rust Workspace CI Run #24 / Run ID `44259219033`：执行 `cargo test --workspace --all-targets`——SUCCESS（34 passed，0 failed）。
+- PR #243 精确 Head 的双语文档门禁 Run #404 / Run ID `44259218907`——SUCCESS。
+- 重复跟踪 PR #244 已关闭且未合并；其精确 Head 验证也已通过（Rust Run ID `44259233587`，文档 Run ID `44259233358`）。不保留重复实现路径。
+
+本决策不构成跨进程或多主机线性一致性、分布式协调、故障切换安全性或生产部署拓扑适用性的证据。
+
 ## 明确限制
 
 本决策仅覆盖 Phase 1 行为及 GitHub Actions 所测本地文件系统/运行环境，不构成以下能力证明：
@@ -35,7 +51,7 @@
 - 跨进程或多主机线性一致性、分布式协调或生产部署拓扑；
 - 生产就绪或生产级持久性 SLO。
 
-独立连接 CAS 和幂等竞争测试是在同一进程内使用不同 SQLite Connection 实例完成的测试。其范围及后续跟踪由 PR #244 单独承载；这些测试不扩大本决策的范围，也不构成跨进程并发结论。
+独立连接 CAS 和幂等竞争测试是在同一进程内使用不同 SQLite Connection 实例完成的测试，其有限范围内的正确性已在上文作出 DECIDED 决策；不扩大为跨进程并发结论。PR #244 是重复跟踪载体，已在 PR #243 合并后关闭。
 
 Memory 和 MemoryVersion 的序列化只是工程表示。Claim 跨 MemoryVersion 身份仍保持 OPEN，本 Adapter 不偷偷关闭该决策。
 
