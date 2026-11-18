@@ -4,9 +4,17 @@
 - Document ID: PR-GOVERNANCE-001-ENFORCEMENT
 - Version: 1.1
 - Status: PROPOSED — becomes normative only after authorized review and merge
-- Parent: [PR-GOVERNANCE-001](PR-GOVERNANCE-001.md)
+- Parent: [PR-GOVERNANCE-001](../../../14-ai-development/PR-GOVERNANCE-001.md)
 - Tracking: [Issue #130](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/130), [Issue #134](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/134)
-- Bilingual counterpart: [简体中文](PR-GOVERNANCE-001-ENFORCEMENT.zh-CN.md)
+- Bilingual counterpart: [简体中文](../../zh-CN/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md)
+
+## 0. PR creation and branch-merge boundary
+
+A pull request is mandatory **only when the target branch is `main`**. This applies to every source branch, including Owner primary branches and child/work branches: if the merge target is `main`, use a PR and satisfy the applicable exact-Head checks and independent-review gate in this addendum.
+
+Merges whose target is any non-`main` branch do **not** require a PR. This includes child/work branch → its Owner primary branch, ordinary branch → Owner primary branch, and Owner primary branch → another non-`main` branch. These are Owner-internal integration operations; the responsible Owner still performs the required scope, test, evidence and safety checks and records material decisions in the existing owning work item. Do not create a PR solely to represent such an internal merge.
+
+Do not interpret this exception as permission to bypass the `main` PR gate by merging into `main` through another route. Before creating a PR, search for an existing PR covering the same change and target; update/reuse it rather than creating a duplicate. Before creating an Issue, search for an existing owning Issue and update/link it. A session, subtask, or closeout is not by itself grounds for a new PR or Issue. Close only demonstrably duplicate, superseded, or completed carriers after preserving links and rationale.
 
 ## 1. Exact-Head merge gate
 
