@@ -43,5 +43,5 @@ prompt_bytes: 4997
 prompt_hash_note: SHA-256 over exact committed file bytes (UTF-8, no normalization) per AI-PROMPT-STD-001 §5; prompt-file commit SHA recorded in INDEX session row at closeout
 bilingual_status: STALE_EXCEPTION_REGISTERED — English counterparts of the three new documents marked STALE per GOV-DOC-001 §5 (reason: owner-prioritized time-critical rollout; authoritative version: Chinese; due: 2026-12-02; owner: Integration Owner; tracking: Issue #218), registered in docs/translation-status.md
 acceptance_blocker: none for R1
-acceptance_authority: project owner (owner-directed adoption of the rules is recorded separately in Issue #218)
+acceptance_authority: project owner; adoption recorded in Issue #218 comment #6971736655; merged at 53aae842c390eac6d54f937af6cd2744dbe8d09d
 verification_summary: escape-scanner zero residue on 4 fixed files (19 literal occurrences replaced); git diff --check clean; runtime/test suites NOT RUN (documentation-only change set)
