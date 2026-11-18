@@ -115,7 +115,7 @@ The 25-value tuple is **not** the complete protected-boundary authorization mech
 - Publication Protocol run #44242418467：**52 项测试 / OK**。
 - GOV-DOC-001 run #44242418382：**SUCCESS**。
 
-The follow-up PermissionEpoch currentness candidate adds an explicit unavailable/stale fail-closed test and tests that a later epoch advance does not cancel an earlier COMMIT_WON. Its current code/test Head before this documentation update is `0c55e4fd9ca7ae9c889498bf173b5888e11ca204` with 58 tests; exact-head CI is pending. The field-substitution test now checks all 25 tuple positions; the earlier index-16-only loop is not used as acceptance evidence. Any subsequent documentation change also requires a fresh exact-head run.
+The follow-up PermissionEpoch currentness candidate adds an explicit unavailable/stale fail-closed test and tests that a later epoch advance does not cancel an earlier COMMIT_WON. The PermissionEpoch code/test Head `8c858b79aeeabff10b225159dc21046e5f10c6a0` passed 58 tests. The dependency-digest cross-boundary regression follow-up is based on `main@ee76e054ccf71bfc3b5d50af6113c699c455852a`, adds two tests (61 total), and requires exact-head CI before merge. The field-substitution test now checks all 25 tuple positions; the earlier index-16-only loop is not used as acceptance evidence. Any subsequent documentation change also requires a fresh exact-head run.
 
 本次仅文档追加会改变 PR Head，因此合并前必须对新精确 Head 重新运行 CI。上述 52/52 仅证明前一代码 Head，不自动证明后续 Head。
 
@@ -132,6 +132,16 @@ The follow-up PermissionEpoch currentness candidate adds an explicit unavailable
 - Storage 必须确认相同 Operation 身份在其 Participant 和最终 Visibility Commit 中具备持久化原子保证。
 - D/I/Storage 必须明确决定一个 `PublicationParticipantRef` 是否只有一个终态授权 Winner，还是需要按 Operation 进行核算。
 - 任何后继规范契约都必须由责任 Owner 针对同一个精确 Blob SHA 明确接受。
+
+## 6.1 Dependency digest consistency / Dependency Digest 一致性
+
+The follow-up regression test verifies that the Storage participant's dependency-set digest equals the digest carried by the D publication participant at three boundaries: first I COMMIT_WON consumption, final Storage commit, and UNKNOWN/NO_PUBLICATION reconciliation. Substituting either side after the earlier transition must fail closed.
+
+后续回归测试验证 Storage Participant 的 Dependency Set Digest 与 D Publication Participant 携带的摘要在三个边界保持一致：首次 I COMMIT_WON 消费、Storage 最终 Commit，以及 UNKNOWN/NO_PUBLICATION 核对。任一侧在前序迁移后被替换，都必须 fail-closed。
+
+The current test seam checks tuple equality only. It does not prove that the digest is correctly derived from the canonical complete dependency set, that the receipt is authenticated, or that a production Storage transaction persists the equality atomically.
+
+当前测试接口只检查元组相等，不证明摘要正确派生自规范完整 Dependency Set、不证明 Receipt 已认证，也不证明生产 Storage 事务原子持久化该一致性。
 
 ## 6. Evidence ceiling / 证据上限
 
