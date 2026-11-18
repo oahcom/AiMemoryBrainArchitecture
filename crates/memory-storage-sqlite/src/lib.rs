@@ -385,6 +385,8 @@ mod tests {
             memory_version_id: id(idv), memory_id: id("m1"), version_number: n,
             parent_version_id: parent.map(id), created_at: "now".into(), claims: vec![],
             entity_refs: vec![], relation_refs: vec![], source_refs: vec![], provenance_refs: vec![],
+            author_kind: "test".into(), change_reason: "update".into(),
+            content_digest: "digest".into(), schema_version: "1".into(),
         }
     }
 
@@ -420,7 +422,7 @@ mod tests {
             memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
             idempotency_key: "op1".into(), request_digest: "d1".into(),
         }, &[scope()]).unwrap();
-        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User };
+        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User, namespace_key: "user:s2".into() };
         assert_eq!(
             store.commit_version(CommitRequest {
                 memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
