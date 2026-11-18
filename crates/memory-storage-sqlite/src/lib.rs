@@ -103,28 +103,6 @@ impl SqliteMemoryStorage {
         }
     }
 
-    fn idempotency_receipt(
-        &self,
-        key: &str,
-        digest: &str,
-    ) -> Result<Option<CommitReceipt>, StorageError> {
-        let row = self
-            .connection
-            .query_row(
-                "SELECT request_digest, receipt_json FROM idempotency WHERE idempotency_key = ?1",
-                params![key],
-                |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?;
-        match row {
-            None => Ok(None),
-            Some((stored_digest, receipt_json)) if stored_digest == digest => {
-                Ok(Some(Self::decode(&receipt_json)?))
-            }
-            Some(_) => Err(StorageError::IdempotencyConflict),
-        }
-    }
 }
 
 impl MemoryStorage for SqliteMemoryStorage {
