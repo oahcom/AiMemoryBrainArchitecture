@@ -33,7 +33,11 @@ Rust Workspace CI 工作流 `.github/workflows/rust-phase1.yml` 执行 `cargo te
 SQLite Adapter 测试覆盖：
 - 内存数据库 round-trip、幂等、stale-version 和 Scope 边界；
 - 关闭连接并重新打开数据库后，已提交状态仍然存在，包括 Current Pointer、Idempotency Receipt 和 Change Sequence；
+- 两个独立 SQLite 连接并发提交同一 Expected Current Version 时，CAS 只允许一个写入成功，另一个得到 StaleVersion；
+- 两个独立 SQLite 连接并发提交完全相同的 Idempotency Key/Digest/请求时，两者返回同一个持久化 Receipt，且只产生一条 Change Record；
 - 在同一个事务已写入 Version Row、Current Pointer、Commit Log 和 Idempotency Receipt、但尚未提交时，强制终止进程；重新打开数据库后，这些未提交的部分效果必须全部不可见。
+
+双连接竞争测试验证的是同一进程内两个独立 SQLite Connection 的写入串行化和幂等重放，不构成跨进程/多主机线性一致性证明。
 
 强制进程退出测试验证的是当前受测本地文件系统/运行环境下，SQLite 对未提交事务的进程终止恢复能力。它不构成断电、内核崩溃、存储控制器缓存、介质损坏、Backup/Restore 或多进程线性一致性证明。
 
