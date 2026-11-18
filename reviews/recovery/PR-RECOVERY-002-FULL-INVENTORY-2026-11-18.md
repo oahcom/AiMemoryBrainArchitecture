@@ -630,3 +630,54 @@ PR #168 将两个转换分离：
 - Issue #26 仍 OPEN / SECURITY_ACCEPTANCE_BLOCKED：Host/Runner Diagnostics、最小权限、sudo 边界、重启恢复、Emergency Stop、凭据轮换、不可信 PR 隔离及责任 Security/Infrastructure 验收仍未核验。
 - Issue #134 仍 P0 / OPEN：Main 经典分支保护未启用，Rulesets 未核验；精确 Head 检查通过不会自动形成硬性合并门禁。
 - 任何合并都不等于独立审查、Owner 验收、架构冻结、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
+
+
+## 18. Latest live inventory and terminal-path dependency digest evidence / 最新实时盘点与终态依赖摘要证据（2026-11-18）
+
+### 18.1 Current inventory / 当前盘点
+
+- Main HEAD: `282a82e58d8d9d1aa876621481df3184fbe5d284`.
+- Fresh GitHub `state=all` inventory (pages 1–2, `per_page=100`): **156 PR records = 127 merged + 29 closed-unmerged + 0 open**.
+- Open PR queue: **0**.
+- Main classic branch protection remains `protected=false`; Rulesets remain unverified (HTTP 403 from available endpoint).
+- This is a metadata/currentness snapshot, not a fresh line-by-line semantic/code review of all 156 PR diffs.
+
+### 18.2 Dependency digest regression and terminal-path closure / 依赖摘要回归与终态路径关闭
+
+- PR #181 merged at `f55a591f1ad506c48de763984b12a9a667fde9a0`: 25-field I context model, all-field mutation coverage, fail-closed PermissionEpoch currentness; exact-head Publication Protocol #44243019867 passed 58 tests and GOV-DOC-001 #44243138626 passed.
+- Post-merge review found PR #181 removed the dependency-digest equality check between the hidden Storage participant and D PublicationParticipant at three enforcement boundaries.
+- PR #183 restored the equality checks at I COMMIT_WON, Storage commit and UNKNOWN reconciliation; exact-head Publication Protocol #44243376970 passed 59 tests and GOV-DOC-001 #44243377015 passed; merged at `39fcb173965ec78b997e803b26c9902463fb25fb`.
+- PR #186 directly tested the previously under-covered terminal paths: digest substitutions after I COMMIT_WON but before Storage commit, and after UNKNOWN but before NO_PUBLICATION reconciliation. It independently mutates the Storage-side and D-side digest. Exact Head `30edf6d0b79b7437b6588ccc7314e25883c03550`; Publication Protocol run #44243873700 passed **61 tests / OK**; GOV-DOC-001 #44243873742 and #44243885872 passed. Merge commit: `282a82e58d8d9d1aa876621481df3184fbe5d284`.
+- PR #185 was closed unmerged as a narrower duplicate test attempt; its regex assertion did not match the actual dependency-binding rejection. PR #186 supersedes it with Storage-side and D-side substitutions at both terminal paths plus bilingual evidence notes.
+
+### 18.3 Remaining acceptance blockers / 剩余验收阻塞
+
+- Issue #25 remains OPEN. These checks prove in-memory tuple equality only; they do not prove canonical dependency digest derivation, authenticated dependency receipts, durable Storage atomicity, physical Storage topology, DB uniqueness/serialization, distributed concurrency, crash/failover/restore or independent D/E/I/Storage Owner acceptance. The broader A §3.1 PublicationTuple and production adapters remain incomplete.
+- Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED. Worker host/runner diagnostics, least privilege, sudo containment, reboot recovery, Emergency Stop, credential rotation, untrusted-PR isolation and accountable Security/Infrastructure acceptance remain unverified.
+- Issue #134 remains P0 / OPEN. Main classic branch protection is disabled; Rulesets remain unverified. Exact-head CI success is not a hard merge gate.
+- No merge establishes independent review, Owner acceptance, architecture freeze, production R3/DFI conformance, worker security acceptance or production authorization.
+
+### 中文规范
+
+#### 18.1 当前盘点
+
+- Main HEAD：`282a82e58d8d9d1aa876621481df3184fbe5d284`。
+- 最新 GitHub `state=all` 盘点（第 1–2 页，`per_page=100`）：**156 条 PR = 127 条已合并 + 29 条关闭未合并 + 0 条开放**。
+- 开放 PR 队列：**0**。
+- Main 经典分支保护仍为 `protected=false`；可用端点返回 HTTP 403，Rulesets 仍无法核验。
+- 本节是元数据/当前性快照，不是对全部 156 条 PR Diff 重新逐行进行语义/代码审查。
+
+#### 18.2 依赖摘要回归与终态路径关闭
+
+- PR #181 合并于 `f55a591f1ad506c48de763984b12a9a667fde9a0`：25 字段 I 上下文模型、全部字段变更测试及 PermissionEpoch Fail Closed；精确 Head Publication Protocol #44243019867 通过 58 项测试，GOV-DOC-001 #44243138626 通过。
+- 合并后审计发现 PR #181 删除了 Hidden Storage Participant 与 D PublicationParticipant 之间的依赖摘要一致性校验，影响三个强制边界。
+- PR #183 在 I COMMIT_WON、Storage Commit 和 UNKNOWN 对账中恢复一致性校验；精确 Head Publication Protocol #44243376970 通过 59 项测试，GOV-DOC-001 #44243377015 通过；合并于 `39fcb173965ec78b997e803b26c9902463fb25fb`。
+- PR #186 直接测试此前覆盖不足的终态路径：I COMMIT_WON 之后、Storage Commit 之前的摘要替换，以及 UNKNOWN 之后、NO_PUBLICATION 对账之前的摘要替换；分别独立修改 Storage 侧与 D 侧摘要。精确 Head `30edf6d0b79b7437b6588ccc7314e25883c03550`；Publication Protocol #44243873700 通过 **61 项测试 / OK**；GOV-DOC-001 #44243873742 和 #44243885872 通过。合并提交：`282a82e58d8d9d1aa876621481df3184fbe5d284`。
+- PR #185 是范围较窄的重复测试尝试，因错误正则未匹配实际依赖绑定拒绝信息而关闭未合并；PR #186 以两个终态路径、Storage/D 两侧摘要替换及双语证据说明取代它。
+
+#### 18.3 剩余验收阻塞
+
+- Issue #25 仍 OPEN。这些检查只证明内存元组相等，不证明规范依赖摘要派生、认证 Dependency Receipt、Storage 持久化原子性、物理 Storage 拓扑、数据库唯一性/序列化、分布式并发、崩溃/故障切换/恢复或独立 D/E/I/Storage Owner 验收。更完整的 A §3.1 PublicationTuple 和生产 Adapter 仍不完整。
+- Issue #26 仍 OPEN / SECURITY_ACCEPTANCE_BLOCKED。Worker Host/Runner Diagnostics、最小权限、sudo 边界、重启恢复、Emergency Stop、凭据轮换、不可信 PR 隔离及责任 Security/Infrastructure 验收仍未核验。
+- Issue #134 仍 P0 / OPEN。Main 经典分支保护未启用；Rulesets 未核验。精确 Head CI 通过不是硬性合并门禁。
+- 任何合并都不等于独立审查、Owner 验收、架构冻结、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
