@@ -106,7 +106,8 @@ impl SqliteMemoryStorage {
 }
 
 impl MemoryStorage for SqliteMemoryStorage {
-    fn create_memory(&mut self, memory: Memory) -> Result<(), StorageError> {
+    fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError> {
+        Self::scope_allowed(&Self::encode(&memory.scope_refs)?, scope)?;
         let scope_json = Self::encode(&memory.scope_refs)?;
         let memory_json = Self::encode(&memory)?;
         self.connection
@@ -168,6 +169,18 @@ impl MemoryStorage for SqliteMemoryStorage {
             .transaction_with_behavior(TransactionBehavior::Immediate)
             .map_err(|_| StorageError::TransactionUnavailable)?;
 
+        let memory_row = tx
+            .query_row(
+                "SELECT scope_json, current_version_id FROM memories WHERE memory_id = ?1",
+                params![request.memory_id.as_str()],
+                |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+            .ok_or(StorageError::NotFoundOrNotVisible)?;
+
+        Self::scope_allowed(&memory_row.0, scope)?;
+
         if let Some((stored_digest, receipt_json)) = tx
             .query_row(
                 "SELECT request_digest, receipt_json FROM idempotency WHERE idempotency_key = ?1",
@@ -182,18 +195,6 @@ impl MemoryStorage for SqliteMemoryStorage {
             }
             return Err(StorageError::IdempotencyConflict);
         }
-
-        let memory_row = tx
-            .query_row(
-                "SELECT scope_json, current_version_id FROM memories WHERE memory_id = ?1",
-                params![request.memory_id.as_str()],
-                |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<String>>(1)?)),
-            )
-            .optional()
-            .map_err(|_| StorageError::TransactionUnavailable)?
-            .ok_or(StorageError::NotFoundOrNotVisible)?;
-
-        Self::scope_allowed(&memory_row.0, scope)?;
 
         let current_id = memory_row.1.as_deref();
         if current_id != request.expected_current_version.as_ref().map(OpaqueId::as_str) {
@@ -385,7 +386,7 @@ mod tests {
     #[test]
     fn sqlite_round_trip_and_idempotency_are_atomic() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
-        store.create_memory(memory()).unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
         let receipt = store.commit_version(CommitRequest {
             memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
             idempotency_key: "op1".into(), request_digest: "d1".into(),
@@ -397,6 +398,32 @@ mod tests {
             memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
             idempotency_key: "op1".into(), request_digest: "d1".into(),
         }, &[scope()]).unwrap(), receipt);
+    }
+
+    #[test]
+    fn sqlite_rejects_create_outside_requested_scope() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User };
+        assert_eq!(store.create_memory(memory(), &[other]), Err(StorageError::ScopeMismatch));
+    }
+
+    #[test]
+    fn sqlite_does_not_replay_idempotency_receipt_before_scope_check() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+        let receipt = store.commit_version(CommitRequest {
+            memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
+            idempotency_key: "op1".into(), request_digest: "d1".into(),
+        }, &[scope()]).unwrap();
+        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User };
+        assert_eq!(
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
+                idempotency_key: "op1".into(), request_digest: "d1".into(),
+            }, &[other]),
+            Err(StorageError::ScopeMismatch)
+        );
+        assert_eq!(receipt.commit_sequence, CommitSequence(1));
     }
 
     #[test]
