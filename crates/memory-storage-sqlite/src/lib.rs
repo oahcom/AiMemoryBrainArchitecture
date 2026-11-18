@@ -305,11 +305,11 @@ impl MemoryStorage for SqliteMemoryStorage {
             .prepare(
                 "SELECT c.commit_sequence, c.memory_id, c.version_id, m.scope_json
                  FROM commit_log c JOIN memories m ON m.memory_id = c.memory_id
-                 WHERE c.commit_sequence > ?1 ORDER BY c.commit_sequence ASC LIMIT ?2",
+                 WHERE c.commit_sequence > ?1 ORDER BY c.commit_sequence ASC",
             )
             .map_err(|_| StorageError::TransactionUnavailable)?;
         let rows = stmt
-            .query_map(params![start, (limit + 1) as i64], |row| {
+            .query_map(params![start], |row| {
                 Ok((
                     row.get::<_, i64>(0)?,
                     row.get::<_, String>(1)?,
@@ -319,19 +319,26 @@ impl MemoryStorage for SqliteMemoryStorage {
             })
             .map_err(|_| StorageError::TransactionUnavailable)?;
 
+        // Apply the page limit to authorized records, not raw commit-log rows.
+        // Read until one extra visible record is found so the cursor never
+        // advances past an item that belongs on the next page.
         let mut records = Vec::new();
         for row in rows {
-            let (sequence, memory_id, version_id, scope_json) = row.map_err(|_| StorageError::TransactionUnavailable)?;
+            let (sequence, memory_id, version_id, scope_json) =
+                row.map_err(|_| StorageError::TransactionUnavailable)?;
             if Self::scope_allowed(&scope_json, scope).is_ok() {
                 records.push(ChangeRecord {
                     commit_sequence: CommitSequence(sequence as u64),
                     memory_id: OpaqueId::new(memory_id).map_err(|_| StorageError::InvalidSchema)?,
                     version_id: OpaqueId::new(version_id).map_err(|_| StorageError::InvalidSchema)?,
                 });
-                if records.len() == limit {
+                if records.len() > limit {
                     break;
                 }
             }
+        }
+        if records.len() > limit {
+            records.pop();
         }
         let next_cursor = records.last().map(|r| r.commit_sequence);
         Ok(ChangePage { records, next_cursor })
@@ -463,6 +470,53 @@ mod tests {
             }, &[scope()]),
             Err(StorageError::IdempotencyConflict)
         );
+    }
+
+    #[test]
+    fn sqlite_change_pages_filter_scope_before_applying_limit() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        let visible_scope = scope();
+        let hidden_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+
+        for (memory_id, version_id, item_scope) in [
+            ("m1", "v1", visible_scope.clone()),
+            ("m2", "v2", hidden_scope.clone()),
+            ("m3", "v3", hidden_scope),
+            ("m4", "v4", visible_scope.clone()),
+        ] {
+            let mut item = memory();
+            item.memory_id = id(memory_id);
+            item.scope_refs = vec![item_scope.clone()];
+            store.create_memory(item, &[item_scope.clone()]).unwrap();
+
+            let mut item_version = version(version_id, 1, None);
+            item_version.memory_id = id(memory_id);
+            store.commit_version(CommitRequest {
+                memory_id: id(memory_id),
+                expected_current_version: None,
+                new_version: item_version,
+                idempotency_key: format!("op-{memory_id}"),
+                request_digest: format!("digest-{memory_id}"),
+            }, &[item_scope]).unwrap();
+        }
+
+        let first = store.list_changes(None, &[visible_scope.clone()], 1).unwrap();
+        assert_eq!(first.records.len(), 1);
+        assert_eq!(first.records[0].memory_id, id("m1"));
+        assert_eq!(first.next_cursor, Some(CommitSequence(1)));
+
+        let second = store.list_changes(first.next_cursor, &[visible_scope.clone()], 1).unwrap();
+        assert_eq!(second.records.len(), 1);
+        assert_eq!(second.records[0].memory_id, id("m4"));
+        assert_eq!(second.next_cursor, Some(CommitSequence(4)));
+
+        let end = store.list_changes(second.next_cursor, &[visible_scope], 1).unwrap();
+        assert!(end.records.is_empty());
+        assert_eq!(end.next_cursor, None);
     }
 
     #[test]
