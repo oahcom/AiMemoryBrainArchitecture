@@ -1,7 +1,7 @@
 //! Minimal Phase 1 Memory Store facade.
 //! 仅负责领域校验、Scope 边界与 Storage Port 编排；不拥有持久化实现。
 
-use memory_domain::{Memory, MemoryVersion, OpaqueId, ScopeRef};
+use memory_domain::{scopes_intersect, Memory, MemoryVersion, OpaqueId, ScopeRef};
 use memory_storage::{CommitReceipt, CommitRequest, MemoryStorage, StorageError};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -114,16 +114,23 @@ mod tests {
     use memory_domain::{MemoryLifecycle, ScopeKind};
     use std::collections::BTreeMap;
 
+    #[derive(Clone)]
+    struct FakeReceiptRecord {
+        receipt: CommitReceipt,
+        request_digest: String,
+        memory_id: String,
+    }
+
     #[derive(Default)]
     struct FakeStorage {
         memories: BTreeMap<String, Memory>,
         versions: BTreeMap<String, MemoryVersion>,
-        receipts: BTreeMap<String, CommitReceipt>,
+        receipts: BTreeMap<String, FakeReceiptRecord>,
     }
 
     impl MemoryStorage for FakeStorage {
         fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError> {
-            if !memory.scope_refs.iter().any(|s| scope.iter().any(|r| r.scope_id == s.scope_id)) {
+            if !scopes_intersect(&memory.scope_refs, scope) {
                 return Err(StorageError::ScopeMismatch);
             }
             self.memories.insert(memory.memory_id.as_str().into(), memory);
@@ -132,7 +139,7 @@ mod tests {
 
         fn read_current(&self, memory_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<MemoryVersion>, StorageError> {
             let Some(memory) = self.memories.get(memory_id.as_str()) else { return Ok(None) };
-            if !memory.scope_refs.iter().any(|s| scope.iter().any(|r| r.scope_id == s.scope_id)) {
+            if !scopes_intersect(&memory.scope_refs, scope) {
                 return Err(StorageError::ScopeMismatch);
             }
             Ok(memory.current_version_id.as_ref().and_then(|id| self.versions.get(id.as_str()).cloned()))
@@ -140,7 +147,7 @@ mod tests {
 
         fn read_version(&self, memory_id: &OpaqueId, version_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<MemoryVersion>, StorageError> {
             let Some(memory) = self.memories.get(memory_id.as_str()) else { return Ok(None) };
-            if !memory.scope_refs.iter().any(|s| scope.iter().any(|r| r.scope_id == s.scope_id)) {
+            if !scopes_intersect(&memory.scope_refs, scope) {
                 return Err(StorageError::ScopeMismatch);
             }
             Ok(self.versions.get(version_id.as_str()).filter(|v| &v.memory_id == memory_id).cloned())
@@ -148,15 +155,17 @@ mod tests {
 
         fn commit_version(&mut self, request: CommitRequest, scope: &[ScopeRef]) -> Result<CommitReceipt, StorageError> {
             let memory = self.memories.get_mut(request.memory_id.as_str()).ok_or(StorageError::NotFoundOrNotVisible)?;
-            if !memory.scope_refs.iter().any(|s| scope.iter().any(|r| r.scope_id == s.scope_id)) {
+            if !scopes_intersect(&memory.scope_refs, scope) {
                 return Err(StorageError::ScopeMismatch);
             }
             if request.memory_id != request.new_version.memory_id {
                 return Err(StorageError::InvalidReference);
             }
             if let Some(existing) = self.receipts.get(&request.idempotency_key) {
-                if existing.idempotency_key == request.idempotency_key && request.request_digest == "digest-1" {
-                    return Ok(existing.clone());
+                if existing.memory_id == request.memory_id.as_str()
+                    && existing.request_digest == request.request_digest
+                {
+                    return Ok(existing.receipt.clone());
                 }
                 return Err(StorageError::IdempotencyConflict);
             }
@@ -175,7 +184,11 @@ mod tests {
             };
             memory.current_version_id = Some(request.new_version.memory_version_id.clone());
             self.versions.insert(request.new_version.memory_version_id.as_str().into(), request.new_version);
-            self.receipts.insert(request.idempotency_key, receipt.clone());
+            self.receipts.insert(request.idempotency_key, FakeReceiptRecord {
+                receipt: receipt.clone(),
+                request_digest: request.request_digest,
+                memory_id: request.memory_id.as_str().into(),
+            });
             Ok(receipt)
         }
 
@@ -183,15 +196,22 @@ mod tests {
             Ok(memory_storage::ChangePage { records: vec![], next_cursor: None })
         }
 
-        fn resolve_idempotency(&self, key: &str, _digest: &str, scope: &[ScopeRef]) -> Result<Option<CommitReceipt>, StorageError> {
-            if scope.is_empty() { return Err(StorageError::ScopeMismatch); }
-            Ok(self.receipts.get(key).cloned())
+        fn resolve_idempotency(&self, key: &str, digest: &str, scope: &[ScopeRef]) -> Result<Option<CommitReceipt>, StorageError> {
+            let Some(record) = self.receipts.get(key) else { return Ok(None) };
+            let memory = self.memories.get(&record.memory_id).ok_or(StorageError::NotFoundOrNotVisible)?;
+            if !scopes_intersect(&memory.scope_refs, scope) {
+                return Err(StorageError::ScopeMismatch);
+            }
+            if record.request_digest != digest {
+                return Err(StorageError::IdempotencyConflict);
+            }
+            Ok(Some(record.receipt.clone()))
         }
     }
 
     struct CommitReceiptSequence;
     impl CommitReceiptSequence {
-        fn next(receipts: &BTreeMap<String, CommitReceipt>) -> memory_storage::CommitSequence {
+        fn next(receipts: &BTreeMap<String, FakeReceiptRecord>) -> memory_storage::CommitSequence {
             memory_storage::CommitSequence(receipts.len() as u64 + 1)
         }
     }
@@ -248,6 +268,42 @@ mod tests {
         };
         let first = store.write_revision(write, &[scope()]).unwrap();
         let resolved = store.resolve_idempotency("op1", "digest-1", &[scope()]).unwrap();
-        assert_eq!(resolved, Some(first));
+        assert_eq!(resolved, Some(first.clone()));
+        assert_eq!(
+            store.resolve_idempotency("op1", "wrong-digest", &[scope()]),
+            Err(MemoryStoreError::Storage(StorageError::IdempotencyConflict)),
+        );
+        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User, namespace_key: "other".into() };
+        assert_eq!(
+            store.resolve_idempotency("op1", "digest-1", &[other]),
+            Err(MemoryStoreError::Storage(StorageError::ScopeMismatch)),
+        );
+        let conflicting_replay = RevisionWrite {
+            memory_id: id("m1"), expected_current_version: None, revision: revision("v2", 2, None),
+            idempotency_key: "op1".into(), request_digest: "different-digest".into(),
+        };
+        assert_eq!(
+            store.write_revision(conflicting_replay, &[scope()]),
+            Err(MemoryStoreError::Storage(StorageError::IdempotencyConflict)),
+        );
+    }
+
+    #[test]
+    fn stale_revision_is_rejected_by_storage_port() {
+        let mut store = MemoryStore::new(FakeStorage::default());
+        store.create_memory(memory(), &[scope()]).unwrap();
+        let first = RevisionWrite {
+            memory_id: id("m1"), expected_current_version: None, revision: revision("v1", 1, None),
+            idempotency_key: "op1".into(), request_digest: "digest-1".into(),
+        };
+        store.write_revision(first, &[scope()]).unwrap();
+        let stale = RevisionWrite {
+            memory_id: id("m1"), expected_current_version: None, revision: revision("v2", 2, None),
+            idempotency_key: "op2".into(), request_digest: "digest-2".into(),
+        };
+        assert_eq!(
+            store.write_revision(stale, &[scope()]),
+            Err(MemoryStoreError::Storage(StorageError::StaleVersion)),
+        );
     }
 }
