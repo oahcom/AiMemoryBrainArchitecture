@@ -1,0 +1,12 @@
+[package]
+name = "memory-storage-sqlite"
+version = "0.1.0"
+edition = "2021"
+license = "UNLICENSED"
+publish = false
+
+[dependencies]
+memory-domain = { path = "../memory-domain" }
+memory-storage = { path = "../memory-storage" }
+rusqlite = { version = "0.43.0", features = ["bundled"] }
+serde_json = "1"
