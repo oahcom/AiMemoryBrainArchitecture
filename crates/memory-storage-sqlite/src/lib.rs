@@ -741,4 +741,154 @@ mod tests {
         }, &[scope()]);
         assert_eq!(result, Err(StorageError::StaleVersion));
     }
+
+    #[test]
+    fn file_db_nested_savepoint_rollback_preserves_outer_work() {
+        let path = temp_db_path("nested-savepoint");
+        let mut store = SqliteMemoryStorage::open(&path).unwrap();
+        store.connection.execute_batch(
+            "CREATE TABLE rollback_probe (value INTEGER PRIMARY KEY);"
+        ).unwrap();
+
+        let mut outer = store.connection
+            .transaction_with_behavior(TransactionBehavior::Immediate).unwrap();
+        outer.execute("INSERT INTO rollback_probe(value) VALUES (1)", []).unwrap();
+
+        {
+            let mut middle = outer.savepoint().unwrap();
+            middle.execute("INSERT INTO rollback_probe(value) VALUES (2)", []).unwrap();
+            {
+                let mut inner = middle.savepoint().unwrap();
+                inner.execute("INSERT INTO rollback_probe(value) VALUES (3)", []).unwrap();
+                inner.rollback().unwrap();
+            }
+            middle.commit().unwrap();
+        }
+        outer.commit().unwrap();
+
+        let values: Vec<i64> = {
+            let mut stmt = store.connection
+                .prepare("SELECT value FROM rollback_probe ORDER BY value").unwrap();
+            stmt.query_map([], |row| row.get(0)).unwrap()
+                .collect::<Result<Vec<_>, _>>().unwrap()
+        };
+        assert_eq!(values, vec![1, 2]);
+        drop(store);
+        remove_db_files(&path);
+    }
+
+    #[test]
+    fn file_db_busy_timeout_bounds_wait_for_long_immediate_transaction() {
+        use std::thread;
+
+        let path = temp_db_path("busy-timeout");
+        let mut blocker = SqliteMemoryStorage::open(&path).unwrap();
+        blocker.create_memory(memory(), &[scope()]).unwrap();
+        let mut contender = SqliteMemoryStorage::open(&path).unwrap();
+        contender.connection.busy_timeout(Duration::from_millis(100)).unwrap();
+
+        let held = blocker.connection
+            .transaction_with_behavior(TransactionBehavior::Immediate).unwrap();
+        held.execute(
+            "UPDATE memories SET updated_at = updated_at WHERE memory_id = 'm1'",
+            [],
+        ).unwrap();
+        thread::sleep(Duration::from_millis(150));
+
+        let request = CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v-busy", 1, None),
+            idempotency_key: "busy-op".into(),
+            request_digest: "busy-digest".into(),
+        };
+        let started = std::time::Instant::now();
+        let blocked = contender.commit_version(request.clone(), &[scope()]);
+        let elapsed = started.elapsed();
+        assert_eq!(blocked, Err(StorageError::TransactionUnavailable));
+        assert!(elapsed >= Duration::from_millis(80), "busy timeout returned too early: {elapsed:?}");
+        assert!(elapsed < Duration::from_secs(2), "busy timeout did not bound lock wait: {elapsed:?}");
+
+        held.rollback().unwrap();
+        let receipt = contender.commit_version(request, &[scope()]).unwrap();
+        assert_eq!(receipt.resulting_version_id, id("v-busy"));
+
+        drop(contender);
+        drop(blocker);
+        let reopened = SqliteMemoryStorage::open(&path).unwrap();
+        assert_eq!(reopened.read_current(&id("m1"), &[scope()]).unwrap().unwrap().memory_version_id, id("v-busy"));
+        drop(reopened);
+        remove_db_files(&path);
+    }
+
+    #[test]
+    fn file_db_interrupted_commit_keeps_version_pointer_log_and_idempotency_consistent() {
+        let path = temp_db_path("interrupted-write");
+        let mut store = SqliteMemoryStorage::open(&path).unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+        store.connection.execute_batch(
+            "CREATE TRIGGER interrupt_commit_log
+             BEFORE INSERT ON commit_log
+             BEGIN SELECT RAISE(ABORT, 'injected write interruption'); END;"
+        ).unwrap();
+
+        let result = store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v-interrupted", 1, None),
+            idempotency_key: "interrupted-op".into(),
+            request_digest: "interrupted-digest".into(),
+        }, &[scope()]);
+        assert_eq!(result, Err(StorageError::TransactionUnavailable));
+
+        drop(store);
+        let reopened = SqliteMemoryStorage::open(&path).unwrap();
+        assert!(reopened.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+        assert_eq!(reopened.read_version(&id("m1"), &id("v-interrupted"), &[scope()]).unwrap(), None);
+        assert_eq!(reopened.resolve_idempotency("interrupted-op", "interrupted-digest", &[scope()]).unwrap(), None);
+        assert!(reopened.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+        drop(reopened);
+        remove_db_files(&path);
+    }
+
+    #[test]
+    fn file_db_unwinding_worker_releases_open_transaction_without_partial_state() {
+        let path = temp_db_path("abnormal-release");
+        {
+            let mut setup = SqliteMemoryStorage::open(&path).unwrap();
+            setup.create_memory(memory(), &[scope()]).unwrap();
+        }
+
+        let worker_path = path.clone();
+        let worker = std::thread::spawn(move || {
+            let mut store = SqliteMemoryStorage::open(&worker_path).unwrap();
+            let tx = store.connection
+                .transaction_with_behavior(TransactionBehavior::Immediate).unwrap();
+            let scope_json = SqliteMemoryStorage::encode(&vec![scope()]).unwrap();
+            let version_json = SqliteMemoryStorage::encode(&version("v-unwind", 1, None)).unwrap();
+            tx.execute(
+                "INSERT INTO versions(version_id, memory_id, version_number, parent_version_id, scope_json, version_json, commit_sequence)
+                 VALUES ('v-unwind', 'm1', 1, NULL, ?1, ?2, 1)",
+                params![scope_json, version_json],
+            ).unwrap();
+            tx.execute(
+                "UPDATE memories SET current_version_id = 'v-unwind' WHERE memory_id = 'm1'",
+                [],
+            ).unwrap();
+            tx.execute(
+                "INSERT INTO commit_log(commit_sequence, memory_id, version_id) VALUES (1, 'm1', 'v-unwind')",
+                [],
+            ).unwrap();
+            panic!("simulate worker panic while connection owns an uncommitted transaction");
+        });
+        assert!(worker.join().is_err());
+
+        let reopened = SqliteMemoryStorage::open(&path).unwrap();
+        assert!(reopened.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+        assert_eq!(reopened.read_version(&id("m1"), &id("v-unwind"), &[scope()]).unwrap(), None);
+        assert!(reopened.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+        drop(reopened);
+        remove_db_files(&path);
+    }
+
 }
