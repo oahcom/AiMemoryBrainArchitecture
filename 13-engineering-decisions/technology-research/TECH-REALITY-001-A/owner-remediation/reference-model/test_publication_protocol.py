@@ -347,8 +347,10 @@ class Protocol:
         if operation_id not in self.i_pending:
             raise Rejected("UNKNOWN Storage outcome requires pending I COMMIT_WON")
         if binding is not None:
-            self._validate_unknown_binding(binding)
             prior = self.operation_bindings.get(operation_id)
+            if prior is not None and len(binding) == 8 and len(prior) == 9:
+                binding = binding + (prior[8],)
+            self._validate_unknown_binding(binding)
             if prior is not None and prior != binding:
                 raise Rejected("UNKNOWN operation identity rebound")
         self.private_unknown.add(operation_id)
