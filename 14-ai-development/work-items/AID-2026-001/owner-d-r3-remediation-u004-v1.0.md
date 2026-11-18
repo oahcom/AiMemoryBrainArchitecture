@@ -11,16 +11,16 @@ Canonical execution instructions must be separately versioned and pinned to an e
 
 # Archive provenance / 归档来源
 
-- Prompt ID: \`AID-2026-001-U-004\`
-- Version: \`v1.0\`
-- Archive status: \`FROZEN_HISTORICAL / TRANSPORT_NORMALIZED\`
+- Prompt ID: `AID-2026-001-U-004`
+- Version: `v1.0`
+- Archive status: `FROZEN_HISTORICAL / TRANSPORT_NORMALIZED`
 - Capture class: rendering-retrieved copy supplied by human Owner
 - Human-reported capture: 12,202 UTF-8 bytes, excluding trailing newline
-- Human-reported capture SHA-256: \`22ea8670d0a06880713547b806947e4d14086bb725c9af1a13828e9c2ac0b31a\`
+- Human-reported capture SHA-256: `22ea8670d0a06880713547b806947e4d14086bb725c9af1a13828e9c2ac0b31a`
 - Original declared source: 12,359 UTF-8 bytes; unrecoverable; not reconstructed
-- Original embedded SHA-256 declaration: \`1ff44263b8b4dbb554419010ed280741454bb80c836cec6e6005815e247e7c4b\` (historical declaration only)
-- Integrity disposition: \`TRANSPORT_EQUIVALENT_UNPROVEN\`
-- Execution disposition: \`HISTORICAL_ONLY — DO NOT EXECUTE AS CURRENT TASK\`
+- Original embedded SHA-256 declaration: `1ff44263b8b4dbb554419010ed280741454bb80c836cec6e6005815e247e7c4b` (historical declaration only)
+- Integrity disposition: `TRANSPORT_EQUIVALENT_UNPROVEN`
+- Execution disposition: `HISTORICAL_ONLY — DO NOT EXECUTE AS CURRENT TASK`
 - Reason: the prompt's recorded baseline and PR pins are stale; PR #66 is merged, and §3/§10 explicitly require STOP when PR #66 is merged.
 
 ---
