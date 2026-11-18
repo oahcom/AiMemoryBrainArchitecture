@@ -85,7 +85,7 @@ The 15-value tuple is **not** the complete protected-boundary authorization mech
 - 经认证的 Principal/Actor/Workload/Delegation 解析；
 - 真实 Scope 隔离和跨 PolicyDomain 执行。
 
-`permission_epoch` is modeled as an opaque I-local value and exact-binding field only. The model does not prove a live I sequencer, freshness, revocation ordering, or comparability with any D/Storage high-water.
+`permission_epoch` remains opaque and I-local. The follow-up model now includes an explicit in-memory `current_permission_epochs` test seam: I COMMIT_WON is rejected if the current epoch is unavailable or differs from the authorization context; a later epoch advance does not rewrite a previously won COMMIT_WON. This models equality/fail-closed ordering only. It does not prove a live I sequencer, authenticated current-state source, issuer-key status, policy/revocation/registry currentness, or comparability with any D/Storage high-water.
 
 `permission_epoch` 在模型中仅作为不透明的 I 本地值和精确绑定字段。该模型不证明真实 I Sequencer、实时新鲜度、撤权排序，也不证明它可与任何 D/Storage High-water 比较。
 
@@ -101,7 +101,7 @@ The 15-value tuple is **not** the complete protected-boundary authorization mech
 - Publication Protocol run #44242418467：**52 项测试 / OK**。
 - GOV-DOC-001 run #44242418382：**SUCCESS**。
 
-The documentation-only addition changes the PR head and therefore requires a fresh exact-head CI run before merge. The 52/52 result above remains evidence for the preceding code Head, not automatically for a later Head.
+The follow-up PermissionEpoch currentness candidate adds an explicit unavailable/stale fail-closed test and tests that a later epoch advance does not cancel an earlier COMMIT_WON. Its current code Head is `acb196d34288892f1b38e82bb023e770d90c5cfb` with 58 expected tests; exact-head CI is pending. Any subsequent documentation change also requires a fresh exact-head run.
 
 本次仅文档追加会改变 PR Head，因此合并前必须对新精确 Head 重新运行 CI。上述 52/52 仅证明前一代码 Head，不自动证明后续 Head。
 
