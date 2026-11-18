@@ -44,16 +44,21 @@ class GlobalForgetModelTests(unittest.TestCase):
 
     def test_inventory_seal_requires_nonempty_identity_and_digest(self):
         self.g.seal = None
-        with self.assertRaises(Blocked):
-            self.g.seal_inventory(seal_id="", digest="digest-1",
-                                  signer="I-inventory-authority")
-        with self.assertRaises(Blocked):
-            self.g.seal_inventory(seal_id="seal-1", digest="",
-                                  signer="I-inventory-authority")
+        for seal_id in ("", "   "):
+            with self.subTest(seal_id=repr(seal_id)), self.assertRaises(Blocked):
+                self.g.seal_inventory(seal_id=seal_id, digest="digest-1",
+                                      signer="I-inventory-authority")
+        for digest in ("", "   "):
+            with self.subTest(digest=repr(digest)), self.assertRaises(Blocked):
+                self.g.seal_inventory(seal_id="seal-1", digest=digest,
+                                      signer="I-inventory-authority")
 
     def test_confirmed_evidence_requires_nonempty_evidence_reference(self):
-        result = self.g.record_evidence(self.evidence(evidence_ref=""))
-        self.assertEqual(result, "UNKNOWN")
+        for evidence_ref in ("", "   "):
+            with self.subTest(evidence_ref=repr(evidence_ref)):
+                result = self.g.record_evidence(self.evidence(evidence_ref=evidence_ref))
+                self.assertEqual(result, "UNKNOWN")
+                self.assertEqual(self.g.targets["F:partition-1"].state, "Unknown")
         self.complete_setup()
         self.assertEqual(self.g.evaluate(now=1), "Pending")
 
