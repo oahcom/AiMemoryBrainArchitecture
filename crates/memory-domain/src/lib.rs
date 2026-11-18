@@ -36,6 +36,7 @@ pub enum DomainError {
 pub struct ScopeRef {
     pub scope_id: OpaqueId,
     pub scope_kind: ScopeKind,
+    pub namespace_key: String,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -78,6 +79,9 @@ pub struct Event {
     pub occurred_at: Option<TimeValue>,
     pub idempotency_key: Option<String>,
     pub payload_ref: String,
+    pub classification: String,
+    pub schema_version: String,
+    pub retention_class: String,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -86,9 +90,13 @@ pub struct Claim {
     pub subject_ref: OpaqueId,
     pub predicate: String,
     pub object_value: String,
+    pub polarity: String,
     pub epistemic_status: EpistemicStatus,
+    pub confidence: Option<f64>,
     pub temporal_ref: Option<TemporalRef>,
+    pub asserted_at: String,
     pub scope_refs: Vec<ScopeRef>,
+    pub qualifiers: Vec<String>,
     pub evidence_refs: Vec<OpaqueId>,
 }
 
@@ -159,11 +167,15 @@ pub struct MemoryVersion {
     pub version_number: u64,
     pub parent_version_id: Option<OpaqueId>,
     pub created_at: String,
+    pub author_kind: String,
+    pub change_reason: String,
     pub claims: Vec<Claim>,
     pub entity_refs: Vec<OpaqueId>,
     pub relation_refs: Vec<OpaqueId>,
     pub source_refs: Vec<OpaqueId>,
     pub provenance_refs: Vec<OpaqueId>,
+    pub content_digest: String,
+    pub schema_version: String,
 }
 
 impl MemoryVersion {
@@ -184,9 +196,14 @@ impl MemoryVersion {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Memory {
     pub memory_id: OpaqueId,
+    pub memory_kind: String,
     pub scope_refs: Vec<ScopeRef>,
     pub current_version_id: Option<OpaqueId>,
     pub lifecycle_state: MemoryLifecycle,
+    pub retention_class: String,
+    pub sensitivity: String,
+    pub created_at: String,
+    pub updated_at: String,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -281,7 +298,7 @@ mod tests {
     }
 
     fn scope(value: &str) -> ScopeRef {
-        ScopeRef { scope_id: id(value), scope_kind: ScopeKind::User }
+        ScopeRef { scope_id: id(value), scope_kind: ScopeKind::User, namespace_key: format!("user:{value}") }
     }
 
     fn claim(value: &str, scope_refs: Vec<ScopeRef>) -> Claim {
@@ -290,9 +307,13 @@ mod tests {
             subject_ref: id("subject"),
             predicate: "has_value".into(),
             object_value: value.into(),
+            polarity: "affirm".into(),
             epistemic_status: EpistemicStatus::Observed,
+            confidence: None,
             temporal_ref: None,
+            asserted_at: "now".into(),
             scope_refs,
+            qualifiers: vec![],
             evidence_refs: vec![id("evidence")],
         }
     }
@@ -308,12 +329,20 @@ mod tests {
             occurred_at: None,
             idempotency_key: None,
             payload_ref: "payload".into(),
+            classification: "observed".into(),
+            schema_version: "1".into(),
+            retention_class: "default".into(),
         };
         let memory = Memory {
             memory_id: id("memory"),
             scope_refs: vec![scope("s1")],
             current_version_id: None,
+            memory_kind: "knowledge".into(),
             lifecycle_state: MemoryLifecycle::Candidate,
+            retention_class: "default".into(),
+            sensitivity: "normal".into(),
+            created_at: "now".into(),
+            updated_at: "now".into(),
         };
         assert_eq!(event.event_id.as_str(), "event");
         assert_eq!(memory.memory_id.as_str(), "memory");
@@ -328,11 +357,15 @@ mod tests {
             version_number: 1,
             parent_version_id: None,
             created_at: "2026-01-01T00:00:00Z".into(),
+            author_kind: "test".into(),
+            change_reason: "initial".into(),
             claims: vec![],
             entity_refs: vec![],
             relation_refs: vec![],
             source_refs: vec![],
             provenance_refs: vec![],
+            content_digest: "digest-v1".into(),
+            schema_version: "1".into(),
         };
         let second = MemoryVersion {
             memory_version_id: id("v2"),
@@ -353,11 +386,15 @@ mod tests {
             version_number: 2,
             parent_version_id: Some(id("v1")),
             created_at: "now".into(),
+            author_kind: "test".into(),
+            change_reason: "update".into(),
             claims: vec![],
             entity_refs: vec![],
             relation_refs: vec![],
             source_refs: vec![],
             provenance_refs: vec![],
+            content_digest: "digest".into(),
+            schema_version: "1".into(),
         };
         let stale = MemoryVersion {
             memory_version_id: id("v3"),
@@ -380,8 +417,13 @@ mod tests {
         let m = Memory {
             memory_id: id("memory"),
             scope_refs: vec![scope("s1")],
+            memory_kind: "knowledge".into(),
             current_version_id: None,
             lifecycle_state: MemoryLifecycle::Active,
+            retention_class: "default".into(),
+            sensitivity: "normal".into(),
+            created_at: "now".into(),
+            updated_at: "now".into(),
         };
         assert_eq!(c.epistemic_status, EpistemicStatus::Observed);
         assert_eq!(m.lifecycle_state, MemoryLifecycle::Active);
@@ -426,8 +468,13 @@ mod tests {
         let memory = Memory {
             memory_id: id("memory"),
             scope_refs: vec![scope("s1")],
+            memory_kind: "knowledge".into(),
             current_version_id: Some(memory_version_id),
             lifecycle_state: MemoryLifecycle::Active,
+            retention_class: "default".into(),
+            sensitivity: "normal".into(),
+            created_at: "now".into(),
+            updated_at: "now".into(),
         };
         assert!(context.remove_entry(&id("entry")));
         assert!(context.entries.is_empty());
