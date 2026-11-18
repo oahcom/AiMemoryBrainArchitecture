@@ -13,7 +13,7 @@ on:
     paths:
       - "Cargo.toml"
       - "Cargo.lock"
-      - "crates/memory-domain/**"
+      - "crates/**"
       - ".github/workflows/rust-domain.yml"
 
 jobs:
