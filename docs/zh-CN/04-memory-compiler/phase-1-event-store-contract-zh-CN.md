@@ -6,8 +6,8 @@ Event Store 是 Source Event 的持久化 custody 边界。Accepted 表示 Event
 
 契约要求显式 Scope、Producer Identity、Payload Digest 和 Idempotency Key。SQLite 候选实现将幂等身份定义为 `(producer_actor_ref, idempotency_key)`：同一身份加同一 Digest 返回原 Receipt；同一身份加不同 Digest 必须冲突。重放 Receipt 前先执行 Scope 授权检查。
 
-候选实现通过一个事务持久化完整 Envelope、声明的 Payload 引用/Digest、Acceptance Time、Receipt Identity 和初始 `Pending` 处理状态。它不存储 Payload Bytes，也不独立计算 Payload Hash；Digest 正确性仍是上游断言。`replay` 只返回未改变的原 Receipt，不会入队或执行任务。Queue 投递、处理状态转换、Retention/Forget 授权及 Schema Migration 均不属于本 Adapter。
+候选实现通过同一个事务持久化完整 Envelope、声明的 Payload 引用/Digest、Acceptance Time、Receipt Identity、初始 `Pending` 处理状态，以及一条持久化的 Compile Intent Outbox 记录。Outbox 记录以已接收 Event 为唯一键，是意图账本，不是已经投递的队列任务。启动初始化会在事务中为历史已接收但缺少意图记录的 Event 补齐记录。它不存储 Payload Bytes，也不独立计算 Payload Hash；Digest 正确性仍是上游断言。`replay` 只返回未改变的原 Receipt，不会创建重复意图或执行任务。Queue Dispatch/投递、Worker Lease、处理状态转换、Retention/Forget 授权及版本化 Schema Migration 均不属于本 Adapter。
 
 Replay 重用原 Event Identity 和原 Acceptance Time。Forget/Retention 检查仍由独立策略权威负责。
 
-候选文件 SQLite Adapter 使用 WAL、synchronous=FULL、foreign_keys=ON 和 5 秒 Busy Timeout；内存模式保留 SQLite 内存 Journal 行为。本单元不包含 Queue 拓扑、Worker 投递、分布式事务、吞吐目标、Schema Migration 或生产持久化证明。
+候选文件 SQLite Adapter 使用 WAL、synchronous=FULL、foreign_keys=ON 和 5 秒 Busy Timeout；内存模式保留 SQLite 内存 Journal 行为。本单元不包含 Dispatcher、Worker 投递/Lease、分布式事务、吞吐目标、版本化 Schema Migration 或生产持久化证明。
