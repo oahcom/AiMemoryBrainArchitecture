@@ -789,10 +789,7 @@ mod tests {
 
         let held = blocker.connection
             .transaction_with_behavior(TransactionBehavior::Immediate).unwrap();
-        held.execute(
-            "UPDATE memories SET updated_at = updated_at WHERE memory_id = 'm1'",
-            [],
-        ).unwrap();
+        // BEGIN IMMEDIATE acquires the write reservation even without a row update.
         thread::sleep(Duration::from_millis(150));
 
         let request = CommitRequest {
