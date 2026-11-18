@@ -8,3 +8,5 @@ publish = false
 [dependencies]
 memory-domain = { path = "../memory-domain" }
 serde = { version = "1", features = ["derive"] }
+
+serde = { version = "1", features = ["derive"] }
