@@ -53,7 +53,7 @@ For an existing, unexpired namespace:
 
 | Incoming request | Required result |
 |---|---|
-| Same ProducerIdentity + Scope + Key + Digest | Return original Receipt as replay; do not append again |
+| Same ProducerIdentity + Scope + Key + Digest | **CANDIDATE / TO_VALIDATE** — return the original Receipt as replay and do not append again only if the Scope equality rule adopted by B/domain + I/security Owners establishes that the two Scope references are equal; pending that decision, this is not an unconditional normative replay condition |
 | Same ProducerIdentity + Scope + Key, different Digest | IDEMPOTENCY_KEY_CONFLICT; do not append or replace Receipt |
 | Different ProducerIdentity, same Scope + Key | Independent namespace; no replay relationship |
 | Same ProducerIdentity + Key, different Scope | CANDIDATE / TO_VALIDATE — independent namespace and no cross-scope receipt disclosure only after B/domain + I/security decide Scope identity/equality |
