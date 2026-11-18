@@ -154,3 +154,41 @@ The 47-test structural CI PASS remains valid for this schema's shape only. It do
 ## 10. Updated H disposition
 
 H accepts the Storage v3 prepared-proof field shape with the enumerated amendments, and the structural schema/parser suite is 47/47 PASS. H does **not** accept the older companion §14 as equivalent to v3, does not freeze the full CGH-APPLIED-1.1 wire contract, and does not infer that the five JF-10 schema variants cover the eight CGH evidence families. Storage §14 reconciliation and a complete, version-pinned C/G/H message-family mapping remain required before G8 can close.
+
+
+## 9. 2026-11-18 current Storage source and CGH wire-coverage reconciliation
+
+### H-V3-06 — RESOLVED at current document level
+
+The earlier H-V3-06 finding referenced companion §14 Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`. The current Storage Owner branch HEAD at discovery is `268af57b099209b33835b663596e87d21bb9c22b`; its current companion §14 Blob is `dbc1dfd4c488c5d5e5a328388487d190984e8adc`. Current §14.1–14.4 explicitly carries DatabaseIncarnationRef, PrepareAttemptRef/Generation, ParticipantLedgerRef/Version and ParticipantTupleDigest, plus the exact pre-PREPARE, signed receipt, replay and recovery semantics. Storage v3.2.3 body Blob `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792` §15.7 carries the matching I proof tuple. The old companion Blob is historical; no further §14 field amendment is required on the current source readback.
+
+The Storage v3.3.2 manifest Blob `5c614375e10698e4931d83deb57d20321445e068` pins the v3.2.3 body but does not explicitly list current companion §14 Blob `dbc1dfd4c488c5d5e5a328388487d190984e8adc`. Storage/A must pin the exact companion source or a successor in the final bundle. This remains a version-binding action, not a semantic §14 gap.
+
+### H-V3-07 — OPEN; exact Phase 3.6 message-family coverage
+
+A's exact CGH-APPLIED-1.1 package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` §4 requires eight causal-order evidence families. H's pinned `bmcp.applied-ack/1.1.0` schema Blob `a8a945cc3623c2907003b93625e3c79742150944` has five JF-10 variants. Current mapping assessment:
+
+| A required family | H 1.1.0 candidate mapping | Disposition |
+|---|---|---|
+| CAUSAL_ORDER_INTENT | `JF10_PREPARE_INTENT_REGISTERED` contains related intent fields | Partial candidate only; not an exact distinct family mapping |
+| CAUSAL_ORDER_INTENT_RECEIPT | No distinct receipt message; registration proof is only a field in the intent variant | OPEN |
+| CAUSAL_ORDER_RESERVATION | No explicit reservation variant | OPEN |
+| I_AUTHORIZATION_TERMINAL | `I_JF10_TERMINAL_DECISION_OBSERVED` | Direct semantic candidate; I authority/signature validation remains external to JSON Schema |
+| D_FENCE_TERMINAL | No explicit D fence terminal variant | OPEN |
+| C_SUBMIT_OUTCOME | C-owned `c-submit-outcome/1.0.1` schema exists (Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`), but no H 1.1.0 transport family binds it | OPEN |
+| CAUSAL_ORDER_TERMINAL_PROOF | No explicit terminal-proof variant | OPEN |
+| CAUSAL_ORDER_ACK | No distinct COC ACK variant | OPEN |
+
+The other H 1.1.0 variants—`JF10_PREPARED_PARTICIPANT_REGISTERED`, `STORAGE_JF10_PARTICIPANT_RESOLVED` and `JF10_BRIDGE_RECONCILIATION_RECORDED`—are Storage prepare/resolution and reconciliation observations; they are not substitutes for Reservation, D terminal, C submit outcome, CausalOrderTerminalProof or a distinct COC ACK.
+
+H's later Phase 3.8 schemas `bmcp.coc-jf10-unified/1.2.17` Blob `1b8f44675f30919764481d33755c566ef5cf1ea8` and `bmcp.applied-delivery-evidence/1.0.0` Blob `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608` are separate successor artifacts, not pins in A's Phase 3.6 package. They cannot be silently substituted for H 1.1.0 or transfer approvals. A must issue a successor package if it elects to adopt them, followed by exact C/G/H and D/I/B predicate re-acceptance.
+
+### H structural test evidence and ceiling
+
+- H branch HEAD at discovery: `0ec8be40b8fe1b8e4729334759d46da0be9b6b87`.
+- Storage proof schema Blob: `6327d9d387bdc0d6610aba08ff3e51ca9da17f5d`.
+- Test Blob: `f8de63379d4d411ff9c9831f25294e4c8b09f158`.
+- Workflow Blob: `f9a8a403b4fd523a065c0aee6c51f3575c4270a2`.
+- GitHub Actions run `44000078669`, job `133761649293`, tested commit `d26a40e2483e32a6afb1e8f9ccd456e8ae3c815c`: Python 3.12, jsonschema 4.23.0, compile succeeded, `python -m unittest discover -s tests/schema -v`: 47 tests, all PASS. The current H branch retains the same schema/test/workflow Blobs.
+
+This is structural schema/parser evidence only. H36, CFG-01..20 and PI-01..08 remain NOT RUN. Signature verification, canonical-byte interoperability, live I/D/Storage authority callbacks, transport/channel binding and production replay durability remain unproven. H-V3-07/08 remain blockers to G8; no schema freeze is claimed.
