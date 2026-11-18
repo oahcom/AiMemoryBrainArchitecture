@@ -1,0 +1,10 @@
+[package]
+name = "memory-store"
+version = "0.1.0"
+edition = "2021"
+license = "UNLICENSED"
+publish = false
+
+[dependencies]
+memory-domain = { path = "../memory-domain" }
+memory-storage = { path = "../memory-storage" }
