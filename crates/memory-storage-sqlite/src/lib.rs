@@ -363,15 +363,19 @@ impl MemoryStorage for SqliteMemoryStorage {
         for row in rows {
             let (sequence, memory_id, version_id, scope_json) =
                 row.map_err(|_| StorageError::TransactionUnavailable)?;
-            if Self::scope_allowed(&scope_json, scope).is_ok() {
-                records.push(ChangeRecord {
-                    commit_sequence: CommitSequence(sequence as u64),
-                    memory_id: OpaqueId::new(memory_id).map_err(|_| StorageError::InvalidSchema)?,
-                    version_id: OpaqueId::new(version_id).map_err(|_| StorageError::InvalidSchema)?,
-                });
-                if records.len() > limit {
-                    break;
+            match Self::scope_allowed(&scope_json, scope) {
+                Ok(()) => {
+                    records.push(ChangeRecord {
+                        commit_sequence: CommitSequence(sequence as u64),
+                        memory_id: OpaqueId::new(memory_id).map_err(|_| StorageError::InvalidSchema)?,
+                        version_id: OpaqueId::new(version_id).map_err(|_| StorageError::InvalidSchema)?,
+                    });
+                    if records.len() > limit {
+                        break;
+                    }
                 }
+                Err(StorageError::ScopeMismatch) => continue,
+                Err(error) => return Err(error),
             }
         }
         if records.len() > limit {
@@ -1254,6 +1258,29 @@ mod tests {
             Err(StorageError::InvalidSchema)
         );
         assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+    }
+
+    #[test]
+    fn sqlite_change_listing_surfaces_corrupt_scope_metadata_instead_of_silently_skipping_it() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+        store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v1", 1, None),
+            idempotency_key: "corrupt-scope-op".into(),
+            request_digest: "corrupt-scope-digest".into(),
+        }, &[scope()]).unwrap();
+
+        store.connection.execute(
+            "UPDATE memories SET scope_json = 'not-json' WHERE memory_id = 'm1'",
+            [],
+        ).unwrap();
+
+        assert_eq!(
+            store.list_changes(None, &[scope()], 10),
+            Err(StorageError::InvalidSchema)
+        );
     }
 
 }
