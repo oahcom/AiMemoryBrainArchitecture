@@ -500,3 +500,23 @@ PR #168 将两个转换分离：
 - Issue #130：PR-GOVERNANCE-001 已作为仓库流程规范 ADOPTED，但会话覆盖运营审计仍 OPEN。
 - Issue #134：仍 OPEN / P0。Main 没有启用必需检查强制执行。PR 模板和流程规范不是硬合并门禁。
 - 任何 PR 合并都不等于独立审查、Owner 验收、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
+
+
+---
+
+## 15. Latest live inventory and publication winner hardening / 最新实时盘点与 Publication winner 加固（2026-11-18）
+
+- Main HEAD: `60b6c2a0f987db4bc150aa7b90664c4c26f96b04`.
+- GitHub `state=all` inventory: **142 PR records = 117 merged + 25 closed-unmerged + 0 open**.
+- Since §14: PR #170/#171/#172 were merged after PR #168/#169; PR #172 is the latest Publication Protocol reference-model hardening.
+- PR #168 exact Head `206909f5af9834b993cfc198b2f171c54bc7cd3f`: separates I COMMIT_WON authorization consumption from Storage commit.
+- PR #170 exact Head `ee346939d2aa51bbb941b47ca10be26b6464bb17`: binds I COMMIT_WON to canonical digest and owner boundary.
+- PR #171 exact Head `45f0f32400f68fd4b85ac98b2a5f7cf1ec9a9c68`: binds final visibility gate identity separately.
+- PR #172 exact Head `6f231976ef665e5c961f467e0cc0e931ae708349`: enforces one I COMMIT_WON winner per PublicationParticipantRef; exact-head Publication Protocol run #44196418535 SUCCESS and GOV-DOC-001 #44196456898 SUCCESS. The earlier failed run #44196325344 is retained as historical evidence; final assertions were corrected and the exact Head passed 44 tests.
+- PR #169 refreshed this report at the then-current 138-record snapshot; §15 supersedes its inventory count while preserving §14 historically.
+- Issue #25 remains OPEN. These PRs are deterministic reference-model evidence only; no production D/I/Storage implementation, authenticated proofs, distributed concurrency, durable fencing, or production conformance is established.
+- Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED. Issue #130 remains OPEN for historical session-coverage audit. Issue #134 remains P0 / OPEN; main branch protection is disabled and Rulesets remain unverified.
+- Issue #3 remains OPEN awaiting explicit C/G/H/I/D/B Owner freeze decisions; no silence or A synthesis is treated as approval.
+- This overlay is a metadata-complete API snapshot, not a fresh line-by-line semantic review of all 142 historical PR diffs.
+
+本节覆盖第 14 节之后的最新实时状态，同时保留第 14 节作为历史快照。
