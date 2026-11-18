@@ -27,21 +27,21 @@ Digest is the cryptographic digest of the canonical request payload covered by t
 
     IdempotencyNamespace = (ProducerIdentity, Scope, IdempotencyKey)
 
-The tuple is typed and compared by exact canonical identity equality. Implementations MUST NOT concatenate unescaped strings, compare only a subset of fields, or substitute a display label for a typed identity.
+The tuple is typed, but the Scope identity/equality domain is **CANDIDATE / TO_VALIDATE** and is not yet normative. The authoritative Scope fields (including whether `scope_id`, `scope_kind`, and/or `namespace_key` participate), namespace/authority qualification, canonicalization and normalization rules, and compatibility/legacy behavior MUST be decided jointly by B/domain and I/security Owners before exact Scope equality is relied upon. Until then, implementations MUST NOT infer a comparator from field names or existing helper behavior. Implementations MUST NOT concatenate unescaped strings, compare only a subset of fields, or substitute a display label for a typed identity.
 
 A request is a replay of an earlier accepted request if and only if all of the following hold:
 - authenticated ProducerIdentity is exactly equal;
-- canonical Scope is exactly equal;
+- Scope equality is **CANDIDATE / TO_VALIDATE** pending the authoritative Scope identity and equality rule; it is not yet a normative replay condition.
 - IdempotencyKey is exactly equal; and
 - incoming Digest is exactly equal to the digest bound to the durable receipt.
 
-The same ProducerIdentity and Digest alone are NOT sufficient: Scope and IdempotencyKey must also match. A matching namespace with a different Digest is a key conflict, not a replay.
+The same ProducerIdentity and Digest alone are NOT sufficient: Scope and IdempotencyKey must also match. However, the Scope comparison domain remains **CANDIDATE / TO_VALIDATE**; the replay predicate must not be treated as fully normative until B/domain and I/security Owners decide the Scope identity tuple, authority/namespace qualification, normalization and compatibility rules. A matching namespace with a different Digest is a key conflict, not a replay.
 
 The first successfully committed request wins. Concurrent requests for the same namespace MUST be serialized by an atomic uniqueness/compare-and-set boundary. Exactly one request may create the receipt and append. A concurrent request with the same digest observes the winning receipt; one with a different digest receives a conflict. A failed transaction that did not commit the event and receipt does not reserve the key.
 
 ## 4. Scope behavior
 
-**DECIDED proposal:** Scope is part of the idempotency namespace. The same ProducerIdentity and IdempotencyKey MAY be used independently in two different Scopes; this creates two distinct operations and two distinct receipts. A request in Scope B MUST NOT replay, reveal, or mutate the receipt created in Scope A.
+**CANDIDATE / TO_VALIDATE — pending authoritative Scope identity decision:** Scope is proposed as part of the idempotency namespace. Whether two Scope references are distinct for this purpose, and therefore whether the same ProducerIdentity and IdempotencyKey form independent operations/receipts, depends on the unresolved Scope identity/equality domain described in §3. Do not rely on cross-Scope replay isolation as a normative comparator rule until B/domain and I/security Owners decide it.
 
 This is namespace separation, not cross-scope authorization. The caller must independently authenticate and be authorized in the target Scope. A caller lacking access receives the normal authorization denial; the implementation must not reveal whether a matching key exists in another Scope.
 
@@ -90,10 +90,10 @@ A Receipt is the durable record binding one namespace to the accepted Digest and
 
 | Topic | Status | Validation |
 |---|---|---|
-| Typed namespace = ProducerIdentity + Scope + Key | DECIDED proposal | Exact equality; review against domain identity and Scope contracts |
-| Replay requires same namespace and same Digest | DECIDED proposal | Deterministic unit/reference-model tests |
+| Typed namespace = ProducerIdentity + Scope + Key | CANDIDATE / TO_VALIDATE (Scope component) | B/domain + I/security decide participating Scope fields, namespace/authority qualification, canonicalization/normalization and compatibility/legacy rules; then validate exact equality |
+| Replay requires same namespace and same Digest | CANDIDATE / TO_VALIDATE for Scope equality | Deterministic unit/reference-model tests after the authoritative Scope equality domain is decided |
 | Different Digest under same namespace is conflict | DECIDED proposal | Negative tests; assert no second append and immutable Receipt |
-| Cross-Scope same key is independent | DECIDED proposal | Two-scope isolation and receipt non-disclosure tests |
+| Cross-Scope same key is independent | CANDIDATE / TO_VALIDATE | B/domain + I/security decide when Scope references are distinct; then run two-scope isolation and receipt non-disclosure tests |
 | Partial ProducerIdentity matching forbidden | DECIDED proposal | Identity-type matrix and serialization round-trip tests |
 | ProducerIdentity composition (principal vs instance) | CANDIDATE | Identity Owner publishes canonical type and authenticated mapping |
 | Digest canonicalization and algorithm/version | TO_VALIDATE | Payload-integrity contract; cross-version golden vectors |
