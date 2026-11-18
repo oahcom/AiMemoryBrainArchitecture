@@ -534,6 +534,10 @@ owner_i_u011:
       severity: P2
       disposition: CHAT_CONVERSATION_ID_NOT_EXPOSED_RELAY_AND_TIMESTAMP_RECORDED
       reflow: Issue #41
+    I-U011-007:
+      severity: P2
+      disposition: AUTHOR_TRANSLATION_RECORDED_INDEPENDENT_BILINGUAL_SEMANTIC_PARITY_REVIEW_PENDING
+      reflow: Issue #41
   approvals:
     owner_i_formal: NOT_CLAIMED_AI_ROLEPLAY_IS_NOT_OWNER_APPROVAL
     owner_d_same_sha: PENDING
