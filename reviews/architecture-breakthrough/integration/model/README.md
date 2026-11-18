@@ -22,7 +22,9 @@ python3 forget_cross_owner_model.py
 python3 -m unittest -v test_forget_cross_owner_model.py
 ```
 
-The model uses only the Python standard library.\n\nRepository CI: [run 44140051181](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44140051181) — **SUCCESS** at integration-branch commit `c6c6e136f3d1c1b24448e28b754bfe083fe1a0f8`; both the model command and unittest regression suite completed successfully (14 tests). Earlier run 44136327645 is retained as historical evidence.
+The model uses only the Python standard library.
+
+Repository CI: [run 44140051181](https://github.com/oahcom/AiMemoryBrainArchitecture/actions/runs/44140051181) — **SUCCESS** at integration-branch commit `c6c6e136f3d1c1b24448e28b754bfe083fe1a0f8`; both the model command and unittest regression suite completed successfully (14 tests). Earlier run 44136327645 is retained as historical evidence.
 
 ## Bounded result / 有界结果
 
@@ -46,4 +48,6 @@ The model uses only the Python standard library.\n\nRepository CI: [run 44140051
 
 Multiple objects, scopes, tenants and overlapping Forget targets; arbitrary dependency DAGs; multiple concurrent producers/workers and independent storage replicas; actual MVCC/WAL/2PC/prepared-XID behavior; split brain, failover, PITR and pg_rewind; complete Producer/Recipient/Backup/External-copy inventory; cryptographic signing, key rotation and trust registry; full F/G/H Adapter and Context implementations; actual COC/G Applied persistence; physical erasure and operational deployment.
 
-The `core_barrier_ready` predicate is deliberately not named or treated as I's `Global Forget Completed`. The model does not infer terminality from a missing Worker run; it accepts an abstract external no-publication proof input whose concrete D/E/Storage contract remains unresolved. A separate two-operation model is still required for overlapping Forget requests; this model remains single-operation.\n\nThe state count is bounded by this abstraction and depth. A PASS means only that no invariant violation was found in this finite model under the assumptions above. It does not establish that the Owner contracts or production topology implement those assumptions.
+The `core_barrier_ready` predicate is deliberately not named or treated as I's `Global Forget Completed`. The model does not infer terminality from a missing Worker run; it accepts an abstract external no-publication proof input whose concrete D/E/Storage contract remains unresolved. A separate two-operation model is still required for overlapping Forget requests; this model remains single-operation.
+
+The state count is bounded by this abstraction and depth. A PASS means only that no invariant violation was found in this finite model under the assumptions above. It does not establish that the Owner contracts or production topology implement those assumptions.

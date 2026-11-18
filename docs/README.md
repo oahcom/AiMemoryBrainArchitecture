@@ -52,7 +52,8 @@ Bilingual guides explain and navigate these specifications; they do not silently
 3. Translation must never turn CANDIDATE, OPEN, or TO_VALIDATE into DECIDED or APPROVED.
 4. Normative decisions are governed by source specifications and the owner/ADR process—not by whichever language page was edited last.
 5. Each paired document records its ID, version, source revision, status, and counterpart path.
-6. Every AI developer/session must check both language counterparts before work and include bilingual parity in its task plan, prompt, review and completion evidence.\n7. A contract change requires both language versions to be updated in the same change set, or the untranslated counterpart must be marked STALE under a formally approved, time-bounded exception.
+6. Every AI developer/session must check both language counterparts before work and include bilingual parity in its task plan, prompt, review and completion evidence.
+7. A contract change requires both language versions to be updated in the same change set, or the untranslated counterpart must be marked STALE under a formally approved, time-bounded exception.
 
 ## Status vocabulary / 状态词汇
 
