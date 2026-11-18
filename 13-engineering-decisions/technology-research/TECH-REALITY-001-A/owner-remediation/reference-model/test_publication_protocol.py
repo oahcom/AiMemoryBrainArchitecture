@@ -1212,5 +1212,24 @@ class PublicationProtocolTests(unittest.TestCase):
             p.resolve_no_publication("op-1", self.no_publication_proof(operation_binding=binding))
 
 
+    def test_storage_dependency_digest_is_rechecked_at_final_commit(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        storage = p.storage_participants["storage-1"]
+        p.storage_participants["storage-1"] = (storage[0], storage[1], "dependency-digest-substituted")
+        with self.assertRaisesRegex(Rejected, "dependency digest"):
+            p.commit(**args)
+
+    def test_storage_dependency_digest_is_rechecked_during_unknown_reconciliation(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        binding = p.operation_bindings["op-1"]
+        p.mark_unknown("op-1", binding)
+        storage = p.storage_participants["storage-1"]
+        p.storage_participants["storage-1"] = (storage[0], storage[1], "dependency-digest-substituted")
+        p.install_forget_fence()
+        with self.assertRaisesRegex(Rejected, "dependency digest"):
+            p.resolve_no_publication("op-1", self.no_publication_proof(operation_binding=binding))
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
