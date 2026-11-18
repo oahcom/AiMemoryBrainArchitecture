@@ -9,7 +9,7 @@
 - Baseline: remediation/aid-2026-001-forget-contract-closure-2026-11-18 @ `eb6aa17c9cefb51434234cdb0f5503197416b9bf` (dispatch-supplied and Issue #41 U-010 comment corroborated; recheck before any later write)
 - Class/Risk: ARCH / SEC / DOC; R3
 - Status: I-SIDE CONTRACT CANDIDATE; formal Owner-I approval NOT CLAIMED; D/I same-SHA approval NOT GRANTED
-- Language status: English working master; complete Chinese translation PENDING; bilingual semantic parity NOT SATISFIED
+- Language status: English working master; complete Chinese translation COMPLETE; bilingual semantic parity NOT SATISFIED
 - Reflow: existing Issue #41; no new Issue/PR
 
 ## 1. Authority and invariants / 权责与不变量
