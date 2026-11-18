@@ -1475,4 +1475,90 @@ mod tests {
         let _ = std::fs::remove_file(second_result);
     }
 
+
+    #[test]
+    fn sqlite_denies_fresh_cross_scope_write_without_persisting_any_commit_state() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+        let foreign_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+
+        let result = store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v-denied-cross-scope", 1, None),
+            idempotency_key: "fresh-foreign-write".into(),
+            request_digest: "fresh-foreign-write-digest".into(),
+        }, &[foreign_scope]);
+        assert_eq!(result, Err(StorageError::ScopeMismatch));
+
+        assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+        assert_eq!(
+            store.read_version(&id("m1"), &id("v-denied-cross-scope"), &[scope()]).unwrap(),
+            None
+        );
+        assert_eq!(
+            store.resolve_idempotency("fresh-foreign-write", "fresh-foreign-write-digest", &[scope()]).unwrap(),
+            None
+        );
+        assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+    }
+
+    #[test]
+    fn sqlite_change_pages_with_limit_two_preserve_order_without_skips_or_duplicates() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        let visible_scope = scope();
+        let hidden_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+
+        for (memory_id, version_id, item_scope) in [
+            ("m1", "v1", visible_scope.clone()),
+            ("m2", "v2", hidden_scope.clone()),
+            ("m3", "v3", hidden_scope.clone()),
+            ("m4", "v4", visible_scope.clone()),
+            ("m5", "v5", visible_scope.clone()),
+            ("m6", "v6", hidden_scope),
+            ("m7", "v7", visible_scope.clone()),
+        ] {
+            let mut item = memory();
+            item.memory_id = id(memory_id);
+            item.scope_refs = vec![item_scope.clone()];
+            store.create_memory(item, &[item_scope.clone()]).unwrap();
+
+            let mut item_version = version(version_id, 1, None);
+            item_version.memory_id = id(memory_id);
+            store.commit_version(CommitRequest {
+                memory_id: id(memory_id),
+                expected_current_version: None,
+                new_version: item_version,
+                idempotency_key: format!("page-two-{memory_id}"),
+                request_digest: format!("page-two-digest-{memory_id}"),
+            }, &[item_scope]).unwrap();
+        }
+
+        let first = store.list_changes(None, &[visible_scope.clone()], 2).unwrap();
+        assert_eq!(
+            first.records.iter().map(|record| record.memory_id.clone()).collect::<Vec<_>>(),
+            vec![id("m1"), id("m4")]
+        );
+        assert_eq!(first.next_cursor, Some(CommitSequence(4)));
+
+        let second = store.list_changes(first.next_cursor, &[visible_scope.clone()], 2).unwrap();
+        assert_eq!(
+            second.records.iter().map(|record| record.memory_id.clone()).collect::<Vec<_>>(),
+            vec![id("m5"), id("m7")]
+        );
+        assert_eq!(second.next_cursor, Some(CommitSequence(7)));
+
+        let end = store.list_changes(second.next_cursor, &[visible_scope], 2).unwrap();
+        assert!(end.records.is_empty());
+        assert_eq!(end.next_cursor, None);
+    }
+
 }
