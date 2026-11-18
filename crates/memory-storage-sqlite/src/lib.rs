@@ -124,7 +124,7 @@ impl SqliteMemoryStorage {
                 let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
                 let mut version: MemoryVersion = Self::decode(&version_json)?;
                 version.validate().map_err(|_| StorageError::InvalidSchema)?;
-                if version.claims.iter().any(|claim| !scopes_intersect(&claim.scope_refs, &stored_scopes)) {
+                if version.claims.iter().any(|claim| claim.scope_refs.iter().any(|claim_scope| !stored_scopes.iter().any(|stored_scope| stored_scope.scope_id == claim_scope.scope_id))) {
                     return Err(StorageError::InvalidSchema);
                 }
                 // A Memory may carry multiple applicability scopes. Filter nested
@@ -228,7 +228,7 @@ impl MemoryStorage for SqliteMemoryStorage {
 
         Self::scope_allowed(&memory_row.0, scope)?;
         let memory_scopes: Vec<ScopeRef> = Self::decode(&memory_row.0)?;
-        if request.new_version.claims.iter().any(|claim| !scopes_intersect(&claim.scope_refs, &memory_scopes)) {
+        if request.new_version.claims.iter().any(|claim| claim.scope_refs.iter().any(|claim_scope| !memory_scopes.iter().any(|memory_scope| memory_scope.scope_id == claim_scope.scope_id))) {
             return Err(StorageError::ScopeMismatch);
         }
 
@@ -1253,6 +1253,75 @@ mod tests {
         );
         assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
         assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+    }
+
+    #[test]
+    fn sqlite_rejects_mixed_parent_and_foreign_claim_scopes_before_commit() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+
+        let other_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+        let mut mixed_claim = claim_in_scope("claim-mixed", scope());
+        mixed_claim.scope_refs.push(other_scope);
+        let mut new_version = version("v-mixed-scope", 1, None);
+        new_version.claims = vec![mixed_claim];
+
+        assert_eq!(
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version,
+                idempotency_key: "mixed-scope-op".into(),
+                request_digest: "mixed-scope-digest".into(),
+            }, &[scope()]),
+            Err(StorageError::ScopeMismatch)
+        );
+        assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+        assert_eq!(store.read_version(&id("m1"), &id("v-mixed-scope"), &[scope()]).unwrap(), None);
+        assert_eq!(store.resolve_idempotency("mixed-scope-op", "mixed-scope-digest", &[scope()]).unwrap(), None);
+        assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+    }
+
+    #[test]
+    fn sqlite_rejects_persisted_claim_with_mixed_parent_and_foreign_scopes() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+        let mut new_version = version("v-persisted-mixed-scope", 1, None);
+        new_version.claims = vec![claim_in_scope("claim-persisted-mixed", scope())];
+        store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version,
+            idempotency_key: "persisted-mixed-op".into(),
+            request_digest: "persisted-mixed-digest".into(),
+        }, &[scope()]).unwrap();
+
+        let other_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+        let version_json: String = store.connection.query_row(
+            "SELECT version_json FROM versions WHERE version_id = 'v-persisted-mixed-scope'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        let mut persisted: MemoryVersion = SqliteMemoryStorage::decode(&version_json).unwrap();
+        persisted.claims[0].scope_refs.push(other_scope);
+        let corrupted = SqliteMemoryStorage::encode(&persisted).unwrap();
+        store.connection.execute(
+            "UPDATE versions SET version_json = ?1 WHERE version_id = 'v-persisted-mixed-scope'",
+            params![corrupted],
+        ).unwrap();
+
+        assert_eq!(
+            store.read_current(&id("m1"), &[scope()]),
+            Err(StorageError::InvalidSchema)
+        );
     }
 
     #[test]
