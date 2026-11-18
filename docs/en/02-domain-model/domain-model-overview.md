@@ -21,7 +21,7 @@ The model is intentionally richer than text plus embedding. Embeddings, lexical 
 1. Every canonical object has a stable typed opaque identifier.
 2. MemoryId identifies the logical Memory for its entire lifetime.
 3. MemoryVersionId identifies one immutable Memory version.
-4. ClaimId is stable across Memory versions when the proposition remains the same logical claim; a semantic change creates a new ClaimId.
+4. ClaimId identity across Memory versions remains OPEN in Phase 1; this implementation contract does not freeze stable-versus-version-local Claim identity.
 5. A Memory update creates a new immutable MemoryVersion. Previous versions remain readable subject to governance.
 6. A ContextEntry references a specific MemoryVersion or governed rendering; it is never a second canonical Memory.
 7. IDs are not timestamps, mutable-content hashes, database row numbers, or authorization credentials.
