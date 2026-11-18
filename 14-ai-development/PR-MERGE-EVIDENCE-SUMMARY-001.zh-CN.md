@@ -16,7 +16,7 @@
 | SQLite scope-filtered pagination | DECIDED（已测边界） | #241 exact-head Workspace CI 成功，分页限制应用于授权可见记录 | 不代表所有复杂权限模型 |
 | SQLite WAL/FULL + reopen/process-exit rollback | DECIDED（本地文件库测试边界） | #242 exact-head 测试验证关闭重开持久化和独立进程未提交事务回滚 | 不证明断电、内核崩溃、介质损坏、备份恢复或生产拓扑 |
 | SQLite independent-connection CAS/idempotency race | DECIDED（同进程独立连接边界） | #243 exact-head Workspace CI 成功，两个独立连接的竞争写及相同幂等键竞争有测试覆盖 | 不证明跨进程线性化或分布式协调 |
-| SQLite rollback/lock/savepoint 扩展 | CANDIDATE / 待验证 | #249 已提交测试实现，Bilingual gate 成功 | Rust Workspace 当前仍在执行；不得提前验收 |
+| SQLite rollback/lock/savepoint 扩展 | CANDIDATE / 测试通过；待独立审查 | #249 exact-head Rust Workspace 与双语文档门禁均已通过 | 尚无 Owner/独立审查批准或合并 |
 | PR 治理强化 / branch protection | OPEN | #248 文档提案已通过双语结构门禁 | #134 的平台级保护、必需检查强制及负向测试仍未完成 |
 | Phase 3.7 D/E/I/Storage publication protocol | OPEN | Issue #25 明确保留 Owner 决策、真实实现及生产证据缺口 | 不得由 Phase 1 SQLite 测试推导出 Forget/Publication 生产闭环已完成 |
 
@@ -54,7 +54,7 @@
 | PR | 目标 / 改动范围 | Exact Head / 门禁快照 | 合并提交 SHA | 当前状态 / 决策 |
 |---|---|---|---|---|
 | [#248](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/248) | PR-GOVERNANCE-001 双语执行附录：exact-head CI、独立审批、prompt/evidence 追踪、Issue #130/#134 runbook | Head `b887e9518977dca985776bf8715de9cd7597beb2`；Bilingual `44264271033` SUCCESS；Rust 不适用 | N/A（OPEN） | 文档提案；CANDIDATE。Issue #134 的 GitHub 平台级保护设置和负向阻断测试仍 OPEN |
-| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback、busy timeout/retry、injected commit failure、panic/unwind rollback 测试 | Head `be1eb17334864b1d74aa70612a09033f09b40d36`；Bilingual `44264275487` SUCCESS；Rust Workspace `44264277063` FAILURE（job `134664822288`；14 passed / 1 failed；`file_db_busy_timeout_bounds_wait_for_long_immediate_transaction` 使用了不存在的 `updated_at` 列） | N/A（OPEN） | CANDIDATE / TO_VALIDATE；待 exact-head Rust 结果完成，不提前验收 |
+| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback、busy timeout/retry、injected commit failure、panic/unwind rollback 测试 | Head `f8aae66de2f47ced90fa486b16e6de2e6daf8659`；Rust Workspace `44264422967` SUCCESS；Bilingual `44264422934` SUCCESS | N/A（OPEN） | CANDIDATE；实现与 CI 门禁通过，仍待独立语义审查与批准 |
 
 ## 3. 状态分类与证据边界
 
@@ -67,7 +67,7 @@
 ### CANDIDATE
 
 - PR #248 的治理执行附录：双语 gate 通过，但 PR 未合并，且不能替代 GitHub 平台配置。
-- PR #249 新增的 SQLite rollback/lock/savepoint 测试：实现已提交，Rust exact-head 结果尚待完成。
+- PR #249 SQLite rollback/lock/savepoint 测试：准确 Head `f8aae66de2f47ced90fa486b16e6de2e6daf8659`；Rust Workspace run `44264422967` SUCCESS，双语文档 run `44264422934` SUCCESS。仍待独立语义审查。
 - SQLite WAL/FULL 配置可作为当前 adapter 的实现配置，但不能提升为生产环境的最终 durability policy。
 
 ### OPEN
