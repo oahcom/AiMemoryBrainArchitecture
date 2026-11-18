@@ -548,7 +548,7 @@ mod tests {
             "UPDATE memories SET current_version_id = 'uncommitted-version' WHERE memory_id = 'm1'",
             [],
         ).unwrap();
-        std::process::abort();
+        std::process::exit(86);
     }
 
     #[test]
@@ -568,7 +568,7 @@ mod tests {
             .env("SQLITE_CRASH_PATH", &path)
             .status()
             .unwrap();
-        assert!(!status.success(), "crash child must terminate before commit");
+        assert_eq!(status.code(), Some(86), "crash child must exit before commit");
 
         let recovered = SqliteMemoryStorage::open(&path).unwrap();
         assert_eq!(recovered.read_current(&id("m1"), &[scope()]).unwrap(), None);
