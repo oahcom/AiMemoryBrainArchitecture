@@ -7,7 +7,9 @@
 **Current I source branch / 当前 I 来源分支:** `session-i-security-governance-2026-11-16`  
 **Current I source HEAD / 当前 I 来源 HEAD:** `029ae8f8f48992532d5c0a9397816e4d8a9220a2`  
 **Exact I source / 精确 I 来源:** `09-security-governance/phase-3.7-i-current-authorization-enforcement-and-restore-proof.md`  
-**Exact I source Blob / 精确 I 来源 Blob:** `e3b1b5d99eb36ac0b395854d8c19287d2b64b752`
+**Exact I source Blob / 精确 I 来源 Blob:** `e3b1b5d99eb36ac0b395854d8c19287d2b64b752`  
+**Additional controlling I source / 额外控制性 I 来源:** `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md`  
+**Exact Phase 3.8 Blob / Phase 3.8 精确 Blob:** `54bab0484bd232a5a258e65e34cc7425288b39a6`
 
 ## 1. Why this addendum exists / 补充原因
 
@@ -39,7 +41,7 @@ PR #179 在同一参考模型变更中覆盖两个维度：
 
 ## 3. Authorization context coverage / 授权上下文覆盖范围
 
-The model currently binds these 15 context values:
+The model currently binds these 25 context values:
 
 当前模型绑定以下 15 个上下文值：
 
@@ -58,18 +60,30 @@ The model currently binds these 15 context values:
 - `workload_binding_ref`
 - `policy_version_digest`
 - `decision_id`
+- `tenant_security_domain_ref`
+- `ownership_scope_ref`
+- `applicability_scope_set_digest`
+- `obligations_digest`
+- `expiry`
+- `producer_binding_ref`
+- `adapter_binding_ref`
+- `authenticated_transport_binding_ref`
+- `authentication_strength`
+- `operation_payload_digest`
 
-These values are immutable within the model's authorization identity and are carried into the I decision proof and subsequent Storage/UNKNOWN checks.
+These 25 values are immutable within the model's authorization identity and are carried into the I decision proof and subsequent Storage/UNKNOWN checks. The exact PublicationOperationId and D/Storage participant IDs are separately bound by the participant/operation tuple, not treated as free context metadata.
 
 这些值在模型授权身份内保持不可变，并进入 I 决策证明及后续 Storage/UNKNOWN 检查。
 
 ### 3.1 Explicitly not covered / 明确尚未覆盖
 
-The 15-value tuple is **not** the complete protected-boundary authorization mechanism. The following remain unimplemented or unproven:
+The 25-value tuple is **not** the complete protected-boundary authorization mechanism. The following remain unimplemented or unproven:
 
 该 15 值元组**不等于**完整的受保护边界授权机制。以下内容仍未实现或未证明：
 
-- authenticated issuer identity and issuer credential validation;
+- authenticated issuer identity, issuer credential validation, and issuer key ID/version/status at issuance and verification;
+- live I policy/revocation/registry state and authoritative PolicyDomain sequencer continuity;
+- exact DerivedArtifactRef/version/content digest, AttemptId/LeaseId/LeaseEpoch, dependency receipt and complete dependency-set digest as separate authoritative bindings (the model currently covers only a subset of these through generic IDs/digests);
 - issuer key ID/version/status, key revocation and trust-root validation;
 - live PolicyDomain policy-version currentness;
 - live PermissionEpoch/revocation/registry currentness and sequencer continuity;
@@ -85,7 +99,7 @@ The 15-value tuple is **not** the complete protected-boundary authorization mech
 - 经认证的 Principal/Actor/Workload/Delegation 解析；
 - 真实 Scope 隔离和跨 PolicyDomain 执行。
 
-`permission_epoch` is modeled as an opaque I-local value and exact-binding field only. The model does not prove a live I sequencer, freshness, revocation ordering, or comparability with any D/Storage high-water.
+`permission_epoch` remains opaque and I-local. The follow-up model now includes an explicit in-memory `current_permission_epochs` test seam: I COMMIT_WON is rejected if the current epoch is unavailable or differs from the authorization context; a later epoch advance does not rewrite a previously won COMMIT_WON. This models equality/fail-closed ordering only. It does not prove a live I sequencer, authenticated current-state source, issuer-key status, policy/revocation/registry currentness, or comparability with any D/Storage high-water.
 
 `permission_epoch` 在模型中仅作为不透明的 I 本地值和精确绑定字段。该模型不证明真实 I Sequencer、实时新鲜度、撤权排序，也不证明它可与任何 D/Storage High-water 比较。
 
@@ -101,7 +115,7 @@ The 15-value tuple is **not** the complete protected-boundary authorization mech
 - Publication Protocol run #44242418467：**52 项测试 / OK**。
 - GOV-DOC-001 run #44242418382：**SUCCESS**。
 
-The documentation-only addition changes the PR head and therefore requires a fresh exact-head CI run before merge. The 52/52 result above remains evidence for the preceding code Head, not automatically for a later Head.
+The follow-up PermissionEpoch currentness candidate adds an explicit unavailable/stale fail-closed test and tests that a later epoch advance does not cancel an earlier COMMIT_WON. Its current code/test Head before this documentation update is `0c55e4fd9ca7ae9c889498bf173b5888e11ca204` with 58 tests; exact-head CI is pending. The field-substitution test now checks all 25 tuple positions; the earlier index-16-only loop is not used as acceptance evidence. Any subsequent documentation change also requires a fresh exact-head run.
 
 本次仅文档追加会改变 PR Head，因此合并前必须对新精确 Head 重新运行 CI。上述 52/52 仅证明前一代码 Head，不自动证明后续 Head。
 
