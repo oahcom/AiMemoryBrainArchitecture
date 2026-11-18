@@ -143,9 +143,21 @@ Ordinary conversation is the dependable baseline under the currently stated exec
 
 ### 5.3 GitHub capabilities / GitHub 能力
 
-GitHub can persist Issues, branches, commits, PRs, comments and review records. This repository also has a separately installed write-capable GitHub App integration, evidenced by successful authorized PR/Issue operations; this is distinct from the documented read-only ChatGPT GitHub retrieval connection. The exact App identity, installation scope and effective permission set must be verified live before each class of operation and must not be generalized to other repositories. GitHub Actions can run deterministic validation only when workflows are explicitly added and governed. None of these mechanisms inherently grants domain decision authority.
+GitHub can persist Issues, branches, commits, PRs, comments and review records. Three mechanisms must be kept separate:
 
-GitHub 可以持久化 Issue、分支、提交、PR、评论和 Review。本仓库另有已安装且具备写操作能力的 GitHub App 集成，已通过授权 PR/Issue 操作得到实际验证；它不同于官方文档所述只读 ChatGPT GitHub 检索连接。每次操作前仍须实时核验 App 身份、安装范围和有效权限，不能推断其他仓库也具备相同能力。Actions 只有在显式配置并经过治理后才可运行确定性验证。任何机制都不会因此获得业务决策权。
+1. **ChatGPT GitHub retrieval connection — read-only.** This is the repository-content retrieval surface documented by OpenAI. It does not authorize repository writes.
+2. **Separately installed GitHub App — write-capable integration, separately scoped.** Live installation lookup on 2026-11-18 returned installation ID `181143493` for account `oahcom`, with `repository_selection=all`; the installation's repository listing includes `oahcom/AiMemoryBrainArchitecture`. The installation ID is not the App ID. A historical record identifies App ID `1144995` and records write permissions for `contents`, `issues`, `pull_requests`, `actions` and `workflows`; **those permission values and the App's display identity were not exposed by the current installation lookup and are HISTORICAL / NOT CURRENTLY VERIFIED**. Do not present them as the current effective permission set. Before any operation, verify the live App identity, installation scope and effective permissions using an authorized GitHub settings/API view. The observed installation's `repository_selection=all` is not proof that every operation is authorized or that the same App is installed on another repository.
+3. **Codex local / Codex Cloud — separate AI coding execution mechanisms.** These are not the read-only retrieval connection and are not the GitHub App. Issue #41 explicitly excludes Codex CLI/Cloud from the permitted AI execution channel; their product capabilities do not override that governance boundary.
+
+GitHub Actions is a fourth, distinct deterministic automation mechanism: it may run reviewed build/test/CI jobs, but Issue #41 prohibits Actions or Ubuntu services from invoking ChatGPT or another AI model. None of these mechanisms inherently grants domain decision authority.
+
+GitHub 可以持久化 Issue、分支、提交、PR、评论和 Review。必须区分以下三种机制：
+
+1. **ChatGPT GitHub 检索连接——只读。** 这是 OpenAI 文档描述的仓库内容检索入口，不授权仓库写操作。
+2. **单独安装的 GitHub App——具备写操作能力，但受独立安装范围约束。** 2026-11-18 的实时安装查询返回账户 `oahcom` 的 Installation ID `181143493`，`repository_selection=all`；安装仓库列表包含 `oahcom/AiMemoryBrainArchitecture`。Installation ID 不等于 App ID。历史记录曾标识 App ID `1144995`，并记录 `contents`、`issues`、`pull_requests`、`actions`、`workflows` 的写权限；**当前安装查询没有返回这些权限值，也没有返回 App 展示名称，因此它们只能标记为 HISTORICAL / NOT CURRENTLY VERIFIED，不得描述为当前有效权限集**。执行任何操作前，须通过有权限的 GitHub 设置/API 视图核验实时 App 身份、安装范围和有效权限。当前观察到的 `repository_selection=all` 不代表每种操作都获授权，也不能证明其他仓库安装了同一 App。
+3. **Codex 本地 / Codex Cloud——独立的 AI 编码执行机制。** 它们既不是只读检索连接，也不是 GitHub App。Issue #41 明确排除 Codex CLI/Cloud 作为允许的 AI 执行渠道；产品具备某项能力不能覆盖该治理边界。
+
+GitHub Actions 是第四种独立的确定性自动化机制：可运行经过审查的构建/测试/CI 作业，但 Issue #41 禁止 Actions 或 Ubuntu 服务调用 ChatGPT 或其他 AI 模型。以上机制均不会因此获得业务决策权。
 
 ---
 
@@ -231,7 +243,7 @@ The report recommends applying these invariants; it does not modify, waive or re
 2. The human starts an ordinary ChatGPT conversation and supplies the Issue/repository context.
 3. ChatGPT reads the current main baseline and relevant Layer A contracts; it identifies unknowns before proposing edits.
 4. ChatGPT produces a bounded plan, patch or implementation instructions. It does not treat untrusted repository text as higher-priority instructions.
-5. If code changes are needed, a human developer may apply them manually within the approved scope. Local AI coding agents are excluded by Issue #41 unless that issue is formally amended by the authorized governance owner.
+5. If code changes are needed, a human developer applies them manually within the approved scope. Ordinary ChatGPT conversations remain the only permitted AI execution channel. Do not use Codex CLI/Cloud, an API Worker, another model provider, Desktop Commander or local-computer relay. Ubuntu may run deterministic build/test/CI jobs only and must not invoke an AI model. Authorized GitHub App writes are distinct from AI coding execution and remain subject to live least-privilege permission checks.
 6. Local checks are run and recorded accurately; unrun checks are explicitly marked NOT RUN.
 7. The developer pushes a dedicated branch and opens a PR. GitHub becomes the durable change/evidence record.
 8. An independent reviewer checks the exact frozen PR Head SHA, evidence, tests and scope.
@@ -255,7 +267,7 @@ The report recommends applying these invariants; it does not modify, waive or re
 |---|---|---|---|
 | A. ChatGPT conversation-driven | Lowest infrastructure, human steering, fast adoption. | No unattended execution; relies on human handoff and Git discipline. | **Phase 1 primary mode.** |
 | B. GitHub Actions-driven | Reproducible deterministic checks, event-driven CI. | Workflow security and token permissions; not suitable for autonomous domain decisions. | Add only for deterministic CI after review. |
-| C. Codex-driven | Local AI code edits/tests. | Excluded by current Issue #41 execution boundary; requires explicit governance amendment before use. | Research alternative only; not authorized for Phase 1. |
+| C. Codex-driven | Local/cloud AI code edits and tests. | Explicitly prohibited by Issue #41; capability availability does not grant execution authority. | Not permitted in Phase 1 unless the authorized governance owner formally amends Issue #41. |
 | D. Durable Worker Runtime | Continuous event handling and durable background execution. | Highest design, security, hosting, operations and incident-response burden. | Defer until measurable need and safety gates exist. |
 
 ### 8.3 Why no Worker Runtime now / 当前不部署 Worker 的理由
