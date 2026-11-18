@@ -316,7 +316,7 @@ pub struct IdempotencyRecord {
     pub payload_digest: String,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Default)]
 pub struct IdempotencyIndex {
     records: BTreeMap<String, String>,
 }
