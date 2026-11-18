@@ -1,238 +1,252 @@
 # 规范领域模型
 
-- Document ID: DOMAIN-MODEL-001
-- Version: 2.0
+- 文档 ID：DOMAIN-MODEL-001
+- 版本：2.0
 - 状态：DECIDED（Phase 1 实现契约）
 - Owner：Memory Domain Model（MB-01）
 - 范围：逻辑领域语义；不定义存储 DDL、Wire 编码、部署拓扑、索引、提取算法或 LLM 行为
 
 ## 1. 决议
 
-Phase 1 uses these canonical domain objects:
+Phase 1 采用以下规范领域对象：
 
-Event, Memory, MemoryVersion, Claim, Entity, Relation, Evidence, Provenance, MemorySource, MemoryContext, ContextEntry, ScopeRef, ActorRef, and TemporalRef.
+Event、Memory、MemoryVersion、Claim、Entity、Relation、Evidence、Provenance、MemorySource、MemoryContext、ContextEntry、ScopeRef、ActorRef、TemporalRef。
 
-Fact is not a separate object in Phase 1. A verified fact is represented as a Claim whose epistemic status is Verified.
+Fact 在 Phase 1 不是独立对象。“已验证事实”表示为 Epistemic Status 为 Verified 的 Claim。
 
-The model is intentionally richer than text plus embedding. Embeddings, lexical indexes, graph indexes, ranking features, and rendered text are derived representations, not canonical domain objects.
+模型明确不压缩为 text + embedding。Embedding、词法索引、图索引、排序特征和渲染文本均属于派生表示，不是规范领域对象。
 
 ## 2. 身份与版本规则
 
-1. Every canonical object has a stable typed opaque identifier.
-2. MemoryId identifies the logical Memory for its entire lifetime.
-3. MemoryVersionId identifies one immutable Memory version.
-4. ClaimId is stable across Memory versions when the proposition remains the same logical claim; a semantic change creates a new ClaimId.
-5. A Memory update creates a new immutable MemoryVersion. Previous versions remain readable subject to governance.
-6. A ContextEntry references a specific MemoryVersion or governed rendering; it is never a second canonical Memory.
-7. IDs are not timestamps, mutable-content hashes, database row numbers, or authorization credentials.
+1. 每个规范对象都有稳定、类型明确的不透明标识符。
+2. MemoryId 在 Memory 整个生命周期内保持不变。
+3. MemoryVersionId 标识一个不可变 Memory 版本。
+4. 当命题仍属于同一逻辑 Claim 时，ClaimId 跨 Memory Version 保持稳定；命题发生语义变化时创建新的 ClaimId。
+5. Memory 更新必须创建新的不可变 MemoryVersion；旧版本在治理允许范围内仍可读取。
+6. ContextEntry 引用特定 MemoryVersion 或受治理的呈现形式；它不是第二份 Canonical Memory。
+7. ID 不是时间戳、可变内容哈希、数据库行号或授权凭证。
 
 ## 3. 规范对象契约
 
 ### 3.1 Event
-An Event 记录系统观察、收到、报告或捕获的发生，不等于所描述事情已经客观为真。
 
-Required semantics: event_id, scope, recorded_at, event_kind, source, payload; optional occurred_at, actor/environment references, and idempotency key for retryable ingestion.
+Event 记录观察、报告、提交或捕获的发生，不等于所描述事情已经客观为真。
 
-Recorded_at is system capture time. Occurred_at describes when the represented event occurred and may be unknown.
+必须具有：event_id、scope、recorded_at、event_kind、source、payload；可选 occurred_at、Actor/Environment 引用，以及可重试接收时使用的幂等键。
+
+recorded_at 表示系统记录时间；occurred_at 表示被描述事件的发生时间，可以未知。
 
 ### 3.2 Memory
+
 Memory 是被保留知识资产的稳定逻辑身份。
 
-Required semantics: memory_id, scope, created_at, lifecycle_state, current_version_id.
+必须具有：memory_id、scope、created_at、lifecycle_state、current_version_id。
 
-Memory identity does not change when content is revised, consolidated, superseded, or rendered differently.
+内容修订、巩固、替代或呈现方式变化都不能改变 Memory 身份。
 
 ### 3.3 MemoryVersion
-MemoryVersion 是不可变的语义快照。
 
-Required semantics: memory_version_id, memory_id, monotonic version_number, created_at, claims, entity_refs, relation_refs, source_refs, provenance_refs.
+MemoryVersion 是不可变语义快照。
 
-A candidate Memory may temporarily have no Claim; canonical commit must satisfy its owning subsystem's acceptance rules.
+必须具有：memory_version_id、memory_id、单调递增的 version_number、created_at、claims、entity_refs、relation_refs、source_refs、provenance_refs。
+
+Candidate Memory 可以暂时没有 Claim；Canonical Commit 必须满足所属子系统的接收规则。
 
 ### 3.4 Claim
+
 Claim 是规范命题对象。
 
-Required semantics: claim_id, proposition subject/reference, predicate, object/value/reference, epistemic_status, temporal_ref, scope, evidence_refs, optional confidence metadata.
+必须具有：claim_id、命题主体/引用、predicate、object/value/reference、epistemic_status、temporal_ref、scope、evidence_refs；可选 confidence 元数据。
 
-The proposition is distinct from Evidence that supports or refutes it. Verified means the claim passed the declaring verification process; it does not mean metaphysical certainty.
+命题与支持/反驳它的 Evidence 必须分离。Verified 表示通过声明的验证流程，不表示绝对真理。
 
-Phase 1 epistemic statuses: Observed, Reported, Inferred, Verified, Disputed, Retracted.
+Phase 1 的认知状态为：Observed、Reported、Inferred、Verified、Disputed、Retracted。
 
 ### 3.5 Entity
+
 Entity 是具有身份的指代对象。
 
-Required semantics: entity_id, scope, entity_type, stable identity metadata, optional canonical label and aliases.
+必须具有：entity_id、scope、entity_type、稳定身份元数据；可选 canonical label 和 aliases。
 
-A mention, string occurrence, or embedding is not an Entity by itself.
+单次文本 mention、字符串或 embedding 本身不是 Entity。
 
 ### 3.6 Relation
+
 Relation 是类型化关联。
 
-Required semantics: relation_id, relation_type, typed endpoints, scope, optional temporal_ref, optional evidence/provenance references.
+必须具有：relation_id、relation_type、类型化端点、scope；可选 temporal_ref 和 Evidence/Provenance 引用。
 
-Co-occurrence alone does not create a Relation. If an association has its own role, time, scope, evidence, or lifecycle, represent it as an explicit association object.
+共同出现本身不构成 Relation。如果关联自身具有角色、时间、Scope、Evidence 或生命周期，应使用显式关联对象表达。
 
 ### 3.7 Evidence
+
 Evidence 是支持、反驳或限定 Claim 的来源材料或观察。
 
-Required semantics: evidence_id, scope, source_ref, captured_at, evidence_role, integrity/reference metadata.
+必须具有：evidence_id、scope、source_ref、captured_at、evidence_role、完整性/引用元数据。
 
-Evidence may have stricter access controls than a derived Memory. Evidence is never replaced by a confidence score.
+Evidence 可以比派生 Memory 具有更严格的访问控制。Evidence 不能被 confidence 分数替代。
 
 ### 3.8 Provenance
+
 Provenance 记录来源和派生血缘。
 
-Required semantics: provenance_id, origin/source references, derivation operation/type, actor/process reference, created_at, optional parent provenance references.
+必须具有：provenance_id、origin/source 引用、derivation operation/type、actor/process 引用、created_at；可选 parent provenance 引用。
 
-If provenance cannot be retained, the record must explicitly state why; it must never fabricate an origin.
+如果无法保留 Provenance，必须明确记录原因，绝不能伪造来源。
 
 ### 3.9 MemorySource
-MemorySource is a typed association from a MemoryVersion or derived asset to its inputs. It records source role and ordering without conflating source material with the resulting Memory.
+
+MemorySource 是 MemoryVersion 或派生资产与输入来源之间的类型化关联，用于记录来源角色和顺序，但不把来源材料与结果 Memory 混为一体。
 
 ### 3.10 MemoryContext
+
 MemoryContext 是有 Scope、有版本、面向任务的 Canonical Memory 引用集合。
 
-Required semantics: context_id, scope, context_version, task/session/environment binding, ordered ContextEntries.
+必须具有：context_id、scope、context_version、task/session/environment 绑定、有序 ContextEntry。
 
-Context versioning is separate from canonical Memory versioning.
+Context 版本体系与 Canonical Memory 版本体系相互独立。
 
 ### 3.11 ContextEntry
+
 ContextEntry 是 MemoryContext 内的一条引用/呈现。
 
-Required semantics: entry_id, context_id, referenced memory_version_id, ordering/placement metadata, optional governed rendering metadata.
+必须具有：entry_id、context_id、referenced memory_version_id、排序/位置元数据；可选受治理的 rendering 元数据。
 
-Removing or replacing an entry does not mutate or delete its referenced canonical Memory.
+删除或替换 Entry 不得修改或删除其引用的 Canonical Memory。
 
 ### 3.12 ScopeRef
+
 ScopeRef 标识对象或操作所属的命名空间。
 
-Scope is distinct from Permission. Phase 1 does not infer permission from object ownership. Cross-scope access requires an authorization decision.
+Scope 与 Permission 分离。Phase 1 不从对象所有权推导 Permission；跨 Scope 访问必须有授权决策。
 
 ### 3.13 ActorRef
-ActorRef 标识操作或来源对应的主体。 It is audit/provenance metadata, not a domain permission grant.
+
+ActorRef 标识负责操作或来源的主体，是审计/Provenance 元数据，不是领域 Permission 授权本身。
 
 ### 3.14 TemporalRef
+
 TemporalRef 保留 Event Time、Recording Time 和 Valid Time 的区别。
 
-Phase 1 supports a point in time, an interval, unknown/unavailable time, and declared precision/certainty metadata.
+Phase 1 支持时间点、时间区间、未知/不可用时间，以及明确的精度和确定性元数据。
 
-Unknown time must not become always valid. Validity interval and storage retention interval are different concepts.
+未知时间不得被转换成“始终有效”。Valid Time 与存储保留时间不是同一概念。
 
 ## 4. 正交状态维度
 
-The model MUST NOT use one universal status field.
+模型不得使用一个通用 Status 字段承载所有状态。
 
-- Claim epistemic status: Observed, Reported, Inferred, Verified, Disputed, Retracted
-- Memory lifecycle: Candidate, Consolidated, Active, Superseded, Archived, Forgotten
-- Context/version/delivery state: owned by Memory Context and synchronization contracts
-- Confidence: support estimate under a declared method
-- Relevance: task-specific usefulness
-- Trust: trust in a source/actor/process
-- Evidence strength: strength of a particular evidence relationship
+- Claim Epistemic Status：Observed、Reported、Inferred、Verified、Disputed、Retracted
+- Memory Lifecycle：Candidate、Consolidated、Active、Superseded、Archived、Forgotten
+- Context/Version/Delivery 状态：由 Memory Context 与同步契约负责
+- Confidence：声明方法下的支持程度估计
+- Relevance：对当前任务的有用程度
+- Trust：对来源、主体或过程的信任
+- Evidence Strength：特定证据关系的支持强度
 
-These values are not interchangeable.
+这些值不可互换。
 
 ## 5. 基数与形成规则
 
-- One Event may produce zero, one, or many candidate Memories.
-- Many Events may contribute to one Memory.
-- One Memory has one or more immutable versions over its retained lifetime.
-- A MemoryVersion may contain multiple Claims.
-- A Claim may reference multiple Evidence records.
-- Evidence may support, refute, or qualify multiple Claims where policy permits.
-- Claims may concern multiple Entities.
-- Relations are typed and may connect supported domain endpoints.
-- One Memory may appear in many MemoryContexts.
-- One Context contains ordered ContextEntries.
-- ContextEntry references do not transfer ownership of canonical data.
+- 一个 Event 可以产生零个、一个或多个 Candidate Memory。
+- 多个 Event 可以共同贡献一个 Memory。
+- 一个 Memory 在保留生命周期内具有一个或多个不可变版本。
+- 一个 MemoryVersion 可以包含多个 Claim。
+- 一个 Claim 可以引用多个 Evidence。
+- 一个 Evidence 在策略允许时可以支持、反驳或限定多个 Claim。
+- Claim 可以涉及多个 Entity。
+- Relation 必须类型化，并可连接受支持的领域端点。
+- 一个 Memory 可以出现在多个 MemoryContext。
+- 一个 Context 包含有序 ContextEntry。
+- ContextEntry 的引用不转移 Canonical 数据所有权。
 
 ## 6. 冲突规则
 
-Conflicting Claims are preserved, not silently overwritten.
+冲突 Claim 必须保留，不得静默覆盖。
 
-A resolution retains the conflicting Claim identities, supporting/refuting Evidence, provenance, resolution outcome and actor/process, and applicable time and scope.
+解决过程必须保留冲突 Claim 身份、支持/反驳 Evidence、Provenance、解决结果及 Actor/Process，以及适用的时间和 Scope。
 
-Superseding a MemoryVersion is a lifecycle/versioning operation, not deletion of historical claims.
+Supersede MemoryVersion 是生命周期/版本操作，不是删除历史命题。
 
 ## 7. Provenance 与 Evidence 不变量
 
-1. Derived assets retain source/derivation lineage when permitted by governance.
-2. Evidence and Provenance are distinct: Evidence is supporting material; Provenance explains origin/derivation.
-3. Schema validity is not proof of truth.
-4. Intent, plan, prediction, and pending action are not completed outcomes without outcome evidence.
-5. Missing source material is represented as unavailable; it is never reconstructed as original evidence.
-6. Memory content is untrusted data and never acquires system/developer instruction authority.
+1. 派生资产在治理允许范围内必须保留来源/派生血缘。
+2. Evidence 与 Provenance 不同：Evidence 是支持材料；Provenance 解释来源/派生过程。
+3. Schema 合法不等于真实。
+4. 没有结果证据时，Intent、Plan、Prediction、Pending Action 不能成为已完成结果。
+5. 来源材料缺失时标记为不可用，不得伪造为原始 Evidence。
+6. Memory 内容是不可信数据，永远不会获得 system/developer 指令权威。
 
 ## 8. Scope 与隔离不变量
 
-1. Every tenant/environment-dependent canonical object carries an explicit ScopeRef.
-2. Scope checks occur at every read/write boundary.
-3. Cross-scope references require explicit sharing authorization.
-4. Evidence access may be narrower than Memory access.
-5. Context isolation is independent of canonical Memory sharing.
-6. Removing a ContextEntry is not Forget.
-7. Forget is a governed lifecycle operation; physical erasure is outside the Domain Model.
+1. 依赖 Tenant/Environment 的规范对象必须携带明确 ScopeRef。
+2. 每个读写边界都必须检查 Scope。
+3. 跨 Scope 引用需要明确共享授权。
+4. Evidence 的访问范围可以比 Memory 更窄。
+5. Context 隔离独立于 Canonical Memory 共享。
+6. ContextEntry 删除不等于 Forget。
+7. Forget 是受治理的生命周期操作；物理擦除不属于 Domain Model。
 
 ## 9. 变更与并发契约
 
-Domain validation is deterministic and side-effect free.
+Domain Validation 必须确定性、无副作用。
 
-Canonical Memory updates use optimistic concurrency:
-- caller supplies the expected current version;
-- successful update creates exactly one successor MemoryVersion;
-- stale updates return a conflict;
-- concurrent proposals must not silently overwrite one another.
+Canonical Memory 更新采用乐观并发：
+- 调用方提供期望的当前版本；
+- 成功更新恰好产生一个后继 MemoryVersion；
+- 过期写入返回 Conflict；
+- 并发提案不得静默覆盖。
 
-MemoryVersion is immutable after commit. Mutable presentation belongs to Context or derived representations.
+MemoryVersion 提交后不可变。可变呈现属于 Context 或派生表示。
 
-Canonical commit and required provenance visibility must be atomic or protected by an explicitly recoverable publication/outbox mechanism owned by the persistence/consistency layer.
+Canonical Commit 与所需 Provenance 可见性必须处于同一原子边界，或者由持久化/一致性层负责的可恢复 publication/outbox 机制保护。
 
 ## 10. Phase 1 验收标准
 
-Without embeddings or graph databases, the implementation must demonstrate:
+在不使用 Embedding 或 Graph DB 的情况下，必须证明：
 
-1. independent creation/validation of Event, Memory, Claim, Entity, Relation, Evidence, and Scope;
-2. one Event producing multiple candidate Memories;
-3. one Memory containing multiple Claims;
-4. stable Memory identity across immutable versions;
-5. stable Claim identity across versions when the proposition is unchanged;
-6. preservation of conflicting Claims and their Evidence;
-7. ContextEntry removal without canonical Memory mutation;
-8. denial of cross-scope reads/writes without authorization;
-9. rejection of plan/intent promotion to completed outcome without outcome evidence;
-10. deterministic validation errors and stale-write conflicts.
+1. Event、Memory、Claim、Entity、Relation、Evidence、Scope 可以独立创建/校验；
+2. 一个 Event 可以产生多个 Candidate Memory；
+3. 一个 Memory 可以包含多个 Claim；
+4. Memory 身份跨不可变版本稳定；
+5. 命题不变时 Claim 身份跨版本稳定；
+6. 冲突 Claim 及其 Evidence 被保留；
+7. 删除 ContextEntry 不会修改 Canonical Memory；
+8. 无授权时跨 Scope 读写被拒绝；
+9. 没有 Outcome Evidence 时拒绝把 Plan/Intent 提升为完成结果；
+10. 校验错误和 Stale Write Conflict 是确定性的。
 
 ## 11. 本规范明确不决定的事项
 
-The following remain outside the Phase 1 semantic freeze:
-- a separate immutable Fact object;
-- physical storage schema and SQL layout;
-- exact serialization/wire format;
-- embedding/vector/graph indexes;
-- ranking and retrieval algorithms;
-- relationship fan-out performance limits;
-- physical Forget/erasure mechanics;
-- model-assisted extraction behavior.
+以下事项不属于 Phase 1 语义冻结：
+- 独立不可变 Fact 对象；
+- 物理存储 Schema 与 SQL 布局；
+- 精确序列化/Wire 格式；
+- Embedding/Vector/Graph Index；
+- Ranking 与 Retrieval 算法；
+- Relation 扇出性能上限；
+- Forget 的物理擦除机制；
+- 模型辅助提取行为。
 
-These must not be introduced into the canonical domain model merely to simplify implementation.
+不得为了简化实现而把这些事项偷偷引入规范领域模型。
 
 ## 12. 决策闭合
 
-| Decision | Status |
+| 决策 | 状态 |
 |---|---|
-| Event / Memory / Claim are distinct | DECIDED |
-| Claim is the canonical proposition; no separate Fact in Phase 1 | DECIDED |
-| Memory identity is stable across versions | DECIDED |
-| Claim identity is stable across versions when proposition identity is preserved | DECIDED |
-| MemoryVersion is immutable | DECIDED |
-| Event / Recorded / Valid Time are distinct | DECIDED |
-| Unknown time is explicit, never always valid | DECIDED |
-| Canonical Memory and Context are separate | DECIDED |
-| Scope and Permission are separate | DECIDED |
-| Conflicts preserve competing Claims and evidence | DECIDED |
-| Qualified many-to-many associations use explicit association objects when needed | DECIDED semantic rule |
-| Separate immutable Fact object | OPEN / deferred |
-| Exact temporal uncertainty encoding | TO_VALIDATE |
-| Physical storage representation | OUT OF SCOPE |
+| Event / Memory / Claim 相互独立 | DECIDED |
+| Claim 是规范命题；Phase 1 不设独立 Fact | DECIDED |
+| Memory 身份跨版本稳定 | DECIDED |
+| 命题身份保持时 Claim 身份跨版本稳定 | DECIDED |
+| MemoryVersion 不可变 | DECIDED |
+| Event / Recorded / Valid Time 分离 | DECIDED |
+| 未知时间显式表示，绝不等于“始终有效” | DECIDED |
+| Canonical Memory 与 Context 分离 | DECIDED |
+| Scope 与 Permission 分离 | DECIDED |
+| 冲突保留竞争 Claim 与 Evidence | DECIDED |
+| 带自身语义的多对多关系使用显式关联对象 | DECIDED（语义规则） |
+| 独立不可变 Fact 对象 | OPEN / 延后 |
+| 时间不确定性的精确编码 | TO_VALIDATE |
+| 物理存储表示 | OUT OF SCOPE |
 
-本规范是 Phase 1 的领域语义唯一基准。Rust 类型、数据库表和协议消息只能映射这些概念，不得重新定义其含义。
+本规范是 Phase 1 的领域语义唯一基准。后续 Rust 类型、数据库表或协议消息只能映射这些概念，不得重新定义其含义。
