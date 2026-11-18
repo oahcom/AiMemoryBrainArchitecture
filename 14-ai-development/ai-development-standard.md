@@ -141,7 +141,8 @@ Every prompt MUST include:
 11. Security, failure, concurrency, recovery and compatibility considerations as applicable.
 12. Required deliverables and report format.
 13. Commit, read-back, branch-head and evidence requirements.
-14. Stop conditions and escalation path for ambiguity or conflicting contracts.\n15. **Bilingual documentation manifest:** affected Chinese/English paths, source revision, counterpart status, stable identifier/status parity checks, cross-links, and the reviewer responsible for semantic parity.
+14. Stop conditions and escalation path for ambiguity or conflicting contracts.
+15. **Bilingual documentation manifest:** affected Chinese/English paths, source revision, counterpart status, stable identifier/status parity checks, cross-links, and the reviewer responsible for semantic parity.
 
 Prompts MUST be reviewed before execution. Prompt changes after execution starts MUST create a new version and record the reason and impact. The previous prompt version remains immutable and retrievable.
 
@@ -171,7 +172,8 @@ A task is READY only when:
 - dependencies are available or explicitly accepted as assumptions;
 - acceptance criteria are testable;
 - security/data/compatibility impact is classified;
-- the prompt is stored, versioned and reviewed;\n- the prompt explicitly requires GOV-DOC-001 compliance and identifies the Chinese/English source/counterpart documents;
+- the prompt is stored, versioned and reviewed;
+- the prompt explicitly requires GOV-DOC-001 compliance and identifies the Chinese/English source/counterpart documents;
 - no unresolved blocker makes safe work impossible.
 
 ### Definition of Done (DoD)
@@ -185,13 +187,21 @@ A task is DONE only when applicable conditions are satisfied:
 - security and permission checks are tested for relevant changes;
 - migration/rollback/compatibility behavior is documented and tested where relevant;
 - independent review findings are resolved or explicitly accepted as residual risk;
-- both Chinese and English normative documentation are created/updated in the same change set whenever architecture/contract behavior changes;\n- a bilingual change manifest records exact paths/source revision and verifies semantic, identifier, decision-status and link parity;\n- the reviewer explicitly checks bilingual parity; missing or materially divergent counterparts block DONE/ACCEPTED unless a formally approved time-bounded exception exists;
+- both Chinese and English normative documentation are created/updated in the same change set whenever architecture/contract behavior changes;
+- a bilingual change manifest records exact paths/source revision and verifies semantic, identifier, decision-status and link parity;
+- the reviewer explicitly checks bilingual parity; missing or materially divergent counterparts block DONE/ACCEPTED unless a formally approved time-bounded exception exists;
 - commit SHA, test evidence, review report and final status are recorded;
 - integration and acceptance authority have explicitly accepted the result.
 
 If a check cannot run, record **NOT RUN** with reason. Never report it as PASS.
 
-### 7.1 Mandatory bilingual-documentation gate / 强制双语文档门禁\n\nEvery task that may affect architecture meaning MUST include this gate, including architecture-only, implementation, test, security, storage, protocol, performance, migration and operations tasks. The implementer MUST check whether code or tests reveal a contract change; if so, it MUST stop treating the work as implementation-only and update the owning specification in both languages. A translation-only change MUST NOT silently change a decision. The independent reviewer MUST compare both language versions against the same source revision and record PASS/FAIL for meaning, stable identifiers, status, examples and links. If either counterpart is missing or materially inconsistent, record BLOCKED/NOT DONE and identify the accountable Owner and closure condition.\n\n每项可能影响架构含义的任务都必须执行本门禁，包括架构、实现、测试、安全、存储、协议、性能、迁移和运维任务。实现者必须检查代码或测试是否揭示了契约变化；若是，就不得再把工作视为纯实现任务，而必须同步更新所属规范的中英文版本。纯翻译变更不得暗中改变决议。独立审查者必须基于同一源版本比较两种语言，并记录含义、稳定标识、状态、示例和链接的 PASS/FAIL。任何一方缺失或存在实质不一致时，必须记录 BLOCKED/NOT DONE，并明确责任 Owner 和关闭条件。\n\n## 8. Verification model / 验证模型
+### 7.1 Mandatory bilingual-documentation gate / 强制双语文档门禁
+
+Every task that may affect architecture meaning MUST include this gate, including architecture-only, implementation, test, security, storage, protocol, performance, migration and operations tasks. The implementer MUST check whether code or tests reveal a contract change; if so, it MUST stop treating the work as implementation-only and update the owning specification in both languages. A translation-only change MUST NOT silently change a decision. The independent reviewer MUST compare both language versions against the same source revision and record PASS/FAIL for meaning, stable identifiers, status, examples and links. If either counterpart is missing or materially inconsistent, record BLOCKED/NOT DONE and identify the accountable Owner and closure condition.
+
+每项可能影响架构含义的任务都必须执行本门禁，包括架构、实现、测试、安全、存储、协议、性能、迁移和运维任务。实现者必须检查代码或测试是否揭示了契约变化；若是，就不得再把工作视为纯实现任务，而必须同步更新所属规范的中英文版本。纯翻译变更不得暗中改变决议。独立审查者必须基于同一源版本比较两种语言，并记录含义、稳定标识、状态、示例和链接的 PASS/FAIL。任何一方缺失或存在实质不一致时，必须记录 BLOCKED/NOT DONE，并明确责任 Owner 和关闭条件。
+
+## 8. Verification model / 验证模型
 
 Use layered evidence:
 
@@ -217,7 +227,8 @@ Independent review MUST evaluate at least:
 - failure handling, idempotency, replay and recovery;
 - security, identity, authorization and isolation;
 - tests, observability and maintainability;
-- documentation and traceability;\n- mandatory Chinese/English semantic parity under GOV-DOC-001.
+- documentation and traceability;
+- mandatory Chinese/English semantic parity under GOV-DOC-001.
 
 Findings use:
 
