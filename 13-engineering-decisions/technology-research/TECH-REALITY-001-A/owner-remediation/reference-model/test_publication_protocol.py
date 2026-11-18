@@ -310,12 +310,16 @@ class Protocol:
         return receipt
 
     def _validate_unknown_binding(self, binding):
-        if not isinstance(binding, tuple) or len(binding) != 9:
-            raise Rejected("UNKNOWN operation binding must be an immutable eight-tuple")
-        auth_id, publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, d_proof, i_commit_won_proof, context = binding
+        if not isinstance(binding, tuple) or len(binding) not in (8, 9):
+            raise Rejected("UNKNOWN operation binding must be an immutable tuple")
+        if len(binding) == 8:
+            context = self._authorization_context(binding[0])
+            auth_id, publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, d_proof, i_commit_won_proof = binding
+        else:
+            auth_id, publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, d_proof, i_commit_won_proof, context = binding
         if self.authorizations.get(auth_id) != (
             publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, context
-        ):
+        ) or self._authorization_context(auth_id) != context:
             raise Rejected("UNKNOWN operation authorization binding mismatch")
         publication = self.publication_participants.get(publication_id)
         if (
@@ -604,7 +608,7 @@ class PublicationProtocolTests(unittest.TestCase):
         self.assertEqual(
             proof,
             ("I_COMMIT_WON", "auth-2", "publication-1", "storage-1",
-             "request-digest-1", "owner-boundary-1", "visibility-gate-1"),
+             "request-digest-1", "owner-boundary-1", "visibility-gate-1", p._authorization_context("auth-2")),
         )
         self.assertEqual(p.publication_commit_winners["publication-1"], "op-2")
 
@@ -1029,7 +1033,7 @@ class PublicationProtocolTests(unittest.TestCase):
         p = self.prepared()
         args = self.consume_i(p)
         p.authorization_contexts["auth-1"] = ("principal-substituted",) + p.authorization_contexts["auth-1"][1:]
-        with self.assertRaisesRegex(Rejected, "authorization context"):
+        with self.assertRaisesRegex(Rejected, "exact I COMMIT_WON participant|authorization context"):
             p.commit(**args)
 
     def test_full_i_authorization_context_is_bound_in_commit_won_proof(self):
