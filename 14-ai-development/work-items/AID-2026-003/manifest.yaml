@@ -69,7 +69,7 @@ policy_unification_ruling:
   ruling_date: 2026-11-18
   ruling_file: 14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md
   tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/218
-  effective_change_commit: recorded in the session-level INDEX row and Issue #218 ruling closeout; no commit SHA is fabricated before GitHub returns it
+  effective_change_commit: 1f97c3fae65828266a0c3cb1d1e8d4e6cb330856
   decisions:
     prompt_structure: UNIFY-TO-15 — AI-STD-001 §5 15 items are the sole mandatory structure; AI-PROMPT-STD-001 §4 12 items remain the core
     verification_vocabulary: UNIFY-TO-VERIFIED — TESTED is evidence wording only; NOT RUN remains explicit
