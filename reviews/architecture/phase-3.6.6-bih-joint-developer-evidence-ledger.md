@@ -208,3 +208,19 @@ H schema Blob `6327d9d387bdc0d6610aba08ff3e51ca9da17f5d`, test Blob `f8de63379d4
 - **Storage/D/E:** name implementation repository/engineering/deployment authority, pin the current companion §14 source, implement and execute D36/E36 and recovery tests.
 
 Fact/Claim ADR-001 remains **ADR-BLOCKED**. No Owner branch merge, main update, external approval, production readiness, Runtime Forget E2E closure, Global Forget completion or physical-erasure claim is made.
+
+
+## 8. I inventory-model follow-up — component PolicyException explicitly blocked — 2026-11-18
+
+This section supersedes §7.6's earlier description of component `PolicyException` as a terminal state requiring only proof/verifier strings. The follow-up adversarial review determined that the model has no component-level governance authorization workflow, expiry or revocation semantics. A caller-supplied proof/reviewer string cannot stand in for that authority.
+
+- Latest I branch HEAD: `224e4734c8d6a390bdab596af635b2a57c29704c`.
+- Model Blob: `207b797fc77358f31bb4d42a541d0b28a0713c5c`, commit `4b8a73c9e529a52e44bf6050f287fe32e1767586`.
+- Test Blob: `ea4102ecbb4fa0b7120a4658f0c931afab341950`, commit `e87bcffe4876d7f7cf8dce687c8543f26247b9e6`; 33 unittest methods are present.
+- I register latest Blob: `49132b30f85f9b82d49ff852c63506850dd5f950`.
+- New behavior: component `PolicyException` is rejected by `set_component`; direct state injection returns Pending in `evaluate()`. Only Confirmed/NotApplicable may satisfy component completion, each with retained proof + verifier. Target-level exception handling remains a separate path and does not authorize component exceptions.
+- Exact test commit combined status: **no status checks returned**; PR workflow-run query returned none. The I workflow exists and specifies Python 3.12, compile plus `python -m unittest discover -v`, but no verified run/log is available. **NOT RUN / NOT PASS**.
+
+I reference-model code is now more fail-closed, but it remains a logical model. No InventorySeal, external approval, I36 execution or Global Forget completion is evidenced. G2/G5 remain BLOCKED; G7 remains NOT RUN.
+
+No other Owner branch changed since §7.1. Current B HEAD remains `da544a4e37285ea279b8aa5158c7009fe34da6ba`; H remains `654d4449fd491cdda37d9761fe63a3efca55dc9d`; A remains `8d2d59fff5ebc6077adc470e91d5d8b9684b3b0e`. The current I HEAD above supersedes the I row in §7.1.
