@@ -39,34 +39,34 @@ All paths and Blob SHAs below were read from the recursive tree at the correspon
 
 | Role | Critical artifact | Exact Blob SHA |
 |---|---|---|
-| A | `reviews/integration/phase-3.8.1-a-contract-surface-and-exact-pin-refresh.md` | `ad5450e6a5e68d6c2a5c3a0b02e0d6d98d6e6a31` |
-| A | `reviews/integration/phase-3.8.2-a-race-crash-failover-conformance-matrix.md` | `29125d4d5b8d5d7f6c2e0b5e2a5e` |
-| B | `02-domain-model/ADR-001-fact-claim-semantics.md` | `a1024938eaf6b2b5a` |
-| B | `02-domain-model/domain-model-overview.md` | `4d1debc9f4d2c7` |
-| B | `02-domain-model/lifecycle-model.md` | `81c48d1e0c` |
-| C | `07-agent-integration/phase-3.8.4-c-normative-provider-submit-outcome-contract.md` | `819705f1` |
-| C | `07-agent-integration/schemas/c-submit-outcome-1.0.1.schema.json` | `a631bc` |
-| C | `07-agent-integration/phase-3.8.28-c-exact-review-h-applied-delivery-evidence-csubmitoutcome-join.md` | `7ae8` |
-| D | `03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md` | `17e538` |
+| A | `reviews/integration/phase-3.8.1-a-contract-surface-and-exact-pin-refresh.md` | `ad5450ea35f6dabc7de1ffa1ea63661f2e500064` |
+| A | `reviews/integration/phase-3.8.2-a-race-crash-failover-conformance-matrix.md` | `29125b89ddf47af4c358c0cddbd5c3d6077e1f53` |
+| B | `02-domain-model/ADR-001-fact-claim-semantics.md` | `a1024938ff5baba069cf128c69496a44e143330c` |
+| B | `02-domain-model/domain-model-overview.md` | `4d1debc0ec19b3917f9e76d04bb66da4df4cd346` |
+| B | `02-domain-model/lifecycle-model.md` | `81c48c928cb5f9c76ca29d493fbd9479079e62f7` |
+| C | `07-agent-integration/phase-3.8.4-c-normative-provider-submit-outcome-contract.md` | `819705037da89834e10b6dd2ec6e66c1b8c70886` |
+| C | `07-agent-integration/schemas/c-submit-outcome-1.0.1.schema.json` | `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda` |
+| C | `07-agent-integration/phase-3.8.28-c-exact-review-h-applied-delivery-evidence-csubmitoutcome-join.md` | `7ae8f2609a8786c4a5a715a270faa706156ed462` |
+| D | `03-memory-brain/phase-3.8-d-publication-participant-and-terminal-contract.md` | `17e53890dd6cce9bea9eacc1be2e64b0ef55ac78` |
 | D | `03-memory-brain/phase-3.9-d-forget-terminal-semantics-and-linearization-closure-proposal.md` | `9c02b5680317f0092788ad0da66d621338b1c54c` |
-| E | `04-memory-compiler/phase-3.8-e-publication-orchestration-retry-recovery-contract.md` | `475fee` |
-| E | `04-memory-compiler/phase-3.8.6-e-review-storage-serialization-anchor.md` | `19d708` |
-| F | `05-memory-runtime/phase-3.8.5-f-storage-logical-serialization-topology-impact-review.md` | `9dae` |
-| F | `05-memory-runtime/phase-3.8.6-f-review-storage-serialization-anchor.md` | `122238` |
-| G | `06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md` | `a8efd1` |
-| G | `06-memory-context/phase-3.8.26-g-restore-fenced-write-admission-hardening.md` | `d6cd` |
-| H | `08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.17.schema.json` | `1b8f` |
-| H | `08-bmcp-protocol/phase-3.8.34-h-owner-gate-release-semantic-reference.md` | `b27dbf` |
-| H | `08-bmcp-protocol/phase-3.8.32-h-unified-1.2.16-owner-snapshot-completeness.md` | `cc40b` |
+| E | `04-memory-compiler/phase-3.8-e-publication-orchestration-retry-recovery-contract.md` | `475fee41e5eea527af4edefbfe88c58c86967d0a` |
+| E | `04-memory-compiler/phase-3.8.6-e-review-storage-serialization-anchor.md` | `19d708bc29b6115d7bccb7d320781f452ee28b78` |
+| F | `05-memory-runtime/phase-3.8.5-f-storage-logical-serialization-topology-impact-review.md` | `9dae404993d3006e59d2dae88a0a97a3c0998d58` |
+| F | `05-memory-runtime/phase-3.8.6-f-review-storage-serialization-anchor.md` | `122238146830db6188f00a9788e018a82bfb3f90` |
+| G | `06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md` | `a8efd1aa9696783035e157131fa9751666a4182d` |
+| G | `06-memory-context/phase-3.8.26-g-restore-fenced-write-admission-hardening.md` | `d6cd4e8ce18c88ade747eb7d19c6c83840b54792` |
+| H | `08-bmcp-protocol/schemas/bmcp.coc-jf10-unified-1.2.17.schema.json` | `1b8f44675f30919764481d33755c566ef5cf1ea8` |
+| H | `08-bmcp-protocol/phase-3.8.34-h-owner-gate-release-semantic-reference.md` | `b27dbfe57a7b3a3312d3d8576a74b81e72ac86f7` |
+| H | `08-bmcp-protocol/phase-3.8.32-h-unified-1.2.16-owner-snapshot-completeness.md` | `cc40b50d99e329eafa6851049ad0e2cdbba5e955b` |
 | I | `09-security-governance/phase-3.8-i-commit-authorization-receipt-and-revocation-sequencer-contract.md` | `54bab0484bd232a5a258e65e34cc7425288b39a6` |
 | I | `09-security-governance/phase-3.9-i-d-forget-lifecycle-terminalization-authorization-proposal.md` | `362307f6fff84cbe81fb71f37d6319e691db4f89` |
-| P | `00-governance/project-decision-authority.md` | `ca3777` |
-| P | `00-governance/architecture-invariants.md` | `662666` |
-| Storage | `reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md` | `175ee` |
-| Storage | `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md` | `bb544` |
+| P | `00-governance/project-decision-authority.md` | `ca3777acae5ceb38a2a421cbf9e738053e4a4057` |
+| P | `00-governance/architecture-invariants.md` | `66266667bdbb1cf15a2644fa98db5ecaaf3bb23b` |
+| Storage | `reviews/storage-consistency/phase-3.8-storage-visibility-participant-and-atomic-outcome-contract.md` | `175ee7b1349cfdb79a19898b311a88391ed88010` |
+| Storage | `reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md` | `bb544ba2f346bdc130d524bd5c7310d86f367988` |
 | Storage | `reviews/storage-consistency/phase-3.9-storage-review-d-i-forget-terminalization-and-read-suppression.md` | `1cd9f35f1e28fb5f71cd74599d1560fa36043ed8` |
 
-**Pin limitation:** Several short Blob values above are abbreviated exactly as returned in the source-ledger extraction; before any normative decision or final acceptance, the full 40-character Blob SHA must be re-read and pinned. This document is therefore an interim source ledger, not a cryptographically complete final evidence manifest.
+**Pin status:** Every Blob SHA in this table is the full 40-character Git object ID read from the recursive tree at the exact branch HEAD listed in §2. The branch HEAD and Blob must both be re-fetched immediately before any normative decision because Owner branches remain mutable.
 
 ## 4. Cross-owner architecture findings
 
