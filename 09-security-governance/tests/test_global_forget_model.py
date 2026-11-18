@@ -29,7 +29,8 @@ class GlobalForgetModelTests(unittest.TestCase):
         self.g.d_barrier_complete = True
         self.g.backup_restore_safe = True
         for name in self.g.COMPONENTS:
-            self.g.set_component(name, "Confirmed", proof=f"{name}-proof")
+            self.g.set_component(name, "Confirmed", proof=f"{name}-proof",
+                                 reviewer="independent-verifier")
 
     def test_inventory_seal_requires_authorized_i_signer(self):
         self.g.seal = None
@@ -206,6 +207,20 @@ class GlobalForgetModelTests(unittest.TestCase):
             self.g.set_component("ExternalCopyHandling", "NotApplicable")
         self.g.set_component("ExternalCopyHandling", "NotApplicable",
                              proof="sealed inventory proves absent", reviewer="independent")
+
+    def test_component_confirmation_requires_proof_and_verifier(self):
+        with self.assertRaises(Blocked):
+            self.g.set_component("ExternalCopyHandling", "Confirmed")
+        with self.assertRaises(Blocked):
+            self.g.set_component("ExternalCopyHandling", "Confirmed", proof="proof")
+        with self.assertRaises(Blocked):
+            self.g.set_component("ExternalCopyHandling", "PolicyException", proof="proof")
+
+    def test_completion_rechecks_component_proof_at_evaluation(self):
+        self.g.record_evidence(self.evidence())
+        self.complete_setup()
+        self.g.component_proofs["ExternalCopyHandling"]["proof"] = ""
+        self.assertEqual(self.g.evaluate(now=1), "Pending")
 
     def test_physical_erasure_target_requires_explicit_action(self):
         self.g.register_target(Target("backup-2", "Storage-owner", ("scope-A",),
