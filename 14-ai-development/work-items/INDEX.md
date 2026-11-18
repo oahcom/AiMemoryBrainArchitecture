@@ -4,7 +4,7 @@ This index is the entry point for all governed AI development tasks.
 
 | Work Item ID | Title | Owner | Class/Risk | Status | Prompt | Implementation | Review | Acceptance |
 |---|---|---|---|---|---|---|---|---|
-| [AID-2026-001](AID-2026-001/manifest.yaml) | Define ChatGPT-native execution model | A + D + I | ARCH/SEC/R3 | REMEDIATION_IN_PROGRESS — U-010 D-side and U-011 I-side candidates recorded; formal I approval, D/I same-SHA, Storage and R3 evidence pending | [prompt-v2](AID-2026-001/prompt-v2.md) | Historical FAIL at 1d6ab393; fresh exact-Head review pending | BLOCKED_PENDING_R3_EVIDENCE |
+| [AID-2026-001](AID-2026-001/manifest.yaml) | Define ChatGPT-native execution model | A + D + I | ARCH/SEC/R3 | REMEDIATION_IN_PROGRESS — U-010 D-side and U-011 I-side EN/ZH candidate counterparts recorded; independent bilingual parity review, formal I approval, D/I same-SHA, Storage and R3 evidence pending | [prompt-v2](AID-2026-001/prompt-v2.md) | Historical FAIL at 1d6ab393; fresh exact-Head review pending | BLOCKED_PENDING_R3_EVIDENCE |
 
 ## Registration rules
 
