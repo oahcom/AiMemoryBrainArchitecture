@@ -64,8 +64,10 @@ mod tests {
             memory_id: id("memory"), expected_current_version: Some(id("v1")),
             new_version: MemoryVersion {
                 memory_version_id: id("v2"), memory_id: id("memory"), version_number: 2,
-                parent_version_id: Some(id("v1")), created_at: "now".into(), claims: vec![],
-                entity_refs: vec![], relation_refs: vec![], source_refs: vec![], provenance_refs: vec![],
+                parent_version_id: Some(id("v1")), created_at: "now".into(),
+                author_kind: "test".into(), change_reason: "update".into(),
+                claims: vec![], entity_refs: vec![], relation_refs: vec![], source_refs: vec![],
+                provenance_refs: vec![], content_digest: "digest-v2".into(), schema_version: "1".into(),
             }, idempotency_key: "op-1".into(), request_digest: "digest-1".into(),
         };
         assert_eq!(request.memory_id.as_str(), "memory");
