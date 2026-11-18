@@ -18,7 +18,7 @@ base_branch: main
 base_commit_sha: 6b5db291
 implementation_branch: ai/AID-2026-003/IO-exec-v11
 tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/218
-related_pr: PENDING — recorded in INDEX.md at closeout
+related_pr: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/256
 dependency_refs:
   - 14-ai-development/AI-EXEC-001.md
   - 14-ai-development/AI-EXEC-002.md
