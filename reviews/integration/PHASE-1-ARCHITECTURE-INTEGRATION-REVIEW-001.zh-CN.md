@@ -191,3 +191,18 @@ Branch HEAD 与文件 Blob SHA 是不同身份。下表记录本次实际读取�
 本报告是增量集成审查文件。不修改 A/B/C 来源契约、架构不变量、Issue #43、实现代码、PR #244/#249、Event Store 工作、RFC-IDE-001、PR 治理或合并依据工作。任何规范性修正必须由责任 Owner 通过独立双语变更完成，并具有自己的审查与精确 Head 证据。
 
 **结论：CANDIDATE — 部分集成审查完成；架构冻结 NOT READY。**
+
+
+## 12. 有界 DECIDED 结论的 Commit 绑定 CI 证据
+
+上文 DECIDED 仅表示有界语义/来源 Owner 决策，不代表新增跨 Owner 冻结。以下精确 Head 运行是本报告对相关可执行行为所依赖的 CI 证据：
+
+| 有界主张 | 精确 Commit / 被测来源 | CI Run ID | 结果 | 证据上限 |
+|---|---|---:|---|---|
+| Phase 1 Domain + SQLite Adapter 回归范围 | PR #249 Head `7411ec57ef87f995cd7be14cc3ccd44620a8e0f8` | `44276433236` | SUCCESS；Workspace 55 通过、0 失败；Domain 目标 12 通过；SQLite Adapter 26 通过 | 仅支持已测试的 Phase 1 Domain/Adapter 行为；PR 仍是待独立审查的候选，不证明全局 Fact/Claim、生产、多进程或断电语义 |
+| C Provider Outcome 参考行为 | C 恢复后的 Owner 来源 `88992da30331121b81cf2773acab11d921daf281` | `44129914790` | SUCCESS；19 项测试、0 失败 | 仅 C 参考/Provider Outcome 测试；不代表 C 端到端 Brain 集成、真实 Provider Truth、生产 Trust 或跨 Owner 验收 |
+| H Applied Delivery Evidence 1.0.0 候选 Validator | H 被测代码 Commit `4e65a2`（审查记录仅缩写此 SHA） | `44130722532` | SUCCESS；11 项测试、0 失败 | 仅 H 候选 Schema/Validator；不代表精确 COutcomeRecord 集成、G Durable Applied、生产 Crypto 或 Wire 冻结 |
+
+上述 C/H 两个 Run ID 来自 C-REVIEW-001 补充审查 Blob `3300d95b3074a7bf6690718e0ab7f6cbd9afb9ae`；它们不是本报告自身 CI，也不会自动转移到变化后的 Commit。已检查的审查文件没有提供 H Commit 的完整 SHA；因此有意保留 `4e65a2...` 缩写，不猜测补全。
+
+**本报告自身精确 Head：** PR #257 Head `fd688c1328aede0c61bf03d4e4507509b7c32ef8`。针对该精确 Commit 的 GitHub Actions 查询未返回 PR 触发的 Workflow Run；Combined Status 也未返回任何 Status Context。因此本报告文档 CI 为 **NOT RUN / 未观察到 Run ID**。不得将此 PR 视为 CI 通过。报告文件已精确读回：EN `eb4759845367c7a03973be6aecdf718f618f481b`；ZH-CN `59eecf6678a7c993814bf68347da612c83101e66`。
