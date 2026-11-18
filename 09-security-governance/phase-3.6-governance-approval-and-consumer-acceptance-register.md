@@ -333,3 +333,26 @@ Adversarial review of the I Global Forget inventory reference model found that `
 - Current readback found no combined status/check run for that commit. **Execution: NOT RUN / NO VERIFIED CI RESULT.** No PASS is claimed. The workflow must be run on the exact test commit and its raw log retained.
 
 This closes only the reference-model source defect. It does not create a real ProducerDomainInventoryEpoch, InventorySealReceipt, external governance approval, Environment Registry Authority, AuthorizationCommitPermit, I36 execution or Global Forget completion. I36-GOV-01..10 remain GOVERNANCE-BLOCKED; G2/G5 remain BLOCKED; G7 remains NOT RUN.
+
+
+## 13. Project Governance Authority and G0 namespace clarification — 2026-11-18
+
+The Project Governance Owner branch `session-p-project-governance-baseline` was discovered at HEAD `0559a03ccd4f9640ddb7d4af8e37a059930b55af`. Its current governance artifacts remain proposals:
+
+- `00-governance/project-decision-authority.md`, Blob `ca3777acae5ceb38a2a421cbf9e738053e4a4057`: **PROPOSED — GOVERNANCE-OPEN**; no named Project Governance Authority (PGA), appointment mechanism, quorum, voting rule or delegated approval policy is evidenced. It expressly says A's Principal Integration Architect role does not imply PGA authority.
+- `00-governance/project-acceptance-gates.md`, Blob `98fc0ab52cadccc22e3eec89b8dc15045904cc7d`: **PROPOSED — NOT APPROVED**; its G0 Project Governance exit requires a documented PGA appointment and approval process.
+
+**Namespace distinction:** A's Phase 3.6 G0 is *Baseline Integrity* (branch/artifact freshness). P's project G0 is *Project Governance* (mission, redlines, authority and change control). They are different gates. A's baseline-integrity result must not be represented as project-governance approval. Project G0 remains BLOCKED / NOT AUTHORIZED until the sponsor appoints the PGA and the required approval evidence is recorded. I cannot appoint the PGA or approve project redlines on its behalf.
+
+## 14. G6 BIH consumer-acceptance status correction — 2026-11-18
+
+A's current Phase 3.6 closure plan Blob `0adca0f54ff6ee1e344949cb48334ff475fad247` §10 explicitly says C/G/H shared Applied-package acceptance and F's explicit BIH consumer acceptance remain outstanding. A's CGH-APPLIED-1.1 matrix Blob `ee35d3b39cb1fddd1feee0e0504b77e73e376893` is a different acceptance campaign: it records B/C/D/E/G/H/I/Storage decisions for the Applied/COC package and contains no F row. It is not BIH36 identity/authorization consumer acceptance.
+
+This I register's §4 is the BIH-specific acceptance ledger. Its C, D, E, F, G, H and Storage rows remain **OPEN — no explicit BIH acceptance**; the I technical baseline is not a substitute for those consumer records. Therefore **A G6 remains BLOCKED**. Any earlier statement that all C/D/E/F/G/Storage BIH consumer acceptances were complete is not supported by the current A plan, A matrix or this I register and must not be used for gate promotion.
+
+Required owner actions (no acceptance is created by this request):
+1. C, D, E, F, G, H and Storage each publish an explicit acceptance in their own Owner branch, pinned to the exact BIH36-JD-01..17 artifact digests, with field mapping, protected enforcement boundary, conditional/rejected fields and negative-test evidence.
+2. I publishes its own consumer mapping/technical acceptance separately from I36-GOV external approvals.
+3. A re-reads every exact Owner Blob and updates the G6 ledger only after each required Owner record exists. A's CGH-APPLIED-1.1 matrix must remain a separate acceptance dimension.
+
+I36-GOV-01..10 remain GOVERNANCE-BLOCKED; I36/H36 remain NOT RUN. This correction does not change BIH36-JD-01..17 or authorize G5/G7/G10.
