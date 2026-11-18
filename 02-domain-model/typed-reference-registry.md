@@ -323,3 +323,32 @@ B requires Storage to either:
 2. explicitly mark §14 as superseded for PostgreSQL v3 and publish one unambiguous normative mapping.
 
 Until then, the repository contains two non-identical prepared-participant field contracts. H's new schema candidate implements the v3 fields; it does not silently amend Storage's §14. No approval of the older incomplete §14 mapping is inferred.
+
+
+## 14. Phase 3.6.7 — current Storage v3.2.3 / companion §14 exact-source reconciliation — 2026-11-18
+
+This append-only addendum supersedes the active remediation wording in §13.5 for the current Storage Owner source readback. It does not rewrite the historical v3 review baseline.
+
+### Exact current sources read
+
+- Storage Owner branch HEAD at discovery: `268af57b099209b33835b663596e87d21bb9c22b`.
+- Storage v3.2.3 normative design: `reviews/storage-consistency/phase-3.6-coc-durable-log-and-recovery-protocol-storage-design-v3.2.3.md`, Blob `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792`.
+- Current PostgreSQL companion protocol §14: `reviews/storage-consistency/phase-3.6.3-coc-durable-log-and-recovery-protocol.md`, Blob `dbc1dfd4c488c5d5e5a328388487d190984e8adc`.
+- Storage v3.3.2 exact-version bundle manifest: Blob `5c614375e10698e4931d83deb57d20321445e068`; it pins the v3.2.3 body but remains **NOT JOINTLY ACCEPTED / NOT FROZEN**.
+
+### B semantic re-evaluation
+
+1. Current companion §14.1–14.4 explicitly binds `DatabaseIncarnationRef`, `PrepareAttemptRef` / `PrepareAttemptGeneration`, `ParticipantLedgerRef` / `ParticipantLedgerVersion`, and `ParticipantTupleDigest` as required typed values. It also defines the exact pre-PREPARE allocation sequence, signed PreparedParticipantReceipt binding, attempt replay/conflict rules, and append-only recovery observations.
+2. Current Storage v3.2.3 §15.7 explicitly includes the DB incarnation, attempt/generation, participant-ledger ref/version, exact PreparedParticipantReceipt ref/digest, full tuple digest and owner-final-gate participant in the I proof binding. This closes the omission described by historical B-V3-04 at the current design-text level.
+3. Current companion §14.2–14.3 uses the complete tuple and prohibits a generic `xid` field. This closes the historical §14 mismatch described by B-V3-06 at the current design-text level. The older companion Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7` is a historical predecessor and is no longer the current Storage branch source.
+4. Storage v3.2.3 also keeps `PreparedTransactionGID` distinct from `PostgreSQLNativeXID`, and its I outcome vocabulary rejects `ABORT_WON`; this is consistent with B's nominal type separation and I's owner-defined outcomes.
+
+### Disposition and remaining boundary
+
+- Historical B-V3-04 and B-V3-06: **RESOLVED AT CURRENT DOCUMENT-ALIGNMENT LEVEL** by the exact current Storage v3.2.3 and companion §14 sources above.
+- B type semantics in §§11–13 remain unchanged; BIH36-JD-01..17 remain unchanged.
+- The Storage v3.3.2 manifest does not list the current companion §14 Blob `dbc1dfd4c488c5d5e5a328388487d190984e8adc` in its exact artifact table. Storage/A must pin this exact companion Blob (or a successor) in the final version bundle and obtain affected-Owner exact-version review. A current source read is not a contract freeze.
+- B does **not** accept the entire Storage v3.3.2 bundle, COC deployment, production implementation, crypto profile or runtime behavior.
+- B runtime type tests remain **NOT RUN**; no B executable domain-model harness was found. Fact/Claim ADR-001 remains **ADR-BLOCKED**.
+
+A must decide whether this evidence closes the corresponding G4 subfinding. It does not close G2/G3/G5/G7/G8/G9/G10.
