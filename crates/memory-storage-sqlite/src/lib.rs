@@ -45,6 +45,7 @@ impl SqliteMemoryStorage {
                  );
                  CREATE TABLE IF NOT EXISTS idempotency (
                    idempotency_key TEXT PRIMARY KEY,
+                   memory_id TEXT NOT NULL REFERENCES memories(memory_id),
                    request_digest TEXT NOT NULL,
                    receipt_json TEXT NOT NULL
                  );
@@ -294,8 +295,8 @@ impl MemoryStorage for SqliteMemoryStorage {
         };
         let receipt_json = Self::encode(&receipt)?;
         tx.execute(
-            "INSERT INTO idempotency(idempotency_key, request_digest, receipt_json) VALUES (?1, ?2, ?3)",
-            params![request.idempotency_key, request.request_digest, receipt_json],
+            "INSERT INTO idempotency(idempotency_key, memory_id, request_digest, receipt_json) VALUES (?1, ?2, ?3, ?4)",
+            params![request.idempotency_key, request.memory_id.as_str(), request.request_digest, receipt_json],
         )
         .map_err(|_| StorageError::IdempotencyConflict)?;
 
@@ -360,8 +361,7 @@ impl MemoryStorage for SqliteMemoryStorage {
             .query_row(
                 "SELECT i.request_digest, i.receipt_json, m.scope_json
                  FROM idempotency i
-                 JOIN commit_log c ON json_extract(i.receipt_json, '$.memory_id.0') = c.memory_id
-                 JOIN memories m ON m.memory_id = c.memory_id
+                 JOIN memories m ON m.memory_id = i.memory_id
                  WHERE i.idempotency_key = ?1",
                 params![idempotency_key],
                 |row| Ok((
