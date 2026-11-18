@@ -47,9 +47,17 @@ Do not create a PR solely to restate an already merged conclusion. Do not split 
 
 不得仅为重复已合并结论而创建 PR；不得为了制造活动记录而把一个完整变更拆成多个 PR。只有 Owner、发布顺序、风险边界或可独立验收要求确实不同，才允许拆分 PR。
 
-For PRs targeting a non-main Owner/research/recovery branch, preserve that base branch and its dependency chain. Do not silently retarget or merge such a PR to main. Mainline publication requires an explicit integration PR with exact source pins and authority boundaries.
+A pull request is mandatory **if and only if the merge target is `main`**, regardless of the source branch (Owner primary, child/work, research or recovery branch). Every change targeting `main` must enter through a PR and satisfy the applicable exact-Head checks and review gates.
 
-目标为非 main Owner/研究/恢复分支的 PR，必须保留其目标分支和依赖链。不得擅自改为 main 或直接合入 main。发布到主线必须另建明确的集成 PR，并记录准确源版本和权威边界。
+A merge whose target is any non-`main` branch does **not** require a PR. This includes child/work → Owner primary, ordinary work → Owner primary, and Owner primary → another non-`main` branch. The responsible Owner may integrate directly after the required scope, test, evidence, safety and authority checks; record material results in the existing Work Item/Issue. Do not create a PR solely to represent an Owner-internal merge.
+
+This exception must not be used to bypass the `main` PR gate indirectly. If the intended integration target is `main`, open a PR targeting `main` from the source branch and do not route the change through a non-`main` branch to evade review.
+
+只有合并目标为 `main` 时才必须创建 PR，且不受来源分支类型限制（Owner 主分支、子/工作分支、研究分支或恢复分支均适用）。所有目标为 `main` 的变更都必须通过 PR 集成，并满足适用的精确 Head 检查和审查门禁。
+
+合并目标为任何非 `main` 分支时，**不需要 PR**。包括子/工作分支 → Owner 主分支、普通工作分支 → Owner 主分支，以及 Owner 主分支 → 其他非 `main` 分支。责任 Owner 可在完成必要的范围、测试、证据、安全和权威检查后直接集成，并将重要结果记录到已有 Work Item/Issue。不得仅为表示 Owner 内部合并而创建 PR。
+
+此例外不得用于间接绕过 `main` 的 PR 门禁。如果预期集成目标是 `main`，应从来源分支创建目标为 `main` 的 PR，不得先绕经非 `main` 分支规避审查。
 
 ## 4. Exact-Head verification gate / 精确 Head 验证门禁
 
@@ -130,3 +138,10 @@ Changes to this standard require a bilingual semantic-parity update and an exact
 本规范已被采用为**流程治理规范**；Issue #130 comment #6962523529 在 PR #144 合并后记录了采用决定。该采用不代表 GitHub 平台已经强制执行。平台强制执行仍由 Issue #134 单独跟踪。
 
 本规范的修改必须同步更新双语语义版本，并进行精确 Head 治理审查。如果仓库平台无法强制执行某项必需控制，则该控制继续保持 BLOCKED，直到管理员建立真正可强制执行的配置。
+
+
+## 10. Enforcement and evidence addendum / 强制执行与证据补充
+
+Version 1.1 implementation details are maintained in the paired [English enforcement and evidence addendum](../docs/en/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md) and [Chinese enforcement and evidence addendum](../docs/zh-CN/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md). The addendum specifies exact-Head CI and bilingual gates, independent approval, prompt-hash/session audit evidence, CANDIDATE-to-DECIDED evidence, administrator-only branch protection actions for Issue #134, Issue #130 operational coverage audit, and rollback/emergency correction. The addendum remains PROPOSED until its PR is reviewed and merged; this link does not imply platform enforcement.
+
+Version 1.1 的执行细节见[英文强制执行与证据补充规范](../docs/en/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md)和[中文强制执行与证据补充规范](../docs/zh-CN/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md)。补充规范定义精确 Head CI 与双语门禁、独立审批、提示词哈希/会话审计证据、CANDIDATE 升级 DECIDED 的证据标准、Issue #134 仅管理员可执行的平台分支保护操作、Issue #130 运营覆盖审计以及回退/紧急纠正策略。补充规范在其 PR 经审查并合并前保持 PROPOSED；该链接不代表平台强制控制已经启用。
