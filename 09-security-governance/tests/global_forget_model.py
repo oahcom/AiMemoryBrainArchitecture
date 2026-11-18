@@ -158,10 +158,12 @@ class GlobalForgetModel:
                       reviewer: Optional[str] = None) -> None:
         if name not in self.component_states:
             raise KeyError(name)
-        allowed = {"Pending", "Confirmed", "NotApplicable", "PolicyException", "Failed", "Unknown"}
+        allowed = {"Pending", "Confirmed", "NotApplicable", "Failed", "Unknown"}
+        if state == "PolicyException":
+            raise Blocked("component policy exceptions require a separate governance workflow")
         if state not in allowed:
             raise ValueError(f"unsupported component state: {state}")
-        if state in {"Confirmed", "NotApplicable", "PolicyException", "Failed"} and (not proof or not reviewer):
+        if state in {"Confirmed", "NotApplicable", "Failed"} and (not proof or not reviewer):
             raise Blocked("terminal component state requires proof and verifier")
         self.component_states[name] = state
         if proof or reviewer:
@@ -224,13 +226,12 @@ class GlobalForgetModel:
                 return "Pending"
         for name, state in self.component_states.items():
             proof = self.component_proofs.get(name, {})
-            if state in {"Confirmed", "NotApplicable", "PolicyException"}:
+            if state in {"Confirmed", "NotApplicable"}:
                 if not proof.get("proof") or not proof.get("reviewer"):
                     return "Pending"
-                if state == "PolicyException":
-                    # Component exceptions still require separate governance evidence.
-                    pass
-            elif state != "Confirmed":
+            else:
+                # Component PolicyException is deliberately unsupported until a
+                # separately authorized, scoped, expiring governance workflow exists.
                 return "Pending"
         if any(t.state == "PolicyException" for t in self.targets.values()) or "PolicyException" in self.component_states.values():
             self.state = "CompletedWithPolicyException"
