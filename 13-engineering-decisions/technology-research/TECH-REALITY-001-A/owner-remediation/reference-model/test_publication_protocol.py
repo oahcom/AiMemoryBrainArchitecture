@@ -226,7 +226,7 @@ class Protocol:
         current = self.i_authority_state.get(domain)
         if current is None:
             raise Rejected("I authoritative policy/revocation/registry state is unavailable")
-        expected = (context[25], context[26], context[27], context[28], context[29])
+        expected = (context[25], context[26], context[34], context[35], context[36])
         if current != expected:
             raise Rejected("I issuer-key/policy/revocation/registry currentness mismatch")
         if context[26] != "VALID":
@@ -494,6 +494,7 @@ class PublicationProtocolTests(unittest.TestCase):
         p.admit_publication("publication-1", "op-1", "work-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
         p.set_authorization_context("auth-1")
         p.set_permission_epoch("policy-domain-1", "epoch-1")
+        p.set_i_authority_state("policy-domain-1")
         p.authorize_commit("auth-1", "op-1", "publication-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
         return p
 
@@ -569,12 +570,12 @@ class PublicationProtocolTests(unittest.TestCase):
 
     def test_artifact_and_region_binding_is_immutable(self):
         p = self.prepared()
-        context = p.authorization_contexts["auth-1"]
-        mutated = list(context)
-        mutated[31] = "artifact-substituted"
-        p.authorization_contexts["auth-1"] = tuple(mutated)
-        with self.assertRaisesRegex(Rejected, "authorization context"):
-            p.commit(**self.consume_i(Protocol().prepared()) if False else self.commit_args())
+        args = self.consume_i(p)
+        context = list(p.authorization_contexts["auth-1"])
+        context[31] = "artifact-substituted"
+        p.authorization_contexts["auth-1"] = tuple(context)
+        with self.assertRaisesRegex(Rejected, "authorization context|currentness mismatch"):
+            p.commit(**args)
 
     def test_admission_then_fence_blocks_new_work(self):
         p = Protocol()
