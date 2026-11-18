@@ -125,7 +125,7 @@
 
 ```markdown
 ### 开工记录（写入 Issue/PR）
-- LOADED: AI-EXEC-001 v__ + AI-EXEC-002 v__ （§1.4 开工载入声明，缺此项记 RULES-NOT-LOADED）
+- LOADED: AI-EXEC-001 v__ + AI-EXEC-002 v__（§1.4 开工载入声明；仅缺少声明记 RULES-LOAD-NOT-RECORDED；有直接证据证明未载入才记 RULES-NOT-LOADED）
 - Work Item: AID-YYYY-____  (manifest.yaml: 已建/未建)
 - Owning Issue: #____   Related PR: #____
 - Role: Owner __ (Accountable Owner: __)
