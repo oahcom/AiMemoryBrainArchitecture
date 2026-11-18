@@ -236,3 +236,5 @@ This file is a bilingual normative-candidate artifact. The English and Chinese s
 ## 12. Explicit non-claims / 明确不作出的声明
 
 No production authorization service, epoch store, transaction protocol, exception workflow, inventory discovery, target execution, Storage atomicity or audit pipeline is claimed implemented. No R3 test was run. No formal Owner-I or D/I same-SHA approval is claimed. No finding is closed by this document alone.
+
+<!-- U-011 artifact content frozen; subsequent registration records point to this exact artifact blob. -->
