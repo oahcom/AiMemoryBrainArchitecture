@@ -11,7 +11,7 @@
 
 > **定位**：本文不是新规范，而是把项目现有提示词体系**真正跑起来**的执行细则。零脚本强制，约束靠提示词文本自我声明 + Issue/PR/Closeout 留痕。
 
-**English summary.** Execution rules for the existing prompt system. (1) Pre-work record: Work Item ID + manifest, **Prompt ID + version + prompt-file commit SHA triple** (kills empty `NOT RECORDED`; SHA-256 recorded when computable, else `NOT_VERIFIED` per AI-PROMPT-STD-001 §5); (2) mandatory structure = AI-PROMPT-STD-001 §4 twelve items, with a six-item minimum set for R0/R1 and the AI-STD-001 §5 item-15 bilingual manifest added for R2/R3 — the 15-vs-12 inter-standard conflict is disclosed and deferred to adoption Issue #218; (3) in-run traceability with the CHATGPT-GLOBAL-001 eight-state vocabulary (never collapsed); (4) NR-001 review-session rules with project finding levels BLOCKER/P0–P3; (5) Closeout template = AI-STD-001 §13 eight items ∪ PR-GOVERNANCE-001 §2 nine items ∪ §7.1 bilingual result; (6) prohibitions per AI-PROMPT-STD-001 §7 + CHATGPT-GLOBAL-001. Copy-paste templates for session open/closeout and review output are provided in appendices. **v1.1 adds** (observation-report gaps ②④⑤): a three-tier prompt-provenance rule (T1 repo-file triple / T2 chat-instruction snapshot + permalink / T3 mixed) with a grandfather clause for pre-v1.1 sessions; a code-session minimum tier (seven items for IMPL/TEST/SEC/MIG/PERF); and the finding minimum line (ID + severity + feedback destination).
+**English summary.** Every execution prompt retains the complete 12-item structure in AI-PROMPT-STD-001 §4. R0/R1 document focus items (six) and code focus items (seven) are supplemental checklists only; they do not waive or replace any of the 12 required sections. The 15-vs-12 upstream-standard discrepancy remains explicitly disclosed for Issue #218. Other rules cover T1/T2/T3 provenance, grandfather evidence distinctions, in-run traceability, independent review, finding minimum fields, bilingual exception records, and Closeout.
 
 ---
 
@@ -43,7 +43,7 @@
 
 - **禁止补造，禁止留空的 NOT RECORDED**（各档同）；
 - 已执行提示词版本不可变；会话内澄清/增补若实质改变指令，必须先出新版本（T1 出新文件版本 / T2 出新快照）再继续（AI-PROMPT-STD-001 §5）；
-- **Grandfather 条款**：v1.1 生效前已开工的会话按 v1.0 口径追溯（三元组或如实 NOT_VERIFIED/NOT RECORDED），**不倒签、不补造**；其登记缺失按缺口①记 `RULES-NOT-LOADED` finding，不追罚。
+- **Grandfather 条款**：v1.1 生效前已开工的会话按 v1.0 口径追溯，**不倒签、不补造、不追罚**。有直接证据证明未载入时，才记 `RULES-NOT-LOADED`；仅缺少 LOADED 声明/记录时，记 `RULES-LOAD-NOT-RECORDED`，仅表示证据缺口，不得反向推定实际未载入或认定历史违规。
 
 > **上位冲突披露（待 Issue #218 adoption 决议）**：AI-STD-001 §5 要求 "Prompt ID、版本和 SHA-256" 必录且未设逃生门，与 AI-PROMPT-STD-001 §5 的 `NOT_VERIFIED` 口径存在字面冲突。本细则暂按 AI-PROMPT-STD-001 §5 执行（三元组 + NOT_VERIFIED），统一口径随批量 adoption 一并裁定。
 
@@ -64,10 +64,11 @@
 11. Stop/escalation（停止条件与升级对象）
 12. Evidence and final report schema（证据与最终报告格式）
 
-**分级裁剪（运行口径）**：
-- **R0/R1 文档会话** 最小集：1、2、5、8、11、12 六项必录，其余从简；
-- **代码会话最小集（v1.1 新增，缺口④对策）**：任务类 `IMPL/TEST/SEC/MIG/PERF`（区别于 DOC/ARCH 文档会话）最小集 = **1、2、3、5、8、9、12 七项**（Identity / Objective / **Baseline** / Scope / Acceptance / **Verification** / Evidence）——代码会话必须有可复现基线与验证口径，这两项在文档最小集之外必录；R2/R3 代码会话仍走全量 12 项；
-- **R2/R3**（任意任务类）：12 项全量 + AI-STD-001 §5 第 15 项**双语文档清单**（中英路径、源版本、对应件状态、标识/状态对等、交叉链接、语义对等审查人）；
+**分级重点检查（不是结构豁免）**：
+- **所有执行提示词、所有风险级别与任务类**均必须保留上述 12 项完整结构；不得因 R0/R1、DOC 或代码会话而删除、合并或省略其余章节。
+- **R0/R1 文档会话重点子集**：1、2、5、8、11、12 六项须特别具体；这六项只是审查重点，不是六项替代模板。
+- **代码会话重点子集**：任务类 `IMPL/TEST/SEC/MIG/PERF` 的 1、2、3、5、8、9、12 七项须特别具体；其余五项仍必须保留在提示词中。R2/R3 无论任务类均须完整 12 项，并执行适用的额外风险/双语要求。
+- **R2/R3**（任意任务类）：12 项全量 + AI-STD-001 §5 第 15 项双语文档清单（中英路径、源版本、对应件状态、标识/状态对等、交叉链接、语义对等审查人）。15-vs-12 的上位规范冲突仍按 §2 披露，留 Issue #218 裁决；本段不自行裁定该冲突。
 - 定时提示词另按 AI-PROMPT-STD-001 §4 附加项（Owner key、automation ID、频率、时区、幂等、单次上限、无任务行为、权限预检）。
 
 > **上位冲突披露（待 Issue #218 adoption 决议）**：AI-STD-001 §5 另有一份 **15 项**强制清单（含第 15 项双语文档清单），与 AI-PROMPT-STD-001 §4 的 12 项切分口径不同。本细则以 12 项为主清单，将 AI-STD-001 §5 差异项（任务类/风险级、独立审查者角色、双语清单）并入 §2 开工必录与上述分级裁剪执行；两清单的统一列入批量 adoption 一并裁定。
