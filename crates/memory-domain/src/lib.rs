@@ -3,7 +3,7 @@
 
 use std::collections::BTreeMap;
 
-#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct OpaqueId(String);
 
 impl OpaqueId {
