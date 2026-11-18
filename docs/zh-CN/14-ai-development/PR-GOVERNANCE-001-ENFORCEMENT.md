@@ -4,9 +4,17 @@
 - 文档 ID：PR-GOVERNANCE-001-ENFORCEMENT
 - 版本：1.1
 - 状态：PROPOSED（提议中）——经授权审查并合并后方成为规范性要求
-- 上位规范：[PR-GOVERNANCE-001](PR-GOVERNANCE-001.md)
+- 上位规范：[PR-GOVERNANCE-001](../../../14-ai-development/PR-GOVERNANCE-001.md)
 - 跟踪项：[Issue #130](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/130)、[Issue #134](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/134)
-- 英文对应版本：[English](PR-GOVERNANCE-001-ENFORCEMENT.md)
+- 英文对应版本：[English](../../en/14-ai-development/PR-GOVERNANCE-001-ENFORCEMENT.md)
+
+## 0. PR 创建与分支合并边界
+
+**只有合并目标为 `main` 时才必须创建 PR。** 该规则适用于所有来源分支，包括 Owner 主分支和子/工作分支：只要目标是 `main`，就必须通过 PR，并满足本补充规范中的准确 Head 检查与独立审查门禁。
+
+合并目标为任何非 `main` 分支时，**不需要 PR**。这包括子/工作分支 → 所属 Owner 主分支、普通工作分支 → Owner 主分支，以及 Owner 主分支 → 其他非 `main` 分支。这些属于 Owner 内部集成操作；责任 Owner 仍须执行必要的范围、测试、证据和安全检查，并将重要决策记录到已有所属工作项。不得仅为表示此类内部合并而创建 PR。
+
+此例外不允许通过先合入其他分支再绕行的方式规避 `main` 的 PR 门禁。创建 PR 前先检索是否已有相同变更和目标分支的 PR，优先更新/复用而不是重复创建。创建 Issue 前先检索已有责任 Issue，优先更新并建立关联。一个会话、子任务或结项记录本身不构成新建 PR/Issue 的理由。只有在确认重复、被取代或已完成，并保留关联链接和原因后，才关闭相应载体。
 
 ## 1. 精确 Head 合并门禁
 
