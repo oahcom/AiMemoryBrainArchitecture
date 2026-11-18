@@ -33,7 +33,8 @@ Rust Workspace CI 工作流 `.github/workflows/rust-phase1.yml` 执行 `cargo te
 SQLite Adapter 测试覆盖：
 - 内存数据库 round-trip、幂等、stale-version 和 Scope 边界；
 - 关闭连接并重新打开数据库后，已提交状态仍然存在，包括 Current Pointer、Idempotency Receipt 和 Change Sequence；
-- 在同一个事务已写入 Version Row、Current Pointer、Commit Log 和 Idempotency Receipt、但尚未提交时，强制终止进程；重新打开数据库后，这些未提交的部分效果必须全部不可见。
+- 在同一个事务已写入 Version Row、Current Pointer、Commit Log 和 Idempotency Receipt、但尚未提交时，强制终止进程；重新打开数据库后，这些未提交的部分效果必须全部不可见；
+- 两个独立打开的 SQLite Connection 同时以相同 Expected-Current 状态竞争首次写入；必须恰好一个提交成功，另一个观察到 `StaleVersion`，持久化 Change Log 恰好只有一条记录。
 
 强制进程退出测试验证的是当前受测本地文件系统/运行环境下，SQLite 对未提交事务的进程终止恢复能力。它不构成断电、内核崩溃、存储控制器缓存、介质损坏、Backup/Restore 或多进程线性一致性证明。
 
