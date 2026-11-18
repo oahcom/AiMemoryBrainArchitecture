@@ -103,6 +103,7 @@ impl MemoryVersion {
         if self.change_reason.is_empty() { return Err(DomainError::EmptyRequiredField("change_reason")); }
         if self.content_digest.is_empty() { return Err(DomainError::EmptyRequiredField("content_digest")); }
         if self.schema_version.is_empty() { return Err(DomainError::EmptyRequiredField("schema_version")); }
+        self.claims.iter().try_for_each(Claim::validate)?;
         Ok(())
     }
 }
