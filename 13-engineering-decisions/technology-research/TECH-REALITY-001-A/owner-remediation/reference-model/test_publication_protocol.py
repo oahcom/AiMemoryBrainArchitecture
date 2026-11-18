@@ -352,8 +352,10 @@ class Protocol:
         if operation_id not in self.i_pending:
             raise Rejected("UNKNOWN Storage outcome requires pending I COMMIT_WON")
         if binding is not None:
-            self._validate_unknown_binding(operation_id, binding)
             prior = self.operation_bindings.get(operation_id)
+            if prior is not None and len(binding) == 8 and len(prior) == 9:
+                binding = binding + (prior[8],)
+            self._validate_unknown_binding(operation_id, binding)
             if prior is not None and prior != binding:
                 raise Rejected("UNKNOWN operation identity rebound")
         self.private_unknown.add(operation_id)
@@ -669,7 +671,7 @@ class PublicationProtocolTests(unittest.TestCase):
         self.assertEqual(
             proof,
             ("I_COMMIT_WON", "op-1", "auth-2", "publication-1", "storage-1",
-             "request-digest-1", "owner-boundary-1", "visibility-gate-1"),
+             "request-digest-1", "owner-boundary-1", "visibility-gate-1", p._authorization_context("auth-2")),
         )
         self.assertEqual(p.publication_commit_winners["publication-1"], "op-1")
 
