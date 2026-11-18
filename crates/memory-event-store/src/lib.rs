@@ -3,7 +3,7 @@
 
 use memory_domain::{OpaqueId, ScopeRef, TimeValue};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum EventClassification {
     Observed,
     Reported,
@@ -15,7 +15,7 @@ pub enum EventClassification {
     Unknown,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct EventEnvelope {
     pub event_kind: String,
     pub source_type: String,
@@ -31,7 +31,7 @@ pub struct EventEnvelope {
     pub correlation_id: OpaqueId,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct AcceptedReceipt {
     pub event_id: OpaqueId,
     pub receipt_id: OpaqueId,
@@ -40,7 +40,7 @@ pub struct AcceptedReceipt {
     pub processing_state: ProcessingState,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum ProcessingState {
     Pending,
     Suppressed,
