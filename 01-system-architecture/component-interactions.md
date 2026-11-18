@@ -115,7 +115,9 @@ The diagram shows logical dependencies, not mandatory synchronous calls. Governa
 
 **Input:** authenticated source, event payload/reference, Scope, schema version, idempotency key, source timestamps, provenance metadata.  
 **Output:** durable receipt with stable Event identifier or explicit rejection.  
-**Guarantee:** Accepted only after durable Event plus recoverable processing intent. Duplicate retries return the prior logical result.  
+**Guarantee — DECIDED:** `Accepted` is returned only after the Event and its recoverable compile intent are durable at the same atomic acceptance boundary (or an equivalent crash-safe protocol). Duplicate retries return the original receipt and do not create another Event or intent. This is not a claim that work has been dispatched or compiled.
+
+**Bounded implementation evidence:** PR #246 commit `fcdecf0a4e638c8b3c9ac0e4623f97c98ed21291`; exact-head Rust run `44261068522` SUCCESS; GOV-DOC-001 run `44261068531` SUCCESS; post-merge Main Rust run `44261208110` SUCCESS. Scope is the SQLite Event Store intent ledger/backfill only.  
 **Failure:** Invalid schema/permission is rejected; storage unavailability yields retryable unavailable/backpressure, not false acceptance.
 
 ### 4.2 Ingestion → Compiler
