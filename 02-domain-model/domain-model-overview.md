@@ -21,7 +21,7 @@ The model is intentionally richer than text plus embedding. Embeddings, lexical 
 1. Every canonical object has a stable typed opaque identifier.
 2. MemoryId identifies the logical Memory for its entire lifetime.
 3. MemoryVersionId identifies one immutable Memory version.
-4. ClaimId is stable across Memory versions when the proposition remains the same logical claim; a semantic change creates a new ClaimId.
+4. ClaimId identity policy across Memory versions remains OPEN; Phase 1 does not freeze stable-versus-version-local Claim identity.
 5. A Memory update creates a new immutable MemoryVersion. Previous versions remain readable subject to governance.
 6. A ContextEntry references a specific MemoryVersion or governed rendering; it is never a second canonical Memory.
 7. IDs are not timestamps, mutable-content hashes, database row numbers, or authorization credentials.
@@ -195,7 +195,7 @@ Without embeddings or graph databases, the implementation must demonstrate:
 2. one Event producing multiple candidate Memories;
 3. one Memory containing multiple Claims;
 4. stable Memory identity across immutable versions;
-5. stable Claim identity across versions when the proposition is unchanged;
+5. Claim identity policy is explicitly tracked as OPEN and must not be frozen by implementation;
 6. preservation of conflicting Claims and their Evidence;
 7. ContextEntry removal without canonical Memory mutation;
 8. denial of cross-scope reads/writes without authorization;
@@ -223,7 +223,7 @@ These must not be introduced into the canonical domain model merely to simplify 
 | Event / Memory / Claim are distinct | DECIDED |
 | Claim is the canonical proposition; no separate Fact in Phase 1 | DECIDED |
 | Memory identity is stable across versions | DECIDED |
-| Claim identity is stable across versions when proposition identity is preserved | DECIDED |
+| Claim identity across Memory versions | OPEN |
 | MemoryVersion is immutable | DECIDED |
 | Event / Recorded / Valid Time are distinct | DECIDED |
 | Unknown time is explicit, never always valid | DECIDED |
