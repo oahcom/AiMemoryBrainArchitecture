@@ -18,6 +18,8 @@ Canonical execution instructions must be separately versioned and pinned to an e
 - Human-reported capture: 12,202 UTF-8 bytes, excluding trailing newline
 - Human-reported capture SHA-256: `22ea8670d0a06880713547b806947e4d14086bb725c9af1a13828e9c2ac0b31a`
 - Original declared source: 12,359 UTF-8 bytes; unrecoverable; not reconstructed
+- Archive-embedded prompt body measured after retrieval: 12,112 UTF-8 bytes (including the final newline immediately before the archive delimiter); SHA-256: `5c88411335ba60c27e25b2444f09a61b206d35eaeb8511d413b77a9fe32b7b06`.
+- Difference from the human-reported transport capture: 90 bytes. Therefore this Git archive must NOT be represented as an exact 12,202-byte copy; the reported 12,202-byte capture hash remains provenance metadata only.
 - Original embedded SHA-256 declaration: `1ff44263b8b4dbb554419010ed280741454bb80c836cec6e6005815e247e7c4b` (historical declaration only)
 - Integrity disposition: `TRANSPORT_EQUIVALENT_UNPROVEN`
 - Execution disposition: `HISTORICAL_ONLY — DO NOT EXECUTE AS CURRENT TASK`
