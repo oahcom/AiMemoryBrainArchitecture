@@ -205,4 +205,4 @@ Branch HEAD 与文件 Blob SHA 是不同身份。下表记录本次实际读取�
 
 上述 C/H 两个 Run ID 来自 C-REVIEW-001 补充审查 Blob `3300d95b3074a7bf6690718e0ab7f6cbd9afb9ae`；它们不是本报告自身 CI，也不会自动转移到变化后的 Commit。已检查的审查文件没有提供 H Commit 的完整 SHA；因此有意保留 `4e65a2...` 缩写，不猜测补全。
 
-针对报告 PR 最终读回 Commit 的 GitHub Actions 查询未返回 PR 触发的 Workflow Run；Combined Status 也未返回任何 Status Context。因此本报告文档 CI 为 **NOT RUN / 未观察到 Run ID**。不得将此 PR 视为 CI 通过。最终 PR Head 和报告 Blob SHA 在最后一次读回后记录于 PR 描述。
+初始触发前查询未返回 Run，但 PR 事件随后产生两个成功的 GOV-DOC-001 运行：#44277855807 和 #44277894130，均绑定前一精确 Head `151d3b87c1c5d09a19ba1d5bbbeafa2e8031425d`。两次均通过结构检查及双语配对/PR Manifest 步骤。这些 Run 不会自动转移到后续 Commit。最终报告 Head 及其精确 Head CI 结果在最终读回后记录于 PR 描述。
