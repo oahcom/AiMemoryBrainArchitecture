@@ -36,6 +36,7 @@ pub enum DomainError {
 pub struct ScopeRef {
     pub scope_id: OpaqueId,
     pub scope_kind: ScopeKind,
+    pub namespace_key: String,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -48,6 +49,61 @@ pub enum ScopeKind {
     Session,
     Environment,
     System,
+}
+
+impl ScopeRef {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.namespace_key.is_empty() {
+            return Err(DomainError::EmptyRequiredField("namespace_key"));
+        }
+        Ok(())
+    }
+}
+
+impl Event {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.event_kind.is_empty() { return Err(DomainError::EmptyRequiredField("event_kind")); }
+        if self.payload_ref.is_empty() { return Err(DomainError::EmptyRequiredField("payload_ref")); }
+        if self.classification.is_empty() { return Err(DomainError::EmptyRequiredField("classification")); }
+        if self.schema_version.is_empty() { return Err(DomainError::EmptyRequiredField("schema_version")); }
+        if self.retention_class.is_empty() { return Err(DomainError::EmptyRequiredField("retention_class")); }
+        if self.scope_refs.is_empty() { return Err(DomainError::EmptyRequiredField("scope_refs")); }
+        self.scope_refs.iter().try_for_each(ScopeRef::validate)
+    }
+}
+
+impl Claim {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.predicate.is_empty() { return Err(DomainError::EmptyRequiredField("predicate")); }
+        if self.object_value.is_empty() { return Err(DomainError::EmptyRequiredField("object_value")); }
+        if self.polarity.is_empty() { return Err(DomainError::EmptyRequiredField("polarity")); }
+        if self.asserted_at.is_empty() { return Err(DomainError::EmptyRequiredField("asserted_at")); }
+        if self.scope_refs.is_empty() { return Err(DomainError::EmptyRequiredField("scope_refs")); }
+        self.scope_refs.iter().try_for_each(ScopeRef::validate)
+    }
+}
+
+impl Memory {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.memory_kind.is_empty() { return Err(DomainError::EmptyRequiredField("memory_kind")); }
+        if self.retention_class.is_empty() { return Err(DomainError::EmptyRequiredField("retention_class")); }
+        if self.sensitivity.is_empty() { return Err(DomainError::EmptyRequiredField("sensitivity")); }
+        if self.created_at.is_empty() { return Err(DomainError::EmptyRequiredField("created_at")); }
+        if self.updated_at.is_empty() { return Err(DomainError::EmptyRequiredField("updated_at")); }
+        if self.scope_refs.is_empty() { return Err(DomainError::EmptyRequiredField("scope_refs")); }
+        self.scope_refs.iter().try_for_each(ScopeRef::validate)
+    }
+}
+
+impl MemoryVersion {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.version_number == 0 { return Err(DomainError::InvalidVersionNumber); }
+        if self.author_kind.is_empty() { return Err(DomainError::EmptyRequiredField("author_kind")); }
+        if self.change_reason.is_empty() { return Err(DomainError::EmptyRequiredField("change_reason")); }
+        if self.content_digest.is_empty() { return Err(DomainError::EmptyRequiredField("content_digest")); }
+        if self.schema_version.is_empty() { return Err(DomainError::EmptyRequiredField("schema_version")); }
+        Ok(())
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -78,6 +134,9 @@ pub struct Event {
     pub occurred_at: Option<TimeValue>,
     pub idempotency_key: Option<String>,
     pub payload_ref: String,
+    pub classification: String,
+    pub schema_version: String,
+    pub retention_class: String,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -86,9 +145,13 @@ pub struct Claim {
     pub subject_ref: OpaqueId,
     pub predicate: String,
     pub object_value: String,
+    pub polarity: String,
     pub epistemic_status: EpistemicStatus,
+    pub confidence: Option<String>,
     pub temporal_ref: Option<TemporalRef>,
+    pub asserted_at: String,
     pub scope_refs: Vec<ScopeRef>,
+    pub qualifiers: Vec<String>,
     pub evidence_refs: Vec<OpaqueId>,
 }
 
@@ -159,11 +222,15 @@ pub struct MemoryVersion {
     pub version_number: u64,
     pub parent_version_id: Option<OpaqueId>,
     pub created_at: String,
+    pub author_kind: String,
+    pub change_reason: String,
     pub claims: Vec<Claim>,
     pub entity_refs: Vec<OpaqueId>,
     pub relation_refs: Vec<OpaqueId>,
     pub source_refs: Vec<OpaqueId>,
     pub provenance_refs: Vec<OpaqueId>,
+    pub content_digest: String,
+    pub schema_version: String,
 }
 
 impl MemoryVersion {
@@ -184,9 +251,14 @@ impl MemoryVersion {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Memory {
     pub memory_id: OpaqueId,
+    pub memory_kind: String,
     pub scope_refs: Vec<ScopeRef>,
     pub current_version_id: Option<OpaqueId>,
     pub lifecycle_state: MemoryLifecycle,
+    pub retention_class: String,
+    pub sensitivity: String,
+    pub created_at: String,
+    pub updated_at: String,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -281,7 +353,7 @@ mod tests {
     }
 
     fn scope(value: &str) -> ScopeRef {
-        ScopeRef { scope_id: id(value), scope_kind: ScopeKind::User }
+        ScopeRef { scope_id: id(value), scope_kind: ScopeKind::User, namespace_key: format!("user:{value}") }
     }
 
     fn claim(value: &str, scope_refs: Vec<ScopeRef>) -> Claim {
@@ -290,9 +362,13 @@ mod tests {
             subject_ref: id("subject"),
             predicate: "has_value".into(),
             object_value: value.into(),
+            polarity: "affirm".into(),
             epistemic_status: EpistemicStatus::Observed,
+            confidence: None,
             temporal_ref: None,
+            asserted_at: "now".into(),
             scope_refs,
+            qualifiers: vec![],
             evidence_refs: vec![id("evidence")],
         }
     }
@@ -308,12 +384,20 @@ mod tests {
             occurred_at: None,
             idempotency_key: None,
             payload_ref: "payload".into(),
+            classification: "observed".into(),
+            schema_version: "1".into(),
+            retention_class: "default".into(),
         };
         let memory = Memory {
             memory_id: id("memory"),
             scope_refs: vec![scope("s1")],
             current_version_id: None,
+            memory_kind: "knowledge".into(),
             lifecycle_state: MemoryLifecycle::Candidate,
+            retention_class: "default".into(),
+            sensitivity: "normal".into(),
+            created_at: "now".into(),
+            updated_at: "now".into(),
         };
         assert_eq!(event.event_id.as_str(), "event");
         assert_eq!(memory.memory_id.as_str(), "memory");
@@ -328,11 +412,15 @@ mod tests {
             version_number: 1,
             parent_version_id: None,
             created_at: "2026-01-01T00:00:00Z".into(),
+            author_kind: "test".into(),
+            change_reason: "initial".into(),
             claims: vec![],
             entity_refs: vec![],
             relation_refs: vec![],
             source_refs: vec![],
             provenance_refs: vec![],
+            content_digest: "digest-v1".into(),
+            schema_version: "1".into(),
         };
         let second = MemoryVersion {
             memory_version_id: id("v2"),
@@ -353,11 +441,15 @@ mod tests {
             version_number: 2,
             parent_version_id: Some(id("v1")),
             created_at: "now".into(),
+            author_kind: "test".into(),
+            change_reason: "update".into(),
             claims: vec![],
             entity_refs: vec![],
             relation_refs: vec![],
             source_refs: vec![],
             provenance_refs: vec![],
+            content_digest: "digest".into(),
+            schema_version: "1".into(),
         };
         let stale = MemoryVersion {
             memory_version_id: id("v3"),
@@ -365,11 +457,15 @@ mod tests {
             version_number: 3,
             parent_version_id: Some(id("v1")),
             created_at: "now".into(),
+            author_kind: "test".into(),
+            change_reason: "update".into(),
             claims: vec![],
             entity_refs: vec![],
             relation_refs: vec![],
             source_refs: vec![],
             provenance_refs: vec![],
+            content_digest: "digest".into(),
+            schema_version: "1".into(),
         };
         assert_eq!(stale.validate_successor(&current), Err(DomainError::InvalidParent));
     }
@@ -380,8 +476,13 @@ mod tests {
         let m = Memory {
             memory_id: id("memory"),
             scope_refs: vec![scope("s1")],
+            memory_kind: "knowledge".into(),
             current_version_id: None,
             lifecycle_state: MemoryLifecycle::Active,
+            retention_class: "default".into(),
+            sensitivity: "normal".into(),
+            created_at: "now".into(),
+            updated_at: "now".into(),
         };
         assert_eq!(c.epistemic_status, EpistemicStatus::Observed);
         assert_eq!(m.lifecycle_state, MemoryLifecycle::Active);
@@ -426,8 +527,13 @@ mod tests {
         let memory = Memory {
             memory_id: id("memory"),
             scope_refs: vec![scope("s1")],
+            memory_kind: "knowledge".into(),
             current_version_id: Some(memory_version_id),
             lifecycle_state: MemoryLifecycle::Active,
+            retention_class: "default".into(),
+            sensitivity: "normal".into(),
+            created_at: "now".into(),
+            updated_at: "now".into(),
         };
         assert!(context.remove_entry(&id("entry")));
         assert!(context.entries.is_empty());
@@ -444,10 +550,95 @@ mod tests {
     fn dm09_domain_types_do_not_require_storage_or_network() {
         let _: Memory = Memory {
             memory_id: id("memory"),
+            memory_kind: "knowledge".into(),
             scope_refs: vec![scope("s1")],
             current_version_id: None,
             lifecycle_state: MemoryLifecycle::Candidate,
+            retention_class: "default".into(),
+            sensitivity: "normal".into(),
+            created_at: "now".into(),
+            updated_at: "now".into(),
         };
+    }
+
+    #[test]
+    fn dm08_required_domain_fields_are_enforced() {
+        let valid_scope = scope("s1");
+        assert!(valid_scope.validate().is_ok());
+
+        let mut invalid_scope = valid_scope.clone();
+        invalid_scope.namespace_key.clear();
+        assert_eq!(
+            invalid_scope.validate(),
+            Err(DomainError::EmptyRequiredField("namespace_key"))
+        );
+
+        let mut event = Event {
+            event_id: id("event"),
+            event_kind: "observation".into(),
+            source_id: id("source"),
+            recorded_at: "now".into(),
+            scope_refs: vec![scope("s1")],
+            occurred_at: None,
+            idempotency_key: None,
+            payload_ref: "payload".into(),
+            classification: "observed".into(),
+            schema_version: "1".into(),
+            retention_class: "default".into(),
+        };
+        assert!(event.validate().is_ok());
+        event.classification.clear();
+        assert_eq!(
+            event.validate(),
+            Err(DomainError::EmptyRequiredField("classification"))
+        );
+
+        let mut c = claim("claim", vec![scope("s1")]);
+        assert!(c.validate().is_ok());
+        c.asserted_at.clear();
+        assert_eq!(
+            c.validate(),
+            Err(DomainError::EmptyRequiredField("asserted_at"))
+        );
+    }
+
+    #[test]
+    fn dm09_memory_and_version_required_fields_are_enforced() {
+        let mut memory = Memory {
+            memory_id: id("memory"),
+            memory_kind: "knowledge".into(),
+            scope_refs: vec![scope("s1")],
+            current_version_id: None,
+            lifecycle_state: MemoryLifecycle::Candidate,
+            retention_class: "default".into(),
+            sensitivity: "normal".into(),
+            created_at: "now".into(),
+            updated_at: "now".into(),
+        };
+        assert!(memory.validate().is_ok());
+        memory.memory_kind.clear();
+        assert_eq!(
+            memory.validate(),
+            Err(DomainError::EmptyRequiredField("memory_kind"))
+        );
+
+        let version = MemoryVersion {
+            memory_version_id: id("v1"),
+            memory_id: id("memory"),
+            version_number: 1,
+            parent_version_id: None,
+            created_at: "now".into(),
+            author_kind: "test".into(),
+            change_reason: "initial".into(),
+            claims: vec![],
+            entity_refs: vec![],
+            relation_refs: vec![],
+            source_refs: vec![],
+            provenance_refs: vec![],
+            content_digest: "digest".into(),
+            schema_version: "1".into(),
+        };
+        assert!(version.validate().is_ok());
     }
 
     #[test]
