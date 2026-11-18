@@ -2,6 +2,9 @@
 //! This adapter persists metadata and the caller-supplied payload reference/digest;
 //! it does not store or independently hash payload bytes.
 
+pub mod payload;
+pub use payload::{PayloadEventStoreExt, StoredEvent};
+
 use memory_domain::{scopes_intersect, OpaqueId, ScopeRef};
 use memory_event_store::{AcceptedReceipt, EventEnvelope, EventStore, EventStoreError, ProcessingState};
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
