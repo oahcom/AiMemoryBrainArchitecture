@@ -12,6 +12,15 @@ pub struct SqliteMemoryStorage {
 impl SqliteMemoryStorage {
     pub fn open(path: impl AsRef<std::path::Path>) -> Result<Self, StorageError> {
         let connection = Connection::open(path).map_err(|_| StorageError::TransactionUnavailable)?;
+        connection
+            .busy_timeout(std::time::Duration::from_secs(5))
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        connection
+            .pragma_update(None, "journal_mode", "WAL")
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        connection
+            .pragma_update(None, "synchronous", "FULL")
+            .map_err(|_| StorageError::TransactionUnavailable)?;
         let store = Self { connection };
         store.initialize()?;
         Ok(store)
@@ -478,5 +487,101 @@ mod tests {
             idempotency_key: "op2".into(), request_digest: "d2".into(),
         }, &[scope()]);
         assert_eq!(result, Err(StorageError::StaleVersion));
+    }
+
+
+    #[test]
+    fn file_database_uses_wal_and_full_synchronous_mode() {
+        let path = std::env::temp_dir().join(format!("memory-brain-wal-{}.sqlite", std::process::id()));
+        let _ = std::fs::remove_file(&path);
+        let store = SqliteMemoryStorage::open(&path).unwrap();
+        let journal_mode: String = store.connection
+            .pragma_query_value(None, "journal_mode", |row| row.get(0)).unwrap();
+        let synchronous: i64 = store.connection
+            .pragma_query_value(None, "synchronous", |row| row.get(0)).unwrap();
+        assert_eq!(journal_mode.to_ascii_lowercase(), "wal");
+        assert_eq!(synchronous, 2, "FULL synchronous mode must be active");
+        drop(store);
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_file(path.with_extension("sqlite-wal"));
+        let _ = std::fs::remove_file(path.with_extension("sqlite-shm"));
+    }
+
+    #[test]
+    fn committed_state_and_receipt_survive_connection_restart() {
+        let path = std::env::temp_dir().join(format!("memory-brain-restart-{}.sqlite", std::process::id()));
+        let _ = std::fs::remove_file(&path);
+        let receipt = {
+            let mut store = SqliteMemoryStorage::open(&path).unwrap();
+            store.create_memory(memory(), &[scope()]).unwrap();
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v1", 1, None),
+                idempotency_key: "restart-op".into(),
+                request_digest: "restart-digest".into(),
+            }, &[scope()]).unwrap()
+        };
+        {
+            let store = SqliteMemoryStorage::open(&path).unwrap();
+            assert_eq!(store.read_current(&id("m1"), &[scope()]).unwrap().unwrap().memory_version_id, id("v1"));
+            assert_eq!(store.resolve_idempotency("restart-op", "restart-digest", &[scope()]).unwrap(), Some(receipt));
+            let changes = store.list_changes(None, &[scope()], 10).unwrap();
+            assert_eq!(changes.records.len(), 1);
+            assert_eq!(changes.records[0].commit_sequence, CommitSequence(1));
+        }
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_file(path.with_extension("sqlite-wal"));
+        let _ = std::fs::remove_file(path.with_extension("sqlite-shm"));
+    }
+
+    // 子进程测试入口：父测试在事务尚未提交时终止该进程，验证 WAL 恢复不会暴露半成品。
+    #[test]
+    fn crash_writer_child() {
+        if std::env::var_os("SQLITE_CRASH_CHILD").is_none() {
+            return;
+        }
+        let path = std::env::var_os("SQLITE_CRASH_PATH").unwrap();
+        let store = SqliteMemoryStorage::open(path).unwrap();
+        let tx = store.connection.unchecked_transaction().unwrap();
+        tx.execute(
+            "UPDATE memories SET current_version_id = 'uncommitted-version' WHERE memory_id = 'm1'",
+            [],
+        ).unwrap();
+        std::process::abort();
+    }
+
+    #[test]
+    fn process_crash_during_open_transaction_recovers_committed_state_only() {
+        let path = std::env::temp_dir().join(format!("memory-brain-crash-{}.sqlite", std::process::id()));
+        let _ = std::fs::remove_file(&path);
+        {
+            let mut store = SqliteMemoryStorage::open(&path).unwrap();
+            store.create_memory(memory(), &[scope()]).unwrap();
+        }
+
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .arg("--exact")
+            .arg("tests::crash_writer_child")
+            .arg("--nocapture")
+            .env("SQLITE_CRASH_CHILD", "1")
+            .env("SQLITE_CRASH_PATH", &path)
+            .status()
+            .unwrap();
+        assert!(!status.success(), "crash child must terminate before commit");
+
+        let recovered = SqliteMemoryStorage::open(&path).unwrap();
+        assert_eq!(recovered.read_current(&id("m1"), &[scope()]).unwrap(), None);
+        let pointer: Option<String> = recovered.connection.query_row(
+            "SELECT current_version_id FROM memories WHERE memory_id = 'm1'",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(pointer, None, "uncommitted pointer update must be rolled back");
+
+        drop(recovered);
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_file(path.with_extension("sqlite-wal"));
+        let _ = std::fs::remove_file(path.with_extension("sqlite-shm"));
     }
 }
