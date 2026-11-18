@@ -54,7 +54,7 @@
 | PR | 目标 / 改动范围 | Exact Head / 门禁快照 | 合并提交 SHA | 当前状态 / 决策 |
 |---|---|---|---|---|
 | [#248](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/248) | PR-GOVERNANCE-001 双语执行附录：exact-head CI、独立审批、prompt/evidence 追踪、Issue #130/#134 runbook | Head `b887e9518977dca985776bf8715de9cd7597beb2`；Bilingual `44264271033` SUCCESS；Rust 不适用 | N/A（OPEN） | 文档提案；CANDIDATE。Issue #134 的 GitHub 平台级保护设置和负向阻断测试仍 OPEN |
-| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback、busy timeout/retry、injected commit failure、panic/unwind rollback 测试 | Head `be1eb17334864b1d74aa70612a09033f09b40d36`；Bilingual `44264275487` SUCCESS；Rust Workspace `44264277063` 在本次抓取时 IN_PROGRESS | N/A（OPEN） | CANDIDATE / TO_VALIDATE；待 exact-head Rust 结果完成，不提前验收 |
+| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback、busy timeout/retry、injected commit failure、panic/unwind rollback 测试 | Head `be1eb17334864b1d74aa70612a09033f09b40d36`；Bilingual `44264275487` SUCCESS；Rust Workspace `44264277063` FAILURE（job `134664822288`；14 passed / 1 failed；`file_db_busy_timeout_bounds_wait_for_long_immediate_transaction` 使用了不存在的 `updated_at` 列） | N/A（OPEN） | CANDIDATE / TO_VALIDATE；待 exact-head Rust 结果完成，不提前验收 |
 
 ## 3. 状态分类与证据边界
 
