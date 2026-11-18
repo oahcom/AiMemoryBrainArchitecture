@@ -184,10 +184,6 @@ impl MemoryStorage for SqliteMemoryStorage {
             return Err(StorageError::InvalidReference);
         }
 
-        if let Some(receipt) = self.idempotency_receipt(&request.idempotency_key, &request.request_digest)? {
-            return Ok(receipt);
-        }
-
         let tx = self
             .connection
             .transaction_with_behavior(TransactionBehavior::Immediate)
@@ -357,8 +353,36 @@ impl MemoryStorage for SqliteMemoryStorage {
         &self,
         idempotency_key: &str,
         request_digest: &str,
+        scope: &[ScopeRef],
     ) -> Result<Option<CommitReceipt>, StorageError> {
-        self.idempotency_receipt(idempotency_key, request_digest)
+        let row = self
+            .connection
+            .query_row(
+                "SELECT i.request_digest, i.receipt_json, m.scope_json
+                 FROM idempotency i
+                 JOIN commit_log c ON json_extract(i.receipt_json, '$.memory_id.0') = c.memory_id
+                 JOIN memories m ON m.memory_id = c.memory_id
+                 WHERE i.idempotency_key = ?1",
+                params![idempotency_key],
+                |row| Ok((
+                    row.get::<_, String>(0)?,
+                    row.get::<_, String>(1)?,
+                    row.get::<_, String>(2)?,
+                )),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?;
+        match row {
+            None => Ok(None),
+            Some((stored_digest, receipt_json, scope_json)) => {
+                Self::scope_allowed(&scope_json, scope)?;
+                if stored_digest == request_digest {
+                    Ok(Some(Self::decode(&receipt_json)?))
+                } else {
+                    Err(StorageError::IdempotencyConflict)
+                }
+            }
+        }
     }
 }
 
@@ -390,7 +414,7 @@ mod tests {
         }, &[scope()]).unwrap();
         assert_eq!(receipt.commit_sequence, CommitSequence(1));
         assert_eq!(store.read_current(&id("m1"), &[scope()]).unwrap().unwrap().version_number, 1);
-        assert_eq!(store.resolve_idempotency("op1", "d1").unwrap(), Some(receipt.clone()));
+        assert_eq!(store.resolve_idempotency("op1", "d1", &[scope()]).unwrap(), Some(receipt.clone()));
         assert_eq!(store.commit_version(CommitRequest {
             memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
             idempotency_key: "op1".into(), request_digest: "d1".into(),
