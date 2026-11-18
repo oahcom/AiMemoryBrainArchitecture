@@ -8,7 +8,7 @@
 
 ## 操作
 
-- create_memory
+- create_memory (with resolved scope)
 - read_current
 - read_version
 - commit_version
@@ -21,7 +21,7 @@
 
 ## 安全
 
-每次读写都接收已解析 Scope。后端 MUST NOT 将陈旧 Projection 当作 Canonical State。expected_current_version 是乐观并发保护。
+每次读写都接收已解析 Scope，包括 create_memory。后端 MUST 在解析幂等 Receipt 前完成 Scope 授权，并 MUST 拒绝 memory_id != new_version.memory_id。后端 MUST NOT 将陈旧 Projection 当作 Canonical State。expected_current_version 是乐观并发保护。
 
 ## 幂等
 
