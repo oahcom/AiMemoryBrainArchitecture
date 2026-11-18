@@ -10,4 +10,4 @@ The candidate persists the complete envelope, declared payload reference/digest,
 
 Replay reuses the original Event identity and recorded acceptance time. Forget/retention checks remain separate policy authority.
 
-No SQLite implementation, queue topology, distributed transaction, throughput target or production durability proof is included in this unit.
+The candidate file-backed SQLite adapter uses WAL, synchronous=FULL, foreign_keys=ON and a 5-second busy timeout; in-memory mode retains SQLite's in-memory journal behavior. No queue topology, worker delivery, distributed transaction, throughput target, schema migration or production durability proof is included in this unit.
