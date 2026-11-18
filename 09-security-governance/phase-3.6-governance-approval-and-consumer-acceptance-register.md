@@ -309,3 +309,27 @@ The Section 4 discovery-time OPEN entries for C/F/G/H are therefore historical a
 - I: continue obtaining the named external authorities, effective policy approvals, Environment Registry Authority designation and I36 execution evidence.
 - D/E/Storage: provide or refresh their exact-version BIH consumer acceptance evidence if still required by the A gate.
 - A: consume this updated I register Blob and the exact C/F/G/H artifacts in the next integration reconciliation; do not reuse the earlier I register Blob.
+
+
+## 12. Phase 3.6.7 — inventory component evidence completeness hardening — 2026-11-18
+
+### I-INV-REF-01 — terminal component state could be marked Confirmed without evidence
+
+Adversarial review of the I Global Forget inventory reference model found that `set_component(name, "Confirmed")` accepted a missing proof/verifier, while `evaluate()` checked only the component state for Confirmed. A caller of the reference model could therefore satisfy all component states without retaining a component-level proof reference. This was a model-level evidence-completeness defect; it is not evidence of a production I service or signed inventory seal.
+
+### I-owned correction
+
+- Model: `09-security-governance/tests/global_forget_model.py`, new Blob `977a3bae77c4d6b9342eaa774731052d2fce8e14`, commit `b869528647627eb125a2cb6eef576faeac1ae7e0`.
+- Tests: `09-security-governance/tests/test_global_forget_model.py`, new Blob `5ec68fd6e948a72e28b10a28fac760b65a167c09`, commit `124b1cc1246cc40bf75cc38bc2aa11890a92ae62`.
+- Correction: terminal component states `Confirmed`, `NotApplicable`, `PolicyException` and `Failed` now require a non-empty proof reference and verifier; unsupported states reject; completion rechecks retained proof/verifier rather than trusting the state label alone.
+- Added tests reject Confirmed/PolicyException without proof+verifier and ensure evaluation returns Pending if a previously stored component proof is absent.
+
+### Execution evidence boundary
+
+- Workflow: `.github/workflows/i-global-forget-reference-model.yml`, Blob `2c16ef5381dd271789912e9b1c1e5c12941d2826`.
+- Intended runner: Python 3.12; standard-library `py_compile` and `unittest`, no third-party dependency.
+- Exact workflow commands: `python -m py_compile 09-security-governance/tests/global_forget_model.py 09-security-governance/tests/test_global_forget_model.py`; then, from `09-security-governance/tests`, `python -m unittest discover -v`.
+- Trigger commit: `124b1cc1246cc40bf75cc38bc2aa11890a92ae62`.
+- Current readback found no combined status/check run for that commit. **Execution: NOT RUN / NO VERIFIED CI RESULT.** No PASS is claimed. The workflow must be run on the exact test commit and its raw log retained.
+
+This closes only the reference-model source defect. It does not create a real ProducerDomainInventoryEpoch, InventorySealReceipt, external governance approval, Environment Registry Authority, AuthorizationCommitPermit, I36 execution or Global Forget completion. I36-GOV-01..10 remain GOVERNANCE-BLOCKED; G2/G5 remain BLOCKED; G7 remains NOT RUN.
