@@ -54,7 +54,7 @@
 | PR | 目标 / 改动范围 | Exact Head / 门禁快照 | 合并提交 SHA | 当前状态 / 决策 |
 |---|---|---|---|---|
 | [#248](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/248) | PR-GOVERNANCE-001 双语执行附录：exact-head CI、独立审批、prompt/evidence 追踪、Issue #130/#134 runbook | Head `b887e9518977dca985776bf8715de9cd7597beb2`；Bilingual `44264271033` SUCCESS；Rust 不适用 | N/A（OPEN） | 文档提案；CANDIDATE。Issue #134 的 GitHub 平台级保护设置和负向阻断测试仍 OPEN |
-| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback、busy timeout/retry、injected commit failure、panic/unwind rollback 测试 | Head `f8aae66de2f47ced90fa486b16e6de2e6daf8659`；Rust Workspace `44264422967` SUCCESS；Bilingual `44264422934` SUCCESS | N/A（OPEN） | CANDIDATE；实现与 CI 门禁通过，仍待独立语义审查与批准 |
+| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback、busy timeout/retry、injected commit failure、panic/unwind rollback 测试 | Head `f8aae66de2f47ced90fa486b16e6de2e6daf8659`；Rust Workspace `44264422967` SUCCESS（执行 `cargo test --workspace --all-targets`；SQLite Adapter 15/15）；Bilingual `44264422934` SUCCESS。历史失败 `44264277063` 对应中间提交 `be1eb173`，不属于该 exact Head | N/A（OPEN） | CANDIDATE；实现与 CI 门禁通过，仍待独立语义审查与批准 |
 
 ## 3. 状态分类与证据边界
 
