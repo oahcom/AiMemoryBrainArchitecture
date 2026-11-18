@@ -152,7 +152,11 @@ class Protocol:
             "principal_ref", "actor_ref", "scope_binding_digest", "environment_ref", "action",
             "resource_ref", "purpose", "audience", "delegation_chain_ref", "policy_domain_id",
             "permission_epoch", "runtime_session_ref", "workload_binding_ref",
-            "policy_version_digest", "decision_id",
+            "policy_version_digest", "decision_id", "tenant_security_domain_ref",
+            "ownership_scope_ref", "applicability_scope_set_digest", "obligations_digest",
+            "expiry", "producer_binding_ref", "adapter_binding_ref",
+            "authenticated_transport_binding_ref", "authentication_strength",
+            "operation_payload_digest",
         )
         defaults = {
             "principal_ref": "principal-1", "actor_ref": "actor-1",
@@ -162,6 +166,16 @@ class Protocol:
             "policy_domain_id": "policy-domain-1", "permission_epoch": "epoch-1",
             "runtime_session_ref": "session-1", "workload_binding_ref": "workload-1",
             "policy_version_digest": "policy-version-1", "decision_id": "decision-1",
+            "tenant_security_domain_ref": "tenant-security-domain-1",
+            "ownership_scope_ref": "scope-owner-1",
+            "applicability_scope_set_digest": "scope-applicability-1",
+            "obligations_digest": "obligations-1",
+            "expiry": "expiry-1",
+            "producer_binding_ref": "producer-1",
+            "adapter_binding_ref": "adapter-1",
+            "authenticated_transport_binding_ref": "transport-binding-1",
+            "authentication_strength": "strong",
+            "operation_payload_digest": "operation-payload-1",
         }
         defaults.update(context)
         value = tuple(defaults[k] for k in fields)
@@ -1031,6 +1045,20 @@ class PublicationProtocolTests(unittest.TestCase):
         with self.assertRaises(Rejected):
             p.resolve_no_publication("op-1", proof)
         self.assertIn("op-1", p.private_unknown)
+
+    def test_full_i_scope_purpose_audience_lifecycle_context_is_immutable(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        context = list(p.authorization_contexts["auth-1"])
+        # applicability Scope / obligations / expiry / authenticated workload
+        # are part of the I authorization tuple, not free metadata.
+        for index in range(16, len(context)):
+            mutated = list(context)
+            mutated[index] = mutated[index] + "-substituted"
+            p.authorization_contexts["auth-1"] = tuple(mutated)
+            with self.assertRaises(Rejected):
+                p.commit(**args)
+            p.authorization_contexts["auth-1"] = tuple(context)
 
     def test_full_i_authorization_context_substitution_is_rejected_at_commit(self):
         p = self.prepared()
