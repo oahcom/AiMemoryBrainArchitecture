@@ -267,14 +267,13 @@ mod tests {
         let mut b2 = envelope("scope-b-2", b"b2");
         b2.scope_refs = vec![scope_b.clone()];
 
-        let hidden = store.accept_with_payload(a, b"a1", &[scope_a]).unwrap();
-        let visible1 = store.accept_with_payload(b1, b"b1", &[scope_b.clone()]).unwrap();
-        let visible2 = store.accept_with_payload(b2, b"b2", &[scope_b.clone()]).unwrap();
-
+        store.accept_with_payload(a, b"a1", &[scope_a]).unwrap();
         let hidden_only = store.read_after(0, 1, &[scope_b.clone()]).unwrap();
         assert!(hidden_only.is_empty());
-        let cursor = hidden.event_id.as_str().trim_start_matches("event:").parse().unwrap();
-        let page1 = store.read_after(cursor, 1, &[scope_b.clone()]).unwrap();
+
+        let visible1 = store.accept_with_payload(b1, b"b1", &[scope_b.clone()]).unwrap();
+        let visible2 = store.accept_with_payload(b2, b"b2", &[scope_b.clone()]).unwrap();
+        let page1 = store.read_after(0, 1, &[scope_b.clone()]).unwrap();
         assert_eq!(page1.len(), 1);
         assert_eq!(page1[0].receipt, visible1);
         let page2 = store.read_after(page1[0].sequence, 1, &[scope_b]).unwrap();
