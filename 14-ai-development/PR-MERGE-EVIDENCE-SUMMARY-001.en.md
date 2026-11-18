@@ -16,7 +16,7 @@
 | SQLite scope-filtered pagination | DECIDED (tested boundary) | #241 exact-head Workspace CI passed; pagination limits apply to authorized visible records | Not a complete authorization model |
 | SQLite WAL/FULL + reopen/process-exit rollback | DECIDED (local file-backed test boundary) | #242 exact-head tests verify close/reopen persistence and rollback of an uncommitted transaction in a terminated child process | No proof of power loss, kernel crash, media corruption, backup/restore, or production topology |
 | SQLite independent-connection CAS/idempotency race | DECIDED (same-process independent-connection boundary) | #243 exact-head Workspace CI passed; competing writes and identical-key replay across two independent connections are covered | No cross-process linearizability or distributed coordination proof |
-| Additional SQLite rollback/locking/savepoint tests | CANDIDATE / pending validation | #249 test implementation is submitted and the bilingual gate passed | Rust Workspace run was still in progress at capture time |
+| Additional SQLite rollback/locking/savepoint tests | CANDIDATE / tests passed; independent review pending | #249 exact-head Rust Workspace and bilingual documentation gates both passed | No Owner/independent review or merge yet |
 | PR governance / branch protection | OPEN | #248 proposal passed the bilingual structural gate | Platform-level protection, required-check enforcement, and a negative blocking test for #134 remain outstanding |
 | Phase 3.7 D/E/I/Storage publication protocol | OPEN | Issue #25 retains unresolved Owner decisions, real implementation, and production evidence gaps | Phase 1 SQLite tests do not establish a production Forget/Publication closure |
 
@@ -54,7 +54,7 @@
 | PR | Goal / scope | Exact Head / gate snapshot | Merge commit SHA | Current state / decision |
 |---|---|---|---|---|
 | [#248](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/248) | Bilingual PR-GOVERNANCE-001 enforcement addendum: exact-head CI, independent approval, prompt/evidence traceability, Issue #130/#134 runbooks | Head `b887e9518977dca985776bf8715de9cd7597beb2`; Bilingual `44264271033` SUCCESS; Rust not applicable | N/A (OPEN) | Governance proposal; CANDIDATE. GitHub platform branch protection and negative enforcement test for #134 remain OPEN |
-| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback, busy-timeout/retry, injected commit failure, panic/unwind rollback tests | Head `be1eb17334864b1d74aa70612a09033f09b40d36`; Bilingual `44264275487` SUCCESS; Rust Workspace `44264277063` FAILURE (job `134664822288`; 14 passed / 1 failed; `file_db_busy_timeout_bounds_wait_for_long_immediate_transaction` referenced a nonexistent `updated_at` column) | N/A (OPEN) | CANDIDATE / TO_VALIDATE; do not accept before the exact-head Rust result completes |
+| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback, busy-timeout/retry, injected commit failure, panic/unwind rollback tests | Head `f8aae66de2f47ced90fa486b16e6de2e6daf8659`; Rust Workspace `44264422967` SUCCESS; Bilingual `44264422934` SUCCESS | N/A (OPEN) | CANDIDATE; implementation and CI gates pass, independent semantic review and approval remain outstanding |
 
 ## 3. State classification and evidence boundaries
 
@@ -67,7 +67,7 @@
 ### CANDIDATE
 
 - PR #248 governance enforcement addendum: bilingual gate passed, but the PR is not merged and cannot substitute for GitHub platform configuration.
-- PR #249 SQLite rollback/locking/savepoint tests: implementation is submitted; the exact-head Rust result is still pending.
+- PR #249 SQLite rollback/locking/savepoint tests: exact Head `f8aae66de2f47ced90fa486b16e6de2e6daf8659`; Rust Workspace run `44264422967` SUCCESS and bilingual documentation run `44264422934` SUCCESS. Independent semantic review remains outstanding.
 - WAL/FULL may be treated as the current adapter configuration, not as a final production durability policy.
 
 ### OPEN
