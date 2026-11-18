@@ -277,8 +277,8 @@ class Protocol:
         ):
             raise Rejected("D proof does not bind exact operation, Storage participant, digest and owner boundary")
         storage = self.storage_participants.get(storage_id)
-        if storage is None or storage[0] != operation_id or storage[1] != publication[1]:
-            raise Rejected("Storage proof does not bind exact operation and work item")
+        if storage is None or storage[0] != operation_id or storage[1] != publication[1] or storage[2] != publication[3]:
+            raise Rejected("Storage proof does not bind exact operation, work item and dependency digest")
         if d_proof != ("D_ADMITTED", operation_id, publication_id, storage_id,
                        request_digest, owner_boundary, final_visibility_gate_id):
             raise Rejected("invalid D publication proof")
@@ -324,8 +324,8 @@ class Protocol:
         if publication[4:] != (request_digest, owner_boundary, final_visibility_gate_id):
             raise Rejected("D participant digest or owner boundary mismatch")
         storage = self.storage_participants.get(storage_id)
-        if storage is None or storage[0] != operation_id or storage[1] != publication[1]:
-            raise Rejected("Storage participant does not bind exact operation and work item")
+        if storage is None or storage[0] != operation_id or storage[1] != publication[1] or storage[2] != publication[3]:
+            raise Rejected("Storage participant does not bind exact operation, work item and dependency digest")
         if d_proof != ("D_ADMITTED", operation_id, publication_id, storage_id,
                        request_digest, owner_boundary, final_visibility_gate_id):
             raise Rejected("invalid D publication proof")
@@ -360,8 +360,8 @@ class Protocol:
         ):
             raise Rejected("UNKNOWN operation publication/Storage/digest/boundary mismatch")
         storage = self.storage_participants.get(storage_id)
-        if storage is None or storage[0] != operation_id or storage[1] != publication[1]:
-            raise Rejected("UNKNOWN operation/Storage participant binding mismatch")
+        if storage is None or storage[0] != operation_id or storage[1] != publication[1] or storage[2] != publication[3]:
+            raise Rejected("UNKNOWN operation/Storage participant/dependency binding mismatch")
         if d_proof != ("D_ADMITTED", operation_id, publication_id, storage_id,
                        request_digest, owner_boundary, final_visibility_gate_id):
             raise Rejected("UNKNOWN operation D admission proof mismatch")
@@ -564,6 +564,22 @@ class PublicationProtocolTests(unittest.TestCase):
                 "publication-without-gate", "op-1", "work-1", "storage-1",
                 "request-digest-1", "owner-boundary-1", "",
             )
+
+    def test_storage_dependency_digest_is_bound_across_d_and_storage_participants(self):
+        p = self.prepared()
+        storage = p.storage_participants["storage-1"]
+        p.storage_participants["storage-1"] = (storage[0], storage[1], "dependency-digest-substituted")
+        with self.assertRaisesRegex(Rejected, "dependency digest"):
+            self.consume_i(p)
+
+        p = self.prepared()
+        publication = p.publication_participants["publication-1"]
+        p.publication_participants["publication-1"] = (
+            publication[0], publication[1], publication[2], "dependency-digest-substituted",
+            *publication[4:],
+        )
+        with self.assertRaisesRegex(Rejected, "dependency digest"):
+            self.consume_i(p)
 
     def test_publication_must_bind_exact_storage_participant(self):
         p = self.prepared()
