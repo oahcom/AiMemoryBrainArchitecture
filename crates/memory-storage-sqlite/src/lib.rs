@@ -111,7 +111,17 @@ impl SqliteMemoryStorage {
         match row {
             Some((scope_json, version_json)) => {
                 Self::scope_allowed(&scope_json, scope)?;
-                Ok(Some(Self::decode(&version_json)?))
+                let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
+                let mut version: MemoryVersion = Self::decode(&version_json)?;
+                version.validate().map_err(|_| StorageError::InvalidSchema)?;
+                if version.claims.iter().any(|claim| !scopes_intersect(&claim.scope_refs, &stored_scopes)) {
+                    return Err(StorageError::InvalidSchema);
+                }
+                // A Memory may carry multiple applicability scopes. Filter nested
+                // Claims independently so a reader authorized for one scope does
+                // not receive Claims belonging only to another scope.
+                version.claims.retain(|claim| scopes_intersect(&claim.scope_refs, scope));
+                Ok(Some(version))
             }
             None => Ok(None),
         }
@@ -203,6 +213,10 @@ impl MemoryStorage for SqliteMemoryStorage {
             .ok_or(StorageError::NotFoundOrNotVisible)?;
 
         Self::scope_allowed(&memory_row.0, scope)?;
+        let memory_scopes: Vec<ScopeRef> = Self::decode(&memory_row.0)?;
+        if request.new_version.claims.iter().any(|claim| !scopes_intersect(&claim.scope_refs, &memory_scopes)) {
+            return Err(StorageError::ScopeMismatch);
+        }
 
         if let Some((stored_memory_id, stored_digest, receipt_json)) = tx
             .query_row(
@@ -406,7 +420,7 @@ impl MemoryStorage for SqliteMemoryStorage {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use memory_domain::{MemoryLifecycle, ScopeKind};
+    use memory_domain::{Claim, EpistemicStatus, MemoryLifecycle, ScopeKind};
 
     fn id(value: &str) -> OpaqueId { OpaqueId::new(value).unwrap() }
     fn scope() -> ScopeRef { ScopeRef { scope_id: id("s1"), scope_kind: ScopeKind::User, namespace_key: "user:s1".into() } }
@@ -425,6 +439,23 @@ mod tests {
             author_kind: "test".into(), change_reason: "test".into(),
             claims: vec![], entity_refs: vec![], relation_refs: vec![], source_refs: vec![],
             provenance_refs: vec![], content_digest: format!("digest-{idv}"), schema_version: "1".into(),
+        }
+    }
+
+    fn claim_in_scope(claim_id: &str, claim_scope: ScopeRef) -> Claim {
+        Claim {
+            claim_id: id(claim_id),
+            subject_ref: id("subject"),
+            predicate: "has_value".into(),
+            object_value: "value".into(),
+            polarity: "affirm".into(),
+            epistemic_status: EpistemicStatus::Observed,
+            confidence: None,
+            temporal_ref: None,
+            asserted_at: "now".into(),
+            scope_refs: vec![claim_scope],
+            qualifiers: vec![],
+            evidence_refs: vec![],
         }
     }
 
@@ -1135,6 +1166,94 @@ mod tests {
 
         drop(store);
         remove_db_files(&path);
+    }
+
+    #[test]
+    fn sqlite_filters_nested_claims_by_the_callers_scope() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        let first_scope = scope();
+        let second_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+
+        let mut multi_scope_memory = memory();
+        multi_scope_memory.scope_refs = vec![first_scope.clone(), second_scope.clone()];
+        store.create_memory(
+            multi_scope_memory,
+            &[first_scope.clone(), second_scope.clone()],
+        ).unwrap();
+
+        let mut new_version = version("v-multi-scope", 1, None);
+        new_version.claims = vec![claim_in_scope("claim-s2", second_scope.clone())];
+        store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version,
+            idempotency_key: "multi-scope-claim".into(),
+            request_digest: "multi-scope-claim-digest".into(),
+        }, &[first_scope.clone(), second_scope.clone()]).unwrap();
+
+        let first_reader = store.read_current(&id("m1"), &[first_scope]).unwrap().unwrap();
+        assert!(first_reader.claims.is_empty(), "scope s1 must not receive the s2-only Claim");
+
+        let second_reader = store.read_current(&id("m1"), &[second_scope.clone()]).unwrap().unwrap();
+        assert_eq!(second_reader.claims.len(), 1);
+        assert_eq!(second_reader.claims[0].claim_id, id("claim-s2"));
+
+        let historical = store.read_version(
+            &id("m1"),
+            &id("v-multi-scope"),
+            &[second_scope],
+        ).unwrap().unwrap();
+        assert_eq!(historical.claims.len(), 1);
+    }
+
+    #[test]
+    fn sqlite_rejects_claims_outside_the_parent_memory_scope() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+        let other_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+        let mut new_version = version("v-cross-scope-claim", 1, None);
+        new_version.claims = vec![claim_in_scope("claim-s2", other_scope)];
+        assert_eq!(
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version,
+                idempotency_key: "cross-scope-claim".into(),
+                request_digest: "cross-scope-claim-digest".into(),
+            }, &[scope()]),
+            Err(StorageError::ScopeMismatch)
+        );
+        assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+        assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+    }
+
+    #[test]
+    fn sqlite_rejects_malformed_nested_claims_before_commit() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+        let mut malformed = claim_in_scope("claim-invalid", scope());
+        malformed.predicate.clear();
+        let mut new_version = version("v-invalid-claim", 1, None);
+        new_version.claims = vec![malformed];
+        assert_eq!(
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version,
+                idempotency_key: "invalid-claim".into(),
+                request_digest: "invalid-claim-digest".into(),
+            }, &[scope()]),
+            Err(StorageError::InvalidSchema)
+        );
+        assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
     }
 
 }
