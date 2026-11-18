@@ -1,11 +1,11 @@
 # Memory Lifecycle Model
 
 **Status:** State vocabulary and separation DECIDED; policy thresholds and selected transitions OPEN.  
-**Owner:** Owner D owns canonical Memory lifecycle and Forget domain semantics; Memory Lifecycle Manager executes D-owned transitions. Owner I owns authorization and security/governance policy; Storage owns durable persistence guarantees.
+**Owner:** Domain Model defines semantics; Memory Lifecycle Manager executes canonical transitions.
 
 ## 1. Purpose and boundaries
 
-Defines lifecycle semantics of canonical Memory assets and relation to Claim epistemic status, Memory Version history, Entity/Relation status, and Forget governance. Domain Model / Owner D defines valid states, transitions and D-domain completion; Memory Lifecycle Manager executes D-owned transitions. Owner I owns authorization, privacy/retention/legal-hold policy and governance evidence acceptance. Canonical Store / Storage owns persistence/version mechanics; Compiler proposes candidates but cannot bypass lifecycle policy.
+Defines lifecycle semantics of canonical Memory assets and relation to Claim epistemic status, Memory Version history, Entity/Relation status, and Forget governance. Domain Model defines valid states; Lifecycle Manager owns policy/execution/authorization/audit; Canonical Store owns persistence/version mechanics; Compiler proposes candidates but cannot bypass lifecycle policy.
 
 ## 2. Lifecycle is not epistemic status
 
@@ -22,7 +22,7 @@ Examples: Active Memory can contain a Disputed Claim; Archived Memory can contai
 | Active | Accepted for normal retrieval/activation in scope | Yes, subject to scope, epistemic, and policy filters |
 | Superseded | Replaced by successor for current use; retained as history | Excluded from default current retrieval |
 | Archived | Retained but inactive under current policy | Excluded from default activation; authorized historical access |
-| Forgotten | D-domain suppression is durably committed at SuppressionCommitted; identity is terminal; later cleanup/governance evidence is tracked separately | No; permissible tombstone only |
+| Forgotten | Governed Forget committed; content access denied and deletion/de-identification tracked | No; permissible tombstone only |
 
 State does not imply truth, relevance, or trust.
 
@@ -63,7 +63,7 @@ Requires successor reference and replacement reason. Historical version and vali
 Requires policy or authorized operation, reason, actor, and retention class. Archive neither deletes nor retracts Claims.
 
 ### Any non-Forgotten → Forgotten
-Requires an applicable I-owned authorization decision at the commit boundary, D-owned suppression proof, and a Storage-approved durable SuppressionCommitted commit tuple. The Memory transitions atomically to Forgotten at that commit point. Dependency discovery, target cleanup, D-domain completion and I governance assessment continue separately after suppression; they do not delay or redefine the Forgotten transition. Physical erasure is tracked separately.
+Requires valid Forget trigger, authorization, dependency discovery, propagation plan, and durable governance record. Ordinary content access is denied at the defined governance barrier; physical erasure may complete asynchronously and is tracked separately.
 
 ### Archived → Active
 Requires explicit restore authorization, revalidation of scope/evidence/currentness, and new version or lifecycle event. No silent reactivation.
@@ -109,7 +109,7 @@ Inputs: lifecycle command, Memory ID/current version, actor, scope, reason, poli
 
 Outputs: accepted/rejected transition, lifecycle event/version reference, current state, Forget job reference, structured error. Errors include NOT_FOUND, SCOPE_MISMATCH, PERMISSION_DENIED, INVALID_TRANSITION, STALE_VERSION, MISSING_SUCCESSOR, PROVENANCE_INCOMPLETE, FORGET_IN_PROGRESS, ALREADY_FORGOTTEN.
 
-Compiler submits Candidate proposals. Store persists accepted versions. Runtime consumes lifecycle-filtered views. MCM reconciles D-owned lifecycle and suppression work. Owner I owns Forget authorization, policy and cross-system governance assessment; D consumes I's authorization decision but does not define I's policy or receipt semantics.
+Compiler submits Candidate proposals. Store persists accepted versions. Runtime consumes lifecycle-filtered views. MCM reconciles references to Superseded/Archived/Forgotten assets. Governance owns Forget authorization/propagation.
 
 ## 10. Concurrency, idempotency, recovery
 
@@ -160,5 +160,3 @@ Proposed clarification:
 - Failed or incomplete cleanup leaves suppression active and resumable; it never reopens the Memory identity.
 
 **Status:** PROPOSED / D-I APPROVAL PENDING / R3 TESTS NOT RUN.
-
-D-side U-010 domain-trigger decision and bilingual source alignment are recorded in `14-ai-development/work-items/AID-2026-001/owner-d-r3-findings-resolution-u010-v1.md`. This does not constitute I approval, Storage approval, independent review or R3 evidence.
