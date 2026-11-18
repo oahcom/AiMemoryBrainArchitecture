@@ -8,3 +8,6 @@ publish = false
 [dependencies]
 memory-domain = { path = "../memory-domain" }
 memory-storage = { path = "../memory-storage" }
+
+[dev-dependencies]
+memory-storage-sqlite = { path = "../memory-storage-sqlite" }
