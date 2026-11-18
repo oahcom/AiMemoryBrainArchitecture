@@ -106,7 +106,8 @@ impl SqliteMemoryStorage {
 }
 
 impl MemoryStorage for SqliteMemoryStorage {
-    fn create_memory(&mut self, memory: Memory) -> Result<(), StorageError> {
+    fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError> {
+        Self::scope_allowed(&Self::encode(&memory.scope_refs)?, scope)?;
         let scope_json = Self::encode(&memory.scope_refs)?;
         let memory_json = Self::encode(&memory)?;
         self.connection
@@ -385,7 +386,7 @@ mod tests {
     #[test]
     fn sqlite_round_trip_and_idempotency_are_atomic() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
-        store.create_memory(memory()).unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
         let receipt = store.commit_version(CommitRequest {
             memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
             idempotency_key: "op1".into(), request_digest: "d1".into(),
