@@ -43,7 +43,7 @@ The first successfully committed request wins. Concurrent requests for the same 
 
 **CANDIDATE / TO_VALIDATE — pending authoritative Scope identity decision:** Scope is proposed as part of the idempotency namespace. Whether two Scope references are distinct for this purpose, and therefore whether the same ProducerIdentity and IdempotencyKey form independent operations/receipts, depends on the unresolved Scope identity/equality domain described in §3. Do not rely on cross-Scope replay isolation as a normative comparator rule until B/domain and I/security Owners decide it.
 
-This is namespace separation, not cross-scope authorization. The caller must independently authenticate and be authorized in the target Scope. A caller lacking access receives the normal authorization denial; the implementation must not reveal whether a matching key exists in another Scope.
+The proposed behavior is namespace separation, not cross-scope authorization; its exact application remains subject to the unresolved Scope identity/equality decision above. The caller must independently authenticate and be authorized in the target Scope. A caller lacking access receives the normal authorization denial; the implementation must not reveal whether a matching key exists in another Scope.
 
 If project policy instead requires a producer-wide key namespace across all Scopes, that alternative requires an explicit superseding decision; it MUST NOT emerge accidentally from a database uniqueness constraint.
 
@@ -56,7 +56,7 @@ For an existing, unexpired namespace:
 | Same ProducerIdentity + Scope + Key + Digest | Return original Receipt as replay; do not append again |
 | Same ProducerIdentity + Scope + Key, different Digest | IDEMPOTENCY_KEY_CONFLICT; do not append or replace Receipt |
 | Different ProducerIdentity, same Scope + Key | Independent namespace; no replay relationship |
-| Same ProducerIdentity + Key, different Scope | Independent namespace; no cross-scope receipt disclosure |
+| Same ProducerIdentity + Key, different Scope | CANDIDATE / TO_VALIDATE — independent namespace and no cross-scope receipt disclosure only after B/domain + I/security decide Scope identity/equality |
 | Only partially matching typed ProducerIdentity | Different namespace; no partial-match dedupe |
 | Same namespace while original outcome is UNKNOWN | Return/recover same unresolved receipt state; do not start a second append |
 
@@ -80,7 +80,7 @@ A Receipt is the durable record binding one namespace to the accepted Digest and
 
 ## 7. Boundary examples
 
-1. **Cross-Scope replay:** Producer P submits key K, digest D1 in Scope A. The same P submits K, D1 in Scope B. This is a new namespace and a new append, not a replay. Scope B cannot read Scope A's Receipt.
+1. **Cross-Scope replay — CANDIDATE / TO_VALIDATE:** Producer P submits key K, digest D1 in Scope A. The same P submits K, D1 in Scope B. Whether these references identify distinct namespaces, and therefore whether this is a new append rather than a replay, remains pending the B/domain + I/security Scope identity/equality decision. Scope B must not receive Scope A's Receipt absent the required authorization.
 2. **Partially matching Producer Identity:** ProducerIdentity=(tenant=T, principal=P, instance=I1) and (tenant=T, principal=P, instance=I2) are different identities if the owning identity contract declares instance part of the type. Same Scope, Key, and Digest do not deduplicate. If instance is not part of canonical ProducerIdentity, every adapter must use that canonical type consistently.
 3. **Digest differs under same namespace:** P + Scope A + Key K first commits D1. A later request with D2 returns IDEMPOTENCY_KEY_CONFLICT; no second event is appended and the original Receipt remains unchanged.
 4. **Concurrent same-digest retry:** Two requests race for the same namespace and D1. One commits; the other returns the same Receipt. Exactly one event exists.
