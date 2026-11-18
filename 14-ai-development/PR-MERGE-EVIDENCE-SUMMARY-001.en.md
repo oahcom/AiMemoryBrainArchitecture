@@ -54,7 +54,7 @@
 | PR | Goal / scope | Exact Head / gate snapshot | Merge commit SHA | Current state / decision |
 |---|---|---|---|---|
 | [#248](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/248) | Bilingual PR-GOVERNANCE-001 enforcement addendum: exact-head CI, independent approval, prompt/evidence traceability, Issue #130/#134 runbooks | Head `b887e9518977dca985776bf8715de9cd7597beb2`; Bilingual `44264271033` SUCCESS; Rust not applicable | N/A (OPEN) | Governance proposal; CANDIDATE. GitHub platform branch protection and negative enforcement test for #134 remain OPEN |
-| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback, busy-timeout/retry, injected commit failure, panic/unwind rollback tests | Head `be1eb17334864b1d74aa70612a09033f09b40d36`; Bilingual `44264275487` SUCCESS; Rust Workspace `44264277063` was IN_PROGRESS when captured | N/A (OPEN) | CANDIDATE / TO_VALIDATE; do not accept before the exact-head Rust result completes |
+| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback, busy-timeout/retry, injected commit failure, panic/unwind rollback tests | Head `be1eb17334864b1d74aa70612a09033f09b40d36`; Bilingual `44264275487` SUCCESS; Rust Workspace `44264277063` FAILURE (job `134664822288`; 14 passed / 1 failed; `file_db_busy_timeout_bounds_wait_for_long_immediate_transaction` referenced a nonexistent `updated_at` column) | N/A (OPEN) | CANDIDATE / TO_VALIDATE; do not accept before the exact-head Rust result completes |
 
 ## 3. State classification and evidence boundaries
 
