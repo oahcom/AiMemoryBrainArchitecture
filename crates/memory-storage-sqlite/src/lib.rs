@@ -371,7 +371,7 @@ mod tests {
     use memory_domain::{MemoryLifecycle, ScopeKind};
 
     fn id(value: &str) -> OpaqueId { OpaqueId::new(value).unwrap() }
-    fn scope() -> ScopeRef { ScopeRef { scope_id: id("s1"), scope_kind: ScopeKind::User } }
+    fn scope() -> ScopeRef { ScopeRef { scope_id: id("s1"), scope_kind: ScopeKind::User, namespace_key: "test".into() } }
     fn memory() -> Memory {
         Memory { memory_id: id("m1"), scope_refs: vec![scope()], current_version_id: None, lifecycle_state: MemoryLifecycle::Candidate }
     }
@@ -403,7 +403,7 @@ mod tests {
     #[test]
     fn sqlite_rejects_create_outside_requested_scope() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
-        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User };
+        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User, namespace_key: "test".into() };
         assert_eq!(store.create_memory(memory(), &[other]), Err(StorageError::ScopeMismatch));
     }
 
@@ -415,7 +415,7 @@ mod tests {
             memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
             idempotency_key: "op1".into(), request_digest: "d1".into(),
         }, &[scope()]).unwrap();
-        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User };
+        let other = ScopeRef { scope_id: id("s2"), scope_kind: ScopeKind::User, namespace_key: "test".into() };
         assert_eq!(
             store.commit_version(CommitRequest {
                 memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
