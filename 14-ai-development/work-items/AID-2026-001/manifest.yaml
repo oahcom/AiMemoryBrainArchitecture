@@ -416,3 +416,58 @@ reference_model_validation:
     - no_production_E_F_G_H_C_Storage_components
     - DFI_001_to_DFI_022_runtime_tests_not_run
     - no_CI_or_acceptance_claim
+
+
+owner_d_u010:
+  dispatch:
+    relay: relay-010
+    instruction_source: ChatGPT user instruction in this conversation
+    instruction_timestamp: "2026-11-18 22:15 +08:00"
+    human_authorization: "Continuous progression to convergence, issued 2026-11-18 22:08 +08:00"
+    conversation_id: UNAVAILABLE_TO_EXECUTING_SESSION
+    provenance_finding: D-U010-001
+  role_prompt:
+    prompt_id: CHATGPT-OWNER-D-001
+    version: "2.0"
+    status: PROPOSED
+    path: 14-ai-development/prompts/owners/D/owner-session-v2.md
+    source_commit_sha: 6b5db2918cffc2281deb22fd9858a37dbaeec726
+    git_blob_sha: 7005788694b4f89513c62a5d58adcfa74b6c14ec
+    sha256: 2c3ad8ffbe01b1d860158f3c4f4eb273f55800578a2d3798af34ad5ce995e4fe
+  artifact:
+    path: 14-ai-development/work-items/AID-2026-001/owner-d-r3-findings-resolution-u010-v1.md
+    commit_sha: e2aa5a7f1dba0dcc4d4e88dd81c65e8231fe8c0b
+    git_blob_sha: e12bc3beaf7327f7646fa090cb1fe2cda023cacf
+    utf8_bytes: 23573
+    sha256: a7c57d14e8909c54c794c347b1bf82918ba2905a3b6af0c8b6b6e565cce27e05
+    status: D_SIDE_CANDIDATE_NOT_NORMATIVE
+  decisions:
+    D-R3-D-001:
+      severity: P1
+      disposition: D_SIDE_AUTHORITY_BOUNDARY_CLARIFIED_CANDIDATE
+      reflow: Issue #41
+    D-R3-D-002:
+      severity: P1
+      disposition: D_SIDE_TRIGGER_SELECTED_SUPPRESSION_COMMITTED_I_AUTHORIZATION_PRECONDITION
+      reflow: Issue #41
+    D-R3-D-004:
+      severity: P2
+      disposition: TYPED_STATE_AXES_SEPARATED_CANDIDATE
+      reflow: Issue #41
+    I-U009-002:
+      severity: P1
+      disposition: D_SIDE_SEMANTICS_CLARIFIED_I_U011_AND_SAME_SHA_APPROVAL_PENDING
+      reflow: Issue #41
+    D-U010-001:
+      severity: P2
+      disposition: CHAT_CONVERSATION_ID_NOT_EXPOSED_TO_EXECUTING_SESSION
+      reflow: Issue #41
+  approvals:
+    owner_d: D_SIDE_CANDIDATE_RECORDED_FORMAL_APPROVAL_STATUS_PENDING
+    owner_i: PENDING_U011
+    storage: PENDING
+    independent_integration_review: PENDING
+    bilingual_semantic_parity_review: PENDING
+    r3_runtime_tests: NOT_RUN_NOT_EVIDENCED
+  overall_status: BLOCKED_PENDING_R3_EVIDENCE
+  note: "The relay identifier and timestamp are recorded. The platform conversation ID was not available to this session and was not fabricated; D-U010-001 tracks this provenance gap. No source prompt SHA or dispatch conversation ID has been invented."
