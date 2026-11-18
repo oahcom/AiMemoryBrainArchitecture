@@ -17,7 +17,7 @@ base_branch: main
 base_commit_sha: 282a82e58d8d9d1aa876621481df3184fbe5d284
 implementation_branch: ai/AID-2026-002/IO-exec-rules
 tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/218
-related_pr: PENDING — recorded in INDEX.md at closeout
+related_pr: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/230
 dependency_refs:
   - 14-ai-development/ai-development-standard.md
   - 14-ai-development/iteration-lifecycle.md
