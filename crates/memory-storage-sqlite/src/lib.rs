@@ -986,4 +986,153 @@ mod tests {
         assert!(store.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
     }
 
+    #[test]
+    fn sqlite_scope_checks_cover_current_history_and_idempotency_receipt_reads() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+        store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v1", 1, None),
+            idempotency_key: "scope-read-op".into(),
+            request_digest: "scope-read-digest".into(),
+        }, &[scope()]).unwrap();
+
+        let other = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+        assert_eq!(
+            store.read_current(&id("m1"), &[other.clone()]),
+            Err(StorageError::ScopeMismatch)
+        );
+        assert_eq!(
+            store.read_version(&id("m1"), &id("v1"), &[other.clone()]),
+            Err(StorageError::ScopeMismatch)
+        );
+        assert_eq!(
+            store.resolve_idempotency("scope-read-op", "scope-read-digest", &[other]),
+            Err(StorageError::ScopeMismatch)
+        );
+    }
+
+    #[test]
+    fn sqlite_idempotency_digest_mismatch_conflicts_for_commit_and_receipt_lookup() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
+        store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version("v1", 1, None),
+            idempotency_key: "digest-conflict".into(),
+            request_digest: "digest-a".into(),
+        }, &[scope()]).unwrap();
+
+        assert_eq!(
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v1", 1, None),
+                idempotency_key: "digest-conflict".into(),
+                request_digest: "digest-b".into(),
+            }, &[scope()]),
+            Err(StorageError::IdempotencyConflict)
+        );
+        assert_eq!(
+            store.resolve_idempotency("digest-conflict", "digest-b", &[scope()]),
+            Err(StorageError::IdempotencyConflict)
+        );
+        assert_eq!(store.list_changes(None, &[scope()], 10).unwrap().records.len(), 1);
+    }
+
+    #[test]
+    fn independent_connections_serialize_conflicting_idempotency_payloads() {
+        use std::sync::{Arc, Barrier};
+        use std::thread;
+
+        let path = temp_db_path("idempotency-conflict-race");
+        {
+            let mut setup = SqliteMemoryStorage::open(&path).unwrap();
+            setup.create_memory(memory(), &[scope()]).unwrap();
+        }
+        let first_store = SqliteMemoryStorage::open(&path).unwrap();
+        let second_store = SqliteMemoryStorage::open(&path).unwrap();
+        let barrier = Arc::new(Barrier::new(2));
+
+        let first_barrier = barrier.clone();
+        let first = thread::spawn(move || {
+            let mut store = first_store;
+            first_barrier.wait();
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v-conflict-a", 1, None),
+                idempotency_key: "same-conflict-key".into(),
+                request_digest: "payload-a".into(),
+            }, &[scope()])
+        });
+
+        let second_barrier = barrier.clone();
+        let second = thread::spawn(move || {
+            let mut store = second_store;
+            second_barrier.wait();
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version: version("v-conflict-b", 1, None),
+                idempotency_key: "same-conflict-key".into(),
+                request_digest: "payload-b".into(),
+            }, &[scope()])
+        });
+
+        let first_result = first.join().unwrap();
+        let second_result = second.join().unwrap();
+        assert_eq!(
+            usize::from(first_result.is_ok()) + usize::from(second_result.is_ok()),
+            1,
+            "only one payload may claim an idempotency key"
+        );
+        let loser = if first_result.is_err() { first_result.unwrap_err() } else { second_result.unwrap_err() };
+        assert_eq!(loser, StorageError::IdempotencyConflict);
+
+        let reopened = SqliteMemoryStorage::open(&path).unwrap();
+        assert_eq!(reopened.list_changes(None, &[scope()], 10).unwrap().records.len(), 1);
+        let receipt = reopened.resolve_idempotency(
+            "same-conflict-key",
+            if first_result.is_ok() { "payload-a" } else { "payload-b" },
+            &[scope()],
+        ).unwrap();
+        assert!(receipt.is_some());
+        drop(reopened);
+        remove_db_files(&path);
+    }
+
+    #[test]
+    fn file_backed_connection_applies_required_sqlite_pragmas() {
+        let path = temp_db_path("pragma-profile");
+        let store = SqliteMemoryStorage::open(&path).unwrap();
+
+        let journal_mode: String = store.connection.query_row(
+            "PRAGMA journal_mode", [], |row| row.get(0)
+        ).unwrap();
+        let synchronous: i64 = store.connection.query_row(
+            "PRAGMA synchronous", [], |row| row.get(0)
+        ).unwrap();
+        let foreign_keys: i64 = store.connection.query_row(
+            "PRAGMA foreign_keys", [], |row| row.get(0)
+        ).unwrap();
+        let busy_timeout: i64 = store.connection.query_row(
+            "PRAGMA busy_timeout", [], |row| row.get(0)
+        ).unwrap();
+
+        assert_eq!(journal_mode.to_ascii_lowercase(), "wal");
+        assert_eq!(synchronous, 2, "SQLite FULL synchronous mode");
+        assert_eq!(foreign_keys, 1);
+        assert_eq!(busy_timeout, 5000);
+
+        drop(store);
+        remove_db_files(&path);
+    }
+
 }
