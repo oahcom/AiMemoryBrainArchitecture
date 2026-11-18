@@ -514,6 +514,105 @@ mod tests {
         remove_db_files(&path);
     }
 
+
+    #[test]
+    fn independent_connections_serialize_competing_compare_and_swap_writers() {
+        use std::sync::{Arc, Barrier};
+        use std::thread;
+
+        let path = temp_db_path("cas-race");
+        {
+            let mut setup = SqliteMemoryStorage::open(&path).unwrap();
+            setup.create_memory(memory(), &[scope()]).unwrap();
+        }
+        let first_store = SqliteMemoryStorage::open(&path).unwrap();
+        let second_store = SqliteMemoryStorage::open(&path).unwrap();
+        let barrier = Arc::new(Barrier::new(2));
+
+        let first_barrier = barrier.clone();
+        let first = thread::spawn(move || {
+            let mut store = first_store;
+            first_barrier.wait();
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"), expected_current_version: None,
+                new_version: version("v-race-a", 1, None),
+                idempotency_key: "race-a".into(), request_digest: "race-a-digest".into(),
+            }, &[scope()])
+        });
+
+        let second_barrier = barrier.clone();
+        let second = thread::spawn(move || {
+            let mut store = second_store;
+            second_barrier.wait();
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"), expected_current_version: None,
+                new_version: version("v-race-b", 1, None),
+                idempotency_key: "race-b".into(), request_digest: "race-b-digest".into(),
+            }, &[scope()])
+        });
+
+        let first_result = first.join().unwrap();
+        let second_result = second.join().unwrap();
+        let successes = usize::from(first_result.is_ok()) + usize::from(second_result.is_ok());
+        assert_eq!(successes, 1, "exactly one CAS writer may commit");
+        let loser = if first_result.is_err() { first_result.unwrap_err() } else { second_result.unwrap_err() };
+        assert_eq!(loser, StorageError::StaleVersion);
+
+        let reopened = SqliteMemoryStorage::open(&path).unwrap();
+        let current = reopened.read_current(&id("m1"), &[scope()]).unwrap().unwrap();
+        assert!(current.memory_version_id == id("v-race-a") || current.memory_version_id == id("v-race-b"));
+        let changes = reopened.list_changes(None, &[scope()], 10).unwrap();
+        assert_eq!(changes.records.len(), 1);
+        drop(reopened);
+        remove_db_files(&path);
+    }
+
+    #[test]
+    fn concurrent_identical_idempotency_requests_replay_one_durable_receipt() {
+        use std::sync::{Arc, Barrier};
+        use std::thread;
+
+        let path = temp_db_path("idempotency-race");
+        {
+            let mut setup = SqliteMemoryStorage::open(&path).unwrap();
+            setup.create_memory(memory(), &[scope()]).unwrap();
+        }
+        let first_store = SqliteMemoryStorage::open(&path).unwrap();
+        let second_store = SqliteMemoryStorage::open(&path).unwrap();
+        let barrier = Arc::new(Barrier::new(2));
+
+        let first_barrier = barrier.clone();
+        let first = thread::spawn(move || {
+            let mut store = first_store;
+            first_barrier.wait();
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"), expected_current_version: None,
+                new_version: version("v-idempotent-race", 1, None),
+                idempotency_key: "same-race-key".into(), request_digest: "same-race-digest".into(),
+            }, &[scope()])
+        });
+
+        let second_barrier = barrier.clone();
+        let second = thread::spawn(move || {
+            let mut store = second_store;
+            second_barrier.wait();
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"), expected_current_version: None,
+                new_version: version("v-idempotent-race", 1, None),
+                idempotency_key: "same-race-key".into(), request_digest: "same-race-digest".into(),
+            }, &[scope()])
+        });
+
+        let first_receipt = first.join().unwrap().unwrap();
+        let second_receipt = second.join().unwrap().unwrap();
+        assert_eq!(first_receipt, second_receipt);
+        let reopened = SqliteMemoryStorage::open(&path).unwrap();
+        assert_eq!(reopened.resolve_idempotency("same-race-key", "same-race-digest", &[scope()]).unwrap(), Some(first_receipt));
+        assert_eq!(reopened.list_changes(None, &[scope()], 10).unwrap().records.len(), 1);
+        drop(reopened);
+        remove_db_files(&path);
+    }
+
     #[test]
     fn sqlite_round_trip_and_idempotency_are_atomic() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
