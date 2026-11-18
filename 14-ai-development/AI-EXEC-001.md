@@ -7,7 +7,7 @@
 - **Owner:** Integration Owner
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml) · 修订 Work Item [AID-2026-003](work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](ai-development-standard.md)、[AI-PROC-001](iteration-lifecycle.md)、[PR-GOVERNANCE-001](PR-GOVERNANCE-001.md)（ADOPTED）、[AI-PROMPT-STD-001](prompt-authoring-standard.md)、GOV-DOC-001
-- **Translation status:** 中文版为本批权威版本；English counterpart = **STALE**（GOV-DOC-001 §5 time-bounded exception，登记见 `docs/translation-status.md`，截止 2026-12-02，Owner: Integration Owner，跟踪 Issue #218）
+- **Translation status:** COMPLETE — source-aligned English counterpart: `docs/en/14-ai-development/AI-EXEC-001.md` (translation commit `e0e20ed30b4a21c2e26d0a4c0903a63c0293a46f`; source commit `1f97c3fae65828266a0c3cb1d1e8d4e6cb330856`); bilingual closeout AID-2026-004 / Issue #218.
 
 > **定位**：本文不是新制度，而是让项目现有流程（AI-STD-001 / AI-PROC-001 / PR-GOVERNANCE-001）**真正运转起来**的执行细则。零脚本强制——PR-GOVERNANCE-001 §7 明确"模板/标签/评论/AI 自审不得冒充硬门禁"，本细则与之一致，只加运行纪律。
 > **本文不修改**任何上位文档条款；凡冲突处以上位文档为准，只补充"怎么跑、留什么痕、多久闭环"。
