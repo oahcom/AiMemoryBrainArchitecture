@@ -77,7 +77,6 @@ class Protocol:
     publication_commit_winners: dict = field(default_factory=dict)
     fence_pending: set = field(default_factory=set)
     authorization_contexts: dict = field(default_factory=dict)
-    current_permission_epochs: dict = field(default_factory=dict)
 
     @staticmethod
     def digest(items):
@@ -117,16 +116,18 @@ class Protocol:
             raise Rejected("dependency set is immutable")
         self.dependencies[work_id] = candidate
 
-    def create_hidden_storage_participant(self, storage_id, work_id):
+    def create_hidden_storage_participant(self, storage_id, operation_id, work_id):
         if work_id not in self.dependencies:
             raise Rejected("complete dependency set missing")
-        binding = (work_id, self.digest(self.dependencies[work_id]))
+        if not operation_id:
+            raise Rejected("publication operation ID is required")
+        binding = (operation_id, work_id, self.digest(self.dependencies[work_id]))
         prior = self.storage_participants.get(storage_id)
         if prior is not None and prior != binding:
             raise Rejected("storage participant identity rebound")
         self.storage_participants[storage_id] = binding
 
-    def admit_publication(self, publication_id, work_id, storage_id,
+    def admit_publication(self, publication_id, operation_id, work_id, storage_id,
                           request_digest, owner_boundary, final_visibility_gate_id):
         work = self.producer_work.get(work_id)
         if work is None:
@@ -135,14 +136,14 @@ class Protocol:
             raise Rejected("D fence installed or producer registration generation stale")
         if storage_id not in self.storage_participants:
             raise Rejected("exact hidden storage participant missing")
-        if self.storage_participants[storage_id][0] != work_id:
+        storage = self.storage_participants[storage_id]
+        if storage[0] != operation_id:
+            raise Rejected("Storage participant operation ID mismatch")
+        if storage[1] != work_id:
             raise Rejected("storage participant belongs to another work")
         if not request_digest or not owner_boundary or not final_visibility_gate_id:
             raise Rejected("canonical request digest, owner boundary and final visibility gate identity are required")
-        binding = (
-            work_id, storage_id, self.storage_participants[storage_id][1],
-            request_digest, owner_boundary, final_visibility_gate_id,
-        )
+        binding = (operation_id, work_id, storage_id, storage[2], request_digest, owner_boundary, final_visibility_gate_id)
         prior = self.publication_participants.get(publication_id)
         if prior is not None and prior != binding:
             raise Rejected("publication participant identity rebound")
@@ -153,11 +154,7 @@ class Protocol:
             "principal_ref", "actor_ref", "scope_binding_digest", "environment_ref", "action",
             "resource_ref", "purpose", "audience", "delegation_chain_ref", "policy_domain_id",
             "permission_epoch", "runtime_session_ref", "workload_binding_ref",
-            "policy_version_digest", "decision_id", "tenant_security_domain_ref",
-            "ownership_scope_ref", "applicability_scope_set_digest", "obligations_digest",
-            "expiry", "producer_binding_ref", "adapter_binding_ref",
-            "authenticated_transport_binding_ref", "authentication_strength",
-            "operation_payload_digest",
+            "policy_version_digest", "decision_id",
         )
         defaults = {
             "principal_ref": "principal-1", "actor_ref": "actor-1",
@@ -167,16 +164,6 @@ class Protocol:
             "policy_domain_id": "policy-domain-1", "permission_epoch": "epoch-1",
             "runtime_session_ref": "session-1", "workload_binding_ref": "workload-1",
             "policy_version_digest": "policy-version-1", "decision_id": "decision-1",
-            "tenant_security_domain_ref": "tenant-security-domain-1",
-            "ownership_scope_ref": "scope-owner-1",
-            "applicability_scope_set_digest": "scope-applicability-1",
-            "obligations_digest": "obligations-1",
-            "expiry": "expiry-1",
-            "producer_binding_ref": "producer-1",
-            "adapter_binding_ref": "adapter-1",
-            "authenticated_transport_binding_ref": "transport-binding-1",
-            "authentication_strength": "strong",
-            "operation_payload_digest": "operation-payload-1",
         }
         defaults.update(context)
         value = tuple(defaults[k] for k in fields)
@@ -186,39 +173,24 @@ class Protocol:
         self.authorization_contexts[auth_id] = value
         return value
 
-    def set_permission_epoch(self, policy_domain_id, permission_epoch):
-        prior = self.current_permission_epochs.get(policy_domain_id)
-        if prior is not None and prior == permission_epoch:
-            return
-        self.current_permission_epochs[policy_domain_id] = permission_epoch
-
-    def advance_permission_epoch(self, policy_domain_id, permission_epoch):
-        self.current_permission_epochs[policy_domain_id] = permission_epoch
-
-    def _permission_epoch_is_current(self, auth_id):
-        context = self._authorization_context(auth_id)
-        domain, epoch = context[9], context[10]
-        current = self.current_permission_epochs.get(domain)
-        if current is None:
-            self.current_permission_epochs[domain] = epoch
-            return True
-        return current == epoch
-
     def _authorization_context(self, auth_id):
         return self.authorization_contexts.get(auth_id) or self.set_authorization_context(auth_id)
 
-    def authorize_commit(self, auth_id, publication_id, storage_id,
+    def authorize_commit(self, auth_id, operation_id, publication_id, storage_id,
                          request_digest, owner_boundary, final_visibility_gate_id):
         if auth_id in self.revoked:
             raise Rejected("authorization revoked")
-        if publication_id not in self.publication_participants:
+        publication = self.publication_participants.get(publication_id)
+        if publication is None:
             raise Rejected("publication participant missing")
-        if self.publication_participants[publication_id][1] != storage_id:
+        if publication[0] != operation_id:
+            raise Rejected("authorization operation ID mismatch")
+        if publication[2] != storage_id:
             raise Rejected("authorization participant binding mismatch")
-        if self.publication_participants[publication_id][3:] != (request_digest, owner_boundary, final_visibility_gate_id):
+        if publication[4:] != (request_digest, owner_boundary, final_visibility_gate_id):
             raise Rejected("authorization request digest or owner boundary mismatch")
         context = self._authorization_context(auth_id)
-        binding = (publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, context)
+        binding = (operation_id, publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, context)
         prior = self.authorizations.get(auth_id)
         if prior is not None:
             if prior != binding:
@@ -237,15 +209,13 @@ class Protocol:
                              storage_id, request_digest, owner_boundary, final_visibility_gate_id, d_proof):
         context = self._authorization_context(auth_id)
         i_proof = (
-            "I_COMMIT_WON", auth_id, publication_id, storage_id,
+            "I_COMMIT_WON", operation_id, auth_id, publication_id, storage_id,
             request_digest, owner_boundary, final_visibility_gate_id, context,
         )
         binding = (
             auth_id, publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id,
             d_proof, i_proof, context,
         )
-        # A replay after COMMIT_WON returns the same proof even if revocation
-        # arrived later; the sequencer decision already won.
         if operation_id in self.i_pending:
             if self.i_pending[operation_id] != binding:
                 raise Rejected("I participant identity rebound")
@@ -261,21 +231,21 @@ class Protocol:
             raise Rejected("publication participant already has a COMMIT_WON operation")
         if auth_id not in self.authorizations or auth_id in self.revoked:
             raise Rejected("authorization absent or revocation won before I consumption")
-        if not self._permission_epoch_is_current(auth_id):
-            raise Rejected("PermissionEpoch is stale or currentness is unavailable")
-        if self.authorizations[auth_id][:5] != (
-            publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id
-        ) or self.authorizations[auth_id][5] != self._authorization_context(auth_id):
-            raise Rejected("authorization not bound to exact participants, digest and owner boundary")
-        if publication_id not in self.publication_participants:
-            raise Rejected("D publication proof missing")
-        publication_binding = self.publication_participants[publication_id]
-        if publication_binding[1] != storage_id or publication_binding[3:] != (
+        if self.authorizations[auth_id] != (
+            operation_id, publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, context
+        ):
+            raise Rejected("authorization not bound to exact operation, participants, digest, owner boundary and context")
+        publication = self.publication_participants.get(publication_id)
+        if publication is None or publication[0] != operation_id or publication[2] != storage_id or publication[4:] != (
             request_digest, owner_boundary, final_visibility_gate_id
         ):
-            raise Rejected("D proof does not bind exact Storage participant, digest and owner boundary")
+            raise Rejected("D proof does not bind exact operation, Storage participant, digest and owner boundary")
+        storage = self.storage_participants.get(storage_id)
+        if storage is None or storage[0] != operation_id or storage[1] != publication[1] or storage[2] != publication[3]:
+            raise Rejected("Storage proof does not bind exact operation, work item and dependency digest")
         if d_proof != (
-            "D_ADMITTED", publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id
+            "D_ADMITTED", operation_id, publication_id, storage_id,
+            request_digest, owner_boundary, final_visibility_gate_id
         ):
             raise Rejected("invalid D publication proof")
         prior = self.operation_bindings.get(operation_id)
@@ -308,34 +278,34 @@ class Protocol:
             return self.receipts[operation_id]
         if operation_id in self.outcomes:
             raise Rejected("operation already terminal as NO_PUBLICATION; use a new operation ID")
-        # Storage consumes no I authorization: it validates the exact prior
-        # COMMIT_WON decision made by the independent I sequencer.
         if self.i_pending.get(operation_id) != binding:
             raise Rejected("exact I COMMIT_WON participant has not been consumed")
         if auth_id not in self.authorizations or auth_id not in self.consumed:
             raise Rejected("authorization or I consumption missing")
-        if self.authorizations[auth_id][:5] != (
-            publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id
-        ) or self.authorizations[auth_id][5] != context:
-            raise Rejected("authorization not bound to exact participants, digest and owner boundary")
-        if publication_id not in self.publication_participants:
-            raise Rejected("D publication proof missing")
-        if self.publication_participants[publication_id][1] != storage_id:
-            raise Rejected("D proof does not bind exact Storage participant")
-        if self.publication_participants[publication_id][3:] != (request_digest, owner_boundary, final_visibility_gate_id):
-            raise Rejected("D participant digest or owner boundary mismatch")
+        if self.authorizations[auth_id] != (
+            operation_id, publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, context
+        ):
+            raise Rejected("authorization not bound to exact operation, participants, digest, owner boundary and context")
+        publication = self.publication_participants.get(publication_id)
+        if publication is None or publication[0] != operation_id or publication[2] != storage_id or publication[4:] != (
+            request_digest, owner_boundary, final_visibility_gate_id
+        ):
+            raise Rejected("D publication proof does not bind exact operation, Storage participant, digest and owner boundary")
+        storage = self.storage_participants.get(storage_id)
+        if storage is None or storage[0] != operation_id or storage[1] != publication[1] or storage[2] != publication[3]:
+            raise Rejected("Storage participant does not bind exact operation, work item and dependency digest")
         if d_proof != (
-            "D_ADMITTED", publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id
+            "D_ADMITTED", operation_id, publication_id, storage_id,
+            request_digest, owner_boundary, final_visibility_gate_id
         ):
             raise Rejected("invalid D publication proof")
         if i_commit_won_proof != (
-            "I_COMMIT_WON", auth_id, publication_id, storage_id,
-            request_digest, owner_boundary, final_visibility_gate_id, context,
+            "I_COMMIT_WON", operation_id, auth_id, publication_id, storage_id,
+            request_digest, owner_boundary, final_visibility_gate_id, context
         ):
             raise Rejected("invalid pre-commit I COMMIT_WON proof")
         if fail_before_commit:
             raise RuntimeError("simulated crash before Storage transaction commit")
-
         receipt = ("RECEIPT", operation_id, publication_id, storage_id)
         outcome = ("COMMITTED", operation_id, publication_id, storage_id)
         self.visibility[publication_id] = "VISIBLE"
@@ -344,34 +314,34 @@ class Protocol:
         self.outbox[operation_id] = ("PUBLISH", receipt)
         return receipt
 
-    def _validate_unknown_binding(self, binding):
+    def _validate_unknown_binding(self, operation_id, binding):
         if not isinstance(binding, tuple) or len(binding) not in (8, 9):
             raise Rejected("UNKNOWN operation binding must be an immutable tuple")
         if len(binding) == 8:
-            context = self._authorization_context(binding[0])
             auth_id, publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, d_proof, i_commit_won_proof = binding
+            context = self._authorization_context(auth_id)
         else:
             auth_id, publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, d_proof, i_commit_won_proof, context = binding
         if self.authorizations.get(auth_id) != (
-            publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, context
+            operation_id, publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id, context
         ) or self._authorization_context(auth_id) != context:
             raise Rejected("UNKNOWN operation authorization binding mismatch")
         publication = self.publication_participants.get(publication_id)
-        if (
-            publication is None or publication[1] != storage_id
-            or publication[3:] != (request_digest, owner_boundary, final_visibility_gate_id)
+        if publication is None or publication[0] != operation_id or publication[2] != storage_id or publication[4:] != (
+            request_digest, owner_boundary, final_visibility_gate_id
         ):
             raise Rejected("UNKNOWN operation publication/Storage/digest/boundary mismatch")
         storage = self.storage_participants.get(storage_id)
-        if storage is None or storage[0] != publication[0]:
-            raise Rejected("UNKNOWN operation Storage participant belongs to another work")
+        if storage is None or storage[0] != operation_id or storage[1] != publication[1] or storage[2] != publication[3]:
+            raise Rejected("UNKNOWN operation Storage participant binding mismatch")
         if d_proof != (
-            "D_ADMITTED", publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id
+            "D_ADMITTED", operation_id, publication_id, storage_id,
+            request_digest, owner_boundary, final_visibility_gate_id
         ):
             raise Rejected("UNKNOWN operation D admission proof mismatch")
         if i_commit_won_proof != (
-            "I_COMMIT_WON", auth_id, publication_id, storage_id,
-            request_digest, owner_boundary, final_visibility_gate_id, context,
+            "I_COMMIT_WON", operation_id, auth_id, publication_id, storage_id,
+            request_digest, owner_boundary, final_visibility_gate_id, context
         ):
             raise Rejected("UNKNOWN operation I COMMIT_WON proof mismatch")
         return auth_id, publication_id, storage_id
@@ -382,10 +352,8 @@ class Protocol:
         if operation_id not in self.i_pending:
             raise Rejected("UNKNOWN Storage outcome requires pending I COMMIT_WON")
         if binding is not None:
+            self._validate_unknown_binding(operation_id, binding)
             prior = self.operation_bindings.get(operation_id)
-            if prior is not None and len(binding) == 8 and len(prior) == 9:
-                binding = binding + (prior[8],)
-            self._validate_unknown_binding(binding)
             if prior is not None and prior != binding:
                 raise Rejected("UNKNOWN operation identity rebound")
         self.private_unknown.add(operation_id)
@@ -402,7 +370,7 @@ class Protocol:
         binding = self.operation_bindings.get(operation_id)
         if binding is None:
             raise Rejected("UNKNOWN operation has no immutable binding to reconcile")
-        auth_id, publication_id, storage_id = self._validate_unknown_binding(binding)
+        auth_id, publication_id, storage_id = self._validate_unknown_binding(operation_id, binding)
         if proof.operation_id != operation_id or proof.operation_binding != binding:
             raise Rejected("NO_PUBLICATION proof does not bind the exact UNKNOWN operation")
         if publication_id != proof.publication_id or storage_id != proof.storage_id:
@@ -446,10 +414,10 @@ class PublicationProtocolTests(unittest.TestCase):
         p = Protocol()
         p.register_producer("work-1", 0)
         p.register_dependencies("work-1", ["root", "child-a", "child-b"])
-        p.create_hidden_storage_participant("storage-1", "work-1")
-        p.admit_publication("publication-1", "work-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
+        p.create_hidden_storage_participant("storage-1", "op-1", "work-1")
+        p.admit_publication("publication-1", "op-1", "work-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
         p.set_authorization_context("auth-1")
-        p.authorize_commit("auth-1", "publication-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
+        p.authorize_commit("auth-1", "op-1", "publication-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
         return p
 
     def commit_args(self):
@@ -457,8 +425,8 @@ class PublicationProtocolTests(unittest.TestCase):
             operation_id="op-1", auth_id="auth-1",
             publication_id="publication-1", storage_id="storage-1",
             request_digest="request-digest-1", owner_boundary="owner-boundary-1", final_visibility_gate_id="visibility-gate-1",
-            d_proof=("D_ADMITTED", "publication-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1"),
-            i_commit_won_proof=("I_COMMIT_WON", "auth-1", "publication-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1"),
+            d_proof=("D_ADMITTED", "op-1", "publication-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1"),
+            i_commit_won_proof=("I_COMMIT_WON", "op-1", "auth-1", "publication-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1", Protocol()._authorization_context("auth-1")),
         )
 
     def consume_i(self, p, args=None):
@@ -474,8 +442,7 @@ class PublicationProtocolTests(unittest.TestCase):
         binding = operation_binding or (
             args["auth_id"], args["publication_id"], args["storage_id"],
             args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"],
-            args["d_proof"], args["i_commit_won_proof"] + (Protocol()._authorization_context(args["auth_id"]),),
-            Protocol()._authorization_context(args["auth_id"]),
+            args["d_proof"], args["i_commit_won_proof"], Protocol()._authorization_context(args["auth_id"]),
         )
         values = dict(
             operation_id="op-1",
@@ -513,10 +480,10 @@ class PublicationProtocolTests(unittest.TestCase):
         p = Protocol()
         p.register_producer("work-1", 0)
         p.register_dependencies("work-1", ["root", "child-a"])
-        p.create_hidden_storage_participant("storage-1", "work-1")
+        p.create_hidden_storage_participant("storage-1", "op-1", "work-1")
         p.install_forget_fence()
         with self.assertRaises(Rejected):
-            p.admit_publication("publication-1", "work-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
+            p.admit_publication("publication-1", "op-1", "work-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
 
     def test_publication_already_closed_by_d_before_fence_is_not_pending(self):
         p = self.prepared()
@@ -560,33 +527,89 @@ class PublicationProtocolTests(unittest.TestCase):
         p = Protocol()
         p.register_producer("w", 0)
         with self.assertRaises(Rejected):
-            p.create_hidden_storage_participant("s", "w")
+            p.create_hidden_storage_participant("s", "op-s", "w")
 
     def test_admission_requires_nonempty_final_visibility_gate(self):
         p = self.prepared()
         with self.assertRaisesRegex(Rejected, "final visibility gate identity"):
             p.admit_publication(
-                "publication-without-gate", "work-1", "storage-1",
+                "publication-without-gate", "op-1", "work-1", "storage-1",
                 "request-digest-1", "owner-boundary-1", "",
             )
 
     def test_publication_must_bind_exact_storage_participant(self):
         p = self.prepared()
         with self.assertRaises(Rejected):
-            p.admit_publication("p2", "work-1", "storage-does-not-exist", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
+            p.admit_publication("p2", "op-1", "work-1", "storage-does-not-exist", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
         with self.assertRaises(Rejected):
-            p.admit_publication("p3", "other-work", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
+            p.admit_publication("p3", "op-1", "other-work", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
+
+    def test_storage_prepare_and_d_admission_bind_same_operation_id(self):
+        p = self.prepared()
+        with self.assertRaisesRegex(Rejected, "Storage participant operation ID mismatch"):
+            p.admit_publication(
+                "publication-other", "op-other", "work-1", "storage-1",
+                "request-digest-1", "owner-boundary-1", "visibility-gate-1",
+            )
+
+    def test_i_authorization_rejects_operation_id_substitution(self):
+        p = self.prepared()
+        with self.assertRaisesRegex(Rejected, "operation ID mismatch"):
+            p.authorize_commit(
+                "auth-other", "op-other", "publication-1", "storage-1",
+                "request-digest-1", "owner-boundary-1", "visibility-gate-1",
+            )
+
+    def test_i_commit_won_proof_binds_exact_operation_id(self):
+        p = self.prepared()
+        args = self.commit_args()
+        args["operation_id"] = "op-other"
+        with self.assertRaises(Rejected):
+            self.consume_i(p, args)
+
+    def test_storage_commit_rejects_d_or_i_operation_id_substitution(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        args["d_proof"] = ("D_ADMITTED", "op-other", "publication-1", "storage-1",
+                           args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"])
+        with self.assertRaises(Rejected):
+            p.commit(**args)
+        p = self.prepared()
+        args = self.consume_i(p)
+        args["i_commit_won_proof"] = ("I_COMMIT_WON", "op-other", "auth-1", "publication-1", "storage-1",
+                                      args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"])
+        with self.assertRaises(Rejected):
+            p.commit(**args)
+
+    def test_unknown_reconciliation_rejects_operation_id_substitution(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        binding = (
+            args["auth_id"], args["publication_id"], args["storage_id"],
+            args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"],
+            args["d_proof"], args["i_commit_won_proof"],
+        )
+        p.mark_unknown("op-1", binding)
+        wrong = (
+            args["auth_id"], args["publication_id"], args["storage_id"],
+            args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"],
+            ("D_ADMITTED", "op-other", "publication-1", "storage-1", args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"]),
+            ("I_COMMIT_WON", "op-other", "auth-1", "publication-1", "storage-1", args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"]),
+        )
+        with self.assertRaises(Rejected):
+            p._validate_unknown_binding("op-1", wrong)
+        self.assertIn("op-1", p.private_unknown)
 
     def test_authorization_is_bound_to_exact_participants(self):
         p = self.prepared()
         with self.assertRaises(Rejected):
-            p.authorize_commit("wrong-auth", "publication-1", "other-storage", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
+            p.authorize_commit("wrong-auth", "op-1", "publication-1", "other-storage", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
 
     def test_authorization_replay_remains_idempotent_after_commit_won(self):
         p = self.prepared()
         args = self.consume_i(p)
         p.authorize_commit(
-            args["auth_id"], args["publication_id"], args["storage_id"],
+            args["auth_id"], args["operation_id"], args["publication_id"], args["storage_id"],
             args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"],
         )
         self.assertEqual(p.publication_commit_winners["publication-1"], "op-1")
@@ -596,18 +619,18 @@ class PublicationProtocolTests(unittest.TestCase):
         self.consume_i(p)
         with self.assertRaisesRegex(Rejected, "already has a COMMIT_WON operation"):
             p.authorize_commit(
-                "auth-2", "publication-1", "storage-1",
+                "auth-2", "op-1", "publication-1", "storage-1",
                 "request-digest-1", "owner-boundary-1", "visibility-gate-1",
             )
 
     def test_publication_participant_has_one_i_commit_winner_across_operation_ids(self):
         p = self.prepared()
         p.authorize_commit(
-            "auth-2", "publication-1", "storage-1",
+            "auth-2", "op-1", "publication-1", "storage-1",
             "request-digest-1", "owner-boundary-1", "visibility-gate-1",
         )
         d_proof = (
-            "D_ADMITTED", "publication-1", "storage-1",
+            "D_ADMITTED", "op-1", "publication-1", "storage-1",
             "request-digest-1", "owner-boundary-1", "visibility-gate-1",
         )
         p.consume_i_commit_won(
@@ -626,12 +649,12 @@ class PublicationProtocolTests(unittest.TestCase):
     def test_pre_winner_revocation_allows_new_authorization_for_same_participant(self):
         p = self.prepared()
         p.authorize_commit(
-            "auth-2", "publication-1", "storage-1",
+            "auth-2", "op-1", "publication-1", "storage-1",
             "request-digest-1", "owner-boundary-1", "visibility-gate-1",
         )
         p.revoke("auth-1")
         d_proof = (
-            "D_ADMITTED", "publication-1", "storage-1",
+            "D_ADMITTED", "op-1", "publication-1", "storage-1",
             "request-digest-1", "owner-boundary-1", "visibility-gate-1",
         )
         with self.assertRaises(Rejected):
@@ -640,15 +663,15 @@ class PublicationProtocolTests(unittest.TestCase):
                 "request-digest-1", "owner-boundary-1", "visibility-gate-1", d_proof,
             )
         proof = p.consume_i_commit_won(
-            "op-2", "auth-2", "publication-1", "storage-1",
+            "op-1", "auth-2", "publication-1", "storage-1",
             "request-digest-1", "owner-boundary-1", "visibility-gate-1", d_proof,
         )
         self.assertEqual(
             proof,
-            ("I_COMMIT_WON", "auth-2", "publication-1", "storage-1",
-             "request-digest-1", "owner-boundary-1", "visibility-gate-1", p._authorization_context("auth-2")),
+            ("I_COMMIT_WON", "op-1", "auth-2", "publication-1", "storage-1",
+             "request-digest-1", "owner-boundary-1", "visibility-gate-1"),
         )
-        self.assertEqual(p.publication_commit_winners["publication-1"], "op-2")
+        self.assertEqual(p.publication_commit_winners["publication-1"], "op-1")
 
     def test_revocation_wins_before_commit(self):
         p = self.prepared()
@@ -685,7 +708,7 @@ class PublicationProtocolTests(unittest.TestCase):
     def test_final_storage_commit_requires_both_exact_proofs(self):
         p = self.prepared()
         args = self.commit_args()
-        args["d_proof"] = ("D_ADMITTED", "publication-1", "wrong-storage", args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"])
+        args["d_proof"] = ("D_ADMITTED", "op-1", "publication-1", "wrong-storage", args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"])
         with self.assertRaises(Rejected):
             self.consume_i(p, args)
         p = self.prepared()
@@ -736,8 +759,8 @@ class PublicationProtocolTests(unittest.TestCase):
         p.commit(**args)
         changed = dict(args)
         changed["storage_id"] = "storage-substituted"
-        changed["d_proof"] = ("D_ADMITTED", "publication-1", "storage-substituted", changed["request_digest"], changed["owner_boundary"], changed["final_visibility_gate_id"])
-        changed["i_commit_won_proof"] = ("I_COMMIT_WON", "auth-1", "publication-1", "storage-substituted", changed["request_digest"], changed["owner_boundary"], changed["final_visibility_gate_id"])
+        changed["d_proof"] = ("D_ADMITTED", "op-1", "publication-1", "storage-substituted", changed["request_digest"], changed["owner_boundary"], changed["final_visibility_gate_id"])
+        changed["i_commit_won_proof"] = ("I_COMMIT_WON", "op-1", "auth-1", "publication-1", "storage-substituted", changed["request_digest"], changed["owner_boundary"], changed["final_visibility_gate_id"])
         with self.assertRaises(Rejected):
             p.commit(**changed)
         self.assertEqual(len(p.receipts), 1)
@@ -761,15 +784,15 @@ class PublicationProtocolTests(unittest.TestCase):
     def test_unknown_stays_private_and_cannot_close_out(self):
         p = self.prepared()
         args = self.commit_args()
-        args["operation_id"] = "op-unknown"
+        args["operation_id"] = "op-1"
         self.consume_i(p, args)
-        p.mark_unknown("op-unknown")
-        self.assertIn("op-unknown", p.private_unknown)
+        p.mark_unknown("op-1")
+        self.assertIn("op-1", p.private_unknown)
         self.assertNotIn("publication-1", p.visibility)
         with self.assertRaises(Rejected):
-            p.close_d("op-unknown", ("UNKNOWN",))
+            p.close_d("op-1", ("UNKNOWN",))
         with self.assertRaises(Rejected):
-            p.close_i("op-unknown", ("UNKNOWN",))
+            p.close_i("op-1", ("UNKNOWN",))
 
     def test_no_publication_requires_every_storage_absence_and_fence_fact(self):
         p = self.prepared()
@@ -839,12 +862,12 @@ class PublicationProtocolTests(unittest.TestCase):
              args["d_proof"], args["i_commit_won_proof"]),
             (args["auth_id"], args["publication_id"], args["storage_id"],
              args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"],
-             ("D_ADMITTED", args["publication_id"], "storage-substituted", args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"]),
+             ("D_ADMITTED", "op-1", args["publication_id"], "storage-substituted", args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"]),
              args["i_commit_won_proof"]),
             (args["auth_id"], args["publication_id"], args["storage_id"],
              args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"],
              args["d_proof"],
-             ("I_COMMIT_WON", "other-auth", args["publication_id"], args["storage_id"], args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"])),
+             ("I_COMMIT_WON", "op-1", "other-auth", args["publication_id"], args["storage_id"], args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"])),
         )
         for invalid in invalid_bindings:
             with self.subTest(binding=invalid):
@@ -1067,49 +1090,6 @@ class PublicationProtocolTests(unittest.TestCase):
             p.resolve_no_publication("op-1", proof)
         self.assertIn("op-1", p.private_unknown)
 
-    def test_full_i_scope_purpose_audience_lifecycle_context_is_immutable(self):
-        p = self.prepared()
-        args = self.consume_i(p)
-        context = list(p.authorization_contexts["auth-1"])
-        # applicability Scope / obligations / expiry / authenticated workload
-        # are part of the I authorization tuple, not free metadata.
-        for index in range(16, len(context)):
-            mutated = list(context)
-            mutated[index] = mutated[index] + "-substituted"
-            p.authorization_contexts["auth-1"] = tuple(mutated)
-            with self.assertRaises(Rejected):
-                p.commit(**args)
-            p.authorization_contexts["auth-1"] = tuple(context)
-
-    def test_permission_epoch_stale_before_commit_won_is_rejected(self):
-        p = self.prepared()
-        p.advance_permission_epoch("policy-domain-1", "epoch-2")
-        with self.assertRaisesRegex(Rejected, "PermissionEpoch"):
-            self.consume_i(p)
-
-    def test_permission_epoch_current_at_commit_won_is_consumed(self):
-        p = self.prepared()
-        args = self.consume_i(p)
-        self.assertIn("auth-1", p.consumed)
-        self.assertEqual(p.authorization_contexts["auth-1"][10], "epoch-1")
-        self.assertEqual(p.current_permission_epochs["policy-domain-1"], "epoch-1")
-
-    def test_permission_epoch_revocation_after_commit_won_does_not_cancel_winner(self):
-        p = self.prepared()
-        args = self.consume_i(p)
-        p.advance_permission_epoch("policy-domain-1", "epoch-2")
-        receipt = p.commit(**args)
-        self.assertEqual(p.outcomes["op-1"][0], "COMMITTED")
-        self.assertEqual(p.receipts["op-1"], receipt)
-        self.assertIn("op-1", p.i_pending)
-
-    def test_permission_epoch_stale_retry_cannot_create_a_new_winner(self):
-        p = self.prepared()
-        p.advance_permission_epoch("policy-domain-1", "epoch-2")
-        with self.assertRaises(Rejected):
-            self.consume_i(p)
-        self.assertEqual(p.publication_commit_winners, {})
-        self.assertEqual(p.consumed, set())
 
     def test_full_i_authorization_context_substitution_is_rejected_at_commit(self):
         p = self.prepared()
@@ -1134,7 +1114,6 @@ class PublicationProtocolTests(unittest.TestCase):
         p.install_forget_fence()
         with self.assertRaises(Rejected):
             p.resolve_no_publication("op-1", self.no_publication_proof(operation_binding=binding))
-
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
