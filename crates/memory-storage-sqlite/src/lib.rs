@@ -428,7 +428,7 @@ mod tests {
     #[test]
     fn sqlite_rejects_stale_expected_version() {
         let mut store = SqliteMemoryStorage::in_memory().unwrap();
-        store.create_memory(memory()).unwrap();
+        store.create_memory(memory(), &[scope()]).unwrap();
         store.commit_version(CommitRequest {
             memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
             idempotency_key: "op1".into(), request_digest: "d1".into(),
