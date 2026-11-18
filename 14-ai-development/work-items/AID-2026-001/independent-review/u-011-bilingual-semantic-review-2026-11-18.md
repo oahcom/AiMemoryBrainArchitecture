@@ -39,7 +39,7 @@ The Chinese artifact additionally contains a final section titled “双语对�
 
 ## 3. Normative differences
 
-### D-U011-SEM-001 — stale translation status in EN §11
+### I-U012-001 — stale translation status in EN §11
 
 **EN source:**
 
@@ -55,7 +55,7 @@ The Chinese artifact additionally contains a final section titled “双语对�
 
 **Recommended correction:** revise EN §11 to state that this English working master has a separately maintained complete Chinese counterpart at the exact ZH path; author-side translation is complete; independent semantic-parity review is the current pending gate. Do not claim PASS until the independent review passes.
 
-### D-U011-SEM-002 — Chinese-only normative maintenance section
+### I-U012-002 — Chinese-only normative maintenance section
 
 **ZH-only source (final section):**
 
