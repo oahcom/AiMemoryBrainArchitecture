@@ -158,11 +158,16 @@ class GlobalForgetModel:
                       reviewer: Optional[str] = None) -> None:
         if name not in self.component_states:
             raise KeyError(name)
-        if state == "NotApplicable" and (not proof or not reviewer):
-            raise Blocked("component NotApplicable requires proof and reviewer")
+        allowed = {"Pending", "Confirmed", "NotApplicable", "PolicyException", "Failed", "Unknown"}
+        if state not in allowed:
+            raise ValueError(f"unsupported component state: {state}")
+        if state in {"Confirmed", "NotApplicable", "PolicyException", "Failed"} and (not proof or not reviewer):
+            raise Blocked("terminal component state requires proof and verifier")
         self.component_states[name] = state
         if proof or reviewer:
             self.component_proofs[name] = {"proof": proof, "reviewer": reviewer}
+        else:
+            self.component_proofs.pop(name, None)
 
     def set_failed(self, target_id: str, evidence_ref: str) -> None:
         target = self.targets[target_id]
@@ -218,14 +223,13 @@ class GlobalForgetModel:
             if target.physical_erasure_required and target.required_action != "PHYSICAL_ERASURE":
                 return "Pending"
         for name, state in self.component_states.items():
-            if state == "NotApplicable":
-                proof = self.component_proofs.get(name, {})
+            proof = self.component_proofs.get(name, {})
+            if state in {"Confirmed", "NotApplicable", "PolicyException"}:
                 if not proof.get("proof") or not proof.get("reviewer"):
                     return "Pending"
-            elif state == "PolicyException":
-                # Component exceptions must be separately evidenced by governance.
-                if name not in self.component_proofs:
-                    return "Pending"
+                if state == "PolicyException":
+                    # Component exceptions still require separate governance evidence.
+                    pass
             elif state != "Confirmed":
                 return "Pending"
         if any(t.state == "PolicyException" for t in self.targets.values()) or "PolicyException" in self.component_states.values():
