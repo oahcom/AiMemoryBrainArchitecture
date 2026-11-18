@@ -232,3 +232,12 @@ Exact current source readback:
 The Storage v3.3.2 manifest pins the v3.2.3 body but does not explicitly list current companion §14 Blob `dbc1dfd4c488c5d5e5a328388487d190984e8adc` in its exact artifact table. Storage/A must add this exact companion pin (or a successor) and obtain affected-Owner exact-version readbacks. The v3.3.2 manifest itself remains **NOT JOINTLY ACCEPTED / NOT FROZEN** and requires A's exact review; this I technical re-read is not a global approval.
 
 I36-GOV-01..10 remain GOVERNANCE-BLOCKED; Environment Registry Authority, signed ProducerDomainInventoryEpoch/InventorySeal, AuthorizationCommitPermit deployment, key custody and external approvals remain unresolved. I36 execution remains NOT RUN. No G5/G7/G10 or production-readiness claim follows from the document corrections.
+
+
+## 9. Successor H schema readback — partial coverage only; no G8 transfer
+
+The current H branch also contains Unified COC/JF-10 schema 1.2.17, Blob `1b8f44675f30919764481d33755c566ef5cf1ea8`. It adds a `C_PROVIDER_OUTCOME_RECORDED` message and generic `OWNER_LOCAL_PENDING_GATE` / `OWNER_LOCAL_GATE_RELEASE` messages with owner-kind and high-water fields. These are potential alternate mappings for C submit outcome and I/D owner-local gate evidence, but they are not an exact eight-family mapping: no distinct intent receipt, reservation event, explicit D fence terminal, explicit causal-order terminal-proof family or distinct COC ACK is present. The current `JF10_BRIDGE_RECONCILIATION_RECORDED` carries D barrier/C provider references and a reconciliation root, not an explicit terminal-proof message.
+
+The schema is a later H successor and is not pinned by A's Phase 3.6 CGH-APPLIED-1.1 package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819`, which targets H `bmcp.applied-ack/1.1.0`. H's separate Applied Delivery Evidence 1.0.0 Blob `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608` is also a later, distinct schema family. Neither may be silently substituted or treated as accepted by C/G/D/I/B.
+
+I's security disposition remains: exact same-version owner/predicate acceptance is required; owner-kind D/I mappings must be confirmed by D/I; a field reference is not a substitute for a separately required terminal proof; and G8 remains BLOCKED until A publishes and freezes one common version/digest after all required approvals. This note does not change I36-GOV-01..10 or I36 execution status.
