@@ -3,7 +3,7 @@
 //! it does not store or independently hash payload bytes.
 
 use memory_domain::{scopes_intersect, OpaqueId, ScopeRef};
-use memory_event_store::{AcceptedReceipt, EventClassification, EventEnvelope, EventStore, EventStoreError, ProcessingState};
+use memory_event_store::{AcceptedReceipt, EventEnvelope, EventStore, EventStoreError, ProcessingState};
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use std::path::Path;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -53,8 +53,7 @@ impl SqliteEventStore {
                 processing_state_json TEXT NOT NULL,
                 UNIQUE(producer_actor_ref, idempotency_key)
             );
-            CREATE INDEX IF NOT EXISTS accepted_events_digest_idx
-              ON accepted_events(producer_actor_ref, idempotency_key, payload_digest);"
+            "
         ).map_err(|_| EventStoreError::TransactionUnavailable)
     }
 
@@ -83,9 +82,11 @@ impl SqliteEventStore {
             || envelope.retention_class.is_empty()
             || envelope.scope_refs.is_empty()
             || envelope.scope_refs.iter().any(|s| s.validate().is_err())
-            || !scopes_intersect(&envelope.scope_refs, scope)
         {
             return Err(EventStoreError::InvalidEnvelope);
+        }
+        if !scopes_intersect(&envelope.scope_refs, scope) {
+            return Err(EventStoreError::ScopeMismatch);
         }
         Ok(())
     }
@@ -177,6 +178,7 @@ impl EventStore for SqliteEventStore {
     }
 
     fn status(&self, event_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<AcceptedReceipt>, EventStoreError> {
+        Self::validate_scope(scope)?;
         let row_id = Self::row_id(event_id)?;
         let row = self.connection.query_row(
             "SELECT payload_digest, scope_json, accepted_at, processing_state_json
@@ -209,6 +211,7 @@ impl EventStore for SqliteEventStore {
 mod tests {
     use super::*;
     use memory_domain::ScopeKind;
+    use memory_event_store::EventClassification;
 
     fn id(value: &str) -> OpaqueId { OpaqueId::new(value).unwrap() }
     fn scope() -> ScopeRef {
