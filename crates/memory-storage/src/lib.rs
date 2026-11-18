@@ -44,16 +44,19 @@ pub struct ChangePage {
 }
 
 pub trait MemoryStorage {
-    fn create_memory(&mut self, memory: Memory) -> Result<(), StorageError>;
+    fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError>;
     fn read_current(&self, memory_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<MemoryVersion>, StorageError>;
     fn read_version(&self, memory_id: &OpaqueId, version_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<MemoryVersion>, StorageError>;
     fn commit_version(&mut self, request: CommitRequest, scope: &[ScopeRef]) -> Result<CommitReceipt, StorageError>;
     fn list_changes(&self, after: Option<CommitSequence>, scope: &[ScopeRef], limit: usize) -> Result<ChangePage, StorageError>;
-    fn resolve_idempotency(&self, idempotency_key: &str, request_digest: &str) -> Result<Option<CommitReceipt>, StorageError>;
+    fn resolve_idempotency(&self, idempotency_key: &str, request_digest: &str, scope: &[ScopeRef]) -> Result<Option<CommitReceipt>, StorageError>;
 }
 
 #[cfg(test)]
 mod tests {
+    // Contract invariant: every storage read/write, including create and idempotency lookup, carries resolved Scope.
+    // Backend implementations must reject CommitRequest.memory_id != new_version.memory_id.
+
     use super::*;
     use memory_domain::{MemoryLifecycle, OpaqueId};
     fn id(value: &str) -> OpaqueId { OpaqueId::new(value).unwrap() }
