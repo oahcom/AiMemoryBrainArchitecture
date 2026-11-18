@@ -1,4 +1,5 @@
 # AI-EXEC-001 — AI Development Process Execution Rules
+# AI Development Process Execution Rules (English counterpart)
 
 - **Document ID:** AI-EXEC-001
 - **Version:** 1.1
