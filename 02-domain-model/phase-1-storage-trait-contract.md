@@ -8,12 +8,12 @@ Define the backend-neutral application port between the pure memory-domain crate
 
 ## Operations
 
-- create_memory
+- create_memory (with resolved scope)
 - read_current
 - read_version
 - commit_version
 - list_changes
-- resolve_idempotency
+- resolve_idempotency (with resolved scope)
 
 ## Commit boundary
 
@@ -21,7 +21,7 @@ A backend implementation MUST treat the immutable version, current-version CAS, 
 
 ## Safety
 
-Every read/write receives resolved scope. A backend MUST NOT use a stale projection as canonical state. expected_current_version is an optimistic-concurrency guard.
+Every read/write receives resolved scope, including create_memory and idempotency lookup. The backend MUST reject a CommitRequest when memory_id differs from new_version.memory_id. A backend MUST NOT use a stale projection as canonical state. expected_current_version is an optimistic-concurrency guard.
 
 ## Idempotency
 
