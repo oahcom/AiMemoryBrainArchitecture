@@ -1,0 +1,65 @@
+work_item_id: AID-2026-004
+title: AI-EXEC-001/002 and AI-EXEC-ROLLOUT-001 source-aligned English translation completion
+class: DOC
+risk: R1
+risk_rationale: Bilingual documentation control and source-aligned translation registration only; no runtime code, security, or contract-boundary changes. Highest applicable risk governs the Work Item.
+security_scope: NONE — documentation and process only
+status: COMPLETE
+sponsor: project user
+accountable_owner: Integration Owner
+implementing_ai_session: AID-2026-004-BILINGUAL-CLOSEOUT
+independent_reviewer: R1 author/reviewer distinction applies; independent review not claimed; human owner remains acceptance authority
+created_at: 2026-11-18
+updated_at: 2026-11-18
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/218
+related_pr: NONE — no PR created; repository PR quota freeze remained in force
+task_scope:
+  - Complete source-aligned English counterparts for AI-EXEC-001, AI-EXEC-002, and AI-EXEC-ROLLOUT-001
+  - Register source/translation commit and blob SHA pairs
+  - Close the bilingual STALE exception early and synchronize status records
+source_translation_pairs:
+  - document_id: AI-EXEC-001
+    source_path: 14-ai-development/AI-EXEC-001.md
+    source_commit_sha: 1f97c3fae65828266a0c3cb1d1e8d4e6cb330856
+    source_blob_sha: 372a290359f9e9de2bd81d7901beb2f084e6e3a4
+    translation_path: docs/en/14-ai-development/AI-EXEC-001.md
+    translation_commit_sha: e0e20ed30b4a21c2e26d0a4c0903a63c0293a46f
+    translation_blob_sha: c93db6a480bbe8f5ebbc8f3e56b570a920a20ad7
+    translation_initial_commit_sha: 0d2857a0fd026e49048031a7fd8b5d0d137ebf87
+    translation_correction_commit_sha: e0e20ed30b4a21c2e26d0a4c0903a63c0293a46f
+    source_sha_provenance: coordinator-supplied
+    translation_sha256: NOT_VERIFIED
+  - document_id: AI-EXEC-002
+    source_path: 14-ai-development/AI-EXEC-002.md
+    source_commit_sha: 1f97c3fae65828266a0c3cb1d1e8d4e6cb330856
+    source_blob_sha: ebb7f1ee9a084864c454711d271499cfbf8d386f
+    translation_path: docs/en/14-ai-development/AI-EXEC-002.md
+    translation_commit_sha: 08b07d228dbe78a209a5af68c4988b292e65e9c8
+    translation_blob_sha: 96aab56ce856484e24ad99ec6944a4c45ceb763b
+    source_sha_provenance: coordinator-supplied
+    translation_sha256: NOT_VERIFIED
+  - document_id: AI-EXEC-ROLLOUT-001
+    source_path: 14-ai-development/AI-EXEC-ROLLOUT-001.md
+    source_commit_sha: 778b4d3b4b6c846faa6a02247d31d14a33d8b626
+    source_blob_sha: 14082151e2839e966349498138b9001d01de9bed
+    translation_path: docs/en/14-ai-development/AI-EXEC-ROLLOUT-001.md
+    translation_commit_sha: e683ea275dfaf85fff0f9d18bb706d3bdb5d60a1
+    translation_blob_sha: 87e4314d1df9bbff2321eb1053078bb5f7148d8d
+    source_sha_provenance: coordinator-supplied
+    translation_sha256: NOT_VERIFIED
+bilingual_status: COMPLETE
+bilingual_exception:
+  original_approval: STALE exception approved through 2026-12-02 under GOV-DOC-001 §5
+  closure: Closed early on 2026-11-18; all three English counterparts registered as source-aligned pairs
+  tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/218
+prompt_id: AID-2026-004-PROMPT
+prompt_version: v1
+prompt_provenance_tier: T2 (coordinator/user-provided in-session task instructions)
+prompt_sha256: NOT_VERIFIED
+prompt_bytes: NOT_VERIFIED
+prompt_file_commit_sha: NOT_VERIFIED
+prompt_provenance_note: The task instruction was supplied in this ChatGPT conversation. A stable conversation permalink and raw immutable instruction snapshot are not available to this session; no synthetic anchor or digest is fabricated.
+verification_summary: English counterpart files were read back from main; source blob SHAs matched the coordinator-supplied source snapshots; heading-level and Markdown table-row counts matched for all three pairs. SHA-256 of exact file bytes NOT_VERIFIED. Runtime/test suites NOT RUN (documentation-only task).
+findings: none — no new findings in this batch
