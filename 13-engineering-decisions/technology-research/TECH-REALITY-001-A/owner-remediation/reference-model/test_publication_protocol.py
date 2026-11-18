@@ -1052,7 +1052,7 @@ class PublicationProtocolTests(unittest.TestCase):
         context = list(p.authorization_contexts["auth-1"])
         # applicability Scope / obligations / expiry / authenticated workload
         # are part of the I authorization tuple, not free metadata.
-        for index in (17, 18, 19, 22, 23, 24, 25):
+        for index in range(16, len(context)):
             mutated = list(context)
             mutated[index] = mutated[index] + "-substituted"
             p.authorization_contexts["auth-1"] = tuple(mutated)
