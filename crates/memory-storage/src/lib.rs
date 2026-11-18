@@ -44,7 +44,7 @@ pub struct ChangePage {
 }
 
 pub trait MemoryStorage {
-    fn create_memory(&mut self, memory: Memory) -> Result<(), StorageError>;
+    fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError>;
     fn read_current(&self, memory_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<MemoryVersion>, StorageError>;
     fn read_version(&self, memory_id: &OpaqueId, version_id: &OpaqueId, scope: &[ScopeRef]) -> Result<Option<MemoryVersion>, StorageError>;
     fn commit_version(&mut self, request: CommitRequest, scope: &[ScopeRef]) -> Result<CommitReceipt, StorageError>;

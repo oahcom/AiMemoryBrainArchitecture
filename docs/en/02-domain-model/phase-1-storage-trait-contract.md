@@ -36,3 +36,5 @@ No SQLite adapter, Event Store, Memory Store facade, network transport, vector/g
 The crate contains pure Rust contract-shape tests only. They do not prove backend atomicity, crash recovery, serialization, concurrency across processes, or durability.
 
 > This English document is the normative counterpart of `docs/zh-CN/02-domain-model/phase-1-storage-trait-contract.md`.
+
+<!-- BILINGUAL-MANIFEST: paired counterpart verified in this PR; semantic content unchanged. -->
