@@ -3,14 +3,14 @@
 
 use memory_domain::{Memory, MemoryVersion, OpaqueId, ScopeRef};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum StorageError {
     NotFoundOrNotVisible, StaleVersion, IdempotencyConflict, InvalidReference,
     ScopeMismatch, PermissionDenied, InvalidSchema, ProvenanceIncomplete,
     ContentDigestMismatch, HistoryUnavailable, TransactionUnavailable,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct CommitRequest {
     pub memory_id: OpaqueId,
     pub expected_current_version: Option<OpaqueId>,
@@ -30,14 +30,14 @@ pub struct CommitReceipt {
 #[derive(serde::Serialize, serde::Deserialize, Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct CommitSequence(pub u64);
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ChangeRecord {
     pub commit_sequence: CommitSequence,
     pub memory_id: OpaqueId,
     pub version_id: OpaqueId,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ChangePage {
     pub records: Vec<ChangeRecord>,
     pub next_cursor: Option<CommitSequence>,
