@@ -27,21 +27,21 @@ Digest 是幂等契约覆盖的规范化请求 Payload 的密码学摘要。它�
 
     IdempotencyNamespace = (ProducerIdentity, Scope, IdempotencyKey)
 
-该元组必须类型化，并按规范化后的身份精确相等比较。实现 MUST NOT 拼接未经转义的字符串、仅比较部分字段，或用显示标签替代类型化身份。
+该元组必须类型化，但 Scope 身份/相等域目前为 **CANDIDATE / TO_VALIDATE**，尚不具规范性。权威 Scope 字段（包括 `scope_id`、`scope_kind` 和/或 `namespace_key` 中哪些字段参与）、namespace/authority 限定、规范化规则及兼容/legacy 行为，必须由 B/domain 与 I/security Owner 共同决定后，才能依赖 Scope 精确相等。在此之前，实现不得根据字段名称或现有 helper 行为自行推断比较器。实现 MUST NOT 拼接未经转义的字符串、仅比较部分字段，或用显示标签替代类型化身份。
 
 当且仅当以下条件全部成立时，请求才是此前已接受请求的重放：
 - 经过认证的 ProducerIdentity 完全相等；
-- 规范化后的 Scope 完全相等；
+- Scope 相等性为 **CANDIDATE / TO_VALIDATE**，须等待权威 Scope 身份与相等规则；目前不得将其视为规范性重放条件。
 - IdempotencyKey 完全相等；
 - 当前请求的 Digest 与持久化 Receipt 绑定的 Digest 完全相等。
 
-仅有相同 Producer Identity 与 Digest **不足以**判定重放；Scope 与 Idempotency Key 也必须相同。命名空间相同但 Digest 不同，属于 Key 冲突，不属于重放。
+仅有相同 Producer Identity 与 Digest **不足以**判定重放；Scope 与 Idempotency Key 也必须相同。但 Scope 比较域仍为 **CANDIDATE / TO_VALIDATE**；在 B/domain 与 I/security Owner 决定 Scope 身份元组、authority/namespace 限定、规范化及兼容规则前，不得将该重放谓词视为完整的规范性规则。命名空间相同但 Digest 不同，属于 Key 冲突，不属于重放。
 
 第一个成功提交的请求胜出。对同一命名空间的并发请求 MUST 由原子唯一性/CAS 边界串行化。恰好一个请求可以创建 Receipt 并追加事件；相同 Digest 的并发请求观察到胜出请求的 Receipt；不同 Digest 的请求收到冲突。未提交事件与 Receipt 的失败事务不占用该 Key。
 
 ## 4. Scope 行为
 
-**DECIDED 提案：** Scope 是幂等命名空间的一部分。同一 Producer Identity 和 Idempotency Key **可以**在两个不同 Scope 中独立使用；这会形成两个不同操作和两份不同 Receipt。Scope B 中的请求 MUST NOT 重放、读取或修改 Scope A 创建的 Receipt。
+**CANDIDATE / TO_VALIDATE——等待权威 Scope 身份决议：** Scope 被提议作为幂等命名空间的一部分。同一 Producer Identity 和 Idempotency Key 是否能在两个 Scope 引用中形成独立操作/Receipt，取决于 §3 所述尚未解决的 Scope 身份/相等域。在 B/domain 与 I/security Owner 决定该规则前，不得将跨 Scope 重放隔离当作规范性比较规则。
 
 这是命名空间隔离，不是跨 Scope 授权。调用方必须在目标 Scope 中独立完成认证和授权。无权访问的调用方收到常规授权拒绝；实现不得泄露另一个 Scope 中是否存在匹配 Key。
 
@@ -90,10 +90,10 @@ Receipt 是将一个命名空间绑定到已接受 Digest 及追加结果的持�
 
 | 主题 | 状态 | 提案/验证方法 |
 |---|---|---|
-| 类型化命名空间 = ProducerIdentity + Scope + Key | DECIDED 提案 | 精确相等；与领域身份及 Scope 契约交叉评审 |
-| 重放要求命名空间与 Digest 均相同 | DECIDED 提案 | 确定性单测/参考模型测试 |
+| 类型化命名空间 = ProducerIdentity + Scope + Key | CANDIDATE / TO_VALIDATE（Scope 组成部分） | B/domain 与 I/security 决定参与的 Scope 字段、namespace/authority 限定、规范化规则及兼容/legacy 规则；之后验证精确相等 |
+| 重放要求命名空间与 Digest 均相同 | Scope 相等性为 CANDIDATE / TO_VALIDATE | 权威 Scope 相等域决议后再进行确定性单测/参考模型测试 |
 | 同一命名空间不同 Digest 属于冲突 | DECIDED 提案 | 负向测试；断言不产生第二次追加且原 Receipt 不变 |
-| 跨 Scope 使用相同 Key 相互独立 | DECIDED 提案 | 双 Scope 隔离测试，包括 Receipt 不可披露 |
+| 跨 Scope 使用相同 Key 相互独立 | CANDIDATE / TO_VALIDATE | B/domain 与 I/security 决定何时两个 Scope 引用不同；之后进行双 Scope 隔离与 Receipt 不可披露测试 |
 | 禁止 Producer Identity 部分匹配 | DECIDED 提案 | 身份类型矩阵与序列化往返测试 |
 | ProducerIdentity 具体组成（主体还是实例） | CANDIDATE | 身份 Owner 发布精确规范类型及认证映射 |
 | Digest 规范化与算法/版本 | TO_VALIDATE | Payload 完整性契约；跨版本黄金向量 |
