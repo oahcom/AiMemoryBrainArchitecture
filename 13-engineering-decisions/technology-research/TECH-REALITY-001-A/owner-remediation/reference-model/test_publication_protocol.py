@@ -439,7 +439,8 @@ class PublicationProtocolTests(unittest.TestCase):
         binding = operation_binding or (
             args["auth_id"], args["publication_id"], args["storage_id"],
             args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"],
-            args["d_proof"], args["i_commit_won_proof"], Protocol()._authorization_context(args["auth_id"]),
+            args["d_proof"], args["i_commit_won_proof"] + (Protocol()._authorization_context(args["auth_id"]),),
+            Protocol()._authorization_context(args["auth_id"]),
         )
         values = dict(
             operation_id="op-1",
