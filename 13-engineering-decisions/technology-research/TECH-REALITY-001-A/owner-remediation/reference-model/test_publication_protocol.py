@@ -581,6 +581,49 @@ class PublicationProtocolTests(unittest.TestCase):
         with self.assertRaisesRegex(Rejected, "dependency digest"):
             self.consume_i(p)
 
+    def test_storage_commit_rejects_dependency_digest_substitution_after_i_commit_won(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        storage = p.storage_participants["storage-1"]
+        p.storage_participants["storage-1"] = (storage[0], storage[1], "dependency-digest-substituted")
+        with self.assertRaisesRegex(Rejected, "dependency digest"):
+            p.commit(**args)
+
+        p = self.prepared()
+        args = self.consume_i(p)
+        publication = p.publication_participants["publication-1"]
+        p.publication_participants["publication-1"] = (
+            publication[0], publication[1], publication[2], "dependency-digest-substituted",
+            *publication[4:],
+        )
+        with self.assertRaisesRegex(Rejected, "dependency digest"):
+            p.commit(**args)
+
+    def test_unknown_reconciliation_rejects_dependency_digest_substitution(self):
+        for mutate_storage in (True, False):
+            p = self.prepared()
+            args = self.consume_i(p)
+            binding = (
+                args["auth_id"], args["publication_id"], args["storage_id"],
+                args["request_digest"], args["owner_boundary"], args["final_visibility_gate_id"],
+                args["d_proof"], args["i_commit_won_proof"], p.authorization_contexts["auth-1"],
+            )
+            p.mark_unknown("op-1", binding)
+            p.install_forget_fence()
+            if mutate_storage:
+                storage = p.storage_participants["storage-1"]
+                p.storage_participants["storage-1"] = (storage[0], storage[1], "dependency-digest-substituted")
+            else:
+                publication = p.publication_participants["publication-1"]
+                p.publication_participants["publication-1"] = (
+                    publication[0], publication[1], publication[2], "dependency-digest-substituted",
+                    *publication[4:],
+                )
+            proof = self.no_publication_proof(operation_binding=binding)
+            with self.assertRaisesRegex(Rejected, "dependency"):
+                p.resolve_no_publication("op-1", proof)
+            self.assertIn("op-1", p.private_unknown)
+
     def test_publication_must_bind_exact_storage_participant(self):
         p = self.prepared()
         with self.assertRaises(Rejected):
