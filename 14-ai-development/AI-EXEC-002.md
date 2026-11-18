@@ -3,7 +3,7 @@
 
 - **Document ID:** AI-EXEC-002
 - **Version:** 1.0
-- **Status:** PROPOSED — owner-directed adoption pending (Issue #218; adoption pattern per PR-GOVERNANCE-001)
+- **Status:** ADOPTED — owner-directed adoption recorded in Issue #218 comment #6971736655
 - **Owner:** Integration Owner
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](ai-development-standard.md) §5/§13、[AI-PROMPT-STD-001](prompt-authoring-standard.md)、[CHATGPT-GLOBAL-001](prompts/global/chatgpt-session-contract-v1.md)、[AI-PROC-001](iteration-lifecycle.md) Stage 2/6、GLB-DOC-001（政策 GOV-DOC-001）
