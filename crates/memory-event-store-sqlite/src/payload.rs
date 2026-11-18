@@ -156,9 +156,9 @@ impl PayloadEventStoreExt for SqliteEventStore {
             "SELECT e.event_row, e.payload_digest, e.scope_json, e.envelope_json,
                     e.accepted_at, e.processing_state_json, p.payload_bytes, p.verified_digest
              FROM accepted_events e INNER JOIN event_payloads p ON p.event_row = e.event_row
-             WHERE e.event_row > ?1 ORDER BY e.event_row ASC LIMIT ?2"
+             WHERE e.event_row > ?1 ORDER BY e.event_row ASC"
         ).map_err(|_| EventStoreError::TransactionUnavailable)?;
-        let rows = statement.query_map(params![after_sequence, limit as i64], |row| {
+        let rows = statement.query_map(params![after_sequence], |row| {
             Ok((row.get::<_, i64>(0)?, row.get::<_, String>(1)?, row.get::<_, String>(2)?,
                 row.get::<_, String>(3)?, row.get::<_, String>(4)?, row.get::<_, String>(5)?,
                 row.get::<_, Vec<u8>>(6)?, row.get::<_, String>(7)?))
@@ -168,7 +168,13 @@ impl PayloadEventStoreExt for SqliteEventStore {
             let (sequence, declared_digest, scope_json, envelope_json, accepted_at,
                  state_json, payload_bytes, verified_digest) =
                 row.map_err(|_| EventStoreError::TransactionUnavailable)?;
-            check_scope(&scope_json, scope)?;
+            match check_scope(&scope_json, scope) {
+                Ok(()) => {}
+                // A valid but non-intersecting Scope is invisible, not a page error.
+                // Decode/validation failures remain fail-closed.
+                Err(EventStoreError::ScopeMismatch) => continue,
+                Err(error) => return Err(error),
+            }
             let envelope: EventEnvelope = decode(&envelope_json)?;
             let actual_digest = digest(&payload_bytes);
             if declared_digest != actual_digest || verified_digest != actual_digest
@@ -177,6 +183,8 @@ impl PayloadEventStoreExt for SqliteEventStore {
             }
             let accepted = receipt(sequence, accepted_at, declared_digest, &state_json)?;
             events.push(StoredEvent { sequence, envelope, payload_bytes, receipt: accepted });
+            // limit counts visible events; the last returned sequence is the next cursor.
+            if events.len() == limit { break; }
         }
         Ok(events)
     }
@@ -241,6 +249,37 @@ mod tests {
                    Err(EventStoreError::PayloadIntegrityMismatch));
         let count: i64 = store.connection.query_row("SELECT COUNT(*) FROM accepted_events", [], |r| r.get(0)).unwrap();
         assert_eq!(count, 0);
+    }
+
+    #[test]
+    fn read_after_skips_non_intersecting_scopes_and_limits_visible_rows() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+        let scope_a = scope();
+        let scope_b = ScopeRef {
+            scope_id: id("scope-2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:scope-2".into(),
+        };
+        let mut a = envelope("scope-a-1", b"a1");
+        a.scope_refs = vec![scope_a.clone()];
+        let mut b1 = envelope("scope-b-1", b"b1");
+        b1.scope_refs = vec![scope_b.clone()];
+        let mut b2 = envelope("scope-b-2", b"b2");
+        b2.scope_refs = vec![scope_b.clone()];
+
+        let hidden = store.accept_with_payload(a, b"a1", &[scope_a]).unwrap();
+        let visible1 = store.accept_with_payload(b1, b"b1", &[scope_b.clone()]).unwrap();
+        let visible2 = store.accept_with_payload(b2, b"b2", &[scope_b.clone()]).unwrap();
+
+        let hidden_only = store.read_after(0, 1, &[scope_b.clone()]).unwrap();
+        assert!(hidden_only.is_empty());
+        let cursor = hidden.event_id.as_str().trim_start_matches("event:").parse().unwrap();
+        let page1 = store.read_after(cursor, 1, &[scope_b.clone()]).unwrap();
+        assert_eq!(page1.len(), 1);
+        assert_eq!(page1[0].receipt, visible1);
+        let page2 = store.read_after(page1[0].sequence, 1, &[scope_b]).unwrap();
+        assert_eq!(page2.len(), 1);
+        assert_eq!(page2[0].receipt, visible2);
     }
 
     #[test]
