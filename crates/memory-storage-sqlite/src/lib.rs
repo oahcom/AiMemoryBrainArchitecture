@@ -1283,4 +1283,86 @@ mod tests {
         );
     }
 
+    // Worker mode for the parent test below. Each invocation is a separate OS process
+    // with its own SQLite Connection; the gate synchronizes the competing CAS start.
+    #[test]
+    fn multi_process_cas_worker() {
+        let (Ok(path), Ok(gate), Ok(result_path), Ok(version_id)) = (
+            std::env::var("MEMORY_SQLITE_MP_CAS_PATH"),
+            std::env::var("MEMORY_SQLITE_MP_CAS_GATE"),
+            std::env::var("MEMORY_SQLITE_MP_CAS_RESULT"),
+            std::env::var("MEMORY_SQLITE_MP_CAS_VERSION"),
+        ) else {
+            return;
+        };
+
+        let mut store = SqliteMemoryStorage::open(path).unwrap();
+        let deadline = std::time::Instant::now() + Duration::from_secs(10);
+        while !std::path::Path::new(&gate).exists() {
+            assert!(std::time::Instant::now() < deadline, "timed out waiting for multiprocess CAS gate");
+            std::thread::sleep(Duration::from_millis(5));
+        }
+
+        let result = store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version: version(&version_id, 1, None),
+            idempotency_key: format!("mp-{version_id}"),
+            request_digest: format!("mp-digest-{version_id}"),
+        }, &[scope()]);
+        let outcome = match result {
+            Ok(_) => "success",
+            Err(StorageError::StaleVersion) => "stale",
+            Err(other) => panic!("unexpected multiprocess CAS result: {other:?}"),
+        };
+        std::fs::write(result_path, outcome).unwrap();
+    }
+
+    #[test]
+    fn separate_processes_serialize_competing_file_backed_cas_writers() {
+        let path = temp_db_path("multiprocess-cas");
+        let gate = path.with_extension("go");
+        let first_result = path.with_extension("first-result");
+        let second_result = path.with_extension("second-result");
+        {
+            let mut setup = SqliteMemoryStorage::open(&path).unwrap();
+            setup.create_memory(memory(), &[scope()]).unwrap();
+        }
+
+        let executable = std::env::current_exe().unwrap();
+        let spawn_worker = |version_id: &str, result_path: &std::path::Path| {
+            std::process::Command::new(&executable)
+                .args(["--exact", "tests::multi_process_cas_worker", "--nocapture"])
+                .env("MEMORY_SQLITE_MP_CAS_PATH", &path)
+                .env("MEMORY_SQLITE_MP_CAS_GATE", &gate)
+                .env("MEMORY_SQLITE_MP_CAS_RESULT", result_path)
+                .env("MEMORY_SQLITE_MP_CAS_VERSION", version_id)
+                .spawn()
+                .unwrap()
+        };
+        let mut first = spawn_worker("v-mp-a", &first_result);
+        let mut second = spawn_worker("v-mp-b", &second_result);
+        std::fs::write(&gate, "go").unwrap();
+
+        assert!(first.wait().unwrap().success());
+        assert!(second.wait().unwrap().success());
+        let outcomes = [
+            std::fs::read_to_string(&first_result).unwrap(),
+            std::fs::read_to_string(&second_result).unwrap(),
+        ];
+        assert_eq!(outcomes.iter().filter(|value| value.as_str() == "success").count(), 1);
+        assert_eq!(outcomes.iter().filter(|value| value.as_str() == "stale").count(), 1);
+
+        let reopened = SqliteMemoryStorage::open(&path).unwrap();
+        let current = reopened.read_current(&id("m1"), &[scope()]).unwrap().unwrap();
+        assert!(current.memory_version_id == id("v-mp-a") || current.memory_version_id == id("v-mp-b"));
+        assert_eq!(reopened.list_changes(None, &[scope()], 10).unwrap().records.len(), 1);
+        drop(reopened);
+
+        remove_db_files(&path);
+        let _ = std::fs::remove_file(gate);
+        let _ = std::fs::remove_file(first_result);
+        let _ = std::fs::remove_file(second_result);
+    }
+
 }
