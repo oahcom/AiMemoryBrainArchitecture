@@ -491,18 +491,18 @@ owner_i_u011:
     sha256: NOT_VERIFIED
   artifact:
     path: 14-ai-development/work-items/AID-2026-001/owner-i-r3-governance-rules-u011-v1.md
-    commit_sha: 443fbd08ee7275c22ab61e8b354888759b7d53c0
-    git_blob_sha: 241f1ac4c63758bb791eb9b7d94bdfaf70eda66d
-    utf8_bytes: 24388
+    commit_sha: da38bde0d3bf3fa6c9a3650cf90ed22b58bd3ae6
+    git_blob_sha: eaf702c8b0bf6d21e30f44e12f5aacb2fd8ec045
+    utf8_bytes: 25632
     sha256: NOT_VERIFIED
-    language_status: ENGLISH_AND_CHINESE_COUNTERPARTS_RECORDED_AUTHOR_TRANSLATION_COMPLETE_INDEPENDENT_PARITY_REVIEW_PENDING
+    language_status: AUTHOR_TRANSLATION_COMPLETE_PRIOR_INDEPENDENT_REVIEW_FAILED_REMEDIATION_IN_PROGRESS_FRESH_REVIEW_PENDING
     chinese_counterpart:
       path: 14-ai-development/work-items/AID-2026-001/owner-i-r3-governance-rules-u011-v1.zh-CN.md
-      commit_sha: e1a1f2016e3ad4fb6905e0b069b1c2f5863b85ff
-      git_blob_sha: ba8f2b0569c834cc384dce0c01b5d918c10a3d0b
-      utf8_bytes: 23192
+      commit_sha: b54108174f32a325eae011427e3f0fdf44bc47ea
+      git_blob_sha: 37d14d89fb6d1911a9c7ed182ed5084c23d48716
+      utf8_bytes: 23649
       sha256: NOT_VERIFIED
-      status: AUTHOR_TRANSLATION_COMPLETE_INDEPENDENT_PARITY_REVIEW_PENDING
+      status: AUTHOR_TRANSLATION_COMPLETE_PRIOR_INDEPENDENT_REVIEW_FAILED_REMEDIATION_IN_PROGRESS_FRESH_REVIEW_PENDING
     status: I_SIDE_CONTRACT_CANDIDATE_NOT_NORMATIVE
   findings:
     I-U009-001:
@@ -536,7 +536,15 @@ owner_i_u011:
       reflow: Issue #41
     I-U011-007:
       severity: P2
-      disposition: AUTHOR_TRANSLATION_RECORDED_INDEPENDENT_BILINGUAL_SEMANTIC_PARITY_REVIEW_PENDING
+      disposition: PRIOR_INDEPENDENT_BILINGUAL_REVIEW_FAILED_REMEDIATION_IN_PROGRESS_FRESH_REVIEW_PENDING
+      reflow: Issue #41
+    I-U012-001:
+      severity: P2
+      disposition: EN_SECTION_11_STALE_TRANSLATION_STATUS_REMEDIATED_PENDING_FRESH_INDEPENDENT_REVIEW
+      reflow: Issue #41
+    I-U012-002:
+      severity: P2
+      disposition: EN_MAINTENANCE_SECTION_MIRRORED_PENDING_FRESH_INDEPENDENT_REVIEW
       reflow: Issue #41
   approvals:
     owner_i_formal: NOT_CLAIMED_AI_ROLEPLAY_IS_NOT_OWNER_APPROVAL
@@ -544,7 +552,21 @@ owner_i_u011:
     storage_atomic_commit: PENDING
     h_transport_principal_binding: PENDING
     executor_acknowledgements: PENDING
-    bilingual_semantic_parity_review: PENDING_INDEPENDENT_REVIEW_TRANSLATION_AUTHORED
+    bilingual_semantic_parity_review: PRIOR_EXACT_BLOB_REVIEW_FAILED_REMEDIATION_RECORDED_FRESH_INDEPENDENT_REVIEW_PENDING
     independent_integration_review: PENDING
     r3_runtime_and_race_tests: NOT_RUN_NOT_EVIDENCED
+  independent_bilingual_review:
+    prior_disposition: FAIL
+    prior_review_baseline_commit: 5a24134200f55d6f559a452d509b8dbcd9753719
+    prior_review_comment: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/41#issuecomment-6983493816
+    prior_review_report: 14-ai-development/work-items/AID-2026-001/independent-review/u-011-bilingual-semantic-review-2026-11-18.md
+    prior_review_report_blob_sha: 97a4731b6881c955a56e7c7a5d1bc84d78f625ee
+    prior_review_report_commit_sha: 1638127074173c9c14f68d20c5c2dd7a7ab165bb
+    findings:
+      I-U012-001: P2_REMEDIATED_AUTHOR_SIDE_FRESH_REVIEW_PENDING
+      I-U012-002: P2_REMEDIATED_AUTHOR_SIDE_FRESH_REVIEW_PENDING
+    corrected_artifacts:
+      en_blob_sha: eaf702c8b0bf6d21e30f44e12f5aacb2fd8ec045
+      zh_blob_sha: 37d14d89fb6d1911a9c7ed182ed5084c23d48716
+    disposition: FRESH_INDEPENDENT_EXACT_HEAD_REVIEW_PENDING
   overall_status: BLOCKED_PENDING_FORMAL_APPROVAL_AND_R3_EVIDENCE
