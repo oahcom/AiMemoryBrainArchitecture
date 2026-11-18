@@ -301,7 +301,7 @@ class Protocol:
         if operation_id not in self.i_pending:
             raise Rejected("UNKNOWN Storage outcome requires pending I COMMIT_WON")
         if binding is not None:
-            self._validate_unknown_binding(binding)
+            self._validate_unknown_binding(operation_id, binding)
             prior = self.operation_bindings.get(operation_id)
             if prior is not None and prior != binding:
                 raise Rejected("UNKNOWN operation identity rebound")
@@ -732,15 +732,15 @@ class PublicationProtocolTests(unittest.TestCase):
     def test_unknown_stays_private_and_cannot_close_out(self):
         p = self.prepared()
         args = self.commit_args()
-        args["operation_id"] = "op-unknown"
+        args["operation_id"] = "op-1"
         self.consume_i(p, args)
-        p.mark_unknown("op-unknown")
-        self.assertIn("op-unknown", p.private_unknown)
+        p.mark_unknown("op-1")
+        self.assertIn("op-1", p.private_unknown)
         self.assertNotIn("publication-1", p.visibility)
         with self.assertRaises(Rejected):
-            p.close_d("op-unknown", ("UNKNOWN",))
+            p.close_d("op-1", ("UNKNOWN",))
         with self.assertRaises(Rejected):
-            p.close_i("op-unknown", ("UNKNOWN",))
+            p.close_i("op-1", ("UNKNOWN",))
 
     def test_no_publication_requires_every_storage_absence_and_fence_fact(self):
         p = self.prepared()
