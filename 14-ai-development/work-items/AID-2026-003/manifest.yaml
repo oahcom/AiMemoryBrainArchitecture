@@ -15,7 +15,7 @@ updated_at: 2026-11-18
 merge_commit_sha: PENDING — recorded at closeout
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
-base_commit_sha: 6b5db291
+base_commit_sha: 6b5db2918cffc2281deb22fd9858a37dbaeec726
 implementation_branch: ai/AID-2026-003/IO-exec-v11
 tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/218
 related_pr: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/256
@@ -29,22 +29,26 @@ dependency_refs:
 deliverables:
   - 14-ai-development/AI-EXEC-001.md (v1.0 -> v1.1)
   - 14-ai-development/AI-EXEC-002.md (v1.0 -> v1.1)
+  - 14-ai-development/work-items/AID-2026-003/prompt-v1-errata.md (immutable prompt companion; no rewrite of prompt-v1.md)
 gap_coverage:
   gap_1_kickoff_loading: AI-EXEC-001 §1.4 + §2 Stage 0
   gap_2_provenance_tiers: AI-EXEC-002 §2 T1/T2/T3 + grandfather clause
   gap_3_governance_doc_interop: AI-EXEC-001 §10
-  gap_4_code_session_tier: AI-EXEC-002 §3 seven-item minimum
+  gap_4_code_session_tier: AI-EXEC-002 §3 seven-item focus subset; all 12 prompt sections remain mandatory
   gap_5_finding_minimum_line: AI-EXEC-001 §4 + AI-EXEC-002 §5
   gap_6_review_acquisition_bridge: AI-EXEC-001 §6
 prompt_id: AID-2026-003-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-003/prompt-v1.md
+prompt_companion_file: 14-ai-development/work-items/AID-2026-003/prompt-v1-errata.md
 prompt_provenance_tier: T1 (repo-file prompt, AI-EXEC-002 §2 v1.1)
-prompt_sha256: f797be6866b0127ea51efbcbf029f683c161429eb78739e0cb5b0b37e96a47d5
-prompt_bytes: 3154
-prompt_file_commit_sha: PENDING — introducing commit of prompt-v1.md, recorded in prompt_file_commit_sha and the INDEX rows at closeout
-prompt_hash_note: SHA-256 over exact committed file bytes (UTF-8, no normalization) per AI-PROMPT-STD-001 §5; prompt-file commit SHA backfilled at closeout (wording matches actual record per OWN-REV-01 remediation)
-bilingual_status: CHINESE_AUTHORITATIVE — v1.1 revision is in-place edit of existing Chinese-authoritative documents; English counterparts remain STALE under the GOV-DOC-001 §5 exception registered for AI-EXEC-001/002 (due 2026-12-02, Issue #218); no new translation-status rows required
+prompt_sha256: NOT_VERIFIED
+prompt_bytes: NOT_VERIFIED
+prompt_file_commit_sha: bb1ac7a59619e56769ac1e69c272a772f8c96b02
+prompt_file_blob_sha: 71332a2b8f412d1bb58d4d53bdb25880dc2f1431
+prompt_companion_commit_sha: 1822f98ea95dc163caf1b82f2b80b13135d48d60
+prompt_hash_note: SHA-256 and byte count are NOT_VERIFIED in this session because the available GitHub connector exposes repository content/blob SHA but no exact-byte SHA-256 computation facility; the previously recorded digest is not reused as a recomputation. prompt-v1.md remains byte-immutable. GitHub blob SHA above is the repository blob identifier, not SHA-256.
+bilingual_status: STALE_EXCEPTION — Chinese v1.1 is temporary authoritative source; English counterparts docs/en/14-ai-development/AI-EXEC-001.md and docs/en/14-ai-development/AI-EXEC-002.md are missing/pending. Exact source commits and blob SHAs, Owner Integration Owner, due 2026-12-02, rationale, and tracking Issue #218 / AID-2026-003 are registered in docs/translation-status.md. Not bilingual-complete.
 acceptance_blocker: none for R1
 acceptance_authority: project owner — adoption/merge decision on the revision PR
-verification_summary: PENDING — recorded at closeout (diff read-back, cross-reference consistency grep, git diff --check)
+verification_summary: Remediation read-back and clause cross-reference checks performed via GitHub; SHA-256 NOT_VERIFIED; runtime/test suites NOT RUN; exact-Head Owner verification pending.
