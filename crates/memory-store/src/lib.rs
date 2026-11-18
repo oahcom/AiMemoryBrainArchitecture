@@ -211,7 +211,7 @@ mod tests {
 
     struct CommitReceiptSequence;
     impl CommitReceiptSequence {
-        fn next(receipts: &BTreeMap<String, CommitReceipt>) -> memory_storage::CommitSequence {
+        fn next(receipts: &BTreeMap<String, FakeReceiptRecord>) -> memory_storage::CommitSequence {
             memory_storage::CommitSequence(receipts.len() as u64 + 1)
         }
     }
