@@ -106,7 +106,8 @@ impl SqliteMemoryStorage {
 }
 
 impl MemoryStorage for SqliteMemoryStorage {
-    fn create_memory(&mut self, memory: Memory) -> Result<(), StorageError> {
+    fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError> {
+        Self::scope_allowed(&Self::encode(&memory.scope_refs)?, scope)?;
         let scope_json = Self::encode(&memory.scope_refs)?;
         let memory_json = Self::encode(&memory)?;
         self.connection
