@@ -4,6 +4,7 @@
 use memory_domain::{scopes_intersect, Memory, MemoryVersion, OpaqueId, ScopeRef};
 use memory_storage::{ChangePage, ChangeRecord, CommitReceipt, CommitRequest, CommitSequence, MemoryStorage, StorageError};
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
+use std::time::Duration;
 
 pub struct SqliteMemoryStorage {
     connection: Connection,
@@ -12,6 +13,13 @@ pub struct SqliteMemoryStorage {
 impl SqliteMemoryStorage {
     pub fn open(path: impl AsRef<std::path::Path>) -> Result<Self, StorageError> {
         let connection = Connection::open(path).map_err(|_| StorageError::TransactionUnavailable)?;
+        connection.busy_timeout(Duration::from_secs(5)).map_err(|_| StorageError::TransactionUnavailable)?;
+        connection.execute_batch(
+            "PRAGMA journal_mode = WAL;
+             PRAGMA synchronous = FULL;
+             PRAGMA foreign_keys = ON;
+             PRAGMA busy_timeout = 5000;"
+        ).map_err(|_| StorageError::TransactionUnavailable)?;
         let store = Self { connection };
         store.initialize()?;
         Ok(store)
@@ -19,6 +27,12 @@ impl SqliteMemoryStorage {
 
     pub fn in_memory() -> Result<Self, StorageError> {
         let connection = Connection::open_in_memory().map_err(|_| StorageError::TransactionUnavailable)?;
+        connection.busy_timeout(Duration::from_secs(5)).map_err(|_| StorageError::TransactionUnavailable)?;
+        connection.execute_batch(
+            "PRAGMA synchronous = FULL;
+             PRAGMA foreign_keys = ON;
+             PRAGMA busy_timeout = 5000;"
+        ).map_err(|_| StorageError::TransactionUnavailable)?;
         let store = Self { connection };
         store.initialize()?;
         Ok(store)
@@ -403,6 +417,101 @@ mod tests {
             claims: vec![], entity_refs: vec![], relation_refs: vec![], source_refs: vec![],
             provenance_refs: vec![], content_digest: format!("digest-{idv}"), schema_version: "1".into(),
         }
+    }
+
+
+    fn temp_db_path(label: &str) -> std::path::PathBuf {
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos();
+        std::env::temp_dir().join(format!("memory-brain-{label}-{}-{nonce}.sqlite", std::process::id()))
+    }
+
+    fn remove_db_files(path: &std::path::Path) {
+        let _ = std::fs::remove_file(path);
+        let _ = std::fs::remove_file(path.with_extension("sqlite-wal"));
+        let _ = std::fs::remove_file(path.with_extension("sqlite-shm"));
+    }
+
+    #[test]
+    fn sqlite_committed_state_survives_close_and_reopen() {
+        let path = temp_db_path("reopen");
+        let receipt = {
+            let mut store = SqliteMemoryStorage::open(&path).unwrap();
+            store.create_memory(memory(), &[scope()]).unwrap();
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"), expected_current_version: None, new_version: version("v1", 1, None),
+                idempotency_key: "restart-op".into(), request_digest: "restart-digest".into(),
+            }, &[scope()]).unwrap()
+        };
+
+        let reopened = SqliteMemoryStorage::open(&path).unwrap();
+        assert_eq!(reopened.read_current(&id("m1"), &[scope()]).unwrap().unwrap().memory_version_id, id("v1"));
+        assert_eq!(reopened.resolve_idempotency("restart-op", "restart-digest", &[scope()]).unwrap(), Some(receipt));
+        let changes = reopened.list_changes(None, &[scope()], 10).unwrap();
+        assert_eq!(changes.records.len(), 1);
+        assert_eq!(changes.records[0].commit_sequence, CommitSequence(1));
+        drop(reopened);
+        remove_db_files(&path);
+    }
+
+    // Invoked only by the parent test in a separate process. process::exit bypasses
+    // Rust destructors, leaving SQLite to recover an uncommitted WAL transaction.
+    #[test]
+    fn abrupt_exit_worker() {
+        let Ok(path) = std::env::var("MEMORY_SQLITE_CRASH_WORKER_PATH") else { return; };
+        let mut store = SqliteMemoryStorage::open(path).unwrap();
+        let tx = store.connection.transaction_with_behavior(TransactionBehavior::Immediate).unwrap();
+
+        let mut updated_memory = memory();
+        updated_memory.current_version_id = Some(id("v-crash"));
+        let scope_json = SqliteMemoryStorage::encode(&vec![scope()]).unwrap();
+        let version_json = SqliteMemoryStorage::encode(&version("v-crash", 1, None)).unwrap();
+        tx.execute(
+            "INSERT INTO versions(version_id, memory_id, version_number, parent_version_id, scope_json, version_json, commit_sequence)
+             VALUES ('v-crash', 'm1', 1, NULL, ?1, ?2, 1)",
+            params![scope_json, version_json],
+        ).unwrap();
+        tx.execute(
+            "UPDATE memories SET current_version_id = 'v-crash', memory_json = ?1 WHERE memory_id = 'm1'",
+            params![SqliteMemoryStorage::encode(&updated_memory).unwrap()],
+        ).unwrap();
+        tx.execute("INSERT INTO commit_log(commit_sequence, memory_id, version_id) VALUES (1, 'm1', 'v-crash')", []).unwrap();
+        let receipt = CommitReceipt {
+            memory_id: id("m1"), resulting_version_id: id("v-crash"),
+            commit_sequence: CommitSequence(1), idempotency_key: "crash-op".into(),
+        };
+        tx.execute(
+            "INSERT INTO idempotency(idempotency_key, memory_id, request_digest, receipt_json)
+             VALUES ('crash-op', 'm1', 'crash-digest', ?1)",
+            params![SqliteMemoryStorage::encode(&receipt).unwrap()],
+        ).unwrap();
+
+        // Deliberately terminate with the transaction still uncommitted.
+        std::process::exit(86);
+    }
+
+    #[test]
+    fn abrupt_process_exit_rolls_back_entire_uncommitted_commit() {
+        let path = temp_db_path("crash");
+        {
+            let store = SqliteMemoryStorage::open(&path).unwrap();
+            let mut store = store;
+            store.create_memory(memory(), &[scope()]).unwrap();
+        }
+
+        let status = std::process::Command::new(std::env::current_exe().unwrap())
+            .args(["--exact", "tests::abrupt_exit_worker", "--nocapture"])
+            .env("MEMORY_SQLITE_CRASH_WORKER_PATH", &path)
+            .status().unwrap();
+        assert_eq!(status.code(), Some(86));
+
+        let reopened = SqliteMemoryStorage::open(&path).unwrap();
+        assert!(reopened.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+        assert_eq!(reopened.read_version(&id("m1"), &id("v-crash"), &[scope()]).unwrap(), None);
+        assert_eq!(reopened.resolve_idempotency("crash-op", "crash-digest", &[scope()]).unwrap(), None);
+        assert!(reopened.list_changes(None, &[scope()], 10).unwrap().records.is_empty());
+        drop(reopened);
+        remove_db_files(&path);
     }
 
     #[test]
