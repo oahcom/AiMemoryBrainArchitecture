@@ -53,3 +53,4 @@ bilingual_status: STALE_EXCEPTION — Chinese v1.1 is temporary authoritative so
 acceptance_blocker: none for R1
 acceptance_authority: project owner — adoption/merge decision on the revision PR
 verification_summary: Remediation read-back and clause cross-reference checks performed via GitHub; SHA-256 NOT_VERIFIED; runtime/test suites NOT RUN; exact-Head Owner verification pending.
+finding_evidence_comments: PR #256 comment 6979287444; Issue #218 comment 6979288315 (implementer remediation evidence; not approval).
