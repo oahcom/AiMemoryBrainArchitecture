@@ -553,6 +553,86 @@ mod tests {
     }
 
     #[test]
+    fn dm08_required_domain_fields_are_enforced() {
+        let valid_scope = scope("s1");
+        assert!(valid_scope.validate().is_ok());
+
+        let mut invalid_scope = valid_scope.clone();
+        invalid_scope.namespace_key.clear();
+        assert_eq!(
+            invalid_scope.validate(),
+            Err(DomainError::EmptyRequiredField("namespace_key"))
+        );
+
+        let mut event = Event {
+            event_id: id("event"),
+            event_kind: "observation".into(),
+            source_id: id("source"),
+            recorded_at: "now".into(),
+            scope_refs: vec![scope("s1")],
+            occurred_at: None,
+            idempotency_key: None,
+            payload_ref: "payload".into(),
+            classification: "observed".into(),
+            schema_version: "1".into(),
+            retention_class: "default".into(),
+        };
+        assert!(event.validate().is_ok());
+        event.classification.clear();
+        assert_eq!(
+            event.validate(),
+            Err(DomainError::EmptyRequiredField("classification"))
+        );
+
+        let mut c = claim("claim", vec![scope("s1")]);
+        assert!(c.validate().is_ok());
+        c.asserted_at.clear();
+        assert_eq!(
+            c.validate(),
+            Err(DomainError::EmptyRequiredField("asserted_at"))
+        );
+    }
+
+    #[test]
+    fn dm09_memory_and_version_required_fields_are_enforced() {
+        let mut memory = Memory {
+            memory_id: id("memory"),
+            memory_kind: "knowledge".into(),
+            scope_refs: vec![scope("s1")],
+            current_version_id: None,
+            lifecycle_state: MemoryLifecycle::Candidate,
+            retention_class: "default".into(),
+            sensitivity: "normal".into(),
+            created_at: "now".into(),
+            updated_at: "now".into(),
+        };
+        assert!(memory.validate().is_ok());
+        memory.memory_kind.clear();
+        assert_eq!(
+            memory.validate(),
+            Err(DomainError::EmptyRequiredField("memory_kind"))
+        );
+
+        let version = MemoryVersion {
+            memory_version_id: id("v1"),
+            memory_id: id("memory"),
+            version_number: 1,
+            parent_version_id: None,
+            created_at: "now".into(),
+            author_kind: "test".into(),
+            change_reason: "initial".into(),
+            claims: vec![],
+            entity_refs: vec![],
+            relation_refs: vec![],
+            source_refs: vec![],
+            provenance_refs: vec![],
+            content_digest: "digest".into(),
+            schema_version: "1".into(),
+        };
+        assert!(version.validate().is_ok());
+    }
+
+    #[test]
     fn dm10_idempotency_and_outcome_rules_are_deterministic() {
         let mut index = IdempotencyIndex::default();
         assert_eq!(index.accept("k", "digest"), Ok(true));
