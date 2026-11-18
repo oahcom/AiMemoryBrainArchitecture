@@ -3,7 +3,7 @@
 
 - **Document ID:** AI-EXEC-ROLLOUT-001
 - **Version:** 4.0（v2 去脚本化 → v3 GitHub 原生跟踪 → v4 对齐项目现行流程）
-- **Status:** PROPOSED — rollout plan under adoption Issue #218
+- **Status:** ADOPTED — owner-directed adoption recorded in Issue #218 comment #6971736655
 - **Owner:** Integration Owner
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml)
 - **落地文本**：[AI-EXEC-001](AI-EXEC-001.md)（流程执行细则）、[AI-EXEC-002](AI-EXEC-002.md)（提示词执行细则）
