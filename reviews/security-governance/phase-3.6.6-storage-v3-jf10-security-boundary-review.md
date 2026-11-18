@@ -207,3 +207,28 @@ This may be an intentional separation between the CGH Applied evidence families 
 H's new `bmcp.storage-prepared-participant-proof/1.0.0` candidate Blob `6327d9d387bdc0d6610aba08ff3e51ca9da17f5d` encodes Storage PreparedParticipantReceipt and StorageResolutionProof shapes and has 47 structural tests passing. It is a separate proof family; it does not add the missing C/D/G/CausalOrder message families to `bmcp.applied-ack/1.1.0`, nor does it establish signature validity or semantic tuple equality. The H schema candidate must be linked into the exact CGH/JF-10 message registry or treated as a separate referenced proof family with explicit binding fields.
 
 I's acceptance of the I-owned causal-order semantics remains valid only within I authority and the exact CGH-APPLIED-1.1 package pin. These cross-document and H wire-coverage gaps prevent an unconditional package/wire freeze. No I governance approval or G8 freeze is claimed.
+
+
+## 8. 2026-11-18 current Storage source reconciliation — prior findings superseded
+
+The historical I-V3-04, I-V3-05 and I-V3-09 findings were based on the earlier Storage v3 Blob `4a60420d457f359780c568dce42b8bef000026ca` and companion §14 Blob `86ff3b247d7565a0dcd1f2e4ed21b5ba70a6b0d7`. A fresh read of the current Storage Owner branch shows that those document gaps have been amended.
+
+Exact current source readback:
+- Storage Owner branch HEAD at discovery: `268af57b099209b33835b663596e87d21bb9c22b`.
+- Storage v3.2.3 body Blob: `5cee0d58575adc0fb3dd20a5c7ab68c2a2711792`.
+- Current companion §14 Blob: `dbc1dfd4c488c5d5e5a328388487d190984e8adc`.
+- Storage v3.3.2 candidate bundle manifest Blob: `5c614375e10698e4931d83deb57d20321445e068`.
+
+### I finding dispositions
+
+1. **I-V3-04 — RESOLVED at current document level.** Storage v3.2.3 §15.7 now requires the exact Storage owner-final-gate participant, CanonicalAuthorityDBRef and DatabaseIncarnationRef, PrepareAttemptRef/Generation, ParticipantLedgerRef/Version, PreparedParticipantReceiptRef and exact signed receipt digest, PublicationOperationId, RequestDigest and ParticipantTupleDigest. I's atomic receipt-consumption proof must still be implemented in I's own authoritative transaction; this is a design-text correction, not implementation evidence.
+2. **I-V3-05 — RESOLVED at current document level.** Storage v3.2.3 §7.3/terminal mapping uses I's `COMMIT_WON`, `REVOCATION_WON` and `INDETERMINATE_ABORTED` vocabulary and explicitly prohibits emitting or inferring `ABORT_WON`. Storage outcome (`COMMITTED`, `ROLLED_BACK`, `UNKNOWN`) remains a separate namespace.
+3. **I-V3-09 — RESOLVED at current document level.** Current companion §14.1–14.4 explicitly includes the DB-incarnation, prepare-attempt, participant-ledger and complete tuple-digest fields, the authoritative PREPARED readback sequence, signed receipt requirements and replay/recovery constraints. The old Blob `86ff3b...` is historical, not the current Storage source.
+4. **I-V3-10 — OPEN.** A CGH-APPLIED-1.1 Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` requires eight evidence families; H Applied ACK 1.1.0 Blob `a8a945cc3623c2907003b93625e3c79742150944` has five JF-10 variants. No exact one-to-one mapping or complete alternate-schema/transport binding is recorded.
+5. **I-V3-11 — OPEN.** H Storage Prepared Participant Proof schema Blob `6327d9d387bdc0d6610aba08ff3e51ca9da17f5d` is a separate proof family and does not by itself supply the missing Applied/C/D/COC message families or cryptographic verification.
+
+### Exact bundle binding still required
+
+The Storage v3.3.2 manifest pins the v3.2.3 body but does not explicitly list current companion §14 Blob `dbc1dfd4c488c5d5e5a328388487d190984e8adc` in its exact artifact table. Storage/A must add this exact companion pin (or a successor) and obtain affected-Owner exact-version readbacks. The v3.3.2 manifest itself remains **NOT JOINTLY ACCEPTED / NOT FROZEN** and requires A's exact review; this I technical re-read is not a global approval.
+
+I36-GOV-01..10 remain GOVERNANCE-BLOCKED; Environment Registry Authority, signed ProducerDomainInventoryEpoch/InventorySeal, AuthorizationCommitPermit deployment, key custody and external approvals remain unresolved. I36 execution remains NOT RUN. No G5/G7/G10 or production-readiness claim follows from the document corrections.
