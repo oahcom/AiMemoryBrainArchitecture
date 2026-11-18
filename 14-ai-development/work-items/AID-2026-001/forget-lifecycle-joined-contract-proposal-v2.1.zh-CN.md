@@ -3,7 +3,7 @@
 **PROPOSED — 尚不具规范效力。** Owner D/I 尚未批准本修订或任何同 SHA 内容。本文件是互链 EN/ZH 双文件中的中文对应件，是冻结 v2 的增量整改层。请与[英文对应文件](forget-lifecycle-joined-contract-proposal-v2.1.en.md)及[不可变 v2 基线](forget-lifecycle-joined-contract-proposal-v2.md)共同阅读。v1、v2 原文件保持不变且可追溯。
 
 - 工作项：AID-2026-001 / U-023 整改
-- 基线 Head：411ad16dc6b59acb2821cd0b4b069c078e6ad941
+- 基线 Head：99d3c95d3a82c5880be46385922efb39ab478874
 - 来源 Blob：v1 96882570d44f6a3c6d60a30b1edb0e405bde5efc；v2 28ce1f735be6781b8de32a310d50e24cb457f01e；U-010 e12bc3beaf7327f7646fa090cb1fe2cda023cacf；U-011 EN c9daf61a538a175718e1bb492797cb2b5a51547a；U-011 ZH d03d26bbdc96ee9df7f532144d331a3a06be3866；执行边界 008b625bdb29ee65fe136f21c0e9be6396228e4b；R3 矩阵 0dac44f65a47541bf5dca90563c90ade6a5d4331；GOV-DOC-001 b51b054b9f1022133666542680df74dfe19de2fb。
 - D 批准：未声明；I 批准：未声明；同 SHA 双边批准：未授予；Storage 批准：未声明。
 - 测试：仅规格，尚未运行。
@@ -74,7 +74,7 @@ API/UI MUST 分别公开 MemoryLifecycle、ForgetOperationPhase、DDomainComplet
 
 ### 2.7 Target 状态词表
 
-`target_state` 值为：`pending`、`in_progress`、`suppressed`、`cleaned`、`erased`、`expired`、`quarantined`、`acknowledged`、`policy_retained`、`failed`、`unknown`。这些值互不等价，不能推导全局完成。至少保留 operation_id、inventory_revision、target_id、target_class、owner_domain、required_action、capability/profile version、target_state、D fence generation、授权/策略引用、不可变 evidence reference/kind、可信 observed_at、认证 verifier/method/version、attempt_id、lease_fence、稳定 result_code、适用的 exception reference/expiry 和来源 provenance/完整性。未知、不支持、离线、不可访问及未登记但必需的 Target MUST 保留在记录中。
+`target_state` 值为：`pending`、`in_progress`、`suppressed`、`cleaned`、`erased`、`expired`、`quarantined`、`acknowledged`、`policy_retained`、`failed`、`unknown`。这些值互不等价，不能推导全局完成。至少保留 operation_id、inventory_revision、target_id、target_class（允许值：Canonical（规范对象）、derivative（派生对象）、index/cache（索引/缓存）、working-set（工作集）、context（上下文）、adapter-managed（适配器管理）、primary-storage（主存储）、replica（副本）、backup（备份）、external-recipient（外部接收方）、audit-copy（审计副本）或 policy-retained（策略保留））、owner_domain、required_action（允许值：suppress（抑制）、invalidate（失效）、delete（删除）、redact（遮蔽）、deidentify（去标识化）、erase（擦除）、expire（到期）、quarantine（隔离）、restore-fence（恢复围栏）、notify（通知）或 verify（验证））、capability/profile version（capability 词表：supported（支持）/ unsupported（不支持）/ conditional（有条件支持），并包含 capability-profile version）、target_state、D fence generation、授权/策略引用、不可变 evidence reference/kind、可信 observed_at、认证 verifier/method/version、attempt_id、lease_fence、稳定 result_code、适用的 exception reference/expiry 和来源 provenance/完整性。未知、不支持、离线、不可访问及未登记但必需的 Target MUST 保留在记录中。
 
 ## 3. G04-C — Failed 恢复与只追加事件历史
 
@@ -85,7 +85,7 @@ API/UI MUST 分别公开 MemoryLifecycle、ForgetOperationPhase、DDomainComplet
 | Failed | CleanupInProgress | 显式 RecoveryStarted Event；先对账既有副作用/Checkpoint；当前每阶段授权、策略、Capability、Fence 检查通过；创建新 attempt_id/当前 lease_fence。 |
 | Failed | AuthorizationPending | 显式 ReauthorizationRequired Event；关闭先前 Attempt；建立新 Attempt 身份；新 I 决策验证前不得执行受保护动作。 |
 | Failed | Blocked | 显式 BlockerRecorded Event，记录原因/Owner；保留历史；解除阻塞前不执行工作。 |
-| Failed | DomainCompletionEvaluated | 仅限评估阶段失败、所有必需证据/Checkpoint 仍当前且完整、显式 ReconciliationCompleted Event 已记录对账，之后由 D 重新评估判定。不得绕过清理/授权。 |
+| Failed | DomainCompletionEvaluated | 仅限评估阶段失败、所有必需证据/Checkpoint 仍当前且完整、显式 ReconciliationCompleted Event 已记录对账，之后由 D 重新评估判定。不得绕过清理/授权；关闭先前 attempt，分配新的 attempt_id，并使用当前 lease_fence。 |
 | Failed | Completed / Cancelled / SuppressionCommitted | 禁止直接转换。 |
 
 每次恢复均追加不可变 Event，含认证 Actor、原因、失败 Event 因果引用、先前 Checkpoint、策略/授权证据及可信时间戳。提交后失败保持 Forgotten/Fence。SuppressionCommitted 后仍禁止 Cancelled。

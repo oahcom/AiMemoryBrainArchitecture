@@ -3,7 +3,7 @@
 **PROPOSED — NOT NORMATIVE.** Owner D/I have not approved this revision or the same exact content SHA. This is the English counterpart of a reciprocal EN/ZH pair and an additive remediation layer over frozen v2. Read with [ZH counterpart](forget-lifecycle-joined-contract-proposal-v2.1.zh-CN.md) and [immutable v2 baseline](forget-lifecycle-joined-contract-proposal-v2.md). v1 and v2 remain unchanged and traceable.
 
 - Work item: AID-2026-001 / U-023 remediation
-- Baseline Head: 411ad16dc6b59acb2821cd0b4b069c078e6ad941
+- Baseline Head: 99d3c95d3a82c5880be46385922efb39ab478874
 - Source Blobs: v1 96882570d44f6a3c6d60a30b1edb0e405bde5efc; v2 28ce1f735be6781b8de32a310d50e24cb457f01e; U-010 e12bc3beaf7327f7646fa090cb1fe2cda023cacf; U-011 EN c9daf61a538a175718e1bb492797cb2b5a51547a; U-011 ZH d03d26bbdc96ee9df7f532144d331a3a06be3866; execution boundaries 008b625bdb29ee65fe136f21c0e9be6396228e4b; R3 matrix 0dac44f65a47541bf5dca90563c90ade6a5d4331; GOV-DOC-001 b51b054b9f1022133666542680df74dfe19de2fb.
 - D approval: NOT CLAIMED; I approval: NOT CLAIMED; same-SHA bilateral approval: NOT GRANTED; Storage approval: NOT CLAIMED.
 - Tests: specifications only; NOT RUN.
@@ -72,7 +72,7 @@ API/UI MUST expose MemoryLifecycle, ForgetOperationPhase, DDomainCompletion, eac
 
 ### 2.7 Target-state vocabulary
 
-`target_state` values: `pending`, `in_progress`, `suppressed`, `cleaned`, `erased`, `expired`, `quarantined`, `acknowledged`, `policy_retained`, `failed`, `unknown`. They are distinct and do not imply global completion. Preserve at least operation_id, inventory_revision, target_id, target_class, owner_domain, required_action, capability/profile version, target_state, D fence generation, authorization/policy references, immutable evidence reference/kind, trusted observed_at, authenticated verifier/method/version, attempt_id, lease_fence, stable result_code, applicable exception reference/expiry and source provenance/integrity. Unknown, unsupported, offline, inaccessible and unregistered-but-required targets MUST remain represented.
+`target_state` values: `pending`, `in_progress`, `suppressed`, `cleaned`, `erased`, `expired`, `quarantined`, `acknowledged`, `policy_retained`, `failed`, `unknown`. They are distinct and do not imply global completion. Preserve at least operation_id, inventory_revision, target_id, target_class (allowed values: Canonical, derivative, index/cache, working-set, context, adapter-managed, primary-storage, replica, backup, external-recipient, audit-copy, or policy-retained), owner_domain, required_action (allowed values: suppress, invalidate, delete, redact, deidentify, erase, expire, quarantine, restore-fence, notify, or verify), capability/profile version (capability values: supported / unsupported / conditional, plus capability-profile version), target_state, D fence generation, authorization/policy references, immutable evidence reference/kind, trusted observed_at, authenticated verifier/method/version, attempt_id, lease_fence, stable result_code, applicable exception reference/expiry and source provenance/integrity. Unknown, unsupported, offline, inaccessible and unregistered-but-required targets MUST remain represented.
 
 ## 3. G04-C — Failed recovery and append-only event history
 
@@ -83,7 +83,7 @@ API/UI MUST expose MemoryLifecycle, ForgetOperationPhase, DDomainCompletion, eac
 | Failed | CleanupInProgress | Explicit RecoveryStarted event; reconcile prior side effects/checkpoints; current per-stage authorization, policy, capability and fence checks; new attempt_id/current lease_fence. |
 | Failed | AuthorizationPending | Explicit ReauthorizationRequired event; close prior attempt; new attempt identity; no protected action before fresh I decision. |
 | Failed | Blocked | Explicit BlockerRecorded event with reason/owner; preserve history; no work until resolved. |
-| Failed | DomainCompletionEvaluated | Only evaluation-only failure, all required evidence/checkpoints still current and complete, explicit ReconciliationCompleted event, then D re-evaluates its predicate. No shortcut around cleanup/authorization. |
+| Failed | DomainCompletionEvaluated | Only evaluation-only failure, all required evidence/checkpoints still current and complete, explicit ReconciliationCompleted event, then D re-evaluates its predicate. No shortcut around cleanup/authorization; close the prior attempt, allocate a new attempt_id, and use the current lease_fence. |
 | Failed | Completed / Cancelled / SuppressionCommitted | Direct transition prohibited. |
 
 Every recovery is an immutable event with authenticated actor, reason, causal reference to failed event, prior checkpoint, policy/authorization evidence and trusted timestamp. Post-commit failure preserves Forgotten/fence. Cancelled remains forbidden after SuppressionCommitted.
