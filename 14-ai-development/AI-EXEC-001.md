@@ -3,7 +3,7 @@
 
 - **Document ID:** AI-EXEC-001
 - **Version:** 1.0
-- **Status:** PROPOSED — owner-directed adoption pending (Issue #218; adoption pattern per PR-GOVERNANCE-001)
+- **Status:** ADOPTED — owner-directed adoption recorded in Issue #218 comment #6971736655
 - **Owner:** Integration Owner
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](ai-development-standard.md)、[AI-PROC-001](iteration-lifecycle.md)、[PR-GOVERNANCE-001](PR-GOVERNANCE-001.md)（ADOPTED）、[AI-PROMPT-STD-001](prompt-authoring-standard.md)、GOV-DOC-001
