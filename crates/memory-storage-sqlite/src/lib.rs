@@ -193,6 +193,21 @@ impl MemoryStorage for SqliteMemoryStorage {
             .transaction_with_behavior(TransactionBehavior::Immediate)
             .map_err(|_| StorageError::TransactionUnavailable)?;
 
+        if let Some((stored_digest, receipt_json)) = tx
+            .query_row(
+                "SELECT request_digest, receipt_json FROM idempotency WHERE idempotency_key = ?1",
+                params![request.idempotency_key.as_str()],
+                |row| Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?)),
+            )
+            .optional()
+            .map_err(|_| StorageError::TransactionUnavailable)?
+        {
+            if stored_digest == request.request_digest {
+                return Self::decode(&receipt_json);
+            }
+            return Err(StorageError::IdempotencyConflict);
+        }
+
         let memory_row = tx
             .query_row(
                 "SELECT scope_json, current_version_id FROM memories WHERE memory_id = ?1",
@@ -227,7 +242,7 @@ impl MemoryStorage for SqliteMemoryStorage {
             return Err(StorageError::StaleVersion);
         }
 
-        let scope_json = Self::encode(&request.new_version.claims.iter().flat_map(|c| c.scope_refs.clone()).collect::<Vec<_>>())?;
+        let scope_json = memory_row.0.clone();
         let version_json = Self::encode(&request.new_version)?;
         let next_sequence: i64 = tx
             .query_row("SELECT COALESCE(MAX(commit_sequence), 0) + 1 FROM commit_log", [], |row| row.get(0))
