@@ -2,17 +2,17 @@
 # AI 开发流程执行细则
 
 - **Document ID:** AI-EXEC-001
-- **Version:** 1.0
-- **Status:** ADOPTED — owner-directed adoption recorded in Issue #218 comment #6971736655
+- **Version:** 1.1
+- **Status:** PROPOSED — v1.1 修订待 owner 采纳（日度治理窗口 RW-20261118；v1.0 ADOPTED 版继续有效至采纳时刻）
 - **Owner:** Integration Owner
-- **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml)
+- **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml) · 修订 Work Item [AID-2026-003](work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](ai-development-standard.md)、[AI-PROC-001](iteration-lifecycle.md)、[PR-GOVERNANCE-001](PR-GOVERNANCE-001.md)（ADOPTED）、[AI-PROMPT-STD-001](prompt-authoring-standard.md)、GOV-DOC-001
 - **Translation status:** 中文版为本批权威版本；English counterpart = **STALE**（GOV-DOC-001 §5 time-bounded exception，登记见 `docs/translation-status.md`，截止 2026-12-02，Owner: Integration Owner，跟踪 Issue #218）
 
 > **定位**：本文不是新制度，而是让项目现有流程（AI-STD-001 / AI-PROC-001 / PR-GOVERNANCE-001）**真正运转起来**的执行细则。零脚本强制——PR-GOVERNANCE-001 §7 明确"模板/标签/评论/AI 自审不得冒充硬门禁"，本细则与之一致，只加运行纪律。
 > **本文不修改**任何上位文档条款；凡冲突处以上位文档为准，只补充"怎么跑、留什么痕、多久闭环"。
 
-**English summary.** Execution rules that operationalize the existing governance stack — no parallel institution, no script enforcement. Adds: (1) a Stage 0–8 run table binding each lifecycle stage to its Work Item state and evidence; (2) tracking carriers per AI-STD-001 §13 (Issue / PR / AID+manifest / INDEX / Closeout); (3) PR discipline = PR-GOVERNANCE-001 five dispositions + exact-Head gate + flow quotas (open PR ≤ 10, weekly integration window — running discipline, violations logged as findings, never hard-blocked); (4) review & exception rules (NR-001 independent session for R2/R3, explicit exception recording, ≤ 2/iteration); (5) a **daily governance window** (≤ 20 min, AI-STD-001 §11 loop materialized) as the only feedback→rules re-entry point; (6) a five-point Definition of Done for closing the ecosystem loop. Conflicts between upstream standards (prompt-structure 15-vs-12 items, TESTED-vs-VERIFIED vocabulary, SHA-256 mandatory-vs-NOT_VERIFIED) are recorded and deferred to the adoption decision in Issue #218.
+**English summary.** Execution rules that operationalize the existing governance stack — no parallel institution, no script enforcement. Adds: (1) a Stage 0–8 run table binding each lifecycle stage to its Work Item state and evidence; (2) tracking carriers per AI-STD-001 §13 (Issue / PR / AID+manifest / INDEX / Closeout); (3) PR discipline = PR-GOVERNANCE-001 five dispositions + exact-Head gate + flow quotas (open PR ≤ 10, weekly integration window — running discipline, violations logged as findings, never hard-blocked); (4) review & exception rules (NR-001 independent session for R2/R3, explicit exception recording, ≤ 2/iteration); (5) a **daily governance window** (≤ 20 min, AI-STD-001 §11 loop materialized) as the only feedback→rules re-entry point; (6) a five-point Definition of Done for closing the ecosystem loop. Conflicts between upstream standards (prompt-structure 15-vs-12 items, TESTED-vs-VERIFIED vocabulary, SHA-256 mandatory-vs-NOT_VERIFIED) are recorded and deferred to the adoption decision in Issue #218. **v1.1 adds** (observation-report gaps ①③⑤⑥): a session kickoff loading obligation (ADOPTED ≠ wired-in), the finding minimum registration line (ID + severity + feedback destination), an independent-review acquisition bridge (source order + timeout → recorded exception), and an interop clause for later governance documents (declare SUPERSEDE/COMPLEMENT/PARALLEL).
 
 ---
 
@@ -21,6 +21,7 @@
 1. **规则先生效再约束**：上位文档当前多为 PROPOSED。按 PR-GOVERNANCE-001 已示范的 **owner-directed adoption** 模式（Issue #130 comment #6962523529 + PR #144 合并记录）批量转 **ADOPTED**；未生效条款不作为门禁依据（AI-STD-001 §12"初始治理状态"本来就允许）。
 2. **证据随产出**：NOT RUN ≠ PASS（AI-STD-001 DoD 原文）；证据指向准确 Head/commit（PR-GOVERNANCE-001 §4 exact-Head 门禁）。
 3. **缺陷必回流**：finding 进 Issue/Closeout；**规则类问题**（提示词/流程/契约缺陷）进**日度治理窗口**处置（AI-STD-001 §11 反馈环的日度化）。
+4. **ADOPTED ≠ 接入——开工必载入**（v1.1 新增）：规范转 ADOPTED 只解决"生效"，不解决"进入执行路径"。每个实质会话（开发/审查/治理）开工时**必须显式载入**本细则 §2–§5 与 [AI-EXEC-002](AI-EXEC-002.md) §2–§3，并在开工记录首行声明 `LOADED: AI-EXEC-001 v1.1 + AI-EXEC-002 v1.1`（或实际版本）。未声明载入的会话视为未接入规范，其产出登记时必须标注 `RULES-NOT-LOADED` 并记一条 finding——这是观察到"规范零引用"的直接对策。
 
 ## 2. 迭代生命周期 = AI-PROC-001 Stage 0–8（运行表）
 
@@ -28,7 +29,7 @@
 
 | Stage（AI-PROC-001） | Work Item 状态（AI-STD-001 §4.1） | Gate | 本细则要求 |
 |---|---|---|---|
-| 0 Intake & registration | PROPOSED | G0 | 复用或创建 Issue；建 `AID-YYYY-NNN` + `manifest.yaml`；记 Sponsor/Owner |
+| 0 Intake & registration | PROPOSED | G0 | **载入 AI-EXEC-001/002 并声明 `LOADED`（§1.4）**；复用或创建 Issue；建 `AID-YYYY-NNN` + `manifest.yaml`；记 Sponsor/Owner |
 | 1 Impact & dependency | ANALYZED | G1 | 影响图、依赖/契约状态（DECIDED/CANDIDATE/OPEN/TO_VALIDATE）、验收标准写入 Issue |
 | 2 Prompt drafting | PROMPT_READY | G1 | 提示词入库并冻结版本（AI-EXEC-002 §2–§3）；A 起草、Owner 批 |
 | 3 Readiness gate | READY | G1 | DoR 全满足（AI-STD-001 §7）；上游契约 OPEN 时按其三选项：先解契约 / 只做隔离切片 / BLOCKED |
@@ -58,6 +59,13 @@
 | **INDEX.md** | 会话级交付记录一行 | AI-STD-001 §13 指定由 Integration Owner 维护；缺证据标 `NOT RECORDED` 禁止补造 |
 | **Closeout** | Issue/PR 评论 | AI-STD-001 §13 八项 ∪ PR-GOVERNANCE-001 §2 九项 ∪ §7.1 双语门禁结果（AI-EXEC-002 §6 模板） |
 
+**finding 最低登记线（v1.1 新增，缺口⑤对策）**：任何 finding（无论来自审查、自查、回顾还是观察）必须三要素齐全才视为"已登记"：
+1. **ID**：`F-n`（PR 内序号）或 `DEF-YYYYMMDD-nn`（跨 PR）；
+2. **严重级**：`BLOCKER / P0 / P1 / P2 / P3`（AI-STD-001 §9）；
+3. **回流去向**：关闭条件 + 回流落点（`Issue #N` / `RW-YYYYMMDD` / `Closeout 项 k`）。
+
+缺任一要素 = 未登记（自由文本评论不算 finding）。三要素齐，反馈流才有取数点——这是七环 ⑥→⑦ 的最小接口。
+
 **不用脚本限制，也不用标签冒充门禁**（PR-GOVERNANCE-001 §7）：Label/模板只是检索与书写便利；真正的约束是上述记录义务 + 审查处置 + owner 权威。
 
 ## 5. PR 纪律（= PR-GOVERNANCE-001 现行条款的执行口径）
@@ -82,6 +90,12 @@
 - 必须显式记录在 Issue/Closeout（豁免理由 + 补审计划）并计数——"例外必须显式记录，不得默默豁免"（§5 原文）；
 - 每迭代例外 ≤ 2；连续 2 迭代超限 → 触发日度治理窗口做**规则修订**（说明流程不现实，修订而非硬扛）。此配额为**本细则新增运行纪律**（非上位文档条款），违规不拦截、记 finding。
 
+**独立审查获取桥（v1.1 新增，缺口⑥对策）**——"必须独立审查"与"审查从哪来"之间补上桥，防止 HOLD 永久悬置：
+
+1. **来源顺序**：① 新建 ChatGPT 会话（NR-001，冻结输入）→ ② R3 加外部安全/领域专家（人或外部会话）→ ③ 都不可用时走 owner-directed exception（上文规则）。
+2. **时限纪律**：请审请求发出 **24 小时**内无可用审查会话/专家 → 自动转入例外路径（显式记录理由 + 补审计划 + 计数），不得空等；被 HOLD 的 PR **3 个工作日**内必须三选一：补上审查 / 记例外降级合并 / 转 REMEDIATE 或 REJECT——悬置不是终点。
+3. **补审回销**：例外合并后，补审一旦完成，在原 PR/Issue 补 `F-n` 级 finding 或确认"无 finding"，回销例外记录；到期未补审的例外在日度治理窗口记 P2 finding。
+
 ## 7. 日度治理窗口（AI-STD-001 §11 的日度化——闭环关键）
 
 **每日一次、固定时段、≤ 20 分钟**，与迭代边界解耦。这是"反馈流回接规则流"的唯一入口：
@@ -104,6 +118,14 @@
 3. **追溯测试**：抽 3 个已合并 PR，全链路可查——`AID / manifest → Prompt ID+版本+commit SHA → Issue → PR Head → 测试证据 → 审查 finding → Closeout → INDEX 行`。
 4. **证据诚实**：NOT RUN 零混同 PASS；新增记录中 Prompt 出处（ID+版本+commit SHA）零 NOT_RECORDED；同作者审查全部披露。
 5. **流动健康**：open PR ≤ 10 且无超 7 天滞留；满足 MERGE 条件的 PR 不搁置；每迭代例外 ≤ 2。
+
+## 10. 后发治理文档挂接（v1.1 新增，缺口③对策）
+
+新增任何治理/证据/流程类文档（如 PR enforcement、merge evidence 标准等）时：
+
+1. **PR 正文必须声明关系**：`SUPERSEDE（取代 AI-EXEC-00x 某节）/ COMPLEMENT（补充，AI-EXEC 仍管运行纪律）/ PARALLEL（平行，双轨风险，需说明为何不能挂接）` 三选一 + 理由；不声明 = finding（P2，回流日度窗口）。
+2. **裁定入口**：挂接关系由**日度治理窗口**裁定并记入修订记录；SUPERSEDE 必须在同 PR 内改写 AI-EXEC-001/002 对应条款，不得留双轨。
+3. **目的**：治理文档可以生长，但必须显式挂接到现行执行细则——防止"平行起草、双轨漂移"（观察缺口③的直接对策）。
 
 ---
 

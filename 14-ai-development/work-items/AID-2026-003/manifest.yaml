@@ -1,0 +1,50 @@
+work_item_id: AID-2026-003
+title: AI-EXEC-001/002 v1.1 revision — close the six rule-completeness gaps (kickoff loading, T1/T2/T3 provenance, governance-doc interop, code-session tier, finding minimum line, review acquisition bridge)
+class: DOC
+risk: R1
+risk_rationale: Execution-rule revision of repository process documentation; no runtime code, no security or contract-boundary changes. Highest applicable risk governs the Work Item.
+security_scope: NONE — documentation and process only
+status: IN_PROGRESS
+sponsor: project user
+accountable_owner: Integration Owner
+implementing_ai_session: AID-2026-003-EXEC-V11
+independent_reviewer: NOT REQUIRED for R1 per AI-STD-001 §3.2 (author/reviewer distinction suffices); same-author AI session disclosed; human owner is acceptance authority
+integration_reviewer: PENDING — owner five-disposition decision on the revision PR
+created_at: 2026-11-18
+updated_at: 2026-11-18
+merge_commit_sha: PENDING — recorded at closeout
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 6b5db291
+implementation_branch: ai/AID-2026-003/IO-exec-v11
+tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/218
+related_pr: PENDING — recorded in INDEX.md at closeout
+dependency_refs:
+  - 14-ai-development/AI-EXEC-001.md
+  - 14-ai-development/AI-EXEC-002.md
+  - 14-ai-development/ai-development-standard.md
+  - 14-ai-development/iteration-lifecycle.md
+  - 14-ai-development/PR-GOVERNANCE-001.md
+  - 14-ai-development/prompt-authoring-standard.md
+deliverables:
+  - 14-ai-development/AI-EXEC-001.md (v1.0 -> v1.1)
+  - 14-ai-development/AI-EXEC-002.md (v1.0 -> v1.1)
+gap_coverage:
+  gap_1_kickoff_loading: AI-EXEC-001 §1.4 + §2 Stage 0
+  gap_2_provenance_tiers: AI-EXEC-002 §2 T1/T2/T3 + grandfather clause
+  gap_3_governance_doc_interop: AI-EXEC-001 §10
+  gap_4_code_session_tier: AI-EXEC-002 §3 seven-item minimum
+  gap_5_finding_minimum_line: AI-EXEC-001 §4 + AI-EXEC-002 §5
+  gap_6_review_acquisition_bridge: AI-EXEC-001 §6
+prompt_id: AID-2026-003-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-003/prompt-v1.md
+prompt_provenance_tier: T1 (repo-file prompt, AI-EXEC-002 §2 v1.1)
+prompt_sha256: f797be6866b0127ea51efbcbf029f683c161429eb78739e0cb5b0b37e96a47d5
+prompt_bytes: 3154
+prompt_file_commit_sha: PENDING — introducing commit of prompt-v1.md, recorded in prompt_file_commit_sha and the INDEX rows at closeout
+prompt_hash_note: SHA-256 over exact committed file bytes (UTF-8, no normalization) per AI-PROMPT-STD-001 §5; prompt-file commit SHA backfilled at closeout (wording matches actual record per OWN-REV-01 remediation)
+bilingual_status: CHINESE_AUTHORITATIVE — v1.1 revision is in-place edit of existing Chinese-authoritative documents; English counterparts remain STALE under the GOV-DOC-001 §5 exception registered for AI-EXEC-001/002 (due 2026-12-02, Issue #218); no new translation-status rows required
+acceptance_blocker: none for R1
+acceptance_authority: project owner — adoption/merge decision on the revision PR
+verification_summary: PENDING — recorded at closeout (diff read-back, cross-reference consistency grep, git diff --check)

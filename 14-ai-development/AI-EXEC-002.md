@@ -2,16 +2,16 @@
 # AI 开发提示词执行细则
 
 - **Document ID:** AI-EXEC-002
-- **Version:** 1.0
-- **Status:** ADOPTED — owner-directed adoption recorded in Issue #218 comment #6971736655
+- **Version:** 1.1
+- **Status:** PROPOSED — v1.1 修订待 owner 采纳（日度治理窗口 RW-20261118；v1.0 ADOPTED 版继续有效至采纳时刻）
 - **Owner:** Integration Owner
-- **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml)
+- **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml) · 修订 Work Item [AID-2026-003](work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](ai-development-standard.md) §5/§13、[AI-PROMPT-STD-001](prompt-authoring-standard.md)、[CHATGPT-GLOBAL-001](prompts/global/chatgpt-session-contract-v1.md)、[AI-PROC-001](iteration-lifecycle.md) Stage 2/6、GLB-DOC-001（政策 GOV-DOC-001）
 - **Translation status:** 中文版为本批权威版本；English counterpart = **STALE**（GOV-DOC-001 §5 time-bounded exception，登记见 `docs/translation-status.md`，截止 2026-12-02，Owner: Integration Owner，跟踪 Issue #218）
 
 > **定位**：本文不是新规范，而是把项目现有提示词体系**真正跑起来**的执行细则。零脚本强制，约束靠提示词文本自我声明 + Issue/PR/Closeout 留痕。
 
-**English summary.** Execution rules for the existing prompt system. (1) Pre-work record: Work Item ID + manifest, **Prompt ID + version + prompt-file commit SHA triple** (kills empty `NOT RECORDED`; SHA-256 recorded when computable, else `NOT_VERIFIED` per AI-PROMPT-STD-001 §5); (2) mandatory structure = AI-PROMPT-STD-001 §4 twelve items, with a six-item minimum set for R0/R1 and the AI-STD-001 §5 item-15 bilingual manifest added for R2/R3 — the 15-vs-12 inter-standard conflict is disclosed and deferred to adoption Issue #218; (3) in-run traceability with the CHATGPT-GLOBAL-001 eight-state vocabulary (never collapsed); (4) NR-001 review-session rules with project finding levels BLOCKER/P0–P3; (5) Closeout template = AI-STD-001 §13 eight items ∪ PR-GOVERNANCE-001 §2 nine items ∪ §7.1 bilingual result; (6) prohibitions per AI-PROMPT-STD-001 §7 + CHATGPT-GLOBAL-001. Copy-paste templates for session open/closeout and review output are provided in appendices.
+**English summary.** Execution rules for the existing prompt system. (1) Pre-work record: Work Item ID + manifest, **Prompt ID + version + prompt-file commit SHA triple** (kills empty `NOT RECORDED`; SHA-256 recorded when computable, else `NOT_VERIFIED` per AI-PROMPT-STD-001 §5); (2) mandatory structure = AI-PROMPT-STD-001 §4 twelve items, with a six-item minimum set for R0/R1 and the AI-STD-001 §5 item-15 bilingual manifest added for R2/R3 — the 15-vs-12 inter-standard conflict is disclosed and deferred to adoption Issue #218; (3) in-run traceability with the CHATGPT-GLOBAL-001 eight-state vocabulary (never collapsed); (4) NR-001 review-session rules with project finding levels BLOCKER/P0–P3; (5) Closeout template = AI-STD-001 §13 eight items ∪ PR-GOVERNANCE-001 §2 nine items ∪ §7.1 bilingual result; (6) prohibitions per AI-PROMPT-STD-001 §7 + CHATGPT-GLOBAL-001. Copy-paste templates for session open/closeout and review output are provided in appendices. **v1.1 adds** (observation-report gaps ②④⑤): a three-tier prompt-provenance rule (T1 repo-file triple / T2 chat-instruction snapshot + permalink / T3 mixed) with a grandfather clause for pre-v1.1 sessions; a code-session minimum tier (seven items for IMPL/TEST/SEC/MIG/PERF); and the finding minimum line (ID + severity + feedback destination).
 
 ---
 
@@ -29,14 +29,21 @@
 工作开始前，在 Work Item 所属 Issue/PR 写明（= AI-STD-001 §13 起始记录 + AI-PROC-001 §8 接收清单）：
 
 1. **Work Item ID**：`AID-YYYY-NNN`（[INDEX.md](work-items/INDEX.md) 注册规则），且 `work-items/AID-YYYY-NNN/manifest.yaml` 已创建；
-2. **提示词标识**：Prompt ID + 版本（如 `AID-2026-002-PROMPT v1`）+ **提示词文件的 commit SHA**；
+2. **提示词标识**：Prompt ID + 版本（如 `AID-2026-002-PROMPT v1`）+ 出处锚点（按下述 **T1/T2/T3 三档**执行）；
 3. **基线**：目标分支、base SHA、依赖 SHA（来源 Pin——分支名不是稳定基线，AI-PROMPT-STD-001 Step 2）；
 4. **范围/非目标、任务类（ARCH/IMPL/TEST/SEC/MIG/PERF/DOC/OPS）、风险级（R0–R3）、验收标准**。
 
-**哈希执行口径**（AI-PROMPT-STD-001 §5 本身允许 `NOT_VERIFIED`）：
-- **最低可追溯要求 = Prompt ID + 版本 + 提示词文件 commit SHA 三元组**——三者齐全即出处可查；
-- SHA-256 有则记录（对仓库内实际提交字节计算，UTF-8 不做归一化），并按其 §5 记路径/字节数/摘要/Blob SHA/commit SHA；无法计算/核验时按其 §5 记 **NOT_VERIFIED**。**禁止补造，禁止继续留空的 NOT RECORDED**；
-- 已执行提示词版本不可变；会话内澄清/增补若实质改变指令，必须先出新版本再继续（AI-PROMPT-STD-001 §5）。
+**提示词出处三档（v1.1 新增，缺口②对策）**——原三元组假设提示词必是仓库文件，盖不住 chat-instruction 会话；按实际形态分档：
+
+| 档 | 适用 | 出处锚点（最低可追溯） |
+|---|---|---|
+| **T1 仓库文件** | 提示词存为仓库文件（`work-items/AID-*/prompt-vN.md` 等） | **Prompt ID + 版本 + 提示词文件 commit SHA 三元组**；SHA-256 有则记录（对实际提交字节计算，UTF-8 不做归一化，并按 AI-PROMPT-STD-001 §5 记路径/字节数/摘要/Blob SHA/commit SHA），无法计算/核验时记 **NOT_VERIFIED** |
+| **T2 会话内指令** | chat-instruction：指令在对话中给出，无仓库文件 | **Prompt ID + 版本 + 指令全文快照**——开工时把实际执行的指令全文存入 Issue/PR 评论（或归档为 `prompt-vN.md`）；出处锚点 = **评论永久链接 + 创建时间戳**（归档则升级为 T1） |
+| **T3 混合** | 仓库文件 + 会话内增补指令 | 以**实际执行的指令集**为准：文件三元组 + 增补快照（T2 方式）两段都记 |
+
+- **禁止补造，禁止留空的 NOT RECORDED**（各档同）；
+- 已执行提示词版本不可变；会话内澄清/增补若实质改变指令，必须先出新版本（T1 出新文件版本 / T2 出新快照）再继续（AI-PROMPT-STD-001 §5）；
+- **Grandfather 条款**：v1.1 生效前已开工的会话按 v1.0 口径追溯（三元组或如实 NOT_VERIFIED/NOT RECORDED），**不倒签、不补造**；其登记缺失按缺口①记 `RULES-NOT-LOADED` finding，不追罚。
 
 > **上位冲突披露（待 Issue #218 adoption 决议）**：AI-STD-001 §5 要求 "Prompt ID、版本和 SHA-256" 必录且未设逃生门，与 AI-PROMPT-STD-001 §5 的 `NOT_VERIFIED` 口径存在字面冲突。本细则暂按 AI-PROMPT-STD-001 §5 执行（三元组 + NOT_VERIFIED），统一口径随批量 adoption 一并裁定。
 
@@ -58,8 +65,9 @@
 12. Evidence and final report schema（证据与最终报告格式）
 
 **分级裁剪（运行口径）**：
-- **R0/R1** 最小集：1、2、5、8、11、12 六项必录，其余从简；
-- **R2/R3**：12 项全量 + AI-STD-001 §5 第 15 项**双语文档清单**（中英路径、源版本、对应件状态、标识/状态对等、交叉链接、语义对等审查人）；
+- **R0/R1 文档会话** 最小集：1、2、5、8、11、12 六项必录，其余从简；
+- **代码会话最小集（v1.1 新增，缺口④对策）**：任务类 `IMPL/TEST/SEC/MIG/PERF`（区别于 DOC/ARCH 文档会话）最小集 = **1、2、3、5、8、9、12 七项**（Identity / Objective / **Baseline** / Scope / Acceptance / **Verification** / Evidence）——代码会话必须有可复现基线与验证口径，这两项在文档最小集之外必录；R2/R3 代码会话仍走全量 12 项；
+- **R2/R3**（任意任务类）：12 项全量 + AI-STD-001 §5 第 15 项**双语文档清单**（中英路径、源版本、对应件状态、标识/状态对等、交叉链接、语义对等审查人）；
 - 定时提示词另按 AI-PROMPT-STD-001 §4 附加项（Owner key、automation ID、频率、时区、幂等、单次上限、无任务行为、权限预检）。
 
 > **上位冲突披露（待 Issue #218 adoption 决议）**：AI-STD-001 §5 另有一份 **15 项**强制清单（含第 15 项双语文档清单），与 AI-PROMPT-STD-001 §4 的 12 项切分口径不同。本细则以 12 项为主清单，将 AI-STD-001 §5 差异项（任务类/风险级、独立审查者角色、双语清单）并入 §2 开工必录与上述分级裁剪执行；两清单的统一列入批量 adoption 一并裁定。
@@ -77,7 +85,7 @@
 
 1. **独立审查 = 新建一个 ChatGPT 对话**，从 GitHub 读取冻结输入（批准的提示词版本、任务记录与验收标准、base/implementation SHA、diff、测试证据、契约文档）；必须读 `prompts/global-architecture-reviewer.md`。
 2. 审查者不得只复述作者报告，须主动找反例、缺失负例、竞态窗口、范围泄漏、陈旧状态行为、兼容性破坏（AI-PROC-001 Stage 6）。
-3. **finding 用项目分级**：`BLOCKER / P0 / P1 / P2 / P3`；**处置**：`PASS / CONDITIONAL PASS / FAIL / NOT REVIEWABLE`。每条 finding 有 ID、证据、owner、严重级、状态、关闭条件；CONDITIONAL PASS 必须列限制项，不得当全量验收（AI-STD-001 §9）。
+3. **finding 用项目分级**：`BLOCKER / P0 / P1 / P2 / P3`；**处置**：`PASS / CONDITIONAL PASS / FAIL / NOT REVIEWABLE`。每条 finding 有 ID、证据、owner、严重级、状态、关闭条件；CONDITIONAL PASS 必须列限制项，不得当全量验收（AI-STD-001 §9）。**最低登记线（v1.1，与 [AI-EXEC-001](AI-EXEC-001.md) §4 对齐）**：ID + 严重级 + **回流去向**（关闭条件 + 回流落点：Issue #N / RW-YYYYMMDD / Closeout 项 k）三要素缺一即未登记；审查输出的每条 `F-n` 必须写明回流去向，反馈流才能取数。
 4. **红线（PR-GOVERNANCE-001 §5 原文）**：`COMMENT` 是技术评论不是 `APPROVE`；同一 GitHub 身份的审查不独立（哪怕换角色）；AI 角色扮演不是 Owner 批准；例外必须显式记录，不得默默豁免。
 5. **披露义务（NR-001）**：审查记录必须写明"独立 ChatGPT 对话只提供上下文/对话隔离，不是模型/统计独立，不得称多模型共识"；R3 仍须独立安全/领域专家审查 + 可复现测试证据。
 
@@ -116,10 +124,14 @@
 
 ```markdown
 ### 开工记录（写入 Issue/PR）
+- LOADED: AI-EXEC-001 v__ + AI-EXEC-002 v__ （§1.4 开工载入声明，缺此项记 RULES-NOT-LOADED）
 - Work Item: AID-YYYY-____  (manifest.yaml: 已建/未建)
 - Owning Issue: #____   Related PR: #____
 - Role: Owner __ (Accountable Owner: __)
-- Prompt: <Prompt ID> v<版本> @ <提示词文件 commit SHA>  (SHA-256: ____ 或 NOT_VERIFIED)
+- Prompt: <Prompt ID> v<版本> [T1|T2|T3]
+  - T1: @ <提示词文件 commit SHA>  (SHA-256: ____ 或 NOT_VERIFIED)
+  - T2: 指令快照 → <Issue/PR 评论永久链接> @ <时间戳>
+  - T3: 两者都记
 - Base: <branch> @ <base SHA>   Deps: <SHA 列表>
 - Class/Risk: ARCH|IMPL|TEST|SEC|MIG|PERF|DOC|OPS / R0|R1|R2|R3
 - Scope / Non-goals: ____
@@ -127,7 +139,7 @@
 - 双语: □ 同变更集同步  □ STALE 例外(原因/临时权威版/Owner/截止日/跟踪 Issue，GOV-DOC-001 §5)
 
 ### Closeout（会话结束发布到 Issue/PR，随后补 INDEX.md 一行）
-1. Session/Prompt: <Prompt ID> v__ @ __ (hash: ____/NOT_VERIFIED)  Role: __
+1. Session/Prompt: <Prompt ID> v__ [T1|T2|T3] @ __ (hash: ____/NOT_VERIFIED；T2: 快照链接__)  Role: __
 2. Work Item AID-____ / Issue #____ / PR #____
 3. Branch __ / base __ / Head __ / changed: ____
 4. Work & decisions: ____(PROPOSED/ACCEPTED/REJECTED/UNRESOLVED/OPEN/BLOCKED + 权威)
@@ -145,8 +157,8 @@
 ### [REVIEW] PR #____ / AID-____  （独立 ChatGPT 会话，输入已冻结）
 Verdict: PASS | CONDITIONAL PASS | FAIL | NOT REVIEWABLE
 Findings:
-- F-1 [P0] <现象 + 证据(文件:行 / commit)> — owner __ — 关闭条件 __
-- F-2 [P2] ...
+- F-1 [P0] <现象 + 证据(文件:行 / commit)> — owner __ — 关闭条件 __ — 回流 __ (Issue #N / RW-YYYYMMDD / Closeout k)
+- F-2 [P2] ... — 回流 __
 Checks: 范围一致 / 测试状态诚实(NOT RUN≠PASS) / 出处可查(Prompt+版本+commit SHA) / 双语对等(GOV-DOC-001)
 Disclosure: 本审查为独立 ChatGPT 对话，提供上下文隔离，非模型/统计独立（NR-001）。
 ```
