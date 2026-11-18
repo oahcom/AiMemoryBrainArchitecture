@@ -4,7 +4,7 @@ class: DOC
 risk: R1
 risk_rationale: Repository-wide documentation/process execution rules and formatting fixes; no runtime code, no security or contract-boundary changes. Highest applicable risk governs the Work Item.
 security_scope: NONE — documentation and process only
-status: IMPLEMENTED
+status: CLOSED
 sponsor: project user
 accountable_owner: Integration Owner
 implementing_ai_session: AID-2026-002-EXEC-001
