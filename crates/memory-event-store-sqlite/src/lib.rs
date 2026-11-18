@@ -278,6 +278,41 @@ mod tests {
     }
 
     #[test]
+    fn startup_backfills_compile_intent_for_preexisting_accepted_events() {
+        let path = path();
+        {
+            let legacy = Connection::open(&path).unwrap();
+            legacy.execute_batch(
+                "CREATE TABLE accepted_events (
+                    event_row INTEGER PRIMARY KEY AUTOINCREMENT,
+                    producer_actor_ref TEXT NOT NULL,
+                    idempotency_key TEXT NOT NULL,
+                    payload_digest TEXT NOT NULL,
+                    scope_json TEXT NOT NULL,
+                    envelope_json TEXT NOT NULL,
+                    accepted_at TEXT NOT NULL,
+                    processing_state_json TEXT NOT NULL,
+                    UNIQUE(producer_actor_ref, idempotency_key)
+                );
+                INSERT INTO accepted_events
+                    (event_row, producer_actor_ref, idempotency_key, payload_digest,
+                     scope_json, envelope_json, accepted_at, processing_state_json)
+                VALUES (1, 'actor-legacy', 'legacy-op', 'legacy-digest',
+                        '[]', '{}', '12345', '"Pending"');"
+            ).unwrap();
+        }
+
+        let store = SqliteEventStore::open(&path).unwrap();
+        let outbox_count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM compile_outbox WHERE event_row = 1",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(outbox_count, 1);
+        cleanup(&path);
+    }
+
+    #[test]
     fn same_producer_key_and_digest_replay_original_receipt() {
         let mut store = SqliteEventStore::in_memory().unwrap();
         let first = store.accept(envelope("op-1", "digest-1"), &[scope()]).unwrap();
