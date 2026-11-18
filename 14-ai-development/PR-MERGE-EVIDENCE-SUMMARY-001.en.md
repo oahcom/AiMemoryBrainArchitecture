@@ -54,7 +54,7 @@
 | PR | Goal / scope | Exact Head / gate snapshot | Merge commit SHA | Current state / decision |
 |---|---|---|---|---|
 | [#248](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/248) | Bilingual PR-GOVERNANCE-001 enforcement addendum: exact-head CI, independent approval, prompt/evidence traceability, Issue #130/#134 runbooks | Head `b887e9518977dca985776bf8715de9cd7597beb2`; Bilingual `44264271033` SUCCESS; Rust not applicable | N/A (OPEN) | Governance proposal; CANDIDATE. GitHub platform branch protection and negative enforcement test for #134 remain OPEN |
-| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback, busy-timeout/retry, injected commit failure, panic/unwind rollback tests | Head `f8aae66de2f47ced90fa486b16e6de2e6daf8659`; Rust Workspace `44264422967` SUCCESS; Bilingual `44264422934` SUCCESS | N/A (OPEN) | CANDIDATE; implementation and CI gates pass, independent semantic review and approval remain outstanding |
+| [#249](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/249) | SQLite SAVEPOINT rollback, busy-timeout/retry, injected commit failure, panic/unwind rollback tests | Head `f8aae66de2f47ced90fa486b16e6de2e6daf8659`; Rust Workspace `44264422967` SUCCESS (`cargo test --workspace --all-targets`; SQLite Adapter 15/15); Bilingual `44264422934` SUCCESS. Historical failure `44264277063` belongs to intermediate commit `be1eb173`, not this exact Head | N/A (OPEN) | CANDIDATE; implementation and CI gates pass, independent semantic review and approval remain outstanding |
 
 ## 3. State classification and evidence boundaries
 
