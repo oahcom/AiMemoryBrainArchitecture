@@ -77,6 +77,7 @@ class Protocol:
     publication_commit_winners: dict = field(default_factory=dict)
     fence_pending: set = field(default_factory=set)
     authorization_contexts: dict = field(default_factory=dict)
+    current_permission_epochs: dict = field(default_factory=dict)
 
     @staticmethod
     def digest(items):
@@ -185,6 +186,24 @@ class Protocol:
         self.authorization_contexts[auth_id] = value
         return value
 
+    def set_permission_epoch(self, policy_domain_id, permission_epoch):
+        prior = self.current_permission_epochs.get(policy_domain_id)
+        if prior is not None and prior == permission_epoch:
+            return
+        self.current_permission_epochs[policy_domain_id] = permission_epoch
+
+    def advance_permission_epoch(self, policy_domain_id, permission_epoch):
+        self.current_permission_epochs[policy_domain_id] = permission_epoch
+
+    def _permission_epoch_is_current(self, auth_id):
+        context = self._authorization_context(auth_id)
+        domain, epoch = context[9], context[10]
+        current = self.current_permission_epochs.get(domain)
+        if current is None:
+            self.current_permission_epochs[domain] = epoch
+            return True
+        return current == epoch
+
     def _authorization_context(self, auth_id):
         return self.authorization_contexts.get(auth_id) or self.set_authorization_context(auth_id)
 
@@ -242,6 +261,8 @@ class Protocol:
             raise Rejected("publication participant already has a COMMIT_WON operation")
         if auth_id not in self.authorizations or auth_id in self.revoked:
             raise Rejected("authorization absent or revocation won before I consumption")
+        if not self._permission_epoch_is_current(auth_id):
+            raise Rejected("PermissionEpoch is stale or currentness is unavailable")
         if self.authorizations[auth_id][:5] != (
             publication_id, storage_id, request_digest, owner_boundary, final_visibility_gate_id
         ) or self.authorizations[auth_id][5] != self._authorization_context(auth_id):
@@ -1059,6 +1080,36 @@ class PublicationProtocolTests(unittest.TestCase):
             with self.assertRaises(Rejected):
                 p.commit(**args)
             p.authorization_contexts["auth-1"] = tuple(context)
+
+    def test_permission_epoch_stale_before_commit_won_is_rejected(self):
+        p = self.prepared()
+        p.advance_permission_epoch("policy-domain-1", "epoch-2")
+        with self.assertRaisesRegex(Rejected, "PermissionEpoch"):
+            self.consume_i(p)
+
+    def test_permission_epoch_current_at_commit_won_is_consumed(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        self.assertIn("auth-1", p.consumed)
+        self.assertEqual(p.authorization_contexts["auth-1"][10], "epoch-1")
+        self.assertEqual(p.current_permission_epochs["policy-domain-1"], "epoch-1")
+
+    def test_permission_epoch_revocation_after_commit_won_does_not_cancel_winner(self):
+        p = self.prepared()
+        args = self.consume_i(p)
+        p.advance_permission_epoch("policy-domain-1", "epoch-2")
+        receipt = p.commit(**args)
+        self.assertEqual(p.outcomes["op-1"][0], "COMMITTED")
+        self.assertEqual(p.receipts["op-1"], receipt)
+        self.assertIn("op-1", p.i_pending)
+
+    def test_permission_epoch_stale_retry_cannot_create_a_new_winner(self):
+        p = self.prepared()
+        p.advance_permission_epoch("policy-domain-1", "epoch-2")
+        with self.assertRaises(Rejected):
+            self.consume_i(p)
+        self.assertEqual(p.publication_commit_winners, {})
+        self.assertEqual(p.consumed, set())
 
     def test_full_i_authorization_context_substitution_is_rejected_at_commit(self):
         p = self.prepared()
