@@ -298,7 +298,7 @@ mod tests {
                     (event_row, producer_actor_ref, idempotency_key, payload_digest,
                      scope_json, envelope_json, accepted_at, processing_state_json)
                 VALUES (1, 'actor-legacy', 'legacy-op', 'legacy-digest',
-                        '[]', '{}', '12345', '"Pending"');"
+                        '[]', '{}', '12345', '\"Pending\"');"
             ).unwrap();
         }
 
