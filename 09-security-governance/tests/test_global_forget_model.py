@@ -214,12 +214,22 @@ class GlobalForgetModelTests(unittest.TestCase):
         with self.assertRaises(Blocked):
             self.g.set_component("ExternalCopyHandling", "Confirmed", proof="proof")
         with self.assertRaises(Blocked):
-            self.g.set_component("ExternalCopyHandling", "PolicyException", proof="proof")
+            self.g.set_component("ExternalCopyHandling", "PolicyException",
+                                 proof="approval-proof", reviewer="independent-reviewer")
 
     def test_completion_rechecks_component_proof_at_evaluation(self):
         self.g.record_evidence(self.evidence())
         self.complete_setup()
         self.g.component_proofs["ExternalCopyHandling"]["proof"] = ""
+        self.assertEqual(self.g.evaluate(now=1), "Pending")
+
+    def test_component_policy_exception_cannot_complete_without_governance_workflow(self):
+        self.g.record_evidence(self.evidence())
+        self.complete_setup()
+        self.g.component_states["ExternalCopyHandling"] = "PolicyException"
+        self.g.component_proofs["ExternalCopyHandling"] = {
+            "proof": "approval-proof", "reviewer": "independent-reviewer"
+        }
         self.assertEqual(self.g.evaluate(now=1), "Pending")
 
     def test_physical_erasure_target_requires_explicit_action(self):
