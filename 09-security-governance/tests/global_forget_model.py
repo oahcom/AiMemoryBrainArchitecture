@@ -89,7 +89,7 @@ class GlobalForgetModel:
     def seal_inventory(self, *, seal_id: str, digest: str, signer: str, gaps: Iterable[str] = ()) -> InventorySeal:
         if signer != "I-inventory-authority":
             raise Blocked("only I inventory authority may seal the target universe")
-        if not seal_id or not digest:
+        if not seal_id.strip() or not digest.strip():
             raise Blocked("InventorySeal requires non-empty identity and canonical digest")
         if list(gaps):
             raise Blocked("unresolved registry gaps prohibit InventorySeal")
@@ -117,7 +117,7 @@ class GlobalForgetModel:
                 or not evidence.integrity_valid):
             target.state = "Unknown"
             return "UNKNOWN"
-        if not evidence.evidence_ref:
+        if not evidence.evidence_ref.strip():
             target.state = "Unknown"
             return "UNKNOWN"
         if evidence.status == "CONFIRMED":
