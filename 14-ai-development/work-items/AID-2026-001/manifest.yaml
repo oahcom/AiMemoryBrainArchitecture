@@ -471,3 +471,68 @@ owner_d_u010:
     r3_runtime_tests: NOT_RUN_NOT_EVIDENCED
   overall_status: BLOCKED_PENDING_R3_EVIDENCE
   note: "The relay identifier and timestamp are recorded. The platform conversation ID was not available to this session and was not fabricated; D-U010-001 tracks this provenance gap. No source prompt SHA or dispatch conversation ID has been invented."
+
+
+owner_i_u011:
+  dispatch:
+    relay: relay-011
+    instruction_source: ChatGPT user instruction in this conversation
+    instruction_timestamp: "2026-11-18 22:35 +08:00"
+    human_authorization: "Continuous progression to convergence, issued 2026-11-18 22:08 +08:00"
+    conversation_id: UNAVAILABLE_TO_EXECUTING_SESSION
+    provenance_finding: I-U011-006
+  role_prompt:
+    prompt_id: CHATGPT-OWNER-I-001
+    version: "2.0"
+    status: PROPOSED
+    path: 14-ai-development/prompts/owners/I/owner-session-v2.md
+    source_commit_sha: 6b5db2918cffc2281deb22fd9858a37dbaeec726
+    git_blob_sha: abf8551e37580f1e18a8f956ba453d88918a87b2
+    sha256: NOT_VERIFIED
+  artifact:
+    path: 14-ai-development/work-items/AID-2026-001/owner-i-r3-governance-rules-u011-v1.md
+    commit_sha: 1efec2c7d132c8f2fc89ee50087a77a55b36a03c
+    git_blob_sha: aa90c0643199ca817ce385c80b274800346a0d02
+    utf8_bytes: 24157
+    sha256: NOT_VERIFIED
+    status: I_SIDE_CONTRACT_CANDIDATE_NOT_NORMATIVE
+  findings:
+    I-U009-001:
+      severity: P1
+      disposition: RECEIPT_PERMISSION_EPOCH_REVOCATION_ORDERING_SPECIFIED_CANDIDATE
+      reflow: Issue #41
+      closure: PENDING_IMPLEMENTATION_H_TRANSPORT_BINDING_RACE_TESTS_AND_INDEPENDENT_REVIEW
+    I-U009-002:
+      severity: P1
+      disposition: D_TRIGGER_ACCEPTED_AS_INTERFACE_PREMISE_I_COMMIT_TIME_AUTHORIZATION_PRECONDITION_SPECIFIED
+      reflow: Issue #41
+      closure: PENDING_JOINED_CONTRACT_D_I_SAME_SHA_APPROVAL_AND_STORAGE_BOUNDARY
+    I-U009-003:
+      severity: P1
+      disposition: RETENTION_LEGAL_HOLD_EXCEPTION_SCHEMA_SPECIFIED_CANDIDATE
+      reflow: Issue #41
+      closure: PENDING_POLICY_VALIDATION_IMPLEMENTATION_AND_INDEPENDENT_REVIEW
+    I-U009-004:
+      severity: P2
+      disposition: REQUIRED_TARGET_POLICY_INVENTORY_INTERFACE_SPECIFIED_CANDIDATE
+      reflow: Issue #41
+      closure: PENDING_D_EXECUTOR_DISCOVERY_EVIDENCE_AND_CONFORMANCE
+    I-U009-005:
+      severity: P2
+      disposition: EXCEPTION_DECISION_SEPARATED_FROM_PER_TARGET_SUCCESS
+      reflow: Issue #41
+      closure: PENDING_SCHEMA_IMPLEMENTATION_AND_CONFORMANCE
+    I-U011-006:
+      severity: P2
+      disposition: CHAT_CONVERSATION_ID_NOT_EXPOSED_RELAY_AND_TIMESTAMP_RECORDED
+      reflow: Issue #41
+  approvals:
+    owner_i_formal: NOT_CLAIMED_AI_ROLEPLAY_IS_NOT_OWNER_APPROVAL
+    owner_d_same_sha: PENDING
+    storage_atomic_commit: PENDING
+    h_transport_principal_binding: PENDING
+    executor_acknowledgements: PENDING
+    bilingual_semantic_parity_review: NOT_RUN
+    independent_integration_review: PENDING
+    r3_runtime_and_race_tests: NOT_RUN_NOT_EVIDENCED
+  overall_status: BLOCKED_PENDING_FORMAL_APPROVAL_AND_R3_EVIDENCE
