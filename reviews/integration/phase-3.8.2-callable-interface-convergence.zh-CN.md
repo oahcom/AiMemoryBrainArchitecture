@@ -56,10 +56,10 @@
 - `D.register_derived_dependency_set(CompleteDependencySet) -> DependencyResult`
   - E 提供完整直接/传递依赖集合及精确 Source Revision/Scope；D 验证 Lineage 与当前 Fence。
   - 仅在完整不可变集合提交后成功；部分集合不得签发完整 Receipt。
-- `D.admit_publication(PublicationTuple, StorageVisibilityParticipantRef) -> DPublicationAdmission`
+- `D.admit_publication(PublicationTuple, StorageVisibilityParticipantRef) -> DPublicationParticipantRef`
   - 要求 Storage Participant 已持久化为 PREPARED_HIDDEN，依赖完整，Attempt/Lease 当前，且 D Fence 准入允许。
-  - 成功：D 所有的 `PublicationParticipantRef`；它只是 Barrier Hold，不是 Visibility Permission。
-- `D.close_publication_participant(PublicationParticipantRef, StorageOutcomeProof) -> DTerminalReceipt`
+  - 成功：D 所有的 `DPublicationParticipantRef`；它只是 Barrier Hold，不是 Visibility Permission。
+- `D.close_publication_participant(DPublicationParticipantRef, StorageOutcomeProof) -> DTerminalReceipt`
   - 仅接受同一 Tuple 对应的权威 `COMMITTED_VISIBLE` 或 `NO_PUBLICATION`。
 - `D.complete_producer_work(WorkItemId, FinalOutputInventory) -> ProducerTerminalReceipt`
   - 只有所有输出、重试、延迟 Publisher 和未知结果都已核清，D 才能关闭 Barrier。
@@ -81,7 +81,7 @@
   - 在 D Admission 前，原子持久化不可变 Tuple 和隐藏 Private Participant。
   - 相同 Operation + 相同 Tuple Digest 返回同一 Participant；Digest 不同则冲突。
 - `Storage.commit_visibility(StorageVisibilityParticipantRef, DPublicationParticipantRef, ICommitAuthorizationProof) -> StorageVisibilityOutcome`
-  - 提交前 I 证明是已消费的一次性 `CommitAuthorizationReceipt/ICommitAuthorizationProof`，不是提交后签发的 `ITerminalProof`。
+  - 提交前 I 证明是已消费的一次性 `ICommitAuthorizationProof/ICommitAuthorizationProof`，不是提交后签发的 `ITerminalProof`。
   - 权威 Commit 验证精确 D Participant/当前 Fence 与精确 I 证明，并原子安装 Visibility Pointer 和不可变 Outcome。
 - `Storage.resolve_visibility(PublicationOperationId, TupleDigest) -> StorageVisibilityOutcome`
   - Lost ACK、Crash、Failover、Restore 都解析同一 Operation。UNKNOWN 始终 Private；不得根据年龄或行缺失推断终态。
@@ -90,10 +90,10 @@
 
 ### I 所有的操作
 
-- `I.consume_commit_authorization(AuthorizationRequest) -> CommitAuthorizationReceipt`
+- `I.consume_commit_authorization(AuthorizationRequest) -> ICommitAuthorizationProof`
   - 在权威 PolicyDomain Sequencer 中单次消费；绑定认证 Subject/Delegation、Action、Purpose、Audience、Scope、Environment、PolicyDomain/当前 PermissionEpoch、Artifact/Version、PublicationOperationId/Tuple Digest，以及精确 D + Storage Participant Ref。
   - 返回权威产生的 `COMMIT_WON`、`REVOCATION_WON` 或 `UNKNOWN/IN_DOUBT`；调用方不得自行填写结果。
-- `I.close_publication_authorization(CommitAuthorizationReceipt, StorageOutcomeProof) -> ITerminalProof`
+- `I.close_publication_authorization(ICommitAuthorizationProof, StorageOutcomeProof) -> ITerminalProof`
   - 仅用于 Storage Outcome 之后的 Closeout。COMMIT_WON 使后续适用撤权等待精确 Storage 终态；UNKNOWN 保持阻塞。
 - I 必须提供已消费 Receipt 在响应丢失后的权威解析查询。重新消费 Nonce 不能代替解析原 Sequencer 结果。
 
@@ -103,8 +103,8 @@
 2. E 在 Queue、Lease、受保护读取或执行前取得持久化 D RegistrationReceipt。
 3. E 在当前 AttemptId/LeaseId 下执行，私有暂存输出，并通过 D 完成精确依赖集合登记。
 4. Storage 持久化隐藏的 `StorageVisibilityParticipantRef`。
-5. D 准入绑定该精确 Storage Participant 的 `PublicationParticipantRef`。
-6. I 在自己的 PolicyDomain Sequencer 中消费单次 `CommitAuthorizationReceipt`，绑定两个 Participant Ref 和同一 Tuple。
+5. D 准入绑定该精确 Storage Participant 的 `DPublicationParticipantRef`。
+6. I 在自己的 PolicyDomain Sequencer 中消费单次 `ICommitAuthorizationProof`，绑定两个 Participant Ref 和同一 Tuple。
 7. Storage 使用精确 D 当前 Participant/Fence 证明和提交前 I `ICommitAuthorizationProof` 提交 Visibility，并原子写入权威 Visibility Pointer 与 Outcome。
 8. D/I 只有读取同一权威 Storage Outcome（`COMMITTED_VISIBLE` 或已证明的 `NO_PUBLICATION`）后，才分别关闭自己的 Participant。
 9. 所有输出、重试和重放路径核清后，E/D 才关闭 Producer Work。
@@ -126,7 +126,7 @@ Producer Append 命名空间与 Receipt 重放语义使用 RFC-IDE-001 v1.0.0（
 
 Publication 使用独立的不可变操作身份：`PublicationOperationId + PublicationTupleDigest`。它不是 Producer 的 IdempotencyKey。同一 Operation + 同一 Tuple 解析到同一 Participant/Outcome；同一 Operation + 不同 Tuple 为 `IMMUTABLE_IDENTITY_CONFLICT`。权威 `NO_PUBLICATION` 后的新发布尝试，或 Artifact/Version、Dependency Set、Scope、Source Revision、Attempt/Lease Tuple 发生变化时，必须分配新的 PublicationOperationId、新 Participant 身份并重新执行 D/I 检查。相同逻辑 Work 的 Retry 可以轮换 AttemptId/LeaseId，但不能替换已经提交的 Publication Tuple。
 
-名义类型必须隔离：ProducerIdentity、ScopeRef、IdempotencyKey、ProducerWorkItemId、DerivationRunId、AttemptId、LeaseId、PublicationOperationId、PublicationParticipantRef、CommitAuthorizationReceipt、StorageVisibilityParticipantRef、Storage PreparedParticipantRef/GID、C ParticipantIntentRef 和 ITerminalProof。
+名义类型必须隔离：ProducerIdentity、ScopeRef、IdempotencyKey、ProducerWorkItemId、DerivationRunId、AttemptId、LeaseId、PublicationOperationId、DPublicationParticipantRef、ICommitAuthorizationProof、StorageVisibilityParticipantRef、Storage PreparedParticipantRef/GID、C ParticipantIntentRef 和 ITerminalProof。
 
 ## 7. 解析与失败契约
 
@@ -174,7 +174,7 @@ H Wire Adapter 与规范化/签名配置仍是独立依赖；本逻辑 API 不�
 ## 10. 明确矛盾与阻塞
 
 1. **E 旧顺序：** E §10 仍写 D Admission 先于 Storage Prepare，并把 I Terminal Proof 描述为 Storage Commit 前置条件。E §11 已明确取代该顺序。E 必须删除或显著标记 §10 旧表述，避免实现者选错顺序。
-2. **Storage 证明阶段歧义：** Storage §12 仍称最终 Commit 验证 I “terminal proof”。A 当前候选映射及因果顺序区分提交前已消费的 `CommitAuthorizationReceipt/ICommitAuthorizationProof` 与提交后 `ITerminalProof`。Storage 与 I 必须明确接受前者作为 Visibility Commit 的提交前证明；ITerminalProof 只能用于 Closeout。
+2. **Storage 证明阶段歧义：** Storage §12 仍称最终 Commit 验证 I “terminal proof”。A 当前候选映射及因果顺序区分提交前已消费的 `ICommitAuthorizationProof/ICommitAuthorizationProof` 与提交后 `ITerminalProof`。Storage 与 I 必须明确接受前者作为 Visibility Commit 的提交前证明；ITerminalProof 只能用于 Closeout。
 3. **Callable API 未冻结：** D/E/I/Storage 源文件定义了语义义务，但尚无共同接受的精确类型化方法/DTO/查询接口。本提案签名仍为 CANDIDATE。
 4. **物理拓扑无证明：** Storage 共享 Serializable Domain 仍是提案；没有已选择/部署的拓扑，也没有 Crash/Failover/Restore 符合性 PASS。
 5. **缺少独立 Owner 批准：** A 的角色模拟评审不等于 D/E/I/Storage 签名。各 Owner 必须针对上列精确 Blob 独立决策。
