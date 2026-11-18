@@ -125,3 +125,5 @@ Still unchanged: ID generation CANDIDATE; Claim global identity OPEN; Relation v
 ## 8. Next implementation unit
 
 **Rust Workspace**: establish Cargo workspace and `crates/memory-domain`; implement the frozen core types and domain-invariant tests; do not introduce Storage, SQLite, Vector DB, or model dependencies.
+
+> Bilingual synchronization note: this file is the English normative counterpart of the Phase 1 domain freeze. Its decision status and section structure must remain synchronized with the Chinese counterpart.
