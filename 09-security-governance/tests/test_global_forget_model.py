@@ -86,7 +86,7 @@ class GlobalForgetModelTests(unittest.TestCase):
         self.g.suppression_established = True
         self.g.backup_restore_safe = True
         for name in self.g.COMPONENTS:
-            self.g.set_component(name, "Confirmed", proof="proof")
+            self.g.set_component(name, "Confirmed", proof="proof", reviewer="independent-verifier")
         self.assertEqual(self.g.evaluate(now=1), "Pending")
 
     def test_missing_target_evidence_blocks_completion(self):
