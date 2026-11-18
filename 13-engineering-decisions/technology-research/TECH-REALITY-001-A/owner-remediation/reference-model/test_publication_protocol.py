@@ -247,6 +247,8 @@ class Protocol:
                    d_proof, i_proof, context)
         if operation_id in self.i_pending:
             if self.i_pending[operation_id] != binding:
+                if self.publication_commit_winners.get(publication_id) == operation_id:
+                    raise Rejected("publication participant already has a COMMIT_WON operation")
                 raise Rejected("I participant identity rebound")
             return i_proof
         if operation_id in self.i_closed:
@@ -686,7 +688,7 @@ class PublicationProtocolTests(unittest.TestCase):
                 "request-digest-1", "owner-boundary-1", "visibility-gate-1", d_proof,
             )
         proof = p.consume_i_commit_won(
-            "op-2", "auth-2", "publication-1", "storage-1",
+            "op-1", "auth-2", "publication-1", "storage-1",
             "request-digest-1", "owner-boundary-1", "visibility-gate-1", d_proof,
         )
         self.assertEqual(
