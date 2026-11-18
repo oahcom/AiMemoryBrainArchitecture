@@ -82,8 +82,18 @@ impl SqliteMemoryStorage {
         serde_json::from_str(value).map_err(|_| StorageError::InvalidSchema)
     }
 
+    fn validate_scope_set(scope: &[ScopeRef]) -> Result<(), StorageError> {
+        if scope.is_empty() {
+            return Err(StorageError::InvalidSchema);
+        }
+        scope.iter()
+            .try_for_each(|item| item.validate().map_err(|_| StorageError::InvalidSchema))
+    }
+
     fn scope_allowed(stored_json: &str, requested: &[ScopeRef]) -> Result<(), StorageError> {
+        Self::validate_scope_set(requested)?;
         let stored: Vec<ScopeRef> = Self::decode(stored_json)?;
+        Self::validate_scope_set(&stored)?;
         if scopes_intersect(&stored, requested) {
             Ok(())
         } else {
@@ -131,6 +141,7 @@ impl SqliteMemoryStorage {
 
 impl MemoryStorage for SqliteMemoryStorage {
     fn create_memory(&mut self, memory: Memory, scope: &[ScopeRef]) -> Result<(), StorageError> {
+        Self::validate_scope_set(scope)?;
         memory.validate().map_err(|_| StorageError::InvalidSchema)?;
         if memory.current_version_id.is_some() {
             // Creation cannot point at a version that this operation does not persist.
@@ -159,6 +170,7 @@ impl MemoryStorage for SqliteMemoryStorage {
         memory_id: &OpaqueId,
         scope: &[ScopeRef],
     ) -> Result<Option<MemoryVersion>, StorageError> {
+        Self::validate_scope_set(scope)?;
         let row = self
             .connection
             .query_row(
@@ -181,6 +193,7 @@ impl MemoryStorage for SqliteMemoryStorage {
         version_id: &OpaqueId,
         scope: &[ScopeRef],
     ) -> Result<Option<MemoryVersion>, StorageError> {
+        Self::validate_scope_set(scope)?;
         self.read_version_row(memory_id, version_id, scope)
     }
 
@@ -189,6 +202,7 @@ impl MemoryStorage for SqliteMemoryStorage {
         request: CommitRequest,
         scope: &[ScopeRef],
     ) -> Result<CommitReceipt, StorageError> {
+        Self::validate_scope_set(scope)?;
         if request.memory_id != request.new_version.memory_id {
             return Err(StorageError::InvalidReference);
         }
@@ -334,6 +348,7 @@ impl MemoryStorage for SqliteMemoryStorage {
         scope: &[ScopeRef],
         limit: usize,
     ) -> Result<ChangePage, StorageError> {
+        Self::validate_scope_set(scope)?;
         if limit == 0 {
             return Ok(ChangePage { records: vec![], next_cursor: after });
         }
@@ -391,6 +406,7 @@ impl MemoryStorage for SqliteMemoryStorage {
         request_digest: &str,
         scope: &[ScopeRef],
     ) -> Result<Option<CommitReceipt>, StorageError> {
+        Self::validate_scope_set(scope)?;
         let row = self
             .connection
             .query_row(
@@ -1258,6 +1274,31 @@ mod tests {
             Err(StorageError::InvalidSchema)
         );
         assert!(store.read_current(&id("m1"), &[scope()]).unwrap().is_none());
+    }
+
+    #[test]
+    fn sqlite_storage_entry_points_reject_empty_and_malformed_scope_sets() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        let empty: Vec<ScopeRef> = vec![];
+        let malformed = ScopeRef {
+            scope_id: id("s1"),
+            scope_kind: ScopeKind::User,
+            namespace_key: String::new(),
+        };
+
+        assert_eq!(store.create_memory(memory(), &empty), Err(StorageError::InvalidSchema));
+        assert_eq!(store.create_memory(memory(), &[malformed.clone()]), Err(StorageError::InvalidSchema));
+        assert_eq!(store.read_current(&id("missing"), &empty), Err(StorageError::InvalidSchema));
+        assert_eq!(store.read_version(&id("missing"), &id("missing-v"), &[malformed.clone()]), Err(StorageError::InvalidSchema));
+        assert_eq!(store.commit_version(CommitRequest {
+            memory_id: id("missing"),
+            expected_current_version: None,
+            new_version: version("missing-v", 1, None),
+            idempotency_key: "scope-validation".into(),
+            request_digest: "scope-validation".into(),
+        }, &empty), Err(StorageError::InvalidSchema));
+        assert_eq!(store.list_changes(None, &empty, 0), Err(StorageError::InvalidSchema));
+        assert_eq!(store.resolve_idempotency("missing", "digest", &[malformed]), Err(StorageError::InvalidSchema));
     }
 
     #[test]
