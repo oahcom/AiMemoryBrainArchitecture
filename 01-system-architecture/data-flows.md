@@ -73,7 +73,9 @@ Optional fields include source confidence/quality, content type, locale, source 
 
 **DECIDED:** `Accepted` means the Event and its processing intent are durably recorded, not that a Memory has been created, verified, indexed, or activated.
 
-**CANDIDATE:** Persist Event plus outbox/processing record in one atomic commit, or use an equivalent recoverable write-ahead protocol. Never acknowledge before the durable acceptance point. Duplicate idempotency keys return the original receipt/result and do not create duplicate Events.
+**DECIDED (logical acceptance contract):** `Accepted` requires both the Event and a recoverable compile-intent record to be durably recorded before acknowledgement. The Event and compile intent share one atomic durable acceptance boundary (or an equivalent protocol with the same crash semantics); duplicate retries return the original receipt and do not create duplicate Events or intents. This does not imply dispatch, worker lease/delivery, compiler execution, or Canonical Memory creation.
+
+**IMPLEMENTED / bounded evidence:** PR #246 merged at `fcdecf0a4e638c8b3c9ac0e4623f97c98ed21291`; exact PR-head Rust Workspace Tests run `44261068522` SUCCESS, GOV-DOC-001 run `44261068531` SUCCESS, and post-merge Main Rust Workspace Tests run `44261208110` SUCCESS. The verified implementation is the SQLite Event Store compile-intent ledger and startup backfill. It does not prove dispatcher/worker execution, payload-byte custody/hash verification, multi-process/production topology, or production readiness.
 
 ### 3.3 Asynchronous compilation
 
