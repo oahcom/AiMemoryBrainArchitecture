@@ -520,3 +520,62 @@ PR #168 将两个转换分离：
 - This overlay is a metadata-complete API snapshot, not a fresh line-by-line semantic review of all 142 historical PR diffs.
 
 本节覆盖第 14 节之后的最新实时状态，同时保留第 14 节作为历史快照。
+
+
+## 16. Latest live inventory and Phase 3.8 integration overlay / 最新实时盘点与 Phase 3.8 集成覆盖层（2026-11-18）
+
+### 16.1 Current repository snapshot / 当前仓库快照
+
+- Main HEAD: `78ab36929ceebf50318edeec2720cee0967e98a8`.
+- Main classic branch protection: `protected=false`; Rulesets remain unverified because the available endpoint returns HTTP 403. Do not infer that no organization-level ruleset exists.
+- Fresh GitHub REST `pulls?state=all` inventory, pages 1–2, `per_page=100`: **150 PR records = 122 merged + 28 closed-unmerged + 0 open**.
+- Open PR queue at this snapshot: **0**.
+- This is a fresh metadata inventory/currentness overlay. It is **not** a fresh line-by-line semantic/code review of all 150 historical PR diffs, and an empty PR queue is not architecture, security or production acceptance.
+
+### 16.2 Phase 3.8 publication reference-model integrations / Phase 3.8 发布参考模型集成
+
+- **PR #171** merged at `9caded49a934194376a044a909cb96fcdbccdd44`: Owner Boundary and Final Visibility Gate Identity are distinct. Exact Head Publication Protocol run #44195661208 passed 40 tests; GOV-DOC-001 #44195661360 passed.
+- **PR #172** merged at `60b6c2a0f987db4bc150aa7b90664c4c26f96b04`: one I COMMIT_WON winner per PublicationParticipantRef. Exact Head Publication Protocol run #44196418535 passed 44 tests; GOV-DOC-001 #44196418676 passed.
+- **PR #177** merged at `e5c0a60925fdb7ee00b3cea1bda86a0d9d5f902d`: expanded the immutable I authorization context with tenant/security domain, ownership/applicability Scope, obligations, expiry, producer/adapter/transport bindings and authentication strength. Exact Head run #44242035594 passed 48 tests; GOV-DOC-001 #44242035614 passed.
+- **PR #178** merged at `12e1ab92820c7fac113eb266e36c9ee2eec73c6b`: modeled I-local PermissionEpoch currentness at COMMIT_WON and revocation ordering. Exact Head run #44242174320 passed; GOV-DOC-001 #44242174327 passed.
+- **PR #179** merged at `78ab36929ceebf50318edeec2720cee0967e98a8`: binds the same PublicationOperationId across Storage hidden participant, D publication admission, I authorization/COMMIT_WON, Storage commit and UNKNOWN/NO_PUBLICATION reconciliation. Exact Head `014ee9941d0b76000c6f3000629765993e859561`; Publication Protocol run #44242539824 passed 52 tests; GOV-DOC-001 #44242539846 and #44242644683 passed.
+- **PR #176** was closed unmerged as a stale-base implementation attempt; its exact-head model runs #44241679186 and #44241803089 failed and it was superseded by PR #179.
+- **PR #180** was closed unmerged as a duplicate reconstruction after PR #179 had already merged the same operation-ID binding on top of current Main.
+- **PR #174** was closed unmerged. Its detailed standalone I authorization-gap map was not merged as a separate file; PR #179 published a newer bilingual integration addendum with the core current model/evidence boundary. Do not claim the old standalone matrix was merged.
+
+### 16.3 Remaining architecture and acceptance blockers / 剩余架构与验收阻塞
+
+- Issue #25 remains OPEN. The merged model is still a deterministic in-memory reference model. The broader A §3.1 PublicationTuple remains incomplete for artifact/version/content digest, Attempt/Lease epoch, Scope, ProducerClass, dependency receipt, private stage and canonicalization/digest profile. Physical Storage serialization/topology, durable DB uniqueness, cross-process fencing, crash/failover/restore, production adapters and independent D/E/I/Storage Owner decisions remain OPEN.
+- PR #179's 15-field I authorization context is not a complete protected-boundary authorization mechanism. Issuer/key status, live policy/revocation/registry currentness, cryptographic signature/trust-root validation and authenticated identity/delegation resolution remain unimplemented or unproven.
+- Issue #26 remains OPEN / SECURITY_ACCEPTANCE_BLOCKED: host diagnostics, least privilege, sudo containment, reboot recovery, Emergency Stop, independent credential rotation, untrusted-PR isolation and accountable Security/Infrastructure acceptance remain unverified.
+- Issue #134 remains P0 / OPEN: Main classic branch protection is disabled; Rulesets are unverified; successful exact-Head CI runs do not by themselves create a mechanically enforced merge gate.
+- No merge establishes independent review, Owner acceptance, architecture freeze, production R3/DFI conformance, worker security acceptance or production authorization.
+
+### 中文规范
+
+#### 16.1 当前仓库快照
+
+- Main HEAD：`78ab36929ceebf50318edeec2720cee0967e98a8`。
+- Main 经典分支保护：`protected=false`；可用端点返回 HTTP 403，Rulesets 状态仍无法核验。不得据此推断组织级 Ruleset 不存在。
+- 最新 GitHub REST `pulls?state=all` 盘点（第 1–2 页，`per_page=100`）：**150 条 PR = 122 条已合并 + 28 条关闭未合并 + 0 条开放**。
+- 本快照开放 PR 队列：**0**。
+- 这是最新元数据盘点/当前性覆盖层，**不是**对全部 150 条历史 PR Diff 重新逐行进行语义/代码审查；空 PR 队列不等于架构、安全或生产验收。
+
+#### 16.2 Phase 3.8 发布参考模型集成
+
+- **PR #171** 合并于 `9caded49a934194376a044a909cb96fcdbccdd44`：Owner Boundary 与 Final Visibility Gate Identity 分离。精确 Head 的 Publication Protocol #44195661208 通过 40 项测试；GOV-DOC-001 #44195661360 通过。
+- **PR #172** 合并于 `60b6c2a0f987db4bc150aa7b90664c4c26f96b04`：每个 PublicationParticipantRef 仅允许一个 I COMMIT_WON Winner。精确 Head 的 Publication Protocol #44196418535 通过 44 项测试；GOV-DOC-001 #44196418676 通过。
+- **PR #177** 合并于 `e5c0a60925fdb7ee00b3cea1bda86a0d9d5f902d`：扩展不可变 I 授权上下文，增加 Tenant/Security Domain、Ownership/Applicability Scope、Obligations、Expiry、Producer/Adapter/Transport Binding 和 Authentication Strength。精确 Head #44242035594 通过 48 项测试；GOV-DOC-001 #44242035614 通过。
+- **PR #178** 合并于 `12e1ab92820c7fac113eb266e36c9ee2eec73c6b`：建模 I 本地 PermissionEpoch 在 COMMIT_WON 时的当前性和撤权顺序。精确 Head Publication Protocol #44242174320 通过；GOV-DOC-001 #44242174327 通过。
+- **PR #179** 合并于 `78ab36929ceebf50318edeec2720cee0967e98a8`：在 Storage 隐藏 Participant、D Publication Admission、I Authorization/COMMIT_WON、Storage Commit 和 UNKNOWN/NO_PUBLICATION 对账中绑定同一 PublicationOperationId。精确 Head 为 `014ee9941d0b76000c6f3000629765993e859561`；Publication Protocol #44242539824 通过 52 项测试；GOV-DOC-001 #44242539846 与 #44242644683 通过。
+- **PR #176** 因基线过旧而关闭未合并；其精确 Head 模型运行 #44241679186 和 #44241803089 失败，随后由 PR #179 取代。
+- **PR #180** 在 PR #179 已将相同 Operation ID 绑定变更合入当前 Main 后，作为重复重建关闭未合并。
+- **PR #174** 关闭未合并。其独立的 I 授权缺口详细映射未作为独立文件合入；PR #179 发布了更新的双语集成补充，记录当前模型和证据边界。不得声称旧的独立矩阵已合并。
+
+#### 16.3 剩余架构与验收阻塞
+
+- Issue #25 仍 OPEN。已合并模型仍是确定性内存参考模型。A §3.1 更完整的 PublicationTuple 仍缺少 Artifact/Version/Content Digest、Attempt/Lease Epoch、Scope、ProducerClass、Dependency Receipt、Private Stage、Canonicalization/Digest Profile 等字段。物理 Storage 序列化/拓扑、数据库持久唯一性、跨进程 Fence、崩溃/故障切换/恢复、生产 Adapter 和独立 D/E/I/Storage Owner 决策仍 OPEN。
+- PR #179 的 15 字段 I 授权上下文并非完整的受保护边界授权机制。Issuer/Key Status、实时 Policy/Revocation/Registry 当前性、密码学签名/信任根验证及认证身份/Delegation 解析仍未实现或未证明。
+- Issue #26 仍 OPEN / SECURITY_ACCEPTANCE_BLOCKED：Host Diagnostics、最小权限、sudo 边界、重启恢复、Emergency Stop、独立凭据轮换、不可信 PR 隔离及责任 Security/Infrastructure 验收仍未验证。
+- Issue #134 仍 P0 / OPEN：Main 经典分支保护未启用；Rulesets 未核验；精确 Head CI 通过本身不会产生可机械强制的合并门禁。
+- 任何 PR 合并都不等于独立审查、Owner 验收、架构冻结、生产 R3/DFI 符合性、Worker 安全验收或生产授权。
