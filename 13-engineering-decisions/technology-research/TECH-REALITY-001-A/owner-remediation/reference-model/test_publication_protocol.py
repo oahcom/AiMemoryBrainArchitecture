@@ -1123,7 +1123,7 @@ class PublicationProtocolTests(unittest.TestCase):
         p = self.prepared()
         args = self.consume_i(p)
         context = list(p.authorization_contexts["auth-1"])
-        self.assertEqual(len(context), 15)
+        self.assertEqual(len(context), 25)
         # Every modeled authorization-context field is immutable after I COMMIT_WON.
         for index in range(len(context)):
             mutated = list(context)
