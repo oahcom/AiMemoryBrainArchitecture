@@ -1,0 +1,63 @@
+work_item_id: AID-2026-003
+title: AI-EXEC-001/002 v1.1 revision — close the six rule-completeness gaps (kickoff loading, T1/T2/T3 provenance, governance-doc interop, code-session tier, finding minimum line, review acquisition bridge)
+class: DOC
+risk: R1
+risk_rationale: Execution-rule revision of repository process documentation; no runtime code, no security or contract-boundary changes. Highest applicable risk governs the Work Item.
+security_scope: NONE — documentation and process only
+status: IN_PROGRESS
+sponsor: project user
+accountable_owner: Integration Owner
+implementing_ai_session: AID-2026-003-EXEC-V11
+independent_reviewer: NOT REQUIRED for R1 per AI-STD-001 §3.2 (author/reviewer distinction suffices); same-author AI session disclosed; human owner is acceptance authority
+integration_reviewer: PENDING — owner five-disposition decision on the revision PR
+created_at: 2026-11-18
+updated_at: 2026-11-18
+merge_commit_sha: PENDING — recorded at closeout
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 6b5db2918cffc2281deb22fd9858a37dbaeec726
+implementation_branch: ai/AID-2026-003/IO-exec-v11
+tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/218
+related_pr: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/256
+dependency_refs:
+  - 14-ai-development/AI-EXEC-001.md
+  - 14-ai-development/AI-EXEC-002.md
+  - 14-ai-development/ai-development-standard.md
+  - 14-ai-development/iteration-lifecycle.md
+  - 14-ai-development/PR-GOVERNANCE-001.md
+  - 14-ai-development/prompt-authoring-standard.md
+deliverables:
+  - 14-ai-development/AI-EXEC-001.md (v1.0 -> v1.1)
+  - 14-ai-development/AI-EXEC-002.md (v1.0 -> v1.1)
+  - 14-ai-development/work-items/AID-2026-003/prompt-v1-errata.md (immutable prompt companion; no rewrite of prompt-v1.md)
+gap_coverage:
+  gap_1_kickoff_loading: AI-EXEC-001 §1.4 + §2 Stage 0
+  gap_2_provenance_tiers: AI-EXEC-002 §2 T1/T2/T3 + grandfather clause
+  gap_3_governance_doc_interop: AI-EXEC-001 §10
+  gap_4_code_session_tier: AI-EXEC-002 §3 seven-item focus subset; all 12 prompt sections remain mandatory
+  gap_5_finding_minimum_line: AI-EXEC-001 §4 + AI-EXEC-002 §5
+  gap_6_review_acquisition_bridge: AI-EXEC-001 §6
+prompt_id: AID-2026-003-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-003/prompt-v1.md
+prompt_companion_file: 14-ai-development/work-items/AID-2026-003/prompt-v1-errata.md
+prompt_provenance_tier: T1 (repo-file prompt, AI-EXEC-002 §2 v1.1)
+prompt_sha256: NOT_VERIFIED
+prompt_bytes: NOT_VERIFIED
+prompt_file_commit_sha: bb1ac7a59619e56769ac1e69c272a772f8c96b02
+prompt_file_blob_sha: 71332a2b8f412d1bb58d4d53bdb25880dc2f1431
+prompt_companion_commit_sha: 1822f98ea95dc163caf1b82f2b80b13135d48d60
+execution_instruction_provenance: >-
+  T2 — source is the user-provided remediation dispatch message in this ChatGPT conversation; conversation/session ID and stable permalink are not exposed by this interface; no synthetic ID or hash was created; T2 anchor remains partially unavailable.
+  Coordinator-supplied historical anchor supplement: see 14-ai-development/work-items/AID-2026-003/t2-dispatch-anchors.md for four conversation_id values, stable account-scoped permalink patterns, dispatch prompt filenames, reported character counts, roles and delivery windows. These anchors were supplied by the coordinator and were not independently retrieved by this session; message_id and epoch create_time remain unavailable and are not fabricated.
+  Full remediation-round-1 T2 snapshot target: t2-snapshot-fix-prompt.md. The source appendix was supplied inline, but a byte-verbatim full archival copy is NOT_VERIFIED; the file records this limitation and requests the original exported prompt file. No shortened reconstruction is represented as the full immutable snapshot.
+  Verbatim sent-payload snapshot established at t2-snapshot-fix-prompt.md, with raw-byte cross-check t2-snapshot-fix-prompt.source.txt and authored companion t2-snapshot-fix-prompt.authored-prompt.md; archive commit d84dcbe269706bec384b02f24de6a0e635da9aa0. Digest coordinator-supplied: 9807 chars / 16735 UTF-8 bytes / LF (158 line feeds) / SHA-256 bbe275373926603732f0a5ad96d7a7d88f30578cd947327ddc8263148cf797b7.
+prompt_hash_note: SHA-256 and byte count are NOT_VERIFIED in this session because the available GitHub connector exposes repository content/blob SHA but no exact-byte SHA-256 computation facility; the previously recorded digest is not reused as a recomputation. prompt-v1.md remains byte-immutable. GitHub blob SHA above is the repository blob identifier, not SHA-256.
+bilingual_status: STALE_EXCEPTION — Chinese v1.1 is temporary authoritative source; English counterparts docs/en/14-ai-development/AI-EXEC-001.md and docs/en/14-ai-development/AI-EXEC-002.md are missing/pending. Exact source commits and blob SHAs, Owner Integration Owner, due 2026-12-02, rationale, and tracking Issue #218 / AID-2026-003 are registered in docs/translation-status.md. Not bilingual-complete.
+acceptance_blocker: none for R1
+acceptance_authority: project owner — adoption/merge decision on the revision PR
+verification_summary: Remediation read-back and clause cross-reference checks performed via GitHub; SHA-256 NOT_VERIFIED; runtime/test suites NOT RUN; exact-Head Owner verification pending.
+finding_evidence_comments: PR #256 comment 6979287444; Issue #218 comment 6979288315 (implementer remediation evidence; not approval).
+
+historical_session_load_disclosure: >-
+  NF-4 [P2] — Owner exact-Head re-verification conversation 6afdaea6-e428-83ec-96b6-0ca8fb5c0291 (coordinator-supplied anchor; https://chatgpt.com/c/6afdaea6-e428-83ec-96b6-0ca8fb5c0291). Its first-output LOADED declaration order was noncompliant. The AI-EXEC-001/002 v1.0 ADOPTED documents were actually read later from main; this is RULES-LOAD-NOT-RECORDED, not evidence of RULES-NOT-LOADED. Do not backdate the declaration, infer non-loading, or retrospectively classify misconduct. Message ID and epoch create_time were not supplied and remain unavailable.
