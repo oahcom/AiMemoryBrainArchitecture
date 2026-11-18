@@ -42,6 +42,21 @@ class GlobalForgetModelTests(unittest.TestCase):
         with self.assertRaises(Blocked):
             self.seal(gaps=["unknown provider"])
 
+    def test_inventory_seal_requires_nonempty_identity_and_digest(self):
+        self.g.seal = None
+        with self.assertRaises(Blocked):
+            self.g.seal_inventory(seal_id="", digest="digest-1",
+                                  signer="I-inventory-authority")
+        with self.assertRaises(Blocked):
+            self.g.seal_inventory(seal_id="seal-1", digest="",
+                                  signer="I-inventory-authority")
+
+    def test_confirmed_evidence_requires_nonempty_evidence_reference(self):
+        result = self.g.record_evidence(self.evidence(evidence_ref=""))
+        self.assertEqual(result, "UNKNOWN")
+        self.complete_setup()
+        self.assertEqual(self.g.evaluate(now=1), "Pending")
+
     def test_inventory_seal_requires_target_identity_scope_capability(self):
         self.g.seal = None
         self.g.targets["bad"] = Target("bad", "", (), "", "")
