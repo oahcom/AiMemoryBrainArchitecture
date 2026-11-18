@@ -209,7 +209,7 @@ Canonical Commit 与所需 Provenance 可见性必须处于同一原子边界，
 2. 一个 Event 可以产生多个 Candidate Memory；
 3. 一个 Memory 可以包含多个 Claim；
 4. Memory 身份跨不可变版本稳定；
-5. 命题不变时 Claim 身份跨版本稳定；
+5. Claim 跨 Memory Version 的身份策略继续保持 OPEN，不在 Phase 1 冻结；
 6. 冲突 Claim 及其 Evidence 被保留；
 7. 删除 ContextEntry 不会修改 Canonical Memory；
 8. 无授权时跨 Scope 读写被拒绝；
@@ -237,7 +237,7 @@ Canonical Commit 与所需 Provenance 可见性必须处于同一原子边界，
 | Event / Memory / Claim 相互独立 | DECIDED |
 | Claim 是规范命题；Phase 1 不设独立 Fact | DECIDED |
 | Memory 身份跨版本稳定 | DECIDED |
-| 命题身份保持时 Claim 身份跨版本稳定 | DECIDED |
+| Claim 跨 Memory Version 的身份策略 | OPEN |
 | MemoryVersion 不可变 | DECIDED |
 | Event / Recorded / Valid Time 分离 | DECIDED |
 | 未知时间显式表示，绝不等于“始终有效” | DECIDED |
