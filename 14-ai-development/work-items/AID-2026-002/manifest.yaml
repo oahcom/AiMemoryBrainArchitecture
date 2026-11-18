@@ -1,0 +1,47 @@
+work_item_id: AID-2026-002
+title: AI development execution rules (AI-EXEC-001/002) + ecosystem-loop rollout + related doc bug fixes
+class: DOC
+risk: R1
+risk_rationale: Repository-wide documentation/process execution rules and formatting fixes; no runtime code, no security or contract-boundary changes. Highest applicable risk governs the Work Item.
+security_scope: NONE — documentation and process only
+status: IMPLEMENTED
+sponsor: project user
+accountable_owner: Integration Owner
+implementing_ai_session: AID-2026-002-EXEC-001
+independent_reviewer: NOT REQUIRED for R1 per AI-STD-001 §3.2 (author/reviewer distinction suffices); same-author AI session disclosed; human owner is acceptance authority
+integration_reviewer: PENDING — owner review at PR
+created_at: 2026-11-18
+updated_at: 2026-11-18
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 282a82e58d8d9d1aa876621481df3184fbe5d284
+implementation_branch: ai/AID-2026-002/IO-exec-rules
+tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/218
+related_pr: PENDING — recorded in INDEX.md at closeout
+dependency_refs:
+  - 14-ai-development/ai-development-standard.md
+  - 14-ai-development/iteration-lifecycle.md
+  - 14-ai-development/PR-GOVERNANCE-001.md
+  - 14-ai-development/prompt-authoring-standard.md
+  - 14-ai-development/prompts/global/chatgpt-session-contract-v1.md
+  - 14-ai-development/work-items/AID-2026-001/governance-decision-NR-001.md
+  - 00-governance/bilingual-documentation-policy.md
+deliverables:
+  - 14-ai-development/AI-EXEC-001.md
+  - 14-ai-development/AI-EXEC-002.md
+  - 14-ai-development/AI-EXEC-ROLLOUT-001.md
+bug_fix_targets:
+  - 14-ai-development/ai-development-standard.md
+  - docs/README.md
+  - docs/translation-status.md
+  - reviews/architecture-breakthrough/integration/model/README.md
+prompt_id: AID-2026-002-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-002/prompt-v1.md
+prompt_sha256: 375d4f8dd5a050464905cc8b3caade683873935fe0cf08e9e9782d38a867846b
+prompt_bytes: 4997
+prompt_hash_note: SHA-256 over exact committed file bytes (UTF-8, no normalization) per AI-PROMPT-STD-001 §5; prompt-file commit SHA recorded in INDEX session row at closeout
+bilingual_status: STALE_EXCEPTION_REGISTERED — English counterparts of the three new documents marked STALE per GOV-DOC-001 §5 (reason: owner-prioritized time-critical rollout; authoritative version: Chinese; due: 2026-12-02; owner: Integration Owner; tracking: Issue #218), registered in docs/translation-status.md
+acceptance_blocker: none for R1; owner review and merge decision pending
+acceptance_authority: project owner (owner-directed adoption of the rules is recorded separately in Issue #218)
+verification_summary: escape-scanner zero residue on 4 fixed files (19 literal occurrences replaced); git diff --check clean; runtime/test suites NOT RUN (documentation-only change set)

@@ -76,6 +76,9 @@ This file tracks which architecture materials have equivalent Chinese and Englis
 | Cross-module conformance and fault-injection reader guide | A owner branch: reviews/integration/cross-module-conformance-plan.md | docs/zh-CN/12-testing-and-acceptance/cross-module-conformance-guide.md | docs/en/12-testing-and-acceptance/cross-module-conformance-guide.md | COMPLETE — test guide only; execution NOT_RUN/BLOCKED |
 | Detailed Testing and Acceptance specifications/reports | 12-testing-and-acceptance/ and reviews/ | Pending | Existing English sources | NOT STARTED — detailed test cases and review reports pending |
 | Detailed technology and Rust engineering | 13-engineering-decisions/ | Pending | Existing English sources | NOT STARTED |
+| AI development process execution rules | 14-ai-development/AI-EXEC-001.md | Embedded Chinese — authoritative for this batch | Pending | STALE EXCEPTION — GOV-DOC-001 §5 time-bounded (owner-prioritized time-critical rollout; temporary authoritative version: Chinese; EN due 2026-12-02; Owner: Integration Owner; tracking: Issue #218 / AID-2026-002) |
+| AI development prompt execution rules | 14-ai-development/AI-EXEC-002.md | Embedded Chinese — authoritative for this batch | Pending | STALE EXCEPTION — GOV-DOC-001 §5 time-bounded (same registration as above; EN due 2026-12-02; tracking: Issue #218 / AID-2026-002) |
+| AI ecosystem-loop rollout plan | 14-ai-development/AI-EXEC-ROLLOUT-001.md | Embedded Chinese — authoritative for this batch | Pending (English summary in file header) | STALE EXCEPTION — GOV-DOC-001 §5 time-bounded (same registration as above; EN due 2026-12-02; tracking: Issue #218 / AID-2026-002) |
 
 **Exact Owner branch source snapshots and migration batches:** [Owner Branch Bilingual Migration Inventory](owner-branch-translation-inventory.md). The audited branch SHAs are source references only; refresh each branch HEAD before translating or accepting a companion.
 
