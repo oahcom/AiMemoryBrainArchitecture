@@ -550,7 +550,7 @@ class PublicationProtocolTests(unittest.TestCase):
         p.admit_publication("publication-1", "op-1", "work-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
         p.set_authorization_context("auth-1")
         p.set_permission_epoch("policy-domain-1", "epoch-1")
-        with self.assertRaisesRegex(Rejected, "authority state is unavailable"):
+        with self.assertRaisesRegex(Rejected, "authoritative policy/revocation/registry state is unavailable"):
             p.authorize_commit("auth-1", "op-1", "publication-1", "storage-1", "request-digest-1", "owner-boundary-1", "visibility-gate-1")
 
     def test_issuer_key_invalidation_before_consumption_fails_closed(self):
@@ -574,7 +574,7 @@ class PublicationProtocolTests(unittest.TestCase):
         context = list(p.authorization_contexts["auth-1"])
         context[31] = "artifact-substituted"
         p.authorization_contexts["auth-1"] = tuple(context)
-        with self.assertRaisesRegex(Rejected, "authorization context|currentness mismatch"):
+        with self.assertRaisesRegex(Rejected, "exact I COMMIT_WON participant|authorization context|currentness mismatch"):
             p.commit(**args)
 
     def test_admission_then_fence_blocks_new_work(self):
@@ -1268,7 +1268,7 @@ class PublicationProtocolTests(unittest.TestCase):
         p = self.prepared()
         args = self.consume_i(p)
         context = list(p.authorization_contexts["auth-1"])
-        self.assertEqual(len(context), 25)
+        self.assertEqual(len(context), 37)
         # Every modeled authorization-context field is immutable after I COMMIT_WON.
         for index in range(len(context)):
             mutated = list(context)
