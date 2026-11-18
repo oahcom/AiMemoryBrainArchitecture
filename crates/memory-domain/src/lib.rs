@@ -51,6 +51,61 @@ pub enum ScopeKind {
     System,
 }
 
+impl ScopeRef {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.namespace_key.is_empty() {
+            return Err(DomainError::EmptyRequiredField("namespace_key"));
+        }
+        Ok(())
+    }
+}
+
+impl Event {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.event_kind.is_empty() { return Err(DomainError::EmptyRequiredField("event_kind")); }
+        if self.payload_ref.is_empty() { return Err(DomainError::EmptyRequiredField("payload_ref")); }
+        if self.classification.is_empty() { return Err(DomainError::EmptyRequiredField("classification")); }
+        if self.schema_version.is_empty() { return Err(DomainError::EmptyRequiredField("schema_version")); }
+        if self.retention_class.is_empty() { return Err(DomainError::EmptyRequiredField("retention_class")); }
+        if self.scope_refs.is_empty() { return Err(DomainError::EmptyRequiredField("scope_refs")); }
+        self.scope_refs.iter().try_for_each(ScopeRef::validate)
+    }
+}
+
+impl Claim {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.predicate.is_empty() { return Err(DomainError::EmptyRequiredField("predicate")); }
+        if self.object_value.is_empty() { return Err(DomainError::EmptyRequiredField("object_value")); }
+        if self.polarity.is_empty() { return Err(DomainError::EmptyRequiredField("polarity")); }
+        if self.asserted_at.is_empty() { return Err(DomainError::EmptyRequiredField("asserted_at")); }
+        if self.scope_refs.is_empty() { return Err(DomainError::EmptyRequiredField("scope_refs")); }
+        self.scope_refs.iter().try_for_each(ScopeRef::validate)
+    }
+}
+
+impl Memory {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.memory_kind.is_empty() { return Err(DomainError::EmptyRequiredField("memory_kind")); }
+        if self.retention_class.is_empty() { return Err(DomainError::EmptyRequiredField("retention_class")); }
+        if self.sensitivity.is_empty() { return Err(DomainError::EmptyRequiredField("sensitivity")); }
+        if self.created_at.is_empty() { return Err(DomainError::EmptyRequiredField("created_at")); }
+        if self.updated_at.is_empty() { return Err(DomainError::EmptyRequiredField("updated_at")); }
+        if self.scope_refs.is_empty() { return Err(DomainError::EmptyRequiredField("scope_refs")); }
+        self.scope_refs.iter().try_for_each(ScopeRef::validate)
+    }
+}
+
+impl MemoryVersion {
+    pub fn validate(&self) -> Result<(), DomainError> {
+        if self.version_number == 0 { return Err(DomainError::InvalidVersionNumber); }
+        if self.author_kind.is_empty() { return Err(DomainError::EmptyRequiredField("author_kind")); }
+        if self.change_reason.is_empty() { return Err(DomainError::EmptyRequiredField("change_reason")); }
+        if self.content_digest.is_empty() { return Err(DomainError::EmptyRequiredField("content_digest")); }
+        if self.schema_version.is_empty() { return Err(DomainError::EmptyRequiredField("schema_version")); }
+        Ok(())
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ActorRef {
     pub actor_id: OpaqueId,
