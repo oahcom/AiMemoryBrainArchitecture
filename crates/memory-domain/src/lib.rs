@@ -32,14 +32,14 @@ pub enum DomainError {
     ConflictingIdempotencyPayload,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ScopeRef {
     pub scope_id: OpaqueId,
     pub scope_kind: ScopeKind,
     pub namespace_key: String,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum ScopeKind {
     User,
     Project,
@@ -106,25 +106,25 @@ impl MemoryVersion {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ActorRef {
     pub actor_id: OpaqueId,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum TimeValue {
     Instant(String),
     Interval { start: String, end: String },
     Unknown,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct TemporalRef {
     pub occurred_at: TimeValue,
     pub valid_time: TimeValue,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Event {
     pub event_id: OpaqueId,
     pub event_kind: String,
@@ -139,7 +139,7 @@ pub struct Event {
     pub retention_class: String,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Claim {
     pub claim_id: OpaqueId,
     pub subject_ref: OpaqueId,
@@ -155,7 +155,7 @@ pub struct Claim {
     pub evidence_refs: Vec<OpaqueId>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum EpistemicStatus {
     Observed,
     Reported,
@@ -165,7 +165,7 @@ pub enum EpistemicStatus {
     Retracted,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Entity {
     pub entity_id: OpaqueId,
     pub entity_type: String,
@@ -173,7 +173,7 @@ pub struct Entity {
     pub scope_refs: Vec<ScopeRef>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Relation {
     pub relation_id: OpaqueId,
     pub relation_type: String,
@@ -182,7 +182,7 @@ pub struct Relation {
     pub scope_refs: Vec<ScopeRef>,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Evidence {
     pub evidence_id: OpaqueId,
     pub source_ref: OpaqueId,
@@ -191,7 +191,7 @@ pub struct Evidence {
     pub role: EvidenceRole,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum EvidenceRole {
     Supports,
     Refutes,
@@ -199,7 +199,7 @@ pub enum EvidenceRole {
     ContextOnly,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct Provenance {
     pub provenance_id: OpaqueId,
     pub source_refs: Vec<OpaqueId>,
@@ -208,14 +208,14 @@ pub struct Provenance {
     pub created_at: String,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct MemorySource {
     pub memory_source_id: OpaqueId,
     pub source_ref: OpaqueId,
     pub source_role: String,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct MemoryVersion {
     pub memory_version_id: OpaqueId,
     pub memory_id: OpaqueId,
@@ -261,7 +261,7 @@ pub struct Memory {
     pub updated_at: String,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub enum MemoryLifecycle {
     Candidate,
     Consolidated,
@@ -271,14 +271,14 @@ pub enum MemoryLifecycle {
     Forgotten,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct ContextEntry {
     pub entry_id: OpaqueId,
     pub context_id: OpaqueId,
     pub memory_version_id: OpaqueId,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct MemoryContext {
     pub context_id: OpaqueId,
     pub scope_refs: Vec<ScopeRef>,
