@@ -28,6 +28,22 @@ Evidence:
 - Rust Workspace CI: run ID `44259233587` (run #25), job `rust-workspace-test`, `cargo test --workspace --all-targets` — SUCCESS.
 - GOV-DOC-001: run ID `44259233358` (run #405), job `GOV-DOC-001 structural checks` — SUCCESS.
 
+## Decision: same-process independent-connection CAS correctness
+
+DECIDED for the tested SQLite profile, limited to two independently opened SQLite Connection instances racing within one process against the same expected-current version:
+- Exactly one competing CAS write commits.
+- The losing writer receives `StaleVersion`.
+- Reopening the database shows one current version and exactly one change-log record.
+- Concurrent identical idempotency requests replay the same durable receipt and create only one change-log record.
+
+Evidence:
+- Implementation merged by PR #243; merge commit `4a3e06fd263e9dbd1056179dceb3cb21b17e330f` (PR head `179059a5be1973e2e188fd648ee57d1db7b004fe`).
+- Exact PR #243 head Rust Workspace CI run #24 / Run ID `44259219033`: `cargo test --workspace --all-targets` — SUCCESS (34 passed, 0 failed).
+- Exact PR #243 head bilingual documentation gate run #404 / Run ID `44259218907` — SUCCESS.
+- Duplicate tracking PR #244 was closed without merging; its exact-head verification also passed (Rust Run ID `44259233587`, docs Run ID `44259233358`). No duplicate implementation is retained.
+
+This decision is not evidence of cross-process or multi-host linearizability, distributed coordination, failover safety, or production topology suitability.
+
 ## Deliberate limits
 
 This decision is limited to the Phase 1 behavior and the tested GitHub Actions local filesystem/runtime. It does not establish:
@@ -35,7 +51,7 @@ This decision is limited to the Phase 1 behavior and the tested GitHub Actions l
 - cross-process or multi-host linearizability, distributed coordination or production deployment topology;
 - production readiness or a production durability SLO.
 
-The independent-connection CAS and idempotency race tests are same-process tests across separate SQLite Connection instances. Their scope and follow-up are tracked separately by PR #244; they do not expand this decision into a cross-process concurrency claim.
+The independent-connection CAS and idempotency race tests are same-process tests across separate SQLite Connection instances. Their bounded correctness is decided above; they do not expand this decision into a cross-process concurrency claim. PR #244 was a duplicate tracking carrier and was closed after PR #243 merged.
 
 The serialized Memory and MemoryVersion payloads are an engineering representation only. Claim cross-version identity remains OPEN and is not resolved by this adapter.
 
