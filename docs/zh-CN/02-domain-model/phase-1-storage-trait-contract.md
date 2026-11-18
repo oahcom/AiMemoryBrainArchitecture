@@ -34,3 +34,6 @@
 ## 验证边界
 
 本 Crate 只包含纯 Rust 契约形态测试，不证明后端原子性、崩溃恢复、跨进程并发、序列化或持久化能力。
+
+
+> 双语同步说明：本文件与 `docs/en/02-domain-model/phase-1-storage-trait-contract.md` 同一提交更新，语义保持一致。
