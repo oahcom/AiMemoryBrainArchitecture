@@ -21,7 +21,7 @@ Fact 在 Phase 1 不是独立对象。“已验证事实”表示为 Epistemic S
 1. 每个规范对象都有稳定、类型明确的不透明标识符。
 2. MemoryId 在 Memory 整个生命周期内保持不变。
 3. MemoryVersionId 标识一个不可变 Memory 版本。
-4. 当命题仍属于同一逻辑 Claim 时，ClaimId 跨 Memory Version 保持稳定；命题发生语义变化时创建新的 ClaimId。
+4. ClaimId 跨 Memory Version 的身份策略仍为 OPEN；Phase 1 不冻结“稳定 ClaimId”与“版本内 ClaimId”之间的选择。
 5. Memory 更新必须创建新的不可变 MemoryVersion；旧版本在治理允许范围内仍可读取。
 6. ContextEntry 引用特定 MemoryVersion 或受治理的呈现形式；它不是第二份 Canonical Memory。
 7. ID 不是时间戳、可变内容哈希、数据库行号或授权凭证。
