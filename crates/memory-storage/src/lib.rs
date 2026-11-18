@@ -19,7 +19,7 @@ pub struct CommitRequest {
     pub request_digest: String,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, Eq, PartialEq)]
 pub struct CommitReceipt {
     pub memory_id: OpaqueId,
     pub resulting_version_id: OpaqueId,
@@ -27,7 +27,7 @@ pub struct CommitReceipt {
     pub idempotency_key: String,
 }
 
-#[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct CommitSequence(pub u64);
 
 #[derive(Clone, Debug, Eq, PartialEq)]
