@@ -61,3 +61,22 @@ finding_evidence_comments: PR #256 comment 6979287444; Issue #218 comment 697928
 
 historical_session_load_disclosure: >-
   NF-4 [P2] — Owner exact-Head re-verification conversation 6afdaea6-e428-83ec-96b6-0ca8fb5c0291 (coordinator-supplied anchor; https://chatgpt.com/c/6afdaea6-e428-83ec-96b6-0ca8fb5c0291). Its first-output LOADED declaration order was noncompliant. The AI-EXEC-001/002 v1.0 ADOPTED documents were actually read later from main; this is RULES-LOAD-NOT-RECORDED, not evidence of RULES-NOT-LOADED. Do not backdate the declaration, infer non-loading, or retrospectively classify misconduct. Message ID and epoch create_time were not supplied and remain unavailable.
+
+
+policy_unification_ruling:
+  ruling_id: AI-EXEC-UNIFICATION-RULING-001
+  ruling_version: v1.0
+  ruling_date: 2026-11-18
+  ruling_file: 14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md
+  tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/218
+  effective_change_commit: recorded in the session-level INDEX row and Issue #218 ruling closeout; no commit SHA is fabricated before GitHub returns it
+  decisions:
+    prompt_structure: UNIFY-TO-15 — AI-STD-001 §5 15 items are the sole mandatory structure; AI-PROMPT-STD-001 §4 12 items remain the core
+    verification_vocabulary: UNIFY-TO-VERIFIED — TESTED is evidence wording only; NOT RUN remains explicit
+    prompt_hash: UNIFY-TO-MANDATORY-SHA256 — NOT_VERIFIED is an evidence limitation, not a waiver
+  inter_document_relationship: SUPERSEDE — narrow owner ruling over the three enumerated conflict interpretations; upstream standards otherwise unchanged
+  review_due: 2026-12-02
+  instruction_provenance: User-provided owner-directed instruction in this ChatGPT conversation; stable conversation ID/permalink and raw message bytes are not exposed by the interface
+  instruction_sha256: NOT_VERIFIED
+  instruction_sha256_note: No exact raw-message byte stream or local hashing facility is exposed in this session; no synthetic digest or identifier was fabricated
+  historical_prompt_hashes: preserved unchanged; no retroactive reconstruction or reclassification

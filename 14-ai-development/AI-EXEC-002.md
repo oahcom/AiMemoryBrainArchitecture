@@ -3,7 +3,7 @@
 
 - **Document ID:** AI-EXEC-002
 - **Version:** 1.1
-- **Status:** PROPOSED — v1.1 修订待 owner 采纳（日度治理窗口 RW-20261118；v1.0 ADOPTED 版继续有效至采纳时刻）
+- **Status:** ADOPTED — v1.0 adopted via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`); v1.1 adopted via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`), both merged 2026-11-18; this header records the two adoption events.
 - **Owner:** Integration Owner
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml) · 修订 Work Item [AID-2026-003](work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](ai-development-standard.md) §5/§13、[AI-PROMPT-STD-001](prompt-authoring-standard.md)、[CHATGPT-GLOBAL-001](prompts/global/chatgpt-session-contract-v1.md)、[AI-PROC-001](iteration-lifecycle.md) Stage 2/6、GLB-DOC-001（政策 GOV-DOC-001）
@@ -11,7 +11,7 @@
 
 > **定位**：本文不是新规范，而是把项目现有提示词体系**真正跑起来**的执行细则。零脚本强制，约束靠提示词文本自我声明 + Issue/PR/Closeout 留痕。
 
-**English summary.** Every execution prompt retains the complete 12-item structure in AI-PROMPT-STD-001 §4. R0/R1 document focus items (six) and code focus items (seven) are supplemental checklists only; they do not waive or replace any of the 12 required sections. The 15-vs-12 upstream-standard discrepancy remains explicitly disclosed for Issue #218. Other rules cover T1/T2/T3 provenance, grandfather evidence distinctions, in-run traceability, independent review, finding minimum fields, bilingual exception records, and Closeout.
+**English summary.** Every execution prompt MUST use the unified 15-item structure ruled in `AI-EXEC-UNIFICATION-RULING-001` (2026-11-18). The 12 items in AI-PROMPT-STD-001 §4 remain the mandatory core; AI-STD-001 §5 items 13–15 are additional mandatory sections. Six/seven-item focus subsets never waive structure. VERIFIED is the canonical lifecycle status; TESTED is evidence wording only. SHA-256 is mandatory for exact prompt bytes; NOT_VERIFIED records an evidence limitation and never waives the gate. T1/T2/T3 provenance, grandfather distinctions, traceability, review, finding fields, bilingual exceptions and Closeout remain governed by this document.
 
 ---
 
@@ -45,7 +45,7 @@
 - 已执行提示词版本不可变；会话内澄清/增补若实质改变指令，必须先出新版本（T1 出新文件版本 / T2 出新快照）再继续（AI-PROMPT-STD-001 §5）；
 - **Grandfather 条款**：v1.1 生效前已开工的会话按 v1.0 口径追溯，**不倒签、不补造、不追罚**。有直接证据证明未载入时，才记 `RULES-NOT-LOADED`；仅缺少 LOADED 声明/记录时，记 `RULES-LOAD-NOT-RECORDED`，仅表示证据缺口，不得反向推定实际未载入或认定历史违规。
 
-> **上位冲突披露（待 Issue #218 adoption 决议）**：AI-STD-001 §5 要求 "Prompt ID、版本和 SHA-256" 必录且未设逃生门，与 AI-PROMPT-STD-001 §5 的 `NOT_VERIFIED` 口径存在字面冲突。本细则暂按 AI-PROMPT-STD-001 §5 执行（三元组 + NOT_VERIFIED），统一口径随批量 adoption 一并裁定。
+> **已裁定（2026-11-18）**：提示词出处及哈希统一执行 `AI-EXEC-UNIFICATION-RULING-001` RULING-03。SHA-256 对准确提示词字节必录；`NOT_VERIFIED` 仅用于如实说明无法计算/核验的证据限制，不构成豁免。未满足提示词完整性要求时不得进入 `PROMPT_READY`。
 
 ## 3. 提示词强制结构（按 AI-PROMPT-STD-001 §4，不另立结构）
 
@@ -68,17 +68,17 @@
 - **所有执行提示词、所有风险级别与任务类**均必须保留上述 12 项完整结构；不得因 R0/R1、DOC 或代码会话而删除、合并或省略其余章节。
 - **R0/R1 文档会话重点子集**：1、2、5、8、11、12 六项须特别具体；这六项只是审查重点，不是六项替代模板。
 - **代码会话重点子集**：任务类 `IMPL/TEST/SEC/MIG/PERF` 的 1、2、3、5、8、9、12 七项须特别具体；其余五项仍必须保留在提示词中。R2/R3 无论任务类均须完整 12 项，并执行适用的额外风险/双语要求。
-- **R2/R3**（任意任务类）：12 项全量 + AI-STD-001 §5 第 15 项双语文档清单（中英路径、源版本、对应件状态、标识/状态对等、交叉链接、语义对等审查人）。15-vs-12 的上位规范冲突仍按 §2 披露，留 Issue #218 裁决；本段不自行裁定该冲突。
+- **R2/R3**（任意任务类）：完整 15 项全量结构，并执行适用的额外风险/双语要求；该要求与 R0/R1 结构义务一致，不构成 R2/R3 独有的结构豁免差异。
 - 定时提示词另按 AI-PROMPT-STD-001 §4 附加项（Owner key、automation ID、频率、时区、幂等、单次上限、无任务行为、权限预检）。
 
-> **上位冲突披露（待 Issue #218 adoption 决议）**：AI-STD-001 §5 另有一份 **15 项**强制清单（含第 15 项双语文档清单），与 AI-PROMPT-STD-001 §4 的 12 项切分口径不同。本细则以 12 项为主清单，将 AI-STD-001 §5 差异项（任务类/风险级、独立审查者角色、双语清单）并入 §2 开工必录与上述分级裁剪执行；两清单的统一列入批量 adoption 一并裁定。
+> **已裁定（2026-11-18）**：唯一完整强制结构为 AI-STD-001 §5 的 15 项，见 `AI-EXEC-UNIFICATION-RULING-001` RULING-01。AI-PROMPT-STD-001 §4 的 12 项完整保留为核心项，AI-STD-001 的第 13–15 项另列为强制附加项；六项/七项重点子集不构成删减或豁免。
 
 提示词审批沿用其 Step 6（A 起草跨 Owner 任务、accountable Owner 批领域语义；A 自己的任务不得自编自批）。**提示词批准 ≠ 实现批准 ≠ 合并批准**。
 
 ## 4. 执行中留痕（AI-PROC-001 Stage 4 + PR-GOVERNANCE-001 §2）
 
 - 重要决策、commit、变更路径、测试结果、阻塞、交接**随手**更新 Issue/PR，不许积压到结项；
-- 状态词表只用项目词表（**CHATGPT-GLOBAL-001 会话流程第 7 条**原文八态）：`PROPOSED / IMPLEMENTED / VERIFIED / REVIEWED / ACCEPTED / MERGED / BLOCKED / NOT RUN`，**不得混同**——"Implemented" 不是 "Verified"，"Reviewed" 不是 "Accepted"；（注：AI-STD-001 §10 词表用 `TESTED` 而非 `VERIFIED` 且不含 NOT RUN，两处差异列入 Issue #218 决议统一）；
+- 状态词表唯一主口径为 **CHATGPT-GLOBAL-001 会话流程第 7 条**八态：`PROPOSED / IMPLEMENTED / VERIFIED / REVIEWED / ACCEPTED / MERGED / BLOCKED / NOT RUN`。`VERIFIED` 是唯一验证阶段状态；`TESTED` 仅描述已执行的测试证据，不是生命周期状态。历史 `TESTED` 按证据描述映射，不自动等同于 `VERIFIED`。详见 `AI-EXEC-UNIFICATION-RULING-001` RULING-02；
 - 测试状态三值明示：`RUN/PASS`、`RUN/FAIL`、`NOT RUN（+原因）`。**NOT RUN 永远不得报为 PASS**（AI-STD-001 DoD 原文）；
 - 测试证据必须指向**准确 commit**；对其他 commit 的测试在证明差异无关并记录之前不算证据（AI-PROC-001 Stage 5）。
 

@@ -3,7 +3,7 @@
 
 - **Document ID:** AI-EXEC-001
 - **Version:** 1.1
-- **Status:** PROPOSED — v1.1 修订待 owner 采纳（日度治理窗口 RW-20261118；v1.0 ADOPTED 版继续有效至采纳时刻）
+- **Status:** ADOPTED — v1.0 adopted via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`); v1.1 adopted via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`), both merged 2026-11-18; this header records the two adoption events.
 - **Owner:** Integration Owner
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml) · 修订 Work Item [AID-2026-003](work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](ai-development-standard.md)、[AI-PROC-001](iteration-lifecycle.md)、[PR-GOVERNANCE-001](PR-GOVERNANCE-001.md)（ADOPTED）、[AI-PROMPT-STD-001](prompt-authoring-standard.md)、GOV-DOC-001
@@ -12,7 +12,7 @@
 > **定位**：本文不是新制度，而是让项目现有流程（AI-STD-001 / AI-PROC-001 / PR-GOVERNANCE-001）**真正运转起来**的执行细则。零脚本强制——PR-GOVERNANCE-001 §7 明确"模板/标签/评论/AI 自审不得冒充硬门禁"，本细则与之一致，只加运行纪律。
 > **本文不修改**任何上位文档条款；凡冲突处以上位文档为准，只补充"怎么跑、留什么痕、多久闭环"。
 
-**English summary.** Execution rules that operationalize the existing governance stack — no parallel institution, no script enforcement. Adds: (1) a Stage 0–8 run table binding each lifecycle stage to its Work Item state and evidence; (2) tracking carriers per AI-STD-001 §13 (Issue / PR / AID+manifest / INDEX / Closeout); (3) PR discipline = PR-GOVERNANCE-001 five dispositions + exact-Head gate + flow quotas (open PR ≤ 10, weekly integration window — running discipline, violations logged as findings, never hard-blocked); (4) review & exception rules (NR-001 independent session for R2/R3, explicit exception recording, ≤ 2/iteration); (5) a **daily governance window** (≤ 20 min, AI-STD-001 §11 loop materialized) as the only feedback→rules re-entry point; (6) a five-point Definition of Done for closing the ecosystem loop. Conflicts between upstream standards (prompt-structure 15-vs-12 items, TESTED-vs-VERIFIED vocabulary, SHA-256 mandatory-vs-NOT_VERIFIED) are recorded and deferred to the adoption decision in Issue #218. **v1.1 adds** (observation-report gaps ①③⑤⑥): a session kickoff loading obligation (ADOPTED ≠ wired-in), the finding minimum registration line (ID + severity + feedback destination), an independent-review acquisition bridge (source order + timeout → recorded exception), and an interop clause for later governance documents (declare SUPERSEDE/COMPLEMENT/PARALLEL).
+**English summary.** Execution rules that operationalize the existing governance stack — no parallel institution, no script enforcement. Adds: (1) a Stage 0–8 run table binding each lifecycle stage to its Work Item state and evidence; (2) tracking carriers per AI-STD-001 §13 (Issue / PR / AID+manifest / INDEX / Closeout); (3) PR discipline = PR-GOVERNANCE-001 five dispositions + exact-Head gate + flow quotas (open PR ≤ 10, weekly integration window — running discipline, violations logged as findings, never hard-blocked); (4) review & exception rules (NR-001 independent session for R2/R3, explicit exception recording, ≤ 2/iteration); (5) a **daily governance window** (≤ 20 min, AI-STD-001 §11 loop materialized) as the only feedback→rules re-entry point; (6) a five-point Definition of Done for closing the ecosystem loop. The three inter-standard conflicts are resolved by the binding Owner ruling `AI-EXEC-UNIFICATION-RULING-001` (2026-11-18): 15-item prompt structure, VERIFIED lifecycle vocabulary, and mandatory SHA-256 with NOT_VERIFIED treated only as an evidence limitation. **v1.1 adds** (observation-report gaps ①③⑤⑥): a session kickoff loading obligation (ADOPTED ≠ wired-in), the finding minimum registration line (ID + severity + feedback destination), an independent-review acquisition bridge (source order + timeout → recorded exception), and an interop clause for later governance documents (declare SUPERSEDE/COMPLEMENT/PARALLEL).
 
 ---
 
@@ -149,5 +149,5 @@
 
 - 本文**不修改** AI-STD-001 / AI-PROC-001 / PR-GOVERNANCE-001 / AI-PROMPT-STD-001 的任何条款定义；
 - 凡冲突处以上位文档为准；本文只补充"怎么跑、留什么痕、多久闭环"；
-- 已知上位冲突三处（AI-STD-001 §5 十五项 vs AI-PROMPT-STD-001 §4 十二项；§10 词表 TESTED vs 会话契约 VERIFIED；AI-STD-001 §5 SHA-256 必录 vs AI-PROMPT-STD-001 §5 NOT_VERIFIED）——已在 AI-EXEC-002 显式披露，统一口径列入 Issue #218 adoption 决议；
+- 上位规范三处冲突已由 Owner 于 2026-11-18 作出有约束力裁定，见 [AI-EXEC-UNIFICATION-RULING-001](AI-EXEC-UNIFICATION-RULING-001.md)：提示词统一为 15 项；验证阶段统一为 VERIFIED（TESTED 仅作测试证据描述）；SHA-256 必录，NOT_VERIFIED 仅表示证据限制，不构成豁免。该裁定以 SUPERSEDE 关系取代此前延期及临时执行口径；上位规范其他条款不变。
 - 本文自身的修订同样走 §7 日度治理窗口。
