@@ -42,7 +42,8 @@ impl SqliteEventStore {
 
     fn initialize(&self) -> Result<(), EventStoreError> {
         self.connection.execute_batch(
-            "CREATE TABLE IF NOT EXISTS accepted_events (
+            "BEGIN IMMEDIATE;
+             CREATE TABLE IF NOT EXISTS accepted_events (
                 event_row INTEGER PRIMARY KEY AUTOINCREMENT,
                 producer_actor_ref TEXT NOT NULL,
                 idempotency_key TEXT NOT NULL,
@@ -53,7 +54,15 @@ impl SqliteEventStore {
                 processing_state_json TEXT NOT NULL,
                 UNIQUE(producer_actor_ref, idempotency_key)
             );
-            "
+            CREATE TABLE IF NOT EXISTS compile_outbox (
+                outbox_row INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_row INTEGER NOT NULL UNIQUE REFERENCES accepted_events(event_row) ON DELETE RESTRICT,
+                intent_kind TEXT NOT NULL CHECK (intent_kind = 'compile'),
+                created_at TEXT NOT NULL
+            );
+            INSERT OR IGNORE INTO compile_outbox (event_row, intent_kind, created_at)
+                SELECT event_row, 'compile', accepted_at FROM accepted_events;
+            COMMIT;"
         ).map_err(|_| EventStoreError::TransactionUnavailable)
     }
 
@@ -172,6 +181,11 @@ impl EventStore for SqliteEventStore {
             ],
         ).map_err(|_| EventStoreError::TransactionUnavailable)?;
         let row_id = tx.last_insert_rowid();
+        tx.execute(
+            "INSERT INTO compile_outbox (event_row, intent_kind, created_at)
+             VALUES (?1, 'compile', ?2)",
+            params![row_id, accepted_at],
+        ).map_err(|_| EventStoreError::TransactionUnavailable)?;
         let receipt = Self::receipt(row_id, accepted_at, envelope.payload_digest, &state_json)?;
         tx.commit().map_err(|_| EventStoreError::TransactionUnavailable)?;
         Ok(receipt)
@@ -254,6 +268,12 @@ mod tests {
         let mut reopened = SqliteEventStore::open(&path).unwrap();
         assert_eq!(reopened.status(&first.event_id, &[scope()]).unwrap(), Some(first.clone()));
         assert_eq!(reopened.replay(&first.event_id, &[scope()]).unwrap(), first);
+        let outbox_count: i64 = reopened.connection.query_row(
+            "SELECT COUNT(*) FROM compile_outbox",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(outbox_count, 1);
         cleanup(&path);
     }
 
@@ -264,6 +284,12 @@ mod tests {
         let retry = store.accept(envelope("op-1", "digest-1"), &[scope()]).unwrap();
         assert_eq!(retry, first);
         assert_eq!(retry.processing_state, ProcessingState::Pending);
+        let outbox_count: i64 = store.connection.query_row(
+            "SELECT COUNT(*) FROM compile_outbox",
+            [],
+            |row| row.get(0),
+        ).unwrap();
+        assert_eq!(outbox_count, 1);
     }
 
     #[test]
