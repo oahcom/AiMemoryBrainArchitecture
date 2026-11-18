@@ -147,7 +147,7 @@ pub struct Claim {
     pub object_value: String,
     pub polarity: String,
     pub epistemic_status: EpistemicStatus,
-    pub confidence: Option<f64>,
+    pub confidence: Option<String>,
     pub temporal_ref: Option<TemporalRef>,
     pub asserted_at: String,
     pub scope_refs: Vec<ScopeRef>,
@@ -457,11 +457,15 @@ mod tests {
             version_number: 3,
             parent_version_id: Some(id("v1")),
             created_at: "now".into(),
+            author_kind: "test".into(),
+            change_reason: "update".into(),
             claims: vec![],
             entity_refs: vec![],
             relation_refs: vec![],
             source_refs: vec![],
             provenance_refs: vec![],
+            content_digest: "digest".into(),
+            schema_version: "1".into(),
         };
         assert_eq!(stale.validate_successor(&current), Err(DomainError::InvalidParent));
     }
@@ -546,9 +550,14 @@ mod tests {
     fn dm09_domain_types_do_not_require_storage_or_network() {
         let _: Memory = Memory {
             memory_id: id("memory"),
+            memory_kind: "knowledge".into(),
             scope_refs: vec![scope("s1")],
             current_version_id: None,
             lifecycle_state: MemoryLifecycle::Candidate,
+            retention_class: "default".into(),
+            sensitivity: "normal".into(),
+            created_at: "now".into(),
+            updated_at: "now".into(),
         };
     }
 
