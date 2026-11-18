@@ -44,7 +44,7 @@ prompt_bytes: 4997
 prompt_file_commit_sha: 53aae842c390eac6d54f937af6cd2744dbe8d09d
 prompt_file_commit_sha_note: main-landing commit of PR #230 containing the exact prompt bytes (blob 7224a5494b4b4cde7fd7ab58b857ac5607ef151e); authored at 997c2d06b04c2798a99e9737d9e72e69a2de8bd1 on branch ai/AID-2026-002/IO-exec-rules — identical bytes at both commits
 prompt_hash_note: SHA-256 over exact committed file bytes (UTF-8, no normalization) per AI-PROMPT-STD-001 §5; prompt-file commit SHA recorded in prompt_file_commit_sha and in the INDEX rows (remediation of owner-review finding OWN-REV-01, PR #230 comment #6971957837)
-bilingual_status: STALE_EXCEPTION_REGISTERED — English counterparts of the three new documents marked STALE per GOV-DOC-001 §5 (reason: owner-prioritized time-critical rollout; authoritative version: Chinese; due: 2026-12-02; owner: Integration Owner; tracking: Issue #218), registered in docs/translation-status.md
+bilingual_status: COMPLETE — all three source-aligned English counterparts are registered under AID-2026-004; original STALE exception approved through 2026-12-02, closed early on 2026-11-18; translation commits: AI-EXEC-001 e0e20ed30b4a21c2e26d0a4c0903a63c0293a46f, AI-EXEC-002 08b07d228dbe78a209a5af68c4988b292e65e9c8, AI-EXEC-ROLLOUT-001 e683ea275dfaf85fff0f9d18bb706d3bdb5d60a1; tracking Issue #218.
 acceptance_blocker: none for R1
 acceptance_authority: project owner; adoption recorded in Issue #218 comment #6971736655; merged at 53aae842c390eac6d54f937af6cd2744dbe8d09d
 verification_summary: escape-scanner zero residue on 4 fixed files (19 literal occurrences replaced); git diff --check clean; runtime/test suites NOT RUN (documentation-only change set)
