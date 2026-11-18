@@ -41,7 +41,9 @@ prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-002/prompt-v1.md
 prompt_sha256: 375d4f8dd5a050464905cc8b3caade683873935fe0cf08e9e9782d38a867846b
 prompt_bytes: 4997
-prompt_hash_note: SHA-256 over exact committed file bytes (UTF-8, no normalization) per AI-PROMPT-STD-001 §5; prompt-file commit SHA recorded in INDEX session row at closeout
+prompt_file_commit_sha: 53aae842c390eac6d54f937af6cd2744dbe8d09d
+prompt_file_commit_sha_note: main-landing commit of PR #230 containing the exact prompt bytes (blob 7224a5494b4b4cde7fd7ab58b857ac5607ef151e); authored at 997c2d06b04c2798a99e9737d9e72e69a2de8bd1 on branch ai/AID-2026-002/IO-exec-rules — identical bytes at both commits
+prompt_hash_note: SHA-256 over exact committed file bytes (UTF-8, no normalization) per AI-PROMPT-STD-001 §5; prompt-file commit SHA recorded in prompt_file_commit_sha and in the INDEX rows (remediation of owner-review finding OWN-REV-01, PR #230 comment #6971957837)
 bilingual_status: STALE_EXCEPTION_REGISTERED — English counterparts of the three new documents marked STALE per GOV-DOC-001 §5 (reason: owner-prioritized time-critical rollout; authoritative version: Chinese; due: 2026-12-02; owner: Integration Owner; tracking: Issue #218), registered in docs/translation-status.md
 acceptance_blocker: none for R1
 acceptance_authority: project owner; adoption recorded in Issue #218 comment #6971736655; merged at 53aae842c390eac6d54f937af6cd2744dbe8d09d
