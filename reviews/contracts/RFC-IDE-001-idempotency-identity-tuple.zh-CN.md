@@ -53,7 +53,7 @@ Digest 是幂等契约覆盖的规范化请求 Payload 的密码学摘要。它�
 
 | 请求情况 | 必须行为 |
 |---|---|
-| Producer Identity + Scope + Key + Digest 全部相同 | 返回原 Receipt 并标记为重放；不得再次追加 |
+| Producer Identity + Scope + Key + Digest 全部相同 | **CANDIDATE / TO_VALIDATE**——仅当 B/domain 与 I/security Owner 决定的 Scope 相等规则认定两个 Scope 引用相等时，才返回原 Receipt 并标记为重放、不得再次追加；该决议完成前，此行不得作为无条件规范性重放条件 |
 | Producer Identity + Scope + Key 相同，但 Digest 不同 | 返回 IDEMPOTENCY_KEY_CONFLICT；不得追加；不得替换 Receipt |
 | Producer Identity 不同，Scope + Key 相同 | 属于独立命名空间；不存在重放关系 |
 | Producer Identity + Key 相同，但 Scope 不同 | CANDIDATE / TO_VALIDATE——只有 B/domain 与 I/security 决定 Scope 身份/相等域后，才能判定为独立命名空间及禁止跨 Scope 披露 Receipt |
