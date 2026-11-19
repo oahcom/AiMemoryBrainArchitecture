@@ -2,8 +2,8 @@
 # AI 开发提示词执行细则
 
 - **Document ID:** AI-EXEC-002
-- **Version:** 1.1
-- **Status:** ADOPTED — v1.0 adopted via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`); v1.1 adopted via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`), both merged 2026-11-18; this header records the two adoption events.
+- **Version:** 1.2
+- **Status:** ADOPTED — v1.0 adopted via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`); v1.1 adopted via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`), both merged 2026-11-18; v1.2 (F-006 anchor revision: structure=seven sections per AI-STD-001 §5.1, 15/12 items reclassified as content obligations mapped per AI-PROMPT-STD-001 §4) pending adoption via this change set. This header records the adoption events.
 - **Owner:** Integration Owner
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml) · 修订 Work Item [AID-2026-003](work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](ai-development-standard.md) §5/§13、[AI-PROMPT-STD-001](prompt-authoring-standard.md)、[CHATGPT-GLOBAL-001](prompts/global/chatgpt-session-contract-v1.md)、[AI-PROC-001](iteration-lifecycle.md) Stage 2/6、GLB-DOC-001（政策 GOV-DOC-001）
@@ -11,7 +11,7 @@
 
 > **定位**：本文不是新规范，而是把项目现有提示词体系**真正跑起来**的执行细则。零脚本强制，约束靠提示词文本自我声明 + Issue/PR/Closeout 留痕。
 
-**English summary.** Every execution prompt MUST use the unified 15-item structure ruled in `AI-EXEC-UNIFICATION-RULING-001` (2026-11-18). The 12 items in AI-PROMPT-STD-001 §4 remain the mandatory core; AI-STD-001 §5 items 13–15 are additional mandatory sections. Six/seven-item focus subsets never waive structure. VERIFIED is the canonical lifecycle status; TESTED is evidence wording only. SHA-256 is mandatory for exact prompt bytes; NOT_VERIFIED records an evidence limitation and never waives the gate. T1/T2/T3 provenance, grandfather distinctions, traceability, review, finding fields, bilingual exceptions and Closeout remain governed by this document.
+**English summary.** Every execution prompt MUST use the seven structural sections defined by AI-STD-001 §5.1 (post-#269 canonical structure). The 12 items in AI-PROMPT-STD-001 §4 and AI-STD-001's former items 13–15 remain mandatory **content obligations** and MUST be mapped into those seven sections per the mapping rule in AI-PROMPT-STD-001 §4; they are not separate headings. Six/seven-item focus subsets never waive content obligations. VERIFIED is the canonical lifecycle status; TESTED is evidence wording only. SHA-256 is mandatory for exact prompt bytes; NOT_VERIFIED records an evidence limitation and never waives the gate. T1/T2/T3 provenance, grandfather distinctions, traceability, review, finding fields, bilingual exceptions and Closeout remain governed by this document.
 
 ---
 
@@ -47,9 +47,11 @@
 
 > **已裁定（2026-11-18）**：提示词出处及哈希统一执行 `AI-EXEC-UNIFICATION-RULING-001` RULING-03。SHA-256 对准确提示词字节必录；`NOT_VERIFIED` 仅用于如实说明无法计算/核验的证据限制，不构成豁免。未满足提示词完整性要求时不得进入 `PROMPT_READY`。
 
-## 3. 提示词强制结构（按 AI-PROMPT-STD-001 §4，不另立结构）
+## 3. 提示词强制结构（七个结构章节 + 十二/十五项内容义务映射，不另立结构）
 
-每份执行提示词必须包含其 12 项结构：
+> **结构权威**：结构章节以 AI-STD-001 §5.1 的七章节为准；内容义务以 AI-PROMPT-STD-001 §4 的映射规则为准——十二项内容必须按 §4 映射纳入七章节。下列 12 项 + 附加项为**内容义务清单**（不是独立标题）；映射后七章节为唯一结构层。
+
+每份执行提示词必须包含其 12 项内容义务（按 AI-PROMPT-STD-001 §4 映射入七章节）：
 
 1. Identity（Work Item ID、Issue、prompt ID/version/hash、Owner、会话角色）
 2. Objective（目标与可观察结果）
@@ -64,14 +66,14 @@
 11. Stop/escalation（停止条件与升级对象）
 12. Evidence and final report schema（证据与最终报告格式）
 
-**分级重点检查（不是结构豁免）**：
-- **所有执行提示词、所有风险级别与任务类**均必须保留上述 12 项完整结构；不得因 R0/R1、DOC 或代码会话而删除、合并或省略其余章节。
+**分级重点检查（不是内容义务豁免）**：
+- **所有执行提示词、所有风险级别与任务类**均必须保留上述 12 项完整内容义务（映射入七章节）；不得因 R0/R1、DOC 或代码会话而删除、合并或省略其余内容义务。
 - **R0/R1 文档会话重点子集**：1、2、5、8、11、12 六项须特别具体；这六项只是审查重点，不是六项替代模板。
-- **代码会话重点子集**：任务类 `IMPL/TEST/SEC/MIG/PERF` 的 1、2、3、5、8、9、12 七项须特别具体；其余五项仍必须保留在提示词中。R2/R3 无论任务类均须完整 12 项，并执行适用的额外风险/双语要求。
-- **R2/R3**（任意任务类）：完整 15 项全量结构，并执行适用的额外风险/双语要求；该要求与 R0/R1 结构义务一致，不构成 R2/R3 独有的结构豁免差异。
+- **代码会话重点子集**：任务类 `IMPL/TEST/SEC/MIG/PERF` 的 1、2、3、5、8、9、12 七项须特别具体；其余五项仍必须保留在提示词中。R2/R3 无论任务类均须完整 12 项内容义务，并执行适用的额外风险/双语要求。
+- **R2/R3**（任意任务类）：完整 15 项全量内容义务（映射入七章节），并执行适用的额外风险/双语要求；该要求与 R0/R1 内容义务一致，不构成 R2/R3 独有的义务豁免差异。
 - 定时提示词另按 AI-PROMPT-STD-001 §4 附加项（Owner key、automation ID、频率、时区、幂等、单次上限、无任务行为、权限预检）。
 
-> **已裁定（2026-11-18）**：唯一完整强制结构为 AI-STD-001 §5 的 15 项，见 `AI-EXEC-UNIFICATION-RULING-001` RULING-01。AI-PROMPT-STD-001 §4 的 12 项完整保留为核心项，AI-STD-001 的第 13–15 项另列为强制附加项；六项/七项重点子集不构成删减或豁免。
+> **已裁定（2026-11-18；2026-11-19 F-006 锚点修订）**：唯一完整强制**结构**为 AI-STD-001 §5.1 的七章节，见 `AI-EXEC-UNIFICATION-RULING-001` RULING-01（修订版）。AI-PROMPT-STD-001 §4 的 12 项与原第 13–15 项为强制**内容义务**，必须按 §4 映射纳入七章节；六项/七项重点子集不构成删减或豁免。precedence：结构层以 AI-STD-001 §5.1 为准，内容义务映射以 AI-PROMPT-STD-001 §4 为准。
 
 提示词审批沿用其 Step 6（A 起草跨 Owner 任务、accountable Owner 批领域语义；A 自己的任务不得自编自批）。**提示词批准 ≠ 实现批准 ≠ 合并批准**。
 
