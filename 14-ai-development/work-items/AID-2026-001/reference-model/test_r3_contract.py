@@ -1655,6 +1655,38 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         self.assertEqual(m.fence_generation, original_fence)
         self.assertEqual(m.commit_counter, original_counter)
 
+    def test_FSTOR_12_default_verifier_fails_closed(self):
+        """A production-default model must reject every credential.
+
+        FSTOR_10/11 inject TrustAllReceiptVerifier to isolate context
+        binding. This test proves that convenience is not the shipped
+        default: an unconfigured model has no commit authority at all.
+        """
+        m = R3Model("m")
+        self.assertIsInstance(m.receipt_verifier, RejectingReceiptVerifier)
+        m.phase = Phase.AUTHORIZED
+
+        supplied = auth(
+            nonce="foi-default-verifier-nonce",
+            operation_id="foi-default-verifier-op",
+            request_hash="foi-default-hash",
+        )
+
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                "foi-default-verifier-op",
+                "foi-default-attempt",
+                "foi-default-key",
+                "foi-default-hash",
+                auth=supplied,
+            )
+
+        self.assertIsNone(m.atomic_commit)
+        self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
+        self.assertEqual(m.fence_generation, 0)
+        self.assertEqual(m.retry_audit, [])
+        self.assertNotIn(supplied.nonce, m.nonce_registry)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
