@@ -10,17 +10,17 @@ Record 010 claims three things that its own target commit does not support.
 The test counts and the `OK` result for `b87a7ea` are accurate; the delta
 descriptions are not.
 
-| Record 010 claim | Actual state at `b87a7ea` |
-|---|---|
-| Item 2: `test_FSTOR_10` "now saves a full snapshot instead of three scalars" | Partly false. `before_nonce_registry = set(...)` and the audit copies were added, but `before_tuple = fresh.atomic_tuple` stayed a bare reference, and `operation_registry` / `inventory_revision` / `lifecycle` were not captured at all. |
-| Item 3: "…and a missing credential is rejected" | False. `_validate_atomic_commit()` used `if authorization.receipt is not None`, so an absent credential skipped the consistency block entirely and validated. |
-| Item 4: "`test_FSTOR_17` swaps the registry entry" | False. No `def test_FSTOR_17...` existed in the `b87a7ea` test blob; the only mention was a docstring reference inside `test_FSTOR_18`. |
+| # | Record 010 claim | Actual state at `b87a7ea` |
+|---|---|---|
+| 1 | Item 2: `test_FSTOR_10` "now saves a full snapshot instead of three scalars" | Partly false. `before_nonce_registry = set(...)` and the audit copies were added, but `before_tuple = fresh.atomic_tuple` stayed a bare reference, and `operation_registry` / `inventory_revision` / `lifecycle` were not captured at all. |
+| 2 | Item 3: "…and a missing credential is rejected" | False. `_validate_atomic_commit()` used `if authorization.receipt is not None`, so an absent credential skipped the consistency block entirely and validated. |
+| 3 | Item 4: "`test_FSTOR_17` swaps the registry entry" | False. No `def test_FSTOR_17...` existed in the `b87a7ea` test blob; the only mention was a docstring reference inside `test_FSTOR_18`. |
 
 ## Correction
 
-- Claims 1 and 3 were closed in code: F-D-NEW-04 at `5bdcd32`
-  (`execution-record-012.md`), F-D-NEW-05 likewise (FSTOR_17 restored).
-- Claim 3 was closed at `95347a5`: the guard is now unconditional and
+- Claim 1 was closed in code at `5bdcd32` (`execution-record-012.md`), and claim 3
+  likewise — `test_FSTOR_17` was restored in the same commit.
+- Claim 2 was closed at `95347a5`: the guard is now unconditional and
   `test_FSTOR_19_missing_credential_is_rejected` proves it
   (`execution-record-013.md`).
 - The identity-correct record for the current tip is
