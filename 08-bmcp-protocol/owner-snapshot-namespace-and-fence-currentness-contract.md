@@ -1,6 +1,7 @@
 # Owner Snapshot Namespace and Fence Currentness Contract / 所有者快照命名空间与 Fence 当前性契约
 
-- Contract version / 契约版本: **1.1.0 (CANDIDATE)**
+- Contract version / 契约版本: **1.2.0 (CANDIDATE)**
+- Revision / 修订: 1.2.0 incorporates review round 2 findings (canonicalization pipeline reordered so percent-decoding precedes case folding and NFC, removing a non-uniqueness defect between `%41UTH-A` and `AUTH-A`; step 1 parse declared single authoritative; decoded-UTF-8 validity and encoded-delimiter rejection made explicit; section 5 English list renumbered 1-11) / 1.2.0 吸收第 2 轮审查发现（规范化流水线重排：百分号解码先于大小写折叠与 NFC，消除 `%41UTH-A` 与 `AUTH-A` 产生不同 canonical 的非唯一性缺陷；第 1 步解析声明为单次权威；显式规定解码后 UTF-8 合法性校验与编码分隔符注入拒绝；第 5 节英文列表重编号为 1–11）
 - Revision / 修订: 1.1.0 incorporates review round 1 findings (ledger lifecycle classification unified with the section 8 decision table; Authority-level authorization revocation restored; prohibition on automatic rollback of executed fade/forget restored; percent-encoding character set, leading-zero policy, Fence replacement classification and state-version concurrency boundary made normative) / 1.1.0 吸收第 1 轮审查发现（Ledger 生命周期判定与第 8 节判定表统一；恢复 Authority 级授权撤销规则；恢复已执行 fade/forget 不得自动回滚的约束；百分号编码字符集、前导零策略、Fence 替换判定及状态版本并发边界转为规范要求）
 - Status / 状态: **DECIDED / IMPLEMENTATION NOT VERIFIED / CONFORMANCE NOT RUN**
 - Source decisions / 决定来源: Issue #25 comments `7008208052` (NS-PR-01..05), `7008249894` (FC-01..04), `7009205234` (four decisions)
@@ -16,8 +17,9 @@
 **1. Document identity and status**
 
 - Document name: Owner Snapshot Namespace and Fence Currentness Contract
-- Version: 1.1.0 (CANDIDATE)
+- Version: 1.2.0 (CANDIDATE)
 - Status: Decisions made, **implementation unverified**, **no consistency run executed**.
+- Revision 1.2.0 incorporates review round 2 findings: the canonicalization pipeline is reordered so that percent-decoding precedes case folding and NFC, eliminating a non-uniqueness defect where an encoded segment (`%41UTH-A`) and its literal equivalent (`AUTH-A`) produced different canonical forms; the parsed segments from step 1 are declared the single authoritative parse; UTF-8 validity of decoded bytes and rule-out of encoded-delimiter injection are made explicit; and the section 5 English list is renumbered so that items run 1-11 without a duplicate.
 - Revision 1.1.0 incorporates review round 1 findings: ledger lifecycle state classification unified with the section 8 decision table; Authority-level authorization revocation restored; the prohibition on automatic rollback of executed fade/forget restored; percent-encoding character set, high-water leading-zero policy, Fence replacement classification, and state-version concurrency boundary made normative.
 - This document records D-side normative decisions and constraints; it does not constitute evidence of completed implementation.
 - This document is not a human Owner signature, is not a contract freeze, and must not be used as evidence of production readiness.
@@ -101,13 +103,13 @@ Where a Ledger lifecycle condition and a namespace-identity staleness condition 
 
 **4. Canonicalization algorithm**
 
-All namespace identifiers MUST be canonicalized in the following six steps, in exactly this order:
+All namespace identifiers MUST be canonicalized in the following six steps, in exactly this order. Decoding MUST precede case folding and Unicode normalization; applying case folding or NFC to a still-encoded segment is prohibited.
 
-1. **Trim:** Remove leading and trailing Unicode White_Space from the entire input and each segment. Internal whitespace MUST NOT be automatically removed.
-2. **Case:** Apply Unicode Default Case Folding to the first three segments. The fourth, version segment MUST NOT undergo case folding.
-3. **Unicode normalization:** Apply NFC normalization to the first three segments.
-4. **Delimiter handling:** Use ASCII `/` as the only segment delimiter. Exactly four segments are required. Empty segments and repeated delimiters are prohibited.
-5. **Escaping:** Split the input on ASCII `/` before any percent-decoding, so that an encoded delimiter (`%2F`) never introduces a segment boundary. Then percent-decode each segment exactly once. Then re-encode the resulting bytes using UTF-8: bytes belonging to the RFC 3986 unreserved set (`ALPHA / DIGIT / "-" / "." / "_" / "~"`) MUST be emitted literally; every other byte MUST be emitted as uppercase `%HH`. Lowercase `%hh` MUST be normalized to uppercase. Double decoding and encoded delimiter injection are prohibited. A `%` that does not begin a valid `%HH` triplet MUST cause rejection, not pass-through.
+1. **Trim and split (single authoritative parse):** Remove leading and trailing Unicode White_Space from the entire input. Split the result on ASCII `/`, which is the only permitted segment delimiter; exactly four segments are required, and empty segments and repeated delimiters are prohibited. Remove leading and trailing Unicode White_Space from each resulting segment. A segment that is empty after trimming MUST also be rejected. Internal whitespace MUST NOT be removed. The four segments produced here are the single authoritative parse for steps 2 through 6; no later step may re-parse the input.
+2. **Decode, exactly once:** Percent-decode each of the four segments one time only. A `%` that does not begin a valid `%HH` triplet MUST be rejected, not passed through. The decoded bytes MUST form valid UTF-8; otherwise the input MUST be rejected. Double decoding is prohibited. Because splitting has already occurred, a segment may decode into a literal `/`: that is encoded-delimiter injection and MUST be rejected rather than accepted as ordinary content.
+3. **Case:** Apply Unicode Default Case Folding to the first three segments **after decoding**. The fourth, version segment MUST NOT undergo case folding.
+4. **Unicode normalization:** Apply NFC normalization to the first three decoded segments.
+5. **Re-encode:** Emit each segment as its UTF-8 bytes, with bytes in the RFC 3986 unreserved set (`ALPHA / DIGIT / "-" / "." / "_" / "~"`) written literally and every other byte written as uppercase `%HH`. Lowercase `%hh` in the input MUST be normalized to uppercase. Literal input and percent-encoded input that decode to the same text MUST produce an identical canonical representation; the `%41UTH-A` / `AUTH-A` pair below is a required conformance vector.
 6. **Version segment handling:** The fourth segment MUST conform to `vMAJOR.MINOR.PATCH`. All three components MUST be non-negative decimal integers without leading zeros, except for the value zero itself.
 
 Canonicalization MUST produce a unique and reproducible canonical representation.
@@ -119,13 +121,24 @@ Equivalent input examples:
 | `AUTH-A/Class-X/Ledger-1/v1.2.0` | `auth-a/class-x/ledger-1/v1.2.0` |
 | ` AUTH-A / CLASS-X / LEDGER-1 / v1.2.0 ` | `auth-a/class-x/ledger-1/v1.2.0` |
 | `auth-a/class-x/ledger-1/v1.2.0` | `auth-a/class-x/ledger-1/v1.2.0` |
+| `%41UTH-A/Class-X/Ledger-1/v1.2.0` | `auth-a/class-x/ledger-1/v1.2.0` |
+| `auth-a/class-x/ledger%2D1/v1.2.0` | `auth-a/class-x/ledger-1/v1.2.0` |
+| `auth-a/class-x/ledger%2d1/v1.2.0` | `auth-a/class-x/ledger-1/v1.2.0` |
 
 Inputs that MUST be considered non-equivalent:
 
 1. `auth-a/class-x/ledger-1/v1.2.0` and `auth-a/class-x/ledger-1/v1.3.0`: different contract versions.
 2. `auth-a/class-x/ledger-1/v1.2.0` and `auth-a/class-x/ledger-2/v1.2.0`: different Ledger identities.
 
-Invalid segment counts, invalid version formats, empty segments, and inputs that cannot be legally decoded MUST be rejected. They MUST NOT be converted into valid identities through permissive parsing.
+Inputs that MUST be rejected as `INVALID`:
+
+1. Any segment count other than four, empty segments, and repeated delimiters.
+2. Any version segment not conforming to `vMAJOR.MINOR.PATCH`.
+3. Any `%` not forming a valid `%HH` triplet.
+4. Any segment whose decoded bytes are not valid UTF-8.
+5. Any segment that decodes to content containing a literal `/` (encoded-delimiter injection), for example `auth-a/class-x/led%2Fa/v1.2.0`.
+
+Rejected inputs MUST NOT be converted into valid identities through permissive parsing.
 
 **5. Dual high-water comparison**
 
@@ -154,7 +167,7 @@ Additional requirements:
 8. The canonical decimal rendering of a high-water value MUST NOT contain leading zeros. Re-emitting a received value in canonical form MUST preserve its numeric value exactly.
 9. A leading `+` or `-` sign, surrounding whitespace, thousands separators, exponent notation, and fractional parts MUST be classified as `INVALID`. They MUST NOT be normalized into a valid value.
 10. Implementations MUST support values at least up to 2^63 - 1. A value exceeding the implementation's supported range MUST be classified as `INVALID`; silent truncation, wraparound, and floating-point coercion are prohibited.
-6. The existence of a field or the ability to parse a number MUST NOT establish that a Fence was installed or remains current.
+11. The existence of a field or the ability to parse a number MUST NOT establish that a Fence was installed or remains current.
 
 **6. Currentness determination**
 
@@ -171,10 +184,7 @@ Currentness MUST use event-driven invalidation and authoritative state-version c
 7. A Fence that has been replaced by a newer Fence, without an explicit revocation of the superseded Fence, MUST result in `STALE`, not `INVALID`.
 8. Inability to obtain the authoritative current state version MUST result in `UNKNOWN`.
 9. Local clocks, cache timestamps, and proof-file timestamps MUST NOT substitute for the authoritative state version.
-
-Concurrency boundary:
-
-10. The revocation/replacement check and the state-version comparison MUST be evaluated against a single authoritative state version read. Splitting them across two reads is prohibited.
+10. **Concurrency boundary.** The revocation/replacement check and the state-version comparison MUST be evaluated against a single authoritative state version read. Splitting them across two reads is prohibited.
 11. A proof MUST be re-evaluated against the authoritative state version at every use. Caching a `VALID` determination across distinct operations is prohibited.
 12. When the state version advances between proof issuance and verification, the verification result MUST reflect the version actually read. The verifier MUST NOT retry until a matching version is observed in order to obtain `VALID`.
 
@@ -288,7 +298,8 @@ Before claiming conformance to this contract, an implementation party MUST compl
 **1. 文档标识与状态**
 
 - 文档名：Owner Snapshot Namespace and Fence Currentness Contract
-- 版本：1.1.0（CANDIDATE）
+- 版本：1.2.0（CANDIDATE）
+- 修订：1.2.0 吸收第 2 轮审查发现——规范化流水线重排为「解码先于大小写折叠与 NFC」，消除 `%41UTH-A` 与 `AUTH-A` 产生不同 canonical 的非唯一性缺陷；第 1 步解析声明为第 2–6 步的单次权威解析；显式规定解码后字节必须为合法 UTF-8、编码分隔符注入必须拒绝；第 5 节英文列表重编号为 1–11（消除重复编号 6）。
 - 修订：1.1.0 吸收第 1 轮审查发现——Ledger 生命周期判定与第 8 节判定表统一；恢复 Authority 级授权撤销规则；恢复已执行 fade/forget 不得自动回滚的约束；百分号编码字符集、前导零策略、Fence 替换判定及状态版本并发边界转为规范要求。
 - 状态：决定已作出、**实现未验证**、**未执行任何一致性运行**。
 - 本文记录 D 侧规范决定及其约束，不构成实现完成证明。
@@ -373,13 +384,13 @@ Ledger 生命周期状态不得映射为 `STALE`。以下映射为规范性要�
 
 **4. Canonicalization 算法**
 
-所有命名空间标识符必须按以下六步顺序规范化：
+所有命名空间标识符必须按以下六步顺序规范化。百分号解码必须先于大小写折叠与 Unicode 规范化；对仍处于编码态的段执行大小写折叠或 NFC 属禁止行为。
 
-1. **Trim**：移除整个输入及各段首尾 Unicode White_Space；内部空白不自动删除。
-2. **大小写**：对前三段执行 Unicode Default Case Folding；第四段版本段不执行大小写折叠。
-3. **Unicode 规范化**：对前三段执行 NFC 规范化。
-4. **分隔符处理**：使用 ASCII `/` 作为唯一段分隔符；必须恰好四段，禁止空段及重复分隔符。
-5. **转义**：必须先按 ASCII `/` 拆段，再做任何百分号解码，使编码后的分隔符（`%2F`）永不引入段边界；随后对每段恰好解码一次；然后将所得字节按 UTF-8 重新编码：属于 RFC 3986 unreserved 集合（`ALPHA / DIGIT / "-" / "." / "_" / "~"`）的字节必须原样输出，其余所有字节必须以大写 `%HH` 输出。小写 `%hh` 必须归一化为大写。禁止二次解码，禁止编码后的分隔符注入。不以合法 `%HH` 三元组开头的 `%` 必须导致拒绝，不得原样透传。
+1. **Trim 与拆段（单次权威解析）**：先移除整个输入首尾的 Unicode White_Space；再按 ASCII `/` 拆段，`/` 是唯一允许的段分隔符，必须恰好四段，禁止空段及重复分隔符；然后移除各段首尾的 Unicode White_Space。Trim 后为空的段同样必须拒绝。内部空白不得删除。此处得到的四段是第 2 至第 6 步的唯一权威解析结果，后续任何步骤不得重新解析输入。
+2. **解码，且仅一次**：对四段各执行一次百分号解码。不以合法 `%HH` 三元组开头的 `%` 必须拒绝，不得原样透传。解码所得字节必须构成合法 UTF-8，否则输入必须拒绝。禁止二次解码。由于拆段已先行完成，某段解码后可能得到字面 `/`：这属于编码后的分隔符注入，必须拒绝，不得作为普通内容接受。
+3. **大小写**：对**解码后**的前三段执行 Unicode Default Case Folding；第四段版本段不执行大小写折叠。
+4. **Unicode 规范化**：对解码后的前三段执行 NFC 规范化。
+5. **重新编码**：将各段按其 UTF-8 字节输出，属于 RFC 3986 unreserved 集合（`ALPHA / DIGIT / "-" / "." / "_" / "~"`）的字节原样写出，其余所有字节以大写 `%HH` 写出。输入中的小写 `%hh` 必须归一化为大写。字面输入与解码后文本相同的百分号编码输入，必须产生完全相同的 canonical representation；下表中的 `%41UTH-A` / `AUTH-A` 为必需的一致性向量。
 6. **版本段处理**：第四段必须符合 `vMAJOR.MINOR.PATCH` 格式，三个部分均为非负十进制整数，不允许前导零，数字零本身除外。
 
 Canonicalization 必须产生唯一、可重复的 canonical representation。
@@ -391,13 +402,24 @@ Canonicalization 必须产生唯一、可重复的 canonical representation。
 | `AUTH-A/Class-X/Ledger-1/v1.2.0` | `auth-a/class-x/ledger-1/v1.2.0` |
 | ` AUTH-A / CLASS-X / LEDGER-1 / v1.2.0 ` | `auth-a/class-x/ledger-1/v1.2.0` |
 | `auth-a/class-x/ledger-1/v1.2.0` | `auth-a/class-x/ledger-1/v1.2.0` |
+| `%41UTH-A/Class-X/Ledger-1/v1.2.0` | `auth-a/class-x/ledger-1/v1.2.0` |
+| `auth-a/class-x/ledger%2D1/v1.2.0` | `auth-a/class-x/ledger-1/v1.2.0` |
+| `auth-a/class-x/ledger%2d1/v1.2.0` | `auth-a/class-x/ledger-1/v1.2.0` |
 
 必须判定不等价：
 
 1. `auth-a/class-x/ledger-1/v1.2.0` 与 `auth-a/class-x/ledger-1/v1.3.0`：契约版本不同。
 2. `auth-a/class-x/ledger-1/v1.2.0` 与 `auth-a/class-x/ledger-2/v1.2.0`：Ledger identity 不同。
 
-非法段数、非法版本格式、空段及无法合法解码的输入必须拒绝，不得通过宽松解析转换为合法身份。
+必须判定为 `INVALID` 并拒绝：
+
+1. 段数不为四、存在空段或重复分隔符。
+2. 版本段不符合 `vMAJOR.MINOR.PATCH`。
+3. 存在不构成合法 `%HH` 三元组的 `%`。
+4. 任一段解码所得字节不是合法 UTF-8。
+5. 任一段解码后内容包含字面 `/`（编码后的分隔符注入），例如 `auth-a/class-x/led%2Fa/v1.2.0`。
+
+被拒绝的输入不得通过宽松解析转换为合法身份。
 
 **5. 双高水位比较**
 
@@ -443,10 +465,7 @@ ForgetFence Currentness Proof 不采用显式 TTL，不设置时间有效期上�
 7. Fence 被更新的 Fence 替换、且被替换的 Fence 未被明确撤销时，证明判定为 `STALE`，不得判定为 `INVALID`。
 8. 无法取得权威当前状态版本时，判定为 `UNKNOWN`。
 9. 禁止使用本地时钟、缓存时间或证明文件时间替代权威状态版本。
-
-并发校验边界：
-
-10. 撤销/替换检查与状态版本比对必须针对同一次权威状态版本读取完成；禁止将其拆分到两次读取。
+10. **并发校验边界。** 撤销/替换检查与状态版本比对必须针对同一次权威状态版本读取完成；禁止将其拆分到两次读取。
 11. 证明必须在每次使用时对权威状态版本重新求值；禁止将 `VALID` 判定跨不同操作缓存复用。
 12. 当状态版本在签发与验签之间推进时，验签结果必须反映实际读取到的版本；验签方不得为取得 `VALID` 而反复重读直至观察到匹配版本。
 
