@@ -91,30 +91,56 @@ Risk levels:
 
 R2/R3 require explicit impact analysis and named reviewers. R3 requires security/domain specialist review and reproducible test evidence before acceptance.
 
-### 4.1 Work item lifecycle
+### 4.1 Work item lifecycle / 工作项生命周期
 
-| State | Meaning | Exit evidence |
+AI-STD-001 uses six operational phases to reduce status-label complexity. The original twelve checkpoints remain distinct as gate milestones and MUST be preserved in lifecycle.source_status and lifecycle.gates. This mapping becomes normative only after independent review and Owner acceptance.
+
+| Operational phase | Source checkpoint(s) | Meaning / 含义 |
 |---|---|---|
-| PROPOSED | Outcome and motivation recorded | Sponsor and candidate Owner identified |
-| ANALYZED | Scope, dependencies, risks and alternatives analyzed | Impact map and acceptance criteria |
-| PROMPT_READY | Prompt reviewed and frozen for execution | Prompt ID/version/hash and base refs |
-| READY | Dependencies and contracts sufficient to start | Owner accepts task; blockers explicit |
-| IN_PROGRESS | AI implementation underway | Branch and progress record |
-| IMPLEMENTED | Change submitted by Owner | Commit SHA, changed-file list, self-check |
-| VERIFIED | Automated/manual checks executed | Commands, environment, logs/results |
-| REVIEWED | Independent review completed | Review report and finding disposition |
-| INTEGRATION_READY | Cross-module contracts compatible | Integration evidence and updated registry |
-| ACCEPTED | Acceptance authority approves | Explicit acceptance record |
-| MERGED | Approved change integrated | Merge commit and target branch |
-| CLOSED | Traceability and follow-up complete | Work item index updated |
+| INTAKE | PROPOSED, ANALYZED, PROMPT_READY | Proposal, analysis and prompt preparation / 提议、分析与提示词准备 |
+| READY | READY | Execution prerequisites satisfied / 执行前置条件满足 |
+| ACTIVE | IN_PROGRESS, IMPLEMENTED | Implementation underway or submitted / 实现进行中或已提交 |
+| VALIDATION | VERIFIED, REVIEWED, INTEGRATION_READY | Verification, independent review and integration-readiness gates / 验证、独立评审和集成就绪门禁 |
+| ACCEPTANCE | ACCEPTED | Explicit acceptance-authority decision / 接受权限主体明确决策 |
+| COMPLETE | MERGED, CLOSED | Merge and closeout milestones / 合并与结项检查点 |
 
-A task MUST NOT skip a required gate. “Implemented” is not “Verified”; “Verified” is not “Reviewed”; “Reviewed” is not “Accepted”; “Accepted” is not “Merged”.
+The phase is a grouping, NOT a gate result. VERIFIED, REVIEWED and INTEGRATION_READY require separate evidence. ACCEPTED, MERGED and CLOSED remain distinct decisions/milestones and MUST NOT be inferred from one another. See status-migration-map.en.md and status-migration-map.zh-CN.md.
 
-### 4.2 Blocked and rejected states
+六个操作阶段仅用于归并状态标签，不代表门禁自动通过。VERIFIED、REVIEWED、INTEGRATION_READY 必须分别保留证据。ACCEPTED、MERGED、CLOSED 仍是独立决策/里程碑，不得相互推断。映射细节见中英文迁移表。
 
-Use **BLOCKED** when a required contract, decision, permission, dependency or environment is unavailable. Record the blocker owner and resolution condition.
+### 4.2 Independent gate evidence / 独立门禁证据
 
-Use **REJECTED** when the proposed approach is invalid or unacceptable. Preserve the prompt and review record; do not erase failed attempts.
+The following gates remain mandatory and independently auditable; phase grouping does not waive, combine or auto-pass them:
+- VERIFIED: exact commands, environment, tested commit SHA, expected/actual results and logs.
+- REVIEWED: reviewer separate from implementer, exact reviewed Head, report and finding dispositions.
+- INTEGRATION_READY: cross-module compatibility evidence and required registry updates.
+- ACCEPTED: explicit decision by the authorized acceptance authority; no self-acceptance.
+- MERGED: target branch and merge commit SHA, after required approval.
+- CLOSED: traceability/index update and closeout evidence.
+
+以下门禁仍然强制且必须独立审计；阶段归并不得豁免、合并或自动通过：
+- VERIFIED：准确命令、环境、测试 Commit SHA、预期/实际结果及日志。
+- REVIEWED：与实现者分离的 Reviewer、准确审查 Head、报告及发现处置。
+- INTEGRATION_READY：跨模块兼容证据及必要的注册表更新。
+- ACCEPTED：获授权接受主体的明确决定，不允许自我接受。
+- MERGED：在所需批准后记录目标分支和 Merge Commit SHA。
+- CLOSED：可追溯性/索引更新和结项证据。
+
+### 4.3 Orthogonal markers and independent lifecycles / 正交标记与独立生命周期
+
+BLOCKED and REJECTED remain orthogonal markers, not operational phases. They may accompany any phase and MUST retain reason, responsible party, known timestamp and resolution/disposition evidence. They MUST NOT be silently converted into a normal phase.
+
+BLOCKED 和 REJECTED 保留为正交标记，而非操作阶段。它们可伴随任一阶段，并 MUST 保留原因、责任方、已知时间及解决/处置证据，不得静默转换为正常阶段。
+
+Architecture decision records retain their own independent lifecycle and status vocabulary. This work item MUST NOT migrate, rename or collapse architecture-decision states. Owner role definitions, including Owner G's charter, are unchanged.
+
+架构决策记录继续使用独立生命周期和状态词汇。本工作项 MUST NOT 迁移、重命名或合并架构决策状态。包括 Owner G Charter 在内的 Owner 角色定义均不变。
+
+### 4.4 Migration safety / 迁移安全
+
+Migration MUST be dry-run by default, additive, idempotent, backup-first and reversible. Preserve exact source status and all historical evidence; unknown or ambiguous values fail closed and remain unchanged. Never infer missing review, acceptance, integration, merge or closeout evidence. The original status field remains intact during compatibility migration; the six-phase value is added under lifecycle.phase. A later canonical-field cutover requires separate authorization and an inventory of all readers, writers and historical records.
+
+迁移 MUST 默认 dry-run、增量、幂等、先备份且可回滚。必须保留精确源状态及全部历史证据；未知或有歧义的值 fail closed 并保持不变。不得推断缺失的评审、接受、集成、合并或结项证据。兼容阶段保留原始 status 字段，六阶段值新增于 lifecycle.phase。后续规范字段切换必须另行授权，并先盘点所有读写方及历史记录。
 
 ## 5. Prompt engineering as controlled engineering / 提示词工程化
 
