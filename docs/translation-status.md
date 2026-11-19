@@ -337,3 +337,13 @@ The earlier OPEN entry is superseded. C's separate cross-authority causal-order 
 - PR #28 current head: `3b5ce54c1687e9c7591f9e6e70e5c24f2afa465d`; workflow runs `44072524932` (#116) and `44072518263` (#115) both completed SUCCESS; job `GOV-DOC-001 structural checks` succeeded.
 - Structural gate remains limited to paired-document/manifest structure. It does not establish translation semantic approval, Owner signature, schema freeze, implementation, L3/L4 conformance or production readiness.
 - PR #28 remains Draft/Open; 158 files changed; no merge or production activation authorized.
+
+
+## 18. FIX-2026-P1-T1 prompt template bilingual companions — remediation
+
+- Work Item: FIX-2026-P1-T1 / Issue #268. The original PR #269 was merged into main at `cd3f5d7191000f6414134ef235cac94f33ca87e8` despite the independent review disposition requiring it to remain Draft/Open; this entry records follow-up remediation only and does not retroactively authorize that merge.
+- Paired artifacts: `prompts/00-setup/TEMPLATE-v2.md` ↔ `prompts/00-setup/TEMPLATE-v2.zh-CN.md`; `prompts/00-setup/MIGRATION-GUIDE.md` ↔ `prompts/00-setup/MIGRATION-GUIDE.zh-CN.md`.
+- Reciprocal links are present in each pair. Both language versions preserve the same seven-section structure, IDs, status, mandatory constraints, evidence rules, migration mapping, source provenance, and NOT RUN / NOT APPLICABLE semantics.
+- Structural parity self-check: 7/7 numbered core sections in both template versions; 6/6 top-level numbered sections in both migration-guide versions; matching IDs/version/status and reciprocal links. This is implementer self-check only, NOT independent semantic-parity approval.
+- Exact-head semantic parity review: PENDING independent reviewer. GOV-DOC-001 structural/link checker and repository automated tests: NOT RUN in this remediation commit.
+- The prompt-authoring standard §4 was also reconciled bilingually in its existing bilingual source artifact; its twelve mandatory content requirements are mapped into the seven structural sections. No governance adoption or Owner acceptance is implied.
