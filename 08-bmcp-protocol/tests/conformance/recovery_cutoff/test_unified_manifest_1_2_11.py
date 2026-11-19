@@ -85,6 +85,8 @@ class Schema1211Tests(unittest.TestCase):
     def setUp(self):self.m,self.prefix,self.admissions,self.snaps,self.proofs=fixtures()
     def validate_union(self,*args,**kwargs):
         kwargs["verify_membership_proof"]=lambda proof,owner,snapshot: proof.get("test_signature_verified") is True
+        kwargs["verify_owner_snapshot"]=lambda snapshot,owner: True
+        kwargs["allow_legacy_d_snapshot"]=True  # Historical 1.2.11 fixtures intentionally use the old five-field D shape.
         return _validate_union(*args,**kwargs)
     def msg(self,t):
         return next(x["allOf"][1] for x in self.schema["oneOf"] if x["allOf"][1]["properties"]["message_type"]["const"]==t)

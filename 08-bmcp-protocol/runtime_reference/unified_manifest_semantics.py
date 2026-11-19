@@ -38,7 +38,7 @@ def member_key(m):
     return ("9","")
 
 
-def validate_owner_snapshot(snapshot, owner):
+def validate_owner_snapshot(snapshot, owner, allow_legacy_d_snapshot=False):
     fields={
       "I":{"receipt_issue_high_water","receipt_consume_high_water","inventory_epoch_ref",
            "registry_snapshot_digest","relevant_entry_set_root"},
@@ -62,7 +62,9 @@ def validate_owner_snapshot(snapshot, owner):
         if any(not isinstance(v,str) or not v for v in values.values()):
             return INVALID
         legacy_digest=td("OWNER-SPECIFIC-HIGH-WATERS",values)
-        return UNKNOWN if snapshot.get("owner_specific_high_waters_digest")==legacy_digest else INVALID
+        if snapshot.get("owner_specific_high_waters_digest")!=legacy_digest:
+            return INVALID
+        return VALID if allow_legacy_d_snapshot else UNKNOWN
     if set(values)!=fields[owner]:
         return INVALID
     if any(not isinstance(v,str) or not v for v in values.values()):
@@ -134,7 +136,7 @@ def validate_owner_snapshot_membership_proof_payload(proof, row, snapshot, verif
         return INVALID
     return VALID
 
-def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=None, complete=True, verify_membership_proof=None):
+def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=None, complete=True, verify_membership_proof=None, verify_owner_snapshot=None, allow_legacy_d_snapshot=False):
     if not complete:
         return UNKNOWN
     if membership_proofs is None:
@@ -148,9 +150,21 @@ def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=
             return INVALID
         if not s.get("ledger_available") or not s.get("pagination_complete"):
             return UNKNOWN
-        snapshot_result=validate_owner_snapshot(s,owner)
+        snapshot_result=validate_owner_snapshot(s,owner,allow_legacy_d_snapshot=allow_legacy_d_snapshot)
         if snapshot_result!=VALID:
             return snapshot_result
+        # Local cache flags are not authority. Attestation, anti-rollback and
+        # currentness must be established by the owner-authoritative verifier.
+        if not callable(verify_owner_snapshot):
+            return UNKNOWN
+        try:
+            owner_verified=verify_owner_snapshot(s,owner)
+        except Exception:
+            return UNKNOWN
+        if owner_verified is None or owner_verified==UNKNOWN:
+            return UNKNOWN
+        if owner_verified is not True:
+            return INVALID
     members=m.get("manifest_members")
     if not isinstance(members,list) or members != sorted(members,key=member_key):
         return INVALID

@@ -53,11 +53,27 @@ class DOwnerSnapshotAlignmentTests(unittest.TestCase):
         s["owner_specific_high_waters"]["forget_fence_generation_high_water"]="9"; s["owner_specific_high_waters_digest"]=td("OWNER-SPECIFIC-HIGH-WATERS",s["owner_specific_high_waters"])
         self.assertEqual(validate_owner_snapshot(s,"D"),VALID)
     def test_06_composed_validate_union_accepts_eight_field_d_snapshot(self):
-        snapshots={owner:snapshot(owner) for owner in ("I","D","C")}; self.assertEqual(validate_union(composed_manifest(snapshots),[],[],snapshots,membership_proofs={}),VALID)
+        snapshots={owner:snapshot(owner) for owner in ("I","D","C")}; self.assertEqual(validate_union(composed_manifest(snapshots),[],[],snapshots,membership_proofs={},verify_owner_snapshot=lambda *_: True),VALID)
     def test_07_composed_validate_union_fails_closed_for_legacy_d_snapshot(self):
         snapshots={owner:snapshot(owner) for owner in ("I","D","C")}; snapshots["D"]=snapshot("D",True)
         self.assertEqual(validate_union(composed_manifest(snapshots),[],[],snapshots,membership_proofs={}),UNKNOWN)
-    def test_08_digest_mismatch_is_invalid(self):
+    def test_08_missing_owner_authority_callback_is_unknown(self):
+        snapshots={owner:snapshot(owner) for owner in ("I","D","C")}
+        self.assertEqual(validate_union(composed_manifest(snapshots),[],[],snapshots,membership_proofs={}),UNKNOWN)
+
+    def test_09_owner_currentness_unavailable_or_exception_is_unknown(self):
+        snapshots={owner:snapshot(owner) for owner in ("I","D","C")}
+        for callback in (lambda *_: UNKNOWN, lambda *_: (_ for _ in ()).throw(RuntimeError("authority unavailable"))):
+            self.assertEqual(validate_union(composed_manifest(snapshots),[],[],snapshots,membership_proofs={},verify_owner_snapshot=callback),UNKNOWN)
+
+    def test_10_owner_authority_denial_is_invalid(self):
+        snapshots={owner:snapshot(owner) for owner in ("I","D","C")}
+        self.assertEqual(validate_union(composed_manifest(snapshots),[],[],snapshots,membership_proofs={},verify_owner_snapshot=lambda *_: False),INVALID)
+
+    def test_11_legacy_five_field_snapshot_requires_explicit_legacy_opt_in(self):
+        self.assertEqual(validate_owner_snapshot(snapshot("D",True),"D",allow_legacy_d_snapshot=True),VALID)
+
+    def test_12_digest_mismatch_is_invalid(self):
         s=snapshot("D"); s["owner_specific_high_waters_digest"]="0"*64; self.assertEqual(validate_owner_snapshot(s,"D"),INVALID)
 
 if __name__=="__main__": unittest.main(verbosity=2)
