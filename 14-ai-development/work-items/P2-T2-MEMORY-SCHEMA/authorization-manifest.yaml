@@ -2,7 +2,7 @@
 # Design-proposal scope only. Implementation authorization is expressly NOT granted
 # by this manifest. See scope.implementation_authorization below.
 
-schema_version: "1.4"
+schema_version: "1.5"
 work_item: P2-T2
 title: "Memory Storage Schema design proposal"
 repository: oahcom/AiMemoryBrainArchitecture
@@ -93,9 +93,11 @@ status: BLOCKED
 status_reason: >
   Awaiting accountable authority assignment and governance decisions. Q1, Q11 and Q12
   are not engineering defects and cannot be closed by further revision. R4 recommended
-  stopping the ordinary revision cycle; R5 adopts that and makes the one remaining
-  engineering correction (NF-R3-02 residual).
-status_supported_by: "review record at R4 — PR #307 comment 7023884586 chain; R4 reply"
+  stopping the ordinary revision cycle; R5 adopts that, makes the one remaining
+  engineering correction (NF-R3-02 residual), and confirms that no R6 is requested.
+  No identified NF-R3-02 engineering-specification residue remains. DDL executability
+  and regression behavior remain UNVERIFIED.
+status_supported_by: "review records R1-R5 — PR #307 comments 7023231264, 7023510140, 7023884586, 7024484706, 7024485207"
 
 r4_disposition:
   reviewed_head: bdb19ac0
@@ -126,6 +128,45 @@ r4_disposition:
   cycle_stop: >
     R4 recommended stopping the ordinary revision cycle and recording PR #307 as blocked.
     Adopted. No further full revision will be produced against open governance questions.
+
+r5_disposition:
+  reviewed_head: 70a68b0854d0c4008d7cc85d0ee5950407dcdd2d
+  confirmation_round: true
+  platform_record: "PR #307 comment 7024485207"
+  rulings:
+    NF-R3-02_residual: CLOSED IN SPECIFICATION
+    noop_update_semantics: "NO DEFECT — SQLite fires UPDATE OF on the named column appearing in SET, and IS NOT is NULL-safe; the guard's predicates behave correctly and no-op updates are not broken"
+    new_defect_from_correction: NONE IDENTIFIED
+    ordinary_revision_cycle: STOP
+    ddl_verification: UNVERIFIED
+    pr_approval: NOT APPROVED
+    implementation_authorization: NOT_GRANTED
+  r6_requested: false
+  r6_reason: >
+    No new concrete evidence of an actual defect and no authorized decision changing the
+    requirements. An R6 would be justified only by one of those.
+  residue_wording_adopted: >
+    No identified NF-R3-02 engineering-specification residue remains. DDL executability
+    and regression behavior remain UNVERIFIED.
+  residue_wording_reason: >
+    Adopted from R5 to prevent engineering closure being read as proof that the complete
+    schema is executable or accepted.
+
+review_outcome_label:
+  recorded_disposition: REQUEST CHANGES
+  is_formal_github_review_object: false
+  note: >
+    R5 observed that GitHub's review-submission endpoint returns no submitted review
+    objects for PR #307. The independent review outcomes R1-R5 are preserved as discussion
+    records, not as GitHub's formal submitted-review state. The label REQUEST CHANGES is
+    retained and is described throughout as the recorded independent-review disposition.
+    REQUEST CHANGES is not a governance decision, and BLOCKED is not APPROVED.
+  distinctions_retained:
+    - "CLOSED IN SPECIFICATION is not VERIFIED"
+    - "BLOCKED is not APPROVED"
+    - "REQUEST CHANGES is not a governance decision"
+    - "NOT_ASSIGNED cannot be filled by engineering participation"
+    - "NOT_GRANTED cannot be inferred from a design review"
 
 r3_disposition:
   reviewed_head: fb1f59de9136a11e1d7fa204734754ec553bc82f
@@ -307,3 +348,8 @@ claims_forbidden:
   - "that Q14 is a confirmed business requirement"
   - "that BLOCKED means approved, accepted, or free of defects"
   - "that the Layer 1 additive index is not a Layer 1 modification"
+  - "that the R5 DDL was executed or verified to apply"
+  - "that a GitHub submitted review object exists for PR #307"
+  - "that REQUEST CHANGES is a governance decision"
+  - "that CLOSED IN SPECIFICATION means verified"
+  - "that no R6 request means the design is accepted"

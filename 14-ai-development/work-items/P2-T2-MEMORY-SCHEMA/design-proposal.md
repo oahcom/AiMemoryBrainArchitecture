@@ -1,8 +1,9 @@
 # P2-T2 — Memory Storage Schema Design Proposal
 
 **Work item:** P2-T2 (Phase 2 Task 2)
-**Revision:** R5 — revised against independent R4 review of head `bdb19ac0`
-**Status:** DESIGN PROPOSAL — not implemented, not frozen
+**Revision:** R5 — revised against independent R4 review of head `bdb19ac0`; R5 confirmation round recorded (§2d)
+**Status:** DESIGN PROPOSAL — not implemented, not frozen, not approved
+**Review state:** `BLOCKED` — recorded independent-review disposition `REQUEST CHANGES` at R4; no R6 requested at R5. GitHub records no submitted review object for this PR.
 **Date:** 2026-11-19
 **Scope authority:** `GO-2026-P2-DESIGN-001` — design proposal first; P2-T1 implementation authorization withheld pending design review.
 
@@ -50,6 +51,8 @@ Specify the persistence design for the memory layer, covering:
 This revision answers R1-B-01 through R1-NB-05 (§2), the seven items R2 required (§2a), the four findings R3 raised (§2b), and the one residual R4 found (§2c). It does **not** claim that Q1 is resolved (§4), does not claim the schema is frozen, and does not authorize implementation.
 
 **Status supported by this document:** `BLOCKED — awaiting accountable authority assignment and governance decisions`. Q1, Q11 and Q12 cannot be closed by revision.
+
+No identified NF-R3-02 engineering-specification residue remains. DDL executability and regression behavior remain `UNVERIFIED`.
 
 ---
 
@@ -114,7 +117,7 @@ R4 does not claim that NF-R3-01 and NF-R3-02 are *verified* fixed. They are fixe
 
 ## 2c. R4 disposition — and why this is the last engineering round
 
-R4 was reviewed at head `bdb19ac0` and returned `REQUEST CHANGES` with one residual defect and an explicit recommendation to stop the ordinary revision cycle. Recorded on PR #307, comment `pending`.
+R4 was reviewed at head `bdb19ac0` and returned `REQUEST CHANGES` with one residual defect and an explicit recommendation to stop the ordinary revision cycle. Recorded on PR #307, comment `7024484706`.
 
 | finding | R4 ruling | disposition in R5 |
 |---|---|---|
@@ -128,6 +131,42 @@ R4 was reviewed at head `bdb19ac0` and returned `REQUEST CHANGES` with one resid
 **This is the last engineering round.** R4's own recommendation, adopted here: one concrete correction remained, it is made, and no further full revision will be produced against open governance questions. Q1, Q11 and Q12 are not engineering defects. Another iteration cannot reach them.
 
 The status this document supports is `BLOCKED — awaiting accountable authority assignment and governance decisions`. It does not support `APPROVE`.
+
+---
+
+## 2d. R5 confirmation — and what it does not say
+
+R5 was a confirmation round, not a full revision review, at head `70a68b08`. Recorded on PR #307, comment `7024485207`.
+
+| item | R5 ruling |
+|---|---|
+| NF-R3-02 residual | `CLOSED IN SPECIFICATION` |
+| no-op `UPDATE OF result_message_id` semantics | `NO DEFECT FOUND` |
+| new defect introduced by the R4 → R5 correction | `NONE IDENTIFIED` |
+| ordinary revision cycle | `STOP` |
+| R6 requested | no |
+
+On the no-op question: SQLite fires `UPDATE OF <col>` on the column appearing in the `SET` clause, not on the value changing, so `SET result_message_id = result_message_id` does fire the guard. The predicates were reviewed against that and behave correctly across all six transition cases, including two `NULL`s being treated as no change because `IS NOT` is NULL-safe. The clearing branch is redundant with the reassignment branch; R5 rules that not a correctness defect.
+
+**What R5 does not say:** it does not approve PR #307, and it does not close any governance question. Its explicit final determination is that the engineering correction is complete, the design is not approved, the governance blockers remain open, and the revision cycle stops.
+
+### 2e. Two distinctions this document now carries
+
+R5 asked for two audit-accuracy qualifications, both adopted.
+
+**Review outcome terminology.** The recorded disposition is `REQUEST CHANGES`, but GitHub's review-submission endpoint returns no submitted review objects for this PR. Every review outcome R1–R5 is therefore a discussion record, not GitHub's formal submitted-review state. `REQUEST CHANGES` is described in this document as the *recorded independent-review disposition* and nothing more.
+
+**Residue wording.** The phrase "engineering residue: none outstanding" would read as a statement about executability. The adopted wording is:
+
+> No identified NF-R3-02 engineering-specification residue remains. DDL executability and regression behavior remain UNVERIFIED.
+
+The distinctions preserved throughout:
+
+- `CLOSED IN SPECIFICATION` is not `VERIFIED`.
+- `BLOCKED` is not `APPROVED`.
+- `REQUEST CHANGES` is not a governance decision.
+- `NOT_ASSIGNED` cannot be filled by engineering participation.
+- `NOT_GRANTED` cannot be inferred from a design review.
 
 ---
 
