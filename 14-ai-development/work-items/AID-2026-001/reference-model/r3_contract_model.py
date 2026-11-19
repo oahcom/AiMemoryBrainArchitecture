@@ -400,8 +400,14 @@ class R3Model:
             raise ContractViolation("receipt operation missing")
         if cred.operation != operation_id:
             raise ContractViolation("receipt operation mismatch")
-        if not cred.request_hash:
-            raise ContractViolation("receipt request hash missing")
+        if not cred.request_hash or cred.request_hash == "default-hash":
+            raise ContractViolation(
+                "receipt request hash missing or placeholder"
+            )
+        if not request_hash or request_hash == "default-hash":
+            raise ContractViolation(
+                "request hash missing or placeholder"
+            )
         if cred.request_hash != request_hash:
             raise ContractViolation("receipt request_hash mismatch")
         if not REQUIRED_RECEIPT_SCOPE.issubset(cred.scope):
@@ -436,7 +442,7 @@ class R3Model:
         operation_id: str,
         attempt_id: str = "attempt-1",
         idempotency_key: str | None = None,
-        request_hash: str = "default-hash",
+        request_hash: str = "",
     ) -> AtomicCommit:
         with self._commit_lock:
             if self.phase != Phase.REQUESTED:
@@ -582,7 +588,7 @@ class R3Model:
         self,
         original: AtomicCommit,
         auth: Authorization,
-        request_hash: str,
+        request_hash: str = "",
     ) -> dict:
         """Append an independent audit record for an idempotent retry.
 
@@ -632,7 +638,7 @@ class R3Model:
         operation_id: str,
         attempt_id: str = "attempt-1",
         idempotency_key: str | None = None,
-        request_hash: str = "default-hash",
+        request_hash: str = "",
         fail_before_commit: bool = False,
         auth: Authorization | None = None,
         now: int = 10,
@@ -1396,6 +1402,7 @@ class R3Model:
         ordering: str,
         auth: Authorization | None = None,
         now: int = 10,
+        request_hash: str = "",
     ) -> str:
         """Construct state transitions for the three revocation outcomes.
 
@@ -1415,6 +1422,7 @@ class R3Model:
                     auth=auth,
                     now=now,
                     current_epoch=self.permission_epoch,
+                    request_hash=request_hash,
                 )
             except ContractViolation:
                 return "REVOCATION_WON"
@@ -1426,6 +1434,7 @@ class R3Model:
                 now,
                 self.permission_epoch,
                 "race-op",
+                request_hash=request_hash,
             )
             self.revoke_authorization()
             return "COMMIT_WON"
@@ -1441,6 +1450,7 @@ class R3Model:
                     auth=auth,
                     now=now,
                     current_epoch=self.permission_epoch,
+                    request_hash=request_hash,
                 )
             except ContractViolation:
                 return "UNKNOWN"
