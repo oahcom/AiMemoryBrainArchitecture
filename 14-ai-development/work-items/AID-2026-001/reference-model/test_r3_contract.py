@@ -1607,8 +1607,11 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         before_outbox = dict(fresh.outbox)
         before_audit = list(fresh.audit)
         before_retry = list(fresh.retry_audit)
-        before_tuple = fresh.atomic_tuple
+        before_tuple = dict(fresh.atomic_tuple)
         before_nonce_registry = set(fresh.nonce_registry)
+        before_op_registry = dict(fresh.operation_registry)
+        before_inventory = fresh.inventory_revision
+        before_lifecycle = fresh.lifecycle
 
         with self.assertRaises(ContractViolation):
             fresh.commit_suppression(
@@ -1629,6 +1632,9 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         self.assertEqual(fresh.retry_audit, before_retry)
         self.assertEqual(fresh.atomic_tuple, before_tuple)
         self.assertEqual(set(fresh.nonce_registry), before_nonce_registry)
+        self.assertEqual(fresh.operation_registry, before_op_registry)
+        self.assertEqual(fresh.inventory_revision, before_inventory)
+        self.assertEqual(fresh.lifecycle, before_lifecycle)
         self.assertNotIn("foi-cleanup-new-nonce", fresh.nonce_registry)
 
     def test_FSTOR_11_receipt_credential_verification_and_retry_binding(self):
@@ -2143,6 +2149,69 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
                     receipt=replace(cred,
                                     permission_epoch=cred.permission_epoch + 1)),
         )
+
+    def test_FSTOR_17_registry_must_hold_the_authoritative_object(self):
+        """U-058 (a): identity, not value equality — registry side.
+
+        The registry entry must point at the very object that is
+        authoritative. A field-equal but distinct AtomicCommit standing in
+        for the registered authority must make the retry fail, with no
+        side effects. This test swaps the registry entry; FSTOR_18 swaps
+        the published self.atomic_commit.
+        """
+        from dataclasses import replace as _replace
+
+        operation_id = "foi-reg-swap-op"
+        request_hash = "foi-reg-swap-hash"
+        idempotency_key = "foi-reg-swap-key"
+
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m.phase = Phase.AUTHORIZED
+
+        first = m.commit_suppression(
+            operation_id,
+            "foi-reg-swap-attempt-1",
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce="foi-reg-swap-nonce-1", operation_id=operation_id,
+                      request_hash=request_hash),
+        )
+        self.assertIsNotNone(first)
+
+        baseline_commit = m.atomic_commit
+        baseline_fence = m.fence_generation
+        baseline_counter = m.commit_counter
+        baseline_outbox = dict(m.outbox)
+        baseline_registry = dict(m.operation_registry)
+        baseline_retry = list(m.retry_audit)
+        baseline_audit = list(m.audit)
+        baseline_nonces = set(m.nonce_registry)
+
+        # Swap in a field-equal but distinct object as the registry entry's
+        # commit reference.
+        swapped = _replace(first)
+        self.assertIsNot(swapped, first)
+        self.assertEqual(swapped, first)
+        m.operation_registry[idempotency_key]["commit"] = swapped
+
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                operation_id,
+                "foi-reg-swap-attempt-2",
+                idempotency_key,
+                request_hash,
+                auth=auth(nonce="foi-reg-swap-nonce-2", operation_id=operation_id,
+                          request_hash=request_hash),
+            )
+
+        # Zero side effects from the rejected retry.
+        self.assertIs(m.atomic_commit, baseline_commit)
+        self.assertEqual(m.fence_generation, baseline_fence)
+        self.assertEqual(m.commit_counter, baseline_counter)
+        self.assertEqual(m.outbox, baseline_outbox)
+        self.assertEqual(m.retry_audit, baseline_retry)
+        self.assertEqual(m.audit, baseline_audit)
+        self.assertEqual(set(m.nonce_registry), baseline_nonces)
 
     def test_FSTOR_18_published_commit_identity_must_match_registry(self):
         """U-058 (a) complement: the published side of the identity check.
