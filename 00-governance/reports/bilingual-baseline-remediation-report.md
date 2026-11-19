@@ -764,7 +764,7 @@ Execution PASS does not imply independent review PASS.
 
 **F-06 — object-level reconciliation COMPLETE (2026-11-20); migration debt unchanged**
 
-Object-level reconciliation is recorded in `00-governance/reports/f06-object-reconciliation.md`, executed against baseline `f86fddc0`. Result: 313/313 commit anchors recomputed and matched (313 unique `sha`; 25 rows share 7 message digests, so `sha` remains the identity key and `msg_sha256` does not); 38/39 issue anchors matched, with #266 recorded as an explained anchor drift after a post-inventory body edit; PR grouping reconciled — all fourteen PR numbers previously listed here as unassigned are in fact present in the §8.4 group tables, and the twelve genuinely unassigned PRs (`#48`, `#271`–`#281`) are assigned by integration-unit evidence.
+Object-level reconciliation is recorded in `00-governance/reports/f06-object-reconciliation.md`, executed against baseline `f86fddc0`. **This section's previous conclusion is retracted:** the statement that fourteen PRs remained unassigned was incorrect when written — all fourteen were already in the §8.4 group tables. Result: 313/313 commit anchors recomputed and matched (313 unique `sha`; 25 rows share 7 message digests, so `sha` remains the identity key and `msg_sha256` does not); 38/39 issue anchors matched, with #266 recorded as an explained anchor drift after a post-inventory body edit; PR grouping reconciled — all fourteen PR numbers previously listed here as unassigned are in fact present in the §8.4 group tables, and the twelve genuinely unassigned PRs (`#48`, `#271`–`#281`) carry **PROPOSED** assignments with per-item evidence, pending accountable-owner confirmation; formal coverage remains 230/242 until then.
 
 Issue #254 remains within the 39-record set, on HOLD with its explicit exit conditions. Assignment is not migration: every group keeps `MIGRATION_DEBT` and `Accountable_Owner: NOT_ASSIGNED`. Closing F-06 does not establish historical bilingual migration completion.
 
@@ -818,7 +818,7 @@ No automatic approval or adoption is permitted.
 
 **F-06——对象级对账已完成（2026-11-20）；迁移欠账不变**
 
-对象级对账记录于 `00-governance/reports/f06-object-reconciliation.md`，基线 `f86fddc0`。结果：313/313 条 Commit 锚点复算命中（`sha` 313 条唯一；25 行分属 7 组同文消息，故身份键仍为 `sha`，`msg_sha256` 不可作身份键）；39 条 Issue 锚点命中 38 条，#266 因清点后正文被编辑而漂移，已连同编辑时间一并登记；PR 归组完成对账——本处原列的 14 个「未归组」PR 实际均已在 §8.4 分组表中，真正未归组的 12 个（`#48`、`#271`–`#281`）已按集成单元证据归组。
+对象级对账记录于 `00-governance/reports/f06-object-reconciliation.md`，基线 `f86fddc0`。**本段原结论撤回：**此前「14 个 PR 未归组」的说法在写下时即为错误——该 14 个当时已在 §8.4 分组表中。结果：313/313 条 Commit 锚点复算命中（`sha` 313 条唯一；25 行分属 7 组同文消息，故身份键仍为 `sha`，`msg_sha256` 不可作身份键）；39 条 Issue 锚点命中 38 条，#266 因清点后正文被编辑而漂移，已连同编辑时间一并登记；PR 归组完成对账——本处原列的 14 个「未归组」PR 实际均已在 §8.4 分组表中，真正未归组的 12 个（`#48`、`#271`–`#281`）已按集成单元证据给出**PROPOSED 归组提案**，逐项附证据，待责任方确认；确认前正式覆盖率仍为 230/242。
 
 Issue #254 继续包含在 39 条集合内，保持 HOLD 并保留退出条件。归组不等于迁移：各分组继续维持 `MIGRATION_DEBT` 与 `Accountable_Owner: NOT_ASSIGNED`。关闭 F-06 不代表历史双语迁移完成。
 

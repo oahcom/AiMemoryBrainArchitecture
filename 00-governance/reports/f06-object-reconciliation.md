@@ -27,14 +27,15 @@
 
 - 38/39 `body_sha256` anchors match exactly (`SHA-256(issue body, UTF-8)`).
 - **Anchor drift — #266:** recorded `d984146097e7ce9a031f7046f4267ce7e2b40cd0380ccd6c37f98d17e93fadef`; recomputed `aaa599ccbfa45a20f4083ac2c9958739013dd4f816b9bda391964bd6b84ce3a9`; the issue was edited at `2026-11-19T16:34:35Z` (state `open`), i.e. after the inventory snapshot. The body still carries both languages (paired EN/ZH headings and parallel sections), so the `EN_ZH_MIXED` classification remains valid; only the anchor is stale.
-- **Disposition:** the stale anchor is superseded by the recomputed value above. The historical anchor is preserved in this record rather than overwritten in the register table, so the edit trail stays auditable. A dedicated anchor-refresh entry should be appended to the register when the next revision lands.
+- **Disposition:** the stale anchor is superseded by the recomputed value above. The historical anchor is preserved in this record rather than overwritten in the register table, so the edit trail stays auditable.
+- **Open follow-up (linked):** a register revision must append an anchor-refresh entry for #266 carrying (a) the original anchor `d984146097e7ce9a031f7046f4267ce7e2b40cd0380ccd6c37f98d17e93fadef`, (b) the recomputed anchor `aaa599ccbfa45a20f4083ac2c9958739013dd4f816b9bda391964bd6b84ce3a9`, (c) the snapshot/edit timestamps, and (d) this report as the source. Until that entry exists, #266's anchor in the register table is known-stale and must not be treated as current.
 - Classification tally: 28 `EN_ONLY` + 10 `EN_ZH_MIXED` + 1 `ZH_ORIGINAL_WITH_EN_TERMS` — consistent with the register's stated 28/10/1 split.
 
 ## 4. PR grouping / PR 归组
 
 - The repository holds **242** PRs at the reconciliation baseline; the register states 232. The difference is explained by PRs created after the inventory snapshot (#271 onward).
 - The six group tables in §8.4 cover **230** PR numbers with no overlap between groups (checked pairwise).
-- **The §9 statement "fourteen PRs remain unassigned" is stale and, as of this baseline, incorrect.** All fourteen numbers it lists are present in the §8.4 group tables:
+- **RETRACTION:** the §9 statement "fourteen PRs remain unassigned" is **withdrawn as incorrect at the time it was written**. It was not merely stale: every one of the fourteen numbers it listed was already present in the §8.4 group tables. Recording it as "stale" would understate a counting error in this report's predecessor, so the earlier conclusion is retracted here explicitly. All fourteen numbers it lists are present in the §8.4 group tables:
 
 | PR | Group assigned in §8.4 |
 |---|---|
@@ -53,9 +54,9 @@
 | #139 | P-05 |
 | #136 | P-02 |
 
-- The actual unassigned set is **12 PRs**: `#48` and `#271`–`#281`. Assignments by integration-unit evidence (title, scope of the change) are proposed below. Language state is **not** inferred from titles; body-language classification for these 12 PRs remains untouched `MIGRATION_DEBT`, as for every existing group.
+- The actual unassigned set is **12 PRs**: `#48` and `#271`–`#281`. The assignments below are **PROPOSED, not registered**: they carry per-item evidence and remain proposals until the accountable owner confirms them. They do not change any formal group membership, and no register table is edited by this report. Language state is **not** inferred from titles; body-language classification for these 12 PRs remains untouched `MIGRATION_DEBT`, as for every existing group.
 
-| PR | Proposed group | Title (verbatim, truncated) | Evidence basis |
+| PR | Proposed group (PROPOSED) | Title (verbatim, truncated) | Evidence basis |
 |---|---|---|---|
 | #48 | P-05 | docs(review): system-wide architecture risk assessment / 全系统架构风险评估 | architecture/research review record |
 | #271 | P-02 | [GOV-DOC-001] Expand Bilingual Governance Baseline / 扩充双语治理基线 | bilingual governance baseline |
@@ -70,7 +71,7 @@
 | #280 | P-01 | direct-push ratification record (audit A-3) | AI governance audit |
 | #281 | P-01 | codify platform check unavailability handling (enforcement v1.2) | AI governance / merge gate |
 
-- After these assignments, group coverage is **242/242** for the PR numbers existing at this baseline. Assignment is not migration: every group keeps `MIGRATION_DEBT` and `Accountable_Owner: NOT_ASSIGNED`.
+- Formal coverage remains **230/242** until these proposals are confirmed; if all twelve are confirmed as proposed, coverage becomes 242/242 for the PR numbers existing at this baseline. **Confirmation responsibility:** the Integration Owner (A) as coordination owner, with each target group's `Accountable_Owner` currently `NOT_ASSIGNED`; until confirmation, the twelve remain formally unassigned. Assignment is not migration: every group keeps `MIGRATION_DEBT`.
 - Group sizes at this baseline: P-01 14, P-02 19, P-03 45, P-04 34, P-05 116, P-06 2.
 
 ## 5. What this does and does not close / 本记录的效力边界
@@ -93,4 +94,4 @@
 
 ---
 
-中文摘要：本报告对 F-06 要求的对象级对账逐项复算——313 条 Commit 锚点全部命中（sha 唯一，msg_sha256 有 7 组 25 行重复，属真实同文提交，不能作身份键）；39 条 Issue 锚点命中 38 条，#266 因正文在清点后被编辑而漂移，已在本文保留旧值与新值，分类不变；PR 侧实际 242 个，分组覆盖 230 个，§9「14 个未归组」的说法已过期——该 14 个在 §8.4 中均有归组，真正未归组的是 #48 与 #271–#281 共 12 个，本文按集成单元证据给出归组提案。归组不等于迁移，各分组继续维持 `MIGRATION_DEBT`。
+中文摘要：本报告对 F-06 要求的对象级对账逐项复算——313 条 Commit 锚点全部命中（sha 唯一，msg_sha256 有 7 组 25 行重复，属真实同文提交，不能作身份键）；39 条 Issue 锚点命中 38 条，#266 因正文在清点后被编辑而漂移，已在本文保留旧值与新值，分类不变；PR 侧实际 242 个，分组覆盖 230 个，§9「14 个未归组」的结论**撤回**——该说法在写下时即为计数错误：该 14 个当时已全部在 §8.4 分组表中；真正未归组的是 #48 与 #271–#281 共 12 个，本文按集成单元证据给出 **PROPOSED 归组提案**（未经责任方确认不改变正式分组）。归组不等于迁移，各分组继续维持 `MIGRATION_DEBT`。
