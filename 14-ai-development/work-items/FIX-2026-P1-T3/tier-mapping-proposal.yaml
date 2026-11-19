@@ -1,0 +1,145 @@
+# Tier classification proposal for bilingual documentation policy.
+# Generated from git ls-tree at branch HEAD aeb68bd1. Status: PROPOSAL - pending independent review.
+status: PROPOSAL
+baseline_commit: aeb68bd1765c82257032bfde8108848939222f53
+policy: 14-ai-development/bilingual-tiering-policy.md
+
+tier1:
+  rule: architecture decisions, interface contracts, security policy - bilingual mandatory
+  files:
+    - path: 00-governance/architecture-invariants.md
+      blob_sha: 33b037318e459ebb73bea33b3186f31a41d5dcfe
+    - path: 00-governance/bilingual-documentation-policy.md
+      blob_sha: 0e170479e1a71e8f4c124c6f1dc170241652f42b
+    - path: 00-governance/design-principles.md
+      blob_sha: 192e6ba6e9287792a02b679dda0d391844270228
+    - path: 00-governance/terminology.md
+      blob_sha: 9b287ebe027ae01128baf164952ce15aad050638
+    - path: 01-system-architecture/component-interactions.md
+      blob_sha: 50ddbeed51d88aecbeee0403a4021e21a668dbcb
+    - path: 01-system-architecture/component-map.md
+      blob_sha: ddb7a1571463cadce83d89f62b03526c4f9693e8
+    - path: 01-system-architecture/data-flows.md
+      blob_sha: 24bc5867749d234238e6d75aadd4119f359de9f8
+    - path: 01-system-architecture/responsibility-matrix.md
+      blob_sha: 85548fcee05b28f8c2d54d4c0a8bf77840c8cdf3
+    - path: 01-system-architecture/system-boundaries.md
+      blob_sha: ad9ea5ce00e74dba89d325601677270a50f30926
+    - path: 01-system-architecture/system-overview.md
+      blob_sha: 995a1c5a3815d7e7b81b8d7f2ccc546c91d4c256
+    - path: 01-system-architecture/system-quality-attributes.md
+      blob_sha: 4350733173d29451a8ea4aa6a544de46526b4fd7
+    - path: 02-domain-model/core-entities.md
+      blob_sha: 8cb5a674eec8eac1f3c4d83c400dc08d00166f23
+    - path: 02-domain-model/domain-model-overview.md
+      blob_sha: 174a20506df8d51132b3c13ff4d3934d1f5865b6
+    - path: 02-domain-model/epistemic-and-temporal-semantics.md
+      blob_sha: 8c03a20db1ed54c90db1d5c4c64f5ea7b1324ed7
+    - path: 02-domain-model/lifecycle-model.md
+      blob_sha: 42b20fbdf81b574eb271f3db02503b615f414ab4
+    - path: 02-domain-model/phase-1-domain-model-freeze.md
+      blob_sha: 8be3d7d48be35f847fe97c9d217d684c3f41644a
+    - path: 02-domain-model/phase-1-memory-store.md
+      blob_sha: 502a342bb47ffd3b634c322383666a235bca3933
+    - path: 02-domain-model/phase-1-sqlite-adapter-contract.md
+      blob_sha: c472e00f2ef4d00bb71806efc7db72062f4efb58
+    - path: 02-domain-model/phase-1-storage-trait-contract.md
+      blob_sha: 22ca7cd3777e0132e25f084084610f1e90b60d21
+    - path: 02-domain-model/relationships-and-provenance.md
+      blob_sha: e762f84c59f69de7a44baad2123aed46e1ffea16
+    - path: 02-domain-model/scope-and-permission-model.md
+      blob_sha: b5215ae27bd65a6c89c185b496f730b6cd52efa9
+    - path: 04-memory-compiler/phase-1-event-store-contract-zh-CN.md
+      blob_sha: d74363c47af2308b950b6047c0df9a96270ea660
+    - path: 04-memory-compiler/phase-1-event-store-contract.md
+      blob_sha: 17b14591d76160a7c125903b41e7dae014c3c5df
+    - path: 08-bmcp-protocol/phase-3.8-h-rj-hw-01-typed-watermark-and-fence-binding-contract.md
+      blob_sha: e583ac2fb888aa5184eaa6525d9cc564f343785f
+    - path: 08-bmcp-protocol/phase-3.8.25-h-applied-delivery-evidence-hardening-addendum.md
+      blob_sha: afa294bc42a8488e4569e6a8bdf5437c7a90e247
+    - path: 08-bmcp-protocol/phase-3.8.26-h-applied-delivery-evidence-csubmitoutcome-join-addendum.md
+      blob_sha: 7b73491c765091728af6f5306b9efd502cf7f30a
+
+tier2:
+  rule: implementation details, internal guides - bilingual optional (language-mark whitelist)
+  files:
+    - path: 06-memory-context/context-architecture.md
+      blob_sha: 56fcc0ea112d423ef69a3f00e9d626bf4230ca0e
+    - path: 06-memory-context/context-budget-and-sufficiency.md
+      blob_sha: a2f96a88f3123862ea263da11366dda4207d5b0a
+    - path: 06-memory-context/context-edit-operations.md
+      blob_sha: 10c94e85dfe89d20dcdb202cafc2bef767f076fc
+    - path: 06-memory-context/context-manager.md
+      blob_sha: ecc0549137a1738c197d02d12d94a1eb971ed6b5
+    - path: 06-memory-context/context-reconciliation.md
+      blob_sha: 87063aceebed1c30b7840045ada8e3f348732688
+    - path: 06-memory-context/context-versioning.md
+      blob_sha: 05c0739d0c22576a1fd5affc7d73c078c89049b1
+    - path: 07-agent-integration/adapter-capability-tiers.md
+      blob_sha: 09c5932350c48f950ee16f6b246f54e661f0c420
+    - path: 07-agent-integration/agent-integration-overview.md
+      blob_sha: 073ff4ddf71fbcaf959107bb06ab724bfa48e63b
+    - path: 07-agent-integration/inference-boundary-model.md
+      blob_sha: e2d5cb6abd9ec40da6e3680531de5944fc8b14df
+    - path: 07-agent-integration/telemetry-model.md
+      blob_sha: 9bb4a77e4bd79caaf3e1faeaf77c6b42858998f0
+
+tier3_per_file:
+  rule: meeting notes, acceptance records, ephemeral notes - Chinese-first
+  files:
+    - path: 06-memory-context/README.md
+    - path: 06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md
+    - path: 06-memory-context/phase-3.6.2-g-jf10-coc-bridge-applied-evidence-acceptance.md
+    - path: 06-memory-context/phase-3.6.3-g-coc-durable-protocol-applied-boundary-acceptance.md
+    - path: 06-memory-context/phase-3.6.4-g-prepared-participant-gid-applied-acceptance.md
+    - path: 06-memory-context/phase-3.6.5-g-restore-reconciliation-consumer-acceptance.md
+    - path: 06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md
+    - path: 06-memory-context/phase-3.8.18-g-exact-review-h-unified-1.2.14-csubmitoutcome-1.0.1-fullpath.md
+    - path: 06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.md
+    - path: 06-memory-context/phase-3.8.22-g-applied-persistence-idempotency-crash-restore-contract.zh-CN.md
+    - path: 06-memory-context/phase-3.8.4-g-c-provider-outcome-consumer-review.md
+    - path: 06-memory-context/phase-3.8.5-g-storage-logical-serialization-topology-impact-review.md
+    - path: 06-memory-context/phase-3.8.6-g-review-storage-serialization-anchor.md
+    - path: ARCHITECTURE_ROADMAP.md
+    - path: README.md
+    - path: recovery/PR-RECOVERY-002-BASELINE.md
+    - path: recovery/PR-RECOVERY-002-CLOSED-PR-CONTENT-AUDIT.md
+    - path: recovery/PR-RECOVERY-002-DEFECT-REGISTER.md
+    - path: recovery/PR-RECOVERY-002-DEPENDENCY-GRAPH.md
+    - path: recovery/PR-RECOVERY-002-GOVERNANCE-DECISION.md
+    - path: recovery/PR-RECOVERY-002-INDIVIDUAL-PR-DECISIONS.md
+    - path: recovery/PR-RECOVERY-002-MERGE-LOG.md
+    - path: recovery/PR-RECOVERY-002-RECOVERY-WAVES.md
+    - path: scripts/governance/status_migration/README.md
+
+directory_rules:
+directory_rules:
+  rules:
+    - directory: reviews/
+      tier: TIER3
+      file_count: 192
+      basis: review records are ephemeral/acceptance documentation
+    - directory: docs/
+      tier: UNKNOWN
+      file_count: 174
+      basis: contains bilingual mirror pairs (docs/en/ 77, docs/zh-CN/ 74, paired 74, en-only 3); per-pair tiering deferred to implementation
+    - directory: 13-engineering-decisions/
+      tier: TIER1_CANDIDATE_PENDING_FILE_CHECK
+      file_count: 58
+      basis: engineering decisions are architecture decisions; per-file confirmation pending
+    - directory: 14-ai-development/
+      tier: UNKNOWN
+      file_count: 70
+      basis: governance/process mixed; core specs registered per-file where confident
+    - directory: prompts/
+      tier: UNKNOWN
+      file_count: 36
+      basis: prompt library; 27-file language-mark whitelist already registered in authorization-manifest.yaml
+
+summary:
+  tier1_count: 26
+  tier2_count: 10
+  tier3_per_file_count: 24
+  directory_rule_files: 530
+  total_markdown: 593
+  unknown_policy: directory-level UNKNOWN requires human confirmation; no auto-promotion
