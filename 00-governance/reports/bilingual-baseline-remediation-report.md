@@ -55,7 +55,7 @@ The complete v1.1 policy was read before drafting v1.2.
 - PR #271 tree at R6 baseline: `a02020dcb2e6b23bd5456b61ddb772c74ca95a63`
 - PR #271 state: OPEN; merged: false
 - PR base / merge-base recorded: `c5a995d9a2808112b007a9108e085048cbed5cc9`
-- Current main...PR head comparison: `diverged`; ahead 8 / behind 42; merge base `c5a995d9a2808112b007a9108e085048cbed5cc9`
+- Current main...PR head comparison at the R6 baseline: `diverged`; ahead 8 / behind 42; merge base `c5a995d9a2808112b007a9108e085048cbed5cc9`\n- Post-v2.2 validation snapshot: PR head `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8`; D7 blob read back as `36c50869fe2c42d5e1f12616012c84e0a1cc5d28`; main...head comparison `diverged`, ahead 10 / behind 42; merge base unchanged at `c5a995d9a2808112b007a9108e085048cbed5cc9`.
 
 **EN**
 
@@ -88,7 +88,7 @@ The current main baseline is newer than the PR's recorded base. The branch is di
 
 **EN**
 
-The initial seven-file submission and the later D7 report-restoration commit are distinct historical events. The original submission commit must not be presented as the current branch head. The R6 baseline head above is the pre-v2.2 remediation head; the v2.2 corrective commit is recorded in the subsequent GitHub commit/read-back evidence.
+The initial seven-file submission and the later D7 report-restoration commit are distinct historical events. The original submission commit must not be presented as the current branch head. The R6 baseline head above is the pre-v2.2 remediation head. D7 v2.2 content was committed as `77084adfb782ed0579cda4c773b14784cd389e69`; the report-version metadata alignment commit is `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8`. The post-commit D7 blob was read back as `36c50869fe2c42d5e1f12616012c84e0a1cc5d28`.
 
 **中文**
 
@@ -130,7 +130,7 @@ R6 已依据 OBJ-07 manifest 快照独立读回全部七个文件：7/7 匹配�
 
 **Current verification boundary / 当前验证边界**
 
-The R6 independent review of Version 2.1 returned `NEEDS-REVISION`. This Version 2.2 report records the corrective response to R6 findings; it is not itself an independent acceptance. A fresh independent review must evaluate the exact v2.2 commit. Current main...PR comparison remains `diverged` (ahead 8 / behind 42); successful Exact-Head integration verification has not been established.
+The R6 independent review of Version 2.1 returned `NEEDS-REVISION`. This Version 2.2 report records the corrective response to R6 findings; it is not itself an independent acceptance. The v2.2 report-version-alignment commit `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8` was read back as D7 blob `36c50869fe2c42d5e1f12616012c84e0a1cc5d28`. Workflow run `44559550224` on that head completed SUCCESS (job `135684753485`; 2026-11-19 15:51:45Z–15:51:48Z). The post-v2.2 main...head comparison remained `diverged` (ahead 10 / behind 42; merge base `c5a995d9a2808112b007a9108e085048cbed5cc9`); successful Exact-Head integration verification has not been established. A fresh independent review must evaluate the final v2.2 commit.
 
 R6 对 Version 2.1 的独立复审结论为 `NEEDS-REVISION`。本 Version 2.2 报告记录对 R6 findings 的修正响应；本报告本身不构成独立验收。必须由新的独立复审针对 v2.2 精确提交进行评估。当前 main 与 PR 比较仍为 `diverged`（ahead 8 / behind 42）；尚未建立 Exact-Head 集成复核通过证据。
 
@@ -507,9 +507,9 @@ Two successful workflow executions are independently evidenced:
 | Run ID | Tested PR head | Job ID | Job / step result | UTC execution window |
 |---|---|---|---|---|
 | `44542512889` | `70219731485040e2974d537080f994108ee1d989` | `135624335886` | Job SUCCESS; validator step SUCCESS | `14:19:42Z–14:19:45Z`, 2026-11-19 |
-| `44546301573` | `47369925ace93821eab82e4cec8418f8d7505d64` | `135637661718` | Job SUCCESS; validator step SUCCESS | `14:40:30Z–14:40:33Z`, 2026-11-19 |
+| `44546301573` | `47369925ace93821eab82e4cec8418f8d7505d64` | `135637661718` | Job SUCCESS; validator step SUCCESS | `14:40:30Z–14:40:33Z`, 2026-11-19 |\n| `44559550224` | `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8` | `135684753485` | Job SUCCESS; validator step SUCCESS | `15:51:45Z–15:51:48Z`, 2026-11-19 |
 
-Both executions reported `Bilingual documentation and prompt-library gate: PASS (11 changed paths inspected).` These runs verify workflow invocation and successful execution on their respective heads. They do not verify platform required-check enforcement.
+All three executions reported `Bilingual documentation and prompt-library gate: PASS (11 changed paths inspected).` These runs verify workflow invocation and successful execution on their respective heads. They do not verify platform required-check enforcement.
 
 The earlier structural CI failure run `44477435608` remains historical evidence and is not overwritten by these later successful runs.
 
@@ -546,7 +546,7 @@ Workflow 与校验器已完成接入：
 
 #### F-02 Gate Behavior — Verified Execution vs Platform Enforcement
 
-The two successful workflow runs establish that the PR workflow invokes the validator and that the validator step completed successfully on the recorded heads.
+The three successful workflow runs (including run `44559550224` on the v2.2 report-version-alignment head) establish that the PR workflow invokes the validator and that the validator step completed successfully on the recorded heads.
 
 They do **not** establish:
 
@@ -846,7 +846,7 @@ The original 15-row governance stage ledger is retained. Only affected evidence/
 | F-02 | PARTIAL | Requirement 1 CI integration COMPLETE/VERIFIED; Requirement 2 required-check enforcement NOT_VERIFIED due GitHub plan-limit HTTP 403. / 要求 1 CI 接入 COMPLETE/VERIFIED；要求 2 因 GitHub 计划限制 HTTP 403 而 NOT_VERIFIED。 |
 | F-06 | OPEN | 39-Issue / 313-Commit anchors and classification require object-level reconciliation; #254 remains HOLD; 14 PRs remain unassigned. / 39 条 Issue、313 条 Commit 的锚点和分类仍需对象级对账；#254 保持 HOLD；14 个 PR 未归组。 |
 | F-07 | CORRECTION RECORDED | PR comment `7006445553`; authoritative D1 baseline blob `66517d39`. / PR 评论 `7006445553`；D1 权威基线 blob `66517d39`。 |
-| Structural CI / 结构 CI | MIXED HISTORICAL RECORD | Failure run `44477435608` retained as historical; later runs `44542512889` and `44546301573` SUCCESS. Required-check enforcement remains NOT_VERIFIED. / 失败运行 `44477435608` 保留为历史记录；后续运行 `44542512889`、`44546301573` SUCCESS。required-check 强制执行仍为 NOT_VERIFIED。 |
+| Structural CI / 结构 CI | MIXED HISTORICAL RECORD | Failure run `44477435608` retained as historical; runs `44542512889`, `44546301573`, and post-v2.2 run `44559550224` SUCCESS. Required-check enforcement remains NOT_VERIFIED. / 失败运行 `44477435608` 保留为历史记录；运行 `44542512889`、`44546301573` 及 v2.2 后运行 `44559550224` 均 SUCCESS。required-check 强制执行仍为 NOT_VERIFIED。 |
 | Owner approval / Owner 批准 | NOT_RECORDED | No explicit Owner approval evidence. / 无明确 Owner 批准证据。 |
 | Policy adoption / 规范采纳 | NOT_ADOPTED | GOV-DOC-001 v1.2 remains DRAFT; no adoption evidence. / GOV-DOC-001 v1.2 仍为 DRAFT；无采纳证据。 |
 | Effective status / 生效状态 | NOT_EFFECTIVE | v1.1 remains NORMATIVE; v1.2 is not effective. / v1.1 仍为 NORMATIVE；v1.2 尚未生效。 |
@@ -926,7 +926,7 @@ This revision responds to the R6 independent review (session `6aff0b47-3988-83ec
 - **F-09 / F-02:** Records validator CI integration as COMPLETE / VERIFIED, records required-check configuration/enforcement as NOT_VERIFIED due the GitHub plan-limit HTTP 403, and retains F-02 overall as PARTIAL.
 - **F-10:** Records the already completed `BILINGUAL-MANIFEST: COMPLETE` PR-body declaration as historical execution evidence and removes it from outstanding blockers.
 - **F-06:** Remains OPEN; the 14 unassigned PRs and object-level reconciliation requirements remain outstanding.
-- The pre-v2.2 current-main comparison was `diverged` (ahead 8 / behind 42). A fresh Exact-Head review is required after this commit.
+- Post-v2.2 validation at head `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8` read back D7 blob `36c50869fe2c42d5e1f12616012c84e0a1cc5d28`; workflow run `44559550224` passed. The main comparison remained `diverged` (ahead 10 / behind 42), so Exact-Head integration verification has not passed.
 - D2 is not modified. v1.1 remains NORMATIVE; v1.2 remains DRAFT. `MIGRATION_DEBT != EXEMPTION`.
 - `Approval: NOT_RECORDED`; `Adoption: NOT_ADOPTED`. This report does not authorize PR merge or imply Owner approval, policy adoption, or historical migration completion.
 - This v2.2 correction is pending a fresh independent review; it is not self-approved.
