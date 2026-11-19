@@ -224,13 +224,17 @@ Recommended entry points:
 
 ### Documentation and decision discipline / 文档与决策纪律
 
-This README is bilingual in a single file: Chinese content is paired with the corresponding English sections in this same `README.md`; there is no separate Chinese README. The repository's architecture documents are maintained in Chinese and English. Both versions must preserve the same meaning, constraints, stable identifiers, decision status, failure cases, and acceptance criteria. A translation must never promote a CANDIDATE, OPEN, or TO_VALIDATE item into a decided requirement.
+This README contains Chinese and English in a single file; there is no separate Chinese README. **Translation status: PARTIAL.** Chinese coverage includes the project introduction, status explanation, problem summary, positioning, core three-layer model, strategic-value summary, interoperability summary, roadmap priorities summary, repository navigation, and long-term thesis. The following detailed material remains English-only in this revision and is explicitly **NOT_TRANSLATED**: the project-status table; the “What the architecture is designed to provide” and “What we are not” lists; the logical-architecture table; detailed subsections 4.1–4.5; the five-stage roadmap table and six-item near-term priority list; the success-metric list; the target-audience list; and the detailed repository entry-point list.
+
+The repository's normative architecture documents are maintained in Chinese and English. Both versions must preserve the same meaning, constraints, stable identifiers, decision status, failure cases, and acceptance criteria. A translation must never promote a CANDIDATE, OPEN, or TO_VALIDATE item into a decided requirement.
 
 Significant design statements use explicit status labels such as **DECIDED**, **CANDIDATE**, **TO_VALIDATE**, and **OPEN**. A component name alone is not sufficient to authorize implementation: responsibilities, boundaries, inputs, outputs, state transitions, failure behavior, security constraints, and acceptance criteria must first be specified. Implementation and acceptance claims must be backed by reproducible evidence.
 
 Substantive development follows the repository's AI development governance: named accountable Owners, versioned prompts, isolated changes, reproducible verification, independent review, and preservation of the exact prompt version in the Work Item evidence bundle. Every AI session must use the [canonical Prompt Library](prompts/README.md). See [GOV-DOC-001](00-governance/bilingual-documentation-policy.md), the [AI Development Standard](14-ai-development/ai-development-standard.md), and the [Iteration Lifecycle](14-ai-development/iteration-lifecycle.md).
 
-本 README 在同一个文件中提供中英双语内容：中文版与对应英文段落配对呈现，位置均在本 `README.md` 中；仓库没有单独的中文 README 文件。仓库架构文档采用中英双语维护，两种语言必须保持相同的含义、约束、稳定标识、决策状态、故障场景和验收标准。翻译不得把 CANDIDATE、OPEN 或 TO_VALIDATE 提升为已决议要求。
+本 README 在同一个文件中包含中英文内容；仓库没有单独的中文 README 文件。**翻译状态：PARTIAL（部分翻译）。** 已有中文内容覆盖项目介绍、状态说明、问题摘要、项目定位、三层核心模型、战略价值摘要、互操作摘要、路线图优先级摘要、仓库导航和长期判断。以下详细内容在本修订中仍仅提供英文，明确标记为 **NOT_TRANSLATED（尚未翻译）**：项目状态表；“架构目标”和“我们不是什么”列表；逻辑架构表；第 4.1–4.5 节详细说明；五阶段路线图表及六项近期优先级清单；成功指标清单；目标读者清单；仓库详细入口清单。
+
+仓库规范性架构文档采用中英双语维护，两种语言必须保持相同的含义、约束、稳定标识、决策状态、故障场景和验收标准。翻译不得把 CANDIDATE、OPEN 或 TO_VALIDATE 提升为已决议要求。
 
 重要设计结论使用明确状态标记。仅仅为组件命名并不足以授权开始实现；必须先明确职责、边界、输入、输出、状态转换、故障行为、安全约束和验收标准。实现和验收结论必须有可复现证据。
 
