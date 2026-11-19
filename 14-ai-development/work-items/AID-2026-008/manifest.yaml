@@ -155,7 +155,7 @@ lifecycle:
   source_status: PROPOSED
   gates:
     registration:
-      status: BLOCKED_PENDING_REGISTRATION
+      status: SATISFIED
       required:
         - manifest persisted and read back
         - INDEX entry persisted and read back
