@@ -1,0 +1,51 @@
+work_item_id: AID-2026-005
+title: Independent-review and platform-identity independence ruling
+owner: Integration Owner
+accountable_owner: Project Owner adoption authority; not inferred from this session
+issue: 130
+related_issues: [130, 249, 251, 252, 253, 258, 264]
+related_prs: [249, 251, 252, 253, 258]
+task_class: DOC
+risk: R2
+status: PROPOSED
+prompt:
+  id: AID-2026-005-PROMPT
+  version: v1
+  provenance: T2 chat instruction
+  source: Coordinator session; original task and continuation/correction messages in this ChatGPT conversation
+  prompt_filename: 本会话任务提示词（独立性口径裁定）
+  repository_prompt_file: null
+  sha256: NOT_VERIFIED
+  note: Stable conversation ID/permalink, raw bytes and immutable repository prompt file were not supplied; no hash is fabricated.
+baseline:
+  repository: oahcom/AiMemoryBrainArchitecture
+  target_branch: main
+  base_sha: 6b5db2918cffc2281deb22fd9858a37dbaeec726
+  base_sha_source: PR #258 quota-closeout comment; direct branch-ref HEAD readback unavailable
+deliverables:
+  - 14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md
+  - 14-ai-development/work-items/INDEX.md
+scope:
+  - Resolve NR-001 session independence versus PR-GOVERNANCE-001 §5 platform identity independence.
+  - Define five-disposition authorization and non-waivable exception protocol.
+  - Define R3 expert qualification and escalation clock.
+  - Apply rules to PRs #251, #252 and #253 without changing their state.
+non_goals:
+  - No PR/Issue/branch creation; no merge, close, draft conversion or PR state mutation.
+  - No amendment to AI-EXEC-001/002 or PR-GOVERNANCE-001 source text.
+  - No waiver of mandatory evidence, independent review or expert review.
+  - No claim of GitHub APPROVE, independent platform identity or human expertise.
+evidence:
+  loaded_standards: [AI-EXEC-001 v1.1 ADOPTED, AI-EXEC-002 v1.1 ADOPTED, AI-EXEC-UNIFICATION-RULING-001 v1.0 ADOPTED, PR-GOVERNANCE-001 v1.0 ADOPTED]
+  main_base_sha: 6b5db2918cffc2281deb22fd9858a37dbaeec726
+  main_head_readback: NOT_VERIFIED
+  runtime_tests: NOT RUN; policy/documentation change
+  independent_review: NOT RECORDED
+  bilingual_independent_review: NOT RECORDED
+findings:
+  - {id: F-AID005-01, severity: BLOCKER, destination: "Issue #130", summary: "Shared connected GitHub identity cannot satisfy §5 platform-identity-independent review."}
+  - {id: F-AID005-02, severity: P1, destination: "Issue #130", summary: "No verifiable expert-source registry is evidenced; qualification must be recorded per R3 review."}
+adoption:
+  status: PROPOSED
+  required_authority: Project Owner explicit written adoption
+  review_by: 2026-12-02
