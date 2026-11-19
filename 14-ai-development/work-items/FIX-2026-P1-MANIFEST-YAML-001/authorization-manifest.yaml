@@ -1,0 +1,99 @@
+# FIX-2026-P1-MANIFEST-YAML-001 authorization manifest
+# Records the coordinator decision, role status, baseline and the approved write
+# scope for the manifest-YAML parseability remediation produced by the
+# translation/manifest full scan. No path outside allowed_write_paths may be
+# modified under this work item.
+schema_version: "1.0"
+work_item: FIX-2026-P1-MANIFEST-YAML-001
+repository: oahcom/AiMemoryBrainArchitecture
+branch: fix/manifest-yaml-parseability
+
+decision:
+  id: DEC-FIX-2026-P1-MANIFEST-YAML-001-GO-001
+  date: "2026-11-20"
+  issued_by: coordinator session (13-20-04)
+  form: GO decision + manifest (allowed_write_paths, authorization_basis)
+  self_issued: true
+  self_issued_note: >
+    Self-issued by the session that performs the write. It is not an Owner approval,
+    not a second-identity review and not an adoption.
+  authorization_basis: >
+    Engine loop Next_Action item 5 ("translation/manifest full scan, within this
+    week"). The scan is read-only; this work item authorizes only the remediation
+    of the four parse defects the scan found. Scope-narrow precedent:
+    FIX-2026-P1-INDEX-REFRESH-001 (narrower than the previous authorization,
+    names exactly the rows and files it writes).
+
+baseline:
+  commit: 87fd195a0f5e272c20270b8e276f27827a1173d8
+  note: main tip at branch creation (merge of PR #296)
+
+roles:
+  sponsor: NOT_ASSIGNED
+  accountable_owner: NOT_ASSIGNED
+  acceptance_authority: NOT_ASSIGNED
+  implementing_owner: coordinator session (13-20-04)
+  role_note: >
+    NOT_ASSIGNED is a true governance state and MUST NOT be substituted by
+    session identity or role simulation.
+
+write_allowlist:
+  allowed_write_paths:
+    - 14-ai-development/work-items/AID-2026-002/manifest.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-T1/manifest.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-INDEX-REFRESH-001/authorization-manifest.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-T4-FU3/authorization-manifest.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-MANIFEST-YAML-001/authorization-manifest.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-MANIFEST-YAML-001/audit-record.md
+  excluded:
+    - "Any path not listed above; a new write needs a new authorization."
+    - "14-ai-development/work-items/INDEX.md — NOT modified in this PR, deliberately; see registration_deferral."
+    - ".github/workflows/** — not touched; the checker remains unwired (tracked item)."
+    - "scripts/** — not touched; scan tooling lives outside the repository tree and is not committed."
+
+findings_closed:
+  M-1: "AID-2026-002/manifest.yaml unquoted scalar containing colon-space (bilingual_status)"
+  M-2: "FIX-2026-P1-T1/manifest.yaml unquoted scalar containing colon-space (prior_failed_reason)"
+  M-3: "FIX-2026-P1-INDEX-REFRESH-001/authorization-manifest.yaml Markdown prose in a .yaml file (not parseable)"
+  M-4: "FIX-2026-P1-T4-FU3/authorization-manifest.yaml Markdown prose in a .yaml file (not parseable)"
+
+format_conversion_rule: >
+  M-3 and M-4 are format conversions, not content rewrites. Prose sections are
+  moved verbatim into YAML block scalars; the two sections that were already
+  YAML-shaped fragments become real mappings. Four line-level deltas exist in
+  M-4 (two allowlist bullets expressed as path+note mappings; two review fields
+  with spaces normalized to underscores in the key names) — values preserved
+  verbatim, listed in the audit record. The preservation check is mechanical:
+  every non-blank non-comment line of the old file must appear in the new file's
+  parsed content or in the audited delta list.
+
+verification:
+  strict_yaml_parse: 15/15 manifest files parse with duplicate-key-rejecting SafeLoader (was 11/15)
+  full_test_suite: 72/72 OK (python -m unittest discover -s scripts/governance/evidence -p "test_*.py")
+  preservation_check: 0 undeclared content-line deltas (2 files, see audit record)
+  bilingual_gate: run on the changed paths at this PR's exact head; result and sha256 recorded in the acceptance comment
+
+registration_deferral:
+  responsible: coordinator session (13-20-04), self-issued decision, labelled as such
+  trigger: this PR merges or closes
+  condition: >
+    the row states the merge SHA and merge time as BINDING FACTS read back after
+    the merge, plus the review chain comment ids; it must not assert a pending
+    state at the moment of writing
+  scope: its own authorization, one path (14-ai-development/work-items/INDEX.md)
+  not_a_licence: >
+    the deferral expires with that registration; it does not permit this work
+    item to stay unregistered. If the trigger fires and no registration follows,
+    the omission is a registry defect and must be recorded as one rather than
+    explained.
+
+review:
+  level: R1 (documentation-only; no code, no checker, no policy change)
+  independent_review: separate session, same oahcom identity
+  platform_axis_independence: NOT MET, not claimed
+
+limits:
+  - "No policy status change; AI-DOC-EVIDENCE-TIERING and bilingual-tiering-policy remain PROPOSED."
+  - "Tier mapping UNKNOWN=376 stays UNKNOWN: policy section 4.3 requires human confirmation and forbids automatic classification; see audit record."
+  - "CI cannot execute (account billing interruption); compensation per enforcement v1.2 section 1 with RULING-06 exception is registered on the PR."
+  - "The two YAML syntax fixes (M-1, M-2) change quoting only; the parsed values are byte-identical to the previously intended scalars."
