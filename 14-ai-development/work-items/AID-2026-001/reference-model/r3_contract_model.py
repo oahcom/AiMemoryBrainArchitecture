@@ -1,11 +1,50 @@
-
-"""R3 contract-level reference model.
-
-This is an abstract in-memory contract model, not a production storage
-implementation or proof of transaction/WAL durability.
 """
+变更清单
+========
+
+基于 R3-FSTOR-20261118-01 原稿修订。
+
+F-STOR-01 — 三阶段原子发布协议
+1. staged 阶段：候选 AtomicCommit 与所有待发布投影完成交叉校验。
+2. 唯一权威发布点：self.atomic_commit = proposed。
+3. published 阶段：从权威提交记录核验全部已发布投影。
+4. expected_revision / expected_fence 显式绑定 proof / tombstone
+   构造时的快照值；不再根据 published 状态推算 expected 值。
+5. 发布点前后发生异常时，恢复完整提交快照。
+
+F-STOR-02 — 提交锁与故障注入
+1. 所有提交、授权撤销和幂等重试共享 _commit_lock。
+2. 保留 COMMIT_PROJECTION_STEPS 故障注入点。
+3. atomic_commit 仍是唯一权威提交记录；其余均为受锁保护的投影。
+4. 本模型只模拟进程内临界区，不声称物理 Crash/WAL/Failover 保证。
+
+F-OI-01 — Nonce 投影与恢复
+1. nonce_registry 不再作为独立权威状态。
+2. nonce_registry 由 atomic_commit.authorization_reference.nonce
+   和已提交 retry_audit 中的 nonce 推导。
+3. 原子提交发布后重建投影；异常回滚时恢复快照。
+4. recover_nonce_registry() 模拟恢复后从权威记录重建投影。
+5. 授权校验前重建投影，避免投影丢失导致已消费 Nonce 重放。
+
+F-OI-02 — 幂等重试独立审计
+1. existing 分支为新授权创建独立 retry_audit 记录。
+2. 记录原 operation ID、原 commit ID、新授权 receipt、新 Nonce、
+   PermissionEpoch、request hash 和重试结果。
+3. 重试不创建新 AtomicCommit，不推进 Fence，不修改 SuppressionCommitted
+   lifecycle event，也不重复写入 SUPPRESSION_COMMITTED。
+4. retry_audit 纳入 Nonce 投影的重建来源。
+
+保留项
+======
+- U-049 既有授权、完成条件与生命周期约束不回退。
+- DFI-013：revoke_race 仍明确是确定性顺序交错，不声称并发线性化证明。
+- DFI-021：本文件仍是抽象内存模型，不声称物理持久化或灾难恢复保证。
+- 本文件未执行测试；测试执行状态为 NOT RUN。
+"""
+
 from dataclasses import dataclass, field
 from enum import Enum
+from threading import RLock
 from typing import Any
 
 
@@ -145,7 +184,13 @@ class R3Model:
     atomic_commit: AtomicCommit | None = None
     audit: list = field(default_factory=list)
     operation_registry: dict = field(default_factory=dict)
+
+    # Derived projection only. Authority is atomic_commit + retry_audit.
     nonce_registry: set = field(default_factory=set)
+
+    # Each entry is a committed, independent idempotent-retry audit record.
+    retry_audit: list = field(default_factory=list)
+
     legal_hold: bool = False
     exception: dict | None = None
     governance_projection_complete: bool = False
@@ -156,6 +201,12 @@ class R3Model:
     context_version: int = 0
     pending_delta: list = field(default_factory=list)
     revocation_state: str = "CURRENT"
+    _commit_lock: Any = field(
+        default_factory=RLock,
+        init=False,
+        repr=False,
+        compare=False,
+    )
 
     ATOMIC_FIELDS = (
         "memory_identity",
@@ -165,6 +216,56 @@ class R3Model:
         "suppression_proof",
         "fence_tombstone",
     )
+
+    COMMIT_PROJECTION_STEPS = (
+        "atomic_tuple",
+        "fence_generation",
+        "inventory_revision",
+        "outbox",
+        "operation_registry",
+        "nonce_registry",
+        "phase",
+        "lifecycle",
+        "atomic_commit",
+    )
+
+    def _derive_nonce_registry(self) -> set:
+        """Derive consumed Nonces from committed authority records.
+
+        The authoritative sources are:
+        - atomic_commit.authorization_reference.nonce
+        - committed retry_audit entries
+
+        nonce_registry itself is deliberately not an authority source.
+        """
+        consumed = set()
+
+        committed = self.atomic_commit
+        if committed is not None:
+            nonce = committed.authorization_reference.nonce
+            if nonce:
+                consumed.add(nonce)
+
+        for entry in self.retry_audit:
+            nonce = entry.get("nonce")
+            if nonce:
+                consumed.add(nonce)
+
+        return consumed
+
+    def _rebuild_nonce_registry(self) -> set:
+        """Rebuild the Nonce projection from committed authority records."""
+        self.nonce_registry = self._derive_nonce_registry()
+        return set(self.nonce_registry)
+
+    def recover_nonce_registry(self) -> set:
+        """Simulate recovery by rebuilding Nonce projection from authority.
+
+        This is an in-memory reconstruction contract. It does not model
+        physical storage recovery, WAL replay, or crash durability.
+        """
+        with self._commit_lock:
+            return self._rebuild_nonce_registry()
 
     def _validate_authorization(
         self,
@@ -192,15 +293,21 @@ class R3Model:
         if not auth.valid(now, self.permission_epoch):
             raise ContractViolation("invalid or expired authorization")
 
+        # Treat nonce_registry as a cache/projection, never as authority.
+        # Rebuild before replay detection so projection loss cannot permit
+        # reuse of a Nonce already represented by committed authority.
+        self._rebuild_nonce_registry()
+
         if auth.nonce in self.nonce_registry:
             raise ContractViolation("authorization nonce replay")
 
     def revoke_authorization(self) -> int:
         """Advance PermissionEpoch and make older authorizations unusable."""
-        self.permission_epoch += 1
-        self.revocation_state = "REVOKED"
-        self.audit.append("AUTHORIZATION_REVOKED")
-        return self.permission_epoch
+        with self._commit_lock:
+            self.permission_epoch += 1
+            self.revocation_state = "REVOKED"
+            self.audit.append("AUTHORIZATION_REVOKED")
+            return self.permission_epoch
 
     def authorize_and_suppress(
         self,
@@ -212,190 +319,79 @@ class R3Model:
         idempotency_key: str | None = None,
         request_hash: str = "default-hash",
     ) -> AtomicCommit:
-        if self.phase != Phase.REQUESTED:
-            raise ContractViolation("authorization must precede suppression")
-
-        if self.legal_hold:
-            raise ContractViolation("Legal Hold prevents suppression")
-
-        # Initial validation is useful for the workflow transition.
-        # commit_suppression repeats it independently at the commit boundary.
-        self._validate_authorization(auth, now, current_epoch)
-
-        self.phase = Phase.AUTHORIZED
-        return self.commit_suppression(
-            operation_id,
-            attempt_id,
-            idempotency_key,
-            request_hash,
-            auth=auth,
-            now=now,
-            current_epoch=current_epoch,
-        )
-
-    def commit_suppression(
-        self,
-        operation_id: str,
-        attempt_id: str = "attempt-1",
-        idempotency_key: str | None = None,
-        request_hash: str = "default-hash",
-        fail_before_commit: bool = False,
-        auth: Authorization | None = None,
-        now: int = 10,
-        current_epoch: int | None = None,
-    ) -> AtomicCommit:
-        # Phase is a workflow guard only. It never substitutes for auth.
-        if self.phase != Phase.AUTHORIZED:
-            raise ContractViolation("authorization workflow phase required")
-
-        if self.legal_hold:
-            raise ContractViolation("Legal Hold prevents suppression")
-
-        if not operation_id or not attempt_id:
-            raise ContractViolation("operation and attempt identity required")
-
-        if current_epoch is None:
-            current_epoch = self.permission_epoch
-
-        # CRITICAL: independently revalidate at every commit entry,
-        # including idempotent retries. Do this BEFORE operation lookup.
-        self._validate_authorization(auth, now, current_epoch)
-
-        key = idempotency_key or operation_id
-        existing = self.operation_registry.get(key)
-
-        if existing:
-            if existing["request_hash"] != request_hash:
+        with self._commit_lock:
+            if self.phase != Phase.REQUESTED:
                 raise ContractViolation(
-                    "idempotency key reused with different hash"
+                    "authorization must precede suppression"
                 )
 
-            # A new valid authorization nonce authorizes the retry.
-            # The previously consumed nonce cannot be replayed to obtain
-            # an idempotent response.
-            self.nonce_registry.add(auth.nonce)
-            self.audit.append("IDEMPOTENT_COMMIT_REUSED")
-            return existing["commit"]
+            if self.legal_hold:
+                raise ContractViolation("Legal Hold prevents suppression")
 
-        self.commit_counter += 1
-        commit_id = f"commit-{self.commit_counter}"
-        next_fence = self.fence_generation + 1
-        next_revision = self.inventory_revision + 1
+            self._validate_authorization(auth, now, current_epoch)
 
-        proof = SuppressionProof(
-            proof_id=f"suppression-{commit_id}",
-            commit_id=commit_id,
-            suppression_complete=True,
-            inventory_revision=next_revision,
-        )
+            self.phase = Phase.AUTHORIZED
+            return self.commit_suppression(
+                operation_id,
+                attempt_id,
+                idempotency_key,
+                request_hash,
+                auth=auth,
+                now=now,
+                current_epoch=current_epoch,
+            )
 
-        # Bind the real, validated Authorization Nonce.
-        authorization = AuthorizationReference(
-            permission_epoch=auth.permission_epoch,
-            receipt_id=f"receipt-{commit_id}",
-            nonce=auth.nonce,
-        )
-
-        proposed = AtomicCommit(
-            memory_identity=MemoryIdentity(self.memory_id),
-            lifecycle_event=LifecycleEvent(
-                event_id=f"event-{commit_id}",
-                event_type="SuppressionCommitted",
-                operation_id=operation_id,
-                attempt_id=attempt_id,
-            ),
-            idempotency_identity=IdempotencyIdentity(
-                operation_id=operation_id,
-                attempt_id=attempt_id,
-                idempotency_key=key,
-                request_hash=request_hash,
-            ),
-            authorization_reference=authorization,
-            suppression_proof=proof,
-            fence_tombstone=FenceTombstone(
-                fence_generation=next_fence,
-                tombstone_id=f"tombstone-{commit_id}",
-                committed=True,
-            ),
-            commit_id=commit_id,
-        )
-
-        self._validate_atomic_commit(proposed)
-
-        if fail_before_commit:
-            self.audit.append("ATOMIC_TUPLE_ABORTED")
-            raise ContractViolation("atomic commit aborted")
-
-        # One in-memory publication point for all six semantic members.
-        self.atomic_commit = proposed
-        self.atomic_tuple = {
-            name: getattr(proposed, name) for name in self.ATOMIC_FIELDS
-        }
-        self.fence_generation = next_fence
-        self.inventory_revision = next_revision
-        self.outbox[operation_id] = "SUPPRESSION_COMMITTED"
-        self.operation_registry[key] = {
-            "request_hash": request_hash,
-            "commit": proposed,
+    def _commit_snapshot(self) -> dict:
+        """Capture every mutable projection touched by commit publication."""
+        return {
+            "atomic_commit": self.atomic_commit,
+            "atomic_tuple": dict(self.atomic_tuple),
+            "fence_generation": self.fence_generation,
+            "inventory_revision": self.inventory_revision,
+            "outbox": dict(self.outbox),
+            "operation_registry": dict(self.operation_registry),
+            "nonce_registry": set(self.nonce_registry),
+            "retry_audit": list(self.retry_audit),
+            "phase": self.phase,
+            "lifecycle": self.lifecycle,
+            "commit_counter": self.commit_counter,
+            "audit": list(self.audit),
         }
 
-        # Consume the actual authorization nonce only after commit succeeds.
-        self.nonce_registry.add(auth.nonce)
-        self.phase = Phase.SUPPRESSION_COMMITTED
-        self.audit.append("SUPPRESSION_COMMITTED")
+    def _restore_commit_snapshot(self, snapshot: dict) -> None:
+        """Restore the complete commit projection after an aborted publish."""
+        self.atomic_commit = snapshot["atomic_commit"]
+        self.atomic_tuple = dict(snapshot["atomic_tuple"])
+        self.fence_generation = snapshot["fence_generation"]
+        self.inventory_revision = snapshot["inventory_revision"]
+        self.outbox = dict(snapshot["outbox"])
+        self.operation_registry = dict(snapshot["operation_registry"])
+        self.nonce_registry = set(snapshot["nonce_registry"])
+        self.retry_audit = list(snapshot["retry_audit"])
+        self.phase = snapshot["phase"]
+        self.lifecycle = snapshot["lifecycle"]
+        self.commit_counter = snapshot["commit_counter"]
+        self.audit = list(snapshot["audit"])
 
-        # The committed D suppression event is the sole lifecycle trigger.
-        self.forgotten_transition(
-            "SuppressionCommitted",
-            authorization_reference=authorization,
-            suppression_proof=proof,
-        )
-        return proposed
+    @staticmethod
+    def _inject_commit_failure(
+        fail_at: str | None,
+        completed_step: str,
+    ) -> None:
+        """Test-only fault injection after a named projection step."""
+        if fail_at == completed_step:
+            raise ContractViolation(
+                f"injected commit publication failure: {completed_step}"
+            )
 
-    def _validate_atomic_commit(self, commit: AtomicCommit) -> None:
-        if set(self.ATOMIC_FIELDS) != {
-            "memory_identity", "lifecycle_event", "idempotency_identity",
-            "authorization_reference", "suppression_proof",
-            "fence_tombstone",
-        }:
-            raise ContractViolation("atomic tuple schema mismatch")
-
-        if commit.memory_identity.memory_id != self.memory_id:
-            raise ContractViolation("memory identity mismatch")
-
-        if commit.lifecycle_event.event_type != "SuppressionCommitted":
-            raise ContractViolation("wrong lifecycle event")
-
-        if (
-            commit.lifecycle_event.operation_id
-            != commit.idempotency_identity.operation_id
-        ):
-            raise ContractViolation("operation identity mismatch")
-
-        if (
-            commit.lifecycle_event.attempt_id
-            != commit.idempotency_identity.attempt_id
-        ):
-            raise ContractViolation("attempt identity mismatch")
-
-        if commit.suppression_proof.commit_id != commit.commit_id:
-            raise ContractViolation("suppression proof commit mismatch")
-
-        if not commit.suppression_proof.suppression_complete:
-            raise ContractViolation("suppression proof incomplete")
-
-        if not commit.fence_tombstone.committed:
-            raise ContractViolation("Fence/Tombstone not committed")
-
-        if not commit.authorization_reference.nonce:
-            raise ContractViolation("authorization nonce missing")
-
-    def forgotten_transition(
+    def _validate_forgotten_candidate(
         self,
         trigger: str,
-        authorization_reference: AuthorizationReference | None = None,
-        suppression_proof: SuppressionProof | None = None,
+        authorization_reference: AuthorizationReference | None,
+        suppression_proof: SuppressionProof | None,
+        committed: AtomicCommit,
     ) -> None:
+        """Validate Forgotten transition against a proposed commit record."""
         if self.lifecycle == Lifecycle.FORGOTTEN:
             raise ContractViolation("Forgotten is terminal")
 
@@ -409,18 +405,13 @@ class R3Model:
                 "I authorization and D suppression proof required"
             )
 
-        if self.atomic_commit is None:
-            raise ContractViolation("no committed atomic tuple")
-
-        committed = self.atomic_commit
-
         if authorization_reference != committed.authorization_reference:
             raise ContractViolation("authorization reference mismatch")
 
         if suppression_proof != committed.suppression_proof:
             raise ContractViolation("suppression proof mismatch")
 
-        if authorization_reference.receipt_id == "":
+        if not authorization_reference.receipt_id:
             raise ContractViolation("authorization receipt missing")
 
         if suppression_proof.commit_id != committed.commit_id:
@@ -431,7 +422,551 @@ class R3Model:
         if not suppression_proof.suppression_complete:
             raise ContractViolation("suppression is not complete")
 
-        self.lifecycle = Lifecycle.FORGOTTEN
+    def _append_retry_audit(
+        self,
+        original: AtomicCommit,
+        auth: Authorization,
+        request_hash: str,
+    ) -> dict:
+        """Append an independent audit record for an idempotent retry.
+
+        Caller holds _commit_lock and has already validated the new
+        authorization and the original authoritative commit.
+        """
+        identity = original.idempotency_identity
+
+        if request_hash != identity.request_hash:
+            raise ContractViolation(
+                "retry request hash differs from original commit"
+            )
+
+        if auth.nonce in self.nonce_registry:
+            raise ContractViolation("authorization nonce replay")
+
+        retry_number = len(self.retry_audit) + 1
+        receipt_id = f"retry-receipt-{retry_number}"
+
+        record = {
+            "retry_id": f"retry-{retry_number}",
+            "operation_id": identity.operation_id,
+            "commit_id": original.commit_id,
+            "authorization_receipt": receipt_id,
+            "nonce": auth.nonce,
+            "permission_epoch": auth.permission_epoch,
+            "request_hash": request_hash,
+            "retry_result": "REUSED_EXISTING_COMMIT",
+        }
+
+        self.retry_audit.append(record)
+
+        # Nonce consumption for this retry is represented by the committed
+        # retry audit record; the set is rebuilt as its derived projection.
+        self._rebuild_nonce_registry()
+        self.audit.append("IDEMPOTENT_COMMIT_REUSED")
+        return record
+
+    def commit_suppression(
+        self,
+        operation_id: str,
+        attempt_id: str = "attempt-1",
+        idempotency_key: str | None = None,
+        request_hash: str = "default-hash",
+        fail_before_commit: bool = False,
+        auth: Authorization | None = None,
+        now: int = 10,
+        current_epoch: int | None = None,
+        fail_at: str | None = None,
+    ) -> AtomicCommit:
+        """Publish one validated commit under the in-memory commit lock.
+
+        Three phases:
+        1. staged validation of the proposed record and staged projections;
+        2. one authoritative assignment to self.atomic_commit;
+        3. published validation against that authoritative record.
+
+        The atomic_commit reference is the sole authoritative publication
+        record. Other commit-related fields are projections protected by
+        the model's in-process commit lock.
+
+        fail_at is an in-memory test hook. Supported values are the names in
+        COMMIT_PROJECTION_STEPS. It does not model a physical crash.
+        """
+        with self._commit_lock:
+            if self.phase not in {
+                Phase.AUTHORIZED,
+                Phase.SUPPRESSION_COMMITTED,
+            }:
+                raise ContractViolation(
+                    "authorization workflow phase required"
+                )
+
+            if self.legal_hold:
+                raise ContractViolation("Legal Hold prevents suppression")
+
+            if not operation_id or not attempt_id:
+                raise ContractViolation(
+                    "operation and attempt identity required"
+                )
+
+            if current_epoch is None:
+                current_epoch = self.permission_epoch
+
+            self._validate_authorization(auth, now, current_epoch)
+
+            key = idempotency_key or operation_id
+            existing = self.operation_registry.get(key)
+
+            if existing:
+                if existing["request_hash"] != request_hash:
+                    raise ContractViolation(
+                        "idempotency key reused with different hash"
+                    )
+
+                original = existing["commit"]
+
+                if self.atomic_commit != original:
+                    raise ContractViolation(
+                        "operation registry is not backed by authoritative "
+                        "atomic commit"
+                    )
+
+                self._validate_atomic_commit(
+                    original,
+                    expected_nonce=original.authorization_reference.nonce,
+                    expected_revision=original.suppression_proof.inventory_revision,
+                    expected_fence=original.fence_tombstone.fence_generation,
+                    published=True,
+                    live_state=False,
+                )
+
+                # F-OI-02: this is an independent retry authorization audit.
+                # It does not mutate the original commit, Fence, outbox,
+                # lifecycle event, phase, or operation registry.
+                retry_snapshot = self._commit_snapshot()
+                try:
+                    self._append_retry_audit(
+                        original,
+                        auth,
+                        request_hash,
+                    )
+                except Exception:
+                    self._restore_commit_snapshot(retry_snapshot)
+                    raise
+
+                return original
+
+            if self.phase == Phase.SUPPRESSION_COMMITTED:
+                raise ContractViolation(
+                    "committed phase requires an existing idempotency record"
+                )
+
+            if self.atomic_commit is not None:
+                raise ContractViolation(
+                    "authoritative commit already exists"
+                )
+
+            snapshot = self._commit_snapshot()
+
+            try:
+                next_counter = self.commit_counter + 1
+                commit_id = f"commit-{next_counter}"
+                next_fence = self.fence_generation + 1
+                next_revision = self.inventory_revision + 1
+
+                # These values are the construction snapshot. Both staged
+                # and published validation compare against these exact values.
+                expected_revision = next_revision
+                expected_fence = next_fence
+
+                proof = SuppressionProof(
+                    proof_id=f"suppression-{commit_id}",
+                    commit_id=commit_id,
+                    suppression_complete=True,
+                    inventory_revision=expected_revision,
+                )
+
+                authorization = AuthorizationReference(
+                    permission_epoch=auth.permission_epoch,
+                    receipt_id=f"receipt-{commit_id}",
+                    nonce=auth.nonce,
+                )
+
+                proposed = AtomicCommit(
+                    memory_identity=MemoryIdentity(self.memory_id),
+                    lifecycle_event=LifecycleEvent(
+                        event_id=f"event-{commit_id}",
+                        event_type="SuppressionCommitted",
+                        operation_id=operation_id,
+                        attempt_id=attempt_id,
+                    ),
+                    idempotency_identity=IdempotencyIdentity(
+                        operation_id=operation_id,
+                        attempt_id=attempt_id,
+                        idempotency_key=key,
+                        request_hash=request_hash,
+                    ),
+                    authorization_reference=authorization,
+                    suppression_proof=proof,
+                    fence_tombstone=FenceTombstone(
+                        fence_generation=expected_fence,
+                        tombstone_id=f"tombstone-{commit_id}",
+                        committed=True,
+                    ),
+                    commit_id=commit_id,
+                )
+
+                if fail_before_commit:
+                    raise ContractViolation("atomic commit aborted")
+
+                self._validate_forgotten_candidate(
+                    "SuppressionCommitted",
+                    authorization,
+                    proof,
+                    proposed,
+                )
+
+                # Stage all non-authoritative projections under the lock.
+                self.atomic_tuple = {
+                    name: getattr(proposed, name)
+                    for name in self.ATOMIC_FIELDS
+                }
+                self._inject_commit_failure(fail_at, "atomic_tuple")
+
+                self.fence_generation = expected_fence
+                self._inject_commit_failure(fail_at, "fence_generation")
+
+                self.inventory_revision = expected_revision
+                self._inject_commit_failure(fail_at, "inventory_revision")
+
+                self.outbox[operation_id] = "SUPPRESSION_COMMITTED"
+                self._inject_commit_failure(fail_at, "outbox")
+
+                self.operation_registry[key] = {
+                    "request_hash": request_hash,
+                    "commit": proposed,
+                }
+                self._inject_commit_failure(
+                    fail_at, "operation_registry"
+                )
+
+                # Do not consume the Nonce in an independently authoritative
+                # write before atomic_commit. Its consumption is derived from
+                # the record published at the single authority point.
+                self._inject_commit_failure(fail_at, "nonce_registry")
+
+                self.phase = Phase.SUPPRESSION_COMMITTED
+                self._inject_commit_failure(fail_at, "phase")
+
+                self.lifecycle = Lifecycle.FORGOTTEN
+                self._inject_commit_failure(fail_at, "lifecycle")
+
+                self.commit_counter = next_counter
+
+                # PHASE 1: staged validation. atomic_commit is still the
+                # pre-publication value (None for this first commit).
+                self._validate_atomic_commit(
+                    proposed,
+                    expected_nonce=auth.nonce,
+                    expected_revision=expected_revision,
+                    expected_fence=expected_fence,
+                    published=False,
+                )
+
+                # PHASE 2: the single authoritative publication point.
+                self.atomic_commit = proposed
+
+                # The nonce projection is now derivable from the published
+                # authority record. It is rebuilt while still holding lock.
+                self._rebuild_nonce_registry()
+
+                self._inject_commit_failure(fail_at, "atomic_commit")
+
+                # PHASE 3: validate published authority and every projection.
+                self._validate_atomic_commit(
+                    proposed,
+                    expected_nonce=auth.nonce,
+                    expected_revision=expected_revision,
+                    expected_fence=expected_fence,
+                    published=True,
+                )
+
+                self.audit.append("SUPPRESSION_COMMITTED")
+                return proposed
+
+            except Exception:
+                self._restore_commit_snapshot(snapshot)
+                self.audit.append("ATOMIC_TUPLE_ABORTED")
+                raise
+
+    def _validate_atomic_commit(
+        self,
+        commit: AtomicCommit,
+        expected_nonce: str | None = None,
+        expected_revision: int | None = None,
+        expected_fence: int | None = None,
+        published: bool = False,
+        live_state: bool = True,
+    ) -> None:
+        """Cross-validate six semantic members and their projections.
+
+        expected_revision and expected_fence are construction-snapshot
+        values supplied by the caller. They are not recomputed from current
+        mutable model fields based on the published flag.
+        """
+        if set(self.ATOMIC_FIELDS) != {
+            "memory_identity",
+            "lifecycle_event",
+            "idempotency_identity",
+            "authorization_reference",
+            "suppression_proof",
+            "fence_tombstone",
+        }:
+            raise ContractViolation("atomic tuple schema mismatch")
+
+        if set(self.atomic_tuple) not in (
+            set(),
+            set(self.ATOMIC_FIELDS),
+        ):
+            raise ContractViolation("atomic tuple projection schema mismatch")
+
+        if not commit.commit_id:
+            raise ContractViolation("commit identity missing")
+
+        if commit.memory_identity.memory_id != self.memory_id:
+            raise ContractViolation("memory identity mismatch")
+
+        if commit.memory_identity.identity_version < 1:
+            raise ContractViolation("memory identity version invalid")
+
+        event = commit.lifecycle_event
+        identity = commit.idempotency_identity
+        authorization = commit.authorization_reference
+        proof = commit.suppression_proof
+        tombstone = commit.fence_tombstone
+
+        if not event.event_id:
+            raise ContractViolation("lifecycle event identity missing")
+
+        if event.event_type != "SuppressionCommitted":
+            raise ContractViolation("wrong lifecycle event")
+
+        if not event.operation_id or not event.attempt_id:
+            raise ContractViolation("lifecycle event identity incomplete")
+
+        if not identity.operation_id or not identity.attempt_id:
+            raise ContractViolation("idempotency operation identity incomplete")
+
+        if not identity.idempotency_key or not identity.request_hash:
+            raise ContractViolation("idempotency key/hash missing")
+
+        if event.operation_id != identity.operation_id:
+            raise ContractViolation("operation identity mismatch")
+
+        if event.attempt_id != identity.attempt_id:
+            raise ContractViolation("attempt identity mismatch")
+
+        if not authorization.receipt_id or not authorization.nonce:
+            raise ContractViolation("authorization reference incomplete")
+
+        if authorization.permission_epoch != self.permission_epoch:
+            raise ContractViolation(
+                "AuthorizationReference PermissionEpoch mismatch"
+            )
+
+        if (
+            expected_nonce is not None
+            and authorization.nonce != expected_nonce
+        ):
+            raise ContractViolation(
+                "AuthorizationReference nonce binding mismatch"
+            )
+
+        if not proof.proof_id:
+            raise ContractViolation("suppression proof identity missing")
+
+        if proof.commit_id != commit.commit_id:
+            raise ContractViolation("suppression proof commit mismatch")
+
+        if not proof.suppression_complete:
+            raise ContractViolation("suppression proof incomplete")
+
+        if expected_revision is None:
+            expected_revision = proof.inventory_revision
+
+        if proof.inventory_revision != expected_revision:
+            raise ContractViolation(
+                "SuppressionProof inventory revision mismatch"
+            )
+
+        if not tombstone.tombstone_id:
+            raise ContractViolation("Fence/Tombstone identity missing")
+
+        if not tombstone.committed:
+            raise ContractViolation("Fence/Tombstone not committed")
+
+        if expected_fence is None:
+            expected_fence = tombstone.fence_generation
+
+        if tombstone.fence_generation != expected_fence:
+            raise ContractViolation(
+                "FenceTombstone generation mismatch"
+            )
+
+        expected_tuple = {
+            name: getattr(commit, name)
+            for name in self.ATOMIC_FIELDS
+        }
+
+        if published:
+            # Published-state checks must only run after the authority point.
+            if self.atomic_commit != commit:
+                raise ContractViolation(
+                    "authoritative atomic commit projection mismatch"
+                )
+
+            if self.atomic_tuple != expected_tuple:
+                raise ContractViolation("atomic tuple projection mismatch")
+
+            if live_state and self.lifecycle != Lifecycle.FORGOTTEN:
+                raise ContractViolation(
+                    "Forgotten lifecycle projection missing"
+                )
+
+            if live_state and self.phase != Phase.SUPPRESSION_COMMITTED:
+                raise ContractViolation(
+                    "suppression phase projection mismatch"
+                )
+
+            if self.fence_generation != expected_fence:
+                raise ContractViolation(
+                    "published Fence projection mismatch"
+                )
+
+            if self.inventory_revision != expected_revision:
+                raise ContractViolation(
+                    "published inventory revision mismatch"
+                )
+
+            if self.outbox.get(identity.operation_id) != (
+                "SUPPRESSION_COMMITTED"
+            ):
+                raise ContractViolation("outbox projection mismatch")
+
+            registry = self.operation_registry.get(
+                identity.idempotency_key
+            )
+            if not registry:
+                raise ContractViolation("operation registry entry missing")
+
+            if registry.get("request_hash") != identity.request_hash:
+                raise ContractViolation(
+                    "operation registry request hash mismatch"
+                )
+
+            if registry.get("commit") != commit:
+                raise ContractViolation(
+                    "operation registry commit identity mismatch"
+                )
+
+            # Validate the derived projection against its authoritative
+            # sources; never treat the projection as the source of truth.
+            expected_nonces = self._derive_nonce_registry()
+            if self.nonce_registry != expected_nonces:
+                raise ContractViolation(
+                    "authorization nonce registry projection mismatch"
+                )
+
+            if authorization.nonce not in expected_nonces:
+                raise ContractViolation(
+                    "authorization nonce registry projection missing"
+                )
+
+        else:
+            # Staged-state validation intentionally does not require
+            # self.atomic_commit == commit. The authority point has not run.
+            if self.atomic_commit == commit:
+                raise ContractViolation(
+                    "staged commit unexpectedly already authoritative"
+                )
+
+            if self.atomic_tuple != expected_tuple:
+                raise ContractViolation(
+                    "staged atomic tuple projection mismatch"
+                )
+
+            if self.fence_generation != expected_fence:
+                raise ContractViolation(
+                    "staged Fence projection mismatch"
+                )
+
+            if self.inventory_revision != expected_revision:
+                raise ContractViolation(
+                    "staged inventory revision mismatch"
+                )
+
+            if self.outbox.get(identity.operation_id) != (
+                "SUPPRESSION_COMMITTED"
+            ):
+                raise ContractViolation(
+                    "staged outbox projection mismatch"
+                )
+
+            registry = self.operation_registry.get(
+                identity.idempotency_key
+            )
+            if not registry:
+                raise ContractViolation(
+                    "staged operation registry entry missing"
+                )
+
+            if registry.get("request_hash") != identity.request_hash:
+                raise ContractViolation(
+                    "staged operation registry request hash mismatch"
+                )
+
+            if registry.get("commit") != commit:
+                raise ContractViolation(
+                    "staged operation registry commit identity mismatch"
+                )
+
+            if self.lifecycle != Lifecycle.FORGOTTEN:
+                raise ContractViolation(
+                    "staged Forgotten lifecycle projection missing"
+                )
+
+            if self.phase != Phase.SUPPRESSION_COMMITTED:
+                raise ContractViolation(
+                    "staged suppression phase projection mismatch"
+                )
+
+    def forgotten_transition(
+        self,
+        trigger: str,
+        authorization_reference: AuthorizationReference | None = None,
+        suppression_proof: SuppressionProof | None = None,
+    ) -> None:
+        with self._commit_lock:
+            if self.lifecycle == Lifecycle.FORGOTTEN:
+                raise ContractViolation("Forgotten is terminal")
+
+            if self.atomic_commit is None:
+                raise ContractViolation("no committed atomic tuple")
+
+            committed = self.atomic_commit
+            self._validate_atomic_commit(
+                committed,
+                expected_nonce=committed.authorization_reference.nonce,
+                expected_revision=committed.suppression_proof.inventory_revision,
+                expected_fence=committed.fence_tombstone.fence_generation,
+                published=True,
+            )
+            self._validate_forgotten_candidate(
+                trigger,
+                authorization_reference,
+                suppression_proof,
+                committed,
+            )
+            self.lifecycle = Lifecycle.FORGOTTEN
 
     def advance_fence(self, generation: int) -> None:
         if generation <= self.fence_generation:
@@ -455,7 +990,6 @@ class R3Model:
         self.audit.append(f"DEPENDENCY:{dependency}")
 
     def recall_cache_fill(self, key: str, value: Any, observed_fence: int) -> None:
-        # A delayed fill must recheck Fence at publication.
         if not self.read_allowed(observed_fence):
             raise ContractViolation("stale cache fill rejected")
         self.cache_entries[key] = (value, observed_fence)
@@ -513,7 +1047,6 @@ class R3Model:
 
     def context_remove(self) -> None:
         self.audit.append("CONTEXT_REMOVE")
-        # Context removal is not canonical Forget.
 
     def set_required_targets(self, targets) -> None:
         self.required_targets = set(targets)

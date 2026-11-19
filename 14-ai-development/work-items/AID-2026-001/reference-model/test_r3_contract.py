@@ -1,10 +1,24 @@
-
 """R3 contract-level tests.
 
-DFI-001..022, I-U011-T01..T16, STOR-01..07,
-plus authorization-entry rejection tests.
+Version: R3-FSTOR-20261118-02
+
+Coverage:
+- DFI-001..022
+- I-U011-T01..T16
+- STOR-01..07
+- AUTH-01..14
+- F-STOR-01/F-STOR-02 repair regressions
+- F-OI-01 nonce projection recovery and replay rejection
+- F-OI-02 independent idempotent retry audit
+
 These tests exercise the in-memory reference model only.
+DFI-013 deterministic sequential interleavings are not concurrency proof.
+DFI-021 is an in-memory failure/rollback boundary, not physical durability.
+Nonce projection reconstruction is an in-memory projection recovery check,
+not a WAL, disk persistence, or physical crash-recovery proof.
 """
+
+import threading
 import unittest
 
 from r3_contract_model import (
@@ -45,27 +59,23 @@ def done():
 
 class DFI(unittest.TestCase):
 
-    # DFI-001: Forgotten identity must not be readable.
     def test_DFI_001(self):
         m = done()
         self.assertFalse(m.read_allowed(m.fence_generation))
         self.assertFalse(m.read_allowed(None))
 
-    # DFI-002: SuppressionCommitted triggers Forgotten before cleanup.
     def test_DFI_002(self):
         m = done()
         m.phase = Phase.CLEANUP
         self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
         self.assertNotEqual(m.phase, Phase.COMPLETED)
 
-    # DFI-003: Arbitrary lifecycle strings cannot trigger Forgotten.
     def test_DFI_003(self):
         m = R3Model("m")
         with self.assertRaises(ContractViolation):
             m.forgotten_transition("Cancel")
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
 
-    # DFI-004: Unknown required targets prevent D completion.
     def test_DFI_004(self):
         m = done()
         m.set_required_targets(["required", "unknown"])
@@ -74,22 +84,18 @@ class DFI(unittest.TestCase):
         self.assertFalse(m.domain_complete())
         self.assertIn("unknown", m.unknown_required_targets)
 
-    # DFI-005: ACKNOWLEDGED is not proof of erasure.
     def test_DFI_005(self):
         m = done()
         m.set_required_targets(["adapter"])
         m.mark_target("adapter", "ACKNOWLEDGED")
         self.assertFalse(m.domain_complete())
 
-    # DFI-006: Policy retention is not successful deletion.
     def test_DFI_006(self):
         m = done()
         m.set_required_targets(["retained"])
         m.mark_target("retained", "POLICY_RETAINED")
         self.assertFalse(m.domain_complete())
 
-    # DFI-007: Same idempotency Key/Hash reuses operation only after
-    # independent validation of the new authorization.
     def test_DFI_007(self):
         m = R3Model("m")
         m.phase = Phase.AUTHORIZED
@@ -98,7 +104,6 @@ class DFI(unittest.TestCase):
             auth=auth(nonce="nonce-first"),
         )
 
-        # Same Key/Hash does not bypass invalid authorization.
         m.phase = Phase.AUTHORIZED
         with self.assertRaises(ContractViolation):
             m.commit_suppression(
@@ -109,7 +114,6 @@ class DFI(unittest.TestCase):
                 ),
             )
 
-        # Same Key/Hash with a fresh valid authorization reuses the commit.
         m.phase = Phase.AUTHORIZED
         second = m.commit_suppression(
             "op-1", "attempt-2", "key-1", "hash-A",
@@ -118,7 +122,6 @@ class DFI(unittest.TestCase):
         self.assertIs(first, second)
         self.assertIn("nonce-second", m.nonce_registry)
 
-        # Same Key but different Hash is rejected.
         m.phase = Phase.AUTHORIZED
         with self.assertRaises(ContractViolation):
             m.commit_suppression(
@@ -126,7 +129,6 @@ class DFI(unittest.TestCase):
                 auth=auth(nonce="nonce-third"),
             )
 
-    # DFI-008: Stale attempt cannot publish a stage.
     def test_DFI_008(self):
         m = done()
         a = m.start_attempt("a1")
@@ -135,7 +137,6 @@ class DFI(unittest.TestCase):
             m.commit_stage("a1", a, "cleanup")
         m.commit_stage("a2", b, "cleanup")
 
-    # DFI-009: UNKNOWN outcome requires reconciliation before retry.
     def test_DFI_009(self):
         m = done()
         m.start_attempt("a1")
@@ -145,7 +146,6 @@ class DFI(unittest.TestCase):
         m.reconcile("APPLIED")
         m.retry("a2")
 
-    # DFI-010: PermissionEpoch mismatch fails closed.
     def test_DFI_010(self):
         m = R3Model("m")
         with self.assertRaises(ContractViolation):
@@ -155,7 +155,6 @@ class DFI(unittest.TestCase):
         self.assertEqual(m.phase, Phase.REQUESTED)
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
 
-    # DFI-011: Inventory revision changes invalidate previous completion.
     def test_DFI_011(self):
         m = done()
         m.set_required_targets(["a"])
@@ -166,7 +165,6 @@ class DFI(unittest.TestCase):
         self.assertGreater(m.inventory_revision, revision)
         self.assertFalse(m.domain_complete())
 
-    # DFI-012: Restore remains quarantined until Fence reconciliation.
     def test_DFI_012(self):
         m = done()
         m.begin_restore(0)
@@ -176,16 +174,10 @@ class DFI(unittest.TestCase):
         m.reconcile_restore(m.fence_generation, True)
         self.assertTrue(m.restore_query_allowed())
 
-    # DFI-013: Three independent stale-publication races.
-    #
-    # Evidence boundary: these are deterministic sequential interleavings.
-    # They demonstrate the rejection conditions for old Fence, old Worker,
-    # and delayed Cache Fill. They are NOT proof of true concurrent
-    # execution or concurrent linearizability.
     def test_DFI_013(self):
+        """Sequential fence interleavings only; NOT a concurrency proof."""
         m = R3Model("m")
 
-        # Race A: worker captures an old lease; a newer worker supersedes it.
         old_worker_lease = m.start_attempt("worker-old")
         new_worker_lease = m.start_attempt("worker-new")
         with self.assertRaises(ContractViolation):
@@ -194,19 +186,15 @@ class DFI(unittest.TestCase):
             )
         self.assertNotIn("STAGE:publish", m.audit)
 
-        # Capture the pre-Forget Fence for producer and cache operations.
         old_fence = m.fence_generation
         self.assertTrue(m.producer_admission(old_fence))
 
-        # The canonical suppression commit advances Fence and Forget state.
         m.authorize_and_suppress(auth(nonce="dfi013-nonce"), 10, 7, "op")
 
-        # Race B: producer with an old Fence cannot register a dependency.
         with self.assertRaises(ContractViolation):
             m.register_dependency("late-producer", old_fence)
         self.assertNotIn("DEPENDENCY:late-producer", m.audit)
 
-        # Race C: delayed Cache Fill must recheck Fence at publication.
         with self.assertRaises(ContractViolation):
             m.recall_cache_fill(
                 "delayed-key", "late-value", old_fence
@@ -217,7 +205,6 @@ class DFI(unittest.TestCase):
         self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
         self.assertGreater(m.fence_generation, old_fence)
 
-    # DFI-014: Old producer lease cannot publish after a new attempt.
     def test_DFI_014(self):
         m = done()
         old = m.start_attempt("producer-old")
@@ -226,7 +213,6 @@ class DFI(unittest.TestCase):
             m.commit_stage("producer-old", old, "publish")
         m.commit_stage("producer-new", new, "publish")
 
-    # DFI-015: Recall/delayed Cache Fill must recheck Fence before return.
     def test_DFI_015(self):
         m = R3Model("m")
         old_fence = m.fence_generation
@@ -238,7 +224,6 @@ class DFI(unittest.TestCase):
             m.recall_return("k", old_fence)
         self.assertNotEqual(m.lifecycle, Lifecycle.ACTIVE)
 
-    # DFI-016: Index rebuild cannot resurrect identity from stale snapshot.
     def test_DFI_016(self):
         m = done()
         with self.assertRaises(ContractViolation):
@@ -249,7 +234,6 @@ class DFI(unittest.TestCase):
             m.rebuild_index(m.fence_generation, {m.memory_id}), set()
         )
 
-    # DFI-017: Offline Snapshot/Delta reconnect checks ContextVersion.
     def test_DFI_017(self):
         m = R3Model("m")
         snapshot = m.offline_snapshot(4)
@@ -265,7 +249,6 @@ class DFI(unittest.TestCase):
             5,
         )
 
-    # DFI-018: Context Remove is distinct from canonical Forget.
     def test_DFI_018(self):
         m = R3Model("m")
         m.context_remove()
@@ -275,23 +258,20 @@ class DFI(unittest.TestCase):
             m.forgotten_transition("ContextRemove")
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
 
-    # DFI-019: ACKNOWLEDGED target cannot satisfy D completion.
     def test_DFI_019(self):
         m = done()
         m.set_required_targets(["adapter"])
         m.mark_target("adapter", "ACKNOWLEDGED")
         self.assertFalse(m.domain_complete())
 
-    # DFI-020: Agent telemetry cannot trigger canonical Forget.
     def test_DFI_020(self):
         m = R3Model("m")
         with self.assertRaises(ContractViolation):
             m.forgotten_transition("AgentTelemetry")
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
 
-    # DFI-021: Atomic tuple abort and model-level recovery boundary.
-    # This is NOT a physical Crash, WAL, or Failover durability test.
     def test_DFI_021(self):
+        """In-memory pre-publication abort; not WAL or crash durability."""
         m = R3Model("m")
         m.phase = Phase.AUTHORIZED
         before = (
@@ -328,13 +308,11 @@ class DFI(unittest.TestCase):
             m.fence_generation,
         )
 
-        # In-memory record inspection only; no physical WAL claim.
         recovered_record = m.atomic_commit
         self.assertIsNotNone(recovered_record)
         self.assertEqual(recovered_record, commit)
         self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
 
-    # DFI-022: Missing backup coverage is UNKNOWN; Restore stays quarantined.
     def test_DFI_022(self):
         m = done()
         m.set_backup_manifest(None)
@@ -353,11 +331,9 @@ class OwnerIU011(unittest.TestCase):
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
         self.assertEqual(m.fence_generation, 0)
 
-    # I-U011-T01: Unknown issuer is denied.
     def test_T01(self):
         self._deny(issuer_known=False)
 
-    # I-U011-T02: Audience, operation, hash, purpose and scope binding.
     def test_T02(self):
         for key in (
             "audience_matches", "operation_matches",
@@ -366,8 +342,6 @@ class OwnerIU011(unittest.TestCase):
             with self.subTest(key=key):
                 self._deny(**{key: False})
 
-    # I-U011-T03: A successfully consumed Nonce cannot be replayed.
-    # Expiry and not-before boundaries are also checked.
     def test_T03(self):
         m = R3Model("m")
         original = auth(nonce="real-authorization-nonce")
@@ -382,7 +356,6 @@ class OwnerIU011(unittest.TestCase):
             "real-authorization-nonce",
         )
 
-        # Replay the same Authorization Nonce through the actual commit API.
         m.phase = Phase.AUTHORIZED
         with self.assertRaises(ContractViolation):
             m.commit_suppression(
@@ -400,11 +373,9 @@ class OwnerIU011(unittest.TestCase):
         self._deny(expires_at=10)
         self._deny(not_before=11)
 
-    # I-U011-T04: Stale PermissionEpoch is denied.
     def test_T04(self):
         self._deny(permission_epoch=6)
 
-    # I-U011-T05: Revocation wins when it precedes commit.
     def test_T05(self):
         m = R3Model("m")
         result = m.revoke_race(
@@ -414,7 +385,6 @@ class OwnerIU011(unittest.TestCase):
 
         self.assertEqual(result, "REVOCATION_WON")
 
-        # Assert actual state and side effects, not just the result label.
         self.assertEqual(m.permission_epoch, 8)
         self.assertEqual(m.revocation_state, "REVOKED")
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
@@ -427,7 +397,6 @@ class OwnerIU011(unittest.TestCase):
         self.assertNotIn("revocation-wins-nonce", m.nonce_registry)
         self.assertIn("AUTHORIZATION_REVOKED", m.audit)
 
-    # I-U011-T06: Commit wins when commit precedes revocation.
     def test_T06(self):
         m = R3Model("m")
         result = m.revoke_race(
@@ -437,7 +406,6 @@ class OwnerIU011(unittest.TestCase):
 
         self.assertEqual(result, "COMMIT_WON")
 
-        # Commit's actual effects remain committed after later revocation.
         self.assertEqual(m.permission_epoch, 8)
         self.assertEqual(m.revocation_state, "REVOKED")
         self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
@@ -452,7 +420,6 @@ class OwnerIU011(unittest.TestCase):
         self.assertIn("commit-wins-nonce", m.nonce_registry)
         self.assertIn("AUTHORIZATION_REVOKED", m.audit)
 
-    # I-U011-T07: Unprovable ordering/currentness is UNKNOWN.
     def test_T07(self):
         m = R3Model("m")
         result = m.revoke_race(
@@ -462,7 +429,6 @@ class OwnerIU011(unittest.TestCase):
 
         self.assertEqual(result, "UNKNOWN")
 
-        # UNKNOWN is an explicit fail-closed state, not a successful commit.
         self.assertEqual(m.revocation_state, "UNKNOWN")
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
         self.assertEqual(m.phase, Phase.AUTHORIZED)
@@ -483,11 +449,9 @@ class OwnerIU011(unittest.TestCase):
                 auth=auth(nonce="unknown-followup-nonce"),
             )
 
-    # I-U011-T08: Stale delegation is denied.
     def test_T08(self):
         self._deny(delegation_current=False)
 
-    # I-U011-T09: Legal Hold/Retention prevents suppression.
     def test_T09(self):
         m = R3Model("m")
         m.legal_hold = True
@@ -496,7 +460,6 @@ class OwnerIU011(unittest.TestCase):
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
         self.assertEqual(m.fence_generation, 0)
 
-    # I-U011-T10: Exception approval, scope, basis, expiry and controls.
     def test_T10(self):
         m = R3Model("m")
         with self.assertRaises(ContractViolation):
@@ -511,21 +474,18 @@ class OwnerIU011(unittest.TestCase):
         self.assertTrue(m.exception_valid(49))
         self.assertFalse(m.exception_valid(50))
 
-    # I-U011-T11: Policy-retained targets are not erased.
     def test_T11(self):
         m = done()
         m.set_required_targets(["held"])
         m.mark_target("held", "POLICY_RETAINED")
         self.assertFalse(m.domain_complete())
 
-    # I-U011-T12: Unknown required target prevents completion.
     def test_T12(self):
         m = done()
         m.set_required_targets(["unknown"])
         m.mark_target("unknown", "UNKNOWN")
         self.assertFalse(m.domain_complete())
 
-    # I-U011-T13: Inventory expansion invalidates prior completion.
     def test_T13(self):
         m = done()
         m.set_required_targets(["a"])
@@ -534,7 +494,6 @@ class OwnerIU011(unittest.TestCase):
         m.set_required_targets(["a", "new"])
         self.assertFalse(m.domain_complete())
 
-    # I-U011-T14: Expired/revoked exception is no longer valid.
     def test_T14(self):
         m = R3Model("m")
         m.set_exception({
@@ -549,8 +508,6 @@ class OwnerIU011(unittest.TestCase):
         self.assertIsNone(m.exception)
         self.assertIn("EXCEPTION_EXPIRED_OR_REVOKED", m.audit)
 
-    # I-U011-T15: Complete target evidence without D completion is rejected.
-    # I governance projection cannot substitute for D completion.
     def test_T15(self):
         m = done()
         m.set_required_targets(["a", "b"])
@@ -563,7 +520,6 @@ class OwnerIU011(unittest.TestCase):
         self.assertFalse(m.d_completion)
         self.assertEqual(m.required_targets, {"a", "b"})
 
-    # I-U011-T16: Forgotten is independent of cleanup completion.
     def test_T16(self):
         m = done()
         m.phase = Phase.CLEANUP
@@ -573,21 +529,111 @@ class OwnerIU011(unittest.TestCase):
 
 class StorageFaults(unittest.TestCase):
 
-    # STOR-01: Concurrent suppression cannot create a second commit.
     def test_STOR_01_concurrent_suppression_race(self):
-        m = done()
-        with self.assertRaises(ContractViolation):
-            m.commit_suppression("duplicate")
+        """Real two-thread shared-boundary race, not sequential duplicate.
+
+        Both callers cross a synchronization barrier before entering the
+        same model commit boundary. They use distinct valid authorization
+        nonces and the same idempotency identity. Exactly one authoritative
+        commit must be published; the other caller must reuse that record.
+        """
+        m = R3Model("mem")
+        m.phase = Phase.AUTHORIZED
+
+        barrier = threading.Barrier(2)
+        results = []
+        errors = []
+        result_lock = threading.Lock()
+
+        def contender(index):
+            try:
+                supplied = auth(nonce=f"concurrent-nonce-{index}")
+                barrier.wait(timeout=5)
+                result = m.commit_suppression(
+                    "concurrent-op",
+                    attempt_id=f"attempt-{index}",
+                    idempotency_key="concurrent-key",
+                    request_hash="concurrent-hash",
+                    auth=supplied,
+                )
+                with result_lock:
+                    results.append((index, result, supplied.nonce))
+            except Exception as exc:
+                with result_lock:
+                    errors.append(exc)
+
+        workers = [
+            threading.Thread(target=contender, args=(0,)),
+            threading.Thread(target=contender, args=(1,)),
+        ]
+
+        for worker in workers:
+            worker.start()
+
+        for worker in workers:
+            worker.join(timeout=10)
+
+        self.assertTrue(all(not worker.is_alive() for worker in workers))
+        self.assertEqual(errors, [])
+        self.assertEqual(len(results), 2)
+
+        authoritative = m.atomic_commit
+        self.assertIsNotNone(authoritative)
+        self.assertIs(results[0][1], authoritative)
+        self.assertIs(results[1][1], authoritative)
+
+        self.assertEqual(m.commit_counter, 1)
+        self.assertEqual(m.fence_generation, 1)
+        self.assertEqual(m.inventory_revision, 1)
+        self.assertEqual(m.phase, Phase.SUPPRESSION_COMMITTED)
         self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
 
-    # STOR-02: Replica lag cannot lower the committed Fence.
+        self.assertEqual(
+            m.outbox,
+            {"concurrent-op": "SUPPRESSION_COMMITTED"},
+        )
+        self.assertEqual(len(m.operation_registry), 1)
+        self.assertEqual(
+            m.operation_registry["concurrent-key"]["commit"],
+            authoritative,
+        )
+        self.assertEqual(
+            m.operation_registry["concurrent-key"]["request_hash"],
+            "concurrent-hash",
+        )
+
+        self.assertEqual(
+            m.nonce_registry,
+            {"concurrent-nonce-0", "concurrent-nonce-1"},
+        )
+        self.assertEqual(
+            sum(
+                item == "SUPPRESSION_COMMITTED"
+                for item in m.audit
+            ),
+            1,
+        )
+        self.assertEqual(
+            sum(
+                item == "IDEMPOTENT_COMMIT_REUSED"
+                for item in m.audit
+            ),
+            1,
+        )
+
+        m._validate_atomic_commit(
+            authoritative,
+            published=True,
+            expected_revision=authoritative.suppression_proof.inventory_revision,
+            expected_fence=authoritative.fence_tombstone.fence_generation,
+        )
+
     def test_STOR_02_replica_lag_failover(self):
         m = done()
         with self.assertRaises(ContractViolation):
             m.promote_replica("lag", m.fence_generation - 1)
         self.assertFalse(m.read_allowed(None, False))
 
-    # STOR-03: Old worker lease cannot commit after new attempt.
     def test_STOR_03_stale_worker_old_lease(self):
         m = done()
         old = m.start_attempt("old")
@@ -596,14 +642,12 @@ class StorageFaults(unittest.TestCase):
             m.commit_stage("old", old, "erase")
         m.commit_stage("new", new, "erase")
 
-    # STOR-04: Outbox replay is idempotent.
     def test_STOR_04_duplicate_events_outbox_replay(self):
         m = done()
         self.assertFalse(m.replay_outbox("op"))
         self.assertTrue(m.replay_outbox("event"))
         self.assertFalse(m.replay_outbox("event"))
 
-    # STOR-05: Timeout UNKNOWN requires reconciliation before retry.
     def test_STOR_05_timeout_retry_reconciliation(self):
         m = done()
         m.start_attempt("a1")
@@ -613,7 +657,6 @@ class StorageFaults(unittest.TestCase):
         m.reconcile("NOT_APPLIED")
         m.retry("a2")
 
-    # STOR-06: Restore isolation until Fence and later Forget reconciliation.
     def test_STOR_06_restore_isolation_reconciliation(self):
         m = done()
         m.begin_restore(0)
@@ -621,7 +664,6 @@ class StorageFaults(unittest.TestCase):
         m.reconcile_restore(m.fence_generation, True)
         self.assertTrue(m.restore_query_allowed())
 
-    # STOR-07: Missing, unauthenticated or empty backup manifest is UNKNOWN.
     def test_STOR_07_missing_manifest_unknown(self):
         m = done()
         m.set_backup_manifest(None)
@@ -646,7 +688,6 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertEqual(m.fence_generation, 0)
         return m
 
-    # AUTH-01: Direct commit without Authorization is rejected.
     def test_AUTH_01_missing_authorization(self):
         m = R3Model("m")
         m.phase = Phase.AUTHORIZED
@@ -655,32 +696,27 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertIsNone(m.atomic_commit)
         self.assertEqual(m.fence_generation, 0)
 
-    # AUTH-02: Invalid signature is rejected at commit entry.
     def test_AUTH_02_invalid_signature(self):
         self._direct_commit(
             auth(signature_valid=False, nonce="bad-signature")
         )
 
-    # AUTH-03: Unknown issuer is rejected at commit entry.
     def test_AUTH_03_unknown_issuer(self):
         self._direct_commit(
             auth(issuer_known=False, nonce="unknown-issuer")
         )
 
-    # AUTH-04: Expired authorization is rejected at commit entry.
     def test_AUTH_04_expired_authorization(self):
         self._direct_commit(
             auth(expires_at=10, nonce="expired"),
             now=10,
         )
 
-    # AUTH-05: Stale PermissionEpoch is rejected at commit entry.
     def test_AUTH_05_stale_permission_epoch(self):
         self._direct_commit(
             auth(permission_epoch=6, nonce="stale-epoch")
         )
 
-    # AUTH-06: Changing phase alone cannot grant commit authority.
     def test_AUTH_06_phase_mutation_is_not_authority(self):
         m = R3Model("m")
         m.phase = Phase.AUTHORIZED
@@ -691,7 +727,6 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertIsNone(m.atomic_commit)
         self.assertEqual(m.fence_generation, 0)
 
-    # AUTH-07: AuthorizationReference carries the actual authorization nonce.
     def test_AUTH_07_real_nonce_binding(self):
         m = R3Model("m")
         supplied = auth(nonce="issuer-generated-real-nonce")
@@ -705,7 +740,6 @@ class AuthorizationCommitEntry(unittest.TestCase):
             f"nonce-{commit.commit_id}", m.nonce_registry
         )
 
-    # AUTH-08: Aborted commit does not consume nonce; successful retry does.
     def test_AUTH_08_abort_does_not_consume_nonce(self):
         m = R3Model("m")
         supplied = auth(nonce="retry-after-abort")
@@ -721,7 +755,6 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertIsNotNone(commit)
         self.assertIn(supplied.nonce, m.nonce_registry)
 
-    # AUTH-09: A consumed nonce cannot authorize a different operation.
     def test_AUTH_09_nonce_replay_different_key(self):
         m = R3Model("m")
         supplied = auth(nonce="one-time-nonce")
@@ -736,7 +769,6 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertNotIn("second-op", m.outbox)
         self.assertEqual(m.fence_generation, 1)
 
-    # AUTH-10: Fresh valid nonce permits same Key/Hash idempotent reuse.
     def test_AUTH_10_fresh_nonce_idempotent_reuse(self):
         m = R3Model("m")
         m.phase = Phase.AUTHORIZED
@@ -753,7 +785,6 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertIn("fresh-valid-nonce", m.nonce_registry)
         self.assertEqual(m.fence_generation, 1)
 
-    # AUTH-11: Invalid authorization cannot use an existing idempotency result.
     def test_AUTH_11_invalid_auth_idempotent_bypass(self):
         m = R3Model("m")
         m.phase = Phase.AUTHORIZED
@@ -773,14 +804,12 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertIs(m.atomic_commit, first)
         self.assertNotIn("invalid-retry", m.nonce_registry)
 
-    # AUTH-12: Not-before boundary is checked at commit entry.
     def test_AUTH_12_not_before(self):
         self._direct_commit(
             auth(not_before=11, nonce="not-yet-valid"),
             now=10,
         )
 
-    # AUTH-13: Caller cannot pass an obsolete epoch to bypass model state.
     def test_AUTH_13_caller_epoch_spoof(self):
         m = R3Model("m")
         m.permission_epoch = 8
@@ -794,7 +823,6 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertIsNone(m.atomic_commit)
         self.assertEqual(m.fence_generation, 0)
 
-    # AUTH-14: Stale delegation is rejected at the commit boundary.
     def test_AUTH_14_stale_delegation(self):
         self._direct_commit(
             auth(
@@ -804,5 +832,399 @@ class AuthorizationCommitEntry(unittest.TestCase):
         )
 
 
+class AtomicPublicationFaultInjection(unittest.TestCase):
+    """F-STOR-01: every intermediate projection failure must roll back."""
+
+    def _snapshot(self, m):
+        return (
+            m.atomic_commit,
+            dict(m.atomic_tuple),
+            m.fence_generation,
+            m.inventory_revision,
+            dict(m.outbox),
+            dict(m.operation_registry),
+            set(m.nonce_registry),
+            m.phase,
+            m.lifecycle,
+            m.commit_counter,
+        )
+
+    def test_FSTOR_01_all_projection_faults_rollback(self):
+        failure_points = (
+            "atomic_tuple",
+            "fence_generation",
+            "inventory_revision",
+            "outbox",
+            "operation_registry",
+            "nonce_registry",
+            "phase",
+            "lifecycle",
+            "atomic_commit",
+        )
+
+        for point in failure_points:
+            with self.subTest(failure_point=point):
+                m = R3Model("m")
+                m.phase = Phase.AUTHORIZED
+                before = self._snapshot(m)
+
+                with self.assertRaises(ContractViolation):
+                    m.commit_suppression(
+                        "op",
+                        auth=auth(nonce=f"fault-{point}"),
+                        fail_at=point,
+                    )
+
+                self.assertEqual(self._snapshot(m), before)
+                self.assertEqual(m.audit, ["ATOMIC_TUPLE_ABORTED"])
+                self.assertNotIn(f"fault-{point}", m.nonce_registry)
+
+    def test_FSTOR_02_retry_after_each_injected_abort(self):
+        for point in R3Model.COMMIT_PROJECTION_STEPS:
+            with self.subTest(failure_point=point):
+                m = R3Model("m")
+                m.phase = Phase.AUTHORIZED
+
+                with self.assertRaises(ContractViolation):
+                    m.commit_suppression(
+                        "op",
+                        auth=auth(nonce=f"aborted-{point}"),
+                        fail_at=point,
+                    )
+
+                commit = m.commit_suppression(
+                    "op",
+                    auth=auth(nonce=f"retry-{point}"),
+                )
+
+                self.assertIs(m.atomic_commit, commit)
+                self.assertEqual(m.commit_counter, 1)
+                self.assertEqual(m.fence_generation, 1)
+                self.assertEqual(m.inventory_revision, 1)
+                self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
+                self.assertEqual(
+                    m.outbox["op"], "SUPPRESSION_COMMITTED"
+                )
+                self.assertIn(f"retry-{point}", m.nonce_registry)
+                self.assertNotIn(f"aborted-{point}", m.nonce_registry)
+
+    def test_FSTOR_03_six_member_projection_exactness(self):
+        m = R3Model("m")
+        commit = m.authorize_and_suppress(
+            auth(nonce="six-member-nonce"),
+            10,
+            7,
+            "op",
+        )
+
+        self.assertEqual(set(m.atomic_tuple), set(R3Model.ATOMIC_FIELDS))
+
+        for name in R3Model.ATOMIC_FIELDS:
+            self.assertEqual(
+                m.atomic_tuple[name],
+                getattr(commit, name),
+            )
+
+        self.assertEqual(
+            commit.lifecycle_event.operation_id,
+            commit.idempotency_identity.operation_id,
+        )
+        self.assertEqual(
+            commit.lifecycle_event.attempt_id,
+            commit.idempotency_identity.attempt_id,
+        )
+        self.assertEqual(
+            commit.authorization_reference.permission_epoch,
+            m.permission_epoch,
+        )
+        self.assertEqual(
+            commit.authorization_reference.nonce,
+            "six-member-nonce",
+        )
+        self.assertEqual(
+            commit.suppression_proof.inventory_revision,
+            m.inventory_revision,
+        )
+        self.assertEqual(
+            commit.fence_tombstone.fence_generation,
+            m.fence_generation,
+        )
+        self.assertEqual(
+            m.operation_registry[
+                commit.idempotency_identity.idempotency_key
+            ]["commit"],
+            commit,
+        )
+        self.assertEqual(
+            m.outbox[commit.lifecycle_event.operation_id],
+            "SUPPRESSION_COMMITTED",
+        )
+
+    def test_FSTOR_04_corrupt_six_member_cross_reference_rejected(self):
+        m = R3Model("m")
+        commit = m.authorize_and_suppress(
+            auth(nonce="cross-reference-nonce"),
+            10,
+            7,
+            "op",
+        )
+
+        from dataclasses import replace
+
+        invalid_commits = (
+            replace(
+                commit,
+                authorization_reference=replace(
+                    commit.authorization_reference,
+                    permission_epoch=commit.authorization_reference.permission_epoch + 1,
+                ),
+            ),
+            replace(
+                commit,
+                suppression_proof=replace(
+                    commit.suppression_proof,
+                    inventory_revision=commit.suppression_proof.inventory_revision + 1,
+                ),
+            ),
+            replace(
+                commit,
+                fence_tombstone=replace(
+                    commit.fence_tombstone,
+                    fence_generation=commit.fence_tombstone.fence_generation + 1,
+                ),
+            ),
+            replace(
+                commit,
+                lifecycle_event=replace(
+                    commit.lifecycle_event,
+                    attempt_id="unrelated-attempt",
+                ),
+            ),
+            replace(
+                commit,
+                idempotency_identity=replace(
+                    commit.idempotency_identity,
+                    request_hash="unrelated-hash",
+                ),
+            ),
+        )
+
+        for invalid in invalid_commits:
+            with self.subTest(invalid=invalid):
+                with self.assertRaises(ContractViolation):
+                    m._validate_atomic_commit(
+                        invalid,
+                        published=True,
+                        expected_revision=commit.suppression_proof.inventory_revision,
+                        expected_fence=commit.fence_tombstone.fence_generation,
+                    )
+
+    def test_FSTOR_05_completion_projection_has_no_domain_side_effect(self):
+        m = done()
+        m.set_required_targets(["a"])
+        m.mark_target("a", "SUCCEEDED")
+        m.d_completion = True
+
+        before = (
+            m.d_completion,
+            set(m.unknown_required_targets),
+            dict(m.target_results),
+            m.inventory_revision,
+        )
+
+        self.assertTrue(m.completion_projection_allowed())
+
+        after = (
+            m.d_completion,
+            set(m.unknown_required_targets),
+            dict(m.target_results),
+            m.inventory_revision,
+        )
+        self.assertEqual(before, after)
+
+    def test_FSTOR_06_nonce_projection_rebuild_and_replay_rejection(self):
+        """F-OI-01: reconstruct nonce projection from authoritative records.
+
+        This is an in-memory projection-recovery test. It does not claim
+        persistence across process or machine crashes.
+        """
+        m = R3Model("m")
+        m.phase = Phase.AUTHORIZED
+
+        first_nonce = "foi01-committed-nonce"
+        retry_nonce = "foi01-retry-nonce"
+
+        commit = m.commit_suppression(
+            "foi01-op",
+            "foi01-attempt-1",
+            "foi01-key",
+            "foi01-hash",
+            auth=auth(nonce=first_nonce),
+        )
+
+        m.phase = Phase.AUTHORIZED
+        reused = m.commit_suppression(
+            "foi01-op",
+            "foi01-attempt-2",
+            "foi01-key",
+            "foi01-hash",
+            auth=auth(nonce=retry_nonce),
+        )
+
+        self.assertIs(reused, commit)
+        self.assertIn(first_nonce, m.nonce_registry)
+        self.assertIn(retry_nonce, m.nonce_registry)
+
+        # Simulate loss/corruption of the derived in-memory projection.
+        m.nonce_registry.clear()
+        self.assertEqual(m.nonce_registry, set())
+
+        rebuilt = m.recover_nonce_registry()
+        self.assertEqual(rebuilt, {first_nonce, retry_nonce})
+        self.assertEqual(m.nonce_registry, {first_nonce, retry_nonce})
+
+        # A committed nonce remains consumed after projection reconstruction.
+        m.phase = Phase.AUTHORIZED
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                "foi01-replay-op",
+                "foi01-attempt-replay",
+                "foi01-other-key",
+                "foi01-other-hash",
+                auth=auth(nonce=first_nonce),
+            )
+
+        self.assertEqual(m.atomic_commit, commit)
+        self.assertEqual(m.fence_generation, 1)
+        self.assertNotIn("foi01-replay-op", m.outbox)
+
+    def test_FSTOR_07_idempotent_retry_has_complete_independent_audit(self):
+        """F-OI-02: retry authorization is audited without a second commit."""
+        m = R3Model("m")
+        m.phase = Phase.AUTHORIZED
+
+        original_operation_id = "foi02-original-operation"
+        original_attempt_id = "foi02-original-attempt"
+        idempotency_key = "foi02-idempotency-key"
+        request_hash = "foi02-request-hash"
+        original_nonce = "foi02-original-nonce"
+        retry_nonce = "foi02-fresh-retry-nonce"
+
+        first = m.commit_suppression(
+            original_operation_id,
+            original_attempt_id,
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce=original_nonce),
+        )
+
+        original_commit_id = first.commit_id
+        original_fence = m.fence_generation
+        original_revision = m.inventory_revision
+        original_counter = m.commit_counter
+        original_outbox = dict(m.outbox)
+        original_audit_count = sum(
+            entry == "SUPPRESSION_COMMITTED" for entry in m.audit
+        )
+
+        m.phase = Phase.AUTHORIZED
+        second = m.commit_suppression(
+            original_operation_id,
+            "foi02-retry-attempt",
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce=retry_nonce),
+        )
+
+        self.assertIs(first, second)
+        self.assertEqual(m.atomic_commit, first)
+        self.assertEqual(m.fence_generation, original_fence)
+        self.assertEqual(m.inventory_revision, original_revision)
+        self.assertEqual(m.commit_counter, original_counter)
+        self.assertEqual(m.outbox, original_outbox)
+
+        self.assertEqual(
+            sum(
+                entry == "SUPPRESSION_COMMITTED"
+                for entry in m.audit
+            ),
+            original_audit_count,
+        )
+        self.assertEqual(
+            sum(
+                entry == "IDEMPOTENT_COMMIT_REUSED"
+                for entry in m.audit
+            ),
+            1,
+        )
+
+        self.assertEqual(len(m.retry_audit), 1)
+        retry_record = m.retry_audit[0]
+
+        self.assertEqual(
+            retry_record["operation_id"],
+            original_operation_id,
+        )
+        self.assertEqual(
+            retry_record["commit_id"],
+            original_commit_id,
+        )
+        self.assertTrue(retry_record["authorization_receipt"])
+        self.assertNotEqual(
+            retry_record["authorization_receipt"],
+            first.authorization_reference,
+        )
+        self.assertEqual(retry_record["nonce"], retry_nonce)
+        self.assertEqual(
+            retry_record["permission_epoch"],
+            first.authorization_reference.permission_epoch,
+        )
+        self.assertEqual(retry_record["request_hash"], request_hash)
+        self.assertEqual(
+            retry_record["retry_result"],
+            "REUSED_EXISTING_COMMIT",
+        )
+
+        self.assertIn(original_nonce, m.nonce_registry)
+        self.assertIn(retry_nonce, m.nonce_registry)
+
+        # The retry is separately auditable but does not emit another
+        # authoritative lifecycle event or create another commit.
+        self.assertEqual(len(m.operation_registry), 1)
+        self.assertEqual(
+            m.operation_registry[idempotency_key]["commit"],
+            first,
+        )
+        self.assertEqual(
+            m.outbox[original_operation_id],
+            "SUPPRESSION_COMMITTED",
+        )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+# Static test-method inventory:
+#   DFI:                         22
+#   OwnerIU011 (T01..T16):       16
+#   StorageFaults (STOR-01..07):  7
+#   AuthorizationCommitEntry:   14
+#   AtomicPublicationFaultInjection:
+#                                7 (FSTOR-01..07)
+#   Total:                       66 test methods
+#
+# Newly added tests:
+#   - test_FSTOR_06_nonce_projection_rebuild_and_replay_rejection
+#       F-OI-01: reconstruct nonce_registry from authoritative commit and
+#       retry audit records, then reject replay of a consumed nonce.
+#   - test_FSTOR_07_idempotent_retry_has_complete_independent_audit
+#       F-OI-02: assert independent retry audit fields and ensure no second
+#       commit, fence advance, revision advance, or duplicate committed event.
+#
+# Execution status:
+#   NOT RUN in this delivery.
+#   No test-pass claim is made. Run against the exact delivered
+#   r3_contract_model.py revision before treating this suite as verified.
+#   These tests cover an in-memory reference model only; they do not prove
+#   WAL durability, physical crash recovery, or distributed linearizability.
