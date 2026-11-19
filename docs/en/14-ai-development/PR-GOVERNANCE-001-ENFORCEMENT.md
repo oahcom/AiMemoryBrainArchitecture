@@ -2,7 +2,7 @@
 # PR 治理强制执行与证据补充规范
 
 - Document ID: PR-GOVERNANCE-001-ENFORCEMENT
-- Version: 1.1
+- Version: 1.2
 - Status: PROPOSED — becomes normative only after authorized review and merge
 - Parent: [PR-GOVERNANCE-001](../../../14-ai-development/PR-GOVERNANCE-001.md)
 - Tracking: [Issue #130](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/130), [Issue #134](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/134)
@@ -30,6 +30,10 @@ Rust gate:
 - The current workflow is path-filtered. Do not configure a skipped Rust check as a universal required check for doc-only PRs. If the platform requires one universal check context, first add an always-running aggregate gate that reports PASS only after evaluating applicable checks and reports failure when a required applicable check is missing or failed.
 
 No merge on missing, pending, skipped-when-applicable, failed, stale-Head, or unverifiable checks. A run on another PR or a later main commit is not a substitute for exact-Head PR evidence.
+
+Platform check unavailability:
+- A check may be applicable yet unable to start because of a documented platform failure, for example an Actions billing suspension, a runner that is permanently offline, or a repository-level API refusal. In that situation the PR may still be classified MERGE only when the acceptance comment records all of the following: (a) the exact run ID and URL where a run object exists, plus the platform message verbatim; (b) an equivalent local execution, at the exact PR Head, of the same in-repo check script with identical inputs (same base SHA, head SHA and PR body), whose stdout, stderr, exit code and SHA-256 are archived in the PR or a linked evidence file, together with a statement of why that script is deterministic for those inputs; (c) a named exception under the RULING-06 five fields; and (d) an explicit statement that this is compensating evidence, not evidence that the check passed.
+- Such an exception is scoped to that PR only. It expires when the platform can run checks again or at its recorded expiry date, whichever is earlier, and MUST NOT be reused for later PRs, cited as precedent for skipping checks, or treated as equivalent to a passing check.
 
 ## 2. Review and approval gate
 

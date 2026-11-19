@@ -2,7 +2,7 @@
 # PR-GOVERNANCE-001 — Enforcement & Evidence Addendum
 
 - 文档 ID：PR-GOVERNANCE-001-ENFORCEMENT
-- 版本：1.1
+- 版本：1.2
 - 状态：PROPOSED（提议中）——经授权审查并合并后方成为规范性要求
 - 上位规范：[PR-GOVERNANCE-001](../../../14-ai-development/PR-GOVERNANCE-001.md)
 - 跟踪项：[Issue #130](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/130)、[Issue #134](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/134)
@@ -30,6 +30,10 @@ Rust 门禁：
 - 当前 Workflow 使用路径过滤。不得把文档专用 PR 中被跳过的 Rust 检查配置成全局必需检查。如果平台要求一个全局通用检查上下文，应先增加始终运行的聚合门禁：只有适用检查均已评估且成功时才报告 PASS；适用检查缺失或失败时必须失败。
 
 检查缺失、待定、适用时被跳过、失败、Head 过期或无法核验，均不得合并。其他 PR 或后续 main 提交上的运行不能替代本 PR 的精确 Head 证据。
+
+平台检查不可用：
+- 检查可能适用，但因已记录的平台故障而无法启动，例如 Actions 计费中断、runner 长期离线、或仓库级 API 拒绝。此时 PR 仍可标记为 MERGE，但验收评论必须完整记录：(a) 存在 run 对象时记录准确 run ID 与 URL，并逐字记录平台消息；(b) 在 PR 准确 Head 上，以完全相同的输入（相同 base SHA、head SHA 与 PR body）本地执行同一仓库内检查脚本的等价执行，其 stdout、stderr、退出码与 SHA-256 归档于 PR 或关联证据文件，并说明该脚本对这些输入为何是确定性的；(c) 按 RULING-06 五字段登记具名例外；(d) 明确声明这是补偿证据，不是检查已通过的证据。
+- 该例外仅限当次 PR。平台恢复可运行检查时或到达登记到期日时（以较早者为准）失效；不得复用于后续 PR、不得引为先例跳过检查、不得视为等同于通过检查。
 
 ## 2. 审查与批准门禁
 
