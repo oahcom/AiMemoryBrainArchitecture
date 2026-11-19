@@ -533,38 +533,69 @@ post_merge_manifest_validation:
   owner_i_approval: PENDING
   independent_specialist_reviews: PENDING_NOT_EVIDENCED
   production_activation: NOT_AUTHORIZED
-  note: PR #147 established full-file YAML parse and required-path checks but used PyYAML safe_load, which accepts duplicate keys. PR #152 fixed actual duplicate keys and added strict duplicate-key rejection; its exact-Head run passed. Neither run is formal JSON Schema validation or production conformance.
+  note: PR #147 established full-file YAML parse and required-path checks but used PyYAML safe_load, which accepts duplicate keys. PR #152 fixed actual duplicate keys and added strict duplicate-key rejection; its exact-Head run passed. Neither run is formal JSON Schema validation or production conformance.
+
 
 # Dev-baseline integration overlay (2026-11-19). Mainline records above are
 # preserved verbatim; this overlay records only R3 reference-model baseline
 # convergence, not formal Owner approval, acceptance or production R3 evidence.
 dev_baseline_integration:
-  target_commit: e5f11982e135da5cfab1567b4bfadf3d824afed4
+  target_commit: 95347a5bbf078b4c5ac6fd01e9f78d094b69d3a4
   branch: remediation/aid-2026-001-forget-contract-closure-2026-11-18
   model_blob: 771c1fdc6f8a248a7121d165a0b035cebcc9880c
   tests_blob: 22b8d81e7738fe66074f9973932a2dbe79fb52ae
-  local_tests: "93 tests OK (79 contract + 14 forget_model); record-014"
+  local_tests: "103 tests OK (79 contract + 24 forget_model); record-016"
+  source_branch_baseline: "93 tests OK (79 contract + 14 forget_model) at e5f1198; record-014 / record-015"
   decisions:
     owner_d: ACCEPT (OD-D-FORGET-DELTA-20261119-009 @ 95347a5)
-    owner_i: ACCEPT (95347a5 model layer)
-    storage: ACCEPT (DEC-AID-2026-001-STOR-20261119-07 @ e5f1198)
+    owner_i: ACCEPT (95347a5 model layer; reviewer issued no Decision_ID)
+    storage: ACCEPT (DEC-AID-2026-001-STOR-20261119-08 @ 95347a5)
   integration_files_added:
     - reference-model/r3_contract_model.py
     - reference-model/test_r3_contract.py
     - reference-model/R3-RUNBOOK.md
     - r3-evidence/erratum-003.md
     - r3-evidence/erratum-004.md
-    - r3-evidence/execution-record-003.md through execution-record-014.md
+    - r3-evidence/execution-record-003.md through execution-record-016.md
   excluded_from_integration:
     reason: mainline versions are newer and authoritative
     paths:
       - reference-model/forget_model.py
       - reference-model/test_forget_model.py
-      - reference-model/README.md
       - execution-record-001.md
       - integration-review-prompt.md
       - r3-specialist-review-owner-d-prompt.md
       - r3-specialist-review-owner-i-prompt.md
+  mainline_append_only_edits:
+    - path: reference-model/README.md
+      treatment: mainline content preserved verbatim; R3 contract model section appended
+    - path: 14-ai-development/work-items/INDEX.md
+      treatment: mainline rows preserved; AID-2026-001 row and session record refreshed
+  mainline_integration:
+    integration_pr: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/277
+    integration_branch: integration-aid-2026-001-r3-baseline
+    pre_update_branch_head: fc179a5a0fb4f158a15df7ab3f98dec8a24d033f
+    merged_main_head: 4f82e3a48a35e9fd73e7920f0c6a559b77aaf0dc
+    merge_commit: fc179a5a0fb4f158a15df7ab3f98dec8a24d033f
+    conflict_resolution: automatic; no conflicts; mainline reference-model payloads kept authoritative
+    forget_model_blob: cd623d67400c8870a729f79f88a4413f37bb335a
+    forget_tests_blob: 633e12db094b703b5f4a431950c3df369dababb0
+    reference_model_readme_blob_before_append: 7aa163719978f253685931b2eb001bb6a7228c6f
+    self_reference: the manifest self-update commit is excluded from self-reference; the final integration Head is recorded in the PR body and in the repository REGISTRY
+  measurement_basis:
+    canonical: git blob bytes (LF, repository index)
+    working_copy_windows: bytes and sha256 of the CRLF-rendered working copy
+    note: execution-record-013 and execution-record-015 quote the CRLF working-copy figures; both bases are reproduced below so no figure has to be inferred
+    model_blob_bytes_lf: 55526
+    model_blob_lines: 1494
+    model_blob_sha256_lf: 8324ec551749c2d50067967e4a445b26a6683008a4fa52e02da02a9976417a15
+    model_blob_bytes_crlf: 57020
+    model_blob_sha256_crlf: 35efab9361f313bb556159818ef2fbb1a6380cbf48d12f8aead273c3c438a946
+    tests_blob_bytes_lf: 91930
+    tests_blob_lines: 2450
+    tests_blob_sha256_lf: 26c72ceaa636606118ef94013b7515842d51b02b521c3cb0e6ef4303c72308af
+    tests_blob_bytes_crlf: 94380
+    tests_blob_sha256_crlf: f326cafd70c97a7cc0133ad2139d7508d83f493c710d80f534e01c25d68734ce
   out_of_scope_dev_baseline:
     - real cryptographic receipt signature verification
     - production issuer minting a fresh credential per retry
