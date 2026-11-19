@@ -2281,6 +2281,53 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         self.assertEqual(len(m.retry_audit), baseline_retry_len)
         self.assertNotIn("foi-swap-nonce-2", m.nonce_registry)
 
+    def test_FSTOR_19_missing_credential_is_rejected(self):
+        """F-STOR-20261119-01 residual: absent credential, not just mismatch.
+
+        A reference that advertises a receipt_id and nonce but embeds no
+        credential at all must be refused. The earlier guard was conditional
+        on ``receipt is not None``, so an absent credential skipped the whole
+        consistency block and validated.
+        """
+        from dataclasses import replace
+
+        operation_id = "foi-missing-cred-op"
+        request_hash = "foi-missing-cred-hash"
+
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m.phase = Phase.AUTHORIZED
+        first = m.commit_suppression(
+            operation_id,
+            "foi-missing-cred-attempt",
+            "foi-missing-cred-key",
+            request_hash,
+            auth=auth(nonce="foi-missing-cred-nonce",
+                      operation_id=operation_id,
+                      request_hash=request_hash),
+        )
+        self.assertIsNotNone(first)
+        m._validate_atomic_commit(first, published=True, live_state=False)
+
+        reference = first.authorization_reference
+        self.assertIsNotNone(reference.receipt)
+        # Scalars still present, only the credential object is gone.
+        stripped = replace(reference, receipt=None)
+        self.assertTrue(stripped.receipt_id)
+        self.assertTrue(stripped.nonce)
+
+        bad_commit = replace(first, authorization_reference=stripped)
+        with self.assertRaises(ContractViolation) as ctx:
+            m._validate_atomic_commit(
+                bad_commit, published=True, live_state=False
+            )
+        self.assertIn("missing its credential", str(ctx.exception))
+
+        # Staged-side validation refuses it too.
+        with self.assertRaises(ContractViolation):
+            m._validate_atomic_commit(
+                bad_commit, published=False, live_state=False
+            )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

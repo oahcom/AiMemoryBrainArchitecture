@@ -982,20 +982,23 @@ class R3Model:
         # fields must agree with the embedded immutable credential. A
         # record whose receipt_id / nonce / epoch were copied from a
         # different credential must not validate.
-        if authorization.receipt is not None:
-            cred = authorization.receipt
-            if cred.receipt_id != authorization.receipt_id:
-                raise ContractViolation(
-                    "authorization receipt_id does not match credential"
-                )
-            if cred.nonce != authorization.nonce:
-                raise ContractViolation(
-                    "authorization nonce does not match credential"
-                )
-            if cred.permission_epoch != authorization.permission_epoch:
-                raise ContractViolation(
-                    "authorization epoch does not match credential"
-                )
+        cred = authorization.receipt
+        if cred is None:
+            raise ContractViolation(
+                "authorization reference is missing its credential"
+            )
+        if cred.receipt_id != authorization.receipt_id:
+            raise ContractViolation(
+                "authorization receipt_id does not match credential"
+            )
+        if cred.nonce != authorization.nonce:
+            raise ContractViolation(
+                "authorization nonce does not match credential"
+            )
+        if cred.permission_epoch != authorization.permission_epoch:
+            raise ContractViolation(
+                "authorization epoch does not match credential"
+            )
 
         if (
             expected_nonce is not None
