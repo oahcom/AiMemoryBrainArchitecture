@@ -622,6 +622,8 @@ Coverage check / 覆盖核对: 216 + 14 = 230 = coordinator inventory; 0 missing
 
 本节登记用于固定 39 条 Issue 的语言状态及其内容锚点。**登记本身不代表 Issue 已完成语言迁移、正文改写、状态迁移或关闭**；这些后续动作仍须依各自授权、审查及治理流程执行。若 Issue body 后续发生变更，应重新计算并更新对应 SHA-256 锚点，不得继续将旧锚点视为当前正文的校验值。
 
+注：本表锚点为清点快照时的历史值。清点后被编辑的对象以 §8.15「锚点刷新登记」为准；截至本次修订，仅 #266 存在刷新条目。
+
 ### 8.12 Out-of-Scope/Disposition — Issue #254
 
 Issue #254 属于本次 39 条非 PR Issue 审计集合，为集合内第 39 条。其语言状态登记为 `ZH_ORIGINAL_WITH_EN_TERMS`，即中文原始正文中包含英文技术术语。对应 `body_sha256` 为：
@@ -1057,3 +1059,29 @@ C168 是 313 条记录中唯一的 `MIXED` 记录；其余 312 条均为 `EN_ONL
 只有在上述对象范围、锚点、分类、唯一性、缺漏及 HOLD 处置证据均完整且通过复核后，才可声明本节规定的登记完整性检查已完成。
 
 若证据仅覆盖部分对象、部分锚点或部分对账项目，必须明确标注审查范围及未验证事项；不得表述为已完成全部审计、已完成全部迁移或已满足全部关闭条件。
+
+## 8.15 Anchor refresh register / 锚点刷新登记
+
+**Purpose.** §8.11 and §8.13 record anchors taken at the inventory snapshot. When a registered object is edited after that snapshot, the historical anchor is *not* overwritten: it stays as recorded, and the refresh is registered here with both values, the observation time, and the source of the recomputation. A superseded anchor must never be presented as the current value.
+
+**用途。** §8.11 与 §8.13 记录的是清点快照时的锚点。登记对象在快照后被编辑时，**不覆盖**历史锚点：原值保留在原表，刷新登记在本节，同时给出旧值、新值、观测时间与复算来源。已被取代的锚点不得作为现行值呈现。
+
+| Object / 对象 | Recorded anchor (historical) / 原锚点 | Recomputed anchor (current) / 复算锚点 | Observation / 观测 | Classification re-check / 分类复核 | Source / 来源 |
+|---|---|---|---|---|---|
+| Issue #266 | `d984146097e7ce9a031f7046f4267ce7e2b40cd0380ccd6c37f98d17e93fadef` | `aaa599ccbfa45a20f4083ac2c9958739013dd4f816b9bda391964bd6b84ce3a9` | issue `updated_at` = `2026-11-19T16:34:35Z`; recomputed `2026-11-19T17:22Z` against the live API body | `EN_ZH_MIXED` — unchanged; the body still carries paired EN/ZH headings and parallel sections | `00-governance/reports/f06-object-reconciliation.md` §3 |
+
+**Rules / 规则**
+
+1. The original anchor in §8.11/§8.13 is never edited in place; this section is the single place where a refreshed value becomes authoritative for current use.
+2. Every entry must carry: object identifier, both anchors, the observation time of each, the reason for the change (edit event with its timestamp), the classification re-check result, and the source record that holds the recomputation.
+3. A refresh entry does not change the object's language classification by itself. Re-classification requires a fresh inspection, whose result is recorded in the entry.
+4. Absence of an entry means the §8.11/§8.13 anchor was current as of the reconciliation baseline `f86fddc0` (recomputed 313/313 commits and 38/39 issues against that baseline).
+5. A refresh entry does not migrate, rewrite, or exonerate any historical object; `MIGRATION_DEBT != EXEMPTION` remains in force.
+
+**中文规则**
+
+1. §8.11/§8.13 中的原锚点一律不就地改写；本节是刷新值取得现行效力的唯一位置。
+2. 每条记录必须包含：对象标识、新旧两个锚点、各自的观测时间、变更原因（编辑事件及其时间戳）、分类复核结果，以及保存复算过程的来源记录。
+3. 刷新条目不因自身而改变对象的语言分类；重新分类须以新的核查为依据，并将结果写入该条目。
+4. 无条目意味着该对象的 §8.11/§8.13 锚点在对账基线 `f86fddc0` 上仍然有效（该基线复算：Commit 313/313、Issue 38/39）。
+5. 刷新条目不迁移、不改写、不豁免任何历史对象；`MIGRATION_DEBT != EXEMPTION` 继续有效。
