@@ -90,13 +90,13 @@ class DOwnerSnapshotAlignmentTests(unittest.TestCase):
         self.assertEqual(validate_owner_snapshot(snapshot("D",True),"D",allow_legacy_d_snapshot=True),VALID)
 
     def test_13_schema_accepts_exact_eight_field_d_snapshot(self):
-        schema_path=ROOT.parent / "schemas" / "bmcp.coc-jf10-unified-1.2.17.schema.json"
+        schema_path=ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.17.schema.json"
         schema=json.loads(schema_path.read_text(encoding="utf-8"))
         validator=Draft202012Validator({"$schema":schema["$schema"],"$defs":schema["$defs"],"$ref":"#/$defs/ownerSnapshot"})
         validator.validate(schema_d_snapshot())
 
     def test_14_schema_rejects_legacy_five_field_d_snapshot(self):
-        schema_path=ROOT.parent / "schemas" / "bmcp.coc-jf10-unified-1.2.17.schema.json"
+        schema_path=ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.17.schema.json"
         schema=json.loads(schema_path.read_text(encoding="utf-8"))
         validator=Draft202012Validator({"$schema":schema["$schema"],"$defs":schema["$defs"],"$ref":"#/$defs/ownerSnapshot"})
         wire=schema_d_snapshot()
