@@ -32,6 +32,7 @@ EMBEDDED_BILINGUAL_SOURCES = {
     "00-governance/templates/bilingual-commit-message.md",
     "00-governance/templates/repository-policy-inheritance.md",
     "00-governance/reports/bilingual-baseline-remediation-report.md",
+    "00-governance/reports/f06-object-reconciliation.md",
 }
 ROOT = Path.cwd()
 
