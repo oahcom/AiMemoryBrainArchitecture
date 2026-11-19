@@ -2,7 +2,7 @@
 # AI 开发迭代生命周期
 
 **Document ID:** AI-PROC-001  
-**Version:** 1.0  
+**Version:** 1.0 + proposed §2.1 amendment  
 **Status:** PROPOSED  
 **Parent standard:** AI-STD-001
 
@@ -14,12 +14,14 @@ The project runs as a controlled, evidence-producing loop. The loop is not “as
 
 ```mermaid
 flowchart TD
-  A[Request / Requirement] --> B[Task Registration]
-  B --> C[Impact & Dependency Analysis]
-  C --> D[Owner Assignment]
-  D --> E[Prompt Draft & Review]
+  A[Request / Requirement] --> B[Issue Registration]
+  B --> C[Owner Responsibility Resolution]
+  C --> C2[Primary Owner Assignment]
+  C2 --> C3[Collaborator Assignment]
+  C3 --> D[Owner Alignment Session]
+  D --> E[A-authored Prompt Draft & Review]
   E --> F{Definition of Ready?}
-  F -- No --> C
+  F -- No --> D
   F -- Yes --> G[AI Implementation on Isolated Branch]
   G --> H[Owner Self-check & Commit]
   H --> I[Automated Verification]
@@ -33,11 +35,665 @@ flowchart TD
   N --> O{Contract Compatible?}
   O -- No --> C
   O -- Yes --> P[Acceptance & Merge]
-  P --> Q[Traceability Closeout]
+  P --> Q[Evidence Closeout / Traceability]
   Q --> R[Iteration Retrospective]
 ```
 
 ## 2. Iteration stages / 迭代阶段
+
+## 2.1 — Owner Responsibility Resolution and Alignment Session
+## Owner 责任解析与对齐会话
+
+**Status: PROPOSED — normative activation requires the applicable adoption process.**
+
+**状态：PROPOSED——规范性生效须遵循适用的采纳程序。**
+
+### 2.1.1 Purpose / 目的
+
+**EN**
+
+Every registered GitHub Issue or lifecycle Work Item MUST be connected to an explicit responsibility and execution chain before substantive implementation begins:
+
+`Issue Registration → Responsibility Domain → Primary Owner → Collaborating Owners → Alignment Session → A-authored Prompt → Definition of Ready → Execution → Verification → Acceptance`
+
+This requirement establishes a repeatable mechanism for converting registered work into properly owned, evidence-producing execution.
+
+The Integration Architect (Owner A) coordinates decomposition, responsibility resolution, session routing, prompt authoring, dependency ordering, and cross-owner integration.
+
+This mechanism does not transfer domain authority to Owner A.
+
+**中文**
+
+每个已登记的 GitHub Issue 或生命周期 Work Item，在开始实质性实现之前，MUST 建立明确的责任和执行链：
+
+`Issue Registration → Responsibility Domain → Primary Owner → Collaborating Owners → Alignment Session → A-authored Prompt → Definition of Ready → Execution → Verification → Acceptance`
+
+本要求建立从任务登记到具备明确责任、产生可审计证据的执行机制。
+
+Integration Architect（Owner A）负责任务分解、责任解析、会话路由、提示词编写、依赖排序及跨 Owner 整合。
+
+本机制不得将领域决策权转移给 Owner A。
+
+### 2.1.2 Issue Registration / Issue 登记
+
+**EN**
+
+Every work item MUST have an identifiable registration carrier.
+
+For GitHub-backed work, the existing Issue SHOULD be the primary responsibility and evidence reference.
+
+Before routing, the coordinator or authorized intake process MUST collect:
+
+1. Issue number and URL.
+2. Title, body, labels and current state.
+3. Existing assignees and explicit responsibility declarations.
+4. Related Issues, PRs and existing decisions.
+5. Referenced artifact paths and exact available revisions.
+6. Existing blockers, findings and historical dispositions.
+
+An existing Issue MUST NOT be silently replaced by a newly created carrier.
+
+During an active quota freeze, no new Issue or PR may be created. Work MUST reuse authorized existing carriers.
+
+**中文**
+
+每个工作项 MUST 具有可识别的登记载体。
+
+对于基于 GitHub 的工作，现有 Issue SHOULD 作为主要责任和证据索引。
+
+在责任路由之前，协调方或获授权的接收流程 MUST 收集：
+
+1. Issue 编号和 URL。
+2. 标题、正文、标签和当前状态。
+3. 已有 assignee 和明确责任声明。
+4. 关联 Issue、PR 和既有决议。
+5. 引用工件路径及可获得的准确版本。
+6. 已有阻塞、Finding 和历史处置记录。
+
+MUST NOT 静默使用新建载体替代现有 Issue。
+
+配额冻结 ACTIVE 时，禁止新建 Issue 或 PR。工作 MUST 复用获准使用的既有载体。
+
+### 2.1.3 Owner Responsibility Resolution / Owner 责任解析
+
+**EN**
+
+Owner A MUST resolve each Issue into:
+
+- one proposed Primary Accountable Owner;
+- zero or more Collaborating Owners;
+- one or more responsibility domains;
+- an explicit responsibility rationale;
+- upstream and downstream dependencies;
+- the applicable decision and acceptance authorities.
+
+The mapping MUST be based on authoritative evidence, including current Owner charters, adopted contracts, explicit assignments and existing decisions.
+
+The following identities MUST remain distinct:
+
+1. GitHub assignee;
+2. Primary Accountable Owner;
+3. Collaborating Owner;
+4. Implementing session;
+5. Independent Reviewer;
+6. Acceptance Authority;
+7. Integration Architect.
+
+A GitHub assignee does not automatically become the domain decision authority.
+
+A collaborating Owner does not automatically become the Primary Owner.
+
+The Integration Architect does not automatically become the approver of every affected domain.
+
+**中文**
+
+Owner A MUST 将每个 Issue 解析为：
+
+- 一个建议的主责 Accountable Owner；
+- 零个或多个协同 Owner；
+- 一个或多个责任领域；
+- 明确的归属依据；
+- 上游和下游依赖；
+- 适用的决策权威和验收权威。
+
+责任映射 MUST 依据权威证据，包括现行 Owner Charter、已采纳契约、明确责任指派和既有决议。
+
+以下身份 MUST 保持区分：
+
+1. GitHub assignee；
+2. 主责 Accountable Owner；
+3. 协同 Owner；
+4. 实现会话；
+5. 独立 Reviewer；
+6. Acceptance Authority；
+7. Integration Architect。
+
+GitHub assignee 不自动成为领域决策权威。
+
+协同 Owner 不自动成为主责 Owner。
+
+Integration Architect 不自动成为所有受影响领域的批准者。
+
+### 2.1.4 ORPHAN Responsibility Queue / ORPHAN 责任队列
+
+**EN**
+
+When no valid Primary Owner can be established from authoritative evidence, the work item MUST be classified as `ORPHAN`.
+
+ORPHAN is an explicit unresolved responsibility state, not an assignment to Owner A.
+
+Owner A MUST:
+
+1. Register the item in the ORPHAN Responsibility Queue.
+2. Identify candidate responsibility domains and candidate Owners.
+3. Record the evidence supporting each candidate.
+4. Identify the missing authority or missing assignment.
+5. Propose a bounded routing and resolution action.
+6. Identify work that can proceed independently.
+7. Keep authority-dependent work BLOCKED or HOLD.
+
+The queue MUST retain:
+
+- Issue ID and URL;
+- candidate Primary Owner;
+- candidate Collaborators;
+- responsibility rationale;
+- missing authority;
+- dependency impact;
+- next routing action;
+- resolution evidence;
+- current status.
+
+ORPHAN items MUST NOT be silently assigned to A, automatically accepted, or treated as approved for implementation.
+
+If a historical Owner role is SUPERSEDED or HISTORICAL, its previous prompt MUST NOT be automatically reactivated.
+
+A new session may use the historical artifact as evidence, but current authority MUST be established independently.
+
+**中文**
+
+当无法依据权威证据确定有效主责 Owner 时，工作项 MUST 标记为 `ORPHAN`。
+
+ORPHAN 是明确的责任未决状态，不代表自动分配给 Owner A。
+
+Owner A MUST：
+
+1. 将工作项登记到 ORPHAN Responsibility Queue。
+2. 识别候选责任领域和候选 Owner。
+3. 记录每个候选项的证据依据。
+4. 识别缺失的权威或责任指派。
+5. 提出有边界的路由和解决动作。
+6. 识别可以独立推进的工作。
+7. 使依赖未决权威的工作保持 BLOCKED 或 HOLD。
+
+队列 MUST 保留：
+
+- Issue ID 和 URL；
+- 候选主责 Owner；
+- 候选协同 Owner；
+- 责任归属依据；
+- 缺失的权威；
+- 依赖影响；
+- 下一步路由动作；
+- 解决证据；
+- 当前状态。
+
+ORPHAN 工作项 MUST NOT 被静默分配给 A、自动接受或视为已经获得实现批准。
+
+历史 Owner 角色已经 SUPERSEDED 或 HISTORICAL 时，不得自动恢复其旧 Prompt。
+
+新会话可以将历史工件作为证据，但当前权威必须独立确认。
+
+### 2.1.5 Owner Alignment Session / Owner 对齐会话
+
+**EN**
+
+After responsibility resolution, Owner A MUST initiate or route an alignment session for the responsible domain.
+
+The session MUST be bound to:
+
+1. An explicit session identity.
+2. An explicit Issue binding list.
+3. One Primary Owner and its Collaborators.
+4. Exact source artifacts and available revisions.
+5. An A-authored, bounded execution prompt.
+6. Defined outputs and stop conditions.
+
+The alignment session MUST establish:
+
+- current Issue scope and state;
+- actual responsibility and authority boundaries;
+- existing decisions and their exact sources;
+- DECIDED, CANDIDATE, OPEN, BLOCKED and TO_VALIDATE items;
+- upstream and downstream dependencies;
+- implementation and verification evidence;
+- next actions and accountable parties;
+- objective acceptance and closure conditions.
+
+The session MUST NOT impersonate another Owner or sign on behalf of another Owner.
+
+A role-playing session, simulated approval, or AI-generated acceptance statement MUST NOT be treated as an independent Owner decision.
+
+**中文**
+
+完成责任解析后，Owner A MUST 为对应责任领域启动或路由对齐会话。
+
+会话 MUST 绑定：
+
+1. 明确的会话身份。
+2. 明确的 Issue 列表。
+3. 一个主责 Owner 及其协同 Owner。
+4. 准确的来源工件及可获得版本。
+5. 一份由 A 自产、有边界的执行提示词。
+6. 明确的交付物和停止条件。
+
+对齐会话 MUST 确定：
+
+- Issue 当前范围和状态；
+- 实际责任和权威边界；
+- 既有决议及其准确来源；
+- DECIDED、CANDIDATE、OPEN、BLOCKED 和 TO_VALIDATE 事项；
+- 上下游依赖；
+- 实现和验证证据；
+- 下一步动作及责任主体；
+- 客观验收和关闭条件。
+
+会话 MUST NOT 冒充其他 Owner 或代替其他 Owner 签署。
+
+角色扮演会话、模拟批准或 AI 生成的接受声明 MUST NOT 被视为独立 Owner 决议。
+
+### 2.1.6 Session Aggregation / 会话聚合
+
+**EN**
+
+Owner A SHOULD group related Issues by responsibility domain instead of launching one independent session per Issue.
+
+A normal alignment batch SHOULD contain three to six L2 sessions when compatible with authority boundaries and dependency structure.
+
+Grouping MUST NOT:
+
+- merge independent decision authorities;
+- erase Issue-level responsibility;
+- merge separate acceptance criteria;
+- convert one Issue's approval into another Issue's approval;
+- discard historical evidence or unresolved findings.
+
+Each Issue MUST retain its own responsibility mapping, decision status, evidence and closure conditions.
+
+**中文**
+
+Owner A SHOULD 按责任领域聚合相关 Issue，而不是每个 Issue 都启动独立会话。
+
+在符合权威边界和依赖结构的情况下，一个常规对齐批次 SHOULD 包含三至六场 L2 会话。
+
+聚合 MUST NOT：
+
+- 合并独立决策权威；
+- 抹去 Issue 级责任；
+- 合并不同验收条件；
+- 将一个 Issue 的批准转化为另一个 Issue 的批准；
+- 丢弃历史证据或未解决 Finding。
+
+每个 Issue MUST 保留自己的责任映射、决策状态、证据和关闭条件。
+
+### 2.1.7 Prompt Draft and Definition of Ready / 提示词编写与 DoR
+
+**EN**
+
+The A-authored prompt MUST be prepared after responsibility and alignment requirements are established.
+
+It MUST contain:
+
+- identity and authority boundaries;
+- bound Issue list;
+- exact source and version requirements;
+- scope and out-of-scope;
+- deliverables;
+- acceptance criteria;
+- dependencies;
+- stop conditions;
+- evidence and registration obligations.
+
+The prompt MUST be versioned and its provenance retained.
+
+Definition of Ready MUST NOT be satisfied merely because a prompt exists.
+
+DoR requires:
+
+1. An identifiable work item.
+2. A resolved or explicitly bounded Primary Owner.
+3. Explicit Collaborators.
+4. Known dependency status.
+5. Authorized implementation scope.
+6. Testable acceptance criteria.
+7. Sufficient source evidence.
+8. No unresolved prerequisite that makes the proposed execution unsafe.
+
+When a prerequisite is unresolved, independent work may proceed only within an explicitly isolated scope.
+
+**中文**
+
+责任和对齐要求确定后，MUST 由 A 编写执行提示词。
+
+提示词 MUST 包含：
+
+- 身份和权威边界；
+- 绑定 Issue 清单；
+- 准确来源和版本要求；
+- 范围及非目标；
+- 交付物；
+- 验收条件；
+- 依赖；
+- 停止条件；
+- 证据和登记义务。
+
+提示词 MUST 版本化并保留出处。
+
+不能仅因为存在提示词，就认为 Definition of Ready 已满足。
+
+DoR 必须满足：
+
+1. 工作项可识别。
+2. 主责 Owner 已确定或其未决边界已明确限定。
+3. 协同 Owner 明确。
+4. 依赖状态明确。
+5. 实现范围获得授权。
+6. 验收条件可测试。
+7. 来源证据充分。
+8. 不存在会使拟议执行不安全的未解决前置条件。
+
+当前置条件未解决时，只有在明确隔离的范围内，才允许独立工作继续。
+
+### 2.1.8 Execution and Independent Work / 执行与独立工作
+
+**EN**
+
+After DoR, the implementing session may execute only within its authorized scope.
+
+A MUST maintain the cross-owner dependency order and prevent downstream work from assuming unapproved upstream contracts.
+
+The lifecycle MUST distinguish:
+
+- DECIDED: an authorized decision exists;
+- IMPLEMENTED: a real implementation exists at an exact revision;
+- VERIFIED: verification evidence applies to that exact implementation;
+- ACCEPTED: the authorized acceptance authority has accepted the defined deliverable.
+
+These states MUST NOT be inferred from one another.
+
+Reference-model tests MUST NOT substitute for production physical-capability evidence.
+
+CI PASS MUST NOT substitute for independent Owner approval.
+
+A session completion MUST NOT automatically close an Issue.
+
+**中文**
+
+DoR 满足后，实现会话只能在获授权范围内执行。
+
+A MUST 维护跨 Owner 依赖顺序，防止下游工作假定上游未批准契约已经成立。
+
+生命周期 MUST 区分：
+
+- DECIDED：存在合法权威作出的决议；
+- IMPLEMENTED：在准确版本上存在真实实现；
+- VERIFIED：验证证据适用于该准确实现版本；
+- ACCEPTED：获授权的验收主体已经接受明确交付物。
+
+这些状态 MUST NOT 相互推导。
+
+Reference Model 测试 MUST NOT 替代生产物理能力证据。
+
+CI PASS MUST NOT 替代独立 Owner 批准。
+
+会话完成 MUST NOT 自动关闭 Issue。
+
+### 2.1.9 Cross-owner Integration / 跨 Owner 整合
+
+**EN**
+
+Owner A is accountable for integration coordination, not for replacing domain authorities.
+
+A MUST:
+
+1. Reconcile dependency ordering.
+2. Identify contradictory contracts.
+3. Record exact source revisions.
+4. Distinguish local Owner acceptance from bilateral or multi-owner agreement.
+5. Identify missing participants and missing proofs.
+6. Route unresolved decisions to their legitimate authorities.
+7. Preserve all blocking findings until objective closure evidence exists.
+
+Shared vocabulary does not imply shared state authority.
+
+Local Owner acceptance does not imply shared Schema Freeze.
+
+A design decision does not imply physical implementation or production conformance.
+
+**中文**
+
+Owner A 对整合协调负责，不得替代领域权威。
+
+A MUST：
+
+1. 协调依赖顺序。
+2. 识别契约冲突。
+3. 记录准确来源版本。
+4. 区分局部 Owner 接受、双边协议和多方协议。
+5. 识别缺失参与者和缺失证明。
+6. 将未决事项路由给合法权威。
+7. 在客观关闭证据出现前保留所有阻塞 Finding。
+
+共享词汇不意味着共享状态权威。
+
+局部 Owner 接受不意味着共享 Schema Freeze。
+
+设计决议不意味着物理实现或生产符合性。
+
+### 2.1.10 Evidence Recovery and Session Closeout / 证据回收与会话关闭
+
+**EN**
+
+Every alignment session MUST produce a complete, independently traceable closeout.
+
+The collection process MUST preserve the original session evidence rather than relying solely on a shortened conversation summary or a partial final-message fetch.
+
+Where an authorized raw conversation mapping is available:
+
+1. L0 MUST retrieve the complete raw conversation mapping.
+2. L0 MUST identify the first complete authoritative assistant response for each deliverable.
+3. Supplemental GET results MUST be checked for truncation, tail-only retrieval and overlap.
+4. Overlapping or duplicate content MUST be deduplicated without rewriting substantive conclusions.
+5. The canonical receipt MUST preserve the complete source response.
+6. Raw source and normalized receipt MUST remain distinguishable.
+7. The conversation identifier, account/session identity, retrieval time, raw length, receipt path and integrity checksum MUST be recorded.
+
+A partial tail response MUST NOT replace a complete earlier response.
+
+When a deliverable is too large for one reliable transfer, L0 MAY use ordered batch delivery or session continuation.
+
+Batch continuation MUST preserve:
+
+- the original session identity;
+- the original binding scope;
+- prompt provenance;
+- message ordering;
+- exact source boundaries;
+- the distinction between completed and pending supplements.
+
+A later batch MUST be appended as a supplement, not silently merged into an earlier final receipt.
+
+**中文**
+
+每场对齐会话 MUST 产生完整且可独立追溯的 Closeout。
+
+证据回收 MUST 保留原始会话证据，不得仅依赖缩短后的会话摘要或部分末条消息 GET。
+
+存在获授权的 raw conversation mapping 时：
+
+1. L0 MUST 获取完整 raw conversation mapping。
+2. L0 MUST 为每项交付物识别第一条完整、权威的 Assistant 回复。
+3. 补充 GET 结果 MUST 检查截断、仅返回尾部和内容重叠。
+4. 对重叠或重复内容 MUST 去重，但不得改写实质性结论。
+5. Canonical Receipt MUST 保留完整源回复。
+6. 原始来源和规范化回执 MUST 保持可区分。
+7. MUST 记录会话 ID、账号/会话身份、回收时间、原始长度、回执路径和完整性校验值。
+
+部分尾部回复 MUST NOT 替代之前的完整回复。
+
+当交付物过大，无法一次可靠转发时，L0 MAY 采用有序批量供给或会话续投。
+
+批量续投 MUST 保留：
+
+- 原始会话身份；
+- 原始绑定范围；
+- Prompt 出处；
+- 消息顺序；
+- 准确来源边界；
+- 已完成与待补充内容的区分。
+
+后续批次 MUST 作为补充记录追加，不得静默合并进此前的最终回执。
+
+### 2.1.11 Decision Registration and No-Proxy-Signature Rule / 决策登记与禁止代签
+
+**EN**
+
+Alignment is not approval.
+
+A session that only investigates, reconciles or recommends MUST NOT invent a Decision_ID or claim an Owner signature.
+
+When no authorized decision has been made, the decision identifier MUST remain `NOT_CREATED`.
+
+The six-session alignment batch of 2026-11-19 contains 23 decision sub-items for which no independent Owner decision was created.
+
+All such items MUST remain `Decision_ID: NOT_CREATED`.
+
+This is a positive evidence-integrity requirement, not a documentation omission.
+
+A Decision_ID may be created only when an authorized decision is explicitly made and its complete evidence is recorded.
+
+Every decision record MUST include:
+
+- Decision_ID;
+- Decision status;
+- Delta_Scope;
+- Decision authority;
+- Relevant_Artifacts;
+- full Commit SHA;
+- full Blob SHA;
+- Evidence;
+- Unresolved_Findings;
+- affected Issues;
+- implementation and verification status.
+
+Unknown values MUST remain `NOT_RECORDED`, `NOT_CREATED`, `OPEN` or `TO_VALIDATE` as applicable.
+
+**中文**
+
+对齐不等于批准。
+
+仅执行调查、整合或建议的会话 MUST NOT 补造 Decision_ID 或声称获得 Owner 签署。
+
+尚无合法权威决策时，决策编号 MUST 保持 `NOT_CREATED`。
+
+2026-11-19 六场对齐批次中，有 23 个决策子项没有产生独立 Owner 决议。
+
+所有这些事项 MUST 保持：
+
+`Decision_ID: NOT_CREATED`
+
+这是证据完整性要求，不是文档遗漏。
+
+只有在合法权威明确作出决策并记录完整证据后，才能创建 Decision_ID。
+
+每份决策记录 MUST 包含：
+
+- Decision_ID；
+- 决策状态；
+- Delta_Scope；
+- 决策权威；
+- Relevant_Artifacts；
+- 完整 Commit SHA；
+- 完整 Blob SHA；
+- Evidence；
+- Unresolved_Findings；
+- 受影响 Issue；
+- 实现和验证状态。
+
+未知值 MUST 根据实际情况保留为 `NOT_RECORDED`、`NOT_CREATED`、`OPEN` 或 `TO_VALIDATE`。
+
+### 2.1.12 Scheduling, Authority and Stop Conditions / 调度、权威与停止条件
+
+**EN**
+
+Responsibility discovery and session launch SHOULD be event-driven where supported.
+
+Where periodic scheduling is required, the interval MUST be one hour (`PT1H`).
+
+Daily or multi-day scheduling MUST NOT replace the one-hour routing cadence.
+
+L0 is responsible for mechanical session launch, input delivery, evidence retrieval, file operations and authorized GitHub carrier updates.
+
+L0 MUST NOT become an undisclosed technical author or decision authority.
+
+Owner A coordinates and integrates.
+
+Domain Owners decide within their authorized domains.
+
+Independent Reviewers review.
+
+The authorized Acceptance Authority accepts.
+
+This workflow introduces no human waiting point into the development lifecycle.
+
+Unresolved authority MUST remain explicitly OPEN or BLOCKED. Independent work MUST continue where safe and independent of the unresolved decision.
+
+A session MUST stop or isolate the affected work when:
+
+- source authority cannot be verified;
+- exact source revisions are missing;
+- a required decision authority is unknown;
+- upstream contracts conflict;
+- evidence is insufficient for the requested conclusion;
+- execution would cross its authorized scope;
+- a security or production safety invariant cannot be demonstrated.
+
+A stop condition does not authorize fabrication, proxy approval or silent scope expansion.
+
+**中文**
+
+责任发现和会话启动在能力允许时 SHOULD 采用事件触发。
+
+需要周期性调度时，间隔 MUST 为一小时（`PT1H`）。
+
+不得以日级或多日级调度替代一小时责任路由节奏。
+
+L0 负责机械性会话启动、输入转发、证据回收、文件操作和获授权的 GitHub 载体更新。
+
+L0 MUST NOT 成为未披露的技术作者或决策权威。
+
+Owner A 负责统筹和整合。
+
+领域 Owner 在其获授权领域内作出决定。
+
+独立 Reviewer 负责审查。
+
+获授权的 Acceptance Authority 负责验收。
+
+本工作流不在开发生命周期中新增人类等待停点。
+
+未解决的权威问题 MUST 明确保持 OPEN 或 BLOCKED。在安全且不依赖该未决事项的范围内，独立工作 MUST 继续推进。
+
+出现以下情况时，会话 MUST 停止或隔离受影响工作：
+
+- 来源权威无法验证；
+- 缺少准确来源版本；
+- 必需决策权威未知；
+- 上游契约冲突；
+- 证据不足以支持所请求结论；
+- 执行将越过授权范围；
+- 无法证明安全或生产安全不变量。
+
 
 ### Stage 0 — Intake and registration
 
