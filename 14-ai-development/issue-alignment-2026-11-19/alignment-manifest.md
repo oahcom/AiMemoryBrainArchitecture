@@ -61,3 +61,5 @@ Target: `14-ai-development/iteration-lifecycle.md` (AI-PROC-001)
 - UA-02..UA-15: see A Decision Register (D5) in conv `6afedebe`.
 - #134 P0 OPEN retained; #271 OPEN (3 findings pending); #275 Draft/HOLD.
 - Quota freeze in force: no PR/Issue created this round.
+
+| l2-05b-integration-review.md | L2-05 batch2 integration review (AID-2026-010) | 25,468 | 8c7eb3740106b1623efc36514eb3c483e0c11c7ea24afd0c77d198a440709826 | conv 6afeef2f msg4 (18,377 chars, raw-mapping dedup) | NOT_CREATED (review ledger only; F-43-01..05) |
