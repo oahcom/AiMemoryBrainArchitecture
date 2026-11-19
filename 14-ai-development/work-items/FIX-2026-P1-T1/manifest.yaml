@@ -114,7 +114,7 @@ verification:
       run_id: 44467148120
       tested_head: 623c914ee64a2934130feba17c40454110610532
       prior_failed_run_id: 44466879200
-      prior_failed_reason: Initial PR body omitted required BILINGUAL-MANIFEST: COMPLETE declaration; PR body was corrected and the exact-Head gate rerun succeeded.
+      prior_failed_reason: "Initial PR body omitted required BILINGUAL-MANIFEST: COMPLETE declaration; PR body was corrected and the exact-Head gate rerun succeeded."
     repository_automated_tests:
       status: NOT_RUN
       reason: No repository automated test suite was run; no PASS is claimed.
