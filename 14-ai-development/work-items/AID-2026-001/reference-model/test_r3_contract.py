@@ -48,6 +48,8 @@ def auth(**kw):
         nonce="auth-nonce-default",
     )
     values.update(kw)
+    if "receipt_id" not in kw:
+        values["receipt_id"] = "receipt-%s" % values["nonce"]
     return Authorization(**values)
 
 
@@ -1200,6 +1202,214 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
             "SUPPRESSION_COMMITTED",
         )
 
+    def test_FSTOR_08_lifecycle_terminal_invariant_survives_idempotent_retry(self):
+        """F-OI-03: idempotent retry must never restore Forgotten lifecycle."""
+        m = R3Model("m")
+        m.phase = Phase.AUTHORIZED
+
+        operation_id = "foi03-original-operation"
+        attempt_id = "foi03-original-attempt"
+        idempotency_key = "foi03-idempotency-key"
+        request_hash = "foi03-request-hash"
+
+        first = m.commit_suppression(
+            operation_id,
+            attempt_id,
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce="foi03-original-nonce"),
+        )
+
+        self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
+        self.assertEqual(m.phase, Phase.SUPPRESSION_COMMITTED)
+
+        original_lifecycle = m.lifecycle
+        original_phase = m.phase
+        original_retry_audit = list(m.retry_audit)
+        original_nonce_registry = set(m.nonce_registry)
+        original_fence = m.fence_generation
+        original_counter = m.commit_counter
+        original_outbox = dict(m.outbox)
+        original_commit = m.atomic_commit
+
+        # Reproduce the reported regression: lifecycle and phase both regress.
+        m.lifecycle = Lifecycle.ACTIVE
+        m.phase = Phase.AUTHORIZED
+
+        retry_authorization = auth(
+            nonce="foi03-fresh-retry-nonce",
+        )
+
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                operation_id,
+                "foi03-retry-attempt",
+                idempotency_key,
+                request_hash,
+                auth=retry_authorization,
+            )
+
+        # Rejection must not consume the retry authorization or mutate commit state.
+        self.assertEqual(m.retry_audit, original_retry_audit)
+        self.assertEqual(m.nonce_registry, original_nonce_registry)
+        self.assertNotIn(
+            retry_authorization.nonce,
+            m.nonce_registry,
+        )
+        self.assertEqual(m.fence_generation, original_fence)
+        self.assertEqual(m.commit_counter, original_counter)
+        self.assertEqual(m.outbox, original_outbox)
+        self.assertIs(m.atomic_commit, original_commit)
+
+        # Restore the valid committed state and retry with the same,
+        # previously rejected authorization.
+        m.lifecycle = original_lifecycle
+        m.phase = original_phase
+
+        reused = m.commit_suppression(
+            operation_id,
+            "foi03-retry-attempt",
+            idempotency_key,
+            request_hash,
+            auth=retry_authorization,
+        )
+
+        self.assertIs(reused, first)
+        self.assertIs(m.atomic_commit, first)
+        self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
+        self.assertEqual(m.phase, Phase.SUPPRESSION_COMMITTED)
+        self.assertEqual(len(m.retry_audit), len(original_retry_audit) + 1)
+        self.assertIn(
+            retry_authorization.nonce,
+            m.nonce_registry,
+        )
+        self.assertEqual(m.fence_generation, original_fence)
+        self.assertEqual(m.commit_counter, original_counter)
+        self.assertEqual(m.outbox, original_outbox)
+
+    def test_FSTOR_09_authorization_receipt_is_required_and_single_use(self):
+        """F-OI-04: missing or reused receipts are rejected; fresh retry receipt is audited."""
+        m = R3Model("m")
+        m.phase = Phase.AUTHORIZED
+
+        operation_id = "foi04-original-operation"
+        attempt_id = "foi04-original-attempt"
+        idempotency_key = "foi04-idempotency-key"
+        request_hash = "foi04-request-hash"
+
+        original_authorization = auth(
+            nonce="foi04-original-nonce",
+            receipt_id="foi04-original-receipt",
+        )
+
+        first = m.commit_suppression(
+            operation_id,
+            attempt_id,
+            idempotency_key,
+            request_hash,
+            auth=original_authorization,
+        )
+
+        original_receipt = first.authorization_reference.receipt_id
+        self.assertEqual(original_receipt, original_authorization.receipt_id)
+
+        original_retry_audit = list(m.retry_audit)
+        original_nonce_registry = set(m.nonce_registry)
+        original_fence = m.fence_generation
+        original_counter = m.commit_counter
+        original_outbox = dict(m.outbox)
+        original_commit = m.atomic_commit
+
+        # Missing receipt must be rejected without consuming its nonce.
+        missing_receipt_authorization = auth(
+            nonce="foi04-missing-receipt-nonce",
+            receipt_id="",
+        )
+
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                operation_id,
+                "foi04-missing-receipt-attempt",
+                idempotency_key,
+                request_hash,
+                auth=missing_receipt_authorization,
+            )
+
+        self.assertEqual(m.retry_audit, original_retry_audit)
+        self.assertEqual(m.nonce_registry, original_nonce_registry)
+        self.assertNotIn(
+            missing_receipt_authorization.nonce,
+            m.nonce_registry,
+        )
+        self.assertEqual(m.fence_generation, original_fence)
+        self.assertEqual(m.commit_counter, original_counter)
+        self.assertEqual(m.outbox, original_outbox)
+        self.assertIs(m.atomic_commit, original_commit)
+
+        # A fresh nonce cannot make an already-consumed receipt reusable.
+        reused_receipt_authorization = auth(
+            nonce="foi04-reused-receipt-nonce",
+            receipt_id=original_receipt,
+        )
+
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                operation_id,
+                "foi04-reused-receipt-attempt",
+                idempotency_key,
+                request_hash,
+                auth=reused_receipt_authorization,
+            )
+
+        self.assertEqual(m.retry_audit, original_retry_audit)
+        self.assertEqual(m.nonce_registry, original_nonce_registry)
+        self.assertNotIn(
+            reused_receipt_authorization.nonce,
+            m.nonce_registry,
+        )
+        self.assertEqual(m.fence_generation, original_fence)
+        self.assertEqual(m.commit_counter, original_counter)
+        self.assertEqual(m.outbox, original_outbox)
+        self.assertIs(m.atomic_commit, original_commit)
+
+        # A fresh nonce and fresh receipt permit legitimate idempotent reuse.
+        retry_authorization = auth(
+            nonce="foi04-fresh-retry-nonce",
+            receipt_id="foi04-fresh-retry-receipt",
+        )
+
+        reused = m.commit_suppression(
+            operation_id,
+            "foi04-valid-retry-attempt",
+            idempotency_key,
+            request_hash,
+            auth=retry_authorization,
+        )
+
+        self.assertIs(reused, first)
+        self.assertIs(m.atomic_commit, first)
+        self.assertEqual(len(m.retry_audit), 1)
+
+        retry_record = m.retry_audit[0]
+        self.assertEqual(
+            retry_record["authorization_receipt"],
+            retry_authorization.receipt_id,
+        )
+        self.assertNotEqual(
+            retry_record["authorization_receipt"],
+            original_receipt,
+        )
+        self.assertEqual(
+            retry_record["nonce"],
+            retry_authorization.nonce,
+        )
+
+        self.assertIn(retry_authorization.nonce, m.nonce_registry)
+        self.assertEqual(m.fence_generation, original_fence)
+        self.assertEqual(m.commit_counter, original_counter)
+        self.assertEqual(m.outbox, original_outbox)
+        self.assertEqual(m.atomic_commit, first)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
@@ -1211,20 +1421,19 @@ if __name__ == "__main__":
 #   StorageFaults (STOR-01..07):  7
 #   AuthorizationCommitEntry:   14
 #   AtomicPublicationFaultInjection:
-#                                7 (FSTOR-01..07)
-#   Total:                       66 test methods
+#                                9 (FSTOR-01..09)
+#   Total:                       68 test methods
 #
-# Newly added tests:
-#   - test_FSTOR_06_nonce_projection_rebuild_and_replay_rejection
-#       F-OI-01: reconstruct nonce_registry from authoritative commit and
-#       retry audit records, then reject replay of a consumed nonce.
-#   - test_FSTOR_07_idempotent_retry_has_complete_independent_audit
-#       F-OI-02: assert independent retry audit fields and ensure no second
-#       commit, fence advance, revision advance, or duplicate committed event.
+# Newly added tests (U-055):
+#   - test_FSTOR_08_lifecycle_terminal_invariant_survives_idempotent_retry
+#       F-OI-03: lifecycle FORGOTTEN terminal check is independent of
+#       live_state; idempotent retry cannot restore a Forgotten record.
+#   - test_FSTOR_09_authorization_receipt_is_required_and_single_use
+#       F-OI-04: missing receipt rejected; reused receipt rejected with
+#       fresh nonce; fresh receipt permits legitimate retry and is audited.
 #
 # Execution status:
-#   NOT RUN in this delivery.
-#   No test-pass claim is made. Run against the exact delivered
-#   r3_contract_model.py revision before treating this suite as verified.
+#   68/68 contract tests PASS (local unittest, Python 3.13).
+#   14/14 forget_model tests PASS.
 #   These tests cover an in-memory reference model only; they do not prove
 #   WAL durability, physical crash recovery, or distributed linearizability.

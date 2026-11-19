@@ -87,6 +87,7 @@ class Authorization:
     nonce_unused: bool = True
     delegation_current: bool = True
     nonce: str = "auth-nonce-default"
+    receipt_id: str = ""
 
     def valid(self, now: int, epoch: int) -> bool:
         return all((
@@ -258,6 +259,20 @@ class R3Model:
         self.nonce_registry = self._derive_nonce_registry()
         return set(self.nonce_registry)
 
+    def _derive_receipt_registry(self) -> set:
+        """Derive used authorization receipts from committed authority."""
+        used = set()
+        committed = self.atomic_commit
+        if committed is not None:
+            receipt = committed.authorization_reference.receipt_id
+            if receipt:
+                used.add(receipt)
+        for entry in self.retry_audit:
+            receipt = entry.get("authorization_receipt")
+            if receipt:
+                used.add(receipt)
+        return used
+
     def recover_nonce_registry(self) -> set:
         """Simulate recovery by rebuilding Nonce projection from authority.
 
@@ -296,10 +311,16 @@ class R3Model:
         # Treat nonce_registry as a cache/projection, never as authority.
         # Rebuild before replay detection so projection loss cannot permit
         # reuse of a Nonce already represented by committed authority.
+        if not auth.receipt_id:
+            raise ContractViolation("authorization receipt missing")
+
         self._rebuild_nonce_registry()
 
         if auth.nonce in self.nonce_registry:
             raise ContractViolation("authorization nonce replay")
+
+        if auth.receipt_id in self._derive_receipt_registry():
+            raise ContractViolation("authorization receipt replay")
 
     def revoke_authorization(self) -> int:
         """Advance PermissionEpoch and make older authorizations unusable."""
@@ -444,7 +465,7 @@ class R3Model:
             raise ContractViolation("authorization nonce replay")
 
         retry_number = len(self.retry_audit) + 1
-        receipt_id = f"retry-receipt-{retry_number}"
+        receipt_id = auth.receipt_id
 
         record = {
             "retry_id": f"retry-{retry_number}",
@@ -587,7 +608,7 @@ class R3Model:
 
                 authorization = AuthorizationReference(
                     permission_epoch=auth.permission_epoch,
-                    receipt_id=f"receipt-{commit_id}",
+                    receipt_id=auth.receipt_id,
                     nonce=auth.nonce,
                 )
 
@@ -827,15 +848,25 @@ class R3Model:
             if self.atomic_tuple != expected_tuple:
                 raise ContractViolation("atomic tuple projection mismatch")
 
-            if live_state and self.lifecycle != Lifecycle.FORGOTTEN:
+            # Forgotten is an irreversible terminal lifecycle. The check is
+            # independent of live_state so idempotent retry can never restore
+            # a Forgotten record to any other lifecycle (F-OI-03).
+            if self.lifecycle != Lifecycle.FORGOTTEN:
                 raise ContractViolation(
                     "Forgotten lifecycle projection missing"
                 )
 
-            if live_state and self.phase != Phase.SUPPRESSION_COMMITTED:
-                raise ContractViolation(
-                    "suppression phase projection mismatch"
-                )
+            # live_state=False is the idempotent-retry context: retries must
+            # not mutate phase/lifecycle, and U-049 tests legally reset phase
+            # before retrying. Only the durable record and its derived
+            # projections are checked there. The phase assertion is the sole
+            # live_state-gated check because workflow phase may advance after
+            # a successful commit without violating any terminal invariant.
+            if live_state:
+                if self.phase != Phase.SUPPRESSION_COMMITTED:
+                    raise ContractViolation(
+                        "suppression phase projection mismatch"
+                    )
 
             if self.fence_generation != expected_fence:
                 raise ContractViolation(
