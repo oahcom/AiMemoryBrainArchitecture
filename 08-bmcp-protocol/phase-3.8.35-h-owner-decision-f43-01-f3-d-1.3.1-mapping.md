@@ -1,6 +1,7 @@
 # H Owner Decision — F-43-01/F3 D 1.3.1 Consumer Mapping
 
-- Decision ID: **H-OWNER-2026-11-19-001**
+- Decision ID: **H-OWNER-2026-11-19-003**
+- Predecessor decision: **H-OWNER-2026-11-19-002**, Issue #43 comment `7021522737` (typed mapping acceptance); this decision extends that acceptance only to the expanded C1–C6 consumption mapping and abstract query request/response in this exact document.
 - Owner: **H Domain Owner**
 - Scope: **AID-2026-010 / Issue #43 / F-43-01 / F3 only**
 - Decision: **ACCEPT WITH EXPLICIT LIMITATIONS**
@@ -11,7 +12,8 @@
 - D Owner Decision: D-OWNER-2026-11-19-003
 - H schema: bmcp.coc-jf10-unified-1.2.17.schema.json, Blob 1b8f44675f30919764481d33755c566ef5cf1ea8
 - H TEST validator: owner_snapshot_semantics_1_2_17.py, Blob d9dc43ff0136751aba20cffa4db3f280d16edc67
-- H branch: session-h-bmcp-protocol; base HEAD de5d7b63ff8555a9bbd58f9dd64d4c28fbc7e5cc
+- H branch: `session-h-bmcp-protocol`; reviewed baseline HEAD `de5d7b63ff8555a9bbd58f9dd64d4c28fbc7e5cc`.
+- Decision artifact commit chain: `33c25d32176ddd5f5ee34fb7bbd507aad67be4df` (parent: reviewed baseline above), followed by clarification commit `940963af09fe25ffb862b69ac5f272050cf000f2` (current branch HEAD at this decision).
 
 ## 1. Independent H decision
 
@@ -251,12 +253,12 @@ These are blocking limitations on runtime consumption and production authorizati
 
 ## 10. Formal H Owner disposition
 
-**Decision ID:** H-OWNER-2026-11-19-001
+**Decision ID:** H-OWNER-2026-11-19-003
 
-**Decision:** **ACCEPT WITH EXPLICIT LIMITATIONS** — H independently accepts the normative D 1.3.1 field mapping, nominal-type separation, C1-C6 conjunctive consumption rules and abstract ResolveForgetFenceSnapshotProof query contract as the required H dependency. §8 limitations are binding preconditions. No production endpoint is accepted or authorized.
+**Decision:** **ACCEPT WITH EXPLICIT LIMITATIONS** — H independently accepts the normative D 1.3.1 field mapping, nominal-type separation, C1–C6 conjunctive consumption mapping, and the abstract `ResolveForgetFenceSnapshotProof` request/response contract as the required H dependency, limited to the exact D/H Blobs listed in this document. This decision is the expanded-artifact follow-on to H-OWNER-2026-11-19-002 (Issue #43 comment `7021522737`); it does not replace or broaden that earlier typed-mapping decision. §8 limitations are binding preconditions. No production endpoint is accepted or authorized.
 
 **Finding boundary:**
-- H decision is only F-43-01/F3 mapping.
+- H decision is only F-43-01/F3 mapping; predecessor H-OWNER-2026-11-19-002 is preserved at Issue #43 comment `7021522737`.
 - F-43-01/F3 remains OPEN pending D/H acceptance of same exact mapping Blob, interface contract verification, A Integration readback/acceptance and A's authoritative Finding Ledger update.
 - This does not decide F-43-01/F1 implementation status.
 - It does not alter D Owner contract or D Owner decision.
