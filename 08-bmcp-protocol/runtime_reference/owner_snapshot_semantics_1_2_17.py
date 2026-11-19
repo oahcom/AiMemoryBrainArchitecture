@@ -14,6 +14,15 @@ VALID, INVALID, UNKNOWN = "VALID", "INVALID", "UNKNOWN"
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 DECIMAL = re.compile(r"^(0|[1-9][0-9]*)$")
 
+D_BOUNDED_STRING_FIELDS = frozenset({
+    "producer_registration_high_water",
+    "work_item_high_water",
+    "attempt_high_water",
+    "barrier_generation",
+    "forget_fence_generation_high_water",
+    "dependency_closure_cursor",
+})
+
 OWNER_FIELDS = {
     "I": {
         "receipt_issue_high_water", "receipt_consume_high_water", "permission_epoch",
@@ -62,6 +71,12 @@ def validate_owner_snapshot_1_2_17(
 
     values = snapshot.get("owner_specific_high_waters")
     if not isinstance(values, Mapping) or set(values) != OWNER_FIELDS[owner]:
+        return INVALID
+    if owner == "D" and any(
+        not isinstance(values.get(field), str)
+        or not 1 <= len(values[field]) <= 512
+        for field in D_BOUNDED_STRING_FIELDS
+    ):
         return INVALID
     if any(not isinstance(v, str) or not v for v in values.values()):
         return INVALID
