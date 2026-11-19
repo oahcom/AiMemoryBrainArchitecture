@@ -3,11 +3,11 @@
 - Example: AI-PROMPT-MIGRATION-EXAMPLE-002
 - Status: ILLUSTRATIVE ONLY — NOT AUTHORIZED FOR EXECUTION
 - Source: `14-ai-development/work-items/AID-2026-003/t2-snapshot-fix-prompt.source.txt`
-- Provenance: exact sent-payload snapshot, 9,807 characters; archive commit `d84dcbe269706bec384b02f24de6a0e635da9aa0`; blob `a274aa761074683b0fd6a7aadcfe917b140fc227`. Manifest records dispatch at 2026-11-18 20:52:09 +08:00 to conversation `6afd9f7f-d544-83ee-98d1-92d7aafb3bcf`.
-- Execution: remediation-round-1 dispatch; resulting work is recorded under AID-2026-003 / PR #256, merged at `48a556491506d25e78be47957276bf3821797a0a`.
+- Source type: verbatim T2 dispatch sent-payload snapshot; NOT the distinct repository T1 `prompt-v1.md`.\n- Provenance: exact sent-payload snapshot, 9,807 characters; archive commit `d84dcbe269706bec384b02f24de6a0e635da9aa0`; blob `a274aa761074683b0fd6a7aadcfe917b140fc227`. Manifest records dispatch at 2026-11-18 20:52:09 +08:00 to conversation `6afd9f7f-d544-83ee-98d1-92d7aafb3bcf`.
+- Distinct artifact not used as this example's source: `14-ai-development/work-items/AID-2026-003/prompt-v1.md`, blob `71332a2b8f412d1bb58d4d53bdb25880dc2f1431`.\n- Execution: remediation-round-1 dispatch; resulting work is recorded under AID-2026-003 / PR #256, merged at `48a556491506d25e78be47957276bf3821797a0a`.
 - Original snapshot and executed artifacts remain unchanged.
 
-> Retrospective, non-executable length-test artifact only. Not a replacement prompt; do not dispatch or execute.
+> Retrospective, non-executable length-test artifact only. Its sole source is the T2 dispatch snapshot identified above, not the distinct T1 repository prompt-v1. Not a replacement prompt; do not dispatch or execute.
 
 ## 1. Task identity / 任务标识
 

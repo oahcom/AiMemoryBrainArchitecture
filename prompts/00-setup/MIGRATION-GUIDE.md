@@ -47,9 +47,16 @@ Git commit/blob identifiers do not replace SHA-256 for the exact executed prompt
 7. Obtain required prompt review/Owner authorization. Start only when applicable Definition of Ready gates pass.
 
 ## 5. Pilot migration / 试点迁移
-A real source prompt was located: 14-ai-development/work-items/AID-2026-003/prompt-v1.md (blob 71332a2b8f412d1bb58d4d53bdb25880dc2f1431). It is an executed, immutable historical artifact and MUST NOT be overwritten.
+The pilot example is derived from the exact historical T2 dispatch payload snapshot, not from the repository's T1 `prompt-v1.md` artifact:
 
-The companion work-item-003-v2-migration-example.md is a non-executed migration example derived from that real source. It demonstrates the seven-section organization; it does not supersede the historical prompt, reopen AID-2026-003, or claim Owner approval. Its executed-prompt SHA-256 is NOT APPLICABLE because it is not authorized for execution.
+- Source payload: `14-ai-development/work-items/AID-2026-003/t2-snapshot-fix-prompt.source.txt`
+- Source blob: `a274aa761074683b0fd6a7aadcfe917b140fc227`
+- Source type: verbatim T2 sent-payload snapshot, 9,807 Unicode characters; archived at commit `d84dcbe269706bec384b02f24de6a0e635da9aa0`.
+- Dispatch record: 2026-11-18 20:52:09 +08:00 to conversation `6afd9f7f-d544-83ee-98d1-92d7aafb3bcf`, as recorded in the AID-2026-003 manifest.
+
+This payload snapshot is distinct from `14-ai-development/work-items/AID-2026-003/prompt-v1.md` (blob `71332a2b8f412d1bb58d4d53bdb25880dc2f1431`). That T1 repository prompt is NOT the source used for this pilot. Do not conflate the T2 dispatch snapshot with the T1 repository prompt.
+
+`work-item-003-v2-migration-example.md` is a retrospective, non-executed example derived only from the T2 snapshot identified above. It does not supersede or modify either historical artifact, reopen AID-2026-003, or claim Owner approval. Its executed-prompt SHA-256 is NOT APPLICABLE because it is not authorized for execution.
 
 ## 6. Migration checklist / 迁移检查表
 - [ ] Source prompt and historical identity verified; source remains unchanged.
