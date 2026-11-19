@@ -46,71 +46,93 @@ The complete v1.1 policy was read before drafting v1.2.
 
 ### 2.2 Current main and remediation branch / 当前 main 与修复分支
 
-- T2 submission-time main HEAD: c5a995d9a2808112b007a9108e085048cbed5cc9
-- Current main HEAD: 2ca77db4c66529394304f0e1e51ba4696544cfb6
-- Current main HEAD verification: Direct GitHub branch-ref read
-- Remediation branch: remediation/gov-doc-001-v1.2-bilingual-baseline
-- Remediation branch HEAD: a77219fa2834af0c4535e6692029adaec2e62638
-- PR: #271
-- PR state: OPEN
-- PR merged: false
-- PR base SHA reported by GitHub: c5a995d9a2808112b007a9108e085048cbed5cc9
+- T2 submission-time main HEAD: `c5a995d9a2808112b007a9108e085048cbed5cc9`
+- Current main HEAD at R6 remediation baseline: `4f82e3a48a35e9fd73e7920f0c6a559b77aaf0dc`
+- Current main HEAD source: direct GitHub branch comparison/read-back
+- Current main D1 policy blob: `0e170479e1a71e8f4c124c6f1dc170241652f42b` (the unchanged GOV-DOC-001 v1.1 NORMATIVE baseline)
+- Remediation branch: `remediation/gov-doc-001-v1.2-bilingual-baseline`
+- PR #271 current head at R6 baseline: `47369925ace93821eab82e4cec8418f8d7505d64`
+- PR #271 tree at R6 baseline: `a02020dcb2e6b23bd5456b61ddb772c74ca95a63`
+- PR #271 state: OPEN; merged: false
+- PR base / merge-base recorded: `c5a995d9a2808112b007a9108e085048cbed5cc9`
+- Current main...PR head comparison: `diverged`; ahead 8 / behind 42; merge base `c5a995d9a2808112b007a9108e085048cbed5cc9`
 
-The current main HEAD was directly retrieved from the GitHub refs API during T9.
+**EN**
 
-当前 main HEAD 已在 T9 期间通过 GitHub refs API 直接读取。
+The current main baseline is newer than the PR's recorded base. The branch is divergent from current main. This comparison is evidence of divergence only; it is not a successful Exact-Head integration verification and does not authorize merge.
 
-The PR base SHA differs from the current main HEAD. A fresh Exact-Head comparison is required before any integration decision.
+**中文**
 
-PR base SHA 与当前 main HEAD 不同。任何集成决策前必须重新进行 Exact-Head 比较。
+当前 main 基线晚于 PR 记录的 base。修复分支与当前 main 已发生分叉。该比较仅证明分叉状态，不构成 Exact-Head 集成复核通过，也不构成合并授权。
 
 ## 3. Seven-file submission and read-back / 七文件提交与读回
 
 ### 3.1 Commit evidence / Commit 证据
 
-- Commit SHA: a77219fa2834af0c4535e6692029adaec2e62638
-- Tree SHA: b11d70b27ef63c5c6af64a5bbc537bec8ab70bd9
-- Parent SHA: c5a995d9a2808112b007a9108e085048cbed5cc9
-- Author: oahcom
-- Committer: oahcom
-- Commit timestamp: 2026-11-19T07:07:18Z
-- Changed files: 7
-- Additions: 1597
-- Deletions: 50
-- Signature verification: unsigned
-- PR: #271
+**Historical initial seven-file submission / 历史首次七文件提交**
 
-Commit Subject:
+- Commit SHA: `a77219fa2834af0c4535e6692029adaec2e62638`
+- Tree SHA: `b11d70b27ef63c5c6af64a5bbc537bec8ab70bd9`
+- Parent SHA: `c5a995d9a2808112b007a9108e085048cbed5cc9`
+- Commit timestamp: `2026-11-19T07:07:18Z`
+- Scope: original seven-file submission; this is historical submission evidence, not the current PR head.
 
-docs(governance): expand bilingual governance baseline / 扩展双语治理基线
+**Current PR head at the R6 review baseline / R6 复审基线的当前 PR head**
+
+- Commit SHA: `47369925ace93821eab82e4cec8418f8d7505d64`
+- Tree SHA: `a02020dcb2e6b23bd5456b61ddb772c74ca95a63`
+- Commit timestamp: `2026-11-19T14:40:18Z`
+- Commit subject: `docs(governance): restore acceptance and governance ledgers in remediation report`
+- Changed path in this commit: `00-governance/reports/bilingual-baseline-remediation-report.md`
+- PR: #271, OPEN, not merged.
+
+**EN**
+
+The initial seven-file submission and the later D7 report-restoration commit are distinct historical events. The original submission commit must not be presented as the current branch head. The R6 baseline head above is the pre-v2.2 remediation head; the v2.2 corrective commit is recorded in the subsequent GitHub commit/read-back evidence.
+
+**中文**
+
+首次七文件提交与后续 D7 报告恢复提交是两个不同的历史事件。不得将首次提交误写为当前分支 head。上列 R6 基线 head 是 v2.2 修正前的修复分支 head；v2.2 修正提交以随后 GitHub commit 和读回证据为准。
 
 ### 3.2 Exact file manifest / 精确文件清单
 
-| ID | Repository path | Blob SHA | Bytes |
-|---|---|---|---:|
-| D1 | 00-governance/bilingual-documentation-policy.md | 66517d39dfeae459fef5cedf9d5a79de08faf08d | 33611 |
-| D2 | 00-governance/bilingual-governance-migration-register.md | 9282ebf35415319b1be64d463b221ed0b54685bc | 7936 |
-| D3 | 00-governance/templates/bilingual-issue-template.md | 64d432395dc7bec9ba5c3b2ae534df4b01a2db3c | 2730 |
-| D4 | 00-governance/templates/bilingual-umbrella-requirement-template.md | 9265098d739369522000ebc54b8c0275ee7e5b6d | 2900 |
-| D5 | 00-governance/templates/bilingual-commit-message.md | 8ea68efd927c62ba48c3249cc39e62760ced9370 | 2340 |
-| D6 | 00-governance/templates/repository-policy-inheritance.md | 07683720cbd43cb60b53edb9ab9bb6de3e6f5a71 | 3382 |
-| D7 | 00-governance/reports/bilingual-baseline-remediation-report.md | c9eff04b498ed0ceb7b9c581205c2426d6a245f5 | 5506 |
+The following is the R6 independently read-back OBJ-07 seven-file manifest snapshot. The D7 entry is the pre-v2.2 D7 Version 2.1 report blob; it is retained as the historical manifest anchor and is not a self-referential hash for this v2.2 revision.
+
+以下为 R6 独立读回的 OBJ-07 七文件 manifest 快照。D7 条目是 v2.2 修订前 D7 Version 2.1 报告的 blob；该值作为历史 manifest 锚点保留，不作为本 v2.2 修订的自引用哈希。
+
+| ID | Repository path / 仓库路径 | Blob SHA |
+|---|---|---|
+| D1 | `00-governance/bilingual-documentation-policy.md` | `66517d39dfeae459fef5cedf9d5a79de08faf08d` |
+| D2 | `00-governance/bilingual-governance-migration-register.md` | `b5d6d2b6c5049e71578d9323c770bc1b48b9e0cc` |
+| D3 | `00-governance/templates/bilingual-issue-template.md` | `64d432395dc7bec9ba5c3b2ae534df4b01a2db3c` |
+| D4 | `00-governance/templates/bilingual-umbrella-requirement-template.md` | `9265098d739369522000ebc54b8c0275ee7e5b6d` |
+| D5 | `00-governance/templates/bilingual-commit-message.md` | `8ea68efd927c62ba48c3249cc39e62760ced9370` |
+| D6 | `00-governance/templates/repository-policy-inheritance.md` | `122f86b1e223e852eb19add7c37c452151372fe8` |
+| D7 | `00-governance/reports/bilingual-baseline-remediation-report.md` | `8fa00af52a6c61e36f850c90332006360b8a82df` |
+
+D2 was not modified by commit `47369925ace93821eab82e4cec8418f8d7505d64`. This D7 v2.2 changeset is D7-only; it does not modify D2.
+
+提交 `47369925ace93821eab82e4cec8418f8d7505d64` 未修改 D2。本 D7 v2.2 变更集仅修改 D7，不修改 D2。
 
 ### 3.3 Verification result / 验证结果
 
-All seven files were fetched from the remediation branch during T9.
+**Historical verification note / 历史验证说明**
 
-All seven returned Blob SHAs match the T2/T3 manifest.
+The original verification in this section applied to the previously committed D7 Version 1.0. The subsequent Version 2.0 proposal was later committed, and the Version 2.1 report was committed at the R6 remediation head. The current verification target must be distinguished from those historical targets.
 
-T9 重新从修复分支读取全部七个文件。
+本节最初的验证针对此前已提交的 D7 Version 1.0。后续 Version 2.0 提案已经提交；Version 2.1 报告也已提交至 R6 修复分支 head。当前验证目标必须与上述历史目标区分。
 
-七个文件返回的 Blob SHA 均与 T2/T3 manifest 一致。
+**R6 OBJ-07 read-back / R6 OBJ-07 读回**
 
-Result: 7/7 read-back verified.
+R6 independently read back all seven files against the OBJ-07 manifest snapshot: 7/7 matched. The D7 v2.1 blob in that snapshot is `8fa00af52a6c61e36f850c90332006360b8a82df`. The v2.2 revision changes D7 only; the new D7 blob is verified separately by post-commit read-back and must not be retroactively substituted into the pre-v2.2 OBJ-07 snapshot.
 
-Important: This verification applies to the committed D7 Version 1.0 content. This Version 2.0 report is a proposed replacement and has not yet been committed.
+R6 已依据 OBJ-07 manifest 快照独立读回全部七个文件：7/7 匹配。该快照中的 D7 v2.1 blob 为 `8fa00af52a6c61e36f850c90332006360b8a82df`。v2.2 修订仅修改 D7；新的 D7 blob 通过提交后的独立读回单独验证，不得追溯替换 v2.2 之前的 OBJ-07 快照。
 
-重要：以上验证针对已经提交的 D7 Version 1.0。本 Version 2.0 报告属于拟议替换内容，尚未提交。
+**Current verification boundary / 当前验证边界**
+
+The R6 independent review of Version 2.1 returned `NEEDS-REVISION`. This Version 2.2 report records the corrective response to R6 findings; it is not itself an independent acceptance. A fresh independent review must evaluate the exact v2.2 commit. Current main...PR comparison remains `diverged` (ahead 8 / behind 42); successful Exact-Head integration verification has not been established.
+
+R6 对 Version 2.1 的独立复审结论为 `NEEDS-REVISION`。本 Version 2.2 报告记录对 R6 findings 的修正响应；本报告本身不构成独立验收。必须由新的独立复审针对 v2.2 精确提交进行评估。当前 main 与 PR 比较仍为 `diverged`（ahead 8 / behind 42）；尚未建立 Exact-Head 集成复核通过证据。
 
 ## 4. Issue updates and verification / Issue 更新与验证
 
@@ -344,37 +366,41 @@ Completing the inventory is not evidence of bilingual migration or authorization
 
 #### F-02 — Independent Validator and CI Integration Status
 
-The independent validator, its declaration, and the associated tests have been committed as `d568325b`.
+F-02 has two distinct requirements:
 
-The tests were subsequently corrected in accordance with the existing review ruling. The correction commit is `e6ff2746`, and the corresponding test-file blob is `4ca1f8a2`. The corrected test suite reports **6/6 PASS**.
+1. **Requirement 1 — validator integrated and invoked by CI: COMPLETE / VERIFIED.**
+   - Workflow: `.github/workflows/bilingual-docs.yml`, blob `fbb01f4cf6c1046fb4f3f6f962d1caed921577b2`.
+   - Validator: `scripts/check_bilingual_docs.py`, blob `cfae34de1d07d4366850d439cb7c1e643d43cfae`.
+   - The workflow step `Check paired documentation and PR manifest` runs `python3 scripts/check_bilingual_docs.py`.
+   - The validator's `main()` calls `check_policy_inheritance(body, changed)`.
 
-**Current status: PARTIAL.**
+2. **Requirement 2 — corresponding required check configured and enforced: NOT_VERIFIED / PLATFORM-LIMITED BLOCKER.**
+   - `GET /branches/main/protection` returned HTTP 403:
+     `{"message":"Upgrade to GitHub Pro or make this repository public to enable this feature."}`
+   - `GET /rulesets` returned the same HTTP 403 plan-limit response.
+   - These responses establish a GitHub plan/visibility limitation for this private repository, not a token-permission failure. Required-check configuration/enforcement and failure-blocking behavior therefore remain unverified.
 
-The following requirements remain outstanding:
-
-1. Integrate the independent validator into the CI workflow.
-2. Provide evidence that the required check is configured and enforced.
-
-Until both requirements have been implemented and verified, F-02 must not be marked COMPLETE. A local test pass does not establish that a CI required check is active or enforced.
+**F-02 overall status: PARTIAL.** CI integration is verified; required-check enforcement is not verified. Successful workflow execution must not be treated as proof that the platform enforces the check.
 
 **中文**
 
 #### F-02 — 独立校验器与 CI 接入状态
 
-独立校验器、配套声明及相关测试已提交入库，提交为 `d568325b`。
+F-02 包含两个相互独立的要求：
 
-测试随后依据既有审查裁决完成修复。修复提交为 `e6ff2746`，对应测试文件 blob 为 `4ca1f8a2`。修复后的测试结果为 **6/6 PASS**。
+1. **要求 1——校验器已接入并由 CI 调用：COMPLETE / VERIFIED（完成/已验证）。**
+   - Workflow：`.github/workflows/bilingual-docs.yml`，blob `fbb01f4cf6c1046fb4f3f6f962d1caed921577b2`。
+   - 校验器：`scripts/check_bilingual_docs.py`，blob `cfae34de1d07d4366850d439cb7c1e643d43cfae`。
+   - Workflow 步骤 `Check paired documentation and PR manifest` 实际运行 `python3 scripts/check_bilingual_docs.py`。
+   - 校验器的 `main()` 调用了 `check_policy_inheritance(body, changed)`。
 
-**当前状态：PARTIAL（部分完成）。**
+2. **要求 2——对应 required check 已配置并强制执行：NOT_VERIFIED / PLATFORM-LIMITED BLOCKER（未验证/平台限制阻塞）。**
+   - `GET /branches/main/protection` 返回 HTTP 403：
+     `{"message":"Upgrade to GitHub Pro or make this repository public to enable this feature."}`
+   - `GET /rulesets` 返回相同的 HTTP 403 计划限制响应。
+   - 该响应证明当前私有仓库受到 GitHub 计划/可见性限制，并非 token 权限不足。因此 required check 的配置、强制执行及失败阻断行为仍未验证。
 
-以下要求仍未完成：
-
-1. 将独立校验器接入 CI workflow。
-2. 提供 required check 已配置并实际强制生效的证据。
-
-在上述两项要求均完成并经过验证前，不得将 F-02 标记为 COMPLETE。本地测试通过不能证明 CI required check 已启用或已实际执行强制检查。
-
----
+**F-02 总体状态：PARTIAL（部分完成）。**CI 接入已验证；required check 强制执行尚未验证。Workflow 成功运行不得被当作平台已经强制执行该 check 的证明。
 
 ### 6.5 F-06 remediation requirements / F-06 修复条件
 
@@ -468,57 +494,81 @@ T9 directly verified current main HEAD after the independent review.
 
 #### F-02 CI Verification Result
 
-The independent validator and its tests are present in the repository. The corrected local test result is **6/6 PASS**, based on test-file blob `4ca1f8a2`, introduced by correction commit `e6ff2746`.
+The workflow and validator are integrated:
 
-This result is local test evidence only. The independent validator has not yet been verified as integrated into the CI workflow, and no evidence has been established here that a corresponding required check is configured and enforced.
+- Workflow blob: `fbb01f4cf6c1046fb4f3f6f962d1caed921577b2`.
+- Validator script blob: `cfae34de1d07d4366850d439cb7c1e643d43cfae`.
+- Workflow job: `GOV-DOC-001 structural checks`.
+- Executed step: `Check paired documentation and PR manifest`.
+- The step runs `python3 scripts/check_bilingual_docs.py`; the script's `main()` invokes `check_policy_inheritance()`.
 
-**Status: PARTIAL.** Do not report F-02 CI integration or required-check enforcement as complete.
+Two successful workflow executions are independently evidenced:
+
+| Run ID | Tested PR head | Job ID | Job / step result | UTC execution window |
+|---|---|---|---|---|
+| `44542512889` | `70219731485040e2974d537080f994108ee1d989` | `135624335886` | Job SUCCESS; validator step SUCCESS | `14:19:42Z–14:19:45Z`, 2026-11-19 |
+| `44546301573` | `47369925ace93821eab82e4cec8418f8d7505d64` | `135637661718` | Job SUCCESS; validator step SUCCESS | `14:40:30Z–14:40:33Z`, 2026-11-19 |
+
+Both executions reported `Bilingual documentation and prompt-library gate: PASS (11 changed paths inspected).` These runs verify workflow invocation and successful execution on their respective heads. They do not verify platform required-check enforcement.
+
+The earlier structural CI failure run `44477435608` remains historical evidence and is not overwritten by these later successful runs.
+
+**Status:** Requirement 1 COMPLETE / VERIFIED; Requirement 2 NOT_VERIFIED; F-02 overall PARTIAL.
 
 **中文**
 
 #### F-02 CI 验证结果
 
-独立校验器及其测试已进入仓库。依据修复提交 `e6ff2746` 引入的测试文件 blob `4ca1f8a2`，修复后的本地测试结果为 **6/6 PASS**。
+Workflow 与校验器已完成接入：
 
-该结果仅属于本地测试证据。目前尚未验证独立校验器已接入 CI workflow，也没有证据证明对应的 required check 已完成配置并实际强制生效。
+- Workflow blob：`fbb01f4cf6c1046fb4f3f6f962d1caed921577b2`。
+- 校验器脚本 blob：`cfae34de1d07d4366850d439cb7c1e643d43cfae`。
+- Workflow job：`GOV-DOC-001 structural checks`。
+- 实际执行步骤：`Check paired documentation and PR manifest`。
+- 该步骤运行 `python3 scripts/check_bilingual_docs.py`；脚本的 `main()` 调用 `check_policy_inheritance()`。
 
-**状态：PARTIAL（部分完成）。**不得将 F-02 的 CI 接入或 required check 强制执行表述为已完成。
+已有两次成功的 workflow 执行证据：
 
----
+| Run ID | 被测 PR head | Job ID | Job / 步骤结果 | UTC 执行时间 |
+|---|---|---|---|---|
+| `44542512889` | `70219731485040e2974d537080f994108ee1d989` | `135624335886` | Job SUCCESS；校验步骤 SUCCESS | 2026-11-19 `14:19:42Z–14:19:45Z` |
+| `44546301573` | `47369925ace93821eab82e4cec8418f8d7505d64` | `135637661718` | Job SUCCESS；校验步骤 SUCCESS | 2026-11-19 `14:40:30Z–14:40:33Z` |
+
+两次执行均报告 `Bilingual documentation and prompt-library gate: PASS (11 changed paths inspected).` 这些运行证明 workflow 在各自 head 上实际调用并成功执行校验器，但不证明平台 required check 已强制生效。
+
+较早的结构 CI 失败运行 `44477435608` 保留为历史证据，不被后续成功运行覆盖。
+
+**状态：**要求 1 COMPLETE / VERIFIED；要求 2 NOT_VERIFIED；F-02 总体 PARTIAL。
 
 ### 7.2 Actual gate behavior / 门禁实际行为
 
 **EN**
 
-#### F-02 Gate Behavior — Verification Boundary
+#### F-02 Gate Behavior — Verified Execution vs Platform Enforcement
 
-The 6/6 PASS result establishes only that the corrected local test suite passed.
+The two successful workflow runs establish that the PR workflow invokes the validator and that the validator step completed successfully on the recorded heads.
 
-It does not establish any of the following:
+They do **not** establish:
 
-- The validator is invoked by the CI workflow.
-- The validator's result is exposed as a CI check.
-- The check is configured as a required check.
-- The check blocks a pull request when validation fails.
+- The check is configured as a required check in repository branch protection or a ruleset.
+- A failing validator result is enforced by the platform as a merge blocker.
+- The required-check configuration can be administered under the repository's current private-repository plan.
 
-These behaviors remain unverified until supported by actual workflow and repository branch-protection evidence.
+The branch-protection and ruleset API requests returned HTTP 403 with the GitHub plan-limit message recorded in §6.4. Accordingly, platform enforcement remains `NOT_VERIFIED` and is a platform-limited blocker. Do not mark F-02 COMPLETE.
 
 **中文**
 
-#### F-02 门禁行为——验证边界
+#### F-02 门禁行为——已验证执行与平台强制的区别
 
-6/6 PASS 仅证明修复后的本地测试套件通过。
+两次成功的 workflow 运行证明 PR workflow 实际调用了校验器，且校验器步骤在所记录的 head 上成功完成。
 
-该结果不能证明以下事项：
+但这些证据**不能**证明：
 
-- CI workflow 已调用该校验器；
-- 校验结果已作为 CI check 提供；
-- 该 check 已配置为 required check；
-- 校验失败时该 check 会阻止 Pull Request 合并。
+- 该 check 已在仓库 branch protection 或 ruleset 中配置为 required check；
+- 校验器失败时，平台会将其强制作为合并阻断条件；
+- 当前私有仓库计划允许管理员配置 required-check 强制规则。
 
-在取得实际 workflow 及仓库分支保护配置证据之前，上述门禁行为均应标记为未验证。
-
----
+分支保护及 ruleset API 请求返回 §6.4 所记录的 GitHub 计划限制 HTTP 403。因此平台强制状态仍为 `NOT_VERIFIED`，并构成平台限制阻塞。不得将 F-02 标记为 COMPLETE。
 
 ### 7.3 Recommended remediation / 建议修复
 
@@ -669,64 +719,141 @@ Execution PASS does not imply independent review PASS.
 
 ### P1
 
-F-02:
+**F-02 — platform required-check enforcement**
 
-Complete CI workflow integration for the independent validator and provide evidence that the required check is configured and enforced. Until verified, F-02 remains PARTIAL.
+- Requirement 1 (validator integrated and invoked by CI): COMPLETE / VERIFIED.
+- Requirement 2 (required check configured and enforced): NOT_VERIFIED — PLATFORM-LIMITED BLOCKER.
+- F-02 overall remains PARTIAL. Do not represent successful workflow runs as platform enforcement.
 
-完成独立校验器的 CI workflow 接入，并提供 required check 已配置且实际强制生效的证据。在验证完成前，F-02 维持 PARTIAL。
+**F-08 — stale baseline and manifest**
+
+- D7 §2.2 and §3.1–§3.3 have been corrected in this v2.2 revision to distinguish current main, current PR head/tree, historical submission commit, and the R6 OBJ-07 pre-v2.2 manifest snapshot.
+- Remediation state: corrected in D7 v2.2; independent re-review pending. Do not mark CLOSED before exact-Head re-review.
+
+**F-09 — stale CI integration status**
+
+- D7 §6.4, §7.1, §7.2, §9 and §10 now distinguish verified workflow integration from unverified platform required-check enforcement.
+- Remediation state: corrected in D7 v2.2; independent re-review pending. F-02 overall remains PARTIAL.
 
 ### P2
 
-F-06:
+**F-06 — historical object-level reconciliation remains OPEN**
 
-Preserve and verify the finalized 39-Issue and 313-Commit inventories, including object uniqueness, identity matching, classification totals, and all required content anchors. Issue #254 remains included in the 39-record set and on HOLD until its explicit exit conditions are satisfied. Inventory registration does not establish migration completion.
+Preserve the 39-Issue and 313-Commit inventory boundaries and complete object-level reconciliation of counts, classification totals, object uniqueness, identity matching, required anchors, and missing/duplicate records. Issue #254 remains within the 39-record set, on HOLD, with its explicit exit conditions.
 
-保留并核验已定稿的 39 条 Issue 和 313 条 Commit 清单，包括对象唯一性、身份匹配、分类总数及全部必需内容锚点。Issue #254 必须继续包含在 39 条集合内，并在明确退出条件满足前保持 HOLD。清单登记完成不代表迁移完成。
+Fourteen PRs remain unassigned to migration groups because sufficient grouping evidence has not been established:
 
-F-07:
+`#269, #207, #197, #194, #193, #192, #191, #190, #189, #154, #143, #141, #139, #136`.
 
-Use D1 authoritative blob `66517d39` for subsequent verification and retain PR comment `7006445553` as the correction traceability record.
+Do not invent group assignments. F-06 remains OPEN until the object-level evidence and PR grouping/reconciliation are complete. Inventory registration does not establish historical bilingual migration completion.
 
-后续核验使用 D1 权威 blob `66517d39`，并保留 PR 评论 `7006445553` 作为更正追踪记录。
+**F-07 — authoritative baseline correction**
+
+Use D1 authoritative baseline blob `66517d39` and retain PR comment `7006445553` as the correction traceability record.
+
+**F-10 — completed PR manifest declaration**
+
+The PR #271 body declaration `BILINGUAL-MANIFEST: COMPLETE` has already been updated. Record it as completed execution evidence; remove it from the outstanding CI blocker list. This declaration does not imply semantic review PASS, Owner approval, policy adoption, or merge authorization.
 
 ### CI blocker
 
-Update scripts/check_bilingual_docs.py using the exact allowlist replacement in Section 7.
-
-Update PR #271 with BILINGUAL-MANIFEST: COMPLETE.
-
-Rerun the workflow and retain the actual result.
+The only remaining F-02 blocker is platform required-check configuration/enforcement. The branch-protection and ruleset endpoints returned HTTP 403 because the repository is private under a plan that does not support these settings. Retain `NOT_VERIFIED`; do not claim the required check is enforced. The workflow integration and successful runs are recorded in §7.1.
 
 ### Other required actions
 
-1. Incorporate the T6/T7 D2 incremental appendix.
-2. Reconcile D2 with the 14 ungrouped PRs.
-3. Obtain independent re-review of the corrected artifacts.
-4. Revalidate Exact-Head against current main.
-5. Obtain explicit authorized governance approval.
-6. Only after approval, evaluate policy adoption and effective date.
+1. Preserve the D2 incremental appendix and its reconciliation work as outstanding; **D2 is not modified by this D7 v2.2 changeset**.
+2. Reconcile the 14 unassigned PRs listed above with object-level evidence; do not infer migration groups.
+3. Obtain a fresh independent review of the D7 v2.2 exact commit and its read-back evidence.
+4. Revalidate Exact-Head against the current main after the v2.2 commit; the pre-v2.2 comparison was `diverged` (ahead 8 / behind 42).
+5. Complete F-06 object-level reconciliation and preserve Issue #254 HOLD/exit conditions.
+6. Obtain explicit authorized governance approval. Only after approval may policy adoption and effective date be evaluated.
 
 No automatic approval or adoption is permitted.
 
+---
+
+### 后续行动与阻塞（中文）
+
+### P1
+
+**F-02——平台 required-check 强制执行**
+
+- 要求 1（校验器已接入并由 CI 调用）：COMPLETE / VERIFIED。
+- 要求 2（required check 已配置并强制执行）：NOT_VERIFIED——PLATFORM-LIMITED BLOCKER。
+- F-02 总体维持 PARTIAL。不得将 workflow 成功运行表述为平台强制执行。
+
+**F-08——基线与 manifest 陈旧**
+
+- 本 v2.2 修订已更正 D7 §2.2、§3.1–§3.3，明确区分当前 main、当前 PR head/tree、历史首次提交及 R6 的 v2.2 前 OBJ-07 manifest 快照。
+- 修复状态：已在 D7 v2.2 中更正；等待独立复审。Exact-Head 复审通过前不得标记 CLOSED。
+
+**F-09——CI 接入状态陈旧**
+
+- D7 §6.4、§7.1、§7.2、§9 和 §10 已更新，明确区分已验证的 workflow 接入与未验证的平台 required-check 强制状态。
+- 修复状态：已在 D7 v2.2 中更正；等待独立复审。F-02 总体仍为 PARTIAL。
+
+### P2
+
+**F-06——历史对象级对账仍为 OPEN**
+
+保留 39 条 Issue 和 313 条 Commit 的清单边界，并完成对象级对账：记录数量、分类总数、对象唯一性、身份匹配、必需锚点及缺漏/重复记录。Issue #254 必须继续包含在 39 条集合内，保持 HOLD，并保留明确退出条件。
+
+以下 14 个 PR 仍未归入迁移组，因为尚无充分归组证据：
+
+`#269, #207, #197, #194, #193, #192, #191, #190, #189, #154, #143, #141, #139, #136`。
+
+不得补造分组。对象级证据及 PR 归组/对账完成前，F-06 保持 OPEN。清单登记不代表历史双语迁移完成。
+
+**F-07——权威基线更正**
+
+后续使用 D1 权威基线 blob `66517d39`，并保留 PR 评论 `7006445553` 作为更正追踪记录。
+
+**F-10——已完成的 PR manifest 声明**
+
+PR #271 正文中的 `BILINGUAL-MANIFEST: COMPLETE` 声明已经更新。应将其记录为已完成执行证据，并从未解决 CI 阻塞项中移除。该声明不代表语义审查 PASS、Owner 批准、规范采纳或合并授权。
+
+### CI 阻塞
+
+F-02 唯一剩余阻塞是平台 required-check 配置/强制执行。由于当前私有仓库所处计划不支持相关设置，branch-protection 和 ruleset API 返回 HTTP 403。继续标记为 `NOT_VERIFIED`，不得声称 required check 已强制执行。Workflow 接入和成功运行已记录于 §7.1。
+
+### 其他必需行动
+
+1. 保留 D2 增量附录及其对账工作为未完成事项；**本 D7 v2.2 变更集不修改 D2**。
+2. 使用对象级证据对上述 14 个未归组 PR 完成对账；不得推断迁移组。
+3. 针对 D7 v2.2 精确提交及其读回证据开展新一轮独立复审。
+4. 在 v2.2 提交后，针对当前 main 重新执行 Exact-Head 复核；v2.2 前比较结果为 `diverged`（ahead 8 / behind 42）。
+5. 完成 F-06 对象级对账，并保留 Issue #254 的 HOLD/退出条件。
+6. 取得明确且有权的治理批准。只有在批准后，才可评估规范采纳及生效日期。
+
+不得自动推定批准或采纳。
+
 ## 10. Governance stage ledger / 治理阶段登记
 
-| Stage | Status | Evidence |
+The original 15-row governance stage ledger is retained. Only affected evidence/status entries are updated; unrelated historical rows remain present.
+
+原 15 行治理阶段登记表予以保留。仅更新受影响的证据/状态项；无关历史登记继续保留。
+
+| Stage / 阶段 | Status / 状态 | Evidence and limitation / 证据与限制 |
 |---|---|---|
-| v1.1 Read | READ | Historical policy source |
-| v1.2 Drafted | DRAFTED | D1–D7 |
-| Seven files submitted | SUBMITTED | Commit a77219fa2834af0c4535e6692029adaec2e62638 |
-| Seven files read back | VERIFIED | Seven exact Blob SHAs |
-| Five Issues updated | SUBMITTED | GitHub Issue records |
-| Five Issues read back | VERIFIED | Five API reads |
-| Historical inventory | PARTIAL | Issue/PR aggregate; Commit sample |
-| Independent review | NEEDS REVISION | T8 review |
-| F-02 | PARTIAL | Validator and tests committed; corrected local tests 6/6 PASS; CI integration and required-check enforcement remain outstanding. |
-| F-06 | INVENTORY FINALIZED | 39 Issues and 313 Commits registered with required anchors; #254 remains HOLD; registration does not establish migration completion. |
-| F-07 | CORRECTION RECORDED | PR comment `7006445553`; authoritative D1 blob `66517d39`. |
-| Structural CI | FAILURE | Run 44477435608. Bilingual documentation gate run `44542512889` succeeded on head `70219731485040e2974d537080f994108ee1d989`. This result does not establish F-02 validator integration or required-check enforcement. |
-| Owner approval | NOT_RECORDED | No approval evidence |
-| Policy adoption | NOT_ADOPTED | No adoption evidence |
-| Effective status | NOT_EFFECTIVE | v1.2 remains DRAFT |
+| v1.1 Read / v1.1 读取 | READ | Historical GOV-DOC-001 v1.1 baseline; current main D1 remains v1.1 NORMATIVE. / 历史 GOV-DOC-001 v1.1 基线；当前 main D1 仍为 v1.1 NORMATIVE。 |
+| v1.2 Drafted / v1.2 起草 | DRAFTED | D1–D7 proposal; v1.2 remains DRAFT. / D1–D7 提案；v1.2 仍为 DRAFT。 |
+| Seven files submitted / 七文件提交 | SUBMITTED | Historical initial submission commit `a77219fa2834af0c4535e6692029adaec2e62638`; current PR #271 head at R6 baseline `47369925ace93821eab82e4cec8418f8d7505d64`. / 历史首次提交为上述 commit；R6 基线的 PR #271 head 为上述 SHA。 |
+| Seven files read back / 七文件读回 | VERIFIED | R6 OBJ-07 pre-v2.2 manifest read-back: 7/7; D7 manifest entry is the v2.1 blob snapshot. / R6 对 v2.2 前 OBJ-07 manifest 读回 7/7；D7 条目为 v2.1 blob 快照。 |
+| Five Issues updated / 五个 Issue 更新 | SUBMITTED | Issues #262–#266; all remain OPEN and Requirement Status RECORDED. / Issues #262–#266；均保持 OPEN，Requirement Status 为 RECORDED。 |
+| Five Issues read back / 五个 Issue 读回 | VERIFIED | Five GitHub API read-backs; no Issue closure or label change inferred. / 五个 GitHub API 读回；不推定 Issue 已关闭或标签已变更。 |
+| Historical inventory / 历史清单 | PARTIAL | 39 Issues and 313 Commits registered; F-06 object-level reconciliation and 14 unassigned PRs remain OPEN. / 已登记 39 条 Issue、313 条 Commit；F-06 对象级对账及 14 个未归组 PR 仍为 OPEN。 |
+| Independent review / 独立复审 | NEEDS-REVISION | R6 review session `6aff0b47-3988-83ec-b666-976e39dfe840` returned NEEDS-REVISION; F-08/F-09/F-10 text corrections are in v2.2 and await fresh independent review. / R6 复审结论 NEEDS-REVISION；F-08/F-09/F-10 已在 v2.2 中更正，等待新一轮独立复审。 |
+| F-02 | PARTIAL | Requirement 1 CI integration COMPLETE/VERIFIED; Requirement 2 required-check enforcement NOT_VERIFIED due GitHub plan-limit HTTP 403. / 要求 1 CI 接入 COMPLETE/VERIFIED；要求 2 因 GitHub 计划限制 HTTP 403 而 NOT_VERIFIED。 |
+| F-06 | OPEN | 39-Issue / 313-Commit anchors and classification require object-level reconciliation; #254 remains HOLD; 14 PRs remain unassigned. / 39 条 Issue、313 条 Commit 的锚点和分类仍需对象级对账；#254 保持 HOLD；14 个 PR 未归组。 |
+| F-07 | CORRECTION RECORDED | PR comment `7006445553`; authoritative D1 baseline blob `66517d39`. / PR 评论 `7006445553`；D1 权威基线 blob `66517d39`。 |
+| Structural CI / 结构 CI | MIXED HISTORICAL RECORD | Failure run `44477435608` retained as historical; later runs `44542512889` and `44546301573` SUCCESS. Required-check enforcement remains NOT_VERIFIED. / 失败运行 `44477435608` 保留为历史记录；后续运行 `44542512889`、`44546301573` SUCCESS。required-check 强制执行仍为 NOT_VERIFIED。 |
+| Owner approval / Owner 批准 | NOT_RECORDED | No explicit Owner approval evidence. / 无明确 Owner 批准证据。 |
+| Policy adoption / 规范采纳 | NOT_ADOPTED | GOV-DOC-001 v1.2 remains DRAFT; no adoption evidence. / GOV-DOC-001 v1.2 仍为 DRAFT；无采纳证据。 |
+| Effective status / 生效状态 | NOT_EFFECTIVE | v1.1 remains NORMATIVE; v1.2 is not effective. / v1.1 仍为 NORMATIVE；v1.2 尚未生效。 |
+
+`Approval: NOT_RECORDED`  
+`Adoption: NOT_ADOPTED`  
+`MIGRATION_DEBT != EXEMPTION`
 
 ## 11. Honest declaration / 诚实声明
 
@@ -787,5 +914,36 @@ This revision updates verified facts and delivery status only. It does not expan
 - **规范效力与授权边界：**v1.1 继续为 NORMATIVE；v1.2 继续为 DRAFT。MIGRATION_DEBT != EXEMPTION。不得推定 Owner 已批准、规范已被采纳、PR 已获合并授权或历史迁移已经完成。
 
 本次修订仅更新已核实事实及交付状态，不扩大既有授权范围，不改变规范效力，也不豁免任何尚未满足的验收要求。
+
+
+**EN**
+
+## D7 v2.2 Revision Note
+
+This revision responds to the R6 independent review (session `6aff0b47-3988-83ec-b666-976e39dfe840`, final disposition `NEEDS-REVISION`).
+
+- **F-08:** Corrects the stale main/PR baseline and separates the historical initial submission from the R6 current-head evidence. The OBJ-07 manifest is explicitly identified as the pre-v2.2 snapshot.
+- **F-09 / F-02:** Records validator CI integration as COMPLETE / VERIFIED, records required-check configuration/enforcement as NOT_VERIFIED due the GitHub plan-limit HTTP 403, and retains F-02 overall as PARTIAL.
+- **F-10:** Records the already completed `BILINGUAL-MANIFEST: COMPLETE` PR-body declaration as historical execution evidence and removes it from outstanding blockers.
+- **F-06:** Remains OPEN; the 14 unassigned PRs and object-level reconciliation requirements remain outstanding.
+- The pre-v2.2 current-main comparison was `diverged` (ahead 8 / behind 42). A fresh Exact-Head review is required after this commit.
+- D2 is not modified. v1.1 remains NORMATIVE; v1.2 remains DRAFT. `MIGRATION_DEBT != EXEMPTION`.
+- `Approval: NOT_RECORDED`; `Adoption: NOT_ADOPTED`. This report does not authorize PR merge or imply Owner approval, policy adoption, or historical migration completion.
+- This v2.2 correction is pending a fresh independent review; it is not self-approved.
+
+**中文**
+
+## D7 v2.2 修订说明
+
+本次修订响应 R6 独立复审（会话 `6aff0b47-3988-83ec-b666-976e39dfe840`，最终结论 `NEEDS-REVISION`）。
+
+- **F-08：**更正陈旧的 main/PR 基线，并区分历史首次提交与 R6 当前 head 证据。明确将 OBJ-07 manifest 标记为 v2.2 之前的快照。
+- **F-09 / F-02：**将校验器 CI 接入登记为 COMPLETE / VERIFIED；将 required-check 配置/强制执行登记为因 GitHub 计划限制 HTTP 403 而 NOT_VERIFIED；F-02 总体继续保持 PARTIAL。
+- **F-10：**将已经完成的 `BILINGUAL-MANIFEST: COMPLETE` PR 正文声明记录为历史执行证据，并从未解决阻塞项中移除。
+- **F-06：**继续保持 OPEN；14 个未归组 PR 及对象级对账要求仍未完成。
+- v2.2 之前的 current-main 比较结果为 `diverged`（ahead 8 / behind 42）。本次提交后仍须重新进行 Exact-Head 复核。
+- 不修改 D2。v1.1 继续为 NORMATIVE；v1.2 继续为 DRAFT。 `MIGRATION_DEBT != EXEMPTION`。
+- `Approval: NOT_RECORDED`；`Adoption: NOT_ADOPTED`。本报告不授权 PR 合并，也不表示 Owner 已批准、规范已采纳或历史迁移已完成。
+- 本 v2.2 更正等待新一轮独立复审，不得自我批准。
 
 R5D2-OK
