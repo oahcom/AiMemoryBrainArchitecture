@@ -352,3 +352,246 @@ This append-only addendum supersedes the active remediation wording in §13.5 fo
 - B runtime type tests remain **NOT RUN**; no B executable domain-model harness was found. Fact/Claim ADR-001 remains **ADR-BLOCKED**.
 
 A must decide whether this evidence closes the corresponding G4 subfinding. It does not close G2/G3/G5/G7/G8/G9/G10.
+
+
+---
+
+## 15. BIH §9 currentness and status-scope reconciliation — B Owner addendum (2026-11-19)
+
+**Decision ID:** `B-OWNER-BIH-REGISTRY-2026-11-19-001`  
+**Disposition:** DECIDED — this addendum decides the B Registry's currentness vocabulary, authority boundaries and status-scope interpretation only. It does not decide another Owner's fields, policy, schema, deployment or runtime behavior.
+
+### 15.1 Exact source pin and version evolution
+
+- Repository: `oahcom/AiMemoryBrainArchitecture`
+- Owner branch: `session-b-domain-model-phase3`
+- Source commit before this addendum: `4ba22c899469ab0f5df9e6f965a1ba1253625733`
+- Registry path: `02-domain-model/typed-reference-registry.md`
+- Registry Blob before this addendum: `d13e7acf5348bccf58c28882a9400aaaa7a17766`
+
+Historical pins are retained, not rewritten:
+
+1. §9's original baseline pin is B HEAD `66adf6bdcf5ec69a146fe75afe20ce3b85af8448` / prior Registry Blob `50252bce6a531c4087678c1e85b0cb8fe8348dd3`.
+2. A's earlier joint BIH package pinned Registry Blob `af23ca9e019ab067a5f8ff62da902d4a419db3f3` (the 181-line historical snapshot).
+3. The later B Registry readback is Blob `d13e7acf5348bccf58c28882a9400aaaa7a17766` (355 lines at the source commit above), containing the expanded §9 and subsequent §§10–14. The historical `af23...` object remains valid as historical evidence, not current source.
+4. This addendum is append-only. It does not delete, rewrite or silently supersede any prior source pin or decision.
+
+### 15.2 Currentness is not lifecycle status, permission or freshness-by-clock
+
+The Registry uses the following **currentness result vocabulary** for an attempted authoritative resolution of one exact typed identity:
+
+| Result | Definition | Required handling |
+|---|---|---|
+| `CURRENT` | The exact typed reference resolves in its responsible authority's current registry/state, with authenticated source evidence and demonstrable continuity/no unresolved gap for the relevant namespace or epoch. | May proceed to the separate lifecycle, trust, Scope and authorization checks. `CURRENT` alone is never ALLOW. |
+| `STALE` | The evidence is known to be superseded, invalidated, behind a known authoritative version/epoch, or inconsistent with a later authoritative event. | Reject for protected use; refresh from the authority. |
+| `UNKNOWN` | The authority is unavailable, evidence is missing/ambiguous, a gap or rollback cannot be excluded, or continuity cannot be established. | Fail closed for protected operations; do not infer ACTIVE, ALLOW or success. |
+| `NOT VERIFIED` | No exact-source verification record, reproducible validation or attributable evidence has been supplied for the claim being made. | Keep the claim unverified; do not convert it to CURRENT or PASS. |
+
+These are **evidence/currentness results**, not identity lifecycle states. An identity whose authoritative lifecycle status is `REVOKED`, `DISABLED` or `RETIRED` may still have a `CURRENT` read result: the read is current precisely because it authoritatively reports that status. Currentness does not mean usable.
+
+Currentness MUST be established from the authority named below, using its authenticated registry read, signed/current state or owner-defined monotonic version/epoch and continuity evidence. A wall-clock timestamp, `updated_at`, local cache age, local receipt time, H transport sequence or consumer's last-seen value is not authoritative currentness evidence. Cache TTL never extends identity validity. In the Phase 3.6 I baseline, cached ALLOW and offline/stale authorization continuation without current I proof are prohibited.
+
+### 15.3 Identity lifecycle vocabulary and authoritative sources
+
+There is no single universal lifecycle enum. The following status sets are type-scoped; a status from one row MUST NOT be copied to another type.
+
+| Identity type | Lifecycle/status vocabulary in scope | Authority for status/currentness | Boundary and non-substitution |
+|---|---|---|---|
+| `IssuerRef` | `TRUSTED`, `SUSPENDED`, `COMPROMISED`, `RETIRED`, `UNKNOWN` | I Trusted Issuer Registry and its trust/key decision record; external key events are inputs, not local trust admission. | I owns local trust admission, rotation/compromise/revocation policy. A valid signature or timestamp does not establish trusted issuer status. |
+| `PrincipalRef` | `ACTIVE`, `DISABLED`, `REVOKED`, `RETIRED`, `UNKNOWN` | I Principal Registry, resolved inside the authenticated IssuerRef and namespace. | H authenticates the protected transport/session; H does not replace I's Principal status or authorization decision. |
+| `ActorRef` | Immutable per-operation attribution; no independently mutable lifecycle enum. | Verifier-produced operation binding from protected H context plus I-resolved Principal/Issuer/delegation evidence. | Historical attribution is not erased by later revocation. Present use must revalidate linked trust, delegation and permission; ActorRef is not a credential or authorization. |
+| `AgentRef` | Registry-defined `REGISTERED` / `ACTIVE` / `SUSPENDED` / `RETIRED` outcomes; unresolved is `UNKNOWN`. | Authoritative Agent/deployment registry plus I's binding of the workload Principal where applicable. | B defines reference semantics; it does not designate or operate the Agent deployment registry. AgentRef is not PrincipalRef or a runtime instance. |
+| `AdapterRef` | `REGISTERED`, `ACTIVE`, `DISABLED`, `REVOKED`, `RETIRED`, `UNKNOWN`. | H Adapter/application/instance and capability registry, combined with I's authenticated Adapter Principal/trust status. | H owns Adapter protocol/capability identity; I owns Principal trust and authorization. CapabilityEpoch is separate from identity. |
+| `ProducerRef` | `REGISTERED`, `ACTIVE`, `SUSPENDED`, `REVOKED`, `RETIRED`, `UNKNOWN`. | I Producer registration/trust registry plus authenticated H workload binding; D's work-admission ledger is an additional D-local gate. | C payload producer fields are claims. D ProducerRegistrationHighWater/WorkItemBarrier does not replace I's Producer registry or ProducerDomainInventoryEpoch. |
+| `ScopeRef` | `ACTIVE`, `SUSPENDED`, `CLOSED`, `RETIRED`, `UNKNOWN`. | Authoritative Scope registry for identity/lifecycle; I owns grants, authorization and PermissionEpoch. | B defines Scope meaning. Formal Scope Registry authority/designation and governance activation remain open; absent authoritative registry evidence, currentness is UNKNOWN. ScopeRef is not permission. |
+| `EnvironmentRef` | `ACTIVE`, `SUSPENDED`, `CLOSED`, `RETIRED`, `UNKNOWN`. | A formally designated Environment Registry Authority; I governs trust binding and cross-environment authorization. | No formal Environment Registry Authority designation is evidenced in the current I register. Until designation and authoritative evidence exist, EnvironmentRef currentness is UNKNOWN/NOT VERIFIED; labels, URLs and coordinates are not substitutes. |
+| `RuntimeSessionRef` | `CREATED`, `ACTIVE`, `EXPIRED`, `REVOKED`, `CLOSED`, `UNKNOWN`. | H/I verifier or session authority, protected channel/session state and I revocation state. | Payload session ID and local clock are not proof. Reconnect requires a newly authenticated/current binding; old-session ACK is historical only. |
+
+### 15.4 Events that invalidate or require revalidation
+
+A currentness result MUST be re-established after any applicable authoritative event, including:
+
+- issuer admission, key/credential rotation, suspension, compromise, retirement or trust-policy change;
+- Principal registration/binding change, disablement, revocation or retirement;
+- delegation grant, amendment, expiry, parent-chain change or revocation;
+- Agent registration/deployment/Principal-binding change;
+- Adapter registration, instance replacement, capability change, disablement or revocation;
+- Producer registration, workload/epoch change, suspension, revocation or retirement;
+- Scope creation, closure, retirement, owner/parent/descriptor change or cross-Scope grant change;
+- Environment registration/revision, closure/retirement, bridge/trust change or registry-authority change;
+- RuntimeSession expiry, revocation, reconnect, channel-binding change or verifier invalidation;
+- I policy change or revocation event advancing the affected PolicyDomain's PermissionEpoch.
+
+A consumer MUST NOT infer that an event is irrelevant merely because the reference string did not change. Identity, version, credential, session, capability, Scope, Environment and PermissionEpoch are separate namespaces.
+
+### 15.5 Evidence loss, unavailable authority and continuity failure
+
+If the responsible source cannot be reached, the exact reference cannot be resolved, a required signature/attestation is absent, a registry version or epoch has a gap, a rollback/fork cannot be excluded, or the evidence chain cannot prove continuity, the result is `UNKNOWN` (and the claim remains `NOT VERIFIED` until evidence is supplied). Protected reads, writes, publication, delivery and other sensitive operations MUST pause, deny or quarantine according to the owning boundary. No fallback to timestamp, local cache, payload self-declaration, prior successful lookup or another Owner's cursor is permitted.
+
+I's PermissionEpoch currentness is a separate authorization check: I is the sole logical authority; values are comparable only within their PolicyDomain; consumers must obtain authoritative currentness at each protected boundary. It is not an identity status and cannot be substituted for D ForgetFenceGeneration, ProducerRegistrationHighWater, H CapabilityEpoch or any other owner-local sequence.
+
+### 15.6 Status-scope reconciliation — authoritative layers
+
+| Status layer | Vocabulary / result | What it applies to | Authority and effect |
+|---|---|---|---|
+| Identity lifecycle | Type-specific values in §15.3 | One identity record in its own namespace | The named identity/registry authority only. Does not grant access. |
+| Identity currentness | `CURRENT` / `STALE` / `UNKNOWN` / `NOT VERIFIED` | One exact typed-reference resolution and its evidence chain | The relevant authority; a current `REVOKED` result is still unusable. |
+| Design maturity | `CANDIDATE` / `DECIDED` | A proposal or exact semantic decision within a named Owner/delegated authority scope | Candidate is not accepted. Decided is limited to the exact semantic subject and authority that made the decision. |
+| Consumer acceptance | `OPEN` / `ACCEPTED` / `ACCEPTED WITH CONDITIONS` / `REJECTED` | One exact artifact/version at one named consumer's own boundary | Only that consumer Owner can accept its field path/enforcement boundary. Acceptance does not propagate to other consumers. |
+| Wire/schema | `CANDIDATE` / `FROZEN` (or explicitly `NOT FROZEN`) | Exact protocol schema, field names, encoding, requiredness and version negotiation | H alone decides H-owned wire/schema freeze. Design acceptance is not freeze. |
+| Governance | `GOVERNANCE-BLOCKED` / `APPROVED` (with exact effective version and scope) | I-owned trust, registration, delegation, grants, revocation, PermissionEpoch and cross-boundary policy | Only the authorized external governance body can approve; an Owner proposal or delegated technical decision is not approval. |
+| Runtime/conformance | `NOT VERIFIED` / `NOT RUN` / evidence-backed `PASS` or `FAIL` | A named implementation/build, operation boundary and reproducible test or operational proof | Each implementation/consumer Owner supplies evidence. Document agreement is not runtime conformance. |
+| Finding tracking | `OPEN` / `BLOCKED` / `REMEDIATION ACCEPTED` / `CLOSED` | The Finding record in the authoritative ledger | A Integration controls ledger disposition; these are not identity, consumer, schema or governance statuses. |
+
+No status is inherited across layers. In particular: `DECIDED ≠ ACCEPTED`; `ACCEPTED ≠ FROZEN`; `FROZEN ≠ GOVERNANCE APPROVED`; `GOVERNANCE APPROVED ≠ RUNTIME CONFORMANT`; `CURRENT ≠ ACTIVE`; and `NOT VERIFIED` is not a pass.
+
+### 15.7 Candidate / decided / accepted / frozen / governance / runtime boundary
+
+1. **Delegated BIH technical baseline:** BIH36-JD-01..17 are recorded as a delegated joint technical baseline, technically DECIDED within that bounded B/I/H design scope. This is not a claim of separate human signatures, external governance approval, blanket consumer sign-off, production schema freeze or runtime conformance.
+2. **Registry §9 Candidate addendum:** the detailed nine-type §9 closure addendum remains labelled CANDIDATE as a composite dependent-authority package. Its presence in this Registry and the later BIH baseline do not automatically promote every row, consumer field path or authority dependency.
+3. **B-owned semantic decisions:** B's exact formal confirmation (Blob `3a1e77889cd9a90cd5822d9f0cb3437880868706`) approves the B semantic mapping of ActorRef, ScopeRef and EnvironmentRef, including role-preserving distinctions. It expressly does not freeze wire fields, approve I policy, designate an external registry authority, approve C telemetry schema or sign for other consumers. Other detailed §9 type clauses remain bounded by their own exact B decision evidence; no blanket promotion is made here.
+4. **Consumer-specific acceptance:** D and E have design-level acceptance records for their own canonical-mutation and compiler-publication boundaries; H has design-level acceptance for its BMCP authentication/protected-message/ACK/reconnect boundary; Storage has design-level acceptance for its durable publication/visibility boundary. These records are exact-owner, design-level evidence only. C's telemetry semantic boundaries are DECIDED, but its event profile remains CANDIDATE and H/I-dependent identity binding remains OPEN; no C BIH consumer acceptance is inferred. F and G remain OPEN in A's BIH consumer matrix absent their own exact acceptance records. No consumer's acceptance is shared automatically with another consumer.
+5. **H wire/schema freeze:** NOT FROZEN. H owns wire names, canonicalization, requiredness, protocol versioning and schema freeze. H's BIH design acceptance and candidate schema artifacts do not establish production freeze or interoperability.
+6. **I governance approval:** GOVERNANCE-BLOCKED. I36-GOV-01..10 remain blocked/not approved absent the required authorized approver, exact policy hash, authority basis, scope/jurisdiction, effective version and durable approval record.
+7. **Runtime conformance:** NOT VERIFIED. I36/H36 cases are specified but NOT RUN in the cited baseline; D/E/H/Storage records explicitly limit themselves to design acceptance and do not claim runtime implementation/conformance.
+
+### 15.8 Unresolved items, accountable Owners and return evidence
+
+| Unresolved item | Accountable Owner(s) | Independent acceptance required | Return carrier | Required evidence |
+|---|---|---|---|---|
+| Formal I issuer/Principal/Producer trust, delegation, revocation and PermissionEpoch policy; I36-GOV-01..10 | I + authorized Security/Identity/Architecture Governance | Authorized governance body; each protected-boundary consumer validates I output | I governance decision register → A Integration → existing Issue #43 | Named authorized approver, decision ID, exact policy text/hash, authority/delegation basis, scope/jurisdiction, effective version/time, expiry/revocation and durable signed record |
+| Formal Scope Registry authority, namespace and lifecycle/continuity source | I + B (semantics); designated Scope authority | I governance and each consumer using Scope | I registry/governance record → B Registry → A / #43 | Named authority, exact registry ref/version, lifecycle vocabulary, authenticated current read and gap/rollback evidence |
+| Environment Registry Authority designation and EnvironmentRef currentness | I + Environment owner; B only for type semantics | I and each environment-dependent consumer | I governance register + Environment authority record → B Registry → A / #43 | Named registry authority, namespace, status/version source, trust binding, bridge policy and continuity proof |
+| C telemetry identity/producer/Agent/Adapter/Environment field paths and requiredness | C; H/I/B for dependent bindings | C Owner; H for wire; I for trust policy | C telemetry contract + H schema/requiredness record → A / #43 | Exact field path, type, requiredness, authenticated source, negative cases and exact version pins |
+| D canonical-memory field paths, role mapping and admission/receipt enforcement | D | D Owner; I independently for policy/receipt; H if wire consumed | D consumer contract → A / #43 | Exact schema/path, owner decision, receipt binding and negative/race evidence; runtime claim only with reproducible implementation tests |
+| E ExtractionIR/ingress/publication field paths and final gate | E | E Owner; I policy and Storage visibility remain independent | E consumer contract → A / #43 | Exact field paths/requiredness, producer binding, lineage, final PermissionEpoch/fence checks and reproducible evidence |
+| F retrieval/index/cache identity and pre-disclosure acceptance | F | F Owner; I authorization; B semantics | F consumer contract → A / #43 | Exact field mapping, cache/rebuild/currentness behavior, negative tests and final-boundary proof |
+| G Context/Delivery/Applied identity and recipient acceptance | G | G Owner; H wire and I policy independently | G consumer contract → A / #43 | Exact ContextVersion/Delivery/session/Scope/epoch mapping, replay/reconnect behavior and Applied evidence |
+| H production wire/schema freeze and interoperable implementation | H | H Owner; affected consumers accept exact same version | H schema/validator/CI record → A / #43 | Exact schema/IDL and commit/Blob, canonicalization, requiredness, version negotiation, generated bindings, interoperability and authorized freeze record |
+| Runtime conformance across consumers | Each implementation/consumer Owner; I for policy service evidence | Each affected consumer Owner and A integration review | Owner implementation/test evidence → A / #43 ledger | Exact build/commit, test commands/environment, raw logs, CI run/job where applicable, protected-boundary negative/race/recovery evidence; no document-only substitution |
+| Fact/Claim canonical identity ADR-001 | B proposes; authorized Architecture Governance decides; affected consumers adopt separately | Governance plus each affected consumer | ADR-001 decision record → A / existing governance tracking | Formal decision authority, approved option/text/hash and exact consumer migrations; BIH identity decisions do not resolve this ADR |
+
+### 15.9 Non-claims and A Integration handoff
+
+This addendum is an authoritative B Registry reconciliation, not a rewrite of the BIH baseline. It does not approve another Owner's fields, designate an external registry authority, change I36 governance status, freeze H schema, close a consumer acceptance, prove runtime conformance or close F-43-06B. The A Integration Owner must independently re-read the exact resulting commit and Blob, reconcile its ledger/source pins and decide the Finding disposition. Until then F-43-06B remains OPEN.
+
+---
+
+## 16. BIH §9 当前性与状态范围权威对账 — B Owner 增补（2026-11-19）
+
+**Decision ID：** `B-OWNER-BIH-REGISTRY-2026-11-19-001`  
+**裁定范围：** 仅决定 B Registry 的 currentness 词汇、权威边界和状态适用范围；不代替其他 Owner 决定字段、策略、Schema、部署或 Runtime 行为。
+
+### 16.1 精确来源 Pin 与版本演进
+
+- 仓库：`oahcom/AiMemoryBrainArchitecture`
+- Owner 分支：`session-b-domain-model-phase3`
+- 本次增补前 commit：`4ba22c899469ab0f5df9e6f965a1ba1253625733`
+- Registry 路径：`02-domain-model/typed-reference-registry.md`
+- 本次增补前 Blob：`d13e7acf5348bccf58c28882a9400aaaa7a17766`
+
+历史 Pin 保留，不覆盖：
+
+1. §9 原始基线：B HEAD `66adf6bdcf5ec69a146fe75afe20ce3b85af8448` / Registry 旧 Blob `50252bce6a531c4087678c1e85b0cb8fe8348dd3`。
+2. A 早期联合 BIH 包引用的 Registry Blob：`af23ca9e019ab067a5f8ff62da902d4a419db3f3`，属于 181 行历史快照。
+3. 后续 B Registry 精确读回：Blob `d13e7acf5348bccf58c28882a9400aaaa7a17766`，在上述 commit 下为 355 行，包含扩展 §9 及后续 §§10–14。旧 `af23...` 仍是有效历史对象，但不是当前文件。
+4. 本增补采用追加方式，不删除、改写或静默取代任何历史 source pin 或决定。
+
+### 16.2 Currentness 不等于生命周期状态、Permission 或时钟新鲜度
+
+对一个精确 typed identity 的权威解析，采用以下 **currentness 结果词汇**：
+
+| 结果 | 定义 | 必须处理方式 |
+|---|---|---|
+| `CURRENT` | 精确 typed reference 在责任权威的当前 Registry/状态中解析成功，且有认证来源证据，并能证明相关 namespace/epoch 的连续性、无未解决缺口。 | 之后仍须单独检查生命周期、信任、Scope 和授权；`CURRENT` 本身绝不是 ALLOW。 |
+| `STALE` | 证据已被取代、失效、落后于已知权威版本/epoch，或与后续权威事件冲突。 | 保护性使用必须拒绝；从权威来源刷新。 |
+| `UNKNOWN` | 权威源不可用、证据缺失/歧义、存在无法排除的 gap/rollback，或无法证明连续性。 | 保护性操作 fail closed；不得推断 ACTIVE、ALLOW 或成功。 |
+| `NOT VERIFIED` | 没有针对该主张的精确来源核验记录、可复现验证或可归属证据。 | 保持未验证；不得转换为 CURRENT 或 PASS。 |
+
+这些是**证据/当前性结果**，不是 identity lifecycle 状态。权威记录为 `REVOKED`、`DISABLED` 或 `RETIRED` 的 identity，其读取结果仍可能是 `CURRENT`：因为权威当前状态恰好报告了该状态。Currentness 不等于可用。
+
+Currentness 必须来自下文指定权威的认证 Registry read、签名/当前状态，或 Owner 定义的单调版本/epoch 与连续性证据。墙上时钟时间戳、`updated_at`、本地缓存年龄、本地 receipt 时间、H transport sequence、消费者 last-seen 值均不是权威 currentness 证据。Cache TTL 不延长 identity 有效性。Phase 3.6 I 基线禁止在缺少 I 当前性证明时使用 cached ALLOW 或离线/过期授权继续执行。
+
+### 16.3 Identity 生命周期词汇与权威来源
+
+不存在可通用于所有类型的生命周期 enum。以下状态集按类型限定，不得跨行复制：
+
+| Identity 类型 | 适用生命周期/状态词汇 | 状态/currentness 权威 | 边界与禁止替代 |
+|---|---|---|---|
+| `IssuerRef` | `TRUSTED`、`SUSPENDED`、`COMPROMISED`、`RETIRED`、`UNKNOWN` | I Trusted Issuer Registry 及其 trust/key 决议记录；外部 key 事件只是输入，不是本地信任准入。 | I 拥有本地信任准入、轮换/失陷/撤销策略。签名有效或时间戳新不代表 Issuer 可信。 |
+| `PrincipalRef` | `ACTIVE`、`DISABLED`、`REVOKED`、`RETIRED`、`UNKNOWN` | I Principal Registry，在已认证 IssuerRef 与 namespace 内解析。 | H 认证受保护 transport/session；H 不替代 I 的 Principal 状态或授权决策。 |
+| `ActorRef` | 每操作不可变 attribution；没有独立可变生命周期 enum。 | 由受保护 H context 与 I 解析的 Principal/Issuer/delegation 证据组成的 verifier-produced operation binding。 | 后续撤销不抹除历史 attribution。当前使用必须重验关联 trust、delegation 和 permission；ActorRef 不是 credential 或授权。 |
+| `AgentRef` | Registry 定义的 `REGISTERED` / `ACTIVE` / `SUSPENDED` / `RETIRED`；无法解析为 `UNKNOWN`。 | 权威 Agent/deployment Registry，以及适用时 I 对 workload Principal 的绑定。 | B 定义引用语义，不指定或运营 Agent deployment Registry。AgentRef 不等于 PrincipalRef 或 runtime instance。 |
+| `AdapterRef` | `REGISTERED`、`ACTIVE`、`DISABLED`、`REVOKED`、`RETIRED`、`UNKNOWN`。 | H Adapter/application/instance 与 capability Registry，结合 I 对已认证 Adapter Principal 的 trust 状态。 | H 拥有 Adapter protocol/capability identity；I 拥有 Principal trust 与 authorization。CapabilityEpoch 与 identity 分离。 |
+| `ProducerRef` | `REGISTERED`、`ACTIVE`、`SUSPENDED`、`REVOKED`、`RETIRED`、`UNKNOWN`。 | I Producer registration/trust Registry，加上 H authenticated workload binding；D work-admission ledger 是额外的 D-local gate。 | C payload producer 字段只是 claim。D ProducerRegistrationHighWater/WorkItemBarrier 不替代 I Producer Registry 或 ProducerDomainInventoryEpoch。 |
+| `ScopeRef` | `ACTIVE`、`SUSPENDED`、`CLOSED`、`RETIRED`、`UNKNOWN`。 | identity/lifecycle 由权威 Scope Registry；I 拥有 grants、authorization 与 PermissionEpoch。 | B 定义 Scope 含义。正式 Scope Registry authority/designation 与治理启用仍 OPEN；缺少权威 Registry 证据时 currentness 为 UNKNOWN。ScopeRef 不是 permission。 |
+| `EnvironmentRef` | `ACTIVE`、`SUSPENDED`、`CLOSED`、`RETIRED`、`UNKNOWN`。 | 正式指定的 Environment Registry Authority；I 管理 trust binding 与跨环境授权。 | 当前 I register 未证明已正式指定 Environment Registry Authority。在指定并提供权威证据前，EnvironmentRef currentness 为 UNKNOWN/NOT VERIFIED；label、URL、坐标不能替代。 |
+| `RuntimeSessionRef` | `CREATED`、`ACTIVE`、`EXPIRED`、`REVOKED`、`CLOSED`、`UNKNOWN`。 | H/I verifier 或 session authority、受保护 channel/session 状态与 I revocation 状态。 | payload session ID 和本地时钟不是证明。Reconnect 必须重新认证/绑定；旧 session ACK 仅为历史证据。 |
+
+### 16.4 导致 currentness 失效或必须重验的事件
+
+发生任何适用权威事件后，必须重新建立 currentness，包括：
+
+- Issuer 准入、key/credential 轮换、suspend、compromise、retire 或 trust-policy 变化；
+- Principal 注册/绑定变化、disable、revoke 或 retire；
+- delegation grant、修改、到期、父链变化或撤销；
+- Agent 注册、deployment 或 Principal binding 变化；
+- Adapter 注册、实例替换、capability 变化、disable 或 revoke；
+- Producer 注册、workload/epoch 变化、suspend、revoke 或 retire；
+- Scope 创建、关闭、retire、owner/parent/descriptor 变化或跨 Scope grant 变化；
+- Environment 注册/版本、关闭/retire、bridge/trust 变化或 Registry authority 变化；
+- RuntimeSession 到期、撤销、reconnect、channel-binding 变化或 verifier invalidation；
+- I policy 变化或 revocation event 推进受影响 PolicyDomain 的 PermissionEpoch。
+
+消费者不得仅因 reference 字符串未变化就推断事件无关。Identity、version、credential、session、capability、Scope、Environment 与 PermissionEpoch 是不同 namespace。
+
+### 16.5 证据缺失、权威源不可用与连续性无法证明
+
+责任来源不可达、精确 reference 无法解析、必需签名/attestation 缺失、Registry version/epoch 存在 gap、无法排除 rollback/fork，或证据链无法证明连续性时，结果为 `UNKNOWN`（在证据补齐前，该主张同时保持 `NOT VERIFIED`）。受保护读取、写入、发布、交付及其他敏感操作必须按所属边界 pause、deny 或 quarantine。不得回退到时间戳、本地缓存、payload 自我声明、历史成功查询或其他 Owner 的 cursor。
+
+I PermissionEpoch currentness 是独立授权检查：I 是唯一逻辑权威；值只在自己的 PolicyDomain 内可比较；消费者必须在每个受保护边界取得权威当前性。它不是 identity status，也不能替代 D ForgetFenceGeneration、ProducerRegistrationHighWater、H CapabilityEpoch 或任何其他 Owner-local sequence。
+
+### 16.6 Status-scope 对账 — 权威层次
+
+| 状态层 | 词汇/结果 | 适用对象 | 权威与效力 |
+|---|---|---|---|
+| Identity lifecycle | §16.3 的按类型状态 | 自身 namespace 内的一条 identity 记录 | 仅对应 identity/Registry authority；不授予访问权。 |
+| Identity currentness | `CURRENT` / `STALE` / `UNKNOWN` / `NOT VERIFIED` | 一个精确 typed-reference 解析及其证据链 | 对应权威；当前读到 `REVOKED` 仍不可用。 |
+| Design maturity | `CANDIDATE` / `DECIDED` | 提案或具名 Owner/委托权威范围内的精确语义决定 | Candidate 不等于 accepted；Decided 仅限作出决定的精确语义对象与权限范围。 |
+| Consumer acceptance | `OPEN` / `ACCEPTED` / `ACCEPTED WITH CONDITIONS` / `REJECTED` | 某个具名 consumer 对一个精确 artifact/version 的自有边界 | 仅该 consumer Owner 能接受其 field path/enforcement boundary；不自动传递给其他 consumer。 |
+| Wire/schema | `CANDIDATE` / `FROZEN`（或明确 `NOT FROZEN`） | 精确 protocol schema、field names、encoding、requiredness、version negotiation | 仅 H 决定 H-owned wire/schema freeze；设计接受不是 freeze。 |
+| Governance | `GOVERNANCE-BLOCKED` / `APPROVED`（须附精确 effective version 与 scope） | I-owned trust、registration、delegation、grant、revocation、PermissionEpoch 与跨边界 policy | 只有获授权的外部治理机构可批准；Owner proposal 或 delegated technical decision 不是批准。 |
+| Runtime/conformance | `NOT VERIFIED` / `NOT RUN` / 有证据的 `PASS` 或 `FAIL` | 指定 implementation/build、operation boundary 与可复现测试或运行证明 | 每个 implementation/consumer Owner 提供证据；文档一致不等于 runtime conformance。 |
+| Finding tracking | `OPEN` / `BLOCKED` / `REMEDIATION ACCEPTED` / `CLOSED` | 权威 ledger 中的一条 Finding | A Integration 管理 ledger disposition；这些不是 identity、consumer、schema 或 governance 状态。 |
+
+各层状态不得继承。尤其：`DECIDED ≠ ACCEPTED`；`ACCEPTED ≠ FROZEN`；`FROZEN ≠ GOVERNANCE APPROVED`；`GOVERNANCE APPROVED ≠ RUNTIME CONFORMANT`；`CURRENT ≠ ACTIVE`；`NOT VERIFIED` 不等于 PASS。
+
+### 16.7 Candidate / decided / accepted / frozen / governance / runtime 边界
+
+1. **委托 BIH 技术基线：** BIH36-JD-01..17 被记录为委托联合技术基线，在该有限 B/I/H 设计范围内为 TECHNICALLY DECIDED。这不声称存在分别的人类签名、外部治理批准、所有消费者签收、生产 Schema freeze 或 runtime conformance。
+2. **Registry §9 Candidate addendum：** 详细的九类型 §9 closure addendum 作为一个依赖其他权威的整体仍为 CANDIDATE。它存在于 Registry 中、以及后续 BIH baseline 的形成，都不会自动提升每一行、consumer field path 或 authority dependency。
+3. **B-owned semantic decisions：** B 的精确正式确认（Blob `3a1e77889cd9a90cd5822d9f0cb3437880868706`）批准 ActorRef、ScopeRef、EnvironmentRef 的 B-owned semantic mapping，包括保留角色的区分。该决定明确不冻结 wire fields、不批准 I policy、不指定外部 Registry authority、不批准 C telemetry schema，也不代表其他 consumer 签收。§9 其他详细 type clauses 仍受各自精确 B 决策证据约束；本增补不作整体提升。
+4. **Consumer-specific acceptance：** D、E 已对各自 canonical-mutation 与 compiler-publication 边界记录 design-level acceptance；H 已对自身 BMCP authentication/protected-message/ACK/reconnect 边界记录 design-level acceptance；Storage 已对自身 durable publication/visibility 边界记录 design-level acceptance。这些只是在精确 Owner 范围内的设计证据。C telemetry semantic boundaries 为 DECIDED，但 event profile 仍 CANDIDATE、H/I-dependent identity binding 仍 OPEN；不推断 C 已完成 BIH consumer acceptance。A 的 BIH consumer matrix 中 F、G 在缺少各自精确 acceptance 记录时仍 OPEN。任一 consumer 的 acceptance 不自动共享给其他 consumer。
+5. **H wire/schema freeze：** NOT FROZEN。H 拥有 wire names、canonicalization、requiredness、protocol versioning 与 schema freeze。H 的 BIH design acceptance 和 candidate schema 工件不构成生产 freeze 或 interoperability 证明。
+6. **I governance approval：** GOVERNANCE-BLOCKED。I36-GOV-01..10 在缺少获授权 approver、精确 policy hash、authority basis、scope/jurisdiction、effective version 与持久化批准记录前均保持 blocked/not approved。
+7. **Runtime conformance：** NOT VERIFIED。所引用基线中的 I36/H36 cases 已定义但 NOT RUN；D/E/H/Storage 记录均将自身限制为 design acceptance，不声称 runtime implementation/conformance。
+
+### 16.8 未决项、责任 Owner 与回流证据
+
+| 未决事项 | 责任 Owner | 必须独立接受的主体 | 回流载体 | 必需证据 |
+|---|---|---|---|---|
+| I issuer/Principal/Producer trust、delegation、revocation、PermissionEpoch policy 正式批准；I36-GOV-01..10 | I + 获授权 Security/Identity/Architecture Governance | 获授权治理机构；各受保护边界 consumer 验证 I 输出 | I governance decision register → A Integration → 既有 Issue #43 | 具名授权 approver、Decision ID、精确 policy 文本/hash、authority/delegation basis、scope/jurisdiction、effective version/time、expiry/revocation、持久化签名记录 |
+| Scope Registry authority、namespace、lifecycle/continuity 来源正式指定 | I + B（语义）；指定的 Scope authority | I governance 与每个使用 Scope 的 consumer | I registry/governance record → B Registry → A / #43 | 具名 authority、精确 Registry ref/version、lifecycle vocabulary、认证 current read、gap/rollback 证据 |
+| Environment Registry Authority 指定与 EnvironmentRef currentness | I + Environment owner；B 仅负责类型语义 | I 与每个依赖 Environment 的 consumer | I governance register + Environment authority record → B Registry → A / #43 | 具名 Registry authority、namespace、status/version 来源、trust binding、bridge policy、连续性证明 |
+| C telemetry identity/producer/Agent/Adapter/Environment field paths 与 requiredness | C；依赖绑定由 H/I/B 各自负责 | C Owner；wire 由 H；trust policy 由 I | C telemetry contract + H schema/requiredness record → A / #43 | 精确 field path、type、requiredness、authenticated source、negative cases、精确版本 Pin |
+| D canonical-memory field paths、role mapping 与 admission/receipt enforcement | D | D Owner；I 对 policy/receipt 独立决定；消费 wire 时 H 独立决定 | D consumer contract → A / #43 | 精确 schema/path、Owner decision、receipt binding、negative/race evidence；只有可复现 implementation tests 才能声称 runtime |
+| E ExtractionIR/ingress/publication field paths 与 final gate | E | E Owner；I policy 和 Storage visibility 仍独立 | E consumer contract → A / #43 | 精确 field paths/requiredness、producer binding、lineage、final PermissionEpoch/fence checks、可复现证据 |
+| F retrieval/index/cache identity 与 pre-disclosure acceptance | F | F Owner；I authorization；B semantics | F consumer contract → A / #43 | 精确 field mapping、cache/rebuild/currentness behavior、negative tests、final-boundary proof |
+| G Context/Delivery/Applied identity 与 recipient acceptance | G | G Owner；H wire、I policy 独立 | G consumer contract → A / #43 | 精确 ContextVersion/Delivery/session/Scope/epoch mapping、replay/reconnect behavior、Applied evidence |
+| H production wire/schema freeze 与 interoperable implementation | H | H Owner；受影响 consumers 接受同一精确版本 | H schema/validator/CI record → A / #43 | 精确 schema/IDL 与 commit/Blob、canonicalization、requiredness、version negotiation、generated bindings、interoperability、获授权 freeze record |
+| 各 consumer Runtime conformance | 各 implementation/consumer Owner；I 对 policy service evidence 负责 | 每个受影响 consumer Owner 与 A 集成复审 | Owner implementation/test evidence → A / #43 ledger | 精确 build/commit、测试命令/环境、原始日志、适用时 CI run/job、受保护边界 negative/race/recovery 证据；不得用文档替代 |
+| Fact/Claim canonical identity ADR-001 | B 提案；获授权 Architecture Governance 决定；受影响 consumers 分别采纳 | Governance 与每个受影响 consumer | ADR-001 decision record → A / 既有治理跟踪 | 正式决策权威、批准选项/文本/hash、精确 consumer migration；BIH identity 决定不解决该 ADR |
+
+### 16.9 非主张与 A Integration 回流
+
+本增补是 B Registry 权威对账，不是重写 BIH baseline。它不批准其他 Owner 的字段、不指定外部 Registry authority、不改变 I36 governance 状态、不冻结 H schema、不关闭 consumer acceptance、不证明 runtime conformance，也不关闭 F-43-06B。A Integration Owner 必须独立回读最终 commit/Blob、对账自己的 ledger/source pins 并决定 Finding disposition。在此之前 F-43-06B 保持 OPEN。
