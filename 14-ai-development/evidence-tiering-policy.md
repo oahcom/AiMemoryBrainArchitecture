@@ -82,7 +82,15 @@
 4. **source_authenticity 边界不变**：内容完整性不等于来源真实性；声称 VERIFIED 必须附 `authenticity.verification_record`，否则 BLOCKED。
 5. Level 1 的 `sidecar_anchor` 与 v3 锚点协议一致：锚点为 `sha256:<64 hex>`，等于 subject tree 中 sidecar 字节的 SHA-256，且最近触碰该 sidecar 的 commit message MUST 携带该摘要。
 6. **治理确认记录同样按 v3 校验**：`classification_record` 与 `downgrade_confirmation_record` MUST 存在于 subject tree，且工作树字节与 subject blob 一致。填写不存在的路径即 BLOCKED（`CE_CLASS_RECORD_NOT_IN_SUBJECT` / `CE_DOWNGRADE_RECORD_NOT_IN_SUBJECT`）；记录不是可任意填写的字符串。
-7. **仓库身份**：声明 MUST 包含 `repository`（owner/name），且与克隆的 `origin` 远程一致；远程缺失或不是 GitHub 地址（`CE_REPO_IDENTITY_UNVERIFIED`）、声明与远程不符（`CE_REPO_IDENTITY_MISMATCH`）均 BLOCKED。这界定了"证据在哪个仓库被验证"的信任边界，但不证明来源真实性。
+7. **仓库身份**：声明 MUST 包含 `repository`（owner/name），且与克隆的 `origin` 远程一致；远程缺失或不在允许格式内（`CE_REPO_IDENTITY_UNVERIFIED`）、声明与远程不符（`CE_REPO_IDENTITY_MISMATCH`）均 BLOCKED。允许的 origin 格式仅有三种（用户名必须为 `git`，主机精确为 `github.com`，路径恰为 `owner/repo` 且可选 `.git` 后缀，不接受端口、query、fragment）：
+
+   | 格式 | 示例 |
+   |---|---|
+   | HTTPS | `https://github.com/owner/repo[.git]` |
+   | SSH URL | `ssh://git@github.com/owner/repo[.git]` |
+   | SCP | `git@github.com:owner/repo[.git]` |
+
+   `http://`、`git://`、非 `git` 用户名、带端口的 URL 一律拒绝。这界定了"证据在哪个仓库被验证"的信任边界，但不证明来源真实性。
 
 ## 6. 检查器
 

@@ -166,27 +166,35 @@ def discover_repo(start):
 
 
 def repo_slug(repo):
-    """Return owner/name from the origin remote, or None if it is not GitHub.
+    """Return owner/name from the origin remote, or None if not allowlisted.
 
-    The host is parsed and compared exactly; matching "github.com" anywhere in
-    the URL string would let a path segment such as
-    https://attacker.invalid/github.com/owner/repo pass as GitHub.
+    Accepted origin forms, and nothing else:
+      https://github.com/owner/repo[.git]   (no username, no port/query/fragment)
+      ssh://git@github.com/owner/repo[.git] (username must be exactly git)
+      git@github.com:owner/repo[.git]       (scp form, username must be git)
+
+    The host is compared exactly after parsing; matching "github.com" anywhere
+    in the URL string would let a path segment pass as GitHub.
     """
     url = git(repo, "config", "--get", "remote.origin.url").stdout.strip()
     if not url:
         return None
     slug = None
-    scp = re.match(r"^(?:[A-Za-z0-9._-]+@)?([A-Za-z0-9.-]+):(.+)$", url)
+    scp = re.match(r"^([A-Za-z0-9._-]+)@([A-Za-z0-9.-]+):(.+)$", url)
     if scp and "://" not in url:
-        if scp.group(1).lower() == "github.com":
-            slug = scp.group(2)
+        if scp.group(1) == "git" and scp.group(2).lower() == "github.com":
+            slug = scp.group(3)
     else:
         parsed = urllib.parse.urlparse(url)
-        if (parsed.scheme.lower() in ("https", "http", "ssh", "git")
-                and (parsed.hostname or "").lower() == "github.com"
-                and parsed.port is None
-                and not parsed.query and not parsed.fragment):
-            slug = parsed.path
+        scheme = parsed.scheme.lower()
+        host = (parsed.hostname or "").lower()
+        clean = (parsed.port is None and not parsed.query
+                 and not parsed.fragment and not parsed.password)
+        if clean and host == "github.com":
+            if scheme == "https" and not parsed.username:
+                slug = parsed.path
+            elif scheme == "ssh" and parsed.username == "git":
+                slug = parsed.path
     if not slug:
         return None
     path = slug.strip()

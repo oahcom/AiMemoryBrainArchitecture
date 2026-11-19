@@ -82,7 +82,15 @@ An assessment missing any of `assessed_by`, `assessed_at`, `rationale`, `base_he
 4. **The source_authenticity boundary is unchanged:** content integrity is not source authenticity. A VERIFIED claim requires `authenticity.verification_record`; otherwise BLOCKED.
 5. Level 1's `sidecar_anchor` follows the v3 anchoring protocol: the anchor is `sha256:<64 hex>`, equal to the SHA-256 of the sidecar bytes in the subject tree, and the commit message of the commit that most recently touched that sidecar MUST carry that digest.
 6. **Governance confirmation records are verified the same way:** `classification_record` and `downgrade_confirmation_record` MUST exist in the subject tree with working-tree bytes equal to the subject blob. A non-existent path is BLOCKED (`CE_CLASS_RECORD_NOT_IN_SUBJECT` / `CE_DOWNGRADE_RECORD_NOT_IN_SUBJECT`); a record is never an arbitrary string.
-7. **Repository identity:** the declaration MUST carry `repository` (owner/name) matching the clone's `origin` remote. A missing or non-GitHub remote (`CE_REPO_IDENTITY_UNVERIFIED`) or a declaration that disagrees with the remote (`CE_REPO_IDENTITY_MISMATCH`) is BLOCKED. This defines the trust boundary for *where* evidence is verified; it does not establish source authenticity.
+7. **Repository identity:** the declaration MUST carry `repository` (owner/name) matching the clone's `origin` remote. A missing remote, or one outside the allowlisted forms (`CE_REPO_IDENTITY_UNVERIFIED`), or a declaration that disagrees with the remote (`CE_REPO_IDENTITY_MISMATCH`) is BLOCKED. Only three origin forms are accepted (username must be `git`, host exactly `github.com`, path exactly `owner/repo` with an optional `.git` suffix; no port, query or fragment):
+
+   | Form | Example |
+   |---|---|
+   | HTTPS | `https://github.com/owner/repo[.git]` |
+   | SSH URL | `ssh://git@github.com/owner/repo[.git]` |
+   | SCP | `git@github.com:owner/repo[.git]` |
+
+   `http://`, `git://`, non-`git` usernames and URLs carrying a port are rejected. This defines the trust boundary for *where* evidence is verified; it does not establish source authenticity.
 
 ## 6. Checker
 

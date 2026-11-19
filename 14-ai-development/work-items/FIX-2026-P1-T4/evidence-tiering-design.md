@@ -110,3 +110,14 @@
 | B-01 输入规范化边界 | `repo_slug()` 现拒绝非标准端口（`parsed.port` 必须为 None）、query、fragment；路径按 `^owner/repo(\.git)?$` 严格匹配，重复斜杠/空段/`..` 一律拒绝而非归一化 |
 | 边界测试 | 新增 5 项：非标准端口、query、fragment、重复路径段、`ssh://` 形式通过 |
 | 文档编号 | 政策 §3.2/§3.5 引用改为「§5 第 6 条 / §5 item 6」，避免与子标题编号混淆 |
+
+## 11. 第五轮复审（R5）修复映射
+
+| R5 缺陷 | 修复 |
+|---|---|
+| URL scheme 过宽（接受 `http://`、`git://`） | 仅接受 `https`（不允许用户名）与 `ssh`（用户名必须为 `git`） |
+| SCP 用户名可选/任意 | 改为 `^([A-Za-z0-9._-]+)@host:path$` 且用户名必须严格为 `git` |
+| SSH URL 用户名未校验 | `ssh://` 形式要求 `parsed.username == "git"` 且无 password |
+| HTTPS 带用户名被接受 | `https://` 形式要求无 username/password |
+| 测试缺口 | 新增 5 项拒绝测试：`http://`、`git://`、`ssh://attacker@`、`attacker@github.com:`、`https://token@` |
+| 政策未列允许格式 | 中英文 §5 第 7 条增加允许 origin 格式表（HTTPS/SSH URL/SCP 三种）与拒绝清单 |

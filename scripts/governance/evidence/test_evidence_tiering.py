@@ -279,6 +279,26 @@ class EvidenceTieringTests(unittest.TestCase):
                 "ssh://git@github.com/oahcom/AiMemoryBrainArchitecture.git")
             self.passed(self.run_checker(fixture, fixture.declaration()))
 
+    def test_http_scheme_rejected(self):
+        self.assert_origin_rejected(
+            "http://github.com/oahcom/AiMemoryBrainArchitecture.git")
+
+    def test_git_scheme_rejected(self):
+        self.assert_origin_rejected(
+            "git://github.com/oahcom/AiMemoryBrainArchitecture.git")
+
+    def test_ssh_wrong_username_rejected(self):
+        self.assert_origin_rejected(
+            "ssh://attacker@github.com/oahcom/AiMemoryBrainArchitecture.git")
+
+    def test_scp_wrong_username_rejected(self):
+        self.assert_origin_rejected(
+            "attacker@github.com:oahcom/AiMemoryBrainArchitecture.git")
+
+    def test_https_with_username_rejected(self):
+        self.assert_origin_rejected(
+            "https://token@github.com/oahcom/AiMemoryBrainArchitecture.git")
+
     # ---- B-02: R2 downgrade confirmation ----------------------------------
     def test_r2_downgrade_requires_confirmer(self):
         with tempfile.TemporaryDirectory() as tmp:
