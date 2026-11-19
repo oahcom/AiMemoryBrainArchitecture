@@ -19,6 +19,7 @@ This report is a point-in-time governance record, not a live dashboard. Two clas
 
 - **Bound assets (dated snapshots).** Repository HEADs, tree and blob SHAs, PR state (`OPEN` / `merged`), ahead/behind counts, workflow run identifiers, and file manifests are bound to the moment they were read. Each such line carries its own as-of boundary. A later commit does not falsify a bound snapshot, and a bound snapshot must not be read as a current assertion.
 - **Live assertions (maintained state).** Only finding states (`CLOSED` / `PARTIAL` / `NOT_VERIFIED`), normative statements, and outstanding-blocker entries are maintained. When one changes, it is changed in a new revision with a revision note.
+- **Limitation assertions.** A third class exists and must not be forced into the first two: statements that are true, permanent, and not actionable — for example "historical migration cannot be inferred from the inventory". These are recorded as `LIMITATION` rather than left `OPEN`. An `OPEN` finding is a work item; a `LIMITATION` is a boundary. Mixing them produces either a work item that can never be closed or a boundary that is quietly treated as closed.
 
 Maintenance rule: do not rewrite a bound snapshot in order to chase a moving HEAD; append a new dated snapshot instead. Only live assertions may be edited in place, and every such edit must be recorded in the revision note. This rule exists because the opposite practice is unsatisfiable: any commit changes `main`, so a report that maintains HEAD values as current assertions is stale the moment it is merged.
 
@@ -34,6 +35,7 @@ Maintenance rule: do not rewrite a bound snapshot in order to chase a moving HEA
 
 - **绑定资产（带时点的快照）**：仓库 HEAD、tree 与 blob SHA、PR 状态（`OPEN` / `merged`）、ahead/behind 计数、workflow 运行标识、文件清单，均绑定于其被读取的时刻。每条此类陈述自带 as-of 边界。后续提交不使既有快照失效，既有快照也不得被读作当前断言。
 - **活动断言（受维护的状态）**：仅限 finding 状态（`CLOSED` / `PARTIAL` / `NOT_VERIFIED`）、规范性陈述、未解决阻塞条目。它们发生变化时，在新修订中更新并附修订说明。
+- **限制性断言**：存在第三类，且不得被强行归入前两类——它们成立、永久、且不可行动（例如「历史迁移无法从清单推得」）。此类记为 `LIMITATION`，而不是任其保持 `OPEN`。`OPEN` 是工作项，`LIMITATION` 是边界。两者混用的后果：要么得到一个永远无法关闭的工作项，要么得到一条被默认当作已关闭的边界。
 
 维护规则：不得为追逐移动的 HEAD 而改写历史快照，应追加新的带时点快照。只有活动断言可以就地变更，且每次变更都必须记入修订说明。该规则的存在理由：相反做法在逻辑上不可满足——任何提交都会改变 `main`，把 HEAD 值当作当前断言来维护的报告，在合并那一刻就已陈旧。
 
@@ -757,7 +759,7 @@ AC-07 was blank in the original task definition. Its missing criterion must not 
 | AC-02 | Issue bilingual requirements | Five templates/updates read back | Execution PASS; independent criterion mapping NOT_RECORDED |
 | AC-03 | Umbrella Requirement bilingual requirements | D1/D4 and five Issue updates | Execution PASS; independent criterion mapping NOT_RECORDED |
 | AC-04 | Commit Message bilingual requirements | D5 and actual bilingual Commit | Execution PASS; historical inventory incomplete |
-| AC-05 | PR bilingual title/body | PR title and body bilingual | PARTIAL — CI FAILURE |
+| AC-05 | PR bilingual title/body | PR title and body bilingual | PARTIAL — the historical CI failure run 44477435608 is retained; the gate passes on the current exact head, but platform required-check enforcement is unverified (F-02 R2) |
 | AC-06 | Future repository inheritance | D1/D6 drafted and committed | FAIL — F-02 Requirement 2 NOT_VERIFIED (platform-limited); v1.2 not adopted |
 | AC-07 | Original criterion unspecified | No criterion supplied | NOT TESTABLE |
 | AC-08 | Stable identifier preservation | Exact identifiers and SHA manifest checked | Execution PASS; independent mapping NOT_RECORDED |
@@ -766,7 +768,7 @@ AC-07 was blank in the original task definition. Its missing criterion must not 
 | AC-11 | Historical Commit immutability | No rewrite or force-push | Execution PASS |
 | AC-12 | Historical migration registration | Issue/Commit/PR aggregate inventory prepared | PARTIAL — F-06 object reconciliation CLOSED (2026-11-20); migration itself not performed |
 | AC-13 | Bilingual normative clauses | D1–D7 are embedded bilingual documents | Independent semantic parity not fully accepted |
-| AC-14 | Complete file/change manifest | Seven files and five Issue updates verified | PARTIAL — historical inventory incomplete |
+| AC-14 | Complete file/change manifest | Seven files and five Issue updates verified | PARTIAL — inventory complete (F-06 CLOSED); historical migration not performed |
 | AC-15 | Reproducible independent acceptance | Review package and exact file SHAs recorded | FAIL / BLOCKED — CI failure and outstanding findings |
 
 Execution PASS does not imply independent review PASS.
@@ -800,6 +802,45 @@ Execution PASS does not imply independent review PASS.
 ---
 
 ## 9. Outstanding blockers and next actions / 未解决阻塞与后续行动
+
+### Finding registry / finding 登记表
+
+Every finding raised against this deliverable appears here with a state and a basis. A finding that is absent from this table is not thereby closed; the registry exists so that no finding can be dropped silently between revisions, which is what had happened to F-01, F-03, F-04 and F-05 — they were listed only in the bound R6 snapshot (§6.3) and had no maintained state anywhere in §9 or §10.
+
+本交付物引发的每一项 finding 均在此列出状态与依据。不在本表中出现并不意味着已关闭；本登记表存在的目的，就是防止 finding 在修订之间被静默遗落——F-01、F-03、F-04、F-05 正是如此：它们只出现在绑定快照 §6.3 中，在 §9 与 §10 里没有任何受维护的状态。
+
+| # | Severity | State | Basis and where it is maintained |
+|---|---|---|---|
+| F-01 | — | `CLOSED` | Accepted closure recorded by the R6 review (§6.3). No counter-evidence recorded since. / R6 审查记录的已接受关闭（§6.3）。 |
+| F-02 | P1 | `PARTIAL` | Requirement 1 `COMPLETE / VERIFIED` (workflow integration, §7.1); Requirement 2 `NOT_VERIFIED` (platform 403). Maintained in §9 P1 and §10. / 要求 1 已验证，要求 2 因平台 403 未验证。 |
+| F-03 | — | `CLOSED (method-bound)` | The finding stated that partial remediation does not establish complete closure. That is a rule about method, not a defect with a patch. §0 and §9 now implement the distinction: remediation is recorded separately from state, and closure requires re-derivable evidence. **Basis proposed in this revision; requires this PR’s review to confirm.** / 该 finding 是方法性规则而非可补丁缺陷；依据本修订提出，待本 PR 审查确认。 |
+| F-04 | — | `CLOSED (method-bound)` | Same basis as F-03, recorded separately because R6 listed it as a separate row. / 与 F-03 同依据；R6 列为独立行，故分列。 |
+| F-05 | — | `LIMITATION` | "Historical migration cannot be inferred" is a permanent boundary, not a work item. Recorded per §0 so it is neither closed silently nor left `OPEN` forever. / 永久边界，非工作项。 |
+| F-06 | P2 | `CLOSED` (2026-11-20) | Object reconciliation in `00-governance/reports/f06-object-reconciliation.md`; the "14 unassigned PRs" conclusion is retracted. Maintained in §9 P2 and §10. / 对象级对账完成，原结论已撤回。 |
+| F-07 | P2 | `CLOSED` | Correction recorded in PR comment `7006445553`; authoritative D1 blob `66517d39`. / 更正已登记。 |
+| F-08 | P1 | `CLOSED` (2026-11-20) | §0 record boundary, §2.2 post-merge snapshot, §3.2 post-merge manifest; closure basis in §9 P1. / 关闭依据见 §9。 |
+| F-09 | P1 | `CLOSED` (2026-11-20) | §6.4/§7.1/§7.2/§9/§10 separation of integration from enforcement; re-opened and re-closed on 2026-11-20 after the §11 contradiction. / 因 §11 矛盾曾重开，同日重新关闭。 |
+| F-10 | P2 | `CLOSED` | PR #271 body declaration `BILINGUAL-MANIFEST: COMPLETE` recorded as execution evidence; implies no approval, adoption or merge authorisation. / 仅为执行证据。 |
+
+Where a state here differs from the R6 snapshot in §6.3, this registry governs, because §6.3 is a bound snapshot.
+
+若本表状态与 §6.3 的 R6 快照不一致，以本登记表为准，因为 §6.3 属于绑定快照。
+
+### Status cross-check / 状态交叉核对
+
+The following cross-check is run on every revision that touches a status sentence. It exists because the §11 contradiction was found only after merge, and because three acceptance-matrix rows had drifted from the finding states.
+
+每次修订只要涉及状态句，就跑下面的交叉核对。设立理由：§11 的矛盾是合并后才发现的，且已有三行验收矩阵与 finding 状态脱节。
+
+c1. Every sentence asserting a capability "has not been established" / 「尚未建立」 — check it names one requirement, not two.
+c2. §10 rows against §9 finding blocks — one state per finding, same value.
+c3. §11 status sentences against §7.1, §7.2, §9 and §10.
+c4. §8 acceptance-matrix rows for any row that cites a finding state or a CI outcome.
+c5. This registry against §6.3 — any divergence must be explained by §6.3 being a bound snapshot.
+
+Result for this revision / 本修订核对结果：c1 clear (the only such sentence, in §11, was corrected in v2.6); c2 clear; c3 clear after v2.6; c4 **two rows drifted and were fixed here** — AC-14 still said "historical inventory incomplete" and AC-05 still said "CI FAILURE" without distinguishing the historical run from current enforcement; c5 **four findings were absent from §9/§10** and are now registered above.
+
+本修订：c1 清（唯一此类句在 §11，v2.6 已更正）；c2 清；c3 经 v2.6 后清；c4 **两行脱节，已在本次修正**；c5 **四项 finding 未在 §9/§10 出现，已在上表登记**。
 
 ### P1
 
@@ -1027,9 +1068,9 @@ F-07 更正记录已登记于 PR 评论 `7006445553`。D1 权威基线 blob 为 
 
 **EN**
 
-Every revision note from v2.1 onward is a bound snapshot of the revision that wrote it: it records what that revision changed and the state at that time, and it is not maintained. Where a note says a finding "remains OPEN", that describes the state when the note was written. Current finding states live in §9 and §10 only.
+Every revision note from v2.1 onward is a bound snapshot of the revision that wrote it: it binds the original record at its own revision timepoint. It records what that revision changed and the state at that time, and it is not maintained. This labelling does not assert that the historical state was permanently correct, and it does not make a historical error harmless — it only removes the ambiguity of reading an old note as a current statement. Where a note says a finding "remains OPEN", that describes the state when the note was written. Current finding states live in §9 and §10 only.
 
-自 v2.1 起的每份修订说明均为其所属修订的绑定快照：它记录该修订做了什么以及当时的状态，不受维护。若某份说明写「某 finding 仍为 OPEN」，那指的是写下该说明时的状态。当前 finding 状态仅以 §9 与 §10 为准。
+自 v2.1 起的每份修订说明均为其所属修订的绑定快照：它绑定的是「原始记录在其自身修订时点」的状态，记录该修订做了什么以及当时状态，不受维护。该标注并不声称历史状态永久正确，也不使历史错误本身变得无害——它只消除「把旧说明当作当前陈述」的歧义。若某份说明写「某 finding 仍为 OPEN」，那指的是写下该说明时的状态。当前 finding 状态仅以 §9 与 §10 为准。
 
 ## D7 v2.1 Revision Note
 
@@ -1180,3 +1221,24 @@ This revision is the first application of the §0 re-open trigger to already-mer
 - **§11 中英两份均已更正**，且以「更正」形式写明，而非静默替换。
 - 不改变任何政策文本、规范状态、批准状态、采纳状态；v1.1 仍为唯一 NORMATIVE；F-02 仅因要求 2 而为 PARTIAL。
 
+## D7 v2.7 Revision Note
+
+This revision closes a hole in the previous one: the registry of findings. It also discharges the two tracking items left open by the R1 review of PR #286.
+
+- **Finding registry added.** F-01, F-03, F-04 and F-05 existed only inside the bound R6 snapshot (§6.3) and had no maintained state anywhere. A finding with no maintained state is indistinguishable from a dropped finding. All ten are now registered with a state and a basis, and where the registry differs from §6.3 the registry governs.
+- **A third state category.** `LIMITATION` is introduced in §0 for statements that are true, permanent and not actionable — F-05 is the first. Without it, a boundary is either kept `OPEN` forever or quietly treated as closed; both are dishonest.
+- **F-03 and F-04 closed as method-bound, with the basis attributed.** Their text is a rule about method (partial remediation does not establish complete closure), not a defect with a patch, and the report now enforces that distinction. The basis is proposed here and marked as requiring this PR’s review; it is not presented as an R6 finding.
+- **Status cross-check list added (§9).** Five checks, run every time a status sentence is touched, together with this revision’s result. Two acceptance-matrix rows had drifted (AC-14, AC-05) and were corrected here.
+- **R1 tracking items from PR #286 discharged.** The bound-snapshot declaration now says it binds the original record at its revision timepoint and explicitly does not assert the historical state was permanently correct; the cross-check list is the second item.
+- No policy text, normative status, approval state or adoption state changes. v1.1 remains the only NORMATIVE text. F-02 stays PARTIAL on Requirement 2 only.
+
+## D7 v2.7 修订说明
+
+本修订堵上上一版的一个缺口：finding 登记表。同时消账 PR #286 的 R1 审查留下的两项跟踪项。
+
+- **新增 finding 登记表**：F-01、F-03、F-04、F-05 此前只存在于绑定快照 §6.3 中，在任何地方都没有受维护的状态。一项没有受维护状态的 finding，与被遗忘的 finding 无法区分。现十项全部登记状态与依据；与 §6.3 不一致时以本表为准。
+- **第三类状态**：§0 新增 `LIMITATION`，用于「成立、永久、不可行动」的陈述（F-05 为首例）。若无此类，边界要么永远保持 `OPEN`，要么被默认当作已关闭，两者都不诚实。
+- **F-03 与 F-04 以「方法性」为由关闭，且依据归属明确**：其文字是关于方法的规则（部分修复不等于完全关闭），非可补丁缺陷，而本报告现已强制该区分。该依据由本修订提出并标注待本 PR 审查确认，不冒充 R6 的 finding。
+- **新增状态交叉核对清单（§9）**：五项核对，每次涉及状态句即执行，并附本修订结果。已发现两行验收矩阵脱节（AC-14、AC-05）并在本次修正。
+- **PR #286 的 R1 跟踪项已消账**：绑定快照声明已改为「绑定原始记录在其修订时点」并明确不声称历史状态永久正确；交叉核对清单即第二项。
+- 不改变任何政策文本、规范状态、批准状态、采纳状态；v1.1 仍为唯一 NORMATIVE；F-02 仅因要求 2 而为 PARTIAL。
