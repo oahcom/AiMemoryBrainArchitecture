@@ -350,6 +350,7 @@ class R3Model:
         now: int,
         current_epoch: int,
         request_hash: str = "",
+        operation_id: str = "",
     ) -> None:
         """Revalidate authorization at the actual commit boundary.
 
@@ -390,8 +391,12 @@ class R3Model:
             raise ContractViolation("receipt PermissionEpoch mismatch")
         if cred.nonce != auth.nonce:
             raise ContractViolation("receipt nonce mismatch")
-        if request_hash and cred.request_hash and cred.request_hash != "default-hash" and cred.request_hash != request_hash:
+        if request_hash and cred.request_hash and cred.request_hash != request_hash:
             raise ContractViolation("receipt request_hash mismatch")
+        if operation_id and cred.operation and cred.operation != operation_id:
+            raise ContractViolation("receipt operation mismatch")
+        if cred.scope and "suppression:commit" not in cred.scope:
+            raise ContractViolation("receipt scope insufficient")
         if not (cred.not_before <= now < cred.expires_at):
             raise ContractViolation("receipt validity window expired")
 
@@ -615,7 +620,8 @@ class R3Model:
                 current_epoch = self.permission_epoch
 
             self._validate_authorization(auth, now, current_epoch,
-                                         request_hash=request_hash)
+                                         request_hash=request_hash,
+                                         operation_id=operation_id)
 
             key = idempotency_key or operation_id
             existing = self.operation_registry.get(key)

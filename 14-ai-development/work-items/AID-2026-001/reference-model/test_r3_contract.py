@@ -38,8 +38,8 @@ from r3_contract_model import (
 
 
 def receipt_credential(
-    operation_id="default-op",
-    request_hash="default-hash",
+    operation_id="",
+    request_hash="",
     nonce="auth-nonce-default",
     receipt_id=None,
     **overrides,
@@ -67,8 +67,8 @@ def receipt_credential(
 def auth(**kw):
     nonce = kw.pop("nonce", "auth-nonce-default")
     receipt_id = kw.pop("receipt_id", None)
-    operation_id = kw.pop("operation_id", "default-op")
-    request_hash = kw.pop("request_hash", "default-hash")
+    operation_id = kw.pop("operation_id", "")
+    request_hash = kw.pop("request_hash", "")
     receipt_overrides = {}
     for k in list(kw):
         if k in ("issuer", "audience", "purpose", "scope",
