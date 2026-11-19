@@ -15,8 +15,17 @@ Both are documentation defects, so a test over the checker alone cannot catch th
 returning. This module reads the example out of the shipped template and runs it, which
 is the only mechanism that ties the documented shape to the executable one.
 
-Each case asserts VERDICT and the specific REASON code; an exit code alone is not
-evidence (AI-STD-001 acceptance rule).
+Each case asserts VERDICT and the exact set of REASON codes; an exit code alone is not
+evidence (AI-STD-001 acceptance rule). Asserting the exact set rather than membership is
+deliberate: a case is only causal when the control passes and the treatment changes one
+field, so any second reason would mean the case is accusing the wrong thing.
+
+This module reads the template, so a legitimate change to the example (a new field, say)
+will make these cases fail until the fixture and the expectation are updated to match.
+That is the intended cost: the example is what adopters copy, so it is a contract, and a
+contract change should stop the build rather than pass silently. What must NOT happen in
+that situation is relaxing an assertion to get green again - if the example stops being
+executable, the fix belongs in the template or the checker.
 
 Run: python test_template_example_executable.py -v
 """
@@ -34,6 +43,7 @@ TEMPLATE = REPO / "14-ai-development" / "prompt-and-evidence-template.md"
 SECTION = "## 4.1 Evidence depth declaration"
 SUBJECT_PLACEHOLDER = 'subject_head: "<40-hex commit>"'
 BASE_PLACEHOLDER = 'base_head: "<40-hex ancestor commit>"'
+BUNDLE_PREFIX = "14-ai-development/work-items/"
 
 
 def load_checker():
@@ -42,6 +52,12 @@ def load_checker():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def reason_codes(result):
+    """The exact set of REASON codes the checker emitted."""
+    return {line.split("\t")[1] for line in result.stdout.splitlines()
+            if line.startswith("REASON\t")}
 
 
 def extract_example():
@@ -120,6 +136,14 @@ class TemplateExampleExecutableTests(unittest.TestCase):
 
     # ---- the example as printed must pass ----------------------------------
     def test_documented_example_passes_verbatim(self):
+        """The example executes as printed.
+
+        Known limit, measured rather than assumed: this case is self-consistent, not
+        correct. The fixture creates whatever the declaration names, so an example that
+        writes "design.md" also passes here - it just gets a design.md at the repository
+        root. That limit is why test_example_evidence_paths_are_root_relative_bundle_paths
+        states the expected path base independently of the template.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             root, head = self.materialise(tmp)
             result = self.run_declaration(root, self.fill_heads(self.example, head))
@@ -131,7 +155,14 @@ class TemplateExampleExecutableTests(unittest.TestCase):
                              "the example produced reasons:\n" + result.stdout)
 
     def test_example_keeps_evidence_paths_root_relative(self):
-        """A bundle-relative evidence path is the FU1 defect; it must still be blocked."""
+        """A bundle-relative evidence path is the FU1 defect; it must still be blocked.
+
+        The control for this case is the test above: the example passes verbatim, so every
+        other condition is already satisfied and the only thing this case changes is one
+        evidence path. That is why the reason set is asserted exactly rather than as a
+        membership test - a membership test would also pass if the flat path were blocked
+        for some unrelated reason that happened to emit the same code.
+        """
         with tempfile.TemporaryDirectory() as tmp:
             root, head = self.materialise(tmp)
             text = self.fill_heads(self.example, head)
@@ -141,19 +172,69 @@ class TemplateExampleExecutableTests(unittest.TestCase):
             self.assertNotEqual(flattened, text, "design_doc path did not occur as declared")
 
             result = self.run_declaration(root, flattened)
-            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-            self.assertIn("VERDICT\tBLOCKED", result.stdout)
-            self.assertIn("REASON\tCE_EVIDENCE_NOT_IN_SUBJECT", result.stdout,
-                          "resolving evidence paths against the declaration directory instead of "
-                          "the repository root is no longer rejected:\n" + result.stdout)
+            self.assertIn("VERDICT\tBLOCKED", result.stdout, result.stdout + result.stderr)
+            self.assertEqual(reason_codes(result), {"CE_EVIDENCE_NOT_IN_SUBJECT"},
+                             "resolving evidence paths against the declaration directory instead "
+                             "of the repository root must be the only reason:\n" + result.stdout)
+
+    def test_example_evidence_paths_are_root_relative_bundle_paths(self):
+        """The example must show the path base, not rely on a lucky layout.
+
+        This case exists because the verbatim case cannot catch the FU1 path defect on its
+        own: the fixture materialises whatever the declaration names, so an example writing
+        "design.md" also passes once the fixture drops a design.md at the repository root.
+        Self-consistency is not correctness. The expectation below is stated independently
+        of the template - every evidence path is written from the repository root into the
+        work item bundle - so a bare filename is caught here even though it would execute.
+        """
+        decl = self.checker.parse_declaration(self.example)
+        values = list(decl["evidence"].values())
+        if decl.get("classification_record"):
+            values.append(decl["classification_record"])
+        self.assertTrue(values, "the example declares no evidence paths")
+        for value in values:
+            self.assertTrue(value.startswith(BUNDLE_PREFIX),
+                            "the example declares %r, which does not show that evidence paths "
+                            "are written from the repository root; a bare filename only "
+                            "executes when the file happens to sit at the root" % value)
+
+    def level3_variant(self):
+        """The example reshaped so Level 3 is legal, leaving one field to isolate.
+
+        FEATURE cannot be Level 3 (CE_LEVEL_CLASS_CONFLICT) and R2 to Level 3 is a downgrade
+        that needs its own justification, so a control built on the example as printed would
+        fail for reasons unrelated to review_note. DOC_EDITORIAL at R1 reaches Level 3 with no
+        extra fields, which is what makes the pair below a controlled comparison.
+        """
+        text = self.example.replace("evidence_level: 2", "evidence_level: 3", 1)
+        text = text.replace('change_class: "FEATURE"', 'change_class: "DOC_EDITORIAL"', 1)
+        text = text.replace('review_level: "R2"', 'review_level: "R1"', 1)
+        self.assertIn("evidence_level: 3", text)
+        self.assertIn('change_class: "DOC_EDITORIAL"', text)
+        self.assertIn('review_level: "R1"', text)
+        return text
+
+    def test_level3_control_passes(self):
+        """Control: a Level 3 declaration that differs from the treatment only in review_note.
+
+        Without this case the treatment below cannot be read as causal: BLOCKED at Level 3
+        could otherwise come from any other Level 3 condition, and the test would be
+        asserting a coincidence.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            root, head = self.materialise(tmp)
+            result = self.run_declaration(root, self.fill_heads(self.level3_variant(), head))
+            self.assertEqual(result.returncode, 0,
+                             "the Level 3 control does not pass, so the review_note case cannot "
+                             "isolate its cause:\n" + result.stdout + result.stderr)
+            self.assertIn("VERDICT\tPASS", result.stdout)
+            self.assertNotIn("REASON", result.stdout, result.stdout)
 
     def test_level3_review_note_must_still_be_a_path(self):
         """Level 3 verifies review_note, so free text there must be blocked, not accepted."""
         with tempfile.TemporaryDirectory() as tmp:
             root, head = self.materialise(tmp)
-            text = self.fill_heads(self.example, head)
-            self.assertIn("evidence_level: 2", text, "the example is expected to declare Level 2")
-            text = text.replace("evidence_level: 2", "evidence_level: 3", 1)
+            text = self.fill_heads(self.level3_variant(), head)
 
             decl = self.checker.parse_declaration(text)
             note = decl["evidence"]["review_note"]
@@ -166,9 +247,10 @@ class TemplateExampleExecutableTests(unittest.TestCase):
             result = self.run_declaration(root, with_text)
             self.assertIn("VERDICT\tBLOCKED", result.stdout,
                           "free text in review_note was accepted at Level 3:\n" + result.stdout)
-            self.assertIn("REASON\tCE_EVIDENCE_NOT_IN_SUBJECT", result.stdout,
-                          "review_note is documented as a path but is not verified as one:\n"
-                          + result.stdout)
+            self.assertEqual(reason_codes(result), {"CE_EVIDENCE_NOT_IN_SUBJECT"},
+                             "with the Level 3 control passing, review_note must be the only "
+                             "reason; anything else means the case is not isolating its "
+                             "cause:\n" + result.stdout)
 
 
 if __name__ == "__main__":
