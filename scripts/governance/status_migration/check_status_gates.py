@@ -5,7 +5,8 @@ from pathlib import Path
 import yaml
 
 PHASES={"INTAKE","READY","ACTIVE","VALIDATION","ACCEPTANCE","COMPLETE"}
-REQUIRED={"VERIFIED":"verified","REVIEWED":"independent_review","INTEGRATION_READY":"integration","ACCEPTED":"owner_acceptance","MERGED":"merge","CLOSED":"closeout"}
+ORDER=["verified","independent_review","integration","owner_acceptance","merge","closeout"]
+REQUIRED={"VERIFIED":1,"REVIEWED":2,"INTEGRATION_READY":3,"ACCEPTED":4,"MERGED":5,"CLOSED":6}
 def check(path):
  d=yaml.safe_load(Path(path).read_bytes())
  if not isinstance(d,dict): raise ValueError("manifest root must be a mapping")
@@ -15,7 +16,13 @@ def check(path):
  gates=life.get("gates",{})
  if not isinstance(gates,dict): raise ValueError("lifecycle.gates must be a mapping")
  token=str(d.get("status","")).strip().split()[0].upper()
- if token in REQUIRED and REQUIRED[token] not in gates: raise ValueError("missing independent gate record: "+REQUIRED[token])
+ count=REQUIRED.get(token,0)
+ for name in ORDER[:count]:
+  record=gates.get(name)
+  if not isinstance(record,dict) or record.get("status")!="PASS":
+   raise ValueError("gate not proven PASS: "+name)
+  if not record.get("evidence"):
+   raise ValueError("gate evidence reference missing: "+name)
  markers=life.get("markers",{})
  if not isinstance(markers,dict): raise ValueError("lifecycle.markers must be a mapping")
  for marker in ("BLOCKED","REJECTED"):
