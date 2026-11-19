@@ -2,9 +2,9 @@
 # Owner Ruling on Three Inter-Standard Conflicts / 三处上位规范冲突的 Owner 统一裁定
 
 - **Document ID:** AI-EXEC-UNIFICATION-RULING-001
-- **Version:** 1.1
+- **Version:** 1.2
 - **Status:** ADOPTED — binding Owner policy ruling
-- **Revision history:** v1.0 (2026-11-18, initial ruling RULING-01..03); v1.1 (2026-11-20) — RULING-01 content revised to SEVEN-SECTIONS-MAPPED at commit `4c38ae2` (PR #273, F-006) while the header still read v1.0; this version bump records that content revision in the header and adds the RULING-01 validity clause (revision point 1 of Issue #130 comment `7001104129`). RULING-02 and RULING-03 text unchanged.
+- **Revision history:** v1.0 (2026-11-18, initial ruling RULING-01..03); v1.1 (2026-11-20) — RULING-01 content revised to SEVEN-SECTIONS-MAPPED at commit `4c38ae2` (PR #273, F-006) while the header still read v1.0; this version bump records that content revision in the header and adds the RULING-01 validity clause (revision point 1 of Issue #130 comment `7001104129`). RULING-02 and RULING-03 text unchanged.; v1.2 (2026-11-20) — RULING-02 gains an explicit namespace disambiguation clause (progress labels such as PARTIAL belong to the report-label namespace and are never lifecycle states), closing tracking item F-RULING-V11-PARTIAL-NS; RULING-01 and RULING-03 text unchanged.
 - **Ruling authority:** Project Owner, exercising the owner-directed authority expressly delegated for Issue #218
 - **Ruling date:** 2026-11-18
 - **Tracking:** Issue #218 · AID-2026-003 · AID-2026-002
@@ -67,6 +67,8 @@ AI-EXEC-002 中 R0/R1 文档会话的六项重点子集和代码会话的七项�
 
 Mapping: a historical `TESTED` entry means checks were executed, not that the verification gate necessarily passed. It maps to `VERIFIED` only when all applicable verification requirements have evidence tied to the exact relevant commit and the required outcome is satisfied. Otherwise retain the historical `TESTED` wording as evidence metadata and report the actual lifecycle state. `NOT RUN` remains explicit and can never be treated as PASS or VERIFIED.
 
+**Namespace disambiguation.** Progress-report labels — including `PARTIAL`, `PARTIALLY SATISFIED`, and percentage or checklist-completion wording — belong to the report-label namespace only. They are never lifecycle states and MUST NOT appear in state fields. A session or work item is always in exactly one of the eight states above (or, outside this vocabulary's scope, in a state explicitly defined by another adopted standard). Where a report says PARTIAL, the corresponding state field must still carry one of the eight canonical states.
+
 **Reason.** The eight-state session contract distinguishes implementation, verification, review, acceptance and merge, and preserves the non-execution state `NOT RUN`. Treating `TESTED` as a parallel lifecycle state would create two names for one stage and lose the explicit non-run state. The execution rules already use VERIFIED in their Stage 5 table and session workflow; this ruling aligns the vocabulary.
 
 **Boundary.** Applies to new status reporting and new lifecycle transitions after the effective date. Existing records are not rewritten; historical TESTED is interpreted using the mapping above. Test-result labels such as PASS/FAIL/NOT RUN remain evidence outcomes, not lifecycle states.
@@ -78,6 +80,8 @@ Mapping: a historical `TESTED` entry means checks were executed, not that the ve
 **裁定——UNIFY-TO-VERIFIED。** CHATGPT-GLOBAL-001 会话流程第 7 条的八态词表是唯一规范化的会话/工作项生命周期词表：`PROPOSED / IMPLEMENTED / VERIFIED / REVIEWED / ACCEPTED / MERGED / BLOCKED / NOT RUN`。验证阶段唯一生命周期状态为 `VERIFIED`。`TESTED` 不再是生命周期状态，只能作为已执行测试证据的描述文字。
 
 映射规则：历史 `TESTED` 表示曾执行检查，不代表验证门禁必然通过。只有所有适用验证要求均有绑定准确提交的证据且满足要求结果时，才可映射为 `VERIFIED`。否则保留历史 `TESTED` 作为证据元数据，并报告实际生命周期状态。`NOT RUN` 必须明确保留，永远不得视为 PASS 或 VERIFIED。
+
+**命名空间消歧。** 进度报告标签——包括 `PARTIAL`、`PARTIALLY SATISFIED` 以及百分比或清单完成度措辞——仅属于报告标签命名空间。它们永远不是生命周期状态，禁止出现在状态字段中。会话或工作项始终处于上述八态之一（或在本词表范围外、由其他已采纳规范明确定义的状态）。报告出现 PARTIAL 时，对应状态字段仍必须填写八个规范状态之一。
 
 **理由。** 八态会话契约区分实现、验证、审查、验收和合并，并保留明确的未执行状态 `NOT RUN`。将 `TESTED` 作为并行生命周期状态会为同一阶段制造两个名称，并丢失未运行状态。执行细则的 Stage 5 表和会话流程已经使用 VERIFIED；本裁定使词表统一。
 
