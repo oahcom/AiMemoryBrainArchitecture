@@ -349,3 +349,37 @@ Current Owner-branch readbacks show the following records:
 5. **B:** retain the current typed semantic baseline; no change to BIH36-JD-01..17 is justified by this evidence batch.
 
 No Owner branch was merged; main was not changed; no external governance approval, consumer approval on another Owner's behalf, production deployment, Runtime Forget E2E closure, Global Forget completion or physical erasure is claimed.
+
+
+## 10. Post-reconciliation verification — 2026-11-19
+
+This section supersedes the pre-I/H-update branch heads and artifact pins in §9. The current live refs were re-fetched after the I and H source-pin corrections.
+
+| Owner | Current branch HEAD |
+|---|---|
+| A | 8d2d59fff5ebc6077adc470e91d5d8b9684b3b0e |
+| B | 141df436bed0e244a7155a79810ac8e692b53b65 (pre-§10 ledger append) |
+| C | 3e7640cbe8a3d5c1dc95b6a0b887a1c41f62916c |
+| D | b525e1f8fee2471a131e4a38efda99804045e424 |
+| E | ee098e14747d9915de5b3efb63a3a8dd77f670ed |
+| F | 1908ce4d233b20f7cafd00cb679affd01bd15174 |
+| G | 0f77ffbe956c5f93df295c436fcb0a750629d595 |
+| H | 36703686e3b40a07322a4d7855554b18b60237aa |
+| I | 8abddf814467b271344a9814613a6b7ca6a446c6 |
+| Storage | 268af57b099209b33835b663596e87d21bb9c22b |
+
+### 10.1 Verified B/I/H documentation commits
+
+| Owner | Commit | Updated artifact Blob | Verified result |
+|---|---|---|---|
+| B | 141df436bed0e244a7155a79810ac8e692b53b65 | 0656817f8667b4902e7ff2d16fdacfcd15c60894 | §9 evidence/gate refresh committed; branch HEAD and file Blob re-fetched |
+| I | 8abddf814467b271344a9814613a6b7ca6a446c6 | 22621fd6a9b26995b55288fee7e205f3a1ae7df5 | Register §16 corrects the §11.1/§14 conflict; current disposition is design-acceptance evidence recorded with exceptions, A-G6 pending |
+| H | 36703686e3b40a07322a4d7855554b18b60237aa | 21d799fbecc20eea02dc9f05863688e38165f04b | H BIH acceptance source pins refreshed to current H binding Blob e7ca5ce... and current H conformance-status Blob 8afb914...; acceptance scope remains BIH36-JD-01..17 only |
+
+Each commit modifies exactly one documentation artifact on its respective Owner branch. No code, test, schema or runtime implementation changed; no test rerun is required for these documentation-only commits. The I 35/35 reference-model PASS and H 47/47 structural schema/parser PASS remain bounded evidence exactly as recorded in §9.4.
+
+The current I register no longer treats all BIH consumer acceptance as OPEN: §16 recognizes the published C/D/E/F/G/Storage/H design-level records, while retaining A-G6 reconciliation and exact package-pin questions. The current H acceptance artifact now pins the current H source and conformance-status Blobs. These corrections do not change A's plan, G0–G10 authority, or final acceptance status.
+
+The B ledger itself is self-referential: §10 records the B HEAD immediately before this append. Re-fetch the live B branch ref for the post-commit HEAD. A remains at 8d2d59fff5ebc6077adc470e91d5d8b9684b3b0e; no other Owner branch changed during this verification.
+
+No branch merge, main update, external governance approval, G6/G8/G10 PASS, production readiness, Runtime Forget E2E closure, Global Forget completion or physical-erasure claim is made.
