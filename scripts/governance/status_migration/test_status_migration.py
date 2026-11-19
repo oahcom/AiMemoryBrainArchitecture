@@ -39,6 +39,23 @@ class StatusMigrationTests(unittest.TestCase):
                 path.with_name(path.name + ".pre-status-migration.bak").exists()
             )
 
+    def test_blocked_and_rejected_markers_are_preserved_orthogonally(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "manifest.yaml"
+            markers = {
+                "blocked": {"reason": "dependency", "owner": "Owner A"},
+                "rejected": {"reason": "superseded proposal", "owner": "Owner B"},
+            }
+            path.write_text(
+                yaml.safe_dump({"status": "IN_PROGRESS", **markers}, sort_keys=False),
+                encoding="utf-8",
+            )
+            run(path, apply=True)
+            migrated = yaml.safe_load(path.read_bytes())
+            self.assertEqual(migrated["status"], "IN_PROGRESS")
+            self.assertEqual(migrated["lifecycle"]["phase"], "ACTIVE")
+            self.assertEqual(migrated["lifecycle"]["markers"], markers)
+
     def test_unknown_status_fails_closed(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "manifest.yaml"
