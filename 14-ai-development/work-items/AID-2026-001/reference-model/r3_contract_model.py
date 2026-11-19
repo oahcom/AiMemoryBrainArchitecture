@@ -652,6 +652,32 @@ class R3Model:
 
                 original = existing["commit"]
 
+                # F-D-NEW-02: a retry may only reuse a commit that was made
+                # for the same operation under the same idempotency key.
+                # request_hash alone is not an identity: two distinct
+                # operations can hash identically, and a credential bound to
+                # operation-B must never retrieve operation-A's commit.
+                if original.idempotency_identity.operation_id != operation_id:
+                    raise ContractViolation(
+                        "idempotency key bound to a different operation"
+                    )
+
+                if (
+                    original.idempotency_identity.idempotency_key
+                    != key
+                ):
+                    raise ContractViolation(
+                        "idempotency key mismatch on retry"
+                    )
+
+                if (
+                    original.idempotency_identity.request_hash
+                    != request_hash
+                ):
+                    raise ContractViolation(
+                        "idempotency request hash mismatch on retry"
+                    )
+
                 if self.atomic_commit != original:
                     raise ContractViolation(
                         "operation registry is not backed by authoritative "

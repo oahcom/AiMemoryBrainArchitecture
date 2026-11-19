@@ -1223,6 +1223,17 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
 
         self.assertIs(first, second)
         self.assertEqual(m.atomic_commit, first)
+        # F-D-NEW-02 / Owner D: the reference carries the same receipt
+        # credential as the commit's authorization; assert the derivation
+        # explicitly rather than relying on the constructor.
+        self.assertEqual(
+            first.authorization_reference.receipt_id,
+            first.authorization_reference.receipt.receipt_id,
+        )
+        self.assertEqual(
+            first.authorization_reference.nonce,
+            first.authorization_reference.receipt.nonce,
+        )
         self.assertEqual(m.fence_generation, original_fence)
         self.assertEqual(m.inventory_revision, original_revision)
         self.assertEqual(m.commit_counter, original_counter)
@@ -1575,6 +1586,11 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
 
         before_commit = fresh.atomic_commit
         before_fence = fresh.fence_generation
+        before_counter = fresh.commit_counter
+        before_outbox = dict(fresh.outbox)
+        before_audit = list(fresh.audit)
+        before_retry = list(fresh.retry_audit)
+        before_tuple = fresh.atomic_tuple
 
         with self.assertRaises(ContractViolation):
             fresh.commit_suppression(
@@ -1589,6 +1605,12 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
 
         self.assertIs(fresh.atomic_commit, before_commit)
         self.assertEqual(fresh.fence_generation, before_fence)
+        self.assertEqual(fresh.commit_counter, before_counter)
+        self.assertEqual(fresh.outbox, before_outbox)
+        self.assertEqual(fresh.audit, before_audit)
+        self.assertEqual(fresh.retry_audit, before_retry)
+        self.assertEqual(fresh.atomic_tuple, before_tuple)
+        self.assertNotIn("foi-cleanup-new-nonce", fresh.nonce_registry)
 
     def test_FSTOR_11_receipt_credential_verification_and_retry_binding(self):
         """F-OI-04: reject forged/mismatched credentials and bind valid retry."""
@@ -1860,6 +1882,154 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
                 scope=frozenset(),
             ),
         )
+
+    def test_FSTOR_14_retry_cannot_cross_operation_identity(self):
+        """F-D-NEW-02: an idempotency key is not shareable across operations.
+
+        A retry must only reuse a commit made for the same operation under
+        the same idempotency key. Reusing the key with a different
+        operation, even with an identically hashed request and a credential
+        correctly bound to that different operation, must be rejected with
+        no side effects.
+        """
+        operation_a = "foi-op-a"
+        operation_b = "foi-op-b"
+        idempotency_key = "foi-shared-key"
+        request_hash = "foi-shared-hash"
+
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m.phase = Phase.AUTHORIZED
+
+        first = m.commit_suppression(
+            operation_a,
+            "foi-op-a-attempt-1",
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce="foi-op-a-nonce", operation_id=operation_a,
+                      request_hash=request_hash),
+        )
+        self.assertIsNotNone(first)
+        self.assertEqual(
+            first.idempotency_identity.operation_id, operation_a,
+        )
+
+        baseline = (
+            m.fence_generation,
+            m.commit_counter,
+            dict(m.outbox),
+            m.retry_audit,
+            m.atomic_commit,
+            m.lifecycle,
+        )
+
+        # Same key and hash, different operation, credential correctly
+        # bound to that different operation.
+        m.phase = Phase.AUTHORIZED
+        with self.assertRaises(ContractViolation) as ctx:
+            m.commit_suppression(
+                operation_b,
+                "foi-op-b-attempt-1",
+                idempotency_key,
+                request_hash,
+                auth=auth(nonce="foi-op-b-nonce", operation_id=operation_b,
+                          request_hash=request_hash),
+            )
+        self.assertIn("different operation", str(ctx.exception))
+
+        self.assertEqual(m.fence_generation, baseline[0])
+        self.assertEqual(m.commit_counter, baseline[1])
+        self.assertEqual(m.outbox, baseline[2])
+        self.assertEqual(m.retry_audit, baseline[3])
+        self.assertIs(m.atomic_commit, baseline[4])
+        self.assertEqual(m.lifecycle, baseline[5])
+
+        # No nonce/receipt was consumed by the rejected cross-operation try.
+        self.assertNotIn("foi-op-b-nonce", m.nonce_registry)
+        self.assertNotIn(
+            "foi-op-b-nonce", m._derive_receipt_registry()
+        )
+
+        # The legitimate retry for operation-A still works afterwards.
+        m.phase = Phase.AUTHORIZED
+        reused = m.commit_suppression(
+            operation_a,
+            "foi-op-a-attempt-2",
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce="foi-op-a-retry-nonce",
+                      operation_id=operation_a, request_hash=request_hash),
+        )
+        self.assertIs(reused, first)
+        self.assertEqual(len(m.retry_audit), 1)
+        self.assertEqual(
+            m.retry_audit[0]["operation_id"], operation_a,
+        )
+
+    def test_FSTOR_15_retry_reaches_completed_phase(self):
+        """F-D-NEW-01: COMPLETED is also a legitimate retry phase.
+
+        FSTOR_10 covers CLEANUP. This covers the terminal workflow phase so
+        the phase whitelist split is proven for both non-committed phases
+        that follow a successful commit.
+        """
+        operation_id = "foi-completed-op"
+        idempotency_key = "foi-completed-key"
+        request_hash = "foi-completed-hash"
+
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m.phase = Phase.AUTHORIZED
+        first = m.commit_suppression(
+            operation_id,
+            "foi-completed-attempt-1",
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce="foi-completed-nonce", operation_id=operation_id,
+                      request_hash=request_hash),
+        )
+        self.assertIsNotNone(first)
+
+        fence = m.fence_generation
+        counter = m.commit_counter
+        outbox = dict(m.outbox)
+
+        m.phase = Phase.COMPLETED
+        reused = m.commit_suppression(
+            operation_id,
+            "foi-completed-attempt-2",
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce="foi-completed-retry-nonce",
+                      operation_id=operation_id, request_hash=request_hash),
+        )
+
+        self.assertIs(reused, first)
+        self.assertEqual(m.phase, Phase.COMPLETED)
+        self.assertEqual(m.fence_generation, fence)
+        self.assertEqual(m.commit_counter, counter)
+        self.assertEqual(m.outbox, outbox)
+        self.assertEqual(
+            sum(x == "SUPPRESSION_COMMITTED" for x in m.audit), 1,
+        )
+        self.assertEqual(len(m.retry_audit), 1)
+
+        # A first commit in COMPLETED is still refused.
+        fresh = R3Model("fresh", receipt_verifier=TrustAllReceiptVerifier())
+        fresh.phase = Phase.COMPLETED
+        with self.assertRaises(ContractViolation) as ctx:
+            fresh.commit_suppression(
+                "foi-completed-new-op",
+                "foi-completed-new-attempt",
+                "foi-completed-new-key",
+                "foi-completed-new-hash",
+                auth=auth(nonce="foi-completed-new-nonce",
+                          operation_id="foi-completed-new-op",
+                          request_hash="foi-completed-new-hash"),
+            )
+        self.assertIn("phase required", str(ctx.exception))
+        self.assertIsNone(fresh.atomic_commit)
+        self.assertEqual(fresh.fence_generation, 0)
+        self.assertEqual(fresh.outbox, {})
+        self.assertEqual(fresh.retry_audit, [])
 
 
 if __name__ == "__main__":
