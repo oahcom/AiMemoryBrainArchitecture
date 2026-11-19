@@ -2,7 +2,7 @@
 
 - Owner boundary: B/I/H delegated joint technical coordination only
 - Branch: `session-b-domain-model-phase3`
-- Snapshot date: 2026-11-17
+- Snapshot date: 2026-11-19 (latest refresh in §9; earlier sections are historical snapshots)
 - A acceptance authority: `reviews/integration/phase-3.6-final-closure-plan.md`, Blob `0adca0f54ff6ee1e344949cb48334ff475fad247`
 - A tracking ledger read: `reviews/integration/phase-3.6-closure-tracking.md`, Blob `e4f45cbee7c8f76de4a0ac1b5939db54a8c7cf7f`
 - A final acceptance read: `reviews/integration/phase-3.6-final-architecture-acceptance.md`, Blob `16f86859645447f3f4397c5c89c6013c3cce92b5`
@@ -224,3 +224,128 @@ This section supersedes §7.6's earlier description of component `PolicyExceptio
 I reference-model code is now more fail-closed, but it remains a logical model. No InventorySeal, external approval, I36 execution or Global Forget completion is evidenced. G2/G5 remain BLOCKED; G7 remains NOT RUN.
 
 A/C/D/E/F/G/H/Storage/P and the CI capability branch did not change after §7.1. I advanced from `c269208d490dec3c28384138241ec8caa8a6f6d8` to `224e4734c8d6a390bdab596af635b2a57c29704c` as recorded above. B is self-referential because each evidence-ledger update advances its own branch: §7.1 records the pre-first-ledger B HEAD, §8 records the immediate pre-follow-up B HEAD, and this correction commit advances B again. Do not treat a B SHA copied from this file as its post-commit HEAD; re-read the live branch ref for that value. H remains `654d4449fd491cdda37d9761fe63a3efca55dc9d`; A remains `8d2d59fff5ebc6077adc470e91d5d8b9684b3b0e`.
+
+
+## 9. Run 3 — 2026-11-19 live branch/source refresh, exact CI readback and G0–G10 reconciliation
+
+This section supersedes prior current-state claims where they conflict with the exact live readbacks below. It is a B/I/H-owned coordination record only. It does not alter A's gate decisions, I governance, any consumer Owner decision, or another Owner's authoritative files.
+
+### 9.1 Current branch and A-authority snapshot
+
+All ten independent Owner branches were re-fetched from live refs. The B row is the pre-ledger HEAD; this append-only update advances B after the evidence is recorded. Main remains non-authoritative.
+
+| Owner | Branch | Pre-update HEAD |
+|---|---|---|
+| A | session-a-integration-2026-11-16 | 8d2d59fff5ebc6077adc470e91d5d8b9684b3b0e |
+| B | session-b-domain-model-phase3 | e8a708faa50f7e0ab3f53b11d2f4f2003feced33 |
+| C | session-c-agent-integration-2026-11-16 | 3e7640cbe8a3d5c1dc95b6a0b887a1c41f62916c |
+| D | session-d-memory-brain-2026-11-16 | b525e1f8fee2471a131e4a38efda99804045e424 |
+| E | session-e-memory-compiler-2026-11-16 | ee098e14747d9915de5b3efb63a3a8dd77f670ed |
+| F | session-f-memory-runtime | 1908ce4d233b20f7cafd00cb679affd01bd15174 |
+| G | session-g-memory-context | 0f77ffbe956c5f93df295c436fcb0a750629d595 |
+| H | session-h-bmcp-protocol | 654d4449fd491cdda37d9761fe63a3efca55dc9d |
+| I | session-i-security-governance-2026-11-16 | 32781b0e728183df0d3e83420f7787abf3744c1c |
+| Storage | session-storage-consistency-forget-atomicity-2026-11-16 | 268af57b099209b33835b663596e87d21bb9c22b |
+
+Auxiliary branches also re-discovered (not substituted for the D/G Owner branches): D publication branches session-d-publication-i-authz-scope-lifecycle-2026-11-18 at d3769a139f9abb56d5ed4f5a90da5a9a863c464b, session-d-publication-i-full-authz-tuple-2026-11-18 at 60079cd6edb2c76a55adaed8f7cc207489d85e2f, and session-d-publication-i-permission-epoch-race-2026-11-18 at 53caf138886ed7325946e5cd8d4307108ab231d7; G recovery branch recovery/session-g-context-publication-2026-11-18 at 4ed91dc3e049767f06f9cc2684620a30a191217a. P remains 0559a03ccd4f9640ddb7d4af8e37a059930b55af; CI capability branch remains b58d7c5a87c5194384a5d06bed62cb63b746662c; main is 7524a3dbba469298b7277c0478c1e65b56dd184b and is not an Owner acceptance source.
+
+A authority artifacts were re-read from A's Owner branch:
+- Closure plan: reviews/integration/phase-3.6-final-closure-plan.md, Blob 0adca0f54ff6ee1e344949cb48334ff475fad247.
+- Closure tracking/approval ledger: reviews/integration/phase-3.6-closure-tracking.md, Blob e4f45cbee7c8f76de4a0ac1b5939db54a8c7cf7f, 1,731 lines, ending at §13.43.
+- Final acceptance: reviews/integration/phase-3.6-final-architecture-acceptance.md, Blob 16f86859645447f3f4397c5c89c6013c3cce92b5: **NOT ACCEPTED — ARCHITECTURE BASELINE FREEZE NOT AUTHORIZED**.
+- BIH package: Blob a45ae90b318a79bf009d14f4d917611881e9e214.
+- CGH-APPLIED-1.1 package: Blob 4961ffefc0f9920efb8425a9b2a7af42d8f64819; owner matrix: Blob ee35d3b39cb1fddd1feee0e0504b77e73e376893.
+
+A's §5 gate table still labels G0 PASS, while §13 says G0 is not PASS until the complete artifact inventory and all gate-input Blob SHAs are reconciled after final changes. The tracking ledger remains stale against the live branch snapshot above. A must resolve its own §5/§13 wording and refresh every required gate-input artifact before final closure. A's §10 also says F's explicit BIH consumer acceptance remains outstanding; the current F artifact below contains an explicit Issue #6 BIH acceptance, so that statement requires A readback/reconciliation. The C/G/H Applied-package acceptance gap is separate and remains a G8 blocker.
+
+### 9.2 Current B/I/H source artifacts
+
+**B**
+- Joint technical baseline: 02-domain-model/phase-3.6-typed-identity-trust-closure.md, Blob 0a6b78a842e550b58533b797cdfcd2d954ed6826.
+- B formal ActorRef/ScopeRef/EnvironmentRef confirmation: 02-domain-model/phase-3.6-b-owner-formal-actor-scope-environment-type-mapping-confirmation.md, Blob 3a1e77889cd9a90cd5822d9f0cb3437880868706.
+- No B executable domain-model validator or B test harness was found on the current B Owner tree.
+
+**I**
+- Joint policy baseline: 09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md, Blob 0cbf6bb7480db873790c454817593a9b1c5548ba.
+- Formal I PermissionEpoch/authorization technical confirmation: 09-security-governance/phase-3.6-permission-epoch-and-authorization-formal-confirmation.md, Blob bae6a24fe3a374bc816993979a8fa9af52517dea. This is an I Owner technical decision, not external governance approval.
+- Current governance/consumer register: 09-security-governance/phase-3.6-governance-approval-and-consumer-acceptance-register.md, Blob 49132b30f85f9b82d49ff852c63506850dd5f950.
+- Current logical reference model/test/workflow: model Blob 0aec1ef731e205475c6cb5f9e1283974b25c73ac; test Blob 385da3dcd4c6ee160ac383a5c31919a03c532df8; workflow Blob 2c16ef5381dd271789912e9b1c1e5c12941d2826.
+
+**H**
+- Current BIH protocol-binding source: 08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md, Blob e7ca5ce4ece5d8fd77fe0760e49a85afa0133248.
+- H BIH consumer acceptance: Blob ccbac2d30234df9b910565a7326d100d11a6494e.
+- Current Storage v3 prepared-proof wire review: Blob 942a21177d57fef608136fb17019e91c4250d7f1.
+- H Applied ACK 1.1.0 schema: Blob a8a945cc3623c2907003b93625e3c79742150944 (five JF-10 variants); 1.1.1 prepared-GID schema: Blob c0bbfc7611a8d88a39cee209831db32b62601fde; separate Storage prepared-proof schema: Blob 6327d9d387bdc0d6610aba08ff3e51ca9da17f5d.
+- H BIH acceptance Blob ccbac2d... still cites the older H protocol-binding source Blob 9845c97ac43d7888732afafe12e28850ec02add8; the current H source is e7ca5ce.... H should publish an exact-current-source reaffirmation/pin update. No semantic equivalence is assumed from a stale pin.
+
+### 9.3 BIH consumer evidence reconciliation — no gate promotion by inference
+
+Current Owner-branch readbacks show the following records:
+
+| Consumer | Current artifact Blob | Current disposition / limitation |
+|---|---|---|
+| C | fd2f47ba6c89bb270e9f2bec956873cb7ae3592b | ACCEPT WITH ENUMERATED EXCEPTIONS; explicitly pins A BIH package a45ae90... |
+| D | 184423d2d8191a12f2d4a869bc63f5e7fafaf96a | DESIGN-LEVEL ACCEPTANCE RECORDED; detailed field mapping/negative behavior, but its header cites B/H/I sources rather than the exact A package Blob |
+| E | 6f4100618695fcf971560fb784f7887a72798c96 | DESIGN-LEVEL ACCEPTANCE RECORDED; detailed ingress/publication mapping/negative behavior, but its header cites B/H/I sources rather than the exact A package Blob |
+| F | ce59252dbbdc5d10d016704797e9ba12d5a941bd | ACCEPT WITH ENUMERATED EXCEPTIONS; explicitly pins A BIH package a45ae90... |
+| G | aa3afa73d8a76cc6f025839c52bfbff6a983046a | ACCEPT WITH ENUMERATED EXCEPTIONS; explicitly pins A BIH package a45ae90... |
+| Storage | ec8e49d0d11c72d37ad0c291611a96a1122ba6f5 | DESIGN-LEVEL ACCEPTANCE RECORDED; detailed durable-visibility mapping, but its header cites B/H/I sources rather than the exact A package Blob |
+| H | ccbac2d30234df9b910565a7326d100d11a6494e | DELEGATED DESIGN-LEVEL ACCEPTANCE RECORDED; its H source pin is stale as noted in §9.2 |
+
+**G6 register inconsistency — G6-REG-01 (coordination discrepancy, not a new BIH decision):** I register §11.1 says the C/D/E/F/G/Storage design-consumer acceptance subrequirement is COMPLETE and records H's owner-side acceptance; later §14 says C/D/E/F/G/H/Storage are all OPEN with no explicit BIH acceptance. The current C/D/E/F/G/Storage/H Owner artifacts above are present and were fetched from their named branches. A's plan §10 separately says F acceptance is outstanding, despite current F Blob ce592... containing an explicit Issue #6 BIH acceptance against A package a45ae90.... These statements cannot all be current simultaneously. I must reconcile its own §4/§11.1/§14 register language; A must independently read the exact Owner artifacts, determine whether D/E/Storage need exact A-package pin amendments, and update A's G6 state. Until A does so, **A-G6 remains BLOCKED**; no G6 PASS is inferred by B/I/H.
+
+### 9.4 Executable harness and verification readback
+
+**I logical inventory reference model — PASS, bounded scope**
+- Exact I branch head: 32781b0e728183df0d3e83420f7787abf3744c1c.
+- GitHub Actions run 44291721899, job 134758326901, SUCCESS. The job checked out PR merge ref b4334994affe5ca5fea5e564a6cf1b153137420b; the model and test Blobs at that tested merge ref were re-fetched and match the current I branch exactly (0aec1ef... / 385da3d...).
+- Environment: Ubuntu 26.04.1, CPython 3.12.16; standard-library harness.
+- Commands: python -m py_compile 09-security-governance/tests/global_forget_model.py 09-security-governance/tests/test_global_forget_model.py; then cd 09-security-governance/tests && python -m unittest discover -v.
+- Result: 35 tests, all PASS. The run log includes empty/whitespace-only rejection for InventorySeal ID/digest/evidence refs, retained component proof checks, and component PolicyException fail-closed behavior.
+- Ceiling: I-owned logical reference-model PASS only. Not I36, a real InventorySeal/ProducerDomainInventoryEpoch, external governance approval, production implementation, Global Forget completion or physical erasure.
+
+**H structural schema/parser suite — PASS, bounded scope**
+- Run 44000078669, job 133761649293, tested commit d26a40e2483e32a6afb1e8f9ccd456e8ae3c815c, SUCCESS.
+- Environment: CPython 3.12.16 and pinned jsonschema==4.23.0.
+- Commands: python -m py_compile 08-bmcp-protocol/runtime_reference/strict_json_parser.py tests/schema/test_jf10_bridge_schema.py tests/schema/test_jf10_bridge_schema_1_1_1.py tests/schema/test_strict_json_parser.py tests/schema/test_storage_prepared_participant_proof_schema.py; then python -m unittest discover -s tests/schema -v.
+- Result: 47 tests, all PASS. At current H HEAD 654d444..., the workflow, parser, four test files and all three schemas exercised by the suite were re-fetched; each Blob SHA exactly matches the tested commit.
+- Ceiling: structural schema/parser candidate evidence only. Not H36, I36, CFG-01..20, PI-01..08, signature verification, canonical-byte interoperability, production transport or owner-authority integration.
+
+**Implementation inventory**
+- Current repository README on main is Blob 2df8396f89886eb1d24b04f1c946a9bcbb2c88e1 and still states “Architecture definition” / “Implementation status: Not started by design”. Main is not an Owner authority; this is repository-scope evidence only.
+- B has no executable model/test harness. I has the logical reference model above. H has schema/parser and later Phase 3.8 reference/conformance harnesses, but H36 remains NOT RUN.
+- D's current Owner tree contains a Phase 3.9 Forget reference-model test, not a Phase 3.6 D36 implementation/suite. E's current Owner tree contains no code/test/workflow harness. Storage has a JF-10 logical reference model, test file and PostgreSQL capability/PITR workflows/probes, but these are not the designated production implementation or D/E integration.
+- No designated runtime implementation repository, engineering owner, build SHA or production deployment was identified. A's G3-IMPL-REPO-01 remains OPEN. D36/E36 and integrated JF-10 execution remain NOT RUN. Storage's A-tracker evidence remains Gate A PARTIAL / OPEN, Gate B/C BLOCKED; deep-PITR run 43953479942 failed at rollback target 0/7000000 because required WAL segment 000000010000000000000007 was unavailable. No production readiness is claimed.
+
+### 9.5 Independent B/I/H adversarial pass
+
+- **B:** current formal mapping Blob 3a1e778... preserves ActorRef as immutable verifier-produced operation attribution; ScopeRef ownership/applicability roles remain distinct; EnvironmentRef is not ScopeRef or policy domain. No evidence contradicts BIH36-JD-01..17. No type coercion, legacy string cast, or cross-Scope/Environment grant is authorized.
+- **I:** current model rejects empty and whitespace-only InventorySeal/evidence references; component Confirmed/NotApplicable require retained proof/verifier; component PolicyException is rejected absent a governance workflow. The 35-test PASS supports only this reference model. I36-GOV-01..10 and I36 execution remain blocked/not run.
+- **H:** current wire review confirms Storage §14 tuple alignment at current Storage source level, but H 1.1.0 still has five variants against A's eight CGH evidence families. H 1.2.17 adds partial recovery/provider/owner-gate coverage but remains a separate, unpinned successor; the Storage proof schema is a separate family. H 47/47 structural PASS does not close H36 or G8/G9.
+- No new BIH36-JD-18 is created. BIH36-JD-01..17 remain preserved. Fact/Claim ADR-001 remains independently ADR-BLOCKED.
+
+### 9.6 A G0–G10 evidence disposition — A states unchanged pending A reconciliation
+
+| Gate | Current disposition | Exact evidence / blocker | Responsible owner and next action |
+|---|---|---|---|
+| G0 Baseline Integrity | HEADS REFRESHED / FULL INVENTORY NOT RECONCILED | A plan 0adca0... §13; A tracker e4f45... stale against current branches and gate-input Blobs; §5/§13 wording conflict | A re-read every gate-input artifact, update its own registry/ledger and resolve the G0 contradiction |
+| G1 DE-S Design Closure | PASS per A plan | No new DE-S design contradiction found in this B/I/H pass | Preserve closed design; no redesign without new evidence |
+| G2 DE-S External Dependency Approval | BLOCKED | I36-GOV-01..10; Environment Registry Authority; InventorySeal/ProducerDomainInventoryEpoch; AuthorizationCommitPermit/revocation serialization; accountable Storage deployment selection/approver absent | I + independent governance authorities + Storage/A to supply effective decisions and named authority |
+| G3 DE-S Implementation Verification | BLOCKED | G3-IMPL-REPO-01; no designated implementation repo/owner/build; D36/E36 and integrated JF-10 not run | A identify implementation repo/owner; D/E/Storage implement; Verification Owner execute exact suites |
+| G4 BIH Technical Agreement | CONDITIONAL PASS | BIH36-JD-01..17 preserved; B mapping 3a1e...; I technical confirmation bae6...; H current binding e7ca...; H acceptance source pin needs refresh | B/I/H preserve semantics; H reaffirm current source pin; A refresh exact package inventory |
+| G5 BIH Governance Approval | BLOCKED | I36-GOV-01..10 have no effective external approvals; technical confirmations are not governance approvals | I route exact policy hashes to named authorized Identity/Security/Privacy/Legal/Environment approvers |
+| G6 BIH Consumer Acceptance | BLOCKED pending register reconciliation | Owner evidence in §9.3; I register §11.1 vs §14 conflict; A plan §10 F status stale; D/E/Storage exact A-package pin needs confirmation | I reconcile its register; D/E/Storage confirm exact A package pin if required; A re-read and decide G6 |
+| G7 BIH Test Verification | NOT RUN | I model 35/35 PASS and H structural 47/47 PASS are bounded reference/schema tests; I36/H36/D36/E36 remain NOT RUN | I/H and runtime Owners execute I36/H36/D36/E36 on designated builds with fixtures/logs/reviewer evidence |
+| G8 CFG Applied Contract Freeze | BLOCKED | A package 4961ff... requires eight evidence families; H 1.1.0 a8a945... has five; 1.2.17 1b8f446... is partial and not pinned; no same-version C/G/H + D/I/B decision set | A issue successor package/version if adopting; H complete exact family mapping/schema; C/G/H accept same digest; D/I/B confirm predicates |
+| G9 CFG Runtime/Security Verification | NOT RUN | CFG-01..20 and PI-01..08 have no verified execution evidence | C/G/H/D/I/B and engineering Owners run race/replay/key/auth/fence/provider/restore suites |
+| G10 Overall Implementation Readiness | BLOCKED | G2/G3/G5/G6/G8 blocked; G7/G9 not run; JF-10 P0 open; ADR-001 blocked | A final acceptance only after every required gate has exact closure evidence |
+
+### 9.7 Exact next actions and limits
+
+1. **I:** reconcile §4/§11.1/§14 of its own register; keep I36-GOV-01..10 blocked until named external approvals, effective policy hashes and authority evidence exist; the reference-model test PASS does not replace I36.
+2. **H:** update/reaffirm the BIH acceptance against current H binding Blob e7ca5ce...; complete the eight-family CGH mapping or publish a versioned successor with explicit transport/schema mapping for intent receipt, reservation, D terminal, C submit outcome, terminal proof and COC ACK.
+3. **D/E/Storage:** confirm exact A BIH package pin in their own acceptance records if A requires it; separately identify implementation location/owner/build and execute D36/E36/Storage integration only on the designated implementation.
+4. **A:** refresh its own full artifact inventory and approval ledger; reconcile G0 and G6 from exact current Owner evidence; publish a successor CGH package only under A's authority; retain NOT ACCEPTED until G0–G10 are actually satisfied.
+5. **B:** retain the current typed semantic baseline; no change to BIH36-JD-01..17 is justified by this evidence batch.
+
+No Owner branch was merged; main was not changed; no external governance approval, consumer approval on another Owner's behalf, production deployment, Runtime Forget E2E closure, Global Forget completion or physical erasure is claimed.
