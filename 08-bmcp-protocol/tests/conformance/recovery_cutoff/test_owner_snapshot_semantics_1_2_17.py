@@ -12,7 +12,14 @@ from owner_snapshot_semantics_1_2_17 import (  # noqa: E402
     INVALID, UNKNOWN, VALID, _td, validate_owner_snapshot_1_2_17,
 )
 
-D_BOUNDED_FIELDS = (
+NON_TYPED_BOUNDED_FIELDS = (
+    "work_item_high_water",
+    "attempt_high_water",
+    "barrier_generation",
+    "dependency_closure_cursor",
+)
+
+ALL_BOUNDED_FIELDS = (
     "producer_registration_high_water",
     "work_item_high_water",
     "attempt_high_water",
@@ -73,7 +80,7 @@ def true_authorities(calls):
 
 class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
     def test_513_character_values_with_recomputed_digest_are_invalid_before_authority_callbacks(self):
-        for field in D_BOUNDED_FIELDS:
+        for field in NON_TYPED_BOUNDED_FIELDS:
             with self.subTest(field=field):
                 snapshot = d_snapshot()
                 snapshot["owner_specific_high_waters"][field] = "1" * 513
@@ -93,7 +100,7 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
                 self.assertEqual(calls, [])
 
     def test_empty_string_is_invalid_for_each_bounded_field(self):
-        for field in D_BOUNDED_FIELDS:
+        for field in ALL_BOUNDED_FIELDS:
             with self.subTest(field=field):
                 snapshot = d_snapshot()
                 snapshot["owner_specific_high_waters"][field] = ""
@@ -107,7 +114,7 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
                 )
 
     def test_length_one_is_accepted_for_each_bounded_field(self):
-        for field in D_BOUNDED_FIELDS:
+        for field in ALL_BOUNDED_FIELDS:
             with self.subTest(field=field):
                 snapshot = d_snapshot()
                 snapshot["owner_specific_high_waters"][field] = "1"
@@ -120,8 +127,8 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
                     VALID,
                 )
 
-    def test_length_512_is_accepted_for_each_bounded_field(self):
-        for field in D_BOUNDED_FIELDS:
+    def test_length_512_is_accepted_for_each_non_typed_bounded_field(self):
+        for field in NON_TYPED_BOUNDED_FIELDS:
             with self.subTest(field=field):
                 snapshot = d_snapshot()
                 snapshot["owner_specific_high_waters"][field] = "1" * 512
@@ -134,8 +141,8 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
                     VALID,
                 )
 
-    def test_length_513_is_invalid_for_each_bounded_field(self):
-        for field in D_BOUNDED_FIELDS:
+    def test_length_513_is_invalid_for_each_non_typed_bounded_field(self):
+        for field in NON_TYPED_BOUNDED_FIELDS:
             with self.subTest(field=field):
                 snapshot = d_snapshot()
                 snapshot["owner_specific_high_waters"][field] = "1" * 513
