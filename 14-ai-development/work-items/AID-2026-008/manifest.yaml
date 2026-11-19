@@ -1,0 +1,175 @@
+work_item_id: AID-2026-008
+title: REQ-02 Evidence-Based Technology Selection and Mature Solution Evaluation
+owner: Integration Owner
+accountable_owner: NOT_ASSIGNED
+issue: 263
+related_issues: [263, 264]
+related_prs: []
+
+task_class: ARCH
+risk: R3
+risk_rationale: >-
+  The requirement spans Canonical Memory authority, Forget and revocation,
+  persistence, recovery, security boundaries and cross-owner architecture.
+  This Work Item begins with evidence inventory and preparation only.
+  R3 acceptance requirements remain applicable before any final acceptance.
+
+status: PROPOSED
+
+registration:
+  status: BLOCKED_PENDING_REGISTRATION
+  allocated_id: AID-2026-008
+  allocation_authority: Issue #264 comment 7007736165
+  owning_issue: 263
+  registration_owner_role: Integration Owner
+  required_persistence:
+    - work-items/AID-2026-008/manifest.yaml
+    - work-items/INDEX.md entry
+    - Issue #263 Work Item association comment
+  completion_condition: >-
+    All three registration records must be persisted and independently
+    read back. Allocation authorization alone does not constitute
+    completed Work Item registration.
+
+prompt:
+  id: REQ02-AID-2026-008-REGISTRATION-DISPATCH
+  version: v1
+  provenance: T2 chat instruction
+  source: >-
+    User-provided REQ-02 registration dispatch in the current ChatGPT
+    conversation. Parent requirement and original requirement provenance
+    are recorded in Issue #263 (Source Conv ID 6afc26a3).
+    AID-2026-008 allocation authority is Issue #264 comment 7007736165.
+  conversation_session_id: NOT_EXPOSED_BY_INTERFACE
+  stable_permalink: NOT_EXPOSED_BY_INTERFACE
+  sha256: NOT_APPLICABLE_CHAT_SOURCE
+  note: >-
+    This source is a chat instruction, not a repository prompt file.
+    The current session interface does not expose a stable conversation
+    permalink or session ID. No synthetic ID, permalink or file hash
+    is fabricated.
+  related_req02_t2_verification:
+    status: VERIFIED
+    evidence: Issue #264 comment 7006879185
+  dispatch_snapshot:
+    status: PENDING_PERSISTENCE
+    note: >-
+      The T2 verification above applies to the previously verified
+      REQ-02 instruction snapshot. The current registration dispatch
+      must not be represented as independently snapshotted unless its
+      exact instruction text is separately persisted.
+
+baseline:
+  repository: oahcom/AiMemoryBrainArchitecture
+  target_branch: main
+  base_sha: 2d2d577e856f4b9812f694b8a4d0f008dac110d7
+  base_sha_source: >-
+    GitHub API read of the main branch ref during this registration
+    preparation on 2026-11-19. L0 should independently capture the
+    remote working-tree baseline before performing the file operation.
+
+scope:
+  - >-
+    Maintain a read-only evidence inventory for REQ-02, identifying
+    repository paths, exact commits, blob SHAs, CI evidence and limitations.
+  - >-
+    Prepare a fact-only candidate capability matrix. Record candidate
+    names, documented capabilities, current implementation facts,
+    evidence references and unresolved questions.
+  - >-
+    Inventory existing evaluation criteria and identify unanswered
+    requirement questions without creating new formal standards,
+    scoring weights or decision thresholds.
+  - >-
+    Preserve the distinction between design evidence, static review,
+    test evidence, integration evidence and production acceptance.
+  - >-
+    Preserve B-I, Storage and other domain Owner authority boundaries.
+  - >-
+    Record all unresolved decisions and route them to the responsible
+    Owner or existing Issue.
+
+non_goals:
+  - No candidate scoring, ranking, comparison verdict or recommendation.
+  - No database, retrieval engine, policy engine or agent framework selection.
+  - No architecture selection or Owner semantic ruling.
+  - No implementation-plan approval or production-readiness claim.
+  - No replacement of B-I or Storage authority.
+  - No new PR, Issue or branch creation.
+  - No merge or repository file write by this ChatGPT session.
+  - No Desktop Commander use.
+  - No local WSL or local workstation project-file editing.
+
+deliverables:
+  - >-
+    Evidence inventory with exact repository and CI evidence references.
+  - >-
+    Fact-only candidate capability matrix without scores, ranking or
+    recommendations.
+  - >-
+    Inventory of existing evaluation criteria and unresolved requirement
+    questions, without introducing new formal decision thresholds.
+  - >-
+    Work Item registration records: manifest, INDEX row and Issue #263
+    association record.
+  - >-
+    Owner decision and independent-review handoff material, when
+    separately authorized.
+
+acceptance:
+  - >-
+    This manifest is valid YAML and contains Work Item identity, title,
+    owning Issue, Owner role, status, source provenance and acceptance
+    criteria.
+  - >-
+    The manifest exists at the exact required remote 43 path and is
+    independently read back.
+  - >-
+    INDEX.md contains the matching AID-2026-008 row.
+  - >-
+    Issue #263 contains the Work Item association record.
+  - >-
+    L0 returns SHA-256, byte count, line count, file list, git status
+    and read-back evidence for the registration artifacts.
+  - >-
+    Evidence inventory claims are traceable to exact repository refs,
+    commits, blobs or CI runs.
+  - >-
+    Candidate matrix contains factual capability and evidence fields
+    only; no scoring, ranking or recommendation is introduced.
+  - >-
+    Evaluation criteria material distinguishes existing standards
+    from unresolved questions and does not create new formal thresholds.
+  - >-
+    Final technology selection requires the authorized Accountable
+    Owner and relevant domain Owner decisions.
+  - >-
+    R3 independent security/domain review and reproducible evidence
+    are required before applicable Work Item acceptance.
+  - >-
+    Work Item registration does not imply architecture acceptance,
+    implementation approval or production readiness.
+
+lifecycle:
+  phase: INTAKE
+  source_status: PROPOSED
+  gates:
+    registration:
+      status: BLOCKED_PENDING_REGISTRATION
+      required:
+        - manifest persisted and read back
+        - INDEX entry persisted and read back
+        - Issue #263 association persisted and read back
+    verified:
+      status: PENDING
+    independent_review:
+      status: PENDING
+    integration:
+      status: PENDING
+    owner_acceptance:
+      status: PENDING
+    merge:
+      status: NOT_APPLICABLE_TO_REGISTRATION
+    closeout:
+      status: PENDING
+  markers: {}
