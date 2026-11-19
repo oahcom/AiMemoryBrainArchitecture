@@ -615,9 +615,33 @@ Until then, CI status remains FAILURE.
 
 ## 8. Acceptance matrix / 验收矩阵
 
-仅替换本节中涉及 F-02、F-06、F-07、规范效力、Owner 批准、豁免及迁移完成状态的对应矩阵行；保留其他验收项目及其原有内容。
+AC-07 was blank in the original task definition. Its missing criterion must not be invented.
 
-**EN — Replacement rows**
+| AC | Criterion | Execution evidence | Independent review / final result |
+|---|---|---|---|
+| AC-01 | Full v1.1 inheritance | v1.1 read; v1.2 committed | PARTIAL — F-03/F-04 require further closure |
+| AC-02 | Issue bilingual requirements | Five templates/updates read back | Execution PASS; independent criterion mapping NOT_RECORDED |
+| AC-03 | Umbrella Requirement bilingual requirements | D1/D4 and five Issue updates | Execution PASS; independent criterion mapping NOT_RECORDED |
+| AC-04 | Commit Message bilingual requirements | D5 and actual bilingual Commit | Execution PASS; historical inventory incomplete |
+| AC-05 | PR bilingual title/body | PR title and body bilingual | PARTIAL — CI FAILURE |
+| AC-06 | Future repository inheritance | D1/D6 drafted and committed | FAIL — F-02 OPEN |
+| AC-07 | Original criterion unspecified | No criterion supplied | NOT TESTABLE |
+| AC-08 | Stable identifier preservation | Exact identifiers and SHA manifest checked | Execution PASS; independent mapping NOT_RECORDED |
+| AC-09 | Status preservation | Five Issues remain OPEN; Requirement Status RECORDED | Execution PASS |
+| AC-10 | No fabricated evidence | Unknown fields and source gaps preserved | Execution PASS within available evidence |
+| AC-11 | Historical Commit immutability | No rewrite or force-push | Execution PASS |
+| AC-12 | Historical migration registration | Issue/Commit/PR aggregate inventory prepared | PARTIAL — F-06 OPEN |
+| AC-13 | Bilingual normative clauses | D1–D7 are embedded bilingual documents | Independent semantic parity not fully accepted |
+| AC-14 | Complete file/change manifest | Seven files and five Issue updates verified | PARTIAL — historical inventory incomplete |
+| AC-15 | Reproducible independent acceptance | Review package and exact file SHAs recorded | FAIL / BLOCKED — CI failure and outstanding findings |
+
+Execution PASS does not imply independent review PASS.
+
+执行自检 PASS 不等于独立审查 PASS。
+
+独立的当前状态补充表
+
+**EN**
 
 | Item | Current status | Acceptance boundary |
 |---|---|---|
@@ -628,7 +652,7 @@ Until then, CI status remains FAILURE.
 | Normative status | Unchanged | v1.1 NORMATIVE; v1.2 DRAFT. |
 | Migration and exemption | Not interchangeable | MIGRATION_DEBT != EXEMPTION. Registration does not establish migration completion. |
 
-**中文 — 替换行**
+**中文**
 
 | 项目 | 当前状态 | 验收边界 |
 |---|---|---|
@@ -643,39 +667,27 @@ Until then, CI status remains FAILURE.
 
 ## 9. Outstanding blockers and next actions / 未解决阻塞与后续行动
 
-仅更新本节中与 F-02、F-06、F-07、规范效力及迁移状态有关的条目；其他阻塞事项保持原文。
-
-**EN — Replacement entries**
-
-- **F-02:** Complete CI workflow integration and provide evidence that the required check is configured and enforced. Until then, retain PARTIAL.
-- **F-06:** Preserve the finalized 39-Issue and 313-Commit inventories. Verify record uniqueness, object identity, classification totals, and all required content anchors. Keep Issue #254 within the 39-record set and on HOLD until its explicit exit conditions are satisfied.
-- **F-07:** Use D1 authoritative blob `66517d39`; retain PR comment `7006445553` as the correction traceability record.
-- **Normative and migration protection:** Maintain v1.1 as NORMATIVE and v1.2 as DRAFT. Do not treat migration debt as an exemption or infer Owner approval, normative adoption, PR merge authorization, or migration completion.
-
-**中文 — 替换条目**
-
-- **F-02：**完成 CI workflow 接入，并提供 required check 已配置且实际强制生效的证据。在此之前维持 PARTIAL。
-- **F-06：**保留已定稿的 39 条 Issue 和 313 条 Commit 清单。核验记录唯一性、对象身份、分类总数及全部必需内容锚点。Issue #254 必须继续包含在 39 条集合内，并在明确退出条件满足前保持 HOLD。
-- **F-07：**使用 D1 权威 blob `66517d39`；保留 PR 评论 `7006445553` 作为更正追踪记录。
-- **规范与迁移保护：**维持 v1.1 为 NORMATIVE、v1.2 为 DRAFT。不得将迁移债务视为豁免，也不得推定 Owner 批准、规范采纳、PR 合并授权或迁移完成。
-
----
-
 ### P1
 
 F-02:
 
-Implement and demonstrate executable repository inheritance enforcement.
+Complete CI workflow integration for the independent validator and provide evidence that the required check is configured and enforced. Until verified, F-02 remains PARTIAL.
+
+完成独立校验器的 CI workflow 接入，并提供 required check 已配置且实际强制生效的证据。在验证完成前，F-02 维持 PARTIAL。
 
 ### P2
 
 F-06:
 
-Complete the historical object inventory, resolve the 14 ungrouped PRs, and verify the full Commit history.
+Preserve and verify the finalized 39-Issue and 313-Commit inventories, including object uniqueness, identity matching, classification totals, and all required content anchors. Issue #254 remains included in the 39-record set and on HOLD until its explicit exit conditions are satisfied. Inventory registration does not establish migration completion.
+
+保留并核验已定稿的 39 条 Issue 和 313 条 Commit 清单，包括对象唯一性、身份匹配、分类总数及全部必需内容锚点。Issue #254 必须继续包含在 39 条集合内，并在明确退出条件满足前保持 HOLD。清单登记完成不代表迁移完成。
 
 F-07:
 
-Record the authoritative D1 Blob SHA correction with historical traceability.
+Use D1 authoritative blob `66517d39` for subsequent verification and retain PR comment `7006445553` as the correction traceability record.
+
+后续核验使用 D1 权威 blob `66517d39`，并保留 PR 评论 `7006445553` 作为更正追踪记录。
 
 ### CI blocker
 
@@ -698,31 +710,23 @@ No automatic approval or adoption is permitted.
 
 ## 10. Governance stage ledger / 治理阶段登记
 
-仅替换本节中涉及 F-02、F-06、F-07、规范效力及迁移完成状态的登记项；保留其他阶段记录、历史时间线和无关状态。
-
-**EN — Replacement entries**
-
-| Governance item | Recorded state | Limitation |
+| Stage | Status | Evidence |
 |---|---|---|
-| F-02 | PARTIAL | Local tests pass 6/6; CI integration and required-check enforcement remain unverified. |
-| F-06 Issue inventory | Finalized | 39 records, including #254 on HOLD; registration does not establish migration completion. |
-| F-06 Commit inventory | Finalized | 313 records with sha and msg_sha256 anchors; classification is based on substantive complete-message content. |
-| F-07 | Correction recorded | PR comment `7006445553`; authoritative D1 blob `66517d39`. |
-| Normative status | Unchanged | v1.1 NORMATIVE; v1.2 DRAFT. |
-| Migration status | Not inferred | MIGRATION_DEBT != EXEMPTION; no migration completion is inferred from registration. |
-
-**中文 — 替换条目**
-
-| 治理事项 | 登记状态 | 限制 |
-|---|---|---|
-| F-02 | PARTIAL | 本地测试 6/6 PASS；CI 接入及 required check 强制生效仍未验证。 |
-| F-06 Issue 清单 | 已定稿 | 39 条记录，包含处于 HOLD 的 #254；登记完成不代表迁移完成。 |
-| F-06 Commit 清单 | 已定稿 | 313 条记录具有 sha 和 msg_sha256 锚点；分类依据完整提交消息的实质内容判定。 |
-| F-07 | 更正已登记 | PR 评论 `7006445553`；D1 权威 blob `66517d39`。 |
-| 规范状态 | 不变 | v1.1 为 NORMATIVE；v1.2 为 DRAFT。 |
-| 迁移状态 | 不作推定 | MIGRATION_DEBT != EXEMPTION；不得根据登记完成推定迁移完成。 |
-
----
+| v1.1 Read | READ | Historical policy source |
+| v1.2 Drafted | DRAFTED | D1–D7 |
+| Seven files submitted | SUBMITTED | Commit a77219fa2834af0c4535e6692029adaec2e62638 |
+| Seven files read back | VERIFIED | Seven exact Blob SHAs |
+| Five Issues updated | SUBMITTED | GitHub Issue records |
+| Five Issues read back | VERIFIED | Five API reads |
+| Historical inventory | PARTIAL | Issue/PR aggregate; Commit sample |
+| Independent review | NEEDS REVISION | T8 review |
+| F-02 | PARTIAL | Validator and tests committed; corrected local tests 6/6 PASS; CI integration and required-check enforcement remain outstanding. |
+| F-06 | INVENTORY FINALIZED | 39 Issues and 313 Commits registered with required anchors; #254 remains HOLD; registration does not establish migration completion. |
+| F-07 | CORRECTION RECORDED | PR comment `7006445553`; authoritative D1 blob `66517d39`. |
+| Structural CI | FAILURE | Run 44477435608. Bilingual documentation gate run `44542512889` succeeded on head `70219731485040e2974d537080f994108ee1d989`. This result does not establish F-02 validator integration or required-check enforcement. |
+| Owner approval | NOT_RECORDED | No approval evidence |
+| Policy adoption | NOT_ADOPTED | No adoption evidence |
+| Effective status | NOT_EFFECTIVE | v1.2 remains DRAFT |
 
 ## 11. Honest declaration / 诚实声明
 
