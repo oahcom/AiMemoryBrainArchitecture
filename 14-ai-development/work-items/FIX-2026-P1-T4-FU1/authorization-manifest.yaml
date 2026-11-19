@@ -1,0 +1,71 @@
+# FIX-2026-P1-T4-FU1 authorization manifest
+# Records the coordinator decision, role status, baseline and the explicitly
+# approved write scope. No path outside allowed_write_paths may be modified.
+schema_version: "1.0"
+work_item: FIX-2026-P1-T4-FU1
+repository: oahcom/AiMemoryBrainArchitecture
+branch: fix/fu1-path-base-and-review-note
+
+decision:
+  id: DEC-FIX-2026-P1-T4-FU1-GO-001
+  date: "2026-11-20"
+  authority: "coordinator session oahcom/13-20-04, acting under dev-baseline delegation"
+  authority_note: >-
+    This is a self-issued coordinator decision. It is NOT an independent Owner grant, NOT an
+    acceptance_authority act, and NOT a substitute for R3 human review. It is labeled as
+    self-issued so that no reader mistakes it for independent authorization.
+  form: "GO decision + manifest(allowed_write_paths, authorization_basis)"
+  form_precedent: "FIX-2026-P1-T4 / DEC-FIX-2026-P1-T4-GO-001 (PR #289, merge e79bddaa)"
+
+roles:
+  sponsor: NOT_ASSIGNED
+  accountable_owner: NOT_ASSIGNED
+  acceptance_authority: NOT_ASSIGNED
+  implementing_owner: "coordinator session (remediation editor)"
+  role_note: >-
+    NOT_ASSIGNED is a true governance state and MUST NOT be substituted by the coordinator
+    session, by engineering contribution, or by GitHub identity.
+
+baseline:
+  commit: 8a1f7e98457873587a564ed49942fa0c39c807ad
+  verification: exact Git tree at baseline commit (main tip after PR #290)
+  source: GitHub refs (origin/main at decision time)
+
+scope:
+  manifest_path: 14-ai-development/work-items/FIX-2026-P1-T4-FU1/authorization-manifest.yaml
+  allowed_write_paths:
+    - 14-ai-development/work-items/FIX-2026-P1-T4-FU1/authorization-manifest.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-T4-FU1/audit-record.md
+    - 14-ai-development/evidence-tiering-policy.md
+    - 14-ai-development/evidence-tiering-policy.en.md
+    - 14-ai-development/ai-development-standard.md
+    - 14-ai-development/prompt-and-evidence-template.md
+    - 14-ai-development/work-items/INDEX.md
+  authorization_basis:
+    - >-
+      Two defects were found by executing the documented template example against the shipped
+      checker: the example, taken verbatim, produces 7 BLOCKED reasons on unmodified text
+      (see audit-record.md). Documented shapes that do not work are defects, not user error.
+    - >-
+      Closing them requires exactly the four normative files (policy ZH/EN, AI-STD-001,
+      template) because the path-base rule is normative and the example lives in the template.
+    - >-
+      #289 declared the INDEX registration of FIX-2026-P1-T4 as a separate authorization item.
+      This decision is that authorization, limited to the two index rows named below.
+  all_other_paths: OUT_OF_SCOPE
+  explicitly_excluded:
+    - .github/workflows/**
+    - scripts/**  (no checker or test change in this work item)
+    - "Any path not listed above; new write needs a new authorization."
+
+constraints:
+  - "Documentation-only: the checker and its 67 tests are unchanged, so the gate stays fail-closed."
+  - "Policy status remains PROPOSED; this work item is neither adoption nor merge authorization of the policy."
+  - "evidence.review_note is normative as a path to an acknowledgement record; free text stays BLOCKED."
+  - "All evidence paths resolve against the repository root of subject_head, not the declaration directory."
+  - "The INDEX rows added here record fact only: #289 was merged without the authorization its own manifest declared."
+
+verification:
+  checker_template_example: "template example verbatim (SHA placeholders replaced) -> VERDICT PASS, exit 0"
+  checker_free_text_negative: "review_note as free text -> CE_EVIDENCE_NOT_IN_SUBJECT, exit 1"
+  checker_pre_fix: "pre-fix template example -> VERDICT BLOCKED, 7 reasons, exit 1"

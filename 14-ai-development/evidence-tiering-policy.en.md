@@ -31,7 +31,7 @@ No Level may change the independent gate meaning of VERIFIED, REVIEWED or INTEGR
 | **Level 2 (standard)** | FEATURE, BUGFIX (bounded, no contract change) | subject_head, change_summary, test_log, review_record, v3 binding (protocol + subject-tree containment + blob equality), source_authenticity |
 | **Level 3 (lightweight)** | DOC_EDITORIAL (editorial documentation with no normative change), OPS (non-release-critical) | subject_head, change_summary, evidence.review_note, v3 binding (protocol + subject-tree containment + blob equality) |
 
-Every level MUST retain a full 40-hex subject_head and a change summary, without exception. The exact v3 scope is defined in §5: protocol, subject-tree containment and blob equality apply to every level; the sidecar anchor is mandatory only for Level 1.
+Every level MUST retain a full 40-hex subject_head and a change summary, without exception. The exact v3 scope is defined in §5: protocol, subject-tree containment and blob equality apply to every level; the sidecar anchor is mandatory only for Level 1. `evidence.review_note` is a **path to an acknowledgement record**, not free text — free text cannot be Git-bound.
 
 ## 3. Non-Downgrade Rules
 
@@ -91,6 +91,8 @@ An assessment missing any of `assessed_by`, `assessed_at`, `rationale`, `base_he
    | SCP | `git@github.com:owner/repo[.git]` |
 
    `http://`, `git://`, non-`git` usernames and URLs carrying a port are rejected. This defines the trust boundary for *where* evidence is verified; it does not establish source authenticity.
+
+8. **Path resolution base:** every evidence path (including `evidence.review_note` and `declaration_path`) is resolved against the **repository root** of the subject commit, **not** against the directory holding the declaration. `evidence.review_note` MUST point at an acknowledgement record that really exists in the subject tree; free text or a bundle-relative name yields `CE_EVIDENCE_NOT_IN_SUBJECT`.
 
 ## 6. Checker
 
