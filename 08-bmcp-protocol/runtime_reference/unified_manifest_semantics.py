@@ -38,14 +38,36 @@ def member_key(m):
     return ("9","")
 
 
-def validate_owner_snapshot(snapshot, owner, allow_legacy_d_snapshot=False):
+def validate_owner_snapshot(
+    snapshot, owner, allow_legacy_d_snapshot=False, schema_artifact_revision="1.2.9"
+):
+    # Keep the 1.2.9 wire contract closed-world by default. 1.2.17 callers
+    # must opt into its distinct I/C field sets explicitly.
+    if schema_artifact_revision == "1.2.9":
+        i_fields = {
+            "receipt_issue_high_water", "receipt_consume_high_water", "inventory_epoch_ref",
+            "registry_snapshot_digest", "relevant_entry_set_root",
+        }
+        c_fields = {
+            "reservation_high_water", "provider_attempt_high_water", "provider_outcome_high_water",
+        }
+    elif schema_artifact_revision == "1.2.17":
+        i_fields = {
+            "receipt_issue_high_water", "receipt_consume_high_water", "permission_epoch",
+            "producer_domain_inventory_epoch_ref", "registry_snapshot_digest", "relevant_entry_set_root",
+        }
+        c_fields = {
+            "reservation_high_water", "provider_attempt_high_water", "provider_outcome_high_water",
+            "provider_idempotency_namespace_ref", "final_request_boundary_generation",
+        }
+    else:
+        return INVALID
     fields={
-      "I":{"receipt_issue_high_water","receipt_consume_high_water","inventory_epoch_ref",
-           "registry_snapshot_digest","relevant_entry_set_root"},
+      "I": i_fields,
       "D":{"producer_registration_high_water","work_item_high_water","attempt_high_water",
            "barrier_generation","barrier_root","forget_fence_generation_high_water",
            "dependency_closure_cursor","dependency_closure_root"},
-      "C":{"reservation_high_water","provider_attempt_high_water","provider_outcome_high_water"},
+      "C": c_fields,
     }
     if owner not in fields or snapshot.get("owner")!=owner:
         return INVALID
@@ -151,7 +173,11 @@ def validate_owner_snapshot_membership_proof_payload(proof, row, snapshot, verif
         return INVALID
     return VALID
 
-def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=None, complete=True, verify_membership_proof=None, verify_owner_snapshot=None, allow_legacy_d_snapshot=False):
+def validate_union(
+    m, prefix_rows, admission_rows, snapshots, membership_proofs=None, complete=True,
+    verify_membership_proof=None, verify_owner_snapshot=None, allow_legacy_d_snapshot=False,
+    schema_artifact_revision="1.2.9",
+):
     if not complete:
         return UNKNOWN
     if membership_proofs is None:
@@ -165,7 +191,10 @@ def validate_union(m, prefix_rows, admission_rows, snapshots, membership_proofs=
             return INVALID
         if not s.get("ledger_available") or not s.get("pagination_complete"):
             return UNKNOWN
-        snapshot_result=validate_owner_snapshot(s,owner,allow_legacy_d_snapshot=allow_legacy_d_snapshot)
+        snapshot_result=validate_owner_snapshot(
+            s, owner, allow_legacy_d_snapshot=allow_legacy_d_snapshot,
+            schema_artifact_revision=schema_artifact_revision,
+        )
         if snapshot_result!=VALID:
             return snapshot_result
         # Local cache flags are not authority. Attestation, anti-rollback and
