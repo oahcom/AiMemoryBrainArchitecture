@@ -19,7 +19,7 @@ This report is a point-in-time governance record, not a live dashboard. Two clas
 
 - **Bound assets (dated snapshots).** Repository HEADs, tree and blob SHAs, PR state (`OPEN` / `merged`), ahead/behind counts, workflow run identifiers, and file manifests are bound to the moment they were read. Each such line carries its own as-of boundary. A later commit does not falsify a bound snapshot, and a bound snapshot must not be read as a current assertion.
 - **Live assertions (maintained state).** Only finding states (`CLOSED` / `PARTIAL` / `NOT_VERIFIED`), normative statements, and outstanding-blocker entries are maintained. When one changes, it is changed in a new revision with a revision note.
-- **Limitation assertions.** A third class exists and must not be forced into the first two: statements that are true, permanent, and not actionable — for example "historical migration cannot be inferred from the inventory". These are recorded as `LIMITATION` rather than left `OPEN`. An `OPEN` finding is a work item; a `LIMITATION` is a boundary. Mixing them produces either a work item that can never be closed or a boundary that is quietly treated as closed.
+- **Limitation assertions.** A third class exists and must not be forced into the first two: statements that are true, permanent, and not actionable — for example "historical migration cannot be inferred from the inventory". These are recorded as `LIMITATION` rather than left `OPEN`. An `OPEN` finding is a work item; a `LIMITATION` is a boundary. Mixing them produces either a work item that can never be closed or a boundary that is quietly treated as closed. A `LIMITATION` is admissible only when all three conditions hold: (i) the statement is factually true as written; (ii) no work item would remove it — it is not merely hard or deferred; (iii) no reasonable executable path exists, including collecting further evidence, changing code, or re-running an investigation. If any one condition later fails, the entry returns to `OPEN` in a new revision with a revision note, exactly as any other falsified assertion. Without that escape the category would become a place to park inconvenient work, which is the failure mode it is meant to prevent.
 
 Maintenance rule: do not rewrite a bound snapshot in order to chase a moving HEAD; append a new dated snapshot instead. Only live assertions may be edited in place, and every such edit must be recorded in the revision note. This rule exists because the opposite practice is unsatisfiable: any commit changes `main`, so a report that maintains HEAD values as current assertions is stale the moment it is merged.
 
@@ -35,7 +35,7 @@ Maintenance rule: do not rewrite a bound snapshot in order to chase a moving HEA
 
 - **绑定资产（带时点的快照）**：仓库 HEAD、tree 与 blob SHA、PR 状态（`OPEN` / `merged`）、ahead/behind 计数、workflow 运行标识、文件清单，均绑定于其被读取的时刻。每条此类陈述自带 as-of 边界。后续提交不使既有快照失效，既有快照也不得被读作当前断言。
 - **活动断言（受维护的状态）**：仅限 finding 状态（`CLOSED` / `PARTIAL` / `NOT_VERIFIED`）、规范性陈述、未解决阻塞条目。它们发生变化时，在新修订中更新并附修订说明。
-- **限制性断言**：存在第三类，且不得被强行归入前两类——它们成立、永久、且不可行动（例如「历史迁移无法从清单推得」）。此类记为 `LIMITATION`，而不是任其保持 `OPEN`。`OPEN` 是工作项，`LIMITATION` 是边界。两者混用的后果：要么得到一个永远无法关闭的工作项，要么得到一条被默认当作已关闭的边界。
+- **限制性断言**：存在第三类，且不得被强行归入前两类——它们成立、永久、且不可行动（例如「历史迁移无法从清单推得」）。此类记为 `LIMITATION`，而不是任其保持 `OPEN`。`OPEN` 是工作项，`LIMITATION` 是边界。两者混用的后果：要么得到一个永远无法关闭的工作项，要么得到一条被默认当作已关闭的边界。 `LIMITATION` 仅在三个条件同时成立时可用：（i）该陈述如其所写为事实；（ii）没有任何工作项能消除它——不只是「难」或「延后」；（iii）不存在合理可执行路径（包括补证据、改代码、重做调查）。任一条件日后不再成立，该条目在新修订中回到 `OPEN` 并附修订说明，与其他被证伪断言同样处理。若无此出口，该类别就会变成安放麻烦工作的地方，而这正是它要防止的失败模式。
 
 维护规则：不得为追逐移动的 HEAD 而改写历史快照，应追加新的带时点快照。只有活动断言可以就地变更，且每次变更都必须记入修订说明。该规则的存在理由：相反做法在逻辑上不可满足——任何提交都会改变 `main`，把 HEAD 值当作当前断言来维护的报告，在合并那一刻就已陈旧。
 
@@ -813,9 +813,9 @@ Every finding raised against this deliverable appears here with a state and a ba
 |---|---|---|---|
 | F-01 | — | `CLOSED` | Accepted closure recorded by the R6 review (§6.3). No counter-evidence recorded since. / R6 审查记录的已接受关闭（§6.3）。 |
 | F-02 | P1 | `PARTIAL` | Requirement 1 `COMPLETE / VERIFIED` (workflow integration, §7.1); Requirement 2 `NOT_VERIFIED` (platform 403). Maintained in §9 P1 and §10. / 要求 1 已验证，要求 2 因平台 403 未验证。 |
-| F-03 | — | `CLOSED (method-bound)` | The finding stated that partial remediation does not establish complete closure. That is a rule about method, not a defect with a patch. §0 and §9 now implement the distinction: remediation is recorded separately from state, and closure requires re-derivable evidence. **Basis proposed in this revision; requires this PR’s review to confirm.** / 该 finding 是方法性规则而非可补丁缺陷；依据本修订提出，待本 PR 审查确认。 |
-| F-04 | — | `CLOSED (method-bound)` | Same basis as F-03, recorded separately because R6 listed it as a separate row. / 与 F-03 同依据；R6 列为独立行，故分列。 |
-| F-05 | — | `LIMITATION` | "Historical migration cannot be inferred" is a permanent boundary, not a work item. Recorded per §0 so it is neither closed silently nor left `OPEN` forever. / 永久边界，非工作项。 |
+| F-03 | — | `CLOSED (method-bound)` | The finding stated that partial remediation does not establish complete closure. That is a rule about method, not a defect with a patch. §0 and §9 now implement the distinction: remediation is recorded separately from state, and closure requires re-derivable evidence. **Basis proposed in this revision; requires this PR’s review to confirm.** Reopens if any revision records a `CLOSED` state whose basis is only a remediation artifact — check c9 below is the detector. / 该 finding 是方法性规则而非可补丁缺陷；依据本修订提出，待本 PR 审查确认；若任一修订将「仅以修复产物为依据」的状态记为 `CLOSED`，即重新开启（核对 c9 为检测器）。 |
+| F-04 | — | `CLOSED (method-bound)` | Same basis and same reopen condition as F-03, recorded separately because R6 listed it as a separate row. / 与 F-03 同依据、同重开条件；R6 列为独立行，故分列。 |
+| F-05 | — | `LIMITATION` | "Historical migration cannot be inferred" meets all three §0 conditions: it is true, no work item removes it, and no executable path exists — migration is a separate activity from inventory registration. Recorded per §0 so it is neither closed silently nor left `OPEN` forever. Re-evaluates if any of the three conditions fails. / 满足 §0 三条件：成立、无工作项可消除、无可执行路径（迁移与清单登记属不同活动）；任一条件失效即重新评估。 |
 | F-06 | P2 | `CLOSED` (2026-11-20) | Object reconciliation in `00-governance/reports/f06-object-reconciliation.md`; the "14 unassigned PRs" conclusion is retracted. Maintained in §9 P2 and §10. / 对象级对账完成，原结论已撤回。 |
 | F-07 | P2 | `CLOSED` | Correction recorded in PR comment `7006445553`; authoritative D1 blob `66517d39`. / 更正已登记。 |
 | F-08 | P1 | `CLOSED` (2026-11-20) | §0 record boundary, §2.2 post-merge snapshot, §3.2 post-merge manifest; closure basis in §9 P1. / 关闭依据见 §9。 |
@@ -837,10 +837,18 @@ c2. §10 rows against §9 finding blocks — one state per finding, same value.
 c3. §11 status sentences against §7.1, §7.2, §9 and §10.
 c4. §8 acceptance-matrix rows for any row that cites a finding state or a CI outcome.
 c5. This registry against §6.3 — any divergence must be explained by §6.3 being a bound snapshot.
+c6. Basis validity — for every state, is the cited basis still true, and is it the kind of basis that can support that state (see c9)?
+c7. Maintenance location reachable — every §, comment id and file path cited as a maintenance location exists and actually carries the state.
+c8. Closure conditions satisfied — where a finding states conditions for closure, each one is met; where it states a reopen condition, none has triggered.
+c9. Closure/evidence consistency — the detector for the F-03/F-04 class. For each `CLOSED` row, the basis must name either (i) a re-derivable verification — object, expected value, comparison — or (ii) a rule change that makes the finding non-actionable, attributed to a review. A basis that names only a rewritten paragraph, a diff, or a partial fix is insufficient and the row must be `PARTIAL`. This check is falsifiable and the negative test is stated so it can be re-run: if F-03 were registered as `CLOSED` with the basis "v2.2 corrected §2.2 and §3.1–§3.3", c9 returns FAIL, because that names only a rewritten paragraph. The accepted basis survives c9 because it names a rule change plus review attribution, not a patch.
 
 Result for this revision / 本修订核对结果：c1 clear (the only such sentence, in §11, was corrected in v2.6); c2 clear; c3 clear after v2.6; c4 **two rows drifted and were fixed here** — AC-14 still said "historical inventory incomplete" and AC-05 still said "CI FAILURE" without distinguishing the historical run from current enforcement; c5 **four findings were absent from §9/§10** and are now registered above.
 
 本修订：c1 清（唯一此类句在 §11，v2.6 已更正）；c2 清；c3 经 v2.6 后清；c4 **两行脱节，已在本次修正**；c5 **四项 finding 未在 §9/§10 出现，已在上表登记**。
+
+c6–c9 were run for the first time in this revision. c6 clear — all ten bases re-read and still true. c7 clear — the cited §, comment ids (`7006445553`, `7017127588`) and file path all exist and carry the stated values. c8 clear once the reopen conditions above were written; before that, the registry stated states without stating what would undo them, which is why c8 was added. c9: eight `CLOSED` rows pass; F-03 and F-04 pass only because their basis is a rule change with review attribution, and the negative test above records exactly how they would fail if that were not so.
+
+c6–c9 首次执行。c6 清——十项依据逐一重读仍成立；c7 清——所引 §、评论 id（`7006445553`、`7017127588`）与文件路径均存在且载有所述值；c8 在补写上述重开条件后清——在此之前，登记表只写状态而不写什么会推翻该状态，这正是新增 c8 的原因；c9：八个 `CLOSED` 行通过；F-03 与 F-04 之所以通过，是因为其依据是规则变更加审查归属，而上述反例测试已记录了它们在不成立时会如何失败。
 
 ### P1
 
@@ -1230,6 +1238,7 @@ This revision closes a hole in the previous one: the registry of findings. It al
 - **F-03 and F-04 closed as method-bound, with the basis attributed.** Their text is a rule about method (partial remediation does not establish complete closure), not a defect with a patch, and the report now enforces that distinction. The basis is proposed here and marked as requiring this PR’s review; it is not presented as an R6 finding.
 - **Status cross-check list added (§9).** Five checks, run every time a status sentence is touched, together with this revision’s result. Two acceptance-matrix rows had drifted (AC-14, AC-05) and were corrected here.
 - **R1 tracking items from PR #286 discharged.** The bound-snapshot declaration now says it binds the original record at its revision timepoint and explicitly does not assert the historical state was permanently correct; the cross-check list is the second item.
+- **R1 review remediation.** The R1 review of this revision returned `NEEDS-REVISION` with two P2 and one P3, all three about the new mechanisms having no failure mode. P2: F-03/F-04 closure had no falsifiable test, so check c9 was added — a `CLOSED` basis must be either a re-derivable verification or a rule change with review attribution, and the exact basis that would make F-03 fail is written down so the test can be re-run. P2: `LIMITATION` had no re-evaluation trigger, so §0 now states three mandatory conditions (factually true, no work item removes it, no executable path) and returns the entry to `OPEN` if any fails. P3: the cross-check verified that states exist but not that their bases survive, so c6 (basis validity), c7 (maintenance location reachable) and c8 (closure conditions met) were added, with this revision’s results recorded.
 - No policy text, normative status, approval state or adoption state changes. v1.1 remains the only NORMATIVE text. F-02 stays PARTIAL on Requirement 2 only.
 
 ## D7 v2.7 修订说明
@@ -1241,4 +1250,5 @@ This revision closes a hole in the previous one: the registry of findings. It al
 - **F-03 与 F-04 以「方法性」为由关闭，且依据归属明确**：其文字是关于方法的规则（部分修复不等于完全关闭），非可补丁缺陷，而本报告现已强制该区分。该依据由本修订提出并标注待本 PR 审查确认，不冒充 R6 的 finding。
 - **新增状态交叉核对清单（§9）**：五项核对，每次涉及状态句即执行，并附本修订结果。已发现两行验收矩阵脱节（AC-14、AC-05）并在本次修正。
 - **PR #286 的 R1 跟踪项已消账**：绑定快照声明已改为「绑定原始记录在其修订时点」并明确不声称历史状态永久正确；交叉核对清单即第二项。
+- **R1 审查整改**：R1 结论为 `NEEDS-REVISION`（2×P2 + 1×P3），三项均指向同一问题：新机制没有失败模式。P2：F-03/F-04 的关闭缺可反驳检验，故新增 c9——`CLOSED` 依据必须是可重推验证或规则变更加审查归属，并写明「使 F-03 失败的那个依据」以便重跑。P2：`LIMITATION` 缺重新评估触发器，故 §0 现写明三项必备条件（事实成立、无工作项可消除、无可执行路径），任一失效即回到 `OPEN`。P3：交叉核对只查状态存在、不查依据是否存续，故新增 c6（依据有效性）、c7（维护位置可达）、c8（关闭条件满足），并记录本修订执行结果。
 - 不改变任何政策文本、规范状态、批准状态、采纳状态；v1.1 仍为唯一 NORMATIVE；F-02 仅因要求 2 而为 PARTIAL。
