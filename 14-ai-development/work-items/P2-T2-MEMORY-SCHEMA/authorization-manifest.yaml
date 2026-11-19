@@ -2,7 +2,7 @@
 # Design-proposal scope only. Implementation authorization is expressly NOT granted
 # by this manifest. See scope.implementation_authorization below.
 
-schema_version: "1.0"
+schema_version: "1.1"
 work_item: P2-T2
 title: "Memory Storage Schema design proposal"
 repository: oahcom/AiMemoryBrainArchitecture
@@ -30,7 +30,8 @@ roles:
 
 baseline:
   commit: 9ede3970f47801cc3d3c93373eb5829bb697398b
-  note: "design branch rebased onto main 7f809387 before commit; frozen contracts unchanged"
+  design_branch_base: 7f8093876729212ef4e83461ba8c2f2cd96582c7
+  note: "design branch rebased onto main 7f809387 before first commit; frozen contracts unchanged"
   source: GitHub refs (origin/main at GO time)
 
 scope:
@@ -50,6 +51,67 @@ scope:
     memory/schema.sql, memory/dao.py, memory/vector_store.py, any Rust crate change,
     any migration script, or any test file. Those require a separate GO decision
     after the design is reviewed and frozen.
+  appending_prompt_source_forbidden: true
+  appending_prompt_source_note: >
+    The prompt DDL is attached inside design-proposal.md as Appendix A because adding a
+    separate prompt-source file would be a third write path outside this manifest's
+    allowed set. Attaching evidence inside an already-authorized path is not a scope
+    expansion.
+
+  schema_execution: DISCLOSED_INTERPRETATION
+  schema_execution_note: >
+    The design's own DDL was executed against an ephemeral in-memory SQLite database to
+    check internal coherence — no file written, no migration applied, no repository path
+    touched. authorization_basis records "no schema execution" as a design-only bound.
+    This manifest reads that bound as prohibiting application of schema to any persistent
+    store or repository path, and records the in-memory coherence check as disclosed
+    rather than as within scope by assumption. The check found a real defect
+    (accepted_events.event_id does not exist; the primary key is event_row) which was
+    corrected before review. No test suite was written and none of the twelve tests in
+    design-proposal.md §13 were run.
+
+review:
+  required: true
+  rounds:
+    - R1
+    - R2
+  independence: REQUIRED
+  blocking_question: >
+    Q1 in the proposal — the architecture choice. R2 states three options (A: Phase 1 as
+    store with Event-only transcript ingress; B: supersede Phase 1; C: three layers with a
+    separate transcript-capture layer). Q1 remains OPEN. A review recommendation is
+    PROPOSED, not a ruling.
+
+r1_disposition:
+  reviewed_head: 9b5446b9b63ff80f6594d0316b6083e986d84769
+  base: 7f8093876729212ef4e83461ba8c2f2cd96582c7
+  verdict: REQUEST CHANGES
+  platform_record: "PR #307 comment 7023231264"
+  findings:
+    - id: R1-B-01
+      severity: BLOCKING
+      title: "projection rebuild is not supported by commit_log alone"
+      r2_disposition: "CORRECTED — rebuild source set declared in full (§8.3); three tiers exact/partial/unreconstructable; commit_log-only claim withdrawn"
+    - id: R1-NB-02
+      severity: NON-BLOCKING
+      title: "Event payload is not equivalent to transcript retrieval"
+      r2_disposition: "CORRECTED — Layer 2 transcript capture schema and retrieval contract added (§7)"
+    - id: R1-NB-03
+      severity: NON-BLOCKING
+      title: "non-composite FK in context_assembly_entry"
+      r2_disposition: "CORRECTED — composite FK on (memory_id, version_id) against a new unique index (§8.4)"
+    - id: R1-NB-04
+      severity: NON-BLOCKING
+      title: "canonical vs transcript ownership conflated; immutability violation overstated"
+      r2_disposition: "CORRECTED — §5 rewritten; mutable transcript metadata no longer characterised as a canonical violation"
+    - id: R1-NB-05
+      severity: NON-BLOCKING
+      title: "prompt source unverifiable at the reviewed head"
+      r2_disposition: "CORRECTED — exact prompt DDL attached verbatim as Appendix A"
+  overclaims_corrected:
+    - "satisfies every capability — withdrawn (§9 gap table)"
+    - "nothing requested is lost — withdrawn (§9 gap table)"
+    - "date 2026-11-20 — corrected to 2026-11-19"
 
 conflicts_disclosed:
   - id: P2T2-C-01
@@ -60,31 +122,45 @@ conflicts_disclosed:
       merged a different object model (Memory/MemoryVersion/Claim/Event/Provenance) with
       implemented SQLite tables memories/versions/idempotency/commit_log and
       accepted_events/event_payloads/compile_outbox. The proposal does not adopt the
-      prompt schema. The conflict is escalated, not silently resolved.
+      prompt schema as the canonical store. The conflict is escalated, not silently
+      resolved.
+    r1_ruling: "the three original 'contradictions' were ruled OVERSTATED; they are recorded as tensions, not necessary incompatibilities"
+    r2_state: "recorded as design tensions in §5; resolution is an ownership decision, stated as such"
   - id: P2T2-C-02
     subject: "mutable value_score/decay_weight on a content row"
     detail: >
-      Contradicts the immutable-version invariant in core-entities.md §4 and the
-      no-stale-projection rule in phase-1-storage-trait-contract.md. Resolved in the
-      proposal by moving both to a rebuildable projection table.
+      Incompatible with the immutable-version invariant only if the row is the canonical
+      content row for a MemoryVersion. Under the recommended architecture it is not.
+    r1_ruling: "OVERSTATED as a canonical-immutability violation"
+    r2_state: >
+      scoring is relocated to a rebuildable projection because it is derived, not because
+      mutability is per se forbidden. Reason restated in §5 and §8.3.
   - id: P2T2-C-03
     subject: "ON DELETE CASCADE from sessions"
     detail: >
-      Conflicts with retention_class / forget_operation_id governance. Resolved in the
-      proposal by not creating a sessions storage root at all.
-
-review:
-  required: true
-  rounds:
-    - R1
-  independence: REQUIRED
-  blocking_question: Q1 in the proposal — Option A (Phase 1 is the store) vs Option B (supersede Phase 1)
+      Conflicts with retention_class / forget_operation_id governance only if canonical
+      memory is reachable through the session root. Under the recommended architecture it
+      is not.
+    r1_ruling: "OVERSTATED as a retention violation"
+    r2_state: >
+      a transcript_session is a real table in Layer 2, but owns no canonical row; the
+      single edge that could reach canonical provenance is ON DELETE RESTRICT, so the
+      destructive case fails loudly instead of cascading (§7.4).
+  - id: P2T2-C-04
+    subject: "prompt capabilities not preserved as-is"
+    detail: >
+      impact_level enum typing, decision_type as a CHECK-constrained column, and the two
+      prompt views as schema objects are not reproduced. Named in the §9 gap table rather
+      than described as 'nothing lost'.
+    r2_state: OPEN for review
 
 claims_forbidden:
   - "that P2-T2 is implemented"
   - "that the schema is frozen"
   - "that P2-T1 implementation is authorized"
-  - "that Q1 (Option A vs B) is resolved"
+  - "that Q1 (Option A vs B vs C) is resolved"
+  - "that the recommended Option C has been chosen by an accountable authority"
   - "that a vector store or embedding model has been selected"
   - "that a human Owner approved this design"
   - "that acceptance_authority has been assigned"
+  - "that this design is approved because an independent review recommended its direction"
