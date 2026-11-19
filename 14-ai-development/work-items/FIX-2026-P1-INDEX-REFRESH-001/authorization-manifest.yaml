@@ -86,6 +86,26 @@ findings: |
   reviewer. Asserting either way from this evidence would be a verdict without a
   standard.
 
+  #### FD-1 terminal disposition (adjudicated 2026-11-20)
+
+  FD-1 was adjudicated `AUTHORIZED-UNDER-DEV-BASELINE` by ruling session
+  `6aff5866-6a9c-83ec-910e-2e462517be4b` (S-axis separate session, same
+  `oahcom` GitHub identity; platform-axis independence NOT MET). Ruling
+  registration: Issue #264 comment `7021012962`. The standard the correction
+  lacked is the user-ruled dev-baseline convergence path registered at Issue
+  #264 comment `7000428916` (2026-11-19T05:14:48Z): development-chain carriers
+  proceed through "code chain + Owner acceptance + PR/merge + registration"
+  without waiting for quota unfreeze. Under that standard the merge
+  authorization source for PR #270 is the convergence ruling itself; the
+  Owner-role acceptance at `7001139728` is a link in that chain, not a separate
+  merge authorization; and the work item constraint ("No merge or normative
+  adoption is authorized by this work item") is not violated, because the
+  authorization was never claimed from this work item. The single-parent commit
+  `c3bf7e47` is registered separately as format deviation
+  `F-FD1-FMT-01` (squash/rebase vs standing "merge commit only"); it does not
+  reopen the authorization question. Ruling reply sha256
+  `fe7168a6d3ec2b0e441598b3586c15bd2f6512e6639f9e024306c48baf041867`.
+
   ### FD-2 — FIX-2026-P1-T4-FU1 row frozen at pre-merge state
 
   Row asserted `OPEN — documentation-only remediation; PR pending this row` and
