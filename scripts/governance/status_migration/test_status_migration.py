@@ -109,6 +109,31 @@ lifecycle:
             with self.assertRaises(ValueError):
                 check(path)
 
+    def test_gate_rejects_fabricated_reference(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "manifest.yaml"
+            head = "a" * 40
+            content = f"""status: VERIFIED
+subject_head: {head}
+lifecycle:
+  phase: VALIDATION
+  source_status: VERIFIED
+  subject_head: {head}
+  gates:
+    verified:
+      status: PASS
+      evidence:
+        commands: [pytest]
+        environment: Python 3.13
+        tested_head: {head}
+        expected_result: 10 tests pass
+        actual_result: 10 tests pass
+        logs: fake://forged-run
+"""
+            path.write_text(content, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "placeholder"):
+                check(path)
+
     def test_gate_rejects_wrong_head(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "manifest.yaml"
