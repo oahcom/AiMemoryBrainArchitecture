@@ -51,9 +51,9 @@ AI Agent 正在变得更强，但有价值的知识仍分散在对话、会话�
 
 Its job is to own the lifecycle of canonical memory and coordinate how task-specific memory context is prepared, delivered, applied, reconciled, and governed. Agents remain responsible for reasoning, planning, tool use, and action execution.
 
-**AI Memory Brain 是独立的记忆权威与治理层，而不是另一个 Agent 框架、聊天应用、向量数据库或提示词管理工具。**
+**AI Memory Brain 正在被设计为独立的记忆权威与治理层，而不是另一个 Agent 框架、聊天应用、向量数据库或提示词管理工具。**
 
-它负责规范记忆资产的生命周期，并协调任务所需记忆上下文的准备、交付、应用、对账和治理。推理、规划、工具调用与行动执行仍由 Agent 自身负责。
+其目标是管理规范记忆资产的生命周期，并协调任务所需记忆上下文的准备、交付、应用、对账和治理。推理、规划、工具调用与行动执行仍由 Agent 自身负责。
 
 ### What the architecture is designed to provide / 架构目标
 
@@ -77,7 +77,7 @@ The proposed architecture separates three concerns that are often collapsed into
 
 1. **Canonical Memory — what the system knows and why.** Durable, versioned memory assets with identity, scope, lifecycle, evidence, and provenance.
 2. **Memory Context — what a particular agent/task needs now.** A scoped and versioned working view assembled for a specific execution context.
-3. **Applied Context — what the adapter confirms was installed.** Evidence of the context version actually applied at the agreed inference boundary.
+3. **Applied Context — what the adapter attests to applying.** Evidence of the context version included at the declared inference boundary, as attested by the Adapter.
 
 This separation matters. A memory can exist without being activated into a task. Removing an item from one task context does not automatically delete its canonical memory. Sending a context package does not prove that an agent applied it. Forgetting is a governed lifecycle operation, not merely removing text from a prompt.
 
@@ -85,7 +85,7 @@ This separation matters. A memory can exist without being activated into a task.
 
 1. **Canonical Memory（规范记忆）：系统长期保存了什么，以及依据是什么。** 具备身份、作用域、生命周期、证据和来源链的持久化、版本化记忆资产。
 2. **Memory Context（记忆上下文）：某个 Agent/任务此刻需要什么。** 面向具体执行环境构建的、有作用域和版本的工作视图。
-3. **Applied Context（已应用上下文）：Adapter 确认实际安装了什么。** 在约定的推理边界上，证明实际应用版本的证据。
+3. **Applied Context（已应用上下文）：Adapter 对应用操作作出了什么确认。** 由 Adapter 提供的证据，用于表明特定上下文版本已纳入约定的推理请求边界。
 
 记忆存在不代表它必须进入每个任务上下文；从某个任务上下文移除内容不等于删除规范记忆；发送上下文也不等于 Agent 已经应用。遗忘必须是受治理的生命周期操作，而不只是从提示词中删掉一段文字。
 
