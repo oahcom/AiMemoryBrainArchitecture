@@ -24,11 +24,14 @@ python -m unittest discover -s . -p 'test_*.py' -v
 Do not suppress stderr, filter failures, use `|| true`, or alter the exit code. Preserve complete stdout, stderr and exit code.
 
 ## Test inventory
-- Existing baseline: 14 tests in test_forget_model.py.
-- DFI-001…DFI-022: methods test_DFI_001…test_DFI_022.
-- I-U011-T01…T16: methods test_T01…test_T16; report full source IDs.
-- STOR-01…07: methods test_STOR_01…test_STOR_07.
-- Expected discovered count: 59. Any difference must be investigated and reported.
+- Existing baseline: 24 tests in test_forget_model.py (14 at original authoring; 10 added by later mainline).
+- DFI-001…DFI-022: methods test_DFI_001…test_DFI_022 (22).
+- I-U011-T01…T16: methods test_T01…test_T16; report full source IDs (16).
+- STOR-01…07: methods test_STOR_01…test_STOR_07 (7).
+- AUTH-01…AUTH-14: methods test_AUTH_01…test_AUTH_14 (14).
+- FSTOR-01…FSTOR-20: methods test_FSTOR_01…test_FSTOR_20 (20).
+- Expected discovered count: 103 (79 contract + 24 baseline). Any difference must be investigated and reported.
+- Baseline reconciliation: 59 = original expectation (22+16+7+14 baseline-14); 93 = source dev-baseline run (79 contract + 14 baseline, record-014/015); 103 = current exact-Head run (79 contract + 24 baseline, record-017). Canonical current expectation = 103.
 
 ## Per-ID result table (expand to one row per ID)
 | Test ID | Expected assertion | Actual result | PASS/FAIL/NOT IMPLEMENTED/NOT RUN | Output reference | Notes |
@@ -36,7 +39,9 @@ Do not suppress stderr, filter failures, use `|| true`, or alter the exit code. 
 | DFI-001…022 | Matrix invariant | | | | |
 | I-U011-T01…T16 | U-011 §8 invariant | | | | |
 | STOR-01…07 | Fault schedule | | | | |
-| Existing baseline ×14 | Existing assertions unchanged | | | | |
+| AUTH-01…14 | Authorization matrix invariant | | | | |
+| FSTOR-01…20 | Fault schedule / projection exactness | | | | |
+| Existing baseline ×24 | Existing assertions unchanged | | | | |
 
 Never mark unexecuted tests PASS. Preserve failures and tracebacks exactly. Production-only gaps must be separately marked NOT IMPLEMENTED / NOT RUN, not used to disguise the model test status.
 

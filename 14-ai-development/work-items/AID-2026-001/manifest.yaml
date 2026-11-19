@@ -544,7 +544,7 @@ dev_baseline_integration:
   branch: remediation/aid-2026-001-forget-contract-closure-2026-11-18
   model_blob: 771c1fdc6f8a248a7121d165a0b035cebcc9880c
   tests_blob: 22b8d81e7738fe66074f9973932a2dbe79fb52ae
-  local_tests: "103 tests OK (79 contract + 24 forget_model); record-016"
+  local_tests: "103 tests OK (79 contract + 24 forget_model); record-017 exact-Head, record-016 integration"
   source_branch_baseline: "93 tests OK (79 contract + 14 forget_model) at e5f1198; record-014 / record-015"
   decisions:
     owner_d: ACCEPT (OD-D-FORGET-DELTA-20261119-009 @ 95347a5)
@@ -556,7 +556,8 @@ dev_baseline_integration:
     - reference-model/R3-RUNBOOK.md
     - r3-evidence/erratum-003.md
     - r3-evidence/erratum-004.md
-    - r3-evidence/execution-record-003.md through execution-record-016.md
+    - r3-evidence/execution-record-002.md
+    - r3-evidence/execution-record-003.md through execution-record-017.md
   excluded_from_integration:
     reason: mainline versions are newer and authoritative
     paths:
@@ -596,6 +597,11 @@ dev_baseline_integration:
     tests_blob_sha256_lf: 26c72ceaa636606118ef94013b7515842d51b02b521c3cb0e6ef4303c72308af
     tests_blob_bytes_crlf: 94380
     tests_blob_sha256_crlf: f326cafd70c97a7cc0133ad2139d7508d83f493c710d80f534e01c25d68734ce
+  baseline_reconciliation:
+    runbook_original_expectation: "59 = DFI 22 + I-U011 16 + STOR 7 + forget baseline 14 (superseded)"
+    source_dev_baseline: "93 = 79 contract + 14 forget at 95347a5/745c768 (record-014/record-015)"
+    current_exact_head: "103 = 79 contract + 24 forget at PR head code blobs (record-017; CI 44553412047)"
+    canonical: 103
   out_of_scope_dev_baseline:
     - real cryptographic receipt signature verification
     - production issuer minting a fresh credential per retry
