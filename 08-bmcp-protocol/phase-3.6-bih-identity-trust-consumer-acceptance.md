@@ -13,8 +13,8 @@
 | B | `session-b-domain-model-phase3` | `02-domain-model/phase-3.6-typed-identity-trust-closure.md` | `0a6b78a842e550b58533b797cdfcd2d954ed6826` |
 | I | `session-i-security-governance-2026-11-16` | `09-security-governance/phase-3.6-identity-trust-policy-joint-closure.md` | `0cbf6bb7480db873790c454817593a9b1c5548ba` |
 | I | same | `09-security-governance/phase-3.6-principal-trust-chain-authorization-revocation.md` | `74643a2f374179128d506c3b7e1d22da77119600` |
-| H | `session-h-bmcp-protocol` | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `9845c97ac43d7888732afafe12e28850ec02add8` |
-| H | same | `08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md` | `a43386d7bda8653a9a7675504cec2e6dacdd47f3` |
+| H | `session-h-bmcp-protocol` | `08-bmcp-protocol/phase-3.6-authenticated-identity-protected-operation-binding.md` | `e7ca5ce4ece5d8fd77fe0760e49a85afa0133248` |
+| H | same | `08-bmcp-protocol/phase-3.6-identity-binding-consumer-conformance-status.md` | `8afb914731a34d8ab44331f54f1f39bfd8ec37ce` |
 
 The acceptance applies to BIH36-JD-01..17 as recorded in the exact B/I/H source baseline above. It does not amend those decisions.
 
@@ -75,3 +75,22 @@ A late ACK may be retained as historical evidence but cannot mutate an owner sta
 ## 6. Final disposition
 
 H records **design-level consumer acceptance** of BIH36-JD-01..17 for its BMCP authentication, protected-message, ACK and reconnect boundary. This closes only H's owner-side design acceptance evidence gap. It does not close G6 as a whole, H36 execution, external governance, production schema freeze, JF-10, or Phase 3.6 final acceptance.
+
+
+## 7. 2026-11-19 — exact current H source-pin reaffirmation
+
+The H protocol-binding source pin in §1 is refreshed to the current H Owner branch readback:
+- Current protected-operation binding Blob: e7ca5ce4ece5d8fd77fe0760e49a85afa0133248.
+- Current H identity-binding conformance-status Blob: 8afb914731a34d8ab44331f54f1f39bfd8ec37ce.
+- The prior protected-operation binding Blob 9845c97ac43d7888732afafe12e28850ec02add8 was fetched directly and compared with the current file. All 257 prior lines remain in the current 751-line file; no prior line was removed. The current file adds Phase 3.6.3 Applied wire-profile and Phase 3.6.4 COC successor-candidate material.
+
+**H reaffirms the existing delegated design-level acceptance of BIH36-JD-01..17 only.** The added Applied/COC material is outside this BIH identity-consumer acceptance scope. This pin refresh does not accept or freeze CGH-APPLIED-1.1, does not resolve the eight-family G8 mapping gap, and does not transfer C/G/D/I/B approval.
+
+The existing ceilings remain unchanged:
+- H36-01..18 and H36-SR: SPECIFIED / NOT RUN.
+- I36-GOV-01..10: GOVERNANCE-BLOCKED.
+- H runtime implementation/conformance: NOT VERIFIED.
+- Applied Contract Frozen: NO.
+- Fact/Claim ADR-001: ADR-BLOCKED.
+
+A may use this refreshed H artifact Blob as current H Owner evidence for the BIH identity-consumer acceptance record. It is not an independent human signature or production schema certification.
