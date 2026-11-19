@@ -4,6 +4,7 @@ import argparse
 import json
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 import yaml
@@ -83,7 +84,43 @@ def _meaningful(value, field):
     raise ValueError(f"invalid evidence content type: {field}")
 
 
-def _validate_evidence(name, evidence, data, lifecycle):
+def _repo_root(path):
+    resolved = Path(path).resolve()
+    for parent in (resolved.parent, *resolved.parents):
+        if (parent / ".git").exists():
+            return parent
+    raise ValueError("manifest is not inside a Git working tree")
+
+
+def _evidence_file(value, field, root, subject_head=None):
+    if not isinstance(value, str):
+        raise ValueError(f"{field} must be a repository-relative file path")
+    candidate = Path(value)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        raise ValueError(f"{field} must be a safe repository-relative path")
+    target = (root / candidate).resolve()
+    if root not in target.parents or not target.is_file():
+        raise ValueError(f"{field} does not resolve to an existing repository file")
+    if subject_head:
+        try:
+            content = target.read_text(encoding="utf-8")
+        except (UnicodeError, OSError) as error:
+            raise ValueError(f"{field} is not readable UTF-8 evidence") from error
+        if subject_head not in content:
+            raise ValueError(f"{field} is not bound to subject_head")
+    return target
+
+
+def _identity(value, aliases):
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError("review identities must be non-empty strings")
+    raw = unicodedata.normalize("NFKC", value).strip().casefold()
+    # Resolve explicitly registered aliases before comparing normalized handles.
+    mapped = aliases.get(raw, raw)
+    return re.sub(r"[^a-z0-9]", "", mapped)
+
+
+def _validate_evidence(name, evidence, data, lifecycle, root):
     if not isinstance(evidence, dict):
         raise ValueError("PASS gate evidence must be a structured mapping: " + name)
     for field in EVIDENCE_FIELDS[name]:
@@ -96,18 +133,31 @@ def _validate_evidence(name, evidence, data, lifecycle):
             raise ValueError("manifest subject_head must be a full commit SHA for VERIFIED")
         if evidence["tested_head"] != subject_head:
             raise ValueError("VERIFIED tested_head does not match manifest subject_head")
+        _evidence_file(evidence["logs"], "verified.logs", root, subject_head)
     elif name == "independent_review":
         subject_head = lifecycle.get("subject_head") or data.get("subject_head")
         if not isinstance(subject_head, str) or not SHA_RE.fullmatch(subject_head):
             raise ValueError("manifest subject_head must be a full commit SHA for REVIEWED")
         if evidence["reviewed_head"] != subject_head:
             raise ValueError("REVIEWED reviewed_head does not match manifest subject_head")
-        if evidence["reviewer"].strip().casefold() == evidence["implementer"].strip().casefold():
+        aliases = data.get("review_identity_aliases", {})
+        if not isinstance(aliases, dict):
+            raise ValueError("review_identity_aliases must be a mapping")
+        normalized_aliases = {
+            unicodedata.normalize("NFKC", str(key)).strip().casefold():
+            unicodedata.normalize("NFKC", str(value)).strip().casefold()
+            for key, value in aliases.items()
+        }
+        if _identity(evidence["reviewer"], normalized_aliases) == _identity(
+                evidence["implementer"], normalized_aliases):
             raise ValueError("REVIEWED reviewer and implementer must be different identities")
+        _evidence_file(evidence["report"], "independent_review.report", root, subject_head)
 
 
 def check(path):
-    data = yaml.load(Path(path).read_bytes(), Loader=UniqueKeySafeLoader)
+    manifest_path = Path(path).resolve()
+    root = _repo_root(manifest_path)
+    data = yaml.load(manifest_path.read_bytes(), Loader=UniqueKeySafeLoader)
     if not isinstance(data, dict):
         raise ValueError("manifest root must be a mapping")
     source = data.get("status")
@@ -138,7 +188,7 @@ def check(path):
         if disposition == "PASS":
             if "evidence" not in record:
                 raise ValueError("PASS gate evidence missing: " + name)
-            _validate_evidence(name, record["evidence"], data, lifecycle)
+            _validate_evidence(name, record["evidence"], data, lifecycle, root)
         elif index < required_count:
             raise ValueError("required gate not proven PASS: " + name)
     markers = lifecycle.get("markers", {})
