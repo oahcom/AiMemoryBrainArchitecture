@@ -1,0 +1,139 @@
+# FIX-2026-P1-T4 设计记录：证据链分级
+
+- **Work Item：** FIX-2026-P1-T4
+- **Owner：** G（流程架构）
+- **授权：** DEC-FIX-2026-P1-T4-GO-001（2026-11-19）
+- **基线：** `5f7918f90fe4defe39ccc3de242019f8d4003d86`
+- **分支：** `ai/FIX-2026-P1-T4/G-evidence-tiering`
+- **政策状态：** PROPOSED
+
+## 1. 裁定链
+
+1. **设计裁定**：Level 1/2/3 = 证据深度选择器（非状态轴）；与 R1/R2/R3 审查级别、12 状态/6 阶段三轴独立。
+2. **授权形式裁定（选择 A）**：采用 P1-T3（PR #279，merge commit `5f7918f`）同构授权形式——正式 GO decision + manifest（allowed_write_paths + authorization_basis）即构成有效授权；`sponsor` / `accountable_owner` / `acceptance_authority` 显式登记 `NOT_ASSIGNED`，不得以 Owner G 替代。依据：AID-2026-008/009 亦为 `accountable_owner: NOT_ASSIGNED`。
+3. **GO 裁定**：8 条写入路径全部批准；不修改 `.github/workflows`；不授予 main 合并权。
+
+## 2. 三轴独立性
+
+| 维度 | 取值 | 决定 | 不得替代 |
+|---|---|---|---|
+| 变更风险 | Level 1/2/3 | 证据深度 | 不得由审查级别/规模推定 |
+| 审查级别 | R0–R3 | 独立与专业审查要求 | 不得由 Level 降低 |
+| 生命周期 | 12 状态 / 6 阶段 | 门禁里程碑 | 不受 Level 影响 |
+
+## 3. 风险类别 → 证据深度映射
+
+| change_class | 允许 Level | 说明 |
+|---|---|---|
+| ARCHITECTURE | 1 | 架构决策与契约 |
+| SECURITY | 1 | 安全边界/授权/遗忘删除 |
+| PERFORMANCE_CRITICAL | 1 | 性能关键路径 |
+| PUBLIC_API | 1 | 公开接口变更 |
+| DATA_MIGRATION | 1 | 数据/模式迁移 |
+| DOC_NORMATIVE | 1 | 改变规范语义的文档 |
+| FEATURE | 1–2 | 有界功能实现 |
+| BUGFIX | 1–2 | 一般缺陷修复 |
+| DOC_EDITORIAL | 1–3 | 编辑性文档（无语义变化） |
+| OPS | 1–3 | 非发布关键运维 |
+| UNKNOWN | BLOCKED | 不得赋级 |
+
+附加规则：R3 一律 Level 1；R2→Level 3 必须提供 `downgrade_justification`，否则 BLOCKED。
+
+## 4. F 裁定落实
+
+| 编号 | 裁定 | 落实位置 |
+|---|---|---|
+| F1 授权缺失（BLOCKING） | 由 DEC-FIX-2026-P1-T4-GO-001 关闭 | 本清单 + authorization-manifest |
+| F2 分类边界 | 风险→深度映射表 | 政策 §2、§3；检查器 CLASS_ALLOWED_LEVELS |
+| F3 安全降级 | Level 1 强制底线 | 政策 §3.1；检查器 CE_LEVEL_CLASS_CONFLICT / CE_R3_DOWNGRADE |
+| F4 证据字段 | 全级 40 位 SHA + 简述 | 政策 §2；检查器 CE_NO_SUBJECT_HEAD / CE_BAD_SHA / CE_NO_SUMMARY |
+| F5 审计留痕 | assessed_by/at/rationale/base_head 等 | 政策 §4 |
+| F6 v3 兼容 | 保留全部绑定与真实性校验 | 政策 §5；检查器 binding.* 与 authenticity.* 判定 |
+| F7 双语结构 | AI-STD-001 单文件 EN/ZH 交替，不建 docs/en 副本 | AI-STD-001 §4.2.1 |
+| F8 上位依据 | 不以 AI-EXEC-002 v1.2 为依据 | 政策文首「明确不作为依据」 |
+
+## 5. 检查器规格
+
+输入：证据声明（扁平 YAML 子集，`evidence:` / `binding:` / `authenticity:` 三个嵌套块）。
+输出：`VERDICT` / `LEVEL` / `REASON` / `SUMMARY` 记录；退出码 0/1/2。
+
+8 项验收门槛逐项实现（原因码见政策 §6），并由 `test_evidence_tiering.py` 逐项断言 VERDICT/REASON 记录（非仅退出码），另有 3 个通过用例与 4 个附加 fail-closed 用例。
+
+## 6. 偏离与限制（Deviations）
+
+| 项 | 说明 |
+|---|---|
+| CI 接入 | 未接入 `.github/workflows`（授权范围外）。检查器当前为手动/流程调用，CI 集成需另行授权。 |
+| 语义等价判断 | 检查器不判断中英文语义等价、不判断文档是否"实质改变规范语义"；`DOC_NORMATIVE` 的判定依赖人（Owner/审查者）并须留痕。脚本只校验声明结构与强制规则。 |
+| 来源真实性 | 检查器不验证外部来源真实性；仅强制 VERIFIED 声明必须附 `verification_record`，否则 BLOCKED。 |
+| 政策采纳 | 本次交付不构成政策采纳；状态保持 PROPOSED。 |
+
+## 7. R1 缺陷修复映射
+
+| R1 缺陷 | 修复 |
+|---|---|
+| B-01 v3 绑定未真实执行 | 仓库自动发现（无仓库即 `CE_NO_REPO`）；subject_head 强制 commit 对象校验；每条 evidence.* 路径以 `cat-file -e <subject>:<path>` 校验 subject tree 包含、以 `hash-object` 与 `rev-parse <subject>:<path>` 校验工作树/blob 一致；Level 1 额外校验 sidecar 摘要（`sha256:<64hex>` 格式、与 subject blob 实际摘要一致、最近触碰该 sidecar 的 commit message 携带摘要）；Level 3 亦执行 protocol/tree/blob 三项 |
+| B-02 R2 降级可伪造 | R2→L3 须同时具备 `downgrade_justification`、`downgrade_confirmed_by`（≠ assessed_by）、`downgrade_confirmation_record`；三项各自独立原因码 |
+| B-03 分类信任边界缺失 | 可降级类别（FEATURE/BUGFIX/DOC_EDITORIAL/OPS）须 `classification_basis` + 独立 `classification_confirmed_by` + subject tree 内 `classification_record`；强制 L1 类别改标即触发 `CE_LEVEL_CLASS_CONFLICT` |
+| H-01 审计字段未强制 | `assessed_by`/`assessed_at`/`rationale`/`base_head` 强制；`base_head` 另校验为 subject_head 祖先 |
+| H-02 测试缺 review_level 边界 | 新增缺失/非法 review_level、R2 降级三项负向测试 |
+| H-03 解析器不严格 | 拒绝 tab、非 2 空格缩进、嵌套块头、重复键/块；全部 `CE_UNPARSABLE` |
+| H-04 测试无真实 Git | 全部用例改为真实临时 Git 仓库 fixture（真实 commit/tree/blob/sidecar 与 commit message 锚定） |
+| M-01 模板字段不全 | manifest `evidence_tiering` 增加 `review_level`、分类与降级确认字段、`declaration_path`，并写明与声明的同步要求 |
+| M-02 Level 3 歧义 | 政策 §5 增加「v3 校验范围按等级」表：protocol/tree/blob 全等级强制，sidecar 仅 Level 1；中英文同步 |
+
+## 8. 第二轮复审（R2）修复映射
+
+| R2 缺陷 | 修复 |
+|---|---|
+| 降级确认记录无 Git 绑定 | `downgrade_confirmation_record` 纳入 subject tree / 工作树 / blob 三项校验（`CE_DOWNGRADE_RECORD_NOT_IN_SUBJECT` / `CE_DOWNGRADE_RECORD_MISSING_WORKTREE` / `CE_DOWNGRADE_RECORD_BLOB_MISMATCH`）；缺失值 `CE_R2_DOWNGRADE_NO_RECORD` |
+| 分类确认记录无 Git 绑定 | `classification_record` 同样三项校验（`CE_CLASS_RECORD_*`）；缺失值 `CE_NO_CLASSIFICATION_RECORD` |
+| `--repo` 仓库身份未绑定 | 声明新增 `repository` 字段，与 `origin` 远程对比：不符 `CE_REPO_IDENTITY_MISMATCH`、远程缺失/非 GitHub `CE_REPO_IDENTITY_UNVERIFIED`、未声明 `CE_NO_REPOSITORY` |
+| 模板同步契约不完整 | 同步清单扩展至 `classification_confirmed_by` / `classification_record` / 三个 `downgrade_*` 字段；AI-STD-001 §4.2.1 新增规则 10（同步义务 + `declaration_path` + 记录按 Git 校验） |
+| 测试缺口 | 新增 11 项：分类/降级记录的伪造路径与缺失值、空白确认者、L3 三项绑定负向、`CE_EVIDENCE_MISSING_WORKTREE`、仓库身份不符与不可核验 |
+
+## 9. 第三轮复审（R3）修复映射
+
+| R3 缺陷 | 修复 |
+|---|---|
+| B-01 origin hostname 可被路径伪造 | `repo_slug()` 改为严格解析：scp 形式仅当 host 精确等于 `github.com`；URL 形式经 `urllib.parse` 校验 scheme ∈ {https,http,ssh,git} 且 hostname 精确等于 `github.com`；拒绝含 `..` 的段与非两段路径；`https://attacker.invalid/github.com/...` 与 `https://github.com.attacker.invalid/...` 均判 `CE_REPO_IDENTITY_UNVERIFIED` |
+| T-01 恶意 URL 测试 | 新增路径伪造与子域伪造两项测试 |
+| T-02 `CE_NO_REPOSITORY` 测试 | 新增未声明 repository 测试 |
+| T-03 记录工作树/blob 负向 | 分类与降级记录各新增 worktree 缺失、blob 篡改两项测试（共 4 项） |
+| D-01 中英描述不一致 | 政策 §3.2/§3.5 的记录表述统一为"按 §5.6 在 subject tree、工作树与 blob 三处校验"，中英文同步 |
+
+## 10. 第四轮复审（R4）修复映射
+
+| R4 缺陷 | 修复 |
+|---|---|
+| T-04 `test_no_repository_fails_closed` 缺 VERDICT 断言 | 补齐 `VERDICT\tBLOCKED` 断言，与 `CE_NO_REPO` 共存，满足「不得仅以退出码为证据」契约 |
+| B-01 输入规范化边界 | `repo_slug()` 现拒绝非标准端口（`parsed.port` 必须为 None）、query、fragment；路径按 `^owner/repo(\.git)?$` 严格匹配，重复斜杠/空段/`..` 一律拒绝而非归一化 |
+| 边界测试 | 新增 5 项：非标准端口、query、fragment、重复路径段、`ssh://` 形式通过 |
+| 文档编号 | 政策 §3.2/§3.5 引用改为「§5 第 6 条 / §5 item 6」，避免与子标题编号混淆 |
+
+## 11. 第五轮复审（R5）修复映射
+
+| R5 缺陷 | 修复 |
+|---|---|
+| URL scheme 过宽（接受 `http://`、`git://`） | 仅接受 `https`（不允许用户名）与 `ssh`（用户名必须为 `git`） |
+| SCP 用户名可选/任意 | 改为 `^([A-Za-z0-9._-]+)@host:path$` 且用户名必须严格为 `git` |
+| SSH URL 用户名未校验 | `ssh://` 形式要求 `parsed.username == "git"` 且无 password |
+| HTTPS 带用户名被接受 | `https://` 形式要求无 username/password |
+| 测试缺口 | 新增 5 项拒绝测试：`http://`、`git://`、`ssh://attacker@`、`attacker@github.com:`、`https://token@` |
+| 政策未列允许格式 | 中英文 §5 第 7 条增加允许 origin 格式表（HTTPS/SSH URL/SCP 三种）与拒绝清单 |
+
+## 12. 第六轮复审（R6）修复映射
+
+| R6 缺陷 | 修复 |
+|---|---|
+| B-02 显式空端口被接受（`https://github.com:/o/r`） | 不再依赖 `parsed.port`，改为 **authority 原文比对**：HTTPS 要求 `netloc` 精确等于 `github.com`，SSH 要求精确等于 `git@github.com`；任何显式端口（含空端口）都会使 netloc 不等而拒绝 |
+| B-03 空 userinfo / 空 password 分隔符被接受 | 同上：`https://@github.com/o/r` 的 netloc 为 `@github.com`、`ssh://git:@github.com/o/r` 为 `git:@github.com`，均不等于允许值 → `CE_REPO_IDENTITY_UNVERIFIED` |
+| B-04 非数字端口触发 ValueError | `urlparse` 分支包裹 `try/except ValueError` → 返回 None（fail-closed），不产生 `CE_INTERNAL_ERROR` |
+| 测试 | 新增 4 项：空端口、空 userinfo、SSH 空 password、非数字端口（并断言不出现 `CE_INTERNAL_ERROR`）；query/fragment 拒绝测试保留并通过 |
+
+## 13. 第七轮复审（R7）修复映射
+
+| R7 缺陷 | 修复 |
+|---|---|
+| B-05 空 query / 空 fragment 分隔符未被拒绝 | `urlparse` 前先检查原始 URL 是否含 `?` 或 `#`（裸分隔符解析后 query/fragment 均为空字符串，仅检查解析字段无法识别）→ 存在即返回 None |
+| 测试 | 新增 2 项：`...git?`、`...git#` 均断言 `CE_REPO_IDENTITY_UNVERIFIED`；累计 67 项 |
