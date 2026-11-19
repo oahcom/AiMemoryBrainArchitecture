@@ -3,6 +3,7 @@
 - 文档 ID：SYS-RESP-001
 - 版本：1.0
 - 源规范：[项目规范性原文](../../../01-system-architecture/responsibility-matrix.md)
+- 源版本：fcec7c598816d439ec4c89694210ccc220aeeccf
 - 对应英文：[Subsystem Responsibility Matrix](../../en/01-system-architecture/responsibility-matrix.md)
 - 状态：DECIDED（职责基线）；明确列出的详细边界问题仍为 OPEN
 
@@ -23,7 +24,8 @@
 | Context 投递/确认 | — | — | — | — | — | — | — | — | — | S | S | P | S | S |
 | Scope/Permission 执行 | S | S | S | S | S | S | S | S | S | S | S | S | P | S |
 | Forget/Retention 治理 | S | S | S | S | S | S | S | S | S | — | S | S | P | S |
-| 幂等/重放/恢复 | — | S | S | — | S | S | S | S | S | S | S | S | S | P |
+| 入站幂等与 Receipt 重放 | — | S | — | — | P | S | — | — | — | — | — | — | S | S |
+| 跨组件重放、协调与恢复 | — | S | S | S | S | S | S | S | S | S | S | S | S | P |
 | Metrics/Tracing/审计关联 | — | S | S | S | S | S | S | S | S | S | S | S | S | P |
 
 ## 职责归属规则
@@ -36,6 +38,7 @@
 6. Compiler 负责提出和转换记忆；Canonical Lifecycle Policy 决定候选内容是否以及如何成为权威记忆资产。
 7. Retrieval 返回候选及证据；Activation Policy 决定候选是否进入 Context。
 8. Agent Adapter 在推理边界应用 Context，但不成为记忆选择或 Canonical Memory 的权威。
+9. 幂等性职责分层：Event Ingestion 负责入站去重和原始 Receipt 语义；Event Store 负责 Event 与编译意图的原子持久化；Consistency/Recovery 负责跨组件重放、协调和恢复。精确幂等身份字段仍由专门的幂等契约规定，本文不重新定义。
 
 ## 需要在详细设计中解决的边界问题
 

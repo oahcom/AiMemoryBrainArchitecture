@@ -3,6 +3,7 @@
 - Document ID: SYS-RESP-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/responsibility-matrix.md)
+- Source revision: fcec7c598816d439ec4c89694210ccc220aeeccf
 - Chinese counterpart: [子系统职责矩阵](../../zh-CN/01-system-architecture/responsibility-matrix.md)
 - Status: DECIDED ownership baseline; detailed boundary questions remain OPEN where stated
 
@@ -23,7 +24,8 @@ Legend: **P** = primary owner; **S** = supporting participant; **—** = not res
 | Context delivery/acknowledgement | — | — | — | — | — | — | — | — | — | S | S | P | S | S |
 | Scope/permission enforcement | S | S | S | S | S | S | S | S | S | S | S | S | P | S |
 | Forgetting/retention governance | S | S | S | S | S | S | S | S | S | — | S | S | P | S |
-| Idempotency/replay/recovery | — | S | S | — | S | S | S | S | S | S | S | S | S | P |
+| Ingress idempotency and receipt replay | — | S | — | — | P | S | — | — | — | — | — | — | S | S |
+| Cross-component replay, reconciliation and recovery coordination | — | S | S | S | S | S | S | S | S | S | S | S | S | P |
 | Metrics/tracing/audit correlation | — | S | S | S | S | S | S | S | S | S | S | S | S | P |
 
 ## Ownership rules
@@ -36,6 +38,7 @@ Legend: **P** = primary owner; **S** = supporting participant; **—** = not res
 6. The Compiler proposes and transforms memories; canonical lifecycle policy decides whether and how candidates become durable canonical assets.
 7. Retrieval returns candidates and evidence; Activation Policy decides whether candidates belong in a context.
 8. Agent Adapter applies context at the boundary; it does not become the authority for memory selection or canonical memory.
+9. Idempotency ownership is layered: Event Ingestion owns ingress deduplication and original-receipt semantics; the Event Store owns atomic persistence of Event plus compile intent; Consistency/Recovery owns cross-component replay, reconciliation and recovery coordination. Exact idempotency identity fields remain governed by the dedicated idempotency contract, not redefined here.
 
 ## Boundary questions to resolve in detailed design
 
