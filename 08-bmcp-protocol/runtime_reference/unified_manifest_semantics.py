@@ -52,6 +52,21 @@ def validate_owner_snapshot(snapshot, owner, allow_legacy_d_snapshot=False):
     values=snapshot.get("owner_specific_high_waters")
     if not isinstance(values,dict):
         return INVALID
+    if owner == "D":
+        # Apply the D string-length contract before either the legacy opt-in
+        # return or the normal eight-field validation path.
+        bounded_string_fields = {
+            "producer_registration_high_water",
+            "work_item_high_water",
+            "attempt_high_water",
+            "barrier_generation",
+            "forget_fence_generation_high_water",
+            "dependency_closure_cursor",
+        }
+        for name in bounded_string_fields.intersection(values):
+            value = values[name]
+            if not isinstance(value, str) or not 1 <= len(value) <= 512:
+                return INVALID
     if owner=="D" and set(values)=={
         "producer_registration_high_water","work_item_high_water","attempt_high_water",
         "barrier_generation","barrier_root",
@@ -69,21 +84,6 @@ def validate_owner_snapshot(snapshot, owner, allow_legacy_d_snapshot=False):
         return INVALID
     if any(not isinstance(v,str) or not v for v in values.values()):
         return INVALID
-    if owner == "D":
-        bounded_string_fields = {
-            "producer_registration_high_water",
-            "work_item_high_water",
-            "attempt_high_water",
-            "barrier_generation",
-            "forget_fence_generation_high_water",
-            "dependency_closure_cursor",
-        }
-        if any(
-            not isinstance(values.get(name), str)
-            or not 1 <= len(values[name]) <= 512
-            for name in bounded_string_fields
-        ):
-            return INVALID
     for name,value in values.items():
         if name.endswith("digest") or name.endswith("_root"):
             if not re.fullmatch(r"[0-9a-f]{64}",value):

@@ -89,6 +89,40 @@ class DOwnerSnapshotAlignmentTests(unittest.TestCase):
     def test_11_legacy_five_field_snapshot_requires_explicit_legacy_opt_in(self):
         self.assertEqual(validate_owner_snapshot(snapshot("D",True),"D",allow_legacy_d_snapshot=True),VALID)
 
+    def test_legacy_opt_in_rejects_513_character_values_in_both_validation_paths(self):
+        bounded_legacy_fields = (
+            "producer_registration_high_water",
+            "work_item_high_water",
+            "attempt_high_water",
+            "barrier_generation",
+        )
+        for field in bounded_legacy_fields:
+            with self.subTest(field=field):
+                direct = snapshot("D", True)
+                direct["owner_specific_high_waters"][field] = "x" * 513
+                direct["owner_specific_high_waters_digest"] = td(
+                    "OWNER-SPECIFIC-HIGH-WATERS", direct["owner_specific_high_waters"]
+                )
+                self.assertEqual(
+                    validate_owner_snapshot(direct, "D", allow_legacy_d_snapshot=True),
+                    INVALID,
+                )
+
+                snapshots = {owner: snapshot(owner) for owner in ("I", "D", "C")}
+                snapshots["D"] = snapshot("D", True)
+                snapshots["D"]["owner_specific_high_waters"][field] = "x" * 513
+                snapshots["D"]["owner_specific_high_waters_digest"] = td(
+                    "OWNER-SPECIFIC-HIGH-WATERS", snapshots["D"]["owner_specific_high_waters"]
+                )
+                self.assertEqual(
+                    validate_union(
+                        composed_manifest(snapshots), [], [], snapshots,
+                        membership_proofs={}, verify_owner_snapshot=lambda *_: True,
+                        allow_legacy_d_snapshot=True,
+                    ),
+                    INVALID,
+                )
+
     def test_13_schema_accepts_exact_eight_field_d_snapshot(self):
         schema_path=ROOT / "schemas" / "bmcp.coc-jf10-unified-1.2.17.schema.json"
         schema=json.loads(schema_path.read_text(encoding="utf-8"))
