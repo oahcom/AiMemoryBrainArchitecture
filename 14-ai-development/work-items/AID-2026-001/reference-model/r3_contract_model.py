@@ -79,6 +79,7 @@ class Reconciliation(str, Enum):
 EXPECTED_RECEIPT_ISSUER = "authority.example"
 EXPECTED_RECEIPT_AUDIENCE = "forget-contract-r3"
 EXPECTED_RECEIPT_PURPOSE = "SUPPRESSION_COMMIT"
+REQUIRED_RECEIPT_SCOPE = frozenset({"suppression:commit"})
 
 
 @dataclass(frozen=True)
@@ -391,11 +392,19 @@ class R3Model:
             raise ContractViolation("receipt PermissionEpoch mismatch")
         if cred.nonce != auth.nonce:
             raise ContractViolation("receipt nonce mismatch")
-        if request_hash and cred.request_hash and cred.request_hash != request_hash:
-            raise ContractViolation("receipt request_hash mismatch")
-        if operation_id and cred.operation and cred.operation != operation_id:
+
+        # F-OI-04: strict binding. A credential that names no operation, no
+        # request hash, or no scope is not a binding for anything, and the
+        # placeholder "default-hash" is not an exemption.
+        if not cred.operation:
+            raise ContractViolation("receipt operation missing")
+        if cred.operation != operation_id:
             raise ContractViolation("receipt operation mismatch")
-        if cred.scope and "suppression:commit" not in cred.scope:
+        if not cred.request_hash:
+            raise ContractViolation("receipt request hash missing")
+        if cred.request_hash != request_hash:
+            raise ContractViolation("receipt request_hash mismatch")
+        if not REQUIRED_RECEIPT_SCOPE.issubset(cred.scope):
             raise ContractViolation("receipt scope insufficient")
         if not (cred.not_before <= now < cred.expires_at):
             raise ContractViolation("receipt validity window expired")
@@ -438,7 +447,13 @@ class R3Model:
             if self.legal_hold:
                 raise ContractViolation("Legal Hold prevents suppression")
 
-            self._validate_authorization(auth, now, current_epoch)
+            self._validate_authorization(
+                auth,
+                now,
+                current_epoch,
+                request_hash=request_hash,
+                operation_id=operation_id,
+            )
 
             self.phase = Phase.AUTHORIZED
             return self.commit_suppression(
