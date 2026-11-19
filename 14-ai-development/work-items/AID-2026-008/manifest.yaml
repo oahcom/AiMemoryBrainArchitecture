@@ -17,7 +17,7 @@ risk_rationale: >-
 status: PROPOSED
 
 registration:
-  status: BLOCKED_PENDING_REGISTRATION
+  status: REGISTERED
   allocated_id: AID-2026-008
   allocation_authority: Issue #264 comment 7007736165
   owning_issue: 263
