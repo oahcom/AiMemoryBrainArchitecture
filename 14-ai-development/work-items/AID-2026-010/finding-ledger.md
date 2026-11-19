@@ -133,17 +133,21 @@ R40（A-OWNER-INTEGRATION-R40-2026-11-19）：A 按精确 commit `d4fb6f199a9546
 | 历史 ID / 别名 | `F-43-06`（历史别名，不得继续作主键） |
 | 原始锚点 | Issue #43 comment `7013501942`；交叉引用 #25 comment `7013493546` |
 | 问题定义 | Storage-persisted + COC-committed JoinProof 缺少规范性双持久化写序、canonical-copy 规则与崩溃恢复协议。 |
-| 状态 | OPEN / BLOCKED |
+| 状态 | CLOSED |
 | 责任 Owner | Storage Owner |
 | 回流去向 | Storage Owner 裁决 → #25 owner-decision 载体 + 本台账 |
 | 关闭条件 | Storage durable write + signed receipt → COC quorum append binding exact ref/digest → 双向回读 → 才 owner release；重试用同一 immutable identity |
-| 最新裁决 / 证据 | #43 `7013501942`（F-43-06 P1 OPEN/BLOCKED 原始登记） |
+| 最新裁决 / 证据 | R43：Storage normative protocol independently reviewed and accepted for limited architecture-contract scope; Commit `8e5e2d9f2d27f0d9d08c208798f3cd9ddd1598ae`, Blob `7ecd7f21724c4f6f46c1618a9d102e5d27ea35de`; #25 `7023314994`; #43 `7023315618` / A review `PENDING` |
 | 范围限制 | 架构可行性 finding，非实现验证 |
 
 
 R41（A-OWNER-INTEGRATION-R41-2026-11-19）：F-43-06A 维持 OPEN/BLOCKED，Storage Owner 派工定义规范性双持久化与崩溃恢复协议。规范写序必须是 Storage durable write → signed receipt → COC quorum append，且 append 明确绑定 exact immutable ref + digest → 双向回读 Storage 与 COC 的 exact identity/ref/digest/receipt → 全部一致后 owner release。所有重试/超时恢复必须复用同一 immutable identity/idempotency key；禁止生成新 identity 掩盖不确定提交。需定义 canonical-copy 唯一权威副本、复制方向、冲突处理、receipt 与 quorum proof 绑定、各崩溃窗口恢复判定及 UNKNOWN/BLOCKED fail-closed。交付到既有 #25 owner-decision 载体并回填本 ledger；不要求实现/运行时证明。本 finding 需 A 独立复审，不因派工或草案完成自动关闭。
 
 R42（A-OWNER-INTEGRATION-R42-2026-11-19）：F-43-06A 继续 OPEN/BLOCKED。A 裁定 AID-2026-010 当前授权范围为 Integration Review；其 accountable_owner 为 NOT_ASSIGNED 的状态不能解释为授予 Storage Owner 规范决策权。Finding 上标注 Storage Owner 是技术责任分配，不等于 AI-EXEC Work Item 授权。A 不授权将 AID-2026-010 扩张解释为 Storage Owner 的规范决策授权，也不在配额冻结 ACTIVE 时自行创建/签发新的 AID 或独立 Work Item。解阻须由有权 Work Item issuer 建立独立 Storage Owner Work Item，明确独立 AID、accountable_owner、授权范围/交付载体及 AI-EXEC-001 v1.1 + AI-EXEC-002 v1.1（或正式更新版本）的适用提示词版本；随后 Storage 才能作出其自有规范决定。此裁定不妨碍 Storage Owner 在获授权前提供非约束性技术输入，但不得登记为 ACCEPT/REJECT 或权威规范决定。
+
+R43（A-OWNER-INTEGRATION-R43-2026-11-20）：A 已在独立 Storage Work Item AID-2026-011 授权上下文下，回读 Storage Owner `STORAGE-OWNER-2026-11-20-001`。精确 Commit `8e5e2d9f2d27f0d9d08c208798f3cd9ddd1598ae`、文件 `reviews/storage-consistency/phase-3.8.3-storage-canonical-joinproof-dual-persistence-and-recovery-protocol.md`、Blob `7ecd7f21724c4f6f46c1618a9d102e5d27ea35de`；既有分支 `session-storage-consistency-forget-atomicity-2026-11-16` 回读同 Blob。核验 Storage durable write → signed durable receipt → COC quorum append exact binding → 双向权威回读 → owner release eligibility；Storage canonical JoinProof bytes 与 COC binding/commit authority 分离；10 类 crash/recovery matrix；exact replay 同 identity/digest；changed digest/immutable parameter conflict；UNKNOWN/BLOCKED 与 INTEGRITY_CONFLICT fail-closed；不以 timestamp/cache 覆盖；不声称 XA/2PC。Storage 与 COC 各自的 authority 边界、D/I/C 独立 release predicate 和生产实现非主张均明确。**裁定 F-43-06A CLOSED（仅限 Storage-owned 双持久化、canonical-copy、恢复与证据绑定架构规范交付）**。不代表生产实现、真实 receipt/quorum、CI、Runtime conformance 或生产授权。Storage #25 comment `7023314994`、#43 comment `7023315618`。
+
+R43 对 F-43-07 Stage 2：A 回读同一 D Blob `05a24f7eab663f66a3153d79adfab699b275f1a6` 对应的 Storage `STORAGE-OWNER-2026-11-20-002` 决定，确认 `ACCEPT WITH LIMITATIONS`。限制被接受为 Storage 权威边界：D Storage PREPARED_HIDDEN prepare receipt 不等同 F-43-06A RecoveryJoinProof durable receipt；COC applicability、ParticipantIntent schema/cardinality、quorum algorithm/threshold 仍由 COC 自决；RecoveryJoinProof canonical bytes 归 Storage，COC 保存 quorum binding envelope；H consumer mapping/currentness 仍待 H。D §2.2/§3.1/§6.1 的 prepare receipt 应按独立记录/类型理解；§3.2/§5.3/§6/§8 的 COC 语义仅为条件提案，须 COC 自有权威接受；§6.5 canonical-copy 规则不得被解释为 COC 持有第二份可竞争 RecoveryJoinProof 内容副本。当前 D Blob 无需为满足 Storage Stage 2 决定而强制修改；若后续 D successor 改动上述边界，须 Storage 对新精确 Blob 重新决定。F-43-07 仍 OPEN/BLOCKED，等待 H Stage 3 及 COC 适用性/权威决定，再由 A 对同一精确版本集成复审。
 ## F-43-06B — BIH Registry §9 currentness / status-scope reconciliation
 
 | 字段 | 内容 |
@@ -182,6 +186,8 @@ R42（A-OWNER-INTEGRATION-R42-2026-11-19）：A 独立回读 #43 comment `702310
 R41（A-OWNER-INTEGRATION-R41-2026-11-19）：F-43-07 维持 OPEN/BLOCKED。批准分阶段执行：D Owner 先在既有 D 会话/分支定义 `PublicationParticipantRef`、`StorageVisibilityParticipantRef` 与 COC `ParticipantIntentRef` 的候选映射边界或规范性排除；必须写明 nominal identity、authority/namespace、exact ref+digest、operation/idempotency identity、ordering/linearization point、receipt/quorum binding、retry/replay、crash/recovery、UNKNOWN/BLOCKED 及独立恢复枚举。D 草案不得单方面确定 Storage/COC 的物理或权威记账所有权。其后 Storage Owner 独立接受/拒绝 Storage visibility 与双持久化语义，H Owner 独立接受/拒绝消费侧映射及 status/currentness 语义；各自提供精确 artifact SHA 与限制项。D/Storage/H 三方均明确接受同一版本后，A 才做集成复审。若不能形成 ParticipantIntentRef 映射，必须明确规范性排除并定义等价的权威恢复枚举。不得把架构可行性结论当作实现验证。
 
 R42（A-OWNER-INTEGRATION-R42-2026-11-19）：A 已独立回读 D Owner `D-OWNER-2026-11-19-008` 的精确草案：Commit `8fbef916785986fa1867ddf2eb3e3a5e4b366c5e`，文件 `08-bmcp-protocol/d-publication-storage-coc-participantref-mapping-boundary-1.0.md`，Blob `05a24f7eab663f66a3153d79adfab699b275f1a6`；在既有 remediation 分支再次读取得到同一 Blob。草案可作为阶段一 D-owned proposal；它明确三种 ref 为不同 nominal identity，采用部分跨域绑定而非身份合并，并将 Storage/COC/H 自有语义留待各自接受。F-43-07 维持 OPEN/BLOCKED；阶段二 Storage Owner 与阶段三 H Owner 对同一 Blob 的独立接受尚未取得，且 Storage 规范决策授权缺口须先解决。A 不把 D 草案视为三方共同基线。
+
+R43（A-OWNER-INTEGRATION-R43-2026-11-20）：F-43-07 Stage 2 Storage Owner 已按独立 Work Item AID-2026-011 对 D Blob `05a24f7eab663f66a3153d79adfab699b275f1a6` 作 `ACCEPT WITH LIMITATIONS`（`STORAGE-OWNER-2026-11-20-002`，见 #25 comment `7023314994` / #43 comment `7023315618`）。A 独立复核五项限制：prepare receipt 与 RecoveryJoinProof durable receipt 分离；COC quorum algorithm/threshold 由 COC 自决；RecoveryJoinProof canonical bytes 归 Storage、COC 保存 binding envelope；COC applicability 尚待权威决定；H 消费侧尚待独立审查。该决定不等于 COC 接受，也不等于 H 接受。当前 D Blob 无需为满足 Storage 决定强制修改；若 D 后续修改 receipt 类型边界、COC applicability/ParticipantIntent/quorum、canonical-copy 或恢复语义，须重新取得受影响 Owner 对 successor Blob 的明确决定。F-43-07 继续 OPEN/BLOCKED，等待 H Stage 3 与 COC 自有适用性/权威边界决定，随后 A 对所有同版决定集成复审。
 ## F-43-08 — Finding ID 冲突纠正
 
 | 字段 | 内容 |
