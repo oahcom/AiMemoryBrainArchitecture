@@ -83,7 +83,7 @@
 | 责任 Owner | H Owner |
 | 回流去向 | H HEAD 精确测试证据（本地 + CI）→ A 独立复核 |
 | 关闭条件 | 对最终 HEAD 的完整测试日志（命令、环境、PASS/FAIL/SKIP 明细），且 CI 有测试级输出（runner 空 steps 不算） |
-| 最新裁决 / 证据 | R28：CI 仍 NOT VERIFIED（Run `44599661184` / Job `135827292056` steps=[]）；本地测试不能替代 CI 证据 |
+| 最新裁决 / 证据 | R28：CI 仍 NOT VERIFIED（Run `44599661184` / Job `135827292056` steps=[]）；H Owner 诊断评论 `7022079646`：Run `44612473889` / Job `135878277940`，HEAD `345bb3be537d018be80040cd2f00425bb80aac2c`，`runner_id=0`、`steps=[]`；同 workflow 及跨 workflow 对照亦报告相同 runner allocation signature，表明该次失败发生在 runner 分配阶段而非测试步骤。L0 随后报告在 Windows/Python 3.12.3/jsonschema 4.26.0 本地运行该 HEAD 的 recovery_cutoff 套件：报告 `423 PASS / 2 FAIL / 1 ERROR / 22 SKIP`，其中两个 FAIL 是 typed high-water 字段被错误纳入 512 位接受断言，ERROR 是缺少 `rfc8785`；但原始完整日志未附，且 `Ran 426` 与分类合计 448 的口径不一致，A 暂不采纳该计数为独立验证结果。A 检视精确 HEAD 测试源码 Blob `b25a9478796138f2d388971d20412407d787e5c7`，确认 `test_length_512_is_accepted_for_each_bounded_field` 对六字段统一赋值 `"1" * 512`，与两个 typed high-water 的 `0..2^63-1` 约束冲突；判定为测试设计缺陷，要求 H 拆分四个非 typed bounded 字段的 512/513 长度边界测试与两个 typed 字段的 0/INT64_MAX/INT64_MAX+1 数值边界测试。F-43-03 维持 OPEN：本地报告是补充诊断材料，不替代最终 HEAD 完整可复核日志及 CI 测试级输出；runner 空 steps 不计作 CI 测试结果。 |
 | 范围限制 | 本地 PASS 不等于 CI PASS |
 
 ## F-43-04 — #25 Phase 3.8.1 Addendum Blob 漂移
