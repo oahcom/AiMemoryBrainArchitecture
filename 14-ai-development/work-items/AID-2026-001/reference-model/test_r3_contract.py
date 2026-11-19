@@ -1858,17 +1858,22 @@ if __name__ == "__main__":
 #   StorageFaults (STOR-01..07):  7
 #   AuthorizationCommitEntry:   14
 #   AtomicPublicationFaultInjection:
-#                               11 (FSTOR-01..11)
-#   Total:                       70 test methods
+#                               13 (FSTOR-01..13)
+#   Total:                       72 test methods
 #
 # U-056 additions:
 #   - test_FSTOR_10_cleanup_allows_existing_retry_but_rejects_first_commit
 #       F-D-NEW-01: phase gate separated from idempotent retry path.
 #   - test_FSTOR_11_receipt_credential_verification_and_retry_binding
 #       F-OI-04: ReceiptCredential verification with context binding.
+#   - test_FSTOR_12_default_verifier_fails_closed
+#       F-OI-04: the shipped default verifier rejects every credential.
+#   - test_FSTOR_13_credential_context_binding_is_mandatory
+#       F-OI-04: empty operation/request hash/scope and the "default-hash"
+#       placeholder cannot bypass a binding check.
 #
 # Execution status:
-#   70/70 contract tests PASS (local unittest, Python 3.13).
+#   72/72 contract tests PASS (local unittest, Python 3.13).
 #   14/14 forget_model tests PASS.
 #   These tests cover an in-memory reference model only; they do not prove
 #   WAL durability, physical crash recovery, or distributed linearizability.
