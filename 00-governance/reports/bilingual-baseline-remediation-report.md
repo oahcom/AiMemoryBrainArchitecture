@@ -26,6 +26,8 @@ Maintenance rule: do not rewrite a bound snapshot in order to chase a moving HEA
 
 **Closure evidence standard.** A finding may be closed only on evidence that a third party with read access can re-derive: the repository object (path and ref, or endpoint and parameter), the expected value, and the check that compares them. Author narrative alone is not closure evidence. Where a closure also rests on a semantic judgement — for example that corrected prose no longer asserts a stale value — that judgement is labelled as judgement and attributed to the review that made it, not presented as a measured fact.
 
+**Reproduction prerequisites.** Every request cited as closure evidence in this report is a plain `GET` carrying `Authorization: token <t>` and `Accept: application/vnd.github+json`, where `<t>` is a token with read access to this private repository. No write scope is needed. Response handling is fixed: a non-200 response — including `403` from a secondary rate limit or `404` from a wrong `ref` — is recorded as `INCONCLUSIVE`, never as a mismatch and never as a pass; only a `200` whose field equals the expected value counts as evidence. Where a `403` or `404` appears, the cause is diagnosed and stated rather than inferred from the status code.
+
 ### 中文
 
 本报告是有时点的治理记录，不是实时看板。两类陈述必须分开，不得混为一谈。
@@ -38,6 +40,8 @@ Maintenance rule: do not rewrite a bound snapshot in order to chase a moving HEA
 **重新开启触发器**：本报告记录的关闭不具永久性，也不自证。若某项受维护的断言事后被证为不真——例如已标注「被取代」的快照被引为当前、更正段落与其所描述对象脱节、新增行重复同一类缺陷——则在新修订中将相应 finding 置回 `OPEN`，并在修订说明中点名失败的断言。因此本机制的检验标准不是「旧快照是否仍准确」，而是「新引入的陈旧活动断言是否被重新开启」。只允许关闭、不允许重开的规则，本质上就是自我豁免。
 
 **关闭证据标准**：finding 只能基于第三方可复现推导的证据关闭：必须给出对象（路径与 ref，或端点与参数）、期望值、以及比对方式。仅凭作者叙述不构成关闭证据。若关闭同时依赖语义判断（如「更正后的文字不再陈述旧值」），该判断应标注为判断并归属于作出该判断的审查，不得作为实测事实呈现。
+
+**复现前提**：本报告中作为关闭证据引用的每个请求均为 `GET`，携带 `Authorization: token <t>` 与 `Accept: application/vnd.github+json`，其中 `<t>` 为对本私有仓库具有读权限的 token，无需写权限。响应处理规则固定：非 200 响应（包括次级限速的 `403`，或 `ref` 错误的 `404`）一律记为 `INCONCLUSIVE`，不得计为不符合，也不得计为通过；只有 `200` 且字段等于期望值才构成证据。出现 `403`/`404` 时，应诊断并写明原因，不得凭状态码推断。
 
 ## 1. Objective / 目标
 
@@ -809,16 +813,28 @@ Execution PASS does not imply independent review PASS.
 **F-08 — stale baseline and manifest**
 
 - Status: `CLOSED` (2026-11-20), on a recorded basis. This closure is not retroactive.
+- Status at the moment of the external correction: `corrected, not independently confirmed`. Comment `7017127588` withdraws the earlier `CLOSED` claim; it does not assert re-confirmation. The `CLOSED` state above is established only by the PR #285 review chain recorded on that PR, and reading the withdrawal as a re-confirmation would be an error.
 - Correction trail: §2.2 and §3.1–§3.3 were rewritten in v2.2 to separate current main, current PR head/tree, the historical submission commit, and the R6 pre-v2.2 OBJ-07 snapshot; v2.3 added the v2.3 comparison and the normative-boundary correction; v2.5 adds the record-boundary rule (§0), a post-merge snapshot (§2.2) and a post-merge manifest read-back (§3.2).
 - Root cause, stated so it is not repeated: the finding was structural, not clerical. A report that treats HEAD values as current assertions is stale the moment it is merged. §0 now separates bound snapshots from live assertions, which is what makes the class of defect closable rather than perpetually re-openable.
 - Sequencing correction: this report previously required `Do not mark CLOSED before exact-Head re-review`, and the PR #271 acceptance record nevertheless listed F-08 as `CLOSED` before any review had examined it — R7 and R8 reviewed other findings. The closure above is supported by the v2.5 revision and its review; it does not validate that earlier line.
-- Objective evidence (re-derivable by any reader with read access, not author narrative): PR state — `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/271` returned `merged=true`, `merged_at=2026-11-19T17:16:13Z`, `merge_commit_sha=f86fddc0fa0291ea8a5e080e741f083ce179a0a2`, `head.sha=1eefa22e7fecfcd882aff795796ae178d1f7c4a5`, `base.sha=c5a995d9a2808112b007a9108e085048cbed5cc9`; merge parents — `GET /repos/…/commits/f86fddc0…` returned `a22024112fce3851428343ca3e655712057e6dce` and `1eefa22e7fecfcd882aff795796ae178d1f7c4a5`; manifest — `GET /repos/…/contents/<path>?ref=main` returned the blobs tabulated in §3.2. Re-running those three requests reproduces every value asserted here.
+- Objective evidence — re-derivable by any reader with read access, not author narrative. Requests, expected values and the assertion each one supports are mapped one-to-one below; `GET`, token and failure handling follow the reproduction prerequisites in §0.
+
+| # | Request (method + path) | Expected field = value | Assertion supported |
+|---|---|---|---|
+| E1 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/271` | `merged` = `true`; `merged_at` = `2026-11-19T17:16:13Z` | §2.2 states PR #271 is merged, at that time |
+| E2 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/271` | `merge_commit_sha` = `f86fddc0fa0291ea8a5e080e741f083ce179a0a2` | the merge commit identity asserted in §2.2 |
+| E3 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/271` | `head.sha` = `1eefa22e7fecfcd882aff795796ae178d1f7c4a5`; `base.sha` = `c5a995d9a2808112b007a9108e085048cbed5cc9` | the reviewed head and the recorded base in §2.2 |
+| E4 | `GET /repos/oahcom/AiMemoryBrainArchitecture/commits/f86fddc0fa0291ea8a5e080e741f083ce179a0a2` | `parents[0].sha` = `a22024112fce3851428343ca3e655712057e6dce`; `parents[1].sha` = `1eefa22e7fecfcd882aff795796ae178d1f7c4a5` | main before the merge, and the merged parent |
+| E5 | E3 and E4 compared | E4 `parents[1].sha` = E3 `head.sha` | the merged head is the reviewed head, not a re-created one |
+| E6 | `GET /repos/oahcom/AiMemoryBrainArchitecture/contents/<path>?ref=main`, once per row of §3.2 | `sha` = the `Blob SHA` in that row | the post-merge manifest recorded in §3.2 |
+
+If any request returns non-200, the affected row is `INCONCLUSIVE` and F-08 may not be closed on it.
 - Judgement, separated from the objective part: that the corrected prose in §2.2 and §3.2 no longer asserts stale values is a review judgement, recorded as such and attributed to the R1 review of PR #285, not presented as a measurement.
 - External correction record: because the PR #271 acceptance comment is an independent historical decision record, it is corrected by comment `7017127588` on PR #271 itself, not by this report alone.
 
 **F-09 — stale CI integration status**
 
-- Status: `CLOSED` (2026-11-20). §6.4, §7.1, §7.2, §9 and §10 distinguish verified workflow integration from unverified platform required-check enforcement, and §7.1 records three runs in both language columns.
+- Status: `CLOSED` (2026-11-20), by the PR #285 review chain. At the moment of the external correction the status was `corrected, not independently confirmed`. §6.4, §7.1, §7.2, §9 and §10 distinguish verified workflow integration from unverified platform required-check enforcement, and §7.1 records three runs in both language columns.
 - Boundary retained: closing F-09 does not close F-02. F-02 Requirement 2 stays `NOT_VERIFIED` because the platform setting is unavailable, not because the text is stale.
 - Sequencing correction: same as F-08 — the earlier acceptance line cited closure ahead of the re-review this report required.
 - Objective evidence (re-derivable): §7.1 lists three workflow runs with their conclusions in both language columns; §6.4, §7.2 and §10 each state separately that workflow integration is verified and required-check enforcement is `NOT_VERIFIED`. The check is textual and located: read those four sections and confirm no line asserts platform enforcement.
@@ -874,13 +890,14 @@ Platform residual tracking: the required-check blocker and the branch-protection
 - 更正轨迹：v2.2 重写§2.2 与 §3.1–§3.3，区分当前 main、当前 PR head/tree、历史首次提交与 R6 的 v2.2 前 OBJ-07 快照；v2.3 新增 v2.3 对比与规范边界更正；v2.5 新增记录边界规则（§0）、合并后快照（§2.2）与合并后 manifest 读回（§3.2）。
 - 根因（写明以免重犯）：该 finding 是结构性的，不是文字疏漏。把 HEAD 值当作当前断言的报告，在合并那一刻就陈旧。§0 现已将绑定快照与活动断言分开，这才使这类缺陷可以真正关闭，而不是永远重开。
 - 时序更正：本报告此前要求「Exact-Head 复审通过前不得标记 CLOSED」，而 PR #271 验收记录却在任何审查看过该项之前就列为 `CLOSED`——R7 与 R8 审的是其他 finding。上述关闭由 v2.5 修订及其审查支撑，不构成对那一行旧验收的追认。
-- 客观证据（任何有读权限的人可重新推导，非作者叙述）：PR 状态 — `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/271` 返回 `merged=true`、`merged_at=2026-11-19T17:16:13Z`、`merge_commit_sha=f86fddc0…`、`head.sha=1eefa22e…`、`base.sha=c5a995d9…`；合并父提交 — `GET /repos/…/commits/f86fddc0…` 返回 `a2202411…` 与 `1eefa22e…`；manifest — `GET /repos/…/contents/<path>?ref=main` 返回 §3.2 表中各 blob。重跑这三组请求即可复现本处全部值。
+- 客观证据（任何有读权限的人可重新推导，非作者叙述）：请求、期望值与其支持的断言已上表 E1–E6 逐项一一映射；方法、令牌与失败处理按 §0 的复现前提执行。任一请求返回非 200，对应行即为 `INCONCLUSIVE`，不得据此关闭 F-08。
+- 外部更正时点的状态：`corrected, not independently confirmed`。评论 `7017127588` 撤回先前 `CLOSED` 表述，但并不声称重新确认；上方 `CLOSED` 仅由记录于 PR #285 的审查链成立，将「撤回」读作「重新确认」属误读。
 - 判断与客观部分分离：「更正后的 §2.2 与 §3.2 不再陈述旧值」属审查判断，已如实标注并归属于 PR #285 的 R1 审查，不作为实测事实。
 - 外部更正记录：PR #271 验收评论属独立历史决策记录，因此由 PR #271 上的评论 `7017127588` 修正，而非仅由本报告覆盖。
 
 **F-09——CI 接入状态陈旧**
 
-- 状态：`CLOSED`（2026-11-20）。§6.4、§7.1、§7.2、§9 与 §10 已区分已验证的 workflow 接入与未验证的平台 required-check 强制状态，且 §7.1 中英两列均列出三次运行。
+- 状态：`CLOSED`（2026-11-20），由 PR #285 的审查链成立。外部更正时点的状态为 `corrected, not independently confirmed`。§6.4、§7.1、§7.2、§9 与 §10 已区分已验证的 workflow 接入与未验证的平台 required-check 强制状态，且 §7.1 中英两列均列出三次运行。
 - 保留边界：关闭 F-09 不等于关闭 F-02。F-02 要求 2 维持 `NOT_VERIFIED`，原因是平台设置不可用，而不是文字陈旧。
 - 时序更正：与 F-08 同——此前验收行在本报告要求的复审之前就引用了关闭。
 - 客观证据（可重新推导）：§7.1 在中英两列均列出三次 workflow 运行及结论；§6.4、§7.2 与 §10 各自分别说明「workflow 接入已验证」与「required-check 强制为 `NOT_VERIFIED`」。检验方式为文本定位：阅读这四节并确认无任何行声称平台已强制执行。
@@ -916,6 +933,22 @@ F-02 唯一剩余阻塞是平台 required-check 配置/强制执行。由于当�
 6. `OUT-OF-SCOPE(dev-baseline)`——明确且有权的治理批准需要可归属的人类权威。单一共享身份无法提供，因此如实记为不可达，而不伪造。不得以任何方式推定自动批准或采纳。
 
 平台残留跟踪：required-check 阻塞与 branch-protection 403 已在 Issue #283 中带复验触发器跟踪，不使本报告长期处于未决状态。
+
+### Re-open check record (this revision) / 重新开启核对记录（本修订）
+
+The §0 re-open trigger is only operative if it is actually applied to each revision. This record applies the three trigger conditions to this revision and states the result, including the one that fired.
+
+§0 的重新开启触发器只有在逐次修订中真被执行时才有效。本记录将三个触发条件应用于本修订并说明结果，包括实际触发的那一项。
+
+| Trigger condition | Check performed | Result | Evidence |
+|---|---|---|---|
+| A snapshot marked superseded is cited as current | searched §2.2 and §10 for the pre-merge `diverged` counts and for `OPEN; merged: false` | CLEAR — both retain an explicit bound/superseded label and neither is used as a current assertion | §2.2 annotation bullet; §10 F-06/F-08 rows |
+| A corrections section has drifted from the objects it describes | read comment `7017127588` against §9 F-08 and F-09 | CLEAR — the comment withdraws the earlier `CLOSED` claim and §9 records the same withdrawal, with the dissolved state named `corrected, not independently confirmed` | comment `7017127588`; §9 |
+| A new line repeats the same defect class | reviewed this revision's diff for unlabelled HEAD/PR-state assertions and for bilingual-parity gaps | **FIRED, fixed in this revision** — §8's Chinese F-02 row omitted the advisory-declaration and workflow-integration sentences present in the English row, which is the F-09 defect class | §8 F-02 rows |
+
+A trigger that never fires is not evidence of health; it is more often evidence that the check was not performed. This revision's third row fired and was repaired before merge, and is recorded here rather than only in the diff.
+
+触发器从不触发并不证明健康，更常说明核对未被执行。本修订第三行实际触发并在合并前修复，已在此登记，而不仅体现于 diff。
 
 ## 10. Governance stage ledger / 治理阶段登记
 
@@ -1099,6 +1132,7 @@ This revision closes the two findings left in an indeterminate state and removes
 - **Sequencing correction recorded, not hidden.** The PR #271 acceptance record listed F-08 and F-09 as closed before any review examined them; R7 and R8 reviewed other findings. The closure recorded here rests on this revision and its review, and does not retroactively validate that line. The correction is written into §9 in both languages rather than silently repaired.
 - **Required actions refreshed.** Items 2, 3 and 5 are `DONE`; item 4 is `SUPERSEDED` by merge containment; item 6 is `OUT-OF-SCOPE(dev-baseline)` because it needs accountable human authority, which a single shared identity cannot supply. Platform residuals are tracked in Issue #283 with re-verification triggers.
 - **R1 review remediation.** The R1 review of this revision returned `NEEDS-REVISION` with one P1 and two P2. P1: a correction to the PR #271 acceptance record must be made on PR #271 itself, because that record is an independent historical decision and cannot be corrected from inside another report; the correction comment is posted there as `7017127588` and cited from this revision. P2: closure evidence must be re-derivable by a third party, so F-08 and F-09 now name the endpoint, parameter, expected value and comparison for each closure, and separate that objective part from the reviewer judgement. P2: a closure that can never be re-opened is self-exemption, so §0 now carries a re-open trigger and the report states the test that falsifies it.
+- **R2 review remediation.** The R2 review returned `NEEDS-REVISION` with two P2 and one P3. P2: the re-open trigger needs a per-revision check record, now added as a section in §9 that applies the three conditions and reports that the third one fired and was repaired before merge. P2: closure evidence lacked HTTP method, authentication preconditions, failure handling and a one-to-one request-to-assertion mapping, all now in §0 and in the E1–E6 table. P3: the post-correction status of F-08 and F-09 must read `corrected, not independently confirmed`, so that withdrawing a `CLOSED` claim is not misread as re-confirming it.
 
 ## D7 v2.5 修订说明
 
@@ -1110,4 +1144,5 @@ This revision closes the two findings left in an indeterminate state and removes
 - **时序更正入库而非静默修补**：PR #271 验收记录在任何审查看过 F-08/F-09 之前就将其列为已关闭；R7 与 R8 审的是其他 finding。本处记录的关闭依据本修订及其审查，不构成对那一行的溯及追认。中英两份 §9 均已写入该更正。
 - **必需行动刷新**：第 2、3、5 项为 `DONE`；第 4 项因合并包含关系而 `SUPERSEDED`；第 6 项为 `OUT-OF-SCOPE(dev-baseline)`，因其需要可归属人类权威，单一共享身份无法提供。平台残留已在 Issue #283 中带复验触发器跟踪。
 - **R1 审查整改**：本修订的 R1 审查结论为 `NEEDS-REVISION`（1×P1 + 2×P2）。P1：对 PR #271 验收记录的更正必须发在 PR #271 本身，因为该记录是独立的历史决策，不能由另一份报告从内部修正；更正评论已在该处发布并由本修订引用。P2：关闭证据必须可由第三方重新推导，故 F-08 与 F-09 现已逐项给出端点、参数、期望值与比对方式，并与审查判断分离。P2：永不可重开的关闭等于自我豁免，故 §0 现携带重新开启触发器，并写明可反驳它的检验。
+- **R2 审查整改**：R2 结论为 `NEEDS-REVISION`（2×P2 + 1×P3）。P2：重新开启触发器需逐次修订的核对记录，已在 §9 新增小节，逐项应用三个条件，并记录第三项实际触发、已在合并前修复。P2：关闭证据缺 HTTP 方法、认证前提、失败响应处理与请求—断言一一映射，已分别补入 §0 与 E1–E6 表。P3：F-08/F-09 在外部更正时点的状态必须读作 `corrected, not independently confirmed`，以免将「撤回 CLOSED」误读为「重新确认关闭」。
 
