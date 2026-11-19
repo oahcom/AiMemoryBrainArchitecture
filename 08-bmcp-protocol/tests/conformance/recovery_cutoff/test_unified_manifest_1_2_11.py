@@ -156,12 +156,15 @@ class UnionSemanticsTests(unittest.TestCase):
     def setUp(self):self.m,self.prefix,self.admissions,self.snaps,self.proofs=fixtures()
     def validate_union(self,*args,**kwargs):
         kwargs["verify_membership_proof"]=lambda proof,owner,snapshot: proof.get("test_signature_verified") is True
+        kwargs["verify_owner_snapshot"]=lambda snapshot,owner: True
+        kwargs["allow_legacy_d_snapshot"]=True  # Historical 1.2.11 fixtures intentionally use the old five-field D shape.
         return _validate_union(*args,**kwargs)
     def test_UNION_00_missing_owner_signature_verifier_is_unknown(self):
         self.assertEqual(_validate_union(self.m,self.prefix,self.admissions,self.snaps,self.proofs),UNKNOWN)
     def test_UNION_00b_owner_signature_verifier_rejection_is_invalid(self):
         self.assertEqual(_validate_union(self.m,self.prefix,self.admissions,self.snaps,self.proofs,
-            verify_membership_proof=lambda proof,owner,snapshot: False),INVALID)
+            verify_membership_proof=lambda proof,owner,snapshot: False,
+            verify_owner_snapshot=lambda snapshot,owner: True, allow_legacy_d_snapshot=True),INVALID)
     def test_UNION_01_exact_union_passes(self):self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions,self.snaps,self.proofs),VALID)
     def test_UNION_02_omitted_prefix_participant_fails(self):self.assertEqual(self.validate_union(self.m,[],self.admissions,self.snaps,self.proofs),INVALID)
     def test_UNION_03_omitted_unregistered_admission_fails(self):self.assertEqual(self.validate_union(self.m,self.prefix,self.admissions[:1],self.snaps,self.proofs),INVALID)
