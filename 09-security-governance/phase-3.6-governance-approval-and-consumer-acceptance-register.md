@@ -2,7 +2,7 @@
 
 - Owner: Session I — Security, Identity & Governance
 - Branch: `session-i-security-governance-2026-11-16`
-- Status: **Technical policy baseline JOINT-DECIDED; all external governance approvals GOVERNANCE-BLOCKED; consumer acceptance OPEN; I36 execution NOT RUN**
+- Status: **Technical policy baseline JOINT-DECIDED; BIH design-consumer acceptance evidence RECORDED WITH EXCEPTIONS; external governance approvals GOVERNANCE-BLOCKED; A G6 reconciliation PENDING; I36 execution NOT RUN**
 - Authority boundary: I organizes and records approval requests. This document is not an approval, does not simulate an approver, and does not activate any policy.
 
 ## 1. Live source baseline
@@ -368,3 +368,43 @@ A second adversarial pass found that the first hardening revision still allowed 
 - Added regression test proves that even a populated proof/reviewer object cannot promote an unimplemented component exception path.
 
 The I reference-model workflow remains the available executable harness (Python 3.12, standard-library compile/unittest), but no GitHub Actions run or combined status was observed for the earlier trigger commit; this follow-up commit also has no verified execution result at this readback. **All I reference-model tests remain NOT RUN / NOT PASS until the exact latest test commit is executed and its raw log is retained.** This is reference-model hardening only; I36-GOV-01..10 remain GOVERNANCE-BLOCKED and I36 remains NOT RUN.
+
+
+## 16. 2026-11-19 — BIH consumer-acceptance evidence reconciliation (supersedes §14 blanket OPEN statement)
+
+This is an I-register evidence correction only. It recognizes published Owner-side design-acceptance records; it is not an external governance approval, a runtime test result, or A's G6 decision.
+
+### 16.1 Exact current Owner readbacks
+
+| Consumer | Live Owner branch HEAD | BIH acceptance artifact Blob | Readback |
+|---|---|---|---|
+| C | 3e7640cbe8a3d5c1dc95b6a0b887a1c41f62916c | fd2f47ba6c89bb270e9f2bec956873cb7ae3592b | Explicit Issue #6 ACCEPT WITH ENUMERATED EXCEPTIONS against A BIH package Blob a45ae90b318a79bf009d14f4d917611881e9e214 |
+| D | b525e1f8fee2471a131e4a38efda99804045e424 | 184423d2d8191a12f2d4a869bc63f5e7fafaf96a | Explicit DE-S design-level acceptance; exact field mapping and negative behavior; cites B/H/I source baseline |
+| E | ee098e14747d9915de5b3efb63b3a8dd77f670ed | 6f4100618695fcf971560fb784f7887a72798c96 | Explicit DE-S design-level acceptance; exact ingress/publication mapping and negative behavior; cites B/H/I source baseline |
+| F | 1908ce4d233b20f7cafd00cb679affd01bd15174 | ce59252dbbdc5d10d016704797e9ba12d5a941bd | Explicit Issue #6 ACCEPT WITH ENUMERATED EXCEPTIONS against A BIH package Blob a45ae90b318a79bf009d14f4d917611881e9e214 |
+| G | 0f77ffbe956c5f93df295c436fcb0a750629d595 | aa3afa73d8a76cc6f025839c52bfbff6a983046a | Explicit Issue #6 ACCEPT WITH ENUMERATED EXCEPTIONS against A BIH package Blob a45ae90b318a79bf009d14f4d917611881e9e214 |
+| Storage | 268af57b099209b33835b663596e87d21bb9c22b | ec8e49d0d11c72d37ad0c291611a96a1122ba6f5 | Explicit Storage design-level acceptance for protected durable visibility; cites B/H/I source baseline |
+| H | 654d4449fd491cdda37d9761fe63a3efca55dc9d | ccbac2d30234df9b910565a7326d100d11a6494e | Explicit delegated design-level acceptance for H's BMCP identity/ACK/reconnect boundary; H source pin requires refresh |
+
+The D/E/Storage records are substantive Owner decisions, not merely architecture readbacks: each contains the accepted semantic rules, local enforcement boundary, negative behavior, exceptions and NOT-VERIFIED runtime ceiling. Their current records cite the exact B/H/I source baseline; they do not all separately pin A's synthesized BIH package Blob. A may require that additional exact package pin for its own acceptance criterion, but that is a pin-completeness question, not absence of an Owner design decision.
+
+### 16.2 Register correction
+
+- §11.1's statement that the BIH design-consumer acceptance subrequirement is recorded is supported by the current Owner artifacts above.
+- §14's later blanket statement that C/D/E/F/G/H/Storage all remain OPEN with “no explicit BIH acceptance” is contradicted by those current Owner records. **That blanket OPEN assertion is superseded for the design-acceptance evidence dimension by this §16 readback.**
+- The §4 table remains a historical discovery snapshot; its OPEN rows are not the current evidence disposition after the Owner artifacts were published.
+- Current I register disposition: **BIH design-consumer acceptance evidence RECORDED WITH ENUMERATED EXCEPTIONS; A G6 reconciliation PENDING.** This is not a declaration that A-G6 has passed.
+
+### 16.3 Exact H source-pin delta
+
+H's acceptance artifact ccbac2d... cites H protected-operation binding Blob 9845c97ac43d7888732afafe12e28850ec02add8. The current H Owner branch binding is Blob e7ca5ce4ece5d8fd77fe0760e49a85afa0133248. The old Blob was fetched directly and compared: all 257 old lines remain in the current 751-line file; the current file adds the Phase 3.6.3 Applied wire profile and Phase 3.6.4 COC successor-candidate sections. No old BIH baseline line was removed. H must refresh its acceptance source pin, while preserving the scope boundary: the added Applied/COC candidate sections do not become a G8 freeze or transfer C/G/D/I/B approval.
+
+### 16.4 Non-transfer and remaining blockers
+
+1. I technical PermissionEpoch/authorization confirmation remains an I Owner technical decision only; I36-GOV-01..10 remain GOVERNANCE-BLOCKED until named external authorities provide effective approvals.
+2. I36 and H36 remain NOT RUN. The I reference-model 35-test PASS and H structural schema/parser 47-test PASS are bounded supplemental evidence only.
+3. D/E/Storage acceptance records do not prove implementation, D36/E36 execution, Storage deployment selection, durable cross-authority atomicity or production visibility.
+4. C/G/H Applied contract remains NOT FROZEN. H's 1.1.0 candidate has five JF-10 variants against A's eight required CGH evidence families; H 1.2.17 is a separate partial successor and is not pinned by A's current package.
+5. A alone determines G0–G10 and final Phase 3.6 acceptance. A must re-read the exact Owner artifacts, resolve its §10 F-status statement and decide whether D/E/Storage need an A-package digest pin before changing G6.
+
+Accordingly, §14 is retained as historical process evidence but no longer controls the current BIH design-consumer evidence status. No external approval, runtime PASS, G6 PASS, G8 freeze, production readiness, Runtime Forget E2E closure, Global Forget completion or physical erasure is claimed.
