@@ -105,6 +105,44 @@ class DOwnerSnapshotAlignmentTests(unittest.TestCase):
         wire["owner_specific_high_waters_digest"]=td("OWNER-SPECIFIC-HIGH-WATERS",wire["owner_specific_high_waters"])
         with self.assertRaises(ValidationError): validator.validate(wire)
 
+    def assert_d_bounded_field_rejected_by_both_paths(self, field):
+        direct = snapshot("D")
+        direct["owner_specific_high_waters"][field] = "x" * 513
+        direct["owner_specific_high_waters_digest"] = td("OWNER-SPECIFIC-HIGH-WATERS", direct["owner_specific_high_waters"])
+        self.assertEqual(validate_owner_snapshot(direct, "D"), INVALID)
+
+        snapshots = {owner: snapshot(owner) for owner in ("I", "D", "C")}
+        snapshots["D"]["owner_specific_high_waters"][field] = "x" * 513
+        snapshots["D"]["owner_specific_high_waters_digest"] = td(
+            "OWNER-SPECIFIC-HIGH-WATERS", snapshots["D"]["owner_specific_high_waters"]
+        )
+        manifest = composed_manifest(snapshots)
+        self.assertEqual(
+            validate_union(
+                manifest, [], [], snapshots, membership_proofs={},
+                verify_owner_snapshot=lambda *_: True,
+            ),
+            INVALID,
+        )
+
+    def test_rejects_513_producer_registration_high_water_in_owner_snapshot_and_union(self):
+        self.assert_d_bounded_field_rejected_by_both_paths("producer_registration_high_water")
+
+    def test_rejects_513_work_item_high_water_in_owner_snapshot_and_union(self):
+        self.assert_d_bounded_field_rejected_by_both_paths("work_item_high_water")
+
+    def test_rejects_513_attempt_high_water_in_owner_snapshot_and_union(self):
+        self.assert_d_bounded_field_rejected_by_both_paths("attempt_high_water")
+
+    def test_rejects_513_barrier_generation_in_owner_snapshot_and_union(self):
+        self.assert_d_bounded_field_rejected_by_both_paths("barrier_generation")
+
+    def test_rejects_513_forget_fence_generation_high_water_in_owner_snapshot_and_union(self):
+        self.assert_d_bounded_field_rejected_by_both_paths("forget_fence_generation_high_water")
+
+    def test_rejects_513_dependency_closure_cursor_in_owner_snapshot_and_union(self):
+        self.assert_d_bounded_field_rejected_by_both_paths("dependency_closure_cursor")
+
     def test_15_malformed_dependency_closure_root_is_invalid(self):
         s=snapshot("D")
         s["owner_specific_high_waters"]["dependency_closure_root"]="not-a-sha256"
