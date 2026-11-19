@@ -187,7 +187,7 @@ lifecycle:
         implementer: alice
         reviewed_head: {head}
         report: review.md
-        findings_disposition: none
+        findings_disposition: all_findings_resolved
 """
             path.write_text(content, encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "different identities"):
