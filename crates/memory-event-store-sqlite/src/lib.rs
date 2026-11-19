@@ -2,6 +2,9 @@
 //! This adapter persists metadata and the caller-supplied payload reference/digest;
 //! it does not store or independently hash payload bytes.
 
+pub mod payload;
+pub use payload::{PayloadEventStoreExt, StoredEvent};
+
 use memory_domain::{scopes_intersect, OpaqueId, ScopeRef};
 use memory_event_store::{AcceptedReceipt, EventEnvelope, EventStore, EventStoreError, ProcessingState};
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
@@ -53,6 +56,11 @@ impl SqliteEventStore {
                 accepted_at TEXT NOT NULL,
                 processing_state_json TEXT NOT NULL,
                 UNIQUE(producer_actor_ref, idempotency_key)
+            );
+            CREATE TABLE IF NOT EXISTS event_payloads (
+                event_row INTEGER PRIMARY KEY REFERENCES accepted_events(event_row) ON DELETE RESTRICT,
+                payload_bytes BLOB NOT NULL,
+                verified_digest TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS compile_outbox (
                 outbox_row INTEGER PRIMARY KEY AUTOINCREMENT,
