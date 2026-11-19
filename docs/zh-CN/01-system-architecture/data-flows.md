@@ -3,7 +3,7 @@
 - 文档 ID：SYS-DATA-FLOWS-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/data-flows.md)
-- 源版本：9cc45d2e593c186123ddc43dcdfdf1881017684a
+- 源版本：fcec7c598816d439ec4c89694210ccc220aeeccf
 - 对应英文：[System Data Flows](../../en/01-system-architecture/data-flows.md)
 - 状态：所有权和语义边界为 DECIDED；调度/传输选择为 CANDIDATE；量化目标为 TO_VALIDATE
 
@@ -79,7 +79,9 @@ sequenceDiagram
 
 **DECIDED：** `Accepted` 表示 Event 及其处理意图已经持久化，不代表 Memory 已创建、验证、索引或激活。
 
-**CANDIDATE：** 将 Event 与 Outbox/处理记录放在同一个原子提交中持久化，或采用等价的可恢复 Write-ahead 协议。到达持久化接收点之前绝不能确认。重复 Idempotency Key 返回原 Receipt/结果，不创建重复 Event。
+**DECIDED（逻辑接收契约）：** `Accepted` 要求在确认之前，Event 与可恢复的编译意图记录都已持久化。Event 和编译意图必须共享同一个原子持久化接收边界，或采用崩溃语义等效的协议；重复重试返回原始 Receipt，不创建重复 Event 或意图。这不代表工作已分发、Worker 已租约/交付、Compiler 已执行或 Canonical Memory 已创建。
+
+**IMPLEMENTED / 有界证据：** PR #246 合并 commit `fcdecf0a4e638c8b3c9ac0e4623f97c98ed21291`；PR exact-head Rust Workspace Tests run `44261068522` SUCCESS，GOV-DOC-001 run `44261068531` SUCCESS，合并后 Main Rust Workspace Tests run `44261208110` SUCCESS。已验证实现仅为 SQLite Event Store 编译意图账本和启动回填；这些证据不证明 Dispatcher/Worker 执行、Payload 字节托管/哈希校验、多进程/生产拓扑或生产就绪。
 
 ### 3.3 异步编译
 
