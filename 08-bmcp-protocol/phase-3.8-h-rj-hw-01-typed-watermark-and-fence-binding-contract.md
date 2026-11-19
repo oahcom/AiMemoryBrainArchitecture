@@ -96,7 +96,7 @@ F1, F2 and F3 are independently supported by source and behavioral probes in the
 
 ### 2.2 Measured probe evidence
 
-All 17 mechanical probes passed:
+All 18 mechanical probes passed (A1-A7, B1-B3, C1-C4, D1-D2, E1-E2):
 
 | Probe group | Probes | Measured scope |
 |---|---|---|
@@ -1060,7 +1060,7 @@ An old 1.2.17 snapshot MUST NOT be treated directly as new-version `VALID` when 
 
 The highest available evidence in this record is:
 
-**17 mechanical probes: ALL PASS.**
+**18 mechanical probes: ALL PASS (7+3+4+2+2).**
 
 | Probe group | Result |
 |---|---|
@@ -1140,7 +1140,7 @@ Branch names, PR titles, commit messages and historical Runs MUST NOT substitute
 ```text
 NOT RUN — GitHub Actions CI was not run on the repaired exact HEAD in this session.
 Historical Run 44215993536 / Job 134505846435 belongs to HEAD 654d4449fd491cdda37d9761fe63a3efca55dc9d and does not constitute repair-validation evidence for this Finding.
-The 17 mechanical probes in this session establish only the defect state of the examined source. They do not prove repair, integration or CI success.
+The 18 mechanical probes in this session establish only the defect state of the examined source. They do not prove repair, integration or CI success.
 NOT RUN MUST NOT be converted into PASS.
 ```
 
@@ -1306,7 +1306,7 @@ Creating new Finding IDs remains a repository Owner governance decision. This co
 
 Reasons:
 
-- 17 probes establish definite defects in the original implementation.
+- 18 probes establish definite defects in the original implementation.
 - Conditions 1 and 2 still lack D-authoritative field definitions and proof implementation.
 - Conditions 3 and 4 have no repair implementation evidence.
 - Condition 5 has no exact-head CI evidence.
@@ -1346,7 +1346,7 @@ The following are confirmed findings in the examined source:
 7. RecoveryJoin 1.0.2 schema does not provide a snapshot carrier for ForgetFenceGeneration high-water.
 8. `fence_generation` currently appears only in the evidence Forget branch.
 9. Existing RJ102-01..14 tests do not establish the six closure conditions of this Finding.
-10. All 17 mechanical probes passed, but no repaired exact-head CI evidence exists.
+10. All 18 mechanical probes passed, but no repaired exact-head CI evidence exists.
 
 ### 12.6 Explicit non-claims
 
@@ -1509,7 +1509,7 @@ F1、F2、F3 均由所提供证据包中的独立源码和行为探针支持，�
 
 ### 2.2 实测探针证据
 
-17 项机械探针全部通过：
+18 项机械探针全部通过（A1–A7、B1–B3、C1–C4、D1–D2、E1–E2）：
 
 | 探针组 | 探针 | 实测范围 |
 |---|---|---|
@@ -2473,7 +2473,7 @@ MUST 增加一个跨版本 negative test。
 
 本记录目前最高等级的证据为：
 
-**17 项机械探针：全部 PASS。**
+**18 项机械探针：全部 PASS（7+3+4+2+2）。**
 
 | 探针组 | 结果 |
 |---|---|
@@ -2553,7 +2553,7 @@ MUST NOT 用其替代 exact-head CI。
 ```text
 NOT RUN — 本会话未在修复后的 exact HEAD 上运行 GitHub Actions CI。
 历史 Run 44215993536 / Job 134505846435 属于 HEAD 654d4449fd491cdda37d9761fe63a3efca55dc9d，不构成本 Finding 的修复验证证据。
-本会话的 17 项机械探针仅证明已检查源码的缺陷状态，不证明修复、集成或 CI 成功。
+本会话的 18 项机械探针仅证明已检查源码的缺陷状态，不证明修复、集成或 CI 成功。
 NOT RUN MUST NOT 被转换为 PASS。
 ```
 
@@ -2719,7 +2719,7 @@ F1 和 F2 可归入 01C 下两个独立技术断言：
 
 理由：
 
-- 17 项探针已经证明原实现存在确定性缺陷。
+- 18 项探针已经证明原实现存在确定性缺陷。
 - 条件 1、2 仍缺少 D 权威字段定义和证明实现。
 - 条件 3、4 尚无修复实现证据。
 - 条件 5 没有 exact-head CI 证据。
@@ -2759,7 +2759,7 @@ R6 完成后，才能评估 Storage 同版本映射条件。
 7. RecoveryJoin 1.0.2 schema 没有提供 ForgetFenceGeneration high-water 的 snapshot 载体。
 8. `fence_generation` 目前只出现在 evidence 的 Forget 分支。
 9. 既有 RJ102-01..14 测试不能证明本 Finding 的六项关闭条件。
-10. 本轮 17 项机械探针全部 PASS，但没有修复后的 exact-head CI 证据。
+10. 本轮 18 项机械探针全部 PASS，但没有修复后的 exact-head CI 证据。
 
 ### 12.6 明确非声明事项
 
