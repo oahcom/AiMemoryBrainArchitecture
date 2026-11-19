@@ -176,10 +176,10 @@ R42（A-OWNER-INTEGRATION-R42-2026-11-19）：A 独立回读 #43 comment `702310
 | 原始锚点 | Issue #43 comment `7013501942`（与 F-43-06A 同评论登记，子项 F-43-07）；交叉引用 #25 comment `7013493546` |
 | 问题定义 | D PublicationParticipantRef / StorageVisibilityParticipantRef 未显式映射到（也未规范性排除于）COC ParticipantIntentRef。 |
 | 状态 | CLOSED（限定于 ParticipantRef 映射/规范性排除、Owner identity binding、ordering/recovery 架构契约交付；非实现验证） |
-| 责任 Owner | D Owner / Storage Owner / H Owner |
+| 责任 Owner | D Owner / Storage Owner / H Owner / COC Owner（仅限 COC applicability 决定） |
 | 回流去向 | D/Storage/H 选定记账边界并定义 exact identity binding + ordering + recovery（或定义独立权威恢复枚举）→ A 集成复审 |
 | 关闭条件 | 已满足：D/Storage/H 对同一精确 D Blob 独立接受；COC Owner 对精确 operation/scope/version 作出限定范围 NOT_REQUIRED 权威决定；契约给出认证负向适用性证明要求、D/Storage ref+digest 绑定、owner-local ordering/recovery、UNKNOWN/BLOCKED、同一 immutable identity 重试及重新进入 COC 范围的升级规则 |
-| 最新裁决 / 证据 | #43 `7013501942`（F-43-07 P1 OPEN/BLOCKED 原始登记）；R28 裁定保留原 ID 与含义 |
+| 最新裁决 / 证据 | R45：A-OWNER-INTEGRATION-R45-2026-11-20；D Blob `05a24f7eab663f66a3153d79adfab699b275f1a6`；Storage #43 `7023315618`；H #43 `7023562083` / H decision Blob `19e3dce92aa6d843d3d8d63b21f843eb30770b0f`；COC #43 `7023843575` / COC decision Blob `89c9e1c718195257c940fce69a2adbc81c01d034`；A 裁定 F-43-07 CLOSED（限定规范交付范围） |
 | 范围限制 | 架构可行性 finding，非实现验证；编号治理不改变其技术含义 |
 
 
