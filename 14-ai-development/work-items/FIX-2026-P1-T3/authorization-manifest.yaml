@@ -13,6 +13,7 @@ scope:
   manifest_path: 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml
   allowed_write_paths:
     - 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-T3/tier-mapping-proposal.yaml
     - 14-ai-development/bilingual-tiering-policy.md
     - 14-ai-development/bilingual-tiering-policy.en.md
     - 14-ai-development/ai-development-standard.md
