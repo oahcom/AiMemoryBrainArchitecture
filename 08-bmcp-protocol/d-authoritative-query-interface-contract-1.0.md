@@ -3,6 +3,7 @@
 - Contract ID: `D-AUTH-QUERY-1.0`
 - Status: **D OWNER NORMATIVE CONTRACT — implementation NOT VERIFIED; endpoint NOT ESTABLISHED; production use NOT AUTHORIZED**
 - Owner: D Domain Owner
+- D Owner Decision ID: `D-OWNER-2026-11-19-007`
 - Scope: AID-2026-010 / Issue #43 / F-43-01 / F3
 - H mapping input: `08-bmcp-protocol/phase-3.8.35-h-owner-decision-f43-01-f3-d-1.3.1-mapping.md`, exact Blob `e60bdd4cbfef79850596001f01cb56e622b7d79d`
 - D contract baseline: 1.3.1, Blob `12b71e770f4e977c7f147694a644066bc2ce11b9`
@@ -399,6 +400,8 @@ This format is normative and does not assert that any D ledger currently emits i
 This contract deliberately does not claim that an endpoint, schema file, signing identity, receipt, serialization proof, ledger proof, or test exists. The interface is not production-authorized by this normative definition.
 
 ## 10. Decision and finding boundary
+
+**D Owner Decision ID:** `D-OWNER-2026-11-19-007`
 
 **D Owner decision:** ACCEPT the normative definition of `D-AUTH-QUERY-1.0` as the D authoritative query interface contract for F-43-01/F3, subject to exact Blob/commit readback and A Integration review.
 
