@@ -98,10 +98,12 @@ impl Memory {
 impl MemoryVersion {
     pub fn validate(&self) -> Result<(), DomainError> {
         if self.version_number == 0 { return Err(DomainError::InvalidVersionNumber); }
+        if self.created_at.is_empty() { return Err(DomainError::EmptyRequiredField("created_at")); }
         if self.author_kind.is_empty() { return Err(DomainError::EmptyRequiredField("author_kind")); }
         if self.change_reason.is_empty() { return Err(DomainError::EmptyRequiredField("change_reason")); }
         if self.content_digest.is_empty() { return Err(DomainError::EmptyRequiredField("content_digest")); }
         if self.schema_version.is_empty() { return Err(DomainError::EmptyRequiredField("schema_version")); }
+        self.claims.iter().try_for_each(Claim::validate)?;
         Ok(())
     }
 }
