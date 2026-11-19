@@ -52,7 +52,7 @@ For every architecture-significant change, update Chinese and English counterpar
 - Chinese/English document paths and parity manifest.
 - Commands, environment, expected/actual results and test evidence.
 - Independent review handoff and unresolved findings.
-- Honest final status: PROPOSED / IMPLEMENTED / VERIFIED / REVIEWED / ACCEPTED / BLOCKED / PARTIAL.
+- Honest final status (RULING-02 canonical eight states, never collapsed): PROPOSED / IMPLEMENTED / VERIFIED / REVIEWED / ACCEPTED / MERGED / BLOCKED / NOT RUN.
 
 ## Definition of done
 
