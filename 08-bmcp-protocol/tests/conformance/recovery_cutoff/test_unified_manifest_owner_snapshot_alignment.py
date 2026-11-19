@@ -1,7 +1,9 @@
 """Regression tests for D Owner Snapshot schema/composed-validator alignment."""
 from __future__ import annotations
+import json
 import sys
 import unittest
+from jsonschema import Draft202012Validator, ValidationError
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "runtime_reference"))
@@ -26,6 +28,20 @@ def snapshot(owner, legacy_d=False):
       "owner_snapshot_attestation_digest":"f"*64,"owner_gate_generation":"4","request_high_water":"19","admission_high_water":"17",
       "request_ledger_root":"1"*64,"admission_ledger_root":"2"*64,"owner_ledger_root":"3"*64,"anti_rollback_anchor_ref":owner+":anchor:1",
       "ledger_available":True,"pagination_complete":True}
+
+def schema_d_snapshot():
+    values=owner_values("D")
+    return {
+        "owner":"D", "owner_gate_ref":"D:gate:1", "owner_gate_generation":"4",
+        "scope_generation_ref":"D:scope:1", "request_high_water":"19", "request_count":19,
+        "request_set_digest":"a"*64, "owner_snapshot_attestation_ref":"D:attestation:1",
+        "anti_rollback_anchor_ref":"D:anchor:1", "owner_ledger_root":"b"*64,
+        "admission_high_water":"17", "admission_count":17, "admission_set_digest":"c"*64,
+        "request_ledger_root":"d"*64, "admission_ledger_root":"e"*64,
+        "owner_snapshot_attestation_digest":"f"*64,
+        "owner_specific_high_waters":values,
+        "owner_specific_high_waters_digest":td("OWNER-SPECIFIC-HIGH-WATERS",values),
+    }
 
 def composed_manifest(snapshots):
     roots={owner:snapshot_root(s) for owner,s in snapshots.items()}
@@ -72,6 +88,28 @@ class DOwnerSnapshotAlignmentTests(unittest.TestCase):
 
     def test_11_legacy_five_field_snapshot_requires_explicit_legacy_opt_in(self):
         self.assertEqual(validate_owner_snapshot(snapshot("D",True),"D",allow_legacy_d_snapshot=True),VALID)
+
+    def test_13_schema_accepts_exact_eight_field_d_snapshot(self):
+        schema_path=ROOT.parent / "schemas" / "bmcp.coc-jf10-unified-1.2.17.schema.json"
+        schema=json.loads(schema_path.read_text(encoding="utf-8"))
+        validator=Draft202012Validator({"$schema":schema["$schema"],"$defs":schema["$defs"],"$ref":"#/$defs/ownerSnapshot"})
+        validator.validate(schema_d_snapshot())
+
+    def test_14_schema_rejects_legacy_five_field_d_snapshot(self):
+        schema_path=ROOT.parent / "schemas" / "bmcp.coc-jf10-unified-1.2.17.schema.json"
+        schema=json.loads(schema_path.read_text(encoding="utf-8"))
+        validator=Draft202012Validator({"$schema":schema["$schema"],"$defs":schema["$defs"],"$ref":"#/$defs/ownerSnapshot"})
+        wire=schema_d_snapshot()
+        wire["owner_specific_high_waters"]={k:v for k,v in wire["owner_specific_high_waters"].items() if k not in {
+            "forget_fence_generation_high_water","dependency_closure_cursor","dependency_closure_root"}}
+        wire["owner_specific_high_waters_digest"]=td("OWNER-SPECIFIC-HIGH-WATERS",wire["owner_specific_high_waters"])
+        with self.assertRaises(ValidationError): validator.validate(wire)
+
+    def test_15_malformed_dependency_closure_root_is_invalid(self):
+        s=snapshot("D")
+        s["owner_specific_high_waters"]["dependency_closure_root"]="not-a-sha256"
+        s["owner_specific_high_waters_digest"]=td("OWNER-SPECIFIC-HIGH-WATERS",s["owner_specific_high_waters"])
+        self.assertEqual(validate_owner_snapshot(s,"D"),INVALID)
 
     def test_12_digest_mismatch_is_invalid(self):
         s=snapshot("D"); s["owner_specific_high_waters_digest"]="0"*64; self.assertEqual(validate_owner_snapshot(s,"D"),INVALID)
