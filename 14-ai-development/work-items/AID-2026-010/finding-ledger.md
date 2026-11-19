@@ -71,6 +71,8 @@
 | 最新裁决 / 证据 | `D-OWNER-2026-11-19-001`：采纳 = **BLOCKED**，H 消费 = **NOT AUTHORIZED**；`D-OWNER-2026-11-19-003`：1.3.1 successor ACCEPT；A R32 裁定两个规范阻塞点（§5 双语规则 + Unicode 15.1.0 版本固定）解除，`BLOCKED → REMEDIATION ACCEPTED`，不直接 CLOSED（main 未同步 + UCD 工件/validator 绑定未实现未验证）。证据：Commit `7c74c23`→`b03e31c7`，1.3.1 Blob `12b71e770f4e977c7f147694a644066bc2ce11b9`，D-002 证明包 Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5`，#43 `7020911000` |
 | 范围限制 | 不得把 H 修复进展解释为 D 1.3.0 采纳；不得把规范版本固定解释为实现符合；后续不得把原始两个规范阻塞点重复派给 D Owner |
 
+
+R41（A-OWNER-INTEGRATION-R41-2026-11-19）：F-43-02 继续保持 REMEDIATION ACCEPTED，不转 CLOSED。A 核验 D successor `owner-snapshot-namespace-and-fence-currentness-contract-1.3.1.md` Blob `12b71e770f4e977c7f147694a644066bc2ce11b9`，其 §4 明确固定 Unicode 15.1.0、UCD 工件和 SHA-256 lock manifest、validator/build 的实际数据源版本核验及 fail-closed、完整 NormalizationTest.txt 与 D-specific vectors。派 D Owner 在既有授权 D 分支完成 UCD 工件 lock manifest、每项 SHA-256、validator/build version binding 与实际来源校验、fail-closed 行为及完整语料/向量测试，提交精确 commit/Blob/原始日志。main 同步：不得直接向 main 写入；当前冻结 ACTIVE，且沿用既有 PR-only / no-main-direct-write 边界。只允许利用已存在且覆盖该精确 successor 的 PR 完成审查/合并；未找到可确认覆盖该 Blob 的既有 open PR，禁止新建 PR。待冻结解除后再按正常 PR 流程同步 main。规范层已满足，main sync 与 Unicode implementation binding 均未完成，不得 CLOSED。
 ## F-43-03 — H 独立可复核测试证据
 
 | 字段 | 内容 |
@@ -136,6 +138,8 @@ R40（A-OWNER-INTEGRATION-R40-2026-11-19）：A 按精确 commit `d4fb6f199a9546
 | 最新裁决 / 证据 | #43 `7013501942`（F-43-06 P1 OPEN/BLOCKED 原始登记） |
 | 范围限制 | 架构可行性 finding，非实现验证 |
 
+
+R41（A-OWNER-INTEGRATION-R41-2026-11-19）：F-43-06A 维持 OPEN/BLOCKED，Storage Owner 派工定义规范性双持久化与崩溃恢复协议。规范写序必须是 Storage durable write → signed receipt → COC quorum append，且 append 明确绑定 exact immutable ref + digest → 双向回读 Storage 与 COC 的 exact identity/ref/digest/receipt → 全部一致后 owner release。所有重试/超时恢复必须复用同一 immutable identity/idempotency key；禁止生成新 identity 掩盖不确定提交。需定义 canonical-copy 唯一权威副本、复制方向、冲突处理、receipt 与 quorum proof 绑定、各崩溃窗口恢复判定及 UNKNOWN/BLOCKED fail-closed。交付到既有 #25 owner-decision 载体并回填本 ledger；不要求实现/运行时证明。本 finding 需 A 独立复审，不因派工或草案完成自动关闭。
 ## F-43-06B — BIH Registry §9 currentness / status-scope reconciliation
 
 | 字段 | 内容 |
@@ -151,6 +155,8 @@ R40（A-OWNER-INTEGRATION-R40-2026-11-19）：A 按精确 commit `d4fb6f199a9546
 | 最新裁决 / 证据 | #43 `7016815868`（F-43-06 P2 OPEN 原始登记） |
 | 范围限制 | — |
 
+
+R41（A-OWNER-INTEGRATION-R41-2026-11-19）：F-43-06B 维持 OPEN，派 BIH Registry Owner 提交 §9 currentness 与 status-scope reconciliation 权威证据。必须精确 pin 当前 Registry 源 commit/Blob，逐项说明 §9 Candidate addendum 与已决定语义的边界、identity currentness 状态及 status-scope 的权威枚举/适用范围、各 consumer acceptance 的效力边界、未决项与 owner/回流去向；不得把设计接受升级为 wire/schema freeze、governance approval 或 runtime conformance。更新 Registry 权威载体及既有 #43 锚点，提供 commit/Blob，供 A 集成复审。完成对账不自动意味着所有 BIH 消费者或治理项关闭。
 ## F-43-07 — ParticipantRef 映射（PublicationParticipantRef / StorageVisibilityParticipantRef ↔ COC ParticipantIntentRef）
 
 | 字段 | 内容 |
@@ -166,6 +172,8 @@ R40（A-OWNER-INTEGRATION-R40-2026-11-19）：A 按精确 commit `d4fb6f199a9546
 | 最新裁决 / 证据 | #43 `7013501942`（F-43-07 P1 OPEN/BLOCKED 原始登记）；R28 裁定保留原 ID 与含义 |
 | 范围限制 | 架构可行性 finding，非实现验证；编号治理不改变其技术含义 |
 
+
+R41（A-OWNER-INTEGRATION-R41-2026-11-19）：F-43-07 维持 OPEN/BLOCKED。批准分阶段执行：D Owner 先在既有 D 会话/分支定义 `PublicationParticipantRef`、`StorageVisibilityParticipantRef` 与 COC `ParticipantIntentRef` 的候选映射边界或规范性排除；必须写明 nominal identity、authority/namespace、exact ref+digest、operation/idempotency identity、ordering/linearization point、receipt/quorum binding、retry/replay、crash/recovery、UNKNOWN/BLOCKED 及独立恢复枚举。D 草案不得单方面确定 Storage/COC 的物理或权威记账所有权。其后 Storage Owner 独立接受/拒绝 Storage visibility 与双持久化语义，H Owner 独立接受/拒绝消费侧映射及 status/currentness 语义；各自提供精确 artifact SHA 与限制项。D/Storage/H 三方均明确接受同一版本后，A 才做集成复审。若不能形成 ParticipantIntentRef 映射，必须明确规范性排除并定义等价的权威恢复枚举。不得把架构可行性结论当作实现验证。
 ## F-43-08 — Finding ID 冲突纠正
 
 | 字段 | 内容 |
