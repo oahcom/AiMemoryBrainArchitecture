@@ -36,10 +36,10 @@
 ## 3. 不可降级规则
 
 1. **Level 1 强制底线**：凡属 R3、安全边界、授权、数据完整性、删除/遗忘、迁移、公开 API、架构语义或规范语义变更，MUST 为 Level 1。任何将其降为 Level 2/3 的判定无效。
-2. **R2 不得自动降级**：R2 变更不得仅因改动规模小、文件数少或"看起来是文字修改"而降到 Level 3。确有必要时 MUST 同时提供三项：`downgrade_justification`（理由）、`downgrade_confirmed_by`（确认者，且不得等于 `assessed_by`）、`downgrade_confirmation_record`（须存在于 subject tree 的确认记录）。任一项缺失或确认者为本人，均 BLOCKED。
+2. **R2 不得自动降级**：R2 变更不得仅因改动规模小、文件数少或"看起来是文字修改"而降到 Level 3。确有必要时 MUST 同时提供三项：`downgrade_justification`（理由）、`downgrade_confirmed_by`（确认者，且不得等于 `assessed_by`）、`downgrade_confirmation_record`（须按 §5.6 在 subject tree、工作树与 blob 三处校验）。任一项缺失或确认者为本人，均 BLOCKED。
 3. **文档变更不等于低风险**：文档变更若改变规范含义、约束强度、接口/协议、数据模型、状态机或安全边界，MUST 升级为 DOC_NORMATIVE → Level 1。
 4. **UNKNOWN 一律 BLOCKED**：无法确定分类时不得赋予任何 Level，判定为 BLOCKED / NEEDS_CLASSIFICATION，由有权 Owner 或治理授权者确认后重新判定。
-5. **分类信任边界**：强制 Level 1 的类别（ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE）不得通过改标为 FEATURE/BUGFIX/DOC_EDITORIAL/OPS 而降级。凡声明为可降级类别（FEATURE、BUGFIX、DOC_EDITORIAL、OPS）者，MUST 提供 `classification_basis`（分类依据）、`classification_confirmed_by`（独立确认者，不得等于 `assessed_by`）与 `classification_record`（subject tree 内的分类记录）；缺失或无法独立确认时 BLOCKED，不得默认相信申报者。
+5. **分类信任边界**：强制 Level 1 的类别（ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE）不得通过改标为 FEATURE/BUGFIX/DOC_EDITORIAL/OPS 而降级。凡声明为可降级类别（FEATURE、BUGFIX、DOC_EDITORIAL、OPS）者，MUST 提供 `classification_basis`（分类依据）、`classification_confirmed_by`（独立确认者，不得等于 `assessed_by`）与 `classification_record`（须按 §5.6 在 subject tree、工作树与 blob 三处校验）；缺失或无法独立确认时 BLOCKED，不得默认相信申报者。
 6. **不存在"自动通过"**：Level 只决定证据深度，不构成任何门禁的通过证据。
 
 ## 4. 判定与审计留痕

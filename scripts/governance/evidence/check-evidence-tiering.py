@@ -46,6 +46,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.parse
 
 SHA40 = re.compile(r"^[0-9a-f]{40}$")
 ANCHOR = re.compile(r"^sha256:([0-9a-f]{64})$")
@@ -165,14 +166,34 @@ def discover_repo(start):
 
 
 def repo_slug(repo):
-    """Return owner/name from the origin remote, or None if unavailable."""
+    """Return owner/name from the origin remote, or None if it is not GitHub.
+
+    The host is parsed and compared exactly; matching "github.com" anywhere in
+    the URL string would let a path segment such as
+    https://attacker.invalid/github.com/owner/repo pass as GitHub.
+    """
     url = git(repo, "config", "--get", "remote.origin.url").stdout.strip()
     if not url:
         return None
-    match = re.search(r"github\.com[:/]+([^/]+)/([^/\s]+?)(?:\.git)?$", url)
-    if not match:
+    slug = None
+    scp = re.match(r"^(?:[A-Za-z0-9._-]+@)?([A-Za-z0-9.-]+):(.+)$", url)
+    if scp and "://" not in url:
+        if scp.group(1).lower() == "github.com":
+            slug = scp.group(2)
+    else:
+        parsed = urllib.parse.urlparse(url)
+        if (parsed.scheme.lower() in ("https", "http", "ssh", "git")
+                and (parsed.hostname or "").lower() == "github.com"):
+            slug = parsed.path.lstrip("/")
+    if not slug:
         return None
-    return "%s/%s" % (match.group(1), match.group(2))
+    slug = slug.rstrip("/")
+    if slug.endswith(".git"):
+        slug = slug[:-4]
+    parts = [p for p in slug.split("/") if p]
+    if len(parts) != 2 or any(".." in p for p in parts):
+        return None
+    return "%s/%s" % (parts[0], parts[1])
 
 
 def verify_path(repo, subject, path, label, block, codes):

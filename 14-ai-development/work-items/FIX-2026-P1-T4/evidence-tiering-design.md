@@ -91,3 +91,13 @@
 | `--repo` 仓库身份未绑定 | 声明新增 `repository` 字段，与 `origin` 远程对比：不符 `CE_REPO_IDENTITY_MISMATCH`、远程缺失/非 GitHub `CE_REPO_IDENTITY_UNVERIFIED`、未声明 `CE_NO_REPOSITORY` |
 | 模板同步契约不完整 | 同步清单扩展至 `classification_confirmed_by` / `classification_record` / 三个 `downgrade_*` 字段；AI-STD-001 §4.2.1 新增规则 10（同步义务 + `declaration_path` + 记录按 Git 校验） |
 | 测试缺口 | 新增 11 项：分类/降级记录的伪造路径与缺失值、空白确认者、L3 三项绑定负向、`CE_EVIDENCE_MISSING_WORKTREE`、仓库身份不符与不可核验 |
+
+## 9. 第三轮复审（R3）修复映射
+
+| R3 缺陷 | 修复 |
+|---|---|
+| B-01 origin hostname 可被路径伪造 | `repo_slug()` 改为严格解析：scp 形式仅当 host 精确等于 `github.com`；URL 形式经 `urllib.parse` 校验 scheme ∈ {https,http,ssh,git} 且 hostname 精确等于 `github.com`；拒绝含 `..` 的段与非两段路径；`https://attacker.invalid/github.com/...` 与 `https://github.com.attacker.invalid/...` 均判 `CE_REPO_IDENTITY_UNVERIFIED` |
+| T-01 恶意 URL 测试 | 新增路径伪造与子域伪造两项测试 |
+| T-02 `CE_NO_REPOSITORY` 测试 | 新增未声明 repository 测试 |
+| T-03 记录工作树/blob 负向 | 分类与降级记录各新增 worktree 缺失、blob 篡改两项测试（共 4 项） |
+| D-01 中英描述不一致 | 政策 §3.2/§3.5 的记录表述统一为"按 §5.6 在 subject tree、工作树与 blob 三处校验"，中英文同步 |

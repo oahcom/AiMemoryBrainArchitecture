@@ -476,6 +476,92 @@ class EvidenceTieringTests(unittest.TestCase):
             self.assert_blocked(self.run_checker(fixture, fixture.declaration()),
                                 "CE_REPO_IDENTITY_UNVERIFIED")
 
+    def test_repository_not_declared_blocked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fixture = Fixture(Path(tmp) / "repo")
+            self.assert_blocked(self.run_checker(fixture, fixture.declaration(repository=None)),
+                                "CE_NO_REPOSITORY")
+
+    def test_spoofed_github_hostname_blocked(self):
+        # A URL whose path contains "github.com" must not be accepted as GitHub.
+        with tempfile.TemporaryDirectory() as tmp:
+            fixture = Fixture(Path(tmp) / "repo")
+            git(fixture.root, "remote", "set-url", "origin",
+                "https://attacker.invalid/github.com/oahcom/AiMemoryBrainArchitecture")
+            self.assert_blocked(self.run_checker(fixture, fixture.declaration()),
+                                "CE_REPO_IDENTITY_UNVERIFIED")
+
+    def test_spoofed_subdomain_hostname_blocked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fixture = Fixture(Path(tmp) / "repo")
+            git(fixture.root, "remote", "set-url", "origin",
+                "https://github.com.attacker.invalid/oahcom/AiMemoryBrainArchitecture.git")
+            self.assert_blocked(self.run_checker(fixture, fixture.declaration()),
+                                "CE_REPO_IDENTITY_UNVERIFIED")
+
+    def test_scp_style_origin_accepted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fixture = Fixture(Path(tmp) / "repo")
+            git(fixture.root, "remote", "set-url", "origin",
+                "git@github.com:oahcom/AiMemoryBrainArchitecture.git")
+            self.passed(self.run_checker(fixture, fixture.declaration()))
+
+    def test_classification_record_missing_from_worktree_blocked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "repo"
+            fixture = Fixture(root)
+            text = fixture.declaration(change_class="FEATURE", review_level="R2",
+                                       evidence_level="2",
+                                       **{"classification_confirmed_by": "reviewer-z",
+                                          "classification_record": "classify.md"})
+            (root / "classify.md").unlink()
+            self.assert_blocked(self.run_checker(fixture, text),
+                                "CE_CLASS_RECORD_MISSING_WORKTREE")
+
+    def test_classification_record_blob_mismatch_blocked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "repo"
+            fixture = Fixture(root)
+            text = fixture.declaration(change_class="FEATURE", review_level="R2",
+                                       evidence_level="2",
+                                       **{"classification_confirmed_by": "reviewer-z",
+                                          "classification_record": "classify.md"})
+            (root / "classify.md").write_text("# tampered\n", encoding="utf-8", newline="\n")
+            self.assert_blocked(self.run_checker(fixture, text),
+                                "CE_CLASS_RECORD_BLOB_MISMATCH")
+
+    def test_downgrade_record_missing_from_worktree_blocked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "repo"
+            fixture = Fixture(root)
+            text = fixture.declaration(
+                change_class="DOC_EDITORIAL", review_level="R2", evidence_level="3",
+                **{"evidence.review_note": "review-note.md",
+                   "classification_confirmed_by": "reviewer-z",
+                   "classification_record": "classify.md",
+                   "downgrade_justification": "typo fixes",
+                   "downgrade_confirmed_by": "reviewer-z",
+                   "downgrade_confirmation_record": "downgrade.md"})
+            (root / "downgrade.md").unlink()
+            self.assert_blocked(self.run_checker(fixture, text),
+                                "CE_DOWNGRADE_RECORD_MISSING_WORKTREE")
+
+    def test_downgrade_record_blob_mismatch_blocked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "repo"
+            fixture = Fixture(root)
+            text = fixture.declaration(
+                change_class="DOC_EDITORIAL", review_level="R2", evidence_level="3",
+                **{"evidence.review_note": "review-note.md",
+                   "classification_confirmed_by": "reviewer-z",
+                   "classification_record": "classify.md",
+                   "downgrade_justification": "typo fixes",
+                   "downgrade_confirmed_by": "reviewer-z",
+                   "downgrade_confirmation_record": "downgrade.md"})
+            (root / "downgrade.md").write_text("# tampered\n", encoding="utf-8", newline="\n")
+            self.assert_blocked(self.run_checker(fixture, text),
+                                "CE_DOWNGRADE_RECORD_BLOB_MISMATCH")
+
     # ---- passing declarations --------------------------------------------
     def test_level1_complete_passes(self):
         with tempfile.TemporaryDirectory() as tmp:
