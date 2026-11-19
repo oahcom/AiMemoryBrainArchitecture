@@ -19,14 +19,14 @@ AI Memory Brain 致力于构建一个持久、可治理的 AI 记忆层，让不
 | Item | Current status |
 |---|---|
 | Repository | Architecture specifications and system-contract design |
-| Implementation | **Not started by design** — this repository does not claim a working product |
+| Product-level runtime | **Not started** — the repository contains limited reference models, validators, and conformance tests, but no integrated product runtime |
 | Architecture | System boundaries and core subsystem responsibilities are defined; detailed contracts continue to evolve |
 | Protocol and technology choices | Some items remain CANDIDATE, OPEN, or TO_VALIDATE; see their source specifications |
 | Performance and production validation | Not yet established through a running implementation and representative workloads |
 
 This is an architecture-first project. A documented design, proposed contract, or review result is not evidence that the corresponding capability has been implemented, integrated, or production-validated. Status labels in the source documents remain authoritative.
 
-本项目采用架构先行的推进方式。目前仓库承载架构规范、子系统设计和跨模块契约治理，**尚未开始产品实现**。文档中的设计、候选方案或审查结论，不代表相应能力已经编码、集成或通过生产验证。具体决策状态以源规范中的标记为准。
+本项目采用架构先行的推进方式。目前仓库承载架构规范、子系统设计和跨模块契约治理，并包含少量参考模型、验证器和符合性测试；**产品级运行时尚未开始实现**，这些参考资产不构成集成产品。文档中的设计、候选方案或局部测试结果，不代表相应能力已经完成端到端集成或通过生产验证。具体决策状态以源规范中的标记为准。
 
 ## 1. The problem we are solving / 我们要解决的问题
 
@@ -47,7 +47,7 @@ AI Agent 正在变得更强，但有价值的知识仍分散在对话、会话�
 
 ## 2. Our positioning / 项目定位
 
-**AI Memory Brain is an independent memory authority and governance layer—not another Agent framework, chat application, vector database, or prompt-management tool.**
+**AI Memory Brain is being designed as an independent memory authority and governance layer—not another Agent framework, chat application, vector database, or prompt-management tool.**
 
 Its job is to own the lifecycle of canonical memory and coordinate how task-specific memory context is prepared, delivered, applied, reconciled, and governed. Agents remain responsible for reasoning, planning, tool use, and action execution.
 
@@ -55,7 +55,7 @@ Its job is to own the lifecycle of canonical memory and coordinate how task-spec
 
 它负责规范记忆资产的生命周期，并协调任务所需记忆上下文的准备、交付、应用、对账和治理。推理、规划、工具调用与行动执行仍由 Agent 自身负责。
 
-### What we are / 我们是什么
+### What the architecture is designed to provide / 架构目标
 
 - A model- and agent-framework-independent memory architecture.
 - A canonical, versioned home for durable memory assets and their evidence.
@@ -73,7 +73,7 @@ Its job is to own the lifecycle of canonical memory and coordinate how task-spec
 
 ## 3. The architectural idea / 核心架构思想
 
-The architecture separates three concerns that are often collapsed into one memory feature:
+The proposed architecture separates three concerns that are often collapsed into one memory feature:
 
 1. **Canonical Memory — what the system knows and why.** Durable, versioned memory assets with identity, scope, lifecycle, evidence, and provenance.
 2. **Memory Context — what a particular agent/task needs now.** A scoped and versioned working view assembled for a specific execution context.
@@ -115,7 +115,7 @@ Represent Event, Memory, Claim, Entity, Relation, Evidence, and Provenance as di
 
 ### 4.2 Lifecycle and provenance
 
-Track where a memory came from, how it was derived, which evidence supports it, how it changed, and which downstream artifacts depend on it. Enable controlled revision, supersession, retraction, retention, and recovery.
+The design tracks where a memory came from, how it was derived, which evidence supports it, how it changed, and which downstream artifacts depend on it. It aims to enable controlled revision, supersession, retraction, retention, and recovery. **Provenance provides traceability; by itself, it does not prove that a source is authentic, accurate, untampered, or independent of other sources.**
 
 ### 4.3 Governance that reaches derived data
 
@@ -123,7 +123,7 @@ Treat forgetting and access control as end-to-end system concerns—not just del
 
 ### 4.4 Applied-context accountability
 
-Distinguish **Delivered**, **Applied**, and **Acknowledged**. A transport success is not proof of application. The architecture aims to make context version, adapter capability, application boundary, and reconciliation state explicit.
+Distinguish **Delivered**, **Applied**, and **Acknowledged**. A transport success is not proof of application. The design aims to make context version, adapter capability, application boundary, and reconciliation state explicit. An Applied attestation can establish the declared Adapter-boundary operation and inclusion of a context version in the submitted request; it does **not** prove that the model attended to, understood, remembered, or behaviorally used that content.
 
 ### 4.5 Cross-agent and cross-model portability
 
@@ -134,25 +134,29 @@ Keep canonical memory independent of a particular model's prompt format or an Ag
 项目希望形成的长期差异化，在于围绕记忆建立系统级语义、治理和互操作保证：
 
 - **规范记忆语义：** 区分 Event、Memory、Claim、Entity、Relation、Evidence、Provenance，避免把观察、主张、意图和已验证结果混为一谈。
-- **生命周期与来源链：** 追踪记忆来源、派生过程、支持证据、历史修订及下游依赖。
+- **生命周期与来源链：** 追踪记忆来源、派生过程、支持证据、历史修订及下游依赖。来源链提供可追溯性，但本身不能证明来源真实、准确、未被篡改，也不能证明多个来源彼此独立。
 - **覆盖派生数据的治理：** 将遗忘和权限控制延伸到生产者、派生记忆、队列、索引、缓存、召回、上下文和恢复路径。Forget Fence 与 Publication Gate 的目标是防止过期异步任务让已撤回信息重新可见；其完整正确性仍需实现和故障注入证据。
-- **上下文应用可问责：** 明确区分 Delivered、Applied、Acknowledged。传输成功不等于实际应用成功。
+- **上下文应用可问责：** 明确区分 Delivered、Applied、Acknowledged。Applied 证据最多证明约定的 Adapter 边界操作及特定上下文版本被纳入提交请求，不证明模型注意、理解、记住或实际使用了这些内容。
 - **跨 Agent、跨模型迁移：** 规范记忆不依赖某个模型的提示词格式或某个 Agent 框架的私有状态表达，通过协议与 Adapter 连接异构系统。
 
 ## 5. Interoperability / 互操作方向
 
+BMCP is currently a **candidate application-level protocol contract**. Its interoperability, wire compatibility, and independent implementations have not yet been demonstrated. It may ultimately be implemented over existing transport and serialization mechanisms; the intended value is in the memory-lifecycle semantics, not in inventing a new transport stack.
+
 The project is designed around an explicit boundary between the Brain and external agents:
 
-- **BMCP** defines the protocol surface for memory-related telemetry and context exchange.
+- **BMCP** is intended to define the protocol surface for memory-related telemetry and context exchange; its contract and interoperability remain candidate work.
 - **Adapters** translate agent-specific signals into canonical telemetry and apply context changes at inference boundaries.
 - **Capability negotiation and versioning** make differences between integrations explicit.
 - **Acknowledgements and reconciliation** provide evidence about delivery and application state.
 
 The goal is not to force every agent to adopt one runtime. The goal is to let existing and future agents use a common, governed memory layer while retaining their own reasoning and execution environments.
 
+BMCP 目前仍是**候选的应用层协议契约**，尚未证明其互操作性、线上兼容性或独立实现能力。它最终可以建立在现有传输和序列化机制之上；预期价值在于记忆生命周期语义，而不是重新发明传输协议栈。
+
 项目通过 Brain 与外部 Agent 之间的明确边界实现互操作：
 
-- **BMCP** 定义记忆相关遥测与上下文交换的协议边界。
+- **BMCP** 旨在定义记忆相关遥测与上下文交换的协议边界；其契约和互操作能力仍处于候选阶段。
 - **Adapter** 将各类 Agent 信号映射为规范遥测，并在推理边界应用上下文变更。
 - **能力协商与版本管理** 显式表达不同集成方式的能力差异。
 - **确认与对账** 为上下文交付和应用状态提供证据。
