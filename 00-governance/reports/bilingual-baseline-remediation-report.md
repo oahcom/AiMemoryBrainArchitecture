@@ -837,6 +837,7 @@ If any request returns non-200, the affected row is `INCONCLUSIVE` and F-08 may 
 - Status: `CLOSED` (2026-11-20), by the PR #285 review chain. At the moment of the external correction the status was `corrected, not independently confirmed`. §6.4, §7.1, §7.2, §9 and §10 distinguish verified workflow integration from unverified platform required-check enforcement, and §7.1 records three runs in both language columns.
 - Boundary retained: closing F-09 does not close F-02. F-02 Requirement 2 stays `NOT_VERIFIED` because the platform setting is unavailable, not because the text is stale.
 - Sequencing correction: same as F-08 — the earlier acceptance line cited closure ahead of the re-review this report required.
+- **Re-open event (2026-11-20) — the first application of the §0 trigger to this report after closure.** §11 asserted that "CI workflow integration and required-check enforcement have not yet been established". That assertion is false for integration: §7.1 records three successful runs and §10 marks Requirement 1 `COMPLETE / VERIFIED`. The finding was therefore set back to `OPEN` in this revision, the failed assertion is named here, and `CLOSED` is re-established only by this revision and its review. This is what the §0 trigger is for; a mechanism that survived its first real contradiction by reinterpreting it would have been self-exemption after all.
 - Objective evidence (re-derivable): §7.1 lists three workflow runs with their conclusions in both language columns; §6.4, §7.2 and §10 each state separately that workflow integration is verified and required-check enforcement is `NOT_VERIFIED`. The check is textual and located: read those four sections and confirm no line asserts platform enforcement.
 - Judgement: that the four sections are now internally consistent and mutually non-contradictory is a review judgement, attributed to the R1 review of PR #285.
 
@@ -900,6 +901,7 @@ Platform residual tracking: the required-check blocker and the branch-protection
 - 状态：`CLOSED`（2026-11-20），由 PR #285 的审查链成立。外部更正时点的状态为 `corrected, not independently confirmed`。§6.4、§7.1、§7.2、§9 与 §10 已区分已验证的 workflow 接入与未验证的平台 required-check 强制状态，且 §7.1 中英两列均列出三次运行。
 - 保留边界：关闭 F-09 不等于关闭 F-02。F-02 要求 2 维持 `NOT_VERIFIED`，原因是平台设置不可用，而不是文字陈旧。
 - 时序更正：与 F-08 同——此前验收行在本报告要求的复审之前就引用了关闭。
+- **重新开启事件（2026-11-20）——§0 触发器在本报告关闭后的首次实际应用**：§11 声称「CI workflow 接入及 required check 强制生效尚未得到证实」。就接入而言该声称不成立：§7.1 记录三次成功运行，§10 将要求 1 记为 `COMPLETE / VERIFIED`。因此在本修订中将该 finding 置回 `OPEN`，在此点名失败的断言，`CLOSED` 仅由本修订及其审查重新成立。这正是 §0 触发器的用途；若一个机制在首次真实矛盾面前靠重新诠释而存活，那它就仍然是自我豁免。
 - 客观证据（可重新推导）：§7.1 在中英两列均列出三次 workflow 运行及结论；§6.4、§7.2 与 §10 各自分别说明「workflow 接入已验证」与「required-check 强制为 `NOT_VERIFIED`」。检验方式为文本定位：阅读这四节并确认无任何行声称平台已强制执行。
 - 判断：「四节内部一致且不矛盾」属审查判断，归属于 PR #285 的 R1 审查。
 
@@ -934,7 +936,7 @@ F-02 唯一剩余阻塞是平台 required-check 配置/强制执行。由于当�
 
 平台残留跟踪：required-check 阻塞与 branch-protection 403 已在 Issue #283 中带复验触发器跟踪，不使本报告长期处于未决状态。
 
-### Re-open check record (this revision) / 重新开启核对记录（本修订）
+### Re-open check record / 重新开启核对记录
 
 The §0 re-open trigger is only operative if it is actually applied to each revision. This record applies the three trigger conditions to this revision and states the result, including the one that fired.
 
@@ -947,6 +949,10 @@ The §0 re-open trigger is only operative if it is actually applied to each revi
 | A new line repeats the same defect class | reviewed this revision's diff for unlabelled HEAD/PR-state assertions and for bilingual-parity gaps | **FIRED, fixed in this revision** — §8's Chinese F-02 row omitted the advisory-declaration and workflow-integration sentences present in the English row, which is the F-09 defect class | §8 F-02 rows |
 
 A trigger that never fires is not evidence of health; it is more often evidence that the check was not performed. This revision's third row fired and was repaired before merge, and is recorded here rather than only in the diff.
+
+**v2.6 — the first application after closure.** The same three conditions were applied again to the merged report as it stood at `main` `c0ea54ed`, before this revision. The third condition fired a second time, and this time against already-merged text rather than against a pending diff: §11 stated that "CI workflow integration and required-check enforcement have not yet been established", contradicting §7.1 and §10. It also turned out that every revision note from v2.1 onward contained the same class of line (v2.2's note still says F-06 "remains OPEN"), which is why those notes are now explicitly labelled as bound snapshots rather than maintained state. F-09 was set back to `OPEN` for this revision and re-closed only on its review.
+
+**v2.6 — 关闭后的首次应用。** 同三个条件在本修订之前对「已合并的报告」（`main` `c0ea54ed`）再次应用。第三条件**第二次触发**，且这次面对的是已合并文本而非待合并 diff：§11 声称「CI workflow 接入及 required check 强制生效尚未得到证实」，与 §7.1 与 §10 相矛盾。同时发现：自 v2.1 起的每份修订说明都存在同类句子（v2.2 说明仍写「F-06 remains OPEN」），因此现已将这些说明明确标为绑定快照、非受维护状态。F-09 在本修订中置回 `OPEN`，仅在其审查通过后重新关闭。
 
 触发器从不触发并不证明健康，更常说明核对未被执行。本修订第三行实际触发并在合并前修复，已在此登记，而不仅体现于 diff。
 
@@ -986,9 +992,11 @@ The original 15-row governance stage ledger is retained. Only affected evidence/
 ### EN
 
 
-This report records the verified delivery and review status as of 2026-11-19.
+This report records delivery facts from 2026-11-19 and the finding statuses maintained through 2026-11-20.
 
-The independent validator, declaration, and tests have been committed. The corrected local test suite reports 6/6 PASS. CI workflow integration and required-check enforcement have not yet been established; F-02 therefore remains PARTIAL.
+The independent validator, declaration, and tests have been committed. The corrected local test suite reports 6/6 PASS. CI **workflow integration** is verified (§7.1 records the runs; §10 marks Requirement 1 COMPLETE / VERIFIED). **Required-check enforcement** is not verified, because the platform setting is unavailable on this repository — not because the integration is missing. F-02 therefore remains PARTIAL on Requirement 2 alone.
+
+Correction of a contradiction: earlier text in this section stated that "CI workflow integration and required-check enforcement have not yet been established". That conflated the two requirements and contradicted §7.1 and §10. It is corrected here rather than left to be read as agreement that integration is unverified.
 
 The historical language inventories have been finalized with 39 Issue records and 313 Commit records. Issue #254 is included in the 39-record Issue inventory, classified as `ZH_ORIGINAL_WITH_EN_TERMS`, and remains on HOLD. Commit language classification is based on the substantive content of the complete commit message. Inventory registration does not establish bilingual migration completion.
 
@@ -1001,9 +1009,11 @@ Any item for which complete supporting evidence has not been established must re
 ### 中文
 
 
-本报告记录截至 2026-11-19 已核实的交付与审查状态。
+本报告记录 2026-11-19 的交付事实，以及维护至 2026-11-20 的 finding 状态。
 
-独立校验器、配套声明及测试已提交入库。修复后的本地测试套件结果为 6/6 PASS。CI workflow 接入及 required check 强制生效尚未得到证实，因此 F-02 继续保持 PARTIAL。
+独立校验器、配套声明及测试已提交入库。修复后的本地测试套件结果为 6/6 PASS。CI **workflow 接入已验证**（§7.1 列出运行记录，§10 将要求 1 记为 COMPLETE / VERIFIED）；**required check 强制执行未验证**，原因是本仓库不得使用该平台设置，而不是接入缺失。因此 F-02 仅因要求 2 而维持 PARTIAL。
+
+矛盾更正：本节此前写有「CI workflow 接入及 required check 强制生效尚未得到证实」，该表述将两项要求混为一谈，与 §7.1 与 §10 相矛盾。此处予以更正，而非任由其被读作「接入尚未验证」的认可表述。
 
 历史语言状态清单已定稿，包含 39 条 Issue 记录和 313 条 Commit 记录。Issue #254 包含在 39 条 Issue 清单内，分类为 `ZH_ORIGINAL_WITH_EN_TERMS`，当前保持 HOLD。Commit 语言分类依据完整提交消息的实质内容判定。清单登记完成不代表双语迁移完成。
 
@@ -1016,6 +1026,10 @@ F-07 更正记录已登记于 PR 评论 `7006445553`。D1 权威基线 blob 为 
 ---
 
 **EN**
+
+Every revision note from v2.1 onward is a bound snapshot of the revision that wrote it: it records what that revision changed and the state at that time, and it is not maintained. Where a note says a finding "remains OPEN", that describes the state when the note was written. Current finding states live in §9 and §10 only.
+
+自 v2.1 起的每份修订说明均为其所属修订的绑定快照：它记录该修订做了什么以及当时的状态，不受维护。若某份说明写「某 finding 仍为 OPEN」，那指的是写下该说明时的状态。当前 finding 状态仅以 §9 与 §10 为准。
 
 ## D7 v2.1 Revision Note
 
@@ -1145,4 +1159,24 @@ This revision closes the two findings left in an indeterminate state and removes
 - **必需行动刷新**：第 2、3、5 项为 `DONE`；第 4 项因合并包含关系而 `SUPERSEDED`；第 6 项为 `OUT-OF-SCOPE(dev-baseline)`，因其需要可归属人类权威，单一共享身份无法提供。平台残留已在 Issue #283 中带复验触发器跟踪。
 - **R1 审查整改**：本修订的 R1 审查结论为 `NEEDS-REVISION`（1×P1 + 2×P2）。P1：对 PR #271 验收记录的更正必须发在 PR #271 本身，因为该记录是独立的历史决策，不能由另一份报告从内部修正；更正评论已在该处发布并由本修订引用。P2：关闭证据必须可由第三方重新推导，故 F-08 与 F-09 现已逐项给出端点、参数、期望值与比对方式，并与审查判断分离。P2：永不可重开的关闭等于自我豁免，故 §0 现携带重新开启触发器，并写明可反驳它的检验。
 - **R2 审查整改**：R2 结论为 `NEEDS-REVISION`（2×P2 + 1×P3）。P2：重新开启触发器需逐次修订的核对记录，已在 §9 新增小节，逐项应用三个条件，并记录第三项实际触发、已在合并前修复。P2：关闭证据缺 HTTP 方法、认证前提、失败响应处理与请求—断言一一映射，已分别补入 §0 与 E1–E6 表。P3：F-08/F-09 在外部更正时点的状态必须读作 `corrected, not independently confirmed`，以免将「撤回 CLOSED」误读为「重新确认关闭」。
+
+## D7 v2.6 Revision Note
+
+This revision is the first application of the §0 re-open trigger to already-merged text. It fixes a contradiction and, more importantly, records what the contradiction did to a finding's status.
+
+- **The contradiction.** §11 stated that "CI workflow integration and required-check enforcement have not yet been established". §7.1 records three successful runs and §10 marks Requirement 1 `COMPLETE / VERIFIED`. The two statements cannot both hold; the earlier one conflated workflow integration with platform required-check enforcement, which is precisely the F-09 defect class.
+- **The consequence for F-09.** Under §0, a falsified maintained assertion sets the affected finding back to `OPEN`. F-09 was therefore re-opened in this revision, the failed assertion is named in §9, and `CLOSED` is re-established only by this revision and its review. This is the mechanism's first real test, and it was recorded rather than quietly reinterpreted.
+- **A second, wider instance of the same class.** Every revision note from v2.1 onward carried status lines that were true when written and are not true now — v2.2's note still says F-06 "remains OPEN". Those notes are now explicitly labelled as bound snapshots of their own revision, not maintained state, and current statuses are located in §9 and §10 only.
+- **Section 11 corrected in both languages**, with the correction stated as a correction rather than silently replaced.
+- No policy text, normative status, approval state or adoption state changes. v1.1 remains the only NORMATIVE text. F-02 stays PARTIAL on Requirement 2 only.
+
+## D7 v2.6 修订说明
+
+本修订是 §0 重新开启触发器首次应用于**已合并文本**。它修正一处矛盾，更重要的是记录该矛盾对 finding 状态造成了什么。
+
+- **矛盾所在**：§11 声称「CI workflow 接入及 required check 强制生效尚未得到证实」；而 §7.1 记录三次成功运行，§10 将要求 1 记为 `COMPLETE / VERIFIED`。两者不可能同时成立；前者将「workflow 接入」与「平台 required-check 强制」混为一谈，而这正是 F-09 的缺陷类型。
+- **对 F-09 的后果**：按 §0，被证伪的受维护断言应将相应 finding 置回 `OPEN`。因此本修订将 F-09 重新开启，在 §9 点名失败断言，并仅在本修订及其审查通过后重新关闭。这是该机制的首次真实检验，已如实登记，而非静默重新诠释。
+- **同类缺陷的第二处、范围更广**：自 v2.1 起的每份修订说明都带有写下时成立、如今不成立的状态行（v2.2 说明仍写 F-06 「remains OPEN」）。这些说明现已明确标为属于其所属修订的绑定快照、非受维护状态；当前状态仅以 §9 与 §10 为准。
+- **§11 中英两份均已更正**，且以「更正」形式写明，而非静默替换。
+- 不改变任何政策文本、规范状态、批准状态、采纳状态；v1.1 仍为唯一 NORMATIVE；F-02 仅因要求 2 而为 PARTIAL。
 
