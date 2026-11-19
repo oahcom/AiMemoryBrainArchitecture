@@ -6,7 +6,7 @@
 **Target:** `[HOST IDENTIFIER WITHHELD]`, runner name `[RUNNER IDENTIFIER WITHHELD]`  
 **Tracking:** [Issue #26](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/26)  
 **Normative architecture statement:** DOC-OPS-001, `docs/zh-CN/14-ai-development/ci-runner-operations.md` and `docs/en/14-ai-development/ci-runner-operations.md`. That pair states the deployed shape, the security boundary, and the admission policy bilingually. This file is the execution procedure.  
-**Translation:** TRANSLATION_PENDING / 翻译待同步. This procedure is English-only; the normative decision and the security boundary live in the bilingual DOC-OPS-001 pair and must be read there.
+**Translation:** TRANSLATED / 中文版已同步（`ubuntu-self-hosted-runner-bootstrap.zh-CN.md`）. This procedure is English-only; the normative decision and the security boundary live in the bilingual DOC-OPS-001 pair and must be read there.
 
 ## Revision summary (v1.0 → v1.1)
 
