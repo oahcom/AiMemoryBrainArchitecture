@@ -56,6 +56,11 @@ verification:
   prior_reviewed_head: a661f067946fca2362ad94c67946d8b7c3309c0b
   remediation_code_head: 31ebc605bc7fd20a25966ebfcb4328852c93427b
   evidence_commit: 31ebc605bc7fd20a25966ebfcb4328852c93427b
+  final_exact_head_gate:
+    status: PASS
+    run_id: 44467233410
+    tested_head: 69fe3907916d70696266ad60b7db63c4a3bf483a
+    evidence: GOV-DOC-001 structural checks succeeded on the final reviewed PR #270 Head.
   evidence_refs:
     - PR comment 7000485649: length criterion PASS (4507 / 9807 = 45.96%); T2 snapshot provenance and source immutability evidence.
     - PR comment 7000536236: earlier independent R1 findings R1-F01 and R1-F02.
@@ -91,8 +96,8 @@ verification:
       status: PASS
       evidence: Implementer read-back at remediation_code_head; template 7/7 numbered sections in EN and zh-CN; migration guide 6/6 numbered sections in EN and zh-CN; matching IDs/version/status and reciprocal links. Self-check only.
     bilingual_semantic_parity:
-      status: PENDING_INDEPENDENT_REVIEW
-      reason: Implementer self-check is not independent semantic-parity approval.
+      status: PASS
+      evidence: Independent R1 review of exact Head 69fe3907916d70696266ad60b7db63c4a3bf483a disposition F03 PASS; see the independent R1 review report registered under review.evidence_refs. This does not claim a formal GitHub second-identity review.
     seven_vs_twelve_normative_mapping:
       status: PASS
       evidence: AI-STD-001 §5.1 and AI-PROMPT-STD-001 §4 updated at remediation_code_head; all twelve mandatory content items mapped into seven structural sections with explicit precedence and NOT READY escalation rule.
