@@ -14,7 +14,9 @@ original_pr:
   merge_commit: cd3f5d7191000f6414134ef235cac94f33ca87e8
   governance_note: Original independent review comment 7000701362 required PR #269 to remain OPEN/DRAFT; current main contains the merge commit. This remediation does not retroactively authorize that merge.
 remediation_carrier:
-  pull_request: PENDING_CREATION
+  pull_request: 270
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/270
+  remediation_pr_head_at_creation: 6c2b091283033426f8f91392f8d968c97b939443
   final_review_head: PENDING_INDEPENDENT_EXACT_HEAD_REVIEW
 base:
   branch: main
