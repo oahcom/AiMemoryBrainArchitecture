@@ -60,7 +60,10 @@ PLACEHOLDERS = {"", "n/a", "na", "none", "null", "todo", "tbd",
 def _meaningful(value, field):
     if isinstance(value, str):
         value = value.strip()
-        if value.lower() in PLACEHOLDERS or len(value) < 3:
+        lowered = value.lower()
+        if (lowered in PLACEHOLDERS or len(value) < 3
+                or lowered.startswith(("fake://", "test://", "placeholder://"))
+                or "example.com/" in lowered or lowered.startswith("placeholder")):
             raise ValueError(f"empty/placeholder evidence content: {field}")
         if field in {"tested_head", "reviewed_head", "merge_commit"} and not SHA_RE.fullmatch(value):
             raise ValueError(f"{field} must be a full 40-character commit SHA")
