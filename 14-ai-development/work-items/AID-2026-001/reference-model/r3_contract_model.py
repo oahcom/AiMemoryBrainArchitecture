@@ -715,7 +715,11 @@ class R3Model:
                         "idempotency request hash mismatch on retry"
                     )
 
-                if self.atomic_commit != original:
+                # U-058 (a): the registry entry must point at the very object
+                # that is authoritative, not merely at an equal one. Value
+                # equality would let a swapped-but-identical commit stand in
+                # for the published authority.
+                if self.atomic_commit is not original:
                     raise ContractViolation(
                         "operation registry is not backed by authoritative "
                         "atomic commit"

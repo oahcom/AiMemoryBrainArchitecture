@@ -2139,6 +2139,74 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
                                     permission_epoch=cred.permission_epoch + 1)),
         )
 
+    def test_FSTOR_18_published_commit_identity_must_match_registry(self):
+        """U-058 (a) complement: the published side of the identity check.
+
+        test_FSTOR_17 swaps the registry entry; this test swaps the
+        published self.atomic_commit instead. A field-equal but distinct
+        object on either side of the comparison must make the retry fail,
+        with no side effects.
+        """
+        from dataclasses import replace as _replace
+
+        operation_id = "foi-swap-op"
+        request_hash = "foi-swap-hash"
+        idempotency_key = "foi-swap-key"
+
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m.phase = Phase.AUTHORIZED
+
+        first = m.commit_suppression(
+            operation_id,
+            "foi-swap-attempt-1",
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce="foi-swap-nonce-1", operation_id=operation_id,
+                      request_hash=request_hash),
+        )
+        self.assertIsNotNone(first)
+
+        baseline_commit = m.atomic_commit
+        baseline_fence = m.fence_generation
+        baseline_counter = m.commit_counter
+        baseline_outbox = dict(m.outbox)
+        baseline_registry = dict(m.operation_registry)
+        baseline_retry = list(m.retry_audit)
+        baseline_audit = list(m.audit)
+        baseline_nonces = set(m.nonce_registry)
+        baseline_retry_len = len(m.retry_audit)
+
+        # Swap in a field-equal but distinct object as the published
+        # authority. Value equality would let this stand in.
+        swapped = _replace(first)
+        self.assertIsNot(swapped, first)
+        self.assertEqual(swapped, first)
+        m.atomic_commit = swapped
+
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                operation_id,
+                "foi-swap-attempt-2",
+                idempotency_key,
+                request_hash,
+                auth=auth(nonce="foi-swap-nonce-2", operation_id=operation_id,
+                          request_hash=request_hash),
+            )
+
+        # Zero side effects from the rejected retry. The swapped object
+        # must not have been promoted or replaced.
+        self.assertIs(m.atomic_commit, swapped)
+        self.assertEqual(m.atomic_commit, baseline_commit)
+        self.assertEqual(m.fence_generation, baseline_fence)
+        self.assertEqual(m.commit_counter, baseline_counter)
+        self.assertEqual(m.outbox, baseline_outbox)
+        self.assertEqual(m.operation_registry, baseline_registry)
+        self.assertEqual(m.retry_audit, baseline_retry)
+        self.assertEqual(m.audit, baseline_audit)
+        self.assertEqual(set(m.nonce_registry), baseline_nonces)
+        self.assertEqual(len(m.retry_audit), baseline_retry_len)
+        self.assertNotIn("foi-swap-nonce-2", m.nonce_registry)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
