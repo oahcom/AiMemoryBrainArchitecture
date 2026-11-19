@@ -1,7 +1,7 @@
 # Owner Snapshot Namespace and Fence Currentness Contract / 所有者快照命名空间与 Fence 当前性契约
 
 - Contract version / 契约版本: **1.2.0 (CANDIDATE)**
-- Revision / 修订: 1.2.0 incorporates review round 2 findings (canonicalization pipeline reordered so percent-decoding precedes case folding and NFC, removing a non-uniqueness defect between `%41UTH-A` and `AUTH-A`; step 1 parse declared single authoritative; decoded-UTF-8 validity and encoded-delimiter rejection made explicit; section 5 English list renumbered 1-11) / 1.2.0 吸收第 2 轮审查发现（规范化流水线重排：百分号解码先于大小写折叠与 NFC，消除 `%41UTH-A` 与 `AUTH-A` 产生不同 canonical 的非唯一性缺陷；第 1 步解析声明为单次权威；显式规定解码后 UTF-8 合法性校验与编码分隔符注入拒绝；第 5 节英文列表重编号为 1–11）
+- Revision / 修订: 1.2.0 incorporates review round 2 findings (canonicalization pipeline reordered so percent-decoding precedes case folding and NFC, removing a non-uniqueness defect between `%41UTH-A` and `AUTH-A`; step 1 parse declared single authoritative; decoded-UTF-8 validity and encoded-delimiter rejection made explicit; section 5 English list renumbered 1-11; case folding specified as Unicode canonical caseless matching to close the same defect class across normalization forms; idempotence required with NFC as sole normal form) / 1.2.0 吸收第 2 轮审查发现（规范化流水线重排：百分号解码先于大小写折叠与 NFC，消除 `%41UTH-A` 与 `AUTH-A` 产生不同 canonical 的非唯一性缺陷；第 1 步解析声明为单次权威；显式规定解码后 UTF-8 合法性校验与编码分隔符注入拒绝；第 5 节英文列表重编号为 1–11；大小写折叠改为 Unicode canonical caseless matching 以闭合同一缺陷类在规范化形式上的分叉；要求幂等且 NFC 为唯一规范形式）
 - Revision / 修订: 1.1.0 incorporates review round 1 findings (ledger lifecycle classification unified with the section 8 decision table; Authority-level authorization revocation restored; prohibition on automatic rollback of executed fade/forget restored; percent-encoding character set, leading-zero policy, Fence replacement classification and state-version concurrency boundary made normative) / 1.1.0 吸收第 1 轮审查发现（Ledger 生命周期判定与第 8 节判定表统一；恢复 Authority 级授权撤销规则；恢复已执行 fade/forget 不得自动回滚的约束；百分号编码字符集、前导零策略、Fence 替换判定及状态版本并发边界转为规范要求）
 - Status / 状态: **DECIDED / IMPLEMENTATION NOT VERIFIED / CONFORMANCE NOT RUN**
 - Source decisions / 决定来源: Issue #25 comments `7008208052` (NS-PR-01..05), `7008249894` (FC-01..04), `7009205234` (four decisions)
@@ -20,6 +20,7 @@
 - Version: 1.2.0 (CANDIDATE)
 - Status: Decisions made, **implementation unverified**, **no consistency run executed**.
 - Revision 1.2.0 incorporates review round 2 findings: the canonicalization pipeline is reordered so that percent-decoding precedes case folding and NFC, eliminating a non-uniqueness defect where an encoded segment (`%41UTH-A`) and its literal equivalent (`AUTH-A`) produced different canonical forms; the parsed segments from step 1 are declared the single authoritative parse; UTF-8 validity of decoded bytes and rule-out of encoded-delimiter injection are made explicit; and the section 5 English list is renumbered so that items run 1-11 without a duplicate.
+- Revision 1.2.0 also hardens the same defect class found in round 2: case folding is now specified as the Unicode canonical caseless matching sequence (NFC, then Default Case Folding, then NFC) so that inputs differing only in normalization form cannot diverge, and canonicalization is required to be idempotent with NFC as the sole accepted normal form.
 - Revision 1.1.0 incorporates review round 1 findings: ledger lifecycle state classification unified with the section 8 decision table; Authority-level authorization revocation restored; the prohibition on automatic rollback of executed fade/forget restored; percent-encoding character set, high-water leading-zero policy, Fence replacement classification, and state-version concurrency boundary made normative.
 - This document records D-side normative decisions and constraints; it does not constitute evidence of completed implementation.
 - This document is not a human Owner signature, is not a contract freeze, and must not be used as evidence of production readiness.
@@ -107,8 +108,8 @@ All namespace identifiers MUST be canonicalized in the following six steps, in e
 
 1. **Trim and split (single authoritative parse):** Remove leading and trailing Unicode White_Space from the entire input. Split the result on ASCII `/`, which is the only permitted segment delimiter; exactly four segments are required, and empty segments and repeated delimiters are prohibited. Remove leading and trailing Unicode White_Space from each resulting segment. A segment that is empty after trimming MUST also be rejected. Internal whitespace MUST NOT be removed. The four segments produced here are the single authoritative parse for steps 2 through 6; no later step may re-parse the input.
 2. **Decode, exactly once:** Percent-decode each of the four segments one time only. A `%` that does not begin a valid `%HH` triplet MUST be rejected, not passed through. The decoded bytes MUST form valid UTF-8; otherwise the input MUST be rejected. Double decoding is prohibited. Because splitting has already occurred, a segment may decode into a literal `/`: that is encoded-delimiter injection and MUST be rejected rather than accepted as ordinary content.
-3. **Case:** Apply Unicode Default Case Folding to the first three segments **after decoding**. The fourth, version segment MUST NOT undergo case folding.
-4. **Unicode normalization:** Apply NFC normalization to the first three decoded segments.
+3. **Case (canonical caseless match):** For each of the first three decoded segments, apply NFC, then Unicode Default Case Folding, then NFC again. This is the Unicode canonical caseless matching sequence, and it is required so that inputs differing only in normalization form cannot diverge under case folding. Applying case folding without the preceding normalization is prohibited. The fourth, version segment MUST NOT undergo case folding or normalization.
+4. **Idempotence and normal form:** Canonicalization MUST be idempotent — applying it to an already canonical identifier MUST reproduce that identifier byte for byte. NFC is the only accepted normal form; segments supplied in NFD, NFKC, or NFKD form MUST NOT be treated as canonical, and MUST NOT be accepted without passing through step 3.
 5. **Re-encode:** Emit each segment as its UTF-8 bytes, with bytes in the RFC 3986 unreserved set (`ALPHA / DIGIT / "-" / "." / "_" / "~"`) written literally and every other byte written as uppercase `%HH`. Lowercase `%hh` in the input MUST be normalized to uppercase. Literal input and percent-encoded input that decode to the same text MUST produce an identical canonical representation; the `%41UTH-A` / `AUTH-A` pair below is a required conformance vector.
 6. **Version segment handling:** The fourth segment MUST conform to `vMAJOR.MINOR.PATCH`. All three components MUST be non-negative decimal integers without leading zeros, except for the value zero itself.
 
@@ -299,7 +300,7 @@ Before claiming conformance to this contract, an implementation party MUST compl
 
 - 文档名：Owner Snapshot Namespace and Fence Currentness Contract
 - 版本：1.2.0（CANDIDATE）
-- 修订：1.2.0 吸收第 2 轮审查发现——规范化流水线重排为「解码先于大小写折叠与 NFC」，消除 `%41UTH-A` 与 `AUTH-A` 产生不同 canonical 的非唯一性缺陷；第 1 步解析声明为第 2–6 步的单次权威解析；显式规定解码后字节必须为合法 UTF-8、编码分隔符注入必须拒绝；第 5 节英文列表重编号为 1–11（消除重复编号 6）。
+- 修订：1.2.0 吸收第 2 轮审查发现——规范化流水线重排为「解码先于大小写折叠与 NFC」，消除 `%41UTH-A` 与 `AUTH-A` 产生不同 canonical 的非唯一性缺陷；第 1 步解析声明为第 2–6 步的单次权威解析；显式规定解码后字节必须为合法 UTF-8、编码分隔符注入必须拒绝；第 5 节英文列表重编号为 1–11（消除重复编号 6）；并将大小写折叠规定为 Unicode canonical caseless matching（NFC → 折叠 → NFC），补上同一缺陷类在规范化形式上的分叉口，同时要求幂等、NFC 为唯一规范形式。
 - 修订：1.1.0 吸收第 1 轮审查发现——Ledger 生命周期判定与第 8 节判定表统一；恢复 Authority 级授权撤销规则；恢复已执行 fade/forget 不得自动回滚的约束；百分号编码字符集、前导零策略、Fence 替换判定及状态版本并发边界转为规范要求。
 - 状态：决定已作出、**实现未验证**、**未执行任何一致性运行**。
 - 本文记录 D 侧规范决定及其约束，不构成实现完成证明。
@@ -388,8 +389,8 @@ Ledger 生命周期状态不得映射为 `STALE`。以下映射为规范性要�
 
 1. **Trim 与拆段（单次权威解析）**：先移除整个输入首尾的 Unicode White_Space；再按 ASCII `/` 拆段，`/` 是唯一允许的段分隔符，必须恰好四段，禁止空段及重复分隔符；然后移除各段首尾的 Unicode White_Space。Trim 后为空的段同样必须拒绝。内部空白不得删除。此处得到的四段是第 2 至第 6 步的唯一权威解析结果，后续任何步骤不得重新解析输入。
 2. **解码，且仅一次**：对四段各执行一次百分号解码。不以合法 `%HH` 三元组开头的 `%` 必须拒绝，不得原样透传。解码所得字节必须构成合法 UTF-8，否则输入必须拒绝。禁止二次解码。由于拆段已先行完成，某段解码后可能得到字面 `/`：这属于编码后的分隔符注入，必须拒绝，不得作为普通内容接受。
-3. **大小写**：对**解码后**的前三段执行 Unicode Default Case Folding；第四段版本段不执行大小写折叠。
-4. **Unicode 规范化**：对解码后的前三段执行 NFC 规范化。
+3. **大小写（canonical caseless match）**：对解码后的前三段，依次执行 NFC → Unicode Default Case Folding → 再次 NFC。此即 Unicode canonical caseless matching 序列，用于保证仅在规范化形式上不同的输入不会在大小写折叠后分叉。缺少前置规范化的大小写折叠属禁止行为。第四段版本段既不执行大小写折叠，也不执行规范化。
+4. **幂等性与规范形式**：Canonicalization 必须幂等——对已是 canonical 的标识符再次执行，必须逐字节复现该标识符。NFC 是唯一被接受的规范形式；以 NFD、NFKC 或 NFKD 形式提供的段不得被视为 canonical，也不得绕过第 3 步被直接接受。
 5. **重新编码**：将各段按其 UTF-8 字节输出，属于 RFC 3986 unreserved 集合（`ALPHA / DIGIT / "-" / "." / "_" / "~"`）的字节原样写出，其余所有字节以大写 `%HH` 写出。输入中的小写 `%hh` 必须归一化为大写。字面输入与解码后文本相同的百分号编码输入，必须产生完全相同的 canonical representation；下表中的 `%41UTH-A` / `AUTH-A` 为必需的一致性向量。
 6. **版本段处理**：第四段必须符合 `vMAJOR.MINOR.PATCH` 格式，三个部分均为非负十进制整数，不允许前导零，数字零本身除外。
 
