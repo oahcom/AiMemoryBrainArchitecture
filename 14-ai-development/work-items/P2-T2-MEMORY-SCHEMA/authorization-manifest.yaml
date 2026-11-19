@@ -1,0 +1,90 @@
+# P2-T2 authorization manifest
+# Design-proposal scope only. Implementation authorization is expressly NOT granted
+# by this manifest. See scope.implementation_authorization below.
+
+schema_version: "1.0"
+work_item: P2-T2
+title: "Memory Storage Schema design proposal"
+repository: oahcom/AiMemoryBrainArchitecture
+branch: design/P2-T2-memory-schema
+
+decision:
+  id: GO-2026-P2-DESIGN-001
+  date: "2026-11-19"
+  authority: "development-baseline convergence path (Issue #264 comment 7000428916)"
+  form: "GO decision + manifest(allowed_write_paths, authorization_basis)"
+  sequence_ruling: "Phase 2 order T2 -> T1 -> T3 -> T4; design before implementation"
+  implementation_ruling: >
+    P2-T1 implementation write authorization is withheld pending a reviewed and frozen
+    P2-T2 design. A separate GO decision is required before any P2-T1 code is written.
+  dev_baseline_note: >
+    Human main-merge approval is OUT-OF-SCOPE(dev-baseline) per item 3 of 7000428916.
+    No human approval is represented as obtained. acceptance_authority remains NOT_ASSIGNED.
+
+roles:
+  sponsor: NOT_ASSIGNED
+  accountable_owner: NOT_ASSIGNED
+  acceptance_authority: NOT_ASSIGNED
+  implementing_owner: "B (data architecture) + D (backend), design phase only"
+  role_note: "NOT_ASSIGNED is a true governance state and MUST NOT be substituted by engineering contribution or session identity."
+
+baseline:
+  commit: 9ede3970f47801cc3d3c93373eb5829bb697398b
+  note: "design branch rebased onto main 7f809387 before commit; frozen contracts unchanged"
+  source: GitHub refs (origin/main at GO time)
+
+scope:
+  manifest_path: 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/authorization-manifest.yaml
+  allowed_write_paths:
+    - 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/authorization-manifest.yaml
+    - 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/design-proposal.md
+  authorization_basis:
+    - "GO-2026-P2-DESIGN-001: P2-T2 design proposal required before P2-T1 implementation authorization."
+    - "Design-only scope: no code, no schema execution, no migration, no test claims."
+    - "Development-baseline convergence path per Issue #264 comment 7000428916."
+  all_other_paths: OUT_OF_SCOPE
+
+  implementation_authorization: NOT_GRANTED
+  implementation_note: >
+    This manifest authorizes a design document only. It does not authorize creating
+    memory/schema.sql, memory/dao.py, memory/vector_store.py, any Rust crate change,
+    any migration script, or any test file. Those require a separate GO decision
+    after the design is reviewed and frozen.
+
+conflicts_disclosed:
+  - id: P2T2-C-01
+    subject: "prompt schema vs frozen Phase 1 domain model"
+    detail: >
+      prompts-fix/P2-T2-memory-schema.md specifies sessions/messages/decisions/
+      file_changes/context_injections/value_score_history. Phase 1 already DECIDED and
+      merged a different object model (Memory/MemoryVersion/Claim/Event/Provenance) with
+      implemented SQLite tables memories/versions/idempotency/commit_log and
+      accepted_events/event_payloads/compile_outbox. The proposal does not adopt the
+      prompt schema. The conflict is escalated, not silently resolved.
+  - id: P2T2-C-02
+    subject: "mutable value_score/decay_weight on a content row"
+    detail: >
+      Contradicts the immutable-version invariant in core-entities.md §4 and the
+      no-stale-projection rule in phase-1-storage-trait-contract.md. Resolved in the
+      proposal by moving both to a rebuildable projection table.
+  - id: P2T2-C-03
+    subject: "ON DELETE CASCADE from sessions"
+    detail: >
+      Conflicts with retention_class / forget_operation_id governance. Resolved in the
+      proposal by not creating a sessions storage root at all.
+
+review:
+  required: true
+  rounds:
+    - R1
+  independence: REQUIRED
+  blocking_question: Q1 in the proposal — Option A (Phase 1 is the store) vs Option B (supersede Phase 1)
+
+claims_forbidden:
+  - "that P2-T2 is implemented"
+  - "that the schema is frozen"
+  - "that P2-T1 implementation is authorized"
+  - "that Q1 (Option A vs B) is resolved"
+  - "that a vector store or embedding model has been selected"
+  - "that a human Owner approved this design"
+  - "that acceptance_authority has been assigned"
