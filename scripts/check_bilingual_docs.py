@@ -22,8 +22,16 @@ NORMATIVE_ROOTS = {
     "13-engineering-decisions",
 }
 EXEMPT_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".drawio"}
-# This normative policy intentionally contains both languages in one source file.
-EMBEDDED_BILINGUAL_SOURCES = {"00-governance/bilingual-documentation-policy.md"}
+# These governance sources intentionally contain both languages in one source file.
+EMBEDDED_BILINGUAL_SOURCES = {
+    "00-governance/bilingual-documentation-policy.md",
+    "00-governance/bilingual-governance-migration-register.md",
+    "00-governance/templates/bilingual-issue-template.md",
+    "00-governance/templates/bilingual-umbrella-requirement-template.md",
+    "00-governance/templates/bilingual-commit-message.md",
+    "00-governance/templates/repository-policy-inheritance.md",
+    "00-governance/reports/bilingual-baseline-remediation-report.md",
+}
 ROOT = Path.cwd()
 
 
