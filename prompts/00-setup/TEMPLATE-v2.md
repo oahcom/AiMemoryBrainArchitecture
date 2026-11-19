@@ -4,6 +4,7 @@
 - Version: 2.0
 - Status: PROPOSED — requires governance adoption
 - Applies to: new work prompts; existing executed prompts remain immutable
+- Chinese counterpart / 中文对应文件: [TEMPLATE-v2.zh-CN.md](TEMPLATE-v2.zh-CN.md)
 
 > Seven core elements are seven sections, not seven metadata fields. This changes prompt organization, not authority, verification, bilingual, security, or acceptance gates.
 
@@ -33,6 +34,7 @@
 - **Dependency contracts:** [Owner + contract + exact revision; or NONE]
 - **Applicable global/Owner prompts:** [Prompt IDs and paths]
 - **Bilingual sources:** [affected Chinese/English paths and source revision, when applicable]
+- **State of knowledge:** [DECIDED / CANDIDATE / OPEN / TO_VALIDATE facts and exact source refs]
 
 If a required source, revision, approval, or dependency is unavailable or conflicting, stop at that boundary and report it; do not infer it.
 
@@ -43,9 +45,15 @@ If a required source, revision, approval, or dependency is unavailable or confli
 - Read and comply with GOV-DOC-001 and applicable global/Owner prompts. Architecture-significant changes require Chinese/English counterparts in the same change set unless a formally approved, time-bounded STALE exception applies.
 - Security, failure, concurrency, recovery, privacy, and compatibility analysis MUST occur at the lifecycle gate appropriate to task class/risk. This template does not waive those reviews.
 
-**Recommended steps / 推荐步骤**
-1. [Suggested inspection/design/implementation sequence.]
-2. [Suggested validation or handoff.]
+**Required execution sequence / 必需执行步骤**
+1. Inspect pinned sources and dependencies.
+2. Plan within authorized scope and record unresolved knowledge states.
+3. Make the authorized change.
+4. Run applicable verification and record exact results.
+5. Report deliverables, evidence, blockers and handoff.
+
+**Recommended refinements / 推荐步骤**
+- [Optional design/implementation sequence or additional handoff detail.]
 These steps are adaptable unless explicitly marked MUST.
 
 ## 5. Acceptance and deliverables / 验收与交付物
@@ -73,6 +81,12 @@ Acceptance criteria define completion. An artifact's existence alone does not pr
 - Mark unavailable or inapplicable checks NOT RUN / NOT APPLICABLE with reason; never imply PASS.
 - R2/R3, security, data-integrity, migration, concurrency, recovery, and other applicable policies retain their full test/review evidence. P1 is not a waiver.
 
+**Git workflow / Git 流程**
+- Branch / Base SHA: [branch @ exact base SHA]
+- Commit and PR target: [commit plan / PR target]
+- Review handoff: [independent reviewer and required evidence]
+- Merge rule: [NO MERGE unless separately authorized]
+
 **Review level:** [R0 / R1 / R2 / R3]  
 **Bilingual parity evidence:** [Chinese/English paths, source revision, reviewer and result, when applicable.]
 
@@ -91,4 +105,5 @@ Acceptance criteria define completion. An artifact's existence alone does not pr
 - Keep the seven headings; use NONE, NOT APPLICABLE, or PENDING + reason instead of inventing content.
 - Compute SHA-256 over the exact immutable executed prompt snapshot and store it in the Work Item evidence bundle/manifest. Do not put a self-referential digest inside the bytes being hashed.
 - This prompt does not replace the Work Item manifest, required global prompts, GOV-DOC-001, AI-STD-001, ADRs, or the GitHub Issue/PR carrier.
+- The twelve mandatory content elements in AI-PROMPT-STD-001 §4 remain required and are embedded in these seven sections according to that standard's crosswalk; they are not twelve additional headings.
 - Existing v1 prompts remain valid and immutable. Migrate only for a new execution/version; never rewrite an executed prompt in place.
