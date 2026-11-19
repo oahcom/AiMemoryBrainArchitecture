@@ -337,3 +337,12 @@ The earlier OPEN entry is superseded. C's separate cross-authority causal-order 
 - PR #28 current head: `3b5ce54c1687e9c7591f9e6e70e5c24f2afa465d`; workflow runs `44072524932` (#116) and `44072518263` (#115) both completed SUCCESS; job `GOV-DOC-001 structural checks` succeeded.
 - Structural gate remains limited to paired-document/manifest structure. It does not establish translation semantic approval, Owner signature, schema freeze, implementation, L3/L4 conformance or production readiness.
 - PR #28 remains Draft/Open; 158 files changed; no merge or production activation authorized.
+
+
+## 18. FIX-2026-P1-T1 prompt-template bilingual companions — 2026-11-19
+
+- English template: `prompts/00-setup/TEMPLATE-v2.md`; Chinese companion: `prompts/00-setup/TEMPLATE-v2.zh-CN.md`; Template ID `AI-PROMPT-TPL-002`, Version 2.0, Status PROPOSED.
+- English migration guide: `prompts/00-setup/MIGRATION-GUIDE.md`; Chinese companion: `prompts/00-setup/MIGRATION-GUIDE.zh-CN.md`; Guide ID `AI-PROMPT-MIGRATION-001`, Version 1.0, Status PROPOSED.
+- Reciprocal links are recorded in each language file. Stable IDs, section numbering, requirement status, source Blob/Commit identifiers and non-executable pilot caveats are preserved.
+- Structural and identifier parity: checked during this change. Independent semantic parity review and GOV-DOC-001 structural/link automation: NOT RUN; no translation acceptance is implied.
+- This registration records paired-document presence only. It does not adopt the proposed template or migration policy, approve AI-STD-001 / AI-PROMPT-STD-001, or authorize merge.
