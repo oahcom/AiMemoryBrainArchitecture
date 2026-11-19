@@ -67,3 +67,11 @@ Prompt files guide task execution; they do not override approved governance, Own
 提示词用于指导任务执行，不能覆盖已批准治理规范、Owner 权限、ADR 或规范性架构文档。如果提示词与更新的已批准规范冲突，必须停止并报告冲突，先维护提示词。
 
 The prompts in this directory are PROPOSED until adopted through the repository's approved governance process. A prompt's presence does not itself grant implementation, merge, security-risk-acceptance, or contract-freeze authority.
+
+
+## Simplified prompt template v2 / 简化提示词模板 v2
+
+- [English template](00-setup/TEMPLATE-v2.md) · [中文模板](00-setup/TEMPLATE-v2.zh-CN.md)
+- [English migration guide](00-setup/MIGRATION-GUIDE.md) · [中文迁移指南](00-setup/MIGRATION-GUIDE.zh-CN.md)
+
+Both pairs are PROPOSED and require governance adoption. Their Chinese and English counterparts are maintained together under GOV-DOC-001.
