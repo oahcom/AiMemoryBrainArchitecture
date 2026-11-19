@@ -43,13 +43,27 @@ def validate_owner_snapshot(snapshot, owner):
       "I":{"receipt_issue_high_water","receipt_consume_high_water","inventory_epoch_ref",
            "registry_snapshot_digest","relevant_entry_set_root"},
       "D":{"producer_registration_high_water","work_item_high_water","attempt_high_water",
-           "barrier_generation","barrier_root"},
+           "barrier_generation","barrier_root","forget_fence_generation_high_water",
+           "dependency_closure_cursor","dependency_closure_root"},
       "C":{"reservation_high_water","provider_attempt_high_water","provider_outcome_high_water"},
     }
     if owner not in fields or snapshot.get("owner")!=owner:
         return INVALID
     values=snapshot.get("owner_specific_high_waters")
-    if not isinstance(values,dict) or set(values)!=fields[owner]:
+    if not isinstance(values,dict):
+        return INVALID
+    if owner=="D" and set(values)=={
+        "producer_registration_high_water","work_item_high_water","attempt_high_water",
+        "barrier_generation","barrier_root",
+    }:
+        # Explicit legacy policy: the former five-field D snapshot is recognizable,
+        # but lacks the separately-authoritative ForgetFence and dependency-closure
+        # evidence required by Schema 1.2.17. It must never become VALID.
+        if any(not isinstance(v,str) or not v for v in values.values()):
+            return INVALID
+        legacy_digest=td("OWNER-SPECIFIC-HIGH-WATERS",values)
+        return UNKNOWN if snapshot.get("owner_specific_high_waters_digest")==legacy_digest else INVALID
+    if set(values)!=fields[owner]:
         return INVALID
     if any(not isinstance(v,str) or not v for v in values.values()):
         return INVALID
