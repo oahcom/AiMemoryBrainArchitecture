@@ -10,7 +10,7 @@
 
 ## 1. Normative delta and precedence
 
-This document is a versioned successor amendment to D contract 1.3.0. It preserves the 1.3.0 namespace identity and canonicalization algorithm except for the explicit Unicode data-version binding in §4 below. It replaces the entire 1.3.0 §5 scalar comparison rule and removes the two corresponding scalar-result rows from §8. If any 1.3.0 text elsewhere appears to permit a cross-type comparison, numeric inequality proof, or Capture-created cutoff, this successor and D Owner Decision -002/-003 prevail.
+This document is a versioned successor amendment to D contract 1.3.0. It preserves the 1.3.0 namespace identity and canonicalization algorithm except for the explicit Unicode data-version binding in §4 below. It replaces the entire 1.3.0 §5 scalar comparison rule in both English and Chinese and removes all three scalar-comparison rows from both English and Chinese §8 tables. If any 1.3.0 text elsewhere appears to permit a cross-type comparison, numeric inequality proof, or Capture-created cutoff, this successor and D Owner Decision -002/-003 prevail.
 
 ## 2. Typed high-water definitions
 
@@ -77,10 +77,7 @@ The words installed and captured MUST NOT be used as untyped scalar variables. W
 
 ## 6. §8 decision-table replacement
 
-Delete the 1.3.0 rows:
-- installed = captured | VALID
-- installed > captured | VALID
-- installed < captured | INVALID
+Delete all three scalar comparison rows (installed = captured, installed > captured, installed < captured) from both the English §8 table and its Chinese counterpart. The affected predecessor rows are English lines 259–261 and Chinese lines 546–548 in the exact 1.3.0 Blob identified in the header. The entire scalar comparison table in §5 is replaced in both languages.
 
 Replace them with:
 - Same typed immutable ProducerRegistrationHighWater, same operation/fence/snapshot binding, and all six D-002 conditions proven | VALID (then evaluate currentness/revocation independently).
