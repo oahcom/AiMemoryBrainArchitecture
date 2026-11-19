@@ -19,8 +19,18 @@ NORMATIVE_ROOTS = {
     "06-memory-context", "07-agent-integration", "08-protocols",
     "09-storage-and-index", "10-security-and-governance",
     "11-consistency-and-recovery", "12-testing-and-acceptance",
-    "13-engineering-decisions",
+    "13-engineering-decisions", "14-ai-development",
 }
+# 14-ai-development subtrees holding operational records or prompt templates,
+# not bilingual specifications. The PR-body declaration requirement still
+# applies; counterpart pairing does not.
+PAIR_EXEMPT_PREFIXES = (
+    "14-ai-development/work-items/",
+    "14-ai-development/prompts/",
+    "14-ai-development/adr/",
+)
+# For 14-ai-development, counterpart pairing applies to prose documents only.
+PAIR_ENFORCED_SUFFIXES = {".md"}
 EXEMPT_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".drawio"}
 # These governance sources intentionally contain both languages in one source file.
 EMBEDDED_BILINGUAL_SOURCES = {
@@ -33,6 +43,18 @@ EMBEDDED_BILINGUAL_SOURCES = {
     "00-governance/templates/repository-policy-inheritance.md",
     "00-governance/reports/bilingual-baseline-remediation-report.md",
     "00-governance/reports/f06-object-reconciliation.md",
+    # 14-ai-development single-file bilingual sources (F-07 explicit
+    # registration so the exemption is documented rather than implied by a
+    # constant gap).
+    "14-ai-development/ai-development-standard.md",
+    "14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md",
+    "14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md",
+    "14-ai-development/PR-GOVERNANCE-001.md",
+    "14-ai-development/prompt-and-evidence-template.md",
+    "14-ai-development/prompt-authoring-standard.md",
+    "14-ai-development/iteration-lifecycle.md",
+    "14-ai-development/owner-automation-operating-model.md",
+    "14-ai-development/README.md",
 }
 ROOT = Path.cwd()
 
@@ -262,6 +284,141 @@ def check_prompt_library() -> list[str]:
     return errors
 
 
+def side_by_side_partner(source: str) -> str | None:
+    """Conventional side-by-side counterpart for a 14-ai-development path."""
+    if source.endswith(".en.md"):
+        stem = source[: -len(".en.md")]
+        for cand in (stem + ".zh-CN.md", stem + ".md"):
+            if cand != source and (ROOT / cand).is_file():
+                return cand
+    elif source.endswith(".zh-CN.md"):
+        stem = source[: -len(".zh-CN.md")]
+        cand = stem + ".en.md"
+        if (ROOT / cand).is_file():
+            return cand
+    elif source.endswith(".md"):
+        stem = source[: -len(".md")]
+        cand = stem + ".en.md"
+        if (ROOT / cand).is_file():
+            return cand
+    return None
+
+
+def mirror_partner(source: str) -> str | None:
+    """docs/en or root mirror counterpart for a 14-ai-development path."""
+    if source.startswith("14-ai-development/"):
+        en = "docs/en/" + source
+        if (ROOT / en).is_file():
+            return en
+    if source.startswith("docs/en/14-ai-development/"):
+        rest = source[len("docs/en/") :]
+        if (ROOT / rest).is_file():
+            return rest
+        zh = "docs/zh-CN/" + rest
+        if (ROOT / zh).is_file():
+            return zh
+    if source.startswith("docs/zh-CN/14-ai-development/"):
+        rest = source[len("docs/zh-CN/") :]
+        if (ROOT / rest).is_file():
+            return rest
+        en = "docs/en/" + rest
+        if (ROOT / en).is_file():
+            return en
+    return None
+
+
+def counterpart_14(source: str) -> str | None:
+    """The single counterpart path for a 14-ai-development source, or None."""
+    return side_by_side_partner(source) or mirror_partner(source)
+
+
+def check_mirror_pairing(changed, exception):
+    # type: (set[str], bool) -> list[str]
+    """A docs/en or docs/zh-CN change must update both sides in the same PR."""
+    errors = []
+    for path in sorted(changed):
+        if path.startswith("docs/en/14-ai-development/"):
+            counterpart = counterpart_14(path)
+            if counterpart is None:
+                if not exception:
+                    errors.append(
+                        f"{path} changed but no counterpart is resolvable "
+                        "(root source or docs/zh-CN mirror); pair it or use "
+                        "a documented BILINGUAL-EXCEPTION"
+                    )
+                continue
+            if counterpart not in changed and not exception:
+                errors.append(f"{path} changed without paired change {counterpart}")
+        elif path.startswith("docs/zh-CN/14-ai-development/"):
+            counterpart = counterpart_14(path)
+            if counterpart is None:
+                if not exception:
+                    errors.append(
+                        f"{path} changed but no counterpart is resolvable "
+                        "(root source or docs/en mirror); pair it or use "
+                        "a documented BILINGUAL-EXCEPTION"
+                    )
+                continue
+            if counterpart not in changed and not exception:
+                errors.append(f"{path} changed without paired change {counterpart}")
+        elif path.startswith("docs/en/"):
+            counterpart = "docs/zh-CN/" + path[len("docs/en/"):]
+            if counterpart not in changed and not exception:
+                errors.append(f"{path} changed without paired change {counterpart}")
+            if not (ROOT / counterpart).is_file() and not exception:
+                errors.append(f"Chinese counterpart does not exist: {counterpart}")
+        elif path.startswith("docs/zh-CN/"):
+            counterpart = "docs/en/" + path[len("docs/zh-CN/"):]
+            if counterpart not in changed and not exception:
+                errors.append(f"{path} changed without paired change {counterpart}")
+            if not (ROOT / counterpart).is_file() and not exception:
+                errors.append(f"English counterpart does not exist: {counterpart}")
+    return errors
+
+
+def check_normative_pairing(normative_changes, changed, complete, exception):
+    # type: (list[str], set[str], bool, bool) -> list[str]
+    """Normative changes need paired counterparts (or an explicit exemption)."""
+    errors = []
+    if not (normative_changes and complete):
+        return errors
+    for source in normative_changes:
+        if source in EMBEDDED_BILINGUAL_SOURCES:
+            continue
+        if source.startswith(PAIR_EXEMPT_PREFIXES):
+            continue
+        if source.startswith("14-ai-development/"):
+            if Path(source).suffix.lower() not in PAIR_ENFORCED_SUFFIXES:
+                continue
+            partner = counterpart_14(source)
+            if partner is None:
+                errors.append(
+                    f"{source} has no resolvable bilingual counterpart "
+                    "(side-by-side .en.md/.zh-CN.md or docs/en mirror); "
+                    "pair it, register it in EMBEDDED_BILINGUAL_SOURCES, "
+                    "or use a documented BILINGUAL-EXCEPTION"
+                )
+                continue
+            if partner not in changed:
+                errors.append(
+                    f"{source} requires its counterpart changed in this PR: {partner}"
+                )
+            if not (ROOT / partner).is_file():
+                errors.append(f"Counterpart file must exist for {source}: {partner}")
+            continue
+        en = f"docs/en/{source}"
+        zh = f"docs/zh-CN/{source}"
+        if en not in changed or zh not in changed:
+            errors.append(
+                f"{source} requires both counterparts changed in this PR: {en}, {zh}"
+            )
+        if not (ROOT / en).is_file() or not (ROOT / zh).is_file():
+            errors.append(
+                f"Both counterpart files must exist for {source}: {en}, {zh}"
+            )
+    return errors
+
+
 def main() -> int:
     try:
         changed = changed_paths()
@@ -281,19 +438,7 @@ def main() -> int:
     complete = "BILINGUAL-MANIFEST: COMPLETE" in body
 
     # A language-pair change must update both sides in the same PR.
-    for path in sorted(changed):
-        if path.startswith("docs/en/"):
-            counterpart = "docs/zh-CN/" + path[len("docs/en/"):]
-            if counterpart not in changed and not exception:
-                errors.append(f"{path} changed without paired change {counterpart}")
-            if not (ROOT / counterpart).is_file() and not exception:
-                errors.append(f"Chinese counterpart does not exist: {counterpart}")
-        elif path.startswith("docs/zh-CN/"):
-            counterpart = "docs/en/" + path[len("docs/zh-CN/"):]
-            if counterpart not in changed and not exception:
-                errors.append(f"{path} changed without paired change {counterpart}")
-            if not (ROOT / counterpart).is_file() and not exception:
-                errors.append(f"English counterpart does not exist: {counterpart}")
+    errors.extend(check_mirror_pairing(changed, exception))
 
     bilingual_doc_changes = any(
         path.startswith("docs/en/") or path.startswith("docs/zh-CN/")
@@ -324,20 +469,7 @@ def main() -> int:
             "'BILINGUAL-EXCEPTION: APPROVED'."
         )
 
-    if normative_changes and complete:
-        for source in normative_changes:
-            if source in EMBEDDED_BILINGUAL_SOURCES:
-                continue
-            en = f"docs/en/{source}"
-            zh = f"docs/zh-CN/{source}"
-            if en not in changed or zh not in changed:
-                errors.append(
-                    f"{source} requires both counterparts changed in this PR: {en}, {zh}"
-                )
-            if not (ROOT / en).is_file() or not (ROOT / zh).is_file():
-                errors.append(
-                    f"Both counterpart files must exist for {source}: {en}, {zh}"
-                )
+    errors.extend(check_normative_pairing(normative_changes, changed, complete, exception))
 
     if exception:
         print("Approved bilingual exception declaration detected; human governance approval remains mandatory.")

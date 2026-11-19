@@ -1,0 +1,52 @@
+schema_version: 1
+work_item_id: FIX-2026-P1-GATE-ROOTS-001
+title: "F-07 remediation — NORMATIVE_ROOTS covers 14-ai-development with convention-aware pairing"
+status: IMPLEMENTED
+opened: 2026-11-20
+tracking:
+  finding: "F-07 [P1] (Issue #266 comment 7005657700)"
+  rationale: "14-ai-development carries the AI execution standards (AI-STD-001, AI-EXEC-*, rulings) yet was the only normative root not covered by the bilingual gate; #272 vs #273 asymmetry is the measured evidence."
+authorization:
+  form: "dev-baseline convergence path (Issue #264 comment 7000428916): development-chain carriers proceed through code chain + Owner acceptance + PR/merge + registration; all owners may be one session (user standing order, 2026-11-20)"
+  decision: "Governance-Owner-session decision to extend NORMATIVE_ROOTS; the coordinator deferral recorded at F-07 registration (normative decision, not mechanical) is resolved under the standing owner-as-session order."
+  merge_commit_only: applies (per AUTH-*-INDEX-* style discipline for governance changes)
+scope:
+  changed_paths:
+    - scripts/check_bilingual_docs.py
+    - scripts/governance/evidence/test_gate_normative_roots.py
+    - 14-ai-development/work-items/FIX-2026-P1-GATE-ROOTS-001/authorization-manifest.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-GATE-ROOTS-001/audit-record.md
+design:
+  root_added: "14-ai-development"
+  pairing_conventions:
+    - "side-by-side: X.md <-> X.en.md (zh primary) or X.en.md <-> X.zh-CN.md (en primary)"
+    - "docs mirror: 14-ai-development/X.md (zh) <-> docs/en/14-ai-development/X.md (en); also docs/en/ <-> docs/zh-CN/ mirror pairs where both exist"
+    - "embedded: explicit per-file registration in EMBEDDED_BILINGUAL_SOURCES"
+  pairing_exempt_prefixes:
+    - "14-ai-development/work-items/"
+    - "14-ai-development/prompts/"
+    - "14-ai-development/adr/"
+  pairing_enforced_suffixes: ".md only (yaml/json/toml/proto are declaration-only under 14-ai-development)"
+  unpaired_behavior: "FAIL unless BILINGUAL-EXCEPTION with documented fields; pay pairing debt or register embedded"
+embedded_registrations:
+  - 14-ai-development/ai-development-standard.md
+  - 14-ai-development/AI-EXEC-UNIFICATION-RULING-001.md
+  - 14-ai-development/AI-EXEC-INDEPENDENCE-RULING-001.md
+  - 14-ai-development/PR-GOVERNANCE-001.md
+  - 14-ai-development/prompt-and-evidence-template.md
+  - 14-ai-development/prompt-authoring-standard.md
+  - 14-ai-development/iteration-lifecycle.md
+  - 14-ai-development/owner-automation-operating-model.md
+  - 14-ai-development/README.md
+known_debt_not_closed:
+  - "ai-run-003-event-driven-owner-worker-runtime.md — unpaired zh; any change now requires pairing or documented exception (intended enforcement, tracked in migration register)"
+  - "ubuntu-self-hosted-runner-bootstrap.md — unpaired en; same"
+  - "continuous-owner-runtime-architecture.md — unpaired en; same"
+  - "F-08 docs/zh-CN mirror gaps — unchanged; the docs/en/14-ai-development/* path now resolves its counterpart to the root zh source, so EN-mirror edits no longer force a nonexistent docs/zh-CN mirror (measured #273 red cause) — this narrows F-08 but does not close it"
+exit_condition_evidence:
+  - "14 new tests in scripts/governance/evidence/test_gate_normative_roots.py (undeclared/unpaired change must fail; conventions must pass; exemptions asserted; 00-governance regression unchanged)"
+  - "exact-Head local gate run on this PR (compensation path, Actions billing interruption)"
+constraints:
+  - "No policy text changed; this is tooling enforcement only."
+  - "Does not close F-07 in the finding registry until reviewer concurrence; does not close F-08 or translation debt."
+  - "GOV-DOC-001 v1.2 adoption remains a separate governance item."
