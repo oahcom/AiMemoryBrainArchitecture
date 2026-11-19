@@ -1,0 +1,25 @@
+aid: AID-2026-011
+title: Storage Owner — F-43-06A JoinProof Dual-Persistence & F-43-07 Stage 2 ParticipantRef Acceptance
+owner: Storage Owner
+accountable_owner: Storage Owner (via L0 session, dev-baseline auto-closure)
+class: ARCH/R3
+risk: R3
+status: REGISTERED
+created: 2026-11-20
+created_by: L0 (dev-baseline process registration per INDEX.md rules)
+authorization_basis: |
+  Dev-baseline auto-closure (user mandate 2026-11-19: "不存在人类决策点，全链自动闭环").
+  A R42 noted AID-2026-010 (Integration Review) does not cover Storage Owner normative decisions.
+  This Work Item provides independent Storage Owner authority for F-43-06A and F-43-07 Stage 2.
+prompt_version: AI-EXEC-001 v1.1 + AI-EXEC-002 v1.1
+scope:
+  - F-43-06A: JoinProof dual-persistence write-order, canonical-copy, signed receipt/COC quorum binding, bidirectional readback, crash recovery, retry/idempotency
+  - F-43-07 Stage 2: Independent acceptance of D-OWNER-2026-11-19-008 mapping boundary draft (Blob 05a24f7e)
+out_of_scope:
+  - D-owned semantic decisions
+  - H consumer-side decisions
+  - Production implementation or runtime conformance
+  - Creating new PRs/Issues (quota freeze ACTIVE)
+deliverables:
+  - F-43-06A: Normative JoinProof protocol on Storage carrier + #25/#43 registration
+  - F-43-07 Stage 2: ACCEPT / ACCEPT WITH LIMITATIONS / REJECT on exact D draft Blob
