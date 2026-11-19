@@ -42,3 +42,34 @@ The 24 model-level cases are not a substitute for Owner D/Owner I approvals, ind
 ### Model review correction
 
 The regression suite now also rejects vacuous D-domain completion when the sealed canonical target inventory is empty. Without this guard, Python's `all([])` semantics would allow a zero-target operation to appear D-domain complete. This is a reference-model correction only; production inventory completeness still requires implementation-level proof.
+
+## R3 contract reference model (dev baseline)
+
+A second, non-production reference model was integrated for the R3 atomic
+suppression contract: `r3_contract_model.py` (model) and `test_r3_contract.py`
+(79 R3 contract tests). It is an in-memory model of the atomic-commit tuple,
+authorization/credential binding, idempotent retry audit, and staged/published
+validation — it is not production code.
+
+### Run
+
+```
+python -m unittest discover -s 14-ai-development/work-items/AID-2026-001/reference-model -v
+```
+
+Current suite: 103 tests (79 R3 contract + 24 Forget model), CPython 3.13.5,
+standard library only. The execution runbook and the per-ID evidence table are
+in `R3-RUNBOOK.md` and `r3-evidence/`.
+
+### Evidence level and non-guarantees
+
+Three owners accepted this dev baseline: Owner D
+(`OD-D-FORGET-DELTA-20261119-009`), Owner I (ACCEPT, reference-model layer
+only) and Storage (`DEC-AID-2026-001-STOR-20261119-08`). A green run proves
+only that this abstract model's tests passed.
+
+Not covered: real cryptographic receipt signature verification; a production
+issuer minting a fresh credential per retry; an enforced production verifier;
+concurrent linearization (DFI-013); WAL / crash durability (DFI-021).
+DFI-001…DFI-022 remain NOT EVIDENCED against production components, and
+production activation is NOT AUTHORIZED.
