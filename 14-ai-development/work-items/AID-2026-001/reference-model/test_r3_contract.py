@@ -2204,6 +2204,10 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
                           request_hash=request_hash),
             )
 
+        # The deliberately corrupted registry projection is not silently
+        # repaired by the rejection path (F-STOR-20261119-04).
+        self.assertIs(m.operation_registry[idempotency_key]["commit"], swapped)
+
         # Zero side effects from the rejected retry.
         self.assertIs(m.atomic_commit, baseline_commit)
         self.assertEqual(m.fence_generation, baseline_fence)
@@ -2327,6 +2331,93 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
             m._validate_atomic_commit(
                 bad_commit, published=False, live_state=False
             )
+
+    def test_FSTOR_20_staged_rejects_missing_credential_and_restores_projection(self):
+        """F-STOR-20261119-03: real staged rollback, not a direct validator call.
+
+        A test-only subclass removes the embedded credential from the staged
+        commit just before PHASE 1 validation. commit_suppression() must then
+        reject, restore every business projection, and leave only the
+        diagnostic ATOMIC_TUPLE_ABORTED audit entry.
+        """
+        from dataclasses import replace as _replace
+
+        class StripCredentialOnStage(R3Model):
+            def _validate_atomic_commit(self, commit, *args, **kwargs):
+                if kwargs.get("published") is False and commit.authorization_reference.receipt is not None:
+                    commit = _replace(
+                        commit,
+                        authorization_reference=_replace(
+                            commit.authorization_reference, receipt=None
+                        ),
+                    )
+                return super()._validate_atomic_commit(commit, *args, **kwargs)
+
+        operation_id = "foi-stage-missing-cred-op"
+        request_hash = "foi-stage-missing-cred-hash"
+        idempotency_key = "foi-stage-missing-cred-key"
+
+        m = StripCredentialOnStage(
+            "m", receipt_verifier=TrustAllReceiptVerifier()
+        )
+        m.phase = Phase.AUTHORIZED
+        before = {
+            "atomic_commit": m.atomic_commit,
+            "fence_generation": m.fence_generation,
+            "commit_counter": m.commit_counter,
+            "inventory_revision": m.inventory_revision,
+            "outbox": dict(m.outbox),
+            "atomic_tuple": dict(m.atomic_tuple),
+            "operation_registry": dict(m.operation_registry),
+            "nonce_registry": set(m.nonce_registry),
+            "retry_audit": list(m.retry_audit),
+            "audit": list(m.audit),
+            "lifecycle": m.lifecycle,
+            "phase": m.phase,
+        }
+
+        with self.assertRaises(ContractViolation) as ctx:
+            m.commit_suppression(
+                operation_id,
+                "foi-stage-missing-cred-attempt",
+                idempotency_key,
+                request_hash,
+                auth=auth(
+                    nonce="foi-stage-missing-cred-nonce",
+                    operation_id=operation_id,
+                    request_hash=request_hash,
+                ),
+            )
+        self.assertIn("missing its credential", str(ctx.exception))
+
+        # All business projections are restored.
+        after = {
+            "atomic_commit": m.atomic_commit,
+            "fence_generation": m.fence_generation,
+            "commit_counter": m.commit_counter,
+            "inventory_revision": m.inventory_revision,
+            "outbox": dict(m.outbox),
+            "atomic_tuple": dict(m.atomic_tuple),
+            "operation_registry": dict(m.operation_registry),
+            "nonce_registry": set(m.nonce_registry),
+            "retry_audit": list(m.retry_audit),
+            "audit": list(m.audit),
+            "lifecycle": m.lifecycle,
+            "phase": m.phase,
+        }
+        for key in (
+            "fence_generation", "commit_counter", "inventory_revision",
+            "outbox", "atomic_tuple", "operation_registry", "nonce_registry",
+            "retry_audit", "lifecycle", "phase",
+        ):
+            self.assertEqual(after[key], before[key], key)
+        self.assertIs(after["atomic_commit"], before["atomic_commit"])
+        # ATOMIC_TUPLE_ABORTED is the expected diagnostic audit event;
+        # "zero side effect" excludes it by definition.
+        self.assertEqual(
+            after["audit"],
+            before["audit"] + ["ATOMIC_TUPLE_ABORTED"],
+        )
 
 
 if __name__ == "__main__":
