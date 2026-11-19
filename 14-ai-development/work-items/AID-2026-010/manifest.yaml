@@ -13,12 +13,14 @@ task_class: ARCH
 risk: R3
 risk_note: Tentative conservative classification pending risk re-review.
 status: PROPOSED
-registration_status: AUTHORIZED_PENDING_PERSISTENCE
+registration_status: REGISTERED
 registration_note: >-
-  Number assignment by A (A-OWNER-ALIGNMENT-001-R16). Status remains
-  AUTHORIZED_PENDING_PERSISTENCE until manifest + INDEX + Issue comment
-  are all persisted and independently read back; only then may be marked
-  REGISTERED.
+  Number assignment by A (A-OWNER-ALIGNMENT-001-R16). Three persistence
+  items completed and independently read back 2026-11-19:
+  (1) manifest.yaml blob 6cc4fe35;
+  (2) INDEX.md row blob 2b58f79e;
+  (3) Issue #43 comment id 7011018228.
+  Status advanced to REGISTERED.
 authorization:
   decision_id: A-OWNER-ALIGNMENT-001-R16
   authorized_by: Owner A (conv 6afedebe-9950-83ee-93d4-7fd19cf46089)
