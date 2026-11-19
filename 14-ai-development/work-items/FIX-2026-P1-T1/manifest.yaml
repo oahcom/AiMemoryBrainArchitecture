@@ -1,0 +1,48 @@
+work_item_id: FIX-2026-P1-T1
+title: Simplify prompt engineering from 15 mandatory headings to 7 core sections
+accountable_owner: A
+task_class: DOC
+risk: R1
+status: IN_PROGRESS
+repository: oahcom/AiMemoryBrainArchitecture
+issue: 268
+branch: fix/simplify-prompts
+base:
+  branch: main
+  sha: c33a1bcd36f767c96f641d2a154f34d102ce2645
+prompt:
+  id: FIX-2026-P1-T1-PROMPT
+  version: v1
+  provenance: User-provided task brief in ChatGPT conversation
+  immutable_source_snapshot: NOT_ARCHIVED_AS_RAW_BYTES
+  sha256: NOT_VERIFIED
+  note: Do not invent a digest; archive exact executed prompt bytes and compute SHA-256 before execution under repository procedure.
+deliverables:
+  - prompts/00-setup/TEMPLATE-v2.md
+  - prompts/00-setup/MIGRATION-GUIDE.md
+  - prompts/00-setup/work-item-003-v2-migration-example.md
+  - 14-ai-development/ai-development-standard.md
+  - 14-ai-development/work-items/INDEX.md
+scope:
+  - Define seven-section prompt structure.
+  - Preserve mandatory governance requirements and existing v1 immutability.
+  - Update AI-STD-001 section 5 bilingually within the existing bilingual standard artifact.
+  - Provide migration guide and real-source non-executable migration example.
+constraints:
+  - GOV-DOC-001 and global prompt requirements remain mandatory.
+  - P0/P1 evidence tiers do not waive tests, R2/R3 gates, independent review or Owner acceptance.
+  - No merge or normative adoption is authorized by this work item.
+  - No existing executed prompt is overwritten.
+verification:
+  status: NOT_RUN
+  required:
+    - Read back every changed file.
+    - Validate seven sections, migration mapping, bilingual parity and traceability references.
+    - Confirm source AID-2026-003 prompt unchanged.
+review:
+  level: R1
+  independent_reviewer: PENDING
+  status: NOT_STARTED
+acceptance:
+  authority: A
+  status: PENDING
