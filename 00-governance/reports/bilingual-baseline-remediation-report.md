@@ -55,7 +55,10 @@ The complete v1.1 policy was read before drafting v1.2.
 - PR #271 tree at R6 baseline: `a02020dcb2e6b23bd5456b61ddb772c74ca95a63`
 - PR #271 state: OPEN; merged: false
 - PR base / merge-base recorded: `c5a995d9a2808112b007a9108e085048cbed5cc9`
-- Current main...PR head comparison at the R6 baseline: `diverged`; ahead 8 / behind 42; merge base `c5a995d9a2808112b007a9108e085048cbed5cc9`\n- Post-v2.2 validation snapshot: PR head `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8`; D7 blob read back as `36c50869fe2c42d5e1f12616012c84e0a1cc5d28`; main...head comparison `diverged`, ahead 10 / behind 42; merge base unchanged at `c5a995d9a2808112b007a9108e085048cbed5cc9`.
+- Current main...PR head comparison at the R6 baseline: `diverged`; ahead 8 / behind 42; merge base `c5a995d9a2808112b007a9108e085048cbed5cc9`
+- Post-v2.2 validation snapshot: PR head `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8`; D7 blob read back as `36c50869fe2c42d5e1f12616012c84e0a1cc5d28`; main...head comparison `diverged`, ahead 10 / behind 42; merge base unchanged at `c5a995d9a2808112b007a9108e085048cbed5cc9`.
+- v2.3 normative-boundary correction (`2026-11-19T17:06:00Z`): `00-governance/bilingual-documentation-policy.md` is restored to the GOV-DOC-001 v1.1 NORMATIVE text, blob `0e170479e1a71e8f4c124c6f1dc170241652f42b`, byte-identical to current main. The v1.2 proposal is relocated to `00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md`, blob `d91bd92b79177decc7baa038fdd24b3f8323b995`, and remains NON-NORMATIVE; the normative path is not replaced by a draft.
+- v2.3 measured comparison at the v2.3 authoring baseline (before the v2.3 commit): main `a22024112fce3851428343ca3e655712057e6dce`; PR head `f915e0234c3388def3bd97f2bfd2ce38dc1576d8`; `diverged`, ahead 11 / behind 70; merge base `c5a995d9a2808112b007a9108e085048cbed5cc9`.
 
 **EN**
 
@@ -112,6 +115,23 @@ The following is the R6 independently read-back OBJ-07 seven-file manifest snaps
 
 D2 was not modified by commit `47369925ace93821eab82e4cec8418f8d7505d64`. This D7 v2.2 changeset is D7-only; it does not modify D2.
 
+**v2.3 current manifest / v2.3 当前清单**
+
+The v2.3 changeset relocates D1 and leaves D2-D6 byte-identical to the R6 read-back. D7 is the file carrying this text and therefore cannot contain its own blob; its post-commit blob is read back and recorded in a PR comment, not in this table.
+
+本 v2.3 变更集迁移 D1，D2–D6 与 R6 读回结果逐字节一致。D7 即承载本表的文件，无法包含自身 blob；其提交后 blob 通过 PR 评论读回登记，不写入本表。
+
+| ID | Repository path / 仓库路径 | Blob SHA | Note / 说明 |
+|---|---|---|---|
+| D1 | `00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md` | `d91bd92b79177decc7baa038fdd24b3f8323b995` | v1.2 draft, relocated from the normative path in v2.3 / v2.3 由规范路径迁移而来的 v1.2 草案 |
+| D1-N | `00-governance/bilingual-documentation-policy.md` | `0e170479e1a71e8f4c124c6f1dc170241652f42b` | v1.1 NORMATIVE, restored and unmodified / v1.1 NORMATIVE，已恢复且未修改 |
+| D2 | `00-governance/bilingual-governance-migration-register.md` | `b5d6d2b6c5049e71578d9323c770bc1b48b9e0cc` | unchanged / 未变更 |
+| D3 | `00-governance/templates/bilingual-issue-template.md` | `64d432395dc7bec9ba5c3b2ae534df4b01a2db3c` | unchanged / 未变更 |
+| D4 | `00-governance/templates/bilingual-umbrella-requirement-template.md` | `9265098d739369522000ebc54b8c0275ee7e5b6d` | unchanged / 未变更 |
+| D5 | `00-governance/templates/bilingual-commit-message.md` | `8ea68efd927c62ba48c3249cc39e62760ced9370` | unchanged / 未变更 |
+| D6 | `00-governance/templates/repository-policy-inheritance.md` | `122f86b1e223e852eb19add7c37c452151372fe8` | unchanged / 未变更 |
+| D7 | `00-governance/reports/bilingual-baseline-remediation-report.md` | post-commit read-back / 提交后读回 | self-referential; recorded in PR comment / 自引用，登记于 PR 评论 |
+
 提交 `47369925ace93821eab82e4cec8418f8d7505d64` 未修改 D2。本 D7 v2.2 变更集仅修改 D7，不修改 D2。
 
 ### 3.3 Verification result / 验证结果
@@ -132,7 +152,7 @@ R6 已依据 OBJ-07 manifest 快照独立读回全部七个文件：7/7 匹配�
 
 The R6 independent review of Version 2.1 returned `NEEDS-REVISION`. This Version 2.2 report records the corrective response to R6 findings; it is not itself an independent acceptance. The v2.2 report-version-alignment commit `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8` was read back as D7 blob `36c50869fe2c42d5e1f12616012c84e0a1cc5d28`. Workflow run `44559550224` on that head completed SUCCESS (job `135684753485`; 2026-11-19 15:51:45Z–15:51:48Z). The post-v2.2 main...head comparison remained `diverged` (ahead 10 / behind 42; merge base `c5a995d9a2808112b007a9108e085048cbed5cc9`); successful Exact-Head integration verification has not been established. A fresh independent review must evaluate the final v2.2 commit.
 
-R6 对 Version 2.1 的独立复审结论为 `NEEDS-REVISION`。本 Version 2.2 报告记录对 R6 findings 的修正响应；本报告本身不构成独立验收。必须由新的独立复审针对 v2.2 精确提交进行评估。当前 main 与 PR 比较仍为 `diverged`（ahead 8 / behind 42）；尚未建立 Exact-Head 集成复核通过证据。
+R6 对 Version 2.1 的独立复审结论为 `NEEDS-REVISION`。本 Version 2.2 报告记录对 R6 findings 的修正响应；本报告本身不构成独立验收。v2.2 版本对齐提交 `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8` 的 D7 blob 读回为 `36c50869fe2c42d5e1f12616012c84e0a1cc5d28`；该 head 上的 workflow 运行 `44559550224` 结论 SUCCESS（job `135684753485`；2026-11-19 15:51:45Z–15:51:48Z）。v2.2 后的 main...head 比较仍为 `diverged`（ahead 10 / behind 42；merge base `c5a995d9a2808112b007a9108e085048cbed5cc9`）；尚未建立 Exact-Head 集成复核通过证据。必须由新的独立复审针对最终 v2.3 精确提交进行评估。
 
 ## 4. Issue updates and verification / Issue 更新与验证
 
@@ -502,12 +522,13 @@ The workflow and validator are integrated:
 - Executed step: `Check paired documentation and PR manifest`.
 - The step runs `python3 scripts/check_bilingual_docs.py`; the script's `main()` invokes `check_policy_inheritance()`.
 
-Two successful workflow executions are independently evidenced:
+Three successful workflow executions are independently evidenced:
 
 | Run ID | Tested PR head | Job ID | Job / step result | UTC execution window |
 |---|---|---|---|---|
 | `44542512889` | `70219731485040e2974d537080f994108ee1d989` | `135624335886` | Job SUCCESS; validator step SUCCESS | `14:19:42Z–14:19:45Z`, 2026-11-19 |
-| `44546301573` | `47369925ace93821eab82e4cec8418f8d7505d64` | `135637661718` | Job SUCCESS; validator step SUCCESS | `14:40:30Z–14:40:33Z`, 2026-11-19 |\n| `44559550224` | `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8` | `135684753485` | Job SUCCESS; validator step SUCCESS | `15:51:45Z–15:51:48Z`, 2026-11-19 |
+| `44546301573` | `47369925ace93821eab82e4cec8418f8d7505d64` | `135637661718` | Job SUCCESS; validator step SUCCESS | `14:40:30Z–14:40:33Z`, 2026-11-19 |
+| `44559550224` | `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8` | `135684753485` | Job SUCCESS; validator step SUCCESS | `15:51:45Z–15:51:48Z`, 2026-11-19 |
 
 All three executions reported `Bilingual documentation and prompt-library gate: PASS (11 changed paths inspected).` These runs verify workflow invocation and successful execution on their respective heads. They do not verify platform required-check enforcement.
 
@@ -527,14 +548,15 @@ Workflow 与校验器已完成接入：
 - 实际执行步骤：`Check paired documentation and PR manifest`。
 - 该步骤运行 `python3 scripts/check_bilingual_docs.py`；脚本的 `main()` 调用 `check_policy_inheritance()`。
 
-已有两次成功的 workflow 执行证据：
+已有三次成功的 workflow 执行证据：
 
 | Run ID | 被测 PR head | Job ID | Job / 步骤结果 | UTC 执行时间 |
 |---|---|---|---|---|
 | `44542512889` | `70219731485040e2974d537080f994108ee1d989` | `135624335886` | Job SUCCESS；校验步骤 SUCCESS | 2026-11-19 `14:19:42Z–14:19:45Z` |
 | `44546301573` | `47369925ace93821eab82e4cec8418f8d7505d64` | `135637661718` | Job SUCCESS；校验步骤 SUCCESS | 2026-11-19 `14:40:30Z–14:40:33Z` |
+| `44559550224` | `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8` | `135684753485` | Job SUCCESS；校验步骤 SUCCESS | 2026-11-19 `15:51:45Z–15:51:48Z` |
 
-两次执行均报告 `Bilingual documentation and prompt-library gate: PASS (11 changed paths inspected).` 这些运行证明 workflow 在各自 head 上实际调用并成功执行校验器，但不证明平台 required check 已强制生效。
+三次执行均报告 `Bilingual documentation and prompt-library gate: PASS (11 changed paths inspected).` 这些运行证明 workflow 在各自 head 上实际调用并成功执行校验器，但不证明平台 required check 已强制生效。
 
 较早的结构 CI 失败运行 `44477435608` 保留为历史证据，不被后续成功运行覆盖。
 
@@ -941,9 +963,33 @@ This revision responds to the R6 independent review (session `6aff0b47-3988-83ec
 - **F-09 / F-02：**将校验器 CI 接入登记为 COMPLETE / VERIFIED；将 required-check 配置/强制执行登记为因 GitHub 计划限制 HTTP 403 而 NOT_VERIFIED；F-02 总体继续保持 PARTIAL。
 - **F-10：**将已经完成的 `BILINGUAL-MANIFEST: COMPLETE` PR 正文声明记录为历史执行证据，并从未解决阻塞项中移除。
 - **F-06：**继续保持 OPEN；14 个未归组 PR 及对象级对账要求仍未完成。
-- v2.2 之前的 current-main 比较结果为 `diverged`（ahead 8 / behind 42）。本次提交后仍须重新进行 Exact-Head 复核。
+- v2.2 之后的 current-main 比较结果为 `diverged`（ahead 10 / behind 42）。本次提交后仍须重新进行 Exact-Head 复核。
 - 不修改 D2。v1.1 继续为 NORMATIVE；v1.2 继续为 DRAFT。 `MIGRATION_DEBT != EXEMPTION`。
 - `Approval: NOT_RECORDED`；`Adoption: NOT_ADOPTED`。本报告不授权 PR 合并，也不表示 Owner 已批准、规范已采纳或历史迁移已完成。
 - 本 v2.2 更正等待新一轮独立复审，不得自我批准。
 
-R5D2-OK
+**EN**
+
+## D7 v2.3 Revision Note
+
+This revision responds to a coordinator-side normative-boundary finding raised while preparing the fresh independent review required by R6. It is not an independent acceptance and does not alter any approval state.
+
+- **Normative boundary (P1, new):** the v1.2 text previously replaced the NORMATIVE v1.1 document at `00-governance/bilingual-documentation-policy.md`. A draft occupying the normative path removes the only normative text from its canonical location without approval, and contradicts the PR statement that v1.2 does not become normative by being merged. Remedy: the normative path is restored to the v1.1 text (blob `0e170479e1a71e8f4c124c6f1dc170241652f42b`, byte-identical to current main `a22024112fce3851428343ca3e655712057e6dce`); the v1.2 proposal is relocated to `00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md` (blob `d91bd92b79177decc7baa038fdd24b3f8323b995`) with an explicit non-normative banner.
+- **v2.2 defect corrections:** two literal backslash-n escape sequences that broke a §2.2 bullet and a §7.1 table row are replaced with real line breaks; the §7.1 Chinese table is aligned to the English table (three runs); §3.3 and the v2.2 note are corrected from `ahead 8` to `ahead 10` for the post-v2.2 snapshot, matching the English text; a stray trailing marker at end of file is removed.
+- **Manifest:** §3.2 retains the R6 OBJ-07 snapshot as history and adds the v2.3 current manifest with D1 relocated and D1-N recording the restored normative blob. D2-D6 are byte-identical to the R6 read-back.
+- **Gate wiring unchanged:** `scripts/check_bilingual_docs.py` still validates the `POLICY-INHERITANCE-DECLARATION` block for `00-governance/` changes, as accepted by R6. Because the inheritance requirement originates from the unadopted v1.2 draft, this wiring is recorded as tooling-level declaration checking, not as policy adoption; adoption remains `NOT_ADOPTED`.
+- **Status boundaries unchanged:** GOV-DOC-001 v1.1 NORMATIVE; v1.2 DRAFT / NOT_ADOPTED / NOT_EFFECTIVE; `MIGRATION_DEBT != EXEMPTION`; `Approval: NOT_RECORDED`; F-02 overall PARTIAL; F-06 OPEN.
+- **Self-reference:** D7 cannot contain its own post-commit blob; the post-commit read-back is recorded in a PR comment. This is the same disclosure pattern used for earlier non-self-referential records.
+
+**中文**
+
+## D7 v2.3 修订说明
+
+本次修订响应协调方在准备 R6 所要求的独立复审过程中提出的规范性边界问题。本修订不构成独立验收，也不改变任何批准状态。
+
+- **规范性边界（P1，新增）：**此前 v1.2 正文替换了规范路径 `00-governance/bilingual-documentation-policy.md` 上的 NORMATIVE v1.1 文件。草案占据规范路径，等于在未经批准的情况下把唯一的规范性文本从其权威位置移除，也与本 PR 关于「v1.2 不因合并而生效」的声明相矛盾。处置：规范路径恢复为 v1.1 原文（blob `0e170479e1a71e8f4c124c6f1dc170241652f42b`，与当前 main `a22024112fce3851428343ca3e655712057e6dce` 逐字节一致）；v1.2 拟议文本迁移至 `00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md`（blob `d91bd92b79177decc7baa038fdd24b3f8323b995`），并附明确非规范性横幅。
+- **v2.2 缺陷更正：**两处字面反斜杠转义曾破坏 §2.2 的项目符号与 §7.1 的表格行，现改为真实换行；§7.1 中文表格与英文表格对齐（三次运行）；§3.3 与 v2.2 修订说明中针对 v2.2 后快照的 `ahead 8` 更正为 `ahead 10`，与英文文本一致；删除文件末尾的杂散标记。
+- **清单：**§3.2 保留 R6 的 OBJ-07 快照作为历史，并新增 v2.3 当前清单：D1 已迁移，D1-N 记录恢复后的规范 blob。D2–D6 与 R6 读回结果逐字节一致。
+- **门禁接线不变：**`scripts/check_bilingual_docs.py` 仍对触及 `00-governance/` 的变更校验 `POLICY-INHERITANCE-DECLARATION` 块，此点已经 R6 接受。由于继承要求源自尚未采纳的 v1.2 草案，该接线登记为工具层的声明校验，不构成政策采纳；采纳状态仍为 `NOT_ADOPTED`。
+- **效力边界不变：**GOV-DOC-001 v1.1 NORMATIVE；v1.2 DRAFT / NOT_ADOPTED / NOT_EFFECTIVE；`MIGRATION_DEBT != EXEMPTION`；`Approval: NOT_RECORDED`；F-02 总体 PARTIAL；F-06 OPEN。
+- **自引用：**D7 无法包含自身提交后的 blob；提交后读回登记于 PR 评论。此披露方式与既往非自引用记录一致。
