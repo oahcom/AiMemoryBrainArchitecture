@@ -1,0 +1,355 @@
+# P2-T2 authorization manifest
+# Design-proposal scope only. Implementation authorization is expressly NOT granted
+# by this manifest. See scope.implementation_authorization below.
+
+schema_version: "1.5"
+work_item: P2-T2
+title: "Memory Storage Schema design proposal"
+repository: oahcom/AiMemoryBrainArchitecture
+branch: design/P2-T2-memory-schema
+
+decision:
+  id: GO-2026-P2-DESIGN-001
+  date: "2026-11-19"
+  authority: "development-baseline convergence path (Issue #264 comment 7000428916)"
+  form: "GO decision + manifest(allowed_write_paths, authorization_basis)"
+  sequence_ruling: "Phase 2 order T2 -> T1 -> T3 -> T4; design before implementation"
+  implementation_ruling: >
+    P2-T1 implementation write authorization is withheld pending a reviewed and frozen
+    P2-T2 design. A separate GO decision is required before any P2-T1 code is written.
+  dev_baseline_note: >
+    Human main-merge approval is OUT-OF-SCOPE(dev-baseline) per item 3 of 7000428916.
+    No human approval is represented as obtained. acceptance_authority remains NOT_ASSIGNED.
+
+roles:
+  sponsor: NOT_ASSIGNED
+  accountable_owner: NOT_ASSIGNED
+  acceptance_authority: NOT_ASSIGNED
+  implementing_owner: "B (data architecture) + D (backend), design phase only"
+  role_note: "NOT_ASSIGNED is a true governance state and MUST NOT be substituted by engineering contribution or session identity."
+
+baseline:
+  commit: 9ede3970f47801cc3d3c93373eb5829bb697398b
+  design_branch_base: 7f8093876729212ef4e83461ba8c2f2cd96582c7
+  note: "design branch rebased onto main 7f809387 before first commit; frozen contracts unchanged"
+  source: GitHub refs (origin/main at GO time)
+
+scope:
+  manifest_path: 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/authorization-manifest.yaml
+  allowed_write_paths:
+    - 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/authorization-manifest.yaml
+    - 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/design-proposal.md
+  authorization_basis:
+    - "GO-2026-P2-DESIGN-001: P2-T2 design proposal required before P2-T1 implementation authorization."
+    - "Design-only scope: no code, no schema execution, no migration, no test claims."
+    - "Development-baseline convergence path per Issue #264 comment 7000428916."
+  all_other_paths: OUT_OF_SCOPE
+
+  implementation_authorization: NOT_GRANTED
+  implementation_note: >
+    This manifest authorizes a design document only. It does not authorize creating
+    memory/schema.sql, memory/dao.py, memory/vector_store.py, any Rust crate change,
+    any migration script, or any test file. Those require a separate GO decision
+    after the design is reviewed and frozen.
+  appending_prompt_source_forbidden: true
+  appending_prompt_source_note: >
+    The prompt DDL is attached inside design-proposal.md as Appendix A because adding a
+    separate prompt-source file would be a third write path outside this manifest's
+    allowed set. Attaching evidence inside an already-authorized path is not a scope
+    expansion.
+
+  schema_execution: DISCLOSED_SCOPE_DEVIATION
+  schema_execution_note: >
+    The design's own DDL was executed against an ephemeral in-memory SQLite database to
+    check internal coherence — no file written, no migration applied, no repository path
+    touched. authorization_basis records "no schema execution" as a design-only bound.
+    An earlier revision recorded this as DISCLOSED_INTERPRETATION on the reading that the
+    bound covers persistent stores and repository paths. R2 declined to accept that reading
+    as established by the authorization text, and stated that an engineering reviewer
+    cannot grant retrospective authorization. That ruling is accepted. The event is recorded
+    as a disclosed scope deviation, the authority question is NOT claimed resolved, and it
+    is carried as Q12 requiring the authority that issued the bound. acceptance_authority
+    is NOT_ASSIGNED; no session can supply it.
+    The check found a real defect (accepted_events.event_id does not exist; the primary key
+    is event_row) which was corrected before R2 review. The R3 DDL was NOT executed; the
+    prior probe result is evidence about the R2 DDL only.
+
+review:
+  required: true
+  rounds:
+    - R1
+    - R2
+    - R3
+    - R4
+    - R5
+  independence: REQUIRED
+  blocking_question: >
+    Q1 in the proposal — the architecture choice. R5 states three options (A: Phase 1 as
+    store with Event-only transcript ingress; B: supersede Phase 1; C: three layers with a
+    separate transcript-capture layer). Q1 remains OPEN. A review recommendation is
+    PROPOSED, not a ruling.
+
+status: BLOCKED
+status_reason: >
+  Awaiting accountable authority assignment and governance decisions. Q1, Q11 and Q12
+  are not engineering defects and cannot be closed by further revision. R4 recommended
+  stopping the ordinary revision cycle; R5 adopts that, makes the one remaining
+  engineering correction (NF-R3-02 residual), and confirms that no R6 is requested.
+  No identified NF-R3-02 engineering-specification residue remains. DDL executability
+  and regression behavior remain UNVERIFIED.
+status_supported_by: "review records R1-R5 — PR #307 comments 7023231264, 7023510140, 7023884586, 7024484706, 7024485207"
+
+r4_disposition:
+  reviewed_head: bdb19ac0
+  verdict: REQUEST CHANGES
+  platform_record: "PR #307, R4 reply recorded"
+  findings_final:
+    NF-R3-01: CLOSED IN SPECIFICATION
+    NF-R3-02: "OPEN — BLOCKING at R4; residual corrected in R5, not verified"
+    NF-R3-03: CLOSED IN SPECIFICATION
+    NF-R3-04: CLOSED
+  residual_corrected_in_r5:
+    title: "result_message_id UPDATE bypass"
+    detail: >
+      result_message_id was absent from the frozen column list and
+      tool_call_result_is_child_tool is BEFORE INSERT only, so a valid call could be
+      re-pointed at an unrelated message in the same session. tool_call_result_binding_guarded
+      now refuses reassignment, refuses clearing, and repeats the role/parent predicate on
+      the single permitted NULL -> valid transition.
+    verified: false
+    verified_note: "specification only; R5 DDL not executed because Q12 remains open"
+  q13_ruling: >
+    Separate open question, NOT part of NF-R3-02. Lifecycle semantics rather than
+    relational integrity. Kept separate so that resolving it is never mistaken for
+    closing NF-R3-02.
+  q14_ruling: >
+    Stricter branch accepted provisionally; the business question stays open. Not to be
+    represented as a confirmed business requirement.
+  cycle_stop: >
+    R4 recommended stopping the ordinary revision cycle and recording PR #307 as blocked.
+    Adopted. No further full revision will be produced against open governance questions.
+
+r5_disposition:
+  reviewed_head: 70a68b0854d0c4008d7cc85d0ee5950407dcdd2d
+  confirmation_round: true
+  platform_record: "PR #307 comment 7024485207"
+  rulings:
+    NF-R3-02_residual: CLOSED IN SPECIFICATION
+    noop_update_semantics: "NO DEFECT — SQLite fires UPDATE OF on the named column appearing in SET, and IS NOT is NULL-safe; the guard's predicates behave correctly and no-op updates are not broken"
+    new_defect_from_correction: NONE IDENTIFIED
+    ordinary_revision_cycle: STOP
+    ddl_verification: UNVERIFIED
+    pr_approval: NOT APPROVED
+    implementation_authorization: NOT_GRANTED
+  r6_requested: false
+  r6_reason: >
+    No new concrete evidence of an actual defect and no authorized decision changing the
+    requirements. An R6 would be justified only by one of those.
+  residue_wording_adopted: >
+    No identified NF-R3-02 engineering-specification residue remains. DDL executability
+    and regression behavior remain UNVERIFIED.
+  residue_wording_reason: >
+    Adopted from R5 to prevent engineering closure being read as proof that the complete
+    schema is executable or accepted.
+
+review_outcome_label:
+  recorded_disposition: REQUEST CHANGES
+  is_formal_github_review_object: false
+  note: >
+    R5 observed that GitHub's review-submission endpoint returns no submitted review
+    objects for PR #307. The independent review outcomes R1-R5 are preserved as discussion
+    records, not as GitHub's formal submitted-review state. The label REQUEST CHANGES is
+    retained and is described throughout as the recorded independent-review disposition.
+    REQUEST CHANGES is not a governance decision, and BLOCKED is not APPROVED.
+  distinctions_retained:
+    - "CLOSED IN SPECIFICATION is not VERIFIED"
+    - "BLOCKED is not APPROVED"
+    - "REQUEST CHANGES is not a governance decision"
+    - "NOT_ASSIGNED cannot be filled by engineering participation"
+    - "NOT_GRANTED cannot be inferred from a design review"
+
+r3_disposition:
+  reviewed_head: fb1f59de9136a11e1d7fa204734754ec553bc82f
+  verdict: REQUEST CHANGES
+  platform_record: "PR #307 comment 7023884586"
+  r2_items_final:
+    1: CLOSED (algorithm identity + score_input immutability)
+    2: PARTIALLY CLOSED
+    3: PARTIALLY CLOSED
+    4: "TECHNICALLY EXPLAINED, DECISION OPEN"
+    5: STILL OPEN
+    6: CLOSED
+    7: CLOSED
+  new_findings:
+    - id: NF-R3-01
+      severity: BLOCKING
+      title: "nullable history provenance — input_id IS NULL reachable for any reason"
+      r4_disposition: "CORRECTED — CHECK binds the NULL exemption to initial and time_decay only"
+    - id: NF-R3-02
+      severity: BLOCKING
+      title: "tool-call relational integrity — emitter role, result role, result parent, UPDATE bypass"
+      r4_disposition: "CORRECTED — tool_call_emitter_is_assistant, tool_call_result_is_child_tool, transcript_message_role_frozen, tool_call_identity_frozen, tool_call_state_transition"
+    - id: NF-R3-03
+      severity: NON-BLOCKING
+      title: "cross-version correction reference"
+      r4_disposition: "CORRECTED — composite (version_id, corrects_input_id) FK"
+    - id: NF-R3-04
+      severity: NON-BLOCKING
+      title: "governance evidence inconsistency — two classifications for one event; thirteen vs sixteen tests"
+      r4_disposition: "CORRECTED — author error; single classification DISCLOSED_SCOPE_DEVIATION; test count no longer duplicated"
+  residues_recorded_not_closed:
+    Q13: "must a completed tool call carry a non-NULL result_message_id"
+    Q14: "does recompute genuinely require a single input_id"
+  review_note: >
+    The R3 reviewer stated that NF-R3-01 and NF-R3-02 are engineering-solvable and must not
+    be folded into 'unassigned authority'. R4 addresses both. R4 does NOT claim they are
+    verified fixed: neither the R3 nor the R4 DDL was executed, and Q12 remains open.
+
+r2_disposition:
+  reviewed_head: aed58ad0582a751bf2609add61754cb30769620d
+  base_at_review: 7f8093876729212ef4e83461ba8c2f2cd96582c7
+  verdict: REQUEST CHANGES
+  platform_record: "PR #307 comment 7023510140"
+  r1_findings_reassessed:
+    R1-B-01: STILL OPEN (algorithm identity; score_input immutability)
+    R1-NB-02: PARTIALLY CLOSED (tool-call cardinality; reconstruction framing)
+    R1-NB-03: TECHNICALLY CORRECTED; BOUNDARY UNRESOLVED
+    R1-NB-04: CLOSED
+    R1-NB-05: PARTIALLY CLOSED (appendix reviewable, provenance unverifiable)
+  new_findings:
+    - id: R2-NF-01
+      title: "tool-call and thread integrity not enforced"
+      r3_disposition: "CORRECTED — transcript_tool_call table; composite self-reference on (session_id, message_id); trigger forces tool parent role"
+    - id: R2-NF-02
+      title: "history provenance integrity — no composite FKs"
+      r3_disposition: "CORRECTED — (method_id, method_version) -> scoring_method and (version_id, input_id) -> score_input"
+    - id: R2-NF-03
+      title: "reconstruction framing — no byte boundaries"
+      r3_disposition: "CORRECTED — byte_length stored and cross-checked; reconstruct returns offset/length frames"
+    - id: R2-NF-04
+      title: "score_input immutability asserted, not enforced"
+      r3_disposition: "CORRECTED — UPDATE/DELETE triggers; corrections via corrects_input_id"
+  q10_ruling: >
+    Reviewer ruled in favour of the tiered posture; structural and unreconstructable tiers
+    accepted; exact-value retained as CONDITIONAL design objective, NOT VERIFIED. R3 accepts.
+  disclosure_a_two_drafts: ACCEPTABLE
+  disclosure_b_in_memory_schema: >
+    NOT ACCEPTABLE AS AUTHORIZED ACTIVITY. Classified DISCLOSED SCOPE DEVIATION.
+    Reviewer states an engineering reviewer cannot grant retrospective authorization and
+    that the authority which issued the restriction must determine the interpretation.
+  disclosure_c_no_rebase: ACCEPTABLE FOR REVIEW; update against main before integration.
+  required_before_r3:
+    - "complete scoring reproducibility contract incl. immutable algorithm identity and enforced score-input immutability"
+    - "complete transcript tool-call relationships and reconstruction framing"
+    - "enforce history-to-method and history-to-input consistency"
+    - "resolve the Layer 1 additive-index boundary explicitly"
+    - "obtain an authority ruling on the disclosed schema-execution interpretation"
+    - "clarify Appendix A provenance limitation"
+    - "record Q10 as tiered, exact value conditional not verified"
+  r3_item_status:
+    1: "ADDRESSED (§8.1 algorithm_spec_ref/sha256 + numeric_semantics; §8.2 triggers)"
+    2: "ADDRESSED (§7.1 transcript_tool_call; §7.2 framed reconstruction)"
+    3: "ADDRESSED (§8.4 two composite FKs; §8.2 UNIQUE (version_id, input_id))"
+    4: "ADDRESSED (§8.4 both boundary readings + fallback; Q11 OPEN, not decided)"
+    5: "ESCALATED, NOT RESOLVED — Q12; requires the authority that issued the bound; NOT_ASSIGNED"
+    6: "ADDRESSED (§16 + Appendix A provenance limit)"
+    7: "ADDRESSED (Q10 recorded as review ruling — tiered; exact value CONDITIONAL, NOT VERIFIED)"
+
+r1_disposition:
+  reviewed_head: 9b5446b9b63ff80f6594d0316b6083e986d84769
+  base: 7f8093876729212ef4e83461ba8c2f2cd96582c7
+  verdict: REQUEST CHANGES
+  platform_record: "PR #307 comment 7023231264"
+  findings:
+    - id: R1-B-01
+      severity: BLOCKING
+      title: "projection rebuild is not supported by commit_log alone"
+      r2_disposition: "CORRECTED — rebuild source set declared in full (§8.3); three tiers exact/partial/unreconstructable; commit_log-only claim withdrawn"
+    - id: R1-NB-02
+      severity: NON-BLOCKING
+      title: "Event payload is not equivalent to transcript retrieval"
+      r2_disposition: "CORRECTED — Layer 2 transcript capture schema and retrieval contract added (§7)"
+    - id: R1-NB-03
+      severity: NON-BLOCKING
+      title: "non-composite FK in context_assembly_entry"
+      r2_disposition: "CORRECTED — composite FK on (memory_id, version_id) against a new unique index (§8.4)"
+    - id: R1-NB-04
+      severity: NON-BLOCKING
+      title: "canonical vs transcript ownership conflated; immutability violation overstated"
+      r2_disposition: "CORRECTED — §5 rewritten; mutable transcript metadata no longer characterised as a canonical violation"
+    - id: R1-NB-05
+      severity: NON-BLOCKING
+      title: "prompt source unverifiable at the reviewed head"
+      r2_disposition: "CORRECTED — exact prompt DDL attached verbatim as Appendix A"
+  overclaims_corrected:
+    - "satisfies every capability — withdrawn (§9 gap table)"
+    - "nothing requested is lost — withdrawn (§9 gap table)"
+    - "date 2026-11-20 — corrected to 2026-11-19"
+
+conflicts_disclosed:
+  - id: P2T2-C-01
+    subject: "prompt schema vs frozen Phase 1 domain model"
+    detail: >
+      prompts-fix/P2-T2-memory-schema.md specifies sessions/messages/decisions/
+      file_changes/context_injections/value_score_history. Phase 1 already DECIDED and
+      merged a different object model (Memory/MemoryVersion/Claim/Event/Provenance) with
+      implemented SQLite tables memories/versions/idempotency/commit_log and
+      accepted_events/event_payloads/compile_outbox. The proposal does not adopt the
+      prompt schema as the canonical store. The conflict is escalated, not silently
+      resolved.
+    r1_ruling: "the three original 'contradictions' were ruled OVERSTATED; they are recorded as tensions, not necessary incompatibilities"
+    r2_state: "recorded as design tensions in §5; resolution is an ownership decision, stated as such"
+  - id: P2T2-C-02
+    subject: "mutable value_score/decay_weight on a content row"
+    detail: >
+      Incompatible with the immutable-version invariant only if the row is the canonical
+      content row for a MemoryVersion. Under the recommended architecture it is not.
+    r1_ruling: "OVERSTATED as a canonical-immutability violation"
+    r2_state: >
+      scoring is relocated to a rebuildable projection because it is derived, not because
+      mutability is per se forbidden. Reason restated in §5 and §8.3.
+  - id: P2T2-C-03
+    subject: "ON DELETE CASCADE from sessions"
+    detail: >
+      Conflicts with retention_class / forget_operation_id governance only if canonical
+      memory is reachable through the session root. Under the recommended architecture it
+      is not.
+    r1_ruling: "OVERSTATED as a retention violation"
+    r2_state: >
+      a transcript_session is a real table in Layer 2, but owns no canonical row; the
+      single edge that could reach canonical provenance is ON DELETE RESTRICT, so the
+      destructive case fails loudly instead of cascading (§7.4).
+  - id: P2T2-C-04
+    subject: "prompt capabilities not preserved as-is"
+    detail: >
+      impact_level enum typing, decision_type as a CHECK-constrained column, and the two
+      prompt views as schema objects are not reproduced. Named in the §9 gap table rather
+      than described as 'nothing lost'.
+    r2_state: OPEN for review
+
+claims_forbidden:
+  - "that P2-T2 is implemented"
+  - "that the schema is frozen"
+  - "that P2-T1 implementation is authorized"
+  - "that Q1 (Option A vs B vs C) is resolved"
+  - "that the recommended Option C has been chosen by an accountable authority"
+  - "that a vector store or embedding model has been selected"
+  - "that a human Owner approved this design"
+  - "that acceptance_authority has been assigned"
+  - "that this design is approved because an independent review recommended its direction"
+  - "that exact-value score reproduction is substantiated"
+  - "that the in-memory DDL check was authorized"
+  - "that the prompt DDL in Appendix A has authenticated provenance"
+  - "that the R3 DDL was executed or verified to apply"
+  - "that the R4 DDL was executed or verified to apply"
+  - "that NF-R3-01 or NF-R3-02 is verified fixed"
+  - "that the NF-R3-02 residual is verified fixed"
+  - "that Q13 is closed"
+  - "that Q14 is a confirmed business requirement"
+  - "that BLOCKED means approved, accepted, or free of defects"
+  - "that the Layer 1 additive index is not a Layer 1 modification"
+  - "that the R5 DDL was executed or verified to apply"
+  - "that a GitHub submitted review object exists for PR #307"
+  - "that REQUEST CHANGES is a governance decision"
+  - "that CLOSED IN SPECIFICATION means verified"
+  - "that no R6 request means the design is accepted"
