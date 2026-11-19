@@ -48,14 +48,21 @@ verification:
   evidence_refs: []
 evidence_tiering:
   change_class: "ARCHITECTURE | SECURITY | PERFORMANCE_CRITICAL | PUBLIC_API | DATA_MIGRATION | DOC_NORMATIVE | FEATURE | BUGFIX | DOC_EDITORIAL | OPS | UNKNOWN"
+  review_level: "R0 | R1 | R2 | R3"
   evidence_level: "1 | 2 | 3"
   assessed_by: ""
   assessed_at: ""
   rationale: ""
   base_head: ""
+  classification_basis: ""
+  classification_confirmed_by: ""
+  classification_record: ""
   downgrade_justification: ""
+  downgrade_confirmed_by: ""
+  downgrade_confirmation_record: ""
   escalation_target: ""
   checker_result: "NOT_RUN"
+  declaration_path: "evidence-declaration.yaml"
 review:
   status: "NOT_STARTED"
   report_ref: ""
@@ -195,7 +202,17 @@ change_class: "FEATURE"
 review_level: "R2"
 evidence_level: 2
 subject_head: "<40-hex commit>"
+base_head: "<40-hex ancestor commit>"
 change_summary: "one-line description of the change"
+classification_basis: "why this risk class applies"
+assessed_by: "owner-x"
+assessed_at: "2026-11-20T00:00:00+08:00"
+rationale: "why this evidence depth is sufficient"
+classification_confirmed_by: "reviewer-y"      # required for FEATURE/BUGFIX/DOC_EDITORIAL/OPS
+classification_record: "classification.md"     # must exist in the subject tree
+downgrade_justification: ""                    # only for R2 -> Level 3
+downgrade_confirmed_by: ""
+downgrade_confirmation_record: ""
 source_authenticity: "NOT_VERIFIED"
 evidence:
   design_doc: "design.md"
@@ -206,8 +223,8 @@ evidence:
   review_note: "reviewer acknowledgement"
 binding:
   protocol: "v3"
-  subject_tree_contains_evidence: "true"
-  sidecar_anchor: "sha256:..."
+  sidecar_path: "evidence.sha256"              # Level 1 only
+  sidecar_anchor: "sha256:<64 hex>"            # Level 1 only
 authenticity:
   acknowledged: "true"
   verification_record: "..."
@@ -217,10 +234,12 @@ Rules:
 - `evidence_level` is an evidence depth selector, independent of `review_level`, the twelve states and the six phases (AI-STD-001 §4.2.1).
 - Level 1 is mandatory for ARCHITECTURE, SECURITY, PERFORMANCE_CRITICAL, PUBLIC_API, DATA_MIGRATION, DOC_NORMATIVE and every R3 change.
 - `UNKNOWN` is BLOCKED; it MUST NOT receive a level.
-- Every level keeps a full 40-hex `subject_head` and `change_summary`.
+- Every level keeps a full 40-hex `subject_head` and `change_summary`, and v3 binding is verified against real Git objects at every level (protocol, subject-tree containment, blob equality); Level 1 additionally anchors a sidecar digest.
+- `assessed_by`, `assessed_at`, `rationale`, `base_head` and `classification_basis` are machine-checked; a missing field is BLOCKED.
+- The manifest `evidence_tiering` block and `evidence-declaration.yaml` MUST stay in sync: same `change_class`, `review_level`, `evidence_level`, `subject_head` and `base_head`. A mismatch is a declaration defect and BLOCKED by review.
 - Validate with `python scripts/governance/evidence/check-evidence-tiering.py <declaration>`, and record the per-scenario `VERDICT` / `REASON` output as evidence. An exit code alone is not acceptance evidence.
 
-每个工作项在交付前 MUST 声明证据深度，使用 manifest 的 `evidence_tiering` 块与可机器校验的 `evidence-declaration.yaml`。`evidence_level` 是证据深度选择器，独立于 `review_level`、十二状态与六阶段（AI-STD-001 §4.2.1）。ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE 及所有 R3 变更强制 Level 1；`UNKNOWN` 为 BLOCKED，不得赋级；所有等级保留 40 位 `subject_head` 与 `change_summary`。使用检查器校验并记录逐项 `VERDICT`/`REASON` 输出，仅退出码不足以作为验收证据。
+每个工作项在交付前 MUST 声明证据深度，使用 manifest 的 `evidence_tiering` 块与可机器校验的 `evidence-declaration.yaml`。`evidence_level` 是证据深度选择器，独立于 `review_level`、十二状态与六阶段（AI-STD-001 §4.2.1）。ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE 及所有 R3 变更强制 Level 1；`UNKNOWN` 为 BLOCKED，不得赋级；所有等级保留 40 位 `subject_head` 与 `change_summary`，v3 绑定在所有等级均对真实 Git 对象校验（protocol、subject tree 包含、blob 一致），Level 1 另加 sidecar 摘要锚定。`assessed_by`、`assessed_at`、`rationale`、`base_head`、`classification_basis` 均经机器校验，缺失即 BLOCKED。manifest 的 `evidence_tiering` 块与 `evidence-declaration.yaml` MUST 保持一致（同 `change_class`、`review_level`、`evidence_level`、`subject_head`、`base_head`），不一致即声明缺陷并在审查中 BLOCKED。使用检查器校验并记录逐项 `VERDICT`/`REASON` 输出，仅退出码不足以作为验收证据。
 
 ## 5. Canonical prompt library and evidence layout / 规范提示词库与证据目录
 

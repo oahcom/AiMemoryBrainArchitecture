@@ -27,44 +27,59 @@
 
 | Level | 适用范围 | 必填证据 |
 |---|---|---|
-| **Level 1（严格）** | ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE；以及所有 R3 变更 | subject_head（40 位 commit SHA）、change_summary、design_doc、impact_analysis、test_log、review_record、rollback_plan、binding.protocol=v3、binding.subject_tree_contains_evidence、binding.sidecar_anchor、source_authenticity（NOT_VERIFIED 时须 authenticity.acknowledged=true） |
-| **Level 2（标准）** | FEATURE、BUGFIX（有界范围、不改变契约） | subject_head、change_summary、test_log、review_record、binding.protocol=v3、binding.subject_tree_contains_evidence、source_authenticity |
-| **Level 3（轻量）** | DOC_EDITORIAL（不改变规范语义的编辑性文档）、OPS（非发布关键） | subject_head、change_summary、evidence.review_note |
+| **Level 1（严格）** | ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE；以及所有 R3 变更 | subject_head（40 位 commit SHA）、change_summary、design_doc、impact_analysis、test_log、review_record、rollback_plan、v3 绑定全套（protocol + subject tree 包含 + blob 一致 + **sidecar_path 与 sidecar_anchor**）、source_authenticity（NOT_VERIFIED 时须 authenticity.acknowledged=true） |
+| **Level 2（标准）** | FEATURE、BUGFIX（有界范围、不改变契约） | subject_head、change_summary、test_log、review_record、v3 绑定（protocol + subject tree 包含 + blob 一致）、source_authenticity |
+| **Level 3（轻量）** | DOC_EDITORIAL（不改变规范语义的编辑性文档）、OPS（非发布关键） | subject_head、change_summary、evidence.review_note、v3 绑定（protocol + subject tree 包含 + blob 一致） |
 
-所有级别均 MUST 保留 40 位完整 subject_head 与变更简述；无例外。
+所有级别均 MUST 保留 40 位完整 subject_head 与变更简述；无例外。v3 绑定的具体范围见 §5：protocol、subject tree 包含性与 blob 一致性适用于全部等级；sidecar 锚点仅 Level 1 强制。
 
 ## 3. 不可降级规则
 
 1. **Level 1 强制底线**：凡属 R3、安全边界、授权、数据完整性、删除/遗忘、迁移、公开 API、架构语义或规范语义变更，MUST 为 Level 1。任何将其降为 Level 2/3 的判定无效。
-2. **R2 不得自动降级**：R2 变更不得仅因改动规模小、文件数少或"看起来是文字修改"而降到 Level 3。确有必要时须提供 `downgrade_justification` 并由审查者确认；无该字段即 BLOCKED。
+2. **R2 不得自动降级**：R2 变更不得仅因改动规模小、文件数少或"看起来是文字修改"而降到 Level 3。确有必要时 MUST 同时提供三项：`downgrade_justification`（理由）、`downgrade_confirmed_by`（确认者，且不得等于 `assessed_by`）、`downgrade_confirmation_record`（须存在于 subject tree 的确认记录）。任一项缺失或确认者为本人，均 BLOCKED。
 3. **文档变更不等于低风险**：文档变更若改变规范含义、约束强度、接口/协议、数据模型、状态机或安全边界，MUST 升级为 DOC_NORMATIVE → Level 1。
 4. **UNKNOWN 一律 BLOCKED**：无法确定分类时不得赋予任何 Level，判定为 BLOCKED / NEEDS_CLASSIFICATION，由有权 Owner 或治理授权者确认后重新判定。
-5. **不存在"自动通过"**：Level 只决定证据深度，不构成任何门禁的通过证据。
+5. **分类信任边界**：强制 Level 1 的类别（ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE）不得通过改标为 FEATURE/BUGFIX/DOC_EDITORIAL/OPS 而降级。凡声明为可降级类别（FEATURE、BUGFIX、DOC_EDITORIAL、OPS）者，MUST 提供 `classification_basis`（分类依据）、`classification_confirmed_by`（独立确认者，不得等于 `assessed_by`）与 `classification_record`（subject tree 内的分类记录）；缺失或无法独立确认时 BLOCKED，不得默认相信申报者。
+6. **不存在"自动通过"**：Level 只决定证据深度，不构成任何门禁的通过证据。
 
 ## 4. 判定与审计留痕
 
 每条证据声明 MUST 记录以下审计字段，供独立审计复核：
 
-| 字段 | 含义 |
-|---|---|
-| `change_class` | 风险类别（枚举，见 §2） |
-| `review_level` | 审查级别 R0–R3 |
-| `evidence_level` | 1/2/3 |
-| `assessed_by` | 判定人（Owner/会话标识） |
-| `assessed_at` | 判定时间（含时区） |
-| `rationale` | 判定理由（为何该 Level 足够） |
-| `base_head` | 判定所依据的基线 commit |
-| `downgrade_justification` | 仅 R2→Level 3 时必填 |
-| `escalation_target` | 升级对象（分类不确定或需 Owner 决策时） |
+| 字段 | 含义 | 机器强制 |
+|---|---|---|
+| `change_class` | 风险类别（枚举，见 §2） | 是 |
+| `review_level` | 审查级别 R0–R3 | 是 |
+| `evidence_level` | 1/2/3 | 是 |
+| `assessed_by` | 判定人（Owner/会话标识） | 是（缺失即 BLOCKED） |
+| `assessed_at` | 判定时间（含时区） | 是（缺失即 BLOCKED） |
+| `rationale` | 判定理由（为何该 Level 足够） | 是（缺失即 BLOCKED） |
+| `base_head` | 判定所依据的基线 commit（须为 subject_head 祖先） | 是（格式/祖先关系均校验） |
+| `classification_basis` | 分类依据（为何该 change_class 成立） | 是（缺失即 BLOCKED） |
+| `classification_confirmed_by` | 可降级类别的独立确认者（≠ assessed_by） | 可降级类别强制 |
+| `classification_record` | 分类确认记录（须在 subject tree 中） | 可降级类别强制 |
+| `downgrade_justification` | 仅 R2→Level 3 时必填 | 该场景强制 |
+| `downgrade_confirmed_by` | 降级确认者（≠ assessed_by） | 该场景强制 |
+| `downgrade_confirmation_record` | 降级确认记录（须在 subject tree 中） | 该场景强制 |
+| `escalation_target` | 升级对象（分类不确定或需 Owner 决策时） | 否（记录用） |
 
-缺少 `assessed_by` / `assessed_at` / `rationale` 的判定不得作为 Level 依据。
+缺少 `assessed_by` / `assessed_at` / `rationale` / `base_head` / `classification_basis` 中任一项的判定不得作为 Level 依据，检查器直接 BLOCKED。
 
 ## 5. 与既有证据基础设施的关系
 
 1. **不替换、不削弱** 既有 applied-delivery-evidence validator 及其 CI workflow（本策略不修改 `.github/workflows`）。
-2. **保留证据绑定协议 v3**：subject_head 必须是 commit 对象、证据文件必须位于 subject tree、工作树字节与 subject blob 一致、sidecar SHA 锚点继续有效。
-3. **source_authenticity 边界不变**：内容完整性不等于来源真实性；声称 VERIFIED 必须附 `authenticity.verification_record`，否则 BLOCKED。
-4. Level 1 的 `sidecar_anchor` 与 v3 锚点协议一致（最近触碰 sidecar 的 commit message 携带 sidecar 字节的 SHA-256）。
+2. **保留证据绑定协议 v3**：subject_head 必须是 commit 对象；证据文件必须位于 subject tree；工作树字节必须与 subject blob 一致。
+3. **v3 校验范围按等级明确**（消除歧义）：
+
+| v3 校验项 | Level 1 | Level 2 | Level 3 |
+|---|---|---|---|
+| `subject_head` 为 commit 对象 | 强制 | 强制 | 强制 |
+| 证据路径存在于 subject tree | 强制 | 强制 | 强制 |
+| 工作树字节 == subject blob | 强制 | 强制 | 强制 |
+| `sidecar_path` + `sidecar_anchor`（sha256 + commit message 锚定） | 强制 | 不适用 | 不适用 |
+
+4. **source_authenticity 边界不变**：内容完整性不等于来源真实性；声称 VERIFIED 必须附 `authenticity.verification_record`，否则 BLOCKED。
+5. Level 1 的 `sidecar_anchor` 与 v3 锚点协议一致：锚点为 `sha256:<64 hex>`，等于 subject tree 中 sidecar 字节的 SHA-256，且最近触碰该 sidecar 的 commit message MUST 携带该摘要。
 
 ## 6. 检查器
 
@@ -74,14 +89,18 @@
 
 | # | 场景 | 原因码 |
 |---|---|---|
-| 1 | 缺失证据级别声明 | `CE_NO_LEVEL` |
-| 2 | Level 与风险类别冲突 | `CE_LEVEL_CLASS_CONFLICT` / `CE_R3_DOWNGRADE` |
-| 3 | Level 1 任一必填字段缺失 | `CE_L1_MISSING_FIELD` |
+| 1 | 缺失证据级别声明 | `CE_NO_LEVEL` / `CE_BAD_LEVEL` |
+| 2 | Level 与风险类别冲突 | `CE_LEVEL_CLASS_CONFLICT` / `CE_R3_DOWNGRADE` / `CE_R2_AUTO_DOWNGRADE` |
+| 3 | Level 1 任一必填字段缺失 | `CE_L1_MISSING_FIELD`（Level 2/3 对应 `CE_L2_MISSING_FIELD` / `CE_L3_MISSING_FIELD`） |
 | 4 | UNKNOWN 被赋级 | `CE_UNKNOWN_CLASS` |
-| 5 | v3 绑定字段缺失 | `CE_NO_BINDING_PROTOCOL` / `CE_NO_BINDING_TREE` / `CE_NO_SIDECAR_ANCHOR` |
-| 6 | SHA 格式或长度错误 | `CE_BAD_SHA` / `CE_BAD_SUBJECT` |
-| 7 | NOT_VERIFIED 被静默放行 / VERIFIED 无据 | `CE_AUTH_NOT_ACK` / `CE_UNFOUNDED_VERIFIED` |
-| 8 | 输入不可解析或异常 | `CE_UNPARSABLE` / `CE_INTERNAL_ERROR` |
+| 5 | v3 绑定校验失败 | `CE_NO_BINDING_PROTOCOL` / `CE_BAD_BINDING_PROTOCOL` / `CE_EVIDENCE_NOT_IN_SUBJECT` / `CE_EVIDENCE_MISSING_WORKTREE` / `CE_BLOB_MISMATCH` / `CE_NO_SIDECAR_PATH` / `CE_NO_SIDECAR_ANCHOR` / `CE_BAD_SIDECAR_ANCHOR` / `CE_SIDECAR_MISSING` / `CE_SIDECAR_MISMATCH` / `CE_SIDECAR_UNANCHORED` |
+| 6 | SHA 格式或长度错误 | `CE_BAD_SHA` / `CE_BAD_SUBJECT` / `CE_BAD_BASE_HEAD` / `CE_BASE_NOT_ANCESTOR` |
+| 7 | NOT_VERIFIED 被静默放行 / VERIFIED 无据 | `CE_AUTH_NOT_ACK` / `CE_UNFOUNDED_VERIFIED` / `CE_NO_AUTHENTICITY` |
+| 8 | 输入不可解析、无仓库或内部异常 | `CE_UNPARSABLE` / `CE_NO_REPO` / `CE_INTERNAL_ERROR` / `CE_INPUT_MISSING` |
+| 附 | 分类与降级信任边界 | `CE_NO_CLASSIFICATION_BASIS` / `CE_CLASS_UNCONFIRMED` / `CE_CLASS_SELF_CONFIRMED` / `CE_NO_CLASSIFICATION_RECORD` / `CE_R2_DOWNGRADE_UNCONFIRMED` / `CE_R2_DOWNGRADE_SELF_CONFIRMED` / `CE_R2_DOWNGRADE_NO_RECORD` |
+| 附 | 审计字段缺失 | `CE_NO_AUDIT_FIELD` / `CE_NO_REVIEW_LEVEL` / `CE_BAD_REVIEW_LEVEL` |
+
+检查器运行 MUST 具备可用的 Git 仓库（自动从声明文件所在目录向上发现，或由 `--repo` 指定）；无仓库即 `CE_NO_REPO` → BLOCKED，不得以"无法验证"为由放行。
 
 检查器输出 `VERDICT`、`LEVEL`、`REASON`、`SUMMARY` 记录。**仅凭退出码不得作为验收证据**：验收方 MUST 核对上述逐项记录的实际判定。
 
