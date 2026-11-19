@@ -183,17 +183,24 @@ def repo_slug(repo):
     else:
         parsed = urllib.parse.urlparse(url)
         if (parsed.scheme.lower() in ("https", "http", "ssh", "git")
-                and (parsed.hostname or "").lower() == "github.com"):
-            slug = parsed.path.lstrip("/")
+                and (parsed.hostname or "").lower() == "github.com"
+                and parsed.port is None
+                and not parsed.query and not parsed.fragment):
+            slug = parsed.path
     if not slug:
         return None
-    slug = slug.rstrip("/")
-    if slug.endswith(".git"):
-        slug = slug[:-4]
-    parts = [p for p in slug.split("/") if p]
-    if len(parts) != 2 or any(".." in p for p in parts):
+    path = slug.strip()
+    if path.startswith("/"):
+        path = path[1:]
+    # Exactly owner/repo, optionally with a single .git suffix. Repeated or
+    # empty segments and traversal are rejected rather than normalised away.
+    if not re.match(r"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+?(?:\.git)?$", path):
         return None
-    return "%s/%s" % (parts[0], parts[1])
+    if ".." in path:
+        return None
+    if path.endswith(".git"):
+        path = path[:-4]
+    return path
 
 
 def verify_path(repo, subject, path, label, block, codes):

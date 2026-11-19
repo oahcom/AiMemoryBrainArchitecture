@@ -246,7 +246,38 @@ class EvidenceTieringTests(unittest.TestCase):
                                     capture_output=True, text=True, encoding="utf-8",
                                     errors="replace")
             self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            self.assertIn("VERDICT\tBLOCKED", result.stdout)
             self.assertIn("REASON\tCE_NO_REPO", result.stdout)
+
+    def assert_origin_rejected(self, url):
+        with tempfile.TemporaryDirectory() as tmp:
+            fixture = Fixture(Path(tmp) / "repo")
+            git(fixture.root, "remote", "set-url", "origin", url)
+            self.assert_blocked(self.run_checker(fixture, fixture.declaration()),
+                                "CE_REPO_IDENTITY_UNVERIFIED")
+
+    def test_non_standard_port_rejected(self):
+        self.assert_origin_rejected(
+            "https://github.com:8443/oahcom/AiMemoryBrainArchitecture.git")
+
+    def test_query_string_rejected(self):
+        self.assert_origin_rejected(
+            "https://github.com/oahcom/AiMemoryBrainArchitecture.git?ref=main")
+
+    def test_fragment_rejected(self):
+        self.assert_origin_rejected(
+            "https://github.com/oahcom/AiMemoryBrainArchitecture.git#main")
+
+    def test_repeated_path_segment_rejected(self):
+        self.assert_origin_rejected(
+            "https://github.com//oahcom/AiMemoryBrainArchitecture.git")
+
+    def test_ssh_scheme_origin_accepted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fixture = Fixture(Path(tmp) / "repo")
+            git(fixture.root, "remote", "set-url", "origin",
+                "ssh://git@github.com/oahcom/AiMemoryBrainArchitecture.git")
+            self.passed(self.run_checker(fixture, fixture.declaration()))
 
     # ---- B-02: R2 downgrade confirmation ----------------------------------
     def test_r2_downgrade_requires_confirmer(self):

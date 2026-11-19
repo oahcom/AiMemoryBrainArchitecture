@@ -101,3 +101,12 @@
 | T-02 `CE_NO_REPOSITORY` 测试 | 新增未声明 repository 测试 |
 | T-03 记录工作树/blob 负向 | 分类与降级记录各新增 worktree 缺失、blob 篡改两项测试（共 4 项） |
 | D-01 中英描述不一致 | 政策 §3.2/§3.5 的记录表述统一为"按 §5.6 在 subject tree、工作树与 blob 三处校验"，中英文同步 |
+
+## 10. 第四轮复审（R4）修复映射
+
+| R4 缺陷 | 修复 |
+|---|---|
+| T-04 `test_no_repository_fails_closed` 缺 VERDICT 断言 | 补齐 `VERDICT\tBLOCKED` 断言，与 `CE_NO_REPO` 共存，满足「不得仅以退出码为证据」契约 |
+| B-01 输入规范化边界 | `repo_slug()` 现拒绝非标准端口（`parsed.port` 必须为 None）、query、fragment；路径按 `^owner/repo(\.git)?$` 严格匹配，重复斜杠/空段/`..` 一律拒绝而非归一化 |
+| 边界测试 | 新增 5 项：非标准端口、query、fragment、重复路径段、`ssh://` 形式通过 |
+| 文档编号 | 政策 §3.2/§3.5 引用改为「§5 第 6 条 / §5 item 6」，避免与子标题编号混淆 |
