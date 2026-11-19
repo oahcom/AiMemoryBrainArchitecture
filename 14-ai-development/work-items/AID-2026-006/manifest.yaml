@@ -37,3 +37,21 @@ acceptance:
   - Work Item registered in INDEX: this commit.
   - AI-SESSION-MGMT-001 baseline PR: NOT YET (separate C-2-adjacent dispatch or PM-A-001 continuation).
   - Owner adoption: PENDING.
+
+lifecycle:
+  phase: INTAKE
+  source_status: PROPOSED
+  gates:
+    verified:
+      status: NOT_RECORDED
+    independent_review:
+      status: NOT_RECORDED
+    integration:
+      status: NOT_RECORDED
+    owner_acceptance:
+      status: NOT_RECORDED
+    merge:
+      status: NOT_RECORDED
+    closeout:
+      status: NOT_RECORDED
+  markers: {}

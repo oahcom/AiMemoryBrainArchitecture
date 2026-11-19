@@ -49,3 +49,21 @@ adoption:
   status: PROPOSED
   required_authority: Project Owner explicit written adoption
   review_by: 2026-12-02
+
+lifecycle:
+  phase: INTAKE
+  source_status: PROPOSED
+  gates:
+    verified:
+      status: NOT_RECORDED
+    independent_review:
+      status: NOT_RECORDED
+    integration:
+      status: NOT_RECORDED
+    owner_acceptance:
+      status: NOT_RECORDED
+    merge:
+      status: NOT_RECORDED
+    closeout:
+      status: NOT_RECORDED
+  markers: {}
