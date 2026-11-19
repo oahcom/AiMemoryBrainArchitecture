@@ -3,7 +3,7 @@
 - 文档 ID：SYS-INTERACTIONS-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../01-system-architecture/component-interactions.md)
-- 源版本：07a35c31921d08a3da832a71cd11db99c0f85922
+- 源版本：fcec7c598816d439ec4c89694210ccc220aeeccf
 - 对应英文：[Component Interactions](../../en/01-system-architecture/component-interactions.md)
 - 状态：权威归属和主要协作为 DECIDED；编排模式和调用拓扑为 CANDIDATE；委托给 Session H 的协议细节为 OPEN
 
@@ -121,7 +121,9 @@ flowchart TB
 
 **输入：** 已认证来源、Event Payload/引用、Scope、Schema Version、Idempotency Key、来源时间戳、Provenance 元数据。  
 **输出：** 带稳定 Event ID 的持久化 Receipt，或明确拒绝。  
-**保证：** 只有在 Event 和可恢复的处理意图均已持久化后才能 Accepted。重复重试返回先前的逻辑结果。  
+**保证 — DECIDED：** 只有当 Event 与可恢复的编译意图在同一原子接收边界（或具备等效崩溃安全语义的协议）中均已持久化后，才返回 `Accepted`。重复重试返回原始 Receipt，不会创建额外 Event 或意图。这不表示工作已经分发或完成编译。
+
+**有界实现证据：** PR #246 commit `fcdecf0a4e638c8b3c9ac0e4623f97c98ed21291`；exact-head Rust run `44261068522` SUCCESS；GOV-DOC-001 run `44261068531` SUCCESS；合并后 Main Rust run `44261208110` SUCCESS。证据范围仅为 SQLite Event Store 意图账本及启动回填。  
 **故障：** Schema/Permission 无效时拒绝；Storage 不可用时返回可重试的不可用/背压，不得虚假 Accepted。
 
 ### 4.2 Ingestion → Compiler
