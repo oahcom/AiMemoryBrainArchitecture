@@ -47,13 +47,14 @@ An acceptance or merge-authorization comment posted in an Issue — as distinct 
 Required rows:
 
 1. **Exact Head SHA** — the commit actually evaluated, written in full or truncated with the length stated. A branch name is not a substitute.
-2. **Applicable check conclusions** — for that exact Head, each applicable check name with its conclusion and run URL. If no check is applicable, state "none applicable" and give the reason.
-3. **Review state and reviewer identity** — review state (APPROVED / COMMENTED / REQUESTED_CHANGES / NOT_REVIEWED), reviewer login, reviewed Head SHA, and a same-identity or delegation disclosure. A COMMENT is not an APPROVE.
+2. **Applicable check conclusions** — for that exact Head, each applicable check name with its conclusion and run URL. If no check is applicable, state "none applicable" and give the reason. That reason MUST be objectively verifiable from the change itself, for example that no changed path matches any workflow path filter. A bare assertion by the accepting party, without such a basis, does not satisfy this row.
+3. **Review state and reviewer identity** — review state (APPROVED / COMMENTED / REQUESTED_CHANGES / NOT_REVIEWED), reviewer login, reviewed Head SHA, and a same-identity or delegation disclosure. A COMMENT is not an APPROVE. Where section 2 requires an approving review for the change, a state of NOT_REVIEWED, COMMENTED or REQUESTED_CHANGES MUST be paired with an exception record under row 4; absent that pairing the comment MUST NOT carry ACCEPT.
 4. **Exception record** — if any applicable check is failing, missing, pending, skipped-when-applicable, stale-Head or unverifiable, the exception MUST be named: basis, authorizing party, scope, expiry condition and tracking Issue. If there is no exception, state "no exception".
 
 Invalidity rule:
 
-A comment missing any of the four rows MUST NOT be treated as a valid acceptance and MUST NOT carry an ACCEPT or merge-authorization YES. Such a comment is void and must be withdrawn and re-issued. A later valid acceptance does not retroactively validate a merge already performed; that merge MUST be recorded as a gate-breach finding.
+A comment missing any of the four rows MUST NOT be treated as a valid acceptance and MUST NOT carry an ACCEPT or merge-authorization YES. Such a comment is void and must be withdrawn and re-issued. The withdrawal MUST be recorded as an appended VOID declaration in the same thread that cites the replacement comment; deleting or editing the void comment is prohibited, because it destroys the audit trail by which a later reader could detect the breach.
+ A later valid acceptance does not retroactively validate a merge already performed; that merge MUST be recorded as a gate-breach finding.
 
 Recorded instance:
 
