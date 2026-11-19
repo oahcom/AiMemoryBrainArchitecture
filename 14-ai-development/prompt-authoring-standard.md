@@ -104,20 +104,24 @@ Prompt approval is not implementation approval, review approval or merge approva
 
 ## 4. Mandatory prompt structure / 强制结构
 
-Every execution prompt MUST contain:
+Every execution prompt MUST use the seven structural sections defined by AI-STD-001 §5.1. The twelve requirements below remain mandatory content obligations; they are NOT twelve additional mandatory headings. The author MUST place each item in its mapped section, and MUST NOT omit an item merely to preserve brevity:
 
-1. Identity: Work Item ID, Issue, prompt ID/version/hash, Owner and session role.
-2. Objective: intended outcome and observable result.
-3. Baseline: repo, branch, base SHA, source paths/blob SHAs, dependencies.
-4. Authority: owned decisions, allowed actions, prohibited actions and approvers.
-5. Scope: in-scope files/modules and explicit non-goals.
-6. State of knowledge: DECIDED/CANDIDATE/OPEN/TO_VALIDATE facts.
-7. Required steps: inspect → plan → change → verify → report.
-8. Acceptance criteria: numbered, objective, independently checkable.
-9. Verification: commands, fixtures, environment, expected/actual results.
-10. Git workflow: branch, commits, PR target, review handoff and no-merge rule.
-11. Stop/escalation conditions.
-12. Evidence and final report schema.
+| Mandatory content requirement retained from v1 | Required v2 section |
+|---|---|
+| 1. Identity: Work Item ID, Issue, prompt ID/version/hash, Owner and session role | 1. Task identity |
+| 2. Objective: intended outcome and observable result | 2. Goal and boundaries |
+| 3. Baseline: repo, branch, base SHA, source paths/blob SHAs, dependencies | 3. Context and dependencies |
+| 4. Authority: owned decisions, allowed actions, prohibited actions and approvers | 1. Task identity; 4. Constraints and execution guidance |
+| 5. Scope: in-scope files/modules and explicit non-goals | 2. Goal and boundaries |
+| 6. State of knowledge: DECIDED/CANDIDATE/OPEN/TO_VALIDATE facts | 3. Context and dependencies |
+| 7. Required steps: inspect → plan → change → verify → report | 4. Constraints and execution guidance |
+| 8. Acceptance criteria: numbered, objective, independently checkable | 5. Acceptance and deliverables |
+| 9. Verification: commands, fixtures, environment, expected/actual results | 6. Evidence and review |
+| 10. Git workflow: branch, commits, PR target, review handoff and no-merge rule | 1. Task identity; 6. Evidence and review; 7. Stop conditions and coordination |
+| 11. Stop/escalation conditions | 7. Stop conditions and coordination |
+| 12. Evidence and final report schema | 5. Acceptance and deliverables; 6. Evidence and review |
+
+**Executable precedence rule:** AI-STD-001 §5.1 is authoritative for the number and names of structural sections. This §4 is authoritative for the twelve mandatory content requirements and their mapping. A prompt is conformant only when it has exactly the seven prescribed core sections and all twelve content requirements are represented in the mapped sections. Neither standard waives the other's requirements. If a requirement cannot be mapped without loss, the prompt is NOT READY and the author MUST escalate the conflict; adding extra mandatory top-level headings is not the resolution. The scheduled-prompt addenda below remain additional conditional content, placed within the relevant seven sections.
 
 For a scheduled prompt, additionally include:
 - Owner key and automation ID;
@@ -199,3 +203,4 @@ This document is PROPOSED and becomes normative only after the project's governa
 - SHA-256 对仓库中实际提交的提示词文件字节计算；UTF-8，不做换行、空白或 Unicode 归一化。记录文件路径、字节数、摘要、Blob SHA 和 Commit SHA。
 - 任何影响目标、范围、授权、基线、验收、测试或定时行为的修改都必须产生新版本；已执行版本不可覆盖。
 - 缺少来源、审批、权限、可验证条件或安全保障时，提示词不得进入 READY；AI 必须停止并报告阻塞，不能自行补造决议。
+- 每份执行提示词必须采用 AI-STD-001 §5.1 规定的七个结构章节；本规范 §4 的十二项要求仍全部是强制内容，但不再要求十二个独立标题。十二项内容必须按 §4 映射纳入七章节；结构以 AI-STD-001 §5.1 为准，十二项内容义务以本规范 §4 为准。两者均须满足；若映射会造成要求丢失，提示词不得进入 READY，必须升级解决，不能通过增加额外强制顶层标题规避。定时提示词的附加要求仍为有条件的强制内容，放入相关七章节。
