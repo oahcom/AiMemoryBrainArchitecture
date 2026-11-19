@@ -129,3 +129,30 @@ policy); this extends it to the index.
   per RULING-06 for this head only).
 - The reviewer of this change is a separate session under the same `oahcom`
   identity, so platform-axis independence is NOT MET and is not claimed.
+
+## 8. Review history
+
+    R1: PASS (separate review session, same oahcom identity; platform-axis
+        independence NOT MET). The reviewer accepted the rule, the
+        authorization reading and FD-1's refusal to adjudicate, and named one
+        substantive gap plus one suggestion.
+
+    Applied from R1: the rule now requires a refresh to record WHICH outcome
+    occurred, because "merged", "closed without merging" and "reopened" are not
+    interchangeable; a carrier closed unmerged MUST NOT be written as merged, and
+    a cell that asserts something about the work item as a whole rather than
+    about a named carrier is outside the rule and must state its own basis. R1
+    listed these as failure scenarios the original wording did not capture; the
+    original wording said "refresh" without saying the refresh had to be
+    discriminating.
+
+    Not applied: R1's suggestion that future authorizations separate append,
+    revise and delete permissions. It is a sound suggestion and it changes a
+    practice rather than this change set, so it is recorded here as a tracked
+    item instead of being folded into a documentation correction.
+
+    Carried forward: R1 could not check the three corrected cells verbatim,
+    because the review prompt summarised the change rather than quoting the
+    final cell text. That is a limit of the review input, not a finding about
+    the content; R2 is given the cell text verbatim so that the verbatim check
+    actually happens.
