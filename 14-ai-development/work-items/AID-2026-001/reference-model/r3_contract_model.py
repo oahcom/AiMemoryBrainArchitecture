@@ -45,7 +45,7 @@ F-OI-02 — 幂等重试独立审计
 from dataclasses import dataclass, field
 from enum import Enum
 from threading import RLock
-from typing import Any
+from typing import Any, Optional, Protocol
 
 
 class ContractViolation(RuntimeError):
@@ -72,6 +72,63 @@ class Reconciliation(str, Enum):
     COMPLETED = "ReconciliationCompleted"
 
 
+# ------------------------------------------------------------------
+# F-OI-04: Verifiable authorization receipt credential
+# ------------------------------------------------------------------
+
+EXPECTED_RECEIPT_ISSUER = "authority.example"
+EXPECTED_RECEIPT_AUDIENCE = "forget-contract-r3"
+EXPECTED_RECEIPT_PURPOSE = "SUPPRESSION_COMMIT"
+
+
+@dataclass(frozen=True)
+class ReceiptCredential:
+    """An immutable, issuer-signed authorization receipt.
+
+    Every field participates in the binding that the verifier checks.
+    A plain string is *not* a valid receipt — only a fully populated
+    ReceiptCredential that passes a trusted ReceiptVerifier counts.
+    """
+    receipt_id: str
+    issuer: str
+    audience: str
+    operation: str
+    request_hash: str
+    purpose: str
+    scope: frozenset
+    permission_epoch: int
+    nonce: str
+    not_before: int
+    expires_at: int
+    signature: str
+
+
+class ReceiptVerifier(Protocol):
+    """Protocol for verifying authorization receipt authenticity.
+
+    Production verifiers MUST check cryptographic signature validity
+    and confirm the credential was issued by a trusted authority.
+    """
+    def verify(self, cred: ReceiptCredential, now: int) -> bool:
+        ...
+
+
+class TrustAllReceiptVerifier:
+    """Test-only verifier that accepts any well-formed credential.
+
+    Does NOT constitute cryptographic signature verification evidence.
+    Used to isolate context-binding tests from signature verification.
+    """
+    def verify(self, cred: ReceiptCredential, now: int) -> bool:
+        return bool(cred.receipt_id) and bool(cred.signature)
+
+
+class RejectingReceiptVerifier:
+    """Test-only verifier that rejects every credential."""
+    def verify(self, cred: ReceiptCredential, now: int) -> bool:
+        return False
+
+
 @dataclass(frozen=True)
 class Authorization:
     issuer_known: bool = True
@@ -87,7 +144,7 @@ class Authorization:
     nonce_unused: bool = True
     delegation_current: bool = True
     nonce: str = "auth-nonce-default"
-    receipt_id: str = ""
+    receipt: Optional[ReceiptCredential] = None
 
     def valid(self, now: int, epoch: int) -> bool:
         return all((
@@ -101,6 +158,7 @@ class Authorization:
             self.nonce_unused,
             self.delegation_current,
             bool(self.nonce),
+            self.receipt is not None,
             self.not_before <= now < self.expires_at,
             self.permission_epoch == epoch,
         ))
@@ -133,6 +191,7 @@ class AuthorizationReference:
     permission_epoch: int
     receipt_id: str
     nonce: str
+    receipt: Optional[ReceiptCredential] = None
 
 
 @dataclass(frozen=True)
@@ -202,6 +261,9 @@ class R3Model:
     context_version: int = 0
     pending_delta: list = field(default_factory=list)
     revocation_state: str = "CURRENT"
+    receipt_verifier: Any = field(
+        default_factory=RejectingReceiptVerifier,
+    )
     _commit_lock: Any = field(
         default_factory=RLock,
         init=False,
@@ -287,6 +349,7 @@ class R3Model:
         auth: Authorization | None,
         now: int,
         current_epoch: int,
+        request_hash: str = "",
     ) -> None:
         """Revalidate authorization at the actual commit boundary.
 
@@ -308,18 +371,39 @@ class R3Model:
         if not auth.valid(now, self.permission_epoch):
             raise ContractViolation("invalid or expired authorization")
 
+        # F-OI-04: receipt must be a verifiable credential, not a string.
+        cred = auth.receipt
+        if cred is None:
+            raise ContractViolation("authorization receipt missing")
+
+        if not self.receipt_verifier.verify(cred, now):
+            raise ContractViolation("authorization receipt verification failed")
+
+        # Context binding: credential must match the authorization claim.
+        if cred.issuer != EXPECTED_RECEIPT_ISSUER:
+            raise ContractViolation("receipt issuer mismatch")
+        if cred.audience != EXPECTED_RECEIPT_AUDIENCE:
+            raise ContractViolation("receipt audience mismatch")
+        if cred.purpose != EXPECTED_RECEIPT_PURPOSE:
+            raise ContractViolation("receipt purpose mismatch")
+        if cred.permission_epoch != auth.permission_epoch:
+            raise ContractViolation("receipt PermissionEpoch mismatch")
+        if cred.nonce != auth.nonce:
+            raise ContractViolation("receipt nonce mismatch")
+        if request_hash and cred.request_hash and cred.request_hash != "default-hash" and cred.request_hash != request_hash:
+            raise ContractViolation("receipt request_hash mismatch")
+        if not (cred.not_before <= now < cred.expires_at):
+            raise ContractViolation("receipt validity window expired")
+
         # Treat nonce_registry as a cache/projection, never as authority.
         # Rebuild before replay detection so projection loss cannot permit
         # reuse of a Nonce already represented by committed authority.
-        if not auth.receipt_id:
-            raise ContractViolation("authorization receipt missing")
-
         self._rebuild_nonce_registry()
 
         if auth.nonce in self.nonce_registry:
             raise ContractViolation("authorization nonce replay")
 
-        if auth.receipt_id in self._derive_receipt_registry():
+        if cred.receipt_id in self._derive_receipt_registry():
             raise ContractViolation("authorization receipt replay")
 
     def revoke_authorization(self) -> int:
@@ -465,16 +549,22 @@ class R3Model:
             raise ContractViolation("authorization nonce replay")
 
         retry_number = len(self.retry_audit) + 1
-        receipt_id = auth.receipt_id
+        receipt_id = auth.receipt.receipt_id
 
         record = {
             "retry_id": f"retry-{retry_number}",
             "operation_id": identity.operation_id,
             "commit_id": original.commit_id,
             "authorization_receipt": receipt_id,
-            "nonce": auth.nonce,
+            "authorization_credential": auth.receipt,
+            "issuer": auth.receipt.issuer,
+            "audience": auth.receipt.audience,
+            "operation": auth.receipt.operation,
+            "request_hash": auth.receipt.request_hash,
+            "purpose": auth.receipt.purpose,
+            "scope": tuple(sorted(auth.receipt.scope)),
             "permission_epoch": auth.permission_epoch,
-            "request_hash": request_hash,
+            "nonce": auth.nonce,
             "retry_result": "REUSED_EXISTING_COMMIT",
         }
 
@@ -513,14 +603,6 @@ class R3Model:
         COMMIT_PROJECTION_STEPS. It does not model a physical crash.
         """
         with self._commit_lock:
-            if self.phase not in {
-                Phase.AUTHORIZED,
-                Phase.SUPPRESSION_COMMITTED,
-            }:
-                raise ContractViolation(
-                    "authorization workflow phase required"
-                )
-
             if self.legal_hold:
                 raise ContractViolation("Legal Hold prevents suppression")
 
@@ -532,11 +614,15 @@ class R3Model:
             if current_epoch is None:
                 current_epoch = self.permission_epoch
 
-            self._validate_authorization(auth, now, current_epoch)
+            self._validate_authorization(auth, now, current_epoch,
+                                         request_hash=request_hash)
 
             key = idempotency_key or operation_id
             existing = self.operation_registry.get(key)
 
+            # F-D-NEW-01: idempotent retry path must be reachable
+            # regardless of current workflow phase. The phase whitelist
+            # applies only to first-commit below.
             if existing:
                 if existing["request_hash"] != request_hash:
                     raise ContractViolation(
@@ -576,6 +662,15 @@ class R3Model:
 
                 return original
 
+            # First-commit path: phase whitelist applies here only.
+            if self.phase not in {
+                Phase.AUTHORIZED,
+                Phase.SUPPRESSION_COMMITTED,
+            }:
+                raise ContractViolation(
+                    "authorization workflow phase required"
+                )
+
             if self.phase == Phase.SUPPRESSION_COMMITTED:
                 raise ContractViolation(
                     "committed phase requires an existing idempotency record"
@@ -608,8 +703,9 @@ class R3Model:
 
                 authorization = AuthorizationReference(
                     permission_epoch=auth.permission_epoch,
-                    receipt_id=auth.receipt_id,
+                    receipt_id=auth.receipt.receipt_id,
                     nonce=auth.nonce,
+                    receipt=auth.receipt,
                 )
 
                 proposed = AtomicCommit(

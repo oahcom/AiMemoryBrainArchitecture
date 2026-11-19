@@ -26,12 +26,62 @@ from r3_contract_model import (
     ContractViolation,
     Lifecycle,
     Phase,
+    ReceiptCredential,
     Reconciliation,
     R3Model,
+    RejectingReceiptVerifier,
+    TrustAllReceiptVerifier,
+    EXPECTED_RECEIPT_AUDIENCE,
+    EXPECTED_RECEIPT_ISSUER,
+    EXPECTED_RECEIPT_PURPOSE,
 )
 
 
+def receipt_credential(
+    operation_id="default-op",
+    request_hash="default-hash",
+    nonce="auth-nonce-default",
+    receipt_id=None,
+    **overrides,
+):
+    if receipt_id is None:
+        receipt_id = "receipt-%s" % nonce
+    values = dict(
+        receipt_id=receipt_id,
+        issuer=EXPECTED_RECEIPT_ISSUER,
+        audience=EXPECTED_RECEIPT_AUDIENCE,
+        operation=operation_id,
+        request_hash=request_hash,
+        purpose=EXPECTED_RECEIPT_PURPOSE,
+        scope=frozenset({"suppression:commit"}),
+        permission_epoch=7,
+        nonce=nonce,
+        not_before=0,
+        expires_at=100,
+        signature="test-signature-%s" % receipt_id,
+    )
+    values.update(overrides)
+    return ReceiptCredential(**values)
+
+
 def auth(**kw):
+    nonce = kw.pop("nonce", "auth-nonce-default")
+    receipt_id = kw.pop("receipt_id", None)
+    operation_id = kw.pop("operation_id", "default-op")
+    request_hash = kw.pop("request_hash", "default-hash")
+    receipt_overrides = {}
+    for k in list(kw):
+        if k in ("issuer", "audience", "purpose", "scope",
+                 "permission_epoch", "not_before", "expires_at", "signature",
+                 "operation", "request_hash"):
+            receipt_overrides[k] = kw.pop(k)
+    cred = receipt_credential(
+        operation_id=operation_id,
+        request_hash=request_hash,
+        nonce=nonce,
+        receipt_id=receipt_id,
+        **receipt_overrides,
+    )
     values = dict(
         issuer_known=True,
         signature_valid=True,
@@ -45,16 +95,15 @@ def auth(**kw):
         permission_epoch=7,
         nonce_unused=True,
         delegation_current=True,
-        nonce="auth-nonce-default",
+        nonce=nonce,
+        receipt=cred,
     )
     values.update(kw)
-    if "receipt_id" not in kw:
-        values["receipt_id"] = "receipt-%s" % values["nonce"]
     return Authorization(**values)
 
 
 def done():
-    model = R3Model("mem")
+    model = R3Model("mem", receipt_verifier=TrustAllReceiptVerifier())
     model.authorize_and_suppress(auth(), 10, 7, "op")
     return model
 
@@ -73,7 +122,7 @@ class DFI(unittest.TestCase):
         self.assertNotEqual(m.phase, Phase.COMPLETED)
 
     def test_DFI_003(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         with self.assertRaises(ContractViolation):
             m.forgotten_transition("Cancel")
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
@@ -99,7 +148,7 @@ class DFI(unittest.TestCase):
         self.assertFalse(m.domain_complete())
 
     def test_DFI_007(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
         first = m.commit_suppression(
             "op-1", "attempt-1", "key-1", "hash-A",
@@ -149,7 +198,7 @@ class DFI(unittest.TestCase):
         m.retry("a2")
 
     def test_DFI_010(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         with self.assertRaises(ContractViolation):
             m.authorize_and_suppress(
                 auth(permission_epoch=6), 10, 7, "op"
@@ -178,7 +227,7 @@ class DFI(unittest.TestCase):
 
     def test_DFI_013(self):
         """Sequential fence interleavings only; NOT a concurrency proof."""
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
 
         old_worker_lease = m.start_attempt("worker-old")
         new_worker_lease = m.start_attempt("worker-new")
@@ -216,7 +265,7 @@ class DFI(unittest.TestCase):
         m.commit_stage("producer-new", new, "publish")
 
     def test_DFI_015(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         old_fence = m.fence_generation
         m.recall_cache_fill("k", "stale-value", old_fence)
         m.authorize_and_suppress(auth(), 10, 7, "op")
@@ -237,7 +286,7 @@ class DFI(unittest.TestCase):
         )
 
     def test_DFI_017(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         snapshot = m.offline_snapshot(4)
         with self.assertRaises(ContractViolation):
             m.reconnect(snapshot, [
@@ -252,7 +301,7 @@ class DFI(unittest.TestCase):
         )
 
     def test_DFI_018(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.context_remove()
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
         self.assertIn("CONTEXT_REMOVE", m.audit)
@@ -267,14 +316,14 @@ class DFI(unittest.TestCase):
         self.assertFalse(m.domain_complete())
 
     def test_DFI_020(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         with self.assertRaises(ContractViolation):
             m.forgotten_transition("AgentTelemetry")
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
 
     def test_DFI_021(self):
         """In-memory pre-publication abort; not WAL or crash durability."""
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
         before = (
             m.lifecycle,
@@ -327,7 +376,7 @@ class DFI(unittest.TestCase):
 class OwnerIU011(unittest.TestCase):
 
     def _deny(self, **kw):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         with self.assertRaises(ContractViolation):
             m.authorize_and_suppress(auth(**kw), 10, 7, "op")
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
@@ -345,7 +394,7 @@ class OwnerIU011(unittest.TestCase):
                 self._deny(**{key: False})
 
     def test_T03(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         original = auth(nonce="real-authorization-nonce")
         first = m.authorize_and_suppress(
             original, 10, 7, "op-first"
@@ -379,7 +428,7 @@ class OwnerIU011(unittest.TestCase):
         self._deny(permission_epoch=6)
 
     def test_T05(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         result = m.revoke_race(
             "REVOCATION_WON",
             auth=auth(nonce="revocation-wins-nonce"),
@@ -400,7 +449,7 @@ class OwnerIU011(unittest.TestCase):
         self.assertIn("AUTHORIZATION_REVOKED", m.audit)
 
     def test_T06(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         result = m.revoke_race(
             "COMMIT_WON",
             auth=auth(nonce="commit-wins-nonce"),
@@ -423,7 +472,7 @@ class OwnerIU011(unittest.TestCase):
         self.assertIn("AUTHORIZATION_REVOKED", m.audit)
 
     def test_T07(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         result = m.revoke_race(
             "UNKNOWN",
             auth=auth(nonce="unknown-order-nonce"),
@@ -455,7 +504,7 @@ class OwnerIU011(unittest.TestCase):
         self._deny(delegation_current=False)
 
     def test_T09(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.legal_hold = True
         with self.assertRaises(ContractViolation):
             m.authorize_and_suppress(auth(), 10, 7, "op")
@@ -463,7 +512,7 @@ class OwnerIU011(unittest.TestCase):
         self.assertEqual(m.fence_generation, 0)
 
     def test_T10(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         with self.assertRaises(ContractViolation):
             m.set_exception({"approver": "A", "scope": "S"})
         m.set_exception({
@@ -497,7 +546,7 @@ class OwnerIU011(unittest.TestCase):
         self.assertFalse(m.domain_complete())
 
     def test_T14(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.set_exception({
             "approver": "A",
             "scope": ["memory:m"],
@@ -539,7 +588,7 @@ class StorageFaults(unittest.TestCase):
         nonces and the same idempotency identity. Exactly one authoritative
         commit must be published; the other caller must reuse that record.
         """
-        m = R3Model("mem")
+        m = R3Model("mem", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
 
         barrier = threading.Barrier(2)
@@ -679,7 +728,7 @@ class StorageFaults(unittest.TestCase):
 class AuthorizationCommitEntry(unittest.TestCase):
 
     def _direct_commit(self, authorization, **kwargs):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
         with self.assertRaises(ContractViolation):
             m.commit_suppression(
@@ -691,7 +740,7 @@ class AuthorizationCommitEntry(unittest.TestCase):
         return m
 
     def test_AUTH_01_missing_authorization(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
         with self.assertRaises(ContractViolation):
             m.commit_suppression("op")
@@ -720,7 +769,7 @@ class AuthorizationCommitEntry(unittest.TestCase):
         )
 
     def test_AUTH_06_phase_mutation_is_not_authority(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
         with self.assertRaises(ContractViolation):
             m.commit_suppression("phase-only")
@@ -730,7 +779,7 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertEqual(m.fence_generation, 0)
 
     def test_AUTH_07_real_nonce_binding(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         supplied = auth(nonce="issuer-generated-real-nonce")
         commit = m.authorize_and_suppress(supplied, 10, 7, "op")
         self.assertEqual(
@@ -743,7 +792,7 @@ class AuthorizationCommitEntry(unittest.TestCase):
         )
 
     def test_AUTH_08_abort_does_not_consume_nonce(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         supplied = auth(nonce="retry-after-abort")
         m.phase = Phase.AUTHORIZED
         with self.assertRaises(ContractViolation):
@@ -758,7 +807,7 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertIn(supplied.nonce, m.nonce_registry)
 
     def test_AUTH_09_nonce_replay_different_key(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         supplied = auth(nonce="one-time-nonce")
         m.authorize_and_suppress(supplied, 10, 7, "first-op")
         m.phase = Phase.AUTHORIZED
@@ -772,7 +821,7 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertEqual(m.fence_generation, 1)
 
     def test_AUTH_10_fresh_nonce_idempotent_reuse(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
         first = m.commit_suppression(
             "op", "a1", "same-key", "same-hash",
@@ -788,7 +837,7 @@ class AuthorizationCommitEntry(unittest.TestCase):
         self.assertEqual(m.fence_generation, 1)
 
     def test_AUTH_11_invalid_auth_idempotent_bypass(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
         first = m.commit_suppression(
             "op", "a1", "key", "hash",
@@ -813,7 +862,7 @@ class AuthorizationCommitEntry(unittest.TestCase):
         )
 
     def test_AUTH_13_caller_epoch_spoof(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.permission_epoch = 8
         m.phase = Phase.AUTHORIZED
         with self.assertRaises(ContractViolation):
@@ -866,7 +915,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
 
         for point in failure_points:
             with self.subTest(failure_point=point):
-                m = R3Model("m")
+                m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
                 m.phase = Phase.AUTHORIZED
                 before = self._snapshot(m)
 
@@ -884,7 +933,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
     def test_FSTOR_02_retry_after_each_injected_abort(self):
         for point in R3Model.COMMIT_PROJECTION_STEPS:
             with self.subTest(failure_point=point):
-                m = R3Model("m")
+                m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
                 m.phase = Phase.AUTHORIZED
 
                 with self.assertRaises(ContractViolation):
@@ -911,7 +960,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
                 self.assertNotIn(f"aborted-{point}", m.nonce_registry)
 
     def test_FSTOR_03_six_member_projection_exactness(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         commit = m.authorize_and_suppress(
             auth(nonce="six-member-nonce"),
             10,
@@ -963,7 +1012,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         )
 
     def test_FSTOR_04_corrupt_six_member_cross_reference_rejected(self):
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         commit = m.authorize_and_suppress(
             auth(nonce="cross-reference-nonce"),
             10,
@@ -1050,7 +1099,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         This is an in-memory projection-recovery test. It does not claim
         persistence across process or machine crashes.
         """
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
 
         first_nonce = "foi01-committed-nonce"
@@ -1102,7 +1151,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
 
     def test_FSTOR_07_idempotent_retry_has_complete_independent_audit(self):
         """F-OI-02: retry authorization is audited without a second commit."""
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
 
         original_operation_id = "foi02-original-operation"
@@ -1117,7 +1166,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
             original_attempt_id,
             idempotency_key,
             request_hash,
-            auth=auth(nonce=original_nonce),
+            auth=auth(nonce=original_nonce, request_hash=request_hash),
         )
 
         original_commit_id = first.commit_id
@@ -1135,7 +1184,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
             "foi02-retry-attempt",
             idempotency_key,
             request_hash,
-            auth=auth(nonce=retry_nonce),
+            auth=auth(nonce=retry_nonce, request_hash=request_hash),
         )
 
         self.assertIs(first, second)
@@ -1174,7 +1223,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         self.assertTrue(retry_record["authorization_receipt"])
         self.assertNotEqual(
             retry_record["authorization_receipt"],
-            first.authorization_reference,
+            first.authorization_reference.receipt_id,
         )
         self.assertEqual(retry_record["nonce"], retry_nonce)
         self.assertEqual(
@@ -1204,7 +1253,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
 
     def test_FSTOR_08_lifecycle_terminal_invariant_survives_idempotent_retry(self):
         """F-OI-03: idempotent retry must never restore Forgotten lifecycle."""
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
 
         operation_id = "foi03-original-operation"
@@ -1289,7 +1338,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
 
     def test_FSTOR_09_authorization_receipt_is_required_and_single_use(self):
         """F-OI-04: missing or reused receipts are rejected; fresh retry receipt is audited."""
-        m = R3Model("m")
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
         m.phase = Phase.AUTHORIZED
 
         operation_id = "foi04-original-operation"
@@ -1311,7 +1360,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         )
 
         original_receipt = first.authorization_reference.receipt_id
-        self.assertEqual(original_receipt, original_authorization.receipt_id)
+        self.assertEqual(original_receipt, original_authorization.receipt.receipt_id)
 
         original_retry_audit = list(m.retry_audit)
         original_nonce_registry = set(m.nonce_registry)
@@ -1393,7 +1442,7 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         retry_record = m.retry_audit[0]
         self.assertEqual(
             retry_record["authorization_receipt"],
-            retry_authorization.receipt_id,
+            retry_authorization.receipt.receipt_id,
         )
         self.assertNotEqual(
             retry_record["authorization_receipt"],
@@ -1410,6 +1459,202 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         self.assertEqual(m.outbox, original_outbox)
         self.assertEqual(m.atomic_commit, first)
 
+    def test_FSTOR_10_cleanup_allows_existing_retry_but_rejects_first_commit(self):
+        """F-D-NEW-01: CLEANUP permits a fresh-authorized retry only."""
+        operation_id = "foi-cleanup-operation"
+        attempt_id = "foi-cleanup-first-attempt"
+        idempotency_key = "foi-cleanup-idempotency-key"
+        request_hash = "foi-cleanup-request-hash"
+
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m.phase = Phase.AUTHORIZED
+
+        first = m.commit_suppression(
+            operation_id,
+            attempt_id,
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce="foi-cleanup-first-nonce",
+                      request_hash=request_hash),
+        )
+
+        original_fence = m.fence_generation
+        original_counter = m.commit_counter
+        original_outbox = dict(m.outbox)
+        original_commit = m.atomic_commit
+
+        self.assertIs(first, original_commit)
+        self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
+
+        m.phase = Phase.CLEANUP
+
+        reused = m.commit_suppression(
+            operation_id,
+            "foi-cleanup-retry-attempt",
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce="foi-cleanup-retry-nonce",
+                      request_hash=request_hash),
+        )
+
+        self.assertIs(reused, first)
+        self.assertIs(m.atomic_commit, first)
+        self.assertEqual(m.phase, Phase.CLEANUP)
+        self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
+
+        self.assertEqual(len(m.retry_audit), 1)
+        retry_record = m.retry_audit[0]
+        self.assertEqual(
+            retry_record["retry_result"],
+            "REUSED_EXISTING_COMMIT",
+        )
+        self.assertNotEqual(
+            retry_record["authorization_receipt"],
+            first.authorization_reference.receipt_id,
+        )
+
+        self.assertEqual(m.fence_generation, original_fence)
+        self.assertEqual(m.commit_counter, original_counter)
+        self.assertEqual(m.outbox, original_outbox)
+
+        self.assertEqual(
+            sum(x == "SUPPRESSION_COMMITTED" for x in m.audit), 1,
+        )
+        self.assertEqual(
+            sum(x == "IDEMPOTENT_COMMIT_REUSED" for x in m.audit), 1,
+        )
+
+        fresh = R3Model("fresh-memory",
+                         receipt_verifier=TrustAllReceiptVerifier())
+        fresh.phase = Phase.CLEANUP
+
+        before_commit = fresh.atomic_commit
+        before_fence = fresh.fence_generation
+
+        with self.assertRaises(ContractViolation):
+            fresh.commit_suppression(
+                "foi-cleanup-new-operation",
+                "foi-cleanup-new-attempt",
+                "foi-cleanup-new-key",
+                "foi-cleanup-new-hash",
+                auth=auth(nonce="foi-cleanup-new-nonce",
+                          request_hash="foi-cleanup-new-hash"),
+            )
+
+        self.assertIs(fresh.atomic_commit, before_commit)
+        self.assertEqual(fresh.fence_generation, before_fence)
+
+    def test_FSTOR_11_receipt_credential_verification_and_retry_binding(self):
+        """F-OI-04: reject forged/mismatched credentials and bind valid retry."""
+        operation_id = "foi-cred-operation"
+        idempotency_key = "foi-cred-key"
+        request_hash = "foi-cred-hash"
+
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m.phase = Phase.AUTHORIZED
+
+        first = m.commit_suppression(
+            operation_id,
+            "foi-cred-first-attempt",
+            idempotency_key,
+            request_hash,
+            auth=auth(nonce="foi-cred-original-nonce",
+                      request_hash=request_hash),
+        )
+
+        original_commit = m.atomic_commit
+        original_fence = m.fence_generation
+        original_counter = m.commit_counter
+        original_outbox = dict(m.outbox)
+        original_nonce_registry = set(m.nonce_registry)
+        original_retry_audit = list(m.retry_audit)
+
+        def assert_no_retry_side_effect(auth_to_try, verifier=None):
+            prev = m.receipt_verifier
+            if verifier is not None:
+                m.receipt_verifier = verifier
+            try:
+                with self.assertRaises(ContractViolation):
+                    m.commit_suppression(
+                        operation_id,
+                        "foi-cred-invalid-retry",
+                        idempotency_key,
+                        request_hash,
+                        auth=auth_to_try,
+                    )
+            finally:
+                m.receipt_verifier = prev
+            self.assertIs(m.atomic_commit, original_commit)
+            self.assertEqual(m.fence_generation, original_fence)
+            self.assertEqual(m.commit_counter, original_counter)
+            self.assertEqual(m.outbox, original_outbox)
+            self.assertEqual(m.nonce_registry, original_nonce_registry)
+            self.assertEqual(m.retry_audit, original_retry_audit)
+
+        assert_no_retry_side_effect(
+            auth(nonce="foi-cred-forged", request_hash=request_hash),
+            verifier=RejectingReceiptVerifier(),
+        )
+        assert_no_retry_side_effect(
+            auth(nonce="foi-cred-wrong-issuer", request_hash=request_hash,
+                 issuer="untrusted-issuer"),
+        )
+        assert_no_retry_side_effect(
+            auth(nonce="foi-cred-wrong-audience", request_hash=request_hash,
+                 audience="other-service"),
+        )
+        assert_no_retry_side_effect(
+            auth(nonce="foi-cred-wrong-hash",
+                 request_hash="different-request-hash"),
+        )
+        assert_no_retry_side_effect(
+            auth(nonce="foi-cred-wrong-epoch", request_hash=request_hash,
+                 permission_epoch=6),
+        )
+
+        # Nonce mismatch: credential nonce differs from Authorization nonce.
+        mismatch_cred = receipt_credential(
+            nonce="foi-cred-inner-nonce",
+            request_hash=request_hash,
+            receipt_id="foi-cred-nonce-mismatch-receipt",
+        )
+        mismatch_auth = Authorization(
+            permission_epoch=7,
+            nonce="foi-cred-outer-nonce",
+            receipt=mismatch_cred,
+        )
+        assert_no_retry_side_effect(mismatch_auth)
+
+        valid_retry = auth(
+            nonce="foi-cred-valid-retry-nonce",
+            request_hash=request_hash,
+        )
+        reused = m.commit_suppression(
+            operation_id,
+            "foi-cred-valid-retry-attempt",
+            idempotency_key,
+            request_hash,
+            auth=valid_retry,
+        )
+
+        self.assertIs(reused, first)
+        self.assertEqual(len(m.retry_audit), 1)
+        record = m.retry_audit[0]
+        cred = valid_retry.receipt
+
+        self.assertEqual(record["authorization_receipt"], cred.receipt_id)
+        self.assertEqual(record["authorization_credential"], cred)
+        self.assertEqual(record["issuer"], cred.issuer)
+        self.assertEqual(record["nonce"], cred.nonce)
+        self.assertEqual(record["retry_result"], "REUSED_EXISTING_COMMIT")
+        self.assertNotEqual(
+            cred.receipt_id,
+            first.authorization_reference.receipt_id,
+        )
+        self.assertIn(cred.nonce, m.nonce_registry)
+        self.assertEqual(m.fence_generation, original_fence)
+        self.assertEqual(m.commit_counter, original_counter)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
@@ -1421,19 +1666,17 @@ if __name__ == "__main__":
 #   StorageFaults (STOR-01..07):  7
 #   AuthorizationCommitEntry:   14
 #   AtomicPublicationFaultInjection:
-#                                9 (FSTOR-01..09)
-#   Total:                       68 test methods
+#                               11 (FSTOR-01..11)
+#   Total:                       70 test methods
 #
-# Newly added tests (U-055):
-#   - test_FSTOR_08_lifecycle_terminal_invariant_survives_idempotent_retry
-#       F-OI-03: lifecycle FORGOTTEN terminal check is independent of
-#       live_state; idempotent retry cannot restore a Forgotten record.
-#   - test_FSTOR_09_authorization_receipt_is_required_and_single_use
-#       F-OI-04: missing receipt rejected; reused receipt rejected with
-#       fresh nonce; fresh receipt permits legitimate retry and is audited.
+# U-056 additions:
+#   - test_FSTOR_10_cleanup_allows_existing_retry_but_rejects_first_commit
+#       F-D-NEW-01: phase gate separated from idempotent retry path.
+#   - test_FSTOR_11_receipt_credential_verification_and_retry_binding
+#       F-OI-04: ReceiptCredential verification with context binding.
 #
 # Execution status:
-#   68/68 contract tests PASS (local unittest, Python 3.13).
+#   70/70 contract tests PASS (local unittest, Python 3.13).
 #   14/14 forget_model tests PASS.
 #   These tests cover an in-memory reference model only; they do not prove
 #   WAL durability, physical crash recovery, or distributed linearizability.
