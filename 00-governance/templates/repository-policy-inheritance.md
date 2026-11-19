@@ -1,11 +1,11 @@
-# Repository Governance Inheritance Declaration / 仓库治理继承声明
+# Repository Policy Inheritance Declaration
 
 - Declaration ID: GOV-DOC-001-REPOSITORY-INHERITANCE
 - Policy ID: GOV-DOC-001
-- Version: 1.0
+- Version: 1.2
 - Status: DRAFT — TEMPLATE ONLY
 
-## 1. Repository identity / 仓库身份
+## 1. Repository identity
 
 - Repository Name:
 - Repository URL:
@@ -15,32 +15,44 @@
 - Formal Governance Inclusion Reference:
 - Inclusion Decision Date:
 
-## 2. Inherited policy / 继承规范
+## 2. Policy inheritance state
 
-EN:
+This declaration does not itself establish approval or inheritance.
 
-This repository inherits GOV-DOC-001 from the project's authoritative governance repository.
+本声明本身不构成批准或继承关系的成立。
 
-The inherited policy version is the formally approved version referenced by the governance authority.
+The inheritance state MUST be exactly one of:
 
-中文：
+- PENDING: Evidence is incomplete. The four evidence fields below MUST explicitly contain NOT_RECORDED.
+- INHERITED: The repository has an approved, traceable policy reference. The source commit and policy blob SHA MUST be supplied and independently reproducible.
+- NOT_APPLICABLE: A documented governance decision establishes that inheritance does not apply. This state does not waive other applicable governance requirements.
 
-本仓库继承项目权威治理仓库中的 GOV-DOC-001。
+继承状态必须且只能为以下三种之一：
 
-继承的规范版本以治理机构正式批准并引用的版本为准。
+- PENDING：证据不完整。以下四个证据字段必须明确填写 NOT_RECORDED。
+- INHERITED：仓库具有经批准且可追溯的规范引用；源提交和规范 Blob SHA 必须提供并可独立复算。
+- NOT_APPLICABLE：有记录的治理决定确认不适用。此状态不豁免其他适用治理要求。
 
+### Machine-readable declaration
+
+The following block is the sole canonical format. Preserve field names and one-field-per-line syntax.
+
+以下代码块是唯一规范格式。必须保留字段名及每行一个字段的格式。
+
+POLICY-INHERITANCE-DECLARATION
 - Policy ID: GOV-DOC-001
-- Inherited Version:
-- Authoritative Source:
-- Approved Source Commit:
-- Policy Blob SHA:
-- Adoption Reference:
+- Inherited Version: NOT_RECORDED
+- Authoritative Repository: NOT_RECORDED
+- Approved Source Commit: NOT_RECORDED
+- Policy Blob SHA: NOT_RECORDED
+- Inheritance State: PENDING
+===END
 
-Unknown values remain NOT_RECORDED.
+Do not change PENDING to INHERITED merely by completing this template. INHERITED requires a formally approved adoption reference and a reproducible policy blob SHA. The SHA must identify the actual policy file blob at the approved source commit, not the commit object itself.
 
-未知值保持 NOT_RECORDED。
+不得仅凭填写模板把状态改为 INHERITED。INHERITED 必须伴随正式批准的纳管引用及可复算的规范 Blob SHA。该 SHA 必须指向批准源提交中的实际规范文件 Blob，而非 Commit 对象本身。
 
-## 3. Mandatory controls / 强制控制
+## 3. Bilingual enforcement scope
 
 EN:
 
@@ -64,7 +76,7 @@ This repository MUST enforce bilingual requirements for:
 5. Pull Request 标题和正文。
 6. 本地治理和迁移记录。
 
-## 4. Templates and workflows / 模板与工作流
+## 4. Required repository templates
 
 - Issue template path:
 - Umbrella Requirement template path:
@@ -77,19 +89,15 @@ All templates MUST link to the authoritative GOV-DOC-001 source.
 
 所有模板 MUST 链接至权威 GOV-DOC-001 来源。
 
-## 5. Historical migration / 历史迁移
+## 5. Historical migration
 
 EN:
 
-The repository MUST inventory historical single-language records and track migration debt.
-
-Historical commits MUST NOT be rewritten.
+The repository MUST inventory historical single-language records and track migration debt. Historical commits MUST NOT be rewritten.
 
 中文：
 
-本仓库 MUST 清点历史单语记录并跟踪迁移技术债。
-
-历史 Commit MUST NOT 被重写。
+本仓库 MUST 清点历史单语记录并跟踪迁移技术债。历史 Commit MUST NOT 被重写。
 
 - Historical Issue inventory:
 - Historical Commit inventory:
@@ -97,7 +105,7 @@ Historical commits MUST NOT be rewritten.
 - Migration Work Item:
 - Migration Register:
 
-## 6. Exceptions / 例外
+## 6. Exceptions and authority
 
 No local team or AI agent may unilaterally weaken or waive GOV-DOC-001.
 
@@ -112,7 +120,7 @@ If none exists, use NOT_RECORDED.
 
 如不存在，使用 NOT_RECORDED。
 
-## 7. Adoption record / 采纳记录
+## 7. Approval record
 
 - Repository governance authority:
 - Approval status:
@@ -124,12 +132,12 @@ The existence of this declaration does not itself establish approval.
 
 本声明存在本身不构成正式批准。
 
-## 8. Inheritance confirmation / 继承确认
+## 8. Governance acknowledgement
 
 EN:
 
-The repository acknowledges that GOV-DOC-001 is inherited governance, not an optional style guide. Changes to the inherited policy remain subject to the central governance authority.
+GOV-DOC-001 is inherited governance, not an optional style guide. Changes to the inherited policy remain subject to the central governance authority.
 
 中文：
 
-本仓库确认 GOV-DOC-001 属于继承的治理规范，而非可选写作指南。对继承规范的修改仍须遵循中央治理机构的权限和审批流程。
+GOV-DOC-001 属于继承的治理规范，而非可选写作指南。对继承规范的修改仍须遵循中央治理机构的权限和审批流程。

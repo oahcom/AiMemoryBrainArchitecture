@@ -78,6 +78,116 @@ def approved_exception(body: str) -> bool:
 
 
 
+def check_policy_inheritance(body: str, changed: set[str]) -> list[str]:
+    """Validate declaration syntax and consistency, not remote authority."""
+    errors: list[str] = []
+    marker = "POLICY-INHERITANCE-DECLARATION"
+    fields = (
+        "Policy ID",
+        "Inherited Version",
+        "Authoritative Repository",
+        "Approved Source Commit",
+        "Policy Blob SHA",
+        "Inheritance State",
+    )
+    lines = body.splitlines()
+    starts = [i for i, line in enumerate(lines) if line.strip() == marker]
+
+    # This checks parseability and internal consistency only. It does not
+    # resolve the authoritative repository remotely. Reviewers or a later CI
+    # step must independently recompute the actual policy blob SHA.
+    if not starts:
+        if any(p.startswith("00-governance/") for p in changed):
+            errors.append(
+                "POLICY-INHERITANCE-DECLARATION missing for 00-governance changes."
+            )
+        return errors
+
+    if len(starts) != 1:
+        errors.append(
+            "PR body must contain exactly one POLICY-INHERITANCE-DECLARATION block."
+        )
+        return errors
+
+    values: dict[str, str] = {}
+    for line in lines[starts[0] + 1:]:
+        stripped = line.strip()
+        if stripped == "===END":
+            break
+        if stripped.startswith("- ") and ":" in stripped:
+            label, value = stripped[2:].split(":", 1)
+            label, value = label.strip(), value.strip()
+            if label in fields:
+                if label in values:
+                    errors.append(
+                        f"POLICY-INHERITANCE-DECLARATION duplicate field: {label}."
+                    )
+                values[label] = value
+
+    for field in fields:
+        if field not in values:
+            errors.append(
+                f"POLICY-INHERITANCE-DECLARATION missing required field: {field}."
+            )
+
+    state = values.get("Inheritance State", "")
+    if state not in {"PENDING", "INHERITED", "NOT_APPLICABLE"}:
+        errors.append(
+            "Inheritance State must be PENDING, INHERITED, or NOT_APPLICABLE."
+        )
+
+    if values.get("Policy ID") != "GOV-DOC-001":
+        errors.append("Policy ID must equal GOV-DOC-001.")
+
+    evidence_fields = (
+        "Inherited Version",
+        "Authoritative Repository",
+        "Approved Source Commit",
+        "Policy Blob SHA",
+    )
+    placeholders = {"TBD", "TODO", "N/A", "PENDING"}
+
+    if state == "PENDING":
+        for field in evidence_fields:
+            if values.get(field) != "NOT_RECORDED":
+                errors.append(
+                    f"{field} must be explicitly NOT_RECORDED when Inheritance State is PENDING."
+                )
+
+    elif state == "NOT_APPLICABLE":
+        for field in evidence_fields:
+            if values.get(field, "").upper() in {"TBD", "TODO", "N/A"}:
+                errors.append(
+                    f"{field} must not be TBD, TODO, or N/A when Inheritance State is NOT_APPLICABLE."
+                )
+        if not values.get("Authoritative Repository", "").strip():
+            errors.append(
+                "Authoritative Repository must be non-empty when Inheritance State is NOT_APPLICABLE."
+            )
+
+    elif state == "INHERITED":
+        for field in evidence_fields:
+            value = values.get(field, "")
+            if not value or value.upper() in placeholders:
+                errors.append(
+                    f"{field} must not be empty or a placeholder when Inheritance State is INHERITED."
+                )
+
+        for field in ("Approved Source Commit", "Policy Blob SHA"):
+            if not re.fullmatch(r"[0-9a-fA-F]{40}", values.get(field, "")):
+                errors.append(
+                    f"{field} must be a 40-character hexadecimal SHA when Inheritance State is INHERITED."
+                )
+
+        commit = values.get("Approved Source Commit", "").lower()
+        blob = values.get("Policy Blob SHA", "").lower()
+        if re.fullmatch(r"[0-9a-f]{40}", commit) and blob == commit:
+            errors.append(
+                "Policy Blob SHA must differ from Approved Source Commit."
+            )
+
+    return errors
+
 def check_prompt_library() -> list[str]:
     """Validate the canonical global/Owner prompt library structure and metadata."""
     errors: list[str] = []
@@ -159,6 +269,7 @@ def main() -> int:
 
     body = os.environ.get("PR_BODY", "")
     errors: list[str] = check_prompt_library()
+    errors.extend(check_policy_inheritance(body, changed))
     exception = approved_exception(body)
     complete = "BILINGUAL-MANIFEST: COMPLETE" in body
 
