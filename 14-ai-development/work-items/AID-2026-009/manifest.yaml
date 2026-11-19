@@ -19,7 +19,7 @@ security_scope: >-
 status: PROPOSED
 
 registration:
-  status: BLOCKED_PENDING_REGISTRATION
+  status: REGISTERED
   allocated_id: AID-2026-009
   allocation_authority: Issue #264 comment 7007736165
   owning_issue: 264
@@ -161,7 +161,7 @@ findings:
   - id: F-REQ03-REG-01
     severity: P1
     destination: Issue #264
-    status: PENDING_GOVERNANCE_CLOSURE
+    status: CLOSED
     summary: >-
       L0 must record the actual authorized SSH execution channel and
       return one real remote file-write verification package. The
@@ -202,9 +202,4 @@ lifecycle:
       status: NOT_APPLICABLE_TO_REGISTRATION
     closeout:
       status: NOT_RECORDED
-  markers:
-    blocked:
-      reason: >-
-        Registration remains BLOCKED_PENDING_REGISTRATION until the
-        manifest, INDEX row and Issue association record are all
-        persisted and read back.
+  markers: {}
