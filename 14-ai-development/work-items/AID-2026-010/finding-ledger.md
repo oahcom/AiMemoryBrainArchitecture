@@ -49,7 +49,7 @@
 | 历史 ID / 别名 | F-43-01（子项 F3） |
 | 原始锚点 | `l2-05b-integration-review.md` §F-43-01（L171）；Issue #43 评论 `7015532739` 等 |
 | 问题定义 | H 尚未独立接受 D/H 双向映射（D/H authoritative query interface 未闭合）。 |
-| 状态 | OPEN |
+| 状态 | CLOSED |
 | 责任 Owner | D Owner / H Owner |
 | 回流去向 | D/H 联合映射接受 → A 集成复审 |
 | 关闭条件 | D/H 双方对同一映射 Blob 的独立接受证据 + authoritative query interface 定义与核验 |
