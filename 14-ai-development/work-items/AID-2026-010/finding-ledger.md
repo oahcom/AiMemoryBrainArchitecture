@@ -1,0 +1,224 @@
+# AID-2026-010 — Finding Ledger（唯一权威状态台账）
+
+> **本文件是 AID-2026-010 的唯一权威 Finding 状态台账。**
+> Issue #43 评论是历史裁决与证据锚点，不单独决定当前状态；与本台账冲突时，须核查最新裁决及精确提交证据后修订本台账。
+> 原始审查报告 `../../issue-alignment-2026-11-19/l2-05b-integration-review.md` 是 F-43-01…05 的原始定义来源，不因本文件存在而改变，也不复制其文本充当原始证据。
+
+- 建立依据：A Integration 裁定（A 会话 `6aff38f6-ac34-83e8-b116-53d4e87b22a5`，R29，选项 A）
+- 建立时间：2026-11-20
+- 状态语义：`OPEN`（未解决或缺证据）/ `BLOCKED`（有明确阻断项）/ `REMEDIATION ACCEPTED`（技术整改被接受，账本关闭条件未全部满足）/ `CLOSED`（关闭条件全部满足，证据已持久化并可回读）
+- **`REMEDIATION ACCEPTED` 不得自动等同于 `CLOSED`。**
+
+---
+
+## F-43-01/F1 — D/H ForgetFence 高水位格式与语义映射（双高水位六条件操作级证明）
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-01/F1 |
+| 历史 ID / 别名 | F-43-01（子项 F1） |
+| 原始锚点 | `14-ai-development/issue-alignment-2026-11-19/l2-05b-integration-review.md` §F-43-01（L171）；Issue #43 裁决评论 `7015532739`（R22）、`7015683598`+`7015684625`（D-001/D-002） |
+| 问题定义 | D-002 双高水位语义已 ACCEPT，但六条件替代证明尚未在操作级落地（`verify_owner_snapshot` 真实 D 权威证据、exact equality、linearization、Receipt）。 |
+| 状态 | OPEN |
+| 责任 Owner | D Owner |
+| 回流去向 | D Owner 双高水位六条件操作级证明 → A 集成复审 |
+| 关闭条件 | 六条件逐条操作级证据（真实 D 权威回调、非 `lambda: True` 占位），含 exact equality 与 linearization 证明、Receipt 样例，经 A 独立复核接受 |
+| 最新裁决 / 证据 | `D-OWNER-2026-11-19-002`（ACCEPT，六条件定义）；R22/R23 裁决维持 OPEN |
+| 范围限制 | 语义 ACCEPT ≠ 操作级证明完成 |
+
+## F-43-01/F2 — H 组合验证器 D Snapshot 八字段与长度约束对齐
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-01/F2 |
+| 历史 ID / 别名 | F-43-01（子项 F2） |
+| 原始锚点 | `l2-05b-integration-review.md` §F-43-01（L171）；Issue #43 评论 `7016478902`（R23-H）、`7016850797`（R24-H）、`7017186199`（R25-H） |
+| 问题定义 | 组合验证器 D allowlist 5 字段 vs Schema 1.2.17 八字段不一致，且长度约束（1–512）在 legacy opt-in 路径可绕过。 |
+| 状态 | CLOSED |
+| 责任 Owner | H Owner |
+| 回流去向 | A 集成复审（R26 已裁定） |
+| 关闭条件 | 八字段对齐 + 六字段长度约束在 legacy/normal 双路径生效 + 独立重跑测试 |
+| 最新裁决 / 证据 | R26 裁定 CLOSED（A-OWNER-ALIGNMENT-001-R26）；Commit `19a839332c390440163c2d9c68e50dd652d4d6c4`，源 Blob `7dd48ecb31ced6c2d6041cce33b9686056705742`，测试 Blob `f4126e2034d71bc90bae5fefab89c826c3f1ccfa`；L0 本地独立重跑 22/22 PASS |
+| 范围限制 | 仅限 TEST-profile 组合验证器 D Snapshot 范围；不代表 1.2.17 整体对齐或生产验证 |
+
+## F-43-01/F3 — H 独立接受 D/H 映射
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-01/F3 |
+| 历史 ID / 别名 | F-43-01（子项 F3） |
+| 原始锚点 | `l2-05b-integration-review.md` §F-43-01（L171）；Issue #43 评论 `7015532739` 等 |
+| 问题定义 | H 尚未独立接受 D/H 双向映射（D/H authoritative query interface 未闭合）。 |
+| 状态 | OPEN |
+| 责任 Owner | D Owner / H Owner |
+| 回流去向 | D/H 联合映射接受 → A 集成复审 |
+| 关闭条件 | D/H 双方对同一映射 Blob 的独立接受证据 + authoritative query interface 定义与核验 |
+| 最新裁决 / 证据 | R22–R28 均维持 OPEN |
+| 范围限制 | — |
+
+## F-43-02 — D 契约 1.3.0 权威采纳
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-02 |
+| 历史 ID / 别名 | — |
+| 原始锚点 | `l2-05b-integration-review.md` §F-43-02（L203）；Issue #43 评论 `7015681927`+`7015682819`（D-001/D-002） |
+| 问题定义 | D 1.3.0 契约在 main 与 D Owner 分支不一致；Unicode 数据版本未固定，§5 双高水位证明规则不符。 |
+| 状态 | BLOCKED |
+| 责任 Owner | D Owner |
+| 回流去向 | D successor 契约正式落文 + Unicode 版本固定 → D 1.3.0 采纳裁决 |
+| 关闭条件 | D successor 契约落文、Unicode 数据版本固定、D Owner 采纳决定（DECIDED → ACCEPTED） |
+| 最新裁决 / 证据 | `D-OWNER-2026-11-19-001`：采纳 = **BLOCKED**，H 消费 = **NOT AUTHORIZED** |
+| 范围限制 | 不得把 H 修复进展解释为 D 1.3.0 采纳 |
+
+## F-43-03 — H 独立可复核测试证据
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-03 |
+| 历史 ID / 别名 | — |
+| 原始锚点 | `l2-05b-integration-review.md` §F-43-03（L215） |
+| 问题定义 | H 测试证据不是当前 H HEAD 的精确验证；缺独立可复核完整测试日志（含 CI）。 |
+| 状态 | OPEN |
+| 责任 Owner | H Owner |
+| 回流去向 | H HEAD 精确测试证据（本地 + CI）→ A 独立复核 |
+| 关闭条件 | 对最终 HEAD 的完整测试日志（命令、环境、PASS/FAIL/SKIP 明细），且 CI 有测试级输出（runner 空 steps 不算） |
+| 最新裁决 / 证据 | R28：CI 仍 NOT VERIFIED（Run `44599661184` / Job `135827292056` steps=[]）；本地测试不能替代 CI 证据 |
+| 范围限制 | 本地 PASS 不等于 CI PASS |
+
+## F-43-04 — #25 Phase 3.8.1 Addendum Blob 漂移
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-04 |
+| 历史 ID / 别名 | — |
+| 原始锚点 | `l2-05b-integration-review.md` §F-43-04（L229）；#25 Pin 更新证据 |
+| 问题定义 | #25 中 A Phase 3.8.1 Addendum Blob 已漂移。 |
+| 状态 | CLOSED |
+| 责任 Owner | A Integration |
+| 回流去向 | #25 Pin 更新（R20 已完成） |
+| 关闭条件 | #25 Pin 更新为精确 Blob 并回读一致 |
+| 最新裁决 / 证据 | R20 裁定 CLOSED |
+| 范围限制 | — |
+
+## F-43-05 — AID-2026-010 登记状态不一致
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-05 |
+| 历史 ID / 别名 | — |
+| 原始锚点 | `l2-05b-integration-review.md` §F-43-05（L239） |
+| 问题定义 | AID-2026-010 登记状态不一致。 |
+| 状态 | CLOSED |
+| 责任 Owner | 按原始报告记录的 Owner（具体责任人不得推测） |
+| 回流去向 | R18 裁决 |
+| 关闭条件 | 登记状态与 R18 基线一致 |
+| 最新裁决 / 证据 | R18 裁定 CLOSED |
+| 范围限制 | — |
+
+## F-43-06A — Storage/COC JoinProof 双持久化与恢复协议
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-06A |
+| 历史 ID / 别名 | `F-43-06`（历史别名，不得继续作主键） |
+| 原始锚点 | Issue #43 comment `7013501942`；交叉引用 #25 comment `7013493546` |
+| 问题定义 | Storage-persisted + COC-committed JoinProof 缺少规范性双持久化写序、canonical-copy 规则与崩溃恢复协议。 |
+| 状态 | OPEN / BLOCKED |
+| 责任 Owner | Storage Owner |
+| 回流去向 | Storage Owner 裁决 → #25 owner-decision 载体 + 本台账 |
+| 关闭条件 | Storage durable write + signed receipt → COC quorum append binding exact ref/digest → 双向回读 → 才 owner release；重试用同一 immutable identity |
+| 最新裁决 / 证据 | #43 `7013501942`（F-43-06 P1 OPEN/BLOCKED 原始登记） |
+| 范围限制 | 架构可行性 finding，非实现验证 |
+
+## F-43-06B — BIH Registry §9 currentness / status-scope reconciliation
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-06B |
+| 历史 ID / 别名 | `F-43-06`（历史别名，不得继续作主键） |
+| 原始锚点 | Issue #43 comment `7016815868` |
+| 问题定义 | BIH identity baseline currentness / status-scope 未完成对账。 |
+| 状态 | OPEN |
+| 责任 Owner | BIH Registry Owner |
+| 回流去向 | BIH Registry Owner 裁决 → A 集成复审 |
+| 关闭条件 | §9 currentness 与 status-scope reconciliation 的权威证据（按该评论定义的关闭条件） |
+| 最新裁决 / 证据 | #43 `7016815868`（F-43-06 P2 OPEN 原始登记） |
+| 范围限制 | — |
+
+## F-43-07 — ParticipantRef 映射（PublicationParticipantRef / StorageVisibilityParticipantRef ↔ COC ParticipantIntentRef）
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-07 |
+| 历史 ID / 别名 | — |
+| 原始锚点 | Issue #43 comment `7013501942`（与 F-43-06A 同评论登记，子项 F-43-07）；交叉引用 #25 comment `7013493546` |
+| 问题定义 | D PublicationParticipantRef / StorageVisibilityParticipantRef 未显式映射到（也未规范性排除于）COC ParticipantIntentRef。 |
+| 状态 | OPEN / BLOCKED |
+| 责任 Owner | D Owner / Storage Owner / H Owner |
+| 回流去向 | D/Storage/H 选定记账边界并定义 exact identity binding + ordering + recovery（或定义独立权威恢复枚举）→ A 集成复审 |
+| 关闭条件 | 映射或规范性排除的契约文本 + identity binding/ordering/recovery 定义 + 三方独立接受 |
+| 最新裁决 / 证据 | #43 `7013501942`（F-43-07 P1 OPEN/BLOCKED 原始登记）；R28 裁定保留原 ID 与含义 |
+| 范围限制 | 架构可行性 finding，非实现验证；编号治理不改变其技术含义 |
+
+## F-43-08 — Finding ID 冲突纠正
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-08 |
+| 历史 ID / 别名 | — |
+| 原始锚点 | Issue #43 comment `7018553089` |
+| 问题定义 | `F-43-06` 被两个不同 finding 复用（`7013501942` Storage/COC JoinProof、`7016815868` BIH Registry §9），后续又曾被 D 长度修复借用为 task label，稳定 ID 不唯一。 |
+| 状态 | OPEN |
+| 责任 Owner | A Integration |
+| 回流去向 | 本台账（编号映射持久化）→ Issue #43 映射评论 → A 精确回读 |
+| 关闭条件 | 本台账提交并按 Blob SHA 精确回读；06A/06B 拆分且保留原始锚点；#43 新增映射评论的 comment ID 与正文核对一致；无 ID 冲突残留 |
+| 最新裁决 / 证据 | R29 采纳编号映射；本文件即持久化载体 |
+| 范围限制 | 纯可追溯性纠正，不改变任何技术 finding 或 Owner 决定 |
+
+## F-43-09 — H 1.2.17 独立 Owner Snapshot D 六字段长度约束
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-09 |
+| 历史 ID / 别名 | `F-43-06`（R27 task label，仅历史别名） |
+| 原始锚点 | Issue #43 comment `7019182732`、#25 comment `7019181900`（H 交付回填）；R27 裁定 |
+| 问题定义 | `owner_snapshot_semantics_1_2_17.py` 未执行 Schema 1.2.17 的 `minLength:1 / maxLength:512`，513 字符 D 字段被 Schema 拒却通过验证器。 |
+| 状态 | REMEDIATION ACCEPTED |
+| 责任 Owner | H Owner |
+| 回流去向 | H 独立 D Snapshot 六字段长度约束证据 → A 独立复审（R27 已通过）→ 本台账登记关闭 |
+| 关闭条件 | 六字段 0/1/512/513 全矩阵 + callback 前置 + 独立重跑测试证据持久化回读（技术条件已满足，待账本登记生效） |
+| 最新裁决 / 证据 | Commit `8ff8c83f0bac59cc834e40e73f8b8f520d8fafb5` + `dd3cacde4af541205d2dc1e50f8a196666ea3a7b`；源 Blob `d9dc43ff0136751aba20cffa4db3f280d16edc67`，测试 Blob `d535ddcc24f57ab38aceb350853a424490f870cc`；L0 本地 9/9 PASS + 全矩阵复现 |
+| 范围限制 | TEST-profile；本地测试 ≠ CI PASS；不构成生产授权 |
+
+## F-43-10 — 组合验证器版本字段集隔离（1.2.9 vs 1.2.17）
+
+| 字段 | 内容 |
+|---|---|
+| ID | F-43-10 |
+| 历史 ID / 别名 | 曾暂记 F-43-07（R26 PROPOSED 期），现独立编号 |
+| 原始锚点 | Issue #43 comment `7019972155`、#25 comment `7019971478`（H 范围声明回填）；R28 裁定 |
+| 问题定义 | 组合验证器默认按 1.2.9 I5/C3 字段集运行，与 Schema 1.2.17 I6/D8/C5 不一致；旧混合测试路径不能证明完整 1.2.17 组合兼容。 |
+| 状态 | REMEDIATION ACCEPTED |
+| 责任 Owner | H Owner |
+| 回流去向 | H 版本隔离修复证据 → A 独立复审（R28 已接受）→ 本台账登记关闭 |
+| 关闭条件 | 显式 `schema_artifact_revision` 版本选择 + I/C 新旧字段集回归测试 + 范围声明持久化回读（技术条件已满足，待账本登记生效） |
+| 最新裁决 / 证据 | Commit `a04d4010152577cab2f27b4c1359e955ea91e447`→`de5d7b63ff8555a9bbd58f9dd64d4c28fbc7e5cc`；源 Blob `6eee88221c7488542240cdaf326ffdeb0cc2419a`，测试 Blob `ea38ae2aa97a75c62ed857bfd16e3b8d27ba72f1`，范围声明 Blob `66a6dfa627ff6a6c382aca84258de347b0048ab5`；L0 本地 7/7 PASS + 版本矩阵复现；CI NOT VERIFIED |
+| 范围限制 | TEST-profile 版本字段集隔离；不代表生产入口验证完成；本地测试 ≠ CI PASS |
+
+---
+
+## 编号映射（历史 → 当前）
+
+| 历史称呼 | 当前 ID | 说明 |
+|---|---|---|
+| F-43-06（Storage/COC JoinProof） | **F-43-06A** | 保留锚点 `7013501942` |
+| F-43-06（BIH Registry §9） | **F-43-06B** | 保留锚点 `7016815868` |
+| F-43-06（R27 task label，D 长度约束） | **F-43-09** | 仅历史别名，不再作主键 |
+| F-43-07 | **F-43-07** | 含义不变（ParticipantRef 映射） |
+| F-43-07（R26 PROPOSED 期 I/C 字段集） | **F-43-10** | 与历史 F-43-07 无关，独立编号 |
+| F-43-08 | **F-43-08** | 编号冲突纠正，待回读关闭 |
+
+## 待补项（TBD）
+
+- 无。F-43-07 原始锚点已核实为 #43 comment `7013501942`（与 F-43-06A 同评论登记），非虚构。
