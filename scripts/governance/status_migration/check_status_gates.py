@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Fail-closed validator for exact work-item status and repository-backed gate evidence."""
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -103,13 +104,35 @@ def _repo_root(path):
     raise ValueError("manifest is not inside a Git working tree")
 
 
+def _git_object_type(root, ref):
+    """Return the git object type of ref, or None when unresolvable."""
+    result = subprocess.run(
+        ["git", "-C", str(root), "cat-file", "-t", ref],
+        check=False, capture_output=True, text=True)
+    return result.stdout.strip() if result.returncode == 0 else None
+
+
 def _git_tree_has_file(root, subject_head, relative_path):
-    """Check the repository HEAD tree, not an untracked/local-only working-tree file."""
+    """Check the subject commit tree, not HEAD and not an untracked working-tree file."""
+    if _git_object_type(root, subject_head) != "commit":
+        raise ValueError(f"subject_head must resolve to a commit object: {subject_head}")
     result = subprocess.run(
         ["git", "-C", str(root), "ls-tree", "-r", "--name-only",
-         "HEAD", "--", relative_path],
-        check=True, capture_output=True, text=True)
+         subject_head, "--", relative_path],
+        check=False, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise ValueError(f"subject_head is not a resolvable commit: {subject_head}")
     return relative_path in {line.strip() for line in result.stdout.splitlines()}
+
+
+def _git_blob_at(root, subject_head, relative_path):
+    """Return the exact bytes stored in subject_head for relative_path."""
+    return subprocess.run(
+        ["git", "-C", str(root), "show", f"{subject_head}:{relative_path}"],
+        check=True, capture_output=True).stdout
+
+
+MIN_EVIDENCE_BYTES = 32
 
 
 def _evidence_file(value, field, root, subject_head):
@@ -124,13 +147,67 @@ def _evidence_file(value, field, root, subject_head):
         raise ValueError(f"{field} does not resolve to an existing repository file")
     if not _git_tree_has_file(root, subject_head, relative):
         raise ValueError(f"{field} is not present in the subject_head Git tree")
+    # Trust the committed blob, not the working tree: a local edit must not
+    # silently satisfy the gate.  Membership in the subject tree plus blob
+    # equality is the cryptographic binding of evidence to subject_head.
     try:
-        content = target.read_text(encoding="utf-8")
-    except (UnicodeError, OSError) as error:
+        blob = _git_blob_at(root, subject_head, relative)
+    except subprocess.CalledProcessError as error:
+        raise ValueError(f"{field} blob is unreadable at subject_head") from error
+    if blob != target.read_bytes():
+        raise ValueError(f"{field} working-tree content differs from subject_head blob")
+    if len(blob) < MIN_EVIDENCE_BYTES:
+        raise ValueError(f"{field} evidence content is too short to be meaningful")
+    try:
+        content = blob.decode("utf-8")
+    except UnicodeError as error:
         raise ValueError(f"{field} is not readable UTF-8 evidence") from error
-    if subject_head not in content:
-        raise ValueError(f"{field} is not bound to subject_head")
+    # The evidence file itself must carry real content: placeholder or
+    # near-empty artifacts must not satisfy a PASS gate.
+    _meaningful(content, f"{field}.content")
     return target
+
+
+SIDECAR_PATH = "scripts/governance/status_migration/PR272-evidence-hardening.sha256"
+
+
+def _validator_root():
+    """Repo containing this validator, not the manifest under review."""
+    return _repo_root(Path(__file__))
+
+
+def _verify_sidecar_anchor(root, sidecar_path=SIDECAR_PATH):
+    """Enforce the committed integrity anchor for the validator itself.
+
+    The sidecar records git blob SHA-1s of protected source files.  The most
+    recent commit touching the sidecar must embed sha256(sidecar bytes) in
+    its message.  Silent local edits to a protected file or to the sidecar
+    break the recorded values; updating both still forces a fresh commit
+    whose message must carry a matching anchor, so any bypass leaves a
+    visible, auditable commit in history rather than silent tampering.
+    """
+    message = subprocess.run(
+        ["git", "-C", str(root), "log", "-1", "--format=%B", "--", sidecar_path],
+        check=True, capture_output=True, text=True).stdout
+    match = re.search(r"\b[0-9a-f]{64}\b", message)
+    if match is None:
+        raise ValueError("sidecar commit message lacks a sha256 anchor")
+    expected = match.group(0)
+    sidecar = root / sidecar_path
+    actual = hashlib.sha256(sidecar.read_bytes()).hexdigest()
+    if actual != expected:
+        raise ValueError("sidecar sha256 does not match its commit anchor")
+    for line in sidecar.read_text(encoding="utf-8").splitlines():
+        parts = line.split()
+        if len(parts) != 3 or parts[0] != "git-blob-sha1":
+            raise ValueError("malformed sidecar record: " + line[:40])
+        recorded, relative = parts[1], parts[2]
+        blob = subprocess.run(
+            ["git", "-C", str(root), "hash-object", str(root / relative)],
+            check=True, capture_output=True, text=True).stdout.strip()
+        if blob != recorded:
+            raise ValueError("protected file does not match sidecar blob: " + relative)
+    return True
 
 
 def _identity_token(value):
@@ -185,10 +262,22 @@ def _validate_evidence(name, evidence, data, lifecycle, root, subject_head):
         if _identity(evidence["reviewer"], aliases) == _identity(evidence["implementer"], aliases):
             raise ValueError("REVIEWED reviewer and implementer must be different identities")
     for field in PATH_FIELDS[name]:
-        _evidence_file(evidence[field], f"{name}.{field}", root, subject_head)
+        target = _evidence_file(evidence[field], f"{name}.{field}", root, subject_head)
+        # Optional independent content digest: when the manifest records a
+        # SHA-256 alongside a path field, it must match the subject blob.
+        digest_field = field + "_sha256"
+        if digest_field in evidence:
+            recorded = evidence[digest_field]
+            if not isinstance(recorded, str) or not re.fullmatch(r"[0-9a-f]{64}", recorded):
+                raise ValueError(f"{name}.{digest_field} must be a 64-hex sha256 digest")
+            actual = hashlib.sha256(target.read_bytes()).hexdigest()
+            if actual != recorded:
+                raise ValueError(f"{name}.{digest_field} does not match evidence content")
 
 
 def check(path):
+    # Fail closed if the validator's own source has been tampered with.
+    _verify_sidecar_anchor(_validator_root())
     manifest_path = Path(path).resolve()
     root = _repo_root(manifest_path)
     data = yaml.load(manifest_path.read_bytes(), Loader=UniqueKeySafeLoader)
@@ -218,12 +307,29 @@ def check(path):
     unknown = set(gates) - set(ORDER)
     if unknown:
         raise ValueError("unknown gate records: " + ", ".join(sorted(unknown)))
+    # Source-authenticity boundary: content-integrity PASS must never be
+    # presented as proof that evidence came from a trusted producer.  Any
+    # PASS gate therefore requires the manifest to declare the honest
+    # capability boundary explicitly.
+    has_pass = any(
+        isinstance(gates.get(name), dict) and gates[name].get("status") == "PASS"
+        for name in ORDER)
+    authenticity = data.get("source_authenticity")
+    if has_pass:
+        if authenticity is None:
+            raise ValueError(
+                "source_authenticity is required (NOT_VERIFIED) when any gate is PASS")
+        if authenticity != "NOT_VERIFIED":
+            raise ValueError(
+                "source_authenticity must be NOT_VERIFIED; authenticity cannot be "
+                "self-certified: " + str(authenticity))
     for index, name in enumerate(ORDER):
         record = gates.get(name)
         if record is None:
             if index < required_count:
                 raise ValueError("required gate record missing: " + name)
-            continue
+            raise ValueError(
+                "future gate record missing; must be explicitly NOT_RECORDED: " + name)
         if not isinstance(record, dict):
             raise ValueError("gate record must be a mapping: " + name)
         disposition = record.get("status")
@@ -240,7 +346,8 @@ def check(path):
     markers = lifecycle.get("markers", {})
     if not isinstance(markers, dict):
         raise ValueError("lifecycle.markers must be a mapping")
-    return {"result": "PASS", "path": str(path), "phase": lifecycle["phase"]}
+    return {"result": "PASS", "path": str(path), "phase": lifecycle["phase"],
+            "content_integrity": "PASS", "source_authenticity": "NOT_VERIFIED"}
 
 
 def main():

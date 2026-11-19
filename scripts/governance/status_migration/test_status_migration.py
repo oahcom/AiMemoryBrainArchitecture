@@ -11,6 +11,7 @@ from check_status_gates import ORDER, check
 
 
 HEAD = "a" * 40
+EVIDENCE_ARTIFACT = "Verified evidence artifact for the attested subject work.\n"
 
 
 def git(root, *args):
@@ -25,21 +26,18 @@ def make_repo(files):
     git(root, "init", "-q")
     git(root, "config", "user.email", "tests@example.invalid")
     git(root, "config", "user.name", "Status Gate Tests")
+    # Evidence must be part of the subject commit's tree, so the default
+    # evidence artifact is committed with the fixture itself.
+    files = {"evidence/proof.txt": EVIDENCE_ARTIFACT, **files}
     for name, content in files.items():
         target = root / name
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(content, encoding="utf-8")
+        target.write_text(content, encoding="utf-8", newline="\n")
     (root / ".fixture").write_text("fixture\n", encoding="utf-8")
     git(root, "add", ".")
     git(root, "commit", "-qm", "fixture")
     head = git(root, "rev-parse", "HEAD")
     return directory, root, head
-
-
-def bind_evidence(root, head, path="evidence/proof.txt"):
-    target = root / path
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(f"Evidence bound to subject_head {head}\n", encoding="utf-8")
 
 
 def evidence_for(gate, head, path):
@@ -103,6 +101,7 @@ def manifest_for(source, head, gate_count, evidence_path="evidence/proof.txt"):
         "status": source,
         "subject_head": head,
         "review_identity_aliases": {},
+        "source_authenticity": "NOT_VERIFIED",
         "lifecycle": {
             "phase": phases[source],
             "source_status": source,
@@ -189,9 +188,8 @@ class StatusMigrationTests(unittest.TestCase):
         ]
         for source, count in checkpoints:
             with self.subTest(source=source):
-                directory, root, head = make_repo({"evidence/proof.txt": "placeholder\n"})
+                directory, root, head = make_repo({})
                 try:
-                    bind_evidence(root, head)
                     path = root / "manifest.yaml"
                     data = manifest_for(source, head, count)
                     path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
@@ -202,9 +200,8 @@ class StatusMigrationTests(unittest.TestCase):
                     directory.cleanup()
 
     def test_future_gate_cannot_be_pre_passed(self):
-        directory, root, head = make_repo({"evidence/proof.txt": "placeholder\n"})
+        directory, root, head = make_repo({})
         try:
-            bind_evidence(root, head)
             data = manifest_for("VERIFIED", head, 1)
             data["lifecycle"]["gates"]["independent_review"] = {
                 "status": "PASS", "evidence": evidence_for("independent_review", head, "evidence/proof.txt")
@@ -219,9 +216,8 @@ class StatusMigrationTests(unittest.TestCase):
             directory.cleanup()
 
     def test_cross_identity_review_is_independent(self):
-        directory, root, head = make_repo({"evidence/proof.txt": "placeholder\n"})
+        directory, root, head = make_repo({})
         try:
-            bind_evidence(root, head)
             data = manifest_for("REVIEWED", head, 2)
             data["review_identity_aliases"] = {"@reviewer_alias": "Reviewer-One"}
             data["lifecycle"]["gates"]["independent_review"]["evidence"]["reviewer"] = "@reviewer_alias"
@@ -235,9 +231,8 @@ class StatusMigrationTests(unittest.TestCase):
             directory.cleanup()
 
     def test_identity_alias_normalization_rejects_same_person(self):
-        directory, root, head = make_repo({"evidence/proof.txt": "placeholder\n"})
+        directory, root, head = make_repo({})
         try:
-            bind_evidence(root, head)
             data = manifest_for("REVIEWED", head, 2)
             data["review_identity_aliases"] = {"@alice_dev": "Alice"}
             review = data["lifecycle"]["gates"]["independent_review"]["evidence"]
@@ -253,7 +248,7 @@ class StatusMigrationTests(unittest.TestCase):
             directory.cleanup()
 
     def test_untrusted_external_and_traversal_references_are_rejected(self):
-        directory, root, head = make_repo({"evidence/proof.txt": "placeholder\n"})
+        directory, root, head = make_repo({})
         try:
             for reference in ("https://attacker.invalid/proof.txt", "../../outside.txt"):
                 with self.subTest(reference=reference):
@@ -270,10 +265,10 @@ class StatusMigrationTests(unittest.TestCase):
     def test_untracked_evidence_file_is_not_in_subject_commit_tree(self):
         directory, root, head = make_repo({})
         try:
-            evidence = root / "evidence" / "proof.txt"
-            evidence.parent.mkdir()
-            evidence.write_text(f"subject_head {head}\n", encoding="utf-8")
-            data = manifest_for("VERIFIED", head, 1)
+            evidence = root / "evidence" / "untracked.txt"
+            evidence.parent.mkdir(exist_ok=True)
+            evidence.write_text(f"subject_head {head}\n", encoding="utf-8", newline="\n")
+            data = manifest_for("VERIFIED", head, 1, "evidence/untracked.txt")
             path = root / "manifest.yaml"
             path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
             git(root, "add", "manifest.yaml")
@@ -283,23 +278,28 @@ class StatusMigrationTests(unittest.TestCase):
         finally:
             directory.cleanup()
 
-    def test_evidence_must_be_bound_to_subject_head(self):
-        directory, root, head = make_repo({"evidence/proof.txt": "evidence for a different commit\n"})
+    def test_evidence_committed_after_subject_head_is_rejected(self):
+        directory, root, head = make_repo({})
         try:
-            data = manifest_for("VERIFIED", head, 1)
+            # Commit a fresh evidence file after the subject commit: the
+            # subject tree does not carry it, so the gate must fail closed.
+            late = root / "evidence" / "late.txt"
+            late.parent.mkdir(exist_ok=True)
+            late.write_text("evidence recorded in a later commit\n",
+                            encoding="utf-8", newline="\n")
+            data = manifest_for("VERIFIED", head, 1, "evidence/late.txt")
             path = root / "manifest.yaml"
             path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
             git(root, "add", ".")
-            git(root, "commit", "-qm", "head binding fixture")
-            with self.assertRaisesRegex(ValueError, "not bound to subject_head"):
+            git(root, "commit", "-qm", "evidence after subject")
+            with self.assertRaisesRegex(ValueError, "Git tree"):
                 check(path)
         finally:
             directory.cleanup()
 
     def test_double_tampering_of_evidence_and_head_is_rejected(self):
-        directory, root, head = make_repo({"evidence/proof.txt": "placeholder\n"})
+        directory, root, head = make_repo({})
         try:
-            bind_evidence(root, head)
             data = manifest_for("VERIFIED", head, 1)
             path = root / "manifest.yaml"
             path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
@@ -324,6 +324,227 @@ class StatusMigrationTests(unittest.TestCase):
             git(root, "commit", "-qm", "missing gates")
             with self.assertRaisesRegex(ValueError, "required gate record missing"):
                 check(path)
+        finally:
+            directory.cleanup()
+
+
+    def test_future_gate_missing_record_is_rejected(self):
+        directory, root, head = make_repo({})
+        try:
+            data = manifest_for("VERIFIED", head, 1)
+            del data["lifecycle"]["gates"]["independent_review"]
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "future gate record dropped")
+            with self.assertRaisesRegex(ValueError, "future gate record missing"):
+                check(path)
+        finally:
+            directory.cleanup()
+
+    def test_evidence_validated_against_subject_tree_not_head(self):
+        directory, root, head = make_repo({})
+        try:
+            data = manifest_for("VERIFIED", head, 1)
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "subject commit")
+            # Advance HEAD far past the subject commit.
+            (root / "unrelated.txt").write_text("later work\n", encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "later commit")
+            self.assertNotEqual(git(root, "rev-parse", "HEAD"), head)
+            # Working tree still matches the subject blob: must pass.
+            check(path)
+        finally:
+            directory.cleanup()
+
+    def test_working_tree_drift_from_subject_blob_is_rejected(self):
+        directory, root, head = make_repo({})
+        try:
+            data = manifest_for("VERIFIED", head, 1)
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "subject commit")
+            # Move both HEAD and the working tree away from the subject blob.
+            (root / "evidence" / "proof.txt").write_text(
+                f"rewritten for a different head {head} with new content\n", encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "evidence rewritten")
+            with self.assertRaisesRegex(ValueError, "differs from subject_head blob"):
+                check(path)
+        finally:
+            directory.cleanup()
+
+    def test_symlinked_evidence_outside_repo_is_rejected(self):
+        directory, root, head = make_repo({})
+        try:
+            data = manifest_for("VERIFIED", head, 1)
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            outside = root.parent / "outside-secret.txt"
+            outside.write_text(f"out-of-repo evidence {head}\n", encoding="utf-8")
+            link = root / "evidence" / "proof.txt"
+            link.unlink()
+            try:
+                link.symlink_to(outside)
+            except (OSError, NotImplementedError):
+                self.skipTest("symlinks unsupported on this platform")
+                return
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "symlink evidence")
+            with self.assertRaises(ValueError):
+                check(path)
+        finally:
+            directory.cleanup()
+
+    def test_sidecar_anchor_detects_silent_tampering(self):
+        directory, root, _ = make_repo({})
+        try:
+            protected = root / "scripts" / "governance" / "protected.py"
+            protected.parent.mkdir(parents=True, exist_ok=True)
+            protected.write_text("original protected source\n", encoding="utf-8")
+            sidecar_rel = "scripts/governance/anchor.sha256"
+            sidecar = root / sidecar_rel
+
+            def commit_sidecar():
+                blob = git(root, "hash-object", str(protected))
+                sidecar.write_text(
+                    f"git-blob-sha1 {blob}  scripts/governance/protected.py\n",
+                    encoding="utf-8")
+                digest = hashlib.sha256(sidecar.read_bytes()).hexdigest()
+                git(root, "add", ".")
+                git(root, "commit", "-qm", f"anchor {digest}")
+
+            commit_sidecar()
+            from check_status_gates import _verify_sidecar_anchor
+            self.assertTrue(_verify_sidecar_anchor(root, sidecar_rel))
+            # Tamper the protected file only.
+            protected.write_text("tampered source\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "does not match sidecar blob"):
+                _verify_sidecar_anchor(root, sidecar_rel)
+            # Tamper both source and sidecar: anchor still fails.
+            protected.write_text("tampered source again\n", encoding="utf-8")
+            blob = git(root, "hash-object", str(protected))
+            sidecar.write_text(
+                f"git-blob-sha1 {blob}  scripts/governance/protected.py\n",
+                encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "does not match its commit anchor"):
+                _verify_sidecar_anchor(root, sidecar_rel)
+            # Only a fresh commit carrying the new anchor restores validity.
+            digest = hashlib.sha256(sidecar.read_bytes()).hexdigest()
+            git(root, "add", ".")
+            git(root, "commit", "-qm", f"anchor {digest}")
+            self.assertTrue(_verify_sidecar_anchor(root, sidecar_rel))
+        finally:
+            directory.cleanup()
+
+
+    def test_placeholder_evidence_content_is_rejected(self):
+        # The placeholder artifact is part of the subject commit itself, so
+        # tree membership and blob equality pass; the content check must
+        # still reject it.
+        directory, root, head = make_repo({
+            "evidence/proof.txt": "placeholder evidence content for testing gates\n"})
+        try:
+            data = manifest_for("VERIFIED", head, 1)
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "placeholder manifest")
+            with self.assertRaisesRegex(ValueError, "placeholder"):
+                check(path)
+        finally:
+            directory.cleanup()
+
+    def test_tree_sha_as_subject_head_is_rejected(self):
+        directory, root, head = make_repo({})
+        try:
+            tree_sha = git(root, "rev-parse", head + "^{tree}")
+            data = manifest_for("VERIFIED", tree_sha, 1)
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "tree sha fixture")
+            with self.assertRaisesRegex(ValueError, "commit object"):
+                check(path)
+        finally:
+            directory.cleanup()
+
+    def test_optional_sha256_digest_binding(self):
+        directory, root, head = make_repo({})
+        try:
+            import hashlib as _hashlib
+            digest = _hashlib.sha256(
+                (root / "evidence" / "proof.txt").read_bytes()).hexdigest()
+            data = manifest_for("VERIFIED", head, 1)
+            # Matching digest passes.
+            data["lifecycle"]["gates"]["verified"]["evidence"]["logs_sha256"] = digest
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "digest binding fixture")
+            self.assertEqual(check(path)["result"], "PASS")
+            # Mismatching digest is rejected.
+            data["lifecycle"]["gates"]["verified"]["evidence"]["logs_sha256"] = "0" * 64
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "digest mismatch fixture")
+            with self.assertRaisesRegex(ValueError, "does not match evidence content"):
+                check(path)
+        finally:
+            directory.cleanup()
+
+
+    def test_source_authenticity_boundary(self):
+        for variant, pattern in (
+            ("missing", "source_authenticity is required"),
+            ("illegal", "must be NOT_VERIFIED"),
+            ("VERIFIED", "cannot be self-certified"),
+        ):
+            with self.subTest(variant=variant):
+                directory, root, head = make_repo({})
+                try:
+                    data = manifest_for("VERIFIED", head, 1)
+                    if variant == "missing":
+                        del data["source_authenticity"]
+                    else:
+                        data["source_authenticity"] = (
+                            "VERIFIED" if variant == "VERIFIED" else "TRUSTED")
+                    path = root / "manifest.yaml"
+                    path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+                    git(root, "add", ".")
+                    git(root, "commit", "-qm", f"authenticity {variant} fixture")
+                    with self.assertRaisesRegex(ValueError, pattern):
+                        check(path)
+                finally:
+                    directory.cleanup()
+        # Explicit NOT_VERIFIED passes and is echoed in the report.
+        directory, root, head = make_repo({})
+        try:
+            data = manifest_for("VERIFIED", head, 1)
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "authenticity declared fixture")
+            report = check(path)
+            self.assertEqual(report["source_authenticity"], "NOT_VERIFIED")
+            self.assertEqual(report["content_integrity"], "PASS")
+        finally:
+            directory.cleanup()
+
+    def test_no_pass_gate_does_not_require_authenticity_field(self):
+        directory, root, head = make_repo({})
+        try:
+            data = manifest_for("PROPOSED", head, 0)
+            del data["source_authenticity"]
+            path = root / "manifest.yaml"
+            path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+            git(root, "add", ".")
+            git(root, "commit", "-qm", "no pass gates fixture")
+            self.assertEqual(check(path)["result"], "PASS")
         finally:
             directory.cleanup()
 
