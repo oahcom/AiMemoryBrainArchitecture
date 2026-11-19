@@ -13,6 +13,8 @@
 
 本策略按变更风险为证据链设定深度等级，减少低风险变更的证据开销，同时不放宽任何门禁。证据等级是**证据深度选择器**，不是状态轴、审查级别或生命周期阶段。
 
+本策略的 **Level 1/2/3 指证据深度**，与相邻策略 `AI-DOC-BILINGUAL-TIERING` 的 **Tier 1/2/3（文档双语分层）**是两个不同刻度：前者决定必填证据字段，后者决定是否需要中英文对应版本（本策略 §7 引用后者）。两轴相互独立，任一轴的判定 MUST NOT 被用来推出另一轴。
+
 三个维度必须保持独立：
 
 | 维度 | 取值 | 决定什么 | 不得由其他维度替代 |
@@ -39,7 +41,7 @@
 2. **R2 不得自动降级**：R2 变更不得仅因改动规模小、文件数少或"看起来是文字修改"而降到 Level 3。确有必要时 MUST 同时提供三项：`downgrade_justification`（理由）、`downgrade_confirmed_by`（确认者，且不得等于 `assessed_by`）、`downgrade_confirmation_record`（须按 §5 第 6 条在 subject tree、工作树与 blob 三处校验）。任一项缺失或确认者为本人，均 BLOCKED。
 3. **文档变更不等于低风险**：文档变更若改变规范含义、约束强度、接口/协议、数据模型、状态机或安全边界，MUST 升级为 DOC_NORMATIVE → Level 1。
 4. **UNKNOWN 一律 BLOCKED**：无法确定分类时不得赋予任何 Level，判定为 BLOCKED / NEEDS_CLASSIFICATION，由有权 Owner 或治理授权者确认后重新判定。
-5. **分类信任边界**：强制 Level 1 的类别（ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE）不得通过改标为 FEATURE/BUGFIX/DOC_EDITORIAL/OPS 而降级。凡声明为可降级类别（FEATURE、BUGFIX、DOC_EDITORIAL、OPS）者，MUST 提供 `classification_basis`（分类依据）、`classification_confirmed_by`（独立确认者，不得等于 `assessed_by`）与 `classification_record`（须按 §5 第 6 条在 subject tree、工作树与 blob 三处校验）；缺失或无法独立确认时 BLOCKED，不得默认相信申报者。`classification_basis` MUST 与实际变更影响对应（本次改动触及的文件、接口、边界或数据模型）；确认者 MUST 在 `classification_record` 中写明实际核对的对象与所得结论，仅复述申报标签不构成独立确认，判 BLOCKED。
+5. **分类信任边界**：强制 Level 1 的类别（ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE）不得通过改标为 FEATURE/BUGFIX/DOC_EDITORIAL/OPS 而降级。凡声明为可降级类别（FEATURE、BUGFIX、DOC_EDITORIAL、OPS）者，MUST 提供 `classification_basis`（分类依据）、`classification_confirmed_by`（独立确认者，不得等于 `assessed_by`）与 `classification_record`（须按 §5 第 6 条在 subject tree、工作树与 blob 三处校验）；缺失或无法独立确认时 BLOCKED，不得默认相信申报者。`classification_basis` MUST 与实际变更影响对应（本次改动触及的文件、接口、边界或数据模型）；确认者 MUST 在 `classification_record` 中写明实际核对的对象与所得结论，仅复述申报标签不构成独立确认，判 BLOCKED。记录至少须覆盖三项：**核对对象**（被核对的文件、接口、边界或数据模型）、**核对结论**、**核对者**；三者缺一或只写「已确认」均不构成记录，判 BLOCKED。审查方 MUST 在其审查记录中逐项记录这三项的核对结果（Level 3 记入 `evidence.review_note` 所指向的确认记录）；缺项即 BLOCKED，且不得以「已审查」一句代替。
 6. **不存在"自动通过"**：Level 只决定证据深度，不构成任何门禁的通过证据。
 
 ## 4. 判定与审计留痕
@@ -72,12 +74,14 @@
 2. **保留证据绑定协议 v3**：subject_head 必须是 commit 对象；证据文件必须位于 subject tree；工作树字节必须与 subject blob 一致。
 3. **v3 校验范围按等级明确**（消除歧义）。本表只调整证据深度，**不改变绑定完整性**：前三项在全部等级强制，`sidecar` 项属 Level 1 的深度要求，其缺失 MUST NOT 被解释为证据可以脱离受审对象：
 
-| v3 校验项 | Level 1 | Level 2 | Level 3 |
-|---|---|---|---|
-| `subject_head` 为 commit 对象 | 强制 | 强制 | 强制 |
-| 证据路径存在于 subject tree | 强制 | 强制 | 强制 |
-| 工作树字节 == subject blob | 强制 | 强制 | 强制 |
-| `sidecar_path` + `sidecar_anchor`（sha256 + commit message 锚定） | 强制 | 不适用 | 不适用 |
+| v3 校验项 | 适用范围 | Level 1 | Level 2 | Level 3 |
+|---|---|---|---|---|
+| `subject_head` 为 commit 对象 | ALL LEVELS | 强制 | 强制 | 强制 |
+| 证据路径存在于 subject tree | ALL LEVELS | 强制 | 强制 | 强制 |
+| 工作树字节 == subject blob | ALL LEVELS | 强制 | 强制 | 强制 |
+| `sidecar_path` + `sidecar_anchor`（sha256 + commit message 锚定） | LEVEL 1 ONLY | 强制 | 不适用 | 不适用 |
+
+「适用范围」列是范围的**唯一规范来源**；三个等级单元格只表达该校验项在各等级的要求，不得单独用以推断范围。两者不得各自演化。
 
 4. **source_authenticity 边界不变**：内容完整性不等于来源真实性；声称 VERIFIED 必须附 `authenticity.verification_record`，否则 BLOCKED。
 5. Level 1 的 `sidecar_anchor` 与 v3 锚点协议一致：锚点为 `sha256:<64 hex>`，等于 subject tree 中 sidecar 字节的 SHA-256，且最近触碰该 sidecar 的 commit message MUST 携带该摘要。

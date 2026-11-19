@@ -1,0 +1,61 @@
+# FIX-2026-P1-T4-FU2 authorization manifest
+# Records the coordinator decision, role status, baseline and the approved scope.
+schema_version: "1.0"
+work_item: FIX-2026-P1-T4-FU2
+repository: oahcom/AiMemoryBrainArchitecture
+branch: fix/fu2-axis-and-record-shape
+
+decision:
+  id: DEC-FIX-2026-P1-T4-FU2-GO-001
+  date: "2026-11-20"
+  authority: "coordinator session oahcom/13-20-04, acting under dev-baseline delegation"
+  authority_note: >-
+    Self-issued coordinator decision. NOT an independent Owner grant, NOT an acceptance_authority act,
+    and NOT a substitute for R3 human review.
+  form: "GO decision + manifest(allowed_write_paths, authorization_basis)"
+  form_precedent: "FIX-2026-P1-T4 / DEC-FIX-2026-P1-T4-GO-001 (PR #289) and FIX-2026-P1-T4-FU1 (PR #291)"
+
+roles:
+  sponsor: NOT_ASSIGNED
+  accountable_owner: NOT_ASSIGNED
+  acceptance_authority: NOT_ASSIGNED
+  implementing_owner: "coordinator session (remediation editor)"
+  role_note: >-
+    NOT_ASSIGNED is a true governance state and MUST NOT be substituted by the coordinator session,
+    by engineering contribution, or by GitHub identity.
+
+baseline:
+  commit: cd9c5cd037ba89f7f20bf333b50af9726c791159
+  verification: exact Git tree at baseline commit (main tip after PR #291)
+
+scope:
+  manifest_path: 14-ai-development/work-items/FIX-2026-P1-T4-FU2/authorization-manifest.yaml
+  allowed_write_paths:
+    - 14-ai-development/work-items/FIX-2026-P1-T4-FU2/authorization-manifest.yaml
+    - 14-ai-development/evidence-tiering-policy.md
+    - 14-ai-development/evidence-tiering-policy.en.md
+    - 14-ai-development/work-items/INDEX.md
+  authorization_basis:
+    - >-
+      Two adjacent policies in the same directory both number their scales 1/2/3: evidence depth
+      (Level 1/2/3, this policy) and document bilingual tiers (Tier 1/2/3, AI-DOC-BILINGUAL-TIERING).
+      Neither states that the scales are unrelated. A reader can read section 7's "Tier 1" as an
+      evidence level; the confusion is cheap to remove and expensive to live with.
+    - >-
+      Closes two tracked items carried over from the #289 R2 review: a concrete three-part shape for
+      classification_record, and explicit ALL LEVELS marking on the v3 verification table.
+  all_other_paths: OUT_OF_SCOPE
+  explicitly_excluded:
+    - .github/workflows/**
+    - scripts/**  (no checker or test change in this work item)
+    - "Any path not listed above; new write needs a new authorization."
+
+constraints:
+  - "Documentation-only: checker and its 67 tests unchanged."
+  - "Policy status remains PROPOSED; this work item is neither adoption nor merge authorization."
+  - "The Tier/Level disambiguation MUST NOT be read as relaxing either axis."
+  - "classification_record's three parts (examined / conclusion / confirmer) are content requirements; the checker does not parse prose, so review enforces them."
+
+tracked_items_closed:
+  - "#289 R2 P2-1 (classification_record field example)"
+  - "#289 R2 P2-2 (v3 table rows marked ALL LEVELS)"

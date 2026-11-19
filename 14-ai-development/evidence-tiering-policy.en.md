@@ -13,6 +13,8 @@
 
 This policy sets evidence-chain depth by change risk so that low-risk changes stop paying full evidence cost, without relaxing any gate. An evidence level is an **evidence depth selector**, not a status axis, review level, or lifecycle phase.
 
+The **Level 1/2/3** scale here is evidence depth. It is a different scale from **Tier 1/2/3** in the neighbouring policy `AI-DOC-BILINGUAL-TIERING`, which governs whether a document needs a Chinese/English counterpart (section 7 relies on it). The two axes are independent: a decision on one MUST NOT be read as a decision on the other.
+
 Three dimensions MUST remain independent:
 
 | Dimension | Values | Determines | Must not be substituted |
@@ -39,7 +41,7 @@ Every level MUST retain a full 40-hex subject_head and a change summary, without
 2. **R2 MUST NOT be auto-downgraded:** an R2 change MUST NOT drop to Level 3 merely because it touches few files, looks small, or "reads like wording". Where genuinely warranted, all three of the following MUST be supplied: `downgrade_justification`, `downgrade_confirmed_by` (which MUST differ from `assessed_by`) and `downgrade_confirmation_record` (verified in the subject tree, the working tree and the subject blob per §5 item 6). Any missing item, or self-confirmation, is BLOCKED.
 3. **Documentation is not automatically low risk:** a documentation change that alters normative meaning, obligation strength, interfaces/protocols, data models, state machines or security boundaries MUST be escalated to DOC_NORMATIVE → Level 1.
 4. **UNKNOWN is always BLOCKED:** if the class cannot be determined, no Level may be assigned; the result is BLOCKED / NEEDS_CLASSIFICATION until an authorized Owner or governance authority confirms the class and the declaration is re-assessed.
-5. **Classification trust boundary:** forced Level 1 classes (ARCHITECTURE, SECURITY, PERFORMANCE_CRITICAL, PUBLIC_API, DATA_MIGRATION, DOC_NORMATIVE) MUST NOT be lowered by relabelling them as FEATURE/BUGFIX/DOC_EDITORIAL/OPS. Any declaration using a downgrade-capable class (FEATURE, BUGFIX, DOC_EDITORIAL, OPS) MUST supply `classification_basis`, `classification_confirmed_by` (an independent confirmer, not `assessed_by`) and `classification_record` (verified in the subject tree, the working tree and the subject blob per §5 item 6). Missing or unverifiable classification is BLOCKED; the declarant is never trusted by default. `classification_basis` MUST correspond to the actual change impact (the files, interfaces, boundaries or data models this change touches), and the confirmer MUST record in `classification_record` what was actually examined and what was concluded; an attestation that only restates the declared label is not independent confirmation and is BLOCKED.
+5. **Classification trust boundary:** forced Level 1 classes (ARCHITECTURE, SECURITY, PERFORMANCE_CRITICAL, PUBLIC_API, DATA_MIGRATION, DOC_NORMATIVE) MUST NOT be lowered by relabelling them as FEATURE/BUGFIX/DOC_EDITORIAL/OPS. Any declaration using a downgrade-capable class (FEATURE, BUGFIX, DOC_EDITORIAL, OPS) MUST supply `classification_basis`, `classification_confirmed_by` (an independent confirmer, not `assessed_by`) and `classification_record` (verified in the subject tree, the working tree and the subject blob per §5 item 6). Missing or unverifiable classification is BLOCKED; the declarant is never trusted by default. `classification_basis` MUST correspond to the actual change impact (the files, interfaces, boundaries or data models this change touches), and the confirmer MUST record in `classification_record` what was actually examined and what was concluded; an attestation that only restates the declared label is not independent confirmation and is BLOCKED. The record MUST cover three parts: **what was examined** (the files, interfaces, boundaries or data models), **the conclusion**, and **who confirmed**; a record missing any part, or saying only "confirmed", is BLOCKED. The reviewer MUST record the result of each of the three parts in its review record (for Level 3, in the acknowledgement record that `evidence.review_note` points at); a missing part is BLOCKED, and "reviewed" alone is not a record.
 6. **No automatic pass:** a Level only sets evidence depth and is never evidence that any gate passed.
 
 ## 4. Assessment and Audit Trail
@@ -72,12 +74,14 @@ An assessment missing any of `assessed_by`, `assessed_at`, `rationale`, `base_he
 2. **Evidence binding protocol v3 is preserved:** subject_head must be a commit object; evidence files must be inside the subject tree; working-tree bytes must equal the subject blob.
 3. **The v3 verification scope is stated per level** (removing ambiguity). This table tunes evidence depth only and **does not change binding integrity**: the first three rows are mandatory at every level, the sidecar row is a Level 1 depth requirement, and its absence MUST NOT be read as allowing evidence to detach from the reviewed object:
 
-| v3 check | Level 1 | Level 2 | Level 3 |
-|---|---|---|---|
-| `subject_head` is a commit object | Mandatory | Mandatory | Mandatory |
-| Evidence path exists in the subject tree | Mandatory | Mandatory | Mandatory |
-| Working-tree bytes == subject blob | Mandatory | Mandatory | Mandatory |
-| `sidecar_path` + `sidecar_anchor` (sha256 plus commit-message anchoring) | Mandatory | Not applicable | Not applicable |
+| v3 check | Scope | Level 1 | Level 2 | Level 3 |
+|---|---|---|---|---|
+| `subject_head` is a commit object | ALL LEVELS | Mandatory | Mandatory | Mandatory |
+| Evidence path exists in the subject tree | ALL LEVELS | Mandatory | Mandatory | Mandatory |
+| Working-tree bytes == subject blob | ALL LEVELS | Mandatory | Mandatory | Mandatory |
+| `sidecar_path` + `sidecar_anchor` (sha256 plus commit-message anchoring) | LEVEL 1 ONLY | Mandatory | Not applicable | Not applicable |
+
+The **Scope** column is the single normative source for scope; the three level cells express only what each level requires, and MUST NOT be used on their own to infer scope. The two MUST NOT evolve independently.
 
 4. **The source_authenticity boundary is unchanged:** content integrity is not source authenticity. A VERIFIED claim requires `authenticity.verification_record`; otherwise BLOCKED.
 5. Level 1's `sidecar_anchor` follows the v3 anchoring protocol: the anchor is `sha256:<64 hex>`, equal to the SHA-256 of the sidecar bytes in the subject tree, and the commit message of the commit that most recently touched that sidecar MUST carry that digest.
