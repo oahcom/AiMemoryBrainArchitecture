@@ -121,3 +121,12 @@
 | HTTPS 带用户名被接受 | `https://` 形式要求无 username/password |
 | 测试缺口 | 新增 5 项拒绝测试：`http://`、`git://`、`ssh://attacker@`、`attacker@github.com:`、`https://token@` |
 | 政策未列允许格式 | 中英文 §5 第 7 条增加允许 origin 格式表（HTTPS/SSH URL/SCP 三种）与拒绝清单 |
+
+## 12. 第六轮复审（R6）修复映射
+
+| R6 缺陷 | 修复 |
+|---|---|
+| B-02 显式空端口被接受（`https://github.com:/o/r`） | 不再依赖 `parsed.port`，改为 **authority 原文比对**：HTTPS 要求 `netloc` 精确等于 `github.com`，SSH 要求精确等于 `git@github.com`；任何显式端口（含空端口）都会使 netloc 不等而拒绝 |
+| B-03 空 userinfo / 空 password 分隔符被接受 | 同上：`https://@github.com/o/r` 的 netloc 为 `@github.com`、`ssh://git:@github.com/o/r` 为 `git:@github.com`，均不等于允许值 → `CE_REPO_IDENTITY_UNVERIFIED` |
+| B-04 非数字端口触发 ValueError | `urlparse` 分支包裹 `try/except ValueError` → 返回 None（fail-closed），不产生 `CE_INTERNAL_ERROR` |
+| 测试 | 新增 4 项：空端口、空 userinfo、SSH 空 password、非数字端口（并断言不出现 `CE_INTERNAL_ERROR`）；query/fragment 拒绝测试保留并通过 |

@@ -299,6 +299,27 @@ class EvidenceTieringTests(unittest.TestCase):
         self.assert_origin_rejected(
             "https://token@github.com/oahcom/AiMemoryBrainArchitecture.git")
 
+    def test_https_empty_port_rejected(self):
+        self.assert_origin_rejected(
+            "https://github.com:/oahcom/AiMemoryBrainArchitecture.git")
+
+    def test_https_empty_userinfo_rejected(self):
+        self.assert_origin_rejected(
+            "https://@github.com/oahcom/AiMemoryBrainArchitecture.git")
+
+    def test_ssh_empty_password_separator_rejected(self):
+        self.assert_origin_rejected(
+            "ssh://git:@github.com/oahcom/AiMemoryBrainArchitecture.git")
+
+    def test_non_numeric_port_rejected_without_exception(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            fixture = Fixture(Path(tmp) / "repo")
+            git(fixture.root, "remote", "set-url", "origin",
+                "https://github.com:abc/oahcom/AiMemoryBrainArchitecture.git")
+            result = self.run_checker(fixture, fixture.declaration())
+            self.assert_blocked(result, "CE_REPO_IDENTITY_UNVERIFIED")
+            self.assertNotIn("CE_INTERNAL_ERROR", result.stdout)
+
     # ---- B-02: R2 downgrade confirmation ----------------------------------
     def test_r2_downgrade_requires_confirmer(self):
         with tempfile.TemporaryDirectory() as tmp:

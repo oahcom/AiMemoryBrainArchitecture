@@ -185,16 +185,23 @@ def repo_slug(repo):
         if scp.group(1) == "git" and scp.group(2).lower() == "github.com":
             slug = scp.group(3)
     else:
-        parsed = urllib.parse.urlparse(url)
-        scheme = parsed.scheme.lower()
-        host = (parsed.hostname or "").lower()
-        clean = (parsed.port is None and not parsed.query
-                 and not parsed.fragment and not parsed.password)
-        if clean and host == "github.com":
-            if scheme == "https" and not parsed.username:
+        try:
+            parsed = urllib.parse.urlparse(url)
+            scheme = parsed.scheme.lower()
+            netloc = parsed.netloc
+            # The authority is compared verbatim: an explicit empty port
+            # ("github.com:"), any userinfo on HTTPS, or an empty password
+            # separator on SSH is not the declared form even though urlparse
+            # reports port/password as None.
+            if (scheme == "https" and netloc.lower() == "github.com"
+                    and not parsed.query and not parsed.fragment):
                 slug = parsed.path
-            elif scheme == "ssh" and parsed.username == "git":
+            elif (scheme == "ssh" and netloc.lower() == "git@github.com"
+                    and not parsed.query and not parsed.fragment):
                 slug = parsed.path
+        except ValueError:
+            # e.g. a non-numeric port; fail closed rather than raise.
+            return None
     if not slug:
         return None
     path = slug.strip()
