@@ -755,7 +755,7 @@ AC-07 was blank in the original task definition. Its missing criterion must not 
 
 | AC | Criterion | Execution evidence | Independent review / final result |
 |---|---|---|---|
-| AC-01 | Full v1.1 inheritance | v1.1 read; v1.2 committed | PARTIAL — F-03/F-04 require further closure |
+| AC-01 | Full v1.1 inheritance | v1.1 read; D1/D6 committed | PARTIAL — inheritance is to v1.1 only, since v1.2 is not adopted. F-03/F-04 are `CLOSED (method-bound)` in §9 and are no longer cited here; the earlier wording treated them as an open blocker, which drifted from the registry |
 | AC-02 | Issue bilingual requirements | Five templates/updates read back | Execution PASS; independent criterion mapping NOT_RECORDED |
 | AC-03 | Umbrella Requirement bilingual requirements | D1/D4 and five Issue updates | Execution PASS; independent criterion mapping NOT_RECORDED |
 | AC-04 | Commit Message bilingual requirements | D5 and actual bilingual Commit | Execution PASS; historical inventory incomplete |
@@ -833,7 +833,7 @@ The following cross-check is run on every revision that touches a status sentenc
 每次修订只要涉及状态句，就跑下面的交叉核对。设立理由：§11 的矛盾是合并后才发现的，且已有三行验收矩阵与 finding 状态脱节。
 
 c1. Every sentence asserting a capability "has not been established" / 「尚未建立」 — check it names one requirement, not two.
-c2. §10 rows against §9 finding blocks — one state per finding, same value.
+c2. §10 rows against the finding registry — where a finding appears in both, the value must be identical. The registry is the single index; §10 is a stage ledger, so a finding absent from §10 is not a defect provided the registry entry names where its state is maintained. This wording replaces an earlier version that required §10 to carry every finding, which was unsatisfiable and therefore not a check.
 c3. §11 status sentences against §7.1, §7.2, §9 and §10.
 c4. §8 acceptance-matrix rows for any row that cites a finding state or a CI outcome.
 c5. This registry against §6.3 — any divergence must be explained by §6.3 being a bound snapshot.
@@ -1009,6 +1009,24 @@ The §0 re-open trigger is only operative if it is actually applied to each revi
 | A new line repeats the same defect class | reviewed this revision's diff for unlabelled HEAD/PR-state assertions and for bilingual-parity gaps | **FIRED, fixed in this revision** — §8's Chinese F-02 row omitted the advisory-declaration and workflow-integration sentences present in the English row, which is the F-09 defect class | §8 F-02 rows |
 
 A trigger that never fires is not evidence of health; it is more often evidence that the check was not performed. This revision's third row fired and was repaired before merge, and is recorded here rather than only in the diff.
+
+**Cross-check run against merged `main` `07450a44` (v2.8, first full c1–c9 run).** The §0 rule is that the check runs on every revision that touches a status sentence; this run applies it to the merged report itself rather than to a pending diff.
+
+| Check | Result | Note |
+|---|---|---|
+| c1 | CLEAR | no sentence asserts an unestablished capability; the only such sentence was corrected in v2.6 |
+| c2 | **UNSATISFIABLE AS WRITTEN — wording fixed here** | it required §10 to carry every finding, but §10 is a stage ledger and legitimately carries six of ten. The check was rewritten to the single-index rule above |
+| c3 | CLEAR | §11 distinguishes verified integration from unverified enforcement, consistent with §7.1/§7.2/§9/§10 |
+| c4 | **FIRED — AC-01 corrected** | AC-01 still said "F-03/F-04 require further closure" while the registry marks both `CLOSED (method-bound)` |
+| c5 | CLEAR | the only registry/§6.3 divergences are the four findings absent from §6.3 by construction |
+| c6 | CLEAR | all ten bases re-read; none has been superseded |
+| c7 | CLEAR | every cited §, comment id (`7006445553`, `7017127588`) and path exists and carries the stated value |
+| c8 | CLEAR | no stated reopen condition has triggered; every `CLOSED` row still meets its closure condition |
+| c9 | CLEAR | eight `CLOSED` rows pass T1; no row rests on a remediation artifact alone |
+
+Two of nine checks fired, and one of them was the check itself being wrong rather than the report being wrong. That distinction is worth keeping: a check that cannot pass is a defect in the check, and fixing it by weakening the report would have been the wrong repair.
+
+本轮后补：c2 原文要求 §10 携带每一项 finding，但 §10 是阶段台账、合理地只携带十项中的六项，该核对因此不可满足，已改为「单一索引」规则；c4 实际触发：AC-01 仍引用 F-03/F-04 作为未关闭阻塞，而登记表已将二者记为 `CLOSED (method-bound)`，已在本次修正。九项中两项触发，其中一项是「核对本身错了」而非「报告错了」——这个区分值得保留：一项永远无法通过的核对是核对自身的缺陷，靠削弱报告去让它通过是错误的修复。
 
 **v2.6 — the first application after closure.** The same three conditions were applied again to the merged report as it stood at `main` `c0ea54ed`, before this revision. The third condition fired a second time, and this time against already-merged text rather than against a pending diff: §11 stated that "CI workflow integration and required-check enforcement have not yet been established", contradicting §7.1 and §10. It also turned out that every revision note from v2.1 onward contained the same class of line (v2.2's note still says F-06 "remains OPEN"), which is why those notes are now explicitly labelled as bound snapshots rather than maintained state. F-09 was set back to `OPEN` for this revision and re-closed only on its review.
 
@@ -1264,4 +1282,22 @@ This revision closes a hole in the previous one: the registry of findings. It al
 - **PR #286 的 R1 跟踪项已消账**：绑定快照声明已改为「绑定原始记录在其修订时点」并明确不声称历史状态永久正确；交叉核对清单即第二项。
 - **R1 审查整改**：R1 结论为 `NEEDS-REVISION`（2×P2 + 1×P3），三项均指向同一问题：新机制没有失败模式。P2：F-03/F-04 的关闭缺可反驳检验，故新增 c9——`CLOSED` 依据必须是可重推验证或规则变更加审查归属，并写明「使 F-03 失败的那个依据」以便重跑。P2：`LIMITATION` 缺重新评估触发器，故 §0 现写明三项必备条件（事实成立、无工作项可消除、无可执行路径），任一失效即回到 `OPEN`。P3：交叉核对只查状态存在、不查依据是否存续，故新增 c6（依据有效性）、c7（维护位置可达）、c8（关闭条件满足），并记录本修订执行结果。
 - **R2 审查整改**：R2 结论为 `NEEDS-REVISION`（2×P2），两项均指向「写了声明但未留证据」。P2：c9 的反例测试只被描述、未作为可执行测试记录，故新增执行记录：两个具体输入行与预期/实际结果（T1 采用的依据、T2 仅靠补丁的依据），并写明无自动化实现、也不声称有。P2：`LIMITATION` 的路径排除只是声称，故 §0 现要求列出已排查路径、逐条排除理由与确认审查；F-05 已列三条路径及各自失败原因。
+- 不改变任何政策文本、规范状态、批准状态、采纳状态；v1.1 仍为唯一 NORMATIVE；F-02 仅因要求 2 而为 PARTIAL。
+
+## D7 v2.8 Revision Note
+
+This revision is the first full run of the c1–c9 cross-check against the merged report, and it reports what that run found rather than asserting that the check exists.
+
+- **c2 was wrong, not the report.** It required §10 to carry every finding; §10 is a stage ledger and carries six of ten by design. An unsatisfiable check is a defect in the check, so c2 was rewritten to the single-index rule: the registry is the index, §10 must agree where it speaks, and absence from §10 is acceptable when the registry names where the state lives.
+- **c4 fired on AC-01.** It still read "PARTIAL — F-03/F-04 require further closure" while the registry marks both `CLOSED (method-bound)`. Corrected, and the earlier wording is named in the row rather than silently replaced.
+- **Seven checks clear**, each with a stated basis rather than a bare "clear".
+- No policy text, normative status, approval state or adoption state changes. v1.1 remains the only NORMATIVE text. F-02 stays PARTIAL on Requirement 2 only.
+
+## D7 v2.8 修订说明
+
+本修订是 c1–c9 交叉核对首次对「已合并报告」完整执行，并如实报告执行结果，而不是声称核对存在。
+
+- **错的是 c2 而不是报告**：它要求 §10 携带每一项 finding，而 §10 是阶段台账，设计上只携带十项中的六项。不可满足的核对是核对自身的缺陷，故将 c2 改为「单一索引」规则：登记表为唯一索引，§10 一旦发言必须一致，未出现于 §10 可接受（需登记表写明维护位置）。
+- **c4 实际触发于 AC-01**：它仍写「F-03/F-04 require further closure」，而登记表已将二者记为 `CLOSED (method-bound)`。已修正，且在行内点名原表述，而非静默替换。
+- **七项清**，且每项附依据而非空写「清」。
 - 不改变任何政策文本、规范状态、批准状态、采纳状态；v1.1 仍为唯一 NORMATIVE；F-02 仅因要求 2 而为 PARTIAL。
