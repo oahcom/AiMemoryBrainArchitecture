@@ -17,7 +17,9 @@ remediation_carrier:
   pull_request: 270
   pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/270
   remediation_pr_head_at_creation: 6c2b091283033426f8f91392f8d968c97b939443
-  final_review_head: PENDING_INDEPENDENT_EXACT_HEAD_REVIEW
+  final_review_head: 69fe3907916d70696266ad60b7db63c4a3bf483a
+  merge_commit: c3bf7e47b5121c89277d3df55b12a7a95dcc9706
+  final_head_registration_comment: 7001158232
 base:
   branch: main
   sha: c33a1bcd36f767c96f641d2a154f34d102ce2645
@@ -60,6 +62,10 @@ verification:
     - PR comment 7000593000: prior remediation evidence/read-back record; registered here because the previous manifest omitted it.
     - PR comment 7000701362: exact-Head independent R1 disposition and complete R1-F02 through R1-F05 matrix.
     - PR #270 comment 7000862813: exact remediation PR Head read-back and R1-F02 through R1-F05 implementation evidence.
+    - PR #270 comment 7000906254: final reviewed Head `69fe3907916d70696266ad60b7db63c4a3bf483a` and exact-Head GOV-DOC-001 Run `44467233410` success record.
+    - PR #270 comment 7001139728: Owner-role DEV-BASELINE acceptance `ACCEPT-WITH-CONDITIONS` at exact Head `69fe3907916d70696266ad60b7db63c4a3bf483a`; R1-F02 through F05 disposition and closeout conditions.
+    - PR #270 comment 7001158232: final-head registration; reviewed Head `69fe3907916d70696266ad60b7db63c4a3bf483a`, merge commit `c3bf7e47b5121c89277d3df55b12a7a95dcc9706`, and merged-main read-back.
+    - Independent R1 review report for exact Head `69fe3907916d70696266ad60b7db63c4a3bf483a`: REQUEST_CHANGES; F02 FAIL (sole blocker), F03/F04/F05 PASS. Fresh review session did not participate in implementation; this is not a formal GitHub review and does not establish platform-level second-identity independence.
     - Issue #268 comment 7000871110: follow-up carrier and governance-state notification.
     - GitHub Actions Bilingual documentation gate run 44464233100: SUCCESS at the earlier evidence commit only; it does not cover this remediation Head.
   checks:
@@ -112,8 +118,30 @@ verification:
       reason: Requires a timed human writing trial; no such trial was performed.
 review:
   level: R1
-  independent_reviewer: PENDING
-  status: PENDING_NEW_EXACT_HEAD_REVIEW
+  independent_reviewer: INDEPENDENT_R1_REVIEW_SESSION (fresh session; no implementation participation; GitHub platform second-identity independence NOT VERIFIED)
+  status: REQUEST_CHANGES
+  reviewed_head: 69fe3907916d70696266ad60b7db63c4a3bf483a
+  blocking_findings:
+    - F02
+  passed_findings:
+    - F03
+    - F04
+    - F05
+  evidence_refs:
+    - Independent R1 review report for exact Head 69fe3907916d70696266ad60b7db63c4a3bf483a.
+    - PR #270 comments 7000701362 and 7000906254: historical exact-Head review/read-back provenance and reviewer identity limitation.
+    - PR #270 comment 7001139728: current exact-Head finding disposition and platform identity review OUT-OF-SCOPE(dev-baseline).
 acceptance:
   authority: A
-  status: PENDING
+  status: ACCEPTED_WITH_CONDITIONS
+  evidence_refs:
+    - PR #270 comment 7001139728: Owner-role DEV-BASELINE ACCEPT-WITH-CONDITIONS at exact Head 69fe3907916d70696266ad60b7db63c4a3bf483a.
+    - PR #270 comment 7001158232: final-head/merge registration and closure of acceptance conditions.
+  dev_baseline_registration_conditions:
+    status: PASS
+    passed: 5
+    total: 5
+    evidence_refs:
+      - PR #270 comment 7000639090: five-condition DEV-BASELINE registration framework.
+      - PR #270 comment 7001139728: exact-Head acceptance and closure record.
+      - PR #270 comment 7001158232: final-head registration condition and merge/read-back evidence.
