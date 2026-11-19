@@ -130,7 +130,11 @@ Start from the [canonical Prompt Library](../prompts/README.md). Every AI sessio
 
 Every new task prompt MUST use the following seven core sections. Seven means seven structural sections, not seven fields. Required detail belongs inside the relevant section; the prompt MUST remain concise and MUST NOT duplicate global policy text.
 
+**Structural hierarchy and retained content requirements:** The seven headings are the only mandatory top-level structure. They do not reduce or waive the twelve mandatory content elements in AI-PROMPT-STD-001 §4. Every execution prompt MUST include all applicable elements from that twelve-item checklist inside the seven sections; the crosswalk in AI-PROMPT-STD-001 §4 is normative for placement. Scheduled-prompt fields remain mandatory where applicable. No author is required to create twelve additional top-level headings.
+
 每个新任务提示词 MUST 使用以下七个核心章节。七项指七个结构章节，而非七个字段。必要细节应放入对应章节；提示词应保持简洁，不得重复粘贴全局规范全文。
+
+**结构层级与内容要求保留：** 七个章节是唯一强制的顶层结构；这不减少或豁免 AI-PROMPT-STD-001 §4 中的十二项强制内容要素。每份执行提示词 MUST 在七个章节内包含该十二项清单中所有适用要素；要素放置位置以 AI-PROMPT-STD-001 §4 的映射表为规范依据。定时提示词的附加调度字段仍然强制。提示词作者无需另行创建十二个顶层章节。
 
 1. **Task identity / 任务标识:** Work Item ID; Prompt ID/version; accountable Owner; implementer and independent reviewer roles; repository and branch; task class/risk; owning Issue/PR carrier.
 2. **Goal and boundaries / 目标与边界:** What, Why, observable objective, and explicit Out of Scope.
