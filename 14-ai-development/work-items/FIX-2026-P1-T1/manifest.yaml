@@ -36,14 +36,14 @@ constraints:
   - No merge or normative adoption is authorized by this work item.
   - No existing executed prompt is overwritten.
 verification:
-  evidence_commit: a661f067946fca2362ad94c67946d8b7c3309c0b
-  reviewed_head: a661f067946fca2362ad94c67946d8b7c3309c0b
-  final_head_evidence: exact final branch Head is recorded in the post-commit remediation evidence comment; this manifest is included in that Head
+  evidence_commit: 448afb0eb6ca4eeef14ae816ec77a3940d371f7f
+  reviewed_head: 448afb0eb6ca4eeef14ae816ec77a3940d371f7f
+  final_head: SELF — the commit containing this manifest; exact SHA is recorded in the post-commit PR evidence comment
   evidence_refs:
     - PR comment 7000485649: length criterion PASS (4507 / 9807 = 45.96%); T2 snapshot provenance and source immutability evidence.
     - PR comment 7000536236: historical independent R1 findings R1-F01 and R1-F02.
     - PR comment 7000593000: exact-Head read-back of all seven original PR files at reviewed_head.
-    - PR comment 7000701362: fresh exact-Head R1 review; findings R1-F02 through R1-F05 and 4,881 / 9,807 Unicode code-point measurement.
+    - PR comment 7000701362: fresh exact-Head R1 review; findings R1-F02 through R1-F05 and 4,881 / 9,807 Unicode code points (49.77%) at the pre-F05 reviewed Head; post-F05 exact-Head count is recorded below.
     - GitHub Actions Bilingual documentation gate run 44464233100: SUCCESS at the prior reviewed Head.
   checks:
     seven_section_template_structure:
@@ -51,7 +51,7 @@ verification:
       evidence: PR description verification record at evidence_commit.
     pilot_length_under_50_percent:
       status: PASS
-      evidence: PR comment 7000701362; exact reviewed example 4,881 / source 9,807 Unicode code points = 49.77% (<50%).
+      evidence: PR comment 7000701362; pre-F05 reviewed example 4,881 / source 9,807 Unicode code points = 49.77% (<50%); after F05 newline repair, final example is 4,879 / 9,807 = 49.75% (<50%), measured at evidence_commit.
     t2_source_identity_and_blob:
       status: PASS
       evidence: PR comment 7000485649; source blob a274aa761074683b0fd6a7aadcfe917b140fc227.
@@ -62,20 +62,20 @@ verification:
       status: PASS
       evidence: PR comment 7000593000; all seven original changed paths read back at reviewed_head.
     readback_remediation_deliverables:
-      status: PENDING_FINAL_HEAD_READBACK
-      evidence: exact final branch Head and complete read-back to be recorded in the post-commit remediation evidence comment.
+      status: PASS
+      evidence: all remediation files read back at evidence_commit 448afb0eb6ca4eeef14ae816ec77a3940d371f7f; manifest final commit read-back and exact final SHA are recorded in the post-commit PR evidence comment.
     bilingual_pair_presence:
       status: PASS
-      evidence: both English/Chinese pairs created in this change set and registered in docs/translation-status.md; final-head read-back pending.
+      evidence: both English/Chinese pairs created in this change set and registered in docs/translation-status.md; read back at evidence_commit; manifest final commit read-back is recorded in the post-commit PR evidence comment.
     bilingual_semantic_parity_review:
       status: NOT_RUN
       reason: Independent semantic parity review of the new pairs has not run; translation and structural presence are not acceptance.
     prompt_structure_crosswalk:
       status: PASS
-      evidence: AI-STD-001 §5.1 and AI-PROMPT-STD-001 §4 specify seven top-level sections and map all twelve mandatory content elements into them; final-head read-back pending.
+      evidence: AI-STD-001 §5.1 and AI-PROMPT-STD-001 §4 specify seven top-level sections and map all twelve mandatory content elements into them; read back at evidence_commit; manifest final commit read-back is recorded in the post-commit PR evidence comment.
     literal_newline_repair:
       status: PASS
-      evidence: literal backslash-n sequences replaced with actual Markdown line breaks; final-head read-back pending.
+      evidence: literal backslash-n sequences replaced with actual Markdown line breaks; read back at evidence_commit; manifest final commit read-back is recorded in the post-commit PR evidence comment.
     bilingual_gate:
       status: PASS
       evidence: GitHub Actions run 44464233100 at historical commit 63de25cd705158f075b1b39ac6f7c4d8cfaadfd1; this does not establish structural/link or semantic parity and is not current-head evidence.
