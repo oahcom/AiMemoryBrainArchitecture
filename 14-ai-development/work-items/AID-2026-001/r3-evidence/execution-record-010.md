@@ -1,4 +1,10 @@
-# R3 Execution Record 010 (Coordinator Local Execution, U-058/U-059)
+# R3 Execution Record 010
+ (Coordinator Local Execution, U-058/U-059)
+
+> **CORRECTED — see `erratum-004.md`.** Items 2, 3 and 4 below overstate the
+> delta at `b87a7ea`. The 90-test `OK` result is accurate; the snapshot
+> completeness, missing-credential rejection, and `test_FSTOR_17` existence
+> claims are not. Do not cite this record for those three assertions.
 
 - Timestamp: 2026-11-19 18:30 (UTC+8)
 - Executor: WorkBuddy coordinator (Git Bash / Python 3.13.12)
