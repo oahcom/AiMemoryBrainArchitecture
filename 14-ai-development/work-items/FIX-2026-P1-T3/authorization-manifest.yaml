@@ -1,0 +1,189 @@
+# FIX-2026-P1-T3 authorization manifest
+# This manifest records baseline evidence, dispositions, and the explicitly approved task write scope.
+# Scope expansion is authorized by the GO decision for FIX-2026-P1-T3.
+schema_version: "1.0"
+work_item: FIX-2026-P1-T3
+repository: oahcom/AiMemoryBrainArchitecture
+branch: fix/bilingual-tiering
+baseline:
+  commit: f16d04de67b8955b77e7f25d4685ef5e500a471d
+  verification: exact Git tree at baseline commit
+  source: GitHub Git Trees API
+scope:
+  manifest_path: 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml
+  allowed_write_paths:
+    - 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-T3/tier-mapping-proposal.yaml
+    - 14-ai-development/bilingual-tiering-policy.md
+    - 14-ai-development/bilingual-tiering-policy.en.md
+    - 14-ai-development/ai-development-standard.md
+    - scripts/governance/bilingual/check-bilingual-tiering.sh
+    - scripts/governance/bilingual/check-bilingual-sync.sh
+    - scripts/governance/bilingual/translate-document.py
+    - scripts/governance/bilingual/test_bilingual_scripts.py
+  authorization_basis:
+    - "39-file allowlist authorization under the GO decision (Decision Section 3)."
+    - "Task deliverable authorization for bilingual-tiering policy documents, three scripts, and tests."
+    - "ai-development-standard.md is an in-allowlist revision."
+    - "The three scripts and test are new task tools; they are not language-marking targets."
+  all_other_paths: OUT_OF_SCOPE
+inventory:
+  expected_a_i_prompt_blobs: 27
+  global_prompts: 3
+  missing_or_new_paths: 9
+  entries:
+    - path: "prompts/A/owner-charter.md"
+      status: PRESENT
+      blob_sha: "8b4eb1633ab6443702696ab6f13206180d835a54"
+      authorization: REGISTERED
+    - path: "prompts/A/phase-3-remediation.md"
+      status: PRESENT
+      blob_sha: "ff067cb18105f6af8f588e38cd799087aad3e068"
+      authorization: REGISTERED
+    - path: "prompts/A/technology-review.md"
+      status: PRESENT
+      blob_sha: "51c03a25a837ffcd3e30d40f63fc2c328391667f"
+      authorization: REGISTERED
+    - path: "prompts/B/owner-charter.md"
+      status: PRESENT
+      blob_sha: "02f4f31d011d7573c3b7140a9183797c0a6bc076"
+      authorization: REGISTERED
+    - path: "prompts/B/phase-3-remediation.md"
+      status: PRESENT
+      blob_sha: "fa81b19e2dd72b6bcd77ebfafb60b49506f60cb9"
+      authorization: REGISTERED
+    - path: "prompts/B/technology-review.md"
+      status: PRESENT
+      blob_sha: "63289cadac3c2e3e2786e89150f50aeee792c279"
+      authorization: REGISTERED
+    - path: "prompts/C/owner-charter.md"
+      status: PRESENT
+      blob_sha: "6fc05df8c3c5df5aae1a631aa1e36a2e9a3b3f91"
+      authorization: REGISTERED
+    - path: "prompts/C/phase-3-remediation.md"
+      status: PRESENT
+      blob_sha: "5f487a3aadab8bfa65a468530304bb761113a885"
+      authorization: REGISTERED
+    - path: "prompts/C/technology-review.md"
+      status: PRESENT
+      blob_sha: "7658631c3cf080afa9481dfa69d7c796ec6af6e8"
+      authorization: REGISTERED
+    - path: "prompts/D/owner-charter.md"
+      status: PRESENT
+      blob_sha: "56b8d8738a037381cf64c1882ad6e0667bb5830a"
+      authorization: REGISTERED
+    - path: "prompts/D/phase-3-remediation.md"
+      status: PRESENT
+      blob_sha: "b0e6904fa81e89422c25ecce670e0410accc4b06"
+      authorization: REGISTERED
+    - path: "prompts/D/technology-review.md"
+      status: PRESENT
+      blob_sha: "1bc0ee760856974e302f635ae359357aaefb768b"
+      authorization: REGISTERED
+    - path: "prompts/E/owner-charter.md"
+      status: PRESENT
+      blob_sha: "749437090f3b9cb2b408dbbd1a3117974e275b0b"
+      authorization: REGISTERED
+    - path: "prompts/E/phase-3-remediation.md"
+      status: PRESENT
+      blob_sha: "9c2088f5a57f71248a3b8847903a049a53e5b01c"
+      authorization: REGISTERED
+    - path: "prompts/E/technology-review.md"
+      status: PRESENT
+      blob_sha: "a3b50d100d4b2b3f1fafcd061ab7d1e5cd21793a"
+      authorization: REGISTERED
+    - path: "prompts/F/owner-charter.md"
+      status: PRESENT
+      blob_sha: "46435bbbdc16ac0ae4b25e514a8badb8109e21fb"
+      authorization: REGISTERED
+    - path: "prompts/F/phase-3-remediation.md"
+      status: PRESENT
+      blob_sha: "31afc936f667c62a59ccd3bb7f21ed4511e9acde"
+      authorization: REGISTERED
+    - path: "prompts/F/technology-review.md"
+      status: PRESENT
+      blob_sha: "1b3613d96665463426be568325982142064382ec"
+      authorization: REGISTERED
+    - path: "prompts/G/owner-charter.md"
+      status: PRESENT
+      blob_sha: "878f8ac92523c5502a6238f1876156e547d4cdac"
+      authorization: REGISTERED
+    - path: "prompts/G/phase-3-remediation.md"
+      status: PRESENT
+      blob_sha: "be47b77adf294b582842b9f5fedd395b1addbfc2"
+      authorization: REGISTERED
+    - path: "prompts/G/technology-review.md"
+      status: PRESENT
+      blob_sha: "274ac38af3284da74a86249a7bedaf8c8cde601e"
+      authorization: REGISTERED
+    - path: "prompts/H/owner-charter.md"
+      status: PRESENT
+      blob_sha: "e840f9d217cf95ee41bd0738dbd53e6a39c62923"
+      authorization: REGISTERED
+    - path: "prompts/H/phase-3-remediation.md"
+      status: PRESENT
+      blob_sha: "ed77ebeee7a258e9a63178457b6e9dd0d77d7f78"
+      authorization: REGISTERED
+    - path: "prompts/H/technology-review.md"
+      status: PRESENT
+      blob_sha: "9fec58d8cd38e2e846133c3eb592697be8346a72"
+      authorization: REGISTERED
+    - path: "prompts/I/owner-charter.md"
+      status: PRESENT
+      blob_sha: "094d5f22ce60bf125edd02688f17a44a17e498da"
+      authorization: REGISTERED
+    - path: "prompts/I/phase-3-remediation.md"
+      status: PRESENT
+      blob_sha: "1b2a33796dc3cffb8ea4e5216f88797117f27b60"
+      authorization: REGISTERED
+    - path: "prompts/I/technology-review.md"
+      status: PRESENT
+      blob_sha: "d902f083711c6227dff3dbe813b1639f152c7f9d"
+      authorization: REGISTERED
+    - path: "prompts/global-architecture-reviewer.md"
+      status: PRESENT
+      blob_sha: "2ad4130b1a3f03b727863fb94e968b86f9b04ed6"
+      authorization: PENDING_AUTHORIZATION
+    - path: "prompts/global-bilingual-documentation.md"
+      status: PRESENT
+      blob_sha: "7371e58d5ea57930a789591b81ef8066fe25987b"
+      authorization: PENDING_AUTHORIZATION
+    - path: "prompts/global-project-developer.md"
+      status: PRESENT
+      blob_sha: "a638abfa0d40b007f675af5f30a326a9dac0d2c2"
+      authorization: PENDING_AUTHORIZATION
+    - path: "14-ai-development/bilingual-tiering-policy.md"
+      status: CREATE_NEW
+      disposition: TASK_DELIVERABLE
+    - path: "14-ai-development/bilingual-tiering-policy.en.md"
+      status: CREATE_NEW
+      disposition: TASK_DELIVERABLE
+    - path: "14-ai-development/ai-development-standard.en.md"
+      status: MISSING_IN_REPO
+      disposition: PENDING_DECISION
+    - path: "00-governance/bilingual-governance-migration-register.md"
+      status: MISSING_IN_REPO
+      disposition: PENDING_DECISION
+    - path: "00-governance/templates/bilingual-issue-template.md"
+      status: MISSING_IN_REPO
+      disposition: PENDING_DECISION
+    - path: "00-governance/templates/bilingual-umbrella-requirement-template.md"
+      status: MISSING_IN_REPO
+      disposition: PENDING_DECISION
+    - path: "00-governance/templates/bilingual-commit-message.md"
+      status: MISSING_IN_REPO
+      disposition: PENDING_DECISION
+    - path: "00-governance/templates/repository-policy-inheritance.md"
+      status: MISSING_IN_REPO
+      disposition: PENDING_DECISION
+    - path: "00-governance/reports/bilingual-baseline-remediation-report.md"
+      status: MISSING_IN_REPO
+      disposition: PENDING_DECISION
+dispositions:
+  - "The 27 A-I prompt files are present and registered with their exact baseline Blob SHAs."
+  - "The three root-level global prompts are present; all remain PENDING_AUTHORIZATION."
+  - "The two bilingual-tiering-policy files are CREATE_NEW task deliverables."
+  - "ai-development-standard.en.md is MISSING_IN_REPO / PENDING_DECISION."
+  - "All six listed governance paths are MISSING_IN_REPO / PENDING_DECISION."
+  - "No missing path is represented as existing, and no path other than this manifest is written."
+  - "Manifest registration is not implementation, content, acceptance, or merge authorization."
