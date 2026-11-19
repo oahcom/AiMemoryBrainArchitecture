@@ -1,0 +1,63 @@
+work_item_id: AID-2026-010
+title: "Issue #43 — Cross-domain Architecture Integration Review and Evidence Reconciliation"
+owner: Integration Owner
+accountable_owner: NOT_ASSIGNED
+accountable_owner_note: >-
+  MUST NOT be presumed to be Owner A. A authorized registration and
+  limited integration review only (A-OWNER-ALIGNMENT-001-R16); domain
+  decisions remain with D/E/F/G/H/I/Storage Owners.
+issue: 43
+related_issues: [43]
+related_prs: []
+task_class: ARCH
+risk: R3
+risk_note: Tentative conservative classification pending risk re-review.
+status: PROPOSED
+registration_status: AUTHORIZED_PENDING_PERSISTENCE
+registration_note: >-
+  Number assignment by A (A-OWNER-ALIGNMENT-001-R16). Status remains
+  AUTHORIZED_PENDING_PERSISTENCE until manifest + INDEX + Issue comment
+  are all persisted and independently read back; only then may be marked
+  REGISTERED.
+authorization:
+  decision_id: A-OWNER-ALIGNMENT-001-R16
+  authorized_by: Owner A (conv 6afedebe-9950-83ee-93d4-7fd19cf46089)
+  scope: >-
+    Cross-domain integration review and evidence reconciliation for #43.
+    Does NOT authorize architecture approval, contract freeze, production
+    activation, or domain decisions on behalf of other Owners.
+prompt:
+  id: AID-2026-010-PROMPT
+  version: v1
+  provenance: L2-05 batch2 supplement (l2-05b-supplement.md) + A integration ruling R16
+  sha256: NOT_VERIFIED
+  note: Integration review continuation of existing L2-05 session 6afeef2f.
+scope:
+  - Harvest and review L2-05 batch2 supplement (#43 45KB body).
+  - Map #43 Findings to source, evidence, responsibility domain, dependencies.
+  - Cross-check existing Issues, PRs, specs and Owner decisions for version accuracy.
+  - Route domain decision questions to corresponding Owners.
+  - Identify cross-domain interface conflicts, evidence gaps, unresolved DoR.
+  - Output integration review result, unresolved list, dependency order.
+out_of_scope:
+  - Domain decisions on behalf of D/E/F/G/H/I/Storage Owners.
+  - Interpreting L2 suggestions or A integration opinions as architecture approval.
+  - Freezing #43 joint contract or approving production activation.
+  - Deriving current Owner acceptance from historical PR merges or CI PASS.
+  - Creating new Issues, PRs or branches for review purposes.
+supplement_status: SUPPLEMENT_RECEIVED_INTEGRATION_REVIEW_AUTHORIZED
+baseline:
+  repository: oahcom/AiMemoryBrainArchitecture
+  target_branch: remediation/aid-2026-001-forget-contract-closure-2026-11-18
+  registration_location: 14-ai-development/work-items/AID-2026-010/manifest.yaml
+  index_location: 14-ai-development/work-items/INDEX.md
+deliverables:
+  - 14-ai-development/work-items/AID-2026-010/manifest.yaml
+  - 14-ai-development/work-items/INDEX.md (registration row)
+  - Issue #43 comment (Work Item association record)
+evidence_refs:
+  - 14-ai-development/issue-alignment-2026-11-19/l2-05-receipt.md
+  - 14-ai-development/issue-alignment-2026-11-19/l2-05b-supplement.md
+  - 14-ai-development/issue-alignment-2026-11-19/alignment-manifest.md
+created_at: 2026-11-19
+updated_at: 2026-11-19
