@@ -2,7 +2,7 @@
 # Design-proposal scope only. Implementation authorization is expressly NOT granted
 # by this manifest. See scope.implementation_authorization below.
 
-schema_version: "1.1"
+schema_version: "1.2"
 work_item: P2-T2
 title: "Memory Storage Schema design proposal"
 repository: oahcom/AiMemoryBrainArchitecture
@@ -58,29 +58,84 @@ scope:
     allowed set. Attaching evidence inside an already-authorized path is not a scope
     expansion.
 
-  schema_execution: DISCLOSED_INTERPRETATION
+  schema_execution: DISCLOSED_SCOPE_DEVIATION
   schema_execution_note: >
     The design's own DDL was executed against an ephemeral in-memory SQLite database to
     check internal coherence — no file written, no migration applied, no repository path
     touched. authorization_basis records "no schema execution" as a design-only bound.
-    This manifest reads that bound as prohibiting application of schema to any persistent
-    store or repository path, and records the in-memory coherence check as disclosed
-    rather than as within scope by assumption. The check found a real defect
-    (accepted_events.event_id does not exist; the primary key is event_row) which was
-    corrected before review. No test suite was written and none of the twelve tests in
-    design-proposal.md §13 were run.
+    An earlier revision recorded this as DISCLOSED_INTERPRETATION on the reading that the
+    bound covers persistent stores and repository paths. R2 declined to accept that reading
+    as established by the authorization text, and stated that an engineering reviewer
+    cannot grant retrospective authorization. That ruling is accepted. The event is recorded
+    as a disclosed scope deviation, the authority question is NOT claimed resolved, and it
+    is carried as Q12 requiring the authority that issued the bound. acceptance_authority
+    is NOT_ASSIGNED; no session can supply it.
+    The check found a real defect (accepted_events.event_id does not exist; the primary key
+    is event_row) which was corrected before R2 review. The R3 DDL was NOT executed; the
+    prior probe result is evidence about the R2 DDL only.
 
 review:
   required: true
   rounds:
     - R1
     - R2
+    - R3
   independence: REQUIRED
   blocking_question: >
-    Q1 in the proposal — the architecture choice. R2 states three options (A: Phase 1 as
+    Q1 in the proposal — the architecture choice. R3 states three options (A: Phase 1 as
     store with Event-only transcript ingress; B: supersede Phase 1; C: three layers with a
     separate transcript-capture layer). Q1 remains OPEN. A review recommendation is
     PROPOSED, not a ruling.
+
+r2_disposition:
+  reviewed_head: aed58ad0582a751bf2609add61754cb30769620d
+  base_at_review: 7f8093876729212ef4e83461ba8c2f2cd96582c7
+  verdict: REQUEST CHANGES
+  platform_record: "PR #307 comment 7023510140"
+  r1_findings_reassessed:
+    R1-B-01: STILL OPEN (algorithm identity; score_input immutability)
+    R1-NB-02: PARTIALLY CLOSED (tool-call cardinality; reconstruction framing)
+    R1-NB-03: TECHNICALLY CORRECTED; BOUNDARY UNRESOLVED
+    R1-NB-04: CLOSED
+    R1-NB-05: PARTIALLY CLOSED (appendix reviewable, provenance unverifiable)
+  new_findings:
+    - id: R2-NF-01
+      title: "tool-call and thread integrity not enforced"
+      r3_disposition: "CORRECTED — transcript_tool_call table; composite self-reference on (session_id, message_id); trigger forces tool parent role"
+    - id: R2-NF-02
+      title: "history provenance integrity — no composite FKs"
+      r3_disposition: "CORRECTED — (method_id, method_version) -> scoring_method and (version_id, input_id) -> score_input"
+    - id: R2-NF-03
+      title: "reconstruction framing — no byte boundaries"
+      r3_disposition: "CORRECTED — byte_length stored and cross-checked; reconstruct returns offset/length frames"
+    - id: R2-NF-04
+      title: "score_input immutability asserted, not enforced"
+      r3_disposition: "CORRECTED — UPDATE/DELETE triggers; corrections via corrects_input_id"
+  q10_ruling: >
+    Reviewer ruled in favour of the tiered posture; structural and unreconstructable tiers
+    accepted; exact-value retained as CONDITIONAL design objective, NOT VERIFIED. R3 accepts.
+  disclosure_a_two_drafts: ACCEPTABLE
+  disclosure_b_in_memory_schema: >
+    NOT ACCEPTABLE AS AUTHORIZED ACTIVITY. Classified DISCLOSED SCOPE DEVIATION.
+    Reviewer states an engineering reviewer cannot grant retrospective authorization and
+    that the authority which issued the restriction must determine the interpretation.
+  disclosure_c_no_rebase: ACCEPTABLE FOR REVIEW; update against main before integration.
+  required_before_r3:
+    - "complete scoring reproducibility contract incl. immutable algorithm identity and enforced score-input immutability"
+    - "complete transcript tool-call relationships and reconstruction framing"
+    - "enforce history-to-method and history-to-input consistency"
+    - "resolve the Layer 1 additive-index boundary explicitly"
+    - "obtain an authority ruling on the disclosed schema-execution interpretation"
+    - "clarify Appendix A provenance limitation"
+    - "record Q10 as tiered, exact value conditional not verified"
+  r3_item_status:
+    1: "ADDRESSED (§8.1 algorithm_spec_ref/sha256 + numeric_semantics; §8.2 triggers)"
+    2: "ADDRESSED (§7.1 transcript_tool_call; §7.2 framed reconstruction)"
+    3: "ADDRESSED (§8.4 two composite FKs; §8.2 UNIQUE (version_id, input_id))"
+    4: "ADDRESSED (§8.4 both boundary readings + fallback; Q11 OPEN, not decided)"
+    5: "ESCALATED, NOT RESOLVED — Q12; requires the authority that issued the bound; NOT_ASSIGNED"
+    6: "ADDRESSED (§16 + Appendix A provenance limit)"
+    7: "ADDRESSED (Q10 recorded as review ruling — tiered; exact value CONDITIONAL, NOT VERIFIED)"
 
 r1_disposition:
   reviewed_head: 9b5446b9b63ff80f6594d0316b6083e986d84769
@@ -164,3 +219,8 @@ claims_forbidden:
   - "that a human Owner approved this design"
   - "that acceptance_authority has been assigned"
   - "that this design is approved because an independent review recommended its direction"
+  - "that exact-value score reproduction is substantiated"
+  - "that the in-memory DDL check was authorized"
+  - "that the prompt DDL in Appendix A has authenticated provenance"
+  - "that the R3 DDL was executed or verified to apply"
+  - "that the Layer 1 additive index is not a Layer 1 modification"

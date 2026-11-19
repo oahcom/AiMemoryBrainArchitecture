@@ -1,7 +1,7 @@
 # P2-T2 — Memory Storage Schema Design Proposal
 
 **Work item:** P2-T2 (Phase 2 Task 2)
-**Revision:** R2 — revised against independent R1 review of head `9b5446b9`
+**Revision:** R3 — revised against independent R2 review of head `aed58ad0`
 **Status:** DESIGN PROPOSAL — not implemented, not frozen
 **Date:** 2026-11-19
 **Scope authority:** `GO-2026-P2-DESIGN-001` — design proposal first; P2-T1 implementation authorization withheld pending design review.
@@ -47,7 +47,7 @@ Specify the persistence design for the memory layer, covering:
 - migration strategy
 - test boundaries
 
-This revision answers R1-B-01 through R1-NB-05 (see §2). It does **not** claim that Q1 is resolved (§4), does not claim the schema is frozen, and does not authorize implementation.
+This revision answers R1-B-01 through R1-NB-05 (see §2) and the seven items R2 required before R3 (see §2a). It does **not** claim that Q1 is resolved (§4), does not claim the schema is frozen, and does not authorize implementation.
 
 ---
 
@@ -63,6 +63,31 @@ This revision answers R1-B-01 through R1-NB-05 (see §2). It does **not** claim 
 | Overclaims A–F in R1 §5 | — | **Corrected.** §5, §9 and §16 are rewritten. `satisfies every capability` and `nothing requested is lost` are withdrawn and replaced with an explicit gap table. |
 | Date inconsistency (2026-11-20 vs review date 2026-11-19) | — | **Corrected.** Proposal dated 2026-11-19. |
 | Claim 2 qualification — trait contract is `CANDIDATE`, not DECIDED | — | **Accepted.** §3 states only that the *SQLite persistence boundary* is DECIDED. The abstract trait is described as a CANDIDATE seam. |
+
+---
+
+## 2a. R2 disposition
+
+R2 was reviewed at head `aed58ad0` and returned `REQUEST CHANGES`, with R1-NB-04 closed and four new findings. Recorded on PR #307, comment `7023510140`.
+
+| item | R2 ruling | disposition in R3 |
+|---|---|---|
+| R1-B-01 **(A)** algorithm identity ≠ reproducibility | still open | **Corrected.** `scoring_method` gains `algorithm_spec_ref`, `algorithm_spec_sha256` and a constrained `numeric_semantics`. A label without a retrievable spec text that hashes to the recorded value cannot support the exact tier. §8.1 |
+| R1-B-01 **(B)** append-only not enforced on `score_input` | still open | **Corrected.** UPDATE and DELETE triggers added, matching the registry. Corrections become new rows via `corrects_input_id`. §8.2 |
+| R1-NB-02 tool-call cardinality | partially closed | **Corrected.** `tool_call_id` removed from `transcript_message`; `transcript_tool_call` holds `(session_id, tool_call_id)` with `(emitting_message_id, call_index)` unique. §7.1 |
+| R1-NB-02 reconstruction boundaries | partially closed | **Corrected.** `byte_length` stored per message and cross-checked; `reconstruct` returns frames with `byte_offset` / `byte_length` plus per-frame re-hash. §7.1, §7.2 |
+| R1-NB-03 boundary — additive index is still a Layer 1 modification | technically corrected, boundary unresolved | **Accepted and corrected.** The index is now described as a Layer 1 modification. Both readings of the boundary are stated with the adapter-level fallback; the choice is Q11, not asserted. §8.4 |
+| R1-NB-05 appendix provenance | partially closed | **Accepted without argument.** An appendix is reviewable but cannot authenticate its own origin. §16 records the limit; the remedy is stated. |
+| R2-NF-01 tool-call and thread integrity | OPEN | **Corrected.** Composite self-reference on `(session_id, message_id)` forces parent and child into one session; a trigger forces a tool result's parent to be an assistant message. §7.1 |
+| R2-NF-02 history provenance integrity | OPEN | **Corrected.** Two composite foreign keys: `(method_id, method_version)` → `scoring_method`, `(version_id, input_id)` → `score_input`. §8.4 |
+| R2-NF-03 reconstruction framing | OPEN | **Corrected.** Same fix as R1-NB-02 boundaries. §7.2 |
+| R2-NF-04 score-input immutability | OPEN | **Corrected.** Same fix as R1-B-01 (B). §8.2 |
+| Q10 — rebuild posture | ruled: tiered preferred | **Recorded as ruled for tiered; exact value conditional and NOT VERIFIED.** §8.3, §14 |
+| Disclosure A — two concurrent drafts | acceptable | **No change.** §0 retained. |
+| Disclosure B — in-memory schema execution | **not acceptable as authorized activity**; `DISCLOSED SCOPE DEVIATION` | **Accepted as a deviation, not defended.** §17 rewritten: the check is recorded as a deviation, its authority is not claimed, and the question is escalated as Q12. |
+| Disclosure C — no rebase | acceptable for review, update before integration | **Accepted.** No rebase performed in R3 either; the integration caveat is carried in §12. |
+
+R3 does not challenge any R2 ruling. Where R2 said a thing was still open, R3 either fixes it or names what remains; it does not argue the ruling down.
 
 ---
 
@@ -215,15 +240,17 @@ CREATE TABLE IF NOT EXISTS transcript_message (
   role              TEXT NOT NULL CHECK (role IN ('system','user','assistant','tool')),
   event_row         INTEGER NOT NULL REFERENCES accepted_events(event_row),
   content_sha256    TEXT NOT NULL,          -- must equal event_payloads.verified_digest
+  byte_length       INTEGER NOT NULL CHECK (byte_length >= 0),
   token_count       INTEGER,
-  parent_message_id TEXT REFERENCES transcript_message(message_id),
-  tool_call_id      TEXT,                   -- provider-assigned id linking call to result
+  parent_message_id TEXT,
   edit_state        TEXT NOT NULL DEFAULT 'original'
                       CHECK (edit_state IN ('original','edited','redacted')),
   created_at        TEXT NOT NULL,
   retention_class   TEXT NOT NULL,
   UNIQUE (session_id, seq_no),
-  CHECK (role <> 'tool' OR (parent_message_id IS NOT NULL AND tool_call_id IS NOT NULL))
+  UNIQUE (session_id, message_id),          -- target key for the composite self-reference
+  FOREIGN KEY (session_id, parent_message_id)
+    REFERENCES transcript_message(session_id, message_id)  -- R2-NF-01: parent in same session
 );
 
 CREATE INDEX IF NOT EXISTS transcript_message_order_idx
@@ -231,14 +258,51 @@ CREATE INDEX IF NOT EXISTS transcript_message_order_idx
 CREATE INDEX IF NOT EXISTS transcript_message_role_idx
   ON transcript_message(session_id, role, seq_no);
 CREATE INDEX IF NOT EXISTS transcript_message_thread_idx
-  ON transcript_message(parent_message_id);
-CREATE INDEX IF NOT EXISTS transcript_message_toolcall_idx
-  ON transcript_message(session_id, tool_call_id);
+  ON transcript_message(session_id, parent_message_id);
+
+-- R2-NF-01: an assistant message may emit several tool calls. One row per call.
+CREATE TABLE IF NOT EXISTS transcript_tool_call (
+  session_id          TEXT NOT NULL,
+  tool_call_id        TEXT NOT NULL,        -- provider-assigned
+  call_index          INTEGER NOT NULL,     -- order within the emitting message
+  emitting_message_id TEXT NOT NULL,
+  result_message_id   TEXT,
+  tool_name           TEXT,
+  tool_state          TEXT NOT NULL DEFAULT 'emitted'
+                        CHECK (tool_state IN ('emitted','completed','failed')),
+  PRIMARY KEY (session_id, tool_call_id),
+  UNIQUE (emitting_message_id, call_index),
+  FOREIGN KEY (session_id, emitting_message_id)
+    REFERENCES transcript_message(session_id, message_id),
+  FOREIGN KEY (session_id, result_message_id)
+    REFERENCES transcript_message(session_id, message_id)
+);
+
+CREATE INDEX IF NOT EXISTS tool_call_emitter_idx
+  ON transcript_tool_call(emitting_message_id, call_index);
+
+-- A tool result's parent MUST be an assistant message (R2-NF-01). CHECK cannot
+-- express this; a trigger can.
+CREATE TRIGGER IF NOT EXISTS transcript_message_tool_parent_role
+BEFORE INSERT ON transcript_message
+WHEN NEW.role = 'tool'
+BEGIN
+  SELECT RAISE(ABORT, 'tool message parent must be an assistant message')
+  WHERE NOT EXISTS (
+    SELECT 1 FROM transcript_message
+    WHERE session_id = NEW.session_id
+      AND message_id = NEW.parent_message_id
+      AND role = 'assistant');
+END;
 ```
 
 `event_row` is `NOT NULL` and references `accepted_events(event_row)`, the actual primary key in the merged Event Store. A transcript message is not a copy of the bytes — it is an index over an accepted Event. Bytes live once, in `event_payloads`. This is the R1-NB-02 correction: byte preservation was always adequate; what was missing was the retrieval structure, which is what this table supplies.
 
 `content_sha256` is validated against `event_payloads.verified_digest` at insert. A mismatch is rejected, not repaired.
+
+`byte_length` is stored rather than inferred. R2-NF-03 is right that concatenation alone cannot recover boundaries: a payload of `ab` followed by `c` is byte-identical to `a` followed by `bc`. Storing the length makes reconstruction unambiguous without re-parsing payload contents, and `byte_length` is cross-checked against the stored payload at insert.
+
+`tool_call_id` is **removed** from `transcript_message`. R2-NF-01 is correct that a single column cannot represent one assistant message emitting several tool calls. The relationship now lives in `transcript_tool_call`, keyed `(session_id, tool_call_id)`, with `(emitting_message_id, call_index)` unique so the emission order inside one message is itself deterministic. Both sides of the relation are composite foreign keys on `(session_id, message_id)`, so a call and its result cannot span two sessions.
 
 ### 7.2 Retrieval contract
 
@@ -248,12 +312,26 @@ The gap R1 identified was that ordered event retrieval is not transcript retriev
 |---|---|
 | `read_session(session_id, after_seq, limit)` | messages ordered by `seq_no` ascending; stable, no clock dependence |
 | `read_by_role(session_id, role, after_seq, limit)` | same ordering, role-filtered |
-| `read_thread(message_id)` | the message plus its `parent_message_id` ancestor chain, oldest first |
-| `read_tool_call(session_id, tool_call_id)` | the `tool` result message and the assistant message that emitted the call, paired by `tool_call_id` |
-| `reconstruct(session_id)` | concatenation of payload bytes for every message in `seq_no` order, plus role and ordering sidecar |
+| `read_thread(message_id)` | the message plus its `parent_message_id` ancestor chain, oldest first; all rows share one `session_id` by constraint |
+| `read_tool_calls(session_id, message_id)` | **all** calls emitted by one assistant message, ordered by `call_index`, each with its `result_message_id` if present |
+| `read_tool_result(session_id, tool_call_id)` | the result message plus the emitting message, resolved through `transcript_tool_call` |
+| `reconstruct(session_id)` | framed payload bytes, one frame per message, ordered by `seq_no` |
 | `source_events(session_id)` | the `accepted_events` rows backing this session, for provenance export |
 
 Ordering is by `seq_no`, never by `created_at`. Capture clocks are not assumed monotonic across channels.
+
+**Reconstruction framing (R2-NF-03).** `reconstruct` does not return a bare concatenation. It returns:
+
+```
+ReconstructedTranscript {
+  session_id,
+  total_bytes,
+  frames: [ { message_id, seq_no, role, byte_offset, byte_length, content_sha256 } ],
+  buffer: [u8]           // frames[i].buffer[byte_offset .. byte_offset+byte_length]
+}
+```
+
+with the invariants that `byte_offset` is the running sum of preceding `byte_length`s, that the final offset plus length equals `total_bytes`, and that every frame's slice re-hashes to its `content_sha256`. A caller can therefore cut any single message out losslessly, and a mismatch is detectable rather than silently produced.
 
 ### 7.3 Source linkage to canonical memory
 
@@ -293,12 +371,16 @@ The R1-B-01 defect was that `method_ref` and `input_digest` identify things with
 
 ```sql
 CREATE TABLE IF NOT EXISTS scoring_method (
-  method_id          TEXT NOT NULL,
-  method_version     INTEGER NOT NULL,
-  algorithm          TEXT NOT NULL,        -- 'ebbinghaus_v1' | 'weighted_citation_v1' | ...
-  parameters_json    TEXT NOT NULL,        -- the parameters themselves, not a digest of them
-  parameters_sha256  TEXT NOT NULL,
-  registered_at      TEXT NOT NULL,
+  method_id             TEXT NOT NULL,
+  method_version        INTEGER NOT NULL,
+  algorithm             TEXT NOT NULL,     -- label, e.g. 'ebbinghaus_v1'
+  algorithm_spec_ref    TEXT NOT NULL,     -- R2 A: normative spec identity, immutable
+  algorithm_spec_sha256 TEXT NOT NULL,     -- R2 A: digest of that spec text
+  params_json           TEXT NOT NULL,     -- the parameters themselves, not a digest
+  params_sha256         TEXT NOT NULL,
+  numeric_semantics     TEXT NOT NULL      -- R2 A: rounding / precision / order
+                          CHECK (numeric_semantics IN ('f64_ieee754','f64_ieee754_round6','decimal_exact')),
+  registered_at         TEXT NOT NULL,
   PRIMARY KEY (method_id, method_version)
 );
 
@@ -315,29 +397,55 @@ BEGIN
 END;
 ```
 
-A method version is never edited or deleted. A changed parameter set is a new `method_version`. This is what makes a historical score reproducible at all: the algorithm and its parameters still exist when you ask to rebuild.
+A method version is never edited or deleted. A changed parameter set is a new `method_version`.
+
+**R2 finding A — algorithm identity is not algorithm reproducibility.** The reviewer is right: `ebbinghaus_v1` is a label, and two implementations carrying it can differ in arithmetic, rounding, intermediate precision and evaluation order. Three columns are added so the label is no longer the whole identity:
+
+- `algorithm_spec_ref` + `algorithm_spec_sha256` — the normative specification the label names, and its digest. A label without a retrievable spec that hashes to the recorded value cannot support the exact-value tier.
+- `numeric_semantics` — a constrained vocabulary (`f64_ieee754`, `f64_ieee754_round6`, `decimal_exact`). Two implementations agreeing on spec but differing on rounding are not the same method.
+
+This does not make the value reproducible by itself; it makes the *identity* of the computation falsifiable. The exact tier in §8.3 now requires a spec digest that matches, not merely a matching label.
 
 ### 8.2 Declared score inputs
 
 ```sql
 CREATE TABLE IF NOT EXISTS score_input (
-  input_id    TEXT PRIMARY KEY,
-  version_id  TEXT NOT NULL REFERENCES versions(version_id),
-  input_kind  TEXT NOT NULL CHECK (input_kind IN
-                ('initial','citation','decision','clock_tick','manual_adjustment')),
-  source_kind TEXT NOT NULL CHECK (source_kind IN ('event','claim','commit','operator')),
-  source_ref  TEXT NOT NULL,
-  weight      REAL,
-  observed_at TEXT NOT NULL,
-  recorded_at TEXT NOT NULL,
-  UNIQUE (version_id, input_kind, source_kind, source_ref)
+  input_id      TEXT PRIMARY KEY,
+  version_id    TEXT NOT NULL REFERENCES versions(version_id),
+  input_kind    TEXT NOT NULL CHECK (input_kind IN
+                  ('initial','citation','decision','clock_tick','manual_adjustment')),
+  source_kind   TEXT NOT NULL CHECK (source_kind IN ('event','claim','commit','operator')),
+  source_ref    TEXT NOT NULL,
+  weight        REAL,
+  observed_at   TEXT NOT NULL,
+  recorded_at   TEXT NOT NULL,
+  corrects_input_id TEXT REFERENCES score_input(input_id),  -- R2 B: corrections are new rows
+  UNIQUE (version_id, input_kind, source_kind, source_ref),
+  UNIQUE (version_id, input_id)             -- R2-NF-02: parent key for value_history
 );
 
 CREATE INDEX IF NOT EXISTS score_input_version_idx
   ON score_input(version_id, observed_at);
+
+-- R2-NF-04 / R2 B: append-only is enforced, not asserted.
+CREATE TRIGGER IF NOT EXISTS score_input_immutable
+BEFORE UPDATE ON score_input
+BEGIN
+  SELECT RAISE(ABORT, 'score_input is append-only; record a correction as a new row');
+END;
+
+CREATE TRIGGER IF NOT EXISTS score_input_no_delete
+BEFORE DELETE ON score_input
+BEGIN
+  SELECT RAISE(ABORT, 'score_input is append-only; record a correction as a new row');
+END;
 ```
 
-Each row is an input that a score actually consumed: a citation event, a decision event, a clock tick, an operator adjustment, the initial creation. Append-only. This table is the thing the earlier revision was missing — it is the difference between "a digest points at something" and "the something is on disk".
+Each row is an input that a score actually consumed: a citation event, a decision event, a clock tick, an operator adjustment, the initial creation. This table is the difference between "a digest points at something" and "the something is on disk".
+
+**R2 finding B — append-only was prose, not an invariant.** Correct. Two triggers now enforce it, matching what the registry already does. A wrong historical input is corrected by inserting a new row with `corrects_input_id` pointing at the row it supersedes; the original stays, and the pair is visible. Historical mutation is refused by the database rather than by convention.
+
+Note the honest limit: enforcement prevents *later* mutation. It does not prove the *original* set was complete. A row that was never recorded cannot be conjured, and §8.3's `unreconstructable` tier is where that shows up.
 
 ### 8.3 The rebuild contract — three tiers, stated honestly
 
@@ -373,12 +481,14 @@ Three rebuild tiers, each with a different promise:
 | tier | promise | condition |
 |---|---|---|
 | **Structural** | Dropping and recreating Layer 3 reproduces the same row identities, links, statuses and ordering. Idempotent. | always |
-| **Exact value** | `value_score`, `decay_weight` and `weighted_score` are byte-identical after rebuild. | iff the same `scoring_method` version exists, the `score_input` set is unchanged (recomputed `input_set_digest` matches) and `evaluated_at` is supplied as recorded |
+| **Exact value** | `value_score`, `decay_weight` and `weighted_score` are byte-identical after rebuild. | iff the `scoring_method` row exists **and its `algorithm_spec_sha256` matches a retrievable spec**, **and** `numeric_semantics` is identical, **and** the `score_input` set is unchanged (recomputed `input_set_digest` matches), **and** `evaluated_at` is supplied as recorded. **Status: CONDITIONAL — design objective, not substantiated.** See below. |
 | **Unreconstructable** | Reported as `unreconstructable` with the missing dependency named. Never silently defaulted, never approximated. | the `score_input` set is incomplete, or the projection's `(method_id, method_version)` is not in the registry, or `evaluated_at` was never recorded |
 
 A missing method row and an incomplete input set are both reachable: the composite foreign key guarantees a method row exists **at insert time**, not that the historical input set is complete. A rebuild is a read of the past, and the past can be under-recorded.
 
 The third row is the point. A rebuild that cannot reproduce a value must say so. A rebuild that quietly substitutes a default is worse than no rebuild, because it manufactures false confidence in a derived number.
+
+**The exact-value tier is not substantiated, and this revision does not claim it is.** R2's ruling: retain it as a conditional design objective, do not adopt a blanket `NOT CLAIMED` posture, and do not claim the complete numeric source set has been proven. R3 accepts that ruling as stated. What is now specified is the *condition under which the claim would be true* — matching spec digest, matching numeric semantics, unchanged input set, recorded evaluation clock — not the evidence that it is true. Establishing it needs a worked example: one version, one method, one recorded score, recomputed by an independent implementation and compared byte for byte. That is not in this proposal, and no test in §13 was run.
 
 ```sql
 CREATE TABLE IF NOT EXISTS projection_rebuild_log (
@@ -399,21 +509,31 @@ Naming note: the earlier revision's `input_digest` column is replaced by `input_
 
 ```sql
 CREATE TABLE IF NOT EXISTS version_value_history (
-  history_id   TEXT PRIMARY KEY,
-  version_id   TEXT NOT NULL REFERENCES versions(version_id),
-  old_score    REAL,
-  new_score    REAL NOT NULL,
-  reason       TEXT NOT NULL CHECK (reason IN
-                 ('initial','cited_by_decision','time_decay','manual_adjustment','recompute')),
-  method_id    TEXT NOT NULL,
+  history_id     TEXT PRIMARY KEY,
+  version_id     TEXT NOT NULL REFERENCES versions(version_id),
+  old_score      REAL,
+  new_score      REAL NOT NULL,
+  reason         TEXT NOT NULL CHECK (reason IN
+                   ('initial','cited_by_decision','time_decay','manual_adjustment','recompute')),
+  method_id      TEXT NOT NULL,
   method_version INTEGER NOT NULL,
-  input_id     TEXT REFERENCES score_input(input_id),
-  recorded_at  TEXT NOT NULL
+  input_id       TEXT,
+  recorded_at    TEXT NOT NULL,
+  FOREIGN KEY (method_id, method_version)
+    REFERENCES scoring_method(method_id, method_version),      -- R2-NF-02
+  FOREIGN KEY (version_id, input_id)
+    REFERENCES score_input(version_id, input_id)               -- R2-NF-02
 );
 
 CREATE INDEX IF NOT EXISTS value_history_version_idx
   ON version_value_history(version_id, recorded_at);
+```
 
+Two composite foreign keys close R2-NF-02. Without them a history row could name a `(method_id, method_version)` that does not exist, or an `input_id` belonging to a different version, and the record would still insert. Both are now refused. Note that `input_id` is nullable — an `initial` or `time_decay` entry may legitimately have no single input row — and SQLite does not enforce a composite foreign key when any component is `NULL`, which is the intended behaviour here rather than an oversight.
+
+The `(version_id, input_id)` parent key requires a matching unique key on `score_input`. `input_id` is already the primary key, so `(version_id, input_id)` is unique by construction; §8.2 gains `UNIQUE (version_id, input_id)` to give the constraint a real target.
+
+```sql
 CREATE TABLE IF NOT EXISTS version_vector_binding (
   version_id        TEXT PRIMARY KEY REFERENCES versions(version_id),
   embedding_id      TEXT NOT NULL UNIQUE,
@@ -439,8 +559,8 @@ CREATE TABLE IF NOT EXISTS context_assembly (
   assembly_state  TEXT NOT NULL CHECK (assembly_state IN ('draft','active','closed'))
 );
 
--- Additive, index-only. Makes the composite FK below possible without ALTER TABLE.
--- (memory_id, version_id) is already unique by construction: version_id is the PK.
+-- This IS a modification to a Layer 1 table. It adds no column and rewrites no row,
+-- but it changes the schema of `versions` and must not be described as no change.
 CREATE UNIQUE INDEX IF NOT EXISTS versions_memory_version_uq
   ON versions(memory_id, version_id);
 
@@ -463,6 +583,19 @@ CREATE INDEX IF NOT EXISTS assembly_entry_assembly_idx
 ```
 
 The composite foreign key is the R1-NB-03 fix. Two independent foreign keys proved existence and nothing else; a pair of values that individually exist but do not belong together would have been accepted. Now it cannot be inserted.
+
+**R1-NB-03 boundary, resolved explicitly (R2 required item 4).** R2 ruled this correct in technique and unresolved in boundary: an additive index is still a modification to the Layer 1 schema — not a column alteration, but not literally zero modification — and the proposal must not describe it as though it were no modification. Accepted, and the earlier wording is corrected in place.
+
+The boundary is resolved by choosing the reading, not by asserting one:
+
+| reading of the boundary | is `versions_memory_version_uq` allowed? | what this proposal does |
+|---|---|---|
+| prohibits modifying existing Layer 1 **columns and tables** | yes — no column added, no row rewritten, no `ALTER TABLE` | the design as written |
+| prohibits **any** Phase 1 schema modification | no | fall back to the alternative below |
+
+The alternative, if the stricter reading governs: drop the index and the composite foreign key, and enforce the same invariant in the adapter — read the version's owning `memory_id` and reject a mismatch inside the same transaction that inserts the context entry. That is strictly weaker, because the guarantee then lives in application code rather than in the database, and any writer bypassing the adapter can violate it. §13.8 requires the negative test either way, so the weaker path is still testable.
+
+This proposal **recommends the index** and states plainly that it is a Layer 1 modification. Which reading controls is not mine to decide; §14 carries it as Q11 rather than as a settled fact. Describing the index as "index-only, no Layer 1 change" — as the previous revision did — was wrong.
 
 `version_sha256` is a digest of `version_json` as stored, computed by the adapter. R1 correctly noted digest validation does not by itself solve external index lifecycle — that is why `index_status` and `binding_epoch` exist; stale-binding recovery is an operational procedure over those columns, not a constraint. It is listed as Q7, still open.
 
@@ -523,7 +656,9 @@ pub trait TranscriptCapture {
     fn read_by_role(&self, session_id: &SessionId, role: MessageRole,
                     after_seq: u64, limit: usize) -> Result<Vec<CapturedMessage>, Error>;
     fn read_thread(&self, message_id: &MessageId) -> Result<Vec<CapturedMessage>, Error>;
-    fn read_tool_call(&self, session_id: &SessionId, tool_call_id: &str)
+    fn read_tool_calls(&self, session_id: &SessionId, message_id: &MessageId)
+        -> Result<Vec<ToolCall>, Error>;
+    fn read_tool_result(&self, session_id: &SessionId, tool_call_id: &str)
         -> Result<ToolCallPair, Error>;
     fn reconstruct(&self, session_id: &SessionId) -> Result<ReconstructedTranscript, Error>;
 }
@@ -549,6 +684,8 @@ Invariants:
 - `invalidate` MUST NOT delete canonical content; it sets `index_status='stale'` and increments `binding_epoch`.
 - `rebuild` MUST be idempotent, MUST report each version under exactly one of `exact` / `partial` / `unreconstructable`, and MUST NOT write a substituted value where it cannot reproduce the original.
 - `rebuild` with `at = None` may only produce `partial` or `unreconstructable` results, because `evaluated_at` was not supplied.
+- `read_tool_calls` MUST return all calls emitted by one message in `call_index` order; there is no single-call form, because one message may emit many.
+- `reconstruct` MUST return framed output, not bare bytes; a frame whose slice does not re-hash to its `content_sha256` MUST be reported as corrupt rather than returned.
 
 ---
 
@@ -559,11 +696,14 @@ Invariants:
 | M1 | Create Layer 2 and Layer 3 tables with `IF NOT EXISTS`; add `versions_memory_version_uq` index | drop new tables and index |
 | M2 | Backfill `transcript_*` from existing `accepted_events` where a session mapping is recorded | truncate; Layer 2 is not canonical |
 | M3 | For each existing version, insert an `initial` `score_input` row so that scores have a declared input set | delete inserted rows |
-| M4 | Compute projections; every row starts `rebuild_state='partial'` (no historical `evaluated_at` exists for pre-migration versions) | drop projections |
-| M5 | Bind vectors; `index_status='pending'` until the external index confirms | delete bindings |
-| M6 | Cut over reads | revert to Phase 1 reads |
+| M4 | Register a `scoring_method` row per algorithm with its spec digest and numeric semantics; without these no projection may claim `exact` | delete inserted rows |
+| M5 | Compute projections; every row starts `rebuild_state='partial'` (no historical `evaluated_at` exists for pre-migration versions) | drop projections |
+| M6 | Bind vectors; `index_status='pending'` until the external index confirms | delete bindings |
+| M7 | Cut over reads | revert to Phase 1 reads |
 
-No destructive migration. No `ALTER TABLE` on Layer 1 tables. No rewrite of `versions`. The only Layer 1 change is one additive unique index, declared in §8.4, created with `CREATE UNIQUE INDEX` only.
+No destructive migration. No `ALTER TABLE` on Layer 1 tables. No rewrite of `versions`. One Layer 1 modification is proposed and declared as such: the additive unique index `versions_memory_version_uq` (§8.4). It adds no column and rewrites no row, but it does change the schema of a Layer 1 table, and it is listed here as a modification rather than as no change.
+
+**Integration caveat (R2, disclosure C).** This branch is not rebased onto current main. R2 verified that the intervening commits touch `remote-worker-inventory.yaml` and the runbook pair only, none of which this proposal depends on, and ruled a forced rebase unnecessary for the design review. The branch must be updated against current main before the PR is treated as fully integrated or merged. GitHub's `mergeable` field does not substitute for that check.
 
 Note M4 honestly: pre-migration versions cannot reach `exact` rebuild state, because their evaluation clock was never recorded. They stay `partial` permanently unless an operator supplies a reconstructed clock, which would then be an `operator` `score_input` row and visible as such.
 
@@ -578,17 +718,23 @@ Required before implementation authorization is granted. These are specified, no
 1. **Vector digest binding** — `bind` rejects a `version_sha256` that does not match stored `version_json`.
 2. **Scope isolation** — two scopes, identical content; each `search` returns only its own scope's versions.
 3. **Invalidation is non-destructive** — `invalidate` leaves `versions` row count unchanged and sets `index_status='stale'`, `binding_epoch` incremented.
-4. **Rebuild — exact tier** — with method version present, `score_input` set unchanged and `evaluated_at` supplied, drop and rebuild produces byte-identical scores and matching `input_set_digest`.
-5. **Rebuild — unreconstructable tier** — delete `score_input` rows for a version (simulating an under-recorded history), run rebuild, assert `rebuild_state='unreconstructable'` with the missing dependency named in the report, and assert no `value_score` was written.
+4. **Rebuild — exact tier** — with the spec digest matching, `score_input` set unchanged and `evaluated_at` supplied, drop and rebuild produces byte-identical scores and a matching `input_set_digest`.
+5. **Rebuild — unreconstructable tier** — delete `score_input` rows for a version (simulating an under-recorded history), run rebuild, assert `rebuild_state='unreconstructable'` with the missing dependency named, and assert no `value_score` was written.
 6. **Rebuild — partial tier on migration** — pre-migration versions rebuild to `partial`, never `exact`, and never silently to `exact`.
 7. **Method immutability** — `UPDATE` and `DELETE` on `scoring_method` both abort.
-8. **Composite integrity** — insert a `context_assembly_entry` with a `version_id` belonging to a different `memory_id`; assert the insert is refused.
-9. **No cascade destruction** — delete a `transcript_session` that has messages; assert the delete is refused. Then delete a `transcript_message` that has a `memory_source_link`; assert refused.
+8. **Composite integrity** — insert a `context_assembly_entry` with a `version_id` belonging to a different `memory_id`; assert refused.
+9. **No cascade destruction** — delete a `transcript_session` that has messages; assert refused. Then delete a `transcript_message` that has a `memory_source_link`; assert refused.
 10. **Canonical row counts** — closing and retiring sessions leaves `memories` and `versions` row counts unchanged.
 11. **Transcript ordering** — insert messages out of `created_at` order with valid `seq_no`; assert `read_session` returns `seq_no` order.
-12. **Tool-call pairing** — `read_tool_call` returns the emitting assistant message and the `tool` result, and rejects an orphan `tool` message at insert via the `CHECK`.
+12. **Tool-call cardinality (R2-NF-01)** — one assistant message emits three tool calls with distinct `tool_call_id` and `call_index` 1..3; assert `read_tool_calls` returns all three in order, and that inserting a fourth with duplicate `call_index` is refused.
+13. **Tool-call thread integrity (R2-NF-01)** — assert a `tool` message whose parent is a `user` message is refused by the trigger, and that a `transcript_tool_call` referencing a `result_message_id` in a different `session_id` is refused by the composite foreign key.
+14. **Reconstruction framing (R2-NF-03)** — reconstruct a session of three messages and assert `frames[i].byte_offset` is the running sum of preceding `byte_length`s, that the last offset plus length equals `total_bytes`, and that each frame slice re-hashes to its `content_sha256`. Include a boundary case where two adjacent payloads would be ambiguous under naive concatenation (`"ab"` then `"c"` versus `"a"` then `"bc"`).
+15. **History provenance (R2-NF-02)** — assert a `version_value_history` row naming an unregistered `(method_id, method_version)` is refused, and one naming an `input_id` belonging to a different `version_id` is refused.
+16. **Score-input immutability (R2-NF-04)** — `UPDATE` and `DELETE` on `score_input` both abort; a correction inserted with `corrects_input_id` succeeds and leaves the corrected row intact.
 
-Tests 4–7 are the direct regression guards for R1-B-01. Tests 9–10 are the direct guards for R1-NB-04. Test 8 is the guard for R1-NB-03. Test 11 is the guard for R1-NB-02.
+Tests 4–7 and 16 are the regression guards for R1-B-01. Tests 9–10 guard R1-NB-04. Test 8 guards R1-NB-03. Tests 11–14 guard R1-NB-02 / R2-NF-01 / R2-NF-03. Test 15 guards R2-NF-02.
+
+These tests were not written and not run. Neither the R2 nor the R3 DDL was executed — see §17.
 
 ---
 
@@ -605,7 +751,9 @@ Tests 4–7 are the direct regression guards for R1-B-01. Tests 9–10 are the d
 | Q7 | Stale-binding recovery procedure, including external index rebuild after an outage | OPEN |
 | Q8 | Transcript retention classes and their default periods | OPEN — this proposal constrains deletion, it does not define the policy |
 | Q9 | Whether `impact_level` should get a typed home or be dropped | OPEN |
-| Q10 | Does numeric reproducibility stay a requirement, or is structural rebuild sufficient? | **OPEN — review must rule.** This draft specifies the tier conditions (§8.3); the concurrent R2-a draft withdraws the numeric guarantee entirely. Both postures are on the table. |
+| Q10 | Does numeric reproducibility stay a requirement, or is structural rebuild sufficient? | **REVIEW RULING (R2): tiered preferred.** Structural and unreconstructable tiers accepted; exact-value retained as a design objective, **CONDITIONAL and NOT VERIFIED**. This is a review ruling on a review question, not an owner decision on Q1. |
+| Q11 | Does the Layer 1 boundary prohibit modifying Layer 1 tables, or only their columns? | **OPEN — controls whether `versions_memory_version_uq` is admissible at all.** §8.4 states both branches and the fallback. Not mine to decide. |
+| Q12 | Is the in-memory DDL check an acceptable reading of the `no schema execution` bound? | **OPEN — requires the authority that issued the bound.** R2 classified it `DISCLOSED SCOPE DEVIATION`, not authorized activity, and stated an engineering reviewer cannot grant retrospective authorization. `acceptance_authority` is `NOT_ASSIGNED`; no session can supply this. |
 
 ---
 
@@ -615,9 +763,13 @@ Tests 4–7 are the direct regression guards for R1-B-01. Tests 9–10 are the d
 - Not a frozen schema. It is a proposal for review.
 - Not an authorization for P2-T1. Implementation authorization remains withheld per `GO-2026-P2-DESIGN-001`.
 - **Not a resolution of Q1.** Option C is recommended, not chosen.
+- **Not a substantiated exact-value rebuild.** The conditions are specified; the evidence is not. Q10 is recorded as ruled for a tiered posture, with exact value `CONDITIONAL` and `NOT VERIFIED`.
+- **Not authorized schema execution.** The one in-memory DDL check is recorded as `DISCLOSED SCOPE DEVIATION`, not as compliant activity; Q12 escalates the authority question.
+- **Not authenticated prompt provenance.** Appendix A is a copy; its origin is `UNVERIFIED`.
 - No technology selection: Qdrant/Chroma, embedding model and dimension remain OPEN.
 - No claim that the prompt schema is unusable. Its tensions are real; its contradictions with Phase 1 are not established as necessary.
 - No claim of approval by any accountable authority. `acceptance_authority` is `NOT_ASSIGNED`.
+- No claim that the R3 DDL applies — it was not executed. §17's probe result is evidence about the R2 DDL only.
 
 ---
 
@@ -627,7 +779,7 @@ Tests 4–7 are the direct regression guards for R1-B-01. Tests 9–10 are the d
 |---|---|
 | Phase 1 DECIDED status, merged commits, observed table definitions | **VERIFIED** — read at base `7f8093876729212ef4e83461ba8c2f2cd96582c7`; `core-entities.md` blob `8cb5a674`, `phase-1-sqlite-adapter-contract.md` blob `c472e00f`, `phase-1-storage-trait-contract.md` blob `22ca7cd3`, `payload.rs` blob `ad22972b`. R1 independently confirmed the same tables. |
 | Trait contract status | **VERIFIED** — the file states `CANDIDATE`; this document relies only on the narrower SQLite-boundary claim |
-| Prompt schema contents | **VERIFIED at this document's head** — reproduced verbatim in Appendix A. R1's finding that the fenced repository path did not resolve is correct and is the reason the appendix exists. |
+| Prompt schema contents | **VERIFIED as embedded text at this document's head** — reproduced in Appendix A. Its **original-source verbatim provenance is UNVERIFIED**: R2 independently fetched the repository path at the reviewed head and got `404`, so an appendix is reviewable evidence but cannot authenticate its own origin. R2's ruling accepted the appendix as a valid self-containment remedy and withheld the `VERIFIED` upgrade. That limit is not contested here. The remedy, if independent authentication is required, is to commit the prompt file at a known commit — which needs a write path this manifest does not contain. |
 | §5 tensions | **CORROBORATED, author assessment** — R1 ruled the stronger form `OVERSTATED`; the downgraded form is retained as tension, not contradiction |
 | R1 findings and dispositions | **VERIFIED** — transcribed from the R1 reply, recorded on PR #307 |
 | Recommendations in §6–§12 | **PROPOSED** — author-authored, subject to R2 review |
@@ -635,28 +787,41 @@ Tests 4–7 are the direct regression guards for R1-B-01. Tests 9–10 are the d
 
 ---
 
-## 17. Design verification performed, and what it does not establish
+## 17. Disclosed scope deviation — in-memory DDL check
 
-The DDL in §7 and §8 was executed against an ephemeral in-memory SQLite database (`sqlite3` 3.53.1), preceded by `CREATE TABLE` statements copied from the merged Phase 1 crates so that foreign keys resolve against the real key shapes. Nothing was written to disk, no migration was applied, and no repository artefact was created or changed.
+**R2 classified this as `DISCLOSED SCOPE DEVIATION`, not authorized activity.** That ruling is accepted without argument. This section does not defend the check; it records it, records what it found, and escalates the authority question.
 
-Result: all eight design DDL blocks parse and apply; seven constraint behaviours were exercised and all behaved as specified — the composite `(memory_id, version_id)` foreign key refuses a mismatched pair; deleting a `transcript_session` that has messages is refused; a `tool` message without parent and `tool_call_id` is refused; deleting a `transcript_message` that carries a `memory_source_link` is refused; `UPDATE` and `DELETE` on `scoring_method` are refused; and a projection referencing an unregistered `(method_id, method_version)` is refused.
+What was done: the DDL in §7 and §8 was executed against an ephemeral in-memory SQLite database (`sqlite3` 3.53.1), preceded by `CREATE TABLE` statements copied from the merged Phase 1 crates so that foreign keys resolve against the real key shapes. Nothing was written to disk, no migration was applied, no repository artefact was created or changed.
 
-This check found one real defect before review: the first draft of `transcript_message` referenced `accepted_events(event_id)`, but the merged Event Store's primary key is `event_row INTEGER`. The draft would not have compiled at all. §7.1 now uses `event_row`.
+Why it was done: to find out whether the document is internally coherent before spending a review round on it.
 
-Scope disclosure: `authorization-manifest.yaml` records `no schema execution` among the bounds of design-only scope. Executing the document's own DDL in a throwaway in-memory database to test whether the document is internally coherent is disclosed here rather than treated as within scope by assumption. The narrower reading — that the prohibition covers applying schema to any persistent store or repository path — is the one this work relied on, and it is recorded as an interpretation, not as a settled boundary.
+Why that reason does not make it authorized: `authorization-manifest.yaml` records `no schema execution` among the design-only bounds, and an in-memory database is still a database against which schema execution occurred. The earlier revision advanced the reading that the bound covers persistent stores and repository paths. R2 declined to accept that reading as established by the authorization text, and an engineering reviewer cannot grant retrospective authorization. Both points stand. The manifest now records the event as `DISCLOSED_INTERPRETATION` rather than as compliance, and the question is carried as **Q12**.
+
+What it found, reported as author-reported and not independently reproduced:
+
+- All design DDL blocks apply against the real Phase 1 key shapes.
+- Constraint probes behaved as specified: the composite `(memory_id, version_id)` foreign key refuses a mismatched pair; deleting a `transcript_session` that has messages is refused; deleting a `transcript_message` carrying a `memory_source_link` is refused; `UPDATE` and `DELETE` on `scoring_method` are refused; a projection referencing an unregistered `(method_id, method_version)` is refused.
+- One real defect, found before review: the first draft of `transcript_message` referenced `accepted_events(event_id)`, and the merged Event Store's primary key is `event_row INTEGER`. The draft would not have compiled. §7.1 now uses `event_row`.
+
+In R3 this check was **not** repeated. The tables changed, so the earlier result does not carry forward as evidence about the current DDL; it is evidence about the R2 DDL only. Whether the R3 DDL applies is an open question for an authorized implementation phase, not something this revision asserts. The prior probes are `AUTHOR-REPORTED`, and R2 declined to upgrade them, which is the correct tier.
 
 What this does not establish:
 
 - Not an implementation. There is no code beyond the document.
-- Not a test suite. None of §13's twelve tests were written or run; seven ad-hoc constraint probes are not those tests.
+- Not a test suite. None of §13's thirteen tests were written or run; the ad-hoc probes are not those tests.
 - Not evidence about performance, concurrency, WAL behaviour, or behaviour under the Phase 1 adapter's transaction discipline.
-- Not evidence that the design satisfies any capability in §9. It establishes only that the stated constraints do what the document says they do.
+- Not evidence that the R3 DDL applies at all — the R3 tables were not exercised.
+- Not evidence that the design satisfies any capability in §9.
 
 ---
 
-## Appendix A — prompt schema DDL, verbatim
+## Appendix A — prompt schema DDL, embedded copy
 
-Source: `prompts-fix/P2-T2-memory-schema.md`, Phase 2 block, reproduced exactly as supplied so this evidence package is self-contained. This appendix is evidence, not adopted design. Where it conflicts with §7–§8, §7–§8 govern.
+**Provenance limit, stated up front.** This appendix is a copy. It is reviewable as text, and it is what R1-NB-05 asked for, but it cannot authenticate its own origin: the source path `prompts-fix/P2-T2-memory-schema.md` is not present in the repository at any reviewed head, and both R1 and R2 independently received `404` for it. R2 therefore accepted the appendix as a self-containment remedy while withholding the `VERIFIED` upgrade, and that tier stands uncontested.
+
+Anyone who needs authenticated provenance must obtain the source file at a known commit — which requires a write path beyond this manifest's two allowed files — or compare this appendix against their own copy.
+
+The copy below is exact as supplied in this session. It is evidence, not adopted design: where it conflicts with §7–§8, §7–§8 govern.
 
 ```sql
 -- AI Memory Brain - SQLite Schema
