@@ -87,8 +87,10 @@ review:
   blocking_question: >
     Q1 in the proposal — the architecture choice. R5 states three options (A: Phase 1 as
     store with Event-only transcript ingress; B: supersede Phase 1; C: three layers with a
-    separate transcript-capture layer). Q1 remains OPEN. A review recommendation is
-    PROPOSED, not a ruling.
+    separate transcript-capture layer). Q1 was DECIDED after R5: OPTION_C, recorded in
+    DEC-P2-T2-Q1-001.md under the dev-baseline Architecture Owner role. It was NOT decided
+    by an accountable human authority, and that distinction is preserved rather than
+    smoothed. Q11, Q12, Q13, Q14, Q8 and Q9 remain OPEN.
 
 status: BLOCKED
 status_reason: >
@@ -381,7 +383,7 @@ claims_forbidden:
   - "that P2-T2 is implemented"
   - "that the schema is frozen"
   - "that P2-T1 implementation is authorized"
-  - "that Q1 (Option A vs B vs C) is resolved"
+  - "that Q1 has been resolved by an accountable human authority"
   - "that the recommended Option C has been chosen by an accountable authority"
   - "that a vector store or embedding model has been selected"
   - "that a human Owner approved this design"
