@@ -388,11 +388,12 @@ Completing the inventory is not evidence of bilingual migration or authorization
 
 F-02 has two distinct requirements:
 
-1. **Requirement 1 — validator integrated and invoked by CI: COMPLETE / VERIFIED.**
+1. **Requirement 1 — validator integrated and invoked by CI: COMPLETE / VERIFIED, ADVISORY (non-blocking).**
    - Workflow: `.github/workflows/bilingual-docs.yml`, blob `fbb01f4cf6c1046fb4f3f6f962d1caed921577b2`.
    - Validator: `scripts/check_bilingual_docs.py`, blob `cfae34de1d07d4366850d439cb7c1e643d43cfae`.
    - The workflow step `Check paired documentation and PR manifest` runs `python3 scripts/check_bilingual_docs.py`.
-   - The validator's `main()` calls `check_policy_inheritance(body, changed)`.
+   - The validator's `main()` calls `check_policy_inheritance(body, changed)` and emits its results as non-blocking notices; those results are not added to the gate's error set.
+- Rationale for advisory scope: the declaration requirement originates from the unadopted GOV-DOC-001 v1.2 draft, so a blocking check would impose an unapproved normative obligation through tooling. Enforcement is deferred until the requirement is formally adopted.
 
 2. **Requirement 2 — corresponding required check configured and enforced: NOT_VERIFIED / PLATFORM-LIMITED BLOCKER.**
    - `GET /branches/main/protection` returned HTTP 403:
@@ -400,7 +401,7 @@ F-02 has two distinct requirements:
    - `GET /rulesets` returned the same HTTP 403 plan-limit response.
    - These responses establish a GitHub plan/visibility limitation for this private repository, not a token-permission failure. Required-check configuration/enforcement and failure-blocking behavior therefore remain unverified.
 
-**F-02 overall status: PARTIAL.** CI integration is verified; required-check enforcement is not verified. Successful workflow execution must not be treated as proof that the platform enforces the check.
+**F-02 overall status: PARTIAL.** CI integration is verified; required-check enforcement is not verified, and the declaration check itself is advisory rather than blocking. Successful workflow execution must not be treated as proof that the platform enforces the check.
 
 **中文**
 
@@ -408,11 +409,12 @@ F-02 has two distinct requirements:
 
 F-02 包含两个相互独立的要求：
 
-1. **要求 1——校验器已接入并由 CI 调用：COMPLETE / VERIFIED（完成/已验证）。**
+1. **要求 1——校验器已接入并由 CI 调用：COMPLETE / VERIFIED（完成/已验证），ADVISORY（非阻断）。**
    - Workflow：`.github/workflows/bilingual-docs.yml`，blob `fbb01f4cf6c1046fb4f3f6f962d1caed921577b2`。
    - 校验器：`scripts/check_bilingual_docs.py`，blob `cfae34de1d07d4366850d439cb7c1e643d43cfae`。
    - Workflow 步骤 `Check paired documentation and PR manifest` 实际运行 `python3 scripts/check_bilingual_docs.py`。
-   - 校验器的 `main()` 调用了 `check_policy_inheritance(body, changed)`。
+   - 校验器的 `main()` 调用了 `check_policy_inheritance(body, changed)`，其结果以非阻断提示输出，不并入门禁错误集。
+- 非阻断的理由：声明要求源自尚未采纳的 GOV-DOC-001 v1.2 草案，若设为阻断即在工具层施加未获批准的规范义务；正式采纳前不予强制。
 
 2. **要求 2——对应 required check 已配置并强制执行：NOT_VERIFIED / PLATFORM-LIMITED BLOCKER（未验证/平台限制阻塞）。**
    - `GET /branches/main/protection` 返回 HTTP 403：
@@ -520,7 +522,7 @@ The workflow and validator are integrated:
 - Validator script blob: `cfae34de1d07d4366850d439cb7c1e643d43cfae`.
 - Workflow job: `GOV-DOC-001 structural checks`.
 - Executed step: `Check paired documentation and PR manifest`.
-- The step runs `python3 scripts/check_bilingual_docs.py`; the script's `main()` invokes `check_policy_inheritance()`.
+- The step runs `python3 scripts/check_bilingual_docs.py`; the script's `main()` invokes `check_policy_inheritance()` in ADVISORY mode (results printed as notices, never blocking).
 
 Three successful workflow executions are independently evidenced:
 
@@ -534,7 +536,7 @@ All three executions reported `Bilingual documentation and prompt-library gate: 
 
 The earlier structural CI failure run `44477435608` remains historical evidence and is not overwritten by these later successful runs.
 
-**Status:** Requirement 1 COMPLETE / VERIFIED; Requirement 2 NOT_VERIFIED; F-02 overall PARTIAL.
+**Status:** Requirement 1 COMPLETE / VERIFIED (advisory, non-blocking); Requirement 2 NOT_VERIFIED; F-02 overall PARTIAL.
 
 **中文**
 
@@ -546,7 +548,7 @@ Workflow 与校验器已完成接入：
 - 校验器脚本 blob：`cfae34de1d07d4366850d439cb7c1e643d43cfae`。
 - Workflow job：`GOV-DOC-001 structural checks`。
 - 实际执行步骤：`Check paired documentation and PR manifest`。
-- 该步骤运行 `python3 scripts/check_bilingual_docs.py`；脚本的 `main()` 调用 `check_policy_inheritance()`。
+- 该步骤运行 `python3 scripts/check_bilingual_docs.py`；脚本的 `main()` 以 ADVISORY 模式调用 `check_policy_inheritance()`（结果仅作提示，不阻断）。
 
 已有三次成功的 workflow 执行证据：
 
@@ -560,7 +562,7 @@ Workflow 与校验器已完成接入：
 
 较早的结构 CI 失败运行 `44477435608` 保留为历史证据，不被后续成功运行覆盖。
 
-**状态：**要求 1 COMPLETE / VERIFIED；要求 2 NOT_VERIFIED；F-02 总体 PARTIAL。
+**状态：**要求 1 COMPLETE / VERIFIED（advisory，非阻断）；要求 2 NOT_VERIFIED；F-02 总体 PARTIAL。
 
 ### 7.2 Actual gate behavior / 门禁实际行为
 
@@ -717,7 +719,7 @@ Execution PASS does not imply independent review PASS.
 
 | Item | Current status | Acceptance boundary |
 |---|---|---|
-| F-02 | PARTIAL | Validator and tests committed; corrected local tests 6/6 PASS. CI workflow integration and required-check enforcement evidence remain outstanding. |
+| F-02 | PARTIAL | Validator and tests committed; corrected local tests 6/6 PASS. Declaration check is ADVISORY (non-blocking); CI workflow integration verified; required-check enforcement evidence remains outstanding. |
 | F-06 Issue inventory | Inventory finalized | 39 records: 28 EN_ONLY, 10 EN_ZH_MIXED, 1 ZH_ORIGINAL_WITH_EN_TERMS (#254, HOLD). Each record requires a matching body_sha256. |
 | F-06 Commit inventory | Inventory finalized | 313 records: 312 EN_ONLY, 1 MIXED (C168). Each record requires matching sha and msg_sha256; classification is based on the complete commit message. |
 | F-07 | Correction recorded | PR comment `7006445553`; authoritative D1 blob `66517d39`. |
@@ -743,7 +745,8 @@ Execution PASS does not imply independent review PASS.
 
 **F-02 — platform required-check enforcement**
 
-- Requirement 1 (validator integrated and invoked by CI): COMPLETE / VERIFIED.
+- Requirement 1 (validator integrated and invoked by CI): COMPLETE / VERIFIED, ADVISORY (non-blocking).
+- Enforcement scope (v2.4, R7 finding): the declaration check reports notices only. A blocking check would impose the unadopted v1.2 inheritance requirement through tooling; enforcement is deferred to adoption.
 - Requirement 2 (required check configured and enforced): NOT_VERIFIED — PLATFORM-LIMITED BLOCKER.
 - F-02 overall remains PARTIAL. Do not represent successful workflow runs as platform enforcement.
 
@@ -800,7 +803,8 @@ No automatic approval or adoption is permitted.
 
 **F-02——平台 required-check 强制执行**
 
-- 要求 1（校验器已接入并由 CI 调用）：COMPLETE / VERIFIED。
+- 要求 1（校验器已接入并由 CI 调用）：COMPLETE / VERIFIED，ADVISORY（非阻断）。
+- 强制范围（v2.4，R7 发现）：声明校验仅输出提示。若设为阻断，即以工具施加尚未采纳的 v1.2 继承要求；强制执行推迟至规范采纳之后。
 - 要求 2（required check 已配置并强制执行）：NOT_VERIFIED——PLATFORM-LIMITED BLOCKER。
 - F-02 总体维持 PARTIAL。不得将 workflow 成功运行表述为平台强制执行。
 
@@ -993,3 +997,27 @@ This revision responds to a coordinator-side normative-boundary finding raised w
 - **门禁接线不变：**`scripts/check_bilingual_docs.py` 仍对触及 `00-governance/` 的变更校验 `POLICY-INHERITANCE-DECLARATION` 块，此点已经 R6 接受。由于继承要求源自尚未采纳的 v1.2 草案，该接线登记为工具层的声明校验，不构成政策采纳；采纳状态仍为 `NOT_ADOPTED`。
 - **效力边界不变：**GOV-DOC-001 v1.1 NORMATIVE；v1.2 DRAFT / NOT_ADOPTED / NOT_EFFECTIVE；`MIGRATION_DEBT != EXEMPTION`；`Approval: NOT_RECORDED`；F-02 总体 PARTIAL；F-06 OPEN。
 - **自引用：**D7 无法包含自身提交后的 blob；提交后读回登记于 PR 评论。此披露方式与既往非自引用记录一致。
+
+**EN**
+
+## D7 v2.4 Revision Note
+
+This revision responds to the R7 independent review (final disposition `NEEDS-REVISION`, two P1 findings). It changes tooling behaviour only; no policy text, status, or approval state changes.
+
+- **P1 (adoption-by-tooling) — remedied:** the `POLICY-INHERITANCE-DECLARATION` check is downgraded from a blocking gate error to an advisory notice. Because the inheritance requirement originates from the unadopted v1.2 draft, a blocking check would have imposed an unapproved normative obligation through tooling. The validator and its tests are retained; enforcement is deferred until formal adoption.
+- **P1 (exception record) — remedied by external registration:** the RULING-06 five-field exception for the platform-unavailability compensation is registered in a PR comment rather than in this report, so that the authorising record is attributable and not self-issued by the report under review.
+- **P2 (merge is not approval) — stated explicitly:** merging this PR does not constitute approval, adoption, or normative activation of GOV-DOC-001 v1.2. v1.1 remains the only NORMATIVE text at the normative path.
+- **P2 (required-check re-verification) — deferred with an owner and a trigger:** the required-check configuration is re-verified when the GitHub Actions billing block is lifted; until then Requirement 2 stays `NOT_VERIFIED`.
+- Gate re-execution at the v2.4 head remains local (platform compensation path); the exact-Head evidence and blob read-backs are recorded in the PR comment for this revision.
+
+**中文**
+
+## D7 v2.4 修订说明
+
+本次修订响应 R7 独立复审（最终结论 `NEEDS-REVISION`，两项 P1）。仅改变工具行为，不改变任何政策正文、状态或批准状态。
+
+- **P1（以工具实现事实采纳）——已修复：**`POLICY-INHERITANCE-DECLARATION` 校验由阻断性门禁错误降级为非阻断提示。由于继承要求源自尚未采纳的 v1.2 草案，阻断性校验等于以工具施加未获批准的规范义务。校验器及其测试保留，强制执行推迟至正式采纳之后。
+- **P1（例外记录）——以外部登记方式修复：**平台不可用补偿所依据的 RULING-06 五字段例外登记于 PR 评论，而非本报告内，以使授权记录可归属、不由被审报告自我签发。
+- **P2（合并不等于批准）——已显式声明：**合并本 PR 不构成对 GOV-DOC-001 v1.2 的批准、采纳或规范性生效。规范路径上唯一的 NORMATIVE 文本仍为 v1.1。
+- **P2（required-check 复验）——带责任与触发器推迟：**待 GitHub Actions 计费阻塞解除后复验 required-check 配置；在此之前要求 2 维持 `NOT_VERIFIED`。
+- v2.4 head 上的门禁复跑仍为本地执行（平台补偿路径）；该精确 head 的证据与 blob 读回登记于本次修订的 PR 评论。

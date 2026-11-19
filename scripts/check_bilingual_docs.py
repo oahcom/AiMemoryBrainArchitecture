@@ -270,7 +270,12 @@ def main() -> int:
 
     body = os.environ.get("PR_BODY", "")
     errors: list[str] = check_prompt_library()
-    errors.extend(check_policy_inheritance(body, changed))
+    # ADVISORY ONLY: the inheritance requirement originates from the unadopted
+    # GOV-DOC-001 v1.2 draft. Reporting it as a blocking error would impose an
+    # unapproved normative obligation through tooling, so it is emitted as a
+    # notice until the requirement is formally adopted.
+    for notice in check_policy_inheritance(body, changed):
+        print(f"::notice::advisory (non-blocking): {notice}")
     exception = approved_exception(body)
     complete = "BILINGUAL-MANIFEST: COMPLETE" in body
 
