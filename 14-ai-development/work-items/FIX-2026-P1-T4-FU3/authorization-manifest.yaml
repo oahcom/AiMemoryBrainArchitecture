@@ -1,0 +1,190 @@
+# FIX-2026-P1-T4-FU3 authorization manifest
+
+Pins the documented declaration example to the shipped checker with an executable
+regression test. Every fact below was measured during this operation.
+
+## 1. Decision
+
+    decision_id: DEC-FIX-2026-P1-T4-FU3-GO-001
+    issued_by: coordinator session (13-20-04)
+    form: GO decision + manifest (allowed_write_paths, authorization_basis)
+    self_issued: true
+    self_issued_note: >
+      Self-issued by the session that performs the write. It is not an Owner approval,
+      not a second-identity review and not an adoption.
+
+## 2. Why this needs its own authorization
+
+Four prior manifests in this series state: "scripts/** — not touched; no code, no test,
+no checker change." That exclusion was correct for documentation corrections and is not
+read here as a prohibition. This change set touches `scripts/**` only to ADD a test file;
+the checker and the template are not modified.
+
+## 3. Write allowlist
+
+    allowed_write_paths:
+      - scripts/governance/evidence/test_template_example_executable.py   (new file)
+      - 14-ai-development/work-items/FIX-2026-P1-T4-FU3/authorization-manifest.yaml
+
+    excluded:
+      - "scripts/governance/evidence/check-evidence-tiering.py — NOT modified. If the
+         checker needed a change, this test would be pinning the wrong side."
+      - "14-ai-development/prompt-and-evidence-template.md — NOT modified."
+      - "14-ai-development/evidence-tiering-policy.md / .en.md — NOT modified."
+      - "14-ai-development/work-items/INDEX.md — NOT modified in this PR, deliberately;
+         see section 8."
+      - ".github/workflows/** — NOT modified; the checker remains unwired."
+
+## 4. What was wrong
+
+FIX-2026-P1-T4-FU1 (merge `cd9c5cd0`) fixed two documentation defects:
+
+  1. the template example wrote evidence paths bundle-relative, while `verify_path()`
+     resolves every declared value against the repository root of `subject_head`;
+  2. `evidence.review_note` was documented as free text, while `LEVEL3_FIELDS` feeds it
+     through the same path verifier.
+
+Neither could be caught by the 67 shipped tests, because those construct declarations by
+hand and never read the documentation. So both defects were invisible to a green suite,
+were found only by a human-style audit, and could return the same way.
+
+The structural point: the repository has a checker that nothing calls automatically, and
+a documented shape that nothing checks. Two artifacts that are supposed to agree, with no
+executable statement that they do agree, is not a gate — it is a coincidence that is
+currently holding.
+
+## 5. What this adds
+
+One test module, five cases. Each asserts VERDICT and the **exact set** of REASON codes, not
+membership: a case is only causal when a control passes and the treatment changes one field,
+so a second reason would mean the case is accusing the wrong thing.
+
+| Case | Assertion | Guards |
+|---|---|---|
+| `test_documented_example_passes_verbatim` | example read out of the shipped template, materialised in a real Git repo, returns `VERDICT PASS` and no REASON | the documented shape stays executable |
+| `test_example_evidence_paths_are_root_relative_bundle_paths` | every declared evidence path starts at `14-ai-development/work-items/` | the path base is visible in the example instead of being satisfied by a lucky layout |
+| `test_example_keeps_evidence_paths_root_relative` | flattening one evidence path returns `BLOCKED` with exactly `{CE_EVIDENCE_NOT_IN_SUBJECT}` | FU1 defect 1 cannot return |
+| `test_level3_control_passes` | a Level 3 declaration shaped so Level 3 is legal returns `VERDICT PASS` | confounders are eliminated before the next case is read as causal |
+| `test_level3_review_note_must_still_be_a_path` | same declaration, only `review_note` changed to free text, returns `BLOCKED` with exactly `{CE_EVIDENCE_NOT_IN_SUBJECT}` | FU1 defect 2 cannot return |
+
+Design notes:
+
+- The example is **read from the template**, not copied into the test. A copy would drift.
+- The declaration is parsed with the **shipped parser** (imported from the checker), not a
+  reimplementation, so a change in the accepted syntax surfaces here.
+- The fixture sets `origin` to the repository the example declares. Without it the checker
+  returns `CE_REPO_IDENTITY_UNVERIFIED` and every case would fail for a reason unrelated to
+  what it tests — discovered while building this test, and the first version did fail that way.
+- The Level 3 control exists because the example as printed is `FEATURE` at `R2`, and
+  `FEATURE` cannot be Level 3 (`CE_LEVEL_CLASS_CONFLICT`) while `R2` to Level 3 is a
+  downgrade needing its own justification. `DOC_EDITORIAL` at `R1` reaches Level 3 with no
+  extra fields, which is what makes the pair a controlled comparison rather than two
+  independent failures.
+
+## 5a. A limit of the verbatim case, measured rather than assumed
+
+The verbatim case is **self-consistent, not correct**. The fixture materialises whatever the
+declaration names, so an example writing `"design.md"` also passes there — it simply gets a
+`design.md` at the repository root. This was found by running the negative control after the
+first revision: the template reverted to its pre-FU1 shape still produced a green verbatim
+case, and only the two guard assertions failed. That is exactly the failure mode R1 later
+named for a different case, found here by accident and fixed on purpose.
+
+Consequence: the path-base defect needs an expectation stated **independently of the
+template**, which is what `test_example_evidence_paths_are_root_relative_bundle_paths` does.
+With that case in place, the negative control fails 3 of 5 rather than 2 of 5, and the
+verbatim case keeps passing — which is now a documented property, not an oversight.
+
+## 6. Verification
+
+    new module:      5 tests, OK
+    full suite:      72 tests, OK  (67 shipped + 5 added, run with
+                     python -m unittest discover -s scripts/governance/evidence -p "test_*.py")
+
+Negative control, run twice — the first run is what exposed the verbatim case's limit:
+
+    injection:  the template was reverted in the working tree to its pre-FU1 shape
+                (evidence paths flattened to bare filenames, review_note set to free text).
+                Nothing else changed: not the test module, not the checker, not the fixture.
+
+    run 1 (3 cases):   FAILED (failures=2)
+                       the verbatim case still PASSED  <-- the limit recorded in 5a
+                       the flatten case failed on its guard: "design_doc path did not occur
+                         as declared"
+                       the Level 3 case failed on its guard: "the example no longer declares
+                         review_note as a path, so this case cannot be constructed; the defect
+                         it guards against has returned to the template itself"
+
+    run 2 (5 cases):   FAILED (failures=3)
+                       test_example_evidence_paths_are_root_relative_bundle_paths
+                       test_example_keeps_evidence_paths_root_relative
+                       test_level3_review_note_must_still_be_a_path
+                       the verbatim case still PASSED, now by design and documented
+
+    restore:    template restored; `git diff` on the template is empty; full suite 72/72 OK.
+
+A regression test that has never been observed to fail is a decoration. The two runs above
+are the evidence that these fail, and the reason the count went from 2 to 3 is a defect the
+first run found in the test itself.
+
+## 7. Review
+
+    level: R1 (documentation plus test-only; no checker or template change)
+    independent review: separate session, same `oahcom` identity.
+    platform-axis independence: NOT MET, not claimed.
+
+## 8. INDEX registration: deferred, with an owner and a condition
+
+The INDEX row for this work item is NOT added here. A row added by the PR that merges it
+would have to assert a carrier state that is false within seconds of the merge — the defect
+FIX-2026-P1-INDEX-REFRESH-001 closed two commits ago. Precedent: #289 declared its own INDEX
+registration as "a separate authorization item".
+
+A deferral without terms is just a missing row, so the terms are stated:
+
+    responsible:   coordinator session (13-20-04), self-issued decision, labelled as such
+    trigger:       this PR merges or closes
+    condition:     the row states the merge SHA and merge time as BINDING FACTS read back
+                   after the merge, plus the review chain comment ids; it must not assert a
+                   pending state at the moment of writing
+    scope:         its own authorization, one path (14-ai-development/work-items/INDEX.md)
+    not a licence: the deferral expires with that registration; it does not permit this work
+                   item to stay unregistered
+
+If the trigger fires and no registration follows, the omission is a registry defect and must
+be recorded as one rather than explained.
+
+## 9. Limits
+
+- No workflow wiring. The checker still runs only when someone runs it. This test narrows
+  the gap by making the *documentation* mismatch detectable in the suite that people do
+  run; it does not make the checker run on pull requests.
+- CI cannot execute (account billing interruption), so the 70/70 above is a local run.
+- No policy status change; `AI-DOC-EVIDENCE-TIERING` remains `PROPOSED`.
+
+## 10. Review history
+
+    R1: NEEDS-REVISION - 1xP1, 2xP2, 1xP3 (separate session, same oahcom identity).
+
+    P1 (applied): the Level 3 case asserted only that the expected REASON appeared, without
+    proving it was the cause. BLOCKED at Level 3 could have come from any other Level 3
+    condition, so the case could have been asserting a coincidence. Fixed by adding the
+    Level 3 control (5a) and by asserting the EXACT reason set rather than membership, in
+    both the Level 3 case and the flatten case. R1 was right, and right for the reason that
+    matters: a case that cannot fail for its stated cause is not evidence about that cause.
+
+    P2 (applied): the negative control's actual output is now recorded in section 6, including
+    the run that failed, and the full 72-test run after restore is stated. R1 also asked for
+    the INDEX registration to name responsibility and completion conditions; section 8 now
+    states responsible party, trigger, condition, scope and expiry.
+
+    P3 (applied): the module docstring states that a legitimate change to the template will
+    fail these cases until the fixture and expectation follow, that this is the intended cost
+    because the example is a contract, and that relaxing an assertion to get green again is
+    the one response that is not allowed.
+
+    Not from R1, found while applying its P1: the verbatim case is insensitive to the path
+    base, because the fixture materialises whatever the declaration names. Recorded in 5a and
+    closed by a case whose expectation is stated independently of the template. The negative
+    control now fails 3 of 5 instead of 2 of 5, and the surviving pass is documented rather
+    than unexplained.
