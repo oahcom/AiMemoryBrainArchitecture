@@ -30,10 +30,20 @@ authorization:
     activation, or domain decisions on behalf of other Owners.
 prompt:
   id: AID-2026-010-PROMPT
-  version: v1
-  provenance: L2-05 batch2 supplement (l2-05b-supplement.md) + A integration ruling R16
-  sha256: NOT_VERIFIED
-  note: Integration review continuation of existing L2-05 session 6afeef2f.
+  version: v2
+  provenance: L2-05 batch2 dispatch + authorization continuation (repository-copied sources)
+  source_files:
+    - filename: prompt-batch2-dispatch.md
+      sha256: 4906dc8ee80e3e1e0f842178c09d3600a8c29cc0d427ee1b1a55c3dca22d0c10
+      bytes: 51323
+      role: batch2 #43 full-body review dispatch pack (original: state/relay-l2-05-a-governance-portfolio-b2.md)
+    - filename: prompt-batch2-continuation.md
+      sha256: 245a68b6bd06157e5d3ed5827c55e751be0436f34358deb1fcc46b16c72db30e
+      bytes: 2140
+      role: authorization-unblock continuation prompt (original: state/relay-l2-05-continue-b2.md)
+  sha256: 4906dc8ee80e3e1e0f842178c09d3600a8c29cc0d427ee1b1a55c3dca22d0c10
+  sha256_note: primary dispatch pack; continuation companion 245a68b6
+  note: Sources copied into this work-item directory for repository traceability. Integration review continues in L2-05 session 6afeef2f.
 scope:
   - Harvest and review L2-05 batch2 supplement (#43 45KB body).
   - Map #43 Findings to source, evidence, responsibility domain, dependencies.
