@@ -1,0 +1,158 @@
+# FIX-2026-P1-INDEX-REFRESH-001 authorization manifest
+
+Records the coordinator decision, the role status, the write allowlist and the
+explicit limits of this correction. Every value stated as a fact below was read
+from the GitHub API or from a committed file in this repository during this
+operation; nothing is inferred from a prior summary.
+
+## 1. Decision
+
+    decision_id: DEC-FIX-2026-P1-INDEX-REFRESH-001
+    issued_by: coordinator session (13-20-04)
+    form: GO decision + manifest (allowed_write_paths, authorization_basis)
+    self_issued: true
+    self_issued_note: >
+      This decision is issued by the same session that performs the write, so it is
+      self-issued so that no reader mistakes it for independent authorization. It is
+      not an Owner approval, not a second-identity review and not an adoption.
+
+## 2. Why a new authorization is required
+
+`AUTH-2026-11-19-P1-INDEX-REG-001` (used by PR #292) permitted appending delivery
+rows and stated that no existing audit row above is modified. That constraint
+governed one append operation. It is NOT read here as a permanent freeze on
+`INDEX.md`, because a permanent freeze would make every stale assertion in the
+table uncorrectable, and an uncorrectable stale assertion is indistinguishable
+from a false one.
+
+The FIX-2026-P1-T4-FU1 manifest states: "Any path not listed above; new write
+needs a new authorization." This manifest is that authorization, and it is
+narrower than the previous one: it names three rows and one paragraph.
+
+## 3. Write allowlist
+
+    allowed_write_paths:
+      - 14-ai-development/work-items/INDEX.md
+      - 14-ai-development/work-items/FIX-2026-P1-INDEX-REFRESH-001/authorization-manifest.yaml
+
+    excluded:
+      - "Any path not listed above; a new write needs a new authorization."
+      - ".github/workflows/** — not touched; the checker remains unwired (tracked item)."
+      - "scripts/** — not touched; no code, no test, no checker change."
+      - "The three delivery rows under Phase 1 remediation delivery sessions — verified
+         fresh in this pass and therefore NOT edited."
+
+## 4. Scope
+
+Correct three cells in three rows of the main work-item table, and add one
+maintenance rule paragraph above the table. No identifier is invented, removed
+or renumbered; every identifier written into a corrected cell was fetched during
+this pass and is listed in section 5 with the fetch that produced it.
+
+## 5. Findings this correction closes
+
+### FD-1 — FIX-2026-P1-T1 row contradicted the work item's own committed manifest
+
+The row asserted, at `b848138c`:
+
+    Status:       REMEDIATION IN_PROGRESS — ... follow-up PR #270 OPEN/DRAFT
+    Review:       Fresh independent exact-head R1 review PENDING
+    Acceptance:   Owner A acceptance PENDING; no adoption/merge authorized for remediation
+
+Measured:
+
+| Claim | Measured | Source |
+|---|---|---|
+| PR #270 OPEN/DRAFT | `state=closed`, `merged=true`, `merged_at=2026-11-19T06:00:14Z` | `GET /pulls/270` |
+| review PENDING | manifest `review.status: PASS`, `blocking_findings: []`; terminal re-review comment `7002449698` | committed manifest + `GET /issues/comments/7002449698` |
+| acceptance PENDING | manifest `acceptance.status: ACCEPTED_WITH_CONDITIONS`, authority `A`, 5/5 conditions PASS | committed manifest |
+| merge not authorized | manifest `constraints`: "No merge or normative adoption is authorized by this work item." | committed manifest |
+
+The merge commit `c3bf7e47b5121c89277d3df55b12a7a95dcc9706` has exactly one
+parent (`9b67fb1b`), so PR #270 was squash- or rebase-merged, not merged with a
+merge commit. This is recorded because "merge commit only" is a standing
+requirement in several manifests and a single-parent commit cannot satisfy it.
+
+Whether the Owner-role acceptance at `7001139728` constituted separate merge
+authorization is NOT adjudicated here. The correction records both the
+constraint text and the acceptance record and leaves the judgement to a
+reviewer. Asserting either way from this evidence would be a verdict without a
+standard.
+
+### FD-2 — FIX-2026-P1-T4-FU1 row frozen at pre-merge state
+
+Row asserted `OPEN — documentation-only remediation; PR pending this row` and
+`Review: PENDING`. Measured: PR #291 `merged=true`, `merged_at=2026-11-19T18:35:38Z`,
+merge `cd9c5cd037ba89f7f20bf333b50af9726c791159`; review chain R1 (`bb857ff`)
+PASS + 2xP2 + 1xP3, R2 (`6151d3e`) PASS, records in comment `7018368565`.
+
+### FD-3 — FIX-2026-P1-T4-FU2 row frozen at pre-merge state
+
+Row asserted `OPEN — documentation-only; PR pending this row` and
+`Review: PENDING`. Measured: PR #293 `merged=true`, `merged_at=2026-11-19T18:43:59Z`,
+merge `b848138c97a7af9d636f3a762a84bae8bd6c53f4`; review chain R1 (`b412bb7`)
+PASS + 2xP2, R2 (`1e43d06`) PASS, records in comment `7018562862`.
+
+### FD-4 — the rule gap that produced FD-1..FD-3
+
+`INDEX.md` mixed two kinds of content with different lifetimes and had no rule
+distinguishing them: binding facts (head SHA, merge SHA, run ID, comment ID,
+blob digest) are snapshots of a past observation and stay true; activity
+assertions ("PR pending", "review PENDING") are claims about the present and
+become false the moment the carrier merges. Because the table had no such rule,
+every Status cell was stale by construction at merge time, and the staleness was
+indistinguishable from a governance failure.
+
+Closed by adding a maintenance rule above the table. The same distinction is
+already normative for the remediation report (record boundary and snapshot
+policy); this extends it to the index.
+
+## 6. Verification
+
+- Each corrected cell's identifiers were fetched in this pass and printed; the
+  fetch results are quoted in section 5.
+- Every other row in the table was left byte-identical; the PR diff is the proof.
+- The three delivery rows under Phase 1 remediation delivery sessions were
+  re-verified in this pass and all of their identifiers resolved
+  (Issue #268, PR #270 head `69fe3907`, Run `44467233410` `success` at that head,
+  comments `7000485649` / `7000701362` / `7000906254` / `7001139728` /
+  `7001158232`, PR #279 head `33302f40`, merge `5f7918f9`, comment `7014209549`,
+  manifest blob `cb9f0dd3`). No delivery row needed correction.
+
+## 7. Limits
+
+- This is a documentation correction. It changes no policy status; the evidence
+  tiering policy remains `PROPOSED`.
+- It does not ratify or condemn any merge. FD-1 raises a question and names the
+  evidence for it; it does not answer it.
+- CI could not be exercised (Actions billing interruption, exception registered
+  per RULING-06 for this head only).
+- The reviewer of this change is a separate session under the same `oahcom`
+  identity, so platform-axis independence is NOT MET and is not claimed.
+
+## 8. Review history
+
+    R1: PASS (separate review session, same oahcom identity; platform-axis
+        independence NOT MET). The reviewer accepted the rule, the
+        authorization reading and FD-1's refusal to adjudicate, and named one
+        substantive gap plus one suggestion.
+
+    Applied from R1: the rule now requires a refresh to record WHICH outcome
+    occurred, because "merged", "closed without merging" and "reopened" are not
+    interchangeable; a carrier closed unmerged MUST NOT be written as merged, and
+    a cell that asserts something about the work item as a whole rather than
+    about a named carrier is outside the rule and must state its own basis. R1
+    listed these as failure scenarios the original wording did not capture; the
+    original wording said "refresh" without saying the refresh had to be
+    discriminating.
+
+    Not applied: R1's suggestion that future authorizations separate append,
+    revise and delete permissions. It is a sound suggestion and it changes a
+    practice rather than this change set, so it is recorded here as a tracked
+    item instead of being folded into a documentation correction.
+
+    Carried forward: R1 could not check the three corrected cells verbatim,
+    because the review prompt summarised the change rather than quoting the
+    final cell text. That is a limit of the review input, not a finding about
+    the content; R2 is given the cell text verbatim so that the verbatim check
+    actually happens.
