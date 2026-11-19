@@ -11,19 +11,24 @@
 
 This policy establishes an auditable bilingual-documentation tiering model for the repository. It defines which documents require Chinese and English counterparts, which may optionally be bilingual, and which are Chinese-first. Tiering governs documentation delivery and review; it does not transfer domain decision authority or weaken any bilingual gate imposed by a governing standard.
 
-The classification baseline is:
+The classification baseline is derived from a per-file survey of all 593 Markdown files in the repository (`14-ai-development/work-items/FIX-2026-P1-T3/tier-mapping-proposal.yaml`, baseline commit `f0a3747b279bcb83297b4490f5cd0bb3e1dbfc17`, status PROPOSAL):
 
-| Tier | File count | Language policy | Constraint |
-|---|---:|---|---|
-| Tier 1 | 32 | Mandatory bilingual | Every file requires Chinese and English versions |
-| Tier 2 | 15 allowlisted files | Optional bilingual | Limited to explicitly allowlisted files |
-| Tier 3 | 30 | Chinese-first | An English version requires Owner confirmation |
+| Tier | Per-file count | Directory-rule coverage | Language policy | Constraint |
+|---|---:|---:|---|---|
+| Tier 1 | 26 | — | Mandatory bilingual | Every file requires Chinese and English versions |
+| Tier 2 | 10 | — | Optional bilingual | Limited to explicitly allowlisted files |
+| Tier 3 | 27 | 192 (reviews/) | Chinese-first | An English version requires Owner confirmation |
+| Pending confirmation (UNKNOWN/TIER1_CANDIDATE) | — | 338 (docs/, prompts/, 14-ai-development/, 13-engineering-decisions/) | Human confirmation | UNKNOWN MUST NOT be auto-promoted; treated as BLOCKED |
 
-These counts describe the classification baseline. They do not authorize adding, removing, or reclassifying files. Actual path membership MUST be established by an authorized per-file classification inventory. Classification MUST NOT be inferred solely from directory, extension, filename, or automated heuristics.
+63 per-file entries + 530 directory-rule files = 593; every Markdown file is accounted for. Directory rules are analytical groupings, not final classifications: files they cover remain UNKNOWN (human confirmation required) or TIER1_CANDIDATE (pending per-file verification) until individually confirmed.
+
+**Relationship to the earlier planning figures (32/15/30):** Before implementation, this policy draft registered planning estimates of Tier 1 = 32, Tier 2 = 15, Tier 3 = 30. Those were design-stage upper-bound targets, not a survey of actual repository files. The implementation-stage per-file survey (baseline `f0a3747b`) produced the actual counts above: 26 (fewer than the estimated 32, because several planning candidates failed per-file verification against the Tier 1 architecture-contract criteria), 10 (fewer than the estimated 15, because the allowlist was tightened under the same criteria), and 27 per-file Tier 3 entries (the survey additionally brought meeting/acceptance records scattered under recovery/, scripts/, and the repository root into the per-file inventory). This section supersedes the planning figures; all future references MUST use the actual baseline, anchored to the commit SHA of the per-file inventory.
+
+These counts do not authorize adding, removing, or reclassifying files. Actual path membership MUST be established by an authorized per-file classification inventory. Classification MUST NOT be inferred solely from directory, extension, filename, or automated heuristics.
 
 ## 2. Tier Definitions
 
-### 2.1 Tier 1 — Mandatory Bilingual (32 files)
+### 2.1 Tier 1 — Mandatory Bilingual (26 per-file baseline entries)
 
 1. Every Tier 1 file MUST have both Chinese and English counterparts. Both versions MUST be created or updated in the same change set.
 2. The two versions MUST preserve equivalent normative meaning, obligation strength, decision status, stable identifiers, examples, and link relationships.
@@ -31,15 +36,15 @@ These counts describe the classification baseline. They do not authorize adding,
 4. **Tier 1 MUST NOT be downgraded.** Any proposal to move a Tier 1 file to Tier 2, Tier 3, or a lower-obligation category is invalid unless the project governance authority formally changes this policy and its classification baseline through a separate, explicit normative revision. An ordinary Owner confirmation, script output, or one-off task approval cannot authorize a downgrade.
 5. Chinese and English files SHOULD link to each other and record their common source revision or change-set identifier.
 
-### 2.2 Tier 2 — Optional Bilingual, Allowlist Only (15 files)
+### 2.2 Tier 2 — Optional Bilingual, Allowlist Only (10 allowlisted files at baseline)
 
-1. Tier 2 applies only to the **15 explicitly approved allowlisted paths**. A file outside that allowlist MUST NOT be assigned to Tier 2 based on similar purpose, directory location, or an author's judgment.
+1. Tier 2 applies only to explicitly approved allowlisted paths (10 registered at baseline). A file outside that allowlist MUST NOT be assigned to Tier 2 based on similar purpose, directory location, or an author's judgment.
 2. For an allowlisted file, its responsible Owner MAY decide whether an English counterpart is useful based on audience, maintenance cost, and usage. If bilingual versions are provided, semantic parity and reciprocal links remain required.
 3. **Optional bilingual status in Tier 2 NEVER waives the bilingual gate for architecture-semantic changes.** Whenever a change affects or may affect architectural meaning, interfaces/protocols, data models, state machines, authorization boundaries, cross-module contracts, or system behavior, the authoritative Chinese and English documentation MUST be updated together under GOV-DOC-001, AI-STD-001 §7.1, and AI-EXEC-002 §7.1—even if the file is in Tier 2.
 4. Tier 2 is not an exception to higher-level bilingual requirements and MUST NOT be used to label an architecture-semantic change as “translation optional.”
 5. Changes to the allowlist require a traceable Owner/governance approval record. Scripts MUST NOT add or remove allowlisted paths automatically.
 
-### 2.3 Tier 3 — Chinese-First (30 files)
+### 2.3 Tier 3 — Chinese-First (27 per-file baseline entries, plus 192 files under the reviews/ directory rule)
 
 1. Chinese is the default authoritative language for Tier 3 files. An English-speaking audience or availability of automated tooling does not, by itself, create a translation requirement.
 2. Whether to create or maintain an English counterpart **MUST be explicitly confirmed by the responsible Owner**. Record the confirmer, scope, intended audience, and maintenance responsibility.

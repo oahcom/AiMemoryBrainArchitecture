@@ -20,6 +20,7 @@ class Tests(unittest.TestCase):
             subprocess.run(["git","-C",str(root),"config","user.email","test@example.invalid"],check=True)
             subprocess.run(["git","-C",str(root),"config","user.name","Test"],check=True)
             (root/"docs").mkdir(); (root/"docs"/"new.md").write_text("# new\n",encoding="utf-8")
+            (root/"known.md").write_text("# known\n",encoding="utf-8")
             mapping=root/"mapping.yaml"; mapping.write_text("tier1:\n  files:\n    - path: known.md\ntier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules:\n    - directory: docs/\n      tier: UNKNOWN\n",encoding="utf-8")
             subprocess.run(["git","-C",str(root),"add","."],check=True); subprocess.run(["git","-C",str(root),"commit","-qm","fixture"],check=True)
             r=self.run_cmd([BASH,TIERING,mapping],env={**os.environ,"REPO_ROOT":str(root)})
@@ -49,4 +50,85 @@ class Tests(unittest.TestCase):
             r=self.run_cmd([sys.executable,TRANSLATOR,"--source",root/"missing.md","--target",root/"t.md","--output",o])
             self.assertEqual(r.returncode,1,r.stdout+r.stderr); self.assertTrue(o.is_file()); body=o.read_text(encoding="utf-8")
             self.assertIn("status: FAILED",body); self.assertIn("failure:",body)
+    def make_repo(self,root,files):
+        root=Path(root); subprocess.run(["git","init","-q",str(root)],check=True)
+        subprocess.run(["git","-C",str(root),"config","user.email","test@example.invalid"],check=True)
+        subprocess.run(["git","-C",str(root),"config","user.name","Test"],check=True)
+        for name,content in files.items():
+            p=root/name; p.parent.mkdir(parents=True,exist_ok=True)
+            p.write_text(content,encoding="utf-8",newline="\n")
+        subprocess.run(["git","-C",str(root),"add","."],check=True)
+        subprocess.run(["git","-C",str(root),"commit","-qm","fixture"],check=True)
+        return subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],capture_output=True,text=True).stdout.strip()
+    def blob_sha(self,root,path):
+        return subprocess.run(["git","-C",str(root),"rev-parse",f"HEAD:{path}"],capture_output=True,text=True).stdout.strip()
+    def test_tiering_blob_sha_drift_fails(self):
+        # A registered blob_sha that no longer matches the file content at the
+        # declared baseline MUST fail the check (exit 1), not pass silently.
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); head=self.make_repo(root,{"docs/a.md":"# real content\n"})
+            sha=self.blob_sha(root,"docs/a.md")
+            mapping=root/"mapping.yaml"
+            mapping.write_text(
+                f"baseline_commit: {head}\ntier1:\n  files:\n    - path: docs/a.md\n      blob_sha: {'0'*40}\n"
+                "tier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules: []\n",
+                encoding="utf-8",newline="\n")
+            r=self.run_cmd([BASH,TIERING,mapping],env={**os.environ,"REPO_ROOT":str(root)})
+            self.assertEqual(r.returncode,1,r.stdout+r.stderr)
+            self.assertIn("STALE_BLOB_SHA\tdocs/a.md",r.stdout)
+            self.assertIn("BASELINE_DRIFT",r.stderr)
+    def test_tiering_valid_baseline_sha_passes(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); head=self.make_repo(root,{"docs/a.md":"# real content\n"})
+            sha=self.blob_sha(root,"docs/a.md")
+            mapping=root/"mapping.yaml"
+            mapping.write_text(
+                f"baseline_commit: {head}\ntier1:\n  files:\n    - path: docs/a.md\n      blob_sha: {sha}\n"
+                "tier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules: []\n",
+                encoding="utf-8",newline="\n")
+            r=self.run_cmd([BASH,TIERING,mapping],env={**os.environ,"REPO_ROOT":str(root)})
+            self.assertEqual(r.returncode,0,r.stdout+r.stderr)
+            self.assertIn("TIER1\tdocs/a.md",r.stdout)
+    def test_tiering_non_commit_baseline_rejected(self):
+        # A declared baseline_commit that is not a commit object MUST be
+        # rejected before any classification is reported (evidence-binding v3).
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); self.make_repo(root,{"docs/a.md":"# x\n"})
+            tree=self.run_cmd(["git","-C",str(root),"rev-parse","HEAD^{tree}"]).stdout.strip()
+            mapping=root/"mapping.yaml"
+            mapping.write_text(
+                f"baseline_commit: {tree}\ntier1:\n  files:\n    - path: docs/a.md\n"
+                "tier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules: []\n",
+                encoding="utf-8",newline="\n")
+            r=self.run_cmd([BASH,TIERING,mapping],env={**os.environ,"REPO_ROOT":str(root)})
+            self.assertEqual(r.returncode,1,r.stdout+r.stderr)
+            self.assertIn("not a commit object",r.stderr)
+    def test_tiering_registered_missing_path_fails(self):
+        # A per-file entry registered in the mapping but absent from the tree
+        # MUST be reported as MISSING_IN_BASELINE and fail the check.
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); self.make_repo(root,{"docs/a.md":"# present\n"})
+            mapping=root/"mapping.yaml"
+            mapping.write_text(
+                "tier1:\n  files:\n    - path: docs/gone.md\n"
+                "tier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules: []\n",
+                encoding="utf-8",newline="\n")
+            r=self.run_cmd([BASH,TIERING,mapping],env={**os.environ,"REPO_ROOT":str(root)})
+            self.assertEqual(r.returncode,1,r.stdout+r.stderr)
+            self.assertIn("MISSING_IN_BASELINE\tdocs/gone.md",r.stderr)
+    def test_sync_bilingual_pair_mismatch_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); s,t=root/"s.md",root/"t.md"
+            s.write_text("<!-- source-revision: abcdef1234567 -->\n<!-- bilingual-pair: t.md -->\n",encoding="utf-8")
+            # Counterpart points back at the wrong file.
+            t.write_text("<!-- source-revision: abcdef1234567 -->\n<!-- bilingual-pair: other.md -->\n",encoding="utf-8")
+            r=self.run_cmd([BASH,SYNC,"--source",s,"--counterpart",t])
+            self.assertNotEqual(r.returncode,0,r.stdout+r.stderr)
+    def test_sync_source_revision_mismatch_fails(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); s,t=root/"s.md",root/"t.md"
+            s.write_text("<!-- source-revision: abcdef1234567 -->\n<!-- bilingual-pair: t.md -->\n",encoding="utf-8")
+            t.write_text("<!-- source-revision: 9999999999999 -->\n<!-- bilingual-pair: s.md -->\n",encoding="utf-8")
+            r=self.run_cmd([BASH,SYNC,"--source",s,"--counterpart",t])
+            self.assertNotEqual(r.returncode,0,r.stdout+r.stderr)
 if __name__=="__main__": unittest.main(verbosity=2)
