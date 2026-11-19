@@ -40,6 +40,25 @@ No merge on missing, pending, skipped-when-applicable, failed, stale-Head, or un
 - Record reviewer login, review state, reviewed Head SHA, timestamp/link, same-identity/delegation disclosure and unresolved findings.
 - Where independent approval cannot be obtained, disposition is HOLD unless an authorized, explicit, scoped and time-bounded exception is recorded. Do not self-approve or represent role-play as Owner approval.
 
+## 2.1 Acceptance comment minimum checklist
+
+An acceptance or merge-authorization comment posted in an Issue — as distinct from the PR body, which the pull request template governs — MUST contain the following four rows. This clause exists because a PR template constrains the PR body only; it cannot constrain free-form Issue comments. An acceptance comment that omits check conclusions can grant ACCEPT while an exact-Head check is failing.
+
+Required rows:
+
+1. **Exact Head SHA** — the commit actually evaluated, written in full or truncated with the length stated. A branch name is not a substitute.
+2. **Applicable check conclusions** — for that exact Head, each applicable check name with its conclusion and run URL. If no check is applicable, state "none applicable" and give the reason.
+3. **Review state and reviewer identity** — review state (APPROVED / COMMENTED / REQUESTED_CHANGES / NOT_REVIEWED), reviewer login, reviewed Head SHA, and a same-identity or delegation disclosure. A COMMENT is not an APPROVE.
+4. **Exception record** — if any applicable check is failing, missing, pending, skipped-when-applicable, stale-Head or unverifiable, the exception MUST be named: basis, authorizing party, scope, expiry condition and tracking Issue. If there is no exception, state "no exception".
+
+Invalidity rule:
+
+A comment missing any of the four rows MUST NOT be treated as a valid acceptance and MUST NOT carry an ACCEPT or merge-authorization YES. Such a comment is void and must be withdrawn and re-issued. A later valid acceptance does not retroactively validate a merge already performed; that merge MUST be recorded as a gate-breach finding.
+
+Recorded instance:
+
+PR #273, exact Head `5e0a919a9253b8747c59062b87d0a580cd204e54`, had `GOV-DOC-001 structural checks` = failure (run `44491572672`, completed 2026-11-19T08:54:26Z). Acceptance comment `7005241529` (2026-11-19T09:33:25Z) recorded ACCEPT and merge authorization YES with a six-row reconciliation table that contained no check-conclusion row. The PR merged at 2026-11-19T09:33:37Z. Tracking Issue: #134.
+
 ## 3. Comment and session audit evidence
 
 Every substantive AI session must leave a durable GitHub record in its owning Issue/PR. Record at minimum:
