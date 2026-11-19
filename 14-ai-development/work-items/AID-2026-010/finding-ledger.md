@@ -23,8 +23,8 @@
 | 责任 Owner | D Owner |
 | 回流去向 | D Owner 双高水位六条件操作级证明 → A 集成复审 |
 | 关闭条件 | 六条件逐条操作级证据（真实 D 权威回调、非 `lambda: True` 占位），含 exact equality 与 linearization 证明、Receipt 样例，经 A 独立复核接受 |
-| 最新裁决 / 证据 | `D-OWNER-2026-11-19-002`（ACCEPT，六条件定义）；R22/R23 裁决维持 OPEN |
-| 范围限制 | 语义 ACCEPT ≠ 操作级证明完成 |
+| 最新裁决 / 证据 | `D-OWNER-2026-11-19-002`（ACCEPT，六条件定义）；`D-OWNER-2026-11-19-003`（D-002 规范证明包 ACCEPT，Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5`）；A R32 裁定规范论证达设计交付要求但**操作级实现验收未达到**，F1 保持 OPEN；D Owner 实施轮回报：仓库无 D Authority Runtime（五操作 NOT IMPLEMENTED、真实 Receipt 不存在、十场景 NOT RUN），请求 A 指定 Runtime 实现边界 |
+| 范围限制 | 语义 ACCEPT ≠ 操作级证明完成；文档六条件论证 ≠ 真实 D 权威状态满足六条件；参考模型 ≠ 生产权威 |
 
 ## F-43-01/F2 — H 组合验证器 D Snapshot 八字段与长度约束对齐
 
@@ -53,8 +53,8 @@
 | 责任 Owner | D Owner / H Owner |
 | 回流去向 | D/H 联合映射接受 → A 集成复审 |
 | 关闭条件 | D/H 双方对同一映射 Blob 的独立接受证据 + authoritative query interface 定义与核验 |
-| 最新裁决 / 证据 | R22–R28 均维持 OPEN |
-| 范围限制 | — |
+| 最新裁决 / 证据 | R22–R28 均维持 OPEN；A R32 授权派 H Owner 开展 F3 独立映射接受（限于精确 D 1.3.1 Blob `12b71e77…` 的字段映射审查 + authoritative query interface 定义；不得复述 D ACCEPT、不得重新引入跨类型比较、不是生产消费授权、H 不得自宣 CLOSED） |
+| 范围限制 | H 的 F3 独立接受不替代 F1 实现验收；D 1.3.1 ACCEPT ≠ H 接受 |
 
 ## F-43-02 — D 契约 1.3.0 权威采纳
 
@@ -64,12 +64,12 @@
 | 历史 ID / 别名 | — |
 | 原始锚点 | `l2-05b-integration-review.md` §F-43-02（L203）；Issue #43 评论 `7015681927`+`7015682819`（D-001/D-002） |
 | 问题定义 | D 1.3.0 契约在 main 与 D Owner 分支不一致；Unicode 数据版本未固定，§5 双高水位证明规则不符。 |
-| 状态 | BLOCKED |
+| 状态 | REMEDIATION ACCEPTED |
 | 责任 Owner | D Owner |
-| 回流去向 | D successor 契约正式落文 + Unicode 版本固定 → D 1.3.0 采纳裁决 |
-| 关闭条件 | D successor 契约落文、Unicode 数据版本固定、D Owner 采纳决定（DECIDED → ACCEPTED） |
-| 最新裁决 / 证据 | `D-OWNER-2026-11-19-001`：采纳 = **BLOCKED**，H 消费 = **NOT AUTHORIZED** |
-| 范围限制 | 不得把 H 修复进展解释为 D 1.3.0 采纳 |
+| 回流去向 | D successor 契约正式落文 + Unicode 版本固定 → D 1.3.0 采纳裁决；实现绑定（UCD 工件 lock manifest / validator 版本校验）作为独立实现验收工作跟踪 |
+| 关闭条件 | D successor 契约落文、Unicode 数据版本固定、D Owner 采纳决定（DECIDED → ACCEPTED）——规范层三条件已满足；剩余：main 基线同步 + Unicode 实现绑定验证 |
+| 最新裁决 / 证据 | `D-OWNER-2026-11-19-001`：采纳 = **BLOCKED**，H 消费 = **NOT AUTHORIZED**；`D-OWNER-2026-11-19-003`：1.3.1 successor ACCEPT；A R32 裁定两个规范阻塞点（§5 双语规则 + Unicode 15.1.0 版本固定）解除，`BLOCKED → REMEDIATION ACCEPTED`，不直接 CLOSED（main 未同步 + UCD 工件/validator 绑定未实现未验证）。证据：Commit `7c74c23`→`b03e31c7`，1.3.1 Blob `12b71e770f4e977c7f147694a644066bc2ce11b9`，D-002 证明包 Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5`，#43 `7020911000` |
+| 范围限制 | 不得把 H 修复进展解释为 D 1.3.0 采纳；不得把规范版本固定解释为实现符合；后续不得把原始两个规范阻塞点重复派给 D Owner |
 
 ## F-43-03 — H 独立可复核测试证据
 
