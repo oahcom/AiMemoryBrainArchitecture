@@ -1,66 +1,48 @@
-# AID-2026-003 v2 Migration Example (Not Executable)
+# AID-2026-003 T2 历史提示词七章节迁移示例（不可执行）
 
-- Example ID: AI-PROMPT-MIGRATION-EXAMPLE-001
-- Source: 14-ai-development/work-items/AID-2026-003/prompt-v1.md
-- Source blob SHA: 71332a2b8f412d1bb58d4d53bdb25880dc2f1431
-- Source status: historical executed prompt; immutable
-- Example status: illustrative migration only; NOT AUTHORIZED FOR EXECUTION
-- No new execution or approval is implied.
+- Example: AI-PROMPT-MIGRATION-EXAMPLE-002
+- Status: ILLUSTRATIVE ONLY — NOT AUTHORIZED FOR EXECUTION
+- Source: `14-ai-development/work-items/AID-2026-003/t2-snapshot-fix-prompt.source.txt`
+- Provenance: exact sent-payload snapshot, 9,807 characters; archive commit `d84dcbe269706bec384b02f24de6a0e635da9aa0`; blob `a274aa761074683b0fd6a7aadcfe917b140fc227`. Manifest records dispatch at 2026-11-18 20:52:09 +08:00 to conversation `6afd9f7f-d544-83ee-98d1-92d7aafb3bcf`.
+- Execution: remediation-round-1 dispatch; resulting work is recorded under AID-2026-003 / PR #256, merged at `48a556491506d25e78be47957276bf3821797a0a`.
+- Original snapshot and executed artifacts remain unchanged.
 
-> This is a real-source migration demonstration. It is not a replacement for the executed v1 prompt. It must not be used for a new run without new Work Item authorization, current base/dependency pins, reviewer assignment and a newly computed SHA-256.
+> Retrospective, non-executable length-test artifact only. Not a replacement prompt; do not dispatch or execute.
 
-## 1. Task identity
-- Work Item ID: AID-2026-003 (historical source; do not reopen by this example)
-- Prompt ID / Version: AID-2026-003-PROMPT v2-example
-- Accountable Owner: Integration Owner (historical source owner; no new authority granted)
-- Implementer: NOT ASSIGNED
-- Independent Reviewer: NOT ASSIGNED
-- Repository: oahcom/AiMemoryBrainArchitecture
-- Branch: NOT ASSIGNED
-- Class / Risk: DOC / R1 (provisional; reclassify for any new work)
-- Carrier: Issue #218 (historical source carrier)
+## 1. Task identity / 任务标识
 
-## 2. Goal and boundaries
-**What:** Demonstrate how the six-gap AI-EXEC-001/002 v1.1 governance-document revision prompt can be organized into seven sections.
+AID-2026-003, remediation round 1; T2 historical dispatch. Role: remediation implementer for the Integration Owner, not reviewer, acceptance Owner, or merger. Repository: `oahcom/AiMemoryBrainArchitecture`; historical carrier: PR #256 / Issue #218; branch: `ai/AID-2026-003/IO-exec-v11`; class/risk: DOC/R1 per manifest.
 
-**Why:** Reduce repeated headings while preserving traceability and explicit governance constraints.
+## 2. Goal and boundaries / 目标与边界
 
-**Out of Scope:** No new edit to AI-EXEC-001/002; no reopening AID-2026-003; no change to the historical prompt or its acceptance record; no claim that the original approval authorizes this example.
+Under the Owner's REMEDIATE decision, repair seven independent-review findings (F-1–F-7), provide file/line closure evidence, and deliver a new branch Head for separate exact-Head review.
 
-## 3. Context and dependencies
-- Historical source prompt: 14-ai-development/work-items/AID-2026-003/prompt-v1.md @ blob 71332a2b8f412d1bb58d4d53bdb25880dc2f1431
-- Historical base recorded by source: main @ 6b5db291 (historical abbreviated reference, not a current base pin)
-- Historical carrier: Issue #218
-- Governing references for any future execution: current AI-STD-001, AI-TPL-001, GOV-DOC-001, GLB-DEV-001, GLB-DOC-001 and current Owner authority. Re-resolve all revisions before execution.
+In scope: governance clauses, immutable-prompt companion/errata, provenance and manifest/INDEX, bilingual registration, finding evidence and closeout. Out of scope: acceptance or merge; rewriting executed prompt-v1; changing upper-level standards; resolving reserved policy conflicts; changing AI-EXEC-ROLLOUT-001; claiming unattended execution.
 
-## 4. Constraints and execution guidance
-**Mandatory constraints**
-- Preserve the six original gap-to-clause mappings and stated non-goals if ever reauthorized.
-- Do not edit upper-level standards, cross-Owner documents, or global policy without explicit authority.
-- Preserve the distinction between proposal, implementation, verification, review, acceptance and merge.
-- GOV-DOC-001 applies to architecture-significant changes; update paired language versions and coverage register as required.
+## 3. Context and dependencies / 上下文与依赖
 
-**Recommended steps**
-1. Inspect current source documents and compare against the historical source revision.
-2. Map each gap to its authorized clause and verify no upper-level conflict.
-3. Verify cross-document terminology and acceptance evidence.
-4. Submit a review handoff; do not self-approve or merge.
+- Frozen baseline: PR #256 Head `ef3aa3e96271ccffe1482931069f30dfa9b1eb2a`; base `6b5db2918cffc2281deb22fd9858a37dbaeec726`.
+- Required historical authorities: adopted AI-EXEC-001/002, AI development standard, iteration lifecycle, PR governance, prompt-authoring standard, and GOV-DOC-001.
+- Findings: F-1 R3 specialist/test bypass; F-2 missing knowledge states; F-3 incomplete provenance; F-4 bilingual-scope/exception mismatch; F-5 seven-vs-twelve structure ambiguity; F-6 missing load record mistaken for non-loading; F-7 absent pre-merge governance ruling.
+- SHAs above are historical anchors only; any future execution must re-resolve current revisions.
 
-## 5. Acceptance and deliverables
-- [ ] Each of the six source gaps maps to an authorized clause.
-- [ ] Cross-document references and terminology agree.
-- [ ] Scope/non-goals and Owner boundaries are preserved.
-- [ ] Chinese/English counterparts and parity evidence are complete where required.
-- [ ] Required review and authorized acceptance are recorded.
+## 4. Constraints and execution guidance / 约束与执行指导
 
-Deliverables for a newly authorized execution would be exact changed specification files, decision/change log, bilingual manifest, verification report, independent review report and carrier closeout. None is created by this example.
+- Authorized channel: ChatGPT conversation plus repository GitHub connection; no API key, Codex, third-party/local model, relay, or unattended worker.
+- Executed prompt versions are immutable; correct via a separate errata/companion, never by rewriting prompt-v1.
+- During the recorded quota freeze, use only PR #256 and Issue #218; create no new carrier.
+- Separate implementer, independent reviewer, Owner acceptance, and merger. Implementer cannot self-approve, accept, or merge.
+- Owner order: F-1; then F-5/F-6/F-7; then F-2/F-3/F-4; then evidence and new Head.
+- COMMENT ≠ APPROVE; NOT RUN ≠ PASS; missing record ≠ proof of non-performance. Never invent hashes, IDs, approvals, or results. Unavailable hash verification is NOT VERIFIED with reason.
 
-## 6. Evidence and review
-P0 minimum: exact prompt snapshot digest (NOT COMPUTED for this non-executable example), base/head/commit SHAs for any future run, changed-file list, read-back, acceptance evidence and carrier closeout.
+## 5. Acceptance and deliverables / 验收与交付物
 
-P1 as applicable: exact consistency checks, commands, tested SHA and results. Historical source verification notes are not evidence for a future run.
+Each finding meets its closure condition with file/line evidence, severity and return route; upper-level documents remain unchanged; existing PR/Issue receive evidence comments; manifest/INDEX record full base SHA, actual prompt-file commit, provenance and honest hash status. Deliver new Head, changed-file inventory, closeout and evidence links for separate Owner review. No acceptance or merge claim.
 
-Review level: R1 provisional; a separate reviewer must be assigned for any future execution. No review or acceptance is claimed here.
+## 6. Evidence and review / 证据与审查
 
-## 7. Stop conditions and coordination
-Stop if source mapping conflicts with current standards, if another Owner's decision is required, or if historical revisions cannot be reconciled. Route the conflict to the accountable Owner through an authorized Issue/PR. Resume only after explicit decision and a newly authorized prompt version.
+Record commands, environment, tested commit, expected/actual results, file/line references, commit SHAs and comment IDs. Mark unrun checks NOT RUN and unverifiable hashes NOT VERIFIED, with reasons. Preserve the historical review and REMEDIATE decision. A separate non-implementing Owner session performs exact-Head review; applicable specialist and test gates remain non-waivable.
+
+## 7. Stop conditions and coordination / 停止条件与协调
+
+Stop on baseline mismatch, unreconciled source revisions, authority/scope breach, or an unmet finding closure condition. Route conflicts to Issue #218 / accountable Owner; leave unresolved findings OPEN with a resume condition. Do not merge. Resume only after refreshed instruction and a newly authorized prompt version.
