@@ -32,7 +32,11 @@ def run(path, apply=False, rollback=False):
    return {"result":"ALREADY_MIGRATED","path":str(path),"phase":phase}
   raise ValueError("conflicting lifecycle metadata; refusing overwrite")
  markers={k:data[k] for k in ("blocked","rejected") if k in data}
- data["lifecycle"]={"phase":phase,"source_status":source,"gates":{},"markers":markers}
+ data["lifecycle"]={"phase":phase,"source_status":source,"gates":{
+  "verified":{"status":"NOT_RECORDED"},"independent_review":{"status":"NOT_RECORDED"},
+  "integration":{"status":"NOT_RECORDED"},"owner_acceptance":{"status":"NOT_RECORDED"},
+  "merge":{"status":"NOT_RECORDED"},"closeout":{"status":"NOT_RECORDED"}
+ },"markers":markers}
  if not apply: return {"result":"WOULD_MIGRATE","path":str(path),"phase":phase}
  if backup.exists(): raise ValueError("backup already exists; refusing overwrite")
  shutil.copy2(path,backup)
