@@ -6,7 +6,7 @@ Requires Python 3.10+ and PyYAML (install in an isolated environment with: pytho
 
 Dry-run (default; no writes):
 ```sh
-python scripts/governance/status_migration/migrate_status.py 14-ai-development/work-items/**/manifest.yaml
+find 14-ai-development/work-items -name manifest.yaml -print0 | xargs -0 python scripts/governance/status_migration/migrate_status.py
 ```
 
 Apply (creates a byte-for-byte sibling backup before writing):
