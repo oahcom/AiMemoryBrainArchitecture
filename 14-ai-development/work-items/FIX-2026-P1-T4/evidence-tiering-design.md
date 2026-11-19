@@ -130,3 +130,10 @@
 | B-03 空 userinfo / 空 password 分隔符被接受 | 同上：`https://@github.com/o/r` 的 netloc 为 `@github.com`、`ssh://git:@github.com/o/r` 为 `git:@github.com`，均不等于允许值 → `CE_REPO_IDENTITY_UNVERIFIED` |
 | B-04 非数字端口触发 ValueError | `urlparse` 分支包裹 `try/except ValueError` → 返回 None（fail-closed），不产生 `CE_INTERNAL_ERROR` |
 | 测试 | 新增 4 项：空端口、空 userinfo、SSH 空 password、非数字端口（并断言不出现 `CE_INTERNAL_ERROR`）；query/fragment 拒绝测试保留并通过 |
+
+## 13. 第七轮复审（R7）修复映射
+
+| R7 缺陷 | 修复 |
+|---|---|
+| B-05 空 query / 空 fragment 分隔符未被拒绝 | `urlparse` 前先检查原始 URL 是否含 `?` 或 `#`（裸分隔符解析后 query/fragment 均为空字符串，仅检查解析字段无法识别）→ 存在即返回 None |
+| 测试 | 新增 2 项：`...git?`、`...git#` 均断言 `CE_REPO_IDENTITY_UNVERIFIED`；累计 67 项 |

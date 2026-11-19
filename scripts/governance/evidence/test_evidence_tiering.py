@@ -311,6 +311,14 @@ class EvidenceTieringTests(unittest.TestCase):
         self.assert_origin_rejected(
             "ssh://git:@github.com/oahcom/AiMemoryBrainArchitecture.git")
 
+    def test_empty_query_delimiter_rejected(self):
+        self.assert_origin_rejected(
+            "https://github.com/oahcom/AiMemoryBrainArchitecture.git?")
+
+    def test_empty_fragment_delimiter_rejected(self):
+        self.assert_origin_rejected(
+            "https://github.com/oahcom/AiMemoryBrainArchitecture.git#")
+
     def test_non_numeric_port_rejected_without_exception(self):
         with tempfile.TemporaryDirectory() as tmp:
             fixture = Fixture(Path(tmp) / "repo")

@@ -185,6 +185,10 @@ def repo_slug(repo):
         if scp.group(1) == "git" and scp.group(2).lower() == "github.com":
             slug = scp.group(3)
     else:
+        # A bare "?" or "#" parses to an empty query/fragment, so the raw URL
+        # is inspected rather than the parsed fields alone.
+        if "?" in url or "#" in url:
+            return None
         try:
             parsed = urllib.parse.urlparse(url)
             scheme = parsed.scheme.lower()
