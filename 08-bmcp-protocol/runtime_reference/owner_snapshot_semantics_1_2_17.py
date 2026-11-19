@@ -13,6 +13,12 @@ from typing import Callable, Mapping
 VALID, INVALID, UNKNOWN = "VALID", "INVALID", "UNKNOWN"
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 DECIMAL = re.compile(r"^(0|[1-9][0-9]*)$")
+MAX_PRODUCER_REGISTRATION_HIGH_WATER = (1 << 63) - 1
+
+
+def _is_canonical_decimal(value: str) -> bool:
+    """Accept only the canonical unsigned decimal wire form; never rewrite signed bytes."""
+    return isinstance(value, str) and DECIMAL.fullmatch(value) is not None
 
 D_BOUNDED_STRING_FIELDS = frozenset({
     "producer_registration_high_water",
@@ -99,7 +105,14 @@ def validate_owner_snapshot_1_2_17(
             if not HEX64.fullmatch(value):
                 return INVALID
         if key.endswith("_high_water") or key.endswith("_generation"):
-            if not DECIMAL.fullmatch(value):
+            if not _is_canonical_decimal(value):
+                return INVALID
+            # This bound belongs only to D's ProducerRegistrationHighWater nominal
+            # type. Do not coerce or compare any other D counter/generation here.
+            if (
+                key == "producer_registration_high_water"
+                and int(value) > MAX_PRODUCER_REGISTRATION_HIGH_WATER
+            ):
                 return INVALID
 
     if snapshot["owner_specific_high_waters_digest"] != _td("OWNER-SPECIFIC-HIGH-WATERS", dict(values)):
