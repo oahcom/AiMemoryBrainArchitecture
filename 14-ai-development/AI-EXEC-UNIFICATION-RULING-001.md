@@ -2,8 +2,9 @@
 # Owner Ruling on Three Inter-Standard Conflicts / 三处上位规范冲突的 Owner 统一裁定
 
 - **Document ID:** AI-EXEC-UNIFICATION-RULING-001
-- **Version:** 1.0
+- **Version:** 1.1
 - **Status:** ADOPTED — binding Owner policy ruling
+- **Revision history:** v1.0 (2026-11-18, initial ruling RULING-01..03); v1.1 (2026-11-20) — RULING-01 content revised to SEVEN-SECTIONS-MAPPED at commit `4c38ae2` (PR #273, F-006) while the header still read v1.0; this version bump records that content revision in the header and adds the RULING-01 validity clause (revision point 1 of Issue #130 comment `7001104129`). RULING-02 and RULING-03 text unchanged.
 - **Ruling authority:** Project Owner, exercising the owner-directed authority expressly delegated for Issue #218
 - **Ruling date:** 2026-11-18
 - **Tracking:** Issue #218 · AID-2026-003 · AID-2026-002
@@ -40,6 +41,8 @@ The six-item R0/R1 documentation focus subset and seven-item code-session focus 
 
 **Boundary.** Applies to prompts newly drafted or materially revised after this ruling takes effect. It does not retrospectively classify already completed and accepted prompts as non-compliant. Existing executed prompt bytes remain immutable.
 
+**Validity clause (added v1.1).** This ruling is anchored to the text of AI-STD-001 §5 as it stands at the time of each revision. If the structure of AI-STD-001 §5 changes, this ruling MUST be upgraded in step with that change; until such an upgrade exists, the current text of the upper standard prevails and a re-ruling is mandatory. No silent substitution of the ruling's anchor by later upstream edits is permitted.
+
 **Review deadline.** 2026-12-02.
 
 ### 中文
@@ -51,6 +54,8 @@ AI-EXEC-002 中 R0/R1 文档会话的六项重点子集和代码会话的七项�
 **理由。** AI-STD-001 §5 已被 PR #269 改为七章节；以原 15 项清单锚定「结构」产生双口径（F-006）。区分结构层（七章节，AI-STD-001 §5.1）与内容层（15 项义务，按 AI-PROMPT-STD-001 §4 映射）即可消除冲突，且不弱化任何义务。15 项上位清单中的双语语义对等、证据和分支回读控制仍为强制内容。
 
 **边界。** 适用于本裁定生效后新起草或实质修订的提示词。不追溯将已经完成并验收的历史提示词判定为不合规。已执行提示词字节保持不可变。
+
+**效力条款（v1.1 增补）。** 本裁定以 AI-STD-001 §5 各次修订时的现行文本为基准。§5 结构发生变更时，本裁定必须同步升版；在同步升版存在之前，以上位规范现行文本为准并强制重新裁定。不得以上位规范的后续改动无裁定地静默替代本裁定的锚点。
 
 **复核期限。** 2026-12-02。
 
