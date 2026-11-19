@@ -3,7 +3,7 @@
 
 - **Document ID:** AI-EXEC-002
 - **Version:** 1.2
-- **Status:** ADOPTED — v1.0 adopted via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`); v1.1 adopted via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`), both merged 2026-11-18; v1.2 (F-006 anchor revision: structure=seven sections per AI-STD-001 §5.1, 15/12 items reclassified as content obligations mapped per AI-PROMPT-STD-001 §4) pending adoption via this change set. This header records the adoption events.
+- **Status:** v1.2 PENDING ADOPTION（本变更集提交并合入 main 后按 AI-EXEC-UNIFICATION-RULING-001 §5 生效条款登记采纳）。Previous versions: v1.1 ADOPTED via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`, 2026-11-18); v1.0 ADOPTED via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`, 2026-11-18). v1.2 变更内容：F-006 锚点修订（结构=七章节 per AI-STD-001 §5.1；15/12 项重分类为按 AI-PROMPT-STD-001 §4 映射的内容义务）。
 - **Owner:** Integration Owner
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml) · 修订 Work Item [AID-2026-003](work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](ai-development-standard.md) §5/§13、[AI-PROMPT-STD-001](prompt-authoring-standard.md)、[CHATGPT-GLOBAL-001](prompts/global/chatgpt-session-contract-v1.md)、[AI-PROC-001](iteration-lifecycle.md) Stage 2/6、GLB-DOC-001（政策 GOV-DOC-001）
@@ -50,8 +50,10 @@
 ## 3. 提示词强制结构（七个结构章节 + 十二/十五项内容义务映射，不另立结构）
 
 > **结构权威**：结构章节以 AI-STD-001 §5.1 的七章节为准；内容义务以 AI-PROMPT-STD-001 §4 的映射规则为准——十二项内容必须按 §4 映射纳入七章节。下列 12 项 + 附加项为**内容义务清单**（不是独立标题）；映射后七章节为唯一结构层。
+>
+> **全风险级基线义务（F-02）**：全部风险级别（R0–R3）、全部任务类别的实质执行提示词，均须保留完整 **15 项内容义务**（12 项 + 原第 13–15 项），并全部映射入七章节。R0/R1 与 R2/R3 不得改变 15 项的基础强制适用范围；六项/七项重点子集仅表示审查重点。定时提示词附加要求继续叠加。
 
-每份执行提示词必须包含其 12 项内容义务（按 AI-PROMPT-STD-001 §4 映射入七章节）：
+每份执行提示词必须包含其 12 项内容义务（按 AI-PROMPT-STD-001 §4 映射入七章节；连同原第 13–15 项构成完整 15 项内容义务，对全部风险级别生效）：
 
 1. Identity（Work Item ID、Issue、prompt ID/version/hash、Owner、会话角色）
 2. Objective（目标与可观察结果）

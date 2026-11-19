@@ -3,7 +3,7 @@
 
 - **Document ID:** AI-EXEC-002
 - **Version:** 1.2
-- **Status:** ADOPTED — v1.0 adopted via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`); v1.1 adopted via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`), both merged 2026-11-18; v1.2 (F-006 anchor revision: structure=seven sections per AI-STD-001 §5.1, 15/12 items reclassified as content obligations mapped per AI-PROMPT-STD-001 §4) pending adoption via this change set. This header records the adoption events.
+- **Status:** v1.2 PENDING ADOPTION (to be registered upon merge of this change set to `main`, per the effectiveness clause of AI-EXEC-UNIFICATION-RULING-001 §5). Previous versions: v1.1 ADOPTED via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`, 2026-11-18); v1.0 ADOPTED via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`, 2026-11-18). v1.2 changes: F-006 anchor revision (structure = seven sections per AI-STD-001 §5.1; the 15/12 items reclassified as content obligations mapped per AI-PROMPT-STD-001 §4).
 - **Owner:** Integration Owner
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](../../../work-items/AID-2026-002/manifest.yaml) · Revision Work Item [AID-2026-003](../../../work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](../../../14-ai-development/ai-development-standard.md) §5/§13, [AI-PROMPT-STD-001](../../../14-ai-development/prompt-authoring-standard.md), [CHATGPT-GLOBAL-001](../../../14-ai-development/prompts/global/chatgpt-session-contract-v1.md), [AI-PROC-001](../../../14-ai-development/iteration-lifecycle.md) Stages 2/6, GLB-DOC-001 (policy GOV-DOC-001)
@@ -53,8 +53,10 @@ Before work starts, record the following in the Work Item's Issue/PR (= AI-STD-0
 ## 3. Mandatory Prompt Structure (seven structural sections + twelve/fifteen content-obligation mapping; no separate structure is created)
 
 > **Structural authority**: the structural sections are the seven sections of AI-STD-001 §5.1; content obligations follow the mapping rule of AI-PROMPT-STD-001 §4 — the twelve items MUST be mapped into the seven sections per §4. The 12 items + additions below are a **content-obligation inventory** (not separate headings); after mapping, the seven sections are the only structural layer.
+>
+> **All-risk-level baseline obligation (F-02)**: substantive execution prompts of **every risk level (R0–R3) and every task class** MUST retain the complete **15 content obligations** (the 12 items + former items 13–15), all mapped into the seven sections. R0/R1 and R2/R3 do not change the base mandatory applicability of the 15 obligations; the six/seven-item focus subsets denote review emphasis only. Scheduled-prompt add-ons remain additional requirements.
 
-Every execution prompt must contain its 12 content obligations (mapped into the seven sections per AI-PROMPT-STD-001 §4):
+Every execution prompt must contain its 12 content obligations (mapped into the seven sections per AI-PROMPT-STD-001 §4; together with former items 13–15 they form the complete 15 content obligations, applicable to every risk level):
 
 1. Identity (Work Item ID, Issue, prompt ID/version/hash, Owner, session role)
 2. Objective (goal and observable result)
