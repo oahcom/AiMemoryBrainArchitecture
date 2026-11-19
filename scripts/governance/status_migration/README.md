@@ -1,28 +1,53 @@
 # Status migration tooling
 
-Requires Python 3.10+ and PyYAML (install in an isolated environment with: python -m pip install PyYAML).
+Requires Python 3.10+ and PyYAML.
+
+## Exact source vocabulary
+
+The migrator accepts only the twelve exact AI-STD-001 work-item states:
+`PROPOSED`, `ANALYZED`, `PROMPT_READY`, `READY`, `IN_PROGRESS`,
+`IMPLEMENTED`, `VERIFIED`, `REVIEWED`, `INTEGRATION_READY`,
+`ACCEPTED`, `MERGED`, and `CLOSED`.
+
+Decorated values (for example, `IN_PROGRESS — explanation`), unknown values,
+missing values and ambiguous values fail closed. `BLOCKED` and `REJECTED`
+are orthogonal markers and are preserved separately; they are not phases or
+source-state aliases. Architecture-decision records are out of scope.
 
 ## Commands
 
-Dry-run (default; no writes):
+Dry-run is the default and does not write files:
+
 ```sh
-find 14-ai-development/work-items -name manifest.yaml -print0 | xargs -0 python scripts/governance/status_migration/migrate_status.py
+find 14-ai-development/work-items -name manifest.yaml -print0 |
+  xargs -0 python scripts/governance/status_migration/migrate_status.py
 ```
 
-Apply (creates a byte-for-byte sibling backup before writing):
+Apply only to an explicitly reviewed exact-path set. Each file receives a
+byte-for-byte sibling backup before atomic replacement:
+
 ```sh
 python scripts/governance/status_migration/migrate_status.py --apply path/to/manifest.yaml
 ```
 
-Validate sequential independent gates:
+Validate independent gates (a phase never implies a gate passed):
+
 ```sh
 python scripts/governance/status_migration/check_status_gates.py path/to/manifest.yaml
 ```
 
-Rollback to exact pre-migration bytes:
+Rollback restores the exact original bytes from the sibling backup:
+
 ```sh
 python scripts/governance/status_migration/migrate_status.py --rollback path/to/manifest.yaml
 ```
 
-The migrator is intentionally conservative: unknown states, conflicting lifecycle metadata, missing status, and pre-existing backups block writes. The source status is retained verbatim. Gate records are initialized to NOT_RECORDED; the validator does not treat those placeholders as evidence. Fill a gate only with a real evidence reference and explicit PASS disposition. No repository-wide apply is authorized by this PR; run the dry-run inventory first, review every candidate, then apply only to an explicitly approved manifest set. Architecture decision records are excluded.
+The migration is additive and idempotent. It preserves the original `status`
+field and adds `lifecycle.phase`, `lifecycle.source_status`,
+`lifecycle.gates` and `lifecycle.markers`. All gates initialize to
+`NOT_RECORDED`; the validator requires real evidence references and explicit
+`PASS` dispositions for every gate implied by the source checkpoint.
 
+Run a complete inventory and dry-run first. Review every candidate and every
+blocked result. Do not apply unknown/decorated statuses or architecture-decision
+records. Never infer review, acceptance, integration, merge or closeout evidence.

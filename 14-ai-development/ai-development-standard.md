@@ -138,9 +138,9 @@ Architecture decision records retain their own independent lifecycle and status 
 
 ### 4.4 Migration safety / 迁移安全
 
-Migration MUST be dry-run by default, additive, idempotent, backup-first and reversible. Preserve exact source status and all historical evidence; unknown or ambiguous values fail closed and remain unchanged. Never infer missing review, acceptance, integration, merge or closeout evidence. The original status field remains intact during compatibility migration; the six-phase value is added under lifecycle.phase. A later canonical-field cutover requires separate authorization and an inventory of all readers, writers and historical records.
+Migration MUST be dry-run by default, additive, idempotent, backup-first and reversible. Preserve exact source status and all historical evidence; only the exact twelve source values listed in §4.1 are eligible. Decorated, unknown, missing or ambiguous values fail closed and remain unchanged for review. Never infer missing review, acceptance, integration, merge or closeout evidence. The original status field remains intact during compatibility migration; the six-phase value is added under lifecycle.phase. A later canonical-field cutover requires separate authorization and an inventory of all readers, writers and historical records.
 
-迁移 MUST 默认 dry-run、增量、幂等、先备份且可回滚。必须保留精确源状态及全部历史证据；未知或有歧义的值 fail closed 并保持不变。不得推断缺失的评审、接受、集成、合并或结项证据。兼容阶段保留原始 status 字段，六阶段值新增于 lifecycle.phase。后续规范字段切换必须另行授权，并先盘点所有读写方及历史记录。
+迁移 MUST 默认 dry-run、增量、幂等、先备份且可回滚。必须保留精确源状态及全部历史证据；只有 §4.1 列出的十二个精确源状态可迁移。带说明后缀、未知、缺失或有歧义的值必须 fail closed，保持不变并等待审查。不得推断缺失的评审、接受、集成、合并或结项证据。兼容阶段保留原始 status 字段，六阶段值新增于 lifecycle.phase。后续规范字段切换必须另行授权，并先盘点所有读写方及历史记录。
 
 ## 5. Prompt engineering as controlled engineering / 提示词工程化
 
