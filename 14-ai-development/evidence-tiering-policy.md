@@ -92,7 +92,7 @@
 
    `http://`、`git://`、非 `git` 用户名、带端口的 URL 一律拒绝。这界定了"证据在哪个仓库被验证"的信任边界，但不证明来源真实性。
 
-8. **路径解析基准**：所有证据路径（含 `evidence.review_note` 与 `declaration_path`）按 subject 提交的**仓库根**解析，**不按声明文件所在目录**解析；`evidence.review_note` 须指向 subject tree 内真实存在的确认记录，填写自由文本或包内相对名即 `CE_EVIDENCE_NOT_IN_SUBJECT`。
+8. **路径解析基准**：所有证据路径（含 `evidence.review_note` 与 `declaration_path`）按 subject 提交的**仓库根**解析，**不按声明文件所在目录**解析；`evidence.review_note` 须指向 subject tree 内真实存在的确认记录，填写自由文本或包内相对名即 `CE_EVIDENCE_NOT_IN_SUBJECT`。本条**不新增校验层级**，只统一第 3 条与第 6 条的路径解析语义——校验范围与适用对象仍分别由那两条决定。
 
 ## 6. 检查器
 

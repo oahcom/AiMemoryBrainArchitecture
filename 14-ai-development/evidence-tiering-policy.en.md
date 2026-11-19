@@ -92,7 +92,7 @@ An assessment missing any of `assessed_by`, `assessed_at`, `rationale`, `base_he
 
    `http://`, `git://`, non-`git` usernames and URLs carrying a port are rejected. This defines the trust boundary for *where* evidence is verified; it does not establish source authenticity.
 
-8. **Path resolution base:** every evidence path (including `evidence.review_note` and `declaration_path`) is resolved against the **repository root** of the subject commit, **not** against the directory holding the declaration. `evidence.review_note` MUST point at an acknowledgement record that really exists in the subject tree; free text or a bundle-relative name yields `CE_EVIDENCE_NOT_IN_SUBJECT`.
+8. **Path resolution base:** every evidence path (including `evidence.review_note` and `declaration_path`) is resolved against the **repository root** of the subject commit, **not** against the directory holding the declaration. `evidence.review_note` MUST point at an acknowledgement record that really exists in the subject tree; free text or a bundle-relative name yields `CE_EVIDENCE_NOT_IN_SUBJECT`. This item **adds no new verification layer**; it only fixes the path resolution semantics shared by items 3 and 6, which keep defining scope and applicability.
 
 ## 6. Checker
 
