@@ -1224,13 +1224,14 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         )
 
         m.phase = Phase.AUTHORIZED
+        retry_auth = auth(nonce=retry_nonce, operation_id=original_operation_id,
+                          request_hash=request_hash)
         second = m.commit_suppression(
             original_operation_id,
             "foi02-retry-attempt",
             idempotency_key,
             request_hash,
-            auth=auth(nonce=retry_nonce, operation_id=original_operation_id,
-                      request_hash=request_hash),
+            auth=retry_auth,
         )
 
         self.assertIs(first, second)
@@ -1278,6 +1279,10 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
             original_commit_id,
         )
         self.assertTrue(retry_record["authorization_receipt"])
+        self.assertEqual(
+            retry_record["authorization_receipt"],
+            retry_auth.receipt.receipt_id,
+        )
         self.assertNotEqual(
             retry_record["authorization_receipt"],
             first.authorization_reference.receipt_id,
