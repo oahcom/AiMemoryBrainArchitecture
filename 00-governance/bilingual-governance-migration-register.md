@@ -624,6 +624,8 @@ Coverage check / 覆盖核对: 216 + 14 = 230 = coordinator inventory; 0 missing
 
 注：本表锚点为清点快照时的历史值。清点后被编辑的对象以 §8.15「锚点刷新登记」为准；截至本次修订，仅 #266 存在刷新条目。
 
+Note: the anchors in this table are the inventory-snapshot values. For objects edited after that snapshot, §8.15 "Anchor refresh register" governs the current value; as of this revision only #266 has a refresh entry, and that is a statement about this revision, not a permanent limit.
+
 ### 8.12 Out-of-Scope/Disposition — Issue #254
 
 Issue #254 属于本次 39 条非 PR Issue 审计集合，为集合内第 39 条。其语言状态登记为 `ZH_ORIGINAL_WITH_EN_TERMS`，即中文原始正文中包含英文技术术语。对应 `body_sha256` 为：
@@ -1076,7 +1078,8 @@ C168 是 313 条记录中唯一的 `MIXED` 记录；其余 312 条均为 `EN_ONL
 2. Every entry must carry: object identifier, both anchors, the observation time of each, the reason for the change (edit event with its timestamp), the classification re-check result, and the source record that holds the recomputation.
 3. A refresh entry does not change the object's language classification by itself. Re-classification requires a fresh inspection, whose result is recorded in the entry.
 4. Absence of an entry means the §8.11/§8.13 anchor was current as of the reconciliation baseline `f86fddc0` (recomputed 313/313 commits and 38/39 issues against that baseline).
-5. A refresh entry does not migrate, rewrite, or exonerate any historical object; `MIGRATION_DEBT != EXEMPTION` remains in force.
+5. **Isolation from classification changes.** A refresh entry must not modify an object's classification field, classification basis, or classification decision record. Any classification change requires its own re-inspection and its own registration/approval path; folding a classification change into an anchor refresh is prohibited.
+6. A refresh entry does not migrate, rewrite, or exonerate any historical object; `MIGRATION_DEBT != EXEMPTION` remains in force.
 
 **中文规则**
 
@@ -1084,4 +1087,5 @@ C168 是 313 条记录中唯一的 `MIXED` 记录；其余 312 条均为 `EN_ONL
 2. 每条记录必须包含：对象标识、新旧两个锚点、各自的观测时间、变更原因（编辑事件及其时间戳）、分类复核结果，以及保存复算过程的来源记录。
 3. 刷新条目不因自身而改变对象的语言分类；重新分类须以新的核查为依据，并将结果写入该条目。
 4. 无条目意味着该对象的 §8.11/§8.13 锚点在对账基线 `f86fddc0` 上仍然有效（该基线复算：Commit 313/313、Issue 38/39）。
-5. 刷新条目不迁移、不改写、不豁免任何历史对象；`MIGRATION_DEBT != EXEMPTION` 继续有效。
+5. **与分类变更严格隔离。** 刷新条目不得修改对象的分类字段、分类依据或分类判定记录。任何分类变更都必须另行重新核查并走独立的登记/审批路径；禁止把分类变更夹带进锚点刷新。
+6. 刷新条目不迁移、不改写、不豁免任何历史对象；`MIGRATION_DEBT != EXEMPTION` 继续有效。
