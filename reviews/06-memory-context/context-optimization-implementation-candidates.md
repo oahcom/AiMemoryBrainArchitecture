@@ -34,7 +34,7 @@ This register is independent from the research assessment. Every item is a propo
 | G-CO-14 | Frozen held-out evaluation with capability floor and isolated test feedback | NEEDS_CROSS_OWNER_APPROVAL | Architecture validation process | A + independent evaluator |
 | G-CO-15 | Candidate receipt generation with exact quote/hash verification and original-output fallback | PROPOSED | Compact operation | F source retrieval; I remote processing policy |
 | G-CO-16 | TSS and observation data classification/retention policy mapping | OPEN | Context Entry / Reconciler | I, D/Storage |
-| G-CO-17 | Determine whether ObservationRef is a Context Entry ref, F locator, or independently owned object | OPEN | Existing Context Entry/source refs | B, D, F, I |
+| G-CO-17 | Determine whether ObservationRef is a Context Entry ref, F locator, or independently owned object | DECIDED (G-local bounded disposition; see § Decision G-CO-17) | Existing Context Entry/source refs | B, D, F, I for any future archive-backed member type |
 | G-CO-18 | Define C/H boundary event schema and declared-vs-verified completion | OPEN | Context Planner input contract | C, H |
 | G-CO-19 | Define cache-write/prefix-discontinuity and recovery-cost telemetry | OPEN | Budget Manager input contract | H, C, F |
 | G-CO-20 | Define durable archive owner, retention, deletion and range-read guarantees | OPEN | No new G module proposed | D/Storage/I |
@@ -60,6 +60,33 @@ This register is independent from the research assessment. Every item is a propo
 3. **Safety closure:** G-CO-09 through G-CO-12, with D/Storage publication and Forget gate demonstrated before implementation.
 4. **Validation:** G-CO-13 through G-CO-15 after interface owners approve instrumentation and frozen evaluation design.
 
+## Decision G-CO-17 — Archive-only reference boundary (G-local)
+
+**Status:** DECIDED — bounded G-owned semantic disposition; no implementation or shared-interface freeze.
+
+**Decision (2026-11-19):**
+
+1. **F `ArchiveLocator` is an F-owned retrieval locator**, not a Canonical `MemoryVersionRef`, not a G `ContextEntry` membership identity, and never an authorization grant.
+2. **F `ObservationRecallResult` is bounded recall evidence**, not a Context mutation, ContextVersion, or membership grant. Its exact archive object revision/hash/source revision/range/ReadReceipt, provenance, completeness/freshness and omission state remain F-returned evidence.
+3. **G `ObservationRef` (if/when its proposed typed metadata contract is adopted) is provenance metadata only**. It may annotate the source/evidence lineage of a separately eligible ContextEntry; it does not itself create membership or make archive bytes a canonical fact.
+4. **Direct archive-only references are ineligible for G Context membership.** The current Context membership path remains an exact, independently resolvable and currently authorized canonical `MemoryVersionRef`, with complete D lineage/producer registration and final publication gate plus current I classification/authorization/retention/Forget controls. An archive-only observation may become eligible only if D independently admits it as a canonical Memory version through its own governed process; an F locator, archive manifest, excerpt or receipt alone cannot do so.
+5. **Fail-closed source handling:** before each F read, F must revalidate current I permission and applicable D Forget fence. Expired locator, source revision/hash mismatch, revocation, Forget/fence, corruption, unavailability, incomplete/partition-gap evidence or unknown authority means the archive evidence is unavailable/suppressed/partial, never silently fresh or complete. G must not create/update a Context membership from that result. If archive evidence was used to support a canonical ContextEntry, G re-evaluates that entry's evidence sufficiency and marks it stale/blocked or removes/replaces the affected provenance reference as appropriate; no silent substitution or resurrection.
+6. This is a **permanent exclusion of direct F archive locator/recall-result membership under the current G membership model**, not a blanket exclusion of archive-derived information if D later canonicalizes it, and not a decision on F's storage/retention implementation, D's canonical admission/lineage, or I's policy.
+
+**Alternatives considered:**
+- (A) Admit ArchiveLocator/ObservationRecallResult directly as a Context member: rejected because it would create a non-canonical membership path whose source expiry, lineage, Forget and authorization gates are not established by G's current ContextEntry contract.
+- (B) Keep the binary membership question indefinitely OPEN: rejected because G owns Context membership semantics and the current baseline already requires canonical refs; indefinite ambiguity would leave F unable to close its response boundary.
+- (C) Treat archive content as canonical by implication or locator possession: rejected because F explicitly states archive manifests are not Canonical Memory and locator is not a bearer credential or grant.
+
+**Evidence pins (read-only source evidence):**
+- G baseline branch HEAD `0f77ffbe956c5f93df295c436fcb0a750629d595`; G lifecycle source `06-memory-context/phase-3.7-g-local-lifecycle-producer-derivative-queue-recall-context-restore.md`, Blob `c1de241ec69834377d9b0e24aa4770a809796d4b`; G Context architecture `06-memory-context/context-architecture.md`, Blob `56fcc0ea112d423ef69a3f00e9d626bf4230ca0e`; G Context edit operations Blob `10c94e85dfe89d20dcdb202cafc2bef767f076fc`.
+- F branch HEAD `1908ce4d233b20f7cafd00cb679affd01bd15174`; F archive candidate `reviews/05-memory-runtime/observation-archive-interface-candidates.md`, Blob `0b5c5b02c5b318c79606328ef1c22d686b8fc8b3`. F §3–5 says archive manifests are not canonical, ArchiveLocator is not a grant, and RecallIntent is not a Context mutation; §10 says ObservationRecallResult has no ContextVersion/mutation instruction; §14 assigns membership to G and lists expiry/invalidation questions.
+- Cross-owner confirmation: F Issue #21 comment #7020865219 confirms compatibility with the recall-only/non-member boundary but explicitly does not approve a future archive-backed Context type or close the future typed contract.
+
+**Decision boundary / remaining candidates:** G-CO-07 remains PROPOSED (typed provenance metadata contract); G-CO-08 remains NEEDS_CROSS_OWNER_APPROVAL (bounded exact-range recall); G-CO-16 remains OPEN (classification/retention mapping); G-CO-20 remains OPEN (durable archive owner/retention/deletion/range-read guarantees). D/I/F/Storage approvals remain independent for any future archive-backed member type. This G-local disposition does not claim their approval.
+
+**Verification ceiling:** source comparison and exact Blob/branch pins only. No code, tests, CI or production behavior changed or verified. This record is a design decision, not implementation evidence.
+
 ## Governance statement
 
-All entries remain candidate-level. **Nothing in this register is DECIDED, frozen, implemented, or authorized for Rust changes.** The two deliverables are research outputs only.
+All entries remain candidate-level **except the explicitly bounded G-CO-17 disposition above**. No other item is DECIDED, frozen, implemented, or authorized for Rust changes. The two research deliverables remain research outputs only.
