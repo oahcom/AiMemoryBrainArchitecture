@@ -1,0 +1,26 @@
+aid: AID-2026-013
+title: COC Owner — F-43-07 Applicability Decision & ParticipantIntent Authority
+owner: COC Owner
+accountable_owner: COC Owner (via L0 session, dev-baseline auto-closure)
+class: ARCH/R3
+risk: R3
+status: REGISTERED
+created: 2026-11-20
+created_by: L0 (dev-baseline process registration per INDEX.md rules)
+authorization_basis: |
+  Dev-baseline auto-closure (user mandate 2026-11-19: "不存在人类决策点，全链自动闭环").
+  A R44 identified COC applicability as the remaining unblocking condition for F-43-07.
+prompt_version: AI-EXEC-001 v1.1 + AI-EXEC-002 v1.1
+scope:
+  - F-43-07 COC applicability decision for ParticipantIntentRef mapping
+  - If applicable: define ParticipantIntent binding, member proof, quorum, ordering/recovery semantics
+  - If not applicable: provide certified NOT_REQUIRED disposition with equivalent recovery boundaries
+out_of_scope:
+  - D/Storage/H owned semantic decisions (already completed)
+  - Production implementation or runtime conformance
+  - Creating new PRs/Issues (quota freeze ACTIVE)
+deliverables:
+  - COC applicability decision (AUTHORITATIVE)
+  - If applicable: ParticipantIntent schema + quorum + binding rules
+  - If not applicable: NOT_REQUIRED disposition
+  - #43 registration with Decision ID + precise SHA/Blob
