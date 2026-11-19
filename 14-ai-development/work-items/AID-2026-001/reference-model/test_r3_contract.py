@@ -1656,6 +1656,10 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
                  audience="other-service"),
         )
         assert_no_retry_side_effect(
+            auth(nonce="foi-cred-wrong-operation", operation_id="other-operation",
+                 request_hash=request_hash),
+        )
+        assert_no_retry_side_effect(
             auth(nonce="foi-cred-wrong-hash", operation_id=operation_id,
                  request_hash="different-request-hash"),
         )
@@ -1766,9 +1770,10 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
     def test_FSTOR_13_credential_context_binding_is_mandatory(self):
         """F-OI-04: no empty or placeholder value may bypass a binding check.
 
-        Covers the four bypasses left open before strict binding:
-        empty operation, empty request hash, the "default-hash" placeholder
-        for a different request, and a scope that omits suppression:commit.
+        Covers the bypasses left open before strict binding:
+        empty operation, operation mismatch, empty request hash, the
+        "default-hash" placeholder for a different request, and a scope
+        that omits suppression:commit (including the empty scope).
         """
         operation_id = "foi-bind-operation"
         request_hash = "foi-bind-request-hash"
@@ -1809,6 +1814,15 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
             "empty operation",
             authorized_attempt(
                 "", request_hash, "foi-bind-no-op", "foi-bind-no-op-r"
+            ),
+        )
+        assert_rejected(
+            "operation mismatch",
+            authorized_attempt(
+                "other-operation",
+                request_hash,
+                "foi-bind-wrong-op",
+                "foi-bind-wrong-op-r",
             ),
         )
         assert_rejected(
