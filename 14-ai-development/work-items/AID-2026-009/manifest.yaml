@@ -1,0 +1,210 @@
+work_item_id: AID-2026-009
+title: REQ-03 PR Governance and Evidence-Based Integration — Architecture and Post-Merge Evidence Work
+owner: Integration Owner
+accountable_owner: NOT_ASSIGNED
+issue: 264
+related_issues: [25, 130, 264]
+related_prs: [249, 251]
+task_class: ARCH
+risk: R3
+risk_rationale: >-
+  The planned architecture work concerns Scope authorization boundaries,
+  typed identity, idempotency, Receipt disclosure and persistent storage
+  isolation. These are security- and integrity-relevant boundaries.
+  R3 independent security/domain expert review and reproducible evidence
+  are required before acceptance.
+security_scope: >-
+  Scope authorization, cross-Scope data isolation, ProducerIdentity,
+  idempotency namespace, RequestDigest and Receipt disclosure/replay.
+status: PROPOSED
+
+registration:
+  status: BLOCKED_PENDING_REGISTRATION
+  allocated_id: AID-2026-009
+  allocation_authority: Issue #264 comment 7007736165
+  owning_issue: 264
+  registration_owner_role: Integration Owner
+  required_persistence:
+    - work-items/AID-2026-009/manifest.yaml
+    - work-items/INDEX.md entry
+    - Issue #264 Work Item association comment
+  completion_condition: >-
+    All three persistence steps must be completed and independently
+    read back. Allocation alone is not registration.
+
+prompt:
+  id: REQ03-AID-2026-009-REGISTRATION-DISPATCH
+  version: current user-provided registration instruction
+  provenance: T2 chat instruction
+  source: >-
+    User-provided management header and AID-2026-009 registration dispatch
+    in the current ChatGPT conversation.
+  conversation_session_id: NOT_EXPOSED_BY_INTERFACE
+  stable_permalink: NOT_EXPOSED_BY_INTERFACE
+  sha256: NOT_APPLICABLE_CHAT_SOURCE
+  note: >-
+    The source is a chat instruction, not a repository prompt file.
+    This session cannot read its conversation ID or stable permalink.
+    No synthetic session ID, permalink or file hash is fabricated.
+  t2_verification:
+    status: VERIFIED
+    evidence: Issue #264 comment 7006879185
+  t1_file_anchor:
+    status: BLOCKED_PENDING_PROVENANCE
+    missing:
+      - Prompt ID in the source file
+      - Source file version
+      - Exact source file commit SHA
+    note: >-
+      T2 verification does not satisfy or replace the T1 file-side anchor.
+
+baseline:
+  repository: oahcom/AiMemoryBrainArchitecture
+  target_branch: main
+  base_sha: NOT_CAPTURED_IN_THIS_REGISTRATION_READ
+  base_sha_note: >-
+    The registration package does not claim an exact main SHA from this
+    read. Capture the exact main HEAD when L0 performs remote registration
+    and record the actual source of that value.
+
+dependencies:
+  - item: PR #249
+    status: CLOSED_MERGED
+    merge_commit: b663c8fde45dd5db3b02c434c47def34a6d1fefe
+    dependency_role: >-
+      Post-merge verification of Scope validation, nested Claim filtering,
+      Scope identity equality and caller authorization boundaries.
+  - item: PR #251
+    status: CLOSED_MERGED
+    merge_commit: ed842fa7ce9dd9df7b808495abd5cd1071850547
+    dependency_role: >-
+      Upstream RFC-IDE-001 proposal for ProducerIdentity, Scope,
+      IdempotencyKey and Receipt replay semantics. RFC adoption and
+      unresolved Owner decisions remain separate gates.
+
+deliverables:
+  - >-
+    Architecture decision proposal comparing Scope identity and
+    authorization-boundary alternatives.
+  - >-
+    Post-merge source-level verification of relevant #249 implementation
+    against the exact current main commit.
+  - >-
+    Contract alignment and unresolved-decision register for RFC-IDE-001
+    from #251.
+  - >-
+    Reproducible negative-test and evidence plan for Scope isolation,
+    unauthorized request Scope, identity collisions and Receipt replay.
+  - >-
+    Owner decision requests and independent review handoff materials.
+  - 14-ai-development/work-items/INDEX.md registration row
+  - Issue #264 Work Item association record
+
+scope:
+  - >-
+    Reconcile REQ-03 requirements with the actual merged state of PR #249
+    and PR #251; do not treat historical pre-merge findings as current
+    implementation facts without re-verification.
+  - >-
+    Verify caller authorization responsibility separately from storage
+    Scope intersection and data filtering.
+  - >-
+    Verify whether Scope identity uses scope_id alone or a complete
+    authoritative identity including scope_kind and namespace_key.
+  - >-
+    Verify nested Claim filtering and prevent cross-Scope metadata or
+    content disclosure.
+  - >-
+    Reconcile ProducerIdentity composition, IdempotencyKey namespace,
+    RequestDigest canonicalization and Receipt replay authorization.
+  - >-
+    Record unresolved Owner decisions and independent R3 review needs.
+  - >-
+    Preserve exact commit, test and review evidence for each conclusion.
+
+non_goals:
+  - No new Issue, PR or branch creation without separate authorization.
+  - No modification, reopening or retargeting of PR #249 or PR #251.
+  - No inference that RFC-IDE-001 is ADOPTED merely because PR #251 merged.
+  - No inference that historical findings are closed merely because PR #249 merged.
+  - No production-readiness or security-acceptance claim without required evidence.
+  - No quota-unfreeze declaration or coordinator action.
+  - No use of Desktop Commander.
+  - No local WSL project-file editing.
+
+acceptance:
+  - >-
+    Manifest is valid YAML and contains the required Work Item identity,
+    title, owning Issue, Owner role, status, source provenance and
+    acceptance criteria.
+  - >-
+    AID-2026-009 manifest exists at the exact required path on remote 43.
+  - >-
+    INDEX.md contains the matching AID-2026-009 entry.
+  - >-
+    Issue #264 contains the Work Item association record.
+  - >-
+    L0 returns remote read-back, SHA-256, file list and git status.
+  - >-
+    Post-merge conclusions identify the exact tested main commit and
+    distinguish verified facts from unresolved assumptions.
+  - >-
+    R3 independent security/domain expert review and reproducible
+    evidence are completed before acceptance.
+  - >-
+    Relevant Owner decisions are explicitly recorded; no self-acceptance.
+  - >-
+    REQ-03 overall acceptance is decided by its authorized authority,
+    not inferred from Work Item registration.
+
+findings:
+  - id: F-REQ03-REG-01
+    severity: P1
+    destination: Issue #264
+    status: PENDING_GOVERNANCE_CLOSURE
+    summary: >-
+      L0 must record the actual authorized SSH execution channel and
+      return one real remote file-write verification package. The
+      session's lack of SSH credentials is an intentional role boundary,
+      not an authorization defect.
+
+evidence:
+  t2_timestamp_verification:
+    status: INDEPENDENTLY_VERIFIED
+    reference: Issue #264 comment 7006879185
+  t3_provenance:
+    status: BLOCKED_PENDING_PROVENANCE
+    blocker: Missing T1 source-file identity and exact commit anchor.
+  pr_249:
+    state: CLOSED_MERGED
+    merge_commit: b663c8fde45dd5db3b02c434c47def34a6d1fefe
+    post_merge_acceptance: PENDING
+  pr_251:
+    state: CLOSED_MERGED
+    merge_commit: ed842fa7ce9dd9df7b808495abd5cd1071850547
+    rfc_adoption: PENDING
+  independent_review: PENDING
+  owner_acceptance: PENDING
+
+lifecycle:
+  phase: INTAKE
+  source_status: PROPOSED
+  gates:
+    verified:
+      status: NOT_RECORDED
+    independent_review:
+      status: NOT_RECORDED
+    integration:
+      status: NOT_RECORDED
+    owner_acceptance:
+      status: NOT_RECORDED
+    merge:
+      status: NOT_APPLICABLE_TO_REGISTRATION
+    closeout:
+      status: NOT_RECORDED
+  markers:
+    blocked:
+      reason: >-
+        Registration remains BLOCKED_PENDING_REGISTRATION until the
+        manifest, INDEX row and Issue association record are all
+        persisted and read back.
