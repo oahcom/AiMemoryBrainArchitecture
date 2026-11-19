@@ -58,13 +58,12 @@ def _load(raw):
 
 def _serialize_lifecycle_preserving_source(raw, lifecycle):
     """Append only the new top-level block; preserve all existing bytes/comments."""
-    text = raw.decode("utf-8")
     block = yaml.safe_dump({"lifecycle": lifecycle}, allow_unicode=True,
                            sort_keys=False, width=1000).encode("utf-8")
-    lines = text.splitlines(keepends=True)
+    lines = raw.splitlines(keepends=True)
     # YAML's explicit document-end marker must remain the final document token.
     marker_index = next((i for i, line in enumerate(lines)
-                         if line.strip() == b"..." if isinstance(line, bytes)), None)
+                         if line.strip() == b"..."), None)
     if marker_index is not None:
         prefix = b"".join(lines[:marker_index])
         suffix = b"".join(lines[marker_index:])
