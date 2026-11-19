@@ -143,7 +143,7 @@ MUST rules:
 3. An R2 change MUST NOT be auto-downgraded to Level 3 for small size; a `downgrade_justification`, an independent `downgrade_confirmed_by` (not the assessor) and a `downgrade_confirmation_record` inside the subject tree are all required.
 4. A documentation change that alters normative meaning, obligation strength, interfaces, data models, state machines or security boundaries MUST be classified DOC_NORMATIVE (Level 1), not DOC_EDITORIAL.
 5. An UNKNOWN classification is BLOCKED and MUST NOT receive any level.
-6. Declaring a downgrade-capable class (FEATURE, BUGFIX, DOC_EDITORIAL, OPS) requires `classification_basis`, an independent `classification_confirmed_by` and a `classification_record` in the subject tree; a forced Level 1 class MUST NOT be relabelled to escape the Level 1 floor.
+6. Declaring a downgrade-capable class (FEATURE, BUGFIX, DOC_EDITORIAL, OPS) requires `classification_basis`, an independent `classification_confirmed_by` and a `classification_record` in the subject tree; a forced Level 1 class MUST NOT be relabelled to escape the Level 1 floor. The basis MUST correspond to the actual change impact and the confirmation record MUST state what was examined; restating the label is not confirmation.
 7. Evidence binding protocol v3 is enforced for real at every level (commit-object subject_head, subject-tree containment, working-tree/blob equality); Level 1 additionally anchors a sidecar digest in the commit message. A VERIFIED authenticity claim without a verification record is BLOCKED.
 8. Audit fields `assessed_by`, `assessed_at`, `rationale` and `base_head` are mandatory and machine-checked.
 9. The checker `scripts/governance/evidence/check-evidence-tiering.py` MUST be run for declared evidence, and its per-scenario records — not its exit code alone — are the acceptance evidence.
@@ -164,7 +164,7 @@ MUST 规则：
 3. R2 变更 MUST NOT 因规模小而自动降为 Level 3；须同时提供 `downgrade_justification`、独立确认者 `downgrade_confirmed_by`（不得为判定人）及 subject tree 内的 `downgrade_confirmation_record`。
 4. 改变规范含义、义务强度、接口、数据模型、状态机或安全边界的文档变更 MUST 归类为 DOC_NORMATIVE（Level 1），不得按 DOC_EDITORIAL 处理。
 5. UNKNOWN 分类为 BLOCKED，MUST NOT 赋予任何等级。
-6. 声明可降级类别（FEATURE、BUGFIX、DOC_EDITORIAL、OPS）须提供 `classification_basis`、独立 `classification_confirmed_by` 与 subject tree 内的 `classification_record`；强制 Level 1 类别 MUST NOT 通过改标逃避 Level 1 底线。
+6. 声明可降级类别（FEATURE、BUGFIX、DOC_EDITORIAL、OPS）须提供 `classification_basis`、独立 `classification_confirmed_by` 与 subject tree 内的 `classification_record`；强制 Level 1 类别 MUST NOT 通过改标逃避 Level 1 底线。分类依据 MUST 与实际变更影响对应，确认记录 MUST 写明实际核对对象；仅复述标签不构成确认。
 7. 证据绑定协议 v3 在所有等级均真实执行（commit 对象 subject_head、subject tree 包含、工作树/blob 一致）；Level 1 另须在 commit message 中锚定 sidecar 摘要。声称 VERIFIED 但无验证记录者 BLOCKED。
 8. 审计字段 `assessed_by`、`assessed_at`、`rationale`、`base_head` 强制且经机器校验。
 9. 已声明证据 MUST 运行检查器 `scripts/governance/evidence/check-evidence-tiering.py`，且以其逐项记录（而非仅退出码）作为验收证据。

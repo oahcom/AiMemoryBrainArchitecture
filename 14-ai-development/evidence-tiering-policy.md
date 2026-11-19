@@ -39,7 +39,7 @@
 2. **R2 不得自动降级**：R2 变更不得仅因改动规模小、文件数少或"看起来是文字修改"而降到 Level 3。确有必要时 MUST 同时提供三项：`downgrade_justification`（理由）、`downgrade_confirmed_by`（确认者，且不得等于 `assessed_by`）、`downgrade_confirmation_record`（须按 §5 第 6 条在 subject tree、工作树与 blob 三处校验）。任一项缺失或确认者为本人，均 BLOCKED。
 3. **文档变更不等于低风险**：文档变更若改变规范含义、约束强度、接口/协议、数据模型、状态机或安全边界，MUST 升级为 DOC_NORMATIVE → Level 1。
 4. **UNKNOWN 一律 BLOCKED**：无法确定分类时不得赋予任何 Level，判定为 BLOCKED / NEEDS_CLASSIFICATION，由有权 Owner 或治理授权者确认后重新判定。
-5. **分类信任边界**：强制 Level 1 的类别（ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE）不得通过改标为 FEATURE/BUGFIX/DOC_EDITORIAL/OPS 而降级。凡声明为可降级类别（FEATURE、BUGFIX、DOC_EDITORIAL、OPS）者，MUST 提供 `classification_basis`（分类依据）、`classification_confirmed_by`（独立确认者，不得等于 `assessed_by`）与 `classification_record`（须按 §5 第 6 条在 subject tree、工作树与 blob 三处校验）；缺失或无法独立确认时 BLOCKED，不得默认相信申报者。
+5. **分类信任边界**：强制 Level 1 的类别（ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE）不得通过改标为 FEATURE/BUGFIX/DOC_EDITORIAL/OPS 而降级。凡声明为可降级类别（FEATURE、BUGFIX、DOC_EDITORIAL、OPS）者，MUST 提供 `classification_basis`（分类依据）、`classification_confirmed_by`（独立确认者，不得等于 `assessed_by`）与 `classification_record`（须按 §5 第 6 条在 subject tree、工作树与 blob 三处校验）；缺失或无法独立确认时 BLOCKED，不得默认相信申报者。`classification_basis` MUST 与实际变更影响对应（本次改动触及的文件、接口、边界或数据模型）；确认者 MUST 在 `classification_record` 中写明实际核对的对象与所得结论，仅复述申报标签不构成独立确认，判 BLOCKED。
 6. **不存在"自动通过"**：Level 只决定证据深度，不构成任何门禁的通过证据。
 
 ## 4. 判定与审计留痕
@@ -70,7 +70,7 @@
 
 1. **不替换、不削弱** 既有 applied-delivery-evidence validator 及其 CI workflow（本策略不修改 `.github/workflows`）。
 2. **保留证据绑定协议 v3**：subject_head 必须是 commit 对象；证据文件必须位于 subject tree；工作树字节必须与 subject blob 一致。
-3. **v3 校验范围按等级明确**（消除歧义）：
+3. **v3 校验范围按等级明确**（消除歧义）。本表只调整证据深度，**不改变绑定完整性**：前三项在全部等级强制，`sidecar` 项属 Level 1 的深度要求，其缺失 MUST NOT 被解释为证据可以脱离受审对象：
 
 | v3 校验项 | Level 1 | Level 2 | Level 3 |
 |---|---|---|---|
