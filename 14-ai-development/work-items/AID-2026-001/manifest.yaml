@@ -533,4 +533,41 @@ post_merge_manifest_validation:
   owner_i_approval: PENDING
   independent_specialist_reviews: PENDING_NOT_EVIDENCED
   production_activation: NOT_AUTHORIZED
-  note: PR #147 established full-file YAML parse and required-path checks but used PyYAML safe_load, which accepts duplicate keys. PR #152 fixed actual duplicate keys and added strict duplicate-key rejection; its exact-Head run passed. Neither run is formal JSON Schema validation or production conformance.
+  note: PR #147 established full-file YAML parse and required-path checks but used PyYAML safe_load, which accepts duplicate keys. PR #152 fixed actual duplicate keys and added strict duplicate-key rejection; its exact-Head run passed. Neither run is formal JSON Schema validation or production conformance.
+
+# Dev-baseline integration overlay (2026-11-19). Mainline records above are
+# preserved verbatim; this overlay records only R3 reference-model baseline
+# convergence, not formal Owner approval, acceptance or production R3 evidence.
+dev_baseline_integration:
+  target_commit: e5f11982e135da5cfab1567b4bfadf3d824afed4
+  branch: remediation/aid-2026-001-forget-contract-closure-2026-11-18
+  model_blob: 771c1fdc6f8a248a7121d165a0b035cebcc9880c
+  tests_blob: 22b8d81e7738fe66074f9973932a2dbe79fb52ae
+  local_tests: "93 tests OK (79 contract + 14 forget_model); record-014"
+  decisions:
+    owner_d: ACCEPT (OD-D-FORGET-DELTA-20261119-009 @ 95347a5)
+    owner_i: ACCEPT (95347a5 model layer)
+    storage: ACCEPT (DEC-AID-2026-001-STOR-20261119-07 @ e5f1198)
+  integration_files_added:
+    - reference-model/r3_contract_model.py
+    - reference-model/test_r3_contract.py
+    - reference-model/R3-RUNBOOK.md
+    - r3-evidence/erratum-003.md
+    - r3-evidence/erratum-004.md
+    - r3-evidence/execution-record-003.md through execution-record-014.md
+  excluded_from_integration:
+    reason: mainline versions are newer and authoritative
+    paths:
+      - reference-model/forget_model.py
+      - reference-model/test_forget_model.py
+      - reference-model/README.md
+      - execution-record-001.md
+      - integration-review-prompt.md
+      - r3-specialist-review-owner-d-prompt.md
+      - r3-specialist-review-owner-i-prompt.md
+  out_of_scope_dev_baseline:
+    - real cryptographic receipt signature verification
+    - production issuer minting a fresh credential per retry
+    - enforced production verifier
+    - concurrent linearization proof (DFI-013)
+    - WAL / crash durability (DFI-021)
