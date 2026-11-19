@@ -777,3 +777,35 @@ These are bounded PostgreSQL physical capability results only. They do not estab
 - Conversation ID: NOT RECORDED because not exposed by this runtime; SHA-256: NOT_VERIFIED (not fabricated).
 - Work Item ID: NOT ASSIGNED by the handoff; no AID inferred.
 - Governing files actually read from main: AI-EXEC-001 v1.1 Blob `58af59af266b81109269156ea667df1a15edfb7b`; AI-EXEC-002 v1.2 Blob `7f5928a5d16eb12da7621cfb8bd99ca463afd859` (v1.2 PENDING ADOPTION; v1.1 adopted predecessor).
+
+
+## 2026-11-20 — I exact-version readback correction (JF10-REC-003a)
+
+A fresh readback of the current I branch refines the previous Issue #4 / report disposition. The earlier statement that I had not accepted the current A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` is superseded by an exact I acceptance now present in the current I JF-10 v2 disposition.
+
+### Fresh exact I evidence
+
+- I branch: `session-i-security-governance-2026-11-16`
+- I branch HEAD: `8abddf814467b271344a9814613a6b7ca6a446c6`
+- I JF-10 v2 disposition Blob: `8069ff86988396442c8d9dc3fd58653683abe2f3`
+- Its §11 explicitly states: **I ACCEPTS exact A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d`, with the binding single-I-PolicyDomain limitation.** The accepted boundary keeps COC as ordering/participant-observation authority, I's policy-domain sequencer as the sole JF-10 terminal decision authority, Storage on the exact prepared XID, D as exclusive ForgetFence/barrier authority, and COC/I positions as distinct typed orders.
+- The same I artifact states COC-01..12 and JF10-COC-01..10 remain SPECIFIED / NOT RUN; JF-10 remains P0 OPEN; multi-policy-domain atomicity remains BLOCKED.
+- I's separate composition-boundary Blob `9e1f66ddbe0952f17068b1638feb8ab0094588c3` is consistent with a bounded bridge only: it rejects automatic/general COC↔JF-10 composition and says combined operations outside the specifically accepted bridge remain BLOCKED/UNKNOWN pending the required joint protocol and exact Owner decisions.
+
+### Refined finding
+
+**JF10-REC-003a [P0] — exact DE-S protocol acceptance remains open; A architecture exact-version acceptance is resolved.**
+
+- **Resolved sub-item:** I exact-version acceptance of A COC architecture Blob `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` is now evidenced by I disposition §11. Do not continue reporting this A-Blob mismatch as open.
+- **Still open:** D/E/Storage's current shared JF-10 protocol is Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`. I's §10 identifies the original proposal Blob `d544cc38a922b314e6dc45dd4db76aae6b47f5fc` and notes evolved D/Storage readbacks at `94679897...`, but the I artifact does not record an unambiguous ACCEPT/REVISE/BLOCK explicitly against the exact `94679897...` protocol Blob. D/E/Storage owner decisions remain scoped to their own boundaries.
+- **Composition interpretation:** retain the explicitly accepted single-I-PolicyDomain JF-10↔COC bridge constraints; do not infer general or automatic composition, multi-domain atomicity, or a merged sequencer.
+- **Owner / return:** I for its exact protocol/sequencer disposition; A for maintaining exact bundle pins; D/E/Storage for their own boundary acceptance and runtime evidence. Return remains existing Issue #4 for I disposition and existing Issue #20 for technical cross-owner follow-through.
+- **Closure condition:** I records a disposition explicitly naming Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0`, or A/D/E/Storage revise and re-pin a single exact protocol bundle and obtain I's exact disposition. No new Issue/PR.
+
+### Verification boundary
+
+This is repository source readback only. No tests were run in this unit. It does not change the existing evidence boundary: PostgreSQL capability runs are bounded storage capability evidence; integrated JF-10 conformance remains NOT RUN / NOT EXECUTED; no production deployment or Phase 3.6 final gate is claimed.
+
+### Owner disposition applied for DE-S consumption
+
+For current DE-S consumption, use the lowest-risk interpretation already supported by I's exact text: accept only the bounded single-I-PolicyDomain bridge semantics pinned by I §11; keep CGH COC ordering and I JF-10 terminal sequencing as distinct typed authorities; reject/hold any multi-domain or broader combined operation as BLOCKED/UNKNOWN. This is a DE-S fail-closed consumption rule, not a new I approval or an expansion of I authority.
