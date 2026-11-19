@@ -44,9 +44,9 @@ flowchart TD
 ## 2.1 — Owner Responsibility Resolution and Alignment Session
 ## Owner 责任解析与对齐会话
 
-**Status: PROPOSED — normative activation requires the applicable adoption process.**
+**Status: ACTIVE — development-baseline operational scope only (A-OWNER-INTEGRATION-R46-2026-11-20). Sub-sections 2.1.3.1–2.1.7.3 also ACTIVE.**
 
-**状态：PROPOSED——规范性生效须遵循适用的采纳程序。**
+**状态：ACTIVE——仅限开发基线运行范围（A-OWNER-INTEGRATION-R46-2026-11-20）。子条款 2.1.3.1–2.1.7.3 同时 ACTIVE。**
 
 ### 2.1.1 Purpose / 目的
 
@@ -403,6 +403,222 @@ DoR 必须满足：
 8. 不存在会使拟议执行不安全的未解决前置条件。
 
 当前置条件未解决时，只有在明确隔离的范围内，才允许独立工作继续。
+
+### 2.1.3.1 — Responsibility Mapping Evidence / 责任映射证据
+
+**Status: ACTIVE (A-OWNER-INTEGRATION-R46-2026-11-20)**
+
+**EN**
+
+Owner A MUST record the evidence supporting each proposed Primary Accountable Owner and Collaborating Owner.
+
+The record MUST distinguish:
+
+- Explicit current assignment.
+- Adopted Owner charter or contract.
+- Existing attributable Owner decision.
+- Historical responsibility evidence.
+- A-proposed responsibility mapping.
+- Unresolved or contradictory responsibility evidence.
+
+A recommendation MUST NOT be represented as an established assignment without its supporting authority.
+
+**中文**
+
+Owner A MUST 记录每个建议主责 Owner 和协同 Owner 的证据依据。
+
+必须区分：
+
+- 当前明确指派。
+- 已采纳的 Owner Charter 或契约。
+- 已存在且可归属的 Owner 决议。
+- 历史责任证据。
+- A 提出的责任映射。
+- 未解决或相互矛盾的责任证据。
+
+没有相应权威依据时，不得将建议归属描述为已经正式指派。
+
+### 2.1.5.1 — Consolidated Owner Session / 合并 Owner 会话
+
+**Status: ACTIVE (A-OWNER-INTEGRATION-R46-2026-11-20)**
+
+**EN**
+
+Multiple Owner responsibility lanes MAY be hosted in one ChatGPT conversation when the project authorization permits consolidated session execution.
+
+The conversation MUST:
+
+1. Identify each Owner role explicitly.
+2. Maintain separate responsibility and decision records.
+3. Preserve the Primary Owner for each Issue and Stage.
+4. Preserve each Owner's domain authority boundaries.
+5. Record exact source revisions and evidence.
+6. Avoid claiming independent session identity or independent review merely because the conversation changes roles.
+7. Identify consolidated session rulings as such rather than fabricating independent signatures.
+
+A consolidated session MUST NOT merge independent acceptance criteria or silently transfer domain ownership to A.
+
+**中文**
+
+在项目授权允许的情况下，多个 Owner 责任泳道 MAY 由同一个 ChatGPT 对话承载。
+
+该对话 MUST：
+
+1. 明确识别每个 Owner 角色。
+2. 保留各自独立的责任记录和决策记录。
+3. 保留每个 Issue 和 Stage 的主责 Owner。
+4. 保留各领域的决策权边界。
+5. 记录准确来源版本和证据。
+6. 不得因为对话切换角色，就声称产生了独立会话身份或独立审查。
+7. 将合并会话作出的裁决明确标记为合并会话裁决，不得补造独立签名。
+
+合并会话 MUST NOT 合并不同验收标准，也不得静默将领域责任转移给 A。
+
+### 2.1.6.1 — Alignment Batch Boundary / 对齐批次边界
+
+**Status: ACTIVE (A-OWNER-INTEGRATION-R46-2026-11-20)**
+
+**EN**
+
+A normal alignment batch SHOULD contain three to six logical L2 Owner work sessions.
+
+These sessions MAY be executed within one shared conversation.
+
+Every Issue MUST retain:
+
+- Its own Primary Accountable Owner.
+- Its own Collaborating Owners.
+- Its own responsibility rationale.
+- Its own dependency status.
+- Its own acceptance conditions.
+- Its own unresolved findings.
+
+Batch completion means routing and reconciliation are complete. It does not imply that all Issues are accepted or closed.
+
+**中文**
+
+常规对齐批次 SHOULD 包含三至六个逻辑 L2 Owner 工作会话。
+
+这些会话 MAY 在同一个共享对话中执行。
+
+每个 Issue MUST 保留自己的：
+
+- Primary Accountable Owner。
+- Collaborating Owners。
+- 责任归属依据。
+- 依赖状态。
+- 验收条件。
+- 未解决 Finding。
+
+批次完成只表示责任路由和整合工作完成，不代表所有 Issue 已验收或关闭。
+
+### 2.1.7.1 — Cross-domain Stage Decomposition / 跨域 Stage 拆分
+
+**Status: ACTIVE (A-OWNER-INTEGRATION-R46-2026-11-20)**
+
+**EN**
+
+When one Issue spans multiple responsibility domains, Owner A MUST decompose the work into explicitly ordered Owner-owned Stages.
+
+Each Stage MUST specify:
+
+1. Stage identifier.
+2. Primary Accountable Owner.
+3. Collaborating Owners.
+4. Exact input artifacts and revisions.
+5. Decision or implementation scope.
+6. Required output and evidence.
+7. Upstream prerequisites.
+8. Downstream consumers.
+9. Acceptance authority.
+10. Stop conditions.
+
+The integration parent remains the traceability carrier.
+
+A Stage decision applies only to its stated scope and exact revision.
+
+Downstream Stages MUST NOT assume that upstream proposals are accepted unless the required evidence exists.
+
+**中文**
+
+当一个 Issue 涉及多个责任领域时，Owner A MUST 将工作拆分为具有明确顺序的 Owner-owned Stage。
+
+每个 Stage MUST 明确：
+
+1. Stage 编号。
+2. 主责 Accountable Owner。
+3. 协同 Owner。
+4. 精确输入工件及版本。
+5. 决策或实现范围。
+6. 必需交付物和证据。
+7. 上游前置条件。
+8. 下游消费者。
+9. 验收权威。
+10. 停止条件。
+
+集成父项继续作为可追溯性载体。
+
+Stage 决议只适用于其声明的范围和精确版本。
+
+下游 Stage MUST NOT 在缺乏所需证据时假定上游提案已经获得接受。
+
+### 2.1.7.2 — Quota Freeze and ORPHAN Routing / 配额冻结与 ORPHAN 路由
+
+**Status: ACTIVE (A-OWNER-INTEGRATION-R46-2026-11-20)**
+
+**EN**
+
+During an active quota freeze:
+
+- New Issues, PRs and branches MUST NOT be created.
+- Existing authorized carriers MUST be reused.
+- ORPHAN responsibility MUST remain explicitly unresolved.
+- Owner A MUST NOT automatically absorb an ORPHAN item.
+- Independent work MAY proceed within an authorized, isolated scope.
+- Authority-dependent work MUST remain BLOCKED or HOLD.
+- Required evidence and proposed routing MUST be recorded in an authorized existing carrier.
+
+A quota freeze does not suspend responsibility resolution or dependency analysis.
+
+**中文**
+
+配额冻结 ACTIVE 时：
+
+- MUST NOT 新建 Issue、PR 或分支。
+- MUST 复用已有获授权载体。
+- ORPHAN 责任 MUST 明确保留为未解决。
+- Owner A MUST NOT 自动接管 ORPHAN。
+- 在授权且隔离的范围内，独立工作 MAY 继续。
+- 依赖未决权威的工作 MUST 保持 BLOCKED 或 HOLD。
+- 所需证据和建议路由 MUST 记录在获授权的既有载体中。
+
+配额冻结不暂停责任解析和依赖分析。
+
+### 2.1.7.3 — Unified Progress Classification / 统一推进分类
+
+**Status: ACTIVE (A-OWNER-INTEGRATION-R46-2026-11-20)**
+
+**EN**
+
+Every routed Issue MUST have one current progress classification:
+
+- READY
+- ORPHAN
+- BLOCKED
+- DEFERRED
+
+The classification applies to the next bounded action and MUST NOT be interpreted as implementation, verification or acceptance status.
+
+**中文**
+
+每个已路由 Issue MUST 有一个当前推进分类：
+
+- READY
+- ORPHAN
+- BLOCKED
+- DEFERRED
+
+该分类仅适用于下一项有边界的工作，不得解释为实现、验证或验收状态。
 
 ### 2.1.8 Execution and Independent Work / 执行与独立工作
 
