@@ -1,0 +1,39 @@
+work_item_id: AID-2026-006
+title: Session management hierarchy baseline (AI-SESSION-MGMT-001)
+owner: Integration Owner
+accountable_owner: Project Owner (adoption authority)
+issue: 130
+related_issues: [130, 262, 263, 264, 265, 266]
+related_prs: []
+task_class: DOC
+risk: R1
+status: PROPOSED
+prompt:
+  id: AID-2026-006-PROMPT
+  version: v1
+  provenance: PM-A-001 session (6afd9e34) + coordinator dispatch + user forced directives (23:18 / 23:36-23:40)
+  source: PM-A-001 second-wave integration ruling (22-supplement + 25-mandate); user instructions in WorkBuddy conversation
+  prompt_filename: prompts/18-pm-hierarchy-intake.md (hierarchy intake); prompts/25-mandate-baseline.md (baseline mandate)
+  repository_prompt_file: null
+  sha256: NOT_VERIFIED
+  note: Prompt provenance is coordinator-dispatched session instructions; immutable raw bytes not captured at dispatch time.
+baseline:
+  repository: oahcom/AiMemoryBrainArchitecture
+  target_branch: main
+  base_sha: 5ab18f57f3f7e44e848c204c1386578fb6c12d18
+  base_sha_source: git pull origin main at registration time
+deliverables:
+  - 14-ai-development/AI-SESSION-MGMT-001.md (target, not yet created)
+  - 14-ai-development/work-items/INDEX.md (registration)
+scope:
+  - Register REQ-HIERARCHY as formal Work Item (PM-A-001 BLOCKER-01 resolution).
+  - Baseline session management hierarchy (L0-L4) into 14-ai-development/.
+  - Consolidate user forced directives: L0 non-stop convergence, requirement-manager co-activation, L1 carrier convergence duty.
+constraints:
+  - SESSION-HIERARCHY v1.2 local document is the operational copy; final home is 14-ai-development/ via PR.
+  - PM-A-001 (6afd9e34) produced the integration ruling; baseline text must be PM-A-001 authored (L0 does not ghostwrite).
+  - Registration here does NOT constitute Owner adoption of the hierarchy specification.
+acceptance:
+  - Work Item registered in INDEX: this commit.
+  - AI-SESSION-MGMT-001 baseline PR: NOT YET (separate C-2-adjacent dispatch or PM-A-001 continuation).
+  - Owner adoption: PENDING.
