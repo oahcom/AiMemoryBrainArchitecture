@@ -57,16 +57,22 @@ for path in sorted(x for x in files if x):
         actual=subprocess.run(["git","-C",str(root),"rev-parse",f"{ref}:{path}"],capture_output=True,text=True)
         if actual.returncode or actual.stdout.strip()!=sha:
             drift.append(path); print(f"STALE_BLOB_SHA\t{path}\texpected={sha}\tactual={actual.stdout.strip() or 'MISSING'}\tref={ref}")
-# Registered per-file entries must exist at the declared baseline; if a file
-# was deleted from the tree it would never appear in the ls-files loop above.
+# Registered per-file entries must bind to the declared baseline tree:
+# 1. every entry MUST carry a valid blob_sha (no unanchored registrations);
+# 2. every registered path MUST exist in the baseline tree itself, checked
+#    directly with git cat-file -e <baseline>:<path> — not inferred from the
+#    working index, which can contain paths absent from the baseline.
 for key in sections:
-    for path in sections[key]:
-        if not any(x==path for x in files if x):
-            missing.append(path); print(f"MISSING_IN_BASELINE\t{path}\tregistered in {key} but absent from working tree",file=sys.stderr)
+    for path,sha in sections[key].items():
+        if not sha:
+            missing.append(path); print(f"NO_BLOB_SHA\t{path}\tregistered in {key} without blob_sha",file=sys.stderr); continue
+        probe=subprocess.run(["git","-C",str(root),"cat-file","-e",f"{ref}:{path}"],capture_output=True)
+        if probe.returncode:
+            missing.append(path); print(f"MISSING_IN_BASELINE\t{path}\tregistered in {key} but absent from tree {ref}",file=sys.stderr)
 print("SUMMARY\t"+"\t".join(f"{k}={v}" for k,v in counts.items()))
 if unknown: print(f"NEEDS_CONFIRMATION\t{len(unknown)} path(s); UNKNOWN is not PASS",file=sys.stderr)
 if drift: print(f"BASELINE_DRIFT\t{len(drift)} blob SHA mismatch(es) against declared baseline {ref}",file=sys.stderr)
-if missing: print(f"MISSING_PATHS\t{len(missing)} registered path(s) absent from tree",file=sys.stderr)
+if missing: print(f"BASELINE_BINDING_FAIL\t{len(missing)} registered path(s) missing from baseline tree or lacking blob_sha",file=sys.stderr)
 if drift or missing: raise SystemExit(1)
 if unknown: raise SystemExit(2)
 PY

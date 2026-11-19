@@ -21,7 +21,8 @@ class Tests(unittest.TestCase):
             subprocess.run(["git","-C",str(root),"config","user.name","Test"],check=True)
             (root/"docs").mkdir(); (root/"docs"/"new.md").write_text("# new\n",encoding="utf-8")
             (root/"known.md").write_text("# known\n",encoding="utf-8")
-            mapping=root/"mapping.yaml"; mapping.write_text("tier1:\n  files:\n    - path: known.md\ntier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules:\n    - directory: docs/\n      tier: UNKNOWN\n",encoding="utf-8")
+            known_sha=subprocess.run(["git","-C",str(root),"hash-object",str((root/"known.md").as_posix())],capture_output=True,text=True).stdout.strip()
+            mapping=root/"mapping.yaml"; mapping.write_text("tier1:\n  files:\n    - path: known.md\n      blob_sha: %s\ntier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules:\n    - directory: docs/\n      tier: UNKNOWN\n"%known_sha,encoding="utf-8")
             subprocess.run(["git","-C",str(root),"add","."],check=True); subprocess.run(["git","-C",str(root),"commit","-qm","fixture"],check=True)
             r=self.run_cmd([BASH,TIERING,mapping],env={**os.environ,"REPO_ROOT":str(root)})
             self.assertEqual(r.returncode,2,r.stdout+r.stderr); self.assertIn("UNKNOWN\tdocs/new.md",r.stdout); self.assertIn("NEEDS_CONFIRMATION",r.stderr)
@@ -110,12 +111,49 @@ class Tests(unittest.TestCase):
             root=Path(d); self.make_repo(root,{"docs/a.md":"# present\n"})
             mapping=root/"mapping.yaml"
             mapping.write_text(
-                "tier1:\n  files:\n    - path: docs/gone.md\n"
-                "tier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules: []\n",
+                "tier1:\n  files:\n    - path: docs/gone.md\n      blob_sha: %s\n"
+                "tier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules: []\n"%("e"*40),
                 encoding="utf-8",newline="\n")
             r=self.run_cmd([BASH,TIERING,mapping],env={**os.environ,"REPO_ROOT":str(root)})
             self.assertEqual(r.returncode,1,r.stdout+r.stderr)
             self.assertIn("MISSING_IN_BASELINE\tdocs/gone.md",r.stderr)
+    def test_tiering_path_in_worktree_but_absent_from_baseline_fails(self):
+        # R2 F1: a file that exists in the current worktree/index but NOT in
+        # the declared baseline tree MUST fail (cat-file -e binding), even
+        # though ls-files would enumerate it.
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            self.make_repo(root,{"docs/a.md":"# a\n"})
+            base=subprocess.run(["git","-C",str(root),"rev-parse","HEAD"],capture_output=True,text=True).stdout.strip()
+            (root/"docs"/"b.md").write_text("# added later\n",encoding="utf-8",newline="\n")
+            subprocess.run(["git","-C",str(root),"add","."],check=True)
+            subprocess.run(["git","-C",str(root),"commit","-qm","add b"],check=True)
+            sha_a=self.blob_sha(root,"docs/a.md")  # rev-parse at HEAD == at base for a.md
+            mapping=root/"mapping.yaml"
+            mapping.write_text(
+                f"baseline_commit: {base}\ntier1:\n  files:\n    - path: docs/a.md\n      blob_sha: {sha_a}\n"
+                "tier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules: []\n",
+                encoding="utf-8",newline="\n")
+            # Register docs/b.md (exists in index) against the older baseline.
+            text=mapping.read_text(encoding="utf-8")
+            text=text.replace("    - path: docs/a.md\n      blob_sha: %s\n"%sha_a,
+                              "    - path: docs/a.md\n      blob_sha: %s\n    - path: docs/b.md\n      blob_sha: %s\n"%(sha_a,self.blob_sha(root,"docs/b.md")))
+            mapping.write_text(text,encoding="utf-8",newline="\n")
+            r=self.run_cmd([BASH,TIERING,mapping],env={**os.environ,"REPO_ROOT":str(root)})
+            self.assertEqual(r.returncode,1,r.stdout+r.stderr)
+            self.assertIn("MISSING_IN_BASELINE\tdocs/b.md",r.stderr)
+    def test_tiering_entry_without_blob_sha_fails(self):
+        # R2 F1: every per-file registration MUST carry a valid blob_sha.
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); self.make_repo(root,{"docs/a.md":"# a\n"})
+            mapping=root/"mapping.yaml"
+            mapping.write_text(
+                "tier1:\n  files:\n    - path: docs/a.md\n"
+                "tier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules: []\n",
+                encoding="utf-8",newline="\n")
+            r=self.run_cmd([BASH,TIERING,mapping],env={**os.environ,"REPO_ROOT":str(root)})
+            self.assertEqual(r.returncode,1,r.stdout+r.stderr)
+            self.assertIn("NO_BLOB_SHA\tdocs/a.md",r.stderr)
     def test_sync_bilingual_pair_mismatch_fails(self):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d); s,t=root/"s.md",root/"t.md"
