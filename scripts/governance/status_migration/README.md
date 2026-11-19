@@ -51,3 +51,31 @@ field and adds `lifecycle.phase`, `lifecycle.source_status`,
 Run a complete inventory and dry-run first. Review every candidate and every
 blocked result. Do not apply unknown/decorated statuses or architecture-decision
 records. Never infer review, acceptance, integration, merge or closeout evidence.
+
+## Evidence schema and rollback integrity
+
+A successful gate record must contain a structured `evidence` mapping, not
+merely a non-empty reference. Required fields are:
+
+- `verified`: `commands`, `environment`, `tested_head`,
+  `expected_result`, `actual_result`, `logs`. The tested Head must equal
+  the manifest's full `subject_head`.
+- `independent_review`: `reviewer`, `implementer`, `reviewed_head`,
+  `report`, `findings_disposition`. Reviewer and implementer must be
+  different identities and the reviewed Head must equal `subject_head`.
+- `integration`: `compatibility_result`, `registry_updates`,
+  `integration_report`.
+- `owner_acceptance`: `authority`, `decision`, `decision_record`.
+- `merge`: `target_branch`, `merge_commit`, `merge_record`.
+- `closeout`: `index_update`, `closeout_record`.
+
+Empty values, placeholders, and fabricated `fake://`, `test://` or
+placeholder references are rejected. The validator continues to require
+sequential PASS dispositions through the source checkpoint; no phase
+automatically passes a gate. YAML duplicate mapping keys are rejected.
+
+The migrator preserves the original YAML text and comments by appending only
+the new `lifecycle` block. It records the post-migration file SHA-256 in the
+sibling `.post-status-migration.sha256` file. Rollback is refused unless the
+current file hash exactly matches that recorded hash; edits made after
+migration must be reviewed rather than overwritten by rollback.
