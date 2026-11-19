@@ -1,0 +1,78 @@
+work_item_id: FIX-2026-P1-T1
+title: Simplify prompt engineering from 15 mandatory headings to 7 core sections
+accountable_owner: A
+task_class: DOC
+risk: R1
+status: IN_PROGRESS
+repository: oahcom/AiMemoryBrainArchitecture
+issue: 268
+branch: fix/simplify-prompts
+base:
+  branch: main
+  sha: c33a1bcd36f767c96f641d2a154f34d102ce2645
+prompt:
+  id: FIX-2026-P1-T1-PROMPT
+  version: v1
+  provenance: User-provided task brief in ChatGPT conversation
+  immutable_source_snapshot: NOT_ARCHIVED_AS_RAW_BYTES
+  sha256: NOT_VERIFIED
+  note: Do not invent a digest; archive exact executed prompt bytes and compute SHA-256 before execution under repository procedure.
+deliverables:
+  - 14-ai-development/ai-development-standard.md
+  - 14-ai-development/work-items/INDEX.md
+  - 14-ai-development/work-items/FIX-2026-P1-T1/manifest.yaml
+  - prompts/README.md
+  - prompts/00-setup/TEMPLATE-v2.md
+  - prompts/00-setup/MIGRATION-GUIDE.md
+  - prompts/00-setup/work-item-003-v2-migration-example.md
+scope:
+  - Define seven-section prompt structure.
+  - Preserve mandatory governance requirements and existing v1 immutability.
+  - Update AI-STD-001 section 5 bilingually within the existing bilingual standard artifact.
+  - Provide migration guide and real-source non-executable migration example.
+constraints:
+  - GOV-DOC-001 and global prompt requirements remain mandatory.
+  - P0/P1 evidence tiers do not waive tests, R2/R3 gates, independent review or Owner acceptance.
+  - No merge or normative adoption is authorized by this work item.
+  - No existing executed prompt is overwritten.
+verification:
+  evidence_commit: 63de25cd705158f075b1b39ac6f7c4d8cfaadfd1
+  evidence_refs:
+    - PR comment 7000485649: length criterion PASS (4507 / 9807 = 45.96%); T2 snapshot provenance and source immutability evidence.
+    - PR comment 7000536236: independent R1 findings R1-F01 and R1-F02; exact prior reviewed Head.
+    - GitHub Actions Bilingual documentation gate run 44464233100: SUCCESS at the prior reviewed Head.
+  checks:
+    seven_section_template_structure:
+      status: PASS
+      evidence: PR description verification record at evidence_commit.
+    pilot_length_under_50_percent:
+      status: PASS
+      evidence: PR comment 7000485649; 4507 / 9807 = 45.96%.
+    t2_source_identity_and_blob:
+      status: PASS
+      evidence: PR comment 7000485649; source blob a274aa761074683b0fd6a7aadcfe917b140fc227.
+    repository_t1_prompt_v1_distinction:
+      status: PASS
+      evidence: MIGRATION-GUIDE.md section 5 and migration example header; T1 prompt-v1 blob 71332a2b8f412d1bb58d4d53bdb25880dc2f1431 is explicitly identified as distinct and not used.
+    readback_all_seven_changed_files:
+      status: PASS
+      evidence: PR description records GitHub read-back of all seven changed files at evidence_commit; final remediation Head read-back is recorded in the remediation evidence comment.
+    bilingual_gate:
+      status: PASS
+      evidence: GitHub Actions run 44464233100 at evidence_commit; this does not establish structural/link or semantic parity.
+    repository_automated_tests:
+      status: NOT_RUN
+      reason: No repository automated test suite was run; no PASS is claimed.
+    gov_doc_001_structural_link_checks:
+      status: NOT_RUN
+      reason: Structural/link checks and semantic parity review were not run; the bilingual gate result does not substitute for them.
+    human_prompt_writing_time_under_2h:
+      status: NOT_RUN
+      reason: Requires a timed human writing trial; no such trial was performed.
+review:
+  level: R1
+  independent_reviewer: PENDING
+  status: NOT_STARTED
+acceptance:
+  authority: A
+  status: PENDING

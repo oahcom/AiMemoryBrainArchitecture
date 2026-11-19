@@ -18,6 +18,9 @@ This is the canonical repository location for reusable AI prompts. Store prompts
 - Cross-owner work uses a global prompt plus one or more relevant Owner prompts. A multi-owner task must identify one accountable integration Owner and each participating Owner's bounded responsibility.
 - Keep executed prompt versions immutable. Material changes create a new versioned file; never silently overwrite a prompt already used.
 
+- Reusable executable global prompts remain directly under prompts/; Owner prompts remain under prompts/A/ through prompts/I/. The prompts/00-setup/ directory is reserved for non-executable templates, migration guides and setup aids; those files do not become global prompts or override the directory rules above.
+- 可复用、可执行的全局提示词仍直接存放在 prompts/ 根目录；Owner 提示词仍存放在 prompts/A/ 至 prompts/I/。prompts/00-setup/ 专用于不可执行的模板、迁移指南和设置辅助材料；这些文件不因此成为全局提示词，也不改变上述目录规则。
+
 - `prompts/` 根目录中的文件属于**全局提示词**，适用于所有 Owner 和工作类型。
 - `prompts/A/` 至 `prompts/I/` 仅存放对应 Owner 负责的专属提示词。
 - Owner 专属提示词不得放在根目录。
