@@ -2,7 +2,7 @@
 # Design-proposal scope only. Implementation authorization is expressly NOT granted
 # by this manifest. See scope.implementation_authorization below.
 
-schema_version: "1.2"
+schema_version: "1.3"
 work_item: P2-T2
 title: "Memory Storage Schema design proposal"
 repository: oahcom/AiMemoryBrainArchitecture
@@ -80,12 +80,50 @@ review:
     - R1
     - R2
     - R3
+    - R4
   independence: REQUIRED
   blocking_question: >
-    Q1 in the proposal — the architecture choice. R3 states three options (A: Phase 1 as
+    Q1 in the proposal — the architecture choice. R4 states three options (A: Phase 1 as
     store with Event-only transcript ingress; B: supersede Phase 1; C: three layers with a
     separate transcript-capture layer). Q1 remains OPEN. A review recommendation is
     PROPOSED, not a ruling.
+
+r3_disposition:
+  reviewed_head: fb1f59de9136a11e1d7fa204734754ec553bc82f
+  verdict: REQUEST CHANGES
+  platform_record: "PR #307 comment 7023884586"
+  r2_items_final:
+    1: CLOSED (algorithm identity + score_input immutability)
+    2: PARTIALLY CLOSED
+    3: PARTIALLY CLOSED
+    4: "TECHNICALLY EXPLAINED, DECISION OPEN"
+    5: STILL OPEN
+    6: CLOSED
+    7: CLOSED
+  new_findings:
+    - id: NF-R3-01
+      severity: BLOCKING
+      title: "nullable history provenance — input_id IS NULL reachable for any reason"
+      r4_disposition: "CORRECTED — CHECK binds the NULL exemption to initial and time_decay only"
+    - id: NF-R3-02
+      severity: BLOCKING
+      title: "tool-call relational integrity — emitter role, result role, result parent, UPDATE bypass"
+      r4_disposition: "CORRECTED — tool_call_emitter_is_assistant, tool_call_result_is_child_tool, transcript_message_role_frozen, tool_call_identity_frozen, tool_call_state_transition"
+    - id: NF-R3-03
+      severity: NON-BLOCKING
+      title: "cross-version correction reference"
+      r4_disposition: "CORRECTED — composite (version_id, corrects_input_id) FK"
+    - id: NF-R3-04
+      severity: NON-BLOCKING
+      title: "governance evidence inconsistency — two classifications for one event; thirteen vs sixteen tests"
+      r4_disposition: "CORRECTED — author error; single classification DISCLOSED_SCOPE_DEVIATION; test count no longer duplicated"
+  residues_recorded_not_closed:
+    Q13: "must a completed tool call carry a non-NULL result_message_id"
+    Q14: "does recompute genuinely require a single input_id"
+  review_note: >
+    The R3 reviewer stated that NF-R3-01 and NF-R3-02 are engineering-solvable and must not
+    be folded into 'unassigned authority'. R4 addresses both. R4 does NOT claim they are
+    verified fixed: neither the R3 nor the R4 DDL was executed, and Q12 remains open.
 
 r2_disposition:
   reviewed_head: aed58ad0582a751bf2609add61754cb30769620d
@@ -223,4 +261,6 @@ claims_forbidden:
   - "that the in-memory DDL check was authorized"
   - "that the prompt DDL in Appendix A has authenticated provenance"
   - "that the R3 DDL was executed or verified to apply"
+  - "that the R4 DDL was executed or verified to apply"
+  - "that NF-R3-01 or NF-R3-02 is verified fixed"
   - "that the Layer 1 additive index is not a Layer 1 modification"

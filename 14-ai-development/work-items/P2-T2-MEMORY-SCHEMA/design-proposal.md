@@ -1,7 +1,7 @@
 # P2-T2 — Memory Storage Schema Design Proposal
 
 **Work item:** P2-T2 (Phase 2 Task 2)
-**Revision:** R3 — revised against independent R2 review of head `aed58ad0`
+**Revision:** R4 — revised against independent R3 review of head `fb1f59de`
 **Status:** DESIGN PROPOSAL — not implemented, not frozen
 **Date:** 2026-11-19
 **Scope authority:** `GO-2026-P2-DESIGN-001` — design proposal first; P2-T1 implementation authorization withheld pending design review.
@@ -47,7 +47,7 @@ Specify the persistence design for the memory layer, covering:
 - migration strategy
 - test boundaries
 
-This revision answers R1-B-01 through R1-NB-05 (see §2) and the seven items R2 required before R3 (see §2a). It does **not** claim that Q1 is resolved (§4), does not claim the schema is frozen, and does not authorize implementation.
+This revision answers R1-B-01 through R1-NB-05 (§2), the seven items R2 required (§2a), and the four findings R3 raised (§2b). It does **not** claim that Q1 is resolved (§4), does not claim the schema is frozen, and does not authorize implementation.
 
 ---
 
@@ -88,6 +88,25 @@ R2 was reviewed at head `aed58ad0` and returned `REQUEST CHANGES`, with R1-NB-04
 | Disclosure C — no rebase | acceptable for review, update before integration | **Accepted.** No rebase performed in R3 either; the integration caveat is carried in §12. |
 
 R3 does not challenge any R2 ruling. Where R2 said a thing was still open, R3 either fixes it or names what remains; it does not argue the ruling down.
+
+---
+
+## 2b. R3 disposition
+
+R3 was reviewed at head `fb1f59de` and returned `REQUEST CHANGES` with four new findings. Recorded on PR #307, comment `7023884586`.
+
+R3 closed three of the seven R2 items outright and was ruled partial on three. Those rulings are accepted as given.
+
+| finding | R3 severity | disposition in R4 |
+|---|---|---|
+| NF-R3-01 nullable history provenance — `input_id IS NULL` reachable for any `reason` | BLOCKING | **Corrected.** `CHECK` binds the NULL exemption to `initial` and `time_decay` only. §8.4 |
+| NF-R3-02 tool-call relational integrity — emitter role, result role, result parent, later UPDATE bypass | BLOCKING | **Corrected.** Four constraints: emitter-is-assistant, result-is-child-tool, `transcript_message_role_frozen`, `tool_call_identity_frozen` + `tool_call_state_transition`. §7.1 |
+| NF-R3-03 cross-version correction reference | NON-BLOCKING | **Corrected.** `corrects_input_id` becomes a composite `(version_id, corrects_input_id)` reference. §8.2 |
+| NF-R3-04 governance evidence inconsistency — manifest says `DISCLOSED_SCOPE_DEVIATION`, §17 said `DISCLOSED_INTERPRETATION`; §17 said thirteen tests, §13 listed sixteen | NON-BLOCKING | **Corrected, and it was my error.** §17 now states one classification, names the earlier contradiction rather than erasing it, and no longer repeats a test count. |
+
+Two residues are recorded rather than closed: whether a `completed` call must carry a result (Q13), and whether `recompute` truly requires a single input (Q14). Both were flagged by R3 as questions R3 could not settle either.
+
+R4 does not claim that NF-R3-01 and NF-R3-02 are *verified* fixed. They are fixed in the specification. The R3 DDL was never executed, and neither is the R4 DDL — Q12 remains open. What can be checked by reading is that the constraint text now exists and says what the prose says it says.
 
 ---
 
@@ -294,6 +313,59 @@ BEGIN
       AND message_id = NEW.parent_message_id
       AND role = 'assistant');
 END;
+
+-- NF-R3-02 (1): the emitter must be an assistant message.
+CREATE TRIGGER IF NOT EXISTS tool_call_emitter_is_assistant
+BEFORE INSERT ON transcript_tool_call
+BEGIN
+  SELECT RAISE(ABORT, 'tool call emitter must be an assistant message')
+  WHERE NOT EXISTS (
+    SELECT 1 FROM transcript_message
+    WHERE session_id = NEW.session_id
+      AND message_id = NEW.emitting_message_id
+      AND role = 'assistant');
+END;
+
+-- NF-R3-02 (2,3): the result must be a tool message whose parent IS the emitter.
+CREATE TRIGGER IF NOT EXISTS tool_call_result_is_child_tool
+BEFORE INSERT ON transcript_tool_call
+WHEN NEW.result_message_id IS NOT NULL
+BEGIN
+  SELECT RAISE(ABORT, 'tool call result must be a tool message parented by the emitter')
+  WHERE NOT EXISTS (
+    SELECT 1 FROM transcript_message
+    WHERE session_id = NEW.session_id
+      AND message_id = NEW.result_message_id
+      AND role = 'tool'
+      AND parent_message_id = NEW.emitting_message_id);
+END;
+
+-- NF-R3-02 (4): the guarded columns of an existing message cannot be changed
+-- to bypass the two triggers above.
+CREATE TRIGGER IF NOT EXISTS transcript_message_role_frozen
+BEFORE UPDATE OF role, parent_message_id, session_id ON transcript_message
+BEGIN
+  SELECT RAISE(ABORT, 'role, parent_message_id and session_id are immutable on a captured message');
+END;
+
+-- The same for a call once recorded: emitter, index and session are frozen.
+CREATE TRIGGER IF NOT EXISTS tool_call_identity_frozen
+BEFORE UPDATE OF session_id, emitting_message_id, call_index, tool_call_id
+  ON transcript_tool_call
+BEGIN
+  SELECT RAISE(ABORT, 'tool call identity is immutable; record a new call instead');
+END;
+
+-- And tool_state may only advance, never regress or reopen.
+CREATE TRIGGER IF NOT EXISTS tool_call_state_transition
+BEFORE UPDATE OF tool_state ON transcript_tool_call
+WHEN NOT (
+  (OLD.tool_state = 'emitted'   AND NEW.tool_state IN ('completed','failed')) OR
+  (OLD.tool_state = 'completed' AND NEW.tool_state = 'completed') OR
+  (OLD.tool_state = 'failed'    AND NEW.tool_state = 'failed'))
+BEGIN
+  SELECT RAISE(ABORT, 'illegal tool_state transition');
+END;
 ```
 
 `event_row` is `NOT NULL` and references `accepted_events(event_row)`, the actual primary key in the merged Event Store. A transcript message is not a copy of the bytes — it is an index over an accepted Event. Bytes live once, in `event_payloads`. This is the R1-NB-02 correction: byte preservation was always adequate; what was missing was the retrieval structure, which is what this table supplies.
@@ -303,6 +375,15 @@ END;
 `byte_length` is stored rather than inferred. R2-NF-03 is right that concatenation alone cannot recover boundaries: a payload of `ab` followed by `c` is byte-identical to `a` followed by `bc`. Storing the length makes reconstruction unambiguous without re-parsing payload contents, and `byte_length` is cross-checked against the stored payload at insert.
 
 `tool_call_id` is **removed** from `transcript_message`. R2-NF-01 is correct that a single column cannot represent one assistant message emitting several tool calls. The relationship now lives in `transcript_tool_call`, keyed `(session_id, tool_call_id)`, with `(emitting_message_id, call_index)` unique so the emission order inside one message is itself deterministic. Both sides of the relation are composite foreign keys on `(session_id, message_id)`, so a call and its result cannot span two sessions.
+
+**NF-R3-02 — the call/emitter/result relation is now enforced, and R3's version was not.** R3 was right: the composite foreign keys only proved the messages existed in one session. They did not prove that the emitter was an assistant message, that the result was a tool message, that the result's parent was the emitter, or that those columns could not be changed afterwards to slip past the trigger. All four are now constrained:
+
+1. `tool_call_emitter_is_assistant` — refuses a call whose emitter is not `role='assistant'`.
+2. `tool_call_result_is_child_tool` — refuses a `result_message_id` that is not `role='tool'` **and** parented by that same emitter.
+3. The same trigger carries condition 3, since `parent_message_id = NEW.emitting_message_id` is checked in the same predicate.
+4. `transcript_message_role_frozen` — `role`, `parent_message_id` and `session_id` are immutable after insert, so a message cannot be re-roled into compliance afterwards. `tool_call_identity_frozen` does the same for the call row, and `tool_call_state_transition` allows `emitted → completed|failed` and forbids regression or reopening.
+
+One honest limit: these are `BEFORE INSERT` checks plus column freezes. They enforce the relation at the moment of writing and prevent later drift through the guarded columns. They do not enforce that a `tool_state='completed'` call has a non-NULL `result_message_id`; adding that would require a `BEFORE UPDATE OF tool_state` condition that couples the two tables in a way the design has not settled. It is recorded as Q13 rather than decided here.
 
 ### 7.2 Retrieval contract
 
@@ -419,9 +500,11 @@ CREATE TABLE IF NOT EXISTS score_input (
   weight        REAL,
   observed_at   TEXT NOT NULL,
   recorded_at   TEXT NOT NULL,
-  corrects_input_id TEXT REFERENCES score_input(input_id),  -- R2 B: corrections are new rows
+  corrects_input_id TEXT,                  -- R2 B: corrections are new rows
   UNIQUE (version_id, input_kind, source_kind, source_ref),
-  UNIQUE (version_id, input_id)             -- R2-NF-02: parent key for value_history
+  UNIQUE (version_id, input_id),            -- R2-NF-02: parent key for value_history
+  FOREIGN KEY (version_id, corrects_input_id)
+    REFERENCES score_input(version_id, input_id)   -- NF-R3-03: same-version correction
 );
 
 CREATE INDEX IF NOT EXISTS score_input_version_idx
@@ -522,14 +605,31 @@ CREATE TABLE IF NOT EXISTS version_value_history (
   FOREIGN KEY (method_id, method_version)
     REFERENCES scoring_method(method_id, method_version),      -- R2-NF-02
   FOREIGN KEY (version_id, input_id)
-    REFERENCES score_input(version_id, input_id)               -- R2-NF-02
+    REFERENCES score_input(version_id, input_id),              -- R2-NF-02
+  -- NF-R3-01: the NULL exemption is bound to the reasons that justify it.
+  CHECK (
+    (reason IN ('initial','time_decay')          AND input_id IS NULL)
+    OR
+    (reason IN ('cited_by_decision','manual_adjustment','recompute') AND input_id IS NOT NULL)
+  )
 );
 
 CREATE INDEX IF NOT EXISTS value_history_version_idx
   ON version_value_history(version_id, recorded_at);
 ```
 
-Two composite foreign keys close R2-NF-02. Without them a history row could name a `(method_id, method_version)` that does not exist, or an `input_id` belonging to a different version, and the record would still insert. Both are now refused. Note that `input_id` is nullable — an `initial` or `time_decay` entry may legitimately have no single input row — and SQLite does not enforce a composite foreign key when any component is `NULL`, which is the intended behaviour here rather than an oversight.
+Two composite foreign keys close R2-NF-02 for the non-NULL case, and the `CHECK` closes the NULL case.
+
+**NF-R3-01 — the NULL exemption is now bound to reason.** R3 was right: the composite foreign key uses SQLite's NULL semantics correctly, but nothing stopped `reason='cited_by_decision'` or `reason='manual_adjustment'` from being recorded with `input_id IS NULL`, which is exactly the provenance hole the FK was meant to close. The `CHECK` above makes the exemption reachable only for `initial` and `time_decay`.
+
+One judgement call is recorded rather than hidden: `recompute` is constrained to require an `input_id`. The reviewer explicitly flagged that whether `recompute` genuinely must reference a single input is a business question, not something a schema proposal can settle. The constraint takes the stricter branch, and if the business answer is that a recompute may legitimately have no single input, the fix is to add `recompute` to the nullable set — a one-line change, visible in the `CHECK`, not a silent default.
+
+Two other composite keys close the rest:
+
+- `(method_id, method_version) → scoring_method` — a history row cannot name a method version that does not exist.
+- `(version_id, input_id) → score_input` — an input cannot be claimed by a different version's history.
+
+**NF-R3-03 — corrections are same-version.** `corrects_input_id` was a single-column reference, so a version-A input could claim to correct a version-B input and nothing refused it. It is now a composite `(version_id, corrects_input_id) → score_input(version_id, input_id)`, with `NULL` retained for rows that correct nothing. SQLite does not enforce a composite foreign key when any component is `NULL`, which is the intended behaviour for non-correction rows rather than an oversight.
 
 The `(version_id, input_id)` parent key requires a matching unique key on `score_input`. `input_id` is already the primary key, so `(version_id, input_id)` is unique by construction; §8.2 gains `UNIQUE (version_id, input_id)` to give the constraint a real target.
 
@@ -731,8 +831,12 @@ Required before implementation authorization is granted. These are specified, no
 14. **Reconstruction framing (R2-NF-03)** — reconstruct a session of three messages and assert `frames[i].byte_offset` is the running sum of preceding `byte_length`s, that the last offset plus length equals `total_bytes`, and that each frame slice re-hashes to its `content_sha256`. Include a boundary case where two adjacent payloads would be ambiguous under naive concatenation (`"ab"` then `"c"` versus `"a"` then `"bc"`).
 15. **History provenance (R2-NF-02)** — assert a `version_value_history` row naming an unregistered `(method_id, method_version)` is refused, and one naming an `input_id` belonging to a different `version_id` is refused.
 16. **Score-input immutability (R2-NF-04)** — `UPDATE` and `DELETE` on `score_input` both abort; a correction inserted with `corrects_input_id` succeeds and leaves the corrected row intact.
+17. **Nullable history provenance (NF-R3-01)** — a `version_value_history` row with `reason='cited_by_decision'` and `input_id IS NULL` is refused; the same row with `input_id` set is accepted; `reason='initial'` with `input_id IS NULL` is accepted.
+18. **Cross-version correction (NF-R3-03)** — a `score_input` row for version A with `corrects_input_id` pointing at an input of version B is refused.
+19. **Tool-call relational integrity (NF-R3-02)** — assert all four refusals: a call whose emitter is a `user` message; a call whose `result_message_id` is an assistant message; a call whose result is a `tool` message parented by a *different* assistant message; and an `UPDATE` that re-roles a captured message or re-points its `parent_message_id`.
+20. **Tool-state transitions (NF-R3-02)** — `emitted → completed` accepted; `completed → emitted` refused; `failed → completed` refused.
 
-Tests 4–7 and 16 are the regression guards for R1-B-01. Tests 9–10 guard R1-NB-04. Test 8 guards R1-NB-03. Tests 11–14 guard R1-NB-02 / R2-NF-01 / R2-NF-03. Test 15 guards R2-NF-02.
+Tests 4–7 and 16 are the regression guards for R1-B-01. Tests 9–10 guard R1-NB-04. Test 8 guards R1-NB-03. Tests 11–14 guard R1-NB-02 / R2-NF-01 / R2-NF-03. Test 15 guards R2-NF-02. Tests 17–20 guard NF-R3-01 / NF-R3-02 / NF-R3-03.
 
 These tests were not written and not run. Neither the R2 nor the R3 DDL was executed — see §17.
 
@@ -754,6 +858,8 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 | Q10 | Does numeric reproducibility stay a requirement, or is structural rebuild sufficient? | **REVIEW RULING (R2): tiered preferred.** Structural and unreconstructable tiers accepted; exact-value retained as a design objective, **CONDITIONAL and NOT VERIFIED**. This is a review ruling on a review question, not an owner decision on Q1. |
 | Q11 | Does the Layer 1 boundary prohibit modifying Layer 1 tables, or only their columns? | **OPEN — controls whether `versions_memory_version_uq` is admissible at all.** §8.4 states both branches and the fallback. Not mine to decide. |
 | Q12 | Is the in-memory DDL check an acceptable reading of the `no schema execution` bound? | **OPEN — requires the authority that issued the bound.** R2 classified it `DISCLOSED SCOPE DEVIATION`, not authorized activity, and stated an engineering reviewer cannot grant retrospective authorization. `acceptance_authority` is `NOT_ASSIGNED`; no session can supply this. |
+| Q13 | Must a `tool_state='completed'` call carry a non-NULL `result_message_id`? | OPEN — enforcing it couples two tables in a `BEFORE UPDATE OF tool_state` condition the design has not settled. Recorded, not decided. |
+| Q14 | Does `recompute` genuinely require a single `input_id`? | OPEN — the `CHECK` in §8.4 takes the stricter branch; if a recompute may legitimately have no single input, `recompute` moves to the nullable set. A business question, not a schema one. |
 
 ---
 
@@ -765,6 +871,7 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 - **Not a resolution of Q1.** Option C is recommended, not chosen.
 - **Not a substantiated exact-value rebuild.** The conditions are specified; the evidence is not. Q10 is recorded as ruled for a tiered posture, with exact value `CONDITIONAL` and `NOT VERIFIED`.
 - **Not authorized schema execution.** The one in-memory DDL check is recorded as `DISCLOSED SCOPE DEVIATION`, not as compliant activity; Q12 escalates the authority question.
+- **Not a verified fix for NF-R3-01 / NF-R3-02.** The constraints are specified. Neither the R3 nor the R4 DDL was executed, so what is asserted is that the constraint text exists and matches the prose — not that SQLite enforces it as intended.
 - **Not authenticated prompt provenance.** Appendix A is a copy; its origin is `UNVERIFIED`.
 - No technology selection: Qdrant/Chroma, embedding model and dimension remain OPEN.
 - No claim that the prompt schema is unusable. Its tensions are real; its contradictions with Phase 1 are not established as necessary.
@@ -795,7 +902,9 @@ What was done: the DDL in §7 and §8 was executed against an ephemeral in-memor
 
 Why it was done: to find out whether the document is internally coherent before spending a review round on it.
 
-Why that reason does not make it authorized: `authorization-manifest.yaml` records `no schema execution` among the design-only bounds, and an in-memory database is still a database against which schema execution occurred. The earlier revision advanced the reading that the bound covers persistent stores and repository paths. R2 declined to accept that reading as established by the authorization text, and an engineering reviewer cannot grant retrospective authorization. Both points stand. The manifest now records the event as `DISCLOSED_INTERPRETATION` rather than as compliance, and the question is carried as **Q12**.
+Why that reason does not make it authorized: `authorization-manifest.yaml` records `no schema execution` among the design-only bounds, and an in-memory database is still a database against which schema execution occurred. The earlier revision advanced the reading that the bound covers persistent stores and repository paths. R2 declined to accept that reading as established by the authorization text, and an engineering reviewer cannot grant retrospective authorization. Both points stand.
+
+The manifest's formal classification of this event is `DISCLOSED_SCOPE_DEVIATION`. **Correction (NF-R3-04):** an earlier revision of this section stated that the manifest records the event as `DISCLOSED_INTERPRETATION`. That was wrong — the manifest was updated to `DISCLOSED_SCOPE_DEVIATION` and this paragraph was not updated with it. The reviewer is right that an audit trail must not give one event two classifications. `DISCLOSED_SCOPE_DEVIATION` is the single recorded status, here and in the manifest, and the question is carried as **Q12**.
 
 What it found, reported as author-reported and not independently reproduced:
 
@@ -808,7 +917,7 @@ In R3 this check was **not** repeated. The tables changed, so the earlier result
 What this does not establish:
 
 - Not an implementation. There is no code beyond the document.
-- Not a test suite. None of §13's thirteen tests were written or run; the ad-hoc probes are not those tests.
+- Not a test suite. None of §13's tests were written or run; the ad-hoc probes are not those tests. (The count is stated once, in §13, and is not repeated here — an earlier revision said "thirteen" while §13 listed sixteen, which NF-R3-04 correctly flagged.)
 - Not evidence about performance, concurrency, WAL behaviour, or behaviour under the Phase 1 adapter's transaction discipline.
 - Not evidence that the R3 DDL applies at all — the R3 tables were not exercised.
 - Not evidence that the design satisfies any capability in §9.
