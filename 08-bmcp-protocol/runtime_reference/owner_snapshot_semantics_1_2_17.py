@@ -13,7 +13,11 @@ from typing import Callable, Mapping
 VALID, INVALID, UNKNOWN = "VALID", "INVALID", "UNKNOWN"
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 DECIMAL = re.compile(r"^(0|[1-9][0-9]*)$")
-MAX_PRODUCER_REGISTRATION_HIGH_WATER = (1 << 63) - 1
+MAX_D_TYPED_HIGH_WATER = (1 << 63) - 1
+D_TYPED_HIGH_WATER_FIELDS = frozenset({
+    "producer_registration_high_water",
+    "forget_fence_generation_high_water",
+})
 
 
 def _is_canonical_decimal(value: str) -> bool:
@@ -107,12 +111,9 @@ def validate_owner_snapshot_1_2_17(
         if key.endswith("_high_water") or key.endswith("_generation"):
             if not _is_canonical_decimal(value):
                 return INVALID
-            # This bound belongs only to D's ProducerRegistrationHighWater nominal
-            # type. Do not coerce or compare any other D counter/generation here.
-            if (
-                key == "producer_registration_high_water"
-                and int(value) > MAX_PRODUCER_REGISTRATION_HIGH_WATER
-            ):
+            # D 1.3.1 §5.1 bounds the two typed H high-water fields independently.
+            # Never compare, cast, or derive one nominal type from the other.
+            if key in D_TYPED_HIGH_WATER_FIELDS and int(value) > MAX_D_TYPED_HIGH_WATER:
                 return INVALID
 
     if snapshot["owner_specific_high_waters_digest"] != _td("OWNER-SPECIFIC-HIGH-WATERS", dict(values)):

@@ -149,38 +149,33 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
                 )
 
 
-    def test_producer_registration_high_water_zero_is_valid(self):
-        snapshot = d_snapshot()
-        snapshot["owner_specific_high_waters"]["producer_registration_high_water"] = "0"
-        snapshot["owner_specific_high_waters_digest"] = _td(
-            "OWNER-SPECIFIC-HIGH-WATERS", snapshot["owner_specific_high_waters"]
-        )
-        self.assertEqual(
-            validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
-            VALID,
-        )
 
-    def test_producer_registration_high_water_signed_64_maximum_is_valid(self):
-        snapshot = d_snapshot()
-        snapshot["owner_specific_high_waters"]["producer_registration_high_water"] = str((1 << 63) - 1)
-        snapshot["owner_specific_high_waters_digest"] = _td(
-            "OWNER-SPECIFIC-HIGH-WATERS", snapshot["owner_specific_high_waters"]
-        )
-        self.assertEqual(
-            validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
-            VALID,
-        )
+    def test_both_typed_high_waters_accept_zero_and_signed_64_maximum(self):
+        for field in ("producer_registration_high_water", "forget_fence_generation_high_water"):
+            for value in ("0", str((1 << 63) - 1)):
+                with self.subTest(field=field, value=value):
+                    snapshot = d_snapshot()
+                    snapshot["owner_specific_high_waters"][field] = value
+                    snapshot["owner_specific_high_waters_digest"] = _td(
+                        "OWNER-SPECIFIC-HIGH-WATERS", snapshot["owner_specific_high_waters"]
+                    )
+                    self.assertEqual(
+                        validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
+                        VALID,
+                    )
 
-    def test_producer_registration_high_water_above_signed_64_maximum_is_invalid(self):
-        snapshot = d_snapshot()
-        snapshot["owner_specific_high_waters"]["producer_registration_high_water"] = str(1 << 63)
-        snapshot["owner_specific_high_waters_digest"] = _td(
-            "OWNER-SPECIFIC-HIGH-WATERS", snapshot["owner_specific_high_waters"]
-        )
-        self.assertEqual(
-            validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
-            INVALID,
-        )
+    def test_both_typed_high_waters_reject_values_above_signed_64_maximum(self):
+        for field in ("producer_registration_high_water", "forget_fence_generation_high_water"):
+            with self.subTest(field=field):
+                snapshot = d_snapshot()
+                snapshot["owner_specific_high_waters"][field] = str(1 << 63)
+                snapshot["owner_specific_high_waters_digest"] = _td(
+                    "OWNER-SPECIFIC-HIGH-WATERS", snapshot["owner_specific_high_waters"]
+                )
+                self.assertEqual(
+                    validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
+                    INVALID,
+                )
 
     def test_noncanonical_decimal_is_invalid_and_not_normalized_by_h(self):
         for value in ("00", "08", "-1", "", " 8", "8 ", "8.0", "8e0"):
@@ -195,9 +190,9 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
                     INVALID,
                 )
 
-    def test_other_nominal_decimal_fields_are_not_given_registration_high_water_bound(self):
+    def test_untyped_d_local_high_water_is_not_given_the_two_field_bound(self):
         snapshot = d_snapshot()
-        snapshot["owner_specific_high_waters"]["forget_fence_generation_high_water"] = str(1 << 63)
+        snapshot["owner_specific_high_waters"]["work_item_high_water"] = str(1 << 63)
         snapshot["owner_specific_high_waters_digest"] = _td(
             "OWNER-SPECIFIC-HIGH-WATERS", snapshot["owner_specific_high_waters"]
         )
