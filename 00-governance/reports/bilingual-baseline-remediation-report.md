@@ -8,7 +8,7 @@
 - Repository: oahcom/AiMemoryBrainArchitecture
 - Target Branch: remediation/gov-doc-001-v1.2-bilingual-baseline
 - Pull Request: #271
-- Report Version: v2.1 / 文档版本：v2.1
+- Report Version: v2.2 / 文档版本：v2.2
 - Revision Date: 2026-11-19 / 修订日期：2026-11-19
 
 ## 1. Objective / 目标
