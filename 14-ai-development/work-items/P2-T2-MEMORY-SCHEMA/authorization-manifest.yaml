@@ -2,7 +2,7 @@
 # Design-proposal scope only. Implementation authorization is expressly NOT granted
 # by this manifest. See scope.implementation_authorization below.
 
-schema_version: "1.5"
+schema_version: "2.0"
 work_item: P2-T2
 title: "Memory Storage Schema design proposal"
 repository: oahcom/AiMemoryBrainArchitecture
@@ -39,6 +39,7 @@ scope:
   allowed_write_paths:
     - 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/authorization-manifest.yaml
     - 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/design-proposal.md
+    - 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/DEC-P2-T2-Q1-001.md
   authorization_basis:
     - "GO-2026-P2-DESIGN-001: P2-T2 design proposal required before P2-T1 implementation authorization."
     - "Design-only scope: no code, no schema execution, no migration, no test claims."
@@ -91,13 +92,62 @@ review:
 
 status: BLOCKED
 status_reason: >
-  Awaiting accountable authority assignment and governance decisions. Q1, Q11 and Q12
-  are not engineering defects and cannot be closed by further revision. R4 recommended
-  stopping the ordinary revision cycle; R5 adopts that, makes the one remaining
-  engineering correction (NF-R3-02 residual), and confirms that no R6 is requested.
-  No identified NF-R3-02 engineering-specification residue remains. DDL executability
-  and regression behavior remain UNVERIFIED.
-status_supported_by: "review records R1-R5 — PR #307 comments 7023231264, 7023510140, 7023884586, 7024484706, 7024485207"
+  Q1 is decided: OPTION_C adopted under the dev-baseline Architecture Owner role,
+  ACCEPT-WITH-CONDITIONS, recorded in DEC-P2-T2-Q1-001.md. That closes one item and closes
+  nothing else. Q11, Q12, Q13, Q14, Q8 and Q9 remain OPEN; the DDL remains NOT APPROVED;
+  DDL executability and regression behavior remain UNVERIFIED; none of the 21 section 13
+  tests exist; implementation_authorization remains NOT_GRANTED. P2-T1 remains blocked for
+  implementation authorization by the seven gates recorded in DEC-P2-T2-Q1-001.md section 8,
+  not by the absence of an architecture choice.
+status_supported_by: "architecture decision DEC-P2-T2-Q1-001; review records R1-R5 — PR #307 comments 7023231264, 7023510140, 7023884586, 7024484706, 7024485207"
+
+architecture_decision:
+  id: DEC-P2-T2-Q1-001
+  file: 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/DEC-P2-T2-Q1-001.md
+  question: "Q1 — Phase 2 memory storage architecture"
+  ruling: OPTION_C
+  disposition: ACCEPT-WITH-CONDITIONS
+  baseline: 049906a960176887e261acb6613e614200682b05
+  capacity: "dev-baseline Architecture Owner role, session-held"
+  capacity_basis:
+    - "Issue #264 comment 7000428916 — no human decision points under the dev baseline; every Owner role may be occupied by a session"
+    - "Precedent form: Issue #268 / PR #270 comment 7001139728 — Owner-role A DEV-BASELINE ACCEPT-WITH-CONDITIONS"
+  capacity_excludes:
+    human_signature: NOT_CLAIMED
+    acceptance_authority_appointment: NOT_CLAIMED
+    independent_human_expert_review: NOT_CLAIMED
+    production_approval: NOT_GRANTED
+  decision_reply: "chatgpt-ops/replies/reply-6aff8813-073819.md (deciding session; not committed to this repository)"
+  option_a: NOT_ADOPTED
+  option_b: NOT_ADOPTED
+  option_b_note: >
+    No supersession decision exists and DEC-P2-T2-Q1-001 creates none. Phase 1 remains
+    authoritative for canonical memory. phase-1-sqlite-adapter-contract.md stays DECIDED
+    and is not re-opened; phase-1-storage-trait-contract.md stays CANDIDATE and is not
+    upgraded; no Phase 1 table is declared obsolete; no Phase 1 migration or data
+    deletion is authorised.
+  conditions:
+    C1: "SATISFIED — OPTION_C recorded against the exact baseline"
+    C2: "SATISFIED — Phase 1 authority preserved; A and B recorded as not adopted"
+    C3: "SATISFIED — unresolved questions and restrictions preserved with unchanged status"
+  closes_only: "Q1"
+  does_not_close: [Q8, Q9, Q11, Q12, Q13, Q14]
+  adopted_direction_not_approved_artefact: >
+    Adopting a direction is not approving the DDL. The merged proposal remains a proposal
+    with an adopted architectural direction. Its unresolved implementation and
+    verification obligations keep their own statuses.
+  p2_t1_gate: >
+    P2-T1 remains BLOCKED for implementation authorization. Option C gives P2-T1 a target,
+    not an executable contract. Seven gates are recorded in DEC-P2-T2-Q1-001.md section 8:
+    canonical persistence boundary; transcript capture contract; derived projection
+    semantics; resolution of Q11-Q14; implementation acceptance criteria and tests; a
+    separate P2-T1 implementation authorization; and the normal convergence chain.
+  weakest_part_recorded: >
+    Separating transcript capture from canonical memory is judged to produce a cleaner
+    architecture, but that is an architectural judgment, not an empirically demonstrated
+    result. Cross-layer consistency, deletion and retention propagation, projection
+    rebuild after source changes, ordering and provenance across ingestion failures, and
+    duplicate representations of the same fact remain unresolved risks.
 
 r4_disposition:
   reviewed_head: bdb19ac0
