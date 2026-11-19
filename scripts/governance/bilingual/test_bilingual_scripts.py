@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""Regression tests for bilingual governance scripts (stdlib only)."""
+import os,subprocess,tempfile,unittest
+from pathlib import Path
+HERE=Path(__file__).resolve().parent
+TIERING=HERE/"check-bilingual-tiering.sh"; SYNC=HERE/"check-bilingual-sync.sh"; TRANSLATOR=HERE/"translate-document.py"
+class Tests(unittest.TestCase):
+    def run_cmd(self,cmd,**kw): return subprocess.run(cmd,text=True,capture_output=True,check=False,**kw)
+    def test_unknown_is_reported_not_pass(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); subprocess.run(["git","init","-q",str(root)],check=True)
+            subprocess.run(["git","-C",str(root),"config","user.email","test@example.invalid"],check=True)
+            subprocess.run(["git","-C",str(root),"config","user.name","Test"],check=True)
+            (root/"docs").mkdir(); (root/"docs"/"new.md").write_text("# new\n",encoding="utf-8")
+            mapping=root/"mapping.yaml"; mapping.write_text("tier1:\n  files:\n    - path: known.md\ntier2:\n  files: []\ntier3_per_file:\n  files: []\ndirectory_rules:\n  rules:\n    - directory: docs/\n      tier: UNKNOWN\n",encoding="utf-8")
+            subprocess.run(["git","-C",str(root),"add","."],check=True); subprocess.run(["git","-C",str(root),"commit","-qm","fixture"],check=True)
+            r=self.run_cmd(["bash",str(TIERING),str(mapping)],env={**os.environ,"REPO_ROOT":str(root)})
+            self.assertEqual(r.returncode,2,r.stdout+r.stderr); self.assertIn("UNKNOWN\tdocs/new.md",r.stdout); self.assertIn("NEEDS_CONFIRMATION",r.stderr)
+    def test_sync_failure_exit_propagates(self):
+        with tempfile.TemporaryDirectory() as d:
+            stub=Path(d)/"python-fails"; stub.write_text("#!/bin/sh\nexit 23\n",encoding="utf-8"); stub.chmod(0o755)
+            r=self.run_cmd(["bash",str(SYNC),"--source","s.md","--counterpart","t.md"],env={**os.environ,"PYTHON_BIN":str(stub)})
+            self.assertEqual(r.returncode,23)
+    def test_sync_source_revision_and_pairing(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); s,t=root/"s.md",root/"t.md"
+            s.write_text("<!-- source-revision: abcdef1234567 -->\n<!-- bilingual-pair: t.md -->\n",encoding="utf-8")
+            t.write_text("<!-- source-revision: abcdef1234567 -->\n<!-- bilingual-pair: s.md -->\n",encoding="utf-8")
+            r=self.run_cmd(["bash",str(SYNC),"--source",str(s),"--counterpart",str(t)])
+            self.assertEqual(r.returncode,0,r.stdout+r.stderr); self.assertIn("PASS",r.stdout)
+    def test_translation_diff_work_order(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); s,t,o=root/"zh.md",root/"en.md",root/"work.md"
+            s.write_text("# 标题\nMUST 保留。\n",encoding="utf-8"); t.write_text("# Title\nMUST preserve.\n",encoding="utf-8")
+            r=self.run_cmd(["python3",str(TRANSLATOR),"--source",str(s),"--target",str(t),"--output",str(o)])
+            self.assertEqual(r.returncode,0,r.stdout+r.stderr); body=o.read_text(encoding="utf-8")
+            self.assertIn("status: PENDING_TRANSLATION",body); self.assertIn("Human translator/reviewer",body); self.assertIn("no model/API invocation",body)
+    def test_translation_failure_status_registered(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d); o=root/"failed.md"
+            r=self.run_cmd(["python3",str(TRANSLATOR),"--source",str(root/"missing.md"),"--target",str(root/"t.md"),"--output",str(o)])
+            self.assertEqual(r.returncode,1); self.assertTrue(o.is_file()); body=o.read_text(encoding="utf-8")
+            self.assertIn("status: FAILED",body); self.assertIn("failure:",body)
+if __name__=="__main__": unittest.main(verbosity=2)

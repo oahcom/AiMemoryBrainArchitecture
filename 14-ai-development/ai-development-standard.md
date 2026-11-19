@@ -28,7 +28,7 @@ The standard governs architecture changes, implementation, tests, documentation,
 7. **Fail closed on uncertainty.** Unknown contract, identity, permission, data-loss, or recovery behavior blocks unsafe progression.
 8. **No silent decisions.** Material changes require a decision record, rationale, alternatives, consequences, and affected owners.
 9. **Traceability is mandatory.** Requirement → task → prompt version → branch/commit → changed files → tests → review → integration decision must be traceable.
-10. **Mandatory bilingual practice for every AI developer.** Every AI developer/session MUST read GOV-DOC-001 before work, inspect both language counterparts, include bilingual deliverables in its prompt and plan, and keep Chinese/English architecture meaning synchronized in the same change set. The accountable Owner MUST enforce this on delegated agents. Missing or materially divergent counterparts make the architecture task NOT DONE, except for a formally approved, time-bounded STALE exception. Code comments and machine-generated artifacts may retain their natural technical language, but their architecture meaning MUST be explained bilingually.
+10. **Tiered bilingual documentation practice.** Every AI developer/session MUST read GOV-DOC-001 and the [Bilingual Documentation Tiering Policy](bilingual-tiering-policy.md), inspect the applicable classification in the authorized tier inventory, and plan documentation work accordingly. Tier 1 files MUST have Chinese and English counterparts updated in the same change set; Tier 2 files are optional-bilingual only within the approved allowlist; Tier 3 files are Chinese-first and an English counterpart requires the responsible Owner's confirmation. UNKNOWN or unconfirmed classifications MUST be escalated for human confirmation and MUST NOT be treated as Tier 2 or Tier 3. These tiers do not waive the architecture-semantic bilingual gate in §7.1. The accountable Owner MUST enforce these requirements on delegated agents. Code comments and machine-generated artifacts may retain their natural technical language, but their architecture meaning MUST be explained bilingually where the gate applies.
 
 ## 3. AI developer roles / AI 开发角色
 
@@ -257,19 +257,33 @@ A task is DONE only when applicable conditions are satisfied:
 - security and permission checks are tested for relevant changes;
 - migration/rollback/compatibility behavior is documented and tested where relevant;
 - independent review findings are resolved or explicitly accepted as residual risk;
-- both Chinese and English normative documentation are created/updated in the same change set whenever architecture/contract behavior changes;
-- a bilingual change manifest records exact paths/source revision and verifies semantic, identifier, decision-status and link parity;
-- the reviewer explicitly checks bilingual parity; missing or materially divergent counterparts block DONE/ACCEPTED unless a formally approved time-bounded exception exists;
+- Tier 1 Chinese and English normative counterparts are created/updated in the same change set; Tier 2 remains optional only within its approved allowlist, and Tier 3 remains Chinese-first subject to Owner confirmation;
+- whenever architecture/contract behavior changes, the owning authoritative documentation MUST be updated in both languages regardless of a Tier 2/Tier 3 label, with a bilingual change manifest recording exact paths/source revision and semantic, identifier, decision-status and link parity;
+- the reviewer explicitly checks bilingual parity wherever Tier 1 or the architecture-semantic gate applies; missing or materially divergent counterparts block DONE/ACCEPTED unless a formally approved time-bounded exception exists;
 - commit SHA, test evidence, review report and final status are recorded;
 - integration and acceptance authority have explicitly accepted the result.
 
 If a check cannot run, record **NOT RUN** with reason. Never report it as PASS.
 
-### 7.1 Mandatory bilingual-documentation gate / 强制双语文档门禁
+### 7.1 Tiered bilingual-documentation gate / 分层双语文档门禁
 
-Every task that may affect architecture meaning MUST include this gate, including architecture-only, implementation, test, security, storage, protocol, performance, migration and operations tasks. The implementer MUST check whether code or tests reveal a contract change; if so, it MUST stop treating the work as implementation-only and update the owning specification in both languages. A translation-only change MUST NOT silently change a decision. The independent reviewer MUST compare both language versions against the same source revision and record PASS/FAIL for meaning, stable identifiers, status, examples and links. If either counterpart is missing or materially inconsistent, record BLOCKED/NOT DONE and identify the accountable Owner and closure condition.
+This gate is governed by bilingual-tiering-policy.md and its authorized per-file inventory (tier-mapping-proposal remains PROPOSAL until formally adopted). Classification MUST come from that inventory, not directory/name heuristics:
 
-每项可能影响架构含义的任务都必须执行本门禁，包括架构、实现、测试、安全、存储、协议、性能、迁移和运维任务。实现者必须检查代码或测试是否揭示了契约变化；若是，就不得再把工作视为纯实现任务，而必须同步更新所属规范的中英文版本。纯翻译变更不得暗中改变决议。独立审查者必须基于同一源版本比较两种语言，并记录含义、稳定标识、状态、示例和链接的 PASS/FAIL。任何一方缺失或存在实质不一致时，必须记录 BLOCKED/NOT DONE，并明确责任 Owner 和关闭条件。
+1. **Tier 1 — mandatory bilingual:** Chinese and English counterparts MUST be created or updated in the same change set. Tier 1 MUST NOT be downgraded by a script, ordinary Owner confirmation, or one-off task approval.
+2. **Tier 2 — optional bilingual:** optionality applies only to explicitly allowlisted files. It NEVER waives the architecture-semantic gate below.
+3. **Tier 3 — Chinese-first:** Chinese remains the default authoritative version. Creating or maintaining an English counterpart requires explicit confirmation from the responsible Owner; this does not waive the architecture-semantic gate.
+4. **UNKNOWN / pending confirmation:** the implementer MUST stop classification-dependent disposition, report the path as UNKNOWN / NEEDS_CONFIRMATION, and obtain an authorized human decision. UNKNOWN MUST NOT be silently assigned to Tier 2 or Tier 3 and MUST NOT be reported as PASS.
+
+**Architecture-semantic gate (applies regardless of tier):** Every task that may affect architecture meaning MUST include this gate, including architecture-only, implementation, test, security, storage, protocol, performance, migration and operations tasks. The implementer MUST check whether code or tests reveal a contract change; if so, it MUST stop treating the work as implementation-only and update the owning authoritative specification in both languages. A Tier 2 or Tier 3 label MUST NOT be used to avoid that update. A translation-only change MUST NOT silently change a decision. The independent reviewer MUST compare both language versions against the same source revision and record PASS/FAIL for meaning, stable identifiers, status, examples and links. If either required counterpart is missing, its source revision cannot be established, or the versions are materially inconsistent, record BLOCKED/NOT DONE and identify the accountable Owner and closure condition.
+
+本门禁由 bilingual-tiering-policy.md 及其获授权的逐文件清单管理（tier-mapping-proposal 仍为正式采纳前的 PROPOSAL）。分类 MUST 来自该清单，不得依靠目录或文件名启发式推断：
+
+1. **Tier 1 — 强制双语：** 中英文对应文件 MUST 在同一变更集中创建或更新。不得通过脚本、普通 Owner 确认或单次任务批准降低 Tier 1。
+2. **Tier 2 — 可选双语：** 可选属性仅适用于明确列入白名单的文件，绝不豁免下述架构语义门禁。
+3. **Tier 3 — 中文优先：** 中文仍是默认权威版本。创建或维护英文对应版本须由责任 Owner 明确确认；该确认不豁免架构语义门禁。
+4. **UNKNOWN / 待确认：** 实施者 MUST 暂停依赖分类的处置，报告路径为 UNKNOWN / NEEDS_CONFIRMATION，并取得有权人员的人工决定。不得静默将 UNKNOWN 归入 Tier 2 或 Tier 3，也不得报告为 PASS。
+
+**架构语义门禁（不受层级标签影响）：** 每项可能影响架构含义的任务都 MUST 执行本门禁，包括架构、实现、测试、安全、存储、协议、性能、迁移和运维任务。实现者 MUST 检查代码或测试是否揭示契约变化；若是，就 MUST 停止将工作视为纯实现，并同步更新所属权威规范的中英文版本。不得利用 Tier 2 或 Tier 3 标签规避该更新。纯翻译变更 MUST NOT 暗中改变决议。独立审查者 MUST 基于同一源版本比较两种语言，并记录含义、稳定标识、状态、示例和链接的 PASS/FAIL。任何必需对应版本缺失、无法确认源版本或存在实质不一致时，均须记录 BLOCKED/NOT DONE，并明确责任 Owner 和关闭条件。
 
 ## 8. Verification model / 验证模型
 
