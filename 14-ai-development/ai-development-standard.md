@@ -126,6 +126,44 @@ The following gates remain mandatory and independently auditable; phase grouping
 - MERGED：在所需批准后记录目标分支和 Merge Commit SHA。
 - CLOSED：可追溯性/索引更新和结项证据。
 
+### 4.2.1 Evidence depth levels / 证据深度等级
+
+Evidence depth is selected by change risk and is independent of the review level (R0–R3) and of the twelve-state / six-phase lifecycle. A level sets which evidence fields are mandatory; it never constitutes evidence that a gate passed, and it MUST NOT lower or replace review requirements. The normative detail lives in [evidence-tiering-policy.md](evidence-tiering-policy.md) (status PROPOSED).
+
+| Level | Mandatory risk classes | Required evidence |
+|---|---|---|
+| **Level 1 (strict)** | ARCHITECTURE, SECURITY, PERFORMANCE_CRITICAL, PUBLIC_API, DATA_MIGRATION, DOC_NORMATIVE; every R3 change | subject_head (40-hex), change_summary, design_doc, impact_analysis, test_log, review_record, rollback_plan, binding protocol v3 fields, source_authenticity |
+| **Level 2 (standard)** | FEATURE, BUGFIX (bounded, no contract change) | subject_head, change_summary, test_log, review_record, binding protocol v3 fields, source_authenticity |
+| **Level 3 (lightweight)** | DOC_EDITORIAL (no normative change), OPS (non-release-critical) | subject_head, change_summary, review note |
+
+MUST rules:
+
+1. Every level retains a full 40-hex commit SHA and a change summary; there is no exception.
+2. R3, security boundaries, authorization, data integrity, deletion/Forget, migration, public API and architecture- or normative-semantics changes are ALWAYS Level 1.
+3. An R2 change MUST NOT be auto-downgraded to Level 3 for small size; an explicit `downgrade_justification` confirmed by the reviewer is required.
+4. A documentation change that alters normative meaning, obligation strength, interfaces, data models, state machines or security boundaries MUST be classified DOC_NORMATIVE (Level 1), not DOC_EDITORIAL.
+5. An UNKNOWN classification is BLOCKED and MUST NOT receive any level.
+6. Evidence binding protocol v3 (commit-object subject_head, subject-tree containment, blob equality, sidecar anchor) and the `source_authenticity` boundary remain in force for every level; a VERIFIED claim without a verification record is BLOCKED.
+7. The checker `scripts/governance/evidence/check-evidence-tiering.py` MUST be run for declared evidence, and its per-scenario records — not its exit code alone — are the acceptance evidence.
+
+证据深度由变更风险决定，独立于审查级别（R0–R3）与十二状态/六阶段生命周期。等级只决定哪些证据字段为必填，从不构成任何门禁已通过的证据，且 MUST NOT 降低或替代审查要求。规范细节见 [evidence-tiering-policy.md](evidence-tiering-policy.md)（状态 PROPOSED）。
+
+| 等级 | 强制风险类别 | 必填证据 |
+|---|---|---|
+| **Level 1（严格）** | ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE；所有 R3 变更 | subject_head（40 位）、change_summary、design_doc、impact_analysis、test_log、review_record、rollback_plan、绑定协议 v3 字段、source_authenticity |
+| **Level 2（标准）** | FEATURE、BUGFIX（有界、不改变契约） | subject_head、change_summary、test_log、review_record、绑定协议 v3 字段、source_authenticity |
+| **Level 3（轻量）** | DOC_EDITORIAL（无规范语义变化）、OPS（非发布关键） | subject_head、change_summary、审查说明 |
+
+MUST 规则：
+
+1. 所有等级均保留 40 位完整 commit SHA 与变更简述，无例外。
+2. R3、安全边界、授权、数据完整性、删除/遗忘、迁移、公开 API 及架构或规范语义变更，一律为 Level 1。
+3. R2 变更 MUST NOT 因规模小而自动降为 Level 3；须提供经审查者确认的 `downgrade_justification`。
+4. 改变规范含义、义务强度、接口、数据模型、状态机或安全边界的文档变更 MUST 归类为 DOC_NORMATIVE（Level 1），不得按 DOC_EDITORIAL 处理。
+5. UNKNOWN 分类为 BLOCKED，MUST NOT 赋予任何等级。
+6. 证据绑定协议 v3（commit 对象 subject_head、subject tree 包含、blob 一致、sidecar 锚点）及 `source_authenticity` 边界在所有等级均继续有效；声称 VERIFIED 但无验证记录者 BLOCKED。
+7. 已声明证据 MUST 运行检查器 `scripts/governance/evidence/check-evidence-tiering.py`，且以其逐项记录（而非仅退出码）作为验收证据。
+
 ### 4.3 Orthogonal markers and independent lifecycles / 正交标记与独立生命周期
 
 BLOCKED and REJECTED remain orthogonal markers, not operational phases. They may accompany any phase and MUST retain reason, responsible party, known timestamp and resolution/disposition evidence. They MUST NOT be silently converted into a normal phase.

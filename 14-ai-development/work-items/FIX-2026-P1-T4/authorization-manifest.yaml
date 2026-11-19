@@ -1,0 +1,79 @@
+# FIX-2026-P1-T4 authorization manifest
+# Records the governance decision, role status, baseline evidence and the
+# explicitly approved task write scope. No path outside allowed_write_paths
+# may be modified under this work item.
+schema_version: "1.0"
+work_item: FIX-2026-P1-T4
+repository: oahcom/AiMemoryBrainArchitecture
+branch: ai/FIX-2026-P1-T4/G-evidence-tiering
+
+decision:
+  id: DEC-FIX-2026-P1-T4-GO-001
+  date: "2026-11-19"
+  authority: governance authority (ChatGPT-native execution model, NR-001)
+  form: "GO decision + manifest(allowed_write_paths, authorization_basis)"
+  form_precedent: "P1-T3 PR #279 merge commit 5f7918f90fe4defe39ccc3de242019f8d4003d86"
+
+roles:
+  sponsor: NOT_ASSIGNED
+  accountable_owner: NOT_ASSIGNED
+  acceptance_authority: NOT_ASSIGNED
+  implementing_owner: "G (process architecture)"
+  role_note: "NOT_ASSIGNED is a true governance state and MUST NOT be substituted by Owner G, engineering contribution or session identity."
+
+baseline:
+  commit: 5f7918f90fe4defe39ccc3de242019f8d4003d86
+  verification: exact Git tree at baseline commit
+  source: GitHub refs (origin/main at GO time)
+
+scope:
+  manifest_path: 14-ai-development/work-items/FIX-2026-P1-T4/authorization-manifest.yaml
+  allowed_write_paths:
+    - 14-ai-development/work-items/FIX-2026-P1-T4/authorization-manifest.yaml
+    - 14-ai-development/work-items/FIX-2026-P1-T4/evidence-tiering-design.md
+    - 14-ai-development/evidence-tiering-policy.md
+    - 14-ai-development/evidence-tiering-policy.en.md
+    - 14-ai-development/ai-development-standard.md
+    - scripts/governance/evidence/check-evidence-tiering.py
+    - scripts/governance/evidence/test_evidence_tiering.py
+    - 14-ai-development/prompt-and-evidence-template.md
+  authorization_basis:
+    - "Formal GO decision DEC-FIX-2026-P1-T4-GO-001 (Sections 1-3)."
+    - "8-path allowlist authorization under that decision (Section 2); all eight approved."
+    - "Authorization form aligned with the P1-T3 precedent (PR #279, merge commit 5f7918f)."
+    - "Direct push to the assigned branch authorized (Section 5); main merge NOT authorized."
+  all_other_paths: OUT_OF_SCOPE
+  explicitly_excluded:
+    - .github/workflows/**
+    - "Any path not listed above; new write needs a new authorization."
+
+constraints:
+  - "Level 1/2/3 is an evidence depth selector, not a status axis; independent of R1/R2/R3, 12 states and 6 phases."
+  - "Level 1 is mandatory for R3, security, authorization, data integrity, migration, public API and normative-semantics changes."
+  - "R2 MUST NOT be auto-downgraded for small change size."
+  - "Documentation changes that alter normative semantics MUST be escalated, not treated as ordinary text edits."
+  - "Every level retains a full 40-hex SHA and a change summary."
+  - "UNKNOWN is always BLOCKED."
+  - "All v3 binding and authenticity checks are preserved."
+  - "AI-STD-001 keeps the single-file EN/ZH alternating structure; no docs/en copy is created."
+  - "AI-EXEC-002 v1.2 MUST NOT be used as an effective normative basis."
+  - "Policy status remains PROPOSED; this GO is neither adoption nor merge authorization."
+
+policy:
+  id: AI-DOC-EVIDENCE-TIERING
+  version: "1.0"
+  status: PROPOSED
+  path: 14-ai-development/evidence-tiering-policy.md
+  counterpart: 14-ai-development/evidence-tiering-policy.en.md
+
+checker:
+  path: scripts/governance/evidence/check-evidence-tiering.py
+  tests: scripts/governance/evidence/test_evidence_tiering.py
+  acceptance_gates: 8
+  gate_assertion: "Each BLOCKED scenario is asserted by VERDICT/REASON records, not by exit code alone."
+
+authorization_state:
+  implementation: AUTHORIZED
+  direct_branch_push: AUTHORIZED
+  main_merge: NOT_AUTHORIZED
+  required_review: "Independent R1 session, then independent re-review after fixes; MERGE_AUTHORIZED is a separate request."

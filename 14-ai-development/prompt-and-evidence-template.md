@@ -46,6 +46,16 @@ verification:
   commit_sha: ""
   commands: []
   evidence_refs: []
+evidence_tiering:
+  change_class: "ARCHITECTURE | SECURITY | PERFORMANCE_CRITICAL | PUBLIC_API | DATA_MIGRATION | DOC_NORMATIVE | FEATURE | BUGFIX | DOC_EDITORIAL | OPS | UNKNOWN"
+  evidence_level: "1 | 2 | 3"
+  assessed_by: ""
+  assessed_at: ""
+  rationale: ""
+  base_head: ""
+  downgrade_justification: ""
+  escalation_target: ""
+  checker_result: "NOT_RUN"
 review:
   status: "NOT_STARTED"
   report_ref: ""
@@ -174,6 +184,43 @@ Each completed implementation task should contain, as applicable:
 - `decision-records/` — approved material decisions;
 - `integration-report.md` — cross-owner acceptance;
 - links to PR, commits and CI runs.
+
+## 4.1 Evidence depth declaration / 证据深度声明
+
+Every work item MUST declare its evidence depth before delivering, using the manifest `evidence_tiering` block and a machine-checkable declaration file (`evidence-declaration.yaml` in the work-item bundle):
+
+```yaml
+work_item: "AID-YYYY-NNN"
+change_class: "FEATURE"
+review_level: "R2"
+evidence_level: 2
+subject_head: "<40-hex commit>"
+change_summary: "one-line description of the change"
+source_authenticity: "NOT_VERIFIED"
+evidence:
+  design_doc: "design.md"
+  impact_analysis: "impact.md"
+  test_log: "test-report.md"
+  review_record: "review-report.md"
+  rollback_plan: "rollback.md"
+  review_note: "reviewer acknowledgement"
+binding:
+  protocol: "v3"
+  subject_tree_contains_evidence: "true"
+  sidecar_anchor: "sha256:..."
+authenticity:
+  acknowledged: "true"
+  verification_record: "..."
+```
+
+Rules:
+- `evidence_level` is an evidence depth selector, independent of `review_level`, the twelve states and the six phases (AI-STD-001 §4.2.1).
+- Level 1 is mandatory for ARCHITECTURE, SECURITY, PERFORMANCE_CRITICAL, PUBLIC_API, DATA_MIGRATION, DOC_NORMATIVE and every R3 change.
+- `UNKNOWN` is BLOCKED; it MUST NOT receive a level.
+- Every level keeps a full 40-hex `subject_head` and `change_summary`.
+- Validate with `python scripts/governance/evidence/check-evidence-tiering.py <declaration>`, and record the per-scenario `VERDICT` / `REASON` output as evidence. An exit code alone is not acceptance evidence.
+
+每个工作项在交付前 MUST 声明证据深度，使用 manifest 的 `evidence_tiering` 块与可机器校验的 `evidence-declaration.yaml`。`evidence_level` 是证据深度选择器，独立于 `review_level`、十二状态与六阶段（AI-STD-001 §4.2.1）。ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE 及所有 R3 变更强制 Level 1；`UNKNOWN` 为 BLOCKED，不得赋级；所有等级保留 40 位 `subject_head` 与 `change_summary`。使用检查器校验并记录逐项 `VERDICT`/`REASON` 输出，仅退出码不足以作为验收证据。
 
 ## 5. Canonical prompt library and evidence layout / 规范提示词库与证据目录
 
