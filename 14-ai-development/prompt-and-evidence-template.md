@@ -47,6 +47,7 @@ verification:
   commands: []
   evidence_refs: []
 evidence_tiering:
+  repository: ""
   change_class: "ARCHITECTURE | SECURITY | PERFORMANCE_CRITICAL | PUBLIC_API | DATA_MIGRATION | DOC_NORMATIVE | FEATURE | BUGFIX | DOC_EDITORIAL | OPS | UNKNOWN"
   review_level: "R0 | R1 | R2 | R3"
   evidence_level: "1 | 2 | 3"
@@ -210,18 +211,18 @@ assessed_by: "owner-x"
 assessed_at: "2026-11-20T00:00:00+08:00"
 rationale: "why this evidence depth is sufficient"
 classification_confirmed_by: "reviewer-y"      # required for FEATURE/BUGFIX/DOC_EDITORIAL/OPS
-classification_record: "classification.md"     # must exist in the subject tree
+classification_record: "14-ai-development/work-items/AID-YYYY-NNN/classification.md"     # must exist in the subject tree
 downgrade_justification: ""                    # only for R2 -> Level 3
 downgrade_confirmed_by: ""
 downgrade_confirmation_record: ""
 source_authenticity: "NOT_VERIFIED"
 evidence:
-  design_doc: "design.md"
-  impact_analysis: "impact.md"
-  test_log: "test-report.md"
-  review_record: "review-report.md"
-  rollback_plan: "rollback.md"
-  review_note: "reviewer acknowledgement"
+  design_doc: "14-ai-development/work-items/AID-YYYY-NNN/design.md"
+  impact_analysis: "14-ai-development/work-items/AID-YYYY-NNN/impact.md"
+  test_log: "14-ai-development/work-items/AID-YYYY-NNN/test-report.md"
+  review_record: "14-ai-development/work-items/AID-YYYY-NNN/review-report.md"
+  rollback_plan: "14-ai-development/work-items/AID-YYYY-NNN/rollback.md"
+  review_note: "14-ai-development/work-items/AID-YYYY-NNN/review-ack.md"   # path to the acknowledgement record, not free text
 binding:
   protocol: "v3"
   sidecar_path: "evidence.sha256"              # Level 1 only
@@ -241,8 +242,9 @@ Rules:
 - `classification_record` and `downgrade_confirmation_record` are verified as Git objects (present in the subject tree, worktree bytes equal to the subject blob); a non-existent path is BLOCKED.
 - `repository` MUST match the clone's `origin` remote; an unverifiable or mismatched identity is BLOCKED.
 - Validate with `python scripts/governance/evidence/check-evidence-tiering.py <declaration>`, and record the per-scenario `VERDICT` / `REASON` output as evidence. An exit code alone is not acceptance evidence.
+- Evidence paths are interpreted against the repository root of `subject_head`, not against the directory holding the declaration; `evidence.review_note` is a path to an acknowledgement record, never free text.
 
-每个工作项在交付前 MUST 声明证据深度，使用 manifest 的 `evidence_tiering` 块与可机器校验的 `evidence-declaration.yaml`。`evidence_level` 是证据深度选择器，独立于 `review_level`、十二状态与六阶段（AI-STD-001 §4.2.1）。ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE 及所有 R3 变更强制 Level 1；`UNKNOWN` 为 BLOCKED，不得赋级；所有等级保留 40 位 `subject_head` 与 `change_summary`，v3 绑定在所有等级均对真实 Git 对象校验（protocol、subject tree 包含、blob 一致），Level 1 另加 sidecar 摘要锚定。`assessed_by`、`assessed_at`、`rationale`、`base_head`、`classification_basis` 均经机器校验，缺失即 BLOCKED。manifest 的 `evidence_tiering` 块与 `evidence-declaration.yaml` MUST 在 `change_class`、`review_level`、`evidence_level`、`subject_head`、`base_head`、`classification_confirmed_by`、`classification_record` 及三个 `downgrade_*` 字段上保持一致，不一致即声明缺陷并在审查中 BLOCKED。`classification_record` 与 `downgrade_confirmation_record` 按 Git 对象校验（须在 subject tree 且工作树/blob 一致），填写不存在的路径即 BLOCKED；`repository` 须与克隆的 `origin` 远程一致，无法核验或不符即 BLOCKED。使用检查器校验并记录逐项 `VERDICT`/`REASON` 输出，仅退出码不足以作为验收证据。
+每个工作项在交付前 MUST 声明证据深度，使用 manifest 的 `evidence_tiering` 块与可机器校验的 `evidence-declaration.yaml`。`evidence_level` 是证据深度选择器，独立于 `review_level`、十二状态与六阶段（AI-STD-001 §4.2.1）。ARCHITECTURE、SECURITY、PERFORMANCE_CRITICAL、PUBLIC_API、DATA_MIGRATION、DOC_NORMATIVE 及所有 R3 变更强制 Level 1；`UNKNOWN` 为 BLOCKED，不得赋级；所有等级保留 40 位 `subject_head` 与 `change_summary`，v3 绑定在所有等级均对真实 Git 对象校验（protocol、subject tree 包含、blob 一致），Level 1 另加 sidecar 摘要锚定。`assessed_by`、`assessed_at`、`rationale`、`base_head`、`classification_basis` 均经机器校验，缺失即 BLOCKED。manifest 的 `evidence_tiering` 块与 `evidence-declaration.yaml` MUST 在 `change_class`、`review_level`、`evidence_level`、`subject_head`、`base_head`、`classification_confirmed_by`、`classification_record` 及三个 `downgrade_*` 字段上保持一致，不一致即声明缺陷并在审查中 BLOCKED。`classification_record` 与 `downgrade_confirmation_record` 按 Git 对象校验（须在 subject tree 且工作树/blob 一致），填写不存在的路径即 BLOCKED；`repository` 须与克隆的 `origin` 远程一致，无法核验或不符即 BLOCKED。使用检查器校验并记录逐项 `VERDICT`/`REASON` 输出，仅退出码不足以作为验收证据。证据路径按 subject 提交的仓库根解析（不相对声明文件所在目录）；`evidence.review_note` 须为指向确认记录的路径，不得填写自由文本。
 
 ## 5. Canonical prompt library and evidence layout / 规范提示词库与证据目录
 

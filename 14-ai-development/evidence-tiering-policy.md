@@ -31,7 +31,7 @@
 | **Level 2（标准）** | FEATURE、BUGFIX（有界范围、不改变契约） | subject_head、change_summary、test_log、review_record、v3 绑定（protocol + subject tree 包含 + blob 一致）、source_authenticity |
 | **Level 3（轻量）** | DOC_EDITORIAL（不改变规范语义的编辑性文档）、OPS（非发布关键） | subject_head、change_summary、evidence.review_note、v3 绑定（protocol + subject tree 包含 + blob 一致） |
 
-所有级别均 MUST 保留 40 位完整 subject_head 与变更简述；无例外。v3 绑定的具体范围见 §5：protocol、subject tree 包含性与 blob 一致性适用于全部等级；sidecar 锚点仅 Level 1 强制。
+所有级别均 MUST 保留 40 位完整 subject_head 与变更简述；无例外。v3 绑定的具体范围见 §5：protocol、subject tree 包含性与 blob 一致性适用于全部等级；sidecar 锚点仅 Level 1 强制。`evidence.review_note` 是**指向确认记录的路径**，不是自由文本——自由文本无法被 Git 绑定。
 
 ## 3. 不可降级规则
 
@@ -91,6 +91,8 @@
    | SCP | `git@github.com:owner/repo[.git]` |
 
    `http://`、`git://`、非 `git` 用户名、带端口的 URL 一律拒绝。这界定了"证据在哪个仓库被验证"的信任边界，但不证明来源真实性。
+
+8. **路径解析基准**：所有证据路径（含 `evidence.review_note` 与 `declaration_path`）按 subject 提交的**仓库根**解析，**不按声明文件所在目录**解析；`evidence.review_note` 须指向 subject tree 内真实存在的确认记录，填写自由文本或包内相对名即 `CE_EVIDENCE_NOT_IN_SUBJECT`。本条**不新增校验层级**，只统一第 3 条与第 6 条的路径解析语义——校验范围与适用对象仍分别由那两条决定。
 
 ## 6. 检查器
 

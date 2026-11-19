@@ -146,7 +146,7 @@ MUST rules:
 6. Declaring a downgrade-capable class (FEATURE, BUGFIX, DOC_EDITORIAL, OPS) requires `classification_basis`, an independent `classification_confirmed_by` and a `classification_record` in the subject tree; a forced Level 1 class MUST NOT be relabelled to escape the Level 1 floor. The basis MUST correspond to the actual change impact and the confirmation record MUST state what was examined; restating the label is not confirmation.
 7. Evidence binding protocol v3 is enforced for real at every level (commit-object subject_head, subject-tree containment, working-tree/blob equality); Level 1 additionally anchors a sidecar digest in the commit message. A VERIFIED authenticity claim without a verification record is BLOCKED.
 8. Audit fields `assessed_by`, `assessed_at`, `rationale` and `base_head` are mandatory and machine-checked.
-9. The checker `scripts/governance/evidence/check-evidence-tiering.py` MUST be run for declared evidence, and its per-scenario records — not its exit code alone — are the acceptance evidence.
+9. The checker `scripts/governance/evidence/check-evidence-tiering.py` MUST be run for declared evidence, and its per-scenario records — not its exit code alone — are the acceptance evidence. Evidence paths (including `evidence.review_note`) resolve against the repository root of the subject commit, not against the directory holding the declaration, and `evidence.review_note` MUST be a path, never free text.
 10. The work-item manifest `evidence_tiering` block and the machine-checked `evidence-declaration.yaml` (located via `declaration_path`) MUST stay in sync on `change_class`, `review_level`, `evidence_level`, `subject_head`, `base_head`, `classification_confirmed_by` / `classification_record` and the three `downgrade_*` fields; a mismatch is a declaration defect. Governance confirmation records and the declared `repository` identity are verified as Git objects, not trusted strings.
 
 证据深度由变更风险决定，独立于审查级别（R0–R3）与十二状态/六阶段生命周期。等级只决定哪些证据字段为必填，从不构成任何门禁已通过的证据，且 MUST NOT 降低或替代审查要求。规范细节见 [evidence-tiering-policy.md](evidence-tiering-policy.md)（状态 PROPOSED）。
@@ -167,7 +167,7 @@ MUST 规则：
 6. 声明可降级类别（FEATURE、BUGFIX、DOC_EDITORIAL、OPS）须提供 `classification_basis`、独立 `classification_confirmed_by` 与 subject tree 内的 `classification_record`；强制 Level 1 类别 MUST NOT 通过改标逃避 Level 1 底线。分类依据 MUST 与实际变更影响对应，确认记录 MUST 写明实际核对对象；仅复述标签不构成确认。
 7. 证据绑定协议 v3 在所有等级均真实执行（commit 对象 subject_head、subject tree 包含、工作树/blob 一致）；Level 1 另须在 commit message 中锚定 sidecar 摘要。声称 VERIFIED 但无验证记录者 BLOCKED。
 8. 审计字段 `assessed_by`、`assessed_at`、`rationale`、`base_head` 强制且经机器校验。
-9. 已声明证据 MUST 运行检查器 `scripts/governance/evidence/check-evidence-tiering.py`，且以其逐项记录（而非仅退出码）作为验收证据。
+9. 已声明证据 MUST 运行检查器 `scripts/governance/evidence/check-evidence-tiering.py`，且以其逐项记录（而非仅退出码）作为验收证据。证据路径（含 `evidence.review_note`）按 subject 提交的仓库根解析，不按声明文件所在目录解析；`evidence.review_note` MUST 为路径，不得填写自由文本。
 10. 工作项 manifest 的 `evidence_tiering` 块与机器校验的 `evidence-declaration.yaml`（经 `declaration_path` 定位）MUST 在 `change_class`、`review_level`、`evidence_level`、`subject_head`、`base_head`、`classification_confirmed_by` / `classification_record` 及三个 `downgrade_*` 字段上保持一致；不一致即声明缺陷。治理确认记录与声明的 `repository` 身份按 Git 对象校验，不得作为可信任字符串。
 
 ### 4.3 Orthogonal markers and independent lifecycles / 正交标记与独立生命周期
