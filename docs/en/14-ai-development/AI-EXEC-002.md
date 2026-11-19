@@ -2,8 +2,8 @@
 # AI Development Prompt Execution Details
 
 - **Document ID:** AI-EXEC-002
-- **Version:** 1.1
-- **Status:** ADOPTED — v1.0 adopted via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`); v1.1 adopted via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`), both merged 2026-11-18; this header records the two adoption events.
+- **Version:** 1.2
+- **Status:** v1.2 PENDING ADOPTION (to be registered upon merge of this change set to `main`, per the effectiveness clause of AI-EXEC-UNIFICATION-RULING-001 §5). Previous versions: v1.1 ADOPTED via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`, 2026-11-18); v1.0 ADOPTED via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`, 2026-11-18). v1.2 changes: F-006 anchor revision (structure = seven sections per AI-STD-001 §5.1; the 15/12 items reclassified as content obligations mapped per AI-PROMPT-STD-001 §4).
 - **Owner:** Integration Owner
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](../../../work-items/AID-2026-002/manifest.yaml) · Revision Work Item [AID-2026-003](../../../work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](../../../14-ai-development/ai-development-standard.md) §5/§13, [AI-PROMPT-STD-001](../../../14-ai-development/prompt-authoring-standard.md), [CHATGPT-GLOBAL-001](../../../14-ai-development/prompts/global/chatgpt-session-contract-v1.md), [AI-PROC-001](../../../14-ai-development/iteration-lifecycle.md) Stages 2/6, GLB-DOC-001 (policy GOV-DOC-001)
@@ -14,7 +14,7 @@
 
 > **Positioning**: This document does not establish a new standard. It provides execution details that make the project's existing prompt system actually work. No scripts are mandated; constraints rely on self-declaration in prompt text and traceability in Issues/PRs/Closeouts.
 
-**English summary.** Every execution prompt MUST use the unified 15-item structure ruled in `AI-EXEC-UNIFICATION-RULING-001` (2026-11-18). The 12 items in AI-PROMPT-STD-001 §4 remain the mandatory core; AI-STD-001 §5 items 13–15 are additional mandatory sections. Six/seven-item focus subsets never waive structure. VERIFIED is the canonical lifecycle status; TESTED is evidence wording only. SHA-256 is mandatory for exact prompt bytes; NOT_VERIFIED records an evidence limitation and never waives the gate. T1/T2/T3 provenance, grandfather distinctions, traceability, review, finding fields, bilingual exceptions and Closeout remain governed by this document.
+**English summary.** Every execution prompt MUST use the seven structural sections defined by AI-STD-001 §5.1 (post-#269 canonical structure). The 12 items in AI-PROMPT-STD-001 §4 and AI-STD-001's former items 13–15 remain mandatory **content obligations** and MUST be mapped into those seven sections per the mapping rule in AI-PROMPT-STD-001 §4; they are not separate headings. Six/seven-item focus subsets never waive content obligations. VERIFIED is the canonical lifecycle status; TESTED is evidence wording only. SHA-256 is mandatory for exact prompt bytes; NOT_VERIFIED records an evidence limitation and never waives the gate. T1/T2/T3 provenance, grandfather distinctions, traceability, review, finding fields, bilingual exceptions and Closeout remain governed by this document.
 
 ---
 
@@ -50,9 +50,13 @@ Before work starts, record the following in the Work Item's Issue/PR (= AI-STD-0
 
 > **Adjudicated (2026-11-18)**: Prompt provenance and hashing uniformly follow RULING-03 of `AI-EXEC-UNIFICATION-RULING-001`. SHA-256 of the exact prompt bytes is mandatory; `NOT_VERIFIED` is only an honest statement of an evidence limitation and is not an exemption. Work must not enter `PROMPT_READY` unless prompt-integrity requirements are met.
 
-## 3. Mandatory Prompt Structure (per AI-PROMPT-STD-001 §4; no separate structure is created)
+## 3. Mandatory Prompt Structure (seven structural sections + twelve/fifteen content-obligation mapping; no separate structure is created)
 
-Every execution prompt must contain its 12 structural items:
+> **Structural authority**: the structural sections are the seven sections of AI-STD-001 §5.1; content obligations follow the mapping rule of AI-PROMPT-STD-001 §4 — the twelve items MUST be mapped into the seven sections per §4. The 12 items + additions below are a **content-obligation inventory** (not separate headings); after mapping, the seven sections are the only structural layer.
+>
+> **All-risk-level baseline obligation (F-02)**: substantive execution prompts of **every risk level (R0–R3) and every task class** MUST retain the complete **15 content obligations** (the 12 items + former items 13–15), all mapped into the seven sections. R0/R1 and R2/R3 do not change the base mandatory applicability of the 15 obligations; the six/seven-item focus subsets denote review emphasis only. Scheduled-prompt add-ons remain additional requirements.
+
+Every execution prompt must contain its 12 content obligations (mapped into the seven sections per AI-PROMPT-STD-001 §4; together with former items 13–15 they form the complete 15 content obligations, applicable to every risk level):
 
 1. Identity (Work Item ID, Issue, prompt ID/version/hash, Owner, session role)
 2. Objective (goal and observable result)
@@ -67,14 +71,14 @@ Every execution prompt must contain its 12 structural items:
 11. Stop/escalation (stop conditions and escalation target)
 12. Evidence and final report schema (evidence and final-report format)
 
-**Tiered review emphasis (not a structural exemption)**:
-- **All execution prompts, across all risk levels and task classes**, must retain the complete 12-item structure above; no remaining sections may be deleted, merged, or omitted because a prompt is R0/R1, DOC, or a code session.
+**Tiered review emphasis (not a content-obligation exemption)**:
+- **All execution prompts, across all risk levels and task classes**, must retain the complete 12 content obligations above (mapped into the seven sections); no remaining content obligations may be deleted, merged, or omitted because a prompt is R0/R1, DOC, or a code session.
 - **R0/R1 documentation-session focus subset**: items 1, 2, 5, 8, 11, and 12 require particular specificity; these are review emphases, not a six-item replacement template.
-- **Code-session focus subset**: for task classes `IMPL/TEST/SEC/MIG/PERF`, items 1, 2, 3, 5, 8, 9, and 12 require particular specificity; the other five items must still remain in the prompt. Regardless of task class, R2/R3 require the complete 12 items plus applicable additional risk/bilingual requirements.
-- **R2/R3 (any task class)**: the full 15-item structure is required, along with applicable additional risk/bilingual requirements; this is consistent with the structural obligation for R0/R1 and does not create a difference in which R2/R3 alone are exempt from.
+- **Code-session focus subset**: for task classes `IMPL/TEST/SEC/MIG/PERF`, items 1, 2, 3, 5, 8, 9, and 12 require particular specificity; the other five items must still remain in the prompt. Regardless of task class, R2/R3 require the complete 12 content obligations plus applicable additional risk/bilingual requirements.
+- **R2/R3 (any task class)**: the full 15 content obligations are required (mapped into the seven sections), along with applicable additional risk/bilingual requirements; this is consistent with the content obligations for R0/R1 and does not create a difference in which R2/R3 alone are exempt from.
 - Scheduled prompts must additionally follow the add-ons in AI-PROMPT-STD-001 §4 (Owner key, automation ID, frequency, time zone, idempotency, per-run limit, no-task behavior, permission preflight).
 
-> **Adjudicated (2026-11-18)**: The sole complete mandatory structure is the 15 items in AI-STD-001 §5, as specified in RULING-01 of `AI-EXEC-UNIFICATION-RULING-001`. The 12 items in AI-PROMPT-STD-001 §4 remain fully mandatory as core items; items 13–15 from AI-STD-001 are separately listed mandatory additions. The six/seven-item focus subsets do not constitute deletion or exemption.
+> **Adjudicated (2026-11-18; 2026-11-19 F-006 anchor revision)**: The sole complete mandatory **structure** is the seven sections of AI-STD-001 §5.1, as specified in RULING-01 (revised) of `AI-EXEC-UNIFICATION-RULING-001`. The 12 items of AI-PROMPT-STD-001 §4 and the former items 13–15 are mandatory **content obligations** and MUST be mapped into the seven sections per §4; the six/seven-item focus subsets do not constitute deletion or exemption. Precedence: structure follows AI-STD-001 §5.1; content-obligation mapping follows AI-PROMPT-STD-001 §4.
 
 Prompt approval continues to follow its Step 6 (A drafts cross-Owner tasks; the accountable Owner approves domain semantics; A must not draft and approve their own task). **Prompt approval ≠ implementation approval ≠ merge approval.**
 

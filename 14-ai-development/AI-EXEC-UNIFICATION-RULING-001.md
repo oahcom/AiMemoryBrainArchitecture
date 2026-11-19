@@ -28,15 +28,15 @@ This ruling does not create a new PR or Issue, does not amend the broad body of 
 
 本裁定不创建新 PR 或 Issue，不大范围修改任何上位规范正文，也不追溯否定已经完成并验收的工作。历史记录中如实写明的 NOT_VERIFIED、TESTED 或 12 项提示词结构必须保留为历史事实；新映射向前适用。
 
-## 2. RULING-01 — Mandatory prompt structure: unify to 15 / 裁定一——提示词强制结构统一为 15 项
+## 2. RULING-01 — Mandatory prompt structure: seven sections with mapped content obligations / 裁定一——提示词强制结构：七章节 + 内容义务映射（2026-11-19 锚点修订）
 
 ### English
 
-**Ruling — UNIFY-TO-15.** AI-STD-001 §5's 15-item list is the sole complete mandatory structure for every substantive execution prompt. AI-PROMPT-STD-001 §4's 12 items remain fully mandatory as the core items 1–12. AI-STD-001's items 13, 14 and 15 are separately represented as mandatory supplemental sections: (13) commit, read-back, branch-head and evidence requirements; (14) stop conditions and escalation for ambiguity/conflicting contracts; and (15) the bilingual documentation manifest. All 15 must be present; the 12-item structure is not an alternative or a waiver.
+**Ruling — SEVEN-SECTIONS-MAPPED (revised 2026-11-19, F-006).** The seven structural sections defined by AI-STD-001 §5.1 (post-#269) are the sole complete mandatory structure for every substantive execution prompt. AI-PROMPT-STD-001 §4's 12 items and AI-STD-001's former items 13–15 — (13) commit, read-back, branch-head and evidence requirements; (14) stop conditions and escalation for ambiguity/conflicting contracts; and (15) the bilingual documentation manifest — remain fully mandatory as **content obligations** and MUST be mapped into the seven sections per the mapping rule in AI-PROMPT-STD-001 §4. All content obligations must be present; the 12-item inventory is not an alternative structure or a waiver.
 
-The six-item R0/R1 documentation focus subset and seven-item code-session focus subset in AI-EXEC-002 are emphasis/checking aids only. They never remove any of the 15 required sections. Applicable scheduled-prompt additions remain additional requirements.
+The six-item R0/R1 documentation focus subset and seven-item code-session focus subset in AI-EXEC-002 are emphasis/checking aids only. They never remove any of the content obligations. Applicable scheduled-prompt additions remain additional requirements.
 
-**Reason.** The 15-item upper-standard list includes explicit bilingual semantic-parity and evidence/branch-readback controls. The 12-item prompt-authoring structure is a useful core skeleton, but treating it as exhaustive silently drops mandatory upper-standard controls. The adopted v1.1 execution rules already treat the six/seven-item subsets as focus subsets; making the 15-item structure canonical resolves the ambiguity without rewriting the upper-standard documents.
+**Reason.** AI-STD-001 §5 was revised to seven sections (PR #269); anchoring "structure" to the former 15-item list left a double-reading (F-006). Separating the structural layer (seven sections, AI-STD-001 §5.1) from the content layer (15 obligations, mapped per AI-PROMPT-STD-001 §4) resolves the conflict without weakening any obligation. The 15-item upper-standard list includes explicit bilingual semantic-parity and evidence/branch-readback controls, which remain mandatory content.
 
 **Boundary.** Applies to prompts newly drafted or materially revised after this ruling takes effect. It does not retrospectively classify already completed and accepted prompts as non-compliant. Existing executed prompt bytes remain immutable.
 
@@ -44,11 +44,11 @@ The six-item R0/R1 documentation focus subset and seven-item code-session focus 
 
 ### 中文
 
-**裁定——UNIFY-TO-15。** AI-STD-001 §5 的 15 项清单是所有实质执行提示词唯一完整的强制结构。AI-PROMPT-STD-001 §4 的 12 项全部保留为第 1–12 项核心内容。AI-STD-001 的第 13、14、15 项必须分别作为强制补充章节列出：（13）提交、回读、分支 Head 和证据要求；（14）歧义及契约冲突的停止条件和升级路径；（15）双语文档清单。15 项必须全部存在；12 项结构不是另一种可选模板，也不构成豁免。
+**裁定——七章节映射（2026-11-19 F-006 锚点修订）。** AI-STD-001 §5.1（#269 修订后）定义的七个结构章节是所有实质执行提示词唯一完整的强制结构。AI-PROMPT-STD-001 §4 的 12 项与 AI-STD-001 原第 13、14、15 项——（13）提交、回读、分支 Head 和证据要求；（14）歧义及契约冲突的停止条件和升级路径；（15）双语文档清单——全部保留为强制**内容义务**，必须按 AI-PROMPT-STD-001 §4 的映射规则纳入七章节。所有内容义务必须全部存在；12 项清单不是另一种结构模板，也不构成豁免。
 
-AI-EXEC-002 中 R0/R1 文档会话的六项重点子集和代码会话的七项重点子集，仅用于强调和检查，不得删除任何 15 项必需章节。适用的定时提示词附加要求继续叠加执行。
+AI-EXEC-002 中 R0/R1 文档会话的六项重点子集和代码会话的七项重点子集，仅用于强调和检查，不得删除任何内容义务。适用的定时提示词附加要求继续叠加执行。
 
-**理由。** 上位规范 15 项清单明确包含双语语义对等、证据和分支回读控制。12 项提示词结构适合作为核心骨架，但将其视为完整清单会悄然遗漏上位规范的强制控制。已采纳的 v1.1 执行细则本来就将六项/七项集合定义为重点子集；将 15 项确定为唯一主结构即可消除歧义，无需重写上位规范。
+**理由。** AI-STD-001 §5 已被 PR #269 改为七章节；以原 15 项清单锚定「结构」产生双口径（F-006）。区分结构层（七章节，AI-STD-001 §5.1）与内容层（15 项义务，按 AI-PROMPT-STD-001 §4 映射）即可消除冲突，且不弱化任何义务。15 项上位清单中的双语语义对等、证据和分支回读控制仍为强制内容。
 
 **边界。** 适用于本裁定生效后新起草或实质修订的提示词。不追溯将已经完成并验收的历史提示词判定为不合规。已执行提示词字节保持不可变。
 
