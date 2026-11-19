@@ -103,6 +103,10 @@ These are logical responsibility boundaries, not a requirement to deploy each co
 
 这些是逻辑职责边界，并不意味着每个组件都必须独立部署为服务或进程。
 
+**Security boundary (design invariant; not a production security validation):** Retrieved or injected memory content is untrusted data and must never acquire system/developer instruction authority. The Brain must not overwrite system/developer instructions, user-originated input, or Agent security policy.
+
+**安全边界（设计不变量；不代表已完成生产级安全验证）：** 检索或注入的记忆内容均属于不可信数据，不得获得 system/developer 指令权威。Brain 不得覆盖 system/developer 指令、用户来源输入或 Agent 安全策略。
+
 ## 4. Where we intend to create durable value / 长期价值来自哪里
 
 We do not expect generic summarization, embeddings, or vector search alone to be a defensible moat. Those capabilities are increasingly available as model-provider features and managed services.
@@ -227,6 +231,10 @@ Recommended entry points:
 This README contains Chinese and English in a single file; there is no separate Chinese README. **Translation status: PARTIAL.** Chinese coverage includes the project introduction, status explanation, problem summary, positioning, core three-layer model, strategic-value summary, interoperability summary, roadmap priorities summary, repository navigation, and long-term thesis. The following detailed material remains English-only in this revision and is explicitly **NOT_TRANSLATED**: the project-status table; the “What the architecture is designed to provide” and “What we are not” lists; the logical-architecture table; detailed subsections 4.1–4.5; the five-stage roadmap table and six-item near-term priority list; the success-metric list; the target-audience list; and the detailed repository entry-point list.
 
 The repository's normative architecture documents are maintained in Chinese and English. Both versions must preserve the same meaning, constraints, stable identifiers, decision status, failure cases, and acceptance criteria. A translation must never promote a CANDIDATE, OPEN, or TO_VALIDATE item into a decided requirement.
+
+**Document authority:** This README is an informative project entry point. GOV-DOC-001 and approved normative architecture specifications remain authoritative. This README does not amend, override, or replace any normative specification or governance policy.
+
+**文档效力：** 本 README 只是说明性项目入口。GOV-DOC-001 和已批准的规范性架构文件才具有规范效力。本 README 不修改、不覆盖、不替代任何规范性文件或治理政策。
 
 Significant design statements use explicit status labels such as **DECIDED**, **CANDIDATE**, **TO_VALIDATE**, and **OPEN**. A component name alone is not sufficient to authorize implementation: responsibilities, boundaries, inputs, outputs, state transitions, failure behavior, security constraints, and acceptance criteria must first be specified. Implementation and acceptance claims must be backed by reproducible evidence.
 
