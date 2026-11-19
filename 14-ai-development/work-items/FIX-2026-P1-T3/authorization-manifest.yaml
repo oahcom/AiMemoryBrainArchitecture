@@ -1,6 +1,6 @@
 # FIX-2026-P1-T3 authorization manifest
-# This manifest registers baseline evidence and dispositions only.
-# It does not authorize edits to any other path listed below.
+# This manifest records baseline evidence, dispositions, and the explicitly approved task write scope.
+# Scope expansion is authorized by the GO decision for FIX-2026-P1-T3.
 schema_version: "1.0"
 work_item: FIX-2026-P1-T3
 repository: oahcom/AiMemoryBrainArchitecture
@@ -13,6 +13,18 @@ scope:
   manifest_path: 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml
   allowed_write_paths:
     - 14-ai-development/work-items/FIX-2026-P1-T3/authorization-manifest.yaml
+    - 14-ai-development/bilingual-tiering-policy.md
+    - 14-ai-development/bilingual-tiering-policy.en.md
+    - 14-ai-development/ai-development-standard.md
+    - scripts/governance/bilingual/check-bilingual-tiering.sh
+    - scripts/governance/bilingual/check-bilingual-sync.sh
+    - scripts/governance/bilingual/translate-document.py
+    - scripts/governance/bilingual/test_bilingual_scripts.py
+  authorization_basis:
+    - "39-file allowlist authorization under the GO decision (Decision Section 3)."
+    - "Task deliverable authorization for bilingual-tiering policy documents, three scripts, and tests."
+    - "ai-development-standard.md is an in-allowlist revision."
+    - "The three scripts and test are new task tools; they are not language-marking targets."
   all_other_paths: OUT_OF_SCOPE
 inventory:
   expected_a_i_prompt_blobs: 27
