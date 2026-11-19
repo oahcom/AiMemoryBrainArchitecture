@@ -1,6 +1,8 @@
+
 """R3 contract-level tests.
 
-DFI-001..022, I-U011-T01..T16, STOR-01..07.
+DFI-001..022, I-U011-T01..T16, STOR-01..07,
+plus authorization-entry rejection tests.
 These tests exercise the in-memory reference model only.
 """
 import unittest
@@ -29,6 +31,7 @@ def auth(**kw):
         permission_epoch=7,
         nonce_unused=True,
         delegation_current=True,
+        nonce="auth-nonce-default",
     )
     values.update(kw)
     return Authorization(**values)
@@ -85,23 +88,42 @@ class DFI(unittest.TestCase):
         m.mark_target("retained", "POLICY_RETAINED")
         self.assertFalse(m.domain_complete())
 
-    # DFI-007: Same idempotency Key/Hash reuses operation;
-    # different Hash under the same Key is rejected.
+    # DFI-007: Same idempotency Key/Hash reuses operation only after
+    # independent validation of the new authorization.
     def test_DFI_007(self):
         m = R3Model("m")
         m.phase = Phase.AUTHORIZED
         first = m.commit_suppression(
-            "op-1", "attempt-1", "key-1", "hash-A", auth=auth()
+            "op-1", "attempt-1", "key-1", "hash-A",
+            auth=auth(nonce="nonce-first"),
         )
-        m.phase = Phase.AUTHORIZED
-        second = m.commit_suppression(
-            "op-1", "attempt-2", "key-1", "hash-A", auth=auth()
-        )
-        self.assertIs(first, second)
+
+        # Same Key/Hash does not bypass invalid authorization.
         m.phase = Phase.AUTHORIZED
         with self.assertRaises(ContractViolation):
             m.commit_suppression(
-                "op-2", "attempt-3", "key-1", "hash-B", auth=auth()
+                "op-1", "attempt-2", "key-1", "hash-A",
+                auth=auth(
+                    signature_valid=False,
+                    nonce="nonce-invalid",
+                ),
+            )
+
+        # Same Key/Hash with a fresh valid authorization reuses the commit.
+        m.phase = Phase.AUTHORIZED
+        second = m.commit_suppression(
+            "op-1", "attempt-2", "key-1", "hash-A",
+            auth=auth(nonce="nonce-second"),
+        )
+        self.assertIs(first, second)
+        self.assertIn("nonce-second", m.nonce_registry)
+
+        # Same Key but different Hash is rejected.
+        m.phase = Phase.AUTHORIZED
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                "op-2", "attempt-3", "key-1", "hash-B",
+                auth=auth(nonce="nonce-third"),
             )
 
     # DFI-008: Stale attempt cannot publish a stage.
@@ -130,7 +152,8 @@ class DFI(unittest.TestCase):
             m.authorize_and_suppress(
                 auth(permission_epoch=6), 10, 7, "op"
             )
-        self.assertEqual(m.phase, Phase.FAILED)
+        self.assertEqual(m.phase, Phase.REQUESTED)
+        self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
 
     # DFI-011: Inventory revision changes invalidate previous completion.
     def test_DFI_011(self):
@@ -153,15 +176,46 @@ class DFI(unittest.TestCase):
         m.reconcile_restore(m.fence_generation, True)
         self.assertTrue(m.restore_query_allowed())
 
-    # DFI-013: Producer admission/dependency registration races with Fence.
+    # DFI-013: Three independent stale-publication races.
+    #
+    # Evidence boundary: these are deterministic sequential interleavings.
+    # They demonstrate the rejection conditions for old Fence, old Worker,
+    # and delayed Cache Fill. They are NOT proof of true concurrent
+    # execution or concurrent linearizability.
     def test_DFI_013(self):
         m = R3Model("m")
+
+        # Race A: worker captures an old lease; a newer worker supersedes it.
+        old_worker_lease = m.start_attempt("worker-old")
+        new_worker_lease = m.start_attempt("worker-new")
+        with self.assertRaises(ContractViolation):
+            m.commit_stage(
+                "worker-old", old_worker_lease, "publish"
+            )
+        self.assertNotIn("STAGE:publish", m.audit)
+
+        # Capture the pre-Forget Fence for producer and cache operations.
         old_fence = m.fence_generation
         self.assertTrue(m.producer_admission(old_fence))
-        m.authorize_and_suppress(auth(), 10, 7, "op")
+
+        # The canonical suppression commit advances Fence and Forget state.
+        m.authorize_and_suppress(auth(nonce="dfi013-nonce"), 10, 7, "op")
+
+        # Race B: producer with an old Fence cannot register a dependency.
         with self.assertRaises(ContractViolation):
             m.register_dependency("late-producer", old_fence)
+        self.assertNotIn("DEPENDENCY:late-producer", m.audit)
+
+        # Race C: delayed Cache Fill must recheck Fence at publication.
+        with self.assertRaises(ContractViolation):
+            m.recall_cache_fill(
+                "delayed-key", "late-value", old_fence
+            )
+        self.assertNotIn("delayed-key", m.cache_entries)
+
         self.assertFalse(m.producer_admission(old_fence))
+        self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
+        self.assertGreater(m.fence_generation, old_fence)
 
     # DFI-014: Old producer lease cannot publish after a new attempt.
     def test_DFI_014(self):
@@ -312,9 +366,37 @@ class OwnerIU011(unittest.TestCase):
             with self.subTest(key=key):
                 self._deny(**{key: False})
 
-    # I-U011-T03: Nonce replay and temporal validity are denied.
+    # I-U011-T03: A successfully consumed Nonce cannot be replayed.
+    # Expiry and not-before boundaries are also checked.
     def test_T03(self):
-        self._deny(nonce_unused=False)
+        m = R3Model("m")
+        original = auth(nonce="real-authorization-nonce")
+        first = m.authorize_and_suppress(
+            original, 10, 7, "op-first"
+        )
+
+        self.assertIsNotNone(first)
+        self.assertIn("real-authorization-nonce", m.nonce_registry)
+        self.assertEqual(
+            first.authorization_reference.nonce,
+            "real-authorization-nonce",
+        )
+
+        # Replay the same Authorization Nonce through the actual commit API.
+        m.phase = Phase.AUTHORIZED
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                "op-replay",
+                "attempt-replay",
+                "key-replay",
+                "hash-replay",
+                auth=original,
+            )
+
+        self.assertEqual(m.atomic_commit, first)
+        self.assertEqual(m.fence_generation, 1)
+        self.assertNotIn("op-replay", m.outbox)
+
         self._deny(expires_at=10)
         self._deny(not_before=11)
 
@@ -325,23 +407,81 @@ class OwnerIU011(unittest.TestCase):
     # I-U011-T05: Revocation wins when it precedes commit.
     def test_T05(self):
         m = R3Model("m")
-        self.assertEqual(m.revoke_race("REVOCATION_WON"), "REVOCATION_WON")
-        self._deny(permission_epoch=6)
+        result = m.revoke_race(
+            "REVOCATION_WON",
+            auth=auth(nonce="revocation-wins-nonce"),
+        )
+
+        self.assertEqual(result, "REVOCATION_WON")
+
+        # Assert actual state and side effects, not just the result label.
+        self.assertEqual(m.permission_epoch, 8)
+        self.assertEqual(m.revocation_state, "REVOKED")
+        self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
+        self.assertIsNone(m.atomic_commit)
+        self.assertEqual(m.atomic_tuple, {})
+        self.assertEqual(m.fence_generation, 0)
+        self.assertEqual(m.inventory_revision, 0)
+        self.assertEqual(m.outbox, {})
+        self.assertEqual(m.operation_registry, {})
+        self.assertNotIn("revocation-wins-nonce", m.nonce_registry)
+        self.assertIn("AUTHORIZATION_REVOKED", m.audit)
 
     # I-U011-T06: Commit wins when commit precedes revocation.
     def test_T06(self):
-        m = done()
+        m = R3Model("m")
+        result = m.revoke_race(
+            "COMMIT_WON",
+            auth=auth(nonce="commit-wins-nonce"),
+        )
+
+        self.assertEqual(result, "COMMIT_WON")
+
+        # Commit's actual effects remain committed after later revocation.
+        self.assertEqual(m.permission_epoch, 8)
+        self.assertEqual(m.revocation_state, "REVOKED")
         self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
         self.assertEqual(m.phase, Phase.SUPPRESSION_COMMITTED)
-        self.assertEqual(m.revoke_race("COMMIT_WON"), "COMMIT_WON")
+        self.assertIsNotNone(m.atomic_commit)
+        self.assertEqual(m.fence_generation, 1)
+        self.assertEqual(m.inventory_revision, 1)
+        self.assertEqual(
+            m.outbox["race-op"], "SUPPRESSION_COMMITTED"
+        )
+        self.assertIn("race-op", m.operation_registry)
+        self.assertIn("commit-wins-nonce", m.nonce_registry)
+        self.assertIn("AUTHORIZATION_REVOKED", m.audit)
 
     # I-U011-T07: Unprovable ordering/currentness is UNKNOWN.
     def test_T07(self):
         m = R3Model("m")
-        self.assertEqual(m.revoke_race("UNKNOWN"), "UNKNOWN")
+        result = m.revoke_race(
+            "UNKNOWN",
+            auth=auth(nonce="unknown-order-nonce"),
+        )
+
+        self.assertEqual(result, "UNKNOWN")
+
+        # UNKNOWN is an explicit fail-closed state, not a successful commit.
+        self.assertEqual(m.revocation_state, "UNKNOWN")
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
+        self.assertEqual(m.phase, Phase.AUTHORIZED)
+        self.assertIsNone(m.atomic_commit)
+        self.assertEqual(m.atomic_tuple, {})
+        self.assertEqual(m.fence_generation, 0)
+        self.assertEqual(m.inventory_revision, 0)
+        self.assertEqual(m.outbox, {})
+        self.assertEqual(m.operation_registry, {})
+        self.assertNotIn("unknown-order-nonce", m.nonce_registry)
+        self.assertIn(
+            "AUTHORIZATION_CURRENTNESS_UNKNOWN", m.audit
+        )
+
         with self.assertRaises(ContractViolation):
-            m.revoke_race("UNVERIFIABLE")
+            m.commit_suppression(
+                "unknown-followup",
+                auth=auth(nonce="unknown-followup-nonce"),
+            )
 
     # I-U011-T08: Stale delegation is denied.
     def test_T08(self):
@@ -490,6 +630,178 @@ class StorageFaults(unittest.TestCase):
         self.assertEqual(m.backup_coverage(), "UNKNOWN")
         m.set_backup_manifest({"authenticated": True, "copies": []})
         self.assertEqual(m.backup_coverage(), "UNKNOWN")
+
+
+class AuthorizationCommitEntry(unittest.TestCase):
+
+    def _direct_commit(self, authorization, **kwargs):
+        m = R3Model("m")
+        m.phase = Phase.AUTHORIZED
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                "direct-op", auth=authorization, **kwargs
+            )
+        self.assertIsNone(m.atomic_commit)
+        self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
+        self.assertEqual(m.fence_generation, 0)
+        return m
+
+    # AUTH-01: Direct commit without Authorization is rejected.
+    def test_AUTH_01_missing_authorization(self):
+        m = R3Model("m")
+        m.phase = Phase.AUTHORIZED
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression("op")
+        self.assertIsNone(m.atomic_commit)
+        self.assertEqual(m.fence_generation, 0)
+
+    # AUTH-02: Invalid signature is rejected at commit entry.
+    def test_AUTH_02_invalid_signature(self):
+        self._direct_commit(
+            auth(signature_valid=False, nonce="bad-signature")
+        )
+
+    # AUTH-03: Unknown issuer is rejected at commit entry.
+    def test_AUTH_03_unknown_issuer(self):
+        self._direct_commit(
+            auth(issuer_known=False, nonce="unknown-issuer")
+        )
+
+    # AUTH-04: Expired authorization is rejected at commit entry.
+    def test_AUTH_04_expired_authorization(self):
+        self._direct_commit(
+            auth(expires_at=10, nonce="expired"),
+            now=10,
+        )
+
+    # AUTH-05: Stale PermissionEpoch is rejected at commit entry.
+    def test_AUTH_05_stale_permission_epoch(self):
+        self._direct_commit(
+            auth(permission_epoch=6, nonce="stale-epoch")
+        )
+
+    # AUTH-06: Changing phase alone cannot grant commit authority.
+    def test_AUTH_06_phase_mutation_is_not_authority(self):
+        m = R3Model("m")
+        m.phase = Phase.AUTHORIZED
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression("phase-only")
+        self.assertEqual(m.phase, Phase.AUTHORIZED)
+        self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
+        self.assertIsNone(m.atomic_commit)
+        self.assertEqual(m.fence_generation, 0)
+
+    # AUTH-07: AuthorizationReference carries the actual authorization nonce.
+    def test_AUTH_07_real_nonce_binding(self):
+        m = R3Model("m")
+        supplied = auth(nonce="issuer-generated-real-nonce")
+        commit = m.authorize_and_suppress(supplied, 10, 7, "op")
+        self.assertEqual(
+            commit.authorization_reference.nonce,
+            "issuer-generated-real-nonce",
+        )
+        self.assertIn("issuer-generated-real-nonce", m.nonce_registry)
+        self.assertNotIn(
+            f"nonce-{commit.commit_id}", m.nonce_registry
+        )
+
+    # AUTH-08: Aborted commit does not consume nonce; successful retry does.
+    def test_AUTH_08_abort_does_not_consume_nonce(self):
+        m = R3Model("m")
+        supplied = auth(nonce="retry-after-abort")
+        m.phase = Phase.AUTHORIZED
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                "op", auth=supplied, fail_before_commit=True
+            )
+        self.assertNotIn(supplied.nonce, m.nonce_registry)
+        self.assertIsNone(m.atomic_commit)
+
+        commit = m.commit_suppression("op", auth=supplied)
+        self.assertIsNotNone(commit)
+        self.assertIn(supplied.nonce, m.nonce_registry)
+
+    # AUTH-09: A consumed nonce cannot authorize a different operation.
+    def test_AUTH_09_nonce_replay_different_key(self):
+        m = R3Model("m")
+        supplied = auth(nonce="one-time-nonce")
+        m.authorize_and_suppress(supplied, 10, 7, "first-op")
+        m.phase = Phase.AUTHORIZED
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                "second-op",
+                idempotency_key="second-key",
+                auth=supplied,
+            )
+        self.assertNotIn("second-op", m.outbox)
+        self.assertEqual(m.fence_generation, 1)
+
+    # AUTH-10: Fresh valid nonce permits same Key/Hash idempotent reuse.
+    def test_AUTH_10_fresh_nonce_idempotent_reuse(self):
+        m = R3Model("m")
+        m.phase = Phase.AUTHORIZED
+        first = m.commit_suppression(
+            "op", "a1", "same-key", "same-hash",
+            auth=auth(nonce="first-valid-nonce"),
+        )
+        m.phase = Phase.AUTHORIZED
+        second = m.commit_suppression(
+            "op", "a2", "same-key", "same-hash",
+            auth=auth(nonce="fresh-valid-nonce"),
+        )
+        self.assertIs(first, second)
+        self.assertIn("fresh-valid-nonce", m.nonce_registry)
+        self.assertEqual(m.fence_generation, 1)
+
+    # AUTH-11: Invalid authorization cannot use an existing idempotency result.
+    def test_AUTH_11_invalid_auth_idempotent_bypass(self):
+        m = R3Model("m")
+        m.phase = Phase.AUTHORIZED
+        first = m.commit_suppression(
+            "op", "a1", "key", "hash",
+            auth=auth(nonce="initial-valid"),
+        )
+        m.phase = Phase.AUTHORIZED
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                "op", "a2", "key", "hash",
+                auth=auth(
+                    issuer_known=False,
+                    nonce="invalid-retry",
+                ),
+            )
+        self.assertIs(m.atomic_commit, first)
+        self.assertNotIn("invalid-retry", m.nonce_registry)
+
+    # AUTH-12: Not-before boundary is checked at commit entry.
+    def test_AUTH_12_not_before(self):
+        self._direct_commit(
+            auth(not_before=11, nonce="not-yet-valid"),
+            now=10,
+        )
+
+    # AUTH-13: Caller cannot pass an obsolete epoch to bypass model state.
+    def test_AUTH_13_caller_epoch_spoof(self):
+        m = R3Model("m")
+        m.permission_epoch = 8
+        m.phase = Phase.AUTHORIZED
+        with self.assertRaises(ContractViolation):
+            m.commit_suppression(
+                "op",
+                auth=auth(permission_epoch=7, nonce="epoch-spoof"),
+                current_epoch=7,
+            )
+        self.assertIsNone(m.atomic_commit)
+        self.assertEqual(m.fence_generation, 0)
+
+    # AUTH-14: Stale delegation is rejected at the commit boundary.
+    def test_AUTH_14_stale_delegation(self):
+        self._direct_commit(
+            auth(
+                delegation_current=False,
+                nonce="stale-delegation",
+            )
+        )
 
 
 if __name__ == "__main__":

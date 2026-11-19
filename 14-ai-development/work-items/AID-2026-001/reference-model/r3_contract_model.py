@@ -1,3 +1,4 @@
+
 """R3 contract-level reference model.
 
 This is an abstract in-memory contract model, not a production storage
@@ -46,6 +47,7 @@ class Authorization:
     permission_epoch: int = 7
     nonce_unused: bool = True
     delegation_current: bool = True
+    nonce: str = "auth-nonce-default"
 
     def valid(self, now: int, epoch: int) -> bool:
         return all((
@@ -58,6 +60,7 @@ class Authorization:
             self.scope_matches,
             self.nonce_unused,
             self.delegation_current,
+            bool(self.nonce),
             self.not_before <= now < self.expires_at,
             self.permission_epoch == epoch,
         ))
@@ -152,6 +155,7 @@ class R3Model:
     index_snapshot_fence: int = 0
     context_version: int = 0
     pending_delta: list = field(default_factory=list)
+    revocation_state: str = "CURRENT"
 
     ATOMIC_FIELDS = (
         "memory_identity",
@@ -162,53 +166,116 @@ class R3Model:
         "fence_tombstone",
     )
 
+    def _validate_authorization(
+        self,
+        auth: Authorization | None,
+        now: int,
+        current_epoch: int,
+    ) -> None:
+        """Revalidate authorization at the actual commit boundary.
+
+        Phase is deliberately not an authorization input. A caller cannot
+        obtain commit authority by changing phase alone.
+        """
+        if auth is None:
+            raise ContractViolation("authorization reference required")
+
+        if current_epoch != self.permission_epoch:
+            raise ContractViolation("caller PermissionEpoch is stale")
+
+        if self.revocation_state == "UNKNOWN":
+            raise ContractViolation("authorization currentness is UNKNOWN")
+
+        if self.revocation_state == "REVOKED":
+            raise ContractViolation("authorization revoked")
+
+        if not auth.valid(now, self.permission_epoch):
+            raise ContractViolation("invalid or expired authorization")
+
+        if auth.nonce in self.nonce_registry:
+            raise ContractViolation("authorization nonce replay")
+
+    def revoke_authorization(self) -> int:
+        """Advance PermissionEpoch and make older authorizations unusable."""
+        self.permission_epoch += 1
+        self.revocation_state = "REVOKED"
+        self.audit.append("AUTHORIZATION_REVOKED")
+        return self.permission_epoch
+
     def authorize_and_suppress(
-        self, auth: Authorization, now: int, current_epoch: int,
-        operation_id: str, attempt_id: str = "attempt-1",
+        self,
+        auth: Authorization,
+        now: int,
+        current_epoch: int,
+        operation_id: str,
+        attempt_id: str = "attempt-1",
         idempotency_key: str | None = None,
         request_hash: str = "default-hash",
     ) -> AtomicCommit:
         if self.phase != Phase.REQUESTED:
             raise ContractViolation("authorization must precede suppression")
+
         if self.legal_hold:
             raise ContractViolation("Legal Hold prevents suppression")
-        if not auth.valid(now, current_epoch):
-            self.phase = Phase.FAILED
-            self.audit.append("AUTHORIZATION_DENIED_FAIL_CLOSED")
-            raise ContractViolation("invalid or unknown authorization")
-        if auth.nonce_unused is False:
-            raise ContractViolation("nonce replay")
-        if not idempotency_key:
-            idempotency_key = operation_id
+
+        # Initial validation is useful for the workflow transition.
+        # commit_suppression repeats it independently at the commit boundary.
+        self._validate_authorization(auth, now, current_epoch)
+
         self.phase = Phase.AUTHORIZED
         return self.commit_suppression(
-            operation_id, attempt_id, idempotency_key, request_hash,
+            operation_id,
+            attempt_id,
+            idempotency_key,
+            request_hash,
             auth=auth,
+            now=now,
+            current_epoch=current_epoch,
         )
 
     def commit_suppression(
-        self, operation_id: str, attempt_id: str = "attempt-1",
+        self,
+        operation_id: str,
+        attempt_id: str = "attempt-1",
         idempotency_key: str | None = None,
         request_hash: str = "default-hash",
         fail_before_commit: bool = False,
         auth: Authorization | None = None,
+        now: int = 10,
+        current_epoch: int | None = None,
     ) -> AtomicCommit:
+        # Phase is a workflow guard only. It never substitutes for auth.
         if self.phase != Phase.AUTHORIZED:
-            raise ContractViolation("I authorization required")
+            raise ContractViolation("authorization workflow phase required")
+
         if self.legal_hold:
             raise ContractViolation("Legal Hold prevents suppression")
+
         if not operation_id or not attempt_id:
             raise ContractViolation("operation and attempt identity required")
 
+        if current_epoch is None:
+            current_epoch = self.permission_epoch
+
+        # CRITICAL: independently revalidate at every commit entry,
+        # including idempotent retries. Do this BEFORE operation lookup.
+        self._validate_authorization(auth, now, current_epoch)
+
         key = idempotency_key or operation_id
         existing = self.operation_registry.get(key)
+
         if existing:
             if existing["request_hash"] != request_hash:
-                raise ContractViolation("idempotency key reused with different hash")
-            return existing["commit"]
+                raise ContractViolation(
+                    "idempotency key reused with different hash"
+                )
 
-        if auth is None:
-            raise ContractViolation("authorization reference required")
+            # A new valid authorization nonce authorizes the retry.
+            # The previously consumed nonce cannot be replayed to obtain
+            # an idempotent response.
+            self.nonce_registry.add(auth.nonce)
+            self.audit.append("IDEMPOTENT_COMMIT_REUSED")
+            return existing["commit"]
 
         self.commit_counter += 1
         commit_id = f"commit-{self.commit_counter}"
@@ -221,11 +288,14 @@ class R3Model:
             suppression_complete=True,
             inventory_revision=next_revision,
         )
+
+        # Bind the real, validated Authorization Nonce.
         authorization = AuthorizationReference(
             permission_epoch=auth.permission_epoch,
             receipt_id=f"receipt-{commit_id}",
-            nonce=f"nonce-{commit_id}",
+            nonce=auth.nonce,
         )
+
         proposed = AtomicCommit(
             memory_identity=MemoryIdentity(self.memory_id),
             lifecycle_event=LifecycleEvent(
@@ -251,6 +321,7 @@ class R3Model:
         )
 
         self._validate_atomic_commit(proposed)
+
         if fail_before_commit:
             self.audit.append("ATOMIC_TUPLE_ABORTED")
             raise ContractViolation("atomic commit aborted")
@@ -267,7 +338,9 @@ class R3Model:
             "request_hash": request_hash,
             "commit": proposed,
         }
-        self.nonce_registry.add(authorization.nonce)
+
+        # Consume the actual authorization nonce only after commit succeeds.
+        self.nonce_registry.add(auth.nonce)
         self.phase = Phase.SUPPRESSION_COMMITTED
         self.audit.append("SUPPRESSION_COMMITTED")
 
@@ -286,45 +359,78 @@ class R3Model:
             "fence_tombstone",
         }:
             raise ContractViolation("atomic tuple schema mismatch")
+
         if commit.memory_identity.memory_id != self.memory_id:
             raise ContractViolation("memory identity mismatch")
+
         if commit.lifecycle_event.event_type != "SuppressionCommitted":
             raise ContractViolation("wrong lifecycle event")
-        if commit.lifecycle_event.operation_id != commit.idempotency_identity.operation_id:
+
+        if (
+            commit.lifecycle_event.operation_id
+            != commit.idempotency_identity.operation_id
+        ):
             raise ContractViolation("operation identity mismatch")
-        if commit.lifecycle_event.attempt_id != commit.idempotency_identity.attempt_id:
+
+        if (
+            commit.lifecycle_event.attempt_id
+            != commit.idempotency_identity.attempt_id
+        ):
             raise ContractViolation("attempt identity mismatch")
+
         if commit.suppression_proof.commit_id != commit.commit_id:
             raise ContractViolation("suppression proof commit mismatch")
+
         if not commit.suppression_proof.suppression_complete:
             raise ContractViolation("suppression proof incomplete")
+
         if not commit.fence_tombstone.committed:
             raise ContractViolation("Fence/Tombstone not committed")
 
+        if not commit.authorization_reference.nonce:
+            raise ContractViolation("authorization nonce missing")
+
     def forgotten_transition(
-        self, trigger: str,
+        self,
+        trigger: str,
         authorization_reference: AuthorizationReference | None = None,
         suppression_proof: SuppressionProof | None = None,
     ) -> None:
         if self.lifecycle == Lifecycle.FORGOTTEN:
             raise ContractViolation("Forgotten is terminal")
+
         if trigger != "SuppressionCommitted":
-            raise ContractViolation("only SuppressionCommitted triggers Forgotten")
+            raise ContractViolation(
+                "only SuppressionCommitted triggers Forgotten"
+            )
+
         if authorization_reference is None or suppression_proof is None:
-            raise ContractViolation("I authorization and D suppression proof required")
+            raise ContractViolation(
+                "I authorization and D suppression proof required"
+            )
+
         if self.atomic_commit is None:
             raise ContractViolation("no committed atomic tuple")
+
         committed = self.atomic_commit
+
         if authorization_reference != committed.authorization_reference:
             raise ContractViolation("authorization reference mismatch")
+
         if suppression_proof != committed.suppression_proof:
             raise ContractViolation("suppression proof mismatch")
+
         if authorization_reference.receipt_id == "":
             raise ContractViolation("authorization receipt missing")
+
         if suppression_proof.commit_id != committed.commit_id:
-            raise ContractViolation("authorization/suppression commit mismatch")
+            raise ContractViolation(
+                "authorization/suppression commit mismatch"
+            )
+
         if not suppression_proof.suppression_complete:
             raise ContractViolation("suppression is not complete")
+
         self.lifecycle = Lifecycle.FORGOTTEN
 
     def advance_fence(self, generation: int) -> None:
@@ -334,7 +440,8 @@ class R3Model:
 
     def read_allowed(self, observed_fence, online=True) -> bool:
         return bool(
-            online and observed_fence is not None
+            online
+            and observed_fence is not None
             and self.lifecycle != Lifecycle.FORGOTTEN
             and observed_fence >= self.fence_generation
         )
@@ -348,7 +455,7 @@ class R3Model:
         self.audit.append(f"DEPENDENCY:{dependency}")
 
     def recall_cache_fill(self, key: str, value: Any, observed_fence: int) -> None:
-        # A delayed fill must recheck Fence at the return/publication boundary.
+        # A delayed fill must recheck Fence at publication.
         if not self.read_allowed(observed_fence):
             raise ContractViolation("stale cache fill rejected")
         self.cache_entries[key] = (value, observed_fence)
@@ -363,12 +470,21 @@ class R3Model:
 
     def rebuild_index(self, snapshot_fence: int, identities: set) -> set:
         if snapshot_fence < self.fence_generation:
-            raise ContractViolation("stale index snapshot cannot be published")
+            raise ContractViolation(
+                "stale index snapshot cannot be published"
+            )
         self.index_snapshot_fence = snapshot_fence
-        return set(identities) if self.lifecycle != Lifecycle.FORGOTTEN else set()
+        return (
+            set(identities)
+            if self.lifecycle != Lifecycle.FORGOTTEN
+            else set()
+        )
 
     def offline_snapshot(self, context_version: int) -> dict:
-        return {"context_version": context_version, "fence": self.fence_generation}
+        return {
+            "context_version": context_version,
+            "fence": self.fence_generation,
+        }
 
     def queue_offline_delta(self, delta: dict) -> None:
         self.pending_delta.append(delta)
@@ -376,19 +492,28 @@ class R3Model:
     def reconnect(self, snapshot: dict, deltas: list[dict]) -> int:
         if snapshot["fence"] < self.fence_generation:
             raise ContractViolation("offline snapshot predates Fence")
+
         version = snapshot["context_version"]
         for delta in deltas:
             if delta["context_version"] <= version:
-                raise ContractViolation("stale or replayed ContextVersion")
+                raise ContractViolation(
+                    "stale or replayed ContextVersion"
+                )
             version = delta["context_version"]
-            if delta.get("operation") == "Forget" and delta.get("memory_id") == self.memory_id:
-                raise ContractViolation("offline Forget cannot reverse canonical Forget")
+            if (
+                delta.get("operation") == "Forget"
+                and delta.get("memory_id") == self.memory_id
+            ):
+                raise ContractViolation(
+                    "offline Forget cannot reverse canonical Forget"
+                )
+
         self.context_version = version
         return version
 
     def context_remove(self) -> None:
         self.audit.append("CONTEXT_REMOVE")
-        # Context removal is not canonical Forget and cannot change lifecycle.
+        # Context removal is not canonical Forget.
 
     def set_required_targets(self, targets) -> None:
         self.required_targets = set(targets)
@@ -400,14 +525,20 @@ class R3Model:
     def mark_target(self, target: str, result: str) -> None:
         if target not in self.required_targets:
             raise ContractViolation("target absent from sealed inventory")
+
         self.target_results[target] = result
-        if result in {"UNKNOWN", "UNSUPPORTED", "NOT_EVIDENCED", "FAILED"}:
+        if result in {
+            "UNKNOWN", "UNSUPPORTED", "NOT_EVIDENCED", "FAILED"
+        }:
             self.unknown_required_targets.add(target)
         else:
             self.unknown_required_targets.discard(target)
 
     def domain_complete(self) -> bool:
-        complete = bool(self.required_targets) and not self.unknown_required_targets
+        complete = (
+            bool(self.required_targets)
+            and not self.unknown_required_targets
+        )
         complete = complete and all(
             self.target_results.get(target) in {
                 "SUCCEEDED", "ERASED", "CLEANED"
@@ -475,7 +606,11 @@ class R3Model:
 
     def backup_coverage(self) -> str:
         manifest = self.backup_manifest
-        if not manifest or not manifest.get("authenticated") or not manifest.get("copies"):
+        if (
+            not manifest
+            or not manifest.get("authenticated")
+            or not manifest.get("copies")
+        ):
             return "UNKNOWN"
         return "KNOWN"
 
@@ -485,8 +620,13 @@ class R3Model:
         if restored_fence < self.fence_generation:
             self.audit.append("STALE_RESTORE_FENCE")
 
-    def reconcile_restore(self, applied_fence: int, all_later_forgets: bool) -> None:
-        if applied_fence < self.fence_generation or not all_later_forgets:
+    def reconcile_restore(
+        self, applied_fence: int, all_later_forgets: bool
+    ) -> None:
+        if (
+            applied_fence < self.fence_generation
+            or not all_later_forgets
+        ):
             raise ContractViolation("restore reconciliation incomplete")
         self.restore_reconciled = True
         self.restore_quarantined = False
@@ -494,21 +634,77 @@ class R3Model:
     def restore_query_allowed(self) -> bool:
         return self.restore_reconciled and not self.restore_quarantined
 
-    def revoke_race(self, ordering: str) -> str:
+    def revoke_race(
+        self,
+        ordering: str,
+        auth: Authorization | None = None,
+        now: int = 10,
+    ) -> str:
+        """Construct state transitions for the three revocation outcomes.
+
+        These are deterministic sequential interleavings, not a proof of
+        concurrent linearizability.
+        """
+        if auth is None:
+            auth = Authorization(nonce=f"race-{ordering}")
+
         if ordering == "REVOCATION_WON":
-            return "REVOCATION_WON"
+            if self.phase == Phase.REQUESTED:
+                self.phase = Phase.AUTHORIZED
+            self.revoke_authorization()
+            try:
+                self.commit_suppression(
+                    "race-op",
+                    auth=auth,
+                    now=now,
+                    current_epoch=self.permission_epoch,
+                )
+            except ContractViolation:
+                return "REVOCATION_WON"
+            raise ContractViolation("revocation unexpectedly lost")
+
         if ordering == "COMMIT_WON":
+            self.authorize_and_suppress(
+                auth,
+                now,
+                self.permission_epoch,
+                "race-op",
+            )
+            self.revoke_authorization()
             return "COMMIT_WON"
+
         if ordering == "UNKNOWN":
-            return "UNKNOWN"
+            if self.phase == Phase.REQUESTED:
+                self.phase = Phase.AUTHORIZED
+            self.revocation_state = "UNKNOWN"
+            self.audit.append("AUTHORIZATION_CURRENTNESS_UNKNOWN")
+            try:
+                self.commit_suppression(
+                    "race-op",
+                    auth=auth,
+                    now=now,
+                    current_epoch=self.permission_epoch,
+                )
+            except ContractViolation:
+                return "UNKNOWN"
+            raise ContractViolation("UNKNOWN authorization was committed")
+
         raise ContractViolation("unknown race ordering")
 
     def set_exception(self, exception: dict) -> None:
-        required = {"approver", "scope", "basis", "expires_at", "controls"}
+        required = {
+            "approver", "scope", "basis", "expires_at", "controls"
+        }
         if not required.issubset(exception):
             raise ContractViolation("exception integrity fields missing")
-        if not exception["approver"] or not exception["scope"] or not exception["basis"]:
-            raise ContractViolation("exception approval/scope/basis empty")
+        if (
+            not exception["approver"]
+            or not exception["scope"]
+            or not exception["basis"]
+        ):
+            raise ContractViolation(
+                "exception approval/scope/basis empty"
+            )
         if not exception["controls"]:
             raise ContractViolation("exception controls missing")
         self.exception = dict(exception)
