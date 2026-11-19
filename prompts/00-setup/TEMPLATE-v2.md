@@ -5,6 +5,8 @@
 - Status: PROPOSED — requires governance adoption
 - Applies to: new work prompts; existing executed prompts remain immutable
 
+**中文对应文档 / Chinese counterpart:** [TEMPLATE-v2.zh-CN.md](TEMPLATE-v2.zh-CN.md)
+
 > Seven core elements are seven sections, not seven metadata fields. This changes prompt organization, not authority, verification, bilingual, security, or acceptance gates.
 
 ## 1. Task identity / 任务标识

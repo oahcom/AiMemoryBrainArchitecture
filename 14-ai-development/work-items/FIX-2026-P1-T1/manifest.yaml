@@ -3,10 +3,21 @@ title: Simplify prompt engineering from 15 mandatory headings to 7 core sections
 accountable_owner: A
 task_class: DOC
 risk: R1
-status: IN_PROGRESS
+status: IN_PROGRESS — remediation after unauthorized integration of original PR #269
 repository: oahcom/AiMemoryBrainArchitecture
 issue: 268
-branch: fix/simplify-prompts
+branch: fix/FIX-2026-P1-T1-remediation
+original_branch: fix/simplify-prompts
+original_pr:
+  number: 269
+  state: CLOSED_MERGED
+  merge_commit: cd3f5d7191000f6414134ef235cac94f33ca87e8
+  governance_note: Original independent review comment 7000701362 required PR #269 to remain OPEN/DRAFT; current main contains the merge commit. This remediation does not retroactively authorize that merge.
+remediation_carrier:
+  pull_request: 270
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/270
+  remediation_pr_head_at_creation: 6c2b091283033426f8f91392f8d968c97b939443
+  final_review_head: PENDING_INDEPENDENT_EXACT_HEAD_REVIEW
 base:
   branch: main
   sha: c33a1bcd36f767c96f641d2a154f34d102ce2645
@@ -23,8 +34,12 @@ deliverables:
   - 14-ai-development/work-items/FIX-2026-P1-T1/manifest.yaml
   - prompts/README.md
   - prompts/00-setup/TEMPLATE-v2.md
+  - prompts/00-setup/TEMPLATE-v2.zh-CN.md
   - prompts/00-setup/MIGRATION-GUIDE.md
+  - prompts/00-setup/MIGRATION-GUIDE.zh-CN.md
   - prompts/00-setup/work-item-003-v2-migration-example.md
+  - 14-ai-development/prompt-authoring-standard.md
+  - docs/translation-status.md
 scope:
   - Define seven-section prompt structure.
   - Preserve mandatory governance requirements and existing v1 immutability.
@@ -36,43 +51,69 @@ constraints:
   - No merge or normative adoption is authorized by this work item.
   - No existing executed prompt is overwritten.
 verification:
-  evidence_commit: 63de25cd705158f075b1b39ac6f7c4d8cfaadfd1
+  prior_reviewed_head: a661f067946fca2362ad94c67946d8b7c3309c0b
+  remediation_code_head: 31ebc605bc7fd20a25966ebfcb4328852c93427b
+  evidence_commit: 31ebc605bc7fd20a25966ebfcb4328852c93427b
   evidence_refs:
     - PR comment 7000485649: length criterion PASS (4507 / 9807 = 45.96%); T2 snapshot provenance and source immutability evidence.
-    - PR comment 7000536236: independent R1 findings R1-F01 and R1-F02; exact prior reviewed Head.
-    - GitHub Actions Bilingual documentation gate run 44464233100: SUCCESS at the prior reviewed Head.
+    - PR comment 7000536236: earlier independent R1 findings R1-F01 and R1-F02.
+    - PR comment 7000593000: prior remediation evidence/read-back record; registered here because the previous manifest omitted it.
+    - PR comment 7000701362: exact-Head independent R1 disposition and complete R1-F02 through R1-F05 matrix.
+    - PR #270 comment 7000862813: exact remediation PR Head read-back and R1-F02 through R1-F05 implementation evidence.
+    - Issue #268 comment 7000871110: follow-up carrier and governance-state notification.
+    - GitHub Actions Bilingual documentation gate run 44464233100: SUCCESS at the earlier evidence commit only; it does not cover this remediation Head.
   checks:
     seven_section_template_structure:
       status: PASS
       evidence: PR description verification record at evidence_commit.
     pilot_length_under_50_percent:
       status: PASS
-      evidence: PR comment 7000485649; 4507 / 9807 = 45.96%.
+      numerator_unicode_code_points: 4879
+      denominator_unicode_code_points: 9807
+      ratio_percent: 49.75
+      evidence: Recounted from the exact remediation code Head 31ebc605bc7fd20a25966ebfcb4328852c93427b; source snapshot remains pinned to blob a274aa761074683b0fd6a7aadcfe917b140fc227. Earlier 4881 / 9807 = 49.77% applied before replacing the two literal escaped newline sequences; corrected exact example length is 4879.
     t2_source_identity_and_blob:
       status: PASS
       evidence: PR comment 7000485649; source blob a274aa761074683b0fd6a7aadcfe917b140fc227.
     repository_t1_prompt_v1_distinction:
       status: PASS
       evidence: MIGRATION-GUIDE.md section 5 and migration example header; T1 prompt-v1 blob 71332a2b8f412d1bb58d4d53bdb25880dc2f1431 is explicitly identified as distinct and not used.
-    readback_all_seven_changed_files:
+    readback_all_changed_files:
       status: PASS
-      evidence: PR description records GitHub read-back of all seven changed files at evidence_commit; final remediation Head read-back is recorded in the remediation evidence comment.
+      evidence: GitHub read-back at remediation_code_head 31ebc605bc7fd20a25966ebfcb4328852c93427b for all remediation paths listed in the PR diff; final manifest update is a separate subsequent commit.
+    bilingual_pair_structure:
+      status: PASS
+      evidence: Implementer read-back at remediation_code_head; template 7/7 numbered sections in EN and zh-CN; migration guide 6/6 numbered sections in EN and zh-CN; matching IDs/version/status and reciprocal links. Self-check only.
+    bilingual_semantic_parity:
+      status: PENDING_INDEPENDENT_REVIEW
+      reason: Implementer self-check is not independent semantic-parity approval.
+    seven_vs_twelve_normative_mapping:
+      status: PASS
+      evidence: AI-STD-001 §5.1 and AI-PROMPT-STD-001 §4 updated at remediation_code_head; all twelve mandatory content items mapped into seven structural sections with explicit precedence and NOT READY escalation rule.
+    literal_escaped_newlines:
+      status: PASS
+      evidence: Exact example read-back at remediation_code_head contains no literal backslash-n sequences; the two affected bullets now use actual Markdown line breaks.
+    gov_doc_001_structural_link_checks:
+      status: PASS
+      run_id: 44467148120
+      tested_head: 623c914ee64a2934130feba17c40454110610532
+      evidence: GitHub Actions Bilingual documentation gate run 44467148120 / Run #541; GOV-DOC-001 structural checks step succeeded. Structural gate only; semantic parity remains pending.
     bilingual_gate:
       status: PASS
-      evidence: GitHub Actions run 44464233100 at evidence_commit; this does not establish structural/link or semantic parity.
+      run_id: 44467148120
+      tested_head: 623c914ee64a2934130feba17c40454110610532
+      prior_failed_run_id: 44466879200
+      prior_failed_reason: Initial PR body omitted required BILINGUAL-MANIFEST: COMPLETE declaration; PR body was corrected and the exact-Head gate rerun succeeded.
     repository_automated_tests:
       status: NOT_RUN
       reason: No repository automated test suite was run; no PASS is claimed.
-    gov_doc_001_structural_link_checks:
-      status: NOT_RUN
-      reason: Structural/link checks and semantic parity review were not run; the bilingual gate result does not substitute for them.
     human_prompt_writing_time_under_2h:
       status: NOT_RUN
       reason: Requires a timed human writing trial; no such trial was performed.
 review:
   level: R1
   independent_reviewer: PENDING
-  status: NOT_STARTED
+  status: PENDING_NEW_EXACT_HEAD_REVIEW
 acceptance:
   authority: A
   status: PENDING

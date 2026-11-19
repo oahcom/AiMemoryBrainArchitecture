@@ -4,6 +4,8 @@
 - Version: 1.0
 - Status: PROPOSED — requires governance adoption
 
+**中文对应文档 / Chinese counterpart:** [MIGRATION-GUIDE.zh-CN.md](MIGRATION-GUIDE.zh-CN.md)
+
 ## 1. Migration policy / 迁移政策
 v2 compresses the prompt structure from 15 mandatory headings to seven core sections. It does not delete applicable governance obligations, evidence, approvals, or historical records.
 

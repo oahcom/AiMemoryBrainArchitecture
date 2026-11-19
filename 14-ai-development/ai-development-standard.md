@@ -128,9 +128,9 @@ Start from the [canonical Prompt Library](../prompts/README.md). Every AI sessio
 
 ### 5.1 Seven core elements / 七项核心要素
 
-Every new task prompt MUST use the following seven core sections. Seven means seven structural sections, not seven fields. Required detail belongs inside the relevant section; the prompt MUST remain concise and MUST NOT duplicate global policy text.
+Every new task prompt MUST use the following seven core sections. Seven means seven structural sections, not seven fields. Required detail belongs inside the relevant section; the prompt MUST remain concise and MUST NOT duplicate global policy text. AI-PROMPT-STD-001 §4 retains twelve mandatory content requirements, mapped into these seven sections; those requirements are content obligations, not additional headings. AI-STD-001 §5.1 governs section count/names, while AI-PROMPT-STD-001 §4 governs the twelve content obligations. Both MUST be satisfied. If any requirement cannot be represented without loss, the prompt is NOT READY and the conflict MUST be escalated; authors MUST NOT add extra mandatory top-level headings as a workaround.
 
-每个新任务提示词 MUST 使用以下七个核心章节。七项指七个结构章节，而非七个字段。必要细节应放入对应章节；提示词应保持简洁，不得重复粘贴全局规范全文。
+每个新任务提示词 MUST 使用以下七个核心章节。七项指七个结构章节，而非七个字段。必要细节应放入对应章节；提示词应保持简洁，不得重复粘贴全局规范全文。 AI-PROMPT-STD-001 §4 的十二项强制要求继续有效，并映射到这七个章节中；这些要求属于内容义务，不是额外标题。AI-STD-001 §5.1 决定章节数量和名称，AI-PROMPT-STD-001 §4 决定十二项内容义务，两者必须同时满足。若任何要求无法在不丢失含义的情况下映射，提示词即为 NOT READY，必须升级处理；不得通过增加额外强制顶层标题规避冲突。
 
 1. **Task identity / 任务标识:** Work Item ID; Prompt ID/version; accountable Owner; implementer and independent reviewer roles; repository and branch; task class/risk; owning Issue/PR carrier.
 2. **Goal and boundaries / 目标与边界:** What, Why, observable objective, and explicit Out of Scope.
