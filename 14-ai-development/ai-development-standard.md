@@ -147,6 +147,7 @@ MUST rules:
 7. Evidence binding protocol v3 is enforced for real at every level (commit-object subject_head, subject-tree containment, working-tree/blob equality); Level 1 additionally anchors a sidecar digest in the commit message. A VERIFIED authenticity claim without a verification record is BLOCKED.
 8. Audit fields `assessed_by`, `assessed_at`, `rationale` and `base_head` are mandatory and machine-checked.
 9. The checker `scripts/governance/evidence/check-evidence-tiering.py` MUST be run for declared evidence, and its per-scenario records — not its exit code alone — are the acceptance evidence.
+10. The work-item manifest `evidence_tiering` block and the machine-checked `evidence-declaration.yaml` (located via `declaration_path`) MUST stay in sync on `change_class`, `review_level`, `evidence_level`, `subject_head`, `base_head`, `classification_confirmed_by` / `classification_record` and the three `downgrade_*` fields; a mismatch is a declaration defect. Governance confirmation records and the declared `repository` identity are verified as Git objects, not trusted strings.
 
 证据深度由变更风险决定，独立于审查级别（R0–R3）与十二状态/六阶段生命周期。等级只决定哪些证据字段为必填，从不构成任何门禁已通过的证据，且 MUST NOT 降低或替代审查要求。规范细节见 [evidence-tiering-policy.md](evidence-tiering-policy.md)（状态 PROPOSED）。
 
@@ -167,6 +168,7 @@ MUST 规则：
 7. 证据绑定协议 v3 在所有等级均真实执行（commit 对象 subject_head、subject tree 包含、工作树/blob 一致）；Level 1 另须在 commit message 中锚定 sidecar 摘要。声称 VERIFIED 但无验证记录者 BLOCKED。
 8. 审计字段 `assessed_by`、`assessed_at`、`rationale`、`base_head` 强制且经机器校验。
 9. 已声明证据 MUST 运行检查器 `scripts/governance/evidence/check-evidence-tiering.py`，且以其逐项记录（而非仅退出码）作为验收证据。
+10. 工作项 manifest 的 `evidence_tiering` 块与机器校验的 `evidence-declaration.yaml`（经 `declaration_path` 定位）MUST 在 `change_class`、`review_level`、`evidence_level`、`subject_head`、`base_head`、`classification_confirmed_by` / `classification_record` 及三个 `downgrade_*` 字段上保持一致；不一致即声明缺陷。治理确认记录与声明的 `repository` 身份按 Git 对象校验，不得作为可信任字符串。
 
 ### 4.3 Orthogonal markers and independent lifecycles / 正交标记与独立生命周期
 

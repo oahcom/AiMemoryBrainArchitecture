@@ -49,6 +49,7 @@
 | 字段 | 含义 | 机器强制 |
 |---|---|---|
 | `change_class` | 风险类别（枚举，见 §2） | 是 |
+| `repository` | 声明所属仓库（owner/name），须与克隆的 origin 远程一致 | 是（不一致/无法核验即 BLOCKED） |
 | `review_level` | 审查级别 R0–R3 | 是 |
 | `evidence_level` | 1/2/3 | 是 |
 | `assessed_by` | 判定人（Owner/会话标识） | 是（缺失即 BLOCKED） |
@@ -57,10 +58,10 @@
 | `base_head` | 判定所依据的基线 commit（须为 subject_head 祖先） | 是（格式/祖先关系均校验） |
 | `classification_basis` | 分类依据（为何该 change_class 成立） | 是（缺失即 BLOCKED） |
 | `classification_confirmed_by` | 可降级类别的独立确认者（≠ assessed_by） | 可降级类别强制 |
-| `classification_record` | 分类确认记录（须在 subject tree 中） | 可降级类别强制 |
+| `classification_record` | 分类确认记录（须在 subject tree 中，并校验工作树/blob 一致） | 可降级类别强制 |
 | `downgrade_justification` | 仅 R2→Level 3 时必填 | 该场景强制 |
 | `downgrade_confirmed_by` | 降级确认者（≠ assessed_by） | 该场景强制 |
-| `downgrade_confirmation_record` | 降级确认记录（须在 subject tree 中） | 该场景强制 |
+| `downgrade_confirmation_record` | 降级确认记录（须在 subject tree 中，并校验工作树/blob 一致） | 该场景强制 |
 | `escalation_target` | 升级对象（分类不确定或需 Owner 决策时） | 否（记录用） |
 
 缺少 `assessed_by` / `assessed_at` / `rationale` / `base_head` / `classification_basis` 中任一项的判定不得作为 Level 依据，检查器直接 BLOCKED。
@@ -80,6 +81,8 @@
 
 4. **source_authenticity 边界不变**：内容完整性不等于来源真实性；声称 VERIFIED 必须附 `authenticity.verification_record`，否则 BLOCKED。
 5. Level 1 的 `sidecar_anchor` 与 v3 锚点协议一致：锚点为 `sha256:<64 hex>`，等于 subject tree 中 sidecar 字节的 SHA-256，且最近触碰该 sidecar 的 commit message MUST 携带该摘要。
+6. **治理确认记录同样按 v3 校验**：`classification_record` 与 `downgrade_confirmation_record` MUST 存在于 subject tree，且工作树字节与 subject blob 一致。填写不存在的路径即 BLOCKED（`CE_CLASS_RECORD_NOT_IN_SUBJECT` / `CE_DOWNGRADE_RECORD_NOT_IN_SUBJECT`）；记录不是可任意填写的字符串。
+7. **仓库身份**：声明 MUST 包含 `repository`（owner/name），且与克隆的 `origin` 远程一致；远程缺失或不是 GitHub 地址（`CE_REPO_IDENTITY_UNVERIFIED`）、声明与远程不符（`CE_REPO_IDENTITY_MISMATCH`）均 BLOCKED。这界定了"证据在哪个仓库被验证"的信任边界，但不证明来源真实性。
 
 ## 6. 检查器
 
@@ -97,7 +100,8 @@
 | 6 | SHA 格式或长度错误 | `CE_BAD_SHA` / `CE_BAD_SUBJECT` / `CE_BAD_BASE_HEAD` / `CE_BASE_NOT_ANCESTOR` |
 | 7 | NOT_VERIFIED 被静默放行 / VERIFIED 无据 | `CE_AUTH_NOT_ACK` / `CE_UNFOUNDED_VERIFIED` / `CE_NO_AUTHENTICITY` |
 | 8 | 输入不可解析、无仓库或内部异常 | `CE_UNPARSABLE` / `CE_NO_REPO` / `CE_INTERNAL_ERROR` / `CE_INPUT_MISSING` |
-| 附 | 分类与降级信任边界 | `CE_NO_CLASSIFICATION_BASIS` / `CE_CLASS_UNCONFIRMED` / `CE_CLASS_SELF_CONFIRMED` / `CE_NO_CLASSIFICATION_RECORD` / `CE_R2_DOWNGRADE_UNCONFIRMED` / `CE_R2_DOWNGRADE_SELF_CONFIRMED` / `CE_R2_DOWNGRADE_NO_RECORD` |
+| 附 | 分类与降级信任边界 | `CE_NO_CLASSIFICATION_BASIS` / `CE_CLASS_UNCONFIRMED` / `CE_CLASS_SELF_CONFIRMED` / `CE_NO_CLASSIFICATION_RECORD` / `CE_CLASS_RECORD_NOT_IN_SUBJECT` / `CE_CLASS_RECORD_MISSING_WORKTREE` / `CE_CLASS_RECORD_BLOB_MISMATCH` / `CE_R2_DOWNGRADE_UNCONFIRMED` / `CE_R2_DOWNGRADE_SELF_CONFIRMED` / `CE_R2_DOWNGRADE_NO_RECORD` / `CE_DOWNGRADE_RECORD_NOT_IN_SUBJECT` / `CE_DOWNGRADE_RECORD_MISSING_WORKTREE` / `CE_DOWNGRADE_RECORD_BLOB_MISMATCH` |
+| 附 | 仓库身份 | `CE_NO_REPOSITORY` / `CE_REPO_IDENTITY_UNVERIFIED` / `CE_REPO_IDENTITY_MISMATCH` |
 | 附 | 审计字段缺失 | `CE_NO_AUDIT_FIELD` / `CE_NO_REVIEW_LEVEL` / `CE_BAD_REVIEW_LEVEL` |
 
 检查器运行 MUST 具备可用的 Git 仓库（自动从声明文件所在目录向上发现，或由 `--repo` 指定）；无仓库即 `CE_NO_REPO` → BLOCKED，不得以"无法验证"为由放行。

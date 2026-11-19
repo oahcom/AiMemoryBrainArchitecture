@@ -164,6 +164,38 @@ def discover_repo(start):
         probe = parent
 
 
+def repo_slug(repo):
+    """Return owner/name from the origin remote, or None if unavailable."""
+    url = git(repo, "config", "--get", "remote.origin.url").stdout.strip()
+    if not url:
+        return None
+    match = re.search(r"github\.com[:/]+([^/]+)/([^/\s]+?)(?:\.git)?$", url)
+    if not match:
+        return None
+    return "%s/%s" % (match.group(1), match.group(2))
+
+
+def verify_path(repo, subject, path, label, block, codes):
+    """Verify a declared path against the subject tree, worktree and blob."""
+    not_in_subject, missing_worktree, blob_mismatch = codes
+    if not SHA40.match(subject or ""):
+        return
+    in_tree = git(repo, "cat-file", "-e", "%s:%s" % (subject, path))
+    if in_tree.returncode:
+        block(not_in_subject, "%s=%s is not in the subject tree of %s"
+              % (label, path, subject[:12]))
+        return
+    worktree_path = os.path.join(repo, path)
+    if not os.path.isfile(worktree_path):
+        block(missing_worktree, "%s=%s is not present in the working tree" % (label, path))
+        return
+    worktree_blob = git(repo, "hash-object", worktree_path)
+    subject_blob = git(repo, "rev-parse", "%s:%s" % (subject, path))
+    if (worktree_blob.returncode or subject_blob.returncode
+            or worktree_blob.stdout.strip() != subject_blob.stdout.strip()):
+        block(blob_mismatch, "%s working-tree bytes differ from subject blob" % label)
+
+
 def check(decl, repo):
     reasons = []
     flat = flatten(decl)
@@ -289,6 +321,20 @@ def check(decl, repo):
                     block("CE_BASE_NOT_ANCESTOR",
                           "base_head %s is not an ancestor of subject_head" % base_head)
 
+    # Repository identity: the declaration MUST name the repository it was
+    # assessed against, and that name MUST match the clone's origin remote.
+    declared_repo = flat.get("repository", "").strip()
+    if not declared_repo:
+        block("CE_NO_REPOSITORY", "repository (owner/name) is required")
+    else:
+        slug = repo_slug(repo)
+        if not slug:
+            block("CE_REPO_IDENTITY_UNVERIFIED",
+                  "origin remote is missing or not a GitHub URL; cannot verify %s" % declared_repo)
+        elif slug.lower() != declared_repo.lower():
+            block("CE_REPO_IDENTITY_MISMATCH",
+                  "declared repository %s does not match origin %s" % (declared_repo, slug))
+
     protocol = flat.get("binding.protocol", "").strip().lower()
     if not protocol:
         block("CE_NO_BINDING_PROTOCOL", "binding.protocol is required at every level (v3)")
@@ -296,30 +342,33 @@ def check(decl, repo):
         block("CE_BAD_BINDING_PROTOCOL", "binding.protocol=%r does not declare v3" % protocol)
 
     # Every declared evidence path must exist in the subject tree and the
-    # working-tree bytes must equal the subject blob.
+    # working-tree bytes must equal the subject blob. Governance confirmation
+    # records are held to the same standard: a path string is not evidence.
     evidence_paths = dict((k.split(".", 1)[1], v) for k, v in flat.items()
                           if k.startswith("evidence.") and v)
     if level and not evidence_paths:
         block("CE_NO_EVIDENCE_PATHS", "no evidence paths declared for Level %s" % level)
     for name, path in sorted(evidence_paths.items()):
-        if not SHA40.match(subject_head):
-            break
-        in_tree = git(repo, "cat-file", "-e", "%s:%s" % (subject_head, path))
-        if in_tree.returncode:
-            block("CE_EVIDENCE_NOT_IN_SUBJECT",
-                  "evidence.%s=%s is not in the subject tree of %s" % (name, path, subject_head[:12]))
-            continue
-        worktree_path = os.path.join(repo, path)
-        if not os.path.isfile(worktree_path):
-            block("CE_EVIDENCE_MISSING_WORKTREE",
-                  "evidence.%s=%s is not present in the working tree" % (name, path))
-            continue
-        worktree_blob = git(repo, "hash-object", worktree_path)
-        subject_blob = git(repo, "rev-parse", "%s:%s" % (subject_head, path))
-        if (worktree_blob.returncode or subject_blob.returncode
-                or worktree_blob.stdout.strip() != subject_blob.stdout.strip()):
-            block("CE_BLOB_MISMATCH",
-                  "evidence.%s working-tree bytes differ from subject blob" % name)
+        verify_path(repo, subject_head, path, "evidence.%s" % name, block,
+                    ("CE_EVIDENCE_NOT_IN_SUBJECT", "CE_EVIDENCE_MISSING_WORKTREE",
+                     "CE_BLOB_MISMATCH"))
+
+    for field, missing_code, codes in (
+        ("classification_record", "CE_NO_CLASSIFICATION_RECORD",
+         ("CE_CLASS_RECORD_NOT_IN_SUBJECT", "CE_CLASS_RECORD_MISSING_WORKTREE",
+          "CE_CLASS_RECORD_BLOB_MISMATCH")),
+        ("downgrade_confirmation_record", "CE_R2_DOWNGRADE_NO_RECORD",
+         ("CE_DOWNGRADE_RECORD_NOT_IN_SUBJECT", "CE_DOWNGRADE_RECORD_MISSING_WORKTREE",
+          "CE_DOWNGRADE_RECORD_BLOB_MISMATCH")),
+    ):
+        record = flat.get(field, "").strip()
+        if record:
+            verify_path(repo, subject_head, record, field, block, codes)
+        elif field == "classification_record" and change_class in DOWNGRADE_CLASSES:
+            block(missing_code, "%s requires %s anchored in the subject tree"
+                  % (change_class, field))
+        elif field == "downgrade_confirmation_record" and review_level == "R2" and level == "3":
+            block(missing_code, "R2 -> Level 3 requires %s anchored in the subject tree" % field)
 
     # Level 1 additionally anchors a sidecar digests to the commit message.
     if level == "1":

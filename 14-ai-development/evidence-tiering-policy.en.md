@@ -49,6 +49,7 @@ Every evidence declaration MUST record the following audit fields for independen
 | Field | Meaning | Machine-enforced |
 |---|---|---|
 | `change_class` | Risk class (enumeration per §2) | Yes |
+| `repository` | Repository the declaration belongs to (owner/name); MUST match the clone's origin remote | Yes (mismatch/unverifiable → BLOCKED) |
 | `review_level` | Review level R0–R3 | Yes |
 | `evidence_level` | 1/2/3 | Yes |
 | `assessed_by` | Who assessed (Owner/session identifier) | Yes (missing → BLOCKED) |
@@ -57,10 +58,10 @@ Every evidence declaration MUST record the following audit fields for independen
 | `base_head` | Baseline commit the assessment relies on (must be an ancestor of subject_head) | Yes (format and ancestry both checked) |
 | `classification_basis` | Why this change_class applies | Yes (missing → BLOCKED) |
 | `classification_confirmed_by` | Independent confirmer for downgrade-capable classes (≠ assessed_by) | Mandatory for downgrade-capable classes |
-| `classification_record` | Classification confirmation record (must exist in the subject tree) | Mandatory for downgrade-capable classes |
+| `classification_record` | Classification confirmation record (must exist in the subject tree, with worktree/blob equality verified) | Mandatory for downgrade-capable classes |
 | `downgrade_justification` | Required only for R2 → Level 3 | Mandatory in that case |
 | `downgrade_confirmed_by` | Downgrade confirmer (≠ assessed_by) | Mandatory in that case |
-| `downgrade_confirmation_record` | Downgrade confirmation record (must exist in the subject tree) | Mandatory in that case |
+| `downgrade_confirmation_record` | Downgrade confirmation record (must exist in the subject tree, with worktree/blob equality verified) | Mandatory in that case |
 | `escalation_target` | Escalation target when classification is uncertain or needs an Owner decision | No (record only) |
 
 An assessment missing any of `assessed_by`, `assessed_at`, `rationale`, `base_head` or `classification_basis` MUST NOT be used as a Level basis; the checker returns BLOCKED.
@@ -80,6 +81,8 @@ An assessment missing any of `assessed_by`, `assessed_at`, `rationale`, `base_he
 
 4. **The source_authenticity boundary is unchanged:** content integrity is not source authenticity. A VERIFIED claim requires `authenticity.verification_record`; otherwise BLOCKED.
 5. Level 1's `sidecar_anchor` follows the v3 anchoring protocol: the anchor is `sha256:<64 hex>`, equal to the SHA-256 of the sidecar bytes in the subject tree, and the commit message of the commit that most recently touched that sidecar MUST carry that digest.
+6. **Governance confirmation records are verified the same way:** `classification_record` and `downgrade_confirmation_record` MUST exist in the subject tree with working-tree bytes equal to the subject blob. A non-existent path is BLOCKED (`CE_CLASS_RECORD_NOT_IN_SUBJECT` / `CE_DOWNGRADE_RECORD_NOT_IN_SUBJECT`); a record is never an arbitrary string.
+7. **Repository identity:** the declaration MUST carry `repository` (owner/name) matching the clone's `origin` remote. A missing or non-GitHub remote (`CE_REPO_IDENTITY_UNVERIFIED`) or a declaration that disagrees with the remote (`CE_REPO_IDENTITY_MISMATCH`) is BLOCKED. This defines the trust boundary for *where* evidence is verified; it does not establish source authenticity.
 
 ## 6. Checker
 
@@ -97,7 +100,8 @@ BLOCKED scenarios that MUST each be judged individually:
 | 6 | SHA format or length invalid | `CE_BAD_SHA` / `CE_BAD_SUBJECT` / `CE_BAD_BASE_HEAD` / `CE_BASE_NOT_ANCESTOR` |
 | 7 | NOT_VERIFIED passed silently / VERIFIED unsupported | `CE_AUTH_NOT_ACK` / `CE_UNFOUNDED_VERIFIED` / `CE_NO_AUTHENTICITY` |
 | 8 | Unparseable input, no repository, or internal error | `CE_UNPARSABLE` / `CE_NO_REPO` / `CE_INTERNAL_ERROR` / `CE_INPUT_MISSING` |
-| Add. | Classification and downgrade trust boundary | `CE_NO_CLASSIFICATION_BASIS` / `CE_CLASS_UNCONFIRMED` / `CE_CLASS_SELF_CONFIRMED` / `CE_NO_CLASSIFICATION_RECORD` / `CE_R2_DOWNGRADE_UNCONFIRMED` / `CE_R2_DOWNGRADE_SELF_CONFIRMED` / `CE_R2_DOWNGRADE_NO_RECORD` |
+| Add. | Classification and downgrade trust boundary | `CE_NO_CLASSIFICATION_BASIS` / `CE_CLASS_UNCONFIRMED` / `CE_CLASS_SELF_CONFIRMED` / `CE_NO_CLASSIFICATION_RECORD` / `CE_CLASS_RECORD_NOT_IN_SUBJECT` / `CE_CLASS_RECORD_MISSING_WORKTREE` / `CE_CLASS_RECORD_BLOB_MISMATCH` / `CE_R2_DOWNGRADE_UNCONFIRMED` / `CE_R2_DOWNGRADE_SELF_CONFIRMED` / `CE_R2_DOWNGRADE_NO_RECORD` / `CE_DOWNGRADE_RECORD_NOT_IN_SUBJECT` / `CE_DOWNGRADE_RECORD_MISSING_WORKTREE` / `CE_DOWNGRADE_RECORD_BLOB_MISMATCH` |
+| Add. | Repository identity | `CE_NO_REPOSITORY` / `CE_REPO_IDENTITY_UNVERIFIED` / `CE_REPO_IDENTITY_MISMATCH` |
 | Add. | Missing audit fields | `CE_NO_AUDIT_FIELD` / `CE_NO_REVIEW_LEVEL` / `CE_BAD_REVIEW_LEVEL` |
 
 The checker MUST run with a usable Git repository (discovered upward from the declaration's directory, or given via `--repo`); without a repository the result is `CE_NO_REPO` → BLOCKED. "Unable to verify" is never a reason to pass.

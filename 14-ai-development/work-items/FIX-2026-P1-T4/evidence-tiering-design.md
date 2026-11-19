@@ -81,3 +81,13 @@
 | H-04 测试无真实 Git | 全部用例改为真实临时 Git 仓库 fixture（真实 commit/tree/blob/sidecar 与 commit message 锚定） |
 | M-01 模板字段不全 | manifest `evidence_tiering` 增加 `review_level`、分类与降级确认字段、`declaration_path`，并写明与声明的同步要求 |
 | M-02 Level 3 歧义 | 政策 §5 增加「v3 校验范围按等级」表：protocol/tree/blob 全等级强制，sidecar 仅 Level 1；中英文同步 |
+
+## 8. 第二轮复审（R2）修复映射
+
+| R2 缺陷 | 修复 |
+|---|---|
+| 降级确认记录无 Git 绑定 | `downgrade_confirmation_record` 纳入 subject tree / 工作树 / blob 三项校验（`CE_DOWNGRADE_RECORD_NOT_IN_SUBJECT` / `CE_DOWNGRADE_RECORD_MISSING_WORKTREE` / `CE_DOWNGRADE_RECORD_BLOB_MISMATCH`）；缺失值 `CE_R2_DOWNGRADE_NO_RECORD` |
+| 分类确认记录无 Git 绑定 | `classification_record` 同样三项校验（`CE_CLASS_RECORD_*`）；缺失值 `CE_NO_CLASSIFICATION_RECORD` |
+| `--repo` 仓库身份未绑定 | 声明新增 `repository` 字段，与 `origin` 远程对比：不符 `CE_REPO_IDENTITY_MISMATCH`、远程缺失/非 GitHub `CE_REPO_IDENTITY_UNVERIFIED`、未声明 `CE_NO_REPOSITORY` |
+| 模板同步契约不完整 | 同步清单扩展至 `classification_confirmed_by` / `classification_record` / 三个 `downgrade_*` 字段；AI-STD-001 §4.2.1 新增规则 10（同步义务 + `declaration_path` + 记录按 Git 校验） |
+| 测试缺口 | 新增 11 项：分类/降级记录的伪造路径与缺失值、空白确认者、L3 三项绑定负向、`CE_EVIDENCE_MISSING_WORKTREE`、仓库身份不符与不可核验 |
