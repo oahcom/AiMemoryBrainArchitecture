@@ -2031,6 +2031,61 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
         self.assertEqual(fresh.outbox, {})
         self.assertEqual(fresh.retry_audit, [])
 
+    def test_FSTOR_16_reference_fields_must_match_credential(self):
+        """F-STOR-20261119-01 / F-OI-04 residual: projection consistency.
+
+        The scalar fields of AuthorizationReference (receipt_id, nonce,
+        permission_epoch) are copies of the embedded immutable credential.
+        A record whose copies disagree with its credential must not validate:
+        cross-field equality is now enforced in _validate_atomic_commit().
+        """
+        from dataclasses import replace
+
+        operation_id = "foi-ref-consistency-op"
+        request_hash = "foi-ref-consistency-hash"
+
+        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m.phase = Phase.AUTHORIZED
+        first = m.commit_suppression(
+            operation_id,
+            "foi-ref-consistency-attempt",
+            "foi-ref-consistency-key",
+            request_hash,
+            auth=auth(nonce="foi-ref-consistency-nonce",
+                      operation_id=operation_id,
+                      request_hash=request_hash),
+        )
+        self.assertIsNotNone(first)
+        # The healthy record validates against its own projections.
+        m._validate_atomic_commit(first, published=True, live_state=False)
+
+        original = first.authorization_reference
+        cred = original.receipt
+        self.assertIsNotNone(cred)
+
+        def assert_inconsistent(label, bad_reference):
+            bad_commit = replace(first, authorization_reference=bad_reference)
+            with self.subTest(case=label):
+                with self.assertRaises(ContractViolation):
+                    m._validate_atomic_commit(
+                        bad_commit, published=True, live_state=False
+                    )
+
+        assert_inconsistent(
+            "receipt_id disagrees with credential",
+            replace(original, receipt_id="not-the-credential-receipt"),
+        )
+        assert_inconsistent(
+            "nonce disagrees with credential",
+            replace(original, nonce="not-the-credential-nonce"),
+        )
+        assert_inconsistent(
+            "credential epoch disagrees with reference",
+            replace(original,
+                    receipt=replace(cred,
+                                    permission_epoch=cred.permission_epoch + 1)),
+        )
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

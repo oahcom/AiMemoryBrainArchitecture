@@ -539,6 +539,37 @@ class R3Model:
         if not authorization_reference.receipt_id:
             raise ContractViolation("authorization receipt missing")
 
+        # F-OI-04 / Owner I: the reference stores receipt_id and nonce as
+        # copied fields next to the full credential. Nothing above forces
+        # those projections to agree with the credential they claim to
+        # describe, so a record could carry a credential for one receipt
+        # and advertise another. Make the relation a checked invariant.
+        if authorization_reference.receipt is None:
+            raise ContractViolation(
+                "authorization reference is missing its receipt credential"
+            )
+
+        if (
+            authorization_reference.receipt.receipt_id
+            != authorization_reference.receipt_id
+        ):
+            raise ContractViolation(
+                "authorization receipt id does not match its credential"
+            )
+
+        if authorization_reference.receipt.nonce != authorization_reference.nonce:
+            raise ContractViolation(
+                "authorization nonce does not match its credential"
+            )
+
+        if (
+            authorization_reference.receipt.permission_epoch
+            != authorization_reference.permission_epoch
+        ):
+            raise ContractViolation(
+                "authorization PermissionEpoch does not match its credential"
+            )
+
         if suppression_proof.commit_id != committed.commit_id:
             raise ContractViolation(
                 "authorization/suppression commit mismatch"
@@ -936,6 +967,25 @@ class R3Model:
             raise ContractViolation(
                 "AuthorizationReference PermissionEpoch mismatch"
             )
+
+        # F-STOR-20261119-01 / F-OI-04 residual: the scalar projection
+        # fields must agree with the embedded immutable credential. A
+        # record whose receipt_id / nonce / epoch were copied from a
+        # different credential must not validate.
+        if authorization.receipt is not None:
+            cred = authorization.receipt
+            if cred.receipt_id != authorization.receipt_id:
+                raise ContractViolation(
+                    "authorization receipt_id does not match credential"
+                )
+            if cred.nonce != authorization.nonce:
+                raise ContractViolation(
+                    "authorization nonce does not match credential"
+                )
+            if cred.permission_epoch != authorization.permission_epoch:
+                raise ContractViolation(
+                    "authorization epoch does not match credential"
+                )
 
         if (
             expected_nonce is not None
