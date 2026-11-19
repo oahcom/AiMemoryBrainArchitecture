@@ -11,6 +11,38 @@
 - Report Version: v2.2 / 文档版本：v2.2
 - Revision Date: 2026-11-19 / 修订日期：2026-11-19
 
+## 0. Record boundary and snapshot policy / 记录边界与快照口径
+
+### EN
+
+This report is a point-in-time governance record, not a live dashboard. Two classes of statement are separated and must not be conflated.
+
+- **Bound assets (dated snapshots).** Repository HEADs, tree and blob SHAs, PR state (`OPEN` / `merged`), ahead/behind counts, workflow run identifiers, and file manifests are bound to the moment they were read. Each such line carries its own as-of boundary. A later commit does not falsify a bound snapshot, and a bound snapshot must not be read as a current assertion.
+- **Live assertions (maintained state).** Only finding states (`CLOSED` / `PARTIAL` / `NOT_VERIFIED`), normative statements, and outstanding-blocker entries are maintained. When one changes, it is changed in a new revision with a revision note.
+
+Maintenance rule: do not rewrite a bound snapshot in order to chase a moving HEAD; append a new dated snapshot instead. Only live assertions may be edited in place, and every such edit must be recorded in the revision note. This rule exists because the opposite practice is unsatisfiable: any commit changes `main`, so a report that maintains HEAD values as current assertions is stale the moment it is merged.
+
+**Re-open trigger.** A closure recorded in this report is not permanent and is not self-validating. If a maintained assertion is later shown to be false — a snapshot marked superseded is cited as current, a corrections section drifts from the objects it describes, or a newly introduced line repeats the same defect class — the affected finding is set back to `OPEN` in a new revision, and the revision note names the assertion that failed. The applicable test for this mechanism is therefore not whether an old bound snapshot is still accurate, but whether a newly introduced stale live assertion is re-opened rather than defended by the snapshot distinction. A rule that only ever permits closure would be self-exemption.
+
+**Closure evidence standard.** A finding may be closed only on evidence that a third party with read access can re-derive: the repository object (path and ref, or endpoint and parameter), the expected value, and the check that compares them. Author narrative alone is not closure evidence. Where a closure also rests on a semantic judgement — for example that corrected prose no longer asserts a stale value — that judgement is labelled as judgement and attributed to the review that made it, not presented as a measured fact.
+
+**Reproduction prerequisites.** Every request cited as closure evidence in this report is a plain `GET` carrying `Authorization: token <t>` and `Accept: application/vnd.github+json`, where `<t>` is a token with read access to this private repository. No write scope is needed. Response handling is fixed: a non-200 response — including `403` from a secondary rate limit or `404` from a wrong `ref` — is recorded as `INCONCLUSIVE`, never as a mismatch and never as a pass; only a `200` whose field equals the expected value counts as evidence. Where a `403` or `404` appears, the cause is diagnosed and stated rather than inferred from the status code.
+
+### 中文
+
+本报告是有时点的治理记录，不是实时看板。两类陈述必须分开，不得混为一谈。
+
+- **绑定资产（带时点的快照）**：仓库 HEAD、tree 与 blob SHA、PR 状态（`OPEN` / `merged`）、ahead/behind 计数、workflow 运行标识、文件清单，均绑定于其被读取的时刻。每条此类陈述自带 as-of 边界。后续提交不使既有快照失效，既有快照也不得被读作当前断言。
+- **活动断言（受维护的状态）**：仅限 finding 状态（`CLOSED` / `PARTIAL` / `NOT_VERIFIED`）、规范性陈述、未解决阻塞条目。它们发生变化时，在新修订中更新并附修订说明。
+
+维护规则：不得为追逐移动的 HEAD 而改写历史快照，应追加新的带时点快照。只有活动断言可以就地变更，且每次变更都必须记入修订说明。该规则的存在理由：相反做法在逻辑上不可满足——任何提交都会改变 `main`，把 HEAD 值当作当前断言来维护的报告，在合并那一刻就已陈旧。
+
+**重新开启触发器**：本报告记录的关闭不具永久性，也不自证。若某项受维护的断言事后被证为不真——例如已标注「被取代」的快照被引为当前、更正段落与其所描述对象脱节、新增行重复同一类缺陷——则在新修订中将相应 finding 置回 `OPEN`，并在修订说明中点名失败的断言。因此本机制的检验标准不是「旧快照是否仍准确」，而是「新引入的陈旧活动断言是否被重新开启」。只允许关闭、不允许重开的规则，本质上就是自我豁免。
+
+**关闭证据标准**：finding 只能基于第三方可复现推导的证据关闭：必须给出对象（路径与 ref，或端点与参数）、期望值、以及比对方式。仅凭作者叙述不构成关闭证据。若关闭同时依赖语义判断（如「更正后的文字不再陈述旧值」），该判断应标注为判断并归属于作出该判断的审查，不得作为实测事实呈现。
+
+**复现前提**：本报告中作为关闭证据引用的每个请求均为 `GET`，携带 `Authorization: token <t>` 与 `Accept: application/vnd.github+json`，其中 `<t>` 为对本私有仓库具有读权限的 token，无需写权限。响应处理规则固定：非 200 响应（包括次级限速的 `403`，或 `ref` 错误的 `404`）一律记为 `INCONCLUSIVE`，不得计为不符合，也不得计为通过；只有 `200` 且字段等于期望值才构成证据。出现 `403`/`404` 时，应诊断并写明原因，不得凭状态码推断。
+
 ## 1. Objective / 目标
 
 ### EN
@@ -58,6 +90,8 @@ The complete v1.1 policy was read before drafting v1.2.
 - Current main...PR head comparison at the R6 baseline: `diverged`; ahead 8 / behind 42; merge base `c5a995d9a2808112b007a9108e085048cbed5cc9`
 - Post-v2.2 validation snapshot: PR head `bbfe046b9307c9bfffd7606c4a7caadcb1de32f8`; D7 blob read back as `36c50869fe2c42d5e1f12616012c84e0a1cc5d28`; main...head comparison `diverged`, ahead 10 / behind 42; merge base unchanged at `c5a995d9a2808112b007a9108e085048cbed5cc9`.
 - v2.3 normative-boundary correction (`2026-11-19T17:06:00Z`): `00-governance/bilingual-documentation-policy.md` is restored to the GOV-DOC-001 v1.1 NORMATIVE text, blob `0e170479e1a71e8f4c124c6f1dc170241652f42b`, byte-identical to current main. The v1.2 proposal is relocated to `00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md`, blob `d91bd92b79177decc7baa038fdd24b3f8323b995`, and remains NON-NORMATIVE; the normative path is not replaced by a draft.
+- **Post-merge snapshot (as-of `2026-11-19T17:39:16Z`, bound to this bullet set only):** PR #271 `state=closed`, `merged=true`, `merged_at=2026-11-19T17:16:13Z`; merge commit `f86fddc0fa0291ea8a5e080e741f083ce179a0a2`; merge parents `a22024112fce3851428343ca3e655712057e6dce` (main before merge) and `1eefa22e7fecfcd882aff795796ae178d1f7c4a5` (the head that R8 reviewed). The reviewed head is therefore contained in `main` history; the earlier `diverged / ahead N / behind M` comparisons describe the pre-merge branch and are superseded as current assertions. Post-merge `main` tip at the time of this reading: `8b7897f172cbf9b9dfbda5728836fd0a639e33bb`.
+- **Annotation, not deletion:** the earlier bullet `PR #271 state: OPEN; merged: false` is a bound R6 snapshot. It is retained so the historical read-back stays auditable; it is not a current assertion.
 - v2.3 measured comparison at the v2.3 authoring baseline (before the v2.3 commit): main `a22024112fce3851428343ca3e655712057e6dce`; PR head `f915e0234c3388def3bd97f2bfd2ce38dc1576d8`; `diverged`, ahead 11 / behind 70; merge base `c5a995d9a2808112b007a9108e085048cbed5cc9`.
 
 **EN**
@@ -133,6 +167,28 @@ The v2.3 changeset relocates D1 and leaves D2-D6 byte-identical to the R6 read-b
 | D7 | `00-governance/reports/bilingual-baseline-remediation-report.md` | post-commit read-back / 提交后读回 | self-referential; recorded in PR comment / 自引用，登记于 PR 评论 |
 
 提交 `47369925ace93821eab82e4cec8418f8d7505d64` 未修改 D2。本 D7 v2.2 变更集仅修改 D7，不修改 D2。
+
+**Post-merge manifest read-back at `main` `8b7897f172cbf9b9dfbda5728836fd0a639e33bb` (as-of `2026-11-19T17:39:16Z`) / 合并后 manifest 读回（main `8b7897f1`，as-of `2026-11-19T17:39:16Z`）**
+
+Read back through the contents API at the recorded `main` tip. This is a new dated snapshot; the R6 OBJ-07 snapshot above is unchanged and remains the historical anchor.
+
+通过 contents API 在记录的 `main` tip 读回。本表为新的带时点快照；上方 R6 OBJ-07 快照未变，仍作为历史锚点。
+
+| ID | Repository path / 仓库路径 | Blob SHA | Relation to the R6 snapshot / 与 R6 快照关系 |
+|---|---|---|---|
+| D1-N | `00-governance/bilingual-documentation-policy.md` | `0e170479e1a71e8f4c124c6f1dc170241652f42b` | byte-identical / 逐字节一致 |
+| D1 | `00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md` | `d91bd92b79177decc7baa038fdd24b3f8323b995` | added by #271, NON-NORMATIVE / #271 新增，非规范 |
+| D2 | `00-governance/bilingual-governance-migration-register.md` | `c805795625bfb367373826b6c6d33221af5853ba` | advanced by later register revisions / 随登记册后续修订前进 |
+| D3 | `00-governance/templates/bilingual-issue-template.md` | `64d432395dc7bec9ba5c3b2ae534df4b01a2db3c` | unchanged / 未变更 |
+| D4 | `00-governance/templates/bilingual-umbrella-requirement-template.md` | `9265098d739369522000ebc54b8c0275ee7e5b6d` | unchanged / 未变更 |
+| D5 | `00-governance/templates/bilingual-commit-message.md` | `8ea68efd927c62ba48c3249cc39e62760ced9370` | unchanged / 未变更 |
+| D6 | `00-governance/templates/repository-policy-inheritance.md` | `122f86b1e223e852eb19add7c37c452151372fe8` | unchanged / 未变更 |
+| D8 | `00-governance/reports/f06-object-reconciliation.md` | `646800d4b426bd19cf9d58bf86433ece1a010bda` | added by #282 / #282 新增 |
+| D7 | `00-governance/reports/bilingual-baseline-remediation-report.md` | self-referential / 自引用 | read back in a PR comment / 在 PR 评论中读回 |
+
+`D2` differs from the R6 row on purpose: the register advanced after the R6 read-back. The R6 value is not wrong; it is bound to an earlier moment. No row above is a substitution into the R6 snapshot.
+
+`D2` 与 R6 行不同是故意的：登记册在 R6 读回之后又有修订。R6 值并非错误，只是绑定于更早时点。上表任何行都不是对 R6 快照的替代。
 
 ### 3.3 Verification result / 验证结果
 
@@ -369,6 +425,10 @@ Completing the inventory is not evidence of bilingual migration or authorization
 | NOT TESTABLE | 1 |
 
 ### 6.3 Findings / 发现
+
+This table is the R6 review output, retained as a bound snapshot per §0. Its `Status` column records the state as found by R6 and is not maintained; current finding states live in §9 and §10.
+
+本表为 R6 审查输出，按 §0 作为绑定快照保留。其 `Status` 列记录的是 R6 当时的发现状态，不受维护；当前 finding 状态以 §9 与 §10 为准。
 
 | Finding | Severity | Status | Summary |
 |---|---|---|---|
@@ -698,13 +758,13 @@ AC-07 was blank in the original task definition. Its missing criterion must not 
 | AC-03 | Umbrella Requirement bilingual requirements | D1/D4 and five Issue updates | Execution PASS; independent criterion mapping NOT_RECORDED |
 | AC-04 | Commit Message bilingual requirements | D5 and actual bilingual Commit | Execution PASS; historical inventory incomplete |
 | AC-05 | PR bilingual title/body | PR title and body bilingual | PARTIAL — CI FAILURE |
-| AC-06 | Future repository inheritance | D1/D6 drafted and committed | FAIL — F-02 OPEN |
+| AC-06 | Future repository inheritance | D1/D6 drafted and committed | FAIL — F-02 Requirement 2 NOT_VERIFIED (platform-limited); v1.2 not adopted |
 | AC-07 | Original criterion unspecified | No criterion supplied | NOT TESTABLE |
 | AC-08 | Stable identifier preservation | Exact identifiers and SHA manifest checked | Execution PASS; independent mapping NOT_RECORDED |
 | AC-09 | Status preservation | Five Issues remain OPEN; Requirement Status RECORDED | Execution PASS |
 | AC-10 | No fabricated evidence | Unknown fields and source gaps preserved | Execution PASS within available evidence |
 | AC-11 | Historical Commit immutability | No rewrite or force-push | Execution PASS |
-| AC-12 | Historical migration registration | Issue/Commit/PR aggregate inventory prepared | PARTIAL — F-06 OPEN |
+| AC-12 | Historical migration registration | Issue/Commit/PR aggregate inventory prepared | PARTIAL — F-06 object reconciliation CLOSED (2026-11-20); migration itself not performed |
 | AC-13 | Bilingual normative clauses | D1–D7 are embedded bilingual documents | Independent semantic parity not fully accepted |
 | AC-14 | Complete file/change manifest | Seven files and five Issue updates verified | PARTIAL — historical inventory incomplete |
 | AC-15 | Reproducible independent acceptance | Review package and exact file SHAs recorded | FAIL / BLOCKED — CI failure and outstanding findings |
@@ -730,7 +790,7 @@ Execution PASS does not imply independent review PASS.
 
 | 项目 | 当前状态 | 验收边界 |
 |---|---|---|
-| F-02 | PARTIAL | 校验器及测试已提交；修复后的本地测试 6/6 PASS。CI workflow 接入及 required check 强制生效证据仍未完成。 |
+| F-02 | PARTIAL | 校验器及测试已提交；修复后的本地测试 6/6 PASS。声明校验为 ADVISORY（非阻断）；CI workflow 接入已验证；required check 强制执行证据仍为未完成。 |
 | F-06 Issue 清单 | 登记定稿 | 39 条：28 条 EN_ONLY、10 条 EN_ZH_MIXED、1 条 ZH_ORIGINAL_WITH_EN_TERMS（#254，HOLD）。每条记录均须具有匹配的 body_sha256。 |
 | F-06 Commit 清单 | 登记定稿 | 313 条：312 条 EN_ONLY、1 条 MIXED（C168）。每条记录均须具有匹配的 sha 和 msg_sha256；分类依据完整提交消息判定。 |
 | F-07 | 更正已登记 | PR 评论 `7006445553`；D1 权威 blob `66517d39`。 |
@@ -752,13 +812,33 @@ Execution PASS does not imply independent review PASS.
 
 **F-08 — stale baseline and manifest**
 
-- D7 §2.2 and §3.1–§3.3 have been corrected in this v2.2 revision to distinguish current main, current PR head/tree, historical submission commit, and the R6 OBJ-07 pre-v2.2 manifest snapshot.
-- Remediation state: corrected in D7 v2.2; independent re-review pending. Do not mark CLOSED before exact-Head re-review.
+- Status: `CLOSED` (2026-11-20), on a recorded basis. This closure is not retroactive.
+- Status at the moment of the external correction: `corrected, not independently confirmed`. Comment `7017127588` withdraws the earlier `CLOSED` claim; it does not assert re-confirmation. The `CLOSED` state above is established only by the PR #285 review chain recorded on that PR, and reading the withdrawal as a re-confirmation would be an error.
+- Correction trail: §2.2 and §3.1–§3.3 were rewritten in v2.2 to separate current main, current PR head/tree, the historical submission commit, and the R6 pre-v2.2 OBJ-07 snapshot; v2.3 added the v2.3 comparison and the normative-boundary correction; v2.5 adds the record-boundary rule (§0), a post-merge snapshot (§2.2) and a post-merge manifest read-back (§3.2).
+- Root cause, stated so it is not repeated: the finding was structural, not clerical. A report that treats HEAD values as current assertions is stale the moment it is merged. §0 now separates bound snapshots from live assertions, which is what makes the class of defect closable rather than perpetually re-openable.
+- Sequencing correction: this report previously required `Do not mark CLOSED before exact-Head re-review`, and the PR #271 acceptance record nevertheless listed F-08 as `CLOSED` before any review had examined it — R7 and R8 reviewed other findings. The closure above is supported by the v2.5 revision and its review; it does not validate that earlier line.
+- Objective evidence — re-derivable by any reader with read access, not author narrative. Requests, expected values and the assertion each one supports are mapped one-to-one below; `GET`, token and failure handling follow the reproduction prerequisites in §0.
+
+| # | Request (method + path) | Expected field = value | Assertion supported |
+|---|---|---|---|
+| E1 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/271` | `merged` = `true`; `merged_at` = `2026-11-19T17:16:13Z` | §2.2 states PR #271 is merged, at that time |
+| E2 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/271` | `merge_commit_sha` = `f86fddc0fa0291ea8a5e080e741f083ce179a0a2` | the merge commit identity asserted in §2.2 |
+| E3 | `GET /repos/oahcom/AiMemoryBrainArchitecture/pulls/271` | `head.sha` = `1eefa22e7fecfcd882aff795796ae178d1f7c4a5`; `base.sha` = `c5a995d9a2808112b007a9108e085048cbed5cc9` | the reviewed head and the recorded base in §2.2 |
+| E4 | `GET /repos/oahcom/AiMemoryBrainArchitecture/commits/f86fddc0fa0291ea8a5e080e741f083ce179a0a2` | `parents[0].sha` = `a22024112fce3851428343ca3e655712057e6dce`; `parents[1].sha` = `1eefa22e7fecfcd882aff795796ae178d1f7c4a5` | main before the merge, and the merged parent |
+| E5 | E3 and E4 compared | E4 `parents[1].sha` = E3 `head.sha` | the merged head is the reviewed head, not a re-created one |
+| E6 | `GET /repos/oahcom/AiMemoryBrainArchitecture/contents/<path>?ref=main`, once per row of §3.2 | `sha` = the `Blob SHA` in that row | the post-merge manifest recorded in §3.2 |
+
+If any request returns non-200, the affected row is `INCONCLUSIVE` and F-08 may not be closed on it.
+- Judgement, separated from the objective part: that the corrected prose in §2.2 and §3.2 no longer asserts stale values is a review judgement, recorded as such and attributed to the R1 review of PR #285, not presented as a measurement.
+- External correction record: because the PR #271 acceptance comment is an independent historical decision record, it is corrected by comment `7017127588` on PR #271 itself, not by this report alone.
 
 **F-09 — stale CI integration status**
 
-- D7 §6.4, §7.1, §7.2, §9 and §10 now distinguish verified workflow integration from unverified platform required-check enforcement.
-- Remediation state: corrected in D7 v2.2; independent re-review pending. F-02 overall remains PARTIAL.
+- Status: `CLOSED` (2026-11-20), by the PR #285 review chain. At the moment of the external correction the status was `corrected, not independently confirmed`. §6.4, §7.1, §7.2, §9 and §10 distinguish verified workflow integration from unverified platform required-check enforcement, and §7.1 records three runs in both language columns.
+- Boundary retained: closing F-09 does not close F-02. F-02 Requirement 2 stays `NOT_VERIFIED` because the platform setting is unavailable, not because the text is stale.
+- Sequencing correction: same as F-08 — the earlier acceptance line cited closure ahead of the re-review this report required.
+- Objective evidence (re-derivable): §7.1 lists three workflow runs with their conclusions in both language columns; §6.4, §7.2 and §10 each state separately that workflow integration is verified and required-check enforcement is `NOT_VERIFIED`. The check is textual and located: read those four sections and confirm no line asserts platform enforcement.
+- Judgement: that the four sections are now internally consistent and mutually non-contradictory is a review judgement, attributed to the R1 review of PR #285.
 
 ### P2
 
@@ -782,14 +862,14 @@ The only remaining F-02 blocker is platform required-check configuration/enforce
 
 ### Other required actions
 
-1. Preserve the D2 incremental appendix and its reconciliation work as outstanding; **D2 is not modified by this D7 v2.2 changeset**.
-2. Reconcile the 14 unassigned PRs listed above with object-level evidence; do not infer migration groups.
-3. Obtain a fresh independent review of the D7 v2.2 exact commit and its read-back evidence.
-4. Revalidate Exact-Head against the current main after the v2.2 commit; the pre-v2.2 comparison was `diverged` (ahead 8 / behind 42).
-5. Complete F-06 object-level reconciliation and preserve Issue #254 HOLD/exit conditions.
-6. Obtain explicit authorized governance approval. Only after approval may policy adoption and effective date be evaluated.
+1. Preserve the D2 incremental appendix and its reconciliation work as outstanding; **this changeset does not modify D2**.
+2. `DONE (2026-11-20)` — the object-level reconciliation is recorded in `00-governance/reports/f06-object-reconciliation.md`; no migration group was inferred.
+3. `DONE` — the D7 exact commit and its read-back evidence were independently reviewed at every revision (R6 → R8 on PR #271; R1 → R3 on #282; R1 → R3 on #284).
+4. `SUPERSEDED` — the pre-merge `diverged` comparison is a bound snapshot, not a live check. After merge, `main` contains the reviewed head (merge `f86fddc0`), so Exact-Head integration is established by containment rather than by re-running a divergence comparison.
+5. `DONE (2026-11-20)` — F-06 reconciliation complete; Issue #254 stays on HOLD with its exit conditions untouched.
+6. `OUT-OF-SCOPE(dev-baseline)` — explicit authorized governance approval requires an accountable human authority. A single shared identity cannot supply it, so it is recorded as unreachable rather than simulated. No automatic approval or adoption is permitted or implied.
 
-No automatic approval or adoption is permitted.
+Platform residual tracking: the required-check blocker and the branch-protection 403 are tracked in Issue #283 with re-verification triggers, so they do not leave this report in a permanent open state.
 
 ---
 
@@ -806,13 +886,22 @@ No automatic approval or adoption is permitted.
 
 **F-08——基线与 manifest 陈旧**
 
-- 本 v2.2 修订已更正 D7 §2.2、§3.1–§3.3，明确区分当前 main、当前 PR head/tree、历史首次提交及 R6 的 v2.2 前 OBJ-07 manifest 快照。
-- 修复状态：已在 D7 v2.2 中更正；等待独立复审。Exact-Head 复审通过前不得标记 CLOSED。
+- 状态：`CLOSED`（2026-11-20），基于已登记依据。本次关闭不具溯及力。
+- 更正轨迹：v2.2 重写§2.2 与 §3.1–§3.3，区分当前 main、当前 PR head/tree、历史首次提交与 R6 的 v2.2 前 OBJ-07 快照；v2.3 新增 v2.3 对比与规范边界更正；v2.5 新增记录边界规则（§0）、合并后快照（§2.2）与合并后 manifest 读回（§3.2）。
+- 根因（写明以免重犯）：该 finding 是结构性的，不是文字疏漏。把 HEAD 值当作当前断言的报告，在合并那一刻就陈旧。§0 现已将绑定快照与活动断言分开，这才使这类缺陷可以真正关闭，而不是永远重开。
+- 时序更正：本报告此前要求「Exact-Head 复审通过前不得标记 CLOSED」，而 PR #271 验收记录却在任何审查看过该项之前就列为 `CLOSED`——R7 与 R8 审的是其他 finding。上述关闭由 v2.5 修订及其审查支撑，不构成对那一行旧验收的追认。
+- 客观证据（任何有读权限的人可重新推导，非作者叙述）：请求、期望值与其支持的断言已上表 E1–E6 逐项一一映射；方法、令牌与失败处理按 §0 的复现前提执行。任一请求返回非 200，对应行即为 `INCONCLUSIVE`，不得据此关闭 F-08。
+- 外部更正时点的状态：`corrected, not independently confirmed`。评论 `7017127588` 撤回先前 `CLOSED` 表述，但并不声称重新确认；上方 `CLOSED` 仅由记录于 PR #285 的审查链成立，将「撤回」读作「重新确认」属误读。
+- 判断与客观部分分离：「更正后的 §2.2 与 §3.2 不再陈述旧值」属审查判断，已如实标注并归属于 PR #285 的 R1 审查，不作为实测事实。
+- 外部更正记录：PR #271 验收评论属独立历史决策记录，因此由 PR #271 上的评论 `7017127588` 修正，而非仅由本报告覆盖。
 
 **F-09——CI 接入状态陈旧**
 
-- D7 §6.4、§7.1、§7.2、§9 和 §10 已更新，明确区分已验证的 workflow 接入与未验证的平台 required-check 强制状态。
-- 修复状态：已在 D7 v2.2 中更正；等待独立复审。F-02 总体仍为 PARTIAL。
+- 状态：`CLOSED`（2026-11-20），由 PR #285 的审查链成立。外部更正时点的状态为 `corrected, not independently confirmed`。§6.4、§7.1、§7.2、§9 与 §10 已区分已验证的 workflow 接入与未验证的平台 required-check 强制状态，且 §7.1 中英两列均列出三次运行。
+- 保留边界：关闭 F-09 不等于关闭 F-02。F-02 要求 2 维持 `NOT_VERIFIED`，原因是平台设置不可用，而不是文字陈旧。
+- 时序更正：与 F-08 同——此前验收行在本报告要求的复审之前就引用了关闭。
+- 客观证据（可重新推导）：§7.1 在中英两列均列出三次 workflow 运行及结论；§6.4、§7.2 与 §10 各自分别说明「workflow 接入已验证」与「required-check 强制为 `NOT_VERIFIED`」。检验方式为文本定位：阅读这四节并确认无任何行声称平台已强制执行。
+- 判断：「四节内部一致且不矛盾」属审查判断，归属于 PR #285 的 R1 审查。
 
 ### P2
 
@@ -836,14 +925,30 @@ F-02 唯一剩余阻塞是平台 required-check 配置/强制执行。由于当�
 
 ### 其他必需行动
 
-1. 保留 D2 增量附录及其对账工作为未完成事项；**本 D7 v2.2 变更集不修改 D2**。
-2. 使用对象级证据对上述 14 个未归组 PR 完成对账；不得推断迁移组。
-3. 针对 D7 v2.2 精确提交及其读回证据开展新一轮独立复审。
-4. 在 v2.2 提交后，针对当前 main 重新执行 Exact-Head 复核；v2.2 前比较结果为 `diverged`（ahead 8 / behind 42）。
-5. 完成 F-06 对象级对账，并保留 Issue #254 的 HOLD/退出条件。
-6. 取得明确且有权的治理批准。只有在批准后，才可评估规范采纳及生效日期。
+1. 保留 D2 增量附录及其对账工作为未完成事项；**本变更集不修改 D2**。
+2. `DONE（2026-11-20）`——对象级对账记录于 `00-governance/reports/f06-object-reconciliation.md`；未推断任何迁移组。
+3. `DONE`——D7 各修订的精确提交与读回证据均已独立审查（#271 上 R6 → R8；#282 上 R1 → R3；#284 上 R1 → R3）。
+4. `SUPERSEDED`——合并前的 `diverged` 比较是绑定快照，不是实时校验。合并后 `main` 已包含被审 head（merge `f86fddc0`），故 Exact-Head 集成由包含关系成立，无需重跑分叉比较。
+5. `DONE（2026-11-20）`——F-06 对账完成；Issue #254 保持 HOLD，其退出条件未被改动。
+6. `OUT-OF-SCOPE(dev-baseline)`——明确且有权的治理批准需要可归属的人类权威。单一共享身份无法提供，因此如实记为不可达，而不伪造。不得以任何方式推定自动批准或采纳。
 
-不得自动推定批准或采纳。
+平台残留跟踪：required-check 阻塞与 branch-protection 403 已在 Issue #283 中带复验触发器跟踪，不使本报告长期处于未决状态。
+
+### Re-open check record (this revision) / 重新开启核对记录（本修订）
+
+The §0 re-open trigger is only operative if it is actually applied to each revision. This record applies the three trigger conditions to this revision and states the result, including the one that fired.
+
+§0 的重新开启触发器只有在逐次修订中真被执行时才有效。本记录将三个触发条件应用于本修订并说明结果，包括实际触发的那一项。
+
+| Trigger condition | Check performed | Result | Evidence |
+|---|---|---|---|
+| A snapshot marked superseded is cited as current | searched §2.2 and §10 for the pre-merge `diverged` counts and for `OPEN; merged: false` | CLEAR — both retain an explicit bound/superseded label and neither is used as a current assertion | §2.2 annotation bullet; §10 F-06/F-08 rows |
+| A corrections section has drifted from the objects it describes | read comment `7017127588` against §9 F-08 and F-09 | CLEAR — the comment withdraws the earlier `CLOSED` claim and §9 records the same withdrawal, with the dissolved state named `corrected, not independently confirmed` | comment `7017127588`; §9 |
+| A new line repeats the same defect class | reviewed this revision's diff for unlabelled HEAD/PR-state assertions and for bilingual-parity gaps | **FIRED, fixed in this revision** — §8's Chinese F-02 row omitted the advisory-declaration and workflow-integration sentences present in the English row, which is the F-09 defect class | §8 F-02 rows |
+
+A trigger that never fires is not evidence of health; it is more often evidence that the check was not performed. This revision's third row fired and was repaired before merge, and is recorded here rather than only in the diff.
+
+触发器从不触发并不证明健康，更常说明核对未被执行。本修订第三行实际触发并在合并前修复，已在此登记，而不仅体现于 diff。
 
 ## 10. Governance stage ledger / 治理阶段登记
 
@@ -859,11 +964,14 @@ The original 15-row governance stage ledger is retained. Only affected evidence/
 | Seven files read back / 七文件读回 | VERIFIED | R6 OBJ-07 pre-v2.2 manifest read-back: 7/7; D7 manifest entry is the v2.1 blob snapshot. / R6 对 v2.2 前 OBJ-07 manifest 读回 7/7；D7 条目为 v2.1 blob 快照。 |
 | Five Issues updated / 五个 Issue 更新 | SUBMITTED | Issues #262–#266; all remain OPEN and Requirement Status RECORDED. / Issues #262–#266；均保持 OPEN，Requirement Status 为 RECORDED。 |
 | Five Issues read back / 五个 Issue 读回 | VERIFIED | Five GitHub API read-backs; no Issue closure or label change inferred. / 五个 GitHub API 读回；不推定 Issue 已关闭或标签已变更。 |
-| Historical inventory / 历史清单 | PARTIAL | 39 Issues and 313 Commits registered; F-06 object-level reconciliation and 14 unassigned PRs remain OPEN. / 已登记 39 条 Issue、313 条 Commit；F-06 对象级对账及 14 个未归组 PR 仍为 OPEN。 |
-| Independent review / 独立复审 | NEEDS-REVISION | R6 review session `6aff0b47-3988-83ec-b666-976e39dfe840` returned NEEDS-REVISION; F-08/F-09/F-10 text corrections are in v2.2 and await fresh independent review. / R6 复审结论 NEEDS-REVISION；F-08/F-09/F-10 已在 v2.2 中更正，等待新一轮独立复审。 |
+| Historical inventory / 历史清单 | PARTIAL | 39 Issues and 313 Commits registered; F-06 object-level reconciliation CLOSED (2026-11-20); twelve PRs carry PROPOSED grouping pending accountable-owner confirmation; migration debt unchanged. / 已登记 39 条 Issue、313 条 Commit；F-06 对象级对账已 CLOSED（2026-11-20）；12 个 PR 为 PROPOSED 归组，待责任方确认；迁移欠账不变。 |
+| Independent review / 独立复审 | REVIEW CHAIN RECORDED | R6 `NEEDS-REVISION` on D7 v2.1 (`6aff0b47-3988-83ec-b666-976e39dfe840`) → R7 `NEEDS-REVISION` on head `04d35f90` → R8 `PASS` on head `1eefa22e`; v2.5 closes the F-08/F-09 re-review that the earlier chain did not cover. Identity axis remains P-independent-unreachable. / R6 对 D7 v2.1 给 NEEDS-REVISION → R7 对 head `04d35f90` 给 NEEDS-REVISION → R8 对 head `1eefa22e` 给 PASS；v2.5 补齐前序链未覆盖的 F-08/F-09 复审。身份轴仍为 P-独立不可达。 |
 | F-02 | PARTIAL | Requirement 1 CI integration COMPLETE/VERIFIED; Requirement 2 required-check enforcement NOT_VERIFIED due GitHub plan-limit HTTP 403. / 要求 1 CI 接入 COMPLETE/VERIFIED；要求 2 因 GitHub 计划限制 HTTP 403 而 NOT_VERIFIED。 |
-| F-06 | OPEN | 39-Issue / 313-Commit anchors and classification require object-level reconciliation; #254 remains HOLD; 14 PRs remain unassigned. / 39 条 Issue、313 条 Commit 的锚点和分类仍需对象级对账；#254 保持 HOLD；14 个 PR 未归组。 |
+| F-06 | CLOSED (2026-11-20) | Object-level reconciliation recorded in `00-governance/reports/f06-object-reconciliation.md`: 313/313 commit anchors matched, 38/39 issue anchors with #266 drift registered; the earlier "14 unassigned PRs" conclusion is retracted. #254 remains HOLD; migration debt unchanged. / 对象级对账已记录于上述报告：313/313 Commit 锚点命中，39 条 Issue 锚点命中 38 条并登记 #266 漂移；此前「14 个未归组 PR」结论已撤回。#254 保持 HOLD；迁移欠账不变。 |
 | F-07 | CORRECTION RECORDED | PR comment `7006445553`; authoritative D1 baseline blob `66517d39`. / PR 评论 `7006445553`；D1 权威基线 blob `66517d39`。 |
+| F-08 | CLOSED (2026-11-20) | Record-boundary rule §0 + post-merge snapshot §2.2 + post-merge manifest §3.2; closure basis and the acceptance-sequencing correction are recorded in §9. / §0 记录边界 + §2.2 合并后快照 + §3.2 合并后 manifest；关闭依据与验收时序更正记于 §9。 |
+| F-09 | CLOSED (2026-11-20) | §6.4/§7.1/§7.2/§9/§10 separate verified workflow integration from unverified required-check enforcement; closing F-09 does not close F-02. / §6.4/§7.1/§7.2/§9/§10 已区分已验证 workflow 接入与未验证 required-check 强制；关闭 F-09 不等于关闭 F-02。 |
+| F-10 | CLOSED | PR #271 body declaration `BILINGUAL-MANIFEST: COMPLETE` recorded as execution evidence; it implies no review PASS, approval, adoption or merge authorisation. / PR #271 正文声明已作为执行证据登记；不构成审查 PASS、批准、采纳或合并授权。 |
 | Structural CI / 结构 CI | MIXED HISTORICAL RECORD | Failure run `44477435608` retained as historical; runs `44542512889`, `44546301573`, and post-v2.2 run `44559550224` SUCCESS. Required-check enforcement remains NOT_VERIFIED. / 失败运行 `44477435608` 保留为历史记录；运行 `44542512889`、`44546301573` 及 v2.2 后运行 `44559550224` 均 SUCCESS。required-check 强制执行仍为 NOT_VERIFIED。 |
 | Owner approval / Owner 批准 | NOT_RECORDED | No explicit Owner approval evidence. / 无明确 Owner 批准证据。 |
 | Policy adoption / 规范采纳 | NOT_ADOPTED | GOV-DOC-001 v1.2 remains DRAFT; no adoption evidence. / GOV-DOC-001 v1.2 仍为 DRAFT；无采纳证据。 |
@@ -1013,3 +1121,28 @@ This revision responds to the R7 independent review (final disposition `NEEDS-RE
 - **P2（合并不等于批准）——已显式声明：**合并本 PR 不构成对 GOV-DOC-001 v1.2 的批准、采纳或规范性生效。规范路径上唯一的 NORMATIVE 文本仍为 v1.1。
 - **P2（required-check 复验）——带责任与触发器推迟：**待 GitHub Actions 计费阻塞解除后复验 required-check 配置；在此之前要求 2 维持 `NOT_VERIFIED`。
 - v2.4 head 上的门禁复跑仍为本地执行（平台补偿路径）；该精确 head 的证据与 blob 读回登记于本次修订的 PR 评论。
+
+## D7 v2.5 Revision Note
+
+This revision closes the two findings left in an indeterminate state and removes the structural cause that kept them re-openable. It changes no policy text, no normative status, and no approval state.
+
+- **New §0 record boundary.** Bound assets (HEADs, blob SHAs, PR state, run ids, manifests) are dated snapshots; live assertions (finding states, normative statements, blockers) are maintained. Maintenance must append a new dated snapshot rather than rewrite an old one. Without this rule F-08 was unsatisfiable: any commit changes `main`, so a report asserting current HEADs is stale on merge.
+- **Post-merge snapshot §2.2 and post-merge manifest §3.2.** PR #271 is recorded as `merged=true` at `2026-11-19T17:16:13Z`, merge `f86fddc0`, parents `a2202411` + `1eefa22e`; the reviewed head is therefore contained in `main`. The post-merge manifest is read back at `main` `8b7897f1`. The pre-merge `diverged` comparisons are retained as bound snapshots and explicitly marked superseded as current assertions.
+- **F-08 and F-09 set to `CLOSED` with a stated basis.** Both were previously annotated `corrected; independent re-review pending`, which is not a maintainable state: a finding that can never be closed by its own rule blocks the report permanently.
+- **Sequencing correction recorded, not hidden.** The PR #271 acceptance record listed F-08 and F-09 as closed before any review examined them; R7 and R8 reviewed other findings. The closure recorded here rests on this revision and its review, and does not retroactively validate that line. The correction is written into §9 in both languages rather than silently repaired.
+- **Required actions refreshed.** Items 2, 3 and 5 are `DONE`; item 4 is `SUPERSEDED` by merge containment; item 6 is `OUT-OF-SCOPE(dev-baseline)` because it needs accountable human authority, which a single shared identity cannot supply. Platform residuals are tracked in Issue #283 with re-verification triggers.
+- **R1 review remediation.** The R1 review of this revision returned `NEEDS-REVISION` with one P1 and two P2. P1: a correction to the PR #271 acceptance record must be made on PR #271 itself, because that record is an independent historical decision and cannot be corrected from inside another report; the correction comment is posted there as `7017127588` and cited from this revision. P2: closure evidence must be re-derivable by a third party, so F-08 and F-09 now name the endpoint, parameter, expected value and comparison for each closure, and separate that objective part from the reviewer judgement. P2: a closure that can never be re-opened is self-exemption, so §0 now carries a re-open trigger and the report states the test that falsifies it.
+- **R2 review remediation.** The R2 review returned `NEEDS-REVISION` with two P2 and one P3. P2: the re-open trigger needs a per-revision check record, now added as a section in §9 that applies the three conditions and reports that the third one fired and was repaired before merge. P2: closure evidence lacked HTTP method, authentication preconditions, failure handling and a one-to-one request-to-assertion mapping, all now in §0 and in the E1–E6 table. P3: the post-correction status of F-08 and F-09 must read `corrected, not independently confirmed`, so that withdrawing a `CLOSED` claim is not misread as re-confirming it.
+
+## D7 v2.5 修订说明
+
+本修订关闭两项处于未决状态的 finding，并移除使它们反复重开的结构性成因。不改变任何政策文本、不改变规范状态、不改变批准状态。
+
+- **新增 §0 记录边界**：绑定资产（HEAD、blob SHA、PR 状态、run id、manifest）属于带时点快照；活动断言（finding 状态、规范陈述、阻塞项）受维护。维护应追加新快照，不得改写旧快照。无此规则时 F-08 在逻辑上不可满足：任何提交都会改变 `main`，把 HEAD 当当前断言的报告在合并时即陈旧。
+- **合并后快照 §2.2 与合并后 manifest §3.2**：PR #271 记为 `merged=true`（`2026-11-19T17:16:13Z`，merge `f86fddc0`，parents `a2202411` + `1eefa22e`），被审 head 因此已包含于 `main`。合并后 manifest 在 `main` `8b7897f1` 读回。合并前的 `diverged` 比较作为绑定快照保留，并明确标注为已被取代的当前断言。
+- **F-08 与 F-09 置为 `CLOSED` 并附依据**：此前标注为「已更正，待独立复审」，而这不是可维护状态——一项永远无法按自身规则关闭的 finding，会使报告永久阻塞。
+- **时序更正入库而非静默修补**：PR #271 验收记录在任何审查看过 F-08/F-09 之前就将其列为已关闭；R7 与 R8 审的是其他 finding。本处记录的关闭依据本修订及其审查，不构成对那一行的溯及追认。中英两份 §9 均已写入该更正。
+- **必需行动刷新**：第 2、3、5 项为 `DONE`；第 4 项因合并包含关系而 `SUPERSEDED`；第 6 项为 `OUT-OF-SCOPE(dev-baseline)`，因其需要可归属人类权威，单一共享身份无法提供。平台残留已在 Issue #283 中带复验触发器跟踪。
+- **R1 审查整改**：本修订的 R1 审查结论为 `NEEDS-REVISION`（1×P1 + 2×P2）。P1：对 PR #271 验收记录的更正必须发在 PR #271 本身，因为该记录是独立的历史决策，不能由另一份报告从内部修正；更正评论已在该处发布并由本修订引用。P2：关闭证据必须可由第三方重新推导，故 F-08 与 F-09 现已逐项给出端点、参数、期望值与比对方式，并与审查判断分离。P2：永不可重开的关闭等于自我豁免，故 §0 现携带重新开启触发器，并写明可反驳它的检验。
+- **R2 审查整改**：R2 结论为 `NEEDS-REVISION`（2×P2 + 1×P3）。P2：重新开启触发器需逐次修订的核对记录，已在 §9 新增小节，逐项应用三个条件，并记录第三项实际触发、已在合并前修复。P2：关闭证据缺 HTTP 方法、认证前提、失败响应处理与请求—断言一一映射，已分别补入 §0 与 E1–E6 表。P3：F-08/F-09 在外部更正时点的状态必须读作 `corrected, not independently confirmed`，以免将「撤回 CLOSED」误读为「重新确认关闭」。
+
