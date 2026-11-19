@@ -136,9 +136,9 @@ The result is VALID only if C1 AND C2 AND C3 AND C4 AND C5 AND C6 hold for the s
 | installed > captured => VALID。 | 更大值不可能是同一不可变 cutoff，意味着快照不一致或类型错误。 | 删除此成功规则；任何不相等均 fail-closed。 | successor §5.2 | 直接落实 D-002。 |
 | installed < captured => INVALID。 | 标量大小关系不是证明模型，不能确定绑定/currentness。 | 删除数值关系表；明确不匹配 INVALID，证据不可得 UNKNOWN/BLOCKED。 | successor §5.2 | 直接落实 D-002。 |
 | 两值按数值比较，接受前导零并按数值归一化。 | 不能靠表示规范化修复名义类型冲突。 | 各字段独立校验规范十进制表示；禁止跨字段算术/排序；只对同一 typed cutoff 作相等验证。 | successor §5.2 | 一致；不以字段名称/数值推断。 |
-| §8 决策表重复 installed > captured VALID 和 installed < captured INVALID。 | 即使 §5 改正，重复行仍会恢复冲突规则。 | 删除两条大小比较行，改为同一 typed cutoff + 六条件证明；不匹配/不可用均 fail-closed。 | successor §6 | 一致；无规范性重复冲突。 |
+| §8 英文/中文决策表分别重复 installed = captured、installed > captured、installed < captured 三行。 | 即使 §5 改正，重复标量行仍会恢复旧规则或被误读为独立充分条件。 | 两种语言表均删除全部三条标量比较行，替换为同一 typed cutoff + 六条件合取；不匹配/不可用均 fail-closed。 | predecessor EN lines 259–261 / ZH lines 546–548; successor §6 | 一致；无规范性重复冲突。 |
 
-## 6. Unicode version and reproducible canonicalization
+### 5.1 Exact source line mapping\n\n- Predecessor 1.3.0 English §5: lines 151–178; the conflicting scalar result rows are lines 162–164.\n- Predecessor 1.3.0 English §8: lines 241–263; the scalar result rows are lines 259–261.\n- Predecessor 1.3.0 Chinese §5: lines 438–465; the conflicting scalar result rows are lines 449–451.\n- Predecessor 1.3.0 Chinese §8: lines 528–550; the scalar result rows are lines 546–548.\n- Successor 1.3.1 §5 contains the six conjuncts and comparison semantics; successor §6 removes the old scalar table rows in both language peers. Exact successor line ranges are pinned in the commit readback record on Issue #43.\n\n## 6. Unicode version and reproducible canonicalization
 
 - **Pinned data version:** Unicode 15.1.0.
 - **Normative source:** Unicode Standard Annex #15, Unicode Normalization Forms; Unicode Character Database 15.1.0 files CaseFolding.txt, DerivedNormalizationProps.txt, PropList.txt, and NormalizationTest.txt. Obtain only from the versioned Unicode 15.1.0 UCD distribution, not an unversioned “latest” endpoint.

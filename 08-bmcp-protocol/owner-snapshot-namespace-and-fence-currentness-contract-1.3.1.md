@@ -2,7 +2,7 @@
 
 - Contract version: **1.3.1**
 - Status: **D OWNER ACCEPTED — normative successor only; implementation NOT VERIFIED; conformance NOT RUN; no production authorization**
-- Supersedes for D-owner normative use: v1.3.0 §5 and its duplicate §8 high-water rows only. All other v1.3.0 rules remain unchanged unless expressly amended below.
+- Supersedes for D-owner normative use: the complete v1.3.0 §5 scalar rule in both English and Chinese, plus all scalar-comparison rows in both English and Chinese §8 tables. All other v1.3.0 rules remain unchanged unless expressly amended below.
 - Exact predecessor: main commit 4f82e3a48a35e9fd73e7920f0c6a559b77aaf0dc; 08-bmcp-protocol/owner-snapshot-namespace-and-fence-currentness-contract.md; Blob d83cde77e98db2e74cf6827d874b0babb4157304.
 - Owner decision: D-OWNER-2026-11-19-003; proof package: 03-memory-brain/d-002-six-condition-operational-proof-2026-11-19.md.
 - Source semantic decision: D-OWNER-2026-11-19-002, Issue #25 comment 7015682819, Issue #43 comment 7015684625.
@@ -53,7 +53,7 @@ The D-002 proof is valid only when **all six** conditions below hold conjunctive
 
 ### 5.1 Type and comparison rule
 
-The words installed and captured MUST NOT be used as untyped scalar variables. Where legacy field labels must be parsed, they MUST be resolved by exact schema/version mapping to the typed fields in Condition 4. The comparison is typed equality of the same immutable ProducerRegistrationHighWater cutoff. No greater-than or less-than success rule exists. Neither value may be interpreted as ForgetFenceGeneration. The two H high-water fields MUST never be compared with one another.
+The words installed and captured MUST NOT be used as untyped scalar variables. Where legacy field labels must be parsed, they MUST be resolved by exact schema/version mapping to the typed fields in Condition 4. Each serialized high-water field MUST independently be a non-negative decimal integer, with no sign, whitespace, separator, exponent, or fraction; leading zeroes remain accepted and canonicalized within that field's own nominal type; the value range is 0 through 2^63-1. Parsing/canonicalization is performed independently and does not authorize cross-type comparison. The only comparison is typed equality of the same immutable ProducerRegistrationHighWater cutoff. No greater-than or less-than success rule exists. Neither value may be interpreted as ForgetFenceGeneration. The two H high-water fields MUST never be compared with one another.
 
 ### 5.2 Result classification
 
