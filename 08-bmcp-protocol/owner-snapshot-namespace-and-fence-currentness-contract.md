@@ -1,6 +1,7 @@
 # Owner Snapshot Namespace and Fence Currentness Contract / 所有者快照命名空间与 Fence 当前性契约
 
-- Contract version / 契约版本: **1.0.0 (CANDIDATE)**
+- Contract version / 契约版本: **1.1.0 (CANDIDATE)**
+- Revision / 修订: 1.1.0 incorporates review round 1 findings (ledger lifecycle classification unified with the section 8 decision table; Authority-level authorization revocation restored; prohibition on automatic rollback of executed fade/forget restored; percent-encoding character set, leading-zero policy, Fence replacement classification and state-version concurrency boundary made normative) / 1.1.0 吸收第 1 轮审查发现（Ledger 生命周期判定与第 8 节判定表统一；恢复 Authority 级授权撤销规则；恢复已执行 fade/forget 不得自动回滚的约束；百分号编码字符集、前导零策略、Fence 替换判定及状态版本并发边界转为规范要求）
 - Status / 状态: **DECIDED / IMPLEMENTATION NOT VERIFIED / CONFORMANCE NOT RUN**
 - Source decisions / 决定来源: Issue #25 comments `7008208052` (NS-PR-01..05), `7008249894` (FC-01..04), `7009205234` (four decisions)
 - Authoring session / 起草会话: `6afee171-c0d8-83ee-8a90-1bae3d42d22c` (prompts `62/63/64/70/71/72`)
@@ -15,8 +16,9 @@
 **1. Document identity and status**
 
 - Document name: Owner Snapshot Namespace and Fence Currentness Contract
-- Version: 1.0.0 (CANDIDATE)
+- Version: 1.1.0 (CANDIDATE)
 - Status: Decisions made, **implementation unverified**, **no consistency run executed**.
+- Revision 1.1.0 incorporates review round 1 findings: ledger lifecycle state classification unified with the section 8 decision table; Authority-level authorization revocation restored; the prohibition on automatic rollback of executed fade/forget restored; percent-encoding character set, high-water leading-zero policy, Fence replacement classification, and state-version concurrency boundary made normative.
 - This document records D-side normative decisions and constraints; it does not constitute evidence of completed implementation.
 - This document is not a human Owner signature, is not a contract freeze, and must not be used as evidence of production readiness.
 - The normative decisions in this document must not be interpreted as evidence that existing schemas, validators, or runtimes already implement the corresponding behavior.
@@ -75,12 +77,19 @@ A namespace MUST be considered `STALE` under any of the following conditions:
 
 1. Its original Authority binding undergoes an incompatible change.
 2. Its Producer class definition undergoes an incompatible change.
-3. Its Ledger identity is migrated, replaced, or rebuilt such that the original identity no longer represents the current ledger.
+3. Its Ledger identity is migrated, replaced, or rebuilt and the continuity of the original identity has been confirmed as no longer current. Where continuity cannot be confirmed, the namespace MUST be classified as `UNKNOWN` rather than `STALE`.
 4. Its original contract version is superseded by an incompatible version.
-5. Its corresponding Ledger is revoked or retired.
-6. Its canonical representation no longer conforms to the current specification.
+5. Its canonical representation no longer conforms to the current specification.
 
 `STALE` means that an identity may have been historically valid but is no longer current. `INVALID` means that the input itself violates identity or format constraints. These states MUST NOT be automatically converted into one another.
+
+Ledger lifecycle state MUST NOT be mapped to `STALE`. The following mappings are normative and MUST be applied exactly as recorded in section 8:
+
+1. A namespace pointing to a revoked Ledger MUST be classified as `INVALID`.
+2. A namespace pointing to a Ledger whose confirmed retirement is established MUST be classified as `INVALID`.
+3. A namespace pointing to a Ledger that has been migrated but whose continuity cannot be confirmed MUST be classified as `UNKNOWN`.
+
+Where a Ledger lifecycle condition and a namespace-identity staleness condition both appear to apply, the Ledger lifecycle mapping above takes precedence for determination purposes. A namespace MUST NOT be reported as `STALE` on Ledger lifecycle grounds alone.
 
 **NS-PR-05: Prohibition on interchangeability**
 
@@ -98,7 +107,7 @@ All namespace identifiers MUST be canonicalized in the following six steps, in e
 2. **Case:** Apply Unicode Default Case Folding to the first three segments. The fourth, version segment MUST NOT undergo case folding.
 3. **Unicode normalization:** Apply NFC normalization to the first three segments.
 4. **Delimiter handling:** Use ASCII `/` as the only segment delimiter. Exactly four segments are required. Empty segments and repeated delimiters are prohibited.
-5. **Escaping:** Encode each segment using UTF-8. Non-unreserved bytes MUST use uppercase `%HH` percent encoding. Split segments first, then decode each segment exactly once. Double decoding and encoded delimiter injection are prohibited.
+5. **Escaping:** Split the input on ASCII `/` before any percent-decoding, so that an encoded delimiter (`%2F`) never introduces a segment boundary. Then percent-decode each segment exactly once. Then re-encode the resulting bytes using UTF-8: bytes belonging to the RFC 3986 unreserved set (`ALPHA / DIGIT / "-" / "." / "_" / "~"`) MUST be emitted literally; every other byte MUST be emitted as uppercase `%HH`. Lowercase `%hh` MUST be normalized to uppercase. Double decoding and encoded delimiter injection are prohibited. A `%` that does not begin a valid `%HH` triplet MUST cause rejection, not pass-through.
 6. **Version segment handling:** The fourth segment MUST conform to `vMAJOR.MINOR.PATCH`. All three components MUST be non-negative decimal integers without leading zeros, except for the value zero itself.
 
 Canonicalization MUST produce a unique and reproducible canonical representation.
@@ -140,6 +149,11 @@ Additional requirements:
 3. Each value MUST correspond to the actual result of its respective authoritative operation.
 4. Deriving `captured` or `installed` from `admission_high_water` is prohibited.
 5. Deriving `captured` or `installed` from `owner_high_water` is prohibited.
+6. Leading zeros MUST be accepted and MUST NOT change the value. Comparison MUST be performed on the numeric value, never on the string form.
+7. A representation consisting solely of zeros MUST be treated as the value zero, and the canonical rendering of zero is `0`.
+8. The canonical decimal rendering of a high-water value MUST NOT contain leading zeros. Re-emitting a received value in canonical form MUST preserve its numeric value exactly.
+9. A leading `+` or `-` sign, surrounding whitespace, thousands separators, exponent notation, and fractional parts MUST be classified as `INVALID`. They MUST NOT be normalized into a valid value.
+10. Implementations MUST support values at least up to 2^63 - 1. A value exceeding the implementation's supported range MUST be classified as `INVALID`; silent truncation, wraparound, and floating-point coercion are prohibited.
 6. The existence of a field or the ability to parse a number MUST NOT establish that a Fence was installed or remains current.
 
 **6. Currentness determination**
@@ -154,8 +168,17 @@ Currentness MUST use event-driven invalidation and authoritative state-version c
 4. The proof remains valid only when its version matches the current version and the Fence has not been revoked or replaced.
 5. A mismatch between the proof version and current version MUST result in `STALE`.
 6. An explicitly revoked Fence MUST result in `INVALID`.
-7. Inability to obtain the authoritative current state version MUST result in `UNKNOWN`.
-8. Local clocks, cache timestamps, and proof-file timestamps MUST NOT substitute for the authoritative state version.
+7. A Fence that has been replaced by a newer Fence, without an explicit revocation of the superseded Fence, MUST result in `STALE`, not `INVALID`.
+8. Inability to obtain the authoritative current state version MUST result in `UNKNOWN`.
+9. Local clocks, cache timestamps, and proof-file timestamps MUST NOT substitute for the authoritative state version.
+
+Concurrency boundary:
+
+10. The revocation/replacement check and the state-version comparison MUST be evaluated against a single authoritative state version read. Splitting them across two reads is prohibited.
+11. A proof MUST be re-evaluated against the authoritative state version at every use. Caching a `VALID` determination across distinct operations is prohibited.
+12. When the state version advances between proof issuance and verification, the verification result MUST reflect the version actually read. The verifier MUST NOT retry until a matching version is observed in order to obtain `VALID`.
+
+Boundary of the above: items 10-12 are behavioral obligations on the verifier. Storage-layer field names and transaction mechanisms (section 9, item 4) and the retry/cache/recovery protocol for a failed state-version retrieval (section 9, item 8) remain NOT_DECIDED as mechanisms. That an implementation mechanism is undecided MUST NOT be read as permission to violate items 10-12; conformance is judged on the observable property, not on a prescribed mechanism.
 
 State definitions:
 
@@ -170,6 +193,8 @@ Prohibitions:
 2. `STALE` MUST NOT serve as valid authorization for current operations.
 3. `INVALID` MUST NOT be converted to `VALID` through permissive parsing or field substitution.
 4. The mere existence of a proof file MUST NOT establish currentness.
+5. Loss of currentness, proof invalidation, or a downgrade to `STALE`, `INVALID`, or `UNKNOWN` MUST NOT cause any already executed fade or forget operation to be automatically rolled back, reversed, or re-executed. Already executed fade/forget effects persist independently of proof state.
+6. Recovery, compensation, and replay for already executed fade/forget operations are not defined by this contract and remain NOT_DECIDED per section 9. Their absence of definition MUST NOT be read as authorizing automatic reversal.
 
 **7. Issuer identity and keys**
 
@@ -188,8 +213,10 @@ Normative requirements:
 6. Following normal rotation, historical proofs legitimately issued by the old Key remain valid while the Fence state version remains current and the old Key has not been retroactively revoked.
 7. Normal retirement of an old Key MUST NOT automatically invalidate historical proofs.
 8. If an old Key is revoked due to compromise or authorization violations, proofs within the revocation scope MUST be classified as `INVALID`.
-9. H MUST verify the authorization relationship between the Key and Authority and the Key's validity at issuance.
-10. The existence of an `issuer_key_id` alone MUST NOT be sufficient for acceptance.
+9. If the authorization of the issuing Authority itself is revoked, every proof that depends on that authorization MUST be classified as `INVALID`. This holds independently of the Key's own status: a Key that is itself uncompromised, unexpired, and never individually revoked MUST NOT preserve proof validity once the underlying Authority authorization is revoked.
+10. Authority-level revocation MUST NOT be inferred from Key-level revocation, and Key-level revocation MUST NOT be inferred from Authority-level revocation. The two revocation scopes MUST be tracked and evaluated separately.
+11. H MUST verify the authorization relationship between the Key and Authority and the Key's validity at issuance.
+12. The existence of an `issuer_key_id` alone MUST NOT be sufficient for acceptance.
 
 Specific signature algorithms, key registry schemas, key revocation timestamps, and historical revocation proof formats are not defined by this contract.
 
@@ -204,17 +231,22 @@ Specific signature algorithms, key registry schemas, key revocation timestamps, 
 | Contract version does not match the required version | STALE | Reject as current identity |
 | Authority explicitly bound incorrectly | INVALID | Reject |
 | Ledger revoked | INVALID | Reject |
+| Ledger confirmed retired | INVALID | Reject |
 | Ledger migrated but continuity cannot be confirmed | UNKNOWN | Suspend acceptance |
 | Fence state version matches current version | VALID | Continue validating other constraints |
 | Fence state version differs from current version | STALE | Obtain a new proof |
 | Fence explicitly revoked | INVALID | Reject |
+| Fence replaced by a newer Fence without explicit revocation | STALE | Obtain a new proof |
 | Authoritative state version unavailable | UNKNOWN | MUST NOT pass |
 | installed = captured | VALID | Accept |
 | installed > captured | VALID | Accept |
 | installed < captured | INVALID | Reject |
 | High-water value contains non-decimal characters | INVALID | Reject |
+| High-water value contains leading zeros | VALID | Compare numerically after canonicalization |
+| High-water value exceeds the supported range | INVALID | Reject |
 | Mandatory issuer identity field missing | INVALID | Reject |
 | Issuer Key authorization cannot be confirmed | UNKNOWN | MUST NOT pass |
+| Issuing Authority authorization revoked | INVALID | Reject at scope level |
 | Old Key normally retired through rotation and proof remains current | VALID | Continue accepting |
 | Old Key explicitly retroactively revoked | INVALID | Reject |
 
@@ -229,11 +261,11 @@ The following matters are not defined by this version:
 5. The specific serialization schema and field encoding of Currentness Proofs.
 6. The Unicode data version used for Unicode normalization and Case Folding.
 7. Namespace migration, historical identity inheritance, and cross-version migration protocols.
-8. The complete character whitelist and reserved-character set for percent encoding.
-9. Input compatibility and raw-input rejection policies for leading zeros in high-water values.
-10. Retry, caching, and recovery protocols when state-version retrieval fails.
-11. Audit retention, replay, and compensation mechanisms for already executed fade/forget operations.
-12. The authoritative state-query interface and transport protocol between D and H.
+8. Retry, caching, and recovery protocols when state-version retrieval fails.
+9. Audit retention, replay, and compensation mechanisms for already executed fade/forget operations.
+10. The authoritative state-query interface and transport protocol between D and H.
+
+The percent-encoding character set (section 4), the high-water leading-zero policy (section 5), the Fence replacement classification boundary (section 6), and the Authority-level revocation scope (section 7) are DECIDED by this version and MUST NOT be listed as undecided or deferred to implementer discretion.
 
 Undecided items MUST NOT be treated by implementers as having already received D contractual authorization.
 
@@ -256,7 +288,8 @@ Before claiming conformance to this contract, an implementation party MUST compl
 **1. 文档标识与状态**
 
 - 文档名：Owner Snapshot Namespace and Fence Currentness Contract
-- 版本：1.0.0（CANDIDATE）
+- 版本：1.1.0（CANDIDATE）
+- 修订：1.1.0 吸收第 1 轮审查发现——Ledger 生命周期判定与第 8 节判定表统一；恢复 Authority 级授权撤销规则；恢复已执行 fade/forget 不得自动回滚的约束；百分号编码字符集、前导零策略、Fence 替换判定及状态版本并发边界转为规范要求。
 - 状态：决定已作出、**实现未验证**、**未执行任何一致性运行**。
 - 本文记录 D 侧规范决定及其约束，不构成实现完成证明。
 - 本文非 Owner 真人签署，非契约冻结，不得作为生产就绪证据。
@@ -316,12 +349,19 @@ Before claiming conformance to this contract, an implementation party MUST compl
 
 1. 原 Authority 绑定发生不兼容变更。
 2. Producer class 定义发生不兼容变更。
-3. Ledger identity 迁移、替换或重建，导致原身份不再代表当前账本。
+3. Ledger identity 迁移、替换或重建，且原身份的连续性已被确认为不再 current；若连续性无法确认，则命名空间必须判定为 `UNKNOWN`，不得判定为 `STALE`。
 4. 原契约版本被不兼容的新版本取代。
-5. 对应 Ledger 被撤销或退役。
-6. 命名空间的 canonical representation 不再符合当前规范。
+5. 命名空间的 canonical representation 不再符合当前规范。
 
 `STALE` 表示历史上可能有效、但当前性已经失效；`INVALID` 表示输入本身违反身份或格式约束。两者不得自动互相转换。
+
+Ledger 生命周期状态不得映射为 `STALE`。以下映射为规范性要求，必须严格按第 8 节判定表执行：
+
+1. 指向已撤销 Ledger 的命名空间必须判定为 `INVALID`。
+2. 指向已确认退役 Ledger 的命名空间必须判定为 `INVALID`。
+3. 指向已迁移但连续性无法确认的 Ledger 的命名空间必须判定为 `UNKNOWN`。
+
+当 Ledger 生命周期条件与命名空间身份失效条件同时看似成立时，以本节 Ledger 生命周期映射为准进行判定。命名空间不得仅以 Ledger 生命周期为由被报告为 `STALE`。
 
 **NS-PR-05：禁止混用**
 
@@ -339,7 +379,7 @@ Before claiming conformance to this contract, an implementation party MUST compl
 2. **大小写**：对前三段执行 Unicode Default Case Folding；第四段版本段不执行大小写折叠。
 3. **Unicode 规范化**：对前三段执行 NFC 规范化。
 4. **分隔符处理**：使用 ASCII `/` 作为唯一段分隔符；必须恰好四段，禁止空段及重复分隔符。
-5. **转义**：各段采用 UTF-8 编码，非 unreserved 字节使用大写 `%HH` 百分号编码。先拆段后分段解码一次，禁止二次解码，禁止编码后的分隔符注入。
+5. **转义**：必须先按 ASCII `/` 拆段，再做任何百分号解码，使编码后的分隔符（`%2F`）永不引入段边界；随后对每段恰好解码一次；然后将所得字节按 UTF-8 重新编码：属于 RFC 3986 unreserved 集合（`ALPHA / DIGIT / "-" / "." / "_" / "~"`）的字节必须原样输出，其余所有字节必须以大写 `%HH` 输出。小写 `%hh` 必须归一化为大写。禁止二次解码，禁止编码后的分隔符注入。不以合法 `%HH` 三元组开头的 `%` 必须导致拒绝，不得原样透传。
 6. **版本段处理**：第四段必须符合 `vMAJOR.MINOR.PATCH` 格式，三个部分均为非负十进制整数，不允许前导零，数字零本身除外。
 
 Canonicalization 必须产生唯一、可重复的 canonical representation。
@@ -381,7 +421,12 @@ Canonicalization 必须产生唯一、可重复的 canonical representation。
 3. 两个值必须分别对应其权威操作的实际结果。
 4. 禁止由 `admission_high_water` 推导 captured 或 installed。
 5. 禁止由 `owner_high_water` 推导 captured 或 installed。
-6. 不得以字段存在或数值可解析推定 Fence 已安装或当前有效。
+6. 前导零必须被接受，且不得改变数值；比较必须基于数值进行，不得基于字符串形式进行。
+7. 全部由零构成的表示必须视为数值零，零的 canonical 渲染为 `0`。
+8. 高水位值的 canonical 十进制渲染不得包含前导零；将收到的值按 canonical 形式重新输出时，必须精确保留其数值。
+9. 前导 `+` 或 `-` 号、首尾空白、千位分隔符、指数记法及小数部分均判定为 `INVALID`，不得被归一化为合法值。
+10. 实现必须至少支持至 2^63 - 1 的数值。超出实现支持范围的值必须判定为 `INVALID`；禁止静默截断、回绕及浮点强制转换。
+11. 不得以字段存在或数值可解析推定 Fence 已安装或当前有效。
 
 **6. 当前性判定**
 
@@ -395,8 +440,17 @@ ForgetFence Currentness Proof 不采用显式 TTL，不设置时间有效期上�
 4. 证明版本与当前版本一致，且 Fence 未撤销、未替换时，证明保持有效。
 5. 证明版本与当前版本不一致时，证明判定为 `STALE`。
 6. Fence 明确撤销时，证明判定为 `INVALID`。
-7. 无法取得权威当前状态版本时，判定为 `UNKNOWN`。
-8. 禁止使用本地时钟、缓存时间或证明文件时间替代权威状态版本。
+7. Fence 被更新的 Fence 替换、且被替换的 Fence 未被明确撤销时，证明判定为 `STALE`，不得判定为 `INVALID`。
+8. 无法取得权威当前状态版本时，判定为 `UNKNOWN`。
+9. 禁止使用本地时钟、缓存时间或证明文件时间替代权威状态版本。
+
+并发校验边界：
+
+10. 撤销/替换检查与状态版本比对必须针对同一次权威状态版本读取完成；禁止将其拆分到两次读取。
+11. 证明必须在每次使用时对权威状态版本重新求值；禁止将 `VALID` 判定跨不同操作缓存复用。
+12. 当状态版本在签发与验签之间推进时，验签结果必须反映实际读取到的版本；验签方不得为取得 `VALID` 而反复重读直至观察到匹配版本。
+
+上述条款的边界：第 10–12 项是对验签方的行为义务。存储层字段名与事务机制（第 9 节第 4 项）、状态版本读取失败后的重试/缓存/恢复协议（第 9 节第 8 项）作为**机制**仍属未决。机制未决不得被解释为可以违反第 10–12 项；一致性按可观测属性判定，不按指定机制判定。
 
 三态及有效状态定义：
 
@@ -411,6 +465,8 @@ ForgetFence Currentness Proof 不采用显式 TTL，不设置时间有效期上�
 2. STALE 不得作为当前操作的有效授权依据。
 3. INVALID 不得通过宽松解析或字段替换恢复为 VALID。
 4. 不得仅因证明文件存在就推定 currentness。
+5. 当前性丧失、证明失效或降级为 `STALE`、`INVALID`、`UNKNOWN`，不得导致任何已执行的 fade 或 forget 操作被自动回滚、反向执行或重新执行。已执行 fade/forget 的效力独立于证明状态持续存在。
+6. 已执行 fade/forget 操作的恢复、补偿与重放机制不属于本契约已定义内容，按第 9 节仍为未决项；未定义不得被解释为授权自动反向执行。
 
 **7. 签发主体与密钥**
 
@@ -429,8 +485,10 @@ ForgetFence Currentness Proof 不采用显式 TTL，不设置时间有效期上�
 6. 正常轮换后，旧 Key 合法签发的历史证明，在 Fence 状态版本仍 current 且旧 Key 未被追溯撤销时继续有效。
 7. 旧 Key 正常退役不自动导致历史证明失效。
 8. 旧 Key 因泄露或授权违规被撤销时，受撤销范围影响的证明判定为 INVALID。
-9. H 必须验证 Key 与 Authority 的授权归属及签发时有效性。
-10. 不得仅凭 `issuer_key_id` 存在就接受证明。
+9. 签发 Authority 自身的授权被撤销时，依赖该授权的全部证明必须判定为 `INVALID`。此判定独立于 Key 自身状态：即使 Key 本身未被泄露、未过期、也未曾被单独撤销，也不得在底层 Authority 授权被撤销后继续维持证明有效。
+10. 不得由 Key 级撤销推定 Authority 级撤销，也不得由 Authority 级撤销推定 Key 级撤销。两类撤销范围必须分别跟踪、分别求值。
+11. H 必须验证 Key 与 Authority 的授权归属及签发时有效性。
+12. 不得仅凭 `issuer_key_id` 存在就接受证明。
 
 签名算法、密钥注册表 schema、密钥撤销时间戳及历史撤销证明格式不属于本契约的已定义内容。
 
@@ -445,17 +503,22 @@ ForgetFence Currentness Proof 不采用显式 TTL，不设置时间有效期上�
 | 契约版本与要求不匹配 | STALE | 不接受当前身份 |
 | Authority 明确绑定错误 | INVALID | 拒绝 |
 | Ledger 已撤销 | INVALID | 拒绝 |
+| Ledger 已确认退役 | INVALID | 拒绝 |
 | Ledger 迁移但连续性无法确认 | UNKNOWN | 暂停接受 |
 | Fence 状态版本与当前版本一致 | VALID | 继续验证其他约束 |
 | Fence 状态版本不一致 | STALE | 重新取得证明 |
 | Fence 明确撤销 | INVALID | 拒绝 |
+| Fence 被更新 Fence 替换且未明确撤销 | STALE | 重新取得证明 |
 | 权威状态版本无法取得 | UNKNOWN | 不得通过 |
 | installed = captured | VALID | 允许 |
 | installed > captured | VALID | 允许 |
 | installed < captured | INVALID | 拒绝 |
 | 高水位包含非十进制字符 | INVALID | 拒绝 |
+| 高水位包含前导零 | VALID | 规范化后按数值比较 |
+| 高水位超出支持范围 | INVALID | 拒绝 |
 | 必需签发主体字段缺失 | INVALID | 拒绝 |
 | 签发 Key 授权状态无法确认 | UNKNOWN | 不得通过 |
+| 签发 Authority 授权已撤销 | INVALID | 按范围拒绝 |
 | 旧 Key 正常轮换退役且证明仍 current | VALID | 继续接受 |
 | 旧 Key 明确被追溯撤销 | INVALID | 拒绝 |
 
@@ -470,11 +533,11 @@ ForgetFence Currentness Proof 不采用显式 TTL，不设置时间有效期上�
 5. Currentness Proof 的具体序列化 schema 和字段编码。
 6. Unicode 规范化及 Case Folding 所采用的 Unicode 数据版本。
 7. 命名空间迁移、历史身份继承及跨版本迁移协议。
-8. 百分号编码所允许的完整字符白名单及保留字符集合。
-9. 高水位前导零的输入兼容策略及原始输入拒绝策略。
-10. 状态版本读取失败后的重试、缓存及恢复协议。
-11. Fade/forget 已执行操作的审计保留、重放及补偿机制。
-12. D、H 之间权威状态查询接口及其传输协议。
+8. 状态版本读取失败后的重试、缓存及恢复协议。
+9. Fade/forget 已执行操作的审计保留、重放及补偿机制。
+10. D、H 之间权威状态查询接口及其传输协议。
+
+百分号编码字符集合（第 4 节）、高水位前导零策略（第 5 节）、Fence 替换的判定边界（第 6 节）及 Authority 级撤销范围（第 7 节）属于本版本已经确定的内容，不得被列为未决项，也不得交由实现方自行裁量。
 
 未决项不得由实现自行推定为已经获得 D 契约授权。
 
