@@ -730,3 +730,50 @@ Storage has recorded design-level acceptance of the BIH identity contract at its
 - I notification comment: `6918538077`
 
 The artifact distinguishes I authorization ordering from Storage's own VisibilityPointer/PublicationReceipt transaction and explicitly leaves JF-10 P0 OPEN. Storage runtime conformance remains NOT VERIFIED. I's Storage consumer row remains OPEN until I records or rejects this artifact.
+
+
+## 2026-11-20 — JF-10 v1/v2 exact-version reconciliation
+
+This section supersedes earlier status text in this report that described the v1 detached I-decision / independent Storage-commit sequence as the current unresolved design. That v1 defect remains historically valid, but I has since accepted the single-I-PolicyDomain owner-gate-participating durable-2PC architecture.
+
+### Exact current Owner evidence
+
+| Boundary | Current artifact / Blob | Disposition |
+|---|---|---|
+| A COC architecture | `reviews/integration/phase-3.6-causal-order-coordinator-deployment-architecture.md` / `a3c51ec18f61dda46bb5e57d1155d1bcb2c7cc4d` | A architecture proposal; exact I composition acceptance not evidenced for this Blob |
+| I JF-10 v2 | `09-security-governance/phase-3.6.2-jf10-v2-i-owner-disposition.md` / `8069ff86988396442c8d9dc3fd58653683abe2f3` | ACCEPTS single-I-PolicyDomain owner-gate-participating durable 2PC, but pins reviewed DE-S proposal Blob `d544cc38a922b314e6dc45dd4db76aae6b47f5fc` |
+| D/E/Storage shared protocol | common readback Blob `94679897e84a6f58fd8b9467b5249e1a885cb0b0` on all three Owner branches | Current common protocol candidate; exact I re-acceptance of this Blob not found |
+| D owner decision | `03-memory-brain/forget-fence-operation-and-publication-gate.md` / `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` | Accepts D-owned semantics for exact A + common v2 bundle, with reservations |
+| E owner decision | `04-memory-compiler/phase-3.6.2-e-jf10-coc-bridge-producer-acceptance.md` / `4503628cf6f6ea46696ab14e7decd3e408ced19a` | Accepts E producer-lifecycle boundary for exact A + common v2 bundle |
+| Storage owner decision | `reviews/storage-consistency/forget-atomicity-storage-realization-review.md` / `107d21bd2c604ee0b04feff2ee5580e1de9c7fce` | Accepts Storage participant/visibility boundary for exact A + common v2 bundle, subject to DB/deployment proof |
+| I COC/JF-10 composition boundary | `09-security-governance/phase-3.6.2-i-coc-jf10-composition-boundary.md` / `9e1f66ddbe0952f17068b1638feb8ab0094588c3` | Explicitly says no automatic COC↔JF-10 composition; combined use requires a new joint protocol and exact Owner decisions |
+
+### Current finding and return path
+
+**JF10-REC-003a [P0] — I exact-version acceptance / COC composition remains open.** I's v2 decision accepts Blob `d544cc...`, while the current D/E/Storage common protocol is Blob `946798...`. D/E/Storage have accepted the latter at their own boundaries, but I has not yet recorded ACCEPT / REVISE / BLOCK against that exact current Blob. In addition, I's composition boundary rejects automatic inference that COC positions replace or compose with the I JF-10 sequencer. The exact A COC Blob `a3c51...` is not the older A COC Blob pinned in I's composition-boundary source.
+
+- **Owner:** I for I sequencer/receipt and composition decisions; A for presenting the exact joint bundle; D/E/Storage retain their own owner predicates.
+- **Closure:** I records a disposition against exact current Blob(s), and explicitly keeps COC/JF-10 separate or approves a bounded composition with exact owner acceptance.
+- **Return:** existing Issue #4 (I decision carrier); technical owner follow-through remains on existing Issue #20.
+- **Issue #4 comment:** `7015814399` — https://github.com/oahcom/AiMemoryBrainArchitecture/issues/4#issuecomment-7015814399
+- No PR or Issue was created; Issue #4 remains OPEN / HOLD.
+
+### Bounded verification evidence
+
+Storage PostgreSQL 18.7 capability workflows returned SUCCESS on test head `83bdacbafa840808dca9be7a8c76c4df83c63504`:
+- Prepared-XID: run `43959079736`
+- Synchronous failover: run `43959079669`
+- WAL archive / PITR: run `43959079745`
+- Standby unavailable fail-closed: run `43959079760`
+- Backup / restore: run `43959079703`
+- Old-primary rewind / rejoin: run `43959079930`
+
+These are bounded PostgreSQL physical capability results only. They do not establish production deployment binding, persistent COC quorum, live I sequencer integration, D fence/lineage serialization, E lifecycle integration or end-to-end JF10-01..17. Storage's executable conformance plan Blob `49056cd46fd30445c0e564c99e0e234f60f065c4` still states integrated JF-10 conformance is NOT EXECUTED; the deployment-binding record remains NOT DESIGNATED. Gate A is partial; Gate B/C blocked; JF-10 P0 OPEN; multi-policy-domain atomicity BLOCKED.
+
+### Prompt provenance — T2
+
+- Prompt ID/version: `CHAT-INSTRUCTION-PHASE36-CONTINUE-2026-11-20 v1.0`.
+- Source: user-provided management/task instruction in this ChatGPT conversation; exact snapshot stored in Issue #4 comment `7015814399` (permalink above).
+- Conversation ID: NOT RECORDED because not exposed by this runtime; SHA-256: NOT_VERIFIED (not fabricated).
+- Work Item ID: NOT ASSIGNED by the handoff; no AID inferred.
+- Governing files actually read from main: AI-EXEC-001 v1.1 Blob `58af59af266b81109269156ea667df1a15edfb7b`; AI-EXEC-002 v1.2 Blob `7f5928a5d16eb12da7621cfb8bd99ca463afd859` (v1.2 PENDING ADOPTION; v1.1 adopted predecessor).
