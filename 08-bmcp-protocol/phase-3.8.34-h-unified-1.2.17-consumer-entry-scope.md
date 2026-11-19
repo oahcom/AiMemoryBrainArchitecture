@@ -52,17 +52,31 @@ These are TEST-profile reference entry points. They are not production runtime c
 
 ## 4. Call-path inventory
 
-The following are the inspected Python call sites relevant to the three requested function names (line numbers refer to the delivered source revision):
+The following inventory covers the repository's Python files under `08-bmcp-protocol` at this branch HEAD. Line numbers refer to the delivered source revision. No production caller was found; all external references below are conformance-test fixtures.
+
+**Combined validator definitions and internal call:**
 
 1. `runtime_reference/unified_manifest_semantics.py:41` — defines `validate_owner_snapshot`.
 2. `runtime_reference/unified_manifest_semantics.py:176` — defines `validate_union`; line 194 calls `validate_owner_snapshot` internally.
-3. `tests/conformance/recovery_cutoff/test_unified_manifest_owner_snapshot_alignment.py:12-13` — test-fixture imports of `validate_owner_snapshot` and `validate_union`; direct assertions and composed calls occur at lines 56-187. This is the pre-existing mixed-version alignment fixture, not a production entry.
-4. `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_17_composed_entry.py:11-13` — new test-fixture imports; direct and composed explicit-revision calls occur at lines 106-180.
-5. `runtime_reference/owner_snapshot_semantics_1_2_17.py:48` — defines `validate_owner_snapshot_1_2_17`.
-6. `tests/conformance/recovery_cutoff/test_owner_snapshot_1_2_17.py:10-11,72,91` — imports and invokes the dedicated 1.2.17 snapshot validator.
-7. `tests/conformance/recovery_cutoff/test_owner_snapshot_semantics_1_2_17.py:11-13,90-173` — imports and invokes the dedicated validator for D bounded-field regressions.
 
-Related but distinct: `test_recovery_join_1_0_2.py:10-11,87-107` calls `validate_owner_snapshot_membership_proof_payload`; that function validates membership-proof payloads and is not any of the three snapshot/union entry points listed above.
+**Legacy composed-validator test fixtures (default legacy I5/C3 mode):**
+
+3. `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_10.py:9` — imports `validate_union` as `_validate_union`; wrapper at 120-122; calls at 123-191. Its fixture is tied to the 1.2.10 schema artifact and retains the legacy field set.
+4. `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_11.py:10` — imports `validate_union` as `_validate_union`; wrappers at 86-90 and 157-161; calls at 163-236. Legacy conformance fixture.
+5. `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_12.py:10` — imports `validate_union` as `_validate_union`; wrappers at 82-86 and 166-170; calls at 171-251. Legacy conformance fixture.
+
+**1.2.17 mixed-version and explicit-version test fixtures:**
+
+6. `tests/conformance/recovery_cutoff/test_unified_manifest_owner_snapshot_alignment.py:12-13` — imports `validate_owner_snapshot` and `validate_union`; direct assertions at 56-70, composed calls at 72-187. It checked D8 against Schema 1.2.17 but supplied legacy I5/C3, hence the mixed-version gap this delivery repairs.
+7. `tests/conformance/recovery_cutoff/test_unified_manifest_1_2_17_composed_entry.py:11-13` — new imports; direct and composed explicit-revision calls at 106-180.
+
+**Dedicated 1.2.17 snapshot validator:**
+
+8. `runtime_reference/owner_snapshot_semantics_1_2_17.py:48` — defines `validate_owner_snapshot_1_2_17`.
+9. `tests/conformance/recovery_cutoff/test_owner_snapshot_1_2_17.py:10-11,72,91` — imports and invokes the dedicated 1.2.17 snapshot validator.
+10. `tests/conformance/recovery_cutoff/test_owner_snapshot_semantics_1_2_17.py:11-13,90-173` — imports and invokes the dedicated validator for D bounded-field regressions.
+
+Related but distinct: `test_recovery_join_1_0_2.py:10-11,87-107` calls `validate_owner_snapshot_membership_proof_payload`; that function validates membership-proof payloads and is not any of the three snapshot/union entry points listed above. The other inspected Python files under `08-bmcp-protocol` contain no references to the three requested function names.
 
 The 1.2.17 semantic-reference note `phase-3.8.33-h-unified-1.2.17-owner-gate-release-semantic-reference.md` identifies `owner_gate_release_semantics_1_2_17.py` as the Owner Gate Release reference validator. That is a separate function family and does not designate the 1.2.9 combined validator as a 1.2.17 owner-snapshot consumer.
 
