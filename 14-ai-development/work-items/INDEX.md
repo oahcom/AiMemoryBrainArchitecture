@@ -121,3 +121,35 @@ Out of scope for this authorization: FIX-2026-P1-T2 (PR #272, merge `f16d04de`) 
 | `2026-11-19-FIX-P1-T4-EVIDENCE-TIERING` | FIX-2026-P1-T4 | NOT RECORDED | [#289](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/289) | `ai/FIX-2026-P1-T4/G-evidence-tiering` / exact Head `cb839a1f3929e62c731517022037aecd7c066145` | Chat instruction; immutable prompt ID/hash NOT RECORDED | Evidence-chain tiering Level 1/2/3 as an evidence-depth selector independent of the R0–R3 review levels and the twelve-state / six-phase axes: `evidence-tiering-policy.md` / `.en.md` (PROPOSED), `check-evidence-tiering.py` with fail-closed exit codes 0/1/2, `test_evidence_tiering.py` at 67 tests, plus `ai-development-standard.md` §4.2.1 and the manifest/template blocks. Authorization `DEC-FIX-2026-P1-T4-GO-001` (8-path allowlist). The author reported an R1→R8 review chain ending in R8 APPROVED; that claim has no platform carrier — `reviews` = 0 and `comments` = 0 at merge time, and the identifiers cited as R1–R8 are eight fix-commit SHAs. It was formally retracted in comment `7017961137` and MUST NOT be cited as review evidence. What is verifiable: post-merge R1 NEEDS-REVISION (`7017936906`) → remediation `de24b7b9` → R2 (`7018059128`) → R3 PASS, all three rounds after the merge; correction comment `7017936362`. Tests: 67/67 OK reproduced on Windows on `cb839a1f` and again after remediation; the Linux run is the author’s report and was not independently reproduced. Post-merge registration comment `7017900648`: Expected Head `cb839a1f`, Authorized Base `c0ea54ed`, Actual Merge Base `2006492f`, Tree `4c9b45a6`. | MERGED (technical fact) — merge commit `e79bddaac40f3b396939c82e2060144c4e710ff8` on `main`; authorization state recorded separately: the manifest of the same head carried `main_merge: NOT_AUTHORIZED` with `required_review` pending, so this is a merge, not an authorized merge. Policy status `PROPOSED`; adoption NOT granted. `sponsor` / `accountable_owner` / `acceptance_authority` = `NOT_ASSIGNED`. Index registration itself was the open leftover `P1T4-INDEX-REG`, closed by this authorized PR. |
 
 Registration boundary: these rows record delivery, review and merge evidence only. They do not certify policy adoption (`AI-DOC-EVIDENCE-TIERING` and the bilingual tiering policy both remain `PROPOSED`), do not assign any governance role, and do not close any other governance Finding.
+
+## Phase 2 design records — P2-T2 / 2026-11-20
+
+This section registers Phase 2 design work. It records design artefacts and their review state.
+
+**States this section does not collapse.** Four states are recorded separately and the later three MUST NOT be derived from the first:
+
+| state | value | meaning |
+|---|---|---|
+| `RECORD_INTEGRATION` | `MERGED` | Git integration fact only |
+| `DESIGN_ACCEPTANCE` | `NOT_GRANTED` | no accountable authority has accepted this design |
+| `IMPLEMENTATION_AUTHORIZATION` | `NOT_GRANTED` | no implementation is authorised by this record |
+| `GOVERNANCE_STATUS` | `BLOCKED` | awaiting accountable authority assignment and governance decisions |
+
+A row appearing in this register means the artefact is tracked. It does not mean the artefact is approved, adopted, reviewed on-platform, or executable.
+
+| Work Item | Title | Carrier | Head / merge | Review | Status / closeout |
+|---|---|---|---|---|---|
+| [P2-T2-MEMORY-SCHEMA](P2-T2-MEMORY-SCHEMA/design-proposal.md) | Memory storage schema design proposal (Phase 2 Task 2) | [#307](https://github.com/oahcom/AiMemoryBrainArchitecture/pull/307) | branch `design/P2-T2-memory-schema`, reviewed heads `9b5446b9` → `aed58ad0` → `fb1f59de` → `bdb19ac0` → `70a68b08` → `04733e9f`; merged as `7f2594128185511d7389665d71fc4b3ba510f3db` (merge commit, parents `6e7fbb31` + `79b8e216`, tree `6e54bb74`), merged `2026-11-20T07:00:38+08:00`, `+1614 / -0`, 2 files | R1 `REQUEST CHANGES` (comment `7023231264`) → R2 `REQUEST CHANGES` (`7023510140`) → R3 `REQUEST CHANGES` (`7023884586`) → R4 `REQUEST CHANGES` (`7024484706`) → R5 confirmation, residual `CLOSED IN SPECIFICATION`, cycle `STOP`, no R6 (`7024485207`). The five review outcomes are preserved in author-posted discussion records as reported independent-review dispositions. GitHub has no submitted review objects for this PR; the discussion records establish the recorded dispositions, not platform-authenticated reviewer identity or formal GitHub review state. | **`RECORD_INTEGRATION = MERGED`** (technical fact). **`DESIGN_ACCEPTANCE = NOT_GRANTED`.** **`IMPLEMENTATION_AUTHORIZATION = NOT_GRANTED`.** **`GOVERNANCE_STATUS = BLOCKED`** — status recorded by the merged document itself: awaiting accountable authority assignment and governance decisions. Open: Q1 (architecture A/B/C), Q11 (Layer 1 boundary), Q12 (schema-execution authority), Q13 (completed call requires result), Q14 (`recompute` single input), Q8, Q9. `accountable_owner` / `acceptance_authority` = `NOT_ASSIGNED`. The conclusion recorded in the merged design document is that no identified NF-R3-02 engineering-specification residue remains; that is the document's own recorded conclusion, not independently verified correctness of the database constraints. DDL executability and regression behavior remain `UNVERIFIED`; none of the 21 §13 tests were written or run. Merge authorization for the specified PR #307 head is recorded in comment `7024574717` (head `79b8e216`, base `6e7fbb31`, Merge Commit). Issue #264 comment `7000428916`, clause 3, supplies the dev-baseline classification of `main` merge approval as `OUT-OF-SCOPE(dev-baseline)`; it removes that human-approval gate as a convergence blocker but does not itself constitute design acceptance or implementation authorization. Prompt source `prompts-fix/P2-T2-memory-schema.md` is not committed to the repository; its DDL is reproduced verbatim as Appendix A of the merged proposal, with provenance recorded as `UNVERIFIED`. |
+
+### Evidence source tiers for the row above
+
+The three evidence sources do different work and are not interchangeable.
+
+| source | establishes | does not establish |
+|---|---|---|
+| GitHub Review API (`pulls/307/reviews`) | `reviews: []` — no formal Review object exists | that any review passed; that no review was performed off-platform |
+| GitHub discussion comments (`issues/307/comments`) | seven comments exist, all posted by `oahcom`; the five cited review records and the merge-authorization record exist as text | reviewer identity, session identity, or independence of the reviewing process |
+| Comment content R1–R4 | the recorded disposition is `REQUEST CHANGES` | a platform Review verdict |
+| Comment content R5 | a confirmation round recording `STOP` and no R6 request | design approval, or any governance decision |
+
+Registration boundary: this row records design content, review evidence and a merge. It does not certify that the design is approved, that any architecture option was chosen, that the DDL executes, or that implementation is authorised. The merged document states each of those as open and this row does not override it.
