@@ -1,18 +1,18 @@
 # AID-2026-001 — Forget / Memory 生命周期联合契约提案 v2.2（简体中文）
 
-**PROPOSED — 尚不具规范效力。** 本文件是在冻结 v2.1 双语层之上的 Storage/Backup 持久化边界增量完成层。不替换、修改、覆盖或削弱 v2.1。根据治理记录，v2.1 精确 Blob 仍是已批准的上游层；该批准不会自动延伸至 v2.2。D/I/Storage 对本 v2.2 精确 SHA 的批准：均未声明。本层不声称已取得同 SHA 批准。
+**PROPOSED — 尚不具规范效力。** 本文件是在冻结 v2.1 双语层之上的 Storage/Backup 持久化边界增量完成层。不替换、修改、覆盖或削弱 v2.1。Owner D 与 Owner I 已在 Issue #41 评论 6995407116、6995704238 中，分别批准 v2.1 的精确内容 Blob（EN `7acd3e5095995c6b8c52b637d7d9978e96619c3a`；ZH `5c778a6e095d3087937da5edd0273cbfc744ec80`）。Storage/Backup 操作方曾在 Issue #41 评论 6995936761（STOR-R3-001）对 v2.1 的**完整持久化边界范围作出 NOT APPROVED（BLOCKED）**裁决。因此，v2.1 仅在 Owner D 与 Owner I 各自权责范围内获得批准；**不得表述为已获 Storage 对完整持久化边界的批准**。v2.2 正是针对该 Storage Finding 的整改层。上述批准不自动延伸至 v2.2。 D/I/Storage 对本 v2.2 精确 SHA 的批准：均未声明。本层不声称已取得同 SHA 批准。
 
 请与 [v2.2 英文对应文件](forget-lifecycle-joined-contract-proposal-v2.2.en.md)、[冻结的 v2.1 英文层](forget-lifecycle-joined-contract-proposal-v2.1.en.md)及[冻结的 v2.1 中文层](forget-lifecycle-joined-contract-proposal-v2.1.zh-CN.md)共同阅读。v2.1 保持不可变。
 
 - 工作项：AID-2026-001 / STOR-R3-001 整改
 - 层级：v2.2 — v2.1 之上的持久化边界增量完成层
-- 基线 Head：cc571886c7f5afb8f581740486f6f32ed5f2e61d
+- 基线 Head：4a962c7b8bf645a5b7498f775feb1e74633fae17
 - 来源 Blob：v1 96882570d44f6a3c6d60a30b1edb0e405bde5efc；v2 28ce1f735be6781b8de32a310d50e24cb457f01e；v2.1 EN 7acd3e5095995c6b8c52b637d7d9978e96619c3a；v2.1 ZH 5c778a6e095d3087937da5edd0273cbfc744ec80；U-010 e12bc3beaf7327f7646fa090cb1fe2cda023cacf；Owner Execution Boundary Contracts v1 008b625bdb29ee65fe136f21c0e9be6396228e4b；R3 Contract Test Matrix 0dac44f65a47541bf5dca90563c90ade6a5d4331。
 - 状态：PROPOSED — NOT NORMATIVE；实现/证据未验证；测试未运行。
 
 ## 1. 目的、范围与权责
 
-本层针对 STOR-R3-001 / P1 / Issue #41，明确承载 U-010 D-R3-D-002 和《Owner Execution Boundary Contracts v1》§8 的 Storage/Backup 义务。本层是增量层；v2.1 仍为已批准的上游语义层。本文件未覆盖之处，继续适用 v2.1 及其源契约。本提案规定要求，不证明已有实现、原子性、备份完整性、恢复安全或测试执行。
+本层针对 STOR-R3-001 / P1 / Issue #41，明确承载 U-010 D-R3-D-002 和《Owner Execution Boundary Contracts v1》§8 的 Storage/Backup 义务。本层是增量层；v2.1 仍为 Owner D 与 Owner I 在各自权责范围内批准的上游语义层；Storage/Backup 对其完整持久化边界范围作出的 NOT APPROVED（BLOCKED）裁决仍然有效，须通过 STOR-R3-001 整改。本文件未覆盖之处，继续适用 v2.1 及其源契约。本提案规定要求，不证明已有实现、原子性、备份完整性、恢复安全或测试执行。
 
 Owner D 拥有规范生命周期与 ForgetFence 语义，并提供领域事件/证明。Owner I 拥有授权、策略、Retention/Legal Hold 及治理证据接受规则，并提供其类型化决策/引用。Storage/Backup 拥有并必须证明持久化排序、原子性、复制/故障切换、备份生命周期、恢复隔离及恢复可见性。本层不转移权责。
 
@@ -63,7 +63,13 @@ Storage MUST 在复制、故障切换、Leader 选举、副本提升、Restore �
 
 尚未达到经验证到期时间的 Backup **不属于已擦除**。除非策略和证据证明介质/对象已不可恢复，否则仅到期本身不构成逐副本擦除回执。任何 Retention Exception 仍须是可归属 I 决策，具有明确范围、控制和到期时间；本层不授予例外。
 
-Backup Manifest 缺失、不可访问、不完整或无法认证时，其状态 MUST 记录为 UNKNOWN。清单缺失 MUST NOT 被解释为没有备份、没有副本、已到期或已擦除。若完成/合规声明依赖证明该覆盖范围，则未知备份覆盖阻止该声明。
+Backup Manifest 缺失、不可访问、不完整或无法认证时，其状态 MUST 记录为 UNKNOWN。备份清单缺失 MUST NOT 被解释为没有备份、没有副本、已到期或已擦除。若完成/合规声明依赖证明该覆盖范围，则未知备份覆盖阻止该声明。
+
+**受控 Primary/Replica 副本清单及完备性（强制义务）。** Storage/Backup MUST 建立并持续维护 Forget 执行与持久化边界内**全部受控 Primary/Replica 副本的全量清单**。清单 MUST 使用稳定副本 ID 标识每个副本，至少记录其角色（Primary 或 Replica）、所属系统/存储、区域/位置、分片或分区、数据/对象类别及覆盖的身份/版本范围、权威/复制关系、责任操作方和生命周期/状态。清单范围 MUST 包含所有受控 Primary 与 Replica 副本，包括用于故障切换或恢复的相关副本；不得仅限于擦除任务已经发现的副本。
+
+Storage/Backup MUST 提供**副本清单覆盖完整性证明**，证明该清单覆盖范围内全部受控 Primary/Replica 副本。证明 MUST 将清单与权威拓扑/配置及部署登记、存储/账户/资源清单、复制成员关系和负责系统 Owner 的确认进行核对，记录所用来源及观察时间，并标识/解释排除项或未解决缺口。任何未枚举、不可访问或未完成核对的潜在受控副本，均使完整性状态成为 UNKNOWN；未出现在清单中不代表该副本不存在。只有先取得清单完备性证明，才可声称逐副本擦除/去标识化工作已穷尽或完成。
+
+对于清单中的**每一项**，Storage/Backup MUST 以稳定副本 ID 为键记录逐副本擦除/去标识化动作及证据，包括动作、结果、验证者和可信观察时间。记录 MUST 明确区分**逻辑 Tombstone/抑制**与**物理擦除**（以及去标识化）；Tombstone 不等于物理擦除。STOR-06 的逐副本证据义务以该受控副本全量清单为前置，并 MUST 与清单逐项对账。
 
 ## 6. STOR-05 — Restore 预检、隔离与对账
 
@@ -84,7 +90,8 @@ Storage/Backup 证据 MUST 只追加、完整性受保护、内容最小化，�
 - 证明六项元组原子持久化提交的 Transaction/WAL Commit Receipt；
 - ForgetOperation 身份、幂等身份、Commit 结果和 Fence Generation；
 - 相关副本及提升/故障切换边界上的副本高水位观察；
-- 逐副本擦除/去标识化回执，含副本身份、动作、结果、验证者和可信观察时间；
+- 受控 Primary/Replica 副本全量清单及其覆盖完整性证明，并与权威拓扑/配置、部署、存储/账户/资源及复制成员关系来源核对；
+- 清单中每一项的逐副本擦除/去标识化回执，以稳定副本 ID 为键，含动作、结果、验证者和可信观察时间；记录 MUST 区分逻辑 Tombstone/抑制、物理擦除与去标识化；
 - Backup Set Manifest、覆盖范围及经验证的到期/保留证明；
 - Restore 预检及逐 Operation 对账轨迹，包括进入/解除隔离决策；
 - Restore 后负向 Query 和 Delivery 测试证据。
@@ -118,7 +125,7 @@ Storage/Backup 证据 MUST 只追加、完整性受保护、内容最小化，�
 ## 10. Finding、批准与不作出的声明
 
 - STOR-R3-001 — P1 — Issue #41 — SPECIFICATION_REMEDIATION_PROPOSED / PENDING_INDEPENDENT_REVIEW_AND_STORAGE_REASSESSMENT。§§2–8 明确规定六项原子提交元组、可执行 Storage/Backup 故障切换/读取/备份/恢复义务、失败规则及证据要求。
-- 根据治理记录，v2.1 作为冻结的上游已批准层；本 Commit 不修改其文件或精确内容 SHA。
+- v2.1 保持冻结且未修改。Owner D 与 Owner I 已在各自权责范围内批准其 EN/ZH 精确内容 SHA（Issue #41 评论 6995407116、6995704238）。这些 D/I 批准不构成 Storage 批准；Storage/Backup 对 v2.1 完整持久化边界范围作出的 NOT APPROVED（BLOCKED）裁决（Issue #41 评论 6995936761；STOR-R3-001）仍然有效，v2.2 是针对该 Storage Finding 的整改层。
 - D/I/Storage 对本 v2.2 精确内容 SHA 的批准：NOT CLAIMED。后续任何批准必须指向本层精确 SHA，并由相应权责方明确归属。
 - 独立复审、Storage 重新审查、D/I 补充同 SHA 批准、集成审查、R3 可复现测试及故障注入证据均待完成。
 - 不声称已有运行时实现、生产符合性、原子性证明、备份完整性、物理擦除、恢复安全、测试 PASS、Finding 关闭、合并或生产激活。
