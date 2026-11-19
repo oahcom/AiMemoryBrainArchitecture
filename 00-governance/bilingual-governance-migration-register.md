@@ -1075,8 +1075,9 @@ C168 是 313 条记录中唯一的 `MIXED` 记录；其余 312 条均为 `EN_ONL
 **Rules / 规则**
 
 1. The original anchor in §8.11/§8.13 is never edited in place; this section is the single place where a refreshed value becomes authoritative for current use.
-2. Every entry must carry: object identifier, both anchors, the observation time of each, the reason for the change (edit event with its timestamp), the classification re-check result, and the source record that holds the recomputation.
-3. A refresh entry does not change the object's language classification by itself. Re-classification requires a fresh inspection, whose result is recorded in the entry.
+2. Every entry must carry: object identifier, both anchors, the observation time of each, the reason for the change (edit event with its timestamp), the classification re-check result **as evidence that the classification is unchanged**, and the source record that holds the recomputation.
+3. **A refresh entry may only carry a re-check whose outcome is "unchanged".** If the re-check finds that a classification change is required, the refresh stops at that point: the entry records the stop and the referral, and the change is handled exclusively by the separate classification process defined in rule 5. The refresh entry must never carry the changed classification itself.
+   A refresh entry therefore cannot change the object's language classification; it can only certify that the classification is unchanged, or record that the case was referred out.
 4. Absence of an entry means the §8.11/§8.13 anchor was current as of the reconciliation baseline `f86fddc0` (recomputed 313/313 commits and 38/39 issues against that baseline).
 5. **Isolation from classification changes.** A refresh entry must not modify an object's classification field, classification basis, or classification decision record. Any classification change requires its own re-inspection and its own registration/approval path; folding a classification change into an anchor refresh is prohibited.
 6. A refresh entry does not migrate, rewrite, or exonerate any historical object; `MIGRATION_DEBT != EXEMPTION` remains in force.
@@ -1084,8 +1085,9 @@ C168 是 313 条记录中唯一的 `MIXED` 记录；其余 312 条均为 `EN_ONL
 **中文规则**
 
 1. §8.11/§8.13 中的原锚点一律不就地改写；本节是刷新值取得现行效力的唯一位置。
-2. 每条记录必须包含：对象标识、新旧两个锚点、各自的观测时间、变更原因（编辑事件及其时间戳）、分类复核结果，以及保存复算过程的来源记录。
-3. 刷新条目不因自身而改变对象的语言分类；重新分类须以新的核查为依据，并将结果写入该条目。
+2. 每条记录必须包含：对象标识、新旧两个锚点、各自的观测时间、变更原因（编辑事件及其时间戳）、**作为「分类未变」证据的**分类复核结果，以及保存复算过程的来源记录。
+3. **刷新条目只承载结论为「未变」的复核。**若复核发现需要变更分类，刷新流程必须在此时停止：条目只记录「已停止并转交」，变更一律交由第 5 条规定的独立分类程序处理。刷新条目不得承载变更后的分类本身。
+   因此刷新条目不能改变对象的语言分类，只能证明分类未变，或记录已转交。
 4. 无条目意味着该对象的 §8.11/§8.13 锚点在对账基线 `f86fddc0` 上仍然有效（该基线复算：Commit 313/313、Issue 38/39）。
 5. **与分类变更严格隔离。** 刷新条目不得修改对象的分类字段、分类依据或分类判定记录。任何分类变更都必须另行重新核查并走独立的登记/审批路径；禁止把分类变更夹带进锚点刷新。
 6. 刷新条目不迁移、不改写、不豁免任何历史对象；`MIGRATION_DEBT != EXEMPTION` 继续有效。
