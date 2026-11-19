@@ -224,11 +224,17 @@ Recommended entry points:
 
 ### Documentation and decision discipline / 文档与决策纪律
 
-Architecture documents are maintained in Chinese and English. Both versions must preserve the same meaning, constraints, stable identifiers, decision status, failure cases, and acceptance criteria. A translation must never promote a CANDIDATE, OPEN, or TO_VALIDATE item into a decided requirement.
+This README is bilingual in a single file: Chinese content is paired with the corresponding English sections in this same `README.md`; there is no separate Chinese README. The repository's architecture documents are maintained in Chinese and English. Both versions must preserve the same meaning, constraints, stable identifiers, decision status, failure cases, and acceptance criteria. A translation must never promote a CANDIDATE, OPEN, or TO_VALIDATE item into a decided requirement.
 
-Significant design statements use explicit status labels such as **DECIDED**, **CANDIDATE**, **TO_VALIDATE**, and **OPEN**. Implementation and acceptance claims must be backed by reproducible evidence. See [GOV-DOC-001](00-governance/bilingual-documentation-policy.md) and the [AI Development Standard](14-ai-development/ai-development-standard.md).
+Significant design statements use explicit status labels such as **DECIDED**, **CANDIDATE**, **TO_VALIDATE**, and **OPEN**. A component name alone is not sufficient to authorize implementation: responsibilities, boundaries, inputs, outputs, state transitions, failure behavior, security constraints, and acceptance criteria must first be specified. Implementation and acceptance claims must be backed by reproducible evidence.
 
-架构文档采用中英双语维护，两种语言必须保持相同的含义、约束、稳定标识、决策状态、故障场景和验收标准。翻译不得把 CANDIDATE、OPEN 或 TO_VALIDATE 提升为已决议要求。重要设计结论使用明确状态标记；实现和验收结论必须有可复现证据。
+Substantive development follows the repository's AI development governance: named accountable Owners, versioned prompts, isolated changes, reproducible verification, independent review, and preservation of the exact prompt version in the Work Item evidence bundle. Every AI session must use the [canonical Prompt Library](prompts/README.md). See [GOV-DOC-001](00-governance/bilingual-documentation-policy.md), the [AI Development Standard](14-ai-development/ai-development-standard.md), and the [Iteration Lifecycle](14-ai-development/iteration-lifecycle.md).
+
+本 README 在同一个文件中提供中英双语内容：中文版与对应英文段落配对呈现，位置均在本 `README.md` 中；仓库没有单独的中文 README 文件。仓库架构文档采用中英双语维护，两种语言必须保持相同的含义、约束、稳定标识、决策状态、故障场景和验收标准。翻译不得把 CANDIDATE、OPEN 或 TO_VALIDATE 提升为已决议要求。
+
+重要设计结论使用明确状态标记。仅仅为组件命名并不足以授权开始实现；必须先明确职责、边界、输入、输出、状态转换、故障行为、安全约束和验收标准。实现和验收结论必须有可复现证据。
+
+实质性开发遵循仓库 AI 开发治理要求：具名责任 Owner、版本化提示词、隔离变更、可复现验证、独立审查，并在 Work Item 证据包中保留准确执行的提示词版本。每个 AI 会话都必须使用[规范提示词目录](prompts/README.md)。参见 [GOV-DOC-001](00-governance/bilingual-documentation-policy.md)、[AI Development Standard](14-ai-development/ai-development-standard.md) 和 [Iteration Lifecycle](14-ai-development/iteration-lifecycle.md)。
 
 ---
 
