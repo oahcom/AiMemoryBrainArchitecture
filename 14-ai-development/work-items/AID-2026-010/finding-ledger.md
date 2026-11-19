@@ -169,11 +169,11 @@
 | 历史 ID / 别名 | — |
 | 原始锚点 | Issue #43 comment `7018553089` |
 | 问题定义 | `F-43-06` 被两个不同 finding 复用（`7013501942` Storage/COC JoinProof、`7016815868` BIH Registry §9），后续又曾被 D 长度修复借用为 task label，稳定 ID 不唯一。 |
-| 状态 | OPEN |
+| 状态 | CLOSED |
 | 责任 Owner | A Integration |
 | 回流去向 | 本台账（编号映射持久化）→ Issue #43 映射评论 → A 精确回读 |
-| 关闭条件 | 本台账提交并按 Blob SHA 精确回读；06A/06B 拆分且保留原始锚点；#43 新增映射评论的 comment ID 与正文核对一致；无 ID 冲突残留 |
-| 最新裁决 / 证据 | R29 采纳编号映射；本文件即持久化载体 |
+| 关闭条件 | 已满足：本台账按 Blob SHA 精确回读；06A/06B 拆分且保留原始锚点；#43 映射评论 `7020472247` 的 comment ID 与正文核对一致；F-43-07 保留原义、I/C 漂移独立编号为 F-43-10；未发现 ID 冲突残留 |
+| 最新裁决 / 证据 | R29 编号映射 + R30 独立精确回读裁决 CLOSED；Commit `6bee14688dcb11b5117699ecdb32abc3698efd9a` / Blob `475fe6d665d12a2c4911cc7677707c68f9ed0b61`；#43 comment `7020472247`；映射与锚点核验通过 |
 | 范围限制 | 纯可追溯性纠正，不改变任何技术 finding 或 Owner 决定 |
 
 ## F-43-09 — H 1.2.17 独立 Owner Snapshot D 六字段长度约束
@@ -184,11 +184,11 @@
 | 历史 ID / 别名 | `F-43-06`（R27 task label，仅历史别名） |
 | 原始锚点 | Issue #43 comment `7019182732`、#25 comment `7019181900`（H 交付回填）；R27 裁定 |
 | 问题定义 | `owner_snapshot_semantics_1_2_17.py` 未执行 Schema 1.2.17 的 `minLength:1 / maxLength:512`，513 字符 D 字段被 Schema 拒却通过验证器。 |
-| 状态 | REMEDIATION ACCEPTED |
+| 状态 | CLOSED |
 | 责任 Owner | H Owner |
 | 回流去向 | H 独立 D Snapshot 六字段长度约束证据 → A 独立复审（R27 已通过）→ 本台账登记关闭 |
-| 关闭条件 | 六字段 0/1/512/513 全矩阵 + callback 前置 + 独立重跑测试证据持久化回读（技术条件已满足，待账本登记生效） |
-| 最新裁决 / 证据 | Commit `8ff8c83f0bac59cc834e40e73f8b8f520d8fafb5` + `dd3cacde4af541205d2dc1e50f8a196666ea3a7b`；源 Blob `d9dc43ff0136751aba20cffa4db3f280d16edc67`，测试 Blob `d535ddcc24f57ab38aceb350853a424490f870cc`；L0 本地 9/9 PASS + 全矩阵复现 |
+| 关闭条件 | 已满足：六字段 0/1/512/513 全矩阵 + callback 前置 + 独立重跑测试证据持久化回读；R30 裁定 CLOSED |
+| 最新裁决 / 证据 | R27 技术整改 ACCEPT + R30 账本关闭裁决；Commit `8ff8c83f0bac59cc834e40e73f8b8f520d8fafb5` + `dd3cacde4af541205d2dc1e50f8a196666ea3a7b`；源 Blob `d9dc43ff0136751aba20cffa4db3f280d16edc67`，测试 Blob `d535ddcc24f57ab38aceb350853a424490f870cc`；L0 本地 9/9 PASS + 全矩阵复现 |
 | 范围限制 | TEST-profile；本地测试 ≠ CI PASS；不构成生产授权 |
 
 ## F-43-10 — 组合验证器版本字段集隔离（1.2.9 vs 1.2.17）
@@ -199,11 +199,11 @@
 | 历史 ID / 别名 | 曾暂记 F-43-07（R26 PROPOSED 期），现独立编号 |
 | 原始锚点 | Issue #43 comment `7019972155`、#25 comment `7019971478`（H 范围声明回填）；R28 裁定 |
 | 问题定义 | 组合验证器默认按 1.2.9 I5/C3 字段集运行，与 Schema 1.2.17 I6/D8/C5 不一致；旧混合测试路径不能证明完整 1.2.17 组合兼容。 |
-| 状态 | REMEDIATION ACCEPTED |
+| 状态 | CLOSED |
 | 责任 Owner | H Owner |
 | 回流去向 | H 版本隔离修复证据 → A 独立复审（R28 已接受）→ 本台账登记关闭 |
-| 关闭条件 | 显式 `schema_artifact_revision` 版本选择 + I/C 新旧字段集回归测试 + 范围声明持久化回读（技术条件已满足，待账本登记生效） |
-| 最新裁决 / 证据 | Commit `a04d4010152577cab2f27b4c1359e955ea91e447`→`de5d7b63ff8555a9bbd58f9dd64d4c28fbc7e5cc`；源 Blob `6eee88221c7488542240cdaf326ffdeb0cc2419a`，测试 Blob `ea38ae2aa97a75c62ed857bfd16e3b8d27ba72f1`，范围声明 Blob `66a6dfa627ff6a6c382aca84258de347b0048ab5`；L0 本地 7/7 PASS + 版本矩阵复现；CI NOT VERIFIED |
+| 关闭条件 | 已满足：显式 `schema_artifact_revision` 版本选择 + I/C 新旧字段集回归测试 + 范围声明持久化回读；R30 裁定 CLOSED |
+| 最新裁决 / 证据 | R28 技术整改 ACCEPT + R30 账本关闭裁决；Commit `a04d4010152577cab2f27b4c1359e955ea91e447`→`de5d7b63ff8555a9bbd58f9dd64d4c28fbc7e5cc`；源 Blob `6eee88221c7488542240cdaf326ffdeb0cc2419a`，测试 Blob `ea38ae2aa97a75c62ed857bfd16e3b8d27ba72f1`，范围声明 Blob `66a6dfa627ff6a6c382aca84258de347b0048ab5`；L0 本地 7/7 PASS + 版本矩阵复现；CI NOT VERIFIED |
 | 范围限制 | TEST-profile 版本字段集隔离；不代表生产入口验证完成；本地测试 ≠ CI PASS |
 
 ---
