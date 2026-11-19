@@ -66,7 +66,7 @@ H mappings:
 
 The only D-002 equality is between InstallForgetFence receipt captured_producer_registration_high_water and CaptureProducerRegistrationHighWater receipt producer_registration_high_water: both are the same nominal ProducerRegistrationHighWater for the same immutable operation/fence/snapshot. Greater-than/less-than is never a success case.
 
-D 1.3.1 §5.1 accepts and canonicalizes leading zeroes within each nominal type. H's current TEST validator requires canonical decimal lexical form (0 or non-zero-leading digits) independently for each D high-water. Therefore the proposed H↔D boundary requires D to emit the canonicalized decimal string and bind that exact representation in its receipt/digest. H will not rewrite signed receipt bytes. If D cannot provide canonical output, malformed representation is INVALID; missing canonicalization provenance is UNKNOWN/BLOCKED. This is an explicit interoperability precondition, not a claim of current D Runtime support.
+D 1.3.1 §5.1 accepts and canonicalizes leading zeroes within each nominal type. H's current TEST validator requires canonical decimal lexical form (0 or non-zero-leading digits) independently for each D high-water, but it does not enforce D's upper bound of 2^63-1; it only applies the decimal lexical regex (plus the schema's string length bound). Therefore the proposed H↔D boundary requires D to emit the canonicalized decimal string and bind that exact representation in its receipt/digest, while a future H production validator must independently enforce the D range 0..2^63-1. H will not rewrite signed receipt bytes. Non-canonical representation is INVALID; missing canonicalization provenance or unverified range is UNKNOWN/BLOCKED. This is an explicit interoperability/implementation precondition, not a claim of current D Runtime support.
 
 ## 4. H consumption of D-002 C1-C6
 
@@ -233,7 +233,7 @@ No item is represented as a deployed endpoint. No API invocation, live ledger qu
 2. D has not published a D 1.3.1 JSON Schema artifact. This decision binds to exact normative contract and D-002 proof Blobs, not an invented D schema revision.
 3. D/H must explicitly bind H owner_snapshot_ref / attestation to D BarrierSnapshotReceiptRef. This is not inferred from similar names.
 4. D must define/authenticate proof response, key identity/rotation/revocation, canonical digest projection and ledger consistency proof format. H TEST helper digest prefix is not production-approved.
-5. D must guarantee canonicalized decimal wire output for both nominal high-waters while preserving distinct nominal types. H TEST validator rejects leading-zero decimal strings and does not rewrite signed payloads.
+5. D must guarantee canonicalized decimal wire output for both nominal high-waters while preserving distinct nominal types. H TEST validator rejects leading-zero decimal strings and does not rewrite signed payloads. It also does not enforce the D upper bound 2^63-1; a production H validator must add per-nominal-type range checks before any proof is eligible.
 6. C6 requires D serialization/inclusion/disposition proof; it cannot be established from schema fields, aggregate counts or static fixtures. No race, crash, restore, anti-rollback or barrier-reconciliation runtime test was run.
 7. H validator uses injected attestation, ledger-currentness and anti-rollback callbacks; it has no live D adapter. Structural schema validity is not semantic validity.
 8. No D or H runtime repository was named for this query interface; no production capability is inferred.
