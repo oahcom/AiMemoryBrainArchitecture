@@ -1,0 +1,43 @@
+work_item_id: AID-2026-007
+title: AI-REQTRACE-001 requirement traceability governance specification
+owner: Integration Owner
+accountable_owner: Project Owner (adoption authority)
+issue: 130
+related_issues: [130, 262, 263, 264, 265, 266]
+related_prs: []
+task_class: DOC
+risk: R1
+status: PROPOSED
+prompt:
+  id: AI-REQTRACE-001-DISPATCH
+  version: c2-cont-1
+  provenance: User-supplied complete AI-REQTRACE-001 v1.0 baseline and continuation dispatch in this ChatGPT conversation
+  source: Conversation message c2-cont-1; exact source bytes were supplied in-message; immutable prompt-file SHA-256 NOT_VERIFIED
+  prompt_filename: NOT_RECORDED
+  repository_prompt_file: null
+  sha256: NOT_VERIFIED
+  note: Baseline source provenance is the verbatim user message. No local source file or raw-byte digest was independently available.
+baseline:
+  repository: oahcom/AiMemoryBrainArchitecture
+  target_branch: main
+  base_sha: c33a1bcd36f767c96f641d2a154f34d102ce2645
+  base_sha_source: GitHub repository latest-commit search and fetch_commit readback on 2026-11-19
+deliverables:
+  - 14-ai-development/AI-REQTRACE-001.md
+  - 14-ai-development/AI-REQTRACE-001.zh-CN.md
+  - 14-ai-development/work-items/INDEX.md
+  - 14-ai-development/work-items/AID-2026-007/manifest.yaml
+scope:
+  - Implement the seven Phase 0 adjudicated requirement-traceability decisions without reopening them.
+  - Preserve the supplied v1.0 baseline and document v1.1 clarifications in Change History.
+  - Provide semantically equivalent English and Chinese normative editions.
+  - Register this execution unit independently from Requirement IDs.
+constraints:
+  - AI-EXEC-001/002 v1.1 and PR-GOVERNANCE-001 remain authoritative and unmodified.
+  - Requirement identity MUST remain distinct from AID, session and prompt identities.
+  - Do not auto-merge; Owner adoption remains PENDING.
+acceptance:
+  - Paired normative documents and manifest committed to the bounded branch.
+  - Work Item INDEX registration committed.
+  - Bilingual structural gate and applicable repository checks evaluated on exact PR Head.
+  - PR opened against main; no automatic merge.
