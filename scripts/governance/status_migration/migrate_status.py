@@ -31,7 +31,11 @@ def run(path, apply=False, rollback=False):
   if isinstance(life,dict) and life.get("source_status")==source and life.get("phase")==phase:
    return {"result":"ALREADY_MIGRATED","path":str(path),"phase":phase}
   raise ValueError("conflicting lifecycle metadata; refusing overwrite")
- markers={k:data[k] for k in ("blocked","rejected") if k in data}
+ existing_markers=data.get("markers",{})
+ if not isinstance(existing_markers,dict): raise ValueError("existing markers must be a mapping; refusing lossy conversion")
+ markers=dict(existing_markers)
+ for k in ("blocked","rejected"):
+  if k in data: markers[k]=data[k]
  data["lifecycle"]={"phase":phase,"source_status":source,"gates":{
   "verified":{"status":"NOT_RECORDED"},"independent_review":{"status":"NOT_RECORDED"},
   "integration":{"status":"NOT_RECORDED"},"owner_acceptance":{"status":"NOT_RECORDED"},
