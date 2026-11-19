@@ -126,23 +126,67 @@ A task prompt is a versioned engineering artifact, not disposable chat text.
 
 Start from the [canonical Prompt Library](../prompts/README.md). Every AI session MUST read `prompts/global-project-developer.md` and `prompts/global-bilingual-documentation.md`, plus its assigned Owner prompt. Review sessions MUST also read `prompts/global-architecture-reviewer.md`.
 
-Every prompt MUST include:
+### 5.1 Seven core elements / 七项核心要素
 
-1. Work Item ID, prompt ID, version, status and task class/risk.
-2. Objective and observable outcome.
-3. Accountable Owner, implementer role and independent reviewer role.
-4. Repository, branch, base commit SHA and relevant dependency SHAs.
-5. Required source documents and exact paths.
-6. Scope: allowed files/modules and explicit non-goals.
-7. Normative constraints, invariants and authority boundaries.
-8. Required design/implementation steps.
-9. Acceptance criteria stated as observable conditions.
-10. Test plan, exact commands where known, fixtures and expected results.
-11. Security, failure, concurrency, recovery and compatibility considerations as applicable.
-12. Required deliverables and report format.
-13. Commit, read-back, branch-head and evidence requirements.
-14. Stop conditions and escalation path for ambiguity or conflicting contracts.
-15. **Bilingual documentation manifest:** affected Chinese/English paths, source revision, counterpart status, stable identifier/status parity checks, cross-links, and the reviewer responsible for semantic parity.
+Every new task prompt MUST use the following seven core sections. Seven means seven structural sections, not seven fields. Required detail belongs inside the relevant section; the prompt MUST remain concise and MUST NOT duplicate global policy text.
+
+每个新任务提示词 MUST 使用以下七个核心章节。七项指七个结构章节，而非七个字段。必要细节应放入对应章节；提示词应保持简洁，不得重复粘贴全局规范全文。
+
+1. **Task identity / 任务标识:** Work Item ID; Prompt ID/version; accountable Owner; implementer and independent reviewer roles; repository and branch; task class/risk; owning Issue/PR carrier.
+2. **Goal and boundaries / 目标与边界:** What, Why, observable objective, and explicit Out of Scope.
+3. **Context and dependencies / 上下文与依赖:** base branch/full Base SHA; required source paths with version/status and blob/commit SHA; dependency Owner/contracts and exact revisions; applicable global/Owner prompts.
+4. **Constraints and execution guidance / 约束与执行指导:** mandatory normative constraints, invariants, trust and authority boundaries; distinguish mandatory controls from adaptable recommended steps. Risk analysis is performed at the appropriate lifecycle gate.
+5. **Acceptance and deliverables / 验收与交付物:** objective, observable acceptance criteria; required artifacts and report paths; applicable bilingual paths/manifest under GOV-DOC-001.
+6. **Evidence and review / 证据与审查:** P0 traceability and acceptance evidence; applicable P1 verification evidence; review level and required independent/specialist review.
+7. **Stop conditions and coordination / 停止条件与协调:** blockers, stop/escalation triggers, decision Owner, Issue/PR coordination route, and objective resume condition.
+
+1. **任务标识：** Work Item ID、Prompt ID/版本、责任 Owner、实现者与独立审查者角色、仓库与分支、任务类别/风险等级、归属 Issue/PR 载体。
+2. **目标与边界：** 做什么、为什么、可观测目标，以及明确的不在范围内事项。
+3. **上下文与依赖：** 基线分支/完整 Base SHA、必读源文件路径及版本/状态和 Blob/Commit SHA、依赖 Owner/契约及准确版本、适用的全局/Owner 提示词。
+4. **约束与执行指导：** 强制规范约束、不变式、信任边界和权限边界；区分强制控制与可调整的推荐步骤。风险分析在适当生命周期门禁执行。
+5. **验收与交付物：** 客观可观测的验收条件、必需工件和报告路径，以及 GOV-DOC-001 要求适用时的双语路径/清单。
+6. **证据与审查：** P0 可追溯性和验收证据、适用的 P1 验证证据、审查级别及必需的独立/专业审查。
+7. **停止条件与协调：** 阻塞和停止/升级触发条件、决策 Owner、Issue/PR 协调路径，以及客观恢复条件。
+
+### 5.2 Evidence and lifecycle rules / 证据与生命周期规则
+
+- **P0 is mandatory:** the exact executed Prompt ID/version and SHA-256 MUST be recorded in the immutable Work Item evidence bundle/manifest; record Base SHA, implementation Commit SHA(s), final branch Head SHA, changed-file list, read-back, acceptance disposition and carrier closeout. Never invent an unavailable digest or identifier.
+- **P1 applies when relevant:** record exact commands, environment, tested commit SHA, expected/actual results and evidence links. Checks not run MUST be marked NOT RUN with reason; inapplicable checks MUST be marked NOT APPLICABLE with reason.
+- P0/P1 classification MUST NOT waive any test, security, specialist review, bilingual, R2/R3, acceptance or release gate required by this standard, GOV-DOC-001, Owner contracts or other governing policies. In particular, R3 still requires independent security/domain specialist review and reproducible test evidence before acceptance.
+- Security, failure, concurrency, recovery, privacy and compatibility analysis need not be exhaustively pre-written before the task is understood. They MUST be identified and addressed at the lifecycle gate appropriate to task class/risk; they are not removed from governance.
+- Recommended steps MAY be adjusted. Normative constraints, authority boundaries, required reviews and acceptance gates MUST NOT be weakened by a prompt.
+- Prompt SHA-256 is the digest of the exact immutable executed prompt snapshot. Store it in the Work Item manifest/evidence bundle; do not create a self-referential hash field inside the bytes being hashed.
+
+- **P0 为必需最低证据：** 准确执行的 Prompt ID/版本及其 SHA-256 MUST 记录在不可变 Work Item 证据包/Manifest 中；同时记录 Base SHA、实现 Commit SHA、最终分支 Head SHA、变更文件清单、读回结果、验收结论和载体 Closeout。不得伪造缺失的摘要或标识。
+- **P1 在适用时提供：** 记录准确命令、环境、测试 Commit SHA、预期/实际结果和证据链接。未运行的检查 MUST 标记 NOT RUN 并说明原因；不适用的检查 MUST 标记 NOT APPLICABLE 并说明原因。
+- P0/P1 分类 MUST NOT 豁免本规范、GOV-DOC-001、Owner 契约或其他治理规范要求的测试、安全、专业审查、双语、R2/R3、验收或发布门禁。尤其是 R3，在验收前仍须完成独立安全/领域专业审查和可复现测试证据。
+- 安全、故障、并发、恢复、隐私和兼容性分析不必在任务尚未明确时提前穷尽，但 MUST 在任务类别/风险等级对应的生命周期门禁识别并处理；这些要求没有从治理中删除。
+- 推荐步骤 MAY 根据实际情况调整。规范约束、权限边界、必需审查和验收门禁 MUST NOT 因提示词简化而弱化。
+- Prompt SHA-256 是对准确、不可变的已执行提示词快照计算的摘要，应存入 Work Item Manifest/证据包；不得在被哈希的字节内容中放入自引用摘要字段。
+
+### 5.3 Backward compatibility and migration / 向后兼容与迁移
+
+Existing v1 prompts remain valid and MUST remain immutable after execution. They do not need retroactive rewriting. New prompts SHOULD use the seven-section template. Migrate an existing prompt only for a new authorized execution/version, preserve the old artifact and digest, and follow the mapping in `prompts/00-setup/MIGRATION-GUIDE.md`. A v2 prompt does not supersede an executed v1 prompt unless the accountable Owner explicitly authorizes the new version.
+
+现有 v1 提示词继续有效，执行后 MUST 保持不可变，无须追溯重写。新提示词 SHOULD 使用七章节模板。只有在获准的新执行/新版本中才迁移旧提示词，并保留旧工件及摘要，遵循 `prompts/00-setup/MIGRATION-GUIDE.md` 的映射。除非责任 Owner 明确授权新版本，否则 v2 不取代已执行的 v1。
+
+The seven-section layout does not replace mandatory preflight. Every AI session MUST continue to read `prompts/global-project-developer.md`, `prompts/global-bilingual-documentation.md`, GOV-DOC-001, this standard, and the applicable Owner prompt. Architecture-significant changes MUST retain Chinese/English counterparts, reciprocal links and parity evidence in the same change set, subject only to a formally approved, time-bounded STALE exception.
+
+七章节结构不替代强制前置载入。每个 AI 会话 MUST 继续阅读 `prompts/global-project-developer.md`、`prompts/global-bilingual-documentation.md`、GOV-DOC-001、本规范和适用的 Owner 提示词。架构语义变更 MUST 在同一变更集中保留中英文对应版本、双向链接和一致性证据，除非正式批准有期限的 STALE 例外。
+
+### 5.4 Simplification principles / 简化原则
+
+- **Metadata consolidation:** group task identity and repository context; keep exact source/dependency revisions in the context section.
+- **Tiered evidence:** distinguish mandatory P0 traceability from applicable P1 verification without weakening required tests.
+- **Mandatory vs recommended:** normative constraints remain mandatory; suggested implementation sequence is adaptable.
+- **Lifecycle-appropriate analysis:** avoid speculative upfront detail while retaining all applicable security, failure, compatibility and recovery gates.
+- **Separation of concerns:** bilingual execution is governed by GOV-DOC-001/GLB-DOC-001; it is referenced by the prompt and remains an acceptance obligation, not a redundant fifteenth heading.
+
+- **元数据合并：** 集中记录任务身份和仓库上下文；源文件/依赖的准确版本仍记录在上下文章节。
+- **证据分级：** 区分必需的 P0 可追溯性和适用的 P1 验证，不弱化任何必需测试。
+- **强制与推荐分离：** 规范约束保持强制；建议实现顺序可按实际调整。
+- **按生命周期分析：** 避免推测性前置细节，同时保留所有适用的安全、故障、兼容性和恢复门禁。
+- **关注点分离：** 双语执行由 GOV-DOC-001/GLB-DOC-001 管理；提示词仍须引用并履行双语验收义务，但不再重复设置冗余的第十五个标题。
 
 Prompts MUST be reviewed before execution. Prompt changes after execution starts MUST create a new version and record the reason and impact. The previous prompt version remains immutable and retrievable.
 
