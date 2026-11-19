@@ -2,7 +2,7 @@
 # Design-proposal scope only. Implementation authorization is expressly NOT granted
 # by this manifest. See scope.implementation_authorization below.
 
-schema_version: "1.3"
+schema_version: "1.4"
 work_item: P2-T2
 title: "Memory Storage Schema design proposal"
 repository: oahcom/AiMemoryBrainArchitecture
@@ -81,12 +81,51 @@ review:
     - R2
     - R3
     - R4
+    - R5
   independence: REQUIRED
   blocking_question: >
-    Q1 in the proposal — the architecture choice. R4 states three options (A: Phase 1 as
+    Q1 in the proposal — the architecture choice. R5 states three options (A: Phase 1 as
     store with Event-only transcript ingress; B: supersede Phase 1; C: three layers with a
     separate transcript-capture layer). Q1 remains OPEN. A review recommendation is
     PROPOSED, not a ruling.
+
+status: BLOCKED
+status_reason: >
+  Awaiting accountable authority assignment and governance decisions. Q1, Q11 and Q12
+  are not engineering defects and cannot be closed by further revision. R4 recommended
+  stopping the ordinary revision cycle; R5 adopts that and makes the one remaining
+  engineering correction (NF-R3-02 residual).
+status_supported_by: "review record at R4 — PR #307 comment 7023884586 chain; R4 reply"
+
+r4_disposition:
+  reviewed_head: bdb19ac0
+  verdict: REQUEST CHANGES
+  platform_record: "PR #307, R4 reply recorded"
+  findings_final:
+    NF-R3-01: CLOSED IN SPECIFICATION
+    NF-R3-02: "OPEN — BLOCKING at R4; residual corrected in R5, not verified"
+    NF-R3-03: CLOSED IN SPECIFICATION
+    NF-R3-04: CLOSED
+  residual_corrected_in_r5:
+    title: "result_message_id UPDATE bypass"
+    detail: >
+      result_message_id was absent from the frozen column list and
+      tool_call_result_is_child_tool is BEFORE INSERT only, so a valid call could be
+      re-pointed at an unrelated message in the same session. tool_call_result_binding_guarded
+      now refuses reassignment, refuses clearing, and repeats the role/parent predicate on
+      the single permitted NULL -> valid transition.
+    verified: false
+    verified_note: "specification only; R5 DDL not executed because Q12 remains open"
+  q13_ruling: >
+    Separate open question, NOT part of NF-R3-02. Lifecycle semantics rather than
+    relational integrity. Kept separate so that resolving it is never mistaken for
+    closing NF-R3-02.
+  q14_ruling: >
+    Stricter branch accepted provisionally; the business question stays open. Not to be
+    represented as a confirmed business requirement.
+  cycle_stop: >
+    R4 recommended stopping the ordinary revision cycle and recording PR #307 as blocked.
+    Adopted. No further full revision will be produced against open governance questions.
 
 r3_disposition:
   reviewed_head: fb1f59de9136a11e1d7fa204734754ec553bc82f
@@ -263,4 +302,8 @@ claims_forbidden:
   - "that the R3 DDL was executed or verified to apply"
   - "that the R4 DDL was executed or verified to apply"
   - "that NF-R3-01 or NF-R3-02 is verified fixed"
+  - "that the NF-R3-02 residual is verified fixed"
+  - "that Q13 is closed"
+  - "that Q14 is a confirmed business requirement"
+  - "that BLOCKED means approved, accepted, or free of defects"
   - "that the Layer 1 additive index is not a Layer 1 modification"

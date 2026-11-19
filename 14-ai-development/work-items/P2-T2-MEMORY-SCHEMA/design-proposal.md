@@ -1,7 +1,7 @@
 # P2-T2 — Memory Storage Schema Design Proposal
 
 **Work item:** P2-T2 (Phase 2 Task 2)
-**Revision:** R4 — revised against independent R3 review of head `fb1f59de`
+**Revision:** R5 — revised against independent R4 review of head `bdb19ac0`
 **Status:** DESIGN PROPOSAL — not implemented, not frozen
 **Date:** 2026-11-19
 **Scope authority:** `GO-2026-P2-DESIGN-001` — design proposal first; P2-T1 implementation authorization withheld pending design review.
@@ -47,7 +47,9 @@ Specify the persistence design for the memory layer, covering:
 - migration strategy
 - test boundaries
 
-This revision answers R1-B-01 through R1-NB-05 (§2), the seven items R2 required (§2a), and the four findings R3 raised (§2b). It does **not** claim that Q1 is resolved (§4), does not claim the schema is frozen, and does not authorize implementation.
+This revision answers R1-B-01 through R1-NB-05 (§2), the seven items R2 required (§2a), the four findings R3 raised (§2b), and the one residual R4 found (§2c). It does **not** claim that Q1 is resolved (§4), does not claim the schema is frozen, and does not authorize implementation.
+
+**Status supported by this document:** `BLOCKED — awaiting accountable authority assignment and governance decisions`. Q1, Q11 and Q12 cannot be closed by revision.
 
 ---
 
@@ -107,6 +109,25 @@ R3 closed three of the seven R2 items outright and was ruled partial on three. T
 Two residues are recorded rather than closed: whether a `completed` call must carry a result (Q13), and whether `recompute` truly requires a single input (Q14). Both were flagged by R3 as questions R3 could not settle either.
 
 R4 does not claim that NF-R3-01 and NF-R3-02 are *verified* fixed. They are fixed in the specification. The R3 DDL was never executed, and neither is the R4 DDL — Q12 remains open. What can be checked by reading is that the constraint text now exists and says what the prose says it says.
+
+---
+
+## 2c. R4 disposition — and why this is the last engineering round
+
+R4 was reviewed at head `bdb19ac0` and returned `REQUEST CHANGES` with one residual defect and an explicit recommendation to stop the ordinary revision cycle. Recorded on PR #307, comment `pending`.
+
+| finding | R4 ruling | disposition in R5 |
+|---|---|---|
+| NF-R3-01 nullable history provenance | `CLOSED IN SPECIFICATION` | unchanged |
+| NF-R3-02 tool-call relational integrity | `OPEN — BLOCKING`, one UPDATE bypass remains | **Corrected.** `result_message_id` was absent from the frozen column list and its validation trigger is `BEFORE INSERT` only, so a valid call could be re-pointed after the fact. `tool_call_result_binding_guarded` now refuses reassignment, refuses clearing, and repeats the role/parent predicate on the single permitted `NULL → valid` transition. §7.1 |
+| NF-R3-03 cross-version correction | `CLOSED IN SPECIFICATION` | unchanged |
+| NF-R3-04 governance evidence inconsistency | `CLOSED` | unchanged |
+| Q13 — completed call must carry a result | ruled a **separate open question**, not part of NF-R3-02 | kept separate and open; R5 does not close it, so closing it can never be read as closing NF-R3-02 |
+| Q14 — does `recompute` need a single input | stricter branch **accepted provisionally**, question stays open | unchanged; §14 records it as provisional, not as a business requirement |
+
+**This is the last engineering round.** R4's own recommendation, adopted here: one concrete correction remained, it is made, and no further full revision will be produced against open governance questions. Q1, Q11 and Q12 are not engineering defects. Another iteration cannot reach them.
+
+The status this document supports is `BLOCKED — awaiting accountable authority assignment and governance decisions`. It does not support `APPROVE`.
 
 ---
 
@@ -356,6 +377,34 @@ BEGIN
   SELECT RAISE(ABORT, 'tool call identity is immutable; record a new call instead');
 END;
 
+-- NF-R3-02 residual (R4): result_message_id was writable, so a valid call could
+-- be re-pointed at an unrelated message and the INSERT-only check never ran again.
+-- Lifecycle permitted: NULL -> a valid child tool message, exactly once.
+CREATE TRIGGER IF NOT EXISTS tool_call_result_binding_guarded
+BEFORE UPDATE OF result_message_id ON transcript_tool_call
+BEGIN
+  -- (a) no reassignment once bound
+  SELECT RAISE(ABORT, 'result_message_id cannot be reassigned once bound')
+  WHERE OLD.result_message_id IS NOT NULL
+    AND NEW.result_message_id IS NOT OLD.result_message_id;
+
+  -- (b) unbinding is not permitted either
+  SELECT RAISE(ABORT, 'result_message_id cannot be cleared once bound')
+  WHERE OLD.result_message_id IS NOT NULL
+    AND NEW.result_message_id IS NULL;
+
+  -- (c) a new binding must satisfy the same role/parent rule as at INSERT
+  SELECT RAISE(ABORT, 'tool call result must be a tool message parented by the emitter')
+  WHERE NEW.result_message_id IS NOT NULL
+    AND OLD.result_message_id IS NULL
+    AND NOT EXISTS (
+      SELECT 1 FROM transcript_message
+      WHERE session_id = NEW.session_id
+        AND message_id = NEW.result_message_id
+        AND role = 'tool'
+        AND parent_message_id = NEW.emitting_message_id);
+END;
+
 -- And tool_state may only advance, never regress or reopen.
 CREATE TRIGGER IF NOT EXISTS tool_call_state_transition
 BEFORE UPDATE OF tool_state ON transcript_tool_call
@@ -383,7 +432,19 @@ END;
 3. The same trigger carries condition 3, since `parent_message_id = NEW.emitting_message_id` is checked in the same predicate.
 4. `transcript_message_role_frozen` — `role`, `parent_message_id` and `session_id` are immutable after insert, so a message cannot be re-roled into compliance afterwards. `tool_call_identity_frozen` does the same for the call row, and `tool_call_state_transition` allows `emitted → completed|failed` and forbids regression or reopening.
 
-One honest limit: these are `BEFORE INSERT` checks plus column freezes. They enforce the relation at the moment of writing and prevent later drift through the guarded columns. They do not enforce that a `tool_state='completed'` call has a non-NULL `result_message_id`; adding that would require a `BEFORE UPDATE OF tool_state` condition that couples the two tables in a way the design has not settled. It is recorded as Q13 rather than decided here.
+One honest limit: these are `BEFORE INSERT` checks plus column freezes. They enforce the relation at the moment of writing and prevent later drift through the guarded columns.
+
+**NF-R3-02 residual, found at R4 and closed here.** R4 was right that `result_message_id` was not in the frozen column list, and that `tool_call_result_is_child_tool` is `BEFORE INSERT` only. The resulting sequence was real: insert a valid call, bind a valid result, then `UPDATE result_message_id` to an unrelated assistant message in the same session. The composite foreign key proved only that the target existed in the session, not that it was a tool message parented by the emitter.
+
+`tool_call_result_binding_guarded` closes it with three refusals:
+
+- reassignment once bound (`OLD` non-NULL → different `NEW`) is refused
+- clearing once bound (`OLD` non-NULL → `NEW` NULL) is refused
+- the one permitted transition, `NULL` → a valid result, repeats the same role-and-parent predicate as the insert check
+
+So the permitted lifecycle is exactly what R4 asked for: initial `NULL` if asynchronous capture is intended, one transition to a valid child tool message, no reassignment, no invalid role or parent relationship.
+
+Still open, and deliberately so: whether a call in `tool_state='completed'` must carry a non-NULL `result_message_id`. That is Q13 — lifecycle semantics, not relational integrity — and R4 ruled it must stay separate so that closing it is never mistaken for closing NF-R3-02.
 
 ### 7.2 Retrieval contract
 
@@ -835,8 +896,9 @@ Required before implementation authorization is granted. These are specified, no
 18. **Cross-version correction (NF-R3-03)** — a `score_input` row for version A with `corrects_input_id` pointing at an input of version B is refused.
 19. **Tool-call relational integrity (NF-R3-02)** — assert all four refusals: a call whose emitter is a `user` message; a call whose `result_message_id` is an assistant message; a call whose result is a `tool` message parented by a *different* assistant message; and an `UPDATE` that re-roles a captured message or re-points its `parent_message_id`.
 20. **Tool-state transitions (NF-R3-02)** — `emitted → completed` accepted; `completed → emitted` refused; `failed → completed` refused.
+21. **Result rebinding (NF-R3-02 residual)** — bind a valid result, then attempt `UPDATE result_message_id` to (a) an unrelated assistant message in the same session, (b) a tool message parented by a *different* assistant, (c) NULL. All three refused. Then assert the one permitted transition `NULL → valid child tool message` succeeds exactly once.
 
-Tests 4–7 and 16 are the regression guards for R1-B-01. Tests 9–10 guard R1-NB-04. Test 8 guards R1-NB-03. Tests 11–14 guard R1-NB-02 / R2-NF-01 / R2-NF-03. Test 15 guards R2-NF-02. Tests 17–20 guard NF-R3-01 / NF-R3-02 / NF-R3-03.
+Tests 4–7 and 16 are the regression guards for R1-B-01. Tests 9–10 guard R1-NB-04. Test 8 guards R1-NB-03. Tests 11–14 guard R1-NB-02 / R2-NF-01 / R2-NF-03. Test 15 guards R2-NF-02. Tests 17–20 guard NF-R3-01 / NF-R3-02 / NF-R3-03. Test 21 guards the NF-R3-02 residual found at R4.
 
 These tests were not written and not run. Neither the R2 nor the R3 DDL was executed — see §17.
 
@@ -858,8 +920,8 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 | Q10 | Does numeric reproducibility stay a requirement, or is structural rebuild sufficient? | **REVIEW RULING (R2): tiered preferred.** Structural and unreconstructable tiers accepted; exact-value retained as a design objective, **CONDITIONAL and NOT VERIFIED**. This is a review ruling on a review question, not an owner decision on Q1. |
 | Q11 | Does the Layer 1 boundary prohibit modifying Layer 1 tables, or only their columns? | **OPEN — controls whether `versions_memory_version_uq` is admissible at all.** §8.4 states both branches and the fallback. Not mine to decide. |
 | Q12 | Is the in-memory DDL check an acceptable reading of the `no schema execution` bound? | **OPEN — requires the authority that issued the bound.** R2 classified it `DISCLOSED SCOPE DEVIATION`, not authorized activity, and stated an engineering reviewer cannot grant retrospective authorization. `acceptance_authority` is `NOT_ASSIGNED`; no session can supply this. |
-| Q13 | Must a `tool_state='completed'` call carry a non-NULL `result_message_id`? | OPEN — enforcing it couples two tables in a `BEFORE UPDATE OF tool_state` condition the design has not settled. Recorded, not decided. |
-| Q14 | Does `recompute` genuinely require a single `input_id`? | OPEN — the `CHECK` in §8.4 takes the stricter branch; if a recompute may legitimately have no single input, `recompute` moves to the nullable set. A business question, not a schema one. |
+| Q13 | Must a `tool_state='completed'` call carry a non-NULL `result_message_id`? | OPEN — lifecycle semantics, not relational integrity. R4 ruled it must stay separate so that resolving it is never mistaken for closing NF-R3-02. |
+| Q14 | Does `recompute` genuinely require a single `input_id`? | OPEN — the `CHECK` in §8.4 takes the stricter branch; R4 accepted that as a provisional choice while keeping the business question open. If a recompute may legitimately have no single input, `recompute` moves to the nullable set. |
 
 ---
 
