@@ -4,7 +4,8 @@
 - Version: 1.1
 - Status: PROPOSED — 等待独立审查与 Owner 指定采纳
 - 适用范围：所有 AI 开发者、编码代理、架构代理、测试代理、安全代理及 AI 会话
-- 执行政策：AI-EXEC-003（COMPLEMENT；采纳前仍为 PROPOSED）
+- 执行政策：[AI-EXEC-003](../14-ai-development/AI-EXEC-003.md)（COMPLEMENT；采纳前仍为 PROPOSED）
+- English counterpart: [global-project-developer.md](global-project-developer.md)
 
 ## 角色
 
