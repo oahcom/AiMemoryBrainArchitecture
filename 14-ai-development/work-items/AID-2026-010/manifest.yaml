@@ -921,3 +921,49 @@ final_current_ledger_pin_owner_ruling_D2026_1120_01_session_closeout:
     runtime_implementation_claimed: false
     independent_owner_signature_claimed: false
     production_acceptance_claimed: false
+
+
+latest_exact_carrier_refresh:
+  date: "2026-11-20"
+  authority: "Owner ruling D-2026-1120-01"
+  finding_ledger:
+    path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+    commit: "513636e9e16d1e64416e67e43e9d6a617ac546d3"
+    blob_sha: "1003d1ee69126abd5a7f67ed0f3d61a647f7dc35"
+  F1:
+    status: "P1 / OPEN (implementation evidence)"
+    pr: 327
+    branch: "docs/f43-01-f1-engineering-entry-handoff"
+    head: "5b11ef7425c33c49ace5f8ef0cadb8e6b55c52db"
+    handoff_blob: "6f8dd7b4ac95c5b470c31585d124f1d1aa31daca"
+    runtime_implementation: "NOT IMPLEMENTED"
+    tests: "NOT RUN"
+    execution_binding: "DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED (Issue #7 comment 7021990583)"
+  F3:
+    status: "P1 / OPEN"
+    D_contract:
+      pr: 321
+      head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      active_H_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+      workflow_runs: []
+    H_TEST_candidate:
+      pr: 322
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      workflow_runs:
+        - id: 44684299500
+          job: 136136137662
+          conclusion: FAILURE
+          steps: null
+        - id: 44684299439
+          job: 136136126048
+          conclusion: FAILURE
+          steps: null
+    independent_human_attribution: NOT_VERIFIED
+    callable_D_query_receipt_currentness: NOT_ESTABLISHED
+    production_consumer_acceptance: NOT_ESTABLISHED
+  tests_for_ledger_and_manifest_changes: NOT_RUN
+  main_write_or_merge: false
+  new_prs_or_issues_created: 0
