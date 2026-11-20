@@ -5,7 +5,7 @@
 - **Status:** PROPOSED — pending independent review and Owner-directed adoption
 - **Relationship:** COMPLEMENT — AI-EXEC-001 / AI-EXEC-002
 - **Owner:** Integration Owner
-- **Tracking:** Issue #329 · Work Item AID-2026-011
+- **Tracking:** Issue #329 · Work Item AID-2026-015
 - **Chinese source:** [AI-EXEC-003](../../../14-ai-development/AI-EXEC-003.md)
 - **Language authority:** This English counterpart and its Chinese source are intended to carry identical normative force.
 
