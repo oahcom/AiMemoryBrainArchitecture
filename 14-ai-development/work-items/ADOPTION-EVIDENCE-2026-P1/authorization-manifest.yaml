@@ -57,4 +57,4 @@ what_this_work_item_does_not_do:
   - "It does not change any Level, Tier, gate, or obligation. The only text added to the policies is a pointer to where the adoption record form and evidence dossier live."
   - "It does not confirm any UNKNOWN or PENDING classification."
   - "It does not assign, appoint, or imply any role."
-  - "It does not create the per-file classification inventory that the bilingual policy's section 8 requires. That inventory does not exist yet; the dossier says so."
+  - "It does not create the per-file classification inventory that the bilingual policy's section 8 requires. Proposal data exists (tier-mapping-proposal.yaml, tier-confirmation-proposal.yaml); what does not exist is the human-confirmed, adopted inventory those proposals are input to. The dossier says so."

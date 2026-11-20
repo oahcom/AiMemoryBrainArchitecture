@@ -57,7 +57,7 @@ a confirmed tier — that is exactly what remains open (section 3.2).
 |---|---|---|
 | `approver` | **MISSING** — no approver exists in the repository; all of `sponsor` / `accountable_owner` / `acceptance_authority` are `NOT_ASSIGNED` | **MISSING** — same |
 | `effective_date` | **MISSING** — cannot exist before an approver signs | **MISSING** — same |
-| Versioned instrument | **READY** — checker path and its blob SHA are measured above; the script carries no version constant, so the blob SHA is the version | **NOT READY** — there is no approved per-file inventory. `tier-mapping-proposal.yaml` is a PROPOSAL (63 entries) and `tier-confirmation-proposal.yaml` is a PROPOSAL (377 rows, every row `confirmation_record: PENDING`). Both say so in their own headers. |
+| Versioned instrument | **READY** — checker path and its blob SHA are measured above; the script carries no version constant, so the blob SHA is the version | **NOT READY** — what §8 requires is an **adopted** per-file inventory plus its SHA. Proposal data exists and is not that: `tier-mapping-proposal.yaml` (63 entries) and `tier-confirmation-proposal.yaml` (377 rows, every row `confirmation_record: PENDING`), both self-declared PROPOSAL in their own headers. The data is present; the approval is not. |
 | Change-record discipline | stated in policy, no change yet | stated in policy, no change yet |
 | Bilingual maintenance | ZH/EN pair present at baseline | ZH/EN pair present at baseline |
 
@@ -89,8 +89,10 @@ a confirmed tier — that is exactly what remains open (section 3.2).
      carry the file-list commit SHA.
    A human confirmation pass over the 377 rows, plus the 24 `PAIR-DIVERGENT`
    rows, is what turns the proposal into the inventory the adoption record
-   needs. Until then the bilingual policy cannot be adopted as written, because
-   its own §8 names an instrument that does not yet exist.
+   needs. Until then the bilingual policy cannot be adopted as written: its §8
+   names an **adopted** per-file classification inventory and its SHA, and what
+   exists is proposal data, not an adopted inventory. The two are different
+   things — the data is present, the approval is not.
 2. **Roles.** `acceptance_authority` / `sponsor` / `accountable_owner` are
    `NOT_ASSIGNED` repository-wide. This is a true governance state, tracked as
    F-ROLE-ASSIGN, and must not be substituted by the implementing Owner.
