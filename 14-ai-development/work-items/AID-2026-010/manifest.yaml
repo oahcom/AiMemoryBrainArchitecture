@@ -1021,3 +1021,56 @@ terminal_exact_pin_refresh_2026_11_20:
     main_write: false
     runtime_authorization: false
     independent_owner_signature_claimed: false
+
+
+# Superseding exact live-ref and provenance correction — D-2026-1120-01
+final_live_refs_and_prompt_provenance_correction_2026_11_20:
+  source_thread_id: "6afae73a-bc9c-83ec-9376-a26df522430b"
+  source_type: "USER_CHAT_INSTRUCTION"
+  platform_current_uuid_and_immutable_raw_bytes: "NOT_EXPOSED"
+  prompt_sha256: "NOT_VERIFIED"
+  carriers:
+    ledger_pr: 323
+    ledger_branch: "fix/f43-01-f3-ledger-reconcile"
+    ledger_commit: "513636e9e16d1e64416e67e43e9d6a617ac546d3"
+    ledger_blob: "1003d1ee69126abd5a7f67ed0f3d61a647f7dc35"
+    F1_handoff_pr: 327
+    F1_handoff_head: "459dd608ecc559841eb6183775cdef674b395fb8"
+    F1_handoff_blob: "0b058d32546105e33be1bb560978dca021af9c66"
+    F3_D_query_pr: 321
+    F3_D_query_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+    F3_D_query_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+    F3_active_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    F3_H_test_pr: 322
+    F3_H_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+    F3_H_validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+    F3_H_test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+    F3_H_test_methods: 15
+  latest_exact_head_workflow_jobs:
+    - run: 44684299439
+      job: 136136582468
+      name: "Validate BMCP JF-10 and Storage proof schema candidates"
+      conclusion: "FAILURE"
+      steps: []
+      log_http_status: 404
+      log_error_code: "BlobNotFound"
+      log_request_id: "a72a7bed-501e-0070-01bc-785587000000"
+    - run: 44684299500
+      job: 136136525120
+      name: "semantic-and-wire-tests"
+      conclusion: "FAILURE"
+      steps: []
+      log_http_status: 404
+      log_error_code: "BlobNotFound"
+      log_request_id: "dab65d6e-e01e-00c5-70bc-7828ef000000"
+  disposition: "FAILURE_BEFORE_TEST_STEPS; LOG_ARTIFACTS_UNAVAILABLE; NO_TEST_ASSERTION_RESULT; NO_CI_PASS"
+  finding_states:
+    F-43-01/F1: "P1_OPEN_RUNTIME_IMPLEMENTATION_EVIDENCE"
+    F-43-01/F3: "P1_OPEN_INDEPENDENT_HUMAN_AND_OPERATIONAL_EVIDENCE"
+  boundary:
+    no_new_pr: true
+    no_new_issue: true
+    no_new_branch: true
+    no_merge: true
+    main_modified: false
+    no_owner_impersonation: true
