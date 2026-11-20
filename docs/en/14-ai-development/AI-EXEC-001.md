@@ -8,8 +8,8 @@
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](../../../14-ai-development/work-items/AID-2026-002/manifest.yaml) · Revision Work Item [AID-2026-003](../../../14-ai-development/work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](../../../14-ai-development/ai-development-standard.md), [AI-PROC-001](../../../14-ai-development/iteration-lifecycle.md), [PR-GOVERNANCE-001](../../../14-ai-development/PR-GOVERNANCE-001.md) (ADOPTED), [AI-PROMPT-STD-001](../../../14-ai-development/prompt-authoring-standard.md), GOV-DOC-001
 - **Source file:** `14-ai-development/AI-EXEC-001.md`
-- **Source commit:** `1f97c3fae65828266a0c3cb1d1e8d4e6cb330856` (coordinator-supplied)
-- **Source blob SHA:** `372a290359f9e9de2bd81d7901beb2f084e6e3a4` (coordinator-supplied)
+- **Source commit:** `4c38ae25b71383d661e4179622cafa04b66a046a` (verified canonical source commit)
+- **Source blob SHA:** `58af59af266b81109269156ea667df1a15edfb7b` (verified canonical source Blob)
 - **Translation status:** English counterpart; source-aligned pair. Chinese source remains authoritative for this batch.
 
 > **Purpose and positioning:** This document does not establish a new governance system. It is an execution rulebook that makes the project's existing process (AI-STD-001 / AI-PROC-001 / PR-GOVERNANCE-001) **actually operate**. There is no script-based enforcement — PR-GOVERNANCE-001 §7 explicitly states that "templates/labels/comments/AI self-review must not be misrepresented as hard gates." These rules are consistent with that principle and add only operating discipline.
