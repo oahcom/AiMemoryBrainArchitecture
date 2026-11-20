@@ -14,8 +14,11 @@ VALID, INVALID, UNKNOWN = "VALID", "INVALID", "UNKNOWN"
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 DECIMAL = re.compile(r"^(0|[1-9][0-9]*)$")
 MAX_D_TYPED_HIGH_WATER = (1 << 63) - 1
-D_TYPED_HIGH_WATER_FIELDS = frozenset({
+D_SIGNED_64_HIGH_WATER_FIELDS = frozenset({
     "producer_registration_high_water",
+    "work_item_high_water",
+    "attempt_high_water",
+    "barrier_generation",
     "forget_fence_generation_high_water",
 })
 
@@ -111,9 +114,10 @@ def validate_owner_snapshot_1_2_17(
         if key.endswith("_high_water") or key.endswith("_generation"):
             if not _is_canonical_decimal(value):
                 return INVALID
-            # D 1.3.1 §5.1 bounds the two typed H high-water fields independently.
-            # Never compare, cast, or derive one nominal type from the other.
-            if key in D_TYPED_HIGH_WATER_FIELDS and int(value) > MAX_D_TYPED_HIGH_WATER:
+            # D-AUTH-QUERY-1.0 §2.2 bounds all five D high-water/generation
+            # nominal types independently. Preserve field identity; never compare,
+            # cast, or derive one nominal type from another.
+            if key in D_SIGNED_64_HIGH_WATER_FIELDS and int(value) > MAX_D_TYPED_HIGH_WATER:
                 return INVALID
 
     if snapshot["owner_specific_high_waters_digest"] != _td("OWNER-SPECIFIC-HIGH-WATERS", dict(values)):
