@@ -91,7 +91,7 @@ integration_closeout:
 
   authoritative_finding_ledger:
     path: 14-ai-development/work-items/AID-2026-010/finding-ledger.md
-    blob_sha: 0f26c02df7bfc54f86c39ee24c2082158a36fb9f
+    blob_sha: 2e0ab50501e7f2fa5902d98a89acf6376a5e7a87
     authority: SOLE_AUTHORITATIVE_FINDING_STATUS_LEDGER
 
   findings_total: 13
@@ -165,8 +165,8 @@ current_status_refresh:
     records the subsequent Owner release and supersedes that historical
     restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "5a7da537a5bb86ed29f5150d7fc9e3dd85c098ed"
-  ledger_blob_sha: "0f26c02df7bfc54f86c39ee24c2082158a36fb9f"
+  ledger_commit: "1ab208bf13dfbdf3b2577358d4dfef2e53bdc5b6"
+  ledger_blob_sha: "2e0ab50501e7f2fa5902d98a89acf6376a5e7a87"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -308,7 +308,7 @@ integration_closeout:
 
   authoritative_finding_ledger:
     path: 14-ai-development/work-items/AID-2026-010/finding-ledger.md
-    blob_sha: 0f26c02df7bfc54f86c39ee24c2082158a36fb9f
+    blob_sha: 2e0ab50501e7f2fa5902d98a89acf6376a5e7a87
     authority: SOLE_AUTHORITATIVE_FINDING_STATUS_LEDGER
 
   findings_total: 13
@@ -382,8 +382,8 @@ current_status_refresh:
     records the subsequent Owner release and supersedes that historical
     restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "5a7da537a5bb86ed29f5150d7fc9e3dd85c098ed"
-  ledger_blob_sha: "0f26c02df7bfc54f86c39ee24c2082158a36fb9f"
+  ledger_commit: "1ab208bf13dfbdf3b2577358d4dfef2e53bdc5b6"
+  ledger_blob_sha: "2e0ab50501e7f2fa5902d98a89acf6376a5e7a87"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -760,8 +760,8 @@ current_session_owner_ruling_2026_11_20:
 final_current_ledger_pin_d2026_1120_01:
   date: "2026-11-20"
   finding_ledger_path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  finding_ledger_commit: "4dbc26346177c68b8aa0bb61e0e8de4dc58a0910"
-  finding_ledger_blob: "e5ca7723bc51bad38da3b50b8a898ebba3b6ea0e"
+  finding_ledger_commit: "1ab208bf13dfbdf3b2577358d4dfef2e53bdc5b6"
+  finding_ledger_blob: "2e0ab50501e7f2fa5902d98a89acf6376a5e7a87"
   reason: "The ledger received a subsequent append-only F1/F3 reconciliation commit; this terminal pin supersedes earlier historical pins in this manifest."
   findings:
     F-43-01/F1: "P1_OPEN_RUNTIME_IMPLEMENTATION_EVIDENCE"
