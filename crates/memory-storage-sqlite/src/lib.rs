@@ -1,7 +1,7 @@
 //! SQLite implementation of the Phase 1 MemoryStorage port.
 //! 这是第一个具体持久化适配器；事务边界仍严格受 Storage Trait 约束。
 
-use memory_domain::{scopes_intersect, Memory, MemoryVersion, OpaqueId, ScopeRef};
+use memory_domain::{scope_set_contains_all, scopes_intersect, Memory, MemoryVersion, OpaqueId, ScopeRef};
 use memory_storage::{ChangePage, ChangeRecord, CommitReceipt, CommitRequest, CommitSequence, MemoryStorage, StorageError};
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use std::time::Duration;
@@ -124,13 +124,13 @@ impl SqliteMemoryStorage {
                 let stored_scopes: Vec<ScopeRef> = Self::decode(&scope_json)?;
                 let mut version: MemoryVersion = Self::decode(&version_json)?;
                 version.validate().map_err(|_| StorageError::InvalidSchema)?;
-                if version.claims.iter().any(|claim| claim.scope_refs.iter().any(|claim_scope| !stored_scopes.iter().any(|stored_scope| stored_scope.scope_id == claim_scope.scope_id))) {
+                if version.claims.iter().any(|claim| !scope_set_contains_all(&stored_scopes, &claim.scope_refs)) {
                     return Err(StorageError::InvalidSchema);
                 }
-                // A Memory may carry multiple applicability scopes. Filter nested
-                // Claims independently so a reader authorized for one scope does
-                // not receive Claims belonging only to another scope.
-                version.claims.retain(|claim| scopes_intersect(&claim.scope_refs, scope));
+                // A Claim is an indivisible disclosure unit: if any of its ScopeRefs
+                // is outside the caller-visible set, hide the entire Claim rather
+                // than returning a partial or existence-revealing projection.
+                version.claims.retain(|claim| scope_set_contains_all(scope, &claim.scope_refs));
                 Ok(Some(version))
             }
             None => Ok(None),
@@ -228,7 +228,10 @@ impl MemoryStorage for SqliteMemoryStorage {
 
         Self::scope_allowed(&memory_row.0, scope)?;
         let memory_scopes: Vec<ScopeRef> = Self::decode(&memory_row.0)?;
-        if request.new_version.claims.iter().any(|claim| claim.scope_refs.iter().any(|claim_scope| !memory_scopes.iter().any(|memory_scope| memory_scope.scope_id == claim_scope.scope_id))) {
+        if request.new_version.claims.iter().any(|claim| {
+            !scope_set_contains_all(&memory_scopes, &claim.scope_refs)
+                || !scope_set_contains_all(scope, &claim.scope_refs)
+        }) {
             return Err(StorageError::ScopeMismatch);
         }
 
@@ -1559,6 +1562,77 @@ mod tests {
         let end = store.list_changes(second.next_cursor, &[visible_scope], 2).unwrap();
         assert!(end.records.is_empty());
         assert_eq!(end.next_cursor, None);
+    }
+
+    #[test]
+    fn sqlite_rejects_claim_scope_outside_callers_scope_even_when_parent_contains_it() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        let first_scope = scope();
+        let second_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+        let mut multi_scope_memory = memory();
+        multi_scope_memory.scope_refs = vec![first_scope.clone(), second_scope.clone()];
+        store.create_memory(
+            multi_scope_memory,
+            &[first_scope.clone(), second_scope.clone()],
+        ).unwrap();
+
+        let mut new_version = version("v-unauthorized-claim-scope", 1, None);
+        new_version.claims = vec![claim_in_scope("claim-s2", second_scope)];
+        assert_eq!(
+            store.commit_version(CommitRequest {
+                memory_id: id("m1"),
+                expected_current_version: None,
+                new_version,
+                idempotency_key: "unauthorized-claim-scope".into(),
+                request_digest: "unauthorized-claim-scope-digest".into(),
+            }, &[first_scope.clone()]),
+            Err(StorageError::ScopeMismatch)
+        );
+        assert!(store.read_current(&id("m1"), &[first_scope.clone()]).unwrap().is_none());
+        assert_eq!(
+            store.resolve_idempotency("unauthorized-claim-scope", "unauthorized-claim-scope-digest", &[first_scope.clone()]).unwrap(),
+            None
+        );
+        assert!(store.list_changes(None, &[first_scope], 10).unwrap().records.is_empty());
+    }
+
+    #[test]
+    fn sqlite_hides_entire_multiscope_claim_from_partial_scope_reader() {
+        let mut store = SqliteMemoryStorage::in_memory().unwrap();
+        let first_scope = scope();
+        let second_scope = ScopeRef {
+            scope_id: id("s2"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:s2".into(),
+        };
+        let mut multi_scope_memory = memory();
+        multi_scope_memory.scope_refs = vec![first_scope.clone(), second_scope.clone()];
+        store.create_memory(
+            multi_scope_memory,
+            &[first_scope.clone(), second_scope.clone()],
+        ).unwrap();
+
+        let mut new_version = version("v-multiscope-claim", 1, None);
+        let mut multi_scope_claim = claim_in_scope("claim-both", first_scope.clone());
+        multi_scope_claim.scope_refs.push(second_scope.clone());
+        new_version.claims = vec![multi_scope_claim];
+        store.commit_version(CommitRequest {
+            memory_id: id("m1"),
+            expected_current_version: None,
+            new_version,
+            idempotency_key: "multiscope-claim".into(),
+            request_digest: "multiscope-claim-digest".into(),
+        }, &[first_scope.clone(), second_scope.clone()]).unwrap();
+
+        let partial_reader = store.read_current(&id("m1"), &[first_scope.clone()]).unwrap().unwrap();
+        assert!(partial_reader.claims.is_empty(), "partial scope access must not disclose a partial Claim");
+        let full_reader = store.read_current(&id("m1"), &[first_scope, second_scope]).unwrap().unwrap();
+        assert_eq!(full_reader.claims.len(), 1);
+        assert_eq!(full_reader.claims[0].claim_id, id("claim-both"));
     }
 
 }
