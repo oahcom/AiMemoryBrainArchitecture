@@ -1,0 +1,56 @@
+{
+  "benchmark": "REQ-02 SQLite FTS5 vs unindexed LIKE exact-token scan",
+  "classification": "LOCAL_ONLY_MICROBENCHMARK_NOT_PRODUCT_RUNTIME",
+  "correctness": {
+    "mean_results_per_query": 956.01,
+    "queries_compared": 100,
+    "result_sets_identical": true
+  },
+  "environment": {
+    "machine": "x86_64",
+    "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+    "python": "3.13.5",
+    "sqlite": "3.46.1"
+  },
+  "latency": {
+    "fts5": {
+      "mean_us": 319.7,
+      "p50_us": 285.44,
+      "p95_us": 433.36,
+      "p99_us": 820.31,
+      "throughput_queries_per_s": 3127.95
+    },
+    "fts5_speedup_by_mean": 32.1,
+    "like_scan": {
+      "mean_us": 10263.03,
+      "p50_us": 9908.69,
+      "p95_us": 12309.67,
+      "p99_us": 14873.49,
+      "throughput_queries_per_s": 97.44
+    }
+  },
+  "limitations": [
+    "Synthetic deterministic corpus; not representative of production memory distributions.",
+    "Single-process, warm-cache, read-only microbenchmark; no concurrent writers or update/delete churn.",
+    "LIKE is a no-index exact-token baseline, not a separate search product.",
+    "Measures Python sqlite3 call path; does not measure the Rust adapter or end-to-end retrieval quality.",
+    "No relevance ranking, scope filtering, authorization, Forget suppression, or index rebuild cost is measured."
+  ],
+  "parameters": {
+    "documents": 12000,
+    "measured_queries_per_path": 300,
+    "query_count": 100,
+    "seed": 20261120,
+    "tokens_per_document": 40,
+    "vocab_size": 500,
+    "warmup_queries_per_path": 25
+  },
+  "query_plans": {
+    "fts5": [
+      "(2, 0, 0, 'SCAN docs_fts VIRTUAL TABLE INDEX 0:M1')"
+    ],
+    "like_scan": [
+      "(2, 0, 0, 'SCAN docs')"
+    ]
+  }
+}
