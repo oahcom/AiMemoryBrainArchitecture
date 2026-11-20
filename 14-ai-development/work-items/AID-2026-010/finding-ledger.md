@@ -48,13 +48,14 @@
 | ID | F-43-01/F3 |
 | 历史 ID / 别名 | F-43-01（子项 F3） |
 | 原始锚点 | `l2-05b-integration-review.md` §F-43-01（L171）；Issue #43 评论 `7015532739` 等 |
-| 问题定义 | H 尚未独立接受 D/H 双向映射（D/H authoritative query interface 未闭合）。 |
-| 状态 | CLOSED |
-| 责任 Owner | D Owner / H Owner |
-| 回流去向 | D/H 联合映射接受 → A 集成复审 |
-| 关闭条件 | D/H 双方对同一映射 Blob 的独立接受证据 + authoritative query interface 定义与核验 |
-| 最新裁决 / 证据 | A R32 授权 H 对 D 1.3.1 Blob `12b71e770f4e977c7f147694a644066bc2ce11b9` 独立映射审查；H `H-OWNER-2026-11-19-001` 对精确 H mapping Blob `e60bdd4cbfef79850596001f01cb56e622b7d79d` 作 `ACCEPT WITH EXPLICIT LIMITATIONS`（H HEAD `940963af09fe25ffb862b69ac5f272050cf000f2`，#43 `7021523060`，补充 `7021543287`）；D `D-OWNER-2026-11-19-006` 对同一精确 H mapping Blob 独立作 `ACCEPT WITH EXPLICIT LIMITATIONS`（#43 `7021721864`）；A R35 接受双 Owner 对同一精确映射 Blob 的规范层决定。D `D-OWNER-2026-11-19-007` 对 `D-AUTH-QUERY-1.0` 作 `ACCEPT`（Commit `4c5183abdc74583a3a6b8f9722d7ff2ef54ca89a` / Blob `da69b84090f45c7b6d786766eac6ec2dec9c6dee`；#43 `7021914182`）。A 独立按精确 commit 回读契约，Blob SHA 匹配；逐项核验八字段 nominal type/authority/namespace/Receipt binding、五类独立 decimal/range、D 14 元组与 H Snapshot/attestation 绑定、请求关联与响应认证、C1–C6 evidence payload/coverage/digest/Receipt 绑定、currentness/revocation、Ed25519/RFC 8785/key lifecycle、`D-Ledger-Consistency-Proof-v1`，覆盖 R35 所列 authoritative query interface 规范缺口。**A 裁定 F3 CLOSED（仅规范定义与核验范围）**：关闭条件“D/H 对同一映射 Blob 独立接受 + authoritative query interface 定义与核验”已满足。明确排除：endpoint/transport、真实 Receipt、生产密钥/签名、实际 ledger proof、C6 真实序列化与事件覆盖 trace、Runtime 测试及 CI 均未验证/未运行；不构成 operational conformance 或生产授权。上述实现级证据继续由 F1 的 BLOCKED/操作级验收及相关生产 Gate 跟踪，不得因 F3 CLOSED 而推定满足。 |
-| 范围限制 | H 的 F3 独立接受不替代 F1 实现验收；D 1.3.1 ACCEPT ≠ H 接受 |
+| 问题定义 | H/D 对 D/H 映射及 authoritative query interface 的独立接受与规范核验；后续扩展映射版本及其消费者/可调用权威证据尚未全部闭环。 |
+| 状态 | OPEN |
+| 严重级 | P1 |
+| 责任 Owner | D Owner / H Owner；A Integration 负责跨域复核 |
+| 回流去向 | D/H 同 Blob 映射接受 → PR #321（D query-contract pin）/ PR #322（H TEST validator）→ Issue #25（D/Storage callable authority and Receipt）→ A Integration exact-source re-review → Issue #43 ledger |
+| 关闭条件 | (1) D/H 对同一精确扩展映射 Blob 的独立接受；(2) D authoritative query contract 精确绑定该映射，并由授权运行时提供可调用查询；(3) 查询响应绑定 exact operation/request/receipt/snapshot/currentness/revocation 且缺失/过期/冲突 fail-closed；(4) H 消费端 parser/range/receipt-binding 实现及精确测试由 H Owner 接受；(5) A 对最终 D/H 精确版本和运行证据独立复核。 |
+| 最新裁决 / 证据 | **映射接受子条件已满足，但 F3 整体保持 OPEN。** H `H-OWNER-2026-11-19-003` 对扩展映射 Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49` 作 `ACCEPT WITH EXPLICIT LIMITATIONS`（H HEAD `7ae6a9ce2a2391e4999fb37a69affd8d0afad3f7`，Issue #43 comment `7021638212`）；D `D-OWNER-2026-11-19-005` 对同一精确 Blob 作 `ACCEPT WITH EXPLICIT LIMITATIONS`（Issue #43 comment `7021655866`）。D query-contract pin：PR #321，Head `3db969c04d08ec4b0d9aadd8f8efcea3ac0309b6`，文件 Blob `781e2e4306577448202ad84c987cbb2a0e5624f3`；该 PR 将接受的映射 Blob 固定两处，旧 Blob `e60bdd4cbfef79850596001f01cb56e622b7d79d` 从两处降至零。PR #321 为 OPEN/DRAFT，精确 Head workflow 查询无 PR-triggered runs，测试 NOT RUN。H 五字段范围修正：PR #322，Head `614b60e354cce9ecf9145e09ea5bb87c74d5cc2e`，validator Blob `6401833916c10dc96cef187c764dc17d723f691e`，test Blob `86b69e0475d6f3b8412a22dbc5211452e2f4a93d`；变更为五个 nominal high-water/generation 字段分别限制 `0..2^63-1`，测试覆盖 0 / max / max+1。PR #322 为 OPEN/DRAFT；精确 Head Actions Run `44674622112` / Job `136083710750` 与 Run `44674622134` / Job `136083718769` 均为 FAILURE 且 `steps=[]`；日志端点返回 `404 BlobNotFound — The specified blob does not exist.`，因此无测试级 CI 结论。PR #322 comment `7030430500` 报告 5 项重建 harness PASS，但非完整仓库测试/CI。D query contract §2.2 规定五种 nominal type 各自范围为 `0..2^63-1`，leading-zero input 为 MAY 接受而非 MUST；H canonical-only parser 不因拒绝 leading zero 单独构成合同冲突。**剩余未满足项：** H Owner 对 PR #322 实现/可用测试证据的处置；D callable endpoint、真实 durable Receipt、live ledger/currentness/revocation/anti-rollback 及 C1–C6 operational evidence 均 NOT ESTABLISHED / NOT VERIFIED。A 当前复核记录见 Issue #43 comments `7030464650`、PR #321 comment `7030448414`、PR #322 comment `7030465900`。 |
+| 范围限制 | D/H mapping acceptance ≠ callable runtime/query acceptance；TEST-profile validator ≠ production implementation；PR Draft ≠ Owner approval；CI failure with `steps=[]` ≠ test failure or PASS；F3 不关闭 F1 的真实 D Runtime 操作、Receipt 和操作级 conformance 要求。 |
 
 ## F-43-02 — D 契约 1.3.0 权威采纳
 
