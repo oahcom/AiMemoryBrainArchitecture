@@ -499,3 +499,30 @@ This addendum updates verification evidence only; it does not change finding sev
 - No test step ran; no current-source test PASS or CI PASS is claimed. The failure cause beyond missing log blob is NOT VERIFIED.
 
 **Disposition unchanged:** F-43-01/F3 | P1 | OPEN. The TEST-profile source remains a bounded candidate; H Owner acceptance, distinct authenticated D/H human signers, callable D query/Receipt/currentness/revocation and C1–C6 operational proof remain NOT ESTABLISHED. This is evidence refresh, not Owner approval or finding closure.
+
+
+## 2026-11-20 D-2026-1120-01 — post-rerun current-continuation evidence
+
+This addendum records a fresh exact-ref readback and a controlled retry of the existing H TEST-profile workflow jobs. It supersedes only the earlier workflow-attempt observations where newer job IDs are stated; it does not close F1 or F3.
+
+### F-43-01/F1 — P1 — OPEN (Runtime implementation evidence)
+
+- Existing PR #327 remains OPEN/DRAFT on `docs/f43-01-f1-engineering-entry-handoff`; current PR metadata Head `934a76e18ba020d01c520a8484ed7fc37f96cff1`, base `f3bc21405aa6ad5a3ec271c04f7f4d8567d8bf33`. Exact file `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md` read at that ref: Blob `2d453d24ae5e65973ced964918b9f3687a5d3284`.
+- The handoff is a verifiable engineering-entry package, not implementation. Five callable D authority operations remain NOT IMPLEMENTED; operation-bound durable Receipt NOT ESTABLISHED; canonical runtime repository/engineering custody not designated; S1–S7 NOT RUN.
+- Issue #7 comment `7021990583` remains the controlling disposition `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED`. Owner ruling D-2026-1120-01 releases only the PR/Issue quota; it does not authorize a placeholder runtime or select an implementation target.
+- **Disposition:** handoff DELIVERED / VERIFIED on existing PR #327; underlying F1 remains P1 / OPEN for runtime implementation evidence. Return: Issues #7/#10/#25/#43 and PR #327.
+
+### F-43-01/F3 — P1 — OPEN (independent-human acceptance / consumer / operational evidence)
+
+- Existing PR #321 remains OPEN/DRAFT; Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; D query contract Blob `099f4948b550919084b0d73094692b590b0be0a9`. Live file readback pins accepted H mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`; the normative query endpoint remains NOT ESTABLISHED AS CALLABLE.
+- Existing PR #322 remains OPEN/DRAFT; Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; test Blob `6685226143f28a5b8764067bb205080b531132e3` (15 test methods). Source readback is not test execution and does not establish H Owner acceptance.
+- On this continuation, the two failed jobs for exact Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb` were explicitly retried: Run `44684299500` → Job `136123331637`; Run `44684299439` → Job `136123345286`. Both latest jobs concluded FAILURE with `steps=null`. Raw log retrieval returned HTTP 404 `BlobNotFound`; RequestIds `41149edd-d01e-0077-19b7-78d79e000000` and `35cedb4e-401e-0031-0bb7-7806f2000000`. This is an external runner/log artifact failure before test-step evidence; it is neither a test-level failure nor a PASS. No test execution is claimed.
+- D role decision #7021655866 and H role decision #7021638212 both concern mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`, but both visible GitHub authors are `oahcom`; distinct authenticated human signers remain NOT VERIFIED. The unsigned attestation template and identity verification instructions remain available in this ledger's preceding section and PR #323 comment #7031665905. No signer is fabricated.
+- Callable D query, durable operation-bound Receipt, currentness/revocation/anti-rollback proof, H Owner acceptance of the current consumer, and C1–C6 operational evidence remain NOT ESTABLISHED.
+- **Disposition:** exact mapping pin and bounded H TEST-profile source are DELIVERED / VERIFIED on existing PRs #321/#322; independent-human and end-to-end operational gates remain P1 / OPEN. Return: PRs #321/#322/#323 and Issues #25/#43.
+
+### This-continuation actions and provenance
+
+- Existing failed H jobs were re-run once each through the connected GitHub integration. The host accepted both rerun requests; subsequent job readback confirms both attempts failed before exposing steps. No retry is represented as successful test execution.
+- No new PR, Issue, branch, or main write; no merge; no tests executed locally in this continuation.
+- T2 source: user-supplied Owner ruling D-2026-1120-01 and continuation instructions in this ChatGPT conversation. Current platform conversation UUID/raw bytes are not exposed to this GitHub operation; prompt SHA-256 NOT_VERIFIED. No synthetic identifier/hash is asserted.
