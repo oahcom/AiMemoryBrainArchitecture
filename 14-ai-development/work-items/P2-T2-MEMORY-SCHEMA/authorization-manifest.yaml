@@ -93,17 +93,32 @@ review:
     architecture_decision.capacity_excludes; it is NOT equivalent to Q1 remaining
     undecided.
 
-    Five of the six remaining questions were DECIDED in design-proposal.md section 2i:
-    Q13 (completed tool call requires a result) -- table-level CHECK, DDL amended;
-    Q11 (authorisation to extend a Phase 1 table's schema) -- admissible on a
-    data-neutrality ground, index stays declared as a modification;
-    Q12 (schema-execution authority) -- prospective interpretation issued, R2 event NOT
-    reclassified; Q15 (INDEX.md authority conflict) -- scope decided, no write by this
-    work item, underlying conflict untouched; Q9 (impact_level) -- retained untyped,
-    neither typed nor dropped.
+    Five of the six remaining questions received dispositions in design-proposal.md
+    section 2i. Their scope differs and the manifest does not flatten them:
+
+      Q13 (completed tool call requires a result) -- DECIDED: table-level CHECK,
+          DDL amended. Separate from NF-R3-02, whose closure this is not.
+      Q11 (authorisation to extend a Phase 1 table's schema) -- PARTLY DECIDED.
+          Technical admissibility is settled: the index is data-neutral with respect
+          to versions' admissible rows and is necessary for the composite foreign key
+          to be expressible. The authorisation half is NOT decided and remains with
+          the Phase 1 contract's owner, who is NOT_ASSIGNED. No rule exempts a
+          data-neutral modification from Phase 1 approval, and this manifest claims
+          none. The index stays declared as a Layer 1 modification.
+      Q12 (schema-execution authority) -- prospective interpretation issued; the
+          R2 event is NOT reclassified and later probes are not covered by it
+          retrospectively.
+      Q15 (INDEX.md authority conflict) -- only this work item's write scope is
+          decided (no write). The AI-STD-001 conflict itself is untouched.
+      Q9 (impact_level) -- DECIDED: retained untyped, neither typed nor dropped.
+
     Two were HELD, deliberately: Q8 (transcript retention classes) and Q14 (recompute
     single input). Both ask for facts about the world that no reading of this repository
     supplies, and deciding them would be invention rather than decision.
+
+    Q11 being PARTLY DECIDED is not a rounding of a completed ruling. It is the
+    difference between a technical finding and a governance exemption, and the manifest
+    records the two separately so a later reader cannot read the first as the second.
 
     Capacity: dev-baseline convergence path (Issue #264 comment 7000428916),
     session-held. human_signature NOT_CLAIMED; acceptance_authority remains
@@ -435,6 +450,7 @@ claims_forbidden:
   - "that a section 2i ruling constitutes design acceptance, implementation authorization, or a human signature"
   - "that section 2i's prospective Q12 interpretation covers the Q13 or Q11 probes retrospectively"
   - "that deciding Q11 authorizes the index -- the index is admissible, not authorized"
+  - "that Q11 is fully decided -- only technical admissibility is settled; the authorisation half is open"
   - "that deciding Q15 resolves the AI-STD-001 conflict -- only this work item's write scope was decided"
   - "that holding Q8 or Q14 is a deferral rather than a decision not to invent"
   - "that Q14 is a confirmed business requirement"

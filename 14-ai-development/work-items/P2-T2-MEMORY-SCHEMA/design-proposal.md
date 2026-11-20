@@ -179,7 +179,7 @@ RULING; REMAINING ITEMS BLOCKED BY AUTHORITY OR MISSING BUSINESS INPUT.**
 
 | question | ruling disposition |
 |---|---|
-| Q11 | **NOT ADOPTED — premise falsified, re-posed.** That disposition stands: the old question was wrong. The re-posed authorisation question is now **DECIDED in §2i** on a data-neutrality ground. |
+| Q11 | **NOT ADOPTED — premise falsified, re-posed.** That disposition stands: the old question was wrong. The re-posed question is now **PARTLY DECIDED in §2i**: technical admissibility settled on a data-neutrality ground, the authorisation half left open for the contract's owner. |
 | Q12 | INTERPRETED — prospective interpretation possible; no retrospective authorization. **Issued in §2i**, with the R2 event left un-reclassified. |
 | Q13 | RECOMMENDED — adapter-level enforcement → **superseded, DECIDED as table-level `CHECK` in §2i** |
 | Q14 | BLOCKED — `BUSINESS_RULE_NOT_SUPPLIED`; **held in §2i**, strict branch stays provisional |
@@ -1343,9 +1343,11 @@ Three things follow, and they are stated rather than inferred:
    since decided it.** A bounded search is not an admissibility determination, and
    the thing being extended belongs to a contract whose owning capacity has not
    been identified — which is why the question was carried rather than answered
-   here. §2i answers it on a different ground entirely: the index is
-   data-neutral, so the question of authorisation does not arise for it. Six
-   probes recorded there; the adapter-level fallback below is retained as what the
+   here. §2i answers the technical half on a different ground entirely — the
+   index is data-neutral — and explicitly does not answer the authorisation half:
+   no rule exempts a data-neutral modification from Phase 1 approval, so that
+   question stands for the contract's owner. Six probes recorded there; the
+   adapter-level fallback below is retained as what the
    implementation would do if that finding were overturned.
 3. **The adapter-level fallback stays documented** as the implementation that
    would be used if an authorising capacity later declines the index. Drop the
@@ -1865,7 +1867,7 @@ The distinction, stated plainly:
 
 Applied to the two gaps this document identifies:
 
-- **The atomicity question** — what happens when `commit_version` succeeds and the `transcript_message` insert does not — can be investigated and specified in alternatives. Selecting which alternative governs needs an authority that is `NOT_ASSIGNED`. A session cannot close that question by writing a document — and §2i did not: Q8 and Q14 are exactly the questions this paragraph names, and they are held, not decided.
+- **The atomicity question** — what happens when `commit_version` succeeds and the `transcript_message` insert does not — can be investigated and specified in alternatives. Selecting which alternative governs needs an authority that is `NOT_ASSIGNED`. A session cannot close that question by writing a document — and §2i did not close it. The two questions this paragraph names are the atomicity contract and the session lifecycle state machine, and neither is Q8 or Q14; those two are held on different grounds (Q8 needs a retention policy, Q14 needs the meaning of `recompute`). What §2i holds and what this paragraph denies are consistent with each other, and the cross-reference that said otherwise is corrected here.
 - **Session lifecycle transitions** — the state machine can be proposed. Adopting it as authoritative has the same problem.
 
 So the accurate statement is not "none of this is blocked on authority". It is: **the investigation is not blocked; the adoption is.** A session can move these questions from "unasked" to "asked with named alternatives". It cannot move them to "settled".
@@ -2126,10 +2128,10 @@ INSERT INTO schema_version (version) VALUES ('1.0.0');
 ## Appendix B — probe harness, so the twenty cases can be rerun
 
 The Q13 and Q11 tables in §2i report twenty executions between them. Those tables are
-useless to a reader who cannot repeat them, and §16 marks the results `VERIFIED` on the
-strength of executions that happened in a session and left no artefact. This appendix is
-the remedy. The two harnesses below are the code that produced the two tables, in the form
-it was run in.
+useless to a reader who cannot repeat them, and §16 grades the results on the strength of
+executions that happened in a session and left no artefact. This appendix is the remedy.
+The two harnesses below are the code that produced the two tables, in the form it was run
+in.
 
 Both read their DDL out of **this document**, not out of a copy: they extract the fenced
 sql blocks before Appendix A, splice in the merged Event Store definitions that §7.1
@@ -2140,15 +2142,37 @@ Appendix A is embedded because the prompt source has no authorised write path. T
 appendix is embedded for a different reason: it is the evidence for two §2i rulings, and
 evidence that cannot be located is evidence a reviewer cannot weigh.
 
-**Requirement.** `sqlite3` at `/usr/bin/sqlite3` (probed with 3.46.1). Nothing else.
+**How to run.** From the repository root, on a machine with `sqlite3` at `/usr/bin/sqlite3`
+(probed with 3.46.1):
+
+```text
+python3 <this file>   # pasted to /tmp/h13.py and /tmp/h11.py
+```
+
+**A note on the fence marker.** These harnesses build their markdown fence from
+`chr(96) * 3` at run time rather than spelling it out. That is not stylistic: the first
+version of this appendix substituted a literal triple-backtick inside the harness source
+with a substituted form so the enclosing fence would not break, and in doing so it broke
+the harness's own fence matching — both scripts then found zero sql blocks and the
+reported results were unrepresentable. An independent reviewer caught it. Building the
+marker at run time means the embedded source is byte-identical to the source that runs,
+so that class of error cannot recur, and an assertion in the build step rejects any
+harness that contains a literal triple-backtick at all.
 
 ### B.1 — Q13 harness
 
 ```python
 # -*- coding: utf-8 -*-
 """Q13 probe harness. Extracts the design's own DDL from design-proposal.md and
-tests the completed-requires-a-result CHECK on 14 cases. Needs /usr/bin/sqlite3."""
-import subprocess, sys, io, os
+tests the completed-requires-a-result CHECK on 14 cases. Needs /usr/bin/sqlite3.
+
+The fence marker is built at runtime from chr(96) so this source contains no
+literal triple-backtick sequence and can be embedded verbatim in Appendix B
+without breaking the enclosing fence or needing any substitution."""
+import subprocess, sys, io
+
+F = chr(96) * 3                       # markdown fence, built not literal
+FENCE_OPEN = F + "sql"
 
 P = sys.argv[1] if len(sys.argv) > 1 else "14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/design-proposal.md"
 lines = io.open(P, encoding="utf-8").read().split("\n")
@@ -2156,16 +2180,20 @@ lines = io.open(P, encoding="utf-8").read().split("\n")
 blocks = []
 i = 0
 while i < len(lines):
-    if lines[i].strip() == "`` `sql":
+    if lines[i].strip() == FENCE_OPEN:
         j = i + 1
-        while j < len(lines) and lines[j].strip() != "`` `":
+        while j < len(lines) and lines[j].strip() != F:
             j += 1
         blocks.append((i + 2, "\n".join(lines[i + 1:j])))
         i = j + 1
     else:
         i += 1
 
+if not blocks:
+    sys.exit("no sql blocks found in %s - fence marker mismatch" % P)
+
 design = [b for (ln, b) in blocks if ln < 1700]
+
 EV = """
 CREATE TABLE IF NOT EXISTS accepted_events (
   event_row INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -2213,6 +2241,7 @@ CASES = [
  ("N  completed -> emitted", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst','m-tool','read','completed');UPDATE transcript_tool_call SET tool_state='emitted' WHERE tool_call_id='tc1';", "REFUSED"),
 ]
 
+print("extracted %d sql blocks from %s" % (len(blocks), P))
 fails = 0
 for label, body, expect in CASES:
     p = subprocess.run(["/usr/bin/sqlite3", ":memory:"], input=BASE + FIX + body,
@@ -2233,8 +2262,15 @@ sys.exit(1 if fails else 0)
 # -*- coding: utf-8 -*-
 """Q11 probe harness. Extracts the design's own DDL from design-proposal.md and
 tests whether versions_memory_version_uq changes admissible rows. 6 cases.
-Needs /usr/bin/sqlite3."""
+Needs /usr/bin/sqlite3.
+
+The fence marker is built at runtime from chr(96) so this source contains no
+literal triple-backtick sequence and can be embedded verbatim in Appendix B
+without breaking the enclosing fence or needing any substitution."""
 import subprocess, sys, io
+
+F = chr(96) * 3                       # markdown fence, built not literal
+FENCE_OPEN = F + "sql"
 
 P = sys.argv[1] if len(sys.argv) > 1 else "14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/design-proposal.md"
 lines = io.open(P, encoding="utf-8").read().split("\n")
@@ -2242,14 +2278,18 @@ lines = io.open(P, encoding="utf-8").read().split("\n")
 blocks = []
 i = 0
 while i < len(lines):
-    if lines[i].strip() == "`` `sql":
+    if lines[i].strip() == FENCE_OPEN:
         j = i + 1
-        while j < len(lines) and lines[j].strip() != "`` `":
+        while j < len(lines) and lines[j].strip() != F:
             j += 1
         blocks.append((i + 2, "\n".join(lines[i + 1:j])))
         i = j + 1
     else:
         i += 1
+
+if not blocks:
+    sys.exit("no sql blocks found in %s - fence marker mismatch" % P)
+
 design = "\n".join(b for (ln, b) in blocks if ln < 1700)
 
 EV = """
@@ -2268,11 +2308,8 @@ CREATE TABLE IF NOT EXISTS event_payloads (
 """
 PRE = "PRAGMA foreign_keys=ON;\n" + EV + "\n" + design
 
-# the index as it appears in the design
 IDX = ("CREATE UNIQUE INDEX IF NOT EXISTS versions_memory_version_uq\n"
        "  ON versions(memory_id, version_id);")
-
-# P6: same content but the index is non-unique
 IDX_NONUNIQUE = ("CREATE INDEX IF NOT EXISTS versions_mv_idx\n"
                  "  ON versions(memory_id, version_id);")
 
@@ -2287,27 +2324,27 @@ INSERT INTO versions VALUES ('v1','m1',1,NULL,'{}','{}',1);
 """
 CTX = ("INSERT INTO context_assembly VALUES ('a1','sc',NULL,NULL,"
        "'2026-01-01T00:00:00Z','draft');")
+ENTRY_M1 = ("INSERT INTO context_assembly_entry VALUES ('e1','a1','m1','v1',1,NULL,"
+            "'included','2026-01-01T00:00:00Z');")
+ENTRY_M2 = ("INSERT INTO context_assembly_entry VALUES ('e1','a1','m2','v1',1,NULL,"
+            "'included','2026-01-01T00:00:00Z');")
 
 CASES = [
  ("P1 duplicate (memory_id, version_id), no index", BASE_NO_IDX,
   SEED + "INSERT INTO versions VALUES ('v1','m1',2,NULL,'{}','{}',2);", "FAILED"),
  ("P2 composite FK, no unique parent key, MATCHED pair", BASE_NO_IDX,
-  SEED + CTX + "INSERT INTO context_assembly_entry VALUES ('e1','a1','m1','v1',1,NULL,'included','2026-01-01T00:00:00Z');",
-  "FAILED"),
+  SEED + CTX + ENTRY_M1, "FAILED"),
  ("P3 composite FK, no unique parent key, MISMATCHED pair", BASE_NO_IDX,
-  SEED + CTX + "INSERT INTO context_assembly_entry VALUES ('e1','a1','m2','v1',1,NULL,'included','2026-01-01T00:00:00Z');",
-  "FAILED"),
+  SEED + CTX + ENTRY_M2, "FAILED"),
  ("P4 WITH index, MATCHED pair", BASE_IDX,
-  SEED + CTX + "INSERT INTO context_assembly_entry VALUES ('e1','a1','m1','v1',1,NULL,'included','2026-01-01T00:00:00Z');",
-  "ACCEPTED"),
+  SEED + CTX + ENTRY_M1, "ACCEPTED"),
  ("P5 WITH index, MISMATCHED pair", BASE_IDX,
-  SEED + CTX + "INSERT INTO context_assembly_entry VALUES ('e1','a1','m2','v1',1,NULL,'included','2026-01-01T00:00:00Z');",
-  "FAILED"),
+  SEED + CTX + ENTRY_M2, "FAILED"),
  ("P6 NON-unique parent index, MATCHED pair", BASE_NONUNIQ,
-  SEED + CTX + "INSERT INTO context_assembly_entry VALUES ('e1','a1','m1','v1',1,NULL,'included','2026-01-01T00:00:00Z');",
-  "FAILED"),
+  SEED + CTX + ENTRY_M1, "FAILED"),
 ]
 
+print("extracted %d sql blocks from %s" % (len(blocks), P))
 fails = 0
 for label, base, body, expect in CASES:
     p = subprocess.run(["/usr/bin/sqlite3", ":memory:"], input=base + body,
@@ -2324,14 +2361,50 @@ print("\n%d cases, %d pass, %d fail" % (len(CASES), len(CASES) - fails, fails))
 sys.exit(1 if fails else 0)
 ```
 
-### B.3 — expected output
+### B.3 — captured output
 
-Both harnesses print one line per case and a summary. The expected summary is what §2i
-records:
+Not an expectation — the actual output of the run that produced §2i's tables, recorded
+here so a reviewer can compare rather than trust:
+
+Q13:
 
 ```text
-# B.1 — 14 cases, 14 pass, 0 fail
-# B.2 —  6 cases,  6 pass, 0 fail
+extracted 10 sql blocks from 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/design-proposal.md
+PASS A  INSERT completed, result NULL             expect=REFUSED  got=REFUSED
+PASS B  emitted -> completed, result NULL         expect=REFUSED  got=REFUSED
+PASS C  emitted -> completed WITH valid result    expect=ACCEPTED got=ACCEPTED
+PASS D  INSERT completed WITH valid result        expect=ACCEPTED got=ACCEPTED
+PASS E  failed with NULL result                   expect=ACCEPTED got=ACCEPTED
+PASS F  emitted with NULL result                  expect=ACCEPTED got=ACCEPTED
+PASS G  bind result FIRST, then completed         expect=ACCEPTED got=ACCEPTED
+PASS H  completed bound to a DIFFERENT child      expect=ACCEPTED got=ACCEPTED
+PASS I  rebind a bound result (R4 guard)          expect=REFUSED  got=REFUSED
+PASS J  clear a bound result (R4 guard)           expect=REFUSED  got=REFUSED
+PASS K  UPDATE tool_name on a completed row       expect=ACCEPTED got=ACCEPTED
+PASS L  result bound while state emitted          expect=ACCEPTED got=ACCEPTED
+PASS M  emitted+result then -> failed             expect=ACCEPTED got=ACCEPTED
+PASS N  completed -> emitted                      expect=REFUSED  got=REFUSED
+
+14 cases, 14 pass, 0 fail
+```
+
+Q11:
+
+```text
+extracted 10 sql blocks from 14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/design-proposal.md
+PASS P1 duplicate (memory_id, version_id), no index       expect=FAILED   got=FAILED
+       err: Runtime error near line 369: UNIQUE constraint failed: versions.version_id (19)
+PASS P2 composite FK, no unique parent key, MATCHED pair  expect=FAILED   got=FAILED
+       err: Parse error near line 369: foreign key mismatch - "context_assembly_entry" referencing "versions"
+PASS P3 composite FK, no unique parent key, MISMATCHED pair expect=FAILED   got=FAILED
+       err: Parse error near line 369: foreign key mismatch - "context_assembly_entry" referencing "versions"
+PASS P4 WITH index, MATCHED pair                          expect=ACCEPTED got=ACCEPTED
+PASS P5 WITH index, MISMATCHED pair                       expect=FAILED   got=FAILED
+       err: Runtime error near line 370: FOREIGN KEY constraint failed (19)
+PASS P6 NON-unique parent index, MATCHED pair             expect=FAILED   got=FAILED
+       err: Parse error near line 370: foreign key mismatch - "context_assembly_entry" referencing "versions"
+
+6 cases, 6 pass, 0 fail
 ```
 
 A mismatch means either the document changed or §2i's table is wrong. Either is worth
