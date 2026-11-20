@@ -222,4 +222,4 @@ A/B/C 基线；D Canonical Memory/Lifecycle 契约；H Producer Identity/Ingress
 - E 必须在输出可见前登记每个在途 Producer/Run 和每个派生依赖。D/I 权威 Barrier/Publication Gate 必须将 Registration 与 Forget 串行化；本地预检查不足以关闭 Check-then-publish 竞争窗口。
 - H BMCP Envelope 和 I Principal/ActorRef 契约是候选依赖。H 传输 Owner 定义的 Idempotency Namespace/Key/Digest；I 定义已认证 Producer Binding、安全域身份、PermissionEpoch 和 Policy。
 - B Fact/Claim 映射仍为 ADR-BLOCKED。CandidateEnvelope/CandidateProposition 仍属于 Canonical 前的 IR。
-- 详细 CANDIDATE 契约见 accepted-receipt-and-idempotency-contract.md 和 forget-fence-and-derived-registration.md。
+- 详细 CANDIDATE 契约见 accepted-receipt-and-idempotency-contract.md 和 forget-fence-and-derived-registration-part1.md。

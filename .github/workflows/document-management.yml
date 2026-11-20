@@ -1,0 +1,24 @@
+name: Architecture document management gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  document-management:
+    name: GOV-DOC-002 metadata checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Self-check the gate
+        run: python3 scripts/test_check_document_management.py
+
+      - name: Validate document metadata
+        run: python3 scripts/check_document_management.py

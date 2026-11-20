@@ -222,4 +222,4 @@ A/B/C baseline; D Canonical Memory/lifecycle contracts; H producer identity/ingr
 - E registers each in-flight producer/run and every derived dependency before output visibility. D/I authoritative barrier/publication gate must serialize registration against Forget; local prechecks alone do not close check-then-publish race.
 - H BMCP envelope and I Principal/ActorRef contracts are candidate dependencies. H transports owner-defined idempotency namespace/key/digest; I defines authenticated producer binding, security-domain identity, PermissionEpoch and policy.
 - B Fact/Claim mapping remains ADR-BLOCKED. CandidateEnvelope/CandidateProposition remain pre-canonical IR.
-- See accepted-receipt-and-idempotency-contract.md and forget-fence-and-derived-registration.md for detailed CANDIDATE contracts.
+- See accepted-receipt-and-idempotency-contract.md and forget-fence-and-derived-registration-part1.md for detailed CANDIDATE contracts.

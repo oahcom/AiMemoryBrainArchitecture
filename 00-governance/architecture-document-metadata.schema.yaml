@@ -1,0 +1,108 @@
+# Architecture document metadata schema (GOV-DOC-002)
+# 架构文档元数据 Schema
+#
+# Copy the block below into the top of a governed Markdown file.
+# 将下面的块复制到受治理 Markdown 文件的顶部。
+#
+# Rules: see 00-governance/architecture-document-management-policy.md
+# Fields marked REQUIRED must always be present. Fields marked CONDITIONAL
+# must be present when their condition holds (enforced by DM-03..DM-07).
+# 必填字段始终存在；条件字段在其条件成立时必须存在。
+
+document_metadata:
+
+  # ---- DIMENSION 1: DOMAIN (REQUIRED) ----
+  # Closed enumeration, see policy §3.1
+  domain: architecture
+
+  # ---- DIMENSION 2: ROLE (REQUIRED) ----
+  # design-specification | decision-record | normative-standard | research |
+  # review-report | work-record | guide | reference | index
+  role: design-specification
+
+  # ---- DIMENSION 3: LIFECYCLE ----
+  lifecycle:
+
+    approval:
+      # Draft | Under-Review | Approved | Rejected | Withdrawn | Revoked
+      decision_status: Draft
+      approver: null
+      decision_date: null
+
+      # CONDITIONAL: REQUIRED when decision_status == Approved (DM-03)
+      approved_version:
+        scheme: git          # git | content-hash
+        value: null
+      approval_scope:
+        type: Full-document  # Full-document | Selected-sections | Selected-assets
+        included_sections: []
+        included_assets: []
+
+      # Applicability of the historical approval to the CURRENT content.
+      # Applicable-To-Current-Version | Not-Applicable-To-Current-Version
+      approval_applicability: Applicable-To-Current-Version
+
+      evidence_reference: []
+
+      # CONDITIONAL: REQUIRED and non-null when decision_status == Revoked (DM-04)
+      revocation: null
+      # revocation:
+      #   revocation_decision_id: "GOV-REV-YYYY-NNN"
+      #   revoked_date: "YYYY-MM-DD"
+      #   revoker: null
+      #   revocation_reason: null
+      #   revocation_evidence: []
+      #   superseding_document: null
+
+    evidence_verification:
+      # Unverified | Verified | Invalidated
+      # CI-maintained. Humans supply references only.
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: null
+
+    # Active | Deprecated | Archived | Superseded
+    usage_status: Active
+
+    # Unchanged | Modified | Active-Modified | Pending-Reapproval
+    modification_status: Unchanged
+
+    supersession:
+      # Human-declared, one direction only.
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+      # CI-derived. MUST NOT appear in Markdown frontmatter (DM-08).
+      # superseded_by: []
+
+    archival:
+      # CONDITIONAL: REQUIRED when usage_status == Archived (DM-05)
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+
+  # ---- DIMENSION 4: AUTHORITY ----
+  authority:
+
+    # Canonical | Non-Canonical | Candidate
+    canonical_status: Non-Canonical
+
+    # CONDITIONAL: REQUIRED and non-empty when canonical_status == Canonical (DM-06)
+    canonical_scope: null
+    canonical_scope_id: null        # lowercase kebab-case, prefixed by domain
+    canonical_scope_keywords: []
+
+    # None | Under-Review | Resolved
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+
+    # Normative | Informative
+    normative_status: Informative
+
+  # ---- BILINGUAL PAIRING (REQUIRED under GOV-DOC-001) ----
+  # The counterpart of this document. Only the authoritative source declares
+  # authority; translations MUST NOT each claim the same canonical_scope_id.
+  # 双语配对：仅权威源声明权威性；各语言译本不得重复声明同一 canonical_scope_id。
+  bilingual_counterpart:
+    en: null
+    zh-CN: null

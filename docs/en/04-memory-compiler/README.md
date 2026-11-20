@@ -12,7 +12,7 @@
 
 ## Remaining core source specifications
 
-The E branch inventory also contains Event Ingestion, Extraction/Normalization, Consolidation/Conflict Resolution, Evidence/Provenance, and Forget Fence/Derived Registration specifications. Their full bilingual companions remain pending and are tracked in [translation status](../translation-status.md).
+The E branch inventory also contains Event Ingestion, Extraction/Normalization, Consolidation/Conflict Resolution, Evidence/Provenance, and Forget Fence/Derived Registration specifications. Their full bilingual companions remain pending and are tracked in [translation status](../../governance/translation-status.md).
 
 ## Authority and status
 

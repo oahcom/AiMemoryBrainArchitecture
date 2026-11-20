@@ -224,4 +224,4 @@ D 拥有 Canonical Object Semantics 和 Write Decision；F 拥有 Index Projecti
 - 只有 D 返回 CanonicalCommitted 及其 Canonical Cursor。E 记录引用，但不分配或解释该 Cursor。只有 F 能确认 Indexed，并推进其 Per-index/Per-partition Watermark。
 - Forget Fence 激活后，不能再发布任何源自被遗忘来源的 Candidate、Conflict Proposal、Review Payload 或 Canonical Write Envelope。派生 Dependency Registration 必须先于可见性。
 - CandidateProposition/ExtractionIR 到 Canonical Claim 的 Mapping，在 B/Governance 批准前仍为 **ADR-BLOCKED**。
-- E 边界候选规范见 [Accepted Receipt and Idempotency Contract](accepted-receipt-and-idempotency-contract.md) 和 [Forget Fence and Derived Registration](forget-fence-and-derived-registration.md)；在 D/H/I/Storage/F Owner 批准接口前，它们仍为 CANDIDATE。
+- E 边界候选规范见 [Accepted Receipt and Idempotency Contract](accepted-receipt-and-idempotency-contract.md) 和 [Forget Fence and Derived Registration](forget-fence-and-derived-registration-part1.md)；在 D/H/I/Storage/F Owner 批准接口前，它们仍为 CANDIDATE。

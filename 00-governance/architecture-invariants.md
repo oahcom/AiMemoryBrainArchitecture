@@ -1,3 +1,53 @@
+---
+document_metadata:
+  domain: architecture
+  role: normative-standard
+  lifecycle:
+    approval:
+      decision_status: Approved
+      approver: NOT_RECORDED
+      decision_date: NOT_RECORDED
+      approved_version:
+        scheme: git
+        value: "a7d12fe9835d8f53403946ab08c1cae8c3f12fbf"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "00-governance/architecture-invariants.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "Status is DECIDED in the document body. No formal approval record, approver identity or decision date exists in this repository; recorded as NOT_RECORDED rather than inferred."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Canonical
+    canonical_scope: "Architecture: system invariants"
+    canonical_scope_id: "architecture/system-invariants"
+    canonical_scope_keywords:
+      - invariant
+      - constraint
+      - subsystem
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+  bilingual_counterpart:
+    en: "docs/en/00-governance/architecture-invariants.md"
+    zh-CN: "docs/zh-CN/00-governance/architecture-invariants.md"
+---
+
 # Architecture Invariants
 
 These invariants are normative constraints for all subsystem specifications and future implementations.

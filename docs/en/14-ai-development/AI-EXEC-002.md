@@ -5,7 +5,7 @@
 - **Version:** 1.2
 - **Status:** v1.2 PENDING ADOPTION (to be registered upon merge of this change set to `main`, per the effectiveness clause of AI-EXEC-UNIFICATION-RULING-001 §5). Previous versions: v1.1 ADOPTED via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`, 2026-11-18); v1.0 ADOPTED via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`, 2026-11-18). v1.2 changes: F-006 anchor revision (structure = seven sections per AI-STD-001 §5.1; the 15/12 items reclassified as content obligations mapped per AI-PROMPT-STD-001 §4).
 - **Owner:** Integration Owner
-- **Tracking:** Issue #218 · Work Item [AID-2026-002](../../../work-items/AID-2026-002/manifest.yaml) · Revision Work Item [AID-2026-003](../../../work-items/AID-2026-003/manifest.yaml)
+- **Tracking:** Issue #218 · Work Item [AID-2026-002](../../../14-ai-development/work-items/AID-2026-002/manifest.yaml) · Revision Work Item [AID-2026-003](../../../14-ai-development/work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](../../../14-ai-development/ai-development-standard.md) §5/§13, [AI-PROMPT-STD-001](../../../14-ai-development/prompt-authoring-standard.md), [CHATGPT-GLOBAL-001](../../../14-ai-development/prompts/global/chatgpt-session-contract-v1.md), [AI-PROC-001](../../../14-ai-development/iteration-lifecycle.md) Stages 2/6, GLB-DOC-001 (policy GOV-DOC-001)
 - **Source document:** `14-ai-development/AI-EXEC-002.md`
 - **Source commit:** `1f97c3fae65828266a0c3cb1d1e8d4e6cb330856` (coordinator-supplied)
@@ -31,7 +31,7 @@
 
 Before work starts, record the following in the Work Item's Issue/PR (= AI-STD-001 §13 start record + AI-PROC-001 §8 intake checklist):
 
-1. **Work Item ID**: `AID-YYYY-NNN` (registration rules in [INDEX.md](../../../work-items/INDEX.md)), with `work-items/AID-YYYY-NNN/manifest.yaml` already created;
+1. **Work Item ID**: `AID-YYYY-NNN` (registration rules in [INDEX.md](../../../14-ai-development/work-items/INDEX.md)), with `work-items/AID-YYYY-NNN/manifest.yaml` already created;
 2. **Prompt identifier**: Prompt ID + version (e.g. `AID-2026-002-PROMPT v1`) + provenance anchor (apply the **three T1/T2/T3 tiers** below);
 3. **Baseline**: target branch, base SHA, dependency SHA(s) (source Pin — a branch name is not a stable baseline; AI-PROMPT-STD-001 Step 2);
 4. **Scope / non-goals, task class** (ARCH/IMPL/TEST/SEC/MIG/PERF/DOC/OPS), **risk level** (R0–R3), and **acceptance criteria**.
@@ -111,7 +111,7 @@ At session end (whether completed or blocked), publish a Closeout comment in the
 8. Merge status: record target branch, merge commit SHA, and post-merge read-back verification only if actually merged — **never infer that a PR was merged from its closure**;
 9. Bilingual-gate result (GOV-DOC-001: both paths, source version, parity-dimension PASS/FAIL, reviewer, or the required STALE-exception registration elements).
 
-Then add one **session-level delivery record** line to [INDEX.md](../../../work-items/INDEX.md) (mark missing evidence `NOT RECORDED`, never fabricate it; blocked/no-change work remains visible and must state resolver and exit condition).
+Then add one **session-level delivery record** line to [INDEX.md](../../../14-ai-development/work-items/INDEX.md) (mark missing evidence `NOT RECORDED`, never fabricate it; blocked/no-change work remains visible and must state resolver and exit condition).
 
 ## 7. Prohibited Actions (AI-PROMPT-STD-001 §7 + CHATGPT-GLOBAL-001)
 

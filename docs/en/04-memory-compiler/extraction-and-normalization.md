@@ -195,7 +195,7 @@ D domain types and Fact/Claim ADR; B epistemic/temporal/scope semantics; C/H sou
 - Extraction stage identity derives from immutable Event/source version, digest, Scope and pinned parser/model/policy versions. Retries reuse the same logical stage identity; changed inputs or method versions create a new attempt/revision.
 - Persist a stage result and next-stage outbox/journal intent atomically or through an equivalent recoverable journal. A worker crash must not lose a completed stage or duplicate its externally visible effect.
 - Before payload dereference, source-span resolution, model prompt construction, stage-result publication or retry, re-check current permission and D Forget Fence. Unknown fence/policy state fails closed.
-- ExtractionIR, CandidateProposition, spans, embeddings and normalized values are derived objects: lineage and dependency registration must be durable before visibility under [Forget Fence and Derived Registration](forget-fence-and-derived-registration.md).
+- ExtractionIR, CandidateProposition, spans, embeddings and normalized values are derived objects: lineage and dependency registration must be durable before visibility under [Forget Fence and Derived Registration](forget-fence-and-derived-registration-part1.md).
 - CandidateProposition remains neutral pre-canonical IR. Mapping to Fact/Claim is ADR-BLOCKED until B/Governance approval; E must not infer the approved model.
 
 ### 19.1 Claim/Fact canonical publication order

@@ -122,7 +122,7 @@ OPEN：D Canonical Read/Lifecycle Snapshot Consistency；E Watermark Granularity
 
 ## Phase 3.5 — Forget 与 Cursor 集成
 
-规范性 F Consumer Matrix、Retrieval-stage Suppression Matrix、Cache/Working Set Invalidation Contract、Index Rebuild Contract 和十项 Conformance Specification 维护于 [phase-3.5-forget-suppression-and-cursor-consumption.md](phase-3.5-forget-suppression-and-cursor-consumption.md)。
+规范性 F Consumer Matrix、Retrieval-stage Suppression Matrix、Cache/Working Set Invalidation Contract、Index Rebuild Contract 和十项 Conformance Specification 维护于 [phase-3.5-forget-suppression-and-cursor-consumption.md](../../governance/documentation-gaps.md)。
 
 Runtime 将 D 的 Per-authority Global CanonicalCommitCursor、Per-aggregate AggregateRevision、Per-Memory LifecycleEventCursor 和 ForgetFenceGeneration 作为独立类型消费；F 拥有 Per-index/Per-partition IndexWatermark；I 拥有 PermissionEpoch；G 拥有 ContextVersion。这些值不可互换。IndexWatermark 只证明连续 Projection Freshness，绝不证明 Forget 完成。
 

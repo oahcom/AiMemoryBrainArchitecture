@@ -12,7 +12,7 @@
 
 ## 尚待双语化的核心源规范
 
-E 分支清单还包含 Event Ingestion、Extraction/Normalization、Consolidation/Conflict Resolution、Evidence/Provenance，以及 Forget Fence/Derived Registration 规范。它们的完整双语伴随文档仍待完成，进度见[双语迁移状态](../translation-status.md)。
+E 分支清单还包含 Event Ingestion、Extraction/Normalization、Consolidation/Conflict Resolution、Evidence/Provenance，以及 Forget Fence/Derived Registration 规范。它们的完整双语伴随文档仍待完成，进度见[双语迁移状态](../../governance/translation-status.md)。
 
 ## 权威与状态
 

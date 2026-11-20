@@ -4,7 +4,7 @@
 - 源文件版本：DEREFERENCED — 保留历史源 Blob `00e37ba56596e710513c8d0568acd79141d9101b`；当前仓库不存在可解析的规范性源文件。
 - 源分支：session-e-memory-compiler-2026-11-16
 - 对应英文：[Part 1 — Core Contract](../../en/04-memory-compiler/forget-fence-and-derived-registration-part1.md)
-- 源规范：DEREFERENCED — 原规范源路径 `04-memory-compiler/forget-fence-and-derived-registration.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/04-memory-compiler/forget-fence-and-derived-registration-part1.md)（Blob `6bb639cb242665cf3f6d3f4816e3d24deac51fb0`；仅为对照文本，不是规范性替代源）。
+- 源规范：DEREFERENCED — 原规范源路径 `04-memory-compiler/forget-fence-and-derived-registration-part1.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/04-memory-compiler/forget-fence-and-derived-registration-part1.md)（Blob `6bb639cb242665cf3f6d3f4816e3d24deac51fb0`；仅为对照文本，不是规范性替代源）。
 
 ## 1. 安全不变量
 

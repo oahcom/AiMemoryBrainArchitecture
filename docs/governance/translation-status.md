@@ -185,7 +185,7 @@ A integration governance and conformance reader guides are available in both lan
 
 Batches 1 and 2 provide the orientation, shared language, governance invariants, component map, responsibility matrix, and the source-aligned system-level specifications. The six core Domain Model source specifications are also paired. The H Phase 3.6 identity consumer/conformance status report now has a separate bilingual pair, but this does not complete H's normative core contracts or imply H36 execution. This is not yet a full translation of all Owner branch contracts, technology decisions, detailed test plans, or review reports. GOV-DOC-001 is already part of the main governance baseline.
 
-The 2026-11-17 Phase 3.6 identity/Applied/Storage source audit is recorded in [the source audit report](../reviews/translation/2026-11-17-phase36-identity-applied-storage-source-audit.md). It records currentness findings BSR-28-005 and BSR-28-006 and keeps the high-risk detailed-contract coverage finding BSR-28-007 OPEN.
+The 2026-11-17 Phase 3.6 identity/Applied/Storage source audit is recorded in [the source audit report](../../reviews/translation/2026-11-17-phase36-identity-applied-storage-source-audit.md). It records currentness findings BSR-28-005 and BSR-28-006 and keeps the high-risk detailed-contract coverage finding BSR-28-007 OPEN.
 
 
 ## 8. B Phase 3 identity companion batch — 2026-11-17
@@ -197,7 +197,7 @@ Two exact B Owner-branch source artifacts now have reciprocal Chinese/English co
 | `02-domain-model/typed-reference-and-scope-semantics.md` | `session-b-domain-model-phase3` | `e9a6bd21e06bc02a5208619f5a949217860b1c00` | `docs/en/02-domain-model/typed-reference-and-scope-semantics.md` | `docs/zh-CN/02-domain-model/typed-reference-and-scope-semantics.md` | CANDIDATE; ClaimRef conditional on ADR-001; I36-GOV-03/04 BLOCKED |
 | `02-domain-model/principal-actor-binding-mapping.md` | `session-b-domain-model-phase3` | `bbbef919e1e2ffe158cda8d9b2c5e718efaae969` | `docs/en/02-domain-model/principal-actor-binding-mapping.md` | `docs/zh-CN/02-domain-model/principal-actor-binding-mapping.md` | CANDIDATE; INT-P0-02 / INT-X-03 OPEN; I36 governance decisions remain blocked |
 
-Pair presence is not semantic acceptance, identity freeze, I policy approval, H wire freeze, or ADR-001 closure. The targeted review [BSR-28-B-IDENTITY-001](../reviews/translation/2026-11-17-b-phase3-identity-bilingual-semantic-review.md) has now inspected both pairs and found no material Chinese/English semantic divergence. This is translation parity only; exact source Blob pins are not Owner branch HEADs and all source CANDIDATE/OPEN/BLOCKED statuses remain unchanged.
+Pair presence is not semantic acceptance, identity freeze, I policy approval, H wire freeze, or ADR-001 closure. The targeted review [BSR-28-B-IDENTITY-001](../../reviews/translation/2026-11-17-b-phase3-identity-bilingual-semantic-review.md) has now inspected both pairs and found no material Chinese/English semantic divergence. This is translation parity only; exact source Blob pins are not Owner branch HEADs and all source CANDIDATE/OPEN/BLOCKED statuses remain unchanged.
 
 
 ## 9. C Phase 3.6 final-request evidence companion — 2026-11-17
@@ -212,7 +212,7 @@ Pair presence is not semantic acceptance, identity freeze, I policy approval, H 
 
 ## 10. C/G/H Phase 3.6 Applied cross-owner review — 2026-11-17
 
-- Independent review: [English report](../reviews/translation/2026-11-17-cgh-applied-contract-cross-owner-review.md) / [中文报告](../reviews/translation/2026-11-17-cgh-applied-contract-cross-owner-review.zh-CN.md).
+- Independent review: [English report](../../reviews/translation/2026-11-17-cgh-applied-contract-cross-owner-review.md) / [中文报告](../../reviews/translation/2026-11-17-cgh-applied-contract-cross-owner-review.zh-CN.md).
 - Exact sources re-read: C `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b`; G `aa3afa73d8a76cc6f025839c52bfbff6a983046a`; H Adapter Capability/Applied `ed6b43a29aa368d772c701ffc83309a5aadf3c00`.
 - Six-stage lifecycle, historical/current-use distinction, and C/G duplicate/late-evidence semantics are aligned.
 - H Adapter candidate remains CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I. Findings H36-AP-01..07 identify unresolved exact boundary identity, target/attempt mapping, managed-region inventory/coverage, I/D authority vector, verifier-bound identity, evidence provenance, and per-request bypass coverage.
@@ -239,7 +239,7 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 - Exact H source Blob: `db59b63e322d7255b8b400f47859dcac32bb3027` on `session-h-bmcp-protocol`.
 - Pair: `docs/en/08-bmcp-protocol/adapter-capability-and-applied-attestation.md` and `docs/zh-CN/08-bmcp-protocol/adapter-capability-and-applied-attestation.md`.
 - Structural readback: 22/22 headings and 33/33 table rows in source, EN and zh-CN; EN content is exact source text plus source/language metadata.
-- Targeted semantic parity review: [EN report](../reviews/translation/2026-11-17-h-adapter-capability-applied-bilingual-review.md) / [中文报告](../reviews/translation/2026-11-17-h-adapter-capability-applied-bilingual-review.zh-CN.md) — PASS for this exact Blob only.
+- Targeted semantic parity review: [EN report](../../reviews/translation/2026-11-17-h-adapter-capability-applied-bilingual-review.md) / [中文报告](../../reviews/translation/2026-11-17-h-adapter-capability-applied-bilingual-review.zh-CN.md) — PASS for this exact Blob only.
 - H source status remains CANDIDATE; final-request proof profile OPEN with C; authorization binding OPEN with I. H conformance NOT RUN; implementation/interoperability NOT VERIFIED; C/G/H freeze BLOCKED.
 - Coverage: 1/7 H detailed core specifications paired. This does not complete H's detailed contract set or the C/G/H freeze.
 
@@ -249,7 +249,7 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 - Exact G source Blob: `aa3afa73d8a76cc6f025839c52bfbff6a983046a` on `session-g-memory-context`.
 - Pair: `docs/en/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md` and `docs/zh-CN/06-memory-context/phase-3.6-applied-forget-reconciliation-contract.md`.
 - Structural readback: 21/21 headings and 37/37 table rows across source, EN and zh-CN; EN companion contains exact source content.
-- Targeted semantic parity: [EN report](../reviews/translation/2026-11-17-g-phase36-applied-forget-bilingual-review.md) / [中文报告](../reviews/translation/2026-11-17-g-phase36-applied-forget-bilingual-review.zh-CN.md) — PASS for this exact Blob.
+- Targeted semantic parity: [EN report](../../reviews/translation/2026-11-17-g-phase36-applied-forget-bilingual-review.md) / [中文报告](../../reviews/translation/2026-11-17-g-phase36-applied-forget-bilingual-review.zh-CN.md) — PASS for this exact Blob.
 - G source status remains semantic decisions recorded; C/G/H Applied freeze BLOCKED; implementation/execution NOT VERIFIED; G-36-01..15 SPECIFIED / NOT RUN.
 
 
@@ -291,8 +291,8 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 ## 14. H current-source refresh and CSubmitOutcome closure proposal — 2026-11-17
 
 - H source moved again to Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`; current EN/zh-CN companions pin this exact Blob and include §§11.8–11.9. Structural readback: 24/24 headings and 33/33 table rows across source/EN/zh-CN; EN companion contains exact source content. §11.9 now explicitly maps C-issued `c_provider_receipt_ref` / `c_submit_outcome_ref`, participant terminal proof eligibility and I/D-exclusive gate release, but remains CANDIDATE.
-- Cross-owner audit refreshed to H Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`: [EN](../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md) / [中文](../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.zh-CN.md).
-- C source remains Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` and still does not define the C-issued Provider receipt/CSubmitOutcome object or record exact-version acceptance of the G recovery-batch 1.1 package. A bounded non-normative closure proposal was added: [EN](../reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal.md) / [中文](../reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal.zh-CN.md). This is NOT a C Owner decision and does not amend C source.
+- Cross-owner audit refreshed to H Blob `74be8374a67da385a5f0f8e34c7aef2b38b72bcf`: [EN](../../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md) / [中文](../../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.zh-CN.md).
+- C source remains Blob `fd2f47ba6c89bb270e9f2bec956873cb7ae3592b` and still does not define the C-issued Provider receipt/CSubmitOutcome object or record exact-version acceptance of the G recovery-batch 1.1 package. A bounded non-normative closure proposal was added: [EN](../../reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal.md) / [中文](../../reviews/integration/2026-11-17-c-owner-csubmitoutcome-closure-proposal.zh-CN.md). This is NOT a C Owner decision and does not amend C source.
 - C/G/H joint 1.1 freeze remains BLOCKED; H schema/SDK freeze NOT ESTABLISHED; implementation NOT VERIFIED; conformance NOT RUN.
 
 
@@ -301,7 +301,7 @@ H 的 `session-h-bmcp-protocol` 源文件 `08-bmcp-protocol/adapter-capability-a
 
 - Exact C source: `07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`, branch `session-c-agent-integration-2026-11-16`, Blob `45a48249717c8cddb07ab96197730ef93d406c22`.
 - Pair: `docs/en/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md` and `docs/zh-CN/07-agent-integration/phase-3.6-c-submit-cross-authority-causal-order-contract.md`.
-- Structural readback: 14/14 headings; no tables in source/EN/zh-CN; EN exact source content. Targeted parity: [EN report](../reviews/translation/2026-11-17-c-submit-causal-order-bilingual-review.md) / [中文报告](../reviews/translation/2026-11-17-c-submit-causal-order-bilingual-review.zh-CN.md) — PASS for this exact Blob.
+- Structural readback: 14/14 headings; no tables in source/EN/zh-CN; EN exact source content. Targeted parity: [EN report](../../reviews/translation/2026-11-17-c-submit-causal-order-bilingual-review.md) / [中文报告](../../reviews/translation/2026-11-17-c-submit-causal-order-bilingual-review.zh-CN.md) — PASS for this exact Blob.
 - C explicitly ACCEPTS WITH ENUMERATED EXCEPTIONS the exact CGH-APPLIED-1.1 recovery-batch amendment, A package Blob `4961ffefc0f9920efb8425a9b2a7af42d8f64819` and COC Blob `fc3bac39ec64fda68b8cba5e1aada4e719e5acea`. C36-AP-01 is RESOLVED at source-decision level; this does not resolve H wire/schema mapping or deployment/test gates.
 - C detailed core companion coverage is now 2/10 (Final Request Evidence + C-submit causal-order).
 
@@ -314,7 +314,7 @@ The earlier OPEN entry is superseded. C's separate cross-authority causal-order 
 
 ## 15. Corrected current C/G/H exact-version review — 2026-11-17
 
-- Corrected cross-owner report (supersedes the earlier false-positive gap assessment): [EN](../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md) / [中文](../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.zh-CN.md).
+- Corrected cross-owner report (supersedes the earlier false-positive gap assessment): [EN](../../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.md) / [中文](../../reviews/integration/2026-11-17-cgh-phase36-cross-owner-contract-consistency-review.zh-CN.md).
 - C exact current evidence: recovery-batch Owner decision Blob `45a48249717c8cddb07ab96197730ef93d406c22`; normative C provider outcome contract Blob `819705037da89834e10b6dd2ec6e66c1b8c70886`; CSubmitOutcome 1.0.1 schema Blob `a631bc7a519be7ce93fcfd7c548fa2ca8e8c1cda`; current 38-test review Blob `24337b79cfea6264a8a6f11fa414578fc559716c`.
 - H exact current evidence: Unified 1.2.14 Blob `09fcd1fa29fe24255fbd87cae79dafb406594a59`; C/H mapping Blob `1cbe74eba69325510d6b1019d971661f965eabf8`; validator/test/fixture Blobs `eab961a08d41e871f38543b18ee60cf024977414` / `540056d7c4f290c31290b17c264c69cfd76b1cb2` / `c80247a6ecfbb4a29ff0993e8e2aea4829d00626`; H full-path closure Blob `cda025fb157815570b3280fa5ff168d5e62453b1`.
 - Exact H CI run `44070924346`, commit `77a9d5e2e716ba33387f0beb1195f864ed8ac54f`, job `133996627914` SUCCESS; 38 methods (32 H validator unit/fixture + 6 C crypto interop). All ten authority callbacks remain deterministic test doubles; production trust/authority integration is not proven.

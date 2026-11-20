@@ -196,7 +196,7 @@ B Domain Model 的 Reference/Time/Scope Semantics；D Canonical Object/Version C
 - Provenance Edge 本身不能证明 D Completion Barrier 已核算某个在途 Producer。E 必须登记 Producer/Run，并取得持久化 Dependency Registration ACK。
 - Source Content、Excerpt Ref、原始 Payload Hash 和可逆 Payload URI 不得复制到 Forget Tombstone。Tombstone 只包含 I 允许的最少、不可反向重建的 Suppression Evidence。
 - Fence 激活时，阻止对已遗忘 Source 的 Dereference/Lineage Expansion；将 Descendant 标记为 Suppressed/Restricted。Traversal 不完整或不可达时必须报告 Pending/Unknown，绝不能报告 Complete。
-- Visibility Gate、Race Protocol 和 Failure Matrix 见 [Forget Fence and Derived Registration](forget-fence-and-derived-registration.md)。Physical Erasure 和 Global Completion 仍由 I 拥有。
+- Visibility Gate、Race Protocol 和 Failure Matrix 见 [Forget Fence and Derived Registration](forget-fence-and-derived-registration-part1.md)。Physical Erasure 和 Global Completion 仍由 I 拥有。
 
 ## 20. Phase 3 Producer Registration、Cursor 与可见性对齐
 

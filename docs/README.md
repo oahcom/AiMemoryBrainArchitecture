@@ -15,12 +15,12 @@
 
 | 目录 | 说明 | 入口 |
 |------|------|------|
-| `en-US/` | 英文规范性文档 | [📖 English Docs](./en-US/README.md) |
-| `zh-CN/` | 中文规范性文档 | [📖 中文文档](./zh-CN/README.md) |
+| `en/` | 英文规范性文档 | [📖 English Docs](./en/) |
+| `zh-CN/` | 中文规范性文档 | [📖 中文文档](./zh-CN/) |
 
 **核心规范**:
-- [AID-2026-000: Architecture Decision Records](./en-US/AID-2026-000-architecture-decision-records.md) - ADR 规范
-- [MVP Architecture Decisions](./MVP-ARCHITECTURE-DECISIONS.md) - 试点项目最小可用架构
+- [ADR: Architecture Decision Records](../14-ai-development/adr/) - ADR 规范
+- [MVP Architecture Decisions](./architecture-convergence/ARCH-CONVERGENCE-001-MINIMUM-RUNNABLE-ARCHITECTURE.md) - 试点项目最小可用架构
 
 ---
 
@@ -45,9 +45,9 @@
 
 
 **开发者**:
-- **试点项目开发** → [MVP Architecture Decisions](./MVP-ARCHITECTURE-DECISIONS.md)
-- **提交新 ADR** → [模板](./templates/aid-template.md)
-- **查看规范** → [中文文档](./zh-CN/README.md) / [English Docs](./en-US/README.md)
+- **试点项目开发** → [MVP Architecture Decisions](./architecture-convergence/ARCH-CONVERGENCE-001-MINIMUM-RUNNABLE-ARCHITECTURE.md)
+- **提交新 ADR** → [ADR 目录](../14-ai-development/adr/)
+- **查看规范** → [中文文档](./zh-CN/) / [English Docs](./en/)
 
 **架构师**:
 - **候选架构评审** → [architecture-convergence/](./architecture-convergence/)

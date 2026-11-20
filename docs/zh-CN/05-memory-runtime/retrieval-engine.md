@@ -134,7 +134,7 @@ TO_VALIDATE：RRF 与 Calibrated Fusion 的比较、Ranking Quality、Graph Budg
 
 ## Phase 3.5 — 类型化 Cursor 与 Forget Suppression 补充（规范性补充）
 
-详细 Owner/Consumer Contract 见 [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](phase-3.5-forget-suppression-and-cursor-consumption.md)。本补充在冲突时取代本文更早的临时措辞。
+详细 Owner/Consumer Contract 见 [Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract](../../governance/documentation-gaps.md)。本补充在冲突时取代本文更早的临时措辞。
 
 ### Typed Cursor Discipline
 

@@ -195,7 +195,7 @@ D Domain Type 和 Fact/Claim ADR；B Epistemic/Temporal/Scope Semantics；C/H So
 - Extraction Stage Identity 来自不可变 Event/Source Version、Digest、Scope 和固定的 Parser/Model/Policy Version。Retry 复用同一个逻辑 Stage Identity；输入或 Method Version 改变时创建新的 Attempt/Revision。
 - Stage Result 与下一阶段 Outbox/Journal Intent 必须原子持久化，或通过等价可恢复 Journal 持久化。Worker 崩溃不得丢失已完成 Stage，也不得重复产生外部可见效果。
 - 在 Payload Dereference、Source Span Resolution、Model Prompt Construction、Stage Result Publication 或 Retry 前，重新检查当前 Permission 和 D Forget Fence。Fence/Policy 状态未知时 Fail-closed。
-- ExtractionIR、CandidateProposition、Span、Embedding 和 Normalized Value 都是派生对象：根据 [Forget Fence and Derived Registration](forget-fence-and-derived-registration.md)，必须在可见前持久化 Lineage 和 Dependency Registration。
+- ExtractionIR、CandidateProposition、Span、Embedding 和 Normalized Value 都是派生对象：根据 [Forget Fence and Derived Registration](forget-fence-and-derived-registration-part1.md)，必须在可见前持久化 Lineage 和 Dependency Registration。
 - CandidateProposition 保持中立的 Pre-canonical IR。映射到 Fact/Claim 在 B/Governance 批准前仍为 **ADR-BLOCKED**；E 不得自行推断批准的模型。
 
 ### 19.1 Claim/Fact 规范发布顺序

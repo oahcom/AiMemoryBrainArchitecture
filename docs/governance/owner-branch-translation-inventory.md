@@ -120,7 +120,7 @@ The following exact source Blob SHAs were re-read directly from their named Owne
 - **BSR-28-006 — OPEN:** the previously cited Storage topology Blob `080433f8e13a500522bc2754da64057edb0ae9d8` is no longer the live path Blob; readback returns `1ef47d4e5711c7db73a24d249adf1992be1f6aa4`. The ADR remains BLOCKED and no topology is selected.
 - **BSR-28-007 — OPEN:** PR #28 contains a bilingual pair for the H identity consumer/conformance status report only. This is not one of the seven H normative core-spec pairs and does not complete B/C/G/H/I/Storage detailed contracts.
 
-Full findings and disposition: [Phase 3.6 identity / Applied / Storage source audit](../reviews/translation/2026-11-17-phase36-identity-applied-storage-source-audit.md).
+Full findings and disposition: [Phase 3.6 identity / Applied / Storage source audit](../../reviews/translation/2026-11-17-phase36-identity-applied-storage-source-audit.md).
 
 
 ## 8. B Phase 3 bilingual companion batch — 2026-11-17

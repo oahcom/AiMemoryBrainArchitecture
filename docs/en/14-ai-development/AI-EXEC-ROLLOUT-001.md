@@ -5,7 +5,7 @@
 - **Version:** 4.0 (v2: script-free → v3: GitHub-native tracking → v4: aligned with the project's current workflow)
 - **Status:** ADOPTED — owner-directed adoption recorded in Issue #218 comment #6971736655
 - **Owner:** Integration Owner
-- **Tracking:** Issue #218 · Work Item [AID-2026-002](../../../work-items/AID-2026-002/manifest.yaml)
+- **Tracking:** Issue #218 · Work Item [AID-2026-002](../../../14-ai-development/work-items/AID-2026-002/manifest.yaml)
 - **Implementation documents:** [AI-EXEC-001](AI-EXEC-001.md) (process execution details), [AI-EXEC-002](AI-EXEC-002.md) (prompt execution details)
 - **Source document:** `14-ai-development/AI-EXEC-ROLLOUT-001.md`
 - **Source commit:** `778b4d3b4b6c846faa6a02247d31d14a33d8b626` (coordinator-supplied)

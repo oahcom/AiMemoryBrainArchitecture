@@ -185,7 +185,7 @@ B Domain Model reference/time/scope semantics; D canonical object and version co
 - A provenance edge alone is not proof that D's completion barrier has accounted for an in-flight producer. E must register the producer/run and obtain durable dependency-registration acknowledgement.
 - Source content, excerpt refs, raw payload hashes and reversible payload URIs must not be copied into Forget tombstones. Tombstones contain only minimum non-reconstructive suppression evidence permitted by I.
 - On fence activation, block dereference and lineage expansion into forgotten sources; mark descendants suppressed/restricted and report incomplete/unreachable traversal as pending/unknown, never complete.
-- See `forget-fence-and-derived-registration.md` for the visibility gate, race protocol and failure matrix. Physical erasure and global completion remain I-owned.
+- See `forget-fence-and-derived-registration-part1.md` for the visibility gate, race protocol and failure matrix. Physical erasure and global completion remain I-owned.
 
 
 ## 19. Phase 3 producer-registration, cursor and visibility alignment
