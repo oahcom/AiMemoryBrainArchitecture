@@ -200,29 +200,61 @@ D domain types and Fact/Claim ADR; B epistemic/temporal/scope semantics; C/H sou
 
 ### 19.1 Claim/Fact canonical publication order
 
-E's ExtractionIR and CandidateProposition remain private staging artifacts.
+E's ExtractionIR and CandidateProposition MUST
+remain private staging artifacts.
 
-The required order is:
+The normative order is:
 
-1. Durable ingress acceptance.
-2. Current I authorization and D Forget-fence check.
-3. Private immutable staging.
-4. Complete direct/transitive dependency enumeration.
-5. Durable D dependency registration.
-6. D canonical ClaimRevision/FactRevision commit.
-7. Storage PREPARED_HIDDEN publication tuple.
-8. D PublicationParticipant admission.
-9. I Commit Authorization.
-10. Storage final visibility commit.
-11. D/E participant reconciliation and terminalization.
+1. Resolve current I authorization and applicable Scope.
+2. Evaluate the active D Forget Fence and perform
+   Producer Admission under one serialized,
+   recoverable admission boundary.
+3. Durably register the complete direct and
+   transitive dependency set under that boundary.
+4. Create private immutable E staging artifacts.
+5. Commit ClaimRevision/FactRevision and required
+   canonical references within D's commit boundary.
+6. Atomically or recoverably associate the committed
+   revisions with dependency registration and
+   Publication Intent.
+7. Complete E publication idempotently.
+8. Advance Storage visibility only after all
+   required canonical and dependency records
+   are confirmed.
+9. Commit G ContextVersion with exact immutable
+   canonical revision references.
+10. Mark logical completion only after all
+    required visibility conditions are satisfied.
 
-E MUST NOT expose a canonical-looking Claim/Fact, index event, public artifact or serving reference before the applicable canonical and publication boundaries have completed.
+#### T17 — Fence-first
 
-UNKNOWN or incomplete dependency state remains private.
+A Forget Fence linearizing before Producer
+Admission MUST prevent admission, staging,
+canonical commit and publication.
 
-Staging does not imply canonical acceptance or public publication.
+#### T18 — Participant-first
 
-E does not own canonical Claim/Fact identity or I governance authorization.
+A successfully admitted Producer MUST be durably
+recorded as an exact participant.
+
+A later Fence MUST account for that participant
+through the authoritative serialized barrier.
+It MUST NOT silently skip or erase the participant.
+
+The final disposition MUST preserve exact identity,
+dependency closure and auditable Forget outcome.
+
+UNKNOWN remains non-final until resolved.
+
+E MUST NOT expose canonical-looking Claims/Facts,
+index events, public artifacts or serving references
+before the applicable protected publication
+conditions are satisfied.
+
+Staging does not imply canonical acceptance.
+
+E does not own canonical Claim/Fact identity
+or I governance authorization.
 
 #### Storage boundary
 

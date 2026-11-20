@@ -200,29 +200,54 @@ D Domain Type 和 Fact/Claim ADR；B Epistemic/Temporal/Scope Semantics；C/H So
 
 ### 19.1 Claim/Fact 规范发布顺序
 
-E 的 ExtractionIR 和 CandidateProposition 必须保持为私有 Staging 产物。
+E 的 ExtractionIR 和 CandidateProposition MUST
+保持为私有 Staging 产物。
 
-必须遵循以下顺序：
+唯一规范顺序如下：
 
-1. 持久化 Ingress Acceptance。
-2. 当前 I 授权和 D Forget Fence 检查。
-3. 私有不可变 Staging。
-4. 完整枚举直接/传递依赖。
-5. 持久化 D Dependency Registration。
-6. D 规范 ClaimRevision/FactRevision 提交。
-7. Storage PREPARED_HIDDEN Publication Tuple。
-8. D PublicationParticipant Admission。
-9. I Commit Authorization。
-10. Storage 最终 Visibility Commit。
-11. D/E Participant Reconciliation 和终结。
+1. 解析当前 I 授权及适用 Scope。
+2. 在同一串行化、可恢复的 Admission 边界内，
+   检查 D Forget Fence 并执行 Producer Admission。
+3. 在该边界下持久登记完整直接及传递依赖。
+4. 创建私有不可变 E Staging 产物。
+5. 在 D 规范提交边界内提交 ClaimRevision、
+   FactRevision 及必要规范引用。
+6. 将已提交 Revision 与依赖登记和
+   Publication Intent 原子或可恢复地关联。
+7. 以幂等方式完成 E Publication。
+8. 只有全部必要规范记录及依赖登记得到确认后，
+   才能推进 Storage Visibility。
+9. G 使用精确不可变规范 Revision 引用提交
+   ContextVersion。
+10. 只有全部必要可见性条件满足后，
+    才能标记逻辑完成。
 
-适用的规范提交与 Publication 边界完成之前，E 不得暴露看似规范 Claim/Fact 的对象、Index Event、公开 Artifact 或 Serving Reference。
+#### T17 — Fence-first
 
-依赖状态 UNKNOWN 或不完整时必须保持私有。
+Forget Fence 如果先于 Producer Admission
+线性化，MUST 阻止准入、Staging、规范提交和发布。
 
-Staging 不代表规范接收或公开发布。
+#### T18 — Participant-first
 
-E 不拥有规范 Claim/Fact 身份，也不拥有 I 治理授权。
+成功准入的 Producer MUST 作为精确 Participant
+持久登记。
+
+后续 Fence MUST 通过权威串行化 Barrier
+处理该参与者，不得静默跳过或删除。
+
+最终处置 MUST 保留精确身份、依赖闭包
+和可审计 Forget 结果。
+
+UNKNOWN 在解析前保持非最终状态。
+
+在受保护发布条件满足之前，E 不得暴露
+看似规范的 Claim/Fact、Index Event、
+公开 Artifact 或 Serving Reference。
+
+Staging 不代表规范接收。
+
+E 不拥有规范 Claim/Fact 身份，
+也不拥有 I 治理授权。
 
 #### Storage 边界
 
