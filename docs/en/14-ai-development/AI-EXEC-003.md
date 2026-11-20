@@ -48,7 +48,7 @@ The AI MUST NOT manufacture third-party approvals, additional expert committees,
 
 Existing mandatory review requirements remain unchanged:
 
-- R0/R1 work follows current AI-STD-001 and AI-EXEC-001 author/reviewer separation and applicable review requirements;
+- R0/R1 work follows the effective provisions of AI-EXEC-001 and applicable AI-STD-001 provisions that have been formally adopted for author/reviewer separation and review; PROPOSED AI-STD-001 provisions do not become mandatory gates merely by being referenced;
 - R2 retains independent ChatGPT-session review and approval of affected Owner contract boundaries;
 - R3 retains independent review, security/domain expert review, reproducible tests, and explicit Acceptance Authority approval;
 - Cross-Owner contracts, permissions, security, Forget, persistence, recovery, and irreversible operations remain subject to their applicable mandatory boundaries.
