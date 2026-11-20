@@ -223,9 +223,9 @@ Two further checks:
 | `grep -rn -i "layer 1\|layer1"` across the tree, excluding this work item and the `docs/` and `reviews/` trees | **zero hits** |
 
 "Layer 1" and "Layer 2" are terminology introduced by this proposal. **No
-governance document located in the stated searches defines this boundary or
-establishes the asserted prohibition.** That is the finding, and it is bounded by
-the searches recorded above — not finding the term does not prove that no
+inspected repository document defines this boundary or establishes the asserted
+prohibition.** That is the finding, and it is bounded by the inspection and the
+searches recorded above — not finding the term does not prove that no
 document imposes an equivalent restriction under other wording. The claim is
 about what was searched, and it is written as such.
 
@@ -233,9 +233,11 @@ The word *boundary* in the contract denotes **the scope of what has been
 decided** — the persistence behaviours enumerated above — not **a line that must
 not be crossed**. This document read it as the second, asked a question premised
 on that reading, and received an answer to the question as asked, explicitly
-conditioned on the check that falsifies it. Stated precisely: the contract as
-inspected contains no crossing prohibition, and the two searches located none
-elsewhere; that is the extent of the finding.
+conditioned on the check that falsifies it. Stated precisely: the inspected Phase 1
+contract contains no crossing prohibition, and neither of the two recorded
+repository searches located an equivalent prohibition elsewhere. This is the
+extent of the finding; it does not establish that no such restriction exists
+under unsearched wording.
 
 ### What this means for Q11
 
@@ -925,9 +927,10 @@ Three things follow, and they are stated rather than inferred:
    constrains persistence behaviour and row immutability; it does not constrain
    schema objects. Verified in §2f with the exact clauses and two bounded
    searches. Stated as a bounded negative, not as a universal one.
-2. **The index is therefore not forbidden, and not authorised either.** Absence
-   of a located prohibition is not permission when the thing being extended
-   belongs to a contract whose owning capacity is `NOT_ASSIGNED`.
+2. **No prohibition was located in the inspected contract or the stated
+   searches; the index is not thereby authorised or established as admissible.**
+   A bounded search result is not an admissibility determination, and the thing
+   being extended belongs to a contract whose owning capacity is `NOT_ASSIGNED`.
 3. **The adapter-level fallback stays documented** as the implementation that
    would be used if an authorising capacity later declines the index. Drop the
    index and the composite foreign key; read the version's owning `memory_id`
