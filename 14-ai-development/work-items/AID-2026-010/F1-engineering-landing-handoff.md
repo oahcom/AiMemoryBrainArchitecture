@@ -87,6 +87,7 @@ For every scenario, retain: exact runtime commit; exact test path and test ID; c
 | Required proof | Current evidence | Current state |
 |---|---|---|
 | D-002 normative semantics | Accepted proof Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5` | ACCEPTED at normative level |
+| H TEST-profile consumer candidate (cross-reference only; not F1 acceptance) | PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; regression-test Blob `6685226143f28a5b8764067bb205080b531132e3` | Bounded TEST-profile candidate; 15 test methods present; exact-head Actions Runs `44684299500` / `44684299439` FAILURE with no steps/log artifacts; not H Owner acceptance or production conformance |
 | Five operational D authority operations | Prior exact-source status records say NOT IMPLEMENTED | NOT VERIFIED / NOT IMPLEMENTED |
 | Authoritative Producer Registration Ledger runtime | No authorized canonical runtime/persistence carrier evidenced | NOT ESTABLISHED |
 | Real durable Receipt sample and readback | No real Receipt evidenced | NOT ESTABLISHED |
