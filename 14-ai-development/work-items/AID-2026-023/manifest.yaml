@@ -1,0 +1,224 @@
+aid: AID-2026-023
+title: Forget Safety and Recovery Fence
+
+class: ARCH/DESIGN (PROVISIONAL; NOT_ADJUDICATED)
+risk: NOT_ADJUDICATED
+risk_rationale: >-
+  The Work Item addresses P0 findings MQ-06 and F-349-02 concerning production
+  Forget enforcement and possible resurrection through backup restoration.
+  This rationale records the severity of the source findings, not an
+  independently authorized Work Item risk classification.
+security_scope: NOT_ASSIGNED
+
+status: PENDING_FORMAL_REGISTRATION
+
+sponsor: NOT_ASSIGNED
+accountable_owner: NOT_ASSIGNED
+acceptance_authority: NOT_APPOINTED
+implementing_ai_session: CURRENT_DESIGN_SESSION (session identity: NOT_RECORDED)
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit: c970c4a61b623c1f127624f60666b0a27e7e0594
+
+tracking_issues:
+  - https://github.com/oahcom/AiMemoryBrainArchitecture/issues/349
+  - https://github.com/oahcom/AiMemoryBrainArchitecture/issues/347
+coordination_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/345
+
+baseline_evidence:
+  verification_status: VERIFIED_IN_PRIOR_SESSION
+  verification_note: >-
+    The immediately preceding design-session response reported that the main
+    baseline and all eight supplied source Blob SHAs matched. This is carried
+    forward evidence, not a new verification performed for this manifest.
+  requirement_reports:
+    req_07: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/347#issuecomment-7036654407
+    req_09: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/349#issuecomment-7036920593
+  source_blobs:
+    - path: 00-governance/architecture-invariants.md
+      sha: 33b037318e459ebb73bea33b3186f31a41d5dcfe
+    - path: 02-domain-model/epistemic-and-temporal-semantics.md
+      sha: 8c03a20db1ed54c90db1d5c4c64f5ea7b1324ed7
+    - path: 02-domain-model/lifecycle-model.md
+      sha: c1daa6225e75ea40d7f86e5ef6916b4f3849a1f8
+    - path: 02-domain-model/scope-and-permission-model.md
+      sha: b5215ae27bd65a6c89c185b496f730b6cd52efa9
+    - path: crates/memory-domain/src/lib.rs
+      sha: 5d90a36d99b8be4ca4f3c8d5837b4e9830558842
+    - path: crates/memory-storage-sqlite/src/lib.rs
+      sha: 32eb1a9a4233de2a1c623ce72b88b4cac88172a2
+    - path: 14-ai-development/work-items/AID-2026-001/reference-model/forget_model.py
+      sha: cd623d67400c8870a729f79f88a4413f37bb335a
+    - path: reviews/architecture-breakthrough/forget-formal-verification/forget-invariants.md
+      sha: 14eb422c4ac7763d4682adacacd50b42b34fda6c
+
+created_at: NOT_RECORDED
+updated_at: NOT_RECORDED
+
+number_allocation:
+  requested: AID-2026-023
+  assigned: PROVISIONAL_ONLY
+  collision_result: NO_MATCH_IN_REPORTED_SCAN
+  uniqueness_status: NOT_VERIFIED
+  evidence:
+    - >-
+      Prior session reported a paginated branch-name scan covering 324 branches
+      across 5 pages, with no branch name containing AID-2026-023.
+    - >-
+      Prior session reported no matching PR from its AID-2026-023 PR search
+      and no matching row in the then-read main INDEX.
+  scan_scope:
+    branch_names: 324 branches; 5 pages; query for AID-2026-023
+    pull_requests: AID-2026-023 search; exact query scope not retained
+    main_index: 14-ai-development/work-items/INDEX.md read on main
+    recursive_work_item_tree_scan: NOT_VERIFIED
+    open_branch_file_allocation_scan: NOT_VERIFIED
+    scan_timestamp: NOT_RECORDED
+  limitation: >-
+    The reported scan is useful preliminary evidence but is not a complete
+    cross-tree allocation scan. AID-2026-023 remains provisional until the
+    coordination layer confirms allocation uniqueness against current main
+    and all relevant open branches.
+
+prompt_id: AID-2026-023-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-023/prompt-v1.md
+prompt_status: FROZEN
+prompt_sha256: b7346c08e8fc07dd7293ced7f7606c4c1addd5279968d01a912f31688dcbb122
+prompt_bytes: 6150
+prompt_provenance_tier: T1
+prompt_provenance_note: >-
+  The prompt snapshot is mechanically copied byte-for-byte by the coordination
+  layer from the actual dispatch source file
+  prompts/323-aid-2026-023-forget-fence.md. The repository prompt-v1.md is
+  intended to preserve that source artifact exactly. The source-file SHA-256 is
+  b7346c08e8fc07dd7293ced7f7606c4c1addd5279968d01a912f31688dcbb122 and its
+  exact byte count is 6150. Equality between the source artifact and the
+  content ultimately rendered to and received by the session is NOT_VERIFIED
+  because the message channel was observed to strip or alter Markdown
+  structural markers. This provenance claim establishes the source artifact
+  identity, not byte-equivalence of the rendered delivery.
+prompt_delivery_integrity: NOT_VERIFIED
+prompt_original_payload_sha256: b7346c08e8fc07dd7293ced7f7606c4c1addd5279968d01a912f31688dcbb122
+prompt_original_payload_bytes: 6150
+
+scope:
+  - >-
+    Define one cross-requirement invariant and protocol preventing forgotten
+    information from becoming available again through persistence, recovery,
+    replay, derived-state, or synchronization paths.
+  - >-
+    Define canonical Forget semantics and semantic deletion scope relevant to
+    REQ-07.
+  - >-
+    Define invalidation or suppression requirements for derived memory,
+    projections, caches, and reconstructed representations.
+  - >-
+    Define durable deletion evidence and its relationship to backup and restore.
+  - >-
+    Define restore-time reconciliation and suppression requirements for
+    backup restoration and point-in-time recovery.
+  - >-
+    Define crash consistency, interrupted recovery, event replay, and
+    projection rebuild behavior.
+  - >-
+    Define ordering, idempotency, concurrency, failure handling, retention,
+    expiry, and auditable evidence for the shared Forget safety protocol.
+  - >-
+    Preserve separate REQ-07 and REQ-09 acceptance tracks.
+  - >-
+    Specify reproducible tests and fault-injection scenarios, migration
+    boundaries, rollback constraints, residual risks, and dependencies.
+
+out_of_scope:
+  - Production implementation, runtime code changes, schema changes, or deployment.
+  - Modification of main, merge of PRs, or repository writes by this design session.
+  - Production acceptance, requirement closure, or claims of operational safety.
+  - Appointment of Sponsor, accountable Owner, acceptance authority, or governance roles.
+  - Unrelated MQ-01 Fact/Claim work.
+  - Independent migration, outbox, corruption, PITR, ACK, or other findings except
+    where a dependency must be recorded to explain a boundary or safety assumption.
+  - Treating reference-model PASS as production proof.
+  - Treating unavailable CI or unrun tests as successful evidence.
+
+prerequisites:
+  - >-
+    Work Item directory and manifest must be created and read back before
+    substantive R2 design work begins.
+  - >-
+    Stage 0 Sponsor and accountable Owner fields must be recorded. If no
+    authorized assignment exists, retain NOT_ASSIGNED and disclose the
+    resulting governance gate; do not infer or appoint either role.
+  - >-
+    AID-2026-023 allocation uniqueness must be confirmed by the coordination
+    layer before treating the identifier as allocated.
+  - >-
+    The coordination layer must supply the merged registration PR URL, exact
+    merge SHA, and read-back Blob SHAs for manifest.yaml and prompt-v1.md
+    before this design session resumes substantive R2 work.
+  - >-
+    Previously verified baseline and eight source Blob SHAs are carried
+    forward from the prior session; do not represent this manifest as a
+    fresh re-verification.
+
+gates:
+  stage_0_registration:
+    status: PENDING
+    required_evidence:
+      - Work Item directory exists in the registration change.
+      - manifest.yaml is present and read back at the merged registration commit.
+      - prompt-v1.md is present and read back at the merged registration commit.
+      - Sponsor and accountable Owner are recorded, or explicitly NOT_ASSIGNED.
+      - Identifier allocation uniqueness is confirmed.
+  sponsor_assignment:
+    status: NOT_ASSIGNED
+    effect: Governance assignment gate remains unresolved; no role is inferred.
+  accountable_owner_assignment:
+    status: NOT_ASSIGNED
+    effect: Governance assignment gate remains unresolved; no role is inferred.
+  acceptance_authority:
+    status: NOT_APPOINTED
+    effect: No acceptance decision can be attributed to this Work Item session.
+  r2_design:
+    status: BLOCKED_PENDING_REGISTRATION_READBACK
+    resume_condition: >-
+      Coordination layer supplies merged registration PR URL, exact merge SHA,
+      and read-back Blob SHAs for both files.
+  independent_adversarial_review:
+    status: NOT_STARTED
+    requirement: Separate reviewer; this design session cannot self-approve.
+  index_closeout:
+    status: DEFERRED_TO_STAGE_8
+    owner: Integration Owner
+    note: >-
+      No INDEX row is required before R2 under the controlling Stage 0/Stage 8
+      instruction. This manifest does not create or propose an INDEX row.
+
+authorization:
+  design_and_evidence: REQUESTED_SCOPE_ONLY
+  registration_write: NOT_GRANTED_TO_THIS_SESSION
+  repository_write: NOT_GRANTED
+  main_write: NOT_GRANTED
+  implementation: NOT_GRANTED
+  schema_or_migration_change: NOT_GRANTED
+  merge: NOT_GRANTED
+  production_deployment: NOT_GRANTED
+  production_acceptance: NOT_GRANTED
+
+owner_acceptance:
+  status: PENDING
+  note: >-
+    No accountable Owner or acceptance authority is assigned in the available
+    evidence. Work Item registration, design completion, and independent review
+    do not by themselves constitute REQ-07 or REQ-09 acceptance or close MQ-06
+    or F-349-02.
+
+execution_constraints:
+  ci_status: UNAVAILABLE_UNDER_ISSUE_352_QUOTA_CONDITION
+  ci_or_test_success_claimed: false
+  independence_status: INDEPENDENCE_UNVERIFIABLE
+  stop_condition: >-
+    After producing the proposed manifest and prompt snapshot, stop. Do not
+    begin substantive R2 design until the required registration merge and
+    exact read-back evidence are supplied in this same session.
