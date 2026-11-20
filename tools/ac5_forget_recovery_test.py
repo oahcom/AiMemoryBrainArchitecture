@@ -8,6 +8,7 @@ conformance.
 from __future__ import annotations
 
 import importlib.util
+import sys
 from pathlib import Path
 import unittest
 
@@ -24,6 +25,7 @@ MODEL_PATH = (
 SPEC = importlib.util.spec_from_file_location("forget_model", MODEL_PATH)
 assert SPEC is not None and SPEC.loader is not None
 forget_model = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = forget_model
 SPEC.loader.exec_module(forget_model)
 
 ContractError = forget_model.ContractError
