@@ -68,6 +68,9 @@ fn validate_envelope(envelope: &EventEnvelope, scope: &[ScopeRef]) -> Result<(),
 fn check_scope(scope_json: &str, requested: &[ScopeRef]) -> Result<(), EventStoreError> {
     validate_scope(requested)?;
     let stored: Vec<ScopeRef> = decode(scope_json)?;
+    // Persisted metadata is untrusted input: validate it before treating a
+    // non-intersection as an ordinary visibility decision.
+    validate_scope(&stored)?;
     if scopes_intersect(&stored, requested) { Ok(()) } else { Err(EventStoreError::ScopeMismatch) }
 }
 fn receipt(row_id: i64, accepted_at: String, payload_digest: String, state_json: &str)
@@ -279,6 +282,50 @@ mod tests {
         let page2 = store.read_after(page1[0].sequence, 1, &[scope_b]).unwrap();
         assert_eq!(page2.len(), 1);
         assert_eq!(page2[0].receipt, visible2);
+    }
+
+    #[test]
+    fn persisted_scope_metadata_must_be_nonempty_and_semantically_valid() {
+        let requested = vec![scope()];
+        let empty: Vec<ScopeRef> = Vec::new();
+        let empty_json = encode(&empty).unwrap();
+        assert_eq!(check_scope(&empty_json, &requested), Err(EventStoreError::ScopeMismatch));
+
+        let mut invalid = scope();
+        invalid.namespace_key.clear();
+        let invalid_json = encode(&vec![invalid]).unwrap();
+        assert_eq!(check_scope(&invalid_json, &requested), Err(EventStoreError::ScopeMismatch));
+    }
+
+    #[test]
+    fn read_after_paginates_interleaved_scope_rows_by_visible_limit() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+        let scope_a = scope();
+        let scope_b = ScopeRef {
+            scope_id: id("scope-b"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:scope-b".into(),
+        };
+        let rows = [
+            ("a1", b"a1".as_slice(), scope_a.clone()),
+            ("b1", b"b1".as_slice(), scope_b.clone()),
+            ("a2", b"a2".as_slice(), scope_a.clone()),
+            ("b2", b"b2".as_slice(), scope_b.clone()),
+        ];
+        let mut expected = Vec::new();
+        for (key, bytes, event_scope) in rows {
+            let mut event = envelope(key, bytes);
+            event.scope_refs = vec![event_scope.clone()];
+            let receipt = store.accept_with_payload(event, bytes, &[event_scope]).unwrap();
+            expected.push(receipt);
+        }
+
+        let first = store.read_after(0, 2, &[scope_a.clone()]).unwrap();
+        assert_eq!(first.len(), 2);
+        assert_eq!(first.iter().map(|row| row.receipt.clone()).collect::<Vec<_>>(),
+                   vec![expected[0].clone(), expected[2].clone()]);
+        let second = store.read_after(first[1].sequence, 2, &[scope_a]).unwrap();
+        assert!(second.is_empty());
     }
 
     #[test]
