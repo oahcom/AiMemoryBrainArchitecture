@@ -171,3 +171,27 @@ The H validator source statically defines `MAX_D_TYPED_HIGH_WATER = (1 << 63) - 
 - Issue #7 comment `7021990583` continues to set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; engineering entry NOT AUTHORIZED / NOT READY.
 
 This addendum is a source/evidence pin refresh within the existing F1 handoff. It is not Runtime implementation, a waiver, Owner acceptance, production conformance, or permission to create a placeholder runtime in this repository.
+
+
+## 2026-11-20 Owner-ruling continuation — exact delivery state
+
+**Finding:** F-43-01/F1 | P1 | OPEN (Runtime implementation / operational evidence) | return: this PR #327 and Issues #7/#10/#25/#43.
+
+### Exact carrier and evidence boundary
+- Existing carrier: PR #327, branch `docs/f43-01-f1-engineering-entry-handoff`, base `remediation/aid-2026-001-forget-contract-closure-2026-11-18`.
+- This addendum is committed on the existing PR branch; it does not create a new carrier or write to main.
+- Existing engineering package: E1–E8; five D authority operations; durable Producer Registration Ledger / operation-bound Receipt; same-typed equality and linearization proof obligations; fail-closed UNKNOWN; D-002 S1–S7.
+- F3 source references: PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`, D query contract Blob `099f4948b550919084b0d73094692b590b0be0a9`, accepted H mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`; PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`, validator Blob `49644a181c578fecb312218c08ce23caa62f603b`, test Blob `6685226143f28a5b8764067bb205080b531132e3`.
+
+### Explicit implementation status
+- Five callable D authority operations: NOT IMPLEMENTED / NOT VERIFIED.
+- Authoritative durable Producer Registration Ledger and operation-bound Receipt: NOT ESTABLISHED.
+- Runtime same-operation equality / linearization traces: NOT ESTABLISHED.
+- S1–S7: NOT RUN.
+- Canonical Runtime repository, accountable engineering custody and implementation entry authorization: not established in the controlling Issue #7 record. Issue #7 comment #7021990583 remains the recorded boundary; this quota ruling does not itself alter that separate authorization.
+
+### Verification ceiling
+- This documentation commit is exact-source handoff evidence only. Tests NOT RUN; no CI Run ID or test PASS is claimed.
+- It does not implement Runtime, grant write authority, impersonate a D Owner, or establish production conformance.
+
+**Disposition:** engineering handoff refresh DELIVERED; F-43-01/F1 remains P1 / OPEN at the actual Runtime implementation exit gate.
