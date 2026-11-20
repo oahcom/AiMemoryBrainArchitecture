@@ -236,3 +236,21 @@ Fresh exact-commit reads:
 This source refresh improves the handoff's exact dependency pins only. It does not change F3's P1/OPEN status, establish H Owner acceptance, grant production authority, or satisfy F1 Runtime implementation. F1 remains P1/OPEN: five callable D operations NOT IMPLEMENTED; durable authoritative Ledger/operation-bound Receipt and runtime equality/linearization proof NOT ESTABLISHED; D-002 S1–S7 NOT RUN. Issue #7 comment #7021990583 remains the controlling engineering-entry boundary.
 
 Verification scope: exact source fetch at the commits above PASS; documentation-only handoff update, tests NOT RUN, no CI Run ID for this documentation commit. No main write, merge, new PR or Issue.
+
+
+## 12. Superseding exact F3 source pin and retry status — 2026-11-20
+
+This addendum supersedes the earlier H TEST-profile source reference in §11 where it names PR #322 Head `0ce618ac503f641cf31e66092ae823c14bf8af7b` and test Blob `e66264ad30df6594e00836524accfdeb54160cee`. That commit is the immediate ancestor of the current PR #322 Head, not its current Head.
+
+Fresh PR metadata and exact-commit reads:
+- PR #322 current observed Head: `a336c85763df0135aa64ecec3cfdac8acd08a8eb`.
+- H TEST-profile validator Blob at that Head: `49644a181c578fecb312218c08ce23caa62f603b`.
+- H regression-test Blob at that Head: `6685226143f28a5b8764067bb205080b531132e3` (15 test methods). Exact fetches at the Head returned these Blob SHAs.
+- PR #321 D query contract remains Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`, contract Blob `099f4948b550919084b0d73094692b590b0be0a9`, active H mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
+- Existing exact-head workflow runs #44684299439 and #44684299500 were re-run from the existing runs. Both retry attempts completed FAILURE with `steps=null`; the available job records show no test steps executed. No CI PASS or test assertion result is claimed.
+
+The exact-source refresh corrects the handoff pin only. It does not alter F3's P1/OPEN disposition, establish distinct D/H human signers, H production consumer acceptance, callable D query/Receipt/currentness/revocation, or C1–C6 operational proof.
+
+**F-43-01/F1 remains P1 / OPEN:** five callable D operations NOT IMPLEMENTED; durable authoritative Ledger / operation-bound Receipt and runtime equality/linearization evidence NOT ESTABLISHED; S1–S7 NOT RUN. Issue #7 comment #7021990583 remains the engineering-entry authorization boundary.
+
+**Verification ceiling:** exact source fetches PASS; documentation-only handoff update; no Runtime test, no CI PASS, no Owner signature, no production acceptance, no merge, and no main write.
