@@ -48,9 +48,9 @@ Specify the persistence design for the memory layer, covering:
 - migration strategy
 - test boundaries
 
-This revision answers R1-B-01 through R1-NB-05 (§2), the seven items R2 required (§2a), the four findings R3 raised (§2b), and the one residual R4 found (§2c). It does **not** claim that Q1 is resolved (§4), does not claim the schema is frozen, and does not authorize implementation.
+This revision answers R1-B-01 through R1-NB-05 (§2), the seven items R2 required (§2a), the four findings R3 raised (§2b), and the one residual R4 found (§2c). It records Q1 as decided under the dev-baseline Architecture Owner role (§4), and does **not** claim resolution by an accountable human authority. It does not claim the schema is frozen and does not authorize implementation.
 
-**Status supported by this document:** `BLOCKED — awaiting accountable authority assignment and governance decisions`. Q1, Q11 and Q12 cannot be closed by revision.
+**Status supported by this document:** `BLOCKED — awaiting accountable authority assignment and governance decisions`. No revision of this document can close Q11 or Q12; they require an authority that is `NOT_ASSIGNED`. Q1 was closed by a decision record, not by revision — see §4 and `DEC-P2-T2-Q1-001.md`.
 
 No identified NF-R3-02 engineering-specification residue remains. DDL executability and regression behavior remain `UNVERIFIED`.
 
@@ -128,7 +128,7 @@ R4 was reviewed at head `bdb19ac0` and returned `REQUEST CHANGES` with one resid
 | Q13 — completed call must carry a result | ruled a **separate open question**, not part of NF-R3-02 | kept separate and open; R5 does not close it, so closing it can never be read as closing NF-R3-02 |
 | Q14 — does `recompute` need a single input | stricter branch **accepted provisionally**, question stays open | unchanged; §14 records it as provisional, not as a business requirement |
 
-**This is the last engineering round.** R4's own recommendation, adopted here: one concrete correction remained, it is made, and no further full revision will be produced against open governance questions. Q1, Q11 and Q12 are not engineering defects. Another iteration cannot reach them.
+**This is the last engineering round.** R4's own recommendation, adopted here: one concrete correction remained, it is made, and no further full revision will be produced against open governance questions. Q1, Q11 and Q12 are not engineering defects. Another iteration cannot reach them. Q1 was subsequently reached by a decision record rather than by iteration (`DEC-P2-T2-Q1-001`, merge `d8e5bebb`); Q11 and Q12 remain unreached because the authority that could reach them is `NOT_ASSIGNED`.
 
 The status this document supports is `BLOCKED — awaiting accountable authority assignment and governance decisions`. It does not support `APPROVE`.
 
