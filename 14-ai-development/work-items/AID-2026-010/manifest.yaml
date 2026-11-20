@@ -178,6 +178,7 @@ current_status_refresh:
   related_prs:
     - 321
     - 322
+    - 323
     - 327
   evidence:
     - "Issue #43 comment 7030877572 — F1/F3 exact-source reconciliation and bounded dispositions"
@@ -190,6 +191,10 @@ current_status_refresh:
     - "2026-11-20 exact-head rerun refresh: PR #322 Head 593b78e3c2aaea329c6611249bd352cd6c7dd1aa; runs 44680796326/job 136107681779 and 44680796328/job 136107696956 rerun, both FAILURE with steps=null; job log retrieval HTTP 404 BlobNotFound (RequestIds 38fdff0d-b01e-001a-13b1-7841dd000000; 64b41e99-501e-00d8-37b1-78bcb3000000); no CI/test PASS."
     - "F1 remains OPEN for implementation evidence; PR #327 handoff HEAD 4684b5d8dded3bd861f3b495c6307b0ac3db1959 / Blob c45933284494dcf712f425012cda6341d5c31212; S1-S7 NOT RUN; Issue #7 comment 7021990583 keeps implementation binding DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED."
     - "F3 same-Blob D/H role-labelled ACCEPT WITH EXPLICIT LIMITATIONS records: Issue #43 comments 7021655866 and 7021638212, mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49; visible GitHub identity is oahcom for both, so independent human signer attribution remains NOT VERIFIED."
+    - "PR #322 final exact HEAD 0ce618ac503f641cf31e66092ae823c14bf8af7b; validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob e66264ad30df6594e00836524accfdeb54160cee."
+    - "PR #322 exact-head Runs 44681841687 and 44681841601 FAILURE; latest retry attempt 2 Jobs 136109249771 and 136109260361 both runner_id=0, steps=[]; test steps did not start; log downloads HTTP 404 BlobNotFound; no CI PASS."
+    - "Issue #43 comment 7031488082 — bounded F1/F3 closeout, residual evidence boundary, and prompt provenance."
+    - "PR #321 COMMENT review 5988059394; PR #322 COMMENT review 5988025205 — exact-head technical reviews, not Owner approval."
   prompt_provenance:
     source_type: T2_CHAT_INSTRUCTION
     source: "User-provided Owner ruling D-2026-1120-01 in continuation of parent conversation 6afae42c-65d8-83ee-853c-a7537b0e273b"
@@ -197,9 +202,6 @@ current_status_refresh:
     immutable_raw_message_bytes: NOT_AVAILABLE
     sha256: NOT_VERIFIED
     note: "No repository prompt file is claimed as the source of this chat instruction; no digest is fabricated."
-
-    - "PR #322 final exact HEAD 0ce618ac503f641cf31e66092ae823c14bf8af7b; validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob e66264ad30df6594e00836524accfdeb54160cee."
-    - "PR #322 exact-head runs 44681841687/job 136108099194 and 44681841601/job 136108110590 FAILURE; reruns 136109249771 and 136109260361 FAILURE with steps=null; rerun log retrieval HTTP 404 BlobNotFound (RequestIds f780ccdd-901e-00df-3cb1-78e52e000000; 7c5c38f0-e01e-00ae-0eb1-78e88c000000). No CI PASS."
   historical_closeout_note: >-
     integration_closeout above remains the historical 2026-11-19 disposition
     (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
