@@ -241,7 +241,8 @@ class DFI(unittest.TestCase):
     def test_DFI_011(self):
         m = done()
         m.set_required_targets(["a"])
-        m.mark_target("a", "SUCCEEDED")
+        m.mark_target("a", "SUCCEEDED",
+                       evidence_ref="ref-a1", evidence_kind="erasure-proof")
         self.assertTrue(m.domain_complete())
         revision = m.inventory_revision
         m.set_required_targets(["a", "b"])
@@ -403,6 +404,137 @@ class DFI(unittest.TestCase):
         m.begin_restore(0)
         self.assertTrue(m.restore_quarantined)
         self.assertFalse(m.restore_query_allowed())
+
+    # --- OD-002 regression: bare SUCCEEDED must NOT yield completion ---
+
+    def test_DFI_023_bare_succeeded_cannot_complete(self):
+        """OD-002: a bare status assertion without typed evidence must not
+        satisfy the canonical completion predicate."""
+        m = done()
+        m.set_required_targets(["a", "b"])
+        m.mark_target("a", "SUCCEEDED")   # no evidence
+        m.mark_target("b", "SUCCEEDED")   # no evidence
+        self.assertFalse(m.domain_complete())
+        self.assertFalse(m.completion_projection_allowed())
+
+    def test_DFI_024_partial_evidence_insufficient(self):
+        """OD-002: all targets need evidence, not just some."""
+        m = done()
+        m.set_required_targets(["a", "b"])
+        m.mark_target("a", "SUCCEEDED",
+                       evidence_ref="ref-a", evidence_kind="erasure-proof")
+        m.mark_target("b", "ERASED")      # no evidence
+        self.assertFalse(m.domain_complete())
+
+    def test_DFI_025_empty_evidence_ref_rejected(self):
+        """OD-002: empty evidence_ref or evidence_kind is not valid evidence."""
+        m = done()
+        m.set_required_targets(["a"])
+        m.mark_target("a", "SUCCEEDED",
+                       evidence_ref="", evidence_kind="erasure-proof")
+        self.assertFalse(m.domain_complete())
+        m.mark_target("a", "SUCCEEDED",
+                       evidence_ref="ref-a", evidence_kind="")
+        self.assertFalse(m.domain_complete())
+
+    def test_DFI_026_stale_evidence_rejected(self):
+        """OD-002: evidence without kind is not current evidence."""
+        m = done()
+        m.set_required_targets(["a"])
+        m.mark_target("a", "CLEANED",
+                       evidence_ref="ref-a", evidence_kind="snapshot-proof")
+        self.assertTrue(m.domain_complete())
+        # Re-mark without evidence resets the evidence
+        m.mark_target("a", "CLEANED")
+        self.assertFalse(m.domain_complete())
+
+    # --- OD-001 regression: resource-level binding ---
+
+    def test_DFI_027_cross_resource_credential_rejected(self):
+        """OD-001: a credential bound to a different resource_id must be
+        rejected before any mutation."""
+        nonce = "nonce-cross"
+        cred = receipt_credential(
+            operation_id="op",
+            request_hash=TEST_REQUEST_HASH,
+            nonce=nonce,
+            resource_id="other-memory",
+            principal="principal-A",
+        )
+        a = Authorization(
+            permission_epoch=7,
+            nonce=nonce,
+            receipt=cred,
+        )
+        m = R3Model("mem-target", receipt_verifier=TrustAllReceiptVerifier())
+        with self.assertRaises(ContractViolation):
+            m.authorize_and_suppress(
+                a, 10, 7, "op", request_hash=TEST_REQUEST_HASH
+            )
+        self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
+        self.assertEqual(m.phase, Phase.REQUESTED)
+        self.assertEqual(m.fence_generation, 0)
+
+    def test_DFI_028_matching_resource_credential_accepted(self):
+        """OD-001: a credential bound to the correct resource_id succeeds."""
+        nonce = "nonce-match"
+        cred = receipt_credential(
+            operation_id="op",
+            request_hash=TEST_REQUEST_HASH,
+            nonce=nonce,
+            resource_id="mem-target",
+            principal="principal-A",
+        )
+        a = Authorization(
+            permission_epoch=7,
+            nonce=nonce,
+            receipt=cred,
+        )
+        m = R3Model("mem-target", receipt_verifier=TrustAllReceiptVerifier())
+        commit = m.authorize_and_suppress(
+            a, 10, 7, "op", request_hash=TEST_REQUEST_HASH
+        )
+        self.assertIsNotNone(commit)
+        self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
+
+    # --- SEC-001: domain identity is not a security principal ---
+
+    def test_DFI_029_domain_identity_alone_cannot_authorize(self):
+        """SEC-001/R3-001: a domain identifier without an authenticated
+        principal must not be able to authorize suppression."""
+        m = R3Model("domain-only-id", receipt_verifier=TrustAllReceiptVerifier())
+        # No Authorization provided at all
+        with self.assertRaises(ContractViolation):
+            m.authorize_and_suppress(
+                None, 10, 7, "op", request_hash=TEST_REQUEST_HASH
+            )
+        self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
+        self.assertEqual(m.phase, Phase.REQUESTED)
+        self.assertEqual(m.fence_generation, 0)
+
+    def test_DFI_030_unauthenticated_credential_rejected(self):
+        """SEC-001: a credential with no principal binding is weaker but
+        currently accepted when no resource_id is set (documents boundary)."""
+        nonce = "nonce-noprincipal"
+        cred = receipt_credential(
+            operation_id="op",
+            request_hash=TEST_REQUEST_HASH,
+            nonce=nonce,
+            principal="",  # no principal
+        )
+        a = Authorization(
+            permission_epoch=7,
+            nonce=nonce,
+            receipt=cred,
+        )
+        m = R3Model("mem", receipt_verifier=TrustAllReceiptVerifier())
+        # Empty principal in credential with no resource_id means
+        # not resource-bound. This documents the current boundary:
+        # unbound credentials are accepted at the reference-model level.
+        commit = m.authorize_and_suppress(
+            a, 10, 7, "op", request_hash=TEST_REQUEST_HASH
+        )
+        self.assertIsNotNone(commit)
 
 
 class OwnerIU011(unittest.TestCase):
@@ -577,7 +709,8 @@ class OwnerIU011(unittest.TestCase):
     def test_T13(self):
         m = done()
         m.set_required_targets(["a"])
-        m.mark_target("a", "SUCCEEDED")
+        m.mark_target("a", "SUCCEEDED",
+                       evidence_ref="ref-a13", evidence_kind="erasure-proof")
         self.assertTrue(m.domain_complete())
         m.set_required_targets(["a", "new"])
         self.assertFalse(m.domain_complete())
@@ -599,8 +732,10 @@ class OwnerIU011(unittest.TestCase):
     def test_T15(self):
         m = done()
         m.set_required_targets(["a", "b"])
-        m.mark_target("a", "SUCCEEDED")
-        m.mark_target("b", "ERASED")
+        m.mark_target("a", "SUCCEEDED",
+                       evidence_ref="ref-a15", evidence_kind="erasure-proof")
+        m.mark_target("b", "ERASED",
+                       evidence_ref="ref-b15", evidence_kind="erasure-proof")
         m.set_governance_projection(True)
         m.d_completion = False
         self.assertFalse(m.completion_projection_allowed())
@@ -1113,7 +1248,8 @@ class AtomicPublicationFaultInjection(unittest.TestCase):
     def test_FSTOR_05_completion_projection_has_no_domain_side_effect(self):
         m = done()
         m.set_required_targets(["a"])
-        m.mark_target("a", "SUCCEEDED")
+        m.mark_target("a", "SUCCEEDED",
+                       evidence_ref="ref-fstor05", evidence_kind="erasure-proof")
         m.d_completion = True
 
         before = (

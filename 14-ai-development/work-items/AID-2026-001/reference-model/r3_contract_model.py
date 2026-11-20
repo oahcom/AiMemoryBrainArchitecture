@@ -102,6 +102,10 @@ class ReceiptCredential:
     not_before: int
     expires_at: int
     signature: str
+    # OD-001: resource-level binding. When set, the credential is bound to
+    # a specific memory_id and principal; cross-resource use must be rejected.
+    resource_id: str = ""
+    principal: str = ""
 
 
 class ReceiptVerifier(Protocol):
@@ -236,6 +240,7 @@ class R3Model:
     outbox: dict = field(default_factory=dict)
     required_targets: set = field(default_factory=set)
     target_results: dict = field(default_factory=dict)
+    target_evidence: dict = field(default_factory=dict)
     unknown_required_targets: set = field(default_factory=set)
     replicas: dict = field(default_factory=dict)
     backup_manifest: dict | None = None
@@ -414,6 +419,14 @@ class R3Model:
             raise ContractViolation("receipt scope insufficient")
         if not (cred.not_before <= now < cred.expires_at):
             raise ContractViolation("receipt validity window expired")
+
+        # OD-001: resource-level binding. When the credential declares a
+        # resource_id, it must match this model's memory_id. Cross-resource
+        # use of a credential is rejected before any mutation.
+        if cred.resource_id and cred.resource_id != self.memory_id:
+            raise ContractViolation(
+                "receipt resource_id does not match target memory"
+            )
 
         # Treat nonce_registry as a cache/projection, never as authority.
         # Rebuild before replay detection so projection loss cannot permit
@@ -1288,15 +1301,31 @@ class R3Model:
     def set_required_targets(self, targets) -> None:
         self.required_targets = set(targets)
         self.target_results = {}
+        self.target_evidence = {}
         self.unknown_required_targets = set()
         self.inventory_revision += 1
         self.d_completion = False
 
-    def mark_target(self, target: str, result: str) -> None:
+    def mark_target(
+        self,
+        target: str,
+        result: str,
+        evidence_ref: str | None = None,
+        evidence_kind: str | None = None,
+    ) -> None:
         if target not in self.required_targets:
             raise ContractViolation("target absent from sealed inventory")
 
         self.target_results[target] = result
+        # OD-002: typed per-target evidence is required for any success claim.
+        if evidence_ref is not None and evidence_kind is not None:
+            self.target_evidence[target] = {
+                "evidence_ref": evidence_ref,
+                "evidence_kind": evidence_kind,
+            }
+        else:
+            self.target_evidence.pop(target, None)
+
         if result in {
             "UNKNOWN", "UNSUPPORTED", "NOT_EVIDENCED", "FAILED"
         }:
@@ -1304,7 +1333,19 @@ class R3Model:
         else:
             self.unknown_required_targets.discard(target)
 
+    def _has_valid_evidence(self, target: str) -> bool:
+        """OD-002: check typed target evidence exists and is current."""
+        ev = self.target_evidence.get(target)
+        return (
+            ev is not None
+            and bool(ev.get("evidence_ref"))
+            and bool(ev.get("evidence_kind"))
+        )
+
     def domain_complete(self) -> bool:
+        # OD-002 canonical completion predicate: every required target must
+        # have a success result AND typed current evidence. A bare status
+        # string like "SUCCEEDED" without evidence must NOT yield completion.
         complete = (
             bool(self.required_targets)
             and not self.unknown_required_targets
@@ -1313,6 +1354,7 @@ class R3Model:
             self.target_results.get(target) in {
                 "SUCCEEDED", "ERASED", "CLEANED"
             }
+            and self._has_valid_evidence(target)
             for target in self.required_targets
         )
         self.d_completion = complete
@@ -1326,6 +1368,7 @@ class R3Model:
                 self.target_results.get(target) in {
                     "SUCCEEDED", "ERASED", "CLEANED"
                 }
+                and self._has_valid_evidence(target)
                 for target in self.required_targets
             )
         )
