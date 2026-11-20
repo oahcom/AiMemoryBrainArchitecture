@@ -8,7 +8,7 @@ accountable_owner_note: >-
   decisions remain with D/E/F/G/H/I/Storage Owners.
 issue: 43
 related_issues: [43]
-related_prs: []
+related_prs: [321, 322, 327]
 task_class: ARCH
 risk: R3
 risk_note: Tentative conservative classification pending risk re-review.
@@ -72,7 +72,7 @@ evidence_refs:
   - 14-ai-development/issue-alignment-2026-11-19/l2-05b-supplement.md
   - 14-ai-development/issue-alignment-2026-11-19/alignment-manifest.md
 created_at: 2026-11-19
-updated_at: 2026-11-19
+updated_at: 2026-11-20
 
 integration_closeout:
   date: "2026-11-19"
@@ -91,7 +91,224 @@ integration_closeout:
 
   authoritative_finding_ledger:
     path: 14-ai-development/work-items/AID-2026-010/finding-ledger.md
-    blob_sha: 479747786fab47a47b7125761c2071921a87b436
+    blob_sha: 2e0ab50501e7f2fa5902d98a89acf6376a5e7a87
+    authority: SOLE_AUTHORITATIVE_FINDING_STATUS_LEDGER
+
+  findings_total: 13
+  findings_closed: 11
+  findings_blocked:
+    - "F-43-01/F1"
+    - "F-43-02"
+
+  blocked_reason: >-
+    Both residual findings require external engineering authorization and
+    an authorized engineering carrier. F-43-01/F1 additionally requires
+    designation of Canonical Authority and the authoritative persistence
+    boundary. F-43-02 requires an authorized Unicode validator/build
+    implementation target and subsequent main-baseline synchronization.
+    The required Product/Platform Architecture responsibility holder,
+    engineering carrier and implementation authority remain unassigned.
+    No implementation target or authority may be inferred or fabricated.
+
+  residual_disposition: >-
+    F-43-01/F1 and F-43-02 remain BLOCKED in the authoritative finding
+    ledger. They are excluded from the integration-review development-
+    baseline convergence count as external engineering residuals.
+    Their exclusion does not constitute technical completion, finding
+    closure, waiver of implementation requirements, or authorization
+    to proceed with implementation.
+
+  verdict: >-
+    YES — AID-2026-010 INTEGRATION-REVIEW DEVELOPMENT-BASELINE
+    CONVERGENCE ACHIEVED. 11/13 findings CLOSED; 2/13 findings
+    remain BLOCKED as explicit external engineering residuals.
+    This verdict closes the bounded integration-review work unit only.
+
+  g8_status: NOT READY
+  architecture_status: NOT ACCEPTED
+  production_activation: NOT AUTHORIZED
+  main_merge: NOT AUTHORIZED
+  quota_freeze: ACTIVE
+
+  out_of_scope_dev_baseline:
+    - production trust root / issuer / key registry
+    - real Receipt and operational-level authority proof
+    - UCD implementation binding and complete runtime corpus verification
+    - main baseline synchronization
+    - production activation and deployment
+    - appointments to unassigned governance roles
+
+  governance_boundaries:
+    acceptance_authority: NOT_APPOINTED
+    sponsor: NOT_APPOINTED
+    accountable_owner: NOT_APPOINTED
+    architecture_acceptance: NOT_GRANTED
+    production_authorization: NOT_GRANTED
+
+  finding_ledger_mutation:
+    authorized: false
+    note: >-
+      The two BLOCKED findings must remain BLOCKED. This closeout
+      does not modify or supersede their authoritative finding records.
+
+  repository_mutation_authorized_by_this_ruling: false
+
+
+current_status_refresh:
+  date: "2026-11-20"
+  carrier_quota_status: RELEASED
+  carrier_quota_release_authority: "Owner ruling D-2026-1120-01, 2026-11-20 12:20"
+  carrier_quota_limits: "This round: maximum 2 new PRs and 3 new Issues"
+  carrier_quota_history_note: >-
+    The historical integration_closeout.quota_freeze value is retained as an
+    as-of record from the prior freeze period; this current-status field
+    records the subsequent Owner release and supersedes that historical
+    restriction prospectively.
+  authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  ledger_commit: "1ab208bf13dfbdf3b2577358d4dfef2e53bdc5b6"
+  ledger_blob_sha: "2e0ab50501e7f2fa5902d98a89acf6376a5e7a87"
+  status_counts:
+    findings_total: 13
+    findings_closed: 10
+    findings_open:
+      - "F-43-01/F1"
+      - "F-43-01/F3"
+    findings_blocked:
+      - "F-43-02"
+  related_prs:
+    - 321
+    - 322
+    - 323
+    - 327
+  evidence:
+    - "Issue #43 comment 7030877572 — F1/F3 exact-source reconciliation and bounded dispositions"
+    - "Issue #7 comment 7021990583 — engineering entry remains DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED"
+    - "PR #321 Head 7af4e4c409a6522d961b15d9622c92c7551be5f9 — D query contract Blob 6f2d583dec8487b321795a006266ee4229c7fd80; accepted H mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49 appears twice, superseded Blob zero times; OPEN/DRAFT; exact-head workflow runs none; tests NOT RUN."
+    - "PR #322 Head 0ce618ac503f641cf31e66092ae823c14bf8af7b — validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob e66264ad30df6594e00836524accfdeb54160cee; corrected NON_TYPED_BOUNDED_FIELDS classification; exact-source focused local module report 13/13 PASS on Python 3.13.5 (not full repository suite; independently rerun in this continuation; not CI); Runs 44681841687 and 44681841601 FAILURE; retry attempt 2 Jobs 136108099194 and 136108110590 and attempt 3 Jobs 136109249771 and 136109260361 all runner_id=0, steps=[]; test steps did not start; no CI PASS; H Owner acceptance not verified."
+    - "PR #327 Head 4684b5d8dded3bd861f3b495c6307b0ac3db1959; handoff Blob c45933284494dcf712f425012cda6341d5c31212 — F1 engineering-entry handoff; seven canonical D-002 scenarios S1–S7 corrected; tests NOT RUN"
+    - "F1 repository fact correction: Issue #43 comment 7030788916 records foundational Batch-1 landing in oahcom/AiMemoryBrain at d11722e39f047bb52a482936a68459e74ce906d1; this is not the authorized D authority runtime and does not close F1"
+    - "D query contract status: ResolveForgetFenceSnapshotProof remains NOT ESTABLISHED AS CALLABLE; no Runtime repository, authoritative storage, trust root, endpoint/transport, operational key registry, or live receipt/currentness/C1-C6 evidence is verified."
+    - "2026-11-20 exact-head rerun refresh: PR #322 Head 593b78e3c2aaea329c6611249bd352cd6c7dd1aa; runs 44680796326/job 136107681779 and 44680796328/job 136107696956 rerun, both FAILURE with steps=null; job log retrieval HTTP 404 BlobNotFound (RequestIds 38fdff0d-b01e-001a-13b1-7841dd000000; 64b41e99-501e-00d8-37b1-78bcb3000000); no CI/test PASS."
+    - "F1 remains OPEN for implementation evidence; PR #327 handoff HEAD 4684b5d8dded3bd861f3b495c6307b0ac3db1959 / Blob c45933284494dcf712f425012cda6341d5c31212; S1-S7 NOT RUN; Issue #7 comment 7021990583 keeps implementation binding DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED."
+    - "F3 same-Blob D/H role-labelled ACCEPT WITH EXPLICIT LIMITATIONS records: Issue #43 comments 7021655866 and 7021638212, mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49; visible GitHub identity is oahcom for both, so independent human signer attribution remains NOT VERIFIED."
+    - "PR #322 comment 7031599217 — exact-Head retry readback at Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687/44681841601 retry jobs 136110511473/136110524577 FAILURE with steps=null; both raw log reads HTTP 404 BlobNotFound (RequestIds 8adb55d1-701e-00b7-55b2-783ba1000000; 3c18a6d6-801e-00be-69b2-78e88c000000); no CI PASS."
+    - "PR #322 latest exact-head Actions attempt 5: Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687 and 44681841601; Jobs 136111641890 and 136111657233; both FAILURE, runner_id=0, steps=[]; test steps did not start; no CI PASS."
+    - "PR #321 current exact Head 7af4e4c409a6522d961b15d9622c92c7551be5f9; D query-contract Blob 6f2d583dec8487b321795a006266ee4229c7fd80; accepted mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49 occurs twice and superseded mapping Blob e60bdd4cbfef79850596001f01cb56e622b7d79d occurs zero times; callable endpoint remains NOT ESTABLISHED; no PR-triggered workflow runs."
+    - "PR #322 current exact Head a336c85763df0135aa64ecec3cfdac8acd08a8eb; validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob 6685226143f28a5b8764067bb205080b531132e3; 15 test methods. Exact-head Runs 44684299500 and 44684299439 FAILURE; Jobs 136114843997 and 136114843602 have empty step arrays; current source test execution NOT RUN and no CI PASS."
+    - "PR #327 current exact Head dd6b132827ac2369df0bc19a3e4c7c65bf25989b; F1 handoff Blob 9e87630efaaf26e1a449a1bc691afadd0de5213b; handoff pins PR #322 current Head a336c85763df0135aa64ecec3cfdac8acd08a8eb and validator/test Blobs 49644a181c578fecb312218c08ce23caa62f603b / 6685226143f28a5b8764067bb205080b531132e3; no runtime implementation claimed."
+    - "Current F1/F3 status refresh ledger commit 12bb6bf5aee926d937301015e25d17040a0a8434 / Blob 32ccf0543de355c9a77dfb56be3aea22528dc12e; F1 and F3 remain P1/OPEN; F-43-02 remains P1/BLOCKED; counts 10 CLOSED / 2 OPEN / 1 BLOCKED."
+  prompt_provenance:
+    source_type: T2_CHAT_INSTRUCTION
+    source: "User-provided Owner ruling D-2026-1120-01 in continuation of parent conversation 6afae42c-65d8-83ee-853c-a7537b0e273b"
+    platform_current_conversation_id: NOT_EXPOSED
+    immutable_raw_message_bytes: NOT_AVAILABLE
+    sha256: NOT_VERIFIED
+    note: "No repository prompt file is claimed as the source of this chat instruction; no digest is fabricated."
+
+  historical_closeout_note: >-
+    integration_closeout above remains the historical 2026-11-19 disposition
+    (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
+    current Finding counts and states: F1 is OPEN for D implementation
+    evidence while the separate A execution binding remains
+    DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED; F3 is OPEN for consumer
+    and operational evidence; F-43-02 remains BLOCKED. It does not rewrite
+    the historical closeout decision or authorize implementation,
+    architecture acceptance, main merge, or production activation.
+
+work_item_id: AID-2026-010
+title: "Issue #43 — Cross-domain Architecture Integration Review and Evidence Reconciliation"
+owner: Integration Owner
+accountable_owner: NOT_ASSIGNED
+accountable_owner_note: >-
+  MUST NOT be presumed to be Owner A. A authorized registration and
+  limited integration review only (A-OWNER-ALIGNMENT-001-R16); domain
+  decisions remain with D/E/F/G/H/I/Storage Owners.
+issue: 43
+related_issues: [43]
+related_prs: [321, 322, 327]
+task_class: ARCH
+risk: R3
+risk_note: Tentative conservative classification pending risk re-review.
+status: CONVERGED_DEVELOPMENT_BASELINE_ONLY
+registration_status: REGISTERED
+registration_note: >-
+  Number assignment by A (A-OWNER-ALIGNMENT-001-R16). Three persistence
+  items completed and independently read back 2026-11-19:
+  (1) manifest.yaml blob 6cc4fe35;
+  (2) INDEX.md row blob 2b58f79e;
+  (3) Issue #43 comment id 7011018228.
+  Status advanced to REGISTERED.
+authorization:
+  decision_id: A-OWNER-ALIGNMENT-001-R16
+  authorized_by: Owner A (conv 6afedebe-9950-83ee-93d4-7fd19cf46089)
+  scope: >-
+    Cross-domain integration review and evidence reconciliation for #43.
+    Does NOT authorize architecture approval, contract freeze, production
+    activation, or domain decisions on behalf of other Owners.
+prompt:
+  id: AID-2026-010-PROMPT
+  version: v2
+  provenance: L2-05 batch2 dispatch + authorization continuation (repository-copied sources)
+  source_files:
+    - filename: prompt-batch2-dispatch.md
+      sha256: 4906dc8ee80e3e1e0f842178c09d3600a8c29cc0d427ee1b1a55c3dca22d0c10
+      bytes: 51323
+      role: batch2 #43 full-body review dispatch pack (original: state/relay-l2-05-a-governance-portfolio-b2.md)
+    - filename: prompt-batch2-continuation.md
+      sha256: 245a68b6bd06157e5d3ed5827c55e751be0436f34358deb1fcc46b16c72db30e
+      bytes: 2140
+      role: authorization-unblock continuation prompt (original: state/relay-l2-05-continue-b2.md)
+  sha256: 4906dc8ee80e3e1e0f842178c09d3600a8c29cc0d427ee1b1a55c3dca22d0c10
+  sha256_note: primary dispatch pack; continuation companion 245a68b6
+  note: Sources copied into this work-item directory for repository traceability. Integration review continues in L2-05 session 6afeef2f.
+scope:
+  - Harvest and review L2-05 batch2 supplement (#43 45KB body).
+  - Map #43 Findings to source, evidence, responsibility domain, dependencies.
+  - Cross-check existing Issues, PRs, specs and Owner decisions for version accuracy.
+  - Route domain decision questions to corresponding Owners.
+  - Identify cross-domain interface conflicts, evidence gaps, unresolved DoR.
+  - Output integration review result, unresolved list, dependency order.
+out_of_scope:
+  - Domain decisions on behalf of D/E/F/G/H/I/Storage Owners.
+  - Interpreting L2 suggestions or A integration opinions as architecture approval.
+  - Freezing #43 joint contract or approving production activation.
+  - Deriving current Owner acceptance from historical PR merges or CI PASS.
+  - Creating new Issues, PRs or branches for review purposes.
+supplement_status: SUPPLEMENT_RECEIVED_INTEGRATION_REVIEW_AUTHORIZED
+baseline:
+  repository: oahcom/AiMemoryBrainArchitecture
+  target_branch: remediation/aid-2026-001-forget-contract-closure-2026-11-18
+  registration_location: 14-ai-development/work-items/AID-2026-010/manifest.yaml
+  index_location: 14-ai-development/work-items/INDEX.md
+deliverables:
+  - 14-ai-development/work-items/AID-2026-010/manifest.yaml
+  - 14-ai-development/work-items/INDEX.md (registration row)
+  - Issue #43 comment (Work Item association record)
+evidence_refs:
+  - 14-ai-development/issue-alignment-2026-11-19/l2-05-receipt.md
+  - 14-ai-development/issue-alignment-2026-11-19/l2-05b-supplement.md
+  - 14-ai-development/issue-alignment-2026-11-19/alignment-manifest.md
+created_at: 2026-11-19
+updated_at: 2026-11-20
+
+integration_closeout:
+  date: "2026-11-19"
+  decision_id: AID-2026-010-ICR-CLOSEOUT-2026-11-19-001
+
+  convergence_scope: >-
+    AID-2026-010 cross-domain integration-review and evidence-reconciliation
+    work unit, development-baseline scope only. This closeout records
+    convergence of attributable Owner dispositions and integration review.
+    It does not close unresolved implementation findings, approve
+    architecture, or establish operational or production conformance.
+
+  repository: oahcom/AiMemoryBrainArchitecture
+  branch: remediation/aid-2026-001-forget-contract-closure-2026-11-18
+  final_head_sha: 11c139e5e7b7600211e5ef4e31bbc09a237a2dfc
+
+  authoritative_finding_ledger:
+    path: 14-ai-development/work-items/AID-2026-010/finding-ledger.md
+    blob_sha: 2e0ab50501e7f2fa5902d98a89acf6376a5e7a87
     authority: SOLE_AUTHORITATIVE_FINDING_STATUS_LEDGER
 
   findings_total: 13
@@ -161,3 +378,1054 @@ development_readiness:
     does_not_block: 39
   f_43_02_disposition: CLOSED
   entry_verdict: SATISFIED_FOR_SCOPED_ENGINEERING_PHASE_DEVELOPMENT_BASELINE
+
+
+current_status_refresh:
+  date: "2026-11-20"
+  carrier_quota_status: RELEASED
+  carrier_quota_release_authority: "Owner ruling D-2026-1120-01, 2026-11-20 12:20"
+  carrier_quota_limits: "This round: maximum 2 new PRs and 3 new Issues"
+  carrier_quota_history_note: >-
+    The historical integration_closeout.quota_freeze value is retained as an
+    as-of record from the prior freeze period; this current-status field
+    records the subsequent Owner release and supersedes that historical
+    restriction prospectively.
+  authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  ledger_commit: "1ab208bf13dfbdf3b2577358d4dfef2e53bdc5b6"
+  ledger_blob_sha: "2e0ab50501e7f2fa5902d98a89acf6376a5e7a87"
+  status_counts:
+    findings_total: 13
+    findings_closed: 10
+    findings_open:
+      - "F-43-01/F1"
+      - "F-43-01/F3"
+    findings_blocked:
+      - "F-43-02"
+  related_prs:
+    - 321
+    - 322
+    - 323
+    - 327
+  evidence:
+    - "Issue #43 comment 7030877572 — F1/F3 exact-source reconciliation and bounded dispositions"
+    - "Issue #7 comment 7021990583 — engineering entry remains DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED"
+    - "PR #321 Head 7af4e4c409a6522d961b15d9622c92c7551be5f9 — D query contract Blob 6f2d583dec8487b321795a006266ee4229c7fd80; accepted H mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49 appears twice, superseded Blob zero times; OPEN/DRAFT; exact-head workflow runs none; tests NOT RUN."
+    - "PR #322 Head 0ce618ac503f641cf31e66092ae823c14bf8af7b — validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob e66264ad30df6594e00836524accfdeb54160cee; corrected NON_TYPED_BOUNDED_FIELDS classification; exact-source focused local module report 13/13 PASS on Python 3.13.5 (not full repository suite; independently rerun in this continuation; not CI); Runs 44681841687 and 44681841601 FAILURE; retry attempt 2 Jobs 136108099194 and 136108110590 and attempt 3 Jobs 136109249771 and 136109260361 all runner_id=0, steps=[]; test steps did not start; no CI PASS; H Owner acceptance not verified."
+    - "PR #327 Head 4684b5d8dded3bd861f3b495c6307b0ac3db1959; handoff Blob c45933284494dcf712f425012cda6341d5c31212 — F1 engineering-entry handoff; seven canonical D-002 scenarios S1–S7 corrected; tests NOT RUN"
+    - "F1 repository fact correction: Issue #43 comment 7030788916 records foundational Batch-1 landing in oahcom/AiMemoryBrain at d11722e39f047bb52a482936a68459e74ce906d1; this is not the authorized D authority runtime and does not close F1"
+    - "D query contract status: ResolveForgetFenceSnapshotProof remains NOT ESTABLISHED AS CALLABLE; no Runtime repository, authoritative storage, trust root, endpoint/transport, operational key registry, or live receipt/currentness/C1-C6 evidence is verified."
+    - "2026-11-20 exact-head rerun refresh: PR #322 Head 593b78e3c2aaea329c6611249bd352cd6c7dd1aa; runs 44680796326/job 136107681779 and 44680796328/job 136107696956 rerun, both FAILURE with steps=null; job log retrieval HTTP 404 BlobNotFound (RequestIds 38fdff0d-b01e-001a-13b1-7841dd000000; 64b41e99-501e-00d8-37b1-78bcb3000000); no CI/test PASS."
+    - "F1 remains OPEN for implementation evidence; PR #327 handoff HEAD 4684b5d8dded3bd861f3b495c6307b0ac3db1959 / Blob c45933284494dcf712f425012cda6341d5c31212; S1-S7 NOT RUN; Issue #7 comment 7021990583 keeps implementation binding DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED."
+    - "F3 same-Blob D/H role-labelled ACCEPT WITH EXPLICIT LIMITATIONS records: Issue #43 comments 7021655866 and 7021638212, mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49; visible GitHub identity is oahcom for both, so independent human signer attribution remains NOT VERIFIED."
+    - "PR #322 comment 7031599217 — exact-Head retry readback at Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687/44681841601 retry jobs 136110511473/136110524577 FAILURE with steps=null; both raw log reads HTTP 404 BlobNotFound (RequestIds 8adb55d1-701e-00b7-55b2-783ba1000000; 3c18a6d6-801e-00be-69b2-78e88c000000); no CI PASS."
+    - "PR #322 latest exact-head Actions attempt 5: Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687 and 44681841601; Jobs 136111641890 and 136111657233; both FAILURE, runner_id=0, steps=[]; test steps did not start; no CI PASS."
+    - "PR #321 current exact Head 7af4e4c409a6522d961b15d9622c92c7551be5f9; D query-contract Blob 6f2d583dec8487b321795a006266ee4229c7fd80; accepted mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49 occurs twice and superseded mapping Blob e60bdd4cbfef79850596001f01cb56e622b7d79d occurs zero times; callable endpoint remains NOT ESTABLISHED; no PR-triggered workflow runs."
+    - "PR #322 current exact Head a336c85763df0135aa64ecec3cfdac8acd08a8eb; validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob 6685226143f28a5b8764067bb205080b531132e3; 15 test methods. Exact-head Runs 44684299500 and 44684299439 FAILURE; Jobs 136114843997 and 136114843602 have empty step arrays; current source test execution NOT RUN and no CI PASS."
+    - "PR #327 current exact Head dd6b132827ac2369df0bc19a3e4c7c65bf25989b; F1 handoff Blob 9e87630efaaf26e1a449a1bc691afadd0de5213b; handoff pins PR #322 current Head a336c85763df0135aa64ecec3cfdac8acd08a8eb and validator/test Blobs 49644a181c578fecb312218c08ce23caa62f603b / 6685226143f28a5b8764067bb205080b531132e3; no runtime implementation claimed."
+    - "Current F1/F3 status refresh ledger commit 12bb6bf5aee926d937301015e25d17040a0a8434 / Blob 32ccf0543de355c9a77dfb56be3aea22528dc12e; F1 and F3 remain P1/OPEN; F-43-02 remains P1/BLOCKED; counts 10 CLOSED / 2 OPEN / 1 BLOCKED."
+  prompt_provenance:
+    source_type: T2_CHAT_INSTRUCTION
+    source: "User-provided Owner ruling D-2026-1120-01 in continuation of parent conversation 6afae42c-65d8-83ee-853c-a7537b0e273b"
+    platform_current_conversation_id: NOT_EXPOSED
+    immutable_raw_message_bytes: NOT_AVAILABLE
+    sha256: NOT_VERIFIED
+    note: "No repository prompt file is claimed as the source of this chat instruction; no digest is fabricated."
+
+  historical_closeout_note: >-
+    integration_closeout above remains the historical 2026-11-19 disposition
+    (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
+    current Finding counts and states: F1 is OPEN for D implementation
+    evidence while the separate A execution binding remains
+    DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED; F3 is OPEN for consumer
+    and operational evidence; F-43-02 remains BLOCKED. It does not rewrite
+    the historical closeout decision or authorize implementation,
+    architecture acceptance, main merge, or production activation.
+
+
+  date: "2026-11-20"
+  ruling: "D-2026-1120-01"
+  finding_ledger:
+    path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+    commit: "37d155fed076f271a42ff8e9343cdbd92c80d7cc"
+    blob: "1bb37ad952a9057069a0d48cbe8f5585917c42c7"
+  carriers:
+    F1_PR_327:
+      head: "8205664c79e9216da6c7b0fa20ba90d23a070ff4"
+      handoff_blob: "09606b739d62570c061b24e459772468206e6a86"
+      status: "P1_OPEN_RUNTIME_IMPLEMENTATION_NOT_ESTABLISHED"
+      exact_head_check_runs: 0
+    F3_PR_321:
+      head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      accepted_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+      status: "P1_OPEN_INDEPENDENT_HUMAN_ACCEPTANCE_AND_OPERATIONAL_EVIDENCE"
+      exact_head_check_runs: 0
+    F3_PR_322:
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      test_methods: 15
+      failed_runs: [44684299439, 44684299500]
+      status: "P1_OPEN_TEST_PROFILE_CANDIDATE_NOT_CI_PASS"
+  prompt_provenance:
+    source_type: "T2_CHAT_INSTRUCTION"
+    source_conversation_id: "6afaf6ae-6e8c-83ec-8aaa-24d5341b9577"
+    current_platform_session_id: "NOT_EXPOSED"
+    raw_message_sha256: "NOT_VERIFIED"
+    note: "Owner ruling and continuation instructions were supplied in chat; no prompt file or synthetic hash is claimed."
+
+
+prior_concurrent_ref_correction:
+  finding_ledger:
+    commit: "442e1c8c576661ee309d0c0b4641907f76b9a8d0"
+    blob: "a5d681f27d761302bb8171d1fcc8edc8782f549c"
+  F1_PR_327:
+    head: "934a76e18ba020d01c520a8484ed7fc37f96cff1"
+    handoff_blob: "2d453d24ae5e65973ced964918b9f3687a5d3284"
+    note: "Supersedes the immediately preceding F1 head/blob pin; branch advanced concurrently."
+
+latest_ledger_pin_reconciliation:
+  date: "2026-11-20"
+  commit: "5a7da537a5bb86ed29f5150d7fc9e3dd85c098ed"
+  blob: "0f26c02df7bfc54f86c39ee24c2082158a36fb9f"
+  note: "Supersedes prior live-ref ledger pin after concurrent evidence refresh; current branch readback verified."
+
+
+# Latest live exact-head refresh — D-2026-1120-01
+latest_exact_head_refresh:
+  date: "2026-11-20"
+  finding_ledger:
+    path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+    commit: "5a7da537a5bb86ed29f5150d7fc9e3dd85c098ed"
+    blob: "0f26c02df7bfc54f86c39ee24c2082158a36fb9f"
+  carriers:
+    F1_PR_327:
+      head: "8205664c79e9216da6c7b0fa20ba90d23a070ff4"
+      handoff_blob: "09606b739d62570c061b24e459772468206e6a86"
+      status: "P1_OPEN_RUNTIME_IMPLEMENTATION_NOT_ESTABLISHED"
+      entry_boundary_comment: 7021990583
+    F3_PR_321:
+      head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      accepted_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+      callable_endpoint: "NOT_ESTABLISHED"
+    F3_PR_322:
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      test_methods: 15
+      latest_retry_runs: [44684299439, 44684299500]
+      latest_retry_jobs: [136123345286, 136123331637]
+      ci_result: "FAILURE_BEFORE_TEST_STEPS; steps=null; log HTTP 404 BlobNotFound; no CI PASS"
+      status: "P1_OPEN_TEST_PROFILE_CANDIDATE_NOT_CI_PASS"
+    F3_independent_acceptance:
+      mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+      D_role_comment: 7021655866
+      H_role_comment: 7021638212
+      visible_identity_for_both: "oahcom"
+      distinct_human_signers: "NOT_VERIFIED"
+      unsigned_attestation_carrier: "Issue #43 comment 7031977399"
+      status: "P1_OPEN_INDEPENDENT_HUMAN_ACCEPTANCE"
+  finding_counts:
+    total: 13
+    closed: 10
+    open: ["F-43-01/F1", "F-43-01/F3"]
+    blocked: ["F-43-02"]
+  prompt_provenance:
+    source_type: "T2_CHAT_INSTRUCTION"
+    source_conversation_id: "6afd445b-38e4-83e8-b39f-08a50a7d2d3b"
+    current_platform_conversation_id: "NOT_EXPOSED"
+    raw_message_sha256: "NOT_VERIFIED"
+
+
+# Attestation-template exact pin
+f3_independent_attestation_template:
+  file: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  ledger_commit: "5a7da537a5bb86ed29f5150d7fc9e3dd85c098ed"
+  ledger_blob: "0f26c02df7bfc54f86c39ee24c2082158a36fb9f"
+  insertion_anchor: "F-43-01/F3 — unsigned independent-human attestation substitute (ready to complete)"
+  status: "TEMPLATE_ONLY_NOT_A_SIGNATURE"
+  suppliers: ["D human role holder", "H human role holder"]
+
+
+# Current-turn exact pin reconciliation — 2026-11-20
+latest_actions_retry_evidence:
+  date: "2026-11-20"
+  finding_ledger:
+    commit: "5a7da537a5bb86ed29f5150d7fc9e3dd85c098ed"
+    blob: "0f26c02df7bfc54f86c39ee24c2082158a36fb9f"
+  exact_pr_322_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+  validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+  test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+  test_methods: 15
+  rerun_attempts:
+    - run_id: 44684299500
+      job_id: 136123331637
+      conclusion: "FAILURE_BEFORE_TEST_STEPS"
+      steps: []
+      log_http_status: 404
+      log_error: "BlobNotFound"
+      request_id: "41149edd-d01e-0077-19b7-78d79e000000"
+    - run_id: 44684299439
+      job_id: 136123345286
+      conclusion: "FAILURE_BEFORE_TEST_STEPS"
+      steps: []
+      log_http_status: 404
+      log_error: "BlobNotFound"
+      request_id: "35cedb4e-401e-0031-0bb7-7806f2000000"
+  ci_status: "NO_TEST_STEPS_NO_PASS"
+  finding_status: "F-43-01/F3_P1_OPEN"
+  note: "H TEST-profile candidate only; no H Owner acceptance, callable D endpoint/Receipt/currentness or operational conformance inferred."
+
+
+# Concurrent F1 exact handoff pin correction
+f1_handoff_latest:
+  pr: 327
+  head: "8205664c79e9216da6c7b0fa20ba90d23a070ff4"
+  file: "14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md"
+  blob: "09606b739d62570c061b24e459772468206e6a86"
+  status: "HANDOFF_DELIVERED; RUNTIME_NOT_IMPLEMENTED_OR_AUTHORIZED"
+  authoritative_ledger_commit: "5a7da537a5bb86ed29f5150d7fc9e3dd85c098ed"
+  authoritative_ledger_blob: "0f26c02df7bfc54f86c39ee24c2082158a36fb9f"
+
+# D-2026-1120-01 current-turn exact reconciliation pin
+current_turn_exact_refresh:
+  date: "2026-11-20"
+  carrier:
+    pr: 323
+    branch: "fix/f43-01-f3-ledger-reconcile"
+    prior_head: "c6744f3a9d290ef017f17a8d7f59d756faef58a6"
+  authoritative_finding_ledger:
+    commit: "5a7da537a5bb86ed29f5150d7fc9e3dd85c098ed"
+    blob: "0f26c02df7bfc54f86c39ee24c2082158a36fb9f"
+  findings:
+    F-43-01-F1:
+      severity: "P1"
+      status: "OPEN_IMPLEMENTATION_EVIDENCE"
+      handoff_pr: 327
+      handoff_head: "8205664c79e9216da6c7b0fa20ba90d23a070ff4"
+      handoff_blob: "09606b739d62570c061b24e459772468206e6a86"
+      runtime_operations: "NOT_IMPLEMENTED"
+      durable_receipt: "NOT_ESTABLISHED"
+      scenarios: "S1-S7_NOT_RUN"
+      engineering_entry: "DEFERRED_TO_ENGINEERING_PHASE_NOT_AUTHORIZED"
+    F-43-01-F3:
+      severity: "P1"
+      status: "OPEN_INDEPENDENT_HUMAN_AND_OPERATIONAL_EVIDENCE"
+      d_query_pr: 321
+      d_query_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      d_query_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      accepted_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+      h_test_pr: 322
+      h_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      exact_head_actions: "44684299439,44684299500_FAILURE_BEFORE_TEST_STEPS"
+      independent_signers: "NOT_VERIFIED_BOTH_VISIBLE_AUTHORS_OAHCOM"
+      unsigned_attestation: "Issue_43_comment_7031977399"
+  test_boundary:
+    tests_run_in_this_turn: false
+    ci_pass_claimed: false
+    production_acceptance_claimed: false
+  mutation_boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    main_modified: false
+    merged: false
+
+# Bounded F1/F3 delivery and evidence-reconciliation closeout — 2026-11-20
+bounded_logical_unit_closeout:
+  disposition: "COMPLETE_FOR_DELIVERY_AND_EVIDENCE_RECONCILIATION"
+  tracking_issue: 43
+  tracking_comment: 7032312378
+  tracking_comment_url: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/43#issuecomment-7032312378"
+  loaded_rules:
+    AI_EXEC_001:
+      version: "1.1"
+      blob: "58af59af266b81109269156ea667df1a15edfb7b"
+    AI_EXEC_002:
+      version: "1.2"
+      adoption_status: "PENDING_ADOPTION"
+      blob: "7f5928a5d16eb12da7621cfb8bd99ca463afd859"
+  F1:
+    finding: "F-43-01/F1"
+    severity: "P1"
+    status: "OPEN_RUNTIME_IMPLEMENTATION_NOT_ESTABLISHED"
+    pr: 327
+    head: "8205664c79e9216da6c7b0fa20ba90d23a070ff4"
+    artifact: "14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md"
+    blob: "09606b739d62570c061b24e459772468206e6a86"
+    exit_evidence: "five callable D operations; durable operation-bound Ledger/Receipt; equality/linearization proof; S1-S7 execution"
+  F3:
+    finding: "F-43-01/F3"
+    severity: "P1"
+    status: "OPEN_INDEPENDENT_HUMAN_AND_OPERATIONAL_ACCEPTANCE"
+    D_contract:
+      pr: 321
+      head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      blob: "099f4948b550919084b0d73094692b590b0be0a9"
+    accepted_H_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    H_TEST_candidate:
+      pr: 322
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      test_methods: 15
+      exact_head_ci_runs: [44684299439, 44684299500]
+      ci_disposition: "FAILURE_BEFORE_TEST_STEPS; NO_CI_PASS"
+    independent_human_acceptance:
+      status: "NOT_VERIFIED"
+      reason: "D/H role-labelled records both expose GitHub login oahcom; distinct authenticated humans not established"
+      unsigned_attestation_comment: 7031665905
+  ledger_commit: "5a7da537a5bb86ed29f5150d7fc9e3dd85c098ed"
+  ledger_blob: "0f26c02df7bfc54f86c39ee24c2082158a36fb9f"
+  closeout_comment: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/323#issuecomment-7032347434"
+  prompt_provenance:
+    source_type: "T2_CHAT_INSTRUCTION"
+    source_thread_id: "6afad9b6-35c8-83ec-9013-08aebd75d535"
+    prompt_sha256: "NOT_VERIFIED"
+    note: "Current platform conversation UUID/raw message bytes are not exposed; no synthetic hash is asserted."
+  scope_boundary: "No runtime implementation, independent human signature, CI PASS, production acceptance, merge, or main write is claimed."
+
+
+# D-2026-1120-01 current continuation exact evidence refresh
+owner_ruling_current_continuation:
+  date: "2026-11-20"
+  carrier:
+    pr: 323
+    branch: "fix/f43-01-f3-ledger-reconcile"
+  finding_ledger:
+    commit: "7dfa2aec1f2b265dcc211160717917e557395599"
+    blob: "8a1f35c383951cc7fdf1dce6da847bad7ffe583f"
+    path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  F1:
+    id: "F-43-01/F1"
+    severity: "P1"
+    status: "OPEN_RUNTIME_IMPLEMENTATION_EVIDENCE"
+    handoff_pr: 327
+    handoff_head: "8205664c79e9216da6c7b0fa20ba90d23a070ff4"
+    handoff_blob: "09606b739d62570c061b24e459772468206e6a86"
+    exit_evidence: "five callable D operations; durable operation-bound Ledger/Receipt; equality/linearization proof; S1-S7 execution"
+    return: "PR #327; Issues #7/#10/#25/#43"
+  F3:
+    id: "F-43-01/F3"
+    severity: "P1"
+    status: "OPEN_INDEPENDENT_HUMAN_AND_OPERATIONAL_EVIDENCE"
+    d_query_pr: 321
+    d_query_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+    d_query_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+    accepted_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    h_test_pr: 322
+    h_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+    validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+    test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+    test_methods: 15
+    exact_head_actions:
+      - "44684299439"
+      - "44684299500"
+    ci_disposition: "FAILURE_BEFORE_TEST_STEPS; NO_CI_PASS"
+    independent_human_acceptance: "NOT_VERIFIED; both visible role records use GitHub login oahcom"
+    unsigned_attestation_comment: 7031665905
+  current_turn_comments:
+    pr_323: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/323#issuecomment-7032386957"
+    issue_43: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/43#issuecomment-7032394744"
+  prompt_provenance:
+    source_type: "USER_CHAT_INSTRUCTION"
+    source_thread_id: "conv 6afd60f0-f76c-83ec-9b0b-7094021ed1e2"
+    sha256: "NOT_VERIFIED"
+  boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merged: false
+    main_modified: false
+    runtime_implementation_claimed: false
+    production_acceptance_claimed: false
+
+
+current_session_owner_ruling_2026_11_20:
+  ruling: "D-2026-1120-01"
+  quota: "UNFROZEN; maximum 2 new PRs and 3 new Issues in this turn"
+  reused_carriers:
+    f1_handoff_pr: 327
+    f3_d_query_contract_pr: 321
+    f3_h_test_candidate_pr: 322
+    finding_ledger_pr: 323
+  finding_states:
+    F-43-01/F1: "P1_OPEN_RUNTIME_IMPLEMENTATION_NOT_ESTABLISHED"
+    F-43-01/F3: "P1_OPEN_INDEPENDENT_HUMAN_ACCEPTANCE_AND_OPERATIONAL_EVIDENCE_NOT_ESTABLISHED"
+  ledger_commit: "4dbc26346177c68b8aa0bb61e0e8de4dc58a0910"
+  ledger_blob: "e5ca7723bc51bad38da3b50b8a898ebba3b6ea0e"
+  prompt_provenance:
+    source_type: "T2_CHAT_INSTRUCTION"
+    source: "Owner ruling D-2026-1120-01 in current continuation"
+    platform_conversation_uuid: "NOT_EXPOSED_BY_CONNECTOR"
+    raw_prompt_sha256: "NOT_VERIFIED"
+  scope_boundary: "No Runtime implementation, independent human signature, CI PASS, production acceptance, merge, or main write is claimed."
+
+# Exact latest ledger pin for current-session D-2026-1120-01 closeout
+final_current_ledger_pin_current_session_2026_11_20:
+  date: "2026-11-20"
+  finding_ledger_path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  finding_ledger_commit: "d4aac8b11ee58eaed56def49b3d953e249a58bb5"
+  finding_ledger_blob: "c4057894995cfeb252ecd85c942237f57a80160f"
+  reason: "Append-only F1/F3 current-session evidence advancement on the existing PR #323 branch; this terminal pin supersedes prior ledger pins."
+  findings:
+    F-43-01/F1: "P1_OPEN_RUNTIME_IMPLEMENTATION_EVIDENCE"
+    F-43-01/F3: "P1_OPEN_INDEPENDENT_HUMAN_AND_OPERATIONAL_EVIDENCE"
+  verification:
+    PR_323_branch: "fix/f43-01-f3-ledger-reconcile"
+    no_main_write: true
+    no_merge: true
+
+
+# Authoritative latest live refs — refreshed after concurrent existing-PR advances
+authoritative_live_refs_after_concurrent_advances_2026_11_20:
+  carrier_pr: 323
+  carrier_branch: "fix/f43-01-f3-ledger-reconcile"
+  prior_observed_head: "e6e29e73d030a8cd9ae8a5b1cedbb49599ae57d5"
+  finding_ledger:
+    commit: "d4aac8b11ee58eaed56def49b3d953e249a58bb5"
+    blob: "c4057894995cfeb252ecd85c942237f57a80160f"
+  work_index_blob: "4195de51f198dc1560a9311451aff8a79a56ac7e"
+  F1:
+    pr: 327
+    head: "99e0ff3e6e39dbce2a0aa0f8d8158490166cb596"
+    handoff_blob: "3704c208ae7e8bf9e81431d744e4a4659f5b531b"
+    finding: "F-43-01/F1 | P1 | OPEN"
+    exit_evidence: "five callable D operations; durable operation-bound Ledger/Receipt; equality/linearization; S1-S7 execution"
+  F3:
+    d_query_pr: 321
+    d_query_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+    d_query_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+    mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    h_test_pr: 322
+    h_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+    validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+    test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+    test_methods: 15
+    exact_head_runs:
+      - run: 44684299439
+        job: 136123345286
+        conclusion: "FAILURE"
+        steps: "null"
+      - run: 44684299500
+        job: 136123331637
+        conclusion: "FAILURE"
+        steps: "null"
+    ci: "FAILURE_BEFORE_TEST_STEPS; NO_CI_PASS"
+    current_source_local_execution: "NOT_RUN_OR_NOT_VERIFIED"
+    independent_human_signers: "NOT_VERIFIED; both visible D/H role records resolve to oahcom"
+    finding: "F-43-01/F3 | P1 | OPEN"
+  provenance:
+    prompt_source: "T2 user chat instruction"
+    source_parent_conversation_id: "6afcc975-06ac-83ee-ba55-9395f7e117ae"
+    platform_current_uuid_and_raw_bytes: "NOT_EXPOSED"
+    sha256: "NOT_VERIFIED"
+  boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merged: false
+    main_modified: false
+    runtime_implementation_claimed: false
+    independent_owner_signature_claimed: false
+    production_acceptance_claimed: false
+
+
+# Superseding exact-head workflow retry evidence — D-2026-1120-01
+current_h_test_rerun_attempt_2026_11_20:
+  source_pr: 322
+  source_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+  validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+  test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+  test_methods: 15
+  reruns:
+    - workflow_run: 44684299439
+      job: 136134868361
+      job_name: "Validate BMCP JF-10 and Storage proof schema candidates"
+      status: "completed"
+      conclusion: "failure"
+      steps: []
+      log_error:
+        http_status: 404
+        code: "BlobNotFound"
+        request_id: "6c937e26-a01e-0006-77bb-78dfcf000000"
+        message: "The specified blob does not exist."
+    - workflow_run: 44684299500
+      job: 136134878395
+      job_name: "semantic-and-wire-tests"
+      status: "completed"
+      conclusion: "failure"
+      steps: []
+      log_error:
+        http_status: 404
+        code: "BlobNotFound"
+        request_id: "348d3b2e-d01e-00c7-18bb-784e89000000"
+        message: "The specified blob does not exist."
+  disposition: "FAILURE_BEFORE_TEST_STEPS; LOG_ARTIFACTS_UNAVAILABLE; NO_TEST_ASSERTION_RESULT; NO_CI_PASS"
+  current_source_local_execution: "NOT_RUN_OR_NOT_VERIFIED"
+  finding: "F-43-01/F3 | P1 | OPEN"
+  return: "PR #322; PR #323 ledger; Issues #25/#43"
+  provenance:
+    source_type: "USER_CHAT_INSTRUCTION"
+    source_parent_conversation_id: "6afcc975-06ac-83ec-9376-a26df522430b"
+    platform_current_uuid_and_raw_bytes: "NOT_EXPOSED"
+    prompt_sha256: "NOT_VERIFIED"
+  boundary:
+    no_new_pr: true
+    no_new_issue: true
+    no_new_branch: true
+    no_merge: true
+    main_modified: false
+
+
+# Current-turn terminal finding-ledger pin — D-2026-1120-01
+final_current_ledger_pin_owner_ruling_D2026_1120_01_session_closeout:
+  ledger_path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  ledger_commit: "970187be9790a02bbdf8805049451bf8e8395828"
+  ledger_blob: "bc2ffca43f87fb9699ba2e909c8520cc6a8d8e16"
+  finding_states:
+    F-43-01/F1: "P1 / OPEN — Runtime implementation and operational evidence absent"
+    F-43-01/F3: "P1 / OPEN — independent human acceptance and end-to-end operational evidence absent"
+  f1_handoff:
+    pr: 327
+    branch: "docs/f43-01-f1-engineering-entry-handoff"
+    commit: "5b11ef7425c33c49ace5f8ef0cadb8e6b55c52db"
+    blob: "6f8dd7b4ac95c5b470c31585d124f1d1aa31daca"
+  f3_sources:
+    d_contract:
+      pr: 321
+      commit: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      active_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    h_test_candidate:
+      pr: 322
+      commit: "0ce618ac503f641cf31e66092ae823c14bf8af7b"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "e66264ad30df6594e00836524accfdeb54160cee"
+      exact_head_actions:
+        - run: 44681841687
+          conclusion: "failure before test steps; runner_id=0; steps=null"
+        - run: 44681841601
+          conclusion: "failure before test steps; runner_id=0; steps=null"
+      ci_pass: false
+      current_source_local_test_execution: "NOT_RUN_OR_NOT_VERIFIED"
+  independent_human_acceptance:
+    d_role_comment: 7021655866
+    h_role_comment: 7021638212
+    visible_github_login_for_both: "oahcom"
+    distinct_authenticated_human_signers: "NOT_VERIFIED"
+  provenance:
+    instruction: "User-supplied Owner ruling D-2026-1120-01 in current ChatGPT continuation"
+    platform_message_permalink_and_raw_bytes: "NOT_EXPOSED"
+    prompt_sha256: "NOT_VERIFIED"
+  boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merged: false
+    main_modified: false
+    runtime_implementation_claimed: false
+    independent_owner_signature_claimed: false
+    production_acceptance_claimed: false
+
+
+latest_exact_carrier_refresh:
+  date: "2026-11-20"
+  authority: "Owner ruling D-2026-1120-01"
+  finding_ledger:
+    path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+    commit: "513636e9e16d1e64416e67e43e9d6a617ac546d3"
+    blob_sha: "1003d1ee69126abd5a7f67ed0f3d61a647f7dc35"
+  F1:
+    status: "P1 / OPEN (implementation evidence)"
+    pr: 327
+    branch: "docs/f43-01-f1-engineering-entry-handoff"
+    head: "5b11ef7425c33c49ace5f8ef0cadb8e6b55c52db"
+    handoff_blob: "6f8dd7b4ac95c5b470c31585d124f1d1aa31daca"
+    runtime_implementation: "NOT IMPLEMENTED"
+    tests: "NOT RUN"
+    execution_binding: "DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED (Issue #7 comment 7021990583)"
+  F3:
+    status: "P1 / OPEN"
+    D_contract:
+      pr: 321
+      head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      active_H_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+      workflow_runs: []
+    H_TEST_candidate:
+      pr: 322
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      workflow_runs:
+        - id: 44684299500
+          job: 136136137662
+          conclusion: FAILURE
+          steps: null
+        - id: 44684299439
+          job: 136136126048
+          conclusion: FAILURE
+          steps: null
+    independent_human_attribution: NOT_VERIFIED
+    callable_D_query_receipt_currentness: NOT_ESTABLISHED
+    production_consumer_acceptance: NOT_ESTABLISHED
+  tests_for_ledger_and_manifest_changes: NOT_RUN
+  main_write_or_merge: false
+  new_prs_or_issues_created: 0
+
+
+# Superseding exact pins after same-run retries and F1 handoff refresh — 2026-11-20
+terminal_exact_pin_refresh_2026_11_20:
+  finding_ledger:
+    path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+    commit: "4681040b96ea7895fa4eb64c5033a434e54dbc27"
+    blob: "52a708bccf0c26369ed5a4f61a1c3089e8e441a0"
+  F1:
+    finding: "F-43-01/F1 | P1 | OPEN"
+    handoff_pr: 327
+    handoff_branch: "docs/f43-01-f1-engineering-entry-handoff"
+    handoff_commit: "459dd608ecc559841eb6183775cdef674b395fb8"
+    handoff_blob: "0b058d32546105e33be1bb560978dca021af9c66"
+    runtime_implementation: "NOT IMPLEMENTED"
+    S1_S7: "NOT RUN"
+    execution_binding: "DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED (Issue #7 comment 7021990583)"
+  F3:
+    finding: "F-43-01/F3 | P1 | OPEN"
+    D_query_contract:
+      pr: 321
+      head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      active_H_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    H_TEST_candidate:
+      pr: 322
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      test_methods: 15
+      retry_runs:
+        - id: 44684299439
+          job: 136136582468
+          conclusion: FAILURE
+          steps: null
+        - id: 44684299500
+          job: 136136525120
+          conclusion: FAILURE
+          steps: null
+      test_execution: "NO_TEST_STEPS_EXECUTED; NO_CI_PASS"
+    independent_human_signers: "NOT_VERIFIED; D/H role comments both show login oahcom"
+    operational_consumer_and_C1_C6_evidence: "NOT_ESTABLISHED"
+  provenance:
+    source: "current user chat instruction, T2"
+    platform_conversation_uuid_and_raw_bytes: "NOT_EXPOSED_BY_CONNECTOR"
+    prompt_sha256: "NOT_VERIFIED"
+  boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merge: false
+    main_write: false
+    runtime_authorization: false
+    independent_owner_signature_claimed: false
+
+
+# Superseding exact live-ref and provenance correction — D-2026-1120-01
+final_live_refs_and_prompt_provenance_correction_2026_11_20:
+  source_thread_id: "6afae73a-bc9c-83ec-9376-a26df522430b"
+  source_type: "USER_CHAT_INSTRUCTION"
+  platform_current_uuid_and_immutable_raw_bytes: "NOT_EXPOSED"
+  prompt_sha256: "NOT_VERIFIED"
+  carriers:
+    ledger_pr: 323
+    ledger_branch: "fix/f43-01-f3-ledger-reconcile"
+    ledger_commit: "513636e9e16d1e64416e67e43e9d6a617ac546d3"
+    ledger_blob: "1003d1ee69126abd5a7f67ed0f3d61a647f7dc35"
+    F1_handoff_pr: 327
+    F1_handoff_head: "459dd608ecc559841eb6183775cdef674b395fb8"
+    F1_handoff_blob: "0b058d32546105e33be1bb560978dca021af9c66"
+    F3_D_query_pr: 321
+    F3_D_query_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+    F3_D_query_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+    F3_active_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    F3_H_test_pr: 322
+    F3_H_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+    F3_H_validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+    F3_H_test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+    F3_H_test_methods: 15
+  latest_exact_head_workflow_jobs:
+    - run: 44684299439
+      job: 136136582468
+      name: "Validate BMCP JF-10 and Storage proof schema candidates"
+      conclusion: "FAILURE"
+      steps: []
+      log_http_status: 404
+      log_error_code: "BlobNotFound"
+      log_request_id: "a72a7bed-501e-0070-01bc-785587000000"
+    - run: 44684299500
+      job: 136136525120
+      name: "semantic-and-wire-tests"
+      conclusion: "FAILURE"
+      steps: []
+      log_http_status: 404
+      log_error_code: "BlobNotFound"
+      log_request_id: "dab65d6e-e01e-00c5-70bc-7828ef000000"
+  disposition: "FAILURE_BEFORE_TEST_STEPS; LOG_ARTIFACTS_UNAVAILABLE; NO_TEST_ASSERTION_RESULT; NO_CI_PASS"
+  finding_states:
+    F-43-01/F1: "P1_OPEN_RUNTIME_IMPLEMENTATION_EVIDENCE"
+    F-43-01/F3: "P1_OPEN_INDEPENDENT_HUMAN_AND_OPERATIONAL_EVIDENCE"
+  boundary:
+    no_new_pr: true
+    no_new_issue: true
+    no_new_branch: true
+    no_merge: true
+    main_modified: false
+    no_owner_impersonation: true
+
+
+# Terminal administrative disposition — objective external evidence blockers
+terminal_closeout_disposition:
+  status: "SESSION_CLOSEOUT_COMPLETE; SUBSTANTIVE_F1_F3_GATES_BLOCKED_ON_OBJECTIVE_EXTERNAL_EVIDENCE"
+  authoritative_ledger:
+    path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+    commit: "76b33d3c88b54aac01bd9b026b52c936b18709f2"
+    blob: "031d329740b53ff7f15d9a7ecf077c3ef04c3ff9"
+  F1:
+    finding: "F-43-01/F1"
+    severity: P1
+    disposition: "BLOCKED-OBJECTIVE-ENGINEERING-AUTHORITY"
+    return: "PR #327; Issues #7/#10/#25/#43"
+    missing: "canonical Runtime repository/branch; named engineering lead and write custody; explicit engineering-entry authorization; canonical D authority and durable persistence boundary"
+    supplier: "project governance authority / engineering leadership; D Domain Owner"
+    release_verification: "authorization and named ownership in Issue #7 or existing carrier; five callable D operations; durable Ledger and operation-bound Receipt; equality/linearization evidence; exact-commit S1-S7 results"
+  F3:
+    finding: "F-43-01/F3"
+    severity: P1
+    disposition: "BLOCKED-OBJECTIVE-INDEPENDENT-ACCEPTANCE-AND-OPERATIONAL-EVIDENCE"
+    return: "PRs #321/#322/#323; Issues #25/#43"
+    missing: "distinct authenticated D/H signers; callable D query/Receipt/currentness/revocation; H production consumer acceptance; C1-C6 operational evidence; exact-Head CI execution that reaches test steps"
+    supplier: "D Owner and H Owner using distinct authorized human identities; engineering/CI maintainer"
+    release_verification: "separate attributable D/H decisions; exact-Head passing CI; callable D query and Receipt/currentness/revocation artifacts; H consumer acceptance and reproducible C1-C6 report"
+  owner_ruling_record:
+    chosen: "preserve P1 OPEN substantive finding states; record objective administrative blockers; complete all session-controlled handoff, source pin, retry, ledger and manifest work"
+    rejected: "false DECIDED/CLOSED; static code as runtime proof; unexecuted test as CI PASS; same-login role comments as independent signatures; impersonated Owner acceptance; unauthorized Runtime write"
+    basis: "Issue #7 comment 7021990583; Actions runs 44684299439 and 44684299500 failed before test steps; D/H role comments 7021655866 and 7021638212 both resolve to oahcom; AI-EXEC-001 v1.1 and AI-EXEC-002 v1.2"
+  provenance:
+    source_type: "T2_USER_CHAT_INSTRUCTION"
+    platform_conversation_uuid_and_raw_bytes: "NOT_EXPOSED_BY_CONNECTOR"
+    prompt_sha256: "NOT_VERIFIED"
+  mutation_boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merged: false
+    main_modified: false
+    runtime_authorized: false
+    independent_owner_signature_claimed: false
+    production_acceptance_claimed: false
+
+
+# Superseding session-vs-finding status correction — D-2026-1120-01
+session_closeout_status_correction_2026_11_20:
+  session_unit: "F1/F3 evidence reconciliation, source review, workflow retry and carrier closeout"
+  session_disposition: "COMPLETE"
+  finding_dispositions:
+    F-43-01/F1:
+      severity: "P1"
+      finding_status: "OPEN"
+      session_delivery: "COMPLETE_VERIFIABLE_HANDOFF_ON_PR_327"
+      handoff_head: "459dd608ecc559841eb6183775cdef674b395fb8"
+      handoff_blob: "0b058d32546105e33be1bb560978dca021af9c66"
+      implementation: "NOT_IMPLEMENTED; not represented as a blocker to this handoff/reconciliation unit"
+      separate_entry_boundary: "DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED (Issue #7 comment 7021990583)"
+      return: "PR #327; Issues #7/#10/#25/#43"
+    F-43-01/F3:
+      severity: "P1"
+      finding_status: "OPEN"
+      session_delivery: "COMPLETE_VERIFIABLE_MAPPING_PIN_TEST_CANDIDATE_AND_LEDGER_ON_EXISTING_PRS"
+      d_contract_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      d_contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+      h_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      h_validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      h_test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      h_test_methods: 15
+      independent_human_acceptance: "NOT_VERIFIED; unsigned separate-attestation template is available at PR #323 comment 7031665905"
+      operational_acceptance: "NOT_ESTABLISHED; not represented as a blocker to this source-review/reconciliation unit"
+      return: "PRs #321/#322/#323; Issues #25/#43"
+  external_evidence_acquisition:
+    item: "GitHub Actions job logs for H/JF-10 retries"
+    classification: "A_EXTERNAL_SYSTEM_404"
+    raw_error: "HTTP 404 BlobNotFound — The specified blob does not exist."
+    evidence_and_substitute: "current_h_test_rerun_attempt_2026_11_20 above; exact jobs, Request IDs, steps=[], and source SHAs are recorded"
+  owner_adjudication:
+    chosen: "complete the bounded evidence-reconciliation unit; preserve F1/F3 as P1/OPEN; do not use BLOCKED as the finding or session status"
+    rejected: "mark F1/F3 BLOCKED merely because substantive exit evidence is absent; mark either finding CLOSED; infer authorization or independent signatures"
+    basis: "Owner ruling D-2026-1120-01; PR-only/no-main-write; CANDIDATE-to-DECIDED evidence rule; no-impersonation redline"
+  boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merged: false
+    main_modified: false
+
+
+# Superseding current-turn terminal pin — D-2026-1120-01 Owner ruling
+final_current_ledger_pin_D2026_1120_01_owner_ruling_superseding:
+  ledger_path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  ledger_commit: "db68281bad28818df0ba48d8b35b402f2e7b4bf3"
+  ledger_blob: "5e495e42d480178d4a6dc12419f50c0688983cfe"
+  status_axis:
+    delivery_unit: "COMPLETE_WITH_VERIFIABLE_SUBSTITUTES"
+    F-43-01/F1: "P1 / OPEN — actual Runtime implementation and operational evidence absent; handoff delivered"
+    F-43-01/F3: "P1 / OPEN — distinct authenticated D/H human acceptance and operational consumer evidence absent; unsigned attestation instrument delivered"
+    blocked_status: "NOT USED; OPEN is the substantive finding state, not a delivery blocker"
+  f1_handoff:
+    pr: 327
+    branch: "docs/f43-01-f1-engineering-entry-handoff"
+    commit: "eb0de9100841d7300c0acc7baff3a65beb33252f"
+    blob: "65a32912ddde3b3fd5f7e6bd63fab359dfe6713f"
+  f3_sources:
+    d_contract:
+      pr: 321
+      commit: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    h_test_candidate:
+      pr: 322
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      test_methods: 15
+      actions_runs:
+        - run: 44684299439
+          conclusion: "failure before test steps; latest retry job 136136582468; steps=null"
+        - run: 44684299500
+          conclusion: "failure before test steps; latest retry job 136136525120; steps=null"
+      job_logs: "HTTP 404 BlobNotFound; no test assertion result; no CI PASS"
+      current_source_local_test_execution: "NOT_RUN_OR_NOT_VERIFIED"
+  f3_independent_acceptance:
+    d_decision_comment: 7021655866
+    h_decision_comment: 7021638212
+    visible_github_login_both: "oahcom"
+    distinct_human_signers: "NOT_VERIFIED"
+    unsigned_attestation_instrument: "PR #323 comment #7032744021"
+  evidence_comments:
+    f1_pr327: "7032709410"
+    f3_pr323: "7032710036"
+    issue43_index: "7032721342"
+    issue7_f1: "7032721974"
+    f3_attestation: "7032744021"
+  governance:
+    AI_EXEC_001: "v1.1 / ADOPTED / Blob 58af59af266b81109269156ea667df1a15edfb7b"
+    AI_EXEC_002: "v1.2 / PENDING ADOPTION / Blob 7f5928a5d16eb12da7621cfb8bd99ca463afd859; v1.1 is adopted predecessor"
+    owner_ruling: "D-2026-1120-01; carrier quota unfreeze does not grant Runtime authorization or substitute for D/H human identity verification"
+  provenance:
+    instruction_source: "user-supplied Owner ruling D-2026-1120-01 in current ChatGPT continuation"
+    platform_permalink_and_raw_bytes: "NOT_EXPOSED"
+    prompt_sha256: "NOT_VERIFIED"
+  boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merged: false
+    main_modified: false
+    runtime_implementation_claimed: false
+    independent_owner_signature_claimed: false
+    production_acceptance_claimed: false
+
+
+# Current continuation reconciliation — D-2026-1120-01
+continuation_2026_11_20_owner_ruling:
+  ruling: "D-2026-1120-01"
+  carrier_quota:
+    prior_freeze: "LIFTED"
+    new_limits: "At most 2 new PRs and 3 new Issues in this continuation"
+    applied: true
+    effect: "Carrier capacity only; does not grant Runtime implementation authority or authenticate D/H signers"
+  f1:
+    finding: "F-43-01/F1"
+    severity: "P1"
+    status: "OPEN"
+    status_axis: "Actual Runtime implementation and operational evidence absent"
+    handoff_pr: 327
+    handoff_branch: "docs/f43-01-f1-engineering-entry-handoff"
+    handoff_prior_head: "eb0de9100841d7300c0acc7baff3a65beb33252f"
+    implementation_authorization: "DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED per Issue #7 comment #7021990583"
+    callable_d_operations: "NOT_IMPLEMENTED"
+    durable_producer_ledger_and_operation_bound_receipt: "NOT_ESTABLISHED"
+    runtime_equality_and_linearization_evidence: "NOT_ESTABLISHED"
+    d002_scenarios_s1_s7: "NOT_RUN"
+    disposition: "Handoff delivery is complete; underlying implementation finding remains OPEN"
+  f3:
+    finding: "F-43-01/F3"
+    severity: "P1"
+    status: "OPEN"
+    status_axis: "Independent human D/H acceptance and end-to-end consumer evidence absent"
+    mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    d_contract_pr: 321
+    d_contract_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+    d_contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+    h_test_pr: 322
+    h_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+    h_validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+    h_test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+    h_test_methods: 15
+    h_actions:
+      run_44684299500: "FAILURE"
+      run_44684299439: "FAILURE"
+      jobs_136136582468_136136525120: "steps=null; log retrieval returned HTTP 404 NOT_FOUND / BlobNotFound"
+      test_assertion_result: "NOT_ESTABLISHED"
+      ci_pass: false
+    d_h_role_decisions:
+      d_comment: 7021655866
+      h_comment: 7021638212
+      visible_github_login_both: "oahcom"
+      distinct_authenticated_human_signers: "NOT_VERIFIED"
+      unsigned_attestation_instrument: "PR #323 comment #7032744021"
+    callable_d_query_receipt_currentness_revocation: "NOT_ESTABLISHED"
+    h_production_consumer_acceptance: "NOT_ESTABLISHED"
+    c1_c6_operational_proof: "NOT_ESTABLISHED"
+    disposition: "Mapping and TEST-profile artifacts are delivered; independent acceptance and operational finding remain OPEN"
+  evidence_provenance:
+    ai_exec_001: "v1.1 ADOPTED; Blob 58af59af266b81109269156ea667df1a15edfb7b"
+    ai_exec_002: "v1.2 PENDING ADOPTION; Blob 7f5928a5d16eb12da7621cfb8bd99ca463afd859; v1.1 remains ADOPTED"
+    owner_ruling_prompt: "User-supplied D-2026-1120-01; platform immutable raw bytes/permalink not exposed; SHA-256 NOT_VERIFIED"
+  carrier_policy:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merge_performed: false
+    main_modified: false
+
+
+f3_current_independent_attestation_instrument:
+  pr: 323
+  comment: 7034813260
+  url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/323#issuecomment-7034813260"
+  mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+  d_contract_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+  h_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+  h_validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+  h_test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+  state: "UNSIGNED TEMPLATE DELIVERED; independent human acceptance remains OPEN / NOT VERIFIED"
+
+f3_current_independent_attestation_instrument:
+  pr: 323
+  comment: 7034813260
+  url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/323#issuecomment-7034813260"
+  mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+  d_contract_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+  h_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+  h_validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+  h_test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+  state: "UNSIGNED TEMPLATE DELIVERED; independent human acceptance remains OPEN / NOT VERIFIED"
+
+
+# Current ledger terminal pin — D-2026-1120-01 continuation
+
+current_ledger_terminal_pin:
+  finding_ledger_path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  finding_ledger_commit: "ec14916de4f905702213589d653b00325efc0b4b"
+  finding_ledger_blob: "0486fffb8fcd605b2c5c6fd93e46b41eddb0663e"
+  branch: "fix/f43-01-f3-ledger-reconcile"
+  pull_request: 323
+  exact_source_refresh:
+    f1_handoff_pr_head: "1a19bc034af8620e19380a61eb185f4a52b56879"
+    f1_handoff_blob: "0603bf2e18681dc29eeb403befa3c947f965143c"
+    f3_d_contract_pr_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+    f3_d_contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+    f3_h_test_pr_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+    f3_h_validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+    f3_h_test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+  evidence_comment:
+    pr323: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/323#issuecomment-7034932609"
+    issue43: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/43#issuecomment-7034933758"
+  disposition:
+    f1: "P1/OPEN — handoff delivered; Runtime implementation and operational evidence absent"
+    f3: "P1/OPEN — same-Blob role-labelled decisions present; distinct human signer attribution and operational consumer evidence not verified"
+  verification_boundary:
+    tests: "NOT RUN for PR #322 exact source; Actions runs 44684299500 and 44684299439 failed before test steps"
+    ci_pass: false
+    runtime_implementation_claimed: false
+    independent_human_signature_claimed: false
+    production_acceptance_claimed: false
+  carrier_policy:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merge_performed: false
+    main_modified: false
+
+ 
+# Repository-side carrier merge refresh — D-2026-1120-01
+repository_side_merge_closeout_2026_11_20:
+  date: "2026-11-20"
+  ruling: "D-2026-1120-01"
+  merged_non_main_carriers:
+    PR_321:
+      head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      merge_commit: "909f62b68e0b48136bbd9d48d41bc7c12a2cb818"
+      base: "remediation/aid-2026-001-forget-contract-closure-2026-11-18"
+      disposition: "D query-contract mapping pin merged; F3 remains P1 OPEN overall"
+    PR_322:
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      merge_commit: "6417d37658fa554a79fdd273946c0009bad53c75"
+      base: "session-h-bmcp-protocol"
+      actions_runs: [44684299500, 44684299439]
+      ci: "FAILURE_BEFORE_TEST_STEPS; runner_id=0; steps=0; no test assertion result or CI PASS"
+      disposition: "H TEST-profile validator and regression tests merged; exact-head CI did not execute"
+    PR_327:
+      head: "1a19bc034af8620e19380a61eb185f4a52b56879"
+      merge_commit: "6e39df999d9f976593bacec357e24bfe3d9132e7"
+      base: "remediation/aid-2026-001-forget-contract-closure-2026-11-18"
+      disposition: "F1 engineering handoff merged; Runtime implementation remains absent"
+    PR_326:
+      head: "7955e5e6a5cd34f30b67d4a3ad90b829f821396e"
+      merge_commit: "239e1975690eced595b8c8fc9bb505415d6e30e8"
+      base: "session-g-memory-context"
+      disposition: "G source-pin refresh merged; delegated technical review only"
+    PR_334:
+      head: "e88cd0e68b7a34b185bcf62ba38aa2a57483dd1c"
+      merge_commit: "3e8b33df18b9e6fc757ca84ff07a12faebc78e74"
+      base: "session-h-bmcp-protocol"
+      actions_run: 44685566586
+      ci: "FAILURE_BEFORE_TEST_STEPS; runner_id=0; steps=0; no test assertion result or CI PASS"
+      disposition: "H/C FinalRequestBoundaryType equality validator and tests merged; exact-head CI did not execute"
+    PR_335:
+      head: "d258bb73e64eace6658eaaf892abdf32fab3e4c3"
+      merge_commit: "b55466a1215a4eeed7132e8ab515d9ad377d3c7b"
+      base: "session-g-memory-context"
+      ci: "NO_EXACT_HEAD_CHECK_RUNS"
+      disposition: "G TEST-only Full Applied request-binding gate merged; no CI PASS claimed"
+  findings:
+    F1:
+      id: "F-43-01/F1"
+      severity: "P1"
+      status: "OPEN"
+      return: "Issue #7, Issues #10/#25/#43, merged PR #327"
+      note: "Handoff delivered; five callable D operations, durable Ledger/Receipt, runtime equality/linearization and S1-S7 remain NOT ESTABLISHED/NOT RUN"
+    F3:
+      id: "F-43-01/F3"
+      severity: "P1"
+      status: "OPEN"
+      return: "merged PRs #321/#322, Issue #25, Issue #43"
+      note: "Normative pin and H TEST-profile changes merged; distinct human D/H signer identity and operational D query/Receipt/currentness/C1-C6 remain NOT VERIFIED"
+  out_of_scope_dev_baseline:
+    - "Independent human signer attribution / production approval"
+    - "Callable production D endpoint, durable operational Receipt and live currentness/revocation"
+    - "Production Runtime implementation and deployment/activation"
+    - "C1-C6 end-to-end operational evidence"
+  provenance:
+    source_type: "T2_USER_CHAT_INSTRUCTION"
+    source: "User-provided Owner ruling D-2026-1120-01 and current carrier-closure instruction"
+    platform_conversation_id: "NOT_EXPOSED"
+    immutable_raw_message_bytes: "NOT_AVAILABLE"
+    sha256: "NOT_VERIFIED"
+    note: "No synthetic prompt digest is asserted."
+  mutation_boundary:
+    new_prs: 0
+    new_issues: 0
+    main_modified: false
