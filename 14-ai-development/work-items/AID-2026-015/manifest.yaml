@@ -1,0 +1,121 @@
+work_item_id: AID-2026-015
+title: Execution-first AI development baseline addendum
+owner: Integration Owner
+sponsor: NOT_ASSIGNED
+accountable_owner: NOT_ASSIGNED
+acceptance_authority: NOT_ASSIGNED
+issue: 329
+related_issues: [218, 264, 329]
+related_prs: [330]
+task_class: DOC
+risk: R1
+risk_rationale: >-
+  This work proposes prompt and process guidance only. It does not change
+  security controls, authorization boundaries, runtime behavior, production
+  data, or upstream normative standards. Mandatory R2/R3 review requirements
+  remain unchanged.
+status: PROPOSED
+
+registration:
+  status: REGISTERED
+  allocated_id: AID-2026-015
+  owning_issue: 329
+  allocation_authority: User instruction in current ChatGPT conversation; Issue #329 created as carrier
+  required_persistence:
+    - work-items/AID-2026-015/manifest.yaml
+    - work-items/INDEX.md entry
+    - Issue #329 association record
+  completion_condition: >-
+    Manifest, INDEX entry and Issue association must agree and be read back.
+
+prompt:
+  id: GLB-DEV-001
+  version: v1.1-proposed
+  provenance: T1 repository prompt plus T2 user direction
+  source:
+    - prompts/global-project-developer.md
+    - prompts/global-project-developer.zh-CN.md
+    - AI-EXEC-003 proposal
+  sha256: NOT_VERIFIED
+  note: >-
+    Exact-byte SHA-256 has not been computed in this connector session.
+    Git blob SHA is recorded separately after commit and is not represented
+    as SHA-256. The user direction is available in the current conversation;
+    no unavailable platform permalink or transport hash is fabricated.
+
+baseline:
+  repository: oahcom/AiMemoryBrainArchitecture
+  target_branch: main
+  base_sha: 9546f78d364b5a1dd1fa2206b34255be9c7fb1a7
+  base_sha_source: GitHub API read of refs/heads/main at Issue #329 creation
+  working_branch: ai/AID-2026-015/IO-execution-first-baseline
+  pull_request: 330
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/330
+
+scope:
+  - Add AI-EXEC-003 as a bilingual execution-first addendum proposal.
+  - Revise GLB-DEV-001 from v1.0 to v1.1-proposed with bounded execution rules.
+  - Register the Chinese and English prompt counterparts.
+  - Update the prompt library index and bilingual coverage register.
+  - Preserve AI-EXEC-001/002, AI-STD-001, AI-PROC-001, PR-GOVERNANCE-001 and NR-001 authority.
+
+non_goals:
+  - No amendment to upstream standards or adopted governance rules.
+  - No cancellation or weakening of R2/R3 independent review or R3 expert review.
+  - No invented approval, acceptance authority, Owner assignment or implementation authorization.
+  - No merge to main, production activation or change to runtime code.
+  - No self-approval or claim of independent review by the author.
+
+deliverables:
+  - 14-ai-development/AI-EXEC-003.md
+  - docs/en/14-ai-development/AI-EXEC-003.md
+  - prompts/global-project-developer.md
+  - prompts/global-project-developer.zh-CN.md
+  - prompts/README.md update
+  - docs/translation-status.md update
+  - work-items/AID-2026-015/manifest.yaml
+  - work-items/INDEX.md registration
+
+acceptance:
+  - All eight deliverable paths exist on the same PR head and are read back.
+  - Chinese and English AI-EXEC-003 counterparts preserve semantic parity.
+  - GLB-DEV-001 v1.1 is explicitly PROPOSED and references AI-EXEC-003.
+  - Blocker scope is limited to the affected work slice; independent authorized work continues.
+  - No additional approval layer is invented beyond binding project requirements.
+  - Existing R2/R3 review, R3 expert review, acceptance, security and authorization boundaries remain explicit.
+  - Two-iteration anti-stagnation behavior triggers strategy reassessment, not unsafe forced execution.
+  - README, translation-status, manifest and Issue #329 references are consistent.
+  - Independent review and Owner adoption remain separate and pending.
+
+verification:
+  repository_tests: NOT_RUN
+  exact_head_readback: VERIFIED — 8/8 deliverable paths re-read; final head is the PR #330 head
+  bilingual_semantic_review: PENDING_INDEPENDENT_REVIEW
+  adoption: NOT_GRANTED
+
+lifecycle:
+  phase: PROPOSAL
+  gates:
+    registration: SATISFIED
+    implementation: IMPLEMENTED
+    verification: PENDING
+    independent_review: PENDING
+    owner_acceptance: NOT_GRANTED
+    adoption: NOT_GRANTED
+    merge: PENDING
+
+renumbering:
+  previous_id: AID-2026-011
+  assigned_id: AID-2026-015
+  finding: IR-01 / F-L0-AID011-COLLISION-002
+  ruling_basis: D-2026-1120-03 — branch-side duplicate must be re-sequenced before merge
+  reason: >-
+    The previous identifier is canonical on main for REQ-01 / Issue #262.
+    A cross-tree scan found AID-2026-014 already allocated to REQ-04 / Issue #265;
+    AID-2026-015 was not present in main, open PR heads, or the scanned active
+    Work Item branches at the time of reassignment.
+  historical_note: >-
+    Earlier branch records and review references using AID-2026-011 are historical
+    collision evidence and are not rewritten. The working branch name retains
+    its original slug as immutable branch provenance.
+  scan_scope: main; all open PR heads; all branches named for AID/work-item registrations
