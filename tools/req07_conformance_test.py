@@ -15,6 +15,7 @@ Source pins: tools/ac5_forget_recovery_test.py
 from __future__ import annotations
 
 import importlib.util
+import re
 import sys
 import unittest
 from dataclasses import dataclass, field
@@ -337,8 +338,8 @@ MQ01_DETECTOR_BLOB = "c287e1c935f177a23df7b9f91a70d458e10dcb1a"
 # AC-7 has no adopted Decision/explanation record contract in the domain model.
 NOT_BINDABLE = {
     "AC-1": "NOT_BINDABLE(no adopted contract in repo): five local epistemic labels do not match the adopted six-state EpistemicStatus enum; MQ-01 still detects missing distinct Fact type",
-    "AC-6": "NOT_BINDABLE(no adopted contract in repo): no adversarial quality/disposition engine defines poison, stale, and contradiction outcomes",
-    "AC-7": "NOT_BINDABLE(no adopted contract in repo): no decision/explanation record defines reason, evidence refs, method, version, and history",
+    "AC-6": "NOT_BINDABLE(no adopted contract in repo): no adopted adversarial quality/disposition engine defines poison, stale, and contradiction outcomes",
+    "AC-7": "NOT_BINDABLE(no adopted contract in repo): no adopted decision/explanation record defines reason, evidence refs, method, version, and history",
 }
 
 
@@ -356,23 +357,33 @@ def _read_pinned_contract(path: Path, expected_blob: str) -> str:
     return content
 
 
-def _rust_block(source: str, declaration: str) -> str:
-    import re
-    match = re.search(declaration, source)
-    if match is None:
+def _rust_blocks(source: str, declaration: str) -> list[str]:
+    """Return every balanced Rust declaration block matching the pattern."""
+    matches = list(re.finditer(declaration, source))
+    if not matches:
         raise AssertionError(f"authoritative Rust declaration not found: {declaration}")
-    opening = source.find("{", match.start())
-    if opening < 0:
-        raise AssertionError(f"authoritative Rust block has no body: {declaration}")
-    depth = 0
-    for index in range(opening, len(source)):
-        if source[index] == "{":
-            depth += 1
-        elif source[index] == "}":
-            depth -= 1
-            if depth == 0:
-                return source[opening + 1:index]
-    raise AssertionError(f"unterminated authoritative Rust block: {declaration}")
+    blocks: list[str] = []
+    for match in matches:
+        opening = source.find("{", match.start())
+        if opening < 0:
+            continue
+        depth = 0
+        for index in range(opening, len(source)):
+            if source[index] == "{":
+                depth += 1
+            elif source[index] == "}":
+                depth -= 1
+                if depth == 0:
+                    blocks.append(source[opening + 1:index])
+                    break
+    if not blocks:
+        raise AssertionError(f"authoritative Rust block has no balanced body: {declaration}")
+    return blocks
+
+
+def _rust_block(source: str, declaration: str) -> str:
+    """Return the first matching block (for declarations unique by contract)."""
+    return _rust_blocks(source, declaration)[0]
 
 
 class AdoptedContractBindings(unittest.TestCase):
@@ -396,7 +407,13 @@ class AdoptedContractBindings(unittest.TestCase):
         self.assertIn("For every transformation, add lineage", self.provenance)
 
     def test_ac3_temporal_and_stale_successor_rules_bind_to_domain_contract(self):
-        version = _rust_block(self.domain, r"impl MemoryVersion\s*")
+        version_blocks = _rust_blocks(self.domain, r"impl MemoryVersion\s*")
+        version = next(
+            (block for block in version_blocks
+             if re.search(r"pub fn validate_successor\s*\(", block)),
+            None,
+        )
+        self.assertIsNotNone(version, "MemoryVersion impl containing validate_successor not found")
         successor = _rust_block(version, r"pub fn validate_successor\s*\(")
         for required in ("self.memory_id != current.memory_id",
                          "self.version_number != current.version_number + 1",
