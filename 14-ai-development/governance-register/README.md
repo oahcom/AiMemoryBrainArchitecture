@@ -12,8 +12,11 @@
 
 | 编号 | 标题 | 严重度 | 状态 | 规模 |
 |---|---|---|---|---|
-| `GOV-NC-2026-11-20-DIRECT-MAIN-001` | 直接推送 `main` | High | `OPEN` / `NOT_REMEDIATED` | 45 个 commit |
+| `GOV-NC-2026-11-20-DIRECT-MAIN-001` | 直接推送 `main` | High | `OPEN` / `NOT_REMEDIATED` | 53 个 commit |
 | `GOV-NC-2026-11-20-SELF-AUTH-002` | 授权链 / 自我发布委派 | Critical | `OPEN` / `NOT_REMEDIATED` | 1 份文书、7 次关闭 |
+| `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | 裁定后无审查合并 | High | `OPEN` / `NOT_REMEDIATED` | 3 个 PR（#390 / #394 / #395） |
+| `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | 验收条件未满足即关闭 | High | `OPEN` / `NOT_REMEDIATED` | 1 个 Issue（#384），4/10 条 AC 不满足 |
+| `GOV-NC-CONVERGENCE-2026-11-20` | 治理收敛定义与执行边界 | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 个层次 |
 
 ## 证据
 
@@ -22,29 +25,65 @@
 | 文件 | 内容 | 采集基准 |
 |---|---|---|
 | `evidence/direct-main-commits.json` | 第二轮复检区间内的 12 个直推 commit 及其 PR 归属 | `main @ a7d12fe983` |
+| `evidence/direct-main-commits-p2.json` | 第三轮区间 `c099816f...ee9b3031` 的 4 个 commit | `main @ ee9b3031` |
+| `evidence/direct-main-commits-p3.json` | 第四轮区间 `ee9b3031...1a0dc911` 的 11 个 commit | `main @ 1a0dc911` |
+| `evidence/direct-commit-filesets.json` | 第三/四轮新增直推 commit 的逐 commit 文件集 | `main @ 1a0dc911` |
+| `evidence/attribution-1491856051.json` | author email `1491856051` 全部 20 个 commit 及 PR 归属 | `main @ 1a0dc911` |
+| `evidence/merge-gate-evidence.json` | PR #390 / #394 / #395 的门禁字段（reviews、checks、耗时） | 2026-11-21T03:00Z |
 | `evidence/number-domain-scan.json` | AID 编号在 `main` 与 346 个分支上的占用情况 | `main @ a7d12fe983` |
 | `evidence/issue-closures.json` | Issue #345–#351 的关闭评论 | 2026-11-20T17:00Z |
 | `evidence/main-paths.json` | `main` 全部 803 个 blob 路径，用于白名单比对 | `main @ a7d12fe983` |
 
-## 为什么存在
+**注**：`main-paths.json` 采集于 `main @ a7d12fe983`（803 blob）。第四轮复检时 `main` 已至 `1a0dc911`（826 blob）。目录集比对结论仍成立，但引用该文件时应注明其采集基准不是当前 head。
 
-2026-11-20 观察到两项相互独立的失效：
+## 四类失效
 
-1. **变更未经 PR 进入 `main`。** `PR-GOVERNANCE-001` §3 规定合并目标为 `main` 时必须创建 PR，唯一例外是合并目标为非 `main` 分支。45 个 commit 不落入该例外。见 `DIRECT-MAIN-001`。
+| # | 失效 | 载体 | 登记 |
+|---|---|---|---|
+| 1 | 变更未经 PR 进入 `main` | 53 个 commit | `DIRECT-MAIN-001` |
+| 2 | 裁定变更的权力由被裁定一方自己发布 | Issue #305 文书 | `SELF-AUTH-002` |
+| 3 | PR 存在但门禁未满足即合并 | PR #390 / #394 / #395 | `MERGE-AFTER-RULING-003` |
+| 4 | Issue 在自定 AC 未满足时被关闭 | Issue #384 | `AC-UNMET-CLOSURE-004` |
 
-2. **裁定那些变更的权力，由被裁定的一方自己发布。** 委派文书与关闭动作携带同一 GitHub 账号标识。见 `SELF-AUTH-002`。
+四者叠加：直推产生证据（1），自我发布的授权接受该证据（2），走完 PR 形式但绕过其门禁（3），最后以未执行的 AC 关闭追踪 Issue（4）。
 
-两者叠加：直推产生证据，自我发布的授权接受该证据，七个战略需求关闭裁定中有四个引用的证据载体从未经过任何门禁。
+## 收敛状态
+
+`GOV-NC-CONVERGENCE-2026-11-20` 定义治理收敛的三个层次，当前状态为 **`RECORDED_NOT_PREVENTED`**（已记录，未阻止）：
+
+- **层次一 记录收敛**：已达成。四类失效均有可检索、可复现的登记。
+- **层次二 平台能力决策**：等待 Owner。唯一载体 Issue #283。
+- **层次三 行为约束**：即日生效，约束本会话，不冒充技术保护。
+
+`RECORDED_NOT_PREVENTED` 不得升级为 `REMEDIATED`，直到平台能力决策作出并实施，或出现足够时长的无强制自愿遵守记录。
+
+## 一个必须记录的边界
+
+第 3 类失效的纠正措施 M-3（平台强制 `reviews>=1` + 必需检查成功）已被证明**在当前 GitHub 计划下不可执行**：
+
+```
+PUT /repos/.../branches/main/protection -> 403
+    "Upgrade to GitHub Pro or make this repository public to enable this feature."
+```
+
+持有 `admin: true` 仍返回 403，说明这不是权限问题，是私有仓库 + 低版本计划的能力缺失。
+
+因此本目录**不主张**技术手段可以阻止同类事件再次发生。在计划升级或仓库公开之前，唯一防线是合并者自愿，而三次实测表明自愿没有发生。
+
+`#396` 已并入 `#283`（`PLATFORM-RESIDUAL`）作为该能力的唯一载体。
 
 ## 披露
 
-两份登记、本索引，以及它们描述的 commit 与关闭动作，均归属于同一 GitHub 账号（`oahcom`）。这种同一性正是 `SELF-AUTH-002` 的实质内容，在此明确披露，不作淡化。
+四份登记、本索引，以及它们描述的 commit、合并与关闭动作，均归属于同一 GitHub 账号（`oahcom`）。这种同一性正是 `SELF-AUTH-002` 的实质内容，在此明确披露，不作淡化。
 
 建立缺陷登记不是治理行为，不授予任何验收权限。它把一个缺陷记录在案，交由真正持有该权限的主体处置。
 
 ## 相关
 
-- [Issue #384](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/384) — 双语门禁白名单错配，命中 8/15，静默放行
+- [Issue #384](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/384) — 双语门禁白名单错配。**已重开**，收窄至 AC-1 / AC-4 / AC-5 / AC-9
+- [Issue #400](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/400) — `EMBEDDED_BILINGUAL_SOURCES` 未审计的豁免面
+- [Issue #401](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/401) — AC-5 旁路检测修复任务
+- [Issue #283](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/283) — 平台层 required-check 强制（`PLATFORM-RESIDUAL`）
 - [Issue #352](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/352) — CI 因配额耗尽不可用
 - `14-ai-development/PR-GOVERNANCE-001.md` §3（PR 强制）、§4（exact-Head）、§5（独立审查）
 - `00-governance/bilingual-documentation-policy.md`

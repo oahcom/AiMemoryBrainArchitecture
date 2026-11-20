@@ -1,0 +1,98 @@
+[
+ {
+  "sha": "a09fcceff046130246d9b188c2402e2e10292f72",
+  "date": "2026-11-20T18:41:41Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "parents": 1,
+  "prs": [
+   395
+  ],
+  "msg": "Merge PR #395: deliver AID-2026-024/026 prompt v2"
+ },
+ {
+  "sha": "0c73f639bf7392a5381d0cc0d9cafd53017bfe05",
+  "date": "2026-11-20T17:35:49Z",
+  "email": "1491856051",
+  "parents": 1,
+  "prs": [],
+  "msg": "docs(governance): add GOV-DOC-002 document management policy and fix links"
+ },
+ {
+  "sha": "7d76c589bc52f14acbd1a32a9807222b732e04b6",
+  "date": "2026-11-20T17:45:56Z",
+  "email": "1491856051",
+  "parents": 1,
+  "prs": [],
+  "msg": "docs(governance): pair bilingual mirrors for GOV-DOC-002 classification"
+ },
+ {
+  "sha": "965a66b9a92cd4c2b20f4b6100721c779be7f784",
+  "date": "2026-11-20T17:57:00Z",
+  "email": "1491856051",
+  "parents": 1,
+  "prs": [],
+  "msg": "docs(governance): normalise work-items links on both language sides"
+ },
+ {
+  "sha": "e2644784c010da488b4794f3e6b10d17c32e9b4b",
+  "date": "2026-11-20T18:25:24Z",
+  "email": "1491856051",
+  "parents": 1,
+  "prs": [],
+  "msg": "docs(governance): register GOV-DOC-002 sources as single-file bilingual"
+ },
+ {
+  "sha": "966fe514be0be0a8c7983cd0d9278fe15576fc7f",
+  "date": "2026-11-20T19:03:21Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "parents": 1,
+  "prs": [
+   397
+  ],
+  "msg": "Bind REQ-07 assertions to adopted domain contracts"
+ },
+ {
+  "sha": "34010079a99959c8ea5ae07b0981bc3482867f4e",
+  "date": "2026-11-20T19:03:32Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "parents": 1,
+  "prs": [
+   397
+  ],
+  "msg": "Pin MQ-01 detector and mark non-bindable criteria explicitly"
+ },
+ {
+  "sha": "f5832931f18fea79a8b10136db46e0678b686527",
+  "date": "2026-11-20T19:03:50Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "parents": 2,
+  "prs": [
+   397
+  ],
+  "msg": "Merge pull request #397 from oahcom/work/issue-388-step2-contract-bindings"
+ },
+ {
+  "sha": "25c6128321052a02007ec684f82ab259a5d2baf1",
+  "date": "2026-11-20T19:05:13Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "parents": 1,
+  "prs": [],
+  "msg": "AID-2026-014 R5 correction: restore ZH status counterpart to docs/zh-CN/00-governance (bilingual parity)"
+ },
+ {
+  "sha": "8b9cb11985243cfdd46f86bdd3f9325b8043f331",
+  "date": "2026-11-20T19:09:10Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "parents": 1,
+  "prs": [],
+  "msg": "AID-2026-014 R5 correction: Storage §8.8 applied on its real carrier, status flip (EN/ZH pair)"
+ },
+ {
+  "sha": "1a0dc911a9e3779c975f570a7996f980ffb98e9c",
+  "date": "2026-11-20T19:15:14Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "parents": 1,
+  "prs": [],
+  "msg": "AID-2026-014 R5 correction: add bilingual read-back correction note (§9, EN/ZH pair)"
+ }
+]

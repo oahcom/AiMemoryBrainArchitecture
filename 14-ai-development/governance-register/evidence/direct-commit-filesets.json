@@ -1,0 +1,400 @@
+{
+ "e2644784c010da488b4794f3e6b10d17c32e9b4b": {
+  "msg": "docs(governance): register GOV-DOC-002 sources as single-file bilingual",
+  "date": "2026-11-20T18:25:24Z",
+  "email": "1491856051",
+  "files": [
+   [
+    "modified",
+    "scripts/check_bilingual_docs.py",
+    3,
+    0
+   ]
+  ]
+ },
+ "0c73f639bf7392a5381d0cc0d9cafd53017bfe05": {
+  "msg": "docs(governance): add GOV-DOC-002 document management policy and fix links",
+  "date": "2026-11-20T17:35:49Z",
+  "email": "1491856051",
+  "files": [
+   [
+    "added",
+    ".github/workflows/document-management.yml",
+    24,
+    0
+   ],
+   [
+    "added",
+    "00-governance/architecture-document-management-policy.md",
+    251,
+    0
+   ],
+   [
+    "added",
+    "00-governance/architecture-document-metadata.schema.yaml",
+    108,
+    0
+   ],
+   [
+    "modified",
+    "00-governance/architecture-invariants.md",
+    50,
+    0
+   ],
+   [
+    "modified",
+    "00-governance/design-principles.md",
+    50,
+    0
+   ],
+   [
+    "modified",
+    "00-governance/terminology.md",
+    50,
+    0
+   ],
+   [
+    "modified",
+    "docs/README.md",
+    7,
+    7
+   ],
+   [
+    "modified",
+    "docs/en/04-memory-compiler/README.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/en/04-memory-compiler/compiler-overview.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/en/04-memory-compiler/consolidation-and-conflict-resolution.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/en/04-memory-compiler/evidence-and-provenance.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/en/04-memory-compiler/extraction-and-normalization.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/en/05-memory-runtime/retrieval-engine.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/en/05-memory-runtime/runtime-overview.md",
+    2,
+    2
+   ],
+   [
+    "modified",
+    "docs/en/05-memory-runtime/working-set-and-cache.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/en/14-ai-development/AI-EXEC-002.md",
+    3,
+    3
+   ],
+   [
+    "modified",
+    "docs/en/14-ai-development/AI-EXEC-ROLLOUT-001.md",
+    1,
+    1
+   ],
+   [
+    "added",
+    "docs/governance/documentation-gaps.md",
+    31,
+    0
+   ],
+   [
+    "modified",
+    "docs/governance/owner-branch-translation-inventory.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/governance/translation-status.md",
+    9,
+    9
+   ],
+   [
+    "modified",
+    "docs/zh-CN/04-memory-compiler/README.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/zh-CN/04-memory-compiler/compiler-overview.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/zh-CN/04-memory-compiler/consolidation-and-conflict-resolution.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/zh-CN/04-memory-compiler/evidence-and-provenance.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/zh-CN/04-memory-compiler/extraction-and-normalization.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/zh-CN/04-memory-compiler/forget-fence-and-derived-registration-part1.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/zh-CN/05-memory-runtime/retrieval-engine.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/zh-CN/05-memory-runtime/runtime-overview.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "docs/zh-CN/05-memory-runtime/working-set-and-cache.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "scripts/check_bilingual_docs.py",
+    1,
+    0
+   ],
+   [
+    "added",
+    "scripts/check_document_management.py",
+    382,
+    0
+   ],
+   [
+    "added",
+    "scripts/test_check_document_management.py",
+    139,
+    0
+   ]
+  ]
+ },
+ "7d76c589bc52f14acbd1a32a9807222b732e04b6": {
+  "msg": "docs(governance): pair bilingual mirrors for GOV-DOC-002 classification",
+  "date": "2026-11-20T17:45:56Z",
+  "email": "1491856051",
+  "files": [
+   [
+    "modified",
+    "docs/en/00-governance/architecture-invariants.md",
+    51,
+    0
+   ],
+   [
+    "modified",
+    "docs/en/00-governance/design-principles.md",
+    51,
+    0
+   ],
+   [
+    "modified",
+    "docs/en/00-governance/terminology.md",
+    51,
+    0
+   ],
+   [
+    "modified",
+    "docs/zh-CN/00-governance/architecture-invariants.md",
+    51,
+    0
+   ],
+   [
+    "modified",
+    "docs/zh-CN/00-governance/design-principles.md",
+    51,
+    0
+   ],
+   [
+    "modified",
+    "docs/zh-CN/00-governance/terminology.md",
+    51,
+    0
+   ],
+   [
+    "modified",
+    "docs/zh-CN/04-memory-compiler/forget-fence-and-derived-registration-part1.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "scripts/check_document_management.py",
+    3,
+    0
+   ]
+  ]
+ },
+ "965a66b9a92cd4c2b20f4b6100721c779be7f784": {
+  "msg": "docs(governance): normalise work-items links on both language sides",
+  "date": "2026-11-20T17:57:00Z",
+  "email": "1491856051",
+  "files": [
+   [
+    "modified",
+    "14-ai-development/AI-EXEC-002.md",
+    3,
+    3
+   ],
+   [
+    "modified",
+    "14-ai-development/AI-EXEC-ROLLOUT-001.md",
+    1,
+    1
+   ],
+   [
+    "modified",
+    "scripts/check_bilingual_docs.py",
+    1,
+    0
+   ]
+  ]
+ },
+ "25c6128321052a02007ec684f82ab259a5d2baf1": {
+  "msg": "AID-2026-014 R5 correction: restore ZH status counterpart to docs/zh-CN/00-governance (bilingual parity)",
+  "date": "2026-11-20T19:05:13Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "files": [
+   [
+    "renamed",
+    "docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md",
+    12,
+    9
+   ]
+  ]
+ },
+ "8b9cb11985243cfdd46f86bdd3f9325b8043f331": {
+  "msg": "AID-2026-014 R5 correction: Storage §8.8 applied on its real carrier, status flip (EN/ZH pair)",
+  "date": "2026-11-20T19:09:10Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "files": [
+   [
+    "modified",
+    "docs/en/00-governance/aid-2026-014-r3-correction-status.md",
+    2,
+    2
+   ],
+   [
+    "modified",
+    "docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md",
+    2,
+    2
+   ]
+  ]
+ },
+ "1a0dc911a9e3779c975f570a7996f980ffb98e9c": {
+  "msg": "AID-2026-014 R5 correction: add bilingual read-back correction note (§9, EN/ZH pair)",
+  "date": "2026-11-20T19:15:14Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "files": [
+   [
+    "modified",
+    "docs/en/00-governance/aid-2026-014-r3-correction-status.md",
+    24,
+    0
+   ],
+   [
+    "modified",
+    "docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md",
+    22,
+    0
+   ]
+  ]
+ },
+ "ae5a886fa0bfec8822c2e7c4013afbd7daa89e61": {
+  "msg": "AID-2026-014 R3 correction: root freeze identity exclusion, D Option A decided, T18 atomic participant barrier, six-component failure matrix (CORRECTION-R3, 6b008463)",
+  "date": "2026-11-20T18:02:27Z",
+  "email": "l0@local",
+  "files": [
+   [
+    "modified",
+    "02-domain-model/phase-1-domain-model-freeze.md",
+    1,
+    2
+   ],
+   [
+    "modified",
+    "06-memory-context/context-versioning.md",
+    31,
+    0
+   ],
+   [
+    "modified",
+    "docs/en/03-memory-brain/memory-versioning.md",
+    74,
+    3
+   ],
+   [
+    "modified",
+    "docs/en/04-memory-compiler/extraction-and-normalization.md",
+    27,
+    0
+   ],
+   [
+    "modified",
+    "docs/en/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md",
+    17,
+    0
+   ],
+   [
+    "modified",
+    "docs/zh-CN/03-memory-brain/memory-versioning.md",
+    67,
+    3
+   ],
+   [
+    "modified",
+    "docs/zh-CN/04-memory-compiler/extraction-and-normalization.md",
+    21,
+    0
+   ],
+   [
+    "modified",
+    "docs/zh-CN/06-memory-context/phase-3.8.27-g-claim-fact-visibility-addendum.md",
+    14,
+    0
+   ]
+  ]
+ }
+}

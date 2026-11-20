@@ -1,6 +1,6 @@
 # Governance Defect Registers
 
-**Chinese primary**: [`README.zh-CN.md`](README.zh-CN.md)
+**Chinese primary**: [`README.md`](README.md)
 **Status**: `OPEN` — all registers in this directory are unresolved.
 
 This directory holds persistent governance defect registers. A register is a tracked defect, not a one-off report. It is opened when a conformance failure is observed, updated as evidence accumulates, and closed only when the correction is verified.
@@ -11,8 +11,11 @@ It is **not** a place to record acceptance, approval, or review conclusions. Not
 
 | ID | Title | Severity | Status | Scale |
 |---|---|---|---|---|
-| `GOV-NC-2026-11-20-DIRECT-MAIN-001` | Direct pushes to `main` | High | `OPEN` / `NOT_REMEDIATED` | 45 commits |
+| `GOV-NC-2026-11-20-DIRECT-MAIN-001` | Direct pushes to `main` | High | `OPEN` / `NOT_REMEDIATED` | 53 commits |
 | `GOV-NC-2026-11-20-SELF-AUTH-002` | Authority chain / self-issued delegation | Critical | `OPEN` / `NOT_REMEDIATED` | 1 instrument, 7 closures |
+| `GOV-NC-2026-11-20-MERGE-AFTER-RULING-003` | Merge without review after a hold ruling | High | `OPEN` / `NOT_REMEDIATED` | 3 PRs (#390 / #394 / #395) |
+| `GOV-NC-2026-11-20-AC-UNMET-CLOSURE-004` | Issue closed with unmet acceptance criteria | High | `OPEN` / `NOT_REMEDIATED` | 1 Issue (#384), 4/10 ACs unmet |
+| `GOV-NC-CONVERGENCE-2026-11-20` | Governance convergence definition and execution boundary | — | `ACTIVE` / `RECORDED_NOT_PREVENTED` | 3 levels |
 
 ## Evidence
 
@@ -21,29 +24,65 @@ Machine-readable evidence lives in [`evidence/`](evidence/). The JSON files are 
 | File | Content | Captured at |
 |---|---|---|
 | `evidence/direct-main-commits.json` | The 12 direct commits in the second re-check range, with PR associations | `main @ a7d12fe983` |
+| `evidence/direct-main-commits-p2.json` | The 4 commits in range `c099816f...ee9b3031` | `main @ ee9b3031` |
+| `evidence/direct-main-commits-p3.json` | The 11 commits in range `ee9b3031...1a0dc911` | `main @ 1a0dc911` |
+| `evidence/direct-commit-filesets.json` | Per-commit file sets for the newly observed direct commits | `main @ 1a0dc911` |
+| `evidence/attribution-1491856051.json` | All 20 commits by author email `1491856051`, with PR associations | `main @ 1a0dc911` |
+| `evidence/merge-gate-evidence.json` | Gate fields for PR #390 / #394 / #395 (reviews, checks, durations) | 2026-11-21T03:00Z |
 | `evidence/number-domain-scan.json` | AID identifier occupancy across `main` and 346 branches | `main @ a7d12fe983` |
 | `evidence/issue-closures.json` | Closure comments for Issues #345–#351 | 2026-11-20T17:00Z |
 | `evidence/main-paths.json` | All 803 blob paths in `main`, used for the whitelist comparison | `main @ a7d12fe983` |
 
-## Why these exist
+**Note**: `main-paths.json` was captured at `main @ a7d12fe983` (803 blobs). By the fourth re-check `main` had advanced to `1a0dc911` (826 blobs). The directory-set comparison still holds, but any citation of that file must state that its baseline is not the current head.
 
-Two independent failures were observed on 2026-11-20:
+## Four failure classes
 
-1. **Changes reached `main` without a pull request.** `PR-GOVERNANCE-001` §3 makes a PR mandatory whenever the merge target is `main`, with exactly one exception: a non-`main` target. 45 commits do not qualify for that exception. See `DIRECT-MAIN-001`.
+| # | Failure | Carrier | Register |
+|---|---|---|---|
+| 1 | Changes reach `main` without a pull request | 53 commits | `DIRECT-MAIN-001` |
+| 2 | The authority to adjudicate is issued by the party adjudicated | Issue #305 instrument | `SELF-AUTH-002` |
+| 3 | A PR exists but merges before its gates are satisfied | PR #390 / #394 / #395 | `MERGE-AFTER-RULING-003` |
+| 4 | An Issue is closed with its own ACs unmet | Issue #384 | `AC-UNMET-CLOSURE-004` |
 
-2. **The authority to adjudicate those changes was issued by the party being adjudicated.** The delegation instrument and the closure actions carry the same GitHub account. See `SELF-AUTH-002`.
+They compose: direct pushes produce evidence (1), self-issued authority accepts that evidence (2), the PR form is completed while its gates are bypassed (3), and finally the tracking Issue is closed against acceptance criteria that were never executed (4).
 
-The two compose. Direct pushes produced evidence; the self-issued authority accepted that evidence; four of seven strategic-requirement closures cite evidence carriers that never passed a gate.
+## Convergence state
+
+`GOV-NC-CONVERGENCE-2026-11-20` defines three levels of governance convergence. Current state: **`RECORDED_NOT_PREVENTED`**.
+
+- **Level one — record completeness**: achieved. All four failure classes have retrievable, reproducible registers.
+- **Level two — platform capability decision**: awaits the Owner. Single carrier is Issue #283.
+- **Level three — behavioural constraints**: effective immediately; they bind this session and are not a substitute for technical protection.
+
+`RECORDED_NOT_PREVENTED` may not be upgraded to `REMEDIATED` until the platform-capability decision is made and implemented, or until compliance without enforcement has been observed for a meaningful period.
+
+## A boundary that must be recorded
+
+Corrective measure M-3 for failure class 3 — platform enforcement of `reviews >= 1` plus successful required checks — was proven **not executable under the current GitHub plan**:
+
+```
+PUT /repos/.../branches/main/protection -> 403
+    "Upgrade to GitHub Pro or make this repository public to enable this feature."
+```
+
+The token holds `admin: true` and still receives 403, so this is not a permissions problem; it is a missing capability on a private repository under a lower-tier plan.
+
+This directory therefore **does not claim** that a technical measure can prevent recurrence. Until the plan is upgraded or the repository is made public, the only defence is the merger's voluntary compliance — and three measurements show voluntary compliance has not occurred.
+
+`#396` was folded into `#283` (`PLATFORM-RESIDUAL`) as the single carrier for that capability.
 
 ## Disclosure
 
-Both registers, this index, and the commits and closures they describe are attributable to the same GitHub account (`oahcom`). That sameness is the substance of `SELF-AUTH-002`, and it is disclosed here rather than glossed over.
+All four registers, this index, and the commits, merges and closures they describe are attributable to the same GitHub account (`oahcom`). That sameness is the substance of `SELF-AUTH-002`, and it is disclosed here rather than glossed over.
 
 Filing a defect register is not a governance act. It confers no acceptance authority. It records a defect for whoever does hold that authority.
 
 ## Related
 
-- [Issue #384](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/384) — bilingual gate whitelist mismatch, 8/15 hit, silent bypass
+- [Issue #384](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/384) — bilingual gate whitelist mismatch. **Reopened**, narrowed to AC-1 / AC-4 / AC-5 / AC-9
+- [Issue #400](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/400) — `EMBEDDED_BILINGUAL_SOURCES` is an unaudited exemption surface
+- [Issue #401](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/401) — AC-5 bypass detection fix task
+- [Issue #283](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/283) — platform-level required-check enforcement (`PLATFORM-RESIDUAL`)
 - [Issue #352](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/352) — CI unavailable under quota exhaustion
 - `14-ai-development/PR-GOVERNANCE-001.md` §3 (PR mandatory), §4 (exact-Head), §5 (independent review)
 - `00-governance/bilingual-documentation-policy.md`

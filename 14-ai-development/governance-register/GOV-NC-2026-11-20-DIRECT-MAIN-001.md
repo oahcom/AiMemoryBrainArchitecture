@@ -435,4 +435,118 @@ Issue #305 在 2026-11-20T14:46Z 发布了一份 `OWNER DELEGATION INSTRUMENT`�
 
 ---
 
-**登记状态更新**：`OPEN` / `NOT_REMEDIATED` / **规模 45** / **性质由「流程疏漏」升级为「已知规则下的主动选择并书面合理化」**
+## 12. 第三轮复检（2026-11-21 03:00Z）
+
+### 12.1 规模变化：45 → 53
+
+在 `c099816f19e1`（PR #390 合并点）之后的两次 main 推进中，又出现 8 个无 PR 的直推 commit。
+
+| 区间 | 直推 commit | 作者 |
+|---|---:|---|
+| `c099816f...ee9b3031` | 1 | `L0-manager <l0@local>` |
+| `ee9b3031...1a0dc911` | 7 | `unknown <1491856051>` × 4，`oahcom` × 3 |
+| **本轮新增** | **8** | |
+| **累计** | **53** | |
+
+第三轮新增清单：
+
+| commit | 时间（Z） | 作者 email | 消息 |
+|---|---|---|---|
+| `ae5a886fa0` | 18:02:27 | `l0@local` | AID-2026-014 R3 correction: root freeze identity exclusion |
+| `0c73f639bf` | 17:35:49 | `1491856051` | docs(governance): add GOV-DOC-002 document management |
+| `7d76c589bc` | 17:45:56 | `1491856051` | docs(governance): pair bilingual mirrors for GOV-DOC |
+| `965a66b9a9` | 17:57:00 | `1491856051` | docs(governance): normalise work-items links on both |
+| `e2644784c0` | 18:25:24 | `1491856051` | docs(governance): register GOV-DOC-002 sources as single-file bilingual |
+| `25c6128321` | 19:05:13 | `oahcom` | AID-2026-014 R5 correction: restore ZH status counterpart |
+| `8b9cb11985` | 19:09:10 | `oahcom` | AID-2026-014 R5 correction: Storage §8.8 applied on both sides |
+| `1a0dc911a9` | 19:15:14 | `oahcom` | AID-2026-014 R5 correction: add bilingual read-back |
+
+### 12.2 新出现的性质：三类身份并行直推
+
+第三轮新增的 8 个直推 commit 分属三个身份：
+
+- `l0@local` — 已在 §7 记为 `AUTHORITY_SOURCE_UNVERIFIED`，第三轮继续直推。
+- `1491856051` — email 无 `@`，不是合法邮箱。第一轮只出现 1 次（`bc114263d7` 同批），本轮一次出现 4 次，且全部是**双语文档治理**提交。
+- `oahcom` — 3 次，全部是 `AID-2026-014 R5 correction` 系列。
+
+其中 `1491856051` 的 4 个 commit 值得单独指出：它们的消息本身讲的是「pair bilingual mirrors」「register ... as single-file bilingual」「normalise work-items links on both」，即**内容是关于双语配对的治理，而投递方式是没有 PR 体、无法携带 `BILINGUAL-MANIFEST` 声明的直推**。门禁对直推没有可检查对象，因此这 4 个 commit 绕过的正是它们所描述的那道门禁。
+
+这不是推断，是机制事实：`check_bilingual_docs.py` 读取 `PR_BODY` 环境变量；直推不产生 PR，CI 不触发，`PR_BODY` 为空。
+
+### 12.3 `1491856051` 身份的验证状态
+
+**口径校正**：上一轮我记为「累计 5」，那是**仅统计直推**的口径。全量统计如下。
+
+| 项目 | 值 |
+|---|---|
+| main 上该 email 的 commit 总数 | **20** |
+| 其中无 PR（直推） | **5** |
+| 其中经 PR 进入 | **15**（PR #279/#285/#286/#287/#288/#298/#299/#301/#302/#303/#304） |
+| 首次出现 | 2026-11-19T15:38:12Z（`33302f40e7`，via PR #279） |
+| email 格式合法性 | 否（无 `@`，`git config user.email` 缺失产物） |
+| GitHub 账号归属 | 无。GitHub API 的 `commit.author` 恒为 `null` |
+| 授权来源 | `NOT_VERIFIED` |
+
+5 个直推全部发生在 2026-11-20（13:40–18:25Z）：
+
+| commit | 时间（Z） | 消息 |
+|---|---|---|
+| `927eadcb1a` | 13:40:07 | docs: 架构文档治理 - 建立清晰层次结构 |
+| `0c73f639bf` | 17:35:49 | docs(governance): add GOV-DOC-002 document management policy |
+| `7d76c589bc` | 17:45:56 | docs(governance): pair bilingual mirrors for GOV-DOC-002 |
+| `965a66b9a9` | 17:57:00 | docs(governance): normalise work-items links on both languages |
+| `e2644784c0` | 18:25:24 | docs(governance): register GOV-DOC-002 sources as single-file bilingual |
+
+`git commit` 使用无法解析的 email 时，GitHub 不建立 commit 与账号的关联。后果是：**这 20 个 commit 在 GitHub UI 上全部不显示作者头像与链接，无法通过账号维度审计**，无论它走的是 PR 还是直推。这是可规避审计的最小成本手段，无论使用者的意图如何。
+
+需要注意：该身份**曾经正常走 PR 流程**（15 次）。因此「它不能走 PR」不成立。5 次直推是选择，不是能力限制。
+
+### 12.4 与 #384 关闭的关系
+
+`e2644784c0`（`1491856051`，18:25:24）的时间点值得单独记录：它比 #384 的关闭时间（18:25:06）晚 **18 秒**，比 PR #394 的合并时间（18:25:04）晚 **20 秒**。
+
+该 commit 的内容不是文档，而是**再次修改门禁脚本本身**：
+
+```
+commit e2644784c010da488b4794f3e6b10d17c32e9b4b
+     modified scripts/check_bilingual_docs.py +3/-0
+
+@@ -40,6 +40,9 @@
++    "14-ai-development/ai-development-standard.md",
++    # GOV-DOC-002 requires the policy to be bilingual in a single file so that
++    # the policy and its metadata schema cannot drift apart between languages.
+     "00-governance/architecture-document-management-policy.md",
+```
+
+即向 `EMBEDDED_BILINGUAL_SOURCES`（配对豁免白名单）追加一项。
+
+三点后果：
+
+1. **豁免白名单本身可以由直推扩大**。`EMBEDDED_BILINGUAL_SOURCES` 是「该文件不需要配对」的唯一开关。它可以被一个没有 PR、没有 `PR_BODY`、没有审查的 commit 追加成员。这意味着 Issue #384 试图修复的「覆盖不全」，可以从另一侧——豁免方向——继续扩大。
+2. **同一个 Issue 的门禁，在关闭后 18 秒被无 PR 修改**。修复 #384 的 PR #394 改的是 `NORMATIVE_ROOTS`；18 秒后的 `e2644784c0` 改的是 `EMBEDDED_BILINGUAL_SOURCES`。两者是同一文件的两套豁免机制，后者未在 #384 的 AC 中被约束。
+3. **修改者仍是 `1491856051`**，无法映射到 GitHub 账号。
+
+对 `14-ai-development/ai-development-standard.md` 本身的实测（`main`，`sha=...`，40409 字节，CJK 3572 字符 / Latin 28321 字符）显示该文件确实同时含中英内容，因此 GOV-DOC-002 的单文件中英并存要求**可能是合理的**。本登记不质疑该豁免的技术理由，只记录**授予该豁免的方式**：无 PR、无声明、无审查、无法归属账号。
+
+### 12.4.1 由此产生的登记条目
+
+| 编号 | 内容 | 状态 |
+|---|---|---|
+| `EMBEDDED-EXEMPT-VIA-DIRECT-PUSH` | `EMBEDDED_BILINGUAL_SOURCES` 可被直推扩大，构成第二类旁路 | `OPEN` |
+
+### 12.5 更新后的验证证据
+
+| 证据 | 值 |
+|---|---|
+| 第三轮 main head | `1a0dc911a9e3779c975f570a7996f980ffb98e9c` |
+| 累计直推 commit | **53**（33 + 12 + 8） |
+| 累计 `verified=true` | **0 / 53** |
+| 第三轮新增直推 | 8（3 个身份） |
+| `1491856051` 累计 | 5 |
+| main blob 总数 | 826 |
+| 原始数据 | `reqs/_delta.json`、`reqs/_delta2.json`、`reqs/_delta3.json` |
+| 复检脚本 | `reqs/_recheck.py`、`reqs/_merge_ev.json` |
+
+---
+
+**登记状态更新**：`OPEN` / `NOT_REMEDIATED` / **规模 53** / **性质由「流程疏漏」升级为「已知规则下的主动选择并书面合理化」**，第三轮追加：**在多身份并行下持续，并出现无法归属账号的提交身份**

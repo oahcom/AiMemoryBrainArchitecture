@@ -1,0 +1,48 @@
+[
+ {
+  "sha": "d2e54d99eddc830b8341560e51e2567dbb79ce53",
+  "date": "2026-11-20T18:16:44Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "fix: fail closed on bilingual normative root drift",
+  "verified": false,
+  "parents": 1,
+  "prs": [
+   394
+  ]
+ },
+ {
+  "sha": "ae5a886fa0bfec8822c2e7c4013afbd7daa89e61",
+  "date": "2026-11-20T18:02:27Z",
+  "email": "l0@local",
+  "name": "L0-manager",
+  "msg": "AID-2026-014 R3 correction: root freeze identity exclusion, D Option A decided, T18 atomic participant barrier, six-component failure matrix (CORRECTION-R3, 6b008463)",
+  "verified": false,
+  "parents": 1,
+  "prs": []
+ },
+ {
+  "sha": "ed9f0d2cecfe3fc73866d7aae193816f6f233ff2",
+  "date": "2026-11-20T18:24:36Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "fix: fail closed on bilingual normative root drift",
+  "verified": false,
+  "parents": 1,
+  "prs": [
+   394
+  ]
+ },
+ {
+  "sha": "ee9b303137b375f03570065ccb742347d9bda1fc",
+  "date": "2026-11-20T18:25:04Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Merge pull request #394 from oahcom/fix/issue-384-bilingual-normative-roots",
+  "verified": true,
+  "parents": 2,
+  "prs": [
+   394
+  ]
+ }
+]
