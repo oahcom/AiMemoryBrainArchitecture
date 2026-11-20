@@ -170,7 +170,9 @@ The distinctions preserved throughout:
 
 ---
 
-## 2f. Q11–Q14 ruling received — and the Q11 premise did not survive its own check
+## 2f. Q8–Q14 ruling received — and the Q11 premise did not survive its own check
+
+*Section title corrected: it read "Q11–Q14", but the section has carried Q8 and Q9 rows since it was written, and the ruling it records covers all seven questions. The narrow title was inherited from the prompt that requested the ruling and was not updated when the summary table grew.*
 
 A ruling was requested on Q11, Q12, Q13, Q14, Q8 and Q9. Disposition: **PARTIAL
 RULING; REMAINING ITEMS BLOCKED BY AUTHORITY OR MISSING BUSINESS INPUT.**
@@ -334,6 +336,80 @@ been asked to accept, waive or dispose of the breach, and this document does not
 attribute any such disposition to it. Recording a violation accurately and having
 that violation formally disposed of are different acts, and only the first has
 happened.
+
+---
+
+## 2h. A second scope-boundary conflict — `INDEX.md`, and why it is not being written
+
+Raised immediately after PR #315 merged, by this session. Not raised by any review.
+Registered as **Q15** in §14.
+
+**The two instruments.** `authorization-manifest.yaml` declares three permitted write
+paths and states `all_other_paths: OUT_OF_SCOPE`. `14-ai-development/work-items/INDEX.md`
+is not among them. Separately, `AI-STD-001` — `ai-development-standard.md`, lines 445
+and 463, English and Chinese — states that the Integration Owner **MUST** maintain that
+file as a session → Work Item → Issue/PR traceability index, and declares itself
+applicable to all AI-assisted work in the repository.
+
+Neither provision is silence. That is what distinguishes this from Q11, where a ruling
+rested on a prohibition the cited contract did not contain. Here there is an explicit
+exclusion and an explicit obligation aimed at the same path, so the Q11 remedy — "the
+prohibition was not located, therefore it does not bind" — does not transfer. The
+exclusion *is* located. What is missing is which document governs when both are read as
+written.
+
+**What is established, and what is not.**
+
+| proposition | disposition |
+|---|---|
+| `INDEX.md` is absent from the three authorised paths | ESTABLISHED |
+| `AI-STD-001` assigns a `MUST`-level maintenance obligation for it | ESTABLISHED |
+| `AI-STD-001` claims repository-wide applicability | ESTABLISHED |
+| `AI-STD-001` has operative authority | **NOT ESTABLISHED** |
+| The manifest authorises this work item to write the path | **NOT ESTABLISHED** |
+| The four historical writes were authorised | **NOT ESTABLISHED** |
+| The four historical writes were unauthorised | **NOT ESTABLISHED** |
+| A merge establishes authorisation | NO |
+
+`PROPOSED` status cuts neither way cleanly, and a lazy reading runs in either direction.
+It does not void the obligation: a written `MUST` scoped repository-wide is an unresolved
+obligation, not an erased one. It does leave the standard's claim to override an issued
+manifest unestablished: stating applicability is not the same as having acquired
+operative authority. The manifest's narrower scope does not exempt this work item from an
+operative standard; the standard's broader scope does not by itself confer greater
+authority.
+
+The two are also not logically impossible to satisfy at once. An Integration Owner could
+maintain the file through a separately authorised path while this work item's write scope
+stays as it is. That reconciliation exists; what is absent is who may direct it.
+
+**What actually happened.** Four writes to the path, across three merged PRs:
+`f70ac051` (#309), `2f5f5a22` (#309), `b987c39c` (#309), `1efd47f7` (#311), `daee315a`
+(#314). No review round raised it. Their individual circumstances have not been examined
+and this record does not classify them identically or at all — only that they fall
+outside the currently stated paths, which establishes neither compliance nor violation.
+
+**Why the manifest is not amended, and the path is not written.** Widening the manifest
+after the fact would convert a breach into a scope expansion, which §2g refuses in the
+other direction and refuses here. The manifest does contain a precedent for disclosing a
+deviation rather than resolving it — `schema_execution: DISCLOSED_SCOPE_DEVIATION`,
+carried as open question Q12. That precedent covers an event that had **already**
+occurred: the DDL was executed, then disclosed, then preserved as a permanent deviation.
+Applying it here would be a **prospective** write made in full knowledge of the boundary,
+the conflict, and the open question. Disclosure is an accountability mechanism, not an
+authorisation mechanism. It records a deviation; it does not license one.
+
+**The consequence, stated rather than hidden.** The P2-T2 row in `INDEX.md` was last
+written by `daee315a`, which predates PR #315 (`f8fd64c4`). It does not reflect §18, this
+section, the gate-5 decomposition, or the assertion audit. Under `AI-STD-001:445` a stale
+source pin is a delivery defect that stays `OPEN`. It is stale now, and correcting it
+requires the path this manifest excludes. Obeying one document violates the other, and
+choosing between them is not the implementing party's determination to make.
+
+**Status.** `OPEN`. Filed as Issue #305 comment `7028019382`, which records the full
+question and the five propositions a determination would need to settle. It does not
+resolve Issue #305 and does not depend on resolving it first: this is a conflict between
+two existing normative documents, not an absence of authority over a single one.
 
 ---
 
@@ -1146,6 +1222,7 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 | Q6 | Is `version_sha256` maintained by trigger or by adapter? | OPEN — adapter is the current assumption |
 | Q7 | Stale-binding recovery procedure, including external index rebuild after an outage | OPEN |
 | Q8 | Transcript retention classes and their default periods | **OPEN — `POLICY_INPUT_ABSENT`.** This proposal constrains deletion; it does not define policy. A development baseline must not invent retention periods or classes. Engineering can implement an established policy; it cannot manufacture one. |
+| Q15 | Whether maintaining `14-ai-development/work-items/INDEX.md` is authorised for this work item, given that the manifest excludes it while `AI-STD-001` line 445 / 463 requires the Integration Owner to maintain it | **OPEN — `AUTHORITY_CONFLICT`.** Neither instrument is silent and neither can be dismissed. `INDEX.md` is not among the three `allowed_write_paths`, and `all_other_paths` is `OUT_OF_SCOPE`; `AI-STD-001` states a `MUST`-level maintenance obligation with repository-wide claimed applicability, and is marked `Status: PROPOSED`, so its operative authority is `NOT ESTABLISHED`. Four writes to the path occurred across three merged PRs and are recorded as neither authorised nor unauthorised. The P2-T2 row is stale as a result — it predates §18 — and is not corrected. Recorded in §2h and filed as Issue #305 comment `7028019382`. |
 | Q9 | Whether `impact_level` should get a typed home or be dropped | **OPEN — `SEMANTIC_DECISION_REQUIRED`.** Its absence from the current schema does not decide it. Whether the field represents information the system must preserve is an authoritative determination. It will not be dropped to simplify the schema. |
 | Q10 | Does numeric reproducibility stay a requirement, or is structural rebuild sufficient? | **REVIEW RULING (R2): tiered preferred.** Structural and unreconstructable tiers accepted; exact-value retained as a design objective, **CONDITIONAL and NOT VERIFIED**. This is a review ruling on a review question, not an owner decision on Q1. |
 | Q11 | Does extending the schema of a Phase 1 table — adding an index without adding a column or rewriting a row — require explicit authorisation from the capacity that owns the Phase 1 contract? | **RE-POSED, OPEN.** The previous form asked which of two readings of a Layer 1 boundary governs; no inspected document defines that boundary or prohibits the modification (§2f). A ruling on the old form returned strict and is **not adopted**, because its stated premise was the one §2f falsifies. The question is authorisation, and the authorising capacity is `NOT_ASSIGNED`. |
