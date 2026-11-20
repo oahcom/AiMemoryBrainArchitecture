@@ -15,7 +15,7 @@ from urllib.parse import unquote
 ROOT = Path(__file__).resolve().parents[1]
 DOC_ROOTS = (ROOT / "docs" / "en", ROOT / "docs" / "zh-CN")
 REVISION_RE = re.compile(
-    r"^\s*-\s*(?:Source revision|源版本|源文件版本):\s*(.*?)\s*$",
+    r"^\s*-\s*(?:Source revision|源版本|源文件版本)[:：]\s*(.*?)\s*$",
     re.MULTILINE,
 )
 SOURCE_LINE_RE = re.compile(
