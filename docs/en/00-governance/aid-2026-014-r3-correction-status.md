@@ -48,13 +48,13 @@ TEST EXECUTION = SUSPENDED
 
 | Requirement | Application status | Independent review |
 |---|---|---|
-| R1 Claim identity | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R2 Attestor authorization | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R3 Shared Fact Forget | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R4 Fact/Claim synchronization | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R5 End-to-end publication | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R5 Storage §8.8 | NOT_APPLIED_PENDING_LOCATE | PENDING |
-| PASS governance synchronization | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
+| R1 Claim identity | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R2 Attestor authorization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R3 Shared Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R4 Fact/Claim synchronization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R5 End-to-end publication | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R5 Storage §8.8 | CARRIER_LOCATED_NOT_APPLIED | PENDING |
+| PASS governance synchronization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 
 ## 4. Application evidence requirements
 
@@ -125,6 +125,9 @@ Applied by: L0 registration channel (CORR-APPLY-DISP-01, finalize 6b002288) on t
 
 All HEAD and Blob values below are returned by the application and read-back process. A source session's self-reported HEAD is not used as application evidence.
 
+Read-back through commit fc17542d (main) and the AID-2026-014 carrier audit; see the correction note
+at the end of this section for the three Blobs that changed after the original application round.
+
 | File | Group | Commit SHA | Blob SHA | UTC |
 |---|---|---|---|---|
 | docs/en/02-domain-model/domain-model-overview.md | R1 §2.4 | d575ebc254ac | 47327d8a0f26 | 2026-11-20T19:53:40+08:00 |
@@ -165,7 +168,7 @@ All HEAD and Blob values below are returned by the application and read-back pro
 
 Not applied in this round (isolated, no repository write):
 
-- G root §13.3 direct integration: ANCHOR_MISMATCH (finalize section 7.6 G carrier status; sync debt SD-06). Root file 06-memory-context/context-versioning.md Blob 05c0739d0c22576a1fd5affc7d73c078c89049b1 retained unchanged. The new EN/ZH paired addendum files do not claim root §13.3 replacement.
-- Storage ADR §8.8: NOT_APPLIED_PENDING_LOCATE (finalize section 8; sync debt SD-08). The writable ADR carrier was not located; no replacement ADR was created and no unrelated document was used.
+- G root §13.3 direct integration: APPLIED. Root file 06-memory-context/context-versioning.md was rebuilt as the canonical root-level normative source (commit 2606978e, Blob 8503a171922a27aca469042164b2e14f5f525910). Addendum Blobs 249fd8691707 (EN) and aed4f80857de (ZH) are merged into that section and no longer claim an independent competing protocol. §14.5 was subsequently aligned to §13.3 as its subordinate constraint (commit fc17542d, Blob dbce95485d02c8b25bfa2c13596c32d0d57b341d). Introduced legacy-open reads of Blob 05c0739d... are superseded.
+- Storage ADR §8.8: CARRIER_LOCATED_NOT_APPLIED. The carrier exists and is reachable: branch session-storage-consistency-forget-atomicity-2026-11-16 at 281fd1edc15f607b0bcb5ff15c5486a6302c41d0, path reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md, current Blob bb544ba2f346bdc130d524bd5c7310d86f367988 (273 lines, sections through §8.7). This branch tip is the Storage HEAD pinned by AID-2026-014-PROMPT v1, and the pinned L1 topology Blob bb544ba2... is the same file. The §8.8 bilingual text is held in Issue #265 comment 7037252404. NOT_APPLIED_PENDING_LOCATE is withdrawn as factually incorrect: the recursive-tree search that produced it was scoped to main only. Application is not performed here because the carrier is not on main and cross-branch normative coexistence has no Owner ruling yet. No replacement ADR was created and no unrelated document was used.
 
 This Application evidence section is added by the application-evidence commit itself; that commit SHA and the resulting status-file Blobs are recorded in the L0 application report and by the raw read-back.
