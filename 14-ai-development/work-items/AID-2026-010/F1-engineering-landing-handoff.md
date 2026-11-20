@@ -254,3 +254,19 @@ The exact-source refresh corrects the handoff pin only. It does not alter F3's P
 **F-43-01/F1 remains P1 / OPEN:** five callable D operations NOT IMPLEMENTED; durable authoritative Ledger / operation-bound Receipt and runtime equality/linearization evidence NOT ESTABLISHED; S1–S7 NOT RUN. Issue #7 comment #7021990583 remains the engineering-entry authorization boundary.
 
 **Verification ceiling:** exact source fetches PASS; documentation-only handoff update; no Runtime test, no CI PASS, no Owner signature, no production acceptance, no merge, and no main write.
+
+
+## 12. Superseding PR #322 head correction — 2026-11-20
+
+This correction supersedes §11's PR #322 pin to commit `0ce618ac503f641cf31e66092ae823c14bf8af7b` / test Blob `e66264ad30df6594e00836524accfdeb54160cee`. That commit is an ancestor on the H branch, not the current PR #322 head.
+
+The latest PR #322 exact-head record is:
+- PR #322 Head: `a336c85763df0135aa64ecec3cfdac8acd08a8eb`.
+- Validator Blob: `49644a181c578fecb312218c08ce23caa62f603b`.
+- Test Blob: `6685226143f28a5b8764067bb205080b531132e3` (15 methods).
+- I fetched both files at exact commit `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; the returned Blob SHAs match the two pins above.
+- Exact-head Actions Runs `44684299439` and `44684299500` remain FAILURE before test steps; retry jobs `136136582468` / `136136525120` also report `steps=null`, and log retrieval returned HTTP 404 `BlobNotFound`. No current-source local execution or CI PASS is claimed.
+
+The D contract and mapping pins remain PR #321 commit `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`, contract Blob `099f4948b550919084b0d73094692b590b0be0a9`, mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
+
+This correction changes only source attribution. F1 remains P1/OPEN; F3 remains P1/OPEN. No Runtime implementation, independent D/H human identity, H production acceptance, callable D query/Receipt/currentness or C1–C6 operational proof is inferred. Documentation-only; tests NOT RUN; no CI PASS.
