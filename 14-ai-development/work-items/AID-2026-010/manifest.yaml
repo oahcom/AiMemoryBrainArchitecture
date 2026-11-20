@@ -165,8 +165,8 @@ current_status_refresh:
     records the subsequent Owner release and supersedes that historical
     restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "1d141b0e2f979e7055df908b092d127eb91f4816"
-  ledger_blob_sha: "39cdc6709a579b07fa48617d1a51fea14dfc5c20"
+  ledger_commit: "4e49e78380bc3b4d4a362d35a654c661a2561a51"
+  ledger_blob_sha: "b668a9d58859589ab33f1227bedb7a1327ee32b9"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -263,3 +263,50 @@ latest_ledger_pin_reconciliation:
   commit: "37d155fed076f271a42ff8e9343cdbd92c80d7cc"
   blob: "1bb37ad952a9057069a0d48cbe8f5585917c42c7"
   note: "Supersedes prior live-ref ledger pin after concurrent evidence refresh; current branch readback verified."
+
+
+# Latest live exact-head refresh — D-2026-1120-01
+latest_exact_head_refresh:
+  date: "2026-11-20"
+  finding_ledger:
+    path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+    commit: "4e49e78380bc3b4d4a362d35a654c661a2561a51"
+    blob: "b668a9d58859589ab33f1227bedb7a1327ee32b9"
+  carriers:
+    F1_PR_327:
+      head: "934a76e18ba020d01c520a8484ed7fc37f96cff1"
+      handoff_blob: "2d453d24ae5e65973ced964918b9f3687a5d3284"
+      status: "P1_OPEN_RUNTIME_IMPLEMENTATION_NOT_ESTABLISHED"
+      entry_boundary_comment: 7021990583
+    F3_PR_321:
+      head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      accepted_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+      callable_endpoint: "NOT_ESTABLISHED"
+    F3_PR_322:
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      test_methods: 15
+      latest_retry_runs: [44684299439, 44684299500]
+      latest_retry_jobs: [136119955880, 136119969030]
+      ci_result: "FAILURE_BEFORE_TEST_STEPS; steps=null; log HTTP 404 BlobNotFound; no CI PASS"
+      status: "P1_OPEN_TEST_PROFILE_CANDIDATE_NOT_CI_PASS"
+    F3_independent_acceptance:
+      mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+      D_role_comment: 7021655866
+      H_role_comment: 7021638212
+      visible_identity_for_both: "oahcom"
+      distinct_human_signers: "NOT_VERIFIED"
+      unsigned_attestation_carrier: "PR #323 comment 7031665905"
+      status: "P1_OPEN_INDEPENDENT_HUMAN_ACCEPTANCE"
+  finding_counts:
+    total: 13
+    closed: 10
+    open: ["F-43-01/F1", "F-43-01/F3"]
+    blocked: ["F-43-02"]
+  prompt_provenance:
+    source_type: "T2_CHAT_INSTRUCTION"
+    source_conversation_id: "6afd445b-38e4-83e8-b39f-08a50a7d2d3b"
+    current_platform_conversation_id: "NOT_EXPOSED"
+    raw_message_sha256: "NOT_VERIFIED"
