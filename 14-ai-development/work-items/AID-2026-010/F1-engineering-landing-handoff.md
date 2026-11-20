@@ -146,3 +146,28 @@ This addendum records a fresh execution-state check after Owner ruling D-2026-11
 **Verifiable disposition:** F-43-01/F1 — P1 — engineering handoff DELIVERED on this existing PR; Runtime implementation remains NOT IMPLEMENTED / NOT VERIFIED and the finding remains OPEN / DEFERRED_TO_ENGINEERING_PHASE. S1–S7 remain NOT RUN. This is not a test or CI PASS. The status is not blocked by the former quota freeze; it is bounded by the still-effective architecture-phase implementation deferral and the absence of a designated implementation target/authority.
 
 **Return destinations:** Issue #7 (engineering entry), Issue #10 (JF-10/COC physical proof), Issue #25 (D/Storage persistence and receipt), Issue #43 (F1 finding ledger). No placeholder Runtime code is added to this architecture-definition repository.
+
+
+## 10. Current exact-source handoff refresh — D-2026-1120-01
+
+This addendum refreshes the engineering handoff's consumer/source pins after the latest F3 reconciliation. It does not authorize implementation or change the entry gate.
+
+| Input | Exact current source | Status |
+|---|---|---|
+| D authoritative query contract | PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; file Blob `099f4948b550919084b0d73094692b590b0be0a9` | Normative interface; `ResolveForgetFenceSnapshotProof` NOT ESTABLISHED AS CALLABLE |
+| Accepted D/H mapping | Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49` | Same-Blob role records exist; distinct authenticated D/H human signers NOT VERIFIED |
+| H TEST-profile validator | PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; Blob `49644a181c578fecb312218c08ce23caa62f603b` | Candidate source only |
+| H regression tests | PR #322 test Blob `6685226143df0135aa64ecec3cfdac8acd08a8eb` | 15 test methods; current source test execution NOT RUN |
+| Latest exact-head CI retries | Runs `44684299439` / Job `136119955880`; `44684299500` / Job `136119969030` | Both FAILURE before test steps (`steps=null`); log download HTTP 404 `BlobNotFound`; no CI PASS |
+
+The H validator source statically defines `MAX_D_TYPED_HIGH_WATER = (1 << 63) - 1`, parses/canonicalizes each D nominal high-water before digest projection, and rejects values above the signed-64-bit bound. The exact test Blob contains 15 methods, including five-field 512-character leading-zero acceptance and 513-character rejection before authority callbacks. This static source review is not an execution result.
+
+### F1 implementation boundary remains unchanged
+
+- Five callable D authority operations: NOT IMPLEMENTED.
+- Authoritative durable Producer Registration Ledger / operation-bound Receipt: NOT ESTABLISHED.
+- Operational exact-equality / linearization evidence: NOT ESTABLISHED.
+- Canonical D-002 scenarios S1–S7: NOT RUN.
+- Issue #7 comment `7021990583` continues to set `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; engineering entry NOT AUTHORIZED / NOT READY.
+
+This addendum is a source/evidence pin refresh within the existing F1 handoff. It is not Runtime implementation, a waiver, Owner acceptance, production conformance, or permission to create a placeholder runtime in this repository.
