@@ -271,3 +271,62 @@ D Producer Admission/Registration、完整 Dependency Registration、D Publicati
 Fence 先提交，则后续 Admission/Visibility 被拒绝；Admission/Dependency 先提交，则必须进入后续 Fence Snapshot/Barrier；Storage Visibility 先提交，则属于 Fence 前可见工作集；Dependency 先提交，则完整依赖集进入 Barrier。顺序 UNKNOWN、旧主未隔离、锚点 Incarnation 不确定或 Transition Record 缺失时必须 RESTORE_FENCED/UNKNOWN，不得用时间戳、Queue 顺序、XID 或 Owner Counter 推断。
 
 SerializationRevision 只属于一个 SerializationDomain/BrainAuthority，是物理单调 Revision；不得与 D Fence/Gate/Barrier Generation、I Permission/Inventory/PolicyDomain Position、C Sequence Namespace、COC Quorum Position、PreparedTransactionGID 或 EngineNativeXID 比较。每个 Canonical Memory Authority 独立一个锚点。单行热点是 v1 正确性优先取舍；没有 successor proof 不得分片。单主、旧主隔离、持久 ACK、读后写和恢复连续性均属于 Option A 必须满足的部署条件；无法满足时 Option A 不符合规范，Option B 必须提交后继 ADR。
+
+### 8.8 Claim/Fact canonical commit integration / Claim/Fact 规范提交集成
+
+This addendum integrates ClaimRevision and FactRevision
+into the existing L1 logical transaction protocol.
+
+It does NOT select a new storage topology.
+
+The D canonical commit and Storage publication
+participant protocol MUST preserve the following order:
+
+- D commits canonical Claim/Fact revisions and their
+  required authorization/dependency references.
+- E publishes no canonical derivative before D's
+  canonical decision and dependency registration.
+- Storage persists the exact publication tuple as
+  PREPARED_HIDDEN.
+- D admits the exact PublicationParticipant against
+  the current ForgetFence.
+- I supplies the applicable single-use commit
+  authorization decision.
+- Storage performs the final protected visibility
+  transaction.
+- G commits a new public ContextVersion only after
+  the applicable authoritative visibility outcome.
+
+The existing per-BrainAuthorityRef serialization
+anchor remains the L1 ordering mechanism for protected
+D/Storage transitions.
+
+No separate process-local transaction or eventual
+message delivery is allowed to substitute for that
+ordering.
+
+**中文规范：**
+
+本补充将 ClaimRevision 和 FactRevision
+纳入既有 L1 逻辑事务协议。
+
+本补充不选择新的 Storage 拓扑。
+
+D 规范提交与 Storage Publication Participant
+协议必须保持以下顺序：
+
+- D 提交规范 Claim/Fact Revision 及其必需授权/依赖引用。
+- D 完成规范决策与依赖登记之前，
+  E 不得发布规范派生对象。
+- Storage 将准确 Publication Tuple 持久化为 PREPARED_HIDDEN。
+- D 针对当前 ForgetFence 准入准确 PublicationParticipant。
+- I 提供适用的一次性 Commit Authorization 决定。
+- Storage 执行最终受保护 Visibility Transaction。
+- 只有在适用权威 Visibility Outcome 确认后，
+  G 才能提交新的公开 ContextVersion。
+
+现有 per-BrainAuthorityRef Serialization Anchor
+仍然是受保护 D/Storage 转换的 L1 排序机制。
+
+不得使用独立进程内事务或最终一致消息传递
+替代该排序机制。
