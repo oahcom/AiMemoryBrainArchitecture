@@ -32,7 +32,7 @@ The model is intentionally richer than text plus embedding. Embeddings, lexical 
 1. Every canonical object has a stable typed opaque identifier.
 2. MemoryId identifies the logical Memory for its entire lifetime.
 3. MemoryVersionId identifies one immutable Memory version.
-4. ClaimId identity policy across Memory versions remains OPEN; Phase 1 does not freeze stable-versus-version-local Claim identity.
+4. ClaimRef is stable across Memory versions for proposition identity; each immutable assertion state has an exact ClaimRevisionRef as specified in §2.4. ID-generation algorithms remain outside this decision and are not frozen by Phase 1.
 
 ### 2.4 Claim Identity Classification and Revision Invariants
 
@@ -446,7 +446,7 @@ Without embeddings or graph databases, the implementation must demonstrate:
 2. one Event producing multiple candidate Memories;
 3. one Memory containing multiple Claims;
 4. stable Memory identity across immutable versions;
-5. Claim identity policy is explicitly tracked as OPEN and must not be frozen by implementation;
+5. Claim identity classification across Memory versions follows §2.4: stable ClaimRef and immutable ClaimRevisionRef semantics are DECIDED FOR CONVERGENCE; ID-generation algorithms remain outside the Phase 1 freeze;
 6. preservation of conflicting Claims and their Evidence;
 7. ContextEntry removal without canonical Memory mutation;
 8. denial of cross-scope reads/writes without authorization;
