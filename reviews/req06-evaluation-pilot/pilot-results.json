@@ -1,0 +1,13 @@
+{
+  "experiment": "REQ06-PILOT-2026-11-20-v1",
+  "baseline": "main@bc114263d700692d32b20a099f3db9be9338d490",
+  "corpus": {"records": 10, "repository_documents": 8, "synthetic_controls": 2, "sha256": "741636f2e9b7354fa6f56c2707cedb96621bb96971a8e84b43238bea722dea70"},
+  "tasks": 7,
+  "arms": {
+    "no_memory": {"success_rate": 0.1429, "wilson95": [0.0257, 0.5131], "positive_hit_rate": 0.0, "mean_recall": 0.0, "mean_precision": 0.0, "mrr": 0.1429, "harmful_activations": 0, "selected": 0},
+    "simple_lexical_top3": {"success_rate": 1.0, "wilson95": [0.6457, 1.0], "positive_hit_rate": 1.0, "mean_recall": 1.0, "mean_precision": 0.4444, "mrr": 0.9286, "harmful_activations": 6, "selected": 18, "median_local_latency_ms_observed": 0.0838},
+    "brain_policy_reference_proxy_NOT_INTEGRATED": {"success_rate": 1.0, "wilson95": [0.6457, 1.0], "positive_hit_rate": 1.0, "mean_recall": 1.0, "mean_precision": 0.4444, "mrr": 1.0, "harmful_activations": 0, "selected": 18, "median_local_latency_ms_observed": 0.0763}
+  },
+  "negative_result": "The policy proxy removes forgotten/out-of-scope activations on this fixture but does not improve mean precision; irrelevant in-scope results remain.",
+  "limitations": ["Repository-document pilot, not representative user tasks", "No preference retention or multi-session handoff tasks", "Brain arm is a policy proxy, not integrated runtime", "Local Python latency only"]
+}
