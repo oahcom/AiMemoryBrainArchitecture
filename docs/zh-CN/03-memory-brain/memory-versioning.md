@@ -115,32 +115,66 @@ Aggregate Head 更新和不可变 Revision 追加，必须与 Receipt/Outbox 原
 
 端到端协议 MUST 在以下环节之间保持统一、可审计的逻辑顺序：
 
-- E 私有 Staging。
-- 完整依赖枚举。
-- 持久化依赖登记。
-- D 规范 ClaimRevision/FactRevision 提交。
-- Storage PREPARED_HIDDEN Publication Tuple。
-- D PublicationParticipant Admission。
-- I Commit Authorization。
-- Storage 最终 Visibility。
+- Authorization 与 Scope 解析。
+- 在串行化、可恢复的 Admission 边界内检查 Forget Fence 并执行 Producer Admission。
+- 在同一受保护 Admission 边界内持久化登记完整的直接及传递依赖集合。
+- E 创建私有不可变 Staging 产物，不产生公开可见性。
+- D 规范 ClaimRevision/FactRevision 提交，包括精确 Parent 链接、授权证据和必需 Provenance 引用。
+- 以原子或可恢复方式，将已提交 Revision 与依赖登记及 Publication Intent 关联。
+- 通过幂等、可恢复的协议完成 E Publication。
+- 只有在必需规范记录和依赖登记得到确认后，才能推进 Storage Visibility。
+- G 在同一受保护可见性边界内提交 ContextVersion，并引用精确的规范 Revision。
+- 只有全部必需可见性条件满足后，才能标记逻辑操作完成。
 
-G ContextVersion 提交及参与方协调，只有在适用的权威 Visibility Outcome 得到确认后才能进行。
+协议 MUST NOT 将任何中间状态暴露为完整发布状态。
+
+G ContextVersion 提交及参与方协调 MUST 遵循适用的权威 Visibility Outcome。
 
 ### 2. 必需顺序
 
-规定的顺序如下：
+规定的逻辑顺序如下：
 
-1. E 创建私有不可变 Staging 产物。Staging MUST NOT 产生公开可见性。
-2. E 和负责依赖的权威方枚举完整的直接及传递依赖集合。
-3. D 在适用 Forget Fence 和授权边界下持久化登记精确依赖集合。
-4. D 在规范提交边界内提交 ClaimRevision/FactRevision、精确 Parent 链接、规范 Head 更新、必需 Evidence/Provenance 引用、Scope、授权证据及必需依赖登记。
-5. Storage 将精确 Publication Tuple 持久化为 PREPARED_HIDDEN。
-6. D 根据当前 ForgetFence 和依赖登记证据准入精确 PublicationParticipant。
-7. I 为准确操作及 Publication Tuple 提供适用 Commit Authorization 决定。
-8. Storage 执行最终受保护 Visibility Transaction。
-9. D/E 协调精确参与方结果，并终结同一逻辑操作。
-10. 只有在必需权威 Visibility Outcome 和精确 Revision 引用得到确认后，G 才能提交新的 ContextVersion。
+A. 解析授权与 Scope。
 
+B. 在同一个串行化、可恢复的 Admission 边界内检查当前 Forget Fence，并执行 Producer Admission。
+
+C. 在同一受保护 Admission 边界下，持久化登记完整的直接及传递依赖集合。
+
+D. 创建 E 私有不可变 Staging 产物。Staging MUST NOT 产生公开可见性。
+
+E. 在 D 的规范提交边界内提交 ClaimRevision 和 FactRevision、精确 Parent 链接、授权证据及必需 Provenance 引用。
+
+F. 以原子或可恢复方式，将已提交 Revision 与依赖登记及 Publication Intent 关联。
+
+G. 通过幂等、可恢复的发布协议完成 E Publication。
+
+H. 只有在必需规范记录和依赖登记得到确认后，才能推进 Storage Visibility。
+
+I. G 必须在同一受保护可见性边界内提交 ContextVersion，并引用精确的规范 Revision。
+
+J. 只有全部必需可见性条件满足后，才能将逻辑操作标记为完成。
+
+### 2.1 T17 — Fence-first（Fence 优先）
+
+如果 Forget Fence 先于 Producer Admission 线性化，则该 Fence MUST 阻止相关操作获得准入并进入发布流程。
+
+不得通过任何 Staging、规范提交、Publication Intent 或 Visibility 转换绕过这一决定。
+
+### 2.2 T18 — Participant-first（参与者优先）
+
+Producer Admission 一旦成功线性化，该精确操作 MUST 被持久化登记为 Participant。
+
+后续 Forget Fence MUST NOT 静默跳过、删除或错误分类该已准入参与者。
+
+必须依据串行化的 Fence/Admission 顺序协调该操作。
+
+其完成或抑制结果 MUST 遵循声明的 Forget Policy，并保留精确参与者身份、依赖闭包和可审计结果。
+
+在权威操作结果得到解决之前，UNKNOWN MUST 保持非最终状态。
+
+恢复 MUST 使用原始操作身份，并协调 Fence、Admission、依赖登记、规范提交、E Publication、Storage Visibility 和 G ContextVersion 状态。
+
+恢复 MUST NOT 根据缺失证据制造成功的最终状态。
 ### 3. Staging 与依赖不变量
 
 Staging 是私有状态，不等于 Publication。
@@ -173,13 +207,21 @@ Lost ACK 必须使用原始幂等身份和精确请求 Digest 查回，不得创
 
 ### 5. PREPARED_HIDDEN 与 Admission 不变量
 
-PREPARED_HIDDEN 是持久化但非公开的 Publication 状态。
+Producer Admission MUST 在串行化、可恢复的 Admission 边界内线性化，并且必须先于依赖登记和 E Staging。
 
-D PublicationParticipant Admission MUST 验证准确的 Prepared Tuple、依赖登记和当前 ForgetFence。
+精确的已准入操作 MUST 被持久化登记为 Participant。
 
-不得仅凭 Prepared Object 的存在推断 Admission 已完成。
+如果 Forget Fence 先于 Producer Admission 线性化，则该 Fence MUST 阻止相关操作进入依赖登记、E Staging、规范提交或 Publication。
 
-尚未通过 Admission 的 Publication MUST NOT 进入最终 Visibility。
+后续 Forget Fence MUST 按照权威 Fence/Admission 顺序处理所有此前已经准入的 Participant，不得静默跳过或错误分类已准入参与者。
+
+PREPARED_HIDDEN 仍然是持久化但非公开的 Publication 状态。
+
+Prepared Publication Tuple MUST 绑定到精确的既有准入操作及其依赖登记证据。
+
+不得仅凭 PREPARED_HIDDEN 的存在推断 Producer Admission 已经发生。
+
+Storage 只有在精确准入参与者、依赖登记、Prepared Tuple 和适用 Forget Fence 条件全部得到验证后，才能推进最终 Visibility。
 
 ### 6. I Commit Authorization
 

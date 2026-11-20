@@ -115,32 +115,66 @@ Aggregate head update and immutable revision append commit atomically with recei
 
 The end-to-end protocol MUST preserve one auditable logical order across:
 
-- Private E staging.
-- Complete dependency enumeration.
-- Durable dependency registration.
-- D canonical ClaimRevision/FactRevision commit.
-- Storage PREPARED_HIDDEN publication tuple.
-- D PublicationParticipant admission.
-- I Commit Authorization.
-- Storage final visibility.
+- Authorization and Scope resolution.
+- Serialized and recoverable Forget Fence evaluation and Producer Admission.
+- Durable registration of the complete direct and transitive dependency set under the protected Admission boundary.
+- Private immutable E staging without public visibility.
+- D canonical ClaimRevision/FactRevision commit, including exact parent links, authorization evidence and required Provenance references.
+- Atomic or recoverable association of committed revisions with dependency registration and publication intent.
+- Idempotent and recoverable E publication.
+- Storage visibility advancement after the required canonical records and dependency registration are confirmed.
+- G ContextVersion commit using the same protected visibility boundary and exact canonical revision references.
+- Logical operation completion only after all required visibility conditions are satisfied.
 
-G ContextVersion commit and participant reconciliation occur only after the applicable authoritative visibility outcome is confirmed.
+The protocol MUST NOT expose an intermediate state as a fully published state.
+
+G ContextVersion commit and participant reconciliation MUST follow the applicable authoritative visibility outcome.
 
 ### 2. Required ordering
 
-The required order is:
+The required logical order is:
 
-1. E creates private immutable staging artifacts. Staging MUST NOT create public visibility.
-2. E and the responsible dependency authorities enumerate the complete direct and transitive dependency set.
-3. D durably registers the exact dependency set under the applicable Forget Fence and authorization boundary.
-4. D commits ClaimRevision/FactRevision, exact parent links, canonical head updates, required Evidence/Provenance references, Scope, authorization evidence and required dependency registration within its canonical commit boundary.
-5. Storage persists the exact publication tuple as PREPARED_HIDDEN.
-6. D admits the exact PublicationParticipant against the current ForgetFence and dependency-registration evidence.
-7. I supplies the applicable commit authorization decision for the exact operation and publication tuple.
-8. Storage executes the final protected visibility transaction.
-9. D/E reconcile the exact participant outcome and terminalize the same logical operation.
-10. G commits a new ContextVersion only after the required authoritative visibility outcome and exact revision references are confirmed.
+A. Resolve authorization and Scope.
 
+B. Under one serialized and recoverable admission boundary, evaluate the current Forget Fence and perform Producer Admission.
+
+C. Durably register the complete direct and transitive dependency set under the same protected Admission boundary.
+
+D. Create private immutable E staging artifacts. Staging MUST NOT create public visibility.
+
+E. Commit ClaimRevision and FactRevision, exact parent links, authorization evidence and required Provenance references within D's canonical commit boundary.
+
+F. Atomically or recoverably associate the committed revisions with their dependency registration and publication intent.
+
+G. Complete E publication through an idempotent, recoverable publication protocol.
+
+H. Advance Storage visibility only after the required canonical records and dependency registration are confirmed.
+
+I. Commit G ContextVersion using the same protected visibility boundary and exact canonical revision references.
+
+J. Mark the logical operation complete only after all required visibility conditions are satisfied.
+
+### 2.1 T17 — Fence-first
+
+A Forget Fence that linearizes before Producer Admission MUST prevent admission and publication.
+
+No staging, canonical commit, publication intent, or visibility transition may bypass that decision.
+
+### 2.2 T18 — Participant-first
+
+Once Producer Admission has successfully linearized, the exact admitted operation MUST be durably recorded as a participant.
+
+A later Forget Fence MUST NOT silently skip, erase, or misclassify that admitted participant.
+
+The operation MUST be reconciled under the serialized Fence/Admission ordering.
+
+Its completion or suppression MUST follow the declared Forget policy and preserve the exact participant identity, dependency closure and auditable outcome.
+
+UNKNOWN MUST remain non-final until the authoritative operation outcome is resolved.
+
+Recovery MUST use the original operation identity and MUST reconcile Fence, Admission, dependency registration, canonical commit, E publication, Storage visibility and G ContextVersion state.
+
+Recovery MUST NOT manufacture a successful terminal state from missing evidence.
 ### 3. Staging and dependency invariant
 
 Staging is private and is not publication.
@@ -173,13 +207,21 @@ A lost acknowledgement MUST be resolved using the original idempotency identity 
 
 ### 5. PREPARED_HIDDEN and Admission invariant
 
-PREPARED_HIDDEN is a durable but non-public publication state.
+Producer Admission MUST linearize under the serialized and recoverable admission boundary before dependency registration and E staging.
 
-D PublicationParticipant Admission MUST validate the exact prepared tuple, dependency registration and current ForgetFence.
+The exact admitted operation MUST be durably recorded as a participant.
 
-Admission MUST NOT be inferred from the existence of a prepared object.
+A Forget Fence that linearizes before Producer Admission MUST prevent the affected operation from entering dependency registration, E staging, canonical commit or publication.
 
-A publication that has not passed Admission MUST NOT advance to final visibility.
+A later Forget Fence MUST account for every previously admitted participant under the authoritative Fence/Admission ordering. It MUST NOT silently skip or misclassify an admitted participant.
+
+PREPARED_HIDDEN remains a durable but non-public publication state.
+
+The prepared publication tuple MUST bind to the exact previously admitted operation and its dependency-registration evidence.
+
+PREPARED_HIDDEN MUST NOT itself imply that Producer Admission has occurred.
+
+Storage MUST NOT advance final visibility unless the exact admitted participant, dependency registration, prepared tuple and applicable Forget Fence conditions have been verified.
 
 ### 6. I Commit Authorization
 
