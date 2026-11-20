@@ -118,7 +118,7 @@ review:
 
 acceptance:
   implementation_acceptance: SELF_AUDIT_PASS
-  owner_acceptance: ACCEPTED_BY_OWNER_DELEGATE — Issue #264 closeout comment to be recorded under Issue #305 comment 7042461592 §3
+  owner_acceptance: ACCEPTED_BY_OWNER_DELEGATE — Issue #264 comment 7043180042 under Owner instrument #305 comment 7042461592 §3
   production_gate: OUT-OF-SCOPE(dev-baseline)
 
 merge:
@@ -127,7 +127,7 @@ merge:
   merge_commit_sha: 02136d14f54de48d2664e17f683a7730cb2c552b
   exact_head_sha: b9cb8a98fa4816b9cdd1df3d73f268fafa22ff01
   base_sha: 010edea0f0a3f2f53f79913bb1fd5c3d795732ea
-  post_merge_readback: PASS — main HEAD equals merge commit SHA; key files read back
+  post_merge_readback: PASS — PR merge commit 02136d14f54de48d2664e17f683a7730cb2c552b is present in main ancestry; merged files and registry were read back from main
 
 findings:
   - id: F-SOURCE-POINTER-STALE-20261120-01
@@ -138,8 +138,13 @@ findings:
   - id: F-SOURCE-POINTER-DEREF-20261120-02
     severity: P2
     destination: Issue #264
-    status: READY_TO_CLOSE_ON_MERGE
+    status: CLOSED_AT_MERGE
     summary: Sixteen absent normative source targets explicitly dereferenced in both language pairs with historical blob and counterpart evidence.
+  - id: F-SOURCE-POINTER-LABEL-20261120-03
+    severity: P2
+    destination: Issue #264
+    status: FIXED
+    summary: Source revision parser updated to recognize full-width Chinese colon labels; fixture check 3/3.
 
 closeout_instruction:
   id: REQ03-PR356-MERGE-CLOSEOUT
@@ -152,6 +157,13 @@ closeout_instruction:
   note: >-
     The current interface does not expose the platform conversation identifier or raw message bytes;
     no identifier or digest has been fabricated.
+
+issue_closeout:
+  issue: 264
+  state: CLOSED
+  acceptance_comment_id: 7043180042
+  closed_at: 2026-11-20T15:18:04Z
+  disposition: A_CLOSE_ALL_NINE_ACCEPTANCE_CRITERIA_SATISFIED
 
 production_scope:
   status: OUT-OF-SCOPE(dev-baseline)
