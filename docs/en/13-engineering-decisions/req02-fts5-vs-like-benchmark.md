@@ -33,14 +33,14 @@ Environment: Python 3.13.5; SQLite 3.46.1; Linux x86_64.
 
 | Metric | SQLite FTS5 | SQL LIKE scan |
 |---|---:|---:|
-| P50 | 285.44 μs | 9,908.69 μs |
-| P95 | 433.36 μs | 12,309.67 μs |
-| P99 | 820.31 μs | 14,873.49 μs |
-| Mean | 319.70 μs | 10,263.03 μs |
-| Throughput | 3,127.95 queries/s | 97.44 queries/s |
+| P50 | 295.74 μs | 10,271.94 μs |
+| P95 | 445.75 μs | 12,259.60 μs |
+| P99 | 561.48 μs | 13,743.61 μs |
+| Mean | 322.01 μs | 10,491.69 μs |
+| Throughput | 3,105.54 queries/s | 95.31 queries/s |
 
 - Result-set parity: **100/100 queries identical**.
-- Mean-latency ratio (LIKE / FTS5): **32.10×**.
+- Mean-latency ratio (LIKE / FTS5): **32.58×**.
 - Query plan: FTS5 reports `SCAN docs_fts VIRTUAL TABLE INDEX 0:M1`; LIKE reports `SCAN docs`.
 
 The captured values are one actual run, not a statistical claim about production workloads. Re-running on another machine or under different cache/load conditions will produce different timings.
@@ -61,7 +61,7 @@ The LIKE baseline is intentionally a no-index comparison, not a separate mature 
 ## Provenance and verification
 
 - Prompt provenance: T2 instruction supplied in the current ChatGPT conversation; Prompt ID `REQ02-LEXICAL-BENCH-PROMPT` v1. Session UUID/permalink are not exposed by this interface; SHA-256 of the raw chat instruction is `NOT_VERIFIED`. No synthetic provenance identifier is claimed.
-- Script SHA-256: `0b2aa5f306940cb3d7baa24f91b55924a012ee14c5eaa3ecdd102f40c5e01d22`.
-- Captured result SHA-256: `56d057552d91155f3eb029773c985cc729f50f6bf70c2209c6462c45bc2f2b6d`.
+- Script SHA-256: `0e5899406f1fde296e4e23020f317cd6e4d23ddccd14cccefe7ffdf940ec4227`.
+- Captured result SHA-256: `d759ffd9c2ddbe8b37aec9723cf55f807ff4cb8181132a7d3f4b0b6f4f91b834`.
 - Local verification: `python3 -m py_compile` exit 0; benchmark exit 0; 100/100 result-set parity checks passed.
 - Execution classification: `LOCAL_ONLY`; this is Python `sqlite3`, not native Rust execution and not CI.
