@@ -7,6 +7,7 @@ Referenced-but-missing normative documents. Each entry records a link that could
 | ID | Missing document | Referenced from | Disposition |
 |---|---|---|---|
 | GAP-01 | `phase-3.5-forget-suppression-and-cursor-consumption.md` (Phase 3.5 Runtime Forget Suppression and Typed Cursor Consumer Contract) | `docs/en/05-memory-runtime/{retrieval-engine, runtime-overview, working-set-and-cache}.md`, `docs/zh-CN/05-memory-runtime/{retrieval-engine, runtime-overview, working-set-and-cache}.md` | OPEN — never committed to this repository. Referencing text preserved; links replaced with an explicit missing-document marker. Content must NOT be reconstructed by an agent. |
+| GAP-02 | Governance enforcement on direct pushes to `main` | `00-governance/architecture-document-management-policy.md` §8, `.github/workflows/document-management.yml` | OPEN — `--require-changed` runs on pull requests only. Branch protection requiring PRs is not enabled, so a direct push can still add an unclassified governed document. |
 
 ## GAP-01 detail / 详情
 

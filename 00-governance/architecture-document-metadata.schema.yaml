@@ -6,8 +6,16 @@
 #
 # Rules: see 00-governance/architecture-document-management-policy.md
 # Fields marked REQUIRED must always be present. Fields marked CONDITIONAL
-# must be present when their condition holds (enforced by DM-03..DM-07).
+# must be present when their condition holds (enforced by DM-03..DM-11).
 # 必填字段始终存在；条件字段在其条件成立时必须存在。
+#
+# Parsed by scripts/check_document_management.py, which accepts only a strict
+# YAML subset: nested block mappings, flat block sequences of scalars, quoted
+# scalars, true/false, null, [], {}. Block scalars (| >), non-empty flow
+# collections, anchors and tabs are rejected, not skipped. Keep this file
+# inside that subset.
+# 由门禁脚本以严格 YAML 子集解析。块标量、非空流式集合、锚点与制表符会被
+# 直接拒绝而非跳过，请保持在本子集内。
 
 document_metadata:
 
@@ -93,8 +101,17 @@ document_metadata:
     canonical_scope_keywords: []
 
     # None | Under-Review | Resolved
+    # Under-Review REQUIRES canonical_status: Candidate (DM-11). Conflict
+    # state never doubles as authority.
     canonical_conflict_status: None
+
+    # REQUIRED when canonical_conflict_status == Resolved (DM-11).
     canonical_conflict_resolution: null
+    # canonical_conflict_resolution:
+    #   resolution_decision_id: "GOV-CONF-YYYY-NNN"   # unique, never reused
+    #   resolved_date: "YYYY-MM-DD"
+    #   selected_document: "docs/en/<domain>/<file>.md"
+    #   resolution_evidence: []
 
     # Normative | Informative
     normative_status: Informative

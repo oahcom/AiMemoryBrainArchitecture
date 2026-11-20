@@ -1,8 +1,53 @@
+---
+document_metadata:
+  domain: security-governance
+  role: normative-standard
+  lifecycle:
+    approval:
+      decision_status: Under-Review
+      approver: NOT_RECORDED
+      decision_date: NOT_RECORDED
+      approved_version: null
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Not-Applicable-To-Current-Version
+      evidence_reference:
+        - "00-governance/architecture-document-management-policy.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "No formal approval record, approver identity or decision date exists in this repository; recorded as NOT_RECORDED rather than inferred."
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    canonical_status: Canonical
+    canonical_scope: "Governance: architecture document management"
+    canonical_scope_id: "security-governance/document-management-policy"
+    canonical_scope_keywords:
+      - document-metadata
+      - lifecycle
+      - canonical-authority
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+---
+
 # Architecture Document Management Policy / 架构文档管理条例
 
 - Policy ID: GOV-DOC-002
-- Version: 1.0
-- Status: **NORMATIVE — MACHINE-CHECKED**
+- Version: 1.1
+- Status: **NORMATIVE — PARTIALLY MACHINE-CHECKED** (see §9.1 for exactly which rules a machine can prove)
 - Owner: A — Principal Integration / Architecture Governance
 - Relation to GOV-DOC-001: **SUPPLEMENTARY — does not weaken, replace or waive GOV-DOC-001**
 - Enforced by: `scripts/check_document_management.py`, `.github/workflows/document-management.yml`
@@ -43,9 +88,9 @@ Classification is **declared in metadata**, never inferred from directory locati
 
 ### 3.1 Domain enumeration / Domain 枚举
 
-The 12 technical concerns. This list is closed; adding a value requires a governance decision recorded as a `decision-record` role document.
+The 13 technical concerns. This list is closed; adding a value requires a governance decision recorded as a `decision-record` role document.
 
-12 个技术关注领域。该列表封闭；新增取值需形成一条 `decision-record` 职责文档所记录的治理决议。
+13 个技术关注领域。该列表封闭；新增取值需形成一条 `decision-record` 职责文档所记录的治理决议。
 
 ```
 architecture, domain-model, memory-brain, memory-compiler, memory-runtime,
@@ -100,6 +145,10 @@ approval:
 **Rule L1 — stale approval / 失效审批**: if content within `approval_scope` changes after `approved_version`, `modification_status` MUST become `Pending-Reapproval`, and `approval_applicability` MUST become `Not-Applicable-To-Current-Version`. The historical `Approved` record is preserved and MUST NOT be rewritten.
 
 **规则 L1 — 失效审批**：若 `approval_scope` 范围内内容在 `approved_version` 之后发生变化，`modification_status` MUST 变为 `Pending-Reapproval`，`approval_applicability` MUST 变为 `Not-Applicable-To-Current-Version`。历史 `Approved` 记录必须保留，禁止改写。
+
+L1 enforcement boundary / L1 执行边界: for `approval_scope.type: Full-document` the gate compares the body hash (frontmatter excluded) at `approved_version` with the body hash now, and fails when a stale approval still presents itself as applicable. For `Selected-sections` and `Selected-assets` the gate only checks that the declared scope is non-empty; section-level staleness remains a manual control, because no stable section identity exists yet.
+
+L1 执行边界：当 `approval_scope.type: Full-document` 时，门禁比较 `approved_version` 时点与当前正文（不含 frontmatter）的哈希，若失效审批仍声称适用则报错。当为 `Selected-sections` / `Selected-assets` 时，门禁只校验声明的范围非空；章节级失效仍属人工控制，因为目前尚无稳定的章节标识。
 
 **Rule L2 — revocation evidence / 撤销证据**: `decision_status: Revoked` REQUIRES a non-null `revocation` block containing a unique `revocation_decision_id`.
 
@@ -164,13 +213,28 @@ Two **independent** attributes. Neither implies the other.
 
 `Canonical` 必须提供非空 `canonical_scope`、`canonical_scope_keywords`，以及规范化的 `canonical_scope_id`。
 
-**Rule A1 — scope conflict / 范围冲突**: at most ONE `Canonical` document per `canonical_scope_id`. On conflict, all conflicting documents MUST set `canonical_conflict_status: Under-Review`.
+**Rule A1 — scope conflict / 范围冲突**: at most ONE `Canonical` document per `canonical_scope_id`, at all times. Conflict state MUST NOT double as authority: while `canonical_conflict_status` is `Under-Review`, every conflicting document MUST declare `canonical_status: Candidate`. Two documents claiming `Canonical` in one scope is a gate error, not a state a document may sit in.
 
-**规则 A1 — 范围冲突**：每个 `canonical_scope_id` 最多允许一份 `Canonical` 文档。发生冲突时，所有冲突文档 MUST 设置 `canonical_conflict_status: Under-Review`。
+**规则 A1 — 范围冲突**：任何时刻，每个 `canonical_scope_id` 最多允许一份 `Canonical` 文档。冲突状态禁止与权威叠加：当 `canonical_conflict_status` 为 `Under-Review` 时，每份冲突文档 MUST 声明 `canonical_status: Candidate`。同一范围内两份文档同时声称 `Canonical` 属门禁错误，而不是文档可以长期停留的状态。
 
-**Rule A2 — conflict consumption / 冲突期消费规则**: while `canonical_conflict_status` is `Under-Review`, consumers MUST NOT treat either document as authoritative; they MUST use the last `Resolved` decision in `canonical_conflict_resolution`, or, absent one, fall back to the document with the earliest `approval.decision_date` and raise a finding.
+**Rule A2 — conflict consumption / 冲突期消费规则**: consumers MUST resolve authority through `resolve_canonical(documents, scope_id)`, the single sanctioned resolver. It returns `NO_AUTHORITATIVE_SOURCE` whenever the scope is empty, has more than one `Canonical`, or carries any conflict status other than `None`. There is NO fallback heuristic: an earlier approval date is not evidence of authority, and guessing hides the conflict.
 
-**规则 A2 — 冲突期消费规则**：当 `canonical_conflict_status` 为 `Under-Review` 时，消费者禁止将任一文档视为权威；必须采用 `canonical_conflict_resolution` 中最近一次 `Resolved` 的决议；若无，则回退到 `approval.decision_date` 最早者并提交 Finding。
+**规则 A2 — 冲突期消费规则**：消费者 MUST 通过唯一受认可的解析接口 `resolve_canonical(documents, scope_id)` 解析权威。当范围为空、存在多份 `Canonical`，或存在 `None` 以外的冲突状态时，该接口返回 `NO_AUTHORITATIVE_SOURCE`。禁止任何回退启发式：更早的审批日期不是权威证据，猜测只会掩盖冲突。
+
+Conflict resolution is an auditable record, not a status flip / 冲突决议是可审计的记录，而非状态翻转：
+
+```yaml
+canonical_conflict_status: Resolved
+canonical_conflict_resolution:
+  resolution_decision_id: "GOV-CONF-2026-002"   # unique, never reused
+  resolved_date: "2026-05-10"
+  selected_document: "docs/en/02-domain-model/entity-model.md"
+  resolution_evidence: []
+```
+
+The gate checks that a `Resolved` status carries a complete record, that `selected_document` really declares the scope, and that it is the document holding `Canonical`. It cannot check that the decision was a good one; that remains reviewer responsibility.
+
+门禁检查 `Resolved` 状态是否带有完整记录、`selected_document` 是否确实声明该范围、以及它是否就是持有 `Canonical` 的文档。门禁无法检查该决议是否合理，那仍属审查者职责。
 
 `canonical_scope_id` normalization / 规范化：lowercase, `domain` prefix, kebab-case, ASCII only. Example: `architecture/data-model-design`.
 
@@ -210,29 +274,57 @@ A document without metadata is `_unclassified`, not "compliant by default". `_un
 
 无元数据的文档属于 `_unclassified`，不得视为默认合规。`_unclassified` 禁止被引用为规范来源。
 
-Governance of a directory is complete only when `scripts/check_document_management.py` reports zero errors for it.
+Governance of a directory is complete only when `scripts/check_document_management.py` reports **zero errors AND zero unclassified documents** for it. Zero errors alone is not completion: an unclassified document is not a compliant document, it is an unreviewed one.
 
-某目录只有在 `scripts/check_document_management.py` 报告零错误时，才算完成纳管。
+某目录只有在 `scripts/check_document_management.py` 对该目录报告**零错误且零未分类**时，才算完成纳管。仅零错误不构成完成：未分类文档不是合规文档，而是未受审查的文档。
+
+Because the backlog is large, the gate also offers a hard edge that does not require full adoption: `--require-changed <ref>` makes metadata mandatory for every governed file added or modified since `<ref>`, untracked included. The backlog may stay unclassified; it may not grow.
+
+由于存量积压较大，门禁另提供不依赖全量采纳的硬边界：`--require-changed <ref>` 要求自 `<ref>` 以来新增或修改（含未跟踪）的所有受治理文件必须带元数据。积压可以继续未分类，但禁止增长。
+
+Open gap / 未闭合缺口: `--require-changed` runs on pull requests only. This repository still accepts direct pushes to `main`, and a whole-tree requirement there would turn `main` red on the existing backlog. Until branch protection requires pull requests, a direct push can add an unclassified document. Recorded as GAP-02 in `docs/governance/documentation-gaps.md`.
+
+未闭合缺口：`--require-changed` 仅在 Pull Request 上运行。本仓库仍接受直接推送到 `main`，若在该路径上要求全量分类，`main` 会因既有积压立即变红。在分支保护强制要求 PR 之前，直接推送仍可能引入未分类文档。登记为 `docs/governance/documentation-gaps.md` 中的 GAP-02。
 
 ## 9. Enforcement / 强制实施
 
-`scripts/check_document_management.py` MUST run on every pull request and MUST fail the build on error.
+`scripts/check_document_management.py` MUST run on every pull request with `--require-changed <base>` and MUST fail the build on error.
 
-`scripts/check_document_management.py` MUST 在每个 Pull Request 上运行，出错必须使构建失败。
+`scripts/check_document_management.py` MUST 在每次 Pull Request 上带 `--require-changed <base>` 运行，出错必须使构建失败。
 
 Machine-checkable rules / 机器可检查规则：
 
 | ID | Rule | Severity |
 |---|---|---|
-| DM-01 | Frontmatter parses and contains all four dimensions | Error |
-| DM-02 | `domain` and `role` values are in the closed enumeration | Error |
-| DM-03 | `Approved` has `approved_version` and `approval_scope` | Error |
-| DM-04 | `Revoked` has `revocation.revocation_decision_id` | Error |
+| DM-01 | Frontmatter parses under the declared YAML subset and contains all four dimensions; parse failure is an error, never a skip | Error |
+| DM-02 | `domain`, `role` and every status value are in the closed enumerations; unknown keys are errors | Error |
+| DM-03 | `Approved` has `approved_version` (scheme + value), `approval_scope.type` and `approval_applicability`; `Selected-sections` has a non-empty `included_sections` | Error |
+| DM-04 | `Revoked` has `revocation.revocation_decision_id`, `revoked_date`, `revocation_reason`; the id is unique repository-wide | Error |
 | DM-05 | `Archived` has `archived_date` and `archival_reason` | Error |
-| DM-06 | `Canonical` has `canonical_scope_id` and keywords | Error |
+| DM-06 | `Canonical` has `canonical_scope`, keywords, and a normalized `canonical_scope_id` whose prefix equals `domain` | Error |
 | DM-07 | At most one `Canonical` per `canonical_scope_id` | Error |
-| DM-08 | No hand-written `superseded_by` in frontmatter | Error |
-| DM-09 | No generated inventory committed as authoritative | Warning |
+| DM-08 | No hand-written `superseded_by` anywhere in the frontmatter | Error |
+| DM-09 | A generated artifact MUST NOT be `Normative` or `Canonical` | Error |
+| DM-10 | `Approved` + `scheme: git` / `content-hash`: body must be unchanged since `approved_version`, otherwise `Pending-Reapproval` + `Not-Applicable-To-Current-Version` | Error |
+| DM-11 | A document under `Under-Review` conflict MUST NOT be `Canonical`; `Resolved` requires a complete resolution record consistent with the scope's Canonical | Error |
+| DM-12 | A declared bilingual counterpart exists, agrees on `domain`/`role`/`normative_status`, and does not double the `Canonical` claim | Error |
+| DM-13 | `supersedes` targets exist, are not self-references, and form no cycle | Error |
+
+### 9.1 Verified versus unverified / 已验证与未验证
+
+| Rule | Machine-verified | Left to reviewers |
+|---|---|---|
+| DM-01..DM-09, DM-11..DM-13 | Full | — |
+| DM-10 `Full-document` | Full (body hash) | — |
+| DM-10 `Selected-sections` | Scope declared | Whether the selected sections are the right ones |
+| Canonical scope overlap | Unique ids, unique `Canonical` | Whether two scopes genuinely overlap |
+| Approval / evidence truth | Field presence and shape | Whether the decision or evidence is real |
+| Bilingual parity | Metadata agreement | Semantic parity (GOV-DOC-001) |
+| `_unclassified` citation ban | Not verifiable in-repo | Enforced by readers and AI agents |
+
+The table is the contract. A rule listed in the right column MUST NOT be described elsewhere as governed by CI.
+
+该表即契约。列在右列的规则，禁止在其他地方被描述为由 CI 保障。
 
 Rules that cannot be mechanized — semantic parity, whether a scope is genuinely non-overlapping, whether evidence truly supports a decision — remain reviewer responsibility under GOV-DOC-001 §2.1.
 
@@ -249,3 +341,4 @@ Amendments require a `decision-record` role document, bilingual, approved by the
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 2026-11-21 | Initial policy. Consolidates the four-dimension model, lifecycle and authority rules from the v3.1 design into an enforceable repository policy. |
+| 1.1 | 2026-11-21 | Independent review response. Fail-closed parser (DM-01), version-bound approval made mechanical for full documents (DM-10), A1/A2 conflict state no longer doubles as authority and the date fallback is removed (DM-11), mirror consistency and supersession graph added (DM-12/13), domain count corrected to 13, completion redefined as zero unclassified, and the machine-checked claim replaced by the §9.1 split. |

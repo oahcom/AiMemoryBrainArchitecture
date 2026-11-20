@@ -16,9 +16,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Full history: DM-10 compares the current body against the body at
+          # approval.approved_version, which may be any ancestor commit.
+          fetch-depth: 0
 
       - name: Self-check the gate
         run: python3 scripts/test_check_document_management.py
 
+      # Pull requests: every governed file added or modified here must carry
+      # metadata. The 300-document backlog may stay unclassified; it may not grow.
+      - name: Validate document metadata (changed files must be classified)
+        if: github.event_name == 'pull_request'
+        run: |
+          python3 scripts/check_document_management.py \
+            --require-changed "${{ github.event.pull_request.base.sha }}"
+
+      # Direct pushes are not gated by --require-changed: this repository still
+      # accepts direct pushes, so a whole-tree requirement would turn main red
+      # on the existing backlog. Policy §8 records this as an open gap.
       - name: Validate document metadata
+        if: github.event_name != 'pull_request'
         run: python3 scripts/check_document_management.py
