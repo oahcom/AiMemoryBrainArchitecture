@@ -48,9 +48,9 @@ Specify the persistence design for the memory layer, covering:
 - migration strategy
 - test boundaries
 
-This revision answers R1-B-01 through R1-NB-05 (§2), the seven items R2 required (§2a), the four findings R3 raised (§2b), and the one residual R4 found (§2c). It does **not** claim that Q1 is resolved (§4), does not claim the schema is frozen, and does not authorize implementation.
+This revision answers R1-B-01 through R1-NB-05 (§2), the seven items R2 required (§2a), the four findings R3 raised (§2b), and the one residual R4 found (§2c). It records Q1 as decided under the dev-baseline Architecture Owner role (§4), and does **not** claim resolution by an accountable human authority. It does not claim the schema is frozen and does not authorize implementation.
 
-**Status supported by this document:** `BLOCKED — awaiting accountable authority assignment and governance decisions`. Q1, Q11 and Q12 cannot be closed by revision.
+**Status supported by this document:** `BLOCKED — awaiting accountable authority assignment and governance decisions`. No revision of this document can close Q11 or Q12; they require an authority that is `NOT_ASSIGNED`. Q1 was decided by a decision record, not by revision, but that decision did not constitute acceptance by an accountable human authority; `acceptance_authority` remains `NOT_ASSIGNED` for Q1. See §4 and `DEC-P2-T2-Q1-001.md`.
 
 No identified NF-R3-02 engineering-specification residue remains. DDL executability and regression behavior remain `UNVERIFIED`.
 
@@ -128,7 +128,7 @@ R4 was reviewed at head `bdb19ac0` and returned `REQUEST CHANGES` with one resid
 | Q13 — completed call must carry a result | ruled a **separate open question**, not part of NF-R3-02 | kept separate and open; R5 does not close it, so closing it can never be read as closing NF-R3-02 |
 | Q14 — does `recompute` need a single input | stricter branch **accepted provisionally**, question stays open | unchanged; §14 records it as provisional, not as a business requirement |
 
-**This is the last engineering round.** R4's own recommendation, adopted here: one concrete correction remained, it is made, and no further full revision will be produced against open governance questions. Q1, Q11 and Q12 are not engineering defects. Another iteration cannot reach them.
+**This is the last engineering round.** R4's own recommendation, adopted here: one concrete correction remained, it is made, and no further full revision will be produced against open governance questions. Q1, Q11 and Q12 are not engineering defects. Another iteration cannot reach them. Q1 was subsequently reached by a decision record rather than by iteration (`DEC-P2-T2-Q1-001`, merge `d8e5bebb`); Q11 and Q12 remain unreached because the authority that could reach them is `NOT_ASSIGNED`. Q1's decision likewise did not constitute acceptance by an accountable human authority; `acceptance_authority` remains `NOT_ASSIGNED` for Q1.
 
 The status this document supports is `BLOCKED — awaiting accountable authority assignment and governance decisions`. It does not support `APPROVE`.
 
@@ -219,7 +219,9 @@ Note for §8.3: `commit_log` carries **only** `commit_sequence`, `memory_id`, `v
 
 ## 4. The design question, restated as three options
 
-R1 ruled that escalating the authority conflict was correct, and that the binary framing in R1 was too narrow. The question is therefore restated with three answers. **Q1 remains OPEN.**
+R1 ruled that escalating the authority conflict was correct, and that the binary framing in R1 was too narrow. The question is therefore restated with three answers.
+
+**Q1 was DECIDED after this section was written, and this section is preserved as it stood rather than rewritten.** The ruling is recorded in `DEC-P2-T2-Q1-001.md` against baseline `049906a9`, merged at `d8e5bebb`: **`OPTION_C`, disposition `ACCEPT-WITH-CONDITIONS`.** The three options below are kept because the choice is only auditable if the alternatives it displaced are still visible. What that ruling closes is the architecture question and nothing else — not the DDL, not Q11–Q14, not Q8/Q9, not design acceptance, not implementation authorization.
 
 **Option A — Phase 1 is the store; transcript capture is Event ingress only.**
 No new content tables. Messages become `accepted_events` with payloads. Fewest tables, one system of record, but no message-level query model without building it on top of a generic event stream (R1: material architectural loss unless a transcript capture interface is added).
@@ -230,7 +232,7 @@ The frozen domain model and Rust adapter become Phase-1-only scaffolding. Requir
 **Option C — three layers, separate transcript capture (R1's recommendation).**
 Phase 1 stays authoritative for canonical memory. Transcript capture becomes its own governed layer with its own retrieval contract. Derived signals become rebuildable projections with declared source dependencies.
 
-**This proposal recommends Option C.** R1 recorded it as `PROPOSED`; a review recommendation is not an authority ruling. Choosing among A, B and C is Q1, and Q1 stays OPEN until an accountable authority rules (§14). Nothing here may be cited as Q1 being resolved.
+**This proposal recommended Option C.** R1 recorded it as `PROPOSED`; a review recommendation is not an authority ruling. The choice was subsequently ruled in favour of Option C by `DEC-P2-T2-Q1-001` (§4 status above), occupying a dev-baseline Architecture Owner role held by a session. That ruling states its own limits: no human Owner signature, no appointment as `acceptance_authority`, no independent human expert review, no production-grade acceptance. `acceptance_authority` remains `NOT_ASSIGNED`. What is settled is the architecture direction; what is not settled is whether the direction has been accepted by any accountable human authority, because there is none.
 
 ---
 
@@ -947,7 +949,7 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 
 | id | question | status |
 |---|---|---|
-| Q1 | Option A vs B vs C — which architecture | **OPEN**. Three options now stated (§4). Requires an accountable authority; a review recommendation is `PROPOSED`, not a ruling. |
+| Q1 | Option A vs B vs C — which architecture | **DECIDED as `OPTION_C` / `ACCEPT-WITH-CONDITIONS`**, recorded in `DEC-P2-T2-Q1-001.md` against baseline `049906a9` (merge `d8e5bebb`). Ruling capacity: dev-baseline Architecture Owner role, session-held — not an accountable human authority, and `acceptance_authority` remains `NOT_ASSIGNED`. Closes the architecture question only. |
 | Q2 | Extract Claim/Entity/Relation to tables, or keep in `version_json`? | OPEN, defer to P2-T3 |
 | Q3 | Vector store: Qdrant vs Chroma. Prompt defaults Chroma; Phase 1 has neither. | OPEN |
 | Q4 | Embedding model and dimension. Prompt assumes `text-embedding-3-small` / 1536. | OPEN — external dependency |
@@ -969,7 +971,7 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 - Not implemented. No code, no migration, no test executed.
 - Not a frozen schema. It is a proposal for review.
 - Not an authorization for P2-T1. Implementation authorization remains withheld per `GO-2026-P2-DESIGN-001`.
-- **Not a resolution of Q1.** Option C is recommended, not chosen.
+- **Not a resolution of Q1 by an accountable authority.** The architecture direction was decided as `OPTION_C` by `DEC-P2-T2-Q1-001`, occupying a dev-baseline Architecture Owner role held by a session. That ruling claims no human signature, no `acceptance_authority` appointment, and no production-grade acceptance. What is settled is the direction; what remains unsettled is whether any accountable human authority has accepted it, because there is none.
 - **Not a substantiated exact-value rebuild.** The conditions are specified; the evidence is not. Q10 is recorded as ruled for a tiered posture, with exact value `CONDITIONAL` and `NOT VERIFIED`.
 - **Not authorized schema execution.** The one in-memory DDL check is recorded as `DISCLOSED SCOPE DEVIATION`, not as compliant activity; Q12 escalates the authority question.
 - **Not a verified fix for NF-R3-01 / NF-R3-02.** The constraints are specified. Neither the R3 nor the R4 DDL was executed, so what is asserted is that the constraint text exists and matches the prose — not that SQLite enforces it as intended.
@@ -991,7 +993,8 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 | §5 tensions | **CORROBORATED, author assessment** — R1 ruled the stronger form `OVERSTATED`; the downgraded form is retained as tension, not contradiction |
 | R1 findings and dispositions | **VERIFIED** — transcribed from the R1 reply, recorded on PR #307 |
 | Recommendations in §6–§12 | **PROPOSED** — author-authored, subject to R2 review |
-| Any claim that Q1 is resolved | **NOT MADE** |
+| Q1 decision, disposition and the merge that recorded it | **VERIFIED** — `DEC-P2-T2-Q1-001.md` and merge `d8e5bebb` are on `main` and readable. |
+| Any claim that Q1 was resolved by an accountable human authority | **NOT MADE** — the ruling occupies a session-held dev-baseline role and says so itself; `acceptance_authority` is `NOT_ASSIGNED`. |
 
 ---
 
