@@ -2298,6 +2298,7 @@ class CanonicalEvidenceAuthorizationRegression(unittest.TestCase):
             set(m.nonce_registry),
             list(m.audit),
             list(m.retry_audit),
+            dict(m.target_results),
         )
 
     # 1. Stale evidence generation cannot complete a target.
@@ -2501,3 +2502,134 @@ class CanonicalEvidenceAuthorizationRegression(unittest.TestCase):
         del m.evidence_registry[valid.evidence_ref]
         self.assertFalse(m._has_valid_evidence("target-a"))
 
+
+
+# === SEC-003 audit regression class (session-authored, L0 verbatim) ===
+class StructuredAuditIntegrityRegression(unittest.TestCase):
+
+    def _model(self):
+        return R3Model(
+            "audit-memory",
+            authenticated_principal=TEST_PRINCIPAL,
+            tenant_id=TEST_TENANT,
+        )
+
+    def _record(self, model, **overrides):
+        values = {
+            "operation_id": "audit-operation",
+            "scope": {
+                "suppression:commit",
+                "tenant:tenant-A",
+                "memory:audit-memory",
+            },
+            "timestamp": 1760000000,
+            "action": "SUPPRESSION_ATTEMPT",
+            "result": "AUTHORIZED",
+            "integrity_ref": "audit-ref-001",
+        }
+        values.update(overrides)
+        return model.append_structured_audit(**values)
+
+    def test_audit_record_carries_authenticated_provenance_scope_timestamp_result_and_integrity_ref(self):
+        model = self._model()
+        record = self._record(model)
+
+        self.assertEqual(
+            record.authenticated_principal,
+            TEST_PRINCIPAL,
+        )
+        self.assertEqual(record.tenant_id, TEST_TENANT)
+        self.assertEqual(record.operation_id, "audit-operation")
+        self.assertEqual(
+            set(record.scope),
+            {
+                "suppression:commit",
+                "tenant:tenant-A",
+                "memory:audit-memory",
+            },
+        )
+        self.assertEqual(record.timestamp, 1760000000)
+        self.assertEqual(record.action, "SUPPRESSION_ATTEMPT")
+        self.assertEqual(record.result, "AUTHORIZED")
+        self.assertEqual(record.integrity_ref, "audit-ref-001")
+        self.assertTrue(model.audit_record_integrity_valid(record))
+        self.assertIn(record, model.structured_audit)
+
+    def test_audit_record_tampering_breaks_integrity_hash(self):
+        model = self._model()
+        record = self._record(model)
+
+        tampered = replace(record, result="REJECTED")
+
+        self.assertTrue(model.audit_record_integrity_valid(record))
+        self.assertFalse(model.audit_record_integrity_valid(tampered))
+
+    def test_audit_metadata_cannot_authorize_suppression_without_credential(self):
+        model = self._model()
+        self._record(
+            model,
+            action="SUPPRESSION_AUTHORIZATION",
+            result="AUTHORIZED",
+        )
+
+        self.assertEqual(model.phase, Phase.REQUESTED)
+        self.assertEqual(model.lifecycle, Lifecycle.ACTIVE)
+
+        with self.assertRaises(ContractViolation):
+            model.commit_suppression(
+                "audit-operation",
+                request_hash=TEST_REQUEST_HASH,
+                auth=None,
+            )
+
+        self.assertEqual(model.phase, Phase.REQUESTED)
+        self.assertEqual(model.lifecycle, Lifecycle.ACTIVE)
+        self.assertIsNone(model.atomic_commit)
+        self.assertEqual(model.fence_generation, 0)
+
+    def test_audit_metadata_cannot_complete_d_lifecycle(self):
+        model = self._model()
+        self._record(
+            model,
+            action="D_LIFECYCLE",
+            result="COMPLETED",
+        )
+
+        self.assertEqual(model.phase, Phase.REQUESTED)
+        self.assertFalse(model.d_completion)
+        self.assertFalse(model.domain_complete())
+        self.assertFalse(model.d_completion)
+        self.assertEqual(model.lifecycle, Lifecycle.ACTIVE)
+
+    def test_audit_record_excludes_sensitive_content_fields(self):
+        model = self._model()
+        record = self._record(model)
+
+        fields = set(record.__dataclass_fields__)
+
+        self.assertEqual(
+            fields,
+            {
+                "authenticated_principal",
+                "tenant_id",
+                "operation_id",
+                "scope",
+                "timestamp",
+                "action",
+                "result",
+                "integrity_ref",
+                "integrity_hash",
+            },
+        )
+        self.assertFalse(
+            fields.intersection({
+                "content",
+                "raw_content",
+                "prompt",
+                "body",
+                "text",
+                "payload",
+                "memory_content",
+                "secret",
+            })
+        )

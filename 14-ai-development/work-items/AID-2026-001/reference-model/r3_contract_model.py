@@ -42,6 +42,8 @@ F-OI-02 — 幂等重试独立审计
 - 本文件未执行测试；测试执行状态为 NOT RUN。
 """
 
+import hashlib
+import json
 from dataclasses import dataclass, field
 from enum import Enum
 from threading import RLock
@@ -127,6 +129,39 @@ class EvidenceRecord:
     state: str
 
 
+@dataclass(frozen=True)
+class AuditRecord:
+    """In-memory structured audit metadata; not a signed audit artifact."""
+
+    authenticated_principal: str
+    tenant_id: str
+    operation_id: str
+    scope: tuple[str, ...]
+    timestamp: int
+    action: str
+    result: str
+    integrity_ref: str
+    integrity_hash: str
+
+
+def _audit_record_digest(record: AuditRecord) -> str:
+    payload = {
+        "authenticated_principal": record.authenticated_principal,
+        "tenant_id": record.tenant_id,
+        "operation_id": record.operation_id,
+        "scope": list(record.scope),
+        "timestamp": record.timestamp,
+        "action": record.action,
+        "result": record.result,
+        "integrity_ref": record.integrity_ref,
+    }
+    canonical = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
 class ReceiptVerifier(Protocol):
     """Protocol for verifying authorization receipt authenticity.
 
@@ -383,6 +418,8 @@ class R3Model:
     context_version: int = 0
     pending_delta: list = field(default_factory=list)
     revocation_state: str = "CURRENT"
+    # Structured metadata is additive; legacy string audit remains unchanged.
+    structured_audit: list[AuditRecord] = field(default_factory=list)
     receipt_verifier: Any = field(
         default_factory=RejectingReceiptVerifier,
     )
@@ -426,6 +463,101 @@ class R3Model:
         "atomic_commit",
     )
 
+    def append_structured_audit(
+        self,
+        *,
+        operation_id: str,
+        scope,
+        timestamp: int,
+        action: str,
+        result: str,
+        integrity_ref: str,
+    ) -> AuditRecord:
+        """Append structured metadata using the model's trusted context.
+
+        This creates an in-memory integrity digest, not a signature or
+        tamper-proof persistent audit record.
+        """
+        if (
+            not isinstance(self.authenticated_principal, str)
+            or not self.authenticated_principal.strip()
+        ):
+            raise ContractViolation("audit authenticated principal missing")
+
+        if (
+            not isinstance(self.tenant_id, str)
+            or not self.tenant_id.strip()
+        ):
+            raise ContractViolation("audit tenant_id missing")
+
+        if not isinstance(operation_id, str) or not operation_id.strip():
+            raise ContractViolation("audit operation_id missing")
+
+        if (
+            isinstance(timestamp, bool)
+            or not isinstance(timestamp, int)
+            or timestamp < 0
+        ):
+            raise ContractViolation("audit timestamp must be a non-negative integer")
+
+        if not isinstance(action, str) or not action.strip():
+            raise ContractViolation("audit action missing")
+
+        if not isinstance(result, str) or not result.strip():
+            raise ContractViolation("audit result missing")
+
+        if not isinstance(integrity_ref, str) or not integrity_ref.strip():
+            raise ContractViolation("audit integrity_ref missing")
+
+        if isinstance(scope, str):
+            raise ContractViolation("audit scope must be an iterable of strings")
+
+        try:
+            normalized_scope = tuple(sorted(set(scope)))
+        except (TypeError, ValueError):
+            raise ContractViolation("audit scope must contain strings")
+
+        if (
+            not normalized_scope
+            or any(
+                not isinstance(item, str) or not item.strip()
+                for item in normalized_scope
+            )
+        ):
+            raise ContractViolation("audit scope must contain non-empty strings")
+
+        record = AuditRecord(
+            authenticated_principal=self.authenticated_principal,
+            tenant_id=self.tenant_id,
+            operation_id=operation_id,
+            scope=normalized_scope,
+            timestamp=timestamp,
+            action=action,
+            result=result,
+            integrity_ref=integrity_ref,
+            integrity_hash="",
+        )
+        record = AuditRecord(
+            **{
+                **{
+                    name: getattr(record, name)
+                    for name in record.__dataclass_fields__
+                    if name != "integrity_hash"
+                },
+                "integrity_hash": _audit_record_digest(record),
+            }
+        )
+        self.structured_audit.append(record)
+        return record
+
+    @staticmethod
+    def audit_record_integrity_valid(record: AuditRecord) -> bool:
+        if not isinstance(record, AuditRecord):
+            return False
+        return (
+            bool(record.integrity_hash)
+            and record.integrity_hash == _audit_record_digest(record)
+        )
     def _derive_nonce_registry(self) -> set:
         """Derive consumed Nonces from committed authority records.
 
