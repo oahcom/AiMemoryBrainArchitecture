@@ -12,10 +12,16 @@ REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.a
 
 def git(*a):
     p = subprocess.run(['git', '-C', REPO] + list(a), capture_output=True)
-    return p.stdout.decode('utf-8', 'replace'), p.returncode == 0
+    # strict decode: a UnicodeDecodeError is itself the read-failure signal.
+    # errors='replace' was rejected because a legitimate U+FFFD in valid UTF-8
+    # would then be indistinguishable from a decode artefact.
+    try:
+        return p.stdout.decode('utf-8'), p.returncode == 0, False
+    except UnicodeDecodeError:
+        return '', p.returncode == 0, True
 
-tree, tree_ok = git('ls-tree', '-r', '--name-only', 'origin/main')
-assert tree_ok, 'git ls-tree failed; refusing to write a proposal from a partial tree'
+tree, tree_ok, tree_bad = git('ls-tree', '-r', '--name-only', 'origin/main')
+assert tree_ok and not tree_bad, 'git ls-tree failed or was not valid UTF-8; refusing to write a proposal from a partial tree'
 all_md = set(p for p in tree.splitlines() if p.endswith('.md'))
 BASE = subprocess.run(['git', '-C', REPO, 'rev-parse', 'origin/main'],
                       capture_output=True, text=True).stdout.strip()
@@ -80,15 +86,15 @@ def classify(p, text):
 rows = []
 read_failures = []
 for p in candidates:
-    text, ok = git('show', 'origin/main:' + p)
+    text, ok, bad = git('show', 'origin/main:' + p)
     sug, conf, reason = classify(p, text)
-    if not ok:
+    if bad:
+        read_failures.append(p)
+        reason = 'READ-FAILURE: bytes were not valid UTF-8 and strict decode refused them; no scan of this file took place. ' + reason
+        conf = 'LOW'
+    elif not ok:
         read_failures.append(p)
         reason = 'READ-FAILURE: git show exited non-zero for this path; the empty scan below is an artefact, not a finding. ' + reason
-        conf = 'LOW'
-    elif '\ufffd' in text:
-        read_failures.append(p)
-        reason = 'READ-FAILURE: bytes were not valid UTF-8 and were decoded with replacement characters; marker counts are unreliable. ' + reason
         conf = 'LOW'
     pr = partner(p)
     rows.append((p, bool(pr), pr or '', sug, conf, reason))
@@ -111,6 +117,21 @@ for p in list(by_path):
         rows[idx[me]] = (me, by_path[me][1], by_path[me][2], by_path[me][3], 'LOW',
                          by_path[me][5] + "; PAIR-DIVERGENT: partner '%s' scanned as %s - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ." % (other[0], other[3]))
 
+# ---- validate BEFORE any write: a failing assertion must leave no file behind ----
+by_path_final = {r[0]: r for r in rows}
+pair_bad = []
+for p, paired, pr, *_ in rows:
+    if not paired:
+        assert not pr, p
+        continue
+    assert pr in all_md, 'partner not in tree: %s -> %s' % (p, pr)
+    back = partner(pr)
+    if back != p:
+        pair_bad.append((p, pr, back))
+assert not pair_bad, 'non-reciprocal pairing: %r' % pair_bad[:5]
+
+divergent = sorted({r[0] for r in rows if 'PAIR-DIVERGENT' in r[5]})
+
 out = [
  '# Tier classification PROPOSAL - evidence-based suggestions for human confirmation',
  '# Generated 2026-11-20 by generate-tier-proposal.py from the origin/main tree at the commit',
@@ -125,10 +146,11 @@ out = [
  'scan_window_chars: 4000',
  'file_enumeration: git ls-tree -r --name-only origin/main, filtered to paths ending .md and starting with one of the four scope prefixes, then sorted with Python sorted() (byte-wise ASC on the full path). No glob, no .gitignore, no filesystem walk - the tree object is the only source.',
  'path_exclusions: none beyond the scope prefixes and the .md filter; the proposal files themselves are not excluded, so they appear as UNKNOWN-bucket rows like any other new document',
- 'read_failure_handling: a non-zero git show exit, or bytes invalid as UTF-8 (U+FFFD present after decode), prefixes the row evidence with READ-<FAILURE> and forces LOW confidence; such a row is never equivalent to a genuine negative',
+ 'read_failure_handling: strict UTF-8 decode (UnicodeDecodeError is the failure signal; errors=replace is rejected because a legitimate U+FFFD would be indistinguishable from a decode artefact) plus a non-zero git show exit; either condition prefixes the row evidence with READ-<FAILURE> and forces LOW confidence; such a row is never equivalent to a genuine negative',
+ 'write_order: all assertions (pairing reciprocity, row counts, no stale baseline text, no tabs) run against the in-memory text before any byte reaches disk; the file is then written to a .tmp in the same directory and moved with os.replace, so a failing run leaves no partial proposal',
  'run_environment: python 3.13, git 2.x, no network access, no third-party packages; output is LF-terminated UTF-8',
  'marker_matching: case-insensitive substring match within the scan window; counts are distinct-marker counts, not occurrence counts; a marker counted once regardless of repetitions',
- 'pairing_detection: (a) same-directory suffix swap .en.md <-> .zh-CN.md <-> .md; (b) docs/en/ <-> docs/zh-CN/ path mirror',
+ 'pairing_detection: (a) same-directory suffix swap .en.md <-> .zh-CN.md <-> .md; (b) docs/en/ <-> docs/zh-CN/ path mirror. Tie-break when an .en.md has both a .zh-CN.md and a plain .md sibling: .zh-CN.md wins, because the bilingual policy pairs on the explicit language suffix first; the plain .md is then treated as an unrelated file and may pair separately',
  'generator: 14-ai-development/work-items/FIX-2026-P1-T3/generate-tier-proposal.py',
  'marker_families:',
  '  normative: [' + ', '.join('"%s"' % m for m in NORMATIVE) + ']',
@@ -147,38 +169,28 @@ for p, paired, pr, sug, conf, reason in rows:
     out.append('    evidence: "%s"' % reason)
     out.append('    confirmation_record: PENDING')
 
+text = '\n'.join(out) + '\n'
+
+# ---- validate the built string before it is allowed to touch disk ----
+assert '6545f8' not in text, 'stale baseline text still present'
+assert text.count('confirmation_record: PENDING') == len(rows)
+assert text.count('- path: ') == len(rows)
+assert len(set(r[0] for r in rows)) == len(rows)
+assert text.count('PAIR-DIVERGENT') == len(divergent)
+assert text.count('\t') == 0, 'tab character in output'
+
+# ---- atomic write: temp file in the same directory, then os.replace ----
 path = os.path.join(REPO, '14-ai-development/work-items/FIX-2026-P1-T3/tier-confirmation-proposal.yaml')
-io.open(path, 'w', encoding='utf-8', newline='\n').write('\n'.join(out) + '\n')
+tmp = path + '.tmp'
+io.open(tmp, 'w', encoding='utf-8', newline='\n').write(text)
+os.replace(tmp, path)
 
 c = Counter((r[3], r[4]) for r in rows)
 print('files:', len(rows), 'paired:', sum(1 for r in rows if r[1]), 'baseline:', BASE[:8])
 for k, v in sorted(c.items()):
     print(' ', k[0], k[1], v)
-
-# self-check: pairing must be reciprocal and point inside the tree
-by_path_final = {r[0]: r for r in rows}
-pair_bad = []
-for p, paired, pr, *_ in rows:
-    if not paired:
-        assert not pr, p
-        continue
-    assert pr in all_md, 'partner not in tree: %s -> %s' % (p, pr)
-    back = partner(pr)
-    if back != p:
-        pair_bad.append((p, pr, back))
-assert not pair_bad, 'non-reciprocal pairing: %r' % pair_bad[:5]
-
-divergent = sorted({r[0] for r in rows if 'PAIR-DIVERGENT' in r[5]})
 print('divergent pairs:', len(divergent) // 2, 'rows:', len(divergent))
 for p in divergent:
     print('  DIV', p, '->', by_path_final[p][2])
-
-# self-check
-txt = io.open(path, encoding='utf-8').read()
-assert '6545f8' not in txt, 'stale baseline text still present'
-assert txt.count('confirmation_record: PENDING') == len(rows)
-assert txt.count('- path: ') == len(rows)
-assert len(set(r[0] for r in rows)) == len(rows)
-assert txt.count('PAIR-DIVERGENT') == len(divergent)
 print('read failures:', len(read_failures), read_failures[:5])
 print('SELF-CHECK OK')
