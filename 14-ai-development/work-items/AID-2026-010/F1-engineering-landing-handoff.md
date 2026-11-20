@@ -221,3 +221,18 @@ Issue #7 current body explicitly keeps `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGIN
 This documentation commit can be verified by exact commit and Blob SHA on this PR branch. No executable Runtime test or CI PASS is claimed. No D Owner signature, production acceptance, merge or main write is inferred.
 
 **Disposition:** F1 handoff delivery advanced by this exact PR-branch commit; the underlying F1 Runtime implementation finding remains P1 / OPEN.
+
+
+## 11. Superseding F3 exact-source pin refresh — 2026-11-20
+
+This append-only addendum supersedes the earlier PR #322 source references in §§8 and 10 where they identify Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb` and test Blob `6685226143f28a5b8764067bb205080b531132e3`. Historical references remain preserved above.
+
+Fresh exact-commit reads:
+- PR #321 D query contract: commit/Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; contract Blob `099f4948b550919084b0d73094692b590b0be0a9`; active mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
+- PR #322 H TEST-profile candidate: commit/Head `0ce618ac503f641cf31e66092ae823c14bf8af7b`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; test Blob `e66264ad30df6594e00836524accfdeb54160cee`. Both files were fetched at that exact commit and their returned Blob SHAs match these pins.
+- Exact-head Actions runs `44681841687` and `44681841601` are recorded as FAILURE; jobs `136110511473` and `136110524577` report `runner_id=0`, `steps=null`; log retrieval returned HTTP 404 `BlobNotFound`. This is runner/log-artifact failure before test steps, not a test assertion result. No CI PASS is claimed.
+- H production consumer acceptance, callable D query/Receipt/currentness/revocation and C1–C6 operational proof remain NOT ESTABLISHED. Distinct authenticated D/H human signers remain NOT VERIFIED.
+
+This source refresh improves the handoff's exact dependency pins only. It does not change F3's P1/OPEN status, establish H Owner acceptance, grant production authority, or satisfy F1 Runtime implementation. F1 remains P1/OPEN: five callable D operations NOT IMPLEMENTED; durable authoritative Ledger/operation-bound Receipt and runtime equality/linearization proof NOT ESTABLISHED; D-002 S1–S7 NOT RUN. Issue #7 comment #7021990583 remains the controlling engineering-entry boundary.
+
+Verification scope: exact source fetch at the commits above PASS; documentation-only handoff update, tests NOT RUN, no CI Run ID for this documentation commit. No main write, merge, new PR or Issue.
