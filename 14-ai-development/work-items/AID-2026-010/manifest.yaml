@@ -73,3 +73,82 @@ evidence_refs:
   - 14-ai-development/issue-alignment-2026-11-19/alignment-manifest.md
 created_at: 2026-11-19
 updated_at: 2026-11-19
+
+integration_closeout:
+  date: "2026-11-19"
+  decision_id: AID-2026-010-ICR-CLOSEOUT-2026-11-19-001
+
+  convergence_scope: >-
+    AID-2026-010 cross-domain integration-review and evidence-reconciliation
+    work unit, development-baseline scope only. This closeout records
+    convergence of attributable Owner dispositions and integration review.
+    It does not close unresolved implementation findings, approve
+    architecture, or establish operational or production conformance.
+
+  repository: oahcom/AiMemoryBrainArchitecture
+  branch: remediation/aid-2026-001-forget-contract-closure-2026-11-18
+  final_head_sha: 11c139e5e7b7600211e5ef4e31bbc09a237a2dfc
+
+  authoritative_finding_ledger:
+    path: 14-ai-development/work-items/AID-2026-010/finding-ledger.md
+    blob_sha: 479747786fab47a47b7125761c2071921a87b436
+    authority: SOLE_AUTHORITATIVE_FINDING_STATUS_LEDGER
+
+  findings_total: 13
+  findings_closed: 11
+  findings_blocked:
+    - "F-43-01/F1"
+    - "F-43-02"
+
+  blocked_reason: >-
+    Both residual findings require external engineering authorization and
+    an authorized engineering carrier. F-43-01/F1 additionally requires
+    designation of Canonical Authority and the authoritative persistence
+    boundary. F-43-02 requires an authorized Unicode validator/build
+    implementation target and subsequent main-baseline synchronization.
+    The required Product/Platform Architecture responsibility holder,
+    engineering carrier and implementation authority remain unassigned.
+    No implementation target or authority may be inferred or fabricated.
+
+  residual_disposition: >-
+    F-43-01/F1 and F-43-02 remain BLOCKED in the authoritative finding
+    ledger. They are excluded from the integration-review development-
+    baseline convergence count as external engineering residuals.
+    Their exclusion does not constitute technical completion, finding
+    closure, waiver of implementation requirements, or authorization
+    to proceed with implementation.
+
+  verdict: >-
+    YES — AID-2026-010 INTEGRATION-REVIEW DEVELOPMENT-BASELINE
+    CONVERGENCE ACHIEVED. 11/13 findings CLOSED; 2/13 findings
+    remain BLOCKED as explicit external engineering residuals.
+    This verdict closes the bounded integration-review work unit only.
+
+  g8_status: NOT READY
+  architecture_status: NOT ACCEPTED
+  production_activation: NOT AUTHORIZED
+  main_merge: NOT AUTHORIZED
+  quota_freeze: ACTIVE
+
+  out_of_scope_dev_baseline:
+    - production trust root / issuer / key registry
+    - real Receipt and operational-level authority proof
+    - UCD implementation binding and complete runtime corpus verification
+    - main baseline synchronization
+    - production activation and deployment
+    - appointments to unassigned governance roles
+
+  governance_boundaries:
+    acceptance_authority: NOT_APPOINTED
+    sponsor: NOT_APPOINTED
+    accountable_owner: NOT_APPOINTED
+    architecture_acceptance: NOT_GRANTED
+    production_authorization: NOT_GRANTED
+
+  finding_ledger_mutation:
+    authorized: false
+    note: >-
+      The two BLOCKED findings must remain BLOCKED. This closeout
+      does not modify or supersede their authoritative finding records.
+
+  repository_mutation_authorized_by_this_ruling: false
