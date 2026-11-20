@@ -84,7 +84,7 @@ deviations:
     residual_risk: "An admitted workflow can sudo. Containment needs NoNewPrivileges or a separate account."
 governance:
   tracking_issue: 26
-  architecture_document: "14-ai-development/continuous-owner-runtime-architecture.md"
+  architecture_document: "14-ai-development/continuous-owner-runtime-architecture.en.md (zh pair: continuous-owner-runtime-architecture.zh-CN.md)"
   runner_runbook: "14-ai-development/ubuntu-self-hosted-runner-bootstrap.en.md (AI-RUN-002-RUNBOOK v1.1; zh pair: ubuntu-self-hosted-runner-bootstrap.zh-CN.md)"
   operations_design: "docs/zh-CN/14-ai-development/ci-runner-operations.md and docs/en/14-ai-development/ci-runner-operations.md (DOC-OPS-001)"
   status_claims:

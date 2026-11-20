@@ -324,7 +324,7 @@ Until all applicable gates pass, no GitHub App/webhook deployment, autonomous re
 
 ## 13. References / 参考
 
-- [AI-RUN-003 Event-Driven Owner Worker Runtime](../ai-run-003-event-driven-owner-worker-runtime.md)
+- [AI-RUN-003 Event-Driven Owner Worker Runtime](../ai-run-003-event-driven-owner-worker-runtime.en.md)
 - [ADR-RUN-001 Durable Store and Transaction Boundaries](ADR-RUN-001-durable-store-and-transaction-boundaries.md)
 - [AI-PROMPT-STD-001 Prompt Authoring Standard](../prompt-authoring-standard.md)
 - [AI-AUTO-001 Owner Automation Operating Model](../owner-automation-operating-model.md)
