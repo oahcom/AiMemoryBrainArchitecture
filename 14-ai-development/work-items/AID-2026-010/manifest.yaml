@@ -192,6 +192,7 @@ current_status_refresh:
     - "F1 remains OPEN for implementation evidence; PR #327 handoff HEAD 4684b5d8dded3bd861f3b495c6307b0ac3db1959 / Blob c45933284494dcf712f425012cda6341d5c31212; S1-S7 NOT RUN; Issue #7 comment 7021990583 keeps implementation binding DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED."
     - "F3 same-Blob D/H role-labelled ACCEPT WITH EXPLICIT LIMITATIONS records: Issue #43 comments 7021655866 and 7021638212, mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49; visible GitHub identity is oahcom for both, so independent human signer attribution remains NOT VERIFIED."
     - "PR #322 comment 7031599217 — exact-Head retry readback at Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687/44681841601 retry jobs 136110511473/136110524577 FAILURE with steps=null; both raw log reads HTTP 404 BlobNotFound (RequestIds 8adb55d1-701e-00b7-55b2-783ba1000000; 3c18a6d6-801e-00be-69b2-78e88c000000); no CI PASS."
+    - "PR #322 latest exact-head Actions attempt 5: Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687 and 44681841601; Jobs 136111641890 and 136111657233; both FAILURE, runner_id=0, steps=[]; test steps did not start; no CI PASS."
   prompt_provenance:
     source_type: T2_CHAT_INSTRUCTION
     source: "User-provided Owner ruling D-2026-1120-01 in continuation of parent conversation 6afae42c-65d8-83ee-853c-a7537b0e273b"
@@ -200,7 +201,6 @@ current_status_refresh:
     sha256: NOT_VERIFIED
     note: "No repository prompt file is claimed as the source of this chat instruction; no digest is fabricated."
 
-    - "PR #322 latest runner-allocation readback: Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687/44681841601; latest jobs 136110511473/136110524577; both FAILURE, runner_id=0, steps=null; log retrieval HTTP 404 BlobNotFound (RequestIds d91924be-601e-00e6-36b2-78a62d000000; 26c3f08d-f01e-00fe-4db2-78f784000000). No test steps started; no CI PASS."
   historical_closeout_note: >-
     integration_closeout above remains the historical 2026-11-19 disposition
     (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
