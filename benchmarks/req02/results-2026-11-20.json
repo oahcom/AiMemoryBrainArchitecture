@@ -14,19 +14,19 @@
   },
   "latency": {
     "fts5": {
-      "mean_us": 319.7,
-      "p50_us": 285.44,
-      "p95_us": 433.36,
-      "p99_us": 820.31,
-      "throughput_queries_per_s": 3127.95
+      "mean_us": 322.01,
+      "p50_us": 295.74,
+      "p95_us": 445.75,
+      "p99_us": 561.48,
+      "throughput_queries_per_s": 3105.54
     },
-    "fts5_speedup_by_mean": 32.1,
+    "fts5_speedup_by_mean": 32.58,
     "like_scan": {
-      "mean_us": 10263.03,
-      "p50_us": 9908.69,
-      "p95_us": 12309.67,
-      "p99_us": 14873.49,
-      "throughput_queries_per_s": 97.44
+      "mean_us": 10491.69,
+      "p50_us": 10271.94,
+      "p95_us": 12259.6,
+      "p99_us": 13743.61,
+      "throughput_queries_per_s": 95.31
     }
   },
   "limitations": [
