@@ -6,7 +6,7 @@ accountable_owner: NOT_ASSIGNED
 acceptance_authority: NOT_ASSIGNED
 issue: 329
 related_issues: [218, 264, 329]
-related_prs: []
+related_prs: [330]
 task_class: DOC
 risk: R1
 risk_rationale: >-
@@ -49,6 +49,8 @@ baseline:
   base_sha: 9546f78d364b5a1dd1fa2206b34255be9c7fb1a7
   base_sha_source: GitHub API read of refs/heads/main at Issue #329 creation
   working_branch: ai/AID-2026-011/IO-execution-first-baseline
+  pull_request: 330
+  pull_request_url: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/330
 
 scope:
   - Add AI-EXEC-003 as a bilingual execution-first addendum proposal.
@@ -87,7 +89,7 @@ acceptance:
 
 verification:
   repository_tests: NOT_RUN
-  exact_head_readback: PENDING
+  exact_head_readback: PENDING_FINAL_READBACK
   bilingual_semantic_review: PENDING_INDEPENDENT_REVIEW
   adoption: NOT_GRANTED
 
