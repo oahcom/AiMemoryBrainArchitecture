@@ -42,7 +42,7 @@ MemoryVersion is an immutable semantic snapshot. Updates create successor versio
 
 Claim is the canonical proposition. Epistemic states are Observed, Reported, Inferred, Verified, Disputed, and Retracted. Confidence is not truth. Conflicts and retractions preserve history and evidence.
 
-**Identity boundary:** Claim identity across Memory versions remains **OPEN** and is not frozen by this Phase 1 contract.
+**Identity boundary:** Proposition identity uses a stable ClaimRef across Memory versions; immutable assertion states use exact ClaimRevisionRef values under DOMAIN-MODEL-001 §2.4. This semantic classification is DECIDED FOR CONVERGENCE. ID-generation algorithms remain CANDIDATE and are not frozen here.
 
 ### Evidence / Provenance
 
@@ -85,7 +85,9 @@ DM-01 Object separation; DM-02 Version immutability; DM-03 Version concurrency; 
 
 **DECIDED for Phase 1:** Event/Memory/MemoryVersion/Claim boundaries, stable Memory identity, immutable MemoryVersion, expected-parent version transition, Scope/Permission separation, Phase 1 scope isolation, Claim epistemic/lifecycle separation, and deterministic dependency-free domain validation.
 
-**Unchanged:** ID generation CANDIDATE; Claim global identity OPEN; Relation vocabulary OPEN; Evidence strength TO_VALIDATE; Scope algebra OPEN; Permission policy language OPEN; physical Forget semantics OPEN; Vector/Graph technology outside Phase 1.
+**DECIDED FOR CONVERGENCE:** Stable ClaimRef proposition identity across Memory versions and the CI-01..CI-13 classification in DOMAIN-MODEL-001 §2.4.
+
+**Unchanged:** ID generation CANDIDATE; Relation vocabulary OPEN; Evidence strength TO_VALIDATE; Scope algebra OPEN; Permission policy language OPEN; physical Forget semantics OPEN; Vector/Graph technology outside Phase 1.
 
 ## 8. Next implementation unit
 
