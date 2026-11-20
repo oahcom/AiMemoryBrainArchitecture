@@ -289,6 +289,117 @@ Superseding a MemoryVersion is a lifecycle/versioning operation, not deletion of
 6. Removing a ContextEntry is not Forget.
 7. Forget is a governed lifecycle operation; physical erasure is outside the Domain Model.
 
+### 8.1 Shared-reference Forget Contract
+
+Forget applies to governed content and its complete dependency closure, not merely to the object through which a request was initiated.
+
+#### 1. Forget target granularity
+
+The Forget target MUST identify the exact governed subject/content and applicable Scope.
+
+Supported dependency targets include:
+
+- ClaimRef and exact ClaimRevisionRef.
+- FactRef and exact FactRevisionRef.
+- EvidenceRef and protected source payload.
+- ProvenanceRef and reconstructive lineage content.
+- Derived MemoryVersion and ContextVersion references.
+- Indexes, caches, snapshots, staging and replay artifacts.
+
+A shared FactRef MUST NOT be treated as proof that all linked ClaimRevisions share one Forget disposition.
+
+#### 2. FactRevision dependency enumeration
+
+For each FactRevision, enumerate:
+
+- Exact ClaimRevisionRef dependencies.
+- EvidenceRef dependencies.
+- ProvenanceRef dependencies.
+- Scope and visibility dependencies.
+- Derived artifacts and transitive descendants.
+- Other authorization or retention dependencies.
+
+Dependency enumeration MUST be complete before declaring the relevant Forget operation complete.
+
+Unknown or incomplete dependency sets remain blocked.
+
+#### 3. Shared Fact visibility
+
+A FactRevision linked to multiple ClaimRevisions may remain visible only if every disclosed dependency is independently authorized and not suppressed by an applicable Forget decision.
+
+If a linked ClaimRevision is forgotten:
+
+- The forgotten ClaimRevision MUST NOT be disclosed through the shared Fact.
+- Its Evidence/Provenance content MUST be suppressed according to the Forget policy.
+- The shared Fact may remain visible only if its remaining content can be independently authorized and does not reveal forgotten information.
+- If safe separation cannot be established, suppress the entire affected FactRevision.
+
+#### 4. Evidence and Provenance handling
+
+Evidence and Provenance are independently governed objects and MUST be included in dependency enumeration.
+
+When the forgotten ClaimRevision is the only lawful basis for retaining an Evidence/Provenance payload, that payload MUST be removed or rendered unavailable under the applicable retention policy.
+
+Shared source material may remain only where an independent lawful dependency exists and the remaining content does not reconstruct forgotten information.
+
+#### 5. Other legal ClaimRevisions
+
+A different ClaimRevision may remain historically available if:
+
+- It is not itself forgotten.
+- Its own Scope and authorization remain valid.
+- Its Evidence and Provenance dependencies remain lawful.
+- It does not expose forgotten content through shared references, excerpts, summaries or derived artifacts.
+
+A shared Fact object MUST NOT cause unrelated legal ClaimRevisions to be erased automatically.
+
+#### 6. Universal read-path enforcement
+
+The same current authorization and Forget checks MUST be applied to all read paths, including:
+
+- FR-01: Direct Claim and ClaimRevision reads.
+- FR-02: Claim reads through Fact and FactRevision.
+- FR-03: Evidence-to-source traversal.
+- FR-04: Provenance lineage traversal.
+- FR-05: F indexes, caches and retrieval projections.
+- FR-06: G existing ContextVersion and historical snapshots.
+- FR-07: Historical version lookup, replay, retry and recovery.
+- Export: authorized content export and sharing.
+- Backup: backup creation and retained copies.
+- Restore: restoration and reconstruction before data becomes queryable or deliverable.
+
+No alternative reference, cache key, old version, replay cursor, export, backup, restore process or retained object identifier bypasses the authorization and Forget decision.
+
+#### 7. Physical erasure and audit separation
+
+Three states MUST remain distinct:
+
+1. Physical content erasure: governed payload and reconstructive derivatives are removed where required.
+2. Audit retention: only policy-permitted, non-reconstructive metadata may remain.
+3. Historical reference unavailability: old identifiers may remain in audit/history, but resolving them MUST return an explicit unavailable/suppressed result.
+
+The existence of an identifier, digest, lineage edge, or historical pointer does not authorize disclosure.
+
+Forget suppression is evaluated before returning content, not after a successful read.
+
+#### 8. Completion invariant
+
+Forget is complete for the declared scope only when all required dependency paths and alternate read paths enforce the same decision.
+
+All required dependencies MUST have a known and reconciled disposition.
+
+If any required dependency, export path, backup copy, restore path, or read path remains unresolved, the outcome MUST remain incomplete or unknown.
+
+It MUST NOT be represented as successful Forget.
+
+#### 9. Test coverage contract
+
+The seven FR identifiers above are stable test identifiers.
+
+Each FR test MUST identify its target, fixture, applicable Forget decision, expected suppression result, actual result, and failure classification.
+
+A test for one FR identifier MUST NOT be treated as evidence that another FR identifier passed.
+
 ## 9. Mutation and concurrency contract
 
 Domain validation is deterministic and side-effect free.

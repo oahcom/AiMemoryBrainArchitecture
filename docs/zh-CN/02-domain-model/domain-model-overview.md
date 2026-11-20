@@ -303,6 +303,117 @@ Supersede MemoryVersion 是生命周期/版本操作，不是删除历史命题�
 6. ContextEntry 删除不等于 Forget。
 7. Forget 是受治理的生命周期操作；物理擦除不属于 Domain Model。
 
+### 8.1 共享引用 Forget 契约
+
+Forget 作用于受治理内容及其完整依赖闭包，而不只是请求最初指向的对象。
+
+#### 1. Forget 目标粒度
+
+Forget 目标 MUST 标识准确的受治理主体/内容及适用 Scope。
+
+依赖目标包括：
+
+- ClaimRef 和准确 ClaimRevisionRef。
+- FactRef 和准确 FactRevisionRef。
+- EvidenceRef 和受保护来源 Payload。
+- ProvenanceRef 和可重建内容的来源链。
+- 派生 MemoryVersion 与 ContextVersion 引用。
+- Index、Cache、Snapshot、Staging 和 Replay 产物。
+
+共享 FactRef 不得被视为所有关联 ClaimRevision 具有相同 Forget 处置结果的证明。
+
+#### 2. FactRevision 依赖枚举
+
+每个 FactRevision MUST 枚举：
+
+- 准确 ClaimRevisionRef 依赖。
+- EvidenceRef 依赖。
+- ProvenanceRef 依赖。
+- Scope 和可见性依赖。
+- 派生资产及其传递后继。
+- 其他授权或保留依赖。
+
+在声明相关 Forget 操作完成之前，必须完成依赖枚举。
+
+依赖集合未知或不完整时必须保持阻断。
+
+#### 3. 共享 Fact 可见性
+
+FactRevision 关联多个 ClaimRevision 时，只有在所有被披露依赖均独立获得授权，且未被适用 Forget 决定抑制的情况下，才允许继续可见。
+
+如果关联 ClaimRevision 被 Forget：
+
+- 不得通过共享 Fact 披露已遗忘 ClaimRevision。
+- 其 Evidence/Provenance 内容必须按 Forget 策略抑制。
+- 只有剩余内容可以独立授权，且不会泄露已遗忘信息时，才允许保留共享 Fact 可见性。
+- 无法安全分离时，必须抑制整个受影响 FactRevision。
+
+#### 4. Evidence 和 Provenance 处理
+
+Evidence 和 Provenance 是独立治理对象，必须纳入依赖枚举。
+
+如果被遗忘 ClaimRevision 是保留某个 Evidence/Provenance Payload 的唯一合法依据，该 Payload 必须按适用保留策略删除或变为不可用。
+
+共享来源材料只有在存在独立合法依赖，且剩余内容不能重建已遗忘信息时才能保留。
+
+#### 5. 其他仍合法的 ClaimRevision
+
+其他 ClaimRevision 只有在以下条件全部满足时，才可以继续提供历史访问：
+
+- 该 Revision 本身未被 Forget。
+- 自身 Scope 和授权仍有效。
+- Evidence 和 Provenance 依赖仍然合法。
+- 不会通过共享引用、摘录、摘要或派生资产暴露已遗忘内容。
+
+共享 Fact 对象不得导致无关的合法 ClaimRevision 被自动删除。
+
+#### 6. 所有读取路径统一执行检查
+
+所有读取路径 MUST 执行相同的当前授权和 Forget 检查，包括：
+
+- FR-01：直接读取 Claim 和 ClaimRevision。
+- FR-02：通过 Fact 和 FactRevision 读取 Claim。
+- FR-03：通过 Evidence 追溯来源。
+- FR-04：通过 Provenance 追溯来源链。
+- FR-05：通过 F 的 Index、Cache 和 Retrieval Projection 读取。
+- FR-06：读取 G 已有 ContextVersion 和历史 Snapshot。
+- FR-07：历史版本查询、Replay、Retry 和 Recovery。
+- Export：受授权的内容导出和共享。
+- Backup：备份创建及保留副本。
+- Restore：数据恢复和重建，以及恢复数据重新变得可查询或可投递之前的检查。
+
+任何替代引用、Cache Key、旧版本、Replay Cursor、Export、Backup、Restore 流程或保留的对象 ID，都不得绕过授权和 Forget 决定。
+
+#### 7. 物理清除与审计分离
+
+以下三种状态必须明确区分：
+
+1. 物理内容清除：按要求删除受治理 Payload 及可重建派生内容。
+2. 审计保留：仅允许保留策略允许的、不可重建内容的元数据。
+3. 历史引用不可用：旧标识符可以留在历史审计中，但解析时必须返回明确的不可用/已抑制结果。
+
+标识符、Digest、谱系边或历史指针仍然存在，不构成内容披露授权。
+
+Forget 抑制必须在返回内容之前执行，不能在成功读取之后才检查。
+
+#### 8. 完成不变量
+
+只有在所有必需依赖路径和替代读取路径均执行相同 Forget 决定后，才能认为声明范围内的 Forget 已完成。
+
+所有必需依赖 MUST 具有已知且完成协调的处置结果。
+
+任何必需依赖、Export 路径、Backup 副本、Restore 路径或读取路径仍未解决时，结果 MUST 保持未完成或未知状态。
+
+MUST NOT 将其表示为成功 Forget。
+
+#### 9. 测试覆盖契约
+
+上述七个 FR 标识符是稳定测试标识符。
+
+每项 FR 测试 MUST 标明目标、Fixture、适用 Forget 决定、预期抑制结果、实际结果及失败分类。
+
+一个 FR 标识符的测试不得被当作另一个 FR 标识符已经通过的证据。
+
 ## 9. 变更与并发契约
 
 Domain Validation 必须确定性、无副作用。
