@@ -677,3 +677,27 @@ This append-only entry records this continuation's actual carrier updates and ex
 D-2026-1120-01 removes the carrier quota freeze only. It does not appoint a Project Governance Authority, grant project-wide G0 approval, authorize Runtime implementation, authenticate D/H identities, or sign for another Owner. AI-EXEC-001 v1.1 is ADOPTED (Blob `58af59af266b81109269156ea667df1a15edfb7b`); AI-EXEC-002 v1.2 remains PENDING ADOPTION (Blob `7f5928a5d16eb12da7621cfb8bd99ca463afd859`; v1.1 is the adopted predecessor).
 
 **Disposition:** the F1 handoff and F3 source-pin / TEST-profile / ledger evidence are advanced on existing PRs. Underlying F1 and F3 remain P1 / OPEN at their substantive implementation, independent-human and operational exit criteria. No Owner signature, Runtime authorization, CI PASS, production acceptance, merge or main write is inferred.
+
+
+## D-2026-1120-01 — current-turn exact-source refresh (2026-11-20)
+
+This append-only entry supersedes earlier F1/F3 source pins in this ledger where they conflict with the exact commits/blobs below. Historical records remain intact.
+
+### F1 — implementation-layer finding
+- **Finding:** `F-43-01/F1 | P1 | OPEN` — actual Runtime implementation and operational proof absent.
+- **Return destinations:** PR #327; Issues #7/#10/#25/#43.
+- Existing PR #327 branch `docs/f43-01-f1-engineering-entry-handoff` advanced by commit `5b11ef7425c33c49ace5f8ef0cadb8e6b55c52db`; handoff file `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md`; Blob `6f8dd7b4ac95c5b470c31585d124f1d1aa31daca`. The commit appends a superseding exact-source refresh for the F3 references and preserves the engineering handoff boundary.
+- Five callable D authority operations: NOT IMPLEMENTED. Durable authoritative Producer Registration Ledger / operation-bound Receipt and runtime equality/linearization: NOT ESTABLISHED. D-002 S1–S7: NOT RUN.
+- Issue #7 comment #7021990583 remains the controlling engineering-entry disposition: `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`, NOT AUTHORIZED / NOT READY. D-2026-1120-01 releases carrier quota only and does not designate a canonical Runtime target or authorize placeholder Runtime code.
+
+### F3 — independent mapping acceptance
+- **Finding:** `F-43-01/F3 | P1 | OPEN` — independently attributable D/H human acceptance and end-to-end operational consumer evidence absent.
+- **Return destinations:** PRs #321/#322/#323; Issues #25/#43.
+- PR #321 D query contract exact commit/Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; contract Blob `099f4948b550919084b0d73094692b590b0be0a9`; active mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
+- PR #322 H TEST-profile exact commit/Head `0ce618ac503f641cf31e66092ae823c14bf8af7b`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; regression-test Blob `e66264ad30df6594e00836524accfdeb54160cee`. Both source files were fetched at the exact commit and the returned Blob SHAs match.
+- Exact-head Actions runs `44681841687` / `44681841601` ended FAILURE before test steps; jobs `136110511473` / `136110524577` have `runner_id=0`, `steps=null`; log retrieval returned HTTP 404 `BlobNotFound`. No test assertion ran and no CI PASS is claimed. Current-source local test execution is NOT RUN / NOT VERIFIED.
+- Both D/H role-labelled decision comments #7021655866 / #7021638212 visibly resolve to GitHub login `oahcom`; distinct authenticated human signer identities are NOT VERIFIED. The role-labelled decisions are not independent identity proof.
+- Callable D query, operation-bound Receipt, currentness/revocation/anti-rollback, H production consumer acceptance and C1–C6 operational proof remain NOT ESTABLISHED.
+
+### Disposition
+The exact-source/handoff/ledger evidence has advanced on existing PR branches and is independently readable by commit and Blob. F1 and F3 remain P1 / OPEN at their substantive exit criteria. No Runtime authorization, D/H human signature, CI PASS, production acceptance, merge or main write is inferred. No new PR, Issue or branch is created by this ledger update. Documentation-only ledger update; tests NOT RUN.
