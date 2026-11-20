@@ -574,3 +574,28 @@ This append-only addendum supersedes stale F1/F3 carrier pins above where they d
 | Current ledger source | This addendum is appended to the authoritative ledger; manifest is refreshed in the immediately following commit to pin the resulting commit and Blob. |
 | Prompt provenance | User-provided D-2026-1120-01 chat instruction, continuation of `conv 6afd60f0-f76c-83ec-9b0b-7094021ed1e2`; immutable platform bytes unavailable; SHA-256 NOT_VERIFIED. |
 | Mutation boundary | Existing PR branch only; no new PR/Issue/branch, no merge, no main write. |
+
+
+## 2026-11-20 Owner-ruling continuation — F1/F3 delivery and exit-state reconciliation
+
+### F-43-01/F1 | P1 | OPEN — Runtime implementation / operational evidence
+- Return: existing PR #327 and Issues #7/#10/#25/#43.
+- Verifiable handoff carrier: PR #327; E1–E8, five D operations, durable Producer Registration Ledger / operation-bound Receipt, equality/linearization proof, fail-closed UNKNOWN and D-002 S1–S7 are documented.
+- Actual callable operations remain NOT IMPLEMENTED; authoritative durable Ledger/Receipt and runtime equality/linearization remain NOT ESTABLISHED; S1–S7 remain NOT RUN.
+- Issue #7 comment #7021990583 records `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED`. The quota-unfreeze ruling changes carrier capacity only and is not a Runtime-target or write-authority designation.
+
+### F-43-01/F3 | P1 | OPEN — independent-human mapping acceptance and operational consumer evidence
+- Return: existing PRs #321/#322/#323 and Issues #25/#43.
+- D query contract: PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; Blob `099f4948b550919084b0d73094692b590b0be0a9`; active H mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
+- H TEST-profile candidate: PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; test Blob `6685226143f28a5b8764067bb205080b531132e3` (15 methods).
+- Focused local replay recorded at PR #322 comment #7032257073: 15/15 PASS. This is not GitHub Actions CI, full-suite CI or production conformance.
+- Exact-head Actions runs #44684299439 / #44684299500 failed before test steps; no CI PASS. Log retrieval returned HTTP 404 `BlobNotFound`; this is an external log-artifact retrieval failure, not test PASS or test assertion failure.
+- D/H role records #7021655866 / #7021638212 both expose GitHub login `oahcom`; distinct authenticated human signers remain NOT VERIFIED. The unsigned attestation template remains PR #323 comment #7031665905; it is not a signature.
+- Callable D query, durable operation-bound Receipt, currentness/revocation/anti-rollback, H production consumer acceptance and C1–C6 operational evidence remain NOT ESTABLISHED / NOT RUN.
+
+### Owner-ruling application and provenance
+- D-2026-1120-01 lifts the carrier quota freeze and permits up to 2 new PRs / 3 new Issues in this turn. Existing PRs #321/#322/#323/#327 are reused; no new PR/Issue/branch is created by this addendum.
+- AI-EXEC-001 v1.1 / Blob `58af59af266b81109269156ea667df1a15edfb7b` is ADOPTED. AI-EXEC-002 v1.2 / Blob `7f5928a5d16eb12da7621cfb8bd99ca463afd859` remains PENDING ADOPTION; v1.1 is the adopted predecessor.
+- Prompt source: T2 user instruction, Owner ruling D-2026-1120-01 in the current continuation. Platform conversation UUID/raw message bytes are not exposed to the repository connector; prompt SHA-256 NOT_VERIFIED. No synthetic digest is asserted.
+
+**Disposition:** F1 handoff and F3 exact-source / TEST-profile artifacts are delivered and reviewable; the underlying F1 implementation and F3 independent-human/operational acceptance findings remain P1 / OPEN. No Owner signature, Runtime authorization, CI PASS, production acceptance, merge or main write is inferred.
