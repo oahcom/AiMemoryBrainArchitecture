@@ -91,7 +91,7 @@ integration_closeout:
 
   authoritative_finding_ledger:
     path: 14-ai-development/work-items/AID-2026-010/finding-ledger.md
-    blob_sha: 479747786fab47a47b7125761c2071921a87b436
+    blob_sha: 239a2e68d1781a78980f0d4d12ca10eb0b6b165b
     authority: SOLE_AUTHORITATIVE_FINDING_STATUS_LEDGER
 
   findings_total: 13
@@ -224,8 +224,8 @@ latest_exact_head_refresh:
     blob: "1bb37ad952a9057069a0d48cbe8f5585917c42c7"
   carriers:
     F1_PR_327:
-      head: "934a76e18ba020d01c520a8484ed7fc37f96cff1"
-      handoff_blob: "2d453d24ae5e65973ced964918b9f3687a5d3284"
+      head: "8205664c79e9216da6c7b0fa20ba90d23a070ff4"
+      handoff_blob: "09606b739d62570c061b24e459772468206e6a86"
       status: "P1_OPEN_RUNTIME_IMPLEMENTATION_NOT_ESTABLISHED"
       exact_head_check_runs: 0
     F3_PR_321:
@@ -260,8 +260,8 @@ latest_concurrent_ref_correction:
 
 latest_ledger_pin_reconciliation:
   date: "2026-11-20"
-  commit: "37d155fed076f271a42ff8e9343cdbd92c80d7cc"
-  blob: "1bb37ad952a9057069a0d48cbe8f5585917c42c7"
+  commit: "0aec53cb748443020eedd348127dd74ae4467cd7"
+  blob: "239a2e68d1781a78980f0d4d12ca10eb0b6b165b"
   note: "Supersedes prior live-ref ledger pin after concurrent evidence refresh; current branch readback verified."
 
 
@@ -270,8 +270,8 @@ latest_exact_head_refresh:
   date: "2026-11-20"
   finding_ledger:
     path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-    commit: "4e49e78380bc3b4d4a362d35a654c661a2561a51"
-    blob: "b668a9d58859589ab33f1227bedb7a1327ee32b9"
+    commit: "0aec53cb748443020eedd348127dd74ae4467cd7"
+    blob: "239a2e68d1781a78980f0d4d12ca10eb0b6b165b"
   carriers:
     F1_PR_327:
       head: "934a76e18ba020d01c520a8484ed7fc37f96cff1"
@@ -289,7 +289,7 @@ latest_exact_head_refresh:
       test_blob: "6685226143f28a5b8764067bb205080b531132e3"
       test_methods: 15
       latest_retry_runs: [44684299439, 44684299500]
-      latest_retry_jobs: [136119955880, 136119969030]
+      latest_retry_jobs: [136123345286, 136123331637]
       ci_result: "FAILURE_BEFORE_TEST_STEPS; steps=null; log HTTP 404 BlobNotFound; no CI PASS"
       status: "P1_OPEN_TEST_PROFILE_CANDIDATE_NOT_CI_PASS"
     F3_independent_acceptance:
@@ -298,7 +298,7 @@ latest_exact_head_refresh:
       H_role_comment: 7021638212
       visible_identity_for_both: "oahcom"
       distinct_human_signers: "NOT_VERIFIED"
-      unsigned_attestation_carrier: "PR #323 comment 7031665905"
+      unsigned_attestation_carrier: "Issue #43 comment 7031977399"
       status: "P1_OPEN_INDEPENDENT_HUMAN_ACCEPTANCE"
   finding_counts:
     total: 13
@@ -315,8 +315,8 @@ latest_exact_head_refresh:
 # Attestation-template exact pin
 f3_independent_attestation_template:
   file: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "17851168271d15d1d8ff174bd6885f8136ef4b7c"
-  ledger_blob: "f4e760aebe6c4f1532a95b52fab511cad596c4b8"
+  ledger_commit: "0aec53cb748443020eedd348127dd74ae4467cd7"
+  ledger_blob: "239a2e68d1781a78980f0d4d12ca10eb0b6b165b"
   insertion_anchor: "F-43-01/F3 — unsigned independent-human attestation substitute (ready to complete)"
   status: "TEMPLATE_ONLY_NOT_A_SIGNATURE"
   suppliers: ["D human role holder", "H human role holder"]
