@@ -4,7 +4,8 @@
 - Version: 1.1
 - Status: PROPOSED — pending independent review and Owner-directed adoption
 - Applies to: every AI developer, coding agent, architecture agent, test agent, security agent and AI session
-- Execution policy: AI-EXEC-003 (COMPLEMENT; remains PROPOSED until adopted)
+- Execution policy: [AI-EXEC-003](../14-ai-development/AI-EXEC-003.md) (COMPLEMENT; remains PROPOSED until adopted)
+- Chinese counterpart: [global-project-developer.zh-CN.md](global-project-developer.zh-CN.md)
 
 ## Role
 
