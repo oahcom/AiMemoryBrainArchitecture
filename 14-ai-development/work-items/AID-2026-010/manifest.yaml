@@ -156,6 +156,14 @@ integration_closeout:
 
 current_status_refresh:
   date: "2026-11-20"
+  carrier_quota_status: RELEASED
+  carrier_quota_release_authority: "Owner ruling D-2026-1120-01, 2026-11-20 12:20"
+  carrier_quota_limits: "This round: maximum 2 new PRs and 3 new Issues"
+  carrier_quota_history_note: >-
+    The historical integration_closeout.quota_freeze value is retained as an
+    as-of record from the prior freeze period; this current-status field
+    records the subsequent Owner release and supersedes that historical
+    restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
   ledger_commit: "7c5053df955b8d1450a8e35cef7b48f1be775d14"
   ledger_blob_sha: "add1e7c4f0cd92145323364d589320fee40d3861"
