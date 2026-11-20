@@ -449,3 +449,38 @@ This addendum supersedes earlier F1/F3 carrier pins above. It records current ex
 - Governance files: AI-EXEC-001 v1.1 ADOPTED, Blob `58af59af266b81109269156ea667df1a15edfb7b`; AI-EXEC-002 v1.2 PENDING ADOPTION, Blob `7f5928a5d16eb12da7621cfb8bd99ca463afd859`; AI-EXEC-002 v1.1 remains the adopted predecessor.
 - T2: user-supplied Owner ruling D-2026-1120-01 and continuation instruction. Parent conversation ID supplied by user: `6afd445b-38e4-83e8-b39f-08a50a7d2d3b`. Current platform conversation UUID and immutable raw message bytes are not exposed; SHA-256 NOT_VERIFIED. No prompt file or synthetic digest is substituted.
 
+
+
+### F-43-01/F3 — unsigned independent-human attestation substitute (ready to complete)
+
+**Target:** this existing authoritative ledger file, `14-ai-development/work-items/AID-2026-010/finding-ledger.md`.  
+**Insertion anchor:** append immediately after the section `2026-11-20 D-2026-1120-01 — F1/F3 live exact-head closeout refresh` (this section).  
+**Status:** TEMPLATE ONLY — not a signature and not acceptance.
+
+Each actual human role holder must complete a separate copy:
+
+```text
+Finding: F-43-01/F3
+Accepted mapping Blob: 004fc0261b447771e73a0f8cfdd34ec1f8b33e49
+D query-contract PR #321 Head: 35668e63a98cbd0f9ea73573ab9251ac5c2bb881
+H TEST-profile PR #322 Head: a336c85763df0135aa64ecec3cfdac8acd08a8eb
+
+Role: [D Owner | H Owner]
+Human name:
+Authenticated GitHub identity:
+Appointment / authority evidence:
+Independence and conflict-of-interest declaration:
+Exact Blob independently fetched and reviewed: YES / NO
+Disposition: ACCEPT | ACCEPT WITH LIMITATIONS | REJECT
+Limitations / excluded claims:
+Review evidence and timestamp:
+Human signature:
+Signature provenance / verification:
+
+Boundary: acceptance covers only the normative mapping Blob. It does not
+accept callable D query, durable Receipt, currentness/revocation,
+H production consumer conformance, CI, or F3 closure.
+```
+
+**Supplier:** actual D and H human role holders, separately.  
+**Verification:** authenticate each identity and appointment; establish the identities are distinct; verify each signature and provenance; independently fetch and compare the exact mapping Blob above. The two existing role-labelled comments #7021655866 and #7021638212 both expose GitHub login `oahcom`, so they do not satisfy this independent-human check. No signature is inferred or fabricated.
