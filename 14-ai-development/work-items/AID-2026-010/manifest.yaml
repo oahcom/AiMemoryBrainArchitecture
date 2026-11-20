@@ -826,3 +826,46 @@ live_exact_ref_reconciliation_2026_11_20:
     runtime_implementation_claimed: false
     independent_owner_signature_claimed: false
     production_acceptance_claimed: false
+
+
+current_turn_final_exact_refresh_d2026_1120_01:
+  date: "2026-11-20"
+  branch: "fix/f43-01-f3-ledger-reconcile"
+  ledger_path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  ledger_commit: "a8d99a2090112002f47641e8c595d46c61c6ddb6"
+  ledger_blob: "867d7b2dc9476b0cf5a38d1ec9dbb98308a26017"
+  index_blob: "3ef2ab10d710ad190fc15caef0bb6b47c198f60e"
+  f1_handoff:
+    pr: 327
+    head: "2858c8798deaf30fb12709e8226f880534c963f1"
+    blob: "eec6314a02b5feb495d21ed1fd065a84742be8d1"
+  f3:
+    d_query_pr: 321
+    d_query_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+    d_query_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+    active_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    h_test_pr: 322
+    h_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+    validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+    test_blob: "e66264ad30df6594e00836524accfdeb54160cee"
+    exact_head_ci:
+      run_44681841601_job: "136132756794"
+      run_44681841687_job: "136132765897"
+      disposition: "FAILURE; empty steps; test steps did not start; no CI PASS"
+  f43_11:
+    disposition: "RESOLVED_ON_THIS_PR_BRANCH_NOT_MERGED"
+    issue_43_comment: 7024096352
+    current_index_status: "10/13 CLOSED; 2/13 OPEN (F1/F3); 1/13 BLOCKED (F-43-02)"
+  findings:
+    F-43-01/F1: "P1_OPEN_IMPLEMENTATION_EVIDENCE"
+    F-43-01/F3: "P1_OPEN_INDEPENDENT_HUMAN_AND_OPERATIONAL_EVIDENCE"
+    F-43-02: "BLOCKED"
+  tests: "NOT RUN for documentation-only ledger/manifest updates"
+  no_main_write: true
+  no_merge: true
+  prompt_provenance:
+    source_type: "T2_CHAT_INSTRUCTION"
+    source: "User-provided Owner ruling D-2026-1120-01"
+    platform_conversation_id: "NOT_EXPOSED"
+    immutable_message_bytes: "NOT_AVAILABLE"
+    sha256: "NOT_VERIFIED"
