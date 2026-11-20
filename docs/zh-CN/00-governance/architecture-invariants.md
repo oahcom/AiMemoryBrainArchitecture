@@ -35,6 +35,17 @@
 | I-23 | 每一项架构设计或改变架构语义的修改，都必须在同一个变更集中提供中文和英文文档；只有符合 GOV-DOC-001 的受治理临时例外才可暂缓。 |
 | I-24 | 架构文档验收必须检查双语语义一致性、稳定标识一致性、决策状态一致性以及源版本可追溯性。 |
 
+## AID-2026-014 Claim/Fact 语义不变量
+
+- Claim 与 Fact 是独立的规范对象。
+- 保持命题身份的 Revision 之间必须保持稳定 Claim 身份。
+- ClaimRevision 不可变，必须通过精确 ClaimRevisionRef 寻址。
+- FactRevision 必须绑定准确 ClaimRevisionRef、Evidence、Provenance、Scope、Attestor 和 Method/Version。
+- FactRevision 必须保留精确 I 授权决定引用。
+- F 和 G 不得以当前 Head 或语义相似度解析替代精确历史 Revision 引用。
+- Forget 检查必须覆盖共享 Fact 依赖及所有声明的替代读取路径。
+- 以上是语义不变量，不构成 Schema、DDL、公开 API 或实现验收批准。
+
 ## 执行要求
 
 每份子系统规范都必须说明自己负责执行哪些不变量、依赖哪些不变量，以及如何发现和处理违反不变量的情况。实现审查不得隐式豁免任何不变量；如需变更，必须提供明确的 ADR 和影响分析。

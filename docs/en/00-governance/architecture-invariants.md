@@ -35,6 +35,17 @@ These invariants are normative constraints for all subsystem specifications and 
 | I-23 | Every architecture design or semantic architecture change must include Chinese and English documentation in the same change set, subject only to the governed temporary exception in GOV-DOC-001. |
 | I-24 | Architecture documentation acceptance requires bilingual semantic parity, stable-identifier parity, matching decision status, and traceable source revisions. |
 
+## AID-2026-014 Claim/Fact semantic invariants
+
+- Claim and Fact are independent canonical objects.
+- Claim identity is stable across proposition-preserving revisions.
+- ClaimRevision is immutable and must be addressed by exact ClaimRevisionRef.
+- FactRevision must bind exact ClaimRevisionRef, Evidence, Provenance, Scope, Attestor and Method/Version.
+- FactRevision must retain the exact I authorization decision reference.
+- F and G must not substitute current-head or semantic-similarity resolution for exact historical revision references.
+- Forget enforcement must cover shared Fact dependencies and every declared alternate read path.
+- These are semantic invariants, not Schema, DDL, public API or implementation-acceptance approvals.
+
 ## Enforcement expectation
 
 Each subsystem specification must identify which invariants it enforces, which it relies on, and how violations are detected and handled. An implementation review must not waive an invariant implicitly; a change requires an explicit architecture decision record and impact analysis.
