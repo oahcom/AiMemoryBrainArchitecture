@@ -2,7 +2,7 @@
 
 ## Measured path
 
-The repository's executable reference adapter is \`crates/memory-storage-sqlite/src/lib.rs\`, implementation \`SqliteMemoryStorage::commit_version\`. The Rust example in this crate calls that exact method. It measures one sequential writer, one memory, empty-claim versions, SQLite WAL mode and synchronous=FULL.
+The repository's executable reference adapter is `crates/memory-storage-sqlite/src/lib.rs`, implementation `SqliteMemoryStorage::commit_version`. The Rust example in this crate calls that exact method. It measures one sequential writer, one memory, empty-claim versions, SQLite WAL mode and synchronous=FULL.
 
 Each write traverses the adapter's scope validation, JSON encoding, IMMEDIATE transaction, memory/current-version lookup, idempotency lookup, parent-version check, sequence allocation, version insert, memory update, commit-log insert, idempotency receipt insert and transaction commit.
 
@@ -10,19 +10,19 @@ Each write traverses the adapter's scope validation, JSON encoding, IMMEDIATE tr
 
 From repository root:
 
-\`\`\`sh
+```sh
 cargo run --release -p memory-storage-sqlite --example commit_hot_path -- 1000 100 /tmp/req10-sqlite-hotpath.db
-\`\`\`
+```
 
-Arguments: measured operations, warm-up operations, optional DB path. It prints P50/P95/P99, mean, throughput, Linux process peak RSS, DB/WAL/SHM bytes and process CPU ticks. Percentiles use nearest-rank. The example is Linux-oriented for RSS/CPU counters; those fields report NOT_AVAILABLE where \`/proc\` is absent.
+Arguments: measured operations, warm-up operations, optional DB path. It prints P50/P95/P99, mean, throughput, Linux process peak RSS, DB/WAL/SHM bytes and process CPU ticks. Percentiles use nearest-rank. The example is Linux-oriented for RSS/CPU counters; those fields report NOT_AVAILABLE where `/proc` is absent.
 
 ## SQL mirror fallback
 
-\`benchmarks/req10/sqlite_commit_sql_mirror.py\` is a standard-library-only fallback that mirrors the adapter's SQL transaction structure. It does **not** invoke the Rust adapter method and must not be described as Rust adapter performance.
+`benchmarks/req10/sqlite_commit_sql_mirror.py` is a standard-library-only fallback that mirrors the adapter's SQL transaction structure. It does **not** invoke the Rust adapter method and must not be described as Rust adapter performance.
 
-\`\`\`sh
+```sh
 python3 benchmarks/req10/sqlite_commit_sql_mirror.py --samples 1000 --warmup 100
-\`\`\`
+```
 
 ## Interpretation
 
