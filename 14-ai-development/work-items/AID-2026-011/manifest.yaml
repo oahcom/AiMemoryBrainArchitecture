@@ -89,7 +89,7 @@ acceptance:
 
 verification:
   repository_tests: NOT_RUN
-  exact_head_readback: PENDING_FINAL_READBACK
+  exact_head_readback: VERIFIED — 8/8 deliverable paths re-read; final head is the PR #330 head
   bilingual_semantic_review: PENDING_INDEPENDENT_REVIEW
   adoption: NOT_GRANTED
 
@@ -97,7 +97,7 @@ lifecycle:
   phase: PROPOSAL
   gates:
     registration: SATISFIED_PENDING_READBACK
-    implementation: IN_PROGRESS
+    implementation: IMPLEMENTED
     verification: PENDING
     independent_review: PENDING
     owner_acceptance: NOT_GRANTED
