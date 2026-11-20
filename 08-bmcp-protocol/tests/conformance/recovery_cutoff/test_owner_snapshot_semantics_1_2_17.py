@@ -13,9 +13,6 @@ from owner_snapshot_semantics_1_2_17 import (  # noqa: E402
 )
 
 NON_TYPED_BOUNDED_FIELDS = (
-    "work_item_high_water",
-    "attempt_high_water",
-    "barrier_generation",
     "dependency_closure_cursor",
 )
 
@@ -157,8 +154,15 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
 
 
 
-    def test_both_typed_high_waters_accept_zero_and_signed_64_maximum(self):
-        for field in ("producer_registration_high_water", "forget_fence_generation_high_water"):
+    def test_all_five_d_high_waters_accept_zero_and_signed_64_maximum(self):
+        fields = (
+            "producer_registration_high_water",
+            "work_item_high_water",
+            "attempt_high_water",
+            "barrier_generation",
+            "forget_fence_generation_high_water",
+        )
+        for field in fields:
             for value in ("0", str((1 << 63) - 1)):
                 with self.subTest(field=field, value=value):
                     snapshot = d_snapshot()
@@ -171,8 +175,15 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
                         VALID,
                     )
 
-    def test_both_typed_high_waters_reject_values_above_signed_64_maximum(self):
-        for field in ("producer_registration_high_water", "forget_fence_generation_high_water"):
+    def test_all_five_d_high_waters_reject_values_above_signed_64_maximum(self):
+        fields = (
+            "producer_registration_high_water",
+            "work_item_high_water",
+            "attempt_high_water",
+            "barrier_generation",
+            "forget_fence_generation_high_water",
+        )
+        for field in fields:
             with self.subTest(field=field):
                 snapshot = d_snapshot()
                 snapshot["owner_specific_high_waters"][field] = str(1 << 63)
@@ -184,8 +195,38 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
                     INVALID,
                 )
 
-    def test_noncanonical_decimal_is_invalid_and_not_normalized_by_h(self):
-        for value in ("00", "08", "-1", "", " 8", "8 ", "8.0", "8e0"):
+    def test_leading_zero_d_values_are_accepted_and_canonicalized_before_digest_projection(self):
+        fields = (
+            "producer_registration_high_water",
+            "work_item_high_water",
+            "attempt_high_water",
+            "barrier_generation",
+            "forget_fence_generation_high_water",
+        )
+        for field in fields:
+            with self.subTest(field=field):
+                snapshot = d_snapshot()
+                values = snapshot["owner_specific_high_waters"]
+                values[field] = "000" + values[field]
+                canonical_projection = dict(values)
+                canonical_projection[field] = str(int(values[field]))
+                snapshot["owner_specific_high_waters_digest"] = _td(
+                    "OWNER-SPECIFIC-HIGH-WATERS", canonical_projection
+                )
+                self.assertEqual(
+                    validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
+                    VALID,
+                )
+                snapshot["owner_specific_high_waters_digest"] = _td(
+                    "OWNER-SPECIFIC-HIGH-WATERS", values
+                )
+                self.assertEqual(
+                    validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
+                    INVALID,
+                )
+
+    def test_invalid_d_decimal_forms_are_rejected(self):
+        for value in ("-1", "+8", "", " 8", "8 ", "8.0", "8e0", "١", "1_0"):
             with self.subTest(value=value):
                 snapshot = d_snapshot()
                 snapshot["owner_specific_high_waters"]["producer_registration_high_water"] = value
@@ -196,17 +237,6 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
                     validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
                     INVALID,
                 )
-
-    def test_untyped_d_local_high_water_is_not_given_the_two_field_bound(self):
-        snapshot = d_snapshot()
-        snapshot["owner_specific_high_waters"]["work_item_high_water"] = str(1 << 63)
-        snapshot["owner_specific_high_waters_digest"] = _td(
-            "OWNER-SPECIFIC-HIGH-WATERS", snapshot["owner_specific_high_waters"]
-        )
-        self.assertEqual(
-            validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
-            VALID,
-        )
 
     def test_existing_legal_d_snapshot_remains_valid(self):
         self.assertEqual(
@@ -233,6 +263,53 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
             validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
             VALID,
         )
+
+
+    def test_all_five_d_high_waters_accept_512_char_leading_zero_input_when_canonical_value_is_in_range(self):
+        fields = (
+            "producer_registration_high_water",
+            "work_item_high_water",
+            "attempt_high_water",
+            "barrier_generation",
+            "forget_fence_generation_high_water",
+        )
+        for field in fields:
+            with self.subTest(field=field):
+                snapshot = d_snapshot()
+                values = snapshot["owner_specific_high_waters"]
+                values[field] = "0" * 511 + "8"
+                canonical_projection = dict(values)
+                canonical_projection[field] = "8"
+                snapshot["owner_specific_high_waters_digest"] = _td(
+                    "OWNER-SPECIFIC-HIGH-WATERS", canonical_projection
+                )
+                self.assertEqual(
+                    validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
+                    VALID,
+                )
+
+    def test_all_five_d_high_waters_reject_513_char_input_before_authority_callbacks(self):
+        fields = (
+            "producer_registration_high_water",
+            "work_item_high_water",
+            "attempt_high_water",
+            "barrier_generation",
+            "forget_fence_generation_high_water",
+        )
+        for field in fields:
+            with self.subTest(field=field):
+                snapshot = d_snapshot()
+                values = snapshot["owner_specific_high_waters"]
+                values[field] = "0" * 512 + "8"
+                snapshot["owner_specific_high_waters_digest"] = _td(
+                    "OWNER-SPECIFIC-HIGH-WATERS", values
+                )
+                calls = []
+                self.assertEqual(
+                    validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities(calls)),
+                    INVALID,
+                )
+                self.assertEqual(calls, [])
 
 
 if __name__ == "__main__":

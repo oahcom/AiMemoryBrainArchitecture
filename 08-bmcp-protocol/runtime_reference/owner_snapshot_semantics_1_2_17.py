@@ -14,8 +14,11 @@ VALID, INVALID, UNKNOWN = "VALID", "INVALID", "UNKNOWN"
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 DECIMAL = re.compile(r"^(0|[1-9][0-9]*)$")
 MAX_D_TYPED_HIGH_WATER = (1 << 63) - 1
-D_TYPED_HIGH_WATER_FIELDS = frozenset({
+D_SIGNED_64_HIGH_WATER_FIELDS = frozenset({
     "producer_registration_high_water",
+    "work_item_high_water",
+    "attempt_high_water",
+    "barrier_generation",
     "forget_fence_generation_high_water",
 })
 
@@ -23,6 +26,16 @@ D_TYPED_HIGH_WATER_FIELDS = frozenset({
 def _is_canonical_decimal(value: str) -> bool:
     """Accept only the canonical unsigned decimal wire form; never rewrite signed bytes."""
     return isinstance(value, str) and DECIMAL.fullmatch(value) is not None
+
+
+def _canonical_d_high_water(value: str) -> str | None:
+    """Parse one D nominal high-water and return its canonical decimal projection."""
+    if not isinstance(value, str) or re.fullmatch(r"[0-9]+", value) is None:
+        return None
+    number = int(value)
+    if number > MAX_D_TYPED_HIGH_WATER:
+        return None
+    return str(number)
 
 D_BOUNDED_STRING_FIELDS = frozenset({
     "producer_registration_high_water",
@@ -104,19 +117,24 @@ def validate_owner_snapshot_1_2_17(
         if not isinstance(snapshot[key], str) or not HEX64.fullmatch(snapshot[key]):
             return INVALID
 
+    digest_projection = dict(values)
     for key, value in values.items():
         if key.endswith("digest") or key.endswith("_root"):
             if not HEX64.fullmatch(value):
                 return INVALID
         if key.endswith("_high_water") or key.endswith("_generation"):
-            if not _is_canonical_decimal(value):
-                return INVALID
-            # D 1.3.1 §5.1 bounds the two typed H high-water fields independently.
-            # Never compare, cast, or derive one nominal type from the other.
-            if key in D_TYPED_HIGH_WATER_FIELDS and int(value) > MAX_D_TYPED_HIGH_WATER:
+            if key in D_SIGNED_64_HIGH_WATER_FIELDS:
+                # D 1.3.1 §5.1 requires accepting leading zeroes, then
+                # canonicalizing independently within this nominal type.
+                # D-AUTH-QUERY-1.0 §2.2 bounds all five D numeric types.
+                canonical_value = _canonical_d_high_water(value)
+                if canonical_value is None:
+                    return INVALID
+                digest_projection[key] = canonical_value
+            elif not _is_canonical_decimal(value):
                 return INVALID
 
-    if snapshot["owner_specific_high_waters_digest"] != _td("OWNER-SPECIFIC-HIGH-WATERS", dict(values)):
+    if snapshot["owner_specific_high_waters_digest"] != _td("OWNER-SPECIFIC-HIGH-WATERS", digest_projection):
         return INVALID
 
     if not all(callable(x) for x in (verify_attestation, verify_ledger_currentness, verify_anti_rollback)):
