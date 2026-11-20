@@ -92,6 +92,18 @@ A typed provenance edge with memory_source_id, typed source_ref (versioned where
 ### Derivation record
 Provenance includes target_ref, source edges, derivation_kind, method/component version, derived_at, input digests, parent provenance refs, and unavailable_reason where incomplete. Kinds include direct_capture, extraction, normalization, summarization, consolidation, inference, human_correction, verification, and migration. Method identity describes process; it is not proof of correctness.
 
+## 5A. Claim/Fact lineage and references
+
+ClaimRevision is the exact immutable assertion state referenced by downstream governed objects.
+
+FactRevision MUST reference exact ClaimRevisionRef values and the relevant EvidenceRef and ProvenanceRef values.
+
+A relationship between FactRevision and ClaimRevision is an explicit governed reference, not an implicit current-head relationship.
+
+Forget dependency discovery MUST traverse these references and their registered derivatives.
+
+Historical lineage does not grant authorization to read forgotten content.
+
 ## 6. Evidence strength and independence
 
 Evidence strength is assessed relative to a Claim and role. It may depend on directness, integrity, temporal proximity, corroboration, contradiction, and source independence. It is distinct from source Trust and Claim Confidence.

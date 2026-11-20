@@ -99,6 +99,18 @@ Context Entry 是呈现/引用，不是新的 Canonical 派生。如果压缩过
 
 Provenance 包含 target_ref、source edges、derivation_kind、method/component version、derived_at、input digests、parent provenance refs，以及在信息不完整时的 unavailable_reason。派生类型包括 direct_capture、extraction、normalization、summarization、consolidation、inference、human_correction、verification 和 migration。Method Identity 只描述过程，不证明正确性。
 
+## 5A. Claim/Fact 谱系与引用
+
+ClaimRevision 是下游治理对象所引用的精确不可变断言状态。
+
+FactRevision MUST 引用精确 ClaimRevisionRef，以及相关 EvidenceRef 和 ProvenanceRef。
+
+FactRevision 与 ClaimRevision 之间的关系是明确的受治理引用，不是隐式的当前 Head 关系。
+
+Forget 依赖发现 MUST 遍历这些引用及其已登记的派生对象。
+
+历史谱系不构成读取已遗忘内容的授权。
+
 ## 6. Evidence Strength 与独立性
 
 Evidence Strength 相对于特定 Claim 和角色进行评估。它可能取决于直接程度、完整性、时间接近程度、佐证、矛盾和来源独立性。它不同于来源 Trust 和 Claim Confidence。
