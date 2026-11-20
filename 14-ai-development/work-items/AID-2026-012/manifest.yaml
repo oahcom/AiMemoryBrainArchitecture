@@ -1,10 +1,10 @@
 aid: AID-2026-012
 title: H Owner — F-43-07 Stage 3 Consumer Mapping Independent Acceptance
 owner: H Owner
-accountable_owner: H Owner (via L0 session, dev-baseline auto-closure)
+accountable_owner: NOT_ASSIGNED
 class: ARCH/R3
 risk: R3
-status: REGISTERED
+status: COMPLETED
 created: 2026-11-20
 created_by: L0 (dev-baseline process registration per INDEX.md rules)
 authorization_basis: |

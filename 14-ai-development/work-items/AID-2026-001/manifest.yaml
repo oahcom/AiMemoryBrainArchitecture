@@ -30,8 +30,8 @@ r3_convergence:
     - D/I normative same-SHA approval
     - production CI / deployment acceptance
   registration_date: 2026-11-20
-sponsor: project user
-accountable_owner: A
+sponsor: NOT_ASSIGNED
+accountable_owner: NOT_ASSIGNED
 implementing_ai_session: AID-2026-001-EXEC-001
 execution_record_ref: 14-ai-development/work-items/AID-2026-001/execution-record-001.md
 independent_reviewer: PENDING — genuinely new ChatGPT conversation required; must not have participated in implementation
@@ -45,7 +45,7 @@ r3_forget_specialist_prompt: 14-ai-development/work-items/AID-2026-001/r3-specia
 integration_reviewer_prompt: 14-ai-development/work-items/AID-2026-001/integration-review-prompt.md
 r3_test_evidence_status: NOT_RUN_NOT_EVIDENCED
 acceptance_blocker: R3 specialist reports and reproducible R3 contract-test evidence are mandatory before acceptance
-acceptance_authority: project governance authority
+acceptance_authority: NOT_ASSIGNED
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
 base_commit_sha: b372b62c640a2b656e54b6db62a4ee67d7d8c001
