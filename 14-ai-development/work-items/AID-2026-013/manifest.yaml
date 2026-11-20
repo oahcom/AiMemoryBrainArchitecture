@@ -4,7 +4,7 @@ owner: COC Owner
 accountable_owner: COC Owner (via L0 session, dev-baseline auto-closure)
 class: ARCH/R3
 risk: R3
-status: REGISTERED
+status: COMPLETED
 created: 2026-11-20
 created_by: L0 (dev-baseline process registration per INDEX.md rules)
 authorization_basis: |
@@ -24,3 +24,49 @@ deliverables:
   - If applicable: ParticipantIntent schema + quorum + binding rules
   - If not applicable: NOT_REQUIRED disposition
   - #43 registration with Decision ID + precise SHA/Blob
+
+closeout_backfill:
+  date: "2026-11-20"
+  decision_id: "AID-2026-020-LEDGER-SELF-CONSISTENCY-2026-11-20-001"
+
+  authoritative_owner_decision:
+    decision_id: "COC-OWNER-2026-11-19-001"
+    disposition: NOT_REQUIRED
+    scope: >-
+      Strictly limited to the exact operation, scope and version specified
+      by the COC Owner decision. This is an authoritative COC applicability
+      exclusion, not a general exemption from COC requirements.
+
+  decision_artifact:
+    branch: "recovery/c-owner-tree-2026-11-18"
+    commit: "ec59bacd2ac4d8695275578ef833db63ff29bd46"
+    path: "reviews/causal-order-coordinator/phase-3.8.37-coc-f43-07-applicability-decision.md"
+    blob_sha: "89c9e1c718195257c940fce69a2adbc81c01d034"
+    issue_43_comment: "7023843575"
+
+  integration_adjudication:
+    decision_id: "A-OWNER-INTEGRATION-R45-2026-11-20"
+    finding_id: "F-43-07"
+    finding_status: CLOSED
+    closure_scope: >-
+      Normative ParticipantRef mapping or exclusion, Owner identity binding,
+      ordering and recovery architecture-contract delivery only.
+      This does not represent implementation or runtime conformance.
+
+  limitations: >-
+    NOT_REQUIRED is conditional on the exact operation/scope/version and
+    the authenticated negative-applicability proof requirements in the
+    COC decision. Missing, stale, unauthenticated, mismatched or
+    unresolvable proof remains UNKNOWN/BLOCKED. This record does not
+    establish production deployment of COC_JOIN_NOT_REQUIRED signing,
+    verification or enforcement. It is NOT production signing,
+    production authorization, runtime conformance or architecture
+    acceptance.
+
+  authority_boundary:
+    records_existing_decision_only: true
+    creates_new_authority: false
+    changes_finding_status: false
+    production_signing_authorized: false
+    production_activation_authorized: false
+    main_merge_authorized: false

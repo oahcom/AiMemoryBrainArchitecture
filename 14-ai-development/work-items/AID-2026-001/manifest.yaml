@@ -4,7 +4,7 @@ class: ARCH
 risk: R3
 risk_rationale: Normative security-identity, authorization, privacy/retention/audit and Forget/deletion boundary changes; highest applicable risk governs the Work Item.
 security_scope: SEC — cross-cutting normative security and Forget governance boundaries
-status: REMEDIATION_IN_PROGRESS
+status: CONVERGED_DEVELOPMENT_BASELINE_ONLY
 
 # === R3 development-baseline convergence registration (2026-11-20) ===
 # Historical statuses below are NOT overwritten; this block is authoritative

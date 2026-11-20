@@ -12,7 +12,7 @@ related_prs: []
 task_class: ARCH
 risk: R3
 risk_note: Tentative conservative classification pending risk re-review.
-status: PROPOSED
+status: CONVERGED_DEVELOPMENT_BASELINE_ONLY
 registration_status: REGISTERED
 registration_note: >-
   Number assignment by A (A-OWNER-ALIGNMENT-001-R16). Three persistence
