@@ -11,6 +11,8 @@ from enum import Enum
 from hashlib import sha256
 from typing import Dict, Iterable, Optional
 
+from r3_contract_model import EvidenceRecord, canonical_evidence_valid
+
 
 class Phase(str, Enum):
     REQUESTED = "Requested"
@@ -69,15 +71,46 @@ class Target:
     exception_approved: bool = False
     exception_expires: Optional[int] = None
 
-    def has_current_evidence(self, generation: int) -> bool:
-        return (
-            self.state not in {TargetState.PENDING, TargetState.IN_PROGRESS,
-                               TargetState.FAILED, TargetState.UNKNOWN,
-                               TargetState.UNSUPPORTED}
-            and self.fence_generation == generation
-            and self.capability != "unsupported"
-            and bool(self.evidence_ref)
-            and bool(self.evidence_kind)
+    def has_current_evidence(
+        self,
+        generation: int,
+        operation_id: str,
+        evidence_registry: Dict[str, EvidenceRecord],
+    ) -> bool:
+        if (
+            self.state in {
+                TargetState.PENDING,
+                TargetState.IN_PROGRESS,
+                TargetState.FAILED,
+                TargetState.UNKNOWN,
+                TargetState.UNSUPPORTED,
+                TargetState.ACKNOWLEDGED,
+                TargetState.POLICY_RETAINED,
+            }
+            or self.fence_generation != generation
+            or self.capability != "supported"
+            or not self.evidence_ref
+            or not self.evidence_kind
+        ):
+            return False
+
+        record = evidence_registry.get(self.evidence_ref)
+        if not isinstance(record, EvidenceRecord):
+            return False
+
+        if (
+            record.evidence_ref != self.evidence_ref
+            or record.evidence_kind != self.evidence_kind
+            or record.capability != self.capability
+        ):
+            return False
+
+        return canonical_evidence_valid(
+            evidence_record=record,
+            target_id=self.target_id,
+            operation_id=operation_id,
+            required_action=self.required_action,
+            current_generation=generation,
         )
 
 
@@ -95,6 +128,7 @@ class ForgetOperation:
     governance: Governance = Governance.PENDING
     domain_targets: Dict[str, Target] = field(default_factory=dict)
     cross_system_targets: Dict[str, Target] = field(default_factory=dict)
+    evidence_registry: Dict[str, EvidenceRecord] = field(default_factory=dict)
     checkpoints: Dict[str, str] = field(default_factory=dict)
     lease_fence: int = 0
     _request_hash: str = ""
@@ -149,13 +183,24 @@ class ForgetOperation:
             raise ContractError("cleanup requires sealed inventory")
         self.phase = Phase.CLEANUP_IN_PROGRESS
 
-    def record_target(self, target_id: str, state: TargetState,
-                      evidence_ref: str, evidence_kind: str,
-                      *, domain_target: bool = False,
-                      capability: str = "supported") -> None:
+    def record_target(
+        self,
+        target_id: str,
+        state: TargetState,
+        evidence_ref: str,
+        evidence_kind: str,
+        *,
+        domain_target: bool = False,
+        capability: str = "supported",
+    ) -> None:
         inventory = self.domain_targets if domain_target else self.cross_system_targets
         if target_id not in inventory:
             raise ContractError("target is not in the current sealed inventory")
+        if not isinstance(evidence_ref, str) or not evidence_ref.strip():
+            raise ContractError("evidence_ref is required")
+        if not isinstance(evidence_kind, str) or not evidence_kind.strip():
+            raise ContractError("evidence_kind is required")
+
         target = inventory[target_id]
         target.state = state
         target.fence_generation = self.fence_generation
@@ -164,14 +209,23 @@ class ForgetOperation:
         target.capability = capability
 
     def evaluate_domain(self) -> bool:
-        if self.phase not in {Phase.CLEANUP_IN_PROGRESS,
-                              Phase.DOMAIN_COMPLETION_EVALUATED}:
+        if self.phase not in {
+            Phase.CLEANUP_IN_PROGRESS,
+            Phase.DOMAIN_COMPLETION_EVALUATED,
+        }:
             raise ContractError("domain evaluation requires cleanup")
+
         accepted = {TargetState.CLEANED, TargetState.ERASED}
         complete = all(
-            t.state in accepted and t.has_current_evidence(self.fence_generation)
-            for t in self.domain_targets.values()
+            target.state in accepted
+            and target.has_current_evidence(
+                self.fence_generation,
+                self.operation_id,
+                self.evidence_registry,
+            )
+            for target in self.domain_targets.values()
         )
+
         self.phase = Phase.DOMAIN_COMPLETION_EVALUATED
         if complete:
             self.phase = Phase.COMPLETED
@@ -181,29 +235,80 @@ class ForgetOperation:
         accepted = {TargetState.ERASED, TargetState.EXPIRED}
         all_accepted = True
         exception_used = False
+
         for target in self.cross_system_targets.values():
-            if not target.has_current_evidence(self.fence_generation):
-                all_accepted = False
-                break
-            if target.state in accepted:
-                continue
-            if (target.state == TargetState.POLICY_RETAINED
+            record = (
+                self.evidence_registry.get(target.evidence_ref)
+                if target.evidence_ref
+                else None
+            )
+
+            if target.state == TargetState.POLICY_RETAINED:
+                exception_evidence_valid = (
+                    isinstance(record, EvidenceRecord)
+                    and record.evidence_ref == target.evidence_ref
+                    and record.target_id == target.target_id
+                    and record.operation_id == self.operation_id
+                    and record.required_action == target.required_action
+                    and record.evidence_generation == self.fence_generation
+                    and record.evidence_kind == "policy-retention"
+                    and record.capability == "supported"
+                    and record.state == TargetState.POLICY_RETAINED.name
+                    and target.fence_generation == self.fence_generation
+                    and target.capability == "supported"
+                )
+                if (
+                    exception_evidence_valid
                     and target.exception_approved
                     and target.exception_expires is not None
-                    and target.exception_expires > now):
-                exception_used = True
+                    and target.exception_expires > now
+                ):
+                    exception_used = True
+                    continue
+                all_accepted = False
+                break
+
+            if target.state == TargetState.ACKNOWLEDGED:
+                notify_evidence_valid = (
+                    target.required_action == "notify"
+                    and isinstance(record, EvidenceRecord)
+                    and record.evidence_ref == target.evidence_ref
+                    and record.target_id == target.target_id
+                    and record.operation_id == self.operation_id
+                    and record.required_action == "notify"
+                    and record.evidence_generation == self.fence_generation
+                    and record.evidence_kind == "notify-receipt"
+                    and record.capability == "supported"
+                    and record.state == TargetState.ACKNOWLEDGED.name
+                    and target.fence_generation == self.fence_generation
+                    and target.capability == "supported"
+                )
+                if notify_evidence_valid:
+                    continue
+                all_accepted = False
+                break
+
+            if not target.has_current_evidence(
+                self.fence_generation,
+                self.operation_id,
+                self.evidence_registry,
+            ):
+                all_accepted = False
+                break
+
+            if target.state in accepted:
                 continue
-            # ACK is accepted only for a notify action; it never means erase.
-            if target.state == TargetState.ACKNOWLEDGED and target.required_action == "notify":
-                continue
+
             all_accepted = False
             break
+
         if not all_accepted:
             self.governance = Governance.NON_COMPLIANT
         elif exception_used:
             self.governance = Governance.COMPLIANT_WITH_EXCEPTION
         else:
             self.governance = Governance.COMPLIANT
+
         return self.governance
 
     def public_result(self) -> str:
@@ -260,3 +365,63 @@ def idempotent_request(existing: Dict[str, tuple[str, str]], key: str,
     if prior_hash != request_hash:
         raise ContractError("IDEMPOTENCY_CONFLICT")
     return prior_operation_id
+
+
+# === STEP 3 module-level additions (session-authored, L0 verbatim) ===
+def register_target_evidence(
+    operation: ForgetOperation,
+    target_id: str,
+    evidence_ref: str,
+    evidence_kind: str,
+    state: TargetState,
+    *,
+    domain_target: bool = False,
+    capability: str = "supported",
+) -> EvidenceRecord:
+    inventory = (
+        operation.domain_targets
+        if domain_target
+        else operation.cross_system_targets
+    )
+    if target_id not in inventory:
+        raise ContractError("evidence target is not in the current inventory")
+
+    target = inventory[target_id]
+    if target.evidence_ref != evidence_ref:
+        raise ContractError("evidence_ref does not match recorded target")
+    if target.evidence_kind != evidence_kind:
+        raise ContractError("evidence_kind does not match recorded target")
+    if capability != target.capability:
+        raise ContractError("evidence capability does not match target")
+    if evidence_ref in operation.evidence_registry:
+        raise ContractError("evidence_ref already registered")
+    if not isinstance(state, TargetState):
+        raise ContractError("state must be a forget_model.TargetState")
+
+    # Translate the Forget enum into the canonical R3 state vocabulary.
+    # This mapping is deliberately action-sensitive.
+    if state == TargetState.CLEANED and target.required_action == "suppress":
+        canonical_state = "SUCCEEDED"
+    elif state == TargetState.CLEANED and target.required_action == "cleanup":
+        canonical_state = "CLEANED"
+    elif state == TargetState.ERASED and target.required_action == "erase":
+        canonical_state = "ERASED"
+    else:
+        # ACKNOWLEDGED and POLICY_RETAINED are validated only by their
+        # dedicated governance branches; other non-success states remain
+        # non-canonical and cannot satisfy completion.
+        canonical_state = state.name
+
+    record = EvidenceRecord(
+        evidence_ref=evidence_ref,
+        target_id=target_id,
+        operation_id=operation.operation_id,
+        required_action=target.required_action,
+        evidence_generation=operation.fence_generation,
+        evidence_kind=evidence_kind,
+        capability=capability,
+        state=canonical_state,
+    )
+    operation.evidence_registry[evidence_ref] = record
+    return record
+

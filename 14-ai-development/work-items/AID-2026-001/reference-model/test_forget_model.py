@@ -2,7 +2,7 @@ import unittest
 
 from forget_model import (
     ContractError, ForgetOperation, Governance, MemoryState, Phase,
-    Target, TargetState, idempotent_request,
+    Target, TargetState, idempotent_request, register_target_evidence,
 )
 
 
@@ -13,7 +13,7 @@ class ForgetReferenceModelTests(unittest.TestCase):
         op.suppress()
         op.seal_inventory(
             [Target("canonical", "D", "suppress")],
-            [Target("index", "F", "invalidate"), Target("adapter", "H", "clear")],
+            [Target("index", "F", "erase"), Target("adapter", "H", "erase")],
         )
         op.start_cleanup()
         return op
@@ -35,7 +35,14 @@ class ForgetReferenceModelTests(unittest.TestCase):
 
     def test_domain_completion_is_separate_from_governance(self):
         op = self.operation()
-        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+        op.record_target(
+            "canonical", TargetState.CLEANED, "ev-d", "suppression-proof",
+            domain_target=True,
+        )
+        register_target_evidence(
+            op, "canonical", "ev-d", "suppression-proof", TargetState.CLEANED,
+            domain_target=True,
+        )
         self.assertTrue(op.evaluate_domain())
         self.assertEqual(op.phase, Phase.COMPLETED)
         self.assertEqual(op.governance, Governance.PENDING)
@@ -43,36 +50,128 @@ class ForgetReferenceModelTests(unittest.TestCase):
 
     def test_unknown_or_unsupported_cross_system_target_blocks_compliance(self):
         op = self.operation()
-        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+        op.record_target(
+            "canonical", TargetState.CLEANED, "ev-d", "suppression-proof",
+            domain_target=True,
+        )
+        register_target_evidence(
+            op, "canonical", "ev-d", "suppression-proof", TargetState.CLEANED,
+            domain_target=True,
+        )
         op.evaluate_domain()
-        op.record_target("index", TargetState.ERASED, "ev-f", "erase-proof")
-        op.record_target("adapter", TargetState.UNKNOWN, "ev-h", "unknown-receipt", capability="conditional")
+
+        op.record_target("index", TargetState.ERASED, "ev-f", "erasure-proof")
+        register_target_evidence(
+            op, "index", "ev-f", "erasure-proof", TargetState.ERASED,
+        )
+        op.record_target(
+            "adapter", TargetState.UNKNOWN, "ev-h", "erasure-proof",
+            capability="conditional",
+        )
+        register_target_evidence(
+            op, "adapter", "ev-h", "erasure-proof", TargetState.UNKNOWN,
+            capability="conditional",
+        )
         self.assertEqual(op.evaluate_governance(), Governance.NON_COMPLIANT)
         self.assertEqual(op.public_result(), "Incomplete")
 
     def test_ack_is_not_erase_evidence(self):
         op = self.operation()
-        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+        op.record_target(
+            "canonical", TargetState.CLEANED, "ev-d", "suppression-proof",
+            domain_target=True,
+        )
+        register_target_evidence(
+            op, "canonical", "ev-d", "suppression-proof", TargetState.CLEANED,
+            domain_target=True,
+        )
         op.evaluate_domain()
-        op.record_target("index", TargetState.ERASED, "ev-f", "erase-proof")
-        op.record_target("adapter", TargetState.ACKNOWLEDGED, "ack", "adapter-ack")
+
+        op.record_target("index", TargetState.ERASED, "ev-f", "erasure-proof")
+        register_target_evidence(
+            op, "index", "ev-f", "erasure-proof", TargetState.ERASED,
+        )
+        op.record_target(
+            "adapter", TargetState.ACKNOWLEDGED, "ack", "erasure-proof",
+        )
+        register_target_evidence(
+            op, "adapter", "ack", "erasure-proof", TargetState.ACKNOWLEDGED,
+        )
         self.assertEqual(op.evaluate_governance(), Governance.NON_COMPLIANT)
 
     def test_notify_ack_can_only_satisfy_notify_action(self):
         op = self.operation()
         op.cross_system_targets["adapter"].required_action = "notify"
-        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+
+        op.record_target(
+            "canonical", TargetState.CLEANED, "ev-d", "suppression-proof",
+            domain_target=True,
+        )
+        register_target_evidence(
+            op, "canonical", "ev-d", "suppression-proof", TargetState.CLEANED,
+            domain_target=True,
+        )
         op.evaluate_domain()
-        op.record_target("index", TargetState.ERASED, "ev-f", "erase-proof")
-        op.record_target("adapter", TargetState.ACKNOWLEDGED, "ack", "notify-receipt")
+
+        op.record_target("index", TargetState.ERASED, "ev-f", "erasure-proof")
+        register_target_evidence(
+            op, "index", "ev-f", "erasure-proof", TargetState.ERASED,
+        )
+        op.record_target(
+            "adapter", TargetState.ACKNOWLEDGED, "ack", "notify-receipt",
+        )
+        register_target_evidence(
+            op, "adapter", "ack", "notify-receipt", TargetState.ACKNOWLEDGED,
+        )
         self.assertEqual(op.evaluate_governance(), Governance.COMPLIANT)
         self.assertEqual(op.public_result(), "Completed")
 
+        # The same ACK cannot satisfy an erase action.
+        erase_op = self.operation()
+        erase_op.record_target(
+            "canonical", TargetState.CLEANED, "erase-ev-d", "suppression-proof",
+            domain_target=True,
+        )
+        register_target_evidence(
+            erase_op, "canonical", "erase-ev-d", "suppression-proof",
+            TargetState.CLEANED, domain_target=True,
+        )
+        erase_op.evaluate_domain()
+        erase_op.record_target(
+            "index", TargetState.ERASED, "erase-ev-f", "erasure-proof",
+        )
+        register_target_evidence(
+            erase_op, "index", "erase-ev-f", "erasure-proof", TargetState.ERASED,
+        )
+        erase_op.record_target(
+            "adapter", TargetState.ACKNOWLEDGED, "erase-ack", "notify-receipt",
+        )
+        register_target_evidence(
+            erase_op, "adapter", "erase-ack", "notify-receipt",
+            TargetState.ACKNOWLEDGED,
+        )
+        self.assertEqual(
+            erase_op.evaluate_governance(),
+            Governance.NON_COMPLIANT,
+        )
+
     def test_bounded_approved_exception_is_derived_projection_only(self):
         op = self.operation()
-        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+        op.record_target(
+            "canonical", TargetState.CLEANED, "ev-d", "suppression-proof",
+            domain_target=True,
+        )
+        register_target_evidence(
+            op, "canonical", "ev-d", "suppression-proof", TargetState.CLEANED,
+            domain_target=True,
+        )
         op.evaluate_domain()
-        op.record_target("index", TargetState.ERASED, "ev-f", "erase-proof")
+
+        op.record_target("index", TargetState.ERASED, "ev-f", "erasure-proof")
+        register_target_evidence(
+            op, "index", "ev-f", "erasure-proof", TargetState.ERASED,
+        )
+
         retained = op.cross_system_targets["adapter"]
         retained.state = TargetState.POLICY_RETAINED
         retained.fence_generation = op.fence_generation
@@ -80,20 +179,42 @@ class ForgetReferenceModelTests(unittest.TestCase):
         retained.evidence_kind = "policy-retention"
         retained.exception_approved = True
         retained.exception_expires = 100
-        self.assertEqual(op.evaluate_governance(now=1), Governance.COMPLIANT_WITH_EXCEPTION)
+        register_target_evidence(
+            op, "adapter", "retention-proof", "policy-retention",
+            TargetState.POLICY_RETAINED,
+        )
+        self.assertEqual(
+            op.evaluate_governance(now=1),
+            Governance.COMPLIANT_WITH_EXCEPTION,
+        )
         self.assertEqual(op.public_result(), "CompletedWithPolicyException")
         self.assertEqual(op.evaluate_governance(now=101), Governance.NON_COMPLIANT)
 
     def test_inventory_expansion_invalidates_prior_evaluation(self):
         op = self.operation()
-        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+        op.record_target(
+            "canonical", TargetState.CLEANED, "ev-d", "suppression-proof",
+            domain_target=True,
+        )
+        register_target_evidence(
+            op, "canonical", "ev-d", "suppression-proof", TargetState.CLEANED,
+            domain_target=True,
+        )
         op.evaluate_domain()
-        op.record_target("index", TargetState.ERASED, "ev-f", "erase-proof")
-        op.record_target("adapter", TargetState.ERASED, "ev-h", "erase-proof")
+
+        op.record_target("index", TargetState.ERASED, "ev-f", "erasure-proof")
+        register_target_evidence(
+            op, "index", "ev-f", "erasure-proof", TargetState.ERASED,
+        )
+        op.record_target("adapter", TargetState.ERASED, "ev-h", "erasure-proof")
+        register_target_evidence(
+            op, "adapter", "ev-h", "erasure-proof", TargetState.ERASED,
+        )
         op.evaluate_governance()
         self.assertEqual(op.public_result(), "Completed")
+
         old_revision = op.inventory_revision
-        op.expand_inventory(Target("late-cache", "F", "invalidate"))
+        op.expand_inventory(Target("late-cache", "F", "erase"))
         self.assertEqual(op.inventory_revision, old_revision + 1)
         self.assertEqual(op.phase, Phase.COMPLETED)
         self.assertEqual(op.governance, Governance.PENDING)
@@ -101,10 +222,28 @@ class ForgetReferenceModelTests(unittest.TestCase):
 
     def test_unsupported_capability_cannot_claim_erasure(self):
         op = self.operation()
-        op.record_target("canonical", TargetState.CLEANED, "ev-d", "transaction", domain_target=True)
+        op.record_target(
+            "canonical", TargetState.CLEANED, "ev-d", "suppression-proof",
+            domain_target=True,
+        )
+        register_target_evidence(
+            op, "canonical", "ev-d", "suppression-proof", TargetState.CLEANED,
+            domain_target=True,
+        )
         op.evaluate_domain()
-        op.record_target("index", TargetState.ERASED, "ev-f", "erase-proof", capability="unsupported")
-        op.record_target("adapter", TargetState.ERASED, "ev-h", "erase-proof")
+
+        op.record_target(
+            "index", TargetState.ERASED, "ev-f", "erasure-proof",
+            capability="unsupported",
+        )
+        register_target_evidence(
+            op, "index", "ev-f", "erasure-proof", TargetState.ERASED,
+            capability="unsupported",
+        )
+        op.record_target("adapter", TargetState.ERASED, "ev-h", "erasure-proof")
+        register_target_evidence(
+            op, "adapter", "ev-h", "erasure-proof", TargetState.ERASED,
+        )
         self.assertEqual(op.evaluate_governance(), Governance.NON_COMPLIANT)
 
     def test_stale_lease_cannot_commit_checkpoint(self):
