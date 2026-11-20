@@ -68,6 +68,11 @@ fn validate_envelope(envelope: &EventEnvelope, scope: &[ScopeRef]) -> Result<(),
 fn check_scope(scope_json: &str, requested: &[ScopeRef]) -> Result<(), EventStoreError> {
     validate_scope(requested)?;
     let stored: Vec<ScopeRef> = decode(scope_json)?;
+    // Persisted metadata is untrusted input. Corruption must not collapse
+    // into ScopeMismatch because read_after intentionally skips that variant.
+    if stored.is_empty() || stored.iter().any(|item| item.validate().is_err()) {
+        return Err(EventStoreError::TransactionUnavailable);
+    }
     if scopes_intersect(&stored, requested) { Ok(()) } else { Err(EventStoreError::ScopeMismatch) }
 }
 fn receipt(row_id: i64, accepted_at: String, payload_digest: String, state_json: &str)
@@ -279,6 +284,76 @@ mod tests {
         let page2 = store.read_after(page1[0].sequence, 1, &[scope_b]).unwrap();
         assert_eq!(page2.len(), 1);
         assert_eq!(page2[0].receipt, visible2);
+    }
+
+    #[test]
+    fn read_after_fails_closed_on_empty_persisted_scope_list() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+        store.accept_with_payload(envelope("corrupt-empty", b"payload"), b"payload", &[scope()]).unwrap();
+        store.connection.execute("UPDATE accepted_events SET scope_json = '[]'", []).unwrap();
+
+        assert_eq!(
+            store.read_after(0, 10, &[scope()]),
+            Err(EventStoreError::TransactionUnavailable),
+        );
+    }
+
+    #[test]
+    fn read_after_fails_closed_on_invalid_persisted_scope_ref() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+        store.accept_with_payload(envelope("corrupt-invalid", b"payload"), b"payload", &[scope()]).unwrap();
+        let mut invalid = scope();
+        invalid.namespace_key.clear();
+        let encoded = encode(&vec![invalid]).unwrap();
+        store.connection.execute(
+            "UPDATE accepted_events SET scope_json = ?1",
+            params![encoded],
+        ).unwrap();
+
+        assert_eq!(
+            store.read_after(0, 10, &[scope()]),
+            Err(EventStoreError::TransactionUnavailable),
+        );
+    }
+
+    #[test]
+    fn read_after_paginates_interleaved_scope_rows_by_visible_limit() {
+        let mut store = SqliteEventStore::in_memory().unwrap();
+        let scope_a = scope();
+        let scope_b = ScopeRef {
+            scope_id: id("scope-b"),
+            scope_kind: ScopeKind::User,
+            namespace_key: "user:scope-b".into(),
+        };
+        let rows = [
+            ("a1", b"a1".as_slice(), scope_a.clone()),
+            ("b1", b"b1".as_slice(), scope_b.clone()),
+            ("a2", b"a2".as_slice(), scope_a.clone()),
+            ("b2", b"b2".as_slice(), scope_b.clone()),
+        ];
+        let mut expected = Vec::new();
+        for (key, bytes, event_scope) in rows {
+            let mut event = envelope(key, bytes);
+            event.scope_refs = vec![event_scope.clone()];
+            let receipt = store.accept_with_payload(event, bytes, &[event_scope]).unwrap();
+            expected.push(receipt);
+        }
+
+        let first_a = store.read_after(0, 1, &[scope_a.clone()]).unwrap();
+        assert_eq!(first_a.len(), 1);
+        assert_eq!(first_a[0].receipt, expected[0]);
+        let second_a = store.read_after(first_a[0].sequence, 1, &[scope_a.clone()]).unwrap();
+        assert_eq!(second_a.len(), 1);
+        assert_eq!(second_a[0].receipt, expected[2]);
+        assert!(store.read_after(second_a[0].sequence, 1, &[scope_a]).unwrap().is_empty());
+
+        let first_b = store.read_after(0, 1, &[scope_b.clone()]).unwrap();
+        assert_eq!(first_b.len(), 1);
+        assert_eq!(first_b[0].receipt, expected[1]);
+        let second_b = store.read_after(first_b[0].sequence, 1, &[scope_b.clone()]).unwrap();
+        assert_eq!(second_b.len(), 1);
+        assert_eq!(second_b[0].receipt, expected[3]);
+        assert!(store.read_after(second_b[0].sequence, 1, &[scope_b]).unwrap().is_empty());
     }
 
     #[test]
