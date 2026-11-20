@@ -491,8 +491,8 @@ latest_exact_head_refresh:
     blob: "239a2e68d1781a78980f0d4d12ca10eb0b6b165b"
   carriers:
     F1_PR_327:
-      head: "934a76e18ba020d01c520a8484ed7fc37f96cff1"
-      handoff_blob: "2d453d24ae5e65973ced964918b9f3687a5d3284"
+      head: "8205664c79e9216da6c7b0fa20ba90d23a070ff4"
+      handoff_blob: "09606b739d62570c061b24e459772468206e6a86"
       status: "P1_OPEN_RUNTIME_IMPLEMENTATION_NOT_ESTABLISHED"
       entry_boundary_comment: 7021990583
     F3_PR_321:
