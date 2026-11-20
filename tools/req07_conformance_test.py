@@ -336,9 +336,9 @@ MQ01_DETECTOR_BLOB = "c287e1c935f177a23df7b9f91a70d458e10dcb1a"
 # AC-6 has no adopted poison/stale/contradiction disposition engine or rule table.
 # AC-7 has no adopted Decision/explanation record contract in the domain model.
 NOT_BINDABLE = {
-    "AC-1": "no adopted contract matching the five local epistemic labels; MQ-01 still detects missing distinct Fact type",
-    "AC-6": "no adopted adversarial quality/disposition engine defining poison, stale, and contradiction outcomes",
-    "AC-7": "no adopted decision/explanation record defining reason, evidence refs, method, version, and history",
+    "AC-1": "NOT_BINDABLE(no adopted contract in repo): five local epistemic labels do not match the adopted six-state EpistemicStatus enum; MQ-01 still detects missing distinct Fact type",
+    "AC-6": "NOT_BINDABLE(no adopted contract in repo): no adversarial quality/disposition engine defines poison, stale, and contradiction outcomes",
+    "AC-7": "NOT_BINDABLE(no adopted contract in repo): no decision/explanation record defines reason, evidence refs, method, version, and history",
 }
 
 
@@ -383,6 +383,7 @@ class AdoptedContractBindings(unittest.TestCase):
         cls.domain = _read_pinned_contract(DOMAIN_MODEL_PATH, DOMAIN_MODEL_BLOB)
         cls.epistemic = _read_pinned_contract(EPISTEMIC_SPEC_PATH, EPISTEMIC_SPEC_BLOB)
         cls.provenance = _read_pinned_contract(PROVENANCE_SPEC_PATH, PROVENANCE_SPEC_BLOB)
+        cls.detector_source = _read_pinned_contract(MQ01_DETECTOR_PATH, MQ01_DETECTOR_BLOB)
 
     def test_ac2_evidence_and_provenance_bind_to_domain_types(self):
         evidence = _rust_block(self.domain, r"pub struct Evidence\s*")
