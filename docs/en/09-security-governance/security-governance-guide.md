@@ -113,3 +113,107 @@ D owns canonical Memory lifecycle, ForgetOperation/Fence semantics and the D-dom
 The cross-system governance assessment is separate from D-domain completion. `CompletedWithPolicyException` is a derived public projection only when D has independently recorded `Completed` and I has recorded `CompliantWithException`. Unknown, failed, unsupported or unaccounted-for mandatory targets block I's `Compliant` assessment. Neither a tombstone nor an ACK proves physical erasure.
 
 **Status:** PROPOSED / D-I APPROVAL PENDING / R3 TESTS NOT RUN.
+
+## 12. Attestor Authorization Contract
+
+### 12.1 Authority boundary
+
+I is the sole governance authority responsible for determining whether an Attestor is authorized to perform a declared Attestation operation.
+
+D MUST NOT independently determine whether an Attestor has governance authority.
+
+D validates and persists the authorization decision reference supplied by I. D does not mint, broaden, or reinterpret I authorization.
+
+### 12.2 Fact and FactRevision binding
+
+Every FactRevision MUST bind to:
+
+- Exact FactRef and FactRevisionRef.
+- Exact ClaimRevisionRef values being attested.
+- Exact EvidenceRef values.
+- Exact ProvenanceRef values.
+- ScopeRef and applicable visibility constraints.
+- Valid-time interval and recorded/commit-time references.
+- Attestor principal identity.
+- Authorization decision reference.
+- Attestation Method identifier and immutable Version.
+- Attestation outcome, rationale, and correction/revocation lineage.
+
+A FactRevision MUST NOT silently follow a Claim's latest revision.
+
+### 12.3 Required authorization decision
+
+Each authorization decision MUST bind:
+
+1. Attestor principal identity: stable authenticated PrincipalRef, not a display name or self-asserted ActorRef.
+2. Authorization Scope: exact ScopeRef and permitted resource/action boundary.
+3. Attestation Method and Version: exact registered method identifier and immutable version.
+4. Validity: effective-from, expiry, and applicable authorization epoch.
+5. Revocation: revocation identity, effective ordering, currentness, and handling of in-flight attestations.
+6. Delegation: explicit ALLOWED or PROHIBITED decision.
+7. Decision identity: immutable AuthorizationDecisionRef and policy/version reference.
+
+The decision MUST also retain its issuing authority and decision provenance.
+
+Delegation is NOT_ALLOWED by default.
+
+Every authorization decision MUST explicitly declare ALLOWED or PROHIBITED.
+
+If Delegation is ALLOWED, the complete delegation chain, delegating principal, delegated principal, authority, Scope, Method restrictions, delegation depth, expiry, and revocation conditions MUST be verifiable.
+
+An Attestor MUST NOT derive delegation authority from its own authorization.
+
+### 12.4 Fail-closed behavior
+
+Missing, ambiguous, expired, revoked, or unverifiable authorization MUST fail closed.
+
+A Method identifier without its exact Version is insufficient.
+
+Changing a Method or Version MUST NOT silently broaden an existing authorization.
+
+### 12.5 Authorization change and historical FactRevision
+
+A later authorization change MUST NOT silently rewrite a committed FactRevision.
+
+The authorization decision and its validity at the original attestation commit remain part of historical audit evidence.
+
+If the Attestor's authority is revoked or materially changed, subsequent attestations MUST use a fresh authorization decision.
+
+Existing FactRevisions MUST be evaluated under the applicable revocation policy.
+
+They may be marked challenged, invalidated for current use, or superseded through a new governed transition.
+
+Their original immutable contents MUST NOT be overwritten.
+
+The relationship between the original authorization decision and any subsequent review decision MUST remain traceable.
+
+### 12.6 D responsibility: verification and persistence
+
+Before committing a FactRevision, D MUST:
+
+1. Obtain the I AuthorizationDecisionRef.
+2. Verify that the reference is resolvable and authentic under the applicable governance contract.
+3. Verify Attestor principal identity.
+4. Verify Scope compatibility.
+5. Verify exact Method/Version authorization.
+6. Verify authorization validity at the relevant evaluation time.
+7. Verify that authorization was not revoked at that time.
+8. Verify all delegation conditions when Delegation is explicitly ALLOWED.
+9. Bind the exact authorization decision reference to the FactRevision.
+10. Persist the decision reference and verification outcome in the auditable commit record.
+
+D MUST preserve the exact AuthorizationDecisionRef, Attestor principal reference, Method/Version, Scope, authorization context, evidence digest/reference, commit sequence, and FactRevision lineage.
+
+D MUST reject an attestation with missing authorization evidence or an authorization reference that cannot be resolved and validated.
+
+D verifies contract compliance and reference integrity. It does not replace I's governance judgment.
+
+### 12.7 Method correctness boundary
+
+Attestation Method identity proves which declared procedure was invoked. It does not prove that the procedure is correct.
+
+Confidence is an assessment value, not an authorization grant and not a Fact creation mechanism.
+
+Verified is an epistemic status, not a substitute for Attestor authorization.
+
+No production key, Trust Root, cryptographic profile, public authorization schema, DDL, or public API is approved by this semantic contract.

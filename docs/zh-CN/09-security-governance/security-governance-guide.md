@@ -113,3 +113,107 @@ D 拥有规范 Memory 生命周期、ForgetOperation/Fence 语义及 D 领域完
 跨系统治理评估独立于 D 领域完成。只有 D 已独立记录 `Completed` 且 I 已记录 `CompliantWithException` 时，才可派生公开展示 `CompletedWithPolicyException`。未知、失败、不支持或未纳入清单的强制目标都会阻止 I 评估为 `Compliant`。Tombstone 或 ACK 均不能证明物理擦除。
 
 **状态：** PROPOSED / 待 D-I 批准 / R3 测试未执行。
+
+## 12. Attestor 授权契约
+
+### 12.1 权限边界
+
+I 是唯一负责判断 Attestor 是否有权执行指定 Attestation 操作的治理授权权威。
+
+D MUST NOT 自行判断 Attestor 是否具有治理授权资格。
+
+D 验证并持久化 I 提供的授权决定引用。D 不签发、不扩大、不重新解释 I 的授权。
+
+### 12.2 Fact 与 FactRevision 绑定
+
+每个 FactRevision MUST 绑定：
+
+- 精确 FactRef 和 FactRevisionRef。
+- 被 Attest 的精确 ClaimRevisionRef。
+- 精确 EvidenceRef。
+- 精确 ProvenanceRef。
+- ScopeRef 及适用的可见性约束。
+- 有效时间区间和记录/提交时间引用。
+- Attestor Principal 身份。
+- 授权决定引用。
+- Attestation Method 标识和不可变 Version。
+- Attestation 结果、理由及更正/撤销谱系。
+
+FactRevision MUST NOT 自动跟随 Claim 的最新 Revision。
+
+### 12.3 必需授权决定
+
+每项授权决定 MUST 绑定：
+
+1. Attestor Principal 身份：稳定且经过认证的 PrincipalRef，不得使用展示名称或自行声明的 ActorRef。
+2. 授权 Scope：准确 ScopeRef 及允许的资源/动作边界。
+3. Attestation Method/Version：精确注册的方法标识及不可变版本。
+4. 有效期：生效时间、过期时间及适用授权 Epoch。
+5. 撤销：撤销身份、生效顺序、当前性及在途 Attestation 处理。
+6. Delegation：明确的 ALLOWED 或 PROHIBITED 决定。
+7. 决策身份：不可变 AuthorizationDecisionRef 及对应 Policy/Version 引用。
+
+授权决定还 MUST 保留签发权威和决策 Provenance。
+
+Delegation 默认 NOT_ALLOWED。
+
+每项授权决定 MUST 显式声明 ALLOWED 或 PROHIBITED。
+
+如果 Delegation 为 ALLOWED，必须能够验证完整委托链、委托主体、被委托主体、授权主体、Scope、Method 限制、委托深度、有效期和撤销条件。
+
+Attestor MUST NOT 从自身授权推导出 Delegation 权限。
+
+### 12.4 Fail-closed 行为
+
+授权缺失、歧义、过期、撤销或无法验证时 MUST fail closed。
+
+只提供 Method 标识符而没有精确 Version 不充分。
+
+改变 Method 或 Version 时 MUST NOT 静默扩大既有授权。
+
+### 12.5 授权变化与历史 FactRevision
+
+后续授权变化不得静默改写已提交的 FactRevision。
+
+原始 Attestation 提交时的授权决定及其有效性，必须作为历史审计证据保留。
+
+Attestor 授权被撤销或发生实质变化后，后续 Attestation 必须使用新的授权决定。
+
+既有 FactRevision 必须根据适用撤销策略重新评估。
+
+可以通过新的治理状态转换标记为受质疑、当前用途失效或被后继版本取代。
+
+不得覆盖原始不可变内容。
+
+原始授权决定与任何后续复核决定之间的关系 MUST 保持可追溯。
+
+### 12.6 D 的验证与持久化责任
+
+提交 FactRevision 前，D MUST：
+
+1. 获取 I 的 AuthorizationDecisionRef。
+2. 验证该引用可解析，并符合适用治理契约的真实性要求。
+3. 验证 Attestor Principal 身份。
+4. 验证 Scope 兼容性。
+5. 验证精确 Method/Version 授权。
+6. 验证相关评估时间处于授权有效期内。
+7. 验证该时间点授权未被撤销。
+8. 在 Delegation 明确 ALLOWED 时验证全部委托条件。
+9. 将精确授权决定引用绑定至 FactRevision。
+10. 在可审计提交记录中持久化决定引用和验证结果。
+
+D MUST 保存精确 AuthorizationDecisionRef、Attestor Principal 引用、Method/Version、Scope、授权上下文、授权证据 Digest/引用、Commit Sequence 和 FactRevision 谱系。
+
+授权证据缺失，或授权引用无法解析、验证时，D MUST 拒绝该 Attestation。
+
+D 负责验证契约符合性和引用完整性，不替代 I 作出治理资格判断。
+
+### 12.7 Method 正确性边界
+
+Attestation Method 身份只能证明调用了哪个声明程序，不能证明该程序本身正确。
+
+Confidence 是评估值，不是授权凭证，也不是创建 Fact 的机制。
+
+Verified 是认知状态，不能代替 Attestor 授权。
+
+本语义契约不批准生产密钥、Trust Root、密码学 Profile、公开授权 Schema、DDL 或公开 API。
