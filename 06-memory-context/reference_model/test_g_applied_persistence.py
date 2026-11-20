@@ -37,6 +37,29 @@ class RestoreFenced(Exception):
     pass
 
 
+def validate_full_applied_request_binding(
+    h_observation: dict[str, str] | None,
+    c_submit_outcome: dict[str, str] | None,
+) -> tuple[str, str | None]:
+    """TEST-only Full Applied request join; not a production authority adapter."""
+    if not isinstance(h_observation, dict) or not isinstance(c_submit_outcome, dict):
+        return "UNKNOWN", "H observation or CSubmitOutcome is unavailable"
+    required = (
+        ("H.inference_request_id", h_observation.get("inference_request_id")),
+        ("H.final_request_boundary_type", h_observation.get("final_request_boundary_type")),
+        ("C.ActualInferenceRequestId", c_submit_outcome.get("ActualInferenceRequestId")),
+        ("C.FinalRequestBoundaryType", c_submit_outcome.get("FinalRequestBoundaryType")),
+    )
+    missing = [name for name, value in required if not isinstance(value, str) or not value]
+    if missing:
+        return "UNKNOWN", "Full Applied request binding incomplete: " + ", ".join(missing)
+    if h_observation["inference_request_id"] != c_submit_outcome["ActualInferenceRequestId"]:
+        return "INVALID", "H.inference_request_id != C.ActualInferenceRequestId"
+    if h_observation["final_request_boundary_type"] != c_submit_outcome["FinalRequestBoundaryType"]:
+        return "INVALID", "H.final_request_boundary_type != C.FinalRequestBoundaryType"
+    return "VALID", None
+
+
 class AppliedStore:
     def __init__(self, path: str | Path):
         self.path = str(path)
@@ -114,12 +137,17 @@ class AppliedStore:
         *,
         c_outcome: str = "HANDOFF_ACCEPTED",
         side_effect_status: str = "PROVEN_OCCURRED",
+        h_observation: dict[str, str] | None = None,
+        c_submit_outcome: dict[str, str] | None = None,
         crash_before_commit: bool = False,
         lose_ack_after_commit: bool = False,
     ) -> str:
         if not identity_key or not evidence_set_digest or evidence_revision < 1:
             raise Rejected("invalid immutable Applied identity/revision/digest")
         self._validate_proofs(proofs)
+        binding_status, binding_reason = validate_full_applied_request_binding(h_observation, c_submit_outcome)
+        if binding_status != "VALID":
+            raise Rejected(f"{binding_status}: {binding_reason}")
         if c_outcome != "HANDOFF_ACCEPTED" or side_effect_status != "PROVEN_OCCURRED":
             raise Rejected("C outcome is not eligible for G Full Applied")
 
@@ -282,6 +310,14 @@ class GAppliedPersistenceReferenceTests(unittest.TestCase):
             evidence_revision=1,
             evidence_set_digest="a" * 64,
             proofs=self.proofs,
+            h_observation={
+                "inference_request_id": "request-9",
+                "final_request_boundary_type": "provider_sdk_send",
+            },
+            c_submit_outcome={
+                "ActualInferenceRequestId": "request-9",
+                "FinalRequestBoundaryType": "provider_sdk_send",
+            },
         )
         defaults.update(kwargs)
         return self.store.commit_full_applied(**defaults)
@@ -413,7 +449,40 @@ class GAppliedPersistenceReferenceTests(unittest.TestCase):
         self.assertEqual(self.store.snapshot()["ledger"], [])
 
 
-    def test_15_snapshot_epoch_ahead_of_trusted_anchor_keeps_restore_fenced(self):
+    def test_18_exact_request_id_and_boundary_type_match_allows_full_applied(self):
+        status, reason = validate_full_applied_request_binding(
+            {"inference_request_id": "request-9", "final_request_boundary_type": "provider_sdk_send"},
+            {"ActualInferenceRequestId": "request-9", "FinalRequestBoundaryType": "provider_sdk_send"},
+        )
+        self.assertEqual((status, reason), ("VALID", None))
+        self.assertTrue(self.commit())
+
+    def test_19_request_id_mismatch_blocks_full_applied(self):
+        with self.assertRaisesRegex(Rejected, "INVALID: H.inference_request_id"):
+            self.commit(c_submit_outcome={"ActualInferenceRequestId": "request-other", "FinalRequestBoundaryType": "provider_sdk_send"})
+        self.assertEqual(self.store.snapshot()["ledger"], [])
+
+    def test_20_boundary_type_mismatch_blocks_full_applied(self):
+        with self.assertRaisesRegex(Rejected, "INVALID: H.final_request_boundary_type"):
+            self.commit(c_submit_outcome={"ActualInferenceRequestId": "request-9", "FinalRequestBoundaryType": "runtime_final_submit_hook"})
+        self.assertEqual(self.store.snapshot()["ledger"], [])
+
+    def test_21_missing_actual_request_id_is_unknown_and_ineligible(self):
+        with self.assertRaisesRegex(Rejected, "UNKNOWN:.*C.ActualInferenceRequestId"):
+            self.commit(c_submit_outcome={"FinalRequestBoundaryType": "provider_sdk_send"})
+        self.assertEqual(self.store.snapshot()["ledger"], [])
+
+    def test_22_missing_boundary_type_is_unknown_and_ineligible(self):
+        with self.assertRaisesRegex(Rejected, "UNKNOWN:.*C.FinalRequestBoundaryType"):
+            self.commit(c_submit_outcome={"ActualInferenceRequestId": "request-9"})
+        self.assertEqual(self.store.snapshot()["ledger"], [])
+
+    def test_23_missing_h_request_identity_is_unknown_and_ineligible(self):
+        with self.assertRaisesRegex(Rejected, "UNKNOWN:.*H.inference_request_id"):
+            self.commit(h_observation={"final_request_boundary_type": "provider_sdk_send"})
+        self.assertEqual(self.store.snapshot()["ledger"], [])
+
+    def test_15_snapshot_epoch_ahead_of_trusted_anchor_keeps_serving_fenced(self):
         self.commit()
         result = self.store.reconcile_restore(
             snapshot_epoch=3, snapshot_highwater=1,
