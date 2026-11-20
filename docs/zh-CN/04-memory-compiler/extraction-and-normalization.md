@@ -272,6 +272,71 @@ Staging 不代表规范接收。
 E 不拥有规范 Claim/Fact 身份，
 也不拥有 I 治理授权。
 
+### 19.2 Producer Admission 与 PublicationParticipant Admission
+
+Producer Admission 与 PublicationParticipant Admission
+是同一受保护生产和发布生命周期中的两个不同且有序的准入阶段。
+
+不得将二者视为别名、等价操作或可以互换的准入决定。
+
+Producer Admission 将准确的 Producer/ProducerWork 身份
+准入规范生产生命周期。
+
+按照 §19.1 的规定，它必须发生在依赖集合登记和
+规范 Revision 提交之前。
+
+PublicationParticipant Admission 将准确的
+PublicationParticipant 准入发布流程，并将其绑定到相应的
+StorageVisibilityParticipantRef 和 publication tuple digest。
+
+只有在 D 已提交适用的规范 Revision，且 Storage 已将准确的
+publication tuple 持久化为 PREPARED_HIDDEN 之后，
+才允许执行 PublicationParticipant Admission。
+
+Producer Admission 成功不得被解释为
+PublicationParticipant Admission 成功。
+
+两个准入阶段必须保持以下顺序：
+
+1. Producer Admission，以及对准确准入 Producer participant
+   的持久化记录。
+2. 完整 direct 和 transitive dependency set 的持久化登记。
+3. Canonical ClaimRevision/FactRevision 提交及必需的规范引用。
+4. 将准确的 Storage publication tuple 持久化为 PREPARED_HIDDEN。
+5. 针对当前 ForgetFence 执行 PublicationParticipant Admission。
+6. 后续受保护的可见性处理。
+
+PublicationParticipant Admission 必须绑定准确的已提交
+publication identity，不得创建、替换、缩减或独立重新定义
+在 Producer Admission 和 dependency-set registration
+阶段建立的 dependency closure。
+
+两个准入阶段都必须针对权威 ForgetFence/Admission
+排序锚点进行串行化。
+
+对于每个准入阶段，准入成功与对准确准入 participant
+的持久化记录，必须在权威串行化 Transaction Domain
+内构成一个不可分操作。
+
+如果对应的 participant 记录失败或尚未持久可见，
+Admission 不得报告成功。
+
+后续 Forget Fence 不得越过对应的、尚未解决的
+已准入 participant barrier。
+
+后续 Fence 必须通过权威串行化 barrier
+处理每一个成功准入的 participant。
+
+不得静默跳过、删除或替换任一 participant identity。
+
+实现必须保留 Producer Admission 与
+PublicationParticipant Admission 之间的区别，
+包括各自的 participant identity、持久化记录、执行顺序、
+dependency closure 和最终 Forget outcome。
+
+这是一个 implementation-conformance gate，
+不是尚未解决的规范排序选择。
+
 #### Storage 边界
 
 既有 Storage L1 决策保持不变。

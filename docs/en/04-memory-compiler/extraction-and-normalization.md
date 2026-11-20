@@ -285,6 +285,81 @@ Staging does not imply canonical acceptance.
 E does not own canonical Claim/Fact identity
 or I governance authorization.
 
+### 19.2 Producer Admission and PublicationParticipant Admission
+
+Producer Admission and PublicationParticipant Admission are
+two distinct, ordered admission stages in the same protected
+production and publication lifecycle.
+
+They MUST NOT be treated as aliases, equivalent operations,
+or interchangeable admission decisions.
+
+Producer Admission admits the exact Producer/ProducerWork
+identity into the canonical production lifecycle.
+
+It MUST occur before dependency-set registration and
+canonical revision commit, as specified in §19.1.
+
+PublicationParticipant Admission admits the exact
+PublicationParticipant bound to the corresponding
+StorageVisibilityParticipantRef and publication tuple digest.
+
+It MUST occur only after D has committed the applicable
+canonical revisions and Storage has durably persisted the
+exact publication tuple as PREPARED_HIDDEN.
+
+Successful Producer Admission MUST NOT be interpreted as
+successful PublicationParticipant Admission.
+
+The two admissions MUST preserve the following order:
+
+1. Producer Admission and durable recording of the exact
+   admitted Producer participant.
+2. Durable registration of the complete direct and
+   transitive dependency set.
+3. Canonical ClaimRevision/FactRevision commit and
+   required canonical references.
+4. Durable persistence of the exact Storage publication
+   tuple as PREPARED_HIDDEN.
+5. PublicationParticipant Admission against the current
+   ForgetFence.
+6. Subsequent protected visibility processing.
+
+PublicationParticipant Admission MUST bind to the exact
+committed publication identity and MUST NOT create,
+replace, narrow, or independently redefine the dependency
+closure established during Producer Admission and
+dependency-set registration.
+
+Both admission stages MUST be serialized against the
+authoritative ForgetFence/Admission ordering anchor.
+
+For each admission stage, successful admission and durable
+recording of the exact admitted participant MUST form one
+indivisible operation within the authoritative serialized
+Transaction Domain.
+
+Admission MUST NOT report success if the corresponding
+participant recording fails or is not durably visible.
+
+A subsequent Forget Fence MUST NOT pass the corresponding
+unresolved admitted-participant barrier.
+
+A later Fence MUST account for every successfully admitted
+participant through the authoritative serialized barrier.
+
+It MUST NOT silently skip, erase, or substitute either
+participant identity.
+
+The implementation MUST preserve the distinction between
+Producer Admission and PublicationParticipant Admission,
+including their respective participant identities,
+durable records, ordering, dependency closure and terminal
+Forget outcomes.
+
+This is an implementation-conformance gate, not an
+unresolved normative ordering choice.
+
 #### Storage boundary
 
 The existing Storage L1 decision remains unchanged.
