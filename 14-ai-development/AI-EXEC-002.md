@@ -5,7 +5,7 @@
 - **Version:** 1.2
 - **Status:** v1.2 PENDING ADOPTION（本变更集提交并合入 main 后按 AI-EXEC-UNIFICATION-RULING-001 §5 生效条款登记采纳）。Previous versions: v1.1 ADOPTED via PR #256 (merge commit `48a556491506d25e78be47957276bf3821797a0a`, 2026-11-18); v1.0 ADOPTED via PR #230 (merge commit `53aae842c390eac6d54f937af6cd2744dbe8d09d`, 2026-11-18). v1.2 变更内容：F-006 锚点修订（结构=七章节 per AI-STD-001 §5.1；15/12 项重分类为按 AI-PROMPT-STD-001 §4 映射的内容义务）。
 - **Owner:** Integration Owner
-- **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml) · 修订 Work Item [AID-2026-003](work-items/AID-2026-003/manifest.yaml)
+- **Tracking:** Issue #218 · Work Item [AID-2026-002](./work-items/AID-2026-002/manifest.yaml) · 修订 Work Item [AID-2026-003](./work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](ai-development-standard.md) §5/§13、[AI-PROMPT-STD-001](prompt-authoring-standard.md)、[CHATGPT-GLOBAL-001](prompts/global/chatgpt-session-contract-v1.md)、[AI-PROC-001](iteration-lifecycle.md) Stage 2/6、GLB-DOC-001（政策 GOV-DOC-001）
 - **Translation status:** COMPLETE — source-aligned English counterpart: `docs/en/14-ai-development/AI-EXEC-002.md` (translation commit `08b07d228dbe78a209a5af68c4988b292e65e9c8`; source commit `1f97c3fae65828266a0c3cb1d1e8d4e6cb330856`); bilingual closeout AID-2026-004 / Issue #218.
 
@@ -28,7 +28,7 @@
 
 工作开始前，在 Work Item 所属 Issue/PR 写明（= AI-STD-001 §13 起始记录 + AI-PROC-001 §8 接收清单）：
 
-1. **Work Item ID**：`AID-YYYY-NNN`（[INDEX.md](work-items/INDEX.md) 注册规则），且 `work-items/AID-YYYY-NNN/manifest.yaml` 已创建；
+1. **Work Item ID**：`AID-YYYY-NNN`（[INDEX.md](./work-items/INDEX.md) 注册规则），且 `work-items/AID-YYYY-NNN/manifest.yaml` 已创建；
 2. **提示词标识**：Prompt ID + 版本（如 `AID-2026-002-PROMPT v1`）+ 出处锚点（按下述 **T1/T2/T3 三档**执行）；
 3. **基线**：目标分支、base SHA、依赖 SHA（来源 Pin——分支名不是稳定基线，AI-PROMPT-STD-001 Step 2）；
 4. **范围/非目标、任务类（ARCH/IMPL/TEST/SEC/MIG/PERF/DOC/OPS）、风险级（R0–R3）、验收标准**。
@@ -108,7 +108,7 @@
 8. 合并状态：仅在确实合并后记目标分支、merge commit SHA、合并后回读验证——**不得由 PR 关闭推断已合并**；
 9. 双语门禁结果（GOV-DOC-001：双方路径、源版本、对等维度 PASS/FAIL、审查人，或 STALE 例外登记要素）。
 
-随后更新 [INDEX.md](work-items/INDEX.md) 的**会话级交付记录**一行（缺证据标 `NOT RECORDED`，禁止补造；受阻/无变更保持可见并注明解决者与退出条件）。
+随后更新 [INDEX.md](./work-items/INDEX.md) 的**会话级交付记录**一行（缺证据标 `NOT RECORDED`，禁止补造；受阻/无变更保持可见并注明解决者与退出条件）。
 
 ## 7. 禁止事项（AI-PROMPT-STD-001 §7 + CHATGPT-GLOBAL-001）
 

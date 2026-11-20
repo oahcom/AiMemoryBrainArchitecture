@@ -41,6 +41,7 @@ EXEMPT_SUFFIXES = {".png", ".jpg", ".jpeg", ".svg", ".drawio"}
 EMBEDDED_BILINGUAL_SOURCES = {
     "00-governance/bilingual-documentation-policy.md",
     "00-governance/architecture-document-management-policy.md",
+    "00-governance/architecture-document-metadata.schema.yaml",
     "00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md",
     "00-governance/bilingual-governance-migration-register.md",
     "00-governance/templates/bilingual-issue-template.md",

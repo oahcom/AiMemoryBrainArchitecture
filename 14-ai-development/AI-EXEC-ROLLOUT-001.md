@@ -5,7 +5,7 @@
 - **Version:** 4.0（v2 去脚本化 → v3 GitHub 原生跟踪 → v4 对齐项目现行流程）
 - **Status:** ADOPTED — owner-directed adoption recorded in Issue #218 comment #6971736655
 - **Owner:** Integration Owner
-- **Tracking:** Issue #218 · Work Item [AID-2026-002](work-items/AID-2026-002/manifest.yaml)
+- **Tracking:** Issue #218 · Work Item [AID-2026-002](./work-items/AID-2026-002/manifest.yaml)
 - **落地文本**：[AI-EXEC-001](AI-EXEC-001.md)（流程执行细则）、[AI-EXEC-002](AI-EXEC-002.md)（提示词执行细则）
 - **Translation status:** COMPLETE — source-aligned English counterpart: `docs/en/14-ai-development/AI-EXEC-ROLLOUT-001.md` (translation commit `e683ea275dfaf85fff0f9d18bb706d3bdb5d60a1`; source commit `778b4d3b4b6c846faa6a02247d31d14a33d8b626`); bilingual closeout AID-2026-004 / Issue #218.
 
