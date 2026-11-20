@@ -65,7 +65,7 @@ That instruction is only actionable if it is clear, gate by gate, what already a
 | design-proposal §11 | `MemoryValueProjection` and `VectorIndex` traits, with the invariant that `invalidate` must not delete canonical content. |
 | design-proposal §13 tests 1–8, 15–18 | Digest binding, scope isolation, non-destructive invalidation, all three rebuild tiers, immutability, composite integrity, provenance. |
 
-**Residual gap.** *Failure recovery* is named in the gate and only partly addressed. §12 gives a forward-only idempotent migration path; it does not state what a rebuild does when it is interrupted partway, whether `rebuild_state` is set before or after the score row is written, or how a partial rebuild is distinguished from an interrupted one. Q10 records that exact-value rebuild remains `CONDITIONAL` / `NOT VERIFIED`.
+**Residual gap (tier 3).** *Failure recovery* is named in the gate and only partly addressed. §12 gives a forward-only idempotent migration path; it does not state what a rebuild does when it is interrupted partway, whether `rebuild_state` is set before or after the score row is written, or how a partial rebuild is distinguished from an interrupted one. Q10 records that exact-value rebuild remains `CONDITIONAL` / `NOT VERIFIED`.
 
 **Blocked by:** nothing at design level for the structural tier. Exact-value tier needs a worked example that does not exist here.
 
@@ -98,14 +98,14 @@ Phase 1 already carries executable tests for several of these criteria. They are
 
 | criterion | Phase 1 evidence (exists, executable) | Phase 2 status |
 |---|---|---|
-| duplicate event delivery | `memory-event-store-sqlite/src/payload.rs:285` — `duplicate_payload_append_returns_original_receipt_without_dup`; `lib.rs:324` — `same_producer_key_and_digest_replay_original_receipt`; `lib.rs:339` — `same_producer_key_with_different_digest_conflicts` | store-layer evidence only; no Phase 2 integration proof |
-| out-of-order delivery | **none** — the change-page test at `memory-storage-sqlite/src/lib.rs:1511` asserts ordered *retrieval* with limit and scope filtering, which is not delivery order | **retrieval ordering specified (test 11); arrival/delivery-order handling unproven** |
-| partial failure | **none** | **genuine gap** |
-| restart/recovery | `resilience.rs:139` — `restart_preserves_receipt_and_idempotent_payload_replay`; `resilience.rs:204` — `committed_payload_survives_process_crash_and_wal_recovery`; `memory-storage-sqlite/src/lib.rs:496` — `sqlite_committed_state_survives_close_and_reopen`; `:554` — `abrupt_process_exit_rolls_back_entire_uncommitted_commit` | store-layer evidence only; no Phase 2 integration proof |
-| concurrent updates | `resilience.rs:162` — `concurrent_appends_preserve_unique_order_and_payload_custody` (6 writers, barrier-synchronised); `memory-storage-sqlite/src/lib.rs:579` — `independent_connections_serialize_competing_compare_and_swap_writers` | store-layer evidence only; no Phase 2 integration proof |
-| projection rebuilding | **none** | tests 4–6 specified, not implemented or run |
-| provenance integrity | **none** | tests 15, 17, 18 specified, not implemented or run |
-| context-injection correctness | **none** | **genuine gap — intended-context semantics undefined** |
+| duplicate event delivery | `memory-event-store-sqlite/src/payload.rs:285` — `duplicate_payload_append_returns_original_receipt_without_dup`; `lib.rs:324` — `same_producer_key_and_digest_replay_original_receipt`; `lib.rs:339` — `same_producer_key_with_different_digest_conflicts` | `PROVEN — PHASE 1 STORE LAYER`; `UNPROVEN — PHASE 2 INTEGRATION` |
+| out-of-order delivery | **none** — the change-page test at `memory-storage-sqlite/src/lib.rs:1511` asserts ordered *retrieval* with limit and scope filtering, which is not delivery order | retrieval ordering specified (test 11); out-of-order **arrival** handling `UNVERIFIED ABSENCE` |
+| partial failure | **none** | `UNVERIFIED ABSENCE` |
+| restart/recovery | `resilience.rs:139` — `restart_preserves_receipt_and_idempotent_payload_replay`; `resilience.rs:204` — `committed_payload_survives_process_crash_and_wal_recovery`; `memory-storage-sqlite/src/lib.rs:496` — `sqlite_committed_state_survives_close_and_reopen`; `:554` — `abrupt_process_exit_rolls_back_entire_uncommitted_commit` | `PROVEN — PHASE 1 STORE LAYER`; `UNPROVEN — PHASE 2 INTEGRATION` |
+| concurrent updates | `resilience.rs:162` — `concurrent_appends_preserve_unique_order_and_payload_custody` (6 writers, barrier-synchronised); `memory-storage-sqlite/src/lib.rs:579` — `independent_connections_serialize_competing_compare_and_swap_writers` | `PROVEN — PHASE 1 STORE LAYER`; `UNPROVEN — PHASE 2 INTEGRATION` |
+| projection rebuilding | **none** | specified, not implemented or run |
+| provenance integrity | **none** | specified, not implemented or run |
+| context-injection correctness | **none** | `UNVERIFIED ABSENCE`; intended-context semantics undefined |
 
 ### Two corrections of this document's own earlier readings
 
@@ -115,11 +115,21 @@ Phase 1 already carries executable tests for several of these criteria. They are
 
 So the honest classification has three tiers, not two:
 
-- **Proven at the store layer, unproven at Phase 2** — duplicate delivery, restart/recovery, concurrent updates. These are not absent: the Phase 1 tests exist and run. They also cannot establish Phase 2 conformance, because none of them involves a transcript write accompanying a canonical commit.
-- **Specified but not implemented or run** — projection rebuilding, provenance integrity, plus retrieval ordering.
-- **Genuinely missing** — partial failure, context-injection correctness, and out-of-order *arrival* semantics.
+| tier | classification | meaning |
+|---|---|---|
+| 1 | `PROVEN — PHASE 1 STORE LAYER` | positive evidence establishes the specifically tested store behaviour |
+| 2 | `UNPROVEN — PHASE 2 INTEGRATION` | store-level evidence exists; Phase 2 integration behaviour not established |
+| 3 | `UNVERIFIED ABSENCE` | no relevant test located in the inspected tree; exhaustive absence not established |
 
-The substantive work is the first tier's open question: what happens when `commit_version` succeeds and the `transcript_message` insert citing it does not. That is a design question, and per F3 below it is not one engineering may settle unilaterally.
+**Tiers 1 and 2 are not competing classifications.** A behaviour can be proven at the store layer and simultaneously unproven at Phase 2, and the mapping keeps both visible rather than letting one stand for the other. A store-level idempotency test does not establish end-to-end idempotency once Phase 2 introduces its own commit, retry and transcript interactions.
+
+Applying it:
+
+- **Tier 1 + 2 together** — duplicate delivery, restart/recovery, concurrent updates. The Phase 1 tests exist and run and prove the tested store operation. None of them involves a transcript write accompanying a canonical commit, so none establishes the Phase 2 path that did not exist when they were written.
+- **Specified, not implemented, not run** — projection rebuilding, provenance integrity, retrieval ordering.
+- **Tier 3** — partial failure, out-of-order *arrival*, context-injection correctness. No test evidence was located. That is not the same as saying those behaviours are untested; it says their coverage status has not been established.
+
+The substantive work is tier 1+2's open question: what happens when `commit_version` succeeds and the `transcript_message` insert citing it does not. That is a design question, and per §10 it is not one engineering may settle unilaterally.
 
 ---
 
@@ -143,7 +153,7 @@ Partially available. Implementation, verification, review and merge are executab
 | 2 transcript capture | substantial; state vocabulary exists, transition and ownership semantics undefined | Q8 for retention; transitions need adoption (§10) |
 | 3 derived projection | substantial; failure recovery and interruption semantics missing | nothing for structural tier; exact tier `NOT VERIFIED` |
 | 4 outstanding decisions | **none** | authority — Issue #305 |
-| 5 acceptance criteria and tests | 3 criteria proven at store layer only; 3 specified but unrun; 3 genuinely missing | work not done; adoption authority for the atomicity contract |
+| 5 acceptance criteria and tests | 3 `PROVEN — PHASE 1 STORE LAYER` / `UNPROVEN — PHASE 2 INTEGRATION`; 3 specified but unrun; 3 `UNVERIFIED ABSENCE` | work not done; adoption authority for the atomicity contract |
 | 6 implementation authorisation | none | authority — Issue #305 |
 | 7 convergence chain | partial | Owner acceptance unavailable |
 
@@ -189,4 +199,4 @@ That is still worth doing, and it is why this map separates *work not done* from
 - Not a substitute for the review rounds recorded in §2–§2f. Those examined the document; this examines its relation to a list written elsewhere.
 - No governance state changes. `DESIGN_ACCEPTANCE` `NOT_GRANTED`, `IMPLEMENTATION_AUTHORIZATION` `NOT_GRANTED`, `GOVERNANCE_STATUS` `BLOCKED`, `acceptance_authority` `NOT_ASSIGNED`.
 
-**Evidence tier:** the gate text and the cited sections are `VERIFIED` — read from the merged tree, citations script-checked. The judgement that a section "addresses" a gate is `PROPOSED` — an author reading, not a review finding. The absence of tests for partial failure, out-of-order arrival and context-injection correctness is `UNVERIFIED ABSENCE` — nothing was located in the inspected tree, and no exhaustive search was performed.
+**Evidence tier:** the gate text and the cited sections are `VERIFIED` — read from the merged tree, citations script-checked. The judgement that a section "addresses" a gate is `PROPOSED` — an author reading, not a review finding. The absence of tests for partial failure, out-of-order arrival and context-injection correctness is `UNVERIFIED ABSENCE` in the tiered sense defined in §6 — no relevant test was located in the inspected tree, and exhaustive absence was not established. The distinction between that and *the behaviour is untested* is the whole point of the tier.
