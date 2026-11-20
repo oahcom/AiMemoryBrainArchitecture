@@ -412,3 +412,40 @@ This addendum supersedes earlier PR #321/#322/#327 head and file-Blob snapshots 
 
 ### Concurrent live-ref correction after the preceding ledger write
 - PR #327 was advanced concurrently after the preceding read. Latest post-write live ref: HEAD `934a76e18ba020d01c520a8484ed7fc37f96cff1`; handoff Blob `2d453d24ae5e65973ced964918b9f3687a5d3284`. This supersedes PR #327 HEAD `4905a2d604b38bbe2d836617b11bed0c97709658` / Blob `ae4ab29c7e7fd14c84b8605f5f5fe10b27477d51` recorded immediately above. PR #327 remains OPEN/DRAFT; current-head checks were not queried after this last ref move.
+
+
+## 2026-11-20 D-2026-1120-01 — F1/F3 live exact-head closeout refresh
+
+This addendum supersedes earlier F1/F3 carrier pins above. It records current exact-source delivery and evidence limits; it does not close either finding.
+
+### F-43-01/F1 — P1 — OPEN (runtime implementation evidence)
+
+- **Finding triad:** `F-43-01/F1` | **P1** | **OPEN — five callable D operations / durable authority / S1–S7 runtime proof not established**.
+- **Return:** Issue #7 (engineering-entry boundary), Issue #10 (JF-10/COC physical proof), Issue #25 (D/Storage authority and Receipt), Issue #43 (this ledger), PR #327.
+- Existing PR #327: branch `docs/f43-01-f1-engineering-entry-handoff`; exact current HEAD `934a76e18ba020d01c520a8484ed7fc37f96cff1`; handoff file `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md`; Blob `2d453d24ae5e65973ced964918b9f3687a5d3284`.
+- The handoff explicitly defines E1–E8, required callable D operations, durable Producer Registration Ledger/Receipt, equality/linearization proof and S1–S7 evidence. Exact-source readback confirms it is a handoff only: five callable D operations NOT IMPLEMENTED; authoritative operation-bound Receipt NOT ESTABLISHED; S1–S7 NOT RUN.
+- Issue #7 comment `7021990583` remains the controlling entry disposition: `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; engineering entry NOT AUTHORIZED / NOT READY. D-2026-1120-01 releases carrier quota but does not designate a canonical Runtime repository, engineering maintainers, write authority or deployment/test custody. No placeholder Runtime is added to this architecture repository.
+- **Disposition:** engineering handoff delivery VERIFIED at the exact PR/Blob above; underlying F1 implementation finding remains OPEN. No runtime implementation or production acceptance is claimed.
+
+### F-43-01/F3 — P1 — OPEN (independent human mapping acceptance / consumer / operational evidence)
+
+- **Finding triad:** `F-43-01/F3` | **P1** | **OPEN — independent signer attribution and end-to-end consumer/operational proof not established**.
+- **Return:** PR #321 (D query contract), PR #322 (H TEST-profile consumer), PR #323 (this ledger), Issue #25 (callable D authority/Receipt/currentness), Issue #43.
+- PR #321: branch `fix/f43-01-f3-d-query-mapping-pin`; exact HEAD `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; D contract Blob `099f4948b550919084b0d73094692b590b0be0a9`. The contract pins accepted mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`; its explicit historical superseded reference is not an active pin. The contract explicitly states `ResolveForgetFenceSnapshotProof` is NOT ESTABLISHED AS CALLABLE. Exact-head workflow query returned no PR-triggered runs; documentation tests NOT RUN.
+- PR #322: branch `fix/f43-01-f3-h-five-d-highwater-bounds`; exact HEAD `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; test Blob `6685226143f28a5b8764067bb205080b531132e3`. Static source readback confirms five nominal numeric fields are present, cursor is separately treated as non-typed bounded text, and the test file contains 15 methods including 512-character leading-zero acceptance and 513-character rejection cases. This is source inspection, not test execution or H Owner acceptance.
+- Exact-head workflow retry: Run `44684299439`, latest Job `136119955880`, failure; Run `44684299500`, latest Job `136119969030`, failure. Both job-step readbacks are `steps=null`; log downloads returned HTTP 404 `BlobNotFound` (RequestIds `06c889c0-601e-0032-40b5-78b7a9000000` and `ffcc00b7-601e-00b8-23b5-78d0bb000000`). No test step started; no CI PASS and no test-level failure cause is claimed. Earlier 13/13 focused report belongs to the prior 13-method test Blob and is not evidence for the current 15-method Blob.
+- D role decision Issue #43 comment `7021655866` and H role decision comment `7021638212` both record ACCEPT WITH EXPLICIT LIMITATIONS for the identical mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`; both visible GitHub identities resolve to `oahcom`. Two role-labelled records do not authenticate two distinct human signers. Independent-human acceptance remains NOT VERIFIED.
+- The unsigned, ready-to-sign attestation and identity verification fields are already delivered in PR #323 comment `7031665905`. Required suppliers are the actual D and H human role holders; verify distinct authenticated identities, appointments/authority, separate signatures/provenance, and independent readback of the identical mapping Blob. No signature is fabricated.
+- Callable authenticated D query, durable operation-bound Receipt, live currentness/revocation/anti-rollback, H Owner acceptance of current consumer code, and C1–C6 operational evidence remain NOT ESTABLISHED.
+
+### Owner adjudication and scope
+
+- **Selected:** reuse PRs #321/#322/#323/#327 and Issues #7/#25/#43; record exact artifacts and retain OPEN states at their real implementation/identity/operational gates.
+- **Rejected:** duplicate PR/Issue creation; treating role labels under one GitHub login as independent human signatures; treating `steps=null` runner failure as test execution or PASS; inventing a Runtime target; writing/merging to `main`.
+- **Basis:** exact PR heads and file Blobs above; Issue #7 comment `7021990583`; D-2026-1120-01. No other Owner signature, runtime authorization, production conformance or merge approval is inferred.
+
+### Prompt provenance
+
+- Governance files: AI-EXEC-001 v1.1 ADOPTED, Blob `58af59af266b81109269156ea667df1a15edfb7b`; AI-EXEC-002 v1.2 PENDING ADOPTION, Blob `7f5928a5d16eb12da7621cfb8bd99ca463afd859`; AI-EXEC-002 v1.1 remains the adopted predecessor.
+- T2: user-supplied Owner ruling D-2026-1120-01 and continuation instruction. Parent conversation ID supplied by user: `6afd445b-38e4-83e8-b39f-08a50a7d2d3b`. Current platform conversation UUID and immutable raw message bytes are not exposed; SHA-256 NOT_VERIFIED. No prompt file or synthetic digest is substituted.
+
