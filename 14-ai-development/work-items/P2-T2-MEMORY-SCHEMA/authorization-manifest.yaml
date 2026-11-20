@@ -180,10 +180,14 @@ architecture_decision:
   closes_only: "Q1"
   does_not_close: [Q8, Q9, Q11, Q12, Q13, Q14]
   note_on_later_rulings: >
-    Q9, Q11, Q12, Q13 and Q15 were subsequently decided in design-proposal.md section 2i
-    under the same dev-baseline capacity form recorded above, with the same exclusions.
-    That does not retroactively widen this decision record: DEC-P2-T2-Q1-001 closes Q1 and
-    only Q1, and the 2i rulings are carried by section 2i, not by this record.
+    Q9, Q12, Q13 and Q15 were subsequently decided in design-proposal.md section 2i under
+    the same dev-baseline capacity form recorded above, with the same exclusions. Q11 was
+    only PARTLY decided there: its technical-admissibility half is settled, its
+    authorisation half is not, and the authorisation half stands with the Phase 1
+    contract's owner, who is NOT_ASSIGNED. Q11 is therefore not in the list of questions
+    decided, and this note does not place it there. None of this retroactively widens this
+    decision record: DEC-P2-T2-Q1-001 closes Q1 and only Q1, and the 2i rulings are carried
+    by section 2i, not by this record.
   adopted_direction_not_approved_artefact: >
     Adopting a direction is not approving the DDL. The merged proposal remains a proposal
     with an adopted architectural direction. Its unresolved implementation and
