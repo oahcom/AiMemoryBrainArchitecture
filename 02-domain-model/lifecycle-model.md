@@ -1,11 +1,11 @@
 # Memory Lifecycle Model
 
 **Status:** State vocabulary and separation DECIDED; policy thresholds and selected transitions OPEN.  
-**Owner:** Domain Model defines semantics; Memory Lifecycle Manager executes canonical transitions.
+**Owner:** Domain Model defines lifecycle semantics; D owns canonical Memory/Forget semantics and fence ordering; I owns authorization and cross-system governance policy; Memory Lifecycle Manager executes only authorized canonical transitions.
 
 ## 1. Purpose and boundaries
 
-Defines lifecycle semantics of canonical Memory assets and relation to Claim epistemic status, Memory Version history, Entity/Relation status, and Forget governance. Domain Model defines valid states; Lifecycle Manager owns policy/execution/authorization/audit; Canonical Store owns persistence/version mechanics; Compiler proposes candidates but cannot bypass lifecycle policy.
+Defines lifecycle semantics of canonical Memory assets and relation to Claim epistemic status, Memory Version history, Entity/Relation status, and Forget governance. Domain Model defines valid states; D owns canonical Memory/Forget semantics and fence ordering; I owns authorization, retention/legal-hold policy, cross-system inventory/evidence acceptance policy and cross-system governance assessment; Lifecycle Manager executes only authorized transitions and records local execution/audit evidence; Canonical Store owns persistence/version mechanics; Compiler proposes candidates but cannot bypass lifecycle policy.
 
 ## 2. Lifecycle is not epistemic status
 
