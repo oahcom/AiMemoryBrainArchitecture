@@ -124,8 +124,10 @@ class TestAuthority:
                 raise Denied("DELEGATION_PARENT_INVALID")
             if parent.agent != g.delegation_chain[-2]:
                 raise Denied("DELEGATION_PARENT_AGENT_MISMATCH")
-            if (parent.tenant, parent.workspace, parent.resource) != (g.tenant, g.workspace, g.resource) or not set(g.actions).issubset(parent.actions):
+            if (parent.tenant, parent.workspace, parent.resource) != (g.tenant, g.workspace, g.resource):
                 raise Denied("DELEGATION_SCOPE_ESCALATION")
+            if not set(g.actions).issubset(parent.actions):
+                raise Denied("DELEGATION_ACTION_ESCALATION")
         return g
 
 class AdapterV1(ABC):
