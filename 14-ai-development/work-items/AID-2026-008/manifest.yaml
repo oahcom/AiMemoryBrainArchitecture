@@ -1,7 +1,7 @@
 work_item_id: AID-2026-008
 title: REQ-02 Evidence-Based Technology Selection and Mature Solution Evaluation
 owner: Integration Owner
-accountable_owner: NOT_ASSIGNED
+accountable_owner: USER-PRINCIPAL-DELEGATED
 issue: 263
 related_issues: [263, 264]
 related_prs: []
