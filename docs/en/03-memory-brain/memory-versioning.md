@@ -7,7 +7,7 @@
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
 - Source: DEREFERENCED — original normative path `03-memory-brain/memory-versioning.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/memory-versioning.md) (reading translation only, not a normative replacement).
 - Chinese counterpart: [Memory Versioning 与历史语义](../../zh-CN/03-memory-brain/memory-versioning.md)
-- Status: Immutable version principle DECIDED; Claim revision and exact transaction/time semantics CANDIDATE/OPEN
+- Status: Claim identity and immutable ClaimRevision semantics DECIDED FOR CONVERGENCE (Option A); concrete Schema representation and exact transaction/time representation CANDIDATE/OPEN
 - Related: INT-P0-01/03, INT-P1-01/02/06; DM-002/003/006/008/009/013
 
 ## 1. Purpose
@@ -210,13 +210,22 @@ D Fence linearizes before Admission
 Participant-first branch (T18):
 
 ```
-Admission success
-      |
-      +--> Exact Participant record MUST be durably
-           persisted as one indivisible operation
-      |
-      +--> A later Fence MUST wait until that record
-           is durably visible to its Participant Barrier
++------------------------------------------------------+
+| Authoritative serialized Fence / Admission boundary  |
+|                                                      |
+| Producer Admission + exact Participant record       |
+| persisted as ONE INDIVISIBLE operation               |
+| (Participant persistence failure => Admission       |
+|  MUST NOT report success)                            |
++------------------------------------------------------+
+                    |
+                    v
+      Admission success becomes observable
+                    |
+                    v
+      A later Fence MUST wait until that exact
+      Participant record is durably visible to
+      its Participant Barrier
 ```
 
 Component responsibility boundaries:
@@ -525,4 +534,4 @@ Historical reads use committed CanonicalCommitCursor/as-of snapshot and exact ag
 
 ### Claim / ConflictSet freeze gate
 
-Claim identity, ClaimRevision schema, ConflictSet schema and field-level refs remain **ADR-BLOCKED** until Architecture Governance + B approve INT-P0-01. Existing ClaimRevision table is an option sketch, not a D decision. D maps approved ADR into immutable revision mechanics after approval; no schema, DDL, public API or wire contract may be frozen in advance.
+Claim identity semantics and immutable ClaimRevision semantics are **DECIDED FOR CONVERGENCE (Option A)**. The concrete ClaimRevision Schema, ConflictSet Schema and field-level refs remain **ADR-BLOCKED** until Architecture Governance + B approve INT-P0-01. Fact-specific modeling and Fact approval remain **OPEN**. Existing ClaimRevision table is an option sketch of field representation only, not a D decision; it does not reopen or qualify the decided Claim identity semantics. D maps approved ADR into immutable revision mechanics after approval; no Schema, DDL, public API or Wire Contract may be frozen in advance.
