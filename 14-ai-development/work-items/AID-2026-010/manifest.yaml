@@ -870,3 +870,54 @@ current_h_test_rerun_attempt_2026_11_20:
     no_new_branch: true
     no_merge: true
     main_modified: false
+
+
+# Current-turn terminal finding-ledger pin — D-2026-1120-01
+final_current_ledger_pin_owner_ruling_D2026_1120_01_session_closeout:
+  ledger_path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  ledger_commit: "970187be9790a02bbdf8805049451bf8e8395828"
+  ledger_blob: "bc2ffca43f87fb9699ba2e909c8520cc6a8d8e16"
+  finding_states:
+    F-43-01/F1: "P1 / OPEN — Runtime implementation and operational evidence absent"
+    F-43-01/F3: "P1 / OPEN — independent human acceptance and end-to-end operational evidence absent"
+  f1_handoff:
+    pr: 327
+    branch: "docs/f43-01-f1-engineering-entry-handoff"
+    commit: "5b11ef7425c33c49ace5f8ef0cadb8e6b55c52db"
+    blob: "6f8dd7b4ac95c5b470c31585d124f1d1aa31daca"
+  f3_sources:
+    d_contract:
+      pr: 321
+      commit: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      active_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    h_test_candidate:
+      pr: 322
+      commit: "0ce618ac503f641cf31e66092ae823c14bf8af7b"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "e66264ad30df6594e00836524accfdeb54160cee"
+      exact_head_actions:
+        - run: 44681841687
+          conclusion: "failure before test steps; runner_id=0; steps=null"
+        - run: 44681841601
+          conclusion: "failure before test steps; runner_id=0; steps=null"
+      ci_pass: false
+      current_source_local_test_execution: "NOT_RUN_OR_NOT_VERIFIED"
+  independent_human_acceptance:
+    d_role_comment: 7021655866
+    h_role_comment: 7021638212
+    visible_github_login_for_both: "oahcom"
+    distinct_authenticated_human_signers: "NOT_VERIFIED"
+  provenance:
+    instruction: "User-supplied Owner ruling D-2026-1120-01 in current ChatGPT continuation"
+    platform_message_permalink_and_raw_bytes: "NOT_EXPOSED"
+    prompt_sha256: "NOT_VERIFIED"
+  boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merged: false
+    main_modified: false
+    runtime_implementation_claimed: false
+    independent_owner_signature_claimed: false
+    production_acceptance_claimed: false
