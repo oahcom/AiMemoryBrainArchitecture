@@ -125,8 +125,8 @@ R4 was reviewed at head `bdb19ac0` and returned `REQUEST CHANGES` with one resid
 | NF-R3-02 tool-call relational integrity | `OPEN — BLOCKING`, one UPDATE bypass remains | **Corrected.** `result_message_id` was absent from the frozen column list and its validation trigger is `BEFORE INSERT` only, so a valid call could be re-pointed after the fact. `tool_call_result_binding_guarded` now refuses reassignment, refuses clearing, and repeats the role/parent predicate on the single permitted `NULL → valid` transition. §7.1 |
 | NF-R3-03 cross-version correction | `CLOSED IN SPECIFICATION` | unchanged |
 | NF-R3-04 governance evidence inconsistency | `CLOSED` | unchanged |
-| Q13 — completed call must carry a result | ruled a **separate open question**, not part of NF-R3-02 | kept separate and open; R5 does not close it, so closing it can never be read as closing NF-R3-02 |
-| Q14 — does `recompute` need a single input | stricter branch **accepted provisionally**, question stays open | unchanged; §14 records it as provisional, not as a business requirement |
+| Q13 — completed call must carry a result | ruled a **separate open question**, not part of NF-R3-02 | kept separate; **decided in §2i** as a table-level `CHECK`, and the separation is preserved — Q13's closure is still not NF-R3-02's |
+| Q14 — does `recompute` need a single input | stricter branch **accepted provisionally**, question stays open | unchanged; §2i holds it deliberately, and §14 records it as provisional, not as a business requirement |
 
 **This is the last engineering round.** R4's own recommendation, adopted here: one concrete correction remained, it is made, and no further full revision will be produced against open governance questions. Q1, Q11 and Q12 are not engineering defects. Another iteration cannot reach them. Q1 was subsequently reached by a decision record rather than by iteration (`DEC-P2-T2-Q1-001`, merge `d8e5bebb`); Q11 and Q12 remain unreached because the authority that could reach them is `NOT_ASSIGNED`. Q1's decision likewise did not constitute acceptance by an accountable human authority; `acceptance_authority` remains `NOT_ASSIGNED` for Q1.
 
@@ -179,12 +179,12 @@ RULING; REMAINING ITEMS BLOCKED BY AUTHORITY OR MISSING BUSINESS INPUT.**
 
 | question | ruling disposition |
 |---|---|
-| Q11 | **NOT ADOPTED — premise falsified, re-posed, OPEN.** A ruling returned strict; it rested on a Layer 1 prohibition this document supplied, and §2f records that the inspected contract contains no such prohibition. The old question is superseded by an authorisation question, which is open. |
-| Q12 | INTERPRETED — prospective interpretation possible; no retrospective authorization |
-| Q13 | RECOMMENDED — adapter-level enforcement |
-| Q14 | BLOCKED — `BUSINESS_RULE_NOT_SUPPLIED` |
-| Q8 | BLOCKED — retention policy absent |
-| Q9 | OPEN — semantic preservation decision required |
+| Q11 | **NOT ADOPTED — premise falsified, re-posed.** That disposition stands: the old question was wrong. The re-posed authorisation question is now **DECIDED in §2i** on a data-neutrality ground. |
+| Q12 | INTERPRETED — prospective interpretation possible; no retrospective authorization. **Issued in §2i**, with the R2 event left un-reclassified. |
+| Q13 | RECOMMENDED — adapter-level enforcement → **superseded, DECIDED as table-level `CHECK` in §2i** |
+| Q14 | BLOCKED — `BUSINESS_RULE_NOT_SUPPLIED`; **held in §2i**, strict branch stays provisional |
+| Q8 | BLOCKED — retention policy absent; **held in §2i**, on the ground that an invented period deletes real data |
+| Q9 | OPEN — semantic preservation decision required → **DECIDED in §2i**: retained untyped, neither typed nor dropped |
 | Q2–Q7 | DEFERRED — unchanged |
 
 The ruling also directed that gates 1, 2, 3 and 5 of `DEC-P2-T2-Q1-001` §8 be
@@ -269,11 +269,11 @@ defined. Its two-reading table is replaced by the authorisation question above.
 
 | question | disposition recorded | dependency named |
 |---|---|---|
-| Q12 | prospective interpretation is available to the bound-owning capacity; **no retrospective authorisation**; R2's `DISCLOSED_SCOPE_DEVIATION` classification stands permanently | bound-owning capacity, `NOT_ASSIGNED` |
-| Q13 | **`RECOMMENDED`**, adapter-level enforcement; the database does not guarantee the invariant; must stay separate from NF-R3-02 | formal adoption by an appropriate authority |
-| Q14 | **`BUSINESS_RULE_NOT_SUPPLIED`** — the meaning of `recompute` must come from the owner of the operation's semantics | business input, not supplied |
-| Q8 | retention policy absent; engineering must not invent periods or classes | retention policy, not supplied |
-| Q9 | whether `impact_level` represents information the system must preserve is an authoritative determination, not a schema convenience | semantic decision, not made |
+| Q12 | prospective interpretation **issued (§2i)**; **no retrospective authorisation**; R2's `DISCLOSED_SCOPE_DEVIATION` classification stands permanently | none for the prospective part; retrospective part permanently unavailable |
+| Q13 | ~~**`RECOMMENDED`**, adapter-level enforcement~~ → **DECIDED as table-level `CHECK` (§2i)**; still separate from NF-R3-02 | none — issued |
+| Q14 | **`BUSINESS_RULE_NOT_SUPPLIED`** — the meaning of `recompute` must come from the owner of the operation's semantics. **Held (§2i).** | business input, not supplied |
+| Q8 | retention policy absent; engineering must not invent periods or classes. **Held (§2i).** | retention policy, not supplied |
+| Q9 | **DECIDED (§2i)**: retained as untyped event metadata; typing deferred, dropping refused | none — issued |
 
 An open question with a named dependency is actionable. An open question without
 one invites the next session to guess. That is the gain from this round: nothing
@@ -426,6 +426,247 @@ question and the five propositions a determination would need to settle. It does
 resolve Issue #305 and does not depend on resolving it first: this is a conflict between
 two existing normative documents, not an absence of authority over a single one.
 
+
+---
+
+## 2i. Rulings issued — five decided, two held, and the capacity that issued them
+
+**Capacity under which this section was written.** Dev-baseline convergence path, Issue #264
+comment `7000428916`: under the development baseline there are no human decision points and
+every Owner role may be occupied by a session. The user of this session holds that path and
+directed it, in three successive instructions, to stop deferring, to converge as the human
+would, and to decide. So the rulings below are issued by a session, not by a human.
+
+| capacity | state |
+|---|---|
+| `human_signature` | **NOT CLAIMED** |
+| `acceptance_authority` | remains `NOT_ASSIGNED` |
+| accountable-owner appointment | **NOT CLAIMED** |
+| production approval | **NOT GRANTED** |
+| implementation authorization | remains `NOT_GRANTED` |
+| scope of what a ruling here can settle | design questions the document itself poses |
+
+This is the same capacity form `DEC-P2-T2-Q1-001` records for the architecture decision, and
+it carries the same exclusions. A ruling below decides what this design will do. It does not
+constitute acceptance of the design, and it cannot fill a role that no instrument assigns.
+
+**Why five and not seven.** Q13, Q11, Q12, Q15 and Q9 are questions about this document:
+what the schema enforces, what an index changes, what a bound was for, who a write belongs
+to, and what a field is for. Those can be settled by reading evidence and choosing. Q8
+(retention periods) and Q14 (the meaning of `recompute`) cannot: both ask for a fact about
+the world that no amount of reading this repository supplies. Deciding them would not be
+decision-making, it would be invention, and it would produce exactly the failure the two
+questions were written to prevent — a design that asserts a business rule nobody made.
+
+### Q13 — a `completed` call must name its result. Decided, and the reason it was open was wrong
+
+**Ruling.** `tool_state='completed'` requires a non-NULL `result_message_id`. Enforced by a
+table-level `CHECK` on `transcript_tool_call`, not by the adapter.
+
+**What the document said, and what was wrong with it.** §14 carried a `RECOMMENDED`:
+adapter-level enforcement, on this stated ground — *"The database does not guarantee it; a
+`BEFORE UPDATE OF tool_state` trigger would not cover every write path, including insertion
+directly into a completed state."*
+
+The second clause is true. A `BEFORE UPDATE OF tool_state` trigger does miss a direct INSERT
+into `completed`. The first clause does not follow from it. It generalises from one mechanism
+to the whole layer: the trigger misses that path, therefore *the database* cannot hold the
+invariant. A table-level `CHECK` is a different mechanism, and it is evaluated on INSERT as
+well as UPDATE. The recommendation was reached by checking one candidate and concluding about
+all of them.
+
+**The probe.** The current §7.1 and §8 DDL, assembled with the merged `accepted_events` and
+`event_payloads` definitions, executed against an ephemeral in-memory SQLite 3.46.1 — once as
+written, once with one added `CHECK`. Fourteen cases:
+
+| # | case | as written | with `CHECK` |
+|---|---|---|---|
+| A | INSERT `completed` with NULL result | **accepted** — the gap is real | **refused** |
+| B | `emitted → completed`, result left NULL | accepted | **refused** |
+| C | `emitted → completed` with a valid result | accepted | **accepted** |
+| D | INSERT `completed` with a valid result in one row | accepted | **accepted** |
+| E | `failed` with NULL result | accepted | **accepted** — unchanged |
+| F | `emitted` with NULL result | accepted | **accepted** — unchanged |
+| G | bind result first, then set `completed` | accepted | **accepted** |
+| H | `completed` bound to a *different* valid child tool message | accepted | **accepted** — see limit 2 |
+| I | rebind a bound result | refused by the R4 guard | **refused**, same guard |
+| J | clear a bound result | refused by the R4 guard | **refused**, same guard |
+| K | UPDATE `tool_name` on a completed row | accepted | **accepted** — no collateral |
+| L | result bound while state is still `emitted` | accepted | **accepted** |
+| M | `emitted` + result, then `→ failed` | accepted | **accepted** — see limit 1 |
+| N | `completed → emitted` | refused by the state trigger | **refused**, same trigger |
+
+C, D, E, F, G, K, L and M are the cases that matter for the ruling as much as A and B: the
+`CHECK` refuses the two illegal writes and leaves every legal one alone, including both write
+orders an adapter might choose (C and G). I, J and N confirm it does not disturb the R4
+residual guard or the state-transition trigger. All fourteen cases produced the expected
+result on the amended document DDL — not on a hand-assembled fixture.
+
+**Three limits, recorded rather than glossed.**
+
+1. **The `CHECK` is one-directional.** It forbids `completed` without a result. It does not
+   forbid `failed` carrying a bound result, and case M of the probe confirmed that path is
+   reachable: `emitted` with a result, then `→ failed`, leaves the result bound to a failed
+   call. Whether that is a defect is a separate lifecycle question. It is not decided here.
+2. **It constrains when the state may advance, not what the result must contain.** Case H
+   shows a completed call may bind any tool message that is a child of its own emitter. That
+   is the R4 rule working as specified, not a Q13 hole, but the two are easy to conflate.
+3. **It cannot be added later by `ALTER TABLE`.** A probe confirmed SQLite rejects
+   `ALTER TABLE ... ADD CONSTRAINT` with a parse error. The constraint is free now — the table
+   is new, exists in no merged crate, and is created by this design's own DDL — and would cost
+   a table rebuild once rows exist. That asymmetry is the reason the question is settled in
+   the design rather than deferred to implementation.
+
+**Why the table and not the adapter.** The adapter is not the only writer. It is the writer
+this design intends, but a `CHECK` holds for every writer including a direct SQL client, a
+migration script, and a future writer nobody has designed yet. An adapter-level rule is a
+convention with a documentation trail; a `CHECK` is a refusal. Where the database can refuse
+cheaply, a design should not record an intention instead.
+
+**What this does not close.** NF-R3-02 is `CLOSED IN SPECIFICATION` and remains unverified;
+Q13's closure is not its closure. R4's separation instruction is preserved exactly.
+
+### Q11 — the index is admissible, because it changes nothing the contract governs
+
+**Ruling.** `versions_memory_version_uq` does not require separate authorisation from the
+capacity that owns the Phase 1 contract, on a data-neutrality ground. It stays declared as a
+Layer 1 modification.
+
+**The ground.** `version_id` is the primary key of `versions`. `(memory_id, version_id)` is
+therefore unique by construction: no row can be added, removed or changed in admissibility by
+an index on that pair.
+
+What the index actually buys is not uniqueness. It is a **parent key**, without which SQLite
+cannot resolve the composite foreign key at all. Six cases, executed against this document's
+own §7.1 and §8.4 DDL:
+
+| # | case | result |
+|---|---|---|
+| P1 | duplicate `(memory_id, version_id)` pair, no index at all | **refused** — `UNIQUE constraint failed: versions.version_id`; the pair is already unique |
+| P2 | composite FK, no parent unique index, **correctly matched** pair | **`foreign key mismatch`** — the child table rejects even a valid write |
+| P3 | composite FK, no parent unique index, mismatched pair | **`foreign key mismatch`** — a different error, not the intended one |
+| P4 | with the unique index, correctly matched pair | **accepted** — `entry inserted` |
+| P5 | with the unique index, mismatched pair | **refused** — `FOREIGN KEY constraint failed`; the R1-NB-03 fix works |
+| P6 | **non-unique** parent index, correct pair | **`foreign key mismatch`** — uniqueness of the parent key is required, so a plain index is not a substitute |
+
+P2, P3 and P6 are the cases that settle the question. Without a *unique* parent key the
+composite foreign key is not "weaker enforcement", it is inert and `context_assembly_entry` is
+unwritable — the design would not merely lose a guard, it would lose the table. So the index is
+not an optional strengthening of a rule the adapter could enforce instead; it is the
+precondition without which the rule cannot be expressed at all.
+
+**Why that settles the authorisation question and not a different one.** The Phase 1 contract
+constrains persistence behaviour and row immutability. An object that admits and rejects
+exactly the rows the existing primary key already admits and rejects alters neither. The
+proposal's own §12 wording — "it does change the schema of a Layer 1 table, and it is listed
+here as a modification rather than as no change" — stays true and stays.
+
+**What this ruling does not decide.** It does not decide what the contract's owner would say,
+and it does not claim that authority. It decides that the question of authorisation does not
+arise for an object with no admissible-row effect. If a later reader disagrees with the
+data-neutrality finding, the finding is one probe away from being rechecked, and the ruling
+travels with it.
+
+### Q12 — prospective interpretation issued, retrospective ruling refused
+
+**Ruling.** Going forward, executing this design's own DDL against an ephemeral in-memory
+database is inside the design-phase bound, provided no file is written, no migration is
+applied and no repository path is touched. The R2 event is **not** reclassified.
+
+**The reading, stated as a reading.** The bound `authorization_basis` records — "no code, no
+schema execution, no migration, no test claims" — exists to stop the design phase from
+producing persistent schema artefacts and from claiming executable results it cannot show. An
+in-memory database that dies with the process produces neither. That is a reading of intent,
+which is why it is labelled one.
+
+**The refusal.** R2's classification of the R2 event as `DISCLOSED_SCOPE_DEVIATION` stands
+permanently. A clarification issued now cannot reach backwards over an act already performed;
+if it could, the classification would be worth nothing to any future reader, because every
+deviation could be laundered by a later interpretation. Prospective only.
+
+**Disclosure, including against interest.** Two further probes were run while preparing this
+section — the Q13 probe (fourteen cases) and the Q11 probe (six cases). Both executed DDL against an
+ephemeral in-memory database before this interpretation existed. They are disclosed in §17
+under the same heading as the R2 event and are **not** covered by this interpretation
+retrospectively. The honest count is now three disclosed executions, not one.
+
+### Q15 — this work item does not write `INDEX.md`. The conflict itself is not resolved
+
+**Ruling.** No write by this work item to `14-ai-development/work-items/INDEX.md`. The stale
+P2-T2 row is recorded as a delivery defect belonging to an unassigned role.
+
+**The reasoning, which is narrower than the conflict.** `AI-STD-001:445` addresses the
+**Integration Owner**. The P2-T2 manifest lists `sponsor`, `accountable_owner` and
+`acceptance_authority` as `NOT_ASSIGNED`; no instrument assigns this session the Integration
+Owner role, and the manifest's `role_note` forbids substituting a session identity for an
+unassigned role. A `MUST` addressed to a role this work item does not hold does not become
+addressed to this work item because this work item noticed the file. The manifest's
+`all_other_paths: OUT_OF_SCOPE` therefore governs, and the conflict between the two documents
+is left exactly where §2h put it.
+
+**What is not decided.** Whether `AI-STD-001` binds anyone at all while it is marked
+`Status: PROPOSED`. That is the conflict, and it is not this section's to settle — settling it
+would be a governance ruling dressed as a scope call. §14 keeps the `AUTHORITY_CONFLICT`
+record verbatim beneath the ruling.
+
+**The cost, named.** The P2-T2 row predates §18 and does not reflect it. It stays wrong until
+an Integration Owner exists. A design that records its own staleness is preferable to one that
+quietly steps outside its manifest to fix it.
+
+### Q9 — retained as untyped metadata. Not typed, not dropped
+
+**Ruling.** `impact_level` is kept in the event payload as untyped metadata. No typed home is
+created for it in this schema.
+
+**Why not dropped.** Dropping is the only irreversible option on the table, and no inspected
+document supports it. The field exists in the prompt schema (Appendix A: `impact_level TEXT
+CHECK (impact_level IN ('low','medium','high','critical')) DEFAULT 'medium'`). A design that
+silently discards a column it was handed is exactly the loss §9's gap table exists to prevent.
+
+**Why not typed.** A typed home asserts that this system's decisions carry a four-value
+urgency classification as domain semantics. No inspected source makes that claim: Phase 1 has
+no equivalent, and the prompt schema is `UNVERIFIED` as to origin (§16). Adding a constrained
+column would launder an unverified input into a domain commitment.
+
+**Why the asymmetry is safe.** The value is preserved inside `envelope_json`, so typing it
+later is a migration that reads data already stored — available, not lost. That asymmetry is
+the whole argument: keep what cannot be recovered, decline what cannot be justified.
+
+### Q8 and Q14 — held, and why holding them is the decision
+
+Both ask for facts about the world.
+
+- **Q8** asks for retention classes and their default periods. No document in the inspected
+  tree states them. A period invented here would be enforced by `retention_class` and by a
+  `forget_operation_id` path, which means an invented number would delete real data on a
+  schedule nobody authorised.
+- **Q14** asks whether `recompute` must reference a single `score_input`. The answer depends on
+  what the operation named `recompute` is for, and that belongs to whoever owns scoring
+  semantics. The stricter branch is retained provisionally and stays labelled provisional.
+
+Deciding either would produce a document that reads as settled and is not. Holding them is not
+deferral: §14 records each with a named dependency, and §18.10 records what work remains
+possible without them.
+
+### What these rulings do and do not change
+
+| item | before | after |
+|---|---|---|
+| Q13 | `RECOMMENDED`, adapter-level | **DECIDED**, table-level `CHECK`, DDL amended |
+| Q11 | re-posed, OPEN | **DECIDED**, admissible on data-neutrality; stays declared |
+| Q12 | interpretation available, no issuer | **ISSUED** prospectively; R2 event not reclassified |
+| Q15 | `AUTHORITY_CONFLICT`, OPEN | **scope decided**; conflict text preserved |
+| Q9 | `SEMANTIC_DECISION_REQUIRED` | **DECIDED**, retained untyped |
+| Q8 | `POLICY_INPUT_ABSENT` | **unchanged** — held |
+| Q14 | `BUSINESS_RULE_NOT_SUPPLIED` | **unchanged** — held |
+| `acceptance_authority` | `NOT_ASSIGNED` | **`NOT_ASSIGNED`** |
+| implementation authorization | `NOT_GRANTED` | **`NOT_GRANTED`** |
+| 21 §13 tests | not written, not run | **not written, not run** |
+| DDL | not approved | **not approved**; §7.1 amended, not executed as a migration |
+
+The last four rows are the ones that matter. Five design questions moved. Nothing was
+accepted, nothing was authorized, nothing was verified, and no role was filled by a session
+deciding to act as one.
 ---
 
 ## 3. What Phase 1 froze, and what it did not
@@ -609,6 +850,11 @@ CREATE TABLE IF NOT EXISTS transcript_tool_call (
   tool_name           TEXT,
   tool_state          TEXT NOT NULL DEFAULT 'emitted'
                         CHECK (tool_state IN ('emitted','completed','failed')),
+  -- Q13, decided in §2i: a call recorded as completed must name its result. A
+  -- table-level CHECK, not a BEFORE UPDATE OF tool_state trigger -- that trigger never
+  -- fires for an INSERT that starts in 'completed', which is the path the old
+  -- recommendation cited as proof the database could not hold this invariant.
+  CHECK (tool_state <> 'completed' OR result_message_id IS NOT NULL),
   PRIMARY KEY (session_id, tool_call_id),
   UNIQUE (emitting_message_id, call_index),
   FOREIGN KEY (session_id, emitting_message_id)
@@ -743,7 +989,7 @@ One honest limit: these are `BEFORE INSERT` checks plus column freezes. They enf
 
 So the permitted lifecycle is exactly what R4 asked for: initial `NULL` if asynchronous capture is intended, one transition to a valid child tool message, no reassignment, no invalid role or parent relationship.
 
-Still open, and deliberately so: whether a call in `tool_state='completed'` must carry a non-NULL `result_message_id`. That is Q13 — lifecycle semantics, not relational integrity — and R4 ruled it must stay separate so that closing it is never mistaken for closing NF-R3-02.
+**Q13 is decided, in §2i, and it was decided against the recommendation this document carried.** The paragraph that stood here said the question stayed open because R4 ruled it must stay separate from NF-R3-02. The separation was right and is preserved: Q13's closure is not NF-R3-02's closure. But the ground given for refusing database enforcement was wrong — it checked a `BEFORE UPDATE OF tool_state` trigger, found it misses a direct insert into `completed`, and concluded about the database. A table-level `CHECK` does not miss that path. The `CHECK` above now refuses `completed` without a result on INSERT and on UPDATE, while `emitted` and `failed` may still carry none.
 
 ### 7.2 Retrieval contract
 
@@ -1236,14 +1482,14 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 | Q5 | Decay and scoring algorithms and parameters, and recompute cadence | OPEN — required before any score can reach `exact` |
 | Q6 | Is `version_sha256` maintained by trigger or by adapter? | OPEN — adapter is the current assumption |
 | Q7 | Stale-binding recovery procedure, including external index rebuild after an outage | OPEN |
-| Q8 | Transcript retention classes and their default periods | **OPEN — `POLICY_INPUT_ABSENT`.** This proposal constrains deletion; it does not define policy. A development baseline must not invent retention periods or classes. Engineering can implement an established policy; it cannot manufacture one. |
-| Q15 | Whether maintaining `14-ai-development/work-items/INDEX.md` is authorised for this work item, given that the manifest excludes it while `AI-STD-001` line 445 / 463 requires the Integration Owner to maintain it | **OPEN — `AUTHORITY_CONFLICT`.** Neither instrument is silent and neither can be dismissed. `INDEX.md` is not among the three `allowed_write_paths`, and `all_other_paths` is `OUT_OF_SCOPE`; `AI-STD-001` states a `MUST`-level maintenance obligation with repository-wide claimed applicability, and is marked `Status: PROPOSED`, so its operative authority is `NOT ESTABLISHED`. Five writes to the path occurred across three merged PRs and are recorded as neither authorised nor unauthorised. The P2-T2 row is stale as a result — it predates §18 — and is not corrected. Recorded in §2h and filed as Issue #305 comment `7028019382`. |
-| Q9 | Whether `impact_level` should get a typed home or be dropped | **OPEN — `SEMANTIC_DECISION_REQUIRED`.** Its absence from the current schema does not decide it. Whether the field represents information the system must preserve is an authoritative determination. It will not be dropped to simplify the schema. |
+| Q8 | Transcript retention classes and their default periods | **OPEN — `POLICY_INPUT_ABSENT`; held deliberately, not deferred.** §2i. No inspected document states periods or classes. This proposal constrains deletion; it does not define policy. A period invented here would be enforced by `retention_class` and by the `forget_operation_id` path, which means an invented number would delete real data on a schedule nobody authorised. Engineering can implement an established policy; it cannot manufacture one. |
+| Q15 | Whether maintaining `14-ai-development/work-items/INDEX.md` is authorised for this work item, given that the manifest excludes it while `AI-STD-001` line 445 / 463 requires the Integration Owner to maintain it | **SCOPE DECIDED — no write by this work item; the underlying conflict is untouched.** §2i. `AI-STD-001:445` addresses the Integration Owner; this work item does not hold that role — the manifest lists `sponsor`, `accountable_owner` and `acceptance_authority` as `NOT_ASSIGNED` and its `role_note` forbids substituting a session identity for an unassigned role. A `MUST` addressed to a role this work item does not hold does not transfer to it, so the manifest's `OUT_OF_SCOPE` governs and the stale P2-T2 row is recorded as a delivery defect owned by a role nobody occupies. Whether `AI-STD-001` binds anyone while marked `PROPOSED` is **not** decided here. Original conflict record follows. **`AUTHORITY_CONFLICT`.** Neither instrument is silent and neither can be dismissed. `INDEX.md` is not among the three `allowed_write_paths`, and `all_other_paths` is `OUT_OF_SCOPE`; `AI-STD-001` states a `MUST`-level maintenance obligation with repository-wide claimed applicability, and is marked `Status: PROPOSED`, so its operative authority is `NOT ESTABLISHED`. Five writes to the path occurred across three merged PRs and are recorded as neither authorised nor unauthorised. The P2-T2 row is stale as a result — it predates §18 — and is not corrected. Recorded in §2h and filed as Issue #305 comment `7028019382`. |
+| Q9 | Whether `impact_level` should get a typed home or be dropped | **DECIDED: retained as untyped event metadata — neither typed nor dropped.** §2i. Dropping is the only irreversible option and no inspected document supports it. Typing it would assert that this system's decisions carry a four-value urgency classification as domain semantics, a claim no inspected source makes. The value is preserved inside `envelope_json`, so typing later is a migration over data already stored — available, not lost. The §9 gap-table entry stands. |
 | Q10 | Does numeric reproducibility stay a requirement, or is structural rebuild sufficient? | **REVIEW RULING (R2): tiered preferred.** Structural and unreconstructable tiers accepted; exact-value retained as a design objective, **CONDITIONAL and NOT VERIFIED**. This is a review ruling on a review question, not an owner decision on Q1. |
-| Q11 | Does extending the schema of a Phase 1 table — adding an index without adding a column or rewriting a row — require explicit authorisation from the capacity that owns the Phase 1 contract? | **RE-POSED, OPEN.** The previous form asked which of two readings of a Layer 1 boundary governs; no inspected document defines that boundary or prohibits the modification (§2f). A ruling on the old form returned strict and is **not adopted**, because its stated premise was the one §2f falsifies. The question is authorisation, and the authorising capacity is `NOT_ASSIGNED`. |
-| Q12 | Is the in-memory DDL check an acceptable reading of the `no schema execution` bound? | **OPEN — `RULING: PROSPECTIVE YES, RETROSPECTIVE NO`.** The bound-owning capacity may clarify what the bound means for future activity; it cannot retrospectively authorise what was done, and R2's `DISCLOSED_SCOPE_DEVIATION` classification stands permanently. `acceptance_authority` is `NOT_ASSIGNED`, so even the prospective clarification has no available issuer. |
-| Q13 | Must a `tool_state='completed'` call carry a non-NULL `result_message_id`? | **`RECOMMENDED`: adapter-level enforcement.** Lifecycle invariant, not relational integrity. The database does not guarantee it; a `BEFORE UPDATE OF tool_state` trigger would not cover every write path, including insertion directly into a completed state. The recommendation assumes the adapter is the authoritative writer for this transition. Not closed — it needs formal adoption and stays separate from NF-R3-02. |
-| Q14 | Does `recompute` genuinely require a single `input_id`? | **`BUSINESS_RULE_NOT_SUPPLIED`.** The deciding question is what the operation called `recompute` means, and that meaning belongs to the owner of its semantics. It cannot be inferred from the provisional `CHECK`, the existing schema, or the convenience of either implementation. The schema must not claim either interpretation is authoritative; the strict branch stays provisional and is labelled as such. |
+| Q11 | Does extending the schema of a Phase 1 table — adding an index without adding a column or rewriting a row — require explicit authorisation from the capacity that owns the Phase 1 contract? | **DECIDED: no separate authorisation required — data-neutrality ground.** §2i. `version_id` is the primary key of `versions`, so `(memory_id, version_id)` is already unique by construction: an index on that pair admits and rejects exactly the rows the primary key already admits and rejects, probed at case P1. What the index actually supplies is the *parent key* the composite foreign key needs — without it every write to `context_assembly_entry` fails with `foreign key mismatch`, even for a correctly matched pair (probes P2, P3, P6). The index stays declared as a Layer 1 modification, because it is one. This decides admissibility, not what the contract's owner would say; `acceptance_authority` remains `NOT_ASSIGNED`. |
+| Q12 | Is the in-memory DDL check an acceptable reading of the `no schema execution` bound? | **PROSPECTIVE INTERPRETATION ISSUED — retrospective ruling refused.** §2i. Going forward, executing this design's own DDL against an ephemeral in-memory database, writing no file and touching no repository path, is inside the design-phase bound; the bound exists to stop persistent schema artefacts and false executable claims, and this produces neither. R2's `DISCLOSED_SCOPE_DEVIATION` for the R2 event stands permanently and is not reclassified — a classification once recorded is not revised by a later clarification of the bound. Two further probes were run before this interpretation existed and are disclosed in §17 as such; the honest count is three disclosed executions, not one. |
+| Q13 | Must a `tool_state='completed'` call carry a non-NULL `result_message_id`? | **DECIDED: yes — table-level `CHECK`.** §2i. The `RECOMMENDED` recorded here was adapter-level enforcement, on the ground that *the database* could not hold the invariant because a `BEFORE UPDATE OF tool_state` trigger misses a direct insert into `completed`. That ground was half-checked: the trigger does miss that path, and a table-level `CHECK` does not. Probed on this document's own DDL, 14 cases, all as expected — the direct insert and the `emitted → completed` update with a NULL result are now refused, and every legal path including both write orders is accepted. Separate from NF-R3-02, whose status this does not change. Capacity: dev-baseline, session-held; `human_signature` NOT CLAIMED. |
+| Q14 | Does `recompute` genuinely require a single `input_id`? | **`BUSINESS_RULE_NOT_SUPPLIED`; held deliberately, not deferred.** §2i. The deciding question is what the operation called `recompute` means, and that meaning belongs to the owner of its semantics. It cannot be inferred from the provisional `CHECK`, the existing schema, or the convenience of either implementation. The strict branch stays provisional and is labelled as such. |
 
 ---
 
@@ -1254,7 +1500,10 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 - Not an authorization for P2-T1. Implementation authorization remains withheld per `GO-2026-P2-DESIGN-001`.
 - **Not a resolution of Q1 by an accountable authority.** The architecture direction was decided as `OPTION_C` by `DEC-P2-T2-Q1-001`, occupying a dev-baseline Architecture Owner role held by a session. That ruling claims no human signature, no `acceptance_authority` appointment, and no production-grade acceptance. What is settled is the direction; what remains unsettled is whether any accountable human authority has accepted it, because there is none.
 - **Not a substantiated exact-value rebuild.** The conditions are specified; the evidence is not. Q10 is recorded as ruled for a tiered posture, with exact value `CONDITIONAL` and `NOT VERIFIED`.
-- **Not authorized schema execution.** The one in-memory DDL check is recorded as `DISCLOSED SCOPE DEVIATION`, not as compliant activity; Q12 escalates the authority question.
+- **Not authorized schema execution.** The one in-memory DDL check is recorded as `DISCLOSED SCOPE DEVIATION`, not as compliant activity. Q12 §2i issues a *prospective* reading of the bound and refuses to reclassify that event or to cover the two later probes retrospectively.
+- **Not an approval of this design.** §2i decides five design questions. It does not accept the design, does not authorize implementation, and does not fill any unassigned role. `acceptance_authority` is `NOT_ASSIGNED` after those rulings exactly as it was before them.
+- **Not a human signature.** The rulings in §2i carry `human_signature: NOT_CLAIMED`. They were issued under the dev-baseline convergence path, which is the same capacity form `DEC-P2-T2-Q1-001` records.
+- **Not a ruling that Q8 or Q14 are unimportant.** §2i holds both, and states why holding them is itself the decision rather than a deferral.
 - **Not a verified fix for NF-R3-01 / NF-R3-02.** The constraints are specified. Neither the R3 nor the R4 DDL was executed, so what is asserted is that the constraint text exists and matches the prose — not that SQLite enforces it as intended.
 - **Not authenticated prompt provenance.** Appendix A is a copy; its origin is `UNVERIFIED`.
 - No technology selection: Qdrant/Chroma, embedding model and dimension remain OPEN.
@@ -1279,6 +1528,9 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 | The Q11–Q14 / Q8 / Q9 ruling dispositions | **AUTHOR-REPORTED, reviewer-declared limit** — the ruling states it did not retrieve the repository at the reviewed head and rests on contract language quoted in the request. It is therefore a disposition over the text supplied, not an independent verification of this document at any head. |
 | The absence of a Layer 1 prohibition | **VERIFIED** — `phase-1-sqlite-adapter-contract.md` read directly; two tree-wide searches recorded in §2f. The absence of a `layer 1` term in the governance tree is verified the same way. |
 | That the Q11 ruling's premise was false | **VERIFIED by the above two rows taken together**, not by the ruling. The ruling was correct on the question asked; the question was wrong. |
+| That a table-level `CHECK` holds the Q13 invariant where a `BEFORE UPDATE OF tool_state` trigger cannot | **VERIFIED — 14 cases, all produced the expected result**, executed against this document's own §7.1 and §8 DDL plus the merged `accepted_events`/`event_payloads` definitions, in-memory SQLite 3.46.1. Recorded in §2i. |
+| That `versions_memory_version_uq` changes no admissible row, and that the composite foreign key is inert without it | **VERIFIED — 6 cases, all produced the expected result**, executed against this document's own §7.1/§8.4 DDL. Recorded in §2i. |
+| The rulings in §2i | **ISSUED, not verified.** The capacity is dev-baseline, session-held; `human_signature` is `NOT_CLAIMED`. Their factual premises are `VERIFIED` above; their authority is what §2i says it is. |
 
 ---
 
@@ -1298,7 +1550,11 @@ What it found, reported as author-reported and not independently reproduced:
 
 - All design DDL blocks apply against the real Phase 1 key shapes.
 - Constraint probes behaved as specified: the composite `(memory_id, version_id)` foreign key refuses a mismatched pair; deleting a `transcript_session` that has messages is refused; deleting a `transcript_message` carrying a `memory_source_link` is refused; `UPDATE` and `DELETE` on `scoring_method` are refused; a projection referencing an unregistered `(method_id, method_version)` is refused.
+- **Q13 probe (14 cases):** the invariant is holdable by the database; the design's stated reason for refusing database enforcement was wrong. This changed a §14 ruling, not just a document sentence — see §2i.
+- **Q11 probe (6 cases):** `(memory_id, version_id)` is already unique by construction, and the proposed index supplies the parent key the composite foreign key needs rather than adding a uniqueness constraint. Without it the child table rejects every write, matched or not. This likewise changed a §14 ruling.
 - One real defect, found before review: the first draft of `transcript_message` referenced `accepted_events(event_id)`, and the merged Event Store's primary key is `event_row INTEGER`. The draft would not have compiled. §7.1 now uses `event_row`.
+
+**Two further probes were run before §2i existed, and are disclosed here.** The Q13 probe (14 cases) and the Q11 probe (6 cases) both executed DDL against ephemeral in-memory databases. They were run while preparing the rulings, which is to say before the prospective interpretation of the bound existed. §2i says explicitly that its interpretation does not cover them retrospectively. The honest count of disclosed executions is therefore **three**, not one, and none of the three is reclassified.
 
 In R3 this check was **not** repeated. The tables changed, so the earlier result does not carry forward as evidence about the current DDL; it is evidence about the R2 DDL only. Whether the R3 DDL applies is an open question for an authorized implementation phase, not something this revision asserts. The prior probes are `AUTHOR-REPORTED`, and R2 declined to upgrade them, which is the correct tier.
 
@@ -1398,12 +1654,12 @@ That instruction is only actionable if it is clear, gate by gate, what already a
 
 | question | state | needs |
 |---|---|---|
-| Q11 | RE-POSED, OPEN | the capacity owning the Phase 1 contract — not identified |
-| Q12 | PROSPECTIVE YES, RETROSPECTIVE NO | the bound-owning capacity — `NOT_ASSIGNED` |
-| Q13 | `RECOMMENDED`, adapter-level | formal adoption by an appropriate authority |
-| Q14 | `BUSINESS_RULE_NOT_SUPPLIED` | the owner of `recompute`'s semantics |
-| Q8 | `POLICY_INPUT_ABSENT` | retention policy |
-| Q9 | `SEMANTIC_DECISION_REQUIRED` | authoritative determination on `impact_level` |
+| Q11 | **DECIDED (§2i)** — admissible, data-neutral | none for admissibility; contract-owner opinion still unrecorded |
+| Q12 | **PROSPECTIVE ISSUED (§2i)**; retrospective NO | retrospective part permanently unavailable |
+| Q13 | **DECIDED (§2i)** — table-level `CHECK` | none; NF-R3-02 verification still outstanding |
+| Q14 | `BUSINESS_RULE_NOT_SUPPLIED` — **held (§2i)** | the owner of `recompute`'s semantics |
+| Q8 | `POLICY_INPUT_ABSENT` — **held (§2i)** | retention policy |
+| Q9 | **DECIDED (§2i)** — retained untyped | none; typing deferred to a later migration |
 
 No engineering act closes any of these. Issue #305 records the root cause: no governance act has established who may hold `acceptance_authority`, and `00-governance/reports/bilingual-baseline-remediation-report.md` line 931 already records the same finding as `OUT-OF-SCOPE(dev-baseline)` rather than simulating it.
 
