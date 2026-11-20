@@ -68,6 +68,21 @@ impl ForgetFence {
         Ok(Self { path })
     }
 
+    /// Open an already provisioned fence store without creating or repairing it.
+    /// Missing or malformed metadata is an error, never an empty-fence fallback.
+    pub fn open_existing(path: impl AsRef<Path>) -> Result<Self, ForgetFenceError> {
+        let path = path.as_ref().to_path_buf();
+        if !path.is_file() {
+            return Err(ForgetFenceError::InvalidFence("fence database is missing"));
+        }
+        let db = Self::connect(&path)?;
+        db.execute_batch("BEGIN IMMEDIATE;")?;
+        let checked = load_fences(&db);
+        let _ = db.execute_batch("ROLLBACK;");
+        checked?;
+        Ok(Self { path })
+    }
+
     fn connect(path: &Path) -> Result<Connection, ForgetFenceError> {
         let db = Connection::open(path)?;
         db.busy_timeout(Duration::from_secs(10))?;
@@ -191,8 +206,13 @@ fn parse_scope_keys(row: i64, encoded: &str) -> Result<Vec<String>, ForgetFenceE
     let entries = value.as_array().filter(|a| !a.is_empty()).ok_or(ForgetFenceError::InvalidScope(row))?;
     let mut keys = Vec::with_capacity(entries.len());
     for entry in entries {
+        let valid_id = entry.get("scope_id").and_then(serde_json::Value::as_str)
+            .map(|s| !s.trim().is_empty()).unwrap_or(false);
+        let valid_kind = entry.get("scope_kind").and_then(serde_json::Value::as_str)
+            .map(|s| !s.trim().is_empty()).unwrap_or(false);
         let key = entry.get("namespace_key").and_then(serde_json::Value::as_str)
             .filter(|s| !s.trim().is_empty()).ok_or(ForgetFenceError::InvalidScope(row))?;
+        if !valid_id || !valid_kind { return Err(ForgetFenceError::InvalidScope(row)); }
         keys.push(key.to_owned());
     }
     Ok(keys)
