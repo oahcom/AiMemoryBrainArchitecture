@@ -109,6 +109,146 @@ STALE_VERSION；REVISION_PARENT_MISMATCH；IDEMPOTENCY_CONFLICT；INVALID_TIME_I
 
 Aggregate Head 更新和不可变 Revision 追加，必须与 Receipt/Outbox 原子提交。历史读取使用已提交 Transaction Sequence，而不是 Projection 到达顺序。LifecycleEvent Sequence 在每个 Memory Aggregate 内唯一，并确定性折叠。Projection Rebuild 记录 Watermark 和 Schema 兼容性。Entity/Relation Migration 和 Successor Ref 与 Canonical Version/Outbox Intent 一起提交。
 
+## Claim/Fact 端到端受保护发布协议
+
+### 1. 逻辑事务边界
+
+端到端协议 MUST 在以下环节之间保持统一、可审计的逻辑顺序：
+
+- E 私有 Staging。
+- 完整依赖枚举。
+- 持久化依赖登记。
+- D 规范 ClaimRevision/FactRevision 提交。
+- Storage PREPARED_HIDDEN Publication Tuple。
+- D PublicationParticipant Admission。
+- I Commit Authorization。
+- Storage 最终 Visibility。
+
+G ContextVersion 提交及参与方协调，只有在适用的权威 Visibility Outcome 得到确认后才能进行。
+
+### 2. 必需顺序
+
+规定的顺序如下：
+
+1. E 创建私有不可变 Staging 产物。Staging MUST NOT 产生公开可见性。
+2. E 和负责依赖的权威方枚举完整的直接及传递依赖集合。
+3. D 在适用 Forget Fence 和授权边界下持久化登记精确依赖集合。
+4. D 在规范提交边界内提交 ClaimRevision/FactRevision、精确 Parent 链接、规范 Head 更新、必需 Evidence/Provenance 引用、Scope、授权证据及必需依赖登记。
+5. Storage 将精确 Publication Tuple 持久化为 PREPARED_HIDDEN。
+6. D 根据当前 ForgetFence 和依赖登记证据准入精确 PublicationParticipant。
+7. I 为准确操作及 Publication Tuple 提供适用 Commit Authorization 决定。
+8. Storage 执行最终受保护 Visibility Transaction。
+9. D/E 协调精确参与方结果，并终结同一逻辑操作。
+10. 只有在必需权威 Visibility Outcome 和精确 Revision 引用得到确认后，G 才能提交新的 ContextVersion。
+
+### 3. Staging 与依赖不变量
+
+Staging 是私有状态，不等于 Publication。
+
+依赖枚举 MUST 先于持久化依赖登记。
+
+依赖登记必须在规范发布获得可见资格之前完整完成。
+
+依赖状态 UNKNOWN 或不完整时，必须保持私有，不得准入为完整准备状态的发布。
+
+### 4. 规范提交不变量
+
+ClaimRevision 和 FactRevision 是不可变规范修订。
+
+D 的规范提交 MUST 绑定：
+
+- 精确修订身份和 Parent 链接。
+- Aggregate Head CAS 更新。
+- 精确 Claim/Fact 交叉引用。
+- Evidence 和 Provenance 依赖引用。
+- Scope 和时间元数据。
+- Fact Attestation 所需的有效 I AuthorizationDecisionRef。
+- 必需 Forget 依赖登记。
+- CanonicalCommitCursor 分配。
+- 持久提交 Receipt 和可恢复 Outbox Intent。
+
+必需授权证据或依赖登记缺失时，不得报告 Revision 已提交。
+
+Lost ACK 必须使用原始幂等身份和精确请求 Digest 查回，不得创建第二个 Revision。
+
+### 5. PREPARED_HIDDEN 与 Admission 不变量
+
+PREPARED_HIDDEN 是持久化但非公开的 Publication 状态。
+
+D PublicationParticipant Admission MUST 验证准确的 Prepared Tuple、依赖登记和当前 ForgetFence。
+
+不得仅凭 Prepared Object 的存在推断 Admission 已完成。
+
+尚未通过 Admission 的 Publication MUST NOT 进入最终 Visibility。
+
+### 6. I Commit Authorization
+
+I MUST 授权精确操作及适用 Publication Tuple。
+
+授权决定 MUST 绑定其身份、有效期、撤销状态、Scope 和适用 Policy Version。
+
+授权缺失、歧义、过期、撤销或无法验证时，必须阻止最终 Visibility。
+
+### 7. Storage Visibility
+
+只有在此前规范提交、PREPARED_HIDDEN 和 Admission 要求全部满足后，Storage 才能执行最终 Visibility。
+
+Visibility 转换 MUST 保持适用的 per-BrainAuthorityRef Serialization Anchor。
+
+不得使用进程内事务、异步消息、重试或参与方独立成功替代受保护排序。
+
+### 8. G Context 可见性
+
+引用 ClaimRevision、FactRevision 或派生资产的 ContextVersion MUST 绑定精确不可变 Revision 引用和适用 ForgetFenceCursor。
+
+G MUST：
+
+- 重新验证当前 I 授权。
+- 重新验证适用 D Forget Fence。
+- 验证所有被引用的 Claim/Fact Revision。
+- 验证完整 Dependency Registration Receipt。
+- Context 包含已发布 Artifact 时，验证精确 Storage Visibility Outcome。
+- 通过受保护可见性协议提交不可变 ContextVersion。
+- 只有权威提交结果得到确认后才允许发布。
+
+后续 Forget 不会因为 ContextVersion 曾经提交就赋予永久访问权。历史 Context 读取和 Replay 仍必须重新执行当前授权和 Forget 抑制检查。
+
+### 9. UNKNOWN、Lost ACK 与恢复
+
+如果参与方返回 UNKNOWN 或丢失 ACK：
+
+- 操作 MUST 保持可恢复的非最终状态。
+- Retry MUST 使用相同操作身份和幂等范围。
+- 参与方 MUST 先解析先前操作结果，再创建第二次逻辑提交。
+- 不得出现重复可见的 ClaimRevision、FactRevision、Publication 或 ContextVersion。
+- 不得根据超时推断操作完成。
+
+崩溃后，恢复过程 MUST 检查权威操作记录并协调：
+
+- ForgetFence 状态。
+- 依赖登记。
+- Claim/Fact 规范提交。
+- PREPARED_HIDDEN Publication Tuple。
+- PublicationParticipant Admission。
+- I Commit Authorization。
+- Storage Visibility。
+- D/E 参与方终结。
+- G ContextVersion 状态。
+
+恢复 MUST 完成同一个逻辑操作，或者将其保留为未完成/未知状态。
+
+恢复 MUST NOT 根据缺失证据制造成功的最终状态。
+
+### 10. Storage 边界
+
+既有 Storage L1 决策保持不变。
+
+本协议定义逻辑顺序、受保护发布及外部可观察的一致性要求。
+
+它不选择或批准物理数据库、部署拓扑、HA/PITR 策略或 Storage L4 设计。
+
+Storage L4 继续保持 OPEN / NOT APPROVED。
+
 ## 13. 安全 / Scope
 
 每个 Revision 都携带或继承明确解析的 Ownership/Applicability ScopeRef，并遵循文档化继承规则；不得扩大 Scope。授权必须同时检查 Identity 和准确 Revision。Evidence Ref 独立授权。历史查询不能绕过当前 Policy 或 Forget Suppression。不得从 Revision Snapshot、Log、可逆辅助数据、Cache 或 Provenance 摘录中重建已遗忘 Payload。

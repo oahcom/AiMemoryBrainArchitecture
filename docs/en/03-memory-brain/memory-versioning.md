@@ -109,6 +109,146 @@ STALE_VERSION; REVISION_PARENT_MISMATCH; IDEMPOTENCY_CONFLICT; INVALID_TIME_INTE
 
 Aggregate head update and immutable revision append commit atomically with receipt and outbox. Historical reads use committed transaction sequence, not projection arrival order. LifecycleEvent sequence is unique per Memory aggregate and deterministically folded. Projection rebuild records watermark/schema compatibility. Entity/Relation migration and successor refs commit with canonical version and outbox intent.
 
+## End-to-End Claim/Fact Protected Publication Protocol
+
+### 1. Logical transaction boundary
+
+The end-to-end protocol MUST preserve one auditable logical order across:
+
+- Private E staging.
+- Complete dependency enumeration.
+- Durable dependency registration.
+- D canonical ClaimRevision/FactRevision commit.
+- Storage PREPARED_HIDDEN publication tuple.
+- D PublicationParticipant admission.
+- I Commit Authorization.
+- Storage final visibility.
+
+G ContextVersion commit and participant reconciliation occur only after the applicable authoritative visibility outcome is confirmed.
+
+### 2. Required ordering
+
+The required order is:
+
+1. E creates private immutable staging artifacts. Staging MUST NOT create public visibility.
+2. E and the responsible dependency authorities enumerate the complete direct and transitive dependency set.
+3. D durably registers the exact dependency set under the applicable Forget Fence and authorization boundary.
+4. D commits ClaimRevision/FactRevision, exact parent links, canonical head updates, required Evidence/Provenance references, Scope, authorization evidence and required dependency registration within its canonical commit boundary.
+5. Storage persists the exact publication tuple as PREPARED_HIDDEN.
+6. D admits the exact PublicationParticipant against the current ForgetFence and dependency-registration evidence.
+7. I supplies the applicable commit authorization decision for the exact operation and publication tuple.
+8. Storage executes the final protected visibility transaction.
+9. D/E reconcile the exact participant outcome and terminalize the same logical operation.
+10. G commits a new ContextVersion only after the required authoritative visibility outcome and exact revision references are confirmed.
+
+### 3. Staging and dependency invariant
+
+Staging is private and is not publication.
+
+Dependency enumeration MUST precede durable dependency registration.
+
+Dependency registration MUST be complete before the canonical publication can become eligible for visibility.
+
+UNKNOWN or incomplete dependency state MUST remain private and MUST NOT be admitted as a fully prepared publication.
+
+### 4. Canonical commit invariant
+
+ClaimRevision and FactRevision are immutable canonical revisions.
+
+D's canonical commit MUST bind:
+
+- Exact revision identity and parent linkage.
+- Aggregate head CAS update.
+- Exact Claim/Fact cross-reference binding.
+- Evidence and Provenance dependency references.
+- Scope and temporal metadata.
+- Validated I AuthorizationDecisionRef for Fact attestation.
+- Required Forget dependency registration.
+- CanonicalCommitCursor allocation.
+- Durable commit receipt and recoverable outbox intent.
+
+A revision MUST NOT be reported committed while required authorization evidence or dependency registration remains absent.
+
+A lost acknowledgement MUST be resolved using the original idempotency identity and exact request digest. It MUST NOT create a second revision.
+
+### 5. PREPARED_HIDDEN and Admission invariant
+
+PREPARED_HIDDEN is a durable but non-public publication state.
+
+D PublicationParticipant Admission MUST validate the exact prepared tuple, dependency registration and current ForgetFence.
+
+Admission MUST NOT be inferred from the existence of a prepared object.
+
+A publication that has not passed Admission MUST NOT advance to final visibility.
+
+### 6. I Commit Authorization
+
+I MUST authorize the exact operation and applicable publication tuple.
+
+The authorization decision MUST be bound to its identity, validity, revocation state, Scope and applicable policy version.
+
+Missing, ambiguous, expired, revoked or unverifiable authorization MUST prevent final visibility.
+
+### 7. Storage Visibility
+
+Storage final visibility MUST occur only after the preceding canonical commit, PREPARED_HIDDEN and Admission requirements have been satisfied.
+
+The visibility transition MUST preserve the applicable per-BrainAuthorityRef serialization anchor.
+
+No process-local transaction, asynchronous message, retry or independent participant success may substitute for the protected ordering.
+
+### 8. G Context visibility
+
+A ContextVersion referencing ClaimRevision, FactRevision or derived artifacts MUST bind exact immutable revision references and the applicable ForgetFenceCursor.
+
+G MUST:
+
+- Revalidate current I authorization.
+- Revalidate the applicable D Forget Fence.
+- Verify all referenced Claim/Fact revisions.
+- Verify complete dependency-registration receipts.
+- Verify the exact Storage visibility outcome where a published artifact is included.
+- Commit the immutable ContextVersion through the protected visibility protocol.
+- Publish only after authoritative commit resolution.
+
+A previously committed ContextVersion does not grant perpetual access. Historical Context reads and replay MUST re-evaluate current authorization and Forget suppression.
+
+### 9. UNKNOWN, lost acknowledgement and recovery
+
+If a participant returns UNKNOWN or loses its acknowledgement:
+
+- The operation MUST remain in a recoverable non-final state.
+- Retry MUST use the same operation identity and idempotency scope.
+- The participant MUST resolve the prior operation outcome before creating a second logical commit.
+- No duplicate ClaimRevision, FactRevision, publication or ContextVersion may become visible.
+- Completion MUST NOT be inferred from a timeout.
+
+After a crash, recovery MUST inspect the authoritative operation record and reconcile:
+
+- ForgetFence state.
+- Dependency registration.
+- Canonical Claim/Fact commit.
+- PREPARED_HIDDEN publication tuple.
+- PublicationParticipant Admission.
+- I Commit Authorization.
+- Storage visibility.
+- D/E participant terminalization.
+- G ContextVersion state.
+
+Recovery MUST either complete the same logical operation or preserve it as incomplete/unknown.
+
+Recovery MUST NOT manufacture a successful terminal state from missing evidence.
+
+### 10. Storage boundary
+
+The existing Storage L1 decision remains unchanged.
+
+This protocol defines logical ordering, protected publication, and observable consistency requirements.
+
+It does not select or approve a physical database, deployment topology, HA/PITR strategy, or Storage L4 design.
+
+Storage L4 remains OPEN and NOT APPROVED.
+
 ## 13. Security / Scope
 
 Each revision carries or inherits an explicitly resolved ownership/applicability ScopeRef under documented inheritance; it must not broaden scope. Authorization checks identity and exact revision. Evidence refs are independently authorized. Historical queries cannot bypass current policy or Forget suppression. Forgotten payload cannot be reconstructed from snapshots, logs, reversible side data, caches or Provenance excerpts.
