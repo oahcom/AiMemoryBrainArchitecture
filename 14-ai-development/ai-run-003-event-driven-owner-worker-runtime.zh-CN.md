@@ -23,7 +23,7 @@ GitHub Actions self-hosted runner 仅是显式派发 Workflow 的执行底座，
 | 只读诊断 | Workflow 文件存在于 PR #27 分支；未观察到匹配的运行记录 / Workflow file exists on PR #27 branch; no matching run observed |
 | PR #27 | 已可审查、开放、未合并；最近一次查询时正式审查列表为空 / Ready for Review, open, not merged; formal review list empty at last query |
 | Main 分支保护 | 早期检查报告未启用；当前集成无法读取此管理端点，因此必须由仓库管理员重新核验 / Earlier check reported disabled; current integration cannot read this admin endpoint, so re-verification by a repository administrator is required |
-| A–I 工作会话运行时 | 尚未部署 / Not deployed |
+| A–I Worker运行时 | 尚未部署 / Not deployed |
 
 这些事实不能证明重启恢复能力、最小权限隔离、持久化事件处理能力、24/7 可用性或 A–I 自主运行能力。
 
@@ -34,7 +34,7 @@ GitHub Actions self-hosted runner 仅是显式派发 Workflow 的执行底座，
 1. 接收经过身份验证的 GitHub 事件，并在确认投递之前将其持久化。
 2. 至少一次处理事件，同时确保工作项执行具有幂等性。
 3. 通过定期读取 GitHub 进行对账，以弥补遗漏的事件。
-4. 将一个有界工作项路由至一个已批准的 Owner Prompt 和隔离的工作会话。
+4. 将一个有界工作项路由至一个已批准的 Owner Prompt 和隔离的Worker。
 5. 强制实施租约、fencing token、超时、预算、背压、重试和死信处理。
 6. 生成可审计的运行证据，并更新 GitHub Issue/PR。
 7. 从一个低风险 Owner 试点开始；只有通过明确的 Gate 后才能扩展。
@@ -130,20 +130,20 @@ Inbox 最小字段：
 
 `BLOCKED`, `RETRY_WAIT`, `DEAD_LETTER`, `CANCELLED`, `SUPERSEDED`, `FAILED`。
 
-租约包含 `work_item_id`、`worker_id`、`lease_expires_at` 和单调递增的 `fencing_token`。每次回写操作都必须证明其持有当前 fencing token。租约过期并由新的工作会话重新领取该工作项时，fencing token 必须递增；过期的工作会话不得再发布 Commit 或完成证据。
+租约包含 `work_item_id`、`worker_id`、`lease_expires_at` 和单调递增的 `fencing_token`。每次回写操作都必须证明其持有当前 fencing token。租约过期并由新的Worker重新领取该工作项时，fencing token 必须递增；过期的Worker不得再发布 Commit 或完成证据。
 
-租约权威必须具备持久化和原子性。仅依赖进程内 Mutex 并不足够。工作会话必须在租约过期前发送心跳；如果错过心跳，则应触发租约过期和恢复，而不是静默继续执行。
+租约权威必须具备持久化和原子性。仅依赖进程内 Mutex 并不足够。Worker必须在租约过期前发送心跳；如果错过心跳，则应触发租约过期和恢复，而不是静默继续执行。
 
 ### 6.1 带 fencing 的发布权限 / Fenced publication authority
 
-只有在实际执行副作用的系统强制检查 fencing token 时，fencing token 才能发挥作用。如果工作会话持有共享 GitHub 写入 Token，就可以绕过 Coordinator 侧的租约检查，在租约过期后继续 Push。因此，在试点阶段：
+只有在实际执行副作用的系统强制检查 fencing token 时，fencing token 才能发挥作用。如果Worker持有共享 GitHub 写入 Token，就可以绕过 Coordinator 侧的租约检查，在租约过期后继续 Push。因此，在试点阶段：
 
-- Owner 工作会话不获得 GitHub 写入凭据。
+- Owner Worker不获得 GitHub 写入凭据。
 - 所有 GitHub 变更（创建分支、Push、PR/评论/Check 更新）都必须通过由 Coordinator 控制的单一 Publication Broker。
 - Broker 在接受每次变更之前，必须原子地验证当前租约所有者、fencing token、工作项状态、允许写入的路径以及预期的 base/head SHA。
-- Broker 拒绝已过期、已被取代或携带过期 fencing token 的请求。工作会话此前执行过的检查并不足以满足要求。
-- 如果 Broker 无法提供原子 compare-and-set 强制校验，则必须继续禁用自主回写；工作会话只能生成 Patch Artifact，供人工应用。
-- 在 Broker 内部使用范围严格受限的短期 GitHub App installation token；不得将其暴露给工作会话进程或其 Worktree。
+- Broker 拒绝已过期（expired）、已被取代（superseded）或陈旧（stale）的 fencing token 的请求。Worker此前执行过的检查并不足以满足要求。
+- 如果 Broker 无法提供原子 compare-and-set 强制校验，则必须继续禁用自主回写；Worker只能生成 Patch Artifact，供人工应用。
+- 在 Broker 内部使用范围严格受限的短期 GitHub App installation token；不得将其暴露给Worker进程或其 Worktree。
 
 ## 7. GitHub 权威与凭据 / GitHub authority and credentials
 
@@ -154,7 +154,7 @@ Inbox 最小字段：
 - 绝不得将 PAT、私钥、注册 Token、webhook secret 或模型凭据存入 Git、Issues、PR 评论、Workflow Artifact 或普通日志。
 - 任何写操作之前，都必须读取当前分支保护/规则集状态。早期检查报告称 main 分支保护未启用，但当前集成访问此管理端点时收到 HTTP 403，无法独立重新核验。仓库管理员必须确认当前生效的规则集/分支保护以及必要的审查/检查规则；在记录此证据之前，自主写入模式必须保持阻止状态。
 
-## 8. 工作会话隔离 / Worker isolation
+## 8. Worker隔离 / Worker isolation
 
 试点要求：
 
@@ -197,11 +197,11 @@ A 可以起草跨 Owner Prompt 并协调路由。但 A 不能替代领域 Owner 
 
 `DESIGNED`, `IMPLEMENTED`, `TESTED`, `REVIEWED`, `INTEGRATION_ACCEPTED`, `MERGED`, `DEPLOYED`, `RUNTIME_VERIFIED`。
 
-Commit 或成功的单元测试不等于系统验收。定时运行不构成工作会话持续健康的证明。
+Commit 或成功的单元测试不等于系统验收。定时运行不构成Worker持续健康的证明。
 
 ## 11. 存储决策仍未确定 / Storage decision remains open
 
-详细决策记录：[ADR-RUN-001 — 持久化存储与事务边界](adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md)、[ADR-RUN-002 — GitHub App、Webhook 接入与秘密管理](adr/ADR-RUN-002-github-app-webhook-security-and-secrets.md) 和 [ADR-RUN-003 — Owner 工作会话隔离与执行边界](adr/ADR-RUN-003-owner-worker-isolation-and-execution-boundary.md)。所有 ADR 均为 PROPOSED：它们定义约束和验收 Gate；没有任何一项授权部署或选择生产凭据。
+详细决策记录：[ADR-RUN-001 — 持久化存储与事务边界](adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md)、[ADR-RUN-002 — GitHub App、Webhook 接入与秘密管理](adr/ADR-RUN-002-github-app-webhook-security-and-secrets.md) 和 [ADR-RUN-003 — Owner Worker隔离与执行边界](adr/ADR-RUN-003-owner-worker-isolation-and-execution-boundary.md)。所有 ADR 均为 PROPOSED：它们定义约束和验收 Gate；没有任何一项授权部署或选择生产凭据。
 
 详细决策记录：[ADR-RUN-001 — 持久化存储与事务边界](adr/ADR-RUN-001-durable-store-and-transaction-boundaries.md)。该 ADR 处于 PROPOSED 状态：定义事务不变量、候选方案比较、基准/故障矩阵和验收 Gate；不代表数据库已经选定或部署。
 
@@ -214,12 +214,12 @@ Commit 或成功的单元测试不等于系统验收。定时运行不构成工�
 | 重复投递 | 相同 delivery ID 不产生重复 Inbox 工作 / Same delivery ID no duplicate inbox work |
 | 不同投递，相同目标修订版本 | 语义工作键阻止重复执行 / Semantic work key prevents duplicate execution |
 | Webhook 乱序 | 重新获取 GitHub 状态；过期工作标记为 superseded / Re-fetch GitHub state; stale work superseded |
-| 工作会话运行期间崩溃 | 租约过期；重新领取时使用新的 fencing token / Lease expires; new fencing token on reclaim |
-| 过期工作会话恢复 | 通过 fencing 检查拒绝其写入 / Writes rejected by fencing check |
+| Worker运行期间崩溃 | 租约过期；重新领取时使用新的 fencing token / Lease expires; new fencing token on reclaim |
+| 过期Worker恢复 | 通过 fencing 检查拒绝其写入 / Writes rejected by fencing check |
 | 队列/存储不可用 | 失败关闭；不得仅通过内存确认事件 / Fail closed; no in-memory-only acknowledgement |
 | GitHub API 不可用 | 使用有界退避策略重试；不得进行过期写入 / Retry with bounded backoff; no stale write |
 | 达到预算/时间限制 | 安全停止，持久化部分证据，释放或使租约过期 / Stop safely, persist partial evidence, release/expire lease |
-| 紧急停止 | 禁止派发，停止工作会话，必要时撤销 Token / Disable dispatch, stop workers, revoke tokens if needed |
+| 紧急停止 | 禁止派发，停止Worker，必要时撤销 Token / Disable dispatch, stop workers, revoke tokens if needed |
 
 ## 13. 分阶段交付 / Staged delivery
 
@@ -271,20 +271,20 @@ Commit 或成功的单元测试不等于系统验收。定时运行不构成工�
 | RT-05 | 语义重复 / Semantic duplicate | 仅产生一个符合资格的工作项 / One eligible work item |
 | RT-06 | 乱序状态 / Out-of-order state | 以当前 GitHub 状态为准 / Current GitHub state wins |
 | RT-07 | 租约过期 / Lease expiry | 重新领取时递增 fencing token / Reclaim increments fencing token |
-| RT-08 | 过期工作会话写入 / Stale worker write | 拒绝 / Rejected |
-| RT-09 | 工作会话进程崩溃 / Worker process crash | 持久化恢复，不丢失工作 / Durable recovery, no lost work |
+| RT-08 | 过期Worker写入 / Stale worker write | 拒绝 / Rejected |
+| RT-09 | Worker进程崩溃 / Worker process crash | 持久化恢复，不丢失工作 / Durable recovery, no lost work |
 | RT-10 | 存储重启/恢复 / Store restart/restore | Inbox、租约和运行台账保持一致 / Inbox, leases and run ledger consistent |
-| RT-11 | 不可信 PR 隔离 / Untrusted PR isolation | 无法在持久化工作会话上执行 / Cannot execute on persistent worker |
+| RT-11 | 不可信 PR 隔离 / Untrusted PR isolation | 无法在持久化Worker上执行 / Cannot execute on persistent worker |
 | RT-12 | 秘密扫描 / Secret scan | 仓库/日志/Artifact 中不存在秘密 / No secret in repo/log/artifact |
 | RT-13 | 预算/超时 / Budget/timeout | 工作停止并记录证据 / Work stops and records evidence |
-| RT-14 | 紧急停止 / Emergency stop | 不发放新租约；活动工作会话安全停止 / No new lease; active workers stop safely |
+| RT-14 | 紧急停止 / Emergency stop | 不发放新租约；活动Worker安全停止 / No new lease; active workers stop safely |
 | RT-15 | 对账 / Reconciliation | 找回遗漏的 Webhook 工作，且不产生重复副作用 / Missed webhook work is discovered without duplicate side effects |
 
 ## 15. 待决事项 / Open decisions
 
 - **ADR-RUN-001:** 持久化存储选型与事务边界。
 - **ADR-RUN-002:** GitHub App 权限矩阵、Webhook 接入/网络暴露及秘密存储。
-- **ADR-RUN-003:** 工作会话隔离机制（systemd + Unix 身份，或每次运行使用独立容器/VM）。
+- **ADR-RUN-003:** Worker隔离机制（systemd + Unix 身份，或每次运行使用独立容器/VM）。
 - **ADR-RUN-004:** 事件到工作项的映射及语义幂等键。
 - **ADR-RUN-005:** Owner Prompt 审批与运行时授权强制机制。
 - **ADR-RUN-006:** 分支保护及必要的审查/检查规则。
@@ -299,13 +299,13 @@ Commit 或成功的单元测试不等于系统验收。定时运行不构成工�
 - 持久化 Inbox/租约存储不可用或失去一致性。
 - 缺少分支保护或必要的独立审查。
 - 无法验证 Prompt 摘要、Owner 批准或 base SHA。
-- 过期工作会话能够绕过租约 fencing 并发布内容。
+- 过期Worker能够绕过租约 fencing 并发布内容。
 - 不可信 PR 代码能够访问持久化 Runner 或秘密。
 - 检测到秘密泄露、意外权限提升、无法解释的写入或预算失控。
 - 无法持久化记录审计证据。
 
 ## 17. 状态声明 / Status statement
 
-本文档是一份提议中的设计和分阶段试点计划。本文档不声称 Webhook Receiver、持久化队列、Coordinator、自主 Owner 工作会话或 24/7 服务已经部署。
+本文档是一份提议中的设计和分阶段试点计划。本文档不声称 Webhook Receiver、持久化队列、Coordinator、自主 Owner Worker或 24/7 服务已经部署。
 
 本译文由 RD-F08-01（P1）驱动，对照原文 EN，语义一致性待 R1 核验。
