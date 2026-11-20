@@ -782,3 +782,35 @@ The administrative closeout disposition below is **BLOCKED-OBJECTIVE-EVIDENCE** 
 
 ### Provenance
 Current user instruction is T2 chat provenance. Platform conversation UUID and immutable raw bytes are not exposed by the connector; SHA-256 remains `NOT_VERIFIED`. No synthetic source hash is supplied.
+
+
+## Superseding disposition — D-2026-1120-01 Owner ruling application (2026-11-20)
+
+This entry corrects any earlier status-axis wording in this ledger that labelled F1/F3 as `BLOCKED`. Under the current Owner ruling, the bounded delivery work is complete with verifiable substitutes; the substantive findings remain `OPEN`. No “waiting for Owner” or quota freeze is recorded as a blocker.
+
+### F1 — `F-43-01/F1 | P1 | OPEN`
+- Existing PR #327 handoff branch exact commit: `eb0de9100841d7300c0acc7baff3a65beb33252f`.
+- File: `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md`.
+- Exact Blob: `65a32912ddde3b3fd5f7e6bd63fab359dfe6713f`; independently fetched at that exact commit and matched.
+- The handoff is the delivered substitute for implementation-entry work; it defines the E1–E8 entry package, five required D operations, durable Ledger/Receipt, equality/linearization evidence and S1–S7 verification. It is not Runtime implementation.
+- Five callable D operations remain NOT IMPLEMENTED; durable authoritative Ledger/operation-bound Receipt and runtime equality/linearization remain NOT ESTABLISHED; S1–S7 remain NOT RUN.
+- Issue #7 comment #7021990583 retains `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED / NOT READY`. This is an existing project authorization boundary, not a quota freeze and not a reason to fabricate placeholder code in this architecture repository.
+- Return: Issue #7, Issues #10/#25/#43, PR #327.
+
+### F3 — `F-43-01/F3 | P1 | OPEN`
+- D contract PR #321 commit `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; contract Blob `099f4948b550919084b0d73094692b590b0be0a9`; accepted mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
+- H TEST-profile PR #322 current exact Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; test Blob `6685226143f28a5b8764067bb205080b531132e3` (15 methods). All three source files were fetched at their exact commits and Blob SHAs matched.
+- Runs #44684299439 / #44684299500 and subsequent retries failed before test steps; latest recorded retry jobs #136136582468 / #136136525120 have `steps=null`; log retrieval returned HTTP 404 `BlobNotFound`. Current 15-method test source execution is NOT RUN / NOT VERIFIED; no CI PASS is claimed.
+- D/H role-labelled decision comments #7021655866 / #7021638212 both visibly resolve to `oahcom`; distinct authenticated human signers remain NOT VERIFIED. The updated unsigned, separate-attestation instrument is delivered at PR #323 comment #7032744021; it is a usable substitute, not acceptance.
+- Callable D query, durable operation-bound Receipt/currentness/revocation/anti-rollback, H production consumer acceptance and C1–C6 operational proof remain NOT ESTABLISHED.
+- Return: PRs #321/#322/#323; Issues #25/#43.
+
+### Current-turn delivery state
+- Existing PR #327 handoff commit: `eb0de9100841d7300c0acc7baff3a65beb33252f`, Blob `65a32912ddde3b3fd5f7e6bd63fab359dfe6713f`.
+- Existing PR #323 ledger/manifest updates and exact pin are recorded in the subsequent manifest terminal pin.
+- Updated independent-human attestation instrument: PR #323 comment #7032744021.
+- Findings F1/F3 remain P1 / OPEN. The bounded evidence-delivery unit is COMPLETE; OPEN is the substantive finding state, not a “BLOCKED” delivery state.
+- No new PR, Issue or branch; no merge or main write; no Runtime authorization, independent Owner signature, CI PASS or production acceptance is inferred.
+
+### Provenance
+The applicable instruction is the user-supplied Owner ruling `D-2026-1120-01` in the current ChatGPT continuation. The connector does not expose a stable platform message permalink or immutable raw payload; prompt SHA-256 remains `NOT_VERIFIED`. No repository prompt file or synthetic hash is claimed.
