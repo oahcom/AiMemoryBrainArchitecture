@@ -42,7 +42,7 @@ MemoryVersion 是不可变语义快照。更新只能创建 successor version。
 
 Claim 是规范 proposition。Epistemic Status 为 Observed、Reported、Inferred、Verified、Disputed、Retracted。Confidence 不等于 Truth。冲突和撤回必须保留历史及 Evidence。
 
-**身份边界：** Claim 跨 Memory Version 的稳定身份仍为 **OPEN**，不得通过 Phase 1 Contract 偷偷冻结。
+**身份边界：** Claim 命题身份跨 Memory Version 使用稳定 ClaimRef；每个不可变断言状态按 DOMAIN-MODEL-001 §2.4 使用精确 ClaimRevisionRef 标识。该语义分类已 DECIDED FOR CONVERGENCE。ID 生成算法仍为 CANDIDATE，本文件不予冻结。
 
 ### Evidence / Provenance
 
@@ -85,7 +85,9 @@ DM-01 Object Separation；DM-02 Version Immutability；DM-03 Version Concurrency
 
 **Phase 1 DECIDED：** Event/Memory/MemoryVersion/Claim 边界、稳定 Memory Identity、Immutable MemoryVersion、Expected-parent Version Transition、Scope/Permission 分离、Phase 1 Scope Isolation、Claim Epistemic/Lifecycle 分离、确定且无外部依赖的 Domain Validation。
 
-**保持原状态：** ID Generation CANDIDATE；Claim Global Identity OPEN；Relation Vocabulary OPEN；Evidence Strength TO_VALIDATE；Scope Algebra OPEN；Permission Policy Language OPEN；Physical Forget Semantics OPEN；Vector/Graph Technology 不进入 Phase 1。
+**已 DECIDED FOR CONVERGENCE：** 跨 Memory Version 的稳定 ClaimRef 命题身份，以及 DOMAIN-MODEL-001 §2.4 的 CI-01..CI-13 分类规则。
+
+**保持原状态：** ID Generation CANDIDATE；Relation Vocabulary OPEN；Evidence Strength TO_VALIDATE；Scope Algebra OPEN；Permission Policy Language OPEN；Physical Forget Semantics OPEN；Vector/Graph Technology 不进入 Phase 1。
 
 ## 8. 下一实现单元
 
