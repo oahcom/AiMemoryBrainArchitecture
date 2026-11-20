@@ -137,9 +137,14 @@ status: BLOCKED
 status_reason: >
   Q1 is decided: OPTION_C adopted under the dev-baseline Architecture Owner role,
   ACCEPT-WITH-CONDITIONS, recorded in DEC-P2-T2-Q1-001.md. That closes one item and closes
-  nothing else. Q13, Q11, Q12, Q15 and Q9 were DECIDED in design-proposal.md section 2i;
+  nothing else. Q13, Q12, Q15 and Q9 were DECIDED in design-proposal.md section 2i. Q11 was
+  PARTLY decided there, and the split is load-bearing: its technical-admissibility half is
+  settled (the index is data-neutral with respect to versions admissible rows and is
+  necessary for the section 8.4 composite foreign key to be expressible), while its
+  authorisation half is NOT settled and stands with the Phase 1 contract's owner, who is
+  NOT_ASSIGNED. Q11 is therefore not in the list of questions decided by section 2i.
   Q8 and Q14 remain OPEN and each carries a named dependency in section 14 rather than an
-  unexplained OPEN. Those five rulings are design decisions, not acceptance: they change
+  unexplained OPEN. Those rulings are design decisions, not acceptance: they change
   what this document specifies and change no governance state. The DDL
   remains NOT APPROVED;
   DDL executability and regression behavior remain UNVERIFIED; none of the 21 section 13
