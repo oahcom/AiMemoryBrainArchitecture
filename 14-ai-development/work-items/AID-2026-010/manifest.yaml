@@ -157,8 +157,8 @@ integration_closeout:
 current_status_refresh:
   date: "2026-11-20"
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "6c061130c5a04dbc378d13bf0d1e0b450fb36344"
-  ledger_blob_sha: "d90d4d8ef83db6df03a5ebbf06a881f936f059f8"
+  ledger_commit: "7c5053df955b8d1450a8e35cef7b48f1be775d14"
+  ledger_blob_sha: "add1e7c4f0cd92145323364d589320fee40d3861"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -174,10 +174,11 @@ current_status_refresh:
   evidence:
     - "Issue #43 comment 7030877572 — F1/F3 exact-source reconciliation and bounded dispositions"
     - "Issue #7 comment 7021990583 — engineering entry remains DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED"
-    - "PR #321 Head 3db969c04d08ec4b0d9aadd8f8efcea3ac0309b6 — D query-contract mapping pin correction; OPEN/DRAFT; tests NOT RUN; D/H role-attributed same-Blob decision records exist, but both comments and both commit identities resolve to GitHub login oahcom; distinct human Owner identities NOT VERIFIED, so independent-acceptance subcondition remains OPEN"
-    - "PR #322 Head 614b60e354cce9ecf9145e09ea5bb87c74d5cc2e — H TEST-profile five-field range candidate; Runs 44674622112 and 44674622134 FAILURE; logs unavailable"
+    - "PR #321 Head 7af4e4c409a6522d961b15d9622c92c7551be5f9 — D query contract Blob 6f2d583dec8487b321795a006266ee4229c7fd80; accepted H mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49 appears twice, superseded Blob zero times; OPEN/DRAFT; exact-head workflow runs none; tests NOT RUN."
+    - "PR #322 Head 593b78e3c2aaea329c6611249bd352cd6c7dd1aa — H TEST-profile validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob 0d90fb3524f4f4750f6fc2d24106ddedde88dc12; five typed fields bounded and leading-zero canonicalization present; Runs 44680796326 and 44680796328 FAILURE, steps unavailable, log retrieval 404 BlobNotFound; no test PASS."
     - "PR #327 Head 4684b5d8dded3bd861f3b495c6307b0ac3db1959; handoff Blob c45933284494dcf712f425012cda6341d5c31212 — F1 engineering-entry handoff; seven canonical D-002 scenarios S1–S7 corrected; tests NOT RUN"
     - "F1 repository fact correction: Issue #43 comment 7030788916 records foundational Batch-1 landing in oahcom/AiMemoryBrain at d11722e39f047bb52a482936a68459e74ce906d1; this is not the authorized D authority runtime and does not close F1"
+    - "D query contract status: ResolveForgetFenceSnapshotProof remains NOT ESTABLISHED AS CALLABLE; no Runtime repository, authoritative storage, trust root, endpoint/transport, operational key registry, or live receipt/currentness/C1-C6 evidence is verified."
   historical_closeout_note: >-
     integration_closeout above remains the historical 2026-11-19 disposition
     (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
