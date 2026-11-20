@@ -109,3 +109,14 @@ renumbering:
     already-in-use means re-sequence and never overwrite; this
     work item is renumbered to AID-2026-011.
   ruling: D-2026-1120-02
+
+cross_tree_collision:
+  finding: F-L0-AID011-COLLISION-002
+  ruling: D-2026-1120-03
+  note: >-
+    AID-2026-011 is also registered on branch remediation/aid-2026-001-forget-contract-closure-2026-11-18
+    (Storage Owner F-43-06A/F-43-07, COMPLETED, commit 25768177dc 2026-11-19T21:52:33Z).
+    Per D-2026-1120-03 tree-scoped canonicality: this main copy (REQ-01) is canonical on main;
+    the branch copy is canonical on that branch; cross-tree references must be tree-qualified.
+    Merge-time reconciliation gate: if that branch merges into main, branch-side duplicates
+    re-sequence to >= AID-2026-014 with historical notes; history is never rewritten.
