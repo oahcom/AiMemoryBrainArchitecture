@@ -19,11 +19,11 @@
 | 历史 ID / 别名 | F-43-01（子项 F1） |
 | 原始锚点 | `14-ai-development/issue-alignment-2026-11-19/l2-05b-integration-review.md` §F-43-01（L171）；Issue #43 裁决评论 `7015532739`（R22）、`7015683598`+`7015684625`（D-001/D-002） |
 | 问题定义 | D-002 双高水位语义已 ACCEPT，但六条件替代证明尚未在操作级落地（`verify_owner_snapshot` 真实 D 权威证据、exact equality、linearization、Receipt）。 |
-| 状态 | BLOCKED |
-| 责任 Owner | D Owner |
+| 状态 | OPEN (implementation evidence) |
+| 责任 Owner | D Owner |\n| A 执行绑定 | `DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED` per A R33 and Issue #7 comment `7021990583`; this is separate from the domain finding state. |
 | 回流去向 | D Owner 双高水位六条件操作级证明 → A 集成复审 |
 | 关闭条件 | 六条件逐条操作级证据（真实 D 权威回调、非 `lambda: True` 占位），含 exact equality 与 linearization 证明、Receipt 样例，经 A 独立复核接受 |
-| 最新裁决 / 证据 | `D-OWNER-2026-11-19-002`（ACCEPT，六条件定义）；`D-OWNER-2026-11-19-003`（D-002 规范证明包 ACCEPT，Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5`）；A R32 裁定规范论证达设计交付要求但**操作级实现验收未达到**；D Owner Runtime 核验确认五操作 NOT IMPLEMENTED、真实 Receipt 不存在、十场景 NOT RUN；A R33 裁定不授权 A1 空仓初始化、不授权 B2 Adapter 承载、不新建 Runtime repo，F1 实现级工作 **BLOCKED（等待产品/平台架构责任方指定工程载体及 Canonical Authority/权威持久化边界）**；D Owner `D-OWNER-2026-11-19-006` 明确 F1 仍 OPEN for implementation evidence，未改变 A 的 BLOCKED 管理状态 |
+| 最新裁决 / 证据 | `D-OWNER-2026-11-19-002`（ACCEPT，六条件定义）；`D-OWNER-2026-11-19-003`（D-002 规范证明包 ACCEPT，Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5`）；A R32 裁定规范论证达设计交付要求但**操作级实现验收未达到**；D Owner Runtime 核验确认五操作 NOT IMPLEMENTED、真实 Receipt 不存在、十场景 NOT RUN；A R33 裁定不授权 A1 空仓初始化、不授权 B2 Adapter 承载、不新建 Runtime repo，F1 domain finding remains **OPEN for implementation evidence**; A execution binding remains `DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED` until an authorized canonical runtime target and engineering-entry package are established；D Owner `D-OWNER-2026-11-19-006` 明确 F1 仍 OPEN for implementation evidence，未改变 A 的 BLOCKED 管理状态 |
 | 范围限制 | 语义 ACCEPT ≠ 操作级证明完成；文档六条件论证 ≠ 真实 D 权威状态满足六条件；参考模型 ≠ 生产权威 |
 
 ### F-43-01/F1 — 2026-11-20 implementation-evidence state reconciliation
@@ -32,11 +32,11 @@
 |---|---|
 | Finding triple | `F-43-01/F1` — P1 — `OPEN (implementation evidence)` — return: Issue #7 (engineering-entry boundary), Issue #10 (JF-10/COC physical proof), Issue #25 (D/E/I/Storage authority boundary), Issue #43 (A integration ledger). |
 | Domain Owner status | D Owner `D-OWNER-2026-11-19-006` explicitly keeps F1 OPEN for implementation evidence. The six-condition D-002 normative proof package is ACCEPTED (Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5`); this is not operational implementation evidence. |
-| A execution binding | `DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED` under A R33 and Issue #7 comment `7021990583`. The F1 row's `BLOCKED` state records this A execution boundary, not a claim that the D Owner's domain finding is closed. These are separate axes, not contradictory statuses. |
+| A execution binding | `DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED` under A R33 and Issue #7 comment `7021990583`. The F1 row's `OPEN` status records the D Owner's domain finding; the separate A execution binding remains deferred and not authorized. These are separate axes, not contradictory statuses. |
 | Exact implementation evidence | Five operational D authority operations: NOT IMPLEMENTED; real authoritative Receipt: absent; ten operational scenarios: NOT RUN. No exact runtime commit, validator/build Blob, CI Run ID, or production artifact exists to cite. |
 | Target repository check | `oahcom/AiMemoryBrain` remains an empty repository; `oahcom/ai-memory-adapter` exposes generic MemoryAdapter capabilities and is not the D ForgetFence/ProducerWork authority runtime; `AiMemoryBrainArchitecture` is the architecture/specification and reference-test repository, not an authorized canonical runtime target. |
 | Current Owner ruling effect | User-supplied D-2026-1120-01 removes the former PR/Issue quota freeze and sets a new carrier quota. It does not designate a canonical runtime repository, name accountable engineering maintainers, authorize a new Runtime repository, or revoke Issue #7's no-placeholder / no-inferred-target boundary. |
-| A disposition this revision | F1 is explicitly retained as `OPEN (implementation evidence)`; A implementation execution remains `DEFERRED / NOT AUTHORIZED`. No placeholder code, fake validator, or non-canonical runtime implementation is created in this architecture repository. This is a recorded, verifiable state—not an assertion of implementation completion or a request to wait on an Owner. |
+| A disposition this revision | F1 is explicitly `OPEN (implementation evidence)`; A implementation execution remains `DEFERRED / NOT AUTHORIZED`. No placeholder code, fake validator, or non-canonical runtime implementation is created in this architecture repository. This is a recorded, verifiable state—not an assertion of implementation completion or a request to wait on an Owner. |
 | Prompt provenance | D-2026-1120-01: current user-provided Owner ruling (T2). Platform conversation UUID and immutable message bytes are not exposed; prompt SHA-256 is NOT_VERIFIED, not fabricated. |
 
 ## F-43-01/F2 — H 组合验证器 D Snapshot 八字段与长度约束对齐
