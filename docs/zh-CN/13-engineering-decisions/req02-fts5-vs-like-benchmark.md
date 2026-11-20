@@ -33,14 +33,14 @@ python3 benchmarks/req02/fts5_vs_like.py --output benchmarks/req02/results-2026-
 
 | 指标 | SQLite FTS5 | SQL LIKE 扫描 |
 |---|---:|---:|
-| P50 | 285.44 μs | 9,908.69 μs |
-| P95 | 433.36 μs | 12,309.67 μs |
-| P99 | 820.31 μs | 14,873.49 μs |
-| 平均值 | 319.70 μs | 10,263.03 μs |
-| 吞吐 | 3,127.95 queries/s | 97.44 queries/s |
+| P50 | 295.74 μs | 10,271.94 μs |
+| P95 | 445.75 μs | 12,259.60 μs |
+| P99 | 561.48 μs | 13,743.61 μs |
+| 平均值 | 322.01 μs | 10,491.69 μs |
+| 吞吐 | 3,105.54 queries/s | 95.31 queries/s |
 
 - 结果集一致性：**100/100 个查询完全一致**。
-- 平均延迟比（LIKE / FTS5）：**32.10×**。
+- 平均延迟比（LIKE / FTS5）：**32.58×**。
 - 查询计划：FTS5 显示 `SCAN docs_fts VIRTUAL TABLE INDEX 0:M1`；LIKE 显示 `SCAN docs`。
 
 记录值来自一次真实执行，不是对生产负载的统计结论。在其他机器、缓存状态或系统负载下重跑会得到不同数值。
@@ -61,7 +61,7 @@ LIKE 基线有意选择为无索引对照，并非另一个成熟产品。若要
 ## 出处与验证
 
 - 提示词出处：当前 ChatGPT 对话中的 T2 用户指令；Prompt ID `REQ02-LEXICAL-BENCH-PROMPT` v1。当前接口不暴露会话 UUID/永久链接；原始聊天指令字节的 SHA-256 为 `NOT_VERIFIED`。未伪造来源标识。
-- 脚本 SHA-256：`0b2aa5f306940cb3d7baa24f91b55924a012ee14c5eaa3ecdd102f40c5e01d22`。
-- 实测结果 SHA-256：`56d057552d91155f3eb029773c985cc729f50f6bf70c2209c6462c45bc2f2b6d`。
+- 脚本 SHA-256：`0e5899406f1fde296e4e23020f317cd6e4d23ddccd14cccefe7ffdf940ec4227`。
+- 实测结果 SHA-256：`d759ffd9c2ddbe8b37aec9723cf55f807ff4cb8181132a7d3f4b0b6f4f91b834`。
 - 本地验证：`python3 -m py_compile` 退出码 0；基准执行退出码 0；100/100 结果集一致性检查通过。
 - 执行分类：`LOCAL_ONLY`；执行路径为 Python `sqlite3`，不是 Rust 原生执行，也不是 CI。
