@@ -28,7 +28,7 @@ The controlling entry decision remains Issue #7 comment [#7021990583](https://gi
 |---|---|---|
 | D-002 accepted proof pack | Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5` | Normative proof semantics accepted; not runtime evidence |
 | D contract 1.3.1 | Blob `12b71e770f4e977c7f147694a644066bc2ce11b9` | Normative D contract |
-| D authoritative query contract 1.0 | PR #321 Head `7af4e4c409a6522d961b15d9622c92c7551be5f9`, file Blob `6f2d583dec8487b321795a006266ee4229c7fd80` | Current normative read-only query interface; pins accepted H mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`; endpoint explicitly NOT ESTABLISHED AS CALLABLE |
+| D authoritative query contract 1.0 | PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`, file Blob `099f4948b550919084b0d73094692b590b0be0a9` | Current normative read-only query interface; pins accepted H mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`; endpoint explicitly NOT ESTABLISHED AS CALLABLE |
 | D/H accepted mapping | Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49` | Same-Blob D/H normative mapping acceptance; does not prove runtime implementation |
 | Engineering entry ruling | Issue #7 comment #7021990583 | Explicit no-entry / defer disposition |
 
