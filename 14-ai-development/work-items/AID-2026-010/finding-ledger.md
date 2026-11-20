@@ -701,3 +701,43 @@ This append-only entry supersedes earlier F1/F3 source pins in this ledger where
 
 ### Disposition
 The exact-source/handoff/ledger evidence has advanced on existing PR branches and is independently readable by commit and Blob. F1 and F3 remain P1 / OPEN at their substantive exit criteria. No Runtime authorization, D/H human signature, CI PASS, production acceptance, merge or main write is inferred. No new PR, Issue or branch is created by this ledger update. Documentation-only ledger update; tests NOT RUN.
+
+
+## 2026-11-20 Owner ruling D-2026-1120-01 — live exact-carrier refresh
+
+This addendum supersedes stale *current-head* references in earlier dated evidence notes; historical commit/run records remain historical.
+
+### F-43-01/F1 — P1 — OPEN (implementation evidence)
+
+- Existing PR #327: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/327
+- Current branch: `docs/f43-01-f1-engineering-entry-handoff`
+- Exact branch HEAD: `5b11ef7425c33c49ace5f8ef0cadb8e6b55c52db`
+- Exact handoff file: `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md`
+- Exact handoff Blob at that branch: `6f8dd7b4ac95c5b470c31585d124f1d1aa31daca`
+- The handoff includes E1–E8 engineering-entry facts and seven canonical D-002 scenarios S1–S7; it is documentation only. It does not create a Runtime implementation or authorize engineering entry.
+- Five callable D authority operations remain NOT IMPLEMENTED; durable authoritative Producer Registration Ledger / operation-bound Receipt and runtime exact-equality / linearization evidence remain NOT ESTABLISHED; S1–S7 remain NOT RUN.
+- Issue #7 comment `7021990583` remains the controlling A execution-binding disposition: `DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED`. D-2026-1120-01 releases carrier quota only and does not designate a canonical Runtime repository or authorize an inferred target.
+- PR-triggered workflows for exact handoff HEAD `5b11ef7425c33c49ace5f8ef0cadb8e6b55c52db`: none returned. Tests NOT RUN; no CI PASS.
+
+### F-43-01/F3 — P1 — OPEN
+
+- Existing PR #321: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/321
+  - Branch HEAD: `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`
+  - D authoritative query contract Blob: `099f4948b550919084b0d73094692b590b0be0a9`
+  - Active H mapping pin: `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`
+  - PR-triggered workflows for this exact HEAD: none returned; documentation-only tests NOT RUN.
+- Existing PR #322: https://github.com/oahcom/AiMemoryBrainArchitecture/pull/322
+  - Branch HEAD: `a336c85763df0135aa64ecec3cfdac8acd08a8eb`
+  - H TEST-profile validator Blob: `49644a181c578fecb312218c08ce23caa62f603b`
+  - H regression-test Blob: `6685226143f28a5b8764067bb205080b531132e3`
+  - Exact-head workflow Run `44684299500` (job `136136137662`) and Run `44684299439` (job `136136126048`) both concluded FAILURE with `steps=null`; no test step executed. These are CI infrastructure/artifact-level failures, not test assertion results and not PASS.
+- D/H role-labelled decisions remain recorded against the same mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`: Issue #43 comments `7021638212` (H) and `7021655866` (D), each ACCEPT WITH EXPLICIT LIMITATIONS. Both visible GitHub identities are `oahcom`; two distinct human signers are NOT VERIFIED. Role labels do not prove independent human attribution, and this ledger does not sign for either Owner.
+- The D contract's `ResolveForgetFenceSnapshotProof` remains NOT ESTABLISHED AS CALLABLE. Real operation-bound Receipt, authoritative currentness/revocation and end-to-end C1–C6 evidence remain NOT ESTABLISHED. H TEST-profile candidate has not been accepted by H Owner; production consumer conformance is NOT ESTABLISHED.
+- Return path: PR #321 (D contract pin) → PR #322 (H TEST-profile candidate) → Issue #25 (callable D/Storage authority and Receipt) → Issue #43 (independent-human attribution and final A integration re-review).
+
+### Round disposition
+
+- F1 handoff delivery is VERIFIED at the exact branch HEAD/Blob above; F1 implementation finding remains OPEN.
+- F3 D/H same-Blob normative records and exact D/H candidate artifacts are VERIFIED at the exact refs above; independent-human attribution and operational/production acceptance remain NOT VERIFIED; F3 remains OPEN.
+- No PR/Issue/branch was created by this addendum. No Owner approval, merge, main write, production acceptance or test PASS is inferred.
+- Prompt provenance: current user-provided D-2026-1120-01 is T2. Immutable raw prompt bytes/platform conversation ID are not exposed here; SHA-256 remains NOT_VERIFIED.
