@@ -68,7 +68,7 @@ Prior assessment artifacts:
 Issue evidence to re-read:
 - #262 comments `7011312621`, `7014315135`, `7015213827`, `7016082294`, `7021805051`, `7023629963`, `7023949251`, `7024521283`, `7025595684`, `7028799024`, `7029040477`, `7029311423`, `7030705727`, `7031180818`, `7031749267`, `7032100327`, `7032151613`, `7032486892`.
 - #264 comment `7021016042` (pure AID registration uses S-independence; P-independence applies only to actual content within PR-GOVERNANCE-001 §5).
-- #264 comment `7032081466` (`F-CI-GATE-001` registration proposal); read current disposition before treating it as a formally accepted Finding.
+- #264 comment `7032081466` (registered Finding `F-CI-GATE-001`, P2/OPEN); read current disposition and evidence before proposing any state change.
 - #266 comment `7032081161` (`D-2026-1120-02` authority and routing instruction).
 
 Historical evidence rules:
