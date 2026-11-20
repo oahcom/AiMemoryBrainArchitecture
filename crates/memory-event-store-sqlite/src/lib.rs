@@ -387,3 +387,6 @@ mod tests {
         assert_eq!(store.accept(invalid, &[scope()]), Err(EventStoreError::InvalidEnvelope));
     }
 }
+
+/// Durable ForgetFence restore gate.
+pub mod forget_fence;
