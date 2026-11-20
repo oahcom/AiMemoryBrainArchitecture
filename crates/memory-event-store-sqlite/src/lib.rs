@@ -12,6 +12,29 @@ use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use std::path::Path;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+/// Switch to WAL while tolerating transient contention during concurrent opens.
+fn enable_wal(connection: &Connection) -> rusqlite::Result<()> {
+    use rusqlite::{Error, ErrorCode};
+
+    let deadline = std::time::Instant::now() + Duration::from_secs(5);
+    let mut delay = Duration::from_millis(10);
+
+    loop {
+        match connection.execute_batch("PRAGMA journal_mode = WAL;") {
+            Ok(()) => return Ok(()),
+            Err(Error::SqliteFailure(error, _))
+                if matches!(error.code, ErrorCode::DatabaseBusy | ErrorCode::DatabaseLocked)
+                    && std::time::Instant::now() < deadline =>
+            {
+                std::thread::sleep(delay);
+                delay = (delay * 2).min(Duration::from_millis(100));
+            }
+            Err(error) => return Err(error),
+        }
+    }
+}
+
+
 pub struct SqliteEventStore {
     connection: Connection,
 }
@@ -20,9 +43,9 @@ impl SqliteEventStore {
     pub fn open(path: impl AsRef<Path>) -> Result<Self, EventStoreError> {
         let connection = Connection::open(path).map_err(|_| EventStoreError::TransactionUnavailable)?;
         connection.busy_timeout(Duration::from_secs(5)).map_err(|_| EventStoreError::TransactionUnavailable)?;
+        enable_wal(&connection).map_err(|_| EventStoreError::TransactionUnavailable)?;
         connection.execute_batch(
-            "PRAGMA journal_mode = WAL;
-             PRAGMA synchronous = FULL;
+            "PRAGMA synchronous = FULL;
              PRAGMA foreign_keys = ON;
              PRAGMA busy_timeout = 5000;"
         ).map_err(|_| EventStoreError::TransactionUnavailable)?;
