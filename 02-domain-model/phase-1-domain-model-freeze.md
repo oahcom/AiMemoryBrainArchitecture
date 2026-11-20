@@ -211,7 +211,7 @@ Phase 1 epistemic status：
 
 **Phase 1 identity boundary：**
 
-`claim_id` 只要求在其所属 immutable MemoryVersion 内唯一。Claim 跨 MemoryVersion 的稳定身份策略仍保持 **OPEN**，本阶段不通过实现偷偷冻结该决策。
+**身份边界：** Claim 命题身份跨 MemoryVersion 使用稳定 ClaimRef；每个不可变断言状态按 DOMAIN-MODEL-001 §2.4 使用精确 ClaimRevisionRef 标识。该语义分类已 DECIDED FOR CONVERGENCE。分类规则遵循 `docs/zh-CN/02-domain-model/domain-model-overview.md` §2.4 / DOMAIN-MODEL-001 §2.4（CI-01–CI-13）。ID 生成算法仍为 CANDIDATE，本文件不予冻结。
 
 ### 2.7 ProvenanceRef
 
@@ -327,12 +327,10 @@ Phase 1 Domain Model 单元验收：
 - Phase 1 scope isolation baseline；
 - Claim epistemic status 与 Memory lifecycle 分离；
 - Domain validation 的纯函数/无外部依赖边界；
-- Claim 跨版本稳定身份暂不实现、继续 OPEN。
 
 以下状态**不变**：
 
 - ID generation：CANDIDATE；
-- Claim global identity：OPEN；
 - Relation vocabulary：OPEN；
 - Evidence strength formula：TO_VALIDATE；
 - Scope algebra：OPEN；
