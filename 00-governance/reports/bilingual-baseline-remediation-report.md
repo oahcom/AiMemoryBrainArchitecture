@@ -656,6 +656,32 @@ The branch-protection and ruleset API requests returned HTTP 403 with the GitHub
 
 分支保护及 ruleset API 请求返回 §6.4 所记录的 GitHub 计划限制 HTTP 403。因此平台强制状态仍为 `NOT_VERIFIED`，并构成平台限制阻塞。不得将 F-02 标记为 COMPLETE。
 
+### 7.2.1 Live platform recheck / 平台实时复核 (2026-11-20)
+
+**EN**
+
+The current-main branch object was read at `main@9546f78d364b5a1dd1fa2206b34255be9c7fb1a7`:
+
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main` returned `protected=false`; embedded `protection.enabled=false`; `required_status_checks.enforcement_level=off`; `contexts=[]`; `checks=[]`.
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` returned HTTP 403 with the raw message: `Resource not accessible by integration`.
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/rulesets?per_page=100` returned HTTP 403 with the raw message: `Upgrade to GitHub Pro or make this repository public to enable this feature.`
+
+The branch object is direct evidence that branch-protection required checks are not enabled on this readback. The rulesets endpoint is unavailable, so ruleset-based enforcement cannot be ruled in or out. **F-02 Requirement 2 therefore remains NOT_VERIFIED; F-02 overall remains PARTIAL.** No deliberately failing required-check experiment or platform merge-rejection evidence was run. Do not treat successful workflow runs as proof of platform enforcement.
+
+**External dependency and verification path:** a repository administrator / plan owner must make branch-protection and ruleset state inspectable (integration permission for the branch-protection endpoint and an eligible GitHub plan/visibility for rulesets). Verify by successfully reading both endpoints, confirming the exact required check context is configured, then running a deliberately failing check and observing GitHub reject the merge. This paragraph records a limitation; it does not claim enforcement is enabled.
+
+**中文**
+
+当前 main 分支对象读取基线为 `main@9546f78d364b5a1dd1fa2206b34255be9c7fb1a7`：
+
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main` 返回 `protected=false`；嵌入的 `protection.enabled=false`；`required_status_checks.enforcement_level=off`；`contexts=[]`；`checks=[]`。
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/branches/main/protection` 返回 HTTP 403，原始消息：`Resource not accessible by integration`。
+- `GET /repos/oahcom/AiMemoryBrainArchitecture/rulesets?per_page=100` 返回 HTTP 403，原始消息：`Upgrade to GitHub Pro or make this repository public to enable this feature.`。
+
+分支对象直接证明本次读取时 branch-protection required checks 未启用。rulesets 端点不可读取，因此无法排除或确认 ruleset 强制规则。**F-02 要求 2 仍为 NOT_VERIFIED；F-02 总体仍为 PARTIAL。**本次未运行故意失败的 required-check 实验，也没有平台拒绝合并证据。不得把 workflow 成功运行当作平台强制的证明。
+
+**外部依赖与验证路径：**仓库管理员 / 计划负责人需使 branch-protection 与 rulesets 状态可读取（branch-protection 端点需具备集成读取权限，rulesets 需符合 GitHub 计划/可见性要求）。验证时先成功读取两个端点、确认精确 required-check context 已配置，再运行故意失败的 check 并观察 GitHub 拒绝合并。本段仅记录限制，不声称强制规则已经启用。
+
 ### 7.3 Recommended remediation / 建议修复
 
 **EN**
