@@ -165,8 +165,8 @@ current_status_refresh:
     records the subsequent Owner release and supersedes that historical
     restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "4e49e78380bc3b4d4a362d35a654c661a2561a51"
-  ledger_blob_sha: "b668a9d58859589ab33f1227bedb7a1327ee32b9"
+  ledger_commit: "17851168271d15d1d8ff174bd6885f8136ef4b7c"
+  ledger_blob_sha: "f4e760aebe6c4f1532a95b52fab511cad596c4b8"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -310,3 +310,13 @@ latest_exact_head_refresh:
     source_conversation_id: "6afd445b-38e4-83e8-b39f-08a50a7d2d3b"
     current_platform_conversation_id: "NOT_EXPOSED"
     raw_message_sha256: "NOT_VERIFIED"
+
+
+# Attestation-template exact pin
+f3_independent_attestation_template:
+  file: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  ledger_commit: "17851168271d15d1d8ff174bd6885f8136ef4b7c"
+  ledger_blob: "f4e760aebe6c4f1532a95b52fab511cad596c4b8"
+  insertion_anchor: "F-43-01/F3 — unsigned independent-human attestation substitute (ready to complete)"
+  status: "TEMPLATE_ONLY_NOT_A_SIGNATURE"
+  suppliers: ["D human role holder", "H human role holder"]
