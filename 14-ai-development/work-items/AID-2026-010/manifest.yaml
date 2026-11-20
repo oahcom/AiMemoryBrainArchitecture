@@ -754,3 +754,19 @@ current_session_owner_ruling_2026_11_20:
     platform_conversation_uuid: "NOT_EXPOSED_BY_CONNECTOR"
     raw_prompt_sha256: "NOT_VERIFIED"
   scope_boundary: "No Runtime implementation, independent human signature, CI PASS, production acceptance, merge, or main write is claimed."
+
+
+# Exact latest ledger pin for D-2026-1120-01 continuation
+final_current_ledger_pin_d2026_1120_01:
+  date: "2026-11-20"
+  finding_ledger_path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  finding_ledger_commit: "4dbc26346177c68b8aa0bb61e0e8de4dc58a0910"
+  finding_ledger_blob: "e5ca7723bc51bad38da3b50b8a898ebba3b6ea0e"
+  reason: "The ledger received a subsequent append-only F1/F3 reconciliation commit; this terminal pin supersedes earlier historical pins in this manifest."
+  findings:
+    F-43-01/F1: "P1_OPEN_RUNTIME_IMPLEMENTATION_EVIDENCE"
+    F-43-01/F3: "P1_OPEN_INDEPENDENT_HUMAN_AND_OPERATIONAL_EVIDENCE"
+  verification:
+    PR_323_branch: "fix/f43-01-f3-ledger-reconcile"
+    no_main_write: true
+    no_merge: true
