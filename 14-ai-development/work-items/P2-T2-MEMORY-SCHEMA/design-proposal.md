@@ -50,7 +50,7 @@ Specify the persistence design for the memory layer, covering:
 
 This revision answers R1-B-01 through R1-NB-05 (§2), the seven items R2 required (§2a), the four findings R3 raised (§2b), and the one residual R4 found (§2c). It records Q1 as decided under the dev-baseline Architecture Owner role (§4), and does **not** claim resolution by an accountable human authority. It does not claim the schema is frozen and does not authorize implementation.
 
-**Status supported by this document:** `BLOCKED — awaiting accountable authority assignment and governance decisions`. No revision of this document can close Q11 or Q12; they require an authority that is `NOT_ASSIGNED`. Q1 was decided by a decision record, not by revision, but that decision did not constitute acceptance by an accountable human authority; `acceptance_authority` remains `NOT_ASSIGNED` for Q1. See §4 and `DEC-P2-T2-Q1-001.md`.
+**Status supported by this document:** `BLOCKED — awaiting accountable authority assignment and governance decisions`. Q11 and Q12 have received the bounded dispositions recorded in §2i — technical admissibility for Q11, a prospective reading of the bound for Q12 — issued under the dev-baseline convergence path and carrying `human_signature: NOT_CLAIMED`. Neither closes the accountable-authority question, and no revision of this document can: that requires an authority that is `NOT_ASSIGNED`. Q1 was decided by a decision record, not by revision, but that decision did not constitute acceptance by an accountable human authority; `acceptance_authority` remains `NOT_ASSIGNED` for Q1. See §4 and `DEC-P2-T2-Q1-001.md`.
 
 No identified NF-R3-02 engineering-specification residue remains. DDL executability and regression behavior remain `UNVERIFIED`.
 
@@ -128,7 +128,7 @@ R4 was reviewed at head `bdb19ac0` and returned `REQUEST CHANGES` with one resid
 | Q13 — completed call must carry a result | ruled a **separate open question**, not part of NF-R3-02 | kept separate; **decided in §2i** as a table-level `CHECK`, and the separation is preserved — Q13's closure is still not NF-R3-02's |
 | Q14 — does `recompute` need a single input | stricter branch **accepted provisionally**, question stays open | unchanged; §2i holds it deliberately, and §14 records it as provisional, not as a business requirement |
 
-**This is the last engineering round.** R4's own recommendation, adopted here: one concrete correction remained, it is made, and no further full revision will be produced against open governance questions. Q1, Q11 and Q12 are not engineering defects. Another iteration cannot reach them. Q1 was subsequently reached by a decision record rather than by iteration (`DEC-P2-T2-Q1-001`, merge `d8e5bebb`); Q11 and Q12 remain unreached because the authority that could reach them is `NOT_ASSIGNED`. Q1's decision likewise did not constitute acceptance by an accountable human authority; `acceptance_authority` remains `NOT_ASSIGNED` for Q1.
+**This is the last engineering round.** R4's own recommendation, adopted here: one concrete correction remained, it is made, and no further full revision will be produced against open governance questions. Q1, Q11 and Q12 are not engineering defects. Another iteration cannot reach them. Q1 was subsequently reached by a decision record rather than by iteration (`DEC-P2-T2-Q1-001`, merge `d8e5bebb`). Q11 and Q12 were not reachable by iteration either, and §2i later reached them in part — Q11's technical admissibility, Q12's prospective reading — under the dev-baseline capacity rather than under the accountable authority, which remains `NOT_ASSIGNED` and which neither ruling appoints. Q1's decision likewise did not constitute acceptance by an accountable human authority; `acceptance_authority` remains `NOT_ASSIGNED` for Q1.
 
 The status this document supports is `BLOCKED — awaiting accountable authority assignment and governance decisions`. It does not support `APPROVE`.
 
@@ -265,7 +265,7 @@ that was not located.
 What §8.4 must stop doing is presenting two readings of a boundary that is not
 defined. Its two-reading table is replaced by the authorisation question above.
 
-### Q12, Q13, Q14, Q8, Q9 — accepted, none closed
+### Q12, Q13, Q14, Q8, Q9 — accepted, and what happened to them since
 
 | question | disposition recorded | dependency named |
 |---|---|---|
@@ -276,8 +276,13 @@ defined. Its two-reading table is replaced by the authorisation question above.
 | Q9 | **DECIDED (§2i)**: retained as untyped event metadata; typing deferred, dropping refused | none — issued |
 
 An open question with a named dependency is actionable. An open question without
-one invites the next session to guess. That is the gain from this round: nothing
-closed, everything given a dependency.
+one invites the next session to guess. That was the gain from this round at the
+time: nothing closed, everything given a dependency.
+
+That is no longer the state of the table above, and the table says so per row
+rather than being rewritten. Five of these six were subsequently decided in §2i;
+Q8 and Q14 remain held. The heading above is therefore a record of this round's
+dispositions, not of current status, and §14 is where current status lives.
 
 ### The vacancy, recorded
 
@@ -526,11 +531,26 @@ cheaply, a design should not record an intention instead.
 **What this does not close.** NF-R3-02 is `CLOSED IN SPECIFICATION` and remains unverified;
 Q13's closure is not its closure. R4's separation instruction is preserved exactly.
 
-### Q11 — the index is admissible, because it changes nothing the contract governs
+### Q11 — the index is technically admissible; what that does not license
 
-**Ruling.** `versions_memory_version_uq` does not require separate authorisation from the
-capacity that owns the Phase 1 contract, on a data-neutrality ground. It stays declared as a
-Layer 1 modification.
+**Ruling.** `versions_memory_version_uq` is **data-neutral with respect to the admissible
+rows of `versions`**, and is **necessary** for the composite foreign key in §8.4 to function
+at all. That is a technical finding, and it is the whole of the finding. It stays declared as
+a Layer 1 modification.
+
+**What this ruling does not establish.** It does not establish that data-neutral modifications
+are exempt from any independently applicable Phase 1 authorisation requirement. No normative
+rule to that effect was located, and this section does not invent one. So the ruling settles
+technical admissibility — the index adds no admissible-row effect and the specified composite
+foreign key cannot be expressed without it — and leaves the question of whether a Phase 1
+authorising capacity would need to approve it exactly where it was. That question is not
+void; it is unanswerable from the inspected tree, because the capacity is `NOT_ASSIGNED` and
+no rule in `phase-1-sqlite-adapter-contract.md` addresses schema objects at all.
+
+An earlier draft of this ruling stated the stronger conclusion — that no separate
+authorisation *is required*. That conflated a technical property (no admissible-row effect)
+with a governance exemption (no approval needed), and the second does not follow from the
+first without a rule that says so. Narrowed here.
 
 **The ground.** `version_id` is the primary key of `versions`. `(memory_id, version_id)` is
 therefore unique by construction: no row can be added, removed or changed in admissibility by
@@ -555,17 +575,23 @@ unwritable — the design would not merely lose a guard, it would lose the table
 not an optional strengthening of a rule the adapter could enforce instead; it is the
 precondition without which the rule cannot be expressed at all.
 
-**Why that settles the authorisation question and not a different one.** The Phase 1 contract
-constrains persistence behaviour and row immutability. An object that admits and rejects
-exactly the rows the existing primary key already admits and rejects alters neither. The
-proposal's own §12 wording — "it does change the schema of a Layer 1 table, and it is listed
-here as a modification rather than as no change" — stays true and stays.
+**What the technical finding does and does not license.** The Phase 1 contract constrains
+persistence behaviour and row immutability. An object that admits and rejects exactly the rows
+the existing primary key already admits and rejects alters neither of those on `versions`. But
+the index is not inert overall: it is what makes the composite foreign key on
+`context_assembly_entry` expressible, so it changes that table's behaviour from unusable to
+guarded. That is a real effect on a dependent table, and this ruling does not pretend
+otherwise. The proposal's own §12 wording — "it does change the schema of a Layer 1 table,
+and it is listed here as a modification rather than as no change" — stays true and stays.
 
-**What this ruling does not decide.** It does not decide what the contract's owner would say,
-and it does not claim that authority. It decides that the question of authorisation does not
-arise for an object with no admissible-row effect. If a later reader disagrees with the
-data-neutrality finding, the finding is one probe away from being rechecked, and the ruling
-travels with it.
+**What this ruling does not decide.** It does not decide what the contract's owner would say
+about authorisation, and it does not claim that authority. It settles what the probes can
+settle: the index adds no admissible-row effect to `versions`, and without it the specified
+composite foreign key is inert rather than weaker. If a later reader disagrees with the
+data-neutrality finding, the finding is one command away from being rechecked — Appendix B
+carries the harness — and the ruling travels with it. If a later authorising capacity
+requires approval for any Layer 1 schema object regardless of effect, that requirement is
+untouched by this ruling and still applies.
 
 ### Q12 — prospective interpretation issued, retrospective ruling refused
 
@@ -593,7 +619,11 @@ retrospectively. The honest count is now three disclosed executions, not one.
 ### Q15 — this work item does not write `INDEX.md`. The conflict itself is not resolved
 
 **Ruling.** No write by this work item to `14-ai-development/work-items/INDEX.md`. The stale
-P2-T2 row is recorded as a delivery defect belonging to an unassigned role.
+P2-T2 row is recorded as a delivery defect with **no owner, because the role that would
+own it is unassigned**. That is an ownership gap, not an obligation sitting on some
+person's desk: nobody is late on this, and no individual should be read as having failed
+to do it. Nor is it this work item's non-compliance, since this work item does not hold
+that role.
 
 **The reasoning, which is narrower than the conflict.** `AI-STD-001:445` addresses the
 **Integration Owner**. The P2-T2 manifest lists `sponsor`, `accountable_owner` and
@@ -653,7 +683,7 @@ possible without them.
 | item | before | after |
 |---|---|---|
 | Q13 | `RECOMMENDED`, adapter-level | **DECIDED**, table-level `CHECK`, DDL amended |
-| Q11 | re-posed, OPEN | **DECIDED**, admissible on data-neutrality; stays declared |
+| Q11 | re-posed, OPEN | **PARTLY DECIDED**: technical admissibility settled on data-neutrality; the authorisation question stands for the contract's owner. Stays declared |
 | Q12 | interpretation available, no issuer | **ISSUED** prospectively; R2 event not reclassified |
 | Q15 | `AUTHORITY_CONFLICT`, OPEN | **scope decided**; conflict text preserved |
 | Q9 | `SEMANTIC_DECISION_REQUIRED` | **DECIDED**, retained untyped |
@@ -1309,10 +1339,14 @@ Three things follow, and they are stated rather than inferred:
    constrains persistence behaviour and row immutability; it does not constrain
    schema objects. Verified in §2f with the exact clauses and two bounded
    searches. Stated as a bounded negative, not as a universal one.
-2. **The search result leaves admissibility undecided.** Q11 remains open
-   because the authorising capacity is `NOT_ASSIGNED`. A bounded search is not an
-   admissibility determination, and the thing being extended belongs to a
-   contract whose owning capacity has not been identified.
+2. **The search result left admissibility undecided at the time, and §2i has
+   since decided it.** A bounded search is not an admissibility determination, and
+   the thing being extended belongs to a contract whose owning capacity has not
+   been identified — which is why the question was carried rather than answered
+   here. §2i answers it on a different ground entirely: the index is
+   data-neutral, so the question of authorisation does not arise for it. Six
+   probes recorded there; the adapter-level fallback below is retained as what the
+   implementation would do if that finding were overturned.
 3. **The adapter-level fallback stays documented** as the implementation that
    would be used if an authorising capacity later declines the index. Drop the
    index and the composite foreign key; read the version's owning `memory_id`
@@ -1321,9 +1355,16 @@ Three things follow, and they are stated rather than inferred:
    the adapter, whereas a database-enforced composite foreign key holds for any
    writer.
 
-This proposal **recommends the index** and does not claim it is admissible. The
-difference between the two is the whole point: a recommendation is the author's,
-an authorisation is a capacity's, and the capacity is unoccupied.
+This proposal **recommends the index**, and §2i now finds it *technically*
+admissible — it changes no admissible row of `versions`, and the specified composite
+foreign key cannot be expressed without it. That is a technical finding and it is
+the whole of what §2i claims here. It is **not** a finding that the extension
+needed no authorising capacity; no rule exempts data-neutral modifications from
+Phase 1 approval, and §2i says so. What is still not claimed is *approval* of any
+kind: no accountable authority has accepted this design, and `acceptance_authority`
+remains `NOT_ASSIGNED`. The distinction that mattered at the time — a
+recommendation is the author's, an authorisation is a capacity's — stands
+unchanged.
 
 `version_sha256` is a digest of `version_json` as stored, computed by the adapter. R1 correctly noted digest validation does not by itself solve external index lifecycle — that is why `index_status` and `binding_epoch` exist; stale-binding recovery is an operational procedure over those columns, not a constraint. It is listed as Q7, still open.
 
@@ -1483,10 +1524,10 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 | Q6 | Is `version_sha256` maintained by trigger or by adapter? | OPEN — adapter is the current assumption |
 | Q7 | Stale-binding recovery procedure, including external index rebuild after an outage | OPEN |
 | Q8 | Transcript retention classes and their default periods | **OPEN — `POLICY_INPUT_ABSENT`; held deliberately, not deferred.** §2i. No inspected document states periods or classes. This proposal constrains deletion; it does not define policy. A period invented here would be enforced by `retention_class` and by the `forget_operation_id` path, which means an invented number would delete real data on a schedule nobody authorised. Engineering can implement an established policy; it cannot manufacture one. |
-| Q15 | Whether maintaining `14-ai-development/work-items/INDEX.md` is authorised for this work item, given that the manifest excludes it while `AI-STD-001` line 445 / 463 requires the Integration Owner to maintain it | **SCOPE DECIDED — no write by this work item; the underlying conflict is untouched.** §2i. `AI-STD-001:445` addresses the Integration Owner; this work item does not hold that role — the manifest lists `sponsor`, `accountable_owner` and `acceptance_authority` as `NOT_ASSIGNED` and its `role_note` forbids substituting a session identity for an unassigned role. A `MUST` addressed to a role this work item does not hold does not transfer to it, so the manifest's `OUT_OF_SCOPE` governs and the stale P2-T2 row is recorded as a delivery defect owned by a role nobody occupies. Whether `AI-STD-001` binds anyone while marked `PROPOSED` is **not** decided here. Original conflict record follows. **`AUTHORITY_CONFLICT`.** Neither instrument is silent and neither can be dismissed. `INDEX.md` is not among the three `allowed_write_paths`, and `all_other_paths` is `OUT_OF_SCOPE`; `AI-STD-001` states a `MUST`-level maintenance obligation with repository-wide claimed applicability, and is marked `Status: PROPOSED`, so its operative authority is `NOT ESTABLISHED`. Five writes to the path occurred across three merged PRs and are recorded as neither authorised nor unauthorised. The P2-T2 row is stale as a result — it predates §18 — and is not corrected. Recorded in §2h and filed as Issue #305 comment `7028019382`. |
+| Q15 | Whether maintaining `14-ai-development/work-items/INDEX.md` is authorised for this work item, given that the manifest excludes it while `AI-STD-001` line 445 / 463 requires the Integration Owner to maintain it | **SCOPE DECIDED — no write by this work item; the underlying conflict is untouched.** §2i. `AI-STD-001:445` addresses the Integration Owner; this work item does not hold that role — the manifest lists `sponsor`, `accountable_owner` and `acceptance_authority` as `NOT_ASSIGNED` and its `role_note` forbids substituting a session identity for an unassigned role. A `MUST` addressed to a role this work item does not hold does not transfer to it, so the manifest's `OUT_OF_SCOPE` governs and the stale P2-T2 row is recorded as a delivery defect with **no owner, because the role that would own it is unassigned** — an ownership gap, not an individual's overdue obligation. Nobody is late on it and no person should be read as having failed to do it. Whether `AI-STD-001` binds anyone while marked `PROPOSED` is **not** decided here. Original conflict record follows. **`AUTHORITY_CONFLICT`.** Neither instrument is silent and neither can be dismissed. `INDEX.md` is not among the three `allowed_write_paths`, and `all_other_paths` is `OUT_OF_SCOPE`; `AI-STD-001` states a `MUST`-level maintenance obligation with repository-wide claimed applicability, and is marked `Status: PROPOSED`, so its operative authority is `NOT ESTABLISHED`. Five writes to the path occurred across three merged PRs and are recorded as neither authorised nor unauthorised. The P2-T2 row is stale as a result — it predates §18 — and is not corrected. Recorded in §2h and filed as Issue #305 comment `7028019382`. |
 | Q9 | Whether `impact_level` should get a typed home or be dropped | **DECIDED: retained as untyped event metadata — neither typed nor dropped.** §2i. Dropping is the only irreversible option and no inspected document supports it. Typing it would assert that this system's decisions carry a four-value urgency classification as domain semantics, a claim no inspected source makes. The value is preserved inside `envelope_json`, so typing later is a migration over data already stored — available, not lost. The §9 gap-table entry stands. |
 | Q10 | Does numeric reproducibility stay a requirement, or is structural rebuild sufficient? | **REVIEW RULING (R2): tiered preferred.** Structural and unreconstructable tiers accepted; exact-value retained as a design objective, **CONDITIONAL and NOT VERIFIED**. This is a review ruling on a review question, not an owner decision on Q1. |
-| Q11 | Does extending the schema of a Phase 1 table — adding an index without adding a column or rewriting a row — require explicit authorisation from the capacity that owns the Phase 1 contract? | **DECIDED: no separate authorisation required — data-neutrality ground.** §2i. `version_id` is the primary key of `versions`, so `(memory_id, version_id)` is already unique by construction: an index on that pair admits and rejects exactly the rows the primary key already admits and rejects, probed at case P1. What the index actually supplies is the *parent key* the composite foreign key needs — without it every write to `context_assembly_entry` fails with `foreign key mismatch`, even for a correctly matched pair (probes P2, P3, P6). The index stays declared as a Layer 1 modification, because it is one. This decides admissibility, not what the contract's owner would say; `acceptance_authority` remains `NOT_ASSIGNED`. |
+| Q11 | Does extending the schema of a Phase 1 table — adding an index without adding a column or rewriting a row — require explicit authorisation from the capacity that owns the Phase 1 contract? | **PARTLY DECIDED — technical admissibility settled; the authorisation question is not.** §2i. The index is data-neutral with respect to `versions` admissible rows and is necessary for the §8.4 composite foreign key to function; six probes recorded there. That settles technical admissibility. It does **not** settle whether a Phase 1 authorising capacity must approve it: no normative rule exempts data-neutral modifications, and no rule in the contract addresses schema objects at all. That question stands for the contract's owner, who remains `NOT_ASSIGNED`. §2i. `version_id` is the primary key of `versions`, so `(memory_id, version_id)` is already unique by construction: an index on that pair admits and rejects exactly the rows the primary key already admits and rejects, probed at case P1. What the index actually supplies is the *parent key* the composite foreign key needs — without it every write to `context_assembly_entry` fails with `foreign key mismatch`, even for a correctly matched pair (probes P2, P3, P6). The index stays declared as a Layer 1 modification, because it is one. This decides admissibility, not what the contract's owner would say; `acceptance_authority` remains `NOT_ASSIGNED`. |
 | Q12 | Is the in-memory DDL check an acceptable reading of the `no schema execution` bound? | **PROSPECTIVE INTERPRETATION ISSUED — retrospective ruling refused.** §2i. Going forward, executing this design's own DDL against an ephemeral in-memory database, writing no file and touching no repository path, is inside the design-phase bound; the bound exists to stop persistent schema artefacts and false executable claims, and this produces neither. R2's `DISCLOSED_SCOPE_DEVIATION` for the R2 event stands permanently and is not reclassified — a classification once recorded is not revised by a later clarification of the bound. Two further probes were run before this interpretation existed and are disclosed in §17 as such; the honest count is three disclosed executions, not one. |
 | Q13 | Must a `tool_state='completed'` call carry a non-NULL `result_message_id`? | **DECIDED: yes — table-level `CHECK`.** §2i. The `RECOMMENDED` recorded here was adapter-level enforcement, on the ground that *the database* could not hold the invariant because a `BEFORE UPDATE OF tool_state` trigger misses a direct insert into `completed`. That ground was half-checked: the trigger does miss that path, and a table-level `CHECK` does not. Probed on this document's own DDL, 14 cases, all as expected — the direct insert and the `emitted → completed` update with a NULL result are now refused, and every legal path including both write orders is accepted. Separate from NF-R3-02, whose status this does not change. Capacity: dev-baseline, session-held; `human_signature` NOT CLAIMED. |
 | Q14 | Does `recompute` genuinely require a single `input_id`? | **`BUSINESS_RULE_NOT_SUPPLIED`; held deliberately, not deferred.** §2i. The deciding question is what the operation called `recompute` means, and that meaning belongs to the owner of its semantics. It cannot be inferred from the provisional `CHECK`, the existing schema, or the convenience of either implementation. The strict branch stays provisional and is labelled as such. |
@@ -1528,9 +1569,9 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 | The Q11–Q14 / Q8 / Q9 ruling dispositions | **AUTHOR-REPORTED, reviewer-declared limit** — the ruling states it did not retrieve the repository at the reviewed head and rests on contract language quoted in the request. It is therefore a disposition over the text supplied, not an independent verification of this document at any head. |
 | The absence of a Layer 1 prohibition | **VERIFIED** — `phase-1-sqlite-adapter-contract.md` read directly; two tree-wide searches recorded in §2f. The absence of a `layer 1` term in the governance tree is verified the same way. |
 | That the Q11 ruling's premise was false | **VERIFIED by the above two rows taken together**, not by the ruling. The ruling was correct on the question asked; the question was wrong. |
-| That a table-level `CHECK` holds the Q13 invariant where a `BEFORE UPDATE OF tool_state` trigger cannot | **VERIFIED — 14 cases, all produced the expected result**, executed against this document's own §7.1 and §8 DDL plus the merged `accepted_events`/`event_payloads` definitions, in-memory SQLite 3.46.1. Recorded in §2i. |
-| That `versions_memory_version_uq` changes no admissible row, and that the composite foreign key is inert without it | **VERIFIED — 6 cases, all produced the expected result**, executed against this document's own §7.1/§8.4 DDL. Recorded in §2i. |
-| The rulings in §2i | **ISSUED, not verified.** The capacity is dev-baseline, session-held; `human_signature` is `NOT_CLAIMED`. Their factual premises are `VERIFIED` above; their authority is what §2i says it is. |
+| That a table-level `CHECK` holds the Q13 invariant where a `BEFORE UPDATE OF tool_state` trigger cannot | **SQL logic VERIFIED; execution history AUTHOR-REPORTED and now reproducible.** The constraint's semantics are checkable by reading: SQLite evaluates table-level `CHECK` on INSERT and UPDATE, which the trigger pattern cannot. The 14-case execution result in §2i is what the harness reports; the harness is Appendix B.1 and reads its DDL out of this document at run time, so anyone can re-run it and get 14/14 or find that §2i's table is wrong. Probed in-memory SQLite 3.46.1. |
+| That `versions_memory_version_uq` changes no admissible row, and that the composite foreign key is inert without it | **SQL logic VERIFIED; execution history AUTHOR-REPORTED and now reproducible.** Uniqueness of `(memory_id, version_id)` follows from `version_id` being the primary key; SQLite's parent-key requirement for a composite FK follows from its documentation and is what P2/P3/P6 report. The 6-case execution result is in §2i; the harness is Appendix B.2. |
+| The rulings in §2i | **ISSUED, not verified.** The capacity is dev-baseline, session-held; `human_signature` is `NOT_CLAIMED`. Their factual premises are as graded above; their authority is what §2i says it is. A ruling is not a verification, and §2i's Q11 in particular is explicitly partial — technical admissibility only. |
 
 ---
 
@@ -1776,12 +1817,12 @@ has been examined and disposed of.
 | 1 canonical persistence | substantial; write-path ordering unspecified | nothing at design level |
 | 2 transcript capture | substantial; state vocabulary exists, transition and ownership semantics undefined | Q8 for retention; transitions need adoption (§10) |
 | 3 derived projection | substantial; failure recovery and interruption semantics missing | nothing for structural tier; exact tier `NOT VERIFIED` |
-| 4 outstanding decisions | **none** | authority — Issue #305 |
+| 4 outstanding decisions | **5 of 7 decided (§2i), 2 held** | Q14 held on business semantics; Q8 held on policy input; accountable authority still `NOT_ASSIGNED` — Issue #305 |
 | 5 acceptance criteria and tests | 10 rows over the gate's 8 criteria: 4 `PROVEN — PHASE 1 STORE LAYER` / `UNPROVEN — PHASE 2 INTEGRATION`; 2 specified but unrun; 4 `UNVERIFIED ABSENCE`; plus retrieval ordering, specified but unrun, carried inside the out-of-order row rather than as a row of its own | work not done; adoption authority for the atomicity contract |
 | 6 implementation authorisation | none | authority — Issue #305 |
 | 7 convergence chain | partial | Owner acceptance unavailable |
 
-The gates that can be advanced by engineering are 1, 2, 3 and 5 — the Q1 ruling's direction, which `DEC-P2-T2-Q1-001` records as decided and which no accountable authority has accepted, since none is assigned. Of those, the substantive gap is the interaction between gates 1 and 5: four gate-5 criteria are proven at the store layer and unproven once a transcript write must accompany a canonical commit.
+The gates that can be advanced by engineering are 1, 2, 3 and 5 — the Q1 ruling's direction, which `DEC-P2-T2-Q1-001` records as decided and which no accountable authority has accepted, since none is assigned. Gate 4 changed shape in §2i: five of its seven questions now carry rulings and two are held deliberately, so what remains of gate 4 is not 'no design coverage' but the two held questions and the accountable-authority vacancy itself. Of those, the substantive gap is the interaction between gates 1 and 5: four gate-5 criteria are proven at the store layer and unproven once a transcript write must accompany a canonical commit.
 
 Second substantive gap, gate 2: session lifecycle transitions. The state vocabulary exists; the transition and ownership semantics do not.
 
@@ -1790,6 +1831,26 @@ Second substantive gap, gate 2: session lifecycle transitions. The state vocabul
 ### 18.10. What engineering may start without authority, and what it may not adopt
 
 The Q1 ruling — recorded as decided at `DEC-P2-T2-Q1-001`, and recorded as not accepted by an accountable authority because none is assigned — directed that gates 1, 2, 3 and 5 be treated as bounded engineering work. That authorises investigation. It does not confer authority to settle every normative design choice arising from the investigation, and this document does not claim otherwise.
+
+**Where §2i sits in this, and where it does not.** §2i settles a narrower category than
+this section denies: questions about **what this design's own specified invariants mean and
+which of two candidate readings the evidence supports** — whether a `completed` call must
+name its result and where that is enforced (Q13), whether an index changes an admissible row
+(Q11, technical part), what a bound was written to prevent (Q12), who a maintenance `MUST`
+is addressed to (Q15), and whether a field is preserved or typed (Q9). Each of those was
+decided by reading this repository and choosing between options the evidence distinguished,
+with the probes recorded in §2i and reproducible from Appendix B.
+
+This section still denies the other category: adopting a **new normative contract that the
+repository does not already contain** — which consistency and recovery contract binds a
+canonical commit against a failed transcript write, what retention periods apply, what the
+operation named `recompute` means. Those are not settled by reading; they would be invented.
+Q8 and Q14 are in this category, and §2i holds them for precisely this reason.
+
+The rule is therefore: a session may decide what the document's own evidence determines, and
+may not authorise what the document does not already know. The two categories are close
+enough at the boundary that this distinction has to be written down rather than left to be
+inferred — which is why it is written here.
 
 The distinction, stated plainly:
 
@@ -1804,7 +1865,7 @@ The distinction, stated plainly:
 
 Applied to the two gaps this document identifies:
 
-- **The atomicity question** — what happens when `commit_version` succeeds and the `transcript_message` insert does not — can be investigated and specified in alternatives. Selecting which alternative governs needs an authority that is `NOT_ASSIGNED`. A session cannot close that question by writing a document.
+- **The atomicity question** — what happens when `commit_version` succeeds and the `transcript_message` insert does not — can be investigated and specified in alternatives. Selecting which alternative governs needs an authority that is `NOT_ASSIGNED`. A session cannot close that question by writing a document — and §2i did not: Q8 and Q14 are exactly the questions this paragraph names, and they are held, not decided.
 - **Session lifecycle transitions** — the state machine can be proposed. Adopting it as authoritative has the same problem.
 
 So the accurate statement is not "none of this is blocked on authority". It is: **the investigation is not blocked; the adoption is.** A session can move these questions from "unasked" to "asked with named alternatives". It cannot move them to "settled".
@@ -2059,3 +2120,219 @@ CREATE TABLE IF NOT EXISTS schema_version (
 
 INSERT INTO schema_version (version) VALUES ('1.0.0');
 ```
+
+---
+
+## Appendix B — probe harness, so the twenty cases can be rerun
+
+The Q13 and Q11 tables in §2i report twenty executions between them. Those tables are
+useless to a reader who cannot repeat them, and §16 marks the results `VERIFIED` on the
+strength of executions that happened in a session and left no artefact. This appendix is
+the remedy. The two harnesses below are the code that produced the two tables, in the form
+it was run in.
+
+Both read their DDL out of **this document**, not out of a copy: they extract the fenced
+sql blocks before Appendix A, splice in the merged Event Store definitions that §7.1
+references, and run against an in-memory SQLite. Re-running them therefore tests what this
+document *currently* says, which is the property that matters after any later edit.
+
+Appendix A is embedded because the prompt source has no authorised write path. This
+appendix is embedded for a different reason: it is the evidence for two §2i rulings, and
+evidence that cannot be located is evidence a reviewer cannot weigh.
+
+**Requirement.** `sqlite3` at `/usr/bin/sqlite3` (probed with 3.46.1). Nothing else.
+
+### B.1 — Q13 harness
+
+```python
+# -*- coding: utf-8 -*-
+"""Q13 probe harness. Extracts the design's own DDL from design-proposal.md and
+tests the completed-requires-a-result CHECK on 14 cases. Needs /usr/bin/sqlite3."""
+import subprocess, sys, io, os
+
+P = sys.argv[1] if len(sys.argv) > 1 else "14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/design-proposal.md"
+lines = io.open(P, encoding="utf-8").read().split("\n")
+
+blocks = []
+i = 0
+while i < len(lines):
+    if lines[i].strip() == "`` `sql":
+        j = i + 1
+        while j < len(lines) and lines[j].strip() != "`` `":
+            j += 1
+        blocks.append((i + 2, "\n".join(lines[i + 1:j])))
+        i = j + 1
+    else:
+        i += 1
+
+design = [b for (ln, b) in blocks if ln < 1700]
+EV = """
+CREATE TABLE IF NOT EXISTS accepted_events (
+  event_row INTEGER PRIMARY KEY AUTOINCREMENT,
+  producer_actor_ref TEXT NOT NULL, idempotency_key TEXT NOT NULL,
+  payload_digest TEXT NOT NULL, scope_json TEXT NOT NULL,
+  envelope_json TEXT NOT NULL, accepted_at TEXT NOT NULL,
+  processing_state_json TEXT NOT NULL,
+  UNIQUE(producer_actor_ref, idempotency_key)
+);
+CREATE TABLE IF NOT EXISTS event_payloads (
+  event_row INTEGER PRIMARY KEY REFERENCES accepted_events(event_row) ON DELETE RESTRICT,
+  payload_bytes BLOB NOT NULL, verified_digest TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS compile_outbox (
+  outbox_row INTEGER PRIMARY KEY AUTOINCREMENT,
+  event_row INTEGER NOT NULL UNIQUE REFERENCES accepted_events(event_row) ON DELETE RESTRICT,
+  intent_kind TEXT NOT NULL CHECK (intent_kind = 'compile'), created_at TEXT NOT NULL
+);
+"""
+BASE = "PRAGMA foreign_keys=ON;\n" + EV + "\n" + "\n".join(design)
+
+FIX = """
+INSERT INTO accepted_events (producer_actor_ref,idempotency_key,payload_digest,scope_json,envelope_json,accepted_at,processing_state_json) VALUES ('p','k1','d1','{}','{}','2026-01-01T00:00:00Z','{}');
+INSERT INTO event_payloads (event_row,payload_bytes,verified_digest) VALUES (1,X'6162','d1');
+INSERT INTO transcript_session VALUES ('s1',NULL,'api',NULL,NULL,NULL,'{}','2026-01-01T00:00:00Z',NULL,'open','standard',NULL,NULL);
+INSERT INTO transcript_message VALUES ('m-asst','s1',1,'assistant',1,'d1',10,NULL,NULL,'original','2026-01-01T00:00:00Z','standard');
+INSERT INTO transcript_message VALUES ('m-tool','s1',2,'tool',1,'d1',5,NULL,'m-asst','original','2026-01-01T00:00:00Z','standard');
+INSERT INTO transcript_message VALUES ('m-tool2','s1',3,'tool',1,'d1',5,NULL,'m-asst','original','2026-01-01T00:00:00Z','standard');
+"""
+
+CASES = [
+ ("A  INSERT completed, result NULL", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst',NULL,'read','completed');", "REFUSED"),
+ ("B  emitted -> completed, result NULL", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst',NULL,'read','emitted');UPDATE transcript_tool_call SET tool_state='completed' WHERE tool_call_id='tc1';", "REFUSED"),
+ ("C  emitted -> completed WITH valid result", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst',NULL,'read','emitted');UPDATE transcript_tool_call SET tool_state='completed', result_message_id='m-tool' WHERE tool_call_id='tc1';", "ACCEPTED"),
+ ("D  INSERT completed WITH valid result", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst','m-tool','read','completed');", "ACCEPTED"),
+ ("E  failed with NULL result", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst',NULL,'read','failed');", "ACCEPTED"),
+ ("F  emitted with NULL result", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst',NULL,'read','emitted');", "ACCEPTED"),
+ ("G  bind result FIRST, then completed", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst',NULL,'read','emitted');UPDATE transcript_tool_call SET result_message_id='m-tool' WHERE tool_call_id='tc1';UPDATE transcript_tool_call SET tool_state='completed' WHERE tool_call_id='tc1';", "ACCEPTED"),
+ ("H  completed bound to a DIFFERENT child", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst',NULL,'read','emitted');UPDATE transcript_tool_call SET tool_state='completed', result_message_id='m-tool2' WHERE tool_call_id='tc1';", "ACCEPTED"),
+ ("I  rebind a bound result (R4 guard)", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst','m-tool','read','completed');UPDATE transcript_tool_call SET result_message_id='m-tool2' WHERE tool_call_id='tc1';", "REFUSED"),
+ ("J  clear a bound result (R4 guard)", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst','m-tool','read','completed');UPDATE transcript_tool_call SET result_message_id=NULL WHERE tool_call_id='tc1';", "REFUSED"),
+ ("K  UPDATE tool_name on a completed row", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst','m-tool','read','completed');UPDATE transcript_tool_call SET tool_name='write' WHERE tool_call_id='tc1';", "ACCEPTED"),
+ ("L  result bound while state emitted", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst','m-tool','read','emitted');", "ACCEPTED"),
+ ("M  emitted+result then -> failed", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst','m-tool','read','emitted');UPDATE transcript_tool_call SET tool_state='failed' WHERE tool_call_id='tc1';", "ACCEPTED"),
+ ("N  completed -> emitted", "INSERT INTO transcript_tool_call VALUES ('s1','tc1',0,'m-asst','m-tool','read','completed');UPDATE transcript_tool_call SET tool_state='emitted' WHERE tool_call_id='tc1';", "REFUSED"),
+]
+
+fails = 0
+for label, body, expect in CASES:
+    p = subprocess.run(["/usr/bin/sqlite3", ":memory:"], input=BASE + FIX + body,
+                       capture_output=True, text=True)
+    actual = "ACCEPTED" if p.returncode == 0 else "REFUSED"
+    ok = actual == expect
+    if not ok:
+        fails += 1
+    print("%-4s %-44s expect=%-8s got=%s" % ("PASS" if ok else "FAIL", label, expect, actual))
+
+print("\n%d cases, %d pass, %d fail" % (len(CASES), len(CASES) - fails, fails))
+sys.exit(1 if fails else 0)
+```
+
+### B.2 — Q11 harness
+
+```python
+# -*- coding: utf-8 -*-
+"""Q11 probe harness. Extracts the design's own DDL from design-proposal.md and
+tests whether versions_memory_version_uq changes admissible rows. 6 cases.
+Needs /usr/bin/sqlite3."""
+import subprocess, sys, io
+
+P = sys.argv[1] if len(sys.argv) > 1 else "14-ai-development/work-items/P2-T2-MEMORY-SCHEMA/design-proposal.md"
+lines = io.open(P, encoding="utf-8").read().split("\n")
+
+blocks = []
+i = 0
+while i < len(lines):
+    if lines[i].strip() == "`` `sql":
+        j = i + 1
+        while j < len(lines) and lines[j].strip() != "`` `":
+            j += 1
+        blocks.append((i + 2, "\n".join(lines[i + 1:j])))
+        i = j + 1
+    else:
+        i += 1
+design = "\n".join(b for (ln, b) in blocks if ln < 1700)
+
+EV = """
+CREATE TABLE IF NOT EXISTS accepted_events (
+  event_row INTEGER PRIMARY KEY AUTOINCREMENT,
+  producer_actor_ref TEXT NOT NULL, idempotency_key TEXT NOT NULL,
+  payload_digest TEXT NOT NULL, scope_json TEXT NOT NULL,
+  envelope_json TEXT NOT NULL, accepted_at TEXT NOT NULL,
+  processing_state_json TEXT NOT NULL,
+  UNIQUE(producer_actor_ref, idempotency_key)
+);
+CREATE TABLE IF NOT EXISTS event_payloads (
+  event_row INTEGER PRIMARY KEY REFERENCES accepted_events(event_row) ON DELETE RESTRICT,
+  payload_bytes BLOB NOT NULL, verified_digest TEXT NOT NULL
+);
+"""
+PRE = "PRAGMA foreign_keys=ON;\n" + EV + "\n" + design
+
+# the index as it appears in the design
+IDX = ("CREATE UNIQUE INDEX IF NOT EXISTS versions_memory_version_uq\n"
+       "  ON versions(memory_id, version_id);")
+
+# P6: same content but the index is non-unique
+IDX_NONUNIQUE = ("CREATE INDEX IF NOT EXISTS versions_mv_idx\n"
+                 "  ON versions(memory_id, version_id);")
+
+BASE_IDX = PRE
+BASE_NO_IDX = PRE.replace(IDX, "")
+BASE_NONUNIQ = PRE.replace(IDX, IDX_NONUNIQUE)
+
+SEED = """
+INSERT INTO memories VALUES ('m1','{}',NULL,'{}');
+INSERT INTO memories VALUES ('m2','{}',NULL,'{}');
+INSERT INTO versions VALUES ('v1','m1',1,NULL,'{}','{}',1);
+"""
+CTX = ("INSERT INTO context_assembly VALUES ('a1','sc',NULL,NULL,"
+       "'2026-01-01T00:00:00Z','draft');")
+
+CASES = [
+ ("P1 duplicate (memory_id, version_id), no index", BASE_NO_IDX,
+  SEED + "INSERT INTO versions VALUES ('v1','m1',2,NULL,'{}','{}',2);", "FAILED"),
+ ("P2 composite FK, no unique parent key, MATCHED pair", BASE_NO_IDX,
+  SEED + CTX + "INSERT INTO context_assembly_entry VALUES ('e1','a1','m1','v1',1,NULL,'included','2026-01-01T00:00:00Z');",
+  "FAILED"),
+ ("P3 composite FK, no unique parent key, MISMATCHED pair", BASE_NO_IDX,
+  SEED + CTX + "INSERT INTO context_assembly_entry VALUES ('e1','a1','m2','v1',1,NULL,'included','2026-01-01T00:00:00Z');",
+  "FAILED"),
+ ("P4 WITH index, MATCHED pair", BASE_IDX,
+  SEED + CTX + "INSERT INTO context_assembly_entry VALUES ('e1','a1','m1','v1',1,NULL,'included','2026-01-01T00:00:00Z');",
+  "ACCEPTED"),
+ ("P5 WITH index, MISMATCHED pair", BASE_IDX,
+  SEED + CTX + "INSERT INTO context_assembly_entry VALUES ('e1','a1','m2','v1',1,NULL,'included','2026-01-01T00:00:00Z');",
+  "FAILED"),
+ ("P6 NON-unique parent index, MATCHED pair", BASE_NONUNIQ,
+  SEED + CTX + "INSERT INTO context_assembly_entry VALUES ('e1','a1','m1','v1',1,NULL,'included','2026-01-01T00:00:00Z');",
+  "FAILED"),
+]
+
+fails = 0
+for label, base, body, expect in CASES:
+    p = subprocess.run(["/usr/bin/sqlite3", ":memory:"], input=base + body,
+                       capture_output=True, text=True)
+    actual = "ACCEPTED" if p.returncode == 0 else "FAILED"
+    ok = actual == expect
+    if not ok:
+        fails += 1
+    print("%-4s %-52s expect=%-8s got=%s" % ("PASS" if ok else "FAIL", label, expect, actual))
+    if p.stderr.strip():
+        print("       err: " + p.stderr.strip().replace("\n", " | ")[:120])
+
+print("\n%d cases, %d pass, %d fail" % (len(CASES), len(CASES) - fails, fails))
+sys.exit(1 if fails else 0)
+```
+
+### B.3 — expected output
+
+Both harnesses print one line per case and a summary. The expected summary is what §2i
+records:
+
+```text
+# B.1 — 14 cases, 14 pass, 0 fail
+# B.2 —  6 cases,  6 pass, 0 fail
+```
+
+A mismatch means either the document changed or §2i's table is wrong. Either is worth
+knowing, which is the point of keeping the harness beside the claim.
