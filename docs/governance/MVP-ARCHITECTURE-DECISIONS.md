@@ -224,7 +224,7 @@ export interface InjectRequest {
 export type InjectStage =
   | "CONTEXT_VERSION_COMMITTED" | "DELIVERY_INTENT_COMMITTED"
   | "DELIVERY_ACCEPTED" | "MANAGED_REGION_MATERIALIZED"
-  | "FINAL_REQUEST_SUBMITTED" | "REJECTED" | "UNKNOWN" | "IN_DOUBT";
+  | "FINAL_REQUEST_SUBMITTED" | "APPLIED_DECISION_COMMITTED" | "REJECTED" | "UNKNOWN" | "IN_DOUBT";
 export type InjectAppliedStatus = "NOT_APPLIED" | "FULL_APPLIED";
 export interface InjectEvidence {
   inferenceRequestRef?: string;
