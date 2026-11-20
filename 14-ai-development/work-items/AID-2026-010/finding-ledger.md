@@ -599,3 +599,25 @@ This append-only addendum supersedes stale F1/F3 carrier pins above where they d
 - Prompt source: T2 user instruction, Owner ruling D-2026-1120-01 in the current continuation. Platform conversation UUID/raw message bytes are not exposed to the repository connector; prompt SHA-256 NOT_VERIFIED. No synthetic digest is asserted.
 
 **Disposition:** F1 handoff and F3 exact-source / TEST-profile artifacts are delivered and reviewable; the underlying F1 implementation and F3 independent-human/operational acceptance findings remain P1 / OPEN. No Owner signature, Runtime authorization, CI PASS, production acceptance, merge or main write is inferred.
+
+
+## 2026-11-20 live-ref reconciliation — current closeout continuation
+
+### Exact live carrier refs (read back from the existing PR branches)
+- F1 handoff: PR #327, branch `docs/f43-01-f1-engineering-entry-handoff`, Head `2858c8798deaf30fb12709e8226f880534c963f1`; file `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md`, Blob `eec6314a02b5feb495d21ed1fd065a84742be8d1`.
+- F3 D query contract: PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; contract Blob `099f4948b550919084b0d73094692b590b0be0a9`; active mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
+- F3 H TEST-profile candidate: PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; test Blob `6685226143f28a5b8764067bb205080b531132e3` (15 methods).
+- F3 ledger/manifest carrier: PR #323 remains OPEN/DRAFT on `fix/f43-01-f3-ledger-reconcile`; current Head observed before this append: `32a081fa22e01570e96464c440495609f01edec4`; base `f3bc21405aa6ad5a3ec271c04f7f4d8567d8bf33`; compare 78 ahead / 0 behind, exactly the three existing paths (ledger, manifest, INDEX).
+
+### Verification and evidence applicability
+- Exact-head Actions Runs `44684299439` / `44684299500` are completed FAILURE; latest jobs `136123345286` / `136123331637` expose `steps=null`. Log retrieval returned HTTP 404 `BlobNotFound`. No CI PASS or test assertion diagnosis is claimed.
+- PR #322 comment #7032257073's 15/15 local replay cites test Blob `6685226143df0135aa64ecec3cfdac8acd08a8eb`, which is not the current test-module Blob `6685226143f28a5b8764067bb205080b531132e3`. PR #322 comment #7032408733 correctly marks that prior PASS inapplicable; current-source local execution remains NOT RUN / NOT VERIFIED. Later comment #7032436756 must not override this exact-Blob correction.
+- D/H role-labelled records #7021655866 / #7021638212 both expose GitHub login `oahcom`; independent human signers remain NOT VERIFIED. The unsigned template #7031665905 is not a signature.
+- F1 remains `F-43-01/F1 | P1 | OPEN`: five callable D operations NOT IMPLEMENTED; durable operation-bound Ledger/Receipt and equality/linearization evidence NOT ESTABLISHED; S1–S7 NOT RUN. Issue #7 comment #7021990583 retains `DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED`.
+- F3 remains `F-43-01/F3 | P1 | OPEN`: callable D query, real Receipt/currentness/revocation, H production consumer acceptance, independent D/H human acceptance and C1–C6 operational proof NOT ESTABLISHED.
+- Return destinations: F1 → PR #327, Issues #7/#10/#25/#43; F3 → PRs #321/#322/#323, Issues #25/#43.
+
+### Prompt provenance and mutation boundary
+- T2 chat instruction, source parent conversation ID supplied in continuation context: `6afcc975-06ac-83ee-ba55-9395f7e117ae`; current platform UUID/raw instruction bytes are not exposed; SHA-256 `NOT_VERIFIED` (no synthetic digest).
+- Governance sources read from `main`: AI-EXEC-001 v1.1 ADOPTED, Blob `58af59af266b81109269156ea667df1a15edfb7b`; AI-EXEC-002 v1.2 PENDING ADOPTION, Blob `7f5928a5d16eb12da7621cfb8bd99ca463afd859` (v1.1 is adopted predecessor).
+- Existing PR branch only; no new PR/Issue/branch, no merge, no main write, no Runtime authorization, no Owner signature and no production acceptance.
