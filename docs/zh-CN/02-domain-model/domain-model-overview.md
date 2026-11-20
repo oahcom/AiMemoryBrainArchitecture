@@ -32,7 +32,7 @@ Claim 与 Fact 的独立性不意味着每个 Claim 都必须具有 Fact。
 1. 每个规范对象都有稳定、类型明确的不透明标识符。
 2. MemoryId 在 Memory 整个生命周期内保持不变。
 3. MemoryVersionId 标识一个不可变 Memory 版本。
-4. ClaimId 跨 Memory Version 的身份策略仍为 OPEN；Phase 1 不冻结“稳定 ClaimId”与“版本内 ClaimId”之间的选择。
+4. Claim 命题身份跨 Memory Version 使用稳定 ClaimRef；每个不可变断言状态按 §2.4 使用精确 ClaimRevisionRef 标识。ID 生成算法仍在本决议范围之外，Phase 1 不予冻结。
 
 ### 2.4 Claim 身份分类与修订不变量
 
@@ -460,7 +460,7 @@ Canonical Commit 与所需 Provenance 可见性必须处于同一原子边界，
 2. 一个 Event 可以产生多个 Candidate Memory；
 3. 一个 Memory 可以包含多个 Claim；
 4. Memory 身份跨不可变版本稳定；
-5. Claim 跨 Memory Version 的身份策略继续保持 OPEN，不在 Phase 1 冻结；
+5. Claim 跨 Memory Version 的身份分类遵循 §2.4：稳定 ClaimRef 与不可变 ClaimRevisionRef 语义已 DECIDED FOR CONVERGENCE；ID 生成算法仍在 Phase 1 冻结范围之外；
 6. 冲突 Claim 及其 Evidence 被保留；
 7. 删除 ContextEntry 不会修改 Canonical Memory；
 8. 无授权时跨 Scope 读写被拒绝；
