@@ -233,7 +233,9 @@ The word *boundary* in the contract denotes **the scope of what has been
 decided** — the persistence behaviours enumerated above — not **a line that must
 not be crossed**. This document read it as the second, asked a question premised
 on that reading, and received an answer to the question as asked, explicitly
-conditioned on the check that falsifies it.
+conditioned on the check that falsifies it. Stated precisely: the contract as
+inspected contains no crossing prohibition, and the two searches located none
+elsewhere; that is the extent of the finding.
 
 ### What this means for Q11
 
@@ -243,18 +245,18 @@ Q11 is **not closed**. It is re-posed, correctly:
 > a column or rewriting a row — require explicit authorisation from a capacity
 > that owns the Phase 1 contract?
 
-That is an authorisation question, not a boundary-interpretation question. There
-is no prohibition to interpret. And because `acceptance_authority` is
+That is an authorisation question, not a boundary-interpretation question. No
+prohibition was located to interpret. And because `acceptance_authority` is
 `NOT_ASSIGNED`, the authority that could answer it is, on the ruling's own
 reasoning, vacant.
 
 **The strict reading is therefore not adopted, and §8.4 is not rewritten to
 remove `versions_memory_version_uq` or the composite foreign key.** That removal
 is what the strict reading requires, and it would have been performed had the
-premise held. Performing it now would delete a constraint for a reason that does
-not exist in any document — a worse outcome than carrying the question open,
-because the resulting schema would look settled while resting on a fabricated
-prohibition.
+premise held. Performing it now would delete a constraint for a reason that no
+inspected document establishes — a worse outcome than carrying the question open,
+because the resulting schema would look settled while resting on a prohibition
+that was not located.
 
 What §8.4 must stop doing is presenting two readings of a boundary that is not
 defined. Its two-reading table is replaced by the authorisation question above.
@@ -907,9 +909,9 @@ The composite foreign key is the R1-NB-03 fix. Two independent foreign keys prov
 **R1-NB-03 boundary, resolved explicitly (R2 required item 4).** R2 ruled this correct in technique and unresolved in boundary: an additive index is still a modification to the Layer 1 schema — not a column alteration, but not literally zero modification — and the proposal must not describe it as though it were no modification. Accepted, and the earlier wording is corrected in place.
 
 The two-reading table that stood here has been removed. It presented two
-interpretations of a boundary that **no document defines** (§2f). There was no
-prohibition to interpret, so choosing between two readings of it was never the
-right question.
+interpretations of a boundary that **no inspected document defines** (§2f). No
+prohibition was located to interpret, so choosing between two readings of it was
+never the right question.
 
 The correct framing is an authorisation question, and it is carried as **Q11**:
 
@@ -924,8 +926,8 @@ Three things follow, and they are stated rather than inferred:
    schema objects. Verified in §2f with the exact clauses and two bounded
    searches. Stated as a bounded negative, not as a universal one.
 2. **The index is therefore not forbidden, and not authorised either.** Absence
-   of a prohibition is not permission when the thing being extended belongs to a
-   contract whose owning capacity is `NOT_ASSIGNED`.
+   of a located prohibition is not permission when the thing being extended
+   belongs to a contract whose owning capacity is `NOT_ASSIGNED`.
 3. **The adapter-level fallback stays documented** as the implementation that
    would be used if an authorising capacity later declines the index. Drop the
    index and the composite foreign key; read the version's owning `memory_id`
@@ -1098,7 +1100,7 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 | Q8 | Transcript retention classes and their default periods | **OPEN — `POLICY_INPUT_ABSENT`.** This proposal constrains deletion; it does not define policy. A development baseline must not invent retention periods or classes. Engineering can implement an established policy; it cannot manufacture one. |
 | Q9 | Whether `impact_level` should get a typed home or be dropped | **OPEN — `SEMANTIC_DECISION_REQUIRED`.** Its absence from the current schema does not decide it. Whether the field represents information the system must preserve is an authoritative determination. It will not be dropped to simplify the schema. |
 | Q10 | Does numeric reproducibility stay a requirement, or is structural rebuild sufficient? | **REVIEW RULING (R2): tiered preferred.** Structural and unreconstructable tiers accepted; exact-value retained as a design objective, **CONDITIONAL and NOT VERIFIED**. This is a review ruling on a review question, not an owner decision on Q1. |
-| Q11 | Does extending the schema of a Phase 1 table — adding an index without adding a column or rewriting a row — require explicit authorisation from the capacity that owns the Phase 1 contract? | **RE-POSED, OPEN.** The previous form asked which of two readings of a Layer 1 boundary governs; no document defines that boundary and no document prohibits the modification (§2f). A ruling on the old form returned strict and is **not adopted**, because its stated premise was the one §2f falsifies. The question is authorisation, and the authorising capacity is `NOT_ASSIGNED`. |
+| Q11 | Does extending the schema of a Phase 1 table — adding an index without adding a column or rewriting a row — require explicit authorisation from the capacity that owns the Phase 1 contract? | **RE-POSED, OPEN.** The previous form asked which of two readings of a Layer 1 boundary governs; no inspected document defines that boundary or prohibits the modification (§2f). A ruling on the old form returned strict and is **not adopted**, because its stated premise was the one §2f falsifies. The question is authorisation, and the authorising capacity is `NOT_ASSIGNED`. |
 | Q12 | Is the in-memory DDL check an acceptable reading of the `no schema execution` bound? | **OPEN — `RULING: PROSPECTIVE YES, RETROSPECTIVE NO`.** The bound-owning capacity may clarify what the bound means for future activity; it cannot retrospectively authorise what was done, and R2's `DISCLOSED_SCOPE_DEVIATION` classification stands permanently. `acceptance_authority` is `NOT_ASSIGNED`, so even the prospective clarification has no available issuer. |
 | Q13 | Must a `tool_state='completed'` call carry a non-NULL `result_message_id`? | **`RECOMMENDED`: adapter-level enforcement.** Lifecycle invariant, not relational integrity. The database does not guarantee it; a `BEFORE UPDATE OF tool_state` trigger would not cover every write path, including insertion directly into a completed state. The recommendation assumes the adapter is the authoritative writer for this transition. Not closed — it needs formal adoption and stays separate from NF-R3-02. |
 | Q14 | Does `recompute` genuinely require a single `input_id`? | **`BUSINESS_RULE_NOT_SUPPLIED`.** The deciding question is what the operation called `recompute` means, and that meaning belongs to the owner of its semantics. It cannot be inferred from the provisional `CHECK`, the existing schema, or the convenience of either implementation. The schema must not claim either interpretation is authoritative; the strict branch stays provisional and is labelled as such. |

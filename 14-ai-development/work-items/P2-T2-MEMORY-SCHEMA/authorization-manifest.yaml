@@ -97,7 +97,7 @@ review:
     (impact_level typing). A ruling was requested on these and is recorded in
     design-proposal.md section 2f; none of the six was closed. Q11 in particular was
     RE-POSED, not resolved: the ruling answered a boundary-interpretation question whose
-    premise does not exist in any repository document, so the strict reading is NOT
+    premise was not located in any inspected repository document, so the strict reading is NOT
     adopted and section 8.4 was not rewritten to remove the index.
     Implementation and verification obligations are separately unresolved:
     DDL NOT APPROVED, executability UNVERIFIED, 21 section 13 tests NOT WRITTEN OR RUN,
