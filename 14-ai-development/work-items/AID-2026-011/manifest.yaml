@@ -28,7 +28,7 @@ updated_at: 2026-11-20T06:17:00Z
 prompt_id: AID-2026-011-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-011/prompt-v1.md
-prompt_status: DRAFT_NOT_FROZEN (awaiting reviewed main integration and final read-back)
+prompt_status: DRAFT_NOT_FROZEN
 prompt_sha256: 0dad06d663b1cdbdd3f1d698bb1210603111d0e3782026c78e20f2cc47b5bd42
 prompt_bytes: 13330
 prompt_file_blob_sha: bc3a8d266ac4153e5797534b31ab53636f9a1f74
