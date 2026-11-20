@@ -53,7 +53,7 @@ TEST EXECUTION = SUSPENDED
 | R3 共享 Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R4 Fact/Claim 同步 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R5 端到端发布 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R5 Storage §8.8 | CARRIER_LOCATED_NOT_APPLIED | PENDING |
+| R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
 | PASS 治理同步 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 
 ## 4. 应用证据要求
@@ -169,6 +169,6 @@ Implementation Conformance 继续保持 NOT ESTABLISHED。
 本轮未应用项（已隔离，无仓库写入）：
 
 - G 根级 §13.3 直接整合：已应用。根级文件 06-memory-context/context-versioning.md 已重建为根级规范来源（提交 2606978e，Blob 8503a171922a27aca469042164b2e14f5f525910）。补充文件 Blob 249fd8691707（EN）与 aed4f80857de（ZH）已并入该节，不再宣称独立竞合协议。§14.5 随后对齐为 §13.3 的下位约束（提交 fc17542d，Blob dbce95485d02c8b25bfa2c13596c32d0d57b341d）。此前对 Blob 05c0739d... 的开放态读取已被取代。
-- Storage ADR §8.8：CARRIER_LOCATED_NOT_APPLIED。载体存在且可达：分支 session-storage-consistency-forget-atomicity-2026-11-16，Tip 281fd1edc15f607b0bcb5ff15c5486a6302c41d0，路径 reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md，当前 Blob bb544ba2f346bdc130d524bd5c7310d86f367988（273 行，章节止于 §8.7）。该分支 Tip 即 AID-2026-014-PROMPT v1 钉定的 Storage HEAD，且所钉 L1 topology Blob bb544ba2... 与本文档为同一文件。§8.8 双语正文存放于 Issue #265 评论 7037252404。NOT_APPLIED_PENDING_LOCATE 因事实错误而撤回：产生该判定的递归树检索仅覆盖 main。此处不执行应用，因为载体不在 main 上，且跨分支规范性共存尚无 Owner 裁决。未创建替代 ADR，未向无关文档插入。
+- Storage ADR §8.8：已应用。载体分支 session-storage-consistency-forget-atomicity-2026-11-16，路径 reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md。应用提交 9f63874ecf2c4d8292435c8c10d0b7b4fe9c620f；Blob bb544ba2f346bdc130d524bd5c7310d86f367988 -> edd81e2ba21c752fc88fa5e1c3cf2f2cca8cf603（27834 -> 29945 字节，274 -> 333 行）。第 8 节现自 8.1 连续至 8.8。8.8 双语正文取自 Issue #265 评论 7037252404 的 Owner 文本，按 ADR 既有双语惯例逐字应用。既有 L1 决策与 Storage L4 OPEN 边界均保留；8.8 不选择新拓扑。NOT_APPLIED_PENDING_LOCATE 撤回：先前的递归树检索仅覆盖 main，而 prompt 钉定的载体位于 Storage Owner 分支。F-265-STORAGE-01 / SD-08 以此记录关闭。跨分支规范性共存登记为后续事项，不构成本次应用的阻断。
 
 本应用证据段由应用证据提交本身加入；该提交 SHA 与状态文件终态 Blob 由 L0 应用报告及 raw 回读登记。

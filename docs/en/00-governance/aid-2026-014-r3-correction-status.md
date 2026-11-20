@@ -53,7 +53,7 @@ TEST EXECUTION = SUSPENDED
 | R3 Shared Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R4 Fact/Claim synchronization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 | R5 End-to-end publication | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
-| R5 Storage §8.8 | CARRIER_LOCATED_NOT_APPLIED | PENDING |
+| R5 Storage §8.8 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
 | PASS governance synchronization | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 
 ## 4. Application evidence requirements
@@ -169,6 +169,6 @@ at the end of this section for the three Blobs that changed after the original a
 Not applied in this round (isolated, no repository write):
 
 - G root §13.3 direct integration: APPLIED. Root file 06-memory-context/context-versioning.md was rebuilt as the canonical root-level normative source (commit 2606978e, Blob 8503a171922a27aca469042164b2e14f5f525910). Addendum Blobs 249fd8691707 (EN) and aed4f80857de (ZH) are merged into that section and no longer claim an independent competing protocol. §14.5 was subsequently aligned to §13.3 as its subordinate constraint (commit fc17542d, Blob dbce95485d02c8b25bfa2c13596c32d0d57b341d). Introduced legacy-open reads of Blob 05c0739d... are superseded.
-- Storage ADR §8.8: CARRIER_LOCATED_NOT_APPLIED. The carrier exists and is reachable: branch session-storage-consistency-forget-atomicity-2026-11-16 at 281fd1edc15f607b0bcb5ff15c5486a6302c41d0, path reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md, current Blob bb544ba2f346bdc130d524bd5c7310d86f367988 (273 lines, sections through §8.7). This branch tip is the Storage HEAD pinned by AID-2026-014-PROMPT v1, and the pinned L1 topology Blob bb544ba2... is the same file. The §8.8 bilingual text is held in Issue #265 comment 7037252404. NOT_APPLIED_PENDING_LOCATE is withdrawn as factually incorrect: the recursive-tree search that produced it was scoped to main only. Application is not performed here because the carrier is not on main and cross-branch normative coexistence has no Owner ruling yet. No replacement ADR was created and no unrelated document was used.
+- Storage ADR §8.8: APPLIED. Carrier branch session-storage-consistency-forget-atomicity-2026-11-16, path reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md. Applied at commit 9f63874ecf2c4d8292435c8c10d0b7b4fe9c620f; Blob bb544ba2f346bdc130d524bd5c7310d86f367988 -> edd81e2ba21c752fc88fa5e1c3cf2f2cca8cf603 (27834 -> 29945 bytes, 274 -> 333 lines). Section 8 now runs continuously 8.1 through 8.8. The bilingual 8.8 text is the Owner text from Issue #265 comment 7037252404, applied verbatim in the ADR's existing bilingual convention. The existing L1 decision and the Storage L4 OPEN boundary are preserved; 8.8 does not select a new topology. NOT_APPLIED_PENDING_LOCATE is withdrawn: the earlier recursive-tree search was scoped to main only while the prompt-pinned carrier lives on the Storage owner branch. F-265-STORAGE-01 / SD-08 close on this record. Cross-branch normative coexistence is recorded as a follow-up, not a blocker for this application.
 
 This Application evidence section is added by the application-evidence commit itself; that commit SHA and the resulting status-file Blobs are recorded in the L0 application report and by the raw read-back.
