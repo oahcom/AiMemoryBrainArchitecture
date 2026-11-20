@@ -1161,3 +1161,68 @@ session_closeout_status_correction_2026_11_20:
     new_branches: 0
     merged: false
     main_modified: false
+
+
+# Superseding current-turn terminal pin — D-2026-1120-01 Owner ruling
+final_current_ledger_pin_D2026_1120_01_owner_ruling_superseding:
+  ledger_path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  ledger_commit: "db68281bad28818df0ba48d8b35b402f2e7b4bf3"
+  ledger_blob: "5e495e42d480178d4a6dc12419f50c0688983cfe"
+  status_axis:
+    delivery_unit: "COMPLETE_WITH_VERIFIABLE_SUBSTITUTES"
+    F-43-01/F1: "P1 / OPEN — actual Runtime implementation and operational evidence absent; handoff delivered"
+    F-43-01/F3: "P1 / OPEN — distinct authenticated D/H human acceptance and operational consumer evidence absent; unsigned attestation instrument delivered"
+    blocked_status: "NOT USED; OPEN is the substantive finding state, not a delivery blocker"
+  f1_handoff:
+    pr: 327
+    branch: "docs/f43-01-f1-engineering-entry-handoff"
+    commit: "eb0de9100841d7300c0acc7baff3a65beb33252f"
+    blob: "65a32912ddde3b3fd5f7e6bd63fab359dfe6713f"
+  f3_sources:
+    d_contract:
+      pr: 321
+      commit: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    h_test_candidate:
+      pr: 322
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      test_methods: 15
+      actions_runs:
+        - run: 44684299439
+          conclusion: "failure before test steps; latest retry job 136136582468; steps=null"
+        - run: 44684299500
+          conclusion: "failure before test steps; latest retry job 136136525120; steps=null"
+      job_logs: "HTTP 404 BlobNotFound; no test assertion result; no CI PASS"
+      current_source_local_test_execution: "NOT_RUN_OR_NOT_VERIFIED"
+  f3_independent_acceptance:
+    d_decision_comment: 7021655866
+    h_decision_comment: 7021638212
+    visible_github_login_both: "oahcom"
+    distinct_human_signers: "NOT_VERIFIED"
+    unsigned_attestation_instrument: "PR #323 comment #7032744021"
+  evidence_comments:
+    f1_pr327: "7032709410"
+    f3_pr323: "7032710036"
+    issue43_index: "7032721342"
+    issue7_f1: "7032721974"
+    f3_attestation: "7032744021"
+  governance:
+    AI_EXEC_001: "v1.1 / ADOPTED / Blob 58af59af266b81109269156ea667df1a15edfb7b"
+    AI_EXEC_002: "v1.2 / PENDING ADOPTION / Blob 7f5928a5d16eb12da7621cfb8bd99ca463afd859; v1.1 is adopted predecessor"
+    owner_ruling: "D-2026-1120-01; carrier quota unfreeze does not grant Runtime authorization or substitute for D/H human identity verification"
+  provenance:
+    instruction_source: "user-supplied Owner ruling D-2026-1120-01 in current ChatGPT continuation"
+    platform_permalink_and_raw_bytes: "NOT_EXPOSED"
+    prompt_sha256: "NOT_VERIFIED"
+  boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merged: false
+    main_modified: false
+    runtime_implementation_claimed: false
+    independent_owner_signature_claimed: false
+    production_acceptance_claimed: false
