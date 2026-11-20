@@ -8,7 +8,7 @@ accountable_owner_note: >-
   decisions remain with D/E/F/G/H/I/Storage Owners.
 issue: 43
 related_issues: [43]
-related_prs: []
+related_prs: [321, 322]
 task_class: ARCH
 risk: R3
 risk_note: Tentative conservative classification pending risk re-review.
@@ -72,7 +72,7 @@ evidence_refs:
   - 14-ai-development/issue-alignment-2026-11-19/l2-05b-supplement.md
   - 14-ai-development/issue-alignment-2026-11-19/alignment-manifest.md
 created_at: 2026-11-19
-updated_at: 2026-11-19
+updated_at: 2026-11-20
 
 integration_closeout:
   date: "2026-11-19"
@@ -152,3 +152,32 @@ integration_closeout:
       does not modify or supersede their authoritative finding records.
 
   repository_mutation_authorized_by_this_ruling: false
+
+  
+current_status_refresh:
+  date: "2026-11-20"
+  authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  ledger_commit: "a176043d7090f264898a7bb625a7de89a7cc7d4d"
+  ledger_blob_sha: "70ef24ba75486276bfaeabbf65fbc349b952f23f"
+  status_counts:
+    findings_total: 13
+    findings_closed: 10
+    findings_open:
+      - "F-43-01/F3"
+    findings_blocked:
+      - "F-43-01/F1"
+      - "F-43-02"
+  related_prs:
+    - 321
+    - 322
+  evidence:
+    - "Issue #43 comment 7030464650 — exact-source F1/F3 audit and CI failure disposition"
+    - "PR #321 head 3db969c04d08ec4b0d9aadd8f8efcea3ac0309b6 — D mapping pin correction, OPEN/DRAFT"
+    - "PR #322 head 614b60e354cce9ecf9145e09ea5bb87c74d5cc2e — H five-field TEST validator candidate; exact-head CI runs 44674622112 and 44674622134 FAILURE, job logs unavailable"
+  historical_closeout_note: >-
+    integration_closeout above remains the historical 2026-11-19 disposition
+    (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
+    current Finding count and F3 status; it does not rewrite the historical
+    closeout decision or authorize implementation, architecture acceptance,
+    main merge, or production activation.
+  quota_note: "Owner ruling D-2026-1120-01 lifted the prior quota freeze; this metadata update does not rely on the former freeze."
