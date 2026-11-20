@@ -1226,3 +1226,67 @@ final_current_ledger_pin_D2026_1120_01_owner_ruling_superseding:
     runtime_implementation_claimed: false
     independent_owner_signature_claimed: false
     production_acceptance_claimed: false
+
+
+# Current continuation reconciliation — D-2026-1120-01
+continuation_2026_11_20_owner_ruling:
+  ruling: "D-2026-1120-01"
+  carrier_quota:
+    prior_freeze: "LIFTED"
+    new_limits: "At most 2 new PRs and 3 new Issues in this continuation"
+    applied: true
+    effect: "Carrier capacity only; does not grant Runtime implementation authority or authenticate D/H signers"
+  f1:
+    finding: "F-43-01/F1"
+    severity: "P1"
+    status: "OPEN"
+    status_axis: "Actual Runtime implementation and operational evidence absent"
+    handoff_pr: 327
+    handoff_branch: "docs/f43-01-f1-engineering-entry-handoff"
+    handoff_prior_head: "eb0de9100841d7300c0acc7baff3a65beb33252f"
+    implementation_authorization: "DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED per Issue #7 comment #7021990583"
+    callable_d_operations: "NOT_IMPLEMENTED"
+    durable_producer_ledger_and_operation_bound_receipt: "NOT_ESTABLISHED"
+    runtime_equality_and_linearization_evidence: "NOT_ESTABLISHED"
+    d002_scenarios_s1_s7: "NOT_RUN"
+    disposition: "Handoff delivery is complete; underlying implementation finding remains OPEN"
+  f3:
+    finding: "F-43-01/F3"
+    severity: "P1"
+    status: "OPEN"
+    status_axis: "Independent human D/H acceptance and end-to-end consumer evidence absent"
+    mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    d_contract_pr: 321
+    d_contract_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+    d_contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+    h_test_pr: 322
+    h_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+    h_validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+    h_test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+    h_test_methods: 15
+    h_actions:
+      run_44684299500: "FAILURE"
+      run_44684299439: "FAILURE"
+      jobs_136136582468_136136525120: "steps=null; log retrieval returned HTTP 404 NOT_FOUND / BlobNotFound"
+      test_assertion_result: "NOT_ESTABLISHED"
+      ci_pass: false
+    d_h_role_decisions:
+      d_comment: 7021655866
+      h_comment: 7021638212
+      visible_github_login_both: "oahcom"
+      distinct_authenticated_human_signers: "NOT_VERIFIED"
+      unsigned_attestation_instrument: "PR #323 comment #7032744021"
+    callable_d_query_receipt_currentness_revocation: "NOT_ESTABLISHED"
+    h_production_consumer_acceptance: "NOT_ESTABLISHED"
+    c1_c6_operational_proof: "NOT_ESTABLISHED"
+    disposition: "Mapping and TEST-profile artifacts are delivered; independent acceptance and operational finding remain OPEN"
+  evidence_provenance:
+    ai_exec_001: "v1.1 ADOPTED; Blob 58af59af266b81109269156ea667df1a15edfb7b"
+    ai_exec_002: "v1.2 PENDING ADOPTION; Blob 7f5928a5d16eb12da7621cfb8bd99ca463afd859; v1.1 remains ADOPTED"
+    owner_ruling_prompt: "User-supplied D-2026-1120-01; platform immutable raw bytes/permalink not exposed; SHA-256 NOT_VERIFIED"
+  carrier_policy:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merge_performed: false
+    main_modified: false
