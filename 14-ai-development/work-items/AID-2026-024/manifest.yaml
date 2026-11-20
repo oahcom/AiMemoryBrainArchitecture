@@ -2,7 +2,7 @@ manifest_version: "1.0"
 record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
 registration_status: "PENDING_FORMAL_REGISTRATION"
 work_item_id: "AID-2026-024"
-identifier_status: "VERIFIED_UNIQUE_324_BRANCH_SCAN"
+identifier_status: "coordinator_verified_unique_see_identifier_evidence"
 
 title: "Minimal Executable Three-Arm Memory Evaluation Architecture"
 
@@ -62,8 +62,27 @@ governance:
   formal_registration:
     status: "PENDING_FORMAL_REGISTRATION"
     index_entry_verified: false
-    identifier_globally_unique: "NOT_VERIFIED"
-    coordinator_confirmation_required: true
+  identifier_evidence:
+    scan_timestamp: "2026-11-20T12:10Z"
+    scan_performed_by: "coordination layer (not an independent session)"
+    main_work_item_tree: "SCANNED"
+    active_branches: "325 branches, paginated 100 per page, full enumeration"
+    method: >-
+      For every branch, GET /repos/.../git/trees/{branch_head_sha}?recursive=1
+      and regex-match AID-2026-([0-9]{2}) against every blob path.
+    result_max_allocated: "AID-2026-026"
+    result_for_this_id: >-
+      TAKEN only by branch work-item/stage0-registration-023-026-024-025
+      (this registration branch). No occurrence on main.
+  identifier_globally_unique: "VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN"
+  identifier_uniqueness_limitation: >-
+    Point-in-time scan of main plus the 325 branches observable at scan time.
+    Does not cover deleted branches, tags, forks, or future allocations. This is
+    an allocation scan, not a permanent reservation.
+  registration_state: >-
+    Registration PR #354 is OPEN and NOT MERGED. Branch-side readback completed
+    byte-for-byte; main-side readback NOT performed and must not be claimed.
+  coordinator_confirmation_required: true
 
   lifecycle:
     current_stage: "STAGE_0"

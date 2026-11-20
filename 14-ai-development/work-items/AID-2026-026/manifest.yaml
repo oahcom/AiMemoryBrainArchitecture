@@ -46,17 +46,29 @@ number_allocation:
       path: 14-ai-development/work-items/AID-2026-026/manifest.yaml
       observation: Returned NOT_FOUND on the inspected default branch.
   scan_scope:
-    main_branch: PARTIAL_EVIDENCE_ONLY
-    all_active_branches: NOT_VERIFIED
-    tags_and_remote_refs: NOT_VERIFIED
-    open_registration_prs: NOT_VERIFIED
-    cross_tree_recursive_collision_scan: NOT_PERFORMED
-  allocation_conclusion: NOT_VERIFIED
-  note: >-
-    Absence from the inspected main INDEX and default-branch path does not prove
-    global uniqueness. Coordination must supply formal allocation evidence
-    before treating this identifier as assigned.
-
+    main_work_item_tree: SCANNED
+    main_index: 14-ai-development/work-items/INDEX.md @ main blob 96619d9c8e3e771a168891c4aa3b83a69f76e189 (71122 bytes, 18 work-item rows, 0 strategic-requirement rows)
+    active_branches: 325 branches, paginated 100 per page, full enumeration
+    method: >-
+      For every branch, GET /repos/.../git/trees/{branch_head_sha}?recursive=1
+      and regex-match AID-2026-([0-9]{2}) against every blob path.
+    scan_timestamp: 2026-11-20T12:10Z
+    scan_performed_by: coordination layer (not an independent session)
+    result_max_allocated: AID-2026-026
+    result_table: >-
+      AID-2026-016..022 = FREE (no match in main or any of 325 branches);
+      AID-2026-023..026 = TAKEN only by branch
+      work-item/stage0-registration-023-026-024-025 (this registration branch).
+  uniqueness_status: VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN
+  uniqueness_limitation: >-
+    This result covers main plus the 325 branches observable at scan time. It
+    does not cover deleted branches, tags, forks, or future allocations. It is
+    a point-in-time allocation scan, not a permanent reservation.
+  registration_state: >-
+    Registration PR #354 is OPEN and NOT MERGED. Branch-side readback of all
+    eight files was completed byte-for-byte; main-side readback has NOT been
+    performed and must not be claimed.
+  allocation_conclusion: VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN
 prompt_id: AID-2026-026-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-026/prompt-v1.md

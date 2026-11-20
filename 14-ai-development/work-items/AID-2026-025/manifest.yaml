@@ -5,7 +5,7 @@ registration_status: "PENDING_COORDINATOR_REGISTRATION"
 
 work_item:
   proposed_id: "AID-2026-025"
-  identifier_status: "VERIFIED_UNIQUE_324_BRANCH_SCAN"
+  identifier_status: "coordinator_verified_unique_see_identifier_evidence"
   title: "REQ-08 Identity and Security Contract Before Portable Memory Exchange"
   requirement_id: "REQ-08"
   requirement_issue: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/348"
@@ -170,12 +170,26 @@ baseline_evidence:
         Existing coordinator record identifies historical allocation conflicts
         and records AID-2026-016 through AID-2026-022 as proposed.
     global_uniqueness:
-      status: "NOT_VERIFIED"
+      status: "VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN"
+      scan_timestamp: "2026-11-20T12:10Z"
+      scan_performed_by: "coordination layer (not an independent session)"
+      main_work_item_tree: "SCANNED"
+      active_branches: "325 branches, paginated 100 per page, full enumeration"
+      method: >-
+        For every branch, GET /repos/.../git/trees/{branch_head_sha}?recursive=1
+        and regex-match AID-2026-([0-9]{2}) against every blob path.
+      result_max_allocated: "AID-2026-026"
+      result_for_this_id: >-
+        TAKEN only by branch work-item/stage0-registration-023-026-024-025
+        (this registration branch). No occurrence on main.
       limitation: >-
-        Absence from the inspected main INDEX and exact-ID search results
-        does not establish uniqueness across all branches, unmerged work
-        item directories, pending registrations or coordination records.
-    allocation_conclusion: "PENDING_COORDINATOR_VERIFICATION"
+        Point-in-time scan of main plus the 325 branches observable at scan
+        time. Does not cover deleted branches, tags, forks, or future
+        allocations. This is an allocation scan, not a permanent reservation.
+    allocation_conclusion: "VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN"
+    registration_state: >-
+      Registration PR #354 is OPEN and NOT MERGED. Branch-side readback
+      completed byte-for-byte; main-side readback NOT performed.
 
 dependencies:
   - id: "REQ-07"
@@ -292,7 +306,7 @@ governance:
 
   registration_authority: "COORDINATOR_ACTION_REQUIRED"
   coordinator_must_verify:
-    - "Global uniqueness of AID-2026-025"
+    - "Global uniqueness of AID-2026-025 (SATISFIED: 325-branch dual-domain scan)"
     - "Formal allocation eligibility"
     - "Prompt source artifact identity"
     - "Prompt snapshot byte count"
