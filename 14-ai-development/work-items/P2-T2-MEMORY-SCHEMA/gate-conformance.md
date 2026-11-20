@@ -46,9 +46,9 @@ That instruction is only actionable if it is clear, gate by gate, what already a
 | design-proposal §13 tests 9–14, 19–21 | Ordering, cardinality, thread integrity, framing, no-cascade, tool-state transitions, result rebinding. |
 | `crates/memory-event-store-sqlite/src/payload.rs` | `PayloadEventStoreExt::accept_with_payload` and `read_after(after_sequence, limit, scope)`. The ingestion and ordered-read primitives the capture layer builds on. |
 
-**Residual gap.** *Lifecycle* is the weakest column. The proposal constrains transitions (`tool_state`, `edit_state`) and deletion, but does not define the session lifecycle transitions themselves — what states a `transcript_session` passes through, who may close it, and whether closure is reversible. Retention classes are likewise constrained but not defined (Q8).
+**Residual gap.** The *state vocabulary* exists — `design-proposal.md:433` defines `session_state TEXT NOT NULL CHECK (session_state IN ('open','closed','abandoned'))`. What is missing is the lifecycle **contract**: which transitions are permitted, who or what may close a session, whether `closed` and `abandoned` are terminal, how `ended_at` must correspond to `session_state`, and whether messages may still be captured after closure. Retention periods and classes are separately absent (Q8).
 
-**Blocked by:** Q8 for retention periods and classes. Session lifecycle states are not Q8 and are not supplied here.
+**Blocked by:** Q8 for retention. The transition and ownership semantics are not Q8 and are simply unwritten — but see §9 on who may adopt them.
 
 ---
 
@@ -98,28 +98,28 @@ Phase 1 already carries executable tests for several of these criteria. They are
 
 | criterion | Phase 1 evidence (exists, executable) | Phase 2 status |
 |---|---|---|
-| duplicate event delivery | `memory-event-store-sqlite/src/payload.rs:285` — `duplicate_payload_append_returns_original_receipt_without_dup`; `lib.rs:324` — `same_producer_key_and_digest_replay_original_receipt`; `lib.rs:339` — `same_producer_key_with_different_digest_conflicts` | not specified at transcript layer |
-| out-of-order delivery | `memory-storage-sqlite/src/lib.rs:1511` — change pages preserve order without skips or duplicates | covered — §7.1 `seq_no`, test 11 |
-| partial failure | **none** | **not covered** |
-| restart/recovery | `resilience.rs:139` — `restart_preserves_receipt_and_idempotent_payload_replay`; `resilience.rs:204` — `committed_payload_survives_process_crash_and_wal_recovery`; `memory-storage-sqlite/src/lib.rs:496` — `sqlite_committed_state_survives_close_and_reopen`; `:554` — `abrupt_process_exit_rolls_back_entire_uncommitted_commit` | not specified at transcript layer |
-| concurrent updates | `resilience.rs:162` — `concurrent_appends_preserve_unique_order_and_payload_custody` (6 writers, barrier-synchronised); `memory-storage-sqlite/src/lib.rs:579` — `independent_connections_serialize_competing_compare_and_swap_writers` | not specified at transcript layer |
-| projection rebuilding | **none** | covered — tests 4–6 |
-| provenance integrity | **none** | covered — tests 15, 17, 18 |
-| context-injection correctness | **none** | **not covered** |
+| duplicate event delivery | `memory-event-store-sqlite/src/payload.rs:285` — `duplicate_payload_append_returns_original_receipt_without_dup`; `lib.rs:324` — `same_producer_key_and_digest_replay_original_receipt`; `lib.rs:339` — `same_producer_key_with_different_digest_conflicts` | store-layer evidence only; no Phase 2 integration proof |
+| out-of-order delivery | **none** — the change-page test at `memory-storage-sqlite/src/lib.rs:1511` asserts ordered *retrieval* with limit and scope filtering, which is not delivery order | **retrieval ordering specified (test 11); arrival/delivery-order handling unproven** |
+| partial failure | **none** | **genuine gap** |
+| restart/recovery | `resilience.rs:139` — `restart_preserves_receipt_and_idempotent_payload_replay`; `resilience.rs:204` — `committed_payload_survives_process_crash_and_wal_recovery`; `memory-storage-sqlite/src/lib.rs:496` — `sqlite_committed_state_survives_close_and_reopen`; `:554` — `abrupt_process_exit_rolls_back_entire_uncommitted_commit` | store-layer evidence only; no Phase 2 integration proof |
+| concurrent updates | `resilience.rs:162` — `concurrent_appends_preserve_unique_order_and_payload_custody` (6 writers, barrier-synchronised); `memory-storage-sqlite/src/lib.rs:579` — `independent_connections_serialize_competing_compare_and_swap_writers` | store-layer evidence only; no Phase 2 integration proof |
+| projection rebuilding | **none** | tests 4–6 specified, not implemented or run |
+| provenance integrity | **none** | tests 15, 17, 18 specified, not implemented or run |
+| context-injection correctness | **none** | **genuine gap — intended-context semantics undefined** |
 
-### Correction to a first reading of this gate
+### Two corrections of this document's own earlier readings
 
-A first draft of this document stated that four of eight criteria were unaddressed. That was wrong, and wrong in a specific way worth recording: it was written from the Phase 2 proposal alone, without checking whether Phase 1 already carried the evidence. Three of the four claimed gaps — duplicate delivery, restart/recovery, concurrent updates — have executable Phase 1 tests behind them.
+**First correction — the gap count.** A first draft said four of eight criteria were unaddressed. That was written from the Phase 2 proposal alone, without checking the tree. Three of the four claimed gaps — duplicate delivery, restart/recovery, concurrent updates — have executable Phase 1 tests behind them.
 
-The corrected reading is narrower:
+**Second correction — the overcorrection.** The response to the first correction then classified out-of-order delivery as covered, citing test 11. It is not covered. Test 11 asserts that `read_session` returns `seq_no` order *after* sequence numbers have been assigned; that is retrieval ordering, not how the capture layer handles events arriving in a different order from their intended sequence. The Phase 1 change-page test at `:1511` is also ordered retrieval with limit and scope filtering. No test in the inspected tree asserts delivery-order handling.
 
-- **One genuine gap: partial failure.** No test anywhere in the tree asserts behaviour on a half-applied transcript insert. Phase 1's crash tests prove atomic rollback of an *uncommitted* commit; they do not cover a commit that succeeded while the transcript row citing it did not.
-- **One genuine gap: context-injection correctness.** `context_assembly_entry` exists with composite FKs and test 8, but nothing asserts that the injected context is the one the assembly intended. That needs a definition of "intended" before a test can exist.
-- **Three criteria have Phase 1 evidence but no Phase 2 test.** Duplicate delivery, restart/recovery and concurrent updates work at the store layer; whether they still hold once a transcript row must be written alongside is untested and unspecified.
+So the honest classification has three tiers, not two:
 
-That third category is the substantive work, not the first two. It is not a matter of writing a test — it is a matter of deciding what the transcript write does when the canonical commit has already succeeded.
+- **Proven at the store layer, unproven at Phase 2** — duplicate delivery, restart/recovery, concurrent updates. These are not absent: the Phase 1 tests exist and run. They also cannot establish Phase 2 conformance, because none of them involves a transcript write accompanying a canonical commit.
+- **Specified but not implemented or run** — projection rebuilding, provenance integrity, plus retrieval ordering.
+- **Genuinely missing** — partial failure, context-injection correctness, and out-of-order *arrival* semantics.
 
-None of this is blocked on authority. All of it is blocked on work not done.
+The substantive work is the first tier's open question: what happens when `commit_version` succeeds and the `transcript_message` insert citing it does not. That is a design question, and per F3 below it is not one engineering may settle unilaterally.
 
 ---
 
@@ -140,25 +140,53 @@ Partially available. Implementation, verification, review and merge are executab
 | gate | design coverage | blocked by |
 |---|---|---|
 | 1 canonical persistence | substantial; write-path ordering unspecified | nothing at design level |
-| 2 transcript capture | substantial; session lifecycle and retention undefined | Q8 for retention; lifecycle states not supplied |
+| 2 transcript capture | substantial; state vocabulary exists, transition and ownership semantics undefined | Q8 for retention; transitions need adoption (§10) |
 | 3 derived projection | substantial; failure recovery and interruption semantics missing | nothing for structural tier; exact tier `NOT VERIFIED` |
 | 4 outstanding decisions | **none** | authority — Issue #305 |
-| 5 acceptance criteria and tests | Phase 1 evidence for 3 of 8 criteria; 2 genuine gaps; 3 criteria untested at Phase 2 | work not done, not authority |
+| 5 acceptance criteria and tests | 3 criteria proven at store layer only; 3 specified but unrun; 3 genuinely missing | work not done; adoption authority for the atomicity contract |
 | 6 implementation authorisation | none | authority — Issue #305 |
 | 7 convergence chain | partial | Owner acceptance unavailable |
 
-The gates that can be advanced by engineering are 1, 2, 3 and 5, which is what the Q1 ruling said. Of those, the substantive gap is the interaction between gates 1 and 5: three gate-5 criteria are proven at the store layer and unproven once a transcript write must accompany a canonical commit. That question — what happens when `commit_version` succeeds and the `transcript_message` insert does not — is a design question with no answer in this work item, and it needs no authority to answer.
+The gates that can be advanced by engineering are 1, 2, 3 and 5, which is what the Q1 ruling said. Of those, the substantive gap is the interaction between gates 1 and 5: three gate-5 criteria are proven at the store layer and unproven once a transcript write must accompany a canonical commit.
 
-Second substantive gap, gate 2: session lifecycle states. Retention periods are Q8 and blocked; the states themselves are not, and are simply unwritten.
+Second substantive gap, gate 2: session lifecycle transitions. The state vocabulary exists; the transition and ownership semantics do not.
 
 ---
 
-## 10. What this document does not claim
+## 10. What engineering may start without authority, and what it may not adopt
+
+The Q1 ruling directed that gates 1, 2, 3 and 5 be treated as bounded engineering work. That authorises investigation. It does not confer authority to settle every normative design choice arising from the investigation, and this document does not claim otherwise.
+
+The distinction, stated plainly:
+
+| act | may a session do it? |
+|---|---|
+| identify failure modes in the commit/transcript interaction | yes |
+| investigate transaction boundaries; produce several candidate contracts | yes |
+| test the candidates; recommend one | yes |
+| declare which consistency and recovery contract is **binding** | no — a design decision, not a test-writing exercise |
+| propose a session state machine | yes |
+| adopt it as the authoritative lifecycle rule | no — it would silently become a business rule |
+
+Applied to the two gaps this document identifies:
+
+- **The atomicity question** — what happens when `commit_version` succeeds and the `transcript_message` insert does not — can be investigated and specified in alternatives. Selecting which alternative governs needs an authority that is `NOT_ASSIGNED`. A session cannot close that question by writing a document.
+- **Session lifecycle transitions** — the state machine can be proposed. Adopting it as authoritative has the same problem.
+
+So the accurate statement is not "none of this is blocked on authority". It is: **the investigation is not blocked; the adoption is.** A session can move these questions from "unasked" to "asked with named alternatives". It cannot move them to "settled".
+
+That is still worth doing, and it is why this map separates *work not done* from *decision not available*. The first column is large. The second is not empty.
+
+---
+
+## 11. What this document does not claim
 
 - Not that any gate is satisfied. It maps coverage and names gaps.
 - Not that the design is adequate. Coverage is not correctness; none of the 21 tests were written or run.
-- Not that the residual gaps are the only gaps. They are the ones visible against the gate text.
+- Not that the residual gaps are the only gaps. They are the ones visible against the gate text in the inspected tree.
+- Not a complete search. The citations were verified by script — ten positive matches, zero failures — but verifying that ten citations exist says nothing about whether other relevant tests exist elsewhere. Absence claims here read "no existing test identified in the inspected tree", not "no test exists".
+- Not an authority to adopt. See §10.
 - Not a substitute for the review rounds recorded in §2–§2f. Those examined the document; this examines its relation to a list written elsewhere.
 - No governance state changes. `DESIGN_ACCEPTANCE` `NOT_GRANTED`, `IMPLEMENTATION_AUTHORIZATION` `NOT_GRANTED`, `GOVERNANCE_STATUS` `BLOCKED`, `acceptance_authority` `NOT_ASSIGNED`.
 
-**Evidence tier:** the gate text and the cited sections are `VERIFIED` — read from the merged tree. The judgement that a section "addresses" a gate is `PROPOSED` — an author reading, not a review finding.
+**Evidence tier:** the gate text and the cited sections are `VERIFIED` — read from the merged tree, citations script-checked. The judgement that a section "addresses" a gate is `PROPOSED` — an author reading, not a review finding. The absence of tests for partial failure, out-of-order arrival and context-injection correctness is `UNVERIFIED ABSENCE` — nothing was located in the inspected tree, and no exhaustive search was performed.
