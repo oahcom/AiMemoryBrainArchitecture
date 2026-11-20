@@ -75,6 +75,22 @@
 R41（A-OWNER-INTEGRATION-R41-2026-11-19）：F-43-02 继续保持 REMEDIATION ACCEPTED，不转 CLOSED。A 核验 D successor `owner-snapshot-namespace-and-fence-currentness-contract-1.3.1.md` Blob `12b71e770f4e977c7f147694a644066bc2ce11b9`，其 §4 明确固定 Unicode 15.1.0、UCD 工件和 SHA-256 lock manifest、validator/build 的实际数据源版本核验及 fail-closed、完整 NormalizationTest.txt 与 D-specific vectors。派 D Owner 在既有授权 D 分支完成 UCD 工件 lock manifest、每项 SHA-256、validator/build version binding 与实际来源校验、fail-closed 行为及完整语料/向量测试，提交精确 commit/Blob/原始日志。main 同步：不得直接向 main 写入；当前冻结 ACTIVE，且沿用既有 PR-only / no-main-direct-write 边界。只允许利用已存在且覆盖该精确 successor 的 PR 完成审查/合并；未找到可确认覆盖该 Blob 的既有 open PR，禁止新建 PR。待冻结解除后再按正常 PR 流程同步 main。规范层已满足，main sync 与 Unicode implementation binding 均未完成，不得 CLOSED。
 
 R42（A-OWNER-INTEGRATION-R42-2026-11-19）：F-43-02 裁定为 BLOCKED（实现目标未授权）。A 检查了可见仓库：`oahcom/AiMemoryBrain` 当前仍为空仓且无分支；`oahcom/ai-memory-adapter` 的 README 所示能力仅为通用 MemoryAdapter（store/query/inject_context/prune，SQLite+Qdrant），不是 D Unicode validator/build，也不含 D 五项权威操作；`AiMemoryBrainArchitecture` 是规范/测试参考仓，未找到可核验的获授权 D Unicode validator/build 载体。不得把上述任一仓库推定为目标。配额冻结 ACTIVE，禁止新建 repo/branch/PR/Issue；不得创建或初始化 Runtime/validator 载体。D Owner 当前仅可在既有 D 授权分支维护规范、测试设计/证据材料，不得在未获授权的仓库或分支写入 validator/build 实现。解阻条件：Product/Platform Architecture responsibility holder 指定现有工程仓库、分支、validator/build 路径、Canonical Authority Owner、数据源/构建边界，并明确 D Owner 写权限；之后 A 再核验目标及授权。Unicode 15.1.0 lock manifest、实际数据源版本绑定、fail-closed 和完整语料测试均未实施/未验证。
+
+> **L0 时序说明（2026-11-20 测量，不构成裁定）**
+>
+> 本节只登记上述裁决与后续裁决的先后顺序，供阅读时定位，不判断何者生效；效力归属由 A 裁定。
+>
+> | 序 | 裁决 / 记录 | 时间（UTC） | 对 F-43-02 的表述 |
+> |---:|---|---|---|
+> | 1 | R41（commit `0ee679b`） | 2026-11-19T21:29Z | 保持 REMEDIATION ACCEPTED，不转 CLOSED |
+> | 2 | R42（commit `29076ed`） | 2026-11-19T21:49Z | BLOCKED（实现目标未授权） |
+> | 3 | AID-2026-026（#43 `7031825212`） | 2026-11-20T06:00Z | NOT YET CLOSED，残余为 lock 绑定证明 |
+> | 4 | AID-2026-027（#43 `7032631742`） | 2026-11-20T06:49Z | CLOSED（限定范围） |
+> | 5 | 本表状态行同步（commit `9263d0d`） | 2026-11-20T06:55Z | 状态行与证据行改为 CLOSED |
+>
+> 事实：R41、R42 早于 AID-2026-026 与 AID-2026-027 约 9 小时；本表「状态」行目前反映的是第 4、5 序记录。R41/R42 段落正文未标注已被后续记录取代，故本表内并存三种表述。
+>
+> 另：R42 的核心事实依据「`oahcom/AiMemoryBrain` 当前仍为空仓且无分支」在 2026-11-20T10:00Z 实测已不成立（该仓 `main` 已有 8 个提交、完整 validator 实现与 UCD 15.1.0 锁清单）。测量记录见 `f43-02-blocked-premise-falsified-l0-measurement.md`。L0 只陈述该事实，不据此改变本表任何状态。
 ## F-43-03 — H 独立可复核测试证据
 
 | 字段 | 内容 |
