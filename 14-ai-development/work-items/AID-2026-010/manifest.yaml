@@ -165,8 +165,8 @@ current_status_refresh:
     records the subsequent Owner release and supersedes that historical
     restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "1e017d11781aa0a1168ec5c177cfc63d458afed0"
-  ledger_blob_sha: "7218715c607554b88d5be2b1acaf5c76634e0250"
+  ledger_commit: "fcac1cf4ce4826c08e439f575408af5acaf652a8"
+  ledger_blob_sha: "85513474a249eff59e11c133d987e8ec5492e950"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -224,8 +224,8 @@ latest_exact_head_refresh:
     blob: "fa07d14329e7872fa2789fc000a97287442bdf78"
   carriers:
     F1_PR_327:
-      head: "4905a2d604b38bbe2d836617b11bed0c97709658"
-      handoff_blob: "ae4ab29c7e7fd14c84b8605f5f5fe10b27477d51"
+      head: "934a76e18ba020d01c520a8484ed7fc37f96cff1"
+      handoff_blob: "2d453d24ae5e65973ced964918b9f3687a5d3284"
       status: "P1_OPEN_RUNTIME_IMPLEMENTATION_NOT_ESTABLISHED"
       exact_head_check_runs: 0
     F3_PR_321:
