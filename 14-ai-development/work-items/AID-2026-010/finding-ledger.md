@@ -561,3 +561,16 @@ This append-only addendum supersedes stale F1/F3 carrier pins above where they d
 - No new PR, Issue or branch; no main write or merge.
 - This addendum records existing artifacts and does not create an Owner approval, implementation authorization, test result or production acceptance.
 - Current carrier is PR #323, branch `fix/f43-01-f3-ledger-reconcile`; parent Head before this addendum: `c6744f3a9d290ef017f17a8d7f59d756faef58a6`.
+
+
+## 2026-11-20 current continuation exact-ref reconciliation — D-2026-1120-01
+
+| Field | Verified disposition |
+|---|---|
+| Session delivery | Bounded F1/F3 delivery and exact-source reconciliation completed; underlying findings remain OPEN until their own exit evidence exists. |
+| F1 | `F-43-01/F1` — P1 — OPEN (runtime implementation evidence); return: PR #327 and Issues #7/#10/#25/#43. Existing handoff Head `8205664c79e9216da6c7b0fa20ba90d23a070ff4`, Blob `09606b739d62570c061b24e459772468206e6a86`. Five callable D operations NOT IMPLEMENTED; durable Ledger/operation-bound Receipt and equality/linearization proof NOT ESTABLISHED; S1–S7 NOT RUN. Issue #7 comment #7021990583 retains `DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED`. |
+| F3 | `F-43-01/F3` — P1 — OPEN (independent-human mapping acceptance and operational consumer evidence); return: PRs #321/#322/#323 and Issues #25/#43. D contract PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`, Blob `099f4948b550919084b0d73094692b590b0be0a9`, active mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`. H TEST candidate PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`, validator Blob `49644a181c578fecb312218c08ce23caa62f603b`, test Blob `6685226143f28a5b8764067bb205080b531132e3` (15 methods). D/H visible role identities both `oahcom`; distinct human signers NOT VERIFIED. |
+| Test evidence | Exact-head Actions Runs `44684299439` / `44684299500` failed before test steps; no CI PASS. Current 15-method test Blob was read back but NOT RUN in this continuation. |
+| Current ledger source | This addendum is appended to the authoritative ledger; manifest is refreshed in the immediately following commit to pin the resulting commit and Blob. |
+| Prompt provenance | User-provided D-2026-1120-01 chat instruction, continuation of `conv 6afd60f0-f76c-83ec-9b0b-7094021ed1e2`; immutable platform bytes unavailable; SHA-256 NOT_VERIFIED. |
+| Mutation boundary | Existing PR branch only; no new PR/Issue/branch, no merge, no main write. |
