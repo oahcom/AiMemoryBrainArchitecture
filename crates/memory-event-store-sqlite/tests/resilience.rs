@@ -1,6 +1,7 @@
 //! F-PR258-RESILIENCE-01: file-backed payload custody and failure-mode tests.
-//! These tests exercise only the public SQLite adapter API except for deliberate
-//! database fault injection used to verify fail-closed reads and transaction rollback.
+//! These tests exercise the public SQLite adapter API, with deliberate database
+//! fault injection for tamper detection and an explicit failed-payload-insert rollback
+//! assertion across accepted_events, event_payloads, and compile_outbox.
 
 use memory_domain::{OpaqueId, ScopeKind, ScopeRef};
 use memory_event_store::{EventClassification, EventEnvelope, EventStoreError};
@@ -197,6 +198,49 @@ fn concurrent_appends_preserve_unique_order_and_payload_custody() {
         .collect();
     expected.sort();
     assert_eq!(recovered, expected);
+    cleanup(&path);
+}
+
+#[test]
+fn failed_payload_insert_rolls_back_event_payload_and_outbox_rows() {
+    let path = db_path("rollback");
+    let store = SqliteEventStore::open(&path).unwrap();
+
+    // Force the second durable write in accept_with_payload to fail after the
+    // accepted_events insert has executed inside the same SQLite transaction.
+    let connection = Connection::open(&path).unwrap();
+    connection.execute_batch(
+        "CREATE TRIGGER reject_event_payload
+         BEFORE INSERT ON event_payloads
+         BEGIN
+             SELECT RAISE(ABORT, 'injected payload insert failure');
+         END;"
+    ).unwrap();
+    drop(connection);
+
+    let mut store = store;
+    assert_eq!(
+        store.accept_with_payload(
+            envelope("rollback-key", b"rollback-payload"),
+            b"rollback-payload",
+            &[scope()],
+        ),
+        Err(EventStoreError::TransactionUnavailable)
+    );
+    drop(store);
+
+    let connection = Connection::open(&path).unwrap();
+    let accepted: i64 = connection.query_row(
+        "SELECT COUNT(*) FROM accepted_events", [], |row| row.get(0)
+    ).unwrap();
+    let payloads: i64 = connection.query_row(
+        "SELECT COUNT(*) FROM event_payloads", [], |row| row.get(0)
+    ).unwrap();
+    let outbox: i64 = connection.query_row(
+        "SELECT COUNT(*) FROM compile_outbox", [], |row| row.get(0)
+    ).unwrap();
+    assert_eq!((accepted, payloads, outbox), (0, 0, 0));
+    drop(connection);
     cleanup(&path);
 }
 
