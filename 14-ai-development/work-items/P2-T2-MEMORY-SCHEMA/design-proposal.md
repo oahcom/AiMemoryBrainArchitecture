@@ -170,6 +170,121 @@ The distinctions preserved throughout:
 
 ---
 
+## 2f. Q11–Q14 ruling received — and the Q11 premise did not survive its own check
+
+A ruling was requested on Q11, Q12, Q13, Q14, Q8 and Q9. Disposition: **PARTIAL
+RULING; REMAINING ITEMS BLOCKED BY AUTHORITY OR MISSING BUSINESS INPUT.**
+
+| question | ruling disposition |
+|---|---|
+| Q11 | RULED — strict reading |
+| Q12 | INTERPRETED — prospective interpretation possible; no retrospective authorization |
+| Q13 | RECOMMENDED — adapter-level enforcement |
+| Q14 | BLOCKED — `BUSINESS_RULE_NOT_SUPPLIED` |
+| Q8 | BLOCKED — retention policy absent |
+| Q9 | OPEN — semantic preservation decision required |
+| Q2–Q7 | DEFERRED — unchanged |
+
+The ruling also directed that gates 1, 2, 3 and 5 of `DEC-P2-T2-Q1-001` §8 be
+treated as bounded engineering work, that design acceptance and implementation
+authorization not be granted, and that the acceptance-authority vacancy be
+recorded rather than re-put to engineering reviewers.
+
+### The Q11 ruling rests on a premise this document supplied, and that premise is false
+
+The ruling states its own limit: the reviewer did not retrieve the repository at
+the reviewed head, and the disposition rests on contract language quoted in the
+request. It then instructs that the Q11 interpretation be checked against the
+exact Layer 1 contract wording before being recorded as a baseline decision.
+
+Checked. The question this document asked was:
+
+> Does the Layer 1 boundary prohibit modifying Layer 1 tables, or only their
+> columns?
+
+`02-domain-model/phase-1-sqlite-adapter-contract.md` contains no such
+prohibition. What it states is:
+
+- `Status: DECIDED — Phase 1 SQLite persistence boundary only.`
+- scope: `explicit schema initialization`, `immutable version rows`,
+  current-version CAS, idempotency receipts, monotonic commit sequence, atomic
+  transaction, scope-filtered reads, WAL with `synchronous=FULL`.
+- evidence: merge `aa711289`, verification commit `4a3e06fd`, CI run `44259233587`.
+
+`immutable version rows` constrains **rows**. It does not constrain schema
+objects. No clause forbids a new table, a new index, or an extension to
+`versions`.
+
+Two further checks:
+
+| check | result |
+|---|---|
+| `grep -rn -i "must not be modified\|not be modified\|modifying layer 1\|layer 1 modification\|additive"` across the tree, excluding this work item | no prohibition found |
+| `grep -rn -i "layer 1\|layer1"` across the tree, excluding this work item and the `docs/` and `reviews/` trees | **zero hits** |
+
+"Layer 1" and "Layer 2" are terminology introduced by this proposal. No
+governance document defines the boundary, so no governance document could have
+prohibited crossing it.
+
+The word *boundary* in the contract denotes **the scope of what has been
+decided** — the persistence behaviours enumerated above — not **a line that must
+not be crossed**. This document read it as the second, asked a question premised
+on that reading, and received an answer to the question as asked, explicitly
+conditioned on the check that falsifies it.
+
+### What this means for Q11
+
+Q11 is **not closed**. It is re-posed, correctly:
+
+> Does extending the schema of a Phase 1 table — adding an index, without adding
+> a column or rewriting a row — require explicit authorisation from a capacity
+> that owns the Phase 1 contract?
+
+That is an authorisation question, not a boundary-interpretation question. There
+is no prohibition to interpret. And because `acceptance_authority` is
+`NOT_ASSIGNED`, the authority that could answer it is, on the ruling's own
+reasoning, vacant.
+
+**The strict reading is therefore not adopted, and §8.4 is not rewritten to
+remove `versions_memory_version_uq` or the composite foreign key.** That removal
+is what the strict reading requires, and it would have been performed had the
+premise held. Performing it now would delete a constraint for a reason that does
+not exist in any document — a worse outcome than carrying the question open,
+because the resulting schema would look settled while resting on a fabricated
+prohibition.
+
+What §8.4 must stop doing is presenting two readings of a boundary that is not
+defined. Its two-reading table is replaced by the authorisation question above.
+
+### Q12, Q13, Q14, Q8, Q9 — accepted, none closed
+
+| question | disposition recorded | dependency named |
+|---|---|---|
+| Q12 | prospective interpretation is available to the bound-owning capacity; **no retrospective authorisation**; R2's `DISCLOSED_SCOPE_DEVIATION` classification stands permanently | bound-owning capacity, `NOT_ASSIGNED` |
+| Q13 | **`RECOMMENDED`**, adapter-level enforcement; the database does not guarantee the invariant; must stay separate from NF-R3-02 | formal adoption by an appropriate authority |
+| Q14 | **`BUSINESS_RULE_NOT_SUPPLIED`** — the meaning of `recompute` must come from the owner of the operation's semantics | business input, not supplied |
+| Q8 | retention policy absent; engineering must not invent periods or classes | retention policy, not supplied |
+| Q9 | whether `impact_level` represents information the system must preserve is an authoritative determination, not a schema convenience | semantic decision, not made |
+
+An open question with a named dependency is actionable. An open question without
+one invites the next session to guess. That is the gain from this round: nothing
+closed, everything given a dependency.
+
+### The vacancy, recorded
+
+```text
+DESIGN_ACCEPTANCE            = NOT_GRANTED
+IMPLEMENTATION_AUTHORIZATION = NOT_GRANTED
+GOVERNANCE_STATUS            = BLOCKED
+acceptance_authority         = NOT_ASSIGNED
+```
+
+This is an **authority vacancy**, not an engineering backlog item. It is recorded
+as such and will not be re-put to review as though a confident answer could fill
+it.
+
+---
+
 ## 3. What Phase 1 froze, and what it did not
 
 Phase 1 left two different kinds of artefact. They have different authority and this proposal treats them differently.
@@ -788,16 +903,36 @@ The composite foreign key is the R1-NB-03 fix. Two independent foreign keys prov
 
 **R1-NB-03 boundary, resolved explicitly (R2 required item 4).** R2 ruled this correct in technique and unresolved in boundary: an additive index is still a modification to the Layer 1 schema — not a column alteration, but not literally zero modification — and the proposal must not describe it as though it were no modification. Accepted, and the earlier wording is corrected in place.
 
-The boundary is resolved by choosing the reading, not by asserting one:
+The two-reading table that stood here has been removed. It presented two
+interpretations of a boundary that **no document defines** (§2f). There was no
+prohibition to interpret, so choosing between two readings of it was never the
+right question.
 
-| reading of the boundary | is `versions_memory_version_uq` allowed? | what this proposal does |
-|---|---|---|
-| prohibits modifying existing Layer 1 **columns and tables** | yes — no column added, no row rewritten, no `ALTER TABLE` | the design as written |
-| prohibits **any** Phase 1 schema modification | no | fall back to the alternative below |
+The correct framing is an authorisation question, and it is carried as **Q11**:
 
-The alternative, if the stricter reading governs: drop the index and the composite foreign key, and enforce the same invariant in the adapter — read the version's owning `memory_id` and reject a mismatch inside the same transaction that inserts the context entry. That is strictly weaker, because the guarantee then lives in application code rather than in the database, and any writer bypassing the adapter can violate it. §13.8 requires the negative test either way, so the weaker path is still testable.
+> Does extending the schema of a Phase 1 table — adding an index, without adding
+> a column or rewriting a row — require explicit authorisation from a capacity
+> that owns the Phase 1 contract?
 
-This proposal **recommends the index** and states plainly that it is a Layer 1 modification. Which reading controls is not mine to decide; §14 carries it as Q11 rather than as a settled fact. Describing the index as "index-only, no Layer 1 change" — as the previous revision did — was wrong.
+Three things follow, and they are stated rather than inferred:
+
+1. **No prohibition exists.** `phase-1-sqlite-adapter-contract.md` constrains
+   persistence behaviour and row immutability; it does not constrain schema
+   objects. Verified in §2f with the exact clauses and two searches.
+2. **The index is therefore not forbidden, and not authorised either.** Absence
+   of a prohibition is not permission when the thing being extended belongs to a
+   contract whose owning capacity is `NOT_ASSIGNED`.
+3. **The adapter-level fallback stays documented** as the implementation that
+   would be used if an authorising capacity later declines the index. Drop the
+   index and the composite foreign key; read the version's owning `memory_id`
+   and reject a mismatch inside the same transaction that inserts the context
+   entry. That fallback is strictly weaker: it holds only for writers that use
+   the adapter, whereas a database-enforced composite foreign key holds for any
+   writer.
+
+This proposal **recommends the index** and does not claim it is admissible. The
+difference between the two is the whole point: a recommendation is the author's,
+an authorisation is a capacity's, and the capacity is unoccupied.
 
 `version_sha256` is a digest of `version_json` as stored, computed by the adapter. R1 correctly noted digest validation does not by itself solve external index lifecycle — that is why `index_status` and `binding_epoch` exist; stale-binding recovery is an operational procedure over those columns, not a constraint. It is listed as Q7, still open.
 
@@ -924,7 +1059,7 @@ Required before implementation authorization is granted. These are specified, no
 5. **Rebuild — unreconstructable tier** — delete `score_input` rows for a version (simulating an under-recorded history), run rebuild, assert `rebuild_state='unreconstructable'` with the missing dependency named, and assert no `value_score` was written.
 6. **Rebuild — partial tier on migration** — pre-migration versions rebuild to `partial`, never `exact`, and never silently to `exact`.
 7. **Method immutability** — `UPDATE` and `DELETE` on `scoring_method` both abort.
-8. **Composite integrity** — insert a `context_assembly_entry` with a `version_id` belonging to a different `memory_id`; assert refused.
+8. **Composite integrity** — insert a `context_assembly_entry` with a `version_id` belonging to a different `memory_id`; assert refused. **Conditional on Q11**: with `versions_memory_version_uq` present the refusal comes from the composite foreign key and holds for any writer; without it the refusal must come from the adapter inside the insert transaction and holds only for adapter writers. The test asserts the refusal, and separately asserts which mechanism produced it, so the weaker configuration cannot pass as the stronger one.
 9. **No cascade destruction** — delete a `transcript_session` that has messages; assert refused. Then delete a `transcript_message` that has a `memory_source_link`; assert refused.
 10. **Canonical row counts** — closing and retiring sessions leaves `memories` and `versions` row counts unchanged.
 11. **Transcript ordering** — insert messages out of `created_at` order with valid `seq_no`; assert `read_session` returns `seq_no` order.
@@ -939,7 +1074,7 @@ Required before implementation authorization is granted. These are specified, no
 20. **Tool-state transitions (NF-R3-02)** — `emitted → completed` accepted; `completed → emitted` refused; `failed → completed` refused.
 21. **Result rebinding (NF-R3-02 residual)** — bind a valid result, then attempt `UPDATE result_message_id` to (a) an unrelated assistant message in the same session, (b) a tool message parented by a *different* assistant, (c) NULL. All three refused. Then assert the one permitted transition `NULL → valid child tool message` succeeds exactly once.
 
-Tests 4–7 and 16 are the regression guards for R1-B-01. Tests 9–10 guard R1-NB-04. Test 8 guards R1-NB-03. Tests 11–14 guard R1-NB-02 / R2-NF-01 / R2-NF-03. Test 15 guards R2-NF-02. Tests 17–20 guard NF-R3-01 / NF-R3-02 / NF-R3-03. Test 21 guards the NF-R3-02 residual found at R4.
+Tests 4–7 and 16 are the regression guards for R1-B-01. Tests 9–10 guard R1-NB-04. Test 8 guards R1-NB-03, in either Q11 branch, and reports which branch it exercised. Tests 11–14 guard R1-NB-02 / R2-NF-01 / R2-NF-03. Test 15 guards R2-NF-02. Tests 17–20 guard NF-R3-01 / NF-R3-02 / NF-R3-03. Test 21 guards the NF-R3-02 residual found at R4.
 
 These tests were not written and not run. Neither the R2 nor the R3 DDL was executed — see §17.
 
@@ -956,13 +1091,13 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 | Q5 | Decay and scoring algorithms and parameters, and recompute cadence | OPEN — required before any score can reach `exact` |
 | Q6 | Is `version_sha256` maintained by trigger or by adapter? | OPEN — adapter is the current assumption |
 | Q7 | Stale-binding recovery procedure, including external index rebuild after an outage | OPEN |
-| Q8 | Transcript retention classes and their default periods | OPEN — this proposal constrains deletion, it does not define the policy |
-| Q9 | Whether `impact_level` should get a typed home or be dropped | OPEN |
+| Q8 | Transcript retention classes and their default periods | **OPEN — `POLICY_INPUT_ABSENT`.** This proposal constrains deletion; it does not define policy. A development baseline must not invent retention periods or classes. Engineering can implement an established policy; it cannot manufacture one. |
+| Q9 | Whether `impact_level` should get a typed home or be dropped | **OPEN — `SEMANTIC_DECISION_REQUIRED`.** Its absence from the current schema does not decide it. Whether the field represents information the system must preserve is an authoritative determination. It will not be dropped to simplify the schema. |
 | Q10 | Does numeric reproducibility stay a requirement, or is structural rebuild sufficient? | **REVIEW RULING (R2): tiered preferred.** Structural and unreconstructable tiers accepted; exact-value retained as a design objective, **CONDITIONAL and NOT VERIFIED**. This is a review ruling on a review question, not an owner decision on Q1. |
-| Q11 | Does the Layer 1 boundary prohibit modifying Layer 1 tables, or only their columns? | **OPEN — controls whether `versions_memory_version_uq` is admissible at all.** §8.4 states both branches and the fallback. Not mine to decide. |
-| Q12 | Is the in-memory DDL check an acceptable reading of the `no schema execution` bound? | **OPEN — requires the authority that issued the bound.** R2 classified it `DISCLOSED SCOPE DEVIATION`, not authorized activity, and stated an engineering reviewer cannot grant retrospective authorization. `acceptance_authority` is `NOT_ASSIGNED`; no session can supply this. |
-| Q13 | Must a `tool_state='completed'` call carry a non-NULL `result_message_id`? | OPEN — lifecycle semantics, not relational integrity. R4 ruled it must stay separate so that resolving it is never mistaken for closing NF-R3-02. |
-| Q14 | Does `recompute` genuinely require a single `input_id`? | OPEN — the `CHECK` in §8.4 takes the stricter branch; R4 accepted that as a provisional choice while keeping the business question open. If a recompute may legitimately have no single input, `recompute` moves to the nullable set. |
+| Q11 | Does extending the schema of a Phase 1 table — adding an index without adding a column or rewriting a row — require explicit authorisation from the capacity that owns the Phase 1 contract? | **RE-POSED, OPEN.** The previous form asked which of two readings of a Layer 1 boundary governs; no document defines that boundary and no document prohibits the modification (§2f). A ruling on the old form returned strict and is **not adopted**, because its stated premise was the one §2f falsifies. The question is authorisation, and the authorising capacity is `NOT_ASSIGNED`. |
+| Q12 | Is the in-memory DDL check an acceptable reading of the `no schema execution` bound? | **OPEN — `RULING: PROSPECTIVE YES, RETROSPECTIVE NO`.** The bound-owning capacity may clarify what the bound means for future activity; it cannot retrospectively authorise what was done, and R2's `DISCLOSED_SCOPE_DEVIATION` classification stands permanently. `acceptance_authority` is `NOT_ASSIGNED`, so even the prospective clarification has no available issuer. |
+| Q13 | Must a `tool_state='completed'` call carry a non-NULL `result_message_id`? | **`RECOMMENDED`: adapter-level enforcement.** Lifecycle invariant, not relational integrity. The database does not guarantee it; a `BEFORE UPDATE OF tool_state` trigger would not cover every write path, including insertion directly into a completed state. The recommendation assumes the adapter is the authoritative writer for this transition. Not closed — it needs formal adoption and stays separate from NF-R3-02. |
+| Q14 | Does `recompute` genuinely require a single `input_id`? | **`BUSINESS_RULE_NOT_SUPPLIED`.** The deciding question is what the operation called `recompute` means, and that meaning belongs to the owner of its semantics. It cannot be inferred from the provisional `CHECK`, the existing schema, or the convenience of either implementation. The schema must not claim either interpretation is authoritative; the strict branch stays provisional and is labelled as such. |
 
 ---
 
@@ -995,6 +1130,9 @@ These tests were not written and not run. Neither the R2 nor the R3 DDL was exec
 | Recommendations in §6–§12 | **PROPOSED** — author-authored, subject to R2 review |
 | Q1 decision, disposition and the merge that recorded it | **VERIFIED** — `DEC-P2-T2-Q1-001.md` and merge `d8e5bebb` are on `main` and readable. |
 | Any claim that Q1 was resolved by an accountable human authority | **NOT MADE** — the ruling occupies a session-held dev-baseline role and says so itself; `acceptance_authority` is `NOT_ASSIGNED`. |
+| The Q11–Q14 / Q8 / Q9 ruling dispositions | **AUTHOR-REPORTED, reviewer-declared limit** — the ruling states it did not retrieve the repository at the reviewed head and rests on contract language quoted in the request. It is therefore a disposition over the text supplied, not an independent verification of this document at any head. |
+| The absence of a Layer 1 prohibition | **VERIFIED** — `phase-1-sqlite-adapter-contract.md` read directly; two tree-wide searches recorded in §2f. The absence of a `layer 1` term in the governance tree is verified the same way. |
+| That the Q11 ruling's premise was false | **VERIFIED by the above two rows taken together**, not by the ruling. The ruling was correct on the question asked; the question was wrong. |
 
 ---
 
