@@ -326,27 +326,27 @@ f3_independent_attestation_template:
 latest_actions_retry_evidence:
   date: "2026-11-20"
   finding_ledger:
-    commit: "12582b844b8f5203a47684eb071f443a8ab091b5"
-    blob: "6c13c22a51283580aec448ef02295c27ef2cdd81"
+    commit: "0aec53cb748443020eedd348127dd74ae4467cd7"
+    blob: "239a2e68d1781a78980f0d4d12ca10eb0b6b165b"
   exact_pr_322_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
   validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
   test_blob: "6685226143f28a5b8764067bb205080b531132e3"
   test_methods: 15
   rerun_attempts:
     - run_id: 44684299500
-      job_id: 136122641631
+      job_id: 136123331637
       conclusion: "FAILURE_BEFORE_TEST_STEPS"
       steps: []
       log_http_status: 404
       log_error: "BlobNotFound"
-      request_id: "7d55adb8-301e-008b-78b6-780667000000"
+      request_id: "41149edd-d01e-0077-19b7-78d79e000000"
     - run_id: 44684299439
-      job_id: 136122698547
+      job_id: 136123345286
       conclusion: "FAILURE_BEFORE_TEST_STEPS"
       steps: []
       log_http_status: 404
       log_error: "BlobNotFound"
-      request_id: "3743258e-201e-00b5-7eb6-780b96000000"
+      request_id: "35cedb4e-401e-0031-0bb7-7806f2000000"
   ci_status: "NO_TEST_STEPS_NO_PASS"
   finding_status: "F-43-01/F3_P1_OPEN"
   note: "H TEST-profile candidate only; no H Owner acceptance, callable D endpoint/Receipt/currentness or operational conformance inferred."
