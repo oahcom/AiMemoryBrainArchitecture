@@ -9,6 +9,10 @@ scope: docs/ + prompts/ + 14-ai-development/ + 13-engineering-decisions/ (the fo
 evidence_method: content-marker scan of first 4000 chars per file; exact inputs listed under marker_families below so a third party can reproduce or reject any row
 explicitly_not: a classification registry; a governance approval; a claim that any UNKNOWN has been confirmed
 scan_window_chars: 4000
+file_enumeration: git ls-tree -r --name-only origin/main, filtered to paths ending .md and starting with one of the four scope prefixes, then sorted with Python sorted() (byte-wise ASC on the full path). No glob, no .gitignore, no filesystem walk - the tree object is the only source.
+path_exclusions: none beyond the scope prefixes and the .md filter; the proposal files themselves are not excluded, so they appear as UNKNOWN-bucket rows like any other new document
+read_failure_handling: a non-zero git show exit, or bytes invalid as UTF-8 (U+FFFD present after decode), prefixes the row evidence with READ-<FAILURE> and forces LOW confidence; such a row is never equivalent to a genuine negative
+run_environment: python 3.13, git 2.x, no network access, no third-party packages; output is LF-terminated UTF-8
 marker_matching: case-insensitive substring match within the scan window; counts are distinct-marker counts, not occurrence counts; a marker counted once regardless of repetitions
 pairing_detection: (a) same-directory suffix swap .en.md <-> .zh-CN.md <-> .md; (b) docs/en/ <-> docs/zh-CN/ path mirror
 generator: 14-ai-development/work-items/FIX-2026-P1-T3/generate-tier-proposal.py
@@ -16,7 +20,7 @@ marker_families:
   normative: ["MUST", "MUST NOT", "SHALL", "REQUIRED", "SHOULD", "禁止", "必须", "不得", "强制性"]
   architecture_contract: ["interface contract", "wire contract", "protocol", "schema", "state machine", "lifecycle", "security", "permission boundary", "architecture decision", "ADR", "接口契约", "协议", "状态机", "生命周期", "安全", "权限边界", "架构决策"]
   ephemeral_record: ["meeting", "minutes", "review record", "acceptance record", "会议", "纪要", "验收记录", "评审记录"]
-  document_header: regex ^\s*[-*]?\s*\**\s*(Document ID|Status|Version|{文档} ID|状态|版本)\s*[:：]
+  document_header: regex (?im)^\s*[-*]?\s*\**\s*(\u6587\u6863\s*ID|Document ID|\u72b6\u6001|Status|\u7248\u672c|Version)\s*[:\uff1a]
 rule_order: index/readme -> prompts/ -> ephemeral>=2 -> (arch>=3 and norm>=3) -> (header and norm>=1) -> norm>=2 -> default; first match wins
 files:
   - path: "13-engineering-decisions/domain-model-research/DOMAIN-REALITY-001-B/README.md"
@@ -660,14 +664,14 @@ files:
     partner: "14-ai-development/status-migration-map.zh-CN.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "14-ai-development/status-migration-map.zh-CN.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner '14-ai-development/status-migration-map.zh-CN.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "14-ai-development/status-migration-map.zh-CN.md"
     paired: true
     partner: "14-ai-development/status-migration-map.en.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "normative constraint markers without ephemeral signals; no header evidence; PAIR-DIVERGENT: partner "14-ai-development/status-migration-map.en.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "normative constraint markers without ephemeral signals; no header evidence; PAIR-DIVERGENT: partner '14-ai-development/status-migration-map.en.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "14-ai-development/ubuntu-self-hosted-runner-bootstrap.en.md"
     paired: true
@@ -1178,7 +1182,7 @@ files:
     partner: "docs/zh-CN/01-system-architecture/system-design-guide.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "docs/zh-CN/01-system-architecture/system-design-guide.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/01-system-architecture/system-design-guide.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/en/01-system-architecture/system-overview.md"
     paired: true
@@ -1241,14 +1245,14 @@ files:
     partner: "docs/zh-CN/02-domain-model/phase-1-memory-store.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "docs/zh-CN/02-domain-model/phase-1-memory-store.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/02-domain-model/phase-1-memory-store.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/en/02-domain-model/phase-1-sqlite-adapter-contract.md"
     paired: true
     partner: "docs/zh-CN/02-domain-model/phase-1-sqlite-adapter-contract.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "docs/zh-CN/02-domain-model/phase-1-sqlite-adapter-contract.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/02-domain-model/phase-1-sqlite-adapter-contract.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/en/02-domain-model/phase-1-storage-trait-contract.md"
     paired: true
@@ -1311,7 +1315,7 @@ files:
     partner: "docs/zh-CN/03-memory-brain/entity-and-relationship-manager.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "docs/zh-CN/03-memory-brain/entity-and-relationship-manager.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/03-memory-brain/entity-and-relationship-manager.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/en/03-memory-brain/forget-fence-and-completion-contract.md"
     paired: true
@@ -1367,7 +1371,7 @@ files:
     partner: "docs/zh-CN/03-memory-brain/memory-brain-overview.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "docs/zh-CN/03-memory-brain/memory-brain-overview.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/03-memory-brain/memory-brain-overview.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/en/03-memory-brain/memory-lifecycle-manager.md"
     paired: true
@@ -1381,7 +1385,7 @@ files:
     partner: "docs/zh-CN/03-memory-brain/memory-versioning.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "docs/zh-CN/03-memory-brain/memory-versioning.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/03-memory-brain/memory-versioning.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/en/04-memory-compiler/README.md"
     paired: true
@@ -1416,7 +1420,7 @@ files:
     partner: "docs/zh-CN/04-memory-compiler/consolidation-and-conflict-resolution.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "docs/zh-CN/04-memory-compiler/consolidation-and-conflict-resolution.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/04-memory-compiler/consolidation-and-conflict-resolution.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/en/04-memory-compiler/event-ingestion-engine.md"
     paired: true
@@ -1437,7 +1441,7 @@ files:
     partner: "docs/zh-CN/04-memory-compiler/extraction-and-normalization.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "docs/zh-CN/04-memory-compiler/extraction-and-normalization.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/04-memory-compiler/extraction-and-normalization.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/en/04-memory-compiler/forget-fence-and-derived-registration-part1.md"
     paired: true
@@ -1458,21 +1462,21 @@ files:
     partner: "docs/zh-CN/04-memory-compiler/phase-1-event-store-contract-zh-CN.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "docs/zh-CN/04-memory-compiler/phase-1-event-store-contract-zh-CN.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/04-memory-compiler/phase-1-event-store-contract-zh-CN.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/en/04-memory-compiler/phase-1-event-store-contract.md"
     paired: true
     partner: "docs/zh-CN/04-memory-compiler/phase-1-event-store-contract.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "docs/zh-CN/04-memory-compiler/phase-1-event-store-contract.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/zh-CN/04-memory-compiler/phase-1-event-store-contract.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/en/05-memory-runtime/activation-policy-engine.md"
     paired: true
     partner: "docs/zh-CN/05-memory-runtime/activation-policy-engine.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner "docs/zh-CN/05-memory-runtime/activation-policy-engine.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/zh-CN/05-memory-runtime/activation-policy-engine.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/en/05-memory-runtime/memory-runtime-guide.md"
     paired: true
@@ -1773,7 +1777,7 @@ files:
     partner: "docs/en/01-system-architecture/system-design-guide.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner "docs/en/01-system-architecture/system-design-guide.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/01-system-architecture/system-design-guide.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/zh-CN/01-system-architecture/system-overview.md"
     paired: true
@@ -1836,14 +1840,14 @@ files:
     partner: "docs/en/02-domain-model/phase-1-memory-store.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner "docs/en/02-domain-model/phase-1-memory-store.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/02-domain-model/phase-1-memory-store.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/zh-CN/02-domain-model/phase-1-sqlite-adapter-contract.md"
     paired: true
     partner: "docs/en/02-domain-model/phase-1-sqlite-adapter-contract.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner "docs/en/02-domain-model/phase-1-sqlite-adapter-contract.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/02-domain-model/phase-1-sqlite-adapter-contract.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/zh-CN/02-domain-model/phase-1-storage-trait-contract.md"
     paired: true
@@ -1906,7 +1910,7 @@ files:
     partner: "docs/en/03-memory-brain/entity-and-relationship-manager.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner "docs/en/03-memory-brain/entity-and-relationship-manager.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/03-memory-brain/entity-and-relationship-manager.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/zh-CN/03-memory-brain/forget-fence-and-completion-contract.md"
     paired: true
@@ -1962,7 +1966,7 @@ files:
     partner: "docs/en/03-memory-brain/memory-brain-overview.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner "docs/en/03-memory-brain/memory-brain-overview.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/03-memory-brain/memory-brain-overview.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/zh-CN/03-memory-brain/memory-lifecycle-manager.md"
     paired: true
@@ -1976,7 +1980,7 @@ files:
     partner: "docs/en/03-memory-brain/memory-versioning.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner "docs/en/03-memory-brain/memory-versioning.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/03-memory-brain/memory-versioning.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/zh-CN/04-memory-compiler/README.md"
     paired: true
@@ -2011,7 +2015,7 @@ files:
     partner: "docs/en/04-memory-compiler/consolidation-and-conflict-resolution.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner "docs/en/04-memory-compiler/consolidation-and-conflict-resolution.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/04-memory-compiler/consolidation-and-conflict-resolution.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/zh-CN/04-memory-compiler/event-ingestion-engine.md"
     paired: true
@@ -2032,7 +2036,7 @@ files:
     partner: "docs/en/04-memory-compiler/extraction-and-normalization.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner "docs/en/04-memory-compiler/extraction-and-normalization.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/04-memory-compiler/extraction-and-normalization.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/zh-CN/04-memory-compiler/forget-fence-and-derived-registration-part1.md"
     paired: true
@@ -2053,21 +2057,21 @@ files:
     partner: "docs/en/04-memory-compiler/phase-1-event-store-contract-zh-CN.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner "docs/en/04-memory-compiler/phase-1-event-store-contract-zh-CN.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/04-memory-compiler/phase-1-event-store-contract-zh-CN.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/zh-CN/04-memory-compiler/phase-1-event-store-contract.md"
     paired: true
     partner: "docs/en/04-memory-compiler/phase-1-event-store-contract.md"
     suggested_tier: TIER1_CANDIDATE
     confidence: LOW
-    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner "docs/en/04-memory-compiler/phase-1-event-store-contract.md" scanned as TIER3_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "document header with ID/Status/Version + normative markers; weakest positive band, verify semantically before confirming; PAIR-DIVERGENT: partner 'docs/en/04-memory-compiler/phase-1-event-store-contract.md' scanned as TIER3_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/zh-CN/05-memory-runtime/activation-policy-engine.md"
     paired: true
     partner: "docs/en/05-memory-runtime/activation-policy-engine.md"
     suggested_tier: TIER3_CANDIDATE
     confidence: LOW
-    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner "docs/en/05-memory-runtime/activation-policy-engine.md" scanned as TIER1_CANDIDATE - a translation pair cannot hold two tiers, confirm the pair together and re-derive one tier"
+    evidence: "no architecture-contract or normative markers in head; descriptive/operational; PAIR-DIVERGENT: partner 'docs/en/05-memory-runtime/activation-policy-engine.md' scanned as TIER1_CANDIDATE - the two sides of one translation pair cannot hold two tiers, so at most one of the two suggestions is right. Confirm the pair together and derive one tier for both. This flag records a conflict between the heuristic and itself; it is not evidence that a human read of either file would differ."
     confirmation_record: PENDING
   - path: "docs/zh-CN/05-memory-runtime/memory-runtime-guide.md"
     paired: true
