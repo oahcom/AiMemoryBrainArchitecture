@@ -79,7 +79,7 @@ The accepted D-002 proof pack (Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5`, 
 | S6 | Recovery repeats an operation after restart/restore | Recovery reuses the original receipt, proves continuity and anti-rollback, and never regresses generation/state version or mints a new cutoff. | NOT RUN |
 | S7 | Partial success and partial failure across namespaces or sub-operations | Preserve each successful namespace receipt; aggregate remains OPEN/UNKNOWN until all required namespaces independently satisfy C1–C6. | NOT RUN |
 
-All seven scenarios are conjunctive with the six D-002 conditions for the same immutable operation/fence/snapshot. A scenario title or normative description is not a test result. Each eventual execution record must retain exact runtime commit, test path/ID, command/environment, injected ordering/fault, raw output or immutable CI log, durable before/after ledger and receipt readback, expected/actual result, CI Run ID and artifact digest.
+All seven scenarios are conjunctive with the six D-002 conditions for the same immutable operation/fence/snapshot. They are normative proof obligations, not executed tests.
 For every scenario, retain: exact runtime commit; exact test path and test ID; command and environment; injected ordering/fault; raw stdout/stderr or immutable CI log; durable before/after ledger and receipt readback; expected/actual result; CI Run ID; artifact digest. A summary count without the underlying evidence is insufficient.
 
 ## 6. Current evidence inventory — do not overstate
