@@ -351,6 +351,6 @@ This addendum refreshes only the F1/F3 source pins and verification state. Earli
 - **Disposition:** exact D mapping pin and current H TEST-profile source are verifiable; F3 remains P1 / OPEN for independently attributable human acceptance and end-to-end consumer/operational evidence.
 
 ### Execution record
-- Carrier reused: existing PR #323 branch `undefined`; no new PR, Issue, or branch.
+- Carrier reused: existing PR #323 branch `fix/f43-01-f3-ledger-reconcile`; no new PR, Issue, or branch.
 - This is an evidence-ledger/manifest reconciliation only. Tests for the documentation update are NOT RUN. No direct main write, merge, deployment, production activation, or other-Owner signature is performed or inferred.
 - Prompt provenance: user-supplied Owner ruling D-2026-1120-01 and continuation instruction; parent source conversation `6afae42c-65d8-83ee-853c-a7537b0e273b`; current platform conversation UUID/raw message bytes unavailable; SHA-256 NOT_VERIFIED. No synthetic ID/hash is asserted.
