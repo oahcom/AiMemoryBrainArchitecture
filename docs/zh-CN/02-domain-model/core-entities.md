@@ -75,30 +75,25 @@ Accepted 不代表已验证真实性。Planned/Predicted 不是 Outcome。同一
 
 禁止原地编辑。当前指针推进和版本提交必须原子完成。竞争写入必须携带期望的 Parent/Current Version。
 
-## 5. Claim（规范 Fact/Claim 对象）
+## 5. Claim
 
-Claim 是关于 Entity、Event 或状态的命题。
+Claim 是规范命题身份。
 
-| 字段 | 类型/是否可空 | 含义与约束 |
-|---|---|---|
-| claim_id | OpaqueId，必填 | 遵循声明的身份策略并保持稳定 |
-| subject_ref | TypedObjectRef，必填 | Entity/Event/Memory 主体 |
-| predicate | TypedPredicate，必填 | 规范命题谓词 |
-| object_value | TypedValue，必填 | Entity 引用、字面量、数量、区间或结构化值 |
-| polarity | positive/negative，必填 | 命题极性 |
-| epistemic_status | Enum，必填 | Observed、Reported、Inferred、Verified、Disputed、Retracted |
-| epistemic_basis_refs | OpaqueId[]，必填 | Evidence/Attestation，或明确的不可用原因 |
-| confidence | ConfidenceValue，可空 | 带方法限定的估计，不代表真理 |
-| valid_time | TimeInterval，可空 | 声称成立的有效时间；null 表示未知/未指定 |
-| asserted_at | Instant，必填 | 声明/派生时间 |
-| scope_refs | ScopeRef[]，必填 | 适用范围/可见范围 |
-| environment_scope_id | OpaqueId，可空 | 环境绑定命题必填 |
-| qualifiers | TypedMap，必填 | 结构化限定条件，不是可执行内容 |
-| retraction_ref | OpaqueId，可空 | Retracted 时必填 |
-| supersedes_claim_ref | OpaqueId，可空 | 明确的来源/替代关系 |
+Claim 使用稳定 ClaimRef，并具有不可变 ClaimRevision 记录。
 
-Verified 必须具有方法和 Evidence。Disputed 必须存在不兼容立场或争议记录。Retracted 必须保留历史声明，并要求授权主体和原因。仅有高 Confidence 不能验证 Claim。
+ClaimRevision 标识一个准确的断言状态，并保留 Parent、命题、Epistemic Status、Valid Time、Evidence 引用、Provenance 引用和 Scope。
 
+Claim 身份分类遵循 DOMAIN-MODEL-001 §2.4。
+
+## 5A. Fact 与 FactRevision
+
+Fact 是独立的受治理 Attestation 对象。
+
+FactRevision 不可变，并引用准确的 ClaimRevisionRef、Evidence、Provenance、Scope、Attestor、Method/Version 和 I AuthorizationDecisionRef。
+
+Fact 不是 Verified Claim 的别名，也不是客观真理标志。
+
+本逻辑实体定义不批准 DDL 或物理 Schema。
 ## 6. Entity（实体）
 
 | 字段 | 类型/是否可空 | 含义与约束 |

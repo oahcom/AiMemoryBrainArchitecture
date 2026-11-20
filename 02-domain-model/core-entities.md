@@ -69,30 +69,25 @@ A Memory may contain multiple Claims. Empty Claim sets require a declared non-pr
 
 No in-place edit. Current pointer advancement and version commit are atomic. Competing writes use expected parent/current version.
 
-## 5. Claim (canonical Fact/Claim object)
+## 5. Claim
 
-A Claim is a proposition about an Entity, Event, or state.
+A Claim is the canonical proposition identity.
 
-| Field | Type / nullable | Meaning and constraint |
-|---|---|---|
-| claim_id | OpaqueId, required | Stable under declared identity policy |
-| subject_ref | TypedObjectRef, required | Entity/Event/Memory subject |
-| predicate | TypedPredicate, required | Canonical proposition predicate |
-| object_value | TypedValue, required | Entity ref, literal, quantity, interval, or structured value |
-| polarity | positive/negative, required | Proposition polarity |
-| epistemic_status | Enum, required | Observed, Reported, Inferred, Verified, Disputed, Retracted |
-| epistemic_basis_refs | OpaqueId[], required | Evidence/attestation or explicit unavailable reason |
-| confidence | ConfidenceValue, nullable | Method-qualified estimate; not truth |
-| valid_time | TimeInterval, nullable | Asserted validity; null means unknown/not specified |
-| asserted_at | Instant, required | Assertion/derivation time |
-| scope_refs | ScopeRef[], required | Applicability/visibility |
-| environment_scope_id | OpaqueId, nullable | Required for environment-bound proposition |
-| qualifiers | TypedMap, required | Structured qualifications, not executable content |
-| retraction_ref | OpaqueId, nullable | Required when Retracted |
-| supersedes_claim_ref | OpaqueId, nullable | Explicit lineage |
+A Claim uses a stable ClaimRef and has immutable ClaimRevision records.
 
-Verified requires method and evidence. Disputed requires incompatible positions or dispute record. Retracted preserves historical assertion and requires authority/reason. High confidence alone cannot verify a Claim.
+A ClaimRevision identifies one exact assertion state and preserves its parent, proposition, epistemic status, valid time, Evidence references, Provenance references and Scope.
 
+Claim identity classification follows DOMAIN-MODEL-001 §2.4.
+
+## 5A. Fact and FactRevision
+
+Fact is an independent governed Attestation object.
+
+FactRevision is immutable and references exact ClaimRevisionRef, Evidence, Provenance, Scope, Attestor, Method/Version and I AuthorizationDecisionRef values.
+
+A Fact is not a Verified Claim alias or an objective-truth flag.
+
+This logical entity definition does not approve DDL or physical Schema.
 ## 6. Entity
 
 | Field | Type / nullable | Meaning and constraint |
