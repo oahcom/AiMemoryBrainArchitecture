@@ -34,11 +34,11 @@ Python 3.10+; standard library only; no network or package installation.
     python evaluate.py --json
     python -m unittest -v test_evaluate.py
 
-pilot-results.json is the captured machine-readable output from the exact run included with this change. evaluate.py is deterministic apart from measured local latency. No random sampling is used (seed=not_applicable_deterministic_no_sampling).
+pilot-results.json is a condensed machine-readable summary captured from a local run. Run evaluate.py --json to regenerate the complete per-task result payload. evaluate.py is deterministic apart from measured local latency. No random sampling is used (seed=not_applicable_deterministic_no_sampling).
 
 ## Pilot result (captured)
 
-See pilot-results.json for per-task selected IDs and full metrics. Key result: no-memory positive hit rate 0%; simple lexical top-3 100% but selected 6 harmful records; policy proxy 100% with zero harmful records on this fixture. Both retrieval arms have mean precision 0.4444, showing that policy filtering removes harmful records but does not eliminate irrelevant in-scope retrieval. The 7-task Wilson interval for 7/7 success is [0.6457, 1.0], too wide for a superiority claim.
+The captured summary reports: no-memory positive hit rate 0%; simple lexical top-3 100% but selected 6 harmful records; policy proxy 100% with zero harmful records on this fixture. Both retrieval arms have mean precision 0.4444, showing that policy filtering removes harmful records but does not eliminate irrelevant in-scope retrieval. The 7-task Wilson interval for 7/7 success is [0.6457, 1.0], too wide for a superiority claim.
 
 ## Validity limits / non-claims
 
