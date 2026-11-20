@@ -89,7 +89,7 @@ def validate_c_submit_outcome_join(
 
     required = (
         "issuer_authority_ref", "sequence_namespace_ref", "record_ref",
-        "record_sequence", "payload_digest", "FinalRequestBoundaryRef",
+        "record_sequence", "payload_digest", "FinalRequestBoundaryRef", "FinalRequestBoundaryType",
     )
     missing = [name for name in required if not isinstance(c_record.get(name), str) or not c_record[name]]
     if missing:
@@ -99,6 +99,7 @@ def validate_c_submit_outcome_join(
         ("c_outcome_record_sequence", "record_sequence"),
         ("c_outcome_payload_digest", "payload_digest"),
         ("final_request_boundary_id", "FinalRequestBoundaryRef"),
+        ("final_request_boundary_type", "FinalRequestBoundaryType"),
     )
     for h_field, c_field in equalities:
         if envelope[h_field] != c_record[c_field]:
