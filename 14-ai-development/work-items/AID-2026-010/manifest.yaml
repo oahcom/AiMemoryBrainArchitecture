@@ -165,8 +165,8 @@ current_status_refresh:
     records the subsequent Owner release and supersedes that historical
     restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "fcac1cf4ce4826c08e439f575408af5acaf652a8"
-  ledger_blob_sha: "85513474a249eff59e11c133d987e8ec5492e950"
+  ledger_commit: "37d155fed076f271a42ff8e9343cdbd92c80d7cc"
+  ledger_blob_sha: "1bb37ad952a9057069a0d48cbe8f5585917c42c7"
   status_counts:
     findings_total: 13
     findings_closed: 10
