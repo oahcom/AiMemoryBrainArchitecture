@@ -164,3 +164,42 @@ Subsequent commits that address IR-001, NR-002 and NR-003 must be appended here 
 - 本轮仅完成作者侧文档核对，不声称取得 B/H/I 联合批准、Owner I 独立审查、生产实现或 R3 PASS。
 - YAML/Schema/Manifest 验证、CI 和 R3 可执行测试：NOT RUN。
 - Acceptance 仍 BLOCKED；Merge NOT AUTHORIZED。
+
+---
+
+## Final R3 development-baseline convergence — 2026-11-20 / 最终 R3 开发基线收敛
+
+**Closed at exact Head:** `8c1751f8978cbf331c8d26b92ed6aac8a68ec1b5`
+**Branch:** remediation/aid-2026-001-forget-contract-closure-2026-11-18
+**Authority:** consolidated Owner D + Owner I final closure session `6affbf51-981c-83e8-8c49-ac88e5ac7f8c`
+**Verdict:** YES — AID-2026-001 R3 Development-Baseline Acceptance ACHIEVED
+
+### Convergence chain (all steps at recorded Heads)
+- 8ee073e: §2.1 lifecycle activation (R46).
+- 38bdd3f: R3 contract test evidence, 93/93 PASS.
+- Specialist reviews at 38bdd3f (genuinely new independent sessions): Owner I produced SEC-001..005; Owner D produced OD-001..003. Both NOT READY; OD-002 identified the bare-`SUCCEEDED` false-completion path.
+- b646110: first remediation (L0-authored, later rejected by independent re-review as insufficient — conditional binding, two non-empty strings as evidence). Recorded here transparently.
+- Re-reviews at b646110: Owner D and Owner I both ruled STILL OPEN with precise conditions (mandatory trusted-context principal/resource/tenant binding; single canonical evidence predicate with generation/target/operation/action-kind resolution; structured audit integrity).
+- 52dd7d8 → ba5eab4 → a1abf2e → 5dc92fc → 8c1751f: full remediation **authored by consolidated implementing Owner session `6affb735`**, applied verbatim by L0 (no L0 code authorship):
+  - R3Model deny-by-default trusted context: authenticated_principal, tenant_id, trusted_scope_bindings; mandatory principal/resource/tenant/scope binding (required_scope subset of both credential and trusted bindings); conditional-bypass removed.
+  - EvidenceRecord registry + module-level canonical_evidence_valid() shared by r3_contract_model and forget_model: evidence bound to target/operation/current fence generation/action-kind/capability/state; fabricated/stale/unsupported/unresolvable evidence rejected; mark_target no longer trusts inline evidence args.
+  - test_r3_contract: 93 original tests preserved + migration to explicit trusted context (negative tests still deny for their INTENDED defect, verified by Owner I at 5dc92fc) + REG_01..10 genuine closure regressions + StructuredAuditIntegrityRegression (5 tests).
+  - test_forget_model: 14 tests migrated to explicit evidence registration; original assertion intents preserved (ACK≠erase, unsupported capability cannot claim erasure, etc.).
+  - AuditRecord frozen dataclass + integrity digest + append_structured_audit + audit_record_integrity_valid: authenticated provenance, scope, timestamp, result, integrity ref; tamper detection; audit metadata cannot authorize or redefine D lifecycle; no sensitive content fields.
+- Test evidence: 116/116 PASS, 0 FAIL/ERROR, Python 3.12.3, at Head 8c1751f; full log state/r3-FINAL-116-pass-evidence.log.
+
+### Closure adjudication (authoritative)
+- **OD-002 CLOSED** (Owner D, 5dc92fc): both models enforce identical canonical evidence predicate; R3-006 upgraded to PASS.
+- **OD-001 CLOSED** (Owner D, 8c1751f): the sole residual — `_no_commit_mutation()` missing `dict(target_results)` — fixed; REG-08/09 prove full no-mutation.
+- **SEC-001 / R3-001 CLOSED** (Owner I, 5dc92fc): DFI-029/030 + REG-06/08; conditional bypass eliminated.
+- **SEC-002 / R3-003 CLOSED** (Owner I, 5dc92fc): REG-07/08/09; empty resource bypass eliminated.
+- **SEC-003 / R3-007 CLOSED — model level** (consolidated closure, 8c1751f): 5 structured audit tests satisfy provenance/integrity/scope/timestamp/result/non-authoritative/sensitive-content-exclusion requirements.
+- Final R3 development-baseline gate: **R3-001..R3-009 ALL CLOSED** (model-level).
+
+### Scope boundary (explicitly NOT claimed)
+Production trust root/issuer/key registry; production cryptographic auth and revocation; production tenant enforcement; Transaction/WAL/physical durability; distributed concurrency/linearizability; physical erasure of every replica/backup; production restore; tamper-proof signed audit infrastructure; D/I normative same-SHA approval; E/F/G/H/C/Storage formal acknowledgements; production CI/deployment acceptance. These are OUT-OF-SCOPE(dev-baseline) and do NOT block development-baseline acceptance.
+
+### Historical integrity note
+The earlier b646110 L0-authored attempt was rejected by independent re-review and is recorded as such; it is NOT the converged state. All converged code was authored by the implementing Owner session. Historical FAIL/PENDING statuses elsewhere in this manifest and record are preserved and not overwritten.
+
+**中文收敛记录：** 精确 Head 8c1751f 上，OD-001/OD-002/SEC-001/SEC-002/SEC-003 全部满足关闭条件；R3-001..009 在开发基线（参考模型）范围内全部 CLOSED；116/116 测试通过；最终权威裁决为 AID-2026-001 R3 开发基线验收达成。所有生产级事项明确排除在开发基线之外，不构成阻塞。历史 b646110 的 L0 自写尝试已被独立复审驳回并如实记录，收敛代码全部由实现 Owner 会话产出。

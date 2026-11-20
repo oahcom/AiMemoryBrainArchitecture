@@ -5,6 +5,31 @@ risk: R3
 risk_rationale: Normative security-identity, authorization, privacy/retention/audit and Forget/deletion boundary changes; highest applicable risk governs the Work Item.
 security_scope: SEC — cross-cutting normative security and Forget governance boundaries
 status: REMEDIATION_IN_PROGRESS
+
+# === R3 development-baseline convergence registration (2026-11-20) ===
+# Historical statuses below are NOT overwritten; this block is authoritative
+# for the current convergence state. Evidence lives in execution-record-001.md.
+r3_convergence:
+  final_head_sha: 8c1751f8978cbf331c8d26b92ed6aac8a68ec1b5
+  branch: remediation/aid-2026-001-forget-contract-closure-2026-11-18
+  test_suite: "116/116 PASS, 0 FAIL/ERROR, Python 3.12.3"
+  test_evidence_ref: state/r3-FINAL-116-pass-evidence.log
+  authoritative_closure_session: 6affbf51-981c-83e8-8c49-ac88e5ac7f8c
+  closure_verdict: "YES — AID-2026-001 R3 Development-Baseline Acceptance ACHIEVED"
+  r3_invariants: "R3-001..R3-009 ALL CLOSED at development-baseline (model-level) scope"
+  findings_closed: [OD-001, OD-002, SEC-001, SEC-002, SEC-003/R3-007]
+  code_authority: "consolidated implementing Owner session 6affb735; L0 applied verbatim"
+  scope: "development baseline only — in-memory reference model; no production claim"
+  out_of_scope_dev_baseline:
+    - production trust root / issuer / key registry
+    - production cryptographic auth and revocation
+    - production tenant enforcement
+    - WAL / Transaction / physical durability
+    - distributed concurrency and linearizability
+    - physical erasure of all replicas and backups
+    - D/I normative same-SHA approval
+    - production CI / deployment acceptance
+  registration_date: 2026-11-20
 sponsor: project user
 accountable_owner: A
 implementing_ai_session: AID-2026-001-EXEC-001
