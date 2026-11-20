@@ -304,3 +304,9 @@ R45（A-OWNER-INTEGRATION-R45-2026-11-20）：A 完成 F-43-07 四方最终集�
 - Current exact-head workflow runs: `44681841687` (job `136108099194`) and `44681841601` (job `136108110590`), both FAILURE with `steps=null`. Explicit job reruns were accepted; rerun jobs `136109249771` and `136109260361` again completed FAILURE with `steps=null`. Log retrieval for the rerun jobs returned HTTP 404 `BlobNotFound` (RequestIds `f780ccdd-901e-00df-3cb1-78e52e000000` and `7c5c38f0-e01e-00ae-0eb1-78e88c000000`). No test-level failure cause or CI PASS is established.
 - The current manifest records a focused local module result of 13/13 PASS on Python 3.13.5 for this validator/test revision; this is a prior recorded local result, not a full repository suite and not a substitute for the failed exact-head CI.
 - **F3 disposition unchanged:** D/H same-Blob role-labelled ACCEPT WITH EXPLICIT LIMITATIONS records are present; independent human signer identity remains NOT VERIFIED; callable D query, durable Receipt/currentness and operational C1–C6 evidence remain NOT VERIFIED; F3 stays P1 / OPEN.
+
+## 2026-11-20 PR #322 latest runner-allocation attempt — supersedes prior job IDs
+
+- Re-read current exact-head runs for PR #322 Head `0ce618ac503f641cf31e66092ae823c14bf8af7b`: Run `44681841687` now resolves to Job `136110511473`; Run `44681841601` now resolves to Job `136110524577`.
+- Both jobs completed FAILURE with `runner_id=0` and `steps=null`; test steps did not start. Log retrieval returned HTTP 404 `BlobNotFound` for both jobs (RequestIds `d91924be-601e-00e6-36b2-78a62d000000` and `26c3f08d-f01e-00fe-4db2-78f784000000`).
+- This latest read supersedes the earlier rerun job IDs `136109249771` / `136109260361` in the prior subsection. The failure is runner allocation / log artifact availability, not a test-level diagnosis. No CI PASS is claimed.
