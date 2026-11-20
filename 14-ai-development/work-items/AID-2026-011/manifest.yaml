@@ -14,7 +14,9 @@ status: REGISTERED
 
 sponsor: USER-PRINCIPAL-DELEGATED (human principal via D-2026-1120-02)
 accountable_owner: USER-PRINCIPAL-DELEGATED (session-eligible per D-2026-1120-02)
-implementing_ai_session: 6aff27f3 (REQ-01 managing ChatGPT session; UUID NOT_EXPOSED)
+implementing_ai_session: 6afffe74-fcbc-83ee-bee2-e933dec52f86 (T4B execution session, acct2, dispatched 2026-11-20T07:55Z per step-5 record 7034370582; sibling 6b0003a3-429c-83ec-896a-89c516fa6020 double-delivery, both productive)
+managing_session: 6aff27f3-b9d4-83ee-ab14-cd4b12bc42f2 (REQ-01 managing ChatGPT session; now 413-full)
+continuation_session: 6afff365-00cc-83ee-87da-ab783357330e (REQ-01 continuation canonical)
 
 repository: oahcom/AiMemoryBrainArchitecture
 base_branch: main
