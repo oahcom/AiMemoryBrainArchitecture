@@ -1,14 +1,20 @@
 work_item_id: AID-2026-011
 title: REQ-01 Risk Assessment — Risk Closure and Evidence Reconciliation
 
-class: NOT_ASSIGNED
-risk: NOT_ASSIGNED
+class: ARCH
+risk: R2
 risk_rationale: >-
-  Classification and risk level require confirmation by the
-  accountable Work Item Owner. No risk classification is
-  asserted by this registration.
+  Read-only, cross-owner architecture risk assessment and evidence
+  reconciliation. The work evaluates multi-module contracts,
+  dependencies, critical-path ordering and evidence gaps, but does
+  not modify architecture contracts, security controls or production
+  implementation. Individual finding severities remain P0-P3 and
+  are distinct from this Work Item risk classification.
 
-security_scope: NOT_ASSIGNED
+security_scope: >-
+  Read-only assessment of security, identity, authorization, privacy,
+  Forget/deletion, canonical consistency and recovery boundaries;
+  no control or contract changes are authorized by this Work Item.
 
 status: REGISTERED
 
@@ -23,22 +29,24 @@ base_commit_sha: 723446225af5daa863e6641106a669e3ad8ba11b
 tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/262
 
 created_at: 2026-11-20T06:17:00Z
-updated_at: 2026-11-20T06:17:00Z
+updated_at: 2026-11-20T06:52:21Z
 
 prompt_id: AID-2026-011-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-011/prompt-v1.md
 prompt_status: DRAFT_NOT_FROZEN
-prompt_sha256: NOT_VERIFIED
-prompt_bytes: NOT_VERIFIED
-prompt_file_blob_sha: NOT_ASSIGNED
-prompt_file_commit_sha: NOT_ASSIGNED
+prompt_sha256: f8879de70c1a82bb8b5715c09985a5abc998c22475b7009ebf6a76f98f4abff1
+prompt_bytes: 17995
+prompt_file_blob_sha: 88894bf02ccad2858d4fafb82af0e689ab36970c
+prompt_file_commit_sha: 09eeb66eb96913e5bf7a9ee9fbd46d8399c318be
+prompt_draft_branch: ai/AID-2026-011/req01-risk-reconciliation-v1
 
 prompt_provenance_tier: T1
 prompt_provenance_note: >-
-  Proposed future work-item-level repository prompt.
-  This is not evidence that a historical T1 existed or
-  was used during previous REQ-01 execution.
+  Draft future work-item-level repository prompt. This prompt applies
+  only to sessions dispatched after its actual approval and frozen
+  commit. It is not evidence that a historical T1 existed or was used
+  during previous REQ-01 execution.
 
 historical_t1_status: NOT_FOUND
 historical_t1_identity: NOT_VERIFIED
@@ -46,11 +54,19 @@ historical_t1_identity: NOT_VERIFIED
 dependency_refs:
   - 14-ai-development/PR-GOVERNANCE-001.md
   - 14-ai-development/work-items/INDEX.md
+  - reviews/architecture/SYS-RISK-001.zh-CN.md
+  - reviews/architecture/SYS-RISK-001.en.md
+  - reviews/complexity/architecture-complexity-assessment.zh-CN.md
+  - reviews/complexity/architecture-complexity-assessment.en.md
+  - reviews/engineering-planning/2026-11-17-session-3-engineering-planning-zh-CN.md
+  - reviews/engineering-planning/2026-11-17-session-3-engineering-planning-en.md
 
 deliverables:
-  - Future REQ-01 risk assessment evidence reconciliation
-  - Future risk finding disposition records
-  - Future risk closure evidence
+  - Current REQ-01 risk assessment evidence reconciliation
+  - Root-cause risk register and dependency/critical-path map
+  - Feasibility, priority and mitigation/monitoring matrix
+  - Finding disposition proposals with objective closure evidence
+  - Acceptance-gap register and independent review handoff
 
 independent_reviewer: NOT_ASSIGNED
 integration_reviewer: NOT_ASSIGNED
