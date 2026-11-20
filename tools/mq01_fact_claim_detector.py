@@ -141,6 +141,13 @@ class DetectorTests(unittest.TestCase):
         self.assertFalse(result["fact_declared"])
         self.assertTrue(result["mq01_detected"])
 
+    def test_fake_declaration_inside_raw_string_does_not_count(self) -> None:
+        result = inspect_source(
+            'let doc = r#"pub struct Fact {}"#;\\npub struct Claim { id: String }'
+        )
+        self.assertFalse(result["fact_declared"])
+        self.assertTrue(result["mq01_detected"])
+
     def test_neither_type_is_not_misreported_as_mq01(self) -> None:
         result = inspect_source("pub struct Memory { id: String }")
         self.assertFalse(result["claim_declared"])
