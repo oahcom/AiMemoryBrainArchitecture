@@ -33,7 +33,7 @@ def fixture():
         "adapter_capability_epoch":"H/capability-epoch/1","evidence_kind":"FINAL_REQUEST_SUBMITTED","evidence_tier":"TIER_1",
         "adapter_ref":"H/adapter/1","runtime_instance_ref":"R/runtime/1","context_id":"G/context/1",
         "context_version":"G/context-version/7","materialized_context_version":"G/context-version/7",
-        "final_request_boundary_type":"RUNTIME_FINAL_SUBMIT_HOOK","managed_region_id":"G/managed-region/1",
+        "final_request_boundary_type":"provider_sdk_send","managed_region_id":"G/managed-region/1",
         "managed_region_revision":"rev-7","managed_region_inventory_digest":"a"*64,
         "managed_region_coverage":"COMPLETE","managed_region_digest":"b"*64,"digest_profile":"TEST-ONLY-SHA256",
         "evidence_issuer_ref":"H/adapter-evidence/issuer","evidence_schema_version":"1.0.0",
@@ -171,6 +171,18 @@ class AppliedDeliveryEvidenceTests(unittest.TestCase):
     def test_22_actual_inference_request_id_mismatch_rejected_when_c_supplies_it(self):
         record=copy.deepcopy(C_ACCEPTED_RECORD); record["ActualInferenceRequestId"]="R/request/other"
         self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"INVALID")
+
+    def test_31_c_final_request_boundary_type_mismatch_rejected(self):
+        record=copy.deepcopy(C_ACCEPTED_RECORD); record["FinalRequestBoundaryType"]="runtime_final_submit_hook"
+        self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"INVALID")
+
+    def test_32_c_record_missing_final_request_boundary_type_rejected(self):
+        record=copy.deepcopy(C_ACCEPTED_RECORD); record.pop("FinalRequestBoundaryType")
+        self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"INVALID")
+
+    def test_33_missing_c_actual_request_id_remains_h_observation_only(self):
+        record=copy.deepcopy(C_ACCEPTED_RECORD); record.pop("ActualInferenceRequestId",None)
+        self.assertEqual(self.validate(fixture(),checks(c_record=record))["status"],"VALID_NEW")
 
     def test_23_c_record_resolver_unavailable_fails_closed(self):
         result=self.validate(fixture(),checks(resolver_available=False))
