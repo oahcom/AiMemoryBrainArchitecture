@@ -65,23 +65,21 @@ After E1–E8 are evidenced and implementation entry is authorized, the engineer
 
 The five operation names and signatures MUST be copied from the exact accepted D-002 source at implementation entry. This handoff intentionally does not guess or rename them.
 
-## 5. Ten-scenario operational evidence matrix
+## 5. Seven canonical D-002 adversarial scenario proofs
 
-The ten scenarios are a required evidence set, not ten documentation checkboxes. At implementation entry, copy the canonical scenario IDs and exact expected outcomes from the accepted D-002 proof pack into this matrix. Preserve one-to-one mapping; do not invent substitute scenarios or collapse distinct races.
+The accepted D-002 proof pack (Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5`, path `03-memory-brain/d-002-six-condition-operational-proof-2026-11-19.md`, source commit `b03e31c7dafea77b610cd49b402dab273dae2412`) defines exactly seven canonical adversarial scenarios, S1–S7. This handoff preserves those canonical IDs and titles; no additional scenarios are inferred. The scenarios are normative proof obligations, **not executed tests**.
 
-| Slot | Canonical D-002 scenario ID/title | Fault/race injection and ordering | Durable Receipt/Ledger observation | Expected terminal/UNKNOWN result | Exact test/report/CI evidence |
-|---|---|---|---|---|---|
-| S01 | NOT RUN — populate from D-002 | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
-| S02 | NOT RUN — populate from D-002 | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
-| S03 | NOT RUN — populate from D-002 | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
-| S04 | NOT RUN — populate from D-002 | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
-| S05 | NOT RUN — populate from D-002 | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
-| S06 | NOT RUN — populate from D-002 | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
-| S07 | NOT RUN — populate from D-002 | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
-| S08 | NOT RUN — populate from D-002 | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
-| S09 | NOT RUN — populate from D-002 | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
-| S10 | NOT RUN — populate from D-002 | NOT RUN | NOT RUN | NOT RUN | NOT RUN |
+| ID | Canonical D-002 scenario title | Required operational observation | Current execution state |
+|---|---|---|---|
+| S1 | Two or more namespaces advance concurrently | Per-namespace identity/receipt isolation; shared serialization only for the same authority/source lineage; aggregate remains OPEN/UNKNOWN until every required namespace proves independently. | NOT RUN |
+| S2 | Capture interleaves with install, replacement, or later publication | Capture reads the immutable installed cutoff; fence/publication race has one authoritative serialization winner; stale or unavailable currentness fails closed. | NOT RUN |
+| S3 | Same request replay and changed-payload replay | Exact replay resolves to the original durable receipt/cutoff; changed digest under the same operation identity is IDEMPOTENCY_CONFLICT; no second generation. | NOT RUN |
+| S4 | Crash during operation (before/within/after durable commit) | Pre-commit crash leaves no success; post-commit response loss recovers the exact receipt; partial durable state remains UNKNOWN/BLOCKED. | NOT RUN |
+| S5 | Durable persistence succeeded but response was lost | Retry/lookup with the same identity returns the same receipt, generation, commit cursor and cutoff; timeout is not treated as abort. | NOT RUN |
+| S6 | Recovery repeats an operation after restart/restore | Recovery reuses the original receipt, proves continuity and anti-rollback, and never regresses generation/state version or mints a new cutoff. | NOT RUN |
+| S7 | Partial success and partial failure across namespaces or sub-operations | Preserve each successful namespace receipt; aggregate remains OPEN/UNKNOWN until all required namespaces independently satisfy C1–C6. | NOT RUN |
 
+All seven scenarios are conjunctive with the six D-002 conditions for the same immutable operation/fence/snapshot. A scenario title or normative description is not a test result. Each eventual execution record must retain exact runtime commit, test path/ID, command/environment, injected ordering/fault, raw output or immutable CI log, durable before/after ledger and receipt readback, expected/actual result, CI Run ID and artifact digest.
 For every scenario, retain: exact runtime commit; exact test path and test ID; command and environment; injected ordering/fault; raw stdout/stderr or immutable CI log; durable before/after ledger and receipt readback; expected/actual result; CI Run ID; artifact digest. A summary count without the underlying evidence is insufficient.
 
 ## 6. Current evidence inventory — do not overstate
@@ -93,7 +91,7 @@ For every scenario, retain: exact runtime commit; exact test path and test ID; c
 | Authoritative Producer Registration Ledger runtime | No authorized canonical runtime/persistence carrier evidenced | NOT ESTABLISHED |
 | Real durable Receipt sample and readback | No real Receipt evidenced | NOT ESTABLISHED |
 | Exact equality and linearization proof from running authority | No runtime trace or operational proof evidenced | NOT RUN |
-| Ten operational scenarios | Prior exact-source status records say NOT RUN | NOT RUN |
+| Seven canonical D-002 adversarial scenarios | Prior exact-source status records say NOT RUN | NOT RUN |
 | Reproducible exact-head runtime CI | No authorized runtime target/build custody evidenced | NOT ESTABLISHED |
 
 No code tests are claimed by this handoff. No CI Run ID is claimed. This is a status-accurate engineering handoff, not an implementation PASS.
@@ -105,7 +103,7 @@ F1 may move from DEFERRED/BLOCKED to implementation-verifiable only after:
 - all five D authority operations are implemented in the authorized runtime repository;
 - a real durable Receipt and authoritative Ledger readback are attached;
 - exact equality and linearization are demonstrated from the running authority;
-- all ten D-002 scenarios have reproducible evidence;
+- all seven canonical D-002 scenarios have reproducible evidence;
 - exact-head build/tests and CI are available;
 - A Integration performs exact-source reconciliation without substituting for D Owner or engineering acceptance.
 
@@ -126,4 +124,4 @@ Return results to:
 
 # English operational summary
 
-F-43-01/F1 is delivered here as an engineering-phase landing handoff with explicit entry gates, deliverables, ten-scenario evidence slots, closure rules and return destinations. It does not claim or create runtime implementation. The controlling Issue #7 ruling still defers implementation entry. The purpose of this PR is to make the deferred work actionable and auditable without violating the architecture-repository boundary.
+F-43-01/F1 is delivered here as an engineering-phase landing handoff with explicit entry gates, deliverables, seven canonical D-002 scenario obligations, closure rules and return destinations. It does not claim or create runtime implementation. The controlling Issue #7 ruling still defers implementation entry. The purpose of this PR is to make the deferred work actionable and auditable without violating the architecture-repository boundary.
