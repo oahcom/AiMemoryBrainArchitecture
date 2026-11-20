@@ -165,8 +165,8 @@ current_status_refresh:
     records the subsequent Owner release and supersedes that historical
     restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "abfead30b3f2138ee5ae682be37517bf4313ae7d"
-  ledger_blob_sha: "db01e1b373b4129cc44363020cb7d6c0d0cbdac4"
+  ledger_commit: "570cbbc49cbc8a01195d5246f9ab0a9e21266e03"
+  ledger_blob_sha: "c0510e490f6f0b765f08b51882ceea1b433b1b6f"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -183,13 +183,21 @@ current_status_refresh:
     - "Issue #43 comment 7030877572 — F1/F3 exact-source reconciliation and bounded dispositions"
     - "Issue #7 comment 7021990583 — engineering entry remains DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED"
     - "PR #321 Head 7af4e4c409a6522d961b15d9622c92c7551be5f9 — D query contract Blob 6f2d583dec8487b321795a006266ee4229c7fd80; accepted H mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49 appears twice, superseded Blob zero times; OPEN/DRAFT; exact-head workflow runs none; tests NOT RUN."
-    - "PR #322 Head 0ce618ac503f641cf31e66092ae823c14bf8af7b — validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob e66264ad30df6594e00836524accfdeb54160cee; corrected NON_TYPED_BOUNDED_FIELDS classification; exact-source focused local module 13/13 PASS on Python 3.13.5 (not full repository suite, not CI); Runs 44681841687 and 44681841601 FAILURE, steps null, log retrieval 404 BlobNotFound; no CI PASS; H Owner acceptance not verified."
+    - "PR #322 Head 0ce618ac503f641cf31e66092ae823c14bf8af7b — validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob e66264ad30df6594e00836524accfdeb54160cee; corrected NON_TYPED_BOUNDED_FIELDS classification; exact-source focused local module report 13/13 PASS on Python 3.13.5 (not full repository suite, not independently rerun in this continuation); Runs 44681841687 and 44681841601 FAILURE; retry attempt 2 Jobs 136108099194 and 136108110590 both runner_id=0, steps=[]; test steps did not start; no CI PASS; H Owner acceptance not verified."
     - "PR #327 Head 4684b5d8dded3bd861f3b495c6307b0ac3db1959; handoff Blob c45933284494dcf712f425012cda6341d5c31212 — F1 engineering-entry handoff; seven canonical D-002 scenarios S1–S7 corrected; tests NOT RUN"
     - "F1 repository fact correction: Issue #43 comment 7030788916 records foundational Batch-1 landing in oahcom/AiMemoryBrain at d11722e39f047bb52a482936a68459e74ce906d1; this is not the authorized D authority runtime and does not close F1"
     - "D query contract status: ResolveForgetFenceSnapshotProof remains NOT ESTABLISHED AS CALLABLE; no Runtime repository, authoritative storage, trust root, endpoint/transport, operational key registry, or live receipt/currentness/C1-C6 evidence is verified."
     - "2026-11-20 exact-head rerun refresh: PR #322 Head 593b78e3c2aaea329c6611249bd352cd6c7dd1aa; runs 44680796326/job 136107681779 and 44680796328/job 136107696956 rerun, both FAILURE with steps=null; job log retrieval HTTP 404 BlobNotFound (RequestIds 38fdff0d-b01e-001a-13b1-7841dd000000; 64b41e99-501e-00d8-37b1-78bcb3000000); no CI/test PASS."
     - "F1 remains OPEN for implementation evidence; PR #327 handoff HEAD 4684b5d8dded3bd861f3b495c6307b0ac3db1959 / Blob c45933284494dcf712f425012cda6341d5c31212; S1-S7 NOT RUN; Issue #7 comment 7021990583 keeps implementation binding DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED."
     - "F3 same-Blob D/H role-labelled ACCEPT WITH EXPLICIT LIMITATIONS records: Issue #43 comments 7021655866 and 7021638212, mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49; visible GitHub identity is oahcom for both, so independent human signer attribution remains NOT VERIFIED."
+  prompt_provenance:
+    source_type: T2_CHAT_INSTRUCTION
+    source: "User-provided Owner ruling D-2026-1120-01 in continuation of parent conversation 6afae42c-65d8-83ee-853c-a7537b0e273b"
+    platform_current_conversation_id: NOT_EXPOSED
+    immutable_raw_message_bytes: NOT_AVAILABLE
+    sha256: NOT_VERIFIED
+    note: "No repository prompt file is claimed as the source of this chat instruction; no digest is fabricated."
+
   historical_closeout_note: >-
     integration_closeout above remains the historical 2026-11-19 disposition
     (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
