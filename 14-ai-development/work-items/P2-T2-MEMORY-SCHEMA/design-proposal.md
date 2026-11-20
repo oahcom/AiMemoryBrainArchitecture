@@ -1493,6 +1493,62 @@ The accounting, stated so it can be checked: §18.6 carries **ten citations**. N
 
 **What the audit does not establish:** that these are the only relevant tests, or that Phase 2 conformance follows. Both limits are already recorded in §18.6 and §18.11.
 
+### 18.6b. Out-of-order arrival — implementation-layer investigation (CANDIDATE)
+
+This subsection advances the gate-5 out-of-order-arrival gap from an unqualified absence statement to a bounded implementation investigation. It is **not** a selected ordering contract, a DDL change, an implementation, or a test result.
+
+#### What the current interfaces actually establish
+
+At the inspected source pins:
+
+- `memory_event_store::EventEnvelope` has event identity, source identity, `event_time`, idempotency and correlation fields, but no producer-stream ordering key or producer-assigned sequence.
+- `PayloadEventStoreExt::accept_with_payload` persists accepted events; `read_after` pages by the Event Store's persisted sequence. That sequence is assigned by local acceptance, so it establishes durable **arrival/acceptance order**.
+- The P2-T2 `transcript_message.seq_no` is described as monotonic within a session and assigned at accept. Test 11 establishes ordered retrieval after that assignment; it does not establish how the capture layer handles a later-arriving event whose source order is earlier.
+- `MemoryStorage::commit_version` has its own atomic SQLite transaction and idempotency receipt. The current interfaces do not expose a shared transaction spanning that commit and a separate transcript/Event Store write.
+
+Exact source pins used for this investigation:
+- `crates/memory-event-store/src/lib.rs` — Blob `36fb8e7c5198c6834ea59e2d6f04b69cac564d43`.
+- `crates/memory-event-store-sqlite/src/payload.rs` — Blob `ad22972ba621d5f780467f1bb8712cb962174315`.
+- `crates/memory-storage/src/lib.rs` — Blob `135ac3b857b5a14467545e1d2b0f7534f5a8ba8e`.
+- `crates/memory-storage-sqlite/src/lib.rs` — Blob `d6287a3deb6497f35ca35cb73e10766cfab6449a`.
+- This proposal at investigation start — Blob `50cb77d124bea9307871f6da4d57cf81464c622f`.
+
+The supported statement is therefore: **arrival order is persisted and retrievable; source/intended order under out-of-order arrival is not established by these interfaces or the cited retrieval tests.** `event_time` is metadata and must not be silently promoted to a total-order authority.
+
+#### Candidate policies — alternatives, not adopted
+
+| candidate | behaviour | required evidence / cost |
+|---|---|---|
+| A — acceptance order | Preserve durable acceptance order as transcript order. If a producer supplies a source-order hint, retain it as metadata only; do not reorder already-visible transcript pages. | Smallest compatible extension. Must label source order UNKNOWN when no authoritative sequence exists. |
+| B — source-sequence reconstruction | Require a stable producer-stream identity plus producer-assigned monotonic sequence. Buffer gaps; expose completeness/watermark separately; only publish a source-ordered view when the declared gap policy is satisfied. | Requires a source ordering authority, gap timeout/skip semantics, duplicate-sequence conflict rules, and cursor/version semantics for late arrivals. |
+| C — quarantine on gaps | Accept durable event custody, but withhold transcript inclusion for a stream while a required predecessor is missing; release only after gap closure or an explicitly authorised gap disposition. | Strong fail-closed behaviour, but requires an explicit policy for permanently missing predecessors and visible partial-state semantics. |
+
+No candidate is selected here. In particular, wall-clock timestamps, local row IDs, thread arrival order, or lexical identifiers are not substitutes for a producer ordering authority.
+
+#### Minimum implementation conformance vectors
+
+The following are proposed Phase-2 acceptance cases. They are **not written or run**; the current P2-T2 manifest does not authorise adding test files.
+
+1. **In-order baseline:** source sequence 1, 2, 3 arrives in order; assert durable acceptance identities and transcript order.
+2. **Out-of-order pair:** source sequence 2 arrives before 1; assert the selected policy's exact visible order and whether the stream is complete or pending.
+3. **Gap:** sequence 1 then 3, with 2 absent; assert no false completeness and no silent synthesis of 2.
+4. **Late gap closure:** sequence 2 arrives after a page/cursor was issued; assert whether prior pages remain immutable and how a new snapshot/version exposes the closure.
+5. **Duplicate sequence:** same stream/sequence with identical digest is idempotent; changed digest or changed immutable binding is a conflict or quarantine, never overwrite.
+6. **Stream isolation:** equal sequence numbers from distinct producer streams do not collide or compare.
+7. **Concurrent acceptance:** two writers race on the same stream/sequence; exactly one canonical identity wins or both are deterministically classified, with no duplicate visible position.
+8. **Cross-layer partial failure:** canonical `commit_version` succeeds but the related transcript write fails; assert durable reconciliation/retry identity and prevent a transcript row from claiming a missing or different canonical version.
+
+#### Decision boundary and current disposition
+
+- **Investigation:** startable under the bounded gate-1/2/5 engineering direction; this subsection records the observed interface limits and test obligations.
+- **Binding choice:** not made. Choosing A/B/C, defining source-order authority, or selecting gap/late-arrival semantics is a normative design decision and is not inferred from this investigation.
+- **Implementation:** not authorised. `authorization-manifest.yaml` v2.1 allows only the three listed design paths, marks all other paths `OUT_OF_SCOPE`, and records `implementation_authorization: NOT_GRANTED`.
+- **Verification:** source inspection only. No DDL execution, Phase-2 test execution, CI run, or production conformance is claimed.
+
+This resolves neither the ordering decision nor the P2-T1 implementation gate. It makes the F1 gap falsifiable: a future implementation must select a policy explicitly and pass the eight vectors above at an exact commit.
+
+---
+
 ### 18.7. Gate 6 — separate P2-T1 implementation authorisation
 
 Not obtainable here. The authorisation requires an implementation Owner accepting the target contract, scope, test obligations and failure boundaries against an exact artefact version. `accountable_owner` and `acceptance_authority` are `NOT_ASSIGNED`; Issue #305 records why, and the remedy is a governance act this work item cannot perform.
