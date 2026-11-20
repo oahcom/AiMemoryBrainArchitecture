@@ -197,3 +197,35 @@ D domain types and Fact/Claim ADR; B epistemic/temporal/scope semantics; C/H sou
 - Before payload dereference, source-span resolution, model prompt construction, stage-result publication or retry, re-check current permission and D Forget Fence. Unknown fence/policy state fails closed.
 - ExtractionIR, CandidateProposition, spans, embeddings and normalized values are derived objects: lineage and dependency registration must be durable before visibility under [Forget Fence and Derived Registration](forget-fence-and-derived-registration.md).
 - CandidateProposition remains neutral pre-canonical IR. Mapping to Fact/Claim is ADR-BLOCKED until B/Governance approval; E must not infer the approved model.
+
+### 19.1 Claim/Fact canonical publication order
+
+E's ExtractionIR and CandidateProposition remain private staging artifacts.
+
+The required order is:
+
+1. Durable ingress acceptance.
+2. Current I authorization and D Forget-fence check.
+3. Private immutable staging.
+4. Complete direct/transitive dependency enumeration.
+5. Durable D dependency registration.
+6. D canonical ClaimRevision/FactRevision commit.
+7. Storage PREPARED_HIDDEN publication tuple.
+8. D PublicationParticipant admission.
+9. I Commit Authorization.
+10. Storage final visibility commit.
+11. D/E participant reconciliation and terminalization.
+
+E MUST NOT expose a canonical-looking Claim/Fact, index event, public artifact or serving reference before the applicable canonical and publication boundaries have completed.
+
+UNKNOWN or incomplete dependency state remains private.
+
+Staging does not imply canonical acceptance or public publication.
+
+E does not own canonical Claim/Fact identity or I governance authorization.
+
+#### Storage boundary
+
+The existing Storage L1 decision remains unchanged.
+
+This protocol does not approve Storage L4.

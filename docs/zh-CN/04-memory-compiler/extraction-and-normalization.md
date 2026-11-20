@@ -197,3 +197,35 @@ D Domain Type 和 Fact/Claim ADR；B Epistemic/Temporal/Scope Semantics；C/H So
 - 在 Payload Dereference、Source Span Resolution、Model Prompt Construction、Stage Result Publication 或 Retry 前，重新检查当前 Permission 和 D Forget Fence。Fence/Policy 状态未知时 Fail-closed。
 - ExtractionIR、CandidateProposition、Span、Embedding 和 Normalized Value 都是派生对象：根据 [Forget Fence and Derived Registration](forget-fence-and-derived-registration.md)，必须在可见前持久化 Lineage 和 Dependency Registration。
 - CandidateProposition 保持中立的 Pre-canonical IR。映射到 Fact/Claim 在 B/Governance 批准前仍为 **ADR-BLOCKED**；E 不得自行推断批准的模型。
+
+### 19.1 Claim/Fact 规范发布顺序
+
+E 的 ExtractionIR 和 CandidateProposition 必须保持为私有 Staging 产物。
+
+必须遵循以下顺序：
+
+1. 持久化 Ingress Acceptance。
+2. 当前 I 授权和 D Forget Fence 检查。
+3. 私有不可变 Staging。
+4. 完整枚举直接/传递依赖。
+5. 持久化 D Dependency Registration。
+6. D 规范 ClaimRevision/FactRevision 提交。
+7. Storage PREPARED_HIDDEN Publication Tuple。
+8. D PublicationParticipant Admission。
+9. I Commit Authorization。
+10. Storage 最终 Visibility Commit。
+11. D/E Participant Reconciliation 和终结。
+
+适用的规范提交与 Publication 边界完成之前，E 不得暴露看似规范 Claim/Fact 的对象、Index Event、公开 Artifact 或 Serving Reference。
+
+依赖状态 UNKNOWN 或不完整时必须保持私有。
+
+Staging 不代表规范接收或公开发布。
+
+E 不拥有规范 Claim/Fact 身份，也不拥有 I 治理授权。
+
+#### Storage 边界
+
+既有 Storage L1 决策保持不变。
+
+本协议不批准 Storage L4。
