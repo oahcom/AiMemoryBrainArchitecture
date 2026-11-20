@@ -3,7 +3,7 @@
 
 - Owner domain: G — ContextVersion, Delivery, Applied State and Reconciliation.
 - Mode: delegated G-role exact consumer review under user instruction; **not an independent human G Owner signature**.
-- G normative source: Phase 3.8.22 Blob \`bd297873bc1e593280484a43cb44b56058d9c4ff\`.
+- G normative source: Phase 3.8.22 Blob \`a8efd1aa9696783035e157131fa9751666a4182d\`.
 - H branch exact Head reviewed: \`session-h-bmcp-protocol@b14e388e9e8ecc19f9c51fed67818e9cc69ef4d9\`.
 - H schema Blob: \`2ce8776ca5ee5e014b234dc3eb34a7cb7961e608\`.
 - H validator Blob: \`8febb915ec321cc37cf159b2f5b917a3f945726c\`.
@@ -344,3 +344,102 @@ H 1.2.16 新增不同 Owner 的专属 Snapshot High-water：
 5. G 自身 SQLite Applied Model 仍是独立的 17 项本地参考模型（Run #44188852578）。H 390 项测试和 G 17 项测试均不证明生产 Owner Ledger、COC Quorum、PostgreSQL/Storage、多副本或物理 JF-10。
 
 **G 处置：** H Unified 1.2.16/1.2.17 是独立候选消费者依赖。G 要将这些字段作为规范 Recovery Evidence 消费，必须先获得精确 C/D/I Owner 接受，并由 Storage Successor Manifest 绑定。此更新不代表 G Applied 或 Current-use 接受。
+
+
+---
+
+## 14. G-PIN-001 — exact Phase 3.8.22 source refresh and consumer re-review (2026-11-20)
+
+**Nature:** append-only exact-source refresh and delegated G-role consumer re-review. This does not become an independent human G Owner signature, shared contract freeze, implementation approval or production acceptance.
+
+### 14.1 Exact source pin
+
+- G source branch: `session-g-memory-context`.
+- G source branch HEAD at review: `b777448c8c0bcd208de4f6c86863d0e94436deb5`.
+- Current Phase 3.8.22 English Blob: `a8efd1aa9696783035e157131fa9751666a4182d`.
+- Current Phase 3.8.22 Chinese Blob: `dd3791aa50c5fb24e93f9ab5cee50d3b5c02706e`.
+- Previous Phase 3.8.22 English Blob (historical source): `bd297873bc1e593280484a43cb44b56058d9c4ff`.
+- Phase 3.8.23 consumer-decision Blob before this amendment: `b3a08c2d62c9e3495a21ea421433e52ff3318274`.
+
+The header source pin is updated to the current English Blob. The old Blob remains a historical reference only; it is no longer the source used for the current consumer re-review.
+
+### 14.2 Semantic delta: old versus current Phase 3.8.22
+
+The exact Blob comparison found two substantive changes and the corresponding disposition refresh; the remaining normative text is unchanged.
+
+1. **H Applied Delivery Evidence candidate mapping.** The old Phase 3.8.22 §12 said the complete `HDeliveryBindingIdentity` tuple was not exposed by H Unified 1.2.15 and required a versioned signed P0 mapping or authenticated owner record. The current Phase 3.8.22 distinguishes Unified 1.2.15 from the separate `BMCP Applied Delivery Evidence 1.0.0` family and records all seven `HDeliveryBindingIdentity` fields in its schema, the seven-field validator allowlist, and tests rejecting omissions. Exact candidate evidence: schema Blob `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608`, validator Blob `43f402e4a09034da197ac24856cddbd496c9c75f`, tests Blob `98242cc193a77b27d58b39353ccc031201992614`, PR #136 Head `fe69b105a44ebe8b0b6f4f603a0dbddd21c28fa8`, workflow Run #44184689270 (30/30). This closes the **candidate schema/validator field-mapping gap only**. H/C exact-version acceptance, production canonicalization/signature profile, key registry/lifecycle, durable replay storage and deployed Adapter integration remain OPEN / NOT VERIFIED. The separate family does not modify Unified 1.2.15 or JF-10 Applied ACK.
+2. **Restore external-anchor rule.** Current Phase 3.8.22 §7 adds that a restored snapshot whose restore epoch or any owner/G/COC/Storage high-water is ahead of its trusted external anchor is `UNKNOWN/UNANCHORED` and MUST remain fenced. A numerically greater snapshot value is not proof of a newer committed prefix. Advancement requires an independently authenticated contiguous-prefix/checkpoint proof to update the trusted anchor, followed by exact epoch/high-water reconciliation.
+3. **Disposition wording.** Current Phase 3.8.22 §12 now calls H EvidenceIdentity `CANDIDATE MAPPED` in the separate Applied Delivery Evidence 1.0.0 family; it explicitly keeps H/C acceptance and production trust/replay/Adapter integration OPEN. It does not claim production readiness.
+
+### 14.3 Exact-version re-review of this Phase 3.8.23 consumer decision
+
+- The candidate `HDeliveryBindingIdentity` and `HEvidenceIdentity` tuple in §§2–4 is consistent with the newly pinned Phase 3.8.22 candidate-mapping status. The former H Unified 1.2.15 gap is not carried forward as though the separate Applied Delivery Evidence 1.0.0 mapping did not exist.
+- The C resolver/equality conditions remain reference-candidate logic only. They do not establish a live C resolver, C Owner Ledger inclusion, signer/profile trust, or production sequence namespace.
+- H Unified 1.2.16/1.2.17 Recovery Owner Snapshot remains a separate schema family from H Applied Delivery Evidence 1.0.0. Its owner-specific fields are not substituted for the seven H delivery-binding fields.
+- **New G restore-consumer constraint:** before a restored snapshot can be used for recovery, current-use, or a new Full Applied commit, G must reconcile the restore epoch and each owner/G/COC/Storage high-water against its corresponding trusted external anchor. G MUST NOT compare opaque high-waters across owners or infer an anchor from a larger numeric value. If an anchor is missing/untrusted, or any snapshot epoch/high-water is ahead of its trusted anchor, the result is `UNKNOWN/UNANCHORED`; keep `GRestoreFence` installed and do not serve protected content or promote Full Applied. Only an independently authenticated contiguous-prefix/checkpoint proof may advance the relevant trusted anchor; after that, repeat exact epoch/high-water and same-GID reconciliation before clearing the fence.
+- This is a consumer obligation derived from the current G normative source. It does not claim that Phase 3.8.23, H, COC, Storage or any deployed service already implements the anchor proof.
+
+### 14.4 Re-review result and boundary
+
+**G-PIN-001 source-pin drift: RESOLVED at the document/evidence level by this exact-source refresh.** The consumer decision has been re-reviewed against current Phase 3.8.22 and carries forward both semantic changes above.
+
+The broader decision remains bounded:
+- H Applied Delivery Evidence 1.0.0: candidate consumer shape only.
+- H/C exact acceptance and production trust/replay/Adapter integration: OPEN.
+- C resolver and C Owner Ledger proof: NOT IMPLEMENTED / NOT VERIFIED.
+- COC/Storage exact participant/GID/terminal/restore binding: OPEN / NOT VERIFIED.
+- I/D authority proofs: owner-specific acceptance and live proof remain required.
+- G durable Applied schema/SDK/unique index/atomic commit/crash-restore/multi-replica conformance: NOT IMPLEMENTED / NOT VERIFIED; G-AP-P01..P18 remain SPECIFIED / NOT RUN.
+- Full Applied: NOT ACCEPTED / NOT PROVEN.
+- Global C/G/H Applied freeze and production activation: NO / NOT AUTHORIZED.
+
+This is a delegated G-role technical re-review under the existing task, not an independent human G Owner signature. No other Owner decision is created or accepted by this amendment.
+
+---
+
+## 15. 中文：G-PIN-001 — Phase 3.8.22 精确来源刷新与消费者复审（2026-11-20）
+
+**性质：** 追加式精确来源刷新与委派 G 角色消费者复审。本节不构成独立人类 G Owner 签署、跨域合同冻结、实现批准或生产验收。
+
+### 15.1 精确来源 Pin
+
+- G 来源分支：`session-g-memory-context`。
+- 复审时 G 来源分支 HEAD：`b777448c8c0bcd208de4f6c86863d0e94436deb5`。
+- 当前 Phase 3.8.22 英文 Blob：`a8efd1aa9696783035e157131fa9751666a4182d`。
+- 当前 Phase 3.8.22 中文 Blob：`dd3791aa50c5fb24e93f9ab5cee50d3b5c02706e`。
+- 旧版 Phase 3.8.22 英文 Blob（历史来源）：`bd297873bc1e593280484a43cb44b56058d9c4ff`。
+- 本次修订前 Phase 3.8.23 消费者决议 Blob：`b3a08c2d62c9e3495a21ea421433e52ff3318274`。
+
+本决议头部来源 Pin 已更新为当前英文 Blob。旧 Blob 仅保留为历史引用，不再作为当前消费者复审依据。
+
+### 15.2 Phase 3.8.22 新旧语义差异
+
+精确 Blob 比较发现两项实质语义变化及对应的处置状态更新；其余规范性正文未发生变化。
+
+1. **H Applied Delivery Evidence 候选映射。** 旧版 Phase 3.8.22 §12 认为 H Unified 1.2.15 未暴露完整的 `HDeliveryBindingIdentity` 元组，要求增加版本化签名 P0 映射或认证 Owner Record。当前版明确区分 Unified 1.2.15 与独立的 `BMCP Applied Delivery Evidence 1.0.0` 消息族，并记录该 Schema 包含全部七个 `HDeliveryBindingIdentity` 字段、Validator 强制七字段元组、测试拒绝字段缺失。精确候选证据：Schema Blob `2ce8776ca5ee5e014b234dc3eb34a7cb7961e608`、Validator Blob `43f402e4a09034da197ac24856cddbd496c9c75f`、Tests Blob `98242cc193a77b27d58b39353ccc031201992614`、PR #136 Head `fe69b105a44ebe8b0b6f4f603a0dbddd21c28fa8`、工作流 Run #44184689270（30/30）。这只关闭**候选 Schema/Validator 字段映射缺口**。H/C 精确版本接受、生产 Canonicalization/Signature Profile、Key Registry/Lifecycle、持久化 Replay Storage 和已部署 Adapter 集成仍为 OPEN / NOT VERIFIED。该独立消息族不修改 Unified 1.2.15 或 JF-10 Applied ACK。
+2. **Restore 外部锚点规则。** 当前 Phase 3.8.22 §7 新增：若恢复快照的 Restore Epoch 或任一 Owner/G/COC/Storage High-water 超前于可信外部锚点，则状态为 `UNKNOWN/UNANCHORED`，必须继续保持 Fence。快照数值更大本身不能证明其提交前缀更新。只有独立认证的连续前缀/Checkpoint 证明更新可信锚点后，才可重新执行精确 Epoch/High-water 对账。
+3. **状态措辞更新。** 当前 Phase 3.8.22 §12 将 H EvidenceIdentity 状态改为独立 Applied Delivery Evidence 1.0.0 中的 `CANDIDATE MAPPED`，同时明确 H/C 接受及生产 Trust/Replay/Adapter 集成仍 OPEN；没有声称生产就绪。
+
+### 15.3 对本 Phase 3.8.23 消费者决议的精确版本复审
+
+- §§2–4 中的候选 `HDeliveryBindingIdentity` 与 `HEvidenceIdentity` 元组，与新 Pin 的 Phase 3.8.22 候选映射状态一致。不得继续把原先针对 H Unified 1.2.15 的映射缺口描述成独立 Applied Delivery Evidence 1.0.0 映射仍不存在。
+- C Resolver/相等性检查仍只是参考候选逻辑，不证明真实 C Resolver、C Owner Ledger Inclusion、Signer/Profile Trust 或生产 Sequence Namespace 已实现。
+- H Unified 1.2.16/1.2.17 Recovery Owner Snapshot 与 H Applied Delivery Evidence 1.0.0 仍属于不同 Schema Family；不得以 Owner-specific 字段替代七个 H Delivery Binding 字段。
+- **新增 G Restore 消费约束：** 恢复快照在用于恢复、Current-use 或新的 Full Applied Commit 前，G 必须将 Restore Epoch 及每个 Owner/G/COC/Storage High-water 分别与其对应的可信外部锚点核对。G 不得跨 Owner 比较不透明 High-water，也不得从更大的数值推断锚点。若锚点缺失/不可信，或任一快照 Epoch/High-water 超前于对应可信锚点，则结果为 `UNKNOWN/UNANCHORED`；继续安装 `GRestoreFence`，不得提供受保护内容，也不得提升 Full Applied。只有独立认证的连续前缀/Checkpoint 证明才可推进对应可信锚点；随后必须重新执行精确 Epoch/High-water 与 Same-GID 对账，才可清除 Fence。
+- 这是从当前 G 规范来源导出的消费者义务，不代表 Phase 3.8.23、H、COC、Storage 或任何已部署服务已经实现锚点证明。
+
+### 15.4 复审结论与边界
+
+**G-PIN-001 来源 Pin 漂移：已通过本次精确来源刷新在文档/证据层面解决。** 消费者决议已针对当前 Phase 3.8.22 重新复审，并明确承接上述两项语义变化。
+
+更广泛的决议范围仍受以下限制：
+- H Applied Delivery Evidence 1.0.0：仅为候选消费者形状。
+- H/C 精确接受及生产 Trust/Replay/Adapter 集成：OPEN。
+- C Resolver 与 C Owner Ledger 证明：NOT IMPLEMENTED / NOT VERIFIED。
+- COC/Storage 精确 Participant/GID/Terminal/Restore 绑定：OPEN / NOT VERIFIED。
+- I/D 权威证明：仍需各自 Owner 的精确接受及实时证明。
+- G Durable Applied Schema/SDK/Unique Index/Atomic Commit/Crash-Restore/Multi-replica 符合性：NOT IMPLEMENTED / NOT VERIFIED；G-AP-P01..P18 仍为 SPECIFIED / NOT RUN。
+- Full Applied：NOT ACCEPTED / NOT PROVEN。
+- 全局 C/G/H Applied Freeze 与生产激活：NO / NOT AUTHORIZED。
+
+本次属于现有任务下的委派 G 角色技术复审，不是独立人类 G Owner 签署。本修订不替任何其他 Owner 创设或接受决定。
