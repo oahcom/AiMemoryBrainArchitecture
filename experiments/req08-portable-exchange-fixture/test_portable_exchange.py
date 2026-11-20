@@ -1,4 +1,5 @@
-import copy, tempfile, unittest
+import copy, hashlib, hmac, tempfile, unittest
+import portable_exchange
 from pathlib import Path
 from portable_exchange import (Denied, JsonFileAdapter, SQLiteAdapter, Principal,
     TestAuthority, fixture_grant, make_record, migrate_v1_to_v2, rollback_v2_to_v1)
@@ -67,9 +68,25 @@ class PortableExchangeConformance(unittest.TestCase):
         t=self.auth.issue(tenant="tenant.red",workspace="workspace.blue",agent="agent.alpha",audience="agent.alpha",resource="memory.demo.001",actions=["read"],expires_at=1)
         with self.assertRaisesRegex(Denied,"GRANT_EXPIRED"): self.a.read(self.record.record_id,t)
     def test_delegation_within_scope_accepted(self):
-        parent=fixture_grant(self.auth,actions=["read","write","import","export","share","delegate"])
+        parent=fixture_grant(self.auth,agent="agent.delegate",actions=["read","write","import","export","share","delegate"])
         child=fixture_grant(self.auth,actions=["read","write","import","export","share"],delegation_chain=(self.auth.issuer,"agent.delegate","agent.alpha"),parent_grant=parent["claims"]["grant_id"])
         self.assertEqual(self.a.read(self.record.record_id,child),self.record)
+    def test_delegation_parent_agent_mismatch_rejected_at_issuance(self):
+        parent=fixture_grant(self.auth,agent="agent.parent",actions=["read","delegate"])
+        with self.assertRaisesRegex(ValueError,"DELEGATION_PARENT_AGENT_MISMATCH"):
+            fixture_grant(self.auth,agent="agent.alpha",actions=["read"],
+                delegation_chain=(self.auth.issuer,"agent.attacker","agent.alpha"),
+                parent_grant=parent["claims"]["grant_id"])
+    def test_tampered_delegation_chain_rejected_after_signature_recomputed(self):
+        parent=fixture_grant(self.auth,agent="agent.parent",actions=["read","delegate"])
+        child=fixture_grant(self.auth,agent="agent.alpha",actions=["read"],
+            delegation_chain=(self.auth.issuer,"agent.parent","agent.alpha"),
+            parent_grant=parent["claims"]["grant_id"])
+        forged=copy.deepcopy(child)
+        forged["claims"]["delegation_chain"][-2]="agent.attacker"
+        forged["signature"]=hmac.new(self.auth._key,portable_exchange.canonical(forged["claims"]),hashlib.sha256).hexdigest()
+        with self.assertRaisesRegex(Denied,"DELEGATION_PARENT_AGENT_MISMATCH"):
+            self.auth.verify(forged,self.principal,self.record.resource,"read")
     def test_delegation_scope_escalation_rejected(self):
         parent=fixture_grant(self.auth,actions=["read","delegate"])
         with self.assertRaisesRegex(ValueError,"DELEGATION_ACTION_ESCALATION"):

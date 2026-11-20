@@ -2,6 +2,7 @@
 """REQ-08 bounded portable exchange fixture; Python stdlib only, not production auth/BMCP."""
 from __future__ import annotations
 import argparse, copy, hashlib, hmac, json, os, sqlite3, tempfile
+from contextlib import closing
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -88,6 +89,8 @@ class TestAuthority:
             parent = self.issued.get(parent_grant)
             if parent is None or "delegate" not in parent.actions:
                 raise ValueError("DELEGATION_NOT_AUTHORIZED")
+            if parent.agent != chain[-2]:
+                raise ValueError("DELEGATION_PARENT_AGENT_MISMATCH")
             if (parent.tenant, parent.workspace, parent.resource) != (tenant, workspace, resource):
                 raise ValueError("DELEGATION_SCOPE_ESCALATION")
             if not set(actions).issubset(parent.actions):
@@ -119,6 +122,8 @@ class TestAuthority:
             parent = self.issued.get(g.parent_grant)
             if parent is None or "delegate" not in parent.actions or parent.grant_id in self.revoked:
                 raise Denied("DELEGATION_PARENT_INVALID")
+            if parent.agent != g.delegation_chain[-2]:
+                raise Denied("DELEGATION_PARENT_AGENT_MISMATCH")
             if (parent.tenant, parent.workspace, parent.resource) != (g.tenant, g.workspace, g.resource) or not set(g.actions).issubset(parent.actions):
                 raise Denied("DELEGATION_SCOPE_ESCALATION")
         return g
@@ -176,13 +181,16 @@ class SQLiteAdapter(AdapterV1):
     provider_id = "provider-sqlite"
     def __init__(self, path, authority, principal):
         super().__init__(authority, principal); self.path = str(path)
-        with sqlite3.connect(self.path) as db:
-            db.execute("CREATE TABLE IF NOT EXISTS records(record_id TEXT PRIMARY KEY, payload BLOB NOT NULL)")
+        with closing(sqlite3.connect(self.path)) as db:
+            with db:
+                db.execute("CREATE TABLE IF NOT EXISTS records(record_id TEXT PRIMARY KEY, payload BLOB NOT NULL)")
     def _put(self, record):
-        with sqlite3.connect(self.path) as db:
-            db.execute("INSERT INTO records(record_id,payload) VALUES(?,?) ON CONFLICT(record_id) DO UPDATE SET payload=excluded.payload", (record.record_id, canonical(record.json())))
+        with closing(sqlite3.connect(self.path)) as db:
+            with db:
+                db.execute("INSERT INTO records(record_id,payload) VALUES(?,?) ON CONFLICT(record_id) DO UPDATE SET payload=excluded.payload", (record.record_id, canonical(record.json())))
     def _get(self, record_id):
-        with sqlite3.connect(self.path) as db: row = db.execute("SELECT payload FROM records WHERE record_id=?", (record_id,)).fetchone()
+        with closing(sqlite3.connect(self.path)) as db:
+            row = db.execute("SELECT payload FROM records WHERE record_id=?", (record_id,)).fetchone()
         if row is None: raise KeyError("RECORD_NOT_FOUND")
         return Record.from_json(json.loads(row[0]))
 
