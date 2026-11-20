@@ -2,7 +2,7 @@
 # Design-proposal scope only. Implementation authorization is expressly NOT granted
 # by this manifest. See scope.implementation_authorization below.
 
-schema_version: "2.0"
+schema_version: "2.1"
 work_item: P2-T2
 title: "Memory Storage Schema design proposal"
 repository: oahcom/AiMemoryBrainArchitecture
@@ -91,10 +91,15 @@ review:
     architecture_decision below, not by this field. The absence of an accountable human
     authority is a limit on the decision's capacity, recorded in
     architecture_decision.capacity_excludes; it is NOT equivalent to Q1 remaining
-    undecided. The remaining open questions are Q11 (Layer 1 boundary), Q12
-    (schema-execution authority), Q13 (completed tool call requires a result), Q14
-    (recompute single input), Q8 (transcript retention classes) and Q9 (impact_level
-    typing). Implementation and verification obligations are separately unresolved:
+    undecided. The remaining open questions are Q11 (authorisation to extend a Phase 1
+    table's schema), Q12 (schema-execution authority), Q13 (completed tool call requires
+    a result), Q14 (recompute single input), Q8 (transcript retention classes) and Q9
+    (impact_level typing). A ruling was requested on these and is recorded in
+    design-proposal.md section 2f; none of the six was closed. Q11 in particular was
+    RE-POSED, not resolved: the ruling answered a boundary-interpretation question whose
+    premise was not located in any inspected repository document, so the strict reading is NOT
+    adopted and section 8.4 was not rewritten to remove the index.
+    Implementation and verification obligations are separately unresolved:
     DDL NOT APPROVED, executability UNVERIFIED, 21 section 13 tests NOT WRITTEN OR RUN,
     P2-T1 NOT AUTHORIZED.
 
@@ -102,7 +107,9 @@ status: BLOCKED
 status_reason: >
   Q1 is decided: OPTION_C adopted under the dev-baseline Architecture Owner role,
   ACCEPT-WITH-CONDITIONS, recorded in DEC-P2-T2-Q1-001.md. That closes one item and closes
-  nothing else. Q11, Q12, Q13, Q14, Q8 and Q9 remain OPEN; the DDL remains NOT APPROVED;
+  nothing else. Q11, Q12, Q13, Q14, Q8 and Q9 remain OPEN and each now carries a named
+  dependency in design-proposal.md section 14 rather than an unexplained OPEN. The DDL
+  remains NOT APPROVED;
   DDL executability and regression behavior remain UNVERIFIED; none of the 21 section 13
   tests exist; implementation_authorization remains NOT_GRANTED. P2-T1 remains blocked for
   implementation authorization by the seven gates recorded in DEC-P2-T2-Q1-001.md section 8,
@@ -308,7 +315,7 @@ r2_disposition:
     1: "ADDRESSED (§8.1 algorithm_spec_ref/sha256 + numeric_semantics; §8.2 triggers)"
     2: "ADDRESSED (§7.1 transcript_tool_call; §7.2 framed reconstruction)"
     3: "ADDRESSED (§8.4 two composite FKs; §8.2 UNIQUE (version_id, input_id))"
-    4: "ADDRESSED (§8.4 both boundary readings + fallback; Q11 OPEN, not decided)"
+    4: "RE-POSED (§8.4 two-reading table removed — no boundary is defined; Q11 restated as an authorisation question; OPEN, capacity NOT_ASSIGNED)"
     5: "ESCALATED, NOT RESOLVED — Q12; requires the authority that issued the bound; NOT_ASSIGNED"
     6: "ADDRESSED (§16 + Appendix A provenance limit)"
     7: "ADDRESSED (Q10 recorded as review ruling — tiered; exact value CONDITIONAL, NOT VERIFIED)"
