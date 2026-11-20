@@ -9,6 +9,7 @@ process exit before COMMIT.
 from __future__ import annotations
 
 import argparse
+from contextlib import closing
 import multiprocessing as mp
 import os
 import sqlite3
@@ -27,7 +28,7 @@ def connect(path: str) -> sqlite3.Connection:
 
 
 def initialize(path: str) -> None:
-    with connect(path) as conn:
+    with closing(connect(path)) as conn:
         conn.executescript("""
             CREATE TABLE memories(memory_id TEXT PRIMARY KEY, current_version_id TEXT);
             CREATE TABLE versions(version_id TEXT PRIMARY KEY, memory_id TEXT NOT NULL REFERENCES memories(memory_id));
@@ -98,7 +99,7 @@ def run() -> None:
             assert process.exitcode == 0, f"CAS worker exit={process.exitcode}"
         states = sorted(item[1] for item in outcomes)
         assert states == ["COMMITTED", "STALE"], f"unexpected CAS outcomes: {outcomes}"
-        with connect(db) as conn:
+        with closing(connect(db)) as conn:
             current = conn.execute("SELECT current_version_id FROM memories WHERE memory_id='m1'").fetchone()[0]
             version_count = conn.execute("SELECT COUNT(*) FROM versions WHERE version_id IN ('v-a','v-b')").fetchone()[0]
             commit_count = conn.execute("SELECT COUNT(*) FROM commit_log WHERE commit_sequence=1").fetchone()[0]
@@ -118,7 +119,7 @@ def run() -> None:
         assert Path(ready).exists(), "crash worker did not reach pre-COMMIT point"
         crash.join(10)
         assert crash.exitcode == 23, f"expected deliberate abrupt exit 23, got {crash.exitcode}"
-        with connect(db) as conn:
+        with closing(connect(db)) as conn:
             current_after = conn.execute("SELECT current_version_id FROM memories WHERE memory_id='m1'").fetchone()[0]
             version_after = conn.execute("SELECT COUNT(*) FROM versions WHERE version_id='v-crash'").fetchone()[0]
             commit_after = conn.execute("SELECT COUNT(*) FROM commit_log WHERE version_id='v-crash'").fetchone()[0]
@@ -129,14 +130,14 @@ def run() -> None:
         print(f"PRE_COMMIT_RECOVERY: current_unchanged={current_after == current} version_rows={version_after} commit_rows={commit_after} idempotency_rows={idem_after}")
 
         # A committed write set must remain visible after connection close/reopen.
-        with connect(db) as conn:
+        with closing(connect(db)) as conn:
             conn.execute("BEGIN IMMEDIATE")
             conn.execute("INSERT INTO versions(version_id, memory_id) VALUES ('v-durable', 'm1')")
             conn.execute("UPDATE memories SET current_version_id='v-durable' WHERE memory_id='m1'")
             conn.execute("INSERT INTO commit_log(commit_sequence, memory_id, version_id) VALUES (2, 'm1', 'v-durable')")
             conn.execute("INSERT INTO idempotency(idempotency_key, memory_id, receipt) VALUES ('key-durable', 'm1', 'v-durable')")
             conn.commit()
-        with connect(db) as conn:
+        with closing(connect(db)) as conn:
             durable = (
                 conn.execute("SELECT current_version_id FROM memories WHERE memory_id='m1'").fetchone()[0],
                 conn.execute("SELECT COUNT(*) FROM versions WHERE version_id='v-durable'").fetchone()[0],
