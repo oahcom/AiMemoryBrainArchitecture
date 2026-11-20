@@ -297,7 +297,12 @@ impl MemoryContext {
 }
 
 pub fn scopes_intersect(left: &[ScopeRef], right: &[ScopeRef]) -> bool {
-    left.iter().any(|l| right.iter().any(|r| l.scope_id == r.scope_id))
+    left.iter().any(|l| right.iter().any(|r| l == r))
+}
+
+/// Returns true only when every required ScopeRef is present by full canonical identity.
+pub fn scope_set_contains_all(container: &[ScopeRef], required: &[ScopeRef]) -> bool {
+    required.iter().all(|item| container.iter().any(|candidate| candidate == item))
 }
 
 pub fn validate_cross_scope_reference(
@@ -658,4 +663,17 @@ mod tests {
         );
         assert!(validate_outcome_claim("outcome", &[]).is_ok());
     }
+    #[test]
+    fn scope_identity_requires_id_kind_and_namespace_to_match() {
+        let canonical = scope("same-id");
+        let mut other_namespace = canonical.clone();
+        other_namespace.namespace_key = "project:same-id".into();
+        let mut other_kind = canonical.clone();
+        other_kind.scope_kind = ScopeKind::Project;
+
+        assert!(scopes_intersect(&[canonical.clone()], &[canonical.clone()]));
+        assert!(!scopes_intersect(&[canonical.clone()], &[other_namespace]));
+        assert!(!scopes_intersect(&[canonical], &[other_kind]));
+    }
+
 }
