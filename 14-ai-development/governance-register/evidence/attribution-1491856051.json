@@ -1,0 +1,152 @@
+[
+ {
+  "sha": "e2644784c010da488b4794f3e6b10d17c32e9b4b",
+  "date": "2026-11-20T18:25:24Z",
+  "msg": "docs(governance): register GOV-DOC-002 sources as single-file bilingual",
+  "prs": []
+ },
+ {
+  "sha": "965a66b9a92cd4c2b20f4b6100721c779be7f784",
+  "date": "2026-11-20T17:57:00Z",
+  "msg": "docs(governance): normalise work-items links on both language sides",
+  "prs": []
+ },
+ {
+  "sha": "7d76c589bc52f14acbd1a32a9807222b732e04b6",
+  "date": "2026-11-20T17:45:56Z",
+  "msg": "docs(governance): pair bilingual mirrors for GOV-DOC-002 classification",
+  "prs": []
+ },
+ {
+  "sha": "0c73f639bf7392a5381d0cc0d9cafd53017bfe05",
+  "date": "2026-11-20T17:35:49Z",
+  "msg": "docs(governance): add GOV-DOC-002 document management policy and fix links",
+  "prs": []
+ },
+ {
+  "sha": "927eadcb1a8ee94cf533491823373b5ce5f4e204",
+  "date": "2026-11-20T13:40:07Z",
+  "msg": "docs: 架构文档治理 - 建立清晰层次结构",
+  "prs": []
+ },
+ {
+  "sha": "e949d82b6cc3681a04631aa429e1bc2ab815305b",
+  "date": "2026-11-19T20:56:20Z",
+  "msg": "feat(gate): F-07 remediation — NORMATIVE_ROOTS covers 14-ai-development",
+  "prs": [
+   304
+  ]
+ },
+ {
+  "sha": "e4e7278d51c2e22207d6c955b96f55e7cdf0894b",
+  "date": "2026-11-19T20:38:21Z",
+  "msg": "docs(governance): UNIFICATION-RULING-001 v1.1 validity clause + RULING-02 downstream status alignment",
+  "prs": [
+   303
+  ]
+ },
+ {
+  "sha": "a427c99150128eb220654648f7bf0e5841c12f8d",
+  "date": "2026-11-19T20:25:25Z",
+  "msg": "docs(prompts): archive task-level T1 prompts/67-t4b-proceed.md with provenance record",
+  "prs": [
+   302
+  ]
+ },
+ {
+  "sha": "41e5202c751e8ceb2b31f6d343c13ee2498a2d1f",
+  "date": "2026-11-19T20:19:06Z",
+  "msg": "docs(work-items): record FD-1 terminal disposition AUTHORIZED-UNDER-DEV-BASELINE",
+  "prs": [
+   301
+  ]
+ },
+ {
+  "sha": "63a4f468114956168de210bc35869d66139726a6",
+  "date": "2026-11-19T20:00:01Z",
+  "msg": "docs(work-items): register FIX-2026-P1-MANIFEST-YAML-001 from post-merge facts (manifest registration_deferral trigger)",
+  "prs": [
+   299
+  ]
+ },
+ {
+  "sha": "bd95cd92a9a1b0760ee19c47a69b0a98f336cf9d",
+  "date": "2026-11-19T19:49:40Z",
+  "msg": "docs(work-items): fix YAML parseability in four manifests (FIX-2026-P1-MANIFEST-YAML-001)",
+  "prs": [
+   298
+  ]
+ },
+ {
+  "sha": "c26b34bea109b7cd7dfa3db3817504063449c788",
+  "date": "2026-11-19T18:05:00Z",
+  "msg": "docs(governance): run the cross-check against merged main and fix what it found",
+  "prs": [
+   288
+  ]
+ },
+ {
+  "sha": "a9cb8bab28777cc303602e6a7f3d5344b7aa2bb7",
+  "date": "2026-11-19T18:02:12Z",
+  "msg": "docs(governance): record the c9 test inputs and the LIMITATION exclusions",
+  "prs": [
+   287
+  ]
+ },
+ {
+  "sha": "25d6e3dd3db1a06d578c0ae23691d45e15e50f12",
+  "date": "2026-11-19T17:54:32Z",
+  "msg": "docs(governance): give the new mechanisms a failure mode",
+  "prs": [
+   287
+  ]
+ },
+ {
+  "sha": "e0df83ca84763a2135360ebcba035c999f620e70",
+  "date": "2026-11-19T17:52:24Z",
+  "msg": "docs(governance): add a finding registry, a LIMITATION state and a status cross-check list",
+  "prs": [
+   287
+  ]
+ },
+ {
+  "sha": "e41e88c9f582e1d4c76ce4c938efa8e75da9bca6",
+  "date": "2026-11-19T17:48:12Z",
+  "msg": "docs(governance): apply the re-open trigger to merged text and correct section 11",
+  "prs": [
+   286
+  ]
+ },
+ {
+  "sha": "d549daba31a01ca523d94431efb7eaac471a7251",
+  "date": "2026-11-19T17:44:55Z",
+  "msg": "docs(governance): add reproduction prerequisites, assertion mapping and re-open check record",
+  "prs": [
+   285
+  ]
+ },
+ {
+  "sha": "0827afe2230ea89c9bdd846d51ff5b2811c3dbb4",
+  "date": "2026-11-19T17:43:12Z",
+  "msg": "docs(governance): add re-open trigger and independently checkable closure evidence",
+  "prs": [
+   285
+  ]
+ },
+ {
+  "sha": "48c1383fb5cd1f8378ed2ba4d6feac26bcd0ab41",
+  "date": "2026-11-19T17:40:58Z",
+  "msg": "docs(governance): record boundary rule and close F-08/F-09 with a stated basis",
+  "prs": [
+   285
+  ]
+ },
+ {
+  "sha": "33302f40e76065becf8e8e7e312a03a9c2438bc0",
+  "date": "2026-11-19T15:38:12Z",
+  "msg": "fix(bilingual-tiering): address R2 findings F1 and F2",
+  "prs": [
+   279
+  ]
+ }
+]

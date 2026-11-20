@@ -436,4 +436,118 @@ The §7 conclusion therefore stands, with one addition: `L0-manager`'s authority
 
 ---
 
-**Status**: `OPEN` / `NOT_REMEDIATED` / **scale 45** / **nature escalated from "process slip" to "deliberate choice under a known rule, rationalised in writing"**
+## 12. Third re-check (2026-11-21 03:00Z)
+
+### 12.1 Scale: 45 → 53
+
+Across the two `main` advances after `c099816f19e1` (the PR #390 merge point), 8 more commits without a PR appeared.
+
+| Range | Direct commits | Authors |
+|---|---:|---|
+| `c099816f...ee9b3031` | 1 | `L0-manager <l0@local>` |
+| `ee9b3031...1a0dc911` | 7 | `unknown <1491856051>` × 4, `oahcom` × 3 |
+| **this round** | **8** | |
+| **cumulative** | **53** | |
+
+This round's additions:
+
+| commit | Time (Z) | Author email | Message |
+|---|---|---|---|
+| `ae5a886fa0` | 18:02:27 | `l0@local` | AID-2026-014 R3 correction: root freeze identity exclusion |
+| `0c73f639bf` | 17:35:49 | `1491856051` | docs(governance): add GOV-DOC-002 document management |
+| `7d76c589bc` | 17:45:56 | `1491856051` | docs(governance): pair bilingual mirrors for GOV-DOC |
+| `965a66b9a9` | 17:57:00 | `1491856051` | docs(governance): normalise work-items links on both |
+| `e2644784c0` | 18:25:24 | `1491856051` | docs(governance): register GOV-DOC-002 sources as single-file bilingual |
+| `25c6128321` | 19:05:13 | `oahcom` | AID-2026-014 R5 correction: restore ZH status counterpart |
+| `8b9cb11985` | 19:09:10 | `oahcom` | AID-2026-014 R5 correction: Storage §8.8 applied on both sides |
+| `1a0dc911a9` | 19:15:14 | `oahcom` | AID-2026-014 R5 correction: add bilingual read-back |
+
+### 12.2 New property: three identities pushing directly in parallel
+
+The 8 new direct commits belong to three identities:
+
+- `l0@local` — already recorded in §7 as `AUTHORITY_SOURCE_UNVERIFIED`; continued pushing directly in round three.
+- `1491856051` — email has no `@`, not a valid address. Appeared once in round one; appears 4 times this round, all on **bilingual governance** commits.
+- `oahcom` — 3 times, all in the `AID-2026-014 R5 correction` series.
+
+The 4 `1491856051` commits deserve separate mention: their messages read "pair bilingual mirrors", "register ... as single-file bilingual", "normalise work-items links on both" — that is, **the content is bilingual-pairing governance, and the delivery method is a direct push that carries no PR body and therefore cannot carry a `BILINGUAL-MANIFEST` declaration**. The gate has nothing to inspect on a direct push, so these 4 commits bypass exactly the gate they describe.
+
+This is not inference, it is mechanism: `check_bilingual_docs.py` reads the `PR_BODY` environment variable; a direct push creates no PR, triggers no CI, and leaves `PR_BODY` empty.
+
+### 12.3 Attribution status of `1491856051`
+
+**Counting correction**: the previous round recorded "cumulative 5", which counted **direct pushes only**. Full figures:
+
+| Item | Value |
+|---|---|
+| total commits by this email on `main` | **20** |
+| of which without a PR (direct) | **5** |
+| of which via PR | **15** (PR #279/#285/#286/#287/#288/#298/#299/#301/#302/#303/#304) |
+| first appearance | 2026-11-19T15:38:12Z (`33302f40e7`, via PR #279) |
+| email format valid | no (no `@`; missing `git config user.email`) |
+| GitHub account attribution | none; `commit.author` is always `null` |
+| authorization source | `NOT_VERIFIED` |
+
+All 5 direct pushes occurred on 2026-11-20 (13:40–18:25Z):
+
+| commit | Time (Z) | Message |
+|---|---|---|
+| `927eadcb1a` | 13:40:07 | docs: architecture document governance — establish clear hierarchy |
+| `0c73f639bf` | 17:35:49 | docs(governance): add GOV-DOC-002 document management policy |
+| `7d76c589bc` | 17:45:56 | docs(governance): pair bilingual mirrors for GOV-DOC-002 |
+| `965a66b9a9` | 17:57:00 | docs(governance): normalise work-items links on both languages |
+| `e2644784c0` | 18:25:24 | docs(governance): register GOV-DOC-002 sources as single-file bilingual |
+
+When a `git commit` uses an unresolvable email, GitHub establishes no commit-to-account link. Consequence: **all 20 of these commits show no author avatar or link in the GitHub UI, and cannot be audited by account**, whether they arrived via PR or by direct push. That is the lowest-cost way to evade attribution audit, regardless of the user's intent.
+
+Note: this identity **has used the PR process normally 15 times**. So "it cannot use PRs" does not hold. The 5 direct pushes are a choice, not a capability limit.
+
+### 12.4 Relationship to the #384 closure
+
+`e2644784c0` (`1491856051`, 18:25:24) deserves separate recording by timestamp: it is **18 seconds** after the #384 closure (18:25:06) and **20 seconds** after the PR #394 merge (18:25:04).
+
+Its content is not documentation but **another modification of the gate script itself**:
+
+```
+commit e2644784c010da488b4794f3e6b10d17c32e9b4b
+     modified scripts/check_bilingual_docs.py +3/-0
+
+@@ -40,6 +40,9 @@
++    "14-ai-development/ai-development-standard.md",
++    # GOV-DOC-002 requires the policy to be bilingual in a single file so that
++    # the policy and its metadata schema cannot drift apart between languages.
+     "00-governance/architecture-document-management-policy.md",
+```
+
+i.e. it appends one entry to `EMBEDDED_BILINGUAL_SOURCES`, the pairing-exemption whitelist.
+
+Three consequences:
+
+1. **The exemption whitelist can itself be widened by direct push.** `EMBEDDED_BILINGUAL_SOURCES` is the single switch that means "this file needs no counterpart". It can gain members via a commit with no PR, no `PR_BODY` and no review. So the "incomplete coverage" that Issue #384 tries to fix can keep growing from the other side — the exemption side.
+2. **The gate of that same Issue was modified without a PR 18 seconds after the Issue closed.** PR #394, the fix for #384, changed `NORMATIVE_ROOTS`; `e2644784c0`, 18 seconds later, changed `EMBEDDED_BILINGUAL_SOURCES`. Both are exemption mechanisms in the same file; the latter is constrained by none of #384's ACs.
+3. **The author is still `1491856051`**, unmappable to a GitHub account.
+
+Measurement of `14-ai-development/ai-development-standard.md` itself on `main` (40,409 bytes, 3,572 CJK characters / 28,321 Latin characters) shows the file genuinely holds both languages, so GOV-DOC-002's single-file requirement **may well be legitimate**. This register does not question the technical rationale of that exemption; it records **the manner in which it was granted**: no PR, no declaration, no review, no attributable account.
+
+### 12.4.1 Register entry produced
+
+| ID | Content | Status |
+|---|---|---|
+| `EMBEDDED-EXEMPT-VIA-DIRECT-PUSH` | `EMBEDDED_BILINGUAL_SOURCES` can be widened by direct push, forming a second bypass class | `OPEN` |
+
+### 12.5 Updated verification evidence
+
+| Evidence | Value |
+|---|---|
+| round-three `main` head | `1a0dc911a9e3779c975f570a7996f980ffb98e9c` |
+| cumulative direct commits | **53** (33 + 12 + 8) |
+| cumulative `verified=true` | **0 / 53** |
+| round-three direct commits | 8 (3 identities) |
+| `1491856051` totals | 20 commits, 5 direct, 15 via PR |
+| `main` blob count | 826 |
+| raw data | `evidence/direct-main-commits.json`, `evidence/direct-main-commits-p2.json`, `evidence/direct-main-commits-p3.json`, `evidence/attribution-1491856051.json` |
+| re-check scripts | `evidence/merge-gate-evidence.json`, `evidence/direct-commit-filesets.json` |
+
+---
+
+**Status**: `OPEN` / `NOT_REMEDIATED` / **scale 53** / **nature escalated from "process slip" to "deliberate choice under a known rule, rationalised in writing"**; round three adds: **continues across parallel identities, and now includes a commit identity that cannot be attributed to any account**
