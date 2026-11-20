@@ -183,19 +183,3 @@ Track at least these separate outcomes:
 9. G8 and architecture acceptance tracked independently of PR backlog convergence.
 
 **Final ruling:** The current open-PR count is 9. PRs 332 and 339 are merged; PR 333 has supplied successful local test evidence, with its merge record requiring confirmation. Historical CI failure classifications after the billing-block boundary are withdrawn as evidence. The repository remains under drain-under-freeze governance. No direct `main` writes, no new PR or Issue, no merge authority, no production activation, no architecture acceptance, and no quota unfreeze are granted.
-
-**替换版本的最终校正（以本段为准）：**
-
-原文第 2 节 PR #333 行应改为：
-
-| PR | Observed condition | Disposition | Required action / rationale |
-|---:|---|---|---|
-| 333 | Merged; local Rust workspace test passed at head `7f24e25dda93` | `CONVERGED-MERGED` | Record actual local execution: `cargo test --workspace --all-targets -j 2`, exit 0. Merge and test results are independent evidence; historical CI failure classification is invalid. |
-
-Disposition totals 最终应为：
-
-- `RETITLE-AND-DECLARE`: 4
-- `REBASE-THEN-MERGE`: 6
-- `HOLD`: 4
-- `CONVERGED-MERGED`: 3 — PRs 332、333、339。
-- Total: 17。
