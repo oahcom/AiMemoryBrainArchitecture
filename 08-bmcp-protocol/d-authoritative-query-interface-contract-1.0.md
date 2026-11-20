@@ -5,7 +5,7 @@
 - Owner: D Domain Owner
 - D Owner Decision ID: `D-OWNER-2026-11-19-007`
 - Scope: AID-2026-010 / Issue #43 / F-43-01 / F3
-- H mapping input: `08-bmcp-protocol/phase-3.8.35-h-owner-decision-f43-01-f3-d-1.3.1-mapping.md`, exact Blob `e60bdd4cbfef79850596001f01cb56e622b7d79d`
+- H mapping input: `08-bmcp-protocol/phase-3.8.35-h-owner-decision-f43-01-f3-d-1.3.1-mapping.md`, exact Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`
 - D contract baseline: 1.3.1, Blob `12b71e770f4e977c7f147694a644066bc2ce11b9`
 - D-002 proof baseline: Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5`
 - Preceding D decision: `D-OWNER-2026-11-19-006` (ACCEPT WITH EXPLICIT LIMITATIONS)
@@ -138,7 +138,7 @@ ResolveForgetFenceSnapshotProofRequest {
   d_contract_blob_sha256: "12b71e770f4e977c7f147694a644066bc2ce11b9",
   d_query_contract_revision: "1.0",
   d_query_contract_blob_sha256: <exact published Blob SHA>,
-  h_mapping_blob_sha256: "e60bdd4cbfef79850596001f01cb56e622b7d79d",
+  h_mapping_blob_sha256: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49",
   request_id: RequestId,
   request_nonce: Nonce256,
   requester_identity: HConsumerIdentity,
