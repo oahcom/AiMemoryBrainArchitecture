@@ -500,3 +500,85 @@ Claim 与 Fact 的概念区分、稳定 Claim 身份与不可变 ClaimRevision �
 | 生产信任与密码学 Profile | NOT APPROVED |
 | Storage L4 | OPEN / NOT APPROVED |
 | Formal Acceptance | PENDING |
+
+## 13. 治理与批准边界
+
+Work Item：AID-2026-014
+
+处置：CORR-APPLY-DISP-01
+
+修正状态：PROPOSED_FOR_APPLICATION
+
+Owner 决策：
+
+- B Option A：DECIDED FOR CONVERGENCE。
+- D Option A：DECIDED FOR CONVERGENCE。
+
+R3 审查处置：REQUEST CHANGES（最严格原则优先）。
+
+Formal Acceptance：PENDING。
+
+Schema Freeze：NOT APPROVED。
+
+Implementation Conformance：NOT ESTABLISHED。
+
+以下事项继续保持 NOT APPROVED：
+
+- Fact/Claim/ClaimRevision/FactRevision/ConflictSet 物理 Schema。
+- DDL。
+- 公开 API。
+- H Wire 字段。
+- 生产 Attestation 密钥。
+- Trust Root。
+- 密码学 Profile。
+- Storage L4。
+
+本次规范同步只记录概念决策及其语义后果。
+
+它不构成 Schema Freeze、实现验收、生产授权或 Formal Acceptance。
+
+### 13.1 证据与验收状态分离
+
+规范文件存在不代表测试 PASS。
+
+测试用例已经编写不代表测试 PASS。
+
+空 CI 记录、缺失的 Workflow 执行或不可获取的执行输出均不代表测试 PASS。
+
+审查 PASS 不等于 Formal Acceptance。
+
+拟议修正不等于已经应用。
+
+修正已经应用，也不代表已经独立复审；必须回读精确 Commit HEAD 和 Blob 内容后才能进行独立复审。
+
+任何 R1–R5 项均不得仅凭作者声明标记 CLOSED。
+
+R1–R5 全部经过独立复审确认闭合之前，不得派发测试执行。
+
+## 变更历史
+
+### AID-2026-014 R3 规范修正同步
+
+权威来源：
+
+- Owner B Option A 和 D Option A：GitHub Issue #43，comment 7034237663。
+- 追踪事项：GitHub Issue #265。
+- 应用处置：CORR-APPLY-DISP-01。
+
+审查来源：
+
+- R3 REQUEST CHANGES 会话：6b00085d…
+- REQUEST CHANGES SHA-256：05d9842cbbaff378935399a0d0c45a3d9e265ed9814029695c586995cbe334fe
+
+- R3 PASS 会话：6b000948…
+- PASS SHA-256：c41455083f0868e7bcd74740e19b436e7811f70542423e91891176538056490a
+
+处置：
+
+R3-DUAL-VERDICT-DISP-01。
+
+Strictest-wins = REQUEST CHANGES。
+
+本次修正保留两个 Owner 决策为 DECIDED FOR CONVERGENCE。
+
+本记录不构成 Formal Acceptance、Schema Freeze 或实现符合性证明。

@@ -486,3 +486,83 @@ This does not freeze any Schema, DDL, public interface or production security co
 | Production trust and cryptographic profile | NOT APPROVED |
 | Storage L4 | OPEN / NOT APPROVED |
 | Formal Acceptance | PENDING |
+
+## 13. Governance and Approval Boundary
+
+Work Item: AID-2026-014
+
+Disposition: CORR-APPLY-DISP-01
+
+Correction status: PROPOSED_FOR_APPLICATION
+
+Owner decisions:
+
+- B Option A: DECIDED FOR CONVERGENCE.
+- D Option A: DECIDED FOR CONVERGENCE.
+
+R3 review disposition: REQUEST CHANGES (strictest-wins).
+
+Formal Acceptance: PENDING.
+
+Schema Freeze: NOT APPROVED.
+
+Implementation Conformance: NOT ESTABLISHED.
+
+The following remain NOT APPROVED:
+
+- Fact/Claim/ClaimRevision/FactRevision/ConflictSet physical Schema.
+- DDL.
+- Public APIs.
+- H Wire fields.
+- Production Attestation keys.
+- Trust Root.
+- Cryptographic Profile.
+- Storage L4.
+
+This normative synchronization records conceptual decisions and their semantic consequences only.
+
+It does not constitute schema freeze, implementation acceptance, production authorization or Formal Acceptance.
+
+### 13.1 Evidence and Acceptance Separation
+
+The existence of a specification does not establish test PASS.
+
+The existence of a written test case does not establish test PASS.
+
+An empty CI record, missing workflow execution, or unavailable execution output does not establish test PASS.
+
+A review PASS is not Formal Acceptance.
+
+A proposed correction is not an applied correction.
+
+An applied correction is not independently reviewed until the exact commit HEAD and Blob content have been read back and reviewed.
+
+No R1-R5 item may be marked CLOSED solely from author assertions.
+
+No test execution may be dispatched until R1-R5 have all been independently confirmed closed.
+
+## Change History
+
+### AID-2026-014 R3 correction synchronization
+
+Authority:
+- Owner B Option A and D Option A: GitHub Issue #43, comment 7034237663.
+- Tracking: GitHub Issue #265.
+- Application disposition: CORR-APPLY-DISP-01.
+
+Review provenance:
+
+- R3 REQUEST CHANGES session: 6b00085d…
+- REQUEST CHANGES SHA-256: 05d9842cbbaff378935399a0d0c45a3d9e265ed9814029695c586995cbe334fe
+
+- R3 PASS session: 6b000948…
+- PASS SHA-256: c41455083f0868e7bcd74740e19b436e7811f70542423e91891176538056490a
+
+Disposition:
+R3-DUAL-VERDICT-DISP-01.
+
+Strictest-wins = REQUEST CHANGES.
+
+The correction preserves both Owner decisions as DECIDED FOR CONVERGENCE.
+
+This entry does not constitute Formal Acceptance, Schema Freeze or implementation conformance.
