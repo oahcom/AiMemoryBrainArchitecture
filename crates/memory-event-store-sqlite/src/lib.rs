@@ -1,6 +1,7 @@
 //! SQLite adapter for durable Phase 1 Event acceptance receipts.
-//! This adapter persists metadata and the caller-supplied payload reference/digest;
-//! it does not store or independently hash payload bytes.
+//! The payload extension persists raw payload bytes with a SHA-256 digest verified
+//! on append and re-verified on ordered reads. Payload custody is implemented by
+//! the exported `payload` module; digest-format policy remains a candidate seam.
 
 pub mod payload;
 pub use payload::{PayloadEventStoreExt, StoredEvent};
