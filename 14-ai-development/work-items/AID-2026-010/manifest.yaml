@@ -152,3 +152,12 @@ integration_closeout:
       does not modify or supersede their authoritative finding records.
 
   repository_mutation_authorized_by_this_ruling: false
+
+development_readiness:
+  decision_id: AID-2026-027
+  register_path: 14-ai-development/work-items/AID-2026-010/development-readiness-register.md
+  counts:
+    blocks_dev_start: 0
+    does_not_block: 39
+  f_43_02_disposition: CLOSED
+  entry_verdict: SATISFIED_FOR_SCOPED_ENGINEERING_PHASE_DEVELOPMENT_BASELINE
