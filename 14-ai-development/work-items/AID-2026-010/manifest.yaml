@@ -967,3 +967,57 @@ latest_exact_carrier_refresh:
   tests_for_ledger_and_manifest_changes: NOT_RUN
   main_write_or_merge: false
   new_prs_or_issues_created: 0
+
+
+# Superseding exact pins after same-run retries and F1 handoff refresh — 2026-11-20
+terminal_exact_pin_refresh_2026_11_20:
+  finding_ledger:
+    path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+    commit: "4681040b96ea7895fa4eb64c5033a434e54dbc27"
+    blob: "52a708bccf0c26369ed5a4f61a1c3089e8e441a0"
+  F1:
+    finding: "F-43-01/F1 | P1 | OPEN"
+    handoff_pr: 327
+    handoff_branch: "docs/f43-01-f1-engineering-entry-handoff"
+    handoff_commit: "459dd608ecc559841eb6183775cdef674b395fb8"
+    handoff_blob: "0b058d32546105e33be1bb560978dca021af9c66"
+    runtime_implementation: "NOT IMPLEMENTED"
+    S1_S7: "NOT RUN"
+    execution_binding: "DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED (Issue #7 comment 7021990583)"
+  F3:
+    finding: "F-43-01/F3 | P1 | OPEN"
+    D_query_contract:
+      pr: 321
+      head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      active_H_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+    H_TEST_candidate:
+      pr: 322
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      test_methods: 15
+      retry_runs:
+        - id: 44684299439
+          job: 136136582468
+          conclusion: FAILURE
+          steps: null
+        - id: 44684299500
+          job: 136136525120
+          conclusion: FAILURE
+          steps: null
+      test_execution: "NO_TEST_STEPS_EXECUTED; NO_CI_PASS"
+    independent_human_signers: "NOT_VERIFIED; D/H role comments both show login oahcom"
+    operational_consumer_and_C1_C6_evidence: "NOT_ESTABLISHED"
+  provenance:
+    source: "current user chat instruction, T2"
+    platform_conversation_uuid_and_raw_bytes: "NOT_EXPOSED_BY_CONNECTOR"
+    prompt_sha256: "NOT_VERIFIED"
+  boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merge: false
+    main_write: false
+    runtime_authorization: false
+    independent_owner_signature_claimed: false
