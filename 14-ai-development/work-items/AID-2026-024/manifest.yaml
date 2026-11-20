@@ -34,14 +34,19 @@ repository:
   baseline_independently_reverified: false
 
 prompt:
-  prompt_file: "14-ai-development/work-items/AID-2026-024/prompt-v1.md"
-  prompt_version: "v1"
+  prompt_file: "14-ai-development/work-items/AID-2026-024/prompt-v2.md"
+  prompt_version: "v2"
+  prompt_status: "FROZEN"
+  prompt_sha256: "c74c47465285ff7ba07b89e750c3b0c64e48d0b84c31240468795a856cf7a7a0"
+  prompt_bytes: 11481
+  prompt_sha256_v1: "2cd4fed82ebdf801298670f1453c7becf51c0d8d6855c593fac5396d3d6ca09c"
+  prompt_bytes_v1: 6856
   prompt_lifecycle:
-    current_version: null
+    current_version: "v2"
     note: >-
-      current_version is null because no prompt currently matches the revised
-      scope. Prompt v1 remains frozen and historically valid; it is no longer an
-      execution basis for this Work Item.
+      v2 was frozen and hash-verified on 2026-11-20. v1 remains preserved as
+      history. Freezing v2 does not authorise R2 and does not fill any ownership
+      field.
     historical_versions:
       - version: "v1"
         status: "FROZEN"
@@ -50,32 +55,43 @@ prompt:
           v1 scopes a from-zero three-arm architecture; the REQ-06 pilot already
           exists in main under reviews/req06-evaluation-pilot/
         delivery_integrity: "NOT_VERIFIED"
-        evidence: "prompt_sha256 and prompt_bytes below are unchanged from registration"
-    next_version:
+        evidence: "prompt_sha256_v1 and prompt_bytes_v1 above are unchanged from registration"
+    current:
       version: "v2"
-      status: "PENDING"
-      required_before: "R2"
-      required_content:
+      status: "FROZEN"
+      supersedes: "v1"
+      file: "14-ai-development/work-items/AID-2026-024/prompt-v2.md"
+      sha256: "c74c47465285ff7ba07b89e750c3b0c64e48d0b84c31240468795a856cf7a7a0"
+      bytes: 11481
+      frozen_at: "2026-11-20"
+      verification: >-
+        Recomputed sha256 over the exact file bytes equals the value above;
+        asserted by reqs/_freeze_v2.py, exit 0. v1 sha256 and byte count
+        re-verified as unchanged in the same run.
+      covered_by_scope_revision: "v2"
+      covers:
         - "Review of the existing REQ-06 pilot"
-        - "Three-arm comparability assessment"
-        - "Wilson interval and statistical validity analysis"
-        - "Sample design and real-user trace gaps"
-        - "Harmful activation risk"
-        - "Scale-up plan"
-        - "Corpus hash, blob pin and experiment id traceability"
+        - "Statistical validity with arithmetic"
+        - "Three-arm comparability, ARM_C as policy proxy"
+        - "Sample and control gap inventory with blocked claims"
+        - "Harmful-activation risk with interval bounds"
+        - "Scale-up plan with derived sample size"
+        - "Reproducibility and traceability requirements"
         - "Acceptance boundary against Issue #374"
-      constraint: >-
-        v2 must not repackage the original three-arm architecture design task.
-        v1 must not be rewritten in place; its SHA-256 and byte count stay as
-        registered.
-  prompt_status: "FROZEN"
-  prompt_sha256: "2cd4fed82ebdf801298670f1453c7becf51c0d8d6855c593fac5396d3d6ca09c"
-  prompt_bytes: 6856
+      delivery_integrity: "NOT_VERIFIED"
+    next_version: null
+    constraint: >-
+      v1 must not be rewritten in place. v2 must not repackage the original
+      three-arm architecture design task. R2 remains NOT_STARTED and is not
+      implied by v2 existing.
   prompt_provenance_tier: "T1"
   prompt_provenance_note: >-
-    The snapshot is mechanically copied byte-for-byte by the coordination
-    layer from the dispatch source file. Byte-equality between the source
-    artifact and the content rendered to this session is NOT_VERIFIED.
+    v1 was mechanically copied byte-for-byte by the coordination layer from the
+    dispatch source file; that note is retained as v1 history. v2 was authored
+    directly for the revised scope and has no separate dispatch source artifact;
+    its identity is the file bytes pinned by prompt_sha256 above. In both cases,
+    equality between the repository artifact and the content rendered to and
+    received by a session is NOT_VERIFIED.
   prompt_delivery_integrity: "NOT_VERIFIED"
 
 governance:
