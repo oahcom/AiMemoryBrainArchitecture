@@ -48,13 +48,13 @@ TEST EXECUTION = SUSPENDED
 
 | 要求 | 应用状态 | 独立复审 |
 |---|---|---|
-| R1 Claim 身份 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R2 Attestor 授权 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R3 共享 Fact Forget | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R4 Fact/Claim 同步 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R5 端到端发布 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
-| R5 Storage §8.8 | NOT_APPLIED_PENDING_LOCATE | PENDING |
-| PASS 治理同步 | APPLIED_PENDING_INDEPENDENT_REVIEW | PENDING |
+| R1 Claim 身份 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R2 Attestor 授权 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R3 共享 Fact Forget | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R4 Fact/Claim 同步 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R5 端到端发布 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
+| R5 Storage §8.8 | CARRIER_LOCATED_NOT_APPLIED | PENDING |
+| PASS 治理同步 | FIX_APPLIED_AWAITING_REREVIEW | PENDING |
 
 ## 4. 应用证据要求
 
@@ -125,6 +125,9 @@ Implementation Conformance 继续保持 NOT ESTABLISHED。
 
 下表所有 HEAD 与 Blob 均来自实际应用与回读过程返回值；不使用源会话自报 HEAD 作为应用证据。
 
+回读经由提交 fc17542d（main）及 AID-2026-014 载体审计；本轮之后变更的
+三个 Blob 见本节末尾更正注。
+
 | 文件 | 组 | Commit SHA | Blob SHA | UTC |
 |---|---|---|---|---|
 | docs/en/02-domain-model/domain-model-overview.md | R1 §2.4 | d575ebc254ac | 47327d8a0f26 | 2026-11-20T19:53:40+08:00 |
@@ -165,7 +168,7 @@ Implementation Conformance 继续保持 NOT ESTABLISHED。
 
 本轮未应用项（已隔离，无仓库写入）：
 
-- G 根级 §13.3 直接整合：ANCHOR_MISMATCH（定稿第七节 6. G 载体状态；同步债务 SD-06）。根级文件 06-memory-context/context-versioning.md，Blob 05c0739d0c22576a1fd5affc7d73c078c89049b1，保持不变。新建 EN/ZH 配对补充文件不宣称根级 §13.3 已完成替换。
-- Storage ADR §8.8：NOT_APPLIED_PENDING_LOCATE（定稿第八节；同步债务 SD-08）。真实可写 ADR 载体未定位；未创建替代 ADR，未向无关文档插入。
+- G 根级 §13.3 直接整合：已应用。根级文件 06-memory-context/context-versioning.md 已重建为根级规范来源（提交 2606978e，Blob 8503a171922a27aca469042164b2e14f5f525910）。补充文件 Blob 249fd8691707（EN）与 aed4f80857de（ZH）已并入该节，不再宣称独立竞合协议。§14.5 随后对齐为 §13.3 的下位约束（提交 fc17542d，Blob dbce95485d02c8b25bfa2c13596c32d0d57b341d）。此前对 Blob 05c0739d... 的开放态读取已被取代。
+- Storage ADR §8.8：CARRIER_LOCATED_NOT_APPLIED。载体存在且可达：分支 session-storage-consistency-forget-atomicity-2026-11-16，Tip 281fd1edc15f607b0bcb5ff15c5486a6302c41d0，路径 reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md，当前 Blob bb544ba2f346bdc130d524bd5c7310d86f367988（273 行，章节止于 §8.7）。该分支 Tip 即 AID-2026-014-PROMPT v1 钉定的 Storage HEAD，且所钉 L1 topology Blob bb544ba2... 与本文档为同一文件。§8.8 双语正文存放于 Issue #265 评论 7037252404。NOT_APPLIED_PENDING_LOCATE 因事实错误而撤回：产生该判定的递归树检索仅覆盖 main。此处不执行应用，因为载体不在 main 上，且跨分支规范性共存尚无 Owner 裁决。未创建替代 ADR，未向无关文档插入。
 
 本应用证据段由应用证据提交本身加入；该提交 SHA 与状态文件终态 Blob 由 L0 应用报告及 raw 回读登记。
