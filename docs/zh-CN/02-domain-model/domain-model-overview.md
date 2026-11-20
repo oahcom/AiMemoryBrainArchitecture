@@ -10,12 +10,23 @@
 
 Phase 1 采用以下规范领域对象：
 
-Event、Memory、MemoryVersion、Claim、Entity、Relation、Evidence、Provenance、MemorySource、MemoryContext、ContextEntry、ScopeRef、ActorRef、TemporalRef。
+Event、Memory、MemoryVersion、Claim、ClaimRevision、Fact、FactRevision、Entity、Relation、Evidence、Provenance、MemorySource、MemoryContext、ContextEntry、ScopeRef、ActorRef 和 TemporalRef。
 
-Fact 在 Phase 1 不是独立对象。“已验证事实”表示为 Epistemic Status 为 Verified 的 Claim。
+Claim 与 Fact 是不同的规范领域对象。
 
-模型明确不压缩为 text + embedding。Embedding、词法索引、图索引、排序特征和渲染文本均属于派生表示，不是规范领域对象。
+Claim 表示命题身份及其不可变修订历史。
 
+Fact 表示独立治理的 Attestation，并引用一个或多个精确 ClaimRevisionRef。
+
+Verified Claim 不会自动成为 Fact。
+
+Fact 不是具有更高 Confidence 的 Claim。
+
+Fact 不代表绝对客观真理。
+
+Claim 与 Fact 的独立性不意味着每个 Claim 都必须具有 Fact。
+
+模型不压缩为 text + embedding。Embedding、词法索引、图索引、排序特征和渲染文本均属于派生表示，不是规范领域对象。
 ## 2. 身份与版本规则
 
 1. 每个规范对象都有稳定、类型明确的不透明标识符。
@@ -262,6 +273,19 @@ Attestation Method 身份只能证明调用了哪个声明程序，不能证明�
 
 这些值不可互换。
 
+### 4.1 Object Semantics and Ownership
+
+| 对象 | Owner | 语义 |
+|---|---|---|
+| Claim | Domain Model | 具有稳定 ClaimRef 和不可变 ClaimRevision 历史的命题身份 |
+| ClaimRevision | Domain Model / D | 具有精确 Parent、Evidence 和 Provenance 引用的不可变命题状态 |
+| Fact | Domain Model / I Governance | 独立的受治理 Attestation 身份；不是客观真理，也不是 Verified Claim 的别名 |
+| FactRevision | Domain Model / D | 不可变 Attestation 状态，绑定精确 ClaimRevisionRef、Evidence、Provenance、Scope、Attestor、Method/Version 和 I 授权决定 |
+
+Claim 与 Fact 具有独立身份。FactRevision 引用精确 ClaimRevision 值，不得使用当前 Claim Head 替代历史引用。
+
+D 拥有规范持久化和 Revision 机制。I 拥有 Attestor 授权和治理策略。B 拥有领域语义。
+
 ## 5. 基数与形成规则
 
 - 一个 Event 可以产生零个、一个或多个 Candidate Memory。
@@ -443,37 +467,36 @@ Canonical Commit 与所需 Provenance 可见性必须处于同一原子边界，
 9. 没有 Outcome Evidence 时拒绝把 Plan/Intent 提升为完成结果；
 10. 校验错误和 Stale Write Conflict 是确定性的。
 
-## 11. 本规范明确不决定的事项
+## 11. 本规范未决定事项
 
-以下事项不属于 Phase 1 语义冻结：
-- 独立不可变 Fact 对象；
-- 物理存储 Schema 与 SQL 布局；
-- 精确序列化/Wire 格式；
-- Embedding/Vector/Graph Index；
-- Ranking 与 Retrieval 算法；
-- Relation 扇出性能上限；
-- Forget 的物理擦除机制；
-- 模型辅助提取行为。
+以下事项仍处于本规范批准边界之外：
 
-不得为了简化实现而把这些事项偷偷引入规范领域模型。
+- Fact/Claim 物理存储 Schema 和 SQL 布局。
+- Fact/Claim DDL 和精确字段级持久化表示。
+- 精确序列化格式和公开 Wire 格式。
+- 公开 API 和 H Wire 字段。
+- 生产 Attestation 密钥材料。
+- Trust Root 和密码学 Profile。
+- Storage L4 数据库及部署选型。
+- 物理 Forget/擦除实现。
+- 实现符合性和运行验收。
 
+Claim 与 Fact 的概念区分、稳定 Claim 身份与不可变 ClaimRevision 模型，以及独立 FactRevision Attestation 模型，均为 DECIDED FOR CONVERGENCE。
+
+这不冻结任何 Schema、DDL、公开接口或生产安全配置。
 ## 12. 决策闭合
 
 | 决策 | 状态 |
 |---|---|
-| Event / Memory / Claim 相互独立 | DECIDED |
-| Claim 是规范命题；Phase 1 不设独立 Fact | DECIDED |
-| Memory 身份跨版本稳定 | DECIDED |
-| Claim 跨 Memory Version 的身份策略 | OPEN |
-| MemoryVersion 不可变 | DECIDED |
-| Event / Recorded / Valid Time 分离 | DECIDED |
-| 未知时间显式表示，绝不等于“始终有效” | DECIDED |
-| Canonical Memory 与 Context 分离 | DECIDED |
-| Scope 与 Permission 分离 | DECIDED |
-| 冲突保留竞争 Claim 与 Evidence | DECIDED |
-| 带自身语义的多对多关系使用显式关联对象 | DECIDED（语义规则） |
-| 独立不可变 Fact 对象 | OPEN / 延后 |
-| 时间不确定性的精确编码 | TO_VALIDATE |
-| 物理存储表示 | OUT OF SCOPE |
-
-本规范是 Phase 1 的领域语义唯一基准。后续 Rust 类型、数据库表或协议消息只能映射这些概念，不得重新定义其含义。
+| Claim 与 Fact 是不同的规范对象 | DECIDED FOR CONVERGENCE |
+| 保持命题身份的 Revision 之间使用稳定 ClaimRef | DECIDED FOR CONVERGENCE |
+| ClaimRevision 不可变且可通过精确引用寻址 | DECIDED FOR CONVERGENCE |
+| FactRef 和 FactRevisionRef 独立于 Claim 身份 | DECIDED FOR CONVERGENCE |
+| FactRevision 绑定准确 ClaimRevision、Evidence、Provenance、Scope、Attestor 和 Method/Version | DECIDED FOR CONVERGENCE |
+| FactRevision 绑定 I AuthorizationDecisionRef | DECIDED FOR CONVERGENCE |
+| Claim 身份分类遵循 §2.4 | DECIDED FOR CONVERGENCE |
+| Fact/Claim 物理 Schema | NOT APPROVED |
+| DDL / 公开 API / H Wire | NOT APPROVED |
+| 生产信任与密码学 Profile | NOT APPROVED |
+| Storage L4 | OPEN / NOT APPROVED |
+| Formal Acceptance | PENDING |

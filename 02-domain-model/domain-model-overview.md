@@ -10,12 +10,23 @@
 
 Phase 1 uses these canonical domain objects:
 
-Event, Memory, MemoryVersion, Claim, Entity, Relation, Evidence, Provenance, MemorySource, MemoryContext, ContextEntry, ScopeRef, ActorRef, and TemporalRef.
+Event, Memory, MemoryVersion, Claim, ClaimRevision, Fact, FactRevision, Entity, Relation, Evidence, Provenance, MemorySource, MemoryContext, ContextEntry, ScopeRef, ActorRef, and TemporalRef.
 
-Fact is not a separate object in Phase 1. A verified fact is represented as a Claim whose epistemic status is Verified.
+Claim and Fact are distinct canonical domain objects.
+
+Claim represents a proposition identity and its immutable revision history.
+
+Fact represents an independently governed Attestation that references one or more exact ClaimRevisionRef values.
+
+A Verified Claim is not automatically a Fact.
+
+A Fact is not a Claim with a higher Confidence value.
+
+A Fact does not represent absolute objective truth.
+
+The distinction between Claim and Fact does not imply that every Claim must have a Fact.
 
 The model is intentionally richer than text plus embedding. Embeddings, lexical indexes, graph indexes, ranking features, and rendered text are derived representations, not canonical domain objects.
-
 ## 2. Identity and version rules
 
 1. Every canonical object has a stable typed opaque identifier.
@@ -248,6 +259,19 @@ The model MUST NOT use one universal status field.
 
 These values are not interchangeable.
 
+### 4.1 Object Semantics and Ownership
+
+| Object | Owner | Semantics |
+|---|---|---|
+| Claim | Domain Model | Proposition identity with stable ClaimRef and immutable ClaimRevision history |
+| ClaimRevision | Domain Model / D | Immutable proposition state with exact parent, evidence and provenance references |
+| Fact | Domain Model / I Governance | Independent governed Attestation identity; not objective truth or a Verified Claim alias |
+| FactRevision | Domain Model / D | Immutable Attestation state bound to exact ClaimRevisionRef, Evidence, Provenance, Scope, Attestor, Method/Version and I authorization decision |
+ 
+Claim and Fact have independent identities. FactRevision references exact ClaimRevision values and never substitutes a current Claim head for a historical reference.
+
+D owns canonical persistence and revision mechanics. I owns Attestor authorization and governance policy. B owns domain semantics.
+
 ## 5. Cardinality and formation rules
 
 - One Event may produce zero, one, or many candidate Memories.
@@ -431,35 +455,34 @@ Without embeddings or graph databases, the implementation must demonstrate:
 
 ## 11. Explicitly not decided by this specification
 
-The following remain outside the Phase 1 semantic freeze:
-- a separate immutable Fact object;
-- physical storage schema and SQL layout;
-- exact serialization/wire format;
-- embedding/vector/graph indexes;
-- ranking and retrieval algorithms;
-- relationship fan-out performance limits;
-- physical Forget/erasure mechanics;
-- model-assisted extraction behavior.
+The following remain outside this specification's approval boundary:
 
-These must not be introduced into the canonical domain model merely to simplify implementation.
+- Physical Fact/Claim storage schema and SQL layout.
+- Fact/Claim DDL and exact field-level persistence representation.
+- Exact serialization and public wire format.
+- Public API and H Wire fields.
+- Production Attestation key material.
+- Trust Root and cryptographic profile.
+- Storage L4 database and deployment selection.
+- Physical Forget/erasure implementation.
+- Implementation conformance and operational acceptance.
 
-## 12. Decision closure
+The conceptual distinction between Claim and Fact, the stable Claim identity with immutable ClaimRevision model, and the independent FactRevision Attestation model are DECIDED FOR CONVERGENCE.
+
+This does not freeze any Schema, DDL, public interface or production security configuration.
+## 12. Decision Closure
 
 | Decision | Status |
 |---|---|
-| Event / Memory / Claim are distinct | DECIDED |
-| Claim is the canonical proposition; no separate Fact in Phase 1 | DECIDED |
-| Memory identity is stable across versions | DECIDED |
-| Claim identity across Memory versions | OPEN |
-| MemoryVersion is immutable | DECIDED |
-| Event / Recorded / Valid Time are distinct | DECIDED |
-| Unknown time is explicit, never always valid | DECIDED |
-| Canonical Memory and Context are separate | DECIDED |
-| Scope and Permission are separate | DECIDED |
-| Conflicts preserve competing Claims and evidence | DECIDED |
-| Qualified many-to-many associations use explicit association objects when needed | DECIDED semantic rule |
-| Separate immutable Fact object | OPEN / deferred |
-| Exact temporal uncertainty encoding | TO_VALIDATE |
-| Physical storage representation | OUT OF SCOPE |
-
-This specification is the Phase 1 semantic source of truth. Rust types, database tables, and protocol messages may map these concepts but may not redefine their meaning.
+| Claim and Fact are distinct canonical objects | DECIDED FOR CONVERGENCE |
+| ClaimRef is stable across proposition-preserving revisions | DECIDED FOR CONVERGENCE |
+| ClaimRevision is immutable and exact-reference-addressable | DECIDED FOR CONVERGENCE |
+| FactRef and FactRevisionRef are independent of Claim identity | DECIDED FOR CONVERGENCE |
+| FactRevision binds exact ClaimRevision, Evidence, Provenance, Scope, Attestor and Method/Version | DECIDED FOR CONVERGENCE |
+| FactRevision binds an I AuthorizationDecisionRef | DECIDED FOR CONVERGENCE |
+| Claim identity classification follows §2.4 | DECIDED FOR CONVERGENCE |
+| Fact/Claim physical Schema | NOT APPROVED |
+| DDL / public API / H Wire | NOT APPROVED |
+| Production trust and cryptographic profile | NOT APPROVED |
+| Storage L4 | OPEN / NOT APPROVED |
+| Formal Acceptance | PENDING |
