@@ -834,7 +834,7 @@ current_turn_final_exact_refresh_d2026_1120_01:
   ledger_path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
   ledger_commit: "a8d99a2090112002f47641e8c595d46c61c6ddb6"
   ledger_blob: "867d7b2dc9476b0cf5a38d1ec9dbb98308a26017"
-  index_blob: "a0f047f36061b7a42937a6f9d0aa5423d66b2948"
+  index_blob: "4195de51f198dc1560a9311451aff8a79a56ac7e"
   f1_handoff:
     pr: 327
     head: "2858c8798deaf30fb12709e8226f880534c963f1"
