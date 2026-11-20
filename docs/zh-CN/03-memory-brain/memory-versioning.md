@@ -63,7 +63,9 @@ D 定义不可变修订语义和 Parent 关系；Canonical Store 持久化 Revis
 | Permissions | Scope 作用于 Claim Identity 和每个 Revision | 每个新 Claim 分别评估 Scope；Successor Link 另行授权 |
 | Storage | Revision Table + Identity Index | 更多 Identity 和 Successor Graph |
 
-**CANDIDATE 推荐：** Option A，即稳定 Claim ID 加不可变 ClaimRevision。它在保持每条历史声明不可变的同时，提供持久引用身份。Correction 创建新 Revision 和明确的 Correction/Supersession Relation；Retraction 创建新的 Epistemic Revision/Event，不删除先前声明。如果 ADR 批准独立 Fact 对象，FactRecord 具有自己的不可变 Revision Stream，并链接到其 Attest 的准确 ClaimRevision。ADR 批准前不冻结 Claim/Fact Schema。
+**DECIDED FOR CONVERGENCE — Option A：** 稳定 Claim 身份加不可变 ClaimRevision。它在保持每条历史声明不可变的同时，提供持久引用身份。Correction 创建新 Revision 和明确的 Correction/Supersession Relation；Retraction 创建新的 Epistemic Revision/Event，不删除先前声明。Option B 继续作为身份模型备选方案保留，但不属于本次选定的收敛方向。如果 ADR 批准独立 Fact 对象，FactRecord 具有自己的不可变 Revision Stream，并链接到其 Attest 的准确 ClaimRevision。
+
+本决策仅确定身份语义，不批准 Claim/Fact Schema、DDL、公共 API 或 Wire Contract。
 
 ## 7. 状态机
 
@@ -164,6 +166,14 @@ J. 只有全部必需可见性条件满足后，才能将逻辑操作标记为�
 
 Producer Admission 一旦成功线性化，该精确操作 MUST 被持久化登记为 Participant。
 
+Producer Admission 成功与精确已准入 Participant 的
+持久化记录 MUST 在权威串行化 Fence/Admission 边界内
+构成一个不可分割的操作。
+
+后续 Forget Fence MUST NOT 在其 Participant Barrier
+评估线性化或完成之前，越过尚未对该 Barrier 持久可见的
+已准入 Participant 记录。
+
 后续 Forget Fence MUST NOT 静默跳过、删除或错误分类该已准入参与者。
 
 必须依据串行化的 Fence/Admission 顺序协调该操作。
@@ -208,6 +218,16 @@ Lost ACK 必须使用原始幂等身份和精确请求 Digest 查回，不得创
 ### 5. PREPARED_HIDDEN 与 Admission 不变量
 
 Producer Admission MUST 在串行化、可恢复的 Admission 边界内线性化，并且必须先于依赖登记和 E Staging。
+
+Admission 只有在精确 Participant 记录已持久化提交后，
+才能报告成功。
+
+Participant 记录持久化失败 MUST 导致 Admission 失败，
+或保持非成功状态。
+
+Forget Fence MUST 等待权威 Fence/Admission 边界确定
+Admission 是否已成功提交，不得忽略 Participant 记录
+尚未完成或结果尚未解决的已准入操作。
 
 精确的已准入操作 MUST 被持久化登记为 Participant。
 
@@ -314,12 +334,56 @@ Storage L4 继续保持 OPEN / NOT APPROVED。
 - Forget 删除 Payload：只保留 I 批准的不可反向重建审计状态；历史内容读取返回 Unavailable。
 - Clock Skew：保留来源时间/精度并独立记录 Commit Time；不得仅按客户端时间戳排序。
 
+### 16.1 受保护发布与 Forget Barrier 故障矩阵
+
+以下矩阵对逻辑 Claim/Fact 发布操作具有规范效力。
+
+六个组件顺序如下：
+
+1. D Fence
+2. Admission
+3. D 规范提交
+4. E Publication
+5. Storage Visibility
+6. G Context Commit
+
+Producer Admission 成功与精确已准入 Participant 的
+持久化记录 MUST 在权威串行化 Fence/Admission 边界内
+构成一个不可分割的操作。
+
+后续 Forget Fence MUST NOT 在已准入 Participant
+记录对该 Barrier 持久可见之前，线性化或完成
+Participant Barrier 评估。
+
+| 场景 | D Fence | Admission | D 规范提交 | E Publication | Storage Visibility | G Context Commit | 禁止的半发布或重复可见效果 |
+|---|---|---|---|---|---|---|---|
+| Fence before Admission（T17） | Fence 先线性化 | MUST 拒绝准入 | MUST NOT 提交 | MUST NOT 发布 | MUST NOT 推进 | MUST NOT 提交 | 不得出现任何规范 Revision、Artifact、Serving Reference 或 ContextVersion |
+| Fence after Admission（T18） | Fence 发现持久 Participant | 原已准入操作保持可识别 | 按声明的完成/抑制策略处置 | 仅授权终态结果可发布 | 仅授权终态结果可推进 | 仅精确授权结果可提交 | Fence MUST NOT 在遗漏已准入 Participant 的情况下完成屏障 |
+| Crash after Admission | 保留持久 Fence/Admission 结果 | 以原始 Operation identity 恢复 Participant 记录 | 不得推定提交 | 不得推定发布 | 不得推定可见 | 不得推定 Context 提交 | 不得出现无持久 Participant 记录却成功的 Admission；不得重复 Participant |
+| Crash after Canonical Commit | 保留 Participant 与 Fence 状态 | 解析原 Admission | 恢复精确规范 Receipt | Publication 保持可恢复且幂等 | MUST NOT 暴露缺少发布前置条件的可见性 | MUST NOT 早于必要可见性提交 | 不得出现半发布规范状态；不得重复 Revision 或 Receipt |
+| Lost ACK | 保留权威操作状态 | 查询原始 Operation identity | 返回原提交 Receipt | 解析原 Publication identity | 返回原可见性结果 | 解析原 ContextVersion identity | ACK 丢失 MUST NOT 产生第二个逻辑操作或重复可见效果 |
+| Retry | 复用原始 Operation identity 与请求摘要 | 返回原准入结果 | 幂等 Receipt 查询 | 幂等发布 | 幂等可见性解析 | 幂等 Context 提交 | 不得重复 Participant、Publication、Visibility 转换或 ContextVersion |
+| Crash after Storage Visibility | 保留精确 Participant 与 Fence 处置 | 解析原 Admission | 验证原规范提交 | 验证原 Publication | 恢复精确已提交可见性结果 | 提交或恢复精确 ContextVersion | 不得第二次推进可见性；不得重复 ContextVersion |
+
+在权威结果得到解析之前，UNKNOWN MUST 保持非最终状态。
+
+恢复 MUST 使用原始 Operation identity，不得生成新身份。
+
+Fence MUST 对每个已准入 Participant 记录可审计的
+完成或抑制处置结果。
+
+该矩阵 MUST 保持 §2 的逻辑顺序，
+MUST NOT 改变 B 的顺序契约。
+
+Storage L1 保持不变。
+Storage L4 保持 OPEN / NOT APPROVED。
+
 ## 17. 依赖与开放问题
 
 依赖：Domain Model 时间/认知语义；Canonical Store；Lifecycle Manager；E Proposal/Replay；F Historical Retrieval；G ContextVersion 引用；H ActorRef/Wire 兼容性；I Retention/Forget Policy；Consistency/Recovery。
 
-- OPEN：INT-P0-01 Fact/Claim ADR 及最终 Revision Model。
-- OPEN：如果 ADR 选择不同语义，Claim 修正采用稳定 ID Revision 还是 Successor Identity。
+- DECIDED FOR CONVERGENCE：INT-P0-01 的 Claim 身份语义，选择稳定 Claim identity + 不可变 ClaimRevision（Option A）。该身份决策不批准 Schema、DDL、公共 API 或 Wire Contract。
+- OPEN：INT-P0-01 中尚未由 Claim 身份决策解决的 Fact 专属建模及批准事项。
 - OPEN：ContextVersion/ChangeSet Schema 由 G 拥有；Brain 只提供固定引用。
 - OPEN：不确定 TimeValue 规范化和时区策略（DM-006）。
 - OPEN：Sequence 范围（Per-Aggregate 还是 Global Commit Stream）。

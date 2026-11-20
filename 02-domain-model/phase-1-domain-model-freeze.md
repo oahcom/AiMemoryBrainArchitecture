@@ -21,12 +21,11 @@ Event
 
 本文件**不**冻结：
 
-- ID 的具体算法（UUIDv7 等仍为 CANDIDATE）。
+- ID 的具体生成算法（UUIDv7 等仍为 CANDIDATE）。
 - BMCP wire format。
 - SQLite DDL。
 - Vector / graph index。
 - LLM / embedding provider。
-- Claim 跨 Memory Version 的稳定身份策略。
 - 物理 Forget 语义。
 - 权限策略语言。
 - 分布式一致性或多节点部署。

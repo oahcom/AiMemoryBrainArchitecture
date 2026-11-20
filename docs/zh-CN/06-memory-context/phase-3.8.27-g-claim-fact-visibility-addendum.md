@@ -32,6 +32,13 @@ G MUST：
 6. 通过受保护可见性协议提交不可变 ContextVersion。
 7. 只有权威提交结果得到确认后才允许发布。
 
+G MUST 验证每一个成功准入的操作在权威
+Fence/Admission 边界下都有持久可见的 Participant 记录。
+
+当对应 Participant Admission 结果仍为 UNKNOWN，
+或其 Participant 记录尚未持久可见时，
+G MUST NOT 提交或暴露 ContextVersion。
+
 G 不得仅凭本地预检查，随后独立执行不受保护的 Head 更新来暴露新 ContextVersion。
 
 ## 3. 历史可见性
@@ -49,6 +56,13 @@ UNKNOWN 提交或 Lost ACK MUST 保持非最终状态。
 恢复 MUST 解析同一个操作及准确 ContextVersion 身份。
 
 任何 Retry 都不得创建重复可见的 ContextVersion 状态。
+
+恢复 MUST 在 Admission、Fence、规范提交、E Publication、
+Storage Visibility 和 G Context Commit 之间
+使用原始 Operation identity。
+
+后续 Forget Fence MUST 计入每个已持久准入的 Participant，
+并记录可审计的完成或抑制处置结果。
 
 B 版顺序以及 T17/T18 不变量，
 对所有源自受保护规范 Claim/Fact 内容的

@@ -208,6 +208,16 @@ E 的 ExtractionIR 和 CandidateProposition MUST
 1. 解析当前 I 授权及适用 Scope。
 2. 在同一串行化、可恢复的 Admission 边界内，
    检查 D Forget Fence 并执行 Producer Admission。
+
+   Producer Admission 成功与精确已准入 Participant 的
+   持久化记录 MUST 在权威串行化 Fence/Admission 边界内
+   构成一个不可分割的操作。
+
+   Participant 记录失败时 Admission MUST NOT 报告成功。
+
+   后续 Forget Fence MUST NOT 在已准入 Participant 记录
+   对该 Barrier 持久可见之前，线性化或完成
+   Participant Barrier 评估。
 3. 在该边界下持久登记完整直接及传递依赖。
 4. 创建私有不可变 E Staging 产物。
 5. 在 D 规范提交边界内提交 ClaimRevision、
@@ -237,6 +247,17 @@ Forget Fence 如果先于 Producer Admission
 
 最终处置 MUST 保留精确身份、依赖闭包
 和可审计 Forget 结果。
+
+恢复 MUST 使用原始 Operation identity。
+
+最终 Fence 处置 MUST 对每个已准入 Participant
+记录可审计的完成或抑制结果。
+
+D memory-versioning.md §16.1 的六组件受保护发布
+故障矩阵为规范矩阵。
+
+E MUST 保持 D 的 Fence/Admission Participant Barrier，
+MUST NOT 引入独立发布顺序。
 
 UNKNOWN 在解析前保持非最终状态。
 

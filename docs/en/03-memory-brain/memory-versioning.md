@@ -63,7 +63,9 @@ Historical query: “valid at T” filters Valid Time; “known by T2” filters
 | Permissions | Scope on Claim identity and every revision | Scope evaluated per new Claim; successor links separately authorized |
 | Storage | Revision table + identity index | More identities and successor graph |
 
-**CANDIDATE recommendation:** Option A, stable Claim ID plus immutable ClaimRevision. It provides durable referential identity while keeping each historical assertion immutable. Correction creates a new revision and explicit correction/supersession relation; retraction creates a new epistemic revision/event and does not erase prior assertions. If ADR approves independent Fact object, FactRecord gets its own immutable revision stream linked to exact ClaimRevision(s). No Claim/Fact schema is frozen before ADR.
+**DECIDED FOR CONVERGENCE — Option A:** Stable Claim identity plus immutable ClaimRevision. It provides durable referential identity while keeping each historical assertion immutable. Correction creates a new revision and explicit correction/supersession relation; retraction creates a new epistemic revision/event and does not erase prior assertions. Option B remains documented as an alternative identity model, not the selected convergence direction. If ADR approves independent Fact object, FactRecord gets its own immutable revision stream linked to exact ClaimRevision(s).
+
+This decision establishes identity semantics only. It does not approve Claim/Fact Schema, DDL, public API, or Wire Contract.
 
 ## 7. State machine
 
@@ -164,6 +166,15 @@ No staging, canonical commit, publication intent, or visibility transition may b
 
 Once Producer Admission has successfully linearized, the exact admitted operation MUST be durably recorded as a participant.
 
+Successful Producer Admission and durable recording of
+the exact admitted participant MUST form one indivisible
+operation under the authoritative serialized
+Fence/Admission boundary.
+
+A subsequent Forget Fence MUST NOT linearize or complete
+its participant-barrier evaluation until the admitted
+participant record is durably visible to that barrier.
+
 A later Forget Fence MUST NOT silently skip, erase, or misclassify that admitted participant.
 
 The operation MUST be reconciled under the serialized Fence/Admission ordering.
@@ -208,6 +219,18 @@ A lost acknowledgement MUST be resolved using the original idempotency identity 
 ### 5. PREPARED_HIDDEN and Admission invariant
 
 Producer Admission MUST linearize under the serialized and recoverable admission boundary before dependency registration and E staging.
+
+The successful Admission result MUST NOT be reported
+until the exact participant record is durably committed.
+
+Failure to persist the participant record MUST cause
+Admission to fail or remain non-successful.
+
+A Forget Fence MUST wait for the authoritative
+Fence/Admission boundary to establish whether an
+admission has successfully committed. It MUST NOT
+ignore an admitted operation whose participant
+recording is incomplete or unresolved.
 
 The exact admitted operation MUST be durably recorded as a participant.
 
@@ -314,12 +337,60 @@ Record aggregate ID, version/revision ID, parent ID, commit sequence, actor/scop
 - Forget removes payload: retain only I-approved non-reconstructive audit state; historical content read returns unavailable.
 - Clock skew: preserve source time/precision and separate commit time; do not order solely by client timestamp.
 
+### 16.1 Protected publication and Forget barrier failure matrix
+
+The following matrix is normative for the logical
+Claim/Fact publication operation.
+
+The six components are ordered as follows:
+
+1. D Fence
+2. Admission
+3. D Canonical Commit
+4. E Publication
+5. Storage Visibility
+6. G Context Commit
+
+Successful Producer Admission and durable recording
+of the exact admitted participant MUST form one
+indivisible operation under the authoritative
+serialized Fence/Admission boundary.
+
+A subsequent Forget Fence MUST NOT linearize or
+complete its participant-barrier evaluation until
+the admitted participant record is durably visible.
+
+| Scenario | D Fence | Admission | D Canonical Commit | E Publication | Storage Visibility | G Context Commit | Forbidden partial-publication or duplicate-visible effect |
+|---|---|---|---|---|---|---|---|
+| Fence before Admission (T17) | Fence linearizes first | MUST reject admission | MUST NOT commit | MUST NOT publish | MUST NOT advance | MUST NOT commit | No canonical revision, artifact, serving reference or ContextVersion may become visible |
+| Fence after Admission (T18) | Fence observes durable participant | Original admitted operation remains identifiable | Apply declared completion/suppression policy | Only authorized terminal outcome may publish | Only authorized terminal outcome may advance | Only exact authorized outcome may commit | Fence MUST NOT complete its barrier while omitting the admitted participant |
+| Crash after Admission | Preserve durable Fence/Admission outcome | Recover original Operation identity and participant record | No inferred commit | No inferred publication | No inferred visibility | No inferred Context commit | No successful Admission without durable participant record; no duplicate participant |
+| Crash after Canonical Commit | Preserve participant and Fence state | Resolve original Admission | Recover exact canonical receipt | Publication remains recoverable and idempotent | MUST NOT expose missing publication prerequisites | MUST NOT commit ahead of required visibility | No half-published canonical state; no duplicate revision or receipt |
+| Lost ACK | Preserve authoritative operation state | Query original Operation identity | Return original commit receipt | Resolve original publication identity | Return original visibility outcome | Resolve original ContextVersion identity | ACK loss MUST NOT create a second logical operation or duplicate visible effect |
+| Retry | Reuse original Operation identity and request digest | Return original admission outcome | Idempotent receipt lookup | Idempotent publication | Idempotent visibility resolution | Idempotent Context commit | No duplicate participant, publication, visibility transition or ContextVersion |
+| Crash after Storage Visibility | Preserve exact participant and Fence disposition | Resolve original admission | Verify original canonical commit | Verify original publication | Recover exact committed visibility outcome | Commit or recover exact ContextVersion | No second visibility advancement or duplicate ContextVersion |
+
+UNKNOWN MUST remain non-final until the authoritative
+outcome is resolved.
+
+Recovery MUST use the original Operation identity,
+not a newly generated identity.
+
+A Fence MUST record an auditable completion or
+suppression disposition for every admitted participant.
+
+The matrix MUST preserve the logical ordering in
+§2 and MUST NOT change B's ordering contract.
+
+Storage L1 remains unchanged.
+Storage L4 remains OPEN / NOT APPROVED.
+
 ## 17. Dependencies and open questions
 
 Dependencies: Domain Model time/epistemic semantics; Canonical Store; Lifecycle Manager; E proposal/replay; F historical retrieval; G ContextVersion refs; H ActorRef/wire compatibility; I retention/Forget policy; consistency/recovery.
 
-- OPEN: INT-P0-01 Fact/Claim ADR and resulting revision model.
-- OPEN: stable-ID revisions vs successor identities if ADR chooses different semantics.
+- DECIDED FOR CONVERGENCE: INT-P0-01 Claim identity semantics, selecting stable Claim identity with immutable ClaimRevision (Option A). The identity decision does not approve Schema, DDL, public API or Wire Contract.
+- OPEN: Remaining INT-P0-01 Fact-specific modeling and approval items not settled by the Claim identity decision.
 - OPEN: ContextVersion/ChangeSet schema is G-owned; Brain supplies pinned refs only.
 - OPEN: uncertain TimeValue normalization/timezone policy (DM-006).
 - OPEN: sequence scope (per aggregate vs global commit stream).

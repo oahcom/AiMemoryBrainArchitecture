@@ -245,6 +245,37 @@ Once Producer Admission successfully linearizes,
 the exact operation MUST be durably recorded
 as an authoritative participant.
 
+Successful Producer Admission and durable recording of
+the exact admitted participant MUST form one indivisible
+operation under the authoritative serialized
+Fence/Admission boundary.
+
+A subsequent Forget Fence MUST NOT linearize or complete
+its participant-barrier evaluation until the admitted
+participant record is durably visible to that barrier.
+
+Participant recording failure MUST prevent Admission
+from reporting success.
+
+A Fence MUST NOT ignore an admitted operation whose
+participant recording is incomplete or unresolved.
+
+UNKNOWN MUST remain non-final.
+
+Recovery MUST use the original Operation identity.
+
+The Fence MUST record an auditable completion or
+suppression disposition for every admitted participant.
+
+The six-component protected publication failure
+matrix in D memory-versioning.md §16.1 is normative
+for G ContextVersion commits derived from
+protected Claim/Fact content.
+
+G MUST NOT commit or expose a ContextVersion
+before the corresponding participant-barrier
+and Storage visibility conditions are resolved.
+
 A later Forget Fence MUST NOT silently skip,
 erase or misclassify that participant.
 

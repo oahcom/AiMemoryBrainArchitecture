@@ -209,6 +209,18 @@ The normative order is:
 2. Evaluate the active D Forget Fence and perform
    Producer Admission under one serialized,
    recoverable admission boundary.
+
+   Successful Producer Admission and durable recording
+   of the exact admitted participant MUST form one
+   indivisible operation under the authoritative
+   serialized Fence/Admission boundary.
+
+   Admission MUST NOT report success if participant
+   recording fails.
+
+   A subsequent Forget Fence MUST NOT linearize or
+   complete participant-barrier evaluation until the
+   admitted participant record is durably visible.
 3. Durably register the complete direct and
    transitive dependency set under that boundary.
 4. Create private immutable E staging artifacts.
@@ -243,6 +255,21 @@ It MUST NOT silently skip or erase the participant.
 
 The final disposition MUST preserve exact identity,
 dependency closure and auditable Forget outcome.
+
+Recovery MUST use the original Operation identity.
+
+UNKNOWN MUST remain non-final.
+
+The final Fence disposition MUST record an auditable
+completion or suppression outcome for every admitted
+participant.
+
+The six-component protected publication failure
+matrix in D memory-versioning.md §16.1 is normative.
+
+E MUST preserve the D Fence/Admission participant
+barrier and MUST NOT introduce an independent
+publication ordering.
 
 UNKNOWN remains non-final until resolved.
 

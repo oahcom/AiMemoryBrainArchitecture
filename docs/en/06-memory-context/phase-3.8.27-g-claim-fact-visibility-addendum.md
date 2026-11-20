@@ -32,6 +32,15 @@ G MUST:
 6. Commit the immutable ContextVersion through the protected visibility protocol.
 7. Publish only after authoritative commit resolution.
 
+G MUST verify that every successfully admitted
+operation has a durably visible participant record
+under the authoritative Fence/Admission boundary.
+
+G MUST NOT commit or expose a ContextVersion while
+the corresponding participant admission outcome
+remains UNKNOWN or its participant record is
+not durably visible.
+
 G MUST NOT expose a new ContextVersion based only on a local pre-check followed by an independent unprotected head update.
 
 ## 3. Historical visibility
@@ -49,6 +58,14 @@ UNKNOWN commit or lost acknowledgement MUST remain non-final.
 Recovery MUST resolve the same operation and exact ContextVersion identity.
 
 No retry may create duplicate visible ContextVersion state.
+
+Recovery MUST use the original Operation identity
+across Admission, Fence, Canonical Commit, E Publication,
+Storage Visibility and G Context Commit.
+
+A later Forget Fence MUST account for every durably
+admitted participant and MUST record an auditable
+completion or suppression disposition.
 
 The B ordering and T17/T18 invariants are
 mandatory for every G ContextVersion derived
