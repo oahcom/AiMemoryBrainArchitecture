@@ -18,16 +18,16 @@ TYPE_DECL = re.compile(r"\bpub\s+(?:struct|enum|type|trait)\s+(Fact|Claim)\b")
 
 
 def strip_rust_comments(source: str) -> str:
-    """Remove comments and string literals while preserving line structure."""
+    """Remove Rust comments and string literals without hiding code after literals."""
     out: list[str] = []
     i = 0
     depth = 0
     line_comment = False
     while i < len(source):
         if line_comment:
-            if source[i] == "\\n":
+            if source[i] == "\n":
                 line_comment = False
-                out.append("\\n")
+                out.append("\n")
             else:
                 out.append(" ")
             i += 1
@@ -42,9 +42,41 @@ def strip_rust_comments(source: str) -> str:
                 out.extend("  ")
                 i += 2
             else:
-                out.append("\\n" if source[i] == "\\n" else " ")
+                out.append("\n" if source[i] == "\n" else " ")
                 i += 1
             continue
+
+        # Recognize literals before comment markers: URLs and comment-like text
+        # inside Rust strings must never start a comment state.
+        prefix_boundary = i == 0 or not (source[i - 1].isalnum() or source[i - 1] == "_")
+        raw = re.match(r'(?:br|r)(?P<hashes>#{0,})"', source[i:]) if prefix_boundary else None
+        if raw:
+            hashes = raw.group("hashes")
+            closing = '"' + hashes
+            content_start = i + raw.end()
+            closing_at = source.find(closing, content_start)
+            end_at = len(source) if closing_at < 0 else closing_at + len(closing)
+            literal = source[i:end_at]
+            out.extend("\n" if ch == "\n" else " " for ch in literal)
+            i = end_at
+            continue
+
+        quote_at = i + 1 if source.startswith(('b"', 'c"'), i) else i
+        if quote_at < len(source) and source[quote_at] == '"':
+            j = quote_at + 1
+            while j < len(source):
+                if source[j] == "\\":
+                    j += 2
+                elif source[j] == '"':
+                    j += 1
+                    break
+                else:
+                    j += 1
+            literal = source[i:j]
+            out.extend("\n" if ch == "\n" else " " for ch in literal)
+            i = j
+            continue
+
         if source.startswith("//", i):
             line_comment = True
             out.extend("  ")
@@ -54,39 +86,6 @@ def strip_rust_comments(source: str) -> str:
             depth = 1
             out.extend("  ")
             i += 2
-            continue
-
-        # Rust raw strings (including byte raw strings) may contain comment
-        # markers or fake declarations; skip through the matching delimiter.
-        raw = re.match(r'(?:br|r)(?P<hashes>#+)?"', source[i:])
-        if raw:
-            hashes = raw.group("hashes") or ""
-            closing = '"' + hashes
-            content_start = i + raw.end()
-            closing_at = source.find(closing, content_start)
-            if closing_at < 0:
-                out.extend(" " * (len(source) - i))
-                break
-            literal = source[i:closing_at + len(closing)]
-            out.extend("\\n" if ch == "\\n" else " " for ch in literal)
-            i = closing_at + len(closing)
-            continue
-
-        # Ordinary and byte strings.
-        quote_at = i + 1 if source.startswith("b\"", i) else i
-        if quote_at < len(source) and source[quote_at] == '"':
-            j = quote_at + 1
-            while j < len(source):
-                if source[j] == "\\\\":
-                    j += 2
-                elif source[j] == '"':
-                    j += 1
-                    break
-                else:
-                    j += 1
-            literal = source[i:j]
-            out.extend("\\n" if ch == "\\n" else " " for ch in literal)
-            i = j
             continue
 
         out.append(source[i])
@@ -145,6 +144,13 @@ class DetectorTests(unittest.TestCase):
         result = inspect_source(
             'let doc = r#"pub struct Fact {}"#;\\npub struct Claim { id: String }'
         )
+        self.assertFalse(result["fact_declared"])
+        self.assertTrue(result["mq01_detected"])
+
+    def test_repository_lib_rs_declares_claim_but_not_fact(self) -> None:
+        domain_path = Path(__file__).resolve().parents[1] / "crates" / "memory-domain" / "src" / "lib.rs"
+        result = inspect_source(domain_path.read_text(encoding="utf-8"))
+        self.assertTrue(result["claim_declared"])
         self.assertFalse(result["fact_declared"])
         self.assertTrue(result["mq01_detected"])
 
