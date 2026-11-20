@@ -64,11 +64,11 @@
 | 历史 ID / 别名 | — |
 | 原始锚点 | `l2-05b-integration-review.md` §F-43-02（L203）；Issue #43 评论 `7015681927`+`7015682819`（D-001/D-002） |
 | 问题定义 | D 1.3.0 契约在 main 与 D Owner 分支不一致；Unicode 数据版本未固定，§5 双高水位证明规则不符。 |
-| 状态 | BLOCKED |
+| 状态 | CLOSED（限定于 UCD 15.1.0 工件锁定、版本绑定及完整一致性语料验证；不代表生产验收或运行时操作证明） |
 | 责任 Owner | D Owner |
 | 回流去向 | D successor 契约正式落文 + Unicode 版本固定 → D 1.3.0 采纳裁决；实现绑定（UCD 工件 lock manifest / validator 版本校验）作为独立实现验收工作跟踪 |
 | 关闭条件 | D successor 契约落文、Unicode 数据版本固定、D Owner 采纳决定（DECIDED → ACCEPTED）——规范层三条件已满足；剩余：main 基线同步 + Unicode 实现绑定验证 |
-| 最新裁决 / 证据 | `D-OWNER-2026-11-19-001`：采纳 = **BLOCKED**，H 消费 = **NOT AUTHORIZED**；`D-OWNER-2026-11-19-003`：1.3.1 successor ACCEPT；A R32 裁定两个规范阻塞点（§5 双语规则 + Unicode 15.1.0 版本固定）解除，`BLOCKED → REMEDIATION ACCEPTED`，不直接 CLOSED（main 未同步 + UCD 工件/validator 绑定未实现未验证）。证据：Commit `7c74c23`→`b03e31c7`，1.3.1 Blob `12b71e770f4e977c7f147694a644066bc2ce11b9`，D-002 证明包 Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5`，#43 `7020911000` |
+| 最新裁决 / 证据 | `D-OWNER-2026-11-19-001`：采纳 = **BLOCKED**，H 消费 = **NOT AUTHORIZED**；`D-OWNER-2026-11-19-003`：1.3.1 successor ACCEPT；A R32 裁定 §5 双语规则与 Unicode 15.1.0 版本固定两个规范阻塞点解除，`BLOCKED → REMEDIATION ACCEPTED`，当时不直接 CLOSED（main 未同步 + UCD 工件/validator 绑定未实现未验证）。`AID-2026-026`：**NOT YET CLOSED**，唯一残余为 `normalizer.cargo_lock_sha256` 与实际 `Cargo.lock` 及锁定 normalizer 版本的绑定证明。`AID-2026-027`：**F-43-02 CLOSED**（限于本 finding 的 UCD 工件锁定、版本绑定及完整一致性语料验证范围；不构成生产验收）。证据：Commit `bb1420b34b1c26e4936fb3b86956e6cf658c2719`；实际 `Cargo.lock` SHA-256 `a697d9051dc486f9707b1f1dd20f135ca922628805dcecf46a9e41078f751f24`，锁定且解析依赖版本 `unicode-normalization 0.1.24` 一致；正向 `cargo test -j 2`：**28 passed / 4 ignored**；完整语料 `records_consumed=19074 / nfc_assertions=95370 / nfd_assertions=95370`；负向伪造 `cargo_lock_sha256` 并重算 payload digests 后，构建以 **exit 101** 失败，报告期望与实际 digest 不匹配。此前对 `Cargo.lock` 追加注释的负向测试因 Cargo 会规范化 lock 文件而未能证明校验行为，明确排除，不作为证据。 |
 | 范围限制 | 不得把 H 修复进展解释为 D 1.3.0 采纳；不得把规范版本固定解释为实现符合；后续不得把原始两个规范阻塞点重复派给 D Owner |
 
 
