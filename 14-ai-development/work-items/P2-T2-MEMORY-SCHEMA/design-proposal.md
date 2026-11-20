@@ -1357,7 +1357,7 @@ So the honest classification has three tiers, not two:
 Applying it:
 
 - **Tier 1 + 2 together** — duplicate delivery, restart/recovery, concurrent append safety, competing CAS serialisation. The Phase 1 tests exist and run and prove the tested store operation. None of them involves a transcript write accompanying a canonical commit, so none establishes the Phase 2 path that did not exist when they were written.
-- **Specified, not implemented, not run** — projection rebuilding, provenance integrity, retrieval ordering.
+- **Specified, not implemented, not run** — projection rebuilding, provenance integrity, retrieval ordering. The last is a sub-finding inside the out-of-order delivery criterion, not a separate criterion of the gate, which is why §18.6 carries ten rows for eight criteria rather than eleven.
 - **Tier 3** — partial failure, out-of-order *arrival*, context-injection correctness, semantic winner selection. No test evidence was located. That is not the same as saying those behaviours are untested; it says their coverage status has not been established.
 
 The substantive work is tier 1+2's open question: what happens when `commit_version` succeeds and the `transcript_message` insert citing it does not. That is a design question, and per §10 it is not one engineering may settle unilaterally.
@@ -1414,7 +1414,7 @@ Partially available. Implementation, verification, review and merge are executab
 | 2 transcript capture | substantial; state vocabulary exists, transition and ownership semantics undefined | Q8 for retention; transitions need adoption (§10) |
 | 3 derived projection | substantial; failure recovery and interruption semantics missing | nothing for structural tier; exact tier `NOT VERIFIED` |
 | 4 outstanding decisions | **none** | authority — Issue #305 |
-| 5 acceptance criteria and tests | 4 `PROVEN — PHASE 1 STORE LAYER` / `UNPROVEN — PHASE 2 INTEGRATION`; 2 specified but unrun; 4 `UNVERIFIED ABSENCE` | work not done; adoption authority for the atomicity contract |
+| 5 acceptance criteria and tests | 10 rows over the gate's 8 criteria: 4 `PROVEN — PHASE 1 STORE LAYER` / `UNPROVEN — PHASE 2 INTEGRATION`; 2 specified but unrun; 4 `UNVERIFIED ABSENCE`; plus retrieval ordering, specified but unrun, carried inside the out-of-order row rather than as a row of its own | work not done; adoption authority for the atomicity contract |
 | 6 implementation authorisation | none | authority — Issue #305 |
 | 7 convergence chain | partial | Owner acceptance unavailable |
 
