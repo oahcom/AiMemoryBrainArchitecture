@@ -195,6 +195,45 @@ Phase 1 supports a point in time, an interval, unknown/unavailable time, and dec
 
 Unknown time must not become always valid. Validity interval and storage retention interval are different concepts.
 
+### 3.15 Fact, FactRevision and Attestation
+
+Fact is an independently identifiable governed Attestation object.
+
+FactRevision is an immutable version of that Attestation.
+
+Every FactRevision MUST reference:
+
+- Exact FactRef and FactRevisionRef.
+- Exact ClaimRevisionRef values being attested.
+- Exact EvidenceRef values.
+- Exact ProvenanceRef values.
+- ScopeRef and applicable visibility constraints.
+- Valid-time interval and recorded/commit-time references.
+- Attestor principal identity.
+- Exact Attestation Method identifier and immutable Version.
+- I AuthorizationDecisionRef.
+- Attestation outcome, rationale and correction/revocation lineage.
+
+FactRevision MUST NOT silently follow a Claim's latest revision.
+
+Its ClaimRevision references are exact and immutable.
+
+Corrections, withdrawal or reassessment MUST create new governed history. They MUST NOT overwrite prior FactRevision records.
+
+Fact does not represent absolute objective truth.
+
+Confidence alone MUST NOT create Fact.
+
+Verified Claim status alone MUST NOT create Fact.
+
+I is the sole authority responsible for Attestor authorization.
+
+D validates and persists I's exact authorization decision reference. D MUST NOT independently determine Attestor governance authority.
+
+Attestation Method identity proves which declared procedure was invoked. It does not prove that the procedure is correct.
+
+This section defines semantic and governance contracts only. It does not approve physical Schema, DDL, public API, production keys, Trust Root or cryptographic profile.
+
 ## 4. Orthogonal state dimensions
 
 The model MUST NOT use one universal status field.

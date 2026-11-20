@@ -209,6 +209,45 @@ Phase 1 支持时间点、时间区间、未知/不可用时间，以及明确�
 
 未知时间不得被转换成“始终有效”。Valid Time 与存储保留时间不是同一概念。
 
+### 3.15 Fact、FactRevision 与 Attestation
+
+Fact 是具有独立身份的受治理 Attestation 对象。
+
+FactRevision 是该 Attestation 的不可变版本。
+
+每个 FactRevision MUST 引用：
+
+- 精确 FactRef 和 FactRevisionRef。
+- 被 Attest 的精确 ClaimRevisionRef。
+- 精确 EvidenceRef。
+- 精确 ProvenanceRef。
+- ScopeRef 及适用的可见性约束。
+- 有效时间区间和记录/提交时间引用。
+- Attestor Principal 身份。
+- 精确 Attestation Method 标识和不可变 Version。
+- I 的 AuthorizationDecisionRef。
+- Attestation 结果、理由及更正/撤销谱系。
+
+FactRevision MUST NOT 自动跟随 Claim 的最新 Revision。
+
+其 ClaimRevision 引用必须精确且不可变。
+
+更正、撤回或重新评估 MUST 创建新的受治理历史，不得覆盖此前的 FactRevision。
+
+Fact 不代表绝对客观真理。
+
+Confidence 单独存在 MUST NOT 产生 Fact。
+
+Verified Claim 状态单独存在 MUST NOT 产生 Fact。
+
+I 是 Attestor 授权的唯一权威。
+
+D 验证并持久化 I 的精确授权决定引用。D MUST NOT 自行判断 Attestor 的治理资格。
+
+Attestation Method 身份只能证明调用了哪个声明程序，不能证明该程序本身正确。
+
+本节只定义语义和治理契约，不批准物理 Schema、DDL、公开 API、生产密钥、Trust Root 或密码学 Profile。
+
 ## 4. 正交状态维度
 
 模型不得使用一个通用 Status 字段承载所有状态。
