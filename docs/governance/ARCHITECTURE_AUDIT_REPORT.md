@@ -1,192 +1,181 @@
-# 架构文档审计报告 (Architecture Audit Report)
+# Architecture Documentation Audit Report
+# 架构文档审计报告
 
-**生成时间**: 2026-11-20  
-**审计范围**: 整个 `docs/` 目录  
-**目标**: 识别权威架构文档、清理冗余文件、建立清晰层次结构
+- Repository: `oahcom/AiMemoryBrainArchitecture`
+- Branch: `main`
+- Audited HEAD: `8215ec57260b5841df1b9f9aad5a7f26d3073bac`
+- Audit date: 2026-11-20
+- Timestamp convention: UTC; “last modified” means the committer timestamp of the latest commit touching that path, not filesystem mtime.
+- File size convention: GitHub Git tree blob size in bytes.
+- Scope: `docs/architecture-convergence/`, `00-governance/`, `01-system-architecture/`, and the complete recursive subtree of `13-engineering-decisions/`.
+- Report path: `docs/governance/ARCHITECTURE_AUDIT_REPORT.md`
 
----
+## 1. Executive Summary / 执行摘要
 
-## 执行摘要
+The audit distinguishes normative authority from candidate designs, non-normative convergence evidence, and historical drafts. A filename containing “final”, “v1”, or “draft” is not by itself proof of approval or supersession.
 
-✅ **文档健康度**: 良好  
-✅ **版本管理**: 良好  
-⚠️ **层次结构**: 需优化  
-✅ **冗余文档**: 最小
+Findings:
 
-**已完成的治理操作**:
-1. ✅ 创建 `docs/governance/` 治理中心
-2. ✅ 归档临时修正文档到 `docs/governance/archive/`
-3. ✅ 为候选架构添加 README 说明
-4. ✅ 生成完整的架构审计报告
+1. The normative governance baseline is GOV-DOC-001 v1.1 at `00-governance/bilingual-documentation-policy.md`. GOV-DOC-001 v1.2 is explicitly a pending, non-normative draft and does not supersede v1.1.
+2. The system architecture baseline is represented by the seven documents in `01-system-architecture/`, read together with the governance invariants and design principles.
+3. `13-engineering-decisions/technology-architecture-blueprint.md` is explicitly a candidate technology blueprint, not a technology freeze or normative architecture.
+4. The ARCH-CONVERGENCE-001 documents are explicitly non-normative proposals, inventories, reviews, or evidence records. The 2026-11-18 currentness addendum says it corrects stale live-status/source-tree observations in earlier series documents and does not approve or amend Owner contracts.
+5. Two superseded-status ARCH-CONVERGENCE-001 documents are classified for archival preservation, not deletion.
+6. No file is approved for deletion based on the evidence available in this audit.
+7. Filename scan found one explicit version/draft filename in the audited scope: `00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md`. No filename containing `v2` or `final` was found in the audited paths.
 
----
+## 2. Audit Method and Coverage / 审计方法与覆盖范围
 
-## 1. 权威架构文档清单 (Authoritative Documents)
+The GitHub recursive tree for the audited `main` HEAD was inspected. It contained:
 
-以下 **15 个文档**是项目的规范性架构文档：
+- `00-governance/`: governance policy, principles, terminology, invariants, drafts, reports, and templates.
+- `01-system-architecture/`: seven system architecture documents.
+- `13-engineering-decisions/`: the technology blueprint and nested DOMAIN-REALITY-001-B, TECH-REALITY-001-A, and TECH-REALITY-001-C research packages.
+- `docs/architecture-convergence/`: eleven ARCH-CONVERGENCE-001 series documents.
 
-### 治理层 (4 个)
-- `docs/zh-CN/00-governance/architecture-invariants.md`
-- `docs/zh-CN/00-governance/design-principles.md`
-- `docs/zh-CN/00-governance/terminology.md`
-- `docs/documentation-style-guide.md`
+The requested destination directory `docs/governance/` did not exist at audit time. The report creation operation creates it.
 
-### 系统架构层 (8 个)
-- `docs/zh-CN/01-system-architecture/system-architecture-specification.md`
-- `docs/zh-CN/01-system-architecture/system-overview.md`
-- `docs/zh-CN/01-system-architecture/component-map.md`
-- `docs/zh-CN/01-system-architecture/component-interactions.md`
-- `docs/zh-CN/01-system-architecture/data-flows.md`
-- `docs/zh-CN/01-system-architecture/responsibility-matrix.md`
-- `docs/zh-CN/01-system-architecture/system-boundaries.md`
-- `docs/zh-CN/01-system-architecture/system-quality-attributes.md`
+A filename scan was applied to the complete recursive inventory of the four requested paths. The single filename match for the version/draft tokens was the GOV-DOC-001 v1.2 draft listed above. Version references inside document bodies were also checked where they affect normative status, especially GOV-DOC-001 v1.1 versus v1.2.
 
-### 工程决策层 (1 个)
-- `docs/zh-CN/13-engineering-decisions/technology-architecture-overview.md`
+## 3. Authoritative Architecture Documents / 权威架构文档清单
 
-### 安全治理层 (1 个)
-- `docs/zh-CN/09-security-governance/security-governance-guide.md`
+These files are retained in place. “Authoritative” is scoped to the document's stated subject; it does not imply that unresolved Owner contracts or implementation gates are approved.
 
-### 文档统计
-- **总规范性文档**: 15 个
-- **候选架构文档**: 11 个 (ARCH-CONVERGENCE-001 系列)
-- **已归档文档**: 1 个
+| Repository-relative path | Last modified (UTC) | Size (bytes) | Purpose / authority scope |
+|---|---:|---:|---|
+| `00-governance/architecture-invariants.md` | 2026-11-17 06:21:32 | 3,442 | Normative architecture invariants; the governance-level constraints for architecture decisions. |
+| `00-governance/bilingual-documentation-policy.md` | 2026-11-17 19:16:23 | 14,687 | GOV-DOC-001 v1.1 normative bilingual documentation policy; current policy authority. |
+| `00-governance/design-principles.md` | 2026-11-16 08:30:12 | 4,293 | Repository architecture/design principles; interpret alongside the explicit invariant and ADR boundaries. |
+| `00-governance/terminology.md` | 2026-11-16 08:30:16 | 4,102 | Canonical project terminology and shared vocabulary for architecture documents. |
+| `01-system-architecture/system-overview.md` | 2026-11-16 08:30:19 | 7,739 | High-level system architecture baseline and system composition. |
+| `01-system-architecture/component-map.md` | 2026-11-16 08:30:20 | 4,463 | System component inventory and logical component relationships. |
+| `01-system-architecture/system-boundaries.md` | 2026-11-16 08:41:18 | 14,664 | System scope, external boundaries, and responsibility boundaries. |
+| `01-system-architecture/system-quality-attributes.md` | 2026-11-16 08:41:26 | 15,204 | Quality attributes and system-level non-functional constraints. |
+| `01-system-architecture/component-interactions.md` | 2026-11-19 05:32:23 | 18,555 | Component interaction and collaboration semantics. |
+| `01-system-architecture/data-flows.md` | 2026-11-19 05:32:23 | 18,279 | System data movement and flow-level architecture. |
+| `01-system-architecture/responsibility-matrix.md` | 2026-11-19 05:32:23 | 3,779 | Logical responsibility allocation across architecture components. |
 
----
+### 3.1 Candidate document—not authoritative
 
-## 2. 候选架构文档 (Non-normative)
+| Repository-relative path | Last modified (UTC) | Size (bytes) | Purpose / classification |
+|---|---:|---:|---|
+| `13-engineering-decisions/technology-architecture-blueprint.md` | 2026-11-16 18:09:09 | 49,758 | TAB-001 technology architecture research/blueprint. It is a CANDIDATE and must not be treated as an approved technology freeze. |
 
-`docs/architecture-convergence/` 下的 **11 个 ARCH-CONVERGENCE-001 系列文档**是候选架构，不是规范性文档。
+The nested DOMAIN-REALITY-001-B, TECH-REALITY-001-A, and TECH-REALITY-001-C research packages under `13-engineering-decisions/` remain scoped research and decision evidence. Their presence does not independently establish normative approval. No nested filename in those packages matched the v1/v2/draft/final filename scan.
 
-已为该目录添加 README.md 说明文档性质和生命周期。
+## 4. To Be Archived / 待归档文档清单
 
----
+Archive these documents under `docs/architecture-convergence/archive/`. Their content remains useful as historical evidence, but their live-status/source-tree observations are superseded or corrected by the later currentness addendum. Do not delete them.
 
-## 3. 已执行的治理操作
+| Current repository-relative path | Proposed archive path | Last modified (UTC) | Size (bytes) | Purpose / archival reason |
+|---|---|---:|---:|---|
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-SOURCE-OF-TRUTH.md` | `docs/architecture-convergence/archive/ARCH-CONVERGENCE-001-SOURCE-OF-TRUTH.md` | 2026-11-17 19:10:21 | 19,511 | Initial source provenance inventory. Explicitly DRAFT / EVIDENCE INVENTORY / NON-NORMATIVE; its live baseline observations are superseded by the currentness addendum. Preserve for historical provenance. |
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-INTEGRATION-REVIEW.md` | `docs/architecture-convergence/archive/ARCH-CONVERGENCE-001-INTEGRATION-REVIEW.md` | 2026-11-17 19:11:09 | 27,909 | Interim A–E integration review. Explicitly DRAFT / INTERIM / NON-NORMATIVE; its PR-state and repository-state snapshot is stale relative to the later addendum. Preserve the integration reasoning and historical findings. |
 
-### 3.1 创建治理结构
+### 4.1 Archive operation commands
+
+Run from the repository root. These commands preserve Git history through rename detection:
+
 ```bash
-mkdir -p docs/governance/archive
+mkdir -p docs/architecture-convergence/archive
+git mv docs/architecture-convergence/ARCH-CONVERGENCE-001-SOURCE-OF-TRUTH.md docs/architecture-convergence/archive/ARCH-CONVERGENCE-001-SOURCE-OF-TRUTH.md
+git mv docs/architecture-convergence/ARCH-CONVERGENCE-001-INTEGRATION-REVIEW.md docs/architecture-convergence/archive/ARCH-CONVERGENCE-001-INTEGRATION-REVIEW.md
 ```
-✅ **状态**: 完成
 
-### 3.2 归档临时文档
+The commands are proposed operations; this audit did not move the files.
+
+## 5. To Be Deleted / 待删除文档清单
+
+**No deletion candidates are approved.**
+
+| Repository-relative path | Last modified (UTC) | Size (bytes) | Purpose / deletion assessment |
+|---|---|---:|---|
+| None | N/A | N/A | No audited file has sufficient evidence of being redundant, superseded without historical value, or safe to destroy. Drafts and non-normative records are retained as evidence. |
+
+No `git rm` command is authorized by this audit. In particular, do not delete GOV-DOC-001 v1.2: its draft status is explicit and its content is needed to preserve the policy evolution trail.
+
+## 6. Version Conflicts / 版本冲突清单
+
+### 6.1 GOV-DOC-001 v1.1 normative versus v1.2 draft
+
+| Repository-relative path | Last modified (UTC) | Size (bytes) | Purpose / conflict |
+|---|---:|---:|---|
+| `00-governance/bilingual-documentation-policy.md` | 2026-11-17 19:16:23 | 14,687 | GOV-DOC-001 v1.1; explicitly identified by the v1.2 draft as the current NORMATIVE policy. |
+| `00-governance/drafts/GOV-DOC-001-v1.2-DRAFT.md` | 2026-11-19 17:07:39 | 34,641 | Proposed GOV-DOC-001 v1.2 extension; explicitly NON-NORMATIVE and pending formal governance approval. |
+
+**Conflict classification: controlled version succession, not an unresolved authority ambiguity.**
+
+The v1.2 draft explicitly states:
+- Previous Version: 1.1.
+- Previous Version Status: NORMATIVE.
+- Status: DRAFT — PENDING FORMAL GOVERNANCE APPROVAL.
+- Supersedes: no existing normative version until v1.2 is formally approved and adopted.
+- The normative policy remains `00-governance/bilingual-documentation-policy.md`.
+
+Therefore v1.1 remains authoritative. v1.2 must not be moved over v1.1, renamed as the current policy, or treated as effective merely because it is committed. The two files have distinct roles and should remain separate until a formal approval/adoption record exists.
+
+### 6.2 ARCH-CONVERGENCE-001 currentness conflict
+
+| Repository-relative path | Last modified (UTC) | Size (bytes) | Purpose / conflict |
+|---|---:|---:|---|
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-CURRENTNESS-ADDENDUM-2026-11-18.md` | 2026-11-17 21:39:21 | 16,668 | Later currentness correction. Its stated purpose is to supersede stale live-status and source-tree observations in earlier ARCH-CONVERGENCE-001 documents; it explicitly changes no Owner contract, ADR, schema, implementation gate, or production authorization. |
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-SOURCE-OF-TRUTH.md` | 2026-11-17 19:10:21 | 19,511 | Earlier evidence inventory; historical PR/main-tree status must not be reused as current status. |
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-INTEGRATION-REVIEW.md` | 2026-11-17 19:11:09 | 27,909 | Earlier interim integration snapshot; historical PR/main-tree status must not be reused as current status. |
+
+**Conflict classification: stale snapshot corrected by a later addendum.**
+
+The currentness addendum is the controlling status correction within this document series, but it is not a normative Owner contract or an architecture approval. Archive the two older snapshots as specified in Section 4; retain the addendum in the active convergence directory.
+
+## 7. ARCH-CONVERGENCE-001 Active Supporting Documents / 当前保留的系列支撑文档
+
+These documents remain in `docs/architecture-convergence/`. They are not classified as authoritative architecture contracts; they are active supporting proposals, dependency maps, risk records, or bounded evidence. Each explicitly belongs to the ARCH-CONVERGENCE-001 workstream and should not be deleted solely because it is non-normative.
+
+| Repository-relative path | Last modified (UTC) | Size (bytes) | Purpose / disposition |
+|---|---:|---:|---|
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-CURRENTNESS-ADDENDUM-2026-11-18.md` | 2026-11-17 21:39:21 | 16,668 | Currentness correction and live-state reconciliation; keep active. |
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-CANONICAL-TRANSACTION.md` | 2026-11-17 19:10:30 | 19,695 | Workstream B canonical transaction proposal; non-normative contract proposal. |
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-FORGET-AUTHORIZATION-RECOVERY.md` | 2026-11-17 19:10:39 | 22,143 | Workstream C Forget, authorization, and recovery safety proposal. |
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-CONTEXT-APPLIED-RUNTIME.md` | 2026-11-17 19:10:48 | 20,137 | Workstream D context/Applied/runtime proposal. |
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-IMPLEMENTATION-ROADMAP.md` | 2026-11-17 19:11:01 | 15,673 | Workstream E implementation sequencing and gate roadmap; not implementation authorization. |
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-MINIMUM-RUNNABLE-ARCHITECTURE.md` | 2026-11-17 19:11:01 | 30,213 | Minimum runnable architecture proposal; not an approved architecture freeze. |
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-ADVERSARIAL-TEST-MATRIX.md` | 2026-11-17 19:11:09 | 11,533 | Adversarial verification matrix and failure-case evidence. |
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-CONFLICT-REGISTER.md` | 2026-11-17 19:10:21 | 7,598 | Cross-workstream conflict and unresolved-decision register. |
+| `docs/architecture-convergence/ARCH-CONVERGENCE-001-CONTRACT-DEPENDENCY-MAP.md` | 2026-11-17 19:10:21 | 9,865 | Contract dependency mapping and sequencing evidence. |
+
+## 8. Git Operation Summary / Git 操作汇总
+
+### 8.1 Exact archive commands
+
 ```bash
-git mv docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md \
-       docs/governance/archive/
+mkdir -p docs/architecture-convergence/archive
+git mv docs/architecture-convergence/ARCH-CONVERGENCE-001-SOURCE-OF-TRUTH.md docs/architecture-convergence/archive/ARCH-CONVERGENCE-001-SOURCE-OF-TRUTH.md
+git mv docs/architecture-convergence/ARCH-CONVERGENCE-001-INTEGRATION-REVIEW.md docs/architecture-convergence/archive/ARCH-CONVERGENCE-001-INTEGRATION-REVIEW.md
 ```
-✅ **状态**: 完成  
-✅ **原因**: 该文档是 AID-2026-014 的临时修正状态跟踪，不属于规范性文档
 
-### 3.3 添加候选架构说明
+### 8.2 Deletion commands
+
+None. No `git rm` command is authorized because the deletion list is empty.
+
+### 8.3 Post-operation verification commands
+
 ```bash
-# 创建 docs/architecture-convergence/README.md
-```
-✅ **状态**: 完成  
-✅ **内容**: 说明候选架构的性质、生命周期、与规范性文档的区别
-
----
-
-## 4. 建议的后续操作
-
-### 立即行动 (今天)
-1. ✅ 提交本次治理更改到 Git
-2. 📝 更新根 README.md，添加文档层次说明
-
-### 本周内
-1. 📊 建立架构文档索引页面
-2. 🔄 评审 ARCH-CONVERGENCE-001 系列文档
-3. 📋 确定哪些候选架构可以提升为规范性文档
-
-### 本月内
-1. ⬆️ 提升成熟的候选架构
-2. 🤖 建立文档质量检查脚本
-3. 📈 建立架构演化追踪机制
-
----
-
-## 5. 文档层次结构
-
-### 优化后的结构
-
-```
-docs/
-├── README.md                          # 总索引
-├── documentation-style-guide.md       # 文档风格指南
-├── governance/                        # 治理中心 ⭐ 新增
-│   ├── ARCHITECTURE_AUDIT_REPORT.md  # 本报告 ⭐ 新增
-│   └── archive/                      # 归档区 ⭐ 新增
-│       └── aid-2026-014-r3-correction-status.md
-├── zh-CN/                            # 中文规范性文档
-│   ├── 00-governance/                # 治理
-│   ├── 01-system-architecture/       # 系统架构
-│   ├── 09-security-governance/       # 安全治理
-│   └── 13-engineering-decisions/     # 工程决策
-├── architecture-convergence/         # 候选架构
-│   ├── README.md                     # 说明文档 ⭐ 新增
-│   └── ARCH-CONVERGENCE-001-*.md
-├── research/                         # 研究文档
-├── glossary/                         # 词汇表
-└── en/                              # 英文文档
+git status --short
+git diff --summary
+git diff --check
+test -f docs/architecture-convergence/archive/ARCH-CONVERGENCE-001-SOURCE-OF-TRUTH.md
+test -f docs/architecture-convergence/archive/ARCH-CONVERGENCE-001-INTEGRATION-REVIEW.md
+test -f docs/governance/ARCHITECTURE_AUDIT_REPORT.md
 ```
 
----
+## 9. Final Governance Disposition / 最终治理结论
 
-## 6. 治理成果总结
-
-### 文件操作统计
-- ✅ **新增文件**: 2 个 (本报告 + 候选架构 README)
-- ✅ **归档文件**: 1 个
-- ✅ **删除文件**: 0 个
-- ✅ **新增目录**: 2 个 (governance/, governance/archive/)
-
-### 文档清晰度提升
-- ✅ 明确了 15 个规范性文档
-- ✅ 明确了 11 个候选架构文档
-- ✅ 建立了归档机制
-- ✅ 清晰标记了文档性质
-
-### 版本冲突解决
-- ✅ 未发现严重版本冲突
-- ✅ 文档版本管理良好
+- Keep the eleven documents listed in Section 3 as the current normative governance/system-architecture baseline, within their stated scopes.
+- Keep the technology blueprint classified as CANDIDATE, not an approved technology decision.
+- Keep GOV-DOC-001 v1.1 normative; keep v1.2 as a separate pending draft.
+- Archive exactly the two stale ARCH-CONVERGENCE-001 snapshots listed in Section 4.
+- Delete no files.
+- Keep the currentness addendum and the remaining ARCH-CONVERGENCE-001 supporting documents in place.
+- Do not infer Owner approval, schema freeze, implementation authorization, or production readiness from publication or archival status.
 
 ---
-
-## 7. 质量指标
-
-| 指标 | 治理前 | 治理后 | 改进 |
-|------|--------|--------|------|
-| 规范性文档识别 | ❌ 不明确 | ✅ 15 个 | +100% |
-| 候选架构标记 | ❌ 无标记 | ✅ 已标记 | +100% |
-| 归档机制 | ❌ 无 | ✅ 已建立 | +100% |
-| 治理文档 | ❌ 无 | ✅ 2 个 | +200% |
-| 文档层次清晰度 | ⚠️ 中等 | ✅ 优秀 | +50% |
-
----
-
-## 8. 附录：提交信息模板
-
-建议使用以下 commit message 提交本次治理：
-
-```
-docs: 架构文档治理 - 建立清晰层次结构
-
-完成的工作：
-- 创建 docs/governance/ 治理中心
-- 归档临时修正文档到 archive/
-- 为候选架构添加 README 说明文档性质
-- 生成完整的架构审计报告
-
-文档统计：
-- 规范性文档: 15 个
-- 候选架构: 11 个
-- 已归档: 1 个
-
-参考: docs/governance/ARCHITECTURE_AUDIT_REPORT.md
-```
-
----
-
-**报告生成时间**: 2026-11-20 21:38  
-**执行者**: AI Memory Brain Architecture Governance Bot  
-**下次审计**: 2027-02-20 (季度审计)
+End of report.
