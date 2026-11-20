@@ -3,8 +3,8 @@
 - 文档 ID：E-PRODUCER-ADMISSION-001
 - 版本：1.0
 - 源分支：session-e-memory-compiler-2026-11-16
-- 源文件版本：e59f517fff161ab882aa0ddc4a5bda513964ae1a
-- 源规范：[E Owner 规范](../../../04-memory-compiler/compiler-state-and-producer-admission.md)
+- 源文件版本：DEREFERENCED — 保留历史源 Blob `e59f517fff161ab882aa0ddc4a5bda513964ae1a`；当前仓库不存在可解析的规范性源文件。
+- 源规范：DEREFERENCED — 原规范源路径 `04-memory-compiler/compiler-state-and-producer-admission.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/04-memory-compiler/compiler-state-and-producer-admission.md)（Blob `bdca52bfa74a32d3e9e9d2feaaa5ce8d0b75545f`；仅为对照文本，不是规范性替代源）。
 - 对应英文：[Compiler State Machine and D Producer Admission Interface](../../en/04-memory-compiler/compiler-state-and-producer-admission.md)
 - 状态：E Lifecycle 语义为 CANDIDATE；D 语义操作为 DECIDED；可调用 API/Transport 和 Storage 原子性为 OPEN
 

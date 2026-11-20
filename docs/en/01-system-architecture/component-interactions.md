@@ -3,7 +3,7 @@
 - Document ID: SYS-INTERACTIONS-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/component-interactions.md)
-- Source revision: fcec7c598816d439ec4c89694210ccc220aeeccf
+- Source revision: 50ddbeed51d88aecbeee0403a4021e21a668dbcb
 - Chinese counterpart: [组件交互](../../zh-CN/01-system-architecture/component-interactions.md)
 - Status: DECIDED for authority and primary collaboration; CANDIDATE for orchestration patterns and call topology; OPEN for protocol details delegated to Session H
 

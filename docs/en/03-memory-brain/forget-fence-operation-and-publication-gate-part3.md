@@ -1,7 +1,8 @@
 # Forget Fence Atomicity — Part 3: Phase 3.6 Linearization and Proof Matrix
 
 - Document ID: D-FORGET-GATE-001-P3
-- Source revision: 4da0b61ba3656a768ea56b4a2a24e09da4e21cd5
+- Source revision: DEREFERENCED — historical source blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` retained; no current normative source path exists.
+- Source: DEREFERENCED — original normative path `03-memory-brain/forget-fence-operation-and-publication-gate.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part3.md) (blob `f611eead55fd812da552d80675a4bc0454d83502`; translation only, not an authoritative substitute).
 - Chinese counterpart: [第 3 部分 — Phase 3.6 线性化与证明矩阵](../../zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate-part3.md)
 
 # Phase 3.6 — Forget Fence Linearization & Atomicity Semantics

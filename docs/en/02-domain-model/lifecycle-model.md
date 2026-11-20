@@ -3,7 +3,7 @@
 - Document ID: DOMAIN-LIFECYCLE-001
 - Version: 1.0
 - Source: [Normative source specification](../../../02-domain-model/lifecycle-model.md)
-- Source revision: 81c48c928cb5f9c76ca29d493fbd9479079e62f7
+- Source revision: c1daa6225e75ea40d7f86e5ef6916b4f3849a1f8
 - Chinese counterpart: [记忆生命周期模型](../../zh-CN/02-domain-model/lifecycle-model.md)
 - Status: State vocabulary and separation DECIDED; policy thresholds and selected transitions OPEN
 - Owner: Domain Model defines semantics; Memory Lifecycle Manager executes canonical transitions

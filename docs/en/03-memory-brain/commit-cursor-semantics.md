@@ -3,9 +3,9 @@
 - Document ID: D-CURSOR-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: 4688a0ca487bf4d853c7f0220408abe8d743d159
+- Source revision: DEREFERENCED — historical source blob `4688a0ca487bf4d853c7f0220408abe8d743d159` retained; no current normative source path exists.
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: [D Owner specification](../../../03-memory-brain/commit-cursor-semantics.md)
+- Source: DEREFERENCED — original normative path `03-memory-brain/commit-cursor-semantics.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/commit-cursor-semantics.md) (blob `dd3887a46cf34e9958282fb0a495ae79c2f655e7`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Canonical Commit 与 Cursor 语义](../../zh-CN/03-memory-brain/commit-cursor-semantics.md)
 - Owner: Session D — Memory Brain Principal Architect (canonical cursor authority only)
 - Status: D canonical semantics DECIDED; storage-engine implementation and E/F/G consumer conformance OPEN

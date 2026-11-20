@@ -1,7 +1,8 @@
 # E Forget Fence and Derived Registration — Part 1: Core Contract
 
 - Document ID: E-FORGET-DERIVED-001-P1
-- Source revision: 00e37ba56596e710513c8d0568acd79141d9101b
+- Source revision: DEREFERENCED — historical source blob `00e37ba56596e710513c8d0568acd79141d9101b` retained; no current normative source path exists.
+- Source: DEREFERENCED — original normative path `04-memory-compiler/forget-fence-and-derived-registration-part1.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/04-memory-compiler/forget-fence-and-derived-registration-part1.md) (blob `0d96f4e0c82763c74ab61f67e4a2869280632395`; translation only, not an authoritative substitute).
 - Chinese counterpart: [第 1 部分 — 核心契约](../../zh-CN/04-memory-compiler/forget-fence-and-derived-registration-part1.md)
 
 ## 1. Safety invariant

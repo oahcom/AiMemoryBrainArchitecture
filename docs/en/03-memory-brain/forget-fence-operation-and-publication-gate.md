@@ -3,7 +3,8 @@
 - Document ID: D-FORGET-GATE-001
 - Version: 1.0 (split bilingual companion)
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: 4da0b61ba3656a768ea56b4a2a24e09da4e21cd5
+- Source revision: DEREFERENCED — historical source blob `4da0b61ba3656a768ea56b4a2a24e09da4e21cd5` retained; no current normative source path exists.
+- Source: DEREFERENCED — original normative path `03-memory-brain/forget-fence-operation-and-publication-gate.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md) (blob `631419e21f685d9266a60081c39fa7ad85d197e9`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Forget Fence Operation and Publication Gate](../../zh-CN/03-memory-brain/forget-fence-operation-and-publication-gate.md)
 - Status: D semantic contract DECIDED; E/Storage enforcement, I authorization freshness and cross-module conformance OPEN
 

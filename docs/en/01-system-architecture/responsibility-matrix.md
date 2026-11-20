@@ -3,7 +3,7 @@
 - Document ID: SYS-RESP-001
 - Version: 1.0
 - Source: [Normative source specification](../../../01-system-architecture/responsibility-matrix.md)
-- Source revision: fcec7c598816d439ec4c89694210ccc220aeeccf
+- Source revision: 85548fcee05b28f8c2d54d4c0a8bf77840c8cdf3
 - Chinese counterpart: [子系统职责矩阵](../../zh-CN/01-system-architecture/responsibility-matrix.md)
 - Status: DECIDED ownership baseline; detailed boundary questions remain OPEN where stated
 

@@ -3,9 +3,9 @@
 - 文档 ID：D-CURSOR-001
 - 版本：1.0
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：4688a0ca487bf4d853c7f0220408abe8d743d159
+- 源文件版本：DEREFERENCED — 保留历史源 Blob `4688a0ca487bf4d853c7f0220408abe8d743d159`；当前仓库不存在可解析的规范性源文件。
 - 审查时源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- 源规范：[D Owner 规范](../../../03-memory-brain/commit-cursor-semantics.md)
+- 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/commit-cursor-semantics.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/03-memory-brain/commit-cursor-semantics.md)（Blob `2de7fe35229372ae5b06093e5e031c2c243fbd7c`；仅为对照文本，不是规范性替代源）。
 - 对应英文：[Canonical Commit and Cursor Semantics](../../en/03-memory-brain/commit-cursor-semantics.md)
 - Owner：Session D — Memory Brain Principal Architect（仅拥有 Canonical Cursor 权威）
 - 状态：D 的 Canonical 语义为 DECIDED；Storage Engine 实现和 E/F/G 消费者一致性为 OPEN

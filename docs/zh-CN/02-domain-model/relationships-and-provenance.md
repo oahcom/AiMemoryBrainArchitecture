@@ -3,7 +3,7 @@
 - 文档 ID：DOMAIN-REL-PROV-001
 - 版本：1.0
 - 源规范：[规范性原文](../../../02-domain-model/relationships-and-provenance.md)
-- 源版本：e762f84c59f69de7a44baad2123aed46e1ffea16
+- 源版本：a674e21756cdbf8c07683083bfdcb58a33f48a20
 - 对应英文：[Relationships and Provenance Model](../../en/02-domain-model/relationships-and-provenance.md)
 - 状态：核心语义为 DECIDED；图表示和血缘压缩为 CANDIDATE/OPEN
 - Owner：Memory Domain Model；Evidence & Provenance 和 Entity/Relationship Manager 负责执行契约

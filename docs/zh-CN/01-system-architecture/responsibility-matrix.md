@@ -3,7 +3,7 @@
 - 文档 ID：SYS-RESP-001
 - 版本：1.0
 - 源规范：[项目规范性原文](../../../01-system-architecture/responsibility-matrix.md)
-- 源版本：fcec7c598816d439ec4c89694210ccc220aeeccf
+- 源版本：85548fcee05b28f8c2d54d4c0a8bf77840c8cdf3
 - 对应英文：[Subsystem Responsibility Matrix](../../en/01-system-architecture/responsibility-matrix.md)
 - 状态：DECIDED（职责基线）；明确列出的详细边界问题仍为 OPEN
 

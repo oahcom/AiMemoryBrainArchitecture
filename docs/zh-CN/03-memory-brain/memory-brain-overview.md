@@ -3,9 +3,9 @@
 - 文档 ID：D-MEMORY-BRAIN-001
 - 版本：1.0
 - 源分支：session-d-memory-brain-2026-11-16
-- 源文件版本：b4ed712ac0626ab127cccfd205c50a9013df01fb
+- 源文件版本：DEREFERENCED — 保留历史源 Blob `b4ed712ac0626ab127cccfd205c50a9013df01fb`；当前仓库不存在可解析的规范性源文件。
 - 审查时源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- 源规范：[D Owner 规范](../../../03-memory-brain/memory-brain-overview.md)
+- 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/memory-brain-overview.md` 在当前 main tree 中不存在；替代物：[英文对照版](../../en/03-memory-brain/memory-brain-overview.md)（Blob `1c88a4302216f980b85b38db9ae47455abb20ce8`；仅为对照文本，不是规范性替代源）。
 - 对应英文：[Memory Brain — Subsystem Architecture](../../en/03-memory-brain/memory-brain-overview.md)
 - 状态：权威边界和不变量为 DECIDED；详细对象/操作契约为 CANDIDATE；OPEN 项不具规范约束力
 - Owner：Session D — Memory Brain Principal Architecture

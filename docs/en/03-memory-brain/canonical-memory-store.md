@@ -3,9 +3,9 @@
 - Document ID: D-CANONICAL-STORE-001
 - Version: 1.0
 - Source branch: session-d-memory-brain-2026-11-16
-- Source revision: 6b37c91033fda21f072e2a3bde6f274663b1e76e
+- Source revision: DEREFERENCED — historical source blob `6b37c91033fda21f072e2a3bde6f274663b1e76e` retained; no current normative source path exists.
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: [D Owner specification](../../../03-memory-brain/canonical-memory-store.md)
+- Source: DEREFERENCED — original normative path `03-memory-brain/canonical-memory-store.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/canonical-memory-store.md) (blob `857f2d2e5cde1e93cfd8612661cbe906be63f9d0`; translation only, not an authoritative substitute).
 - Chinese counterpart: [Canonical Memory Store](../../zh-CN/03-memory-brain/canonical-memory-store.md)
 - Status: Authority and immutability DECIDED; detailed record layouts and transaction implementation CANDIDATE pending engineering validation
 - Related blockers: INT-P0-01..04, INT-P1-02, INT-P1-06, DM-001..DM-013
