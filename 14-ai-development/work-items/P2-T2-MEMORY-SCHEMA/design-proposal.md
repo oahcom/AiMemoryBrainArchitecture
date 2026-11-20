@@ -1697,7 +1697,7 @@ That instruction is only actionable if it is clear, gate by gate, what already a
 
 | question | state | needs |
 |---|---|---|
-| Q11 | **DECIDED (§2i)** — admissible, data-neutral | none for admissibility; contract-owner opinion still unrecorded |
+| Q11 | **PARTLY DECIDED (§2i)** — technical admissibility settled, data-neutral; authorisation half NOT settled | the Phase 1 contract's owner (`NOT_ASSIGNED`); no rule exempts a data-neutral modification from Phase 1 approval |
 | Q12 | **PROSPECTIVE ISSUED (§2i)**; retrospective NO | retrospective part permanently unavailable |
 | Q13 | **DECIDED (§2i)** — table-level `CHECK` | none; NF-R3-02 verification still outstanding |
 | Q14 | `BUSINESS_RULE_NOT_SUPPLIED` — **held (§2i)** | the owner of `recompute`'s semantics |
