@@ -1,0 +1,60 @@
+# ADOPTION-EVIDENCE-2026-P1 authorization manifest
+# Records what this work item writes and on what basis. No path outside
+# allowed_write_paths may be modified under this work item.
+schema_version: "1.0"
+work_item: ADOPTION-EVIDENCE-2026-P1
+repository: oahcom/AiMemoryBrainArchitecture
+branch: docs/adoption-evidence-2026-p1
+
+decision:
+  id: NOT_ISSUED
+  note: >-
+    No GO decision authorizes this work item. It is operational work under the
+    dev-baseline authorization (Issue #264 comment 7000428916: no human decision
+    points, full-chain automated closure) together with the R-D8-01 Q4 item
+    for the two PROPOSED policies. That Q4 item directs preparation of policy
+    text improvements and adoption evidence material, and forbids claiming that
+    either policy has been adopted or has taken effect.
+
+authorization_status: SELF_DECLARED_NOT_OWNER_SIGNED
+authorization_note: >-
+    The scope list below is self-declared by the coordinator session. It is not
+    an Owner signature and must never be cited as one. This follows the pattern
+    already present in FIX-2026-P1-T3 (see its manifest, which carries the same
+    status) and in the three earlier scope expansions 111877aa / 66f1b0ff /
+    aeb68bd1. If a real GO decision later excludes any of these paths, the
+    affected file moves; nothing in the adoption dossier depends on where the
+    file physically sits.
+
+roles:
+  sponsor: NOT_ASSIGNED
+  accountable_owner: NOT_ASSIGNED
+  acceptance_authority: NOT_ASSIGNED
+  implementing_owner: coordinator session (operational, not a governance role)
+  role_note: >-
+    NOT_ASSIGNED is a true governance state. It must not be substituted by the
+    implementing party, by a ChatGPT session, or by the fact that this work
+    item was delivered. Tracked as F-ROLE-ASSIGN.
+
+scope:
+  manifest_path: 14-ai-development/work-items/ADOPTION-EVIDENCE-2026-P1/authorization-manifest.yaml
+  allowed_write_paths:
+    - 14-ai-development/work-items/ADOPTION-EVIDENCE-2026-P1/authorization-manifest.yaml
+    - 14-ai-development/work-items/ADOPTION-EVIDENCE-2026-P1/adoption-record-template.md
+    - 14-ai-development/work-items/ADOPTION-EVIDENCE-2026-P1/adoption-evidence-dossier.md
+    - 14-ai-development/evidence-tiering-policy.md
+    - 14-ai-development/evidence-tiering-policy.en.md
+    - 14-ai-development/bilingual-tiering-policy.md
+    - 14-ai-development/bilingual-tiering-policy.en.md
+  authorization_basis:
+    - "R-D8-01 Q4 item for the two PROPOSED policies: improve the policy text and the adoption evidence material, and do not claim the policies have been adopted or have taken effect."
+    - "The four policy paths are amended only by appending one paragraph to the existing effectiveness clause (item 4 in evidence-policy section 8; a trailing paragraph in bilingual-policy section 8), in Chinese and English together. No definition, tier, gate or obligation is changed by this work item."
+    - "The three ADOPTION-EVIDENCE-2026-P1 paths are new preparation material under the work item's own directory. They adopt nothing, confirm no classification, and appoint no role."
+  all_other_paths: OUT_OF_SCOPE
+
+what_this_work_item_does_not_do:
+  - "It does not adopt either policy. Both remain PROPOSED after this work item merges."
+  - "It does not change any Level, Tier, gate, or obligation. The only text added to the policies is a pointer to where the adoption record form and evidence dossier live."
+  - "It does not confirm any UNKNOWN or PENDING classification."
+  - "It does not assign, appoint, or imply any role."
+  - "It does not create the per-file classification inventory that the bilingual policy's section 8 requires. Proposal data exists (tier-mapping-proposal.yaml, tier-confirmation-proposal.yaml); what does not exist is the human-confirmed, adopted inventory those proposals are input to. The dossier says so."

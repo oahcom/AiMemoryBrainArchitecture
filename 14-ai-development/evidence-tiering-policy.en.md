@@ -133,3 +133,4 @@ This policy is a Tier 1 document (architecture/governance policy). Chinese and E
 1. Any change to Level definitions, required field sets or non-downgrade rules requires a formal change record (rationale, affected files, proposer, approver, effective version).
 2. This policy is PROPOSED until formally adopted by the governance authority; passing independent review and merging an implementation does not constitute adoption.
 3. The adoption record MUST state the approver, effective date, and the checker version and commit SHA in force.
+4. The blank form for the adoption record is `14-ai-development/work-items/ADOPTION-EVIDENCE-2026-P1/adoption-record-template.md`; the assembly of ready and missing evidence is `adoption-evidence-dossier.md` in the same directory. Both are preparation material: neither constitutes adoption, and neither may be cited as adoption or as proof that an approver exists.

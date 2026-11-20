@@ -133,3 +133,4 @@
 1. Level 定义、必填字段集合或不可降级规则的任何变更，须经正式变更记录（理由、影响文件、提议者、批准者、生效版本）。
 2. 本策略在治理权威正式采纳前为 PROPOSED；工程实施通过独立审查与合并，不构成政策采纳。
 3. 采纳记录须明确批准者、生效日期、适用的检查器版本及其 commit SHA。
+4. 采纳记录的空白表格见 `14-ai-development/work-items/ADOPTION-EVIDENCE-2026-P1/adoption-record-template.md`；已就绪证据与仍缺失证据的汇编见同目录 `adoption-evidence-dossier.md`。两份均为准备材料：不构成采纳，不得被引用为已采纳，也不得被引用为批准者已存在。
