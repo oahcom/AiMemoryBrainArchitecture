@@ -1074,3 +1074,45 @@ final_live_refs_and_prompt_provenance_correction_2026_11_20:
     no_merge: true
     main_modified: false
     no_owner_impersonation: true
+
+
+# Terminal administrative disposition — objective external evidence blockers
+terminal_closeout_disposition:
+  status: "SESSION_CLOSEOUT_COMPLETE; SUBSTANTIVE_F1_F3_GATES_BLOCKED_ON_OBJECTIVE_EXTERNAL_EVIDENCE"
+  authoritative_ledger:
+    path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+    commit: "76b33d3c88b54aac01bd9b026b52c936b18709f2"
+    blob: "031d329740b53ff7f15d9a7ecf077c3ef04c3ff9"
+  F1:
+    finding: "F-43-01/F1"
+    severity: P1
+    disposition: "BLOCKED-OBJECTIVE-ENGINEERING-AUTHORITY"
+    return: "PR #327; Issues #7/#10/#25/#43"
+    missing: "canonical Runtime repository/branch; named engineering lead and write custody; explicit engineering-entry authorization; canonical D authority and durable persistence boundary"
+    supplier: "project governance authority / engineering leadership; D Domain Owner"
+    release_verification: "authorization and named ownership in Issue #7 or existing carrier; five callable D operations; durable Ledger and operation-bound Receipt; equality/linearization evidence; exact-commit S1-S7 results"
+  F3:
+    finding: "F-43-01/F3"
+    severity: P1
+    disposition: "BLOCKED-OBJECTIVE-INDEPENDENT-ACCEPTANCE-AND-OPERATIONAL-EVIDENCE"
+    return: "PRs #321/#322/#323; Issues #25/#43"
+    missing: "distinct authenticated D/H signers; callable D query/Receipt/currentness/revocation; H production consumer acceptance; C1-C6 operational evidence; exact-Head CI execution that reaches test steps"
+    supplier: "D Owner and H Owner using distinct authorized human identities; engineering/CI maintainer"
+    release_verification: "separate attributable D/H decisions; exact-Head passing CI; callable D query and Receipt/currentness/revocation artifacts; H consumer acceptance and reproducible C1-C6 report"
+  owner_ruling_record:
+    chosen: "preserve P1 OPEN substantive finding states; record objective administrative blockers; complete all session-controlled handoff, source pin, retry, ledger and manifest work"
+    rejected: "false DECIDED/CLOSED; static code as runtime proof; unexecuted test as CI PASS; same-login role comments as independent signatures; impersonated Owner acceptance; unauthorized Runtime write"
+    basis: "Issue #7 comment 7021990583; Actions runs 44684299439 and 44684299500 failed before test steps; D/H role comments 7021655866 and 7021638212 both resolve to oahcom; AI-EXEC-001 v1.1 and AI-EXEC-002 v1.2"
+  provenance:
+    source_type: "T2_USER_CHAT_INSTRUCTION"
+    platform_conversation_uuid_and_raw_bytes: "NOT_EXPOSED_BY_CONNECTOR"
+    prompt_sha256: "NOT_VERIFIED"
+  mutation_boundary:
+    new_prs: 0
+    new_issues: 0
+    new_branches: 0
+    merged: false
+    main_modified: false
+    runtime_authorized: false
+    independent_owner_signature_claimed: false
+    production_acceptance_claimed: false
