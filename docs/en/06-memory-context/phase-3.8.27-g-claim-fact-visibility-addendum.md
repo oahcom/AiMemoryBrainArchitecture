@@ -1,5 +1,19 @@
 # G Claim/Fact Context Visibility Addendum
 
+> Normative relationship:
+> The normative requirements in this bilingual
+> addendum are merged into the canonical root
+> section `06-memory-context/context-versioning.md`
+> §13.3.
+>
+> This file is the English synchronized counterpart,
+> not an independent competing protocol.
+>
+> The root §13.3 controls in case of textual drift.
+>
+> Lineage: Phase 3.8.27 G Claim/Fact Context
+> Visibility Addendum; AID-2026-014 R5 FLIP_TO_B.
+
 ## 1. Exact revision references
 
 A ContextVersion referencing ClaimRevision, FactRevision or derived artifacts MUST bind exact immutable revision references and the applicable ForgetFenceCursor.
@@ -35,6 +49,16 @@ UNKNOWN commit or lost acknowledgement MUST remain non-final.
 Recovery MUST resolve the same operation and exact ContextVersion identity.
 
 No retry may create duplicate visible ContextVersion state.
+
+The B ordering and T17/T18 invariants are
+mandatory for every G ContextVersion derived
+from protected canonical Claim/Fact content.
+
+G MUST NOT bypass an admitted participant's
+Forget barrier.
+
+The physical realization gate in root §13.3
+remains applicable.
 
 ## 5. Storage boundary
 

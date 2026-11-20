@@ -176,11 +176,167 @@ For derivative-capable G work, retain:
 
 G's producer work registration precedes queueing, leasing, protected source dereference and execution. Retry preserves WorkItemId/digest. D's semantic operation receipts are owner-controlled; this document does not invent their wire or storage schema.
 
-### 13.3 Visibility and storage atomicity
+### 13.3 Protected visibility and storage atomicity
 
-The logical Context commit remains G-owned and creates one immutable ContextVersion. However, when the target version or its Snapshot/Delta/Delivery is a derivative of canonical content, its visible-head transition must be fenced by D's PublishDerivedIfFenceCurrent semantics and current I authorization at the same linearizable visibility decision. G must first durably register complete dependencies with D. A local pre-check followed by an independent G head write is invalid.
+#### Normative source and lineage
 
-The physical transaction/CAS or equivalent recoverable prepare/commit protocol spanning G visibility and D's final gate is **OPEN** with D and Storage/Consistency. Until that realization is specified and proven, G may stage privately but must not expose the artifact, advance the public head or send a delivery. This is an explicit implementation gate, not a claim that an API exists.
+This section is the canonical root-level normative
+source for G Claim/Fact protected visibility.
+
+The bilingual EN/ZH Claim/Fact Context Visibility
+Addendum is merged into this section. Its normative
+requirements are not an independent competing
+protocol.
+
+The paired EN/ZH documents MUST remain synchronized
+with this section. If textual drift occurs, this
+root section controls until the paired documents
+are corrected.
+
+Lineage: the merged requirements originate from
+the Phase 3.8.27 G Claim/Fact Context Visibility
+Addendum and the AID-2026-014 R5 correction.
+
+#### 1. Ownership and exact references
+
+The logical Context commit remains G-owned and
+creates one immutable ContextVersion.
+
+A ContextVersion referencing ClaimRevision,
+FactRevision or derived artifacts MUST bind exact
+immutable revision references and the applicable
+ForgetFenceCursor.
+
+G MUST NOT substitute a current Claim head for
+a pinned ClaimRevisionRef.
+
+#### 2. Required protected ordering
+
+The shared protected publication order is:
+
+1. Resolve authorization and Scope.
+2. Evaluate D Forget Fence and perform Producer
+   Admission under the serialized admission boundary.
+3. Durably register the complete dependency set.
+4. Stage E artifacts privately.
+5. Commit canonical ClaimRevision/FactRevision.
+6. Associate dependency registration and
+   Publication Intent with the committed revisions.
+7. Complete E publication idempotently.
+8. Advance Storage visibility only after required
+   canonical and dependency evidence is confirmed.
+9. Commit G ContextVersion using exact canonical
+   revision references.
+10. Mark logical completion only after all
+    required visibility conditions are satisfied.
+
+#### 3. T17 — Fence-first
+
+If a Forget Fence linearizes before Producer
+Admission, the affected work MUST NOT be admitted.
+
+No staging, canonical commit, publication intent,
+E publication or Storage visibility transition
+may bypass the Fence decision.
+
+#### 4. T18 — Participant-first
+
+Once Producer Admission successfully linearizes,
+the exact operation MUST be durably recorded
+as an authoritative participant.
+
+A later Forget Fence MUST NOT silently skip,
+erase or misclassify that participant.
+
+The Fence/Admission barrier MUST account for
+the participant and preserve its exact identity,
+dependency closure and auditable disposition.
+
+The final completion or suppression decision
+MUST follow the declared Forget policy.
+
+UNKNOWN MUST remain non-final until the
+authoritative outcome is resolved.
+
+#### 5. G protected commit requirements
+
+G MUST:
+
+- Revalidate current I authorization.
+- Revalidate the applicable D Forget Fence.
+- Verify all referenced Claim/Fact revisions.
+- Verify complete dependency-registration receipts.
+- Verify exact Storage visibility outcome where
+  the Context includes a published artifact.
+- Commit the immutable ContextVersion through
+  the protected visibility protocol.
+- Publish only after authoritative commit resolution.
+
+G MUST NOT expose a new ContextVersion based only
+on a local pre-check followed by an independent,
+unprotected head update.
+
+#### 6. Historical visibility
+
+A ContextVersion committed before a later Forget
+does not grant perpetual access.
+
+Historical Context reads and replay MUST
+re-evaluate current authorization and Forget
+suppression.
+
+A forgotten ClaimRevision MUST NOT be disclosed
+through an existing FactRevision or historical
+ContextVersion.
+
+#### 7. UNKNOWN and recovery
+
+UNKNOWN commit or lost acknowledgement MUST
+remain non-final.
+
+Recovery MUST resolve the same operation and
+exact ContextVersion identity.
+
+No retry may create duplicate visible
+ContextVersion state.
+
+Recovery MUST reconcile Fence, Admission,
+dependency registration, canonical commit,
+E publication, Storage visibility and G state.
+
+Recovery MUST NOT manufacture a successful
+terminal state from missing evidence.
+
+#### 8. Physical realization gate
+
+The physical transaction/CAS or equivalent
+recoverable prepare/commit realization spanning
+G visibility and D's final gate MUST be specified
+and independently proven by D and Storage/
+Consistency before public visibility is enabled.
+
+Until that proof exists, G may stage privately
+but MUST NOT expose the artifact, advance the
+public head or send a delivery.
+
+This is an implementation-conformance gate,
+not an unresolved normative ordering choice.
+
+This section does not claim that an API or
+production implementation already exists.
+
+#### 9. Storage boundary
+
+The existing Storage L1 decision remains unchanged.
+
+This protocol defines logical ordering, protected
+publication and observable consistency.
+
+It does not select or approve a physical database,
+deployment topology, HA/PITR strategy or Storage
+L4 design.
+
+Storage L4 remains OPEN / NOT APPROVED.
 
 ### 13.4 Applied attestation evidence
 
