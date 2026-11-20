@@ -621,3 +621,35 @@ This append-only addendum supersedes stale F1/F3 carrier pins above where they d
 - T2 chat instruction, source parent conversation ID supplied in continuation context: `6afcc975-06ac-83ee-ba55-9395f7e117ae`; current platform UUID/raw instruction bytes are not exposed; SHA-256 `NOT_VERIFIED` (no synthetic digest).
 - Governance sources read from `main`: AI-EXEC-001 v1.1 ADOPTED, Blob `58af59af266b81109269156ea667df1a15edfb7b`; AI-EXEC-002 v1.2 PENDING ADOPTION, Blob `7f5928a5d16eb12da7621cfb8bd99ca463afd859` (v1.1 is adopted predecessor).
 - Existing PR branch only; no new PR/Issue/branch, no merge, no main write, no Runtime authorization, no Owner signature and no production acceptance.
+
+
+## 2026-11-20 current-turn exact-source closeout refresh — D-2026-1120-01
+
+This append-only refresh supersedes only earlier current-source pins where explicitly stated. Historical decisions remain preserved.
+
+### F-43-01/F1 | P1 | OPEN — Runtime implementation evidence
+- Return: existing PR #327 and Issues #7/#10/#25/#43.
+- Current PR #327 branch: `docs/f43-01-f1-engineering-entry-handoff`; exact current HEAD `2858c8798deaf30fb12709e8226f880534c963f1`; handoff file `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md`; current Blob `eec6314a02b5feb495d21ed1fd065a84742be8d1`.
+- Earlier commit `934a76e18ba020d01c520a8484ed7fc37f96cff1` / Blob `2d453d24ae5e65973ced964918b9f3687a5d3284` is an ancestor, not the current PR head: compare reports 4 commits ahead / 0 behind from 934a to 2858.
+- The handoff remains documentation only. Five callable D authority operations remain NOT IMPLEMENTED; authoritative durable Ledger/operation-bound Receipt and equality/linearization runtime evidence remain NOT ESTABLISHED; canonical D-002 scenarios S1–S7 remain NOT RUN.
+- Issue #7 comment #7021990583 retains `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED`. The current quota release changes carrier capacity only and does not grant runtime target/write authorization. No placeholder runtime was added.
+
+### F-43-01/F3 | P1 | OPEN — independent-human mapping acceptance and operational consumer evidence
+- Return: existing PRs #321/#322/#323 and Issues #25/#43.
+- D query contract: PR #321 HEAD `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; file Blob `099f4948b550919084b0d73094692b590b0be0a9`; exact active mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49` is pinned. The contract still records `ResolveForgetFenceSnapshotProof` as NOT ESTABLISHED AS CALLABLE.
+- H TEST-profile candidate: PR #322 HEAD `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; current test Blob `e66264ad30df6594e00836524accfdeb54160cee` (15 methods).
+- Prior 15/15 local replay in PR #322 comment #7032257073 is NOT applicable to the current test Blob: that comment names a different test Blob `6685226143df0135aa64ecec3cfdac8acd08a8eb`. No current-source local PASS is claimed.
+- Exact-head Actions runs `44681841601` and `44681841687` were re-run in this continuation. Rerun jobs `136132756794` and `136132765897` both completed FAILURE with empty step arrays; test steps did not start. No CI PASS or test-level failure diagnosis is claimed.
+- D/H role-labelled decisions #7021655866 and #7021638212 both expose GitHub login `oahcom`; distinct authenticated human signers remain NOT VERIFIED. No Owner signature is supplied or inferred.
+- Callable D query, durable operation-bound Receipt, currentness/revocation/anti-rollback, H production consumer acceptance and C1–C6 operational evidence remain NOT ESTABLISHED / NOT RUN.
+
+### F-43-11 | P2 | RESOLVED ON EXISTING PR BRANCH (not merged)
+- Return: existing PR #323 / Issue #43.
+- The earlier finding comment #7024096352 identified an obsolete INDEX summary of 9/13 CLOSED. The current PR #323 branch INDEX Blob `3ef2ab10d710ad190fc15caef0bb6b47c198f60e` now records 10/13 CLOSED, 2/13 OPEN (F1/F3), and 1/13 BLOCKED (F-43-02), retaining the historical 2026-11-19 11/13 closeout as history.
+- The exact current ledger Blob before this append is `2e0ab50501e7f2fa5902d98a89acf6376a5e7a87`; its 13 status rows count 10 CLOSED, 2 OPEN and 1 BLOCKED. The INDEX and ledger therefore reconcile.
+- This is resolved in the existing PR branch only; no claim of merge or main synchronization is made. F-43-11 is a separate traceability finding and is not added to the 13-row AID-2026-010 ledger.
+
+### Current-turn execution / provenance
+- Existing PR #323 branch `fix/f43-01-f3-ledger-reconcile` reused; no new PR, Issue or branch; no merge and no write to main.
+- Documentation-only ledger/manifest update: tests NOT RUN; no CI PASS claimed.
+- Prompt provenance: user-provided D-2026-1120-01 chat instruction (T2). Current platform conversation UUID and immutable raw message bytes are not exposed to the repository connector; SHA-256 NOT_VERIFIED. No digest is fabricated.
