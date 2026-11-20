@@ -214,3 +214,36 @@ current_status_refresh:
     and operational evidence; F-43-02 remains BLOCKED. It does not rewrite
     the historical closeout decision or authorize implementation,
     architecture acceptance, main merge, or production activation.
+
+latest_exact_head_refresh:
+  date: "2026-11-20"
+  ruling: "D-2026-1120-01"
+  finding_ledger:
+    path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+    commit: "9453e8a789f979e575c73f734c13ef1f7a6d95e0"
+    blob: "fa07d14329e7872fa2789fc000a97287442bdf78"
+  carriers:
+    F1_PR_327:
+      head: "4905a2d604b38bbe2d836617b11bed0c97709658"
+      handoff_blob: "ae4ab29c7e7fd14c84b8605f5f5fe10b27477d51"
+      status: "P1_OPEN_RUNTIME_IMPLEMENTATION_NOT_ESTABLISHED"
+      exact_head_check_runs: 0
+    F3_PR_321:
+      head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
+      contract_blob: "099f4948b550919084b0d73094692b590b0be0a9"
+      accepted_mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
+      status: "P1_OPEN_INDEPENDENT_HUMAN_ACCEPTANCE_AND_OPERATIONAL_EVIDENCE"
+      exact_head_check_runs: 0
+    F3_PR_322:
+      head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
+      validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
+      test_blob: "6685226143f28a5b8764067bb205080b531132e3"
+      test_methods: 15
+      failed_runs: [44684299439, 44684299500]
+      status: "P1_OPEN_TEST_PROFILE_CANDIDATE_NOT_CI_PASS"
+  prompt_provenance:
+    source_type: "T2_CHAT_INSTRUCTION"
+    source_conversation_id: "6afaf6ae-6e8c-83ec-8aaa-24d5341b9577"
+    current_platform_session_id: "NOT_EXPOSED"
+    raw_message_sha256: "NOT_VERIFIED"
+    note: "Owner ruling and continuation instructions were supplied in chat; no prompt file or synthetic hash is claimed."
