@@ -319,5 +319,123 @@ def load_tests(loader, standard_tests, pattern):
     return standard_tests
 
 
+# Adopted-contract cross-checks. These load the canonical Rust domain source and
+# its semantic specification; they do not copy a second implementation here.
+DOMAIN_MODEL_PATH = ROOT / "crates" / "memory-domain" / "src" / "lib.rs"
+EPISTEMIC_SPEC_PATH = ROOT / "02-domain-model" / "epistemic-and-temporal-semantics.md"
+PROVENANCE_SPEC_PATH = ROOT / "02-domain-model" / "relationships-and-provenance.md"
+DOMAIN_MODEL_BLOB = "5d90a36d99b8be4ca4f3c8d5837b4e9830558842"
+EPISTEMIC_SPEC_BLOB = "8c03a20db1ed54c90db1d5c4c64f5ea7b1324ed7"
+PROVENANCE_SPEC_BLOB = "a674e21756cdbf8c07683083bfdcb58a33f48a20"
+MQ01_DETECTOR_PATH = ROOT / "tools" / "mq01_fact_claim_detector.py"
+MQ01_DETECTOR_BLOB = "c287e1c935f177a23df7b9f91a70d458e10dcb1a"
+
+# These are intentionally explicit non-bindings, not implied conformance:
+# AC-1's local five labels (Fact/Claim/Inference/Hypothesis/Preference) do not
+# match the adopted six-state EpistemicStatus enum. MQ-01 confirms Fact is absent.
+# AC-6 has no adopted poison/stale/contradiction disposition engine or rule table.
+# AC-7 has no adopted Decision/explanation record contract in the domain model.
+NOT_BINDABLE = {
+    "AC-1": "NOT_BINDABLE(no adopted contract in repo): five local epistemic labels do not match the adopted six-state EpistemicStatus enum; MQ-01 still detects missing distinct Fact type",
+    "AC-6": "NOT_BINDABLE(no adopted contract in repo): no adversarial quality/disposition engine defines poison, stale, and contradiction outcomes",
+    "AC-7": "NOT_BINDABLE(no adopted contract in repo): no decision/explanation record defines reason, evidence refs, method, version, and history",
+}
+
+
+def _git_blob_sha(content: str) -> str:
+    import hashlib
+    payload = content.encode("utf-8")
+    return hashlib.sha1(b"blob " + str(len(payload)).encode("ascii") + b"\0" + payload).hexdigest()
+
+
+def _read_pinned_contract(path: Path, expected_blob: str) -> str:
+    content = path.read_text(encoding="utf-8")
+    actual = _git_blob_sha(content)
+    if actual != expected_blob:
+        raise AssertionError(f"authoritative source changed: {path} expected {expected_blob}, got {actual}")
+    return content
+
+
+def _rust_block(source: str, declaration: str) -> str:
+    import re
+    match = re.search(declaration, source)
+    if match is None:
+        raise AssertionError(f"authoritative Rust declaration not found: {declaration}")
+    opening = source.find("{", match.start())
+    if opening < 0:
+        raise AssertionError(f"authoritative Rust block has no body: {declaration}")
+    depth = 0
+    for index in range(opening, len(source)):
+        if source[index] == "{":
+            depth += 1
+        elif source[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return source[opening + 1:index]
+    raise AssertionError(f"unterminated authoritative Rust block: {declaration}")
+
+
+class AdoptedContractBindings(unittest.TestCase):
+    """Cross-check selected ACs against pinned, adopted domain contracts."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.domain = _read_pinned_contract(DOMAIN_MODEL_PATH, DOMAIN_MODEL_BLOB)
+        cls.epistemic = _read_pinned_contract(EPISTEMIC_SPEC_PATH, EPISTEMIC_SPEC_BLOB)
+        cls.provenance = _read_pinned_contract(PROVENANCE_SPEC_PATH, PROVENANCE_SPEC_BLOB)
+        cls.detector_source = _read_pinned_contract(MQ01_DETECTOR_PATH, MQ01_DETECTOR_BLOB)
+
+    def test_ac2_evidence_and_provenance_bind_to_domain_types(self):
+        evidence = _rust_block(self.domain, r"pub struct Evidence\s*")
+        provenance = _rust_block(self.domain, r"pub struct Provenance\s*")
+        for field_name in ("evidence_id", "source_ref", "recorded_at", "scope_refs", "role"):
+            self.assertRegex(evidence, rf"\b{field_name}\s*:")
+        for field_name in ("provenance_id", "source_refs", "derivation_kind", "actor_ref", "created_at"):
+            self.assertRegex(provenance, rf"\b{field_name}\s*:")
+        self.assertIn("input digests", self.provenance)
+        self.assertIn("For every transformation, add lineage", self.provenance)
+
+    def test_ac3_temporal_and_stale_successor_rules_bind_to_domain_contract(self):
+        version = _rust_block(self.domain, r"impl MemoryVersion\s*")
+        successor = _rust_block(version, r"pub fn validate_successor\s*\(")
+        for required in ("self.memory_id != current.memory_id",
+                         "self.version_number != current.version_number + 1",
+                         "self.parent_version_id.as_ref() != Some(&current.memory_version_id)"):
+            self.assertIn(required, successor)
+        self.assertIn("DomainError::InvalidParent", successor)
+        self.assertIn("DomainError::InvalidVersionNumber", successor)
+        self.assertIn("expected Claim/version", self.epistemic)
+        self.assertIn("stale operations are rejected", self.epistemic)
+        self.assertIn("Valid Time", self.epistemic)
+        self.assertIn("half-open [from, to)", self.epistemic)
+
+    def test_ac4_confidence_trust_and_evidence_strength_are_distinct(self):
+        claim = _rust_block(self.domain, r"pub struct Claim\s*")
+        self.assertRegex(claim, r"\bconfidence\s*:\s*Option<String>")
+        for semantic in ("Confidence", "Trust", "Evidence Strength"):
+            self.assertIn(semantic, self.epistemic)
+        self.assertIn("Source Trust does not automatically transfer", self.epistemic)
+        self.assertIn("Evidence Strength is specific to a Claim-Evidence link", self.epistemic)
+        self.assertIn("Confidence is not truth", self.epistemic)
+
+    def test_ac1_is_explicitly_not_bindable_while_mq01_remains_detected(self):
+        import importlib.util
+        self.assertIn("AC-1", NOT_BINDABLE)
+        detector_spec = importlib.util.spec_from_file_location("mq01_fact_claim_detector", MQ01_DETECTOR_PATH)
+        self.assertIsNotNone(detector_spec)
+        self.assertIsNotNone(detector_spec.loader)
+        detector = importlib.util.module_from_spec(detector_spec)
+        sys.modules[detector_spec.name] = detector
+        detector_spec.loader.exec_module(detector)
+        result = detector.inspect_source(self.domain)
+        self.assertTrue(result["claim_declared"])
+        self.assertFalse(result["fact_declared"])
+        self.assertTrue(result["mq01_detected"])
+
+    def test_ac6_and_ac7_are_explicitly_not_bindable_without_adopted_contracts(self):
+        self.assertIn("no adopted adversarial quality/disposition engine", NOT_BINDABLE["AC-6"])
+        self.assertIn("no adopted decision/explanation record", NOT_BINDABLE["AC-7"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
