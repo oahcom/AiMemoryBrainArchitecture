@@ -46,7 +46,7 @@ fn counts(path: &Path) -> (i64,i64,i64) {
 fn restore_anti_resurrection_and_preserves_other_scope() {
     let (live,backup,_,fence)=fixture();
     let first=fence.record_forget("user:alice","sha256:forget").unwrap();
-    assert_eq!(fence.record_forget("user:alice","sha256:forget"),Ok(first));
+    assert_eq!(fence.record_forget("user:alice","sha256:forget").unwrap(),first);
     assert_eq!(fence.restore_backup(&backup,&live).unwrap(),1);
     assert_eq!(counts(&live),(1,1,1));
     let db=Connection::open(&live).unwrap();
