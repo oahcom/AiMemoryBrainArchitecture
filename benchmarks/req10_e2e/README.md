@@ -47,7 +47,7 @@ For a real integrated runtime, replace only the fixture command with the product
 
 ## Local verification record
 
-The fixture run validates the harness protocol and report generation only. Its latency, throughput, process resources, and stage timings are **development-fixture measurements**, not integrated-runtime measurements and not product performance evidence. The report's `integrated_runtime` field remains `NOT_MEASURED` by design.
+A 100-sample/10-warm-up fixture execution was run with Python 3.13.5 on Linux. The captured output is committed as [dev-fixture-report.json](dev-fixture-report.json). It records fixture-only latency, throughput, process CPU, and peak RSS; storage, per-operation attribution, and model/token/cost are `NOT_MEASURED`. **None of these values are integrated-runtime measurements or product performance evidence.** The report's `integrated_runtime` field remains `NOT_MEASURED` by design.
 
 PR #355 remains a separate SQLite commit carrier. Its Python SQL-path mirror results are not imported, combined, or represented here.
 
