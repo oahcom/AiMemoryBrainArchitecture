@@ -409,7 +409,7 @@ CN:
 
 EN:
 
-The repository has 232 Pull Requests.
+The original supplied inventory snapshot recorded 232 Pull Requests. The object-level reconciliation baseline at main commit `f86fddc0fa0291ea8a5e080e741f083ce179a0a2` contains 242 PRs; the 12 later PR objects are confirmed and registered in §8.4.2. This is a dated baseline, not a live repository total.
 
 The supplied single-language PR inventory is classified by integration unit.
 
@@ -417,16 +417,16 @@ Each PR remains an independent historical object, even when grouped with other P
 
 | Group | Integration Unit | PR numbers | Migration_Status | Accountable_Owner |
 |---|---|---|---|---|
-| P-01 | AI governance / AI execution / policy adoption | #270, #269, #267, #261, #260, #256, #250, #248, #237, #230, #201, #199, #196, #195 | MIGRATION_DEBT | NOT_ASSIGNED |
-| P-02 | AI execution traceability / bilingual governance / recovery records | #158, #157, #156, #155, #150, #149, #148, #147, #146, #145, #144, #142, #140, #138, #137, #136, #135, #133, #132 | MIGRATION_DEBT | NOT_ASSIGNED |
+| P-01 | AI governance / AI execution / policy adoption | #281, #280, #278, #277, #273, #272, #270, #269, #267, #261, #260, #256, #250, #248, #237, #230, #201, #199, #196, #195 | MIGRATION_DEBT | NOT_ASSIGNED |
+| P-02 | AI execution traceability / bilingual governance / recovery records | #279, #271, #158, #157, #156, #155, #150, #149, #148, #147, #146, #145, #144, #142, #140, #138, #137, #136, #135, #133, #132 | MIGRATION_DEBT | NOT_ASSIGNED |
 | P-03 | Phase 1 Rust / Storage / SQLite / Event Store | #249, #247, #246, #245, #244, #243, #242, #241, #240, #239, #238, #236, #235, #234, #233, #232, #231, #229, #228, #227, #226, #225, #224, #223, #222, #221, #220, #219, #217, #216, #215, #214, #213, #212, #211, #210, #209, #208, #206, #205, #204, #203, #202, #198, **#191** | MIGRATION_DEBT | NOT_ASSIGNED |
-| P-04 | Publication / Forget / authorization / recovery | #187–#174, #173–#160, #159, #153, #152, #151, **#207, #141** | MIGRATION_DEBT | NOT_ASSIGNED |
-| P-05 | Architecture / domain / integration / research | #257, #255, #253, #252, #251, #197, #194, #193, #192, #190, #189, #188, #154, #143, #139, #131, #129–#121, #120–#114, #113–#99, #98–#89, #88–#80, #79–#71, #70–#60, #59–#52, #51, #50, #49, #47, #46, #45, #44, #42, #40, #38, #36, #35, #34, #33, #32, #31, #28, #27, #23, #22, #12, #1 | MIGRATION_DEBT | NOT_ASSIGNED |
+| P-04 | Publication / Forget / authorization / recovery | #276, #274, #187–#174, #173–#160, #159, #153, #152, #151, **#207, #141** | MIGRATION_DEBT | NOT_ASSIGNED |
+| P-05 | Architecture / domain / integration / research | #275, #257, #255, #253, #252, #251, #197, #194, #193, #192, #190, #189, #188, #154, #143, #139, #131, #129–#121, #120–#114, #113–#99, #98–#89, #88–#80, #79–#71, #70–#60, #59–#52, #51, #50, #49, #48, #47, #46, #45, #44, #42, #40, #38, #36, #35, #34, #33, #32, #31, #28, #27, #23, #22, #12, #1 | MIGRATION_DEBT | NOT_ASSIGNED |
 | P-06 | Event Store payload / Global Forget inventory hardening | #259, #258 | MIGRATION_DEBT | NOT_ASSIGNED |
 
 CN:
 
-仓库共有 232 个 Pull Request。
+原始提供的清点快照记载 232 个 Pull Request。对象级对账基线 main commit `f86fddc0fa0291ea8a5e080e741f083ce179a0a2` 共包含 242 个 PR；新增 12 个 PR 对象已在 §8.4.2 核验并登记。本数字为带时点基线，不是实时仓库总数。
 
 本次提供的单语 PR 清单按集成单元进行分类。
 
@@ -451,6 +451,49 @@ CN:
 - 保留 Exact-Head 证据。
 - 创建双语对应记录，不替换历史审查记录。
 - 不得根据标题语言核验推断正文语言一致性。
+
+#### 8.4.2 A Integration confirmation of the 12 later PR groupings / A 集成确认后续 12 个 PR 归组
+
+**Decision scope:** A Integration confirms group classification only, exercising the coordination responsibility recorded in the F-06 object reconciliation report §4. This is not Project Owner approval, target-group Owner approval, accountable-owner appointment, language-state classification, or migration completion.
+
+**Method:** each PR was fetched by exact PR number; title, body, state, merged flag and exact head SHA were read from GitHub. Group choice follows the PR's substantive integration unit and body, not number proximity, author identity, or title language alone.
+
+| PR | Exact PR Head | State at readback | Confirmed group | Evidence basis |
+|---|---|---|---|---|
+| #48 | `cfcc8f20e2bd6323798864875735db4c57038479` | CLOSED / not merged | P-05 | Bilingual principal system-wide architecture risk assessment; research/architecture review record |
+| #271 | `1eefa22e7fecfcd882aff795796ae178d1f7c4a5` | MERGED | P-02 | GOV-DOC-001 bilingual governance baseline and migration register |
+| #272 | `e698999f1e8c80afb0fc9239971ae00ac509cf34` | MERGED | P-01 | Governance lifecycle gate consolidation (12-state to 6-phase) |
+| #273 | `5e0a919a9253b8747c59062b87d0a580cd204e54` | MERGED | P-01 | AI execution governance structure and RULING-01 anchor correction |
+| #274 | `9be9a09fb13fc7442f5a88e70280ffdfdfd989b9` | MERGED | P-04 | Typed watermark and ForgetFence binding contract |
+| #275 | `373aaf5def95d64554d8ad020a1a53a0934f6819` | MERGED | P-05 | Project positioning, architecture and roadmap |
+| #276 | `a7c15572d851f7764c7565c95b80c24a94548cde` | MERGED | P-04 | D owner-snapshot namespace and ForgetFence currentness contract |
+| #277 | `6a6088afc4994e274974917e3fceb5e08c083bfe` | MERGED | P-01 | AID-2026-001 R3 development-baseline governance integration |
+| #278 | `5f049265fc24a76fdac3647ff0b56eeee2521dbe` | MERGED | P-01 | PR-GOVERNANCE-001 acceptance-comment checklist |
+| #279 | `33302f40e76065becf8e8e7e312a03a9c2438bc0` | MERGED | P-02 | Bilingual documentation tiering policy, inventory and checks |
+| #280 | `ffda3ed9fcb6a697ae5ffa00a0ef007ce4a97d2e` | MERGED | P-01 | AID-2026-009 direct-push ratification record |
+| #281 | `2f7397208fb5e76b69b43444cd0fbb3b3d0ce647` | MERGED | P-01 | Governance enforcement v1.2 platform-check unavailability handling |
+
+**Result:** the 12 previously proposed assignments are now confirmed in the group table above. Together with the existing 230 group entries, the six groups cover 242/242 PR objects at reconciliation baseline `f86fddc0fa0291ea8a5e080e741f083ce179a0a2`. The earlier “14 unassigned PRs” statement remains retracted; those 14 were already present in the pre-existing group tables.
+
+**Authority and limits:**
+- `Accountable_Owner` remains `NOT_ASSIGNED` for every group; no individual or domain Owner is appointed.
+- `Migration_Status` remains `MIGRATION_DEBT` for P-01 through P-06. Group registration is not bilingual migration.
+- PR #48 remains CLOSED / not merged; its group membership does not alter that state.
+- This 242-object baseline is historical and does not claim to inventory PRs created after the reconciliation baseline.
+
+**中文**
+
+**决策范围：**A Integration 依据 F-06 对象级对账报告 §4 所登记的协调责任，仅确认集成单元归组。这不是 Project Owner 或目标组 Owner 批准，不是责任人任命，不是语言状态分类，也不代表迁移完成。
+
+**方法：**逐一按精确 PR 编号读取 GitHub 的标题、正文、状态、合并标志和 Head SHA；根据 PR 正文中的实质集成单元归组，不按编号邻近、作者身份或标题语言推断。
+
+**结果：**此前 12 个归组提案现已确认并写入上表。与既有 230 条分组记录合计，在对账基线 `f86fddc0fa0291ea8a5e080e741f083ce179a0a2` 覆盖 242/242 个 PR 对象。此前“14 个未归组 PR”的说法仍明确撤回；该 14 个编号原本已存在于旧分组表。
+
+**权责与限制：**
+- 各组 `Accountable_Owner` 继续为 `NOT_ASSIGNED`；不任命任何个人或领域 Owner。
+- P-01 至 P-06 的 `Migration_Status` 继续为 `MIGRATION_DEBT`。归组登记不等于双语迁移。
+- PR #48 仍为 CLOSED / not merged；归组不改变其状态。
+- 242 个对象是历史对账基线，不声称覆盖该基线之后创建的 PR。
 
 ### 8.5 Migration classification / 迁移分类
 
