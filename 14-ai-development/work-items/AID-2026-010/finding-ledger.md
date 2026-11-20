@@ -409,3 +409,6 @@ This addendum supersedes earlier PR #321/#322/#327 head and file-Blob snapshots 
 - This is a source-pin refresh on the existing handoff PR, not Runtime implementation. F-43-01/F1 remains P1 / OPEN for actual Runtime implementation and operational evidence; Issue #7 comment #7021990583 continues to prohibit implementation entry without an authorized canonical Runtime target and engineering custody.
 - F-43-01/F3 remains P1 / OPEN for independent-human mapping acceptance and end-to-end consumer/operational evidence; current D/H role-labelled decisions still resolve to the same visible GitHub login `oahcom`.
 - Tests for this documentation-only handoff refresh were NOT RUN; no CI PASS, independent signer, merge, main write or production authorization is claimed.
+
+### Concurrent live-ref correction after the preceding ledger write
+- PR #327 was advanced concurrently after the preceding read. Latest post-write live ref: HEAD `934a76e18ba020d01c520a8484ed7fc37f96cff1`; handoff Blob `2d453d24ae5e65973ced964918b9f3687a5d3284`. This supersedes PR #327 HEAD `4905a2d604b38bbe2d836617b11bed0c97709658` / Blob `ae4ab29c7e7fd14c84b8605f5f5fe10b27477d51` recorded immediately above. PR #327 remains OPEN/DRAFT; current-head checks were not queried after this last ref move.
