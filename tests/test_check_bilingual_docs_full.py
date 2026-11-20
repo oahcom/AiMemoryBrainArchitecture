@@ -1,0 +1,54 @@
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+import check_bilingual_docs_full as checker
+
+
+class FullRepositoryCheckerTests(unittest.TestCase):
+    def test_root_architecture_requires_both_mirrors(self):
+        files = {
+            "01-system-architecture/spec.md",
+            "docs/en/01-system-architecture/spec.md",
+            "docs/zh-CN/01-system-architecture/spec.md",
+        }
+        self.assertEqual(
+            checker.counterpart("01-system-architecture/spec.md", files),
+            "docs/en/01-system-architecture/spec.md + docs/zh-CN/01-system-architecture/spec.md",
+        )
+
+    def test_missing_mirror_is_reportable(self):
+        files = {
+            "01-system-architecture/spec.md",
+            "docs/en/01-system-architecture/spec.md",
+        }
+        self.assertIsNone(
+            checker.counterpart("01-system-architecture/spec.md", files)
+        )
+
+    def test_ai_development_side_by_side_pair(self):
+        files = {
+            "14-ai-development/example.md",
+            "14-ai-development/example.en.md",
+        }
+        self.assertEqual(
+            checker.counterpart("14-ai-development/example.md", files),
+            "14-ai-development/example.en.md",
+        )
+
+    def test_operational_subtrees_are_explicitly_exempt(self):
+        files = {"14-ai-development/work-items/AID-1/prompt.md"}
+        self.assertIn(
+            "operational",
+            checker.counterpart("14-ai-development/work-items/AID-1/prompt.md", files),
+        )
+
+    def test_scope_is_markdown_only(self):
+        self.assertTrue(checker.in_scope("docs/en/00-governance/guide.md"))
+        self.assertFalse(checker.in_scope("src/lib.rs"))
+        self.assertFalse(checker.in_scope("docs/en/00-governance/logo.png"))
+
+
+if __name__ == "__main__":
+    unittest.main(verbosity=2)
