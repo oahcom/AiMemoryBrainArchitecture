@@ -927,10 +927,10 @@ Three things follow, and they are stated rather than inferred:
    constrains persistence behaviour and row immutability; it does not constrain
    schema objects. Verified in §2f with the exact clauses and two bounded
    searches. Stated as a bounded negative, not as a universal one.
-2. **No prohibition was located in the inspected contract or the stated
-   searches; the index is not thereby authorised or established as admissible.**
-   A bounded search result is not an admissibility determination, and the thing
-   being extended belongs to a contract whose owning capacity is `NOT_ASSIGNED`.
+2. **The search result leaves admissibility undecided.** Q11 remains open
+   because the authorising capacity is `NOT_ASSIGNED`. A bounded search is not an
+   admissibility determination, and the thing being extended belongs to a
+   contract whose owning capacity has not been identified.
 3. **The adapter-level fallback stays documented** as the implementation that
    would be used if an authorising capacity later declines the index. Drop the
    index and the composite foreign key; read the version's owning `memory_id`
