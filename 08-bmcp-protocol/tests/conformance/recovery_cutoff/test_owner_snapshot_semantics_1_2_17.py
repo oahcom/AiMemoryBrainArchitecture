@@ -198,8 +198,38 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
                     INVALID,
                 )
 
-    def test_noncanonical_decimal_is_invalid_and_not_normalized_by_h(self):
-        for value in ("00", "08", "-1", "", " 8", "8 ", "8.0", "8e0"):
+    def test_leading_zero_d_values_are_accepted_and_canonicalized_before_digest_projection(self):
+        fields = (
+            "producer_registration_high_water",
+            "work_item_high_water",
+            "attempt_high_water",
+            "barrier_generation",
+            "forget_fence_generation_high_water",
+        )
+        for field in fields:
+            with self.subTest(field=field):
+                snapshot = d_snapshot()
+                values = snapshot["owner_specific_high_waters"]
+                values[field] = "000" + values[field]
+                canonical_projection = dict(values)
+                canonical_projection[field] = str(int(values[field]))
+                snapshot["owner_specific_high_waters_digest"] = _td(
+                    "OWNER-SPECIFIC-HIGH-WATERS", canonical_projection
+                )
+                self.assertEqual(
+                    validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
+                    VALID,
+                )
+                snapshot["owner_specific_high_waters_digest"] = _td(
+                    "OWNER-SPECIFIC-HIGH-WATERS", values
+                )
+                self.assertEqual(
+                    validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
+                    INVALID,
+                )
+
+    def test_invalid_d_decimal_forms_are_rejected(self):
+        for value in ("-1", "+8", "", " 8", "8 ", "8.0", "8e0", "١", "1_0"):
             with self.subTest(value=value):
                 snapshot = d_snapshot()
                 snapshot["owner_specific_high_waters"]["producer_registration_high_water"] = value
