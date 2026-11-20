@@ -95,8 +95,8 @@ class PortableExchangeConformance(unittest.TestCase):
                 parent_grant=parent["claims"]["grant_id"])
     def test_delegation_parent_revocation_denied(self):
         parent=fixture_grant(self.auth,agent="agent.parent",actions=["read","delegate"])
-        child=fixture_grant(self.auth,agent="agent.child",actions=["read"],
-            delegation_chain=(self.auth.issuer,"agent.parent","agent.child"),
+        child=fixture_grant(self.auth,agent="agent.alpha",actions=["read"],
+            delegation_chain=(self.auth.issuer,"agent.parent","agent.alpha"),
             parent_grant=parent["claims"]["grant_id"])
         self.auth.revoke(parent["claims"]["grant_id"])
         with self.assertRaisesRegex(Denied,"DELEGATION_PARENT_INVALID"): self.a.read(self.record.record_id,child)
