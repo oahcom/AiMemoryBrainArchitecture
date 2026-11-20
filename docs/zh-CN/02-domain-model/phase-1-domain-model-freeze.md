@@ -14,9 +14,17 @@ Phase 1 只冻结以下最小领域闭环所需语义：
 
 ## 2. 规范领域对象
 
-Phase 1 使用 Event、Memory、MemoryVersion、Claim、Entity、Relation、Evidence、Provenance、MemorySource、MemoryContext、ContextEntry、ScopeRef、ActorRef、TemporalRef。
+Phase 1 使用 Event、Memory、MemoryVersion、Claim、ClaimRevision、Fact、FactRevision、Entity、Relation、Evidence、Provenance、MemorySource、MemoryContext、ContextEntry、ScopeRef、ActorRef 和 TemporalRef。
 
-Phase 1 不建立独立 Fact 对象。Verified Fact 通过具有 Verified Epistemic Status 的 Claim 表示。
+Claim 表示命题身份及不可变 ClaimRevision 历史。
+
+Fact 是引用精确 ClaimRevision 值的独立受治理 Attestation 对象。
+
+Fact 不等同于客观真理、Confidence 或 Verified Claim 状态。
+
+本次收敛决策取代此前 Phase 1 文档中相冲突的语义描述。
+
+本决策仅确定语义方向，不批准物理 Schema、DDL、公开 API、Wire 契约、生产安全材料或实现符合性。
 
 ### Event
 

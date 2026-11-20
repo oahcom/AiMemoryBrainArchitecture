@@ -14,9 +14,17 @@ This document does not freeze ID-generation algorithms, BMCP wire format, SQLite
 
 ## 2. Canonical objects
 
-Phase 1 uses Event, Memory, MemoryVersion, Claim, Entity, Relation, Evidence, Provenance, MemorySource, MemoryContext, ContextEntry, ScopeRef, ActorRef, and TemporalRef.
+Phase 1 uses Event, Memory, MemoryVersion, Claim, ClaimRevision, Fact, FactRevision, Entity, Relation, Evidence, Provenance, MemorySource, MemoryContext, ContextEntry, ScopeRef, ActorRef, and TemporalRef.
 
-Fact is not a separate Phase 1 object. A verified fact is represented as a Claim with Verified epistemic status.
+Claim represents proposition identity and immutable ClaimRevision history.
+
+Fact is an independent governed Attestation object referencing exact ClaimRevision values.
+
+Fact is not equivalent to objective truth, Confidence, or Verified Claim status.
+
+The convergence decision supersedes conflicting semantic descriptions in earlier Phase 1 documentation.
+
+This is a semantic direction decision only. It does not approve physical Schema, DDL, public API, wire contract, production security material, or implementation conformance.
 
 ### Event
 
