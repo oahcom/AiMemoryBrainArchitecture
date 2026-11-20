@@ -22,6 +22,83 @@ Fact 在 Phase 1 不是独立对象。“已验证事实”表示为 Epistemic S
 2. MemoryId 在 Memory 整个生命周期内保持不变。
 3. MemoryVersionId 标识一个不可变 Memory 版本。
 4. ClaimId 跨 Memory Version 的身份策略仍为 OPEN；Phase 1 不冻结“稳定 ClaimId”与“版本内 ClaimId”之间的选择。
+
+### 2.4 Claim 身份分类与修订不变量
+
+Claim 身份由命题身份决定，而不是由文本表示、Evidence 数量、Confidence 分数或序列化形式决定。
+
+Claim 具有稳定的逻辑身份（`ClaimRef`）。每一个不可变断言状态使用独立的 `ClaimRevisionRef` 标识。
+
+以下分类具有规范效力：
+
+| ID | 变化维度 | 分类 | 谱系关系 | 授权要求 |
+|---|---|---|---|---|
+| CI-01 | Subject/Entity Resolution 改变实际指代对象 | NEW_CLAIM | 创建新 ClaimRef；存在关联时记录与原 Claim 的身份谱系 | 经授权的身份解析决定 |
+| CI-02 | Predicate 改变所断言的关系或属性 | NEW_CLAIM | 创建新 ClaimRef；适用时记录关联谱系 | 经授权的 Claim 创建 |
+| CI-03 | Object/Value 改变所断言的命题 | NEW_CLAIM | 创建新 ClaimRef；适用时记录关联谱系 | 经授权的 Claim 创建 |
+| CI-04 | Polarity 改变（肯定/否定） | NEW_CLAIM | 创建新 ClaimRef；保留对立命题关系 | 经授权的 Claim 创建 |
+| CI-05 | Quantifier 改变命题的实质范围 | NEW_CLAIM | 创建新 ClaimRef；记录关联谱系 | 经授权的 Claim 创建 |
+| CI-06 | Modality 改变可能性、必要性、义务或能力断言 | NEW_CLAIM | 创建新 ClaimRef；记录关联谱系 | 经授权的 Claim 创建 |
+| CI-07 | Temporal Qualifier 改变命题的实质时间含义 | NEW_CLAIM | 创建新 ClaimRef；记录关联谱系 | 经授权的 Claim 创建 |
+| CI-08 | Scope 改变命名空间或适用边界 | NEW_CLAIM | 创建新 ClaimRef；显式记录 Scope 谱系；不得静默迁移身份 | 按适用情况分别取得源 Scope 和目标 Scope 授权 |
+| CI-09 | Evidence 改变，但命题身份不变 | NEW_REVISION | 保留 ClaimRef；创建新的不可变 ClaimRevisionRef | 经授权的修订 |
+| CI-10 | Provenance 或派生血缘改变，但命题身份不变 | NEW_REVISION | 保留 ClaimRef；创建新的不可变 ClaimRevisionRef | 经授权的 Provenance 更正 |
+| CI-11 | Epistemic Status 改变 | NEW_REVISION | 保留 ClaimRef；创建新的不可变 ClaimRevisionRef | 经授权的状态转换 |
+| CI-12 | Confidence 或 Evidence Strength 评估改变 | NEW_REVISION | 保留 ClaimRef；创建新的不可变 ClaimRevisionRef | 经授权的评估更新 |
+| CI-13 | 仅格式、拼写、标点或展示层修正 | NEW_REVISION | 保留 ClaimRef；保持语义等价并保留历史版本 | 经授权的编辑性修正 |
+
+#### 实质限定词规则
+
+如果限定词变化会改变命题的真值条件、适用范围、时间含义、模态或 Scope，则该限定词属于实质限定词。
+
+实质限定词发生变化时，MUST 创建 NEW_CLAIM。
+
+如果限定词变化仅影响表达方式，不改变命题含义或适用范围，则 MUST 创建 NEW_REVISION。
+
+#### 身份解析规则
+
+仅显示 Entity 标签变化，而底层指代对象不变时，不创建新 Claim。
+
+解析出的实际指代对象发生变化时，创建新 Claim。
+
+#### Scope 不变量
+
+ClaimRef 绑定其声明的 Scope 身份。
+
+改变 Scope MUST NOT 修改或静默转移既有 ClaimRef。
+
+必须创建新 ClaimRef 并记录明确谱系。
+
+跨 Scope 谱系不得转移访问权。适用时必须分别验证源 Scope 和目标 Scope 的授权。
+
+#### Revision 不变量
+
+NEW_REVISION MUST 保留 ClaimRef，并创建新的不可变 ClaimRevisionRef。
+
+不得覆盖历史 Revision。
+
+每次更正 MUST 记录 Parent Revision 和更正原因。
+
+仅增加 Evidence 不创建新的 Claim 身份。
+
+Evidence 或 Provenance 引用变化不授权改变 Claim 命题。
+
+#### 授权不变量
+
+分类 MUST 具有确定性，并与最终身份/修订决定一同记录。
+
+不同实现 MUST NOT 对语义等价的输入独立选择不同分类。
+
+分类存在歧义时，系统 MUST 拒绝自动身份变更，并要求明确的受治理决定。
+
+不得静默退化为 NEW_REVISION。
+
+F 和 G MUST 消费精确 ClaimRevisionRef。
+
+F 和 G MUST NOT 通过语义相似度、当前 Head 替代或不限定版本的最新版本查询解析历史引用。
+
+本节只定义语义身份，不冻结 Schema、DDL、公开 API 或 Wire 表示。
+
 5. Memory 更新必须创建新的不可变 MemoryVersion；旧版本在治理允许范围内仍可读取。
 6. ContextEntry 引用特定 MemoryVersion 或受治理的呈现形式；它不是第二份 Canonical Memory。
 7. ID 不是时间戳、可变内容哈希、数据库行号或授权凭证。

@@ -22,6 +22,83 @@ The model is intentionally richer than text plus embedding. Embeddings, lexical 
 2. MemoryId identifies the logical Memory for its entire lifetime.
 3. MemoryVersionId identifies one immutable Memory version.
 4. ClaimId identity policy across Memory versions remains OPEN; Phase 1 does not freeze stable-versus-version-local Claim identity.
+
+### 2.4 Claim Identity Classification and Revision Invariants
+
+Claim identity is determined by proposition identity, not by textual representation, evidence count, confidence score, or serialization.
+
+A Claim has a stable logical identity (`ClaimRef`). Each immutable assertion state is identified by a separate `ClaimRevisionRef`.
+
+The following classification is normative:
+
+| ID | Change dimension | Classification | Lineage | Authorization |
+|---|---|---|---|---|
+| CI-01 | Subject/entity resolution changes the actual referent | NEW_CLAIM | New ClaimRef; record identity lineage to the prior Claim where related | Authorized identity-resolution decision |
+| CI-02 | Predicate changes the asserted relationship or property | NEW_CLAIM | New ClaimRef; related-to lineage where applicable | Authorized claim creation |
+| CI-03 | Object/value changes the asserted proposition | NEW_CLAIM | New ClaimRef; related-to lineage where applicable | Authorized claim creation |
+| CI-04 | Polarity changes (positive/negative) | NEW_CLAIM | New ClaimRef; preserve the opposing proposition relationship | Authorized claim creation |
+| CI-05 | Quantifier changes the proposition's substantive extent | NEW_CLAIM | New ClaimRef; related-to lineage | Authorized claim creation |
+| CI-06 | Modality changes the asserted possibility, necessity, obligation, or ability | NEW_CLAIM | New ClaimRef; related-to lineage | Authorized claim creation |
+| CI-07 | Temporal qualifier changes the proposition's substantive temporal meaning | NEW_CLAIM | New ClaimRef; related-to lineage | Authorized claim creation |
+| CI-08 | Scope changes the namespace or applicability boundary | NEW_CLAIM | New ClaimRef; explicit scope lineage; never silently migrate identity | Authorization in source and target Scope as applicable |
+| CI-09 | Evidence changes without changing proposition identity | NEW_REVISION | Same ClaimRef; new immutable ClaimRevisionRef | Authorized revision |
+| CI-10 | Provenance or derivation lineage changes without changing proposition identity | NEW_REVISION | Same ClaimRef; new immutable ClaimRevisionRef | Authorized provenance correction |
+| CI-11 | Epistemic status changes | NEW_REVISION | Same ClaimRef; new immutable ClaimRevisionRef | Authorized status transition |
+| CI-12 | Confidence or evidence-strength assessment changes | NEW_REVISION | Same ClaimRef; new immutable ClaimRevisionRef | Authorized assessment update |
+| CI-13 | Formatting, spelling, punctuation, or presentation-only correction | NEW_REVISION | Same ClaimRef; preserve semantic equivalence and prior revision | Authorized editorial correction |
+
+#### Substantive qualifier rule
+
+A qualifier is substantive if changing it changes the proposition's truth conditions, applicability, temporal meaning, modality, or scope.
+
+A substantive qualifier change MUST create a NEW_CLAIM.
+
+A qualifier that changes only representation, without changing proposition meaning or applicability, MUST create a NEW_REVISION.
+
+#### Identity resolution rule
+
+A change in the displayed entity label alone does not create a new Claim if the underlying referent is unchanged.
+
+A change in the resolved referent does create a new Claim.
+
+#### Scope invariant
+
+A ClaimRef is bound to its declared Scope identity.
+
+Changing Scope MUST NOT mutate or silently transfer an existing ClaimRef.
+
+A new ClaimRef and explicit lineage are required.
+
+Cross-Scope lineage MUST NOT transfer access rights. Authorization in the source and target Scope MUST be independently validated as applicable.
+
+#### Revision invariant
+
+A NEW_REVISION MUST preserve ClaimRef and create a new immutable ClaimRevisionRef.
+
+Historical revisions MUST NOT be overwritten.
+
+Every correction MUST record its parent revision and correction reason.
+
+Evidence addition alone does not create a new Claim identity.
+
+Evidence or Provenance reference changes do not authorize changing the Claim proposition.
+
+#### Authorization invariant
+
+Classification MUST be deterministic and recorded with the resulting identity/revision decision.
+
+Implementations MUST NOT independently choose different classifications for semantically equivalent input.
+
+When classification is ambiguous, the system MUST reject automatic identity mutation and require an explicit governed decision.
+
+It MUST NOT silently select NEW_REVISION as a fallback.
+
+F and G MUST consume exact ClaimRevisionRef values.
+
+F and G MUST NOT resolve historical references through semantic similarity, current-head substitution, or an unqualified latest-version lookup.
+
+This section defines semantic identity only. It does not freeze Schema, DDL, public API, or wire representation.
+
 5. A Memory update creates a new immutable MemoryVersion. Previous versions remain readable subject to governance.
 6. A ContextEntry references a specific MemoryVersion or governed rendering; it is never a second canonical Memory.
 7. IDs are not timestamps, mutable-content hashes, database row numbers, or authorization credentials.
