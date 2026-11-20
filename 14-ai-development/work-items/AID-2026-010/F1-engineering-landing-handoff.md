@@ -270,3 +270,19 @@ The latest PR #322 exact-head record is:
 The D contract and mapping pins remain PR #321 commit `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`, contract Blob `099f4948b550919084b0d73094692b590b0be0a9`, mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
 
 This correction changes only source attribution. F1 remains P1/OPEN; F3 remains P1/OPEN. No Runtime implementation, independent D/H human identity, H production acceptance, callable D query/Receipt/currentness or C1–C6 operational proof is inferred. Documentation-only; tests NOT RUN; no CI PASS.
+
+
+## 13. Owner ruling D-2026-1120-01 — current continuation reconciliation
+
+The Owner ruling supplied on 2026-11-20 removes the prior carrier quota freeze and permits at most two new PRs and three new Issues in this continuation. This changes carrier capacity only; it does not amend the separate engineering-entry decision recorded in Issue #7 comment #7021990583.
+
+Current disposition:
+- F-43-01/F1 remains P1 / OPEN for actual Runtime implementation and operational proof.
+- This handoff is a delivered, reviewable engineering-entry package; it is not Runtime implementation, an implementation authorization, or production conformance.
+- The five callable D authority operations remain NOT IMPLEMENTED.
+- Durable authoritative Producer Registration Ledger and operation-bound Receipt remain NOT ESTABLISHED.
+- Runtime equality/linearization evidence remains NOT ESTABLISHED.
+- D-002 adversarial scenarios S1–S7 remain NOT RUN.
+- No canonical Runtime repository/branch, engineering write custody, or implementation-entry authorization is inferred from the quota ruling.
+
+The existing PR #327 is retained as the sole F1 handoff carrier. No duplicate PR, Issue, branch, placeholder Runtime, merge, or main write is created by this update. Exact source pins and the controlling Issue #7 entry boundary must be refreshed from live GitHub refs before any later implementation claim.
