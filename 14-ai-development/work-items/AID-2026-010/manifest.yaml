@@ -220,8 +220,8 @@ latest_exact_head_refresh:
   ruling: "D-2026-1120-01"
   finding_ledger:
     path: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-    commit: "442e1c8c576661ee309d0c0b4641907f76b9a8d0"
-    blob: "a5d681f27d761302bb8171d1fcc8edc8782f549c"
+    commit: "37d155fed076f271a42ff8e9343cdbd92c80d7cc"
+    blob: "1bb37ad952a9057069a0d48cbe8f5585917c42c7"
   carriers:
     F1_PR_327:
       head: "934a76e18ba020d01c520a8484ed7fc37f96cff1"
@@ -257,3 +257,9 @@ latest_concurrent_ref_correction:
     head: "934a76e18ba020d01c520a8484ed7fc37f96cff1"
     handoff_blob: "2d453d24ae5e65973ced964918b9f3687a5d3284"
     note: "Supersedes the immediately preceding F1 head/blob pin; branch advanced concurrently."
+
+latest_ledger_pin_reconciliation:
+  date: "2026-11-20"
+  commit: "37d155fed076f271a42ff8e9343cdbd92c80d7cc"
+  blob: "1bb37ad952a9057069a0d48cbe8f5585917c42c7"
+  note: "Supersedes prior live-ref ledger pin after concurrent evidence refresh; current branch readback verified."
