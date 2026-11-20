@@ -8,8 +8,8 @@
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](../../../work-items/AID-2026-002/manifest.yaml)
 - **Implementation documents:** [AI-EXEC-001](AI-EXEC-001.md) (process execution details), [AI-EXEC-002](AI-EXEC-002.md) (prompt execution details)
 - **Source document:** `14-ai-development/AI-EXEC-ROLLOUT-001.md`
-- **Source commit:** `778b4d3b4b6c846faa6a02247d31d14a33d8b626` (coordinator-supplied)
-- **Source blob SHA:** `14082151e2839e966349498138b9001d01de9bed` (coordinator-supplied)
+- **Source commit:** `e2fa44b1437a9cee22247fffd40c245a13fa4f90` (verified canonical source commit)
+- **Source blob SHA:** `ab85fe263a94f8f0bd68ec12aa2bf831e31167a0` (verified canonical source Blob)
 - **Translation status:** English counterpart; source-aligned translation. Source document remains authoritative for this batch.
 
 > This document reorganizes the pain-point analysis of the AI development process (15 measures): **Phase 1 implements only the minimum loop needed to make the cycle run; Phase 2 adds hardening afterward**. Starting with v4, **the project's current workflow is the foundation**—no parallel governance system is created; everything is implemented through existing mechanisms in AI-STD-001 / AI-PROC-001 / PR-GOVERNANCE-001 / AI-PROMPT-STD-001. Work Items (`AID-YYYY-NNN` + `manifest.yaml` + `INDEX.md`) are retained and operationalized under AI-STD-001 §13.
