@@ -97,3 +97,5 @@
 ## 8. 生效
 
 本文在治理权威正式采纳前为 PROPOSED。采纳记录须明确批准者、生效日期、采用的逐文件分类清单版本及其 SHA。任何自动化实现均须遵循本策略，尤其是 UNKNOWN 人工确认、Tier 1 不可降级及架构语义双语门禁。
+
+采纳记录的空白表格见 `14-ai-development/work-items/ADOPTION-EVIDENCE-2026-P1/adoption-record-template.md`；已就绪证据与仍缺失证据的汇编见同目录 `adoption-evidence-dossier.md`。两份均为准备材料：不构成采纳，不得被引用为已采纳，也不得被引用为批准者已存在。

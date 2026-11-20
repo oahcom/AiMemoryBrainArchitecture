@@ -97,3 +97,5 @@ This policy governs documentation classification and execution. It does not repl
 ## 8. Effective Date
 
 This document remains PROPOSED until formally adopted by the governance authority. The adoption record MUST identify the approver, effective date, adopted per-file classification inventory version, and its SHA. All automation MUST comply with this policy, especially human confirmation for UNKNOWN, the non-downgradability of Tier 1, and the architecture-semantic bilingual gate.
+
+The blank form for the adoption record is `14-ai-development/work-items/ADOPTION-EVIDENCE-2026-P1/adoption-record-template.md`; the assembly of ready and missing evidence is `adoption-evidence-dossier.md` in the same directory. Both are preparation material: neither constitutes adoption, and neither may be cited as adoption or as proof that an approver exists.
