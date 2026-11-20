@@ -401,3 +401,11 @@ This addendum supersedes earlier PR #321/#322/#327 head and file-Blob snapshots 
 - F3 H validator/test: PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb` / Blobs `49644a181c578fecb312218c08ce23caa62f603b` and `6685226143f28a5b8764067bb205080b531132e3`.
 - No new PR, Issue, or branch; no merge, main write, runtime deployment, production authorization, or other-Owner signature.
 - Prompt provenance: this user-provided Owner ruling D-2026-1120-01; originating conversation reference supplied by user; platform UUID/raw bytes unavailable; SHA-256 NOT_VERIFIED.
+
+### F1 handoff exact-source refresh — supersedes prior PR #327 pins
+
+- Existing PR #327 branch `docs/f43-01-f1-engineering-entry-handoff` current Head `934a76e18ba020d01c520a8484ed7fc37f96cff1`; handoff file `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md` Blob `2d453d24ae5e65973ced964918b9f3687a5d3284`.
+- This exact handoff Blob now pins the current D query contract PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881` / Blob `099f4948b550919084b0d73094692b590b0be0a9`; the accepted H mapping Blob remains `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
+- This is a source-pin refresh on the existing handoff PR, not Runtime implementation. F-43-01/F1 remains P1 / OPEN for actual Runtime implementation and operational evidence; Issue #7 comment #7021990583 continues to prohibit implementation entry without an authorized canonical Runtime target and engineering custody.
+- F-43-01/F3 remains P1 / OPEN for independent-human mapping acceptance and end-to-end consumer/operational evidence; current D/H role-labelled decisions still resolve to the same visible GitHub login `oahcom`.
+- Tests for this documentation-only handoff refresh were NOT RUN; no CI PASS, independent signer, merge, main write or production authorization is claimed.
