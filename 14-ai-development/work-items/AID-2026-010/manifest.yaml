@@ -165,8 +165,8 @@ current_status_refresh:
     records the subsequent Owner release and supersedes that historical
     restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "570cbbc49cbc8a01195d5246f9ab0a9e21266e03"
-  ledger_blob_sha: "c0510e490f6f0b765f08b51882ceea1b433b1b6f"
+  ledger_commit: "9555e777c2570125686924df486048f02e3803fc"
+  ledger_blob_sha: "4bbaec9f4933da118f7110a529d36ef581b720e2"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -198,7 +198,8 @@ current_status_refresh:
     sha256: NOT_VERIFIED
     note: "No repository prompt file is claimed as the source of this chat instruction; no digest is fabricated."
 
-  historical_closeout_note: >-
+    - "PR #322 final exact HEAD 0ce618ac503f641cf31e66092ae823c14bf8af7b; validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob e66264ad30df6594e00836524accfdeb54160cee."
+    - "PR #322 exact-head runs 44681841687/job 136108099194 and 44681841601/job 136108110590 FAILURE; reruns 136109249771 and 136109260361 FAILURE with steps=null; rerun log retrieval HTTP 404 BlobNotFound (RequestIds f780ccdd-901e-00df-3cb1-78e52e000000; 7c5c38f0-e01e-00ae-0eb1-78e88c000000). No CI PASS."\n  historical_closeout_note: >-
     integration_closeout above remains the historical 2026-11-19 disposition
     (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
     current Finding counts and states: F1 is OPEN for D implementation
