@@ -29,16 +29,16 @@ base_commit_sha: 723446225af5daa863e6641106a669e3ad8ba11b
 tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/262
 
 created_at: 2026-11-20T06:17:00Z
-updated_at: 2026-11-20T06:52:21Z
+updated_at: 2026-11-20T06:55:30Z
 
 prompt_id: AID-2026-011-PROMPT
 prompt_version: v1
 prompt_file: 14-ai-development/work-items/AID-2026-011/prompt-v1.md
 prompt_status: DRAFT_NOT_FROZEN
-prompt_sha256: f8879de70c1a82bb8b5715c09985a5abc998c22475b7009ebf6a76f98f4abff1
-prompt_bytes: 17995
-prompt_file_blob_sha: 88894bf02ccad2858d4fafb82af0e689ab36970c
-prompt_file_commit_sha: 09eeb66eb96913e5bf7a9ee9fbd46d8399c318be
+prompt_sha256: 26541dfc88b51fbb799763fe7ee7cdd6a135f5712b4f56be8ade7d1b91635951
+prompt_bytes: 17998
+prompt_file_blob_sha: 575aeb74c11ea596a8978b1824643de114dbe938
+prompt_file_commit_sha: 25b9b48aff2bba5c678bbd494a24a20de453a703
 prompt_draft_branch: ai/AID-2026-011/req01-risk-reconciliation-v1
 
 prompt_provenance_tier: T1
