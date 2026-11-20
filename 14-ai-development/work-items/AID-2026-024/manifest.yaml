@@ -1,0 +1,304 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_status: "PENDING_FORMAL_REGISTRATION"
+work_item_id: "AID-2026-024"
+identifier_status: "coordinator_verified_unique_see_identifier_evidence"
+
+title: "Minimal Executable Three-Arm Memory Evaluation Architecture"
+
+date: "2026-11-20"
+
+requirements:
+  primary:
+    id: "REQ-06"
+    issue: 346
+    url: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/346"
+    responsibility: "Product value and memory effectiveness validation"
+
+  joint:
+    id: "REQ-10"
+    issue: 350
+    url: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/350"
+    responsibility: "Performance, cost and resource efficiency"
+
+  coordination:
+    issue: 345
+    url: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/345"
+
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  url: "https://github.com/oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "c970c4a61b623c1f127624f60666b0a27e7e0594"
+  baseline_status: "USER_SUPPLIED_BASELINE"
+  baseline_independently_reverified: false
+
+prompt:
+  prompt_file: "14-ai-development/work-items/AID-2026-024/prompt-v1.md"
+  prompt_status: "FROZEN"
+  prompt_sha256: "2cd4fed82ebdf801298670f1453c7becf51c0d8d6855c593fac5396d3d6ca09c"
+  prompt_bytes: 6856
+  prompt_provenance_tier: "T1"
+  prompt_provenance_note: >-
+    The snapshot is mechanically copied byte-for-byte by the coordination
+    layer from the dispatch source file. Byte-equality between the source
+    artifact and the content rendered to this session is NOT_VERIFIED.
+  prompt_delivery_integrity: "NOT_VERIFIED"
+
+governance:
+  sponsor: "NOT_ASSIGNED"
+  accountable_owner: "NOT_ASSIGNED"
+  acceptance_authority: "NOT_ASSIGNED"
+  architecture_authority: "NOT_ASSIGNED"
+  implementation_authority: "NOT_GRANTED"
+  independent_reviewer: "NOT_APPOINTED"
+  security_reviewer: "NOT_APPOINTED"
+  performance_reviewer: "NOT_APPOINTED"
+
+  self_appointment_prohibited: true
+  role_assignment_by_session: false
+  authority_inferred_from_issue_creation: false
+
+  formal_registration:
+    status: "PENDING_FORMAL_REGISTRATION"
+    index_entry_verified: false
+  identifier_evidence:
+    scan_timestamp: "2026-11-20T12:10Z"
+    scan_performed_by: "coordination layer (not an independent session)"
+    main_work_item_tree: "SCANNED"
+    active_branches: "325 branches, paginated 100 per page, full enumeration"
+    method: >-
+      For every branch, GET /repos/.../git/trees/{branch_head_sha}?recursive=1
+      and regex-match AID-2026-([0-9]{2}) against every blob path.
+    result_max_allocated: "AID-2026-026"
+    result_for_this_id: >-
+      TAKEN only by branch work-item/stage0-registration-023-026-024-025
+      (this registration branch). No occurrence on main.
+  identifier_globally_unique: "VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN"
+  identifier_uniqueness_limitation: >-
+    Point-in-time scan of main plus the 325 branches observable at scan time.
+    Does not cover deleted branches, tags, forks, or future allocations. This is
+    an allocation scan, not a permanent reservation.
+  registration_state: >-
+    Registration PR #354 is OPEN and NOT MERGED. Branch-side readback completed
+    byte-for-byte; main-side readback NOT performed and must not be claimed.
+  coordinator_confirmation_required: true
+
+  lifecycle:
+    current_stage: "STAGE_0"
+    stage_0: "REGISTRATION_PENDING"
+    r0: "NOT_CLAIMED"
+    r1: "EVIDENCE_AVAILABLE_FROM_EXISTING_RECORDS"
+    r2: "NOT_STARTED"
+    r3: "NOT_STARTED"
+    r4: "NOT_STARTED"
+    r5: "NOT_AUTHORIZED"
+    implementation: "NOT_AUTHORIZED"
+    independent_acceptance: "NOT_STARTED"
+
+scope:
+  objective: >-
+    Design the smallest executable integration path capable of reproducibly
+    comparing no-memory, simple-retrieval-memory and complete AI Memory Brain
+    execution, while supporting end-to-end performance, resource and cost
+    measurements.
+
+  evaluation_arms:
+    - id: "ARM_A"
+      name: "No memory"
+      description: "Agent execution without persistent or retrieved memory."
+
+    - id: "ARM_B"
+      name: "Simple retrieval memory"
+      description: "Agent execution using a bounded, independently defined retrieval-memory baseline."
+
+    - id: "ARM_C"
+      name: "Complete AI Memory Brain"
+      description: "Agent execution through the complete integrated Brain memory and context-delivery chain."
+
+  deliverables:
+    - "Existing integration inventory"
+    - "Missing runtime capability assessment"
+    - "Minimal three-arm execution architecture"
+    - "Fair-comparison and confounder-control protocol"
+    - "Shared runtime instrumentation interface"
+    - "REQ-06 independent evaluation contract"
+    - "REQ-10 independent performance measurement contract"
+    - "Representative workload and dataset design"
+    - "Contamination and leakage controls"
+    - "Benchmarking, tracing and evaluation ecosystem comparison"
+    - "Reproducible benchmark execution plan"
+    - "Model and operational cost attribution design"
+    - "Failure and graceful-degradation model"
+    - "Implementation dependency sequence and rollback plan"
+
+non_goals:
+  - "Implementing the proposed architecture"
+  - "Writing to main or modifying production code"
+  - "Production deployment or infrastructure expansion"
+  - "Merging branches or pull requests"
+  - "Claiming REQ-06 or REQ-10 implementation or acceptance"
+  - "Claiming product improvement without experimental evidence"
+  - "Inventing benchmark results, model prices or performance targets"
+  - "Treating reference-model execution as integrated Brain execution"
+  - "Treating retrieved context as proof of Applied Context"
+  - "Combining REQ-06 and REQ-10 acceptance criteria"
+  - "Selecting infrastructure before measuring actual bottlenecks"
+
+baseline_evidence:
+  req_06:
+    source_issue: 346
+    source_comment: 7036613128
+    url: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/346#issuecomment-7036613128"
+    findings:
+      executable_domain_storage_tests: "PRESENT"
+      historical_reference_model_evaluation: "PRESENT"
+      integrated_brain_benchmark: "NOT_ESTABLISHED"
+      representative_corpus: "NOT_ESTABLISHED"
+      product_improvement: "NOT_DEMONSTRATED"
+      three_arm_feasibility: "PARTIAL"
+      implementation_authorization: "NOT_GRANTED"
+
+  req_10:
+    source_issue: 350
+    source_comment: 7037161287
+    url: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/350#issuecomment-7037161287"
+    findings:
+      integrated_runtime_performance: "NOT_ESTABLISHED"
+      representative_workload_benchmark: "NOT_ESTABLISHED"
+      p50: "NOT_MEASURED"
+      p95: "NOT_MEASURED"
+      p99: "NOT_MEASURED"
+      throughput: "NOT_MEASURED"
+      concurrency: "NOT_MEASURED"
+      cpu_attribution: "NOT_MEASURED"
+      memory_attribution: "NOT_MEASURED"
+      storage_growth: "NOT_MEASURED"
+      model_cost_attribution: "NOT_MEASURED"
+
+  shared_findings:
+    missing_integrated_runtime: true
+    shared_instrumentation_opportunity: true
+    acceptance_tracks_remain_separate: true
+
+  evidence_limitations:
+    - "Existing findings are inherited baseline evidence, not fresh source-code verification."
+    - "The supplied main commit is the proposed design baseline."
+    - "No new benchmark execution is claimed."
+    - "No CI execution or PASS result is claimed."
+    - "Independent reviewer identity remains subject to governance verification."
+
+dependencies:
+  governance:
+    - issue: 345
+      requirement: "Valid Work Item allocation and registration"
+    - "Coordinator verification of globally unique identifier"
+    - "Formal establishment of accountable ownership and acceptance authority"
+
+  technical:
+    - issue: 346
+      requirement: "Three-arm product evaluation requirements"
+    - issue: 350
+      requirement: "Performance and cost measurement requirements"
+    - issue: 254
+      requirement: "Inspect and reconcile existing evaluation proposals before designing duplicate mechanisms"
+    - "Identify the actual executable Brain integration boundary"
+    - "Identify the model invocation and agent adapter boundaries"
+    - "Establish reproducible workload and dataset provenance"
+
+  ordering_constraints:
+    - "Stage 0 registration must precede substantive R2 execution."
+    - "Existing evaluation proposals must be reconciled before proposing replacements."
+    - "Brain-arm execution feasibility must be established before claiming end-to-end benchmark capability."
+    - "REQ-06 and REQ-10 retain separate acceptance decisions."
+
+acceptance_criteria:
+  stage_0:
+    - "Work Item identifier formally verified as globally unique."
+    - "Coordinator completes formal registration."
+    - "Prompt snapshot copied by the coordination layer."
+    - "Prompt hash and byte count measured by the coordination layer."
+    - "Prompt provenance and delivery-integrity limitations preserved."
+    - "Sponsor, accountable owner and acceptance authority remain unassigned unless formally established."
+    - "No implementation authorization inferred."
+
+  stage_0_exit_status: "PENDING"
+
+risk_register:
+  - id: "RISK-01"
+    description: "Work Item identifier collision or conflicting allocation."
+    severity: "HIGH"
+    mitigation: "Coordinator verifies identifier uniqueness before assignment."
+
+  - id: "RISK-02"
+    description: "Prompt snapshot differs from dispatched source."
+    severity: "HIGH"
+    mitigation: "Coordinator performs mechanical byte-preserving copy and independent measurement."
+
+  - id: "RISK-03"
+    description: "Complete Brain execution path is unavailable."
+    severity: "HIGH"
+    mitigation: "Establish actual integration dependencies before implementation planning."
+
+  - id: "RISK-04"
+    description: "Reference-model evidence is mistaken for product-level evidence."
+    severity: "HIGH"
+    mitigation: "Maintain explicit evidence tiers and separate execution-arm definitions."
+
+  - id: "RISK-05"
+    description: "Memory initialization or model configuration introduces comparison bias."
+    severity: "HIGH"
+    mitigation: "Define controlled initialization, identical task inputs and confounder controls."
+
+  - id: "RISK-06"
+    description: "Instrumentation materially changes measured runtime behavior."
+    severity: "MEDIUM"
+    mitigation: "Define measurement overhead experiments and independent instrumentation checks."
+
+  - id: "RISK-07"
+    description: "Performance metrics are published without reproducible workload context."
+    severity: "HIGH"
+    mitigation: "Require workload, hardware, software, dataset and model provenance."
+
+  - id: "RISK-08"
+    description: "Evaluation and performance criteria become improperly conflated."
+    severity: "HIGH"
+    mitigation: "Maintain separate REQ-06 and REQ-10 acceptance contracts."
+
+  - id: "RISK-09"
+    description: "Premature infrastructure expansion increases complexity."
+    severity: "MEDIUM"
+    mitigation: "Prefer existing tools and minimum-change architecture."
+
+constraints:
+  - "Architecture design only."
+  - "Read-only repository investigation."
+  - "No main writes."
+  - "No production deployment."
+  - "No infrastructure expansion."
+  - "No merges."
+  - "No implementation authorization."
+  - "No unsupported performance claims."
+  - "No unsupported cost claims."
+  - "No inferred governance appointments."
+
+next_task:
+  name: "Independent review of benchmark architecture and measurement validity"
+  status: "NOT_STARTED"
+  prerequisites:
+    - "Formal Stage 0 registration"
+    - "Identifier uniqueness confirmation"
+    - "Prompt snapshot coordinator verification"
+    - "Substantive R2 architecture design completion"
+  reviewer: "NOT_APPOINTED"
+
+final_registration_disposition:
+  status: "PENDING_FORMAL_REGISTRATION"
+  substantive_r2_execution: "NOT_STARTED"
+  implementation: "NOT_AUTHORIZED"
+  req_06_acceptance: "NOT_EVALUATED"
+  req_10_acceptance: "NOT_EVALUATED"
+  ci_status: "NOT_RUN"
+  product_value: "NOT_DEMONSTRATED"
+  performance_readiness: "NOT_MEASURED"
+  coordinator_action_required: true

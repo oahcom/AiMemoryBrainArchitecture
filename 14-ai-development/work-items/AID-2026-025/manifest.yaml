@@ -1,0 +1,349 @@
+manifest_version: "1.0"
+record_type: "STAGE_0_WORK_ITEM_REGISTRATION"
+registration_stage: "STAGE_0"
+registration_status: "PENDING_COORDINATOR_REGISTRATION"
+
+work_item:
+  proposed_id: "AID-2026-025"
+  identifier_status: "coordinator_verified_unique_see_identifier_evidence"
+  title: "REQ-08 Identity and Security Contract Before Portable Memory Exchange"
+  requirement_id: "REQ-08"
+  requirement_issue: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/348"
+  related_requirements:
+    - id: "REQ-07"
+      issue: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/347"
+    - id: "REQ-09"
+      issue: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/349"
+  coordination_issue: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/345"
+  work_class: "ARCHITECTURE_DESIGN"
+  risk_level: "R3_SECURITY_AND_PROTOCOL"
+  priority: "PENDING_AUTHORITY_DECISION"
+
+repository:
+  name: "oahcom/AiMemoryBrainArchitecture"
+  url: "https://github.com/oahcom/AiMemoryBrainArchitecture"
+  baseline_branch: "main"
+  baseline_commit: "c970c4a61b623c1f127624f60666b0a27e7e0594"
+  known_architecture_invariants: "33b037318e459ebb73bea33b3186f31a41d5dcfe"
+
+prompt:
+  prompt_file: "14-ai-development/work-items/AID-2026-025/prompt-v1.md"
+  prompt_status: "FROZEN"
+  prompt_sha256: "62d4a59860561c45009f736888d041cc8230ded2a347fa5993a5399a45d2b56f"
+  prompt_bytes: 6286
+  prompt_provenance_tier: "T1"
+  prompt_provenance_note: >-
+    The authoritative prompt snapshot is mechanically copied byte-for-byte
+    by the coordination layer from the dispatched source prompt file.
+    Byte-equality between the source artifact and the content rendered to
+    this session is NOT_VERIFIED. This session does not reconstruct,
+    reproduce, or certify the original prompt bytes.
+  prompt_delivery_integrity: "NOT_VERIFIED"
+
+strategic_direction:
+  controlling_decision: "IDENTITY_AND_SECURITY_CONTRACT_FIRST"
+  mandatory_sequence:
+    - stage: "A"
+      name: "Identity and Security Contract"
+      position: 1
+      status: "FIRST"
+    - stage: "B"
+      name: "Portable Memory Exchange Contract"
+      position: 2
+      status: "DEPENDENT_ON_STAGE_A_CONTRACT_STABILIZATION"
+  sequencing_decision_status: "DECIDED_BY_STRATEGIC_COORDINATION"
+  reopening_policy: >-
+    Do not reopen the sequencing decision without identifying new,
+    material, contradictory evidence.
+  exchange_research: "MAY_PROCEED_CONCURRENTLY"
+  exchange_format_freeze: "PROHIBITED_BEFORE_STAGE_A_STABILIZATION"
+
+scope:
+  primary_objective: >-
+    Produce an evidence-backed, technology-neutral identity and authorization
+    architecture proposal for multi-agent and multi-provider memory access,
+    sharing, delegation, provenance, revocation and tenant isolation.
+  stage_a:
+    name: "Identity and Security"
+    deliverables:
+      - "Identity and authorization decision record"
+      - "Principal and resource model"
+      - "Tenant-isolation matrix"
+      - "Delegation model"
+      - "Revocation model"
+      - "Confused-deputy threat model"
+      - "Provider capability mapping"
+      - "Mature ecosystem comparison"
+      - "Security conformance test specification"
+      - "Open decisions and residual risks"
+      - "Stage B readiness criteria"
+    mandatory_contract_elements:
+      - "Principal"
+      - "Resource"
+      - "Tenant"
+      - "Scope"
+      - "Action"
+      - "Delegation"
+      - "Audience"
+      - "Permission decision"
+      - "Revocation"
+      - "Provenance"
+      - "Audit event"
+    investigation_areas:
+      - "Agent identity"
+      - "Human principals"
+      - "Service principals"
+      - "Tenant and workspace boundaries"
+      - "Delegation and permission inheritance"
+      - "Audience restrictions"
+      - "Revocation and authorization freshness"
+      - "Source attribution"
+      - "Cross-agent sharing"
+      - "Confused-deputy prevention"
+      - "Provider-specific authorization semantics"
+      - "Auditability"
+  stage_b:
+    name: "Portable Memory Exchange"
+    deliverables:
+      - "Export identity contract"
+      - "Import recipient contract"
+      - "Source provenance preservation"
+      - "Permission preservation semantics"
+      - "Revocation propagation semantics"
+      - "Schema versioning"
+      - "Round-trip semantics"
+      - "Data minimization requirements"
+      - "Cross-provider semantic mapping"
+    prerequisites:
+      - "Stage A principal model stabilized"
+      - "Stage A resource and scope model stabilized"
+      - "Authorization decision semantics defined"
+      - "Delegation semantics defined"
+      - "Revocation semantics defined"
+      - "Provenance requirements defined"
+      - "Provider-specific semantic differences documented"
+    freeze_authorization: "NOT_GRANTED"
+
+non_goals:
+  - "Implementing BMCP protocol changes"
+  - "Modifying the main branch"
+  - "Merging pull requests"
+  - "Deploying authentication or authorization providers"
+  - "Claiming production authorization"
+  - "Claiming production security conformance"
+  - "Selecting a single mandatory Agent framework"
+  - "Selecting a single mandatory model provider"
+  - "Freezing an exchange format before Stage A stabilization"
+  - "Declaring portability acceptance"
+  - "Self-appointing governance authorities"
+  - "Treating external protocol compatibility as proof of Brain memory authority"
+
+baseline_evidence:
+  repository_baseline:
+    commit: "c970c4a61b623c1f127624f60666b0a27e7e0594"
+    status: "USER_SUPPLIED_BASELINE"
+  architecture_invariants:
+    commit: "33b037318e459ebb73bea33b3186f31a41d5dcfe"
+    status: "KNOWN_REFERENCE"
+  requirement:
+    issue: 348
+    url: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/348"
+    status: "RECORDED_PROPOSED_NOT_APPROVED"
+  r1_report:
+    url: "https://github.com/oahcom/AiMemoryBrainArchitecture/issues/348#issuecomment-7036927570"
+    status: "EXISTING_REVIEW_EVIDENCE"
+    recorded_findings:
+      - "Incomplete identity and authorization closure"
+      - "Insufficient independently demonstrated adapter behavior"
+      - "Incomplete cross-provider semantic consistency"
+      - "Incomplete normalized export/import contract"
+      - "Missing cross-tenant integration evidence"
+      - "Missing confused-deputy integration evidence"
+  formal_allocation_check:
+    main_index:
+      path: "14-ai-development/work-items/INDEX.md"
+      baseline: "c970c4a61b623c1f127624f60666b0a27e7e0594"
+      observation: "AID-2026-025 not found in inspected INDEX content"
+    coordination_record:
+      issue: 345
+      observation: >-
+        Existing coordinator record identifies historical allocation conflicts
+        and records AID-2026-016 through AID-2026-022 as proposed.
+    global_uniqueness:
+      status: "VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN"
+      scan_timestamp: "2026-11-20T12:10Z"
+      scan_performed_by: "coordination layer (not an independent session)"
+      main_work_item_tree: "SCANNED"
+      active_branches: "325 branches, paginated 100 per page, full enumeration"
+      method: >-
+        For every branch, GET /repos/.../git/trees/{branch_head_sha}?recursive=1
+        and regex-match AID-2026-([0-9]{2}) against every blob path.
+      result_max_allocated: "AID-2026-026"
+      result_for_this_id: >-
+        TAKEN only by branch work-item/stage0-registration-023-026-024-025
+        (this registration branch). No occurrence on main.
+      limitation: >-
+        Point-in-time scan of main plus the 325 branches observable at scan
+        time. Does not cover deleted branches, tags, forks, or future
+        allocations. This is an allocation scan, not a permanent reservation.
+    allocation_conclusion: "VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN"
+    registration_state: >-
+      Registration PR #354 is OPEN and NOT MERGED. Branch-side readback
+      completed byte-for-byte; main-side readback NOT performed.
+
+dependencies:
+  - id: "REQ-07"
+    issue: 347
+    relationship: "Memory quality, knowledge governance and provenance semantics"
+    completion_status: "NOT_VERIFIED"
+  - id: "REQ-09"
+    issue: 349
+    relationship: "Reliability, recovery, data safety and revocation lifecycle"
+    completion_status: "NOT_VERIFIED"
+  - id: "REQ-12"
+    issue: 345
+    relationship: "Strategic coordination and sequencing"
+    completion_status: "COORDINATION_REFERENCE"
+  - id: "ARCHITECTURE_INVARIANTS"
+    commit: "33b037318e459ebb73bea33b3186f31a41d5dcfe"
+    relationship: "Existing architecture constraints"
+    completion_status: "REQUIRES_EXACT_SOURCE_REVALIDATION"
+
+mature_ecosystem_research:
+  candidates:
+    - name: "Model Context Protocol"
+      investigation: "Authorization, OAuth, resource audiences, scopes and token handling"
+      acceptance: "NOT_VERIFIED"
+    - name: "Agent2Agent Protocol"
+      investigation: "Agent identity, authentication, trust and agent discovery mechanisms"
+      acceptance: "NOT_VERIFIED"
+    - name: "OAuth 2.0"
+      investigation: "Delegation, audience restriction, token lifetime and revocation"
+      acceptance: "NOT_VERIFIED"
+    - name: "OpenID Connect"
+      investigation: "Human and service identity federation"
+      acceptance: "NOT_VERIFIED"
+  mandatory_comparison_rule: >-
+    Evaluate mature mechanisms against Brain-specific memory ownership,
+    tenant isolation, permission inheritance, delegation and provenance.
+    Protocol compatibility must not be interpreted as authorization to
+    access or redistribute Brain memory.
+  provider_neutrality: "REQUIRED"
+
+acceptance_criteria:
+  stage_0:
+    - "Proposed identifier checked against coordinator allocation records."
+    - "Identifier uniqueness either verified or explicitly left pending."
+    - "Authoritative prompt snapshot assigned to coordinator copy."
+    - "Prompt digest and byte count measured by coordinator."
+    - "Scope and non-goals explicitly recorded."
+    - "Dependencies and baseline evidence recorded."
+    - "Governance fields remain unassigned."
+    - "No implementation authorization inferred."
+  stage_a:
+    - "Technology-neutral principal and resource contracts defined."
+    - "Tenant isolation boundaries explicitly specified."
+    - "Delegation and permission inheritance semantics defined."
+    - "Audience restrictions and confused-deputy defenses specified."
+    - "Revocation and authorization freshness semantics specified."
+    - "Source provenance and audit requirements specified."
+    - "Provider-specific semantic differences documented."
+    - "Reproducible adversarial security tests specified."
+    - "Unsupported security properties explicitly marked NOT_VERIFIED."
+    - "Independent review limitations explicitly recorded."
+  stage_b:
+    - "Stage A contract stabilization demonstrated."
+    - "Export identity and import recipient semantics established."
+    - "Permission and revocation preservation rules established."
+    - "Source attribution and lineage preservation specified."
+    - "Round-trip and migration semantics testable."
+    - "Cross-provider mapping limitations documented."
+    - "No portability acceptance inferred from serialization success."
+
+risk_register:
+  - risk: "Confused-deputy privilege escalation"
+    severity: "CRITICAL"
+    disposition: "STAGE_A_BLOCKING"
+  - risk: "Cross-tenant memory disclosure"
+    severity: "CRITICAL"
+    disposition: "STAGE_A_BLOCKING"
+  - risk: "Delegation privilege amplification"
+    severity: "HIGH"
+    disposition: "STAGE_A_BLOCKING"
+  - risk: "Stale authorization after revocation"
+    severity: "HIGH"
+    disposition: "STAGE_A_BLOCKING"
+  - risk: "Provider-specific authorization mismatch"
+    severity: "HIGH"
+    disposition: "MUST_BE_DOCUMENTED_AND_TESTED"
+  - risk: "Provenance loss during export/import"
+    severity: "HIGH"
+    disposition: "STAGE_B_BLOCKING"
+  - risk: "Premature exchange schema commitment"
+    severity: "HIGH"
+    disposition: "PROHIBITED"
+  - risk: "Unverifiable reviewer independence"
+    severity: "HIGH"
+    disposition: "RECORD_INDEPENDENCE_UNVERIFIABLE"
+
+evidence_policy:
+  unsupported_claims: "NOT_VERIFIED"
+  reviewer_independence: "INDEPENDENCE_UNVERIFIABLE_WHERE_APPLICABLE"
+  simulated_evidence: "NOT_ACCEPTABLE_AS_INDEPENDENT_PROOF"
+  production_authorization: "NOT_GRANTED"
+  production_acceptance: "NOT_GRANTED"
+  implementation_status: "NOT_STARTED"
+  portability_acceptance: "NOT_GRANTED"
+
+governance:
+  sponsor: "NOT_ASSIGNED"
+  accountable_owner: "NOT_ASSIGNED"
+  acceptance_authority: "NOT_ASSIGNED"
+  architecture_decision_authority: "NOT_ASSIGNED"
+  independent_reviewer: "NOT_APPOINTED"
+  security_reviewer: "NOT_APPOINTED"
+  implementation_owner: "NOT_ASSIGNED"
+
+  registration_authority: "COORDINATOR_ACTION_REQUIRED"
+  coordinator_must_verify:
+    - "Global uniqueness of AID-2026-025 (SATISFIED: 325-branch dual-domain scan)"
+    - "Formal allocation eligibility"
+    - "Prompt source artifact identity"
+    - "Prompt snapshot byte count"
+    - "Prompt snapshot SHA-256"
+    - "Prompt snapshot byte-equality against dispatch source"
+    - "Required registration persistence and readback"
+
+  implementation_authorization: "NOT_GRANTED"
+  design_acceptance: "NOT_GRANTED"
+  production_acceptance: "NOT_GRANTED"
+  main_modification_authorization: "NOT_GRANTED"
+  merge_authorization: "NOT_GRANTED"
+
+stage_b_readiness:
+  status: "NOT_READY"
+  mandatory_gate:
+    - "Stage A contract has a stable, versioned candidate."
+    - "Principal and resource identity semantics have no unresolved blocking ambiguity."
+    - "Tenant and workspace isolation rules are explicit."
+    - "Delegation cannot amplify the delegator's authority."
+    - "Audience restrictions prevent unintended recipient access."
+    - "Revocation semantics cover outstanding delegations and derived access."
+    - "Provenance survives authorization and sharing boundaries."
+    - "Provider capability differences have explicit mappings."
+    - "Security conformance cases have reproducible expected outcomes."
+    - "Residual risks and NOT_VERIFIED properties are disclosed."
+    - "Required independent security and architecture reviews are recorded."
+  readiness_does_not_imply:
+    - "Exchange format acceptance"
+    - "Implementation authorization"
+    - "Production authorization"
+    - "Portability acceptance"
+
+final_disposition:
+  current_state: "STAGE_0_MANIFEST_PROPOSED"
+  next_authorized_action: "COORDINATOR_FORMAL_ALLOCATION_AND_REGISTRATION_CHECK"
+  substantive_r2_design: "NOT_STARTED"
+  implementation: "NOT_AUTHORIZED"
+  production_deployment: "NOT_AUTHORIZED"
+  merge: "NOT_AUTHORIZED"
