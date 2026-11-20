@@ -376,3 +376,28 @@ This final reconciliation is based on fresh live reads of the four existing PR h
 - No new PR, Issue, branch, merge, direct main write, deployment, or production activation.
 - No test PASS or Owner signature is inferred. Documentation-only ledger change tests are NOT RUN.
 - Prompt provenance: user-provided Owner ruling D-2026-1120-01 and continuation instruction in this conversation; originating conversation ID supplied by user: `6afaf6ae-6e8c-83ec-8aaa-24d5341b9577`. This is chat instruction provenance, not a repository prompt file. Raw message bytes and current platform session UUID are unavailable; SHA-256 `NOT_VERIFIED`.
+
+
+## 2026-11-20 live-ref refresh — D-2026-1120-01 (latest GitHub readback)
+
+This addendum supersedes earlier PR #321/#322/#327 head and file-Blob snapshots above. The underlying finding dispositions remain unchanged.
+
+### F-43-01/F1 — P1 — OPEN (runtime implementation evidence)
+- Existing PR #327 remains OPEN/DRAFT; branch `docs/f43-01-f1-engineering-entry-handoff`; current exact PR Head `4905a2d604b38bbe2d836617b11bed0c97709658`; base `f3bc21405aa6ad5a3ec271c04f7f4d8567d8bf33`.
+- Handoff file `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md`, current Blob `ae4ab29c7e7fd14c84b8605f5f5fe10b27477d51`. Readback confirms E1–E8 engineering-entry checklist and explicit NOT IMPLEMENTED / NOT VERIFIED disposition; no runtime implementation or test PASS is claimed.
+- Issue #7 comment #7021990583 remains the controlling implementation boundary: `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`, engineering entry NOT AUTHORIZED / NOT READY. D-2026-1120-01 lifts carrier quota but does not authorize implementation or identify a canonical Runtime repository/branch, maintainers, write authority or deployment/test custody.
+- Five callable D operations, authoritative durable Producer Registration Ledger/Receipt, running-authority equality/linearization proof and S1–S7 remain NOT IMPLEMENTED / NOT ESTABLISHED / NOT RUN. The handoff is the verifiable deliverable; F1 itself remains OPEN.
+
+### F-43-01/F3 — P1 — OPEN (independent mapping acceptance / consumer / operational evidence)
+- Existing PR #321 remains OPEN/DRAFT; branch `fix/f43-01-f3-d-query-mapping-pin`; exact Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; D contract file Blob `099f4948b550919084b0d73094692b590b0be0a9`. The contract still identifies the accepted mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49` as the active pin; the older Blob `e60bdd4cbfef79850596001f01cb56e622b7d79d` occurs only in explanatory text stating it is not the active pin. The contract explicitly does not claim the D query endpoint is callable. No PR-triggered workflow runs were returned for this exact Head; documentation tests NOT RUN.
+- Existing PR #322 remains OPEN/DRAFT; branch `fix/f43-01-f3-h-five-d-highwater-bounds`; exact Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; test Blob `6685226143f28a5b8764067bb205080b531132e3`. The current test file contains 15 test methods, including all-five-field 512-character leading-zero acceptance and 513-character rejection before authority callbacks.
+- Exact-Head Actions: Run `44684299500` / Job `136118042894` and Run `44684299439` / Job `136118060059` both completed FAILURE with `steps=null`; test steps did not start. This is not a test-level diagnosis and is not CI PASS. The earlier 13/13 focused local report belongs to the earlier 13-test revision and is not attributed to this 15-test source. Current-source test execution remains NOT RUN.
+- D role decision #7021655866 and H role decision #7021638212 still point to the identical accepted mapping Blob, but both visible GitHub identities are `oahcom`. Separate authenticated human D/H signers and independent acceptance are NOT VERIFIED. H Owner acceptance of this TEST-profile implementation is not recorded.
+- Callable authenticated D query, durable operation-bound Receipt, live currentness/revocation/anti-rollback, H accepted consumer implementation, production conformance and C1–C6 operational evidence remain NOT ESTABLISHED. F3 remains P1 / OPEN.
+
+### Current exact-source evidence boundary
+- F1 handoff: PR #327 Head `4905a2d604b38bbe2d836617b11bed0c97709658` / Blob `ae4ab29c7e7fd14c84b8605f5f5fe10b27477d51`.
+- F3 D contract: PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881` / Blob `099f4948b550919084b0d73094692b590b0be0a9`.
+- F3 H validator/test: PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb` / Blobs `49644a181c578fecb312218c08ce23caa62f603b` and `6685226143f28a5b8764067bb205080b531132e3`.
+- No new PR, Issue, or branch; no merge, main write, runtime deployment, production authorization, or other-Owner signature.
+- Prompt provenance: this user-provided Owner ruling D-2026-1120-01; originating conversation reference supplied by user; platform UUID/raw bytes unavailable; SHA-256 NOT_VERIFIED.
