@@ -177,7 +177,7 @@ RULING; REMAINING ITEMS BLOCKED BY AUTHORITY OR MISSING BUSINESS INPUT.**
 
 | question | ruling disposition |
 |---|---|
-| Q11 | RULED — strict reading |
+| Q11 | **NOT ADOPTED — premise falsified, re-posed, OPEN.** A ruling returned strict; it rested on a Layer 1 prohibition this document supplied, and §2f records that the inspected contract contains no such prohibition. The old question is superseded by an authorisation question, which is open. |
 | Q12 | INTERPRETED — prospective interpretation possible; no retrospective authorization |
 | Q13 | RECOMMENDED — adapter-level enforcement |
 | Q14 | BLOCKED — `BUSINESS_RULE_NOT_SUPPLIED` |
