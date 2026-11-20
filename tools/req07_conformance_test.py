@@ -344,7 +344,7 @@ NOT_BINDABLE = {
 
 
 def _git_blob_sha(path: Path) -> str:
-    payload = path.read_bytes()
+    payload = path.read_text(encoding="utf-8").encode("utf-8")
     return hashlib.sha1(b"blob " + str(len(payload)).encode("ascii") + b"\0" + payload).hexdigest()
 
 
