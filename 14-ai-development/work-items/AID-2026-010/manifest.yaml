@@ -165,8 +165,8 @@ current_status_refresh:
     records the subsequent Owner release and supersedes that historical
     restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "17851168271d15d1d8ff174bd6885f8136ef4b7c"
-  ledger_blob_sha: "f4e760aebe6c4f1532a95b52fab511cad596c4b8"
+  ledger_commit: "0aec53cb748443020eedd348127dd74ae4467cd7"
+  ledger_blob_sha: "239a2e68d1781a78980f0d4d12ca10eb0b6b165b"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -350,3 +350,14 @@ latest_actions_retry_evidence:
   ci_status: "NO_TEST_STEPS_NO_PASS"
   finding_status: "F-43-01/F3_P1_OPEN"
   note: "H TEST-profile candidate only; no H Owner acceptance, callable D endpoint/Receipt/currentness or operational conformance inferred."
+
+
+# Concurrent F1 exact handoff pin correction
+f1_handoff_latest:
+  pr: 327
+  head: "8205664c79e9216da6c7b0fa20ba90d23a070ff4"
+  file: "14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md"
+  blob: "09606b739d62570c061b24e459772468206e6a86"
+  status: "HANDOFF_DELIVERED; RUNTIME_NOT_IMPLEMENTED_OR_AUTHORIZED"
+  authoritative_ledger_commit: "0aec53cb748443020eedd348127dd74ae4467cd7"
+  authoritative_ledger_blob: "239a2e68d1781a78980f0d4d12ca10eb0b6b165b"
