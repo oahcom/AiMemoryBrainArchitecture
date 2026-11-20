@@ -4,7 +4,7 @@
 - 版本：1.0
 - 日期：2026-11-20
 - 状态：**MVP 试点基线——已选定实现配置；跨 Owner 契约仍为条件性状态**
-- 英文对应版本：[MVP Architecture Decisions](../../../governance/MVP-ARCHITECTURE-DECISIONS.md)
+- 英文对应版本：[MVP Architecture Decisions](../../governance/MVP-ARCHITECTURE-DECISIONS.md)
 - 源基线：main@e52594f181d2edb77448adcfed64a0fbdffaf3aa
 
 ## 1. 决策摘要
@@ -125,7 +125,7 @@ export interface InjectRequest {
 }
 export type InjectStage =
   | "CONTEXT_VERSION_COMMITTED" | "DELIVERY_INTENT_COMMITTED" | "DELIVERY_ACCEPTED"
-  | "MANAGED_REGION_MATERIALIZED" | "FINAL_REQUEST_SUBMITTED" | "REJECTED" | "UNKNOWN" | "IN_DOUBT";
+  | "MANAGED_REGION_MATERIALIZED" | "FINAL_REQUEST_SUBMITTED" | "APPLIED_DECISION_COMMITTED" | "REJECTED" | "UNKNOWN" | "IN_DOUBT";
 export type InjectAppliedStatus = "NOT_APPLIED" | "FULL_APPLIED";
 export interface InjectEvidence {
   inferenceRequestRef?: string; deliveryRef: string; contextVersionRef: string;
