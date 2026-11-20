@@ -526,3 +526,13 @@ This addendum records a fresh exact-ref readback and a controlled retry of the e
 - Existing failed H jobs were re-run once each through the connected GitHub integration. The host accepted both rerun requests; subsequent job readback confirms both attempts failed before exposing steps. No retry is represented as successful test execution.
 - No new PR, Issue, branch, or main write; no merge; no tests executed locally in this continuation.
 - T2 source: user-supplied Owner ruling D-2026-1120-01 and continuation instructions in this ChatGPT conversation. Current platform conversation UUID/raw bytes are not exposed to this GitHub operation; prompt SHA-256 NOT_VERIFIED. No synthetic identifier/hash is asserted.
+
+
+## Concurrent exact-ref correction — F1 handoff latest PR #327 commit
+
+Latest live readback supersedes the earlier F1 pin:
+
+- PR #327 current Head / commit `8205664c79e9216da6c7b0fa20ba90d23a070ff4`; handoff file Blob `09606b739d62570c061b24e459772468206e6a86`.
+- The exact handoff file now pins PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881` / contract Blob `099f4948b550919084b0d73094692b590b0be0a9`, H validator Blob `49644a181c578fecb312218c08ce23caa62f603b`, and H test Blob `6685226143f28a5b8764067bb205080b531132e3`.
+- F1 remains P1 / OPEN: five callable D operations NOT IMPLEMENTED, durable operation-bound Receipt NOT ESTABLISHED, S1–S7 NOT RUN. Issue #7 comment `7021990583` remains DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED. This is a handoff/source-pin commit, not Runtime implementation.
+- Concurrent exact-head H retry readback now reports Run `44684299500` → Job `136123331637` and Run `44684299439` → Job `136123345286`; both FAILURE with `steps=null`. Log retrieval returned HTTP 404 `BlobNotFound` (RequestIds `41149edd-d01e-0077-19b7-78d79e000000` and `35cedb4e-401e-0031-0bb7-7806f2000000`). No test steps or CI PASS.
