@@ -48,4 +48,3 @@ Terms in this document are normative within this repository. A subsystem specifi
 - **Scope** answers “where does this asset belong?”
 - **Permission** answers “who may perform which operation?”
 
-The Fact/Claim object relationship remains governed by the applicable approved ADR. This glossary does not decide that unresolved domain question.
