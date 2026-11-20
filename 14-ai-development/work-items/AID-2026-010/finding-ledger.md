@@ -653,3 +653,27 @@ This append-only refresh supersedes only earlier current-source pins where expli
 - Existing PR #323 branch `fix/f43-01-f3-ledger-reconcile` reused; no new PR, Issue or branch; no merge and no write to main.
 - Documentation-only ledger/manifest update: tests NOT RUN; no CI PASS claimed.
 - Prompt provenance: user-provided D-2026-1120-01 chat instruction (T2). Current platform conversation UUID and immutable raw message bytes are not exposed to the repository connector; SHA-256 NOT_VERIFIED. No digest is fabricated.
+
+
+## 2026-11-20 D-2026-1120-01 closeout — current-session F1/F3 advancement
+
+This append-only entry records this continuation's actual carrier updates and exact evidence limits. It does not promote either finding to DECIDED or CLOSED.
+
+### F-43-01/F1 | P1 | OPEN — Runtime implementation / operational evidence
+- **Return:** PR #327; Issues #7/#10/#25/#43.
+- Existing PR #327 was advanced by commit `99e0ff3e6e39dbce2a0aa0f8d8158490166cb596` on `docs/f43-01-f1-engineering-entry-handoff`; handoff Blob `3704c208ae7e8bf9e81431d744e4a4659f5b531b`.
+- This is an engineering-entry handoff update only. Five callable D operations, authoritative durable Producer Registration Ledger / operation-bound Receipt, runtime equality/linearization traces and D-002 S1–S7 execution remain NOT IMPLEMENTED / NOT ESTABLISHED / NOT RUN.
+- Issue #7 retains `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`; the quota ruling does not identify a canonical Runtime repository, accountable engineering custody or build/test/deployment authority, and does not authorize placeholder Runtime code.
+
+### F-43-01/F3 | P1 | OPEN — independent human mapping acceptance / operational consumer evidence
+- **Return:** PRs #321/#322/#323; Issues #25/#43.
+- D query contract PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`, contract Blob `099f4948b550919084b0d73094692b590b0be0a9`, active mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
+- H TEST-profile PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`, validator Blob `49644a181c578fecb312218c08ce23caa62f603b`, test Blob `6685226143f28a5b8764067bb205080b531132e3` (15 methods).
+- D/H role records #7021655866 / #7021638212 both visibly resolve to `oahcom`; distinct authenticated human signers are NOT VERIFIED. The unsigned separate-attestation template at PR #323 comment #7031665905 is a delivered substitute, not acceptance.
+- Callable D query, durable operation-bound Receipt, currentness/revocation/anti-rollback, H production consumer acceptance and C1–C6 operational proof remain NOT ESTABLISHED.
+- PR #322 exact-head Actions runs #44684299439 and #44684299500 ended FAILURE before test steps; no test assertion ran and no CI PASS is claimed. Current-source local execution remains NOT VERIFIED.
+
+### Governance boundary
+D-2026-1120-01 removes the carrier quota freeze only. It does not appoint a Project Governance Authority, grant project-wide G0 approval, authorize Runtime implementation, authenticate D/H identities, or sign for another Owner. AI-EXEC-001 v1.1 is ADOPTED (Blob `58af59af266b81109269156ea667df1a15edfb7b`); AI-EXEC-002 v1.2 remains PENDING ADOPTION (Blob `7f5928a5d16eb12da7621cfb8bd99ca463afd859`; v1.1 is the adopted predecessor).
+
+**Disposition:** the F1 handoff and F3 source-pin / TEST-profile / ledger evidence are advanced on existing PRs. Underlying F1 and F3 remain P1 / OPEN at their substantive implementation, independent-human and operational exit criteria. No Owner signature, Runtime authorization, CI PASS, production acceptance, merge or main write is inferred.
