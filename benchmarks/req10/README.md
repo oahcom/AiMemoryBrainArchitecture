@@ -41,7 +41,7 @@ python3 benchmarks/req10/sqlite_commit_sql_mirror.py --samples 1000 --warmup 100
 
 ### 测量路径
 
-仓库中已有可执行的 SQLite 参考适配器：\`crates/memory-storage-sqlite/src/lib.rs\` 的 \`SqliteMemoryStorage::commit_version\`。Rust 示例直接调用该方法。负载为单写入者、单个 Memory、空 Claims 版本；SQLite 使用 WAL 和 synchronous=FULL。
+仓库中已有可执行的 SQLite 参考适配器：`crates/memory-storage-sqlite/src/lib.rs` 的 `SqliteMemoryStorage::commit_version`。Rust 示例直接调用该方法。负载为单写入者、单个 Memory、空 Claims 版本；SQLite 使用 WAL 和 synchronous=FULL。
 
 每次写入包含 Scope 校验、JSON 编解码、IMMEDIATE 事务、当前/父版本检查、幂等查询、版本插入、Memory 更新、commit_log 写入、幂等回执写入及事务提交。
 
@@ -49,19 +49,19 @@ python3 benchmarks/req10/sqlite_commit_sql_mirror.py --samples 1000 --warmup 100
 
 在仓库根目录运行：
 
-\`\`\`sh
+```sh
 cargo run --release -p memory-storage-sqlite --example commit_hot_path -- 1000 100 /tmp/req10-sqlite-hotpath.db
-\`\`\`
+```
 
-参数依次为实测操作数、预热操作数和可选数据库路径。输出 P50/P95/P99、平均延迟、吞吐、Linux 进程峰值 RSS、DB/WAL/SHM 文件大小及进程 CPU ticks。百分位采用 nearest-rank 算法。RSS/CPU 计数依赖 Linux \`/proc\`；不可用时会明确输出 NOT_AVAILABLE。
+参数依次为实测操作数、预热操作数和可选数据库路径。输出 P50/P95/P99、平均延迟、吞吐、Linux 进程峰值 RSS、DB/WAL/SHM 文件大小及进程 CPU ticks。百分位采用 nearest-rank 算法。RSS/CPU 计数依赖 Linux `/proc`；不可用时会明确输出 NOT_AVAILABLE。
 
 ### SQL 镜像回退入口
 
-\`benchmarks/req10/sqlite_commit_sql_mirror.py\` 是仅使用 Python 标准库的回退程序，复现适配器 SQL 事务结构。它**不会调用 Rust 适配器方法**，不能将其数据称为 Rust 适配器性能。
+`benchmarks/req10/sqlite_commit_sql_mirror.py` 是仅使用 Python 标准库的回退程序，复现适配器 SQL 事务结构。它**不会调用 Rust 适配器方法**，不能将其数据称为 Rust 适配器性能。
 
-\`\`\`sh
+```sh
 python3 benchmarks/req10/sqlite_commit_sql_mirror.py --samples 1000 --warmup 100
-\`\`\`
+```
 
 ### 解释与限制
 
