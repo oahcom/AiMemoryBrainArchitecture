@@ -172,3 +172,27 @@ Not applied in this round (isolated, no repository write):
 - Storage ADR §8.8: APPLIED. Carrier branch session-storage-consistency-forget-atomicity-2026-11-16, path reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md. Applied at commit 9f63874ecf2c4d8292435c8c10d0b7b4fe9c620f; Blob bb544ba2f346bdc130d524bd5c7310d86f367988 -> edd81e2ba21c752fc88fa5e1c3cf2f2cca8cf603 (27834 -> 29945 bytes, 274 -> 333 lines). Section 8 now runs continuously 8.1 through 8.8. The bilingual 8.8 text is the Owner text from Issue #265 comment 7037252404, applied verbatim in the ADR's existing bilingual convention. The existing L1 decision and the Storage L4 OPEN boundary are preserved; 8.8 does not select a new topology. NOT_APPLIED_PENDING_LOCATE is withdrawn: the earlier recursive-tree search was scoped to main only while the prompt-pinned carrier lives on the Storage owner branch. F-265-STORAGE-01 / SD-08 close on this record. Cross-branch normative coexistence is recorded as a follow-up, not a blocker for this application.
 
 This Application evidence section is added by the application-evidence commit itself; that commit SHA and the resulting status-file Blobs are recorded in the L0 application report and by the raw read-back.
+
+## 9. Correction note — read-back after the R5 application round
+
+The round recorded in §8 above was written before three Blobs changed. This note is the
+read-back that supersedes the corresponding rows, per the requirement in §4 that application
+records carry the actual HEAD and Blob values.
+
+| Target | Superseded value | Current value | Commit | Note |
+|---|---|---|---|---|
+| 06-memory-context/context-versioning.md | 05c0739d0c22 | dbce95485d02 | fc17542d | §13.3 rebuilt as canonical root source (2606978e, 8503a171), then §14.5 aligned to §13.3 as its subordinate constraint. EN-only root file; no ZH counterpart exists for this root path before or after. |
+| docs/en/00-governance/aid-2026-014-r3-correction-status.md | 8ad07e794f05 | d9b3a9141c71 | 8b9cb119 | Status table flipped to FIX_APPLIED_AWAITING_REREVIEW / APPLIED_PENDING_INDEPENDENT_REVIEW. |
+| docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md | d6d7e00e03f9 | 706c4da352e5 | 8b9cb119 | Restored to its paired location by 25c61283 after 927eadcb renamed it alone into docs/governance/archive/; the orphaned archive copy was removed. |
+
+Storage §8.8 is **not** in this repository's `main` tree. Its applied state lives on the carrier
+branch `session-storage-consistency-forget-atomicity-2026-11-16` at commit `9f63874e`, Blob
+`edd81e2ba21c`. That branch is the Storage owner branch whose tip `281fd1ed` and L1-topology Blob
+`bb544ba2` are pinned by AID-2026-014-PROMPT v1. Application on that branch is the correct
+disposition; copying the ADR into `main` would create a second normative copy and was not done.
+
+Open follow-up (not a blocker for R5): cross-branch normative coexistence has no Owner ruling yet.
+Until one exists, the ADR is authoritative on its own branch and MUST NOT be mirrored.
+
+R3 review disposition, formal acceptance, schema freeze, and implementation conformance are
+unchanged by this note. All seven rows still carry `PENDING` for independent review.

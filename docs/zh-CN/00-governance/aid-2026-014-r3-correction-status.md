@@ -172,3 +172,25 @@ Implementation Conformance 继续保持 NOT ESTABLISHED。
 - Storage ADR §8.8：已应用。载体分支 session-storage-consistency-forget-atomicity-2026-11-16，路径 reviews/storage-consistency/phase-3.8.2-storage-serialization-topology-adr.md。应用提交 9f63874ecf2c4d8292435c8c10d0b7b4fe9c620f；Blob bb544ba2f346bdc130d524bd5c7310d86f367988 -> edd81e2ba21c752fc88fa5e1c3cf2f2cca8cf603（27834 -> 29945 字节，274 -> 333 行）。第 8 节现自 8.1 连续至 8.8。8.8 双语正文取自 Issue #265 评论 7037252404 的 Owner 文本，按 ADR 既有双语惯例逐字应用。既有 L1 决策与 Storage L4 OPEN 边界均保留；8.8 不选择新拓扑。NOT_APPLIED_PENDING_LOCATE 撤回：先前的递归树检索仅覆盖 main，而 prompt 钉定的载体位于 Storage Owner 分支。F-265-STORAGE-01 / SD-08 以此记录关闭。跨分支规范性共存登记为后续事项，不构成本次应用的阻断。
 
 本应用证据段由应用证据提交本身加入；该提交 SHA 与状态文件终态 Blob 由 L0 应用报告及 raw 回读登记。
+
+## 9. 更正注 —— R5 应用轮次后的回读
+
+上文第 8 节写于三个 Blob 变更之前。本注为回读结果，按第 4 节「应用记录必须携带实际 HEAD 与
+Blob 值」的要求取代相应行。
+
+| 目标 | 被取代值 | 当前值 | 提交 | 说明 |
+|---|---|---|---|---|
+| 06-memory-context/context-versioning.md | 05c0739d0c22 | dbce95485d02 | fc17542d | §13.3 重建为根级规范来源（2606978e，8503a171），随后 §14.5 对齐为 §13.3 的下位约束。该根级文件仅英文；此前与此后均无同路径中文对应文件。 |
+| docs/en/00-governance/aid-2026-014-r3-correction-status.md | 8ad07e794f05 | d9b3a9141c71 | 8b9cb119 | 状态表翻转为 FIX_APPLIED_AWAITING_REREVIEW / APPLIED_PENDING_INDEPENDENT_REVIEW。 |
+| docs/zh-CN/00-governance/aid-2026-014-r3-correction-status.md | d6d7e00e03f9 | 706c4da352e5 | 8b9cb119 | 经 25c61283 恢复至配对位置；927eadcb 曾将其单独重命名至 docs/governance/archive/，孤立的归档副本已移除。 |
+
+Storage §8.8 **不在**本仓库 `main` 树中。其已应用状态位于载体分支
+`session-storage-consistency-forget-atomicity-2026-11-16`，提交 `9f63874e`，Blob `edd81e2ba21c`。
+该分支即 Storage owner 分支，其 Tip `281fd1ed` 与 L1 topology Blob `bb544ba2` 由
+AID-2026-014-PROMPT v1 钉定。在该分支上应用是正确处置；将 ADR 复制进 `main` 会产生第二个规范副本，
+故未执行。
+
+后续开放事项（不构成 R5 阻断）：跨分支规范性共存尚无 Owner 裁决。在裁决作出前，该 ADR 在其自身分支上
+具权威性，且不得镜像。
+
+R3 复审处置、正式验收、Schema 冻结与实现一致性均不因本注改变。七行独立复审状态仍全部为 `PENDING`。
