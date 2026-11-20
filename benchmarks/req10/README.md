@@ -26,7 +26,7 @@ python3 benchmarks/req10/sqlite_commit_sql_mirror.py --samples 1000 --warmup 100
 
 ## Interpretation
 
-- The Rust example measures the actual reference adapter method; the Python fallback measures a SQL-path mirror only.
+- The Rust example measures the actual reference adapter method; the Python fallback measures a SQL-path mirror only and reports process CPU time (not per-operation CPU attribution).
 - Neither measures an integrated product runtime or end-to-end ingestion, compilation, retrieval, context assembly or agent delivery.
 - One writer and one memory do not characterize concurrent workloads or capacity/saturation.
 - Peak RSS is process high-water RSS, not operation-level allocation attribution.
@@ -65,7 +65,7 @@ python3 benchmarks/req10/sqlite_commit_sql_mirror.py --samples 1000 --warmup 100
 
 ### 解释与限制
 
-- Rust 示例测量实际参考适配器方法；Python 回退程序只测量 SQL 路径镜像。
+- Rust 示例测量实际参考适配器方法；Python 回退程序只测量 SQL 路径镜像，并报告进程级 CPU 时间（不是单操作 CPU 归因）。
 - 两者均不测量集成产品运行时或摄取、编译、召回、上下文组装、Agent 交付的端到端路径。
 - 单写入者和单 Memory 不代表并发负载或容量上限。
 - 峰值 RSS 是进程高水位，不是单操作内存分配归因。
