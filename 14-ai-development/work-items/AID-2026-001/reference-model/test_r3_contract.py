@@ -43,6 +43,19 @@ from r3_contract_model import (
 # the credential side and the caller side. Positive tests must supply a real,
 # non-placeholder hash; this constant is that default for the helpers.
 TEST_REQUEST_HASH = "test-request-hash"
+TEST_PRINCIPAL = "principal-A"
+TEST_TENANT = "tenant-A"
+
+
+def trusted_scope_bindings(memory_id, tenant_id, operation_ids):
+    return frozenset(
+        {
+            "suppression:commit",
+            f"tenant:{tenant_id}",
+            f"memory:{memory_id}",
+            *{f"operation:{operation_id}" for operation_id in operation_ids},
+        }
+    )
 
 
 def receipt_credential(
@@ -54,6 +67,7 @@ def receipt_credential(
 ):
     if receipt_id is None:
         receipt_id = "receipt-%s" % nonce
+
     values = dict(
         receipt_id=receipt_id,
         issuer=EXPECTED_RECEIPT_ISSUER,
@@ -61,18 +75,31 @@ def receipt_credential(
         operation=operation_id,
         request_hash=request_hash,
         purpose=EXPECTED_RECEIPT_PURPOSE,
-        scope=frozenset({"suppression:commit"}),
+        scope=frozenset({
+            "suppression:commit",
+            f"tenant:{TEST_TENANT}",
+            "memory:m",
+            f"operation:{operation_id}",
+        }),
         permission_epoch=7,
         nonce=nonce,
         not_before=0,
         expires_at=100,
         signature="test-signature-%s" % receipt_id,
+        resource_id="m",
+        principal=TEST_PRINCIPAL,
     )
     values.update(overrides)
     return ReceiptCredential(**values)
 
 
-def authorized_attempt(operation_id, request_hash, nonce, receipt_id, **credential_overrides):
+def authorized_attempt(
+    operation_id,
+    request_hash,
+    nonce,
+    receipt_id,
+    **credential_overrides,
+):
     cred = receipt_credential(
         operation_id=operation_id,
         request_hash=request_hash,
@@ -90,18 +117,27 @@ def authorized_attempt(operation_id, request_hash, nonce, receipt_id, **credenti
 def auth(**kw):
     nonce = kw.pop("nonce", "auth-nonce-default")
     receipt_id = kw.pop("receipt_id", None)
-    # F-OI-04 strict binding: the credential must name its operation and
-    # request hash. The placeholder string "default-hash" is rejected by the
-    # model on both sides, so the helper default is a real, non-placeholder
-    # hash. A test that commits under another identity must pass both values.
     operation_id = kw.pop("operation_id", "op")
     request_hash = kw.pop("request_hash", TEST_REQUEST_HASH)
+
     receipt_overrides = {}
-    for k in list(kw):
-        if k in ("issuer", "audience", "purpose", "scope",
-                 "permission_epoch", "not_before", "expires_at", "signature",
-                 "operation", "request_hash"):
-            receipt_overrides[k] = kw.pop(k)
+    for key in list(kw):
+        if key in {
+            "issuer",
+            "audience",
+            "purpose",
+            "scope",
+            "permission_epoch",
+            "not_before",
+            "expires_at",
+            "signature",
+            "operation",
+            "request_hash",
+            "resource_id",
+            "principal",
+        }:
+            receipt_overrides[key] = kw.pop(key)
+
     cred = receipt_credential(
         operation_id=operation_id,
         request_hash=request_hash,
@@ -109,6 +145,7 @@ def auth(**kw):
         receipt_id=receipt_id,
         **receipt_overrides,
     )
+
     values = dict(
         issuer_known=True,
         signature_valid=True,
@@ -130,8 +167,25 @@ def auth(**kw):
 
 
 def done():
-    model = R3Model("mem", receipt_verifier=TrustAllReceiptVerifier())
-    model.authorize_and_suppress(auth(), 10, 7, "op", request_hash=TEST_REQUEST_HASH)
+    model = R3Model(
+        "mem",
+        receipt_verifier=TrustAllReceiptVerifier(),
+        authenticated_principal=TEST_PRINCIPAL,
+        tenant_id=TEST_TENANT,
+        trusted_scope_bindings=trusted_scope_bindings(
+            "mem", TEST_TENANT, {"op"}
+        ),
+    )
+    model.authorize_and_suppress(
+        auth(
+            resource_id="mem",
+            principal=TEST_PRINCIPAL,
+        ),
+        10,
+        7,
+        "op",
+        request_hash=TEST_REQUEST_HASH,
+    )
     return model
 
 

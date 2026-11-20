@@ -108,6 +108,25 @@ class ReceiptCredential:
     principal: str = ""
 
 
+@dataclass(frozen=True)
+class EvidenceRecord:
+    """Immutable, explicitly registered evidence metadata.
+
+    Registration makes an evidence_ref resolvable in this in-memory model.
+    It does not claim that the underlying evidence is cryptographically
+    authentic or durably stored.
+    """
+
+    evidence_ref: str
+    target_id: str
+    operation_id: str
+    required_action: str
+    evidence_generation: int
+    evidence_kind: str
+    capability: str
+    state: str
+
+
 class ReceiptVerifier(Protocol):
     """Protocol for verifying authorization receipt authenticity.
 
@@ -226,6 +245,103 @@ class AtomicCommit:
     commit_id: str
 
 
+def canonical_evidence_valid(
+    *,
+    evidence_record: dict | EvidenceRecord | None,
+    target_id: str,
+    operation_id: str,
+    required_action: str,
+    current_generation: int,
+) -> bool:
+    """Return whether an evidence record satisfies the canonical contract.
+
+    This function validates record metadata. Registry resolution is checked
+    by R3Model._has_valid_evidence before this predicate is called.
+    """
+    if evidence_record is None:
+        return False
+
+    if isinstance(evidence_record, EvidenceRecord):
+        record = {
+            "evidence_ref": evidence_record.evidence_ref,
+            "target_id": evidence_record.target_id,
+            "operation_id": evidence_record.operation_id,
+            "required_action": evidence_record.required_action,
+            "evidence_generation": evidence_record.evidence_generation,
+            "evidence_kind": evidence_record.evidence_kind,
+            "capability": evidence_record.capability,
+            "state": evidence_record.state,
+        }
+    elif isinstance(evidence_record, dict):
+        record = evidence_record
+    else:
+        return False
+
+    required_fields = {
+        "evidence_ref",
+        "target_id",
+        "operation_id",
+        "required_action",
+        "evidence_generation",
+        "evidence_kind",
+        "capability",
+        "state",
+    }
+    if not required_fields.issubset(record):
+        return False
+
+    evidence_ref = record.get("evidence_ref")
+    if not isinstance(evidence_ref, str) or not evidence_ref.strip():
+        return False
+
+    if record.get("target_id") != target_id or not target_id:
+        return False
+
+    if record.get("operation_id") != operation_id or not operation_id:
+        return False
+
+    if record.get("required_action") != required_action or not required_action:
+        return False
+
+    generation = record.get("evidence_generation")
+    if (
+        isinstance(generation, bool)
+        or not isinstance(generation, int)
+        or generation != current_generation
+    ):
+        return False
+
+    evidence_kind = record.get("evidence_kind")
+    if not isinstance(evidence_kind, str) or not evidence_kind.strip():
+        return False
+
+    capability = record.get("capability")
+    if capability != "supported":
+        return False
+
+    state = record.get("state")
+    if state not in {"SUCCEEDED", "ERASED", "CLEANED"}:
+        return False
+
+    allowed_kinds = {
+        "erase": {"erasure-proof"},
+        "cleanup": {"cleanup-proof", "snapshot-proof"},
+        "suppress": {"suppression-proof"},
+    }
+    if evidence_kind not in allowed_kinds.get(required_action, set()):
+        return False
+
+    allowed_states = {
+        "erase": {"ERASED", "SUCCEEDED"},
+        "cleanup": {"CLEANED", "SUCCEEDED"},
+        "suppress": {"SUCCEEDED"},
+    }
+    if state not in allowed_states.get(required_action, set()):
+        return False
+
+    return True
+
+
 @dataclass
 class R3Model:
     memory_id: str
@@ -270,6 +386,18 @@ class R3Model:
     receipt_verifier: Any = field(
         default_factory=RejectingReceiptVerifier,
     )
+
+    # Trusted context. Empty defaults deliberately deny authorization.
+    authenticated_principal: str = ""
+    tenant_id: str = ""
+    trusted_scope_bindings: frozenset = field(default_factory=frozenset)
+
+    # Evidence is resolvable only after explicit registration.
+    evidence_registry: dict = field(default_factory=dict)
+
+    # Required action is sealed per target; default is deny-by-default.
+    target_required_actions: dict = field(default_factory=dict)
+
     _commit_lock: Any = field(
         default_factory=RLock,
         init=False,
@@ -358,10 +486,10 @@ class R3Model:
         request_hash: str = "",
         operation_id: str = "",
     ) -> None:
-        """Revalidate authorization at the actual commit boundary.
+        """Revalidate authorization and all trusted-context bindings.
 
-        Phase is deliberately not an authorization input. A caller cannot
-        obtain commit authority by changing phase alone.
+        Phase is deliberately not an authorization input. Trusted context
+        comes from R3Model construction, never from the receipt itself.
         """
         if auth is None:
             raise ContractViolation("authorization reference required")
@@ -378,7 +506,6 @@ class R3Model:
         if not auth.valid(now, self.permission_epoch):
             raise ContractViolation("invalid or expired authorization")
 
-        # F-OI-04: receipt must be a verifiable credential, not a string.
         cred = auth.receipt
         if cred is None:
             raise ContractViolation("authorization receipt missing")
@@ -386,7 +513,6 @@ class R3Model:
         if not self.receipt_verifier.verify(cred, now):
             raise ContractViolation("authorization receipt verification failed")
 
-        # Context binding: credential must match the authorization claim.
         if cred.issuer != EXPECTED_RECEIPT_ISSUER:
             raise ContractViolation("receipt issuer mismatch")
         if cred.audience != EXPECTED_RECEIPT_AUDIENCE:
@@ -398,11 +524,10 @@ class R3Model:
         if cred.nonce != auth.nonce:
             raise ContractViolation("receipt nonce mismatch")
 
-        # F-OI-04: strict binding. A credential that names no operation, no
-        # request hash, or no scope is not a binding for anything, and the
-        # placeholder "default-hash" is not an exemption.
         if not cred.operation:
             raise ContractViolation("receipt operation missing")
+        if not operation_id:
+            raise ContractViolation("operation_id missing")
         if cred.operation != operation_id:
             raise ContractViolation("receipt operation mismatch")
         if not cred.request_hash or cred.request_hash == "default-hash":
@@ -415,18 +540,49 @@ class R3Model:
             )
         if cred.request_hash != request_hash:
             raise ContractViolation("receipt request_hash mismatch")
-        if not REQUIRED_RECEIPT_SCOPE.issubset(cred.scope):
-            raise ContractViolation("receipt scope insufficient")
+
         if not (cred.not_before <= now < cred.expires_at):
             raise ContractViolation("receipt validity window expired")
 
-        # OD-001: resource-level binding. When the credential declares a
-        # resource_id, it must match this model's memory_id. Cross-resource
-        # use of a credential is rejected before any mutation.
-        if cred.resource_id and cred.resource_id != self.memory_id:
+        # Mandatory trusted-context bindings. Empty defaults deny access.
+        if (
+            not isinstance(self.authenticated_principal, str)
+            or not self.authenticated_principal.strip()
+        ):
+            raise ContractViolation("trusted authenticated_principal missing")
+
+        if (
+            not isinstance(self.tenant_id, str)
+            or not self.tenant_id.strip()
+        ):
+            raise ContractViolation("trusted tenant_id missing")
+
+        if not isinstance(cred.principal, str) or not cred.principal.strip():
+            raise ContractViolation("receipt principal missing")
+
+        if cred.principal != self.authenticated_principal:
+            raise ContractViolation("receipt principal mismatch")
+
+        if not isinstance(cred.resource_id, str) or not cred.resource_id.strip():
+            raise ContractViolation("receipt resource_id missing")
+
+        if cred.resource_id != self.memory_id:
             raise ContractViolation(
                 "receipt resource_id does not match target memory"
             )
+
+        required_scope = frozenset({
+            "suppression:commit",
+            f"tenant:{self.tenant_id}",
+            f"memory:{self.memory_id}",
+            f"operation:{operation_id}",
+        })
+
+        if not required_scope.issubset(cred.scope):
+            raise ContractViolation("receipt scope insufficient")
+
+        if not required_scope.issubset(self.trusted_scope_bindings):
+            raise ContractViolation("trusted scope binding insufficient")
 
         # Treat nonce_registry as a cache/projection, never as authority.
         # Rebuild before replay detection so projection loss cannot permit
@@ -1298,13 +1454,83 @@ class R3Model:
     def context_remove(self) -> None:
         self.audit.append("CONTEXT_REMOVE")
 
-    def set_required_targets(self, targets) -> None:
+    def set_required_targets(
+        self,
+        targets,
+        required_actions: dict | None = None,
+    ) -> None:
         self.required_targets = set(targets)
         self.target_results = {}
         self.target_evidence = {}
         self.unknown_required_targets = set()
+        self.target_required_actions = dict(required_actions or {})
+        self.evidence_registry = {}
         self.inventory_revision += 1
         self.d_completion = False
+
+    def register_evidence(
+        self,
+        target: str,
+        operation_id: str,
+        evidence_ref: str,
+        evidence_kind: str,
+        evidence_generation: int,
+        capability: str,
+        state: str,
+    ) -> bool:
+        """Explicitly register evidence metadata for one target.
+
+        mark_target does not call this method. Registration is a distinct
+        operation and duplicate evidence references are rejected.
+        """
+        if target not in self.required_targets:
+            raise ContractViolation(
+                "evidence target absent from sealed inventory"
+            )
+
+        if not isinstance(operation_id, str) or not operation_id.strip():
+            raise ContractViolation("evidence operation_id required")
+
+        if not isinstance(evidence_ref, str) or not evidence_ref.strip():
+            raise ContractViolation("evidence_ref required")
+
+        if not isinstance(evidence_kind, str) or not evidence_kind.strip():
+            raise ContractViolation("evidence_kind required")
+
+        if (
+            isinstance(evidence_generation, bool)
+            or not isinstance(evidence_generation, int)
+        ):
+            raise ContractViolation("evidence_generation must be an integer")
+
+        if capability != "supported":
+            raise ContractViolation("evidence capability is not supported")
+
+        if state not in {"SUCCEEDED", "ERASED", "CLEANED"}:
+            raise ContractViolation("evidence state is not terminal success")
+
+        required_action = self.target_required_actions.get(target)
+        if not required_action:
+            raise ContractViolation(
+                "target required_action is not registered"
+            )
+
+        if evidence_ref in self.evidence_registry:
+            raise ContractViolation("evidence_ref already registered")
+
+        record = EvidenceRecord(
+            evidence_ref=evidence_ref,
+            target_id=target,
+            operation_id=operation_id,
+            required_action=required_action,
+            evidence_generation=evidence_generation,
+            evidence_kind=evidence_kind,
+            capability=capability,
+            state=state,
+        )
+
+        self.evidence_registry[evidence_ref] = record
+        return True
 
     def mark_target(
         self,
@@ -1313,18 +1539,18 @@ class R3Model:
         evidence_ref: str | None = None,
         evidence_kind: str | None = None,
     ) -> None:
+        """Record a target result only; evidence registration is separate.
+
+        evidence_ref/evidence_kind remain in the signature for compatibility
+        with existing callers, but are intentionally ignored.
+        """
         if target not in self.required_targets:
             raise ContractViolation("target absent from sealed inventory")
 
         self.target_results[target] = result
-        # OD-002: typed per-target evidence is required for any success claim.
-        if evidence_ref is not None and evidence_kind is not None:
-            self.target_evidence[target] = {
-                "evidence_ref": evidence_ref,
-                "evidence_kind": evidence_kind,
-            }
-        else:
-            self.target_evidence.pop(target, None)
+
+        # Legacy evidence arguments are intentionally not trusted or stored.
+        self.target_evidence.pop(target, None)
 
         if result in {
             "UNKNOWN", "UNSUPPORTED", "NOT_EVIDENCED", "FAILED"
@@ -1334,22 +1560,52 @@ class R3Model:
             self.unknown_required_targets.discard(target)
 
     def _has_valid_evidence(self, target: str) -> bool:
-        """OD-002: check typed target evidence exists and is current."""
-        ev = self.target_evidence.get(target)
-        return (
-            ev is not None
-            and bool(ev.get("evidence_ref"))
-            and bool(ev.get("evidence_kind"))
+        """Resolve and validate evidence against the current operation/fence."""
+        required_action = self.target_required_actions.get(target)
+        if not required_action:
+            return False
+
+        committed = self.atomic_commit
+        if committed is None:
+            return False
+
+        operation_id = committed.idempotency_identity.operation_id
+        if not operation_id:
+            return False
+
+        # Evidence references are resolved only through the explicit registry.
+        # target_evidence is not an authority source.
+        candidates = [
+            record
+            for record in self.evidence_registry.values()
+            if (
+                isinstance(record, EvidenceRecord)
+                and record.target_id == target
+            )
+        ]
+        if len(candidates) != 1:
+            return False
+
+        record = candidates[0]
+        registered = self.evidence_registry.get(record.evidence_ref)
+        if registered is not record:
+            return False
+
+        return canonical_evidence_valid(
+            evidence_record=record,
+            target_id=target,
+            operation_id=operation_id,
+            required_action=required_action,
+            current_generation=self.fence_generation,
         )
 
     def domain_complete(self) -> bool:
-        # OD-002 canonical completion predicate: every required target must
-        # have a success result AND typed current evidence. A bare status
-        # string like "SUCCEEDED" without evidence must NOT yield completion.
+        """Completion requires successful results and canonical evidence."""
         complete = (
             bool(self.required_targets)
             and not self.unknown_required_targets
         )
+
         complete = complete and all(
             self.target_results.get(target) in {
                 "SUCCEEDED", "ERASED", "CLEANED"
@@ -1357,10 +1613,12 @@ class R3Model:
             and self._has_valid_evidence(target)
             for target in self.required_targets
         )
+
         self.d_completion = complete
         return complete
 
     def completion_projection_allowed(self) -> bool:
+        """Do not project completion unless canonical evidence still passes."""
         evidence_complete = (
             bool(self.required_targets)
             and not self.unknown_required_targets
