@@ -5,7 +5,7 @@
 - Source branch: session-d-memory-brain-2026-11-16
 - Source revision: DEREFERENCED — historical source blob `af747f339d03bdd4684b6ed60fca05957dc8e1fb` retained; original normative source path is absent from the current main tree.
 - Source branch head audited: 6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
-- Source: DEREFERENCED — original normative path `03-memory-brain/memory-versioning.md` is absent from the current main tree; the surviving Chinese counterpart is a reading translation only, not a normative replacement.
+- Source: DEREFERENCED — original normative path `03-memory-brain/memory-versioning.md` is absent from the current main tree; alternative: [surviving Chinese counterpart](../../zh-CN/03-memory-brain/memory-versioning.md) (reading translation only, not a normative replacement).
 - Chinese counterpart: [Memory Versioning 与历史语义](../../zh-CN/03-memory-brain/memory-versioning.md)
 - Status: Immutable version principle DECIDED; Claim revision and exact transaction/time semantics CANDIDATE/OPEN
 - Related: INT-P0-01/03, INT-P1-01/02/06; DM-002/003/006/008/009/013
