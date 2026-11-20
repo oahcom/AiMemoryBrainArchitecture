@@ -165,8 +165,8 @@ current_status_refresh:
     records the subsequent Owner release and supersedes that historical
     restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "9555e777c2570125686924df486048f02e3803fc"
-  ledger_blob_sha: "4bbaec9f4933da118f7110a529d36ef581b720e2"
+  ledger_commit: "e71bdb69e4f37bd74135247d32673b6d730bce37"
+  ledger_blob_sha: "bce76600dde50f13a7e072dc6bac95b761319420"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -200,6 +200,7 @@ current_status_refresh:
     sha256: NOT_VERIFIED
     note: "No repository prompt file is claimed as the source of this chat instruction; no digest is fabricated."
 
+    - "PR #322 latest runner-allocation readback: Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687/44681841601; latest jobs 136110511473/136110524577; both FAILURE, runner_id=0, steps=null; log retrieval HTTP 404 BlobNotFound (RequestIds d91924be-601e-00e6-36b2-78a62d000000; 26c3f08d-f01e-00fe-4db2-78f784000000). No test steps started; no CI PASS."
   historical_closeout_note: >-
     integration_closeout above remains the historical 2026-11-19 disposition
     (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
