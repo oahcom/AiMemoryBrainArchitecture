@@ -88,12 +88,16 @@ class PortableExchangeConformance(unittest.TestCase):
         with self.assertRaisesRegex(Denied,"DELEGATION_PARENT_AGENT_MISMATCH"):
             self.auth.verify(forged,self.principal,self.record.resource,"read")
     def test_delegation_scope_escalation_rejected(self):
-        parent=fixture_grant(self.auth,actions=["read","delegate"])
+        parent=fixture_grant(self.auth,agent="agent.parent",actions=["read","delegate"])
         with self.assertRaisesRegex(ValueError,"DELEGATION_ACTION_ESCALATION"):
-            fixture_grant(self.auth,actions=["read","write"],parent_grant=parent["claims"]["grant_id"])
+            fixture_grant(self.auth,agent="agent.child",actions=["read","write"],
+                delegation_chain=(self.auth.issuer,"agent.parent","agent.child"),
+                parent_grant=parent["claims"]["grant_id"])
     def test_delegation_parent_revocation_denied(self):
-        parent=fixture_grant(self.auth,actions=["read","delegate"])
-        child=fixture_grant(self.auth,actions=["read"],delegation_chain=(self.auth.issuer,"agent.alpha"),parent_grant=parent["claims"]["grant_id"])
+        parent=fixture_grant(self.auth,agent="agent.parent",actions=["read","delegate"])
+        child=fixture_grant(self.auth,agent="agent.child",actions=["read"],
+            delegation_chain=(self.auth.issuer,"agent.parent","agent.child"),
+            parent_grant=parent["claims"]["grant_id"])
         self.auth.revoke(parent["claims"]["grant_id"])
         with self.assertRaisesRegex(Denied,"DELEGATION_PARENT_INVALID"): self.a.read(self.record.record_id,child)
     def test_tampered_envelope_denied(self):
