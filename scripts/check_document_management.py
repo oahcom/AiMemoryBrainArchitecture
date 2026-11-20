@@ -27,6 +27,9 @@ NORMATIVE_ROOTS = (
     "09-storage-and-index", "10-security-and-governance",
     "11-consistency-and-recovery", "12-testing-and-acceptance",
     "13-engineering-decisions", "14-ai-development",
+    # Bilingual mirrors of the sources above. Counted so that mirror drift is
+    # visible rather than falling outside the audit entirely.
+    "docs/en", "docs/zh-CN",
 )
 EXEMPT_PREFIXES = (
     "14-ai-development/work-items/",

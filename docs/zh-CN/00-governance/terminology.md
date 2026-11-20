@@ -1,3 +1,54 @@
+---
+document_metadata:
+  domain: architecture
+  role: normative-standard
+  lifecycle:
+    approval:
+      decision_status: Approved
+      approver: NOT_RECORDED
+      decision_date: NOT_RECORDED
+      approved_version:
+        scheme: git
+        value: "a7d12fe9835d8f53403946ab08c1cae8c3f12fbf"
+      approval_scope:
+        type: Full-document
+        included_sections: []
+        included_assets: []
+      approval_applicability: Applicable-To-Current-Version
+      evidence_reference:
+        - "00-governance/terminology.md"
+      revocation: null
+    evidence_verification:
+      verification_status: Unverified
+      last_verified_date: null
+      last_verification_note: "通常用于定义仓库内具有规范效力的术语"
+    usage_status: Active
+    modification_status: Unchanged
+    supersession:
+      supersedes: []
+      supersession_reason: null
+      effective_date: null
+    archival:
+      archived_date: null
+      archival_reason: null
+      archival_reference: null
+  authority:
+    # Translation of the authoritative source. It does not independently
+    # claim canonical authority; see bilingual_counterpart below.
+    canonical_status: Non-Canonical
+    canonical_scope: "Architecture: canonical terminology"
+    canonical_scope_id: null
+    canonical_scope_keywords:
+      - terminology
+      - glossary
+      - definition
+    canonical_conflict_status: None
+    canonical_conflict_resolution: null
+    normative_status: Normative
+  bilingual_counterpart:
+    en: "docs/en/00-governance/terminology.md"
+---
+
 # 规范术语表
 
 - 文档 ID：GOV-TERM-001
