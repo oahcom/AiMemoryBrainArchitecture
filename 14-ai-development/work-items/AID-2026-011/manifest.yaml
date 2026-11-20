@@ -1,0 +1,111 @@
+work_item_id: AID-2026-011
+title: REQ-01 Risk Assessment — Risk Closure and Evidence Reconciliation
+
+class: NOT_ASSIGNED
+risk: NOT_ASSIGNED
+risk_rationale: >-
+  Classification and risk level require confirmation by the
+  accountable Work Item Owner. No risk classification is
+  asserted by this registration.
+
+security_scope: NOT_ASSIGNED
+
+status: REGISTERED
+
+sponsor: USER-PRINCIPAL-DELEGATED (human principal via D-2026-1120-02)
+accountable_owner: USER-PRINCIPAL-DELEGATED (session-eligible per D-2026-1120-02)
+implementing_ai_session: 6aff27f3 (REQ-01 managing ChatGPT session; UUID NOT_EXPOSED)
+
+repository: oahcom/AiMemoryBrainArchitecture
+base_branch: main
+base_commit_sha: 723446225af5daa863e6641106a669e3ad8ba11b
+
+tracking_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/262
+
+created_at: 2026-11-20T06:17:00Z
+updated_at: 2026-11-20T06:17:00Z
+
+prompt_id: AID-2026-011-PROMPT
+prompt_version: v1
+prompt_file: 14-ai-development/work-items/AID-2026-011/prompt-v1.md
+prompt_status: DRAFT_NOT_FROZEN
+prompt_sha256: NOT_VERIFIED
+prompt_bytes: NOT_VERIFIED
+prompt_file_blob_sha: NOT_ASSIGNED
+prompt_file_commit_sha: NOT_ASSIGNED
+
+prompt_provenance_tier: T1
+prompt_provenance_note: >-
+  Proposed future work-item-level repository prompt.
+  This is not evidence that a historical T1 existed or
+  was used during previous REQ-01 execution.
+
+historical_t1_status: NOT_FOUND
+historical_t1_identity: NOT_VERIFIED
+
+dependency_refs:
+  - 14-ai-development/PR-GOVERNANCE-001.md
+  - 14-ai-development/work-items/INDEX.md
+
+deliverables:
+  - Future REQ-01 risk assessment evidence reconciliation
+  - Future risk finding disposition records
+  - Future risk closure evidence
+
+independent_reviewer: NOT_ASSIGNED
+integration_reviewer: NOT_ASSIGNED
+
+review:
+  status: NOT_ASSIGNED
+  report_ref: ""
+
+acceptance:
+  status: NOT_ASSIGNED
+  record_ref: ""
+  acceptance_authority: USER-PRINCIPAL-DELEGATED (D-2026-1120-02)
+
+implementation:
+  status: NOT_STARTED
+  branch: NOT_ASSIGNED
+  pull_request: NOT_ASSIGNED
+  merge_commit_sha: NOT_ASSIGNED
+
+authorization:
+  registration_write: GRANTED (D-2026-1120-02)
+  prompt_write: GRANTED (D-2026-1120-02)
+  branch_creation: GRANTED (D-2026-1120-02)
+  pr_creation: GRANTED (D-2026-1120-02)
+  main_write: GRANTED (registration scope only, D-2026-1120-02)
+  t4b_dispatch: GRANTED (dispatch to ChatGPT sessions only; L0 hand-coding prohibited per D-2026-1120-02)
+  risk_acceptance: USER-PRINCIPAL-DELEGATED (D-2026-1120-02)
+
+governance:
+  aid_assignment: APPROVED
+  aid_status: REGISTERED
+  registration_authorization: GRANTED (D-2026-1120-02)
+  quota_exception: GRANTED (quota_unfreeze per D-2026-1120-02)
+  merge_authorization: GRANTED (reviewed PRs only, D-2026-1120-02)
+
+verification:
+  status: NOT_RUN
+  commands: []
+  evidence_refs: []
+
+independence:
+  session_independence: SATISFIED
+  platform_identity_independence: NOT_ESTABLISHED
+  model_independence: NOT_ESTABLISHED
+  provider_independence: NOT_ESTABLISHED
+  p_independence: NOT_APPLICABLE (pure AID registration uses S-independence per #262 7028799024 / #264 7021016042)
+
+renumbering:
+  previous_draft_id: AID-2026-010
+  collision_ref: F-L0-AID010-COLLISION-001
+  reason: >-
+    AID-2026-010 is already REGISTERED on branch
+    remediation/aid-2026-001-forget-contract-closure-2026-11-18
+    for Issue #43 cross-domain integration review
+    (Owner A / A-OWNER-ALIGNMENT-001-R16). Per numbering rule
+    already-in-use means re-sequence and never overwrite; this
+    work item is renumbered to AID-2026-011.
+  ruling: D-2026-1120-02
