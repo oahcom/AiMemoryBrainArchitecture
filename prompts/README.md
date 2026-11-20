@@ -36,7 +36,9 @@ This is the canonical repository location for reusable AI prompts. Store prompts
 | GLB-REV-001 | [global-architecture-reviewer.md](global-architecture-reviewer.md) | Independent architecture review and evidence discipline |
 | GLB-DOC-001 | [global-bilingual-documentation.md](global-bilingual-documentation.md) | Bilingual documentation execution requirements |
 
-The execution-first policy source is [AI-EXEC-003](../14-ai-development/AI-EXEC-003.md) with its [English counterpart](../docs/en/14-ai-development/AI-EXEC-003.md). GLB-DEV-001 v1.1 and AI-EXEC-003 are PROPOSED; they do not override adopted governance or authorize restricted actions.\n\n## 3. Owner prompts / Owner 专属提示词
+The execution-first policy source is [AI-EXEC-003](../14-ai-development/AI-EXEC-003.md) with its [English counterpart](../docs/en/14-ai-development/AI-EXEC-003.md). GLB-DEV-001 v1.1 and AI-EXEC-003 are PROPOSED; they do not override adopted governance or authorize restricted actions.
+
+## 3. Owner prompts / Owner 专属提示词
 
 | Owner | Directory | Responsibility |
 |---|---|---|
