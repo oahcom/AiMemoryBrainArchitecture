@@ -5,7 +5,7 @@
 - Owner: D Domain Owner
 - D Owner Decision ID: `D-OWNER-2026-11-19-007`
 - Scope: AID-2026-010 / Issue #43 / F-43-01 / F3
-- H mapping input: `08-bmcp-protocol/phase-3.8.35-h-owner-decision-f43-01-f3-d-1.3.1-mapping.md`, exact Blob `e60bdd4cbfef79850596001f01cb56e622b7d79d`
+- H mapping input: `08-bmcp-protocol/phase-3.8.35-h-owner-decision-f43-01-f3-d-1.3.1-mapping.md`, exact Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`
 - D contract baseline: 1.3.1, Blob `12b71e770f4e977c7f147694a644066bc2ce11b9`
 - D-002 proof baseline: Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5`
 - Preceding D decision: `D-OWNER-2026-11-19-006` (ACCEPT WITH EXPLICIT LIMITATIONS)
@@ -55,7 +55,7 @@ The following nominal types are high-waters/generations and MUST each be validat
 For each type, the mathematical domain is the integer range `0..2^63-1`. The wire representation is a JSON string containing ASCII decimal digits only.
 
 - Canonical output grammar: `0` or `[1-9][0-9]*`.
-- Input parsing MAY accept leading zeroes as specified by D contract 1.3.1 §5.1, but canonicalization MUST occur within that one nominal type before the value is emitted in a signed response or included in a digest projection.
+- Input parsing MUST accept leading zeroes as required by D contract 1.3.1 §5.1. Leading zeroes MUST be canonicalized within that one nominal type before the value is emitted in a signed response or included in a digest projection.
 - Negative sign, plus sign, whitespace, separators, exponent, fraction, Unicode digits, empty string, and values greater than `2^63-1` are invalid.
 - The type tag and namespace identity are mandatory alongside the decimal string in the receipt binding. A bare decimal string is never a typed value.
 - No conversion to a shared integer domain for cross-field comparison is permitted. No cross-type equality, ordering, subtraction, range comparison, aliasing, or derivation is permitted.
@@ -138,7 +138,7 @@ ResolveForgetFenceSnapshotProofRequest {
   d_contract_blob_sha256: "12b71e770f4e977c7f147694a644066bc2ce11b9",
   d_query_contract_revision: "1.0",
   d_query_contract_blob_sha256: <exact published Blob SHA>,
-  h_mapping_blob_sha256: "e60bdd4cbfef79850596001f01cb56e622b7d79d",
+  h_mapping_blob_sha256: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49",
   request_id: RequestId,
   request_nonce: Nonce256,
   requester_identity: HConsumerIdentity,
@@ -414,3 +414,35 @@ This decision:
 - leaves A Integration responsible for independent verification and Finding Ledger status.
 
 **Implementation gate:** F3 cannot be considered operationally closed solely because this normative document exists. A Integration must verify the exact contract Blob and decide whether the remaining finding criterion is normative contract closure or requires additional implementation evidence under the governing R35 decision.
+
+
+## 11. 2026-11-20 F3 same-Blob mapping acceptance and attribution recheck
+
+**Finding:** F-43-01/F3 — P1 — OPEN. This addendum separates normative same-Blob mapping acceptance from independent-human identity attribution and operational consumer conformance.
+
+### 11.1 Exact same-Blob decisions
+- Accepted H mapping artifact: `08-bmcp-protocol/phase-3.8.35-h-owner-decision-f43-01-f3-d-1.3.1-mapping.md`, Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
+- H role-labelled disposition: Issue #43 comment [#7021638212](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/43#issuecomment-7021638212), decision `H-OWNER-2026-11-19-003`, ACCEPT WITH EXPLICIT LIMITATIONS, same Blob.
+- D role-labelled disposition: Issue #43 comment [#7021655866](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/43#issuecomment-7021655866), decision `D-OWNER-2026-11-19-005`, ACCEPT WITH EXPLICIT LIMITATIONS, same Blob.
+- D query contract correction delivered by existing PR #321: Head `7af4e4c409a6522d961b15d9622c92c7551be5f9`, contract Blob `6f2d583dec8487b321795a006266ee4229c7fd80`; the accepted mapping Blob is pinned in the contract, and the superseded mapping Blob `e60bdd4cbfef79850596001f01cb56e622b7d79d` is not the active pin.
+
+### 11.2 Attribution boundary
+Both role-labelled decision comments above expose the same GitHub login `oahcom`. The repository evidence therefore verifies two role-labelled, same-Blob decision records, but does **not** authenticate two distinct human signers or establish independent-human acceptance. This document does not infer distinct identity from role labels, comment wording, or a shared account, and does not sign for either Owner.
+
+**Integration disposition:** normative D/H mapping content is mutually recorded as ACCEPT WITH EXPLICIT LIMITATIONS for the exact Blob above; independent-human attribution remains NOT VERIFIED. F3 is not marked DECIDED/CLOSED on that basis.
+
+### 11.3 Consumer implementation and test boundary
+- Existing H TEST-profile correction PR #322 Head: `0ce618ac503f641cf31e66092ae823c14bf8af7b`.
+- Validator Blob: `49644a181c578fecb312218c08ce23caa62f603b`; regression-test Blob: `e66264ad30df6594e00836524accfdeb54160cee`.
+- The patch covers five independent D high-water/generation fields, signed-64-bit bounds, leading-zero canonicalization and digest projection. The recorded focused local report is 13/13 PASS (Python 3.13.5; PR #322 review comment #5988025205); this is not a full repository suite.
+- Exact-Head Actions runs `44681841687` and `44681841601` recorded FAILURE; the available job evidence had no executed steps and log retrieval returned HTTP 404 `BlobNotFound`. No CI PASS or test-level failure cause is inferred.
+- No callable D query endpoint, real D BarrierSnapshotReceipt, authenticated response, authoritative currentness/revocation read, H production consumer, or end-to-end C1–C6 operational trace is established by these document/TEST-profile artifacts.
+
+### 11.4 Finding and return
+- **F-43-01/F3 — P1 — OPEN** — return: PR #321 (D query contract), PR #322 (H TEST-profile validator), Issue #25 (operational D/Storage authority), Issue #43 (cross-owner finding ledger).
+- Normative same-Blob D/H role dispositions: recorded with explicit limitations.
+- Independent-human attribution: NOT VERIFIED.
+- H consumer TEST-profile patch: delivered; exact-Head CI: FAILURE / NOT PASS.
+- Callable D query, receipt/currentness and production/end-to-end evidence: NOT ESTABLISHED / NOT RUN.
+
+This is an evidence addendum, not an independent signature, not production acceptance, and not F3 closure. No Owner authority is transferred by this document.
