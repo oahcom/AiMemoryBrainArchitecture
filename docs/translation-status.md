@@ -347,3 +347,12 @@ The earlier OPEN entry is superseded. C's separate cross-authority causal-order 
 - Structural parity self-check: 7/7 numbered core sections in both template versions; 6/6 top-level numbered sections in both migration-guide versions; matching IDs/version/status and reciprocal links. This is implementer self-check only, NOT independent semantic-parity approval.
 - Exact-head semantic parity review: PENDING independent reviewer. GOV-DOC-001 structural/link checker and repository automated tests: NOT RUN in this remediation commit.
 - The prompt-authoring standard §4 was also reconciled bilingually in its existing bilingual source artifact; its twelve mandatory content requirements are mapped into the seven structural sections. No governance adoption or Owner acceptance is implied.
+
+
+## 19. AI execution-first addendum and global developer prompt — 2026-11-20
+
+- AI-EXEC-003 source: `14-ai-development/AI-EXEC-003.md`; English counterpart: `docs/en/14-ai-development/AI-EXEC-003.md`.
+- GLB-DEV-001 v1.1 prompt pair: `prompts/global-project-developer.md` ↔ `prompts/global-project-developer.zh-CN.md`.
+- Both pairs are introduced together under AID-2026-011 / Issue #329 / branch `ai/AID-2026-011/IO-execution-first-baseline`.
+- Status: PROPOSED; exact-head readback and structural self-check pending; independent semantic-parity review pending; no Owner adoption or upstream-standard amendment implied.
+- Normative parity dimensions: execution default, blocker taxonomy, blocker scope, Owner authority, mandatory R2/R3 reviews, independent-slice continuation, two-iteration anti-stagnation trigger, lifecycle status/evidence integrity, and adoption boundary.
