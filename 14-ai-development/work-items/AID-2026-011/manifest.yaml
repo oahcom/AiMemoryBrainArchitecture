@@ -96,7 +96,7 @@ verification:
 lifecycle:
   phase: PROPOSAL
   gates:
-    registration: SATISFIED_PENDING_READBACK
+    registration: SATISFIED
     implementation: IMPLEMENTED
     verification: PENDING
     independent_review: PENDING
