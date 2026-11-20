@@ -215,232 +215,6 @@ current_status_refresh:
     the historical closeout decision or authorize implementation,
     architecture acceptance, main merge, or production activation.
 
-work_item_id: AID-2026-010
-title: "Issue #43 — Cross-domain Architecture Integration Review and Evidence Reconciliation"
-owner: Integration Owner
-accountable_owner: NOT_ASSIGNED
-accountable_owner_note: >-
-  MUST NOT be presumed to be Owner A. A authorized registration and
-  limited integration review only (A-OWNER-ALIGNMENT-001-R16); domain
-  decisions remain with D/E/F/G/H/I/Storage Owners.
-issue: 43
-related_issues: [43]
-related_prs: [321, 322, 327]
-task_class: ARCH
-risk: R3
-risk_note: Tentative conservative classification pending risk re-review.
-status: CONVERGED_DEVELOPMENT_BASELINE_ONLY
-registration_status: REGISTERED
-registration_note: >-
-  Number assignment by A (A-OWNER-ALIGNMENT-001-R16). Three persistence
-  items completed and independently read back 2026-11-19:
-  (1) manifest.yaml blob 6cc4fe35;
-  (2) INDEX.md row blob 2b58f79e;
-  (3) Issue #43 comment id 7011018228.
-  Status advanced to REGISTERED.
-authorization:
-  decision_id: A-OWNER-ALIGNMENT-001-R16
-  authorized_by: Owner A (conv 6afedebe-9950-83ee-93d4-7fd19cf46089)
-  scope: >-
-    Cross-domain integration review and evidence reconciliation for #43.
-    Does NOT authorize architecture approval, contract freeze, production
-    activation, or domain decisions on behalf of other Owners.
-prompt:
-  id: AID-2026-010-PROMPT
-  version: v2
-  provenance: L2-05 batch2 dispatch + authorization continuation (repository-copied sources)
-  source_files:
-    - filename: prompt-batch2-dispatch.md
-      sha256: 4906dc8ee80e3e1e0f842178c09d3600a8c29cc0d427ee1b1a55c3dca22d0c10
-      bytes: 51323
-      role: batch2 #43 full-body review dispatch pack (original: state/relay-l2-05-a-governance-portfolio-b2.md)
-    - filename: prompt-batch2-continuation.md
-      sha256: 245a68b6bd06157e5d3ed5827c55e751be0436f34358deb1fcc46b16c72db30e
-      bytes: 2140
-      role: authorization-unblock continuation prompt (original: state/relay-l2-05-continue-b2.md)
-  sha256: 4906dc8ee80e3e1e0f842178c09d3600a8c29cc0d427ee1b1a55c3dca22d0c10
-  sha256_note: primary dispatch pack; continuation companion 245a68b6
-  note: Sources copied into this work-item directory for repository traceability. Integration review continues in L2-05 session 6afeef2f.
-scope:
-  - Harvest and review L2-05 batch2 supplement (#43 45KB body).
-  - Map #43 Findings to source, evidence, responsibility domain, dependencies.
-  - Cross-check existing Issues, PRs, specs and Owner decisions for version accuracy.
-  - Route domain decision questions to corresponding Owners.
-  - Identify cross-domain interface conflicts, evidence gaps, unresolved DoR.
-  - Output integration review result, unresolved list, dependency order.
-out_of_scope:
-  - Domain decisions on behalf of D/E/F/G/H/I/Storage Owners.
-  - Interpreting L2 suggestions or A integration opinions as architecture approval.
-  - Freezing #43 joint contract or approving production activation.
-  - Deriving current Owner acceptance from historical PR merges or CI PASS.
-  - Creating new Issues, PRs or branches for review purposes.
-supplement_status: SUPPLEMENT_RECEIVED_INTEGRATION_REVIEW_AUTHORIZED
-baseline:
-  repository: oahcom/AiMemoryBrainArchitecture
-  target_branch: remediation/aid-2026-001-forget-contract-closure-2026-11-18
-  registration_location: 14-ai-development/work-items/AID-2026-010/manifest.yaml
-  index_location: 14-ai-development/work-items/INDEX.md
-deliverables:
-  - 14-ai-development/work-items/AID-2026-010/manifest.yaml
-  - 14-ai-development/work-items/INDEX.md (registration row)
-  - Issue #43 comment (Work Item association record)
-evidence_refs:
-  - 14-ai-development/issue-alignment-2026-11-19/l2-05-receipt.md
-  - 14-ai-development/issue-alignment-2026-11-19/l2-05b-supplement.md
-  - 14-ai-development/issue-alignment-2026-11-19/alignment-manifest.md
-created_at: 2026-11-19
-updated_at: 2026-11-20
-
-integration_closeout:
-  date: "2026-11-19"
-  decision_id: AID-2026-010-ICR-CLOSEOUT-2026-11-19-001
-
-  convergence_scope: >-
-    AID-2026-010 cross-domain integration-review and evidence-reconciliation
-    work unit, development-baseline scope only. This closeout records
-    convergence of attributable Owner dispositions and integration review.
-    It does not close unresolved implementation findings, approve
-    architecture, or establish operational or production conformance.
-
-  repository: oahcom/AiMemoryBrainArchitecture
-  branch: remediation/aid-2026-001-forget-contract-closure-2026-11-18
-  final_head_sha: 11c139e5e7b7600211e5ef4e31bbc09a237a2dfc
-
-  authoritative_finding_ledger:
-    path: 14-ai-development/work-items/AID-2026-010/finding-ledger.md
-    blob_sha: 2e0ab50501e7f2fa5902d98a89acf6376a5e7a87
-    authority: SOLE_AUTHORITATIVE_FINDING_STATUS_LEDGER
-
-  findings_total: 13
-  findings_closed: 11
-  findings_blocked:
-    - "F-43-01/F1"
-    - "F-43-02"
-
-  blocked_reason: >-
-    Both residual findings require external engineering authorization and
-    an authorized engineering carrier. F-43-01/F1 additionally requires
-    designation of Canonical Authority and the authoritative persistence
-    boundary. F-43-02 requires an authorized Unicode validator/build
-    implementation target and subsequent main-baseline synchronization.
-    The required Product/Platform Architecture responsibility holder,
-    engineering carrier and implementation authority remain unassigned.
-    No implementation target or authority may be inferred or fabricated.
-
-  residual_disposition: >-
-    F-43-01/F1 and F-43-02 remain BLOCKED in the authoritative finding
-    ledger. They are excluded from the integration-review development-
-    baseline convergence count as external engineering residuals.
-    Their exclusion does not constitute technical completion, finding
-    closure, waiver of implementation requirements, or authorization
-    to proceed with implementation.
-
-  verdict: >-
-    YES — AID-2026-010 INTEGRATION-REVIEW DEVELOPMENT-BASELINE
-    CONVERGENCE ACHIEVED. 11/13 findings CLOSED; 2/13 findings
-    remain BLOCKED as explicit external engineering residuals.
-    This verdict closes the bounded integration-review work unit only.
-
-  g8_status: NOT READY
-  architecture_status: NOT ACCEPTED
-  production_activation: NOT AUTHORIZED
-  main_merge: NOT AUTHORIZED
-  quota_freeze: ACTIVE
-
-  out_of_scope_dev_baseline:
-    - production trust root / issuer / key registry
-    - real Receipt and operational-level authority proof
-    - UCD implementation binding and complete runtime corpus verification
-    - main baseline synchronization
-    - production activation and deployment
-    - appointments to unassigned governance roles
-
-  governance_boundaries:
-    acceptance_authority: NOT_APPOINTED
-    sponsor: NOT_APPOINTED
-    accountable_owner: NOT_APPOINTED
-    architecture_acceptance: NOT_GRANTED
-    production_authorization: NOT_GRANTED
-
-  finding_ledger_mutation:
-    authorized: false
-    note: >-
-      The two BLOCKED findings must remain BLOCKED. This closeout
-      does not modify or supersede their authoritative finding records.
-
-  repository_mutation_authorized_by_this_ruling: false
-
-development_readiness:
-  decision_id: AID-2026-027
-  register_path: 14-ai-development/work-items/AID-2026-010/development-readiness-register.md
-  counts:
-    blocks_dev_start: 0
-    does_not_block: 39
-  f_43_02_disposition: CLOSED
-  entry_verdict: SATISFIED_FOR_SCOPED_ENGINEERING_PHASE_DEVELOPMENT_BASELINE
-
-
-current_status_refresh:
-  date: "2026-11-20"
-  carrier_quota_status: RELEASED
-  carrier_quota_release_authority: "Owner ruling D-2026-1120-01, 2026-11-20 12:20"
-  carrier_quota_limits: "This round: maximum 2 new PRs and 3 new Issues"
-  carrier_quota_history_note: >-
-    The historical integration_closeout.quota_freeze value is retained as an
-    as-of record from the prior freeze period; this current-status field
-    records the subsequent Owner release and supersedes that historical
-    restriction prospectively.
-  authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "1ab208bf13dfbdf3b2577358d4dfef2e53bdc5b6"
-  ledger_blob_sha: "2e0ab50501e7f2fa5902d98a89acf6376a5e7a87"
-  status_counts:
-    findings_total: 13
-    findings_closed: 10
-    findings_open:
-      - "F-43-01/F1"
-      - "F-43-01/F3"
-    findings_blocked:
-      - "F-43-02"
-  related_prs:
-    - 321
-    - 322
-    - 323
-    - 327
-  evidence:
-    - "Issue #43 comment 7030877572 — F1/F3 exact-source reconciliation and bounded dispositions"
-    - "Issue #7 comment 7021990583 — engineering entry remains DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED"
-    - "PR #321 Head 7af4e4c409a6522d961b15d9622c92c7551be5f9 — D query contract Blob 6f2d583dec8487b321795a006266ee4229c7fd80; accepted H mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49 appears twice, superseded Blob zero times; OPEN/DRAFT; exact-head workflow runs none; tests NOT RUN."
-    - "PR #322 Head 0ce618ac503f641cf31e66092ae823c14bf8af7b — validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob e66264ad30df6594e00836524accfdeb54160cee; corrected NON_TYPED_BOUNDED_FIELDS classification; exact-source focused local module report 13/13 PASS on Python 3.13.5 (not full repository suite; independently rerun in this continuation; not CI); Runs 44681841687 and 44681841601 FAILURE; retry attempt 2 Jobs 136108099194 and 136108110590 and attempt 3 Jobs 136109249771 and 136109260361 all runner_id=0, steps=[]; test steps did not start; no CI PASS; H Owner acceptance not verified."
-    - "PR #327 Head 4684b5d8dded3bd861f3b495c6307b0ac3db1959; handoff Blob c45933284494dcf712f425012cda6341d5c31212 — F1 engineering-entry handoff; seven canonical D-002 scenarios S1–S7 corrected; tests NOT RUN"
-    - "F1 repository fact correction: Issue #43 comment 7030788916 records foundational Batch-1 landing in oahcom/AiMemoryBrain at d11722e39f047bb52a482936a68459e74ce906d1; this is not the authorized D authority runtime and does not close F1"
-    - "D query contract status: ResolveForgetFenceSnapshotProof remains NOT ESTABLISHED AS CALLABLE; no Runtime repository, authoritative storage, trust root, endpoint/transport, operational key registry, or live receipt/currentness/C1-C6 evidence is verified."
-    - "2026-11-20 exact-head rerun refresh: PR #322 Head 593b78e3c2aaea329c6611249bd352cd6c7dd1aa; runs 44680796326/job 136107681779 and 44680796328/job 136107696956 rerun, both FAILURE with steps=null; job log retrieval HTTP 404 BlobNotFound (RequestIds 38fdff0d-b01e-001a-13b1-7841dd000000; 64b41e99-501e-00d8-37b1-78bcb3000000); no CI/test PASS."
-    - "F1 remains OPEN for implementation evidence; PR #327 handoff HEAD 4684b5d8dded3bd861f3b495c6307b0ac3db1959 / Blob c45933284494dcf712f425012cda6341d5c31212; S1-S7 NOT RUN; Issue #7 comment 7021990583 keeps implementation binding DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED."
-    - "F3 same-Blob D/H role-labelled ACCEPT WITH EXPLICIT LIMITATIONS records: Issue #43 comments 7021655866 and 7021638212, mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49; visible GitHub identity is oahcom for both, so independent human signer attribution remains NOT VERIFIED."
-    - "PR #322 comment 7031599217 — exact-Head retry readback at Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687/44681841601 retry jobs 136110511473/136110524577 FAILURE with steps=null; both raw log reads HTTP 404 BlobNotFound (RequestIds 8adb55d1-701e-00b7-55b2-783ba1000000; 3c18a6d6-801e-00be-69b2-78e88c000000); no CI PASS."
-    - "PR #322 latest exact-head Actions attempt 5: Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687 and 44681841601; Jobs 136111641890 and 136111657233; both FAILURE, runner_id=0, steps=[]; test steps did not start; no CI PASS."
-    - "PR #321 current exact Head 7af4e4c409a6522d961b15d9622c92c7551be5f9; D query-contract Blob 6f2d583dec8487b321795a006266ee4229c7fd80; accepted mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49 occurs twice and superseded mapping Blob e60bdd4cbfef79850596001f01cb56e622b7d79d occurs zero times; callable endpoint remains NOT ESTABLISHED; no PR-triggered workflow runs."
-    - "PR #322 current exact Head a336c85763df0135aa64ecec3cfdac8acd08a8eb; validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob 6685226143f28a5b8764067bb205080b531132e3; 15 test methods. Exact-head Runs 44684299500 and 44684299439 FAILURE; Jobs 136114843997 and 136114843602 have empty step arrays; current source test execution NOT RUN and no CI PASS."
-    - "PR #327 current exact Head dd6b132827ac2369df0bc19a3e4c7c65bf25989b; F1 handoff Blob 9e87630efaaf26e1a449a1bc691afadd0de5213b; handoff pins PR #322 current Head a336c85763df0135aa64ecec3cfdac8acd08a8eb and validator/test Blobs 49644a181c578fecb312218c08ce23caa62f603b / 6685226143f28a5b8764067bb205080b531132e3; no runtime implementation claimed."
-    - "Current F1/F3 status refresh ledger commit 12bb6bf5aee926d937301015e25d17040a0a8434 / Blob 32ccf0543de355c9a77dfb56be3aea22528dc12e; F1 and F3 remain P1/OPEN; F-43-02 remains P1/BLOCKED; counts 10 CLOSED / 2 OPEN / 1 BLOCKED."
-  prompt_provenance:
-    source_type: T2_CHAT_INSTRUCTION
-    source: "User-provided Owner ruling D-2026-1120-01 in continuation of parent conversation 6afae42c-65d8-83ee-853c-a7537b0e273b"
-    platform_current_conversation_id: NOT_EXPOSED
-    immutable_raw_message_bytes: NOT_AVAILABLE
-    sha256: NOT_VERIFIED
-    note: "No repository prompt file is claimed as the source of this chat instruction; no digest is fabricated."
-
-  historical_closeout_note: >-
-    integration_closeout above remains the historical 2026-11-19 disposition
-    (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
-    current Finding counts and states: F1 is OPEN for D implementation
-    evidence while the separate A execution binding remains
-    DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED; F3 is OPEN for consumer
-    and operational evidence; F-43-02 remains BLOCKED. It does not rewrite
-    the historical closeout decision or authorize implementation,
-    architecture acceptance, main merge, or production activation.
-
 
   date: "2026-11-20"
   ruling: "D-2026-1120-01"
@@ -1312,18 +1086,6 @@ f3_current_independent_attestation_instrument:
   h_test_blob: "6685226143f28a5b8764067bb205080b531132e3"
   state: "UNSIGNED TEMPLATE DELIVERED; independent human acceptance remains OPEN / NOT VERIFIED"
 
-f3_current_independent_attestation_instrument:
-  pr: 323
-  comment: 7034813260
-  url: "https://github.com/oahcom/AiMemoryBrainArchitecture/pull/323#issuecomment-7034813260"
-  mapping_blob: "004fc0261b447771e73a0f8cfdd34ec1f8b33e49"
-  d_contract_head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
-  h_test_head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
-  h_validator_blob: "49644a181c578fecb312218c08ce23caa62f603b"
-  h_test_blob: "6685226143f28a5b8764067bb205080b531132e3"
-  state: "UNSIGNED TEMPLATE DELIVERED; independent human acceptance remains OPEN / NOT VERIFIED"
-
-
 # Current ledger terminal pin — D-2026-1120-01 continuation
 
 current_ledger_terminal_pin:
@@ -1359,7 +1121,15 @@ current_ledger_terminal_pin:
     merge_performed: false
     main_modified: false
 
- 
+development_readiness:
+  decision_id: AID-2026-027
+  register_path: 14-ai-development/work-items/AID-2026-010/development-readiness-register.md
+  counts:
+    blocks_dev_start: 0
+    does_not_block: 39
+  f_43_02_disposition: CLOSED
+  entry_verdict: SATISFIED_FOR_SCOPED_ENGINEERING_PHASE_DEVELOPMENT_BASELINE
+
 # Repository-side carrier merge refresh — D-2026-1120-01
 repository_side_merge_closeout_2026_11_20:
   date: "2026-11-20"
@@ -1368,36 +1138,30 @@ repository_side_merge_closeout_2026_11_20:
     PR_321:
       head: "35668e63a98cbd0f9ea73573ab9251ac5c2bb881"
       merge_commit: "909f62b68e0b48136bbd9d48d41bc7c12a2cb818"
-      base: "remediation/aid-2026-001-forget-contract-closure-2026-11-18"
       disposition: "D query-contract mapping pin merged; F3 remains P1 OPEN overall"
     PR_322:
       head: "a336c85763df0135aa64ecec3cfdac8acd08a8eb"
       merge_commit: "6417d37658fa554a79fdd273946c0009bad53c75"
-      base: "session-h-bmcp-protocol"
       actions_runs: [44684299500, 44684299439]
       ci: "FAILURE_BEFORE_TEST_STEPS; runner_id=0; steps=0; no test assertion result or CI PASS"
       disposition: "H TEST-profile validator and regression tests merged; exact-head CI did not execute"
     PR_327:
       head: "1a19bc034af8620e19380a61eb185f4a52b56879"
       merge_commit: "6e39df999d9f976593bacec357e24bfe3d9132e7"
-      base: "remediation/aid-2026-001-forget-contract-closure-2026-11-18"
       disposition: "F1 engineering handoff merged; Runtime implementation remains absent"
     PR_326:
       head: "7955e5e6a5cd34f30b67d4a3ad90b829f821396e"
       merge_commit: "239e1975690eced595b8c8fc9bb505415d6e30e8"
-      base: "session-g-memory-context"
       disposition: "G source-pin refresh merged; delegated technical review only"
     PR_334:
       head: "e88cd0e68b7a34b185bcf62ba38aa2a57483dd1c"
       merge_commit: "3e8b33df18b9e6fc757ca84ff07a12faebc78e74"
-      base: "session-h-bmcp-protocol"
       actions_run: 44685566586
       ci: "FAILURE_BEFORE_TEST_STEPS; runner_id=0; steps=0; no test assertion result or CI PASS"
       disposition: "H/C FinalRequestBoundaryType equality validator and tests merged; exact-head CI did not execute"
     PR_335:
       head: "d258bb73e64eace6658eaaf892abdf32fab3e4c3"
       merge_commit: "b55466a1215a4eeed7132e8ab515d9ad377d3c7b"
-      base: "session-g-memory-context"
       ci: "NO_EXACT_HEAD_CHECK_RUNS"
       disposition: "G TEST-only Full Applied request-binding gate merged; no CI PASS claimed"
   findings:
