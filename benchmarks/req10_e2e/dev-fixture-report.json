@@ -1,0 +1,71 @@
+{
+  "classification": "DEV_BASELINE_HARNESS_FIXTURE_OR_UNVERIFIED_ADAPTER",
+  "integrated_runtime": "NOT_MEASURED",
+  "workload": "representative_memory_ingest_compile_retrieve_context",
+  "dataset": {
+    "records": 1000,
+    "memories": 100,
+    "claims_per_memory": 3,
+    "approx_claims": 300
+  },
+  "environment": {
+    "python": "3.13.5",
+    "platform": "linux",
+    "system": "Linux",
+    "command": [
+      "python3",
+      "-u",
+      "/tmp/req10-e2e/fixture_runtime.py"
+    ]
+  },
+  "concurrency": 1,
+  "warmup": 10,
+  "samples": 100,
+  "latency_ms": {
+    "p50": 0.09008549999123261,
+    "p95": 0.1479740999954515,
+    "p99": 0.30087988999923765
+  },
+  "throughput_ops_per_sec": 9459.621934983696,
+  "process_wide": {
+    "cpu_seconds": 0.979501,
+    "peak_rss_bytes": 98447360,
+    "storage_bytes_before": "NOT_MEASURED",
+    "storage_bytes_after": "NOT_MEASURED"
+  },
+  "per_operation": {
+    "cpu_seconds": "NOT_MEASURED",
+    "peak_memory_bytes": "NOT_MEASURED",
+    "storage_bytes": "NOT_MEASURED"
+  },
+  "stage_latency_ms": {
+    "ingest": {
+      "p50": 0.01780635000301345,
+      "p95": 0.029132714994943854,
+      "p99": 0.05621644200439873
+    },
+    "compile": {
+      "p50": 0.014838625002511208,
+      "p95": 0.024277262495786545,
+      "p99": 0.04684703500366561
+    },
+    "retrieve": {
+      "p50": 0.014838625002511208,
+      "p95": 0.024277262495786545,
+      "p99": 0.04684703500366561
+    },
+    "context_package": {
+      "p50": 0.011870900002008966,
+      "p95": 0.019421809996629236,
+      "p99": 0.037477628002932487
+    }
+  },
+  "model_metrics": "NOT_MEASURED",
+  "notes": [
+    "Harness execution is not evidence of an integrated product-runtime path.",
+    "Process CPU and peak RSS are child-process-wide; no per-operation attribution is inferred.",
+    "Stage timings are adapter-reported.",
+    "Storage footprint is file/directory bytes before and after; absent path is NOT_MEASURED.",
+    "Throughput uses summed measured request wall time; serial concurrency is 1."
+  ]
+}
