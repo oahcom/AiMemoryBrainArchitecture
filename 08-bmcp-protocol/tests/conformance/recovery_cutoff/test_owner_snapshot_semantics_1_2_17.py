@@ -265,5 +265,52 @@ class DOwnerSnapshotBoundedFieldTests(unittest.TestCase):
         )
 
 
+    def test_all_five_d_high_waters_accept_512_char_leading_zero_input_when_canonical_value_is_in_range(self):
+        fields = (
+            "producer_registration_high_water",
+            "work_item_high_water",
+            "attempt_high_water",
+            "barrier_generation",
+            "forget_fence_generation_high_water",
+        )
+        for field in fields:
+            with self.subTest(field=field):
+                snapshot = d_snapshot()
+                values = snapshot["owner_specific_high_waters"]
+                values[field] = "0" * 511 + "8"
+                canonical_projection = dict(values)
+                canonical_projection[field] = "8"
+                snapshot["owner_specific_high_waters_digest"] = _td(
+                    "OWNER-SPECIFIC-HIGH-WATERS", canonical_projection
+                )
+                self.assertEqual(
+                    validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities([])),
+                    VALID,
+                )
+
+    def test_all_five_d_high_waters_reject_513_char_input_before_authority_callbacks(self):
+        fields = (
+            "producer_registration_high_water",
+            "work_item_high_water",
+            "attempt_high_water",
+            "barrier_generation",
+            "forget_fence_generation_high_water",
+        )
+        for field in fields:
+            with self.subTest(field=field):
+                snapshot = d_snapshot()
+                values = snapshot["owner_specific_high_waters"]
+                values[field] = "0" * 512 + "8"
+                snapshot["owner_specific_high_waters_digest"] = _td(
+                    "OWNER-SPECIFIC-HIGH-WATERS", values
+                )
+                calls = []
+                self.assertEqual(
+                    validate_owner_snapshot_1_2_17(snapshot, "D", **true_authorities(calls)),
+                    INVALID,
+                )
+                self.assertEqual(calls, [])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
