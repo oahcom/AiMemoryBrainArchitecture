@@ -1,0 +1,517 @@
+[
+ {
+  "sha": "8498d46d19958536d14bfcd9c81ba711c75abc77",
+  "date": "2026-11-20T14:01:47Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "test(req08): add isolated cross-agent exchange proof",
+  "verified": false,
+  "prs": [
+   362
+  ]
+ },
+ {
+  "sha": "f09d93e5267dba3a12ecccee069ab4fd28298af4",
+  "date": "2026-11-20T14:01:52Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "test(req08): add authorization and provenance negative cases",
+  "verified": false,
+  "prs": [
+   362
+  ]
+ },
+ {
+  "sha": "c1f95bcad58466512c4aa6ae3993d7797a9d2181",
+  "date": "2026-11-20T14:01:55Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(req08): document local exchange proof limits and run steps",
+  "verified": false,
+  "prs": [
+   362
+  ]
+ },
+ {
+  "sha": "0d33c61378e1e9f63af7a3cd441693c06b7e0eeb",
+  "date": "2026-11-20T14:04:14Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(req08): record reproducible local exchange output",
+  "verified": false,
+  "prs": [
+   362
+  ]
+ },
+ {
+  "sha": "22451b9cd30ececd2a9c2a381c29fddc96ecad3e",
+  "date": "2026-11-20T14:39:42Z",
+  "email": "l0@local",
+  "name": "L0-manager",
+  "msg": "AID-2026-014 R4 correction: root phase-1 freeze Claim identity sync (CORRECTION-R2b, 6b005879)",
+  "verified": false,
+  "prs": []
+ },
+ {
+  "sha": "7f3707e0ef518f0e89a92b8a392b4404241c3e34",
+  "date": "2026-11-20T14:39:42Z",
+  "email": "l0@local",
+  "name": "L0-manager",
+  "msg": "AID-2026-014 R5 correction: B ordering + T17/T18 + §5 admission retiming, §3-§10 preserved (CORRECTION-R2b, 6b005879)",
+  "verified": false,
+  "prs": []
+ },
+ {
+  "sha": "6620756d5d7292c26354090ed6daffa8c9f660e2",
+  "date": "2026-11-20T14:57:10Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Merge PR #362: local cross-agent exchange proof",
+  "verified": true,
+  "prs": [
+   362
+  ]
+ },
+ {
+  "sha": "010edea0f0a3f2f53f79913bb1fd5c3d795732ea",
+  "date": "2026-11-20T14:58:23Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "[REQ-10] Add reproducible SQLite commit benchmark harness (#355)",
+  "verified": true,
+  "prs": [
+   355
+  ]
+ },
+ {
+  "sha": "84b125508b6eefd20ec490691d9170c48f35c13b",
+  "date": "2026-11-20T15:01:17Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Rebase PR #356 source-pointer repair onto current main",
+  "verified": false,
+  "prs": [
+   356
+  ]
+ },
+ {
+  "sha": "d21969a874895289677bc3ae3e567d6410036d53",
+  "date": "2026-11-20T15:06:04Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Fix DEREFERENCED counterpart links after rebase",
+  "verified": false,
+  "prs": [
+   356
+  ]
+ },
+ {
+  "sha": "b9cb8a98fa4816b9cdd1df3d73f268fafa22ff01",
+  "date": "2026-11-20T15:08:17Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "fix: scan full-width Chinese source revision labels",
+  "verified": false,
+  "prs": [
+   356
+  ]
+ },
+ {
+  "sha": "02136d14f54de48d2664e17f683a7730cb2c552b",
+  "date": "2026-11-20T15:12:21Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Merge PR #356: repair REQ-03 source revision pointers",
+  "verified": true,
+  "prs": [
+   356
+  ]
+ },
+ {
+  "sha": "d8fdf54f402ff5c4d404e96eb9b6271c60ab60dd",
+  "date": "2026-11-20T15:15:36Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(work-items): record AID-2026-029 merge and closeout evidence",
+  "verified": false,
+  "prs": []
+ },
+ {
+  "sha": "e6a7a544c4afdad2ccfc8fcabb9aae11e8049b07",
+  "date": "2026-11-20T15:18:44Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(work-items): finalize AID-2026-029 acceptance and Issue #264 closure",
+  "verified": false,
+  "prs": []
+ },
+ {
+  "sha": "5f0f7a095be1cc9f34daf5381f21e636614d5440",
+  "date": "2026-11-20T15:24:39Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "test(REQ-09): add Forget-safe backup restore fence reference",
+  "verified": false,
+  "prs": []
+ },
+ {
+  "sha": "39b25a3fd5bc15908244913a6abc9c756c6acd0c",
+  "date": "2026-11-20T15:26:14Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "test(req-07): add AC-5 Forget recovery contract tests (#347)",
+  "verified": false,
+  "prs": []
+ },
+ {
+  "sha": "568b847ce39f30071f35355ee0fb6f2300e00708",
+  "date": "2026-11-20T15:26:24Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(REQ-11): record development-baseline scope disposition (ZH)",
+  "verified": false,
+  "prs": []
+ },
+ {
+  "sha": "ece8f18b5404d9a732eca2367a6e4b90503b51b2",
+  "date": "2026-11-20T15:26:27Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "test(sqlite): add process-level crash recovery probe",
+  "verified": false,
+  "prs": [
+   372
+  ]
+ },
+ {
+  "sha": "f019ed157bcde46952ad5e44eebd94e32217e307",
+  "date": "2026-11-20T15:26:29Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(work-items): register AID-2026-030 SQLite process probe",
+  "verified": false,
+  "prs": [
+   372
+  ]
+ },
+ {
+  "sha": "03f96a6dee7b76ec6d1480c3ec648e8fb427eaa7",
+  "date": "2026-11-20T15:26:32Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(work-items): index AID-2026-030 SQLite process probe",
+  "verified": false,
+  "prs": [
+   372
+  ]
+ },
+ {
+  "sha": "5bea08f36ea515c19db246f2d29db7230087be5c",
+  "date": "2026-11-20T15:26:48Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "feat(docs): add full-repository GOV-DOC-001 scanner",
+  "verified": false,
+  "prs": [
+   368
+  ]
+ },
+ {
+  "sha": "af1e93d49d72975a83900795d6558ff1899419ca",
+  "date": "2026-11-20T15:26:52Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(REQ-11): record development-baseline scope disposition",
+  "verified": false,
+  "prs": [
+   370
+  ]
+ },
+ {
+  "sha": "5088b154c9baa5f10717f2978f158a2d0c3ed8be",
+  "date": "2026-11-20T15:27:38Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Merge pull request #370 from oahcom/docs/req-11-dev-baseline-disposition-pr",
+  "verified": true,
+  "prs": [
+   370
+  ]
+ },
+ {
+  "sha": "7600c0afbfa8cc3e7214827fe641f31b5997f5d6",
+  "date": "2026-11-20T15:27:48Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "test(sqlite): align checked-in probe with locally executed source",
+  "verified": false,
+  "prs": [
+   372
+  ]
+ },
+ {
+  "sha": "d283743d4d990c18a4fa3d02f8184602e3caaac9",
+  "date": "2026-11-20T15:28:22Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(governance): restore the verified architecture audit report (#367)",
+  "verified": true,
+  "prs": [
+   367
+  ]
+ },
+ {
+  "sha": "0cc5ad5b752fe62e06d129a65323d8480e7985d3",
+  "date": "2026-11-20T15:28:37Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "test(req-07): fix reference model loader for AC-5 recovery suite (#347)",
+  "verified": false,
+  "prs": []
+ },
+ {
+  "sha": "6ab00f0e9e5e44b979d2e520b263d68d73e3a68d",
+  "date": "2026-11-20T15:29:16Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(governance): record GOV-DOC-001 full scan inventory",
+  "verified": false,
+  "prs": [
+   368
+  ]
+ },
+ {
+  "sha": "abbff0dea98b5b2e5467db6ad8a916dac9981a6d",
+  "date": "2026-11-20T15:29:35Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Merge latest main and refresh AID-2026-030 registration",
+  "verified": false,
+  "prs": [
+   372
+  ]
+ },
+ {
+  "sha": "f0bbeca7a6299f0052e8545239bbb36d576bed8a",
+  "date": "2026-11-20T15:31:21Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "test(sqlite): close connections explicitly in reopen probe",
+  "verified": false,
+  "prs": [
+   372
+  ]
+ },
+ {
+  "sha": "25672f24584873c9e99690b35076c8abaf2e1763",
+  "date": "2026-11-20T15:31:24Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "feat(docs): add full-repository GOV-DOC-001 scanner",
+  "verified": true,
+  "prs": [
+   368
+  ]
+ },
+ {
+  "sha": "daee824806d6b22cb5f3a0e48faf7b1ffb1198c1",
+  "date": "2026-11-20T15:31:39Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(req02): record bounded FTS5 selection ADR",
+  "verified": false,
+  "prs": [
+   375
+  ]
+ },
+ {
+  "sha": "d44511d54a459581c687c193fb979db79efef582",
+  "date": "2026-11-20T15:31:41Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(req02): record bounded FTS5 selection ADR",
+  "verified": false,
+  "prs": [
+   375
+  ]
+ },
+ {
+  "sha": "dcfd1bd7a305682778aba073f3d0c3c736c65d51",
+  "date": "2026-11-20T15:31:41Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(req06): record evidence-calibrated quality and efficiency thresholds (#346)",
+  "verified": false,
+  "prs": []
+ },
+ {
+  "sha": "c2d68dda46d1d010bf725de40ab86ce93717f639",
+  "date": "2026-11-20T15:31:43Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(req02): register bilingual lexical selection ADR",
+  "verified": false,
+  "prs": [
+   375
+  ]
+ },
+ {
+  "sha": "7c61e17a7b86feb0a36d82bd323cae4a6bb8be65",
+  "date": "2026-11-20T15:32:01Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Merge latest main into F-REQ01-09 conformance probe",
+  "verified": false,
+  "prs": [
+   372
+  ]
+ },
+ {
+  "sha": "10cd3bb0b031aa0071e0e44dab44157a3650388a",
+  "date": "2026-11-20T15:33:16Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Merge main into REQ-02 lexical selection ADR branch",
+  "verified": false,
+  "prs": [
+   375
+  ]
+ },
+ {
+  "sha": "a2b2981174d62151182ebc9d53a781396f358ebb",
+  "date": "2026-11-20T15:33:34Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(req02): add bounded FTS5 selection ADR",
+  "verified": true,
+  "prs": [
+   375
+  ]
+ },
+ {
+  "sha": "b074b672fbe691b9a5a28c9c2a7f62afbded51e4",
+  "date": "2026-11-20T15:33:58Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "test(sqlite): add process-level crash-recovery conformance probe",
+  "verified": true,
+  "prs": [
+   372
+  ]
+ },
+ {
+  "sha": "91a4984c76960c00002fb175de56324919eafe4d",
+  "date": "2026-11-20T15:34:28Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "fix(sqlite): retry busy WAL transition during open",
+  "verified": false,
+  "prs": [
+   377
+  ]
+ },
+ {
+  "sha": "0539af73ee8fee5b7531cf1d37fc80199a8ef614",
+  "date": "2026-11-20T15:34:31Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "fix(sqlite): retry busy WAL transition during open",
+  "verified": false,
+  "prs": [
+   377
+  ]
+ },
+ {
+  "sha": "fc17542de7fa0281d30cdf3476146e1dbab78429",
+  "date": "2026-11-20T15:40:46Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "AID-2026-014 R5 correction: §14.5 subordinate to §13.3 canonical source (CORR-R5-145)",
+  "verified": false,
+  "prs": []
+ },
+ {
+  "sha": "4aad69941cf6064cdd8868f3dc61450bdb51ca21",
+  "date": "2026-11-20T15:43:00Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "AID-2026-014 R5 correction: sync status table, G §13.3 applied, Storage §8.8 carrier located (CORR-R5-STATUS)",
+  "verified": false,
+  "prs": []
+ },
+ {
+  "sha": "56409785414b1901ed2b37b244b9773d0e5981e8",
+  "date": "2026-11-20T16:02:29Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Merge pull request #377 from oahcom/fix/371-sqlite-concurrent-wal-open",
+  "verified": true,
+  "prs": [
+   377
+  ]
+ },
+ {
+  "sha": "7caa4ae344aa28bbb8b00093669c2197df17f230",
+  "date": "2026-11-20T16:08:22Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "feat(req08): add versioned portable exchange adapters",
+  "verified": false,
+  "prs": [
+   363
+  ]
+ },
+ {
+  "sha": "6e02140ee0b318fa42f5c2676b7713a103be6736",
+  "date": "2026-11-20T16:08:53Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "test(req08): add portable exchange behavioral conformance suite",
+  "verified": false,
+  "prs": [
+   363
+  ]
+ },
+ {
+  "sha": "c867daf506c159ccb7f2b799bcab964372dd02fb",
+  "date": "2026-11-20T16:09:05Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "docs(req08): document portable exchange fixture and rollback",
+  "verified": false,
+  "prs": [
+   363
+  ]
+ },
+ {
+  "sha": "d8a0cae4b3e401229540939ac933bad94f828f39",
+  "date": "2026-11-20T16:09:41Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "[REQ-10] Add end-to-end workload benchmark harness contract",
+  "verified": true,
+  "prs": [
+   379
+  ]
+ },
+ {
+  "sha": "31dfe978f20245792502949b1003460d027c2571",
+  "date": "2026-11-20T16:09:57Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Merge PR #363: REQ-08 portable exchange fixture",
+  "verified": true,
+  "prs": [
+   363
+  ]
+ },
+ {
+  "sha": "a7d12fe9835d8f53403946ab08c1cae8c3f12fbf",
+  "date": "2026-11-20T16:10:51Z",
+  "email": "81014746+oahcom@users.noreply.github.com",
+  "name": "oahcom",
+  "msg": "Refresh fixture report from final local harness execution",
+  "verified": false,
+  "prs": []
+ }
+]

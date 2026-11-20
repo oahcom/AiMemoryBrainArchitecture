@@ -1,5 +1,9 @@
 aid: AID-2026-026
-title: Fact and Claim Semantic Architecture Decision
+title: Inference and Hypothesis Semantic Boundary — Forget Interaction and AID-2026-023 Interface
+status_revision_note: >-
+  Title narrowed under coordinating ruling P4 (2026-11-20). Prior title was
+  "Fact and Claim Semantic Architecture Decision"; that surface is owned by
+  AID-2026-014. See scope_revision below.
 
 class: ARCH/R2
 risk: R2
@@ -27,6 +31,7 @@ related_tracking_issues:
 coordination_hub_issue: https://github.com/oahcom/AiMemoryBrainArchitecture/issues/345
 related_work_items:
   - AID-2026-023 (Forget boundary; exact manifest/relationship read-back NOT_VERIFIED)
+  - AID-2026-014 (Fact/Claim semantics owner; this Work Item cites it and does not re-adjudicate)
 
 created_at: NOT_RECORDED
 updated_at: NOT_RECORDED
@@ -71,6 +76,31 @@ number_allocation:
   allocation_conclusion: VERIFIED_UNIQUE_325_BRANCH_DUAL_DOMAIN_SCAN
 prompt_id: AID-2026-026-PROMPT
 prompt_version: v1
+prompt_lifecycle:
+  current_version: null
+  note: >-
+    current_version is null because no prompt currently matches the revised
+    scope. Prompt v1 remains frozen and historically valid; it is no longer an
+    execution basis for this Work Item.
+  historical_versions:
+    - version: v1
+      status: FROZEN
+      superseded_by: scope_revision_v2
+      superseded_reason: v1 scopes Fact/Claim semantic adjudication, which is owned by AID-2026-014
+      delivery_integrity: NOT_VERIFIED
+      evidence: prompt_sha256 and prompt_bytes below are unchanged from registration
+  next_version:
+    version: v2
+    status: PENDING
+    required_before: R2
+    required_content:
+      - Inference/Hypothesis boundary and identity rule
+      - Forget interaction for Inference/Hypothesis
+      - AID-2026-023 interface contract
+      - AID-2026-014 citation discipline (cite, do not re-adjudicate)
+    constraint: >-
+      v2 must not reintroduce Fact/Claim semantic adjudication. v1 must not be
+      rewritten in place; its SHA-256 and byte count stay as registered.
 prompt_file: 14-ai-development/work-items/AID-2026-026/prompt-v1.md
 prompt_status: FROZEN
 prompt_sha256: 4d52da1e3a3fa5334f51bf75201cd3b3d51f95ca170353873a754393c201150c
@@ -91,15 +121,80 @@ prompt_delivery_integrity: NOT_VERIFIED
 prompt_original_payload_sha256: 4d52da1e3a3fa5334f51bf75201cd3b3d51f95ca170353873a754393c201150c
 prompt_original_payload_bytes: 4267
 
+scope_revision:
+  version: v2
+  status: PROPOSED_NOT_COMMITTED
+  authority: coordinating ruling P4, 2026-11-20 (scope/ownership decoupled; sponsor unchanged)
+  basis:
+    - AID-2026-014 already owns Fact/Claim semantic adjudication and Claim identity/revision.
+      Re-running that decision here would be a duplicate ADR.
+    - The remaining undecided surface is the Inference/Hypothesis boundary, its Forget
+      interaction, and the interface contract with AID-2026-023.
+  changed_fields: [title, scope, out_of_scope, related_work_items, forget_boundary]
+
+  superseded_by_other_work_item:
+    work_item: AID-2026-014
+    title: REQ-04 G03 — B/D ADR Independent R3 Review and Conformance Tests
+    covers:
+      - Claim identity Option A and Claim revision semantics
+      - Fact Attestation authorization
+      - Evidence binding and historical immutability
+      - Storage atomicity for Claim/Fact revision
+    manifest: 14-ai-development/work-items/AID-2026-014/manifest.yaml
+    effect: >-
+      AID-2026-026 must reference AID-2026-014 for these matters and must not
+      restate, re-adjudicate, or contradict them. No new ADR is created for
+      anything AID-2026-014 already decided.
+
+  scope_v2:
+    in_scope:
+      - Inference and Hypothesis semantic boundary, including their distinction from each other, from Claim, and from unidentified assertion.
+      - Whether Inference/Hypothesis are first-class persisted types or derived annotations on Claim; identity rule only, no Fact/Claim restatement.
+      - Forget interaction specific to Inference/Hypothesis: what must be invalidated when their supporting Claim or Evidence is forgotten, and what may survive.
+      - Interface contract with AID-2026-023 Forget boundary: identifiers, invalidation signals, and completion acknowledgement this Work Item must consume.
+      - Executable domain-test specifications for the above, expressed against the normative model.
+      - Contradiction and supersession behaviour that applies to Inference/Hypothesis only, where AID-2026-014 has not already ruled.
+    out_of_scope:
+      - Fact/Claim basic semantics — owned by AID-2026-014.
+      - Whether Fact is an independently persistent entity — owned by AID-2026-014.
+      - Claim Identity, Claim Revision, Evidence binding, historical immutability — owned by AID-2026-014.
+      - Fact Attestation authorization and Storage atomicity for Claim/Fact — owned by AID-2026-014.
+      - Redefining, duplicating, or weakening AID-2026-023's canonical Forget authorization, propagation, denial, retention, or completion rules.
+      - Everything already listed in the top-level out_of_scope below.
+    cross_reference_rule: >-
+      Where this Work Item's text would otherwise restate a Fact/Claim rule, it
+      must cite AID-2026-014's ADR by identifier instead of re-deriving it. A
+      citation is not an adjudication.
+
+  ownership_unchanged:
+    sponsor: NOT_ASSIGNED
+    accountable_owner: NOT_ASSIGNED
+    note: >-
+      Coordinating ruling P4 decouples scope revision from ownership. Revising
+      scope does not fill, imply, or pre-empt the Sponsor / accountable_owner
+      appointment. Both fields remain NOT_ASSIGNED after this revision.
+
+  gates_unchanged:
+    r2_readiness: BLOCKED_PENDING_MERGED_REGISTRATION_READBACK
+    r2_authorized: false
+    note: >-
+      This is a scope revision proposal. It does not open R2, does not authorize
+      repository write, and does not authorize a PR. Submission requires the
+      normal PR-GOVERNANCE-001 §3 path plus applicable review and exact-Head gates.
+
 scope:
   - Map the existing normative domain model and inspected Rust domain types before proposing changes.
-  - Resolve only the semantic boundary among Fact, Claim, Inference, Hypothesis, Observation, Source, Evidence, and user correction.
-  - Determine whether Fact is an independently persistent domain entity or a qualified/derived state, and define its identity and relationship to Claims.
-  - Compare the three required modeling alternatives and recommend the smallest model preserving required semantics.
-  - Define contradiction coexistence, evidence/provenance links, temporal validity, correction, uncertainty, authority separation, Forget interaction, compatibility, migration, rollback, and executable domain-test specifications.
-  - Produce a proposed ADR and identify decisions requiring accountable domain/Owner governance.
+  - Resolve the Inference/Hypothesis semantic boundary and its identity rule, without restating Fact/Claim semantics owned by AID-2026-014.
+  - Specify what must be invalidated in Inference/Hypothesis when supporting Claim or Evidence is forgotten, and what may survive.
+  - Define the interface contract this Work Item consumes from AID-2026-023 Forget boundary (identifiers, invalidation signals, completion acknowledgement).
+  - Define contradiction and supersession behaviour for Inference/Hypothesis only, where AID-2026-014 has not ruled.
+  - Cite AID-2026-014 by ADR identifier for every Fact/Claim rule that this Work Item depends on; do not re-derive it.
+  - Produce executable domain-test specifications for the above, and identify decisions requiring accountable domain/Owner governance.
 
 out_of_scope:
+  - Fact/Claim basic semantics, Claim Identity, Claim Revision, Evidence binding, historical immutability, Fact Attestation authorization, Storage atomicity — all owned by AID-2026-014.
+  - Determining whether Fact is an independently persistent entity — owned by AID-2026-014.
+  - Creating a duplicate or superseding ADR for any matter AID-2026-014 has already decided.
   - Production schema, DDL, database, or persistent-storage changes.
   - Production API or runtime implementation changes.
   - Repository writes, branch creation, commits, pull requests, merges, or INDEX maintenance by this session.
@@ -171,11 +266,26 @@ forget_boundary:
   related_work_item: AID-2026-023
   relationship: DEPENDENCY_INTERFACE_ONLY
   status: NOT_VERIFIED
+  in_scope_interaction:
+    - What Inference/Hypothesis state must be invalidated when a supporting Claim or Evidence is forgotten.
+    - What Inference/Hypothesis state may survive a Forget operation, and on what basis.
+    - The identifiers, invalidation signals, and completion acknowledgement this Work Item consumes from AID-2026-023.
   constraint: >-
-    This Work Item must identify Fact/Claim provenance and dependency behavior
-    needed by Forget, but must not redefine, duplicate, or weaken the canonical
-    Forget authorization, propagation, denial, retention, or completion rules
-    owned by AID-2026-023 and its accountable governance authorities.
+    This Work Item must identify Inference/Hypothesis dependency behavior needed
+    by Forget, but must not redefine, duplicate, or weaken the canonical Forget
+    authorization, propagation, denial, retention, or completion rules owned by
+    AID-2026-023 and its accountable governance authorities.
+
+fact_claim_boundary:
+  related_work_item: AID-2026-014
+  relationship: DEPENDENCY_CITATION_ONLY
+  status: NOT_VERIFIED
+  constraint: >-
+    Fact and Claim basic semantics, Claim identity and revision, Evidence
+    binding, historical immutability, Fact Attestation authorization, and
+    Storage atomicity are owned by AID-2026-014. This Work Item cites that ADR
+    by identifier and must not restate, re-adjudicate, supersede, or contradict
+    it. A citation is not an adjudication.
 
 execution_constraints:
   repository_baseline_reported: c970c4a61b623c1f127624f60666b0a27e7e0594

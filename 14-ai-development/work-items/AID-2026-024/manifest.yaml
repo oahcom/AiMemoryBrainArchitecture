@@ -35,6 +35,39 @@ repository:
 
 prompt:
   prompt_file: "14-ai-development/work-items/AID-2026-024/prompt-v1.md"
+  prompt_version: "v1"
+  prompt_lifecycle:
+    current_version: null
+    note: >-
+      current_version is null because no prompt currently matches the revised
+      scope. Prompt v1 remains frozen and historically valid; it is no longer an
+      execution basis for this Work Item.
+    historical_versions:
+      - version: "v1"
+        status: "FROZEN"
+        superseded_by: "scope_revision_v2"
+        superseded_reason: >-
+          v1 scopes a from-zero three-arm architecture; the REQ-06 pilot already
+          exists in main under reviews/req06-evaluation-pilot/
+        delivery_integrity: "NOT_VERIFIED"
+        evidence: "prompt_sha256 and prompt_bytes below are unchanged from registration"
+    next_version:
+      version: "v2"
+      status: "PENDING"
+      required_before: "R2"
+      required_content:
+        - "Review of the existing REQ-06 pilot"
+        - "Three-arm comparability assessment"
+        - "Wilson interval and statistical validity analysis"
+        - "Sample design and real-user trace gaps"
+        - "Harmful activation risk"
+        - "Scale-up plan"
+        - "Corpus hash, blob pin and experiment id traceability"
+        - "Acceptance boundary against Issue #374"
+      constraint: >-
+        v2 must not repackage the original three-arm architecture design task.
+        v1 must not be rewritten in place; its SHA-256 and byte count stay as
+        registered.
   prompt_status: "FROZEN"
   prompt_sha256: "2cd4fed82ebdf801298670f1453c7becf51c0d8d6855c593fac5396d3d6ca09c"
   prompt_bytes: 6856
@@ -97,53 +130,96 @@ governance:
     independent_acceptance: "NOT_STARTED"
 
 scope:
+  scope_revision:
+    version: "v2"
+    status: "PROPOSED_NOT_COMMITTED"
+    authority: "coordinating ruling P4/P3, 2026-11-20 (scope/ownership decoupled; sponsor unchanged)"
+    prior_objective: >-
+      Design the smallest executable integration path capable of reproducibly
+      comparing no-memory, simple-retrieval-memory and complete AI Memory Brain
+      execution, while supporting end-to-end performance, resource and cost
+      measurements.
+    prior_objective_status: "SUPERSEDED_IN_PART"
+    reason: >-
+      The from-scratch three-arm design premise no longer holds. A REQ-06 pilot
+      already exists in main under reviews/req06-evaluation-pilot/ (PR #360,
+      merge 0a3e05dc1022f753d0dd6b9eb5ff1470e8dbb730). Designing a second
+      three-arm architecture from zero would duplicate an existing artifact and
+      would not answer the question that is actually open: whether the pilot's
+      three arms are comparable and whether its results support any claim.
+    superseded_arms:
+      note: >-
+        ARM_A / ARM_B / ARM_C remain valid as an evaluation concept. What is
+        superseded is treating their design as this Work Item's deliverable.
+        ARM_C as delivered is a policy proxy
+        (brain_policy_reference_proxy_NOT_INTEGRATED), not the integrated Brain
+        path; that gap belongs to Issue #374, not to this Work Item.
+
+    in_scope:
+      - Review the existing REQ-06 pilot in reviews/req06-evaluation-pilot/ against its own stated claims, including corpus, evaluator, arms and threshold decision.
+      - Statistical validity analysis of the pilot's reported figures: Wilson interval width, effective sample size (7 hand-authored tasks), and what the reported precision/recall can and cannot support.
+      - Identify sample and control design gaps that prevent a product-improvement claim, including absence of preference-retention, multi-session handoff, real-user traces and independent relevance labels.
+      - Quantify harmful-activation risk in the pilot as delivered, and state what evidence would be needed to bound it.
+      - Produce a scale-up evaluation plan: corpus growth, arm integration path, and the minimum sample size implied by the chosen confidence level.
+      - Reproducibility and result traceability requirements for any scale-up run, including pinned corpus hashes, source blob pins and experiment identifiers.
+      - Delimit this Work Item's boundary against REQ-06 acceptance as tracked in Issue #374, so that neither claims the other's scope.
+
+    out_of_scope:
+      - Designing a three-arm evaluation architecture from zero.
+      - Building or specifying the integrated Brain execution path — owned by Issue #374.
+      - Re-running the pilot or producing new benchmark numbers.
+      - Claiming any product improvement, including for the policy proxy arm.
+      - Everything already listed in the top-level non_goals below.
+
+    ownership_unchanged:
+      sponsor: "NOT_ASSIGNED"
+      accountable_owner: "NOT_ASSIGNED"
+      note: >-
+        Coordinating ruling P4 decouples scope revision from ownership. Revising
+        scope does not fill, imply, or pre-empt the Sponsor / accountable_owner
+        appointment.
+
+    gates_unchanged:
+      r2: "NOT_STARTED"
+      note: >-
+        This is a scope revision proposal. It does not open R2, does not
+        authorize repository write, and does not authorize a PR. Submission
+        requires the normal PR-GOVERNANCE-001 §3 path plus applicable review and
+        exact-Head gates.
+
   objective: >-
-    Design the smallest executable integration path capable of reproducibly
-    comparing no-memory, simple-retrieval-memory and complete AI Memory Brain
-    execution, while supporting end-to-end performance, resource and cost
-    measurements.
+    Determine whether the existing REQ-06 evaluation pilot supports any
+    product-value claim, quantify what it cannot support, and specify the
+    evidence a scale-up would require. No new evaluation architecture is
+    designed here.
 
   evaluation_arms:
-    - id: "ARM_A"
-      name: "No memory"
-      description: "Agent execution without persistent or retrieved memory."
+    status: "REFERENCE_ONLY_NOT_A_DELIVERABLE"
+    note: >-
+      Retained for review context. The pilot's actual third arm is
+      brain_policy_reference_proxy_NOT_INTEGRATED, not the integrated Brain.
+    arms:
+      - id: "ARM_A"
+        name: "No memory"
+        description: "Agent execution without persistent or retrieved memory."
 
-    - id: "ARM_B"
-      name: "Simple retrieval memory"
-      description: "Agent execution using a bounded, independently defined retrieval-memory baseline."
+      - id: "ARM_B"
+        name: "Simple retrieval memory"
+        description: "Agent execution using a bounded, independently defined retrieval-memory baseline."
 
-    - id: "ARM_C"
-      name: "Complete AI Memory Brain"
-      description: "Agent execution through the complete integrated Brain memory and context-delivery chain."
+      - id: "ARM_C"
+        name: "Complete AI Memory Brain"
+        description: "Agent execution through the complete integrated Brain memory and context-delivery chain."
+        delivered_substitute: "brain_policy_reference_proxy_NOT_INTEGRATED"
 
   deliverables:
-    - "Existing integration inventory"
-    - "Missing runtime capability assessment"
-    - "Minimal three-arm execution architecture"
-    - "Fair-comparison and confounder-control protocol"
-    - "Shared runtime instrumentation interface"
-    - "REQ-06 independent evaluation contract"
-    - "REQ-10 independent performance measurement contract"
-    - "Representative workload and dataset design"
-    - "Contamination and leakage controls"
-    - "Benchmarking, tracing and evaluation ecosystem comparison"
-    - "Reproducible benchmark execution plan"
-    - "Model and operational cost attribution design"
-    - "Failure and graceful-degradation model"
-    - "Implementation dependency sequence and rollback plan"
-
-non_goals:
-  - "Implementing the proposed architecture"
-  - "Writing to main or modifying production code"
-  - "Production deployment or infrastructure expansion"
-  - "Merging branches or pull requests"
-  - "Claiming REQ-06 or REQ-10 implementation or acceptance"
-  - "Claiming product improvement without experimental evidence"
-  - "Inventing benchmark results, model prices or performance targets"
-  - "Treating reference-model execution as integrated Brain execution"
-  - "Treating retrieved context as proof of Applied Context"
-  - "Combining REQ-06 and REQ-10 acceptance criteria"
-  - "Selecting infrastructure before measuring actual bottlenecks"
+    - "Review of the existing pilot: corpus, evaluator, arms, threshold decision"
+    - "Statistical validity analysis of the pilot's reported figures"
+    - "Sample and control design gap inventory with the claim each gap blocks"
+    - "Harmful-activation risk assessment as delivered, and bounding evidence required"
+    - "Scale-up evaluation plan with implied minimum sample size"
+    - "Reproducibility and traceability requirements for any scale-up run"
+    - "Boundary statement against Issue #374 (integrated Brain path)"
 
 baseline_evidence:
   req_06:
@@ -187,6 +263,23 @@ baseline_evidence:
     - "No new benchmark execution is claimed."
     - "No CI execution or PASS result is claimed."
     - "Independent reviewer identity remains subject to governance verification."
+
+non_goals:
+  - "Designing a three-arm evaluation architecture from zero"
+  - "Specifying or building the integrated Brain execution path"
+  - "Implementing the proposed architecture"
+  - "Writing to main or modifying production code"
+  - "Production deployment or infrastructure expansion"
+  - "Merging branches or pull requests"
+  - "Claiming REQ-06 or REQ-10 implementation or acceptance"
+  - "Claiming product improvement without experimental evidence"
+  - "Inventing benchmark results, model prices or performance targets"
+  - "Treating reference-model execution as integrated Brain execution"
+  - "Treating the policy proxy arm as the integrated Brain path"
+  - "Treating retrieved context as proof of Applied Context"
+  - "Combining REQ-06 and REQ-10 acceptance criteria"
+  - "Selecting infrastructure before measuring actual bottlenecks"
+
 
 dependencies:
   governance:
