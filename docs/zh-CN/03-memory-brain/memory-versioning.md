@@ -7,7 +7,7 @@
 - 审查时源分支 HEAD：6b654d5cffaeb71b01f2b0750daa0abc14eb64b3
 - 源规范：DEREFERENCED — 原规范源路径 `03-memory-brain/memory-versioning.md` 在当前 main tree 中不存在；替代物：[现存英文对照文本](../../en/03-memory-brain/memory-versioning.md)（仅供阅读，不是规范性替代源）。
 - 对应英文：[Memory Versioning and Historical Semantics](../../en/03-memory-brain/memory-versioning.md)
-- 状态：不可变版本原则为 DECIDED；Claim Revision 和精确事务/时间语义为 CANDIDATE/OPEN
+- 状态：Claim identity 与不可变 ClaimRevision 语义已 DECIDED FOR CONVERGENCE（Option A）；具体 Schema 表示与精确事务/时间表示仍为 CANDIDATE/OPEN
 - 相关问题：INT-P0-01/03、INT-P1-01/02/06；DM-002/003/006/008/009/013
 
 ## 1. 目的
@@ -209,13 +209,21 @@ D Fence 先于 Admission 线性化
 Participant-first 分支（T18）：
 
 ```
-Admission 成功
-      |
-      +--> 准确的 Participant 记录 MUST 作为一个
-           不可分割操作完成持久化
-      |
-      +--> 后续 Fence MUST 等待该记录对其
-           Participant Barrier 持久可见
++------------------------------------------------------+
+| 权威串行化 Fence / Admission 边界                    |
+|                                                      |
+| Producer Admission + 精确 Participant 记录           |
+| 作为一个不可分割操作完成持久化                        |
+| (Participant 持久化失败 => Admission                 |
+|  MUST NOT 报告成功)                                  |
++------------------------------------------------------+
+                    |
+                    v
+      Admission 成功结果变为可观察
+                    |
+                    v
+      后续 Fence MUST 等待该精确 Participant 记录
+      对其 Participant Barrier 持久可见
 ```
 
 组件职责边界：
@@ -515,4 +523,4 @@ LifecycleEvent Sequence 属于单个 Memory Stream，只有 Event 和所属 Tran
 
 ### Claim / ConflictSet 冻结门禁
 
-Claim Identity、ClaimRevision Schema、ConflictSet Schema 和字段级引用，在 Architecture Governance + B 批准 INT-P0-01 之前都保持 **ADR-BLOCKED**。本文现有 ClaimRevision 表只是备选草图，不是 D 决议。D 会在批准后将 ADR 映射到不可变 Revision 机制；此前不得冻结 Schema、DDL、公共 API 或 Wire Contract。
+Claim identity 语义与不可变 ClaimRevision 语义已 **DECIDED FOR CONVERGENCE（Option A）**。具体 ClaimRevision Schema、ConflictSet Schema 和字段级引用，在 Architecture Governance + B 批准 INT-P0-01 之前仍保持 **ADR-BLOCKED**。Fact-specific modeling 与 Fact approval 继续保持 **OPEN**。本文现有 ClaimRevision 表只是字段表示的备选草图，不是 D 决议；它不会重新开启或削弱已决定的 Claim identity 语义。D 会在批准后将 ADR 映射到不可变 Revision 机制；此前不得冻结 Schema、DDL、公共 API 或 Wire Contract。
