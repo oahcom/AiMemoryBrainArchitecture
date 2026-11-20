@@ -329,3 +329,28 @@ R45（A-OWNER-INTEGRATION-R45-2026-11-20）：A 完成 F-43-07 四方最终集�
 ### Execution record
 - This addendum only refreshes exact pins and test/CI evidence on the existing PR #323 branch. No new PR/Issue/branch, no main write, no merge, no production activation, and no other-Owner signature.
 - Tests for this ledger-only addendum: NOT RUN. The two PR #322 workflow jobs above are failed runner/log evidence, not a test result.
+
+
+## 2026-11-20 current exact-head reconciliation — D-2026-1120-01 (supersedes prior carrier pins)
+
+This addendum refreshes only the F1/F3 source pins and verification state. Earlier exact-head snapshots above remain historical.
+
+### F-43-01/F1 — P1 — OPEN (runtime implementation evidence)
+- Existing PR #327 remains OPEN/DRAFT. Current exact Head: `dd6b132827ac2369df0bc19a3e4c7c65bf25989b`; handoff file `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md`; current Blob: `9e87630efaaf26e1a449a1bc691afadd0de5213b`.
+- The current handoff pins the H TEST-profile candidate at PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`, validator Blob `49644a181c578fecb312218c08ce23caa62f603b`, and test Blob `6685226143f28a5b8764067bb205080b531132e3`. This is a source cross-reference only, not runtime implementation or H acceptance.
+- Issue #7 comment #7021990583 remains controlling: `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`, engineering entry NOT AUTHORIZED / NOT READY. Five callable D authority operations remain NOT IMPLEMENTED; authoritative durable Producer Registration Ledger/Receipt and operational equality/linearization proof remain NOT ESTABLISHED; S1–S7 remain NOT RUN.
+- **Disposition:** engineering-entry handoff is exact-pinned and delivered; F1 remains P1 / OPEN for actual runtime implementation and operational evidence. No placeholder runtime or inferred canonical runtime target is claimed.
+
+### F-43-01/F3 — P1 — OPEN (independent mapping acceptance / consumer / operational evidence)
+- PR #321 remains OPEN/DRAFT at exact Head `7af4e4c409a6522d961b15d9622c92c7551be5f9`; D query-contract Blob `6f2d583dec8487b321795a006266ee4229c7fd80`. Accepted mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49` occurs twice; superseded mapping Blob `e60bdd4cbfef79850596001f01cb56e622b7d79d` occurs zero times. The contract explicitly says `ResolveForgetFenceSnapshotProof` is NOT ESTABLISHED AS CALLABLE. No PR-triggered workflow runs were returned for this exact Head; documentation tests NOT RUN.
+- PR #322 remains OPEN/DRAFT at exact Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; test Blob `6685226143f28a5b8764067bb205080b531132e3`. The current test file contains 15 test methods. The latest commit adds explicit 512-character leading-zero acceptance and 513-character rejection-before-authority-callback regressions for all five D nominal high-water fields.
+- Exact-head workflow Runs `44684299500` (H Recovery Cutoff Conformance) and `44684299439` (BMCP JF-10 and Storage Prepared Participant Schema Validation) both completed FAILURE. Their latest jobs are `136114843997` and `136114843602`; job-step readback returned empty step arrays for both. No test step execution, test-level diagnosis, or CI PASS is established.
+- The prior 13/13 focused local report applies to the earlier test Blob `e66264ad30df6594e00836524accfdeb54160cee`, not the current test Blob `6685226143f28a5b8764067bb205080b531132e3`. The current 15-method source has not been independently executed in this reconciliation; no pass is inferred.
+- D/H role-labelled decisions #7021655866 and #7021638212 both accept mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`, but both visible GitHub identities are `oahcom`; distinct authenticated human signer identities remain NOT VERIFIED. H Owner acceptance of the current TEST-profile implementation is not recorded.
+- Callable D query, operation-bound durable Receipt, live currentness/revocation/anti-rollback, H accepted consumer implementation/full conformance, and C1–C6 operational evidence remain NOT ESTABLISHED.
+- **Disposition:** exact D mapping pin and current H TEST-profile source are verifiable; F3 remains P1 / OPEN for independently attributable human acceptance and end-to-end consumer/operational evidence.
+
+### Execution record
+- Carrier reused: existing PR #323 branch `undefined`; no new PR, Issue, or branch.
+- This is an evidence-ledger/manifest reconciliation only. Tests for the documentation update are NOT RUN. No direct main write, merge, deployment, production activation, or other-Owner signature is performed or inferred.
+- Prompt provenance: user-supplied Owner ruling D-2026-1120-01 and continuation instruction; parent source conversation `6afae42c-65d8-83ee-853c-a7537b0e273b`; current platform conversation UUID/raw message bytes unavailable; SHA-256 NOT_VERIFIED. No synthetic ID/hash is asserted.
