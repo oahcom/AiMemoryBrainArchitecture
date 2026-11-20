@@ -157,8 +157,8 @@ integration_closeout:
 current_status_refresh:
   date: "2026-11-20"
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "06e23259c752fd654bc92142776f633adf685b12"
-  ledger_blob_sha: "96dfa22a6d23f4b93e1442ae6b32128262dad16c"
+  ledger_commit: "6c061130c5a04dbc378d13bf0d1e0b450fb36344"
+  ledger_blob_sha: "d90d4d8ef83db6df03a5ebbf06a881f936f059f8"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -177,6 +177,7 @@ current_status_refresh:
     - "PR #321 Head 3db969c04d08ec4b0d9aadd8f8efcea3ac0309b6 — D query-contract mapping pin correction; OPEN/DRAFT; tests NOT RUN; D/H role-attributed same-Blob decision records exist, but both comments and both commit identities resolve to GitHub login oahcom; distinct human Owner identities NOT VERIFIED, so independent-acceptance subcondition remains OPEN"
     - "PR #322 Head 614b60e354cce9ecf9145e09ea5bb87c74d5cc2e — H TEST-profile five-field range candidate; Runs 44674622112 and 44674622134 FAILURE; logs unavailable"
     - "PR #327 Head 4684b5d8dded3bd861f3b495c6307b0ac3db1959; handoff Blob c45933284494dcf712f425012cda6341d5c31212 — F1 engineering-entry handoff; seven canonical D-002 scenarios S1–S7 corrected; tests NOT RUN"
+    - "F1 repository fact correction: Issue #43 comment 7030788916 records foundational Batch-1 landing in oahcom/AiMemoryBrain at d11722e39f047bb52a482936a68459e74ce906d1; this is not the authorized D authority runtime and does not close F1"
   historical_closeout_note: >-
     integration_closeout above remains the historical 2026-11-19 disposition
     (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
