@@ -14,7 +14,9 @@ Source pins: tools/ac5_forget_recovery_test.py
 """
 from __future__ import annotations
 
+import hashlib
 import importlib.util
+import re
 import sys
 import unittest
 from dataclasses import dataclass, field
@@ -328,7 +330,6 @@ DOMAIN_MODEL_BLOB = "5d90a36d99b8be4ca4f3c8d5837b4e9830558842"
 EPISTEMIC_SPEC_BLOB = "8c03a20db1ed54c90db1d5c4c64f5ea7b1324ed7"
 PROVENANCE_SPEC_BLOB = "a674e21756cdbf8c07683083bfdcb58a33f48a20"
 MQ01_DETECTOR_PATH = ROOT / "tools" / "mq01_fact_claim_detector.py"
-MQ01_DETECTOR_BLOB = "c287e1c935f177a23df7b9f91a70d458e10dcb1a"
 
 # These are intentionally explicit non-bindings, not implied conformance:
 # AC-1's local five labels (Fact/Claim/Inference/Hypothesis/Preference) do not
@@ -337,42 +338,50 @@ MQ01_DETECTOR_BLOB = "c287e1c935f177a23df7b9f91a70d458e10dcb1a"
 # AC-7 has no adopted Decision/explanation record contract in the domain model.
 NOT_BINDABLE = {
     "AC-1": "NOT_BINDABLE(no adopted contract in repo): five local epistemic labels do not match the adopted six-state EpistemicStatus enum; MQ-01 still detects missing distinct Fact type",
-    "AC-6": "NOT_BINDABLE(no adopted contract in repo): no adversarial quality/disposition engine defines poison, stale, and contradiction outcomes",
-    "AC-7": "NOT_BINDABLE(no adopted contract in repo): no decision/explanation record defines reason, evidence refs, method, version, and history",
+    "AC-6": "NOT_BINDABLE(no adopted contract in repo): no adopted adversarial quality/disposition engine defines poison, stale, and contradiction outcomes",
+    "AC-7": "NOT_BINDABLE(no adopted contract in repo): no adopted decision/explanation record defines reason, evidence refs, method, version, and history",
 }
 
 
-def _git_blob_sha(content: str) -> str:
-    import hashlib
-    payload = content.encode("utf-8")
+def _git_blob_sha(path: Path) -> str:
+    payload = path.read_text(encoding="utf-8").encode("utf-8")
     return hashlib.sha1(b"blob " + str(len(payload)).encode("ascii") + b"\0" + payload).hexdigest()
 
 
 def _read_pinned_contract(path: Path, expected_blob: str) -> str:
-    content = path.read_text(encoding="utf-8")
-    actual = _git_blob_sha(content)
+    actual = _git_blob_sha(path)
     if actual != expected_blob:
         raise AssertionError(f"authoritative source changed: {path} expected {expected_blob}, got {actual}")
-    return content
+    return path.read_text(encoding="utf-8")
+
+
+def _rust_blocks(source: str, declaration: str) -> list[str]:
+    """Return every balanced Rust declaration block matching the pattern."""
+    matches = list(re.finditer(declaration, source))
+    if not matches:
+        raise AssertionError(f"authoritative Rust declaration not found: {declaration}")
+    blocks: list[str] = []
+    for match in matches:
+        opening = source.find("{", match.start())
+        if opening < 0:
+            continue
+        depth = 0
+        for index in range(opening, len(source)):
+            if source[index] == "{":
+                depth += 1
+            elif source[index] == "}":
+                depth -= 1
+                if depth == 0:
+                    blocks.append(source[opening + 1:index])
+                    break
+    if not blocks:
+        raise AssertionError(f"authoritative Rust block has no balanced body: {declaration}")
+    return blocks
 
 
 def _rust_block(source: str, declaration: str) -> str:
-    import re
-    match = re.search(declaration, source)
-    if match is None:
-        raise AssertionError(f"authoritative Rust declaration not found: {declaration}")
-    opening = source.find("{", match.start())
-    if opening < 0:
-        raise AssertionError(f"authoritative Rust block has no body: {declaration}")
-    depth = 0
-    for index in range(opening, len(source)):
-        if source[index] == "{":
-            depth += 1
-        elif source[index] == "}":
-            depth -= 1
-            if depth == 0:
-                return source[opening + 1:index]
-    raise AssertionError(f"unterminated authoritative Rust block: {declaration}")
+    """Return the first matching block (for declarations unique by contract)."""
+    return _rust_blocks(source, declaration)[0]
 
 
 class AdoptedContractBindings(unittest.TestCase):
@@ -383,7 +392,6 @@ class AdoptedContractBindings(unittest.TestCase):
         cls.domain = _read_pinned_contract(DOMAIN_MODEL_PATH, DOMAIN_MODEL_BLOB)
         cls.epistemic = _read_pinned_contract(EPISTEMIC_SPEC_PATH, EPISTEMIC_SPEC_BLOB)
         cls.provenance = _read_pinned_contract(PROVENANCE_SPEC_PATH, PROVENANCE_SPEC_BLOB)
-        cls.detector_source = _read_pinned_contract(MQ01_DETECTOR_PATH, MQ01_DETECTOR_BLOB)
 
     def test_ac2_evidence_and_provenance_bind_to_domain_types(self):
         evidence = _rust_block(self.domain, r"pub struct Evidence\s*")
@@ -396,7 +404,13 @@ class AdoptedContractBindings(unittest.TestCase):
         self.assertIn("For every transformation, add lineage", self.provenance)
 
     def test_ac3_temporal_and_stale_successor_rules_bind_to_domain_contract(self):
-        version = _rust_block(self.domain, r"impl MemoryVersion\s*")
+        version_blocks = _rust_blocks(self.domain, r"impl MemoryVersion\s*")
+        version = next(
+            (block for block in version_blocks
+             if re.search(r"pub fn validate_successor\s*\(", block)),
+            None,
+        )
+        self.assertIsNotNone(version, "MemoryVersion impl containing validate_successor not found")
         successor = _rust_block(version, r"pub fn validate_successor\s*\(")
         for required in ("self.memory_id != current.memory_id",
                          "self.version_number != current.version_number + 1",
@@ -419,15 +433,14 @@ class AdoptedContractBindings(unittest.TestCase):
         self.assertIn("Confidence is not truth", self.epistemic)
 
     def test_ac1_is_explicitly_not_bindable_while_mq01_remains_detected(self):
-        import importlib.util
         self.assertIn("AC-1", NOT_BINDABLE)
         detector_spec = importlib.util.spec_from_file_location("mq01_fact_claim_detector", MQ01_DETECTOR_PATH)
         self.assertIsNotNone(detector_spec)
         self.assertIsNotNone(detector_spec.loader)
-        detector = importlib.util.module_from_spec(detector_spec)
-        sys.modules[detector_spec.name] = detector
-        detector_spec.loader.exec_module(detector)
-        result = detector.inspect_source(self.domain)
+        mq01 = importlib.util.module_from_spec(detector_spec)
+        sys.modules[detector_spec.name] = mq01
+        detector_spec.loader.exec_module(mq01)
+        result = mq01.inspect_source(self.domain)
         self.assertTrue(result["claim_declared"])
         self.assertFalse(result["fact_declared"])
         self.assertTrue(result["mq01_detected"])
