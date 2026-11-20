@@ -157,7 +157,7 @@ This addendum refreshes the engineering handoff's consumer/source pins after the
 | D authoritative query contract | PR #321 Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; file Blob `099f4948b550919084b0d73094692b590b0be0a9` | Normative interface; `ResolveForgetFenceSnapshotProof` NOT ESTABLISHED AS CALLABLE |
 | Accepted D/H mapping | Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49` | Same-Blob role records exist; distinct authenticated D/H human signers NOT VERIFIED |
 | H TEST-profile validator | PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; Blob `49644a181c578fecb312218c08ce23caa62f603b` | Candidate source only |
-| H regression tests | PR #322 test Blob `6685226143df0135aa64ecec3cfdac8acd08a8eb` | 15 test methods; current source test execution NOT RUN |
+| H regression tests | PR #322 test Blob `6685226143f28a5b8764067bb205080b531132e3` | 15 test methods; current source test execution NOT RUN |
 | Latest exact-head CI retries | Runs `44684299439` / Job `136119955880`; `44684299500` / Job `136119969030` | Both FAILURE before test steps (`steps=null`); log download HTTP 404 `BlobNotFound`; no CI PASS |
 
 The H validator source statically defines `MAX_D_TYPED_HIGH_WATER = (1 << 63) - 1`, parses/canonicalizes each D nominal high-water before digest projection, and rejects values above the signed-64-bit bound. The exact test Blob contains 15 methods, including five-field 512-character leading-zero acceptance and 513-character rejection before authority callbacks. This static source review is not an execution result.
