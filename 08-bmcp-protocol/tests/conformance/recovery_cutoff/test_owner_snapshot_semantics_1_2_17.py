@@ -13,9 +13,6 @@ from owner_snapshot_semantics_1_2_17 import (  # noqa: E402
 )
 
 NON_TYPED_BOUNDED_FIELDS = (
-    "work_item_high_water",
-    "attempt_high_water",
-    "barrier_generation",
     "dependency_closure_cursor",
 )
 
