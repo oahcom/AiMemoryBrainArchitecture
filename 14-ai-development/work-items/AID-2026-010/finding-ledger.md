@@ -741,3 +741,26 @@ This addendum supersedes stale *current-head* references in earlier dated eviden
 - F3 D/H same-Blob normative records and exact D/H candidate artifacts are VERIFIED at the exact refs above; independent-human attribution and operational/production acceptance remain NOT VERIFIED; F3 remains OPEN.
 - No PR/Issue/branch was created by this addendum. No Owner approval, merge, main write, production acceptance or test PASS is inferred.
 - Prompt provenance: current user-provided D-2026-1120-01 is T2. Immutable raw prompt bytes/platform conversation ID are not exposed here; SHA-256 remains NOT_VERIFIED.
+
+
+## 2026-11-20 exact-source retry reconciliation — superseding current pins
+
+This append-only refresh supersedes earlier references to PR #322 Head `0ce618ac503f641cf31e66092ae823c14bf8af7b` / test Blob `e66264ad30df6594e00836524accfdeb54160cee` where those were described as current. The current PR metadata observed in this turn reports PR #322 Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; compare confirms `0ce618a` is its immediate ancestor (one commit behind).
+
+### F-43-01/F3 | P1 | OPEN — independent-human and operational evidence
+- Return: PRs #321/#322/#323; Issues #25/#43.
+- PR #321 D query contract Head `35668e63a98cbd0f9ea73573ab9251ac5c2bb881`; contract Blob `099f4948b550919084b0d73094692b590b0be0a9`; active H mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`.
+- PR #322 H TEST-profile Head `a336c85763df0135aa64ecec3cfdac8acd08a8eb`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; regression-test Blob `6685226143f28a5b8764067bb205080b531132e3` (15 test methods). Both files were fetched at that exact Head and their returned Blob SHAs match.
+- Existing exact-head Actions runs #44684299439 and #44684299500 were re-run. Both retry jobs completed FAILURE with `steps=null`; no test steps or assertions ran. These retries do not establish a test-level failure or CI PASS. The earlier workflow artifact/log retrieval failure remains recorded; no claim is made that a successful test execution occurred.
+- Distinct authenticated D/H human signers remain NOT VERIFIED: role-labelled comments #7021655866 and #7021638212 both resolve to GitHub login `oahcom`; no signature is supplied or inferred.
+- Callable D query/operation-bound Receipt/currentness/revocation/anti-rollback, H production consumer acceptance, and C1–C6 operational proof remain NOT ESTABLISHED / NOT RUN.
+
+### F-43-01/F1 | P1 | OPEN — Runtime implementation evidence
+- Return: PR #327; Issues #7/#10/#25/#43.
+- PR #327 handoff was refreshed by commit `459dd608ecc559841eb6183775cdef674b395fb8`, file Blob `0b058d32546105e33be1bb560978dca021af9c66`.
+- Five callable D operations remain NOT IMPLEMENTED; authoritative durable Ledger / operation-bound Receipt and equality/linearization traces remain NOT ESTABLISHED; S1–S7 remain NOT RUN. Issue #7 comment #7021990583 continues to record `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED`.
+
+### Provenance and boundary
+- Source: current user chat instruction (T2). Platform conversation UUID and immutable raw message bytes are not exposed by the connector; SHA-256 `NOT_VERIFIED`. No synthetic digest is asserted.
+- Existing PR branches only. No new PR, Issue or branch; no merge; no main write; no Runtime authorization; no independent Owner signature; no production acceptance.
+- Documentation/source-pin refresh only. Tests on the documentation changes NOT RUN. No CI PASS is claimed.
