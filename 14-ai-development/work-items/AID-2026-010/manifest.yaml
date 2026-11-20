@@ -174,9 +174,9 @@ current_status_refresh:
   evidence:
     - "Issue #43 comment 7030877572 — F1/F3 exact-source reconciliation and bounded dispositions"
     - "Issue #7 comment 7021990583 — engineering entry remains DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED"
-    - "PR #321 Head 3db969c04d08ec4b0d9aadd8f8efcea3ac0309b6 — D query-contract mapping pin correction; OPEN/DRAFT; tests NOT RUN"
+    - "PR #321 Head 3db969c04d08ec4b0d9aadd8f8efcea3ac0309b6 — D query-contract mapping pin correction; OPEN/DRAFT; tests NOT RUN; D/H same-Blob mapping acceptance subcondition SATISFIED (PR comment 7030823997)"
     - "PR #322 Head 614b60e354cce9ecf9145e09ea5bb87c74d5cc2e — H TEST-profile five-field range candidate; Runs 44674622112 and 44674622134 FAILURE; logs unavailable"
-    - "PR #327 Head a2ce68f2575d5cc7c976866da2272eb40242723c — F1 engineering-entry handoff; documentation-only; tests NOT RUN"
+    - "PR #327 Head 4684b5d8dded3bd861f3b495c6307b0ac3db1959; handoff Blob c45933284494dcf712f425012cda6341d5c31212 — F1 engineering-entry handoff; seven canonical D-002 scenarios S1–S7 corrected; tests NOT RUN"
   historical_closeout_note: >-
     integration_closeout above remains the historical 2026-11-19 disposition
     (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
