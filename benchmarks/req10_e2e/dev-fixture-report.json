@@ -2,63 +2,20 @@
   "classification": "DEV_BASELINE_HARNESS_FIXTURE_OR_UNVERIFIED_ADAPTER",
   "integrated_runtime": "NOT_MEASURED",
   "workload": "representative_memory_ingest_compile_retrieve_context",
-  "dataset": {
-    "records": 1000,
-    "memories": 100,
-    "claims_per_memory": 3,
-    "approx_claims": 300
-  },
-  "environment": {
-    "python": "3.13.5",
-    "platform": "linux",
-    "system": "Linux",
-    "command": [
-      "python3",
-      "-u",
-      "/tmp/req10-e2e/fixture_runtime.py"
-    ]
-  },
+  "dataset": {"records": 1000, "memories": 100, "claims_per_memory": 3, "approx_claims": 300},
+  "environment": {"python": "3.13.5", "platform": "linux", "system": "Linux", "command": ["python3", "-u", "/tmp/req10-e2e/fixture_runtime.py"]},
   "concurrency": 1,
   "warmup": 10,
   "samples": 100,
-  "latency_ms": {
-    "p50": 0.09008549999123261,
-    "p95": 0.1479740999954515,
-    "p99": 0.30087988999923765
-  },
-  "throughput_ops_per_sec": 9459.621934983696,
-  "process_wide": {
-    "cpu_seconds": 0.979501,
-    "peak_rss_bytes": 98447360,
-    "storage_bytes_before": "NOT_MEASURED",
-    "storage_bytes_after": "NOT_MEASURED"
-  },
-  "per_operation": {
-    "cpu_seconds": "NOT_MEASURED",
-    "peak_memory_bytes": "NOT_MEASURED",
-    "storage_bytes": "NOT_MEASURED"
-  },
+  "latency_ms": {"p50": 0.08748599999819362, "p95": 0.15763684999967606, "p99": 0.36358183999624316},
+  "throughput_ops_per_sec": 9588.820815774056,
+  "process_wide": {"cpu_seconds": 0.9662009999999999, "peak_rss_bytes": 98312192, "storage_bytes_before": "NOT_MEASURED", "storage_bytes_after": "NOT_MEASURED"},
+  "per_operation": {"cpu_seconds": "NOT_MEASURED", "peak_memory_bytes": "NOT_MEASURED", "storage_bytes": "NOT_MEASURED"},
   "stage_latency_ms": {
-    "ingest": {
-      "p50": 0.01780635000301345,
-      "p95": 0.029132714994943854,
-      "p99": 0.05621644200439873
-    },
-    "compile": {
-      "p50": 0.014838625002511208,
-      "p95": 0.024277262495786545,
-      "p99": 0.04684703500366561
-    },
-    "retrieve": {
-      "p50": 0.014838625002511208,
-      "p95": 0.024277262495786545,
-      "p99": 0.04684703500366561
-    },
-    "context_package": {
-      "p50": 0.011870900002008966,
-      "p95": 0.019421809996629236,
-      "p99": 0.037477628002932487
-    }
+    "ingest": {"p50": 0.017203800005916037, "p95": 0.03250447499766551, "p99": 0.048813698997691064},
+    "compile": {"p50": 0.01433650000493003, "p95": 0.02708706249805459, "p99": 0.04067808249807588},
+    "retrieve": {"p50": 0.01433650000493003, "p95": 0.02708706249805459, "p99": 0.04067808249807588},
+    "context_package": {"p50": 0.011469200003944025, "p95": 0.021669649998443674, "p99": 0.03254246599846071}
   },
   "model_metrics": "NOT_MEASURED",
   "notes": [
