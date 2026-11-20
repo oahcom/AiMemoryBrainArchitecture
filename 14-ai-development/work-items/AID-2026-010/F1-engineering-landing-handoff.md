@@ -126,3 +126,23 @@ Return results to:
 # English operational summary
 
 F-43-01/F1 is delivered here as an engineering-phase landing handoff with explicit entry gates, deliverables, seven canonical D-002 scenario obligations, closure rules and return destinations. It does not claim or create runtime implementation. The controlling Issue #7 ruling still defers implementation entry. The purpose of this PR is to make the deferred work actionable and auditable without violating the architecture-repository boundary.
+
+
+## 9. 2026-11-20 implementation-entry verification addendum
+
+This addendum records a fresh execution-state check after Owner ruling D-2026-1120-01. The ruling releases PR/Issue carrier quotas; it does not designate a Runtime target or grant implementation write authority. The controlling engineering-entry disposition remains Issue #7 comment [#7021990583](https://github.com/oahcom/AiMemoryBrainArchitecture/issues/7#issuecomment-7021990583): `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE`, entry NOT AUTHORIZED / NOT READY.
+
+| Gate | Rechecked state | Exact return evidence / supplier |
+|---|---|---|
+| E1 canonical Runtime repository/branch | NOT ESTABLISHED | Issue #7 #7021990583; project authority must designate repository URL, branch and exact HEAD |
+| E2 engineering lead/maintainers | NOT ESTABLISHED | Issue #7 #7021990583; engineering leadership must name accountable maintainers |
+| E3 write/custody authority | NOT ESTABLISHED | Issue #7 #7021990583; project authority/repository administrator must provide explicit authorization |
+| E4 authoritative persistence/linearization boundary | NOT ESTABLISHED | Issue #7 #7021990583 and Issue #25; D + Storage authority must identify ledger/store, transaction and recovery boundary |
+| E5 five callable D authority operations | NOT ESTABLISHED | Accepted D-002 proof Blob `4c8672a68e4339e40b5d8cb98eb073af8c98c1a5` defines obligations; no callable endpoint/runtime is evidenced |
+| E6 build/test/CI custody | NOT ESTABLISHED | Issue #7 #7021990583; engineering leadership must provide reproducible commands, workflow and artifact identity |
+| E7 deployment/trust topology | NOT ESTABLISHED | Issue #7 #7021990583; engineering leadership + D/Storage authorities must supply deployed topology and trust/restore boundary |
+| E8 contract-to-code traceability | NOT ESTABLISHED | No canonical runtime paths or exact implementation commit exist to map; D Owner + engineering lead supply this after E1–E7 |
+
+**Verifiable disposition:** F-43-01/F1 — P1 — engineering handoff DELIVERED on this existing PR; Runtime implementation remains NOT IMPLEMENTED / NOT VERIFIED and the finding remains OPEN / DEFERRED_TO_ENGINEERING_PHASE. S1–S7 remain NOT RUN. This is not a test or CI PASS. The status is not blocked by the former quota freeze; it is bounded by the still-effective architecture-phase implementation deferral and the absence of a designated implementation target/authority.
+
+**Return destinations:** Issue #7 (engineering entry), Issue #10 (JF-10/COC physical proof), Issue #25 (D/Storage persistence and receipt), Issue #43 (F1 finding ledger). No placeholder Runtime code is added to this architecture-definition repository.
