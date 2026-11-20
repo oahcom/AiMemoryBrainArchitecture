@@ -190,4 +190,4 @@ This model is PROPOSED. Existing tasks may be linked retrospectively, with missi
 
 ## 12. Continuous operation target / 不间断运行目标
 
-The project target is event-driven continuous progress. Scheduled ChatGPT tasks can provide periodic reconciliation only within their supported cadence; they are not always-on workers. For the 24/7 target, use the event-driven architecture in [AI-RUN-001](continuous-owner-runtime-architecture.md), with GitHub webhooks, durable queue, isolated Owner workers, leases, idempotency, watchdog recovery and operational monitoring. Do not claim continuous operation before deployment and acceptance tests.
+The project target is event-driven continuous progress. Scheduled ChatGPT tasks can provide periodic reconciliation only within their supported cadence; they are not always-on workers. For the 24/7 target, use the event-driven architecture in [AI-RUN-001](continuous-owner-runtime-architecture.en.md), with GitHub webhooks, durable queue, isolated Owner workers, leases, idempotency, watchdog recovery and operational monitoring. Do not claim continuous operation before deployment and acceptance tests.

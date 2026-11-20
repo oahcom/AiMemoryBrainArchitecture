@@ -242,6 +242,6 @@ No host changes, container installation, service deployment or arbitrary code ex
 
 ## 12. References / 参考
 
-- [AI-RUN-003 Runtime Architecture](../ai-run-003-event-driven-owner-worker-runtime.md)
+- [AI-RUN-003 Runtime Architecture](../ai-run-003-event-driven-owner-worker-runtime.en.md)
 - [ADR-RUN-001 Durable Store and Transaction Boundaries](ADR-RUN-001-durable-store-and-transaction-boundaries.md)
 - [ADR-RUN-002 GitHub App, Webhook Ingress and Secret Management](ADR-RUN-002-github-app-webhook-security-and-secrets.md)
