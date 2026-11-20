@@ -165,8 +165,8 @@ current_status_refresh:
     records the subsequent Owner release and supersedes that historical
     restriction prospectively.
   authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
-  ledger_commit: "479be79e40cc1645591e389e6653f998ba731837"
-  ledger_blob_sha: "2105ddba103d536ac45c00d9cc075c03a94a71ee"
+  ledger_commit: "12bb6bf5aee926d937301015e25d17040a0a8434"
+  ledger_blob_sha: "32ccf0543de355c9a77dfb56be3aea22528dc12e"
   status_counts:
     findings_total: 13
     findings_closed: 10
@@ -193,6 +193,10 @@ current_status_refresh:
     - "F3 same-Blob D/H role-labelled ACCEPT WITH EXPLICIT LIMITATIONS records: Issue #43 comments 7021655866 and 7021638212, mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49; visible GitHub identity is oahcom for both, so independent human signer attribution remains NOT VERIFIED."
     - "PR #322 comment 7031599217 — exact-Head retry readback at Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687/44681841601 retry jobs 136110511473/136110524577 FAILURE with steps=null; both raw log reads HTTP 404 BlobNotFound (RequestIds 8adb55d1-701e-00b7-55b2-783ba1000000; 3c18a6d6-801e-00be-69b2-78e88c000000); no CI PASS."
     - "PR #322 latest exact-head Actions attempt 5: Head 0ce618ac503f641cf31e66092ae823c14bf8af7b; Runs 44681841687 and 44681841601; Jobs 136111641890 and 136111657233; both FAILURE, runner_id=0, steps=[]; test steps did not start; no CI PASS."
+    - "PR #321 current exact Head 7af4e4c409a6522d961b15d9622c92c7551be5f9; D query-contract Blob 6f2d583dec8487b321795a006266ee4229c7fd80; accepted mapping Blob 004fc0261b447771e73a0f8cfdd34ec1f8b33e49 occurs twice and superseded mapping Blob e60bdd4cbfef79850596001f01cb56e622b7d79d occurs zero times; callable endpoint remains NOT ESTABLISHED; no PR-triggered workflow runs."
+    - "PR #322 current exact Head a336c85763df0135aa64ecec3cfdac8acd08a8eb; validator Blob 49644a181c578fecb312218c08ce23caa62f603b; test Blob 6685226143f28a5b8764067bb205080b531132e3; 15 test methods. Exact-head Runs 44684299500 and 44684299439 FAILURE; Jobs 136114843997 and 136114843602 have empty step arrays; current source test execution NOT RUN and no CI PASS."
+    - "PR #327 current exact Head dd6b132827ac2369df0bc19a3e4c7c65bf25989b; F1 handoff Blob 9e87630efaaf26e1a449a1bc691afadd0de5213b; handoff pins PR #322 current Head a336c85763df0135aa64ecec3cfdac8acd08a8eb and validator/test Blobs 49644a181c578fecb312218c08ce23caa62f603b / 6685226143f28a5b8764067bb205080b531132e3; no runtime implementation claimed."
+    - "Current F1/F3 status refresh ledger commit 12bb6bf5aee926d937301015e25d17040a0a8434 / Blob 32ccf0543de355c9a77dfb56be3aea22528dc12e; F1 and F3 remain P1/OPEN; F-43-02 remains P1/BLOCKED; counts 10 CLOSED / 2 OPEN / 1 BLOCKED."
   prompt_provenance:
     source_type: T2_CHAT_INSTRUCTION
     source: "User-provided Owner ruling D-2026-1120-01 in continuation of parent conversation 6afae42c-65d8-83ee-853c-a7537b0e273b"
