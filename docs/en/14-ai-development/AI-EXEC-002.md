@@ -8,8 +8,8 @@
 - **Tracking:** Issue #218 · Work Item [AID-2026-002](../../../work-items/AID-2026-002/manifest.yaml) · Revision Work Item [AID-2026-003](../../../work-items/AID-2026-003/manifest.yaml)
 - **Upstream standards:** [AI-STD-001](../../../14-ai-development/ai-development-standard.md) §5/§13, [AI-PROMPT-STD-001](../../../14-ai-development/prompt-authoring-standard.md), [CHATGPT-GLOBAL-001](../../../14-ai-development/prompts/global/chatgpt-session-contract-v1.md), [AI-PROC-001](../../../14-ai-development/iteration-lifecycle.md) Stages 2/6, GLB-DOC-001 (policy GOV-DOC-001)
 - **Source document:** `14-ai-development/AI-EXEC-002.md`
-- **Source commit:** `1f97c3fae65828266a0c3cb1d1e8d4e6cb330856` (coordinator-supplied)
-- **Source blob SHA:** `ebb7f1ee9a084864c454711d271499cfbf8d386f` (coordinator-supplied)
+- **Source commit:** `4c38ae25b71383d661e4179622cafa04b66a046a` (verified canonical source commit)
+- **Source blob SHA:** `7f5928a5d16eb12da7621cfb8bd99ca463afd859` (verified canonical source Blob)
 - **Translation status:** English counterpart; source-aligned translation. Source document remains authoritative for this batch.
 
 > **Positioning**: This document does not establish a new standard. It provides execution details that make the project's existing prompt system actually work. No scripts are mandated; constraints rely on self-declaration in prompt text and traceability in Issues/PRs/Closeouts.
