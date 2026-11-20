@@ -484,3 +484,18 @@ H production consumer conformance, CI, or F3 closure.
 
 **Supplier:** actual D and H human role holders, separately.  
 **Verification:** authenticate each identity and appointment; establish the identities are distinct; verify each signature and provenance; independently fetch and compare the exact mapping Blob above. The two existing role-labelled comments #7021655866 and #7021638212 both expose GitHub login `oahcom`, so they do not satisfy this independent-human check. No signature is inferred or fabricated.
+
+
+## 2026-11-20 current-turn Actions retry evidence — D-2026-1120-01
+
+This addendum updates verification evidence only; it does not change finding severity, ownership, authorization, or disposition.
+
+- Exact PR #322 Head reviewed: `a336c85763df0135aa64ecec3cfdac8acd08a8eb`.
+- Validator Blob: `49644a181c578fecb312218c08ce23caa62f603b`.
+- Regression-test Blob: `6685226143f28a5b8764067bb205080b531132e3` (15 test methods).
+- Re-ran failed jobs on existing exact-head workflow runs: Run `44684299500` → Job `136122641631`; Run `44684299439` → Job `136122698547`. Both rerun requests returned success, but both jobs subsequently completed `failure` with `steps=[]`.
+- Raw log retrieval for Job `136122641631` returned HTTP 404: `<Code>BlobNotFound</Code><Message>The specified blob does not exist.</Message>`, RequestId `7d55adb8-301e-008b-78b6-780667000000`, Time `2026-11-20T06:17:24.8638569Z`.
+- Raw log retrieval for Job `136122698547` returned HTTP 404: `<Code>BlobNotFound</Code><Message>The specified blob does not exist.</Message>`, RequestId `3743258e-201e-00b5-7eb6-780b96000000`, Time `2026-11-20T06:17:33.2400524Z`.
+- No test step ran; no current-source test PASS or CI PASS is claimed. The failure cause beyond missing log blob is NOT VERIFIED.
+
+**Disposition unchanged:** F-43-01/F3 | P1 | OPEN. The TEST-profile source remains a bounded candidate; H Owner acceptance, distinct authenticated D/H human signers, callable D query/Receipt/currentness/revocation and C1–C6 operational proof remain NOT ESTABLISHED. This is evidence refresh, not Owner approval or finding closure.
