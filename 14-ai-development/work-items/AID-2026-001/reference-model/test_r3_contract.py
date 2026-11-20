@@ -48,14 +48,12 @@ TEST_TENANT = "tenant-A"
 
 
 def trusted_scope_bindings(memory_id, tenant_id, operation_ids):
-    return frozenset(
-        {
-            "suppression:commit",
-            f"tenant:{tenant_id}",
-            f"memory:{memory_id}",
-            *{f"operation:{operation_id}" for operation_id in operation_ids},
-        }
-    )
+    return frozenset({
+        "suppression:commit",
+        f"tenant:{tenant_id}",
+        f"memory:{memory_id}",
+        *{f"operation:{operation_id}" for operation_id in operation_ids},
+    })
 
 
 def receipt_credential(
@@ -63,6 +61,8 @@ def receipt_credential(
     request_hash="",
     nonce="auth-nonce-default",
     receipt_id=None,
+    memory_id="m",
+    tenant_id=TEST_TENANT,
     **overrides,
 ):
     if receipt_id is None:
@@ -77,8 +77,8 @@ def receipt_credential(
         purpose=EXPECTED_RECEIPT_PURPOSE,
         scope=frozenset({
             "suppression:commit",
-            f"tenant:{TEST_TENANT}",
-            "memory:m",
+            f"tenant:{tenant_id}",
+            f"memory:{memory_id}",
             f"operation:{operation_id}",
         }),
         permission_epoch=7,
@@ -86,7 +86,7 @@ def receipt_credential(
         not_before=0,
         expires_at=100,
         signature="test-signature-%s" % receipt_id,
-        resource_id="m",
+        resource_id=memory_id,
         principal=TEST_PRINCIPAL,
     )
     values.update(overrides)
@@ -119,6 +119,8 @@ def auth(**kw):
     receipt_id = kw.pop("receipt_id", None)
     operation_id = kw.pop("operation_id", "op")
     request_hash = kw.pop("request_hash", TEST_REQUEST_HASH)
+    memory_id = kw.pop("memory_id", "m")
+    tenant_id = kw.pop("tenant_id", TEST_TENANT)
 
     receipt_overrides = {}
     for key in list(kw):
@@ -143,6 +145,8 @@ def auth(**kw):
         request_hash=request_hash,
         nonce=nonce,
         receipt_id=receipt_id,
+        memory_id=memory_id,
+        tenant_id=tenant_id,
         **receipt_overrides,
     )
 
@@ -177,10 +181,7 @@ def done():
         ),
     )
     model.authorize_and_suppress(
-        auth(
-            resource_id="mem",
-            principal=TEST_PRINCIPAL,
-        ),
+        auth(memory_id="mem"),
         10,
         7,
         "op",
@@ -229,12 +230,15 @@ class DFI(unittest.TestCase):
         self.assertFalse(m.domain_complete())
 
     def test_DFI_007(self):
-        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("m", "op-1", "op-2")
         m.phase = Phase.AUTHORIZED
         first = m.commit_suppression(
             "op-1", "attempt-1", "key-1", "hash-A",
-            auth=auth(nonce="nonce-first", operation_id="op-1",
-                      request_hash="hash-A"),
+            auth=auth(
+                nonce="nonce-first",
+                operation_id="op-1",
+                request_hash="hash-A",
+            ),
         )
 
         m.phase = Phase.AUTHORIZED
@@ -252,8 +256,11 @@ class DFI(unittest.TestCase):
         m.phase = Phase.AUTHORIZED
         second = m.commit_suppression(
             "op-1", "attempt-2", "key-1", "hash-A",
-            auth=auth(nonce="nonce-second", operation_id="op-1",
-                      request_hash="hash-A"),
+            auth=auth(
+                nonce="nonce-second",
+                operation_id="op-1",
+                request_hash="hash-A",
+            ),
         )
         self.assertIs(first, second)
         self.assertIn("nonce-second", m.nonce_registry)
@@ -262,8 +269,11 @@ class DFI(unittest.TestCase):
         with self.assertRaises(ContractViolation):
             m.commit_suppression(
                 "op-2", "attempt-3", "key-1", "hash-B",
-                auth=auth(nonce="nonce-third", operation_id="op-2",
-                          request_hash="hash-B"),
+                auth=auth(
+                    nonce="nonce-third",
+                    operation_id="op-2",
+                    request_hash="hash-B",
+                ),
             )
 
     def test_DFI_008(self):
@@ -284,22 +294,31 @@ class DFI(unittest.TestCase):
         m.retry("a2")
 
     def test_DFI_010(self):
-        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("m", "op")
         with self.assertRaises(ContractViolation):
             m.authorize_and_suppress(
-                auth(permission_epoch=6), 10, 7, "op"
-            , request_hash=TEST_REQUEST_HASH)
+                auth(permission_epoch=6),
+                10,
+                7,
+                "op",
+                request_hash=TEST_REQUEST_HASH,
+            )
         self.assertEqual(m.phase, Phase.REQUESTED)
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
 
     def test_DFI_011(self):
         m = done()
-        m.set_required_targets(["a"])
-        m.mark_target("a", "SUCCEEDED",
-                       evidence_ref="ref-a1", evidence_kind="erasure-proof")
+        m.set_required_targets(["a"], required_actions={"a": "erase"})
+        m.mark_target("a", "SUCCEEDED")
+        register_current_evidence(
+            m, "a", "erase", "ref-a1", "erasure-proof", "SUCCEEDED"
+        )
         self.assertTrue(m.domain_complete())
         revision = m.inventory_revision
-        m.set_required_targets(["a", "b"])
+        m.set_required_targets(
+            ["a", "b"],
+            required_actions={"a": "erase", "b": "erase"},
+        )
         self.assertGreater(m.inventory_revision, revision)
         self.assertFalse(m.domain_complete())
 
@@ -314,7 +333,7 @@ class DFI(unittest.TestCase):
 
     def test_DFI_013(self):
         """Sequential fence interleavings only; NOT a concurrency proof."""
-        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("m", "op")
 
         old_worker_lease = m.start_attempt("worker-old")
         new_worker_lease = m.start_attempt("worker-new")
@@ -327,7 +346,13 @@ class DFI(unittest.TestCase):
         old_fence = m.fence_generation
         self.assertTrue(m.producer_admission(old_fence))
 
-        m.authorize_and_suppress(auth(nonce="dfi013-nonce"), 10, 7, "op", request_hash=TEST_REQUEST_HASH)
+        m.authorize_and_suppress(
+            auth(nonce="dfi013-nonce"),
+            10,
+            7,
+            "op",
+            request_hash=TEST_REQUEST_HASH,
+        )
 
         with self.assertRaises(ContractViolation):
             m.register_dependency("late-producer", old_fence)
@@ -352,10 +377,16 @@ class DFI(unittest.TestCase):
         m.commit_stage("producer-new", new, "publish")
 
     def test_DFI_015(self):
-        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("m", "op")
         old_fence = m.fence_generation
         m.recall_cache_fill("k", "stale-value", old_fence)
-        m.authorize_and_suppress(auth(), 10, 7, "op", request_hash=TEST_REQUEST_HASH)
+        m.authorize_and_suppress(
+            auth(),
+            10,
+            7,
+            "op",
+            request_hash=TEST_REQUEST_HASH,
+        )
         with self.assertRaises(ContractViolation):
             m.recall_cache_fill("k", "late-value", old_fence)
         with self.assertRaises(ContractViolation):
@@ -410,7 +441,7 @@ class DFI(unittest.TestCase):
 
     def test_DFI_021(self):
         """In-memory pre-publication abort; not WAL or crash durability."""
-        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("m", "op")
         m.phase = Phase.AUTHORIZED
         before = (
             m.lifecycle,
@@ -422,8 +453,11 @@ class DFI(unittest.TestCase):
         )
         with self.assertRaises(ContractViolation):
             m.commit_suppression(
-                "op", fail_before_commit=True, auth=auth()
-            , request_hash=TEST_REQUEST_HASH)
+                "op",
+                fail_before_commit=True,
+                auth=auth(),
+                request_hash=TEST_REQUEST_HASH,
+            )
         after = (
             m.lifecycle,
             m.fence_generation,
@@ -434,7 +468,9 @@ class DFI(unittest.TestCase):
         )
         self.assertEqual(before, after)
 
-        commit = m.commit_suppression("op", auth=auth(), request_hash=TEST_REQUEST_HASH)
+        commit = m.commit_suppression(
+            "op", auth=auth(), request_hash=TEST_REQUEST_HASH
+        )
         self.assertEqual(set(m.atomic_tuple), set(R3Model.ATOMIC_FIELDS))
         self.assertEqual(commit.suppression_proof.commit_id, commit.commit_id)
         self.assertEqual(
@@ -462,91 +498,110 @@ class DFI(unittest.TestCase):
     # --- OD-002 regression: bare SUCCEEDED must NOT yield completion ---
 
     def test_DFI_023_bare_succeeded_cannot_complete(self):
-        """OD-002: a bare status assertion without typed evidence must not
-        satisfy the canonical completion predicate."""
+        """A status assertion without separately registered evidence cannot complete."""
         m = done()
-        m.set_required_targets(["a", "b"])
-        m.mark_target("a", "SUCCEEDED")   # no evidence
-        m.mark_target("b", "SUCCEEDED")   # no evidence
+        m.set_required_targets(
+            ["a", "b"],
+            required_actions={"a": "erase", "b": "erase"},
+        )
+        m.mark_target("a", "SUCCEEDED")
+        m.mark_target("b", "SUCCEEDED")
         self.assertFalse(m.domain_complete())
         self.assertFalse(m.completion_projection_allowed())
 
     def test_DFI_024_partial_evidence_insufficient(self):
-        """OD-002: all targets need evidence, not just some."""
+        """All targets need separately registered, current evidence."""
         m = done()
-        m.set_required_targets(["a", "b"])
-        m.mark_target("a", "SUCCEEDED",
-                       evidence_ref="ref-a", evidence_kind="erasure-proof")
-        m.mark_target("b", "ERASED")      # no evidence
+        m.set_required_targets(
+            ["a", "b"],
+            required_actions={"a": "erase", "b": "erase"},
+        )
+        m.mark_target("a", "SUCCEEDED")
+        register_current_evidence(
+            m, "a", "erase", "ref-a", "erasure-proof", "SUCCEEDED"
+        )
+        m.mark_target("b", "ERASED")
         self.assertFalse(m.domain_complete())
 
     def test_DFI_025_empty_evidence_ref_rejected(self):
-        """OD-002: empty evidence_ref or evidence_kind is not valid evidence."""
+        """Empty evidence references and kinds cannot be registered."""
         m = done()
-        m.set_required_targets(["a"])
-        m.mark_target("a", "SUCCEEDED",
-                       evidence_ref="", evidence_kind="erasure-proof")
+        m.set_required_targets(["a"], required_actions={"a": "erase"})
+        m.mark_target("a", "SUCCEEDED", evidence_ref="", evidence_kind="erasure-proof")
+        with self.assertRaises(ContractViolation):
+            m.register_evidence(
+                "a", "op", "", "erasure-proof",
+                m.fence_generation, "supported", "SUCCEEDED",
+            )
         self.assertFalse(m.domain_complete())
-        m.mark_target("a", "SUCCEEDED",
-                       evidence_ref="ref-a", evidence_kind="")
+
+        m.mark_target("a", "SUCCEEDED", evidence_ref="ref-a", evidence_kind="")
+        with self.assertRaises(ContractViolation):
+            m.register_evidence(
+                "a", "op", "ref-a", "",
+                m.fence_generation, "supported", "SUCCEEDED",
+            )
         self.assertFalse(m.domain_complete())
 
     def test_DFI_026_stale_evidence_rejected(self):
-        """OD-002: evidence without kind is not current evidence."""
+        """Evidence registered at generation G is stale at generation G+1."""
         m = done()
-        m.set_required_targets(["a"])
-        m.mark_target("a", "CLEANED",
-                       evidence_ref="ref-a", evidence_kind="snapshot-proof")
-        self.assertTrue(m.domain_complete())
-        # Re-mark without evidence resets the evidence
+        m.set_required_targets(["a"], required_actions={"a": "cleanup"})
         m.mark_target("a", "CLEANED")
+        register_current_evidence(
+            m, "a", "cleanup", "ref-a", "snapshot-proof", "CLEANED"
+        )
+        self.assertTrue(m.domain_complete())
+
+        generation_g = m.fence_generation
+        m.fence_generation = generation_g + 1
+
         self.assertFalse(m.domain_complete())
+        self.assertFalse(m.completion_projection_allowed())
 
     # --- OD-001 regression: resource-level binding ---
 
     def test_DFI_027_cross_resource_credential_rejected(self):
-        """OD-001: a credential bound to a different resource_id must be
-        rejected before any mutation."""
+        """A different resource binding is rejected with otherwise trusted context."""
         nonce = "nonce-cross"
         cred = receipt_credential(
             operation_id="op",
             request_hash=TEST_REQUEST_HASH,
             nonce=nonce,
+            memory_id="mem-target",
             resource_id="other-memory",
-            principal="principal-A",
+            principal=TEST_PRINCIPAL,
         )
-        a = Authorization(
+        supplied = Authorization(
             permission_epoch=7,
             nonce=nonce,
             receipt=cred,
         )
-        m = R3Model("mem-target", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("mem-target", "op")
+        before = (
+            m.lifecycle, m.phase, m.fence_generation, m.inventory_revision,
+            dict(m.outbox), dict(m.operation_registry), dict(m.target_results),
+        )
         with self.assertRaises(ContractViolation):
             m.authorize_and_suppress(
-                a, 10, 7, "op", request_hash=TEST_REQUEST_HASH
+                supplied, 10, 7, "op", request_hash=TEST_REQUEST_HASH
             )
-        self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
-        self.assertEqual(m.phase, Phase.REQUESTED)
-        self.assertEqual(m.fence_generation, 0)
+        after = (
+            m.lifecycle, m.phase, m.fence_generation, m.inventory_revision,
+            dict(m.outbox), dict(m.operation_registry), dict(m.target_results),
+        )
+        self.assertEqual(after, before)
 
     def test_DFI_028_matching_resource_credential_accepted(self):
-        """OD-001: a credential bound to the correct resource_id succeeds."""
-        nonce = "nonce-match"
-        cred = receipt_credential(
+        """Matching resource, principal, tenant and scope bindings are accepted."""
+        supplied = auth(
+            nonce="nonce-match",
             operation_id="op",
-            request_hash=TEST_REQUEST_HASH,
-            nonce=nonce,
-            resource_id="mem-target",
-            principal="principal-A",
+            memory_id="mem-target",
         )
-        a = Authorization(
-            permission_epoch=7,
-            nonce=nonce,
-            receipt=cred,
-        )
-        m = R3Model("mem-target", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("mem-target", "op")
         commit = m.authorize_and_suppress(
-            a, 10, 7, "op", request_hash=TEST_REQUEST_HASH
+            supplied, 10, 7, "op", request_hash=TEST_REQUEST_HASH
         )
         self.assertIsNotNone(commit)
         self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
@@ -554,10 +609,8 @@ class DFI(unittest.TestCase):
     # --- SEC-001: domain identity is not a security principal ---
 
     def test_DFI_029_domain_identity_alone_cannot_authorize(self):
-        """SEC-001/R3-001: a domain identifier without an authenticated
-        principal must not be able to authorize suppression."""
-        m = R3Model("domain-only-id", receipt_verifier=TrustAllReceiptVerifier())
-        # No Authorization provided at all
+        """A domain identifier without an Authorization cannot authorize."""
+        m = trusted_model("domain-only-id", "op")
         with self.assertRaises(ContractViolation):
             m.authorize_and_suppress(
                 None, 10, 7, "op", request_hash=TEST_REQUEST_HASH
@@ -567,36 +620,48 @@ class DFI(unittest.TestCase):
         self.assertEqual(m.fence_generation, 0)
 
     def test_DFI_030_unauthenticated_credential_rejected(self):
-        """SEC-001: a credential with no principal binding is weaker but
-        currently accepted when no resource_id is set (documents boundary)."""
+        """An empty credential principal is rejected despite valid trusted context."""
         nonce = "nonce-noprincipal"
-        cred = receipt_credential(
-            operation_id="op",
-            request_hash=TEST_REQUEST_HASH,
-            nonce=nonce,
-            principal="",  # no principal
-        )
-        a = Authorization(
+        supplied = Authorization(
             permission_epoch=7,
             nonce=nonce,
-            receipt=cred,
+            receipt=receipt_credential(
+                operation_id="op",
+                request_hash=TEST_REQUEST_HASH,
+                nonce=nonce,
+                memory_id="m",
+                principal="",
+            ),
         )
-        m = R3Model("mem", receipt_verifier=TrustAllReceiptVerifier())
-        # Empty principal in credential with no resource_id means
-        # not resource-bound. This documents the current boundary:
-        # unbound credentials are accepted at the reference-model level.
-        commit = m.authorize_and_suppress(
-            a, 10, 7, "op", request_hash=TEST_REQUEST_HASH
+        m = trusted_model("m", "op")
+        before = (
+            m.lifecycle, m.phase, m.fence_generation, m.inventory_revision,
+            dict(m.outbox), dict(m.operation_registry), dict(m.target_results),
         )
-        self.assertIsNotNone(commit)
+        with self.assertRaises(ContractViolation) as ctx:
+            m.authorize_and_suppress(
+                supplied, 10, 7, "op", request_hash=TEST_REQUEST_HASH
+            )
+        self.assertIn("receipt principal missing", str(ctx.exception))
+        after = (
+            m.lifecycle, m.phase, m.fence_generation, m.inventory_revision,
+            dict(m.outbox), dict(m.operation_registry), dict(m.target_results),
+        )
+        self.assertEqual(after, before)
 
 
 class OwnerIU011(unittest.TestCase):
 
     def _deny(self, **kw):
-        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("m", "op")
         with self.assertRaises(ContractViolation):
-            m.authorize_and_suppress(auth(**kw), 10, 7, "op", request_hash=TEST_REQUEST_HASH)
+            m.authorize_and_suppress(
+                auth(**kw),
+                10,
+                7,
+                "op",
+                request_hash=TEST_REQUEST_HASH,
+            )
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
         self.assertEqual(m.fence_generation, 0)
 
@@ -612,12 +677,15 @@ class OwnerIU011(unittest.TestCase):
                 self._deny(**{key: False})
 
     def test_T03(self):
-        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
-        original = auth(nonce="real-authorization-nonce",
-                        operation_id="op-first")
+        m = trusted_model("m", "op-first")
+        original = auth(
+            nonce="real-authorization-nonce",
+            operation_id="op-first",
+        )
         first = m.authorize_and_suppress(
-            original, 10, 7, "op-first"
-        , request_hash=TEST_REQUEST_HASH)
+            original, 10, 7, "op-first",
+            request_hash=TEST_REQUEST_HASH,
+        )
 
         self.assertIsNotNone(first)
         self.assertIn("real-authorization-nonce", m.nonce_registry)
@@ -648,15 +716,17 @@ class OwnerIU011(unittest.TestCase):
         self._deny(permission_epoch=6)
 
     def test_T05(self):
-        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("m", "race-op")
         result = m.revoke_race(
             "REVOCATION_WON",
-            auth=auth(nonce="revocation-wins-nonce", operation_id="race-op"),
+            auth=auth(
+                nonce="revocation-wins-nonce",
+                operation_id="race-op",
+            ),
             request_hash=TEST_REQUEST_HASH,
         )
 
         self.assertEqual(result, "REVOCATION_WON")
-
         self.assertEqual(m.permission_epoch, 8)
         self.assertEqual(m.revocation_state, "REVOKED")
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
@@ -670,15 +740,17 @@ class OwnerIU011(unittest.TestCase):
         self.assertIn("AUTHORIZATION_REVOKED", m.audit)
 
     def test_T06(self):
-        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("m", "race-op")
         result = m.revoke_race(
             "COMMIT_WON",
-            auth=auth(nonce="commit-wins-nonce", operation_id="race-op"),
+            auth=auth(
+                nonce="commit-wins-nonce",
+                operation_id="race-op",
+            ),
             request_hash=TEST_REQUEST_HASH,
         )
 
         self.assertEqual(result, "COMMIT_WON")
-
         self.assertEqual(m.permission_epoch, 8)
         self.assertEqual(m.revocation_state, "REVOKED")
         self.assertEqual(m.lifecycle, Lifecycle.FORGOTTEN)
@@ -686,23 +758,23 @@ class OwnerIU011(unittest.TestCase):
         self.assertIsNotNone(m.atomic_commit)
         self.assertEqual(m.fence_generation, 1)
         self.assertEqual(m.inventory_revision, 1)
-        self.assertEqual(
-            m.outbox["race-op"], "SUPPRESSION_COMMITTED"
-        )
+        self.assertEqual(m.outbox["race-op"], "SUPPRESSION_COMMITTED")
         self.assertIn("race-op", m.operation_registry)
         self.assertIn("commit-wins-nonce", m.nonce_registry)
         self.assertIn("AUTHORIZATION_REVOKED", m.audit)
 
     def test_T07(self):
-        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("m", "race-op", "unknown-followup")
         result = m.revoke_race(
             "UNKNOWN",
-            auth=auth(nonce="unknown-order-nonce", operation_id="race-op"),
+            auth(
+                nonce="unknown-order-nonce",
+                operation_id="race-op",
+            ),
             request_hash=TEST_REQUEST_HASH,
         )
 
         self.assertEqual(result, "UNKNOWN")
-
         self.assertEqual(m.revocation_state, "UNKNOWN")
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
         self.assertEqual(m.phase, Phase.AUTHORIZED)
@@ -713,24 +785,28 @@ class OwnerIU011(unittest.TestCase):
         self.assertEqual(m.outbox, {})
         self.assertEqual(m.operation_registry, {})
         self.assertNotIn("unknown-order-nonce", m.nonce_registry)
-        self.assertIn(
-            "AUTHORIZATION_CURRENTNESS_UNKNOWN", m.audit
-        )
+        self.assertIn("AUTHORIZATION_CURRENTNESS_UNKNOWN", m.audit)
 
         with self.assertRaises(ContractViolation):
             m.commit_suppression(
                 "unknown-followup",
-                auth=auth(nonce="unknown-followup-nonce"),
-            request_hash=TEST_REQUEST_HASH)
+                auth=auth(
+                    nonce="unknown-followup-nonce",
+                    operation_id="unknown-followup",
+                ),
+                request_hash=TEST_REQUEST_HASH,
+            )
 
     def test_T08(self):
         self._deny(delegation_current=False)
 
     def test_T09(self):
-        m = R3Model("m", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("m", "op")
         m.legal_hold = True
         with self.assertRaises(ContractViolation):
-            m.authorize_and_suppress(auth(), 10, 7, "op", request_hash=TEST_REQUEST_HASH)
+            m.authorize_and_suppress(
+                auth(), 10, 7, "op", request_hash=TEST_REQUEST_HASH
+            )
         self.assertEqual(m.lifecycle, Lifecycle.ACTIVE)
         self.assertEqual(m.fence_generation, 0)
 
@@ -762,11 +838,16 @@ class OwnerIU011(unittest.TestCase):
 
     def test_T13(self):
         m = done()
-        m.set_required_targets(["a"])
-        m.mark_target("a", "SUCCEEDED",
-                       evidence_ref="ref-a13", evidence_kind="erasure-proof")
+        m.set_required_targets(["a"], required_actions={"a": "erase"})
+        m.mark_target("a", "SUCCEEDED")
+        register_current_evidence(
+            m, "a", "erase", "ref-a13", "erasure-proof", "SUCCEEDED"
+        )
         self.assertTrue(m.domain_complete())
-        m.set_required_targets(["a", "new"])
+        m.set_required_targets(
+            ["a", "new"],
+            required_actions={"a": "erase", "new": "erase"},
+        )
         self.assertFalse(m.domain_complete())
 
     def test_T14(self):
@@ -785,11 +866,18 @@ class OwnerIU011(unittest.TestCase):
 
     def test_T15(self):
         m = done()
-        m.set_required_targets(["a", "b"])
-        m.mark_target("a", "SUCCEEDED",
-                       evidence_ref="ref-a15", evidence_kind="erasure-proof")
-        m.mark_target("b", "ERASED",
-                       evidence_ref="ref-b15", evidence_kind="erasure-proof")
+        m.set_required_targets(
+            ["a", "b"],
+            required_actions={"a": "erase", "b": "erase"},
+        )
+        m.mark_target("a", "SUCCEEDED")
+        register_current_evidence(
+            m, "a", "erase", "ref-a15", "erasure-proof", "SUCCEEDED"
+        )
+        m.mark_target("b", "ERASED")
+        register_current_evidence(
+            m, "b", "erase", "ref-b15", "erasure-proof", "ERASED"
+        )
         m.set_governance_projection(True)
         m.d_completion = False
         self.assertFalse(m.completion_projection_allowed())
@@ -814,7 +902,7 @@ class StorageFaults(unittest.TestCase):
         nonces and the same idempotency identity. Exactly one authoritative
         commit must be published; the other caller must reuse that record.
         """
-        m = R3Model("mem", receipt_verifier=TrustAllReceiptVerifier())
+        m = trusted_model("mem", "concurrent-op")
         m.phase = Phase.AUTHORIZED
 
         barrier = threading.Barrier(2)
@@ -824,9 +912,12 @@ class StorageFaults(unittest.TestCase):
 
         def contender(index):
             try:
-                supplied = auth(nonce=f"concurrent-nonce-{index}",
-                                operation_id="concurrent-op",
-                                request_hash="concurrent-hash")
+                supplied = auth(
+                    nonce=f"concurrent-nonce-{index}",
+                    operation_id="concurrent-op",
+                    request_hash="concurrent-hash",
+                    memory_id="mem",
+                )
                 barrier.wait(timeout=5)
                 result = m.commit_suppression(
                     "concurrent-op",
@@ -886,17 +977,11 @@ class StorageFaults(unittest.TestCase):
             {"concurrent-nonce-0", "concurrent-nonce-1"},
         )
         self.assertEqual(
-            sum(
-                item == "SUPPRESSION_COMMITTED"
-                for item in m.audit
-            ),
+            sum(item == "SUPPRESSION_COMMITTED" for item in m.audit),
             1,
         )
         self.assertEqual(
-            sum(
-                item == "IDEMPOTENT_COMMIT_REUSED"
-                for item in m.audit
-            ),
+            sum(item == "IDEMPOTENT_COMMIT_REUSED" for item in m.audit),
             1,
         )
 
@@ -2638,3 +2723,38 @@ if __name__ == "__main__":
 #   14/14 forget_model tests PASS.
 #   These tests cover an in-memory reference model only; they do not prove
 #   WAL durability, physical crash recovery, or distributed linearizability.
+
+
+# === BATCH A added helpers (session-authored, L0 verbatim) ===
+def trusted_model(memory_id, *operation_ids):
+    """Construct a model with explicit, least-scope test trusted context."""
+    return R3Model(
+        memory_id,
+        receipt_verifier=TrustAllReceiptVerifier(),
+        authenticated_principal=TEST_PRINCIPAL,
+        tenant_id=TEST_TENANT,
+        trusted_scope_bindings=trusted_scope_bindings(
+            memory_id, TEST_TENANT, set(operation_ids)
+        ),
+    )
+
+def register_current_evidence(
+    model,
+    target,
+    required_action,
+    evidence_ref,
+    evidence_kind,
+    state,
+):
+    """Register evidence separately from mark_target at the current fence."""
+    operation_id = model.atomic_commit.idempotency_identity.operation_id
+    return model.register_evidence(
+        target=target,
+        operation_id=operation_id,
+        evidence_ref=evidence_ref,
+        evidence_kind=evidence_kind,
+        evidence_generation=model.fence_generation,
+        capability="supported",
+        state=state,
+    )
+
