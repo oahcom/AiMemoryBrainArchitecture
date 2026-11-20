@@ -8,7 +8,7 @@ accountable_owner_note: >-
   decisions remain with D/E/F/G/H/I/Storage Owners.
 issue: 43
 related_issues: [43]
-related_prs: []
+related_prs: [321, 322, 327]
 task_class: ARCH
 risk: R3
 risk_note: Tentative conservative classification pending risk re-review.
@@ -72,7 +72,7 @@ evidence_refs:
   - 14-ai-development/issue-alignment-2026-11-19/l2-05b-supplement.md
   - 14-ai-development/issue-alignment-2026-11-19/alignment-manifest.md
 created_at: 2026-11-19
-updated_at: 2026-11-19
+updated_at: 2026-11-20
 
 integration_closeout:
   date: "2026-11-19"
@@ -152,3 +152,37 @@ integration_closeout:
       does not modify or supersede their authoritative finding records.
 
   repository_mutation_authorized_by_this_ruling: false
+
+
+current_status_refresh:
+  date: "2026-11-20"
+  authority: "14-ai-development/work-items/AID-2026-010/finding-ledger.md"
+  ledger_commit: "016a5fa7b3e71f6524e0ea4fa644525eac00c7fe"
+  ledger_blob_sha: "2278dad1d8a91c06a6e3bb56598fec6de26240d9"
+  status_counts:
+    findings_total: 13
+    findings_closed: 10
+    findings_open:
+      - "F-43-01/F1"
+      - "F-43-01/F3"
+    findings_blocked:
+      - "F-43-02"
+  related_prs:
+    - 321
+    - 322
+    - 327
+  evidence:
+    - "Issue #43 comment 7030877572 — F1/F3 exact-source reconciliation and bounded dispositions"
+    - "Issue #7 comment 7021990583 — engineering entry remains DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED"
+    - "PR #321 Head 3db969c04d08ec4b0d9aadd8f8efcea3ac0309b6 — D query-contract mapping pin correction; OPEN/DRAFT; tests NOT RUN"
+    - "PR #322 Head 614b60e354cce9ecf9145e09ea5bb87c74d5cc2e — H TEST-profile five-field range candidate; Runs 44674622112 and 44674622134 FAILURE; logs unavailable"
+    - "PR #327 Head a2ce68f2575d5cc7c976866da2272eb40242723c — F1 engineering-entry handoff; documentation-only; tests NOT RUN"
+  historical_closeout_note: >-
+    integration_closeout above remains the historical 2026-11-19 disposition
+    (11 CLOSED / 2 BLOCKED). This current_status_refresh supersedes only the
+    current Finding counts and states: F1 is OPEN for D implementation
+    evidence while the separate A execution binding remains
+    DEFERRED_TO_ENGINEERING_PHASE / NOT_AUTHORIZED; F3 is OPEN for consumer
+    and operational evidence; F-43-02 remains BLOCKED. It does not rewrite
+    the historical closeout decision or authorize implementation,
+    architecture acceptance, main merge, or production activation.
