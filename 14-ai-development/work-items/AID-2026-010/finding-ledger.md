@@ -764,3 +764,21 @@ This append-only refresh supersedes earlier references to PR #322 Head `0ce618ac
 - Source: current user chat instruction (T2). Platform conversation UUID and immutable raw message bytes are not exposed by the connector; SHA-256 `NOT_VERIFIED`. No synthetic digest is asserted.
 - Existing PR branches only. No new PR, Issue or branch; no merge; no main write; no Runtime authorization; no independent Owner signature; no production acceptance.
 - Documentation/source-pin refresh only. Tests on the documentation changes NOT RUN. No CI PASS is claimed.
+
+
+## Terminal disposition for this closeout — objective external evidence blockers
+
+The administrative closeout disposition below is **BLOCKED-OBJECTIVE-EVIDENCE** for the substantive acceptance gates. It does not falsify or overwrite the underlying finding lifecycle: both findings remain P1 / OPEN until their stated exit evidence is supplied. This session's bounded handoff, source-pin, retry, ledger and manifest work is complete; the missing external facts are not safely producible by this session.
+
+| Finding | Severity | Terminal disposition | Return path | Missing fact / supplier | Objective verification to release |
+|---|---|---|---|---|---|
+| F-43-01/F1 | P1 | BLOCKED-OBJECTIVE-ENGINEERING-AUTHORITY | PR #327; Issues #7/#10/#25/#43 | Missing: designated canonical Runtime repository and branch; named accountable engineering lead/maintainers and write custody; explicit engineering-entry authorization; canonical D authority and durable persistence boundary. Supplier: project governance authority / engineering leadership for repository, accountable custody and authorization; D Domain Owner for D authority and persistence semantics. | Issue #7 or an existing carrier records the authorization, canonical repo/branch and named owners; implementation commit provides five callable D operations, durable authoritative Ledger and operation-bound Receipt, same-operation equality/linearization evidence, and exact-commit S1–S7 test results. No placeholder or implementation in this architecture repository is substituted. |
+| F-43-01/F3 | P1 | BLOCKED-OBJECTIVE-INDEPENDENT-ACCEPTANCE-AND-OPERATIONAL-EVIDENCE | PRs #321/#322/#323; Issues #25/#43 | Missing: distinct authenticated D and H human signers (current role comments both resolve to `oahcom`); callable D query/Receipt/currentness/revocation evidence; H production-consumer acceptance and C1–C6 operational evidence; successful exact-Head test execution (the two retry jobs failed before steps). Supplier: D Owner and H Owner using distinct authorized human identities for their own contract decisions; engineering/CI maintainer for executable consumer evidence and functioning test runner. | Separate attributable D/H acceptance records with distinct GitHub identities; exact-Head CI run that reaches test steps and passes; callable D query/Receipt/currentness/revocation artifacts; H production-consumer acceptance and C1–C6 reproducible operational report pinned to exact commit. |
+
+### Owner裁决记录（本会话权限边界内）
+- **所选项：**不把 F1/F3 伪报为 DECIDED/CLOSED；将其 substantive acceptance gates 记为客观证据阻塞，同时完成本会话可控制的 handoff、pin、retry、台账和 manifest 收口。
+- **放弃项：**不把文档交接当作 Runtime 实现；不把静态 validator 或未执行测试当作 CI PASS；不把同一 GitHub login 的 D/H 角色评论当作独立人类签署；不代签 D/H Owner；不擅自授权 Runtime 仓库写入。
+- **依据：**Issue #7 comment #7021990583 的 `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE / NOT AUTHORIZED`；精确 Head #322 Actions runs #44684299439/#44684299500 的失败 job 均无测试 steps；D/H 角色记录 #7021655866/#7021638212 均显示 `oahcom`；AI-EXEC-001 v1.1 与 AI-EXEC-002 v1.2 对状态、证据和不得伪造授权的要求。
+
+### Provenance
+Current user instruction is T2 chat provenance. Platform conversation UUID and immutable raw bytes are not exposed by the connector; SHA-256 remains `NOT_VERIFIED`. No synthetic source hash is supplied.
