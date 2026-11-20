@@ -310,3 +310,22 @@ R45（A-OWNER-INTEGRATION-R45-2026-11-20）：A 完成 F-43-07 四方最终集�
 - Re-read current exact-head runs for PR #322 Head `0ce618ac503f641cf31e66092ae823c14bf8af7b`: Run `44681841687` now resolves to Job `136110511473`; Run `44681841601` now resolves to Job `136110524577`.
 - Both jobs completed FAILURE with `runner_id=0` and `steps=null`; test steps did not start. Log retrieval returned HTTP 404 `BlobNotFound` for both jobs (RequestIds `d91924be-601e-00e6-36b2-78a62d000000` and `26c3f08d-f01e-00fe-4db2-78f784000000`).
 - This latest read supersedes the earlier rerun job IDs `136109249771` / `136109260361` in the prior subsection. The failure is runner allocation / log artifact availability, not a test-level diagnosis. No CI PASS is claimed.
+
+
+## 2026-11-20 current carrier pins — D-2026-1120-01 execution refresh
+
+### F-43-01/F1 — P1 — OPEN (implementation evidence)
+- Existing PR #327 remains OPEN/DRAFT on `docs/f43-01-f1-engineering-entry-handoff`; current exact Head `98f47b548491d95a08fa0c8f2d0bbf6eaf60f15d`; base `f3bc21405aa6ad5a3ec271c04f7f4d8567d8bf33`.
+- Handoff file `14-ai-development/work-items/AID-2026-010/F1-engineering-landing-handoff.md`, current Blob `746b822681cf5b46cf43df88eaf42719f997927f`; commit `98f47b548491d95a08fa0c8f2d0bbf6eaf60f15d` refreshes its D query-contract pin to PR #321 Head `7af4e4c409a6522d961b15d9622c92c7551be5f9` / Blob `6f2d583dec8487b321795a006266ee4229c7fd80`. The prior query-contract Blob pin was removed.
+- The handoff remains a verifiable engineering-entry artifact only. Issue #7 comment #7021990583 retains `IMPLEMENTATION_BINDING=DEFERRED_TO_ENGINEERING_PHASE` and entry NOT AUTHORIZED / NOT READY. Five callable D operations remain NOT IMPLEMENTED; durable Producer Registration Ledger/Receipt and operational equality/linearization proof are NOT ESTABLISHED; S1–S7 remain NOT RUN. No Runtime implementation is claimed.
+
+### F-43-01/F3 — P1 — OPEN (independent mapping acceptance and end-to-end evidence)
+- PR #321 exact Head `7af4e4c409a6522d961b15d9622c92c7551be5f9`; D query contract Blob `6f2d583dec8487b321795a006266ee4229c7fd80`; accepted H mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49` appears twice and superseded mapping Blob `e60bdd4cbfef79850596001f01cb56e622b7d79d` appears zero times.
+- PR #322 exact Head `0ce618ac503f641cf31e66092ae823c14bf8af7b`; validator Blob `49644a181c578fecb312218c08ce23caa62f603b`; test Blob `e66264ad30df6594e00836524accfdeb54160cee`. Focused exact-source module result previously recorded: Python 3.13.5, 13/13 PASS; this is not full repository CI.
+- Current exact-head workflow Runs `44681841687` / Job `136111641890` and `44681841601` / Job `136111657233` both completed FAILURE with `steps=null`; log downloads returned HTTP 404 `BlobNotFound`, RequestIds `23ab965c-101e-00ee-4db2-78043d000000` and `3a1d4420-901e-00e8-24b2-78027c000000`. No test-level failure cause or CI PASS is established. Exact retry record is PR #322 comment #7031599217 for the prior retry and the current job IDs are pinned here.
+- D role decision #7021655866 and H role decision #7021638212 both accept mapping Blob `004fc0261b447771e73a0f8cfdd34ec1f8b33e49`, but both visible GitHub identities resolve to `oahcom`; distinct human D/H signer identities remain NOT VERIFIED. No same-account role label is promoted to independent human acceptance.
+- Callable `ResolveForgetFenceSnapshotProof`, real operation-bound Receipt, live currentness/revocation/anti-rollback, H Owner implementation acceptance, and operational C1–C6 proof remain NOT ESTABLISHED.
+
+### Execution record
+- This addendum only refreshes exact pins and test/CI evidence on the existing PR #323 branch. No new PR/Issue/branch, no main write, no merge, no production activation, and no other-Owner signature.
+- Tests for this ledger-only addendum: NOT RUN. The two PR #322 workflow jobs above are failed runner/log evidence, not a test result.
