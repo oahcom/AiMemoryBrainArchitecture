@@ -6,6 +6,7 @@
 - **Relationship:** COMPLEMENT — AI-EXEC-001 / AI-EXEC-002
 - **Owner:** Integration Owner
 - **Tracking:** Issue #329 · Work Item AID-2026-011
+- **English counterpart:** [AI-EXEC-003](../../docs/en/14-ai-development/AI-EXEC-003.md)
 - **Language authority:** This Chinese source and its English counterpart are intended to carry identical normative force.
 
 ## 1. 目的与适用范围
